@@ -33,27 +33,38 @@ reasonable modifications.
 
 =over
 
-=item "Package" refers to the collection of files distributed by the
+=item "Package"
+
+refers to the collection of files distributed by the
 Copyright Holder, and derivatives of that collection of files created
 through textual modification.
 
-=item "Standard Version" refers to such a Package if it has not been
+=item "Standard Version"
+
+refers to such a Package if it has not been
 modified, or has been modified in accordance with the wishes of the
 Copyright Holder as specified below.
 
-=item "Copyright Holder" is whoever is named in the copyright or
+=item "Copyright Holder"
+
+is whoever is named in the copyright or
 copyrights for the package.
 
-=item "You" is you, if you're thinking about copying or distributing
-this Package.
+=item "You"
 
-=item "Reasonable copying fee" is whatever you can justify on the basis
+is you, if you're thinking about copying or distributing this Package.
+
+=item "Reasonable copying fee"
+
+is whatever you can justify on the basis
 of media cost, duplication charges, time of people involved, and so on.
 (You will not be required to justify it to the Copyright Holder, but
 only to the computing community at large as a market that must bear the
 fee.)
 
-=item "Freely Available" means that no fee is charged for the item
+=item "Freely Available"
+
+means that no fee is charged for the item
 itself, though there may be fees involved in handling the item. It also
 means that recipients of the item may redistribute it under the same
 conditions they received it.
@@ -64,19 +75,19 @@ conditions they received it.
 
 =over
 
-=item 1
+=item 1.
 
 You may make and give away verbatim copies of the source form of the
 Standard Version of this Package without restriction, provided that you
 duplicate all of the original copyright notices and associated disclaimers.
 
-=item 2
+=item 2.
 
 You may apply bug fixes, portability fixes and other modifications
 derived from the Public Domain or from the Copyright Holder.  A Package
 modified in such a way shall still be considered the Standard Version.
 
-=item 3
+=item 3.
 
 You may otherwise modify your copy of this Package in any way, provided
 that you insert a prominent notice in each changed file stating how and
@@ -85,62 +96,62 @@ following:
 
 =over
 
-=item *
+=item a)
 
-a) place your modifications in the Public Domain or otherwise make them
+place your modifications in the Public Domain or otherwise make them
 Freely Available, such as by posting said modifications to Usenet or an
 equivalent medium, or placing the modifications on a major archive site
 such as uunet.uu.net, or by allowing the Copyright Holder to include
 your modifications in the Standard Version of the Package.
 
-=item *
+=item b)
 
-b) use the modified Package only within your corporation or organization.
+use the modified Package only within your corporation or organization.
 
-=item *
+=item c)
 
-c) rename any non-standard executables so the names do not conflict with
+rename any non-standard executables so the names do not conflict with
 standard executables, which must also be provided, and provide a
 separate manual page for each non-standard executable that clearly
 documents how it differs from the Standard Version.
 
-=item *
+=item d)
 
-d) make other distribution arrangements with the Copyright Holder.
+make other distribution arrangements with the Copyright Holder.
 
 =back
 
-=item 4
+=item 4.
 
 You may distribute the programs of this Package in object code or
 executable form, provided that you do at least ONE of the following:
 
 =over
 
-=item *
+=item a)
 
-a) distribute a Standard Version of the executables and library files,
+distribute a Standard Version of the executables and library files,
 together with instructions (in the manual page or equivalent) on where
 to get the Standard Version.
 
-=item *
+=item b)
 
-b) accompany the distribution with the machine-readable source of the
+accompany the distribution with the machine-readable source of the
 Package with your modifications.
 
-=item *
+=item c)
 
-c) give non-standard executables non-standard names, and clearly
+give non-standard executables non-standard names, and clearly
 document the differences in manual pages (or equivalent), together with
 instructions on where to get the Standard Version.
 
-=item *
+=item d)
 
-d) make other distribution arrangements with the Copyright Holder.
+make other distribution arrangements with the Copyright Holder.
 
 =back
 
-=item 5
+=item 5.
 
 You may charge a reasonable copying fee for any distribution of this
 Package.  You may charge any fee you choose for support of this
@@ -153,7 +164,7 @@ an executable of yours (by linking); this shall be construed as a mere
 form of aggregation, provided that the complete Standard Version of the
 interpreter is so embedded.
 
-=item 6
+=item 6.
 
 The scripts and library files supplied as input to or produced as
 output from the programs of this Package do not automatically fall
@@ -167,7 +178,7 @@ fall under the restrictions of Paragraphs 3 and 4, provided that you do
 not represent such an executable image as a Standard Version of this
 Package.
 
-=item 7
+=item 7.
 
 C subroutines (or comparably compiled subroutines in other
 languages) supplied by you and linked into this Package in order to
@@ -177,7 +188,7 @@ equivalent of input as in Paragraph 6, provided these subroutines do
 not change the language in any way that would cause it to fail the
 regression tests for the language.
 
-=item 8
+=item 8.
 
 Aggregation of this Package with a commercial distribution is always
 permitted provided that the use of this Package is embedded; that is,
@@ -185,13 +196,13 @@ when no overt attempt is made to make this Package's interfaces visible
 to the end user of the commercial distribution.  Such use shall not be
 construed as a distribution of this Package.
 
-=item 9
+=item 9.
 
 The name of the Copyright Holder may not be used to endorse or promote
 products derived from this software without specific prior written permission.
 
 
-=item 10
+=item 10.
 
 THIS PACKAGE IS PROVIDED "AS IS" AND WITHOUT ANY EXPRESS OR
 IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
