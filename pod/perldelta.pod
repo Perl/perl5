@@ -12,14 +12,11 @@ maintenance release since the two releases were kept closely
 coordinated (while 5.8.0 was still called 5.7.something).
 
 Changes that were integrated into the 5.6.1 release are marked C<[561]>.
-In some cases the said bug/feature may have been further fixed/enhanced
-after 5.6.1.
+Changes that also appear in 5.6.1 but have been improved since are marked
+C<[561+]>.
 
-You can see the list of changes in the 5.6.1 (from 5.6.0) by reading
-L<perl561delta>.
-
-If you are upgrading from Perl 5.005_03, you might also want
-to read L<perl56delta>.
+You can see the list of changes in the 5.6.1 release (both from the
+5.005_03 release and the 5.6.0 release) by reading L<perl561delta>.
 
 =head1 Highlights In 5.8.0
 
@@ -400,7 +397,7 @@ and L<perlunicode> for details.
 
 The Unicode Character Database coming with Perl has been upgraded
 to Unicode 3.2.0.  For more information, see http://www.unicode.org/ .
-
+[561+] (5.6.1 has UCD 3.0.1.)
 
 =item *
 
@@ -526,7 +523,7 @@ Formats now support zero-padded decimal fields.
 =item *
 
 Lvalue subroutines can now return C<undef> in list context.  However,
-the lvalue subroutine feature still remains experimental.
+the lvalue subroutine feature still remains experimental.  [561+]
 
 =item *
 
@@ -702,7 +699,7 @@ See L<Attribute::Handlers>.
 
 C<B::Concise>, by Stephen McCamant, is a new compiler backend for
 walking the Perl syntax tree, printing concise info about ops.
-The output is highly customisable.  See L<B::Concise>.
+The output is highly customisable.  See L<B::Concise>. [561+]
 
 =item *
 
@@ -815,8 +812,8 @@ Filter::Util::Call.  See L<Filter::Simple>.
 =item *
 
 C<File::Temp>, by Tim Jenness, allows one to create temporary files
-and directories in an easy, portable, and secure way.  See
-L<File::Temp>.
+and directories in an easy, portable, and secure way.  See L<File::Temp>.
+[561+]
 
 =item *
 
@@ -952,7 +949,7 @@ perlpodspec.
 
 C<Pod::Text::Overstrike>, by Joe Smith, has been added.
 It converts POD data to formatted overstrike text.
-See L<Pod::Text::Overstrike>.
+See L<Pod::Text::Overstrike>. [561+]
 
 =item *
 
@@ -1096,7 +1093,7 @@ for extension writers.
 The following independently supported modules have been updated to the
 newest versions from CPAN: CGI, CPAN, DB_File, File::Spec, File::Temp,
 Getopt::Long, Math::BigFloat, Math::BigInt, the podlators bundle
-(Pod::Man, Pod::Text), Pod::LaTeX, Pod::Parser, Storable,
+(Pod::Man, Pod::Text), Pod::LaTeX [561+], Pod::Parser, Storable,
 Term::ANSIColor, Test, Text-Tabs+Wrap.
 
 =item *
@@ -1433,16 +1430,16 @@ perl56delta details the changes between the 5.005 release and the
 
 perlclib documents the internal replacements for standard C library
 functions.  (Interesting only for extension writers and Perl core
-hackers.)
+hackers.) [561+]
 
 =item *
 
-perldebtut is a Perl debugging tutorial.
+perldebtut is a Perl debugging tutorial. [561+]
 
 =item *
 
 perlebcdic contains considerations for running Perl on EBCDIC
-platforms.
+platforms. [561+]
 
 =item *
 
@@ -1458,7 +1455,7 @@ perlmodstyle is a style guide for writing modules.
 
 =item *
 
-perlnewmod tells about writing and submitting a new module.
+perlnewmod tells about writing and submitting a new module. [561+]
 
 =item *
 
@@ -1477,7 +1474,7 @@ people writing in pod.
 
 =item *
 
-perlretut is a regular expression tutorial.
+perlretut is a regular expression tutorial. [561+]
 
 =item *
 
@@ -1502,7 +1499,7 @@ information)
 =item *
 
 perlutil explains the command line utilities packaged with the Perl
-distribution.
+distribution. [561+]
 
 =back
 
@@ -1944,7 +1941,7 @@ possible non-preemptability of the underlying thread implementation.
 Stratus VOS is now supported using Perl's native build method
 (Configure).  This is the recommended method to build Perl on
 VOS.  The older methods, which build miniperl, are still
-available.  See L<perlvos>.
+available.  See L<perlvos>. [561+]
 
 =item *
 
@@ -1976,10 +1973,10 @@ The autouse pragma didn't work for Multi::Part::Function::Names.
 
 =item *
 
-caller() could cause core dumps in certain situations.  Carp was sometimes
-affected by this problem.  In particular, caller() now returns a
-subroutine name of C<(unknown)> for subroutines that have been removed
-from the symbol table.
+caller() could cause core dumps in certain situations.  Carp was
+sometimes affected by this problem.  In particular, caller() now
+returns a subroutine name of C<(unknown)> for subroutines that have
+been removed from the symbol table.
 
 =item *
 
@@ -2184,7 +2181,7 @@ without the q L ll prefixes (assuming you are on a quad-capable platform).
 
 =item *
 
-Regular expressions on references and overloaded scalars now work.
+Regular expressions on references and overloaded scalars now work. [561+]
 
 =item *
 
@@ -2571,7 +2568,7 @@ $ENV{LIB} now used to search for libs under Visual C.
 =item *
 
 fork() emulation has been improved in various ways, but still continues
-to be experimental.  See L<perlfork> for known bugs and caveats.
+to be experimental.  See L<perlfork> for known bugs and caveats. [561+]
 
 =item *
 
