@@ -5072,6 +5072,10 @@ Returns the current position for FILEHANDLE, or -1 on error.  FILEHANDLE
 may be an expression whose value gives the name of the actual filehandle.
 If FILEHANDLE is omitted, assumes the file last read.  
 
+The return value of tell() for the standard streams like the STDIN
+depends on the operating system: it may return -1 or something else.
+tell() on pipes, fifos, and sockets usually returns -1.
+
 There is no C<systell> function.  Use C<sysseek(FH, 0, 1)> for that.
 
 =item telldir DIRHANDLE
