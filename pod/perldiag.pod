@@ -1520,13 +1520,6 @@ a literal dollar sign, or was meant to introduce a variable name that
 happens to be missing.  So you have to put either the backslash or the
 name.
 
-=item Final @ should be \@ or @name
-
-(F) You must now decide whether the final @ in a string was meant to be
-a literal "at" sign, or was meant to introduce a variable name that
-happens to be missing.  So you have to put either the backslash or the
-name.
-
 =item flock() on closed filehandle %s
 
 (W closed) The filehandle you're attempting to flock() got itself closed
