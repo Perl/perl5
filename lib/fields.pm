@@ -120,6 +120,14 @@ be used to construct the pseudo hash.  Examples:
 
 =back
 
+=head2 NOTES
+
+Note that in Perl 5.8.1 the first element of a pseudo-hash, the hash
+reference mapping the allowed keys into indices, has been blessed into
+the C<pseudohash> package.  This was done to ease giving warnings
+about deprecation of the pseudo-hash feature (the pseudo-hashes will
+be completely removed in Perl 5.10).
+
 =head1 SEE ALSO
 
 L<base>,
@@ -133,7 +141,7 @@ no strict 'refs';
 use warnings::register;
 our(%attr, $VERSION);
 
-$VERSION = "1.02";
+$VERSION = "1.03";
 
 # some constants
 sub _PUBLIC    () { 1 }
@@ -156,6 +164,8 @@ sub import {
     my $fields = \%{"$package\::FIELDS"};
     my $fattr = ($attr{$package} ||= [1]);
     my $next = @$fattr;
+
+    bless \%{"$package\::FIELDS"}, 'pseudohash'; # New since 1.03 (Perl 5.8.1)
 
     if ($next > $fattr->[0]
 	and ($fields->{$_[0]} || 0) >= $fattr->[0])

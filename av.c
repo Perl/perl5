@@ -957,9 +957,9 @@ Perl_avhv_keys(pTHX_ AV *av)
 	if (SvGMAGICAL(sv))
 	    mg_get(sv);
 	if (SvROK(sv)) {
-            if (!SvOBJECT((SV*)av) && ckWARN(WARN_DEPRECATED))
+            if (ckWARN(WARN_DEPRECATED) && !sv_isa(sv, "pseudohash"))
 	        Perl_warner(aTHX_ packWARN(WARN_DEPRECATED),
-		     "Pseudo-hashes are deprecated");
+			    "Pseudo-hashes are deprecated");
 	    sv = SvRV(sv);
 	    if (SvTYPE(sv) == SVt_PVHV)
 		return (HV*)sv;
