@@ -6718,7 +6718,7 @@ Perl_sv_vsetpvfn(pTHX_ SV *sv, const char *pat, STRLEN patlen, va_list *args, SV
     sv_vcatpvfn(sv, pat, patlen, args, svargs, svmax, maybe_tainted);
 }
 
-I32
+STATIC I32
 S_expect_number(pTHX_ char** pattern)
 {
     I32 var = 0;
