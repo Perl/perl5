@@ -3301,6 +3301,7 @@
 /* USE_FAST_STDIO:
  *	This symbol, if defined, indicates that Perl should
  *	be built to use 'fast stdio'.
+ *	Defaults to define in Perls 5.8 and earlier, to undef later.
  */
 #ifndef USE_FAST_STDIO
 #define	USE_FAST_STDIO		/**/

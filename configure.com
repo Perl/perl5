@@ -4782,6 +4782,7 @@ $   d_stdiobase="define"
 $   d_stdio_cnt_lval="define"
 $   d_stdio_ptr_lval="define"
 $   d_stdstdio="define"
+$   d_faststdio="define"
 $   d_wcstombs="define"
 $   d_mblen="define"
 $   d_mktime="define"
@@ -4806,6 +4807,7 @@ $   d_stdiobase="undef"
 $   d_stdio_cnt_lval="undef"
 $   d_stdio_ptr_lval="undef"
 $   d_stdstdio="undef"
+$   d_faststdio="undef"
 $   d_wcstombs="undef"
 $   d_mblen="undef"
 $   d_mktime="undef"
@@ -4820,6 +4822,7 @@ $   d_setlocale="undef"
 $ ENDIF
 $ d_stdio_ptr_lval_sets_cnt="undef"
 $ d_stdio_ptr_lval_nochange_cnt="define"
+$ usefaststdio="define"
 $!
 $! Sockets?
 $ if Has_Socketshr .OR. Has_Dec_C_Sockets
