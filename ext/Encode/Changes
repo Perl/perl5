@@ -1,17 +1,35 @@
 # Revision history for Perl extension Encode.
 #
-# $Id: Changes,v 2.2 2004/08/31 10:55:34 dankogai Exp dankogai $
+# $Id: Changes,v 2.4 2004/10/16 21:22:44 dankogai Exp dankogai $
 #
 
-$Revision: 2.2 $ $Date: 2004/08/31 10:55:34 $
-  ucm/big5-hkscs.ucm AUTHORS t/big5-hkscs.enc t/big5-hkscs.utf
+$Revision: 2.4 $ $Date: 2004/10/16 21:22:44 $
+! Makefle.PL 
+  From:   craigberry@mac.com
+  Subject: [PATCH ext/Encode/Makefile.PL] make Encode.c dependency explicit
+  Message-Id: <41716868.7000102@mac.com>
+
+2.03 2004/10/06 05:07:20
+! lib/Encode/Alias.pm
+    Resolved some alias case sensitivity glitches reported via RT.
+    http://rt.cpan.org/NoAuth/Bug.html?id=7835
+! bin/piconv
+    Resolved Win32 glitches reported via RT. 
+    (Fixed by dankogai and tested by Steve Hay)
+    http://rt.cpan.org/Ticket/Display.html?id=7831
+! JP/JP.pm lib/Encode/Alias.pm lib/Encode/Supported.pod AUTHORS
+    /\bwindows-31j$/i is now an alias of CP932, by Steve Hay.
+    http://rt.cpan.org/NoAuth/Bug.html?id=6695
+
+2.02 2004/08/31 10:55:34
+! ucm/big5-hkscs.ucm AUTHORS t/big5-hkscs.enc t/big5-hkscs.utf
   New map submitted by Deng Liu and Autrijus.  Test data needed
   to be upgrade as well, done by dankogai
   Message-Id: <20040824204828.GB6999@aut.dyndns.org>
-  bin/ucmsort
+! bin/ucmsort
   Now works for characters U+10000 and above.  This fix was needed
   to "tidy" the original map that was submitted.
-  bin/enc2xs
+! bin/enc2xs
   "ucmsort" now mentioned in pod
 
 2.01 2004/05/25 16:27:14

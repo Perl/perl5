@@ -1,5 +1,5 @@
 #
-# $Id: big5-hkscs.ucm,v 2.1 2004/08/31 10:55:34 dankogai Exp dankogai $
+# $Id: big5-hkscs.ucm,v 2.1 2004/08/31 10:55:34 dankogai Exp $
 #
 <code_set_name> "big5-hkscs"
 <mb_cur_min> 1
