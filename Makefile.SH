@@ -36,8 +36,11 @@ true)
 		-compatibility_version 1 -current_version $patchlevel \
 		-prebind -seg1addr 0x27000000 -install_name \$(shrpdir)/\$@"
 		;;
-	sunos*|freebsd[23]*|netbsd*)
+	sunos*)
 		linklibperl="-lperl"
+		;;
+	netbsd*|freebsd[234]*)
+		linklibperl="-L. -lperl"
 		;;
 	aix*)
 		shrpldflags="-H512 -T512 -bhalt:4 -bM:SRE -bE:perl.exp"
@@ -52,7 +55,7 @@ true)
 		aixinstdir=`pwd | sed 's/\/UU$//'`
 		linklibperl="-L $archlibexp/CORE -L $aixinstdir -lperl"
 		;;
-	hpux10*)
+	hpux10*|hpux11*)
 		linklibperl="-L `pwd | sed 's/\/UU$//'` -Wl,+b$archlibexp/CORE -lperl"
 		;;
 	esac
