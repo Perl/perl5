@@ -1435,12 +1435,25 @@ perl4 programs which unconsciously rely on the bugs in earlier perl versions.
 
 =item * Interpolation
 
-You also have to be careful about array references.
+You also have to be careful about array and hash brackets during
+interpolation.
+
+    print "$foo["
+
+    perl 4 prints: [
+    perl 5 prints: syntax error
 
     print "$foo{"
 
     perl 4 prints: {
     perl 5 prints: syntax error
+
+Perl 5 is expecting to find an index or key name following the respective
+brackets, as well as an ending bracket of the appropriate type.  In order
+to mimic the behavior of Perl 4, you must escape the bracket like so.
+
+    print "$foo\[";
+    print "$foo\{";
 
 =item * Interpolation
 
