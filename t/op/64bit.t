@@ -8,8 +8,8 @@ BEGIN {
 
 # This could use a lot of more tests.
 #
-# Nota bene: bit operations are not 64-bit clean.  See the beginning
-# of pp.c and the explanation next to IBW/UBW.
+# Nota bene: bit operations (&, |, ^, ~, <<, >>, vec) are not 64-bit clean.
+# See the beginning of pp.c and the explanation next to IBW/UBW.
 
 print "1..30\n";
 
