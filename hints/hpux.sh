@@ -189,6 +189,7 @@ case "$cppstdin" in
 	cpprun="${cc:-cc} -E -Aa"
 	cppstdin="$cpprun"
 	cppminus='-'
+	cpplast='-'
 	;;
     esac
     ;;
