@@ -15,7 +15,7 @@
 ## This file is created by using the makefile that creates Windows Perl as the reference
 ## Author: sgp
 ## Date Created: 13th July 2000
-## Date Modified: 2nd July 2001
+## Date Modified: 29th Mar 2001
 
 # Name of the NLM
 NLM_NAME		= perl.nlm
@@ -1186,139 +1186,139 @@ config.nw5 : $(NW_CFGSH_TMPL)
 
 $(SOCKET_NLP): $(NLM_NAME) $(SOCKET).xs
 	cd $(EXTDIR)\$(*B)
-	..\..\miniperl -I..\..\lib Makefile.PL INSTALLDIRS=perl
+	..\..\miniperl -I..\..\lib Makefile.PL PERL_CORE=1 INSTALLDIRS=perl
 	$(MAKE)
 	cd ..\..\netware
 
 $(HOSTNAME_NLP): $(NLM_NAME) $(HOSTNAME).xs
 	cd $(EXTDIR)\Sys\$(*B)
-	..\..\..\miniperl -I..\..\..\lib Makefile.PL INSTALLDIRS=perl
+	..\..\..\miniperl -I..\..\..\lib Makefile.PL PERL_CORE=1 INSTALLDIRS=perl
 	$(MAKE)
 	cd ..\..\..\netware
 
 $(FCNTL_NLP):
 	cd $(EXTDIR)\$(*B)
-	..\..\miniperl -I..\..\lib Makefile.PL INSTALLDIRS=perl
+	..\..\miniperl -I..\..\lib Makefile.PL PERL_CORE=1 INSTALLDIRS=perl
 	$(MAKE)
 	cd ..\..\netware
 
 $(IO_NLP):
 	cd $(EXTDIR)\$(*B)
-	..\..\miniperl -I..\..\lib Makefile.PL INSTALLDIRS=perl
+	..\..\miniperl -I..\..\lib Makefile.PL PERL_CORE=1 INSTALLDIRS=perl
 	$(MAKE)
 	cd ..\..\netware
 
 $(OPCODE_NLP):
 	cd $(EXTDIR)\$(*B)
-	..\..\miniperl -I..\..\lib Makefile.PL INSTALLDIRS=perl
+	..\..\miniperl -I..\..\lib Makefile.PL PERL_CORE=1 INSTALLDIRS=perl
 	$(MAKE)
 	cd ..\..\netware
 
 $(B_NLP):
 	cd $(EXTDIR)\$(*B)
-	..\..\miniperl -I..\..\lib Makefile.PL INSTALLDIRS=perl
+	..\..\miniperl -I..\..\lib Makefile.PL PERL_CORE=1 INSTALLDIRS=perl
 	$(MAKE)
 	cd ..\..\netware
 
 $(DUMPER_NLP):
 	cd $(EXTDIR)\Data\$(*B)
-	..\..\..\miniperl -I..\..\..\lib Makefile.PL INSTALLDIRS=perl
+	..\..\..\miniperl -I..\..\..\lib Makefile.PL PERL_CORE=1 INSTALLDIRS=perl
 	$(MAKE)
 	cd ..\..\..\netware
 
 $(PEEK_NLP):
 	cd $(EXTDIR)\Devel\$(*B)
-	..\..\..\miniperl -I..\..\..\lib Makefile.PL INSTALLDIRS=perl
+	..\..\..\miniperl -I..\..\..\lib Makefile.PL PERL_CORE=1 INSTALLDIRS=perl
 	$(MAKE)
 	cd ..\..\..\netware
 
 $(RE_NLP):
 	cd $(EXTDIR)\$(*B)
-	..\..\miniperl -I..\..\lib Makefile.PL INSTALLDIRS=perl
+	..\..\miniperl -I..\..\lib Makefile.PL PERL_CORE=1 INSTALLDIRS=perl
 	$(MAKE)
 	cd ..\..\netware
 
 $(BYTELOADER_NLP):
 	cd $(EXTDIR)\$(*B)
-	..\..\miniperl -I..\..\lib Makefile.PL INSTALLDIRS=perl
+	..\..\miniperl -I..\..\lib Makefile.PL PERL_CORE=1 INSTALLDIRS=perl
 	$(MAKE)
 	cd ..\..\netware
 
 $(DPROF_NLP):
 	cd $(EXTDIR)\Devel\$(*B)
-	..\..\..\miniperl -I..\..\..\lib Makefile.PL INSTALLDIRS=perl
+	..\..\..\miniperl -I..\..\..\lib Makefile.PL PERL_CORE=1 INSTALLDIRS=perl
 	$(MAKE)
 	cd ..\..\..\netware
 
 $(GLOB_NLP):
 	cd $(EXTDIR)\File\$(*B)
-	..\..\..\miniperl -I..\..\..\lib Makefile.PL INSTALLDIRS=perl
+	..\..\..\miniperl -I..\..\..\lib Makefile.PL PERL_CORE=1 INSTALLDIRS=perl
 	$(MAKE)
 	cd ..\..\..\netware
 
 $(POSIX_NLP):
 	cd $(EXTDIR)\$(*B)
-	..\..\miniperl -I..\..\lib Makefile.PL INSTALLDIRS=perl
+	..\..\miniperl -I..\..\lib Makefile.PL PERL_CORE=1 INSTALLDIRS=perl
 	$(MAKE)
 	cd ..\..\netware
 
 $(THREAD_NLP):
 	cd $(EXTDIR)\$(*B)
-	..\..\miniperl -I..\..\lib Makefile.PL INSTALLDIRS=perl
+	..\..\miniperl -I..\..\lib Makefile.PL PERL_CORE=1 INSTALLDIRS=perl
 	$(MAKE)
 	cd ..\..\netware
 
 $(ATTRS_NLP):
 	cd $(EXTDIR)\$(*B)
-	..\..\miniperl -I..\..\lib Makefile.PL INSTALLDIRS=perl
+	..\..\miniperl -I..\..\lib Makefile.PL PERL_CORE=1 INSTALLDIRS=perl
 	$(MAKE)
 	cd ..\..\netware
 
 $(SDBM_FILE_NLP):
 	cd $(EXTDIR)\$(*B)
-	..\..\miniperl -I..\..\lib Makefile.PL INSTALLDIRS=perl
+	..\..\miniperl -I..\..\lib Makefile.PL PERL_CORE=1 INSTALLDIRS=perl
 	$(MAKE)
 	cd ..\..\netware
 
 $(CWD_NLP):
 	cd $(EXTDIR)\$(*B)
-	..\..\miniperl -I..\..\lib Makefile.PL INSTALLDIRS=perl
+	..\..\miniperl -I..\..\lib Makefile.PL PERL_CORE=1 INSTALLDIRS=perl
 	$(MAKE)
 	cd ..\..\netware
 
 $(STORABLE_NLP):
 	cd $(EXTDIR)\$(*B)
-	..\..\miniperl -I..\..\lib Makefile.PL INSTALLDIRS=perl
+	..\..\miniperl -I..\..\lib Makefile.PL PERL_CORE=1 INSTALLDIRS=perl
 	$(MAKE)
 	cd ..\..\netware
 
 $(LISTUTIL_NLP):
 	cd $(EXTDIR)\List\$(*B)
-	..\..\..\miniperl -I..\..\lib Makefile.PL INSTALLDIRS=perl
+	..\..\..\miniperl -I..\..\lib Makefile.PL PERL_CORE=1 INSTALLDIRS=perl
 	$(MAKE)
 	cd ..\..\..\netware
 
 $(MIMEBASE64_NLP):
 	cd $(EXTDIR)\Mime\$(*B)
-	..\..\..\miniperl -I..\..\lib Makefile.PL INSTALLDIRS=perl
+	..\..\..\miniperl -I..\..\lib Makefile.PL PERL_CORE=1 INSTALLDIRS=perl
 	$(MAKE)
 	cd ..\..\..\netware
 
 $(XSTYPEMAP_NLP):
 	cd $(EXTDIR)\XS\$(*B)
-	..\..\..\miniperl -I..\..\lib Makefile.PL INSTALLDIRS=perl
+	..\..\..\miniperl -I..\..\lib Makefile.PL PERL_CORE=1 INSTALLDIRS=perl
 	$(MAKE)
 	cd ..\..\..\netware
 
 $(UNICODENORMALIZE_NLP):
 	cd $(EXTDIR)\Unicode\$(*B)
-	..\..\..\miniperl -I..\..\lib Makefile.PL INSTALLDIRS=perl
+	..\..\..\miniperl -I..\..\lib Makefile.PL PERL_CORE=1 INSTALLDIRS=perl
 	$(MAKE)
 	cd ..\..\..\netware
 
 $(ERRNO_PM_NW):
 	cd $(EXTDIR)\$(*B)
-	..\..\miniperl -I..\..\lib Makefile.PL INSTALLDIRS=perl
+	..\..\miniperl -I..\..\lib Makefile.PL PERL_CORE=1 INSTALLDIRS=perl
 	$(MAKE)
 	cd ..\..\netware
 
@@ -1399,7 +1399,7 @@ Import @perl.imp
 $(CGI2PERL_NLP):
 !if "$(NW_EXTNS)"=="yes"
 	cd $(*B)
-	..\..\miniperl -I..\..\lib Makefile.PL INSTALLDIRS=perl
+	..\..\miniperl -I..\..\lib Makefile.PL PERL_CORE=1 INSTALLDIRS=perl
 	$(MAKE)
 	cd ..\..\netware
 !endif
@@ -1407,7 +1407,7 @@ $(CGI2PERL_NLP):
 $(PERL2UCS_NLP):
 !if "$(NW_EXTNS)"=="yes"
 	cd $(EXTDIR)\$(*B)
-	..\..\miniperl -I..\..\lib Makefile.PL INSTALLDIRS=perl
+	..\..\miniperl -I..\..\lib Makefile.PL PERL_CORE=1 INSTALLDIRS=perl
 	$(MAKE)
 	cd ..\..\netware
 !endif
@@ -1415,7 +1415,7 @@ $(PERL2UCS_NLP):
 $(UCSEXT_NLP):
 !if "$(NW_EXTNS)"=="yes"
 	cd $(EXTDIR)\$(*B)
-	..\..\miniperl -I..\..\lib Makefile.PL INSTALLDIRS=perl
+	..\..\miniperl -I..\..\lib Makefile.PL PERL_CORE=1 INSTALLDIRS=perl
 	$(MAKE)
 	cd ..\..\netware
 !endif

@@ -426,7 +426,7 @@ lib/auto/$p/*/%.a : $d/%/Makefile.aout
 	cd $d/\$(basename \$(notdir \$@)) ; make -f Makefile.aout LINKTYPE=static CCCDLFLAGS=
 
 $d/%/Makefile.aout : miniperl_ \$(_preplibrary) \$(AOUT_EXTENSIONS_FORCE)
-	cd \$(dir \$@) ; ../../../../miniperl_ -I ../../../../lib Makefile.PL FIRST_MAKEFILE=Makefile.aout INSTALLDIRS=perl 
+	cd \$(dir \$@) ; ../../../../miniperl_ -I ../../../../lib Makefile.PL FIRST_MAKEFILE=Makefile.aout INSTALLDIRS=perl PERL_CORE=1
 
 !GROK!THIS!
 
@@ -441,7 +441,7 @@ lib/auto/$p/*/%.a : $d/%/Makefile.aout
 	cd $d/\$(basename \$(notdir \$@)) ; make -f Makefile.aout LINKTYPE=static CCCDLFLAGS=
 
 $d/%/Makefile.aout : miniperl_ \$(_preplibrary) \$(AOUT_EXTENSIONS_FORCE)
-	cd \$(dir \$@) ; ../../../miniperl_ -I ../../../lib Makefile.PL FIRST_MAKEFILE=Makefile.aout INSTALLDIRS=perl 
+	cd \$(dir \$@) ; ../../../miniperl_ -I ../../../lib Makefile.PL FIRST_MAKEFILE=Makefile.aout INSTALLDIRS=perl PERL_CORE=1
 
 !GROK!THIS!
 
@@ -459,6 +459,6 @@ lib/auto/*/%.a : ext/%/Makefile.aout
 	cd ext/$(basename $(notdir $@)) ; make -f Makefile.aout LINKTYPE=static CCCDLFLAGS=
 
 ext/%/Makefile.aout : miniperl_ $(_preplibrary) $(AOUT_EXTENSIONS_FORCE)
-	cd $(dir $@) ; ../../miniperl_ -I ../../lib Makefile.PL FIRST_MAKEFILE=Makefile.aout INSTALLDIRS=perl 
+	cd $(dir $@) ; ../../miniperl_ -I ../../lib Makefile.PL FIRST_MAKEFILE=Makefile.aout INSTALLDIRS=perl PERL_CORE=1
 
 !NO!SUBS!
