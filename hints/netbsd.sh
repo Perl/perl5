@@ -37,16 +37,21 @@ case "$osvers" in
 		cccdlflags="-DPIC -fPIC $cccdlflags"
 		lddlflags="--whole-archive -shared $lddlflags"
 		rpathflag="-Wl,-rpath,"
-		#
-		# Include the whole libgcc.a into the perl executable so
-		# that certain symbols needed by loadable modules built as
-		# C++ objects (__eh_alloc, __pure_virtual, etc.) will always
-		# be defined.
-		#
-		# XXX This should be obsoleted by gcc-3.0.
-		#
-		ccdlflags="-Wl,-whole-archive -lgcc -Wl,-no-whole-archive \
-			-Wl,-E $ccdlflags"
+		case "$osvers" in
+		1.[0-5]*)
+			#
+			# Include the whole libgcc.a into the perl executable
+			# so that certain symbols needed by loadable modules
+			# built as C++ objects (__eh_alloc, __pure_virtual,
+			# etc.) will always be defined.
+			#
+			ccdlflags="-Wl,-whole-archive -lgcc \
+				-Wl,-no-whole-archive -Wl,-E $ccdlflags"
+			;;
+		*)
+			ccdlflags="-Wl,-E $ccdlflags"
+			;;
+		esac
 	elif test -f /usr/libexec/ld.so; then
 		# a.out
 		d_dlopen=$define

@@ -58,7 +58,7 @@ sub profile {
 		print @results
 	}
 
-        print '# ',timestr( $t_total, 'nop' ), "\n";
+        print '# ' . timestr( $t_total, 'nop' ), "\n";
 }
 
 

@@ -264,7 +264,7 @@ ok $^O;
 ok $^T > 850000000, $^T;
 
 if ($Is_VMS || $Is_Dos || $Is_MacOS) {
-    skip("%ENV manipulations fail or aren't safe on $^O") for 1..3;
+    skip("%ENV manipulations fail or aren't safe on $^O") for 1..4;
 }
 else {
 	$PATH = $ENV{PATH};
