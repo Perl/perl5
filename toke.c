@@ -1489,6 +1489,7 @@ S_scan_const(pTHX_ char *start)
 			char *ostart = SvPVX(sv);
 			SvCUR_set(sv, d - ostart);
 			SvPOK_on(sv);
+			*d = '\0';
 			sv_utf8_upgrade(sv);
 			/* this just broke our allocation above... */
 			SvGROW(sv, send - start);
