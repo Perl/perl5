@@ -261,23 +261,13 @@ LINE: while (<CPP>) {
 }
 close CPP;
 
-# This was:
-# Kluge to determine whether we need to add EMBED prefix to
-# symbols read from local list.  vmsreaddirversions() is a VMS-
-# specific function whose Perl_ prefix is added in vmsish.h
-# if EMBED is #defined.
-#
-# but now we always define EMBED, so it's not a big deal any more
 while (<DATA>) {
   next if /^#/;
   s/\s+#.*\n//;
   next if /^\s*$/;
   ($key,$array) = split('=',$_);
-  if ($array eq 'vars') {
-      $key = "PL_$key";
-  } else {
-      $key = "Perl_$key";
-  }
+  if ($array eq 'vars') { $key = "PL_$key";   }
+  else                  { $key = "Perl_$key"; }
   print "Adding $key to \%$array list\n" if $debug > 1;
   ${$array}{$key}++;
 }
@@ -303,14 +293,6 @@ if ($isvaxc) {
     }
     print STDERR "Unrecognized enum constant \"$_\" ignored\n";
   }
-}
-elsif ($isgcc) {
-  # gcc creates this as a SHR,WRT psect in globals.c, but we
-  # don't see it in the perl.h scan, since it's only declared
-  # if DOINIT is #defined.  Bleah.  It's cheaper to just add
-  # it by hand than to add /Define=DOINIT to the preprocessing
-  # run and wade through all the extra junk.
-  $vars{"${embed}Error"}++;
 }
 
 # Eventually, we'll check against existing copies here, so we can add new

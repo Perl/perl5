@@ -45,11 +45,11 @@ $ Thread_Live_Dangerously = "MT="
 $ use_two_pot_malloc = "N"
 $ use_pack_malloc = "N"
 $ use_debugmalloc = "N"
-$ preload_env = "N"
+$ d_secintgenv = "N"
 $ use_multiplicity = "N"
 $ vms_default_directory_name = F$ENVIRONMENT("DEFAULT")
-$! max_allowed_dir_depth = 3  ! e.g. [A.B.PERL5_00n] not [A.B.C.PERL5_00n]
-$ max_allowed_dir_depth = 2  ! e.g. [FOO.PERL5_00n] not [FOO.BAR.PERL5_00n]
+$ max_allowed_dir_depth = 3  ! e.g. [A.B.PERL5_00n] not [A.B.C.PERL5_00n]
+$! max_allowed_dir_depth = 2  ! e.g. [FOO.PERL5_00n] not [FOO.BAR.PERL5_00n]
 $!
 $ vms_filcnt = F$GETJPI ("","FILCNT")
 $!
@@ -972,13 +972,13 @@ $   READ/END_Of_File=Close_patch CONFIG line
 $   IF ((F$LOCATE("#define PERL_VERSION",line).NE.F$LENGTH(line)).AND.(.NOT.got_patch))
 $   THEN
 $     line = F$EDIT(line,"COMPRESS, TRIM")
-$     patchlevel = F$EXTRACT(18,F$LENGTH(line)-18,line)
+$     patchlevel = F$ELEMENT(2," ",line)
 $     got_patch = "true"
 $   ENDIF
 $   IF ((F$LOCATE("#define PERL_SUBVERSION",line).NE.F$LENGTH(line)).AND.(.NOT.got_sub))
 $   THEN
 $     line = F$EDIT(line,"COMPRESS, TRIM")
-$     subversion = F$EXTRACT(18,F$LENGTH(line)-18,line)
+$     subversion = F$ELEMENT(2," ",line)
 $     got_sub = "true"
 $   ENDIF
 $   IF (.NOT.got_patch).OR.(.NOT.got_sub) THEN GOTO Patchlevel_h_loop
@@ -1562,7 +1562,7 @@ $ IF mydomain.NES.""  !no periods in DECnet names like "MYDECNODE::"
 $ THEN
 $   rp = "What is your domain name? [''mydomain'] "
 $   GOSUB myread
-$   IF ans THEN mydomain = ans
+$   IF ans .nes. "" THEN mydomain = ans
 $!: translate upper to lower if necessary
 $   mydomain = F$EDIT(mydomain,"COLLAPSE")
 $   mylowdomain = F$EDIT(mydomain," LOWERCASE")
@@ -1586,7 +1586,7 @@ $ ENDIF
 $ dflt = "''cf_by@''myhostname'"+"''mydomain'"
 $ rp = "What is your e-mail address? [''dflt'] "
 $ GOSUB myread
-$ IF ans
+$ IF ans .nes. ""
 $ THEN cf_email = ans
 $ ELSE cf_email = dflt
 $ ENDIF
@@ -1603,7 +1603,7 @@ $ ENDIF
 $ dflt = "''cf_email'"
 $ rp = "Perl administrator e-mail address [''dflt'] "
 $ GOSUB myread
-$ IF ans
+$ IF ans .nes. ""
 $ THEN perladmin = ans
 $ ELSE perladmin = dflt
 $ ENDIF
@@ -1727,6 +1727,44 @@ $     ENDIF
 $   ENDIF
 $ ENDIF
 $!
+$! Ask whether they want to use secure logical translation when tainting
+$ echo ""
+$ echo "As Perl starts up, it checks several logical names, such as"
+$ echo "PERL5LIB and PERL_ENV_TABLES, which allow you to modify aspects"
+$ echo "of its behavior.  For additional security, you may limit this"
+$ echo "process to executive- and kernel-mode translation when tainting"
+$ echo "is enabled.  In this case, logical names normally skipped when"
+$ echo "tainting is enabled (e.g. PERL5OPTS) are translated as well."
+$ echo "If you do not choose to do this, the usual order of access modes"
+$ echo "is used for logical name translation."
+$ echo ""
+$ echo "This restriction does not apply to the %ENV hash or to implicit"
+$ echo "logical name translation during parsing of file specifications;"
+$ echo "these always use the normal sequence of access modes for logical"
+$ echo "name translation."
+$ echo ""
+$ dflt = "n"
+$ rp = "Use secure logical name translation? [''dflt'] "
+$ GOSUB myread
+$ if ans.eqs."" then ans="''dflt'"
+$ d_secintgenv = f$extract(0, 1, f$edit(ans,"TRIM,COMPRESS,UPCASE"))
+$!
+$! Ask whether they want to default filetypes
+$ echo ""
+$ echo "When you pass the name of a program to Perl on the command line,"
+$ echo "it generally doesn't supply any defaults unless the -S command"
+$ echo "line switch is specified.  In keeping with the VMS tradition of"
+$ echo "default file types, however, you can configure Perl to try default"
+$ echo "file types of nothing, .pl, and .com, in that order (e.g. typing"
+$ echo """$ perl foo"" would cause Perl to look for foo., then foo.pl, and"
+$ echo "finally foo.com)."
+$ echo ""
+$ dflt = "n"
+$ rp = "Always use default file types? [''dflt'] "
+$ GOSUB myread
+$ if ans.eqs."" then ans="''dflt'"
+$ d_alwdeftype = f$extract(0, 1, f$edit(ans,"TRIM,COMPRESS,UPCASE"))
+$!
 $! Ask if they want to use perl's memory allocator
 $ echo ""
 $ echo "Perl has a built-in memory allocator that's tuned for perl's
@@ -1780,7 +1818,7 @@ $ echo "you might, for example, want to build GDBM_File instead of
 $ echo "SDBM_File if you have the GDBM library built on your machine
 $ echo "
 $ echo "Which modules do you want to build into perl?"
-$ dflt = "Fcntl Errno IO Opcode Dumper attrs re Stdio DCLsym B SDBM_File"
+$ dflt = "Fcntl Errno IO Opcode Data::Dumper attrs re VMS::Stdio VMS::DCLsym B SDBM_File"
 $ if Using_Dec_C.eqs."Yes"
 $ THEN
 $   dflt = dflt + " POSIX"
@@ -1929,7 +1967,7 @@ $!
 $! Invoke the subconfig piece
 $!
 $ echo ""
-$ echo4 "Checking the C Run time library"
+$ echo4 "Checking the C run-time library"
 $ dflt = F$ENVIRONMENT("DEFAULT")
 $ SET DEFAULT [-.vms]
 $ @subconfigure

@@ -400,27 +400,31 @@ PP(pp_rcatline)
 PP(pp_warn)
 {
     djSP; dMARK;
+    SV *tmpsv;
     char *tmps;
-    STRLEN n_a;
+    STRLEN len;
     if (SP - MARK != 1) {
 	dTARGET;
 	do_join(TARG, &PL_sv_no, MARK, SP);
-	tmps = SvPV(TARG, n_a);
+	tmpsv = TARG;
 	SP = MARK + 1;
     }
     else {
-	tmps = SvPV(TOPs, n_a);
+	tmpsv = TOPs;
     }
-    if (!tmps || !*tmps) {
+    tmps = SvPV(tmpsv, len);
+    if (!tmps || !len) {
   	SV *error = ERRSV;
 	(void)SvUPGRADE(error, SVt_PV);
 	if (SvPOK(error) && SvCUR(error))
 	    sv_catpv(error, "\t...caught");
-	tmps = SvPV(error, n_a);
+	tmpsv = error;
+	tmps = SvPV(tmpsv, len);
     }
-    if (!tmps || !*tmps)
-	tmps = "Warning: something's wrong";
-    warn("%s", tmps);
+    if (!tmps || !len)
+	tmpsv = sv_2mortal(newSVpvn("Warning: something's wrong", 26));
+
+    warn("%_", tmpsv);
     RETSETYES;
 }
 
@@ -428,26 +432,28 @@ PP(pp_die)
 {
     djSP; dMARK;
     char *tmps;
-    SV *tmpsv = Nullsv;
-    char *pat = "%s";
-    STRLEN n_a;
+    SV *tmpsv;
+    STRLEN len;
+    bool multiarg = 0;
     if (SP - MARK != 1) {
 	dTARGET;
 	do_join(TARG, &PL_sv_no, MARK, SP);
-	tmps = SvPV(TARG, n_a);
+	tmpsv = TARG;
+	tmps = SvPV(tmpsv, len);
+	multiarg = 1;
 	SP = MARK + 1;
     }
     else {
 	tmpsv = TOPs;
-	tmps = SvROK(tmpsv) ? Nullch : SvPV(tmpsv, n_a);
+	tmps = SvROK(tmpsv) ? Nullch : SvPV(tmpsv, len);
     }
-    if (!tmps || !*tmps) {
+    if (!tmps || !len) {
   	SV *error = ERRSV;
 	(void)SvUPGRADE(error, SVt_PV);
-	if(tmpsv ? SvROK(tmpsv) : SvROK(error)) {
-	    if(tmpsv)
+	if (multiarg ? SvROK(error) : SvROK(tmpsv)) {
+	    if (!multiarg)
 		SvSetSV(error,tmpsv);
-	    else if(sv_isobject(error)) {
+	    else if (sv_isobject(error)) {
 		HV *stash = SvSTASH(SvRV(error));
 		GV *gv = gv_fetchmethod(stash, "PROPAGATE");
 		if (gv) {
@@ -464,17 +470,19 @@ PP(pp_die)
 		    sv_setsv(error,*PL_stack_sp--);
 		}
 	    }
-	    pat = Nullch;
+	    DIE(Nullch);
 	}
 	else {
 	    if (SvPOK(error) && SvCUR(error))
 		sv_catpv(error, "\t...propagated");
-	    tmps = SvPV(error, n_a);
+	    tmpsv = error;
+	    tmps = SvPV(tmpsv, len);
 	}
     }
-    if (!tmps || !*tmps)
-	tmps = "Died";
-    DIE(pat, tmps);
+    if (!tmps || !len)
+	tmpsv = sv_2mortal(newSVpvn("Died", 4));
+
+    DIE("%_", tmpsv);
 }
 
 /* I/O. */

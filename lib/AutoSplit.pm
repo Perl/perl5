@@ -280,7 +280,7 @@ sub autosplit_file {
     $last_package = '';
     while (<IN>) {
 	$fnr++;
-	$in_pod = 1 if /^=/;
+	$in_pod = 1 if /^=\w/;
 	$in_pod = 0 if /^=cut/;
 	next if ($in_pod || /^=cut/);
 	# the following (tempting) old coding gives big troubles if a
