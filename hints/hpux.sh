@@ -45,14 +45,19 @@ ldflags="$ldflags -D_HPUX_SOURCE"
 toke_cflags='ccflags="$ccflags -DARG_ZERO_IS_SCRIPT"'
 
 cc=${cc:-cc}
+ar=/usr/bin/ar
+
 case `$cc -v 2>&1`"" in
-    *gcc*) ccisgcc="$define" ;;
-    *)     ccisgcc=''
-	   ccversion=`which cc | xargs what | awk '/Compiler/{print $2}'`
-	   case "$d_casti32" in
-	       "") d_casti32='undef' ;;
-	       esac
-	   ;;
+    *gcc*)  ccisgcc="$define" ;;
+    *)      ccisgcc=''
+	    ccversion=`which cc | xargs what | awk '/Compiler/{print $2}'`
+	    case "`getconf KERNEL_BITS 2>/dev/null`" in
+		*64*) ldflags="$ldflags -Wl,+vnocompatwarnings" ;;
+		esac
+	    case "$d_casti32" in
+		"") d_casti32='undef' ;;
+		esac
+	    ;;
     esac
 
 set `echo X "$libswanted "| sed -e 's/ BSD//' -e 's/ PW//'`
@@ -160,34 +165,6 @@ case "$ccisgcc" in
 	;;
     esac
 
-cat > UU/cc.cbu <<'EOCBU'
-# XXX This script UU/cc.cbu will get 'called-back' by Configure after it
-# XXX has prompted the user for the C compiler to use.
-# Get gcc to share its secrets.
-echo 'main() { return 0; }' > try.c
-	# Indent to avoid propagation to config.sh
-	verbose=`${cc:-cc} -v -o try try.c 2>&1`
-	if echo "$verbose" | grep '^Reading specs from' >/dev/null 2>&1; then
-		# Using gcc.
-	: nothing to see here, move on.
-	else
-		# Using cc.
-	        ar=${ar:-ar}
-		case "`$ar -V 2>&1`" in
-    		*GNU*)
-		    if test -x /usr/bin/ar; then
-			cat <<END >&2
- 
-*** You are using HP cc(1) but GNU ar(1).  This might lead into trouble
-*** later on, I'm switching to HP ar to play safe.
-
-END
-			ar=/usr/bin/ar
-		    fi
-		    ;;
-		esac
-	fi
-EOCBU
 
 ## LARGEFILES
 
