@@ -547,18 +547,18 @@ sub format_write {
     }
 }
 
+# XXX undocumented
 sub fcntl {
     @_ == 3 || croak 'usage: $io->fcntl( OP, VALUE );';
-    my ($io, $op, $val) = @_;
-    my $r = fcntl($io, $op, $val);
-    defined $r && $r eq "0 but true" ? 0 : $r;
+    my ($io, $op) = @_;
+    return fcntl($io, $op, $_[2]);
 }
 
+# XXX undocumented
 sub ioctl {
     @_ == 3 || croak 'usage: $io->ioctl( OP, VALUE );';
-    my ($io, $op, $val) = @_;
-    my $r = ioctl($io, $op, $val);
-    defined $r && $r eq "0 but true" ? 0 : $r;
+    my ($io, $op) = @_;
+    return ioctl($io, $op, $_[2]);
 }
 
 # this sub is for compatability with older releases of IO that used
