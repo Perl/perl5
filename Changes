@@ -27,3 +27,25 @@ example from http://www.xray.mpe.mpg.de/mailing-lists/perl5-porters/
 --------------
 Version v5.9.X		Development release working toward v5.10
 --------------
+____________________________________________________________________________
+[ 17641] By: jhi                                   on 2002/07/19  16:31:08
+        Log: Integrate perlio (no changes, but that's fine).
+     Branch: perl
+	  !> embed.fnc perl.h
+____________________________________________________________________________
+[ 17640] By: nick                                  on 2002/07/19  07:09:37
+        Log: Integrate mainline@17638, apply couple
+             of whitespace edits so matches perl5.8.0 exactly.
+     Branch: perlio
+	   ! embed.fnc perl.h
+	  !> AUTHORS Changes Configure INSTALL NetWare/Makefile
+	  !> NetWare/t/NWScripts.pl Porting/config.sh Porting/config_H
+	  !> lib/File/stat.pm patchlevel.h pod/perldelta.pod
+	  !> pod/perlfunc.pod pod/perlhist.pod pod/perlthrtut.pod
+	  !> pod/perltoc.pod pod/perlvar.pod util.c
+____________________________________________________________________________
+[ 17639] By: jhi                                   on 2002/07/19  00:47:18
+        Log: It's all yours, Hugo.
+     Branch: perl
+	   + Changes5.8
+	   ! Changes MANIFEST
