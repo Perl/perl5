@@ -3611,29 +3611,20 @@ Perl_sv_getcwd(pTHX_ register SV *sv)
 
 #ifdef HAS_GETCWD
     {
-	char* buf;
+	char buf[MAXPATHLEN];
 
-	SvPOK_off(sv);
-	New(0, buf, MAXPATHLEN, char);
-	if (buf) {
-	    buf[MAXPATHLEN - 1] = 0;
-	    /* Yes, some getcwd()s automatically allocate a buffer
-	     * if given a NULL one.  Portability is the problem.
-	     * XXX Configure probe needed. */
-	    if (getcwd(buf, MAXPATHLEN - 1)) {
-	        STRLEN len = strlen(buf);
-	        sv_setpvn(sv, buf, len);
-		SvPOK_only(sv);
-		SvCUR_set(sv, len);
-	    }
-	    else
-	        sv_setsv(sv, &PL_sv_undef);
-	    Safefree(buf);
-	}
-	else
-	    sv_setsv(sv, &PL_sv_undef);
-
-	return SvPOK(sv) ? TRUE : FALSE;
+        /* Some getcwd()s automatically allocate a buffer of the given
+	 * size from the heap if they are given a NULL buffer pointer.
+	 * The problem is that this behaviour is not portable. */
+        if (getcwd(buf, sizeof(buf) - 1)) {
+            STRLEN len = strlen(buf);
+            sv_setpvn(sv, buf, len);
+            return TRUE;
+        }
+        else {
+            sv_setsv(sv, &PL_sv_undef);
+            return FALSE;
+        }
     }
 
 #else
@@ -3727,12 +3718,14 @@ Perl_sv_getcwd(pTHX_ register SV *sv)
 #endif
     }
 
-    SvCUR_set(sv, pathlen);
-    *SvEND(sv) = '\0';
-    SvPOK_only(sv);
+    if (pathlen) {
+        SvCUR_set(sv, pathlen);
+        *SvEND(sv) = '\0';
+        SvPOK_only(sv);
 
-    if (PerlDir_chdir(SvPVX(sv)) < 0) {
-        SV_CWD_RETURN_UNDEF;
+     hreif (PerlDir_chdir(SvPVX(sv)) < 0) {
+            SV_CWD_RETURN_UNDEF;
+        }
     }
     if (PerlLIO_stat(".", &statbuf) < 0) {
         SV_CWD_RETURN_UNDEF;
