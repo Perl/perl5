@@ -28,11 +28,33 @@ configured to use.  Running "perl -V:make" should tell you what it is.
 
 =head2 Version caveat
 
-This tutorial tries hard to keep up with the latest development versions
-of Perl.  This often means that it is sometimes in advance of the latest
-released version of Perl, and that certain features described here might
-not work on earlier versions.  See the section on "Troubleshooting
-these Examples" for more information.
+When writing a Perl extension for general consumption, one should expect that
+the extension will be used with versions of Perl different from the
+version available on your machine.  Since you are reading this document,
+the version of Perl on your machine is probably 5.005 or later, but the users
+of your extension may have more ancient versions.
+
+To understand what kinds of incompatibilities one may expect, and in the rare
+case that the version of Perl on your machine is older than this document,
+see the section on "Troubleshooting these Examples" for more information.
+
+If your extension uses some features of Perl which are not available on older
+releases of Perl, your users would appreciate an early meaningful warning.
+You would probably put this information into the F<README> file, but nowadays
+installation of extensions may be performed automatically, guided by F<CPAN.pm>
+module or other tools.
+
+In MakeMaker-based installations, F<Makefile.PL> provides the earliest
+opportunity to perform version checks.  One can put something like this
+in F<Makefile.PL> for this purpose:
+
+    eval { require 5.007 }
+        or die <<EOD;
+    ############
+    ### This module uses frobnication framework which is not available before
+    ### version 5.007 of Perl.  Upgrade your Perl before installing Kara::Mba.
+    ############
+    EOD
 
 =head2 Dynamic Loading versus Static Loading
 
@@ -400,21 +422,21 @@ which we passed in, so we listed it (and not RETVAL) in the OUTPUT: section.
 
 =head2 The XSUBPP Program
 
-The xsubpp program takes the XS code in the .xs file and translates it into
+The B<xsubpp> program takes the XS code in the .xs file and translates it into
 C code, placing it in a file whose suffix is .c.  The C code created makes
 heavy use of the C functions within Perl.
 
 =head2 The TYPEMAP file
 
-The xsubpp program uses rules to convert from Perl's data types (scalar,
+The B<xsubpp> program uses rules to convert from Perl's data types (scalar,
 array, etc.) to C's data types (int, char, etc.).  These rules are stored
 in the typemap file ($PERLLIB/ExtUtils/typemap).  This file is split into
 three parts.
 
 The first section maps various C data types to a name, which corresponds
 somewhat with the various Perl types.  The second section contains C code
-which xsubpp uses to handle input parameters.  The third section contains
-C code which xsubpp uses to handle output parameters.
+which B<xsubpp> uses to handle input parameters.  The third section contains
+C code which B<xsubpp> uses to handle output parameters.
 
 Let's take a look at a portion of the .c file created for our extension.
 The file name is Mytest.c:
@@ -649,39 +671,174 @@ commands to build it.
 
 =back
 
-=head2 More about XSUBPP
+=head2 Anatomy of .xs file
+
+The .xs file of L<"EXAMPLE 4"> contained some new elements.  To understand
+the meaning of these elements, pay attention to the line which reads
+
+	MODULE = Mytest2		PACKAGE = Mytest2		
+
+Anything before this line is plain C code which describes which headers
+to include, and defines some convenience functions.  No translations are
+performed on this part, it goes into the generated output C file as is.
+
+Anything after this line is the description of XSUB functions.
+These descriptions are translated by B<xsubpp> into C code which
+implements these functions using Perl calling conventions, and which
+makes these functions visible from Perl interpreter.
+
+Pay a special attention to the function C<constant>.  This name appears
+twice in the generated .xs file: once in the first part, as a static C
+function, the another time in the second part, when an XSUB interface to
+this static C function is defined.
+
+This is quite typical for .xs files: usually the .xs file provides
+an interface to an existing C function.  Then this C function is defined
+somewhere (either in an external library, or in the first part of .xs file),
+and a Perl interface to this function (i.e. "Perl glue") is described in the
+second part of .xs file.  The situation in L<"EXAMPLE 1">, L<"EXAMPLE 2">,
+and L<"EXAMPLE 3">, when all the work is done inside the "Perl glue", is
+somewhat of an exception rather than the rule.
+
+=head2 Getting the fat out of XSUBs
+
+In L<"EXAMPLE 4"> the second part of .xs file contained the following
+description of an XSUB:
+
+	double
+	foo(a,b,c)
+		int             a
+		long            b
+		const char *    c
+	    OUTPUT:
+		RETVAL
+
+Note that in contrast with L<"EXAMPLE 1">, L<"EXAMPLE 2"> and L<"EXAMPLE 3">,
+this description does not contain the actual I<code> for what is done
+is done during a call to Perl function foo().  To understand what is going
+on here, one can add a CODE section to this XSUB:
+
+	double
+	foo(a,b,c)
+		int             a
+		long            b
+		const char *    c
+	    CODE:
+		RETVAL = foo(a,b,c);
+	    OUTPUT:
+		RETVAL
+
+However, these two XSUBs provide almost identical generated C code: B<xsubpp>
+compiler is smart enough to figure out the C<CODE:> section from the first
+two lines of the description of XSUB.  What about C<OUTPUT:> section?  In
+fact, that is absolutely the same!  The C<OUTPUT:> section can be removed
+as well, I<as far as C<CODE:> section or C<PPCODE:> section> is not
+specified: B<xsubpp> can see that it needs to generate a function call
+section, and will autogenerate the OUTPUT section too.  Thus one can
+shortcut the XSUB to become:
+
+	double
+	foo(a,b,c)
+		int             a
+		long            b
+		const char *    c
+
+Can we do the same with an XSUB
+
+	int
+	is_even(input)
+		int	input
+	    CODE:
+		RETVAL = (input % 2 == 0);
+	    OUTPUT:
+		RETVAL
+
+of L<"EXAMPLE 2">?  To do this, one needs to define a C function C<int
+is_even(int input)>.  As we saw in L<Anatomy of .xs file>, a proper place
+for this definition is in the first part of .xs file.  In fact a C function
+
+	int
+	is_even(int arg)
+	{
+		return (arg % 2 == 0);
+	}
+
+is probably overkill for this.  Something as simple as a C<#define> will
+do too:
+
+	#define is_even(arg)	((arg) % 2 == 0)
+
+After having this in the first part of .xs file, the "Perl glue" part becomes
+as simple as
+
+	int
+	is_even(input)
+		int	input
+
+This technique of separation of the glue part from the workhorse part has
+obvious tradeoffs: if you want to change a Perl interface, you need to
+change two places in your code.  However, it removes a lot of clutter,
+and makes the workhorse part independent from idiosyncrasies of Perl calling
+convention.  (In fact, there is nothing Perl-specific in the above description,
+a different version of B<xsubpp> might have translated this to TCL glue or
+Python glue as well.)
+
+=head2 More about XSUB arguments
 
 With the completion of Example 4, we now have an easy way to simulate some
 real-life libraries whose interfaces may not be the cleanest in the world.
 We shall now continue with a discussion of the arguments passed to the
-xsubpp compiler.
+B<xsubpp> compiler.
 
 When you specify arguments to routines in the .xs file, you are really
 passing three pieces of information for each argument listed.  The first
 piece is the order of that argument relative to the others (first, second,
 etc).  The second is the type of argument, and consists of the type
 declaration of the argument (e.g., int, char*, etc).  The third piece is
-the exact way in which the argument should be used in the call to the
-library function from this XSUB.  This would mean whether or not to place
-a "&" before the argument or not, meaning the argument expects to be
-passed the address of the specified data type.
+the calling convention for the argument in the call to the library function.  
 
-There is a difference between the two arguments in this hypothetical function:
+While Perl passes arguments to functions by reference,
+C passes arguments by value; to implement a C function which modifies data
+of one of the "arguments", the actual argument of this C function would be
+a pointer to the data.  Thus two C functions with declarations
+
+	int string_length(char *s);
+	int upper_case_char(char *cp);
+
+may have completely different semantics: the first one may inspect an array
+of chars pointed by s, and the second one may immediately dereference C<cp>
+and manipulate C<*cp> only (using the return value as, say, a success
+indicator).  From Perl one would use these functions in
+a completely different manner.
+
+One conveys this info to B<xsubpp> by replacing C<*> before the
+argument by C<&>.  C<&> means that the argument should be passed to a library
+function by its address.  The above two function may be XSUB-ified as
+
+	int
+	string_length(s)
+		char *	s
+
+	int
+	upper_case_char(cp)
+		char	&cp
+
+For example, consider:
 
 	int
 	foo(a,b)
 		char	&a
 		char *	b
 
-The first argument to this function would be treated as a char and assigned
+The first Perl argument to this function would be treated as a char and assigned
 to the variable a, and its address would be passed into the function foo.
-The second argument would be treated as a string pointer and assigned to the
+The second Perl argument would be treated as a string pointer and assigned to the
 variable b.  The I<value> of b would be passed into the function foo.  The
-actual call to the function foo that xsubpp generates would look like this:
+actual call to the function foo that B<xsubpp> generates would look like this:
 
 	foo(&a, b);
 
-Xsubpp will parse the following function argument lists identically:
+B<xsubpp> will parse the following function argument lists identically:
 
 	char	&a
 	char&a
@@ -706,7 +863,7 @@ on the argument stack.  ST(0) is thus the first argument on the stack and
 therefore the first argument passed to the XSUB, ST(1) is the second
 argument, and so on.
 
-When you list the arguments to the XSUB in the .xs file, that tells xsubpp
+When you list the arguments to the XSUB in the .xs file, that tells B<xsubpp>
 which argument corresponds to which of the argument stack (i.e., the first
 one listed is the first argument, and so on).  You invite disaster if you
 do not list them in the same order as the function expects them.
@@ -723,6 +880,23 @@ The code for the round() XSUB routine contains lines that look like this:
 
 The arg variable is initially set by taking the value from ST(0), then is
 stored back into ST(0) at the end of the routine.
+
+XSUBs are also allowed to return lists, not just scalars.  This must be
+done by manipulating stack values ST(0), ST(1), etc, in a subtly
+different way.  See L<perlxs> for details.
+
+XSUBs are also allowed to avoid automatic conversion of Perl function arguments
+to C function arguments.  See L<perlxs> for details.  Some people prefer
+manual conversion by inspecting C<ST(i)> even in the cases when automatic
+conversion will do, arguing that this makes the logic of an XSUB call clearer.
+Compare with L<"Getting the fat out of XSUBs"> for a similar tradeoff of
+a complete separation of "Perl glue" and "workhorse" parts of an XSUB.
+
+While experts may argue about these idioms, a novice to Perl guts may
+prefer a way which is as little Perl-guts-specific as possible, meaning
+automatic conversion and automatic call generation, as in
+L<"Getting the fat out of XSUBs">.  This approach has the additional
+benefit of protecting the XSUB writer from future changes to the Perl API.
 
 =head2 Extending your Extension
 
@@ -781,7 +955,7 @@ Mytest.xs:
 	void
 	statfs(path)
 		char *  path
-	    PREINIT:
+	    INIT:
 		int i;
 		struct statfs buf;
 
@@ -822,10 +996,12 @@ This example added quite a few new concepts.  We'll take them one at a time.
 
 =item *
 
-The PREINIT: directive contains code that will be placed immediately after
-variable declaration and before the argument stack is decoded.  Some compilers
-cannot handle variable declarations at arbitrary locations inside a function,
+The INIT: directive contains code that will be placed immediately after
+the argument stack is decoded.  C does not allow variable declarations at
+arbitrary locations inside a function,
 so this is usually the best way to declare local variables needed by the XSUB.
+(Alternatively, one could put the whole C<PPCODE:> section into braces, and
+put these declarations on top.)
 
 =item *
 
@@ -837,7 +1013,7 @@ this function, we need room on the stack to hold the 9 values which may be
 returned.
 
 We do this by using the PPCODE: directive, rather than the CODE: directive.
-This tells xsubpp that we will be managing the return values that will be
+This tells B<xsubpp> that we will be managing the return values that will be
 put on the argument stack by ourselves.
 
 =item *
@@ -846,7 +1022,8 @@ When we want to place values to be returned to the caller onto the stack,
 we use the series of macros that begin with "XPUSH".  There are five
 different versions, for placing integers, unsigned integers, doubles,
 strings, and Perl scalars on the stack.  In our example, we placed a
-Perl scalar onto the stack.
+Perl scalar onto the stack.  (In fact this is the only macro which
+can be used to return multiple values.)
 
 The XPUSH* macros will automatically extend the return stack to prevent
 it from being overrun.  You push values onto the stack in the order you
@@ -859,6 +1036,22 @@ They are made mortal so that once the values are copied by the calling
 program, the SV's that held the returned values can be deallocated.
 If they were not mortal, then they would continue to exist after the XSUB
 routine returned, but would not be accessible.  This is a memory leak.
+
+=item *
+
+If we were interested in performance, not in code compactness, in the success
+branch we would not use C<XPUSHs> macros, but C<PUSHs> macros, and would
+pre-extend the stack before pushing the return values:
+
+	EXTEND(SP, 9);
+
+The tradeoff is that one needs to calculate the number of return values
+in advance (though overextending the stack will not typically hurt
+anything but memory consumption).
+
+Similarly, in the failure branch we could use C<PUSHs> I<without> extending
+the stack: the Perl function reference comes to an XSUB on the stack, thus
+the stack is I<always> large enough to take one return value.
 
 =back
 
@@ -930,4 +1123,4 @@ and Tim Bunce.
 
 =head2 Last Changed
 
-1999/5/25
+1999/11/30
