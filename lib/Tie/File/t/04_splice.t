@@ -11,11 +11,11 @@
 # Then, it checks the actual contents of the file against the expected
 # contents.
 
+
 my $file = "tf$$.txt";
 $: = Tie::File::_default_recsep();
 my $data = "rec0$:rec1$:rec2$:";
-
-print "1..101\n";
+print "1..106\n";
 
 init_file($data);
 
@@ -154,14 +154,15 @@ splice(@a, 89, 0, "pie pie pie");
 check_contents("I$:like$:pie$:pie pie pie$:");
 
 # (97) Splicing with too large a negative number should be fatal
-# This test ignored because it causes 5.6.1 and 5.7.2 to dump core
+# This test ignored because it causes 5.6.1 and 5.7.3 to dump core
+# It also garbles the stack under 5.005_03 (20020401)
 # NOT MY FAULT
-if ($] < 5.006 || $] > 5.007003) {
+if ($] > 5.008) {
   eval { splice(@a, -7, 0) };
   print $@ =~ /^Modification of non-creatable array value attempted, subscript -7/
       ? "ok $N\n" : "not ok $N \# \$\@ was '$@'\n";
 } else { 
-  print "ok $N \# skipped (5.6.0 through 5.7.3 dump core here.)\n";
+  print "ok $N \# skipped (5.6.0 through 5.8 dump core here.)\n";
 }
 $N++;
        
@@ -171,7 +172,31 @@ splice @a, 4;
 check_contents("0$:1$:2$:3$:");
 splice @a;
 check_contents("");
+
+# (102-103) I think there's a bug here---it will fail to clear the EOF flag
+@a = (0..11);
+splice @a, -1, 1000;
+check_contents("0$:1$:2$:3$:4$:5$:6$:7$:8$:9$:10$:");
     
+# (104-106) make sure that undefs are treated correctly---they should
+# be converted to empty records, and should not raise any warnings.
+# (Some of these failed in 0.90.  The change to _fixrec fixed them.)
+# 20020331
+{
+  my $good = 1; my $warn;
+  # If any of these raise warnings, we have a problem.
+  local $SIG{__WARN__} = sub { $good = 0; $warn = shift(); ctrlfix($warn)};
+  local $^W = 1;
+  @a = (1);
+  splice @a, 1, 0, undef, undef, undef;
+  print $good ? "ok $N\n" : "not ok $N # $warn\n";
+  $N++; $good = 1;
+  print defined($a[2]) ? "ok $N\n" : "not ok $N\n";
+  $N++; $good = 1;
+  my @r = splice @a, 2;
+  print defined($r[0]) ? "ok $N\n" : "not ok $N\n";
+  $N++; $good = 1;
+}
 
 sub init_file {
   my $data = shift;

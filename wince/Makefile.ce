@@ -749,103 +749,103 @@ $(EXTDIR)\DynaLoader\dl_win32.xs: dl_win32.xs
 
 $(DUMPER_DLL): $(PERLEXE) $(DUMPER).xs
 	cd $(EXTDIR)\Data\$(*B)
-	$(NTPERL) -I..\..\..\lib Makefile.PL INSTALLDIRS=perl
+	$(NTPERL) -I..\..\..\lib Makefile.PL PERL_CORE=1 INSTALLDIRS=perl
 	$(MAKE)
 	cd ..\..\..\wince
 
 $(DPROF_DLL): $(PERLEXE) $(DPROF).xs
 	cd $(EXTDIR)\Devel\$(*B)
-	$(NTPERL) -I..\..\..\lib Makefile.PL INSTALLDIRS=perl
+	$(NTPERL) -I..\..\..\lib Makefile.PL PERL_CORE=1 INSTALLDIRS=perl
 	$(MAKE)
 	cd ..\..\..\wince
 
 $(GLOB_DLL): $(PERLEXE) $(GLOB).xs
 	cd $(EXTDIR)\File\$(*B)
-	$(NTPERL) -I..\..\..\lib Makefile.PL INSTALLDIRS=perl
+	$(NTPERL) -I..\..\..\lib Makefile.PL PERL_CORE=1 INSTALLDIRS=perl
 	$(MAKE)
 	cd ..\..\..\wince
 
 $(PEEK_DLL): $(PERLEXE) $(PEEK).xs
 	cd $(EXTDIR)\Devel\$(*B)
-	$(NTPERL) -I..\..\..\lib Makefile.PL INSTALLDIRS=perl
+	$(NTPERL) -I..\..\..\lib Makefile.PL PERL_CORE=1 INSTALLDIRS=perl
 	$(MAKE)
 	cd ..\..\..\wince
 
 $(RE_DLL): $(PERLEXE) $(RE).xs
 	cd $(EXTDIR)\$(*B)
-	$(NTPERL) -I..\..\lib Makefile.PL INSTALLDIRS=perl
+	$(NTPERL) -I..\..\lib Makefile.PL PERL_CORE=1 INSTALLDIRS=perl
 	$(MAKE)
 	cd ..\..\wince
 
 $(B_DLL): $(PERLEXE) $(B).xs
 	cd $(EXTDIR)\$(*B)
-	$(NTPERL) -I..\..\lib Makefile.PL INSTALLDIRS=perl
+	$(NTPERL) -I..\..\lib Makefile.PL PERL_CORE=1 INSTALLDIRS=perl
 	$(MAKE)
 	cd ..\..\wince
 
 $(THREAD_DLL): $(PERLEXE) $(THREAD).xs
 	cd $(EXTDIR)\$(*B)
-	$(NTPERL) -I..\..\lib Makefile.PL INSTALLDIRS=perl
+	$(NTPERL) -I..\..\lib Makefile.PL PERL_CORE=1 INSTALLDIRS=perl
 	$(MAKE)
 	cd ..\..\wince
 
 $(ATTRS_DLL): $(PERLEXE) $(ATTRS).xs
 	cd $(EXTDIR)\$(*B)
-	$(NTPERL) -I..\..\lib Makefile.PL INSTALLDIRS=perl
+	$(NTPERL) -I..\..\lib Makefile.PL PERL_CORE=1 INSTALLDIRS=perl
 	$(MAKE)
 	cd ..\..\wince
 
 $(POSIX_DLL): $(PERLEXE) $(POSIX).xs
 	cd $(EXTDIR)\$(*B)
-	$(NTPERL) -I..\..\lib Makefile.PL INSTALLDIRS=perl
+	$(NTPERL) -I..\..\lib Makefile.PL PERL_CORE=1 INSTALLDIRS=perl
 	$(MAKE)
 	cd ..\..\wince
 
 $(IO_DLL): $(PERLEXE) $(IO).xs
 	cd $(EXTDIR)\$(*B)
-	$(NTPERL) -I..\..\lib Makefile.PL INSTALLDIRS=perl
+	$(NTPERL) -I..\..\lib Makefile.PL PERL_CORE=1 INSTALLDIRS=perl
 	$(MAKE)
 	cd ..\..\wince
 
 $(SDBM_FILE_DLL) : $(PERLEXE) $(SDBM_FILE).xs
 	cd $(EXTDIR)\$(*B)
-	$(NTPERL) -I..\..\lib Makefile.PL INSTALLDIRS=perl
+	$(NTPERL) -I..\..\lib Makefile.PL PERL_CORE=1 INSTALLDIRS=perl
 	$(MAKE)
 	cd ..\..\wince
 
 $(FCNTL_DLL): $(PERLEXE) $(FCNTL).xs
 	cd $(EXTDIR)\$(*B)
-	$(NTPERL) -I..\..\lib Makefile.PL INSTALLDIRS=perl
+	$(NTPERL) -I..\..\lib Makefile.PL PERL_CORE=1 INSTALLDIRS=perl
 	$(MAKE)
 	cd ..\..\wince
 
 $(OPCODE_DLL): $(PERLEXE) $(OPCODE).xs
 	cd $(EXTDIR)\$(*B)
-	$(NTPERL) -I..\..\lib Makefile.PL INSTALLDIRS=perl
+	$(NTPERL) -I..\..\lib Makefile.PL PERL_CORE=1 INSTALLDIRS=perl
 	$(MAKE)
 	cd ..\..\wince
 
 $(SOCKET_DLL): $(PERLEXE) $(SOCKET).xs
 	cd $(EXTDIR)\$(*B)
-	$(NTPERL) -I..\..\lib Makefile.PL INSTALLDIRS=perl
+	$(NTPERL) -I..\..\lib Makefile.PL PERL_CORE=1 INSTALLDIRS=perl
 	$(MAKE)
 	cd ..\..\wince
 
 $(HOSTNAME_DLL): $(PERLEXE) $(HOSTNAME).xs
 	cd $(EXTDIR)\Sys\$(*B)
-	$(NTPERL) -I..\..\..\lib Makefile.PL INSTALLDIRS=perl
+	$(NTPERL) -I..\..\..\lib Makefile.PL PERL_CORE=1 INSTALLDIRS=perl
 	$(MAKE)
 	cd ..\..\..\wince
 
 $(BYTELOADER_DLL): $(PERLEXE) $(BYTELOADER).xs
 	cd $(EXTDIR)\$(*B)
-	$(NTPERL) -I..\..\lib Makefile.PL INSTALLDIRS=perl
+	$(NTPERL) -I..\..\lib Makefile.PL PERL_CORE=1 INSTALLDIRS=perl
 	$(MAKE)
 	cd ..\..\wince
 
 $(ERRNO_PM): $(PERLEXE) $(ERRNO)_pm.PL
 	cd $(EXTDIR)\$(*B)
-	$(NTPERL) -I..\..\lib Makefile.PL INSTALLDIRS=perl
+	$(NTPERL) -I..\..\lib Makefile.PL PERL_CORE=1 INSTALLDIRS=perl
 	$(MAKE)
 	cd ..\..\wince
 

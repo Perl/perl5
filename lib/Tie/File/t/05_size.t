@@ -9,7 +9,7 @@ use POSIX 'SEEK_SET';
 my $file = "tf$$.txt";
 my ($o, $n);
 
-print "1..15\n";
+print "1..16\n";
 
 my $N = 1;
 use Tie::File;
@@ -73,6 +73,17 @@ check_contents($data);
 populate();
 $#a = -1;
 check_contents('');
+
+# (16) 20020324 I have an idea that shortening the array will not
+# expunge a cached record at the end if one is present.
+$o->defer;
+$a[3] = "record";
+my $r = $a[3];
+$#a = -1;
+$r = $a[3];
+print (! defined $r ? "ok $N\n" : "not ok $N \# was <$r>; should be UNDEF\n");
+# Turns out not to be the case---STORESIZE explicitly removes them later
+# 20020326 Well, but happily, this test did fail today.
 
 # In the past, there was a bug in STORESIZE that it didn't correctly
 # remove deleted records from the the cache.  This wasn't detected

@@ -72,8 +72,8 @@ Perl_reentrant_size(pTHX) {
 #ifdef HAS_GETPWNAM_R
 #   if defined(HAS_SYSCONF) && defined(_SC_GETPW_R_SIZE_MAX) && !defined(__GLIBC__)
 	PL_reentrant_buffer->_getpwent_size = sysconf(_SC_GETPW_R_SIZE_MAX);
-	if (PL_reentrant_buffer->_getgrent_size == -1)
-		PL_reentrant_buffer->_getgrent_size = REENTRANTUSUALSIZE;
+	if (PL_reentrant_buffer->_getpwent_size == -1)
+		PL_reentrant_buffer->_getpwent_size = REENTRANTUSUALSIZE;
 #   else
 #       if defined(__osf__) && defined(__alpha) && defined(SIABUFSIZ)
 	PL_reentrant_buffer->_getpwent_size = SIABUFSIZ;
@@ -281,9 +281,18 @@ Perl_reentrant_retry(const char *f, ...)
     dTHX;
     void *retptr = NULL;
 #ifdef USE_REENTRANT_API
-    void *p0, *p1;
+#  if defined(USE_GETHOSTENT_BUFFER) || defined(USE_GETGRENT_BUFFER) || defined(USE_GETNETENT_BUFFER) || defined(USE_GETPWENT_BUFFER) || defined(USE_GETPROTOENT_BUFFER) || defined(USE_GETSERVENT_BUFFER)
+    void *p0;
+#  endif
+#  if defined(USE_GETSERVENT_BUFFER)
+    void *p1;
+#  endif
+#  if defined(USE_GETHOSTENT_BUFFER)
     size_t asize;
+#  endif
+#  if defined(USE_GETHOSTENT_BUFFER) || defined(USE_GETNETENT_BUFFER) || defined(USE_GETPROTOENT_BUFFER) || defined(USE_GETSERVENT_BUFFER)
     int anint;
+#  endif
     va_list ap;
 
     va_start(ap, f);

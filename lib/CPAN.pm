@@ -1,6 +1,6 @@
 # -*- Mode: cperl; coding: utf-8; cperl-indent-level: 4 -*-
 package CPAN;
-$VERSION = '1.59_56';
+$VERSION = '1.59_57';
 # $Id: CPAN.pm,v 1.385 2001/02/09 21:37:57 k Exp $
 
 # only used during development:
@@ -22,6 +22,7 @@ use Safe ();
 use Text::ParseWords ();
 use Text::Wrap;
 use File::Spec;
+use Sys::Hostname;
 no lib "."; # we need to run chdir all over and we would get at wrong
             # libraries there
 
@@ -460,19 +461,33 @@ sub checklock {
     if (-f $lockfile && -M _ > 0) {
 	my $fh = FileHandle->new($lockfile) or
             $CPAN::Frontend->mydie("Could not open $lockfile: $!");
-	my $other = <$fh>;
+	my $otherpid  = <$fh>;
+	my $otherhost = <$fh>;
 	$fh->close;
-	if (defined $other && $other) {
-	    chomp $other;
-	    return if $$==$other; # should never happen
+	if (defined $otherpid && $otherpid) {
+	    chomp $otherpid;
+        }
+	if (defined $otherhost && $otherhost) {
+	    chomp $otherhost;
+	}
+	my $thishost  = hostname();
+	if (defined $otherhost && defined $thishost &&
+	    $otherhost ne '' && $thishost ne '' &&
+	    $otherhost ne $thishost) {
+            $CPAN::Frontend->mydie(sprintf("CPAN.pm panic: Lockfile $lockfile\n".
+                                           "reports other host $otherhost and other process $otherpid.\n".
+                                           "Cannot proceed.\n"));
+	}
+	elsif (defined $otherpid && $otherpid) {
+	    return if $$ == $otherpid; # should never happen
 	    $CPAN::Frontend->mywarn(
 				    qq{
-There seems to be running another CPAN process ($other). Contacting...
+There seems to be running another CPAN process (pid $otherpid).  Contacting...
 });
-	    if (kill 0, $other) {
+	    if (kill 0, $otherpid) {
 		$CPAN::Frontend->mydie(qq{Other job is running.
 You may want to kill it and delete the lockfile, maybe. On UNIX try:
-    kill $other
+    kill $otherpid
     rm $lockfile
 });
 	    } elsif (-w $lockfile) {
@@ -492,9 +507,9 @@ You may want to kill it and delete the lockfile, maybe. On UNIX try:
 			   );
 	    }
 	} else {
-            $CPAN::Frontend->mydie(sprintf("CPAN.pm panic: Lockfile $lockfile ".
+            $CPAN::Frontend->mydie(sprintf("CPAN.pm panic: Lockfile $lockfile\n".
                                            "reports other process with ID ".
-                                           "$other. Cannot proceed.\n"));
+                                           "$otherpid. Cannot proceed.\n"));
         }
     }
     my $dotcpan = $CPAN::Config->{cpan_home};
@@ -558,6 +573,7 @@ or
 	$CPAN::Frontend->mydie("Could not open >$lockfile: $!");
     }
     $fh->print($$, "\n");
+    $fh->print(hostname(), "\n");
     $self->{LOCK} = $lockfile;
     $fh->close;
     $SIG{TERM} = sub {

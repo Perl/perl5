@@ -5,6 +5,7 @@
 BEGIN {
     chdir 't' if -d 't';
     @INC = '../lib';
+    $ENV{PERL5LIB} = '../lib';
 }
 
 use Config;

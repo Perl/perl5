@@ -100,5 +100,10 @@ caches that are much faster than main memory.  You can force the
 choice of algorithm with this pragma, but this feels heavy-handed,
 so the subpragmas beginning with a C<_> may not persist beyond Perl 5.8.
 
+=head1 CAVEATS
+
+This pragma is not lexically scoped : its effect is global to the program
+it appears in.  This may change in future versions.
+
 =cut
 

@@ -3,7 +3,7 @@ BEGIN {
     @INC = '../lib';
     require './test.pl';
 
-    plan(tests => 37);
+    plan(tests => 48);
 }
 
 # Two hashes one will all keys 8-bit possible (initially), other
@@ -77,3 +77,26 @@ foreach my $a ("\x7f","\xff")
  }
 
 
+
+{
+    print "# Unicode hash keys and \\w\n";
+    # This is not really a regex test but regexes bring
+    # out the issue nicely.
+    use strict;
+    my $u3 = "f\x{df}\x{100}";
+    my $u2 = substr($u3,0,2);
+    my $u1 = substr($u2,0,1);
+    my %u = ( $u1 => $u1, $u2 => $u2, $u3 => $u3 );  
+
+    for (keys %u) {
+	ok (/^\w+$/ && $u{$_} =~ /^\w+$/, "\\w on keys");
+   }
+
+    for (each %u) {
+	ok (/^\w+$/ && $u{$_} =~ /^\w+$/, "\\w on each");
+   }
+
+    for (%u) {
+	ok (/^\w+$/ && $u{$_} =~ /^\w+$/, "\\w on hash");
+   }
+}

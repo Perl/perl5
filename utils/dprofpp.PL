@@ -896,10 +896,12 @@ sub run_profiler {
 	my $script = shift;
 	my $profiler = shift;
 	my $startperl = shift;
+	my @script_parts = split /\s+/, $script;
 
-	system $startperl, "-d:$profiler", $script;
+	system $startperl, "-d:$profiler", @script_parts;
 	if( $? / 256 > 0 ){
-		die "Failed: $startperl -d:$profiler $script: $!";
+		my $cmd = join ' ', @script_parts;
+		die "Failed: $startperl -d:$profiler $cmd: $!";
 	}
 }
 

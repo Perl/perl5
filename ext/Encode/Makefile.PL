@@ -1,5 +1,4 @@
-use 5.7.2;
-use strict;
+use 5.007003;
 use ExtUtils::MakeMaker;
 
 my %tables = 
@@ -9,12 +8,19 @@ my %tables =
 	       ]
      );
 
-my @exe_files = ();
-my @more_exe_files = qw(bin/enc2xs bin/piconv);
-
+my @exe_files = qw(bin/enc2xs
+		   bin/piconv
+		   );
+my @more_exe_files = qw(
+			ucm2table
+			);
+my @pmlibdirs = qw(lib Encode);
 for my $arg (@ARGV){
-    if ($arg eq "USE_SCRIPTS"){
+    if ($arg eq "MORE_SCRIPTS"){
 	push @exe_files, @more_exe_files;
+    }
+    if ($arg eq "INSTALL_UCM"){
+	push @pmlibdirs, "ucm";
     }
 }
 
@@ -29,7 +35,8 @@ WriteMakefile(
 		  DIST_DEFAULT => 'all tardist',
 	      },
 	      MAN3PODS	=> {},
-	      INC       => "-I./Encode"
+	      INC       => "-I./Encode",
+	      PMLIBDIRS => \@pmlibdirs,
 	      );
 
 package MY;
@@ -70,7 +77,7 @@ return '';
 sub postamble
 {
     my $self = shift;
-    my $dir  = $self->catdir($self->curdir,'Encode');
+    my $dir  = $self->catdir($self->curdir,'ucm');
     my $str  = "# Encode\$(OBJ_EXT) depends on .h and _def.h files not .c files - but all written by enc2xs\n";
     $str  .= 'Encode$(OBJ_EXT) :';
     foreach my $table (keys %tables)

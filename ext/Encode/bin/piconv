@@ -1,5 +1,5 @@
-#!/usr/bin/perl
-# $Id: piconv,v 1.0 2002/03/28 23:26:28 dankogai Exp dankogai $
+#!./perl
+# $Id: piconv,v 1.10 2002/03/31 21:00:50 dankogai Exp $
 #
 use 5.7.3;
 use strict;
@@ -9,9 +9,11 @@ my %Scheme =  map {$_ => 1} qw(from_to decode_encode perlio);
 
 use Getopt::Std;
 
-my %Opt; getopts("DS:lf:t:s:", \%Opt);
+my %Opt; getopts("hDS:lf:t:s:", \%Opt);
+$Opt{h} and help();
 $Opt{l} and list_encodings();
 my $locale = $ENV{LC_CTYPE} || $ENV{LC_ALL} || $ENV{LANG};
+$Opt{f} || $Opt{t} || help();
 my $from = $Opt{f} || $locale or help("from_encoding unspecified");
 my $to   = $Opt{t} || $locale or help("to_encoding unspecified");
 $Opt{s} and Encode::from_to($Opt{s}, $from, $to) and print $Opt{s} and exit;
@@ -83,8 +85,8 @@ piconv -- iconv(1), reinvented in perl
 =head1 DESCRIPTION
 
 B<piconv> is perl version of F<iconv>, a character encoding converter
-widely availabe for various unixen today.   This script was primarily
-a technology demostrator for Perl 5.8.0, you can use piconv in the
+widely available for various Unixen today.   This script was primarily
+a technology demonstrator for Perl 5.8.0, you can use piconv in the
 place of iconv for virtually any cases.
 
 piconv converts character encoding of either STDIN or files specified
@@ -97,12 +99,12 @@ Here are list of options.
 =item -f from_encoding
 
 Specifies the encoding you are converting from.  Unlike F<iconv>,
-this option can be ommited.  In such cases the current locale is used.
+this option can be omitted.  In such cases the current locale is used.
 
 =item -t to_encoding
 
 Specifies the encoding you are converting to.  Unlike F<iconv>,
-this option can be ommited.  In such cases the current locale is used.
+this option can be omitted.  In such cases the current locale is used.
 
 Therefore when both -f and -t are omitted, F<piconv> just acts like F<cat>.
 
@@ -112,12 +114,15 @@ uses I<string> instead of file for the source of text.  Same as F<iconv>.
 
 =item -l
 
-Lists all available encodings to STDERR.  This feature is missing from
-F<iconv>.
+Lists all available encodings to STDERR.
+
+=item -h
+
+Show usage.
 
 =item -D
 
-Invokes debugging mode.  primarily for Encode hackers.
+Invokes debugging mode.  Primarily for Encode hackers.
 
 =item -S scheme
 
@@ -132,12 +137,12 @@ Uses Encode::from_to for conversion.  This is the default.
 
 =item decode_encode
 
-Input strings are decode()ed then encode()ed.  A straight step-by-step
+Input strings are decode()d then encode()d.  A straight two-step
 implementation.
 
 =item perlio
 
-The new perlIO layer is used.  NI-S favorite.
+The new perlIO layer is used.  NI-S' favorite.
 
 =back
 

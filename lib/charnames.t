@@ -12,7 +12,7 @@ BEGIN {
 
 $| = 1;
 
-print "1..37\n";
+print "1..38\n";
 
 use charnames ':full';
 
@@ -137,7 +137,8 @@ sub to_bytes {
     print "not " unless charnames::viacode(0x1234) eq "ETHIOPIC SYLLABLE SEE";
     print "ok 17\n";
 
-    print "not " if defined charnames::viacode(0x0590); # unused Hebrew
+    # Unused Hebrew.
+    print "not " unless charnames::viacode(0x0590) eq chr(0xFFFD);
     print "ok 18\n";
 }
 
@@ -181,19 +182,21 @@ print "ok 27\n";
 print "not " unless "\N{LF}" eq "\n";
 print "ok 28\n";
 
-print "not " unless "\N{NEXT LINE (NEL)}" eq chr(0x85);
+my $nel = ord("A") == 193 ? qr/^(?:\x15|\x25)$/ : qr/^\x85$/;
+
+print "not " unless "\N{NEXT LINE (NEL)}" =~ $nel;
 print "ok 29\n";
 
-print "not " unless "\N{NEXT LINE}" eq chr(0x85);
+print "not " unless "\N{NEXT LINE}" =~ $nel;
 print "ok 30\n";
 
-print "not " unless "\N{NEL}" eq chr(0x85);
+print "not " unless "\N{NEL}" =~ $nel;
 print "ok 31\n";
 
-print "not " unless "\N{BYTE ORDER MARK}" eq chr(0xFFFE);
+print "not " unless "\N{BYTE ORDER MARK}" eq chr(0xFEFF);
 print "ok 32\n";
 
-print "not " unless "\N{BOM}" eq chr(0xFFFE);
+print "not " unless "\N{BOM}" eq chr(0xFEFF);
 print "ok 33\n";
 
 {
@@ -213,4 +216,7 @@ print "ok 33\n";
     print "not " if grep { /"VERTICAL TABULATION" is deprecated/ } @WARN;
     print "ok 37\n";
 }
+
+print "not " unless charnames::viacode(0xFEFF) eq "ZERO WIDTH NO-BREAK SPACE";
+print "ok 38\n";
 

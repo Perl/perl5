@@ -5,6 +5,9 @@ BEGIN {
         chdir 't' if -d 't';
         @INC = '../lib';
     }
+    else {
+        unshift @INC, 't/lib';
+    }
 }
 chdir 't';
 
@@ -15,7 +18,7 @@ BEGIN {
         plan skip_all => 'Non-Unix platform';
     }
     else {
-        plan tests => 108; 
+        plan tests => 107;
     }
 }
 
@@ -88,7 +91,6 @@ foreach ( qw /
   fixin
   force
   guess_name
-  htmlifypods
   init_dirscan
   init_main
   init_others
@@ -129,7 +131,7 @@ foreach ( qw /
   xsubpp_version 
   / )
   {
-  ok ($class->can ($_), "can $_");
+      can_ok($class, $_);
   }
 
 ###############################################################################

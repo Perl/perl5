@@ -20,7 +20,7 @@
 
 # $Id: Head.U,v 3.0.1.9 1997/02/28 15:02:09 ram Exp $
 #
-# Generated on Sun Mar 24 23:35:42 EET 2002 [metaconfig 3.0 PL70]
+# Generated on Fri Mar 29 18:09:14 EET 2002 [metaconfig 3.0 PL70]
 # (with additional metaconfig patches by perlbug@perl.org)
 
 cat >c1$$ <<EOF
@@ -8387,6 +8387,12 @@ esac
 set versiononly
 eval $setvar
 
+case "$versiononly" in
+"$define") inc_version_list=''
+           inc_version_list_init=0
+           ;;
+esac
+
 : figure out how to guarantee perl startup
 case "$startperl" in
 '')
@@ -16184,6 +16190,24 @@ echo " "
 set d_telldirproto telldir $i_systypes sys/types.h $i_dirent dirent.h
 eval $hasproto
 
+: see if time exists
+echo " "
+if test "X$d_time" = X -o X"$timetype" = X; then
+    if set time val -f d_time; eval $csym; $val; then
+		echo 'time() found.' >&4
+		val="$define"
+		rp="What is the type returned by time() on this system?"
+		set time_t timetype long stdio.h sys/types.h
+		eval $typedef_ask
+    else
+		echo 'time() not found, hope that will do.' >&4
+		val="$undef"
+		timetype='int';
+    fi
+    set d_time
+    eval $setvar
+fi
+
 : see if this is a sys/times.h system
 set sys/times.h i_systimes
 eval $inhdr
@@ -18735,24 +18759,6 @@ fi
 $rm -f stdioh
 
 
-
-: see if time exists
-echo " "
-if test "X$d_time" = X -o X"$timetype" = X; then
-    if set time val -f d_time; eval $csym; $val; then
-		echo 'time() found.' >&4
-		val="$define"
-		rp="What is the type returned by time() on this system?"
-		set time_t timetype long stdio.h sys/types.h
-		eval $typedef_ask
-    else
-		echo 'time() not found, hope that will do.' >&4
-		val="$undef"
-		timetype='int';
-    fi
-    set d_time
-    eval $setvar
-fi
 
 : see what type uids are declared as in the kernel
 echo " "

@@ -55,7 +55,7 @@ sub charnames
 
   if ($name eq "BYTE ORDER MARK") {
       $fname = $name;
-      $ord = 0xFFFE;
+      $ord = 0xFEFF;
   } else {
       ## Suck in the code/name list as a big string.
       ## Lines look like:
@@ -104,7 +104,7 @@ sub charnames
       
       ##
       ## Now know where in the string the name starts.
-      ## The code, in hex, is befor that.
+      ## The code, in hex, is before that.
       ##
       ## The code can be 4-6 characters long, so we've got to sort of
       ## go look for it, just after the newline that comes before $off[0].
@@ -181,7 +181,7 @@ my %viacode;
 sub viacode
 {
     if (@_ != 1) {
-        carp "charnames::viacode() expects one numeric argument";
+        carp "charnames::viacode() expects one argument";
         return ()
     }
 
@@ -209,7 +209,8 @@ sub viacode
     if ($txt =~ m/^$hex\t\t(.+)/m) {
         return $viacode{$hex} = $1;
     } else {
-        return;
+	carp "Unknown charcode '$hex'";
+        return "\x{FFFD}";
     }
 }
 
@@ -241,7 +242,7 @@ __END__
 
 =head1 NAME
 
-charnames - define character names for C<\N{named}> string literal escapes.
+charnames - define character names for C<\N{named}> string literal escapes
 
 =head1 SYNOPSIS
 
@@ -254,8 +255,8 @@ charnames - define character names for C<\N{named}> string literal escapes.
   use charnames qw(cyrillic greek);
   print "\N{sigma} is Greek sigma, and \N{be} is Cyrillic b.\n";
 
-  print charname::viacode(0x1234); # prints "ETHIOPIC SYLLABLE SEE"
-  printf "%04X", charname::vianame("GOTHIC LETTER AHSA"); # prints "10330"
+  print charnames::viacode(0x1234); # prints "ETHIOPIC SYLLABLE SEE"
+  printf "%04X", charnames::vianame("GOTHIC LETTER AHSA"); # prints "10330"
 
 =head1 DESCRIPTION
 
@@ -333,8 +334,11 @@ prints "FOUR TEARDROP-SPOKED ASTERISK".
 
 Returns undef if no name is known for the code.
 
-This works only for the standard names, and does not yet aply 
+This works only for the standard names, and does not yet apply 
 to custom translators.
+
+Notice that the name returned for of U+FEFF is "ZERO WIDTH NO-BREAK
+SPACE", not "BYTE ORDER MARK".
 
 =head1 charnames::vianame(code)
 
@@ -397,9 +401,8 @@ will also give a warning about being deprecated.
 
 =head1 ILLEGAL CHARACTERS
 
-If you ask for a character that is illegal (like the byte order mark
-U+FFFE, or the U+FFFF) does not exist, a warning is given and the
-special Unicode I<replacement character> "\x{FFFD}" is returned.
+If you ask for a character that does not exist, a warning is given
+and the Unicode I<replacement character> "\x{FFFD}" is returned.
 
 =head1 BUGS
 

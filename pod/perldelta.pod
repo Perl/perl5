@@ -500,7 +500,7 @@ prototype(\[$@%&]) is now available to implicitly create references
 =item *
 
 A new command-line option, C<-t> is available.  It is the
-little brother of C<-T>: instead of dieing on taint violations,
+little brother of C<-T>: instead of dying on taint violations,
 lexical warnings are given.  B<This is only meant as a temporary
 debugging aid while securing the code of old legacy applications.
 This is not a substitute for -T.>
@@ -559,8 +559,12 @@ The command-line options -s and -F are now recognized on the shebang
 
 Use of the C</c> match modifier without an accompanying C</g> modifier
 elicits a new warning: C<Use of /c modifier is meaningless without /g>.
+
 Use of C</c> in substitutions, even with C</g>, elicits 
-C<Use of /c modifier is meaningless in s///>.
+C<Use of /c modifier is meaningless in s///>.  
+
+Use of C</g> with C<split> elicits <Use of /g modifier is meaningless
+in split>.
 
 =back
 
@@ -1187,6 +1191,11 @@ F<emacs/e2ctags.pl> is now much faster.
 
 =item *
 
+C<enc2xs> is a tool for people adding their own encodings to the
+Encode module.
+
+=item *
+
 C<h2ph> now supports C trigraphs.
 
 =item *
@@ -1229,6 +1238,11 @@ command line) is much more like that of the UNIX C compiler, cc.
 
 C<perlivp> is a new Installation Verification Procedure utility
 for running any time after installing Perl.
+
+=item *
+
+C<piconv> is an implementation of the character conversion utility
+C<iconv>, demonstrating the new Encode module.
 
 =item *
 
@@ -2628,6 +2642,13 @@ One cannot call Perl using the C<volume:> syntax, that is, C<perl -v>
 works, but for example C<bin:perl -v> doesn't.  The exact reason isn't
 known but the current suspect is the F<ixemul> library.
 
+=head2 FreeBSD Failing locale Test 117 For ISO8859-15 Locales
+
+The ISO8859-15 locales may fail the locale test 117 in FreeBSD.
+This is caused by the characters \xFF (y with diaeresis) and \xBE
+(Y with diaeresis) not behaving correctly when being matched
+case-insensitively.
+
 =head2 mod_perl 1.26 Doesn't Build With Threaded Perl
 
 Use mod_perl 1.27 or higher.
@@ -2648,6 +2669,10 @@ subtest 9 failed.
 No known fix.
 
 =head2 Mac OS X
+
+Please remember to set your environment variable LC_ALL to "C"
+(setenv LC_ALL C) before running "make test" to avoid a lot of
+warnings about the broken locales of Mac OS X.
 
 The following tests are known to fail:
 

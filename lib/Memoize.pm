@@ -8,10 +8,10 @@
 # same terms as Perl itself.  If in doubt, 
 # write to mjd-perl-memoize+@plover.com for a license.
 #
-# Version 0.66 $Revision: 1.18 $ $Date: 2001/06/24 17:16:47 $
+# Version 1.00 $Revision: 1.18 $ $Date: 2001/06/24 17:16:47 $
 
 package Memoize;
-$VERSION = '0.66';
+$VERSION = '1.00';
 
 # Compile-time constants
 sub SCALAR () { 0 } 
@@ -167,6 +167,8 @@ sub memoize {
   $wrapper			# Return just memoized version
 }
 
+use warnings::register;
+
 # This function tries to load a tied hash class and tie the hash to it.
 sub _my_tie {
   my ($context, $hash, $options) = @_;
@@ -176,8 +178,8 @@ sub _my_tie {
   my $shortopt = (ref $fullopt) ? $fullopt->[0] : $fullopt;
   
   return unless defined $shortopt && $shortopt eq 'TIE';
-  carp("TIE option to memoize() is deprecated; use HASH instead") if $^W;
-
+  carp("TIE option to memoize() is deprecated; use HASH instead")
+      if warnings::enabled('deprecated');
 
   my @args = ref $fullopt ? @$fullopt : ();
   shift @args;
@@ -357,10 +359,11 @@ sub _crap_out {
 
 =head1 NAME
 
-Memoize - Make your functions faster by trading space for time
+Memoize - Make functions faster by trading space for time
 
 =head1 SYNOPSIS
 
+        # This is the documentation for Memoize 1.00
 	use Memoize;
 	memoize('slow_function');
 	slow_function(arguments);    # Is faster than it was before
@@ -462,7 +465,7 @@ this:
 
 Since there are relatively few objects in a picture, there are only a
 few colors, which get looked up over and over again.  Memoizing
-C<ColorToRGB> speeded up the program by several percent.
+C<ColorToRGB> sped up the program by several percent.
 
 =head1 DETAILS
 
@@ -692,15 +695,18 @@ because all its results have been precomputed.
 
 =item C<TIE>
 
-This option is B<strongly deprecated> and will be removed
-in the B<next> release of C<Memoize>.  Use the C<HASH> option instead.
+This option is no longer supported.  It is still documented only to
+aid in the debugging of old programs that use it.  Old programs should
+be converted to use the C<HASH> option instead.
 
         memoize ... [TIE, PACKAGE, ARGS...]
 
 is merely a shortcut for
 
         require PACKAGE;
-        tie my %cache, PACKAGE, ARGS...;
+	{ my %cache;
+          tie %cache, PACKAGE, ARGS...;
+	}
         memoize ... [HASH => \%cache];
 
 =item C<FAULT>
@@ -975,15 +981,12 @@ in Perl, and until it is resolved, memoized functions will see a
 slightly different C<caller()> and will perform a little more slowly
 on threaded perls than unthreaded perls.
 
-Here's a bug that isn't my fault: Some versions of C<DB_File> won't
-let you store data under a key of length 0.  That means that if you
-have a function C<f> which you memoized and the cache is in a
-C<DB_File> database, then the value of C<f()> (C<f> called with no
-arguments) will not be memoized.  Let us all breathe deeply and repeat
-this mantra: ``Gosh, Keith, that sure was a stupid thing to do.''  If
-this is a big problem, you can write a tied hash class which is a
-front-end to C<DB_File> that prepends <x> to every key before storing
-it.
+Some versions of C<DB_File> won't let you store data under a key of
+length 0.  That means that if you have a function C<f> which you
+memoized and the cache is in a C<DB_File> database, then the value of
+C<f()> (C<f> called with no arguments) will not be memoized.  If this
+is a big problem, you can supply a normalizer function that prepends
+C<"x"> to every key.
 
 =head1 MAILING LIST
 

@@ -1,7 +1,7 @@
 package Encode::Alias;
 use strict;
 use Encode;
-our $VERSION = do { my @r = (q$Revision: 1.0 $ =~ /\d+/g); sprintf "%d."."%02d" x $#r, @r };
+our $VERSION = do { my @r = (q$Revision: 1.2 $ =~ /\d+/g); sprintf "%d."."%02d" x $#r, @r };
 our $DEBUG = 0;
 require Exporter;
 
@@ -167,6 +167,9 @@ sub init_aliases
     # Sometimes seen with a leading zero.
     define_alias( qr/\bcp037\b/i => '"cp37"');
 
+    # Mac Mappings
+    define_alias( qr/\bmacIcelandic$/i => '"macIceland"');
+    define_alias( qr/^mac_(.*)$/i => '"mac$1"');
     # Ououououou.
     define_alias( qr/\bmacRomanian$/i => '"macRumanian"');
 
@@ -235,8 +238,9 @@ Encode::Alias - alias defintions to encodings
 
 =head1 DESCRIPTION
 
-Allows newName to be used as am alias for ENCODING. ENCODING may be
-either the name of an encoding or and encoding object (as described in L<Encode>).
+Allows newName to be used as an alias for ENCODING. ENCODING may be
+either the name of an encoding or an encoding object (as described 
+in L<Encode>).
 
 Currently I<newName> can be specified in the following ways:
 
@@ -249,28 +253,29 @@ Currently I<newName> can be specified in the following ways:
   define_alias( qr/^iso8859-(\d+)$/i => '"iso-8859-$1"' );
 
 In this case if I<ENCODING> is not a reference it is C<eval>-ed to
-allow C<$1> etc. to be subsituted.  The example is one way to names as
-used in X11 font names to alias the MIME names for the iso-8859-*
-family.  Note the double quote inside the single quote. 
+allow C<$1> etc. to be substituted.  The example is one way to alias
+names as used in X11 fonts to the MIME names for the iso-8859-*
+family.  Note the double quote inside the single quote.
 
-If you are using regex here, you have to do so or it won't work in
-this case.  Also not regex is tricky even for the experienced.  Use it
-with caution.
+If you are using a regex here, you have to use the quotes as shown or
+it won't work.  Also note that regex handling is tricky even for the
+experienced.  Use it with caution.
 
 =item As a code reference, e.g.:
 
   define_alias( sub { return /^iso8859-(\d+)$/i ? "iso-8859-$1" : undef } , '');
 
+
 In this case C<$_> will be set to the name that is being looked up and
 I<ENCODING> is passed to the sub as its first argument.  The example
-is another way to names as used in X11 font names to alias the MIME
-names for the iso-8859-* family.
+is another way to alias names as used in X11 fonts to the MIME names
+for the iso-8859-* family.
 
 =back
 
 =head2  Alias overloading
 
-You can override predefined aliases by simply applying define_alias().  
+You can override predefined aliases by simply applying define_alias().
 New alias is always evaluated first and when neccessary define_alias()
 flushes internal cache to make new definition available.
 

@@ -6,7 +6,7 @@
 
 $| = 1;
 
-print "1..908\n";
+print "1..897\n";
 
 BEGIN {
     chdir 't' if -d 't';
@@ -2772,40 +2772,9 @@ print "# some Unicode properties\n";
     }
 }
 
-
-{
-    print "# Unicode hash keys and \\w\n";
-    # This is not really a regex test but regexes bring
-    # out the issue nicely.
-    use strict;
-    my $test = 893;
-    my $u3 = "f\x{df}\x{100}";
-    my $u2 = substr($u3,0,2);
-    my $u1 = substr($u2,0,1);
-    my %u = ( $u1 => $u1, $u2 => $u2, $u3 => $u3 );  
-
-    for (keys %u) {
-	print /^\w+$/ && $u{$_} =~ /^\w+$/ ?
-	    "ok $test\n" : "not ok $test\n";
-	$test++;
-   }
-
-    for (each %u) {
-	print /^\w+$/ && $u{$_} =~ /^\w+$/ ?
-	    "ok $test\n" : "not ok $test\n";
-	$test++;
-   }
-
-    for (%u) {
-	print /^\w+$/ && $u{$_} =~ /^\w+$/ ?
-	    "ok $test\n" : "not ok $test\n";
-	$test++;
-   }
-}
-
 {
     print "# qr/.../x\n";
-    my $test = 904;
+    my $test = 893;
 
     my $R = qr/ A B C # D E/x;
 
@@ -2821,7 +2790,7 @@ print "# some Unicode properties\n";
 
 {
     print "# illegal Unicode properties\n";
-    my $test = 907;
+    my $test = 896;
 
     print eval { "a" =~ /\pq / }      ? "not ok $test\n" : "ok $test\n";
     $test++;

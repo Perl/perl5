@@ -1403,7 +1403,8 @@ off.  C<\G> allows us to easily do context-sensitive matching:
 
 The combination of C<//g> and C<\G> allows us to process the string a
 bit at a time and use arbitrary Perl logic to decide what to do next.
-Currently, the C<\G> anchor only works at the beginning of a pattern.
+Currently, the C<\G> anchor is only fully supported when used to anchor
+to the start of the pattern.
 
 C<\G> is also invaluable in processing fixed length records with
 regexps.  Suppose we have a snippet of coding region DNA, encoded as

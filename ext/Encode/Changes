@@ -1,8 +1,68 @@
 # Revision history for Perl extension Encode.
 #
-# $Id: Changes,v 1.0 2002/03/28 23:26:24 dankogai Exp dankogai $
+# $Id: Changes,v 1.11 2002/03/31 22:12:13 dankogai Exp dankogai $
 #
-1.00  Wed Mar 27 2002
+
+1.11  $Date: 2002/03/31 22:12:13 $
++ t/encoding.t
++ t/jperl.t
+! MANIFEST
+  Missing files from the MANIFEST fixed.
+  Message-Id: <20020401010156.H10509@alpha.hut.fi>
+  Version incremented just to make CPAN happy.
+
+1.10  2002/03/31 21:32:42
+! Makefile.PL
+! README
+  INSTALL_UCM option added to Makefile.PL so you can install *.ucm
+  if you want.  This should make Autrijus happy.  Also, piconv
+  is added to default install.
++ Encode/*.e2x
+! bin/enc2xs
+  Here-documented files that enc2xs generates are now exported
+  to *.e2x.  Much cleaner and easier to debug.
+! encoding.pm
+  encoding enhances so you can make it act more like such 
+  (now prehistoric ) "localized" variations of perl like Jperl.
++ t/jperl.t
+  Further test for encoding.pm.  Written in euc-jp
++ encoding.pm
++ t/encoding.t
+  Taken over form jhi.
+  Message-Id: <20020330174618.B10154@alpha.hut.fi>
+- Encode/*.ucm
++ ucm/*.ucm
+! Makefile.PL
+! */Makefile.PL
+  *.ucm relocated to ucm/ so MakeMaker will not install'em by default.
+- ucm2table
++ bin/ucm2table
+  ***
+! AUTHORS
+! Byte/Byte.pm
+! Encode.pm
+! Encode/macIceland.ucm
+! lib/Encode/Alias.pm
+! lib/Encode/Supported.pod
+  MacIceland fixes and Pod Typo fixes.  This adds Andreas to AUTHORS.
+  Message-Id: <m3lmcavhjt.fsf@anima.de>
+
+1.01  2002/03/29 20:59:39
+! Makefile.PL
+! README
+  s/USE_SCRIPTS/MORE_SCRIPTS/
+! Makefile.PL
+  installs enc2xs by default for external Encode:: modules in CPAN, 
+  such as Encode::HanExtra
+! t/*.t
+  More sensible perl core detection via $ENV{PERL_CORE}
+  suggested by Spider
+  Message-Id: <200203291007.FAA07329@Orb.Nashua.NH.US>
+! bin/enc2xs
+  Perl core ditection via $^X =~ m/\bminiperl$/o
+  Message-Id: <A5C7B0CA-42F1-11D6-B5AD-00039301D480@dan.co.jp>
+
+1.00  Wed Mar 29 2002
 ! *
   The version of all files is updated to 1.00 via "ci -f -l1.00",
   commemorating version 1.00.  All files, including *.ucm are now

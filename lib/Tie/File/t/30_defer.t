@@ -2,6 +2,10 @@
 #
 # Check ->defer and ->flush methods
 #
+# This is the old version, which you used in the past when
+# there was a defer buffer separate from the read cache.  
+# There isn't any longer.
+#
 
 use POSIX 'SEEK_SET';
 my $file = "tf$$.txt";
@@ -145,7 +149,7 @@ check_caches({1 => "recordB$:",                 },
 check_contents(join("$:", qw(recordA recordB recordC 
                              record3 record4 record5 record6 record7)) . "$:");
 
-# (48-51) This should read back out of the defer buffer 
+# (48-51) This should read back out of the defer buffer
 # without adding anything to the read cache
 my $z;
 $z = $a[2];
@@ -247,7 +251,14 @@ sub check_caches {
 #  $N++;
 
   my $good = 1;
-  $good &&= hash_equal($o->{cache}, $xcache, "true cache", "expected cache");
+
+  # Copy the contents of the cache into a regular hash
+  my %cache;
+  for my $k ($o->{cache}->keys) {
+    $cache{$k} = $o->{cache}->_produce($k);
+  }
+
+  $good &&= hash_equal(\%cache, $xcache, "true cache", "expected cache");
   $good &&= hash_equal($o->{deferred}, $xdefer, "true defer", "expected defer");
   print $good ? "ok $N\n" : "not ok $N\n";
   $N++;

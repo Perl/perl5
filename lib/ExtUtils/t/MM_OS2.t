@@ -1,15 +1,17 @@
 #!/usr/bin/perl -w
 
-use strict;
-
 BEGIN {
     if( $ENV{PERL_CORE} ) {
         chdir 't' if -d 't';
         @INC = '../lib';
     }
+    else {
+        unshift @INC, 't/lib';
+    }
 }
 chdir 't';
 
+use strict;
 use Test::More;
 if ($^O =~ /os2/i) {
 	plan( tests => 32 );

@@ -48,8 +48,10 @@ foreach my $dir (sort @ext)
     if (!(-f 'Makefile') || $mmod > $dmod)
      {
       print "\nRunning Makefile.PL in $dir\n";
-      print "$perl \"-I$here\\..\\lib\" Makefile.PL INSTALLDIRS=perl\n";
-      my $code = system($perl,"-I$here\\..\\lib",'Makefile.PL','INSTALLDIRS=perl');
+      my @perl = ($perl, "-I$here\\..\\lib", 'Makefile.PL',
+                  'INSTALLDIRS=perl', 'PERL_CORE=1');
+      print join(' ', @perl), "\n";
+      my $code = system(@perl);
       warn "$code from $dir's Makefile.PL" if $code;
       $mmod = -M 'Makefile';
       if ($mmod > $dmod)

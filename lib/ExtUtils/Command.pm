@@ -1,6 +1,6 @@
 package ExtUtils::Command;
 
-use 5.006_001;
+use 5.006;
 use strict;
 # use AutoLoader;
 use Carp;
@@ -12,7 +12,7 @@ require Exporter;
 our(@ISA, @EXPORT, $VERSION);
 @ISA     = qw(Exporter);
 @EXPORT  = qw(cp rm_f rm_rf mv cat eqtime mkpath touch test_f);
-$VERSION = '1.02';
+$VERSION = '1.03_01';
 
 =head1 NAME
 
@@ -33,8 +33,7 @@ ExtUtils::Command - utilities to replace common UNIX commands in Makefiles etc.
 
 =head1 DESCRIPTION
 
-The module is used in the Win32 port to replace common UNIX commands.
-Most commands are wrappers on generic modules File::Path and File::Basename.
+The module is used to replace common UNIX commands.
 
 =over 4
 

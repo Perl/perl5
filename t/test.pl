@@ -30,8 +30,12 @@ END {
 # Use this instead of "print STDERR" when outputing failure diagnostic 
 # messages
 sub _diag {
+    return unless @_;
+    my @mess = map { /^#/ ? "$_\n" : "# $_\n" } 
+               map { split /\n/ } @_;
     my $fh = $TODO ? *STDOUT : *STDERR;
-    print $fh @_;
+    print $fh @mess;
+
 }
 
 sub skip_all {
@@ -64,8 +68,7 @@ sub _ok {
     }
 
     # Ensure that the message is properly escaped.
-    _diag map { /^#/ ? "$_\n" : "# $_\n" } 
-          map { split /\n/ } @mess if @mess;
+    _diag @mess;
 
     $test++;
 
@@ -241,11 +244,12 @@ sub fail {
 }
 
 sub curr_test {
+    $test = shift if @_;
     return $test;
 }
 
 sub next_test {
-    $test++
+  $test++;
 }
 
 # Note: can't pass multipart messages since we try to
@@ -512,10 +516,10 @@ sub _fresh_perl {
 
     my $pass = $resolve->($results);
     unless ($pass) {
-        print STDERR "# PROG: $switch\n$prog\n";
-        print STDERR "# EXPECTED:\n", $resolve->(), "\n";
-        print STDERR "# GOT:\n$results\n";
-        print STDERR "# STATUS: $status\n";
+        _diag "# PROG: \n$prog\n";
+        _diag "# EXPECTED:\n", $resolve->(), "\n";
+        _diag "# GOT:\n$results\n";
+        _diag "# STATUS: $status\n";
     }
 
     # Use the first line of the program as a name if none was given

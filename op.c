@@ -6658,6 +6658,10 @@ Perl_ck_split(pTHX_ OP *o)
     kid->op_type = OP_PUSHRE;
     kid->op_ppaddr = PL_ppaddr[OP_PUSHRE];
     scalar(kid);
+    if (ckWARN(WARN_REGEXP) && ((PMOP *)kid)->op_pmflags & PMf_GLOBAL) {
+      Perl_warner(aTHX_ packWARN(WARN_REGEXP),
+                  "Use of /g modifier is meaningless in split");
+    }
 
     if (!kid->op_sibling)
 	append_elem(OP_SPLIT, o, newDEFSVOP());

@@ -17,7 +17,7 @@
 /*
  * Package name      : perl5
  * Source directory  : .
- * Configuration time: Fri Mar 15 17:39:35 EET 2002
+ * Configuration time: Fri Mar 29 20:37:35 EET 2002
  * Configured by     : jhi
  * Target system     : osf1 alpha.hut.fi v4.0 878 alpha 
  */
@@ -1143,8 +1143,8 @@
 /* ASCTIME_R_PROTO:
  *	This symbol encodes the prototype of asctime_r.
  */
-#define HAS_ASCTIME_R	   /**/
-#define ASCTIME_R_PROTO REENTRANT_PROTO_B_SB	   /**/
+/*#define HAS_ASCTIME_R	   / **/
+#define ASCTIME_R_PROTO 0	   /**/
 
 /* CASTI32:
  *	This symbol is defined if the C compiler can cast negative
@@ -1225,8 +1225,8 @@
 /* CTIME_R_PROTO:
  *	This symbol encodes the prototype of ctime_r.
  */
-#define HAS_CTIME_R	   /**/
-#define CTIME_R_PROTO REENTRANT_PROTO_B_SB	   /**/
+/*#define HAS_CTIME_R	   / **/
+#define CTIME_R_PROTO 0	   /**/
 
 /* DLSYM_NEEDS_UNDERSCORE:
  *	This symbol, if defined, indicates that we need to prepend an
@@ -1243,8 +1243,8 @@
 /* DRAND48_R_PROTO:
  *	This symbol encodes the prototype of drand48_r.
  */
-#define HAS_DRAND48_R	   /**/
-#define DRAND48_R_PROTO REENTRANT_PROTO_I_ST	   /**/
+/*#define HAS_DRAND48_R	   / **/
+#define DRAND48_R_PROTO 0	   /**/
 
 /* HAS_DRAND48_PROTO:
  *	This symbol, if defined, indicates that the system provides
@@ -1267,8 +1267,8 @@
 /* ENDGRENT_R_PROTO:
  *	This symbol encodes the prototype of endgrent_r.
  */
-#define HAS_ENDGRENT_R	   /**/
-#define ENDGRENT_R_PROTO REENTRANT_PROTO_I_H	   /**/
+/*#define HAS_ENDGRENT_R	   / **/
+#define ENDGRENT_R_PROTO 0	   /**/
 
 /* HAS_ENDHOSTENT:
  *	This symbol, if defined, indicates that the endhostent() routine is
@@ -1301,8 +1301,8 @@
 /* ENDPWENT_R_PROTO:
  *	This symbol encodes the prototype of endpwent_r.
  */
-#define HAS_ENDPWENT_R	   /**/
-#define ENDPWENT_R_PROTO REENTRANT_PROTO_I_H	   /**/
+/*#define HAS_ENDPWENT_R	   / **/
+#define ENDPWENT_R_PROTO 0	   /**/
 
 /* HAS_ENDSERVENT:
  *	This symbol, if defined, indicates that the endservent() routine is
@@ -1489,8 +1489,8 @@
 /* GETGRENT_R_PROTO:
  *	This symbol encodes the prototype of getgrent_r.
  */
-#define HAS_GETGRENT_R	   /**/
-#define GETGRENT_R_PROTO REENTRANT_PROTO_I_SBWR	   /**/
+/*#define HAS_GETGRENT_R	   / **/
+#define GETGRENT_R_PROTO 0	   /**/
 
 /* HAS_GETGRGID_R:
  *	This symbol, if defined, indicates that the getgrgid_r routine
@@ -1499,8 +1499,8 @@
 /* GETGRGID_R_PROTO:
  *	This symbol encodes the prototype of getgrgid_r.
  */
-#define HAS_GETGRGID_R	   /**/
-#define GETGRGID_R_PROTO REENTRANT_PROTO_I_TSBWR	   /**/
+/*#define HAS_GETGRGID_R	   / **/
+#define GETGRGID_R_PROTO 0	   /**/
 
 /* HAS_GETGRNAM_R:
  *	This symbol, if defined, indicates that the getgrnam_r routine
@@ -1509,8 +1509,8 @@
 /* GETGRNAM_R_PROTO:
  *	This symbol encodes the prototype of getgrnam_r.
  */
-#define HAS_GETGRNAM_R	   /**/
-#define GETGRNAM_R_PROTO REENTRANT_PROTO_I_CSBWR	   /**/
+/*#define HAS_GETGRNAM_R	   / **/
+#define GETGRNAM_R_PROTO 0	   /**/
 
 /* HAS_GETHOSTBYADDR:
  *	This symbol, if defined, indicates that the gethostbyaddr() routine is
@@ -1580,8 +1580,8 @@
 /* GETLOGIN_R_PROTO:
  *	This symbol encodes the prototype of getlogin_r.
  */
-#define HAS_GETLOGIN_R	   /**/
-#define GETLOGIN_R_PROTO REENTRANT_PROTO_I_BW	   /**/
+/*#define HAS_GETLOGIN_R	   / **/
+#define GETLOGIN_R_PROTO 0	   /**/
 
 /* HAS_GETMNT:
  *	This symbol, if defined, indicates that the getmnt routine is
@@ -1684,8 +1684,8 @@
 /* GETPWENT_R_PROTO:
  *	This symbol encodes the prototype of getpwent_r.
  */
-#define HAS_GETPWENT_R	   /**/
-#define GETPWENT_R_PROTO REENTRANT_PROTO_I_SBWR	   /**/
+/*#define HAS_GETPWENT_R	   / **/
+#define GETPWENT_R_PROTO 0	   /**/
 
 /* HAS_GETPWNAM_R:
  *	This symbol, if defined, indicates that the getpwnam_r routine
@@ -1694,8 +1694,8 @@
 /* GETPWNAM_R_PROTO:
  *	This symbol encodes the prototype of getpwnam_r.
  */
-#define HAS_GETPWNAM_R	   /**/
-#define GETPWNAM_R_PROTO REENTRANT_PROTO_I_CSBWR	   /**/
+/*#define HAS_GETPWNAM_R	   / **/
+#define GETPWNAM_R_PROTO 0	   /**/
 
 /* HAS_GETPWUID_R:
  *	This symbol, if defined, indicates that the getpwuid_r routine
@@ -1704,8 +1704,8 @@
 /* GETPWUID_R_PROTO:
  *	This symbol encodes the prototype of getpwuid_r.
  */
-#define HAS_GETPWUID_R	   /**/
-#define GETPWUID_R_PROTO REENTRANT_PROTO_I_TSBWR	   /**/
+/*#define HAS_GETPWUID_R	   / **/
+#define GETPWUID_R_PROTO 0	   /**/
 
 /* HAS_GETSERVENT:
  *	This symbol, if defined, indicates that the getservent() routine is
@@ -1755,8 +1755,8 @@
 /* GMTIME_R_PROTO:
  *	This symbol encodes the prototype of gmtime_r.
  */
-#define HAS_GMTIME_R	   /**/
-#define GMTIME_R_PROTO REENTRANT_PROTO_S_TS	   /**/
+/*#define HAS_GMTIME_R	   / **/
+#define GMTIME_R_PROTO 0	   /**/
 
 /* HAS_GNULIBC:
  *	This symbol, if defined, indicates to the C program that 
@@ -1856,8 +1856,8 @@
 /* LOCALTIME_R_PROTO:
  *	This symbol encodes the prototype of localtime_r.
  */
-#define HAS_LOCALTIME_R	   /**/
-#define LOCALTIME_R_PROTO REENTRANT_PROTO_S_TS	   /**/
+/*#define HAS_LOCALTIME_R	   / **/
+#define LOCALTIME_R_PROTO 0	   /**/
 
 /* HAS_LONG_DOUBLE:
  *	This symbol will be defined if the C compiler supports long
@@ -2018,8 +2018,8 @@
 /* RANDOM_R_PROTO:
  *	This symbol encodes the prototype of random_r.
  */
-#define HAS_RANDOM_R	   /**/
-#define RANDOM_R_PROTO REENTRANT_PROTO_I_TS	   /**/
+/*#define HAS_RANDOM_R	   / **/
+#define RANDOM_R_PROTO 0	   /**/
 
 /* HAS_READDIR_R:
  *	This symbol, if defined, indicates that the readdir_r routine
@@ -2028,8 +2028,8 @@
 /* READDIR_R_PROTO:
  *	This symbol encodes the prototype of readdir_r.
  */
-#define HAS_READDIR_R	   /**/
-#define READDIR_R_PROTO REENTRANT_PROTO_I_TSR	   /**/
+/*#define HAS_READDIR_R	   / **/
+#define READDIR_R_PROTO 0	   /**/
 
 /* HAS_READV:
  *	This symbol, if defined, indicates that the readv routine is
@@ -2101,8 +2101,8 @@
 /* SETGRENT_R_PROTO:
  *	This symbol encodes the prototype of setgrent_r.
  */
-#define HAS_SETGRENT_R	   /**/
-#define SETGRENT_R_PROTO REENTRANT_PROTO_I_H	   /**/
+/*#define HAS_SETGRENT_R	   / **/
+#define SETGRENT_R_PROTO 0	   /**/
 
 /* HAS_SETGROUPS:
  *	This symbol, if defined, indicates that the setgroups() routine is
@@ -2166,8 +2166,8 @@
 /* SETPWENT_R_PROTO:
  *	This symbol encodes the prototype of setpwent_r.
  */
-#define HAS_SETPWENT_R	   /**/
-#define SETPWENT_R_PROTO REENTRANT_PROTO_I_H	   /**/
+/*#define HAS_SETPWENT_R	   / **/
+#define SETPWENT_R_PROTO 0	   /**/
 
 /* HAS_SETSERVENT:
  *	This symbol, if defined, indicates that the setservent() routine is
@@ -2297,8 +2297,8 @@
 /* SRAND48_R_PROTO:
  *	This symbol encodes the prototype of srand48_r.
  */
-#define HAS_SRAND48_R	   /**/
-#define SRAND48_R_PROTO REENTRANT_PROTO_I_LS	   /**/
+/*#define HAS_SRAND48_R	   / **/
+#define SRAND48_R_PROTO 0	   /**/
 
 /* HAS_SRANDOM_R:
  *	This symbol, if defined, indicates that the srandom_r routine
@@ -2307,8 +2307,8 @@
 /* SRANDOM_R_PROTO:
  *	This symbol encodes the prototype of srandom_r.
  */
-#define HAS_SRANDOM_R	   /**/
-#define SRANDOM_R_PROTO REENTRANT_PROTO_I_TS	   /**/
+/*#define HAS_SRANDOM_R	   / **/
+#define SRANDOM_R_PROTO 0	   /**/
 
 /* USE_STAT_BLOCKS:
  *	This symbol is defined if this system has a stat structure declaring
@@ -2437,8 +2437,8 @@
 /* STRERROR_R_PROTO:
  *	This symbol encodes the prototype of strerror_r.
  */
-#define HAS_STRERROR_R	   /**/
-#define STRERROR_R_PROTO REENTRANT_PROTO_I_IBW	   /**/
+/*#define HAS_STRERROR_R	   / **/
+#define STRERROR_R_PROTO 0	   /**/
 
 /* HAS_STRTOLD:
  *	This symbol, if defined, indicates that the strtold routine is
@@ -2484,11 +2484,15 @@
  */
 #define	HAS_TELLDIR_PROTO	/**/
 
+/* HAS_TIME:
+ *	This symbol, if defined, indicates that the time() routine exists.
+ */
 /* Time_t:
  *	This symbol holds the type returned by time(). It can be long,
  *	or time_t on BSD sites (in which case <sys/types.h> should be
  *	included).
  */
+#define HAS_TIME		/**/
 #define Time_t time_t		/* Time type */
 
 /* HAS_TIMES:
@@ -3863,8 +3867,8 @@
 /* ENDHOSTENT_R_PROTO:
  *	This symbol encodes the prototype of endhostent_r.
  */
-#define HAS_ENDHOSTENT_R	   /**/
-#define ENDHOSTENT_R_PROTO REENTRANT_PROTO_I_S	   /**/
+/*#define HAS_ENDHOSTENT_R	   / **/
+#define ENDHOSTENT_R_PROTO 0	   /**/
 
 /* HAS_ENDNETENT_R:
  *	This symbol, if defined, indicates that the endnetent_r routine
@@ -3873,8 +3877,8 @@
 /* ENDNETENT_R_PROTO:
  *	This symbol encodes the prototype of endnetent_r.
  */
-#define HAS_ENDNETENT_R	   /**/
-#define ENDNETENT_R_PROTO REENTRANT_PROTO_I_S	   /**/
+/*#define HAS_ENDNETENT_R	   / **/
+#define ENDNETENT_R_PROTO 0	   /**/
 
 /* HAS_ENDPROTOENT_R:
  *	This symbol, if defined, indicates that the endprotoent_r routine
@@ -3883,8 +3887,8 @@
 /* ENDPROTOENT_R_PROTO:
  *	This symbol encodes the prototype of endprotoent_r.
  */
-#define HAS_ENDPROTOENT_R	   /**/
-#define ENDPROTOENT_R_PROTO REENTRANT_PROTO_I_S	   /**/
+/*#define HAS_ENDPROTOENT_R	   / **/
+#define ENDPROTOENT_R_PROTO 0	   /**/
 
 /* HAS_ENDSERVENT_R:
  *	This symbol, if defined, indicates that the endservent_r routine
@@ -3893,8 +3897,8 @@
 /* ENDSERVENT_R_PROTO:
  *	This symbol encodes the prototype of endservent_r.
  */
-#define HAS_ENDSERVENT_R	   /**/
-#define ENDSERVENT_R_PROTO REENTRANT_PROTO_I_S	   /**/
+/*#define HAS_ENDSERVENT_R	   / **/
+#define ENDSERVENT_R_PROTO 0	   /**/
 
 /* HAS_GETHOSTBYADDR_R:
  *	This symbol, if defined, indicates that the gethostbyaddr_r routine
@@ -3903,8 +3907,8 @@
 /* GETHOSTBYADDR_R_PROTO:
  *	This symbol encodes the prototype of gethostbyaddr_r.
  */
-#define HAS_GETHOSTBYADDR_R	   /**/
-#define GETHOSTBYADDR_R_PROTO REENTRANT_PROTO_I_CWISBWRE	   /**/
+/*#define HAS_GETHOSTBYADDR_R	   / **/
+#define GETHOSTBYADDR_R_PROTO 0	   /**/
 
 /* HAS_GETHOSTBYNAME_R:
  *	This symbol, if defined, indicates that the gethostbyname_r routine
@@ -3913,8 +3917,8 @@
 /* GETHOSTBYNAME_R_PROTO:
  *	This symbol encodes the prototype of gethostbyname_r.
  */
-#define HAS_GETHOSTBYNAME_R	   /**/
-#define GETHOSTBYNAME_R_PROTO REENTRANT_PROTO_I_CSBWRE	   /**/
+/*#define HAS_GETHOSTBYNAME_R	   / **/
+#define GETHOSTBYNAME_R_PROTO 0	   /**/
 
 /* HAS_GETHOSTENT_R:
  *	This symbol, if defined, indicates that the gethostent_r routine
@@ -3923,8 +3927,8 @@
 /* GETHOSTENT_R_PROTO:
  *	This symbol encodes the prototype of gethostent_r.
  */
-#define HAS_GETHOSTENT_R	   /**/
-#define GETHOSTENT_R_PROTO REENTRANT_PROTO_I_SBWRE	   /**/
+/*#define HAS_GETHOSTENT_R	   / **/
+#define GETHOSTENT_R_PROTO 0	   /**/
 
 /* HAS_GETNETBYADDR_R:
  *	This symbol, if defined, indicates that the getnetbyaddr_r routine
@@ -3933,8 +3937,8 @@
 /* GETNETBYADDR_R_PROTO:
  *	This symbol encodes the prototype of getnetbyaddr_r.
  */
-#define HAS_GETNETBYADDR_R	   /**/
-#define GETNETBYADDR_R_PROTO REENTRANT_PROTO_I_UISBWRE	   /**/
+/*#define HAS_GETNETBYADDR_R	   / **/
+#define GETNETBYADDR_R_PROTO 0	   /**/
 
 /* HAS_GETNETBYNAME_R:
  *	This symbol, if defined, indicates that the getnetbyname_r routine
@@ -3943,8 +3947,8 @@
 /* GETNETBYNAME_R_PROTO:
  *	This symbol encodes the prototype of getnetbyname_r.
  */
-#define HAS_GETNETBYNAME_R	   /**/
-#define GETNETBYNAME_R_PROTO REENTRANT_PROTO_I_CSBWRE	   /**/
+/*#define HAS_GETNETBYNAME_R	   / **/
+#define GETNETBYNAME_R_PROTO 0	   /**/
 
 /* HAS_GETNETENT_R:
  *	This symbol, if defined, indicates that the getnetent_r routine
@@ -3953,8 +3957,8 @@
 /* GETNETENT_R_PROTO:
  *	This symbol encodes the prototype of getnetent_r.
  */
-#define HAS_GETNETENT_R	   /**/
-#define GETNETENT_R_PROTO REENTRANT_PROTO_I_SBWRE	   /**/
+/*#define HAS_GETNETENT_R	   / **/
+#define GETNETENT_R_PROTO 0	   /**/
 
 /* HAS_GETPROTOBYNAME_R:
  *	This symbol, if defined, indicates that the getprotobyname_r routine
@@ -3963,8 +3967,8 @@
 /* GETPROTOBYNAME_R_PROTO:
  *	This symbol encodes the prototype of getprotobyname_r.
  */
-#define HAS_GETPROTOBYNAME_R	   /**/
-#define GETPROTOBYNAME_R_PROTO REENTRANT_PROTO_I_CSBWR	   /**/
+/*#define HAS_GETPROTOBYNAME_R	   / **/
+#define GETPROTOBYNAME_R_PROTO 0	   /**/
 
 /* HAS_GETPROTOBYNUMBER_R:
  *	This symbol, if defined, indicates that the getprotobynumber_r routine
@@ -3973,8 +3977,8 @@
 /* GETPROTOBYNUMBER_R_PROTO:
  *	This symbol encodes the prototype of getprotobynumber_r.
  */
-#define HAS_GETPROTOBYNUMBER_R	   /**/
-#define GETPROTOBYNUMBER_R_PROTO REENTRANT_PROTO_I_ISBWR	   /**/
+/*#define HAS_GETPROTOBYNUMBER_R	   / **/
+#define GETPROTOBYNUMBER_R_PROTO 0	   /**/
 
 /* HAS_GETPROTOENT_R:
  *	This symbol, if defined, indicates that the getprotoent_r routine
@@ -3983,8 +3987,8 @@
 /* GETPROTOENT_R_PROTO:
  *	This symbol encodes the prototype of getprotoent_r.
  */
-#define HAS_GETPROTOENT_R	   /**/
-#define GETPROTOENT_R_PROTO REENTRANT_PROTO_I_SBWR	   /**/
+/*#define HAS_GETPROTOENT_R	   / **/
+#define GETPROTOENT_R_PROTO 0	   /**/
 
 /* HAS_GETSERVBYNAME_R:
  *	This symbol, if defined, indicates that the getservbyname_r routine
@@ -3993,8 +3997,8 @@
 /* GETSERVBYNAME_R_PROTO:
  *	This symbol encodes the prototype of getservbyname_r.
  */
-#define HAS_GETSERVBYNAME_R	   /**/
-#define GETSERVBYNAME_R_PROTO REENTRANT_PROTO_I_CCSBWR	   /**/
+/*#define HAS_GETSERVBYNAME_R	   / **/
+#define GETSERVBYNAME_R_PROTO 0	   /**/
 
 /* HAS_GETSERVBYPORT_R:
  *	This symbol, if defined, indicates that the getservbyport_r routine
@@ -4003,8 +4007,8 @@
 /* GETSERVBYPORT_R_PROTO:
  *	This symbol encodes the prototype of getservbyport_r.
  */
-#define HAS_GETSERVBYPORT_R	   /**/
-#define GETSERVBYPORT_R_PROTO REENTRANT_PROTO_I_ICSBWR	   /**/
+/*#define HAS_GETSERVBYPORT_R	   / **/
+#define GETSERVBYPORT_R_PROTO 0	   /**/
 
 /* HAS_GETSERVENT_R:
  *	This symbol, if defined, indicates that the getservent_r routine
@@ -4013,8 +4017,8 @@
 /* GETSERVENT_R_PROTO:
  *	This symbol encodes the prototype of getservent_r.
  */
-#define HAS_GETSERVENT_R	   /**/
-#define GETSERVENT_R_PROTO REENTRANT_PROTO_I_SBWR	   /**/
+/*#define HAS_GETSERVENT_R	   / **/
+#define GETSERVENT_R_PROTO 0	   /**/
 
 /* HAS_PTHREAD_ATFORK:
  *	This symbol, if defined, indicates that the pthread_atfork routine
@@ -4039,8 +4043,8 @@
 /* SETHOSTENT_R_PROTO:
  *	This symbol encodes the prototype of sethostent_r.
  */
-#define HAS_SETHOSTENT_R	   /**/
-#define SETHOSTENT_R_PROTO REENTRANT_PROTO_I_ID	   /**/
+/*#define HAS_SETHOSTENT_R	   / **/
+#define SETHOSTENT_R_PROTO 0	   /**/
 
 /* HAS_SETLOCALE_R:
  *	This symbol, if defined, indicates that the setlocale_r routine
@@ -4059,8 +4063,8 @@
 /* SETNETENT_R_PROTO:
  *	This symbol encodes the prototype of setnetent_r.
  */
-#define HAS_SETNETENT_R	   /**/
-#define SETNETENT_R_PROTO REENTRANT_PROTO_I_ID	   /**/
+/*#define HAS_SETNETENT_R	   / **/
+#define SETNETENT_R_PROTO 0	   /**/
 
 /* HAS_SETPROTOENT_R:
  *	This symbol, if defined, indicates that the setprotoent_r routine
@@ -4069,8 +4073,8 @@
 /* SETPROTOENT_R_PROTO:
  *	This symbol encodes the prototype of setprotoent_r.
  */
-#define HAS_SETPROTOENT_R	   /**/
-#define SETPROTOENT_R_PROTO REENTRANT_PROTO_I_ID	   /**/
+/*#define HAS_SETPROTOENT_R	   / **/
+#define SETPROTOENT_R_PROTO 0	   /**/
 
 /* HAS_SETSERVENT_R:
  *	This symbol, if defined, indicates that the setservent_r routine
@@ -4079,8 +4083,8 @@
 /* SETSERVENT_R_PROTO:
  *	This symbol encodes the prototype of setservent_r.
  */
-#define HAS_SETSERVENT_R	   /**/
-#define SETSERVENT_R_PROTO REENTRANT_PROTO_I_ID	   /**/
+/*#define HAS_SETSERVENT_R	   / **/
+#define SETSERVENT_R_PROTO 0	   /**/
 
 /* HAS_TTYNAME_R:
  *	This symbol, if defined, indicates that the ttyname_r routine
@@ -4089,7 +4093,7 @@
 /* TTYNAME_R_PROTO:
  *	This symbol encodes the prototype of ttyname_r.
  */
-#define HAS_TTYNAME_R	   /**/
-#define TTYNAME_R_PROTO REENTRANT_PROTO_I_IBW	   /**/
+/*#define HAS_TTYNAME_R	   / **/
+#define TTYNAME_R_PROTO 0	   /**/
 
 #endif

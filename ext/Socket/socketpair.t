@@ -32,7 +32,7 @@ BEGIN {
         $SIG{INT} = sub {exit 0}; # You have 60 seconds. Your time starts now.
         my $must_finish_by = time + 60;
         my $remaining;
-        while ($remaining = time - $must_finish_by) {
+        while (($remaining = $must_finish_by - time) > 0) {
           sleep $remaining;
         }
         warn "Something unexpectedly hung during testing";

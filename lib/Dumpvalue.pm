@@ -1,7 +1,7 @@
 use 5.006_001;			# for (defined ref) and $#$v and our
 package Dumpvalue;
 use strict;
-our $VERSION = '1.10';
+our $VERSION = '1.11';
 our(%address, $stab, @stab, %stab, %subs);
 
 # documentation nits, handle complex data structures better by chromatic
@@ -492,6 +492,7 @@ Dumpvalue - provides screen dump of Perl data.
   $dumper->set(globPrint => 1);
   $dumper->dumpValue(\*::);
   $dumper->dumpvars('main');
+  my $dump = $dumper->stringify($some_value);
 
 =head1 DESCRIPTION
 
@@ -578,9 +579,21 @@ method and set() method (which accept multiple arguments).
   $dumper->dumpValue($value);
   $dumper->dumpValue([$value1, $value2]);
 
+Prints a dump to the currently selected filehandle.
+
 =item dumpValues
 
   $dumper->dumpValues($value1, $value2);
+
+Same as C< $dumper->dumpValue([$value1, $value2]); >.
+
+=item stringify
+
+  my $dump = $dumper->stringify($value [,$noticks] );
+
+Returns the dump of a single scalar without printing. If the second
+argument is true, the return value does not contain enclosing ticks.
+Does not handle data structures.
 
 =item dumpvars
 

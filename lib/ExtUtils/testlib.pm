@@ -1,7 +1,9 @@
 package ExtUtils::testlib;
 $VERSION = 1.12_01;
 
-use lib qw(blib/arch blib/lib);
+# So the tests can chdir around and not break @INC.
+use File::Spec;
+use lib map File::Spec->rel2abs($_), qw(blib/arch blib/lib);
 1;
 __END__
 
@@ -14,8 +16,6 @@ ExtUtils::testlib - add blib/* directories to @INC
   use ExtUtils::testlib;
 
 =head1 DESCRIPTION
-
-B<THIS MODULE IS OBSOLETE!>  Use blib instead.
 
 After an extension has been built and before it is installed it may be
 desirable to test it bypassing C<make test>. By adding

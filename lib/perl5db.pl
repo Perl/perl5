@@ -1,7 +1,7 @@
 package DB;
 
 # Debugger for Perl 5.00x; perl5db.pl patch level:
-$VERSION = 1.17;
+$VERSION = 1.19;
 $header  = "perl5db.pl version $VERSION";
 
 # It is crucial that there is no lexicals in scope of `eval ""' down below
@@ -318,6 +318,8 @@ sub eval {
 #   + v(view code), V(view Variables) # ...           (was w,V)
 # Changes: 1.18: Mar 17, 2002 Richard Foley <richard.foley@rfi.net>
 #   + fixed missing cmd_O bug
+# Changes: 1.19: Mar 29, 2002 Spider Boardman
+#   + Added missing local()s -- DB::DB is called recursively.
 # 
 ####################################################################
 
@@ -664,9 +666,9 @@ sub DB {
     }
     $runnonstop = 0 if $single or $signal; # Disable it if interactive.
     &save;
-    ($package, $filename, $line) = caller;
-    $filename_ini = $filename;
-    $usercontext = '($@, $!, $^E, $,, $/, $\, $^W) = @saved;' .
+    local($package, $filename, $line) = caller;
+    local $filename_ini = $filename;
+    local $usercontext = '($@, $!, $^E, $,, $/, $\, $^W) = @saved;' .
       "package $package;";	# this won't let them modify, alas
     local(*dbline) = $main::{'_<' . $filename};
 
@@ -677,7 +679,7 @@ sub DB {
 	*dbline = $main::{'_<' . $filename};
     }
 
-    $max = $#dbline;
+    local $max = $#dbline;
     if ($dbline{$line} && (($stop,$action) = split(/\0/,$dbline{$line}))) {
 		if ($stop eq '1') {
 			$signal |= 1;

@@ -58,17 +58,24 @@ SKIP: {
     $sigset->delset(1);
     ok(! $sigset->ismember(1),  'POSIX::SigSet->delset' );
     ok(  $sigset->ismember(3),  'POSIX::SigSet->ismember' );
-    
+
     SKIP: {
         skip("no kill() support on Mac OS", 4) if $Is_MacOS;
 
-       print "# warning, darwin seems to loose blocked signals (failing test 10)\n" if($^O eq 'darwin');
+        my $sigint_called = 0;
+
 	my $mask   = new POSIX::SigSet &SIGINT;
 	my $action = new POSIX::SigAction 'main::SigHUP', $mask, 0;
 	sigaction(&SIGHUP, $action);
 	$SIG{'INT'} = 'SigINT';
 	kill 'HUP', $$;
 	sleep 1;
+
+        printf "%s 10 -   masked SIGNINT received %s\n",
+          $sigint_called ? "ok" : "not ok",
+          $^O eq 'darwin' ? "# TODO Darwin seems to loose blocked signals" 
+                          : '';
+
 	print "ok 11 - signal masks successful\n";
 	
 	sub SigHUP {
@@ -79,7 +86,7 @@ SKIP: {
 	}
 
         sub SigINT {
-	    print "ok 10 -   masked SIGINT received\n";
+            $sigint_called++;
 	}
 
         # The order of the above tests is very important, so

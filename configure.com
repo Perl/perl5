@@ -5408,6 +5408,7 @@ $ WC "d_tcgetpgrp='undef'"
 $ WC "d_tcsetpgrp='undef'"
 $ WC "d_telldir='define'"
 $ WC "d_telldirproto='define'"
+$ WC "d_time='define'"
 $ WC "d_times='define'"
 $ IF ("''F$EXTRACT(1,3, F$GETSYI(""VERSION""))'".GES."7.0")
 $ THEN
@@ -6102,7 +6103,7 @@ $      Write Sys$Output "''targ'ing ''ext' . . ."
 $      On Error Then Continue
 $    EndIf
 $    If redesc Then -
-       miniperl "-I[''up'.lib]" Makefile.PL "INST_LIB=[''up'.lib]" "INST_ARCHLIB=[''up'.lib]"
+       miniperl "-I[''up'.lib]" Makefile.PL "INST_LIB=[''up'.lib]" "INST_ARCHLIB=[''up'.lib]"  "PERL_CORE=1"
 $    makeutil 'targ'
 $    i = i + 1
 $    Set Def &def

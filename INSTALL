@@ -1920,10 +1920,12 @@ external program.
 
 Several tests in the test suite check timing functions, such as
 sleep(), and see if they return in a reasonable amount of time.
-If your system is quite busy and doesn't return quickly enough,
-these tests might fail.  If possible, try running the tests again with
-the system under a lighter load.  These tests include F<t/op/alarm.t>,
-F<ext/Time/HiRes/HiRes.t>, and F<lib/Benchmark.t>.
+If your system is quite busy and doesn't respond quickly enough,
+these tests might fail.  If possible, try running the tests again
+with the system under a lighter load.  These timing-sensitive
+and load-sensitive tests include F<t/op/alarm.t>,
+F<ext/Time/HiRes/HiRes.t>, F<lib/Benchmark.t>,
+F<lib/Memoize/t/expmod_t.t>, and F<lib/Memoize/t/speed.t>.
 
 =item Out of memory
 
@@ -2278,6 +2280,13 @@ available in TeX format.  Type
 The following section is meant for people worrying about squeezing the
 Perl installation into minimal systems (for example when installing
 operating systems, or in really small filesystems).
+
+Leaving out as many extensions as possible is an obvious way:
+especially the Encode with its big conversion tables consumes a lot of
+space.  On the other hand, you cannot throw away everything, especially
+the Fcntl module is pretty essential.  If you need to do network
+programming, you'll appreciate the Socket module, and so forth: it all
+depends on what do you need to do.
 
 In the following we offer two different slimmed down installation
 recipes.  They are informative, not normative: the choice of files

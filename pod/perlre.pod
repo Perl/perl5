@@ -349,8 +349,11 @@ It is also useful when writing C<lex>-like scanners, when you have
 several patterns that you want to match against consequent substrings
 of your string, see the previous reference.  The actual location
 where C<\G> will match can also be influenced by using C<pos()> as
-an lvalue.  Currently C<\G> only works when used at the
-beginning of the pattern. See L<perlfunc/pos>.
+an lvalue: see L<perlfunc/pos>. Currently C<\G> is only fully
+supported when anchored to the start of the pattern; while it
+is permitted to use it elsewhere, as in C</(?<=\G..)./g>, some
+such uses (C</.\G/g>, for example) currently cause problems, and
+it is recommended that you avoid such usage for now.
 
 The bracketing construct C<( ... )> creates capture buffers.  To
 refer to the digit'th buffer use \<digit> within the

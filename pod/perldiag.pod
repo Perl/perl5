@@ -3996,6 +3996,12 @@ modifier is not presently meaningful in substitutions.
 use the /g modifier.  Currently, /c is meaningful only when /g is
 used.  (This may change in the future.)
 
+=item Use of /g modifier is meaningless in split
+
+(W regexp) You used the /g modifier on the pattern for a C<split>
+operator.  Since C<split> always tries to match the pattern
+repeatedly, the C</g> has no effect.
+
 =item Use of *glob{FILEHANDLE} is deprecated
 
 (D deprecated) You are now encouraged to use the shorter *glob{IO} form

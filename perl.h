@@ -131,7 +131,11 @@ struct perl_thread;
 #endif
 
 #ifdef HASATTRIBUTE
-#  define PERL_UNUSED_DECL __attribute__((unused))
+#  if defined(__GNUC__) && defined(__cplusplus)
+#    define PERL_UNUSED_DECL
+#  else
+#    define PERL_UNUSED_DECL __attribute__((unused))
+#  endif
 #else
 #  define PERL_UNUSED_DECL
 #endif

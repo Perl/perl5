@@ -261,7 +261,7 @@ foreach $typemap (@tm) {
 }
 
 foreach $key (keys %input_expr) {
-    $input_expr{$key} =~ s/\n+$//;
+    $input_expr{$key} =~ s/;*\s+\z//;
 }
 
 $bal = qr[(?:(?>[^()]+)|\((??{ $bal })\))*];	# ()-balanced

@@ -199,6 +199,7 @@ ext/DynaLoader/XSLoader_pm.PL	Simple XS Loader perl module
 ext/Encode/AUTHORS		List of authors
 ext/Encode/bin/enc2xs	Encode module generator
 ext/Encode/bin/piconv	iconv by perl
+ext/Encode/bin/ucm2table	Table Generator for testing
 ext/Encode/Byte/Byte.pm	Encode extension
 ext/Encode/Byte/Makefile.PL       Encode extension
 ext/Encode/Changes		Change Log
@@ -209,74 +210,13 @@ ext/Encode/EBCDIC/Makefile.PL     Encode extension
 ext/Encode/encengine.c		Encode extension
 ext/Encode/Encode.pm			Encode extension
 ext/Encode/Encode.xs		Encode extension
-ext/Encode/Encode/8859-1.ucm	Unicode Character Map
-ext/Encode/Encode/8859-10.ucm	Unicode Character Map
-ext/Encode/Encode/8859-11.ucm	Unicode Character Map
-ext/Encode/Encode/8859-13.ucm	Unicode Character Map
-ext/Encode/Encode/8859-14.ucm	Unicode Character Map
-ext/Encode/Encode/8859-15.ucm	Unicode Character Map
-ext/Encode/Encode/8859-16.ucm	Unicode Character Map
-ext/Encode/Encode/8859-2.ucm	Unicode Character Map
-ext/Encode/Encode/8859-3.ucm	Unicode Character Map
-ext/Encode/Encode/8859-4.ucm	Unicode Character Map
-ext/Encode/Encode/8859-5.ucm	Unicode Character Map
-ext/Encode/Encode/8859-6.ucm	Unicode Character Map
-ext/Encode/Encode/8859-7.ucm	Unicode Character Map
-ext/Encode/Encode/8859-8.ucm	Unicode Character Map
-ext/Encode/Encode/8859-9.ucm	Unicode Character Map
-ext/Encode/Encode/ascii.ucm	Unicode Character Map
-ext/Encode/Encode/big5-hkscs.ucm	Unicode Character Map
-ext/Encode/Encode/big5.ucm	Unicode Character Map
-ext/Encode/Encode/cp1047.ucm	Unicode Character Map
-ext/Encode/Encode/cp1250.ucm	Unicode Character Map
-ext/Encode/Encode/cp37.ucm	Unicode Character Map
-ext/Encode/Encode/cp932.ucm	Unicode Character Map
-ext/Encode/Encode/cp936.ucm	Unicode Character Map
-ext/Encode/Encode/cp949.ucm	Unicode Character Map
-ext/Encode/Encode/cp950.ucm	Unicode Character Map
-ext/Encode/Encode/dingbats.ucm	Unicode Character Map
+ext/Encode/Encode/Changes.e2x		Skelton file for enc2xs
 ext/Encode/Encode/encode.h		Encode extension header file
-ext/Encode/Encode/euc-cn.ucm	Unicode Character Map
-ext/Encode/Encode/euc-jp.ucm	Unicode Character Map
-ext/Encode/Encode/euc-kr.ucm	Unicode Character Map
-ext/Encode/Encode/gb12345.ucm	Unicode Character Map
-ext/Encode/Encode/gb2312.ucm	Unicode Character Map
-ext/Encode/Encode/gsm0338.ucm	Unicode Character Map
-ext/Encode/Encode/hp-roman8.ucm	Unicode Character Map
-ext/Encode/Encode/ibm-1250.ucm	Unicode Character Map
-ext/Encode/Encode/ibm-1251.ucm	Unicode Character Map
-ext/Encode/Encode/ibm-1252.ucm	Unicode Character Map
-ext/Encode/Encode/ibm-1253.ucm	Unicode Character Map
-ext/Encode/Encode/ibm-1254.ucm	Unicode Character Map
-ext/Encode/Encode/ibm-1255.ucm	Unicode Character Map
-ext/Encode/Encode/ibm-1256.ucm	Unicode Character Map
-ext/Encode/Encode/ibm-1257.ucm	Unicode Character Map
-ext/Encode/Encode/ibm-1258.ucm	Unicode Character Map
-ext/Encode/Encode/ir-165.ucm	Unicode Character Map
-ext/Encode/Encode/jis0201.ucm	Unicode Character Map
-ext/Encode/Encode/johab.ucm	Unicode Character Map
-ext/Encode/Encode/koi8-f.ucm	Unicode Character Map
-ext/Encode/Encode/koi8-r.ucm	Unicode Character Map
-ext/Encode/Encode/koi8-u.ucm	Unicode Character Map
-ext/Encode/Encode/ksc5601.ucm	Unicode Character Map
-ext/Encode/Encode/macCentEuro.ucm	Unicode Character Map
-ext/Encode/Encode/macCroatian.ucm	Unicode Character Map
-ext/Encode/Encode/macCyrillic.ucm	Unicode Character Map
-ext/Encode/Encode/macDingbats.ucm	Unicode Character Map
-ext/Encode/Encode/macGreek.ucm	Unicode Character Map
-ext/Encode/Encode/macIceland.ucm	Unicode Character Map
-ext/Encode/Encode/macJapan.ucm	Unicode Character Map
-ext/Encode/Encode/macRoman.ucm	Unicode Character Map
-ext/Encode/Encode/macRumanian.ucm	Unicode Character Map
-ext/Encode/Encode/macSami.ucm	Unicode Character Map
-ext/Encode/Encode/macThai.ucm	Unicode Character Map
-ext/Encode/Encode/macTurkish.ucm	Unicode Character Map
-ext/Encode/Encode/macUkraine.ucm	Unicode Character Map
-ext/Encode/Encode/nextstep.ucm	Unicode Character Map
-ext/Encode/Encode/posix-bc.ucm	Unicode Character Map
-ext/Encode/Encode/shiftjis.ucm	Unicode Character Map
-ext/Encode/Encode/symbol.ucm	Unicode Character Map
-ext/Encode/Encode/viscii.ucm	Unicode Character Map
+ext/Encode/Encode/Makefile_PL.e2x	Skelton file for enc2xs
+ext/Encode/Encode/README.e2x		Skelton file for enc2xs
+ext/Encode/Encode/_PM.e2x		Skelton file for enc2xs
+ext/Encode/Encode/_T.e2x		Skelton file for enc2xs
+ext/Encode/encoding.pm	Perl Pragmactic Module
 ext/Encode/JP/JP.pm		Encode extension
 ext/Encode/JP/Makefile.PL	Encode extension
 ext/Encode/KR/KR.pm		Encode extension
@@ -305,6 +245,7 @@ ext/Encode/Symbol/Symbol.pm       Encode extension
 ext/Encode/t/Aliases.t	Encode extension test
 ext/Encode/t/CN.t		Encode extension test
 ext/Encode/t/Encode.t		Encode extension test
+ext/Encode/t/encoding.t		Encode extension test
 ext/Encode/t/gb2312.euc	test data
 ext/Encode/t/gb2312.ref	test data
 ext/Encode/t/jisx0208.euc	test data
@@ -312,14 +253,81 @@ ext/Encode/t/jisx0208.ref	test data
 ext/Encode/t/jisx0212.euc	test data
 ext/Encode/t/jisx0212.ref	test data
 ext/Encode/t/JP.t		Encode extension test
+ext/Encode/t/jperl.t		Encode extension test
 ext/Encode/t/KR.t		Encode extension test
 ext/Encode/t/ksc5601.euc	test data
 ext/Encode/t/ksc5601.ref	test data
 ext/Encode/t/TW.t		Encode extension test
 ext/Encode/TW/Makefile.PL	Encode extension
 ext/Encode/TW/TW.pm		Encode extension
-ext/Encode/ucm2table	Table Generator for testing
-ext/Errno/ChangeLog	Errno perl module change log
+ext/Encode/ucm/8859-1.ucm	Unicode Character Map
+ext/Encode/ucm/8859-10.ucm	Unicode Character Map
+ext/Encode/ucm/8859-11.ucm	Unicode Character Map
+ext/Encode/ucm/8859-13.ucm	Unicode Character Map
+ext/Encode/ucm/8859-14.ucm	Unicode Character Map
+ext/Encode/ucm/8859-15.ucm	Unicode Character Map
+ext/Encode/ucm/8859-16.ucm	Unicode Character Map
+ext/Encode/ucm/8859-2.ucm	Unicode Character Map
+ext/Encode/ucm/8859-3.ucm	Unicode Character Map
+ext/Encode/ucm/8859-4.ucm	Unicode Character Map
+ext/Encode/ucm/8859-5.ucm	Unicode Character Map
+ext/Encode/ucm/8859-6.ucm	Unicode Character Map
+ext/Encode/ucm/8859-7.ucm	Unicode Character Map
+ext/Encode/ucm/8859-8.ucm	Unicode Character Map
+ext/Encode/ucm/8859-9.ucm	Unicode Character Map
+ext/Encode/ucm/ascii.ucm	Unicode Character Map
+ext/Encode/ucm/big5-hkscs.ucm	Unicode Character Map
+ext/Encode/ucm/big5.ucm	Unicode Character Map
+ext/Encode/ucm/cp1047.ucm	Unicode Character Map
+ext/Encode/ucm/cp1250.ucm	Unicode Character Map
+ext/Encode/ucm/cp37.ucm	Unicode Character Map
+ext/Encode/ucm/cp932.ucm	Unicode Character Map
+ext/Encode/ucm/cp936.ucm	Unicode Character Map
+ext/Encode/ucm/cp949.ucm	Unicode Character Map
+ext/Encode/ucm/cp950.ucm	Unicode Character Map
+ext/Encode/ucm/dingbats.ucm	Unicode Character Map
+ext/Encode/ucm/euc-cn.ucm	Unicode Character Map
+ext/Encode/ucm/euc-jp.ucm	Unicode Character Map
+ext/Encode/ucm/euc-kr.ucm	Unicode Character Map
+ext/Encode/ucm/gb12345.ucm	Unicode Character Map
+ext/Encode/ucm/gb2312.ucm	Unicode Character Map
+ext/Encode/ucm/gsm0338.ucm	Unicode Character Map
+ext/Encode/ucm/hp-roman8.ucm	Unicode Character Map
+ext/Encode/ucm/ibm-1250.ucm	Unicode Character Map
+ext/Encode/ucm/ibm-1251.ucm	Unicode Character Map
+ext/Encode/ucm/ibm-1252.ucm	Unicode Character Map
+ext/Encode/ucm/ibm-1253.ucm	Unicode Character Map
+ext/Encode/ucm/ibm-1254.ucm	Unicode Character Map
+ext/Encode/ucm/ibm-1255.ucm	Unicode Character Map
+ext/Encode/ucm/ibm-1256.ucm	Unicode Character Map
+ext/Encode/ucm/ibm-1257.ucm	Unicode Character Map
+ext/Encode/ucm/ibm-1258.ucm	Unicode Character Map
+ext/Encode/ucm/ir-165.ucm	Unicode Character Map
+ext/Encode/ucm/jis0201.ucm	Unicode Character Map
+ext/Encode/ucm/johab.ucm	Unicode Character Map
+ext/Encode/ucm/koi8-f.ucm	Unicode Character Map
+ext/Encode/ucm/koi8-r.ucm	Unicode Character Map
+ext/Encode/ucm/koi8-u.ucm	Unicode Character Map
+ext/Encode/ucm/ksc5601.ucm	Unicode Character Map
+ext/Encode/ucm/macCentEuro.ucm	Unicode Character Map
+ext/Encode/ucm/macCroatian.ucm	Unicode Character Map
+ext/Encode/ucm/macCyrillic.ucm	Unicode Character Map
+ext/Encode/ucm/macDingbats.ucm	Unicode Character Map
+ext/Encode/ucm/macGreek.ucm	Unicode Character Map
+ext/Encode/ucm/macIceland.ucm	Unicode Character Map
+ext/Encode/ucm/macJapan.ucm	Unicode Character Map
+ext/Encode/ucm/macRoman.ucm	Unicode Character Map
+ext/Encode/ucm/macRumanian.ucm	Unicode Character Map
+ext/Encode/ucm/macSami.ucm	Unicode Character Map
+ext/Encode/ucm/macThai.ucm	Unicode Character Map
+ext/Encode/ucm/macTurkish.ucm	Unicode Character Map
+ext/Encode/ucm/macUkraine.ucm	Unicode Character Map
+ext/Encode/ucm/nextstep.ucm	Unicode Character Map
+ext/Encode/ucm/posix-bc.ucm	Unicode Character Map
+ext/Encode/ucm/shiftjis.ucm	Unicode Character Map
+ext/Encode/ucm/symbol.ucm	Unicode Character Map
+ext/Encode/ucm/viscii.ucm	Unicode Character Map
+ext/Errno/ChangeLog	See if Errno works
 ext/Errno/Errno.t	See if Errno works
 ext/Errno/Errno_pm.PL	Errno perl module create script
 ext/Errno/Makefile.PL	Errno extension makefile writer
@@ -920,8 +928,6 @@ lib/dotsh.pl			Code to "dot" in a shell script
 lib/Dumpvalue.pm		Screen dump of perl values
 lib/Dumpvalue.t			See if Dumpvalue works
 lib/dumpvar.pl			A variable dumper
-lib/encoding.pm			Encoding of legacy data into Unicode
-lib/encoding.t			Test for the encoding pragma
 lib/English.pm			Readable aliases for short variables
 lib/English.t			See if English works
 lib/Env.pm			Map environment into ordinary variables
@@ -933,29 +939,40 @@ lib/Exporter.t			See if Exporter works
 lib/Exporter/Heavy.pm		Complicated routines for Exporter
 lib/ExtUtils/Changes            MakeMaker change log
 lib/ExtUtils/Command.pm		Utilities for Make on non-UNIX platforms
+lib/ExtUtils/Command/MM.pm      Calling MM functions from the cmd line
 lib/ExtUtils/Constant.pm	generate XS code to import C header constants
 lib/ExtUtils/Embed.pm		Utilities for embedding Perl in C programs
 lib/ExtUtils/Install.pm		Handles 'make install' on extensions
 lib/ExtUtils/Installed.pm	Information on installed extensions
 lib/ExtUtils/instmodsh		Give information about installed extensions
 lib/ExtUtils/Liblist.pm		Locates libraries
+lib/ExtUtils/Liblist/Kid.pm     Does the real work of the above
 lib/ExtUtils/MakeMaker.pm	Write Makefiles for extensions
 lib/ExtUtils/Manifest.pm	Utilities to write MANIFEST files
 lib/ExtUtils/MANIFEST.SKIP	The default MANIFEST.SKIP
 lib/ExtUtils/Mkbootstrap.pm	Writes a bootstrap file (see MakeMaker)
 lib/ExtUtils/Mksymlists.pm	Writes a linker options file for extensions
+lib/ExtUtils/MM.pm              MakeMaker adaptor class
+lib/ExtUtils/MM_Any.pm          MakeMaker methods for Any OS
 lib/ExtUtils/MM_BeOS.pm		MakeMaker methods for BeOS
 lib/ExtUtils/MM_Cygwin.pm	MakeMaker methods for Cygwin
+lib/ExtUtils/MM_DOS.pm          MakeMaker methods for DOS
 lib/ExtUtils/MM_NW5.pm		MakeMaker methods for NetWare
 lib/ExtUtils/MM_OS2.pm		MakeMaker methods for OS/2
-lib/ExtUtils/MM_Unix.pm		MakeMaker base class for Unix
+lib/ExtUtils/MM_Unix.pm		MakeMaker methods for Unix
+lib/ExtUtils/MM_UWIN.pm         MakeMaker methods for U/WIN
 lib/ExtUtils/MM_VMS.pm		MakeMaker methods for VMS
 lib/ExtUtils/MM_Win32.pm	MakeMaker methods for Win32
+lib/ExtUtils/MM_Win95.pm        MakeMaker methods for Win95
+lib/ExtUtils/MY.pm              MakeMaker user override class
 lib/ExtUtils/Packlist.pm	Manipulates .packlist files
+lib/ExtUtils/t/basic.t		See if MakeMaker can build a module
+lib/ExtUtils/t/Big-Fat-Dummy/lib/Big/Fat/Dummy.pm     MakeMaker dummy module
+lib/ExtUtils/t/Big-Fat-Dummy/Makefile.PL              MakeMaker dummy module
 lib/ExtUtils/t/Command.t	See if ExtUtils::Command works (Win32 only)
 lib/ExtUtils/t/Constant.t	See if ExtUtils::Constant works
 lib/ExtUtils/t/Embed.t		See if ExtUtils::Embed and embedding works
-lib/ExtUtils/t/hints.t      See if hint files are honored.
+lib/ExtUtils/t/hints.t          See if hint files are honored.
 lib/ExtUtils/t/Installed.t	See if ExtUtils::Installed works
 lib/ExtUtils/t/Manifest.t	See if ExtUtils::Manifest works
 lib/ExtUtils/t/Mkbootstrap.t	See if ExtUtils::Mkbootstrap works
@@ -966,7 +983,10 @@ lib/ExtUtils/t/MM_Unix.t	See if ExtUtils::MM_UNIX works
 lib/ExtUtils/t/MM_VMS.t		See if ExtUtils::MM_VMS works
 lib/ExtUtils/t/MM_Win32.t	See if ExtUtils::MM_Win32 works
 lib/ExtUtils/t/Packlist.t	See if Packlist works
-lib/ExtUtils/t/testlib.t	Fixes up @INC to use just-built extension
+lib/ExtUtils/t/Problem-Module/Makefile.PL           MakeMaker dummy module
+lib/ExtUtils/t/Problem-Module/subdir/Makefile.PL    MakeMaker dummy module
+lib/ExtUtils/t/problems.t       How MakeMaker reacts to build problems
+lib/ExtUtils/t/testlib.t	See if ExtUtils::testlib works
 lib/ExtUtils/testlib.pm		Fixes up @INC to use just-built extension
 lib/ExtUtils/typemap		Extension interface types
 lib/ExtUtils/xsubpp		External subroutine preprocessor
@@ -1153,10 +1173,10 @@ lib/Memoize/t/array.t		Memoize
 lib/Memoize/t/array_confusion.t		Memoize
 lib/Memoize/t/correctness.t	Memoize
 lib/Memoize/t/errors.t		Memoize
+lib/Memoize/t/expfile.t		Memoize
 lib/Memoize/t/expire.t		Memoize
-lib/Memoize/t/expire_file.t	Memoize
-lib/Memoize/t/expire_module_n.t	Memoize
-lib/Memoize/t/expire_module_t.t	Memoize
+lib/Memoize/t/expmod_n.t	Memoize
+lib/Memoize/t/expmod_t.t	Memoize
 lib/Memoize/t/flush.t		Memoize
 lib/Memoize/t/normalize.t	Memoize
 lib/Memoize/t/prototype.t	Memoize
@@ -1402,34 +1422,39 @@ lib/Tie/Array/push.t		Test for Tie::Array
 lib/Tie/Array/splice.t		Test for Tie::Array::SPLICE
 lib/Tie/Array/std.t		Test for Tie::StdArray
 lib/Tie/Array/stdpush.t		Test for Tie::StdArray
-lib/Tie/File.pm                 Files as tied arrays.
-lib/Tie/File/t/00_version.t     Test for Tie::File.
-lib/Tie/File/t/01_gen.t         Test for Tie::File.
-lib/Tie/File/t/02_fetchsize.t   Test for Tie::File.
-lib/Tie/File/t/03_longfetch.t   Test for Tie::File.
-lib/Tie/File/t/04_splice.t      Test for Tie::File.
-lib/Tie/File/t/05_size.t        Test for Tie::File.
-lib/Tie/File/t/06_fixrec.t      Test for Tie::File.
-lib/Tie/File/t/07_rv_splice.t   Test for Tie::File.
-lib/Tie/File/t/08_ro.t          Test for Tie::File.
-lib/Tie/File/t/09_gen_rs.t      Test for Tie::File.
-lib/Tie/File/t/10_splice_rs.t   Test for Tie::File.
-lib/Tie/File/t/11_rv_splice_rs.t  Test for Tie::File.
-lib/Tie/File/t/12_longfetch_rs.t  Test for Tie::File.
-lib/Tie/File/t/13_size_rs.t     Test for Tie::File.
-lib/Tie/File/t/14_lock.t        Test for Tie::File.
-lib/Tie/File/t/15_pushpop.t     Test for Tie::File.
-lib/Tie/File/t/16_handle.t      Test for Tie::File.
-lib/Tie/File/t/17_misc_meth.t   Test for Tie::File.
-lib/Tie/File/t/18_rs_fixrec.t   Test for Tie::File.
-lib/Tie/File/t/19_cache.t       Test for Tie::File.
-lib/Tie/File/t/20_cache_full.t  Test for Tie::File.
-lib/Tie/File/t/21_win32.t       Test for Tie::File.
-lib/Tie/File/t/22_autochomp.t   Test for Tie::File.
-lib/Tie/File/t/23_rv_ac_splice.t  Test for Tie::File.
-lib/Tie/File/t/30_defer.t       Test for Tie::File.
-lib/Tie/File/t/31_autodefer.t   Test for Tie::File.
-lib/Tie/File/t/32_defer_misc.t  Test for Tie::File.
+lib/Tie/File.pm                 Files as tied arrays
+lib/Tie/File/t/00_version.t     Test for Tie::File
+lib/Tie/File/t/01_gen.t         Test for Tie::File
+lib/Tie/File/t/02_fetchsize.t   Test for Tie::File
+lib/Tie/File/t/03_longfetch.t   Test for Tie::File
+lib/Tie/File/t/04_splice.t      Test for Tie::File
+lib/Tie/File/t/05_size.t        Test for Tie::File
+lib/Tie/File/t/06_fixrec.t      Test for Tie::File
+lib/Tie/File/t/07_rv_splice.t   Test for Tie::File
+lib/Tie/File/t/08_ro.t          Test for Tie::File
+lib/Tie/File/t/09_gen_rs.t      Test for Tie::File
+lib/Tie/File/t/10_splice_rs.t   Test for Tie::File
+lib/Tie/File/t/11_rv_splice_rs.t  Test for Tie::File
+lib/Tie/File/t/12_longfetch_rs.t  Test for Tie::File
+lib/Tie/File/t/13_size_rs.t     Test for Tie::File
+lib/Tie/File/t/14_lock.t        Test for Tie::File
+lib/Tie/File/t/15_pushpop.t     Test for Tie::File
+lib/Tie/File/t/16_handle.t      Test for Tie::File
+lib/Tie/File/t/17_misc_meth.t   Test for Tie::File
+lib/Tie/File/t/18_rs_fixrec.t   Test for Tie::File
+lib/Tie/File/t/19_cache.t       Test for Tie::File
+lib/Tie/File/t/20_cache_full.t  Test for Tie::File
+lib/Tie/File/t/21_win32.t       Test for Tie::File
+lib/Tie/File/t/22_autochomp.t   Test for Tie::File
+lib/Tie/File/t/23_rv_ac_splice.t  Test for Tie::File
+lib/Tie/File/t/24_cache_loop.t	Test for Tie::File
+lib/Tie/File/t/25_gen_nocache.t	Test for Tie::File
+lib/Tie/File/t/26_twrite.t	Test for Tie::File
+lib/Tie/File/t/30_defer.t       Test for Tie::File
+lib/Tie/File/t/31_autodefer.t   Test for Tie::File
+lib/Tie/File/t/32_defer_misc.t  Test for Tie::File
+lib/Tie/File/t/33_defer_vs.t	Test for Tie::File
+lib/Tie/File/t/40_abs_cache.t	Test for Tie::File
 lib/Tie/Handle.pm		Base class for tied handles
 lib/Tie/Handle/stdhandle.t	Test for Tie::StdHandle
 lib/Tie/Hash.pm			Base class for tied hashes
@@ -1770,8 +1795,8 @@ lib/unicore/NamesList.txt	Unicode character database
 lib/unicore/Number.pl		Unicode character database
 lib/unicore/Properties		Built-in \p{...} / \P{...} property list
 lib/unicore/PropertyAliases.txt	Unicode character database
-lib/unicore/PropertyValueAliases.txt	Unicode character database
 lib/unicore/PropList.txt	Unicode character database
+lib/unicore/PropValueAliases.txt	Unicode character database
 lib/unicore/README.perl		Unicode character database
 lib/unicore/ReadMe.txt		Unicode character database info
 lib/unicore/Scripts.pl		Unicode character database
@@ -2226,6 +2251,7 @@ t/lib/h2ph.h			Test header file for h2ph
 t/lib/h2ph.pht			Generated output from h2ph.h by h2ph, for comparison
 t/lib/locale/latin1		Part of locale.t in Latin 1
 t/lib/locale/utf8		Part of locale.t in UTF8
+t/lib/MakeMaker/Test/Utils.pm           MakeMaker test utilities
 t/lib/Math/BigFloat/Subclass.pm	Empty subclass of BigFloat for test
 t/lib/Math/BigInt/BareCalc.pm	Bigint's simulation of Calc
 t/lib/Math/BigInt/Subclass.pm	Empty subclass of BigInt for test
@@ -2496,6 +2522,7 @@ util.h				Dummy header
 utils.lst			Lists utilities bundled with Perl
 utils/c2ph.PL			program to translate dbx stabs to perl
 utils/dprofpp.PL		Perl code profile post-processor
+utils/enc2xs.PL			Encode module generator
 utils/h2ph.PL			A thing to turn C .h files into perl .ph files
 utils/h2xs.PL			Program to make .xs files from C header files
 utils/libnetcfg.PL		libnet
@@ -2504,6 +2531,7 @@ utils/perlbug.PL		A simple tool to submit a bug report
 utils/perlcc.PL			Front-end for compiler
 utils/perldoc.PL		A simple tool to find & display perl's documentation
 utils/perlivp.PL		installation verification procedure
+utils/piconv.PL			A pl to pm translator
 utils/pl2pm.PL			A pl to pm translator
 utils/splain.PL			Stand-alone version of diagnostics.pm
 uts/sprintf_wrap.c		sprintf wrapper for UTS
