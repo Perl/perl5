@@ -7981,7 +7981,7 @@ Perl_scan_vstring(pTHX_ char *s, SV *sv)
     }
 
     if (ckWARN(WARN_DEPRECATED))
-	Perl_warner(aTHX_ packWARN(WARN_DEPRECATED), "v-strings are deprecated", s);
+	Perl_warner(aTHX_ packWARN(WARN_DEPRECATED), "v-strings are deprecated");
 
     if (!isALPHA(*pos)) {
 	UV rev;
