@@ -136,7 +136,9 @@ unlink 'c';
 chdir $wd || die "Can't cd back to $wd";
 
 unlink 'c';
-if ((($^O eq 'MSWin32') || ($^O eq 'NetWare')) and `ls -l perl 2>/dev/null` =~ /^l.*->/) {
+# Yet another way to look for links (perhaps those that cannot be created by perl?).
+# Hopefully there is an ls utility in your %PATH%. N.B. that $^O is 'cygwin' on Cygwin.
+if ((($^O eq 'MSWin32') || ($^O eq 'NetWare')) and `ls -l perl 2>nul` =~ /^l.*->/) {
     # we have symbolic links
     system("cp TEST TEST$$");
     # we have to copy because e.g. GNU grep gets huffy if we have
@@ -149,7 +151,12 @@ if ((($^O eq 'MSWin32') || ($^O eq 'NetWare')) and `ls -l perl 2>/dev/null` =~ /
     unlink("TEST$$");
 }
 else {
-    print "ok 21\nok 22\n";
+    if ( ($^O eq 'MSWin32') || ($^O eq 'NetWare') ) {
+        print "ok 21 # skipped: no link\nok 22 # skipped: no link\n";
+    }
+    else {
+        print "ok 21 # skipped: $^O is neither 'MSWin32' nor 'NetWare'\nok 22 # skipped: $^O is neither 'MSWin32' nor 'NetWare'\n";
+    }
 }
 
 # truncate (may not be implemented everywhere)
