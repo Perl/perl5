@@ -719,6 +719,7 @@ lib/Pod/Plainer.pm	Pod migration utility module
 lib/Pod/Select.pm	Pod-Parser - select portions of POD docs
 lib/Pod/Text.pm		Pod-Parser - convert POD data to formatted ASCII text
 lib/Pod/Text/Color.pm	Convert POD data to color ASCII text
+lib/Pod/Text/Overstrike.pm	Convert POD data to formatted overstrike text
 lib/Pod/Text/Termcap.pm	Convert POD data to ASCII text with format escapes
 lib/Pod/Usage.pm	Pod-Parser - print usage messages
 lib/Search/Dict.pm	Perform binary search on dictionaries

@@ -1,5 +1,5 @@
 # Pod::Man -- Convert POD data to formatted *roff input.
-# $Id: Man.pm,v 1.10 2000/11/19 05:46:19 eagle Exp $
+# $Id: Man.pm,v 1.12 2000/12/25 12:56:12 eagle Exp $
 #
 # Copyright 1999, 2000 by Russ Allbery <rra@stanford.edu>
 #
@@ -38,7 +38,7 @@ use vars qw(@ISA %ESCAPES $PREAMBLE $VERSION);
 # Perl core and too many things could munge CVS magic revision strings.
 # This number should ideally be the same as the CVS revision in podlators,
 # however.
-$VERSION = 1.10;
+$VERSION = 1.12;
 
 
 ############################################################################
@@ -1063,7 +1063,7 @@ sub output { print { $_[0]->output_handle } $_[1] }
 # If there are double quotes, use an if statement to test for nroff, and for
 # nroff output the command followed by the argument in double quotes with
 # embedded double quotes doubled.  For other formatters, remap paired double
-# quotes to `` and ''.
+# quotes to LQUOTE and RQUOTE.
 sub switchquotes {
     my $self = shift;
     my $command = shift;
@@ -1073,17 +1073,19 @@ sub switchquotes {
 
     # We also have to deal with \*C` and \*C', which are used to add the
     # quotes around C<> text, since they may expand to " and if they do this
-    # confuses the .SH macros and the like no end.
+    # confuses the .SH macros and the like no end.  Expand them ourselves.
+    # If $extra is set, we're dealing with =item, which in most nroff macro
+    # sets requires an extra level of quoting of double quotes.
     my $c_is_quote = ($$self{LQUOTE} =~ /\"/) || ($$self{RQUOTE} =~ /\"/);
     if (/\"/ || ($c_is_quote && /\\\*\(C[\'\`]/)) {
         s/\"/\"\"/g;
         my $troff = $_;
         $troff =~ s/\"\"([^\"]*)\"\"/\`\`$1\'\'/g;
-        s/\"/\"\"/g if $extra;
-        $troff =~ s/\"/\"\"/g if $extra;
         s/\\\*\(C\`/$$self{LQUOTE}/g;
         s/\\\*\(C\'/$$self{RQUOTE}/g;
         $troff =~ s/\\\*\(C[\'\`]//g;
+        s/\"/\"\"/g if $extra;
+        $troff =~ s/\"/\"\"/g if $extra;
         $_ = qq("$_") . ($extra ? " $extra" : '');
         $troff = qq("$troff") . ($extra ? " $extra" : '');
         return ".if n $command $_\n.el $command $troff\n";
