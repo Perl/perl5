@@ -2493,8 +2493,12 @@ SSize_t
 PerlIOUnix_read(pTHX_ PerlIO *f, void *vbuf, Size_t count)
 {
     int fd = PerlIOSelf(f, PerlIOUnix)->fd;
-    if (!(PerlIOBase(f)->flags & PERLIO_F_CANREAD) ||
-         PerlIOBase(f)->flags & (PERLIO_F_EOF|PERLIO_F_ERROR)) {
+    if (!(PerlIOBase(f)->flags & PERLIO_F_CANREAD)) {
+	SETERRNO(EBADF, SS_IVCHAN);
+	PerlIOBase(f)->flags |= PERLIO_F_ERROR;
+	return -1;
+    }
+    if (PerlIOBase(f)->flags & (PERLIO_F_EOF|PERLIO_F_ERROR)) {
 	return 0;
     }
     while (1) {
