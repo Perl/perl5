@@ -3086,6 +3086,11 @@ you may get an error message saying "unable to remap".
 This is known problem with Cygwin, and a workaround is
 detailed in here: http://sources.redhat.com/ml/cygwin/2001-12/msg00894.html
 
+=head2 Cygwin ndbm tests fail on FAT
+
+One can build but not install (or test the build of) the NDBM_File
+on FAT filesystems.  Installation (or build) on NTFS works fine.
+
 =head2 ext/threads/t/libc
 
 If this test fails, it indicates that your libc (C library) is not
