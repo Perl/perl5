@@ -12,7 +12,7 @@ package Math::BigFloat;
 #   _a	: accuracy
 #   _p	: precision
 
-$VERSION = '1.48';
+$VERSION = '1.49';
 require 5.005;
 
 require Exporter;
@@ -1340,19 +1340,25 @@ sub bdiv
   $scale = $ly if $ly > $scale;
   my $diff = $ly - $lx;
   $scale += $diff if $diff > 0;		# if lx << ly, but not if ly << lx!
-  
-  # cases like $x /= $x (but not $x /= $y!) were wrong due to modifying $x
-  # twice below)
-  require Scalar::Util;
-  if (Scalar::Util::refaddr($x) == Scalar::Util::refaddr($y)) 
+
+  # already handled inf/NaN/-inf above:
+
+  my $xsign = $x->{sign};
+  $y->{sign} =~ tr/+-/-+/;
+  my $y_not_one = !$y->is_one();	# cache this result
+  if ($xsign ne $x->{sign})
     {
-    $x->bone();				# x/x => 1, rem 0
+    # special case of $x /= $x results in 1
+    $x->bone();
     }
   else
     {
- 
+    # correct $y's sign again
+    $y->{sign} =~ tr/+-/-+/;
+    # continue with normal div code:
+
     # make copy of $x in case of list context for later reminder calculation
-    if (wantarray && !$y->is_one())
+    if (wantarray && $y_not_one)
       {
       $rem = $x->copy();
       }
@@ -1360,7 +1366,7 @@ sub bdiv
     $x->{sign} = $x->{sign} ne $y->sign() ? '-' : '+'; 
 
     # check for / +-1 ( +/- 1E0)
-    if (!$y->is_one())
+    if ($y_not_one)
       {
       # promote BigInts and it's subclasses (except when already a BigFloat)
       $y = $self->new($y) unless $y->isa('Math::BigFloat'); 
@@ -1397,7 +1403,7 @@ sub bdiv
 
   if (wantarray)
     {
-    if (!$y->is_one())
+    if ($y_not_one)
       {
       $rem->bmod($y,@params);			# copy already done
       }
@@ -2736,12 +2742,33 @@ it is rounded. The rounding mode taken is either the default mode, or the one
 supplied to the operation after the I<scale>:
 
 	$x = Math::BigFloat->new(2);
-	Math::BigFloat->precision(5);		# 5 digits max
-	$y = $x->copy()->bdiv(3);		# will give 0.66666
-	$y = $x->copy()->bdiv(3,6);		# will give 0.666666
-	$y = $x->copy()->bdiv(3,6,'odd');	# will give 0.666667
+	Math::BigFloat->accuracy(5);		# 5 digits max
+	$y = $x->copy()->bdiv(3);		# will give 0.66667
+	$y = $x->copy()->bdiv(3,6);		# will give 0.666667
+	$y = $x->copy()->bdiv(3,6,undef,'odd');	# will give 0.666667
 	Math::BigFloat->round_mode('zero');
-	$y = $x->copy()->bdiv(3,6);		# will give 0.666666
+	$y = $x->copy()->bdiv(3,6);		# will also give 0.666667
+
+Note that C<< Math::BigFloat->accuracy() >> and C<< Math::BigFloat->precision() >>
+set the global variables, and thus B<any> newly created number will be subject
+to the global rounding. This means that in the examples above, the C<3>
+as argument to C<bdiv()> will also get an accuracy of B<5>.
+
+It is less confusing to either calculate the result fully, and afterwards
+round it explicitely, or use the additional parameters to the math
+functions like so:
+
+	use Math::BigFloat;	
+	$x = Math::BigFloat->new(2);
+	$y = $x->copy()->bdiv(3);
+	print $y->bround(5),"\n";		# will give 0.66667
+
+	or
+
+	use Math::BigFloat;	
+	$x = Math::BigFloat->new(2);
+	$y = $x->copy()->bdiv(3,5);		# will give 0.66667
+	print "$y\n";
 
 =head2 Rounding
 

@@ -15,7 +15,7 @@ $VERSION = '0.45';
 # automatically at loading time to be the maximum possible value
 
 # todo:
-# - fully remove funky $# stuff (maybe)
+# - fully remove funky $# stuff in div() (maybe - that code scares me...)
 
 # USE_MUL: due to problems on certain os (os390, posix-bc) "* 1e-5" is used
 # instead of "/ 1e5" at some places, (marked with USE_MUL). Other platforms

@@ -18,7 +18,7 @@ package Math::BigInt;
 my $class = "Math::BigInt";
 require 5.005;
 
-$VERSION = '1.74';
+$VERSION = '1.75';
 
 @ISA = qw( Exporter );
 @EXPORT_OK = qw( objectify bgcd blcm); 
@@ -75,7 +75,9 @@ use overload
 'cos'	=>	sub { cos($_[0]->numify()) }, 
 'sin'	=>	sub { sin($_[0]->numify()) }, 
 'exp'	=>	sub { exp($_[0]->numify()) }, 
-'atan2'	=>	sub { atan2($_[0]->numify(),$_[1]) }, 
+'atan2'	=>	sub { $_[2] ?
+			atan2($_[1],$_[0]->numify()) :
+			atan2($_[0]->numify(),$_[1]) },
 
 # are not yet overloadable
 #'hex'	=>	sub { print "hex"; $_[0]; }, 
@@ -90,8 +92,8 @@ use overload
 
 # for subtract it's a bit tricky to not modify b: b-a => -a+b
 '-'	=>	sub { my $c = $_[0]->copy; $_[2] ?
-                   $c->bneg()->badd( $_[1]) :
-                   $c->bsub( $_[1]) },
+			$c->bneg()->badd( $_[1]) :
+			$c->bsub( $_[1]) },
 '+'	=>	sub { $_[0]->copy()->badd($_[1]); },
 '*'	=>	sub { $_[0]->copy()->bmul($_[1]); },
 
@@ -1146,15 +1148,17 @@ sub bsub
 
   return $x->round(@r) if $y->is_zero();
 
-  require Scalar::Util;
-  if (Scalar::Util::refaddr($x) == Scalar::Util::refaddr($y)) 
+  # To correctly handle the lone special case $x->bsub($x), we note the sign
+  # of $x, then flip the sign from $y, and if the sign of $x did change, too,
+  # then we caught the special case:
+  my $xsign = $x->{sign};
+  $y->{sign} =~ tr/+\-/-+/; 	# does nothing for NaN
+  if ($xsign ne $x->{sign})
     {
-    # if we get the same variable twice, the result must be zero (the code
-    # below fails in that case)
-    return $x->bzero(@r) if $x->{sign} =~ /^[+-]$/;
+    # special case of $x->bsub($x) results in 0
+    return $x->bzero(@r) if $xsign =~ /^[+-]$/;
     return $x->bnan();          # NaN, -inf, +inf
     }
-  $y->{sign} =~ tr/+\-/-+/; 	# does nothing for NaN
   $x->badd($y,@r); 		# badd does not leave internal zeros
   $y->{sign} =~ tr/+\-/-+/; 	# refix $y (does nothing for NaN)
   $x;				# already rounded by badd() or no round necc.
@@ -2471,7 +2475,7 @@ sub import
 	{
 	if (($WARN{$lib}||0) < 2)
 	  {
-	  my $ver = eval "\$$lib\::VERSION";
+	  my $ver = eval "\$$lib\::VERSION" || 'unknown';
 	  require Carp;
 	  Carp::carp ("Cannot load outdated $lib v$ver, please upgrade");
 	  $WARN{$lib} = 2;		# never warn again
