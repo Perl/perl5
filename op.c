@@ -6882,6 +6882,15 @@ Perl_peep(pTHX_ register OP *o)
 				SvPV_nolen(sv));
 		}
 	    }
+	    else if (o->op_next->op_type == OP_READLINE
+		    && o->op_next->op_next->op_type == OP_CONCAT
+		    && (o->op_next->op_next->op_flags & OPf_STACKED))
+	    {
+		/* Turn "$a .= <FH>" into an OP_RCATLINE. AMS 20010811 */
+		o->op_next->op_type   = OP_RCATLINE;
+		o->op_next->op_flags |= OPf_STACKED;
+		op_null(o->op_next->op_next);
+	    }
 
 	    o->op_seq = PL_op_seqmax++;
 	    break;
