@@ -668,8 +668,8 @@ How Do I Detect Data That's Not Valid In a Particular Encoding?
 Use the C<Encode> package to try converting it.
 For example,
 
-    use Encode 'encode_utf8';
-    if (encode_utf8($string_of_bytes_that_I_think_is_utf8)) {
+    use Encode 'decode_utf8';
+    if (decode_utf8($string_of_bytes_that_I_think_is_utf8)) {
         # valid
     } else {
         # invalid
