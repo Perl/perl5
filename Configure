@@ -2678,7 +2678,7 @@ case "$usethreads" in
 $define)
 	$cat <<EOM
 
-As of 5.5.64, Perl has two different internal threading implementations,
+As of 5.5.640, Perl has two different internal threading implementations,
 the 5.005 version (5005threads) and an interpreter-based version
 (ithreads) that has one interpreter per thread.  Both are very 
 experimental.  This arrangement exists to help developers work out
@@ -2741,24 +2741,31 @@ EOM
 	;;
 esac
 
-cat <<EOM
+case "$useithreads" in
+$define|true|[yY]*)
+	echo "Interpreter threads requested, multiple interpreter support enabled..." >&4
+	val="$define" ;;
+*)
+	cat <<EOM
 
-Perl can be built so that multiple Perl interpreters can coexist
-within the same Perl executable.  To do so, Configure must be run with
--Dusemultiplicity.
+	Perl can be built so that multiple Perl interpreters can coexist
+	within the same Perl executable.  To do so, Configure must be run with
+	-Dusemultiplicity.
 
-Normally you do not need this and you should answer no.
+	Normally you do not need this and you should answer no.
 
 EOM
-case "$usemultiplicity" in
-$define|true|[yY]*)	dflt='y';;
-*) dflt='n';;
-esac
-rp='Build Perl for multiplicity?'
-. ./myread
-case "$ans" in
-y|Y)	val="$define" ;;     
-*)      val="$undef" ;;
+	case "$usemultiplicity" in
+	$define|true|[yY]*)	dflt='y';;
+	*) dflt='n';;
+	esac
+	rp='Build Perl for multiplicity?'
+	. ./myread
+	case "$ans" in
+	y|Y)	val="$define" ;;     
+	*)      val="$undef" ;;
+	esac
+	;;
 esac
 set usemultiplicity
 eval $setvar 
