@@ -4122,7 +4122,8 @@ Perl_cv_undef(pTHX_ CV *cv)
      * apply to closures generated within eval"", since eval"" CVs are
      * ephemeral. --GSAR */
     if (!CvANON(cv) || CvCLONED(cv)
-	|| (CvOUTSIDE(cv) && CvEVAL(CvOUTSIDE(cv)) && !CvGV(CvOUTSIDE(cv))))
+	|| (CvOUTSIDE(cv) && SvTYPE(CvOUTSIDE(cv)) == SVt_PVCV
+	    && CvEVAL(CvOUTSIDE(cv)) && !CvGV(CvOUTSIDE(cv))))
     {
 	SvREFCNT_dec(CvOUTSIDE(cv));
     }
@@ -4688,7 +4689,8 @@ Perl_newATTRSUB(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs, OP *block)
      * lifetime of the outer CV.  Avoids memory leak due to reference
      * loop. --GSAR */
     if (!name && CvOUTSIDE(cv)
-	&& !(CvEVAL(CvOUTSIDE(cv)) && !CvGV(CvOUTSIDE(cv))))
+	&& !(SvTYPE(CvOUTSIDE(cv)) == SVt_PVCV
+	     && CvEVAL(CvOUTSIDE(cv)) && !CvGV(CvOUTSIDE(cv))))
     {
 	SvREFCNT_dec(CvOUTSIDE(cv));
     }
