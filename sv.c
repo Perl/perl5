@@ -3846,12 +3846,18 @@ HV *stash;
 	}
 	for (i = 0; i <= (I32) HvMAX(stash); i++) {
 	    for (entry = HvARRAY(stash)[i];
-	      entry;
-	      entry = HeNEXT(entry)) {
+		 entry;
+		 entry = HeNEXT(entry))
+	    {
 		if (!todo[(U8)*HeKEY(entry)])
 		    continue;
 		gv = (GV*)HeVAL(entry);
 		sv = GvSV(gv);
+		if (SvTHINKFIRST(sv)) {
+		    if (!SvREADONLY(sv) && SvROK(sv))
+			sv_unref(sv);
+		    continue;
+		}
 		(void)SvOK_off(sv);
 		if (SvTYPE(sv) >= SVt_PV) {
 		    SvCUR_set(sv, 0);

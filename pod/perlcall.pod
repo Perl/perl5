@@ -971,7 +971,7 @@ and some C to call it
         /* Check the eval first */
         if (SvTRUE(ERRSV))
         {
-            printf ("Uh oh - %s\n", SvPV(ERRSV, na)) ;
+            printf ("Uh oh - %s\n", SvPV(ERRSV, PL_na)) ;
             POPs ;
         }
         else
@@ -1013,7 +1013,7 @@ The code
 
     if (SvTRUE(ERRSV))
     {
-        printf ("Uh oh - %s\n", SvPV(ERRSV, na)) ;
+        printf ("Uh oh - %s\n", SvPV(ERRSV, PL_na)) ;
         POPs ;
     }
 
@@ -1021,7 +1021,7 @@ is the direct equivalent of this bit of Perl
 
     print "Uh oh - $@\n" if $@ ;
 
-C<errgv> is a perl global of type C<GV *> that points to the
+C<PL_errgv> is a perl global of type C<GV *> that points to the
 symbol table entry containing the error.  C<ERRSV> therefore
 refers to the C equivalent of C<$@>.
 
@@ -1877,7 +1877,7 @@ of values> recoded to use C<ST> instead of C<POP*>.
 
         SPAGAIN ;
         SP -= count ;
-        ax = (SP - stack_base) + 1 ;
+        ax = (SP - PL_stack_base) + 1 ;
 
         if (count != 2)
             croak("Big trouble\n") ;
@@ -1907,7 +1907,7 @@ The code
 
         SPAGAIN ;
         SP -= count ;
-        ax = (SP - stack_base) + 1 ;
+        ax = (SP - PL_stack_base) + 1 ;
 
 sets the stack up so that we can use the C<ST> macro.
 

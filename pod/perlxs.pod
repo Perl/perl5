@@ -372,7 +372,7 @@ and C<$type> can be used as in typemaps.
 
      bool_t
      rpcb_gettime(host,timep)
-          char *host = (char *)SvPV($arg,na);
+          char *host = (char *)SvPV($arg,PL_na);
           time_t &timep = 0;
           OUTPUT:
           timep

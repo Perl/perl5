@@ -2,11 +2,12 @@
 
 BEGIN {
     chdir 't' if -d 't';
-	@INC = '../lib';
+    @INC = '../lib';
 }
 
-use vars qw{ @warnings };
 use strict;
+
+use vars qw{ @warnings };
 
 BEGIN {
     $^W |= 1;		# Insist upon warnings

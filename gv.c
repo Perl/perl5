@@ -19,8 +19,6 @@
 #include "EXTERN.h"
 #include "perl.h"
 
-EXT char rcsid[];
-
 GV *
 gv_AVadd(gv)
 register GV *gv;

@@ -1,8 +1,6 @@
 #!./perl
 
-# $RCSfile: eval.t,v $$Revision: 4.1 $$Date: 92/08/07 18:27:48 $
-
-print "1..23\n";
+print "1..29\n";
 
 eval 'print "ok 1\n";';
 
@@ -79,3 +77,55 @@ eval {
   };
   &$x();
 }
+
+my $b = 'wrong';
+my $X = sub {
+   my $b = "right";
+   print eval('"$b"') eq $b ? "ok 24\n" : "not ok 24\n";
+};
+&$X();
+
+
+# check navigation of multiple eval boundaries to find lexicals
+
+my $x = 25;
+eval <<'EOT'; die if $@;
+  sub do_eval {
+     eval $_[0]; die if $@;
+  }
+EOT
+do_eval('print "ok $x\n"');
+$x++;
+do_eval('eval q[print "ok $x\n"]');
+$x++;
+do_eval('sub { eval q[print "ok $x\n"] }->()');
+$x++;
+
+# can recursive subroutine-call inside eval'' see its own lexicals?
+sub recurse {
+  my $l = shift;
+  if ($l < $x) {
+     ++$l;
+     eval 'print "# level $l\n"; recurse($l);';
+     die if $@;
+  }
+  else {
+    print "ok $l\n";
+  }
+}
+{
+  local $SIG{__WARN__} = sub { die "not ok $x\n" if $_[0] =~ /^Deep recurs/ };
+  recurse($x-5);
+}
+$x++;
+
+# do closures created within eval bind correctly?
+eval <<'EOT';
+  sub create_closure {
+    my $self = shift;
+    return sub {
+       print $self;
+    };
+  }
+EOT
+create_closure("ok $x\n")->();

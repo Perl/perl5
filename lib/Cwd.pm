@@ -118,7 +118,7 @@ sub fastcwd {
     for (;;) {
 	my $direntry;
 	($odev, $oino) = ($cdev, $cino);
-	chdir('..') || return undef;
+	CORE::chdir('..') || return undef;
 	($cdev, $cino) = stat('.');
 	last if $odev == $cdev && $oino == $cino;
 	opendir(DIR, '.') || return undef;
@@ -139,7 +139,7 @@ sub fastcwd {
     # At this point $path may be tainted (if tainting) and chdir would fail.
     # To be more useful we untaint it then check that we landed where we started.
     $path = $1 if $path =~ /^(.*)$/;	# untaint
-    chdir($path) || return undef;
+    CORE::chdir($path) || return undef;
     ($cdev, $cino) = stat('.');
     die "Unstable directory path, current directory changed unexpectedly"
 	if $cdev != $orig_cdev || $cino != $orig_cino;
@@ -259,9 +259,9 @@ sub abs_path
 sub fast_abs_path {
     my $cwd = getcwd();
     my $path = shift || '.';
-    chdir($path) || croak "Cannot chdir to $path:$!";
+    CORE::chdir($path) || croak "Cannot chdir to $path:$!";
     my $realpath = getcwd();
-    chdir($cwd)  || croak "Cannot chdir back to $cwd:$!";
+    CORE::chdir($cwd)  || croak "Cannot chdir back to $cwd:$!";
     $realpath;
 }
 
@@ -269,7 +269,7 @@ sub fast_abs_path {
 # --- PORTING SECTION ---
 
 # VMS: $ENV{'DEFAULT'} points to default directory at all times
-# 06-Mar-1996  Charles Bailey  bailey@genetics.upenn.edu
+# 06-Mar-1996  Charles Bailey  bailey@newman.upenn.edu
 # Note: Use of Cwd::chdir() causes the logical name PWD to be defined
 #   in the process logical name table as the default device and directory
 #   seen by Perl. This may not be the same as the default device

@@ -13,6 +13,7 @@ use File::Copy;
 
 # First we create a file
 open(F, ">file-$$") or die;
+binmode F; # for DOSISH platforms, because test 3 copies to stdout
 print F "ok 3\n";
 close F;
 

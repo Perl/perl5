@@ -66,7 +66,7 @@ If the build fails under that shell, try building again with the cmd
 shell.  The Makefile also has known incompatibilites with the "command.com"
 shell that comes with Windows95, so building under Windows95 should
 be considered "unsupported".  However, there have been reports of successful
-build attempts using 4DOS/NT version 3.00 under Windows95, using dmake, but
+build attempts using 4DOS/NT version 6.01 under Windows95, using dmake, but
 your mileage may vary.
 
 The surest way to build it is on WindowsNT, using the cmd shell.
@@ -127,7 +127,12 @@ available worldwide, usually along with SSLeay (for example:
 "ftp://fractal.mta.ca/pub/crypto/SSLeay/DES/").  Set CRYPT_SRC to the
 name of the file that implements des_fcrypt().  Alternatively, if
 you have built a library that contains des_fcrypt(), you can set
-CRYPT_LIB to point to the library name.
+CRYPT_LIB to point to the library name.  The location above contains
+many versions of the "libdes" library, all with slightly different
+implementations of des_fcrypt().  Older versions have a single,
+self-contained file (fcrypt.c) that implements crypt(), so they may be
+easier to use.  A patch against the fcrypt.c found in libdes-3.06 is
+in des_fcrypt.patch.
 
 Perl will also build without des_fcrypt(), but the crypt() builtin will
 fail at run time.
@@ -162,9 +167,9 @@ perl95.exe will have esoteric problems with extensions like perl/Tk that
 themselves use the C Runtime heavily, or want to free() pointers
 malloc()-ed by perl.
 
-You can avoid the perl95.exe problems completely if you use Borland
-C++ for building perl (perl95.exe is not needed and will not be built
-in that case).
+You can avoid the perl95.exe problems completely if you either enable
+USE_PERLCRT with Visual C++, or use Borland C++ for building perl.  In
+those cases, perl95.exe is not needed and will not be built.
 
 =back
 
@@ -183,8 +188,8 @@ from where Borland chose to install it, into the Windows system directory
 (usually somewhere like C:\WINNT\SYSTEM32), and rerun the test.
 
 The Visual C runtime apparently has a bug that causes posix.t to fail
-one it test#2.  This usually happens only if you extracted the files in
-text mode.
+test#2.  This usually happens only if you extracted the files in text
+mode.  Enable the USE_PERLCRT option in the Makefile to fix this bug.
 
 Please report any other failures as described under L<BUGS AND CAVEATS>.
 
@@ -215,8 +220,21 @@ variables you can set in L<perlrun>.
 You can also control the shell that perl uses to run system() and
 backtick commands via PERL5SHELL.  See L<perlrun>.
 
-Sometime in the future, some of the configuration information
-for perl will be moved into the Windows registry.
+Perl does not depend on the registry, but it can look up certain default
+values if you choose to put them there.  Perl attempts to read entries from
+C<HKEY_CURRENT_USER\Software\Perl> and C<HKEY_LOCAL_MACHINE\Software\Perl>.
+Entries in the former override entries in the latter.  One or more of the
+following entries (of type REG_SZ or REG_EXPAND_SZ) may be set:
+
+    lib-$]		version-specific path to add to @INC
+    lib			path to add to @INC
+    sitelib-$]		version-specific path to add to @INC
+    sitelib		path to add to @INC
+    PERL*		fallback for all %ENV lookups that begin with "PERL"
+
+Note the C<$]> in the above is not literal.  Substitute whatever version
+of perl you want to honor that entry, e.g. C<5.00502>.  Paths must be
+separated with semicolons, as usual on win32.
 
 =item File Globbing
 
@@ -336,6 +354,59 @@ why it failed, and report problems to the module author.  If
 it looks like the extension building support is at fault, report
 that with full details of how the build failed using the perlbug
 utility.
+
+=item Command-line Wildcard Expansion
+
+The default command shells on DOS descendant operating systems (such
+as they are) usually do not expand wildcard arguments supplied to
+programs.  They consider it the application's job to handle that.
+This is commonly achieved by linking the application (in our case,
+perl) with startup code that the C runtime libraries usually provide.
+However, doing that results in incompatible perl versions (since the
+behavior of the argv expansion code differs depending on the
+compiler, and it is even buggy on some compilers).  Besides, it may
+be a source of frustration if you use such a perl binary with an
+alternate shell that *does* expand wildcards.
+
+Instead, the following solution works rather well. The nice things
+about it: 1) you can start using it right away 2) it is more powerful,
+because it will do the right thing with a pattern like */*/*.c
+3) you can decide whether you do/don't want to use it 4) you can
+extend the method to add any customizations (or even entirely
+different kinds of wildcard expansion).
+
+	C:\> copy con c:\perl\lib\Wild.pm
+	# Wild.pm - emulate shell @ARGV expansion on shells that don't
+	use File::DosGlob;
+	@ARGV = map {
+		      my @g = File::DosGlob::glob($_) if /[*?]/;
+		      @g ? @g : $_;
+		    } @ARGV;
+	1;
+	^Z
+	C:\> set PERL5OPT=-MWild
+	C:\> perl -le "for (@ARGV) { print }" */*/perl*.c
+	p4view/perl/perl.c
+	p4view/perl/perlio.c
+	p4view/perl/perly.c
+	perl5.005/win32/perlglob.c
+	perl5.005/win32/perllib.c
+	perl5.005/win32/perlglob.c
+	perl5.005/win32/perllib.c
+	perl5.005/win32/perlglob.c
+	perl5.005/win32/perllib.c
+
+Note there are two distinct steps there: 1) You'll have to create
+Wild.pm and put it in your perl lib directory. 2) You'll need to
+set the PERL5OPT environment variable.  If you want argv expansion
+to be the default, just set PERL5OPT in your default startup
+environment.
+
+If you are using the Visual C compiler, you can get the C runtime's
+command line wildcard expansion built into perl binary.  The resulting
+binary will always expand unquoted command lines, which may not be
+what you want if you use a shell that does that for you.  The expansion
+done is also somewhat less powerful than the approach suggested above.
 
 =item Win32 Specific Extensions
 
@@ -529,7 +600,7 @@ variable in the handler.  Using signals under this port should
 currently be considered unsupported.
 
 =item *
- 
+
 C<kill()> is implemented, but doesn't have the semantics of
 C<raise()>, i.e. it doesn't send a signal to the identified process
 like it does on Unix platforms.  Instead it immediately calls
@@ -585,7 +656,7 @@ sundry hacks since then.
 
 Borland support was added in 5.004_01 (Gurusamy Sarathy).
 
-Last updated: 19 July 1998
+Last updated: 22 September 1998
 
 =cut
 

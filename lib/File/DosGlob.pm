@@ -97,9 +97,19 @@ my %entries;
 sub glob {
     my $pat = shift;
     my $cxix = shift;
+    my @pat;
 
     # glob without args defaults to $_
     $pat = $_ unless defined $pat;
+
+    # extract patterns
+    if ($pat =~ /\s/) {
+	require Text::ParseWords;
+	@pat = Text::ParseWords::parse_line('\s+',0,$pat);
+    }
+    else {
+	push @pat, $pat;
+    }
 
     # assume global context if not provided one
     $cxix = '_G_' unless defined $cxix;
@@ -107,7 +117,7 @@ sub glob {
 
     # if we're just beginning, do it all first
     if ($iter{$cxix} == 0) {
-	$entries{$cxix} = [doglob(1,$pat)];
+	$entries{$cxix} = [doglob(1,@pat)];
     }
 
     # chuck it all out, quick or slow
@@ -130,10 +140,10 @@ sub glob {
 
 sub import {
     my $pkg = shift;
-    my $callpkg = caller(0);
+    return unless @_;
     my $sym = shift;
-    *{$callpkg.'::'.$sym} = \&{$pkg.'::'.$sym}
-	if defined($sym) and $sym eq 'glob';
+    my $callpkg = ($sym =~ s/^GLOBAL_// ? 'CORE::GLOBAL' : caller(0));
+    *{$callpkg.'::'.$sym} = \&{$pkg.'::'.$sym} if $sym eq 'glob';
 }
 
 1;
@@ -151,6 +161,9 @@ File::DosGlob - DOS like globbing and then some
     # override CORE::glob in current package
     use File::DosGlob 'glob';
     
+    # override CORE::glob in ALL packages (use with extreme caution!)
+    use File::DosGlob 'GLOBAL_glob';
+
     @perlfiles = glob  "..\\pe?l/*.p?";
     print <..\\pe?l/*.p?>;
     
@@ -171,6 +184,15 @@ backslashes and forward slashes are both accepted, and preserved.
 You may have to double the backslashes if you are putting them in
 literally, due to double-quotish parsing of the pattern by perl.
 
+Spaces in the argument delimit distinct patterns, so
+C<glob('*.exe *.dll')> globs all filenames that end in C<.exe>
+or C<.dll>.  If you want to put in literal spaces in the glob
+pattern, you can escape them with either double quotes, or backslashes.
+e.g. C<glob('c:/"Program Files"/*/*.dll')>, or
+C<glob('c:/Program\ Files/*/*.dll')>.  The argument is tokenized using
+C<Text::ParseWords::parse_line()>, so see L<Text::ParseWords> for details
+of the quoting rules used.
+
 Extending it to csh patterns is left as an exercise to the reader.
 
 =head1 EXPORTS (by request only)
@@ -189,6 +211,10 @@ Gurusamy Sarathy <gsar@umich.edu>
 =head1 HISTORY
 
 =over 4
+
+=item *
+
+Support for globally overriding glob() (GSAR 3-JUN-98)
 
 =item *
 
@@ -216,6 +242,8 @@ Initial version (GSAR 20-FEB-97)
 perl
 
 perlglob.bat
+
+Text::ParseWords
 
 =cut
 

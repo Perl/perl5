@@ -785,8 +785,8 @@ cx_dump(cx)
 PERL_CONTEXT *cx;
 {
     dTHR;
-    PerlIO_printf(Perl_debug_log, "CX %ld = %s\n", (long)(cx - cxstack), block_type[cx->cx_type]);
-    if (cx->cx_type != CXt_SUBST) {
+    PerlIO_printf(Perl_debug_log, "CX %ld = %s\n", (long)(cx - cxstack), block_type[CxTYPE(cx)]);
+    if (CxTYPE(cx) != CXt_SUBST) {
 	PerlIO_printf(Perl_debug_log, "BLK_OLDSP = %ld\n", (long)cx->blk_oldsp);
 	PerlIO_printf(Perl_debug_log, "BLK_OLDCOP = 0x%lx\n", (long)cx->blk_oldcop);
 	PerlIO_printf(Perl_debug_log, "BLK_OLDMARKSP = %ld\n", (long)cx->blk_oldmarksp);
@@ -795,7 +795,7 @@ PERL_CONTEXT *cx;
 	PerlIO_printf(Perl_debug_log, "BLK_OLDPM = 0x%lx\n", (long)cx->blk_oldpm);
 	PerlIO_printf(Perl_debug_log, "BLK_GIMME = %s\n", cx->blk_gimme ? "LIST" : "SCALAR");
     }
-    switch (cx->cx_type) {
+    switch (CxTYPE(cx)) {
     case CXt_NULL:
     case CXt_BLOCK:
 	break;

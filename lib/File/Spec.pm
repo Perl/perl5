@@ -106,7 +106,7 @@ File::Spec::VMS, ExtUtils::MakeMaker
 Kenneth Albanowski <F<kjahds@kjahds.com>>, Andy Dougherty
 <F<doughera@lafcol.lafayette.edu>>, Andreas KE<ouml>nig
 <F<A.Koenig@franz.ww.TU-Berlin.DE>>, Tim Bunce <F<Tim.Bunce@ig.co.uk>>. VMS
-support by Charles Bailey <F<bailey@genetics.upenn.edu>>.  OS/2 support by
+support by Charles Bailey <F<bailey@newman.upenn.edu>>.  OS/2 support by
 Ilya Zakharevich <F<ilya@math.ohio-state.edu>>. Mac support by Paul Schinder
 <F<schinder@pobox.com>>.
 
