@@ -1,6 +1,6 @@
 #!./perl
 
-print "1..186\n";
+print "1..188\n";
 
 #P = start of string  Q = start of substr  R = end of substr  S = end of string
 
@@ -628,4 +628,15 @@ ok 174, $x eq "\x{100}\x{200}\xFFb";
 	ok 185, $_ eq 'YYYY';   
 	ok 186, $x eq 'aYYYYef';
     }
+}
+
+# [perl #24200] string corruption with lvalue sub
+
+{
+    my $foo = "a";
+    sub bar: lvalue { substr $foo, 0 }
+    bar = "XXX";
+    ok 187, bar eq 'XXX';
+    $foo = '123456789';
+    ok 188, bar eq '123456789';
 }
