@@ -1315,7 +1315,7 @@ Perl_to_utf8_case(pTHX_ U8 *p, U8* ustrp, STRLEN *lenp, SV **swashp,char *normal
 		   ustrp[1] = UTF8_EIGHT_BIT_LO(c);
 		   *lenp = 2;
 	      }
-	      return 0;
+	      return utf8_to_uvchr(ustrp, 0);
 	 }
     }
     if (lenp)
@@ -1324,12 +1324,40 @@ Perl_to_utf8_case(pTHX_ U8 *p, U8* ustrp, STRLEN *lenp, SV **swashp,char *normal
     return uv;
 }
 
+/*
+=for apidoc A|UV|to_utf8_upper|U8 *p|U8 *ustrp|STRLEN *lenp
+
+Convert the UTF-8 encoded character at p to its uppercase version and
+store that in UTF-8 in ustrp and its length in bytes in lenp.  Note
+that the ustrp needs to be at least UTF8_MAXLEN_UCLC+1 bytes since the
+uppercase version may be longer than the original character (up to two
+characters).
+
+The first character of the uppercased version is returned
+(but note, as explained above, that there may be more.)
+
+=cut */
+
 UV
 Perl_to_utf8_upper(pTHX_ U8 *p, U8* ustrp, STRLEN *lenp)
 {
     return Perl_to_utf8_case(aTHX_ p, ustrp, lenp,
                              &PL_utf8_toupper, "ToUpper", "utf8::ToSpecUpper");
 }
+
+/*
+=for apidoc A|UV|to_utf8_title|U8 *p|U8 *ustrp|STRLEN *lenp
+
+Convert the UTF-8 encoded character at p to its titlecase version and
+store that in UTF-8 in ustrp and its length in bytes in lenp.  Note
+that the ustrp needs to be at least UTF8_MAXLEN_UCLC+1 bytes since the
+titlecase version may be longer than the original character (up to two
+characters).
+
+The first character of the titlecased version is returned
+(but note, as explained above, that there may be more.)
+
+=cut */
 
 UV
 Perl_to_utf8_title(pTHX_ U8 *p, U8* ustrp, STRLEN *lenp)
@@ -1338,12 +1366,40 @@ Perl_to_utf8_title(pTHX_ U8 *p, U8* ustrp, STRLEN *lenp)
                              &PL_utf8_totitle, "ToTitle", "utf8::ToSpecTitle");
 }
 
+/*
+=for apidoc A|UV|to_utf8_lower|U8 *p|U8 *ustrp|STRLEN *lenp
+
+Convert the UTF-8 encoded character at p to its lowercase version and
+store that in UTF-8 in ustrp and its length in bytes in lenp.  Note
+that the ustrp needs to be at least UTF8_MAXLEN_UCLC+1 bytes since the
+lowercase version may be longer than the original character (up to two
+characters).
+
+The first character of the lowercased version is returned
+(but note, as explained above, that there may be more.)
+
+=cut */
+
 UV
 Perl_to_utf8_lower(pTHX_ U8 *p, U8* ustrp, STRLEN *lenp)
 {
     return Perl_to_utf8_case(aTHX_ p, ustrp, lenp,
                              &PL_utf8_tolower, "ToLower", "utf8::ToSpecLower");
 }
+
+/*
+=for apidoc A|UV|to_utf8_fold|U8 *p|U8 *ustrp|STRLEN *lenp
+
+Convert the UTF-8 encoded character at p to its foldcase version and
+store that in UTF-8 in ustrp and its length in bytes in lenp.  Note
+that the ustrp needs to be at least UTF8_MAXLEN_FOLD+1 bytes since the
+foldcase version may be longer than the original character (up to
+three characters).
+
+The first character of the foldcased version is returned
+(but note, as explained above, that there may be more.)
+
+=cut */
 
 UV
 Perl_to_utf8_fold(pTHX_ U8 *p, U8* ustrp, STRLEN *lenp)
