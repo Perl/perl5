@@ -95,6 +95,32 @@ Version v5.7.0		Development release working toward v5.8
 --------------
 
 ____________________________________________________________________________
+[  6639] By: jhi                                   on 2000/08/15  16:34:55
+        Log: Missed a file from #6638.
+     Branch: perl
+	   ! lib/File/Temp.pm
+____________________________________________________________________________
+[  6638] By: jhi                                   on 2000/08/15  16:33:19
+        Log: Subject: [PATCH perl@6620] cygwin port
+             From: "Fifer, Eric" <EFifer@sanwaint.com>
+             Date: Tue, 15 Aug 2000 17:00:49 +0100
+             Message-ID: <779F20BCCE5AD31186A50008C75D9979171779@silldn_mail1.sanwaint.com>
+     Branch: perl
+	   ! README.cygwin hints/cygwin.sh pod/perlport.pod t/lib/b.t
+____________________________________________________________________________
+[  6637] By: jhi                                   on 2000/08/15  16:29:22
+        Log: Subject: [PATCH] debugger exit code should reflect user exit code
+             From: Mike Guy <mjtg@cam.ac.uk>
+             Date: Tue, 15 Aug 2000 16:55:59 +0100
+             Message-Id: <E13Oj4J-0005FS-00@libra.cus.cam.ac.uk>
+     Branch: perl
+	   ! lib/perl5db.pl
+____________________________________________________________________________
+[  6636] By: jhi                                   on 2000/08/15  15:30:58
+        Log: Update Changes.
+     Branch: perl
+	   ! Changes
+____________________________________________________________________________
 [  6635] By: jhi                                   on 2000/08/15  15:27:21
         Log: Use -Dusedevel; regen Configure and the respective Porting stuff.
      Branch: metaconfig
