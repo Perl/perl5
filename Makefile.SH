@@ -493,6 +493,8 @@ miniperl: $& miniperlmain$(OBJ_EXT) $(LIBPERL) opmini$(OBJ_EXT)
 perl: $& perlmain$(OBJ_EXT) $(LIBPERL) $(DYNALOADER) $(static_ext) ext.libs $(PERLEXPORT)
 	$(SHRPENV) $(LDLIBPTH) $(CC) -o perl $(CLDFLAGS) $(CCDLFLAGS) perlmain$(OBJ_EXT) $(DYNALOADER) $(static_ext) $(LLIBPERL) `cat ext.libs` $(libs)
 
+# Purify/Quantify Perls.
+
 pureperl: $& perlmain$(OBJ_EXT) $(LIBPERL) $(DYNALOADER) $(static_ext) ext.libs $(PERLEXPORT)
 	$(SHRPENV) $(LDLIBPTH) purify $(CC) -o pureperl $(CLDFLAGS) $(CCDLFLAGS) perlmain$(OBJ_EXT) $(DYNALOADER) $(static_ext) $(LLIBPERL) `cat ext.libs` $(libs)
 
@@ -502,17 +504,41 @@ purecovperl: $& perlmain$(OBJ_EXT) $(LIBPERL) $(DYNALOADER) $(static_ext) ext.li
 quantperl: $& perlmain$(OBJ_EXT) $(LIBPERL) $(DYNALOADER) $(static_ext) ext.libs $(PERLEXPORT)
 	$(SHRPENV) $(LDLIBPTH) quantify $(CC) -o quantperl $(CLDFLAGS) $(CCDLFLAGS) perlmain$(OBJ_EXT) $(DYNALOADER) $(static_ext) $(LLIBPERL) `cat ext.libs` $(libs)
 
-perl.third.config: config.sh
-	@echo "To build perl.third you must Configure -Doptimize=-g -Uusemymalloc, checking..."
+# Third Degree Perl (Tru64 only)
+
+perl.config.-g:
 	@echo "Checking optimize='-g'..."
 	@grep "^optimize=" config.sh
 	@grep -q "^optimize='-g'" config.sh || exit 1
+
+perl.third.config: config.sh
+	@echo "To build perl.third you must Configure -Doptimize=-g -Uusemymalloc, checking..."
+	$(MAKE) perl.config.-g
 	@echo "Checking usemymalloc='n'..."
 	@grep "^usemymalloc=" config.sh
 	@grep -q "^usemymalloc='n'" config.sh || exit 1
 
 perl.third: /usr/bin/atom perl.third.config perl
 	atom -tool third -L. -all -gp -toolargs="-quiet -invalid -uninit heap+stack+partword+copy -min 0" perl
+
+# Pixie Perls (Tru64 and IRIX only)
+
+perl.pixie.atom.config: config.sh
+	@echo "To build perl.pixie you must Configure -Doptimize=-g, checking..."
+	$(MAKE) perl.config.-g
+
+perl.pixie.atom: /usr/bin/atom perl.pixie.atom.config perl
+	atom -tool pixie -L. -all -toolargs="-quiet" perl
+
+perl.pixie.irix: perl
+	pixie perl
+
+perl.pixie: perl
+	if test -x /usr/bin/atom; then \
+	  $(MAKE) perl.pixie.atom; \
+	else \
+	  $(MAKE) perl.pixie.irix; \
+	fi
 
 # This version, if specified in Configure, does ONLY those scripts which need
 # set-id emulation.  Suidperl must be setuid root.  It contains the "taint"
