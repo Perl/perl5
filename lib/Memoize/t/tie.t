@@ -23,11 +23,12 @@ sub n {
   $_[0]+1;
 }
 
-$tmpdir = $ENV{TMP} || $ENV{TMPDIR} ||  '/tmp';  
 if (eval {require File::Spec::Functions}) {
- File::Spec::Functions->import();
+  File::Spec::Functions->import('tmpdir');
+  $tmpdir = tmpdir();
 } else {
   *catfile = sub { join '/', @_ };
+  $tmpdir = $ENV{TMP} || $ENV{TMPDIR} || '/tmp';
 }
 $file = catfile($tmpdir, "md$$");
 @files = ($file, "$file.db", "$file.dir", "$file.pag");
