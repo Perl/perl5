@@ -1327,6 +1327,9 @@ sub process_L {
     $str =~ s/\n/ /g;			# undo word-wrapped tags
     $s1 = $str;
     for ($s1) {
+	# LREF: a la HREF L<show this text|man/section>
+	$linktext = $1 if s:^([^|]+)\|::;
+
 	# a :: acts like a /
 	s,::,/,;
 
@@ -1350,13 +1353,13 @@ sub process_L {
 
     if ($page eq "") {
 	$link = "#" . htmlify(0,$section);
-	$linktext = $section;
+	$linktext = $section unless defined($linktext);
     } elsif (!defined $pages{$page}) {
 	warn "$0: $podfile: cannot resolve L<$str> in paragraph $paragraph: no such page '$page'\n";
 	$link = "";
-	$linktext = $page;
+	$linktext = $page unless defined($linktext);
     } else {
-	$linktext  = ($section ? "$section" : "the $page manpage");
+	$linktext  = ($section ? "$section" : "the $page manpage") unless defined($linktext);
 	$section = htmlify(0,$section) if $section ne "";
 
 	# if there is a directory by the name of the page, then assume that an
@@ -1378,7 +1381,7 @@ sub process_L {
 		warn "$0: $podfile: cannot resolve L$str in paragraph $paragraph: ".
 			     "no .pod or .pm found\n";
 		$link = "";
-		$linktext = $section;
+		$linktext = $section unless defined($linktext);
 	    }
 	}
     }
