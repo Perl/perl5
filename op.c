@@ -5294,6 +5294,19 @@ Perl_ck_sassign(pTHX_ OP *o)
 	    {
 		return o;
 	    }
+	    if (kid->op_type == OP_JOIN) {
+		/* do_join has problems the arguments coincide with target.
+		   In fact the second argument *can* safely coincide,
+		   but ignore=pessimize this rare occasion. */
+		OP *arg = kLISTOP->op_first->op_sibling; /* Skip PUSHMARK */
+
+		while (arg) {
+		    if (arg->op_type == OP_PADSV
+			&& arg->op_targ == kkid->op_targ)
+			return o;
+		    arg = arg->op_sibling;
+		}
+	    }
 	    kid->op_targ = kkid->op_targ;
 	    /* Now we do not need PADSV and SASSIGN. */
 	    kid->op_sibling = o->op_sibling;	/* NULL */
