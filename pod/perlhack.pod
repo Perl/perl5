@@ -1950,12 +1950,12 @@ If you plan to use the "Viewer" windows, then you only need this option:
 
 In Bourne-type shells:
 
-    PURIFY_OPTIONS="..."
-    export PURIFY_OPTIONS
+    PURIFYOPTIONS="..."
+    export PURIFYOPTIONS
 
 or if you have the "env" utility:
 
-    env PURIFY_OPTIONS="..." ../pureperl ...
+    env PURIFYOPTIONS="..." ../pureperl ...
 
 =head2 Purify on NT
 
