@@ -142,8 +142,8 @@ PERLVAR(Tcolors[6],	char *)		/* from regcomp.c */
 PERLVAR(Treginput,	char *)		/* String-input pointer. */
 PERLVAR(Tregbol,	char *)		/* Beginning of input, for ^ check. */
 PERLVAR(Tregeol,	char *)		/* End of input, for $ check. */
-PERLVAR(Tregstartp,	char **)	/* Pointer to startp array. */
-PERLVAR(Tregendp,	char **)	/* Ditto for endp. */
+PERLVAR(Tregstartp,	I32 *)		/* Pointer to startp array. */
+PERLVAR(Tregendp,	I32 *)		/* Ditto for endp. */
 PERLVAR(Treglastparen,	U32 *)		/* Similarly for lastparen. */
 PERLVAR(Tregtill,	char *)		/* How far we are required to go. */
 PERLVAR(Tregprev,	char)		/* char before regbol, \n if none */
@@ -166,6 +166,8 @@ PERLVAR(Treg_magic,	MAGIC *)	/* pos-magic of what we match */
 PERLVAR(Treg_oldpos,	I32)		/* old pos of what we match */
 PERLVARI(Treg_oldcurpm,	PMOP*, NULL)	/* curpm before match */
 PERLVARI(Treg_curpm,	PMOP*, NULL)	/* curpm during match */
+PERLVAR(Treg_oldsaved,	char*)		/* old saved substr during match */
+PERLVAR(Treg_oldsavedlen, STRLEN)	/* old length of saved substr during match */
 
 PERLVARI(Tregcompp,	regcomp_t, FUNC_NAME_TO_PTR(pregcomp))
 					/* Pointer to RE compiler */

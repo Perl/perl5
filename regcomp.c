@@ -875,7 +875,8 @@ pregcomp(char *exp, char *xend, PMOP *pm)
     r->refcnt = 1;
     r->prelen = xend - exp;
     r->precomp = PL_regprecomp;
-    r->subbeg = r->subbase = NULL;
+    r->subbeg = NULL;
+    r->reganch = pm->op_pmflags & PMf_COMPILETIME;
     r->nparens = PL_regnpar - 1;	/* set early to validate backrefs */
 
     r->substrs = 0;			/* Useful during FAIL. */
@@ -898,7 +899,7 @@ pregcomp(char *exp, char *xend, PMOP *pm)
 	return(NULL);
 
     /* Dig out information for optimizations. */
-    r->reganch = pm->op_pmflags & PMf_COMPILETIME;
+    r->reganch = pm->op_pmflags & PMf_COMPILETIME; /* Again? */
     pm->op_pmflags = PL_regflags;
     if (UTF)
 	r->reganch |= ROPT_UTF8;
@@ -998,6 +999,8 @@ pregcomp(char *exp, char *xend, PMOP *pm)
 	    || (data.flags & SF_FL_BEFORE_EOL
 		&& (!(data.flags & SF_FL_BEFORE_MEOL)
 		    || (PL_regflags & PMf_MULTILINE)))) {
+	    int t;
+
 	    if (SvCUR(data.longest_fixed) 			/* ok to leave SvCUR */
 		&& data.offset_fixed == data.offset_float_min
 		&& SvCUR(data.longest_fixed) == SvCUR(data.longest_float))
@@ -1006,12 +1009,10 @@ pregcomp(char *exp, char *xend, PMOP *pm)
 	    r->float_substr = data.longest_float;
 	    r->float_min_offset = data.offset_float_min;
 	    r->float_max_offset = data.offset_float_max;
-	    fbm_compile(r->float_substr, 0);
-	    BmUSEFUL(r->float_substr) = 100;
-	    if (data.flags & SF_FL_BEFORE_EOL /* Cannot have SEOL and MULTI */
-		&& (!(data.flags & SF_FL_BEFORE_MEOL)
-		    || (PL_regflags & PMf_MULTILINE))) 
-		SvTAIL_on(r->float_substr);
+	    t = (data.flags & SF_FL_BEFORE_EOL /* Can't have SEOL and MULTI */
+		       && (!(data.flags & SF_FL_BEFORE_MEOL)
+			   || (PL_regflags & PMf_MULTILINE)));
+	    fbm_compile(r->float_substr, t ? FBMcf_TAIL : 0);
 	}
 	else {
 	  remove_float:
@@ -1025,14 +1026,14 @@ pregcomp(char *exp, char *xend, PMOP *pm)
 	    || (data.flags & SF_FIX_BEFORE_EOL /* Cannot have SEOL and MULTI */
 		&& (!(data.flags & SF_FIX_BEFORE_MEOL)
 		    || (PL_regflags & PMf_MULTILINE)))) {
+	    int t;
+
 	    r->anchored_substr = data.longest_fixed;
 	    r->anchored_offset = data.offset_fixed;
-	    fbm_compile(r->anchored_substr, 0);
-	    BmUSEFUL(r->anchored_substr) = 100;
-	    if (data.flags & SF_FIX_BEFORE_EOL /* Cannot have SEOL and MULTI */
-		&& (!(data.flags & SF_FIX_BEFORE_MEOL)
-		    || (PL_regflags & PMf_MULTILINE)))
-		SvTAIL_on(r->anchored_substr);
+	    t = (data.flags & SF_FIX_BEFORE_EOL /* Can't have SEOL and MULTI */
+		 && (!(data.flags & SF_FIX_BEFORE_MEOL)
+		     || (PL_regflags & PMf_MULTILINE)));
+	    fbm_compile(r->anchored_substr, t ? FBMcf_TAIL : 0);
 	}
 	else {
 	    r->anchored_substr = Nullsv;
@@ -1070,8 +1071,8 @@ pregcomp(char *exp, char *xend, PMOP *pm)
 	r->reganch |= ROPT_LOOKBEHIND_SEEN;
     if (PL_regseen & REG_SEEN_EVAL)
 	r->reganch |= ROPT_EVAL_SEEN;
-    Newz(1002, r->startp, PL_regnpar, char*);
-    Newz(1002, r->endp, PL_regnpar, char*);
+    Newz(1002, r->startp, PL_regnpar, I32);
+    Newz(1002, r->endp, PL_regnpar, I32);
     DEBUG_r(regdump(r));
     return(r);
 }
@@ -2946,8 +2947,8 @@ pregfree(struct regexp *r)
 	return;
     if (r->precomp)
 	Safefree(r->precomp);
-    if (r->subbase)
-	Safefree(r->subbase);
+    if (RX_MATCH_COPIED(r))
+	Safefree(r->subbeg);
     if (r->substrs) {
 	if (r->anchored_substr)
 	    SvREFCNT_dec(r->anchored_substr);

@@ -846,7 +846,9 @@ PP(pp_match)
     char *strend;
     I32 global;
     I32 r_flags = 0;
-    char *truebase;
+    char *truebase;			/* Start of string, may be
+					   relocated if REx engine
+					   copies the string.  */
     register REGEXP *rx = pm->op_pmregexp;
     bool rxtainted;
     I32 gimme = GIMME;
@@ -888,15 +890,15 @@ PP(pp_match)
 
     /* XXXX What part of this is needed with true \G-support? */
     if (global = pm->op_pmflags & PMf_GLOBAL) {
-	rx->startp[0] = 0;
+	rx->startp[0] = -1;
 	if (SvTYPE(TARG) >= SVt_PVMG && SvMAGIC(TARG)) {
 	    MAGIC* mg = mg_find(TARG, 'g');
 	    if (mg && mg->mg_len >= 0) {
 		if (!(rx->reganch & ROPT_GPOS_SEEN))
-		    rx->endp[0] = rx->startp[0] = s + mg->mg_len; 
+		    rx->endp[0] = rx->startp[0] = mg->mg_len; 
 		else if (rx->reganch & ROPT_ANCH_GPOS) {
 		    r_flags |= REXEC_IGNOREPOS;
-		    rx->endp[0] = rx->startp[0] = s + mg->mg_len; 
+		    rx->endp[0] = rx->startp[0] = mg->mg_len; 
 		}
 		minmatch = (mg->mg_flags & MGf_MINMATCH);
 		update_minmatch = 0;
@@ -917,8 +919,8 @@ PP(pp_match)
     }
 
 play_it_again:
-    if (global && rx->startp[0]) {
-	t = s = rx->endp[0];
+    if (global && rx->startp[0] != -1) {
+	t = s = rx->endp[0] + truebase;
 	if ((s + rx->minlen) > strend)
 	    goto nope;
 	if (update_minmatch++)
@@ -926,29 +928,33 @@ play_it_again:
     }
     if (rx->check_substr) {
 	if (!(rx->reganch & ROPT_NOSCAN)) { /* Floating checkstring. */
+	    SV *c = rx->check_substr;
+
 	    if (r_flags & REXEC_SCREAM) {
 		I32 p = -1;
 		char *b;
-		
-		if (PL_screamfirst[BmRARE(rx->check_substr)] < 0)
+
+		if (PL_screamfirst[BmRARE(c)] < 0
+		    && !( BmRARE(c) == '\n' && (BmPREVIOUS(c) == SvCUR(c) - 1)
+			  && SvTAIL(c) ))
 		    goto nope;
 
 		b = (char*)HOP((U8*)s, rx->check_offset_min);
-		if (!(s = screaminstr(TARG, rx->check_substr, b - s, 0, &p, 0)))
+		if (!(s = screaminstr(TARG, c, b - s, 0, &p, 0)))
 		    goto nope;
 
 		if ((rx->reganch & ROPT_CHECK_ALL)
-			 && !PL_sawampersand && !SvTAIL(rx->check_substr))
+			 && !PL_sawampersand && !SvTAIL(c))
 		    goto yup;
 	    }
 	    else if (!(s = fbm_instr((unsigned char*)HOP((U8*)s, rx->check_offset_min),
-				     (unsigned char*)strend, 
-				     rx->check_substr, 0)))
+				     (unsigned char*)strend, c, 
+				     PL_multiline ? FBMrf_MULTILINE : 0)))
 		goto nope;
 	    else if ((rx->reganch & ROPT_CHECK_ALL) && !PL_sawampersand)
 		goto yup;
 	    if (s && rx->check_offset_max < s - t) {
-		++BmUSEFUL(rx->check_substr);
+		++BmUSEFUL(c);
 		s = (char*)HOP((U8*)s, -rx->check_offset_max);
 	    }
 	    else
@@ -959,10 +965,30 @@ play_it_again:
 	else if (!PL_multiline) {	/* Anchored near beginning of string. */
 	    I32 slen;
 	    char *b = (char*)HOP((U8*)s, rx->check_offset_min);
-	    if (*SvPVX(rx->check_substr) != *b
-		|| ((slen = SvCUR(rx->check_substr)) > 1
-		    && memNE(SvPVX(rx->check_substr), b, slen)))
-		goto nope;
+
+	    if (SvTAIL(rx->check_substr)) {
+		slen = SvCUR(rx->check_substr);	/* >= 1 */
+
+		if ( strend - b > slen || strend - b < slen - 1 )
+		    goto nope;
+		if ( strend - b == slen && strend[-1] != '\n')
+		    goto nope;
+		/* Now should match b[0..slen-2] */
+		slen--;
+		if (slen && (*SvPVX(rx->check_substr) != *b
+			     || (slen > 1
+				 && memNE(SvPVX(rx->check_substr), b, slen))))
+		    goto nope;
+		if ((rx->reganch & ROPT_CHECK_ALL) && !PL_sawampersand)
+		    goto yup;
+	    } else {			/* Assume len > 0 */
+		if (*SvPVX(rx->check_substr) != *b
+		    || ((slen = SvCUR(rx->check_substr)) > 1
+			&& memNE(SvPVX(rx->check_substr), b, slen)))
+		    goto nope;
+		if ((rx->reganch & ROPT_CHECK_ALL) && !PL_sawampersand)
+		    goto yup;
+	    }
 	}
 	if (!(rx->reganch & ROPT_NAUGHTY) && --BmUSEFUL(rx->check_substr) < 0
 	    && rx->check_substr == rx->float_substr) {
@@ -1000,17 +1026,17 @@ play_it_again:
 	for (i = !i; i <= iters; i++) {
 	    PUSHs(sv_newmortal());
 	    /*SUPPRESS 560*/
-	    if ((s = rx->startp[i]) && rx->endp[i] ) {
-		len = rx->endp[i] - s;
+	    if ((rx->startp[i] != -1) && rx->endp[i] != -1 ) {
+		len = rx->endp[i] - rx->startp[i];
+		s = rx->startp[i] + truebase;
 		sv_setpvn(*SP, s, len);
 	    }
 	}
 	if (global) {
-	    truebase = rx->subbeg;
-	    strend = rx->subend;
-	    had_zerolen = (rx->startp[0] && rx->startp[0] == rx->endp[0]);
+	    had_zerolen = (rx->startp[0] != -1
+			   && rx->startp[0] == rx->endp[0]);
 	    PUTBACK;			/* EVAL blocks may use stack */
-	    r_flags |= REXEC_IGNOREPOS;
+	    r_flags |= REXEC_IGNOREPOS | REXEC_NOT_FIRST;
 	    goto play_it_again;
 	}
 	else if (!iters)
@@ -1027,8 +1053,8 @@ play_it_again:
 		sv_magic(TARG, (SV*)0, 'g', Nullch, 0);
 		mg = mg_find(TARG, 'g');
 	    }
-	    if (rx->startp[0]) {
-		mg->mg_len = rx->endp[0] - rx->subbeg;
+	    if (rx->startp[0] != -1) {
+		mg->mg_len = rx->endp[0];
 		if (rx->startp[0] == rx->endp[0])
 		    mg->mg_flags |= MGf_MINMATCH;
 		else
@@ -1047,23 +1073,29 @@ yup:					/* Confirmed by check_substr */
     PL_curpm = pm;
     if (pm->op_pmflags & PMf_ONCE)
 	pm->op_pmdynflags |= PMdf_USED;
-    Safefree(rx->subbase);
-    rx->subbase = Nullch;
+    if (RX_MATCH_COPIED(rx))
+	Safefree(rx->subbeg);
+    RX_MATCH_COPIED_off(rx);
+    rx->subbeg = Nullch;
     if (global) {
 	rx->subbeg = truebase;
-	rx->subend = strend;
-	rx->startp[0] = s;
-	rx->endp[0] = s + SvCUR(rx->check_substr);
+	rx->startp[0] = s - truebase;
+	rx->endp[0] = s - truebase + SvCUR(rx->check_substr);
+	rx->sublen = strend - truebase;
 	goto gotcha;
-    }
+    } 
     if (PL_sawampersand) {
-	char *tmps;
+	I32 off;
 
-	tmps = rx->subbase = savepvn(t, strend-t);
-	rx->subbeg = tmps;
-	rx->subend = tmps + (strend-t);
-	tmps = rx->startp[0] = tmps + (s - t);
-	rx->endp[0] = tmps + SvCUR(rx->check_substr);
+	rx->subbeg = savepvn(t, strend - t);
+	rx->sublen = strend - t;
+	RX_MATCH_COPIED_on(rx);
+	off = rx->startp[0] = s - t;
+	rx->endp[0] = off + SvCUR(rx->check_substr);
+    }
+    else {			/* startp/endp are used by @- @+. */
+	rx->startp[0] = s - truebase;
+	rx->endp[0] = s - truebase + SvCUR(rx->check_substr);
     }
     LEAVE_SCOPE(oldsave);
     RETPUSHYES;
@@ -1714,7 +1746,8 @@ PP(pp_subst)
 	    }
 	    else if (!(s = fbm_instr((unsigned char*)HOP((U8*)s, rx->check_offset_min), 
 				     (unsigned char*)strend,
-				     rx->check_substr, 0)))
+				     rx->check_substr, 
+				     PL_multiline ? FBMrf_MULTILINE : 0)))
 		goto nope;
 	    if (s && rx->check_offset_max < s - m) {
 		++BmUSEFUL(rx->check_substr);
@@ -1766,13 +1799,8 @@ PP(pp_subst)
 	SvSCREAM_off(TARG);	/* disable possible screamer */
 	if (once) {
 	    rxtainted |= RX_MATCH_TAINTED(rx);
-	    if (rx->subbase) {
-		m = orig + (rx->startp[0] - rx->subbase);
-		d = orig + (rx->endp[0] - rx->subbase);
-	    } else {
-		m = rx->startp[0];
-		d = rx->endp[0];
-	    }
+	    m = orig + rx->startp[0];
+	    d = orig + rx->endp[0];
 	    s = orig;
 	    if (m - s > strend - d) {  /* faster to shorten from end */
 		if (clen) {
@@ -1815,7 +1843,7 @@ PP(pp_subst)
 		if (iters++ > maxiters)
 		    DIE("Substitution loop");
 		rxtainted |= RX_MATCH_TAINTED(rx);
-		m = rx->startp[0];
+		m = rx->startp[0] + orig;
 		/*SUPPRESS 560*/
 		if (i = m - s) {
 		    if (s != d)
@@ -1826,9 +1854,9 @@ PP(pp_subst)
 		    Copy(c, d, clen, char);
 		    d += clen;
 		}
-		s = rx->endp[0];
+		s = rx->endp[0] + orig;
 	    } while (CALLREGEXEC(rx, s, strend, orig, s == m,
-			      Nullsv, NULL, 0)); /* don't match same null twice */
+				 Nullsv, NULL, REXEC_NOT_FIRST)); /* don't match same null twice */
 	    if (s != d) {
 		i = strend - s;
 		SvCUR_set(TARG, d - SvPVX(TARG) + i);
@@ -1866,21 +1894,21 @@ PP(pp_subst)
 	    PUSHSUBST(cx);
 	    RETURNOP(cPMOP->op_pmreplroot);
 	}
-	r_flags |= REXEC_IGNOREPOS;
+	r_flags |= REXEC_IGNOREPOS | REXEC_NOT_FIRST;
 	do {
 	    if (iters++ > maxiters)
 		DIE("Substitution loop");
 	    rxtainted |= RX_MATCH_TAINTED(rx);
-	    if (rx->subbase && rx->subbase != orig) {
+	    if (RX_MATCH_COPIED(rx) && rx->subbeg != orig) {
 		m = s;
 		s = orig;
-		orig = rx->subbase;
+		orig = rx->subbeg;
 		s = orig + (m - s);
 		strend = s + (strend - m);
 	    }
-	    m = rx->startp[0];
+	    m = rx->startp[0] + orig;
 	    sv_catpvn(dstr, s, m-s);
-	    s = rx->endp[0];
+	    s = rx->endp[0] + orig;
 	    if (clen)
 		sv_catpvn(dstr, c, clen);
 	    if (once)

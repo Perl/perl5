@@ -34,20 +34,9 @@ struct reg_substr_data {
 };
 
 typedef struct regexp {
-	I32 refcnt;
-	char **startp;
-	char **endp;
+	I32 *startp;
+	I32 *endp;
 	regnode *regstclass;
-	I32 minlen;		/* mininum possible length of $& */
-	I32 prelen;		/* length of precomp */
-	U32 nparens;		/* number of parentheses */
-	U32 lastparen;		/* last paren matched */
-	char *precomp;		/* pre-compilation regular expression */
-	char *subbase;		/* saved string so \digit works forever */
-	char *subbeg;		/* same, but not responsible for allocation */
-	char *subend;		/* end of subbase */
-	U32 reganch;		/* Internal use only +
-				   Tainted information used by regexec? */
 #if 0
         SV *anchored_substr;	/* Substring at fixed position wrt start. */
 	I32 anchored_offset;	/* Position of it. */
@@ -60,7 +49,18 @@ typedef struct regexp {
 #else
         struct reg_substr_data *substrs;
 #endif
+	char *precomp;		/* pre-compilation regular expression */
         struct reg_data *data;	/* Additional data. */
+	char *subbeg;		/* saved or original string 
+				   so \digit works forever. */
+	I32 sublen;		/* Length of string pointed by subbeg */
+	I32 refcnt;
+	I32 minlen;		/* mininum possible length of $& */
+	I32 prelen;		/* length of precomp */
+	U32 nparens;		/* number of parentheses */
+	U32 lastparen;		/* last paren matched */
+	U32 reganch;		/* Internal use only +
+				   Tainted information used by regexec? */
 	regnode program[1];	/* Unwarranted chumminess with compiler. */
 } regexp;
 
@@ -92,6 +92,7 @@ typedef struct regexp {
 
 #define ROPT_UTF8		0x10000
 #define ROPT_NAUGHTY		0x20000 /* how exponential is this pattern? */
+#define ROPT_COPY_DONE		0x40000	/* subbeg is a copy of the string */
 
 #define RX_MATCH_TAINTED(prog)	((prog)->reganch & ROPT_TAINTED_SEEN)
 #define RX_MATCH_TAINTED_on(prog) ((prog)->reganch |= ROPT_TAINTED_SEEN)
@@ -100,10 +101,25 @@ typedef struct regexp {
 				       ? RX_MATCH_TAINTED_on(prog) \
 				       : RX_MATCH_TAINTED_off(prog))
 
+#define RX_MATCH_COPIED(prog)		((prog)->reganch & ROPT_COPY_DONE)
+#define RX_MATCH_COPIED_on(prog)	((prog)->reganch |= ROPT_COPY_DONE)
+#define RX_MATCH_COPIED_off(prog)	((prog)->reganch &= ~ROPT_COPY_DONE)
+#define RX_MATCH_COPIED_set(prog,t)	((t) \
+					 ? RX_MATCH_COPIED_on(prog) \
+					 : RX_MATCH_COPIED_off(prog))
+
 #define REXEC_COPY_STR	1		/* Need to copy the string. */
 #define REXEC_CHECKED	2		/* check_substr already checked. */
 #define REXEC_SCREAM	4		/* use scream table. */
 #define REXEC_IGNOREPOS	8		/* \G matches at start. */
+#define REXEC_NOT_FIRST	0x10		/* This is another iteration of //g. */
 
 #define ReREFCNT_inc(re) ((re && re->refcnt++), re)
 #define ReREFCNT_dec(re) pregfree(re)
+
+#define FBMcf_TAIL_DOLLAR	1
+#define FBMcf_TAIL_Z		2
+#define FBMcf_TAIL_z		4
+#define FBMcf_TAIL		(FBMcf_TAIL_DOLLAR|FBMcf_TAIL_Z|FBMcf_TAIL_z)
+
+#define FBMrf_MULTILINE	1

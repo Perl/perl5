@@ -889,6 +889,14 @@ mem_collxfrm(const char *s, STRLEN len, STRLEN *xlen)
 
 #endif /* USE_LOCALE_COLLATE */
 
+#define FBM_TABLE_OFFSET 2	/* Number of bytes between EOS and table*/
+
+/* As a space optimization, we do not compile tables for strings of length
+   0 and 1, and for strings of length 2 unless FBMcf_TAIL.  These are
+   special-cased in fbm_instr().
+
+   If FBMcf_TAIL, the table is created as if the string has a trailing \n. */
+
 void
 fbm_compile(SV *sv, U32 flags /* not used yet */)
 {
@@ -899,24 +907,32 @@ fbm_compile(SV *sv, U32 flags /* not used yet */)
     I32 rarest = 0;
     U32 frequency = 256;
 
+    if (flags & FBMcf_TAIL)
+	sv_catpvn(sv, "\n", 1);		/* Taken into account in fbm_instr() */
     s = (U8*)SvPV_force(sv, len);
     (void)SvUPGRADE(sv, SVt_PVBM);
-    if (len > 255 || len == 0)	/* TAIL might be on on a zero-length string. */
-	return;			/* can't have offsets that big */
+    if (len == 0)		/* TAIL might be on on a zero-length string. */
+	return;
     if (len > 2) {
-	Sv_Grow(sv,len + 258);
-	table = (unsigned char*)(SvPVX(sv) + len + 1);
-	s = table - 2;
+	I32 mlen = len;
+	unsigned char *sb;
+
+	if (mlen > 255)
+	    mlen = 255;
+	Sv_Grow(sv,len + 256 + FBM_TABLE_OFFSET);
+	table = (unsigned char*)(SvPVX(sv) + len + FBM_TABLE_OFFSET);
+	s = table - 1 - FBM_TABLE_OFFSET; /* Last char */
 	for (i = 0; i < 256; i++) {
-	    table[i] = len;
+	    table[i] = mlen;
 	}
+	table[-1] = flags;		/* Not used yet */
 	i = 0;
-	while (s >= (unsigned char*)(SvPVX(sv)))
-	    {
-		if (table[*s] == len)
-		    table[*s] = i;
-		s--,i++;
-	    }
+	sb = s - mlen;
+	while (s >= sb) {
+	    if (table[*s] == mlen)
+		table[*s] = i;
+	    s--, i++;
+	}
     }
     sv_magic(sv, Nullsv, 'B', Nullch, 0);	/* deep magic */
     SvVALID_on(sv);
@@ -930,119 +946,200 @@ fbm_compile(SV *sv, U32 flags /* not used yet */)
     }
     BmRARE(sv) = s[rarest];
     BmPREVIOUS(sv) = rarest;
+    BmUSEFUL(sv) = 100;			/* Initial value */
+    if (flags & FBMcf_TAIL)
+	SvTAIL_on(sv);
     DEBUG_r(PerlIO_printf(Perl_debug_log, "rarest char %c at %d\n",BmRARE(sv),BmPREVIOUS(sv)));
 }
+
+/* If SvTAIL(littlestr), it has a fake '\n' at end. */
+/* If SvTAIL is actually due to \Z or \z, this gives false positives
+   if multiline */
 
 char *
 fbm_instr(unsigned char *big, register unsigned char *bigend, SV *littlestr, U32 flags)
 {
     register unsigned char *s;
-    register I32 tmp;
-    register I32 littlelen;
-    register unsigned char *little;
-    register unsigned char *table;
-    register unsigned char *olds;
-    register unsigned char *oldlittle;
+    STRLEN l;
+    register unsigned char *little = (unsigned char *)SvPV(littlestr,l);
+    register STRLEN littlelen = l;
+    register I32 multiline = flags & FBMrf_MULTILINE;
 
-    if (SvTYPE(littlestr) != SVt_PVBM || !SvVALID(littlestr)) {
-	STRLEN len;
-	char *l = SvPV(littlestr,len);
-	if (!len) {
-	    if (SvTAIL(littlestr)) {	/* Can be only 0-len constant
-					   substr => we can ignore SvVALID */
-		if (PL_multiline) {
-		    char *t = "\n";
-		    if ((s = (unsigned char*)ninstr((char*)big, (char*)bigend,
-			 			    t, t + len))) {
-			return (char*)s;
-		    }
-		}
-		if (bigend > big && bigend[-1] == '\n')
-		    return (char *)(bigend - 1);
-		else
-		    return (char *) bigend;
-	    }
+    if (bigend - big < littlelen) {
+      check_tail:
+	if ( SvTAIL(littlestr) 
+	     && (bigend - big == littlelen - 1)
+	     && (littlelen == 1 
+		 || *big == *little && memEQ(big, little, littlelen - 1)))
 	    return (char*)big;
-	}
-	return ninstr((char*)big,(char*)bigend, l, l + len);
+	return Nullch;
     }
 
-    littlelen = SvCUR(littlestr);
-    if (SvTAIL(littlestr) && !PL_multiline) {	/* tail anchored? */
+    if (littlelen <= 2) {		/* Special-cased */
+	register char c;
+
+	if (littlelen == 1) {
+	    if (SvTAIL(littlestr) && !multiline) { /* Anchor only! */
+		/* Know that bigend != big.  */
+		if (bigend[-1] == '\n')
+		    return (char *)(bigend - 1);
+		return (char *) bigend;
+	    }
+	    s = big;
+	    while (s < bigend) {
+		if (*s == *little)
+		    return (char *)s;
+		s++;
+	    }
+	    if (SvTAIL(littlestr))
+		return (char *) bigend;
+	    return Nullch;
+	}
+	if (!littlelen)
+	    return (char*)big;		/* Cannot be SvTAIL! */
+
+	/* littlelen is 2 */
+	if (SvTAIL(littlestr) && !multiline) {
+	    if (bigend[-1] == '\n' && bigend[-2] == *little)
+		return (char*)bigend - 2;
+	    if (bigend[-1] == *little)
+		return (char*)bigend - 1;
+	    return Nullch;
+	}
+	{
+	    /* This should be better than FBM if c1 == c2, and almost
+	       as good otherwise: maybe better since we do less indirection.
+	       And we save a lot of memory by caching no table. */
+	    register unsigned char c1 = little[0];
+	    register unsigned char c2 = little[1];
+
+	    s = big + 1;
+	    bigend--;
+	    if (c1 != c2) {
+		while (s <= bigend) {
+		    if (s[0] == c2) {
+			if (s[-1] == c1)
+			    return (char*)s - 1;
+			s += 2;
+			continue;
+		    }
+		  next_chars:
+		    if (s[0] == c1) {
+			if (s == bigend)
+			    goto check_1char_anchor;
+			if (s[1] == c2)
+			    return (char*)s;
+			else {
+			    s++;
+			    goto next_chars;
+			}
+		    }
+		    else
+			s += 2;
+		}
+		goto check_1char_anchor;
+	    }
+	    /* Now c1 == c2 */
+	    while (s <= bigend) {
+		if (s[0] == c1) {
+		    if (s[-1] == c1)
+			return (char*)s - 1;
+		    if (s == bigend)
+			goto check_1char_anchor;
+		    if (s[1] == c1)
+			return (char*)s;
+		    s += 3;
+		}
+		else
+		    s += 2;
+	    }
+	}
+      check_1char_anchor:		/* One char and anchor! */
+	if (SvTAIL(littlestr) && (*bigend == *little))
+	    return (char *)bigend;	/* bigend is already decremented. */
+	return Nullch;
+    }
+    if (SvTAIL(littlestr) && !multiline) {	/* tail anchored? */
+	s = bigend - littlelen;
+	if (s >= big
+	    && bigend[-1] == '\n' 
+	    && *s == *little 
+	    /* Automatically of length > 2 */
+	    && memEQ((char*)s + 1, (char*)little + 1, littlelen - 2))
+	    return (char*)s;		/* how sweet it is */
+	if (s[1] == *little && memEQ((char*)s + 2,(char*)little + 1,
+				     littlelen - 2))
+	    return (char*)s + 1;	/* how sweet it is */
+	return Nullch;
+    }
+    if (SvTYPE(littlestr) != SVt_PVBM || !SvVALID(littlestr)) {
+	char *b = ninstr((char*)big,(char*)bigend,
+			 (char*)little, (char*)little + littlelen);
+
+	if (!b && SvTAIL(littlestr)) {	/* Automatically multiline!  */
+	    /* Chop \n from littlestr: */
+	    s = bigend - littlelen + 1;
+	    if (*s == *little && memEQ((char*)s + 1, (char*)little + 1,
+				       littlelen - 2))
+		return (char*)s;
+	    return Nullch;
+	}
+	return b;
+    }
+    
+    {	/* Do actual FBM.  */
+	register unsigned char *table = little + littlelen + FBM_TABLE_OFFSET;
+	register unsigned char *oldlittle;
+
 	if (littlelen > bigend - big)
 	    return Nullch;
-	little = (unsigned char*)SvPVX(littlestr);
-	s = bigend - littlelen;
-	if (s > big
-	    && bigend[-1] == '\n' 
-	    && s[-1] == *little && memEQ((char*)s - 1,(char*)little,littlelen))
-	    return (char*)s - 1;	/* how sweet it is */
-	else if (*s == *little && memEQ((char*)s,(char*)little,littlelen))
-	    return (char*)s;		/* how sweet it is */
-	return Nullch;
-    }
-    if (littlelen <= 2) {
-	unsigned char c1 = (unsigned char)SvPVX(littlestr)[0];
-	unsigned char c2 = (unsigned char)SvPVX(littlestr)[1];
-	/* This may do extra comparisons if littlelen == 2, but this
-	   should be hidden in the noise since we do less indirection. */
-	
-	s = big;
-	bigend -= littlelen;
-	while (s <= bigend) {
-	    if (s[0] == c1 
-		&& (littlelen == 1 || s[1] == c2)
-		&& (!SvTAIL(littlestr)
-		    || s == bigend
-		    || s[littlelen] == '\n')) /* Automatically multiline */
-	    {
-		return (char*)s;
-	    }
-	    s++;
-	}
-	return Nullch;
-    }
-    table = (unsigned char*)(SvPVX(littlestr) + littlelen + 1);
-    if (--littlelen >= bigend - big)
-	return Nullch;
-    s = big + littlelen;
-    oldlittle = little = table - 2;
-    if (s < bigend) {
-      top2:
-	/*SUPPRESS 560*/
-	if (tmp = table[*s]) {
+	--littlelen;			/* Last char found by table lookup */
+
+	s = big + littlelen;
+	little += littlelen;		/* last char */
+	oldlittle = little;
+	if (s < bigend) {
+	    register I32 tmp;
+
+	  top2:
+	    /*SUPPRESS 560*/
+	    if (tmp = table[*s]) {
 #ifdef POINTERRIGOR
-	    if (bigend - s > tmp) {
-		s += tmp;
-		goto top2;
-	    }
-#else
-	    if ((s += tmp) < bigend)
-		goto top2;
-#endif
-	    return Nullch;
-	}
-	else {
-	    tmp = littlelen;	/* less expensive than calling strncmp() */
-	    olds = s;
-	    while (tmp--) {
-		if (*--s == *--little)
-		    continue;
-	      differ:
-		s = olds + 1;	/* here we pay the price for failure */
-		little = oldlittle;
-		if (s < bigend)	/* fake up continue to outer loop */
+		if (bigend - s > tmp) {
+		    s += tmp;
 		    goto top2;
-		return Nullch;
+		}
+		s += tmp;
+#else
+		if ((s += tmp) < bigend)
+		    goto top2;
+#endif
+		goto check_end;
 	    }
-	    if (SvTAIL(littlestr)	/* automatically multiline */
-		&& olds + 1 != bigend
-		&& olds[1] != '\n') 
-		goto differ;
-	    return (char *)s;
+	    else {		/* less expensive than calling strncmp() */
+		register unsigned char *olds = s;
+
+		tmp = littlelen;
+
+		while (tmp--) {
+		    if (*--s == *--little)
+			continue;
+		  differ:
+		    s = olds + 1;	/* here we pay the price for failure */
+		    little = oldlittle;
+		    if (s < bigend)	/* fake up continue to outer loop */
+			goto top2;
+		    goto check_end;
+		}
+		return (char *)s;
+	    }
 	}
+      check_end:
+	if ( s == bigend && (table[-1] & FBMcf_TAIL)
+	     && memEQ(bigend - littlelen, oldlittle - littlelen, littlelen) )
+	    return (char*)bigend - littlelen;
+	return Nullch;
     }
-    return Nullch;
 }
 
 /* start_shift, end_shift are positive quantities which give offsets
@@ -1051,9 +1148,14 @@ fbm_instr(unsigned char *big, register unsigned char *bigend, SV *littlestr, U32
    old_posp is the way of communication between consequent calls if
    the next call needs to find the . 
    The initial *old_posp should be -1.
-   Note that we do not take into account SvTAIL, so it may give wrong
-   positives if _ALL flag is set.
+
+   Note that we take into account SvTAIL, so one can get extra
+   optimizations if _ALL flag is set.
  */
+
+/* If SvTAIL is actually due to \Z or \z, this gives false positives
+   if PL_multiline.  In fact if !PL_multiline the autoritative answer
+   is not supported yet. */
 
 char *
 screaminstr(SV *bigstr, SV *littlestr, I32 start_shift, I32 end_shift, I32 *old_posp, I32 last)
@@ -1071,8 +1173,18 @@ screaminstr(SV *bigstr, SV *littlestr, I32 start_shift, I32 end_shift, I32 *old_
 
     if (*old_posp == -1
 	? (pos = PL_screamfirst[BmRARE(littlestr)]) < 0
-	: (((pos = *old_posp), pos += PL_screamnext[pos]) == 0))
+	: (((pos = *old_posp), pos += PL_screamnext[pos]) == 0)) {
+      cant_find:
+	if ( BmRARE(littlestr) == '\n' 
+	     && BmPREVIOUS(littlestr) == SvCUR(littlestr) - 1) {
+	    little = (unsigned char *)(SvPVX(littlestr));
+	    littleend = little + SvCUR(littlestr);
+	    first = *little++;
+	    goto check_tail;
+	}
 	return Nullch;
+    }
+
     little = (unsigned char *)(SvPVX(littlestr));
     littleend = little + SvCUR(littlestr);
     first = *little++;
@@ -1081,10 +1193,14 @@ screaminstr(SV *bigstr, SV *littlestr, I32 start_shift, I32 end_shift, I32 *old_
     big = (unsigned char *)(SvPVX(bigstr));
     /* The value of pos we can stop at: */
     stop_pos = SvCUR(bigstr) - end_shift - (SvCUR(littlestr) - 1 - previous);
-    if (previous + start_shift > stop_pos) return Nullch;
+    if (previous + start_shift > stop_pos) {
+	if (previous + start_shift == stop_pos + 1) /* A fake '\n'? */
+	    goto check_tail;
+	return Nullch;
+    }
     while (pos < previous + start_shift) {
 	if (!(pos += PL_screamnext[pos]))
-	    return Nullch;
+	    goto cant_find;
     }
 #ifdef POINTERRIGOR
     do {
@@ -1122,8 +1238,22 @@ screaminstr(SV *bigstr, SV *littlestr, I32 start_shift, I32 end_shift, I32 *old_
 	    found = 1;
 	}
     } while ( pos += PL_screamnext[pos] );
-    return (last && found) ? (char *)(big+(*old_posp)) : Nullch;
+    if (last && found) 
+	return (char *)(big+(*old_posp));
 #endif /* POINTERRIGOR */
+  check_tail:
+    if (!SvTAIL(littlestr) || (end_shift > 0))
+	return Nullch;
+    /* Ignore the trailing "\n".  This code is not microoptimized */
+    big = (unsigned char *)(SvPVX(bigstr) + SvCUR(bigstr));
+    stop_pos = littleend - little;	/* Actual littlestr len */
+    if (stop_pos == 0)
+	return (char*)big;
+    big -= stop_pos;
+    if (*big == first
+	&& ((stop_pos == 1) || memEQ(big + 1, little, stop_pos - 1)))
+	return (char*)big;
+    return Nullch;
 }
 
 I32

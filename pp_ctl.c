@@ -172,8 +172,8 @@ PP(pp_substcont)
 	if (cx->sb_once || !CALLREGEXEC(rx, s, cx->sb_strend, orig,
 				     s == m, cx->sb_targ, NULL,
 				     ((cx->sb_rflags & REXEC_COPY_STR)
-				      ? REXEC_IGNOREPOS 
-				      : (REXEC_COPY_STR|REXEC_IGNOREPOS))))
+				      ? (REXEC_IGNOREPOS|REXEC_NOT_FIRST)
+				      : (REXEC_COPY_STR|REXEC_IGNOREPOS|REXEC_NOT_FIRST))))
 	{
 	    SV *targ = cx->sb_targ;
 	    sv_catpvn(dstr, s, cx->sb_strend - s);
@@ -201,16 +201,16 @@ PP(pp_substcont)
 	    RETURNOP(pm->op_next);
 	}
     }
-    if (rx->subbase && rx->subbase != orig) {
+    if (RX_MATCH_COPIED(rx) && rx->subbeg != orig) {
 	m = s;
 	s = orig;
-	cx->sb_orig = orig = rx->subbase;
+	cx->sb_orig = orig = rx->subbeg;
 	s = orig + (m - s);
 	cx->sb_strend = s + (cx->sb_strend - m);
     }
-    cx->sb_m = m = rx->startp[0];
+    cx->sb_m = m = rx->startp[0] + orig;
     sv_catpvn(dstr, s, m-s);
-    cx->sb_s = rx->endp[0];
+    cx->sb_s = rx->endp[0] + orig;
     cx->sb_rxtainted |= RX_MATCH_TAINTED(rx);
     rxres_save(&cx->sb_rxres, rx);
     RETURNOP(pm->op_pmreplstart);
@@ -231,13 +231,13 @@ rxres_save(void **rsp, REGEXP *rx)
 	*rsp = (void*)p;
     }
 
-    *p++ = (UV)rx->subbase;
-    rx->subbase = Nullch;
+    *p++ = (UV)(RX_MATCH_COPIED(rx) ? rx->subbeg : Nullch);
+    RX_MATCH_COPIED_off(rx);
 
     *p++ = rx->nparens;
 
     *p++ = (UV)rx->subbeg;
-    *p++ = (UV)rx->subend;
+    *p++ = (UV)rx->sublen;
     for (i = 0; i <= rx->nparens; ++i) {
 	*p++ = (UV)rx->startp[i];
 	*p++ = (UV)rx->endp[i];
@@ -250,17 +250,18 @@ rxres_restore(void **rsp, REGEXP *rx)
     UV *p = (UV*)*rsp;
     U32 i;
 
-    Safefree(rx->subbase);
-    rx->subbase = (char*)(*p);
+    if (RX_MATCH_COPIED(rx))
+	Safefree(rx->subbeg);
+    RX_MATCH_COPIED_set(rx, *p);
     *p++ = 0;
 
     rx->nparens = *p++;
 
     rx->subbeg = (char*)(*p++);
-    rx->subend = (char*)(*p++);
+    rx->sublen = (I32)(*p++);
     for (i = 0; i <= rx->nparens; ++i) {
-	rx->startp[i] = (char*)(*p++);
-	rx->endp[i] = (char*)(*p++);
+	rx->startp[i] = (I32)(*p++);
+	rx->endp[i] = (I32)(*p++);
     }
 }
 

@@ -518,6 +518,10 @@
 #define PL_reg_oldcurpm		pPerl->PL_reg_oldcurpm
 #undef  PL_reg_oldpos
 #define PL_reg_oldpos		pPerl->PL_reg_oldpos
+#undef  PL_reg_oldsaved
+#define PL_reg_oldsaved		pPerl->PL_reg_oldsaved
+#undef  PL_reg_oldsavedlen
+#define PL_reg_oldsavedlen	pPerl->PL_reg_oldsavedlen
 #undef  PL_reg_re
 #define PL_reg_re		pPerl->PL_reg_re
 #undef  PL_reg_start_tmp

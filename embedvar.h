@@ -62,6 +62,8 @@
 #define PL_reg_magic		(PL_curinterp->Treg_magic)
 #define PL_reg_oldcurpm		(PL_curinterp->Treg_oldcurpm)
 #define PL_reg_oldpos		(PL_curinterp->Treg_oldpos)
+#define PL_reg_oldsaved		(PL_curinterp->Treg_oldsaved)
+#define PL_reg_oldsavedlen	(PL_curinterp->Treg_oldsavedlen)
 #define PL_reg_re		(PL_curinterp->Treg_re)
 #define PL_reg_start_tmp	(PL_curinterp->Treg_start_tmp)
 #define PL_reg_start_tmpl	(PL_curinterp->Treg_start_tmpl)
@@ -453,6 +455,8 @@
 #define PL_Treg_magic		PL_reg_magic
 #define PL_Treg_oldcurpm	PL_reg_oldcurpm
 #define PL_Treg_oldpos		PL_reg_oldpos
+#define PL_Treg_oldsaved	PL_reg_oldsaved
+#define PL_Treg_oldsavedlen	PL_reg_oldsavedlen
 #define PL_Treg_re		PL_reg_re
 #define PL_Treg_start_tmp	PL_reg_start_tmp
 #define PL_Treg_start_tmpl	PL_reg_start_tmpl
@@ -589,6 +593,8 @@
 #define PL_reg_magic		(thr->Treg_magic)
 #define PL_reg_oldcurpm		(thr->Treg_oldcurpm)
 #define PL_reg_oldpos		(thr->Treg_oldpos)
+#define PL_reg_oldsaved		(thr->Treg_oldsaved)
+#define PL_reg_oldsavedlen	(thr->Treg_oldsavedlen)
 #define PL_reg_re		(thr->Treg_re)
 #define PL_reg_start_tmp	(thr->Treg_start_tmp)
 #define PL_reg_start_tmpl	(thr->Treg_start_tmpl)

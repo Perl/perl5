@@ -4,7 +4,7 @@
 # the format supported by op/regexp.t.  If you want to add a test
 # that does fit that format, add it to op/re_tests, not here.
 
-print "1..186\n";
+print "1..188\n";
 
 BEGIN {
     chdir 't' if -d 't';
@@ -856,5 +856,19 @@ $test++;
 # see if matching against temporaries (created via pp_helem()) is safe
 { foo => "ok $test\n".$^X }->{foo} =~ /^(.*)\n/g;
 print "$1\n";
+$test++;
+
+# See if $i work inside (?{}) in the presense of saved substrings and
+# changing $_
+@a = qw(foo bar);
+@b = ();
+s/(\w)(?{push @b, $1})/,$1,/g for @a;
+
+print "# \@b='@b', expect 'f o o b a r'\nnot " unless("@b" eq "f o o b a r");
+print "ok $test\n";
+$test++;
+
+print "not " unless("@a" eq ",f,,o,,o, ,b,,a,,r,");
+print "ok $test\n";
 $test++;
 
