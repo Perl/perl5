@@ -4713,6 +4713,10 @@ elif com="$sed -n -e 's/.*\.text n\ \ \ \.//p'";\
 	eval $xscan;\
 	$contains '^fprintf$' libc.list >/dev/null 2>&1; then
 		eval $xrun
+elif com="sed -n -e 's/^__.*//' -e 's/[       ]*D[    ]*[0-9]*.*//p'";\
+	eval $xscan;\
+	$contains '^fprintf$' libc.list >/dev/null 2>&1; then
+		eval $xrun
 else
 	$nm -p $* 2>/dev/null >libc.tmp
 	$grep fprintf libc.tmp > libc.ptf
