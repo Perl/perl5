@@ -366,7 +366,7 @@ sub _quote_args {
 
 sub _create_runperl { # Create the string to qx in runperl().
     my %args = @_;
-    my $runperl = $^X;
+    my $runperl = $^X =~ m/\s/ ? qq{"$^X"} : $^X;
     unless ($args{nolib}) {
 	if ($is_macos) {
 	    $runperl .= ' -I::lib';
