@@ -3,8 +3,8 @@
  DB_File.xs -- Perl 5 interface to Berkeley DB 
 
  written by Paul Marquess <Paul.Marquess@btinternet.com>
- last modified 30th July 2001
- version 1.78
+ last modified 22nd Oct 2001
+ version 1.79
 
  All comments/suggestions/problems are welcome
 
@@ -93,6 +93,8 @@
         1.76 -  No change to DB_File.xs
         1.77 -  Tidied up a few types used in calling newSVpvn.
         1.78 -  Core patch 10335, 10372, 10534, 10549, 11051 included.
+        1.79 -  NEXTKEY ignores the input key.
+                Added lots of casts
 
 */
 
@@ -412,7 +414,7 @@ typedef DBT DBTKEY ;
 #define ckFilter(arg,type,name)					\
 	if (db->type) {						\
 	    SV * save_defsv ;					\
-            /* printf("filtering %s\n", name) ;*/		\
+            /* printf("filtering %s\n", name) ; */ 		\
 	    if (db->filtering)					\
 	        croak("recursion detected in %s", name) ;	\
 	    db->filtering = TRUE ;				\
@@ -424,7 +426,7 @@ typedef DBT DBTKEY ;
 	    sv_setsv(DEFSV, save_defsv) ;			\
 	    SvREFCNT_dec(save_defsv) ;				\
 	    db->filtering = FALSE ;				\
-	    /*printf("end of filtering %s\n", name) ;*/		\
+	    /* printf("end of filtering %s\n", name) ; */ 	\
 	}
 
 #else
@@ -454,16 +456,28 @@ typedef DBT DBTKEY ;
 	  } 								\
 	}
 
+#define my_SvUV32(sv) ((u_int32_t)SvUV(sv))
 
 #ifdef CAN_PROTOTYPE
 extern void __getBerkeleyDBInfo(void);
 #endif
 
 /* Internal Global Data */
-static recno_t Value ; 
-static recno_t zero = 0 ;
-static DB_File CurrentDB ;
-static DBTKEY empty ;
+#define MY_CXT_KEY "DB_File::_guts" XS_VERSION
+
+typedef struct {
+    recno_t	x_Value; 
+    recno_t	x_zero;
+    DB_File	x_CurrentDB;
+    DBTKEY	x_empty;
+} my_cxt_t;
+
+START_MY_CXT
+
+#define Value		(MY_CXT.x_Value)
+#define zero		(MY_CXT.x_zero)
+#define CurrentDB	(MY_CXT.x_CurrentDB)
+#define empty		(MY_CXT.x_empty)
 
 #ifdef DB_VERSION_MAJOR
 
@@ -557,7 +571,8 @@ const DBT * key2 ;
     dTHX;
 #endif    
     dSP ;
-    char * data1, * data2 ;
+    dMY_CXT ;
+    void * data1, * data2 ;
     int retval ;
     int count ;
     
@@ -628,6 +643,7 @@ const DBT * key2 ;
     dTHX;
 #endif    
     dSP ;
+    dMY_CXT ;
     char * data1, * data2 ;
     int retval ;
     int count ;
@@ -706,6 +722,7 @@ HASH_CB_SIZE_TYPE size ;
     dTHX;
 #endif    
     dSP ;
+    dMY_CXT;
     int retval ;
     int count ;
 
@@ -881,6 +898,7 @@ SV *   sv ;
     void *	openinfo = NULL ;
     INFO	* info  = &RETVAL->info ;
     STRLEN	n_a;
+    dMY_CXT;
 
 /* printf("In ParseOpenInfo name=[%s] flags=[%d] mode = [%d]\n", name, flags, mode) ;  */
     Zero(RETVAL, 1, DB_File_type) ;
@@ -1154,6 +1172,7 @@ SV *   sv ;
     DB *	dbp ;
     STRLEN	n_a;
     int		status ;
+    dMY_CXT;
 
 /* printf("In ParseOpenInfo name=[%s] flags=[%d] mode = [%d]\n", name, flags, mode) ;  */
     Zero(RETVAL, 1, DB_File_type) ;
@@ -1210,23 +1229,23 @@ SV *   sv ;
 
            svp = hv_fetch(action, "ffactor", 7, FALSE);
 	   if (svp)
-	       (void)dbp->set_h_ffactor(dbp, SvIV(*svp)) ;
+	       (void)dbp->set_h_ffactor(dbp, my_SvUV32(*svp)) ;
          
            svp = hv_fetch(action, "nelem", 5, FALSE);
 	   if (svp)
-               (void)dbp->set_h_nelem(dbp, SvIV(*svp)) ;
+               (void)dbp->set_h_nelem(dbp, my_SvUV32(*svp)) ;
          
            svp = hv_fetch(action, "bsize", 5, FALSE);
 	   if (svp)
-               (void)dbp->set_pagesize(dbp, SvIV(*svp));
+               (void)dbp->set_pagesize(dbp, my_SvUV32(*svp));
            
            svp = hv_fetch(action, "cachesize", 9, FALSE);
 	   if (svp)
-               (void)dbp->set_cachesize(dbp, 0, SvIV(*svp), 0) ;
+               (void)dbp->set_cachesize(dbp, 0, my_SvUV32(*svp), 0) ;
          
            svp = hv_fetch(action, "lorder", 6, FALSE);
 	   if (svp)
-               (void)dbp->set_lorder(dbp, SvIV(*svp)) ;
+               (void)dbp->set_lorder(dbp, (int)SvIV(*svp)) ;
 
            PrintHash(info) ; 
         }
@@ -1253,19 +1272,19 @@ SV *   sv ;
 
            svp = hv_fetch(action, "flags", 5, FALSE);
 	   if (svp)
-              (void)dbp->set_flags(dbp, (u_int32_t)SvIV(*svp)) ;
+	       (void)dbp->set_flags(dbp, my_SvUV32(*svp)) ;
    
            svp = hv_fetch(action, "cachesize", 9, FALSE);
 	   if (svp)
-               (void)dbp->set_cachesize(dbp, 0, SvIV(*svp), 0) ;
+               (void)dbp->set_cachesize(dbp, 0, my_SvUV32(*svp), 0) ;
          
            svp = hv_fetch(action, "psize", 5, FALSE);
 	   if (svp)
-               (void)dbp->set_pagesize(dbp, SvIV(*svp)) ;
+               (void)dbp->set_pagesize(dbp, my_SvUV32(*svp)) ;
          
            svp = hv_fetch(action, "lorder", 6, FALSE);
 	   if (svp)
-               (void)dbp->set_lorder(dbp, SvIV(*svp)) ;
+               (void)dbp->set_lorder(dbp, (int)SvIV(*svp)) ;
 
             PrintBtree(info) ;
          
@@ -1291,17 +1310,17 @@ SV *   sv ;
 
            svp = hv_fetch(action, "cachesize", 9, FALSE);
 	   if (svp) {
-               status = dbp->set_cachesize(dbp, 0, SvIV(*svp), 0) ;
+               status = dbp->set_cachesize(dbp, 0, my_SvUV32(*svp), 0) ;
 	   }
          
            svp = hv_fetch(action, "psize", 5, FALSE);
 	   if (svp) {
-               status = dbp->set_pagesize(dbp, SvIV(*svp)) ;
+               status = dbp->set_pagesize(dbp, my_SvUV32(*svp)) ;
 	    }
          
            svp = hv_fetch(action, "lorder", 6, FALSE);
 	   if (svp) {
-               status = dbp->set_lorder(dbp, SvIV(*svp)) ;
+               status = dbp->set_lorder(dbp, (int)SvIV(*svp)) ;
 	   }
 
 	    svp = hv_fetch(action, "bval", 4, FALSE);
@@ -1311,7 +1330,7 @@ SV *   sv ;
                 if (SvPOK(*svp))
 		    value = (int)*SvPV(*svp, n_a) ;
 		else
-		    value = SvIV(*svp) ;
+		    value = (int)SvIV(*svp) ;
 
 		if (fixed) {
 		    status = dbp->set_re_pad(dbp, value) ;
@@ -1325,7 +1344,7 @@ SV *   sv ;
 	   if (fixed) {
                svp = hv_fetch(action, "reclen", 6, FALSE);
 	       if (svp) {
-		   u_int32_t len =  (u_int32_t)SvIV(*svp) ;
+		   u_int32_t len =  my_SvUV32(*svp) ;
                    status = dbp->set_re_len(dbp, len) ;
 	       }    
 	   }
@@ -1344,10 +1363,10 @@ SV *   sv ;
 		name = NULL ;
          
 
-	    status = dbp->set_flags(dbp, DB_RENUMBER) ;
+	    status = dbp->set_flags(dbp, (u_int32_t)DB_RENUMBER) ;
          
 		if (flags){
-	            (void)dbp->set_flags(dbp, flags) ;
+	            (void)dbp->set_flags(dbp, (u_int32_t)flags) ;
 		}
             PrintRecno(info) ;
         }
@@ -1356,7 +1375,7 @@ SV *   sv ;
     }
 
     {
-        int	 	Flags = 0 ;
+        u_int32_t 	Flags = 0 ;
         int		status ;
 
         /* Map 1.x flags to 3.x flags */
@@ -1636,6 +1655,7 @@ MODULE = DB_File	PACKAGE = DB_File	PREFIX = db_
 
 BOOT:
   {
+    MY_CXT_INIT;
     __getBerkeleyDBInfo() ;
  
     DBT_clear(empty) ; 
@@ -1677,6 +1697,8 @@ db_DoTie_(isHASH, dbtype, name=undef, flags=O_CREAT|O_RDWR, mode=0666, type=DB_H
 int
 db_DESTROY(db)
 	DB_File		db
+	PREINIT:
+	  dMY_CXT;
 	INIT:
 	  CurrentDB = db ;
 	CLEANUP:
@@ -1708,6 +1730,8 @@ db_DELETE(db, key, flags=0)
 	DB_File		db
 	DBTKEY		key
 	u_int		flags
+	PREINIT:
+	  dMY_CXT;
 	INIT:
 	  CurrentDB = db ;
 
@@ -1716,6 +1740,8 @@ int
 db_EXISTS(db, key)
 	DB_File		db
 	DBTKEY		key
+	PREINIT:
+	  dMY_CXT;
 	CODE:
 	{
           DBT		value ;
@@ -1733,7 +1759,8 @@ db_FETCH(db, key, flags=0)
 	DBTKEY		key
 	u_int		flags
 	PREINIT:
-	int RETVAL;
+	dMY_CXT ;
+	int RETVAL ;
 	CODE:
 	{
             DBT		value ;
@@ -1752,6 +1779,8 @@ db_STORE(db, key, value, flags=0)
 	DBTKEY		key
 	DBT		value
 	u_int		flags
+	PREINIT:
+	  dMY_CXT;
 	INIT:
 	  CurrentDB = db ;
 
@@ -1760,7 +1789,8 @@ void
 db_FIRSTKEY(db)
 	DB_File		db
 	PREINIT:
-	int RETVAL;
+	dMY_CXT ;
+	int RETVAL ;
 	CODE:
 	{
 	    DBTKEY	key ;
@@ -1779,7 +1809,8 @@ db_NEXTKEY(db, key)
 	DB_File		db
 	DBTKEY		key = NO_INIT
 	PREINIT:
-	int RETVAL;
+	dMY_CXT ;
+	int RETVAL ;
 	CODE:
 	{
 	    DBT		value ;
@@ -1800,6 +1831,8 @@ int
 unshift(db, ...)
 	DB_File		db
 	ALIAS:		UNSHIFT = 1
+	PREINIT:
+	  dMY_CXT;
 	CODE:
 	{
 	    DBTKEY	key ;
@@ -1840,6 +1873,8 @@ unshift(db, ...)
 void
 pop(db)
 	DB_File		db
+	PREINIT:
+	  dMY_CXT;
 	ALIAS:		POP = 1
 	PREINIT:
 	I32 RETVAL;
@@ -1869,6 +1904,8 @@ pop(db)
 void
 shift(db)
 	DB_File		db
+	PREINIT:
+	  dMY_CXT;
 	ALIAS:		SHIFT = 1
 	PREINIT:
 	I32 RETVAL;
@@ -1898,6 +1935,8 @@ shift(db)
 I32
 push(db, ...)
 	DB_File		db
+	PREINIT:
+	  dMY_CXT;
 	ALIAS:		PUSH = 1
 	CODE:
 	{
@@ -1940,6 +1979,8 @@ push(db, ...)
 I32
 length(db)
 	DB_File		db
+	PREINIT:
+	  dMY_CXT;
 	ALIAS:		FETCHSIZE = 1
 	CODE:
 	    CurrentDB = db ;
@@ -1957,6 +1998,8 @@ db_del(db, key, flags=0)
 	DB_File		db
 	DBTKEY		key
 	u_int		flags
+	PREINIT:
+	  dMY_CXT;
 	CODE:
 	  CurrentDB = db ;
 	  RETVAL = db_del(db, key, flags) ;
@@ -1976,6 +2019,8 @@ db_get(db, key, value, flags=0)
 	DBTKEY		key
 	DBT		value = NO_INIT
 	u_int		flags
+	PREINIT:
+	  dMY_CXT;
 	CODE:
 	  CurrentDB = db ;
 	  DBT_clear(value) ; 
@@ -1996,6 +2041,8 @@ db_put(db, key, value, flags=0)
 	DBTKEY		key
 	DBT		value
 	u_int		flags
+	PREINIT:
+	  dMY_CXT;
 	CODE:
 	  CurrentDB = db ;
 	  RETVAL = db_put(db, key, value, flags) ;
@@ -2012,6 +2059,8 @@ db_put(db, key, value, flags=0)
 int
 db_fd(db)
 	DB_File		db
+	PREINIT:
+	dMY_CXT ;
 	CODE:
 	  CurrentDB = db ;
 #ifdef DB_VERSION_MAJOR
@@ -2036,6 +2085,8 @@ int
 db_sync(db, flags=0)
 	DB_File		db
 	u_int		flags
+	PREINIT:
+	  dMY_CXT;
 	CODE:
 	  CurrentDB = db ;
 	  RETVAL = db_sync(db, flags) ;
@@ -2053,6 +2104,8 @@ db_seq(db, key, value, flags)
 	DBTKEY		key 
 	DBT		value = NO_INIT
 	u_int		flags
+	PREINIT:
+	  dMY_CXT;
 	CODE:
 	  CurrentDB = db ;
 	  DBT_clear(value) ; 

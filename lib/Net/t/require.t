@@ -1,3 +1,11 @@
+#!./perl -w
+
+BEGIN {
+    unless (-d 'blib') {
+	chdir 't' if -d 't';
+	@INC = '../lib';
+    }
+}
 
 print "1..9\n";
 my $i = 1;

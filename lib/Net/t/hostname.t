@@ -1,8 +1,10 @@
 #!./perl -w
 
 BEGIN {
-    chdir 't' if -d 't';
-    @INC = '../lib';
+    unless (-d 'blib') {
+	chdir 't' if -d 't';
+	@INC = '../lib';
+    }
 }
 
 use Net::Domain qw(hostname domainname hostdomain);

@@ -7,15 +7,18 @@ use Scalar::Util qw(weaken);
 use attributes qw(reftype);
 
 BEGIN {
-    if($Config{'useithreads'} && $Config::threads) {
+    if($Config{'useithreads'} && $threads::threads) {
 	*share = \&share_enabled;
+	*cond_wait = \&cond_wait_enabled;
+	*cond_signal = \&cond_signal_enabled;
+	*cond_broadcast = \&cond_broadcast_enabled;
+	*unlock = \&unlock_enabled;
+    } else {
+	*share = \&share_disabled;
 	*cond_wait = \&cond_wait_disabled;
 	*cond_signal = \&cond_signal_disabled;
-	*cond_broadcast = \&cond_broadcast_disabled;
+	*cond_broadcast = \&cond_broadcast_dosabled;
 	*unlock = \&unlock_disabled;
-	*lock = \&lock_disabled;
-    } else {
-	*share = \&share_enabled;
     }
 }
 
@@ -23,7 +26,7 @@ require Exporter;
 require DynaLoader;
 our @ISA = qw(Exporter DynaLoader);
 
-our @EXPORT = qw(share cond_wait cond_broadcast cond_signal unlock lock);
+our @EXPORT = qw(share cond_wait cond_broadcast cond_signal unlock);
 our $VERSION = '0.01';
 
 our %shared;
@@ -39,10 +42,14 @@ sub share_enabled (\[$@%]) { # \]
     my $value = $_[0];
     my $ref = reftype($value);
     if($ref eq 'SCALAR') {
-      my $obj = \threads::shared::sv->new($$value);
-      bless $obj, 'threads::shared::sv';
-      $shared{$$obj} = $value;
-      weaken($shared{$$obj});
+	my $obj = \threads::shared::sv->new($$value);
+	bless $obj, 'threads::shared::sv';
+	$shared{$$obj} = $value;
+	weaken($shared{$$obj});
+    } elsif($ref eq "ARRAY") {
+	tie @$value, 'threads::shared::av', $value;
+    } elsif($ref eq "HASH") {
+	tie %$value, "threads::shared::hv", $value;
     } else {
 	die "You cannot share ref of type $_[0]\n";
     }
@@ -57,15 +64,42 @@ sub CLONE {
 	}
 }
 
+sub DESTROY {
+    my $self = shift;
+    _thrcnt_dec($$self);
+    delete($shared{$$self});
+}
+
 package threads::shared::sv;
 use base 'threads::shared';
 
+sub DESTROY {}
+
 package threads::shared::av;
 use base 'threads::shared';
+use Scalar::Util qw(weaken);
+sub TIEARRAY {
+	my $class = shift;
+        my $value = shift;
+	my $self = bless \threads::shared::av->new($value),'threads::shared::av';
+	$shared{$self->ptr} = $value;
+	weaken($shared{$self->ptr});
+	return $self;
+}
 
 package threads::shared::hv;
 use base 'threads::shared';
+use Scalar::Util qw(weaken);
+sub TIEHASH {
+    my $class = shift;
+    my $value = shift;
+    my $self = bless \threads::shared::hv->new($value),'threads::shared::hv';
+    $shared{$self->ptr} = $value;
+    weaken($shared{$self->ptr});
+    return $self;
+}
 
+package threads::shared;
 bootstrap threads::shared $VERSION;
 
 __END__
@@ -79,9 +113,9 @@ threads::shared - Perl extension for sharing data structures between threads
   use threads::shared;
 
   my($foo, @foo, %foo);
-  share(\$foo);
-  share(\@foo);
-  share(\%hash);
+  share($foo);
+  share(@foo);
+  share(%hash);
   my $bar = share([]);
   $hash{bar} = share({});
 
@@ -104,15 +138,13 @@ share(), lock(), unlock(), cond_wait, cond_signal, cond_broadcast
 =head1 BUGS
 
 Not stress tested!
-Does not support references
 Does not support splice on arrays!
-The exported functions need a reference due to unsufficent prototyping!
 
 =head1 AUTHOR
 
-Artur Bergman E<lt>artur at contiller.seE<gt>
+Arthur Bergman E<lt>arthur at contiller.seE<gt>
 
-threads is released under the same license as Perl
+threads::shared is released under the same license as Perl
 
 =head1 SEE ALSO
 

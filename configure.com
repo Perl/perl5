@@ -4917,21 +4917,21 @@ $ myuname="''osname' ''myname' ''osvers' ''F$EDIT(hwname, "TRIM")'"
 $!
 $ IF ccname .EQS. "DEC"
 $ THEN
-$   ccflags="/Include=[]/Standard=Relaxed_ANSI/Prefix=All/Obj=''obj_ext'/NoList''ccflags'"
+$   ccflags="/Include=[]/Standard=Relaxed_ANSI/Prefix=All/Obj=''obj_ext' ''ccflags'"
 $ ENDIF
 $ i_dirent = "undef"
 $ IF ccname .EQS. "CXX"
 $ THEN
 $   i_dirent = "define"
-$   ccflags="/Include=[]/Standard=ANSI/Prefix=All/Obj=''obj_ext'/NoList''ccflags'"
+$   ccflags="/Include=[]/Standard=ANSI/Prefix=All/Obj=''obj_ext' ''ccflags'"
 $ ENDIF
 $ IF use_vmsdebug_perl
 $ THEN
-$   optimize="/Debug/NoOpt"
+$   optimize="/List/Debug/NoOpt"
 $   ldflags="/Debug/Trace/Map"
 $   dbgprefix = "DBG"
 $ ELSE
-$   optimize= ""
+$   optimize= "/NoList"
 $   ldflags="/NoTrace/NoMap"
 $   dbgprefix = ""
 $ ENDIF
@@ -4990,7 +4990,13 @@ $ WC "cpplast='" + cpplast + "'"
 $ WC "cppminus='" + cppminus + "'"
 $ WC "cpprun='" + cpprun + "'"
 $ WC "cppstdin='" + cppstdin + "'"
-$ WC "d_Gconvert='my_gconvert(x,n,t,b)'"
+$ IF use64bitint .OR. use64bitint .EQS. "define"
+$ THEN
+$!  gcvt() does not work for > 16 decimal places; fallback to sprintf
+$   WC "d_Gconvert='sprintf((b),""%.*" + (nvgformat-"""") + ",(n),(x))'"
+$ ELSE
+$   WC "d_Gconvert='my_gconvert(x,n,t,b)'"
+$ ENDIF
 $ WC "d_PRIEldbl='" + d_PRIEUldbl + "'"
 $ WC "d_PRIFldbl='" + d_PRIFUldbl + "'"
 $ WC "d_PRIGldbl='" + d_PRIGUldbl + "'"

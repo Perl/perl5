@@ -379,9 +379,15 @@ usleep(useconds)
 	if (items > 0) {
 	    if (useconds > 1E6) {
 		IV seconds = (IV) (useconds / 1E6);
-		sleep(seconds);
-		useconds -= 1E6 * seconds;
-	    }
+		/* If usleep() has been implemented using setitimer()
+		 * then this contortion is unnecessary-- but usleep()
+		 * may be implemented in some other way, so let's contort. */
+		if (seconds) {
+		    sleep(seconds);
+		    useconds -= 1E6 * seconds;
+		}
+	    } else if (useconds < 0.0)
+	        croak("Time::HiRes::usleep(%"NVgf"): negative time not invented yet", useconds);
 	    usleep((UV)useconds);
 	} else
 	    PerlProc_pause();
@@ -402,9 +408,12 @@ sleep(...)
 	gettimeofday(&Ta, NULL);
 	if (items > 0) {
 	    NV seconds  = SvNV(ST(0));
-	    IV useconds = 1E6 * (seconds - (IV)seconds);
-	    sleep(seconds);
-	    usleep(useconds);
+	    if (seconds >= 0.0) {
+  	         UV useconds = 1E6 * (seconds - (UV)seconds);
+		 sleep((UV)seconds);
+		 usleep(useconds);
+	    } else
+	        croak("Time::HiRes::sleep(%"NVgf"): negative time not invented yet", seconds);
 	} else
 	    PerlProc_pause();
 	gettimeofday(&Tb, NULL);
@@ -424,17 +433,23 @@ int
 ualarm(useconds,interval=0)
 	int useconds
 	int interval
-
-int
-alarm(fseconds,finterval=0)
-	NV fseconds
-	NV finterval
-	PREINIT:
-	int useconds, uinterval;
 	CODE:
-	useconds = fseconds * 1000000;
-	uinterval = finterval * 1000000;
-	RETVAL = ualarm (useconds, uinterval);
+	if (useconds < 0 || interval < 0)
+	    croak("Time::HiRes::ualarm(%d, %d): negative time not invented yet", useconds, interval);
+	RETVAL = ualarm(useconds, interval);
+
+	OUTPUT:
+	RETVAL
+
+NV
+alarm(seconds,interval=0)
+	NV seconds
+	NV interval
+	CODE:
+	if (seconds < 0.0 || interval < 0.0)
+	    croak("Time::HiRes::alarm(%"NVgf", %"NVgf"): negative time not invented yet", seconds, interval);
+	RETVAL = (NV)ualarm(seconds  * 1000000,
+			    interval * 1000000) / 1E6;
 
 	OUTPUT:
 	RETVAL
@@ -520,6 +535,8 @@ setitimer(which, seconds, interval = 0)
 	struct itimerval newit;
 	struct itimerval oldit;
     PPCODE:
+	if (seconds < 0.0 || interval < 0.0)
+	    croak("Time::HiRes::setitimer(%"IVdf", %"NVgf", %"NVgf"): negative time not invented yet", which, seconds, interval);
 	newit.it_value.tv_sec  = seconds;
 	newit.it_value.tv_usec =
 	  (seconds  - (NV)newit.it_value.tv_sec)    * 1000000.0;

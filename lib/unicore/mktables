@@ -748,7 +748,7 @@ if (open(my $SpecCase, "SpecCase.txt")) {
 # Prepend them to the To/{Upper,Lower,Title}.pl.
 
 for my $case (qw(Lower Title Upper)) {
-    my $NormalCase = do "To/$case.pl";
+    my $NormalCase = do "To/$case.pl" || die "$0: To/$case.pl: $!\n";
     if (open(my $Case, ">To/$case.pl")) {
 	header($Case);
 	print $Case <<EOT;
@@ -759,7 +759,7 @@ EOT
 	    my ($ix, $code, $to) = @$prop;
 	    my $tostr =
 		join "", map { sprintf "\\x{%s}", $_ } split ' ', $to;
-	    print $Case qq['$ix' => "$tostr",\n];
+	    printf $Case qq['%04X' => "$tostr",\n], $ix;
 	}
 	print $Case <<EOT;
 );
@@ -771,6 +771,60 @@ EOT
     } else {
 	die "$0: To/$case.txt: $!\n";
     }
+}
+
+#
+# Read in the case foldings.
+#
+# We will do full case folding, C + F + I (see CaseFold.txt).
+#
+
+if (open(my $CaseFold, "CaseFold.txt")) {
+    my @Fold;
+    my %Fold;
+
+    while (<$CaseFold>) {
+	next unless /^([0-9A-Fa-f]+)\s*;\s*([CFI])\s*;\s*([0-9A-Fa-f]+(?: [0-9A-Fa-f]+)*)\s*;/;
+
+	my ($code, $status, $fold) = ($1, $2, $3);
+
+	if ($status eq 'C') { # Common: one-to-one folding
+	    append(\@Fold, $code, $fold);
+	} else { # F: full, or I: dotted uppercase I -> dotless lowercase I
+	    $Fold{hex($code)} = $fold;
+	}
+    }
+
+    flush(\@Fold, "To/Fold.pl");
+
+    #
+    # Prepend the special foldings to the common foldings.
+    #
+
+    my $CommonFold = do "To/Fold.pl" || die "$0: To/Fold.pl: $!\n";
+    if (open(my $Fold, ">To/Fold.pl")) {
+	header($Fold);
+	print $Fold <<EOT;
+
+%utf8::ToSpecFold = (
+EOT
+        for my $code (sort { $a <=> $b } keys %Fold) {
+	    my $foldstr =
+		join "", map { sprintf "\\x{%s}", $_ } split ' ', $Fold{$code};
+	    printf $Fold qq['%04X' => "$foldstr",\n], $code;
+	}
+	print $Fold <<EOT;
+);
+
+EOT
+	begin($Fold);
+	print $Fold $CommonFold;
+	end($Fold);
+    } else {
+	die "$0: To/Fold.pl: $!\n";
+    }
+} else {
+    die "$0: CaseFold.txt: $!\n";
 }
 
 # That's all, folks!

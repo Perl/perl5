@@ -69,7 +69,7 @@ threads->create('test3',1)->join();
 
 
 #check Config
-ok(5, 1 == $Config::threads,"Check that Config::threads is true");
+ok(5, 1 == $threads::threads,"Check that threads::threads is true");
 
 #test trying to detach thread
 

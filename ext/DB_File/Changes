@@ -366,3 +366,11 @@
 
    * added documentation patch regarding duplicate keys from Andrew Johnson
 
+1.79 22nd October 2001
+
+   * Added a "local $SIG{__DIE__}" inside the eval that checks for the presence
+     of XSLoader s suggested by Andrew Hryckowin.
+
+   * merged core patch 12277.
+
+   * Changed NEXTKEY to not initialise the input key. It isn't used anyway.

@@ -1360,6 +1360,10 @@ typedef NVTYPE NV;
 #   endif
 #endif
 
+#ifdef UNDER_CE
+int isnan(double d);
+#endif
+
 #ifndef Perl_isinf
 #   ifdef HAS_ISINF
 #       define Perl_isinf(x) isinf((NV)x)
@@ -1740,7 +1744,7 @@ typedef struct clone_params CLONE_PARAMS;
 #   endif
 #endif
 
-#if defined(OS2)
+#if defined(OS2) || defined(MACOS_TRADITIONAL)
 #  include "iperlsys.h"
 #endif
 
@@ -2095,7 +2099,7 @@ typedef I32 (*filter_t) (pTHX_ int, SV *, int);
 #define FILTER_DATA(idx)	   (AvARRAY(PL_rsfp_filters)[idx])
 #define FILTER_ISREADER(idx)	   (idx >= AvFILLp(PL_rsfp_filters))
 
-#if !defined(OS2)
+#if !defined(OS2) && !defined(MACOS_TRADITIONAL)
 #  include "iperlsys.h"
 #endif
 #include "regexp.h"
@@ -3775,6 +3779,83 @@ typedef struct am_table_short AMTS;
 #       endif
 #   endif
 #endif
+
+/*
+ * Boilerplate macros for initializing and accessing interpreter-local
+ * data from C.  All statics in extensions should be reworked to use
+ * this, if you want to make the extension thread-safe.  See ext/re/re.xs
+ * for an example of the use of these macros.
+ *
+ * Code that uses these macros is responsible for the following:
+ * 1. #define MY_CXT_KEY to a unique string, e.g. "DynaLoader_guts"
+ * 2. Declare a typedef named my_cxt_t that is a structure that contains
+ *    all the data that needs to be interpreter-local.
+ * 3. Use the START_MY_CXT macro after the declaration of my_cxt_t.
+ * 4. Use the MY_CXT_INIT macro such that it is called exactly once
+ *    (typically put in the BOOT: section).
+ * 5. Use the members of the my_cxt_t structure everywhere as
+ *    MY_CXT.member.
+ * 6. Use the dMY_CXT macro (a declaration) in all the functions that
+ *    access MY_CXT.
+ */
+
+#if defined(PERL_IMPLICIT_CONTEXT)
+
+/* This must appear in all extensions that define a my_cxt_t structure,
+ * right after the definition (i.e. at file scope).  The non-threads
+ * case below uses it to declare the data as static. */
+#define START_MY_CXT
+
+/* Fetches the SV that keeps the per-interpreter data. */
+#define dMY_CXT_SV \
+	SV *my_cxt_sv = *hv_fetch(PL_modglobal, MY_CXT_KEY,		\
+				  sizeof(MY_CXT_KEY)-1, TRUE)
+
+/* This declaration should be used within all functions that use the
+ * interpreter-local data. */
+#define dMY_CXT	\
+	dMY_CXT_SV;							\
+	my_cxt_t *my_cxtp = (my_cxt_t*)SvUV(my_cxt_sv)
+
+/* Creates and zeroes the per-interpreter data.
+ * (We allocate my_cxtp in a Perl SV so that it will be released when
+ * the interpreter goes away.) */
+#define MY_CXT_INIT \
+	dMY_CXT_SV;							\
+	/* newSV() allocates one more than needed */			\
+	my_cxt_t *my_cxtp = (my_cxt_t*)SvPVX(newSV(sizeof(my_cxt_t)-1));\
+	Zero(my_cxtp, 1, my_cxt_t);					\
+	sv_setuv(my_cxt_sv, (UV)my_cxtp)
+
+/* This macro must be used to access members of the my_cxt_t structure.
+ * e.g. MYCXT.some_data */
+#define MY_CXT		(*my_cxtp)
+
+/* Judicious use of these macros can reduce the number of times dMY_CXT
+ * is used.  Use is similar to pTHX, aTHX etc. */
+#define pMY_CXT		my_cxt_t *my_cxtp
+#define pMY_CXT_	pMY_CXT,
+#define _pMY_CXT	,pMY_CXT
+#define aMY_CXT		my_cxtp
+#define aMY_CXT_	aMY_CXT,
+#define _aMY_CXT	,aMY_CXT
+
+#else /* USE_ITHREADS */
+
+#define START_MY_CXT	static my_cxt_t my_cxt;
+#define dMY_CXT_SV	dNOOP
+#define dMY_CXT		dNOOP
+#define MY_CXT_INIT	NOOP
+#define MY_CXT		my_cxt
+
+#define pMY_CXT		void
+#define pMY_CXT_
+#define _pMY_CXT
+#define aMY_CXT
+#define aMY_CXT_
+#define _aMY_CXT
+
+#endif /* !defined(USE_ITHREADS) */
 
 #ifdef I_FCNTL
 #  include <fcntl.h>

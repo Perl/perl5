@@ -70,9 +70,17 @@ static char *opclassnames[] = {
     "B::COP"	
 };
 
-static int walkoptree_debug = 0;	/* Flag for walkoptree debug hook */
+#define MY_CXT_KEY "B::_guts" XS_VERSION
 
-static SV *specialsv_list[6];
+typedef struct {
+    int		x_walkoptree_debug;	/* Flag for walkoptree debug hook */
+    SV *	x_specialsv_list[6];
+} my_cxt_t;
+
+START_MY_CXT
+
+#define walkoptree_debug	(MY_CXT.x_walkoptree_debug)
+#define specialsv_list		(MY_CXT.x_specialsv_list)
 
 static opclass
 cc_opclass(pTHX_ OP *o)
@@ -192,6 +200,7 @@ make_sv_object(pTHX_ SV *arg, SV *sv)
 {
     char *type = 0;
     IV iv;
+    dMY_CXT;
     
     for (iv = 0; iv < sizeof(specialsv_list)/sizeof(SV*); iv++) {
 	if (sv == specialsv_list[iv]) {
@@ -312,7 +321,8 @@ walkoptree(pTHX_ SV *opsv, char *method)
 {
     dSP;
     OP *o;
-    
+    dMY_CXT;
+
     if (!SvROK(opsv))
 	croak("opsv is not a reference");
     opsv = sv_mortalcopy(opsv);
@@ -373,6 +383,7 @@ BOOT:
 {
     HV *stash = gv_stashpvn("B", 1, TRUE);
     AV *export_ok = perl_get_av("B::EXPORT_OK",TRUE);
+    MY_CXT_INIT;
     specialsv_list[0] = Nullsv;
     specialsv_list[1] = &PL_sv_undef;
     specialsv_list[2] = &PL_sv_yes;
@@ -440,6 +451,7 @@ walkoptree(opsv, method)
 int
 walkoptree_debug(...)
     CODE:
+	dMY_CXT;
 	RETVAL = walkoptree_debug;
 	if (items > 0 && SvTRUE(ST(1)))
 	    walkoptree_debug = 1;

@@ -84,8 +84,12 @@ SKIP: {
 	# set this file to read-only
 	chmod 0444, 'eplist';
 
-	eval { ExtUtils::Packlist::write({}, 'eplist') };
-	like( $@, qr/Can't open file/, 'write() should croak on open failure' );
+	SKIP: {
+	    skip("can write readonly files", 1) if -w 'eplist';
+
+	    eval { ExtUtils::Packlist::write({}, 'eplist') };
+	    like( $@, qr/Can't open file/, 'write() should croak on open failure' );
+	}
 
 	#'now set it back (tick here fixes vim syntax highlighting ;)
 	chmod 0777, 'eplist';

@@ -1,4 +1,4 @@
-## $Id: //depot/libnet/Net/FTP/I.pm#11 $
+## $Id: //depot/libnet/Net/FTP/I.pm#12 $
 ## Package to read/write on BINARY data connections
 ##
 
@@ -10,7 +10,7 @@ use Carp;
 require Net::FTP::dataconn;
 
 @ISA = qw(Net::FTP::dataconn);
-$VERSION = "1.10"; 
+$VERSION = "1.11"; 
 
 sub read {
   my    $data 	 = shift;
@@ -26,7 +26,7 @@ sub read {
   $blksize = $size if $size > $blksize;
 
   while(($l = length(${*$data})) < $size) {
-   $n += ($b = sysread($data, ${*$data}, $blksize, $l));
+   $n += ($b = sysread($data, ${*$data}, $blksize, $l)) || 0;
    last unless $b;
   }
 

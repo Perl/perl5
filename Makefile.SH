@@ -230,6 +230,21 @@ INSTALLPREFIXEXP = $prefix
 # $installusrbinperl
 # $versiononly
 
+case "${osname}:${osvers}" in
+darwin:*)
+$spitshell >>Makefile <<EOF
+
+# Your locales are broken (osname $osname, osvers $osvers)
+# and to avoid the numerous
+# perl: warning: Setting locale failed.
+# warnings during the build process we reset the locale variables.
+
+LC_ALL=C
+LANG=C
+LANGUAGE=C
+EOF
+	;;
+esac
 
 ## In the following dollars and backticks do not need the extra backslash.
 $spitshell >>Makefile <<'!NO!SUBS!'

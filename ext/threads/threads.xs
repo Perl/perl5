@@ -23,7 +23,6 @@ void* Perl_thread_run(void * arg) {
 
 	SHAREDSvLOCK(threads);
 	SHAREDSvEDIT(threads);
-	PERL_THREAD_ALLOC_SPECIFIC(self_key);
 	PERL_THREAD_SETSPECIFIC(self_key,INT2PTR(void*,thread->tid));
 	thread_tid_ptr = Perl_newSVuv(PL_sharedsv_space, thread->tid);	
 	thread_ptr = Perl_newSVuv(PL_sharedsv_space, PTR2UV(thread));
@@ -279,6 +278,7 @@ void Perl_thread_destruct (ithread* thread) {
 MODULE = threads		PACKAGE = threads		
 BOOT:
 	Perl_sharedsv_init(aTHX);
+	PERL_THREAD_ALLOC_SPECIFIC(self_key);
 	PL_perl_destruct_level = 2;
 	threads = Perl_sharedsv_new(aTHX);
 	SHAREDSvEDIT(threads);
@@ -330,6 +330,24 @@ create (class, function_to_call, ...)
 			RETVAL = Perl_thread_create(class, function_to_call, newRV_noinc((SV*) params));
 			OUTPUT:
 			RETVAL
+
+SV *
+new (class, function_to_call, ...)
+        char *  class
+        SV *    function_to_call
+		CODE:
+			AV* params = newAV();
+			if(items > 2) {
+				int i;
+				for(i = 2; i < items ; i++) {
+					av_push(params, ST(i));
+				}
+			}
+			RETVAL = Perl_thread_create(class, function_to_call, newRV_noinc((SV*) params));
+			OUTPUT:
+			RETVAL
+
+
 
 SV *
 self (class)

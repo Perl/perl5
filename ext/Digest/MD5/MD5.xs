@@ -7,7 +7,7 @@
  *  Copyright 1991-1992 RSA Data Security, Inc.
  *
  * This code is derived from Neil Winton's MD5-1.7 Perl module, which in
- * turn is derived from the reference implementation in RFC 1231 which
+ * turn is derived from the reference implementation in RFC 1321 which
  * comes with this message:
  *
  * Copyright (C) 1991-2, RSA Data Security, Inc. Created 1991. All

@@ -1,4 +1,4 @@
-# Net::Cmd.pm $Id: //depot/libnet/Net/Cmd.pm#25 $
+# Net::Cmd.pm $Id: //depot/libnet/Net/Cmd.pm#26 $
 #
 # Copyright (c) 1995-1997 Graham Barr <gbarr@pobox.com>. All rights reserved.
 # This program is free software; you can redistribute it and/or
@@ -20,7 +20,7 @@ BEGIN {
   }
 }
 
-$VERSION = "2.19";
+$VERSION = "2.20";
 @ISA     = qw(Exporter);
 @EXPORT  = qw(CMD_INFO CMD_OK CMD_MORE CMD_REJECT CMD_ERROR CMD_PENDING);
 
@@ -403,7 +403,9 @@ sub datasend
    print STDERR $b,join("\n$b",split(/\n/,$line)),"\n";
   }
 
- $line =~ s/\n/\015\012/sgo;
+ # Translate LF => CRLF, but not if the LF is
+ # already preceeded by a CR
+ $line =~ s/\G()\n|([^\r\n])\n/$+\015\012/sgo;
 
  ${*$cmd}{'net_cmd_lastch'} ||= " ";
  $line = ${*$cmd}{'net_cmd_lastch'} . $line;
@@ -639,6 +641,6 @@ it under the same terms as Perl itself.
 
 =for html <hr>
 
-I<$Id: //depot/libnet/Net/Cmd.pm#25 $>
+I<$Id: //depot/libnet/Net/Cmd.pm#26 $>
 
 =cut

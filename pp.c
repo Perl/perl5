@@ -1074,9 +1074,13 @@ PP(pp_divide)
 #else
                 /* Otherwise we only attempt it if either or both operands
                    would not be preserved by an NV.  If both fit in NVs
-                   we fall through to the NV divide code below.  */
-                && ((left > ((UV)1 << NV_PRESERVES_UV_BITS))
-                    || (right > ((UV)1 << NV_PRESERVES_UV_BITS)))
+                   we fall through to the NV divide code below.  However,
+                   as left >= right to ensure integer result here, we know that
+                   we can skip the test on the right operand - right big
+                   enough not to be preserved can't get here unless left is
+                   also too big.  */
+
+                && (left > ((UV)1 << NV_PRESERVES_UV_BITS))
 #endif
                 ) {
                 /* Integer division can't overflow, but it can be imprecise.  */
@@ -1494,11 +1498,6 @@ PP(pp_lt)
 		    RETURN;
 		}
 		auv = SvUVX(TOPs);
-		if (auv >= (UV) IV_MAX) {
-		    /* As (b) is an IV, it cannot be > IV_MAX */
-		    SETs(&PL_sv_no);
-		    RETURN;
-		}
 		SETs(boolSV(auv < (UV)biv));
 		RETURN;
 	    }
@@ -1515,11 +1514,6 @@ PP(pp_lt)
 		}
 		buv = SvUVX(TOPs);
 		SP--;
-		if (buv > (UV) IV_MAX) {
-		    /* As (a) is an IV, it cannot be > IV_MAX */
-		    SETs(&PL_sv_yes);
-		    RETURN;
-		}
 		SETs(boolSV((UV)aiv < buv));
 		RETURN;
 	    }
@@ -1572,11 +1566,6 @@ PP(pp_gt)
 		    RETURN;
 		}
 		auv = SvUVX(TOPs);
-		if (auv > (UV) IV_MAX) {
-		    /* As (b) is an IV, it cannot be > IV_MAX */
-		    SETs(&PL_sv_yes);
-		    RETURN;
-		}
 		SETs(boolSV(auv > (UV)biv));
 		RETURN;
 	    }
@@ -1593,11 +1582,6 @@ PP(pp_gt)
 		}
 		buv = SvUVX(TOPs);
 		SP--;
-		if (buv >= (UV) IV_MAX) {
-		    /* As (a) is an IV, it cannot be > IV_MAX */
-		    SETs(&PL_sv_no);
-		    RETURN;
-		}
 		SETs(boolSV((UV)aiv > buv));
 		RETURN;
 	    }
@@ -1650,11 +1634,6 @@ PP(pp_le)
 		    RETURN;
 		}
 		auv = SvUVX(TOPs);
-		if (auv > (UV) IV_MAX) {
-		    /* As (b) is an IV, it cannot be > IV_MAX */
-		    SETs(&PL_sv_no);
-		    RETURN;
-		}
 		SETs(boolSV(auv <= (UV)biv));
 		RETURN;
 	    }
@@ -1671,11 +1650,6 @@ PP(pp_le)
 		}
 		buv = SvUVX(TOPs);
 		SP--;
-		if (buv >= (UV) IV_MAX) {
-		    /* As (a) is an IV, it cannot be > IV_MAX */
-		    SETs(&PL_sv_yes);
-		    RETURN;
-		}
 		SETs(boolSV((UV)aiv <= buv));
 		RETURN;
 	    }
@@ -1728,11 +1702,6 @@ PP(pp_ge)
 		    RETURN;
 		}
 		auv = SvUVX(TOPs);
-		if (auv >= (UV) IV_MAX) {
-		    /* As (b) is an IV, it cannot be > IV_MAX */
-		    SETs(&PL_sv_yes);
-		    RETURN;
-		}
 		SETs(boolSV(auv >= (UV)biv));
 		RETURN;
 	    }
@@ -1749,11 +1718,6 @@ PP(pp_ge)
 		}
 		buv = SvUVX(TOPs);
 		SP--;
-		if (buv > (UV) IV_MAX) {
-		    /* As (a) is an IV, it cannot be > IV_MAX */
-		    SETs(&PL_sv_no);
-		    RETURN;
-		}
 		SETs(boolSV((UV)aiv >= buv));
 		RETURN;
 	    }
@@ -1825,11 +1789,6 @@ PP(pp_ne)
 		    }
 		    uv = SvUVX(*(SP+1)); /* Do I want TOPp1s() ? */
 		}
-		/* we know iv is >= 0 */
-		if (uv > (UV) IV_MAX) {
-		    SETs(&PL_sv_yes);
-		    RETURN;
-		}
 		SETs(boolSV((UV)iv != uv));
 		RETURN;
 	    }
@@ -1891,10 +1850,7 @@ PP(pp_ncmp)
 		    value = 1;
 		} else {
 		    leftuv = SvUVX(TOPm1s);
-		    if (leftuv > (UV) IV_MAX) {
-			/* As (b) is an IV, it cannot be > IV_MAX */
-			value = 1;
-		    } else if (leftuv > (UV)rightiv) {
+		    if (leftuv > (UV)rightiv) {
 			value = 1;
 		    } else if (leftuv < (UV)rightiv) {
 			value = -1;
@@ -1912,12 +1868,9 @@ PP(pp_ncmp)
 		    value = -1;
 		} else {
 		    rightuv = SvUVX(TOPs);
-		    if (rightuv > (UV) IV_MAX) {
-			/* As (a) is an IV, it cannot be > IV_MAX */
-			value = -1;
-		    } else if (leftiv > (UV)rightuv) {
+		    if ((UV)leftiv > rightuv) {
 			value = 1;
-		    } else if (leftiv < (UV)rightuv) {
+		    } else if ((UV)leftiv < rightuv) {
 			value = -1;
 		    } else {
 			value = 0;
@@ -2157,15 +2110,22 @@ PP(pp_negate)
 		sv_setsv(TARG, sv);
 		*SvPV_force(TARG, len) = *s == '-' ? '+' : '-';
 	    }
-	    else if (DO_UTF8(sv) && UTF8_IS_START(*s) && isIDFIRST_utf8((U8*)s)) {
-		sv_setpvn(TARG, "-", 1);
-		sv_catsv(TARG, sv);
+	    else if (DO_UTF8(sv)) {
+		SvIV_please(sv);
+		if (SvIOK(sv))
+		    goto oops_its_an_int;
+		if (SvNOK(sv))
+		    sv_setnv(TARG, -SvNV(sv));
+		else {
+		    sv_setpvn(TARG, "-", 1);
+		    sv_catsv(TARG, sv);
+		}
 	    }
 	    else {
-	      SvIV_please(sv);
-	      if (SvIOK(sv))
-		goto oops_its_an_int;
-	      sv_setnv(TARG, -SvNV(sv));
+		SvIV_please(sv);
+		if (SvIOK(sv))
+		  goto oops_its_an_int;
+		sv_setnv(TARG, -SvNV(sv));
 	    }
 	    SETTARG;
 	}

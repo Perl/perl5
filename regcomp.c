@@ -4409,9 +4409,20 @@ Perl_regprop(pTHX_ SV *sv, regnode *o)
 
     k = PL_regkind[(U8)OP(o)];
 
-    if (k == EXACT)
-	Perl_sv_catpvf(aTHX_ sv, " <%s%.*s%s>", PL_colors[0],
-		       STR_LEN(o), STRING(o), PL_colors[1]);
+    if (k == EXACT) {
+        SV *dsv = sv_2mortal(newSVpvn("", 0));
+	bool do_utf8 = PL_reg_match_utf8;
+	char *s    = do_utf8 ?
+	  pv_uni_display(dsv, (U8*)STRING(o), STR_LEN(o), 60, 0) :
+	  STRING(o);
+	int len = do_utf8 ?
+	  strlen(s) :
+	  STR_LEN(o);
+	Perl_sv_catpvf(aTHX_ sv, " <%s%.*s%s>",
+		       PL_colors[0],
+		       len, s,
+		       PL_colors[1]);
+    }
     else if (k == CURLY) {
 	if (OP(o) == CURLYM || OP(o) == CURLYN || OP(o) == CURLYX)
 	    Perl_sv_catpvf(aTHX_ sv, "[%d]", o->flags); /* Parenth number */
@@ -4492,7 +4503,7 @@ Perl_regprop(pTHX_ SV *sv, regnode *o)
 	if (flags & ANYOF_UNICODE)
 	    sv_catpv(sv, "{unicode}");
 	else if (flags & ANYOF_UNICODE_ALL)
-	    sv_catpv(sv, "{all-unicode}");
+	    sv_catpv(sv, "{unicode_all}");
 
 	{
 	    SV *lv;

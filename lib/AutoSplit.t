@@ -269,7 +269,7 @@ is (&*MOD*::testtesttesttest4_2, "duplicate test 4");
 is (&Just::Another::test5, "another test 5");
 # very messy way to interpolate function into regexp, but it's going to be
 # needed to get : for Mac filespecs
-like (&*MOD*::test6, qr!^*INC**PATHSEP**MOD*.pm \(autosplit into @{[File::Spec->catfile('*DIR*','*MOD*', 'test6.al')]}\):\d+$!);
+like (&*MOD*::test6, qr!^\Q*INC**PATHSEP**MOD*\E\.pm \(autosplit into \Q@{[File::Spec->catfile('*DIR*','*MOD*', 'test6.al')]}\E\):\d+$!);
 ok (Yet::Another::AutoSplit->testtesttesttest4_1 eq "another test 4");
 ################################################################
 ## Name

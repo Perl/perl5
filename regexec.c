@@ -383,20 +383,26 @@ Perl_re_intuit_start(pTHX_ regexp *prog, SV *sv, char *strpos,
     char *check_at = Nullch;		/* check substr found at this pos */
 #ifdef DEBUGGING
     char *i_strpos = strpos;
+    SV *dsv = sv_2mortal(newSVpvn("", 0));
 #endif
 
-    DEBUG_r( if (!PL_colorset) reginitcolors() );
-    DEBUG_r(PerlIO_printf(Perl_debug_log,
-		      "%sGuessing start of match, REx%s `%s%.60s%s%s' against `%s%.*s%s%s'...\n",
-		      PL_colors[4],PL_colors[5],PL_colors[0],
-		      prog->precomp,
-		      PL_colors[1],
-		      (strlen(prog->precomp) > 60 ? "..." : ""),
-		      PL_colors[0],
-		      (int)(strend - strpos > 60 ? 60 : strend - strpos),
-		      strpos, PL_colors[1],
-		      (strend - strpos > 60 ? "..." : ""))
-	);
+    DEBUG_r({
+	 char*s   = UTF ? sv_uni_display(dsv, sv, 60, 0) : strpos;
+	 int  len = UTF ? strlen(s) : strend - strpos;
+	 if (!PL_colorset)
+	      reginitcolors();
+	 PerlIO_printf(Perl_debug_log,
+		       "%sGuessing start of match, REx%s `%s%.60s%s%s' against `%s%.*s%s%s'...\n",
+		       PL_colors[4],PL_colors[5],PL_colors[0],
+		       prog->precomp,
+		       PL_colors[1],
+		       (strlen(prog->precomp) > 60 ? "..." : ""),
+		       PL_colors[0],
+		       (int)(len > 60 ? 60 : len),
+		       s, PL_colors[1],
+		       (len > 60 ? "..." : "")
+	      );
+    });
 
     if (prog->reganch & ROPT_UTF8)
 	PL_reg_flags |= RF_utf8;
@@ -1450,6 +1456,9 @@ Perl_regexec_flags(pTHX_ register regexp *prog, char *stringarg, register char *
     char *scream_olds;
     SV* oreplsv = GvSV(PL_replgv);
     bool do_utf8 = DO_UTF8(sv);
+#ifdef DEBUGGING
+    SV *dsv = sv_2mortal(newSVpvn("", 0));
+#endif
 
     PL_regcc = 0;
 
@@ -1532,18 +1541,23 @@ Perl_regexec_flags(pTHX_ register regexp *prog, char *stringarg, register char *
 	    goto phooey;	/* not present */
     }
 
-    DEBUG_r( if (!PL_colorset) reginitcolors() );
-    DEBUG_r(PerlIO_printf(Perl_debug_log,
-		      "%sMatching REx%s `%s%.60s%s%s' against `%s%.*s%s%s'\n",
-		      PL_colors[4],PL_colors[5],PL_colors[0],
-		      prog->precomp,
-		      PL_colors[1],
-		      (strlen(prog->precomp) > 60 ? "..." : ""),
-		      PL_colors[0],
-		      (int)(strend - startpos > 60 ? 60 : strend - startpos),
-		      startpos, PL_colors[1],
-		      (strend - startpos > 60 ? "..." : ""))
-	);
+    DEBUG_r({
+	 char *s   = UTF ? sv_uni_display(dsv, sv, 60, 0) : startpos;
+	 int   len = UTF ? strlen(s) : strend - startpos;
+	 if (!PL_colorset)
+	     reginitcolors();
+	 PerlIO_printf(Perl_debug_log,
+		       "%sMatching REx%s `%s%.60s%s%s' against `%s%.*s%s%s'\n",
+		       PL_colors[4],PL_colors[5],PL_colors[0],
+		       prog->precomp,
+		       PL_colors[1],
+		       (strlen(prog->precomp) > 60 ? "..." : ""),
+		       PL_colors[0],
+		       (int)(len > 60 ? 60 : len),
+		       s, PL_colors[1],
+		       (len > 60 ? "..." : "")
+	      );
+    });
 
     /* Simplest case:  anchored match need be tried only once. */
     /*  [unless only anchor is BOL and multiline is set] */
@@ -1713,7 +1727,7 @@ Perl_regexec_flags(pTHX_ register regexp *prog, char *stringarg, register char *
 	DEBUG_r({
 	    SV *prop = sv_newmortal();
 	    regprop(prop, c);
-	    PerlIO_printf(Perl_debug_log, "Matching stclass `%s' against `%s'\n", SvPVX(prop), s);
+	    PerlIO_printf(Perl_debug_log, "Matching stclass `%s' against `%s'\n", SvPVX(prop), UTF ? sv_uni_display(dsv, sv, 60, 0) : s);
 	});
   	if (find_byclass(prog, c, s, strend, startpos, 0))
 	    goto got_it;
@@ -2026,6 +2040,11 @@ S_regmatch(pTHX_ regnode *prog)
     I32 firstcp = PL_savestack_ix;
 #endif
     register bool do_utf8 = PL_reg_match_utf8;
+#ifdef DEBUGGING
+    SV *dsv0 = sv_2mortal(newSVpvn("", 0));
+    SV *dsv1 = sv_2mortal(newSVpvn("", 0));
+    SV *dsv2 = sv_2mortal(newSVpvn("", 0));
+#endif
 
 #ifdef DEBUGGING
     PL_regindent++;
@@ -2036,7 +2055,7 @@ S_regmatch(pTHX_ regnode *prog)
     scan = prog;
     while (scan != NULL) {
 
-	DEBUG_r( {
+        DEBUG_r( {
 	    SV *prop = sv_newmortal();
 	    int docolor = *PL_colors[0];
 	    int taill = (docolor ? 10 : 7); /* 3 chars for "> <" */
@@ -2064,20 +2083,42 @@ S_regmatch(pTHX_ regnode *prog)
 	    if (pref0_len > pref_len)
 		pref0_len = pref_len;
 	    regprop(prop, scan);
-	    PerlIO_printf(Perl_debug_log,
-			  "%4"IVdf" <%s%.*s%s%s%.*s%s%s%s%.*s%s>%*s|%3"IVdf":%*s%s\n",
-			  (IV)(locinput - PL_bostr),
-			  PL_colors[4], pref0_len,
-			  locinput - pref_len, PL_colors[5],
-			  PL_colors[2], pref_len - pref0_len,
-			  locinput - pref_len + pref0_len, PL_colors[3],
-			  (docolor ? "" : "> <"),
-			  PL_colors[0], l, locinput, PL_colors[1],
-			  15 - l - pref_len + 1,
-			  "",
-			  (IV)(scan - PL_regprogram), PL_regindent*2, "",
-			  SvPVX(prop));
-	} );
+	    {
+	      char *s0 =
+		UTF ?
+		pv_uni_display(dsv0, (U8*)(locinput - pref_len),
+			       pref0_len, 60, 0) :
+		locinput - pref_len;
+	      int len0 = UTF ? strlen(s0) : pref0_len;
+	      char *s1 = UTF ?
+		pv_uni_display(dsv1, (U8*)(locinput - pref_len + pref0_len),
+			       pref_len - pref0_len, 60, 0) :
+		locinput - pref_len + pref0_len;
+	      int len1 = UTF ? strlen(s1) : pref_len - pref0_len;
+	      char *s2 = UTF ?
+		pv_uni_display(dsv2, (U8*)locinput,
+			       PL_regeol - locinput, 60, 0) :
+		locinput;
+	      int len2 = UTF ? strlen(s2) : l;
+	      PerlIO_printf(Perl_debug_log,
+			    "%4"IVdf" <%s%.*s%s%s%.*s%s%s%s%.*s%s>%*s|%3"IVdf":%*s%s\n",
+			    (IV)(locinput - PL_bostr),
+			    PL_colors[4],
+			    len0, s0,
+			    PL_colors[5],
+			    PL_colors[2],
+			    len1, s1,
+			    PL_colors[3],
+			    (docolor ? "" : "> <"),
+			    PL_colors[0],
+			    len2, s2,
+			    PL_colors[1],
+			    15 - l - pref_len + 1,
+			    "",
+			    (IV)(scan - PL_regprogram), PL_regindent*2, "",
+			    SvPVX(prop));
+	    }
+	});
 
 	next = scan + NEXT_OFF(scan);
 	if (next == scan)

@@ -526,6 +526,8 @@ Perl_sv_setpvn_mg
 Perl_sv_setsv_mg
 Perl_sv_usepvn_mg
 Perl_get_vtbl
+Perl_pv_uni_display
+Perl_sv_uni_display
 Perl_dump_indent
 Perl_dump_vindent
 Perl_do_gv_dump

@@ -1,3 +1,111 @@
+Change 661 on 2001/10/26 by <gbarr@pobox.com> (Graham Barr)
+
+	Add install-nomake to install libnet on machines that do not
+	have make available
+
+Change 660 on 2001/10/26 by <gbarr@pobox.com> (Graham Barr)
+
+	Net::Cmd
+	- Ensure we don't insert an extra CR during LF=>CRLF when the CR already exists
+
+Change 659 on 2001/10/22 by <gbarr@pobox.com> (Graham Barr)
+
+	Net::Domain
+	- Be more robust if no hostname or domainname
+	  (especially the latter)
+
+Change 658 on 2001/10/22 by <gbarr@pobox.com> (Graham Barr)
+
+	Net::Config
+	- Protect eval's from user defining $SIG{__DIE__}
+
+Change 657 on 2001/10/22 by <gbarr@pobox.com> (Graham Barr)
+
+	Net::Config
+	- Fix handling of single values passed, when a ref to an array is wanted
+
+Change 656 on 2001/10/22 by <gbarr@pobox.com> (Graham Barr)
+
+	Net::Config
+	- Pod updates from chromatic
+
+Change 655 on 2001/10/22 by <gbarr@pobox.com> (Graham Barr)
+
+	Net::SMTP
+	- Don't be sensetive to extra spaces on reply to HELO
+
+Change 654 on 2001/10/22 by <gbarr@pobox.com> (Graham Barr)
+
+	Net::Netrc
+	- Update lookup() docs to describe what happens if no .netrc file is found
+
+Change 653 on 2001/10/22 by <gbarr@pobox.com> (Graham Barr)
+
+	Net::FTP
+	- Fix hash() to match docs (patch from Doug Wilson)
+
+Change 652 on 2001/09/21 by <gbarr@pobox.com> (Graham Barr)
+
+	Net::FTP
+	- Fix patterns in ->size and ->supported
+
+Change 651 on 2001/09/21 by <gbarr@pobox.com> (Graham Barr)
+
+	Net::Config, Net::Netrc
+	- Handle $home on w2k
+
+Change 650 on 2001/09/21 by <gbarr@pobox.com> (Graham Barr)
+
+	Net::Domain
+	- Fix some potential undef warnings
+
+Change 649 on 2001/09/21 by <gbarr@pobox.com> (Graham Barr)
+
+	Net::FTP
+	- Add FirewallType as an option to ->new
+
+Change 648 on 2001/09/21 by <gbarr@pobox.com> (Graham Barr)
+
+	Net::FTP
+	- use sysopen instead of open so we don't get caught by special chars in the filename
+
+Change 630 on 2001/08/31 by <gbarr@pobox.com> (Graham Barr)
+
+	Net::FTP::I
+	- Avoid uninit warning
+
+Change 627 on 2001/08/20 by <gbarr@pobox.com> (Graham Barr)
+
+	Remove tests for modules removed from dist
+
+Change 626 on 2001/08/17 by <gbarr@pobox.com> (Graham Barr)
+
+	Increment VERSIONs
+
+Change 625 on 2001/08/17 by <gbarr@pobox.com> (Graham Barr)
+
+	Doc updates and add cc and bcc as aliases for recipient
+
+Change 624 on 2001/08/17 by <gbarr@pobox.com> (Graham Barr)
+
+	Don't set ENV variables
+
+Change 623 on 2001/08/17 by <gbarr@pobox.com> (Graham Barr)
+
+	Support mixed case in the EHLO response
+
+Change 622 on 2001/08/06 by <gbarr@pobox.com> (Graham Barr)
+
+	Documentation update
+
+Change 621 on 2001/08/06 by <gbarr@pobox.com> (Graham Barr)
+
+	Set the status if command returns due to the connection being closed
+
+Change 620 on 2001/08/06 by <gbarr@pobox.com> (Graham Barr)
+
+	Fix for _msg_spec when passed the same msg number twice, pass N instead of N-N
+
 Change 625 on 2001/08/17 by <gbarr@pobox.com> (Graham Barr)
 
 	Doc updates and add cc and bcc as aliases for recipient

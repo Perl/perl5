@@ -411,8 +411,8 @@ Perl_gv_fetchmethod_autoload(pTHX_ HV *stash, const char *name, I32 autoload)
 GV*
 Perl_gv_autoload4(pTHX_ HV *stash, const char *name, STRLEN len, I32 method)
 {
-    static char autoload[] = "AUTOLOAD";
-    static STRLEN autolen = 8;
+    char autoload[] = "AUTOLOAD";
+    STRLEN autolen = sizeof(autoload)-1;
     GV* gv;
     CV* cv;
     HV* varstash;

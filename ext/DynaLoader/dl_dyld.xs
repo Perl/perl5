@@ -41,19 +41,16 @@ been tested on NeXT platforms.
 #include "perl.h"
 #include "XSUB.h"
 
-#define DL_LOADONCEONLY
-
-#include "dlutils.c"	/* SaveError() etc	*/
+#include "dlutils.c"	/* for SaveError() etc */
 
 #undef environ
 #undef bool
 #import <mach-o/dyld.h>
 
-static char * dl_last_error = (char *) 0;
-static AV *dl_resolve_using = Nullav;
-
 static char *dlerror()
 {
+    dTHX;
+    dMY_CXT;
     return dl_last_error;
 }
 
@@ -72,6 +69,7 @@ static void TranslateError
     (const char *path, enum dyldErrorSource type, int number)
 {
     dTHX;
+    dMY_CXT;
     char *error;
     unsigned int index;
     static char *OFIErrorStrings[] =
@@ -147,7 +145,6 @@ static void
 dl_private_init(pTHX)
 {
     (void)dl_generic_private_init(aTHX);
-    dl_resolve_using = get_av("DynaLoader::dl_resolve_using", GV_ADDMULTI);
 }
 
 MODULE = DynaLoader     PACKAGE = DynaLoader
@@ -219,7 +216,8 @@ dl_install_xsub(perl_name, symref, filename="$Package")
 char *
 dl_error()
     CODE:
-    RETVAL = LastError ;
+    dMY_CXT;
+    RETVAL = dl_last_error ;
     OUTPUT:
     RETVAL
 
