@@ -9,7 +9,7 @@
 #include "perl.h"
 
 void
-Perl_taint_proper(pTHX_ const char *f, char *s)
+Perl_taint_proper(pTHX_ const char *f, const char *s)
 {
     dTHR;	/* just for taint */
     char *ug;

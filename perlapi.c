@@ -4203,7 +4203,7 @@ Perl_taint_env(pTHXo)
 
 #undef  Perl_taint_proper
 void
-Perl_taint_proper(pTHXo_ const char* f, char* s)
+Perl_taint_proper(pTHXo_ const char* f, const char* s)
 {
     ((CPerlObj*)pPerl)->Perl_taint_proper(f, s);
 }

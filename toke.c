@@ -1153,7 +1153,7 @@ S_scan_const(pTHX_ char *start)
 	? (PL_sublex_info.sub_op->op_private & (PL_lex_repl ?
 						OPpTRANS_FROM_UTF : OPpTRANS_TO_UTF))
 	: UTF;
-    char *leaveit =			/* set of acceptably-backslashed characters */
+    const char *leaveit =	/* set of acceptably-backslashed characters */
 	PL_lex_inpat
 	    ? "\\.^$@AGZdDwWsSbBpPXC+*?|()-nrtfeaxcz0123456789[{]} \t\n\r\f\v#"
 	    : "";
@@ -1330,7 +1330,7 @@ S_scan_const(pTHX_ char *start)
 	    /* \132 indicates an octal constant */
 	    case '0': case '1': case '2': case '3':
 	    case '4': case '5': case '6': case '7':
-		*d++ = scan_oct(s, 3, &len);
+		*d++ = (char)scan_oct(s, 3, &len);
 		s += len;
 		continue;
 
@@ -1352,7 +1352,7 @@ S_scan_const(pTHX_ char *start)
 		    }
 		    /* note: utf always shorter than hex */
 		    d = (char*)uv_to_utf8((U8*)d,
-					  scan_hex(s + 1, e - s - 1, &len));
+					  (UV)scan_hex(s + 1, e - s - 1, &len));
 		    s = e + 1;
 		}
 		else {
@@ -5460,14 +5460,15 @@ S_checkcomma(pTHX_ register char *s, char *name, char *what)
    and type is used with error messages only. */
 
 STATIC SV *
-S_new_constant(pTHX_ char *s, STRLEN len, char *key, SV *sv, SV *pv, char *type) 
+S_new_constant(pTHX_ char *s, STRLEN len, const char *key, SV *sv, SV *pv,
+	       const char *type) 
 {
     dSP;
     HV *table = GvHV(PL_hintgv);		 /* ^H */
     SV *res;
     SV **cvp;
     SV *cv, *typesv;
-    char *why, *why1, *why2;
+    const char *why, *why1, *why2;
     
     if (!(PL_hints & HINT_LOCALIZE_HH)) {
 	SV *msg;
@@ -5695,7 +5696,7 @@ S_scan_ident(pTHX_ register char *s, register char *send, char *dest, STRLEN des
 	    if ((*s == '[' || (*s == '{' && strNE(dest, "sub")))) {
 		dTHR;			/* only for ckWARN */
 		if (ckWARN(WARN_AMBIGUOUS) && keyword(dest, d - dest)) {
-		    char *brack = *s == '[' ? "[...]" : "{...}";
+		    const char *brack = *s == '[' ? "[...]" : "{...}";
 		    Perl_warner(aTHX_ WARN_AMBIGUOUS,
 			"Ambiguous use of %c{%s%s} resolved to %c%s%s",
 			funny, dest, brack, funny, dest, brack);

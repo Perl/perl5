@@ -94,7 +94,7 @@ int _CRT_glob = 0;
 #endif
 
 static void		get_shell(void);
-static long		tokenize(char *str, char **dest, char ***destv);
+static long		tokenize(const char *str, char **dest, char ***destv);
 	int		do_spawn2(char *cmd, int exectype);
 static BOOL		has_shell_metachars(char *ptr);
 static long		filetime_to_clock(PFILETIME ft);
@@ -427,7 +427,7 @@ win32_os_id(void)
  * Returns number of words in result buffer.
  */
 static long
-tokenize(char *str, char **dest, char ***destv)
+tokenize(const char *str, char **dest, char ***destv)
 {
     char *retstart = Nullch;
     char **retvstart = 0;
@@ -485,8 +485,9 @@ get_shell(void)
 	 *     interactive use (which is what most programs look in COMSPEC
 	 *     for).
 	 */
-	char* defaultshell = (IsWinNT() ? "cmd.exe /x/c" : "command.com /c");
-	char *usershell = getenv("PERL5SHELL");
+	const char* defaultshell = (IsWinNT()
+				    ? "cmd.exe /x/c" : "command.com /c");
+	const char *usershell = getenv("PERL5SHELL");
 	w32_perlshell_items = tokenize(usershell ? usershell : defaultshell,
 				       &w32_perlshell_tokens,
 				       &w32_perlshell_vec);

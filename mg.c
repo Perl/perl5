@@ -1126,7 +1126,7 @@ int
 Perl_magic_nextpack(pTHX_ SV *sv, MAGIC *mg, SV *key)
 {
     dSP;
-    char *meth = SvOK(key) ? "NEXTKEY" : "FIRSTKEY";
+    const char *meth = SvOK(key) ? "NEXTKEY" : "FIRSTKEY";
 
     ENTER;
     SAVETMPS;

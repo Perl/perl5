@@ -5348,7 +5348,8 @@ Perl_sv_vcatpvfn(pTHX_ SV *sv, const char *pat, STRLEN patlen, va_list *args, SV
 	    case 16:
 		if (!uv)
 		    alt = FALSE;
-		p = (c == 'X') ? "0123456789ABCDEF" : "0123456789abcdef";
+		p = (char*)((c == 'X')
+			    ? "0123456789ABCDEF" : "0123456789abcdef");
 		do {
 		    dig = uv & 15;
 		    *--eptr = p[dig];

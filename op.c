@@ -1810,9 +1810,9 @@ Perl_bind_match(pTHX_ I32 type, OP *left, OP *right)
       char *desc = PL_op_desc[(right->op_type == OP_SUBST ||
                             right->op_type == OP_TRANS)
                            ? right->op_type : OP_MATCH];
-      char *sample = ((left->op_type == OP_RV2AV ||
-                       left->op_type == OP_PADAV)
-                      ? "@array" : "%hash");
+      const char *sample = ((left->op_type == OP_RV2AV ||
+			     left->op_type == OP_PADAV)
+			    ? "@array" : "%hash");
       Perl_warner(aTHX_ WARN_UNSAFE,
              "Applying %s to %s will act on scalar(%s)", 
              desc, sample, sample);

@@ -2022,7 +2022,7 @@ tryagain:
 			    if (!e)
 				FAIL("Missing right brace on \\x{}");
 			    else if (UTF) {
-				ender = scan_hex(p + 1, e - p, &numlen);
+				ender = (UV)scan_hex(p + 1, e - p, &numlen);
 				if (numlen + len >= 127) {	/* numlen is generous */
 				    p--;
 				    goto loopdone;
@@ -2033,7 +2033,7 @@ tryagain:
 				FAIL("Can't use \\x{} without 'use utf8' declaration");
 			}
 			else {
-			    ender = scan_hex(p, 2, &numlen);
+			    ender = (UV)scan_hex(p, 2, &numlen);
 			    p += numlen;
 			}
 			break;
@@ -2046,7 +2046,7 @@ tryagain:
 		    case '5': case '6': case '7': case '8':case '9':
 			if (*p == '0' ||
 			  (isDIGIT(p[1]) && atoi(p) >= PL_regnpar) ) {
-			    ender = scan_oct(p, 3, &numlen);
+			    ender = (UV)scan_oct(p, 3, &numlen);
 			    p += numlen;
 			}
 			else {
@@ -2293,7 +2293,7 @@ S_regclass(pTHX)
 {
     dTHR;
     register char *opnd, *s;
-    register I32 value;
+    register UV value;
     register I32 lastvalue = OOB_CHAR8;
     register I32 range = 0;
     register regnode *ret;
@@ -2352,7 +2352,7 @@ S_regclass(pTHX)
 	    case 'e':	value = '\033';			break;
 	    case 'a':	value = '\007';			break;
 	    case 'x':
-		value = scan_hex(PL_regcomp_parse, 2, &numlen);
+		value = (UV)scan_hex(PL_regcomp_parse, 2, &numlen);
 		PL_regcomp_parse += numlen;
 		break;
 	    case 'c':
@@ -2361,7 +2361,7 @@ S_regclass(pTHX)
 		break;
 	    case '0': case '1': case '2': case '3': case '4':
 	    case '5': case '6': case '7': case '8': case '9':
-		value = scan_oct(--PL_regcomp_parse, 3, &numlen);
+		value = (UV)scan_oct(--PL_regcomp_parse, 3, &numlen);
 		PL_regcomp_parse += numlen;
 		break;
 	    default:
@@ -2712,7 +2712,7 @@ S_regclassutf8(pTHX)
 {
     dTHR;
     register char *opnd, *e;
-    register U32 value;
+    register UV value;
     register U32 lastvalue = OOB_UTF8;
     register I32 range = 0;
     register regnode *ret;
@@ -2796,13 +2796,13 @@ S_regclassutf8(pTHX)
 		    e = strchr(PL_regcomp_parse++, '}');
                     if (!e)
                         FAIL("Missing right brace on \\x{}");
-		    value = scan_hex(PL_regcomp_parse,
+		    value = (UV)scan_hex(PL_regcomp_parse,
 				     e - PL_regcomp_parse,
 				     &numlen);
 		    PL_regcomp_parse = e + 1;
 		}
 		else {
-		    value = scan_hex(PL_regcomp_parse, 2, &numlen);
+		    value = (UV)scan_hex(PL_regcomp_parse, 2, &numlen);
 		    PL_regcomp_parse += numlen;
 		}
 		break;
@@ -2812,7 +2812,7 @@ S_regclassutf8(pTHX)
 		break;
 	    case '0': case '1': case '2': case '3': case '4':
 	    case '5': case '6': case '7': case '8': case '9':
-		value = scan_oct(--PL_regcomp_parse, 3, &numlen);
+		value = (UV)scan_oct(--PL_regcomp_parse, 3, &numlen);
 		PL_regcomp_parse += numlen;
 		break;
 	    default:
