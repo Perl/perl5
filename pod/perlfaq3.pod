@@ -15,7 +15,7 @@ Have you read the appropriate man pages?  Here's a brief index:
 
 	Objects		perlref, perlmod, perlobj, perltie
 	Data Structures	perlref, perllol, perldsc
-	Modules		perlmod, perlsub
+	Modules		perlmod, perlmodlib, perlsub
 	Regexps		perlre, perlfunc, perlop
 	Moving to perl5	perltrap, perl
 	Linking w/C	perlxstut, perlxs, perlcall, perlguts, perlembed

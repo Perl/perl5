@@ -22,6 +22,7 @@ POD = \
 	perlvar.pod	\
 	perlsub.pod	\
 	perlmod.pod	\
+	perlmodlib.pod	\
 	perlform.pod	\
 	perllocale.pod	\
 	perlref.pod	\
@@ -69,6 +70,7 @@ MAN = \
 	perlvar.man	\
 	perlsub.man	\
 	perlmod.man	\
+	perlmodlib.man	\
 	perlform.man	\
 	perllocale.man	\
 	perlref.man	\
@@ -116,6 +118,7 @@ HTML = \
 	perlvar.html	\
 	perlsub.html	\
 	perlmod.html	\
+	perlmodlib.html	\
 	perlform.html	\
 	perllocale.html	\
 	perlref.html	\
@@ -163,6 +166,7 @@ TEX = \
 	perlvar.tex	\
 	perlsub.tex	\
 	perlmod.tex	\
+	perlmodlib.tex	\
 	perlform.tex	\
 	perllocale.tex	\
 	perlref.tex	\

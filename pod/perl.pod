@@ -30,7 +30,8 @@ of sections:
     perlfunc	Perl builtin functions
     perlvar	Perl predefined variables
     perlsub	Perl subroutines
-    perlmod	Perl modules
+    perlmod	Perl modules: how they work
+    perlmodlib	Perl modules: how to write and use
     perlform	Perl formats
     perllocale	Perl locale support
 
@@ -219,9 +220,9 @@ all old regular expressions.
 
 =item * Innumerable Unbundled Modules
 
-The Comprehensive Perl Archive Network described in L<perlmod>
-contains hundreds of plug-and-play modules full of reusable
-code.  See F<http://www.perl.com/CPAN> for a site near you.
+The Comprehensive Perl Archive Network described in L<perlmodlib>
+contains hundreds of plug-and-play modules full of reusable code.
+See F<http://www.perl.com/CPAN> for a site near you.
 
 =item * Compilability
 

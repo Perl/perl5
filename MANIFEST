@@ -557,7 +557,8 @@ pod/perlguts.pod	Internals info
 pod/perlipc.pod		IPC info
 pod/perllocale.pod	Locale support info
 pod/perllol.pod		How to use lists of lists
-pod/perlmod.pod		Module info
+pod/perlmod.pod		Module mechanism info
+pod/perlmodlib.pod	Module policy info
 pod/perlobj.pod		Object info
 pod/perlop.pod		Operator info
 pod/perlpod.pod		Pod info

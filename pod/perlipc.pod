@@ -973,7 +973,7 @@ version.
 =head1 SEE ALSO
 
 Besides the obvious functions in L<perlfunc>, you should also check out
-the F<modules> file at your nearest CPAN site.  (See L<perlmod> or best
+the F<modules> file at your nearest CPAN site.  (See L<perlmodlib> or best
 yet, the F<Perl FAQ> for a description of what CPAN is and where to get it.)
 Section 5 of the F<modules> file is devoted to "Networking, Device Control
 (modems), and Interprocess Communication", and contains numerous unbundled

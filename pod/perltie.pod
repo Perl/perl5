@@ -839,7 +839,7 @@ hashes) to a dbm file.  The first problem is that all but GDBM and
 Berkeley DB have size limitations, but beyond that, you also have problems
 with how references are to be represented on disk.  One experimental
 module that does attempt to address this need partially is the MLDBM
-module.  Check your nearest CPAN site as described in L<perlmod> for
+module.  Check your nearest CPAN site as described in L<perlmodlib> for
 source code to MLDBM.
 
 =head1 AUTHOR

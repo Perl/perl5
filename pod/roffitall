@@ -41,6 +41,7 @@ toroff=`
     $mandir/perlvar.1	\
     $mandir/perlsub.1	\
     $mandir/perlmod.1	\
+    $mandir/perlmodlib.1	\
     $mandir/perlref.1	\
     $mandir/perldsc.1	\
     $mandir/perllol.1	\
