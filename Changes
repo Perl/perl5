@@ -31,6 +31,159 @@ or any other branch.
 Version v5.7.2		Development release working toward v5.8
 --------------
 ____________________________________________________________________________
+[ 12813] By: jhi                                   on 2001/11/02  15:19:35
+        Log: More encoding testing.
+     Branch: perl
+	   ! lib/encoding.pm lib/encoding.t
+____________________________________________________________________________
+[ 12812] By: ams                                   on 2001/11/02  15:07:11
+        Log: Slight modification of #12811.
+     Branch: perl
+	   ! op.c
+____________________________________________________________________________
+[ 12811] By: jhi                                   on 2001/11/02  14:58:13
+        Log: Subject: Re: [ID 20011101.069] \stat('.') gives "Attempt to free unreferenced scalar"
+             From: Radu Greab <radu@netsoft.ro>
+             Date: Fri, 2 Nov 2001 15:28:58 +0200
+             Message-ID: <15330.40858.629851.468818@ix.netsoft.ro>
+     Branch: perl
+	   ! op.c t/op/stat.t
+____________________________________________________________________________
+[ 12810] By: jhi                                   on 2001/11/02  14:15:34
+        Log: Subject: [PATCH] Re: Extra MakeMaker noise in lib/ExtUtils/Embed.t @12791
+             From: Rafael Garcia-Suarez <rgarciasuarez@free.fr>
+             Date: Thu, 1 Nov 2001 22:35:50 +0100
+             Message-ID: <20011101223550.A10849@rafael>
+     Branch: perl
+	   ! lib/ExtUtils/Embed.t
+____________________________________________________________________________
+[ 12809] By: jhi                                   on 2001/11/02  14:10:05
+        Log: Subject: [REPATCH] Re: [PATCH File::Find] use warnings::register
+             From: rgarciasuarez@free.fr (Rafael Garcia-Suarez)
+             Date: 2 Nov 2001 14:48:51 -0000
+             Message-Id: <slrn9u5cj6.liq.rgarciasuarez@rafael.kazibao.net> 
+     Branch: perl
+	   ! lib/File/Find.pm
+____________________________________________________________________________
+[ 12808] By: jhi                                   on 2001/11/02  05:40:21
+        Log: Add documentation.
+     Branch: perl
+	   ! embed.pl pod/perlapi.pod utf8.c
+____________________________________________________________________________
+[ 12807] By: jhi                                   on 2001/11/02  05:18:45
+        Log: Unicode: add ToFold mapping.  Not used yet; but basically
+             a more useful mapping for caseless aka case-ignoring than
+             doing either lc($a) eq lc($b) or uc($a) eq uc($b); the full
+             algorithm for creating the foldings uses equivalence classes,
+             see http://www.unicode.org/unicode/reports/tr21/
+             Hopefully this feature will be used in //i.
+             (The folding tables were introduced by #12689.)
+     Branch: perl
+	   ! embed.h embed.pl embedvar.h intrpvar.h perl.c perlapi.h sv.c
+	   ! utf8.c
+____________________________________________________________________________
+[ 12806] By: jhi                                   on 2001/11/02  05:04:05
+        Log: Subject: [PATCH] AutoSplit.t clean-up for VMS
+             From: "Craig A. Berry" <craigberry@mac.com>
+             Date: Fri, 02 Nov 2001 00:03:52 -0600
+             Message-Id: <5.1.0.14.2.20011101235844.02cd4e50@exchi01>
+     Branch: perl
+	   ! lib/AutoSplit.t
+____________________________________________________________________________
+[ 12805] By: jhi                                   on 2001/11/02  04:17:04
+        Log: Subject: Trivial doc patch
+             From: andreas.koenig@anima.de (Andreas J. Koenig)
+             Date: 02 Nov 2001 06:11:35 +0100
+             Message-ID: <m37kt94v08.fsf@anima.de>
+     Branch: perl
+	   ! pod/perlport.pod
+____________________________________________________________________________
+[ 12804] By: jhi                                   on 2001/11/02  02:14:46
+        Log: Make encoding and charnames pragmas coexist.
+     Branch: perl
+	   ! lib/charnames.pm lib/encoding.pm lib/encoding.t
+____________________________________________________________________________
+[ 12803] By: jhi                                   on 2001/11/02  01:26:53
+        Log: The basic character classes seem to go untested with Unicode.
+     Branch: perl
+	   ! t/op/pat.t
+____________________________________________________________________________
+[ 12802] By: ams                                   on 2001/11/02  00:39:36
+        Log: Subject: [PATCH] the the double double word word fix fix
+             From: Richard Soderberg <rs@oregonnet.com>
+             Date: Thu, 1 Nov 2001 13:12:03 -0800
+             Message-Id: <200111012112.NAA23288@oregonnet.com>
+             
+             Subject: Re: [PATCH] the the double double word word fix fix
+             From: Mark-Jason Dominus <mjd@plover.com>
+             Date: Thu, 01 Nov 2001 16:43:40 -0500
+             Message-Id: <20011101214340.2044.qmail@plover.com>
+             
+             Subject: Re: [PATCH] the the double double word word fix fix
+             From: Mark-Jason Dominus <mjd@plover.com>
+             Date: Thu, 01 Nov 2001 16:51:39 -0500
+             Message-Id: <20011101215139.2196.qmail@plover.com>
+     Branch: perl
+	   ! pod/perldebtut.pod pod/perldiag.pod pod/perlfaq3.pod
+	   ! pod/perlguts.pod pod/perlintro.pod pod/perliol.pod
+	   ! pod/perlmodlib.PL pod/perlmodstyle.pod pod/perlpodspec.pod
+	   ! pod/perlrequick.pod pod/perlretut.pod pod/perltoc.pod
+	   ! pod/perltodo.pod pod/perlxstut.pod
+____________________________________________________________________________
+[ 12801] By: jhi                                   on 2001/11/01  14:27:51
+        Log: Comment tweaks.
+     Branch: perl
+	   ! toke.c
+____________________________________________________________________________
+[ 12800] By: jhi                                   on 2001/11/01  14:06:04
+        Log: FAQ sync.
+     Branch: perl
+	   ! pod/perlfaq9.pod
+____________________________________________________________________________
+[ 12799] By: jhi                                   on 2001/11/01  13:59:42
+        Log: If an encoding is set by -M/-m, it must be in
+             effect only for the actual script, not any other
+             required/-M/-m'ed module, otherwise we enter a nasty
+             recursion in regexec.c while trying to init the simple
+             UTF-8 charclasses like PL_utf8_alnum.
+     Branch: perl
+	   ! lib/encoding.pm pod/perlunicode.pod pp_ctl.c
+____________________________________________________________________________
+[ 12798] By: jhi                                   on 2001/10/31  21:10:09
+        Log: A bit more descriptive name.
+     Branch: perl
+	   ! mg.c
+____________________________________________________________________________
+[ 12797] By: jhi                                   on 2001/10/31  20:32:29
+        Log: Subject: [PATCH Perl@12768] Time::Hires test fix
+             From: lane@DUPHY4.Physics.Drexel.Edu (Charles Lane)
+             Date: Wed, 31 Oct 2001 13:47:04 EST
+             Message-Id: <011031134626.1227@DUPHY4.Physics.Drexel.Edu>
+     Branch: perl
+	   ! ext/Time/HiRes/HiRes.t
+____________________________________________________________________________
+[ 12796] By: jhi                                   on 2001/10/31  20:31:20
+        Log: Subject: [PATCH Perl@12768] make setting signal() persistent
+             From: lane@DUPHY4.Physics.Drexel.Edu (Charles Lane)
+             Date: Wed, 31 Oct 2001 13:43:29 EST
+             Message-Id: <011031134318.231c@DUPHY4.Physics.Drexel.Edu>
+     Branch: perl
+	   ! mg.c
+____________________________________________________________________________
+[ 12795] By: jhi                                   on 2001/10/31  20:29:37
+        Log: Subject: [PATCH] Various test cleanups
+             From: Rafael Garcia-Suarez <rgarciasuarez@free.fr>
+             Date: Tue, 30 Oct 2001 21:56:26 +0100
+             Message-ID: <20011030215626.A28503@rafael>
+     Branch: perl
+	   ! ext/DB_File/t/db-btree.t ext/DB_File/t/db-hash.t
+	   ! ext/DB_File/t/db-recno.t ext/Encode.t
+____________________________________________________________________________
+[ 12794] By: jhi                                   on 2001/10/31  15:26:59
+        Log: Update Changes.
+     Branch: perl
+	   ! Changes patchlevel.h
+____________________________________________________________________________
 [ 12793] By: jhi                                   on 2001/10/31  15:23:12
         Log: Subject: [PATCH] Data::Dumper opt. use B::Deparse for coderefs
              From: Rafael Garcia-Suarez <rgarciasuarez@free.fr>               
