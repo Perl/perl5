@@ -4771,8 +4771,6 @@ PP(pp_gpwent)
     register SV *sv;
     STRLEN n_a;
     struct passwd *pwent  = NULL;
-/* We do not use HAS_GETSPENT in pp_gpwent() but leave it here in the case
- * somebody wants to write an XS to access the shadow passwords. --jhi */
 #   ifdef HAS_GETSPNAM
     struct spwd   *spwent = NULL;
 #   endif
@@ -4900,9 +4898,6 @@ PP(pp_spwent)
     djSP;
 #if defined(HAS_PASSWD) && defined(HAS_SETPWENT)
     setpwent();
-#   ifdef HAS_SETSPENT
-    setspent();
-#   endif
     RETPUSHYES;
 #else
     DIE(aTHX_ PL_no_func, "setpwent");
@@ -4914,9 +4909,6 @@ PP(pp_epwent)
     djSP;
 #if defined(HAS_PASSWD) && defined(HAS_ENDPWENT)
     endpwent();
-#   ifdef HAS_ENDSPENT
-    endspent();
-#   endif
     RETPUSHYES;
 #else
     DIE(aTHX_ PL_no_func, "endpwent");

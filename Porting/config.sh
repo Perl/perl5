@@ -8,7 +8,7 @@
 
 # Package name      : perl5
 # Source directory  : .
-# Configuration time: Fri Apr 28 23:34:47 EET DST 2000
+# Configuration time: Sun May  7 18:54:35 EET DST 2000
 # Configured by     : jhi
 # Target system     : osf1 alpha.hut.fi v4.0 878 alpha 
 
@@ -59,7 +59,7 @@ ccflags='-pthread -std -DLANGUAGE_C'
 ccsymbols='__alpha=1 __LANGUAGE_C__=1 __osf__=1 __unix__=1 _LONGLONG=1 _SYSTYPE_BSD=1 SYSTYPE_BSD=1 unix=1'
 cf_by='jhi'
 cf_email='yourname@yourhost.yourplace.com'
-cf_time='Fri Apr 28 23:34:47 EET DST 2000'
+cf_time='Sun May  7 18:54:35 EET DST 2000'
 charsize='1'
 chgrp=''
 chmod=''
@@ -136,7 +136,6 @@ d_endnent='define'
 d_endpent='define'
 d_endpwent='define'
 d_endsent='define'
-d_endspent='undef'
 d_eofnblk='define'
 d_eunice='undef'
 d_fchmod='define'
@@ -189,7 +188,6 @@ d_getsbyname='define'
 d_getsbyport='define'
 d_getsent='define'
 d_getservprotos='define'
-d_getspent='undef'
 d_getspnam='undef'
 d_gettimeod='define'
 d_gnulibc='undef'
@@ -309,7 +307,6 @@ d_setrgid='define'
 d_setruid='define'
 d_setsent='define'
 d_setsid='define'
-d_setspent='undef'
 d_setvbuf='define'
 d_sfio='undef'
 d_shm='define'

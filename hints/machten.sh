@@ -46,10 +46,7 @@
 #
 # MachTen 4.1.1's support for shadow password file access is incomplete:
 # disable its use completely.
-d_endspent=${d_endspent:-undef}
-d_getspent=${d_getspent:-undef}
 d_getspnam=${d_getspnam:-undef}
-d_setspent=${d_setspent:-undef}
 
 # MachTen 4.1.1 does support dynamic loading, but perl doesn't
 # know how to use it yet.
@@ -241,10 +238,9 @@ Similarly, when you see
 select the default answer: vfork() works, and avoids expensive data
 copying.
 
-You may also see "WHOA THERE!!!" messages concerning \$d_endspent,
-\$d_getspent, \$d_getspnam and \$d_setspent.  In all cases, select the
-default answer: MachTen's support for shadow password file access is
-incomplete, and should not be used.
+You may also see "WHOA THERE!!!" messages concerning \$d_getspnam.
+Select the default answer: MachTen's support for shadow password
+file access is incomplete, and should not be used.
 
 At the end of Configure, you will see a harmless message
 
