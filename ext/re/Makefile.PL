@@ -1,12 +1,19 @@
 use ExtUtils::MakeMaker;
 use File::Spec;
+use Config;
+
+my $object = 're_exec$(OBJ_EXT) re_comp$(OBJ_EXT) re$(OBJ_EXT)';
+
+if ($^O eq 'darwin' and $Config{ccflags} !~ /-DDEBUGGING/) {
+    $object .= ' ../../deb$(OBJ_EXT)';
+}
 
 WriteMakefile(
     NAME		=> 're',
     VERSION_FROM	=> 're.pm',
     MAN3PODS		=> {}, 	# Pods will be built by installman.
     XSPROTOARG		=> '-noprototypes',
-    OBJECT		=> 're_exec$(OBJ_EXT) re_comp$(OBJ_EXT) re$(OBJ_EXT)',
+    OBJECT		=> $object,
     DEFINE		=> '-DPERL_EXT_RE_BUILD -DPERL_EXT_RE_DEBUG',
     clean		=> { FILES => '*$(OBJ_EXT) *.c ../../lib/re.pm' },
 );
