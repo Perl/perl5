@@ -383,10 +383,12 @@ S_pad_findlex(pTHX_ char *name, PADOFFSET newoff, U32 seq, CV* startcv,
 		    saweval = i;
 		    seq = cxstack[i].blk_oldcop->cop_seq;
 		    startcv = cxstack[i].blk_eval.cv;
-		    off = pad_findlex(name, newoff, seq, startcv, i-1,
-				      saweval, 0);
-		    if (off)	/* continue looking if not found here */
-			return off;
+		    if (startcv && CvOUTSIDE(startcv)) {
+			off = pad_findlex(name, newoff, seq, CvOUTSIDE(startcv),
+					  i-1, saweval, 0);
+			if (off)	/* continue looking if not found here */
+			    return off;
+		    }
 		}
 		break;
 	    case OP_DOFILE:
