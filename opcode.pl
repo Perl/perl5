@@ -913,7 +913,7 @@ getlogin	getlogin		ck_null		st0
 syscall		syscall			ck_fun		imst@	S L
 
 # For multi-threading
-lock		lock			ck_rfun		s%	S
+lock		lock			ck_rfun		s%	R
 threadsv	per-thread value	ck_null		ds0
 
 # Control (contd.)
