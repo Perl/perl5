@@ -25,7 +25,7 @@ BEGIN {
 
 use ExtUtils::testlib;
 use strict;
-BEGIN { print "1..12\n" };
+BEGIN { print "1..14\n" };
 use threads;
 
 
