@@ -1832,6 +1832,12 @@ typedef enum {
 #define RsPARA(sv)    (SvOK(sv) && ! SvCUR(sv))
 #define RsRECORD(sv)  (SvROK(sv) && (SvIV(SvRV(sv)) > 0))
 
+/* Enable variables which are pointers to functions */
+typedef regexp*(*regcomp_t) _((char* exp, char* xend, PMOP* pm));
+typedef I32 (*regexec_t) _((regexp* prog, char* stringarg, char* strend, char*
+			    strbeg, I32 minend, SV* screamer, void* data, 
+			    U32 flags));
+
 /* Set up PERLVAR macros for populating structs */
 #define PERLVAR(var,type) type var;
 #define PERLVARI(var,type,init) type var;

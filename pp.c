@@ -4338,7 +4338,7 @@ PP(pp_split)
     else {
 	maxiters += (strend - s) * rx->nparens;
 	while (s < strend && --limit &&
-	       regexec_flags(rx, s, strend, orig, 1, Nullsv, NULL, 0))
+	       (*regexecp)(rx, s, strend, orig, 1, Nullsv, NULL, 0))
 	{
 	    TAINT_IF(RX_MATCH_TAINTED(rx));
 	    if (rx->subbase

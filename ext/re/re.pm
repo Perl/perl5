@@ -1,5 +1,7 @@
 package re;
 
+$VERSION = 0.02;
+
 =head1 NAME
 
 re - Perl pragma to alter regular expression behaviour
@@ -45,23 +47,36 @@ eval	=> 0x00200000,
 );
 
 sub bits {
+    my $on = shift;
     my $bits = 0;
     unless(@_) {
 	require Carp;
 	Carp::carp("Useless use of \"re\" pragma");
     }
-    foreach my $s (@_){ $bits |= $bitmask{$s} || 0; };
+    foreach my $s (@_){
+      if ($s eq 'debug') {
+	  eval <<'EOE';
+	    use DynaLoader;
+	    @ISA = ('DynaLoader');
+	    bootstrap re;
+EOE
+	  install() if $on;
+	  uninstall() unless $on;
+	  next;
+      }
+      $bits |= $bitmask{$s} || 0;
+    }
     $bits;
 }
 
 sub import {
     shift;
-    $^H |= bits(@_);
+    $^H |= bits(1,@_);
 }
 
 sub unimport {
     shift;
-    $^H &= ~ bits(@_);
+    $^H &= ~ bits(0,@_);
 }
 
 1;

@@ -19,6 +19,12 @@
  * with the POSIX routines of the same names.
 */
 
+#ifdef IN_XSUB_RE
+#  define Perl_pregcomp my_regcomp
+#  define Perl_regdump my_regdump
+#  define Perl_regprop my_regprop
+#endif 
+
 /*SUPPRESS 112*/
 /*
  * pregcomp and pregexec -- regsub and regerror are not used in perl

@@ -308,6 +308,9 @@ ext/Thread/unsync4.t	Test thread implicit synchronisation
 ext/attrs/Makefile.PL	attrs extension makefile writer
 ext/attrs/attrs.pm	attrs extension Perl module
 ext/attrs/attrs.xs	attrs extension external subroutines
+ext/re/Makefile.PL	re extension makefile writer
+ext/re/re.pm		re extension Perl module
+ext/re/re.xs		re extension external subroutines
 ext/util/make_ext	Used by Makefile to execute extension Makefiles
 ext/util/mkbootstrap	Turns ext/*/*_BS into bootstrap info
 fakethr.h		Fake threads header
@@ -558,7 +561,6 @@ lib/open3.pl		Open a three-ended pipe (uses IPC::Open3)
 lib/overload.pm		Module for overloading perl operators
 lib/perl5db.pl		Perl debugging routines
 lib/pwd.pl		Routines to keep track of PWD environment variable
-lib/re.pm		Pragmas for regular expressions
 lib/shellwords.pl	Perl library to split into words with shell quoting
 lib/sigtrap.pm		For trapping an abort and giving traceback
 lib/stat.pl		Perl library supporting stat function

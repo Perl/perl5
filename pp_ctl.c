@@ -101,7 +101,7 @@ PP(pp_regcomp)
 	    }
 
 	    pm->op_pmflags = pm->op_pmpermflags;	/* reset case sensitivity */
-	    pm->op_pmregexp = pregcomp(t, t + len, pm);
+	    pm->op_pmregexp = (*regcompp)(t, t + len, pm);
 	}
     }
 
@@ -148,7 +148,7 @@ PP(pp_substcont)
 	sv_catsv(dstr, POPs);
 
 	/* Are we done */
-	if (cx->sb_once || !regexec_flags(rx, s, cx->sb_strend, orig,
+	if (cx->sb_once || !(*regexecp)(rx, s, cx->sb_strend, orig,
 				     s == m, Nullsv, NULL,
 				     cx->sb_safebase ? 0 : REXEC_COPY_STR))
 	{
