@@ -279,6 +279,7 @@ ext/Encode/Encode/shiftjis.enc	Encoding tables
 ext/Encode/Encode/symbol.enc	Encoding tables
 ext/Encode/Encode/symbol.ucm	Encoding tables
 ext/Encode/Encode/Tcl.pm	Handler for .enc encodings
+ext/Encode/Encode/Tcl.t	See if Encode::Tcl works
 ext/Encode/Makefile.PL	Encode extension
 ext/Encode/Todo		Encode extension
 ext/Errno/ChangeLog	Errno perl module change log

@@ -79,7 +79,7 @@ sub loadEncoding
      last unless $type eq '#';
     }
    my $class = ref($obj).('::'.(($type eq 'E') ? 'Escape' : 'Table'));
-   carp "Loading $file";
+   # carp "Loading $file";
    bless $obj,$class;
    return $obj if $obj->read($fh,$obj->name,$type);
   }
