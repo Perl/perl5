@@ -56,12 +56,6 @@
     } STMT_END
 #endif
 
-#define EndSockets() \
-    STMT_START {					\
-	if (wsock_started)				\
-	    WSACleanup();				\
-    } STMT_END
-
 #define SOCKET_TEST(x, y) \
     STMT_START {					\
 	StartSockets();					\
@@ -76,6 +70,13 @@ static struct servent* win32_savecopyservent(struct servent*d,
                                              const char *proto);
 
 static int wsock_started = 0;
+
+EXTERN_C void
+EndSockets(void)
+{
+    if (wsock_started)
+	WSACleanup();
+}
 
 void
 start_sockets(void) 
