@@ -94,6 +94,9 @@ BEGIN {
 	WindowFromId
 	WindowFromPoint
 	EnumDlgItem
+
+	get_title
+	set_title
 );
 
 sub AUTOLOAD {
@@ -224,6 +227,10 @@ sub ChildWindows ($) {
   EndEnumWindows $h;
   @kids;
 }
+
+# backward compatibility
+*set_title = \&Title_set;
+*get_title = \&Title;
 
 # Autoload methods go after __END__, and are processed by the autosplit program.
 
