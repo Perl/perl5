@@ -16,7 +16,7 @@ print F $data;
 close F;
 
 
-my $o = tie @a, 'Tie::File', $file;
+my $o = tie @a, 'Tie::File', $file, autochomp => 0;
 print $o ? "ok $N\n" : "not ok $N\n";
 $N++;
 

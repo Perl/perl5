@@ -1,9 +1,8 @@
 #!/usr/bin/perl
 #
-# Check SPLICE function's return value
-# (04_splice.t checks its effect on the file)
+# Check SPLICE function's return value when autochoping is now
+# (07_rv_splice.t checks it aith autochomping off)
 #
-
 
 my $file = "tf$$.txt";
 $: = Tie::File::_default_recsep();
@@ -17,7 +16,7 @@ print "ok $N\n"; $N++;  # partial credit just for showing up
 
 init_file($data);
 
-my $o = tie @a, 'Tie::File', $file, autochomp => 0;
+my $o = tie @a, 'Tie::File', $file, autochomp => 1;
 print $o ? "ok $N\n" : "not ok $N\n";
 $N++;
 
@@ -140,11 +139,11 @@ print !defined($r) ? "ok $N\n" : "not ok $N \# return should have been undef, wa
 $N++;
 
 $r = splice(@a, 2, 1);
-print $r eq "pie$:" ? "ok $N\n" : "not ok $N \# return should have been 'pie\\n', was <$r>\n";
+print $r eq "pie" ? "ok $N\n" : "not ok $N \# return should have been 'pie', was <$r>\n";
 $N++;
 
 $r = splice(@a, 0, 2);
-print $r eq "like$:" ? "ok $N\n" : "not ok $N \# return should have been 'like\\n', was <$r>\n";
+print $r eq "like" ? "ok $N\n" : "not ok $N \# return should have been 'like', was <$r>\n";
 $N++;
 
 # (49-50) Test default arguments
@@ -166,7 +165,6 @@ sub init_file {
 # expected results are in @_
 sub check_result {
   my @x = @_;
-  s/$:$// for @r;
   my $good = 1;
   $good = 0 unless @r == @x;
   for my $i (0 .. $#r) {
