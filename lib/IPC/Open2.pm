@@ -80,8 +80,8 @@ sub open2 {
 
     # force unqualified filehandles into callers' package
     local($package) = caller;
-    $dad_rdr =~ s/^[^']+$/$package'$&/ unless ref $dad_rdr;
-    $dad_wtr =~ s/^[^']+$/$package'$&/ unless ref $dad_wtr;
+    $dad_rdr =~ s/^([^']+$)/$package'$1/ unless ref $dad_rdr;
+    $dad_wtr =~ s/^([^']+$)/$package'$1/ unless ref $dad_wtr;
 
     local($kid_rdr) = ++$fh;
     local($kid_wtr) = ++$fh;

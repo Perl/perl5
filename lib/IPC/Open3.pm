@@ -83,9 +83,9 @@ sub open3 {
 
     # force unqualified filehandles into callers' package
     my($package) = caller;
-    $dad_wtr =~ s/^[^:]+$/$package\:\:$&/ unless ref $dad_wtr;
-    $dad_rdr =~ s/^[^:]+$/$package\:\:$&/ unless ref $dad_rdr;
-    $dad_err =~ s/^[^:]+$/$package\:\:$&/ unless ref $dad_err;
+    $dad_wtr =~ s/^([^:]+$)/$package\:\:$1/ unless ref $dad_wtr;
+    $dad_rdr =~ s/^([^:]+$)/$package\:\:$1/ unless ref $dad_rdr;
+    $dad_err =~ s/^([^:]+$)/$package\:\:$1/ unless ref $dad_err;
 
     my($kid_rdr) = ++$fh;
     my($kid_wtr) = ++$fh;
