@@ -298,23 +298,25 @@ EOT
 my @need_relocation;
 
 if (fetch_string({},'userelocatableinc')) {
-    foreach my $what (qw(archlib archlibexp
-			 privlib privlibexp
-			 sitearch sitearchexp
-			 sitelib sitelibexp
+    foreach my $what (qw(archlibexp
+			 privlibexp
+			 sitearchexp
+			 sitelibexp
 			 sitelib_stem
-			 vendorarch vendorarchexp
-			 vendorlib vendorlibexp
+			 vendorarchexp
+			 vendorlibexp
 			 vendorlib_stem)) {
 	push @need_relocation, $what if fetch_string({}, $what) =~ m!^\.\.\./!;
     }
-    # This can have .../ anywhere:
-    push @need_relocation, 'otherlibdirs'
-	if fetch_string({}, 'otherlibdirs') =~ m!\.\.\./!;
 }
 
 my %need_relocation;
 @need_relocation{@need_relocation} = @need_relocation;
+
+# This can have .../ anywhere:
+if (fetch_string({}, 'otherlibdirs') =~ m!\.\.\./!) {
+    $need_relocation{otherlibdirs} = 'otherlibdirs';
+}
 
 my $relocation_code = <<'EOT';
 
@@ -344,9 +346,10 @@ sub relocate_inc {
 }
 EOT
 
-if (@need_relocation) {
+if (%need_relocation) {
   my $relocations_in_common;
-  foreach (@need_relocation) {
+  # otherlibdirs only features in the hash
+  foreach (keys %need_relocation) {
     $relocations_in_common++ if $Common{$_};
   }
   if ($relocations_in_common) {
@@ -399,6 +402,15 @@ print CONFIG_HEAVY 'foreach my $what (qw(', join (' ', @need_relocation),
     s/^($what=)(['"])(.*?)\2/$1 . $2 . relocate_inc($3) . $2/me;
 }
 EOT
+# Currently it only makes sense to do the ... relocation on Unix, so there's
+# no need to emulate the "which separator for this platform" logic in perl.c -
+# ':' will always be applicable
+if ($need_relocation{otherlibdirs}) {
+print CONFIG_HEAVY << 'EOT';
+s{^(otherlibdirs=)(['"])(.*?)\2}
+ {$1 . $2 . join ':', map {relocate_inc($_)} split ':', $3 . $2}me;
+EOT
+}
 }
 
 print CONFIG_HEAVY <<'EOT';
@@ -585,7 +597,9 @@ foreach my $key (keys %Common) {
 	$value =~ s!\\!\\\\!g;
 	$value =~ s!'!\\'!g;
 	$value = "'$value'";
-	if ($need_relocation{$key}) {
+	if ($key eq 'otherlibdirs') {
+	    $value = "join (':', map {relocate_inc(\$_)} split (':', $value))";
+	} elsif ($need_relocation{$key}) {
 	    $value = "relocate_inc($value)";
 	}
     } else {
