@@ -2639,7 +2639,7 @@ PerlIOStdio_unread(pTHX_ PerlIO *f, const void *vbuf, Size_t count)
     SSize_t unread = 0;
     FILE *s = PerlIOSelf(f, PerlIOStdio)->stdio;
 
-    if (PerlIO_fast_gets(f)) {
+    if (PerlIO_fast_gets(f) && PerlIO_has_base(f)) {
 	STDCHAR *buf = ((STDCHAR *) vbuf) + count;
 	STDCHAR *base = PerlIO_get_base(f);
 	SSize_t cnt   = PerlIO_get_cnt(f);
@@ -2654,14 +2654,37 @@ PerlIOStdio_unread(pTHX_ PerlIO *f, const void *vbuf, Size_t count)
 	    count -= avail;
 	    unread += avail;
 	    PerlIO_set_ptrcnt(f,ptr,cnt+avail);
+	    if (PerlSIO_feof(s) && unread >= 0)
+		PerlSIO_clearerr(s);
+	}
+    }
+    else if (PerlIO_has_cntptr(f)) {
+	/* We can get pointer to buffer but not its base
+	   Do ungetc() but check chars are ending up in the
+	   buffer
+	 */
+	STDCHAR *eptr = (STDCHAR*)PerlSIO_get_ptr(s);
+	STDCHAR *buf = ((STDCHAR *) vbuf) + count;
+	while (count > 0) {
+	    int ch = *--buf & 0xFF;
+	    if (ungetc(ch,s) != ch) {
+		/* ungetc did not work */
+		break;
+	    }
+	    if ((STDCHAR*)PerlSIO_get_ptr(s) != --eptr || ((*eptr & 0xFF) != ch)) {
+		/* Did not change pointer as expected */
+		fgetc(s);  /* get char back again */
+		break;
+	    }
+	    /* It worked ! */
+	    count--;
+	    unread++;
 	}
     }
 
     if (count > 0) {
 	unread += PerlIOBase_unread(aTHX_ f, vbuf, count);
     }
-    if (PerlSIO_feof(s) && unread >= 0)
-	PerlSIO_clearerr(s);
     return unread;
 }
 
@@ -2829,7 +2852,7 @@ PerlIOStdio_fill(pTHX_ PerlIO *f)
 	return EOF;
 
 #if (defined(STDIO_PTR_LVALUE) && (defined(STDIO_CNT_LVALUE) || defined(STDIO_PTR_LVAL_SETS_CNT)))
-    if (PerlIO_fast_gets(f)) {
+    if (PerlIO_fast_gets(f) && PerlIO_has_base(f)) {
 	/* Fake ungetc() to the real buffer in case system's ungetc
 	   goes elsewhere
 	 */
@@ -2844,6 +2867,12 @@ PerlIOStdio_fill(pTHX_ PerlIO *f)
 	    return 0;
 	}
     }
+    else if (PerlIO_has_cntptr(f)) {
+	STDCHAR ch = c;
+	if (PerlIOStdio_unread(aTHX_ f,&ch,1) == 1) {
+	    return 0;
+	}
+    }
 #endif
 
 #if defined(VMS)
@@ -2855,7 +2884,7 @@ PerlIOStdio_fill(pTHX_ PerlIO *f)
     (*stdio)->_cnt++;
 #else
     /* If buffer snoop scheme above fails fall back to
-       using ungetc (but why did "fill" get called?).
+       using ungetc().
      */
     if (PerlSIO_ungetc(c, stdio) != c)
 	return EOF;
