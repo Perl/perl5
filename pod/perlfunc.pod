@@ -4602,12 +4602,6 @@ Examples:
     use sort '_mergesort';  # note discouraging _
     @new = sort { substr($a, 3, 5) cmp substr($b, 3, 5) } @old;
 
-    # Similar to the previous example, but demand stability as well
-    # Because of the way quicksort is "stabilized", this combination
-    # is not threadsafe
-    use sort qw( _quicksort stable );
-    @new = sort { substr($a, 3, 5) cmp substr($b, 3, 5) } @old;
-
 If you're using strict, you I<must not> declare $a
 and $b as lexicals.  They are package globals.  That means
 if you're in the C<main> package and type
