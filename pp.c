@@ -1494,11 +1494,6 @@ PP(pp_lt)
 		    RETURN;
 		}
 		auv = SvUVX(TOPs);
-		if (auv >= (UV) IV_MAX) {
-		    /* As (b) is an IV, it cannot be > IV_MAX */
-		    SETs(&PL_sv_no);
-		    RETURN;
-		}
 		SETs(boolSV(auv < (UV)biv));
 		RETURN;
 	    }
@@ -1515,11 +1510,6 @@ PP(pp_lt)
 		}
 		buv = SvUVX(TOPs);
 		SP--;
-		if (buv > (UV) IV_MAX) {
-		    /* As (a) is an IV, it cannot be > IV_MAX */
-		    SETs(&PL_sv_yes);
-		    RETURN;
-		}
 		SETs(boolSV((UV)aiv < buv));
 		RETURN;
 	    }
@@ -1572,11 +1562,6 @@ PP(pp_gt)
 		    RETURN;
 		}
 		auv = SvUVX(TOPs);
-		if (auv > (UV) IV_MAX) {
-		    /* As (b) is an IV, it cannot be > IV_MAX */
-		    SETs(&PL_sv_yes);
-		    RETURN;
-		}
 		SETs(boolSV(auv > (UV)biv));
 		RETURN;
 	    }
@@ -1593,11 +1578,6 @@ PP(pp_gt)
 		}
 		buv = SvUVX(TOPs);
 		SP--;
-		if (buv >= (UV) IV_MAX) {
-		    /* As (a) is an IV, it cannot be > IV_MAX */
-		    SETs(&PL_sv_no);
-		    RETURN;
-		}
 		SETs(boolSV((UV)aiv > buv));
 		RETURN;
 	    }
@@ -1650,11 +1630,6 @@ PP(pp_le)
 		    RETURN;
 		}
 		auv = SvUVX(TOPs);
-		if (auv > (UV) IV_MAX) {
-		    /* As (b) is an IV, it cannot be > IV_MAX */
-		    SETs(&PL_sv_no);
-		    RETURN;
-		}
 		SETs(boolSV(auv <= (UV)biv));
 		RETURN;
 	    }
@@ -1671,11 +1646,6 @@ PP(pp_le)
 		}
 		buv = SvUVX(TOPs);
 		SP--;
-		if (buv >= (UV) IV_MAX) {
-		    /* As (a) is an IV, it cannot be > IV_MAX */
-		    SETs(&PL_sv_yes);
-		    RETURN;
-		}
 		SETs(boolSV((UV)aiv <= buv));
 		RETURN;
 	    }
@@ -1728,11 +1698,6 @@ PP(pp_ge)
 		    RETURN;
 		}
 		auv = SvUVX(TOPs);
-		if (auv >= (UV) IV_MAX) {
-		    /* As (b) is an IV, it cannot be > IV_MAX */
-		    SETs(&PL_sv_yes);
-		    RETURN;
-		}
 		SETs(boolSV(auv >= (UV)biv));
 		RETURN;
 	    }
@@ -1749,11 +1714,6 @@ PP(pp_ge)
 		}
 		buv = SvUVX(TOPs);
 		SP--;
-		if (buv > (UV) IV_MAX) {
-		    /* As (a) is an IV, it cannot be > IV_MAX */
-		    SETs(&PL_sv_no);
-		    RETURN;
-		}
 		SETs(boolSV((UV)aiv >= buv));
 		RETURN;
 	    }
@@ -1825,11 +1785,6 @@ PP(pp_ne)
 		    }
 		    uv = SvUVX(*(SP+1)); /* Do I want TOPp1s() ? */
 		}
-		/* we know iv is >= 0 */
-		if (uv > (UV) IV_MAX) {
-		    SETs(&PL_sv_yes);
-		    RETURN;
-		}
 		SETs(boolSV((UV)iv != uv));
 		RETURN;
 	    }
@@ -1891,10 +1846,7 @@ PP(pp_ncmp)
 		    value = 1;
 		} else {
 		    leftuv = SvUVX(TOPm1s);
-		    if (leftuv > (UV) IV_MAX) {
-			/* As (b) is an IV, it cannot be > IV_MAX */
-			value = 1;
-		    } else if (leftuv > (UV)rightiv) {
+		    if (leftuv > (UV)rightiv) {
 			value = 1;
 		    } else if (leftuv < (UV)rightiv) {
 			value = -1;
@@ -1912,12 +1864,9 @@ PP(pp_ncmp)
 		    value = -1;
 		} else {
 		    rightuv = SvUVX(TOPs);
-		    if (rightuv > (UV) IV_MAX) {
-			/* As (a) is an IV, it cannot be > IV_MAX */
-			value = -1;
-		    } else if (leftiv > (UV)rightuv) {
+		    if ((UV)leftiv > rightuv) {
 			value = 1;
-		    } else if (leftiv < (UV)rightuv) {
+		    } else if ((UV)leftiv < rightuv) {
 			value = -1;
 		    } else {
 			value = 0;

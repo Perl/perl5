@@ -294,10 +294,6 @@ PP(pp_eq)
 		    uv = SvUVX(*(SP+1)); /* Do I want TOPp1s() ? */
 		}
 		/* we know iv is >= 0 */
-		if (uv > (UV) IV_MAX) {
-		    SETs(&PL_sv_no);
-		    RETURN;
-		}
 		SETs(boolSV((UV)iv == uv));
 		RETURN;
 	    }
