@@ -25,16 +25,15 @@ stdchar='unsigned char'
 # And even there, we should only bother to delete harmful libraries.
 # However, I don't know what they are or why they should be deleted,
 # so this will have to do for now.  --AD  28 Mar 1995
-libswanted='nsl dbm gdbm db PW malloc m'
+libswanted='sfio nsl dbm gdbm db PW malloc m'
 #
 # Extensions:  This system can not compile POSIX. We'll let Configure 
-# figure out the others.  Certainly Fcntl, Socket, and at least one *DB*
-# extension should be included.
-# perl5.000 had:  static_ext='DynaLoader NDBM_File Socket'
+# figure out the others. 
 useposix='n'
 #
 uidtype='ushort'
 voidflags='7'
 inclwanted='/usr/include /usr/include/net'
-libpth='/usr/lib /usr/local/lib /lib'
+# Setting libpth shouldn't be needed any more.
+# libpth='/usr/lib /usr/local/lib /lib'
 pth='. /bin /usr/bin /usr/ucb /usr/local/bin /usr/X11/bin /usr/lbin /etc /usr/lib'
