@@ -638,8 +638,9 @@ Level 1 - Basic Unicode Support
         [ 7] include Letters in word characters
         [ 8] see UTR#21 Case Mappings: Perl implements 1:1 mappings
         [ 9] see UTR#13 Unicode Newline Guidelines
-        [10] should do ^ and $ also on \x{2028} and \x{2029}
-
+        [10] should do ^ and $ also on \x{85}, \x{2028} and \x{2029})
+             (should also affect <>, $., and script line numbers)
+  
 (*) Instead of [\u0370-\u03FF-[{UNASSIGNED}]] as suggested by the TR
 18 you can use negated lookahead: to match currently assigned modern
 Greek characters use for example
