@@ -8,7 +8,7 @@ use warnings;
 
 use Exporter ();
 
-our $VERSION   = "0.53";
+our $VERSION   = "0.54";
 our @ISA       = qw(Exporter);
 our @EXPORT_OK = qw(set_style add_callback);
 
@@ -132,17 +132,15 @@ sub compile {
 	if (!@args or $do_main) {
 	    print "main program:\n" if $do_main;
 	    sequence(main_start);
+	    $curcv = main_cv;
 	    if ($order eq "exec") {
 		return if class(main_start) eq "NULL";
-		$curcv = main_cv;
 		walk_exec(main_start);
 	    } elsif ($order eq "tree") {
 		return if class(main_root) eq "NULL";
-		$curcv = main_cv;
 		print tree(main_root, 0);
 	    } elsif ($order eq "basic") {
 		return if class(main_root) eq "NULL";
-		$curcv = main_cv;
 		walk_topdown(main_root,
 			     sub { $_[0]->concise($_[1]) }, 0);
 	    }
@@ -393,13 +391,13 @@ sub concise_sv {
 	    $sv = $sv->RV;
 	}
 	if (class($sv) eq "SPECIAL") {
-	    $hr->{svval} = ["Null", "sv_undef", "sv_yes", "sv_no"]->[$$sv];
+	    $hr->{svval} .= ["Null", "sv_undef", "sv_yes", "sv_no"]->[$$sv];
 	} elsif ($sv->FLAGS & SVf_NOK) {
-	    $hr->{svval} = $sv->NV;
+	    $hr->{svval} .= $sv->NV;
 	} elsif ($sv->FLAGS & SVf_IOK) {
-	    $hr->{svval} = $sv->IV;
+	    $hr->{svval} .= $sv->IV;
 	} elsif ($sv->FLAGS & SVf_POK) {
-	    $hr->{svval} = cstring($sv->PV);
+	    $hr->{svval} .= cstring($sv->PV);
 	}
 	return $hr->{svclass} . " " .  $hr->{svval};
     }
