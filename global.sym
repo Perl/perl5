@@ -933,6 +933,7 @@ same_dirent
 save_I16
 save_I32
 save_aelem
+save_alloc
 save_aptr
 save_ary
 save_clearsv

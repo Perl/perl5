@@ -532,6 +532,24 @@ save_op(void)
     SSPUSHINT(SAVEt_OP);
 }
 
+I32
+save_alloc(I32 size, I32 pad)
+{
+    dTHR;
+    register I32 start = pad + ((char*)&PL_savestack[PL_savestack_ix]
+                                - (char*)PL_savestack);
+    register I32 elems = 1 + ((size + pad - 1) / sizeof(*PL_savestack));
+
+    /* SSCHECK may not be good enough */
+    while (PL_savestack_ix + elems + 2 > PL_savestack_max)
+        savestack_grow();
+
+    PL_savestack_ix += elems;
+    SSPUSHINT(elems);
+    SSPUSHINT(SAVEt_ALLOC);
+    return start;
+}
+
 void
 leave_scope(I32 base)
 {
@@ -759,6 +777,7 @@ leave_scope(I32 base)
 	    (CALLDESTRUCTOR)(ptr);
 	    break;
 	case SAVEt_REGCONTEXT:
+	case SAVEt_ALLOC:
 	    i = SSPOPINT;
 	    PL_savestack_ix -= i;  	/* regexp must have croaked */
 	    break;

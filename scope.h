@@ -26,6 +26,7 @@
 #define SAVEt_HELEM     25
 #define SAVEt_OP	26
 #define SAVEt_HINTS	27
+#define SAVEt_ALLOC	28
 
 #define SSCHECK(need) if (PL_savestack_ix + need > PL_savestack_max) savestack_grow()
 #define SSPUSHINT(i) (PL_savestack[PL_savestack_ix++].any_i32 = (I32)(i))
@@ -109,6 +110,23 @@
 	    SSPUSHINT(SAVEt_HINTS);		\
 	}					\
     } STMT_END
+
+/* SSNEW() temporarily allocates a specified number of bytes of data on the
+ * savestack.  It returns an integer index into the savestack, because a
+ * pointer would get broken if the savestack is moved on reallocation.
+ * SSNEWa() works like SSNEW(), but also aligns the data to the specified
+ * number of bytes.  MEM_ALIGNBYTES is perhaps the most useful.  The
+ * alignment will be preserved therough savestack reallocation *only* if
+ * realloc returns data aligned to a size divisible by `align'!
+ *
+ * SSPTR() converts the index returned by SSNEW/SSNEWa() into a pointer.
+ */
+
+#define SSNEW(size)             save_alloc(size, 0)
+#define SSNEWa(size,align)	save_alloc(size, \
+    (align - ((int)((caddr_t)&PL_savestack[PL_savestack_ix]) % align)) % align)
+
+#define SSPTR(off,type)         ((type) ((char*)PL_savestack + off))
 
 /* A jmpenv packages the state required to perform a proper non-local jump.
  * Note that there is a start_env initialized when perl starts, and top_env

@@ -1613,6 +1613,8 @@
 #define savestack_grow      pPerl->Perl_savestack_grow
 #undef  save_aelem
 #define save_aelem          pPerl->Perl_save_aelem
+#undef  save_alloc
+#define save_alloc          pPerl->Perl_save_alloc
 #undef  save_aptr
 #define save_aptr           pPerl->Perl_save_aptr
 #undef  save_ary

@@ -1144,6 +1144,8 @@
 #define savestack_grow    CPerlObj::Perl_savestack_grow
 #undef  save_aelem
 #define save_aelem        CPerlObj::Perl_save_aelem
+#undef  save_alloc
+#define save_alloc        CPerlObj::Perl_save_alloc
 #undef  save_aptr
 #define save_aptr         CPerlObj::Perl_save_aptr
 #undef  save_ary

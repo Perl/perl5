@@ -878,6 +878,7 @@
 #define save_I16		Perl_save_I16
 #define save_I32		Perl_save_I32
 #define save_aelem		Perl_save_aelem
+#define save_alloc		Perl_save_alloc
 #define save_aptr		Perl_save_aptr
 #define save_ary		Perl_save_ary
 #define save_clearsv		Perl_save_clearsv

@@ -498,6 +498,7 @@ VIRTUAL char*	savepv _((char* sv));
 VIRTUAL char*	savepvn _((char* sv, I32 len));
 VIRTUAL void	savestack_grow _((void));
 VIRTUAL void	save_aelem _((AV* av, I32 idx, SV **sptr));
+VIRTUAL I32	save_alloc _((I32 size, I32 pad));
 VIRTUAL void	save_aptr _((AV** aptr));
 VIRTUAL AV*	save_ary _((GV* gv));
 VIRTUAL void	save_clearsv _((SV** svp));

@@ -1300,13 +1300,9 @@ struct _sublex_info {
     OP *sub_op;		/* "lex_op" to use */
 };
 
-#ifdef PERL_OBJECT
-struct magic_state {
-    SV* mgs_sv;
-    U32 mgs_flags;
-};
-typedef struct magic_state MGS;
+typedef struct magic_state MGS;	/* struct magic_state defined in mg.c */
 
+#ifdef PERL_OBJECT
 typedef struct {
     I32 len_min;
     I32 len_delta;
