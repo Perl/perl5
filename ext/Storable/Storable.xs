@@ -2455,7 +2455,7 @@ static int store_code(stcxt_t *cxt, CV *cv)
 	 * Require B::Deparse. At least B::Deparse 0.61 is needed for
 	 * blessed code references.
 	 */
-	/* XXX sv_2mortal seems to be evil here. why? */
+	/* Ownership of both SVs is passed to load_module, which frees them. */
 	load_module(PERL_LOADMOD_NOIMPORT, newSVpvn("B::Deparse",10), newSVnv(0.61));
 
 	ENTER;
@@ -3315,7 +3315,7 @@ static int store(stcxt_t *cxt, SV *sv)
 			*/
 			/* Need to jump past the next hv_store, because on the
 			   second store of undef the old hash value will be
-			   SV_REFCNT_DEC()ed, and as Storable cheats horribly
+			   SvREFCNT_dec()ed, and as Storable cheats horribly
 			   by storing non-SVs in the hash a SEGV will ensure.
 			   Need to increase the tag number so that the
 			   receiver has no idea what games we're up to.  This
