@@ -102,10 +102,8 @@ while ($test = shift) {
 	open(script,"$test") || die "Can't run $test.\n";
 	$_ = <script>;
 	close(script);
-	if (/#!..perl(.*)/) {
-	    $switch = $1;
-	    # Add "" to protect uppercase switches on command line
-	    $switch =~ s/-(\S*[A-Z]\S*)/"-$1"/g;
+	if (/#!.*\bperl.*-\w*([tT])/) {
+	    $switch = qq{"-$1"};
 	} else {
 	    $switch = '';
 	}
