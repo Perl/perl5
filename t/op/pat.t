@@ -6,7 +6,7 @@
 
 $| = 1;
 
-print "1..834\n";
+print "1..842\n";
 
 BEGIN {
     chdir 't' if -d 't';
@@ -2577,4 +2577,34 @@ print "# some Unicode properties\n";
 	"ok 833\n" : "not ok 833\n";
     print ":$S3:" =~ /:(([$sigma])+):/i && $1 eq $S3 && $2 eq $sigma ?
 	"ok 834\n" : "not ok 834\n";
+}
+
+{
+    print "# LATIN SMALL LETTER SHARP S\n";
+
+    use charnames ':full';
+
+    print "\N{LATIN SMALL LETTER SHARP S}" =~
+	/\N{LATIN SMALL LETTER SHARP S}/    ? "ok 835\n" : "not ok 835\n";
+
+    print "\N{LATIN SMALL LETTER SHARP S}" =~
+	/\N{LATIN SMALL LETTER SHARP S}/i   ? "ok 836\n" : "not ok 836\n";
+
+    print "\N{LATIN SMALL LETTER SHARP S}" =~
+	/[\N{LATIN SMALL LETTER SHARP S}]/  ? "ok 837\n" : "not ok 837\n";
+
+    print "\N{LATIN SMALL LETTER SHARP S}" =~
+	/[\N{LATIN SMALL LETTER SHARP S}]/i ? "ok 838\n" : "not ok 838\n";
+
+    print "ss" =~
+	/\N{LATIN SMALL LETTER SHARP S}/i   ? "ok 839\n" : "not ok 839\n";
+
+    print "SS" =~
+	/\N{LATIN SMALL LETTER SHARP S}/i   ? "ok 840\n" : "not ok 840\n";
+
+    print "ss" =~
+	/[\N{LATIN SMALL LETTER SHARP S}]/i ? "ok 841\n" : "not ok 841\n";
+
+    print "SS" =~
+	/[\N{LATIN SMALL LETTER SHARP S}]/i ? "ok 842\n" : "not ok 842\n";
 }
