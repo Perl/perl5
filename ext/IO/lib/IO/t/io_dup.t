@@ -55,7 +55,7 @@ $stdout->close;
 $stdout->fdopen($dupout,"w");
 $stderr->fdopen($duperr,"w");
 
-if ($^O eq 'MSWin32' || $^O eq 'NetWare') { print `type Io.dup` }
+if ($^O eq 'MSWin32' || $^O eq 'NetWare' || $^O eq 'VMS') { print `type Io.dup` }
 else                  { system 'cat Io.dup' }
 unlink 'Io.dup';
 
