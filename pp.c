@@ -1392,9 +1392,10 @@ seed()
     U32 u;
 #ifdef VMS
 #  include <starlet.h>
+    /* when[] = (low 32 bits, high 32 bits) of time since epoch
+     * in 100-ns units, typically incremented ever 10 ms.        */
     unsigned int when[2];
     _ckvmssts(sys$gettim(when));
-    /* Please tell us:  Which value is seconds and what is the other here? */
     u = (U32)SEED_C1 * when[0] + (U32)SEED_C2 * when[1];
 #else
 #  ifdef HAS_GETTIMEOFDAY
