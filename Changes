@@ -1,4 +1,648 @@
 ____________________________________________________________________________
+[  6818] By: jhi                                   on 2000/08/25  18:47:45
+        Log: Tweak the sfio/useperlio logic, hopefully as wished in
+             
+             Subject: [ID 20000825.004] Not OK: perl v5.7.0 +SUIDMAIL +DEVEL6804 on i586-linux 2.2.12 (UNINSTALLED)
+             From: Nicholas Clark <nick@babyhippo.co.uk>
+             Date: Fri, 25 Aug 2000 12:01:45 +0100
+             Message-Id: <E13SHF3-0005I9-00@fruitbat.babyhippo.co.uk>
+     Branch: metaconfig/U/perl
+	   ! d_sfio.U
+     Branch: perl
+	   ! Configure
+____________________________________________________________________________
+[  6817] By: jhi                                   on 2000/08/25  18:32:51
+        Log: Allow microperl to assume <math.h>, without it the math
+             functions like floor() are assumed to return int, which makes
+             for core dumps in machines where integer and floating register
+             don't mix.
+     Branch: perl
+	   ! uconfig.h uconfig.sh
+____________________________________________________________________________
+[  6816] By: jhi                                   on 2000/08/25  18:27:17
+        Log: AIX 4.3.3 has SOCKS in libc with a differently named init routine,
+             the problem reported in
+             
+             Subject: [ID 20000825.007] Building stable 5.6.0 on AIX 4.3.3 using SOCKS
+             From: danhale@us.ibm.com
+             Date: Fri, 25 Aug 2000 10:58:06 -0400
+             Message-Id: <85256946.005238A3.00@d54mta02.raleigh.ibm.com>
+     Branch: metaconfig/U/perl
+	   + d_socks5_init.U
+     Branch: perl
+	   ! Configure INSTALL config_h.SH configure.com epoc/config.sh
+	   ! perl.c uconfig.h uconfig.sh vos/config.def vos/config.h
+	   ! vos/config.pl vos/config_h.SH_orig win32/config.bc
+	   ! win32/config.gc win32/config.vc
+____________________________________________________________________________
+[  6815] By: jhi                                   on 2000/08/25  17:43:31
+        Log: A solution for the retrieve_fd autosplit warning,
+             idea suggested by Mike Guy.
+     Branch: perl
+	   ! ext/Storable/Storable.pm
+____________________________________________________________________________
+[  6814] By: jhi                                   on 2000/08/25  17:16:03
+        Log: Add install-silent target.
+     Branch: perl
+	   ! Makefile.SH
+____________________________________________________________________________
+[  6813] By: jhi                                   on 2000/08/25  17:14:23
+        Log: Subject: Re: [PATCH] More silencing of installman.
+             From: <abigail@foad.org>
+             Date: Thu, 24 Aug 2000 19:27:03 -0400
+             Message-ID: <20000824232703.7001.qmail@foad.org>
+             
+             Subject: Re: [PATCH] More silencing of installman.
+             From: <abigail@foad.org>
+             Date: Fri, 25 Aug 2000 03:00:58 -0400
+             Message-ID: <20000825070058.10697.qmail@foad.org>
+     Branch: perl
+	   ! installman
+____________________________________________________________________________
+[  6812] By: jhi                                   on 2000/08/25  17:11:28
+        Log: installperl --verbose and --silent.
+             
+             Subject: Re: [PATCH] More silencing of installman.
+             From: <abigail@foad.org>
+             Message-ID: <20000825064430.9719.qmail@foad.org>
+             Date: Fri, 25 Aug 2000 02:44:30 -0400
+     Branch: perl
+	   ! installperl
+____________________________________________________________________________
+[  6811] By: jhi                                   on 2000/08/25  17:05:43
+        Log: Subject: [ID 20000824.029] MakeMaker manifypods fails on DJGPP systems
+             From: "Peter J. Farley III" <pjfarley@banet.net>
+             Date: Thu, 24 Aug 2000 21:58:03 -0400
+             Message-Id: <4.3.1.0.20000824215500.00ac3df0@pop5.banet.net>
+             
+             (applied slightly modified)
+     Branch: perl
+	   ! lib/ExtUtils/MM_Unix.pm
+____________________________________________________________________________
+[  6810] By: jhi                                   on 2000/08/25  17:01:18
+        Log: Missing parts of 
+             
+             Subject: [PATCH: 6789] some endl fixes for VMS wackiness
+             From: Peter Prymmer <pvhp@forte.com>
+             Date: Wed, 23 Aug 2000 13:58:31 -0700 (PDT)
+             Message-ID: <Pine.OSF.4.10.10008231351000.126820-100000@aspara.forte.com>
+     Branch: perl
+	   ! t/lib/cgi-html.t
+____________________________________________________________________________
+[  6809] By: jhi                                   on 2000/08/25  16:46:32
+        Log: Subject: [PATCH perl@6805, 5.6.0, 5.005_03] prevent rare Perl hang on VMS
+             From: "Craig A. Berry" <craig.berry@psinetcs.com>
+             Date: Thu, 24 Aug 2000 19:13:11 -0500
+             Message-Id: <4.3.2.7.2.20000824174417.02479ef8@exchi01>
+     Branch: perl
+	   ! vms/vms.c
+____________________________________________________________________________
+[  6808] By: jhi                                   on 2000/08/25  16:39:22
+        Log: Subject: [PATCH: 6805] several more tweaks to configure.com
+             From: Peter Prymmer <pvhp@forte.com>
+             Date: Thu, 24 Aug 2000 16:25:48 -0700 (PDT)
+             Message-ID: <Pine.OSF.4.10.10008241623420.181493-100000@aspara.forte.com>
+     Branch: perl
+	   ! configure.com
+____________________________________________________________________________
+[  6807] By: jhi                                   on 2000/08/25  16:36:37
+        Log: Better wording for the vec lvalue diagnostic.
+             
+             Subject: Re: [PATCH] Re: [ID 20000821.008] Negitive numbers with vec dumps core
+             From: Ronald J Kimball <rjk@linguist.dartmouth.edu>
+             Date: Wed, 23 Aug 2000 14:12:16 -0400
+             Message-ID: <20000823141215.A173200@linguist.dartmouth.edu>
+     Branch: perl
+	   ! pod/perldiag.pod
+____________________________________________________________________________
+[  6806] By: jhi                                   on 2000/08/24  18:17:22
+        Log: Subject: [PATCH] More silencing of installman.
+             From: <abigail@foad.org>
+             Date: Thu, 24 Aug 2000 14:01:44 -0400
+             Message-ID: <20000824180144.20062.qmail@foad.org>
+     Branch: perl
+	   ! installman
+____________________________________________________________________________
+[  6805] By: jhi                                   on 2000/08/24  15:00:31
+        Log: Update Changes.
+     Branch: perl
+	   ! Changes patchlevel.h
+____________________________________________________________________________
+[  6804] By: jhi                                   on 2000/08/24  14:59:07
+        Log: Regen perltoc.
+     Branch: perl
+	   ! pod/perltoc.pod
+____________________________________________________________________________
+[  6803] By: jhi                                   on 2000/08/24  14:44:39
+        Log: Show the doc file, not the temp file.
+     Branch: perl
+	   ! installman
+____________________________________________________________________________
+[  6802] By: jhi                                   on 2000/08/24  14:41:53
+        Log: Continue silencing.
+     Branch: perl
+	   ! installman
+____________________________________________________________________________
+[  6801] By: jhi                                   on 2000/08/24  14:34:40
+        Log: Actually do something with the silencer option.
+     Branch: perl
+	   ! installman
+____________________________________________________________________________
+[  6800] By: jhi                                   on 2000/08/24  14:26:22
+        Log: Make installman to recognize the silence flag -S.
+     Branch: perl
+	   ! installman
+____________________________________________________________________________
+[  6799] By: jhi                                   on 2000/08/24  13:49:38
+        Log: DOS patches and portability/porting notes, from Tim Jenness.
+     Branch: perl
+	   ! lib/File/Temp.pm
+____________________________________________________________________________
+[  6798] By: jhi                                   on 2000/08/24  13:48:27
+        Log: Create directories in silence.
+             
+             Subject: [PATCH] Another silencer for MakeMaker
+             From: andreas.koenig@anima.de (Andreas J. Koenig)
+             Date: 24 Aug 2000 14:18:52 +0200
+             Message-ID: <m3zom297ir.fsf@ak-71.mind.de>
+     Branch: perl
+	   ! lib/ExtUtils/Command.pm
+____________________________________________________________________________
+[  6797] By: jhi                                   on 2000/08/24  13:46:42
+        Log: More liberal parsing of version numbers.
+             
+             Subject: Re: CPAN.pm beta for testing available
+             From: andreas.koenig@anima.de (Andreas J. Koenig)
+             Date: 24 Aug 2000 13:51:57 +0200
+             Message-ID: <m34s4aanc2.fsf@ak-71.mind.de>
+     Branch: perl
+	   ! lib/CPAN.pm
+____________________________________________________________________________
+[  6796] By: jhi                                   on 2000/08/24  13:44:36
+        Log: Make "make install" by default silent.  A new "install-verbose"
+             target is verbose.
+     Branch: perl
+	   ! Makefile.SH
+____________________________________________________________________________
+[  6795] By: jhi                                   on 2000/08/24  13:39:14
+        Log: Add silencer flags to installperl.
+             
+             Subject: [PATCH] Making installperl silent.
+             From: <abigail@foad.org>
+             Date: Thu, 24 Aug 2000 05:01:45 -0400
+             Message-ID: <20000824090145.13141.qmail@foad.org>
+     Branch: perl
+	   ! installperl
+____________________________________________________________________________
+[  6794] By: jhi                                   on 2000/08/24  13:35:50
+        Log: installperl couldn't tell whether it had run tests or not.
+             
+             Subject: [PATCH] Re: installperl and t/TEST
+             From: <abigail@foad.org>
+             Date: Thu, 24 Aug 2000 04:00:53 -0400
+             Message-ID: <20000824080053.2494.qmail@foad.org>
+     Branch: perl
+	   ! Makefile.SH installperl
+____________________________________________________________________________
+[  6793] By: jhi                                   on 2000/08/24  13:27:50
+        Log: Drop the separate perlbc, perlcc -b should be enough.
+     Branch: perl
+	   - utils/perlbc.PL
+	   ! MANIFEST pod/perldelta.pod pod/perlutil.pod utils/Makefile
+____________________________________________________________________________
+[  6792] By: jhi                                   on 2000/08/24  04:41:30
+        Log: Upgrade to Storable 0.7.4, from Raphael Manfredi,
+             plus the typo fix from Peter Prymmer.
+     Branch: perl
+	   ! ext/Storable/ChangeLog ext/Storable/Makefile.PL
+	   ! ext/Storable/Storable.pm ext/Storable/Storable.xs
+____________________________________________________________________________
+[  6791] By: jhi                                   on 2000/08/24  02:10:43
+        Log: Replace #6705 with a minimal doc patch.
+             
+             Subject: [PATCH 5.6.0] replace change #6705
+             From: Jan Dubois <jand@ActiveState.com>
+             Date: Wed, 23 Aug 2000 18:31:51 -0700
+             Message-ID: <dau8qsolaurdcbom4810gfuhbjegemtr58@4ax.com>
+     Branch: perl
+	   ! lib/Win32.pod win32/win32.c
+____________________________________________________________________________
+[  6790] By: jhi                                   on 2000/08/23  17:52:00
+        Log: Subject: [PATCH] Re: [ID 20000821.008] Negitive numbers with vec dumps core
+             From: Mike Guy <mjtg@cam.ac.uk>
+             Date: Wed, 23 Aug 2000 18:38:46 +0100
+             Message-Id: <E13ReUA-0000vC-00@virgo.cus.cam.ac.uk>
+     Branch: perl
+	   ! doop.c pod/perldiag.pod pod/perlfunc.pod t/op/vec.t
+____________________________________________________________________________
+[  6789] By: jhi                                   on 2000/08/23  15:34:21
+        Log: Update Changes.
+     Branch: perl
+	   ! Changes patchlevel.h
+____________________________________________________________________________
+[  6788] By: jhi                                   on 2000/08/23  15:33:40
+        Log: Subject: [PATCH] (Mac OS X): Don't #define environ unless PERL_CORE
+             From: Wilfredo Sánchez <wsanchez@apple.com>
+             Date: Tue, 22 Aug 2000 19:31:27 -0700
+             Message-Id: <200008230231.TAA00461@ns1.abstrata.com>
+     Branch: perl
+	   ! perl.h
+____________________________________________________________________________
+[  6787] By: jhi                                   on 2000/08/23  15:29:31
+        Log: Subject: [ID 20000823.004] [PATCH 5.6.0+] Pod::Html is too self-contained
+             From: Spider Boardman <spider@leggy.zk3.dec.com>
+             Date: Wed, 23 Aug 2000 10:33:23 -0400
+             Message-Id: <200008231433.KAA28122@leggy.zk3.dec.com>
+     Branch: perl
+	   ! lib/Pod/Html.pm
+____________________________________________________________________________
+[  6786] By: jhi                                   on 2000/08/23  15:28:11
+        Log: Bad makefile.
+     Branch: perl
+	   ! ext/B/Makefile.PL
+____________________________________________________________________________
+[  6785] By: jhi                                   on 2000/08/23  14:37:04
+        Log: Update Changes.
+     Branch: perl
+	   ! Changes patchlevel.h
+____________________________________________________________________________
+[  6784] By: jhi                                   on 2000/08/23  13:58:41
+        Log: Portability fix from Hugo van der Sanden.
+     Branch: perl
+	   ! ext/re/Makefile.PL
+____________________________________________________________________________
+[  6783] By: jhi                                   on 2000/08/23  13:53:53
+        Log: Storable support, v-version fixes.
+             
+             Subject: CPAN.pm beta for testing available
+             From: andreas.koenig@anima.de (Andreas J. Koenig)
+             Date: 22 Aug 2000 23:31:33 +0200
+             Message-ID: <m3hf8dc79m.fsf@ak-71.mind.de>
+     Branch: perl
+	   ! lib/CPAN.pm lib/CPAN/FirstTime.pm
+____________________________________________________________________________
+[  6782] By: jhi                                   on 2000/08/23  13:51:26
+        Log: Mac and other portability updates from Chris Nandor.
+     Branch: perl
+	   ! pod/perlmodinstall.pod
+____________________________________________________________________________
+[  6781] By: jhi                                   on 2000/08/23  13:47:33
+        Log: Subject: [PATCH: 6778] fix a small typo in Storable.xs
+             From: Peter Prymmer <pvhp@forte.com>
+             Date: Tue, 22 Aug 2000 16:20:41 -0700 (PDT)
+             Message-ID: <Pine.OSF.4.10.10008221616430.68568-100000@aspara.forte.com>
+     Branch: perl
+	   ! ext/Storable/Storable.xs
+____________________________________________________________________________
+[  6780] By: jhi                                   on 2000/08/23  13:33:34
+        Log: VMS MMS (make) wants null action.
+     Branch: perl
+	   ! ext/B/Makefile.PL
+____________________________________________________________________________
+[  6779] By: jhi                                   on 2000/08/22  19:44:47
+        Log: Forgot portability nit.
+     Branch: perl
+	   ! t/lib/st-forgive.t
+____________________________________________________________________________
+[  6778] By: jhi                                   on 2000/08/22  19:35:25
+        Log: Be portable.
+     Branch: perl
+	   ! ext/B/Makefile.PL t/lib/st-forgive.t t/lib/st-retrieve.t
+	   ! t/lib/st-store.t
+____________________________________________________________________________
+[  6777] By: jhi                                   on 2000/08/22  18:50:53
+        Log: Update Changes.
+     Branch: perl
+	   ! Changes patchlevel.h
+____________________________________________________________________________
+[  6776] By: jhi                                   on 2000/08/22  18:44:46
+        Log: cSVOPo_*v things index into the current PL_curpad
+             under ithreads, which is different from the curpad
+             used by the XSUB.  (In other words, the code as-is
+             before this patch wouldn't work under ithreads.)
+             From Sarathy.
+     Branch: perl
+	   ! ext/B/B.xs
+____________________________________________________________________________
+[  6775] By: jhi                                   on 2000/08/22  18:18:37
+        Log: Make the selection of NVff et al stricter.
+     Branch: metaconfig/U/perl
+	   ! perlxvf.U
+     Branch: perl
+	   ! Configure config_h.SH
+____________________________________________________________________________
+[  6774] By: jhi                                   on 2000/08/22  17:19:42
+        Log: perldelta nits.
+     Branch: perl
+	   ! pod/perldelta.pod
+____________________________________________________________________________
+[  6773] By: jhi                                   on 2000/08/22  17:06:26
+        Log: Long double fixes from Spider Boardman.
+             
+             Subject: [ID 20000821.014] Not OK: perl v5.7.0 +SUIDMAIL +DEVEL6756 on alpha-dec_osf 5.1 (UNINSTALLED)
+             From: system PRIVILEGED account <root@peano.zk3.dec.com>
+             Date: Mon, 21 Aug 2000 18:41:15 -0400 (EDT)
+             Message-Id: <200008212241.SAA0000014255@peano.zk3.dec.com>
+     Branch: perl
+	   ! t/lib/bigfltpm.t t/lib/st-06compat.t
+____________________________________________________________________________
+[  6772] By: jhi                                   on 2000/08/22  15:04:53
+        Log: Update Changes.
+     Branch: perl
+	   ! Changes patchlevel.h
+____________________________________________________________________________
+[  6771] By: jhi                                   on 2000/08/22  15:01:44
+        Log: perldelta fixes from Hugo van der Sanden.
+     Branch: perl
+	   ! pod/perldelta.pod
+____________________________________________________________________________
+[  6770] By: jhi                                   on 2000/08/22  14:34:49
+        Log: Subject: [PATCH blead] nextchar() abuse misses an optimisation
+             From: Hugo <hv@crypt.compulink.co.uk>
+             Date: Tue, 22 Aug 2000 11:21:53 +0100
+             Message-Id: <200008221021.LAA03332@crypt.compulink.co.uk>
+     Branch: perl
+	   ! regcomp.c
+____________________________________________________________________________
+[  6769] By: jhi                                   on 2000/08/22  14:30:02
+        Log: Add Yitzchak, reformat.
+     Branch: perl
+	   ! Changes config_h.SH
+____________________________________________________________________________
+[  6768] By: jhi                                   on 2000/08/22  14:21:35
+        Log: Long double Gconvert fixes from Yitzchak Scott-Thoennes
+             and Spider Boardman.
+     Branch: metaconfig
+	   ! U/compline/d_gconvert.U
+     Branch: perl
+	   ! Configure
+____________________________________________________________________________
+[  6767] By: jhi                                   on 2000/08/22  14:11:24
+        Log: Subject: Re: [PATCH] [ID 20000820.012] Not OK: perl v5.7.0 +SUIDMAIL +DEVEL6735 on
+             From: sthoenna@efn.org (Yitzchak Scott-Thoennes)
+             Date: Mon, 21 Aug 2000 19:08:31 -0700
+             Message-ID: <fCeo5gzkgmhY092yn@efn.org>
+     Branch: perl
+	   - ext/Storable/patchlevel.h
+	   ! MANIFEST ext/Storable/MANIFEST
+____________________________________________________________________________
+[  6766] By: jhi                                   on 2000/08/22  13:49:29
+        Log: Subject: [PATCH: 6757] configure.com updates and syslog build
+             From: Peter Prymmer <pvhp@forte.com>
+             Date: Mon, 21 Aug 2000 17:15:35 -0700 (PDT)
+             Message-ID: <Pine.OSF.4.10.10008211653270.17516-100000@aspara.forte.com>
+     Branch: perl
+	   ! configure.com ext/Storable/Makefile.PL
+____________________________________________________________________________
+[  6765] By: jhi                                   on 2000/08/22  13:44:59
+        Log: Subject: [PATCH blead] B:: missing dependency
+             From: Hugo <hv@crypt.compulink.co.uk>
+             Date: Tue, 22 Aug 2000 06:44:33 +0100
+             Message-Id: <200008220544.GAA31051@crypt.compulink.co.uk>
+     Branch: perl
+	   ! ext/B/Makefile.PL
+____________________________________________________________________________
+[  6764] By: jhi                                   on 2000/08/22  13:38:12
+        Log: More bytecompiler.
+     Branch: perl
+	   ! pod/perlutil.pod utils/Makefile utils/perlbc.PL
+____________________________________________________________________________
+[  6763] By: jhi                                   on 2000/08/22  13:36:44
+        Log: Bytecompiler patches from Benjamin Stuhl.
+     Branch: perl
+	   ! bytecode.pl embedvar.h ext/B/B.pm ext/B/B.xs
+	   ! ext/B/B/Asmdata.pm ext/B/B/Assembler.pm ext/B/B/Bytecode.pm
+	   ! ext/B/O.pm ext/B/defsubs_h.PL ext/ByteLoader/ByteLoader.pm
+	   ! ext/ByteLoader/ByteLoader.xs ext/ByteLoader/bytecode.h
+	   ! ext/ByteLoader/byterun.c ext/ByteLoader/byterun.h intrpvar.h
+	   ! perl.c perlapi.h pod/perldelta.pod
+____________________________________________________________________________
+[  6762] By: jhi                                   on 2000/08/21  23:43:40
+        Log: An obsoleted diagnostic.
+     Branch: perl
+	   ! pod/perldelta.pod
+____________________________________________________________________________
+[  6761] By: jhi                                   on 2000/08/21  23:01:45
+        Log: The #6759 wasn't quite right.
+     Branch: perl
+	   ! t/lib/st-06compat.t t/lib/st-blessed.t t/lib/st-canonical.t
+	   ! t/lib/st-dclone.t t/lib/st-forgive.t t/lib/st-freeze.t
+	   ! t/lib/st-overload.t t/lib/st-recurse.t t/lib/st-retrieve.t
+	   ! t/lib/st-store.t t/lib/st-tied.t t/lib/st-tiedhook.t
+	   ! t/lib/st-tieditems.t
+____________________________________________________________________________
+[  6760] By: jhi                                   on 2000/08/21  22:35:49
+        Log: Be verydeepclean.
+     Branch: perl
+	   ! Makefile.SH
+____________________________________________________________________________
+[  6759] By: jhi                                   on 2000/08/21  22:25:40
+        Log: Subject: [PATCH: 6757] make new Storable tests forgiving of places where not built
+             From: Peter Prymmer <pvhp@forte.com>
+             Date: Mon, 21 Aug 2000 14:58:16 -0700 (PDT)
+             Message-ID: <Pine.OSF.4.10.10008211456250.17516-100000@aspara.forte.com>
+     Branch: perl
+	   ! t/lib/st-06compat.t t/lib/st-blessed.t t/lib/st-canonical.t
+	   ! t/lib/st-dclone.t t/lib/st-forgive.t t/lib/st-freeze.t
+	   ! t/lib/st-overload.t t/lib/st-recurse.t t/lib/st-retrieve.t
+	   ! t/lib/st-store.t t/lib/st-tied.t t/lib/st-tiedhook.t
+	   ! t/lib/st-tieditems.t
+____________________________________________________________________________
+[  6758] By: jhi                                   on 2000/08/21  22:22:32
+        Log: Few more casts, need reported in
+             
+             Subject: Re: [ID 20000821.010] OK: perl v5.7.0 +SUIDMAIL +DEVEL6756 on i586-linux-64all 2.2.16-9mdk (UNINSTALLED)
+             From: Mike Stok <mike@stok.co.uk>
+             Date: Mon, 21 Aug 2000 15:59:29 -0500 (CDT)
+             Message-ID: <Pine.LNX.4.21.0008211558480.19081-100000@ratdog.stok.co.uk>
+             
+             and
+             
+             Subject: [ID 20000821.013] Not OK: perl v5.7.0 +SUIDMAIL +DEVEL6756 on i686-linux-64int 2.2.13
+             From: abigail@foad.org
+             Date: 21 Aug 2000 21:31:34 -0000
+             Message-Id: <20000821213134.30170.qmail@foad.org>
+     Branch: perl
+	   ! ext/Storable/Storable.xs
+____________________________________________________________________________
+[  6757] By: jhi                                   on 2000/08/21  18:37:07
+        Log: Update Changes.
+     Branch: perl
+	   ! Changes patchlevel.h
+____________________________________________________________________________
+[  6756] By: jhi                                   on 2000/08/21  18:34:02
+        Log: A pod nit.
+             
+             Subject: [PATCH] pod/perlre.pod (was Re: [ID 20000821.007] $&, $1, etc. disappear when sub returns)
+             From: <abigail@foad.org>
+             Date: Mon, 21 Aug 2000 14:00:16 -0400
+             Message-ID: <20000821180016.28627.qmail@foad.org>
+     Branch: perl
+	   ! pod/perlre.pod
+____________________________________________________________________________
+[  6755] By: jhi                                   on 2000/08/21  18:30:56
+        Log: Use PodParser 1.18 new test.
+     Branch: perl
+	   ! t/pod/special_seqs.t t/pod/special_seqs.xr
+____________________________________________________________________________
+[  6754] By: jhi                                   on 2000/08/21  18:28:35
+        Log: Apply some PodParser 1.18 patches; the Pod/Find.pm
+             patches cannot be applied since #6712 conflicts.
+     Branch: perl
+	   ! lib/Pod/InputObjects.pm lib/Pod/Parser.pm lib/Pod/Usage.pm
+____________________________________________________________________________
+[  6753] By: jhi                                   on 2000/08/21  18:15:11
+        Log: Weed out some smaller changes.
+     Branch: perl
+	   ! pod/perldelta.pod
+____________________________________________________________________________
+[  6752] By: jhi                                   on 2000/08/21  18:02:30
+        Log: Also under djgpp the timestamps are funky.
+     Branch: perl
+	   ! t/op/stat.t
+____________________________________________________________________________
+[  6751] By: jhi                                   on 2000/08/21  17:55:56
+        Log: Tweak the floating point output routine preferences.
+     Branch: metaconfig
+	   ! U/compline/d_gconvert.U
+     Branch: perl
+	   ! Configure
+____________________________________________________________________________
+[  6750] By: jhi                                   on 2000/08/21  17:51:29
+        Log: Unicos/mk requires elaborate paranoia.
+     Branch: perl
+	   ! lib/Math/Complex.pm
+____________________________________________________________________________
+[  6749] By: gsar                                  on 2000/08/21  16:53:31
+        Log: use Cwd 'chdir' didn't set $ENV{PWD} correctly on Windows
+     Branch: perl
+	   ! lib/Cwd.pm
+____________________________________________________________________________
+[  6748] By: gsar                                  on 2000/08/21  16:22:19
+        Log: free TLS slot properly on Windows
+     Branch: perl
+	   ! thread.h win32/perllib.c win32/win32thread.h
+____________________________________________________________________________
+[  6747] By: jhi                                   on 2000/08/21  16:20:58
+        Log: Rename the macro argument because some preprocessors
+             can't tell the difference and expand arguments also inside
+             double quoted strings.
+     Branch: perl
+	   ! regcomp.c
+____________________________________________________________________________
+[  6746] By: jhi                                   on 2000/08/21  16:09:41
+        Log: Support long doubles in Storable.
+             
+             Subject: Re: Not OK: perl v5.7.0 +SUIDMAIL +DEVEL6735 on i686-linux-thread-multi-64int 2.2.14-5.0 (UNINSTALLED)
+             From: Radu Greab <radu@netsoft.ro>
+             Date: Mon, 21 Aug 2000 18:05:59 +0300 (EET DST)
+             Message-ID: <Pine.GSO.4.05.10008211804210.10137-100000@localhost>
+     Branch: perl
+	   ! ext/Storable/Storable.xs
+____________________________________________________________________________
+[  6745] By: jhi                                   on 2000/08/21  15:51:40
+        Log: Subject: RE: [PATCH perl@6736] t/pragma/warn/9enabled assumes stdout buffered
+             From: "Fifer, Eric" <EFifer@sanwaint.com>
+             Date: Mon, 21 Aug 2000 15:34:49 +0100
+             Message-ID: <779F20BCCE5AD31186A50008C75D9979171786@silldn_mail1.sanwaint.com>
+     Branch: perl
+	   ! t/pragma/warn/9enabled
+____________________________________________________________________________
+[  6744] By: jhi                                   on 2000/08/21  15:39:35
+        Log: Document the endianness of Alpha more precisely.
+     Branch: perl
+	   ! hints/unicos.sh pod/perldelta.pod pod/perlfunc.pod
+	   ! pod/perlport.pod
+____________________________________________________________________________
+[  6743] By: jhi                                   on 2000/08/21  14:47:05
+        Log: perldelta fixes from the p5p crowd.
+     Branch: perl
+	   ! pod/perldelta.pod pod/perlop.pod
+____________________________________________________________________________
+[  6742] By: jhi                                   on 2000/08/21  13:34:51
+        Log: Update to Pod::LaTeX 0.53.
+             
+             Subject: [PATCH] lib/Pod/LaTeX.pm updates
+             From: Tim Jenness <timj@jach.hawaii.edu>
+             Date: Sun, 20 Aug 2000 23:09:48 -1000 (HST)
+             Message-ID: <Pine.LNX.4.21.0008202308040.12047-100000@lapaki.jach.hawaii.edu>
+     Branch: perl
+	   ! lib/Pod/LaTeX.pm
+____________________________________________________________________________
+[  6741] By: jhi                                   on 2000/08/21  13:33:01
+        Log: Subject: [PATCH] os2.c fix for use64bitint
+             From: sthoenna@efn.org (Yitzchak Scott-Thoennes)
+             Date: Mon, 21 Aug 2000 01:32:25 -0700
+             Message-ID: <ZkOo5gzkgWEb092yn@efn.org>
+     Branch: perl
+	   ! os2/os2.c
+____________________________________________________________________________
+[  6740] By: jhi                                   on 2000/08/21  13:28:52
+        Log: Array context keeps slithering in.
+             
+             Subject: Re: 5.7.0 getting really close, new snapshot: perldelta, Storable
+             From: Daniel Chetlin <daniel@chetlin.com>
+             Date: Sun, 20 Aug 2000 21:40:25 -0700
+             Message-ID: <20000820214025.C29387@ilmd.chetlin.org>
+     Branch: perl
+	   ! ext/Storable/Storable.xs lib/Pod/InputObjects.pm
+	   ! pod/perldebtut.pod
+____________________________________________________________________________
+[  6739] By: jhi                                   on 2000/08/21  13:23:55
+        Log: Big-endian quad fixes for Storable from Radu Greab,
+             plus few explicit null casts for picky compilers.
+     Branch: perl
+	   ! ext/Storable/Storable.xs
+____________________________________________________________________________
+[  6738] By: gsar                                  on 2000/08/21  05:56:13
+        Log: small tweaks for change#6705: avoid C++ style comments in C code;
+             use Perl's malloc API rather than the low level system one
+     Branch: perl
+	   ! win32/win32.c
+____________________________________________________________________________
+[  6737] By: gsar                                  on 2000/08/21  05:35:41
+        Log: add Storable to list of extensions on Windows
+     Branch: perl
+	   ! win32/Makefile win32/makefile.mk
+____________________________________________________________________________
+[  6736] By: jhi                                   on 2000/08/21  02:57:53
+        Log: Update Changes.
+     Branch: perl
+	   ! Changes patchlevel.h
+____________________________________________________________________________
+[  6735] By: jhi                                   on 2000/08/21  02:57:20
+        Log: Draft 0.
+     Branch: perl
+	   ! pod/perldelta.pod
+____________________________________________________________________________
+[  6734] By: jhi                                   on 2000/08/21  02:57:03
+        Log: Add Storable 0.7.2 from Raphael Manfredi,
+             plus the patch from
+             
+             Subject: Re: someone with too much time and a 64-bit box and interest in Storable?
+             From: Radu Greab <radu@netsoft.ro>
+             Date: Mon, 21 Aug 2000 03:10:05 +0300 (EEST)
+             Message-ID: <Pine.LNX.4.10.10008210258160.1292-100000@busy.netsoft.ro>
+             
+             plus changes to get Storable to compile with
+             picky ANSI compilers.
+     Branch: perl
+	   + ext/Storable/ChangeLog ext/Storable/MANIFEST
+	   + ext/Storable/Makefile.PL ext/Storable/README
+	   + ext/Storable/Storable.pm ext/Storable/Storable.xs
+	   + ext/Storable/patchlevel.h t/lib/st-06compat.t
+	   + t/lib/st-blessed.t t/lib/st-canonical.t t/lib/st-dclone.t
+	   + t/lib/st-dump.pl t/lib/st-forgive.t t/lib/st-freeze.t
+	   + t/lib/st-overload.t t/lib/st-recurse.t t/lib/st-retrieve.t
+	   + t/lib/st-store.t t/lib/st-tied.t t/lib/st-tiedhook.t
+	   + t/lib/st-tieditems.t
+	   ! MANIFEST
+____________________________________________________________________________
+[  6733] By: jhi                                   on 2000/08/21  02:29:09
+        Log: The correct cleaning order is an art.
+     Branch: perl
+	   ! Makefile.SH
+____________________________________________________________________________
 [  6804] By: jhi                                   on 2000/08/24  14:59:07
         Log: Regen perltoc.
      Branch: perl
