@@ -36,7 +36,7 @@ use Carp;
 
 use vars qw/ $VERSION %HTML_Escapes @LatexSections /;
 
-$VERSION = '0.52';
+$VERSION = '0.53';
 
 # Definitions of =headN -> latex mapping
 @LatexSections = (qw/
@@ -57,6 +57,8 @@ $VERSION = '0.52';
     'lt'        =>      '$<$',    #   ' left chevron, less-than
     'gt'        =>      '$>$',    #   ' right chevron, greater-than
     'quot'      =>      '"',      #   double quote
+    'sol'       =>      '/',
+    'verbar'    =>      '$|$',
 
     "Aacute"    =>      "\\'{A}",       #   capital A, acute accent
     "aacute"    =>      "\\'{a}",       #   small a, acute accent
@@ -952,6 +954,9 @@ sub verbatim {
     # Clean trailing space
     $paragraph =~ s/\s+$//;
 
+    # Clean tabs
+    $paragraph =~ s/\t/        /g;
+
     $self->_output('\begin{verbatim}' . "\n$paragraph\n". '\end{verbatim}'."\n");
   }
 }
@@ -1248,7 +1253,7 @@ sub add_item {
     $paragraph =~ s/^\s+//;
 
     my $type;
-    if ($paragraph eq '*') {
+    if (substr($paragraph, 0,1) eq '*') {
       $type = 'itemize';
     } elsif ($paragraph =~ /^\d/) {
       $type = 'enumerate';
@@ -1264,10 +1269,21 @@ sub add_item {
   my $type = $self->lists->[-1]->type;
 
   if ($type eq 'description') {
+    # Handle long items - long items do not wrap
+    if (length($paragraph) < 40) {
+      # A real description list item
+      $self->_output("\\item[$paragraph] \\mbox{}");
+    } else {
+      # The item is now simply bold text
+      $self->_output(qq{\\item \\textbf{$paragraph}});
+    }
 
-    $self->_output("\\item[$paragraph] \\mbox{}");
   } else {
-    $self->_output('\item ');
+    # If the item was '* Something' we still need to write
+    # out the something
+    my $extra_info = $paragraph;
+    $extra_info =~ s/^\*\s*//;
+    $self->_output("\\item $extra_info");
   }
 
   # Store the item name in the object. Required so that 
@@ -1392,6 +1408,8 @@ Special characters and the C<latex> equivalents are:
   &     \&
   \     $\backslash$
   ^     \^{}
+  ~     \~{}
+  |     $|$
 
 =cut
 
@@ -1411,6 +1429,12 @@ sub _replace_special_chars {
 
   # Replace ^ characters with \^{} so that $^F works okay
   $paragraph =~ s/(\^)/\\$1\{\}/g;
+
+  # Replace tilde (~) with \texttt{\~{}}
+  $paragraph =~ s/~/\\texttt\{\\~\{\}\}/g;
+
+  # Replace | with $|$
+  $paragraph =~ s'\|'$|$'g;
 
   # Now add the dollars around each \backslash
   $paragraph =~ s/(\\backslash)/\$$1\$/g;
@@ -1560,7 +1584,7 @@ under the same terms as Perl itself.
 
 =head1 REVISION
 
-$Id: LaTeX.pm,v 1.4 2000/05/16 01:26:55 timj Exp $
+$Id: LaTeX.pm,v 1.6 2000/08/21 09:05:03 timj Exp $
 
 =end __PRIVATE__
 
