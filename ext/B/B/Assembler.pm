@@ -80,7 +80,7 @@ sub B::Asmdata::PUT_PV {
     error "bad string argument: $arg" unless defined($arg);
     return pack("N", length($arg)) . $arg;
 }
-sub B::Asmdata::PUT_comment {
+sub B::Asmdata::PUT_comment_t {
     my $arg = shift;
     $arg = uncstring($arg);
     error "bad string argument: $arg" unless defined($arg);
