@@ -1757,7 +1757,7 @@ static VOID CALLBACK TimerProc(HWND win, UINT msg, UINT id, DWORD time)
     dTHXo;
     KillTimer(NULL,timerid);
     timerid=0;  
-    sighandler(14);
+    CALL_FPTR(PL_sighandlerp)(14);
 }
 #endif	/* !PERL_OBJECT */
 

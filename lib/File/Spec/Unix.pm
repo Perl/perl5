@@ -38,7 +38,7 @@ sub canonpath {
     $path =~ s|(/\.)+/|/|g;                        # xx/././xx -> xx/xx
     $path =~ s|^(\./)+||s unless $path eq "./";    # ./xx      -> xx
     $path =~ s|^/(\.\./)+|/|s;                     # /../../xx -> xx
-    $path =~ s|/\z|| unless $path eq "/";          # xx/       -> xx
+    $path =~ s|/\Z(?!\n)|| unless $path eq "/";          # xx/       -> xx
     return $path;
 }
 
@@ -149,7 +149,7 @@ directory. (Does not strip symlinks, only '.', '..', and equivalents.)
 
 sub no_upwards {
     my $self = shift;
-    return grep(!/^\.{1,2}\z/s, @_);
+    return grep(!/^\.{1,2}\Z(?!\n)/s, @_);
 }
 
 =item case_tolerant
@@ -226,7 +226,7 @@ sub splitpath {
         $directory = $path;
     }
     else {
-        $path =~ m|^ ( (?: .* / (?: \.\.?\z )? )? ) ([^/]*) |xs;
+        $path =~ m|^ ( (?: .* / (?: \.\.?\Z(?!\n) )? )? ) ([^/]*) |xs;
         $directory = $1;
         $file      = $2;
     }
@@ -266,7 +266,7 @@ sub splitdir {
     # check to be sure that there will not be any before handling the
     # simple case.
     #
-    if ( $directories !~ m|/\z| ) {
+    if ( $directories !~ m|/\Z(?!\n)| ) {
         return split( m|/|, $directories );
     }
     else {

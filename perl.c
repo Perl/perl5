@@ -1939,7 +1939,7 @@ S_usage(pTHX_ char *name)		/* XXX move this out into a module ? */
 "-0[octal]       specify record separator (\\0, if no argument)",
 "-a              autosplit mode with -n or -p (splits $_ into @F)",
 "-C              enable native wide character system interfaces",
-"-c              check syntax only (runs BEGIN and END blocks)",
+"-c              check syntax only (runs BEGIN and CHECK blocks)",
 "-d[:debugger]   run program under debugger",
 "-D[number/list] set debugging flags (argument is a bit mask or alphabets)",
 "-e 'command'    one line of program (several -e's allowed, omit programfile)",
