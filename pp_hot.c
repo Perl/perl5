@@ -2032,8 +2032,6 @@ PP(pp_entersub)
     }
 #endif /* USE_THREADS */
 
-    gimme = GIMME;
-
     if (CvXSUB(cv)) {
 	if (CvOLDSTYLE(cv)) {
 	    I32 (*fp3)_((int,int,int));
