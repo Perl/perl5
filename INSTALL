@@ -328,7 +328,8 @@ If your prefix contains the string "perl", then the suggested
 directory structure is simplified.  For example, if you use
 prefix=/opt/perl, then Configure will suggest /opt/perl/lib instead of
 /opt/perl/lib/perl5/.  Again, see L<"Installation Directories"> below
-for more details.
+for more details.  Do not include a trailing slash, (i.e. /opt/perl/)
+or you may experience odd test failures.
 
 NOTE:  You must not specify an installation directory that is the same
 as or below your perl source directory.  If you do, installperl will
@@ -403,7 +404,8 @@ appropriate questions in Configure.  For convenience, all the
 installation questions are near the beginning of Configure.
 Further, there are a number of additions to the installation
 directories since 5.005, so reusing your old config.sh may not
-be sufficient to put everything where you want it.
+be sufficient to put everything where you want it.  Do not include
+trailing slashes on directory names.
 
 I highly recommend running Configure interactively to be sure it puts
 everything where you want it.  At any point during the Configure
