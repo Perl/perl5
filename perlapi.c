@@ -2458,6 +2458,13 @@ Perl_save_generic_svref(pTHXo_ SV** sptr)
     ((CPerlObj*)pPerl)->Perl_save_generic_svref(sptr);
 }
 
+#undef  Perl_save_generic_pvref
+void
+Perl_save_generic_pvref(pTHXo_ char** str)
+{
+    ((CPerlObj*)pPerl)->Perl_save_generic_pvref(str);
+}
+
 #undef  Perl_save_gp
 void
 Perl_save_gp(pTHXo_ GV* gv, I32 empty)

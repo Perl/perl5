@@ -29,32 +29,33 @@ struct cop {
 #  define CopFILE(c)		((c)->cop_file)
 #  define CopFILEGV(c)		(CopFILE(c) \
 				 ? gv_fetchfile(CopFILE(c)) : Nullgv)
-#  define CopFILE_set(c,pv)	((c)->cop_file = savepv(pv))	/* XXX */
+#  define CopFILE_set(c,pv)	((c)->cop_file = savepv(pv))
 #  define CopFILESV(c)		(CopFILE(c) \
 				 ? GvSV(gv_fetchfile(CopFILE(c))) : Nullsv)
 #  define CopFILEAV(c)		(CopFILE(c) \
 				 ? GvAV(gv_fetchfile(CopFILE(c))) : Nullav)
 #  define CopSTASHPV(c)		((c)->cop_stashpv)
-#  define CopSTASHPV_set(c,pv)	((c)->cop_stashpv = savepv(pv))	/* XXX */
+#  define CopSTASHPV_set(c,pv)	((c)->cop_stashpv = savepv(pv))
 #  define CopSTASH(c)		(CopSTASHPV(c) \
 				 ? gv_stashpv(CopSTASHPV(c),GV_ADD) : Nullhv)
 #  define CopSTASH_set(c,hv)	CopSTASHPV_set(c, HvNAME(hv))
-#  define CopSTASH_eq(c,hv)	(hv 					\
+#  define CopSTASH_eq(c,hv)	((hv) 					\
 				 && (CopSTASHPV(c) == HvNAME(hv)	\
 				     || (CopSTASHPV(c) && HvNAME(hv)	\
 					 && strEQ(CopSTASHPV(c), HvNAME(hv)))))
 #else
 #  define CopFILEGV(c)		((c)->cop_filegv)
-#  define CopFILEGV_set(c,gv)	((c)->cop_filegv = gv)
-#  define CopFILE_set(c,pv)	((c)->cop_filegv = gv_fetchfile(pv))
+#  define CopFILEGV_set(c,gv)	((c)->cop_filegv = (GV*)SvREFCNT_inc(gv))
+#  define CopFILE_set(c,pv)	CopFILEGV_set((c), gv_fetchfile(pv))
 #  define CopFILESV(c)		(CopFILEGV(c) ? GvSV(CopFILEGV(c)) : Nullsv)
 #  define CopFILEAV(c)		(CopFILEGV(c) ? GvAV(CopFILEGV(c)) : Nullav)
 #  define CopFILE(c)		(CopFILESV(c) ? SvPVX(CopFILESV(c)) : Nullch)
 #  define CopSTASH(c)		((c)->cop_stash)
-#  define CopSTASH_set(c,hv)	((c)->cop_stash = hv)
+#  define CopSTASH_set(c,hv)	((c)->cop_stash = (hv))
 #  define CopSTASHPV(c)		(CopSTASH(c) ? HvNAME(CopSTASH(c)) : Nullch)
-#  define CopSTASHPV_set(c,pv)	CopSTASH_set(c, gv_stashpv(pv,GV_ADD))
-#  define CopSTASH_eq(c,hv)	(CopSTASH(c) == hv)
+   /* cop_stash is not refcounted */
+#  define CopSTASHPV_set(c,pv)	CopSTASH_set((c), gv_stashpv(pv,GV_ADD))
+#  define CopSTASH_eq(c,hv)	(CopSTASH(c) == (hv))
 #endif /* USE_ITHREADS */
 
 #define CopSTASH_ne(c,hv)	(!CopSTASH_eq(c,hv))
