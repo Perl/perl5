@@ -653,5 +653,5 @@ foreach (
     my ($u, $v) = qw(foo xyzzy);
     my $p = pack($t, $u, $v);
     my @u = unpack($t, $p);
-    print @u == 2 && $u[0] eq $u && $u[1] eq $v ? "ok 611\n" : "not ok 611\n";
+    ok(@u == 2 && $u[0] eq $u && $u[1] eq $v);
 }
