@@ -333,9 +333,10 @@ File::Copy also provides the C<syscopy> routine, which copies the
 file specified in the first parameter to the file specified in the
 second parameter, preserving OS-specific attributes and file
 structure.  For Unix systems, this is equivalent to the simple
-C<copy> routine.  For VMS systems, this calls the C<rmscopy>
-routine (see below).  For OS/2 systems, this calls the C<syscopy>
-XSUB directly. For Win32 systems, this calls C<Win32::CopyFile>.
+C<copy> routine, which doesn't preserve OS-specific attributes.  For
+VMS systems, this calls the C<rmscopy> routine (see below).  For OS/2
+systems, this calls the C<syscopy> XSUB directly. For Win32 systems,
+this calls C<Win32::CopyFile>.
 
 =head2 Special behaviour if C<syscopy> is defined (OS/2, VMS and Win32)
 
