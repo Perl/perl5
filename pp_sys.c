@@ -5430,7 +5430,7 @@ PP(pp_ggrent)
 	PUSHs(sv = sv_mortalcopy(&PL_sv_no));
 	sv_setiv(sv, (IV)grent->gr_gid);
 
-#if !(defined(_CRAYMPP) && defined(USE_REENTRANT_API)
+#if !(defined(_CRAYMPP) && defined(USE_REENTRANT_API))
 	PUSHs(sv = sv_mortalcopy(&PL_sv_no));
 	/* In UNICOS/mk (_CRAYMPP) the multithreading
 	 * versions (getgrnam_r, getgrgid_r)
