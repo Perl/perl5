@@ -1,6 +1,6 @@
 #!./perl
 
-print "1..66\n";
+print "1..70\n";
 
 #
 # @foo, @bar, and @ary are also used from tie-stdarray after tie-ing them
@@ -216,3 +216,16 @@ reify('ok');
 print "not " unless qw(foo bar snorfle)[2] eq 'snorfle';
 print "ok 66\n";
 
+@ary = (12,23,34,45,56);
+
+print "not " unless shift(@ary) == 12;
+print "ok 67\n";
+
+print "not " unless pop(@ary) == 56;
+print "ok 68\n";
+
+print "not " unless push(@ary,56) == 4;
+print "ok 69\n";
+
+print "not " unless unshift(@ary,12) == 5;
+print "ok 70\n";
