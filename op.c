@@ -1919,19 +1919,27 @@ Perl_localize(pTHX_ OP *o, I32 lex)
 	    && PL_bufptr > PL_oldbufptr && PL_bufptr[-1] == ',')
 	{
 	    char *s = PL_bufptr;
-	    int sigil = 0;
+	    bool sigil = FALSE;
 
 	    /* some heuristics to detect a potential error */
-	    while (*s && (strchr(", \t\n", *s)
-			|| (strchr("@$%*", *s) && ++sigil) ))
+	    while (*s && (strchr(", \t\n", *s)))
 		s++;
-	    if (sigil) {
-		while (*s && (isALNUM(*s) || UTF8_IS_CONTINUED(*s)
-			    || strchr("@$%*, \t\n", *s)))
-		    s++;
 
-		if (*s == ';' || *s == '=')
-		    Perl_warner(aTHX_ packWARN(WARN_PARENTHESIS),
+	    while (1) {
+		if (*s && strchr("@$%*", *s) && *++s
+		       && (isALNUM(*s) || UTF8_IS_CONTINUED(*s))) {
+		    s++;
+		    sigil = TRUE;
+		    while (*s && (isALNUM(*s) || UTF8_IS_CONTINUED(*s)))
+			s++;
+		    while (*s && (strchr(", \t\n", *s)))
+			s++;
+		}
+		else
+		    break;
+	    }
+	    if (sigil && (*s == ';' || *s == '=')) {
+		Perl_warner(aTHX_ packWARN(WARN_PARENTHESIS),
 				"Parentheses missing around \"%s\" list",
 				lex ? (PL_in_my == KEY_our ? "our" : "my")
 				: "local");
@@ -5431,6 +5439,7 @@ Perl_ck_glob(pTHX_ OP *o)
 	o->op_ppaddr = PL_ppaddr[OP_LIST];
 	cLISTOPo->op_first->op_type = OP_PUSHMARK;
 	cLISTOPo->op_first->op_ppaddr = PL_ppaddr[OP_PUSHMARK];
+	cLISTOPo->op_first->op_targ = 0;
 	o = newUNOP(OP_ENTERSUB, OPf_STACKED,
 		    append_elem(OP_LIST, o,
 				scalar(newUNOP(OP_RV2CV, 0,

@@ -587,6 +587,7 @@ BEGIN not safe after errors--compilation aborted at - line 18.
 use warnings 'parenthesis' ;
 my $a, $b = (1,2);
 my @foo,%bar,	$quux; # there's a TAB here
+my $x, $y or print;
 no warnings 'parenthesis' ;
 my $c, $d = (1,2);
 EXPECT
