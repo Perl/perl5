@@ -760,6 +760,7 @@ I32 dopoptolabel _((char *label));
 I32 dopoptoloop _((I32 startingblock));
 I32 dopoptosub _((I32 startingblock));
 I32 dopoptosub_at _((PERL_CONTEXT* cxstk, I32 startingblock));
+void free_closures _((void));
 void save_lines _((AV *array, SV *sv));
 OP *doeval _((int gimme, OP** startop));
 PerlIO *doopen_pmc _((const char *name, const char *mode));

@@ -1179,6 +1179,7 @@
 #define force_word		CPerlObj::Perl_force_word
 #define form			CPerlObj::Perl_form
 #define fprintf			CPerlObj::Perl_fprintf
+#define free_closures		CPerlObj::Perl_free_closures
 #define free_tmps		CPerlObj::Perl_free_tmps
 #define gen_constant_list	CPerlObj::Perl_gen_constant_list
 #define get_db_sub		CPerlObj::Perl_get_db_sub

@@ -1221,6 +1221,8 @@
 #define form			pPerl->Perl_form
 #undef  fprintf
 #define fprintf			pPerl->Perl_fprintf
+#undef  free_closures
+#define free_closures		pPerl->Perl_free_closures
 #undef  free_tmps
 #define free_tmps		pPerl->Perl_free_tmps
 #undef  gen_constant_list
