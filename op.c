@@ -112,7 +112,7 @@ Perl_pad_allocmy(pTHX_ char *name)
 
     if (!(PL_in_my == KEY_our ||
 	  isALPHA(name[1]) ||
-	  (PL_hints & HINT_UTF8 && (name[1] & 0xc0) == 0xc0) ||
+	  (PL_hints & HINT_UTF8 && UTF8_IS_START(name[1])) ||
 	  (name[1] == '_' && (int)strlen(name) > 2)))
     {
 	if (!isPRINT(name[1]) || strchr("\t\n\r\f", name[1])) {
@@ -2170,7 +2170,7 @@ Perl_localize(pTHX_ OP *o, I32 lex)
     else {
 	if (ckWARN(WARN_PARENTHESIS) && PL_bufptr > PL_oldbufptr && PL_bufptr[-1] == ',') {
 	    char *s;
-	    for (s = PL_bufptr; *s && (isALNUM(*s) || (*s & 0x80) || strchr("@$%, ",*s)); s++) ;
+	    for (s = PL_bufptr; *s && (isALNUM(*s) || UTF8_IS_CONTINUED(*s) || strchr("@$%, ",*s)); s++) ;
 	    if (*s == ';' || *s == '=')
 		Perl_warner(aTHX_ WARN_PARENTHESIS,
 			    "Parentheses missing around \"%s\" list",

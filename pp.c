@@ -2095,7 +2095,7 @@ PP(pp_negate)
 		sv_setsv(TARG, sv);
 		*SvPV_force(TARG, len) = *s == '-' ? '+' : '-';
 	    }
-	    else if (DO_UTF8(sv) && *(U8*)s >= 0xc0 && isIDFIRST_utf8((U8*)s)) {
+	    else if (DO_UTF8(sv) && UTF8_IS_START(*s) && isIDFIRST_utf8((U8*)s)) {
 		sv_setpvn(TARG, "-", 1);
 		sv_catsv(TARG, sv);
 	    }
@@ -2958,7 +2958,8 @@ PP(pp_chr)
 
     (void)SvUPGRADE(TARG,SVt_PV);
 
-    if ((value > 255 && !IN_BYTE) || (value & 0x80 && PL_hints & HINT_UTF8) ) {
+    if ((value > 255 && !IN_BYTE) ||
+	(UTF8_IS_CONTINUED(value) && (PL_hints & HINT_UTF8)) ) {
 	SvGROW(TARG, UTF8_MAXLEN+1);
 	tmps = SvPVX(TARG);
 	tmps = (char*)uv_to_utf8((U8*)tmps, (UV)value);
@@ -3009,7 +3010,7 @@ PP(pp_ucfirst)
     register U8 *s;
     STRLEN slen;
 
-    if (DO_UTF8(sv) && (s = (U8*)SvPV(sv, slen)) && slen && (*s & 0xc0) == 0xc0) {
+    if (DO_UTF8(sv) && (s = (U8*)SvPV(sv, slen)) && slen && UTF8_IS_START(*s)) {
 	STRLEN ulen;
 	U8 tmpbuf[UTF8_MAXLEN+1];
 	U8 *tend;
@@ -3068,7 +3069,7 @@ PP(pp_lcfirst)
     register U8 *s;
     STRLEN slen;
 
-    if (DO_UTF8(sv) && (s = (U8*)SvPV(sv, slen)) && slen && (*s & 0xc0) == 0xc0) {
+    if (DO_UTF8(sv) && (s = (U8*)SvPV(sv, slen)) && slen && UTF8_IS_START(*s)) {
 	STRLEN ulen;
 	U8 tmpbuf[UTF8_MAXLEN+1];
 	U8 *tend;
@@ -3284,7 +3285,7 @@ PP(pp_quotemeta)
 	d = SvPVX(TARG);
 	if (DO_UTF8(sv)) {
 	    while (len) {
-		if (*s & 0x80) {
+		if (UTF8_IS_CONTINUED(*s)) {
 		    STRLEN ulen = UTF8SKIP(s);
 		    if (ulen > len)
 			ulen = len;
@@ -4797,7 +4798,7 @@ PP(pp_unpack)
 		
 		while ((len > 0) && (s < strend)) {
 		    auv = (auv << 7) | (*s & 0x7f);
-		    if (!(*s++ & 0x80)) {
+		    if (UTF8_IS_ASCII(*s++)) {
 			bytes = 0;
 			sv = NEWSV(40, 0);
 			sv_setuv(sv, auv);

@@ -1408,7 +1408,7 @@ S_scan_const(pTHX_ char *start)
 		        int hicount = 0;
 			char *c;
 			for (c = SvPVX(sv); c < d; c++) {
-			    if (*c & 0x80)
+			    if (UTF8_IS_CONTINUED(*c))
 			        hicount++;
 			}
 			if (hicount) {
@@ -1421,7 +1421,7 @@ S_scan_const(pTHX_ char *start)
 			    dst = d - 1;
 
 			    while (src < dst) {
-			        if (*src & 0x80) {
+			        if (UTF8_IS_CONTINUED(*src)) {
 				    dst--;
 				    uv_to_utf8((U8*)dst, (U8)*src--);
 				    dst--;
@@ -1547,7 +1547,7 @@ S_scan_const(pTHX_ char *start)
 
        /* (now in tr/// code again) */
 
-       if (*s & 0x80 && (this_utf8 || has_utf8)) {
+       if (UTF8_IS_CONTINUED(*s) && (this_utf8 || has_utf8)) {
            STRLEN len = (STRLEN) -1;
            UV uv;
            if (this_utf8) {
@@ -3647,7 +3647,7 @@ Perl_yylex(pTHX)
 	    missingterm((char*)0);
 	yylval.ival = OP_CONST;
 	for (d = SvPV(PL_lex_stuff, len); len; len--, d++) {
-	    if (*d == '$' || *d == '@' || *d == '\\' || *d & 0x80) {
+	    if (*d == '$' || *d == '@' || *d == '\\' || UTF8_IS_CONTINUED(*d)) {
 		yylval.ival = OP_STRINGIFY;
 		break;
 	    }
@@ -5918,9 +5918,9 @@ S_scan_word(pTHX_ register char *s, char *dest, STRLEN destlen, int allow_packag
 	    *d++ = *s++;
 	    *d++ = *s++;
 	}
-	else if (UTF && *(U8*)s >= 0xc0 && isALNUM_utf8((U8*)s)) {
+	else if (UTF && UTF8_IS_START(*s) && isALNUM_utf8((U8*)s)) {
 	    char *t = s + UTF8SKIP(s);
-	    while (*t & 0x80 && is_utf8_mark((U8*)t))
+	    while (UTF8_IS_CONTINUED(*t) && is_utf8_mark((U8*)t))
 		t += UTF8SKIP(t);
 	    if (d + (t - s) > e)
 		Perl_croak(aTHX_ ident_too_long);
@@ -5970,9 +5970,9 @@ S_scan_ident(pTHX_ register char *s, register char *send, char *dest, STRLEN des
 		*d++ = *s++;
 		*d++ = *s++;
 	    }
-	    else if (UTF && *(U8*)s >= 0xc0 && isALNUM_utf8((U8*)s)) {
+	    else if (UTF && UTF8_IS_START(*s) && isALNUM_utf8((U8*)s)) {
 		char *t = s + UTF8SKIP(s);
-		while (*t & 0x80 && is_utf8_mark((U8*)t))
+		while (UTF8_IS_CONTINUED(*t) && is_utf8_mark((U8*)t))
 		    t += UTF8SKIP(t);
 		if (d + (t - s) > e)
 		    Perl_croak(aTHX_ ident_too_long);
@@ -6025,7 +6025,7 @@ S_scan_ident(pTHX_ register char *s, register char *send, char *dest, STRLEN des
 		e = s;
 		while ((e < send && isALNUM_lazy_if(e,UTF)) || *e == ':') {
 		    e += UTF8SKIP(e);
-		    while (e < send && *e & 0x80 && is_utf8_mark((U8*)e))
+		    while (e < send && UTF8_IS_CONTINUED(*e) && is_utf8_mark((U8*)e))
 			e += UTF8SKIP(e);
 		}
 		Copy(s, d, e - s, char);
@@ -6642,7 +6642,7 @@ S_scan_str(pTHX_ char *start, int keep_quoted, int keep_delims)
 
     /* after skipping whitespace, the next character is the terminator */
     term = *s;
-    if ((term & 0x80) && UTF)
+    if (UTF8_IS_CONTINUED(term) && UTF)
 	has_utf8 = TRUE;
 
     /* mark where we are */
@@ -6689,7 +6689,7 @@ S_scan_str(pTHX_ char *start, int keep_quoted, int keep_delims)
 		   have found the terminator */
 		else if (*s == term)
 		    break;
-		else if (!has_utf8 && (*s & 0x80) && UTF)
+		else if (!has_utf8 && UTF8_IS_CONTINUED(*s) && UTF)
 		    has_utf8 = TRUE;
 		*to = *s;
 	    }
@@ -6718,7 +6718,7 @@ S_scan_str(pTHX_ char *start, int keep_quoted, int keep_delims)
 		    break;
 		else if (*s == PL_multi_open)
 		    brackets++;
-		else if (!has_utf8 && (*s & 0x80) && UTF)
+		else if (!has_utf8 && UTF8_IS_CONTINUED(*s) && UTF)
 		    has_utf8 = TRUE;
 		*to = *s;
 	    }

@@ -2273,7 +2273,7 @@ S_regmatch(pTHX_ regnode *prog)
 	    if (!nextchr)
 		sayNO;
 	    if (do_utf8) {
-		if (nextchr & 0x80) {
+		if (UTF8_IS_CONTINUED(nextchr)) {
 		    if (!(OP(scan) == SPACE
 			  ? swash_fetch(PL_utf8_space, (U8*)locinput)
 			  : isSPACE_LC_utf8((U8*)locinput)))
