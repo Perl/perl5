@@ -63,19 +63,17 @@
    the ibmcxx and/or xlC includes.  Since we only need a single file,
    be more fine-grained about what's included <hirschs@btv.ibm.com> */
 
-/* The fancier load and unload don't work with LP64, though.
- * (with AIX 4.3.1.0 and vac.C 5.0.1.0) --jhi */
-
-#ifdef USE_64_BIT_ALL
-#   undef USE_libC
-#endif
 #ifdef USE_libC /* The define comes, when it comes, from hints/aix.pl. */
 #   define LOAD   loadAndInit
 #   define UNLOAD terminateAndUnload
-#   if defined(USE_xlC_load_h)
-#       include "/usr/lpp/xlC/include/load.h"
+#   if defined(USE_vacpp_load_h)
+#       include "/usr/vacpp/include/load.h"
 #   elif defined(USE_ibmcxx_load_h)
 #       include "/usr/ibmcxx/include/load.h"
+#   elif defined(USE_xlC_load_h)
+#       include "/usr/lpp/xlC/include/load.h"
+#   else
+#       include "/usr/include/load.h"
 #   endif
 #else
 #   define LOAD   load
