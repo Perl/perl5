@@ -33,6 +33,9 @@
   readline() on closed filehandle %s		[Perl_do_readline]
     close STDIN ; $a = <STDIN>;
 
+  readline() on closed filehandle %s		[Perl_do_readline]
+    readline(NONESUCH);
+
   glob failed (child exited with status %d%s)	[Perl_do_readline] <<TODO
 
   Deep recursion on subroutine \"%s\"		[Perl_sub_crush_depth]

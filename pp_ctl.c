@@ -1005,10 +1005,17 @@ PP(pp_flip)
     else {
 	dTOPss;
 	SV *targ = PAD_SV(PL_op->op_targ);
+ 	int flip;
 
-	if ((PL_op->op_private & OPpFLIP_LINENUM)
-	  ? (PL_last_in_gv && SvIV(sv) == (IV)IoLINES(GvIOp(PL_last_in_gv)))
-	  : SvTRUE(sv) ) {
+ 	if (PL_op->op_private & OPpFLIP_LINENUM) {
+ 	    struct io *gp_io;
+ 	    flip = PL_last_in_gv
+ 		&& (gp_io = GvIOp(PL_last_in_gv))
+ 		&& SvIV(sv) == (IV)IoLINES(gp_io);
+ 	} else {
+ 	    flip = SvTRUE(sv);
+ 	}
+ 	if (flip) {
 	    sv_setiv(PAD_SV(cUNOP->op_first->op_targ), 1);
 	    if (PL_op->op_flags & OPf_SPECIAL) {
 		sv_setiv(targ, 1);
