@@ -57,6 +57,9 @@ static char sccsid[] = "@(#)glob.c	8.3 (Berkeley) 10/13/93";
  *	expand {1,2}{a,b} to 1a 1b 2a 2b
  * gl_matchc:
  *	Number of matches in the current invocation of glob.
+ * GLOB_ALPHASORT:
+ *	sort alphabetically like csh (case doesn't matter) instead of in ASCII
+ *	order
  */
 
 #include <EXTERN.h>
@@ -531,7 +534,8 @@ glob0(const Char *pattern, glob_t *pglob)
 	else if (!(pglob->gl_flags & GLOB_NOSORT))
 		qsort(pglob->gl_pathv + pglob->gl_offs + oldpathc,
 		    pglob->gl_pathc - oldpathc, sizeof(char *), 
-		    (pglob->gl_flags & GLOB_NOCASE) ? ci_compare : compare);
+		    (pglob->gl_flags & (GLOB_ALPHASORT|GLOB_NOCASE))
+			? ci_compare : compare);
 	pglob->gl_flags = oldflags;
 	return(0);
 }

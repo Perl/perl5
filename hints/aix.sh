@@ -384,13 +384,13 @@ EOM
 	    ar="ar -X64"
 	    nm_opt="-X64 $nm_opt"
 	    # Note: Placing the 'qacflags' variable into the 'ldflags' string
-	    # is NOT a typo.  ldqalags is passed to the C compiler for final
+	    # is NOT a typo.  ldflags is passed to the C compiler for final
 	    # linking, and it wants -q64 (-b64 is for ld only!).
 	    case "$qacflags$qaldflags$qalibs" in
 	    '');;
 	    *) ccflags="$ccflags $qacflags"
 	       ldflags="$ldflags $qacflags"
-	       lddqalags="$qaldflags $lddqalags"
+	       lddlflags="$qaldflags $lddlflags"
 	       libswanted="$libswanted $qalibs"
 	       ;;
 	    esac

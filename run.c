@@ -90,7 +90,7 @@ Perl_debop(pTHX_ OP *o)
 	if (svp)
 	    PerlIO_printf(Perl_debug_log, "(%s)", SvPV(*svp,n_a));
 	else
-	    PerlIO_printf(Perl_debug_log, "[%"UVuf"]", o->op_targ);
+           PerlIO_printf(Perl_debug_log, "[%"UVuf"]", (UV)o->op_targ);
 	break;
     default:
 	break;

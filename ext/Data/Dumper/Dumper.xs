@@ -22,6 +22,7 @@
 
 static I32 num_q (char *s, STRLEN slen);
 static I32 esc_q (char *dest, char *src, STRLEN slen);
+static I32 esc_q_utf8 (SV *sv, char *src, STRLEN slen);
 static SV *sv_x (pTHX_ SV *sv, char *str, STRLEN len, I32 n);
 static I32 DD_dump (pTHX_ SV *val, char *name, STRLEN namelen, SV *retval,
 		    HV *seenhv, AV *postav, I32 *levelp, I32 indent,
@@ -94,6 +95,52 @@ esc_q(register char *d, register char *s, register STRLEN slen)
 	}
     }
     return ret;
+}
+
+static I32
+esc_q_utf8(SV* sv, register char *src, register STRLEN slen)
+{
+    char *s, *send, *r;
+    STRLEN grow = 0, j = 1, l;
+    bool dquote = FALSE;
+    
+    /* this will need EBCDICification */
+    for (s = src, send = src + slen; s < send; s += UTF8SKIP(s)) {
+        UV k = utf8_to_uvchr((U8*)s, &l);
+      
+	grow +=
+	  (*s == '"' || *s == '\\') ? 2 :
+	  (k < 0x80 ? 1 : UNISKIP(k) + 1 + 4); /* 4: \x{} */
+    }
+    sv_grow(sv, SvCUR(sv)+3+grow); /* 3: ""\0 */
+    r = SvPVX(sv) + SvCUR(sv);
+
+    for (s = src; s < send; s += UTF8SKIP(s)) {
+        UV k = utf8_to_uvchr((U8*)s, &l);
+
+	if (*s == '"' || *s == '\\') {
+	    r[j++] = '\\';
+	    r[j++] = *s;
+	}
+	else if (k < 0x80)
+	    r[j++] = k;
+	else {
+	    r[j++] = '\\';
+	    r[j++] = 'x';
+	    r[j++] = '{';
+	    j += sprintf(r + j, "%x", k);
+	    r[j++] = '}';
+	    dquote = TRUE;
+	}
+    }
+    if (dquote)
+      r[0] = r[j++] = '"';
+    else
+      r[0] = r[j++] = '\'';
+    r[j++] = '\0';
+    SvCUR_set(sv, SvCUR(sv) + j);
+
+    return j;
 }
 
 /* append a repeated string to an SV */
@@ -456,38 +503,59 @@ DD_dump(pTHX_ SV *val, char *name, STRLEN namelen, SV *retval, HV *seenhv,
 	    (void)hv_iterinit((HV*)ival);
 	    i = 0;
 	    while ((entry = hv_iternext((HV*)ival)))  {
-		char *nkey;
+		char *nkey = NULL;
 		I32 nticks = 0;
+		SV* keysv;
+		STRLEN keylen;
+		bool do_utf8 = FALSE;
 		
 		if (i)
 		    sv_catpvn(retval, ",", 1);
 		i++;
-		key = hv_iterkey(entry, &klen);
-		hval = hv_iterval((HV*)ival, entry);
+		keysv = hv_iterkeysv(entry);
+		hval  = hv_iterval((HV*)ival, entry);
 
-		if (quotekeys || needs_quote(key)) {
-		    nticks = num_q(key, klen);
-		    New(0, nkey, klen+nticks+3, char);
-		    nkey[0] = '\'';
-		    if (nticks)
-			klen += esc_q(nkey+1, key, klen);
-		    else
-			(void)Copy(key, nkey+1, klen, char);
-		    nkey[++klen] = '\'';
-		    nkey[++klen] = '\0';
+		do_utf8 = DO_UTF8(keysv);
+		key = SvPV(keysv, keylen);
+		klen = keylen;
+
+		if (do_utf8) {
+		    char *okey = SvPVX(retval) + SvCUR(retval);
+		    I32 nlen;
+
+		    sv_catsv(retval, totpad);
+		    sv_catsv(retval, ipad);
+		    nlen = esc_q_utf8(retval, key, klen);
+
+		    sname = newSVsv(iname);
+		    sv_catpvn(sname, okey, nlen);
+		    sv_catpvn(sname, "}", 1);
 		}
 		else {
-		    New(0, nkey, klen, char);
-		    (void)Copy(key, nkey, klen, char);
-		}
-		
-		sname = newSVsv(iname);
-		sv_catpvn(sname, nkey, klen);
-		sv_catpvn(sname, "}", 1);
+		    if (quotekeys || needs_quote(key)) {
+		        nticks = num_q(key, klen);
+			New(0, nkey, klen+nticks+3, char);
+			nkey[0] = '\'';
+			if (nticks)
+			    klen += esc_q(nkey+1, key, klen);
+			else
+			    (void)Copy(key, nkey+1, klen, char);
+			nkey[++klen] = '\'';
+			nkey[++klen] = '\0';
+		    }
+		    else {
+		        New(0, nkey, klen, char);
+			(void)Copy(key, nkey, klen, char);
+		    }
 
-		sv_catsv(retval, totpad);
-		sv_catsv(retval, ipad);
-		sv_catpvn(retval, nkey, klen);
+		    sname = newSVsv(iname);
+		    sv_catpvn(sname, nkey, klen);
+		    sv_catpvn(sname, "}", 1);
+
+		    sv_catsv(retval, totpad);
+		    sv_catsv(retval, ipad);
+		    sv_catpvn(retval, nkey, klen);
+		}
 		sv_catpvn(retval, " => ", 4);
 		if (indent >= 2) {
 		    char *extra;
@@ -662,14 +730,18 @@ DD_dump(pTHX_ SV *val, char *name, STRLEN namelen, SV *retval, HV *seenhv,
 	}
 	else {
 	    c = SvPV(val, i);
-	    sv_grow(retval, SvCUR(retval)+3+2*i);
-	    r = SvPVX(retval)+SvCUR(retval);
-	    r[0] = '\'';
-	    i += esc_q(r+1, c, i);
-	    ++i;
-	    r[i++] = '\'';
-	    r[i] = '\0';
-	    SvCUR_set(retval, SvCUR(retval)+i);
+	    if (DO_UTF8(val))
+	        i += esc_q_utf8(retval, c, i);
+	    else {
+		sv_grow(retval, SvCUR(retval)+3+2*i); /* 3: ""\0 */
+		r = SvPVX(retval) + SvCUR(retval);
+		r[0] = '\'';
+		i += esc_q(r+1, c, i);
+		++i;
+		r[i++] = '\'';
+		r[i] = '\0';
+		SvCUR_set(retval, SvCUR(retval)+i);
+	    }
 	}
     }
 

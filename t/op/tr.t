@@ -5,7 +5,7 @@ BEGIN {
     @INC = '../lib';
 }
 
-print "1..61\n";
+print "1..65\n";
 
 $_ = "abcdefghijklmnopqrstuvwxyz";
 
@@ -350,3 +350,20 @@ print "ok 61\n";
 } else {
   for (60..61) { print "ok $_ # Skip: not EBCDIC\n" }
 }
+
+($a = "\x{100}") =~ tr/\x00-\xff/X/c;
+print "not " unless ord($a) == ord("X");
+print "ok 62\n";
+
+($a = "\x{100}") =~ tr/\x00-\xff/X/cs;
+print "not " unless ord($a) == ord("X");
+print "ok 63\n";
+
+($a = "\x{100}\x{100}") =~ tr/\x{101}-\x{200}//c;
+print "not " unless $a eq "\x{100}\x{100}";
+print "ok 64\n";
+
+($a = "\x{100}\x{100}") =~ tr/\x{101}-\x{200}//cs;
+print "not " unless $a eq "\x{100}";
+print "ok 65\n";
+

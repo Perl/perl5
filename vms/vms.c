@@ -759,7 +759,7 @@ Perl_vmssetuserlnm(char *name, char *eqv)
 {
     $DESCRIPTOR(d_tab, "LNM$PROCESS");
     struct dsc$descriptor_d d_name = {0,DSC$K_DTYPE_T,DSC$K_CLASS_D,0};
-    unsigned long int iss, attr = 0;
+    unsigned long int iss, attr = LNM$M_CONFINE;
     unsigned char acmode = PSL$C_USER;
     struct itmlst_3 lnmlst[2] = {{0, LNM$_STRING, 0, 0},
                                  {0, 0, 0, 0}};
@@ -1898,8 +1898,8 @@ vmspipe_tempfile(void)
     fprintf(fp,"$ perl_del    = \"delete\"\n");
     fprintf(fp,"$ pif         = \"if\"\n");
     fprintf(fp,"$!  --- define i/o redirection (sys$output set by lib$spawn)\n");
-    fprintf(fp,"$ pif perl_popen_in  .nes. \"\" then perl_define/user sys$input  'perl_popen_in'\n");
-    fprintf(fp,"$ pif perl_popen_err .nes. \"\" then perl_define/user sys$error  'perl_popen_err'\n");
+    fprintf(fp,"$ pif perl_popen_in  .nes. \"\" then perl_define/user/name_attributes=confine sys$input  'perl_popen_in'\n");
+    fprintf(fp,"$ pif perl_popen_err .nes. \"\" then perl_define/user/name_attributes=confine sys$error  'perl_popen_err'\n");
     fprintf(fp,"$ pif perl_popen_out .nes. \"\" then perl_define      sys$output 'perl_popen_out'\n");
     fprintf(fp,"$ cmd = perl_popen_cmd\n");
     fprintf(fp,"$!  --- get rid of global symbols\n");
