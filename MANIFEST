@@ -1538,6 +1538,7 @@ t/lib/tie-substrhash.t	Test for Tie::SubstrHash
 t/lib/timelocal.t	See if Time::Local works
 t/lib/trig.t		See if Math::Trig works
 t/op/64bitint.t		See if 64 bit integers work
+t/op/anonsub.t		See if anonymous subroutines work
 t/op/append.t		See if . works
 t/op/args.t		See if operations on @_ work
 t/op/arith.t		See if arithmetic works

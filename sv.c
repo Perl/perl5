@@ -8179,7 +8179,10 @@ dup_pvcv:
 	}
 	else
 	    CvPADLIST(dstr)	= av_dup_inc(CvPADLIST(sstr));
-	CvOUTSIDE(dstr)	= cv_dup_inc(CvOUTSIDE(sstr));
+	if (!CvANON(sstr) || CvCLONED(sstr))
+	    CvOUTSIDE(dstr)	= cv_dup_inc(CvOUTSIDE(sstr));
+	else
+	    CvOUTSIDE(dstr)	= cv_dup(CvOUTSIDE(sstr));
 	CvFLAGS(dstr)	= CvFLAGS(sstr);
 	break;
     default:
