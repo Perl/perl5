@@ -178,8 +178,9 @@ sub autosplit_lib_modules{
 	    $_ = catfile($1, $2);
 	}
 	s|\\|/|g;		# bug in ksh OS/2
+	s#^lib/##s; # incase specified as lib/*.pm
 	my($lib) = catfile(curdir(), "lib");
-	s#^$lib\W+##s; # incase specified as lib/*.pm
+	s#^$lib\W+##s; # incase specified as ./lib/*.pm
 	if ($Is_VMS && /[:>\]]/) { # may need to convert VMS-style filespecs
 	    my ($dir,$name) = (/(.*])(.*)/s);
 	    $dir =~ s/.*lib[\.\]]//s;
