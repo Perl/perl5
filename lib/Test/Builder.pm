@@ -545,7 +545,7 @@ sub no_ending {
 Controlling where the test output goes.
 
 It's ok for your test to change where STDOUT and STDERR point to,
-Test::Builder's default output settings will not be effected.
+Test::Builder's default output settings will not be affected.
 
 =over 4
 
@@ -557,7 +557,7 @@ Prints out the given $message.  Normally, it uses the failure_output()
 handle, but if this is for a TODO test, the todo_output() handle is
 used.
 
-Output will be indented and marked with a # as not to interfere
+Output will be indented and marked with a # so as not to interfere
 with test output.
 
 We encourage using this rather than calling print directly.
