@@ -1410,7 +1410,7 @@ C<(?(condition)yes-pattern|no-pattern)>
 
 =item Method Invocation
 
-=item WARNING
+=item Indirect Object Syntax
 
 =item Default UNIVERSAL methods
 
@@ -1586,7 +1586,7 @@ Proto, LocalPort, Listen, Reuse
 
 =back
 
-=head2 perlfork - Perl's fork() emulation
+=head2 perlfork - Perl's fork() emulation (EXPERIMENTAL, subject to change)
 
 =over 4
 
@@ -4493,12 +4493,9 @@ I<The Road goes ever on and on, down from the door where it began.>
 
 =item Core Enhancements
 
-The printf() and sprintf() now support parameter reordering using the
-C<%\d+\$> and C<*\d+\$> syntaxes.  For example
+=item Modules and Pragmata
 
 =over 4
-
-=item Modules and Pragmata
 
 =item New Modules
 
@@ -4534,8 +4531,6 @@ C<%\d+\$> and C<*\d+\$> syntaxes.  For example
 
 =back
 
-=item Performance Enhancements
-
 =item Installation and Configuration Improvements
 
 =over 4
@@ -4543,6 +4538,10 @@ C<%\d+\$> and C<*\d+\$> syntaxes.  For example
 =item New Or Improved Platforms
 
 =item Generic Improvements
+
+d_cmsghdr, d_fcntl_can_lock, d_fsync, d_getitimer, d_getpagsz, d_msghdr_s,
+need_va_copy, d_readv, d_recvmsg, d_sendmsg, sig_size, d_sockatmark,
+d_strtoq, d_u32align, d_ualarm, d_usleep
 
 =back
 
@@ -4558,19 +4557,37 @@ C<%\d+\$> and C<*\d+\$> syntaxes.  For example
 
 =item Changed Internals
 
+=item New Tests
+
 =item Known Problems
 
 =over 4
 
+=item AIX vac 5.0.0.0 May Produce Buggy Code For Perl
+
+=item lib/ftmp-security tests warn 'system possibly insecure'
+
+=item lib/io_multihomed Fails In LP64-Configured HP-UX
+
+=item Test lib/posix Subtest 9 Fails In LP64-Configured HP-UX
+
 =item lib/b test 19
 
-=item Localizing a Tied Variable Leaks Memory
+=item Linux With Sfio Fails op/misc Test 48
 
 =item sigaction test 13 in VMS
 
 =item sprintf tests 129 and 130
 
+=item  Failure of Thread tests
+
+=item Localising a Tied Variable Leaks Memory
+
 =item Self-tying of Arrays and Hashes Is Forbidden
+
+=item Building Extensions Can Fail Because Of Largefiles
+
+=item The Compiler Suite Is Still Experimental
 
 =back
 
@@ -5651,50 +5668,6 @@ Source, Compiled Module Source, Perl Modules/Scripts
 
 =back
 
-=head2 perldos - Perl under DOS, W31, W95.
-
-=over 4
-
-=item SYNOPSIS
-
-=item DESCRIPTION
-
-=over 4
-
-=item Prerequisites
-
-DJGPP, Pthreads
-
-=item Shortcomings of Perl under DOS
-
-=item Building
-
-=item Testing
-
-=item Installation
-
-=back
-
-=item BUILDING AND INSTALLING MODULES
-
-=over 4
-
-=item Prerequisites
-
-=item Unpacking CPAN Modules
-
-=item Building Non-XS Modules
-
-=item Building XS Modules
-
-=back
-
-=item AUTHOR
-
-=item SEE ALSO
-
-=back
-
 =head2 perlepoc, README.epoc - Perl for EPOC
 
 =over 4
@@ -6379,48 +6352,6 @@ LIST, waitpid PID,FLAGS
 
 =back
 
-=head2 perlwin32 - Perl under Win32
-
-=over 4
-
-=item SYNOPSIS
-
-=item DESCRIPTION
-
-=over 4
-
-=item Setting Up
-
-Make, Command Shell, Borland C++, Microsoft Visual C++, Mingw32 with GCC
-
-=item Building
-
-=item Testing
-
-=item Installation
-
-=item Usage Hints
-
-Environment Variables, File Globbing, Using perl from the command line,
-Building Extensions, Command-line Wildcard Expansion, Win32 Specific
-Extensions, Running Perl Scripts, Miscellaneous Things
-
-=back
-
-=item BUGS AND CAVEATS
-
-=item AUTHORS
-
-Gary Ng E<lt>71564.1743@CompuServe.COME<gt>, Gurusamy Sarathy
-E<lt>gsar@activestate.comE<gt>, Nick Ing-Simmons
-E<lt>nick@ing-simmons.netE<gt>
-
-=item SEE ALSO
-
-=item HISTORY
-
-=back
-
 =head1 PRAGMA DOCUMENTATION
 
 =head2 attrs - set/get attributes of a subroutine (deprecated)
@@ -6908,7 +6839,8 @@ and non-UTF data.
 
 =back
 
-=head2 utf8 - Perl pragma to enable/disable UTF-8 in source code
+=head2 utf8 - Perl pragma to enable/disable UTF-8 (or UTF-EBCDIC) in source
+code
 
 =over 4
 
@@ -7611,8 +7543,9 @@ B<:standard>, B<:all>
 
 =item PRAGMAS
 
--any, -compile, -nosticky, -no_xhtml, -nph, -newstyle_urls, -oldstyle_urls,
--autoload, -no_debug, -debug, -private_tempfiles
+-any, -compile, -nosticky, -no_undef_params, -no_xhtml, -nph,
+-newstyle_urls, -oldstyle_urls, -autoload, -no_debug, -debug,
+-private_tempfiles
 
 =item SPECIAL FORMS FOR IMPORTING HTML-TAG FUNCTIONS
 
@@ -13664,6 +13597,8 @@ unexpand(1)
 change)
 
 =over 4
+
+=item CAVEAT
 
 =item SYNOPSIS
 
