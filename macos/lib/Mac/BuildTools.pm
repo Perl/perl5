@@ -20,8 +20,8 @@ sub make {
 	$cwd = cwd();
 
 	undef $@;
-	unless (eval { do ":Makefile.PL" }) {
-		warn "Can't do :Makefile.PL in $cwd: $@\n";
+	unless (eval { package main; do ":Makefile.PL" }) {
+		warn "Can't do ${cwd}Makefile.PL: $@\n";
 	}
 	warn $@ if $@;
 
@@ -81,6 +81,10 @@ sub make_install {
 	# taken from PerlInstall
 	my(%dirs, $dir, $d);
 	$dirs{lib} = "$ENV{MACPERL}site_perl";
+	while (-l $dirs{lib}) {
+		$dirs{lib} = readlink $dirs{lib};
+	}
+	$dirs{lib} =~ s/:$//;
 	chomp($dir = `pwd`);
 
 	$dir .= ":" unless ($dir =~ /:$/);
@@ -103,7 +107,7 @@ sub make_install {
 		mkpath($newdir, 1);
 
 		if (!copy($_, "$newdir:$_")) {
-			die $^E unless -e "$newdir:$_";
+			die "'$newdir:$_' does not exist" unless -e "$newdir:$_";
 			printf("    Moving %-20s -> %s\nDelete old file manually\n",
 				"$newdir:$_", "$newdir:$_ old");
 			move "$newdir:$_", "$newdir:$_ old";
