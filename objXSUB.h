@@ -1331,6 +1331,10 @@
 #define Perl_rsignal		pPerl->Perl_rsignal
 #undef  rsignal
 #define rsignal			Perl_rsignal
+#undef  Perl_rsignal_state
+#define Perl_rsignal_state	pPerl->Perl_rsignal_state
+#undef  rsignal_state
+#define rsignal_state		Perl_rsignal_state
 #if !defined(HAS_RENAME)
 #endif
 #undef  Perl_savepv
@@ -2378,6 +2382,30 @@
 #endif
 #if defined(PERL_OBJECT)
 #endif
+#undef  Perl_sv_setsv_flags
+#define Perl_sv_setsv_flags	pPerl->Perl_sv_setsv_flags
+#undef  sv_setsv_flags
+#define sv_setsv_flags		Perl_sv_setsv_flags
+#undef  Perl_sv_catpvn_flags
+#define Perl_sv_catpvn_flags	pPerl->Perl_sv_catpvn_flags
+#undef  sv_catpvn_flags
+#define sv_catpvn_flags		Perl_sv_catpvn_flags
+#undef  Perl_sv_catsv_flags
+#define Perl_sv_catsv_flags	pPerl->Perl_sv_catsv_flags
+#undef  sv_catsv_flags
+#define sv_catsv_flags		Perl_sv_catsv_flags
+#undef  Perl_sv_utf8_upgrade_flags
+#define Perl_sv_utf8_upgrade_flags	pPerl->Perl_sv_utf8_upgrade_flags
+#undef  sv_utf8_upgrade_flags
+#define sv_utf8_upgrade_flags	Perl_sv_utf8_upgrade_flags
+#undef  Perl_sv_pvn_force_flags
+#define Perl_sv_pvn_force_flags	pPerl->Perl_sv_pvn_force_flags
+#undef  sv_pvn_force_flags
+#define sv_pvn_force_flags	Perl_sv_pvn_force_flags
+#undef  Perl_sv_2pv_flags
+#define Perl_sv_2pv_flags	pPerl->Perl_sv_2pv_flags
+#undef  sv_2pv_flags
+#define sv_2pv_flags		Perl_sv_2pv_flags
 
 #endif  /* PERL_CORE && PERL_OBJECT */
 #endif	/* __objXSUB_h__ */

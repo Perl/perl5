@@ -123,6 +123,7 @@ For ease of access, the Perl manual has been split up into several sections:
     perlos2		Perl notes for OS/2
     perlos390		Perl notes for OS/390
     perlsolaris 	Perl notes for Solaris
+    perltru64		Perl notes for Tru64
     perlvmesa		Perl notes for VM/ESA
     perlvms		Perl notes for VMS
     perlvos		Perl notes for Stratus VOS

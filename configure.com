@@ -4672,7 +4672,7 @@ $   d_locconv="undef"
 $   d_setlocale="undef"
 $ ENDIF
 $ d_stdio_ptr_lval_sets_cnt="undef"
-$ d_stdio_ptr_lval_nochange_cnt="undef"
+$ d_stdio_ptr_lval_nochange_cnt="define"
 $!
 $! Sockets?
 $ if Has_Socketshr .OR. Has_Dec_C_Sockets

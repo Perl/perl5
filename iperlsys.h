@@ -303,7 +303,17 @@ struct IPerlStdIOInfo
 #define PerlSIO_fputs(f,s)		fputs(s,f)
 #define PerlSIO_fflush(f)		Fflush(f)
 #define PerlSIO_fgets(s, n, fp)		fgets(s,n,fp)
-#define PerlSIO_ungetc(c,f)		ungetc(c,f)
+#if defined(VMS) && defined(__DECC)
+     /* Unusual definition of ungetc() here to accomodate fast_sv_gets()'
+      * belief that it can mix getc/ungetc with reads from stdio buffer */
+     int decc$ungetc(int __c, FILE *__stream);
+#    define PerlSIO_ungetc(c,f) ((c) == EOF ? EOF : \
+            ((*(f) && !((*(f))->_flag & _IONBF) && \
+            ((*(f))->_ptr > (*(f))->_base)) ? \
+            ((*(f))->_cnt++, *(--(*(f))->_ptr) = (c)) : decc$ungetc(c,f)))
+#else
+#  define PerlSIO_ungetc(c,f)          ungetc(c,f)
+#endif
 #define PerlSIO_fileno(f)		fileno(f)
 #define PerlSIO_fdopen(f, s)		fdopen(f,s)
 #define PerlSIO_freopen(p, m, f)	freopen(p,m,f)

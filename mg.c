@@ -51,7 +51,7 @@ S_save_magic(pTHX_ I32 mgs_ix, SV *sv)
 
     SvMAGICAL_off(sv);
     SvREADONLY_off(sv);
-    SvFLAGS(sv) |= (SvFLAGS(sv) & (SVp_IOK|SVp_NOK|SVp_POK)) >> PRIVSHIFT;
+    SvFLAGS(sv) |= (SvFLAGS(sv) & (SVp_NOK|SVp_POK)) >> PRIVSHIFT;
 }
 
 /*

@@ -9,6 +9,8 @@ BEGIN {
     }
 }
 
+no utf8; # so that the naked 8-bit chars won't gripe under use utf8
+
 $| = 1;
 my $total_tests = 25;
 if (ord('A') == 193) { $total_tests = 24; } # EBCDIC platforms do not warn on UTF-8

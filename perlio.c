@@ -311,6 +311,13 @@ HV *PerlIO_layer_hv;
 AV *PerlIO_layer_av;
 
 void
+PerlIO_cleanup_layers(pTHXo_ void *data)
+{
+ PerlIO_layer_hv = Nullhv;
+ PerlIO_layer_av = Nullav;
+}
+
+void
 PerlIO_cleanup()
 {
  dTHX;
@@ -3596,6 +3603,8 @@ PerlIO_funcs PerlIO_mmap = {
 void
 PerlIO_init(void)
 {
+ dTHX;
+ call_atexit(PerlIO_cleanup_layers, NULL);
  if (!_perlio)
   {
 #ifndef WIN32
@@ -3647,8 +3656,14 @@ char *
 PerlIO_getname(PerlIO *f, char *buf)
 {
  dTHX;
+ char *name = NULL;
+#ifdef VMS
+ FILE *stdio = PerlIOSelf(f,PerlIOStdio)->stdio;
+ if (stdio) name = fgetname(stdio, buf);
+#else
  Perl_croak(aTHX_ "Don't know how to get file name");
- return NULL;
+#endif
+ return name;
 }
 
 

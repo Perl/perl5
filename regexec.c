@@ -2211,6 +2211,7 @@ S_regmatch(pTHX_ regnode *prog)
 	    if (!nextchr)
 		sayNO;
 	    if (do_utf8) {
+		LOAD_UTF8_CHARCLASS(alnum,"a");
 		if (!(OP(scan) == ALNUM
 		      ? swash_fetch(PL_utf8_alnum, (U8*)locinput, do_utf8)
 		      : isALNUM_LC_utf8((U8*)locinput)))

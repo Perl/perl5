@@ -1043,6 +1043,7 @@ S_sublex_push(pTHX)
     SAVEI32(PL_lex_inwhat);
     SAVECOPLINE(PL_curcop);
     SAVEPPTR(PL_bufptr);
+    SAVEPPTR(PL_bufend);
     SAVEPPTR(PL_oldbufptr);
     SAVEPPTR(PL_oldoldbufptr);
     SAVEPPTR(PL_last_lop);
@@ -1438,14 +1439,14 @@ S_scan_const(pTHX_ char *start)
 		++s;
 		if (*s == '{') {
 		    char* e = strchr(s, '}');
+		    STRLEN len = 1;		/* allow underscores */
+
 		    if (!e) {
 			yyerror("Missing right brace on \\x{}");
-			e = s;
+			++s;
+			continue;
 		    }
-		    else {
-			STRLEN len = 1;		/* allow underscores */
-			uv = (UV)scan_hex(s + 1, e - s - 1, &len);
-		    }
+		    uv = (UV)scan_hex(s + 1, e - s - 1, &len);
 		    s = e + 1;
 		}
 		else {
@@ -1634,7 +1635,7 @@ S_scan_const(pTHX_ char *start)
     *d = '\0';
     SvCUR_set(sv, d - SvPVX(sv));
     if (SvCUR(sv) >= SvLEN(sv))
-      Perl_croak(aTHX_ "panic:constant overflowed allocated space");
+      Perl_croak(aTHX_ "panic: constant overflowed allocated space");
 
     SvPOK_on(sv);
     if (has_utf8) {
@@ -3227,8 +3228,16 @@ Perl_yylex(pTHX)
 		else
 		    PL_lex_brackstack[PL_lex_brackets++] = XOPERATOR;
 		s = skipspace(s);
-		if (*s == '}')
+		if (*s == '}') {
+		    if (PL_expect == XREF && PL_lex_state == LEX_INTERPNORMAL) {
+			PL_expect = XTERM;
+			/* This hack is to get the ${} in the message. */
+			PL_bufptr = s+1;
+			yyerror("syntax error");
+			break;
+		    }
 		    OPERATOR(HASHBRACK);
+		}
 		/* This hack serves to disambiguate a pair of curlies
 		 * as being a block or an anon hash.  Normally, expectation
 		 * determines that, but in cases where we're not in a
@@ -3773,7 +3782,7 @@ Perl_yylex(pTHX)
 		TERM(THING);
 	    }
 	    /* avoid v123abc() or $h{v1}, allow C<print v10;> */
-	    else if (!isALPHA(*start) && (PL_expect == XTERM || PL_expect == XREF)) {
+	    else if (!isALPHA(*start) && (PL_expect == XTERM || PL_expect == XREF || PL_expect == XSTATE)) {
 		char c = *start;
 		GV *gv;
 		*start = '\0';

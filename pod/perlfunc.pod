@@ -4291,6 +4291,12 @@ loop control operators described in L<perlsyn> or with C<goto>.
 When C<use locale> is in effect, C<sort LIST> sorts LIST according to the
 current collation locale.  See L<perllocale>.
 
+Perl does B<not> guarantee that sort is stable.  (A I<stable> sort
+preserves the input order of elements that compare equal.)  5.7 and
+5.8 happen to use a stable mergesort, but 5.6 and earlier used quicksort,
+which is not stable.  Do not assume that future perls will continue to
+use a stable sort.
+
 Examples:
 
     # sort lexically
@@ -5615,6 +5621,13 @@ command if the files already exist:
     #!/usr/bin/perl
     $now = time;
     utime $now, $now, @ARGV;
+
+If the first two elements of the list are C<undef>, then the utime(2)
+function in the C library will be called with a null second argument.
+On most systems, this will set the file's access and modification
+times to the current time.  (i.e. equivalent to the example above.)
+
+    utime undef, undef, @ARGV;
 
 =item values HASH
 

@@ -57,6 +57,7 @@ README.plan9		Notes about Plan9 port
 README.qnx		Notes about QNX port
 README.solaris		Notes about Solaris port
 README.threads		Notes about multithreading
+README.tru64		Notes about Tru64
 README.vmesa		Notes about VM/ESA port
 README.vms		Notes about installing the VMS port
 README.vos		Notes about Stratus VOS port
@@ -720,6 +721,7 @@ lib/Env.pm		Map environment into ordinary variables
 lib/Exporter.pm		Exporter base class
 lib/Exporter/Heavy.pm	Complicated routines for Exporter
 lib/ExtUtils/Command.pm	Utilities for Make on non-UNIX platforms
+lib/ExtUtils/Constant.pm	generate XS code to import C header constants
 lib/ExtUtils/Embed.pm	Utilities for embedding Perl in C programs
 lib/ExtUtils/Install.pm	Handles 'make install' on extensions
 lib/ExtUtils/Installed.pm	Information on installed extensions
@@ -764,12 +766,17 @@ lib/FindBin.pm		Find name of currently executing program
 lib/Getopt/Long.pm	Fetch command options (GetOptions)
 lib/Getopt/Std.pm	Fetch command options (getopt, getopts)
 lib/I18N/Collate.pm	Routines to do strxfrm-based collation
+lib/I18N/LangTags.pm	I18N::LangTags
+lib/I18N/LangTags/List.pod	list of tags for human languages
 lib/IPC/Open2.pm	Open a two-ended pipe
 lib/IPC/Open3.pm	Open a three-ended pipe!
 lib/Locale/Constants.pm	Locale::Codes
 lib/Locale/Country.pm	Locale::Codes
 lib/Locale/Currency.pm	Locale::Codes
 lib/Locale/Language.pm	Locale::Codes
+lib/Locale/Maketext.pm	Locale::Maketext
+lib/Locale/Maketext.pod	Locale::Maketext documentation
+lib/Locale/Maketext/TPJ13.pod	Locale::Maketext documentation article
 lib/Math/BigFloat.pm	An arbitrary precision floating-point arithmetic package
 lib/Math/BigInt.pm	An arbitrary precision integer arithmetic package
 lib/Math/Complex.pm	A Complex package
@@ -1446,6 +1453,13 @@ t/io/tell.t		See if file seeking works
 t/io/utf8.t		See if file seeking works
 t/lib/1_compile.t	See if the various libraries and extensions compile
 t/lib/MyFilter.pm	Helper file for t/lib/filter-simple.t
+t/lib/Test/fail.t	See if Test works
+t/lib/Test/mix.t	See if Test works
+t/lib/Test/onfail.t	See if Test works
+t/lib/Test/qr.t	See if Test works
+t/lib/Test/skip.t	See if Test works
+t/lib/Test/success.t	See if Test works
+t/lib/Test/todo.t	See if Test works
 t/lib/abbrev.t		See if Text::Abbrev works
 t/lib/ansicolor.t	See if Term::ANSIColor works
 t/lib/anydbm.t		See if AnyDBM_File works
@@ -1461,6 +1475,7 @@ t/lib/bigfloat.t	See if bigfloat.pl works
 t/lib/bigfltpm.t	See if BigFloat.pm works
 t/lib/bigint.t		See if bigint.pl works
 t/lib/bigintpm.t	See if BigInt.pm works
+t/lib/carp.t		See if Carp works
 t/lib/cgi-esc.t		See if CGI.pm works
 t/lib/cgi-form.t	See if CGI.pm works
 t/lib/cgi-function.t	See if CGI.pm works
@@ -1504,6 +1519,7 @@ t/lib/env-array.t	See if Env works for arrays
 t/lib/env.t		See if Env works
 t/lib/errno.t		See if Errno works
 t/lib/exporter.t        See if Exporter works
+t/lib/extutils.t	See if extutils work
 t/lib/fatal.t           See if Fatal works
 t/lib/fcntl.t           See if Fcntl works
 t/lib/fields.t          See if base/fields works
@@ -1514,6 +1530,7 @@ t/lib/filefunc.t	See if File::Spec::Functions works
 t/lib/filehand.t	See if FileHandle works
 t/lib/filepath.t	See if File::Path works
 t/lib/filespec.t	See if File::Spec works
+t/lib/filestat.t	See if File::stat works
 t/lib/filter-simple.t	See if Filter::Simple works
 t/lib/filter-util.pl	See if Filter::Util::Call works
 t/lib/filter-util.t	See if Filter::Util::Call works
@@ -1537,6 +1554,7 @@ t/lib/h2ph.pht		Generated output from h2ph.h by h2ph, for comparison
 t/lib/h2ph.t		See if h2ph works like it should
 t/lib/hostname.t	See if Sys::Hostname works
 t/lib/i18n-collate.t	See if I18N::Collate works
+t/lib/i18n-langtags.t	See if I18N::LangTags work
 t/lib/io_const.t	See if constants from IO work
 t/lib/io_dir.t		See if directory-related methods from IO work
 t/lib/io_dup.t		See if dup()-related methods from IO work
@@ -1558,6 +1576,7 @@ t/lib/lc-constants.t	See if Locale::Codes work
 t/lib/lc-country.t	See if Locale::Codes work
 t/lib/lc-currency.t	See if Locale::Codes work
 t/lib/lc-language.t	See if Locale::Codes work
+t/lib/lc-maketext.t	See if Locale::Maketext works
 t/lib/lc-uk.t	See if Locale::Codes work
 t/lib/md5-aaa.t	See if Digest::MD5 extension works
 t/lib/md5-align.t	See if Digest::MD5 extension works
@@ -1568,6 +1587,9 @@ t/lib/mimeb64u.t		see whether MIME::Base64 works
 t/lib/mimeqp.t		see whether MIME::QuotedPrint works
 t/lib/ndbm.t		See if NDBM_File works
 t/lib/net-hostent.t	See if Net::hostent works
+t/lib/net-nent.t	See if Net::netent works
+t/lib/net-pent.t	See if Net::protoent works
+t/lib/net-sent.t	See if Net::servtent works
 t/lib/next.t		See if NEXT works
 t/lib/odbm.t		See if ODBM_File works
 t/lib/opcode.t		See if Opcode works
@@ -1576,6 +1598,7 @@ t/lib/open3.t		See if IPC::Open3 works
 t/lib/ops.t		See if Opcode works
 t/lib/parsewords.t	See if Text::ParseWords works
 t/lib/peek.t		See if Devel::Peek works
+t/lib/perlio.t		See if PerlIO works
 t/lib/ph.t		See if h2ph works
 t/lib/posix.t		See if POSIX works
 t/lib/safe1.t		See if Safe works
@@ -1640,7 +1663,9 @@ t/lib/tie-stdarray.t	Test for Tie::StdArray
 t/lib/tie-stdhandle.t	Test for Tie::StdHandle
 t/lib/tie-stdpush.t	Test for Tie::StdArray
 t/lib/tie-substrhash.t	Test for Tie::SubstrHash
+t/lib/time-gmtime.t	Test for Time::gmtime
 t/lib/time-hires.t	Test for Time::HiRes
+t/lib/time-localtime.t	Test for Time::localtime
 t/lib/time-piece.t	Test for Time::Piece
 t/lib/timelocal.t	See if Time::Local works
 t/lib/trig.t		See if Math::Trig works
@@ -1657,6 +1682,8 @@ t/lib/u-reftype.t	Scalar::Util
 t/lib/u-sum.t		List::Util
 t/lib/u-tainted.t	Scalar::Util
 t/lib/u-weak.t		Scalar::Util
+t/lib/user-grent.t	See if User::grwent works
+t/lib/user-pwent.t	See if User::pwent works
 t/lib/xs-typemap.t	test that typemaps work
 t/op/64bitint.t		See if 64 bit integers work
 t/op/anonsub.t		See if anonymous subroutines work
@@ -1692,6 +1719,7 @@ t/op/filetest.t		See if file tests work
 t/op/flip.t		See if range operator works
 t/op/fork.t		See if fork works
 t/op/glob.t		See if <*> works
+t/op/gmagic.t		See if GMAGIC works
 t/op/goto.t		See if goto works
 t/op/goto_xs.t		See if "goto &sub" works on XSUBs
 t/op/grent.t		See if getgr*() functions work
@@ -1799,6 +1827,7 @@ t/pod/testcmp.pl	Module to compare output against expected results
 t/pod/testp2pt.pl	Module to test Pod::PlainText for a given file
 t/pod/testpchk.pl	Module to test Pod::Checker for a given file
 t/pod/testpods/lib/Pod/Stuff.pm        Sample data for find.t
+t/pragma/autouse.t	See if autouse works
 t/pragma/constant.t	See if compile-time constants work
 t/pragma/diagnostics.t	See if diagnostics.pm works
 t/pragma/locale.t	See if locale support works

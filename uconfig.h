@@ -981,7 +981,7 @@
  *	preprocessor can make decisions based on it.
  */
 #define INTSIZE 1		/**/
-#define LONGSIZE 1		/**/
+#define LONGSIZE 4		/**/
 #define SHORTSIZE 1		/**/
 
 /* MULTIARCH:
@@ -1038,7 +1038,13 @@
  *	by Configure.  You shouldn't rely on it too much; the specific
  *	feature tests from Configure are generally more reliable.
  */
+/* OSVERS:
+ *	This symbol contains the version of the operating system, as determined
+ *	by Configure.  You shouldn't rely on it too much; the specific
+ *	feature tests from Configure are generally more reliable.
+ */
 #define OSNAME "unknown"		/**/
+#define OSVERS ""		/**/
 
 /* MEM_ALIGNBYTES:
  *	This symbol contains the number of bytes required to align a
@@ -1146,7 +1152,7 @@
 #    define BYTEORDER 0x4321
 #  endif
 #else
-#define BYTEORDER 0x12	/* large digits for MSB */
+#define BYTEORDER 0x1234	/* large digits for MSB */
 #endif /* NeXT */
 
 /* CAT2:
@@ -2324,7 +2330,7 @@
  *	This symbol contains the size of a double, so that the C preprocessor
  *	can make decisions based on it.
  */
-#define DOUBLESIZE 1		/**/
+#define DOUBLESIZE 8		/**/
 
 /* EBCDIC:
  *     This symbol, if defined, indicates that this system uses
@@ -2927,7 +2933,7 @@
  *	the compiler supports (void *); otherwise it will be
  *	sizeof(char *).
  */
-#define PTRSIZE 1		/**/
+#define PTRSIZE 4		/**/
 
 /* Drand01:
  *	This macro is to be used to generate uniformly distributed

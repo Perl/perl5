@@ -211,6 +211,21 @@ $b = sub
 EXPECT
 ########
 # pp_hot.c [pp_concat]
+use warnings 'uninitialized';
+my($x, $y);
+sub a { shift }
+a($x . "x");	# should warn once
+a($x . $y);	# should warn twice
+$x .= $y;	# should warn once
+$y .= $y;	# should warn once
+EXPECT
+Use of uninitialized value in concatenation (.) or string at - line 5.
+Use of uninitialized value in concatenation (.) or string at - line 6.
+Use of uninitialized value in concatenation (.) or string at - line 6.
+Use of uninitialized value in concatenation (.) or string at - line 7.
+Use of uninitialized value in concatenation (.) or string at - line 8.
+########
+# pp_hot.c [pp_concat]
 use warnings 'y2k';
 use Config;
 BEGIN {

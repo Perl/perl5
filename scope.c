@@ -203,7 +203,7 @@ S_save_scalar_at(pTHX_ SV **sptr)
 		mg->mg_obj = osv;
 	    }
 	    SvFLAGS(osv) |= (SvFLAGS(osv) &
-		(SVp_IOK|SVp_NOK|SVp_POK)) >> PRIVSHIFT;
+               (SVp_NOK|SVp_POK)) >> PRIVSHIFT;
 	    PL_tainted = oldtainted;
 	}
 	SvMAGIC(sv) = SvMAGIC(osv);
@@ -699,7 +699,7 @@ Perl_leave_scope(pTHX_ I32 base)
 		     SvTYPE(value) != SVt_PVGV)
 	    {
 		SvFLAGS(value) |= (SvFLAGS(value) &
-				   (SVp_IOK|SVp_NOK|SVp_POK)) >> PRIVSHIFT;
+                                  (SVp_NOK|SVp_POK)) >> PRIVSHIFT;
 		SvMAGICAL_off(value);
 		/* XXX this is a leak when we get here because the
 		 * mg_get() in save_scalar_at() croaked */

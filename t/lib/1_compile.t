@@ -106,6 +106,8 @@ sub compile_module {
     return scalar `$^X "-Ilib" t/lib/compmod.pl $module` =~ /^ok/;
 }
 
+# Add here modules that have their own test scripts and therefore
+# need not be test-compiled by 1_compile.t.
 __DATA__
 AnyDBM_File
 AutoLoader
@@ -119,6 +121,7 @@ CGI
 CGI::Pretty
 CGI::Util
 Carp
+Carp::Heavy
 Class::ISA
 Class::Struct
 CPAN
@@ -138,6 +141,8 @@ Env
 Errno
 Exporter
 Exporter::Heavy
+ExtUtils::Constant
+ExtUtils::MakeMaker
 Fatal
 Fcntl
 File::Basename
@@ -150,6 +155,7 @@ File::Path
 File::Spec
 File::Spec::Functions
 File::Temp
+File::stat
 FileCache
 FileHandle
 Filter::Simple
@@ -158,7 +164,8 @@ FindBin
 GDBM_File
 Getopt::Long
 Getopt::Std
-I18N:Collate
+I18N::LangTags
+I18N::Collate
 IO::Dir
 IO::File
 IO::Handle
@@ -177,6 +184,7 @@ Locale::Constants
 Locale::Country
 Locale::Currency
 Locale::Language
+Locale::Maketext
 MIME::Base64
 MIME::QuotedPrint
 Math::BigFloat
@@ -186,8 +194,12 @@ Math::Trig
 NDBM_File
 NEXT
 Net::hostent
+Net::netent
+Net::protoent
+Net::servent
 ODBM_File
 Opcode
+PerlIO
 POSIX
 Pod::Checker
 Pod::Find
@@ -225,9 +237,15 @@ Tie::SubstrHash
 Time::HiRes
 Time::Local
 Time::Piece
+Time::gmtime
+Time::localtime
+Time::tm
 UNIVERSAL
+User::grent
+User::pwent
 XS::Typemap
 attrs
+autouse
 base
 bytes
 charnames

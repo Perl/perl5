@@ -667,14 +667,16 @@ Perl_do_join(pTHX_ register SV *sv, SV *del, register SV **mark, register SV **s
 	++mark;
     }
 
+    sv_setpv(sv, "");
+    if (PL_tainting && SvMAGICAL(sv))
+	SvTAINTED_off(sv);
+
     if (items-- > 0) {
-	sv_setpv(sv, "");
 	if (*mark)
 	    sv_catsv(sv, *mark);
 	mark++;
     }
-    else
-	sv_setpv(sv,"");
+
     if (delimlen) {
 	for (; items > 0; items--,mark++) {
 	    sv_catsv(sv,del);

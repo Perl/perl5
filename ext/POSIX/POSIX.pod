@@ -1230,6 +1230,8 @@ The string for Tuesday, December 12, 1995.
 	$str = POSIX::strftime( "%A, %B %d, %Y", 0, 0, 0, 12, 11, 95, 2 );
 	print "$str\n";
 
+See also L<Time::Piece>.
+
 =item strlen
 
 strlen() is C-specific, use C<length()> instead, see L<perlfunc/length>.

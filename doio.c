@@ -143,7 +143,14 @@ Perl_do_openn(pTHX_ GV *gv, register char *name, I32 len, int as_raw,
 	if (num_svs != 0) {
 	     Perl_croak(aTHX_ "panic: sysopen with multiple args");
 	}
-	if (rawmode & (O_WRONLY|O_RDWR|O_APPEND|O_CREAT|O_TRUNC))
+	if (rawmode & (O_WRONLY|O_RDWR|O_CREAT
+#ifdef O_APPEND	/* Not fully portable. */
+		       |O_APPEND
+#endif
+#ifdef O_TRUNC	/* Not fully portable. */
+		       |O_TRUNC
+#endif
+		       ))
 	    TAINT_PROPER("sysopen");
 	mode[ix++] = '#'; /* Marker to openn to use numeric "sysopen" */
 
@@ -566,7 +573,7 @@ Perl_do_openn(pTHX_ GV *gv, register char *name, I32 len, int as_raw,
 #ifdef VMS
 	    if (savefd != PerlIO_fileno(PerlIO_stdin())) {
 	      char newname[FILENAME_MAX+1];
-	      if (fgetname(fp, newname)) {
+             if (PerlIO_getname(fp, newname)) {
  	        if (fd == PerlIO_fileno(PerlIO_stdout())) Perl_vmssetuserlnm(aTHX_ "SYS$OUTPUT", newname);
  	        if (fd == PerlIO_fileno(PerlIO_stderr())) Perl_vmssetuserlnm(aTHX_ "SYS$ERROR",  newname);
 	      }
@@ -1667,20 +1674,31 @@ nothing in the core.
 	    } utbuf;
 #endif
 
+           SV* accessed = *++mark;
+           SV* modified = *++mark;
+           void * utbufp = &utbuf;
+
+           /* be like C, and if both times are undefined, let the C
+              library figure out what to do.  This usually means
+              "current time" */
+
+           if ( accessed == &PL_sv_undef && modified == &PL_sv_undef )
+             utbufp = NULL;
+           
 	    Zero(&utbuf, sizeof utbuf, char);
 #ifdef BIG_TIME
-	    utbuf.actime = (Time_t)SvNVx(*++mark);	/* time accessed */
-	    utbuf.modtime = (Time_t)SvNVx(*++mark);	/* time modified */
+           utbuf.actime = (Time_t)SvNVx(accessed);     /* time accessed */
+           utbuf.modtime = (Time_t)SvNVx(modified);    /* time modified */
 #else
-	    utbuf.actime = (Time_t)SvIVx(*++mark);	/* time accessed */
-	    utbuf.modtime = (Time_t)SvIVx(*++mark);	/* time modified */
+           utbuf.actime = (Time_t)SvIVx(accessed);     /* time accessed */
+           utbuf.modtime = (Time_t)SvIVx(modified);    /* time modified */
 #endif
 	    APPLY_TAINT_PROPER();
 	    tot = sp - mark;
 	    while (++mark <= sp) {
 		char *name = SvPVx(*mark, n_a);
 		APPLY_TAINT_PROPER();
-		if (PerlLIO_utime(name, &utbuf))
+               if (PerlLIO_utime(name, utbufp))
 		    tot--;
 	    }
 	}
@@ -2103,7 +2121,6 @@ Perl_start_glob (pTHX_ SV *tmpglob, IO *io)
 	char rslt[NAM$C_MAXRSS+1+sizeof(unsigned short int)] = {'\0','\0'};
 	char vmsspec[NAM$C_MAXRSS+1];
 	char *rstr = rslt + sizeof(unsigned short int), *begin, *end, *cp;
-	char tmpfnam[L_tmpnam] = "SYS$SCRATCH:";
 	$DESCRIPTOR(dfltdsc,"SYS$DISK:[]*.*;");
 	PerlIO *tmpfp;
 	STRLEN i;
@@ -2118,7 +2135,6 @@ Perl_start_glob (pTHX_ SV *tmpglob, IO *io)
 	   ((struct NAM *)((struct FAB *)cxt)->fab$l_nam)->nam$l_fnb
 	   but that's unsupported, so I don't want to do it now and
 	   have it bite someone in the future. */
-	strcat(tmpfnam,PerlLIO_tmpnam(NULL));
 	cp = SvPV(tmpglob,i);
 	for (; i; i--) {
 	    if (cp[i] == ';') hasver = 1;
@@ -2135,7 +2151,7 @@ Perl_start_glob (pTHX_ SV *tmpglob, IO *io)
 		break;
 	    }
 	}
-	if ((tmpfp = PerlIO_open(tmpfnam,"w+","fop=dlt")) != NULL) {
+       if ((tmpfp = PerlIO_tmpfile()) != NULL) {
 	    Stat_t st;
 	    if (!PerlLIO_stat(SvPVX(tmpglob),&st) && S_ISDIR(st.st_mode))
 		ok = ((wilddsc.dsc$a_pointer = tovmspath(SvPVX(tmpglob),vmsspec)) != NULL);

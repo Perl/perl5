@@ -14,6 +14,15 @@ esac
 dll_post="`echo $perl_fullversion | sum | sed -e 's/^0*//' | awk '{print $1}'`"
 dll_post="`printf '%x' $dll_post | tr '[a-z]' '[A-Z]'`"
 
+aout_extra_libs=''
+aout_extra_sep=''
+for xxx in $aout_extra_static_ext; do
+  aout_extra_dir=`echo "$xxx" | sed -e 's/::/\//g'`
+  aout_extra_lib="lib/auto/$aout_extra_dir/"`basename "$aout_extra_dir"`
+  aout_extra_libs="$aout_extra_libs$aout_extra_sep$aout_extra_lib$aout_lib_ext"
+  aout_extra_sep=' '
+done
+
 $spitshell >>Makefile <<!GROK!THIS!
 
 PERL_FULLVERSION = $perl_fullversion
@@ -37,6 +46,7 @@ PERL_DLL_BASE	= perl$dll_post
 PERL_DLL	= \$(PERL_DLL_BASE)\$(DLSUFFIX)
 TEST_PERL_DLL	= perl_dll_t
 CONFIG_ARGS	= $config_args
+AOUT_EXTRA_LIBS	= $aout_extra_libs
 
 !GROK!THIS!
 
@@ -150,8 +160,9 @@ installcmd :
 
 aout_obj = $(addsuffix $(AOUT_OBJ_EXT),$(basename $(obj)))
 AOUT_DYNALOADER = $(addsuffix $(AOUT_LIB_EXT),$(basename $(DYNALOADER)))
-aout_static_ext = $(addsuffix $(AOUT_LIB_EXT),$(basename $(dynamic_ext)))
-aout_static_lib = $(addsuffix $(LIB_EXT),$(basename $(dynamic_ext)))
+aout_ext = $(dynamic_ext) $(AOUT_EXTRA_LIBS)
+aout_static_ext = $(addsuffix $(AOUT_LIB_EXT),$(basename $(aout_ext)))
+aout_static_lib = $(addsuffix $(LIB_EXT),$(basename $(aout_ext)))
 
 aout_static_ext_dll = $(addsuffix $(AOUT_LIB_EXT),$(basename $(static_ext)))
 DYNALOADER_OBJ = ext/DynaLoader/DynaLoader$(OBJ_EXT)

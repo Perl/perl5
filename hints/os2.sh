@@ -131,6 +131,8 @@ aout_cppflags="-DDOSISH -DPERL_IS_AOUT -DOS2=2 -DEMBED -I. $_defemxcrtrev"
 aout_use_clib='c'
 aout_usedl='undef'
 aout_archobjs="os2.o dl_os2.o"
+# Not listed in dynamic_ext, but needed for AOUT static_ext nevertheless
+aout_extra_static_ext="OS2::DLL"
 
 # variable which have different values for aout compile
 used_aout='d_shrplib useshrplib plibext lib_ext obj_ext ar plibext d_fork lddlflags ldflags ccflags use_clib usedl archobjs cppflags'

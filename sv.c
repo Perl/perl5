@@ -2306,7 +2306,10 @@ Perl_sv_2nv(pTHX_ register SV *sv)
     }
     else if (SvTYPE(sv) < SVt_PVNV)
 	sv_upgrade(sv, SVt_PVNV);
-    if (SvIOKp(sv) &&
+    if (SvNOKp(sv) && !(SvIOK(sv) || SvPOK(sv))) {
+	SvNOK_on(sv);
+    }
+    else if (SvIOKp(sv) &&
 	    (!SvPOKp(sv) || !strchr(SvPVX(sv),'.') || !looks_like_number(sv)))
     {
 	SvNVX(sv) = SvIsUV(sv) ? (NV)SvUVX(sv) : (NV)SvIVX(sv);
@@ -2643,6 +2646,12 @@ uiv_2buf(char *buf, IV iv, UV uv, int is_uv, char **peob)
 char *
 Perl_sv_2pv(pTHX_ register SV *sv, STRLEN *lp)
 {
+    return sv_2pv_flags(sv, lp, SV_GMAGIC);
+}
+
+char *
+Perl_sv_2pv_flags(pTHX_ register SV *sv, STRLEN *lp, I32 flags)
+{
     register char *s;
     int olderrno;
     SV *tsv;
@@ -2654,7 +2663,8 @@ Perl_sv_2pv(pTHX_ register SV *sv, STRLEN *lp)
 	return "";
     }
     if (SvGMAGICAL(sv)) {
-	mg_get(sv);
+	if (flags & SV_GMAGIC)
+	    mg_get(sv);
 	if (SvPOKp(sv)) {
 	    *lp = SvCUR(sv);
 	    return SvPVX(sv);
@@ -2965,6 +2975,25 @@ if all the bytes have hibit clear.
 STRLEN
 Perl_sv_utf8_upgrade(pTHX_ register SV *sv)
 {
+    return sv_utf8_upgrade_flags(sv, SV_GMAGIC);
+}
+
+/*
+=for apidoc sv_utf8_upgrade_flags
+
+Convert the PV of an SV to its UTF8-encoded form.
+Forces the SV to string form it it is not already.
+Always sets the SvUTF8 flag to avoid future validity checks even
+if all the bytes have hibit clear. If C<flags> has C<SV_GMAGIC> bit set,
+will C<mg_get> on C<sv> if appropriate, else not. C<sv_utf8_upgrade> and
+C<sv_utf8_upgrade_nomg> are implemented in terms of this function.
+
+=cut
+*/
+
+STRLEN
+Perl_sv_utf8_upgrade_flags(pTHX_ register SV *sv, I32 flags)
+{
     U8 *s, *t, *e;
     int  hibit = 0;
 
@@ -2973,7 +3002,7 @@ Perl_sv_utf8_upgrade(pTHX_ register SV *sv)
 
     if (!SvPOK(sv)) {
 	STRLEN len = 0;
-	(void) sv_2pv(sv,&len);
+	(void) sv_2pv_flags(sv,&len, flags);
 	if (!SvPOK(sv))
 	     return len;
     }
@@ -3149,8 +3178,29 @@ C<sv_setsv_mg>.
 =cut
 */
 
+/* sv_setsv() is aliased to Perl_sv_setsv_macro; this function provided
+   for binary compatibility only
+*/
 void
 Perl_sv_setsv(pTHX_ SV *dstr, register SV *sstr)
+{
+    sv_setsv_flags(dstr, sstr, SV_GMAGIC);
+}
+
+/*
+=for apidoc sv_setsv_flags
+
+Copies the contents of the source SV C<ssv> into the destination SV C<dsv>.
+The source SV may be destroyed if it is mortal.  Does not handle 'set'
+magic.  If C<flags> has C<SV_GMAGIC> bit set, will C<mg_get> on C<ssv> if
+appropriate, else not. C<sv_setsv> and C<sv_setsv_nomg> are implemented
+in terms of this function.
+
+=cut
+*/
+
+void
+Perl_sv_setsv_flags(pTHX_ SV *dstr, register SV *sstr, I32 flags)
 {
     register U32 sflags;
     register int dtype;
@@ -3305,7 +3355,7 @@ Perl_sv_setsv(pTHX_ SV *dstr, register SV *sstr)
 	/* FALL THROUGH */
 
     default:
-	if (SvGMAGICAL(sstr)) {
+	if (SvGMAGICAL(sstr) && (flags & SV_GMAGIC)) {
 	    mg_get(sstr);
 	    if (SvTYPE(sstr) != stype) {
 		stype = SvTYPE(sstr);
@@ -3833,21 +3883,43 @@ Handles 'get' magic, but not 'set' magic.  See C<sv_catpvn_mg>.
 =cut
 */
 
+/* sv_catpvn() is aliased to Perl_sv_catpvn_macro; this function provided
+   for binary compatibility only
+*/
 void
-Perl_sv_catpvn(pTHX_ register SV *sv, register const char *ptr, register STRLEN len)
+Perl_sv_catpvn(pTHX_ SV *dsv, const char* sstr, STRLEN slen)
 {
-    STRLEN tlen;
-    char *junk;
+    sv_catpvn_flags(dsv, sstr, slen, SV_GMAGIC);
+}
 
-    junk = SvPV_force(sv, tlen);
-    SvGROW(sv, tlen + len + 1);
-    if (ptr == junk)
-	ptr = SvPVX(sv);
-    Move(ptr,SvPVX(sv)+tlen,len,char);
-    SvCUR(sv) += len;
-    *SvEND(sv) = '\0';
-    (void)SvPOK_only_UTF8(sv);		/* validate pointer */
-    SvTAINT(sv);
+/*
+=for apidoc sv_catpvn_flags
+
+Concatenates the string onto the end of the string which is in the SV.  The
+C<len> indicates number of bytes to copy.  If the SV has the UTF8
+status set, then the bytes appended should be valid UTF8.
+If C<flags> has C<SV_GMAGIC> bit set, will C<mg_get> on C<dsv> if
+appropriate, else not. C<sv_catpvn> and C<sv_catpvn_nomg> are implemented
+in terms of this function.
+
+=cut
+*/
+
+void
+Perl_sv_catpvn_flags(pTHX_ register SV *dsv, register const char *sstr, register STRLEN slen, I32 flags)
+{
+    STRLEN dlen;
+    char *dstr;
+
+    dstr = SvPV_force_flags(dsv, dlen, flags);
+    SvGROW(dsv, dlen + slen + 1);
+    if (sstr == dstr)
+	sstr = SvPVX(dsv);
+    Move(sstr, SvPVX(dsv) + dlen, slen, char);
+    SvCUR(dsv) += slen;
+    *SvEND(dsv) = '\0';
+    (void)SvPOK_only_UTF8(dsv);		/* validate pointer */
+    SvTAINT(dsv);
 }
 
 /*
@@ -3874,36 +3946,52 @@ not 'set' magic.  See C<sv_catsv_mg>.
 
 =cut */
 
+/* sv_catsv() is aliased to Perl_sv_catsv_macro; this function provided
+   for binary compatibility only
+*/
 void
-Perl_sv_catsv(pTHX_ SV *dsv, register SV *ssv)
+Perl_sv_catsv(pTHX_ SV *dstr, register SV *sstr)
+{
+    sv_catsv_flags(dstr, sstr, SV_GMAGIC);
+}
+
+/*
+=for apidoc sv_catsv_flags
+
+Concatenates the string from SV C<ssv> onto the end of the string in
+SV C<dsv>.  Modifies C<dsv> but not C<ssv>.  If C<flags> has C<SV_GMAGIC>
+bit set, will C<mg_get> on the SVs if appropriate, else not. C<sv_catsv>
+and C<sv_catsv_nomg> are implemented in terms of this function.
+
+=cut */
+
+void
+Perl_sv_catsv_flags(pTHX_ SV *dsv, register SV *ssv, I32 flags)
 {
     char *spv;
     STRLEN slen;
     if (!ssv)
 	return;
     if ((spv = SvPV(ssv, slen))) {
-	bool dutf8 = DO_UTF8(dsv);
 	bool sutf8 = DO_UTF8(ssv);
+	bool dutf8;
 
-	if (dutf8 == sutf8)
-	    sv_catpvn(dsv,spv,slen);
-	else {
+	if (SvGMAGICAL(dsv) && (flags & SV_GMAGIC))
+	    mg_get(dsv);
+	dutf8 = DO_UTF8(dsv);
+
+	if (dutf8 != sutf8) {
 	    if (dutf8) {
 		/* Not modifying source SV, so taking a temporary copy. */
-		SV* csv = sv_2mortal(newSVsv(ssv));
-		char *cpv;
-		STRLEN clen;
+		SV* csv = sv_2mortal(newSVpvn(spv, slen));
 
 		sv_utf8_upgrade(csv);
-		cpv = SvPV(csv,clen);
-		sv_catpvn(dsv,cpv,clen);
+		spv = SvPV(csv, slen);
 	    }
-	    else {
-		sv_utf8_upgrade(dsv);
-		sv_catpvn(dsv,spv,slen);
-		SvUTF8_on(dsv); /* If dsv has no wide characters. */
-	    }
+	    else
+		sv_utf8_upgrade_nomg(dsv);
 	}
+	sv_catpvn_nomg(dsv, spv, slen);
     }
 }
 
@@ -4206,7 +4294,7 @@ Perl_sv_unmagic(pTHX_ SV *sv, int type)
     }
     if (!SvMAGIC(sv)) {
 	SvMAGICAL_off(sv);
-	SvFLAGS(sv) |= (SvFLAGS(sv) & (SVp_IOK|SVp_NOK|SVp_POK)) >> PRIVSHIFT;
+       SvFLAGS(sv) |= (SvFLAGS(sv) & (SVp_NOK|SVp_POK)) >> PRIVSHIFT;
     }
 
     return 0;
@@ -6168,6 +6256,23 @@ Get a sensible string out of the SV somehow.
 char *
 Perl_sv_pvn_force(pTHX_ SV *sv, STRLEN *lp)
 {
+    return sv_pvn_force_flags(sv, lp, SV_GMAGIC);
+}
+
+/*
+=for apidoc sv_pvn_force_flags
+
+Get a sensible string out of the SV somehow.
+If C<flags> has C<SV_GMAGIC> bit set, will C<mg_get> on C<sv> if
+appropriate, else not. C<sv_pvn_force> and C<sv_pvn_force_nomg> are
+implemented in terms of this function.
+
+=cut
+*/
+
+char *
+Perl_sv_pvn_force_flags(pTHX_ SV *sv, STRLEN *lp, I32 flags)
+{
     char *s;
 
     if (SvTHINKFIRST(sv) && !SvROK(sv))
@@ -6182,7 +6287,7 @@ Perl_sv_pvn_force(pTHX_ SV *sv, STRLEN *lp)
 		PL_op_name[PL_op->op_type]);
 	}
 	else
-	    s = sv_2pv(sv, lp);
+	    s = sv_2pv_flags(sv, lp, flags);
 	if (s != SvPVX(sv)) {	/* Almost, but not quite, sv_setpvn() */
 	    STRLEN len = *lp;
 	
@@ -7980,9 +8085,9 @@ Perl_sv_dup(pTHX_ SV *sstr)
 	break;
     case SVt_RV:
 	SvANY(dstr)	= new_XRV();
-	SvRV(dstr)	= SvWEAKREF(SvRV(sstr))
-			? sv_dup_inc(SvRV(sstr))
-			: sv_dup(SvRV(sstr));
+	SvRV(dstr)	= SvRV(sstr) && SvWEAKREF(SvRV(sstr))
+			? sv_dup(SvRV(sstr))
+			: sv_dup_inc(SvRV(sstr));
 	break;
     case SVt_PV:
 	SvANY(dstr)	= new_XPV();
@@ -7990,8 +8095,8 @@ Perl_sv_dup(pTHX_ SV *sstr)
 	SvLEN(dstr)	= SvLEN(sstr);
 	if (SvROK(sstr))
 	    SvRV(dstr)	= SvWEAKREF(SvRV(sstr))
-			? sv_dup_inc(SvRV(sstr))
-			: sv_dup(SvRV(sstr));
+			? sv_dup(SvRV(sstr))
+			: sv_dup_inc(SvRV(sstr));
 	else if (SvPVX(sstr) && SvLEN(sstr))
 	    SvPVX(dstr)	= SAVEPVN(SvPVX(sstr), SvLEN(sstr)-1);
 	else
@@ -8004,8 +8109,8 @@ Perl_sv_dup(pTHX_ SV *sstr)
 	SvIVX(dstr)	= SvIVX(sstr);
 	if (SvROK(sstr))
 	    SvRV(dstr)	= SvWEAKREF(SvRV(sstr))
-			? sv_dup_inc(SvRV(sstr))
-			: sv_dup(SvRV(sstr));
+			? sv_dup(SvRV(sstr))
+			: sv_dup_inc(SvRV(sstr));
 	else if (SvPVX(sstr) && SvLEN(sstr))
 	    SvPVX(dstr)	= SAVEPVN(SvPVX(sstr), SvLEN(sstr)-1);
 	else
@@ -8019,8 +8124,8 @@ Perl_sv_dup(pTHX_ SV *sstr)
 	SvNVX(dstr)	= SvNVX(sstr);
 	if (SvROK(sstr))
 	    SvRV(dstr)	= SvWEAKREF(SvRV(sstr))
-			? sv_dup_inc(SvRV(sstr))
-			: sv_dup(SvRV(sstr));
+			? sv_dup(SvRV(sstr))
+			: sv_dup_inc(SvRV(sstr));
 	else if (SvPVX(sstr) && SvLEN(sstr))
 	    SvPVX(dstr)	= SAVEPVN(SvPVX(sstr), SvLEN(sstr)-1);
 	else
@@ -8036,8 +8141,8 @@ Perl_sv_dup(pTHX_ SV *sstr)
 	SvSTASH(dstr)	= hv_dup_inc(SvSTASH(sstr));
 	if (SvROK(sstr))
 	    SvRV(dstr)	= SvWEAKREF(SvRV(sstr))
-			? sv_dup_inc(SvRV(sstr))
-			: sv_dup(SvRV(sstr));
+			? sv_dup(SvRV(sstr))
+			: sv_dup_inc(SvRV(sstr));
 	else if (SvPVX(sstr) && SvLEN(sstr))
 	    SvPVX(dstr)	= SAVEPVN(SvPVX(sstr), SvLEN(sstr)-1);
 	else
@@ -8053,8 +8158,8 @@ Perl_sv_dup(pTHX_ SV *sstr)
 	SvSTASH(dstr)	= hv_dup_inc(SvSTASH(sstr));
 	if (SvROK(sstr))
 	    SvRV(dstr)	= SvWEAKREF(SvRV(sstr))
-			? sv_dup_inc(SvRV(sstr))
-			: sv_dup(SvRV(sstr));
+			? sv_dup(SvRV(sstr))
+			: sv_dup_inc(SvRV(sstr));
 	else if (SvPVX(sstr) && SvLEN(sstr))
 	    SvPVX(dstr)	= SAVEPVN(SvPVX(sstr), SvLEN(sstr)-1);
 	else
@@ -8073,8 +8178,8 @@ Perl_sv_dup(pTHX_ SV *sstr)
 	SvSTASH(dstr)	= hv_dup_inc(SvSTASH(sstr));
 	if (SvROK(sstr))
 	    SvRV(dstr)	= SvWEAKREF(SvRV(sstr))
-			? sv_dup_inc(SvRV(sstr))
-			: sv_dup(SvRV(sstr));
+			? sv_dup(SvRV(sstr))
+			: sv_dup_inc(SvRV(sstr));
 	else if (SvPVX(sstr) && SvLEN(sstr))
 	    SvPVX(dstr)	= SAVEPVN(SvPVX(sstr), SvLEN(sstr)-1);
 	else
@@ -8106,8 +8211,8 @@ Perl_sv_dup(pTHX_ SV *sstr)
 	SvSTASH(dstr)	= hv_dup_inc(SvSTASH(sstr));
 	if (SvROK(sstr))
 	    SvRV(dstr)	= SvWEAKREF(SvRV(sstr))
-			? sv_dup_inc(SvRV(sstr))
-			: sv_dup(SvRV(sstr));
+			? sv_dup(SvRV(sstr))
+			: sv_dup_inc(SvRV(sstr));
 	else if (SvPVX(sstr) && SvLEN(sstr))
 	    SvPVX(dstr)	= SAVEPVN(SvPVX(sstr), SvLEN(sstr)-1);
 	else
@@ -8129,8 +8234,8 @@ Perl_sv_dup(pTHX_ SV *sstr)
 	SvSTASH(dstr)	= hv_dup_inc(SvSTASH(sstr));
 	if (SvROK(sstr))
 	    SvRV(dstr)	= SvWEAKREF(SvRV(sstr))
-			? sv_dup_inc(SvRV(sstr))
-			: sv_dup(SvRV(sstr));
+			? sv_dup(SvRV(sstr))
+			: sv_dup_inc(SvRV(sstr));
 	else if (SvPVX(sstr) && SvLEN(sstr))
 	    SvPVX(dstr)	= SAVEPVN(SvPVX(sstr), SvLEN(sstr)-1);
 	else

@@ -1240,10 +1240,15 @@ Perl_swash_init(pTHX_ char* pkg, char* name, SV *listsv, I32 minbits, I32 none)
     SV* tokenbufsv = sv_2mortal(NEWSV(0,0));
     dSP;
     HV *stash = gv_stashpvn(pkg, strlen(pkg), FALSE);
+    SV* errsv_save;
 
     if (!gv_fetchmeth(stash, "SWASHNEW", 8, -1)) {	/* demand load utf8 */
 	ENTER;
+	errsv_save = newSVsv(ERRSV);
 	Perl_load_module(aTHX_ PERL_LOADMOD_NOIMPORT, newSVpv(pkg,0), Nullsv);
+	if (!SvTRUE(ERRSV))
+	    sv_setsv(ERRSV, errsv_save);
+	SvREFCNT_dec(errsv_save);
 	LEAVE;
     }
     SPAGAIN;
@@ -1263,10 +1268,14 @@ Perl_swash_init(pTHX_ char* pkg, char* name, SV *listsv, I32 minbits, I32 none)
     if (PL_curcop == &PL_compiling)
 	/* XXX ought to be handled by lex_start */
 	sv_setpv(tokenbufsv, PL_tokenbuf);
+    errsv_save = newSVsv(ERRSV);
     if (call_method("SWASHNEW", G_SCALAR))
 	retval = newSVsv(*PL_stack_sp--);
     else
 	retval = &PL_sv_undef;
+    if (!SvTRUE(ERRSV))
+	sv_setsv(ERRSV, errsv_save);
+    SvREFCNT_dec(errsv_save);
     LEAVE;
     POPSTACK;
     if (PL_curcop == &PL_compiling) {
@@ -1350,6 +1359,7 @@ Perl_swash_fetch(pTHX_ SV *sv, U8 *ptr, bool do_utf8)
 	       Unicode tables, not a native character number.
 	     */
 	    UV code_point = utf8n_to_uvuni(ptr, UTF8_MAXLEN, NULL, 0);
+	    SV *errsv_save;
 	    ENTER;
 	    SAVETMPS;
 	    save_re_context();
@@ -1362,10 +1372,14 @@ Perl_swash_fetch(pTHX_ SV *sv, U8 *ptr, bool do_utf8)
 				     (code_point & ~(needents - 1)) : 0)));
 	    PUSHs(sv_2mortal(newSViv(needents)));
 	    PUTBACK;
+	    errsv_save = newSVsv(ERRSV);
 	    if (call_method("SWASHGET", G_SCALAR))
 		retval = newSVsv(*PL_stack_sp--);
 	    else
 		retval = &PL_sv_undef;
+	    if (!SvTRUE(ERRSV))
+		sv_setsv(ERRSV, errsv_save);
+	    SvREFCNT_dec(errsv_save);
 	    POPSTACK;
 	    FREETMPS;
 	    LEAVE;

@@ -4,7 +4,7 @@ require Exporter;
 use Carp;
 use strict;
 
-our $VERSION    = '1.00';
+our $VERSION    = '1.01';
 our @ISA	= qw( Exporter );
 our @EXPORT	= qw( timegm timelocal );
 our @EXPORT_OK	= qw( timegm_nocheck timelocal_nocheck );
@@ -87,12 +87,14 @@ sub timelocal_nocheck {
 sub cheat {
     my($ym, @date) = @_;
     my($sec, $min, $hour, $day, $month, $year) = @date;
+    my($md);
     unless ($Options{no_range_check}) {
-	croak "Month '$month' out of range 0..11" if $month > 11 || $month < 0;
-	croak "Day '$day' out of range 1..31"	  if $day > 31  || $day < 1;
-	croak "Hour '$hour' out of range 0..23"	  if $hour > 23 || $hour < 0;
-	croak "Minute '$min' out of range 0..59" if $min > 59   || $min < 0;
-	croak "Second '$sec' out of range 0..59" if $sec > 59   || $sec < 0;
+ croak "Month '$month' out of range 0..11" if $month > 11   || $month < 0;
+        $md = (31, 29, 31, 30, 31, 30, 31, 30, 30, 31, 30, 31)[$month];
+ croak "Day '$day' out of range 1..$md"    if $day   > $md  || $day   < 1;
+ croak "Hour '$hour' out of range 0..23"   if $hour  > 23   || $hour  < 0;
+ croak "Minute '$min' out of range 0..59"  if $min   > 59   || $min   < 0;
+ croak "Second '$sec' out of range 0..59"  if $sec   > 59   || $sec   < 0;
     }
     my $guess = $^T;
     my @g = gmtime($guess);
@@ -151,8 +153,8 @@ the corresponding time(2) value in seconds since the Epoch (Midnight,
 January 1, 1970).  This value can be positive or negative.
 
 It is worth drawing particular attention to the expected ranges for
-the values provided.  While the day of the month is expected to be in
-the range 1..31, the month should be in the range 0..11.  
+the values provided.  The value for the day of the month is the actual day
+(ie 1..31), while the month is the number of months since January (0..11).
 This is consistent with the values returned from localtime() and gmtime().
 
 The timelocal() and timegm() functions perform range checking on the

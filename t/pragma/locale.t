@@ -515,16 +515,15 @@ foreach $Locale (@Locale) {
 	# Test \w.
     
 	if (utf8locale($Locale)) {
-	    # Until the polymorphic regexen arrive.
+	    # utf8 and locales do not mix.
 	    debug "# skipping UTF-8 locale '$Locale'\n";
 	} else {
 	    my $word = join('', @Neoalpha);
 
 	    $word =~ /^(\w+)$/;
-
+ 
 	    tryneoalpha($Locale, 99, $1 eq $word);
 	}
-
 	# Cross-check the whole 8-bit character set.
 
 	for (map { chr } 0..255) {
@@ -697,29 +696,32 @@ foreach $Locale (@Locale) {
     # Does lc of an UPPER (if different from the UPPER) match
     # case-insensitively the UPPER, and does the UPPER match
     # case-insensitively the lc of the UPPER.  And vice versa.
-    if (utf8locale($Locale)) {
-        # Until the polymorphic regexen arrive.
-        debug "# skipping UTF-8 locale '$Locale'\n";
-    } else {
-	use locale;
+    {
+        if (utf8locale($Locale)) {
+	    # utf8 and locales do not mix.
+	    debug "# skipping UTF-8 locale '$Locale'\n";
+	} else {
+	    use locale;
+	    use locale;
+	    no utf8; # so that the native 8-bit characters work
 
-	my @f = ();
-	foreach my $x (keys %UPPER) {
-	    my $y = lc $x;
-	    next unless uc $y eq $x;
-	    push @f, $x unless $x =~ /$y/i && $y =~ /$x/i;
-	}
-	foreach my $x (keys %lower) {
-	    my $y = uc $x;
-	    next unless lc $y eq $x;
-	    push @f, $x unless $x =~ /$y/i && $y =~ /$x/i;
-	}
-	tryneoalpha($Locale, 116, @f == 0);
-        if (@f) {
-	    print "# failed 116 locale '$Locale' characters @f\n"
+	    my @f = ();
+	    foreach my $x (keys %UPPER) {
+		my $y = lc $x;
+		next unless uc $y eq $x;
+		push @f, $x unless $x =~ /$y/i && $y =~ /$x/i;
+	    }
+	    foreach my $x (keys %lower) {
+		my $y = uc $x;
+		next unless lc $y eq $x;
+		push @f, $x unless $x =~ /$y/i && $y =~ /$x/i;
+	    }
+	    tryneoalpha($Locale, 116, @f == 0);
+	    if (@f) {
+		print "# failed 116 locale '$Locale' characters @f\n"
+  	    }
         }
     }
-
 }
 
 # Recount the errors.

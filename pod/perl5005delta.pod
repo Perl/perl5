@@ -145,7 +145,7 @@ Most of the Perl documentation was previously under the implicit GNU
 General Public License or the Artistic License (at the user's choice).
 Now much of the documentation unambiguously states the terms under which
 it may be distributed.  Those terms are in general much less restrictive
-than the GNU GPL.  See L<perl> and the individual perl man pages listed
+than the GNU GPL.  See L<perl> and the individual perl manpages listed
 therein.
 
 =head1 Core Changes

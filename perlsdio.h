@@ -15,6 +15,7 @@
 #define PerlIO_stdoutf			printf
 #define PerlIO_vprintf(f,fmt,a)		vfprintf(f,fmt,a)
 #define PerlIO_write(f,buf,count)	fwrite1(buf,1,count,f)
+#define PerlIO_unread(f,buf,count)	(-1)
 #define PerlIO_open			fopen
 #define PerlIO_fdopen			fdopen
 #define PerlIO_reopen			freopen

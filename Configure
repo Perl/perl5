@@ -20,7 +20,7 @@
 
 # $Id: Head.U,v 3.0.1.9 1997/02/28 15:02:09 ram Exp $
 #
-# Generated on Thu May 24 17:54:36 EET DST 2001 [metaconfig 3.0 PL70]
+# Generated on Tue May 29 17:16:31 EET DST 2001 [metaconfig 3.0 PL70]
 # (with additional metaconfig patches by perlbug@perl.org)
 
 cat >c1$$ <<EOF
@@ -6692,13 +6692,13 @@ fi
 : Find perl5.005 or later.
 echo "Looking for a previously installed perl5.005 or later... "
 case "$perl5" in
-'')	for tdir in `echo "$binexp:$PATH" | $sed "s/$path_sep/ /g"`; do
+'')	for tdir in `echo "$binexp$path_sep$PATH" | $sed "s/$path_sep/ /g"`; do
 		: Check if this perl is recent and can load a simple module
-		if $test -x $tdir/perl && $tdir/perl -Mless -e 'use 5.005;' >/dev/null 2>&1; then
+		if $test -x $tdir/perl$exe_ext && $tdir/perl -Mless -e 'use 5.005;' >/dev/null 2>&1; then
 			perl5=$tdir/perl
 			break;
-		elif $test -x $tdir/perl5 && $tdir/perl5 -Mless -e 'use 5.005;' >/dev/null 2>&1; then
-			perl5=$tdir/perl
+		elif $test -x $tdir/perl5$exe_ext && $tdir/perl5 -Mless -e 'use 5.005;' >/dev/null 2>&1; then
+			perl5=$tdir/perl5
 			break;
 		fi
 	done
@@ -6763,7 +6763,7 @@ else {
 EOPL
 chmod +x getverlist
 case "$inc_version_list" in
-'')	if test -x "$perl5"; then
+'')	if test -x "$perl5$exe_ext"; then
 		dflt=`$perl5 getverlist`
 	else
 		dflt='none'
@@ -14588,7 +14588,7 @@ else
 	xxx=`echo '#include <signal.h>' |
 	$cppstdin $cppminus $cppflags 2>/dev/null |
 	$grep '^[ 	]*#.*include' | 
-	$awk "{print \\$$fieldn}" | $sed 's!"!!g' | $sort | $uniq`
+	$awk "{print \\$$fieldn}" | $sed 's!"!!g' | $sed 's!\\\\\\\\!/!g' | $sort | $uniq`
 fi
 : Check this list of files to be sure we have parsed the cpp output ok.
 : This will also avoid potentially non-existent files, such 

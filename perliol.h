@@ -115,8 +115,6 @@ extern SSize_t	PerlIOBase_unread    (PerlIO *f, const void *vbuf, Size_t count);
 extern IV	PerlIOBase_eof       (PerlIO *f);
 extern IV	PerlIOBase_error     (PerlIO *f);
 extern void	PerlIOBase_clearerr  (PerlIO *f);
-extern IV	PerlIOBase_flush     (PerlIO *f);
-extern IV	PerlIOBase_fill      (PerlIO *f);
 extern IV	PerlIOBase_close     (PerlIO *f);
 extern void	PerlIOBase_setlinebuf(PerlIO *f);
 extern void	PerlIOBase_flush_linebuf(void);

@@ -1630,7 +1630,8 @@ sub break_on_line {
   my $pl = '';
   die "Line $i$filename_error not breakable.\n" if $dbline[$i] == 0;
   $had_breakpoints{$filename} |= 1;
-  $dbline{$i} =~ s/^[^\0]*/$cond/ if $dbline{$i};
+  if ($dbline{$i}) { $dbline{$i} =~ s/^[^\0]*/$cond/; }
+  else { $dbline{$i} = $cond; }
 }
 
 sub cmd_b_line {

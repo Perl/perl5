@@ -5,7 +5,7 @@ BEGIN {
     @INC = '../lib';
 }
 
-print "1..33\n";
+print "1..37\n";
 
 my $test = 1;
 
@@ -222,3 +222,17 @@ okeq(v5.6.0 lt v5.7.0,1,"v5.6.0 lt v5.7.0 fails");
 # floating point too messy
 # my $v = ord($^V)+ord(substr($^V,1,1))/1000+ord(substr($^V,2,1))/1000000;
 # okeq($v,$],"\$^V and \$] do not match");
+
+# 34..37: part of 20000323.059
+print "not " unless v200 eq chr(200);
+print "ok 34\n";
+
+print "not " unless v200 eq +v200;
+print "ok 35\n";
+
+print "not " unless v200 eq eval "v200";
+print "ok 36\n";
+
+print "not " unless v200 eq eval "+v200";
+print "ok 37\n";
+

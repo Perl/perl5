@@ -693,7 +693,7 @@ sub parsestack {
 		chop;
 		if (/^&/) {
 		  ($dir, $id, $pack, $name) = split;
-		  if ($opt_R and ($name =~ /::(__ANON_|END)$/)) {
+		  if ($opt_R and ($name =~ /(?:::)?(__ANON__|END)$/)) {
 		    $name .= "($id)";
 		  }
 		  $cv_hash{$id} = "$pack\::$name";
@@ -830,7 +830,7 @@ sub exitstamp {
 		die "Garbled profile, missing an enter time stamp";
 	}
 	if( $x->[0] ne $name and $opt_G and ($name =~ /$opt_G/)){
-	  if ($x->[0] =~ /::AUTOLOAD$/) {
+	  if ($x->[0] =~ /(?:::)?AUTOLOAD$/) {
 	    if ($opt_A) {
 	      $name = $x->[0];
 	    }

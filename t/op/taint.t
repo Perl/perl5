@@ -106,7 +106,7 @@ print PROG 'print "@ARGV\n"', "\n";
 close PROG;
 my $echo = "$Invoke_Perl $ECHO";
 
-print "1..173\n";
+print "1..174\n";
 
 # First, let's make sure that Perl is checking the dangerous
 # environment variables. Maybe they aren't set yet, so we'll
@@ -809,5 +809,24 @@ else {
 	
 	unlink("foo"); # not unlink($evil), because that would fail...
     }
+}
+
+{
+    # bug 20010526.004
+
+    use warnings;
+
+    $SIG{__WARN__} = sub { print "not " };
+
+    sub fmi {
+	my $divnum = shift()/1;
+	sprintf("%1.1f\n", $divnum);
+    }
+
+    fmi(21 . $TAINT);
+    fmi(37);
+    fmi(248);
+
+    print "ok 174\n";
 }
 

@@ -62,7 +62,7 @@ natively, ASCII or EBCDIC, unless GLOB_ALPHASORT is specified.)
 
 =head1 Core Enhancements
 
-=head1 AUTOLOAD Is Now Lvaluable
+=head2 AUTOLOAD Is Now Lvaluable
 
 AUTOLOAD is now lvaluable, meaning that you can add the :lvalue attribute
 to AUTOLOAD subroutines and you can assign to the AUTOLOAD return value.

@@ -11,7 +11,7 @@ and programming support.
 
 Have you looked at CPAN (see L<perlfaq2>)?  The chances are that
 someone has already written a module that can solve your problem.
-Have you read the appropriate man pages?  Here's a brief index:
+Have you read the appropriate manpages?  Here's a brief index:
 
 	Basics	        perldata, perlvar, perlsyn, perlop, perlsub
 	Execution	perlrun, perldebug
@@ -25,12 +25,12 @@ Have you read the appropriate man pages?  Here's a brief index:
 	Various 	http://www.perl.com/CPAN/doc/FMTEYEWTK/index.html
 			(not a man-page but still useful)
 
-A crude table of contents for the Perl man page set is found in L<perltoc>.
+A crude table of contents for the Perl manpage set is found in L<perltoc>.
 
 =head2 How can I use Perl interactively?
 
 The typical approach uses the Perl debugger, described in the
-perldebug(1) man page, on an ``empty'' program, like this:
+perldebug(1) manpage, on an ``empty'' program, like this:
 
     perl -de 42
 
