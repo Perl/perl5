@@ -8,9 +8,9 @@ BEGIN
   $| = 1;
   # chdir 't' if -d 't';
   unshift @INC, '../lib'; # for running manually
-  plan tests => 1424;
+  plan tests => 1447;
   }
-my $version = '1.40';	# for $VERSION tests, match current release (by hand!)
+my $version = '1.42';	# for $VERSION tests, match current release (by hand!)
 
 ##############################################################################
 # for testing inheritance of _swap
@@ -85,6 +85,10 @@ while (<DATA>)
       $try .= '$x->is_negative()+0;';
     } elsif ($f eq "is_positive") {
       $try .= '$x->is_positive()+0;';
+    } elsif ($f eq "as_hex") {
+      $try .= '$x->as_hex();';
+    } elsif ($f eq "as_bin") {
+      $try .= '$x->as_bin();';
     } elsif ($f eq "is_inf") {
       $try .= "\$x->is_inf('$args[1]')+0;";
     } elsif ($f eq "binf") {
@@ -495,6 +499,14 @@ ok ($x->length(),length "20988936657440586486151264256610222593863921");
 # MM7 = 2^127-1
 $x = Math::BigInt->new(2); $x **= 127; $x--;
 ok ($x,"170141183460469231731687303715884105727");
+
+$x = Math::BigInt->new('215960156869840440586892398248');
+($x,$y) = $x->length();
+ok ($x,30); ok ($y,0);
+
+$x = Math::BigInt->new('1_000_000_000_000');
+($x,$y) = $x->length();
+ok ($x,13); ok ($y,0);
 
 # I am afraid the following is not yet possible due to slowness
 # Also, testing for 2 meg output is a bit hard ;)
@@ -1266,6 +1278,7 @@ abc:12:NaN
 12345:5
 10000000000000000:17
 -123:3
+215960156869840440586892398248:30
 &bsqrt
 144:12
 16:4
@@ -1397,3 +1410,23 @@ NaNceil:NaN
 2:2
 3:3
 abc:NaN
+&as_hex
+128:0x80
+-128:-0x80
+0:0x0
+-0:0x0
+1:0x1
+0x123456789123456789:0x123456789123456789
++inf:inf
+-inf:-inf
+NaNas_hex:NaN
+&as_bin
+128:0b10000000
+-128:-0b10000000
+0:0b0
+-0:0b0
+1:0b1
+0b1010111101010101010110110110110110101:0b1010111101010101010110110110110110101
++inf:inf
+-inf:-inf
+NaNas_bin:NaN
