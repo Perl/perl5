@@ -141,8 +141,10 @@ Perl program and a Perl library file.
 
 =item Macintosh
 
-A Macintosh perl program will have the appropriate Creator and
-Type, so that double-clicking them will invoke the perl application.
+Under "Classic" MacOS, a perl program will have the appropriate Creator and
+Type, so that double-clicking them will invoke the MacPerl application.
+Under Mac OS X, clickable apps can be made from any C<#!> script using Wil
+Sanchez' DropScript utility: http://www.wsanchez.net/software/ .
 
 =item VMS
 

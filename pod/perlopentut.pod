@@ -521,7 +521,7 @@ working directory, slash the directory separator, and disallows ASCII
 NULs within a valid filename.  Most systems follow these conventions,
 including all POSIX systems as well as proprietary Microsoft systems.
 The only vaguely popular system that doesn't work this way is the
-proprietary Macintosh system, which uses a colon where the rest of us
+"Classic" Macintosh system, which uses a colon where the rest of us
 use a slash.  Maybe C<sysopen> isn't such a bad idea after all.
 
 If you want to use C<< <ARGV> >> processing in a totally boring

@@ -819,8 +819,10 @@ the Registry yourself.  In addition to associating C<.pl> with the
 interpreter, NT people can use: C<SET PATHEXT=%PATHEXT%;.PL> to let them
 run the program C<install-linux.pl> merely by typing C<install-linux>.
 
-Macintosh Perl programs will have the appropriate Creator and
-Type, so that double-clicking them will invoke the Perl application.
+Under "Classic" MacOS, a perl program will have the appropriate Creator and
+Type, so that double-clicking them will invoke the MacPerl application.
+Under Mac OS X, clickable apps can be made from any C<#!> script using Wil
+Sanchez' DropScript utility: http://www.wsanchez.net/software/ .
 
 I<IMPORTANT!>: Whatever you do, PLEASE don't get frustrated, and just
 throw the perl interpreter into your cgi-bin directory, in order to
