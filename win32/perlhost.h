@@ -1594,6 +1594,14 @@ PerlProcPopen(struct IPerlProc* piPerl, const char *command, const char *mode)
     return win32_popen(command, mode);
 }
 
+PerlIO*
+PerlProcPopenList(struct IPerlProc* piPerl, const char *mode, IV narg, SV **args)
+{
+    dTHXo;
+    PERL_FLUSHALL_FOR_CHILD;
+    return win32_popenlist(mode, narg, args);
+}
+
 int
 PerlProcPclose(struct IPerlProc* piPerl, PerlIO *stream)
 {
@@ -1893,7 +1901,8 @@ struct IPerlProc perlProc =
     PerlProcSpawn,
     PerlProcSpawnvp,
     PerlProcASpawn,
-    PerlProcLastHost
+    PerlProcLastHost,
+    PerlProcPopenList
 };
 
 

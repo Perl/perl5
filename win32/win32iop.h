@@ -73,6 +73,7 @@ DllExport  int  	win32_fstat(int fd,struct stat *sbufptr);
 DllExport  int  	win32_stat(const char *name,struct stat *sbufptr);
 DllExport  int		win32_pipe( int *phandles, unsigned int psize, int textmode );
 DllExport  PerlIO*	win32_popen( const char *command, const char *mode );
+DllExport  PerlIO*	win32_popenlist(const char *mode, IV narg, SV **args);
 DllExport  int		win32_pclose( PerlIO *pf);
 DllExport  int		win32_rename( const char *oname, const char *newname);
 DllExport  int		win32_setmode( int fd, int mode);

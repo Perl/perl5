@@ -2356,6 +2356,14 @@ win32_pipe(int *pfd, unsigned int size, int mode)
     return _pipe(pfd, size, mode);
 }
 
+DllExport PerlIO*
+win32_popenlist(const char *mode, IV narg, SV **args)
+{
+ dTHX;
+ Perl_croak(aTHX_ "List form of pipe open not implemented");
+ return NULL;
+}
+
 /*
  * a popen() clone that respects PERL5SHELL
  *

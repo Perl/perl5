@@ -880,6 +880,8 @@ typedef int		(*LPProcKillpg)(struct IPerlProc*, int, int);
 typedef int		(*LPProcPauseProc)(struct IPerlProc*);
 typedef PerlIO*		(*LPProcPopen)(struct IPerlProc*, const char*,
 			    const char*);
+typedef PerlIO*		(*LPProcPopenList)(struct IPerlProc*, const char*,
+			    IV narg, SV **args);
 typedef int		(*LPProcPclose)(struct IPerlProc*, PerlIO*);
 typedef int		(*LPProcPipe)(struct IPerlProc*, int*);
 typedef int		(*LPProcSetuid)(struct IPerlProc*, uid_t);
@@ -942,6 +944,7 @@ struct IPerlProc
     LPProcASpawn	pASpawn;
 #endif
     LPProcLastHost      pLastHost;
+    LPProcPopenList	pPopenList;
 };
 
 struct IPerlProcInfo

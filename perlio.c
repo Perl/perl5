@@ -684,8 +684,8 @@ PerlIO_push(pTHX_ PerlIO *f,PerlIO_funcs *tab,const char *mode,SV *arg)
    l->next = *f;
    l->tab  = tab;
    *f      = l;
-   PerlIO_debug("PerlIO_push f=%p %s %s '%s'\n",f,tab->name,
-                 (mode) ? mode : "(Null)",(arg) ? SvPV_nolen(arg) : "(Null)");
+   PerlIO_debug("PerlIO_push f=%p %s %s %p\n",f,tab->name,
+                 (mode) ? mode : "(Null)",arg);
    if ((*l->tab->Pushed)(f,mode,arg) != 0)
     {
      PerlIO_pop(aTHX_ f);
@@ -754,7 +754,7 @@ PerlIO_apply_layera(pTHX_ PerlIO *f, const char *mode, AV *layers, IV n)
     {
      if (!PerlIO_push(aTHX_ f,tab,mode,PerlIOArg))
       {
-       code -1;
+       code = -1;
        break;
       }
     }
@@ -2306,6 +2306,7 @@ PerlIOBuf_pushed(PerlIO *f, const char *mode, SV *arg)
  PerlIOBuf *b = PerlIOSelf(f,PerlIOBuf);
  int fd  = PerlIO_fileno(f);
  Off_t posn;
+ dTHX;
  if (fd >= 0 && PerlLIO_isatty(fd))
   {
    PerlIOBase(f)->flags |= PERLIO_F_LINEBUF;
