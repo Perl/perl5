@@ -1887,6 +1887,7 @@ IEXT AV *	Idbargs;	/* args to call listed by caller function */
 IEXT HV *	Idefstash;	/* main symbol table */
 IEXT HV *	Icurstash;	/* symbol table for current package */
 IEXT HV *	Idebstash;	/* symbol table for perldb package */
+IEXT HV *	Iglobalstash;	/* global keyword overrides imported here */
 IEXT SV *	Icurstname;	/* name of current package */
 IEXT AV *	Ibeginav;	/* names of BEGIN subroutines */
 IEXT AV *	Iendav;		/* names of END subroutines */

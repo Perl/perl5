@@ -58,6 +58,7 @@ forkprocess
 formfeed
 formtarget
 gensym
+globalstash
 in_eval
 incgv
 initav
