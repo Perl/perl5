@@ -1,5 +1,5 @@
 /*
- *      Copyright (c) 1996, 1997 Malcolm Beattie
+ *      Copyright (c) 1996-1998 Malcolm Beattie
  *
  *      You may distribute under the terms of either the GNU General Public
  *      License or the Artistic License, as specified in the README file.
@@ -187,8 +187,8 @@ EXT int optype_size[]
 
 EXT SV * specialsv_list[4];
 #define INIT_SPECIALSV_LIST STMT_START { \
-specialsv_list[0] = Nullsv; \
-specialsv_list[1] = &sv_undef; \
-specialsv_list[2] = &sv_yes; \
-specialsv_list[3] = &sv_no; \
-} STMT_END
+	specialsv_list[0] = Nullsv; \
+	specialsv_list[1] = &sv_undef; \
+	specialsv_list[2] = &sv_yes; \
+	specialsv_list[3] = &sv_no; \
+    } STMT_END

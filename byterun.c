@@ -1,5 +1,5 @@
 /*
- *      Copyright (c) 1996, 1997 Malcolm Beattie
+ *      Copyright (c) 1996-1998 Malcolm Beattie
  *
  *      You may distribute under the terms of either the GNU General Public
  *      License or the Artistic License, as specified in the README file.
@@ -15,11 +15,9 @@
 #include "byterun.h"
 
 #ifdef INDIRECT_BGET_MACROS
-void byterun(bs)
-struct bytestream bs;
+void byterun(struct bytestream bs)
 #else
-void byterun(fp)
-FILE *fp;
+void byterun(FILE *fp)
 #endif /* INDIRECT_BGET_MACROS */
 {
     dTHR;
