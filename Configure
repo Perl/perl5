@@ -3686,12 +3686,9 @@ esac
 for thislib in $libswanted; do
 	
 	libname="$thislib"
-	if xxx=`./loc lib$thislib.$so.[0-9]'*' X $libpth`; $test -f "$xxx"; then
-		if $test "X$ignore_versioned_solibs" = "X"; then
-			xxx=/ignored$xxx
-		else
-			libstyle=shared
-		fi
+	if xxx=`./loc lib$thislib.$so.[0-9]'*' X $libpth`;
+		$test -f "$xxx" -a "X$ignore_versioned_solibs" = "X"; then
+		libstyle=shared
 	elif xxx=`./loc lib$thislib.$so X $libpth` ; $test -f "$xxx"; then
 		libstyle=shared
 	elif xxx=`./loc lib$thislib$_a X $libpth`; $test -f "$xxx"; then
