@@ -1993,12 +1993,13 @@ pmtrans(OP *o, OP *expr, OP *repl)
     register I32 j;
     I32 Delete;
     I32 complement;
+    I32 squash;
     register short *tbl;
 
     tbl = (short*)cPVOPo->op_pv;
     complement	= o->op_private & OPpTRANS_COMPLEMENT;
     Delete	= o->op_private & OPpTRANS_DELETE;
-    /* squash	= o->op_private & OPpTRANS_SQUASH; */
+    squash	= o->op_private & OPpTRANS_SQUASH;
 
     if (complement) {
 	Zero(tbl, 256, short);
@@ -2022,6 +2023,8 @@ pmtrans(OP *o, OP *expr, OP *repl)
     else {
 	if (!rlen && !Delete) {
 	    r = t; rlen = tlen;
+	    if (!squash)
+		o->op_private |= OPpTRANS_COUNTONLY;
 	}
 	for (i = 0; i < 256; i++)
 	    tbl[i] = -1;
