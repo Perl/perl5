@@ -446,11 +446,12 @@ sub _dump {
     elsif (!defined($val)) {
       $out .= "undef";
     }
-    elsif ($val =~ /^(?:0|-?[1-9]\d{0,8})$/) { # safe decimal number
+    elsif ($val =~ /^(?:0|-?[1-9]\d{0,8})\z/) { # safe decimal number
       $out .= $val;
     }
     else {				 # string
-      if ($s->{useqq}) {
+      if ($s->{useqq} or $val =~ tr/\0-\377//c) {
+        # Fall back to qq if there's unicode
 	$out .= qquote($val, $s->{useqq});
       }
       else {
@@ -623,6 +624,7 @@ sub qquote {
         # leave it as it is
     } else {
       s/([\200-\377])/'\\'.sprintf('%03o',ord($1))/eg;
+      s/([^\040-\176])/sprintf "\\x{%04x}", ord($1)/ge;
     }
   }
   else { # ebcdic

@@ -708,7 +708,26 @@ DD_dump(pTHX_ SV *val, char *name, STRLEN namelen, SV *retval, HV *seenhv,
 	    else
 	      (void) sprintf(tmpbuf, "%"IVdf, SvIV(val));
             len = strlen(tmpbuf);
-	    sv_catpvn(retval, tmpbuf, len);
+            /* For 5.6.x and earlier will need to change this test to check
+               NV if NOK, as there NOK trumps IOK, and NV=3.5,IV=3 is valid.
+               Current code will Dump that as $VAR1 = 3;
+               Changes in 5.7 series mean that now IOK is only set if scalar
+               is precisely integer.  */
+            if (SvPOK(val)) {
+              /* Need to check to see if this is a string such as " 0".
+                 I'm assuming from sprintf isn't going to clash with utf8.
+                 Is this valid on EBCDIC?  */
+              STRLEN pvlen;
+              const char *pv = SvPV(val, pvlen);
+              if (pvlen != len || memNE(pv, tmpbuf, len))
+                goto integer_came_from_string;
+            }
+            if (len > 10) {
+              /* Looks like we're on a 64 bit system.  Make it a string so that
+                 if a 32 bit system reads the number it will cope better.  */
+              sv_catpvf(retval, "'%s'", tmpbuf);
+            } else
+              sv_catpvn(retval, tmpbuf, len);
 	}
 	else if (realtype == SVt_PVGV) {/* GLOBs can end up with scribbly names */
 	    c = SvPV(val, i);
@@ -781,6 +800,7 @@ DD_dump(pTHX_ SV *val, char *name, STRLEN namelen, SV *retval, HV *seenhv,
 	    sv_catpvn(retval, "undef", 5);
 	}
 	else {
+        integer_came_from_string:
 	    c = SvPV(val, i);
 	    if (DO_UTF8(val))
 	        i += esc_q_utf8(aTHX_ retval, c, i);

@@ -25,6 +25,7 @@ my $WANT = '';
 
 sub TEST {
   my $string = shift;
+  my $name = shift;
   my $t = eval $string;
   ++$TNUM;
   $t =~ s/([A-Z]+)\(0x[0-9a-f]+\)/$1(0xdeadbeef)/g
@@ -37,8 +38,9 @@ sub TEST {
       $t    = join("\n",sort(split(/\n/,$t)));
       $t    =~ s/\,$//mg;
   }
-  print( ($t eq $WANT and not $@) ? "ok $TNUM\n"
-	: "not ok $TNUM\n--Expected--\n$WANT\n--Got--\n$@$t\n");
+  $name = $name ? " - $name" : '';
+  print( ($t eq $WANT and not $@) ? "ok $TNUM$name\n"
+	: "not ok $TNUM$name\n--Expected--\n$WANT\n--Got--\n$@$t\n");
 
   ++$TNUM;
   eval "$t";
@@ -59,17 +61,22 @@ sub TEST {
 	: "not ok $TNUM\n--Expected--\n$WANT\n--Got--\n$@$t\n");
 }
 
+# Force Data::Dumper::Dump to use perl. We test Dumpxs explicitly by calling
+# it direct. Out here it lets us knobble the next if to test that the perl
+# only tests do work (and count correctly)
+$Data::Dumper::Useperl = 1;
 if (defined &Data::Dumper::Dumpxs) {
   print "### XS extension loaded, will run XS tests\n";
-  $TMAX = 213; $XS = 1;
+  $TMAX = 321; $XS = 1;
 }
 else {
   print "### XS extensions not loaded, will NOT run XS tests\n";
-  $TMAX = 108; $XS = 0;
+  $TMAX = 162; $XS = 0;
 }
 
 print "1..$TMAX\n";
 
+#XXXif (0) {
 #############
 #############
 
@@ -817,8 +824,9 @@ TEST q(Data::Dumper->new([$b],['b'])->Purity(1)->Dumpxs;)
 #$a = "\x{9c10}";
 EOT
 
-  TEST q(Data::Dumper->Dump([$a], ['a']));
-  TEST q(Data::Dumper->Dumpxs([$a], ['a']));
+  TEST q(Data::Dumper->Dump([$a], ['a'])), "\\x{9c10}";
+  TEST q(Data::Dumper->Dumpxs([$a], ['a'])), "XS \\x{9c10}"
+	if $XS;
 
 }
 
@@ -861,19 +869,22 @@ TEST q(Data::Dumper->new([$a])->Dumpxs;)
 ##
   $WANT = <<'EOT';
 #$VAR1 = {
-#  '14' => 'QQQ',
-#  '13' => 'PPP',
-#  '12' => 'OOO',
-#  '11' => 'NNN',
-#  '10' => 'MMM',
-#  '9' => 'LLL',
-#  '8' => 'KKK',
-#  '7' => 'JJJ',
-#  '6' => 'III'
+#  14 => 'QQQ',
+#  13 => 'PPP',
+#  12 => 'OOO',
+#  11 => 'NNN',
+#  10 => 'MMM',
+#  9 => 'LLL',
+#  8 => 'KKK',
+#  7 => 'JJJ',
+#  6 => 'III'
 #};
 EOT
 
+# perl code does keys and values as numbers if possible
 TEST q(Data::Dumper->new([$c])->Dump;);
+# XS code always does them as strings
+$WANT =~ s/ (\d+)/ '$1'/gs;
 TEST q(Data::Dumper->new([$c])->Dumpxs;)
 	if $XS;
 }
@@ -896,31 +907,32 @@ TEST q(Data::Dumper->new([$c])->Dumpxs;)
   $WANT = <<'EOT';
 #$VAR1 = [
 #  {
-#    '6' => 'III',
-#    '7' => 'JJJ',
-#    '8' => 'KKK',
-#    '9' => 'LLL',
-#    '10' => 'MMM',
-#    '11' => 'NNN',
-#    '12' => 'OOO',
-#    '13' => 'PPP',
-#    '14' => 'QQQ'
+#    6 => 'III',
+#    7 => 'JJJ',
+#    8 => 'KKK',
+#    9 => 'LLL',
+#    10 => 'MMM',
+#    11 => 'NNN',
+#    12 => 'OOO',
+#    13 => 'PPP',
+#    14 => 'QQQ'
 #  },
 #  {
-#    QQQ => '14',
-#    PPP => '13',
-#    OOO => '12',
-#    NNN => '11',
-#    MMM => '10',
-#    LLL => '9',
-#    KKK => '8',
-#    JJJ => '7',
-#    III => '6'
+#    QQQ => 14,
+#    PPP => 13,
+#    OOO => 12,
+#    NNN => 11,
+#    MMM => 10,
+#    LLL => 9,
+#    KKK => 8,
+#    JJJ => 7,
+#    III => 6
 #  }
 #];
 EOT
 
 TEST q(Data::Dumper->new([[$c, $d]])->Dump;);
+$WANT =~ s/ (\d+)/ '$1'/gs;
 TEST q(Data::Dumper->new([[$c, $d]])->Dumpxs;)
 	if $XS;
 }
@@ -941,3 +953,318 @@ EOT
 
   TEST q(Data::Dumper->new([{ foo => sub { print "foo"; } }])->Dump);
 }
+
+############# 214
+##
+
+# This is messy.
+# The controls (bare numbers) are stored either as integers or floating point.
+# [depending on whether the tokeniser sees things like ".".
+# The peephole optimiser only runs for constant folding, not single constants,
+# so I already have some NVs, some IVs
+# The string versions are not. They are all PV
+
+# This is arguably all far too chummy with the implementation, but I really
+# want to ensure that we don't go wrong when flags on scalars get as side
+# effects of reading them.
+
+# These tests are actually testing the precise output of the current
+# implementation, so will most likely fail if the implementation changes,
+# even if the new implementation produces different but correct results.
+# It would be nice to test for wrong answers, but I can't see how to do that,
+# so instead I'm checking for unexpected answers. (ie -2 becoming "-2" is not
+# wrong, but I can't see an easy, reliable way to code that knowledge)
+
+# Numbers (seen by the tokeniser as numbers, stored as numbers.
+  @numbers =
+  (
+   0, +1, -2, 3.0, +4.0, -5.0, 6.5, +7.5, -8.5,
+    9,  +10,  -11,  12.0,  +13.0,  -14.0,  15.5,  +16.25,  -17.75,
+  );
+# Strings
+  @strings =
+  (
+   "0", "+1", "-2", "3.0", "+4.0", "-5.0", "6.5", "+7.5", "-8.5", " 9",
+   " +10", " -11", " 12.0", " +13.0", " -14.0", " 15.5", " +16.25", " -17.75",
+  );
+
+# The perl code always does things the same way for numbers.
+  $WANT_PL_N = <<'EOT';
+#$VAR1 = 0;
+#$VAR2 = 1;
+#$VAR3 = -2;
+#$VAR4 = 3;
+#$VAR5 = 4;
+#$VAR6 = -5;
+#$VAR7 = '6.5';
+#$VAR8 = '7.5';
+#$VAR9 = '-8.5';
+#$VAR10 = 9;
+#$VAR11 = 10;
+#$VAR12 = -11;
+#$VAR13 = 12;
+#$VAR14 = 13;
+#$VAR15 = -14;
+#$VAR16 = '15.5';
+#$VAR17 = '16.25';
+#$VAR18 = '-17.75';
+EOT
+# The perl code knows that 0 and -2 stringify exactly back to the strings,
+# so it dumps them as numbers, not strings.
+  $WANT_PL_S = <<'EOT';
+#$VAR1 = 0;
+#$VAR2 = '+1';
+#$VAR3 = -2;
+#$VAR4 = '3.0';
+#$VAR5 = '+4.0';
+#$VAR6 = '-5.0';
+#$VAR7 = '6.5';
+#$VAR8 = '+7.5';
+#$VAR9 = '-8.5';
+#$VAR10 = ' 9';
+#$VAR11 = ' +10';
+#$VAR12 = ' -11';
+#$VAR13 = ' 12.0';
+#$VAR14 = ' +13.0';
+#$VAR15 = ' -14.0';
+#$VAR16 = ' 15.5';
+#$VAR17 = ' +16.25';
+#$VAR18 = ' -17.75';
+EOT
+
+# The XS code differs.
+# These are the numbers as seen by the tokeniser. Constants aren't folded
+# (which makes IVs where possible) so values the tokeniser thought were
+# floating point are stored as NVs. The XS code outputs these as strings,
+# but as it has converted them from NVs, leading + signs will not be there.
+  $WANT_XS_N = <<'EOT';
+#$VAR1 = 0;
+#$VAR2 = 1;
+#$VAR3 = -2;
+#$VAR4 = '3';
+#$VAR5 = '4';
+#$VAR6 = '-5';
+#$VAR7 = '6.5';
+#$VAR8 = '7.5';
+#$VAR9 = '-8.5';
+#$VAR10 = 9;
+#$VAR11 = 10;
+#$VAR12 = -11;
+#$VAR13 = '12';
+#$VAR14 = '13';
+#$VAR15 = '-14';
+#$VAR16 = '15.5';
+#$VAR17 = '16.25';
+#$VAR18 = '-17.75';
+EOT
+
+# These are the strings as seen by the tokeniser. The XS code will output
+# these for all cases except where the scalar has been used in integer context
+  $WANT_XS_S = <<'EOT';
+#$VAR1 = '0';
+#$VAR2 = '+1';
+#$VAR3 = '-2';
+#$VAR4 = '3.0';
+#$VAR5 = '+4.0';
+#$VAR6 = '-5.0';
+#$VAR7 = '6.5';
+#$VAR8 = '+7.5';
+#$VAR9 = '-8.5';
+#$VAR10 = ' 9';
+#$VAR11 = ' +10';
+#$VAR12 = ' -11';
+#$VAR13 = ' 12.0';
+#$VAR14 = ' +13.0';
+#$VAR15 = ' -14.0';
+#$VAR16 = ' 15.5';
+#$VAR17 = ' +16.25';
+#$VAR18 = ' -17.75';
+EOT
+
+# These are the numbers as IV-ized by &
+# These will differ from WANT_XS_N because now IV flags will be set on all
+# values that were actually integer, and the XS code will then output these
+# as numbers not strings.
+  $WANT_XS_I = <<'EOT';
+#$VAR1 = 0;
+#$VAR2 = 1;
+#$VAR3 = -2;
+#$VAR4 = 3;
+#$VAR5 = 4;
+#$VAR6 = -5;
+#$VAR7 = '6.5';
+#$VAR8 = '7.5';
+#$VAR9 = '-8.5';
+#$VAR10 = 9;
+#$VAR11 = 10;
+#$VAR12 = -11;
+#$VAR13 = 12;
+#$VAR14 = 13;
+#$VAR15 = -14;
+#$VAR16 = '15.5';
+#$VAR17 = '16.25';
+#$VAR18 = '-17.75';
+EOT
+
+# Some of these tests will be redundant.
+@numbers_s = @numbers_i = @numbers_is = @numbers_n = @numbers_ns = @numbers_ni
+  = @numbers_nis = @numbers;
+@strings_s = @strings_i = @strings_is = @strings_n = @strings_ns = @strings_ni
+  = @strings_nis = @strings;
+# Use them in an integer context
+foreach (@numbers_i, @numbers_ni, @numbers_nis, @numbers_is,
+         @strings_i, @strings_ni, @strings_nis, @strings_is) {
+  my $b = sprintf "%d", $_;
+}
+# Use them in a floating point context
+foreach (@numbers_n, @numbers_ni, @numbers_nis, @numbers_ns,
+         @strings_n, @strings_ni, @strings_nis, @strings_ns) {
+  my $b = sprintf "%e", $_;
+}
+# Use them in a string context
+foreach (@numbers_s, @numbers_is, @numbers_nis, @numbers_ns,
+         @strings_s, @strings_is, @strings_nis, @strings_ns) {
+  my $b = sprintf "%s", $_;
+}
+
+# use Devel::Peek; Dump ($_) foreach @vanilla_c;
+
+$WANT=$WANT_PL_N;
+TEST q(Data::Dumper->new(\@numbers)->Dump), 'Numbers';
+TEST q(Data::Dumper->new(\@numbers_s)->Dump), 'Numbers PV';
+TEST q(Data::Dumper->new(\@numbers_i)->Dump), 'Numbers IV';
+TEST q(Data::Dumper->new(\@numbers_is)->Dump), 'Numbers IV,PV';
+TEST q(Data::Dumper->new(\@numbers_n)->Dump), 'Numbers NV';
+TEST q(Data::Dumper->new(\@numbers_ns)->Dump), 'Numbers NV,PV';
+TEST q(Data::Dumper->new(\@numbers_ni)->Dump), 'Numbers NV,IV';
+TEST q(Data::Dumper->new(\@numbers_nis)->Dump), 'Numbers NV,IV,PV';
+$WANT=$WANT_PL_S;
+TEST q(Data::Dumper->new(\@strings)->Dump), 'Strings';
+TEST q(Data::Dumper->new(\@strings_s)->Dump), 'Strings PV';
+TEST q(Data::Dumper->new(\@strings_i)->Dump), 'Strings IV';
+TEST q(Data::Dumper->new(\@strings_is)->Dump), 'Strings IV,PV';
+TEST q(Data::Dumper->new(\@strings_n)->Dump), 'Strings NV';
+TEST q(Data::Dumper->new(\@strings_ns)->Dump), 'Strings NV,PV';
+TEST q(Data::Dumper->new(\@strings_ni)->Dump), 'Strings NV,IV';
+TEST q(Data::Dumper->new(\@strings_nis)->Dump), 'Strings NV,IV,PV';
+if ($XS) {
+  $WANT=$WANT_XS_N;
+  TEST q(Data::Dumper->new(\@numbers)->Dumpxs), 'XS Numbers';
+  TEST q(Data::Dumper->new(\@numbers_s)->Dumpxs), 'XS Numbers PV';
+  $WANT=$WANT_XS_I;
+  TEST q(Data::Dumper->new(\@numbers_i)->Dumpxs), 'XS Numbers IV';
+  TEST q(Data::Dumper->new(\@numbers_is)->Dumpxs), 'XS Numbers IV,PV';
+  $WANT=$WANT_XS_N;
+  TEST q(Data::Dumper->new(\@numbers_n)->Dumpxs), 'XS Numbers NV';
+  TEST q(Data::Dumper->new(\@numbers_ns)->Dumpxs), 'XS Numbers NV,PV';
+  $WANT=$WANT_XS_I;
+  TEST q(Data::Dumper->new(\@numbers_ni)->Dumpxs), 'XS Numbers NV,IV';
+  TEST q(Data::Dumper->new(\@numbers_nis)->Dumpxs), 'XS Numbers NV,IV,PV';
+
+  $WANT=$WANT_XS_S;
+  TEST q(Data::Dumper->new(\@strings)->Dumpxs), 'XS Strings';
+  TEST q(Data::Dumper->new(\@strings_s)->Dumpxs), 'XS Strings PV';
+  # This one used to really mess up. New code actually emulates the .pm code
+  $WANT=$WANT_PL_S;
+  TEST q(Data::Dumper->new(\@strings_i)->Dumpxs), 'XS Strings IV';
+  TEST q(Data::Dumper->new(\@strings_is)->Dumpxs), 'XS Strings IV,PV';
+  $WANT=$WANT_XS_S;
+  TEST q(Data::Dumper->new(\@strings_n)->Dumpxs), 'XS Strings NV';
+  TEST q(Data::Dumper->new(\@strings_ns)->Dumpxs), 'XS Strings NV,PV';
+  # This one used to really mess up. New code actually emulates the .pm code
+  $WANT=$WANT_PL_S;
+  TEST q(Data::Dumper->new(\@strings_ni)->Dumpxs), 'XS Strings NV,IV';
+  TEST q(Data::Dumper->new(\@strings_nis)->Dumpxs), 'XS Strings NV,IV,PV';
+}
+
+{
+  $a = "1\n";
+############# 310
+## Perl code was using /...$/ and hence missing the \n.
+  $WANT = <<'EOT';
+my $VAR1 = '42
+';
+EOT
+
+  # Can't pad with # as the output has an embedded newline.
+  local $Data::Dumper::Pad = "my ";
+  TEST q(Data::Dumper->Dump(["42\n"])), "number with trailing newline";
+  TEST q(Data::Dumper->Dumpxs(["42\n"])), "XS number with trailing newline"
+	if $XS;
+}
+
+#XXX}
+
+
+{
+  @a = (
+        999999999,
+        1000000000,
+        9999999999,
+        10000000000,
+        -999999999,
+        -1000000000,
+        -9999999999,
+        -10000000000,
+        4294967295,
+        4294967296,
+        -2147483648,
+        -2147483649,
+        );
+############# 316
+## Perl code flips over at 10 digits.
+  $WANT = <<'EOT';
+#$VAR1 = 999999999;
+#$VAR2 = '1000000000';
+#$VAR3 = '9999999999';
+#$VAR4 = '10000000000';
+#$VAR5 = -999999999;
+#$VAR6 = '-1000000000';
+#$VAR7 = '-9999999999';
+#$VAR8 = '-10000000000';
+#$VAR9 = '4294967295';
+#$VAR10 = '4294967296';
+#$VAR11 = '-2147483648';
+#$VAR12 = '-2147483649';
+EOT
+
+  TEST q(Data::Dumper->Dump(\@a)), "long integers";
+
+  if ($XS) {
+## XS code flips over at 11 characters ("-" is a char) or larger than int.
+    if (~0 == 0xFFFFFFFF) {
+      # 32 bit system
+      $WANT = <<'EOT';
+#$VAR1 = 999999999;
+#$VAR2 = 1000000000;
+#$VAR3 = '9999999999';
+#$VAR4 = '10000000000';
+#$VAR5 = -999999999;
+#$VAR6 = '-1000000000';
+#$VAR7 = '-9999999999';
+#$VAR8 = '-10000000000';
+#$VAR9 = 4294967295;
+#$VAR10 = '4294967296';
+#$VAR11 = '-2147483648';
+#$VAR12 = '-2147483649';
+EOT
+    } else {
+      $WANT = <<'EOT';
+#$VAR1 = 999999999;
+#$VAR2 = 1000000000;
+#$VAR3 = 9999999999;
+#$VAR4 = '10000000000';
+#$VAR5 = -999999999;
+#$VAR6 = '-1000000000';
+#$VAR7 = '-9999999999';
+#$VAR8 = '-10000000000';
+#$VAR9 = 4294967295;
+#$VAR10 = 4294967296;
+#$VAR11 = '-2147483648';
+#$VAR12 = '-2147483649';
+EOT
+    }
+    TEST q(Data::Dumper->Dumpxs(\@a)), "XS long integers";
+  }
+}
+
