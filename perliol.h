@@ -41,6 +41,7 @@ struct _PerlIO_funcs
 #define PERLIO_K_CANCRLF	0x00000004
 #define PERLIO_K_FASTGETS	0x00000008
 #define PERLIO_K_DUMMY		0x00000010
+#define PERLIO_K_UTF8		0x00008000
 
 /*--------------------------------------------------------------------------------------*/
 struct _PerlIO
@@ -74,17 +75,17 @@ struct _PerlIO
 #define PerlIONext(f)      (&(PerlIOBase(f)->next))
 
 /*--------------------------------------------------------------------------------------*/
-
-extern PerlIO_funcs PerlIO_unix;
-extern PerlIO_funcs PerlIO_perlio;
-extern PerlIO_funcs PerlIO_stdio;
-extern PerlIO_funcs PerlIO_crlf;
-extern PerlIO_funcs PerlIO_utf8;
-extern PerlIO_funcs PerlIO_raw;
-/* The EXT is need for Cygwin -- but why only for _pending? --jhi */
+/* Data exports - EXT rather than extern is needed for Cygwin */
+EXT PerlIO_funcs PerlIO_unix;
+EXT PerlIO_funcs PerlIO_perlio;
+EXT PerlIO_funcs PerlIO_stdio;
+EXT PerlIO_funcs PerlIO_crlf;
+EXT PerlIO_funcs PerlIO_utf8;
+EXT PerlIO_funcs PerlIO_byte;
+EXT PerlIO_funcs PerlIO_raw;
 EXT PerlIO_funcs PerlIO_pending;
 #ifdef HAS_MMAP
-extern PerlIO_funcs PerlIO_mmap;
+EXT PerlIO_funcs PerlIO_mmap;
 #endif
 
 extern PerlIO *PerlIO_allocate(pTHX);

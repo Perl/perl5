@@ -1,6 +1,6 @@
 /*    perlio.c
  *
- *    Copyright (c) 1996-2000, Nick Ing-Simmons
+ *    Copyright (c) 1996-2001, Nick Ing-Simmons
  *
  *    You may distribute under the terms of either the GNU General Public
  *    License or the Artistic License, as specified in the README file.
@@ -283,7 +283,8 @@ PerlIO_pop(PerlIO *f)
  if (l)
   {
    PerlIO_debug("PerlIO_pop f=%p %s\n",f,l->tab->name);
-   (*l->tab->Popped)(f);
+   if (l->tab->Popped)
+    (*l->tab->Popped)(f);
    *f = l->next;
    PerlMemShared_free(l);
   }
@@ -416,6 +417,10 @@ PerlIO_define_layer(PerlIO_funcs *tab)
  dTHX;
  HV *stash = gv_stashpv("perlio::Layer", TRUE);
  SV *sv = sv_bless(newRV_noinc(newSViv(PTR2IV(tab))),stash);
+ if (!PerlIO_layer_hv)
+  {
+   PerlIO_layer_hv = get_hv("open::layers",GV_ADD|GV_ADDMULTI);
+  }
  hv_store(PerlIO_layer_hv,tab->name,strlen(tab->name),sv,0);
  PerlIO_debug("define %s %p\n",tab->name,tab);
 }
@@ -437,7 +442,6 @@ PerlIO_default_buffer(pTHX)
   }
  PerlIO_debug("Pushing %s\n",tab->name);
  av_push(PerlIO_layer_av,SvREFCNT_inc(PerlIO_find_layer(tab->name,0)));
-
 }
 
 
@@ -449,16 +453,15 @@ PerlIO_default_layer(I32 n)
  SV *layer;
  PerlIO_funcs *tab = &PerlIO_stdio;
  int len;
- if (!PerlIO_layer_hv)
+ if (!PerlIO_layer_av)
   {
    const char *s  = PerlEnv_getenv("PERLIO");
+   PerlIO_layer_av = get_av("open::layers",GV_ADD|GV_ADDMULTI);
    newXS("perlio::import",XS_perlio_import,__FILE__);
    newXS("perlio::unimport",XS_perlio_unimport,__FILE__);
 #if 0
    newXS("io::MODIFY_SCALAR_ATTRIBUTES",XS_io_MODIFY_SCALAR_ATTRIBUTES,__FILE__);
 #endif
-   PerlIO_layer_hv = get_hv("open::layers",GV_ADD|GV_ADDMULTI);
-   PerlIO_layer_av = get_av("open::layers",GV_ADD|GV_ADDMULTI);
    PerlIO_define_layer(&PerlIO_raw);
    PerlIO_define_layer(&PerlIO_unix);
    PerlIO_define_layer(&PerlIO_perlio);
@@ -468,6 +471,7 @@ PerlIO_default_layer(I32 n)
    PerlIO_define_layer(&PerlIO_mmap);
 #endif
    PerlIO_define_layer(&PerlIO_utf8);
+   PerlIO_define_layer(&PerlIO_byte);
    av_push(PerlIO_layer_av,SvREFCNT_inc(PerlIO_find_layer(PerlIO_unix.name,0)));
    if (s)
     {
@@ -560,28 +564,17 @@ PerlIO_push(PerlIO *f,PerlIO_funcs *tab,const char *mode,const char *arg,STRLEN 
 }
 
 IV
-PerlIOUtf8_pushed(PerlIO *f, const char *mode, const char *arg, STRLEN len)
-{
- if (PerlIONext(f))
-  {
-   PerlIO_pop(f);
-   PerlIOBase(f)->flags |= PERLIO_F_UTF8;
-   return 0;
-  }
- return -1;
-}
-
-IV
 PerlIORaw_pushed(PerlIO *f, const char *mode, const char *arg, STRLEN len)
 {
  /* Pop back to bottom layer */
- if (PerlIONext(f))
+ if (f && *f && *PerlIONext(f))
   {
-   PerlIO_flush(f);
-   while (PerlIONext(f))
+   PerlIO_flush(PerlIONext(f));
+   while (*PerlIONext(f))
     {
      PerlIO_pop(f);
     }
+   PerlIO_debug(":raw f=%p :%s\n",f,PerlIOBase(f)->tab->name);
    return 0;
   }
  return -1;
@@ -595,9 +588,7 @@ PerlIO_apply_layers(pTHX_ PerlIO *f, const char *mode, const char *names)
    const char *s = names;
    while (*s)
     {
-     while (isSPACE(*s))
-      s++;
-     if (*s == ':')
+     while (isSPACE(*s) || *s == ':')
       s++;
      if (*s)
       {
@@ -628,11 +619,12 @@ PerlIO_apply_layers(pTHX_ PerlIO *f, const char *mode, const char *names)
            if (PerlIONext(f))
             {
              PerlIO_flush(f);
-             while (PerlIONext(f))
+             while (*PerlIONext(f))
               {
                PerlIO_pop(f);
               }
             }
+           PerlIO_debug(":raw f=%p => :%s\n",f,PerlIOBase(f)->tab->name);
           }
          else if ((e - s) == 4 && strncmp(s,"utf8",4) == 0)
           {
@@ -821,7 +813,17 @@ PerlIO_flush(PerlIO *f)
 {
  if (f)
   {
-   return (*PerlIOBase(f)->tab->Flush)(f);
+   PerlIO_funcs *tab = PerlIOBase(f)->tab;
+   if (tab && tab->Flush)
+    {
+     return (*tab->Flush)(f);
+    }
+   else
+    {
+     PerlIO_debug("Cannot flush f=%p :%s\n",f,tab->name);
+     errno = EINVAL;
+     return -1;
+    }
   }
  else
   {
@@ -989,6 +991,22 @@ PerlIO_set_ptrcnt(PerlIO *f, STDCHAR *ptr, int cnt)
 /*--------------------------------------------------------------------------------------*/
 /* utf8 and raw dummy layers */
 
+IV
+PerlIOUtf8_pushed(PerlIO *f, const char *mode, const char *arg, STRLEN len)
+{
+ if (PerlIONext(f))
+  {
+   PerlIO_funcs *tab = PerlIOBase(f)->tab;
+   PerlIO_pop(f);
+   if (tab->kind & PERLIO_K_UTF8)
+    PerlIOBase(f)->flags |= PERLIO_F_UTF8;
+   else
+    PerlIOBase(f)->flags &= ~PERLIO_F_UTF8;
+   return 0;
+  }
+ return -1;
+}
+
 PerlIO *
 PerlIOUtf8_fdopen(PerlIO_funcs *self, int fd,const char *mode)
 {
@@ -996,8 +1014,12 @@ PerlIOUtf8_fdopen(PerlIO_funcs *self, int fd,const char *mode)
  PerlIO *f = (*tab->Fdopen)(tab,fd,mode);
  if (f)
   {
-   PerlIOBase(f)->flags |= PERLIO_F_UTF8;
-  }
+   PerlIOl *l = PerlIOBase(f);
+   if (tab->kind & PERLIO_K_UTF8)
+    l->flags |= PERLIO_F_UTF8;
+   else
+    l->flags &= ~PERLIO_F_UTF8;
+ }
  return f;
 }
 
@@ -1008,7 +1030,11 @@ PerlIOUtf8_open(PerlIO_funcs *self, const char *path,const char *mode)
  PerlIO *f = (*tab->Open)(tab,path,mode);
  if (f)
   {
-   PerlIOBase(f)->flags |= PERLIO_F_UTF8;
+   PerlIOl *l = PerlIOBase(f);
+   if (tab->kind & PERLIO_K_UTF8)
+    l->flags |= PERLIO_F_UTF8;
+   else
+    l->flags &= ~PERLIO_F_UTF8;
   }
  return f;
 }
@@ -1016,7 +1042,36 @@ PerlIOUtf8_open(PerlIO_funcs *self, const char *path,const char *mode)
 PerlIO_funcs PerlIO_utf8 = {
  "utf8",
  sizeof(PerlIOl),
- PERLIO_K_DUMMY|PERLIO_K_BUFFERED,
+ PERLIO_K_DUMMY|PERLIO_F_UTF8,
+ NULL,
+ PerlIOUtf8_fdopen,
+ PerlIOUtf8_open,
+ NULL,
+ PerlIOUtf8_pushed,
+ NULL,
+ NULL,
+ NULL,
+ NULL,
+ NULL,
+ NULL,
+ NULL,
+ NULL, /* flush */
+ NULL, /* fill */
+ NULL,
+ NULL,
+ NULL,
+ NULL,
+ NULL, /* get_base */
+ NULL, /* get_bufsiz */
+ NULL, /* get_ptr */
+ NULL, /* get_cnt */
+ NULL, /* set_ptrcnt */
+};
+
+PerlIO_funcs PerlIO_byte = {
+ "bytes",
+ sizeof(PerlIOl),
+ PERLIO_K_DUMMY,
  NULL,
  PerlIOUtf8_fdopen,
  PerlIOUtf8_open,
@@ -1065,7 +1120,7 @@ PerlIO_funcs PerlIO_raw = {
  PerlIORaw_open,
  NULL,
  PerlIORaw_pushed,
- NULL,
+ PerlIOBase_popped,
  NULL,
  NULL,
  NULL,
