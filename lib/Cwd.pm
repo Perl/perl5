@@ -254,12 +254,12 @@ elsif ($^O eq 'NT' or $^O eq 'MSWin32') {
     *fastgetcwd = \&_NT_cwd;
 }
 elsif ($^O eq 'os2') {
-
-    *cwd     = \&_os2_cwd;
-    *getcwd     = \&_os2_cwd;
-    *fastgetcwd = \&_os2_cwd;
-    *fastcwd = \&_os2_cwd;
-}
+    # sys_cwd may keep the builtin command
+    *cwd	 = defined &sys_cwd ? \&sys_cwd : \&_os2_cwd;
+    *getcwd	 = defined &sys_cwd ? \&sys_cwd : \&_os2_cwd;
+    *fastgetcwd	 = defined &sys_cwd ? \&sys_cwd : \&_os2_cwd;
+    *fastcwd	 = defined &sys_cwd ? \&sys_cwd : \&_os2_cwd;
+  }
 $^W = $oldw;
 
 # package main; eval join('',<DATA>) || die $@;	# quick test
