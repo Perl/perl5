@@ -125,7 +125,7 @@ Perl_gv_init(pTHX_ GV *gv, HV *stash, const char *name, STRLEN len, int multi)
 	LEAVE;
 
 	PL_sub_generation++;
-	CvGV(GvCV(gv)) = (GV*)SvREFCNT_inc(gv);
+	CvGV(GvCV(gv)) = gv;
 	CvFILE(GvCV(gv)) = CopFILE(PL_curcop);
 	CvSTASH(GvCV(gv)) = PL_curstash;
 #ifdef USE_THREADS

@@ -3326,7 +3326,7 @@ S_init_postdump_symbols(pTHX_ register int argc, register char **argv, register 
 	HV *hv;
 	GvMULTI_on(PL_envgv);
 	hv = GvHVn(PL_envgv);
-	hv_magic(hv, PL_envgv, 'E');
+	hv_magic(hv, Nullgv, 'E');
 #ifdef USE_ENVIRON_ARRAY
 	/* Note that if the supplied env parameter is actually a copy
 	   of the global environ then it may now point to free'd memory
