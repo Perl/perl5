@@ -433,8 +433,14 @@ do_test(21,
     MG_TYPE = PERL_MAGIC_envelem\\(e\\)
 (?:    MG_FLAGS = 0x01
       TAINTEDDIR
-)?    MG_LEN = 4
-    MG_PTR = $ADDR "(?i:PATH)"
+)?    MG_LEN = -?\d+
+    MG_PTR = $ADDR (?:"(?i:PATH)"|=> HEf_SVKEY
+    SV = PV\\($ADDR\\) at $ADDR
+      REFCNT = \d+
+      FLAGS = \\(TEMP,POK,pPOK\\)
+      PV = $ADDR "(?i:PATH)"\\\0
+      CUR = \d+
+      LEN = \d+)
   MAGIC = $ADDR
     MG_VIRTUAL = &PL_vtbl_taint
     MG_TYPE = PERL_MAGIC_taint\\(t\\)');
