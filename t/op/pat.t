@@ -73,24 +73,23 @@ $* = 1;		# test 3 only tested the optimized version--this one is for real
 if ("ab\ncd\n" =~ /^cd/) {print "ok 24\n";} else {print "not ok 24\n";}
 $* = 0;
 
-#$XXX{123} = 123;
-#$XXX{234} = 234;
-#$XXX{345} = 345;
-#
-#@XXX = ('ok 25','not ok 25', 'ok 26','not ok 26','not ok 27');
-#while ($_ = shift(@XXX)) {
-#    ?(.*)? && (print $1,"\n");
-#    /not/ && reset;
-#    /not ok 26/ && reset 'X';
-#}
-#
-#while (($key,$val) = each(%XXX)) {
-#    print "not ok 27\n";
-#    exit;
-#}
-#
-#print "ok 27\n";
-for (25..27) { print "ok $_\n" }
+$XXX{123} = 123;
+$XXX{234} = 234;
+$XXX{345} = 345;
+
+@XXX = ('ok 25','not ok 25', 'ok 26','not ok 26','not ok 27');
+while ($_ = shift(@XXX)) {
+    ?(.*)? && (print $1,"\n");
+    /not/ && reset;
+    /not ok 26/ && reset 'X';
+}
+
+while (($key,$val) = each(%XXX)) {
+    print "not ok 27\n";
+    exit;
+}
+
+print "ok 27\n";
 
 'cde' =~ /[^ab]*/;
 'xyz' =~ //;
@@ -1133,8 +1132,6 @@ $test++;
 $_ = "a\x{100}b";
 if (/(.)(\C)(\C)(.)/) {
   print "ok 232\n";
-  # currently \C are still tagged as UTF-8
-  use bytes;
   if ($1 eq "a") {
     print "ok 233\n";
   } else {
@@ -1164,7 +1161,6 @@ $_ = "\x{100}";
 if (/(\C)/g) {
   print "ok 237\n";
   # currently \C are still tagged as UTF-8
-  use bytes;
   if ($1 eq "\xC4") {
     print "ok 238\n";
   } else {
@@ -1178,7 +1174,6 @@ if (/(\C)/g) {
 if (/(\C)/g) {
   print "ok 239\n";
   # currently \C are still tagged as UTF-8
-  use bytes;
   if ($1 eq "\x80") {
     print "ok 240\n";
   } else {
@@ -1231,7 +1226,7 @@ if (ord('i') == 0x89 && ord('J') == 0xd1) { # EBCDIC
   }
 } else {
   for (244..245) {
-    print "ok $_ # Skip: not EBCDIC\n";
+    print "ok $_ # Skip: only in EBCDIC\n";
   }
 }
 

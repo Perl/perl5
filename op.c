@@ -843,6 +843,29 @@ S_op_clear(pTHX_ OP *o)
     case OP_MATCH:
     case OP_QR:
 clear_pmop:
+	{
+	    HV *pmstash = PmopSTASH(cPMOPo);
+	    if (pmstash && SvREFCNT(pmstash)) {
+		PMOP *pmop = HvPMROOT(pmstash);
+		PMOP *lastpmop = NULL;
+		while (pmop) {
+		    if (cPMOPo == pmop) {
+			if (lastpmop)
+			    lastpmop->op_pmnext = pmop->op_pmnext;
+			else
+			    HvPMROOT(pmstash) = pmop->op_pmnext;
+			break;
+		    }
+		    lastpmop = pmop;
+		    pmop = pmop->op_pmnext;
+		}
+#ifdef USE_ITHREADS
+		Safefree(PmopSTASHPV(cPMOPo));
+#else
+		/* NOTE: PMOP.op_pmstash is not refcounted */
+#endif
+	    }
+	}
 	cPMOPo->op_pmreplroot = Nullop;
 	ReREFCNT_dec(cPMOPo->op_pmregexp);
 	cPMOPo->op_pmregexp = (REGEXP*)NULL;
@@ -2740,7 +2763,7 @@ Perl_pmtrans(pTHX_ OP *o, OP *expr, OP *repl)
 	    r = t; rlen = tlen; rend = tend;
 	}
 	if (!squash) {
-		if (t == r ||
+		if ((!rlen && !del) || t == r ||
 		    (tlen == rlen && memEQ((char *)t, (char *)r, tlen)))
 		{
 		    o->op_private |= OPpTRANS_IDENTICAL;
@@ -2872,8 +2895,16 @@ Perl_pmtrans(pTHX_ OP *o, OP *expr, OP *repl)
 		}
 	    }
 	}
-	if (!del && rlen >= j) {
-	    cPVOPo->op_pv = (char*)Renew(tbl, 0x101+rlen-j, short);
+	if (!del) {
+	    if (!rlen) {
+		j = rlen;
+		if (!squash)
+		    o->op_private |= OPpTRANS_IDENTICAL;
+	    }
+	    else if (j >= rlen)
+		j = rlen - 1;
+	    else
+		cPVOPo->op_pv = (char*)Renew(tbl, 0x101+rlen-j, short);
 	    tbl[0x100] = rlen - j;
 	    for (i=0; i < rlen - j; i++)
 		tbl[0x101+i] = r[j+i];
@@ -2932,6 +2963,7 @@ Perl_newPMOP(pTHX_ I32 type, I32 flags)
     if (type != OP_TRANS && PL_curstash) {
 	pmop->op_pmnext = HvPMROOT(PL_curstash);
 	HvPMROOT(PL_curstash) = pmop;
+	PmopSTASH_set(pmop,PL_curstash);
     }
 
     return (OP*)pmop;

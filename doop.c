@@ -213,7 +213,8 @@ S_do_trans_complex(pTHX_ SV *sv)/* SPC - NOT OK */
 		    else {
 			matches++;
 			if (!del) {
-			    ch = (comp - 0x100 < rlen) ?
+			    ch = (rlen == 0) ? comp :
+				(comp - 0x100 < rlen) ?
 				tbl[comp+1] : tbl[0x100+rlen];
 			    if (ch != pch) {
 				d = uvchr_to_utf8(d, ch);
@@ -601,6 +602,7 @@ Perl_do_trans(pTHX_ SV *sv)
 	    return do_trans_simple(sv);
 
     case OPpTRANS_IDENTICAL:
+    case OPpTRANS_IDENTICAL|OPpTRANS_COMPLEMENT:
 	if (hasutf)
 	    return do_trans_count_utf8(sv);
 	else

@@ -412,7 +412,9 @@ Perl_magic_len(pTHX_ SV *sv, MAGIC *mg)
 		    char *s    = rx->subbeg + s1;
 		    char *send = rx->subbeg + t1;
 
-		    i = Perl_utf8_length(aTHX_ (U8*)s, (U8*)send);
+		    i = t1 - s1;
+		    if (is_utf8_string((U8*)s, i))
+			i = Perl_utf8_length(aTHX_ (U8*)s, (U8*)send);
 		}
 		if (i < 0)
 		    Perl_croak(aTHX_ "panic: magic_len: %"IVdf, (IV)i);
@@ -630,7 +632,7 @@ Perl_magic_get(pTHX_ SV *sv, MAGIC *mg)
 			PL_tainted = FALSE;
 		    }
 		    sv_setpvn(sv, s, i);
-		    if (DO_UTF8(PL_reg_sv))
+		    if (DO_UTF8(PL_reg_sv) && is_utf8_string((U8*)s, i))
 			SvUTF8_on(sv);
 		    else
 			SvUTF8_off(sv);
