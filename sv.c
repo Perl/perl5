@@ -2039,22 +2039,34 @@ S_sv_2iuv_non_preserve(pTHX_ register SV *sv, I32 numtype)
 }
 #endif /* !NV_PRESERVES_UV*/
 
-/*
-=for apidoc sv_2iv
+/* sv_2iv() is now a macro using Perl_sv_2iv_flags();
+ * this function provided for binary compatibility only
+ */
 
-Return the integer value of an SV, doing any necessary string conversion,
-magic etc. Normally used via the C<SvIV(sv)> and C<SvIVx(sv)> macros.
+IV
+Perl_sv_2iv(pTHX_ register SV *sv)
+{
+    return sv_2iv_flags(sv, SV_GMAGIC);
+}
+
+/*
+=for apidoc sv_2iv_flags
+
+Return the integer value of an SV, doing any necessary string
+conversion.  If flags includes SV_GMAGIC, does an mg_get() first.
+Normally used via the C<SvIV(sv)> and C<SvIVx(sv)> macros.
 
 =cut
 */
 
 IV
-Perl_sv_2iv(pTHX_ register SV *sv)
+Perl_sv_2iv_flags(pTHX_ register SV *sv, I32 flags)
 {
     if (!sv)
 	return 0;
     if (SvGMAGICAL(sv)) {
-	mg_get(sv);
+	if (flags & SV_GMAGIC)
+	    mg_get(sv);
 	if (SvIOKp(sv))
 	    return SvIVX(sv);
 	if (SvNOKp(sv)) {
@@ -2336,23 +2348,34 @@ Perl_sv_2iv(pTHX_ register SV *sv)
     return SvIsUV(sv) ? (IV)SvUVX(sv) : SvIVX(sv);
 }
 
+/* sv_2uv() is now a macro using Perl_sv_2uv_flags();
+ * this function provided for binary compatibility only
+ */
+
+UV
+Perl_sv_2uv(pTHX_ register SV *sv)
+{
+    return sv_2uv_flags(sv, SV_GMAGIC);
+}
+
 /*
-=for apidoc sv_2uv
+=for apidoc sv_2uv_flags
 
 Return the unsigned integer value of an SV, doing any necessary string
-conversion, magic etc. Normally used via the C<SvUV(sv)> and C<SvUVx(sv)>
-macros.
+conversion.  If flags includes SV_GMAGIC, does an mg_get() first.
+Normally used via the C<SvUV(sv)> and C<SvUVx(sv)> macros.
 
 =cut
 */
 
 UV
-Perl_sv_2uv(pTHX_ register SV *sv)
+Perl_sv_2uv_flags(pTHX_ register SV *sv, I32 flags)
 {
     if (!sv)
 	return 0;
     if (SvGMAGICAL(sv)) {
-	mg_get(sv);
+	if (flags & SV_GMAGIC)
+	    mg_get(sv);
 	if (SvIOKp(sv))
 	    return SvUVX(sv);
 	if (SvNOKp(sv))

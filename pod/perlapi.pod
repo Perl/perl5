@@ -2923,6 +2923,15 @@ Only use when you are sure SvIOK is true. See also C<SvIV()>.
 =for hackers
 Found in file sv.h
 
+=item SvIV_nomg
+
+Like C<SvIV> but doesn't process magic.
+
+	IV	SvIV_nomg(SV* sv)
+
+=for hackers
+Found in file sv.h
+
 =item SvLEN
 
 Returns the size of the string buffer in the SV, not including any part
@@ -3018,22 +3027,22 @@ which guarantees to evaluate sv only once.
 =for hackers
 Found in file sv.h
 
-=item SvNVX
-
-Returns the raw value in the SV's NV slot, without checks or conversions.
-Only use when you are sure SvNOK is true. See also C<SvNV()>.
-
-	NV	SvNVX(SV* sv)
-
-=for hackers
-Found in file sv.h
-
 =item SvNVx
 
 Coerces the given SV to a double and returns it. Guarantees to evaluate
 sv only once. Use the more efficient C<SvNV> otherwise.
 
 	NV	SvNVx(SV* sv)
+
+=for hackers
+Found in file sv.h
+
+=item SvNVX
+
+Returns the raw value in the SV's NV slot, without checks or conversions.
+Only use when you are sure SvNOK is true. See also C<SvNV()>.
+
+	NV	SvNVX(SV* sv)
 
 =for hackers
 Found in file sv.h
@@ -3227,21 +3236,21 @@ Like C<SvPV_nolen>, but converts sv to utf8 first if necessary.
 =for hackers
 Found in file sv.h
 
-=item SvPVx
-
-A version of C<SvPV> which guarantees to evaluate sv only once.
-
-	char*	SvPVx(SV* sv, STRLEN len)
-
-=for hackers
-Found in file sv.h
-
 =item SvPVX
 
 Returns a pointer to the physical string in the SV.  The SV must contain a
 string.
 
 	char*	SvPVX(SV* sv)
+
+=for hackers
+Found in file sv.h
+
+=item SvPVx
+
+A version of C<SvPV> which guarantees to evaluate sv only once.
+
+	char*	SvPVx(SV* sv, STRLEN len)
 
 =for hackers
 Found in file sv.h
@@ -3275,6 +3284,15 @@ the SV if the SV does not contain a string.  The SV may cache the
 stringified form becoming C<SvPOK>.  Handles 'get' magic.
 
 	char*	SvPV_nolen(SV* sv)
+
+=for hackers
+Found in file sv.h
+
+=item SvPV_nomg
+
+Like C<SvPV> but doesn't process magic.
+
+	char*	SvPV_nomg(SV* sv, STRLEN len)
 
 =for hackers
 Found in file sv.h
@@ -3480,6 +3498,16 @@ for a version which guarantees to evaluate sv only once.
 =for hackers
 Found in file sv.h
 
+=item SvUVx
+
+Coerces the given SV to an unsigned integer and returns it. Guarantees to
+evaluate sv only once. Use the more efficient C<SvUV> otherwise.
+
+	UV	SvUVx(SV* sv)
+
+=for hackers
+Found in file sv.h
+
 =item SvUVX
 
 Returns the raw value in the SV's UV slot, without checks or conversions.
@@ -3490,12 +3518,11 @@ Only use when you are sure SvIOK is true. See also C<SvUV()>.
 =for hackers
 Found in file sv.h
 
-=item SvUVx
+=item SvUV_nomg
 
-Coerces the given SV to an unsigned integer and returns it. Guarantees to
-evaluate sv only once. Use the more efficient C<SvUV> otherwise.
+Like C<SvUV> but doesn't process magic.
 
-	UV	SvUVx(SV* sv)
+	UV	SvUV_nomg(SV* sv)
 
 =for hackers
 Found in file sv.h
@@ -3540,12 +3567,13 @@ named after the PV if we're a string.
 =for hackers
 Found in file sv.c
 
-=item sv_2iv
+=item sv_2iv_flags
 
-Return the integer value of an SV, doing any necessary string conversion,
-magic etc. Normally used via the C<SvIV(sv)> and C<SvIVx(sv)> macros.
+Return the integer value of an SV, doing any necessary string
+conversion.  If flags includes SV_GMAGIC, does an mg_get() first.
+Normally used via the C<SvIV(sv)> and C<SvIVx(sv)> macros.
 
-	IV	sv_2iv(SV* sv)
+	IV	sv_2iv_flags(SV* sv, I32 flags)
 
 =for hackers
 Found in file sv.c
@@ -3643,13 +3671,13 @@ use the macro wrapper C<SvPV_nolen(sv)> instead.
 =for hackers
 Found in file sv.c
 
-=item sv_2uv
+=item sv_2uv_flags
 
 Return the unsigned integer value of an SV, doing any necessary string
-conversion, magic etc. Normally used via the C<SvUV(sv)> and C<SvUVx(sv)>
-macros.
+conversion.  If flags includes SV_GMAGIC, does an mg_get() first.
+Normally used via the C<SvUV(sv)> and C<SvUVx(sv)> macros.
 
-	UV	sv_2uv(SV* sv)
+	UV	sv_2uv_flags(SV* sv, I32 flags)
 
 =for hackers
 Found in file sv.c

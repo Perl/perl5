@@ -1135,8 +1135,8 @@ Perl_do_vop(pTHX_ I32 optype, SV *sv, SV *left, SV *right)
 
     if (sv != left || (optype != OP_BIT_AND && !SvOK(sv) && !SvGMAGICAL(sv)))
 	sv_setpvn(sv, "", 0);	/* avoid undef warning on |= and ^= */
-    lsave = lc = SvPV(left, leftlen);
-    rsave = rc = SvPV(right, rightlen);
+    lsave = lc = SvPV_nomg(left, leftlen);
+    rsave = rc = SvPV_nomg(right, rightlen);
     len = leftlen < rightlen ? leftlen : rightlen;
     lensave = len;
     if ((left_utf || right_utf) && (sv == left || sv == right)) {
@@ -1145,7 +1145,7 @@ Perl_do_vop(pTHX_ I32 optype, SV *sv, SV *left, SV *right)
     }
     else if (SvOK(sv) || SvTYPE(sv) > SVt_PVMG) {
 	STRLEN n_a;
-	dc = SvPV_force(sv, n_a);
+	dc = SvPV_force_nomg(sv, n_a);
 	if (SvCUR(sv) < (STRLEN)len) {
 	    dc = SvGROW(sv, (STRLEN)(len + 1));
 	    (void)memzero(dc + SvCUR(sv), len - SvCUR(sv) + 1);

@@ -854,6 +854,9 @@ C<SvPVx> for a version which guarantees to evaluate sv only once.
 =for apidoc Am|char*|SvPVx|SV* sv|STRLEN len
 A version of C<SvPV> which guarantees to evaluate sv only once.
 
+=for apidoc Am|char*|SvPV_nomg|SV* sv|STRLEN len
+Like C<SvPV> but doesn't process magic.
+
 =for apidoc Am|char*|SvPV_nolen|SV* sv
 Returns a pointer to the string in the SV, or a stringified form of
 the SV if the SV does not contain a string.  The SV may cache the
@@ -862,6 +865,9 @@ stringified form becoming C<SvPOK>.  Handles 'get' magic.
 =for apidoc Am|IV|SvIV|SV* sv
 Coerces the given SV to an integer and returns it. See  C<SvIVx> for a
 version which guarantees to evaluate sv only once.
+
+=for apidoc Am|IV|SvIV_nomg|SV* sv
+Like C<SvIV> but doesn't process magic.
 
 =for apidoc Am|IV|SvIVx|SV* sv
 Coerces the given SV to an integer and returns it. Guarantees to evaluate
@@ -878,6 +884,9 @@ sv only once. Use the more efficient C<SvNV> otherwise.
 =for apidoc Am|UV|SvUV|SV* sv
 Coerces the given SV to an unsigned integer and returns it.  See C<SvUVx>
 for a version which guarantees to evaluate sv only once.
+
+=for apidoc Am|UV|SvUV_nomg|SV* sv
+Like C<SvUV> but doesn't process magic.
 
 =for apidoc Am|UV|SvUVx|SV* sv
 Coerces the given SV to an unsigned integer and returns it. Guarantees to
@@ -941,6 +950,9 @@ scalar.
 #define SvIV(sv) (SvIOK(sv) ? SvIVX(sv) : sv_2iv(sv))
 #define SvUV(sv) (SvIOK(sv) ? SvUVX(sv) : sv_2uv(sv))
 #define SvNV(sv) (SvNOK(sv) ? SvNVX(sv) : sv_2nv(sv))
+
+#define SvIV_nomg(sv) (SvIOK(sv) ? SvIVX(sv) : sv_2iv_flags(sv, 0))
+#define SvUV_nomg(sv) (SvIOK(sv) ? SvUVX(sv) : sv_2uv_flags(sv, 0))
 
 /* ----*/
 
@@ -1114,6 +1126,8 @@ scalar.
 #define sv_2pv_nomg(sv, lp) sv_2pv_flags(sv, lp, 0)
 #define sv_pvn_force(sv, lp) sv_pvn_force_flags(sv, lp, SV_GMAGIC)
 #define sv_utf8_upgrade(sv) sv_utf8_upgrade_flags(sv, SV_GMAGIC)
+#define sv_2iv(sv) sv_2iv_flags(sv, SV_GMAGIC)
+#define sv_2uv(sv) sv_2uv_flags(sv, SV_GMAGIC)
 
 /* Should be named SvCatPVN_utf8_upgrade? */
 #define sv_catpvn_utf8_upgrade(dsv, sstr, slen, nsv)	\

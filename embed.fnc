@@ -697,14 +697,16 @@ p	|void	|sub_crush_depth|CV* cv
 Apd	|bool	|sv_2bool	|SV* sv
 Apd	|CV*	|sv_2cv		|SV* sv|HV** st|GV** gvp|I32 lref
 Apd	|IO*	|sv_2io		|SV* sv
-Apd	|IV	|sv_2iv		|SV* sv
+Amb	|IV	|sv_2iv		|SV* sv
+Apd	|IV	|sv_2iv_flags	|SV* sv|I32 flags
 Apd	|SV*	|sv_2mortal	|SV* sv
 Apd	|NV	|sv_2nv		|SV* sv
 Amb	|char*	|sv_2pv		|SV* sv|STRLEN* lp
 Apd	|char*	|sv_2pvutf8	|SV* sv|STRLEN* lp
 Apd	|char*	|sv_2pvbyte	|SV* sv|STRLEN* lp
 Ap	|char*	|sv_pvn_nomg	|SV* sv|STRLEN* lp
-Apd	|UV	|sv_2uv		|SV* sv
+Amb	|UV	|sv_2uv		|SV* sv
+Apd	|UV	|sv_2uv_flags	|SV* sv|I32 flags
 Apd	|IV	|sv_iv		|SV* sv
 Apd	|UV	|sv_uv		|SV* sv
 Apd	|NV	|sv_nv		|SV* sv

@@ -2204,11 +2204,11 @@ PP(pp_bit_and)
       if (SvGMAGICAL(right)) mg_get(right);
       if (SvNIOKp(left) || SvNIOKp(right)) {
 	if (PL_op->op_private & HINT_INTEGER) {
-	  IV i = SvIV(left) & SvIV(right);
+	  IV i = SvIV_nomg(left) & SvIV_nomg(right);
 	  SETi(i);
 	}
 	else {
-	  UV u = SvUV(left) & SvUV(right);
+	  UV u = SvUV_nomg(left) & SvUV_nomg(right);
 	  SETu(u);
 	}
       }
@@ -2229,11 +2229,11 @@ PP(pp_bit_xor)
       if (SvGMAGICAL(right)) mg_get(right);
       if (SvNIOKp(left) || SvNIOKp(right)) {
 	if (PL_op->op_private & HINT_INTEGER) {
-	  IV i = (USE_LEFT(left) ? SvIV(left) : 0) ^ SvIV(right);
+	  IV i = (USE_LEFT(left) ? SvIV_nomg(left) : 0) ^ SvIV_nomg(right);
 	  SETi(i);
 	}
 	else {
-	  UV u = (USE_LEFT(left) ? SvUV(left) : 0) ^ SvUV(right);
+	  UV u = (USE_LEFT(left) ? SvUV_nomg(left) : 0) ^ SvUV_nomg(right);
 	  SETu(u);
 	}
       }
@@ -2254,11 +2254,11 @@ PP(pp_bit_or)
       if (SvGMAGICAL(right)) mg_get(right);
       if (SvNIOKp(left) || SvNIOKp(right)) {
 	if (PL_op->op_private & HINT_INTEGER) {
-	  IV i = (USE_LEFT(left) ? SvIV(left) : 0) | SvIV(right);
+	  IV i = (USE_LEFT(left) ? SvIV_nomg(left) : 0) | SvIV_nomg(right);
 	  SETi(i);
 	}
 	else {
-	  UV u = (USE_LEFT(left) ? SvUV(left) : 0) | SvUV(right);
+	  UV u = (USE_LEFT(left) ? SvUV_nomg(left) : 0) | SvUV_nomg(right);
 	  SETu(u);
 	}
       }
@@ -2357,11 +2357,11 @@ PP(pp_complement)
 	  mg_get(sv);
       if (SvNIOKp(sv)) {
 	if (PL_op->op_private & HINT_INTEGER) {
-	  IV i = ~SvIV(sv);
+	  IV i = ~SvIV_nomg(sv);
 	  SETi(i);
 	}
 	else {
-	  UV u = ~SvUV(sv);
+	  UV u = ~SvUV_nomg(sv);
 	  SETu(u);
 	}
       }
@@ -2370,7 +2370,7 @@ PP(pp_complement)
 	register I32 anum;
 	STRLEN len;
 
-	SvSetSV(TARG, sv);
+	sv_setsv_nomg(TARG, sv);
 	tmps = (U8*)SvPV_force(TARG, len);
 	anum = len;
 	if (SvUTF8(TARG)) {
