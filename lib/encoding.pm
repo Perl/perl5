@@ -43,7 +43,7 @@ The pragma is a per script, not a per block lexical.  Only the last
 =head1 FUTURE POSSIBILITIES
 
 The C<\x..> and C<\0...> in literals and regular expressions are not
-affected by this pragma.  They probably should.
+affected by this pragma.  They probably should.  Ditto C<\N{...}>.
 
 =head1 SEE ALSO
 
