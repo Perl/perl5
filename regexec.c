@@ -116,6 +116,15 @@
 #define HOPc(pos,off) ((char*)HOP(pos,off))
 #define HOPMAYBEc(pos,off) ((char*)HOPMAYBE(pos,off))
 
+#define HOPBACK(pos, off) (		\
+    (UTF && DO_UTF8(PL_reg_sv))		\
+	? reghopmaybe((U8*)pos, -off)	\
+    : (pos - off >= PL_bostr)		\
+	? (U8*)(pos - off)		\
+    : (U8*)NULL				\
+)
+#define HOPBACKc(pos, off) (char*)HOPBACK(pos, off)
+
 #define reghop3_c(pos,off,lim) ((char*)reghop3((U8*)pos, off, (U8*)lim))
 #define reghopmaybe3_c(pos,off,lim) ((char*)reghopmaybe3((U8*)pos, off, (U8*)lim))
 #define HOP3(pos,off,lim) (DO_UTF8(PL_reg_sv) ? reghop3((U8*)pos, off, (U8*)lim) : (U8*)(pos + off))
@@ -3368,20 +3377,10 @@ S_regmatch(pTHX_ regnode *prog)
 	case UNLESSM:
 	    n = 0;
 	    if (scan->flags) {
-		if (UTF) {		/* XXXX This is absolutely
-					   broken, we read before
-					   start of string. */
-		    s = HOPMAYBEc(locinput, -scan->flags);
-		    if (!s)
-			goto say_yes;
-		    PL_reginput = s;
-		}
-		else {
-		    if (locinput < PL_bostr + scan->flags)
-			goto say_yes;
-		    PL_reginput = locinput - scan->flags;
-		    goto do_ifmatch;
-		}
+		s = HOPBACKc(locinput, scan->flags);
+		if (!s)
+		    goto say_yes;
+		PL_reginput = s;
 	    }
 	    else
 		PL_reginput = locinput;
@@ -3389,20 +3388,10 @@ S_regmatch(pTHX_ regnode *prog)
 	case IFMATCH:
 	    n = 1;
 	    if (scan->flags) {
-		if (UTF) {		/* XXXX This is absolutely
-					   broken, we read before
-					   start of string. */
-		    s = HOPMAYBEc(locinput, -scan->flags);
-		    if (!s || s < PL_bostr)
-			goto say_no;
-		    PL_reginput = s;
-		}
-		else {
-		    if (locinput < PL_bostr + scan->flags)
-			goto say_no;
-		    PL_reginput = locinput - scan->flags;
-		    goto do_ifmatch;
-		}
+		s = HOPBACKc(locinput, scan->flags);
+		if (!s)
+		    goto say_no;
+		PL_reginput = s;
 	    }
 	    else
 		PL_reginput = locinput;
