@@ -4701,8 +4701,9 @@ Perl_ck_bitop(pTHX_ OP *o)
 OP *
 Perl_ck_concat(pTHX_ OP *o)
 {
-    if (cUNOPo->op_first->op_type == OP_CONCAT)
-	o->op_flags |= OPf_STACKED;
+    OP *kid = cUNOPo->op_first;
+    if (kid->op_type == OP_CONCAT && !(kUNOP->op_first->op_flags & OPf_MOD))
+        o->op_flags |= OPf_STACKED;
     return o;
 }
 
