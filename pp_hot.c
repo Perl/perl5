@@ -1555,7 +1555,7 @@ Perl_do_readline(pTHX)
 	    /* undef TARG, and push that undefined value */
 	    if (type != OP_RCATLINE) {
 	        SV_CHECK_THINKFIRST(TARG);
-	        (void)SvOK_off(TARG);
+	        SvOK_off(TARG);
 	    }
 	    PUSHTARG;
 	}
@@ -1621,7 +1621,7 @@ Perl_do_readline(pTHX)
 	    if (gimme == G_SCALAR) {
 		if (type != OP_RCATLINE) {
 		    SV_CHECK_THINKFIRST(TARG);
-		    (void)SvOK_off(TARG);
+		    SvOK_off(TARG);
 		}
 		SPAGAIN;
 		PUSHTARG;
@@ -2265,7 +2265,7 @@ PP(pp_subst)
 	else
 	    sv_catpvn(dstr, s, strend - s);
 
-	(void)SvOOK_off(TARG);
+	SvOOK_off(TARG);
 	if (SvLEN(TARG))
 	    Safefree(SvPVX(TARG));
 	SvPVX(TARG) = SvPVX(dstr);
@@ -3078,7 +3078,7 @@ Perl_vivify_ref(pTHX_ SV *sv, U32 to_what)
 	if (SvTYPE(sv) < SVt_RV)
 	    sv_upgrade(sv, SVt_RV);
 	else if (SvTYPE(sv) >= SVt_PV) {
-	    (void)SvOOK_off(sv);
+	    SvOOK_off(sv);
 	    Safefree(SvPVX(sv));
 	    SvLEN(sv) = SvCUR(sv) = 0;
 	}

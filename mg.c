@@ -203,7 +203,7 @@ Perl_mg_get(pTHX_ SV *sv)
     if (SvREFCNT(sv) == 1) {
 	/* We hold the last reference to this SV, which implies that the
 	   SV was deleted as a side effect of the routines we called.  */
-	(void)SvOK_off(sv);
+	SvOK_off(sv);
     }
     return 0;
 }
@@ -693,7 +693,7 @@ Perl_magic_get(pTHX_ SV *sv, MAGIC *mg)
     case '\023':		/* ^S */
         if (*(mg->mg_ptr+1) == '\0') {
 	    if (PL_lex_state != LEX_NOTPARSING)
-		(void)SvOK_off(sv);
+		SvOK_off(sv);
 	    else if (PL_in_eval)
  		sv_setiv(sv, PL_in_eval & ~(EVAL_INREQUIRE));
 	    else
@@ -1684,7 +1684,7 @@ Perl_magic_getpos(pTHX_ SV *sv, MAGIC *mg)
 	    return 0;
 	}
     }
-    (void)SvOK_off(sv);
+    SvOK_off(sv);
     return 0;
 }
 
@@ -1852,7 +1852,7 @@ Perl_magic_getvec(pTHX_ SV *sv, MAGIC *mg)
     SV *lsv = LvTARG(sv);
 
     if (!lsv) {
-	(void)SvOK_off(sv);
+	SvOK_off(sv);
 	return 0;
     }
 
@@ -1973,7 +1973,7 @@ Perl_magic_killbackrefs(pTHX_ SV *sv, MAGIC *mg)
 		Perl_croak(aTHX_ "panic: magic_killbackrefs");
 	    /* XXX Should we check that it hasn't changed? */
 	    SvRV(svp[i]) = 0;
-	    (void)SvOK_off(svp[i]);
+	    SvOK_off(svp[i]);
 	    SvWEAKREF_off(svp[i]);
 	    svp[i] = Nullsv;
 	}

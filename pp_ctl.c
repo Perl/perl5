@@ -207,7 +207,7 @@ PP(pp_substcont)
 	    }
 	    cx->sb_rxtainted |= RX_MATCH_TAINTED(rx);
 
-	    (void)SvOOK_off(targ);
+	    SvOOK_off(targ);
 	    if (SvLEN(targ))
 		Safefree(SvPVX(targ));
 	    SvPVX(targ) = SvPVX(dstr);

@@ -581,9 +581,9 @@ Set the length of the string which is in the SV.  See C<SvCUR>.
 #define SvIOK_on(sv)		((void)SvOOK_off(sv), \
 				    SvFLAGS(sv) |= (SVf_IOK|SVp_IOK))
 #define SvIOK_off(sv)		(SvFLAGS(sv) &= ~(SVf_IOK|SVp_IOK|SVf_IVisUV))
-#define SvIOK_only(sv)		((void)SvOK_off(sv), \
+#define SvIOK_only(sv)		(SvOK_off(sv), \
 				    SvFLAGS(sv) |= (SVf_IOK|SVp_IOK))
-#define SvIOK_only_UV(sv)	((void)SvOK_off_exc_UV(sv), \
+#define SvIOK_only_UV(sv)	(SvOK_off_exc_UV(sv), \
 				    SvFLAGS(sv) |= (SVf_IOK|SVp_IOK))
 
 #define SvIOK_UV(sv)		((SvFLAGS(sv) & (SVf_IOK|SVf_IVisUV))	\
@@ -600,7 +600,7 @@ Set the length of the string which is in the SV.  See C<SvCUR>.
 #define SvNOK(sv)		(SvFLAGS(sv) & SVf_NOK)
 #define SvNOK_on(sv)		(SvFLAGS(sv) |= (SVf_NOK|SVp_NOK))
 #define SvNOK_off(sv)		(SvFLAGS(sv) &= ~(SVf_NOK|SVp_NOK))
-#define SvNOK_only(sv)		((void)SvOK_off(sv), \
+#define SvNOK_only(sv)		(SvOK_off(sv), \
 				    SvFLAGS(sv) |= (SVf_NOK|SVp_NOK))
 
 /*
@@ -640,7 +640,7 @@ and leaves the UTF-8 status as it was.
 
 #define SvOOK(sv)		(SvFLAGS(sv) & SVf_OOK)
 #define SvOOK_on(sv)		((void)SvIOK_off(sv), SvFLAGS(sv) |= SVf_OOK)
-#define SvOOK_off(sv)		(SvOOK(sv) && sv_backoff(sv))
+#define SvOOK_off(sv)		((void)(SvOOK(sv) && sv_backoff(sv)))
 
 #define SvFAKE(sv)		(SvFLAGS(sv) & SVf_FAKE)
 #define SvFAKE_on(sv)		(SvFLAGS(sv) |= SVf_FAKE)
