@@ -919,6 +919,10 @@ a "version object", as will be the C<$^V>.
 
 =item *
 
+The bytecompiler and byteloader will be fixed.
+
+=item *
+
 5.005 Threads Will Be Removed
 
 =item *
