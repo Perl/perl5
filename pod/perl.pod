@@ -265,9 +265,8 @@ F<http://www.perl.com/CPAN/src/index.html>
 	VMS
 	Windows
 
-The following platforms have separate source code distributions
-at F<http://www.perl.com/CPAN/src/index.html> and binaries at
-F<http://www.perl.com/CPAN/ports/index.html>.
+The following platforms have their own source code distributions and
+binaries at F<http://www.perl.com/CPAN/ports/index.html>.
 
 	AS/400
 	Mac
