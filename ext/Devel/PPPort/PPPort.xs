@@ -102,8 +102,9 @@ XS(XS_Devel__PPPort_dXSTARG)
 {
   dXSARGS;
   dXSTARG;
+  IV iv;
   SP -= items;
-  IV iv = SvIV(ST(0)) + 1;
+  iv = SvIV(ST(0)) + 1;
   PUSHi(iv);
   XSRETURN(1);
 }
