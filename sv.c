@@ -1678,6 +1678,12 @@ S_sv_2iuv_non_preserve (pTHX_ register SV *sv, I32 numtype)
 	SvIsUV_on(sv);
 	SvUVX(sv) = U_V(SvNVX(sv));
 	if ((NV)(SvUVX(sv)) == SvNVX(sv)) {
+	    if (SvUVX(sv) == UV_MAX) {
+		/* As we know that NVs don't preserve UVs, UV_MAX cannot
+		   possibly be preserved by NV. Hence, it must be overflow.
+		   NOK, IOKp */
+		return IS_NUMBER_OVERFLOW_UV;
+	    }
 	    SvIOK_on(sv); /* Integer is precise. NOK, UOK */
 	} else {
 	    /* Integer is imprecise. NOK, IOKp */
