@@ -218,6 +218,7 @@ CGI::Response
 require 5.000;
 use Exporter;
 use Carp;
+use File::Spec;
 
 @ISA = qw(Exporter);
 @EXPORT = qw(confess croak carp);
@@ -248,19 +249,19 @@ sub realdie { CORE::die(@_); }
 sub id {
     my $level = shift;
     my($pack,$file,$line,$sub) = caller($level);
-    my($id) = $file=~m|([^/]+)$|;
+    my($dev,$dirs,$id) = File::Spec->splitpath($file);
     return ($file,$line,$id);
 }
 
 sub stamp {
     my $time = scalar(localtime);
     my $frame = 0;
-    my ($id,$pack,$file);
+     my ($id,$pack,$file,$dev,$dirs);
     do {
 	$id = $file;
 	($pack,$file) = caller($frame++);
     } until !$file;
-    ($id) = $id=~m|([^/]+)$|;
+    ($dev,$dirs,$id) = File::Spec->splitpath($id);
     return "[$time] $id: ";
 }
 
