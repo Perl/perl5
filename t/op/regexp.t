@@ -69,7 +69,7 @@ while (<TESTS>) {
     $expect =~ s/\\n/\n/g;
     $expect = $repl = '-' if $skip_amp and $input =~ /\$[&\`\']/;
     $skip = ($skip_amp ? ($result =~ s/B//i) : ($result =~ s/B//));
-    $reason = $skip_amp ? 'skipping $&' : '';
+    $reason = 'skipping $&' if $reason eq  '' && $skip_amp;
     $result =~ s/B//i unless $skip;
     for $study ('', 'study \$subject') {
  	$c = $iters;
