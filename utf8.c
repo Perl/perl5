@@ -1315,11 +1315,6 @@ Perl_to_utf8_case(pTHX_ U8 *p, U8* ustrp, STRLEN *lenp, SV **swashp, char *norma
 			 * (usually, but not always multicharacter)
 			 * mapping, since any characters in the low 256
 			 * are in Unicode code points, not EBCDIC.
-			 * If we either had a bit in the "special"
-			 * mappings indicating "contains lower 256",
-			 * or if we on EBCDIC platforms regenerate the
-			 * lib/unicore/To/Foo.pl, we could do without
-			 * this, but for now, let's do it this way.
 			 * --jhi */
 
 			U8 tmpbuf[UTF8_MAXLEN_FOLD+1];
