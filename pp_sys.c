@@ -4972,8 +4972,10 @@ PP(pp_gpwent)
 		sv_setpv(sv, spwent->sp_pwdp);
 	}
 #   endif
+#   ifdef PWPASSWD
 	if (!SvPOK(sv)) /* Use the standard password, then. */
 	    sv_setpv(sv, pwent->pw_passwd);
+#   endif
 
 #   ifndef INCOMPLETE_TAINTS
 	/* passwd is tainted because user himself can diddle with it.
