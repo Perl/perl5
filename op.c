@@ -2621,7 +2621,7 @@ Perl_pmtrans(pTHX_ OP *o, OP *expr, OP *repl)
 	SV* transv = 0;
 	U8* tend = t + tlen;
 	U8* rend = r + rlen;
-	I32 ulen;
+	STRLEN ulen;
 	U32 tfirst = 1;
 	U32 tlast = 0;
 	I32 tdiff;
@@ -2641,6 +2641,7 @@ Perl_pmtrans(pTHX_ OP *o, OP *expr, OP *repl)
 	if (complement) {
 	    U8 tmpbuf[UTF8_MAXLEN];
 	    U8** cp;
+	    I32* cl;
 	    UV nextmin = 0;
 	    New(1109, cp, tlen, U8*);
 	    i = 0;
@@ -2656,7 +2657,8 @@ Perl_pmtrans(pTHX_ OP *o, OP *expr, OP *repl)
 	    qsort(cp, i, sizeof(U8*), utf8compare);
 	    for (j = 0; j < i; j++) {
 		U8 *s = cp[j];
-		UV val = utf8_to_uv_chk(s, &ulen, 0);
+		I32 cur = j < i ? cp[j+1] - s : tend - s;
+		UV  val = utf8_to_uv_chk(s, cur, &ulen, 0);
 		s += ulen;
 		diff = val - nextmin;
 		if (diff > 0) {
@@ -2669,7 +2671,7 @@ Perl_pmtrans(pTHX_ OP *o, OP *expr, OP *repl)
 		    }
 	        }
 		if (*s == 0xff)
-		    val = utf8_to_uv_chk(s+1, &ulen, 0);
+		    val = utf8_to_uv_chk(s+1, cur - 1, &ulen, 0);
 		if (val >= nextmin)
 		    nextmin = val + 1;
 	    }
@@ -2696,10 +2698,11 @@ Perl_pmtrans(pTHX_ OP *o, OP *expr, OP *repl)
 	while (t < tend || tfirst <= tlast) {
 	    /* see if we need more "t" chars */
 	    if (tfirst > tlast) {
-		tfirst = (I32)utf8_to_uv_chk(t, &ulen, 0);
+		tfirst = (I32)utf8_to_uv_chk(t, tend - t, &ulen, 0);
 		t += ulen;
 		if (t < tend && *t == 0xff) {	/* illegal utf8 val indicates range */
-		    tlast = (I32)utf8_to_uv_chk(++t, &ulen, 0);
+		    t++;
+		    tlast = (I32)utf8_to_uv_chk(t, tend - t, &ulen, 0);
 		    t += ulen;
 		}
 		else
@@ -2709,10 +2712,11 @@ Perl_pmtrans(pTHX_ OP *o, OP *expr, OP *repl)
 	    /* now see if we need more "r" chars */
 	    if (rfirst > rlast) {
 		if (r < rend) {
-		    rfirst = (I32)utf8_to_uv_chk(r, &ulen, 0);
+		    rfirst = (I32)utf8_to_uv_chk(r, rend - r, &ulen, 0);
 		    r += ulen;
 		    if (r < rend && *r == 0xff) {	/* illegal utf8 val indicates range */
-			rlast = (I32)utf8_to_uv_chk(++r, &ulen, 0);
+			r++;
+			rlast = (I32)utf8_to_uv_chk(r, rend - r, &ulen, 0);
 			r += ulen;
 		    }
 		    else

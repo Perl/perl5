@@ -71,6 +71,11 @@ on Windows.
 Regardless of the above, the C<bytes> pragma can always be used to force
 byte semantics in a particular lexical scope.  See L<bytes>.
 
+One effect of the C<utf8> pragma is that the internal UTF-8 decoding
+becomes stricter so that the character 0xFFFF (UTF-8 bytes 0xEF 0xBF
+0xBF), and the bytes 0xFE and 0xFF, start to cause warnings if they
+appear in the data.
+
 The C<utf8> pragma is primarily a compatibility device that enables
 recognition of UTF-8 in literals encountered by the parser.  It may also
 be used for enabling some of the more experimental Unicode support features.

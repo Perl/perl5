@@ -6358,13 +6358,13 @@ Perl_sv_vcatpvfn(pTHX_ SV *sv, const char *pat, STRLEN patlen, va_list *args, SV
 	case 'd':
 	case 'i':
 	    if (vectorize) {
-		I32 ulen;
+		STRLEN ulen;
 		if (!veclen) {
 		    vectorize = FALSE;
 		    break;
 		}
 		if (utf)
-		    iv = (IV)utf8_to_uv_chk(vecstr, &ulen, 0);
+		    iv = (IV)utf8_to_uv_chk(vecstr, veclen, &ulen, 0);
 		else {
 		    iv = *vecstr;
 		    ulen = 1;
@@ -6440,14 +6440,14 @@ Perl_sv_vcatpvfn(pTHX_ SV *sv, const char *pat, STRLEN patlen, va_list *args, SV
 
 	uns_integer:
 	    if (vectorize) {
-		I32 ulen;
+		STRLEN ulen;
 	vector:
 		if (!veclen) {
 		    vectorize = FALSE;
 		    break;
 		}
 		if (utf)
-		    uv = utf8_to_uv_chk(vecstr, &ulen, 0);
+		    uv = utf8_to_uv_chk(vecstr, veclen, &ulen, 0);
 		else {
 		    uv = *vecstr;
 		    ulen = 1;

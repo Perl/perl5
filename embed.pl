@@ -1941,10 +1941,10 @@ p	|OP*	|scalar		|OP* o
 p	|OP*	|scalarkids	|OP* o
 p	|OP*	|scalarseq	|OP* o
 p	|OP*	|scalarvoid	|OP* o
-Ap	|NV	|scan_bin	|char* start|I32 len|I32* retlen
-Ap	|NV	|scan_hex	|char* start|I32 len|I32* retlen
+Ap	|NV	|scan_bin	|char* start|STRLEN len|STRLEN* retlen
+Ap	|NV	|scan_hex	|char* start|STRLEN len|STRLEN* retlen
 Ap	|char*	|scan_num	|char* s|YYSTYPE *lvalp
-Ap	|NV	|scan_oct	|char* start|I32 len|I32* retlen
+Ap	|NV	|scan_oct	|char* start|STRLEN len|STRLEN* retlen
 p	|OP*	|scope		|OP* o
 Ap	|char*	|screaminstr	|SV* bigsv|SV* littlesv|I32 start_shift \
 				|I32 end_shift|I32 *state|I32 last
@@ -2074,8 +2074,8 @@ Ap	|I32	|utf8_distance	|U8 *a|U8 *b
 Ap	|U8*	|utf8_hop	|U8 *s|I32 off
 ApM	|U8*	|utf8_to_bytes	|U8 *s|STRLEN *len
 ApM	|U8*	|bytes_to_utf8	|U8 *s|STRLEN *len
-Ap	|UV	|utf8_to_uv	|U8 *s|I32* retlen
-Ap	|UV	|utf8_to_uv_chk	|U8 *s|I32* retlen|bool checking
+Ap	|UV	|utf8_to_uv	|U8 *s|STRLEN* retlen
+Ap	|UV	|utf8_to_uv_chk	|U8 *s|STRLEN curlen|STRLEN* retlen|bool checking
 Ap	|U8*	|uv_to_utf8	|U8 *d|UV uv
 p	|void	|vivify_defelem	|SV* sv
 p	|void	|vivify_ref	|SV* sv|U32 to_what
@@ -2358,7 +2358,7 @@ s	|regnode*|reg		|I32|I32 *
 s	|regnode*|reganode	|U8|U32
 s	|regnode*|regatom	|I32 *
 s	|regnode*|regbranch	|I32 *|I32
-s	|void	|reguni		|UV|char *|I32*
+s	|void	|reguni		|UV|char *|STRLEN*
 s	|regnode*|regclass
 s	|regnode*|regclassutf8
 s	|I32	|regcurly	|char *

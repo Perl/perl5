@@ -1789,6 +1789,10 @@ a builtin library search path, prefix2 is substituted.  The error may
 appear if components are not found, or are too long.  See
 "PERLLIB_PREFIX" in L<perlos2>.
 
+=item Malformed UTF-8 character (%s)
+
+Perl detected something that didn't comply with UTF-8 encoding rules.
+
 =item Malformed UTF-16 surrogate
 
 Perl thought it was reading UTF-16 encoded character data but while

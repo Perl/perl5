@@ -813,10 +813,10 @@ Perl_str_to_version(pTHX_ SV *sv)
     bool utf = SvUTF8(sv) ? TRUE : FALSE;
     char *end = start + len;
     while (start < end) {
-	I32 skip;
+	STRLEN skip;
 	UV n;
 	if (utf)
-	    n = utf8_to_uv_chk((U8*)start, &skip, 0);
+	    n = utf8_to_uv_chk((U8*)start, len, &skip, 0);
 	else {
 	    n = *(U8*)start;
 	    skip = 1;
@@ -1188,7 +1188,6 @@ S_scan_const(pTHX_ char *start)
     bool dorange = FALSE;			/* are we in a translit range? */
     bool didrange = FALSE;		        /* did we just finish a range? */
     bool has_utf = FALSE;			/* embedded \x{} */
-    I32 len;					/* ? */
     UV uv;
 
     I32 utf = (PL_lex_inwhat == OP_TRANS && PL_sublex_info.sub_op)
@@ -1329,20 +1328,23 @@ S_scan_const(pTHX_ char *start)
 	/* (now in tr/// code again) */
 
 	if (*s & 0x80 && thisutf) {
-	   (void)utf8_to_uv_chk((U8*)s, &len, 0);
-	   if (len == 1) {
-	       /* illegal UTF8, make it valid */
-	       char *old_pvx = SvPVX(sv);
-	       /* need space for one extra char (NOTE: SvCUR() not set here) */
-	       d = SvGROW(sv, SvLEN(sv) + 1) + (d - old_pvx);
-	       d = (char*)uv_to_utf8((U8*)d, (U8)*s++);
-	   }
-	   else {
-	       while (len--)
-		   *d++ = *s++;
-	   }
-	   has_utf = TRUE;
-	   continue;
+	    STRLEN len;
+	    UV uv;
+
+	    uv = utf8_to_uv_chk((U8*)s, send - s, &len, 1);
+	    if (len == 1) {
+		/* illegal UTF8, make it valid */
+		char *old_pvx = SvPVX(sv);
+		/* need space for one extra char (NOTE: SvCUR() not set here) */
+		d = SvGROW(sv, SvLEN(sv) + 1) + (d - old_pvx);
+		d = (char*)uv_to_utf8((U8*)d, (U8)*s++);
+	    }
+	    else {
+		while (len--)
+		    *d++ = *s++;
+	    }
+	    has_utf = TRUE;
+	    continue;
 	}
 
 	/* backslashes */
@@ -1398,9 +1400,11 @@ S_scan_const(pTHX_ char *start)
 	    /* \132 indicates an octal constant */
 	    case '0': case '1': case '2': case '3':
 	    case '4': case '5': case '6': case '7':
-		len = 0;	/* disallow underscores */
-		uv = (UV)scan_oct(s, 3, &len);
-		s += len;
+		{
+		    STRLEN len = 0;	/* disallow underscores */
+		    uv = (UV)scan_oct(s, 3, &len);
+		    s += len;
+		}
 		goto NUM_ESCAPE_INSERT;
 
 	    /* \x24 indicates a hex constant */
@@ -1412,14 +1416,18 @@ S_scan_const(pTHX_ char *start)
 			yyerror("Missing right brace on \\x{}");
 			e = s;
 		    }
-		    len = 1;		/* allow underscores */
-                    uv = (UV)scan_hex(s + 1, e - s - 1, &len);
-                    s = e + 1;
+		    {
+			STRLEN len = 1;		/* allow underscores */
+			uv = (UV)scan_hex(s + 1, e - s - 1, &len);
+		    }
+		    s = e + 1;
 		}
 		else {
-		    len = 0;		/* disallow underscores */
-		    uv = (UV)scan_hex(s, 2, &len);
-		    s += len;
+		    {
+			STRLEN len = 0;		/* disallow underscores */
+			uv = (UV)scan_hex(s, 2, &len);
+			s += len;
+		    }
 		}
 
 	      NUM_ESCAPE_INSERT:
@@ -1528,8 +1536,10 @@ S_scan_const(pTHX_ char *start)
 		*d = toCTRL(*d); 
 		d++;
 #else
-		len = *s++;
-		*d++ = toCTRL(len);
+		{
+		    U8 c = *s++;
+		    *d++ = toCTRL(c);
+		}
 #endif
 		continue;
 

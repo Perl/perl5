@@ -2025,7 +2025,7 @@ NULL
 char *
 Perl_moreswitches(pTHX_ char *s)
 {
-    I32 numlen;
+    STRLEN numlen;
     U32 rschar;
 
     switch (*s) {

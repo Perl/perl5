@@ -29,7 +29,7 @@ END_EXTERN_C
 
 #define UTF8_MAXLEN 13 /* how wide can a single UTF8 encoded character become */
 
-/*#define IN_UTF8 (PL_curcop->op_private & HINT_UTF8)*/
+#define IN_UTF8 (PL_curcop->op_private & HINT_UTF8)
 #define IN_BYTE (PL_curcop->op_private & HINT_BYTE)
 #define DO_UTF8(sv) (SvUTF8(sv) && !IN_BYTE)
 
@@ -52,6 +52,8 @@ END_EXTERN_C
 		      (uv) < 0x4000000      ? 5 : \
 		      (uv) < 0x80000000     ? 6 : 7 )
 #endif
+
+#define UNICODE_REPLACEMENT_CHARACTER	0xfffd
 
 /*
  * Note: we try to be careful never to call the isXXX_utf8() functions

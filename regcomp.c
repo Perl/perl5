@@ -2742,11 +2742,11 @@ tryagain:
 	/* FALL THROUGH */
 
     default: {
-	    register I32 len;
+	    register STRLEN len;
 	    register UV ender;
 	    register char *p;
 	    char *oldp, *s;
-	    I32 numlen;
+	    STRLEN numlen;
 
 	    PL_regcomp_parse++;
 
@@ -2884,7 +2884,8 @@ tryagain:
 		default:
 		  normal_default:
 		    if ((*p & 0xc0) == 0xc0 && UTF) {
-			ender = utf8_to_uv_chk((U8*)p, &numlen, 0);
+			ender = utf8_to_uv_chk((U8*)p, PL_regxend - p,
+					       &numlen, 0);
 			p += numlen;
 		    }
 		    else
@@ -3128,7 +3129,7 @@ S_regclass(pTHX)
     register I32 lastvalue = OOB_CHAR8;
     register I32 range = 0;
     register regnode *ret;
-    I32 numlen;
+    STRLEN numlen;
     I32 namedclass;
     char *rangebegin;
     bool need_class = 0;
@@ -3606,7 +3607,7 @@ S_regclassutf8(pTHX)
     register U32 lastvalue = OOB_UTF8;
     register I32 range = 0;
     register regnode *ret;
-    I32 numlen;
+    STRLEN numlen;
     I32 n;
     SV *listsv;
     U8 flags = 0;
@@ -3638,12 +3639,16 @@ S_regclassutf8(pTHX)
 	namedclass = OOB_NAMEDCLASS;
 	if (!range)
 	    rangebegin = PL_regcomp_parse;
-	value = utf8_to_uv_chk((U8*)PL_regcomp_parse, &numlen, 0);
+	value = utf8_to_uv_chk((U8*)PL_regcomp_parse,
+			       PL_regxend - PL_regcomp_parse,
+			       &numlen, 0);
 	PL_regcomp_parse += numlen;
 	if (value == '[')
 	    namedclass = regpposixcc(value);
 	else if (value == '\\') {
-	    value = (U32)utf8_to_uv_chk((U8*)PL_regcomp_parse, &numlen, 0);
+	    value = (U32)utf8_to_uv_chk((U8*)PL_regcomp_parse,
+					PL_regxend - PL_regcomp_parse,
+					&numlen, 0);
 	    PL_regcomp_parse += numlen;
 	    /* Some compilers cannot handle switching on 64-bit integer
 	     * values, therefore value cannot be an UV.  Yes, this will
@@ -3937,7 +3942,7 @@ S_reganode(pTHX_ U8 op, U32 arg)
 - reguni - emit (if appropriate) a Unicode character
 */
 STATIC void
-S_reguni(pTHX_ UV uv, char* s, I32* lenp)
+S_reguni(pTHX_ UV uv, char* s, STRLEN* lenp)
 {
     dTHR;
     if (SIZE_ONLY) {

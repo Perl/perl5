@@ -2933,7 +2933,7 @@ Perl_same_dirent(pTHX_ char *a, char *b)
 #endif /* !HAS_RENAME */
 
 NV
-Perl_scan_bin(pTHX_ char *start, I32 len, I32 *retlen)
+Perl_scan_bin(pTHX_ char *start, STRLEN len, STRLEN *retlen)
 {
     register char *s = start;
     register NV rnv = 0.0;
@@ -3004,7 +3004,7 @@ Perl_scan_bin(pTHX_ char *start, I32 len, I32 *retlen)
 }
 
 NV
-Perl_scan_oct(pTHX_ char *start, I32 len, I32 *retlen)
+Perl_scan_oct(pTHX_ char *start, STRLEN len, STRLEN *retlen)
 {
     register char *s = start;
     register NV rnv = 0.0;
@@ -3074,7 +3074,7 @@ Perl_scan_oct(pTHX_ char *start, I32 len, I32 *retlen)
 }
 
 NV
-Perl_scan_hex(pTHX_ char *start, I32 len, I32 *retlen)
+Perl_scan_hex(pTHX_ char *start, STRLEN len, STRLEN *retlen)
 {
     register char *s = start;
     register NV rnv = 0.0;

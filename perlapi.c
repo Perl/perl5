@@ -2638,14 +2638,14 @@ Perl_save_threadsv(pTHXo_ PADOFFSET i)
 
 #undef  Perl_scan_bin
 NV
-Perl_scan_bin(pTHXo_ char* start, I32 len, I32* retlen)
+Perl_scan_bin(pTHXo_ char* start, STRLEN len, STRLEN* retlen)
 {
     return ((CPerlObj*)pPerl)->Perl_scan_bin(start, len, retlen);
 }
 
 #undef  Perl_scan_hex
 NV
-Perl_scan_hex(pTHXo_ char* start, I32 len, I32* retlen)
+Perl_scan_hex(pTHXo_ char* start, STRLEN len, STRLEN* retlen)
 {
     return ((CPerlObj*)pPerl)->Perl_scan_hex(start, len, retlen);
 }
@@ -2659,7 +2659,7 @@ Perl_scan_num(pTHXo_ char* s, YYSTYPE *lvalp)
 
 #undef  Perl_scan_oct
 NV
-Perl_scan_oct(pTHXo_ char* start, I32 len, I32* retlen)
+Perl_scan_oct(pTHXo_ char* start, STRLEN len, STRLEN* retlen)
 {
     return ((CPerlObj*)pPerl)->Perl_scan_oct(start, len, retlen);
 }
@@ -3380,16 +3380,16 @@ Perl_bytes_to_utf8(pTHXo_ U8 *s, STRLEN *len)
 
 #undef  Perl_utf8_to_uv
 UV
-Perl_utf8_to_uv(pTHXo_ U8 *s, I32* retlen)
+Perl_utf8_to_uv(pTHXo_ U8 *s, STRLEN* retlen)
 {
     return ((CPerlObj*)pPerl)->Perl_utf8_to_uv(s, retlen);
 }
 
 #undef  Perl_utf8_to_uv_chk
 UV
-Perl_utf8_to_uv_chk(pTHXo_ U8 *s, I32* retlen, bool checking)
+Perl_utf8_to_uv_chk(pTHXo_ U8 *s, STRLEN curlen, STRLEN* retlen, bool checking)
 {
-    return ((CPerlObj*)pPerl)->Perl_utf8_to_uv_chk(s, retlen, checking);
+    return ((CPerlObj*)pPerl)->Perl_utf8_to_uv_chk(s, curlen, retlen, checking);
 }
 
 #undef  Perl_uv_to_utf8

@@ -3225,7 +3225,7 @@ advanced to the end of the character.
 If C<s> does not point to a well-formed UTF8 character, an optional UTF8
 warning is produced.
 
-	U8* s	utf8_to_uv(I32 *retlen)
+	U8* s	utf8_to_uv(STRLEN *retlen)
 
 =for hackers
 Found in file utf8.c
@@ -3233,9 +3233,9 @@ Found in file utf8.c
 =item utf8_to_uv_chk
 
 Returns the character value of the first character in the string C<s>
-which is assumed to be in UTF8 encoding; C<retlen> will be set to the
-length, in bytes, of that character, and the pointer C<s> will be
-advanced to the end of the character.
+which is assumed to be in UTF8 encoding and no longer than C<curlen>;
+C<retlen> will be set to the length, in bytes, of that character,
+and the pointer C<s> will be advanced to the end of the character.
 
 If C<s> does not point to a well-formed UTF8 character, the behaviour
 is dependent on the value of C<checking>: if this is true, it is
@@ -3243,7 +3243,7 @@ assumed that the caller will raise a warning, and this function will
 set C<retlen> to C<-1> and return. If C<checking> is not true, an optional UTF8
 warning is produced.
 
-	U8* s	utf8_to_uv_chk(I32 *retlen, I32 checking)
+	U8* s	utf8_to_uv_chk(STRLEN curlen, I32 *retlen, I32 checking)
 
 =for hackers
 Found in file utf8.c
