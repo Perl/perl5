@@ -2443,6 +2443,25 @@ Remember that "my", "our", and "local" bind tighter than comma.
 (W) You are concatenating the number 19 with another number, which
 could be a potential Year 2000 problem.
 
+=item pragma "attrs" is deprecated, use "sub NAME : ATTRS" instead
+
+(W) You have written somehing like this:
+
+    sub doit
+    {
+        use attrs qw(locked);
+    }
+
+You should use the new declaration syntax instead.
+
+    sub doit : locked
+    {
+        ...
+
+The C<use attrs> pragma is now obsolete, and is only provided for
+backward-compatibility. See L<perlsub/"Subroutine Attributes">.
+
+
 =item Premature end of script headers
 
 See Server error.

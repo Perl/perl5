@@ -646,6 +646,7 @@ package $module;
 
 require 5.005_62;
 use strict;
+use warnings;
 END
 
 unless( $opt_X || $opt_c || $opt_A ){
