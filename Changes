@@ -103,6 +103,101 @@ Version v5.7.0		Development release working toward v5.8
 --------------
 
 ____________________________________________________________________________
+[  6961] By: jhi                                   on 2000/08/31  23:20:04
+        Log: Small tweaks all over.
+     Branch: metaconfig
+	   ! U/compline/d_gconvert.U
+     Branch: perl
+	   ! AUTHORS Configure config_h.SH pp_ctl.c
+____________________________________________________________________________
+[  6960] By: jhi                                   on 2000/08/31  22:39:36
+        Log: Further rewording.
+     Branch: perl
+	   ! pp_ctl.c
+____________________________________________________________________________
+[  6959] By: jhi                                   on 2000/08/31  21:26:44
+        Log: More address tweaking.
+     Branch: perl
+	   ! AUTHORS Changes
+____________________________________________________________________________
+[  6958] By: jhi                                   on 2000/08/31  20:47:25
+        Log: AUTHORS tweaks, from Peter Prymmer.
+             
+             Subject: [PATCH: 6948] mvs doesn't exist (not any more)
+             From: Peter Prymmer <pvhp@forte.com>
+             Date: Thu, 31 Aug 2000 12:56:32 -0700 (PDT) 
+             Message-ID: <Pine.OSF.4.10.10008311248410.91659-100000@aspara.forte.com>
+     Branch: perl
+	   ! AUTHORS MAINTAIN
+____________________________________________________________________________
+[  6957] By: jhi                                   on 2000/08/31  20:34:43
+        Log: perldelta tweaks.
+     Branch: perl
+	   ! pod/perldelta.pod
+____________________________________________________________________________
+[  6956] By: jhi                                   on 2000/08/31  19:11:06
+        Log: Regen perltoc.
+     Branch: perl
+	   ! pod/perltoc.pod
+____________________________________________________________________________
+[  6955] By: jhi                                   on 2000/08/31  19:06:30
+        Log: Clarify the mergesort situation.
+     Branch: perl
+	   ! pp_ctl.c
+____________________________________________________________________________
+[  6954] By: jhi                                   on 2000/08/31  18:24:17
+        Log: Move the Solaris 7 scan to use64bitall, make the
+             failure to find 64-bot sparc libc to mention the
+             possibility of being in an intel, from Lupe and Alan.
+     Branch: perl
+	   ! hints/solaris_2.sh
+____________________________________________________________________________
+[  6953] By: jhi                                   on 2000/08/31  18:09:20
+        Log: Forget about NV_MAX (#6951).  Various floating point tweaks,
+             ideas from Eric Fifer, Yitzchak, Alan, and Spider.
+     Branch: metaconfig
+	   ! U/compline/d_gconvert.U U/threads/archname.U
+     Branch: metaconfig/U/perl
+	   ! perlxv.U
+     Branch: perl
+	   ! Configure config_h.SH sv.c
+____________________________________________________________________________
+[  6952] By: jhi                                   on 2000/08/31  17:42:24
+        Log: :: not allowed in pathnames, change to .
+             
+             Subject: [PATCH perl@6938] cygwin port
+             From: "Fifer, Eric" <EFifer@sanwaint.com>
+             Date: Thu, 31 Aug 2000 16:32:59 +0100
+             Message-ID: <779F20BCCE5AD31186A50008C75D997917179A@silldn_mail1.sanwaint.com>
+     Branch: metaconfig/U/perl
+	   ! perlxv.U
+____________________________________________________________________________
+[  6951] By: jhi                                   on 2000/08/31  17:02:05
+        Log: Try to deduce NV_MAX.  Really should be Configure fodder.
+     Branch: perl
+	   ! perl.h
+____________________________________________________________________________
+[  6950] By: jhi                                   on 2000/08/31  16:26:08
+        Log: More author updates.
+             
+             Subject: Re: [PATCH] Mark-Jason Dominus Does Exist
+             From: Simon Cozens <simon@cozens.net>
+             Date: Thu, 31 Aug 2000 17:13:32 +0100
+             Message-ID: <20000831171332.A22498@deep-dark-truthful-mirror.perlhacker.org>
+     Branch: perl
+	   ! AUTHORS
+____________________________________________________________________________
+[  6949] By: jhi                                   on 2000/08/31  16:04:49
+        Log: POSIX doesn't report long double values under -Duselongdouble
+             when the long doubles are "real" (bigger than doubles).
+     Branch: perl
+	   ! ext/POSIX/POSIX.xs
+____________________________________________________________________________
+[  6948] By: jhi                                   on 2000/08/31  15:25:10
+        Log: Update Changes.
+     Branch: perl
+	   ! Changes patchlevel.h
+____________________________________________________________________________
 [  6947] By: jhi                                   on 2000/08/31  15:22:29
         Log: Document UNTIE in a very minimalistic way.
      Branch: perl
