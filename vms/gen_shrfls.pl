@@ -68,16 +68,17 @@ if ($docc) {
   elsif (-f '[-]perl.h') { $dir = '[-]'; }
   else { die "$0: Can't find perl.h\n"; }
 
-  # Go see if debugging is enabled in config.h
-  $config = $dir . "config.h";
+  # Go see what is enabled in config.sh
+  $config = $dir . "config.sh";
   open CONFIG, "< $config";
   while(<CONFIG>) {
-    $debugging_enabled++ if /define\s+DEBUGGING/;
-    $use_mymalloc++ if /define\s+MYMALLOC/;
-    $hide_mymalloc++ if /define\s+EMBEDMYMALLOC/;
-    $use_threads++ if /define\s+USE_THREADS/;
-    $care_about_case++ if /define\s+VMS_WE_ARE_CASE_SENSITIVE/;
+    $use_threads++ if /usethreads='define'/;
+    $use_mymalloc++ if /usemymalloc='Y'/;
+    $care_about_case++ if /d_vms_case_sensitive_symbols='define'/;
+    $debugging_enabled++ if /usedebugging_perl='Y'/;
+    $hide_mymalloc++ if /embedmymalloc='Y'/;
   }
+  close CONFIG;
   
   # put quotes back onto defines - they were removed by DCL on the way in
   if (($prefix,$defines,$suffix) =
