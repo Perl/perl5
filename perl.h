@@ -1548,8 +1548,11 @@ typedef struct pvop PVOP;
 typedef struct loop LOOP;
 
 typedef struct interpreter PerlInterpreter;
-#ifdef UTS
-#   define STRUCT_SV perl_sv /* Amdahl's <ksync.h> has struct sv */
+
+/* Amdahl's <ksync.h> has struct sv */
+/* SGI's <sys/sema.h> has struct sv */
+#if defined(UTS) || defined(__sgi)
+#   define STRUCT_SV perl_sv
 #else
 #   define STRUCT_SV sv
 #endif
