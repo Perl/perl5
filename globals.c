@@ -14,7 +14,7 @@ Perl_fprintf_nocontext(PerlIO *stream, const char *format, ...)
 int
 Perl_printf_nocontext(const char *format, ...)
 {
-    dTHXs;
+    dTHX;
     va_list(arglist);
     va_start(arglist, format);
     return PerlIO_vprintf(PerlIO_stdout(), format, arglist);

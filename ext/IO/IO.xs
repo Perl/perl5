@@ -55,7 +55,7 @@ not_here(char *s)
 #endif
 
 static int
-io_blocking(InputStream f, int block)
+io_blocking(pTHX_ InputStream f, int block)
 {
     int RETVAL;
     if(!f) {
@@ -261,7 +261,7 @@ io_blocking(handle,blk=-1)
 PROTOTYPE: $;$
 CODE:
 {
-    int ret = io_blocking(handle, items == 1 ? -1 : blk ? 1 : 0);
+    int ret = io_blocking(aTHX_ handle, items == 1 ? -1 : blk ? 1 : 0);
     if(ret >= 0)
 	XSRETURN_IV(ret);
     else
