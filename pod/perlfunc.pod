@@ -2812,18 +2812,24 @@ STDERR:
     print STDOUT "stdout 2\n";
     print STDERR "stderr 2\n";
 
-If you specify C<< '<&=N' >>, where C<N> is a number, then Perl will do an
-equivalent of C's C<fdopen> of that file descriptor; this is more
-parsimonious of file descriptors.  For example:
+If you specify C<< '<&=N' >>, where C<N> is a number, then Perl will
+do an equivalent of C's C<fdopen> of that file descriptor; this is
+more parsimonious of file descriptors.  For example:
 
     open(FILEHANDLE, "<&=$fd")
+
 or
+
     open(FILEHANDLE, "<&=", $fd)
 
-Note that if perl is using the standard C libraries fdopen() then on many UNIX systems,
-fdopen() is known to fail when file descriptors
+Note that if Perl is using the standard C libraries' fdopen() then on
+many UNIX systems, fdopen() is known to fail when file descriptors
 exceed a certain value, typically 255. If you need more file
 descriptors than that, consider rebuilding Perl to use the C<PerlIO>.
+
+You can see whether Perl has been compiled with PerlIO or not by
+running C<perl -V> and looking for C<useperlio=> line.  If C<useperlio>
+is C<define>, you have PerlIO, otherwise you don't.
 
 If you open a pipe on the command C<'-'>, i.e., either C<'|-'> or C<'-|'>
 with 2-arguments (or 1-argument) form of open(), then
