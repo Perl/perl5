@@ -13,6 +13,7 @@
 #	Martijn Koster <m.koster@webcrawler.com>
 #	Richard Yeh <rcyeh@cco.caltech.edu>
 #
+# Use of semctl() can crash system: disable -- Dominic Dunlop 980506
 # Raise stack size further; slight tweaks to accomodate MT 4.1
 #                      -- Dominic Dunlop <domo@computer.org> 980211
 # Raise perl's stack size -- Dominic Dunlop <domo@tcp.ip.lu> 970922
@@ -53,6 +54,9 @@ alignbytes=8
 # friends.  Use setjmp and friends instead.
 expr "$osvers" \< "4.0.3" > /dev/null && d_sigsetjmp='undef'
 
+# semctl(.., ..,  IPC_STATUS, ..) hangs system: say we don't have semctl()
+d_semctl='undef'
+
 # Get rid of some extra libs which it takes Configure a tediously
 # long time never to find on MachTen
 set `echo X "$libswanted "|sed -e 's/ net / /' -e 's/ socket / /' \
@@ -75,11 +79,14 @@ dont_use_nlink=define
 
 cat <<'EOM' >&4
 
-Tests
-	io/fs test 4  and
-	op/stat test 3
-may fail since MachTen may not return a useful nlinks field to stat
-on directories.
+During Configure, you may see the message
+
+*** WHOA THERE!!! ***
+    The recommended value for $d_semctl on this machine was "undef"!
+    Keep the recommended value? [y]
+
+Select the default answer: semctl() is buggy, and perl should be built
+without it.
 
 At the end of Configure, you will see a harmless message
 
@@ -88,5 +95,12 @@ Hmm...You had some extra variables I don't know about...I'll try to keep 'em.
         Propagating recommended variable nmopts
 Read the File::Find documentation for more information about dont_use_nlink
 
+Tests
+	io/fs test 4  and
+	op/stat test 3
+may fail since MachTen may not return a useful nlinks field to stat
+on directories.
+
 EOM
-expr "$osvers" \< "4.1" && test -r ./broken-db.msg && . ./broken-db.msg
+expr "$osvers" \< "4.1" >/dev/null && test -r ./broken-db.msg && \
+    . ./broken-db.msg
