@@ -8,7 +8,7 @@ BEGIN
   $| = 1;
   chdir 't' if -d 't';
   unshift @INC, '../lib'; # for running manually
-  plan tests => 151;
+  plan tests => 159;
   }
 
 # testing of Math::BigRat
@@ -44,6 +44,7 @@ foreach my $func (qw/new bnorm/)
   $x = $cr->$func('0.1/10');	ok ($x,'1/100');
   $x = $cr->$func('0.1/0.1');	ok ($x,'1');
   $x = $cr->$func('1e2/10');	ok ($x,10);
+  $x = $cr->$func('5/1e2');	ok ($x,'1/20');
   $x = $cr->$func('1e2/1e1');	ok ($x,10);
   $x = $cr->$func('1 / 3');	ok ($x,'1/3');
   $x = $cr->$func('-1 / 3');	ok ($x,'-1/3');
@@ -54,6 +55,10 @@ foreach my $func (qw/new bnorm/)
 
   # input ala '1+1/3' isn't parsed ok yet
   $x = $cr->$func('1+1/3');	ok ($x,'NaN');
+  
+  $x = $cr->$func('1/1.2');	ok ($x,'5/6');
+  $x = $cr->$func('1.3/1.2');	ok ($x,'13/12');
+  $x = $cr->$func('1.2/1');	ok ($x,'6/5');
 
   ############################################################################
   # other classes as input

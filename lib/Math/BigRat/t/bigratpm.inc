@@ -2,6 +2,8 @@
 
 ok ($class->config()->{lib},$CL);
 
+$setup = '';
+
 while (<DATA>)
   {
   chomp;
@@ -33,7 +35,8 @@ while (<DATA>)
       {
         $try .= "\$x;";
       } elsif ($f eq "finf") {
-        $try .= "\$x->binf('$args[1]');";
+        my $a = $args[1] || '';
+        $try .= "\$x->binf('$a');";
       } elsif ($f eq "is_inf") {
         $try .= "\$x->is_inf('$args[1]');"; 
       } elsif ($f eq "fone") {
@@ -168,15 +171,53 @@ sub ok_undef
   }
 
 __DATA__
+&as_number
+144/7:20
+NaN:NaN
++inf:inf
+-inf:-inf
+&bmod
+NaN:1:NaN
+1:NaN:NaN
+1:1:0
+2:2:0
+12:6:0
+7/4:4/14:1/28
+7/4:4/16:0
+-7/4:4/16:0
+-7/4:-4/16:0
+7/4:-4/16:0
+7/4:4/32:0
+-7/4:4/32:0
+-7/4:-4/32:0
+7/4:-4/32:0
+7/4:4/28:1/28
+-7/4:4/28:-1/28
+7/4:-4/28:1/28
+-7/4:-4/28:-1/28
+&fsqrt
+1:1
+0:0
+NaN:NaN
++inf:inf
+-inf:NaN
+144:12
+# sqrt(144) / sqrt(4) = 12/2 = 6/1
+144/4:6
+25/16:5/4
+-3:NaN
+&flog
+NaN:NaN
+0:NaN
 &finf
 1:+:inf
 2:-:-inf
 3:abc:inf
-#&numify
+&numify
 #0:0e+1
 #+1:1e+0
 #1234:1234e+0
-#NaN:NaN
+NaN:NaN
 #+inf:inf
 #-inf:-inf
 &fnan

@@ -1,6 +1,6 @@
 #!/usr/bin/perl -w
 
-# check that simple requiring BigInt works
+# check that simple requiring BigRat works
 
 use strict;
 use Test;
@@ -9,7 +9,7 @@ BEGIN
   {
   $| = 1;
   # to locate the testing files
-  my $location = $0; $location =~ s/require.t//i;
+  my $location = $0; $location =~ s/requirer.t//i;
   if ($ENV{PERL_CORE})
     {
     # testing with the core distribution
@@ -33,7 +33,7 @@ BEGIN
 
 my ($x);
 
-require Math::BigInt; $x = Math::BigInt->new(1); ++$x;
+require Math::BigRat; $x = Math::BigRat->new(1); ++$x;
 
 ok ($x||'undef',2);
 

@@ -19,25 +19,30 @@ use strict;
 use Exporter;
 use Math::BigFloat;
 use vars qw($VERSION @ISA $PACKAGE @EXPORT_OK $upgrade $downgrade
-            $accuracy $precision $round_mode $div_scale);
+            $accuracy $precision $round_mode $div_scale $_trap_nan $_trap_inf);
 
 @ISA = qw(Exporter Math::BigFloat);
 @EXPORT_OK = qw();
 
-$VERSION = '0.09';
+$VERSION = '0.10';
 
-use overload;				# inherit from Math::BigFloat
+use overload;			# inherit from Math::BigFloat
 
 ##############################################################################
 # global constants, flags and accessory
-
-use constant MB_NEVER_ROUND => 0x0001;
 
 $accuracy = $precision = undef;
 $round_mode = 'even';
 $div_scale = 40;
 $upgrade = undef;
 $downgrade = undef;
+
+# these are internally, and not to be used from the outside
+
+use constant MB_NEVER_ROUND => 0x0001;
+
+$_trap_nan = 0;                         # are NaNs ok? set w/ config()
+$_trap_inf = 0;                         # are infs ok? set w/ config()
 
 my $nan = 'NaN';
 my $class = 'Math::BigRat';
@@ -60,7 +65,7 @@ sub _new_from_float
 
   $self->{_n} = $f->{_m}->copy();			# mantissa
   $self->{_d} = $MBI->bone();
-  $self->{sign} = $f->{sign}; $self->{_n}->{sign} = '+';
+  $self->{sign} = $f->{sign} || '+'; $self->{_n}->{sign} = '+';
   if ($f->{_e}->{sign} eq '-')
     {
     # something like Math::BigRat->new('0.1');
@@ -94,6 +99,7 @@ sub new
       }
     if ($n->isa('Math::BigInt'))
       {
+      # TODO: trap NaN, inf
       $self->{_n} = $n->copy();				# "mantissa" = $n
       $self->{_d} = $MBI->bone();
       $self->{sign} = $self->{_n}->{sign}; $self->{_n}->{sign} = '+';
@@ -101,9 +107,10 @@ sub new
       }
     if ($n->isa('Math::BigInt::Lite'))
       {
-      $self->{_n} = $MBI->new($$n,undef,undef);		# "mantissa" = $n
+      # TODO: trap NaN, inf
+      $self->{sign} = '+'; $self->{sign} = '-' if $$n < 0;
+      $self->{_n} = $MBI->new(abs($$n),undef,undef);	# "mantissa" = $n
       $self->{_d} = $MBI->bone();
-      $self->{sign} = $self->{_n}->{sign}; $self->{_n}->{sign} = '+';
       return $self->bnorm();
       }
     }
@@ -119,8 +126,8 @@ sub new
   # string input with / delimiter
   if ($n =~ /\s*\/\s*/)
     {
-    return Math::BigRat->bnan() if $n =~ /\/.*\//;	# 1/2/3 isn't valid
-    return Math::BigRat->bnan() if $n =~ /\/\s*$/;	# 1/ isn't valid
+    return $class->bnan() if $n =~ /\/.*\//;	# 1/2/3 isn't valid
+    return $class->bnan() if $n =~ /\/\s*$/;	# 1/ isn't valid
     ($n,$d) = split (/\//,$n);
     # try as BigFloats first
     if (($n =~ /[\.eE]/) || ($d =~ /[\.eE]/))
@@ -131,32 +138,54 @@ sub new
       local $Math::BigFloat::precision = undef;
       local $Math::BigInt::accuracy = undef;
       local $Math::BigInt::precision = undef;
-      $self->_new_from_float(Math::BigFloat->new($n));
+      my $nf = Math::BigFloat->new($n);
+      $self->{sign} = '+';
+      return $self->bnan() if $nf->is_nan();
+      $self->{_n} = $nf->{_m};
       # now correct $self->{_n} due to $n
       my $f = Math::BigFloat->new($d,undef,undef);
-      if ($f->{_e}->{sign} eq '-')
+      $self->{_d} = $f->{_m};
+      return $self->bnan() if $f->is_nan();
+      #print "n=$nf e$nf->{_e} d=$f e$f->{_e}\n";
+      # calculate the difference between nE and dE
+      my $diff_e = $nf->{_e}->copy()->bsub ( $f->{_e} );
+      if ($diff_e->is_negative())
+	{
+        # < 0: mul d with it
+        $self->{_d}->blsft($diff_e->babs(),10);
+	}
+      elsif (!$diff_e->is_zero())
         {
-	# 10 / 0.1 => 100/1
-        $self->{_n}->blsft($f->{_e}->copy()->babs(),10);
+        # > 0: mul n with it
+        $self->{_n}->blsft($diff_e,10);
         }
-      else
-        {
-        $self->{_d}->blsft($f->{_e},10); 		# 1 / 1 => 10/1
-         }
       }
     else
       {
       # both d and n are (big)ints
       $self->{_n} = $MBI->new($n,undef,undef);
       $self->{_d} = $MBI->new($d,undef,undef);
-      return $self->bnan() if $self->{_n}->is_nan() || $self->{_d}->is_nan();
+      $self->{sign} = '+';
+      return $self->bnan() if $self->{_n}->{sign} eq $nan ||
+                              $self->{_d}->{sign} eq $nan;
       # inf handling is missing here
+      if ($self->{_n}->is_inf() || $self->{_d}->is_inf())
+        {
+        # inf/inf => NaN
+        return $self->bnan() if
+	  ($self->{_n}->is_inf() && $self->{_d}->is_inf());
+        # +-inf/123 => +-inf
+        return $self->binf($self->{sign}) if $self->{_n}->is_inf();
+        # 123/inf => 0
+        return $self->bzero();
+        }
  
-      $self->{sign} = $self->{_n}->{sign}; $self->{_n}->{sign} = '+';
+      $self->{sign} = $self->{_n}->{sign}; $self->{_n}->babs();
       # if $d is negative, flip sign
       $self->{sign} =~ tr/+-/-+/ if $self->{_d}->{sign} eq '-';
-      $self->{_d}->{sign} = '+';	# normalize
+      $self->{_d}->babs();				# normalize
       }
+
     return $self->bnorm();
     }
 
@@ -169,20 +198,36 @@ sub new
     local $Math::BigFloat::precision = undef;
     local $Math::BigInt::accuracy = undef;
     local $Math::BigInt::precision = undef;
+    $self->{sign} = 'NaN';
     $self->_new_from_float(Math::BigFloat->new($n,undef,undef));
     }
   else
     {
     $self->{_n} = $MBI->new($n,undef,undef);
     $self->{_d} = $MBI->bone();
-    $self->{sign} = $self->{_n}->{sign}; $self->{_n}->{sign} = '+';
+    $self->{sign} = $self->{_n}->{sign}; $self->{_n}->babs();
     return $self->bnan() if $self->{sign} eq 'NaN';
     return $self->binf($self->{sign}) if $self->{sign} =~ /^[+-]inf$/;
     }
   $self->bnorm();
   }
 
-###############################################################################
+##############################################################################
+
+sub config
+  {
+  # return (later set?) configuration data as hash ref
+  my $class = shift || 'Math::BigFloat';
+
+  my $cfg = $class->SUPER::config(@_);
+
+  # now we need only to override the ones that are different from our parent
+  $cfg->{class} = $class;
+  $cfg->{with} = $MBI;
+  $cfg;
+  }
+
+##############################################################################
 
 sub bstr
   {
@@ -220,11 +265,15 @@ sub bnorm
   # don't reduce again)
   my ($self,$x) = ref($_[0]) ? (ref($_[0]),$_[0]) : objectify(1,@_);
 
-  # both parts must be BigInt's
-  die ("n is not $MBI but (".ref($x->{_n}).')')
-    if ref($x->{_n}) ne $MBI;
-  die ("d is not $MBI but (".ref($x->{_d}).')')
-    if ref($x->{_d}) ne $MBI;
+  # both parts must be BigInt's (or whatever we are using today)
+  if (ref($x->{_n}) ne $MBI)
+    {
+    require Carp; Carp::croak ("n is not $MBI but (".ref($x->{_n}).')');
+    }
+  if (ref($x->{_d}) ne $MBI)
+    {
+    require Carp; Carp::croak ("d is not $MBI but (".ref($x->{_d}).')');
+    }
 
   # this is to prevent automatically rounding when MBI's globals are set
   $x->{_d}->{_f} = MB_NEVER_ROUND;
@@ -267,8 +316,15 @@ sub bnorm
 
 sub _bnan
   {
-  # used by parent class bone() to initialize number to 1
+  # used by parent class bnan() to initialize number to NaN
   my $self = shift;
+
+  if ($_trap_nan)
+    {
+    require Carp;
+    my $class = ref($self);
+    Carp::croak ("Tried to set $self to NaN in $class\::_bnan()");
+    }
   $self->{_n} = $MBI->bzero();
   $self->{_d} = $MBI->bzero();
   }
@@ -277,6 +333,13 @@ sub _binf
   {
   # used by parent class bone() to initialize number to +inf/-inf
   my $self = shift;
+
+  if ($_trap_inf)
+    {
+    require Carp;
+    my $class = ref($self);
+    Carp::croak ("Tried to set $self to inf in $class\::_binf()");
+    }
   $self->{_n} = $MBI->bzero();
   $self->{_d} = $MBI->bzero();
   }
@@ -291,7 +354,7 @@ sub _bone
 
 sub _bzero
   {
-  # used by parent class bone() to initialize number to 0
+  # used by parent class bzero() to initialize number to 0
   my $self = shift;
   $self->{_n} = $MBI->bzero();
   $self->{_d} = $MBI->bone();
@@ -357,6 +420,7 @@ sub bsub
     ($self,$x,$y,@r) = objectify(2,@_);
     }
 
+  # TODO: $self instead or $class??
   $x = $class->new($x) unless $x->isa($class);
   $y = $class->new($y) unless $y->isa($class);
 
@@ -400,6 +464,7 @@ sub bmul
     ($self,$x,$y,@r) = objectify(2,@_);
     }
 
+  # TODO: $self instead or $class??
   $x = $class->new($x) unless $x->isa($class);
   $y = $class->new($y) unless $y->isa($class);
 
@@ -451,6 +516,7 @@ sub bdiv
     ($self,$x,$y,@r) = objectify(2,@_);
     }
 
+  # TODO: $self instead or $class??
   $x = $class->new($x) unless $x->isa($class);
   $y = $class->new($y) unless $y->isa($class);
 
@@ -473,6 +539,62 @@ sub bdiv
 
   # compute new sign 
   $x->{sign} = $x->{sign} eq $y->{sign} ? '+' : '-';
+
+  $x->bnorm()->round(@r);
+  $x;
+  }
+
+sub bmod
+  {
+  # compute "remainder" (in Perl way) of $x / $y
+
+  # set up parameters
+  my ($self,$x,$y,@r) = (ref($_[0]),@_);
+  # objectify is costly, so avoid it
+  if ((!ref($_[0])) || (ref($_[0]) ne ref($_[1])))
+    {
+    ($self,$x,$y,@r) = objectify(2,@_);
+    }
+
+  # TODO: $self instead or $class??
+  $x = $class->new($x) unless $x->isa($class);
+  $y = $class->new($y) unless $y->isa($class);
+
+  return $self->_div_inf($x,$y)
+   if (($x->{sign} !~ /^[+-]$/) || ($y->{sign} !~ /^[+-]$/) || $y->is_zero());
+
+  return $self->_div_inf($x,$y)
+   if (($x->{sign} !~ /^[+-]$/) || ($y->{sign} !~ /^[+-]$/) || $y->is_zero());
+
+  return $x if $x->is_zero();           # 0 / 7 = 0, mod 0
+
+  # compute $x - $y * floor($x/$y), keeping the sign of $x
+
+  local $Math::BigInt::upgrade = undef;
+  local $Math::BigInt::accuracy = undef;
+  local $Math::BigInt::precision = undef;
+
+  my $u = $x->copy()->babs();
+  # do a "normal" division ($x/$y)
+  $u->{_d}->bmul($y->{_n});
+  $u->{_n}->bmul($y->{_d});
+
+  # compute floor
+  if (!$u->{_d}->is_one())
+    {
+    $u->{_n}->bdiv($u->{_d});			# 22/7 => 3/1 w/ truncate
+    # no need to set $u->{_d} to 1, since later we set it to $y->{_d}
+    #$x->{_n}->binc() if $x->{sign} eq '-';	# -22/7 => -4/1
+    }
+  
+  # compute $y * $u
+  $u->{_d} = $y->{_d};			# 1 * $y->{_d}, see floor above
+  $u->{_n}->bmul($y->{_n});
+
+  my $xsign = $x->{sign}; $x->{sign} = '+';	# remember sign and make abs
+  # compute $x - $u
+  $x->bsub($u);
+  $x->{sign} = $xsign;				# put sign back
 
   $x->bnorm()->round(@r);
   $x;
@@ -648,6 +770,9 @@ sub bceil
   return $x unless $x->{sign} =~ /^[+-]$/;
   return $x if $x->{_d}->is_one();		# 22/1 => 22, 0/1 => 0
 
+  local $Math::BigInt::upgrade = undef;
+  local $Math::BigInt::accuracy = undef;
+  local $Math::BigInt::precision = undef;
   $x->{_n}->bdiv($x->{_d});			# 22/7 => 3/1 w/ truncate
   $x->{_d}->bone();
   $x->{_n}->binc() if $x->{sign} eq '+';	# +22/7 => 4/1
@@ -662,6 +787,9 @@ sub bfloor
   return $x unless $x->{sign} =~ /^[+-]$/;
   return $x if $x->{_d}->is_one();		# 22/1 => 22, 0/1 => 0
 
+  local $Math::BigInt::upgrade = undef;
+  local $Math::BigInt::accuracy = undef;
+  local $Math::BigInt::precision = undef;
   $x->{_n}->bdiv($x->{_d});			# 22/7 => 3/1 w/ truncate
   $x->{_d}->bone();
   $x->{_n}->binc() if $x->{sign} eq '-';	# -22/7 => -4/1
@@ -767,12 +895,39 @@ sub blog
 
 sub bsqrt
   {
-  my ($self,$x,$a,$p,$r) = ref($_[0]) ? (ref($_[0]),$_[0]) : objectify(1,@_);
+  my ($self,$x,@r) = ref($_[0]) ? (ref($_[0]),@_) : objectify(1,@_);
 
-  return $x->bnan() if $x->{sign} ne '+';	# inf, NaN, -1 etc
-  $x->{_d}->bsqrt($a,$p,$r);
-  $x->{_n}->bsqrt($a,$p,$r);
-  $x->bnorm();
+  return $x->bnan() if $x->{sign} !~ /^[+]/;    # NaN, -inf or < 0
+  return $x if $x->{sign} eq '+inf';            # sqrt(inf) == inf
+  return $x->round(@r) if $x->is_zero() || $x->is_one();
+
+  local $Math::BigFloat::upgrade = undef;
+  local $Math::BigFloat::downgrade = undef;
+  local $Math::BigFloat::precision = undef;
+  local $Math::BigFloat::accuracy = undef;
+  local $Math::BigInt::upgrade = undef;
+  local $Math::BigInt::precision = undef;
+  local $Math::BigInt::accuracy = undef;
+  $x->{_d} = Math::BigFloat->new($x->{_d})->bsqrt(@r);
+  $x->{_n} = Math::BigFloat->new($x->{_n})->bsqrt(@r);
+
+  # if sqrt(D) was not integer
+  if ($x->{_d}->{_e}->{sign} ne '+')
+    {
+    $x->{_n}->blsft($x->{_d}->{_e}->babs(),10);		# 7.1/4.51 => 7.1/45.1
+    $x->{_d} = $x->{_d}->{_m};				# 7.1/45.1 => 71/45.1
+    }
+  # if sqrt(N) was not integer
+  if ($x->{_n}->{_e}->{sign} ne '+')
+    {
+    $x->{_d}->blsft($x->{_n}->{_e}->babs(),10);		# 71/45.1 => 710/45.1
+    $x->{_n} = $x->{_n}->{_n};				# 710/45.1 => 710/451
+    }
+ 
+  # convert parts to $MBI again 
+  $x->{_n} = $x->{_n}->as_number();
+  $x->{_d} = $x->{_d}->as_number();
+  $x->bnorm()->round(@r);
   }
 
 sub blsft
@@ -879,7 +1034,12 @@ sub as_number
   {
   my ($self,$x) = ref($_[0]) ? (ref($_[0]),$_[0]) : objectify(1,@_);
 
-  return $x if $x->{sign} !~ /^[+-]$/;			# NaN, inf etc 
+  return $x if $x->{sign} !~ /^[+-]$/;			# NaN, inf etc
+ 
+  # need to disable these, otherwise bdiv() gives BigRat again
+  local $Math::BigInt::upgrade = undef;
+  local $Math::BigInt::accuracy = undef;
+  local $Math::BigInt::precision = undef;
   my $t = $x->{_n}->copy()->bdiv($x->{_d});		# 22/7 => 3
   $t->{sign} = $x->{sign};
   $t;
@@ -1058,7 +1218,7 @@ BigInts.
 	$x = Math::BigRat->new('13/7');
 	print $x->as_number(),"\n";		# '1'
 
-Returns a copy of the object as BigInt by truncating it to integer.
+Returns a copy of the object as BigInt trunced it to integer.
 
 =head2 bfac()
 
@@ -1078,6 +1238,15 @@ Is not yet implemented.
 =head2 bround()/round()/bfround()
 
 Are not yet implemented.
+
+=head2 bmod()
+
+	use Math::BigRat;
+	my $x = Math::BigRat->new('7/4');
+	my $y = Math::BigRat->new('4/3');
+	print $x->bmod($y);
+
+Set $x to the remainder of the division of $x by $y.
 
 =head2 is_one()
 
@@ -1136,6 +1305,49 @@ and then increment it by one).
 	$x->bfloor();
 
 Truncate $x to an integer value.
+
+=head2 config
+
+        use Data::Dumper;
+
+        print Dumper ( Math::BigRat->config() );
+        print Math::BigRat->config()->{lib},"\n";
+
+Returns a hash containing the configuration, e.g. the version number, lib
+loaded etc. The following hash keys are currently filled in with the
+appropriate information.
+
+        key             RO/RW   Description
+                                Example
+        ============================================================
+        lib             RO      Name of the Math library
+                                Math::BigInt::Calc
+        lib_version     RO      Version of 'lib'
+                                0.30
+        class           RO      The class of config you just called
+                                Math::BigRat
+        version         RO      version number of the class you used
+                                0.10
+        upgrade         RW      To which class numbers are upgraded
+                                undef
+        downgrade       RW      To which class numbers are downgraded
+                                undef
+        precision       RW      Global precision
+                                undef
+        accuracy        RW      Global accuracy
+                                undef
+        round_mode      RW      Global round mode
+                                even
+        div_scale       RW      Fallback acccuracy for div
+                                40
+        trap_nan        RW      Trap creation of NaN (undef = no)
+                                undef
+        trap_inf        RW      Trap creation of +inf/-inf (undef = no)
+                                undef
+
+By passing a reference to a hash you may set the configuration values. This
+works only for values that a marked with a C<RW> above, anything else is
+read-only.
 
 =head1 BUGS
 
