@@ -263,7 +263,7 @@ available.   Replace any occurrence of C<if BLOCK> by C<if (do BLOCK)>.
 
 =head2 For Loops
 
-Perl's C-style C<for> loop works exactly like the corresponding C<while> loop;
+Perl's C-style C<for> loop works like the corresponding C<while> loop;
 that means that this:
 
     for ($i = 1; $i < 10; $i++) {
@@ -279,8 +279,10 @@ is the same as this:
 	$i++;
     }
 
-(There is one minor difference: The first form implies a lexical scope
-for variables declared with C<my> in the initialization expression.)
+There is one minor difference: if variables are declared with C<my>
+in the initialization section of the C<for>, the lexical scope of
+those variables is exactly the C<for> loop (the body of the loop
+and the control sections).
 
 Besides the normal array index looping, C<for> can lend itself
 to many other interesting applications.  Here's one that avoids the
