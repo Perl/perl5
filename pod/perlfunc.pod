@@ -2602,6 +2602,12 @@ parsimonious of file descriptors.  For example:
 
     open(FILEHANDLE, "<&=$fd")
 
+Note that this feature depends on the fdopen() C library function.
+On many UNIX systems, fdopen() is known to fail when file descriptors
+exceed a certain value, typically 255. If you need more file
+descriptors than that, consider rebuilding Perl to use the C<sfio>
+library.
+
 If you open a pipe on the command C<'-'>, i.e., either C<'|-'> or C<'-|'>
 with 2-arguments (or 1-argument) form of open(), then
 there is an implicit fork done, and the return value of open is the pid
@@ -4528,8 +4534,7 @@ For historical reasons, some values work on almost every system
 supported by perl: zero means read-only, one means write-only, and two
 means read/write.  We know that these values do I<not> work under
 OS/390 & VM/ESA Unix and on the Macintosh; you probably don't want to
-se them in new code, use thhe constants discussed in the preceding
-paragraph.
+use them in new code.
 
 If the file named by FILENAME does not exist and the C<open> call creates
 it (typically because MODE includes the C<O_CREAT> flag), then the value of
@@ -4549,6 +4554,12 @@ You should seldom if ever use C<0644> as argument to C<sysopen>, because
 that takes away the user's option to have a more permissive umask.
 Better to omit it.  See the perlfunc(1) entry on C<umask> for more
 on this.
+
+Note that C<sysopen> depends on the fdopen() C library function.
+On many UNIX systems, fdopen() is known to fail when file descriptors
+exceed a certain value, typically 255. If you need more file
+descriptors than that, consider rebuilding Perl to use the C<sfio>
+library, or perhaps using the POSIX::open() function.
 
 See L<perlopentut> for a kinder, gentler explanation of opening files.
 
