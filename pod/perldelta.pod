@@ -215,6 +215,20 @@ C<5.005 threads are deprecated>.  If you really want to continue using
 
     no warnings 'deprecated';
 
+=head2 Version Strings (v-strings) Are Deprecated
+
+Version Strings (v-strings) have been deprecated.  They will not be
+available after Perl 5.8.  The marginal benefits of v-strings were
+greatly outweighed by the potential for Surprise and Confusion.
+
+=head2 The $* variable Is Deprecated
+
+The C<$*> variable controlling multi-line matching has been
+deprecated.  It will not be available after Perl 5.8.  The variable
+has been deprecated for a long time, now it will just finally be
+removed.  The functionality has been supplanted by the C</s> and
+C</m> modifiers on pattern matching.
+
 =head1 Modules and Pragmata
 
 =head2 Updated Modules
