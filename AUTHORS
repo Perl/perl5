@@ -8,8 +8,8 @@
 # diff -u or diff -c between the original and a corrected version of this file.
 #
 # The use of this database for anything else than Perl development
-# (and of course passive distribution with the Perl source code kit)
-# is strictly forbidden.
+# is strictly forbidden.  (Passive distribution with the Perl source
+# code kit is naturally allowed.)
 -- 
 A. C. Yardley                  <yardley@tanet.net>
 Aaron B. Dossett               <aaron@iglou.com>
