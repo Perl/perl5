@@ -551,7 +551,13 @@ PP(pp_formline)
 	    if (item_is_utf) {
 		while (arg--) {
 		    if (UTF8_IS_CONTINUED(*s)) {
-			switch (UTF8SKIP(s)) {
+			STRLEN skip = UTF8SKIP(s);
+			switch (skip) {
+			default:
+			    Move(s,t,skip,char);
+			    s += skip;
+			    t += skip;
+			    break;
 			case 7: *t++ = *s++;
 			case 6: *t++ = *s++;
 			case 5: *t++ = *s++;

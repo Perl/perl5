@@ -2978,7 +2978,7 @@ Perl_sv_utf8_upgrade(pTHX_ register SV *sv)
     e = (U8 *) SvEND(sv);
     t = s;
     while (t < e) {
-	if ((hibit = UTF8_IS_CONTINUED(NATIVE_TO_ASCII(*t++))))
+	if ((hibit = !UTF8_IS_INVARIANT(*t++)))
 	    break;
     }
     if (hibit) {
@@ -3097,8 +3097,8 @@ bool
 Perl_sv_utf8_decode(pTHX_ register SV *sv)
 {
     if (SvPOK(sv)) {
-        char *c;
-        char *e;
+        U8 *c;
+        U8 *e;
 
 	/* The octets may have got themselves encoded - get them back as bytes */
         if (!sv_utf8_downgrade(sv, TRUE))
@@ -3107,12 +3107,12 @@ Perl_sv_utf8_decode(pTHX_ register SV *sv)
         /* it is actually just a matter of turning the utf8 flag on, but
          * we want to make sure everything inside is valid utf8 first.
          */
-        c = SvPVX(sv);
-	if (!is_utf8_string((U8*)c, SvCUR(sv)+1))
+        c = (U8 *) SvPVX(sv);
+	if (!is_utf8_string(c, SvCUR(sv)+1))
 	    return FALSE;
-        e = SvEND(sv);
+        e = (U8 *) SvEND(sv);
         while (c < e) {
-            if (UTF8_IS_CONTINUED(*c++)) {
+            if (!UTF8_IS_INVARIANT(*c++)) {
 		SvUTF8_on(sv);
 		break;
 	    }
@@ -7127,7 +7127,7 @@ Perl_sv_vcatpvfn(pTHX_ SV *sv, const char *pat, STRLEN patlen, va_list *args, SV
 
 	case 'c':
 	    uv = args ? va_arg(*args, int) : SvIVx(argsv);
-	    if ((uv > 255 || (uv > 127 && SvUTF8(sv))) && !IN_BYTE) {
+	    if ((uv > 255 || (!UTF8_IS_INVARIANT(uv) && SvUTF8(sv))) && !IN_BYTE) {
 		eptr = (char*)utf8buf;
 		elen = uvchr_to_utf8((U8*)eptr, uv) - utf8buf;
 		is_utf = TRUE;
