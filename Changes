@@ -9,6 +9,92 @@ releases.)
 
 
 ----------------
+Version 5.003_17
+----------------
+
+The rate of patches is slowing down....  I see 5.004 at the end of the
+tunnel!  (Hey, what's that whistle?)
+
+ CORE LANGUAGE CHANGES
+
+  Title:  "Support named closures"
+   From:  Chip Salzenberg <chip@atlantic.net>
+  Files:  cv.h op.c perl.c pp.c pp_ctl.c pp_hot.c
+
+ CORE PORTABILITY
+
+  Title:  "perl5.003_15 and Interactive Unix"
+   From:  win@in.rhein-main.de (Winfried Koenig)
+ Msg-ID:  <m0vd254-0004oKC@incom.rhein-main.de>
+   Date:  Thu, 26 Dec 1996 00:45:45 +0200 (EET)
+  Files:  hints/isc.sh pp_sys.c
+
+  Title:  "Suggest "usemymalloc='n'" for FreeBSD 2.*"
+   From:  rse@engelschall.com (Ralf S. Engelschall)
+  Files:  hints/freebsd.sh
+
+  Title:  "Minor OS/2 fixes"
+   From:  Ilya Zakharevich <ilya@math.ohio-state.edu>
+ Msg-ID:  <199612252105.QAA11890@monk.mps.ohio-state.edu>
+   Date:  Wed, 25 Dec 1996 16:05:42 -0500 (EST)
+  Files:  os2/os2ish.h pod/perlxstut.pod
+
+ OTHER CORE CHANGES
+
+  Title:  "Fix {,un}tainting of $1 etc. when C<use locale>"
+   From:  Chip Salzenberg <chip@atlantic.net>
+  Files:  mg.c sv.c
+
+  Title:  "Limit effects of "=pod" to a single file"
+   From:  Chip Salzenberg <chip@atlantic.net>
+  Files:  toke.c
+
+ TESTS
+
+  Title:  "New tests: op/method.t and op/locale.t"
+   From:  Ilya Zakharevich and Jarkko Hietaniemi
+  Files:  MANIFEST t/lib/locale.t t/op/method.t
+
+  Title:  "Test C< ()=() >"
+   From:  Chip Salzenberg <chip@atlantic.net>
+  Files:  t/op/misc.t
+
+ LIBRARY AND EXTENSIONS
+
+  Title:  "Refresh MakeMaker to 5.39"
+   From:  Andreas Koenig <k@anna.in-berlin.de>
+  Files:  lib/ExtUtils/Install.pm lib/ExtUtils/Liblist.pm
+          lib/ExtUtils/MM_Unix.pm lib/ExtUtils/MakeMaker.pm
+          lib/ExtUtils/Mksymlists.pm
+
+  Title:  "Newer debugger"
+   From:  Ilya Zakharevich <ilya@math.ohio-state.edu>
+ Msg-ID:  <199612261954.OAA12999@monk.mps.ohio-state.edu>
+   Date:  Thu, 26 Dec 1996 14:54:34 -0500 (EST)
+  Files:  lib/perl5db.pl
+
+ DOCUMENTATION
+
+  Title:  "Perlguts, version 27"
+   From:  Jeff Okamoto <okamoto@hpcc123.corp.hp.com>
+ Msg-ID:  <199612250144.AA059528263@hpcc123.corp.hp.com>
+   Date:  Tue, 24 Dec 1996 17:44:23 -0800
+  Files:  pod/perlguts.pod
+
+  Title:  "perlpod.pod patch for _16"
+   From:  Kenneth Albanowski <kjahds@kjahds.com>
+ Msg-ID:  <Pine.LNX.3.93.961224225906.337B-100000@kjahds.com>
+   Date:  Tue, 24 Dec 1996 23:00:10 -0500 (EST)
+  Files:  pod/perlpod.pod
+
+  Title:  "tiny perllocale.pod diff for _16"
+   From:  Jarkko Hietaniemi <jhi@cc.hut.fi>
+ Msg-ID:  <199612261306.PAA21161@alpha.hut.fi>
+   Date:  Thu, 26 Dec 1996 15:06:04 +0200 (EET)
+  Files:  pod/perllocale.pod
+
+
+----------------
 Version 5.003_16
 ----------------
 
