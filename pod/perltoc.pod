@@ -1996,6 +1996,10 @@ to enable a few features
 
 =item Effects of character semantics
 
+=item Scripts
+
+=item Blocks
+
 =item Character encodings for input and output
 
 =back
@@ -3911,15 +3915,15 @@ PUTBACK, Renew, Renewc, require_pv, RETVAL, Safefree, savepv, savepvn,
 SAVETMPS, SP, SPAGAIN, ST, strEQ, strGE, strGT, strLE, strLT, strNE,
 strnEQ, strnNE, StructCopy, SvCUR, SvCUR_set, SvEND, SvGETMAGIC, SvGROW,
 SvIOK, SvIOKp, SvIOK_notUV, SvIOK_off, SvIOK_on, SvIOK_only, SvIOK_only_UV,
-SvIOK_UV, SvIV, SvIVx, SvIVX, SvLEN, SvNIOK, SvNIOKp, SvNIOK_off, SvNOK,
-SvNOKp, SvNOK_off, SvNOK_on, SvNOK_only, SvNV, SvNVX, SvNVx, SvOK, SvOOK,
+SvIOK_UV, SvIV, SvIVX, SvIVx, SvLEN, SvNIOK, SvNIOKp, SvNIOK_off, SvNOK,
+SvNOKp, SvNOK_off, SvNOK_on, SvNOK_only, SvNV, SvNVx, SvNVX, SvOK, SvOOK,
 SvPOK, SvPOKp, SvPOK_off, SvPOK_on, SvPOK_only, SvPOK_only_UTF8, SvPV,
 SvPVbyte, SvPVbytex, SvPVbytex_force, SvPVbyte_force, SvPVbyte_nolen,
 SvPVutf8, SvPVutf8x, SvPVutf8x_force, SvPVutf8_force, SvPVutf8_nolen,
-SvPVx, SvPVX, SvPV_force, SvPV_force_nomg, SvPV_nolen, SvREFCNT,
+SvPVX, SvPVx, SvPV_force, SvPV_force_nomg, SvPV_nolen, SvREFCNT,
 SvREFCNT_dec, SvREFCNT_inc, SvROK, SvROK_off, SvROK_on, SvRV, SvSETMAGIC,
 SvSetMagicSV, SvSetMagicSV_nosteal, SvSetSV, SvSetSV_nosteal, SvSTASH,
-SvTAINT, SvTAINTED, SvTAINTED_off, SvTAINTED_on, SvTRUE, SvTYPE, svtype,
+SvTAINT, SvTAINTED, SvTAINTED_off, SvTAINTED_on, SvTRUE, svtype, SvTYPE,
 SVt_IV, SVt_NV, SVt_PV, SVt_PVAV, SVt_PVCV, SVt_PVHV, SVt_PVMG, SvUOK,
 SvUPGRADE, SvUTF8, SvUTF8_off, SvUTF8_on, SvUV, SvUVX, SvUVx, sv_2bool,
 sv_2cv, sv_2io, sv_2iv, sv_2mortal, sv_2nv, sv_2pvbyte, sv_2pvbyte_nolen,
@@ -4089,7 +4093,7 @@ PerlIO_apply_layers(f,mode,layers), PerlIO_binmode(f,ptype,imode,layers),
 
 =item Eliminate need for "use utf8";
 
-=item Create a char *sv_printify(sv, STRLEN *lenp, UV flags)
+=item Create a char *sv_pvprintify(sv, STRLEN *lenp, UV flags)
 
 =item Autoload byte.pm
 
@@ -4198,6 +4202,8 @@ PerlIO_apply_layers(f,mode,layers), PerlIO_binmode(f,ptype,imode,layers),
 =item All ARGV input should act like E<lt>E<gt>
 
 =item Support for rerunning debugger
+
+=item Test Suite for the Debugger
 
 =item my sub foo { }
 
@@ -4585,6 +4591,8 @@ I<The Road goes ever on and on, down from the door where it began.>
 
 =item Socket Extension Dynamic in VMS
 
+=item Different Definition of the Unicode Character Classes \p{In...}
+
 =item Deprecations
 
 =back
@@ -4658,6 +4666,8 @@ I<The Road goes ever on and on, down from the door where it began.>
 =item  HP-UX lib/posix Subtest 9 Fails When LP64-Configured
 
 =item Linux With Sfio Fails op/misc Test 48
+
+=item OS/390
 
 =item op/sprintf tests 129 and 130
 
@@ -12748,28 +12758,6 @@ hostfqdn (), hostname (), hostdomain ()
 
 =back
 
-=head2 Net::DummyInetd - A dummy Inetd server
-
-=over 4
-
-=item SYNOPSIS
-
-=item DESCRIPTION
-
-=item CONSTRUCTOR
-
-new ( CMD )
-
-=item METHODS
-
-port
-
-=item AUTHOR
-
-=item COPYRIGHT
-
-=back
-
 =head2 Net::FTP - FTP Client class
 
 =over 4
@@ -12876,36 +12864,6 @@ MESSAGE-SPEC, PATTERN, Examples, C<[^]-]>, C<*bdc>, C<[0-9a-zA-Z]>, C<a??d>
 
 =back
 
-=head2 Net::PH - CCSO Nameserver Client class
-
-=over 4
-
-=item SYNOPSIS
-
-=item DESCRIPTION
-
-=item CONSTRUCTOR
-
-new ( [ HOST ] [, OPTIONS ])
-
-=item METHODS
-
-query( SEARCH [, RETURN ] ), change( SEARCH , MAKE ), login( USER, PASS [,
-ENCRYPT ]), logout(), fields( [ FIELD_LIST ] ), add( FIELD_VALUES ),
-delete( FIELD_VALUES ), id( [ ID ] ), status(), siteinfo(), quit()
-
-=item Q&A
-
-=item SEE ALSO
-
-=item AUTHORS
-
-=item ACKNOWLEDGMENTS
-
-=item COPYRIGHT
-
-=back
-
 =head2 Net::POP3 - Post Office Protocol 3 Client class (RFC1081)
 
 =over 4
@@ -12981,36 +12939,6 @@ OPTIONS] ), send ( ADDRESS ), send_or_mail ( ADDRESS ), send_and_mail (
 ADDRESS ), reset (), recipient ( ADDRESS [, ADDRESS [ ...]] [, OPTIONS ] ),
 to ( ADDRESS [, ADDRESS [...]] ), data ( [ DATA ] ), expand ( ADDRESS ),
 verify ( ADDRESS ), help ( [ $subject ] ), quit ()
-
-=item SEE ALSO
-
-=item AUTHOR
-
-=item COPYRIGHT
-
-=back
-
-=head2 Net::SNPP - Simple Network Pager Protocol Client
-
-=over 4
-
-=item SYNOPSIS
-
-=item NOTE
-
-=item DESCRIPTION
-
-=item EXAMPLES
-
-=item CONSTRUCTOR
-
-new ( [ HOST, ] [ OPTIONS ] )
-
-=item METHODS
-
-reset (), help (), quit ()
-
-=item EXPORTS
 
 =item SEE ALSO
 
@@ -15761,6 +15689,20 @@ VAL, TYPE ), UNIVERSAL::can ( VAL, METHOD )
 =back
 
 =over 4
+
+=item charscript
+
+=back
+
+=over 4
+
+=item charblock versus charscript
+
+=back
+
+=over 4
+
+=item IMPLEMENTATION NOTE
 
 =item AUTHOR
 
