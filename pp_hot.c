@@ -1569,6 +1569,16 @@ Perl_do_readline(pTHX)
 	    MAYBE_TAINT_LINE(io, sv);
 	    RETURN;
 	}
+	if (SvUTF8(sv)) {
+	     U8 *f;
+
+	     if (ckWARN(WARN_UTF8) &&
+		 !Perl_is_utf8_string_loc(aTHX_ (U8*)SvPVX(sv), SvCUR(sv), &f))
+		  /* Emulate :encoding(utf8) warning in the same case. */
+		  Perl_warner(aTHX_ packWARN(WARN_UTF8),
+			      "utf8 \"\\x%02X\" does not map to Unicode",
+			      f < (U8*)SvEND(sv) ? *f : 0);
+	}
 	MAYBE_TAINT_LINE(io, sv);
 	IoLINES(io)++;
 	IoFLAGS(io) |= IOf_NOLINE;
