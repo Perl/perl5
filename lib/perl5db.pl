@@ -898,7 +898,7 @@ sub eval {
 #   + Added comments and reformatted source. No bug fixes/enhancements.
 #   + Includes cleanup by Robin Barker and Jarkko Hietaniemi.
 # Changes: 1.22  Jun 09, 2003 Alex Vandiver <alexmv@MIT.EDU>
-    + Flush stdout/stderr before the debugger prompt is printed.
+#   + Flush stdout/stderr before the debugger prompt is printed.
 
 ####################################################################
 
