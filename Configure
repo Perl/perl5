@@ -20,7 +20,7 @@
 
 # $Id: Head.U,v 3.0.1.9 1997/02/28 15:02:09 ram Exp $
 #
-# Generated on Wed Aug  2 03:07:08 EET DST 2000 [metaconfig 3.0 PL70]
+# Generated on Fri Aug  4 03:54:52 EET DST 2000 [metaconfig 3.0 PL70]
 # (with additional metaconfig patches by perlbug@perl.com)
 
 cat >/tmp/c1$$ <<EOF
@@ -14528,8 +14528,9 @@ $osname
 EOSH
 ./tr '[a-z]' '[A-Z]' < Cppsym.know > Cppsym.a
 ./tr '[A-Z]' '[a-z]' < Cppsym.know > Cppsym.b
-$cat Cppsym.a Cppsym.b | $tr ' ' $trnl | sort | uniq > Cppsym.know
-$rm -f Cppsym.a Cppsym.b
+$cat Cppsym.know > Cppsym.c
+$cat Cppsym.a Cppsym.b Cppsym.c | $tr ' ' $trnl | sort | uniq > Cppsym.know
+$rm -f Cppsym.a Cppsym.b Cppsym.c
 cat <<EOSH > Cppsym
 $startsh
 if $test \$# -gt 0; then
@@ -14568,6 +14569,7 @@ cat <<EOSH >> Cppsym.try
 ccflags="$ccflags"
 case "$osname-$gccversion" in
 irix-) ccflags="\$ccflags -woff 1178" ;;
+os2-*) ccflags="\$ccflags -Zlinker /PM:VIO" ;;
 esac
 $cc $optimize \$ccflags $ldflags -o try try.c $libs && ./try$exe_ext
 EOSH
@@ -14623,7 +14625,7 @@ if $test -z ccsym.raw; then
 else
 	if $test -s ccsym.com; then
 		echo "Your C compiler and pre-processor define these symbols:"
-		$sed -e 's/\(.*\)=.*/\1/' ccsym.com
+		$sed -e 's/\(..*\)=.*/\1/' ccsym.com
 		also='also '
 		symbols='ones'
 		cppccsymbols=`$cat ccsym.com`
@@ -14633,7 +14635,7 @@ else
 	if $test -s ccsym.cpp; then
 		$test "$also" && echo " "
 		echo "Your C pre-processor ${also}defines the following symbols:"
-		$sed -e 's/\(.*\)=.*/\1/' ccsym.cpp
+		$sed -e 's/\(..*\)=.*/\1/' ccsym.cpp
 		also='further '
 		cppsymbols=`$cat ccsym.cpp`
 		cppsymbols=`echo $cppsymbols`
@@ -14642,14 +14644,14 @@ else
 	if $test -s ccsym.own; then
 		$test "$also" && echo " "
 		echo "Your C compiler ${also}defines the following cpp symbols:"
-		$sed -e 's/\(.*\)=1/\1/' ccsym.own
-		$sed -e 's/\(.*\)=.*/\1/' ccsym.own | $uniq >>Cppsym.true
+		$sed -e 's/\(..*\)=1/\1/' ccsym.own
+		$sed -e 's/\(..*\)=.*/\1/' ccsym.own | $uniq >>Cppsym.true
 	        ccsymbols=`$cat ccsym.own`
 	        ccsymbols=`echo $ccsymbols`
 		$test "$silent" || sleep 1
 	fi
 fi
-$rm -f ccsym*
+$rm -f ccsym* Cppsym.*
 
 : see if this is a termio system
 val="$undef"
