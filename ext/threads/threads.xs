@@ -135,8 +135,13 @@ Perl_ithread_destruct (pTHX_ ithread* thread, const char *why)
 	MUTEX_DESTROY(&thread->mutex);
         PerlMemShared_free(thread);
 	if(destroyperl) {
+	    ithread*        current_thread;
+	    PERL_THREAD_GETSPECIFIC(self_key,current_thread);
+	    PERL_THREAD_SETSPECIFIC(self_key,thread);
 	    perl_destruct(destroyperl);
             perl_free(destroyperl);
+	    PERL_THREAD_SETSPECIFIC(self_key,current_thread);
+
 	}
 	PERL_SET_CONTEXT(aTHX);
 }
@@ -358,7 +363,8 @@ Perl_ithread_create(pTHX_ SV *obj, char* classname, SV* init_function, SV* param
 {
 	ithread*	thread;
 	CLONE_PARAMS	clone_param;
-
+	ithread*        current_thread;
+	PERL_THREAD_GETSPECIFIC(self_key,current_thread);
 	MUTEX_LOCK(&create_destruct_mutex);
 	thread = PerlMemShared_malloc(sizeof(ithread));
 	Zero(thread,1,ithread);
@@ -379,7 +385,7 @@ Perl_ithread_create(pTHX_ SV *obj, char* classname, SV* init_function, SV* param
 	 */
 
 	PerlIO_flush((PerlIO*)NULL);
-
+	PERL_THREAD_SETSPECIFIC(self_key,thread);
 #ifdef WIN32
 	thread->interp = perl_clone(aTHX, CLONEf_KEEP_PTR_TABLE | CLONEf_CLONE_HOST);
 #else
@@ -410,7 +416,7 @@ Perl_ithread_create(pTHX_ SV *obj, char* classname, SV* init_function, SV* param
 	    PL_ptr_table = NULL;
 	    PL_exit_flags |= PERL_EXIT_DESTRUCT_END;
 	}
-
+	PERL_THREAD_SETSPECIFIC(self_key,current_thread);
 	PERL_SET_CONTEXT(aTHX);
 
 	/* Start the thread */
@@ -507,11 +513,15 @@ Perl_ithread_join(pTHX_ SV *obj)
 	
 	/* sv_dup over the args */
 	{
+	  ithread*        current_thread;
 	  AV* params = (AV*) SvRV(thread->params);	
 	  CLONE_PARAMS clone_params;
 	  clone_params.stashes = newAV();
 	  PL_ptr_table = ptr_table_new();
+	  PERL_THREAD_GETSPECIFIC(self_key,current_thread);
+	  PERL_THREAD_SETSPECIFIC(self_key,thread);
 	  retparam = (AV*) sv_dup((SV*)params, &clone_params);
+	  PERL_THREAD_SETSPECIFIC(self_key,current_thread);
 	  SvREFCNT_dec(clone_params.stashes);
 	  SvREFCNT_inc(retparam);
 	  ptr_table_free(PL_ptr_table);
