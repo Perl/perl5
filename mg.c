@@ -398,7 +398,7 @@ Perl_mg_free(pTHX_ SV *sv)
 }
 
 
-#if !defined(NSIG) || defined(M_UNIX) || defined(M_XENIX)
+#if !defined(NSIG) || defined(M_UNIX) || defined(__unix) || defined(M_XENIX)
 #include <signal.h>
 #endif
 
