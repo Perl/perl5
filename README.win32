@@ -258,7 +258,6 @@ Server beta 3 are expected to be fixed before the 5.8.0 release:
 
     Failed Test              Stat Wstat Total Fail  Failed  List of Failed
     ------------------------------------------------------------------------
-    ../ext/threads/t/end.t                  6    4  66.67%  3-6
     op/fork.t                              18    3  16.67%  2 15 17
 
 Some test failures may occur if you use a command shell other than the
