@@ -1276,6 +1276,7 @@ play_it_again:
     }
     if (rx->reganch & RE_USE_INTUIT &&
 	DO_UTF8(TARG) == ((rx->reganch & ROPT_UTF8) != 0)) {
+	PL_bostr = truebase;
 	s = CALLREG_INTUIT_START(aTHX_ rx, TARG, s, strend, r_flags, NULL);
 
 	if (!s)
@@ -1918,6 +1919,7 @@ PP(pp_subst)
     }
     orig = m = s;
     if (rx->reganch & RE_USE_INTUIT) {
+	PL_bostr = orig;
 	s = CALLREG_INTUIT_START(aTHX_ rx, TARG, s, strend, r_flags, NULL);
 
 	if (!s)
