@@ -879,8 +879,8 @@ characters that are letters as C<\w>.  For example: your locale might
 not think that LATIN SMALL LETTER ETH is a letter (unless you happen
 to speak Icelandic), but Unicode does.
 
-As discussed elsewhere, Perl tries to stand one leg (two legs, being
-a quadruped camel?) in two worlds: the old world of byte and the new
+As discussed elsewhere, Perl tries to stand one leg (two legs, as
+camels are quadrupeds?) in two worlds: the old world of byte and the new
 world of characters, upgrading from bytes to characters when necessary.
 If your legacy code is not explicitly using Unicode, no automatic
 switchover to characters should happen, and characters shouldn't get
@@ -1045,10 +1045,10 @@ return data that are incorrectly flagged.
 So if you're working with Unicode data, consult the documentation of
 every module you're using if there are any issues with Unicode data
 exchange. If the documentation does not talk about Unicode at all,
-suspect the worst and probably look at the source how the module is
-implemented. Modules written completely in perl shouldn't cause
-problems. Modules that directly or indirectly access code written in
-other programming languages are at risk.
+suspect the worst and probably look at the source to learn how the
+module is implemented. Modules written completely in perl shouldn't
+cause problems. Modules that directly or indirectly access code written
+in other programming languages are at risk.
 
 For affected functions the simple strategy to avoid data corruption is
 to always make the encoding of the exchanged data explicit. Choose an
@@ -1093,8 +1093,8 @@ derived class with such a C<param> method:
       }
     }
 
-Some extensions provide filters on data entry/exit points, as e.g.
-DB_File::filter_store_key and family. Watch out for such filters in
+Some extensions provide filters on data entry/exit points, such as
+DB_File::filter_store_key and family. Look out for such filters in
 the documentation of your extensions, they can make the transition to
 Unicode data much easier.
 
