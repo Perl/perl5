@@ -232,7 +232,7 @@ typedef long		gid_t;
 /* compatibility stuff for other compilers goes here */
 
 
-#if !defined(PERL_OBJECT) && defined(PERL_MEMBER_PTR_SIZE)
+#if !defined(PERL_OBJECT) && defined(PERL_CAPI) && defined(PERL_MEMBER_PTR_SIZE)
 #  define STRUCT_MGVTBL_DEFINITION \
 struct mgvtbl {								\
     union {								\
@@ -268,7 +268,7 @@ struct mgvtbl {								\
     U8		op_flags;						\
     U8		op_private;
 
-#endif /* !PERL_OBJECT && PERL_MEMBER_PTR_SIZE */
+#endif /* !PERL_OBJECT && PERL_CAPI && PERL_MEMBER_PTR_SIZE */
 
 
 START_EXTERN_C

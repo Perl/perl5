@@ -22,6 +22,8 @@ See File::Spec::Unix for a documentation of the methods provided
 there. This package overrides the implementation of these methods, not
 the semantics.
 
+=over
+
 =item eliminate_macros
 
 Expands MM[KS]/Make macros in a text string, using the contents of
@@ -111,6 +113,7 @@ sub fixpath {
     $fixedpath;
 }
 
+=back
 
 =head2 Methods always loaded
 

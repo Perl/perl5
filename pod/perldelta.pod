@@ -24,10 +24,10 @@ responsibility to ensure that warnings are enabled judiciously.
 
 =over 4
 
-=item STOP is a new keyword
+=item CHECK is a new keyword
 
 In addition to C<BEGIN>, C<INIT>, C<END>, C<DESTROY> and C<AUTOLOAD>,
-subroutines named C<STOP> are now special.  These are queued up during
+subroutines named C<CHECK> are now special.  These are queued up during
 compilation and behave similar to END blocks, except they are called at
 the end of compilation rather than at the end of execution.  They cannot
 be called directly.
@@ -679,9 +679,9 @@ as requiring an automatic lock() when it is entered, you had to declare
 that with a C<use attrs> pragma in the body of the subroutine.
 That can now be accomplished with a declaration syntax, like this:
 
-    sub mymethod : locked, method ;
+    sub mymethod : locked method ;
     ...
-    sub mymethod : locked, method {
+    sub mymethod : locked :method {
 	...
     }
 
@@ -925,7 +925,7 @@ run in compile-only mode.  Since this is typically not the expected
 behavior, END blocks are not executed anymore when the C<-c> switch
 is used.
 
-See L<STOP blocks> for how to run things when the compile phase ends.
+See L<CHECK blocks> for how to run things when the compile phase ends.
 
 =head2 Potential to leak DATA filehandles
 
@@ -1914,14 +1914,14 @@ The offending range is now explicitly displayed.
 
 =item Invalid separator character %s in attribute list
 
-(F) Something other than a comma or whitespace was seen between the
+(F) Something other than a colon or whitespace was seen between the
 elements of an attribute list.  If the previous attribute
 had a parenthesised parameter list, perhaps that list was terminated
 too soon.  See L<attributes>.
 
 =item Invalid separator character %s in subroutine attribute list
 
-(F) Something other than a comma or whitespace was seen between the
+(F) Something other than a colon or whitespace was seen between the
 elements of a subroutine attribute list.  If the previous attribute
 had a parenthesised parameter list, perhaps that list was terminated
 too soon.

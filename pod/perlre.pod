@@ -269,8 +269,6 @@ Any punctuation character.
 Any hexadecimal digit.  Though this may feel silly (/0-9a-f/i would
 work just fine) it is included for completeness.
 
-=item 
-
 =back
 
 You can negate the [::] character classes by prefixing the class name

@@ -453,11 +453,11 @@ perl_destruct(pTHXx)
     /* startup and shutdown function lists */
     SvREFCNT_dec(PL_beginav);
     SvREFCNT_dec(PL_endav);
-    SvREFCNT_dec(PL_stopav);
+    SvREFCNT_dec(PL_checkav);
     SvREFCNT_dec(PL_initav);
     PL_beginav = Nullav;
     PL_endav = Nullav;
-    PL_stopav = Nullav;
+    PL_checkav = Nullav;
     PL_initav = Nullav;
 
     /* shortcuts just get cleared */
@@ -742,8 +742,8 @@ setuid perl scripts securely.\n");
 		env, xsinit);
     switch (ret) {
     case 0:
-	if (PL_stopav)
-	    call_list(oldscope, PL_stopav);
+	if (PL_checkav)
+	    call_list(oldscope, PL_checkav);
 	return 0;
     case 1:
 	STATUS_ALL_FAILURE;
@@ -754,8 +754,8 @@ setuid perl scripts securely.\n");
 	    LEAVE;
 	FREETMPS;
 	PL_curstash = PL_defstash;
-	if (PL_stopav)
-	    call_list(oldscope, PL_stopav);
+	if (PL_checkav)
+	    call_list(oldscope, PL_checkav);
 	return STATUS_NATIVE_EXPORT;
     case 3:
 	PerlIO_printf(Perl_error_log, "panic: top_env\n");
@@ -3180,7 +3180,7 @@ Perl_call_list(pTHX_ I32 oldscope, AV *paramList)
 		else
 		    Perl_sv_catpvf(aTHX_ atsv,
 				   "%s failed--call queue aborted",
-				   paramList == PL_stopav ? "STOP"
+				   paramList == PL_checkav ? "CHECK"
 				   : paramList == PL_initav ? "INIT"
 				   : "END");
 		while (PL_scopestack_ix > oldscope)
@@ -3204,7 +3204,7 @@ Perl_call_list(pTHX_ I32 oldscope, AV *paramList)
 		    Perl_croak(aTHX_ "BEGIN failed--compilation aborted");
 		else
 		    Perl_croak(aTHX_ "%s failed--call queue aborted",
-			       paramList == PL_stopav ? "STOP"
+			       paramList == PL_checkav ? "CHECK"
 			       : paramList == PL_initav ? "INIT"
 			       : "END");
 	    }

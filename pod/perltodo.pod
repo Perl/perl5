@@ -297,6 +297,8 @@ subject on perl5-porters.
 
 Ronald Kimball (rjk@linguist.dartmouth.edu) has volunteered.
 
+=back
+
 =head2 Include a search tool
 
 perldoc should be able to 'grep' fulltext indices of installed POD
@@ -824,7 +826,7 @@ Workarounds to help Win32 dynamic loading.
 
 =head2 END blocks
 
-END blocks need saving in compiled output, now that STOP blocks
+END blocks need saving in compiled output, now that CHECK blocks
 are available.
 
 =head2 _AUTOLOAD

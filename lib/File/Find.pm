@@ -53,12 +53,12 @@ If either I<follow> or I<follow_fast> is in effect:
 
 =over 6
 
-=item
+=item *
 
 It is guarantueed that an I<lstat> has been called before the user's
 I<wanted()> function is called. This enables fast file checks involving S< _>.
 
-=item
+=item *
 
 There is a variable C<$File::Find::fullname> which holds the absolute
 pathname of the file with all symbolic links resolved

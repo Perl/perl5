@@ -3,7 +3,7 @@ package SelfLoader;
 require Exporter;
 @ISA = qw(Exporter);
 @EXPORT = qw(AUTOLOAD);
-$VERSION = "1.09";
+$VERSION = "1.0901";
 sub Version {$VERSION}
 $DEBUG = 0;
 
@@ -12,7 +12,7 @@ my %Cache;      # private cache for all SelfLoader's client packages
 # allow checking for valid ': attrlist' attachments
 my $nested;
 $nested = qr{ \( (?: (?> [^()]+ ) | (?p{ $nested }) )* \) }x;
-my $one_attr = qr{ (?> (?! \d) \w+ (?:$nested)? ) [\s,]* }x;
+my $one_attr = qr{ (?> (?! \d) \w+ (?:$nested)? ) (?:\s*\:\s*|\s+(?!\:)) }x;
 my $attr_list = qr{ \s* : \s* (?: $one_attr )* }x;
 
 sub croak { require Carp; goto &Carp::croak }

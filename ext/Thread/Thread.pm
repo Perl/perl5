@@ -176,6 +176,8 @@ increasing integer assigned when a thread is created. The main thread of a
 program will have a tid of zero, while subsequent threads will have tids
 assigned starting with one.
 
+=back
+
 =head1 LIMITATIONS
 
 The sequence number used to assign tids is a simple integer, and no

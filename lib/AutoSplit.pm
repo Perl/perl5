@@ -10,7 +10,7 @@ use strict;
 our($VERSION, @ISA, @EXPORT, @EXPORT_OK, $Verbose, $Keep, $Maxlen,
     $CheckForAutoloader, $CheckModTime);
 
-$VERSION = "1.0304";
+$VERSION = "1.0305";
 @ISA = qw(Exporter);
 @EXPORT = qw(&autosplit &autosplit_lib_modules);
 @EXPORT_OK = qw($Verbose $Keep $Maxlen $CheckForAutoloader $CheckModTime);
@@ -149,7 +149,7 @@ my $Is_VMS = ($^O eq 'VMS');
 # allow checking for valid ': attrlist' attachments
 my $nested;
 $nested = qr{ \( (?: (?> [^()]+ ) | (?p{ $nested }) )* \) }x;
-my $one_attr = qr{ (?> (?! \d) \w+ (?:$nested)? ) [\s,]* }x;
+my $one_attr = qr{ (?> (?! \d) \w+ (?:$nested)? ) (?:\s*\:\s*|\s+(?!\:)) }x;
 my $attr_list = qr{ \s* : \s* (?: $one_attr )* }x;
 
 
@@ -468,5 +468,5 @@ package Yet::Another::AutoSplit;
 sub testtesttesttest4_1 ($)  { "another test 4\n"; }
 sub testtesttesttest4_2 ($$) { "another duplicate test 4\n"; }
 package Yet::More::Attributes;
-sub test_a1 ($) : locked { 1; }
+sub test_a1 ($) : locked :locked { 1; }
 sub test_a2 : locked { 1; }

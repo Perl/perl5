@@ -213,7 +213,7 @@ This also has implications for the use of the SUPER:: qualifier
 =head2 Package Constructors and Destructors
 
 Four special subroutines act as package constructors and destructors.
-These are the C<BEGIN>, C<STOP>, C<INIT>, and C<END> routines.  The
+These are the C<BEGIN>, C<CHECK>, C<INIT>, and C<END> routines.  The
 C<sub> is optional for these routines.
 
 A C<BEGIN> subroutine is executed as soon as possible, that is, the moment
@@ -245,9 +245,9 @@ Perl runtime begins execution, in "first in, first out" (FIFO) order.
 For example, the code generators documented in L<perlcc> make use of
 C<INIT> blocks to initialize and resolve pointers to XSUBs.
 
-Similar to C<END> blocks, C<STOP> blocks are run just after the
+Similar to C<END> blocks, C<CHECK> blocks are run just after the
 Perl compile phase ends and before the run time begins, in
-LIFO order.  C<STOP> blocks are again useful in the Perl compiler
+LIFO order.  C<CHECK> blocks are again useful in the Perl compiler
 suite to save the compiled state of the program.
 
 When you use the B<-n> and B<-p> switches to Perl, C<BEGIN> and
