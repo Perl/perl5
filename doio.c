@@ -717,6 +717,8 @@ Perl_nextargv(pTHX_ register GV *gv)
 #endif
     }
     PL_filemode = 0;
+    if (!GvAV(gv))
+        return Nullfp;
     while (av_len(GvAV(gv)) >= 0) {
 	STRLEN oldlen;
 	sv = av_shift(GvAV(gv));
