@@ -4,6 +4,10 @@ Install - Build and Installation guide for perl5.
 
 =head1 SYNOPSIS
 
+First, make sure you are installing an up-to-date version of Perl.   If
+you didn't get your Perl source from CPAN, check the latest version at
+<URL:http://www.perl.com/CPAN/src/>.
+
 The basic steps to build and install perl5 on a Unix system are:
 
 	rm -f config.sh Policy.sh
@@ -27,8 +31,6 @@ on the platform.  If that's not okay with you, use
 	make
 	make test
 	make install
-
-Full configuration instructions can be found in the INSTALL file.
 
 For information on non-Unix systems, see the section on
 L<"Porting information"> below.
