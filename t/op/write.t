@@ -272,7 +272,7 @@ else
     { print "not ok 11\n"; }
 
 {
-    our $el;
+    my $el;
     format STDOUT =
 ok ^<<<<<<<<<<<<<<~~ # sv_chop() naze
 $el

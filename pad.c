@@ -88,6 +88,9 @@ is a CV representing a possible closure.
 (SvFAKE and name of '&' is not a meaningful combination currently but could
 become so if C<my sub foo {}> is implemented.)
 
+Note that formats are treated as anon subs, and are cloned each time
+write is called (if necessary).
+
 =cut
 */
 
@@ -572,6 +575,9 @@ the parent pad.
  * all CVs (eg XSUBs), but suffices for the CVs found in a lexical chain */
 #define CvCOMPILED(cv)	CvROOT(cv)
 
+/* the CV does late binding of its lexicals */
+#define CvLATE(cv) (CvANON(cv) || SvTYPE(cv) == SVt_PVFM)
+
 
 STATIC PADOFFSET
 S_pad_findlex(pTHX_ char *name, CV* cv, U32 seq, int warn,
@@ -720,9 +726,9 @@ S_pad_findlex(pTHX_ char *name, CV* cv, U32 seq, int warn,
 	return NOT_IN_PAD;
     
     /* out_capture non-null means caller wants us to capture lex; in
-     * addition we capture ourselves unless its an ANON */
+     * addition we capture ourselves unless it's an ANON/format */
     new_capturep = out_capture ? out_capture :
-		CvANON(cv) ? Null(SV**) : &new_capture;
+		CvLATE(cv) ? Null(SV**) : &new_capture;
 
     offset = pad_findlex(name, CvOUTSIDE(cv), CvOUTSIDE_SEQ(cv), 1,
 		new_capturep, out_name_sv, out_flags);
@@ -760,7 +766,7 @@ S_pad_findlex(pTHX_ char *name, CV* cv, U32 seq, int warn,
 	if (SvFLAGS(new_namesv) & SVpad_OUR) {
 	   /* do nothing */
 	}
-	else if (CvANON(cv)) {
+	else if (CvLATE(cv)) {
 	    /* delayed creation - just note the offset within parent pad */
 	    SvNVX(new_namesv) = (NV)offset;
 	    CvCLONE_on(cv);
@@ -1267,6 +1273,7 @@ S_cv_dump(pTHX_ CV *cv, char *title)
 		  title,
 		  PTR2UV(cv),
 		  (CvANON(cv) ? "ANON"
+		   : (SvTYPE(cv) == SVt_PVFM) ? "FORMAT"
 		   : (cv == PL_main_cv) ? "MAIN"
 		   : CvUNIQUE(cv) ? "UNIQUE"
 		   : CvGV(cv) ? GvNAME(CvGV(cv)) : "UNDEFINED"),
@@ -1312,13 +1319,21 @@ Perl_cv_clone(pTHX_ CV *proto)
     CV* cv;
     SV** outpad;
     CV* outside;
+    long depth;
 
     assert(!CvUNIQUE(proto));
 
-    outside = find_runcv(NULL);
-    /* presumably whoever invoked us must be active */
-    assert(outside);
-    assert(CvDEPTH(outside));
+    /* Since cloneable anon subs can be nested, CvOUTSIDE may point
+     * to a prototype; we instead want the cloned parent who called us.
+     * Note that in general for formats, CvOUTSIDE != find_runcv */
+
+    outside = CvOUTSIDE(proto);
+    if (outside && CvCLONE(outside) && ! CvCLONED(outside))
+	outside = find_runcv(NULL);
+    depth = CvDEPTH(outside);
+    assert(depth || SvTYPE(proto) == SVt_PVFM);
+    if (!depth)
+	depth = 1;
     assert(CvPADLIST(outside));
 
     ENTER;
@@ -1353,18 +1368,28 @@ Perl_cv_clone(pTHX_ CV *proto)
 
     PL_curpad = AvARRAY(PL_comppad);
 
-    outpad = AvARRAY(AvARRAY(CvPADLIST(outside))[CvDEPTH(outside)]);
+    outpad = AvARRAY(AvARRAY(CvPADLIST(outside))[depth]);
 
     for (ix = fpad; ix > 0; ix--) {
 	SV* namesv = (ix <= fname) ? pname[ix] : Nullsv;
-	SV *sv;
-	if (namesv && namesv != &PL_sv_undef) {
+	SV *sv = Nullsv;
+	if (namesv && namesv != &PL_sv_undef) { /* lexical */
 	    if (SvFAKE(namesv)) {   /* lexical from outside? */
-		assert(outpad[(I32)SvNVX(namesv)] &&
-			!SvPADSTALE(outpad[(I32)SvNVX(namesv)]));
-		PL_curpad[ix] = SvREFCNT_inc(outpad[(I32)SvNVX(namesv)]);
+		sv = outpad[(I32)SvNVX(namesv)];
+		assert(sv);
+		/* formats may have an inactive parent */
+		if (SvTYPE(proto) == SVt_PVFM && SvPADSTALE(sv)) {
+		    if (ckWARN(WARN_CLOSURE))
+			Perl_warner(aTHX_ packWARN(WARN_CLOSURE),
+			    "Variable \"%s\" is not available", SvPVX(namesv));
+		    sv = Nullsv;
+		}
+		else {
+		    assert(!SvPADSTALE(sv));
+		    sv = SvREFCNT_inc(sv);
+		}
 	    }
-	    else {
+	    if (!sv) {
 		char *name = SvPVX(namesv);
 		if (*name == '&')
 		    sv = SvREFCNT_inc(ppad[ix]);
@@ -1375,17 +1400,16 @@ Perl_cv_clone(pTHX_ CV *proto)
 		else
 		    sv = NEWSV(0, 0);
 		SvPADMY_on(sv);
-		PL_curpad[ix] = sv;
 	    }
 	}
 	else if (IS_PADGV(ppad[ix]) || IS_PADCONST(ppad[ix])) {
-	    PL_curpad[ix] = SvREFCNT_inc(ppad[ix]);
+	    sv = SvREFCNT_inc(ppad[ix]);
 	}
 	else {
 	    sv = NEWSV(0, 0);
 	    SvPADTMP_on(sv);
-	    PL_curpad[ix] = sv;
 	}
+	PL_curpad[ix] = sv;
     }
 
     DEBUG_Xv(
