@@ -444,7 +444,7 @@ regexec_flags(register regexp *prog, char *stringarg, register char *strend,
 		s = HOP(s, -back_max);
 	    }
 	    else {
-		char *t = (last1 >= PL_bostr) ? HOP(last1, 1) : last + 1;
+		char *t = (last1 >= PL_bostr) ? HOP(last1, 1) : last1 + 1;
 
 		last1 = HOP(s, -back_min);
 		s = t;		

@@ -483,3 +483,4 @@ b\Z	a\nb\n	y	-	-
 b\z	a\nb\n	n	-	-
 b\Z	a\nb	y	-	-
 b\z	a\nb	y	-	-
+(^|x)(c)	ca	y	$2	c
