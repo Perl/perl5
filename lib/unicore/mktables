@@ -652,8 +652,7 @@ sub UnicodeData_Txt()
                                     || $code == 0x2029;# 2029: PARAGRAPH SEP.
 
         $Cat{Blank}->$op($code) if $cat eq "Zs"
-                                || $code == 0x0009  # 0009: HORIZONTAL TAB
-                                || $code == 0x0020; # 0020: SPACE
+                                || $code == 0x0009; # 0009: HORIZONTAL TAB
 
         $Cat{Digit}->$op($code) if $cat eq "Nd";
         $Cat{Upper}->$op($code) if $cat eq "Lu";
