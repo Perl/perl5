@@ -4,6 +4,7 @@
 # the format supported by op/regexp.t.  If you want to add a test
 # that does fit that format, add it to op/re_tests, not here.
 
+$| = 1;
 print "1..581\n";
 
 BEGIN {
