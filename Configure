@@ -20,7 +20,7 @@
 
 # $Id: Head.U,v 3.0.1.9 1997/02/28 15:02:09 ram Exp $
 #
-# Generated on Sat Dec  2 18:39:37 EET 2000 [metaconfig 3.0 PL70]
+# Generated on Sun Dec  3 18:14:37 EET 2000 [metaconfig 3.0 PL70]
 # (with additional metaconfig patches by perlbug@perl.org)
 
 cat >/tmp/c1$$ <<EOF
@@ -14493,24 +14493,17 @@ $rm -f ssize ssize.*
 
 : see what type of char stdio uses.
 echo " "
-if $contains 'unsigned.*char.*_ptr;' `./findhdr stdio.h` >/dev/null 2>&1 ; then
+echo '#include <stdio.h>' | $cppstdin $cppminus > stdioh
+if $contains 'unsigned.*char.*_ptr;' stdioh >/dev/null 2>&1 ; then
 	echo "Your stdio uses unsigned chars." >&4
 	stdchar="unsigned char"
 else
-	: Solaris 7+, others?
-	stdiohdr=`./findhdr stdio_impl.h`
-	case "$stdiohdr" in
-	'') ;;
-	*)	if $contains 'unsigned.*char.*_ptr;' $stdiohdr >/dev/null 2>&1 ; then
-			echo "Your stdio uses unsigned chars." >&4
-			stdchar="unsigned char"
-		else
-			echo "Your stdio uses signed chars." >&4
-			stdchar="char"
-		fi
-		;;
-	esac
+	echo "Your stdio uses signed chars." >&4
+	stdchar="char"
 fi
+$rm -f stdioh
+
+
 
 : see if time exists
 echo " "

@@ -569,12 +569,15 @@ sub nok_bytes {
 # http://www.cl.cam.ac.uk/~mgk25/ucs/examples/UTF-8-test.txt,
 # version dated 2000-09-02. 
 
+# Note the \0 instead of a raw zero byte in 2.1.1: for example
+# GNU patch v2.1 has "issues" with raw zero bytes.
+
 my @MK = split(/\n/, <<__EOMK__);
 1	Correct UTF-8
 1.1.1 y "κόσμε"	-		11	ce:ba:e1:bd:b9:cf:83:ce:bc:ce:b5	5
 2	Boundary conditions 
 2.1	First possible sequence of certain length
-2.1.1 y " "			0		1	00	1
+2.1.1 y "\0"			0		1	00	1
 2.1.2 y ""			80		2	c2:80	1
 2.1.3 y "ࠀ"		800		3	e0:a0:80	1
 2.1.4 y "𐀀"		10000		4	f0:90:80:80	1
