@@ -165,7 +165,10 @@ ext/Data/Dumper/Changes		Data pretty printer, changelog
 ext/Data/Dumper/Dumper.pm	Data pretty printer, module
 ext/Data/Dumper/Dumper.xs	Data pretty printer, externals
 ext/Data/Dumper/Makefile.PL	Data pretty printer, makefile writer
+ext/Data/Dumper/t/dumper.t      See if Data::Dumper works
 ext/Data/Dumper/Todo		Data pretty printer, futures
+ext/Data/Dumper/t/overload.t    See if Data::Dumper works for overloaded data
+ext/Data/Dumper/t/pair.t        See if Data::Dumper pair separator works
 ext/DB_File/Changes		Berkeley DB extension change log
 ext/DB_File/config.in
 ext/DB_File/DB_File_BS		Berkeley DB extension mkbootstrap fodder
@@ -1458,8 +1461,6 @@ t/lib/dprof/test6_t	Perl code profiler tests
 t/lib/dprof/test6_v	Perl code profiler tests
 t/lib/dprof.t		Perl code profiler testsuite driver
 t/lib/dprof/V.pm	Perl code profiler tests
-t/lib/dumper-ovl.t	See if Data::Dumper works for overloaded data
-t/lib/dumper.t		See if Data::Dumper works
 t/lib/english.t		See if English works
 t/lib/env-array.t	See if Env works for arrays
 t/lib/env.t		See if Env works
