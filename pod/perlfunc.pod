@@ -2325,7 +2325,8 @@ Perl for security reasons (see L<perlsec/"Algorithmic Complexity
 Attacks">).
 
 As a side effect, calling keys() resets the HASH's internal iterator,
-see L</each>.
+see L</each>. (In particular, calling keys() in void context resets
+the iterator with no other overhead.)
 
 Here is yet another way to print your environment:
 
@@ -6297,7 +6298,8 @@ function would produce on the same (unmodified) hash.  Since Perl
 for security reasons (see L<perlsec/"Algorithmic Complexity Attacks">).
 
 As a side effect, calling values() resets the HASH's internal iterator,
-see L</each>.
+see L</each>. (In particular, calling values() in void context resets
+the iterator with no other overhead.)
 
 Note that the values are not copied, which means modifying them will
 modify the contents of the hash:
