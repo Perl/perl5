@@ -28,8 +28,8 @@ $AUTOLOAD_DEBUG=0;
 #    3) print header(-nph=>1)
 $NPH=0;
 
-$CGI::revision = '$Id: CGI.pm,v 2.32 1997/3/19 10:10 lstein Exp $';
-$CGI::VERSION='2.3202';
+$CGI::revision = '$Id: CGI.pm,v 2.34 1997/4/7 7:23 lstein Exp $';
+$CGI::VERSION='2.3401';
 
 # OVERRIDE THE OS HERE IF CGI.pm GUESSES WRONG
 # $OS = 'UNIX';
@@ -87,9 +87,7 @@ $SL = {
 $NPH++ if defined($ENV{'SERVER_SOFTWARE'}) && $ENV{'SERVER_SOFTWARE'}=~/IIS/;
 
 # Turn on special checking for Doug MacEachern's modperl
-if (defined($MOD_PERL = $ENV{'GATEWAY_INTERFACE'}) &&
-    $MOD_PERL =~ /^CGI-Perl/)
-{
+if (defined($ENV{'GATEWAY_INTERFACE'}) && ($MOD_PERL = $ENV{'GATEWAY_INTERFACE'} =~ /^CGI-Perl/)) {
     $NPH++;
     $| = 1;
     $SEQNO = 1;
@@ -176,7 +174,6 @@ sub new {
     my($class,$initializer) = @_;
     my $self = {};
     bless $self,ref $class || $class || $DefaultClass;
-    $CGI::DefaultClass->_reset_globals() if $MOD_PERL;
     $initializer = to_filehandle($initializer) if $initializer;
     $self->init($initializer);
     return $self;
@@ -986,12 +983,11 @@ END_OF_FUNC
 'redirect' => <<'END_OF_FUNC',
 sub redirect {
     my($self,@p) = self_or_default(@_);
-    my($url,$target,$cookie,$nph,@other) =
-	$self->rearrange([[URI,URL],TARGET,COOKIE,NPH],@p);
+    my($url,$target,$cookie,$nph,@other) = $self->rearrange([[URI,URL],TARGET,COOKIE,NPH],@p);
     $url = $url || $self->self_url;
     my(@o);
     foreach (@other) { push(@o,split("=")); }
-    if ($MOD_PERL or exists $self->{'.req'}) {
+    if($MOD_PERL or exists $self->{'.req'}) {
 	my $r = $self->{'.req'} || Apache->request;
 	$r->header_out(Location => $url);
 	$r->err_header_out(Location => $url);

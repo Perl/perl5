@@ -4,9 +4,15 @@ use vars qw(@ISA $VERSION);
 require CGI;
 @ISA = qw(CGI);
 
-$VERSION = (qw$Revision: 1.00 $)[1];
+$VERSION = (qw$Revision: 1.01 $)[1];
 $CGI::DefaultClass = 'CGI::Apache';
 $CGI::Apache::AutoloadClass = 'CGI';
+
+sub import {
+    my $self = shift;
+    my ($callpack, $callfile, $callline) = caller;
+    ${"${callpack}::AutoloadClass"} = 'CGI';
+}
 
 sub new {
     my($class) = shift;
@@ -75,9 +81,16 @@ When using the Perl-Apache API, your applications are faster, but the
 enviroment is different than CGI.
 This module attempts to set-up that environment as best it can.
 
-=head1 NOTE
+=head1 NOTE 1
 
 This module used to be named Apache::CGI.  Sorry for the confusion.
+
+=head1 NOTE 2
+
+If you're going to inherit from this class, make sure to "use" it
+after your package declaration rather than "require" it.  This is
+because CGI.pm does a little magic during the import() step in order
+to make autoloading work correctly.
 
 =head1 SEE ALSO
 

@@ -32,4 +32,6 @@ if (param()) {
 	hr;
 }
 print a({href=>'../cgi_docs.html'},'Go to the documentation');
+print end_html;
+
 
