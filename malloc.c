@@ -618,6 +618,9 @@ realloc(void *mp, size_t nbytes)
 	 *  FIRST_BIG_TWO_POT, but the new one is near the lower end.
 	 */
 	if (was_alloced &&
+#ifdef STRESS_REALLOC
+	    0 && /* always do it the hard way */
+#endif
 	    nbytes <= onb && (nbytes > ( (onb >> 1) - M_OVERHEAD )
 #ifdef TWO_POT_OPTIMIZE
 			      || (i == (FIRST_BIG_TWO_POT - 3) 
