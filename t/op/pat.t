@@ -6,7 +6,7 @@
 
 $| = 1;
 
-print "1..855\n";
+print "1..858\n";
 
 BEGIN {
     chdir 't' if -d 't';
@@ -2688,4 +2688,21 @@ print "# some Unicode properties\n";
     }ge;
 
     print $x eq "x b x" ? "ok 855\n" : "not ok 855\n";
+}
+
+{
+    print "# UTF-8 hash keys and /\$/\n";
+    # http://www.xray.mpe.mpg.de/mailing-lists/perl5-porters/2002-01/msg01327.html
+
+    my $u = "a\x{100}";
+    my $v = substr($u,0,1);
+    my $w = substr($u,1,1);
+    my %u = ( $u => $u, $v => $v, $w => $w );
+    my $i = 856; 
+    for (keys %u) {
+	my $m1 = /^\w*$/ ? 1 : 0;
+	my $m2 = $u{$_}=~/^\w*$/ ? 1 : 0;
+	print $m1 == $m2 ? "ok $i\n" : "not ok $i # $m1 $m2\n";
+	$i++;
+    }
 }
