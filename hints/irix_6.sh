@@ -186,9 +186,9 @@ set `echo X "$libswanted "|sed -e 's/ sun / /' -e 's/ crypt / /' -e 's/ bsd / /'
 shift
 libswanted="$*"
 
+cat > UU/usethreads.cbu <<'EOCBU'
 # This script UU/usethreads.cbu will get 'called-back' by Configure 
 # after it has prompted the user for whether to use threads.
-cat > UU/usethreads.cbu <<'EOCBU'
 case "$usethreads" in
 $define|true|[yY]*)
         if test ! -f ${TOOLROOT}/usr/include/pthread.h -o ! -f /usr/lib/libpthread.so; then
@@ -238,9 +238,9 @@ EOCBU
 
 # The -n32 makes off_t to be 8 bytes, so we should have largefileness.
 
-# This script UU/use64bitint.cbu will get 'called-back' by Configure 
-# after it has prompted the user for whether to use 64 bits.
 cat > UU/use64bitint.cbu <<'EOCBU'
+# This script UU/use64bitint.cbu will get 'called-back' by Configure 
+# after it has prompted the user for whether to use 64 bit integers.
 case "$use64bitint" in
 $define|true|[yY]*)
 	    case "`uname -r`" in
@@ -257,9 +257,9 @@ EOM
 esac
 EOCBU
 
-# This script UU/use64bitall.cbu will get 'called-back' by Configure 
-# after it has prompted the user for whether to use 64 bits.
 cat > UU/use64bitall.cbu <<'EOCBU'
+# This script UU/use64bitall.cbu will get 'called-back' by Configure 
+# after it has prompted the user for whether to be maximally 64-bitty.
 case "$use64bitall" in
 $define|true|[yY]*)
 	ccflags="`echo $ccflags|sed -e 's%-n32%%'` -64"

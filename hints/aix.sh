@@ -235,7 +235,7 @@ esac
 EOCBU
 
 # This script UU/use64bitint.cbu will get 'called-back' by Configure 
-# after it has prompted the user for whether to use 64 bits.
+# after it has prompted the user for whether to use 64 bit integers.
 cat > UU/use64bitint.cbu <<'EOCBU'
 case "$use64bitint" in
 $define|true|[yY]*)
@@ -252,9 +252,9 @@ EOM
 esac
 EOCBU
 
-# This script UU/use64bitall.cbu will get 'called-back' by Configure 
-# after it has prompted the user for whether to use full 64-bitness.
 cat > UU/use64bitall.cbu <<'EOCBU'
+# This script UU/use64bitall.cbu will get 'called-back' by Configure 
+# after it has prompted the user for whether to be maximally 64-bitty.
 case "$use64bitall" in
 $define|true|[yY]*)
 	    case "`oslevel`" in
@@ -351,9 +351,9 @@ EOM
 esac
 EOCBU
 
+cat > UU/uselongdouble.cbu <<'EOCBU'
 # This script UU/uselongdouble.cbu will get 'called-back' by Configure 
 # after it has prompted the user for whether to use long doubles.
-cat > UU/uselongdouble.cbu <<'EOCBU'
 case "$uselongdouble" in
 $define|true|[yY]*)
 	ccflags="$ccflags -qlongdouble"

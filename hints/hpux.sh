@@ -298,9 +298,9 @@ EOSH
 #          (warning) Use of GR3 when frame >= 8192 may cause conflict.
 #     These warnings are harmless and can be safely ignored.
 
+cat > UU/usethreads.cbu <<'EOCBU'
 # This script UU/usethreads.cbu will get 'called-back' by Configure 
 # after it has prompted the user for whether to use threads.
-cat > UU/usethreads.cbu <<'EOCBU'
 case "$usethreads" in
 $define|true|[yY]*)
         if [ "$xxOsRevMajor" -lt 10 ]; then
@@ -353,9 +353,9 @@ EOM
 esac
 EOCBU
 
-# This script UU/uselfs.cbu will get 'called-back' by Configure 
-# after it has prompted the user for whether to use 64 bits.
 cat > UU/uselfs.cbu <<'EOCBU'
+# This script UU/uselfs.cbu will get 'called-back' by Configure 
+# after it has prompted the user for whether to use large files.
 case "$uselargefiles" in
 ''|$define|true|[yY]*)
 	# there are largefile flags available via getconf(1)

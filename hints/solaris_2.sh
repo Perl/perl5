@@ -285,9 +285,9 @@ rm -f core
 # XXX
 EOSH
 
+cat > UU/usethreads.cbu <<'EOCBU'
 # This script UU/usethreads.cbu will get 'called-back' by Configure 
 # after it has prompted the user for whether to use threads.
-cat > UU/usethreads.cbu <<'EOCBU'
 case "$usethreads" in
 $define|true|[yY]*)
         ccflags="-D_REENTRANT $ccflags"
@@ -333,9 +333,9 @@ EOM
 esac
 EOCBU
 
+cat > UU/useuselargefiles.cbu <<'EOCBU'
 # This script UU/useuselargefiles.cbu will get 'called-back' by Configure 
 # after it has prompted the user for whether to use large files.
-cat > UU/useuselargefiles.cbu <<'EOCBU'
 case "$uselargefiles" in
 ''|$define|true|[yY]*)
     ccflags="$ccflags `getconf LFS_CFLAGS 2>/dev/null`"
@@ -345,9 +345,9 @@ case "$uselargefiles" in
 esac
 EOCBU
 
-# This script UU/use64bitint.cbu will get 'called-back' by Configure 
-# after it has prompted the user for whether to use 64 bits.
 cat > UU/use64bitint.cbu <<'EOCBU'
+# This script UU/use64bitint.cbu will get 'called-back' by Configure 
+# after it has prompted the user for whether to use 64 bit integers.
 case "$use64bitint" in
 $define|true|[yY]*)
 	    case "`uname -r`" in
@@ -359,15 +359,13 @@ EOM
 		exit 1
 		;;
 	    esac
-	    # When a 64-bit cc becomes available $archname64
-	    # may need setting so that $archname gets it attached.
 	    ;;
 esac
 EOCBU
 
-# This script UU/use64bitint.cbu will get 'called-back' by Configure 
-# after it has prompted the user for whether to use 64 bits.
-cat > UU/use64bitint.cbu <<'EOCBU'
+cat > UU/use64bitall.cbu <<'EOCBU'
+# This script UU/use64bitall.cbu will get 'called-back' by Configure 
+# after it has prompted the user for whether to be maximally 64 bitty.
 case "$use64bitall" in
 $define|true|[yY]*)
 	    case "$cc -v 2>/dev/null" in
