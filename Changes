@@ -73,6 +73,194 @@ indicator:
     	    !>	    merged changes (from elsewhere)
 
 
+-------------
+Version 5.005           Production release
+-------------
+
+____________________________________________________________________________
+[  1637] By: gsar                                  on 1998/07/22  08:27:09
+        Log: VMS patches from Dan Sugalski <sugalskd@osshe.edu>
+             Date:    Tue, 21 Jul 1998 16:04:40 PDT
+             Message-Id: <3.0.5.32.19980721160440.00a916f0@ous.edu>
+             Subject: [PATCH 5.004_76]Document Vax C's death for VMS
+             --
+             Date:    Tue, 21 Jul 1998 16:08:57 PDT
+             Message-Id: <3.0.5.32.19980721160857.00a6d250@ous.edu>
+             Subject: [PATCH 5.004_76]fix clean/realclean targets of VMS' makefile
+             --
+             Date:    Tue, 21 Jul 1998 16:05:56 PDT
+             Message-Id: <3.0.5.32.19980721160556.00a1a100@ous.edu>
+             Subject: [PATCH 5.004_76]Note the record-read capabilities of $/ in perldelta.pod
+     Branch: perl
+           ! README.vms pod/perldelta.pod vms/descrip_mms.template
+____________________________________________________________________________
+[  1636] By: gsar                                  on 1998/07/22  08:04:37
+        Log: fix quoting in t/io/inplace.t
+     Branch: perl
+           ! t/io/inplace.t
+____________________________________________________________________________
+[  1635] By: gsar                                  on 1998/07/22  07:59:30
+        Log: From:    Dan Sugalski <sugalskd@osshe.edu>
+             Date:    Tue, 21 Jul 1998 13:06:44 PDT
+             Message-Id: <3.0.5.32.19980721130644.00ac5100@ous.edu>
+             Subject: [PATCH 5.004_76]t/io/inplace.t enabled for VMS
+     Branch: perl
+           ! t/io/inplace.t vms/test.com
+____________________________________________________________________________
+[  1634] By: gsar                                  on 1998/07/22  07:55:35
+        Log: From:    Dan Sugalski <sugalskd@osshe.edu>
+             Date:    Tue, 21 Jul 1998 12:42:20 PDT
+             Message-Id: <3.0.5.32.19980721124220.00a82a20@ous.edu>
+             Subject: [PATCH 5.004_76]Fix inplace editing for VMS
+     Branch: perl
+           ! doio.c
+____________________________________________________________________________
+[  1633] By: gsar                                  on 1998/07/22  07:53:53
+        Log: fix AIX hints for PL_* changes
+             From:    Jarkko Hietaniemi <jhi@iki.fi>
+             Date:    Tue, 21 Jul 1998 22:53:54 +0300
+             Message-Id: <199807211953.WAA55724@vipunen.hut.fi>
+             Subject: Re: _76 fails to link B extension on AIX 414
+     Branch: perl
+           ! perl_exp.SH
+____________________________________________________________________________
+[  1632] By: gsar                                  on 1998/07/22  07:51:56
+        Log: From:    Anton Berezin <tobez@plab.ku.dk>
+             Date:    Tue, 21 Jul 1998 21:46:45 +0200
+             Message-Id: <199807211946.VAA01301@lion.plab.ku.dk>
+             Subject: [PATCH _76] t/op/eval.t test for eval & scoping of lexicals
+     Branch: perl
+           ! t/op/eval.t
+____________________________________________________________________________
+[  1631] By: gsar                                  on 1998/07/22  07:48:20
+        Log: applied patch, with tweak suggested by Michael Parker
+             From:    Andy Dougherty <doughera@lafcol.lafayette.edu>
+             Date:    Tue, 21 Jul 1998 14:30:05 EDT
+             Message-Id: <Pine.SUN.3.96.980721142928.8231Q-100000@newton.phys>
+             Subject: Re: Not OK: _76 on IP22-irix6.2 fails tests
+     Branch: perl
+           ! hints/irix_6.sh
+____________________________________________________________________________
+[  1630] By: gsar                                  on 1998/07/22  07:40:25
+        Log: better diagnostic on errno.t failure
+             From:    Graham Barr <gbarr@ti.com>
+             Date:    Tue, 21 Jul 1998 13:07:29 CDT
+             Message-Id: <19980721130729.K4337@asic.sc.ti.com>
+     Branch: perl
+           ! t/lib/errno.t
+____________________________________________________________________________
+[  1629] By: gsar                                  on 1998/07/22  07:36:38
+        Log: win32 tweaks: disable XSLOCKS in perl.c, correct typo, search
+             the registry for anything that begins with "PERL", not "PERL5"
+             From:    "Douglas Lankshear" <dougl@ActiveState.com>
+             Date:    Tue, 21 Jul 1998 11:08:00 PDT
+             Message-Id: <000601bdb4d2$7ee74720$a32fa8c0@tau.Active>
+     Branch: perl
+           ! perl.c win32/perlhost.h win32/win32.c
+____________________________________________________________________________
+[  1628] By: gsar                                  on 1998/07/22  07:28:35
+        Log: suppress redefined warnings on C<INIT {} INIT {}>
+     Branch: perl
+           ! op.c
+____________________________________________________________________________
+[  1627] By: gsar                                  on 1998/07/22  07:15:19
+        Log: remove spurious $VERSION line that confuses CPAN
+             From:    Johan Vromans <jvromans@squirrel.nl>
+             Date:    Tue, 21 Jul 1998 20:01:36 +0200
+             Message-Id: <13748.55168.397720.564438@phoenix.squirrel.nl>
+             Subject: Re: 5.004_76 missing version numbers
+     Branch: perl
+           ! lib/Getopt/Long.pm
+____________________________________________________________________________
+[  1626] By: gsar                                  on 1998/07/22  06:57:56
+        Log: From:    Andy Dougherty <doughera@lafcol.lafayette.edu>
+             Date:    Tue, 21 Jul 1998 10:20:13 EDT
+             Message-Id: <Pine.SUN.3.96.980721101922.8078A-100000@newton.phys>
+             Subject: [PATCH] Porting/config* updates for 5.005
+     Branch: perl
+           ! Changes Porting/config.sh Porting/config_H
+____________________________________________________________________________
+[  1625] By: gsar                                  on 1998/07/22  06:46:38
+        Log: add a few more globals with old names #defined
+     Branch: perl
+           ! embed.pl embedvar.h
+____________________________________________________________________________
+[  1624] By: gsar                                  on 1998/07/22  06:39:22
+        Log: allow extensions to be specified as paths 
+             From:    Paul Johnson <pjcj@transeda.com>
+             Date:    Tue, 21 Jul 1998 12:04:27 BST
+             Message-Id: <19980721120427.F903@west-tip.transeda.com>
+             Subject: [PATCH] 5.004_75 Embed and static extensions
+     Branch: perl
+           ! lib/ExtUtils/Embed.pm
+____________________________________________________________________________
+[  1623] By: gsar                                  on 1998/07/22  06:12:50
+        Log: make $ prototype to accept THREADSVs
+     Branch: perl
+           ! op.c
+____________________________________________________________________________
+[  1622] By: gsar                                  on 1998/07/22  06:04:25
+        Log: fix Liblist.pm to find entries that are plain pathnames on win32
+     Branch: perl
+           ! lib/ExtUtils/Liblist.pm
+____________________________________________________________________________
+[  1621] By: gsar                                  on 1998/07/22  05:10:53
+        Log: perlfaq update from From Tom Christiansen and Nathan Torkington
+             (removes all mention of training courses from perlfaq*.pod)
+     Branch: perl
+	   ! pod/perlfaq.pod pod/perlfaq2.pod pod/perlfaq3.pod
+	   ! pod/perlfaq4.pod pod/perlfaq6.pod pod/perlfaq7.pod
+           ! pod/perlfaq8.pod pod/perlfaq9.pod
+____________________________________________________________________________
+[  1620] By: gsar                                  on 1998/07/22  02:51:13
+        Log: applied patch, modulo parts already added to perldelta
+             From:    Stephen McCamant <alias@mcs.com>
+             Date:    Tue, 21 Jul 1998 17:06:23 CDT
+             Message-Id: <13749.3106.995764.413053@alias-2.pr.mcs.net>
+             Subject: [PATCH] Re: Beta2 is available
+     Branch: perl
+           ! pod/perldelta.pod
+____________________________________________________________________________
+[  1619] By: gsar                                  on 1998/07/22  02:45:55
+        Log: applied patch, add new message to perldeta
+             From:    Stephen McCamant <alias@mcs.com>
+             Date:    Tue, 21 Jul 1998 16:12:25 CDT
+             Message-Id: <13749.910.83378.949909@alias-2.pr.mcs.net>
+             Subject: [PATCH] Band-aid patch for local($avhv->{a})
+     Branch: perl
+           ! pod/perldelta.pod pod/perldiag.pod pp.c pp_hot.c
+____________________________________________________________________________
+[  1618] By: gsar                                  on 1998/07/22  02:08:00
+        Log: fix up B modules for PL_* changes
+     Branch: perl
+           ! ext/B/B/C.pm ext/B/B/CC.pm ext/B/B/Stackobj.pm
+____________________________________________________________________________
+[  1617] By: gsar                                  on 1998/07/22  01:42:14
+        Log: From:    Malcolm Beattie <mbeattie@sable.ox.ac.uk>
+             Date:    Tue, 21 Jul 1998 18:13:16 BST
+             Message-Id: <199807211713.SAA20735@sable.ox.ac.uk>
+             Subject: Compiler docs for 5.005
+     Branch: perl
+	   ! ext/B/B.pm ext/B/B/Bytecode.pm ext/B/B/C.pm ext/B/B/CC.pm
+           ! ext/B/O.pm
+____________________________________________________________________________
+[  1616] By: gsar                                  on 1998/07/22  01:29:09
+        Log: s/PL_sv/PL_bytecode_sv/ etc., so we have unique, case-insensitive
+             names
+     Branch: perl
+	   ! bytecode.h bytecode.pl byterun.c embedvar.h interp.sym
+           ! intrpvar.h
+____________________________________________________________________________
+[  1615] By: nick                                  on 1998/07/21  22:26:34
+        Log: Mingw32 PERL_OBJECT tweaks
+     Branch: perl
+           ! ext/Fcntl/Fcntl.xs ext/IO/IO.xs ext/POSIX/POSIX.xs
+____________________________________________________________________________
+[  1614] By: gsar                                  on 1998/07/21  19:43:32
+        Log: fix off-by-one in change#623 that broke lexical lookups in eval''
+     Branch: perl
+           ! pp_ctl.c
+
 ----------------
 Version 5.004_76        5.005 Public Beta, Issue 2
 ----------------
