@@ -59,7 +59,7 @@ sub eliminate_macros {
                     $complex = 1;
                 }
             }
-            else { ($macro = unixify($self->{$macro})) =~ s#/\z##; }
+            else { ($macro = unixify($self->{$macro})) =~ s#/\Z(?!\n)##; }
             $npath = "$head$macro$tail";
         }
     }
@@ -89,8 +89,8 @@ sub fixpath {
     $self = bless {} unless ref $self;
     my($fixedpath,$prefix,$name);
 
-    if ($path =~ m#^\$\([^\)]+\)\z#s || $path =~ m#[/:>\]]#) { 
-        if ($force_path or $path =~ /(?:DIR\)|\])\z/) {
+    if ($path =~ m#^\$\([^\)]+\)\Z(?!\n)#s || $path =~ m#[/:>\]]#) { 
+        if ($force_path or $path =~ /(?:DIR\)|\])\Z(?!\n)/) {
             $fixedpath = vmspath($self->eliminate_macros($path));
         }
         else {
@@ -100,7 +100,7 @@ sub fixpath {
     elsif ((($prefix,$name) = ($path =~ m#^\$\(([^\)]+)\)(.+)#s)) && $self->{$prefix}) {
         my($vmspre) = $self->eliminate_macros("\$($prefix)");
         # is it a dir or just a name?
-        $vmspre = ($vmspre =~ m|/| or $prefix =~ /DIR\z/) ? vmspath($vmspre) : '';
+        $vmspre = ($vmspre =~ m|/| or $prefix =~ /DIR\Z(?!\n)/) ? vmspath($vmspre) : '';
         $fixedpath = ($vmspre ? $vmspre : $self->{$prefix}) . $name;
         $fixedpath = vmspath($fixedpath) if $force_path;
     }
@@ -139,7 +139,7 @@ sub canonpath {
     my($self,$path) = @_;
 
     if ($path =~ m|/|) { # Fake Unix
-      my $pathify = $path =~ m|/\z|;
+      my $pathify = $path =~ m|/\Z(?!\n)|;
       $path = $self->SUPER::canonpath($path);
       if ($pathify) { return vmspath($path); }
       else          { return vmsify($path);  }
@@ -172,8 +172,8 @@ sub catdir {
     if (@dirs) {
 	my $path = (@dirs == 1 ? $dirs[0] : $self->catdir(@dirs));
 	my ($spath,$sdir) = ($path,$dir);
-	$spath =~ s/\.dir\z//; $sdir =~ s/\.dir\z//; 
-	$sdir = $self->eliminate_macros($sdir) unless $sdir =~ /^[\w\-]+\z/s;
+	$spath =~ s/\.dir\Z(?!\n)//; $sdir =~ s/\.dir\Z(?!\n)//; 
+	$sdir = $self->eliminate_macros($sdir) unless $sdir =~ /^[\w\-]+\Z(?!\n)/s;
 	$rslt = $self->fixpath($self->eliminate_macros($spath)."/$sdir",1);
 
 	# Special case for VMS absolute directory specs: these will have had device
@@ -184,7 +184,7 @@ sub catdir {
     }
     else {
 	if    (not defined $dir or not length $dir) { $rslt = ''; }
-	elsif ($dir =~ /^\$\([^\)]+\)\z/s)          { $rslt = $dir; }
+	elsif ($dir =~ /^\$\([^\)]+\)\Z(?!\n)/s)          { $rslt = $dir; }
 	else                                        { $rslt = vmspath($dir); }
     }
     return $self->canonpath($rslt);
@@ -205,8 +205,8 @@ sub catfile {
     if (@files) {
 	my $path = (@files == 1 ? $files[0] : $self->catdir(@files));
 	my $spath = $path;
-	$spath =~ s/\.dir\z//;
-	if ($spath =~ /^[^\)\]\/:>]+\)\z/s && basename($file) eq $file) {
+	$spath =~ s/\.dir\Z(?!\n)//;
+	if ($spath =~ /^[^\)\]\/:>]+\)\Z(?!\n)/s && basename($file) eq $file) {
 	    $rslt = "$spath$file";
 	}
 	else {
@@ -313,7 +313,7 @@ Checks for VMS directory spec as well as Unix separators.
 sub file_name_is_absolute {
     my ($self,$file) = @_;
     # If it's a logical name, expand it.
-    $file = $ENV{$file} while $file =~ /^[\w\$\-]+\z/s && $ENV{$file};
+    $file = $ENV{$file} while $file =~ /^[\w\$\-]+\Z(?!\n)/s && $ENV{$file};
     return scalar($file =~ m!^/!s             ||
 		  $file =~ m![<\[][^.\-\]>]!  ||
 		  $file =~ /:[^<\[]/);
@@ -344,7 +344,7 @@ sub splitdir {
     $dirspec =~ s/\]\[//g;  $dirspec =~ s/\-\-/-.-/g;
     $dirspec = "[$dirspec]" unless $dirspec =~ /[\[<]/; # make legal
     my(@dirs) = split('\.', vmspath($dirspec));
-    $dirs[0] =~ s/^[\[<]//s;  $dirs[-1] =~ s/[\]>]\z//s;
+    $dirs[0] =~ s/^[\[<]//s;  $dirs[-1] =~ s/[\]>]\Z(?!\n)//s;
     @dirs;
 }
 
@@ -358,7 +358,7 @@ Construct a complete filespec using VMS syntax
 sub catpath {
     my($self,$dev,$dir,$file) = @_;
     if ($dev =~ m|^/+([^/]+)|) { $dev = "$1:"; }
-    else { $dev .= ':' unless $dev eq '' or $dev =~ /:\z/; }
+    else { $dev .= ':' unless $dev eq '' or $dev =~ /:\Z(?!\n)/; }
     if (length($dev) or length($dir)) {
       $dir = "[$dir]" unless $dir =~ /[\[<\/]/;
       $dir = vmspath($dir);
@@ -403,17 +403,16 @@ sub abs2rel {
     }
 
     # Split up paths
-    my ( undef, $path_directories, $path_file ) =
-        $self->splitpath( $path, 1 ) ;
+    my ( $path_directories, $path_file ) =
+        ($self->splitpath( $path, 1 ))[1,2] ;
 
     $path_directories = $1
-        if $path_directories =~ /^\[(.*)\]\z/s ;
+        if $path_directories =~ /^\[(.*)\]\Z(?!\n)/s ;
 
-    my ( undef, $base_directories, undef ) =
-        $self->splitpath( $base, 1 ) ;
+    my $base_directories = ($self->splitpath( $base, 1 ))[1] ;
 
     $base_directories = $1
-        if $base_directories =~ /^\[(.*)\]\z/s ;
+        if $base_directories =~ /^\[(.*)\]\Z(?!\n)/s ;
 
     # Now, remove all leading components that are the same
     my @pathchunks = $self->splitdir( $path_directories );
@@ -430,7 +429,7 @@ sub abs2rel {
     # @basechunks now contains the directories to climb out of,
     # @pathchunks now has the directories to descend in to.
     $path_directories = '-.' x @basechunks . join( '.', @pathchunks ) ;
-    $path_directories =~ s{\.\z}{} ;
+    $path_directories =~ s{\.\Z(?!\n)}{} ;
     return $self->canonpath( $self->catpath( '', $path_directories, $path_file ) ) ;
 }
 
@@ -461,17 +460,17 @@ sub rel2abs($;$;) {
         }
 
         # Split up paths
-        my ( undef, $path_directories, $path_file ) =
-            $self->splitpath( $path ) ;
+        my ( $path_directories, $path_file ) =
+            ($self->splitpath( $path ))[1,2] ;
 
-        my ( $base_volume, $base_directories, undef ) =
+        my ( $base_volume, $base_directories ) =
             $self->splitpath( $base ) ;
 
         $path_directories = '' if $path_directories eq '[]' ||
                                   $path_directories eq '<>';
         my $sep = '' ;
         $sep = '.'
-            if ( $base_directories =~ m{[^.\]>]\z} &&
+            if ( $base_directories =~ m{[^.\]>]\Z(?!\n)} &&
                  $path_directories =~ m{^[^.\[<]}s
             ) ;
         $base_directories = "$base_directories$sep$path_directories";
