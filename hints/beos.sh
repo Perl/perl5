@@ -56,4 +56,7 @@ case "$ldlibpthname" in
 esac
 
 # the waitpid() wrapper
-archobjs="beos/beos.o"
+archobjs="beos.o"
+test -f beos.c || cp beos/beos.c .
+
+
