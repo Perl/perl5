@@ -167,7 +167,7 @@ unless (defined &Time::HiRes::gettimeofday
     $r = [Time::HiRes::gettimeofday()];
     $i = 5;
     $SIG{ALRM} = "tick";
-    while ($i)
+    while ($i > 0)
     {
 	alarm(0.3);
 	select (undef, undef, undef, 10);
