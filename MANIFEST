@@ -1226,6 +1226,7 @@ lib/Pod/t/latex.t		Test for Pod::LaTeX
 lib/Pod/t/man.t    		podlators test
 lib/Pod/t/parselink.t		podlators test
 lib/Pod/t/text-errors.t		podlators test
+lib/Pod/t/Usage.t		See if Pod::Usage works
 lib/Pod/t/utils.t		Test for Pod::ParseUtils
 lib/Pod/Text.pm			Pod-Parser - convert POD data to formatted ASCII text
 lib/Pod/Text/Color.pm		Convert POD data to color ASCII text
