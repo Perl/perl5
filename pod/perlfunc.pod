@@ -448,13 +448,22 @@ L<perlipc/"Sockets: Client/Server Communication">.
 Arranges for FILEHANDLE to be read or written in "binary" or "text" mode
 on systems where the run-time libraries distinguish between binary and
 text files.  If FILEHANDLE is an expression, the value is taken as the
-name of the filehandle.  DISCIPLINE can be either of C<":raw"> for
-binary mode or C<":crlf"> for "text" mode.  If the DISCIPLINE is
-omitted, it defaults to C<":raw">.  Returns true on success, C<undef> on
-failure.
+name of the filehandle.  DISCIPLINE can be either of C<:raw> for
+binary mode or C<:crlf> for "text" mode.  If the DISCIPLINE is
+omitted, it defaults to C<:raw>.  Returns true on success, C<undef> on
+failure.  The C<:raw> are C<:clrf>, and any other directives of the
+form C<:...>, are called I/O I<disciplines>.
 
-binmode() should be called after open() but before any I/O is done on
-the filehandle.
+The C<open> pragma can be used to establish default I/O disciplines.
+See L<open>.
+
+In general, binmode() should be called after open() but before any I/O
+is done on the filehandle.  Calling binmode() will flush any possibly
+pending buffered input or output data on the handle.  The only
+exception to this is the C<:encoding> discipline that changes
+the default character encoding of the handle, see L<open>.
+The C<:encoding> discipline sometimes needs to be called in
+mid-stream, and it doesn't flush the stream.
 
 On some systems binmode() is necessary when you're not working with a
 text file.  For the sake of portability it is a good idea to always use
@@ -462,9 +471,6 @@ it when appropriate, and to never use it when it isn't appropriate.
 
 In other words:  Regardless of platform, use binmode() on binary
 files, and do not use binmode() on text files.
-
-The C<open> pragma can be used to establish default disciplines.
-See L<open>.
 
 The operating system, device drivers, C libraries, and Perl run-time
 system all work together to let the programmer treat a single
@@ -2659,33 +2665,39 @@ conversion assumes base 10.)
 =item open FILEHANDLE
 
 Opens the file whose filename is given by EXPR, and associates it with
-FILEHANDLE.  If FILEHANDLE is an undefined lexical (C<my>) variable the variable is
-assigned a reference to a new anonymous filehandle, otherwise if FILEHANDLE is an expression,
-its value is used as the name of the real filehandle wanted.  (This is considered a symbolic
-reference, so C<use strict 'refs'> should I<not> be in effect.)
+FILEHANDLE.
 
-If EXPR is omitted, the scalar
-variable of the same name as the FILEHANDLE contains the filename.
-(Note that lexical variables--those declared with C<my>--will not work
-for this purpose; so if you're using C<my>, specify EXPR in your call
-to open.)  See L<perlopentut> for a kinder, gentler explanation of opening
-files.
+(The following is a comprehensive reference to open(): for a gentler
+introduction you may consider L<perlopentut>.)
 
-If three or more arguments are specified then the mode of opening and the file name
-are separate. If MODE is C<< '<' >> or nothing, the file is opened for input.
-If MODE is C<< '>' >>, the file is truncated and opened for
-output, being created if necessary.  If MODE is C<<< '>>' >>>,
+If FILEHANDLE is an undefined lexical (C<my>) variable the variable is
+assigned a reference to a new anonymous filehandle, otherwise if
+FILEHANDLE is an expression, its value is used as the name of the real
+filehandle wanted.  (This is considered a symbolic reference, so C<use
+strict 'refs'> should I<not> be in effect.)
+
+If EXPR is omitted, the scalar variable of the same name as the
+FILEHANDLE contains the filename.  (Note that lexical variables--those
+declared with C<my>--will not work for this purpose; so if you're
+using C<my>, specify EXPR in your call to open.) 
+
+If three or more arguments are specified then the mode of opening and
+the file name are separate. If MODE is C<< '<' >> or nothing, the file
+is opened for input.  If MODE is C<< '>' >>, the file is truncated and
+opened for output, being created if necessary.  If MODE is C<<< '>>' >>>,
 the file is opened for appending, again being created if necessary.
-You can put a C<'+'> in front of the C<< '>' >> or C<< '<' >> to indicate that
-you want both read and write access to the file; thus C<< '+<' >> is almost
-always preferred for read/write updates--the C<< '+>' >> mode would clobber the
-file first.  You can't usually use either read-write mode for updating
-textfiles, since they have variable length records.  See the B<-i>
-switch in L<perlrun> for a better approach.  The file is created with
-permissions of C<0666> modified by the process' C<umask> value.
 
-These various prefixes correspond to the fopen(3) modes of C<'r'>, C<'r+'>,
-C<'w'>, C<'w+'>, C<'a'>, and C<'a+'>.
+You can put a C<'+'> in front of the C<< '>' >> or C<< '<' >> to
+indicate that you want both read and write access to the file; thus
+C<< '+<' >> is almost always preferred for read/write updates--the C<<
+'+>' >> mode would clobber the file first.  You can't usually use
+either read-write mode for updating textfiles, since they have
+variable length records.  See the B<-i> switch in L<perlrun> for a
+better approach.  The file is created with permissions of C<0666>
+modified by the process' C<umask> value.
+
+These various prefixes correspond to the fopen(3) modes of C<'r'>,
+C<'r+'>, C<'w'>, C<'w+'>, C<'a'>, and C<'a+'>.
 
 In the 2-arguments (and 1-argument) form of the call the mode and
 filename should be concatenated (in this order), possibly separated by
@@ -2701,38 +2713,46 @@ that pipes both in I<and> out, but see L<IPC::Open2>, L<IPC::Open3>,
 and L<perlipc/"Bidirectional Communication with Another Process">
 for alternatives.)
 
-For three or more arguments if MODE is C<'|-'>, the filename is interpreted as a
-command to which output is to be piped, and if MODE is
-C<'-|'>, the filename is interpreted as a command which pipes output to
-us.  In the 2-arguments (and 1-argument) form one should replace dash
-(C<'-'>) with the command.  See L<perlipc/"Using open() for IPC">
-for more examples of this.  (You are not allowed to C<open> to a command
-that pipes both in I<and> out, but see L<IPC::Open2>, L<IPC::Open3>,
-and L<perlipc/"Bidirectional Communication"> for alternatives.) In 3+ arg form of
-pipe opens then if LIST is specified (extra arguments after the command name) then
-LIST becomes arguments to the command invoked if the platform supports it.
-The meaning of C<open> with more than three arguments for non-pipe modes
-is not yet specified. Experimental "layers" may give extra LIST arguments meaning.
+For three or more arguments if MODE is C<'|-'>, the filename is
+interpreted as a command to which output is to be piped, and if MODE
+is C<'-|'>, the filename is interpreted as a command which pipes
+output to us.  In the 2-arguments (and 1-argument) form one should
+replace dash (C<'-'>) with the command.
+See L<perlipc/"Using open() for IPC"> for more examples of this.
+(You are not allowed to C<open> to a command that pipes both in I<and>
+out, but see L<IPC::Open2>, L<IPC::Open3>, and
+L<perlipc/"Bidirectional Communication"> for alternatives.)
+
+In the three-or-more argument form of pipe opens, if LIST is specified
+(extra arguments after the command name) then LIST becomes arguments
+to the command invoked if the platform supports it.  The meaning of
+C<open> with more than three arguments for non-pipe modes is not yet
+specified. Experimental "layers" may give extra LIST arguments
+meaning.
 
 In the 2-arguments (and 1-argument) form opening C<'-'> opens STDIN
 and opening C<< '>-' >> opens STDOUT.
 
-Open returns
-nonzero upon success, the undefined value otherwise.  If the C<open>
-involved a pipe, the return value happens to be the pid of the
-subprocess.
+You may use the three-argument form of open to specify
+I<I/O disciplines> that affect how the input and output
+are processed: see L</binmode> and L<open>.
 
-If you're unfortunate enough to be running Perl on a system that
-distinguishes between text files and binary files (modern operating
-systems don't care), then you should check out L</binmode> for tips for
-dealing with this.  The key distinction between systems that need C<binmode>
-and those that don't is their text file formats.  Systems like Unix, MacOS, and
-Plan9, which delimit lines with a single character, and which encode that
-character in C as C<"\n">, do not need C<binmode>.  The rest need it.
+Open returns nonzero upon success, the undefined value otherwise.  If
+the C<open> involved a pipe, the return value happens to be the pid of
+the subprocess.
 
-In the three argument form MODE may also contain a list of IO "layers" (see L<open> and
-L<PerlIO> for more details) to be applied to the handle. This can be used to achieve the
-effect of C<binmode> as well as more complex behaviours.
+If you're running Perl on a system that distinguishes between text
+files and binary files, then you should check out L</binmode> for tips
+for dealing with this.  The key distinction between systems that need
+C<binmode> and those that don't is their text file formats.  Systems
+like Unix, MacOS, and Plan9, which delimit lines with a single
+character, and which encode that character in C as C<"\n">, do not
+need C<binmode>.  The rest need it.
+
+In the three argument form MODE may also contain a list of IO "layers"
+(see L<open> and L<PerlIO> for more details) to be applied to the
+handle. This can be used to achieve the effect of C<binmode> as well
+as more complex behaviours.
 
 When opening a file, it's usually a bad idea to continue normal execution
 if the request failed, so C<open> is frequently used in connection with
@@ -2742,13 +2762,12 @@ modules that can help with that problem)) you should always check
 the return value from opening a file.  The infrequent exception is when
 working with an unopened filehandle is actually what you want to do.
 
-As a special case the 3 arg form with a read/write mode and the third argument
-being C<undef>:
+As a special case the 3 arg form with a read/write mode and the third
+argument being C<undef>:
 
     open(TMP, "+>", undef) or die ...
 
 opens a filehandle to an anonymous temporary file.
-
 
 Examples:
 
@@ -2887,17 +2906,16 @@ supported on some platforms (see L<perlport>).  To be safe, you may need
 to set C<$|> ($AUTOFLUSH in English) or call the C<autoflush()> method
 of C<IO::Handle> on any open handles.
 
-On systems that support a
-close-on-exec flag on files, the flag will be set for the newly opened
-file descriptor as determined by the value of $^F.  See L<perlvar/$^F>.
+On systems that support a close-on-exec flag on files, the flag will
+be set for the newly opened file descriptor as determined by the value
+of $^F.  See L<perlvar/$^F>.
 
 Closing any piped filehandle causes the parent process to wait for the
 child to finish, and returns the status value in C<$?>.
 
-The filename passed to 2-argument (or 1-argument) form of open()
-will have leading and trailing
-whitespace deleted, and the normal redirection characters
-honored.  This property, known as "magic open",
+The filename passed to 2-argument (or 1-argument) form of open() will
+have leading and trailing whitespace deleted, and the normal
+redirection characters honored.  This property, known as "magic open",
 can often be used to good effect.  A user could specify a filename of
 F<"rsh cat file |">, or you could change certain filenames as needed:
 

@@ -1072,16 +1072,19 @@ PerlIO_binmode(pTHX_ PerlIO *f, int iotype, int mode, const char *names)
     PerlIO_debug("PerlIO_binmode f=%p %s %c %x %s\n",
 		 f, PerlIOBase(f)->tab->name, iotype, mode,
 		 (names) ? names : "(Null)");
-    PerlIO_flush(f);
-    if (!names && (O_TEXT != O_BINARY && (mode & O_BINARY))) {
-	PerlIO *top = f;
-	while (*top) {
-	    if (PerlIOBase(top)->tab == &PerlIO_crlf) {
-		PerlIOBase(top)->flags &= ~PERLIO_F_CRLF;
-		break;
+    /* Can't flush if switching encodings. */
+    if (!(names && memEQ(names, ":encoding(", 10))) {
+        PerlIO_flush(f);
+	if (!names && (O_TEXT != O_BINARY && (mode & O_BINARY))) {
+	    PerlIO *top = f;
+	    while (*top) {
+	        if (PerlIOBase(top)->tab == &PerlIO_crlf) {
+		  PerlIOBase(top)->flags &= ~PERLIO_F_CRLF;
+		  break;
+		}
+		top = PerlIONext(top);
+		PerlIO_flush(top);
 	    }
-	    top = PerlIONext(top);
-	    PerlIO_flush(top);
 	}
     }
     return PerlIO_apply_layers(aTHX_ f, NULL, names) == 0 ? TRUE : FALSE;
