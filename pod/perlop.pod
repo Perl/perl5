@@ -895,7 +895,8 @@ C<m//g>, if any, left off.  Without the C</g> modifier, the C<\G> assertion
 still anchors at pos(), but the match is of course only attempted once.
 Using C<\G> without C</g> on a target string that has not previously had a
 C</g> match applied to it is the same as using the C<\A> assertion to match
-the beginning of the string.
+the beginning of the string.  Note also that, currently, C<\G> is only
+properly supported when anchored at the very beginning of the pattern.
 
 Examples:
 
