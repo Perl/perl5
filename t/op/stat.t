@@ -69,7 +69,7 @@ else {print "# \$nlink is |$nlink|\nnot ok 3\n";}
 if (   $Is_Dosish
         # Solaris tmpfs bug
 	|| ($cwd =~ m#^/tmp# and $mtime && $mtime==$ctime && $^O eq 'solaris')
-	|| $cwd =~ m#/afs/#
+    || $cwd =~ m#$Config{'afsroot'}/#
 	|| $^O eq 'amigaos') {
     print "ok 4 # skipped: different semantic of mtime/ctime\n";
 }
