@@ -138,13 +138,8 @@ sub ret_backtrace {
     $tid_msg = " thread $tid" if $tid;
   }
 
-  { if ($err =~ /\n$/) {	# extra block to localise $1 etc
-    $mess = $err;
-  }
-  else {
-    my %i = caller_info($i);
-    $mess = "$err at $i{file} line $i{line}$tid_msg\n";
-  }}
+  my %i = caller_info($i);
+  $mess = "$err at $i{file} line $i{line}$tid_msg\n";
 
   while (my %i = caller_info(++$i)) {
       $mess .= "\t$i{sub_name} called at $i{file} line $i{line}$tid_msg\n";
@@ -155,7 +150,6 @@ sub ret_backtrace {
 
 sub ret_summary {
   my ($i, @error) = @_;
-  my $mess;
   my $err = join '', @error;
   $i++;
 
