@@ -1,12 +1,12 @@
-#!./perl
+#!./perl -w
 
 BEGIN {
     chdir 't' if -d 't';
     @INC = '../lib';
-    require Config; import Config;
+    require './test.pl';
 }
 
-use Test::More tests => 4;
+plan( tests => 4 );
 
 sub empty_sub {}
 
