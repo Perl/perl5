@@ -367,11 +367,11 @@ SV *sv;
 }
 
 void
-save_freeop(op)
-OP *op;
+save_freeop(o)
+OP *o;
 {
     SSCHECK(2);
-    SSPUSHPTR(op);
+    SSPUSHPTR(o);
     SSPUSHINT(SAVEt_FREEOP);
 }
 

@@ -82,7 +82,7 @@ END
 # Emit function declarations.
 
 for (sort keys %ckname) {
-    print "OP *\t", &tab(3,$_),"_((OP* op));\n";
+    print "OP *\t", &tab(3,$_),"_((OP* o));\n";
 }
 
 print "\n";
@@ -115,9 +115,9 @@ END
 
 print <<END;
 #ifndef DOINIT
-EXT OP * (*check[]) _((OP *op));
+EXT OP * (*check[]) _((OP *o));
 #else
-EXT OP * (*check[]) _((OP *op)) = {
+EXT OP * (*check[]) _((OP *o)) = {
 END
 
 for (@ops) {

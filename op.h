@@ -233,6 +233,18 @@ struct loop {
 #define cCOP ((COP*)op)
 #define cLOOP ((LOOP*)op)
 
+#define cUNOPo ((UNOP*)o)
+#define cBINOPo ((BINOP*)o)
+#define cLISTOPo ((LISTOP*)o)
+#define cLOGOPo ((LOGOP*)o)
+#define cCONDOPo ((CONDOP*)o)
+#define cPMOPo ((PMOP*)o)
+#define cSVOPo ((SVOP*)o)
+#define cGVOPo ((GVOP*)o)
+#define cPVOPo ((PVOP*)o)
+#define cCOPo ((COP*)o)
+#define cLOOPo ((LOOP*)o)
+
 #define kUNOP ((UNOP*)kid)
 #define kBINOP ((BINOP*)kid)
 #define kLISTOP ((LISTOP*)kid)
