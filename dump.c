@@ -334,7 +334,7 @@ Perl_sv_peek(pTHX_ SV *sv)
 }
 
 void
-Perl_do_pmop_dump(pTHX_ I32 level, PerlIO *file, PMOP *pm)
+Perl_do_pmop_dump(pTHX_ I32 level, PerlIO *file, const PMOP *pm)
 {
     char ch;
 
@@ -402,14 +402,14 @@ Perl_pmop_dump(pTHX_ PMOP *pm)
 /* An op sequencer.  We visit the ops in the order they're to execute. */
 
 STATIC void
-sequence(pTHX_ register OP *o)
+sequence(pTHX_ register const OP *o)
 {
     SV      *op;
     char    *key;
     STRLEN   len;
     static   UV seq;
-    OP      *oldop = 0,
-            *l;
+    const OP *oldop = 0;
+    OP      *l;
 
     if (!Sequence)
 	Sequence = newHV();
@@ -499,7 +499,7 @@ sequence(pTHX_ register OP *o)
 }
 
 STATIC UV
-sequence_num(pTHX_ OP *o)
+sequence_num(pTHX_ const OP *o)
 {
     SV     *op,
           **seq;
@@ -513,7 +513,7 @@ sequence_num(pTHX_ OP *o)
 }
 
 void
-Perl_do_op_dump(pTHX_ I32 level, PerlIO *file, OP *o)
+Perl_do_op_dump(pTHX_ I32 level, PerlIO *file, const OP *o)
 {
     UV      seq;
     sequence(aTHX_ o);
@@ -856,7 +856,7 @@ Perl_do_op_dump(pTHX_ I32 level, PerlIO *file, OP *o)
 }
 
 void
-Perl_op_dump(pTHX_ OP *o)
+Perl_op_dump(pTHX_ const OP *o)
 {
     do_op_dump(0, Perl_debug_log, o);
 }
@@ -932,7 +932,7 @@ static struct { const char type; const char *name; } magic_names[] = {
 };
 
 void
-Perl_do_magic_dump(pTHX_ I32 level, PerlIO *file, MAGIC *mg, I32 nest, I32 maxnest, bool dumpops, STRLEN pvlim)
+Perl_do_magic_dump(pTHX_ I32 level, PerlIO *file, const MAGIC *mg, I32 nest, I32 maxnest, bool dumpops, STRLEN pvlim)
 {
     for (; mg; mg = mg->mg_moremagic) {
  	Perl_dump_indent(aTHX_ level, file,
@@ -1050,7 +1050,7 @@ Perl_do_magic_dump(pTHX_ I32 level, PerlIO *file, MAGIC *mg, I32 nest, I32 maxne
 }
 
 void
-Perl_magic_dump(pTHX_ MAGIC *mg)
+Perl_magic_dump(pTHX_ const MAGIC *mg)
 {
     do_magic_dump(0, Perl_debug_log, mg, 0, 0, 0, 0);
 }
@@ -1586,9 +1586,8 @@ Perl_runops_debug(pTHX)
 }
 
 I32
-Perl_debop(pTHX_ OP *o)
+Perl_debop(pTHX_ const OP *o)
 {
-    AV *padlist, *comppad;
     CV *cv;
     SV *sv;
 
@@ -1617,8 +1616,8 @@ Perl_debop(pTHX_ OP *o)
 	/* print the lexical's name */
         cv = deb_curcv(cxstack_ix);
         if (cv) {
-            padlist = CvPADLIST(cv);
-            comppad = (AV*)(*av_fetch(padlist, 0, FALSE));
+            AV *padlist = CvPADLIST(cv);
+            AV *comppad = (AV*)(*av_fetch(padlist, 0, FALSE));
             sv = *av_fetch(comppad, o->op_targ, FALSE);
         } else
             sv = Nullsv;

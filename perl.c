@@ -3838,6 +3838,7 @@ Perl_doing_taint(int argc, char *argv[], char *envp[])
     int euid = PerlProc_geteuid();
     int gid  = PerlProc_getgid();
     int egid = PerlProc_getegid();
+    (void)envp;
 
 #ifdef VMS
     uid  |=  gid << 16;
@@ -3853,7 +3854,6 @@ Perl_doing_taint(int argc, char *argv[], char *envp[])
          && (argv[1][1] == 't' || argv[1][1] == 'T') )
 	return 1;
     return 0;
-    (void)envp;
 }
 
 STATIC void

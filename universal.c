@@ -249,8 +249,9 @@ XS(XS_UNIVERSAL_isa)
 {
     dXSARGS;
     SV *sv;
-    char *name;
+    const char *name;
     STRLEN n_a;
+    (void)cv;
 
     if (items != 2)
 	Perl_croak(aTHX_ "Usage: UNIVERSAL::isa(reference, kind)");
@@ -264,7 +265,7 @@ XS(XS_UNIVERSAL_isa)
 		|| (SvGMAGICAL(sv) && SvPOKp(sv) && SvCUR(sv))))
 	XSRETURN_UNDEF;
 
-    name = (char *)SvPV(ST(1),n_a);
+    name = (const char *)SvPV(ST(1),n_a);
 
     ST(0) = boolSV(sv_derived_from(sv, name));
     XSRETURN(1);
@@ -274,10 +275,11 @@ XS(XS_UNIVERSAL_can)
 {
     dXSARGS;
     SV   *sv;
-    char *name;
+    const char *name;
     SV   *rv;
     HV   *pkg = NULL;
     STRLEN n_a;
+    (void)cv;
 
     if (items != 2)
 	Perl_croak(aTHX_ "Usage: UNIVERSAL::can(object-ref, method)");
@@ -291,7 +293,7 @@ XS(XS_UNIVERSAL_can)
 		|| (SvGMAGICAL(sv) && SvPOKp(sv) && SvCUR(sv))))
 	XSRETURN_UNDEF;
 
-    name = (char *)SvPV(ST(1),n_a);
+    name = (const char *)SvPV(ST(1),n_a);
     rv = &PL_sv_undef;
 
     if (SvROK(sv)) {
@@ -321,6 +323,7 @@ XS(XS_UNIVERSAL_VERSION)
     GV *gv;
     SV *sv;
     const char *undef;
+    (void)cv;
 
     if (SvROK(ST(0))) {
         sv = (SV*)SvRV(ST(0));
@@ -390,6 +393,7 @@ XS(XS_UNIVERSAL_VERSION)
 XS(XS_version_new)
 {
     dXSARGS;
+    (void)cv;
     if (items > 3)
 	Perl_croak(aTHX_ "Usage: version::new(class, version)");
     SP -= items;
@@ -416,6 +420,7 @@ XS(XS_version_new)
 XS(XS_version_stringify)
 {
      dXSARGS;
+     (void)cv;
      if (items < 1)
 	  Perl_croak(aTHX_ "Usage: version::stringify(lobj, ...)");
      SP -= items;
@@ -439,6 +444,7 @@ XS(XS_version_stringify)
 XS(XS_version_numify)
 {
      dXSARGS;
+     (void)cv;
      if (items < 1)
 	  Perl_croak(aTHX_ "Usage: version::numify(lobj, ...)");
      SP -= items;
@@ -462,6 +468,7 @@ XS(XS_version_numify)
 XS(XS_version_vcmp)
 {
      dXSARGS;
+     (void)cv;
      if (items < 1)
 	  Perl_croak(aTHX_ "Usage: version::vcmp(lobj, ...)");
      SP -= items;
@@ -507,6 +514,7 @@ XS(XS_version_vcmp)
 XS(XS_version_boolean)
 {
      dXSARGS;
+     (void)cv;
      if (items < 1)
 	  Perl_croak(aTHX_ "Usage: version::boolean(lobj, ...)");
      SP -= items;
@@ -514,6 +522,7 @@ XS(XS_version_boolean)
 	  SV *	lobj;
 
 	  if (sv_derived_from(ST(0), "version")) {
+               /* XXX If tmp serves a purpose, explain it. */
 	       SV *tmp = SvRV(ST(0));
 	       lobj = tmp;
 	  }
@@ -534,6 +543,7 @@ XS(XS_version_boolean)
 XS(XS_version_noop)
 {
      dXSARGS;
+     (void)cv;
      if (items < 1)
 	  Perl_croak(aTHX_ "Usage: version::noop(lobj, ...)");
      {
@@ -557,6 +567,7 @@ XS(XS_version_noop)
 XS(XS_version_is_alpha)
 {
     dXSARGS;
+    (void)cv;
     if (items != 1)
 	Perl_croak(aTHX_ "Usage: version::is_alpha(lobj)");
     SP -= items;
@@ -564,14 +575,15 @@ XS(XS_version_is_alpha)
 	SV *lobj;
 
         if (sv_derived_from(ST(0), "version")) {
+                /* XXX If tmp serves a purpose, explain it. */
                 SV *tmp = SvRV(ST(0));
         	lobj = tmp;
         }
         else
                 Perl_croak(aTHX_ "lobj is not of type version");
 {
-    I32 len = av_len((AV *)lobj);
-    I32 digit = SvIVX(*av_fetch((AV *)lobj, len, 0));
+    const I32 len = av_len((AV *)lobj);
+    const I32 digit = SvIVX(*av_fetch((AV *)lobj, len, 0));
     if ( digit < 0 )
 	XSRETURN_YES;
     else
@@ -585,6 +597,7 @@ XS(XS_version_is_alpha)
 XS(XS_version_qv)
 {
     dXSARGS;
+    (void)cv;
     if (items != 1)
 	Perl_croak(aTHX_ "Usage: version::qv(ver)");
     SP -= items;
@@ -622,10 +635,11 @@ XS(XS_version_qv)
 XS(XS_utf8_is_utf8)
 {
      dXSARGS;
+     (void)cv;
      if (items != 1)
 	  Perl_croak(aTHX_ "Usage: utf8::is_utf8(sv)");
      {
-	  SV *	sv = ST(0);
+          const SV *sv = ST(0);
 	  {
 	       if (SvUTF8(sv))
 		    XSRETURN_YES;
@@ -639,14 +653,15 @@ XS(XS_utf8_is_utf8)
 XS(XS_utf8_valid)
 {
      dXSARGS;
+     (void)cv;
      if (items != 1)
 	  Perl_croak(aTHX_ "Usage: utf8::valid(sv)");
      {
 	  SV *	sv = ST(0);
 	  {
 	       STRLEN len;
-	       char *s = SvPV(sv,len);
-	       if (!SvUTF8(sv) || is_utf8_string((U8*)s,len))
+	       const char *s = SvPV(sv,len);
+	       if (!SvUTF8(sv) || is_utf8_string((const U8*)s,len))
 		    XSRETURN_YES;
 	       else
 		    XSRETURN_NO;
@@ -658,6 +673,7 @@ XS(XS_utf8_valid)
 XS(XS_utf8_encode)
 {
     dXSARGS;
+    (void)cv;
     if (items != 1)
 	Perl_croak(aTHX_ "Usage: utf8::encode(sv)");
     {
@@ -671,13 +687,12 @@ XS(XS_utf8_encode)
 XS(XS_utf8_decode)
 {
     dXSARGS;
+    (void)cv;
     if (items != 1)
 	Perl_croak(aTHX_ "Usage: utf8::decode(sv)");
     {
 	SV *	sv = ST(0);
-	bool	RETVAL;
-
-	RETVAL = sv_utf8_decode(sv);
+	const bool RETVAL = sv_utf8_decode(sv);
 	ST(0) = boolSV(RETVAL);
 	sv_2mortal(ST(0));
     }
@@ -687,6 +702,7 @@ XS(XS_utf8_decode)
 XS(XS_utf8_upgrade)
 {
     dXSARGS;
+    (void)cv;
     if (items != 1)
 	Perl_croak(aTHX_ "Usage: utf8::upgrade(sv)");
     {
@@ -703,20 +719,14 @@ XS(XS_utf8_upgrade)
 XS(XS_utf8_downgrade)
 {
     dXSARGS;
+    (void)cv;
     if (items < 1 || items > 2)
 	Perl_croak(aTHX_ "Usage: utf8::downgrade(sv, failok=0)");
     {
 	SV *	sv = ST(0);
-	bool	failok;
-	bool	RETVAL;
+        const bool failok = (items < 2) ? 0 : (int)SvIV(ST(1));
+        const bool RETVAL = sv_utf8_downgrade(sv, failok);
 
-	if (items < 2)
-	    failok = 0;
-	else {
-	    failok = (int)SvIV(ST(1));
-	}
-
-	RETVAL = sv_utf8_downgrade(sv, failok);
 	ST(0) = boolSV(RETVAL);
 	sv_2mortal(ST(0));
     }
@@ -726,7 +736,8 @@ XS(XS_utf8_downgrade)
 XS(XS_utf8_native_to_unicode)
 {
  dXSARGS;
- UV uv = SvUV(ST(0));
+ const UV uv = SvUV(ST(0));
+ (void)cv;
 
  if (items > 1)
      Perl_croak(aTHX_ "Usage: utf8::native_to_unicode(sv)");
@@ -738,7 +749,8 @@ XS(XS_utf8_native_to_unicode)
 XS(XS_utf8_unicode_to_native)
 {
  dXSARGS;
- UV uv = SvUV(ST(0));
+ const UV uv = SvUV(ST(0));
+ (void)cv;
 
  if (items > 1)
      Perl_croak(aTHX_ "Usage: utf8::unicode_to_native(sv)");
@@ -751,6 +763,8 @@ XS(XS_Internals_SvREADONLY)	/* This is dangerous stuff. */
 {
     dXSARGS;
     SV *sv = SvRV(ST(0));
+    (void)cv;
+
     if (items == 1) {
 	 if (SvREADONLY(sv))
 	     XSRETURN_YES;
@@ -775,6 +789,8 @@ XS(XS_Internals_SvREFCNT)	/* This is dangerous stuff. */
 {
     dXSARGS;
     SV *sv = SvRV(ST(0));
+    (void)cv;
+
     if (items == 1)
 	 XSRETURN_IV(SvREFCNT(sv) - 1); /* Minus the ref created for us. */
     else if (items == 2) {
@@ -789,6 +805,8 @@ XS(XS_Internals_hv_clear_placehold)
 {
     dXSARGS;
     HV *hv = (HV *) SvRV(ST(0));
+    (void)cv;
+
     if (items != 1)
 	Perl_croak(aTHX_ "Usage: UNIVERSAL::hv_clear_placeholders(hv)");
     hv_clear_placeholders(hv);
@@ -797,12 +815,13 @@ XS(XS_Internals_hv_clear_placehold)
 
 XS(XS_Regexp_DESTROY)
 {
-
+    (void)cv;
 }
 
 XS(XS_PerlIO_get_layers)
 {
     dXSARGS;
+    (void)cv;
     if (items < 1 || items % 2 == 0)
 	Perl_croak(aTHX_ "Usage: PerlIO_get_layers(filehandle[,args])");
 #ifdef USE_PERLIO
@@ -820,7 +839,7 @@ XS(XS_PerlIO_get_layers)
 		  SV **varp = svp;
 		  SV **valp = svp + 1;
 		  STRLEN klen;
-		  char *key = SvPV(*varp, klen);
+                  const char *key = SvPV(*varp, klen);
 
 		  switch (*key) {
 		  case 'i':
@@ -930,6 +949,7 @@ XS(XS_Internals_hash_seed)
     /* Using dXSARGS would also have dITEM and dSP,
      * which define 2 unused local variables.  */
     dMARK; dAX;
+    (void)cv;
     XSRETURN_UV(PERL_HASH_SEED);
 }
 
@@ -938,14 +958,16 @@ XS(XS_Internals_rehash_seed)
     /* Using dXSARGS would also have dITEM and dSP,
      * which define 2 unused local variables.  */
     dMARK; dAX;
+    (void)cv;
     XSRETURN_UV(PL_rehash_seed);
 }
 
 XS(XS_Internals_HvREHASH)	/* Subject to change  */
 {
     dXSARGS;
+    (void)cv;
     if (SvROK(ST(0))) {
-	HV *hv = (HV *) SvRV(ST(0));
+	const HV *hv = (HV *) SvRV(ST(0));
 	if (items == 1 && SvTYPE(hv) == SVt_PVHV) {
 	    if (HvREHASH(hv))
 		XSRETURN_YES;

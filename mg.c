@@ -2489,7 +2489,7 @@ Perl_magic_set(pTHX_ SV *sv, MAGIC *mg)
 	{
 	     union pstun un;
 	     s = SvPV(sv, len);
-	     un.pst_command = s;
+	     un.pst_command = (char *)s;
 	     pstat(PSTAT_SETCMD, un, len, 0, 0);
 	}
 #endif

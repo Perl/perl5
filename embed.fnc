@@ -82,7 +82,7 @@ Ap	|CV*	|gv_handler	|HV* stash|I32 id
 p	|OP*	|append_elem	|I32 optype|OP* head|OP* tail
 p	|OP*	|append_list	|I32 optype|LISTOP* first|LISTOP* last
 p	|I32	|apply		|I32 type|SV** mark|SV** sp
-ApM	|void	|apply_attrs_string|char *stashpv|CV *cv|char *attrstr|STRLEN len
+ApM	|void	|apply_attrs_string|const char *stashpv|CV *cv|const char *attrstr|STRLEN len
 Apd	|void	|av_clear	|AV* ar
 Apd	|SV*	|av_delete	|AV* ar|I32 key|I32 flags
 Apd	|bool	|av_exists	|AV* ar|I32 key
@@ -137,7 +137,7 @@ Afnp	|int	|printf_nocontext|const char* fmt|...
 p	|void	|cv_ckproto	|const CV* cv|const GV* gv|const char* p
 pd	|CV*	|cv_clone	|CV* proto
 Apd	|SV*	|cv_const_sv	|CV* cv
-p	|SV*	|op_const_sv	|OP* o|CV* cv
+p	|SV*	|op_const_sv	|const OP* o|CV* cv
 Apd	|void	|cv_undef	|CV* cv
 Ap	|void	|cx_dump	|PERL_CONTEXT* cs
 Ap	|SV*	|filter_add	|filter_t funcp|SV* datasv
@@ -152,7 +152,7 @@ Ep	|I32	|cxinc
 Afp	|void	|deb		|const char* pat|...
 Ap	|void	|vdeb		|const char* pat|va_list* args
 Ap	|void	|debprofdump
-Ap	|I32	|debop		|OP* o
+Ap	|I32	|debop		|const OP* o
 Ap	|I32	|debstack
 Ap	|I32	|debstackptrs
 Ap	|char*	|delimcpy	|char* to|const char* toend|const char* from \
@@ -218,7 +218,7 @@ Ap	|void	|dump_fds	|char* s
 #endif
 Ap	|void	|dump_form	|const GV* gv
 Ap	|void	|gv_dump	|GV* gv
-Ap	|void	|op_dump	|OP* arg
+Ap	|void	|op_dump	|const OP* arg
 Ap	|void	|pmop_dump	|PMOP* pm
 Ap	|void	|dump_packsubs	|const HV* stash
 Ap	|void	|dump_sub	|const GV* gv
@@ -895,13 +895,13 @@ Ap	|void	|dump_vindent	|I32 level|PerlIO *file|const char* pat \
 Ap	|void	|do_gv_dump	|I32 level|PerlIO *file|const char *name|GV *sv
 Ap	|void	|do_gvgv_dump	|I32 level|PerlIO *file|const char *name|GV *sv
 Ap	|void	|do_hv_dump	|I32 level|PerlIO *file|const char *name|HV *sv
-Ap	|void	|do_magic_dump	|I32 level|PerlIO *file|MAGIC *mg|I32 nest \
+Ap	|void	|do_magic_dump	|I32 level|PerlIO *file|const MAGIC *mg|I32 nest \
 				|I32 maxnest|bool dumpops|STRLEN pvlim
-Ap	|void	|do_op_dump	|I32 level|PerlIO *file|OP *o
-Ap	|void	|do_pmop_dump	|I32 level|PerlIO *file|PMOP *pm
+Ap	|void	|do_op_dump	|I32 level|PerlIO *file|const OP *o
+Ap	|void	|do_pmop_dump	|I32 level|PerlIO *file|const PMOP *pm
 Ap	|void	|do_sv_dump	|I32 level|PerlIO *file|SV *sv|I32 nest \
 				|I32 maxnest|bool dumpops|STRLEN pvlim
-Ap	|void	|magic_dump	|MAGIC *mg
+Ap	|void	|magic_dump	|const MAGIC *mg
 Ap	|void	|reginitcolors
 Apd	|char*	|sv_2pv_nolen	|SV* sv
 Apd	|char*	|sv_2pvutf8_nolen|SV* sv
@@ -935,6 +935,7 @@ Ap	|DIR*	|dirp_dup	|DIR* dp
 Ap	|GP*	|gp_dup		|GP* gp|CLONE_PARAMS* param
 Ap	|MAGIC*	|mg_dup		|MAGIC* mg|CLONE_PARAMS* param
 Ap	|SV*	|sv_dup		|SV* sstr|CLONE_PARAMS* param
+Ap	|void	|rvpv_dup	|SV* dstr|SV *sstr|CLONE_PARAMS* param
 #if defined(HAVE_INTERP_INTERN)
 Ap	|void	|sys_intern_dup	|struct interp_intern* src \
 				|struct interp_intern* dst
@@ -1000,11 +1001,11 @@ s	|int	|magic_methcall	|SV *sv|const MAGIC *mg|const char *meth|I32 f \
 #endif
 
 #if defined(PERL_IN_OP_C) || defined(PERL_DECL_PROT)
-s	|I32	|list_assignment|OP *o
-s	|void	|bad_type	|I32 n|const char *t|const char *name|OP *kid
+s	|I32	|list_assignment|const OP *o
+s	|void	|bad_type	|I32 n|const char *t|const char *name|const OP *kid
 s	|void	|cop_free	|COP *cop
 s	|OP*	|modkids	|OP *o|I32 type
-s	|void	|no_bareword_allowed|OP *o
+s	|void	|no_bareword_allowed|const OP *o
 s	|OP*	|no_fh_allowed	|OP *o
 s	|OP*	|scalarboolean	|OP *o
 s	|OP*	|too_few_arguments|OP *o|const char* name
@@ -1012,9 +1013,9 @@ s	|OP*	|too_many_arguments|OP *o|const char* name
 s	|OP*	|newDEFSVOP
 s	|OP*	|new_logop	|I32 type|I32 flags|OP **firstp|OP **otherp
 s	|void	|simplify_sort	|OP *o
-s	|bool	|is_handle_constructor	|OP *o|I32 argnum
+s	|bool	|is_handle_constructor	|const OP *o|I32 argnum
 s	|char*	|gv_ename	|GV *gv
-s	|bool	|scalar_mod_type|OP *o|I32 type
+s	|bool	|scalar_mod_type|const OP *o|I32 type
 s	|OP *	|my_kid		|OP *o|OP *attrs|OP **imopsp
 s	|OP *	|dup_attrlist	|OP *o
 s	|void	|apply_attrs	|HV *stash|SV *target|OP *attrs|bool for_my

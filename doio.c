@@ -71,6 +71,7 @@ Perl_do_open9(pTHX_ GV *gv, register char *name, I32 len, int as_raw,
 	      int rawmode, int rawperm, PerlIO *supplied_fp, SV *svs,
 	      I32 num_svs)
 {
+    (void)num_svs;
     return do_openn(gv, name, len, as_raw, rawmode, rawperm,
 		    supplied_fp, &svs, 1);
 }
@@ -156,7 +157,7 @@ Perl_do_openn(pTHX_ GV *gv, register char *name, I32 len, int as_raw,
 	     |O_TRUNC
 #endif
 	     ;
-	int modifyingmode = O_WRONLY|O_RDWR|O_CREAT|appendtrunc;
+	const int modifyingmode = O_WRONLY|O_RDWR|O_CREAT|appendtrunc;
 	int ismodifying;
 
 	if (num_svs != 0) {
@@ -1613,7 +1614,7 @@ Perl_do_exec3(pTHX_ char *cmd, int fd, int do_report)
 		&& s > cmd + 1 && s[-1] == '2' && isSPACE(s[-2])
 		&& (!s[3] || isSPACE(s[3])))
 	    {
-		char *t = s + 3;
+                const char *t = s + 3;
 
 		while (*t && isSPACE(*t))
 		    ++t;
@@ -1651,12 +1652,11 @@ Perl_do_exec3(pTHX_ char *cmd, int fd, int do_report)
 	    goto doshell;
 	}
 	{
-	    int e = errno;
-
 	    if (ckWARN(WARN_EXEC))
 		Perl_warner(aTHX_ packWARN(WARN_EXEC), "Can't exec \"%s\": %s",
 		    PL_Argv[0], Strerror(errno));
 	    if (do_report) {
+		int e = errno;
 		PerlLIO_write(fd, (void*)&e, sizeof(int));
 		PerlLIO_close(fd);
 	    }
@@ -1672,7 +1672,6 @@ I32
 Perl_apply(pTHX_ I32 type, register SV **mark, register SV **sp)
 {
     register I32 val;
-    register I32 val2;
     register I32 tot = 0;
     const char *what;
     char *s;
@@ -1715,6 +1714,7 @@ Perl_apply(pTHX_ I32 type, register SV **mark, register SV **sp)
 	what = "chown";
 	APPLY_TAINT_PROPER();
 	if (sp - mark > 2) {
+            register I32 val2;
 	    val = SvIVx(*++mark);
 	    val2 = SvIVx(*++mark);
 	    APPLY_TAINT_PROPER();
@@ -1967,12 +1967,11 @@ Perl_ingroup(pTHX_ Gid_t testgid, Uid_t effective)
 I32
 Perl_do_ipcget(pTHX_ I32 optype, SV **mark, SV **sp)
 {
-    key_t key;
-    I32 n, flags;
+    key_t key = (key_t)SvNVx(*++mark);
+    const I32 n = (optype == OP_MSGGET) ? 0 : SvIVx(*++mark);
+    const I32 flags = SvIVx(*++mark);
+    (void)sp;
 
-    key = (key_t)SvNVx(*++mark);
-    n = (optype == OP_MSGGET) ? 0 : SvIVx(*++mark);
-    flags = SvIVx(*++mark);
     SETERRNO(0,0);
     switch (optype)
     {
@@ -2001,12 +2000,13 @@ Perl_do_ipcctl(pTHX_ I32 optype, SV **mark, SV **sp)
 {
     SV *astr;
     char *a;
-    I32 id, n, cmd, infosize, getinfo;
+    I32 infosize, getinfo;
     I32 ret = -1;
+    const I32 id  = SvIVx(*++mark);
+    const I32 n   = (optype == OP_SEMCTL) ? SvIVx(*++mark) : 0;
+    const I32 cmd = SvIVx(*++mark);
+    (void)sp;
 
-    id = SvIVx(*++mark);
-    n = (optype == OP_SEMCTL) ? SvIVx(*++mark) : 0;
-    cmd = SvIVx(*++mark);
     astr = *++mark;
     infosize = 0;
     getinfo = (cmd == IPC_STAT);
@@ -2125,10 +2125,11 @@ Perl_do_msgsnd(pTHX_ SV **mark, SV **sp)
 #ifdef HAS_MSG
     SV *mstr;
     char *mbuf;
-    I32 id, msize, flags;
+    I32 msize, flags;
     STRLEN len;
+    const I32 id = SvIVx(*++mark);
+    (void)sp;
 
-    id = SvIVx(*++mark);
     mstr = *++mark;
     flags = SvIVx(*++mark);
     mbuf = SvPV(mstr, len);
@@ -2148,10 +2149,11 @@ Perl_do_msgrcv(pTHX_ SV **mark, SV **sp)
     SV *mstr;
     char *mbuf;
     long mtype;
-    I32 id, msize, flags, ret;
+    I32 msize, flags, ret;
     STRLEN len;
+    const I32 id = SvIVx(*++mark);
+    (void)sp;
 
-    id = SvIVx(*++mark);
     mstr = *++mark;
     /* suppress warning when reading into undef var --jhi */
     if (! SvOK(mstr))
@@ -2184,10 +2186,10 @@ Perl_do_semop(pTHX_ SV **mark, SV **sp)
 #ifdef HAS_SEM
     SV *opstr;
     char *opbuf;
-    I32 id;
     STRLEN opsize;
+    const I32 id = SvIVx(*++mark);
+    (void)sp;
 
-    id = SvIVx(*++mark);
     opstr = *++mark;
     opbuf = SvPV(opstr, opsize);
     if (opsize < 3 * SHORTSIZE
@@ -2198,7 +2200,7 @@ Perl_do_semop(pTHX_ SV **mark, SV **sp)
     SETERRNO(0,0);
     /* We can't assume that sizeof(struct sembuf) == 3 * sizeof(short). */
     {
-        int nsops  = opsize / (3 * sizeof (short));
+        const int nsops  = opsize / (3 * sizeof (short));
         int i      = nsops;
         short *ops = (short *) opbuf;
         short *o   = ops;
@@ -2237,11 +2239,12 @@ Perl_do_shmio(pTHX_ I32 optype, SV **mark, SV **sp)
 #ifdef HAS_SHM
     SV *mstr;
     char *mbuf, *shm;
-    I32 id, mpos, msize;
+    I32 mpos, msize;
     STRLEN len;
     struct shmid_ds shmds;
+    const I32 id = SvIVx(*++mark);
+    (void)sp;
 
-    id = SvIVx(*++mark);
     mstr = *++mark;
     mpos = SvIVx(*++mark);
     msize = SvIVx(*++mark);

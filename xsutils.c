@@ -160,6 +160,7 @@ XS(XS_attributes_bootstrap)
 {
     dXSARGS;
     const char file[] = __FILE__;
+    (void)cv;
 
     if( items > 1 )
         Perl_croak(aTHX_ "Usage: attributes::bootstrap $module");
@@ -177,6 +178,7 @@ XS(XS_attributes__modify_attrs)
 {
     dXSARGS;
     SV *rv, *sv;
+    (void)cv;
 
     if (items < 1) {
 usage:
@@ -199,6 +201,7 @@ XS(XS_attributes__fetch_attrs)
     dXSARGS;
     SV *rv, *sv;
     cv_flags_t cvflags;
+    (void)cv;
 
     if (items != 1) {
 usage:
@@ -244,6 +247,7 @@ XS(XS_attributes__guess_stash)
     dXSARGS;
     SV *rv, *sv;
     dXSTARG;
+    (void)cv;
 
     if (items != 1) {
 usage:
@@ -264,7 +268,7 @@ usage:
 	sv_setsv(TARG, &PL_sv_no);	/* unblessed lexical */
 #endif
     else {
-	HV *stash = Nullhv;
+	const HV *stash = Nullhv;
 	switch (SvTYPE(sv)) {
 	case SVt_PVCV:
 	    if (CvGV(sv) && isGV(CvGV(sv)) && GvSTASH(CvGV(sv)))
@@ -296,6 +300,7 @@ XS(XS_attributes_reftype)
     dXSARGS;
     SV *rv, *sv;
     dXSTARG;
+    (void)cv;
 
     if (items != 1) {
 usage:
@@ -319,6 +324,7 @@ usage:
 XS(XS_attributes__warn_reserved)
 {
     dXSARGS;
+    (void)cv;
 
     if (items != 0) {
 	Perl_croak(aTHX_

@@ -7228,7 +7228,7 @@ thats_really_all_folks:
 
 screamer2:
 	if (rslen) {
-	    register STDCHAR *bpe = buf + sizeof(buf);
+            const register STDCHAR *bpe = buf + sizeof(buf);
 	    bp = buf;
 	    while ((i = PerlIO_getc(fp)) != EOF && (*bp++ = (STDCHAR)i) != rslast && bp < bpe)
 		; /* keep reading */

@@ -41,7 +41,7 @@ package Maintainers;
 	'ni-s'		=> 'Nick Ing-Simmons <nick@ing-simmons.net>',
 	'p5p'		=> 'perl5-porters <perl5-porters@perl.org>',
 	'perlfaq'	=> 'perlfaq-workers <perlfaq-workers@perl.org>',
-	'petdance'	=> 'Andy Lester <petdance@cpan.org>',
+	'petdance'	=> 'Andy Lester <andy@petdance.com>',
 	'pmqs'		=> 'Paul Marquess <pmqs@cpan.org>',
 	'pvhp'		=> 'Peter Prymmer <pvhp@best.com>',
 	'rclamp'	=> 'Richard Clamp <rclamp@cpan.org>',
