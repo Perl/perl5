@@ -8,9 +8,13 @@ $| = 1;
 # Cheesy version of Getopt::Std.  Maybe we should replace it with that.
 if ($#ARGV >= 0) {
     foreach my $idx (0..$#ARGV) {
-	next unless $ARGV[$idx] =~ /^-(\w+)$/;
+	next unless $ARGV[$idx] =~ /^-(\S+)$/;
 	$verbose = 1 if $1 eq 'v';
 	$with_utf= 1 if $1 eq 'utf8';
+	if ($1 =~ /^deparse(,.+)?$/) {
+	    $deparse = 1;
+	    $deparse_opts = $1;
+	}
 	splice(@ARGV, $idx, 1);
     }
 }
@@ -47,8 +51,12 @@ if ($#ARGV == -1) {
 
 # %infinite = ( 'comp/require.t', 1, 'op/bop.t', 1, 'lib/hostname.t', 1 );
 
-_testprogs('perl', @ARGV);
-_testprogs('compile', @ARGV) if (-e "../testcompile");
+if ($deparse) {
+    _testprogs('deparse', @ARGV);
+} else {
+    _testprogs('perl', @ARGV);
+    _testprogs('compile', @ARGV) if (-e "../testcompile");
+}
 
 sub _testprogs {
     $type = shift @_;
@@ -58,6 +66,12 @@ sub _testprogs {
     print <<'EOT' if ($type eq 'compile');
 --------------------------------------------------------------------------------
 TESTING COMPILER
+--------------------------------------------------------------------------------
+EOT
+
+    print <<'EOT' if ($type eq 'deparse');
+--------------------------------------------------------------------------------
+TESTING DEPARSER
 --------------------------------------------------------------------------------
 EOT
 
@@ -86,13 +100,23 @@ EOT
 	if ($test =~ /^$/) {
 	    next;
 	}
+	if ($type eq 'deparse') {
+	    if ($test eq "comp/redef.t") {
+		# Redefinition happens at compile time
+		next;
+	    }
+	    elsif ($test eq "lib/switch.t") {
+		# B::Deparse doesn't support source filtering
+		next;
+	    }
+	}
 	$te = $test;
 	chop($te);
 	print "$te" . '.' x ($dotdotdot - length($te));
 
 	open(SCRIPT,"<$test") or die "Can't run $test.\n";
 	$_ = <SCRIPT>;
-	close(SCRIPT);
+	close(SCRIPT) unless ($type eq 'deparse');
 	if (/#!.*perl(.*)$/) {
 	    $switch = $1;
 	    if ($^O eq 'VMS') {
@@ -104,10 +128,28 @@ EOT
 	    $switch = '';
 	}
 
+	my $file_opts = "";
+	if ($type eq 'deparse') {
+	    # Look for #line directives which change the filename
+	    while (<SCRIPT>) {
+		$file_opts .= ",-f$3$4"
+			if /^#\s*line\s+(\d+)\s+((\w+)|"([^"]+)")/;
+	    }
+	    close(SCRIPT);
+	}
 	my $utf = $with_utf ? '-I../lib -Mutf8'
 	                    : '';
 	my $testswitch = '-I. -MTestInit'; # -T will strict . from @INC
-	if ($type eq 'perl') {
+	if ($type eq 'deparse') {
+	    my $deparse =
+		"./perl $testswitch $switch -I../lib -MO=-qq,Deparse,".
+		"-l$deparse_opts$file_opts ".
+		"./$test > ./$test.dp ".
+		"&& ./perl $testswitch $switch -I../lib ./$test.dp |";
+	    open(RESULTS, $deparse)
+		or print "can't deparse '$deparse': $!.\n";
+	}
+	elsif ($type eq 'perl') {
 	    my $run = "./perl $testswitch $switch $utf $test |";
 	    open(RESULTS,$run) or print "can't run '$run': $!.\n";
 	}
@@ -161,6 +203,9 @@ EOT
 	    }
 	}
 	close RESULTS;
+	if ($type eq 'deparse') {
+	    unlink "./$test.dp";
+	}
 	if ($ENV{PERL_3LOG}) {
 	    my $tpp = $test;
 	    $tpp =~ s:/:_:g;
