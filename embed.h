@@ -775,12 +775,6 @@
 #define safesyscalloc		Perl_safesyscalloc
 #define safesysrealloc		Perl_safesysrealloc
 #define safesysfree		Perl_safesysfree
-#if defined(LEAKTEST)
-#define safexmalloc		Perl_safexmalloc
-#define safexcalloc		Perl_safexcalloc
-#define safexrealloc		Perl_safexrealloc
-#define safexfree		Perl_safexfree
-#endif
 #if defined(PERL_GLOBAL_STRUCT)
 #define GetVars			Perl_GetVars
 #endif
@@ -1182,9 +1176,6 @@
 #if defined(PERL_IN_UTIL_C) || defined(PERL_DECL_PROT)
 #define closest_cop		S_closest_cop
 #define mess_alloc		S_mess_alloc
-#  if defined(LEAKTEST)
-#define xstat			S_xstat
-#  endif
 #endif
 #define sv_setsv_flags		Perl_sv_setsv_flags
 #define sv_catpvn_flags		Perl_sv_catpvn_flags
@@ -2343,12 +2334,6 @@
 #define safesyscalloc		Perl_safesyscalloc
 #define safesysrealloc		Perl_safesysrealloc
 #define safesysfree		Perl_safesysfree
-#if defined(LEAKTEST)
-#define safexmalloc		Perl_safexmalloc
-#define safexcalloc		Perl_safexcalloc
-#define safexrealloc		Perl_safexrealloc
-#define safexfree		Perl_safexfree
-#endif
 #if defined(PERL_GLOBAL_STRUCT)
 #define GetVars()		Perl_GetVars(aTHX)
 #endif
@@ -2745,9 +2730,6 @@
 #if defined(PERL_IN_UTIL_C) || defined(PERL_DECL_PROT)
 #define closest_cop(a,b)	S_closest_cop(aTHX_ a,b)
 #define mess_alloc()		S_mess_alloc(aTHX)
-#  if defined(LEAKTEST)
-#define xstat(a)		S_xstat(aTHX_ a)
-#  endif
 #endif
 #define sv_setsv_flags(a,b,c)	Perl_sv_setsv_flags(aTHX_ a,b,c)
 #define sv_catpvn_flags(a,b,c,d)	Perl_sv_catpvn_flags(aTHX_ a,b,c,d)
