@@ -421,6 +421,7 @@ C<xsubpp>.  See L<perlxs/"The VERSIONCHECK: Keyword">.
 #    define longjmp		PerlProc_longjmp
 #    define signal		PerlProc_signal
 #    define getpid		PerlProc_getpid
+#    define gettimeofday	PerlProc_gettimeofday
 #    define htonl		PerlSock_htonl
 #    define htons		PerlSock_htons
 #    define ntohl		PerlSock_ntohl

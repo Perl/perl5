@@ -1052,6 +1052,7 @@ if ($PLATFORM =~ /^win(?:32|ce)$/) {
 			    win32_link
 			    win32_unlink
 			    win32_utime
+			    win32_gettimeofday
 			    win32_uname
 			    win32_wait
 			    win32_waitpid

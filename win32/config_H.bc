@@ -169,7 +169,7 @@
  *	<sys/resource.h> needs to be included (see I_SYS_RESOURCE).
  *	The type "Timeval" should be used to refer to "struct timeval".
  */
-/*#define HAS_GETTIMEOFDAY	/**/
+#define HAS_GETTIMEOFDAY	/**/
 #ifdef HAS_GETTIMEOFDAY
 #define Timeval struct timeval	/* Structure used by gettimeofday() */
 #endif

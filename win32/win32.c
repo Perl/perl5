@@ -1651,6 +1651,38 @@ win32_utime(const char *filename, struct utimbuf *times)
     return rc;
 }
 
+typedef union {
+    unsigned __int64	ft_i64;
+    FILETIME		ft_val;
+} FT_t;
+
+#ifdef __GNUC__
+#define Const64(x) x##LL
+#else
+#define Const64(x) x##i64
+#endif
+/* Number of 100 nanosecond units from 1/1/1601 to 1/1/1970 */
+#define EPOCH_BIAS  Const64(116444736000000000)
+
+/* NOTE: This does not compute the timezone info (doing so can be expensive,
+ * and appears to be unsupported even by glibc) */
+DllExport int
+win32_gettimeofday(struct timeval *tp, void *not_used)
+{
+    FT_t ft;
+
+    /* this returns time in 100-nanosecond units  (i.e. tens of usecs) */
+    GetSystemTimeAsFileTime(&ft.ft_val);
+
+    /* seconds since epoch */
+    tp->tv_sec = (long)((ft.ft_i64 - EPOCH_BIAS) / Const64(10000000));
+
+    /* microseconds remaining */
+    tp->tv_usec = (long)((ft.ft_i64 / Const64(10)) % Const64(1000000));
+
+    return 0;
+}
+
 DllExport int
 win32_uname(struct utsname *name)
 {

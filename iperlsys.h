@@ -953,6 +953,8 @@ typedef int		(*LPProcSpawnvp)(struct IPerlProc*, int, const char*,
 typedef int		(*LPProcASpawn)(struct IPerlProc*, void*, void**, void**);
 #endif
 typedef int		(*LPProcLastHost)(struct IPerlProc*);
+typedef int		(*LPProcGetTimeOfDay)(struct IPerlProc*,
+					      struct timeval*, void*);
 
 struct IPerlProc
 {
@@ -993,6 +995,7 @@ struct IPerlProc
 #endif
     LPProcLastHost      pLastHost;
     LPProcPopenList	pPopenList;
+    LPProcGetTimeOfDay	pGetTimeOfDay;
 };
 
 struct IPerlProcInfo
@@ -1076,6 +1079,8 @@ struct IPerlProcInfo
 #endif
 #define PerlProc_lasthost()						\
 	(*PL_Proc->pLastHost)(PL_Proc)
+#define PerlProc_gettimeofday(t,z)					\
+	(*PL_Proc->pGetTimeOfDay)(PL_Proc,(t),(z))
 
 #else	/* PERL_IMPLICIT_SYS */
 
@@ -1110,6 +1115,7 @@ struct IPerlProcInfo
 #define PerlProc_signal(n, h)	signal((n), (h))
 #define PerlProc_fork()		my_fork()
 #define PerlProc_getpid()	getpid()
+#define PerlProc_gettimeofday(t,z)	gettimeofday((t),(z))
 
 #ifdef WIN32
 #define PerlProc_DynaLoad(f)						\

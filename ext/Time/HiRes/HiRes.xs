@@ -58,49 +58,6 @@ not_there:
     return 0;
 }
 
-#if !defined(HAS_GETTIMEOFDAY) && defined(WIN32)
-#define HAS_GETTIMEOFDAY
-
-/* shows up in winsock.h?
-struct timeval {
- long tv_sec;
- long tv_usec;
-}
-*/
-
-typedef union {
-    unsigned __int64	ft_i64;
-    FILETIME		ft_val;
-} FT_t;
-
-/* Number of 100 nanosecond units from 1/1/1601 to 1/1/1970 */
-#ifdef __GNUC__
-#define Const64(x) x##LL
-#else
-#define Const64(x) x##i64
-#endif
-#define EPOCH_BIAS  Const64(116444736000000000)
-
-/* NOTE: This does not compute the timezone info (doing so can be expensive,
- * and appears to be unsupported even by glibc) */
-int
-gettimeofday (struct timeval *tp, void *not_used)
-{
-    FT_t ft;
-
-    /* this returns time in 100-nanosecond units  (i.e. tens of usecs) */
-    GetSystemTimeAsFileTime(&ft.ft_val);
-
-    /* seconds since epoch */
-    tp->tv_sec = (long)((ft.ft_i64 - EPOCH_BIAS) / Const64(10000000));
-
-    /* microseconds remaining */
-    tp->tv_usec = (long)((ft.ft_i64 / Const64(10)) % Const64(1000000));
-
-    return 0;
-}
-#endif
-
 #if !defined(HAS_GETTIMEOFDAY) && defined(VMS)
 #define HAS_GETTIMEOFDAY
 
@@ -540,7 +497,7 @@ myU2time(UV *ret)
 {
   struct timeval Tp;
   int status;
-  status = gettimeofday (&Tp, NULL);
+  status = PerlProc_gettimeofday(&Tp,NULL);
   ret[0] = Tp.tv_sec;
   ret[1] = Tp.tv_usec;
   return status;
@@ -551,7 +508,7 @@ myNVtime()
 {
   struct timeval Tp;
   int status;
-  status = gettimeofday (&Tp, NULL);
+  status = PerlProc_gettimeofday(&Tp,NULL);
   return status == 0 ? Tp.tv_sec + (Tp.tv_usec / 1000000.) : -1.0;
 }
 
@@ -584,7 +541,7 @@ usleep(useconds)
 	PREINIT:
 	struct timeval Ta, Tb;
 	CODE:
-	gettimeofday(&Ta, NULL);
+	PerlProc_gettimeofday(&Ta,NULL);
 	if (items > 0) {
 	    if (useconds > 1E6) {
 		IV seconds = (IV) (useconds / 1E6);
@@ -600,7 +557,7 @@ usleep(useconds)
 	    usleep((UV)useconds);
 	} else
 	    PerlProc_pause();
-	gettimeofday(&Tb, NULL);
+	PerlProc_gettimeofday(&Tb,NULL);
 #if 0
 	printf("[%ld %ld] [%ld %ld]\n", Tb.tv_sec, Tb.tv_usec, Ta.tv_sec, Ta.tv_usec);
 #endif
@@ -614,7 +571,7 @@ sleep(...)
 	PREINIT:
 	struct timeval Ta, Tb;
 	CODE:
-	gettimeofday(&Ta, NULL);
+	PerlProc_gettimeofday(&Ta,NULL);
 	if (items > 0) {
 	    NV seconds  = SvNV(ST(0));
 	    if (seconds >= 0.0) {
@@ -626,7 +583,7 @@ sleep(...)
 	        croak("Time::HiRes::sleep(%"NVgf"): negative time not invented yet", seconds);
 	} else
 	    PerlProc_pause();
-	gettimeofday(&Tb, NULL);
+	PerlProc_gettimeofday(&Tb,NULL);
 #if 0
 	printf("[%ld %ld] [%ld %ld]\n", Tb.tv_sec, Tb.tv_usec, Ta.tv_sec, Ta.tv_usec);
 #endif
@@ -675,7 +632,7 @@ gettimeofday()
         struct timezone Tz;
         PPCODE:
         int status;
-        status = gettimeofday (&Tp, &Tz);
+        status = PerlProc_gettimeofday(&Tp,&Tz);
         Tp.tv_sec += Tz.tz_minuteswest * 60;	/* adjust for TZ */
 
         if (GIMME == G_ARRAY) {
@@ -695,7 +652,7 @@ time()
         struct timezone Tz;
         CODE:
         int status;
-        status = gettimeofday (&Tp, &Tz);
+        status = PerlProc_gettimeofday(&Tp,&Tz);
         Tp.tv_sec += Tz.tz_minuteswest * 60;	/* adjust for TZ */
         RETVAL = Tp.tv_sec + (Tp.tv_usec / 1000000.0);
 	OUTPUT:
@@ -708,7 +665,7 @@ gettimeofday()
         struct timeval Tp;
         PPCODE:
 	int status;
-        status = gettimeofday (&Tp, NULL);
+        status = PerlProc_gettimeofday(&Tp,NULL);
         if (GIMME == G_ARRAY) {
 	     EXTEND(sp, 2);
              PUSHs(sv_2mortal(newSViv(Tp.tv_sec)));
@@ -724,7 +681,7 @@ time()
         struct timeval Tp;
         CODE:
 	int status;
-        status = gettimeofday (&Tp, NULL);
+        status = PerlProc_gettimeofday(&Tp,NULL);
         RETVAL = Tp.tv_sec + (Tp.tv_usec / 1000000.);
 	OUTPUT:
 	RETVAL
