@@ -301,7 +301,7 @@ dl_load_file(filespec, flags)
       ST(0) = &PL_sv_undef;
     }
     else {
-      ST(0) = sv_2mortal(newSViv((IV) dlptr));
+      ST(0) = sv_2mortal(newSViv(PTR2IV(dlptr)));
     }
 
 
@@ -328,7 +328,7 @@ dl_find_symbol(librefptr,symname)
       /* error message already saved by findsym_handler */
       ST(0) = &PL_sv_undef;
     }
-    else ST(0) = sv_2mortal(newSViv((IV) entry));
+    else ST(0) = sv_2mortal(newSViv(PTR2IV(entry)));
 
 
 void

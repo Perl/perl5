@@ -54,7 +54,7 @@ dl_load_file(filename, flags=0)
 	PerlIO_printf(PerlIO_stderr(), "load_add_on(%s) : %d (%s)\n", path, bogo, strerror(bogo));
     } else {
 	RETVAL = (void *) bogo;
-	sv_setiv( ST(0), (IV)RETVAL);
+	sv_setiv( ST(0), PTR2IV(RETVAL));
     }
     free(path);
 }
@@ -83,7 +83,7 @@ dl_find_symbol(libhandle, symbolname)
 	SaveError(aTHX_ "%s", strerror(retcode)) ;
 	PerlIO_printf(PerlIO_stderr(), "retcode = %p (%s)\n", retcode, strerror(retcode));
     } else
-	sv_setiv( ST(0), (IV)RETVAL);
+	sv_setiv( ST(0), PTR2IV(RETVAL));
 
 
 void
