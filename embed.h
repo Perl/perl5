@@ -1138,11 +1138,6 @@
 #ifdef PERL_CORE
 #define yyerror			Perl_yyerror
 #endif
-#ifdef USE_PURE_BISON
-#ifdef PERL_CORE
-#define yylex_r			Perl_yylex_r
-#endif
-#endif
 #ifdef PERL_CORE
 #define yylex			Perl_yylex
 #endif
@@ -3639,11 +3634,6 @@
 #endif
 #ifdef PERL_CORE
 #define yyerror(a)		Perl_yyerror(aTHX_ a)
-#endif
-#ifdef USE_PURE_BISON
-#ifdef PERL_CORE
-#define yylex_r(a,b)		Perl_yylex_r(aTHX_ a,b)
-#endif
 #endif
 #ifdef PERL_CORE
 #define yylex()			Perl_yylex(aTHX)

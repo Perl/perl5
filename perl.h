@@ -11,12 +11,6 @@
 #ifndef H_PERL
 #define H_PERL 1
 
-/* XXX DAPM tmp - always do this now - probably nedd to remove all trace
- * of the define at some pooint. Feb 04 */
-
-#define USE_PURE_BISON 1
-
-
 #ifdef PERL_FOR_X2P
 /*
  * This file is being used for x2p stuff.

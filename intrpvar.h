@@ -396,6 +396,10 @@ PERLVARA(Ilast_swash_key,10,	U8)
 PERLVAR(Ilast_swash_tmps,	U8 *)
 PERLVAR(Ilast_swash_slen,	STRLEN)
 
+/* perly.c globals */
+PERLVAR(Iyycharp,	int *)
+PERLVAR(Iyylvalp,	YYSTYPE *)
+
 PERLVARI(Iglob_index,	int,	0)
 PERLVAR(Isrand_called,	bool)
 PERLVARA(Iuudmap,256,	char)

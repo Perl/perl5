@@ -566,9 +566,6 @@ Perl_magic_get(pTHX_ SV *sv, MAGIC *mg)
 
     case '\004':		/* ^D */
 	sv_setiv(sv, (IV)(PL_debug & DEBUG_MASK));
-#if defined(YYDEBUG) && defined(DEBUGGING)
-	PL_yydebug = DEBUG_p_TEST;
-#endif
 	break;
     case '\005':  /* ^E */
 	 if (*(mg->mg_ptr+1) == '\0') {

@@ -457,6 +457,8 @@
 #define PL_xpvnv_root		(vTHX->Ixpvnv_root)
 #define PL_xrv_arenaroot	(vTHX->Ixrv_arenaroot)
 #define PL_xrv_root		(vTHX->Ixrv_root)
+#define PL_yycharp		(vTHX->Iyycharp)
+#define PL_yylvalp		(vTHX->Iyylvalp)
 
 #else	/* !MULTIPLICITY */
 
@@ -756,6 +758,8 @@
 #define PL_Ixpvnv_root		PL_xpvnv_root
 #define PL_Ixrv_arenaroot	PL_xrv_arenaroot
 #define PL_Ixrv_root		PL_xrv_root
+#define PL_Iyycharp		PL_yycharp
+#define PL_Iyylvalp		PL_yylvalp
 
 #define PL_TSv			PL_Sv
 #define PL_TXpv			PL_Xpv

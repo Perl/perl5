@@ -853,9 +853,6 @@ p	|void	|watch		|char** addr
 Ap	|I32	|whichsig	|char* sig
 p	|void	|write_to_stderr|const char* message|int msglen
 p	|int	|yyerror	|char* s
-#ifdef USE_PURE_BISON
-p	|int	|yylex_r	|YYSTYPE *lvalp|int *lcharp
-#endif
 p	|int	|yylex
 p	|int	|yyparse
 p	|int	|yywarn		|char* s

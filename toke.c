@@ -23,8 +23,8 @@
 #define PERL_IN_TOKE_C
 #include "perl.h"
 
-#define yychar	PL_yychar
-#define yylval	PL_yylval
+#define yychar	(*PL_yycharp)
+#define yylval	(*PL_yylvalp)
 
 static char ident_too_long[] = "Identifier too long";
 static char c_without_g[] = "Use of /c modifier is meaningless without /g";
@@ -77,22 +77,6 @@ static I32 utf16rev_textfilter(pTHX_ int idx, SV *sv, int maxlen);
 
 #ifdef ff_next
 #undef ff_next
-#endif
-
-#ifdef USE_PURE_BISON
-#  ifndef YYMAXLEVEL
-#    define YYMAXLEVEL 100
-#  endif
-YYSTYPE* yylval_pointer[YYMAXLEVEL];
-int* yychar_pointer[YYMAXLEVEL];
-int yyactlevel = -1;
-#  undef yylval
-#  undef yychar
-#  define yylval (*yylval_pointer[yyactlevel])
-#  define yychar (*yychar_pointer[yyactlevel])
-#  define PERL_YYLEX_PARAM yylval_pointer[yyactlevel],yychar_pointer[yyactlevel]
-#  undef yylex
-#  define yylex()      Perl_yylex_r(aTHX_ yylval_pointer[yyactlevel],yychar_pointer[yyactlevel])
 #endif
 
 #include "keywords.h"
@@ -2176,31 +2160,6 @@ S_find_in_my_stash(pTHX_ char *pkgname, I32 len)
       if we already built the token before, use it.
 */
 
-#ifdef USE_PURE_BISON
-int
-Perl_yylex_r(pTHX_ YYSTYPE *lvalp, int *lcharp)
-{
-    int r;
-
-    yyactlevel++;
-    yylval_pointer[yyactlevel] = lvalp;
-    yychar_pointer[yyactlevel] = lcharp;
-    if (yyactlevel >= YYMAXLEVEL)
-	Perl_croak(aTHX_ "panic: YYMAXLEVEL");
-
-    r = Perl_yylex(aTHX);
-#  ifdef EBCDIC
-    if (r >= 0 && r < 255) {
-	r = NATIVE_TO_ASCII(r);
-    }
-#  endif
-
-    if (yyactlevel > 0)
-       yyactlevel--;
-
-    return r;
-}
-#endif
 
 #ifdef __SC__
 #pragma segment Perl_yylex
@@ -7802,12 +7761,7 @@ Perl_yyerror(pTHX_ char *s)
     }
     else if (yychar > 255)
 	where = "next token ???";
-#ifdef USE_PURE_BISON
-/*  GNU Bison sets the value -2 */
-    else if (yychar == -2) {
-#else
-    else if ((yychar & 127) == 127) {
-#endif
+    else if (yychar == -2) { /* YYEMPTY */
 	if (PL_lex_state == LEX_NORMAL ||
 	   (PL_lex_state == LEX_KNOWNEXT && PL_lex_defer == LEX_NORMAL))
 	    where = "at end of line";

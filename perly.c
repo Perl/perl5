@@ -76,10 +76,6 @@ while (0)
 #define YYTERROR	1
 #define YYERRCODE	256
 
-/* YYLEX -- calling `yylex' with the right arguments.  */
-
-# define YYLEX yylex_r (&yylval, &yychar)
-
 /* Enable debugging if requested.  */
 #ifdef DEBUGGING
 
@@ -335,11 +331,12 @@ Perl_yyparse (pTHX)
 
     YYDPRINTF ((Perl_debug_log, "Starting parse\n"));
 
-#ifdef USE_ITHREADS
-    /* XXX is this needed anymore? DAPM 13-Feb-04;
-     * if not, delete the correspinding LEAVE too */
     ENTER;			/* force stack free before we return */
-#endif
+    SAVEVPTR(PL_yycharp);
+    SAVEVPTR(PL_yylvalp);
+    PL_yycharp = &yychar; /* so PL_yyerror() can access it */
+    PL_yylvalp = &yylval; /* so various functions in toke.c can access it */
+
     yyss_sv = NEWSV(73, YYINITDEPTH * sizeof(short));
     yyvs_sv = NEWSV(73, YYINITDEPTH * sizeof(YYSTYPE));
     SAVEFREESV(yyss_sv);
@@ -437,7 +434,12 @@ Perl_yyparse (pTHX)
     /* YYCHAR is either YYEMPTY or YYEOF or a valid lookahead symbol.  */
     if (yychar == YYEMPTY) {
 	YYDPRINTF ((Perl_debug_log, "Reading a token: "));
-	yychar = YYLEX;
+	yychar = yylex();
+#  ifdef EBCDIC
+	if (yychar >= 0 && yychar < 255) {
+	    yychar = NATIVE_TO_ASCII(yychar);
+	}
+#  endif
     }
 
     if (yychar <= YYEOF) {
@@ -722,9 +724,7 @@ Perl_yyparse (pTHX)
 
   yyreturn:
 
-#ifdef USE_ITHREADS
-	LEAVE;			/* force stack free before we return */
-#endif
+    LEAVE;			/* force stack free before we return */
 
     return yyresult;
 }

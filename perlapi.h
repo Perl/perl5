@@ -672,6 +672,10 @@ END_EXTERN_C
 #define PL_xrv_arenaroot	(*Perl_Ixrv_arenaroot_ptr(aTHX))
 #undef  PL_xrv_root
 #define PL_xrv_root		(*Perl_Ixrv_root_ptr(aTHX))
+#undef  PL_yycharp
+#define PL_yycharp		(*Perl_Iyycharp_ptr(aTHX))
+#undef  PL_yylvalp
+#define PL_yylvalp		(*Perl_Iyylvalp_ptr(aTHX))
 #undef  PL_Sv
 #define PL_Sv			(*Perl_TSv_ptr(aTHX))
 #undef  PL_Xpv
