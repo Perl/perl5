@@ -45,7 +45,7 @@ Perl_alloc_thread_key(void)
 }
 
 void
-Perl_init_thread_intern(struct perl_thread *thr)
+Perl_init_thread_intern(struct perl_thread *athr)
 {
 #ifdef USE_THREADS
 #ifndef USE_DECLSPEC_THREAD
@@ -56,7 +56,7 @@ Perl_init_thread_intern(struct perl_thread *thr)
   * return values we don't _need_ to do anything but 
   * this is good practice:
   */
- memset(&thr->i,0,sizeof(thr->i));
+ memset(&athr->i,0,sizeof(athr->i));
 
 #endif
 #endif
@@ -95,3 +95,4 @@ Perl_thread_create(struct perl_thread *thr, thread_func_t *fn)
     return thr->self ? 0 : -1;
 }
 #endif
+

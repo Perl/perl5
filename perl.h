@@ -1613,6 +1613,27 @@ typedef enum {
 #define RsSIMPLE(sv)  (SvOK(sv) && SvCUR(sv))
 #define RsPARA(sv)    (SvOK(sv) && ! SvCUR(sv))
 
+/* Set up PERLVAR macros for populating structs */
+#define PERLVAR(var,type) type var;
+#define PERLVARI(var,type,init) type var;
+
+#ifdef PERL_GLOBAL_STRUCT
+struct perl_vars {
+#include "perlvars.h"
+};
+
+#ifdef PERL_CORE
+EXT struct perl_vars Perl_Vars;
+EXT struct perl_vars *Perl_VarsPtr INIT(&Perl_Vars);
+#else
+#if !defined(__GNUC__) || !defined(WIN32)
+EXT
+#endif
+struct perl_vars *Perl_VarsPtr;
+#define Perl_Vars (*((Perl_VarsPtr) ? Perl_VarsPtr : (Perl_VarsPtr =  Perl_GetVars())))
+#endif
+#endif /* PERL_GLOBAL_STRUCT */
+
 #ifdef MULTIPLICITY
 /* If we have multiple interpreters define a struct 
    holding variables which must be per-interpreter
@@ -1620,18 +1641,12 @@ typedef enum {
    be per-thread is per-interpreter.
 */
 
-#define PERLVAR(var,type) type var;
-#define PERLVARI(var,type,init) type var;
-
 struct interpreter {
 #ifndef USE_THREADS
 #include "thrdvar.h"
 #endif
 #include "intrpvar.h"
 };
-
-#undef PERLVAR
-#undef PERLVARI
 
 #else
 struct interpreter {
@@ -1644,25 +1659,22 @@ struct interpreter {
  * that have to be per-thread
  */
 
-#define PERLVAR(var,type) type var;
-#define PERLVARI(var,type,init) type var;
 
 struct perl_thread {
 #include "thrdvar.h"
 };
 
-#undef PERLVAR
-#undef PERLVARI
 #endif
 
+/* Done with PERLVAR macros for now ... */
+#undef PERLVAR
+#undef PERLVARI
+
 typedef struct perl_thread *Thread;
+
 #include "thread.h"
-
 #include "pp.h"
-
-START_EXTERN_C
 #include "proto.h"
-END_EXTERN_C
 
 #ifdef EMBED
 #define Perl_sv_setptrobj(rv,ptr,name) Perl_sv_setref_iv(rv,name,(IV)ptr)
@@ -1684,15 +1696,19 @@ END_EXTERN_C
 #define PERLVAR(var,type) EXT type var;
 #define PERLVARI(var,type,init) EXT type var INIT(init);
 
+#ifndef PERL_GLOBAL_STRUCT
 #include "perlvars.h"
+#endif
 
 #ifndef MULTIPLICITY
-#include "intrpvar.h"
-#endif
 
 #ifndef USE_THREADS
 #include "thrdvar.h"
 #endif
+
+#include "intrpvar.h"
+#endif
+
 
 #undef PERLVAR
 #undef PERLVARI

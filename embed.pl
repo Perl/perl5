@@ -29,7 +29,7 @@ sub readvars(\%$$) {
     while (<FILE>) {
 	s/[ \t]*#.*//;		# Delete comments.
 	if (/PERLVARI?\($pre(\w+)/) {
-	    $$syms{$1} = $pre;
+	    $$syms{$1} = 1;
 	}
     }
     close(FILE);
@@ -40,7 +40,7 @@ my %thread;
 
 readvars %intrp,  'intrpvar.h','I';
 readvars %thread, 'thrdvar.h','T';
-#readvars %global, 'perlvars.h','';
+readvars %globvar, 'perlvars.h','G';
 
 foreach my $sym (sort keys %intrp)
  {
@@ -49,6 +49,15 @@ foreach my $sym (sort keys %intrp)
    {
     delete $global{$sym};
     warn "$sym in global.sym as well as interp\n";
+   }
+ }
+
+foreach my $sym (sort keys %globvar)
+ {
+  if (exists $global{$sym})
+   {
+    delete $global{$sym};
+    warn "$sym in global.sym as well as perlvars.h\n";
    }
  }
 
@@ -79,7 +88,7 @@ sub embed ($) {
 }
 sub multon ($$$) {
     my ($sym,$pre,$ptr) = @_;
-    hide($sym, "($ptr->$pre$sym)");
+    hide($sym, "($ptr$pre$sym)");
 }
 sub multoff ($$) {
     my ($sym,$pre) = @_;
@@ -156,7 +165,7 @@ print EM <<'END';
 END
 
 for $sym (sort keys %thread) {
-    print EM multon($sym,'T','curinterp');
+    print EM multon($sym,'T','curinterp->');
 }
 
 print EM <<'END';
@@ -168,7 +177,7 @@ print EM <<'END';
 END
 
 for $sym (sort keys %intrp) {
-    print EM multon($sym,'I','curinterp');
+    print EM multon($sym,'I','curinterp->');
 }
 
 print EM <<'END';
@@ -228,12 +237,45 @@ print EM <<'END';
 END
 
 for $sym (sort keys %thread) {
-    print EM multon($sym,'T','thr');
+    print EM multon($sym,'T','thr->');
 }
 
 print EM <<'END';
 
 #endif /* USE_THREADS */
+
+#ifdef PERL_GLOBAL_STRUCT
+
+END
+
+for $sym (sort keys %globvar) {
+    print EM multon($sym,'G','Perl_Vars.');
+}
+
+print EM <<'END';
+
+#else /* !PERL_GLOBAL_STRUCT */
+
+END
+
+for $sym (sort keys %globvar) {
+    print EM multoff($sym,'G');
+}
+
+print EM <<'END';
+
+#ifdef EMBED
+
+END
+
+for $sym (sort keys %globvar) {
+    print EM embed($sym);
+}
+
+print EM <<'END';
+
+#endif /* EMBED */
+#endif /* PERL_GLOBAL_STRUCT */
 
 END
 

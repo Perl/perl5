@@ -11,7 +11,7 @@
 # newly built perl.
 INST_DRV=c:
 INST_TOP=$(INST_DRV)\perl5004.5x
-BUILDOPT=-DUSE_THREADS
+BUILDOPT=
 
 
 #
@@ -49,7 +49,7 @@ CCLIBDIR = $(CCHOME)\lib
 
 .USESHELL :
 
-CC = gcc
+CC = gcc -pipe
 LINK32 = gcc
 LIB32 = ar
 IMPLIB = dlltool

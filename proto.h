@@ -1,3 +1,5 @@
+START_EXTERN_C
+
 #ifndef NEXT30_NO_ATTRIBUTE
 #ifndef HASATTRIBUTE       /* disable GNU-cc attribute checking? */
 #ifdef  __attribute__      /* Avoid possible redefinition errors */
@@ -581,3 +583,9 @@ Malloc_t safexcalloc _((I32 x, MEM_SIZE elements, MEM_SIZE size));
 Malloc_t safexrealloc _((Malloc_t where, MEM_SIZE size));
 void     safexfree _((Malloc_t where));
 #endif
+
+#ifdef PERL_GLOBAL_STRUCT
+struct perl_vars *Perl_GetVars _((void));
+#endif
+
+END_EXTERN_C

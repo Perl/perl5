@@ -10,11 +10,27 @@
 #define  _INC_WIN32_PERL5
 
 #ifdef __GNUC__
-#define __declspec(x)
 typedef long long __int64;
 #define Win32_Winsock
+/* GCC does not do __declspec() - render it a nop 
+ * and turn on options to avoid importing data 
+ */
+#define __declspec(x)
+#define PERL_GLOBAL_STRUCT
+#define MULTIPLICITY
 #endif
 
+/* Define DllExport akin to perl's EXT, 
+ * If we are in the DLL or mimicing the DLL for Win95 work round
+ * then Export the symbol, 
+ * otherwise import it.
+ */
+
+#if defined(PERLDLL) || defined(WIN95FIX)
+#define DllExport __declspec(dllexport)
+#else 
+#define DllExport __declspec(dllimport)
+#endif
 
 #define  WIN32_LEAN_AND_MEAN
 #include <windows.h>
@@ -56,8 +72,6 @@ struct tms {
 #define  STANDARD_C	1
 #define  DOSISH		1		/* no escaping our roots */
 #define  OP_BINARY	O_BINARY	/* mistake in in pp_sys.c? */
-#define DllExport	__declspec(dllexport)
-#define DllImport	__declspec(dllimport)
 
 /* Define USE_SOCKETS_AS_HANDLES to enable emulation of windows sockets as
  * real filehandles. XXX Should always be defined (the other version is untested) */
@@ -133,8 +147,8 @@ extern  void	*sbrk(int need);
 #undef   init_os_extras
 #define  init_os_extras Perl_init_os_extras
 
-EXT void		Perl_win32_init(int *argcp, char ***argvp);
-EXT void		Perl_init_os_extras(void);
+DllExport void		Perl_win32_init(int *argcp, char ***argvp);
+DllExport void		Perl_init_os_extras(void);
 
 #ifndef USE_SOCKETS_AS_HANDLES
 extern FILE *		my_fdopen(int, char *);

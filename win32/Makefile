@@ -11,9 +11,10 @@
 # newly built perl.
 INST_DRV=c:
 INST_TOP=$(INST_DRV)\perl5004.5x
-BUILDOPT=-DUSE_THREADS
+#BUILDOPT=-DUSE_THREADS
 #BUILDOPT=-DMULTIPLICITY 
 #BUILDOPT=-DMULTIPLICITY -DUSE_THREADS
+BUILDOPT=-DPERL_GLOBAL_STRUCT -DMULTIPLICITY 
 CORECCOPT=
 
 #
@@ -54,7 +55,7 @@ RUNTIME  = -MD
 INCLUDES = -I.\include -I. -I..
 #PCHFLAGS = -Fp"$(INTDIR)/modules.pch" -YX 
 DEFINES  = -DWIN32 -D_CONSOLE $(BUILDOPT)
-LOCDEFS  = -DPERLDLL -DPERL_CORE $(CORECCOPT)
+LOCDEFS  = -DPERLDLL $(CORECCOPT)
 SUBSYS   = console
 
 !IF "$(RUNTIME)" == "-MD"
@@ -376,13 +377,13 @@ perl95.c : runperl.c
 	copy runperl.c perl95.c
 
 perl95.obj : perl95.c
-	$(CC) $(CFLAGS) -MT -UPERLDLL -c perl95.c
+	$(CC) $(CFLAGS) -MT -UPERLDLL -DWIN95FIX -c perl95.c
 
 win32sckmt.obj : win32sck.c
-	$(CC) $(CFLAGS) -MT -UPERLDLL -c $(OBJOUT_FLAG)win32sckmt.obj win32sck.c
+	$(CC) $(CFLAGS) -MT -UPERLDLL -DWIN95FIX -c $(OBJOUT_FLAG)win32sckmt.obj win32sck.c
 
 win32mt.obj : win32.c
-	$(CC) $(CFLAGS) -MT -UPERLDLL -c $(OBJOUT_FLAG)win32mt.obj win32.c
+	$(CC) $(CFLAGS) -MT -UPERLDLL -DWIN95FIX -c $(OBJOUT_FLAG)win32mt.obj win32.c
 
 $(PERL95EXE): $(PERLDLL) $(CONFIGPM) $(PERL95_OBJ)
 	$(LINK32) -subsystem:console -out:perl95.exe $(LINK_FLAGS) $(LIBFILES) \

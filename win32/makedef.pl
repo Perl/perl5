@@ -38,9 +38,37 @@ if ($CCTYPE ne 'GCC')
   print "CODE LOADONCALL\n";
   print "DATA LOADONCALL NONSHARED MULTIPLE\n";
  }
+else
+ {
+  $define{'PERL_GLOBAL_STRUCT'} = 1;
+  $define{'MULTIPLICITY'} = 1;
+ }
+
 print "EXPORTS\n";
 
-$skip_sym=<<'!END!OF!SKIP!';
+my %skip;
+my %export;
+
+sub skip_symbols
+{
+ my $list = shift;
+ foreach my $symbol (@$list)
+  {
+   $skip{$symbol} = 1;
+  }
+}
+
+sub emit_symbols
+{
+ my $list = shift;
+ foreach my $symbol (@$list)
+  {
+   emit_symbol($symbol) unless exists $skip{$symbol};
+  }
+}
+
+skip_symbols [qw(
+Perl_statusvalue_vms
 Perl_block_type
 Perl_additem
 Perl_cast_ulong
@@ -157,30 +185,26 @@ Perl_my_memset
 Perl_cshlen
 Perl_cshname
 Perl_opsave
-!END!OF!SKIP!
+)];
 
-if ($CCTYPE eq 'GCC')
- {
-  $skip_sym .= "Perl_na\n";
- }
 
 if ($define{'MYMALLOC'})
  {
-  $skip_sym .= <<'!END!OF!SKIP!';
-Perl_safefree
-Perl_safemalloc
-Perl_saferealloc
-Perl_safecalloc
-!END!OF!SKIP!
-  emit_symbol('Perl_malloc');
-  emit_symbol('Perl_free');
-  emit_symbol('Perl_realloc');
-  emit_symbol('Perl_calloc');
+  skip_symbols [qw(
+    Perl_safefree
+    Perl_safemalloc
+    Perl_saferealloc
+    Perl_safecalloc)];
+  emit_symbols [qw(
+    Perl_malloc
+    Perl_free
+    Perl_realloc
+    Perl_calloc)];
  }
 
 unless ($define{'USE_THREADS'})
  {
-  $skip_sym .= <<'!END!OF!SKIP!';
+  skip_symbols [qw(
 Perl_condpair_magic
 Perl_thr_key
 Perl_sv_mutex
@@ -205,56 +229,63 @@ Perl_sv_nv
 Perl_sv_true
 Perl_sv_uv
 Perl_sv_pvn
-Perl_newRV_noinc
-!END!OF!SKIP!
+Perl_newRV_noinc)];
 
  }
 
+sub readvar
+{
+ my $file = shift;
+ open(VARS,$file) || die "Cannot open $file:$!";
+ my @syms;
+ while (<VARS>)
+  {
+   # All symbols have a Perl_ prefix because that's what embed.h
+   # sticks in front of them.
+   push(@syms,"Perl_".$1) if (/\bPERLVARI?\([IGT](\w+)/);
+  } 
+ close(VARS); 
+ return \@syms;
+}
+
 if ($define{'USE_THREADS'} || $define{'MULTIPLICITY'})
  {
-  open(THREAD,"<../thrdvar.h") || die "Cannot open ../thrdvar.h:$!";
-  while (<THREAD>)
-   {
-    if (/\bPERLVARI?\(T(\w+)/)
-     {
-      $skip_sym .= "Perl_".$1."\n";
-     } 
-   } 
-  close(THREAD); 
+  my $thrd = readvar("../thrdvar.h");
+  skip_symbols $thrd;
  } 
 
 if ($define{'MULTIPLICITY'})
  {
-  open(THREAD,"<../intrpvar.h") || die "Cannot open ../intrpvar.h:$!";
-  while (<THREAD>)
-   {
-    if (/\bPERLVARI?\(I(\w+)/)
-     {
-      $skip_sym .= "Perl_".$1."\n";
-     } 
-   } 
-  close(THREAD); 
+  my $interp = readvar("../intrpvar.h");
+  skip_symbols $interp;
+ } 
+
+if ($define{'PERL_GLOBAL_STRUCT'})
+ {
+  my $global = readvar("../perlvars.h");
+  skip_symbols $global;
  } 
 
 unless ($define{'DEBUGGING'})
  {
-  $skip_sym .= "Perl_runops_debug\n";
-  $skip_sym .= "Perl_sv_peek\n";
+  skip_symbols [qw(
+    Perl_runops_debug
+    Perl_sv_peek
+    Perl_watchaddr
+    Perl_watchok)];
  }
 
-# All symbols have a Perl_ prefix because that's what embed.h
-# sticks in front of them.
-
-
 open (GLOBAL, "<../global.sym") || die "failed to open global.sym" . $!;
-while (<GLOBAL>) {
-	my $symbol;
-	next if (!/^[A-Za-z]/);
-	next if (/_amg[ \t]*$/);
-	$symbol = "Perl_$_";
-    	next if ($skip_sym =~ m/$symbol/m);
-	emit_symbol($symbol);
-}
+while (<GLOBAL>) 
+ {
+  next if (!/^[A-Za-z]/);
+  next if (/_amg[ \t]*$/);
+  # All symbols have a Perl_ prefix because that's what embed.h
+  # sticks in front of them.
+  chomp($_);
+  my $symbol = "Perl_$_";
+  emit_symbol($symbol) unless exists $skip{$symbol};
+ }
 close(GLOBAL);
 
 # also add symbols from interp.sym
@@ -262,34 +293,41 @@ close(GLOBAL);
 # doesn't hurt to include them anyway.
 # these don't have Perl prefix
 
-open (INTERP, "<../interp.sym") || die "failed to open interp.sym" . $!;
-while (<INTERP>) {
-	my $symbol;
-	next if (!/^[A-Za-z]/);
-	next if (/_amg[ \t]*$/);
-	$symbol = $_;
-    	next if ($skip_sym =~ m/$symbol/m);
-	#print "\t$symbol";
-	emit_symbol("Perl_" . $symbol);
-}
+if ($define{'PERL_GLOBAL_STRUCT'})
+ {
+  emit_symbol( ($CCTYPE eq 'GCC') ? 'Perl_GetVars' : 'Perl_VarsPtr')
+ }
+else
+ {
+  my $glob = readvar("../perlvars.h");
+  emit_symbols $glob;
+ } 
 
-#close(INTERP);
+unless ($define{'MULTIPLICITY'})
+ {
+  my $glob = readvar("../intrpvar.h");
+  emit_symbols $glob;
+ } 
+
+unless ($define{'MULTIPLICITY'} || $define{'USE_THREADS'})
+ {
+  my $glob = readvar("../thrdvar.h");
+  emit_symbols $glob;
+ } 
 
 while (<DATA>) {
 	my $symbol;
 	next if (!/^[A-Za-z]/);
 	next if (/^#/);
         s/\r//g;
+        chomp($_);
 	$symbol = $_;
-    	next if ($skip_sym =~ m/^$symbol/m);
-        $symbol = "Perl_".$symbol if ($define{'USE_THISPTR'} 
-                                      && $symbol =~ /^perl/);
+    	next if exists $skip{$symbol};
 	emit_symbol($symbol);
 }
 
-sub emit_symbol {
-	my $symbol = shift;
-	chomp $symbol;
+foreach my $symbol (sort keys %export)
+ {
 	if ($CCTYPE eq "BORLAND") {
 		# workaround Borland quirk by exporting both the straight
 		# name and a name with leading underscore.  Note the
@@ -298,12 +336,23 @@ sub emit_symbol {
 		print "\t_$symbol\n";
 		print "\t$symbol = _$symbol\n";
 	}
+        elsif ($CCTYPE eq 'GCC') {
+                # Symbols have leading _ whole process is $%£"% slow
+                # so skip aliases for now
+		print "\t$symbol\n";
+        }
 	else {
 		# for binary coexistence, export both the symbol and
 		# alias with leading underscore
 		print "\t$symbol\n";
 		print "\t_$symbol = $symbol\n";
 	}
+ }
+
+sub emit_symbol {
+	my $symbol = shift;
+        chomp($symbol); 
+	$export{$symbol} = 1;
 }
 
 1;
@@ -453,3 +502,4 @@ Perl_init_os_extras
 Perl_getTHR
 Perl_setTHR
 RunPerl
+

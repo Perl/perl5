@@ -545,15 +545,15 @@ getegid(void)
 }
 
 int
-setuid(uid_t uid)
+setuid(uid_t auid)
 { 
-    return (uid == ROOT_UID ? 0 : -1);
+    return (auid == ROOT_UID ? 0 : -1);
 }
 
 int
-setgid(gid_t gid)
+setgid(gid_t agid)
 {
-    return (gid == ROOT_GID ? 0 : -1);
+    return (agid == ROOT_GID ? 0 : -1);
 }
 
 /*
@@ -1131,9 +1131,9 @@ win32_abort(void)
 }
 
 DllExport int
-win32_fstat(int fd,struct stat *bufptr)
+win32_fstat(int fd,struct stat *sbufptr)
 {
-    return fstat(fd,bufptr);
+    return fstat(fd,sbufptr);
 }
 
 DllExport int
@@ -1772,6 +1772,7 @@ win32_strip_return(SV *sv)
 }
 
 #endif
+
 
 
 
