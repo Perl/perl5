@@ -321,7 +321,7 @@ SHRDLU
    ### You may have to set your dynamic library search path,
    ### $Config{ldlibpthname}, to point to the build directory
    ### before running the harness-- depending on your shell style:
-   ###     setenv $Config{ldlibpthname} `pwd`:\$$Config{ldlibpthname}; cd t; ./perl harness
+   ###     setenv $Config{ldlibpthname} `pwd`:\${?$Config{ldlibpthname}}; cd t; ./perl harness
    ###     $Config{ldlibpthname}=`pwd`:\$$Config{ldlibpthname}; export $Config{ldlibpthname}; cd t; ./perl harness
    ###     export $Config{ldlibpthname}=`pwd`:\$$Config{ldlibpthname}; cd t; ./perl harness
    ### for csh-style shells, like tcsh; or for traditional/modern
