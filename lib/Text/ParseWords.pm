@@ -76,10 +76,12 @@ sub parse_line {
 	}
         else {
 	    $unquoted =~ s/\\(.)/$1/g;
-	    $quoted =~ s/\\(.)/$1/g if ($quote eq '"');
-	    $quoted =~ s/\\([\\'])/$1/g if ( $PERL_SINGLE_QUOTE && $quote eq "'");
+	    if (defined $quote) {
+		$quoted =~ s/\\(.)/$1/g if ($quote eq '"');
+		$quoted =~ s/\\([\\'])/$1/g if ( $PERL_SINGLE_QUOTE && $quote eq "'");
+            }
 	}
-        $word .= ($quote) ? $quoted : $unquoted;
+        $word .= defined $quote ? $quoted : $unquoted;
  
         if (length($delim)) {
             push(@pieces, $word);
