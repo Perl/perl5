@@ -404,7 +404,7 @@ via this XSUB
     void
     Call_fred()
         CODE:
-        PUSHMARK(sp) ;
+        PUSHMARK(SP) ;
         perl_call_pv("fred", G_DISCARD|G_NOARGS) ;
         fprintf(stderr, "back in Call_fred\n") ;
 
@@ -421,7 +421,7 @@ higher, or use the G_EVAL flag with I<perl_call_*> as shown below
     void
     Call_fred()
         CODE:
-        PUSHMARK(sp) ;
+        PUSHMARK(SP) ;
         perl_call_pv("fred", G_EVAL|G_DISCARD|G_NOARGS) ;
         fprintf(stderr, "back in Call_fred\n") ;
 
@@ -462,7 +462,7 @@ and here is a C function to call it
     {
         dSP ;
 
-        PUSHMARK(sp) ;
+        PUSHMARK(SP) ;
         perl_call_pv("PrintUID", G_DISCARD|G_NOARGS) ;
     }
 
@@ -474,7 +474,7 @@ A few points to note about this example.
 
 =item 1.
 
-Ignore C<dSP> and C<PUSHMARK(sp)> for now. They will be discussed in
+Ignore C<dSP> and C<PUSHMARK(SP)> for now. They will be discussed in
 the next example.
 
 =item 2.
@@ -526,7 +526,7 @@ The C function required to call I<LeftString> would look like this.
     {
         dSP ;
 
-        PUSHMARK(sp) ;
+        PUSHMARK(SP) ;
         XPUSHs(sv_2mortal(newSVpv(a, 0)));
         XPUSHs(sv_2mortal(newSViv(b)));
         PUTBACK ;
@@ -542,8 +542,9 @@ Here are a few notes on the C function I<call_LeftString>.
 
 Parameters are passed to the Perl subroutine using the Perl stack.
 This is the purpose of the code beginning with the line C<dSP> and
-ending with the line C<PUTBACK>.
-
+ending with the line C<PUTBACK>.  The C<dSP> declares a local copy
+of the stack pointer.  This local copy should B<always> be accessed
+as C<SP>.
 
 =item 2.
 
@@ -630,7 +631,7 @@ function required to call it is now a bit more complex.
         ENTER ;
         SAVETMPS;
 
-        PUSHMARK(sp) ;
+        PUSHMARK(SP) ;
         XPUSHs(sv_2mortal(newSViv(a)));
         XPUSHs(sv_2mortal(newSViv(b)));
         PUTBACK ;
@@ -766,7 +767,7 @@ and this is the C function
         ENTER ;
         SAVETMPS;
 
-        PUSHMARK(sp) ;
+        PUSHMARK(SP) ;
         XPUSHs(sv_2mortal(newSViv(a)));
         XPUSHs(sv_2mortal(newSViv(b)));
         PUTBACK ;
@@ -829,7 +830,7 @@ context, like this
         ENTER ;
         SAVETMPS;
 
-        PUSHMARK(sp) ;
+        PUSHMARK(SP) ;
         XPUSHs(sv_2mortal(newSViv(a)));
         XPUSHs(sv_2mortal(newSViv(b)));
         PUTBACK ;
@@ -897,7 +898,7 @@ and here is a C function to call it.
         sva = sv_2mortal(newSViv(a)) ;
         svb = sv_2mortal(newSViv(b)) ;
 
-        PUSHMARK(sp) ;
+        PUSHMARK(SP) ;
         XPUSHs(sva);
         XPUSHs(svb);
         PUTBACK ;
@@ -954,7 +955,7 @@ and some C to call it
         ENTER ;
         SAVETMPS;
 
-        PUSHMARK(sp) ;
+        PUSHMARK(SP) ;
         XPUSHs(sv_2mortal(newSViv(a)));
         XPUSHs(sv_2mortal(newSViv(b)));
         PUTBACK ;
@@ -1087,7 +1088,7 @@ Here is a snippet of XSUB which defines I<CallSubPV>.
     CallSubPV(name)
     	char *	name
     	CODE:
-    	PUSHMARK(sp) ;
+    	PUSHMARK(SP) ;
     	perl_call_pv(name, G_DISCARD|G_NOARGS) ;
 
 That is fine as far as it goes. The thing is, the Perl subroutine
@@ -1103,7 +1104,7 @@ I<perl_call_sv> instead of I<perl_call_pv>.
     CallSubSV(name)
     	SV *	name
     	CODE:
-    	PUSHMARK(sp) ;
+    	PUSHMARK(SP) ;
     	perl_call_sv(name, G_DISCARD|G_NOARGS) ;
 
 Because we are using an SV to call I<fred> the following can all be used
@@ -1133,7 +1134,7 @@ pointer to the SV. Say the code above had been like this
     void
     CallSavedSub1()
     	CODE:
-    	PUSHMARK(sp) ;
+    	PUSHMARK(SP) ;
     	perl_call_sv(rememberSub, G_DISCARD|G_NOARGS) ;
 
 The reason this is wrong is that by the time you come to use the
@@ -1209,7 +1210,7 @@ SV.  The code below shows C<SaveSub2> modified to do that
     void
     CallSavedSub2()
     	CODE:
-    	PUSHMARK(sp) ;
+    	PUSHMARK(SP) ;
     	perl_call_sv(keepSub, G_DISCARD|G_NOARGS) ;
 
 To avoid creating a new SV every time C<SaveSub2> is called,
@@ -1318,7 +1319,7 @@ the C<PrintID> and C<Display> methods from C.
         char *	method
         int		index
         CODE:
-        PUSHMARK(sp);
+        PUSHMARK(SP);
         XPUSHs(ref);
         XPUSHs(sv_2mortal(newSViv(index))) ;
         PUTBACK;
@@ -1330,7 +1331,7 @@ the C<PrintID> and C<Display> methods from C.
         char *	class
         char *	method
         CODE:
-        PUSHMARK(sp);
+        PUSHMARK(SP);
         XPUSHs(sv_2mortal(newSVpv(class, 0))) ;
         PUTBACK;
 
@@ -1522,7 +1523,7 @@ Now change that to call a Perl subroutine instead
     {
         dSP ;
 
-        PUSHMARK(sp) ;
+        PUSHMARK(SP) ;
 
         /* Call the Perl sub to process the callback */
         perl_call_sv(callback, G_DISCARD) ;
@@ -1625,7 +1626,7 @@ and C<asynch_read_if> could look like this
         if (sv == (SV**)NULL)
             croak("Internal error...\n") ;
 
-        PUSHMARK(sp) ;
+        PUSHMARK(SP) ;
         XPUSHs(sv_2mortal(newSViv(fh))) ;
         XPUSHs(sv_2mortal(newSVpv(buffer, 0))) ;
         PUTBACK ;
@@ -1709,7 +1710,7 @@ series of C functions to act as the interface to Perl, thus
     {
         dSP ;
 
-        PUSHMARK(sp) ;
+        PUSHMARK(SP) ;
         XPUSHs(sv_2mortal(newSVpv(buffer, 0))) ;
         PUTBACK ;
 
@@ -1863,7 +1864,7 @@ of values> recoded to use C<ST> instead of C<POP*>.
         ENTER ;
         SAVETMPS;
 
-        PUSHMARK(sp) ;
+        PUSHMARK(SP) ;
         XPUSHs(sv_2mortal(newSViv(a)));
         XPUSHs(sv_2mortal(newSViv(b)));
         PUTBACK ;
@@ -1871,8 +1872,8 @@ of values> recoded to use C<ST> instead of C<POP*>.
         count = perl_call_pv("AddSubtract", G_ARRAY);
 
         SPAGAIN ;
-        sp -= count ;
-        ax = (sp - stack_base) + 1 ;
+        SP -= count ;
+        ax = (SP - stack_base) + 1 ;
 
         if (count != 2)
             croak("Big trouble\n") ;
@@ -1901,8 +1902,8 @@ you.
 The code
 
         SPAGAIN ;
-        sp -= count ;
-        ax = (sp - stack_base) + 1 ;
+        SP -= count ;
+        ax = (SP - stack_base) + 1 ;
 
 sets the stack up so that we can use the C<ST> macro.
 

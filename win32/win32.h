@@ -137,6 +137,13 @@ typedef long		gid_t;
 #define flushall	_flushall
 #define fcloseall	_fcloseall
 
+#ifndef _O_NOINHERIT
+#  define _O_NOINHERIT	0x0080
+#  ifndef _NO_OLDNAMES
+#    define O_NOINHERIT	_O_NOINHERIT
+#  endif
+#endif
+
 #endif /* __MINGW32__ */
 
 /* compatibility stuff for other compilers goes here */
@@ -222,6 +229,9 @@ struct thread_intern {
     char		Wstrerror_buffer[512];
     struct servent	Wservent;
     char		Wgetlogin_buffer[128];
+#    ifdef USE_SOCKETS_AS_HANDLES
+    int			Winit_socktype;
+#    endif
 #    ifdef HAVE_DES_FCRYPT
     char		Wcrypt_buffer[30];
 #    endif

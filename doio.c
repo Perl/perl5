@@ -816,7 +816,7 @@ my_stat(ARGSproto)
     GV* tmpgv;
 
     if (op->op_flags & OPf_REF) {
-	EXTEND(sp,1);
+	EXTEND(SP,1);
 	tmpgv = cGVOP->op_gv;
       do_fstat:
 	io = GvIO(tmpgv);
@@ -867,7 +867,7 @@ my_lstat(ARGSproto)
     djSP;
     SV *sv;
     if (op->op_flags & OPf_REF) {
-	EXTEND(sp,1);
+	EXTEND(SP,1);
 	if (cGVOP->op_gv == defgv) {
 	    if (laststype != OP_LSTAT)
 		croak("The stat preceding -l _ wasn't an lstat");

@@ -959,8 +959,8 @@ magic_methcall(MAGIC *mg, char *meth, I32 flags, int n, SV *val)
 {
     dSP;
 
-    PUSHMARK(sp);
-    EXTEND(sp, n);
+    PUSHMARK(SP);
+    EXTEND(SP, n);
     PUSHs(mg->mg_obj);
     if (n > 1) { 
 	if (mg->mg_ptr) {
@@ -1044,7 +1044,7 @@ int magic_wipepack(SV *sv, MAGIC *mg)
 {
     dSP;
 
-    PUSHMARK(sp);
+    PUSHMARK(SP);
     XPUSHs(mg->mg_obj);
     PUTBACK;
     ENTER;
@@ -1061,8 +1061,8 @@ magic_nextpack(SV *sv, MAGIC *mg, SV *key)
 
     ENTER;
     SAVETMPS;
-    PUSHMARK(sp);
-    EXTEND(sp, 2);
+    PUSHMARK(SP);
+    EXTEND(SP, 2);
     PUSHs(mg->mg_obj);
     if (SvOK(key))
 	PUSHs(key);
@@ -1874,7 +1874,7 @@ sighandler(int sig)
 	sv = sv_newmortal();
 	sv_setpv(sv,sig_name[sig]);
     }
-    PUSHMARK(sp);
+    PUSHMARK(SP);
     PUSHs(sv);
     PUTBACK;
 

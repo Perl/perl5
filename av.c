@@ -53,8 +53,8 @@ av_extend(AV *av, I32 key)
 	dSP;
 	ENTER;
 	SAVETMPS;
-	PUSHMARK(sp);
-	EXTEND(sp,2);
+	PUSHMARK(SP);
+	EXTEND(SP,2);
 	PUSHs(mg->mg_obj);
 	PUSHs(sv_2mortal(newSViv(key+1)));
         PUTBACK;
@@ -157,8 +157,8 @@ av_fetch(register AV *av, I32 key, I32 lval)
 	    dTHR;
 	    sv = sv_newmortal();
 	    mg_copy((SV*)av, sv, 0, key);
-	    Sv = sv;
-	    return &Sv;
+	    av_fetch_sv = sv;
+	    return &av_fetch_sv;
 	}
     }
 
@@ -388,8 +388,8 @@ av_push(register AV *av, SV *val)
 
     if (SvRMAGICAL(av) && (mg = mg_find((SV*)av,'P'))) {
 	dSP;
-	PUSHMARK(sp);
-	EXTEND(sp,2);
+	PUSHMARK(SP);
+	EXTEND(SP,2);
 	PUSHs(mg->mg_obj);
 	PUSHs(val);
 	PUTBACK;
@@ -413,7 +413,7 @@ av_pop(register AV *av)
 	croak(no_modify);
     if (SvRMAGICAL(av) && (mg = mg_find((SV*)av,'P'))) {
 	dSP;    
-	PUSHMARK(sp);
+	PUSHMARK(SP);
 	XPUSHs(mg->mg_obj);
 	PUTBACK;
 	ENTER;
@@ -446,8 +446,8 @@ av_unshift(register AV *av, register I32 num)
 
     if (SvRMAGICAL(av) && (mg = mg_find((SV*)av,'P'))) {
 	dSP;
-	PUSHMARK(sp);
-	EXTEND(sp,1+num);
+	PUSHMARK(SP);
+	EXTEND(SP,1+num);
 	PUSHs(mg->mg_obj);
 	while (num-- > 0) {
 	    PUSHs(&sv_undef);
@@ -495,7 +495,7 @@ av_shift(register AV *av)
 	croak(no_modify);
     if (SvRMAGICAL(av) && (mg = mg_find((SV*)av,'P'))) {
 	dSP;
-	PUSHMARK(sp);
+	PUSHMARK(SP);
 	XPUSHs(mg->mg_obj);
 	PUTBACK;
 	ENTER;
@@ -536,8 +536,8 @@ av_fill(register AV *av, I32 fill)
 	dSP;            
 	ENTER;
 	SAVETMPS;
-	PUSHMARK(sp);
-	EXTEND(sp,2);
+	PUSHMARK(SP);
+	EXTEND(SP,2);
 	PUSHs(mg->mg_obj);
 	PUSHs(sv_2mortal(newSViv(fill+1)));
 	PUTBACK;

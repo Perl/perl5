@@ -32,11 +32,22 @@
 #	define TO_SOCKET(x)	(x)
 #endif	/* USE_SOCKETS_AS_HANDLES */
 
+#ifdef USE_THREADS
 #define StartSockets() \
     STMT_START {					\
 	if (!wsock_started)				\
 	    start_sockets();				\
+       set_socktype();                         \
     } STMT_END
+#else
+#define StartSockets() \
+    STMT_START {					\
+	if (!wsock_started) {				\
+	    start_sockets();				\
+	    set_socktype();				\
+	}						\
+    } STMT_END
+#endif
 
 #define EndSockets() \
     STMT_START {					\
@@ -60,8 +71,10 @@ static struct servent* win32_savecopyservent(struct servent*d,
 #ifdef USE_THREADS
 #ifdef USE_DECLSPEC_THREAD
 __declspec(thread) struct servent myservent;
+__declspec(thread) int init_socktype;
 #else
 #define myservent (thr->i.Wservent)
+#define init_socktype (thr->i.Winit_socktype)
 #endif
 #else
 static struct servent myservent;
@@ -75,7 +88,6 @@ start_sockets(void)
     unsigned short version;
     WSADATA retdata;
     int ret;
-    int iSockOpt = SO_SYNCHRONOUS_NONALERT;
 
     /*
      * initalize the winsock interface and insure that it is
@@ -88,15 +100,28 @@ start_sockets(void)
 	croak("Could not find version 1.1 of winsock dll\n");
 
     /* atexit((void (*)(void)) EndSockets); */
+    wsock_started = 1;
+}
 
+void
+set_socktype(void)
+{
 #ifdef USE_SOCKETS_AS_HANDLES
+#ifdef USE_THREADS
+    dTHR;
+    if(!init_socktype) {
+#endif
+    int iSockOpt = SO_SYNCHRONOUS_NONALERT;
     /*
      * Enable the use of sockets as filehandles
      */
     setsockopt(INVALID_SOCKET, SOL_SOCKET, SO_OPENTYPE,
 		(char *)&iSockOpt, sizeof(iSockOpt));
+#ifdef USE_THREADS
+    init_socktype = 1;
+    }
+#endif
 #endif	/* USE_SOCKETS_AS_HANDLES */
-    wsock_started = 1;
 }
 
 

@@ -648,9 +648,9 @@ PP(pp_dbmopen)
     }
 
     ENTER;
-    PUSHMARK(sp);
+    PUSHMARK(SP);
 
-    EXTEND(sp, 5);
+    EXTEND(SP, 5);
     PUSHs(sv);
     PUSHs(left);
     if (SvIV(right))
@@ -663,8 +663,8 @@ PP(pp_dbmopen)
     SPAGAIN;
 
     if (!sv_isobject(TOPs)) {
-	sp--;
-	PUSHMARK(sp);
+	SP--;
+	PUSHMARK(SP);
 	PUSHs(sv);
 	PUSHs(left);
 	PUSHs(sv_2mortal(newSViv(O_RDONLY)));
@@ -3994,7 +3994,7 @@ PP(pp_ehostent)
     djSP;
 #ifdef HAS_ENDHOSTENT
     endhostent();
-    EXTEND(sp,1);
+    EXTEND(SP,1);
     RETPUSHYES;
 #else
     DIE(no_sock_func, "endhostent");
@@ -4006,7 +4006,7 @@ PP(pp_enetent)
     djSP;
 #ifdef HAS_ENDNETENT
     endnetent();
-    EXTEND(sp,1);
+    EXTEND(SP,1);
     RETPUSHYES;
 #else
     DIE(no_sock_func, "endnetent");
@@ -4018,7 +4018,7 @@ PP(pp_eprotoent)
     djSP;
 #ifdef HAS_ENDPROTOENT
     endprotoent();
-    EXTEND(sp,1);
+    EXTEND(SP,1);
     RETPUSHYES;
 #else
     DIE(no_sock_func, "endprotoent");
@@ -4030,7 +4030,7 @@ PP(pp_eservent)
     djSP;
 #ifdef HAS_ENDSERVENT
     endservent();
-    EXTEND(sp,1);
+    EXTEND(SP,1);
     RETPUSHYES;
 #else
     DIE(no_sock_func, "endservent");

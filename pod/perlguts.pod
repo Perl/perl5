@@ -1088,10 +1088,10 @@ two, the local time zone's standard and summer time abbreviations.
 To handle this situation, the PPCODE directive is used and the stack is
 extended using the macro:
 
-    EXTEND(sp, num);
+    EXTEND(SP, num);
 
-where C<sp> is the stack pointer, and C<num> is the number of elements the
-stack should be extended by.
+where C<SP> is the macro that represents the local copy of the stack pointer,
+and C<num> is the number of elements the stack should be extended by.
 
 Now that there is room on the stack, values can be pushed on it using the
 macros to push IVs, doubles, strings, and SV pointers respectively:
@@ -1144,6 +1144,7 @@ must manipulate the Perl stack.  These include the following macros and
 functions:
 
     dSP
+    SP
     PUSHMARK()
     PUTBACK
     SPAGAIN
@@ -1575,7 +1576,8 @@ The C variable which corresponds to Perl's $^W warning variable.
 
 =item dSP
 
-Declares a stack pointer variable, C<sp>, for the XSUB.  See C<SP>.
+Declares a local copy of perl's stack pointer for the XSUB, available via
+the C<SP> macro.  See C<SP>.
 
 =item dXSARGS
 
