@@ -13,15 +13,14 @@ case $CONFIG in
     . ./config.sh
     ;;
 esac
-case "$mallocsrc" in
-'') ;;
-*) mallocsrc="../$mallocsrc";;
-esac
 echo "Extracting x2p/Makefile (with variable substitutions)"
 cat >Makefile <<!GROK!THIS!
-# $RCSfile: Makefile.SH,v $$Revision: 4.0.1.1 $$Date: 91/06/07 12:12:14 $
+# $RCSfile: Makefile.SH,v $$Revision: 4.0.1.2 $$Date: 91/11/05 19:19:04 $
 #
 # $Log:	Makefile.SH,v $
+# Revision 4.0.1.2  91/11/05  19:19:04  lwall
+# patch11: random cleanup
+# 
 # Revision 4.0.1.1  91/06/07  12:12:14  lwall
 # patch4: cflags now emits entire cc command except for the filename
 # 
@@ -119,7 +118,7 @@ realclean: clean
 lint:
 	lint $(lintflags) $(defs) $(c) > a2p.fuzz
 
-depend: ../makedepend
+depend: $(mallocsrc) ../makedepend
 	../makedepend
 
 clist:
@@ -135,6 +134,9 @@ config.sh: ../config.sh
 	rm -f config.sh
 	ln ../config.sh .
 
+malloc.c: ../malloc.c
+	sed 's/"perl.h"/"..\/perl.h"/' ../malloc.c >malloc.c
+
 # AUTOMATICALLY GENERATED MAKE DEPENDENCIES--PUT NOTHING BELOW THIS LINE
 $(obj):
 	@ echo "You haven't done a "'"make depend" yet!'; exit 1
@@ -148,3 +150,4 @@ case `pwd` in
     ln Makefile ../Makefile
     ;;
 esac
+rm -f makefile

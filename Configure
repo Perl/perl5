@@ -8,7 +8,7 @@
 # and edit it to reflect your system.  Some packages may include samples
 # of config.h for certain machines, so you might look for one of those.)
 #
-# $RCSfile: Configure,v $$Revision: 4.0.1.2 $$Date: 91/06/07 10:09:34 $
+# $RCSfile: Configure,v $$Revision: 4.0.1.5 $$Date: 91/11/05 23:11:32 $
 #
 # Yes, you may rip this off to use in other distribution packages.
 # (Note: this Configure script was generated automatically.  Rather than
@@ -17,13 +17,12 @@
 cat >/tmp/c1$$ <<EOF
 ARGGGHHHH!!!!!
 
-SCO csh still thinks true is false.  Write to SCO today and tell them that next
-year Configure ought to "rm /bin/csh" unless they fix their blasted shell. :-)
+Your csh still thinks true is false.  Write to your vendor today and tell
+them that next year Configure ought to "rm /bin/csh" unless they fix their
+blasted shell. :-)
 
-(Actually, Configure ought to just patch csh in place.  Hmm.  Hmmmmm.  All
-we'd have to do is go in and swap the && and || tokens, wherever they are.)
-
-[End of diatribe.  We now return you to your regularly scheduled programming...]
+[End of diatribe.  We now return you to your regularly scheduled
+programming...]
 
 EOF
 cat >/tmp/c2$$ <<EOF
@@ -249,7 +248,7 @@ ndirc=''
 ndiro=''
 mallocsrc=''
 mallocobj=''
-usemymalloc=''
+d_mymalloc=''
 mallocptrtype=''
 mansrc=''
 manext=''
@@ -304,7 +303,21 @@ define='define'
 undef='undef'
 : change the next line if compiling for Xenix/286 on Xenix/386
 xlibpth='/usr/lib/386 /lib/386'
-libpth='/usr/ccs/lib /usr/lib /usr/ucblib /usr/local/lib /usr/lib/large /lib '$xlibpth' /lib/large /usr/lib/small /lib/small'
+
+: the hints files may add more components to libpth
+test -d /usr/cs/lib		&& libpth="$libpth /usr/cs/lib"
+test -d /usr/ccs/lib		&& libpth="$libpth /usr/ccs/lib"
+test -d /usr/lib		&& libpth="$libpth /usr/lib"
+test -d /usr/ucblib		&& libpth="$libpth /usr/ucblib"
+test -d /usr/local/lib		&& libpth="$libpth /usr/local/lib"
+test -d /usr/lib/large		&& libpth="$libpth /usr/lib/large"
+test -d /lib			&& libpth="$libpth /lib"
+				   libpth="$libpth $xlibpth"
+test -d /lib/large		&& libpth="$libpth /lib/large"
+test -d /usr/lib/small		&& libpth="$libpth /usr/lib/small"
+test -d /lib/small		&& libpth="$libpth /lib/small"
+test -d /usr/lib/cmplrs/cc	&& libpth="$libpth /usr/lib/cmplrs/cc"
+
 smallmach='pdp11 i8086 z8000 i80286 iAPX286'
 trap 'echo " "; exit 1' 1 2 3
 
@@ -341,7 +354,7 @@ serve_unix_tcp=""
 d_ndir=ndir
 voidwant=1
 voidwant=7
-libswanted="c_s net_s net nsl_s nsl socket nm ndir ndbm dbm malloc sun m bsd BSD x posix ucb"
+libswanted="c_s net_s net nsl_s nsl socket nm ndir ndbm dbm PW malloc sun m bsd BSD x posix ucb"
 inclwanted='/usr/include /usr/netinclude /usr/include/sun /usr/include/bsd /usr/include/lan /usr/ucbinclude'
 
 : Now test for existence of everything in MANIFEST
@@ -737,6 +750,8 @@ if test -f ../config.sh; then
 	hint=previous
 	;;
     esac
+else
+    lastuname=`(uname -a) 2>&1`
 fi
 if test -d ../hints && test ! -f ../config.sh; then
     echo ' '
@@ -1262,6 +1277,11 @@ gcc*) cpp=`./loc gcc-cpp $cpp $pth`
     n*) nativegcc="$undef"; gccflags='-fpcc-struct-return';;
     *) nativegcc="$define"; gccflags='';;
     esac
+    case "$gccflags" in
+    *-ansi*) ;;
+    *-traditional*) ;;
+    *) gccflags="$gccflags -traditional -Dvolatile=__volatile__" ;;
+    esac
     ;;
 esac
 
@@ -1710,7 +1730,12 @@ EOT
 cd ..
 echo 'cat >.$$.c; '"$cc"' -E ${1+"$@"} .$$.c; rm .$$.c' >cppstdin
 chmod 755 cppstdin
-wrapper=`pwd`/cppstdin
+wrapper=cppstdin
+
+case "$cppstdin" in
+/*cppstdin) cppstdin=cppstdin;;
+esac
+cp cppstdin UU
 cd UU
 
 if test "X$cppstdin" != "X" && \
@@ -1736,12 +1761,6 @@ elif echo 'Nope...maybe "'"$cc"' -E -" will work...'; \
     echo "Yup, it does."
     cppstdin="$cc -E"
     cppminus='-';
-elif echo 'Uh-uh.  Time to get fancy.  Trying a wrapper...'; \
-  $wrapper <testcpp.c >testcpp.out 2>&1; \
-  $contains 'abc.*xyz' testcpp.out >/dev/null 2>&1 ; then
-    cppstdin="$wrapper"
-    cppminus=''
-    echo "Eureka!."
 elif echo 'No such luck, maybe "'$cpp'" will work...'; \
   $cpp <testcpp.c >testcpp.out 2>&1; \
   $contains 'abc.*xyz' testcpp.out >/dev/null 2>&1 ; then
@@ -1754,6 +1773,12 @@ elif echo 'Nixed again...maybe "'$cpp' -" will work...'; \
     echo "Hooray, it works!  I was beginning to wonder."
     cppstdin="$cpp"
     cppminus='-';
+elif echo 'Uh-uh.  Time to get fancy.  Trying a wrapper...'; \
+  $wrapper <testcpp.c >testcpp.out 2>&1; \
+  $contains 'abc.*xyz' testcpp.out >/dev/null 2>&1 ; then
+    cppstdin="$wrapper"
+    cppminus=''
+    echo "Eureka!."
 elif echo 'Nope...maybe "'"$cc"' -P" will work...'; \
   $cc -P <testcpp.c >testcpp.out 2>&1; \
   $contains 'abc.*xyz' testcpp.out >/dev/null 2>&1 ; then
@@ -2497,7 +2522,8 @@ echo " "
 if $test -r $usrinclude/pwd.h ; then
     i_pwd="$define"
     echo "pwd.h found."
-    $cppstdin $cppflags $cppminus <$usrinclude/pwd.h >pwd.txt
+    $cppstdin $cppflags $cppminus <$usrinclude/pwd.h | \
+	sed -n '/struct[ 	][ 	]*passwd/,/^};/p' >pwd.txt
     if $contains 'pw_quota' pwd.txt >/dev/null 2>&1; then
 	d_pwquota="$define"
     else
@@ -3029,15 +3055,23 @@ intsize="$ans"
 
 : determine which malloc to compile in
 echo " "
-case "$usemymalloc" in
+case "$d_mymalloc" in
 '')
-    if bsd || v7; then
-	dflt='y'
-    else
-	dflt='n'
-    fi
+    case "$usemymalloc" in
+    '')
+	if bsd || v7; then
+	    dflt='y'
+	else
+	    dflt='n'
+	fi
+	;;
+    n*) dflt=n;;
+    *)  dflt=y;;
+    esac
     ;;
-*)  dflt="$usemymalloc"
+define)  dflt="y"
+    ;;
+*)  dflt="n"
     ;;
 esac
 rp="Do you wish to attempt to use the malloc that comes with $package? [$dflt]"
@@ -3046,10 +3080,10 @@ $echo $n "$rp $c"
 case "$ans" in
 '') ans=$dflt;;
 esac
-usemymalloc="$ans"
 case "$ans" in
 y*) mallocsrc='malloc.c'; mallocobj='malloc.o'
     libs=`echo $libs | sed 's/-lmalloc//'`
+    val="$define"
     case "$mallocptrtype" in
     '')
 	cat >usemymalloc.c <<'END'
@@ -3070,8 +3104,14 @@ END
     echo " "
     echo "Your system wants malloc to return $mallocptrtype*, it would seem."
     ;;
-*) mallocsrc=''; mallocobj=''; mallocptrtype=void;;
+*)  mallocsrc='';
+    mallocobj='';
+    mallocptrtype=void
+    val="$define"
+    ;;
 esac
+set d_mymalloc
+eval $setvar
 
 : determine where private executables go
 case "$privlib" in
@@ -3734,7 +3774,7 @@ ndirc='$ndirc'
 ndiro='$ndiro'
 mallocsrc='$mallocsrc'
 mallocobj='$mallocobj'
-usemymalloc='$usemymalloc'
+d_mymalloc='$d_mymalloc'
 mallocptrtype='$mallocptrtype'
 mansrc='$mansrc'
 manext='$manext'

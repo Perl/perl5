@@ -149,6 +149,8 @@ Installation
     If you have GDBM available and want it instead of NDBM, say -DHAS_GDBM.
     C's that don't try to restore registers on longjmp() may need -DJMPCLOBBER.
 	(Try this if you get random glitches.)
+    If you get duplicates upon linking for malloc et al, say -DHIDEMYMALLOC.
+    Turn on support for 64-bit integers (long longs) with -DQUAD.
 
 5)  make test
 
