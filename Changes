@@ -105,6 +105,257 @@ Version v5.7.0		Development release working toward v5.8
 --------------
 
 ____________________________________________________________________________
+[  7044] By: jhi                                   on 2000/09/08  21:29:56
+        Log: Subject: [PATCH: 5.7.0] proper setting for isnan for DECC 5.3
+             From: Peter Prymmer <pvhp@forte.com>
+             Date: Fri, 8 Sep 2000 13:33:27 -0700 (PDT)
+             Message-ID: <Pine.OSF.4.10.10009081331420.132461-100000@aspara.forte.com>
+     Branch: perl
+	   ! configure.com
+____________________________________________________________________________
+[  7043] By: jhi                                   on 2000/09/08  21:27:50
+        Log: Subject: [PATCH (or RFC): 5.7.0] make the ran_tests intermediate file 8.3 friendly
+             From: Peter Prymmer <pvhp@forte.com>
+             Date: Fri, 8 Sep 2000 11:02:19 -0700 (PDT)
+             Message-ID: <Pine.OSF.4.10.10009081054340.132461-100000@aspara.forte.com>
+     Branch: perl
+	   ! Makefile.SH installperl
+____________________________________________________________________________
+[  7042] By: jhi                                   on 2000/09/08  21:23:21
+        Log: Continue #7041.
+     Branch: perl
+	   ! cygwin/Makefile.SHs os2/Makefile.SHs
+____________________________________________________________________________
+[  7041] By: jhi                                   on 2000/09/08  21:18:10
+        Log: Do away with memory models cruft.  Sorry, PDP users.
+     Branch: metaconfig
+	   ! U/modified/cc.U U/modified/libpth.U
+     Branch: perl
+	   ! Configure Makefile.SH Porting/Glossary Porting/config.sh
+	   ! Porting/config_H cflags.SH config_h.SH configure.com
+	   ! epoc/config.sh hints/mint.sh hints/titanos.sh hints/vmesa.sh
+	   ! lib/ExtUtils/MM_Unix.pm win32/config.bc win32/config.gc
+	   ! win32/config.vc x2p/Makefile.SH x2p/cflags.SH
+____________________________________________________________________________
+[  7040] By: jhi                                   on 2000/09/08  14:34:18
+        Log: Major rewrite of s2p.  And I mean really major, it is
+             an implementation of sed in perl.  If called as s2p it
+             will function as s2p.  Note: needs non-UNIXifying.
+             
+             Subject: s2p
+             From: Wolfgang Laun <Wolfgang.Laun@alcatel.at>
+             Date: Mon, 28 Aug 2000 14:05:12 +0200
+             Message-ID: <39AA5578.2102E2AA@alcatel.at>
+     Branch: perl
+	   ! x2p/s2p.PL
+____________________________________________________________________________
+[  7039] By: jhi                                   on 2000/09/08  14:19:49
+        Log: Re-allow vec() for characters > 255.
+             
+             Subject: [PATCH] Re: [ID 20000907.005] Not OK: perl v5.7.0 +devel-7030 on alpha-dec_osf-perlio 4.0f (UNINSTALLED) 
+             From: Spider Boardman <spider@web.zk3.dec.com>
+             Date: Fri, 08 Sep 2000 02:21:02 -0400
+             Message-Id: <200009080621.CAA03409@leggy.zk3.dec.com>
+     Branch: perl
+	   ! doop.c pod/perldelta.pod pod/perldiag.pod pod/perlfunc.pod
+	   ! t/op/vec.t
+____________________________________________________________________________
+[  7038] By: jhi                                   on 2000/09/08  14:14:18
+        Log: Subject: [PATCH lib/Benchmark.pm]
+             From: <abigail@foad.org>
+             Date: Thu, 7 Sep 2000 15:03:20 -0400
+             Message-ID: <20000907190320.888.qmail@foad.org>
+     Branch: perl
+	   ! lib/Benchmark.pm
+____________________________________________________________________________
+[  7037] By: jhi                                   on 2000/09/08  14:11:06
+        Log: Optimizing hash keys into shared strings doesn't work with ithreads.
+             
+             Subject: Re: [ID 20000907.008] Not OK: v5.7.0 on alpha-dec_osf-thread-multi    
+             From: Spider Boardman <spider@web.zk3.dec.com>
+             Date: Fri, 08 Sep 2000 01:30:27 -0400
+             Message-Id: <200009080530.BAA10498@leggy.zk3.dec.com>
+     Branch: perl
+	   ! op.c
+____________________________________________________________________________
+[  7036] By: jhi                                   on 2000/09/08  14:08:58
+        Log: Subject: [ID 20000908.002] perlipc documentation bug.
+             From: Major Sébastien <sebastien.major@crdp.ac-caen.fr>
+             Date: Fri, 08 Sep 2000 12:38:32 +0200
+             Message-Id: <39B8C1A8.3DC36E6D@crdp.ac-caen.fr>
+     Branch: perl
+	   ! pod/perlipc.pod
+____________________________________________________________________________
+[  7035] By: jhi                                   on 2000/09/08  14:03:12
+        Log: Subject: Re: [ID 20000907.007] Not OK: perl v5.7.0 +devel-7030 on alpha-dec_osf 4.0f
+             From: "H.Merijn Brand" <h.m.brand@hccnet.nl>
+             Date: Fri, 08 Sep 2000 11:47:34 +0200
+             Message-Id: <20000908111426.FBDB.H.M.BRAND@hccnet.nl>
+     Branch: perl
+	   ! hints/dec_osf.sh
+____________________________________________________________________________
+[  7034] By: jhi                                   on 2000/09/08  13:59:35
+        Log: Subject: Re: [ID 20000906.004] segfault with bad perl statement
+             From: Simon Cozens <simon@cozens.net>
+             Date: Thu, 7 Sep 2000 20:40:38 +0100
+             Message-ID: <20000907204038.A15650@deep-dark-truthful-mirror.perlhacker.org>
+     Branch: perl
+	   ! pp_hot.c
+____________________________________________________________________________
+[  7033] By: jhi                                   on 2000/09/08  04:03:03
+        Log: Subject: [ID 20000904.008] Tiny fix for perldiag
+             From: "Larry W. Virden" <lvirden@cas.org>
+             Date: Mon, 4 Sep 2000 18:45:44 -0400 (EDT)
+             Message-Id: <200009042245.SAA22916@lwv26awu.cas.org>
+     Branch: perl
+	   ! pod/perldiag.pod
+____________________________________________________________________________
+[  7032] By: jhi                                   on 2000/09/07  22:18:30
+        Log: Subject: [PATCH 5.7.0] perl5db.pl [Was: Re: Debugger question]
+             From: Peter Scott <Peter.J.Scott@jpl.nasa.gov>
+             Date: Mon, 04 Sep 2000 13:16:38 -0700
+             Message-Id: <4.3.2.7.2.20000904130939.00adae90@mail2a.jpl.nasa.gov>
+     Branch: perl
+	   ! lib/perl5db.pl
+____________________________________________________________________________
+[  7031] By: jhi                                   on 2000/09/07  22:02:29
+        Log: Fix the ccversion detection for 5.1 and beyond.
+             
+             Subject: [ID 20000907.007] Not OK: perl v5.7.0 +devel-7030 on alpha-dec_osf 4.0f
+             From: Spider Boardman <spider@leggy.zk3.dec.com>
+             Date: Thu, 7 Sep 2000 17:54:27 -0400
+             Message-Id: <200009072154.RAA14747@leggy.zk3.dec.com>
+     Branch: perl
+	   ! hints/dec_osf.sh
+____________________________________________________________________________
+[  7030] By: jhi                                   on 2000/09/07  19:12:28
+        Log: Fix for
+             
+             Subject: [ID 20000903.001] \w in utf8-strings
+             From: Marc Lehmann <pcg@goof.com>
+             Date: Sun, 03 Sep 2000 09:44:29 +0200
+             Message-Id: <E13VUS5-0000cv-00.pgcc-forever-2000-09-03-09-44-29@fuji>
+             
+             and various related nits.
+     Branch: perl
+	   ! lib/unicode/mktables.PL regcomp.h regexec.c utf8.c
+____________________________________________________________________________
+[  7029] By: jhi                                   on 2000/09/07  18:49:09
+        Log: Fix the URL, but the server is still missing in action.
+             
+             Subject: [ID 20000905.002] perlfaq1.pod URL error
+             From: "Larry W. Virden" <lvirden@cas.org>
+             Date: Tue, 5 Sep 2000 08:24:40 -0400 (EDT)
+             Message-Id: <200009051224.IAA11226@lwv26awu.cas.org>
+     Branch: perl
+	   ! pod/perlfaq1.pod
+____________________________________________________________________________
+[  7028] By: jhi                                   on 2000/09/07  18:47:13
+        Log: Subject: Re: [ID 20000905.001] Assertion failed: file "toke.c", line 202 
+             From: Hugo <hv@crypt.compulink.co.uk>
+             Date: Tue, 05 Sep 2000 14:13:37 +0100
+             Message-Id: <200009051313.OAA24507@crypt.compulink.co.uk>
+     Branch: perl
+	   ! toke.c
+____________________________________________________________________________
+[  7027] By: jhi                                   on 2000/09/07  18:45:35
+        Log: Subject: [PATCH@7014] \G in non-/g is well-defined now ... right?
+             From: Daniel Chetlin <daniel@chetlin.com>
+             Date: Tue, 5 Sep 2000 04:57:07 -0700
+             Message-ID: <20000905045707.A8620@ilmd.chetlin.org>
+     Branch: perl
+	   ! pod/perlfaq6.pod pod/perlop.pod
+____________________________________________________________________________
+[  7026] By: jhi                                   on 2000/09/07  18:44:01
+        Log: Document the new ref() semantics.
+             
+             Subject: Re: Undocumented(?) change to "ref" semantics in 5.7.0
+             From: Gisle Aas <gisle@ActiveState.com>
+             Date: 05 Sep 2000 08:10:30 +0200
+             Message-ID: <m3vgwb8j3d.fsf@eik.g.aas.no>
+     Branch: perl
+	   ! pod/perldelta.pod
+____________________________________________________________________________
+[  7025] By: jhi                                   on 2000/09/07  18:42:27
+        Log: Make Data::Dumper (non-XS) to work with changed semantics of ref().
+             
+             Subject: Re: Undocumented(?) change to "ref" semantics in 5.7.0
+             From: Gisle Aas <gisle@ActiveState.com>
+             Date: 05 Sep 2000 08:11:40 +0200
+             Message-ID: <m3snrf8j1f.fsf@eik.g.aas.no>
+     Branch: perl
+	   ! ext/Data/Dumper/Dumper.pm t/lib/dumper.t
+____________________________________________________________________________
+[  7024] By: jhi                                   on 2000/09/07  18:39:32
+        Log: Subject: [PATCH] Modernize Opcode.pm documentation
+             From: Gisle Aas <gisle@ActiveState.com>
+             Date: 4 Sep 2000 00:18:55 -0000
+             Message-ID: <20000904001855.26128.qmail@eik.g.aas.no>
+     Branch: perl
+	   ! ext/Opcode/Opcode.pm
+____________________________________________________________________________
+[  7023] By: jhi                                   on 2000/09/07  18:37:42
+        Log: Subject: [PATCH] Tied filehandle documentation
+             From: Gisle Aas <gisle@ActiveState.com>
+             Date: 4 Sep 2000 00:14:40 -0000
+             Message-ID: <20000904001440.26084.qmail@eik.g.aas.no>
+     Branch: perl
+	   ! pod/perlfunc.pod pod/perltie.pod
+____________________________________________________________________________
+[  7022] By: jhi                                   on 2000/09/07  18:35:37
+        Log: Subject: [PATCH] Tie::StdHandle did not know about 3-arg open
+             From: Gisle Aas <gisle@ActiveState.com>
+             Date: 4 Sep 2000 00:04:22 -0000
+             Message-ID: <20000904000422.26002.qmail@eik.g.aas.no>
+     Branch: perl
+	   ! lib/Tie/Handle.pm t/lib/tie-stdhandle.t
+____________________________________________________________________________
+[  7021] By: jhi                                   on 2000/09/07  18:33:22
+        Log: Subject: small apidoc fix
+             From: Marc Lehmann <pcg@goof.com>
+             Date: Sun, 3 Sep 2000 05:12:06 +0200
+             Message-ID: <20000903051206.A5909@cerebro.laendle>
+     Branch: perl
+	   ! pod/perlapi.pod utf8.c
+____________________________________________________________________________
+[  7020] By: jhi                                   on 2000/09/07  16:14:57
+        Log: Tiny perldelta nits.
+     Branch: perl
+	   ! pod/perldelta.pod
+____________________________________________________________________________
+[  7019] By: jhi                                   on 2000/09/07  16:04:20
+        Log: Guard against bad string->int conversion for quads.
+     Branch: perl
+	   ! t/op/64bitint.t
+____________________________________________________________________________
+[  7018] By: jhi                                   on 2000/09/06  17:07:03
+        Log: Update Unicode todo list.
+     Branch: perl
+	   ! Todo-5.6
+____________________________________________________________________________
+[  7017] By: jhi                                   on 2000/09/05  21:16:01
+        Log: Document the SvIOK_.*UV().
+     Branch: perl
+	   ! pod/perlapi.pod sv.h
+____________________________________________________________________________
+[  7016] By: nick                                  on 2000/09/03  21:54:46
+        Log: Hash lookup of constant strings optimization:
+             Introduce SvREADONLY && SvFAKE to flag an SV which has SvPVX pointing
+             to string table (as per sharepvn). Add newSV_pvn_share to create such
+             a thing. Make hv.c compare addresses of strings and skip string compare
+             if equal. Make method_named and helem ops use these shared-string SVs
+             when arg is constant. Make keys op return shared-string SVs (less clearly
+             a win).
+     Branch: perl
+	   ! embed.h embed.pl embedvar.h global.sym hv.c objXSUB.h op.c
+	   ! opcode.h opnames.h perlapi.c perlapi.h pod/perlapi.pod
+	   ! pod/perlintern.pod pp_hot.c proto.h sv.c
+____________________________________________________________________________
+[  7015] By: jhi                                   on 2000/09/02  17:48:59
+        Log: This is 5.7.0.
+     Branch: perl
+	   ! Changes
+____________________________________________________________________________
 [  7014] By: jhi                                   on 2000/09/02  17:35:45
         Log: Changes and patchlevel tweaks.
      Branch: perl
