@@ -36,6 +36,7 @@ typedef struct {
 
 static void terminate(void)
 {
+    dTHX;
     dMY_CXT;
     int size = GetHandleSize((Handle) dl_connections) / sizeof(ConnectionID);
     HLock((Handle) dl_connections);

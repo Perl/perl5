@@ -101,6 +101,7 @@ copy_errmsg(msg,unused)
     struct dsc$descriptor_s *   msg;
     vmssts  unused;
 {
+    dTHX;
     dMY_CXT;
     if (*(msg->dsc$a_pointer) == '%') { /* first line */
       if (dl_last_error)
@@ -251,6 +252,7 @@ dl_load_file(filespec, flags)
     int		flags
     PREINIT:
     dTHX;
+    dMY_CXT;
     char vmsspec[NAM$C_MAXRSS];
     SV *reqSV, **reqSVhndl;
     STRLEN deflen;
@@ -265,7 +267,6 @@ dl_load_file(filespec, flags)
     struct libref *dlptr;
     vmssts sts, failed = 0;
     void (*entry)();
-    dMY_CXT;
     CODE:
 
     DLDEBUG(1,PerlIO_printf(Perl_debug_log, "dl_load_file(%s,%x):\n", filespec,flags));

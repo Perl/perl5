@@ -156,6 +156,7 @@ static void TransferError(NXStream *s)
 {
     char *buffer;
     int len, maxlen;
+    dTHX;
     dMY_CXT;
 
     if ( dl_last_error ) {
@@ -181,6 +182,7 @@ static char *dlopen(char *path, int mode /* mode is ignored */)
     char *result;
     char **p;
     STRLEN n_a;
+    dTHX;
     dMY_CXT;
 	
     /* Do not load what is already loaded into this process */
