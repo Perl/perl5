@@ -698,6 +698,22 @@ sometimes it's a string representing the function, and sometimes it's
 going to call the subroutine call right then and there!  Best to be sure
 and quote it or take a reference to it.  *Plumber works too.  See L<perlsub>.
 
+If your system has the sigaction() function then signal handlers are
+installed using it.  This means you get reliable signal handling.  If
+your system has the SA_RESTART flag it is used when signals handlers are
+installed.  This means that system calls for which it is supported
+continue rather than returning when a signal arrives.  If you want your
+system calls to be interrupted by signal delivery then do something like
+this:
+
+    use POSIX ':signal_h';
+
+    my $alarm = 0;
+    sigaction SIGALRM, new POSIX::SigAction sub { $alarm = 1 }
+    	or die "Error setting SIGALRM handler: $!\n";
+
+See L<POSIX>.
+
 Certain internal hooks can be also set using the %SIG hash.  The
 routine indicated by C<$SIG{__WARN__}> is called when a warning message is
 about to be printed.  The warning message is passed as the first
