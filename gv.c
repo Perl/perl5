@@ -427,7 +427,6 @@ I32 sv_type;
     register char *namend;
     HV *stash = 0;
     U32 add_gvflags = 0;
-    char *tmpbuf;
 
     if (*name == '*' && isALPHA(name[1])) /* accidental stringify on a GV? */
 	name++;
@@ -443,13 +442,20 @@ I32 sv_type;
 
 	    len = namend - name;
 	    if (len > 0) {
-		New(601, tmpbuf, len+3, char);
+		char smallbuf[256];
+		char *tmpbuf;
+
+		if (len + 3 < sizeof smallbuf)
+		    tmpbuf = smallbuf;
+		else
+		    New(601, tmpbuf, len+3, char);
 		Copy(name, tmpbuf, len, char);
 		tmpbuf[len++] = ':';
 		tmpbuf[len++] = ':';
 		tmpbuf[len] = '\0';
 		gvp = (GV**)hv_fetch(stash,tmpbuf,len,add);
-		Safefree(tmpbuf);
+		if (tmpbuf != smallbuf)
+		    Safefree(tmpbuf);
 		if (!gvp || *gvp == (GV*)&sv_undef)
 		    return Nullgv;
 		gv = *gvp;
