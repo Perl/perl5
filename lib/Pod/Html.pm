@@ -1156,7 +1156,7 @@ sub process_text {
   $rest =~ s{
         \b                          # start at word boundary
         (                           # begin $1  {
-          $urls     :               # need resource and a colon
+          $urls     :[^:]           # need resource and a colon
           [$any] +?                 # followed by on or more
                                     #  of any valid character, but
                                     #  be conservative and take only

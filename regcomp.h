@@ -186,8 +186,19 @@ struct regnode_2 {
 #define UCHARAT(p)	PL_regdummy
 #endif /* lint */
 
-#define	FAIL(m)		croak    ("/%.127s/: %s",  PL_regprecomp,m)
-#define	FAIL2(pat,m)	re_croak2("/%.127s/: ",pat,PL_regprecomp,m)
+#define	FAIL(m) \
+    STMT_START {					\
+	/*if (!SIZE_ONLY)				\
+	    ReREFCNT_dec(PL_regcomp_rx);*/		\
+	croak    ("/%.127s/: %s",  PL_regprecomp,m);	\
+    } STMT_END
+
+#define	FAIL2(pat,m) \
+    STMT_START {					\
+	/*if (!SIZE_ONLY)				\
+	    ReREFCNT_dec(PL_regcomp_rx);*/		\
+	re_croak2("/%.127s/: ",pat,PL_regprecomp,m);	\
+    } STMT_END
 
 #define EXTRA_SIZE(guy) ((sizeof(guy)-1)/sizeof(struct regnode))
 

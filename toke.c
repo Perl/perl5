@@ -598,8 +598,6 @@ force_word(register char *start, int token, int check_keyword, int allow_pack, i
 		PL_expect = XTERM;
 	    else {
 		PL_expect = XOPERATOR;
-		force_next(')');
-		force_next('(');
 	    }
 	}
 	PL_nextval[PL_nexttoke].opval = (OP*)newSVOP(OP_CONST,0, newSVpv(PL_tokenbuf,0));

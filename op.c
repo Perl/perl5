@@ -4642,6 +4642,12 @@ ck_fun(OP *o)
 	    sibl = kid->op_sibling;
 	    switch (oa & 7) {
 	    case OA_SCALAR:
+		/* list seen where single (scalar) arg expected? */
+		if (numargs == 1 && !(oa >> 4)
+		    && kid->op_type == OP_LIST && type != OP_SCALAR)
+		{
+		    return too_many_arguments(o,PL_op_desc[type]);
+		}
 		scalar(kid);
 		break;
 	    case OA_LIST:
@@ -4654,7 +4660,8 @@ ck_fun(OP *o)
 		break;
 	    case OA_AVREF:
 		if (kid->op_type == OP_CONST &&
-		  (kid->op_private & OPpCONST_BARE)) {
+		    (kid->op_private & OPpCONST_BARE))
+		{
 		    char *name = SvPVx(((SVOP*)kid)->op_sv, n_a);
 		    OP *newop = newAVREF(newGVOP(OP_GV, 0,
 			gv_fetchpv(name, TRUE, SVt_PVAV) ));
@@ -4673,7 +4680,8 @@ ck_fun(OP *o)
 		break;
 	    case OA_HVREF:
 		if (kid->op_type == OP_CONST &&
-		  (kid->op_private & OPpCONST_BARE)) {
+		    (kid->op_private & OPpCONST_BARE))
+		{
 		    char *name = SvPVx(((SVOP*)kid)->op_sv, n_a);
 		    OP *newop = newHVREF(newGVOP(OP_GV, 0,
 			gv_fetchpv(name, TRUE, SVt_PVHV) ));
@@ -4704,7 +4712,8 @@ ck_fun(OP *o)
 	    case OA_FILEREF:
 		if (kid->op_type != OP_GV && kid->op_type != OP_RV2GV) {
 		    if (kid->op_type == OP_CONST &&
-		      (kid->op_private & OPpCONST_BARE)) {
+			(kid->op_private & OPpCONST_BARE))
+		    {
 			OP *newop = newGVOP(OP_GV, 0,
 			    gv_fetchpv(SvPVx(((SVOP*)kid)->op_sv, n_a), TRUE,
 					SVt_PVIO) );

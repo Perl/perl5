@@ -62,6 +62,29 @@ somewhat 64-bit aware platforms are HP-UX 11 or better, Solaris 2.6 or
 better, IRIX 6.2 or better.  Naturally 64-bit platforms like Digital
 UNIX and UNICOS also have 64-bit support.
 
+=head2 Better syntax checks on parenthesized unary operators
+
+Expressions such as:
+
+	print defined(&foo,&bar,&baz);
+	print uc("foo","bar","baz");
+	undef($foo,&bar);
+
+used to be accidentally allowed in earlier versions, and produced 
+unpredictable behavior.  Some of them produced ancillary warnings
+when used in this way, while others silently did the wrong thing.
+
+The parenthesized forms of most unary operators that expect a single
+argument will now ensure that they are not called with more than one
+argument, making the above cases syntax errors.  Note that the usual
+behavior of:
+
+	print defined &foo, &bar, &baz;
+	print uc "foo", "bar", "baz";
+	undef $foo, &bar;
+
+remains unchanged.  See L<perlop>.
+
 =head1 Supported Platforms
 
 =over 4
