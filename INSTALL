@@ -1594,10 +1594,8 @@ external program.
 
 On some systems, particularly those with smaller amounts of RAM, some
 of the tests in t/op/pat.t may fail with an "Out of memory" message.
-Specifically, in perl5.004_64, tests 74 and 78 have been reported to
-fail on some systems.  On my SparcStation IPC with 8 MB of RAM, test 78
-will fail if the system is running any other significant tasks at the
-same time.
+For example, on my SparcStation IPC with 12 MB of RAM, in perl5.5.670,
+test 85 will fail if run under either t/TEST or t/harness.
 
 Try stopping other jobs on the system and then running the test by itself:
 
