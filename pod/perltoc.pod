@@ -2216,10 +2216,10 @@ LC_NUMERIC, LC_TIME, LANG
 =item Questions With Answers
 
 Will My Old Scripts Break?, How Do I Make My Scripts Work With Unicode?,
-How Do I Know Whether My String Is In Unicode?, How Do I Detect Invalid
-UTF-8?, How Do I Convert Data Into UTF-8?  Or Vice Versa?, How Do I Display
-Unicode?  How Do I Input Unicode?, How Does Unicode Work With Traditional
-Locales?
+How Do I Know Whether My String Is In Unicode?, How Do I Detect Data That's
+Not Valid In a Particular Encoding, How Do I Convert Binary Data Into a
+Particular Encoding, Or Vice Versa?, How Do I Display Unicode?	How Do I
+Input Unicode?, How Does Unicode Work With Traditional Locales?
 
 =item Hexadecimal Notation
 
@@ -2270,8 +2270,8 @@ to enable UTF-8/UTF-EBCDIC in scripts
 
 =item Unicode Encodings
 
-UTF-8, UTF-16, UTF-16BE, UTF16-LE, Surrogates, and BOMs (Byte Order Marks),
-UTF-32, UTF-32BE, UTF32-LE, UCS-2, UCS-4, UTF-7
+UTF-8, UTF-EBDIC, UTF-16, UTF-16BE, UTF16-LE, Surrogates, and BOMs (Byte
+Order Marks), UTF-32, UTF-32BE, UTF32-LE, UCS-2, UCS-4, UTF-7
 
 =item Security Implications of Malformed UTF-8
 
@@ -3122,8 +3122,8 @@ array of hashes or arrays?
 
 =back
 
-=head2 perlfaq5 - Files and Formats ($Revision: 1.4 $, $Date: 2001/11/09
-08:06:04 $)
+=head2 perlfaq5 - Files and Formats ($Revision: 1.5 $, $Date: 2001/12/18
+09:01:14 $)
 
 =over 4
 
@@ -8113,6 +8113,8 @@ escapes.
 
 =item charnames::vianame(code)
 
+=item ILLEGAL CHARACTERS
+
 =item BUGS
 
 =back
@@ -8801,6 +8803,8 @@ bytecode
 
 =item DESCRIPTION
 
+%insn_data, @insn_name, @optype, @specialsv_name
+
 =item AUTHOR
 
 =back
@@ -8824,6 +8828,14 @@ bytecode
 =item SYNOPSIS
 
 =item DESCRIPTION
+
+=over 4
+
+=item Functions
+
+B<find_leaders>
+
+=back
 
 =item AUTHOR
 
@@ -9112,6 +9124,14 @@ C<-oFILENAME>, C<-r>, C<-D[tO]>
 =item SYNOPSIS
 
 =item DESCRIPTION
+
+=over 4
+
+=item Functions
+
+B<find_leaders>
+
+=back
 
 =item AUTHOR
 
@@ -10803,6 +10823,8 @@ arrays
 =item Managing Unknown Symbols
 
 =item Tag Handling Utility Functions
+
+=item Generating combined tags
 
 =item C<AUTOLOAD>ed Constants
 
