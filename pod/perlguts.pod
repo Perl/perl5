@@ -1173,7 +1173,8 @@ See C<av_len>.
 
 =item av_clear
 
-Clears an array, making it empty.
+Clears an array, making it empty.  Does not free the memory used by the
+array itself.
 
 	void	av_clear _((AV* ar));
 
@@ -1236,14 +1237,15 @@ dereferenced to get the original C<SV*>.
 
 =item av_undef
 
-Undefines the array.
+Undefines the array.  Frees the memory used by the array itself.
 
 	void	av_undef _((AV* ar));
 
 =item av_unshift
 
-Unshift an SV onto the beginning of the array.  The array will grow
-automatically to accommodate the addition.
+Unshift the given number of C<undef> values onto the beginning of the
+array.  The array will grow automatically to accommodate the addition.
+You must then use C<av_store> to assign values to these new elements.
 
 	void	av_unshift _((AV* ar, I32 num));
 
@@ -1257,7 +1259,7 @@ L<perlxs/"Using XS With C++">.
 
 The XSUB-writer's interface to the C C<memcpy> function.  The C<s> is the
 source, C<d> is the destination, C<n> is the number of items, and C<t> is
-the type.
+the type.  May fail on overlapping copies.  See also C<Move>.
 
 	(void) Copy( s, d, n, t );
 
@@ -1788,7 +1790,7 @@ Do magic after a value is assigned to the SV.  See C<sv_magic>.
 
 The XSUB-writer's interface to the C C<memmove> function.  The C<s> is the
 source, C<d> is the destination, C<n> is the number of items, and C<t> is
-the type.
+the type.  Can do overlapping moves.  See also C<Copy>.
 
 	(void) Move( s, d, n, t );
 
@@ -2955,4 +2957,4 @@ API Listing by Dean Roehrich <F<roehrich@cray.com>>.
 
 =head1 DATE
 
-Version 31.6: 1997/4/14
+Version 31.7: 1997/5/1
