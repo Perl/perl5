@@ -6,14 +6,19 @@ my %Expect_Name = (); # what we expect for $File::Find::name/fullname
 my %Expect_Dir  = (); # what we expect for $File::Find::dir
 my ($cwd, $cwd_untainted);
 
+
 BEGIN {
     chdir 't' if -d 't';
     unshift @INC => '../lib';
+}
 
-    require Config;
+use Config;
 
-    for (keys %ENV) { # untaint ENV
-	($ENV{$_}) = $ENV{$_} =~ /(.*)/;
+BEGIN {
+    if ($^O ne 'VMS') {
+	for (keys %ENV) { # untaint ENV
+	    ($ENV{$_}) = $ENV{$_} =~ /(.*)/;
+	}
     }
 
     # Remove insecure directories from PATH
@@ -138,28 +143,26 @@ sub simple_wanted {
 # $File::Find::dir (%Expect_Dir). Also use it in file operations like
 # chdir, rmdir etc.
 #
-# dir_path() concatenates directory names to form a _relative_
-# directory path, independant from the platform it's run on, although
-# there are limitations.  Don't try to create an absolute path,
+# dir_path() concatenates directory names to form a *relative*
+# directory path, independent from the platform it's run on, although
+# there are limitations. Don't try to create an absolute path,
 # because that may fail on operating systems that have the concept of
-# volume names (e.g. Mac OS). Be careful when you want to create an
-# updir path like ../fa (Unix) or ::fa: (Mac OS). Plain directory
-# names will work best. As a special case, you can pass it a "." as
-# first argument, to create a directory path like "./fa/dir" on
+# volume names (e.g. Mac OS). As a special case, you can pass it a "." 
+# as first argument, to create a directory path like "./fa/dir" on
 # operating systems other than Mac OS (actually, Mac OS will ignore
 # the ".", if it's the first argument). If there's no second argument,
 # this function will return the empty string on Mac OS and the string
 # "./" otherwise.
 
 sub dir_path {
-    my $first_item = shift @_;
+    my $first_arg = shift @_;
 
-    if ($first_item eq '.') {
+    if ($first_arg eq '.') {
         if ($^O eq 'MacOS') {
             return '' unless @_;
             # ignore first argument; return a relative path
             # with leading ":" and with trailing ":"
-            return File::Spec->catdir("", @_); 
+            return File::Spec->catdir(@_); 
         } else { # other OS
             return './' unless @_;
             my $path = File::Spec->catdir(@_);
@@ -168,21 +171,16 @@ sub dir_path {
             return $path;
         }
 
-    } else { # $first_item ne '.'
-        return $first_item unless @_; # return plain filename
-        if ($^O eq 'MacOS') {
-            # relative path with leading ":" and with trailing ":"
-            return File::Spec->catdir("", $first_item, @_);
-        } else { # other OS
-            return File::Spec->catdir($first_item, @_);
-        }
+    } else { # $first_arg ne '.'
+        return $first_arg unless @_; # return plain filename
+        return File::Spec->catdir($first_arg, @_); # relative path
     }
 }
 
 
 # Use topdir() to specify a directory path that you want to pass to
-#find/finddepth Basically, topdir() does the same as dir_path() (see
-#above), except that there's no trailing ":" on Mac OS.
+# find/finddepth. Basically, topdir() does the same as dir_path() (see
+# above), except that there's no trailing ":" on Mac OS.
 
 sub topdir {
     my $path = dir_path(@_);
@@ -191,28 +189,28 @@ sub topdir {
 }
 
 
-# Use file_path() to specify a file path that's expected for $_ (%Expect_File).
-# Also suitable for file operations like unlink etc.
-
+# Use file_path() to specify a file path that's expected for $_
+# (%Expect_File). Also suitable for file operations like unlink etc.
+#
 # file_path() concatenates directory names (if any) and a filename to
-# form a _relative_ file path (the last argument is assumed to be a
-# file). It's independant from the platform it's run on, although
-# there are limitations (see the warnings for dir_path() above). As a
-# special case, you can pass it a "." as first argument, to create a
-# file path like "./fa/file" on operating systems other than Mac OS
-# (actually, Mac OS will ignore the ".", if it's the first
-# argument). If there's no second argument, this function will return
-# the empty string on Mac OS and the string "./" otherwise.
+# form a *relative* file path (the last argument is assumed to be a
+# file). It's independent from the platform it's run on, although
+# there are limitations. As a special case, you can pass it a "." as 
+# first argument, to create a file path like "./fa/file" on operating 
+# systems other than Mac OS (actually, Mac OS will ignore the ".", if 
+# it's the first argument). If there's no second argument, this 
+# function will return the empty string on Mac OS and the string "./" 
+# otherwise.
 
 sub file_path {
-    my $first_item = shift @_;
+    my $first_arg = shift @_;
 
-    if ($first_item eq '.') {
+    if ($first_arg eq '.') {
         if ($^O eq 'MacOS') {
             return '' unless @_;
             # ignore first argument; return a relative path  
             # with leading ":", but without trailing ":"
-            return File::Spec->catfile("", @_); 
+            return File::Spec->catfile(@_); 
         } else { # other OS
             return './' unless @_;
             my $path = File::Spec->catfile(@_);
@@ -221,14 +219,9 @@ sub file_path {
             return $path;
         }
 
-    } else { # $first_item ne '.'
-        return $first_item unless @_; # return plain filename
-        if ($^O eq 'MacOS') {
-            # relative path with leading ":", but without trailing ":"
-            return File::Spec->catfile("", $first_item, @_);
-        } else { # other OS
-            return File::Spec->catfile($first_item, @_);
-        }
+    } else { # $first_arg ne '.'
+        return $first_arg unless @_; # return plain filename
+        return File::Spec->catfile($first_arg, @_); # relative path
     }
 }
 
