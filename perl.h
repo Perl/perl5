@@ -2809,10 +2809,14 @@ EXT MGVTBL PL_vtbl_envelem =	{0,	MEMBER_TO_FPTR(Perl_magic_setenv),
 					0,	MEMBER_TO_FPTR(Perl_magic_clearenv),
 							0};
 EXT MGVTBL PL_vtbl_sig =	{0,	0,		 0, 0, 0};
+#ifdef PERL_MICRO
+EXT MGVTBL PL_vtbl_sigelem =	{0,	0,		 0, 0, 0};
+#else
 EXT MGVTBL PL_vtbl_sigelem =	{MEMBER_TO_FPTR(Perl_magic_getsig),
 					MEMBER_TO_FPTR(Perl_magic_setsig),
 					0,	MEMBER_TO_FPTR(Perl_magic_clearsig),
 							0};
+#endif
 EXT MGVTBL PL_vtbl_pack =	{0,	0,	MEMBER_TO_FPTR(Perl_magic_sizepack),	MEMBER_TO_FPTR(Perl_magic_wipepack),
 							0};
 EXT MGVTBL PL_vtbl_packelem =	{MEMBER_TO_FPTR(Perl_magic_getpack),

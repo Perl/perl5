@@ -15,8 +15,10 @@
 #define PERL_IN_DOOP_C
 #include "perl.h"
 
+#ifndef PERL_MICRO
 #if !defined(NSIG) || defined(M_UNIX) || defined(M_XENIX)
 #include <signal.h>
+#endif
 #endif
 
 STATIC I32

@@ -3749,7 +3749,7 @@ PP(pp_system)
 	}
     }
     PERL_FLUSHALL_FOR_CHILD;
-#if (defined(HAS_FORK) || defined(AMIGAOS)) && !defined(VMS) && !defined(OS2) && !defined(__CYGWIN__)
+#if (defined(HAS_FORK) || defined(AMIGAOS)) && !defined(VMS) && !defined(OS2) && !defined(__CYGWIN__) || defined(PERL_MICRO)
     if (PerlProc_pipe(pp) >= 0)
 	did_pipes = 1;
     while ((childpid = vfork()) == -1) {
@@ -3768,13 +3768,17 @@ PP(pp_system)
     if (childpid > 0) {
 	if (did_pipes)
 	    PerlLIO_close(pp[1]);
+#ifndef PERL_MICRO
 	rsignal_save(SIGINT, SIG_IGN, &ihand);
 	rsignal_save(SIGQUIT, SIG_IGN, &qhand);
+#endif
 	do {
 	    result = wait4pid(childpid, &status, 0);
 	} while (result == -1 && errno == EINTR);
+#ifndef PERL_MICRO
 	(void)rsignal_restore(SIGINT, &ihand);
 	(void)rsignal_restore(SIGQUIT, &qhand);
+#endif
 	STATUS_NATIVE_SET(result == -1 ? -1 : status);
 	do_execfree();	/* free any memory child malloced on vfork */
 	SP = ORIGMARK;

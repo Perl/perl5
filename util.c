@@ -16,12 +16,14 @@
 #define PERL_IN_UTIL_C
 #include "perl.h"
 
+#ifndef PERL_MICRO
 #if !defined(NSIG) || defined(M_UNIX) || defined(M_XENIX)
 #include <signal.h>
 #endif
 
 #ifndef SIG_ERR
 # define SIG_ERR ((Sighandler_t) -1)
+#endif
 #endif
 
 /* XXX If this causes problems, set i_unistd=undef in the hint file.  */
@@ -2494,7 +2496,7 @@ dup2(int oldfd, int newfd)
 }
 #endif
 
-
+#ifndef PERL_MICRO
 #ifdef HAS_SIGACTION
 
 Sighandler_t
@@ -2597,6 +2599,7 @@ Perl_rsignal_restore(pTHX_ int signo, Sigsave_t *save)
 }
 
 #endif /* !HAS_SIGACTION */
+#endif /* !PERL_MICRO */
 
     /* VMS' my_pclose() is in VMS.c; same with OS/2 */
 #if (!defined(DOSISH) || defined(HAS_FORK) || defined(AMIGAOS)) && !defined(VMS) && !defined(__OPEN_VM) && !defined(EPOC) && !defined(MACOS_TRADITIONAL)
@@ -2638,15 +2641,19 @@ Perl_my_pclose(pTHX_ PerlIO *ptr)
 #ifdef UTS
     if(PerlProc_kill(pid, 0) < 0) { return(pid); }   /* HOM 12/23/91 */
 #endif
+#ifndef PERL_MICRO
     rsignal_save(SIGHUP, SIG_IGN, &hstat);
     rsignal_save(SIGINT, SIG_IGN, &istat);
     rsignal_save(SIGQUIT, SIG_IGN, &qstat);
+#endif
     do {
 	pid2 = wait4pid(pid, &status, 0);
     } while (pid2 == -1 && errno == EINTR);
+#ifndef PERL_MICRO
     rsignal_restore(SIGHUP, &hstat);
     rsignal_restore(SIGINT, &istat);
     rsignal_restore(SIGQUIT, &qstat);
+#endif
     if (close_failed) {
 	SETERRNO(saved_errno, saved_vaxc_errno);
 	return -1;

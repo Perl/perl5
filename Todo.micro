@@ -2,14 +2,6 @@
 
 - make creating Makefile.micro automatic (by pumpkin)
 
-- clean up compilation warnings as much as possible:
-  most of them seem to stem from not including enough headers (as planned)
-  to have enough prototypes, these may be correctible with some simple casts
-
-- do away with signals? (not very portable outside UNIX lands)
-  (missing signal API prototypes cause the majority of the compilation
-   warnings anyway) 
-
 - do away with fork/exec/wait? (system, popen should be enough?)
 
 - some of the uconfig.sh really needs to be probed (using cc) in buildtime:
