@@ -35,7 +35,7 @@ Curly brackets are required on C<if>s and C<while>s.
 
 =item *
 
-Variables begin with "$" or "@" in Perl.
+Variables begin with "$", "@" or "%" in Perl.
 
 =item *
 
@@ -168,7 +168,7 @@ There's no switch statement.  (But it's easy to build one on the fly.)
 
 =item *
 
-Variables begin with "$" or "@" in Perl.
+Variables begin with "$", "@" or "%" in Perl.
 
 =item *
 
@@ -1451,9 +1451,7 @@ Everything else.
 
 =over 5
 
-=item * Unclassified
-
-C<require>/C<do> trap using returned value
+=item * C<require>/C<do> trap using returned value
 
 If the file doit.pl has:
 
@@ -1473,6 +1471,14 @@ Running doit.pl gives the following:
     # perl 5 prints: 8
 
 Same behavior if you replace C<do> with C<require>.
+
+=item * C<split> on empty string with LIMIT specified
+
+	$string = '';
+    @list = split(/foo/, $string, 2)
+
+Perl4 returns a one element list containing the empty string but Perl5
+returns an empty list.
 
 =back
 
