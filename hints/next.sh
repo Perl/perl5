@@ -2,3 +2,4 @@
 nativegcc='define'
 groupstype="int"
 usemymalloc="n"
+libswanted='dbm sys_s'

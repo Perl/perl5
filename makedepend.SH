@@ -13,11 +13,15 @@ case "$0" in
 */*) cd `expr X$0 : 'X\(.*\)/'` ;;
 esac
 echo "Extracting makedepend (with variable substitutions)"
+rm -f makedepend
 $spitshell >makedepend <<!GROK!THIS!
 $startsh
-# $RCSfile: makedepend.SH,v $$Revision: 4.0.1.3 $$Date: 91/11/05 17:56:33 $
+# $RCSfile: makedepend.SH,v $$Revision: 4.0.1.4 $$Date: 92/06/08 13:51:24 $
 #
 # $Log:	makedepend.SH,v $
+# Revision 4.0.1.4  92/06/08  13:51:24  lwall
+# patch20: various and sundry fixes
+# 
 # Revision 4.0.1.3  91/11/05  17:56:33  lwall
 # patch11: various portability fixes
 # 
@@ -53,6 +57,9 @@ uniq='$uniq'
 
 $spitshell >>makedepend <<'!NO!SUBS!'
 
+PATH="$PATH:."
+export PATH
+
 $cat /dev/null >.deptmp
 $rm -f *.c.c c/*.c.c
 if test -f Makefile; then
@@ -83,21 +90,28 @@ for file in `$cat .clist`; do
 # for file in `cat /dev/null`; do
     case "$file" in
     *.c) filebase=`basename $file .c` ;;
-    *.y) filebase=`basename $file .c` ;;
+    *.y) filebase=`basename $file .y` ;;
+    esac
+    case "$file" in
+    */*) finc="-I`echo $file | sed 's#/[^/]*$##`" ;;
+    *)   finc= ;;
     esac
     $echo "Finding dependencies for $filebase.o."
-    $sed -n <$file >$file.c \
+    ( $echo "#line 1 \"$file\""; \
+      $sed -n <$file \
 	-e "/^${filebase}_init(/q" \
 	-e '/^#/{' \
 	-e 's|/\*.*$||' \
 	-e 's|\\$||' \
 	-e p \
-	-e '}'
-    $cppstdin -I/usr/local/include -I. $cppflags $cppminus <$file.c | sed -e 's#\.[0-9][0-9]*\.c#'"$file.c#" | \
+	-e '}' ) >$file.c
+    $cppstdin $finc -I/usr/local/include -I. $cppflags $cppminus <$file.c |
     $sed \
+	-e 's#\.[0-9][0-9]*\.c#'"$file.c#" \
 	-e 's/^[	 ]*#[	 ]*line/#/' \
-	-e '/^# *[0-9][0-9]* *"/!d' \
+	-e '/^# *[0-9][0-9]* *[".\/]/!d' \
 	-e 's/^.*"\(.*\)".*$/'$filebase'.o: \1/' \
+	-e 's/^# *[0-9][0-9]* \(.*\)$/'$filebase'.o: \1/' \
 	-e 's|: \./|: |' \
 	-e 's|\.c\.c|.c|' | \
     $uniq | $sort | $uniq >> .deptmp

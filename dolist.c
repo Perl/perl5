@@ -1,4 +1,4 @@
-/* $RCSfile: dolist.c,v $$Revision: 4.0.1.4 $$Date: 91/11/11 16:33:19 $
+/* $RCSfile: dolist.c,v $$Revision: 4.0.1.5 $$Date: 92/06/08 13:13:27 $
  *
  *    Copyright (c) 1991, Larry Wall
  *
@@ -6,6 +6,17 @@
  *    License or the Artistic License, as specified in the README file.
  *
  * $Log:	dolist.c,v $
+ * Revision 4.0.1.5  92/06/08  13:13:27  lwall
+ * patch20: g pattern modifer sometimes returned extra values
+ * patch20: m/$pattern/g didn't work
+ * patch20: pattern modifiers i and o didn't interact right
+ * patch20: @ in unpack failed too often
+ * patch20: Perl now distinguishes overlapped copies from non-overlapped
+ * patch20: slice on null list in scalar context returned random value
+ * patch20: splice with negative offset didn't work with $[ = 1
+ * patch20: fixed some memory leaks in splice
+ * patch20: scalar keys %array now counts keys for you
+ * 
  * Revision 4.0.1.4  91/11/11  16:33:19  lwall
  * patch19: added little-endian pack/unpack options
  * patch19: sort $subname was busted by changes in 4.018
@@ -40,6 +51,8 @@
 #include "EXTERN.h"
 #include "perl.h"
 
+static int sortcmp();
+static int sortsub();
 
 #ifdef BUGGY_MSC
  #pragma function(memcmp)
@@ -63,6 +76,8 @@ int *arglast;
     char *myhint = hint;
     int global;
     int safebase;
+    char *truebase = s;
+    register REGEXP *rx = spat->spat_regexp;
 
     hint = Nullch;
     if (!spat) {
@@ -100,16 +115,17 @@ int *arglast;
 	if (debug & 8)
 	    deb("2.SPAT /%s/\n",t);
 #endif
-	if (spat->spat_regexp) {
-	    regfree(spat->spat_regexp);
-	    spat->spat_regexp = Null(REGEXP*);	/* crucial if regcomp aborts */
-	}
+	if (!global && rx)
+	    regfree(rx);
+	spat->spat_regexp = Null(REGEXP*);	/* crucial if regcomp aborts */
 	spat->spat_regexp = regcomp(t,t+tmpstr->str_cur,
 	    spat->spat_flags & SPAT_FOLD);
 	if (!spat->spat_regexp->prelen && lastspat)
 	    spat = lastspat;
 	if (spat->spat_flags & SPAT_KEEP) {
-	    scanconst(spat,spat->spat_regexp->precomp, spat->spat_regexp->prelen);
+	    if (!(spat->spat_flags & SPAT_FOLD))
+		scanconst(spat,spat->spat_regexp->precomp,
+		    spat->spat_regexp->prelen);
 	    if (spat->spat_runtime)
 		arg_free(spat->spat_runtime);	/* it won't change, so */
 	    spat->spat_runtime = Nullarg;	/* no point compiling again */
@@ -120,16 +136,27 @@ int *arglast;
 	    }
 	}
 	if (global) {
-	    if (spat->spat_regexp->startp[0]) {
-		s = spat->spat_regexp->endp[0];
+	    if (rx) {
+	        if (rx->startp[0]) {
+		    s = rx->endp[0];
+		    if (s == rx->startp[0])
+			s++;
+		    if (s > strend) {
+			regfree(rx);
+			rx = spat->spat_regexp;
+			goto nope;
+		    }
+		}
+		regfree(rx);
 	    }
 	}
 	else if (!spat->spat_regexp->nparens)
 	    gimme = G_SCALAR;			/* accidental array context? */
-	if (regexec(spat->spat_regexp, s, strend, s, 0,
+	rx = spat->spat_regexp;
+	if (regexec(rx, s, strend, s, 0,
 	  srchstr->str_pok & SP_STUDIED ? srchstr : Nullstr,
 	  safebase)) {
-	    if (spat->spat_regexp->subbase || global)
+	    if (rx->subbase || global)
 		curspat = spat;
 	    lastspat = spat;
 	    goto gotcha;
@@ -152,21 +179,28 @@ int *arglast;
 		ch = '?';
 	    else
 		ch = '/';
-	    deb("2.SPAT %c%s%c\n",ch,spat->spat_regexp->precomp,ch);
+	    deb("2.SPAT %c%s%c\n",ch,rx->precomp,ch);
 	}
 #endif
-	if (!spat->spat_regexp->prelen && lastspat)
+	if (!rx->prelen && lastspat) {
 	    spat = lastspat;
+	    rx = spat->spat_regexp;
+	}
 	t = s;
     play_it_again:
-	if (global && spat->spat_regexp->startp[0])
-	    t = s = spat->spat_regexp->endp[0];
+	if (global && rx->startp[0]) {
+	    t = s = rx->endp[0];
+	    if (s == rx->startp[0])
+		s++,t++;
+	    if (s > strend)
+		goto nope;
+	}
 	if (myhint) {
 	    if (myhint < s || myhint > strend)
 		fatal("panic: hint in do_match");
 	    s = myhint;
-	    if (spat->spat_regexp->regback >= 0) {
-		s -= spat->spat_regexp->regback;
+	    if (rx->regback >= 0) {
+		s -= rx->regback;
 		if (s < t)
 		    s = t;
 	    }
@@ -190,9 +224,9 @@ int *arglast;
 #endif
 		else if (spat->spat_flags & SPAT_ALL)
 		    goto yup;
-		if (s && spat->spat_regexp->regback >= 0) {
+		if (s && rx->regback >= 0) {
 		    ++spat->spat_short->str_u.str_useful;
-		    s -= spat->spat_regexp->regback;
+		    s -= rx->regback;
 		    if (s < t)
 			s = t;
 		}
@@ -207,14 +241,14 @@ int *arglast;
 		spat->spat_short = Nullstr;	/* opt is being useless */
 	    }
 	}
-	if (!spat->spat_regexp->nparens && !global) {
+	if (!rx->nparens && !global) {
 	    gimme = G_SCALAR;			/* accidental array context? */
 	    safebase = FALSE;
 	}
-	if (regexec(spat->spat_regexp, s, strend, t, 0,
+	if (regexec(rx, s, strend, truebase, 0,
 	  srchstr->str_pok & SP_STUDIED ? srchstr : Nullstr,
 	  safebase)) {
-	    if (spat->spat_regexp->subbase || global)
+	    if (rx->subbase || global)
 		curspat = spat;
 	    lastspat = spat;
 	    if (spat->spat_flags & SPAT_ONCE)
@@ -223,7 +257,7 @@ int *arglast;
 	}
 	else {
 	    if (global)
-		spat->spat_regexp->startp[0] = Nullch;
+		rx->startp[0] = Nullch;
 	    if (gimme == G_ARRAY)
 		return sp;
 	    str_sset(str,&str_no);
@@ -238,7 +272,7 @@ int *arglast;
     if (gimme == G_ARRAY) {
 	int iters, i, len;
 
-	iters = spat->spat_regexp->nparens;
+	iters = rx->nparens;
 	if (global && !iters)
 	    i = 1;
 	else
@@ -251,14 +285,16 @@ int *arglast;
 	for (i = !i; i <= iters; i++) {
 	    st[++sp] = str_mortal(&str_no);
 	    /*SUPPRESS 560*/
-	    if (s = spat->spat_regexp->startp[i]) {
-		len = spat->spat_regexp->endp[i] - s;
+	    if (s = rx->startp[i]) {
+		len = rx->endp[i] - s;
 		if (len > 0)
 		    str_nset(st[sp],s,len);
 	    }
 	}
-	if (global)
+	if (global) {
+	    truebase = rx->subbeg;
 	    goto play_it_again;
+	}
 	return sp;
     }
     else {
@@ -274,23 +310,23 @@ yup:
     if (spat->spat_flags & SPAT_ONCE)
 	spat->spat_flags |= SPAT_USED;
     if (global) {
-	spat->spat_regexp->subbeg = t;
-	spat->spat_regexp->subend = strend;
-	spat->spat_regexp->startp[0] = s;
-	spat->spat_regexp->endp[0] = s + spat->spat_short->str_cur;
+	rx->subbeg = t;
+	rx->subend = strend;
+	rx->startp[0] = s;
+	rx->endp[0] = s + spat->spat_short->str_cur;
 	curspat = spat;
 	goto gotcha;
     }
     if (sawampersand) {
 	char *tmps;
 
-	if (spat->spat_regexp->subbase)
-	    Safefree(spat->spat_regexp->subbase);
-	tmps = spat->spat_regexp->subbase = nsavestr(t,strend-t);
-	spat->spat_regexp->subbeg = tmps;
-	spat->spat_regexp->subend = tmps + (strend-t);
-	tmps = spat->spat_regexp->startp[0] = tmps + (s - t);
-	spat->spat_regexp->endp[0] = tmps + spat->spat_short->str_cur;
+	if (rx->subbase)
+	    Safefree(rx->subbase);
+	tmps = rx->subbase = nsavestr(t,strend-t);
+	rx->subbeg = tmps;
+	rx->subend = tmps + (strend-t);
+	tmps = rx->startp[0] = tmps + (s - t);
+	rx->endp[0] = tmps + spat->spat_short->str_cur;
 	curspat = spat;
     }
     str_sset(str,&str_yes);
@@ -299,10 +335,9 @@ yup:
     return sp;
 
 nope:
-    spat->spat_regexp->startp[0] = Nullch;
-    ++spat->spat_short->str_u.str_useful;
-    if (global)
-	spat->spat_regexp->startp[0] = Nullch;
+    rx->startp[0] = Nullch;
+    if (spat->spat_short)
+	++spat->spat_short->str_u.str_useful;
     if (gimme == G_ARRAY)
 	return sp;
     str_sset(str,&str_no);
@@ -628,7 +663,7 @@ int *arglast;
 		goto reparse;
 	    break;
 	case '@':
-	    if (len > strend - s)
+	    if (len > strend - strbeg)
 		fatal("@ outside of string");
 	    s = strbeg + len;
 	    break;
@@ -775,14 +810,14 @@ int *arglast;
 		len = along;
 	    if (checksum) {
 		while (len-- > 0) {
-		    bcopy(s,(char*)&ashort,sizeof(short));
+		    Copy(s,&ashort,1,short);
 		    s += sizeof(short);
 		    culong += ashort;
 		}
 	    }
 	    else {
 		while (len-- > 0) {
-		    bcopy(s,(char*)&ashort,sizeof(short));
+		    Copy(s,&ashort,1,short);
 		    s += sizeof(short);
 		    str = Str_new(38,0);
 		    str_numset(str,(double)ashort);
@@ -798,7 +833,7 @@ int *arglast;
 		len = along;
 	    if (checksum) {
 		while (len-- > 0) {
-		    bcopy(s,(char*)&aushort,sizeof(unsigned short));
+		    Copy(s,&aushort,1,unsigned short);
 		    s += sizeof(unsigned short);
 #ifdef HAS_NTOHS
 		    if (datumtype == 'n')
@@ -813,7 +848,7 @@ int *arglast;
 	    }
 	    else {
 		while (len-- > 0) {
-		    bcopy(s,(char*)&aushort,sizeof(unsigned short));
+		    Copy(s,&aushort,1,unsigned short);
 		    s += sizeof(unsigned short);
 		    str = Str_new(39,0);
 #ifdef HAS_NTOHS
@@ -835,7 +870,7 @@ int *arglast;
 		len = along;
 	    if (checksum) {
 		while (len-- > 0) {
-		    bcopy(s,(char*)&aint,sizeof(int));
+		    Copy(s,&aint,1,int);
 		    s += sizeof(int);
 		    if (checksum > 32)
 			cdouble += (double)aint;
@@ -845,7 +880,7 @@ int *arglast;
 	    }
 	    else {
 		while (len-- > 0) {
-		    bcopy(s,(char*)&aint,sizeof(int));
+		    Copy(s,&aint,1,int);
 		    s += sizeof(int);
 		    str = Str_new(40,0);
 		    str_numset(str,(double)aint);
@@ -859,7 +894,7 @@ int *arglast;
 		len = along;
 	    if (checksum) {
 		while (len-- > 0) {
-		    bcopy(s,(char*)&auint,sizeof(unsigned int));
+		    Copy(s,&auint,1,unsigned int);
 		    s += sizeof(unsigned int);
 		    if (checksum > 32)
 			cdouble += (double)auint;
@@ -869,7 +904,7 @@ int *arglast;
 	    }
 	    else {
 		while (len-- > 0) {
-		    bcopy(s,(char*)&auint,sizeof(unsigned int));
+		    Copy(s,&auint,1,unsigned int);
 		    s += sizeof(unsigned int);
 		    str = Str_new(41,0);
 		    str_numset(str,(double)auint);
@@ -883,7 +918,7 @@ int *arglast;
 		len = along;
 	    if (checksum) {
 		while (len-- > 0) {
-		    bcopy(s,(char*)&along,sizeof(long));
+		    Copy(s,&along,1,long);
 		    s += sizeof(long);
 		    if (checksum > 32)
 			cdouble += (double)along;
@@ -893,7 +928,7 @@ int *arglast;
 	    }
 	    else {
 		while (len-- > 0) {
-		    bcopy(s,(char*)&along,sizeof(long));
+		    Copy(s,&along,1,long);
 		    s += sizeof(long);
 		    str = Str_new(42,0);
 		    str_numset(str,(double)along);
@@ -909,7 +944,7 @@ int *arglast;
 		len = along;
 	    if (checksum) {
 		while (len-- > 0) {
-		    bcopy(s,(char*)&aulong,sizeof(unsigned long));
+		    Copy(s,&aulong,1,unsigned long);
 		    s += sizeof(unsigned long);
 #ifdef HAS_NTOHL
 		    if (datumtype == 'N')
@@ -927,7 +962,7 @@ int *arglast;
 	    }
 	    else {
 		while (len-- > 0) {
-		    bcopy(s,(char*)&aulong,sizeof(unsigned long));
+		    Copy(s,&aulong,1,unsigned long);
 		    s += sizeof(unsigned long);
 		    str = Str_new(43,0);
 #ifdef HAS_NTOHL
@@ -951,7 +986,7 @@ int *arglast;
 		if (sizeof(char*) > strend - s)
 		    break;
 		else {
-		    bcopy(s,(char*)&aptr,sizeof(char*));
+		    Copy(s,&aptr,1,char*);
 		    s += sizeof(char*);
 		}
 		str = Str_new(44,0);
@@ -966,7 +1001,7 @@ int *arglast;
 		if (s + sizeof(quad) > strend)
 		    aquad = 0;
 		else {
-		    bcopy(s,(char*)&aquad,sizeof(quad));
+		    Copy(s,&aquad,1,quad);
 		    s += sizeof(quad);
 		}
 		str = Str_new(42,0);
@@ -979,7 +1014,7 @@ int *arglast;
 		if (s + sizeof(unsigned quad) > strend)
 		    auquad = 0;
 		else {
-		    bcopy(s,(char*)&auquad,sizeof(unsigned quad));
+		    Copy(s,&auquad,1,unsigned quad);
 		    s += sizeof(unsigned quad);
 		}
 		str = Str_new(43,0);
@@ -996,14 +1031,14 @@ int *arglast;
 		len = along;
 	    if (checksum) {
 		while (len-- > 0) {
-		    bcopy(s, (char *)&afloat, sizeof(float));
+		    Copy(s, &afloat,1, float);
 		    s += sizeof(float);
 		    cdouble += afloat;
 		}
 	    }
 	    else {
 		while (len-- > 0) {
-		    bcopy(s, (char *)&afloat, sizeof(float));
+		    Copy(s, &afloat,1, float);
 		    s += sizeof(float);
 		    str = Str_new(47, 0);
 		    str_numset(str, (double)afloat);
@@ -1018,14 +1053,14 @@ int *arglast;
 		len = along;
 	    if (checksum) {
 		while (len-- > 0) {
-		    bcopy(s, (char *)&adouble, sizeof(double));
+		    Copy(s, &adouble,1, double);
 		    s += sizeof(double);
 		    cdouble += adouble;
 		}
 	    }
 	    else {
 		while (len-- > 0) {
-		    bcopy(s, (char *)&adouble, sizeof(double));
+		    Copy(s, &adouble,1, double);
 		    s += sizeof(double);
 		    str = Str_new(48, 0);
 		    str_numset(str, (double)adouble);
@@ -1182,7 +1217,9 @@ int *arglast;
 	sp--;
     }
     else {
-	if (numarray) {
+	if (sp == max)
+	    st[sp] = &str_undef;
+	else if (numarray) {
 	    if (st[max])
 		st[sp] = afetch(ary,
 		  ((int)str_gnum(st[max])) - arybase, lval);
@@ -1225,9 +1262,11 @@ int *arglast;
     STR **tmparyval;
 
     if (++sp < max) {
-	offset = ((int)str_gnum(st[sp])) - arybase;
+	offset = (int)str_gnum(st[sp]);
 	if (offset < 0)
 	    offset += ary->ary_fill + 1;
+	else
+	    offset -= arybase;
 	if (++sp < max) {
 	    length = (int)str_gnum(st[sp++]);
 	    if (length < 0)
@@ -1284,8 +1323,11 @@ int *arglast;
 	}
 	else {
 	    st[sp] = ary->ary_array[offset+length-1];
-	    if (ary->ary_flags & ARF_REAL)
+	    if (ary->ary_flags & ARF_REAL) {
 		str_2mortal(st[sp]);
+		for (i = length - 1, dst = &ary->ary_array[offset]; i > 0; i--)
+		    str_free(*dst++);	/* free them now */
+	    }
 	}
 	ary->ary_fill += diff;
 
@@ -1306,7 +1348,7 @@ int *arglast;
 	    if (after) {			/* anything to pull down? */
 		src = ary->ary_array + offset + length;
 		dst = src + diff;		/* diff is negative */
-		Copy(src, dst, after, STR*);
+		Move(src, dst, after, STR*);
 	    }
 	    Zero(&ary->ary_array[ary->ary_fill+1], -diff, STR*);
 						/* avoid later double free */
@@ -1334,7 +1376,7 @@ int *arglast;
 		if (offset) {
 		    src = ary->ary_array;
 		    dst = src - diff;
-		    Copy(src, dst, offset, STR*);
+		    Move(src, dst, offset, STR*);
 		}
 		ary->ary_array -= diff;		/* diff is positive */
 		ary->ary_max += diff;
@@ -1345,14 +1387,17 @@ int *arglast;
 		    astore(ary, ary->ary_fill + diff, Nullstr);
 		else
 		    ary->ary_fill += diff;
+		dst = ary->ary_array + ary->ary_fill;
+		for (i = diff; i > 0; i--) {
+		    if (*dst)			/* str was hanging around */
+			str_free(*dst);		/*  after $#foo */
+		    dst--;
+		}
 		if (after) {
 		    dst = ary->ary_array + ary->ary_fill;
 		    src = dst - diff;
 		    for (i = after; i; i--) {
-			if (*dst)		/* str was hanging around */
-			    str_free(*dst);	/*  after $#foo */
-			*dst-- = *src;
-			*src-- = Nullstr;
+			*dst-- = *src--;
 		    }
 		}
 	    }
@@ -1374,10 +1419,13 @@ int *arglast;
 	    }
 	    sp += length - 1;
 	}
-	else if (length) {
-	    st[sp] = tmparyval[length-1];
-	    if (ary->ary_flags & ARF_REAL)
+	else if (length--) {
+	    st[sp] = tmparyval[length];
+	    if (ary->ary_flags & ARF_REAL) {
 		str_2mortal(st[sp]);
+		while (length-- > 0)
+		    str_free(tmparyval[length]);
+	    }
 	    Safefree(tmparyval);
 	}
 	else
@@ -1450,7 +1498,7 @@ int *arglast;
 	    *down-- = *up;
     }
     i = arglast[2] - arglast[1];
-    Copy(down+1,up,i/2,STR*);
+    Move(down+1,up,i/2,STR*);
     return arglast[2] - 1;
 }
 
@@ -1543,8 +1591,8 @@ int *arglast;
 	    if (stab) {
 		if (!stab_sub(stab) || !(sortcmd = stab_sub(stab)->cmd))
 		    fatal("Undefined subroutine \"%s\" in sort", 
-			stab_name(stab));
-		stash = stab_stash(stab);
+			stab_ename(stab));
+		stash = stab_estash(stab);
 	    }
 	    else
 		sortcmd = Nullcmd;
@@ -1587,7 +1635,7 @@ int *arglast;
     return sp+max;
 }
 
-int
+static int
 sortsub(str1,str2)
 STR **str1;
 STR **str2;
@@ -1598,6 +1646,7 @@ STR **str2;
     return (int)str_gnum(*stack->ary_array);
 }
 
+static int
 sortcmp(strp1,strp2)
 STR **strp1;
 STR **strp2;
@@ -1736,7 +1785,7 @@ int *arglast;
     if (!maxarg)
 	return sp;
     str = Str_new(49,0);
-    stab_fullname(str, csv->stab);
+    stab_efullname(str, csv->stab);
     (void)astore(stack,++sp, str_2mortal(str));
     (void)astore(stack,++sp,
       str_2mortal(str_nmake((double)csv->hasargs)) );
@@ -1848,7 +1897,13 @@ int *arglast;
     int dovalues = (kv == O_VALUES || kv == O_HASH);
 
     if (gimme != G_ARRAY) {
-	str_sset(str,&str_undef);
+	i = 0;
+	(void)hiterinit(hash);
+	/*SUPPRESS 560*/
+	while (entry = hiternext(hash)) {
+	    i++;
+	}
+	str_numset(str,(double)i);
 	STABSET(str);
 	st[++sp] = str;
 	return sp;
