@@ -941,9 +941,7 @@ else
 {
     # bug 20020208.005 plus some extras
     # single arg exec/system are tests 80-83
-    use if $] lt '5.009', warnings => FATAL => 'taint';
-    my $err = $] ge '5.009' ? qr/^Insecure dependency/ 
-                            : qr/^Use of tainted arguments/;
+    my $err = qr/^Insecure dependency/ ;
     test 184, eval { exec $TAINT, $TAINT } eq '', 'exec';
     test 185, $@ =~ $err, $@;
     test 186, eval { exec $TAINT $TAINT } eq '', 'exec';
