@@ -718,6 +718,8 @@ sub _find_dir($$$) {
 	    $_= ($no_chdir ? $dir_name : $dir_rel ); # $_
 	    # prune may happen here
 	    $prune= 0;
+            # guarantee lstat for directory
+            lstat( $dir_name );
 	    { &$wanted_callback };	# protect against wild "next"
 	    next if $prune;
 	}
@@ -869,6 +871,8 @@ sub _find_dir($$$) {
 			s|/\.$||;
 		    }
 		}
+                # guarantee lstat at return to directory
+		lstat( $dir_name );
 		{ &$wanted_callback }; # protect against wild "next"
 	     }
 	     else {
