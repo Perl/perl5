@@ -52,7 +52,7 @@ else
  {
   if (@edit)
    {
-    System("p4 revert @edit");
+    System("p4 refresh @edit");
    }
  }
 
