@@ -475,15 +475,15 @@ representation matches the internal representation, but on some
 platforms the external representation of C<\n> is made up of more than
 one character.
 
-Mac OS, all variants of Unix, and Stream_LF files on VMS use a single 
-character to end each line in the external representation of text (even 
+Mac OS, all variants of Unix, and Stream_LF files on VMS use a single
+character to end each line in the external representation of text (even
 though that single character is CARRIAGE RETURN on Mac OS and LINE FEED
-on Unix and most VMS files).  Consequently binmode() has no effect on 
-these operating systems.  In other systems like OS/2, DOS and the various 
-flavors of MS-Windows your program sees a C<\n> as a simple C<\cJ>, but 
-what's stored in text files are the two characters C<\cM\cJ>.  That means 
-that, if you don't use binmode() on these systems, C<\cM\cJ> sequences on 
-disk will be converted to C<\n> on input, and any C<\n> in your program 
+on Unix and most VMS files).  Consequently binmode() has no effect on
+these operating systems.  In other systems like OS/2, DOS and the various
+flavors of MS-Windows your program sees a C<\n> as a simple C<\cJ>, but
+what's stored in text files are the two characters C<\cM\cJ>.  That means
+that, if you don't use binmode() on these systems, C<\cM\cJ> sequences on
+disk will be converted to C<\n> on input, and any C<\n> in your program
 will be converted back to C<\cM\cJ> on output.  This is what you want for
 text files, but it can be disastrous for binary files.
 
@@ -2629,15 +2629,18 @@ to be converted into a file mode, for example. (Although perl will
 automatically convert strings into numbers as needed, this automatic
 conversion assumes base 10.)
 
-=item open FILEHANDLE,MODE,LIST
-
 =item open FILEHANDLE,EXPR
+
+=item open FILEHANDLE,MODE,EXPR
+
+=item open FILEHANDLE,MODE,EXPR,LIST
 
 =item open FILEHANDLE
 
 Opens the file whose filename is given by EXPR, and associates it with
-FILEHANDLE.  If FILEHANDLE is an expression, its value is used as the
-name of the real filehandle wanted.  (This is considered a symbolic
+FILEHANDLE.  If FILEHANDLE is an undefined lexical (C<my>) variable the variable is
+assigned a reference to a new anonymous filehandle, otherwise if FILEHANDLE is an expression,
+its value is used as the name of the real filehandle wanted.  (This is considered a symbolic
 reference, so C<use strict 'refs'> should I<not> be in effect.)
 
 If EXPR is omitted, the scalar
@@ -2647,7 +2650,8 @@ for this purpose; so if you're using C<my>, specify EXPR in your call
 to open.)  See L<perlopentut> for a kinder, gentler explanation of opening
 files.
 
-If MODE is C<< '<' >> or nothing, the file is opened for input.
+If three or more arguments are specified then the mode of opening and the file name
+are separate. If MODE is C<< '<' >> or nothing, the file is opened for input.
 If MODE is C<< '>' >>, the file is truncated and opened for
 output, being created if necessary.  If MODE is C<<< '>>' >>>,
 the file is opened for appending, again being created if necessary.
@@ -2664,7 +2668,8 @@ C<'w'>, C<'w+'>, C<'a'>, and C<'a+'>.
 
 In the 2-arguments (and 1-argument) form of the call the mode and
 filename should be concatenated (in this order), possibly separated by
-spaces.  It is possible to omit the mode if the mode is C<< '<' >>.
+spaces.  It is possible to omit the mode in these forms if the mode is
+C<< '<' >>.
 
 If the filename begins with C<'|'>, the filename is interpreted as a
 command to which output is to be piped, and if the filename ends with a
@@ -2675,14 +2680,18 @@ that pipes both in I<and> out, but see L<IPC::Open2>, L<IPC::Open3>,
 and L<perlipc/"Bidirectional Communication with Another Process">
 for alternatives.)
 
-If MODE is C<'|-'>, the filename is interpreted as a
+For three or more arguments if MODE is C<'|-'>, the filename is interpreted as a
 command to which output is to be piped, and if MODE is
 C<'-|'>, the filename is interpreted as a command which pipes output to
 us.  In the 2-arguments (and 1-argument) form one should replace dash
 (C<'-'>) with the command.  See L<perlipc/"Using open() for IPC">
 for more examples of this.  (You are not allowed to C<open> to a command
 that pipes both in I<and> out, but see L<IPC::Open2>, L<IPC::Open3>,
-and L<perlipc/"Bidirectional Communication"> for alternatives.)
+and L<perlipc/"Bidirectional Communication"> for alternatives.) In 3+ arg form of
+pipe opens then if LIST is specified (extra arguments after the command name) then
+LIST becomes arguments to the command invoked if the platform supports it.
+The meaning of C<open> with more than three arguments for non-pipe modes
+is not yet specified. Experimental "layers" may give extra LIST arguments meaning.
 
 In the 2-arguments (and 1-argument) form opening C<'-'> opens STDIN
 and opening C<< '>-' >> opens STDOUT.
@@ -2700,6 +2709,10 @@ and those that don't is their text file formats.  Systems like Unix, MacOS, and
 Plan9, which delimit lines with a single character, and which encode that
 character in C as C<"\n">, do not need C<binmode>.  The rest need it.
 
+In the three argument form MODE may also contain a list of IO "layers" (see L<open> and
+L<PerlIO> for more details) to be applied to the handle. This can be used to achieve the
+effect of C<binmode> as well as more complex behaviours.
+
 When opening a file, it's usually a bad idea to continue normal execution
 if the request failed, so C<open> is frequently used in connection with
 C<die>.  Even if C<die> won't do what you want (say, in a CGI script,
@@ -2714,6 +2727,7 @@ being C<undef>:
     open(TMP, "+>", undef) or die ...
 
 opens a filehandle to an anonymous temporary file.
+
 
 Examples:
 
@@ -3532,7 +3546,7 @@ If EXPR is omitted, uses C<$_>.
 
 Returns a random fractional number greater than or equal to C<0> and less
 than the value of EXPR.  (EXPR should be positive.)  If EXPR is
-omitted, or a C<0>, the value C<1> is used.  Automatically calls C<srand> 
+omitted, or a C<0>, the value C<1> is used.  Automatically calls C<srand>
 unless C<srand> has already been called.  See also C<srand>.
 
 Apply C<int()> to the value returned by C<rand()> if you want random
