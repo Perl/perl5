@@ -1658,6 +1658,12 @@
 #define LONGLONGSIZE _error_		/**/
 #endif
 
+/* HAS_MADVISE:
+ *	This symbol, if defined, indicates that the madvise system call is
+ *	available to map a file into memory.
+ */
+/*#define HAS_MADVISE		/**/
+
 /* HAS_MEMCHR:
  *	This symbol, if defined, indicates that the memchr routine is available
  *	to locate characters within a C string.
@@ -2346,6 +2352,12 @@
  */
 /*#define	I_SOCKS		/**/
 
+/* I_SUNMATH:
+ *	This symbol, if defined, indicates that <sunmath.h> exists and
+ *	should be included.
+ */
+/*#define	I_SUNMATH		/**/
+
 /* I_SYSLOG:
  *	This symbol, if defined, indicates that <syslog.h> exists and
  *	should be included.
@@ -2997,6 +3009,12 @@
  *	available to stat filesystems in bulk.
  */
 /*#define HAS_GETFSSTAT		/**/
+
+/* I_IEEEFP:
+ *	This symbol, if defined, indicates that <ieeefp.h> exists and
+ *	should be included.
+ */
+/*#define	I_IEEEFP		/**/
 
 /* HAS_LSEEK_PROTO:
  *	This symbol, if defined, indicates that the system provides

@@ -2823,12 +2823,12 @@ S_regpposixcc(pTHX_ I32 value)
 			}
 			break;
 		    }
-		    if ((namedclass == OOB_NAMEDCLASS ||
-			 !(posixcc + skip + 2 < PL_regxend &&
-			   (posixcc[skip] == ':' &&
-			    posixcc[skip + 1] == ']'))))
-			Perl_croak(aTHX_ "Character class [:%.*s:] unknown",
-				   t - s - 1, s + 1); 
+		    if (namedclass == OOB_NAMEDCLASS ||
+			posixcc[skip] != ':' ||
+			posixcc[skip+1] != ']')
+			Perl_croak(aTHX_
+				   "Character class [:%.*s:] unknown",
+				   t - s - 1, s + 1);
 		} else if (ckWARN(WARN_REGEXP) && !SIZE_ONLY)
 		    /* [[=foo=]] and [[.foo.]] are still future. */
 		    Perl_warner(aTHX_ WARN_REGEXP,

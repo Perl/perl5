@@ -852,6 +852,10 @@ d_lstat (d_lstat.U):
 	This variable conditionally defines HAS_LSTAT if lstat() is
 	available to do file stats on symbolic links.
 
+d_madvise (d_madvise.U):
+	This variable conditionally defines HAS_MADVISE if madvise() is
+	available to map a file into memory.
+
 d_mblen (d_mblen.U):
 	This variable conditionally defines the HAS_MBLEN symbol, which
 	indicates to the C program that the mblen() routine is available
@@ -1133,6 +1137,10 @@ d_pwpasswd (i_pwd.U):
 d_pwquota (i_pwd.U):
 	This variable conditionally defines PWQUOTA, which indicates
 	that struct passwd contains pw_quota.
+
+d_qgcvt (d_qgcvt.U):
+	This variable conditionally defines the HAS_QGCVT symbol, which
+	indicates to the C program that the qgcvt() routine is available.
 
 d_quad (quadtype.U):
 	This variable, if defined, tells that there's a 64-bit integer type,
@@ -1918,6 +1926,10 @@ i_iconv (i_iconv.U):
 	This variable conditionally defines the I_ICONV symbol, and indicates
 	whether a C program should include <iconv.h>.
 
+i_ieeefp (i_ieeefp.U):
+	This variable conditionally defines the I_IEEEFP symbol, and indicates
+	whether a C program should include <ieeefp.h>.
+
 i_inttypes (i_inttypes.U):
 	This variable conditionally defines the I_INTTYPES symbol,
 	and indicates whether a C program should include <inttypes.h>.
@@ -2026,6 +2038,10 @@ i_stdlib (i_stdlib.U):
 i_string (i_string.U):
 	This variable conditionally defines the I_STRING symbol, which
 	indicates that <string.h> should be included rather than <strings.h>.
+
+i_sunmath (i_sunmath.U):
+	This variable conditionally defines the I_SUNMATH symbol, and indicates
+	whether a C program should include <sunmath.h>.
 
 i_sysaccess (i_sysaccess.U):
 	This variable conditionally defines the I_SYS_ACCESS symbol,

@@ -86,7 +86,7 @@ some:[where.over]the.rainbow	unixify	/some/where/over/the.rainbow
 /some/where/over/the.rainbow	vmsify	some:[where.over]the.rainbow
 some/where/over/the.rainbow	vmsify	[.some.where.over]the.rainbow
 ../some/where/over/the.rainbow	vmsify	[-.some.where.over]the.rainbow
-some/../../where/over/the.rainbow	vmsify	[-.where.over]the.rainbow
+some/../../where/over/the.rainbow	vmsify	[.some.--.where.over]the.rainbow
 .../some/where/over/the.rainbow	vmsify	[...some.where.over]the.rainbow
 some/.../where/over/the.rainbow	vmsify	[.some...where.over]the.rainbow
 /some/.../where/over/the.rainbow	vmsify	some:[...where.over]the.rainbow

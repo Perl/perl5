@@ -1262,7 +1262,30 @@ This port is still using its own builtin globbing.
 
 =head2 VMS
 
-[TODO - Charles Bailey <bailey@newman.upenn.edu>]
+Numerous revisions and extensions to configuration, build, testing, and
+installation process to accomodate core changes and VMS-specific options
+
+Expand %ENV-handling code to allow runtime mapping to logical names,
+CLI symbols, and CRTL environ array
+
+Extension of subprocess invocation code to accept filespecs as command "verbs"
+
+Add to Perl command line processing the ability to use default file types and
+to recognize Unix-style C<2E<gt>&1>. 
+
+Expansion of File::Spec::VMS routines, and integration into ExtUtils::MM_VMS
+
+Extension of ExtUtils::MM_VMS to handle complex extensions more flexibly
+
+Barewords at start of Unix-syntax paths may be treated as text rather than
+only as logical names
+
+Optional secure translation of several logical names used internally by Perl
+
+Miscellaneous bugfixing and porting of new core code to VMS
+
+Thanks are gladly extended to the many people who have contributed VMS
+patches, testing, and ideas.
 
 =head2 Win32
 

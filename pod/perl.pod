@@ -52,6 +52,7 @@ sections:
     perlfork		Perl fork() information
     perlthrtut		Perl threads tutorial
     perllexwarn		Perl warnings and their control
+    perlfilter		Perl source filters
     perldbmfilter	Perl DBM filters
 
     perlcompile		Perl compiler suite intro

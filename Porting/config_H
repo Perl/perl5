@@ -17,7 +17,7 @@
 /*
  * Package name      : perl5
  * Source directory  : .
- * Configuration time: Sat Feb 26 03:04:10 EET 2000
+ * Configuration time: Fri Mar  3 17:00:59 EET 2000
  * Configured by     : jhi
  * Target system     : osf1 alpha.hut.fi v4.0 878 alpha 
  */
@@ -1098,8 +1098,8 @@
  *	This symbol contains the ~name expanded version of ARCHLIB, to be used
  *	in programs that are not prepared to deal with ~ expansion at run-time.
  */
-#define ARCHLIB "/opt/perl/lib/5.5.660/alpha-dec_osf-thread-multi"		/**/
-#define ARCHLIB_EXP "/opt/perl/lib/5.5.660/alpha-dec_osf-thread-multi"		/**/
+#define ARCHLIB "/opt/perl/lib/5.5.670/alpha-dec_osf-thread-multi"		/**/
+#define ARCHLIB_EXP "/opt/perl/lib/5.5.670/alpha-dec_osf-thread-multi"		/**/
 
 /* ARCHNAME:
  *	This symbol holds a string representing the architecture name.
@@ -1605,7 +1605,7 @@
  *	This symbol, if defined, indicates that the iconv routine is
  *	available to do character set conversions.
  */
-/*#define HAS_ICONV		/ **/
+#define HAS_ICONV		/**/
 
 /* HAS_INT64_T:
  *     This symbol will defined if the C compiler supports int64_t.
@@ -1661,6 +1661,12 @@
 #ifdef HAS_LONG_LONG
 #define LONGLONGSIZE 8		/**/
 #endif
+
+/* HAS_MADVISE:
+ *	This symbol, if defined, indicates that the madvise system call is
+ *	available to map a file into memory.
+ */
+#define HAS_MADVISE		/**/
 
 /* HAS_MEMCHR:
  *	This symbol, if defined, indicates that the memchr routine is available
@@ -2350,6 +2356,12 @@
  */
 /*#define	I_SOCKS		/ **/
 
+/* I_SUNMATH:
+ *	This symbol, if defined, indicates that <sunmath.h> exists and
+ *	should be included.
+ */
+/*#define	I_SUNMATH		/ **/
+
 /* I_SYSLOG:
  *	This symbol, if defined, indicates that <syslog.h> exists and
  *	should be included.
@@ -2663,8 +2675,8 @@
  *	This symbol contains the ~name expanded version of PRIVLIB, to be used
  *	in programs that are not prepared to deal with ~ expansion at run-time.
  */
-#define PRIVLIB "/opt/perl/lib/5.5.660"		/**/
-#define PRIVLIB_EXP "/opt/perl/lib/5.5.660"		/**/
+#define PRIVLIB "/opt/perl/lib/5.5.670"		/**/
+#define PRIVLIB_EXP "/opt/perl/lib/5.5.670"		/**/
 
 /* PTRSIZE:
  *	This symbol contains the size of a pointer, so that the C preprocessor
@@ -2762,8 +2774,8 @@
  *	This symbol contains the ~name expanded version of SITEARCH, to be used
  *	in programs that are not prepared to deal with ~ expansion at run-time.
  */
-#define SITEARCH "/opt/perl/lib/site_perl/5.5.660/alpha-dec_osf-thread-multi"		/**/
-#define SITEARCH_EXP "/opt/perl/lib/site_perl/5.5.660/alpha-dec_osf-thread-multi"		/**/
+#define SITEARCH "/opt/perl/lib/site_perl/5.5.670/alpha-dec_osf-thread-multi"		/**/
+#define SITEARCH_EXP "/opt/perl/lib/site_perl/5.5.670/alpha-dec_osf-thread-multi"		/**/
 
 /* SITELIB:
  *	This symbol contains the name of the private library for this package.
@@ -2780,8 +2792,8 @@
  *	This symbol contains the ~name expanded version of SITELIB, to be used
  *	in programs that are not prepared to deal with ~ expansion at run-time.
  */
-#define SITELIB "/opt/perl/lib/site_perl/5.5.660"		/**/
-#define SITELIB_EXP "/opt/perl/lib/site_perl/5.5.660"		/**/
+#define SITELIB "/opt/perl/lib/site_perl/5.5.670"		/**/
+#define SITELIB_EXP "/opt/perl/lib/site_perl/5.5.670"		/**/
 
 /* Size_t:
  *	This symbol holds the type used to declare length parameters
@@ -2964,7 +2976,7 @@
 /* PERL_XS_APIVERSION:
  *	This variable contains the version of the oldest perl binary
  *	compatible with the present perl.  perl.c:incpush() and
- *	lib/lib.pm will automatically search in /opt/perl/lib/site_perl/5.5.660/alpha-dec_osf-thread-multi for older
+ *	lib/lib.pm will automatically search in /opt/perl/lib/site_perl/5.5.670/alpha-dec_osf-thread-multi for older
  *	directories across major versions back to xs_apiversion.
  *	This is only useful if you have a perl library directory tree
  *	structured like the default one.
@@ -2983,7 +2995,7 @@
  *	compatible with the present perl.  (That is, pure perl modules
  *	written for pm_apiversion will still work for the current
  *	version).  perl.c:incpush() and lib/lib.pm will automatically
- *	search in /opt/perl/lib/site_perl/5.5.660 for older directories across major versions
+ *	search in /opt/perl/lib/site_perl/5.5.670 for older directories across major versions
  *	back to pm_apiversion.  This is only useful if you have a perl
  *	library directory tree structured like the default one.  The
  *	versioned site_perl library was introduced in 5.005, so that's
@@ -2993,7 +3005,7 @@
  *	(presumably) be similar.
  *	See the INSTALL file for how this works.
  */
-#define PERL_XS_APIVERSION "5.5.660"
+#define PERL_XS_APIVERSION "5.5.670"
 #define PERL_PM_APIVERSION "5.005"
 
 /* HAS_GETFSSTAT:
@@ -3001,6 +3013,12 @@
  *	available to stat filesystems in bulk.
  */
 #define HAS_GETFSSTAT		/**/
+
+/* I_IEEEFP:
+ *	This symbol, if defined, indicates that <ieeefp.h> exists and
+ *	should be included.
+ */
+/*#define	I_IEEEFP		/ **/
 
 /* HAS_LSEEK_PROTO:
  *	This symbol, if defined, indicates that the system provides

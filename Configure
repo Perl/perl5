@@ -20,7 +20,7 @@
 
 # $Id: Head.U,v 3.0.1.9 1997/02/28 15:02:09 ram Exp $
 #
-# Generated on Thu Mar  2 21:42:14 EET 2000 [metaconfig 3.0 PL70]
+# Generated on Fri Mar  3 16:54:03 EET 2000 [metaconfig 3.0 PL70]
 # (with additional metaconfig patches by perlbug@perl.com)
 
 cat >/tmp/c1$$ <<EOF
@@ -618,6 +618,7 @@ i_gdbm=''
 d_grpasswd=''
 i_grp=''
 i_iconv=''
+i_ieeefp=''
 i_inttypes=''
 i_limits=''
 i_locale=''
@@ -13938,6 +13939,10 @@ eval $setvar
 set iconv.h i_iconv
 eval $inhdr
 
+: see if this is a ieeefp.h system
+set ieeefp.h i_ieeefp
+eval $inhdr
+
 : see if locale.h is available
 set locale.h i_locale
 eval $inhdr
@@ -15227,6 +15232,7 @@ i_float='$i_float'
 i_gdbm='$i_gdbm'
 i_grp='$i_grp'
 i_iconv='$i_iconv'
+i_ieeefp='$i_ieeefp'
 i_inttypes='$i_inttypes'
 i_limits='$i_limits'
 i_locale='$i_locale'

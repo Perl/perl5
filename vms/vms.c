@@ -987,6 +987,7 @@ pipe_exit_routine()
     info = open_pipes;
 
     while (info) {
+      int need_eof;
       _ckvmssts(SYS$SETAST(0));
       need_eof = info->mode != 'r' && !info->done;
       _ckvmssts(SYS$SETAST(1));
@@ -2518,6 +2519,9 @@ getredirection(int *ac, char ***av)
 	exit(vaxc$errno);
 	}
     if (err != NULL) {
+        if (strcmp(err,"&1") == 0) {
+            dup2(fileno(stdout), fileno(Perl_debug_log));
+        } else {
 	FILE *tmperr;
 	if (NULL == (tmperr = fopen(err, errmode, "mbc=32", "mbf=2")))
 	    {
@@ -2530,6 +2534,7 @@ getredirection(int *ac, char ***av)
 		exit(vaxc$errno);
 		}
 	}
+        }
 #ifdef ARGPROC_DEBUG
     PerlIO_printf(Perl_debug_log, "Arglist:\n");
     for (j = 0; j < *ac;  ++j)
@@ -3388,6 +3393,7 @@ setup_cmddsc(char *cmd, int check_img)
 {
   char vmsspec[NAM$C_MAXRSS+1], resspec[NAM$C_MAXRSS+1];
   $DESCRIPTOR(defdsc,".EXE");
+  $DESCRIPTOR(defdsc2,".");
   $DESCRIPTOR(resdsc,resspec);
   struct dsc$descriptor_s imgdsc = {0, DSC$K_DTYPE_T, DSC$K_CLASS_S, 0};
   unsigned long int cxt = 0, flags = 1, retsts = SS$_NORMAL;
@@ -3443,18 +3449,44 @@ setup_cmddsc(char *cmd, int check_img)
     imgdsc.dsc$a_pointer = s;
     imgdsc.dsc$w_length = wordbreak - s;
     retsts = lib$find_file(&imgdsc,&resdsc,&cxt,&defdsc,0,0,&flags);
+    if (!(retsts&1)) {
+        _ckvmssts(lib$find_file_end(&cxt));
+        retsts = lib$find_file(&imgdsc,&resdsc,&cxt,&defdsc2,0,0,&flags);
     if (!(retsts & 1) && *s == '$') {
+          _ckvmssts(lib$find_file_end(&cxt));
       imgdsc.dsc$a_pointer++; imgdsc.dsc$w_length--;
       retsts = lib$find_file(&imgdsc,&resdsc,&cxt,&defdsc,0,0,&flags);
+          if (!(retsts&1)) {
       _ckvmssts(lib$find_file_end(&cxt));
+            retsts = lib$find_file(&imgdsc,&resdsc,&cxt,&defdsc2,0,0,&flags);
+          }
     }
+    }
+    _ckvmssts(lib$find_file_end(&cxt));
+
     if (retsts & 1) {
+      FILE *fp;
       s = resspec;
       while (*s && !isspace(*s)) s++;
       *s = '\0';
+
+      /* check that it's really not DCL with no file extension */
+      fp = fopen(resspec,"r","ctx=bin,shr=get");
+      if (fp) {
+        char b[4] = {0,0,0,0};
+        read(fileno(fp),b,4);
+        isdcl = isprint(b[0]) && isprint(b[1]) && isprint(b[2]) && isprint(b[3]);
+        fclose(fp);
+      }
+      if (check_img && isdcl) return RMS$_FNF;
+
       if (cando_by_name(S_IXUSR,0,resspec)) {
         New(402,VMScmd.dsc$a_pointer,7 + s - resspec + (rest ? strlen(rest) : 0),char);
+        if (!isdcl) {
         strcpy(VMScmd.dsc$a_pointer,"$ MCR ");
+        } else {
+            strcpy(VMScmd.dsc$a_pointer,"@");
+        }
         strcat(VMScmd.dsc$a_pointer,resspec);
         if (rest) strcat(VMScmd.dsc$a_pointer,rest);
         VMScmd.dsc$w_length = strlen(VMScmd.dsc$a_pointer);

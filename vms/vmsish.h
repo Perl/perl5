@@ -263,6 +263,10 @@
 #define HAS_WAIT
 
 #define PERL_FS_VER_FMT		"%d_%d_%d"
+/* Temporary; we need to add support for this to Configure.Com */
+#ifdef PERL_INC_VERSION_LIST
+#  undef PERL_INC_VERSION_LIST
+#endif
 
 /* VMS:
  *	This symbol, if defined, indicates that the program is running under
