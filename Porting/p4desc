@@ -85,7 +85,8 @@ if ($cur) {
 		warn "$newfile add, revision != 1!\n" unless $newfile =~ /#1$/;
 	    }
         } else {
-	    $_ = "# Skipped: $_";
+	    push @skipped, "# $_";
+	    $_ = '';
 	}
     }
     warn "file [$file] line [$cur] file# [$fnum]\n" if $v;
@@ -93,6 +94,7 @@ if ($cur) {
 
 if (m|^==== //depot/|) { 
     $skip = !m|$branches|;
+    print "# Skipped because not under branches: $branches\n" if $skip;
 }
 
 $_ = "# $_" if $skip; 
@@ -108,6 +110,9 @@ if (/^Change (\d+) by/) {
 
 if (eof) {
     $_ .= newfiles();
+    $_ .= join('', "\n",
+               "# Skipped because not under branches: $branches\n",
+               @skipped, "\n") if @skipped; 
 }
 
 sub newfiles {
