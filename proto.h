@@ -1228,7 +1228,7 @@ STATIC char*	S_scan_subst(pTHX_ char *start);
 STATIC char*	S_scan_trans(pTHX_ char *start);
 STATIC char*	S_scan_word(pTHX_ char *s, char *dest, STRLEN destlen, int allow_package, STRLEN *slp);
 STATIC char*	S_skipspace(pTHX_ char *s);
-STATIC char*	S_swallow_bom(pTHX_ char *s);
+STATIC char*	S_swallow_bom(pTHX_ U8 *s);
 STATIC void	S_checkcomma(pTHX_ char *s, char *name, char *what);
 STATIC void	S_force_ident(pTHX_ char *s, int kind);
 STATIC void	S_incline(pTHX_ char *s);
