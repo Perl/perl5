@@ -2091,14 +2091,14 @@ Perl_magic_set(pTHX_ SV *sv, MAGIC *mg)
 	break;
     case '\017':	/* ^O */
 	if (*(mg->mg_ptr+1) == '\0') {
-	    if (PL_osname)
+	    if (PL_osname) {
 		Safefree(PL_osname);
+		PL_osname = Nullch;
+	    }
 	    if (SvOK(sv)) {
 		TAINT_PROPER("assigning to $^O");
 		PL_osname = savepv(SvPV(sv,len));
 	    }
-	    else
-		PL_osname = Nullch;
 	}
 	else if (strEQ(mg->mg_ptr, "\017PEN")) {
 	    if (!PL_compiling.cop_io)
