@@ -4,7 +4,7 @@ use 5.7.2;
 use strict;
 use warnings;
 
-use overload 
+use overload
     '==' => \&equal,
     'fallback' => 1;
 
@@ -41,6 +41,9 @@ $threads::threads = 1;
 
 bootstrap threads $VERSION;
 
+# why document 'new' then use 'create' in the tests!
+*create = \&new;
+
 # Preloaded methods go here.
 
 1;
@@ -58,9 +61,9 @@ sub start_thread {
     print "Thread started\n";
 }
 
-my $thread = threads->new("start_thread","argument");
+my $thread = threads->create("start_thread","argument");
 
-$thread->new(sub { print "I am a thread"},"argument");
+$thread->create(sub { print "I am a thread"},"argument");
 
 $thread->join();
 
@@ -97,13 +100,11 @@ a warning if you do it the other way around.
 
 =over
 
-=item $thread = new(function, LIST)
+=item $thread = threads->create(function, LIST)
 
 This will create a new thread with the entry point function and give
 it LIST as parameters.  It will return the corresponding threads
 object.
-
-create() is an alias to new.
 
 =item $thread->join
 
@@ -146,9 +147,9 @@ Arthur Bergman E<lt>arthur at contiller.seE<gt>
 
 threads is released under the same license as Perl.
 
-Thanks to 
+Thanks to
 
-Richard Soderberg E<lt>rs at crystalflame.netE<gt> 
+Richard Soderberg E<lt>rs at crystalflame.netE<gt>
 Helping me out tons, trying to find reasons for races and other weird bugs!
 
 Simon Cozens E<lt>simon at brecon.co.ukE<gt>

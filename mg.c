@@ -34,7 +34,7 @@
 #  define  FAKE_PERSISTENT_SIGNAL_HANDLERS
 #endif
 /* if we're doing kill() with sys$sigprc on VMS, FAKE_DEFAULT_SIGNAL_HANDLERS */
-#if defined(KILL_BY_SIGPRC) 
+#if defined(KILL_BY_SIGPRC)
 #  define  FAKE_DEFAULT_SIGNAL_HANDLERS
 #endif
 
@@ -212,7 +212,7 @@ Perl_mg_length(pTHX_ SV *sv)
 	}
     }
 
-    if (DO_UTF8(sv)) 
+    if (DO_UTF8(sv))
     {
         U8 *s = (U8*)SvPV(sv, len);
         len = Perl_utf8_length(aTHX_ s, s + len);
@@ -319,7 +319,11 @@ Perl_mg_copy(pTHX_ SV *sv, SV *nsv, const char *key, I32 klen)
     int count = 0;
     MAGIC* mg;
     for (mg = SvMAGIC(sv); mg; mg = mg->mg_moremagic) {
-	if (isUPPER(mg->mg_type)) {
+	MGVTBL* vtbl = mg->mg_virtual;
+	if ((mg->mg_flags & MGf_COPY) && vtbl->svt_copy){
+	    count += CALL_FPTR(vtbl->svt_copy)(aTHX_ sv, mg, nsv, key, klen);
+	}
+	else if (isUPPER(mg->mg_type)) {
 	    sv_magic(nsv,
 		     mg->mg_type == PERL_MAGIC_tied ? SvTIED_obj(sv, mg) :
 		     (mg->mg_type == PERL_MAGIC_regdata && mg->mg_obj)
@@ -350,7 +354,7 @@ Perl_mg_free(pTHX_ SV *sv)
 	if (vtbl && vtbl->svt_free)
 	    CALL_FPTR(vtbl->svt_free)(aTHX_ sv, mg);
 	if (mg->mg_ptr && mg->mg_type != PERL_MAGIC_regex_global) {
-	    if (mg->mg_len >= 0)
+	    if (mg->mg_len > 0)
 		Safefree(mg->mg_ptr);
 	    else if (mg->mg_len == HEf_SVKEY)
 		SvREFCNT_dec((SV*)mg->mg_ptr);
@@ -1011,7 +1015,7 @@ Perl_magic_clear_all_env(pTHX_ SV *sv, MAGIC *mg)
 #if defined(FAKE_PERSISTENT_SIGNAL_HANDLERS)||defined(FAKE_DEFAULT_SIGNAL_HANDLERS)
 static int sig_handlers_initted = 0;
 #endif
-#ifdef FAKE_PERSISTENT_SIGNAL_HANDLERS   
+#ifdef FAKE_PERSISTENT_SIGNAL_HANDLERS
 static int sig_ignoring[SIG_SIZE];      /* which signals we are ignoring */
 #endif
 #ifdef FAKE_DEFAULT_SIGNAL_HANDLERS
@@ -1091,7 +1095,7 @@ Perl_csighandler(int sig)
     if (sig_ignoring[sig]) return;
 #endif
 #ifdef FAKE_DEFAULT_SIGNAL_HANDLERS
-    if (sig_defaulting[sig]) 
+    if (sig_defaulting[sig])
 #ifdef KILL_BY_SIGPRC
             exit((Perl_sig_to_vmscondition(sig)&STS$M_COND_ID)|STS$K_SEVERE|STS$M_INHIB_MSG);
 #else
@@ -1256,7 +1260,7 @@ Perl_magic_getnkeys(pTHX_ SV *sv, MAGIC *mg)
 {
     HV *hv = (HV*)LvTARG(sv);
     I32 i = 0;
-     
+
     if (hv) {
          (void) hv_iterinit(hv);
          if (! SvTIED_mg((SV*)hv, PERL_MAGIC_tied))

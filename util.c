@@ -4279,3 +4279,52 @@ Perl_my_socketpair (int family, int type, int protocol, int fd[2]) {
 }
 #endif
 
+/*
+
+=for apidoc sv_nosharing
+
+Dummy routine which "shares" an SV when there is no sharing module present.
+Exists to avoid test for a NULL function pointer and because it could potentially warn under
+some level of strict-ness.
+
+=cut
+*/
+
+void
+Perl_sv_nosharing(pTHX_ SV *sv)
+{
+}
+
+/*
+=for apidoc sv_nolocking
+
+Dummy routine which "locks" an SV when there is no locking module present.
+Exists to avoid test for a NULL function pointer and because it could potentially warn under
+some level of strict-ness.
+
+=cut
+*/
+
+void
+Perl_sv_nolocking(pTHX_ SV *sv)
+{
+}
+
+
+/*
+=for apidoc sv_nounlocking
+
+Dummy routine which "unlocks" an SV when there is no locking module present.
+Exists to avoid test for a NULL function pointer and because it could potentially warn under
+some level of strict-ness.
+
+=cut
+*/
+
+void
+Perl_sv_nounlocking(pTHX_ SV *sv)
+{
+}
+
+
+

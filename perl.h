@@ -2150,7 +2150,6 @@ typedef I32 (*filter_t) (pTHX_ int, SV *, int);
 #include "scope.h"
 #include "warnings.h"
 #include "utf8.h"
-#include "sharedsv.h"
 
 /* Current curly descriptor */
 typedef struct curcur CURCUR;
@@ -2515,7 +2514,9 @@ Gid_t getegid (void);
 #define PERL_MAGIC_nkeys	  'k' /* scalar(keys()) lvalue */
 #define PERL_MAGIC_dbfile	  'L' /* Debugger %_<filename */
 #define PERL_MAGIC_dbline	  'l' /* Debugger %_<filename element */
-#define PERL_MAGIC_mutex	  'm' /* ??? */
+#define PERL_MAGIC_mutex	  'm' /* for lock op */
+#define PERL_MAGIC_shared	  'N' /* Shared between threads */
+#define PERL_MAGIC_shared_scalar  'n' /* Shared between threads */
 #define PERL_MAGIC_collxfrm	  'o' /* Locale transformation */
 #define PERL_MAGIC_tied		  'P' /* Tied array or hash */
 #define PERL_MAGIC_tiedelem	  'p' /* Tied array or hash element */
@@ -2525,6 +2526,7 @@ Gid_t getegid (void);
 #define PERL_MAGIC_sigelem	  's' /* %SIG hash element */
 #define PERL_MAGIC_taint	  't' /* Taintedness */
 #define PERL_MAGIC_uvar		  'U' /* Available for use by extensions */
+#define PERL_MAGIC_uvar_elem	  'u' /* Reserved for use by extensions */
 #define PERL_MAGIC_vec		  'v' /* vec() lvalue */
 #define PERL_MAGIC_substr	  'x' /* substr() lvalue */
 #define PERL_MAGIC_defelem	  'y' /* Shadow "foreach" iterator variable /
@@ -2532,19 +2534,28 @@ Gid_t getegid (void);
 #define PERL_MAGIC_glob		  '*' /* GV (typeglob) */
 #define PERL_MAGIC_arylen	  '#' /* Array length ($#ary) */
 #define PERL_MAGIC_pos		  '.' /* pos() lvalue */
-#define PERL_MAGIC_backref	  '<' /* ??? */
+#define PERL_MAGIC_backref	  '<' /* for weak ref data */
 #define PERL_MAGIC_ext		  '~' /* Available for use by extensions */
 
 
 #define YYMAXDEPTH 300
 
 #ifndef assert  /* <assert.h> might have been included somehow */
+#ifdef DEBUGGING
+#define assert(what)	DEB( {						\
+	if (!(what)) {							\
+	    Perl_croak(aTHX_ "Assertion " STRINGIFY(what) " failed: file \"%s\", line %d",	\
+		__FILE__, __LINE__);					\
+	    PerlProc_exit(1);						\
+	}})
+#else
 #define assert(what)	DEB( {						\
 	if (!(what)) {							\
 	    Perl_croak(aTHX_ "Assertion failed: file \"%s\", line %d",	\
 		__FILE__, __LINE__);					\
 	    PerlProc_exit(1);						\
 	}})
+#endif
 #endif
 
 struct ufuncs {
@@ -2763,6 +2774,7 @@ typedef Sighandler_t Sigsave_t;
 
 
 typedef int (CPERLscope(*runops_proc_t)) (pTHX);
+typedef void (CPERLscope(*share_proc_t)) (pTHX_ SV *sv);
 typedef OP* (CPERLscope(*PPADDR_t)[]) (pTHX);
 
 /* _ (for $_) must be first in the following list (DEFSV requires it) */
@@ -3326,7 +3338,7 @@ START_EXTERN_C
 
 #ifdef DOINIT
 
-EXT MGVTBL PL_vtbl_sv =	{MEMBER_TO_FPTR(Perl_magic_get),
+EXT MGVTBL PL_vtbl_sv =		{MEMBER_TO_FPTR(Perl_magic_get),
 				MEMBER_TO_FPTR(Perl_magic_set),
 					MEMBER_TO_FPTR(Perl_magic_len),
 						0,	0};
@@ -3345,10 +3357,12 @@ EXT MGVTBL PL_vtbl_sigelem =	{MEMBER_TO_FPTR(Perl_magic_getsig),
 					0,	MEMBER_TO_FPTR(Perl_magic_clearsig),
 							0};
 #endif
-EXT MGVTBL PL_vtbl_pack =	{0,	0,	MEMBER_TO_FPTR(Perl_magic_sizepack),	MEMBER_TO_FPTR(Perl_magic_wipepack),
+EXT MGVTBL PL_vtbl_pack =	{0,	0,	
+    				MEMBER_TO_FPTR(Perl_magic_sizepack),	
+				MEMBER_TO_FPTR(Perl_magic_wipepack),
 							0};
 EXT MGVTBL PL_vtbl_packelem =	{MEMBER_TO_FPTR(Perl_magic_getpack),
-				MEMBER_TO_FPTR(Perl_magic_setpack),
+					MEMBER_TO_FPTR(Perl_magic_setpack),
 					0,	MEMBER_TO_FPTR(Perl_magic_clearpack),
 							0};
 EXT MGVTBL PL_vtbl_dbline =	{0,	MEMBER_TO_FPTR(Perl_magic_setdbline),
@@ -3369,12 +3383,14 @@ EXT MGVTBL PL_vtbl_mglob =	{0,	MEMBER_TO_FPTR(Perl_magic_setmglob),
 EXT MGVTBL PL_vtbl_nkeys =	{MEMBER_TO_FPTR(Perl_magic_getnkeys),
 				MEMBER_TO_FPTR(Perl_magic_setnkeys),
 					0,	0,	0};
-EXT MGVTBL PL_vtbl_taint =	{MEMBER_TO_FPTR(Perl_magic_gettaint),MEMBER_TO_FPTR(Perl_magic_settaint),
+EXT MGVTBL PL_vtbl_taint =	{MEMBER_TO_FPTR(Perl_magic_gettaint),
+    					MEMBER_TO_FPTR(Perl_magic_settaint),
 					0,	0,	0};
-EXT MGVTBL PL_vtbl_substr =	{MEMBER_TO_FPTR(Perl_magic_getsubstr), MEMBER_TO_FPTR(Perl_magic_setsubstr),
+EXT MGVTBL PL_vtbl_substr =	{MEMBER_TO_FPTR(Perl_magic_getsubstr),
+    					MEMBER_TO_FPTR(Perl_magic_setsubstr),
 					0,	0,	0};
 EXT MGVTBL PL_vtbl_vec =	{MEMBER_TO_FPTR(Perl_magic_getvec),
-				MEMBER_TO_FPTR(Perl_magic_setvec),
+					MEMBER_TO_FPTR(Perl_magic_setvec),
 					0,	0,	0};
 EXT MGVTBL PL_vtbl_pos =	{MEMBER_TO_FPTR(Perl_magic_getpos),
 				MEMBER_TO_FPTR(Perl_magic_setpos),
@@ -3387,9 +3403,11 @@ EXT MGVTBL PL_vtbl_uvar =	{MEMBER_TO_FPTR(Perl_magic_getuvar),
 				MEMBER_TO_FPTR(Perl_magic_setuvar),
 					0,	0,	0};
 #ifdef USE_5005THREADS
-EXT MGVTBL PL_vtbl_mutex =	{0,	0,	0,	0,	MEMBER_TO_FPTR(Perl_magic_mutexfree)};
+EXT MGVTBL PL_vtbl_mutex =	{0,	0,	0,	0,	
+					MEMBER_TO_FPTR(Perl_magic_mutexfree)};
 #endif /* USE_5005THREADS */
-EXT MGVTBL PL_vtbl_defelem = {MEMBER_TO_FPTR(Perl_magic_getdefelem),MEMBER_TO_FPTR(Perl_magic_setdefelem),
+EXT MGVTBL PL_vtbl_defelem = {MEMBER_TO_FPTR(Perl_magic_getdefelem),
+    					MEMBER_TO_FPTR(Perl_magic_setdefelem),
 					0,	0,	0};
 
 EXT MGVTBL PL_vtbl_regexp = {0,0,0,0, MEMBER_TO_FPTR(Perl_magic_freeregexp)};

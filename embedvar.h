@@ -1359,14 +1359,15 @@
 #define PL_curinterp		(PL_Vars.Gcurinterp)
 #define PL_do_undump		(PL_Vars.Gdo_undump)
 #define PL_hexdigit		(PL_Vars.Ghexdigit)
+#define PL_lockhook		(PL_Vars.Glockhook)
 #define PL_malloc_mutex		(PL_Vars.Gmalloc_mutex)
 #define PL_op_mutex		(PL_Vars.Gop_mutex)
 #define PL_patleave		(PL_Vars.Gpatleave)
 #define PL_runops_dbg		(PL_Vars.Grunops_dbg)
 #define PL_runops_std		(PL_Vars.Grunops_std)
-#define PL_sharedsv_space	(PL_Vars.Gsharedsv_space)
-#define PL_sharedsv_space_mutex	(PL_Vars.Gsharedsv_space_mutex)
+#define PL_sharehook		(PL_Vars.Gsharehook)
 #define PL_thr_key		(PL_Vars.Gthr_key)
+#define PL_unlockhook		(PL_Vars.Gunlockhook)
 
 #else /* !PERL_GLOBAL_STRUCT */
 
@@ -1375,14 +1376,15 @@
 #define PL_Gcurinterp		PL_curinterp
 #define PL_Gdo_undump		PL_do_undump
 #define PL_Ghexdigit		PL_hexdigit
+#define PL_Glockhook		PL_lockhook
 #define PL_Gmalloc_mutex	PL_malloc_mutex
 #define PL_Gop_mutex		PL_op_mutex
 #define PL_Gpatleave		PL_patleave
 #define PL_Grunops_dbg		PL_runops_dbg
 #define PL_Grunops_std		PL_runops_std
-#define PL_Gsharedsv_space	PL_sharedsv_space
-#define PL_Gsharedsv_space_mutex	PL_sharedsv_space_mutex
+#define PL_Gsharehook		PL_sharehook
 #define PL_Gthr_key		PL_thr_key
+#define PL_Gunlockhook		PL_unlockhook
 
 #endif /* PERL_GLOBAL_STRUCT */
 

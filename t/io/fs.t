@@ -74,7 +74,7 @@ close(fh);
 my ($dev,$ino,$mode,$nlink,$uid,$gid,$rdev,$size,$atime,$mtime,$ctime,
     $blksize,$blocks);
 
-SKIP: { 
+SKIP: {
     skip("no link", 4) unless $has_link;
 
     ok(link('a','b'), "link a b");
@@ -113,7 +113,7 @@ SKIP: {
     $newmode = 0666;
 
     is(chmod($newmode,'c','x'), 2, "chmod two files");
-    
+
     ($dev,$ino,$mode,$nlink,$uid,$gid,$rdev,$size,$atime,$mtime,$ctime,
      $blksize,$blocks) = stat('c');
 
@@ -160,7 +160,7 @@ SKIP: {
 }
 
 SKIP: {
-    skip "filesystem atime/mtime granularity too low", 2 
+    skip "filesystem atime/mtime granularity too low", 2
       unless $accurate_timestamps;
 
     print "# atime - $atime  mtime - $mtime  delta - $delta\n";
@@ -176,21 +176,23 @@ SKIP: {
             my ($new_atime, $new_mtime) = (stat('b'))[8,9];
             print "# newatime - $new_atime  nemtime - $new_mtime\n";
             if ($new_atime == $atime && $new_mtime - $mtime == $delta) {
-                pass("atime/mtime - accounted for possible NFS/glibc2.2 bug on linux");
-            } 
-            else {
-                fail("atime mtime - $atime/$new_atime $mtime/$new_mtime");
+                pass("atime - accounted for possible NFS/glibc2.2 bug on linux");
+                pass("mtime - accounted for possible NFS/glibc2.2 bug on linux");
             }
-        } 
+            else {
+                fail("atime - $atime/$new_atime $mtime/$new_mtime");
+                fail("mtime - $atime/$new_atime $mtime/$new_mtime");
+            }
+        }
         elsif ($^O eq 'VMS') {
             # why is this 1 second off?
             is( $atime, 500000001,          'atime' );
             is( $mtime, 500000000 + $delta, 'mtime' );
-        } 
+        }
         elsif ($^O eq 'beos') {
             SKIP: { skip "atime not updated", 1; }
             is($mtime, 500000001, 'mtime');
-        } 
+        }
         else {
             fail("atime");
             fail("mtime");
@@ -214,7 +216,7 @@ chdir $wd || die "Can't cd back to $wd";
 SKIP: {
     skip "Win32/Netware specific test", 2
       unless ($^O eq 'MSWin32') || ($^O eq 'NetWare');
-    skip "No symbolic links found to test with", 2 
+    skip "No symbolic links found to test with", 2
       unless  `ls -l perl 2>nul` =~ /^l.*->/;
 
     system("cp TEST TEST$$");
@@ -286,7 +288,7 @@ SKIP: {
     open(fh,'>x') || die "Can't create x";
     close(fh);
     rename('x', 'X');
-    
+
     # this works on win32 only, because fs isn't casesensitive
     ok(-e 'X', "rename working");
 

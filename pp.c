@@ -1006,7 +1006,7 @@ PP(pp_divide)
 {
     dSP; dATARGET; tryAMAGICbin(div,opASSIGN);
     /* Only try to do UV divide first
-       if ((SLOPPYDIVIDE is true) or 
+       if ((SLOPPYDIVIDE is true) or
            (PERL_PRESERVE_IVUV is true and one or both SV is a UV too large
             to preserve))
        The assumption is that it is better to use floating point divide
@@ -2702,7 +2702,7 @@ PP(pp_int)
 #   if defined(HAS_MODFL) || defined(LONG_DOUBLE_EQUALS_DOUBLE)
 #       ifdef HAS_MODFL_POW32_BUG
 /* some versions of glibc split (i + d) into (i-1, d+1) for 2^32 <= i < 2^64 */
-                { 
+                {
                     NV offset = Perl_modf(value, &value);
                     (void)Perl_modf(offset, &offset);
                     value += offset;
@@ -2798,7 +2798,7 @@ PP(pp_hex)
 	 /* If Unicode, try to downgrade
 	  * If not possible, croak. */
          SV* tsv = sv_2mortal(newSVsv(sv));
-	 
+	
 	 SvUTF8_on(tsv);
 	 sv_utf8_downgrade(tsv, FALSE);
 	 tmps = SvPVX(tsv);
@@ -2828,7 +2828,7 @@ PP(pp_oct)
 	 /* If Unicode, try to downgrade
 	  * If not possible, croak. */
          SV* tsv = sv_2mortal(newSVsv(sv));
-	 
+	
 	 SvUTF8_on(tsv);
 	 sv_utf8_downgrade(tsv, FALSE);
 	 tmps = SvPVX(tsv);
@@ -3154,7 +3154,7 @@ PP(pp_ord)
     }
 
     XPUSHu(DO_UTF8(argsv) ? utf8_to_uvchr(s, 0) : (*s & 0xff));
-    
+
     RETURN;
 }
 
@@ -4561,14 +4561,7 @@ PP(pp_lock)
     dSP;
     dTOPss;
     SV *retsv = sv;
-#ifdef USE_5005THREADS
-    sv_lock(sv);
-#endif /* USE_5005THREADS */
-#ifdef USE_ITHREADS
-    shared_sv *ssv = Perl_sharedsv_find(aTHX_ sv);
-    if(ssv)
-        Perl_sharedsv_lock(aTHX_ ssv);
-#endif /* USE_ITHREADS */
+    SvLOCK(sv);
     if (SvTYPE(retsv) == SVt_PVAV || SvTYPE(retsv) == SVt_PVHV
 	|| SvTYPE(retsv) == SVt_PVCV) {
 	retsv = refto(retsv);

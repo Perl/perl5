@@ -889,6 +889,9 @@
 #endif
 #define custom_op_name		Perl_custom_op_name
 #define custom_op_desc		Perl_custom_op_desc
+#define sv_nosharing		Perl_sv_nosharing
+#define sv_nolocking		Perl_sv_nolocking
+#define sv_nounlocking		Perl_sv_nounlocking
 #if defined(PERL_IN_AV_C) || defined(PERL_DECL_PROT)
 #define avhv_index_sv		S_avhv_index_sv
 #define avhv_index		S_avhv_index
@@ -1079,16 +1082,6 @@
 #endif
 #if defined(PERL_IN_SCOPE_C) || defined(PERL_DECL_PROT)
 #define save_scalar_at		S_save_scalar_at
-#endif
-#if defined(USE_ITHREADS)
-#define sharedsv_init		Perl_sharedsv_init
-#define sharedsv_new		Perl_sharedsv_new
-#define sharedsv_find		Perl_sharedsv_find
-#define sharedsv_lock		Perl_sharedsv_lock
-#define sharedsv_unlock		Perl_sharedsv_unlock
-#define sharedsv_unlock_scope	Perl_sharedsv_unlock_scope
-#define sharedsv_thrcnt_inc	Perl_sharedsv_thrcnt_inc
-#define sharedsv_thrcnt_dec	Perl_sharedsv_thrcnt_dec
 #endif
 #if defined(PERL_IN_SV_C) || defined(PERL_DECL_PROT)
 #define asIV			S_asIV
@@ -2435,6 +2428,9 @@
 #endif
 #define custom_op_name(a)	Perl_custom_op_name(aTHX_ a)
 #define custom_op_desc(a)	Perl_custom_op_desc(aTHX_ a)
+#define sv_nosharing(a)		Perl_sv_nosharing(aTHX_ a)
+#define sv_nolocking(a)		Perl_sv_nolocking(aTHX_ a)
+#define sv_nounlocking(a)	Perl_sv_nounlocking(aTHX_ a)
 #if defined(PERL_IN_AV_C) || defined(PERL_DECL_PROT)
 #define avhv_index_sv(a)	S_avhv_index_sv(aTHX_ a)
 #define avhv_index(a,b,c)	S_avhv_index(aTHX_ a,b,c)
@@ -2624,16 +2620,6 @@
 #endif
 #if defined(PERL_IN_SCOPE_C) || defined(PERL_DECL_PROT)
 #define save_scalar_at(a)	S_save_scalar_at(aTHX_ a)
-#endif
-#if defined(USE_ITHREADS)
-#define sharedsv_init()		Perl_sharedsv_init(aTHX)
-#define sharedsv_new()		Perl_sharedsv_new(aTHX)
-#define sharedsv_find(a)	Perl_sharedsv_find(aTHX_ a)
-#define sharedsv_lock(a)	Perl_sharedsv_lock(aTHX_ a)
-#define sharedsv_unlock(a)	Perl_sharedsv_unlock(aTHX_ a)
-#define sharedsv_unlock_scope(a)	Perl_sharedsv_unlock_scope(aTHX_ a)
-#define sharedsv_thrcnt_inc(a)	Perl_sharedsv_thrcnt_inc(aTHX_ a)
-#define sharedsv_thrcnt_dec(a)	Perl_sharedsv_thrcnt_dec(aTHX_ a)
 #endif
 #if defined(PERL_IN_SV_C) || defined(PERL_DECL_PROT)
 #define asIV(a)			S_asIV(aTHX_ a)

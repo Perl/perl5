@@ -604,19 +604,21 @@ ext/threads/shared/Makefile.PL  thread shared variables
 ext/threads/shared/README       thread shared variables
 ext/threads/shared/shared.pm    thread shared variables
 ext/threads/shared/shared.xs    thread shared variables
+ext/threads/shared/t/0nothread.t	Tests for basic shared array functionality.
 ext/threads/shared/t/av_simple.t	Tests for basic shared array functionality.
 ext/threads/shared/t/hv_refs.t	Test shared hashes containing references
 ext/threads/shared/t/hv_simple.t	Tests for basic shared hash functionality.
 ext/threads/shared/t/no_share.t	Tests for disabled share on variables.
 ext/threads/shared/t/sv_refs.t	thread shared variables
 ext/threads/shared/t/sv_simple.t	thread shared variables
+ext/threads/shared/typemap	thread::shared types
 ext/threads/t/basic.t		ithreads
 ext/threads/t/stress_cv.t	Test with multiple threads, coderef cv argument.
 ext/threads/t/stress_re.t	Test with multiple threads, string cv argument and regexes.
 ext/threads/t/stress_string.t	Test with multiple threads, string cv argument.
-ext/threads/threads.h		ithreads
 ext/threads/threads.pm          ithreads
 ext/threads/threads.xs		ithreads
+ext/threads/typemap		ithreads
 ext/Time/HiRes/Changes		Time::HiRes extension
 ext/Time/HiRes/hints/dynixptx.pl	Hint for Time::HiRes for named architecture
 ext/Time/HiRes/hints/sco.pl	Hints for Time::HiRes for named architecture
@@ -2042,8 +2044,6 @@ regnodes.h			Description of nodes of RE engine
 run.c				The interpreter loop
 scope.c				Scope entry and exit code
 scope.h				Scope entry and exit header
-sharedsv.c			ithreads-shared scalar values code
-sharedsv.h			ithreads-shared scalar values header
 sv.c				Scalar value code
 sv.h				Scalar value header
 t/base/cond.t			See if conditionals work

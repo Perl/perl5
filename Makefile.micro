@@ -1,7 +1,7 @@
 CC = cc
 LD = $(CC)
 DEFINES = -DPERL_CORE -DPERL_MICRO
-OPTIMIZE = 
+OPTIMIZE =
 CFLAGS = $(DEFINES) $(OPTIMIZE)
 LIBS = -lm
 _O = .o
@@ -16,8 +16,7 @@ O = uav$(_O) udeb$(_O) udoio$(_O) udoop$(_O) udump$(_O) \
 	uregcomp$(_O) uregexec$(_O) urun$(_O) \
 	uscope$(_O) usv$(_O) utaint$(_O) utoke$(_O) \
 	unumeric$(_O) ulocale$(_O) \
-	uuniversal$(_O) uutf8$(_O) uutil$(_O) uperlapi$(_O) \
-	usharedsv$(_O)
+	uuniversal$(_O) uutf8$(_O) uutil$(_O) uperlapi$(_O)
 
 microperl:	$(O)
 	$(LD) -o $@ $(O) $(LIBS)
@@ -138,6 +137,4 @@ uutil$(_O):	$(HE) util.c
 uperlapi$(_O):	$(HE) perlapi.c perlapi.h
 	$(CC) -c -o $@ $(CFLAGS) perlapi.c
 
-usharedsv$(_O):	$(HE) sharedsv.c sharedsv.h
-	$(CC) -c -o $@ $(CFLAGS) sharedsv.c
 

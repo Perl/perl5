@@ -335,7 +335,7 @@ RSC		= rc
 # Options
 #
 INCLUDES	= -I$(COREDIR) -I.\include -I. -I.. -I"$(CCINCDIR)"
-#PCHFLAGS	= -H -Hc -H=c:\temp\bcmoduls.pch 
+#PCHFLAGS	= -H -Hc -H=c:\temp\bcmoduls.pch
 DEFINES		= -DWIN32 $(CRYPT_FLAG)
 LOCDEFS		= -DPERLDLL -DPERL_CORE
 SUBSYS		= console
@@ -647,7 +647,6 @@ MICROCORE_SRC	=		\
 		..\run.c	\
 		..\scope.c	\
 		..\sv.c		\
-		..\sharedsv.c	\
 		..\taint.c	\
 		..\toke.c	\
 		..\universal.c	\
@@ -709,7 +708,6 @@ CORE_NOCFG_H	=		\
 		..\proto.h	\
 		..\regexp.h	\
 		..\scope.h	\
-		..\sharedsv.h	\
 		..\sv.h		\
 		..\thread.h	\
 		..\unixish.h	\
@@ -732,7 +730,7 @@ MICROCORE_OBJ	= $(MICROCORE_SRC:db:+$(o))
 CORE_OBJ	= $(MICROCORE_OBJ) $(EXTRACORE_SRC:db:+$(o))
 WIN32_OBJ	= $(WIN32_SRC:db:+$(o))
 MINICORE_OBJ	= $(MINIDIR)\{$(MICROCORE_OBJ:f) miniperlmain$(o) perlio$(o)}
-MINIWIN32_OBJ	= $(MINIDIR)\{$(WIN32_OBJ:f)} 
+MINIWIN32_OBJ	= $(MINIDIR)\{$(WIN32_OBJ:f)}
 MINI_OBJ	= $(MINICORE_OBJ) $(MINIWIN32_OBJ)
 DLL_OBJ		= $(DLL_SRC:db:+$(o))
 X2P_OBJ		= $(X2P_SRC:db:+$(o))
@@ -813,7 +811,7 @@ RIGHTMAKE	=
 
 all : .\config.h $(GLOBEXE) $(MINIPERL) $(MK2)		\
 	$(RIGHTMAKE) $(MINIMOD) $(CONFIGPM) $(PERLEXE)	\
-	$(X2P) Extensions 
+	$(X2P) Extensions
 
 $(DYNALOADER)$(o) : $(DYNALOADER).c $(CORE_H) $(EXTDIR)\DynaLoader\dlutils.c
 
@@ -1055,10 +1053,10 @@ $(EXTDIR)\DynaLoader\dl_win32.xs: dl_win32.xs
 	copy dl_win32.xs $(EXTDIR)\DynaLoader\dl_win32.xs
 
 #----------------------------------------------------------------------------------
-Extensions : buildext.pl $(PERLDEP) $(CONFIGPM) 
+Extensions : buildext.pl $(PERLDEP) $(CONFIGPM)
 	$(MINIPERL) -I..\lib buildext.pl $(MAKE) $(PERLDEP) $(EXTDIR)
 
-Extensions_clean : 
+Extensions_clean :
 	-if exist $(MINIPERL) $(MINIPERL) -I..\lib buildext.pl $(MAKE) $(PERLDEP) $(EXTDIR) clean
 
 #----------------------------------------------------------------------------------

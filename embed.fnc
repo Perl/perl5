@@ -943,6 +943,9 @@ Ap	|void	|sys_intern_init
 Ap |char * |custom_op_name|OP* op
 Ap |char * |custom_op_desc|OP* op
 
+Adp	|void	|sv_nosharing	|SV *
+Adp	|void	|sv_nolocking	|SV *
+Adp	|void	|sv_nounlocking	|SV *
 
 END_EXTERN_C
 
@@ -1159,17 +1162,6 @@ s	|void	|debprof	|OP *o
 
 #if defined(PERL_IN_SCOPE_C) || defined(PERL_DECL_PROT)
 s	|SV*	|save_scalar_at	|SV **sptr
-#endif
-
-#if defined(USE_ITHREADS)
-Adp    |void        |sharedsv_init
-Adp    |shared_sv*  |sharedsv_new
-Adp    |shared_sv*  |sharedsv_find          |SV* sv
-Adp    |void        |sharedsv_lock          |shared_sv* ssv
-Adp    |void        |sharedsv_unlock        |shared_sv* ssv
-p      |void        |sharedsv_unlock_scope  |shared_sv* ssv
-Adp    |void        |sharedsv_thrcnt_inc    |shared_sv* ssv
-Adp    |void        |sharedsv_thrcnt_dec    |shared_sv* ssv
 #endif
 
 #if defined(PERL_IN_SV_C) || defined(PERL_DECL_PROT)

@@ -34,7 +34,8 @@ share($foo);
 eval {
 $foo = \$bar;
 };
-ok(2,my $temp1 = $@ =~/You cannot assign a non shared reference to a shared scalar/, "Check that the warning message is correct");
+
+ok(2,my $temp1 = $@ =~/^Invalid\b.*shared scalar/, "Wrong error message");
 share($bar);
 $foo = \$bar;
 ok(3, $temp1 = $foo =~/SCALAR/, "Check that is a ref");

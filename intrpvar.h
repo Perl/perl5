@@ -490,9 +490,6 @@ PERLVAR(Iregex_padav,   AV*)		/* All regex objects */
 PERLVAR(Ireentrant_buffer, REBUF*)	/* here we store the _r buffers */
 #endif
 
-PERLVAR(sharedsv_space,		PerlInterpreter*)
-PERLVAR(sharedsv_space_mutex,	perl_mutex)
-
 #endif
 
 PERLVAR(Isavebegin,     bool)	/* save BEGINs for compiler	*/

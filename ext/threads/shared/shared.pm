@@ -1,35 +1,31 @@
 package threads::shared;
-
 use strict;
 use warnings;
 use Config;
-use Scalar::Util qw(weaken);
-use attributes qw(reftype);
 
-BEGIN {
-    if($Config{'useithreads'} && $threads::threads) {
-	*share = \&share_enabled;
+require Exporter;
+our @ISA = qw(Exporter);
+our @EXPORT = qw(share cond_wait cond_broadcast cond_signal unlock);
+our @EXPORT_OK = qw(_id _thrcnt _refcnt);
+our $VERSION = '0.90';
+
+
+if ($Config{'useithreads'}) {
 	*cond_wait = \&cond_wait_enabled;
 	*cond_signal = \&cond_signal_enabled;
 	*cond_broadcast = \&cond_broadcast_enabled;
 	*unlock = \&unlock_enabled;
-    } else {
+	require XSLoader;
+	XSLoader::load('threads::shared',$VERSION);
+}
+else {
 	*share = \&share_disabled;
 	*cond_wait = \&cond_wait_disabled;
 	*cond_signal = \&cond_signal_disabled;
 	*cond_broadcast = \&cond_broadcast_disabled;
 	*unlock = \&unlock_disabled;
-    }
 }
 
-require Exporter;
-require DynaLoader;
-our @ISA = qw(Exporter DynaLoader);
-
-our @EXPORT = qw(share cond_wait cond_broadcast cond_signal unlock);
-our $VERSION = '0.90';
-
-our %shared;
 
 sub cond_wait_disabled { return @_ };
 sub cond_signal_disabled { return @_};
@@ -38,72 +34,15 @@ sub unlock_disabled { 1 };
 sub lock_disabled { 1 }
 sub share_disabled { return @_}
 
-sub share_enabled (\[$@%]) { # \]     
-    my $value = $_[0];
-    my $ref = reftype($value);
-    if($ref eq 'SCALAR') {
-	my $obj = \threads::shared::sv->new($$value);
-	bless $obj, 'threads::shared::sv';
-	$shared{$$obj} = $value;
-	weaken($shared{$$obj});
-    } elsif($ref eq "ARRAY") {
-	tie @$value, 'threads::shared::av', $value;
-    } elsif($ref eq "HASH") {
-	tie %$value, "threads::shared::hv", $value;
-    } else {
-	die "You cannot share ref of type $_[0]\n";
-    }
-}
-
-sub CLONE {
-    return unless($_[0] eq "threads::shared");
-	foreach my $ptr (keys %shared) {
-	    if($ptr) {
-		thrcnt_inc($shared{$ptr},$threads::origthread);
-	    }
-	}
-}
-
-sub DESTROY {
-    my $self = shift;
-    _thrcnt_dec($$self);
-    delete($shared{$$self});
-}
-
-package threads::shared::sv;
-use base 'threads::shared';
-
-sub DESTROY {}
-
-package threads::shared::av;
-use base 'threads::shared';
-use Scalar::Util qw(weaken);
-sub TIEARRAY {
-	my $class = shift;
-        my $value = shift;
-	my $self = bless \threads::shared::av->new($value),'threads::shared::av';
-	$shared{$self->ptr} = $value;
-	weaken($shared{$self->ptr});
-	return $self;
-}
-
-package threads::shared::hv;
-use base 'threads::shared';
-use Scalar::Util qw(weaken);
-sub TIEHASH {
-    my $class = shift;
-    my $value = shift;
-    my $self = bless \threads::shared::hv->new($value),'threads::shared::hv';
-    $shared{$self->ptr} = $value;
-    weaken($shared{$self->ptr});
-    return $self;
-}
-
-package threads::shared;
-
 $threads::shared::threads_shared = 1;
 
-bootstrap threads::shared $VERSION;
+sub _thrcnt { 42 }
+
+sub threads::shared::tie::SPLICE
+{
+ die "Splice not implemented for shared arrays";
+}
+
 
 __END__
 
@@ -156,7 +95,7 @@ C<lock> places a lock on a variable until the lock goes out of scope.  If
 the variable is locked by another thread, the C<lock> call will block until
 it's available. C<lock> is recursive, so multiple calls to C<lock> are
 safe--the variable will remain locked until the outermost lock on the
-variable goes out of scope or C<unlock> is called enough times to match 
+variable goes out of scope or C<unlock> is called enough times to match
 the number of calls to <lock>.
 
 If a container object, such as a hash or array, is locked, all the elements

@@ -1167,6 +1167,18 @@ Like C<SvSetSV>, but does any set magic required afterwards.
 =for apidoc Am|void|SvSetMagicSV_nosteal|SV* dsv|SV* ssv
 Like C<SvSetMagicSV>, but does any set magic required afterwards.
 
+=for apidoc Am|void|SvSHARE|SV* sv
+Arranges for sv to be shared between threads if a suitable module
+has been loaded.
+
+=for apidoc Am|void|SvLOCK|SV* sv
+Arranges for a mutual exclusion lock to be obtained on sv if a suitable module
+has been loaded.
+
+=for apidoc Am|void|SvUNLOCK|SV* sv
+Releases a mutual exclusion lock on sv if a suitable module
+has been loaded.
+
 =head1 SV Manipulation Functions
 
 =for apidoc Am|char *|SvGROW|SV* sv|STRLEN len
@@ -1177,6 +1189,10 @@ Returns a pointer to the character buffer.
 
 =cut
 */
+
+#define SvSHARE(sv) CALL_FPTR(PL_sharehook)(aTHX_ sv)
+#define SvLOCK(sv) CALL_FPTR(PL_lockhook)(aTHX_ sv)
+#define SvUNLOCK(sv) CALL_FPTR(PL_unlockhook)(aTHX_ sv)
 
 #define SvGETMAGIC(x) STMT_START { if (SvGMAGICAL(x)) mg_get(x); } STMT_END
 #define SvSETMAGIC(x) STMT_START { if (SvSMAGICAL(x)) mg_set(x); } STMT_END

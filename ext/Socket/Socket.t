@@ -16,6 +16,7 @@ use Socket;
 
 print "1..16\n";
 
+$has_echo = $^O ne 'MSWin32';
 $alarmed = 0;
 sub arm      { $alarmed = 0; alarm(shift) if $has_alarm }
 sub alarmed  { $alarmed = 1 }
@@ -25,7 +26,7 @@ if (socket(T,PF_INET,SOCK_STREAM,6)) {
   print "ok 1\n";
   
   arm(5);
-  if (connect(T,pack_sockaddr_in(7,inet_aton("localhost")))){
+  if ($has_echo && connect(T,pack_sockaddr_in(7,inet_aton("localhost")))){
 	arm(0);
 
 	print "ok 2\n";
@@ -67,7 +68,7 @@ if( socket(S,PF_INET,SOCK_STREAM,6) ){
   print "ok 4\n";
 
   arm(5);
-  if (connect(S,pack_sockaddr_in(7,INADDR_LOOPBACK))){
+  if ($has_echo && connect(S,pack_sockaddr_in(7,INADDR_LOOPBACK))){
         arm(0);
 
 	print "ok 5\n";

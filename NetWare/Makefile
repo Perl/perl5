@@ -690,7 +690,6 @@ MICROCORE_SRC	=		\
 		..\regexec.c	\
 		..\run.c	\
 		..\scope.c	\
-		..\sharedsv.c	\
 		..\sv.c		\
 		..\taint.c	\
 		..\toke.c	\
@@ -744,7 +743,6 @@ CORE_NOCFG_H	=		\
 		..\proto.h	\
 		..\regexp.h	\
 		..\scope.h	\
-		..\sharedsv.h	\
 		..\sv.h		\
 		..\thread.h	\
 		..\unixish.h	\
