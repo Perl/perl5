@@ -3361,9 +3361,9 @@ PP(pp_unpack)
     register char *str;
 
     /* These must not be in registers: */
-    I16 ashort;
+    short ashort;
     int aint;
-    STRLEN along;
+    long along;
 #ifdef HAS_QUAD
     Quad_t aquad;
 #endif
@@ -3659,7 +3659,9 @@ PP(pp_unpack)
 		len = strend - s;
 	    if (checksum) {
 		while (len-- > 0 && s < strend) {
-		    auint = utf8_to_uv_chk((U8*)s, strend - s, &along, 0);
+		    STRLEN alen;
+		    auint = utf8_to_uv_chk((U8*)s, strend - s, &alen, 0);
+		    along = alen;
 		    s += along;
 		    if (checksum > 32)
 			cdouble += (NV)auint;
@@ -3671,7 +3673,9 @@ PP(pp_unpack)
 		EXTEND(SP, len);
 		EXTEND_MORTAL(len);
 		while (len-- > 0 && s < strend) {
-		    auint = utf8_to_uv_chk((U8*)s, strend - s, &along, 0);
+		    STRLEN alen;
+		    auint = utf8_to_uv_chk((U8*)s, strend - s, &alen, 0);
+		    along = alen;
 		    s += along;
 		    sv = NEWSV(37, 0);
 		    sv_setuv(sv, (UV)auint);
