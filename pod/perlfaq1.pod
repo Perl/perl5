@@ -68,52 +68,52 @@ is best for you.
 
 =over 4
 
-=item 
+=item *
 
 If things aren't broken, upgrading perl may break
 them (or at least issue new warnings).
-	
-=item 
+
+=item *
 
 The latest versions of perl have more bug fixes.
 
-=item 
+=item *
 
 The Perl community is geared toward supporting the most
 recent releases, so you'll have an easier time finding help for
 those.
-	
-=item 
 
-Versions prior to perl5.004 had serious security problems with 
+=item *
+
+Versions prior to perl5.004 had serious security problems with
 buffer overflows, and in some cases have CERT advisories (for
 instance, http://www.cert.org/advisories/CA-1997-17.html ).
 
-=item 
+=item *
 
 The latest versions are probably the least deployed and
 widely tested, so you may want to wait a few months after their
-release and see what problems others have if you are risk averse. 
+release and see what problems others have if you are risk averse.
 
-=item 
+=item *
 
 The immediate, previous releases (i.e. perl5.6.x ) are usually
-maintained for a while, although not at the same level as the 
+maintained for a while, although not at the same level as the
 current releases.
 
-=item 
+=item *
 
 No one is actively supporting perl4.x.  Five years ago it was
 a dead camel carcass (according to this document).  Now it's barely
 a skeleton as its whitewashed bones have fractured or eroded.
 
-=item 
+=item *
 
 There is no perl6.x for the next couple of years.  Stay tuned,
 but don't worry that you'll have to change major versions of Perl
 soon (i.e. before 2006).
 
-=item 
+=item *
 
 There are really two tracks of perl development: a
 maintenance version and an experimental version.  The
@@ -123,7 +123,7 @@ release).  The experimental versions may include features that
 don't make it into the stable versions, and have an odd number
 as the minor release (i.e. perl5.9.x, where 9 is the minor release).
 
-=back 
+=back
 
 
 =head2 What are perl4, perl5, or perl6?
@@ -131,7 +131,7 @@ as the minor release (i.e. perl5.9.x, where 9 is the minor release).
 (contributed by brian d foy)
 
 In short, perl4 is the past, perl5 is the present, and perl6 is the
-future. 
+future.
 
 The number after perl (i.e. the 5 after perl5) is the major release
 of the perl interpreter as well as the version of the language.  Each
@@ -141,7 +141,7 @@ support.
 The current major release of Perl is perl5, and was released in 1994.
 It can run scripts from the previous major release, perl4 (March 1991),
 but has significant differences. It introduced the concept of references,
-complex data structures, and modules.  The perl5 interpreter was a 
+complex data structures, and modules.  The perl5 interpreter was a
 complete re-write of the previous perl sources.
 
 Perl6 is the next major version of Perl, but it's still in development
