@@ -150,8 +150,8 @@ Perl now tries internally to use integer values in numeric conversions
 and basic arithmetics (+ - * /) if the arguments are integers, and
 tries also to keep the results stored internally as integers.
 This change leads into often slightly faster and always less lossy
-arithmetics (previously Perl always preferred floating point numbers
-in its math)
+arithmetics. (Previously Perl always preferred floating point numbers
+in its math.)
 
 =item *
 
@@ -237,7 +237,7 @@ has been added.
 
     print $digest, "\n"; # 01d19d9d2045e005c3f1b80e8b164de1
 
-NOTE: the MD5 backward compatibility module is purposefully not
+NOTE: the MD5 backward compatibility module is deliberately not
 included since its use is discouraged.
 
 See L<Digest::MD5> for more information.
@@ -792,7 +792,7 @@ reverse order.  This has been reversed to be in the right order.
 
 =item *
 
-The order of DESTROYS has been made more predictable.
+The order of DESTROYs has been made more predictable.
 
 =item *
 
@@ -915,7 +915,7 @@ a no-op) and the latter replaced with dSP.
 
 =item *
 
-Perl now uses system malloc instead of Perl malloc in all 64-bit
+Perl now uses system malloc instead of Perl malloc on all 64-bit
 platforms, and even in some not-always-64-bit platforms like AIX,
 IRIX, and Solaris.  This change breaks backward compatibility but
 Perl's malloc has problems with large address spaces and also the
@@ -966,7 +966,7 @@ subtest 9 failed.
 
 =head2 lib/b test 19
 
-The test fails in various platforms (PA64 and IA64 are known), but the
+The test fails on various platforms (PA64 and IA64 are known), but the
 exact cause is still being investigated.
 
 =head2 Linux With Sfio Fails op/misc Test 48
@@ -975,12 +975,12 @@ No known fix.
 
 =head2 sigaction test 13 in VMS
 
-The test is known to fail, whether it's because of VMS of because
-of faulty test, is not known.
+The test is known to fail; whether it's because of VMS of because
+of faulty test is not known.
 
 =head2 sprintf tests 129 and 130
 
-The op/sprintf tests 129 and 130 are known to fail in some platforms.
+The op/sprintf tests 129 and 130 are known to fail on some platforms.
 Examples include any platform using sfio, and Compaq/Tandem's NonStop-UX.
 The failing platforms do not comply with the ANSI C Standard, line
 19ff on page 134 of ANSI X3.159 1989 to be exact.  (They produce
