@@ -166,7 +166,7 @@ dl_load_file(filename, flags=0)
     if (RETVAL == NULL)
 	SaveError(aTHX_ "%s",dlerror()) ;
     else
-	sv_setiv( ST(0), (IV)PTR_CAST RETVAL);
+	sv_setiv( ST(0), PTR2IV(RETVAL));
 
 
 void *
@@ -187,7 +187,7 @@ dl_find_symbol(libhandle, symbolname)
     if (RETVAL == NULL)
 	SaveError(aTHX_ "%s",dlerror()) ;
     else
-	sv_setiv( ST(0), (IV)PTR_CAST RETVAL);
+	sv_setiv( ST(0), PTR2IV(RETVAL));
 
 
 void
