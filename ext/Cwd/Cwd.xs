@@ -183,7 +183,11 @@ loop:
 	return (resolved);
 
 err1:	serrno = errno;
+#ifdef HAS_FCHDIR
 	(void)fchdir(fd);
+#else
+	(void)chdir(wd);
+#endif
 err2:	(void)close(fd);
 	errno = serrno;
 	return (NULL);
