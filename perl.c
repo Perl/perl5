@@ -683,12 +683,12 @@ perl_destruct(pTHXx)
     SvREFCNT(&PL_sv_yes) = 0;
     sv_clear(&PL_sv_yes);
     SvANY(&PL_sv_yes) = NULL;
-    SvREADONLY_off(&PL_sv_yes);
+    SvFLAGS(&PL_sv_yes) = 0;
 
     SvREFCNT(&PL_sv_no) = 0;
     sv_clear(&PL_sv_no);
     SvANY(&PL_sv_no) = NULL;
-    SvREADONLY_off(&PL_sv_no);
+    SvFLAGS(&PL_sv_no) = 0;
 
     SvREFCNT(&PL_sv_undef) = 0;
     SvREADONLY_off(&PL_sv_undef);
