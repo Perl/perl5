@@ -19,11 +19,11 @@ sub MY::postamble {
 
     my $retval = <<"EOM";
 
-ppport.h:	$pmfile
-	\$(PERL) "-I\$(PERL_ARCHLIB)" "-I\$(PERL_LIB)"  -e "require qq{$pmfile}; package Devel::PPPort ; sub bootstrap {} ; WriteFile(qq{ppport.h})"     
+#ppport.h::	ppport.h.PL
+#	\$(PERL) "-I\$(PERL_ARCHLIB)" "-I\$(PERL_LIB)"  ppport.h.PL > ppport.h     
 
 PPPort.xs module2.c module3.c : ppport.h
-	\$(TOUCH) \$@
+	-\$(TOUCH) \$@
 
 EOM
  

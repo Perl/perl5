@@ -5,6 +5,7 @@ use strict;
 our $VERSION = "1.09_00";
 
 my %err = ();
+my %wsa = ();
 
 unlink "Errno.pm" if -f "Errno.pm";
 open OUT, ">Errno.pm" or die "Cannot open Errno.pm: $!";
@@ -12,6 +13,10 @@ select OUT;
 my $file;
 foreach $file (get_files()) {
     process_file($file);
+    if ($^O eq 'MSWin32') {
+      $file =~ s/errno/winsock/;
+      process_file($file);
+    }
 }
 write_errno_pm();
 unlink "errno.c" if -f "errno.c";
@@ -20,6 +25,7 @@ sub process_file {
     my($file) = @_;
 
     return unless defined $file and -f $file;
+#   warn "Processing $file\n";
 
     local *FH;
     if (($^O eq 'VMS') && ($Config{vms_cc_type} ne 'gnuc')) {
@@ -55,6 +61,10 @@ sub process_file {
 	while(<FH>) {
 	    $err{$1} = 1
 		if /^\s*#\s*define\s+(E\w+)\s+/;
+            if ($^O eq 'MSWin32') {
+	        $wsa{$1} = 1
+	    	    if /^\s*#\s*define\s+WSA(E\w+)\s+/;
+            }
 	}
     }
     close(FH);
@@ -172,11 +182,21 @@ sub write_errno_pm {
 	die "Cannot open errno.c";
 
     if ($^O eq 'NetWare') {
-		print CPPI "#include <nwerrno.h>\n";
-	} else {
-		print CPPI "#include <errno.h>\n";
+	print CPPI "#include <nwerrno.h>\n";
+	} 
+    else {
+	print CPPI "#include <errno.h>\n";
+    }
+    if ($^O eq 'MSWin32') {
+	print CPPI "#include <winsock.h>\n";
+	foreach $err (keys %wsa) {
+	    print CPPI "#ifndef $err\n";
+	    print CPPI "#define $err WSA$err\n";
+	    print CPPI "#endif\n";
+	    $err{$err} = 1;
 	}
-
+    }
+ 
     foreach $err (keys %err) {
 	print CPPI '"',$err,'" [[',$err,']]',"\n";
     }
