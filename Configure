@@ -20,7 +20,7 @@
 
 # $Id: Head.U,v 3.0.1.9 1997/02/28 15:02:09 ram Exp $
 #
-# Generated on Sat May 29 13:37:18 EET DST 1999 [metaconfig 3.0 PL70]
+# Generated on Sun May 30 15:51:19 EET DST 1999 [metaconfig 3.0 PL70]
 # (with additional metaconfig patches by perlbug@perl.com)
 
 cat >/tmp/c1$$ <<EOF
@@ -11023,7 +11023,7 @@ int main() {
 #  if defined(HAS_SYSCONF) && defined(_SC_OPEN_MAX)
     open_max = sysconf(_SC_OPEN_MAX);
 #  else
-#  ifdef FOPEN_MAX
+#   ifdef FOPEN_MAX
     open_max = FOPEN_MAX;
 #   else
 #    ifdef OPEN_MAX
@@ -11035,6 +11035,7 @@ int main() {
 #    endif
 #   endif
 #  endif
+# endif 
 # ifdef HAS_STDIO_STREAM_ARRAY
     if (open_max > 0) {
       long i;
@@ -11054,8 +11055,8 @@ EOCP
 if $test "X$fflushNULL" = X -o "X$fflushall" = X; then
     output=''
     set try -DTRY_FPUTC
-    $rm -f try.out
     if eval $compile; then
+	    $rm -f try.out
  	    ./try$exe_ext 2>/dev/null
 	    if $test ! -s try.out -a "X$?" = X42; then
 		output=-DTRY_FPUTC
@@ -11066,6 +11067,7 @@ if $test "X$fflushNULL" = X -o "X$fflushall" = X; then
 	    set try -DTRY_FPRINTF
 	    $rm -f try.out
 	    if eval $compile; then
+		    $rm -f try.out
  		    ./try$exe_ext 2>/dev/null
 		    if $test ! -s try.out -a "X$?" = X42; then
 			output=-DTRY_FPRINTF
@@ -11077,8 +11079,8 @@ fi
 : check for fflush NULL behaviour
 case "$fflushNULL" in
 '') 	set try -DTRY_FFLUSH_NULL $output
-	$rm -f try.out
 	if eval $compile; then
+	        $rm -f try.out
 	    	./try$exe_ext 2>/dev/null
 		code="$?"
 		if $test -s try.out -a "X$code" = X42; then
@@ -11124,11 +11126,11 @@ case "$fflushNULL" in
 	: check for fflush all behaviour
 	case "$fflushall" in
 	'') 	set try -DTRY_FFLUSH_ALL $output
-		$rm -f try.out
 		if eval $compile; then
-	        $cat >&4 <<EOM
+		        $cat >&4 <<EOM
 (Now testing the other method--but note that also this may fail.)
 EOM
+			$rm -f try.out
 		    	./try$exe_ext 2>/dev/null
 			if $test -s try.out -a "X$?" = X42; then
 				fflushall="`$cat try.out`"
