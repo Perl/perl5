@@ -688,7 +688,6 @@ my ($name, %fullpath, %prefix, %seen_define, %prefixless, %const_names);
 my $module = $opt_n;
 
 if( @path_h ){
-    use Config;
     use File::Spec;
     my @paths;
     my $pre_sub_tri_graphs = 1;
@@ -867,7 +866,6 @@ if( ! $opt_X ){  # use XS, unless it was disabled
   }
   open(XS, ">$modfname.xs") || die "Can't create $ext$modpname/$modfname.xs: $!\n";
   if ($opt_x) {
-    require Config;		# Run-time directive
     warn "Scanning typemaps...\n";
     get_typemap();
     my @td;
