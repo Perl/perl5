@@ -1714,6 +1714,11 @@ to your Perl administrator.
 (W syntax) An illegal character was found in a prototype declaration.  Legal
 characters in prototypes are $, @, %, *, ;, [, ], &, and \.
 
+=item Illegal declaration of anonymous subroutine
+
+(F) When using the C<sub> keyword to construct an anonymous subroutine,
+you must always specify a block of code. See L<perlsub>.
+
 =item Illegal division by zero
 
 (F) You tried to divide a number by 0.  Either something was wrong in
