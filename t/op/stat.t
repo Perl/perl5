@@ -195,6 +195,9 @@ unless($ENV{PERL_SKIP_TTY_TEST}) {
 	    if (-t TTY) {print "ok 36\n";} else {print "not ok 36\n";}
 	    if (-c TTY) {print "ok 37\n";} else {print "not ok 37\n";}
 	    close(TTY);
+	} else { # if some platform completely undefines $TTY
+	    print "ok 36 # skipped\n";
+	    print "ok 37 # skipped\n";
 	}
     }
     if (! -t TTY) {print "ok 38\n";} else {print "not ok 38\n";}
