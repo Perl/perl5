@@ -59,3 +59,12 @@ Revision history for Perl extension Switch.
 	- Fixed the parsing of embedded POD (thanks Brent)
 
 	- Fixed bug encountered when -s or -m file test used (thanks Jochen)
+
+
+2.07	Wed May 15 15:19:28 2002
+
+	- Corified tests
+
+	- Updated "Perl6" syntax to reflect current design
+	  (as far as possible -- can't eliminate need to parenthesize
+	  variables, since they're ambiguous in Perl 5)
