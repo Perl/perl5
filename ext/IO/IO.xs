@@ -427,10 +427,9 @@ sockatmark (sock)
 #ifdef HAS_SOCKATMARK
      RETVAL = sockatmark(fd);
 #else
-#   ifdef SIOCATMARK
      {
        int flag = 0;
-
+#   ifdef SIOCATMARK
        if (ioctl(fd, SIOCATMARK, &flag) != 0)
 	 XSRETURN_UNDEF;
 #   else

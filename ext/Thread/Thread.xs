@@ -322,7 +322,13 @@ newthread (pTHX_ SV *startsv, AV *initargs, char *classname)
 
     return sv;
 #else
-    croak("No threads in this perl");
+#  ifdef USE_ITHREADS
+    croak("This perl was built for \"ithreads\", which currently does not support Thread.pm.\n"
+	  "Run \"perldoc Thread\" for more information");
+#  else
+    croak("This perl was not built with support for 5.005-style threads.\n"
+	  "Run \"perldoc Thread\" for more information");
+#  endif
     return &PL_sv_undef;
 #endif
 }

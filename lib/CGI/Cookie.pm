@@ -13,7 +13,7 @@ package CGI::Cookie;
 # wish, but if you redistribute a modified version, please attach a note
 # listing the modifications you have made.
 
-$CGI::Cookie::VERSION='1.18';
+$CGI::Cookie::VERSION='1.20';
 
 use CGI::Util qw(rearrange unescape escape);
 use overload '""' => \&as_string,
@@ -65,14 +65,14 @@ sub parse {
   my(@pairs) = split("; ?",$raw_cookie);
   foreach (@pairs) {
     s/\s*(.*?)\s*/$1/;
-    my($key,$value) = split("=");
+    my($key,$value) = split("=",$_,2);
 
     # Some foreign cookies are not in name=value format, so ignore
     # them.
     next if !defined($value);
     my @values = ();
     if ($value ne '') {
-      @values = map CGI::unescape($_),split(/[&;]/,$value.'&dmy');
+      @values = map unescape($_),split(/[&;]/,$value.'&dmy');
       pop @values;
     }
     $key = unescape($key);
@@ -279,7 +279,7 @@ script if the CGI request is occurring on a secure channel, such as SSL.
                              -value   =>  'bar',
                              -expires =>  '+3M',
                              -domain  =>  '.capricorn.com',
-                             -path    =>  '/cgi-bin/database'
+                             -path    =>  '/cgi-bin/database',
                              -secure  =>  1
 	                    );
 

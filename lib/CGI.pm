@@ -19,7 +19,7 @@ use Carp 'croak';
 #   http://stein.cshl.org/WWW/software/CGI/
 
 $CGI::revision = '$Id: CGI.pm,v 1.49 2001/02/04 23:08:39 lstein Exp $';
-$CGI::VERSION='2.752';
+$CGI::VERSION='2.753';
 
 # HARD-CODED LOCATION FOR FILE UPLOAD TEMPORARY FILES.
 # UNCOMMENT THIS ONLY IF YOU KNOW WHAT YOU'RE DOING.
@@ -81,6 +81,10 @@ sub initialize_globals {
 
     # separate the name=value pairs by semicolons rather than ampersands
     $USE_PARAM_SEMICOLONS = 1;
+
+	# Do not include undefined params parsed from query string
+	# use CGI qw(-no_undef_params);
+	$NO_UNDEF_PARAMS = 0;
 
     # Other globals that you shouldn't worry about.
     undef $Q;
@@ -542,6 +546,7 @@ sub parse_params {
     my($param,$value);
     foreach (@pairs) {
 	($param,$value) = split('=',$_,2);
+	next if $NO_UNDEF_PARAMS and not $value;
 	$value = '' unless defined $value;
 	$param = unescape($param);
 	$value = unescape($value);
@@ -665,6 +670,7 @@ sub _setup_symbols {
 	$PRIVATE_TEMPFILES++,    next if /^[:-]private_tempfiles$/;
 	$EXPORT{$_}++,           next if /^[:-]any$/;
 	$compile++,              next if /^[:-]compile$/;
+	$NO_UNDEF_PARAMS++,      next if /^[:-]no_undef_params$/;
 	
 	# This is probably extremely evil code -- to be deleted some day.
 	if (/^[-]autoload$/) {
@@ -2937,10 +2943,9 @@ END_OF_FUNC
 'upload' =><<'END_OF_FUNC',
 sub upload {
     my($self,$param_name) = self_or_default(@_);
-    my $param = $self->param($param_name);
-    return unless $param;
-    return unless ref($param) && fileno($param);
-    return $param;
+    my @param = grep(ref && fileno($_), $self->param($param_name));
+    return unless @param;
+    return wantarray ? @param : $param[0];
 }
 END_OF_FUNC
 
@@ -4063,6 +4068,10 @@ have the hidden fields appear in the querystring in a GET method.
 For example, a search script generated this way will have
 a very nice url with search parameters for bookmarking.
 
+=item -no_undef_params
+
+This keeps CGI.pm from including undef params in the parameter list.
+
 =item -no_xhtml
 
 By default, CGI.pm versions 2.69 and higher emit XHTML
@@ -5173,6 +5182,10 @@ filehandle, or undef if the parameter is not a valid filehandle.
 	   print;
      }
 
+In an array context, upload() will return an array of filehandles.
+This makes it possible to create forms that use the same name for
+multiple upload fields.
+
 This is the recommended idiom.
 
 When a file is uploaded the browser usually sends along some
@@ -5209,6 +5222,12 @@ Example:
 
 You are free to create a custom HTML page to complain about the error,
 if you wish.
+
+If you are using CGI.pm on a Windows platform and find that binary
+files get slightly larger when uploaded but that text files remain the
+same, then you have forgotten to activate binary mode on the output
+filehandle.  Be sure to call binmode() on any handle that you create
+to write the uploaded file to disk.
 
 JAVASCRIPTING: The B<-onChange>, B<-onFocus>, B<-onBlur>,
 B<-onMouseOver>, B<-onMouseOut> and B<-onSelect> parameters are

@@ -996,7 +996,7 @@ while (fetch_para()) {
 
     death ("Code is not inside a function"
 	   ." (maybe last function was ended by a blank line "
-	   ." followed by a a statement on column one?)")
+	   ." followed by a statement on column one?)")
 	if $line[0] =~ /^\s/;
 
     # initialize info arrays

@@ -1,16 +1,10 @@
 Unicode support
     finish byte <-> utf8 and localencoding <-> utf8 conversions
-    add Unicode::Map equivivalent to core
     add support for I/O disciplines
-        - a way to specify disciplines when opening things:
-	    open(F, "<:crlf :utf16", $file)
-        - a way to specify disciplines for an already opened handle:
-	    binmode(STDIN, ":slurp :raw")
 	- a way to set default disciplines for all handle constructors:
 	    use open IN => ":any", OUT => ":utf8", SYS => ":utf16"
     eliminate need for "use utf8;"
     autoload byte.pm when byte:: is seen by the parser
-    check uv_to_utf8() calls for buffer overflow
     make \uXXXX (and \u{XXXX}?) where XXXX are hex digits
 	to work similarly to Unicode tech reports and Java
 	notation \uXXXX (and already existing \x{XXXX))?
