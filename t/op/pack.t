@@ -15,24 +15,8 @@ use Config;
 my $Is_EBCDIC = (defined $Config{ebcdic} && $Config{ebcdic} eq 'define');
 my $Perl = which_perl();
 
-sub encode {
-  my @result = @_;
-  foreach (@result) {
-    s/([[:cntrl:]\177 ])/sprintf "\\%03o", ord $1/ge if defined;
-  }
-  @result;
-}
-
 sub encode_list {
-  my @result = @_;
-  foreach (@result) {
-    if (defined) {
-      s/([[:cntrl:]\177])/sprintf "\\%03o", ord $1/ge;
-      $_ = qq("$_");
-    } else {
-      $_ = 'undef';
-    }
-  }
+  my @result = map {_qq($_)} @_;
   if (@result == 1) {
     return @result;
   }
@@ -284,9 +268,9 @@ foreach (
     my ($what, $template, $in, $out) = @$_;
     my $got = $what eq 'u' ? (unpack $template, $in) : (pack $template, $in);
     unless (is($got, $out)) {
-        ($in, $out, $got) = encode ($in, $out, $got);
         my $un = $what eq 'u' ? 'un' : '';
-        print "# ${un}pack ('$template', \"$in\") gave $out not $got\n";
+        print "# ${un}pack ('$template', "._qq($in).') gave '._qq($out).
+            ' not '._qq($got)."\n";
     }
 }
 
@@ -521,8 +505,7 @@ EOU
 EOP
   $expect = "\000\006string\003etc";
 
-  is($z, $expect) ||
-    printf "# got '%s', expected '$expect'\n", encode $z;
+  is($z, $expect);
 }
 
 is("1.20.300.4000", sprintf "%vd", pack("U*",1,20,300,4000));
@@ -641,15 +624,15 @@ foreach (
   my @got = eval {unpack $template, $in};
   is($@, '');
   list_eq (\@got, \@out) ||
-    printf "# list unpack ('$template', \"%s\") gave %s expected %s\n",
-           encode ($in), encode_list (@got), encode_list (@out);
+    printf "# list unpack ('$template', %s) gave %s expected %s\n",
+           _qq($in), encode_list (@got), encode_list (@out);
 
   my $got = eval {unpack $template, $in};
   is($@, '');
   @out ? is( $got, $out[0] ) # 1 or more items; should get first
        : ok( !defined $got ) # 0 items; should get undef
-    or printf "# scalar unpack ('$template', \"%s\") gave %s expected %s\n",
-              encode ($in), encode_list ($got), encode_list ($out[0]);
+    or printf "# scalar unpack ('$template', %s) gave %s expected %s\n",
+              _qq($in), encode_list ($got), encode_list ($out[0]);
 }
 
 {
