@@ -20,7 +20,7 @@
 
 # $Id: Head.U,v 3.0.1.9 1997/02/28 15:02:09 ram Exp $
 #
-# Generated on Wed Nov  8 18:52:10 EET 2000 [metaconfig 3.0 PL70]
+# Generated on Thu Nov  9 15:20:17 EET 2000 [metaconfig 3.0 PL70]
 # (with additional metaconfig patches by perlbug@perl.org)
 
 cat >/tmp/c1$$ <<EOF
@@ -10343,7 +10343,7 @@ int main() {
 #endif
       }	
     }
-    printf("%d\n", ((i == n) ? -n : i), u);
+    printf("%d\n", ((i == n) ? -n : i));
     exit(0);
 }
 EOP
