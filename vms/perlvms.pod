@@ -19,6 +19,12 @@ sleep when writing Perl scripts on VMS.  If you find we've
 missed something you think should appear here, please don't 
 hesitate to drop a line to vmsperl@genetics.upenn.edu.
 
+=head1 Installation
+
+Directions for building and installing Perl 5 can be found in 
+the file F<README.vms> in the main source directory of the 
+Perl distribution..
+
 =head1 Organization of Perl Images
 
 =head2 Core Images
@@ -134,12 +140,12 @@ be added to the linker options file F<PGPLOT.Opt> produced
 during the build process for the Perl extension.
 
 By default, the shareable image for an extension is placed
-in the F<[.Lib.Auto.I<Arch>.I<Extname>]> directory of the
+in the F<[.Lib.Auto.>I<Arch>.I<Extname>F<]> directory of the
 installed Perl directory tree (where I<Arch> is F<VMS_VAX> or
-F<VMS_AXP>, and I<Extname> is the name of the extension, with
-each C<::> translated to C<.>).  However, it can be manually
-placed in any of several locations:
-   - the F<[.Lib.Auto.I<Extname>]> subdirectory of one of
+F<VMS_AXP>, followed by the Perl version number, and I<Extname>
+is the name of the extension, with each C<::> translated to C<.>).
+However, it can be manually placed in any of several locations:
+   - the F<[.Lib.Auto.>I<Extname>F<]> subdirectory of one of
      the directories in C<@INC>, or
    - one of the directories in C<@INC>, or
    - a directory which the extensions Perl library module
@@ -151,21 +157,17 @@ to define a logical name I<Extshortname>, where I<Extshortname>
 is the portion of the extension's name after the last C<::>, which
 translates to the full file specification of the shareable image.
 
-=head1 Installation
+=head1 File specifications
 
-Directions for building and installing Perl 5 can be found in 
-the file F<ReadMe.VMS> in the main source directory of the 
-Perl distribution..
-
-=head1 File specifications 
+=head2 Syntax
 
 We have tried to make Perl aware of both VMS-style and Unix-
 style file specifications wherever possible.  You may use 
 either style, or both, on the command line and in scripts, 
 but you may not combine the two styles within a single fle 
-specfication.  Filenames are, of course, still case-
+specification.  Filenames are, of course, still case-
 insensitive.  For consistency, most Perl routines return 
-filespecs using lower case latters only, regardless of the 
+filespecs using lower case letters only, regardless of the 
 case used in the arguments passed to them.  (This is true 
 only when running under VMS; Perl respects the case-
 sensitivity of OSs like Unix.)
@@ -174,11 +176,57 @@ We've tried to minimize the dependence of Perl library
 modules on Unix syntax, but you may find that some of these, 
 as well as some scripts written for Unix systems, will 
 require that you use Unix syntax, since they will assume that 
-'/' is the directory separator, etc.  If you find instances 
+'/' is the directory separator, I<etc.>  If you find instances 
 of this in the Perl distribution itself, please let us know, 
 so we can try to work around them. 
 
-=head1 Command line redirection
+=head2 Wildcard expansion
+
+File specifications containing wildcards are allowed both on 
+the command line and within Perl globs (e.g. <CE<lt>*.cE<gt>>).  If 
+the wildcard filespec uses VMS syntax, the resultant 
+filespecs will follow VMS syntax; if a Unix-style filespec is 
+passed in, Unix-style filespecs will be returned.
+
+If the wildcard filespec contains a device or directory 
+specification, then the resultant filespecs will also contain 
+a device and directory; otherwise, device and directory 
+information are removed.  VMS-style resultant filespecs will 
+contain a full device and directory, while Unix-style 
+resultant filespecs will contain only as much of a directory 
+path as was present in the input filespec.  For example, if 
+your default directory is Perl_Root:[000000], the expansion 
+of C<[.t]*.*> will yield filespecs  like 
+"perl_root:[t]base.dir", while the expansion of C<t/*/*> will 
+yield filespecs like "t/base.dir".  (This is done to match 
+the behavior of glob expansion performed by Unix shells.) 
+
+Similarly, the resultant filespec will contain the file version
+only if one was present in the input filespec.
+
+=head2 Pipes
+
+Input and output pipes to Perl filehandles are supported; the 
+"file name" is passed to lib$spawn() for asynchronous 
+execution.  You should be careful to close any pipes you have 
+opened in a Perl script, lest you leave any "orphaned" 
+subprocesses around when Perl exits. 
+
+You may also use backticks to invoke a DCL subprocess, whose 
+output is used as the return value of the expression.  The 
+string between the backticks is passed directly to lib$spawn 
+as the command to execute.  In this case, Perl will wait for 
+the subprocess to complete before continuing. 
+
+=head1 PERL5LIB and PERLLIB
+
+The PERL5LIB and PERLLIB logical names work as documented L<perl>,
+except that the element separator is '|' instead of ':'.  The
+directory specifications may use either VMS or Unix syntax.
+
+=head1 Command line
+
+=head2 I/O redirection and backgrounding
 
 Perl for VMS supports redirection of input and output on the 
 command line, using a subset of Bourne shell syntax:
@@ -197,50 +245,29 @@ Finally, if the command line ends with '&', the entire
 command is run in the background as an asynchronous 
 subprocess.
 
-=head1 Pipes
+=head2 Command line switches
 
-Input and output pipes to Perl filehandles are supported; the 
-"file name" is passed to lib$spawn() for asynchronous 
-execution.  You should be careful to close any pipes you have 
-opened in a Perl script, lest you leave any "orphaned" 
-subprocesses around when Perl exits. 
+The following command line switches behave differently under
+VMS than described in L<perlrun>.  Note also that in order
+to pass uppercase switches to Perl, you need to enclose
+them in double-quotes on the command line, since the CRTL
+downcases all unquoted strings.
 
-You may also use backticks to invoke a DCL subprocess, whose 
-output is used as the return value of the expression.  The 
-string between the backticks is passed directly to lib$spawn 
-as the command to execute.  In this case, Perl will wait for 
-the subprocess to complete before continuing. 
+=item -S
 
-=head1 Wildcard expansion
+If the C<-S> switch is present I<and> the script name does
+not contain a directory, then Perl translates the logical
+name DCL$PATH as a searchlist, using each translation as
+a directory in which to look for the script.  In addition,
+if no file type is specified, Perl looks in each directory
+for a file matching the name specified, with a blank type,
+a type of F<.pl>, and a type of F<.com>, in that order.
 
-File specifications containing wildcards are allowed both on 
-the command line and within Perl globs (e.g. <C<*.c>>).  If 
-the wildcard filespec uses VMS syntax, the resultant 
-filespecs will follow VMS syntax; if a Unix-style filespec is 
-passed in, Unix-style filespecs will be returned..
+=item -u
 
-If the wildcard filespec contains a device or directory 
-specification, then the resultant filespecs will also contain 
-a device and directory; otherwise, device and directory 
-information are removed.  VMS-style resultant filespecs will 
-contain a full device and directory, while Unix-style 
-resultant filespecs will contain only as much of a directory 
-path as was present in the input filespec.  For example, if 
-your default directory is Perl_Root:[000000], the expansion 
-of C<[.t]*.*> will yield filespecs  like 
-"perl_root:[t]base.dir", while the expansion of C<t/*/*> will 
-yield filespecs like "t/base.dir".  (This is done to match 
-the behavior of glob expansion performed by Unix shells.) 
-
-Similarly, the resultant filespec will the file version only 
-if one was present in the input filespec.
-
-=head1 PERL5LIB and PERLLIB
-
-The PERL5LIB and PERLLIB logical names work as
-documented L<perl>, except that the element
-separator is '|' instead of ':'.  The directory
-specifications may use either VMS or Unix syntax.
+The C<-u> switch causes the VMS debugger to be invoked
+after the Perl program is compiled, but before it has
+run.  It does not create a core dump file.
 
 =head1 Perl functions
 
@@ -251,12 +278,12 @@ Perl functions were implemented in the VMS port of Perl
     file tests*, abs, alarm, atan, binmode*, bless,
     caller, chdir, chmod, chown, chomp, chop, chr,
     close, closedir, cos, crypt*, defined, delete,
-    die, do, each, endpwent, eof, eval, exec*, exists,
-    exit, exp, fileno, fork*, getc, getlogin, getpwent*,
-    getpwnam*, getpwuid*, glob, gmtime*, goto, grep, hex,
-    import, index, int, join, keys, kill*, last, lc,
-    lcfirst, length, local, localtime, log, m//, map,
-    mkdir, my, next, no, oct, open, opendir, ord, pack,
+    die, do, dump*, each, endpwent, eof, eval, exec*,
+    exists, exit, exp, fileno, fork*, getc, getlogin,
+    getpwent*, getpwnam*, getpwuid*, glob, gmtime*, goto,
+    grep, hex, import, index, int, join, keys, kill*,
+    last, lc, lcfirst, length, local, localtime, log, m//,
+    map, mkdir, my, next, no, oct, open, opendir, ord, pack,
     pipe, pop, pos, print, printf, push, q//, qq//, qw//,
     qx//, quotemeta, rand, read, readdir, redo, ref, rename,
     require, reset, return, reverse, rewinddir, rindex,
@@ -272,7 +299,7 @@ The following functions were not implemented in the VMS port,
 and calling them produces a fatal error (usually) or 
 undefined behavior (rarely, we hope):
 
-    chroot, dbmclose, dbmopen, dump, fcntl, flock,
+    chroot, dbmclose, dbmopen, fcntl, flock,
     getpgrp, getppid, getpriority, getgrent, getgrgid,
     getgrnam, setgrent, endgrent, ioctl, link, lstat,
     msgctl, msgget, msgsend, msgrcv, readlink, semctl,
@@ -282,6 +309,7 @@ undefined behavior (rarely, we hope):
 The following functions may or may not be implemented, 
 depending on what type of socket support you've built into 
 your copy of Perl:
+
     accept, bind, connect, getpeername,
     gethostbyname, getnetbyname, getprotobyname,
     getservbyname, gethostbyaddr, getnetbyaddr,
@@ -309,6 +337,17 @@ your CRTL C<stat()> routine does to the equivalent bits in the
 st_mode field.  Finally, C<-d> returns true if passed a device
 specification without an explicit directory (e.g. C<DUA1:>), as
 well as if passed a directory.
+
+Note: Some sites have reported problems when using the file-access
+tests (C<-r>, C<-w>, and C<-x>) on files accessed via DEC's DFS.
+Specifically, since DFS does not currently provide access to the
+extended file header of files on remote volumes, attempts to
+examine the ACL fail, and the file tests will return false,
+with C<$!> indicating that the file does not exist.  You can
+use C<stat> on these files, since that checks UIC-based protection
+only, and then manually check the appropriate bits, as defined by
+your C compiler's F<stat.h>, in the mode value it returns, if you
+need an approximation of the file's protections.
 
 =item binmode FILEHANDLE
 
@@ -342,6 +381,17 @@ C<crypt> to insure that you'll get the proper value:
     }
     return 1;
   }
+
+=item dump
+
+Rather than causing Perl to abort and dump core, the C<dump>
+operator invokes the VMS debugger.  If you continue to
+execute the Perl program under the debugger, control will
+be transferred to the label specified as the argument to
+C<dump>, or, if no label was specified, back to the
+beginning of the program.  All other state of the program
+(I<e.g.> values of variables, open file handles) are not
+affected by calling C<dump>.
 
 =item exec LIST
 
@@ -487,6 +537,7 @@ whether you've got explicit delete access to a file by using the
 C<VMS::Filespec::candelete> operator.  For instance, in order
 to delete only files to which you have delete access, you could
 say something like
+
     sub safe_unlink {
         my($file,$num);
         foreach $file (@_) {
@@ -495,10 +546,12 @@ say something like
         }
         $num;
     }
-Finally, if C<unlink> has to change the file protection to
-delete the file, and you interrupt it in midstream, the file
-may be left intact, but with a changed ACL allowing you delete
-access.
+
+(or you could just use C<VMS::Stdio::remove>, if you've installed
+the VMS::Stdio extension distributed with Perl). If C<unlink> has to
+change the file protection to delete the file, and you interrupt it
+in midstream, the file may be left intact, but with a changed ACL
+allowing you delete access.
 
 =item utime LIST
 
@@ -577,12 +630,30 @@ strerror() function, so it will include the VMS message for
 VMS-specific errors.  The numeric value of C<$!> is the
 value of C<errno>, except if errno is EVMSERR, in which
 case C<$!> contains the value of vaxc$errno.  Setting C<$!>
-always sets errno to the value specified, and sets vaxc$errno
-to 4 (NONAME-F-NOMSG).
+always sets errno to the value specified.  If this value is
+EVMSERR, it also sets vaxc$errno to 4 (NONAME-F-NOMSG), so
+that the string value of C<$!> won't reflect the VMS error
+message from before C<$!> was set.
+
+=item $^E
+
+This variable provides direct access to VMS status values
+in vaxc$errno, which are often more specific than the
+generic Unix-style error messages in C<$!>.  Its numeric value
+is the value of vaxc$errno, and its string value is the
+corresponding VMS message string, as retrieved by sys$getmsg().
+Setting C<$^E> sets vaxc$errno to the value specified.
+
+=item $|
+
+Setting C<$|> for an I/O stream causes data to be flushed
+all the way to disk on each write (I<i.e.> not just to
+the underlying RMS buffers for a file).  In other words,
+it's equivalent to calling fflush() and fsync() from C.
 
 =head1 Revision date
 
-This document was last updated on 16-Dec-1994, for Perl 5, 
+This document was last updated on 28-Feb-1996, for Perl 5, 
 patchlevel 2.
 
 =head1 AUTHOR
