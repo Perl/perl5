@@ -654,6 +654,7 @@ C<Attribute::Handlers> allows a class to define attribute handlers.
 Both variables and routines can have attribute handlers.  Handlers can
 be specific to type (SCALAR, ARRAY, HASH, or CODE), or specific to the
 exact compilation phase (BEGIN, CHECK, INIT, or END).
+See L<Attribute::Handlers>.
 
 =item *
 
@@ -683,7 +684,7 @@ but if not possible, the familiar Perl implementation is used.
 C<Devel::PPPort>, originally from Kenneth Albanowski and now
 maintained by Paul Marquess, has been added.  It is primarily used
 by C<h2xs> to enhance portability of XS modules between different
-versions of Perl.
+versions of Perl.  See L<Devel::PPPort>.
 
 =item *
 
@@ -723,7 +724,7 @@ Any encoding supported by Encode module is also available to the
 
 C<Hash::Util> is the interface to the new I<restricted hashes>
 feature.  (Implemented by Jeffrey Friedl, Nick Ing-Simmons, and
-Michael Schwern.)
+Michael Schwern.)  See L<Hash::Util>.
 
 =item *
 
@@ -824,7 +825,7 @@ Journal #13, republished here with kind permission.
 =item *
 
 C<Math::BigRat> for big rational numbers, to accompany Math::BigInt and
-Math::BigFloat, from Tels.
+Math::BigFloat, from Tels.  See L<Math::BigRat>.
 
 =item *
 
@@ -999,11 +1000,12 @@ where data sharing was implicit.  See L<threads::shared>.
 =item *
 
 C<Tie::File>, by Mark-Jason Dominus, associates a Perl array with the
-lines of a file.
+lines of a file, see L<Tie::File>.
 
 =item *
 
-C<Tie::Memoize>, by Ilya Zakharevich, provides on-demand loaded hashes.
+C<Tie::Memoize>, by Ilya Zakharevich, provides on-demand loaded hashes,
+see L<Tie::Memoize>.
 
 =item *
 
