@@ -3545,6 +3545,12 @@ be exact.  (They produce something other than "1" and "-1" when
 formatting 0.6 and -0.6 using the printf format "%.0f"; most often,
 they produce "0" and "-0".)
 
+=head2 SCO
+
+The socketpair tests are known to be unhappy in SCO 3.2v5.0.4:
+
+ ext/Socket/socketpair.t...............FAILED tests 15-45
+
 =head2 Solaris 2.5
 
 In case you are still using Solaris 2.5 (aka SunOS 5.5), you may
