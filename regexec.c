@@ -431,7 +431,8 @@ Perl_re_intuit_start(pTHX_ regexp *prog, SV *sv, char *strpos,
 	      );
     });
 
-    if (prog->minlen > CHR_DIST((U8*)strend, (U8*)strpos)) {
+    /* CHR_DIST() would be more correct here but it makes things slow. */
+    if (prog->minlen > strend - strpos) {
 	DEBUG_r(PerlIO_printf(Perl_debug_log,
 			      "String too short... [re_intuit_start]\n"));
 	goto fail;
