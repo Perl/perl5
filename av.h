@@ -83,3 +83,4 @@ Same as C<av_len()>.  Deprecated, use C<av_len()> instead.
 #define AvFILL(av)	((SvRMAGICAL((SV *) (av))) \
 			  ? mg_size((SV *) av) : AvFILLp(av))
 
+#define NEGATIVE_INDICES_VAR "NEGATIVE_INDICES"

@@ -318,12 +318,6 @@ which is left unnoticed if C<DB> uses I<forgiving> system malloc().
 
 (P) One of the internal hash routines was passed a null HV pointer.
 
-=item Bad index while coercing array into hash
-
-(F) The index looked up in the hash found as the 0'th element of a
-pseudo-hash is not legal.  Index values must be at 1 or greater.
-See L<perlref>.
-
 =item Badly placed ()'s
 
 (A) You've accidentally run your script through B<csh> instead
@@ -779,13 +773,6 @@ L<perlfunc/last>.
 lexical variable using "my".  This is not allowed.  If you want to
 localize a package variable of the same name, qualify it with the
 package name.
-
-=item Can't localize pseudo-hash element
-
-(F) You said something like C<< local $ar->{'key'} >>, where $ar is a
-reference to a pseudo-hash.  That hasn't been implemented yet, but you
-can get a similar effect by localizing the corresponding array element
-directly -- C<< local $ar->[$ar->[0]{'key'}] >>.
 
 =item Can't localize through a reference
 
@@ -2330,19 +2317,6 @@ this class doesn't exist at this point in your program.
 (P) An error peculiar to VMS.  The internal routine my_pclose() tried to
 close a pipe which hadn't been opened.  This should have been caught
 earlier as an attempt to close an unopened filehandle.
-
-=item No such pseudo-hash field "%s"
-
-(F) You tried to access an array as a hash, but the field name used is
-not defined.  The hash at index 0 should map all valid field names to
-array indices for that to work.
-
-=item No such pseudo-hash field "%s" in variable %s of type %s
-
-(F) You tried to access a field of a typed variable where the type does
-not know about the field name.  The field names are looked up in the
-%FIELDS hash in the type package at compile time.  The %FIELDS hash is
-%usually set up with the 'fields' pragma.
 
 =item No such signal: SIG%s
 

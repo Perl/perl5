@@ -461,8 +461,6 @@ Perl_do_op_dump(pTHX_ I32 level, PerlIO *file, OP *o)
         else if (o->op_type == OP_AASSIGN) {
 	    if (o->op_private & OPpASSIGN_COMMON)
 		sv_catpv(tmpsv, ",COMMON");
-	    if (o->op_private & OPpASSIGN_HASH)
-		sv_catpv(tmpsv, ",HASH");
 	}
 	else if (o->op_type == OP_SASSIGN) {
 	    if (o->op_private & OPpASSIGN_BACKWARDS)
@@ -1085,12 +1083,22 @@ Perl_do_sv_dump(pTHX_ I32 level, PerlIO *file, SV *sv, I32 nest, I32 maxnest, bo
 	return;
     }
     if (type >= SVt_PVIV || type == SVt_IV) {
-	if (SvIsUV(sv))
+	if (SvIsUV(sv)
+#ifdef PERL_COPY_ON_WRITE
+	               || SvIsCOW(sv)
+#endif
+	                             )
 	    Perl_dump_indent(aTHX_ level, file, "  UV = %"UVuf, (UV)SvUVX(sv));
 	else
 	    Perl_dump_indent(aTHX_ level, file, "  IV = %"IVdf, (IV)SvIVX(sv));
 	if (SvOOK(sv))
 	    PerlIO_printf(file, "  (OFFSET)");
+#ifdef PERL_COPY_ON_WRITE
+	if (SvIsCOW_shared_hash(sv))
+	    PerlIO_printf(file, "  (HASH)");
+	else if (SvIsCOW_normal(sv))
+	    PerlIO_printf(file, "  (COW from 0x%"UVxf")", (UV)SvUVX(sv));
+#endif
 	PerlIO_putc(file, '\n');
     }
     if (type >= SVt_PVNV || type == SVt_NV) {
@@ -1391,7 +1399,16 @@ Perl_runops_debug(pTHX)
 			      "WARNING: %"UVxf" changed from %"UVxf" to %"UVxf"\n",
 			      PTR2UV(PL_watchaddr), PTR2UV(PL_watchok),
 			      PTR2UV(*PL_watchaddr));
-	    if (DEBUG_s_TEST_) debstack();
+	    if (DEBUG_s_TEST_) {
+		if (DEBUG_v_TEST_) {
+		    PerlIO_printf(Perl_debug_log, "\n");
+		    deb_stack_all();
+		}
+		else
+		    debstack();
+	    }
+
+
 	    if (DEBUG_t_TEST_) debop(PL_op);
 	    if (DEBUG_P_TEST_) debprof(PL_op);
 	}

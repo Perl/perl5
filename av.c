@@ -184,21 +184,40 @@ Perl_av_fetch(pTHX_ register AV *av, I32 key, I32 lval)
     if (!av)
 	return 0;
 
+    if (SvRMAGICAL(av)) {
+        MAGIC *tied_magic = mg_find((SV*)av, PERL_MAGIC_tied);
+        if (tied_magic || mg_find((SV*)av, PERL_MAGIC_regdata)) {
+            U32 adjust_index = 1;
+
+            if (tied_magic && key < 0) {
+                /* Handle negative array indices 20020222 MJD */
+                SV **negative_indices_glob = 
+                    hv_fetch(SvSTASH(SvRV(SvTIED_obj((SV *)av, 
+                                                     tied_magic))), 
+                             NEGATIVE_INDICES_VAR, 16, 0);
+
+                if (negative_indices_glob
+                    && SvTRUE(GvSV(*negative_indices_glob)))
+                    adjust_index = 0;
+            }
+
+            if (key < 0 && adjust_index) {
+                key += AvFILL(av) + 1;
+                if (key < 0)
+                    return 0;
+            }
+
+            sv = sv_newmortal();
+            mg_copy((SV*)av, sv, 0, key);
+            PL_av_fetch_sv = sv;
+            return &PL_av_fetch_sv;
+        }
+    }
+
     if (key < 0) {
 	key += AvFILL(av) + 1;
 	if (key < 0)
 	    return 0;
-    }
-
-    if (SvRMAGICAL(av)) {
-	if (mg_find((SV*)av, PERL_MAGIC_tied) ||
-		mg_find((SV*)av, PERL_MAGIC_regdata))
-	{
-	    sv = sv_newmortal();
-	    mg_copy((SV*)av, sv, 0, key);
-	    PL_av_fetch_sv = sv;
-	    return &PL_av_fetch_sv;
-	}
     }
 
     if (key > AvFILLp(av)) {
@@ -251,6 +270,33 @@ Perl_av_store(pTHX_ register AV *av, I32 key, SV *val)
     if (!val)
 	val = &PL_sv_undef;
 
+    if (SvRMAGICAL(av)) {
+        MAGIC *tied_magic = mg_find((SV*)av, PERL_MAGIC_tied);
+        if (tied_magic) {
+            /* Handle negative array indices 20020222 MJD */
+            if (key < 0) {
+                unsigned adjust_index = 1;
+                SV **negative_indices_glob = 
+                    hv_fetch(SvSTASH(SvRV(SvTIED_obj((SV *)av, 
+                                                     tied_magic))), 
+                             NEGATIVE_INDICES_VAR, 16, 0);
+                if (negative_indices_glob
+                    && SvTRUE(GvSV(*negative_indices_glob)))
+                    adjust_index = 0;
+                if (adjust_index) {
+                    key += AvFILL(av) + 1;
+                    if (key < 0)
+                        return 0;
+                }
+            }
+	    if (val != &PL_sv_undef) {
+		mg_copy((SV*)av, val, 0, key);
+	    }
+	    return 0;
+        }
+    }
+
+
     if (key < 0) {
 	key += AvFILL(av) + 1;
 	if (key < 0)
@@ -259,15 +305,6 @@ Perl_av_store(pTHX_ register AV *av, I32 key, SV *val)
 
     if (SvREADONLY(av) && key >= AvFILL(av))
 	Perl_croak(aTHX_ PL_no_modify);
-
-    if (SvRMAGICAL(av)) {
-	if (mg_find((SV*)av, PERL_MAGIC_tied)) {
-	    if (val != &PL_sv_undef) {
-		mg_copy((SV*)av, val, 0, key);
-	    }
-	    return 0;
-	}
-    }
 
     if (!AvREAL(av) && AvREIFY(av))
 	av_reify(av);
@@ -750,26 +787,48 @@ Perl_av_delete(pTHX_ AV *av, I32 key, I32 flags)
 	return Nullsv;
     if (SvREADONLY(av))
 	Perl_croak(aTHX_ PL_no_modify);
+
+    if (SvRMAGICAL(av)) {
+        MAGIC *tied_magic = mg_find((SV*)av, PERL_MAGIC_tied);
+        SV **svp;
+        if ((tied_magic || mg_find((SV*)av, PERL_MAGIC_regdata))) {
+            /* Handle negative array indices 20020222 MJD */
+            if (key < 0) {
+                unsigned adjust_index = 1;
+                if (tied_magic) {
+                    SV **negative_indices_glob = 
+                        hv_fetch(SvSTASH(SvRV(SvTIED_obj((SV *)av, 
+                                                         tied_magic))), 
+                                 NEGATIVE_INDICES_VAR, 16, 0);
+                    if (negative_indices_glob
+                        && SvTRUE(GvSV(*negative_indices_glob)))
+                        adjust_index = 0;
+                }
+                if (adjust_index) {
+                    key += AvFILL(av) + 1;
+                    if (key < 0)
+                        return Nullsv;
+                }
+            }
+            svp = av_fetch(av, key, TRUE);
+            if (svp) {
+                sv = *svp;
+                mg_clear(sv);
+                if (mg_find(sv, PERL_MAGIC_tiedelem)) {
+                    sv_unmagic(sv, PERL_MAGIC_tiedelem); /* No longer an element */
+                    return sv;
+                }
+                return Nullsv;     
+            }
+        }
+    }
+
     if (key < 0) {
 	key += AvFILL(av) + 1;
 	if (key < 0)
 	    return Nullsv;
     }
-    if (SvRMAGICAL(av)) {
-	SV **svp;
-	if ((mg_find((SV*)av, PERL_MAGIC_tied) ||
-		mg_find((SV*)av, PERL_MAGIC_regdata))
-	    && (svp = av_fetch(av, key, TRUE)))
-	{
-	    sv = *svp;
-	    mg_clear(sv);
-	    if (mg_find(sv, PERL_MAGIC_tiedelem)) {
-		sv_unmagic(sv, PERL_MAGIC_tiedelem);	/* No longer an element */
-		return sv;
-	    }
-	    return Nullsv;			/* element cannot be deleted */
-	}
-    }
+
     if (key > AvFILLp(av))
 	return Nullsv;
     else {
@@ -807,26 +866,48 @@ Perl_av_exists(pTHX_ AV *av, I32 key)
 {
     if (!av)
 	return FALSE;
+
+
+    if (SvRMAGICAL(av)) {
+        MAGIC *tied_magic = mg_find((SV*)av, PERL_MAGIC_tied);
+        if (tied_magic || mg_find((SV*)av, PERL_MAGIC_regdata)) {
+            SV *sv = sv_newmortal();
+            MAGIC *mg;
+            /* Handle negative array indices 20020222 MJD */
+            if (key < 0) {
+                unsigned adjust_index = 1;
+                if (tied_magic) {
+                    SV **negative_indices_glob = 
+                        hv_fetch(SvSTASH(SvRV(SvTIED_obj((SV *)av, 
+                                                         tied_magic))), 
+                                 NEGATIVE_INDICES_VAR, 16, 0);
+                    if (negative_indices_glob
+                        && SvTRUE(GvSV(*negative_indices_glob)))
+                        adjust_index = 0;
+                }
+                if (adjust_index) {
+                    key += AvFILL(av) + 1;
+                    if (key < 0)
+                        return FALSE;
+                }
+            }
+
+            mg_copy((SV*)av, sv, 0, key);
+            mg = mg_find(sv, PERL_MAGIC_tiedelem);
+            if (mg) {
+                magic_existspack(sv, mg);
+                return (bool)SvTRUE(sv);
+            }
+
+        }
+    }
+
     if (key < 0) {
 	key += AvFILL(av) + 1;
 	if (key < 0)
 	    return FALSE;
     }
-    if (SvRMAGICAL(av)) {
-	if (mg_find((SV*)av, PERL_MAGIC_tied) ||
-		mg_find((SV*)av, PERL_MAGIC_regdata))
-	{
-	    SV *sv = sv_newmortal();
-	    MAGIC *mg;
 
-	    mg_copy((SV*)av, sv, 0, key);
-	    mg = mg_find(sv, PERL_MAGIC_tiedelem);
-	    if (mg) {
-		magic_existspack(sv, mg);
-		return (bool)SvTRUE(sv);
-	    }
-	}
-    }
     if (key <= AvFILLp(av) && AvARRAY(av)[key] != &PL_sv_undef
 	&& AvARRAY(av)[key])
     {
@@ -834,105 +915,4 @@ Perl_av_exists(pTHX_ AV *av, I32 key)
     }
     else
 	return FALSE;
-}
-
-/* AVHV: Support for treating arrays as if they were hashes.  The
- * first element of the array should be a hash reference that maps
- * hash keys to array indices.
- */
-
-STATIC I32
-S_avhv_index_sv(pTHX_ SV* sv)
-{
-    I32 index = SvIV(sv);
-    if (index < 1)
-	Perl_croak(aTHX_ "Bad index while coercing array into hash");
-    return index;    
-}
-
-STATIC I32
-S_avhv_index(pTHX_ AV *av, SV *keysv, U32 hash)
-{
-    HV *keys;
-    HE *he;
-    STRLEN n_a;
-
-    keys = avhv_keys(av);
-    he = hv_fetch_ent(keys, keysv, FALSE, hash);
-    if (!he)
-        Perl_croak(aTHX_ "No such pseudo-hash field \"%s\"", SvPV(keysv,n_a));
-    return avhv_index_sv(HeVAL(he));
-}
-
-HV*
-Perl_avhv_keys(pTHX_ AV *av)
-{
-    SV **keysp = av_fetch(av, 0, FALSE);
-    if (keysp) {
-	SV *sv = *keysp;
-	if (SvGMAGICAL(sv))
-	    mg_get(sv);
-	if (SvROK(sv)) {
-	    sv = SvRV(sv);
-	    if (SvTYPE(sv) == SVt_PVHV)
-		return (HV*)sv;
-	}
-    }
-    Perl_croak(aTHX_ "Can't coerce array into hash");
-    return Nullhv;
-}
-
-SV**
-Perl_avhv_store_ent(pTHX_ AV *av, SV *keysv, SV *val, U32 hash)
-{
-    return av_store(av, avhv_index(av, keysv, hash), val);
-}
-
-SV**
-Perl_avhv_fetch_ent(pTHX_ AV *av, SV *keysv, I32 lval, U32 hash)
-{
-    return av_fetch(av, avhv_index(av, keysv, hash), lval);
-}
-
-SV *
-Perl_avhv_delete_ent(pTHX_ AV *av, SV *keysv, I32 flags, U32 hash)
-{
-    HV *keys = avhv_keys(av);
-    HE *he;
-	
-    he = hv_fetch_ent(keys, keysv, FALSE, hash);
-    if (!he || !SvOK(HeVAL(he)))
-	return Nullsv;
-
-    return av_delete(av, avhv_index_sv(HeVAL(he)), flags);
-}
-
-/* Check for the existence of an element named by a given key.
- *
- */
-bool
-Perl_avhv_exists_ent(pTHX_ AV *av, SV *keysv, U32 hash)
-{
-    HV *keys = avhv_keys(av);
-    HE *he;
-	
-    he = hv_fetch_ent(keys, keysv, FALSE, hash);
-    if (!he || !SvOK(HeVAL(he)))
-	return FALSE;
-
-    return av_exists(av, avhv_index_sv(HeVAL(he)));
-}
-
-HE *
-Perl_avhv_iternext(pTHX_ AV *av)
-{
-    HV *keys = avhv_keys(av);
-    return hv_iternext(keys);
-}
-
-SV *
-Perl_avhv_iterval(pTHX_ AV *av, register HE *entry)
-{
-    SV *sv = hv_iterval(avhv_keys(av), entry);
-    return *av_fetch(av, avhv_index_sv(sv), TRUE);
 }

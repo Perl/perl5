@@ -309,6 +309,7 @@ B<-D14> is equivalent to B<-Dtls>):
 
         1  p  Tokenizing and parsing
         2  s  Stack snapshots
+                with v, displays all stacks
         4  l  Context (loop) stack processing
         8  t  Trace execution
        16  o  Method and overloading resolution
@@ -327,6 +328,7 @@ B<-D14> is equivalent to B<-Dtls>):
    131072  T  Tokenising
    262144  R  Include reference counts of dumped variables (eg when using -Ds)
    524288  J  Do not s,t,P-debug (Jump over) opcodes within package DB
+  1048576  v  Verbose: use in conjunction with other flags
 
 All these flags require B<-DDEBUGGING> when you compile the Perl
 executable (but see L<Devel::Peek>, L<re> which may change this).

@@ -538,6 +538,7 @@ d_mmap=''
 mmaptype=''
 d_modfl=''
 d_modfl_pow32_bug=''
+d_modflproto=''
 d_mprotect=''
 d_msg=''
 d_msgctl=''
@@ -6035,6 +6036,31 @@ esac
 set modfl d_modfl
 eval $inlibc
 
+
+hasproto='varname=$1; func=$2; shift; shift;
+while $test $# -ge 2; do
+	case "$1" in
+	$define) echo "#include <$2>";;
+	esac ;
+    shift 2;
+done > try.c;
+$cppstdin $cppflags $cppminus < try.c > tryout.c 2>/dev/null;
+if $contains "$func.*(" tryout.c >/dev/null 2>&1; then
+	echo "$func() prototype found.";
+	val="$define";
+else
+	echo "$func() prototype NOT found.";
+	val="$undef";
+fi;
+set $varname;
+eval $setvar;
+$rm -f try.c tryout.c'
+
+: see if prototype for modfl is available
+echo " "
+set d_modflproto modfl math.h
+eval $hasproto
+
 d_modfl_pow32_bug="$undef"
 
 case "$d_longdbl$d_modfl" in
@@ -6045,6 +6071,14 @@ EOM
 $cat >try.c <<EOCP
 #include <math.h> 
 #include <stdio.h>
+EOCP
+if $test "X$d_modflproto" != "X$define"; then
+	$cat >>try.c <<EOCP
+/* Sigh. many current glibcs provide the function, but do not prototype it.  */ 
+long double modfl (long double, long double *);
+EOCP
+fi
+$cat >>try.c <<EOCP
 int main() {
     long double nv = 4294967303.15;
     long double v, w;
@@ -9152,25 +9186,6 @@ exit $status
 EOSH
 chmod +x protochk
 $eunicefix protochk
-
-hasproto='varname=$1; func=$2; shift; shift;
-while $test $# -ge 2; do
-	case "$1" in
-	$define) echo "#include <$2>";;
-	esac ;
-    shift 2;
-done > try.c;
-$cppstdin $cppflags $cppminus < try.c > tryout.c 2>/dev/null;
-if $contains "$func.*(" tryout.c >/dev/null 2>&1; then
-	echo "$func() prototype found.";
-	val="$define";
-else
-	echo "$func() prototype NOT found.";
-	val="$undef";
-fi;
-set $varname;
-eval $setvar;
-$rm -f try.c tryout.c'
 
 : see if sys/types.h has to be included
 set sys/types.h i_systypes
@@ -19919,6 +19934,7 @@ d_mktime='$d_mktime'
 d_mmap='$d_mmap'
 d_modfl='$d_modfl'
 d_modfl_pow32_bug='$d_modfl_pow32_bug'
+d_modflproto='$d_modflproto'
 d_mprotect='$d_mprotect'
 d_msg='$d_msg'
 d_msg_ctrunc='$d_msg_ctrunc'

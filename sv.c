@@ -22,8 +22,16 @@
 #include "regcomp.h"
 
 #define FCALL *f
-#define SV_CHECK_THINKFIRST(sv) if (SvTHINKFIRST(sv)) sv_force_normal(sv)
 
+#ifdef PERL_COPY_ON_WRITE
+#define SV_COW_NEXT_SV(sv)	INT2PTR(SV *,SvUVX(sv))
+/* This is a pessamistic view. Scalar must be purely a read-write PV to copy-
+   on-write.  */
+#define CAN_COW_MASK	(SVs_OBJECT|SVs_GMG|SVs_SMG|SVf_IOK|SVf_NOK|SVf_POK| \
+			 SVf_ROK|SVp_IOK|SVp_NOK|SVp_POK|SVf_FAKE|SVf_OOK| \
+			 SVf_BREAK|SVf_READONLY|SVf_AMAGIC)
+#define CAN_COW_FLAGS	(SVp_POK|SVf_POK)
+#endif
 
 /* ============================================================================
 
@@ -1234,8 +1242,8 @@ Perl_sv_upgrade(pTHX_ register SV *sv, U32 mt)
     MAGIC*	magic = NULL;
     HV*		stash = Nullhv;
 
-    if (mt != SVt_PV && SvREADONLY(sv) && SvFAKE(sv)) {
-	sv_force_normal(sv);
+    if (mt != SVt_PV && SvIsCOW(sv)) {
+	sv_force_normal_flags(sv, 0);
     }
 
     if (SvTYPE(sv) == mt)
@@ -1580,12 +1588,6 @@ Perl_sv_grow(pTHX_ register SV *sv, register STRLEN newlen)
 	    Renew(s,newlen,char);
 	}
         else {
-	    /* sv_force_normal_flags() must not try to unshare the new
-	       PVX we allocate below. AMS 20010713 */
-	    if (SvREADONLY(sv) && SvFAKE(sv)) {
-		SvFAKE_off(sv);
-		SvREADONLY_off(sv);
-	    }
 	    New(703, s, newlen, char);
 	    if (SvPVX(sv) && SvCUR(sv)) {
 	        Move(SvPVX(sv), s, (newlen < SvCUR(sv)) ? newlen : SvCUR(sv), char);
@@ -1609,7 +1611,7 @@ Does not handle 'set' magic.  See also C<sv_setiv_mg>.
 void
 Perl_sv_setiv(pTHX_ register SV *sv, IV i)
 {
-    SV_CHECK_THINKFIRST(sv);
+    SV_CHECK_THINKFIRST_COW_DROP(sv);
     switch (SvTYPE(sv)) {
     case SVt_NULL:
 	sv_upgrade(sv, SVt_IV);
@@ -1721,7 +1723,7 @@ Does not handle 'set' magic.  See also C<sv_setnv_mg>.
 void
 Perl_sv_setnv(pTHX_ register SV *sv, NV num)
 {
-    SV_CHECK_THINKFIRST(sv);
+    SV_CHECK_THINKFIRST_COW_DROP(sv);
     switch (SvTYPE(sv)) {
     case SVt_NULL:
     case SVt_IV:
@@ -2032,8 +2034,8 @@ Perl_sv_2iv(pTHX_ register SV *sv)
 	      return SvIV(tmpstr);
 	  return PTR2IV(SvRV(sv));
 	}
-	if (SvREADONLY(sv) && SvFAKE(sv)) {
-	    sv_force_normal(sv);
+	if (SvIsCOW(sv)) {
+	    sv_force_normal_flags(sv, 0);
 	}
 	if (SvREADONLY(sv) && !SvOK(sv)) {
 	    if (ckWARN(WARN_UNINITIALIZED))
@@ -2329,8 +2331,8 @@ Perl_sv_2uv(pTHX_ register SV *sv)
 	      return SvUV(tmpstr);
 	  return PTR2UV(SvRV(sv));
 	}
-	if (SvREADONLY(sv) && SvFAKE(sv)) {
-	    sv_force_normal(sv);
+	if (SvIsCOW(sv)) {
+	    sv_force_normal_flags(sv, 0);
 	}
 	if (SvREADONLY(sv) && !SvOK(sv)) {
 	    if (ckWARN(WARN_UNINITIALIZED))
@@ -2617,8 +2619,8 @@ Perl_sv_2nv(pTHX_ register SV *sv)
 	      return SvNV(tmpstr);
 	  return PTR2NV(SvRV(sv));
 	}
-	if (SvREADONLY(sv) && SvFAKE(sv)) {
-	    sv_force_normal(sv);
+	if (SvIsCOW(sv)) {
+	    sv_force_normal_flags(sv, 0);
 	}
 	if (SvREADONLY(sv) && !SvOK(sv)) {
 	    if (ckWARN(WARN_UNINITIALIZED))
@@ -3380,8 +3382,8 @@ Perl_sv_utf8_upgrade_flags(pTHX_ register SV *sv, I32 flags)
     if (SvUTF8(sv))
 	return SvCUR(sv);
 
-    if (SvREADONLY(sv) && SvFAKE(sv)) {
-	sv_force_normal(sv);
+    if (SvIsCOW(sv)) {
+        sv_force_normal_flags(sv, 0);
     }
 
     if (PL_encoding)
@@ -3437,8 +3439,9 @@ Perl_sv_utf8_downgrade(pTHX_ register SV* sv, bool fail_ok)
 	    U8 *s;
 	    STRLEN len;
 
-	    if (SvREADONLY(sv) && SvFAKE(sv))
-		sv_force_normal(sv);
+            if (SvIsCOW(sv)) {
+                sv_force_normal_flags(sv, 0);
+            }
 	    s = (U8 *) SvPV(sv, len);
 	    if (!utf8_to_bytes(s, &len)) {
 	        if (fail_ok)
@@ -3559,7 +3562,7 @@ Perl_sv_setsv_flags(pTHX_ SV *dstr, register SV *sstr, I32 flags)
 
     if (sstr == dstr)
 	return;
-    SV_CHECK_THINKFIRST(dstr);
+    SV_CHECK_THINKFIRST_COW_DROP(dstr);
     if (!sstr)
 	sstr = &PL_sv_undef;
     stype = SvTYPE(sstr);
@@ -3887,6 +3890,7 @@ Perl_sv_setsv_flags(pTHX_ SV *dstr, register SV *sstr, I32 flags)
 	}
     }
     else if (sflags & SVp_POK) {
+        bool isSwipe = 0;
 
 	/*
 	 * Check to see if we can just swipe the string.  If so, it's a
@@ -3895,13 +3899,60 @@ Perl_sv_setsv_flags(pTHX_ SV *dstr, register SV *sstr, I32 flags)
 	 * has to be allocated and SvPVX(sstr) has to be freed.
 	 */
 
-	if (SvTEMP(sstr) &&		/* slated for free anyway? */
-	    SvREFCNT(sstr) == 1 && 	/* and no other references to it? */
-	    !(sflags & SVf_OOK) && 	/* and not involved in OOK hack? */
-	    SvLEN(sstr) 	&&	/* and really is a string */
+	if (
+#ifdef PERL_COPY_ON_WRITE
+            (sflags & (SVf_FAKE | SVf_READONLY)) != (SVf_FAKE | SVf_READONLY)
+            &&
+#endif
+            !(isSwipe =
+                 (sflags & SVs_TEMP) &&   /* slated for free anyway? */
+                 !(sflags & SVf_OOK) &&   /* and not involved in OOK hack? */
+                 SvREFCNT(sstr) == 1 &&   /* and no other references to it? */
+                 SvLEN(sstr) 	&&	  /* and really is a string */
 	    			/* and won't be needed again, potentially */
-	    !(PL_op && PL_op->op_type == OP_AASSIGN))
-	{
+	      !(PL_op && PL_op->op_type == OP_AASSIGN))
+#ifdef PERL_COPY_ON_WRITE
+            && !((sflags & CAN_COW_MASK) == CAN_COW_FLAGS
+                 && SvTYPE(sstr) >= SVt_PVIV)
+#endif
+            ) {
+            /* Failed the swipe test, and it's not a shared hash key either.
+               Have to copy the string.  */
+	    STRLEN len = SvCUR(sstr);
+            SvGROW(dstr, len + 1);	/* inlined from sv_setpvn */
+            Move(SvPVX(sstr),SvPVX(dstr),len,char);
+            SvCUR_set(dstr, len);
+            *SvEND(dstr) = '\0';
+            (void)SvPOK_only(dstr);
+        } else {
+            /* If PERL_COPY_ON_WRITE is not defined, then isSwipe will always
+               be true in here.  */
+#ifdef PERL_COPY_ON_WRITE
+            /* Either it's a shared hash key, or it's suitable for
+               copy-on-write or we can swipe the string.  */
+#ifdef DEBUG_COW
+            PerlIO_printf(PerlIO_stderr(),"sstr --> dstr\n");
+                Perl_sv_dump(sstr);
+                Perl_sv_dump(dstr);
+#endif
+            if (!isSwipe) {
+                /* I believe I should acquire a global SV mutex if
+                   it's a COW sv (not a shared hash key) to stop
+                   it going un copy-on-write.
+                   If the source SV has gone un copy on write between up there
+                   and down here, then (assert() that) it is of the correct
+                   form to make it copy on write again */
+                if ((sflags & (SVf_FAKE | SVf_READONLY))
+                    != (SVf_FAKE | SVf_READONLY)) {
+                    SvREADONLY_on(sstr);
+                    SvFAKE_on(sstr);
+                    /* Make the source SV into a loop of 1.
+                       (about to become 2) */
+                    SV_COW_NEXT_SV(sstr) = sstr;
+                }
+            }
+#endif
+            /* Initial code is common.  */
 	    if (SvPVX(dstr)) {		/* we know that dtype >= SVt_PV */
 		if (SvOOK(dstr)) {
 		    SvFLAGS(dstr) &= ~SVf_OOK;
@@ -3911,25 +3962,50 @@ Perl_sv_setsv_flags(pTHX_ SV *dstr, register SV *sstr, I32 flags)
 		    Safefree(SvPVX(dstr));
 	    }
 	    (void)SvPOK_only(dstr);
-	    SvPV_set(dstr, SvPVX(sstr));
-	    SvLEN_set(dstr, SvLEN(sstr));
-	    SvCUR_set(dstr, SvCUR(sstr));
 
-	    SvTEMP_off(dstr);
-	    (void)SvOK_off(sstr);	/* NOTE: nukes most SvFLAGS on sstr */
-	    SvPV_set(sstr, Nullch);
-	    SvLEN_set(sstr, 0);
-	    SvCUR_set(sstr, 0);
-	    SvTEMP_off(sstr);
-	}
-	else {				/* have to copy actual string */
-	    STRLEN len = SvCUR(sstr);
-	    SvGROW(dstr, len + 1);	/* inlined from sv_setpvn */
-	    Move(SvPVX(sstr),SvPVX(dstr),len,char);
-	    SvCUR_set(dstr, len);
-	    *SvEND(dstr) = '\0';
-	    (void)SvPOK_only(dstr);
-	}
+#ifdef PERL_COPY_ON_WRITE
+            if (!isSwipe) {
+                /* making another shared SV.  */
+                STRLEN cur = SvCUR(sstr);
+                STRLEN len = SvLEN(sstr);
+                if (len) {
+                    /* SvIsCOW_normal */
+                    /* splice us in between source and next-after-source.  */
+                    SV_COW_NEXT_SV(dstr) = SV_COW_NEXT_SV(sstr);
+                    SV_COW_NEXT_SV(sstr) = dstr;
+                    SvPV_set(dstr, SvPVX(sstr));
+                } else {
+                    /* SvIsCOW_shared_hash */
+                    UV hash = SvUVX(sstr);
+#ifdef DEBUG_COW
+                    PerlIO_printf(PerlIO_stderr(), "Sharing hash\n");
+#endif
+                    SvPV_set(dstr,
+                             sharepvn(SvPVX(sstr),
+                                      (sflags & SVf_UTF8?-cur:cur), hash));
+                    SvUVX(dstr) = hash;
+                }
+                SvLEN(dstr) = len;
+                SvCUR(dstr) = cur;
+                SvREADONLY_on(dstr);
+                SvFAKE_on(dstr);
+                /* Relesase a global SV mutex.  */
+            }
+            else
+#endif
+                {	/* Passes the swipe test.  */
+                SvPV_set(dstr, SvPVX(sstr));
+                SvLEN_set(dstr, SvLEN(sstr));
+                SvCUR_set(dstr, SvCUR(sstr));
+
+                SvTEMP_off(dstr);
+                (void)SvOK_off(sstr);	/* NOTE: nukes most SvFLAGS on sstr */
+                SvPV_set(sstr, Nullch);
+                SvLEN_set(sstr, 0);
+                SvCUR_set(sstr, 0);
+                SvTEMP_off(sstr);
+            }
+        }
 	if (sflags & SVf_UTF8)
 	    SvUTF8_on(dstr);
 	/*SUPPRESS 560*/
@@ -4017,7 +4093,7 @@ Perl_sv_setpvn(pTHX_ register SV *sv, register const char *ptr, register STRLEN 
 {
     register char *dptr;
 
-    SV_CHECK_THINKFIRST(sv);
+    SV_CHECK_THINKFIRST_COW_DROP(sv);
     if (!ptr) {
 	(void)SvOK_off(sv);
 	return;
@@ -4068,7 +4144,7 @@ Perl_sv_setpv(pTHX_ register SV *sv, register const char *ptr)
 {
     register STRLEN len;
 
-    SV_CHECK_THINKFIRST(sv);
+    SV_CHECK_THINKFIRST_COW_DROP(sv);
     if (!ptr) {
 	(void)SvOK_off(sv);
 	return;
@@ -4115,7 +4191,7 @@ See C<sv_usepvn_mg>.
 void
 Perl_sv_usepvn(pTHX_ register SV *sv, register char *ptr, register STRLEN len)
 {
-    SV_CHECK_THINKFIRST(sv);
+    SV_CHECK_THINKFIRST_COW_DROP(sv);
     (void)SvUPGRADE(sv, SVt_PV);
     if (!ptr) {
 	(void)SvOK_off(sv);
@@ -4148,13 +4224,64 @@ Perl_sv_usepvn_mg(pTHX_ register SV *sv, register char *ptr, register STRLEN len
     SvSETMAGIC(sv);
 }
 
+#ifdef PERL_COPY_ON_WRITE
+/* Need to do this *after* making the SV normal, as we need the buffer
+   pointer to remain valid until after we've copied it.  If we let go too early,
+   another thread could invalidate it by unsharing last of the same hash key
+   (which it can do by means other than releasing copy-on-write Svs)
+   or by changing the other copy-on-write SVs in the loop.  */
+STATIC void
+S_sv_release_COW(pTHX_ register SV *sv, char *pvx, STRLEN cur, STRLEN len,
+                 U32 hash, SV *after)
+{
+    if (len) { /* this SV was SvIsCOW_normal(sv) */
+         /* we need to find the SV pointing to us.  */
+        SV *current = SV_COW_NEXT_SV(after);
+        
+        if (current == sv) {
+            /* The SV we point to points back to us (there were only two of us
+               in the loop.)
+               Hence other SV is no longer copy on write either.  */
+            SvFAKE_off(after);
+            SvREADONLY_off(after);
+        } else {
+            /* We need to follow the pointers around the loop.  */
+            SV *next;
+            while ((next = SV_COW_NEXT_SV(current)) != sv) {
+                assert (next);
+                current = next;
+                 /* don't loop forever if the structure is bust, and we have
+                    a pointer into a closed loop.  */
+                assert (current != after);
+            }
+            /* Make the SV before us point to the SV after us.  */
+            SV_COW_NEXT_SV(current) = after;
+        }
+    } else {
+        unsharepvn(pvx, SvUTF8(sv) ? -(I32)cur : cur, hash);
+    }
+}
+
+int
+Perl_sv_release_IVX(pTHX_ register SV *sv)
+{
+    if (SvIsCOW(sv))
+        sv_force_normal_flags(sv, 0);
+    return SvOOK_off(sv);
+}
+#endif
 /*
 =for apidoc sv_force_normal_flags
 
 Undo various types of fakery on an SV: if the PV is a shared string, make
 a private copy; if we're a ref, stop refing; if we're a glob, downgrade to
-an xpvmg. The C<flags> parameter gets passed to  C<sv_unref_flags()>
-when unrefing. C<sv_force_normal> calls this function with flags set to 0.
+an xpvmg; if we're a copy-on-write scalar, this is the on-write time when
+we do the copy, and is also used locally. If C<SV_COW_DROP_PV> is set
+then a copy-on-write scalar drops its PV buffer (if any) and becomes
+SvPOK_off rather than making a copy. (Used where this scalar is about to be
+set to some other value. In addtion, the C<flags> parameter gets passed to
+C<sv_unref_flags()> when unrefing. C<sv_force_normal> calls this function
+with flags set to 0.
 
 =cut
 */
@@ -4162,6 +4289,43 @@ when unrefing. C<sv_force_normal> calls this function with flags set to 0.
 void
 Perl_sv_force_normal_flags(pTHX_ register SV *sv, U32 flags)
 {
+#ifdef PERL_COPY_ON_WRITE
+    if (SvREADONLY(sv)) {
+        /* At this point I believe I should acquire a global SV mutex.  */
+	if (SvFAKE(sv)) {
+            char *pvx = SvPVX(sv);
+            STRLEN len = SvLEN(sv);
+            STRLEN cur = SvCUR(sv);
+            U32 hash = SvUVX(sv);
+            SV *next = SV_COW_NEXT_SV(sv);   /* next COW sv in the loop. */
+#ifdef DEBUG_COW
+        PerlIO_printf(PerlIO_stderr(), "Force normal %ld\n", flags);
+        Perl_sv_dump(sv);
+#endif
+            SvFAKE_off(sv);
+            SvREADONLY_off(sv);
+            /* This SV doesn't own the buffer, so need to New() a new one:  */
+            SvPVX(sv) = 0;
+            SvLEN(sv) = 0;
+            if (flags & SV_COW_DROP_PV) {
+                /* OK, so we don't need to copy our buffer.  */
+                SvPOK_off(sv);
+            } else {
+                SvGROW(sv, cur + 1);
+                Move(pvx,SvPVX(sv),cur,char);
+                SvCUR(sv) = cur;
+                *SvEND(sv) = '\0';
+            }
+            S_sv_release_COW(sv, pvx, cur, len, hash, next);
+#ifdef DEBUG_COW
+        Perl_sv_dump(sv);
+#endif
+	}
+	else if (PL_curcop != &PL_compiling)
+	    Perl_croak(aTHX_ PL_no_modify);
+        /* At this point I believe that I can drop the global SV mutex.  */
+    }
+#else
     if (SvREADONLY(sv)) {
 	if (SvFAKE(sv)) {
 	    char *pvx = SvPVX(sv);
@@ -4177,6 +4341,7 @@ Perl_sv_force_normal_flags(pTHX_ register SV *sv, U32 flags)
 	else if (PL_curcop != &PL_compiling)
 	    Perl_croak(aTHX_ PL_no_modify);
     }
+#endif
     if (SvROK(sv))
 	sv_unref_flags(sv, flags);
     else if (SvFAKE(sv) && SvTYPE(sv) == SVt_PVGV)
@@ -4515,6 +4680,10 @@ Perl_sv_magic(pTHX_ register SV *sv, SV *obj, int how, const char *name, I32 nam
     MAGIC* mg;
     MGVTBL *vtable = 0;
 
+#ifdef PERL_COPY_ON_WRITE
+    if (SvIsCOW(sv))
+        sv_force_normal_flags(sv, 0);
+#endif
     if (SvREADONLY(sv)) {
 	if (PL_curcop != &PL_compiling
 	    && how != PERL_MAGIC_regex_global
@@ -4892,7 +5061,7 @@ void
 Perl_sv_replace(pTHX_ register SV *sv, register SV *nsv)
 {
     U32 refcnt = SvREFCNT(sv);
-    SV_CHECK_THINKFIRST(sv);
+    SV_CHECK_THINKFIRST_COW_DROP(sv);
     if (SvREFCNT(nsv) != 1 && ckWARN_d(WARN_INTERNAL))
 	Perl_warner(aTHX_ packWARN(WARN_INTERNAL), "Reference miscount in sv_replace()");
     if (SvMAGICAL(sv)) {
@@ -5045,6 +5214,24 @@ Perl_sv_clear(pTHX_ register SV *sv)
 	    else
 	        SvREFCNT_dec(SvRV(sv));
 	}
+#ifdef PERL_COPY_ON_WRITE
+	else if (SvPVX(sv)) {
+            if (SvIsCOW(sv)) {
+                /* I believe I need to grab the global SV mutex here and
+                   then recheck the COW status.  */
+#ifdef DEBUG_COW
+        PerlIO_printf(PerlIO_stderr(), "Clear\n");
+        Perl_sv_dump(sv);
+#endif
+                S_sv_release_COW(sv, SvPVX(sv), SvCUR(sv), SvLEN(sv),
+                                 SvUVX(sv), SV_COW_NEXT_SV(sv));
+                /* And drop it here.  */
+                SvFAKE_off(sv);
+            } else if (SvLEN(sv)) {
+                Safefree(SvPVX(sv));
+            }
+	}
+#else
 	else if (SvPVX(sv) && SvLEN(sv))
 	    Safefree(SvPVX(sv));
 	else if (SvPVX(sv) && SvREADONLY(sv) && SvFAKE(sv)) {
@@ -5053,6 +5240,7 @@ Perl_sv_clear(pTHX_ register SV *sv)
 		       SvUVX(sv));
 	    SvFAKE_off(sv);
 	}
+#endif
 	break;
 /*
     case SVt_NV:
@@ -5409,7 +5597,7 @@ Perl_sv_eq(pTHX_ register SV *sv1, register SV *sv2)
     }
 
     if (cur1 == cur2)
-	eq = memEQ(pv1, pv2, cur1);
+	eq = (pv1 == pv2) || memEQ(pv1, pv2, cur1);
 	
     if (svrecode)
 	 SvREFCNT_dec(svrecode);
@@ -5643,7 +5831,12 @@ Perl_sv_gets(pTHX_ register SV *sv, register PerlIO *fp, I32 append)
     I32 i = 0;
     I32 rspara = 0;
 
-    SV_CHECK_THINKFIRST(sv);
+    SV_CHECK_THINKFIRST_COW_DROP(sv);
+    /* XXX. If you make this PVIV, then copy on write can copy scalars read
+       from <>.
+       However, perlbench says it's slower, because the existing swipe code
+       is faster than copy on write.
+       Swings and roundabouts.  */
     (void)SvUPGRADE(sv, SVt_PV);
 
     SvSCREAM_off(sv);
@@ -5957,8 +6150,8 @@ Perl_sv_inc(pTHX_ register SV *sv)
     if (SvGMAGICAL(sv))
 	mg_get(sv);
     if (SvTHINKFIRST(sv)) {
-	if (SvREADONLY(sv) && SvFAKE(sv))
-	    sv_force_normal(sv);
+	if (SvIsCOW(sv))
+	    sv_force_normal_flags(sv, 0);
 	if (SvREADONLY(sv)) {
 	    if (PL_curcop != &PL_compiling)
 		Perl_croak(aTHX_ PL_no_modify);
@@ -6113,8 +6306,8 @@ Perl_sv_dec(pTHX_ register SV *sv)
     if (SvGMAGICAL(sv))
 	mg_get(sv);
     if (SvTHINKFIRST(sv)) {
-	if (SvREADONLY(sv) && SvFAKE(sv))
-	    sv_force_normal(sv);
+	if (SvIsCOW(sv))
+	    sv_force_normal_flags(sv, 0);
 	if (SvREADONLY(sv)) {
 	    if (PL_curcop != &PL_compiling)
 		Perl_croak(aTHX_ PL_no_modify);
@@ -6901,7 +7094,7 @@ Perl_sv_pvn_force_flags(pTHX_ SV *sv, STRLEN *lp, I32 flags)
     char *s = NULL;
 
     if (SvTHINKFIRST(sv) && !SvROK(sv))
-	sv_force_normal(sv);
+        sv_force_normal_flags(sv, 0);
 
     if (SvPOK(sv)) {
 	*lp = SvCUR(sv);
@@ -7123,7 +7316,7 @@ Perl_newSVrv(pTHX_ SV *rv, const char *classname)
 
     new_SV(sv);
 
-    SV_CHECK_THINKFIRST(rv);
+    SV_CHECK_THINKFIRST_COW_DROP(rv);
     SvAMAGIC_off(rv);
 
     if (SvTYPE(rv) >= SVt_PVMG) {
@@ -7367,7 +7560,7 @@ Perl_sv_unref_flags(pTHX_ SV *sv, U32 flags)
     }
     SvRV(sv) = 0;
     SvROK_off(sv);
-    if (SvREFCNT(rv) != 1 || SvREADONLY(rv) || flags) /* SV_IMMEDIATE_UNREF */
+    if (SvREFCNT(rv) != 1 || SvREADONLY(rv) || (flags & SV_IMMEDIATE_UNREF))
 	SvREFCNT_dec(rv);
     else /* XXX Hack, but hard to make $a=$a->[1] work otherwise */
 	sv_2mortal(rv);		/* Schedule for freeing later */

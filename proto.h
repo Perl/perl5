@@ -53,13 +53,6 @@ PERL_CALLCONV OP*	Perl_append_elem(pTHX_ I32 optype, OP* head, OP* tail);
 PERL_CALLCONV OP*	Perl_append_list(pTHX_ I32 optype, LISTOP* first, LISTOP* last);
 PERL_CALLCONV I32	Perl_apply(pTHX_ I32 type, SV** mark, SV** sp);
 PERL_CALLCONV void	Perl_apply_attrs_string(pTHX_ char *stashpv, CV *cv, char *attrstr, STRLEN len);
-PERL_CALLCONV SV*	Perl_avhv_delete_ent(pTHX_ AV *ar, SV* keysv, I32 flags, U32 hash);
-PERL_CALLCONV bool	Perl_avhv_exists_ent(pTHX_ AV *ar, SV* keysv, U32 hash);
-PERL_CALLCONV SV**	Perl_avhv_fetch_ent(pTHX_ AV *ar, SV* keysv, I32 lval, U32 hash);
-PERL_CALLCONV SV**	Perl_avhv_store_ent(pTHX_ AV *ar, SV* keysv, SV* val, U32 hash);
-PERL_CALLCONV HE*	Perl_avhv_iternext(pTHX_ AV *ar);
-PERL_CALLCONV SV*	Perl_avhv_iterval(pTHX_ AV *ar, HE* entry);
-PERL_CALLCONV HV*	Perl_avhv_keys(pTHX_ AV *ar);
 PERL_CALLCONV void	Perl_av_clear(pTHX_ AV* ar);
 PERL_CALLCONV SV*	Perl_av_delete(pTHX_ AV* ar, I32 key, I32 flags);
 PERL_CALLCONV bool	Perl_av_exists(pTHX_ AV* ar, I32 key);
@@ -1003,17 +996,16 @@ PERL_CALLCONV void	Perl_sys_intern_init(pTHX);
 PERL_CALLCONV char *	Perl_custom_op_name(pTHX_ OP* op);
 PERL_CALLCONV char *	Perl_custom_op_desc(pTHX_ OP* op);
 
+#if defined(PERL_COPY_ON_WRITE)
+PERL_CALLCONV int	Perl_sv_release_IVX(pTHX_ SV *sv);
+#endif
+
 PERL_CALLCONV void	Perl_sv_nosharing(pTHX_ SV *);
 PERL_CALLCONV void	Perl_sv_nolocking(pTHX_ SV *);
 PERL_CALLCONV void	Perl_sv_nounlocking(pTHX_ SV *);
 PERL_CALLCONV int	Perl_nothreadhook(pTHX);
 
 END_EXTERN_C
-
-#if defined(PERL_IN_AV_C) || defined(PERL_DECL_PROT)
-STATIC I32	S_avhv_index_sv(pTHX_ SV* sv);
-STATIC I32	S_avhv_index(pTHX_ AV* av, SV* sv, U32 hash);
-#endif
 
 #if defined(PERL_IN_DOOP_C) || defined(PERL_DECL_PROT)
 STATIC I32	S_do_trans_simple(pTHX_ SV *sv);
@@ -1151,7 +1143,6 @@ STATIC bool	S_path_is_absolute(pTHX_ char *name);
 #endif
 
 #if defined(PERL_IN_PP_HOT_C) || defined(PERL_DECL_PROT)
-STATIC int	S_do_maybe_phash(pTHX_ AV *ary, SV **lelem, SV **firstlelem, SV **relem, SV **lastrelem);
 STATIC void	S_do_oddball(pTHX_ HV *hash, SV **relem, SV **firstrelem);
 STATIC CV*	S_get_db_sub(pTHX_ SV **svp, CV *cv);
 STATIC SV*	S_method_common(pTHX_ SV* meth, U32* hashp);
@@ -1282,6 +1273,9 @@ STATIC I32	S_expect_number(pTHX_ char** pattern);
 #  if defined(USE_ITHREADS)
 STATIC SV*	S_gv_share(pTHX_ SV *sv, CLONE_PARAMS *param);
 #  endif
+#if defined(PERL_COPY_ON_WRITE)
+STATIC void	S_sv_release_COW(pTHX_ SV *sv, char *pvx, STRLEN cur, STRLEN len, U32 hash, SV *after);
+#endif
 #endif
 
 #if defined(PERL_IN_TOKE_C) || defined(PERL_DECL_PROT)
@@ -1387,6 +1381,12 @@ PERL_CALLCONV PerlIO *	Perl_PerlIO_stdin(pTHX);
 PERL_CALLCONV PerlIO *	Perl_PerlIO_stdout(pTHX);
 PERL_CALLCONV PerlIO *	Perl_PerlIO_stderr(pTHX);
 #endif /* PERLIO_LAYERS */
+
+PERL_CALLCONV void	Perl_deb_stack_all(pTHX);
+#ifdef PERL_IN_DEB_C
+STATIC void	S_deb_stack_n(pTHX_ SV** stack_base, I32 stack_min, I32 stack_max, I32 mark_min, I32 mark_max);
+#endif
+
 
 END_EXTERN_C
 

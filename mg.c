@@ -57,6 +57,11 @@ S_save_magic(pTHX_ I32 mgs_ix, SV *sv)
 {
     MGS* mgs;
     assert(SvMAGICAL(sv));
+#ifdef PERL_COPY_ON_WRITE
+    /* Turning READONLY off for a copy-on-write scalar is a bad idea.  */
+    if (SvIsCOW(sv))
+      sv_force_normal(sv);
+#endif
 
     SAVEDESTRUCTOR_X(restore_magic, INT2PTR(void*, (IV)mgs_ix));
 
@@ -1674,16 +1679,9 @@ Perl_magic_getdefelem(pTHX_ SV *sv, MAGIC *mg)
     if (LvTARGLEN(sv)) {
 	if (mg->mg_obj) {
 	    SV *ahv = LvTARG(sv);
-	    if (SvTYPE(ahv) == SVt_PVHV) {
-		HE *he = hv_fetch_ent((HV*)ahv, mg->mg_obj, FALSE, 0);
-		if (he)
-		    targ = HeVAL(he);
-	    }
-	    else {
-		SV **svp = avhv_fetch_ent((AV*)ahv, mg->mg_obj, FALSE, 0);
-		if (svp)
-		    targ = *svp;
-	    }
+            HE *he = hv_fetch_ent((HV*)ahv, mg->mg_obj, FALSE, 0);
+            if (he)
+                targ = HeVAL(he);
 	}
 	else {
 	    AV* av = (AV*)LvTARG(sv);
@@ -1729,16 +1727,9 @@ Perl_vivify_defelem(pTHX_ SV *sv)
     if (mg->mg_obj) {
 	SV *ahv = LvTARG(sv);
 	STRLEN n_a;
-	if (SvTYPE(ahv) == SVt_PVHV) {
-	    HE *he = hv_fetch_ent((HV*)ahv, mg->mg_obj, TRUE, 0);
-	    if (he)
-		value = HeVAL(he);
-	}
-	else {
-	    SV **svp = avhv_fetch_ent((AV*)ahv, mg->mg_obj, TRUE, 0);
-	    if (svp)
-		value = *svp;
-	}
+        HE *he = hv_fetch_ent((HV*)ahv, mg->mg_obj, TRUE, 0);
+        if (he)
+            value = HeVAL(he);
 	if (!value || value == &PL_sv_undef)
 	    Perl_croak(aTHX_ PL_no_helem, SvPV(mg->mg_obj, n_a));
     }

@@ -20,7 +20,7 @@ my @prgs = () ;
 
 foreach (sort glob($^O eq 'MacOS' ? ":lib:strict:*" : "lib/strict/*")) {
 
-    next if /(~|\.orig|,v)$/;
+    next if -d || /(~|\.orig|,v)$/;
 
     open F, "<$_" or die "Cannot open $_: $!\n" ;
     while (<F>) {

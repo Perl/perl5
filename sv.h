@@ -556,15 +556,27 @@ Set the length of the string which is in the SV.  See C<SvCUR>.
 
 #define SvOKp(sv)		(SvFLAGS(sv) & (SVp_IOK|SVp_NOK|SVp_POK))
 #define SvIOKp(sv)		(SvFLAGS(sv) & SVp_IOK)
+#ifdef PERL_COPY_ON_WRITE
+#define SvRELEASE_IVX(sv)   ((SvFLAGS(sv) & (SVf_OOK|SVf_READONLY|SVf_FAKE)) \
+				&& sv_release_IVX(sv))
+#define SvIOKp_on(sv)		((void)sv_release_IVX(sv), \
+				    SvFLAGS(sv) |= SVp_IOK)
+#else
 #define SvIOKp_on(sv)		((void)SvOOK_off(sv), SvFLAGS(sv) |= SVp_IOK)
+#endif
 #define SvNOKp(sv)		(SvFLAGS(sv) & SVp_NOK)
 #define SvNOKp_on(sv)		(SvFLAGS(sv) |= SVp_NOK)
 #define SvPOKp(sv)		(SvFLAGS(sv) & SVp_POK)
 #define SvPOKp_on(sv)		(SvFLAGS(sv) |= SVp_POK)
 
 #define SvIOK(sv)		(SvFLAGS(sv) & SVf_IOK)
+#ifdef PERL_COPY_ON_WRITE
+#define SvIOK_on(sv)		((void)sv_release_IVX(sv), \
+				    SvFLAGS(sv) |= (SVf_IOK|SVp_IOK))
+#else
 #define SvIOK_on(sv)		((void)SvOOK_off(sv), \
 				    SvFLAGS(sv) |= (SVf_IOK|SVp_IOK))
+#endif
 #define SvIOK_off(sv)		(SvFLAGS(sv) &= ~(SVf_IOK|SVp_IOK|SVf_IVisUV))
 #define SvIOK_only(sv)		((void)SvOK_off(sv), \
 				    SvFLAGS(sv) |= (SVf_IOK|SVp_IOK))
@@ -1063,10 +1075,28 @@ otherwise.
 #  endif /* USE_5005THREADS */
 #endif /* __GNU__ */
 
+#define SvIsCOW(sv)		((SvFLAGS(sv) & (SVf_FAKE | SVf_READONLY)) == \
+				    (SVf_FAKE | SVf_READONLY))
 
 /* flag values for sv_*_flags functions */
 #define SV_IMMEDIATE_UNREF	1
 #define SV_GMAGIC		2
+
+#ifdef PERL_COPY_ON_WRITE
+#define SV_COW_DROP_PV		4
+
+#define SvIsCOW_shared_hash(sv)	(SvIsCOW(sv) && SvLEN(sv) == 0)
+#define SvIsCOW_normal(sv)	(SvIsCOW(sv) && SvLEN(sv))
+
+#define SV_CHECK_THINKFIRST_COW_DROP(sv) if (SvTHINKFIRST(sv)) \
+				    sv_force_normal_flags(sv, SV_COW_DROP_PV)
+#else
+#define SV_CHECK_THINKFIRST_COW_DROP(sv) if (SvTHINKFIRST(sv)) \
+				    sv_force_normal_flags(sv, 0)
+#endif /* PERL_COPY_ON_WRITE */
+#define SV_CHECK_THINKFIRST(sv) if (SvTHINKFIRST(sv)) \
+				    sv_force_normal_flags(sv, 0)
+
 
 /* all these 'functions' are now just macros */
 

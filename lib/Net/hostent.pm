@@ -70,7 +70,7 @@ Net::hostent - by-name interface to Perl's built-in gethost*() functions
 
 =head1 SYNOPSIS
 
- use Net::hostnet;
+ use Net::hostent;
 
 =head1 DESCRIPTION
 

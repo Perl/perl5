@@ -37,13 +37,6 @@
 #define append_list		Perl_append_list
 #define apply			Perl_apply
 #define apply_attrs_string	Perl_apply_attrs_string
-#define avhv_delete_ent		Perl_avhv_delete_ent
-#define avhv_exists_ent		Perl_avhv_exists_ent
-#define avhv_fetch_ent		Perl_avhv_fetch_ent
-#define avhv_store_ent		Perl_avhv_store_ent
-#define avhv_iternext		Perl_avhv_iternext
-#define avhv_iterval		Perl_avhv_iterval
-#define avhv_keys		Perl_avhv_keys
 #define av_clear		Perl_av_clear
 #define av_delete		Perl_av_delete
 #define av_exists		Perl_av_exists
@@ -866,14 +859,13 @@
 #endif
 #define custom_op_name		Perl_custom_op_name
 #define custom_op_desc		Perl_custom_op_desc
+#if defined(PERL_COPY_ON_WRITE)
+#define sv_release_IVX		Perl_sv_release_IVX
+#endif
 #define sv_nosharing		Perl_sv_nosharing
 #define sv_nolocking		Perl_sv_nolocking
 #define sv_nounlocking		Perl_sv_nounlocking
 #define nothreadhook		Perl_nothreadhook
-#if defined(PERL_IN_AV_C) || defined(PERL_DECL_PROT)
-#define avhv_index_sv		S_avhv_index_sv
-#define avhv_index		S_avhv_index
-#endif
 #if defined(PERL_IN_DOOP_C) || defined(PERL_DECL_PROT)
 #define do_trans_simple		S_do_trans_simple
 #define do_trans_count		S_do_trans_count
@@ -1001,7 +993,6 @@
 #define path_is_absolute	S_path_is_absolute
 #endif
 #if defined(PERL_IN_PP_HOT_C) || defined(PERL_DECL_PROT)
-#define do_maybe_phash		S_do_maybe_phash
 #define do_oddball		S_do_oddball
 #define get_db_sub		S_get_db_sub
 #define method_common		S_method_common
@@ -1125,6 +1116,9 @@
 #  if defined(USE_ITHREADS)
 #define gv_share		S_gv_share
 #  endif
+#if defined(PERL_COPY_ON_WRITE)
+#define sv_release_COW		S_sv_release_COW
+#endif
 #endif
 #if defined(PERL_IN_TOKE_C) || defined(PERL_DECL_PROT)
 #define check_uni		S_check_uni
@@ -1220,6 +1214,10 @@
 #define PerlIO_stdout		Perl_PerlIO_stdout
 #define PerlIO_stderr		Perl_PerlIO_stderr
 #endif /* PERLIO_LAYERS */
+#define deb_stack_all		Perl_deb_stack_all
+#ifdef PERL_IN_DEB_C
+#define deb_stack_n		S_deb_stack_n
+#endif
 #define ck_anoncode		Perl_ck_anoncode
 #define ck_bitop		Perl_ck_bitop
 #define ck_concat		Perl_ck_concat
@@ -1629,13 +1627,6 @@
 #define append_list(a,b,c)	Perl_append_list(aTHX_ a,b,c)
 #define apply(a,b,c)		Perl_apply(aTHX_ a,b,c)
 #define apply_attrs_string(a,b,c,d)	Perl_apply_attrs_string(aTHX_ a,b,c,d)
-#define avhv_delete_ent(a,b,c,d)	Perl_avhv_delete_ent(aTHX_ a,b,c,d)
-#define avhv_exists_ent(a,b,c)	Perl_avhv_exists_ent(aTHX_ a,b,c)
-#define avhv_fetch_ent(a,b,c,d)	Perl_avhv_fetch_ent(aTHX_ a,b,c,d)
-#define avhv_store_ent(a,b,c,d)	Perl_avhv_store_ent(aTHX_ a,b,c,d)
-#define avhv_iternext(a)	Perl_avhv_iternext(aTHX_ a)
-#define avhv_iterval(a,b)	Perl_avhv_iterval(aTHX_ a,b)
-#define avhv_keys(a)		Perl_avhv_keys(aTHX_ a)
 #define av_clear(a)		Perl_av_clear(aTHX_ a)
 #define av_delete(a,b,c)	Perl_av_delete(aTHX_ a,b,c)
 #define av_exists(a,b)		Perl_av_exists(aTHX_ a,b)
@@ -2427,14 +2418,13 @@
 #endif
 #define custom_op_name(a)	Perl_custom_op_name(aTHX_ a)
 #define custom_op_desc(a)	Perl_custom_op_desc(aTHX_ a)
+#if defined(PERL_COPY_ON_WRITE)
+#define sv_release_IVX(a)	Perl_sv_release_IVX(aTHX_ a)
+#endif
 #define sv_nosharing(a)		Perl_sv_nosharing(aTHX_ a)
 #define sv_nolocking(a)		Perl_sv_nolocking(aTHX_ a)
 #define sv_nounlocking(a)	Perl_sv_nounlocking(aTHX_ a)
 #define nothreadhook()		Perl_nothreadhook(aTHX)
-#if defined(PERL_IN_AV_C) || defined(PERL_DECL_PROT)
-#define avhv_index_sv(a)	S_avhv_index_sv(aTHX_ a)
-#define avhv_index(a,b,c)	S_avhv_index(aTHX_ a,b,c)
-#endif
 #if defined(PERL_IN_DOOP_C) || defined(PERL_DECL_PROT)
 #define do_trans_simple(a)	S_do_trans_simple(aTHX_ a)
 #define do_trans_count(a)	S_do_trans_count(aTHX_ a)
@@ -2562,7 +2552,6 @@
 #define path_is_absolute(a)	S_path_is_absolute(aTHX_ a)
 #endif
 #if defined(PERL_IN_PP_HOT_C) || defined(PERL_DECL_PROT)
-#define do_maybe_phash(a,b,c,d,e)	S_do_maybe_phash(aTHX_ a,b,c,d,e)
 #define do_oddball(a,b,c)	S_do_oddball(aTHX_ a,b,c)
 #define get_db_sub(a,b)		S_get_db_sub(aTHX_ a,b)
 #define method_common(a,b)	S_method_common(aTHX_ a,b)
@@ -2685,6 +2674,9 @@
 #  if defined(USE_ITHREADS)
 #define gv_share(a,b)		S_gv_share(aTHX_ a,b)
 #  endif
+#if defined(PERL_COPY_ON_WRITE)
+#define sv_release_COW(a,b,c,d,e,f)	S_sv_release_COW(aTHX_ a,b,c,d,e,f)
+#endif
 #endif
 #if defined(PERL_IN_TOKE_C) || defined(PERL_DECL_PROT)
 #define check_uni()		S_check_uni(aTHX)
@@ -2780,6 +2772,10 @@
 #define PerlIO_stdout()		Perl_PerlIO_stdout(aTHX)
 #define PerlIO_stderr()		Perl_PerlIO_stderr(aTHX)
 #endif /* PERLIO_LAYERS */
+#define deb_stack_all()		Perl_deb_stack_all(aTHX)
+#ifdef PERL_IN_DEB_C
+#define deb_stack_n(a,b,c,d,e)	S_deb_stack_n(aTHX_ a,b,c,d,e)
+#endif
 #define ck_anoncode(a)		Perl_ck_anoncode(aTHX_ a)
 #define ck_bitop(a)		Perl_ck_bitop(aTHX_ a)
 #define ck_concat(a)		Perl_ck_concat(aTHX_ a)

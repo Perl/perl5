@@ -383,8 +383,9 @@ This shares the variable(s) in the argument list with the compartment.
 This is almost identical to exporting variables using the L<Exporter>
 module.
 
-Each NAME must be the B<name> of a variable, typically with the leading
-type identifier included. A bareword is treated as a function name.
+Each NAME must be the B<name> of a non-lexical variable, typically
+with the leading type identifier included. A bareword is treated as a
+function name.
 
 Examples of legal names are '$foo' for a scalar, '@foo' for an
 array, '%foo' for a hash, '&foo' or 'foo' for a subroutine and '*foo'

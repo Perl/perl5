@@ -922,10 +922,7 @@ numeric value.)  This prints:
 =head2 Two-face references
 
 Suppose you want to create an object which is accessible as both an
-array reference and a hash reference, similar to the
-L<pseudo-hash|perlref/"Pseudo-hashes: Using an array as a hash">
-builtin Perl type.  Let's make it better than a pseudo-hash by
-allowing index 0 to be treated as a normal element.
+array reference and a hash reference.
 
   package two_refs;
   use overload '%{}' => \&gethash, '@{}' => sub { $ {shift()} };

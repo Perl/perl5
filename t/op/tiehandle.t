@@ -77,7 +77,7 @@ package main;
 
 use Symbol;
 
-print "1..39\n";
+print "1..40\n";
 
 my $fh = gensym;
 
@@ -230,3 +230,15 @@ ok($r == 1);
     Implement::compare(PRINT => @received);
 }
 
+{
+    # [ID 20020713.001] chomp($data=<tied_fh>)
+    local *TEST;
+    tie *TEST, 'CHOMP';
+    my $data;
+    chomp($data = <TEST>);
+    ok($data eq 'foobar');
+
+    package CHOMP;
+    sub TIEHANDLE { bless {}, $_[0] }
+    sub READLINE { "foobar\n" }
+}

@@ -1077,15 +1077,7 @@ Perl_gv_fullname4(pTHX_ SV *sv, GV *gv, const char *prefix, bool keepmain)
 void
 Perl_gv_fullname3(pTHX_ SV *sv, GV *gv, const char *prefix)
 {
-    HV *hv = GvSTASH(gv);
-    if (!hv) {
-	(void)SvOK_off(sv);
-	return;
-    }
-    sv_setpv(sv, prefix ? prefix : "");
-    sv_catpv(sv,HvNAME(hv));
-    sv_catpvn(sv,"::", 2);
-    sv_catpvn(sv,GvNAME(gv),GvNAMELEN(gv));
+    gv_fullname4(sv, gv, prefix, TRUE);
 }
 
 void
@@ -1100,10 +1092,7 @@ Perl_gv_efullname4(pTHX_ SV *sv, GV *gv, const char *prefix, bool keepmain)
 void
 Perl_gv_efullname3(pTHX_ SV *sv, GV *gv, const char *prefix)
 {
-    GV *egv = GvEGV(gv);
-    if (!egv)
-	egv = gv;
-    gv_fullname3(sv, egv, prefix);
+    gv_efullname4(sv, gv, prefix, TRUE);
 }
 
 /* XXX compatibility with versions <= 5.003. */

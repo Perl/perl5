@@ -1,6 +1,11 @@
 This file documents the changes made to port Perl to the Stratus
 VOS operating system.
 
+For 5.9.0:
+     Removed support for building (mini) perl on VOS using
+     custom VOS command macros.  Henceforth, perl must be built
+     using the native Configure script.
+
 For 5.8.0:
      Updated "config.alpha.def", "config.ga.def", "build.cm", and
      "install_perl.cm" to use directory naming conventions that
