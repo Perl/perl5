@@ -43,8 +43,8 @@ test(7,h1({-align=>'CENTER'},['fred','agnes']) eq
 
 test(9,header() eq "Content-Type: text/html$crlf$crlf","header()");
 test(10,header(-type=>'image/gif') eq "Content-Type: image/gif$crlf$crlf","header()");
-test(11,header(-type=>'image/gif',-status=>'500 Sucks') eq "Status: 500 Sucks$crlfContent-Type: image/gif$crlf$crlf","header()");
-test(12,header(-nph=>1) eq "HTTP/1.0 200 OK$crlfContent-Type: text/html$crlf$crlf","header()");
+test(11,header(-type=>'image/gif',-status=>'500 Sucks') eq "Status: 500 Sucks${crlf}Content-Type: image/gif$crlf$crlf","header()");
+test(12,header(-nph=>1) eq "HTTP/1.0 200 OK${crlf}Content-Type: text/html$crlf$crlf","header()");
 test(13,start_html() ."\n" eq <<END,"start_html()");
 <!DOCTYPE HTML PUBLIC "-//IETF//DTD HTML//EN">
 <HTML><HEAD><TITLE>Untitled Document</TITLE>
@@ -65,7 +65,7 @@ END
     ;
 test(16,($cookie=cookie(-name=>'fred',-value=>['chocolate','chip'],-path=>'/')) eq 
      'fred=chocolate&chip; path=/',"cookie()");
-test(17,header(-Cookie=>$cookie) =~ m!^Set-Cookie: fred=chocolate&chip\; path=/$crlfDate:.*$crlfContent-Type: text/html$crlf$crlf!s,
+test(17,header(-Cookie=>$cookie) =~ m!^Set-Cookie: fred=chocolate&chip\; path=/${crlf}Date:.*${crlf}Content-Type: text/html$crlf$crlf!s,
      "header(-cookie)");
 test(18,start_h3 eq '<H3>');
 test(19,end_h3 eq '</H3>');
