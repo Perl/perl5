@@ -13,6 +13,8 @@ plan(tests => 25);
 SKIP: {
     skip("tests for non-VMS only", 1) if $^O eq 'VMS';
 
+    no utf8;
+
     BEGIN { $Orig_Bits = $^H }
 
     # make sure that all those 'use vmsish' calls didn't do anything.
