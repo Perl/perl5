@@ -13,13 +13,19 @@ the L<perl58delta>, which describes differences between 5.6.0 and
 
 In case you are wondering about 5.6.1, it was bug-fix-wise rather
 identical to the development release 5.7.1.  Confused?  This timeline
-hopefully helps a bit:
+hopefully helps a bit: it lists the new major releases, their maintenance
+releases, and the development releases.
 
-          5.6.0         2000-Mar-22
-          5.7.0         2000-Sep-02
-          5.6.1         2001-Apr-08
-          5.7.1         2001-Apr-09
-          5.8.0         2002-Jul-18
+          New     Maintenance  Development
+
+          5.6.0                             2000-Mar-22
+                               5.7.0        2000-Sep-02
+                  5.6.1                     2001-Apr-08
+                               5.7.1        2001-Apr-09
+                               5.7.2        2001-Jul-13
+                               5.7.3        2002-Mar-05
+          5.8.0                             2002-Jul-18
+                  5.8.1                     2003-Sep-
 
 =head1 Incompatible Changes
 
@@ -534,12 +540,14 @@ a fatal error to even try to use.  Now F<malloc.h> is not used.
 
 Perl is now known to build also in Hitachi HI-UXMPP.
 
+Perl is now known to build again in LynxOS.
+
 Mac OS X now installs with Perl version number embedded in
 installation directory names for easier upgrading of user-compiled
 Perl, and the installation directories in general are more standard.
 In other words, the default installation no longer breaks the
 Apple-provided Perl.  On the other hand, with C<Configure -Dprefix=/usr>
-you can now really replace the Apple-supplied Perl (please be careful).
+you can now really replace the Apple-supplied Perl (B<please be careful>).
 
 Mac OS X now builds Perl statically by default.  This change was done
 mainly for faster startup times.  The Apple-provided Perl is still
@@ -880,7 +888,7 @@ common Perl platforms (Unix and Unix-like, Microsoft platforms, and
 VMS) have large enough testing and expert population that they are
 doing well.
 
-=head2 tied hashes in scalar context
+=head2 Tied hashes in scalar context
 
 Tied hashes do not currently return anything useful in scalar context,
 for example when used as boolean tests:

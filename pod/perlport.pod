@@ -2151,8 +2151,8 @@ First public release with perl5.005.
 
 =head1 Supported Platforms
 
-As of July 2003 (the Perl release 5.8.1), the following platforms are
-able to build Perl from the standard source code distribution
+As of September 2003 (the Perl release 5.8.1), the following platforms
+are able to build Perl from the standard source code distribution
 available at http://www.cpan.org/src/index.html
 
         AIX
@@ -2168,6 +2168,7 @@ available at http://www.cpan.org/src/index.html
         HP-UX
         IRIX
         Linux
+        LynxOS
         Mac OS Classic
         Mac OS X        (Darwin)
         MPE/iX
@@ -2186,6 +2187,7 @@ available at http://www.cpan.org/src/index.html
         Solaris
         SunOS 4
         SUPER-UX        (NEC)
+        SVR4
         Tru64 UNIX      (formerly DEC OSF/1, Digital UNIX)
         UNICOS
         UNICOS/mk
@@ -2206,11 +2208,9 @@ will work fine with the 5.8.1.
 
         DomainOS
         Hurd
-        LynxOS
         MachTen
         PowerMAX
         SCO SV
-        SVR4
         Unixware
         Windows 3.1
 
