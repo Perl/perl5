@@ -32,6 +32,273 @@ Version v5.7.1		Development release working toward v5.8
 --------------
 
 ____________________________________________________________________________
+[  8374] By: jhi                                   on 2001/01/09  04:14:32
+        Log: IDE/editor section tweaking.
+     Branch: perl
+	   ! pod/perlfaq3.pod
+____________________________________________________________________________
+[  8373] By: jhi                                   on 2001/01/09  02:38:26
+        Log: Subject: [PATCH: perl@8342] updates to OS/390 hints file
+             From: Peter Prymmer <pvhp@forte.com>
+             Date: Mon, 8 Jan 2001 18:06:51 -0800 (PST)
+             Message-ID: <Pine.OSF.4.10.10101081805530.239173-100000@aspara.forte.com>
+             
+             In preparation os OS/390 dynamic loading.
+     Branch: perl
+	   ! README.os390 hints/os390.sh
+____________________________________________________________________________
+[  8372] By: jhi                                   on 2001/01/09  00:24:30
+        Log: Integrate with perlio.
+     Branch: perl
+	  !> embed.h embed.pl gv.c mg.c perl.h proto.h sv.c
+____________________________________________________________________________
+[  8371] By: nick                                  on 2001/01/08  23:54:33
+        Log: Fix "scalars leaked" bugs caused by overload magic
+             (Highlighted by Ilya's DESTROY optimization.)
+     Branch: perlio
+	   ! embed.h embed.pl gv.c mg.c perl.h proto.h sv.c
+____________________________________________________________________________
+[  8370] By: nick                                  on 2001/01/08  20:19:41
+        Log: Integrate mainline
+     Branch: perlio
+	  !> README.epoc dump.c ext/GDBM_File/GDBM_File.xs gv.c
+	  !> lib/Getopt/Long.pm mg.c op.c scope.c sv.c t/io/pipe.t
+	  !> t/op/64bitint.t
+____________________________________________________________________________
+[  8369] By: jhi                                   on 2001/01/08  17:30:52
+        Log: save_delete() Safefree() doesn't (anymore?) work with shared
+             strings, one test failure in op/misc and almost all of lib/b.
+             (Outcomments #8369.)
+     Branch: perl
+	   ! scope.c
+____________________________________________________________________________
+[  8368] By: jhi                                   on 2001/01/08  14:47:10
+        Log: (Outcommented by #8369.)
+             
+             Subject: Re: Perl BugID 20001205.022 ---- save_delete
+             From: Simon Cozens <simon@cozens.net>
+             Date: Sat, 6 Jan 2001 11:48:40 +0000
+             Message-ID: <20010106114840.A13227@deep-dark-truthful-mirror.perlhacker.org>
+             
+             The save_delete() does need the Safefree.
+     Branch: perl
+	   ! scope.c
+____________________________________________________________________________
+[  8367] By: bailey                                on 2001/01/08  08:53:52
+        Log: Once again syncing after too long an absence
+     Branch: vmsperl
+	  +> (branch 55 files)
+	   - MAINTAIN fix_pl vos/config.def vos/config.h
+	   - vos/config_h.SH_orig
+	  !> (integrate 498 files)
+____________________________________________________________________________
+[  8366] By: jhi                                   on 2001/01/08  02:42:59
+        Log: Subject: [ID 20010107.012] [PATCH] 18446744073709551616e0 was treated as UV=18446744073709551615
+             From: nick@ccl4.org
+             Date: Sun, 7 Jan 2001 21:07:18 +0000
+             Message-Id: <20010107210717.D1048@plum.flirble.org>
+     Branch: perl
+	   ! sv.c t/op/64bitint.t
+____________________________________________________________________________
+[  8365] By: jhi                                   on 2001/01/08  02:35:16
+        Log: Subject: [PATCH] environ nit
+             From: Simon Cozens <simon@cozens.net>
+             Date: Sun, 7 Jan 2001 17:57:07 +0000
+             Message-ID: <20010107175707.A2013@pembro26.pmb.ox.ac.uk>
+             
+             Use environ only if we have it.
+     Branch: perl
+	   ! mg.c
+____________________________________________________________________________
+[  8364] By: jhi                                   on 2001/01/08  02:24:51
+        Log: Replace #6721, GDBM, system malloc, and LEAKTEST.
+     Branch: perl
+	   ! ext/GDBM_File/GDBM_File.xs
+____________________________________________________________________________
+[  8363] By: jhi                                   on 2001/01/08  02:19:24
+        Log: Subject: [PATCH @8344] Fix spurious GVSV OPpOUR_INTRO
+             From: Stephen McCamant <smcc@CSUA.Berkeley.EDU>
+             Date: Sat,  6 Jan 2001 15:25:02 -0800 (PST)
+             Message-ID: <14935.41722.239364.55174@soda.csua.berkeley.edu>
+     Branch: perl
+	   ! dump.c op.c
+____________________________________________________________________________
+[  8362] By: jhi                                   on 2001/01/08  02:17:43
+        Log: Subject: [patch] xsub AUTOLOAD fix/optimization
+             From: Doug MacEachern <dougm@covalent.net>
+             Date: Sat, 6 Jan 2001 09:30:05 -0800 (PST)
+             Message-ID: <Pine.LNX.4.10.10101060924280.24460-100000@mojo.covalent.net>
+             
+             Allow AUTOLOAD to be an xsub and allow such xsubs
+             to avoid use of $AUTOLOAD.
+     Branch: perl
+	   ! gv.c
+____________________________________________________________________________
+[  8361] By: jhi                                   on 2001/01/08  02:16:07
+        Log: Subject: Re: [PATCH] Re: [ID 20010105.002] close() on process filehandle leaves defunct process
+             From: Radu Greab <radu@netsoft.ro>
+             Date: Sun, 7 Jan 2001 03:16:55 +0200 (EET)
+             Message-ID: <14935.50055.838449.408835@ix.netsoft.ro>
+             
+             No need for the potentially unportable $SIG{CHLD}.
+     Branch: perl
+	   ! t/io/pipe.t
+____________________________________________________________________________
+[  8360] By: jhi                                   on 2001/01/08  01:58:23
+        Log: Update to Getopt::Long 2.24_02, from Johan Vromans.
+     Branch: perl
+	   ! lib/Getopt/Long.pm
+____________________________________________________________________________
+[  8359] By: jhi                                   on 2001/01/08  01:55:44
+        Log: Integrate perlio.
+     Branch: perl
+	  !> ext/Encode/Encode.xs lib/ExtUtils/typemap perl.c perlio.c
+	  !> perlio.h pp.c pp_hot.c pp_sys.c sv.c t/lib/tie-refhash.t
+	  !> utf8.c win32/Makefile
+____________________________________________________________________________
+[  8358] By: jhi                                   on 2001/01/07  21:16:50
+        Log: Update the EPOC cross SDK URL.
+     Branch: perl
+	   ! README.epoc
+____________________________________________________________________________
+[  8357] By: jhi                                   on 2001/01/07  21:16:09
+        Log: Update the EPOC cross SDK URL.
+     Branch: maint-5.6/perl
+	   ! README.epoc
+____________________________________________________________________________
+[  8356] By: nick                                  on 2001/01/06  21:47:52
+        Log: FILE * in XS code for PerlIO world:
+             - make PERLIO_NOT_STDIO 0 (co-existance) default for non PERL_CORE case.
+             - Add FILE * T_STDIO typemap.
+             - Finish PerlIO_findFILE() and PerlIO_extprtFILE()
+     Branch: perlio
+	   ! lib/ExtUtils/typemap perlio.c perlio.h
+____________________________________________________________________________
+[  8355] By: jhi                                   on 2001/01/06  20:27:15
+        Log: integrate change #8836 from mainline
+             
+             Scoping of %^H still broken in both perl@8269 and perl-5.6.1-TRIAL1
+     Branch: maint-5.6/perl
+	   ! hv.c
+____________________________________________________________________________
+[  8354] By: jhi                                   on 2001/01/06  20:24:29
+        Log: Subject: [PATCH 5.6.1-TRIAL1 and @8223]; was Re: Perlbug 20000322.006 status update
+             From: Robin Barker <rmb1@cise.npl.co.uk>
+             Date: Fri, 22 Dec 2000 12:17:38 GMT
+             Message-Id: <200012221217.MAA21332@tempest.npl.co.uk>
+             
+             The patch reformats some long =item lines so they give
+             correct output via pod2man | nroff -man
+             
+             Subject: [PATCH 5.[67].1]; as Re: [PATCH 5.6.1-TRIAL1 and @8223]; was Re: Perlbug 20000322.006 status update
+             From: Robin Barker <rmb1@cise.npl.co.uk>
+             Date: Tue, 2 Jan 2001 15:35:03 GMT
+             Message-Id: <200101021535.PAA15161@tempest.npl.co.uk>
+             
+             Here is a _further_ patch which corrects a few more errors:
+             * an empty C<=item> in CPAN.pm
+             * patching the wrong file (pod/perlamiga.pod not README.amiga)
+             * leaving empty C<=item>s which formatted incorrectly
+             * over long C<=item>s revealed by latest patch to Pod::Man
+     Branch: maint-5.6/perl
+	   ! README.amiga lib/CGI.pm lib/CPAN.pm lib/Pod/Select.pm
+	   ! lib/Text/ParseWords.pm lib/Win32.pod pod/perl.pod
+	   ! pod/perl5004delta.pod pod/perl5005delta.pod pod/perlapi.pod
+	   ! pod/perldelta.pod pod/perldiag.pod pod/perlembed.pod
+	   ! pod/perlfaq4.pod pod/perllocale.pod pod/perlmodlib.pod
+	   ! pod/perlrequick.pod pod/perlretut.pod pod/perlsub.pod
+____________________________________________________________________________
+[  8353] By: jhi                                   on 2001/01/06  20:21:10
+        Log: integrate changes #7980, 7990, 8056, 8057 from mainline
+             
+             UTF-8 hash keys.
+     Branch: maint-5.6/perl
+	   ! embed.h embed.pl hv.c hv.h perlapi.c proto.h t/op/each.t
+____________________________________________________________________________
+[  8352] By: jhi                                   on 2001/01/06  20:18:44
+        Log: Forgotten from #8438.
+     Branch: maint-5.6/perl
+	   ! epoc/epocish.h
+____________________________________________________________________________
+[  8351] By: jhi                                   on 2001/01/06  20:18:12
+        Log: Forgotten from #8347.
+     Branch: maint-5.6/perl
+	   ! config_h.SH
+____________________________________________________________________________
+[  8350] By: jhi                                   on 2001/01/06  20:00:19
+        Log: Thinko in #8347.
+     Branch: maint-5.6/perl
+	   ! regcomp.c
+____________________________________________________________________________
+[  8349] By: jhi                                   on 2001/01/06  18:05:30
+        Log: Copy the FAQ3 IDE section from the development branch,
+             changes originally by Peter Prymmer.
+     Branch: maint-5.6/perl
+	   ! pod/perlfaq3.pod
+____________________________________________________________________________
+[  8348] By: jhi                                   on 2001/01/06  18:03:02
+        Log: EPOC updates for TRIAL1.
+             
+             Subject: [5.6.1 trial1] EPOC update
+             From: Olaf Flebbe <O.Flebbe@science-computing.de>
+             Date: Sun, 31 Dec 2000 16:04:52 +0100 (CET)
+             Message-ID: <Pine.LNX.4.02.10012311603040.14097-100000@milkyway.science-computing.de> 
+             
+             Subject: epoc patch2 for perl-5.6.1-trial1
+             From: Olaf Flebbe <O.Flebbe@science-computing.de>
+             Date: Sat, 6 Jan 2001 13:55:53 +0100 (CET)
+             Message-ID: <Pine.LNX.4.02.10101061355220.26469-100000@milkyway.science-computing.de> 
+     Branch: maint-5.6/perl
+	   ! README.epoc epoc/config.sh epoc/createpkg.pl epoc/epoc.c
+	   ! epoc/epocish.c
+____________________________________________________________________________
+[  8347] By: jhi                                   on 2001/01/06  17:29:10
+        Log: integrate changes #7710,7824,7973 from mainline,
+             plus VMS nits from Peter Prymmer and Dan Sugalski.
+             
+             AIX 4.2 (using latest patchlevels on 20001130) has a broken bind
+             library (getprotobyname and getprotobynumber are outversioned by
+             the same calls in libc, at least for xlc version 3.
+             
+             Add HAS_SBRK_PROTO.
+             
+             Fixes for signedness warnings noticed by VMSperlers.
+     Branch: maint-5.6/perl
+	   ! Configure Porting/Glossary Porting/config.sh Porting/config_H
+	   ! configure.com epoc/config.sh hints/aix.sh malloc.c regcomp.c
+	   ! sv.c vms/descrip_mms.template vos/config.alpha.def
+	   ! vos/config.alpha.h vos/config.ga.def vos/config.ga.h
+	   ! win32/config.bc win32/config.gc win32/config.vc
+____________________________________________________________________________
+[  8346] By: nick                                  on 2001/01/06  14:36:01
+        Log: Fixup accumulated integrate muddles (perlio == devperl again)
+     Branch: perlio
+	   ! ext/Encode/Encode.xs perl.c pp_sys.c t/lib/tie-refhash.t
+____________________________________________________________________________
+[  8345] By: nick                                  on 2001/01/06  14:24:58
+        Log: Integrate mainline
+     Branch: perlio
+	  !> (integrate 55 files)
+____________________________________________________________________________
+[  8344] By: jhi                                   on 2001/01/06  02:24:02
+        Log: Subject: [patch] PerlIO_cleanup() prototype
+             From: Doug MacEachern <dougm@covalent.net>
+             Date: Fri, 5 Jan 2001 18:15:31 -0800 (PST)
+             Message-ID: <Pine.LNX.4.10.10101051813220.340-100000@mojo.covalent.net>
+     Branch: perl
+	   ! perlio.h
+____________________________________________________________________________
+[  8343] By: jhi                                   on 2001/01/06  01:04:09
+        Log: IRIX compiler noticed that the bof initialization might be
+             bypassed by control flow.
+     Branch: perl
+	   ! toke.c
+____________________________________________________________________________
+[  8342] By: jhi                                   on 2001/01/06  00:10:48
+        Log: Update Changes.
+     Branch: perl
+	   ! Changes patchlevel.h
+____________________________________________________________________________
 [  8341] By: jhi                                   on 2001/01/05  23:52:33
         Log: Add a note about EBCDIC versus UTF-8 to a potential problem spot.
      Branch: perl
