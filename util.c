@@ -3589,6 +3589,8 @@ Perl_new_struct_thread(pTHX_ struct perl_thread *t)
     PL_dirty = 0;
     PL_localizing = 0;
     Zero(&PL_hv_fetch_ent_mh, 1, HE);
+    PL_efloatbuf = (char*)NULL;
+    PL_efloatsize = 0;
 #else
     Zero(thr, 1, struct perl_thread);
 #endif
