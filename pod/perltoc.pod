@@ -928,7 +928,7 @@ command, V package [symbols], X [symbols], ! number, ! -number, H
 
 
 =head2 perlipc - Perl interprocess communication (signals, fifos,
-pipes, safe subprocceses, sockets, and semaphores)
+pipes, safe subprocesses, sockets, and semaphores)
 
 =item DESCRIPTION
 
@@ -1987,7 +1987,7 @@ get, put, del, fd, seq, sync
 
 @dl_library_path, @dl_resolve_using, @dl_require_symbols, dl_error(),
 $dl_debug, dl_findfile(), dl_expandspec(), dl_load_file(),
-dl_find_symbol(), dl_undef_symbols(), dl_install_xsub(), boostrap()
+dl_find_symbol(), dl_undef_symbols(), dl_install_xsub(), bootstrap()
 
 =item AUTHOR
 
@@ -3147,7 +3147,7 @@ have man pages yet:
 
 =head1 AUTHOR
 
-Larry Wall E<lt><F<lwall@sems.com>E<gt>, with the help of oodles of
+Larry Wall E<lt><F<larry@wall.org>E<gt>, with the help of oodles of
 other folks.
 
 
