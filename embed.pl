@@ -1,5 +1,9 @@
 #!/usr/bin/perl -w
 
+BEGIN {
+    unshift @INC, "./lib";
+}
+
 require 5.003;	# keep this compatible, an old perl is all we may have before
                 # we build the new one
 
