@@ -582,6 +582,10 @@ op_free(OP *o)
 	o->op_targ = 0;	/* Was holding hints. */
 	break;
 #ifdef USE_THREADS
+    case OP_ENTERITER:
+	if (!(o->op_flags & OPf_SPECIAL))
+	    break;
+	/* FALL THROUGH */
     case OP_THREADSV:
 	o->op_targ = 0;	/* Was holding index into thr->threadsv AV. */
 	break;
