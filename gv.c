@@ -107,7 +107,7 @@ gv_init(GV *gv, HV *stash, char *name, STRLEN len, int multi)
     GvSTASH(gv) = (HV*)SvREFCNT_inc(stash);
     GvNAME(gv) = savepvn(name, len);
     GvNAMELEN(gv) = len;
-    if (multi)
+    if (multi || doproto)              /* doproto means it _was_ mentioned */
 	GvMULTI_on(gv);
     if (doproto) {			/* Replicate part of newSUB here. */
 	SvIOK_off(gv);
