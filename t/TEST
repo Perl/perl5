@@ -76,8 +76,9 @@ unless (@ARGV) {
 		$t = $1;
 		if (!$core || $t =~ m!^lib/[a-z]!)
 		{
-		    push @ARGV, $t;
-		    $OVER{$t} = File::Spec->catdir($updir, $t);
+		    $path = File::Spec->catdir($updir, $t);
+		    push @ARGV, $path;
+		    $name{$path} = $t;
 		}
 	    }
 	}
@@ -122,17 +123,18 @@ EOT
     $total = @tests;
     $files  = 0;
     $totmax = 0;
+
+    foreach (@tests) {
+        $name{$_} = File::Spec->catdir('t',$_) unless exists $name{$_};
+    }
     my $maxlen = 0;
-    my $maxsuflen = 0;
-    foreach (@tests) { # The same code in lib/Test/Harness.pm:_run_all_tests
-	my $suf    = /\.(\w+)$/ ? $1 : '';
-	my $len    = length;
-	my $suflen = length $suf;
-	$maxlen    = $len    if $len    > $maxlen;
-	$maxsuflen = $suflen if $suflen > $maxsuflen;
+    foreach (@name{@tests}) {
+	s/\.\w+\z/./;
+	my $len = length ;
+	$maxlen = $len if $len > $maxlen;
     }
     # + 3 : we want three dots between the test name and the "ok"
-    $dotdotdot = $maxlen + 3 - $maxsuflen;
+    $dotdotdot = $maxlen + 3 ;
     while ($test = shift @tests) {
 
 	if ( $infinite{$test} && $type eq 'compile' ) {
@@ -152,8 +154,7 @@ EOT
 		next;
 	    }
 	}
-	$te = $test;
-	$te =~ s/\.\w+$/./;
+	$te = $name{$test};
 	print "$te" . '.' x ($dotdotdot - length($te));
 
 	$test = $OVER{$test} if exists $OVER{$test};
