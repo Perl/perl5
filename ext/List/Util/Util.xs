@@ -6,9 +6,15 @@
 #include <EXTERN.h>
 #include <perl.h>
 #include <XSUB.h>
-#include <patchlevel.h>
 
-#if PATCHLEVEL < 5
+#ifndef PERL_VERSION
+#    include "patchlevel.h"
+#    define PERL_REVISION	5
+#    define PERL_VERSION	PATCHLEVEL
+#    define PERL_SUBVERSION	SUBVERSION
+#endif
+
+#if PERL_VERSION < 5
 #  ifndef gv_stashpvn
 #    define gv_stashpvn(n,l,c) gv_stashpv(n,c)
 #  endif
@@ -36,7 +42,7 @@ sv_tainted(SV *sv)
 #  define PL_sv_undef sv_undef
 #  define PERL_CONTEXT struct context
 #endif
-#if (PATCHLEVEL < 5) || (PATCHLEVEL == 5 && SUBVERSION <50)
+#if (PERL_VERSION < 5) || (PERL_VERSION == 5 && PERL_SUBVERSION <50)
 #  ifndef PL_tainting
 #    define PL_tainting tainting
 #  endif

@@ -47,7 +47,6 @@
 
 #include <EXTERN.h>
 #include <perl.h>
-#include <patchlevel.h>		/* Perl's one, needed since 5.6 */
 #include <XSUB.h>
 
 #if 0
@@ -75,6 +74,7 @@
  */
 
 #ifndef PERL_VERSION		/* For perls < 5.6 */
+#include <patchlevel.h>
 #define PERL_VERSION PATCHLEVEL
 #ifndef newRV_noinc
 #define newRV_noinc(sv)		((Sv = newRV(sv)), --SvREFCNT(SvRV(Sv)), Sv)
