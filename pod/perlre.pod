@@ -270,7 +270,9 @@ function of the extension.  Several extensions are already supported:
 =item C<(?#text)>
 
 A comment.  The text is ignored.  If the C</x> switch is used to enable
-whitespace formatting, a simple C<#> will suffice.
+whitespace formatting, a simple C<#> will suffice.  Note that perl closes
+the comment as soon as it sees a C<)>, so there is no way to put a literal
+C<)> in the comment.
 
 =item C<(?:pattern)>
 
