@@ -1442,7 +1442,7 @@ sub pp_truncate {
     my(@exprs);
     my $parens = ($cx >= 5) || $self->{'parens'};
     my $kid = $op->first->sibling;
-    my($fh, $len);
+    my $fh;
     if ($op->flags & OPf_SPECIAL) {
 	# $kid is an OP_CONST
 	$fh = $kid->sv->PV;

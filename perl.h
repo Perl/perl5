@@ -1349,6 +1349,15 @@ typedef I32 (*filter_t) _((int, SV *, int));
 # endif
 #endif         
 
+/* XXX MAXPATHLEN should be determined by Configure */
+#ifndef MAXPATHLEN
+#  ifdef PATH_MAX
+#    define MAXPATHLEN PATH_MAX
+#  else
+#    define MAXPATHLEN 1024
+#  endif
+#endif
+
 #ifndef FUNC_NAME_TO_PTR
 #define FUNC_NAME_TO_PTR(name)		name
 #endif

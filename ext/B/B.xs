@@ -514,7 +514,28 @@ svref_2object(sv)
 	    croak("argument is not a reference");
 	RETVAL = (SV*)SvRV(sv);
     OUTPUT:
-	RETVAL
+	RETVAL              
+
+void
+opnumber(name)
+char *	name
+CODE:
+{
+ int i; 
+ IV  result = -1;
+ ST(0) = sv_newmortal();
+ if (strncmp(name,"pp_",3) == 0)
+   name += 3;
+ for (i = 0; i < PL_maxo; i++)
+  {
+   if (strcmp(name, PL_op_name[i]) == 0)
+    {
+     result = i;
+     break;
+    }
+  }
+ sv_setiv(ST(0),result);
+}
 
 void
 ppname(opnum)
@@ -533,10 +554,9 @@ hash(sv)
 	char *s;
 	STRLEN len;
 	U32 hash = 0;
-	char hexhash[11]; /* must fit "0xffffffff" plus trailing \0 */
+	char hexhash[19]; /* must fit "0xffffffff" plus trailing \0 */
 	s = SvPV(sv, len);
-	while (len--)
-	    hash = hash * 33 + *s++;
+	PERL_HASH(hash, s, len);
 	sprintf(hexhash, "0x%x", hash);
 	ST(0) = sv_2mortal(newSVpv(hexhash, 0));
 

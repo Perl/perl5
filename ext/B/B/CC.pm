@@ -8,8 +8,8 @@
 package B::CC;
 use strict;
 use B qw(main_start main_root class comppadlist peekop svref_2object
-	timing_info);
-use B::C qw(save_unused_subs objsym init_sections
+	timing_info init_av);
+use B::C qw(save_unused_subs objsym init_sections mark_unused
 	    output_all output_boilerplate output_main);
 use B::Bblock qw(find_leaders);
 use B::Stackobj qw(:types :flags);
@@ -499,7 +499,7 @@ sub pp_and {
     if (@stack >= 1) {
 	my $bool = pop_bool();
 	write_back_stack();
-	runtime(sprintf("if (!$bool) goto %s;", label($next)));
+	runtime(sprintf("if (!$bool) {XPUSHs(&PL_sv_no); goto %s;}", label($next)));
     } else {
 	runtime(sprintf("if (!%s) goto %s;", top_bool(), label($next)),
 		"*sp--;");
@@ -513,10 +513,10 @@ sub pp_or {
     reload_lexicals();
     unshift(@bblock_todo, $next);
     if (@stack >= 1) {
-	my $obj = pop @stack;
+	my $bool = pop_bool @stack;
 	write_back_stack();
-	runtime(sprintf("if (%s) { XPUSHs(%s); goto %s; }",
-			$obj->as_numeric, $obj->as_sv, label($next)));
+	runtime(sprintf("if (%s) { XPUSHs(&PL_sv_yes); goto %s; }",
+			$bool, label($next)));
     } else {
 	runtime(sprintf("if (%s) goto %s;", top_bool(), label($next)),
 		"*sp--;");
@@ -1264,11 +1264,11 @@ sub pp_substcont {
     write_back_stack();
     doop($op);
     my $pmop = $op->other;
-    warn sprintf("substcont: op = %s, pmop = %s\n",
-		 peekop($op), peekop($pmop));#debug
-#    my $pmopsym = objsym($pmop);
+    # warn sprintf("substcont: op = %s, pmop = %s\n",
+    # 		 peekop($op), peekop($pmop));#debug
+#   my $pmopsym = objsym($pmop);
     my $pmopsym = $pmop->save; # XXX can this recurse?
-    warn "pmopsym = $pmopsym\n";#debug
+#   warn "pmopsym = $pmopsym\n";#debug
     runtime sprintf("if (PL_op == ((PMOP*)(%s))->op_pmreplstart) goto %s;",
 		    $pmopsym, label($pmop->pmreplstart));
     invalidate_lexicals();
@@ -1387,10 +1387,13 @@ sub cc_obj {
 
 sub cc_main {
     my @comppadlist = comppadlist->ARRAY;
-    my $curpad_nam = $comppadlist[0]->save;
-    my $curpad_sym = $comppadlist[1]->save;
+    my $curpad_nam  = $comppadlist[0]->save;
+    my $curpad_sym  = $comppadlist[1]->save;
+    my $init_av     = init_av->save; 
+    my $inc_hv      = svref_2object(\%INC)->save;
+    my $inc_av      = svref_2object(\@INC)->save;
     my $start = cc_recurse("pp_main", main_root, main_start, @comppadlist);
-    save_unused_subs(@unused_sub_packages);
+    save_unused_subs();
     cc_recurse();
 
     return if $errors;
@@ -1398,8 +1401,13 @@ sub cc_main {
 	$init->add(sprintf("PL_main_root = s\\_%x;", ${main_root()}),
 		   "PL_main_start = $start;",
 		   "PL_curpad = AvARRAY($curpad_sym);",
+		   "PL_initav = $init_av;",
+		   "GvHV(PL_incgv) = $inc_hv;",
+		   "GvAV(PL_incgv) = $inc_av;",
 		   "av_store(CvPADLIST(PL_main_cv),0,SvREFCNT_inc($curpad_nam));",
-		   "av_store(CvPADLIST(PL_main_cv),1,SvREFCNT_inc($curpad_sym));");
+		   "av_store(CvPADLIST(PL_main_cv),1,SvREFCNT_inc($curpad_sym));",
+		     );
+                 
     }
     output_boilerplate();
     print "\n";
@@ -1459,7 +1467,7 @@ sub compile {
 	    $module_name = $arg;
 	} elsif ($opt eq "u") {
 	    $arg ||= shift @options;
-	    push(@unused_sub_packages, $arg);
+	    mark_unused($arg,undef);
 	} elsif ($opt eq "f") {
 	    $arg ||= shift @options;
 	    my $value = $arg !~ s/^no-//;

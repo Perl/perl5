@@ -5,15 +5,51 @@
 #      You may distribute under the terms of either the GNU General Public
 #      License or the Artistic License, as specified in the README file.
 #
+package B::C::Section;
+use B ();
+use base B::Section;
+
+sub new
+{
+ my $class = shift;
+ my $o = $class->SUPER::new(@_);
+ push(@$o,[]);
+ return $o;
+}
+
+sub add
+{  
+ my $section = shift;
+ push(@{$section->[-1]},@_);
+}
+
+sub index
+{  
+ my $section = shift;
+ return scalar(@{$section->[-1]})-1;
+}
+
+sub output
+{   
+ my ($section, $fh, $format) = @_;
+ my $sym = $section->symtable || {};
+ my $default = $section->default;
+ foreach (@{$section->[-1]})
+  {
+   s{(s\\_[0-9a-f]+)}{ exists($sym->{$1}) ? $sym->{$1} : $default; }ge;
+   printf $fh $format, $_;
+  }
+}
+
 package B::C;
 use Exporter ();
 @ISA = qw(Exporter);
-@EXPORT_OK = qw(output_all output_boilerplate output_main
-		init_sections set_callback save_unused_subs objsym);
+@EXPORT_OK = qw(output_all output_boilerplate output_main mark_unused
+		init_sections set_callback save_unused_subs objsym save_context);
 
 use B qw(minus_c sv_undef walkoptree walksymtable main_root main_start peekop
 	 class cstring cchar svref_2object compile_stats comppadlist hash
-	 threadsv_names main_cv init_av);
+	 threadsv_names main_cv init_av opnumber);
 use B::Asmdata qw(@specialsv_name);
 
 use FileHandle;
@@ -25,13 +61,14 @@ my $gv_index = 0;
 my $re_index = 0;
 my $pv_index = 0;
 my $anonsub_index = 0;
+my $initsub_index = 0;
 
 my %symtable;
 my $warn_undefined_syms;
 my $verbose;
-my @unused_sub_packages;
+my %unused_sub_packages;
 my $nullop_count;
-my $pv_copy_on_grow;
+my $pv_copy_on_grow = 0;
 my ($debug_cops, $debug_av, $debug_cv, $debug_mg);
 
 my @threadsv_names;
@@ -40,7 +77,7 @@ BEGIN {
 }
 
 # Code sections
-my ($init, $decl, $symsect, $binopsect, $condopsect, $copsect, $cvopsect,
+my ($init, $decl, $symsect, $binopsect, $condopsect, $copsect, 
     $gvopsect, $listopsect, $logopsect, $loopsect, $opsect, $pmopsect,
     $pvopsect, $svopsect, $unopsect, $svsect, $xpvsect, $xpvavsect,
     $xpvhvsect, $xpvcvsect, $xpvivsect, $xpvnvsect, $xpvmgsect, $xpvlvsect,
@@ -68,9 +105,9 @@ my $op_seq = 65535;
 
 sub AVf_REAL () { 1 }
 
-# XXX This shouldn't really be hardcoded here but it saves
-# looking up the name of every BASEOP in B::OP
-sub OP_THREADSV () { 345 }
+# Look this up here so we can do just a number compare
+# rather than looking up the name of every BASEOP in B::OP
+my $OP_THREADSV = opnumber('threadsv');
 
 sub savesym {
     my ($obj, $value) = @_;
@@ -98,10 +135,11 @@ sub getsym {
 }
 
 sub savepv {
-    my $pv = shift;
+    my $pv = shift;         
+    $pv    = '' unless defined $pv;  # Is this sane ?
     my $pvsym = 0;
     my $pvmax = 0;
-    if ($pv_copy_on_grow) {
+    if ($pv_copy_on_grow) { 
 	my $cstring = cstring($pv);
 	if ($cstring ne "0") { # sic
 	    $pvsym = sprintf("pv%d", $pv_index++);
@@ -117,7 +155,7 @@ sub B::OP::save {
     my ($op, $level) = @_;
     my $type = $op->type;
     $nullop_count++ unless $type;
-    if ($type == OP_THREADSV) {
+    if ($type == $OP_THREADSV) {
 	# saves looking up ppaddr but it's a bit naughty to hard code this
 	$init->add(sprintf("(void)find_threadsv(%s);",
 			   cstring($threadsv_names[$op->targ])));
@@ -388,7 +426,8 @@ sub B::PVNV::save {
     my ($sv) = @_;
     my $sym = objsym($sv);
     return $sym if defined $sym;
-    my $pv = $sv->PV;
+    my $pv = $sv->PV;     
+    $pv = '' unless defined $pv;
     my $len = length($pv);
     my ($pvsym, $pvmax) = savepv($pv);
     $xpvnvsect->add(sprintf("%s, %u, %u, %d, %s",
@@ -489,7 +528,9 @@ sub B::RV::save {
     my ($sv) = @_;
     my $sym = objsym($sv);
     return $sym if defined $sym;
-    $xrvsect->add($sv->RV->save);
+    my $rv = $sv->RV->save;
+    $rv =~ s/^\([AGHS]V\s*\*\)\s*(\&sv_list.*)$/$1/;
+    $xrvsect->add($rv);
     $svsect->add(sprintf("&xrv_list[%d], %lu, 0x%x",
 			 $xrvsect->index, $sv->REFCNT + 1, $sv->FLAGS));
     return savesym($sv, sprintf("&sv_list[%d]", $svsect->index));
@@ -564,6 +605,10 @@ sub B::CV::save {
 		$ppname .= ($stashname eq "main") ?
 			    $gvname : "$stashname\::$gvname";
 		$ppname =~ s/::/__/g;
+	        if ($gvname eq "INIT"){
+		       $ppname .= "_$initsub_index";
+		       $initsub_index++;
+		    }
 	    }
 	}
 	if (!$ppname) {
@@ -595,7 +640,8 @@ sub B::CV::save {
     else {
 	warn sprintf("No definition for sub %s::%s (unable to autoload)\n",
 		     $cvstashname, $cvname); # debug
-    }
+    }              
+    $pv = '' unless defined $pv; # Avoid use of undef warnings
     $symsect->add(sprintf("xpvcvix%d\t%s, %u, 0, %d, %s, 0, Nullhv, Nullhv, %s, s\\_%x, $xsub, $xsubany, Nullgv, Nullgv, %d, s\\_%x, (CV*)s\\_%x, 0x%x",
 			  $xpvcv_ix, cstring($pv), length($pv), $cv->IVX,
 			  $cv->NVX, $startfield, ${$cv->ROOT}, $cv->DEPTH,
@@ -802,6 +848,8 @@ sub B::HV::save {
 	    my ($key, $value) = splice(@contents, 0, 2);
 	    $init->add(sprintf("\thv_store(hv, %s, %u, %s, %s);",
 			       cstring($key),length($key),$value, hash($key)));
+#	    $init->add(sprintf("\thv_store(hv, %s, %u, %s, %s);",
+#			       cstring($key),length($key),$value, 0));
 	}
 	$init->add("}");
     }
@@ -813,6 +861,7 @@ sub B::IO::save {
     my $sym = objsym($io);
     return $sym if defined $sym;
     my $pv = $io->PV;
+    $pv = '' unless defined $pv;
     my $len = length($pv);
     $xpviosect->add(sprintf("0, %u, %u, %d, %s, 0, 0, 0, 0, 0, %d, %d, %d, %d, %s, Nullgv, %s, Nullgv, %s, Nullgv, %d, %s, 0x%x",
 			    $len, $len+1, $io->IVX, $io->NVX, $io->LINES,
@@ -849,7 +898,7 @@ sub output_all {
     my $section;
     my @sections = ($opsect, $unopsect, $binopsect, $logopsect, $condopsect,
 		    $listopsect, $pmopsect, $svopsect, $gvopsect, $pvopsect,
-		    $cvopsect, $loopsect, $copsect, $svsect, $xpvsect,
+		    $loopsect, $copsect, $svsect, $xpvsect,
 		    $xpvavsect, $xpvhvsect, $xpvcvsect, $xpvivsect, $xpvnvsect,
 		    $xpvmgsect, $xpvlvsect, $xrvsect, $xpvbmsect, $xpviosect);
     $bootstrap->output(\*STDOUT, "/* bootstrap %s */\n");
@@ -1056,107 +1105,179 @@ sub save_object {
 
 sub Dummy_BootStrap { }            
 
-sub B::GV::savecv {
-    my $gv = shift;
-    my $cv = $gv->CV;
-    my $name = $gv->NAME;
-    if ($$cv) {
-	if ($name eq "bootstrap" && $cv->XSUB) {
-	    my $file = $cv->FILEGV->SV->PV;
-	    $bootstrap->add($file);
-	    my $name = $gv->STASH->NAME.'::'.$name;
-	    no strict 'refs';
-            *{$name} = \&Dummy_BootStrap;   
-	    $cv = $gv->CV;
-	}
-	if ($debug_cv) {
-	    warn sprintf("saving extra CV &%s::%s (0x%x) from GV 0x%x\n",
-			 $gv->STASH->NAME, $name, $$cv, $$gv);
-	}
-      my $package=$gv->STASH->NAME;
-      # This seems to undo all the ->isa and prefix stuff we do below
-      # so disable again for now
-      if (0 && ! grep(/^$package$/,@unused_sub_packages)){
-          warn sprintf("omitting cv in superclass %s", $gv->STASH->NAME) 
-              if $debug_cv;
-          return ;
-      }
-	$gv->save;
+sub B::GV::savecv 
+{
+ my $gv = shift;
+ my $package=$gv->STASH->NAME;
+ my $name = $gv->NAME;
+ my $cv = $gv->CV;
+ return unless ($$cv || $name eq 'ISA');
+ # We may be looking at this package just because it is a branch in the 
+ # symbol table which is on the path to a package which we need to save
+ # e.g. this is 'Getopt' and wee need to save 'Getopt::Long'
+ # 
+ if ($$cv && $name eq "bootstrap" && $cv->XSUB)
+  {
+   my $file = $cv->FILEGV->SV->PV;
+   $bootstrap->add($file);
+  }
+ unless ($unused_sub_packages{$package})
+  {
+   warn sprintf("omitting cv $name in %s\n", $package) if $$cv; # if $debug_cv;
+   return ;
+  }
+ if ($$cv) 
+  {
+   if ($name eq "bootstrap" && $cv->XSUB) 
+    {
+     my $name = $gv->STASH->NAME.'::'.$name;
+     no strict 'refs';
+     *{$name} = \&Dummy_BootStrap;   
+     $cv = $gv->CV;
     }
-    elsif ($name eq 'ISA')
-     {
-      $gv->save;
-     }
+   warn sprintf("saving extra CV &%s::%s (0x%x) from GV 0x%x\n",
+                  $package, $name, $$cv, $$gv) if ($debug_cv); 
+   $gv->save;
+  }
+ elsif ($name eq 'ISA')
+  {
+   $gv->save;
+  }
+}
 
+sub mark_package
+{    
+ my $package = shift;
+ unless ($unused_sub_packages{$package})
+  {    
+   no strict 'refs';
+   $unused_sub_packages{$package} = 1;
+   if (defined(@{$package.'::ISA'}))
+    {
+     foreach my $isa (@{$package.'::ISA'}) 
+      {
+       if ($isa eq 'DynaLoader')
+        {
+         unless (defined(&{$package.'::bootstrap'}))
+          {                    
+           warn "Forcing bootstrap of $package\n";
+           eval { $package->bootstrap }; 
+          }
+        }
+       else
+        {
+         unless ($unused_sub_packages{$isa})
+          {
+           warn "$isa saved (it is in $package\'s \@ISA)\n";
+           mark_package($isa);
+          }
+        }
+      }
+    }
+  }
+ return 1;
+}
+     
+sub should_save
+{
+ no strict qw(vars refs);
+ my $package = shift;
+ $package =~ s/::$//;
+ return $unused_sub_packages{$package} = 0 if ($package =~ /::::/);  # skip ::::ISA::CACHE etc.
+ # warn "Considering $package\n";#debug
+ foreach my $u (grep($unused_sub_packages{$_},keys %unused_sub_packages)) 
+  {  
+   # If this package is a prefix to something we are saving, traverse it 
+   # but do not mark it for saving if it is not already
+   # e.g. to get to Getopt::Long we need to traverse Getopt but need
+   # not save Getopt
+   return 1 if ($u =~ /^$package\:\:/);
+  }
+ if (exists $unused_sub_packages{$package})
+  {
+   # warn "Cached $package is ".$unused_sub_packages{$package}."\n"; 
+   return $unused_sub_packages{$package} 
+  }
+ # Omit the packages which we use (and which cause grief
+ # because of fancy "goto &$AUTOLOAD" stuff).
+ # XXX Surely there must be a nicer way to do this.
+ if ($package eq "FileHandle" || $package eq "Config" || 
+     $package eq "SelectSaver" || $package =~/^(B|IO)::/) 
+  {
+   return $unused_sub_packages{$package} = 0;
+  }
+ # Now see if current package looks like an OO class this is probably too strong.
+ foreach my $m (qw(new DESTROY TIESCALAR TIEARRAY TIEHASH TIEHANDLE)) 
+  {
+   if ($package->can($m)) 
+    {
+     warn "$package has method $m: saving package\n";#debug
+     return mark_package($package);
+    }
+  }
+ return $unused_sub_packages{$package} = 0;
+}
+
+sub walkpackages 
+{
+ my ($symref, $recurse, $prefix) = @_;
+ my $sym;
+ my $ref;
+ no strict 'vars';
+ local(*glob);
+ $prefix = '' unless defined $prefix;
+ while (($sym, $ref) = each %$symref) 
+  {             
+   *glob = $ref;
+   if ($sym =~ /::$/) 
+    {
+     $sym = $prefix . $sym;
+     if ($sym ne "main::" && &$recurse($sym)) 
+      {
+       walkpackages(\%glob, $recurse, $sym);
+      }
+    } 
+  }
 }
 
 
-
-sub save_unused_subs {
-    my %search_pack;
-    map { $search_pack{$_} = 1 } @_;
-    @unused_sub_packages=@_;
-    no strict qw(vars refs);
-    walksymtable(\%{"main::"}, "savecv", sub {
-	my $package = shift;
-	$package =~ s/::$//;
-	return 0 if ($package =~ /::::/);  # skip ::::ISA::CACHE etc.
-	#warn "Considering $package\n";#debug
-	return 1 if exists $search_pack{$package};
-      #sub try for a partial match
-      if (grep(/^$package\:\:/,@unused_sub_packages)){ 
-          return 1;   
-      }       
-	#warn "    (nothing explicit)\n";#debug
-	# Omit the packages which we use (and which cause grief
-	# because of fancy "goto &$AUTOLOAD" stuff).
-	# XXX Surely there must be a nicer way to do this.
-	if ($package eq "FileHandle"
-	    || $package eq "Config"
-	    || $package eq "SelectSaver") {
-	    return 0;
-	}
-	foreach my $u (keys %search_pack) {
-	    if ($package =~ /^${u}::/) {
-		warn "$package starts with $u\n";
-		return 1
-	    }
-	    if ($package->isa($u)) {
-		warn "$package isa $u\n";
-		return 1
-	    }
-	    return 1 if $package->isa($u);
-	}
-	foreach my $m (qw(new DESTROY TIESCALAR TIEARRAY TIEHASH)) {
-	    if (defined(&{$package."::$m"})) {
-		warn "$package has method $m: -u$package assumed\n";#debug
-              push @unused_sub_package, $package;
-		return 1;
-	    }
-	}
-	return 0;
-    });
+sub save_unused_subs 
+{
+ no strict qw(refs);
+ warn "Prescan\n";
+ walkpackages(\%{"main::"}, sub { should_save($_[0]); return 1 });
+ warn "Saving methods\n";
+ walksymtable(\%{"main::"}, "savecv", \&should_save);
 }
 
-sub save_main {
-    warn "Walking tree\n";
-    my $curpad_nam = (comppadlist->ARRAY)[0]->save;
-    my $curpad_sym = (comppadlist->ARRAY)[1]->save;
-    my $init_av    = init_av->save;
-    my $inc_hv     = svref_2object(\%INC)->save;
-    my $inc_av     = svref_2object(\@INC)->save;
-    walkoptree(main_root, "save");
-    warn "done main optree, walking symtable for extras\n" if $debug_cv;
-    save_unused_subs(@unused_sub_packages);
-
-    $init->add(sprintf("PL_main_root = s\\_%x;", ${main_root()}),
-	       sprintf("PL_main_start = s\\_%x;", ${main_start()}),
-	       "PL_curpad = AvARRAY($curpad_sym);",
-	       "PL_initav = $init_av;",
+sub save_context
+{
+ my $curpad_nam = (comppadlist->ARRAY)[0]->save;
+ my $curpad_sym = (comppadlist->ARRAY)[1]->save;
+ my $inc_hv     = svref_2object(\%INC)->save;
+ my $inc_av     = svref_2object(\@INC)->save;
+ $init->add(   "PL_curpad = AvARRAY($curpad_sym);",
 	       "GvHV(PL_incgv) = $inc_hv;",
 	       "GvAV(PL_incgv) = $inc_av;",
                "av_store(CvPADLIST(PL_main_cv),0,SvREFCNT_inc($curpad_nam));",
                "av_store(CvPADLIST(PL_main_cv),1,SvREFCNT_inc($curpad_sym));");
+}
+
+sub save_main {
+    warn "Starting compile\n";
+    foreach my $pack (keys %unused_sub_packages)
+     {
+      mark_package($pack);
+     }
+    warn "Walking tree\n";
+    walkoptree(main_root, "save");
+    warn "done main optree, walking symtable for extras\n" if $debug_cv;
+    save_unused_subs();
+    my $init_av = init_av->save;
+    $init->add(sprintf("PL_main_root = s\\_%x;", ${main_root()}),
+	       sprintf("PL_main_start = s\\_%x;", ${main_start()}),
+	       "PL_initav = $init_av;");
+    save_context();
     warn "Writing output\n";
     output_boilerplate();
     print "\n";
@@ -1168,7 +1289,7 @@ sub save_main {
 sub init_sections {
     my @sections = (init => \$init, decl => \$decl, sym => \$symsect,
 		    binop => \$binopsect, condop => \$condopsect,
-		    cop => \$copsect, cvop => \$cvopsect, gvop => \$gvopsect,
+		    cop => \$copsect, gvop => \$gvopsect,
 		    listop => \$listopsect, logop => \$logopsect,
 		    loop => \$loopsect, op => \$opsect, pmop => \$pmopsect,
 		    pvop => \$pvopsect, svop => \$svopsect, unop => \$unopsect,
@@ -1180,8 +1301,14 @@ sub init_sections {
 		    xpvio => \$xpviosect, bootstrap => \$bootstrap);
     my ($name, $sectref);
     while (($name, $sectref) = splice(@sections, 0, 2)) {
-	$$sectref = new B::Section $name, \%symtable, 0;
+	$$sectref = new B::C::Section $name, \%symtable, 0;
     }
+}           
+
+sub mark_unused
+{
+ my ($arg,$val) = @_;
+ $unused_sub_packages{$arg} = $val;
 }
 
 sub compile {
@@ -1226,7 +1353,7 @@ sub compile {
 	    $verbose = 1;
 	} elsif ($opt eq "u") {
 	    $arg ||= shift @options;
-	    push(@unused_sub_packages, $arg);
+	    mark_unused($arg,undef);
 	} elsif ($opt eq "f") {
 	    $arg ||= shift @options;
 	    if ($arg eq "cog") {

@@ -2241,14 +2241,6 @@ expression compiler gave it.
 
 (P) A "can't happen" error, because safemalloc() should have caught it earlier.
 
-=item regexp too big
-
-(F) The current implementation of regular expressions uses shorts as
-address offsets within a string.  Unfortunately this means that if
-the regular expression compiles to longer than 32767, it'll blow up.
-Usually when you want a regular expression this big, there is a better
-way to do it with multiple statements.  See L<perlre>.
-
 =item Reversed %s= operator
 
 (W) You wrote your assignment operator backwards.  The = must always

@@ -15,7 +15,7 @@ operator.  A unary operator generally provides a scalar context to its
 argument, while a list operator may provide either scalar and list
 contexts for its arguments.  If it does both, the scalar arguments will
 be first, and the list argument will follow.  (Note that there can ever
-be only one list argument.)  For instance, splice() has three scalar
+be only one such list argument.)  For instance, splice() has three scalar
 arguments followed by a list.
 
 In the syntax descriptions that follow, list operators that expect a
@@ -1473,7 +1473,7 @@ L</last>, L</next>, and L</redo> for additional control flow.
 Enter BLOCK as LOOPVAR set in turn to each element of LIST.
 For example:
 
-	foreach $rolling (@stones) { print "rolling $stone\n" }
+	foreach $rolling (@stones) { print "$rolling stone\n" }
 
 	foreach my $file (@files)  { print "file $file\n" }
 

@@ -1,4 +1,3 @@
-
 #!./perl
 
 BEGIN {
