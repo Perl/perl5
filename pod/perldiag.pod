@@ -1713,6 +1713,16 @@ silently ignored.
 (F) Your machine apparently doesn't implement ioctl(), which is pretty
 strange for a machine that supports C.
 
+=item `%s' is not a code reference
+
+(W) The second (fourth, sixth, ...) argument of overload::constant needs
+to be a code reference. Either an anonymous subroutine, or a reference
+to a subroutine.
+
+=item `%s' is not an overloadable type
+
+(W) You tried to overload a constant type the overload package is unaware of.
+
 =item junk on end of regexp
 
 (P) The regular expression parser is confused.
@@ -2235,6 +2245,11 @@ future version.
 L<perlport> for more on portability concerns.
 
 See also L<perlport> for writing portable code.
+
+=item Odd number of arguments for overload::constant
+
+(W) The call to overload::constant contained an odd number of arguments.
+The arguments should come in pairs.
 
 =item Odd number of elements in hash assignment
 

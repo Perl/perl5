@@ -1354,7 +1354,7 @@ key (in fact a presence of this method shows that this package has
 overloading enabled, and it is what is used by the C<Overloaded>
 function of module C<overload>).
 
-The module might issues the following warnings:
+The module might issue the following warnings:
 
 =over 4
 
