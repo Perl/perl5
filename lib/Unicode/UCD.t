@@ -106,11 +106,11 @@ ok($charinfo->{script},         'Hebrew');
 $charinfo = charinfo(0xAC00);
 
 ok($charinfo->{code},           'AC00');
-ok($charinfo->{name},           'HANGUL SYLLABLE GA');
+ok($charinfo->{name},           'HANGUL SYLLABLE-AC00');
 ok($charinfo->{category},       'Lo');
 ok($charinfo->{combining},      '0');
 ok($charinfo->{bidi},           'L');
-ok($charinfo->{decomposition},  '1100 1161');
+ok($charinfo->{decomposition},  undef);
 ok($charinfo->{decimal},        '');
 ok($charinfo->{digit},          '');
 ok($charinfo->{numeric},        '');
@@ -128,11 +128,11 @@ ok($charinfo->{script},         'Hangul');
 $charinfo = charinfo(0xAE00);
 
 ok($charinfo->{code},           'AE00');
-ok($charinfo->{name},           'HANGUL SYLLABLE GEUL');
+ok($charinfo->{name},           'HANGUL SYLLABLE-AE00');
 ok($charinfo->{category},       'Lo');
 ok($charinfo->{combining},      '0');
 ok($charinfo->{bidi},           'L');
-ok($charinfo->{decomposition},  '1100 1173 11AF');
+ok($charinfo->{decomposition},  undef);
 ok($charinfo->{decimal},        '');
 ok($charinfo->{digit},          '');
 ok($charinfo->{numeric},        '');

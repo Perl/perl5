@@ -592,63 +592,65 @@ PERLDLL_OBJ	= $(PERLDLL_OBJ) $(WIN32_OBJ) $(DLL_OBJ)
 SETARGV_OBJ	= setargv$(o)
 !ENDIF
 
-DYNALOADER	= $(EXTDIR)\DynaLoader\DynaLoader
-SOCKET		= $(EXTDIR)\Socket\Socket
-FCNTL		= $(EXTDIR)\Fcntl\Fcntl
-OPCODE		= $(EXTDIR)\Opcode\Opcode
-SDBM_FILE	= $(EXTDIR)\SDBM_File\SDBM_File
-IO		= $(EXTDIR)\IO\IO
-POSIX		= $(EXTDIR)\POSIX\POSIX
-ATTRS		= $(EXTDIR)\attrs\attrs
-THREAD		= $(EXTDIR)\Thread\Thread
-B		= $(EXTDIR)\B\B
-RE		= $(EXTDIR)\re\re
-DUMPER		= $(EXTDIR)\Data\Dumper\Dumper
-ERRNO		= $(EXTDIR)\Errno\Errno
-PEEK		= $(EXTDIR)\Devel\Peek\Peek
-BYTELOADER	= $(EXTDIR)\ByteLoader\ByteLoader
-DPROF		= $(EXTDIR)\Devel\DProf\DProf
-GLOB		= $(EXTDIR)\File\Glob\Glob
-HOSTNAME	= $(EXTDIR)\Sys\Hostname\Hostname
-STORABLE	= $(EXTDIR)\Storable\Storable
-FILTER		= $(EXTDIR)\Filter\Util\Call\Call
-ENCODE		= $(EXTDIR)\Encode\Encode
-MD5		= $(EXTDIR)\Digest\MD5\MD5
-PERLIOSCALAR	= $(EXTDIR)\PerlIO\Scalar\Scalar
-MIMEBASE64	= $(EXTDIR)\MIME\Base64\Base64
-TIMEHIRES	= $(EXTDIR)\Time\HiRes\HiRes
-CWD		= $(EXTDIR)\Cwd\Cwd
-LISTUTIL  	= $(EXTDIR)\List\Util\Util
-PERLIOVIA	= $(EXTDIR)\PerlIO\Via\Via
-XSTYPEMAP	= $(EXTDIR)\XS\Typemap\Typemap
+DYNALOADER		= $(EXTDIR)\DynaLoader\DynaLoader
+SOCKET			= $(EXTDIR)\Socket\Socket
+FCNTL			= $(EXTDIR)\Fcntl\Fcntl
+OPCODE			= $(EXTDIR)\Opcode\Opcode
+SDBM_FILE		= $(EXTDIR)\SDBM_File\SDBM_File
+IO			= $(EXTDIR)\IO\IO
+POSIX			= $(EXTDIR)\POSIX\POSIX
+ATTRS			= $(EXTDIR)\attrs\attrs
+THREAD			= $(EXTDIR)\Thread\Thread
+B			= $(EXTDIR)\B\B
+RE			= $(EXTDIR)\re\re
+DUMPER			= $(EXTDIR)\Data\Dumper\Dumper
+ERRNO			= $(EXTDIR)\Errno\Errno
+PEEK			= $(EXTDIR)\Devel\Peek\Peek
+BYTELOADER		= $(EXTDIR)\ByteLoader\ByteLoader
+DPROF			= $(EXTDIR)\Devel\DProf\DProf
+GLOB			= $(EXTDIR)\File\Glob\Glob
+HOSTNAME		= $(EXTDIR)\Sys\Hostname\Hostname
+STORABLE		= $(EXTDIR)\Storable\Storable
+FILTER			= $(EXTDIR)\Filter\Util\Call\Call
+ENCODE			= $(EXTDIR)\Encode\Encode
+MD5			= $(EXTDIR)\Digest\MD5\MD5
+PERLIOSCALAR		= $(EXTDIR)\PerlIO\Scalar\Scalar
+MIMEBASE64		= $(EXTDIR)\MIME\Base64\Base64
+TIMEHIRES		= $(EXTDIR)\Time\HiRes\HiRes
+CWD			= $(EXTDIR)\Cwd\Cwd
+LISTUTIL  		= $(EXTDIR)\List\Util\Util
+PERLIOVIA		= $(EXTDIR)\PerlIO\Via\Via
+XSTYPEMAP		= $(EXTDIR)\XS\Typemap\Typemap
+UNICODENORMALIZE	= $(EXTDIR)\Unicode\Normalize\Normalize
 
-SOCKET_DLL	= $(AUTODIR)\Socket\Socket.dll
-FCNTL_DLL	= $(AUTODIR)\Fcntl\Fcntl.dll
-OPCODE_DLL	= $(AUTODIR)\Opcode\Opcode.dll
-SDBM_FILE_DLL	= $(AUTODIR)\SDBM_File\SDBM_File.dll
-IO_DLL		= $(AUTODIR)\IO\IO.dll
-POSIX_DLL	= $(AUTODIR)\POSIX\POSIX.dll
-ATTRS_DLL	= $(AUTODIR)\attrs\attrs.dll
-THREAD_DLL	= $(AUTODIR)\Thread\Thread.dll
-B_DLL		= $(AUTODIR)\B\B.dll
-DUMPER_DLL	= $(AUTODIR)\Data\Dumper\Dumper.dll
-PEEK_DLL	= $(AUTODIR)\Devel\Peek\Peek.dll
-RE_DLL		= $(AUTODIR)\re\re.dll
-BYTELOADER_DLL	= $(AUTODIR)\ByteLoader\ByteLoader.dll
-DPROF_DLL	= $(AUTODIR)\Devel\DProf\DProf.dll
-GLOB_DLL	= $(AUTODIR)\File\Glob\Glob.dll
-HOSTNAME_DLL	= $(AUTODIR)\Sys\Hostname\Hostname.dll
-STORABLE_DLL	= $(AUTODIR)\Storable\Storable.dll
-FILTER_DLL	= $(AUTODIR)\Filter\Util\Call\Call.dll
-ENCODE_DLL	= $(AUTODIR)\Encode\Encode.dll
-MD5_DLL		= $(AUTODIR)\Digest\MD5\MD5.dll
-PERLIOSCALAR_DLL= $(AUTODIR)\PerlIO\Scalar\Scalar.dll
-MIMEBASE64_DLL	= $(AUTODIR)\MIME\Base64\Base64.dll
-TIMEHIRES_DLL	= $(AUTODIR)\Time\HiRes\HiRes.dll
-CWD_DLL		= $(AUTODIR)\Cwd\Cwd.dll
-LISTUTIL_DLL	= $(AUTODIR)\List\Util\Util.dll
-PERLIOVIA_DLL	= $(AUTODIR)\PerlIO\Via\Via.dll
-XSTYPEMAP_DLL	= $(AUTODIR)\XS\Typemap\Typemap.dll
+SOCKET_DLL		= $(AUTODIR)\Socket\Socket.dll
+FCNTL_DLL		= $(AUTODIR)\Fcntl\Fcntl.dll
+OPCODE_DLL		= $(AUTODIR)\Opcode\Opcode.dll
+SDBM_FILE_DLL		= $(AUTODIR)\SDBM_File\SDBM_File.dll
+IO_DLL			= $(AUTODIR)\IO\IO.dll
+POSIX_DLL		= $(AUTODIR)\POSIX\POSIX.dll
+ATTRS_DLL		= $(AUTODIR)\attrs\attrs.dll
+THREAD_DLL		= $(AUTODIR)\Thread\Thread.dll
+B_DLL			= $(AUTODIR)\B\B.dll
+DUMPER_DLL		= $(AUTODIR)\Data\Dumper\Dumper.dll
+PEEK_DLL		= $(AUTODIR)\Devel\Peek\Peek.dll
+RE_DLL			= $(AUTODIR)\re\re.dll
+BYTELOADER_DLL		= $(AUTODIR)\ByteLoader\ByteLoader.dll
+DPROF_DLL		= $(AUTODIR)\Devel\DProf\DProf.dll
+GLOB_DLL		= $(AUTODIR)\File\Glob\Glob.dll
+HOSTNAME_DLL		= $(AUTODIR)\Sys\Hostname\Hostname.dll
+STORABLE_DLL		= $(AUTODIR)\Storable\Storable.dll
+FILTER_DLL		= $(AUTODIR)\Filter\Util\Call\Call.dll
+ENCODE_DLL		= $(AUTODIR)\Encode\Encode.dll
+MD5_DLL			= $(AUTODIR)\Digest\MD5\MD5.dll
+PERLIOSCALAR_DLL	= $(AUTODIR)\PerlIO\Scalar\Scalar.dll
+MIMEBASE64_DLL		= $(AUTODIR)\MIME\Base64\Base64.dll
+TIMEHIRES_DLL		= $(AUTODIR)\Time\HiRes\HiRes.dll
+CWD_DLL			= $(AUTODIR)\Cwd\Cwd.dll
+LISTUTIL_DLL		= $(AUTODIR)\List\Util\Util.dll
+PERLIOVIA_DLL		= $(AUTODIR)\PerlIO\Via\Via.dll
+XSTYPEMAP_DLL		= $(AUTODIR)\XS\Typemap\Typemap.dll
+UNICODENORMALIZE_DLL	= $(AUTODIR)\Unicode\Normalize\Normalize.dll
 
 EXTENSION_C	= 		\
 		$(SOCKET).c	\
@@ -677,7 +679,8 @@ EXTENSION_C	= 		\
 		$(CWD).c	\
 		$(LISTUTIL).c	\
 		$(PERLIOVIA).c	\
-		$(XSTYPEMAP).c
+		$(XSTYPEMAP).c	\
+		$(UNICODENORMALIZE).c
 
 EXTENSION_DLL	= 		\
 		$(SOCKET_DLL)	\
@@ -706,7 +709,8 @@ EXTENSION_DLL	= 		\
 		$(CWD_DLL)	\
 		$(LISTUTIL_DLL)	\
 		$(PERLIOVIA_DLL)	\
-		$(XSTYPEMAP_DLL)
+		$(XSTYPEMAP_DLL)	\
+		$(UNICODENORMALIZE_DLL)
 
 POD2HTML	= $(PODDIR)\pod2html
 POD2MAN		= $(PODDIR)\pod2man
@@ -968,6 +972,7 @@ distclean: clean
 	-del /f $(LIBDIR)\Scalar\Util.pm
 	-del /f $(LIBDIR)\Time\HiRes.pm
 	-del /f $(LIBDIR)\XS\Typemap.pm
+	-del /f $(LIBDIR)\Unicode\Normalize.pm
 	-if exist $(LIBDIR)\IO rmdir /s /q $(LIBDIR)\IO
 	-rmdir /s $(LIBDIR)\IO
 	-if exist $(LIBDIR)\Thread rmdir /s /q $(LIBDIR)\Thread

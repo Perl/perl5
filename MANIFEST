@@ -596,6 +596,16 @@ ext/Time/HiRes/HiRes.pm		Time::HiRes extension
 ext/Time/HiRes/HiRes.t		Test for Time::HiRes
 ext/Time/HiRes/HiRes.xs		Time::HiRes extension
 ext/Time/HiRes/Makefile.PL	Time::HiRes extension
+ext/Unicode/Normalize/Changes	Unicode::Normalize
+ext/Unicode/Normalize/Makefile.PL	Unicode::Normalize
+ext/Unicode/Normalize/mkheader	Unicode::Normalize
+ext/Unicode/Normalize/Normalize.pm	Unicode::Normalize
+ext/Unicode/Normalize/Normalize.pod	Unicode::Normalize
+ext/Unicode/Normalize/Normalize.xs	Unicode::Normalize
+ext/Unicode/Normalize/README	Unicode::Normalize
+ext/Unicode/Normalize/t/func.t	Unicode::Normalize
+ext/Unicode/Normalize/t/norm.t	Unicode::Normalize
+ext/Unicode/Normalize/t/test.t	Unicode::Normalize
 ext/util/make_ext		Used by Makefile to execute extension Makefiles
 ext/XS/Typemap/Makefile.PL	XS::Typemap extension
 ext/XS/Typemap/README		XS::Typemap extension
@@ -1005,10 +1015,6 @@ lib/IPC/SysV.t			See if IPC::SysV works
 lib/less.pm			For "use less"
 lib/less.t			See if less support works
 lib/lib_pm.PL			For "use lib", produces lib/lib.pm
-lib/Lingua/KO/Hangul/Util.pm		Lingua::KO::Hangul::Util
-lib/Lingua/KO/Hangul/Util/Changes	Lingua::KO::Hangul::Util
-lib/Lingua/KO/Hangul/Util/README	Lingua::KO::Hangul::Util
-lib/Lingua/KO/Hangul/Util/t/test.t		Lingua::KO::Hangul::Util
 lib/locale.pm			For "use locale"
 lib/locale.t			See if locale support works
 lib/Locale/Codes/t/all.t	See if Locale::Codes work
@@ -1277,11 +1283,6 @@ lib/Unicode/Collate/Changes	Unicode::Collate
 lib/Unicode/Collate/keys.txt	Unicode::Collate
 lib/Unicode/Collate/README	Unicode::Collate
 lib/Unicode/Collate/t/test.t	Unicode::Collate
-lib/Unicode/Normalize.pm	Unicode::Normalize
-lib/Unicode/Normalize/Changes	Unicode::Normalize
-lib/Unicode/Normalize/README	Unicode::Normalize
-lib/Unicode/Normalize/t/norm.t	Unicode::Normalize
-lib/Unicode/Normalize/t/test.t	Unicode::Normalize
 lib/Unicode/README		Explanation what happened to lib/unicode.
 lib/Unicode/UCD.pm		Unicode character database
 lib/Unicode/UCD.t		See if Unicode character database works

@@ -1,0 +1,284 @@
+#!perl
+#
+# This script generates "unfcan.h", "unfcpt.h", "unfcmb.h",
+# "unfcmp.h", and "unfexc.h" 
+# from CombiningClass.pl, Decomposition.pl, CompExcl.txt
+# in lib/unicore or unicode directory
+# for Unicode::Normalize.xs. (cf. Makefile.PL)
+#
+use 5.006;
+use strict;
+use warnings;
+use Carp;
+
+our $PACKAGE = 'Unicode::Normalize, mkheader';
+
+our $Combin = do "unicore/CombiningClass.pl"
+  || do "unicode/CombiningClass.pl"
+  || croak "$PACKAGE: CombiningClass.pl not found";
+
+our $Decomp = do "unicore/Decomposition.pl"
+  || do "unicode/Decomposition.pl"
+  || croak "$PACKAGE: Decomposition.pl not found";
+
+our %Combin; # $codepoint => $number      : combination class
+our %Canon;  # $codepoint => $hexstring   : canonical decomp.
+our %Compat; # $codepoint => $hexstring   : compat. decomp.
+our %Compos; # $string    => $codepoint   : composite
+
+our %Exclus; # $codepoint => 1            : composition exclusions
+
+{
+  my($f, $fh);
+  foreach my $d (@INC) {
+    use File::Spec;
+    $f = File::Spec->catfile($d, "unicore", "CompExcl.txt");
+    last if open($fh, $f);
+    $f = File::Spec->catfile($d, "unicode", "CompExcl.txt");
+    last if open($fh, $f);
+    $f = undef;
+  }
+  croak "$PACKAGE: CompExcl.txt not found in @INC" unless defined $f;
+  while(<$fh>) {
+    next if /^#/ or /^$/;
+    s/#.*//;
+    $Exclus{ hex($1) } =1 if /([0-9A-Fa-f]+)/;
+  }
+  close $fh;
+}
+
+while($Combin =~ /(.+)/g) {
+  my @tab = split /\t/, $1;
+  my $ini = hex $tab[0];
+  if($tab[1] eq '') {
+    $Combin{ $ini } = $tab[2];
+  } else {
+    $Combin{ $_ } = $tab[2] foreach $ini .. hex($tab[1]);
+  }
+}
+
+while($Decomp =~ /(.+)/g) {
+  my @tab = split /\t/, $1;
+  my $compat = $tab[2] =~ s/<[^>]+>//;
+  my $dec = [ _getHexArray($tab[2]) ]; # decomposition
+  my $com = pack('U*', @$dec); # composable sequence
+  my $ini = hex($tab[0]);
+  if($tab[1] eq '') {
+    $Compat{ $ini } = $dec;
+    if(! $compat) {
+      $Canon{  $ini } = $dec;
+      $Compos{ $com } = $ini if @$dec > 1;
+    }
+  } else {
+    foreach my $u ($ini .. hex($tab[1])){
+      $Compat{ $u } = $dec;
+      if(! $compat){
+        $Canon{  $u }   = $dec;
+        $Compos{ $com } = $ini if @$dec > 1;
+      }
+    }
+  }
+}
+
+# exhaustive decomposition
+foreach my $key (keys %Canon) {
+  $Canon{$key}  = [ getCanonList($key) ];
+}
+
+# exhaustive decomposition
+foreach my $key (keys %Compat) { 
+  $Compat{$key} = [ getCompatList($key) ];
+}
+
+sub getCanonList {
+  my @src = @_;
+  my @dec = map $Canon{$_} ? @{ $Canon{$_} } : $_, @src;
+  join(" ",@src) eq join(" ",@dec) ? @dec : getCanonList(@dec);
+  # condition @src == @dec is not ok.
+}
+
+sub getCompatList {
+  my @src = @_;
+  my @dec = map $Compat{$_} ? @{ $Compat{$_} } : $_, @src;
+  join(" ",@src) eq join(" ",@dec) ? @dec : getCompatList(@dec);
+  # condition @src == @dec is not ok.
+}
+
+sub _getHexArray {
+  my $str = shift;
+  map hex(), $str =~ /([0-9A-Fa-f]+)/g;
+}
+
+sub _U_stringify {
+  sprintf '"%s"', join '',
+    map sprintf("\\x%2x", $_), unpack 'C*', pack 'U*', @_;
+}
+
+foreach my $hash (\%Canon, \%Compat) {
+  foreach my $key (keys %$hash) {
+    $hash->{$key} = _U_stringify( @{ $hash->{$key} } );
+  }
+}
+
+sub utf8len {
+  my $uv = shift;
+  return $uv < 0x80 ? 1 :
+        $uv < 0x800 ? 2 :
+      $uv < 0x10000 ? 3 :
+     $uv < 0x110000 ? 4 :
+  croak "$PACKAGE: illegal char in the composite. utf-8 max is 0x10ffff.";
+}
+
+my $prefix = "UNF_";
+
+my $structname = "${prefix}complist";
+
+our (%Comp1st, %CompList);
+
+foreach(sort keys %Compos) {
+  my @a = unpack('U*', $_);
+  my $val = $Compos{$_};
+  my $name = sprintf "${structname}_%06x", $a[0];
+  $Comp1st{ $a[0] } = $name;
+  $CompList{ $name }{ $a[1] } = $val;
+
+  if( utf8len($a[0]) + utf8len($a[1]) < utf8len($val) ) {
+    croak "$PACKAGE: "
+      . "composable pair is longer than the composite in bytes!\n"
+      . sprintf("%d + %d => %d", $a[0], $a[1], $val);
+  }
+}
+
+my $compinit =
+  "typedef struct { UV nextchar; UV composite; } $structname;\n\n";
+
+foreach my $i (sort keys %CompList) {
+  $compinit .= "$structname $i [] = {\n";
+  $compinit .= join ",\n", 
+    map sprintf("\t{ %d, %d }", $_, $CompList{$i}{$_}),
+    sort {$a <=> $b } keys %{ $CompList{$i} };
+  $compinit .= ",\n{0,0}\n};\n\n"; # with sentinel
+}
+
+####################################
+
+my @Exclus = sort {$a <=> $b} keys %Exclus;
+
+my $file = "unfexc.h";
+open FH, ">$file" or croak "$PACKAGE: $file can't be made";
+binmode FH; select FH;
+
+print "bool getExclusion (UV uv) \n{\nreturn\n\t";
+
+while(@Exclus) {
+  my $cur = shift @Exclus;
+  if(@Exclus && $cur + 1 == $Exclus[0]) {
+    print "$cur <= uv && uv <= ";
+    while(@Exclus && $cur + 1 == $Exclus[0]) {
+      $cur = shift @Exclus;
+    }
+    print $cur;
+    print "\n\t|| " if @Exclus;
+  } else {
+    print "uv == $cur";
+    print "\n\t|| " if @Exclus;
+  }
+}
+
+print "\n\t? TRUE : FALSE;\n}\n\n";
+close FH;
+
+####################################
+
+my @tripletable = (
+  {
+    file => "unfcmb",
+    name => "combin",
+    type => "char",
+    hash => \%Combin,
+    null =>  0,
+  },
+  {
+    file => "unfcan",
+    name => "canon",
+    type => "char*",
+    hash => \%Canon,
+    null => "NULL",
+  },
+  {
+    file => "unfcpt",
+    name => "compat",
+    type => "char*",
+    hash => \%Compat,
+    null => "NULL",
+  },
+  {
+    file => "unfcmp",
+    name => "compos",
+    type => "$structname *",
+    hash => \%Comp1st,
+    null => "NULL",
+    init => $compinit,
+  },
+);
+
+foreach my $tbl (@tripletable) {
+  my $file = "$tbl->{file}.h";
+  my $head = "${prefix}$tbl->{name}";
+  my $type = $tbl->{type};
+  my $hash = $tbl->{hash};
+  my $null = $tbl->{null};
+  my $init = $tbl->{init};
+
+  open FH, ">$file" or croak "$PACKAGE: $file can't be made";
+  binmode FH; select FH;
+  my %val;
+
+  print FH << 'EOF';
+/*
+ * This file is auto-generated by mkheader.
+ * Any changes here will be lost!
+ */
+EOF
+
+  print $init if defined $init;
+
+  foreach my $uv (keys %$hash) {
+    my @c = unpack 'CCCC', pack 'N', $uv;
+    $val{ $c[1] }{ $c[2] }{ $c[3] } = $hash->{$uv};
+  }
+
+  foreach my $p (sort { $a <=> $b } keys %val) {
+    next if ! $val{ $p };
+    for(my $r = 0; $r < 256; $r++){
+      next if ! $val{ $p }{ $r };
+      printf "$type ${head}_%02x_%02x [256] = {\n", $p, $r;
+      for(my $c = 0; $c < 256; $c++){
+        print "\t", defined $val{$p}{$r}{$c} ? $val{$p}{$r}{$c} : $null;
+        print ','  if $c != 255;
+        print "\n" if $c % 8 == 7;
+      }
+      print "};\n\n";
+    }
+  }
+  foreach my $p (sort { $a <=> $b } keys %val) {
+    next if ! $val{ $p };
+    printf "$type* ${head}_%02x [256] = {\n", $p;
+    for(my $r = 0; $r < 256; $r++){
+      print $val{ $p }{ $r } ? sprintf("${head}_%02x_%02x", $p, $r) : "NULL";
+      print ','  if $r != 255;
+      print "\n" if $val{ $p }{ $r } || ($r+1) % 8 == 0;
+    }
+    print "};\n\n";
+  }
+  print "$type** $head [] = {\n";
+  for(my $p = 0; $p <= 0x10; $p++){
+    print $val{ $p } ? sprintf("${head}_%02x", $p) : "NULL";
+    print ','  if $p != 0x10;
+    print "\n";
+  }
+  print "};\n\n";
+  close FH;
+}
+
+__END__

@@ -135,14 +135,26 @@ sub _getcode {
     return;
 }
 
-use Lingua::KO::Hangul::Util;
+# Lingua::KO::Hangul::Util not part of the standard distribution
+# but it will be used if available.
+
+eval { require Lingua::KO::Hangul::Util };
+my $hasHangulUtil = ! $@;
+if ($hasHangulUtil) {
+    Lingua::KO::Hangul::Util->import();
+}
 
 sub hangul_decomp { # internal: called from charinfo
-  my @tmp = decomposeHangul(shift);
-  return
-    @tmp == 2 ? sprintf("%04X %04X",      @tmp) :
-    @tmp == 3 ? sprintf("%04X %04X %04X", @tmp) :
-      undef;
+    if ($hasHangulUtil) {
+	my @tmp = decomposeHangul(shift);
+	return sprintf("%04X %04X",      @tmp) if @tmp == 2;
+	return sprintf("%04X %04X %04X", @tmp) if @tmp == 3;
+    }
+    return;
+}
+
+sub hangul_charname { # internal: called from charinfo
+    return sprintf("HANGUL SYLLABLE-%04X", shift);
 }
 
 sub han_charname { # internal: called from charinfo
@@ -157,7 +169,7 @@ my @CharinfoRanges = (
 # CJK Ideographs
   [ 0x4E00,   0x9FA5,   \&han_charname,   undef  ],
 # Hangul Syllables
-  [ 0xAC00,   0xD7A3,   \&getHangulName,  \&hangul_decomp ],
+  [ 0xAC00,   0xD7A3,   $hasHangulUtil ? \&getHangulName : \&hangul_charname,  \&hangul_decomp ],
 # Non-Private Use High Surrogates
   [ 0xD800,   0xDB7F,   undef,   undef  ],
 # Private Use High Surrogates

@@ -4,7 +4,6 @@ use 5.006;
 use strict;
 use warnings;
 use Carp;
-use Lingua::KO::Hangul::Util;
 require Exporter;
 
 our $VERSION = '0.08';
@@ -18,6 +17,15 @@ our @EXPORT = ();
 
 (our $Path = $INC{'Unicode/Collate.pm'}) =~ s/\.pm$//;
 our $KeyFile = "allkeys.txt";
+
+# Lingua::KO::Hangul::Util not part of the standard distribution
+# but it will be used if available.
+
+eval { require Lingua::KO::Hangul::Util };
+my $hasHangulUtil = ! $@;
+if ($hasHangulUtil) {
+    Lingua::KO::Hangul::Util->import();
+}
 
 our %Combin; # combining class from Unicode::Normalize
 
@@ -256,7 +264,10 @@ sub getWt
     _isHangul($u)
       ? $hang
         ? &$hang($u)
-        : map(@{ $ent->{pack('U', $_)} }, decomposeHangul($u))
+        : ($hasHangulUtil ?
+              map(@{ $ent->{pack('U', $_)} }, decomposeHangul($u)) :
+	      # runtime compile error...
+              (eval 'use Lingua::KO::Hangul::Util', print $@))
       : _isCJK($u)
         ? $cjk ? &$cjk($u) : map($self->altCE(0,@$_), _CJK($u))
         : map($self->altCE(0,@$_), _derivCE($u));
