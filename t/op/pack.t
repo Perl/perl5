@@ -19,7 +19,10 @@ print ($#ary == $#ary2 ? "ok 1\n" : "not ok 1\n");
 
 $out1=join(':',@ary);
 $out2=join(':',@ary2);
-print ($out1 eq $out2 ? "ok 2\n" : "not ok 2\n");
+# Using long double NVs may introduce greater accuracy than wanted.
+$out2 =~ s/:9\.87654321097999\d*:/:9.87654321098:/
+   if $Config{uselongdouble} eq 'define';
+print ($out1 eq $out2? "ok 2\n" : "not ok 2\n");
 
 print ($foo =~ /def/ ? "ok 3\n" : "not ok 3\n");
 

@@ -20,7 +20,7 @@
 
 # $Id: Head.U,v 3.0.1.9 1997/02/28 15:02:09 ram Exp $
 #
-# Generated on Fri Jan  7 16:14:30 EST 2000 [metaconfig 3.0 PL70]
+# Generated on Tue Jan 18 21:42:31 EET 2000 [metaconfig 3.0 PL70]
 # (with additional metaconfig patches by perlbug@perl.com)
 
 cat >/tmp/c1$$ <<EOF
@@ -529,7 +529,11 @@ d_sysernlst=''
 d_syserrlst=''
 d_strtod=''
 d_strtol=''
+d_strtold=''
+d_strtoll=''
 d_strtoul=''
+d_strtoull=''
+d_strtouq=''
 d_strxfrm=''
 d_symlink=''
 d_syscall=''
@@ -666,6 +670,7 @@ i_stdarg=''
 i_varargs=''
 i_varhdr=''
 i_vfork=''
+inc_version_list=''
 installprefix=''
 installprefixexp=''
 installstyle=''
@@ -746,9 +751,10 @@ ranlib=''
 package=''
 spackage=''
 pager=''
-apirevision=''
-apisubversion=''
-apiversion=''
+api_revision=''
+api_subversion=''
+api_version=''
+api_versionstring=''
 patchlevel=''
 subversion=''
 version=''
@@ -843,7 +849,6 @@ startsh=''
 stdchar=''
 d_stdio_stream_array=''
 stdio_stream_array=''
-d_strtoull=''
 sysman=''
 trnl=''
 uidformat=''
@@ -900,14 +905,6 @@ if test -f /etc/unixtovms.exe; then
 fi
 
 i_whoami=''
-: Possible local include directories to search.
-: Set locincpth to "" in a hint file to defeat local include searches.
-locincpth="/usr/local/include /opt/local/include /usr/gnu/include"
-locincpth="$locincpth /opt/gnu/include /usr/GNU/include /opt/GNU/include"
-:
-: no include file wanted by default
-inclwanted=''
-
 : list of known cpp symbols, sorted alphabetically
 al="AMIX BIT_MSF BSD BSD4_3 BSD_NET2 CMU CRAY DGUX DOLPHIN DPX2"
 al="$al GO32 GOULD_PN HP700 I386 I80960 I960 Lynx M68000 M68K MACH"
@@ -973,10 +970,22 @@ al="$al tower32_800 tower32_850 tss u370 u3b u3b2 u3b20 u3b200"
 al="$al u3b20d u3b5 ultrix unix unixpc unos vax venix vms"
 al="$al xenix z8000"
 
+: set useposix=false in your hint file to disable the POSIX extension.
+useposix=true
+: set useopcode=false in your hint file to disable the Opcode extension.
+useopcode=true
 : Trailing extension.  Override this in a hint file, if needed.
 _exe=''
 : Extra object files, if any, needed on this platform.
 archobjs=''
+: Possible local include directories to search.
+: Set locincpth to "" in a hint file to defeat local include searches.
+locincpth="/usr/local/include /opt/local/include /usr/gnu/include"
+locincpth="$locincpth /opt/gnu/include /usr/GNU/include /opt/GNU/include"
+:
+: no include file wanted by default
+inclwanted=''
+
 groupstype=''
 : change the next line if compiling for Xenix/286 on Xenix/386
 xlibpth='/usr/lib/386 /lib/386'
@@ -1000,16 +1009,12 @@ plibpth=''
 libswanted=''
 : some systems want to use only the non-versioned libso:s
 ignore_versioned_solibs=''
-: full support for void wanted by default
-defvoidused=15
-
-: set useposix=false in your hint file to disable the POSIX extension.
-useposix=true
-: set useopcode=false in your hint file to disable the Opcode extension.
-useopcode=true
 : set usemultiplicity on the Configure command line to enable multiplicity.
 : set usesocks on the Configure command line to enable socks.
 : set usethreads on the Configure command line to enable threads.
+: full support for void wanted by default
+defvoidused=15
+
 : List of libraries we want.
 : If anyone needs -lnet, put it in a hint file.
 libswanted='sfio socket inet nsl nm ndbm gdbm dbm db malloc dl'
@@ -1890,7 +1895,6 @@ comm
 cp
 echo
 expr
-find
 grep
 ls
 make
@@ -1912,14 +1916,12 @@ date
 egrep
 gzip
 less
-line
 ln
 more
 nm
 nroff
 perl
 pg
-sendmail
 test
 uname
 zip
@@ -2741,20 +2743,21 @@ EOM
 	;;
 esac
 
-case "$useithreads" in
-$define|true|[yY]*)
-	echo "Interpreter threads requested, multiple interpreter support enabled..." >&4
-	val="$define" ;;
-*)
-	cat <<EOM
+cat <<EOM
 
-	Perl can be built so that multiple Perl interpreters can coexist
-	within the same Perl executable.  To do so, Configure must be run with
-	-Dusemultiplicity.
-
-	Normally you do not need this and you should answer no.
-
+Perl can be built so that multiple Perl interpreters can coexist
+within the same Perl executable.
 EOM
+
+case "$useithreads" in
+$define)
+	cat <<EOM
+This multiple interpreter support is required for interpreter-based threads.
+EOM
+	val="$define"
+	;;
+*)
+	echo 'Normally you do not need this and you should answer no.'
 	case "$usemultiplicity" in
 	$define|true|[yY]*)	dflt='y';;
 	*) dflt='n';;
@@ -2762,13 +2765,13 @@ EOM
 	rp='Build Perl for multiplicity?'
 	. ./myread
 	case "$ans" in
-	y|Y)	val="$define" ;;     
+	y|Y)	val="$define" ;;
 	*)      val="$undef" ;;
 	esac
 	;;
 esac
 set usemultiplicity
-eval $setvar 
+eval $setvar
 
 : determine where manual pages are on this system
 echo " "
@@ -3096,7 +3099,10 @@ if $cc -o gccvers gccvers.c; then
 	gccversion=`./gccvers`
 	case "$gccversion" in
 	'') echo "You are not using GNU cc." ;;
-	*)  echo "You are using GNU cc $gccversion." ;;
+	*)  echo "You are using GNU cc $gccversion."
+	    echo "Adding -D_GNU_SOURCE to ccflags."
+	    ccflags="$ccflags -D_GNU_SOURCE" # expose glibc interfaces
+	    ;;
 	esac
 else
 	echo " "
@@ -3113,154 +3119,6 @@ $rm -f gccvers*
 case "$gccversion" in
 1*) cpp=`./loc gcc-cpp $cpp $pth` ;;
 esac
-
-: see how we invoke the C preprocessor
-echo " "
-echo "Now, how can we feed standard input to your C preprocessor..." >&4
-cat <<'EOT' >testcpp.c
-#define ABC abc
-#define XYZ xyz
-ABC.XYZ
-EOT
-cd ..
-if test ! -f cppstdin; then
-	if test "X$osname" = "Xaix" -a "X$gccversion" = X; then
-		# AIX cc -E doesn't show the absolute headerfile
-		# locations but we'll cheat by using the -M flag.
-		echo 'cat >.$$.c; rm -f .$$.u; '"$cc"' ${1+"$@"} -M -c .$$.c 2>/dev/null; test -s .$$.u && awk '"'"'$2 ~ /\.h$/ { print "# 0 \""$2"\"" }'"'"' .$$.u; rm -f .$$.o .$$.u; '"$cc"' -E ${1+"$@"} .$$.c; rm .$$.c' > cppstdin
-	else
-		echo 'cat >.$$.c; '"$cc"' -E ${1+"$@"} .$$.c; rm .$$.c' >cppstdin
-	fi
-else
-	echo "Keeping your $hint cppstdin wrapper."
-fi
-chmod 755 cppstdin
-wrapper=`pwd`/cppstdin
-ok='false'
-cd UU
-
-if $test "X$cppstdin" != "X" && \
-	$cppstdin $cppminus <testcpp.c >testcpp.out 2>&1 && \
-	$contains 'abc.*xyz' testcpp.out >/dev/null 2>&1
-then
-	echo "You used to use $cppstdin $cppminus so we'll use that again."
-	case "$cpprun" in
-	'') echo "But let's see if we can live without a wrapper..." ;;
-	*)
-		if $cpprun $cpplast <testcpp.c >testcpp.out 2>&1 && \
-			$contains 'abc.*xyz' testcpp.out >/dev/null 2>&1
-		then
-			echo "(And we'll use $cpprun $cpplast to preprocess directly.)"
-			ok='true'
-		else
-			echo "(However, $cpprun $cpplast does not work, let's see...)"
-		fi
-		;;
-	esac
-else
-	case "$cppstdin" in
-	'') ;;
-	*)
-		echo "Good old $cppstdin $cppminus does not seem to be of any help..."
-		;;
-	esac
-fi
-
-if $ok; then
-	: nothing
-elif echo 'Maybe "'"$cc"' -E" will work...'; \
-	$cc -E <testcpp.c >testcpp.out 2>&1; \
-	$contains 'abc.*xyz' testcpp.out >/dev/null 2>&1 ; then
-	echo "Yup, it does."
-	x_cpp="$cc -E"
-	x_minus='';
-elif echo 'Nope...maybe "'"$cc"' -E -" will work...'; \
-	$cc -E - <testcpp.c >testcpp.out 2>&1; \
-	$contains 'abc.*xyz' testcpp.out >/dev/null 2>&1 ; then
-	echo "Yup, it does."
-	x_cpp="$cc -E"
-	x_minus='-';
-elif echo 'Nope...maybe "'"$cc"' -P" will work...'; \
-	$cc -P <testcpp.c >testcpp.out 2>&1; \
-	$contains 'abc.*xyz' testcpp.out >/dev/null 2>&1 ; then
-	echo "Yipee, that works!"
-	x_cpp="$cc -P"
-	x_minus='';
-elif echo 'Nope...maybe "'"$cc"' -P -" will work...'; \
-	$cc -P - <testcpp.c >testcpp.out 2>&1; \
-	$contains 'abc.*xyz' testcpp.out >/dev/null 2>&1 ; then
-	echo "At long last!"
-	x_cpp="$cc -P"
-	x_minus='-';
-elif echo 'No such luck, maybe "'$cpp'" will work...'; \
-	$cpp <testcpp.c >testcpp.out 2>&1; \
-	$contains 'abc.*xyz' testcpp.out >/dev/null 2>&1 ; then
-	echo "It works!"
-	x_cpp="$cpp"
-	x_minus='';
-elif echo 'Nixed again...maybe "'$cpp' -" will work...'; \
-	$cpp - <testcpp.c >testcpp.out 2>&1; \
-	$contains 'abc.*xyz' testcpp.out >/dev/null 2>&1 ; then
-	echo "Hooray, it works!  I was beginning to wonder."
-	x_cpp="$cpp"
-	x_minus='-';
-elif echo 'Uh-uh.  Time to get fancy.  Trying a wrapper...'; \
-	$wrapper <testcpp.c >testcpp.out 2>&1; \
-	$contains 'abc.*xyz' testcpp.out >/dev/null 2>&1 ; then
-	x_cpp="$wrapper"
-	x_minus=''
-	echo "Eureka!"
-else
-	dflt=''
-	rp="No dice.  I can't find a C preprocessor.  Name one:"
-	. ./myread
-	x_cpp="$ans"
-	x_minus=''
-	$x_cpp <testcpp.c >testcpp.out 2>&1
-	if $contains 'abc.*xyz' testcpp.out >/dev/null 2>&1 ; then
-		echo "OK, that will do." >&4
-	else
-echo "Sorry, I can't get that to work.  Go find one and rerun Configure." >&4
-		exit 1
-	fi
-fi
-
-case "$ok" in
-false)
-	cppstdin="$x_cpp"
-	cppminus="$x_minus"
-	cpprun="$x_cpp"
-	cpplast="$x_minus"
-	set X $x_cpp
-	shift
-	case "$1" in
-	"$cpp")
-		echo "Perhaps can we force $cc -E using a wrapper..."
-		if $wrapper <testcpp.c >testcpp.out 2>&1; \
-			$contains 'abc.*xyz' testcpp.out >/dev/null 2>&1
-		then
-			echo "Yup, we can."
-			cppstdin="$wrapper"
-			cppminus='';
-		else
-			echo "Nope, we'll have to live without it..."
-		fi
-		;;
-	esac
-	case "$cpprun" in
-	"$wrapper")
-		cpprun=''
-		cpplast=''
-		;;
-	esac
-	;;
-esac
-
-case "$cppstdin" in
-"$wrapper"|'cppstdin') ;;
-*) $rm -f $wrapper;;
-esac
-$rm -f testcpp.c testcpp.out
 
 : decide how portable to be.  Allow command line overrides.
 case "$d_portable" in
@@ -3584,6 +3442,154 @@ y)	fn=d/
 *)	usrinc="$dflt"
 	;;
 esac
+
+: see how we invoke the C preprocessor
+echo " "
+echo "Now, how can we feed standard input to your C preprocessor..." >&4
+cat <<'EOT' >testcpp.c
+#define ABC abc
+#define XYZ xyz
+ABC.XYZ
+EOT
+cd ..
+if test ! -f cppstdin; then
+	if test "X$osname" = "Xaix" -a "X$gccversion" = X; then
+		# AIX cc -E doesn't show the absolute headerfile
+		# locations but we'll cheat by using the -M flag.
+		echo 'cat >.$$.c; rm -f .$$.u; '"$cc"' ${1+"$@"} -M -c .$$.c 2>/dev/null; test -s .$$.u && awk '"'"'$2 ~ /\.h$/ { print "# 0 \""$2"\"" }'"'"' .$$.u; rm -f .$$.o .$$.u; '"$cc"' -E ${1+"$@"} .$$.c; rm .$$.c' > cppstdin
+	else
+		echo 'cat >.$$.c; '"$cc"' -E ${1+"$@"} .$$.c; rm .$$.c' >cppstdin
+	fi
+else
+	echo "Keeping your $hint cppstdin wrapper."
+fi
+chmod 755 cppstdin
+wrapper=`pwd`/cppstdin
+ok='false'
+cd UU
+
+if $test "X$cppstdin" != "X" && \
+	$cppstdin $cppminus <testcpp.c >testcpp.out 2>&1 && \
+	$contains 'abc.*xyz' testcpp.out >/dev/null 2>&1
+then
+	echo "You used to use $cppstdin $cppminus so we'll use that again."
+	case "$cpprun" in
+	'') echo "But let's see if we can live without a wrapper..." ;;
+	*)
+		if $cpprun $cpplast <testcpp.c >testcpp.out 2>&1 && \
+			$contains 'abc.*xyz' testcpp.out >/dev/null 2>&1
+		then
+			echo "(And we'll use $cpprun $cpplast to preprocess directly.)"
+			ok='true'
+		else
+			echo "(However, $cpprun $cpplast does not work, let's see...)"
+		fi
+		;;
+	esac
+else
+	case "$cppstdin" in
+	'') ;;
+	*)
+		echo "Good old $cppstdin $cppminus does not seem to be of any help..."
+		;;
+	esac
+fi
+
+if $ok; then
+	: nothing
+elif echo 'Maybe "'"$cc"' -E" will work...'; \
+	$cc -E <testcpp.c >testcpp.out 2>&1; \
+	$contains 'abc.*xyz' testcpp.out >/dev/null 2>&1 ; then
+	echo "Yup, it does."
+	x_cpp="$cc -E"
+	x_minus='';
+elif echo 'Nope...maybe "'"$cc"' -E -" will work...'; \
+	$cc -E - <testcpp.c >testcpp.out 2>&1; \
+	$contains 'abc.*xyz' testcpp.out >/dev/null 2>&1 ; then
+	echo "Yup, it does."
+	x_cpp="$cc -E"
+	x_minus='-';
+elif echo 'Nope...maybe "'"$cc"' -P" will work...'; \
+	$cc -P <testcpp.c >testcpp.out 2>&1; \
+	$contains 'abc.*xyz' testcpp.out >/dev/null 2>&1 ; then
+	echo "Yipee, that works!"
+	x_cpp="$cc -P"
+	x_minus='';
+elif echo 'Nope...maybe "'"$cc"' -P -" will work...'; \
+	$cc -P - <testcpp.c >testcpp.out 2>&1; \
+	$contains 'abc.*xyz' testcpp.out >/dev/null 2>&1 ; then
+	echo "At long last!"
+	x_cpp="$cc -P"
+	x_minus='-';
+elif echo 'No such luck, maybe "'$cpp'" will work...'; \
+	$cpp <testcpp.c >testcpp.out 2>&1; \
+	$contains 'abc.*xyz' testcpp.out >/dev/null 2>&1 ; then
+	echo "It works!"
+	x_cpp="$cpp"
+	x_minus='';
+elif echo 'Nixed again...maybe "'$cpp' -" will work...'; \
+	$cpp - <testcpp.c >testcpp.out 2>&1; \
+	$contains 'abc.*xyz' testcpp.out >/dev/null 2>&1 ; then
+	echo "Hooray, it works!  I was beginning to wonder."
+	x_cpp="$cpp"
+	x_minus='-';
+elif echo 'Uh-uh.  Time to get fancy.  Trying a wrapper...'; \
+	$wrapper <testcpp.c >testcpp.out 2>&1; \
+	$contains 'abc.*xyz' testcpp.out >/dev/null 2>&1 ; then
+	x_cpp="$wrapper"
+	x_minus=''
+	echo "Eureka!"
+else
+	dflt=''
+	rp="No dice.  I can't find a C preprocessor.  Name one:"
+	. ./myread
+	x_cpp="$ans"
+	x_minus=''
+	$x_cpp <testcpp.c >testcpp.out 2>&1
+	if $contains 'abc.*xyz' testcpp.out >/dev/null 2>&1 ; then
+		echo "OK, that will do." >&4
+	else
+echo "Sorry, I can't get that to work.  Go find one and rerun Configure." >&4
+		exit 1
+	fi
+fi
+
+case "$ok" in
+false)
+	cppstdin="$x_cpp"
+	cppminus="$x_minus"
+	cpprun="$x_cpp"
+	cpplast="$x_minus"
+	set X $x_cpp
+	shift
+	case "$1" in
+	"$cpp")
+		echo "Perhaps can we force $cc -E using a wrapper..."
+		if $wrapper <testcpp.c >testcpp.out 2>&1; \
+			$contains 'abc.*xyz' testcpp.out >/dev/null 2>&1
+		then
+			echo "Yup, we can."
+			cppstdin="$wrapper"
+			cppminus='';
+		else
+			echo "Nope, we'll have to live without it..."
+		fi
+		;;
+	esac
+	case "$cpprun" in
+	"$wrapper")
+		cpprun=''
+		cpplast=''
+		;;
+	esac
+	;;
+esac
+
+case "$cppstdin" in
+"$wrapper"|'cppstdin') ;;
+*) $rm -f $wrapper;;
+esac
+$rm -f testcpp.c testcpp.out
 
 : Set private lib path
 case "$plibpth" in
@@ -4654,23 +4660,25 @@ prefixit='case "$3" in
 	esac;;
 esac'
 
-: get the revision, patchlevel, subversion
+: set the base revision
+baserev=5.0
+
+
+: get the patchlevel
 echo " "
 echo "Getting the current patchlevel..." >&4
 if $test -r $rsrc/patchlevel.h;then
-	baserev=`awk '/define[ 	]+PERL_REVISION/ {print $3}' $rsrc/patchlevel.h`
 	patchlevel=`awk '/define[ 	]+PERL_VERSION/ {print $3}' $rsrc/patchlevel.h`
 	subversion=`awk '/define[ 	]+PERL_SUBVERSION/ {print $3}' $rsrc/patchlevel.h`
-	apirevision=`awk '/define[ 	]+PERL_API_REVISION/ {print $3}' $rsrc/patchlevel.h`
-	apiversion=`awk '/define[ 	]+PERL_API_VERSION/ {print $3}' $rsrc/patchlevel.h`
-	apisubversion=`awk '/define[ 	]+PERL_API_SUBVERSION/ {print $3}' $rsrc/patchlevel.h`
+	api_revision=`awk '/define[ 	]+PERL_API_REVISION/ {print $3}' $rsrc/patchlevel.h`
+	api_version=`awk '/define[ 	]+PERL_API_VERSION/ {print $3}' $rsrc/patchlevel.h`
+	api_subversion=`awk '/define[ 	]+PERL_API_SUBVERSION/ {print $3}' $rsrc/patchlevel.h`
 else
-	baserev=0
 	patchlevel=0
 	subversion=0
-	apirevision=0
-	apiversion=0
-	apisubversion=0
+	api_revision=0
+	api_version=0
+	api_subversion=0
 fi
 $echo $n "(You have $package" $c
 case "$package" in
@@ -4680,15 +4688,25 @@ esac
 $echo $n " patchlevel $patchlevel" $c
 test 0 -eq "$subversion" || $echo $n " subversion $subversion" $c
 echo ".)"
-
-if $test -n $osname -a "$osname" = "dos"; then
-	version=`LC_ALL=C; export LC_ALL; \
-		 echo $baserev $patchlevel $subversion | \
+case "$osname" in
+dos|cygwin|vms|win32)
+	: XXX Should be a Configure test for double-dots in filenames.
+	version=`echo $baserev $patchlevel $subversion | \
 		 $awk '{ printf "%d_%d_%d\n", $1, $2, $3 }'`
-else
-	version=`LC_ALL=C; export LC_ALL; \
-		 echo $baserev $patchlevel $subversion | \
+	api_versionstring=`echo $api_revision $api_version $api_subversion | \
+		 $awk '{ printf "%d_%d_%d\n", $1, $2, $3 }'`
+	;;
+*)
+	version=`echo $baserev $patchlevel $subversion | \
 		 $awk '{ printf "%d.%d.%d\n", $1, $2, $3 }'`
+	api_versionstring=`echo $api_revision $api_version $api_subversion | \
+		 $awk '{ printf "%d.%d.%d\n", $1, $2, $3 }'`
+	;;
+esac
+: Special case the 5.005_xx maintenance series, which used 5.005
+: without any subversion label as a subdirectory in $sitelib
+if test "${api_revision}${api_version}${api_subversion}" = "550"; then
+	api_versionstring='5.005'
 fi
 
 : determine installation style
@@ -5251,6 +5269,152 @@ if $test X"$prefix" != X"$installprefix"; then
 else
 	installbin="$binexp"
 fi
+
+$cat <<EOM
+
+After $package is installed, you may wish to install various
+add-on modules and utilities.  Typically, these add-ons will
+be installed under $prefix with the rest
+of this package.  However, you may wish to install such add-ons
+elsewhere under a different prefix.
+
+If you do not wish to put everything under a single prefix, that's
+ok.  You will be prompted for the individual locations; this siteprefix
+is only used to suggest the defaults.
+
+The default should be fine for most people.
+
+EOM
+fn=d~+
+rp='Installation prefix to use for add-on modules and utilities?'
+: XXX Here might be another good place for an installstyle setting.
+case "$siteprefix" in
+'') dflt=$prefix ;;
+*)  dflt=$siteprefix ;;
+esac
+. ./getfile
+oldsiteprefix=''
+case "$siteprefix" in
+'') ;;
+*)
+	case "$ans" in
+	"$prefix") ;;
+	*) oldsiteprefix="$prefix";;
+	esac
+	;;
+esac
+siteprefix="$ans"
+siteprefixexp="$ansexp"
+
+: determine where site specific libraries go.
+: Usual default is /usr/local/lib/perl5/site_perl/$version
+: The default "style" setting is made in installstyle.U
+: XXX No longer works with Prefixit stuff.
+prog=`echo $package | $sed 's/-*[0-9.]*$//'`
+case "$installstyle" in
+*lib/perl5*) dflt=$siteprefix/lib/$package/site_$prog/$version ;;
+*)	 dflt=$siteprefix/lib/site_$prog/$version ;;
+esac
+$cat <<EOM
+
+The installation process will create a directory for
+site-specific extensions and modules.  Most users find it convenient
+to place all site-specific files in this directory rather than in the
+main distribution directory.
+
+EOM
+fn=d~+
+rp='Pathname for the site-specific library files?'
+. ./getfile
+sitelib="$ans"
+sitelibexp="$ansexp"
+: Change installation prefix, if necessary.
+if $test X"$prefix" != X"$installprefix"; then
+	installsitelib=`echo $sitelibexp | sed "s#^$prefix#$installprefix#"`
+else
+	installsitelib="$sitelibexp"
+fi
+
+: Determine list of previous versions to include in @INC
+$cat > getverlist <<EOPL
+#!$perl -w
+use File::Basename;
+\$api_versionstring = "$api_versionstring";
+\$version = "$version";
+\$sitelib = "$sitelib";
+\$archname = "$archname";
+EOPL
+	$cat >> getverlist <<'EOPL'
+# Can't have leading @ because metaconfig interprets it as a command!
+;@inc_version_list=();
+$stem=dirname($sitelib);
+# Redo to do opendir/readdir? 
+if (-d $stem) {
+    chdir($stem);
+    ;@candidates = glob("5.*");
+}
+else {
+    ;@candidates = ();
+}
+
+# XXX ToDo:  These comparisons must be reworked when two-digit
+# subversions come along, so that 5.7.10 compares as greater than
+# 5.7.3!  By that time, hope that 5.6.x is sufficiently
+# widespread that we can use the built-in version vectors rather
+# than reinventing them here.  For 5.6.0, however, we must
+# assume this script will likely be run by 5.005_0x.  --AD 1/2000.
+foreach $d (@candidates) {
+    if ($d lt $version) {
+	if ($d ge $api_versionstring) {
+	    unshift(@inc_version_list, "$d/$archname", $d);
+	}
+	elsif ($d ge "5.005") {
+	    unshift(@inc_version_list, $d);
+	}
+    }
+    else {
+	# Skip newer version.  I.e. don't look in
+	# 5.7.0 if we're installing 5.6.1.
+    }
+}
+
+if (@inc_version_list) {
+    print '"';
+    print join('", "', @inc_version_list);
+    print '"';
+}
+else {
+    # Blank space to preserve value for next Configure run.
+    print " ";
+}
+EOPL
+chmod +x getverlist
+case "$inc_version_list" in
+'')	if test -x $perl; then
+		dflt=`$perl getverlist`
+	else
+		dflt=''
+	fi
+	;;
+*)  dflt="$inc_version_list" ;;
+esac
+$cat <<'EOM'
+
+In order to ease the process of upgrading, this version of perl 
+can be configured to use modules built and installed with earlier 
+versions of perl that were installed under $prefix.  Specify here
+the list of earlier versions that this version of perl should check.
+If Configure detected no earlier versions of perl installed under
+$prefix, then the list will be empty.
+
+The default should almost always be sensible, so if you're not sure,
+just accept the default.
+EOM
+
+rp='list of earlier versions to include in @INC?'
+. ./myread
+inc_version_list="$ans"
+$rm -f getverlist
 
 : determine whether to install perl also as /usr/bin/perl
 
@@ -6802,71 +6966,6 @@ else
 	installscript="$scriptdirexp"
 fi
 
-$cat <<EOM
-
-After $package is installed, you may wish to install various
-add-on modules and utilities.  Typically, these add-ons will
-be installed under $prefix with the rest
-of this package.  However, you may wish to install such add-ons
-elsewhere under a different prefix.
-
-If you do not wish to put everything under a single prefix, that's
-ok.  You will be prompted for the individual locations; this siteprefix
-is only used to suggest the defaults.
-
-The default should be fine for most people.
-
-EOM
-fn=d~+
-rp='Installation prefix to use for add-on modules and utilities?'
-: XXX Here might be another good place for an installstyle setting.
-case "$siteprefix" in
-'') dflt=$prefix ;;
-*)  dflt=$siteprefix ;;
-esac
-. ./getfile
-oldsiteprefix=''
-case "$siteprefix" in
-'') ;;
-*)
-	case "$ans" in
-	"$prefix") ;;
-	*) oldsiteprefix="$prefix";;
-	esac
-	;;
-esac
-siteprefix="$ans"
-siteprefixexp="$ansexp"
-
-: determine where site specific libraries go.
-: Usual default is /usr/local/lib/perl5/site_perl/$version
-: The default "style" setting is made in installstyle.U
-: XXX No longer works with Prefixit stuff.
-prog=`echo $package | $sed 's/-*[0-9.]*$//'`
-case "$installstyle" in
-*lib/perl5*) dflt=$siteprefix/lib/$package/site_$prog/$version ;;
-*)	 dflt=$siteprefix/lib/site_$prog/$version ;;
-esac
-$cat <<EOM
-
-The installation process will create a directory for
-site-specific extensions and modules.  Most users find it convenient
-to place all site-specific files in this directory rather than in the
-main distribution directory.
-
-EOM
-fn=d~+
-rp='Pathname for the site-specific library files?'
-. ./getfile
-sitelib="$ans"
-sitelibexp="$ansexp"
-: Change installation prefix, if necessary.
-if $test X"$prefix" != X"$installprefix"; then
-	installsitelib=`echo $sitelibexp | sed "s#^$prefix#$installprefix#"`
-else
-	installsitelib="$sitelibexp"
-fi
-
 : determine where site specific architecture-dependent libraries go.
 : sitelib  default is /usr/local/lib/perl5/site_perl/$version
 : sitearch default is /usr/local/lib/perl5/site_perl/$version/$archname
@@ -7056,99 +7155,6 @@ case "$vendorprefix" in
 	;;
 esac
 
-: Check how to convert floats to strings.
-if test "X$d_Gconvert" = X; then
-	echo " "
-	echo "Checking for an efficient way to convert floats to strings."
-	$cat >try.c <<'EOP'
-#ifdef TRY_gconvert
-#define Gconvert(x,n,t,b) gconvert((x),(n),(t),(b))
-char *myname = "gconvert";
-#endif
-#ifdef TRY_gcvt
-#define Gconvert(x,n,t,b) gcvt((x),(n),(b))
-char *myname = "gcvt";
-#endif
-#ifdef TRY_sprintf
-#define Gconvert(x,n,t,b) sprintf((b),"%.*g",(n),(x))
-char *myname = "sprintf";
-#endif
-
-#include <stdio.h>
-
-int
-checkit(expect, got)
-char *expect;
-char *got;
-{
-    if (strcmp(expect, got)) {
-		printf("%s oddity:  Expected %s, got %s\n",
-			myname, expect, got);
-		exit(1);
-	}
-}
-
-int main()
-{ 
-	char buf[64]; 
-	buf[63] = '\0';
-
-	/* This must be 1st test on (which?) platform */
-	/* Alan Burlison <AlanBurlsin@unn.unisys.com> */
-	Gconvert(0.1, 8, 0, buf);
-	checkit("0.1", buf);
-
-	Gconvert(1.0, 8, 0, buf); 
-	checkit("1", buf);
-
-	Gconvert(0.0, 8, 0, buf); 
-	checkit("0", buf);
-
-	Gconvert(-1.0, 8, 0, buf); 
-	checkit("-1", buf);
-
-	/* Some Linux gcvt's give 1.e+5 here. */
-	Gconvert(100000.0, 8, 0, buf); 
-	checkit("100000", buf);
-	
-	/* Some Linux gcvt's give -1.e+5 here. */
-	Gconvert(-100000.0, 8, 0, buf); 
-	checkit("-100000", buf);
-
-	exit(0);
-}
-EOP
-	case "$d_Gconvert" in
-	gconvert*) xxx_list='gconvert gcvt sprintf' ;;
-	gcvt*) xxx_list='gcvt gconvert sprintf' ;;
-	sprintf*) xxx_list='sprintf gconvert gcvt' ;;
-	*) xxx_list='gconvert gcvt sprintf' ;;
-	esac
-
-	for xxx_convert in $xxx_list; do
-		echo "Trying $xxx_convert"
-		$rm -f try try$_o
-		set try -DTRY_$xxx_convert
-		if eval $compile; then
-			echo "$xxx_convert" found. >&4
-			if ./try; then
-				echo "I'll use $xxx_convert to convert floats into a string." >&4
-				break;
-			else
-				echo "...But $xxx_convert didn't work as I expected."
-			fi
-		else
-			echo "$xxx_convert NOT found." >&4
-		fi
-	done
-		
-	case "$xxx_convert" in
-	gconvert) d_Gconvert='gconvert((x),(n),(t),(b))' ;;
-	gcvt) d_Gconvert='gcvt((x),(n),(b))' ;;
-	*) d_Gconvert='sprintf((b),"%.*g",(n),(x))' ;;
-	esac
-fi
-
 : check for length of double
 echo " "
 case "$doublesize" in
@@ -7224,6 +7230,117 @@ EOCP
 	;;
 esac
 $rm -f try.* try
+
+: Check how to convert floats to strings.
+if test "X$d_Gconvert" = X; then
+	echo " "
+	echo "Checking for an efficient way to convert floats to strings."
+	$cat >try.c <<EOP
+#ifdef TRY_gconvert
+#define Gconvert(x,n,t,b) gconvert((x),(n),(t),(b))
+char *myname = "gconvert";
+#endif
+#ifdef TRY_gcvt
+#define Gconvert(x,n,t,b) gcvt((x),(n),(b))
+char *myname = "gcvt";
+#endif
+#ifdef TRY_qgcvt
+#define Gconvert(x,n,t,b) qgcvt((x),(n),(b))
+char *myname = "qgcvt";
+#define DOUBLETYPE long double
+#endif
+#ifdef TRY_sprintf
+#define Gconvert(x,n,t,b) sprintf((b),"%.*g",(n),(x))
+char *myname = "sprintf";
+#endif
+
+#ifndef DOUBLETYPE
+#define DOUBLETYPE double
+#endif
+
+#include <stdio.h>
+
+#ifdef I_STDLIB
+#include <stdlib.h>
+#endif
+
+int
+checkit(expect, got)
+char *expect;
+char *got;
+{
+    if (strcmp(expect, got)) {
+		printf("%s oddity:  Expected %s, got %s\n",
+			myname, expect, got);
+		exit(1);
+	}
+}
+
+int main()
+{ 
+	char buf[64]; 
+	buf[63] = '\0';
+
+	/* This must be 1st test on (which?) platform */
+	/* Alan Burlison <AlanBurlsin@unn.unisys.com> */
+	Gconvert((DOUBLETYPE)0.1, 8, 0, buf);
+	checkit("0.1", buf);
+
+	Gconvert((DOUBLETYPE)1.0, 8, 0, buf); 
+	checkit("1", buf);
+
+	Gconvert((DOUBLETYPE)0.0, 8, 0, buf); 
+	checkit("0", buf);
+
+	Gconvert((DOUBLETYPE)-1.0, 8, 0, buf); 
+	checkit("-1", buf);
+
+	/* Some Linux gcvt's give 1.e+5 here. */
+	Gconvert((DOUBLETYPE)100000.0, 8, 0, buf); 
+	checkit("100000", buf);
+	
+	/* Some Linux gcvt's give -1.e+5 here. */
+	Gconvert((DOUBLETYPE)-100000.0, 8, 0, buf); 
+	checkit("-100000", buf);
+
+	exit(0);
+}
+EOP
+	case "$d_Gconvert" in
+	gconvert*) xxx_list='gconvert gcvt sprintf' ;;
+	gcvt*) xxx_list='gcvt gconvert sprintf' ;;
+	sprintf*) xxx_list='sprintf gconvert gcvt' ;;
+	*) xxx_list='gconvert gcvt sprintf' ;;
+	esac
+
+        case "$d_longdbl$uselongdouble" in
+        definedefine) xxx_list="`echo $xxx_list|sed 's/gcvt/qgcvt gcvt/'`" ;;
+	esac
+
+	for xxx_convert in $xxx_list; do
+		echo "Trying $xxx_convert..."
+		$rm -f try try$_o
+		set try -DTRY_$xxx_convert
+		if eval $compile; then
+			echo "$xxx_convert() found." >&4
+			if ./try; then
+				echo "I'll use $xxx_convert to convert floats into a string." >&4
+				break;
+			else
+				echo "...But $xxx_convert didn't work as I expected."
+			fi
+		else
+			echo "$xxx_convert NOT found." >&4
+		fi
+	done
+		
+	case "$xxx_convert" in
+	gconvert) d_Gconvert='gconvert((x),(n),(t),(b))' ;;
+	gcvt) d_Gconvert='gcvt((x),(n),(b))' ;;
+	qgcvt) d_Gconvert='qgcvt((x),(n),(b))' ;;
+	*) d_Gconvert='sprintf((b),"%.*g",(n),(x))' ;;
+	esac
+fi
 
 echo " "
 
@@ -9174,51 +9291,6 @@ set d_index; eval $setvar
 set inet_aton d_inetaton
 eval $inlibc
 
-: see if inttypes.h is available
-: we want a real compile instead of Inhdr because some systems
-: have an inttypes.h which includes non-existent headers
-echo " "
-$cat >try.c <<EOCP
-#include <inttypes.h>
-int main() {
-	static int32_t foo32 = 0x12345678;
-}
-EOCP
-set try
-if eval $compile; then
-	echo "<inttypes.h> found." >&4
-	val="$define"
-else
-	echo "<inttypes.h> NOT found." >&4
-	val="$undef"
-fi
-$rm -f try.c try
-set i_inttypes
-eval $setvar
-
-: check for int64_t
-echo " "
-$echo $n "Checking to see if your system supports int64_t...$c" >&4
-$cat >try.c <<EOCP
-#include <sys/types.h>
-#$i_inttypes I_INTTYPES
-#ifdef I_INTTYPES
-#include <inttypes.h>
-#endif
-int main() { int64_t x = 7; }
-EOCP
-set try
-if eval $compile; then
-	val="$define"
-	echo " Yes, it does." >&4
-else
-	val="$undef"
-	echo " No, it doesn't." >&4
-fi
-$rm -f try try.*
-set d_int64t
-eval $setvar
-
 : Look for isascii
 echo " "
 $cat >isascii.c <<'EOCP'
@@ -9705,6 +9777,51 @@ $define)
 	set d_pwpasswd; eval $setvar
 	;;
 esac
+
+: see if inttypes.h is available
+: we want a real compile instead of Inhdr because some systems
+: have an inttypes.h which includes non-existent headers
+echo " "
+$cat >try.c <<EOCP
+#include <inttypes.h>
+int main() {
+	static int32_t foo32 = 0x12345678;
+}
+EOCP
+set try
+if eval $compile; then
+	echo "<inttypes.h> found." >&4
+	val="$define"
+else
+	echo "<inttypes.h> NOT found." >&4
+	val="$undef"
+fi
+$rm -f try.c try
+set i_inttypes
+eval $setvar
+
+: check for int64_t
+echo " "
+$echo $n "Checking to see if your system supports int64_t...$c" >&4
+$cat >try.c <<EOCP
+#include <sys/types.h>
+#$i_inttypes I_INTTYPES
+#ifdef I_INTTYPES
+#include <inttypes.h>
+#endif
+int main() { int64_t x = 7; }
+EOCP
+set try
+if eval $compile; then
+	val="$define"
+	echo " Yes, it does." >&4
+else
+	val="$undef"
+	echo " No, it doesn't." >&4
+fi
+$rm -f try try.*
+set d_int64t
+eval $setvar
 
 
 echo " "
@@ -10851,12 +10968,24 @@ eval $inlibc
 set strtol d_strtol
 eval $inlibc
 
+: see if strtold exists
+set strtold d_strtold
+eval $inlibc
+
+: see if strtoll exists
+set strtoll d_strtoll
+eval $inlibc
+
 : see if strtoul exists
 set strtoul d_strtoul
 eval $inlibc
 
 : see if strtoull exists
 set strtoull d_strtoull
+eval $inlibc
+
+: see if strtouq exists
+set strtouq d_strtouq
 eval $inlibc
 
 : see if strxfrm exists
@@ -14231,9 +14360,10 @@ afs='$afs'
 alignbytes='$alignbytes'
 ansi2knr='$ansi2knr'
 aphostname='$aphostname'
-apirevision='$apirevision'
-apisubversion='$apisubversion'
-apiversion='$apiversion'
+api_revision='$api_revision'
+api_subversion='$api_subversion'
+api_version='$api_version'
+api_versionstring='$api_versionstring'
 ar='$ar'
 archlib='$archlib'
 archlibexp='$archlibexp'
@@ -14520,8 +14650,11 @@ d_strerrm='$d_strerrm'
 d_strerror='$d_strerror'
 d_strtod='$d_strtod'
 d_strtol='$d_strtol'
+d_strtold='$d_strtold'
+d_strtoll='$d_strtoll'
 d_strtoul='$d_strtoul'
 d_strtoull='$d_strtoull'
+d_strtouq='$d_strtouq'
 d_strxfrm='$d_strxfrm'
 d_suidsafe='$d_suidsafe'
 d_symlink='$d_symlink'
@@ -14679,6 +14812,7 @@ i_varargs='$i_varargs'
 i_varhdr='$i_varhdr'
 i_vfork='$i_vfork'
 ignore_versioned_solibs='$ignore_versioned_solibs'
+inc_version_list='$inc_version_list'
 incpath='$incpath'
 inews='$inews'
 installarchlib='$installarchlib'

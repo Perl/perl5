@@ -899,6 +899,21 @@ S_parse_body(pTHX_ va_list args)
 #  ifdef USE_THREADS
 		sv_catpv(PL_Sv," USE_THREADS");
 #  endif
+#  ifdef USE_ITHREADS
+		sv_catpv(PL_Sv," USE_ITHREADS");
+#  endif
+#  ifdef USE_64_BITS
+		sv_catpv(PL_Sv," USE_64_BITS");
+#  endif
+#  ifdef USE_LONG_DOUBLE
+		sv_catpv(PL_Sv," USE_LONG_DOUBLE");
+#  endif
+#  ifdef USE_LARGE_FILES
+		sv_catpv(PL_Sv," USE_LARGE_FILES");
+#  endif
+#  ifdef USE_SOCKS
+		sv_catpv(PL_Sv," USE_SOCKS");
+#  endif
 #  ifdef PERL_OBJECT
 		sv_catpv(PL_Sv," PERL_OBJECT");
 #  endif
