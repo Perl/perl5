@@ -2,7 +2,7 @@
 # this file as a template for defsubs.h
 # Extracting defsubs.h (with variable substitutions)
 #!perl
-my ($out) = __FILE__ =~ /(^.*)\.PL/;
+my ($out) = __FILE__ =~ /(^.*)\.PL/i;
 $out =~ s/_h$/.h/;
 open(OUT,">$out") || die "Cannot open $file:$!";
 print "Extracting $out...\n";
