@@ -50,7 +50,7 @@ local $SIG{__WARN__} = sub { $warn = "@_" } ;
 {
     local $^W = 1;
     IO->import();
-    like( $warn, qr/^parameterless "use IO" deprecated at/, 
+    like( $warn, qr/^Parameterless "use IO" deprecated at/, 
               "... import default, should warn");
     $warn = '' ;
 }
@@ -58,7 +58,7 @@ local $SIG{__WARN__} = sub { $warn = "@_" } ;
 {
     use warnings 'deprecated' ;
     IO->import(); 
-    like( $warn, qr/^parameterless "use IO" deprecated at/, 
+    like( $warn, qr/^Parameterless "use IO" deprecated at/, 
               "... import default, should warn");
     $warn = '' ;
 }
@@ -66,7 +66,7 @@ local $SIG{__WARN__} = sub { $warn = "@_" } ;
 {
     use warnings ;
     IO->import();
-    like( $warn, qr/^parameterless "use IO" deprecated at/, 
+    like( $warn, qr/^Parameterless "use IO" deprecated at/, 
               "... import default, should warn");
     $warn = '' ;
 }
