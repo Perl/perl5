@@ -2090,7 +2090,8 @@ Perl_yylex_r(pTHX_ YYSTYPE *lvalp, int *lcharp)
 
     r = Perl_yylex(aTHX);
 
-    yyactlevel--;
+    if (yyactlevel > 0)
+       yyactlevel--;
 
     return r;
 }
