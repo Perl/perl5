@@ -553,6 +553,7 @@ perl_destruct(register PerlInterpreter *sv_interp)
     
     DEBUG_P(debprofdump());
 #ifdef USE_THREADS
+    MUTEX_DESTROY(&PL_strtab_mutex);
     MUTEX_DESTROY(&PL_sv_mutex);
     MUTEX_DESTROY(&PL_eval_mutex);
     COND_DESTROY(&PL_eval_cond);
@@ -1905,6 +1906,9 @@ init_main_stash(void)
        about not iterating on it, and not adding tie magic to it.
        It is properly deallocated in perl_destruct() */
     PL_strtab = newHV();
+#ifdef USE_THREADS
+    MUTEX_INIT(&PL_strtab_mutex);
+#endif
     HvSHAREKEYS_off(PL_strtab);			/* mandatory */
     hv_ksplit(PL_strtab, 512);
     

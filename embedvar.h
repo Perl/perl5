@@ -252,6 +252,7 @@
 #define PL_stdingv		(PL_curinterp->Istdingv)
 #define PL_strchop		(PL_curinterp->Istrchop)
 #define PL_strtab		(PL_curinterp->Istrtab)
+#define PL_strtab_mutex		(PL_curinterp->Istrtab_mutex)
 #define PL_sub_generation	(PL_curinterp->Isub_generation)
 #define PL_sublex_info		(PL_curinterp->Isublex_info)
 #define PL_sv_arenaroot		(PL_curinterp->Isv_arenaroot)
@@ -386,6 +387,7 @@
 #define PL_Istdingv		PL_stdingv
 #define PL_Istrchop		PL_strchop
 #define PL_Istrtab		PL_strtab
+#define PL_Istrtab_mutex	PL_strtab_mutex
 #define PL_Isub_generation	PL_sub_generation
 #define PL_Isublex_info		PL_sublex_info
 #define PL_Isv_arenaroot	PL_sv_arenaroot

@@ -1149,6 +1149,7 @@ unsharepvn(char *str, I32 len, U32 hash)
     } */
     xhv = (XPVHV*)SvANY(PL_strtab);
     /* assert(xhv_array != 0) */
+    LOCK_STRTAB_MUTEX;
     oentry = &((HE**)xhv->xhv_array)[hash & (I32) xhv->xhv_max];
     for (entry = *oentry; entry; i=0, oentry = &HeNEXT(entry), entry = *oentry) {
 	if (HeHASH(entry) != hash)		/* strings can't be equal */
@@ -1166,6 +1167,7 @@ unsharepvn(char *str, I32 len, U32 hash)
 	    del_he(entry);
 	    --xhv->xhv_keys;
 	}
+	UNLOCK_STRTAB_MUTEX;
 	break;
     }
     
@@ -1193,6 +1195,7 @@ share_hek(char *str, I32 len, register U32 hash)
     */
     xhv = (XPVHV*)SvANY(PL_strtab);
     /* assert(xhv_array != 0) */
+    LOCK_STRTAB_MUTEX;
     oentry = &((HE**)xhv->xhv_array)[hash & (I32) xhv->xhv_max];
     for (entry = *oentry; entry; i=0, entry = HeNEXT(entry)) {
 	if (HeHASH(entry) != hash)		/* strings can't be equal */
@@ -1219,6 +1222,7 @@ share_hek(char *str, I32 len, register U32 hash)
     }
 
     ++HeVAL(entry);				/* use value slot as REFCNT */
+    UNLOCK_STRTAB_MUTEX;
     return HeKEY_hek(entry);
 }
 

@@ -447,6 +447,8 @@
 #define PL_strchop				pPerl->PL_strchop		
 #undef  PL_strtab		
 #define PL_strtab				pPerl->PL_strtab		
+#undef  PL_strtab_mutex
+#define PL_strtab_mutex				pPerl->PL_strtab_mutex
 #undef  PL_sub_generation	
 #define PL_sub_generation		pPerl->PL_sub_generation	
 #undef  PL_sublex_info		
