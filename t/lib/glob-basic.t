@@ -2,7 +2,12 @@
 
 BEGIN {
     chdir 't' if -d 't';
-    @INC = '../lib';
+    if ($^O eq 'MacOS') { 
+	@INC = qw(: ::lib ::macos:lib); 
+    } else { 
+	@INC = '.'; 
+	push @INC, '../lib'; 
+    }
     require Config; import Config;
     if ($Config{'extensions'} !~ /\bFile\/Glob\b/i) {
         print "1..0\n";
@@ -26,7 +31,7 @@ sub array {
 $ENV{PATH} = "/bin";
 delete @ENV{BASH_ENV, CDPATH, ENV, IFS};
 @correct = ();
-if (opendir(D, ".")) {
+if (opendir(D, $^O eq "MacOS" ? ":" : ".")) {
    @correct = grep { !/^\./ } sort readdir(D);
    closedir D;
 }
@@ -120,7 +125,7 @@ print "ok 8\n";
 # "~" should expand to $ENV{HOME}
 $ENV{HOME} = "sweet home";
 @a = bsd_glob('~', GLOB_TILDE | GLOB_NOMAGIC);
-unless (@a == 1 and $a[0] eq $ENV{HOME}) {
+unless ($^O eq "MacOS" || (@a == 1 and $a[0] eq $ENV{HOME})) {
     print "not ";
 }
 print "ok 9\n";
