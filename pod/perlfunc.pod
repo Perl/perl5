@@ -1966,7 +1966,7 @@ lookup by name, in which case you get the other thing, whatever it is.
     $name  = getpwuid($num);
     $name  = getpwent();
     $gid   = getgrnam($name);
-    $name  = getgrgid($num;
+    $name  = getgrgid($num);
     $name  = getgrent();
     #etc.
 
