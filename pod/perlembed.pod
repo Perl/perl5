@@ -578,15 +578,12 @@ deep breath...
 
     int main (int argc, char **argv, char **env)
     {
-      char *my_argv[2];
+      char *my_argv[] = { "", "power.pl" };
 
       my_perl = perl_alloc();
       perl_construct( my_perl );
 
-      my_argv[1] = (char *) malloc(10);
-      sprintf(my_argv[1], "power.pl");
-
-      perl_parse(my_perl, NULL, argc, my_argv, NULL);
+      perl_parse(my_perl, NULL, 2, my_argv, (char **)NULL);
       perl_run(my_perl);
 
       PerlPower(3, 4);                      /*** Compute 3 ** 4 ***/
