@@ -154,9 +154,9 @@ static
 XS(XS_UNIVERSAL_class)
 {
     dXSARGS;
-    if(SvROK(ST(0))) {
+    if(SvROK(ST(0)) && SvOBJECT(SvRV(ST(0)))) {
         SV *sv = sv_newmortal();
-        sv_setpv(sv, HvNAME(SvSTASH(ST(0))));
+        sv_setpv(sv, HvNAME(SvSTASH(SvRV(ST(0)))));
         ST(0) = sv;
     }
     XSRETURN(1);
