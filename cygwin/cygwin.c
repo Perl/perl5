@@ -9,6 +9,7 @@
 
 #include <unistd.h>
 #include <process.h>
+#include <sys/cygwin.h>
 
 /*
  * pp_system() implemented via spawn()
@@ -155,6 +156,39 @@ XS(Cygwin_cwd)
     XSRETURN_UNDEF;
 }
 
+static
+XS(XS_Cygwin_pid_to_winpid)
+{
+    dXSARGS;
+    if (items != 1)
+        Perl_croak(aTHX_ "Usage: Cygwin::pid_to_winpid(pid)");
+    pid_t pid = (pid_t)SvIV(ST(0));
+    pid_t RETVAL;
+    dXSTARG;
+    if ((RETVAL = cygwin_internal(CW_CYGWIN_PID_TO_WINPID, pid)) > 0) {
+	XSprePUSH; PUSHi((IV)RETVAL);
+        XSRETURN(1);
+    }
+    XSRETURN_UNDEF;
+}
+
+static
+XS(XS_Cygwin_winpid_to_pid)
+{
+    dXSARGS;
+    if (items != 1)
+        Perl_croak(aTHX_ "Usage: Cygwin::winpid_to_pid(pid)");
+    pid_t pid = (pid_t)SvIV(ST(0));
+    pid_t RETVAL;
+    dXSTARG;
+    if ((RETVAL = cygwin32_winpid_to_pid(pid)) > 0) {
+        XSprePUSH; PUSHi((IV)RETVAL);
+        XSRETURN(1);
+    }
+    XSRETURN_UNDEF;
+}
+
+
 void
 init_os_extras(void)
 {
@@ -162,4 +196,6 @@ init_os_extras(void)
     dTHX;
 
     newXS("Cwd::cwd", Cygwin_cwd, file);
+    newXS("Cygwin::winpid_to_pid", XS_Cygwin_winpid_to_pid, file);
+    newXS("Cygwin::pid_to_winpid", XS_Cygwin_pid_to_winpid, file);
 }

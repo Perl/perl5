@@ -369,6 +369,8 @@ A C<fork()> failure may result in the following tests failing:
 
 See comment on fork in L<Miscellaneous> below.
 
+=head1 Specific features of the Cygwin port
+
 =head2 Script Portability on Cygwin
 
 Cygwin does an outstanding job of providing UNIX-like semantics on top of
@@ -467,6 +469,25 @@ error like the following:
 Use the rebase utility to resolve the conflicting dll addresses.  The
 rebase package is included in the Cygwin netrelease.  Use setup.exe from
 F<http://www.cygwin.com/setup.exe> to install it and run rebaseall.
+
+=back
+
+=head2 Prebuilt methods:
+
+=over 4
+
+=item C<Cwd::cwd>
+
+Returns current working directory.
+
+=item C<Cygwin::pid_to_winpid>
+
+Translates a cygwin pid to the corresponding Windows pid (which may or
+may not be the same).
+
+=item C<Cygwin::winpid_to_pid>
+
+Translates a Windows pid to the corresponding cygwin pid (if any).
 
 =back
 
