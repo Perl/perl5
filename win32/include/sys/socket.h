@@ -17,6 +17,8 @@ extern "C" {
 #include <windows.h>
 #include <winsock.h>
 
+#include "win32.h"
+
 #define  ENOTSOCK	WSAENOTSOCK
 
 #ifdef USE_SOCKETS_AS_HANDLES
