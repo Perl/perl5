@@ -1185,7 +1185,7 @@ sigaction(sig, optaction, oldaction = 0)
 	    struct sigaction act;
 	    struct sigaction oact;
 	    sigset_t sset;
-	    static sigset_t osset;
+	    sigset_t osset;
 	    POSIX__SigSet sigset;
 	    SV** svp;
 	    SV** sigsvp = hv_fetch(GvHVn(siggv),
