@@ -4,7 +4,7 @@
 # test method calls and autoloading.
 #
 
-print "1..46\n";
+print "1..49\n";
 
 @A::ISA = 'B';
 @B::ISA = 'C';
@@ -155,3 +155,15 @@ test(A->eee(), "new B: In A::eee, 4");	# Which sticks
 
 # this test added due to bug discovery
 test(defined(@{"unknown_package::ISA"}) ? "defined" : "undefined", "undefined");
+
+# test that failed subroutine calls don't affect method calls
+{
+    package A1;
+    sub foo { "foo" }
+    package A2;
+    @ISA = 'A1';
+    package main;
+    test(A2->foo(), "foo");
+    test(do { eval 'A2::foo()'; $@ ? 1 : 0}, 1);
+    test(A2->foo(), "foo");
+}

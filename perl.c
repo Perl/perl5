@@ -1190,6 +1190,9 @@ perl_get_cv(const char *name, I32 create)
 {
     GV* gv = gv_fetchpv(name, create, SVt_PVCV);
     /* XXX unsafe for threads if eval_owner isn't held */
+    /* XXX this is probably not what they think they're getting.
+     * It has the same effect as "sub name;", i.e. just a forward
+     * declaration! */
     if (create && !GvCVu(gv))
     	return newSUB(start_subparse(FALSE, 0),
 		      newSVOP(OP_CONST, 0, newSVpv(name,0)),

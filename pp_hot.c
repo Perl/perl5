@@ -2094,10 +2094,13 @@ PP(pp_entersub)
 	break;
     case SVt_PVGV:
 	if (!(cv = GvCVu((GV*)sv)))
-	    cv = sv_2cv(sv, &stash, &gv, TRUE);
-	if (cv)
-	    break;
-	DIE("Not a CODE reference");
+	    cv = sv_2cv(sv, &stash, &gv, FALSE);
+	if (!cv) {
+	    ENTER;
+	    SAVETMPS;
+	    goto try_autoload;
+	}
+	break;
     }
 
     ENTER;
@@ -2117,16 +2120,19 @@ PP(pp_entersub)
 	    cv = GvCV(gv);
 	}
 	/* should call AUTOLOAD now? */
-	else if ((autogv = gv_autoload4(GvSTASH(gv), GvNAME(gv), GvNAMELEN(gv),
-				   FALSE)))
-	{
-	    cv = GvCV(autogv);
-	}
-	/* sorry */
 	else {
-	    sub_name = sv_newmortal();
-	    gv_efullname3(sub_name, gv, Nullch);
-	    DIE("Undefined subroutine &%s called", SvPVX(sub_name));
+try_autoload:
+	    if ((autogv = gv_autoload4(GvSTASH(gv), GvNAME(gv), GvNAMELEN(gv),
+				   FALSE)))
+	    {
+		cv = GvCV(autogv);
+	    }
+	    /* sorry */
+	    else {
+		sub_name = sv_newmortal();
+		gv_efullname3(sub_name, gv, Nullch);
+		DIE("Undefined subroutine &%s called", SvPVX(sub_name));
+	    }
 	}
 	if (!cv)
 	    DIE("Not a CODE reference");

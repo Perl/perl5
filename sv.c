@@ -4214,6 +4214,9 @@ sv_2cv(SV *sv, HV **st, GV **gvp, I32 lref)
 	    ENTER;
 	    tmpsv = NEWSV(704,0);
 	    gv_efullname3(tmpsv, gv, Nullch);
+	    /* XXX this is probably not what they think they're getting.
+	     * It has the same effect as "sub name;", i.e. just a forward
+	     * declaration! */
 	    newSUB(start_subparse(FALSE, 0),
 		   newSVOP(OP_CONST, 0, tmpsv),
 		   Nullop,
