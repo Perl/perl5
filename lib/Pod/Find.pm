@@ -13,7 +13,7 @@
 package Pod::Find;
 
 use vars qw($VERSION);
-$VERSION = 0.11;   ## Current version of this package
+$VERSION = 0.12;   ## Current version of this package
 require  5.005;    ## requires this Perl version or later
 
 #############################################################################
@@ -49,13 +49,15 @@ Only text files containing at least one valid POD command are found.
 
 A warning is printed if more than one POD file with the same POD name
 is found, e.g. F<CPAN.pm> in different directories. This usually
-indicates duplicate occurences of modules in the I<@INC> search path.
+indicates duplicate occurrences of modules in the I<@INC> search path.
 
 The function B<simplify_name> is equivalent to B<basename>, but also
-strips Perl-like extensions (.pm, .pl, .pod).
+strips Perl-like extensions (.pm, .pl, .pod) and extensions like
+F<.bat>, F<.cmd> on Win32 and OS/2, respectively.
 
 Note that neither B<pod_find> nor B<simplify_name> are exported by
-default so be sure to specify them in the B<use> statement if you need them:
+default so be sure to specify them in the B<use> statement if you need
+them:
 
   use Pod::Find qw(pod_find simplify_name);
 
@@ -86,7 +88,8 @@ B<scriptdir>. This is taken from the local L<Config|Config> module.
 
 =item B<-inc>
 
-Search for PODs in the current Perl interpreter's I<@INC> paths.
+Search for PODs in the current Perl interpreter's I<@INC> paths. This
+automatically considers paths specified in the C<PERL5LIB> environment.
 
 =back
 
@@ -104,6 +107,7 @@ L<Pod::Parser>, L<Pod::Checker>
 use strict;
 #use diagnostics;
 use Exporter;
+use File::Spec;
 use File::Find;
 use Cwd;
 
@@ -144,7 +148,7 @@ sub pod_find
         require Config;
         # this code simplifies the POD name for Perl modules:
         # * remove "site_perl"
-        # * remove e.g. "i586-linux"
+        # * remove e.g. "i586-linux" (from 'archname')
         # * remove e.g. 5.00503
         # * remove pod/ if followed by *.pod (e.g. in pod/perlfunc.pod)
         $SIMPLIFY_RX =
@@ -158,11 +162,12 @@ sub pod_find
     my $pwd = cwd();
 
     foreach my $try (@search) {
-        unless($try =~ m:^/:s) {
-	    # make path absolute
-	    $try = join('/',$pwd,$try);
-	}
-	$try =~ s:/\.?(?=/|\z)::; # simplify path
+        unless(File::Spec->file_name_is_absolute($try)) {
+            # make path absolute
+            $try = File::Spec->catfile($pwd,$try);
+        }
+        # simplify path
+        $try = File::Spec->canonpath($try);
         my $name;
         if(-f $try) {
             if($name = _check_and_extract_name($try, $opts{-verbose})) {
@@ -170,30 +175,30 @@ sub pod_find
             }
             next;
         }
-	my $root_rx = qq!^\Q$try\E/!;
+        my $root_rx = qq!^\Q$try\E/!;
         File::Find::find( sub {
-	    my $item = $File::Find::name;
-	    if(-d) {
-	        if($dirs_visited{$item}) {
-		    warn "Directory '$item' already seen, skipping.\n"
-		        if($opts{-verbose});
-		    $File::Find::prune = 1;
-		    return;
-		}
-		else {
-	            $dirs_visited{$item} = 1;
-		}
-		if($opts{-perl} && /^(\d+\.[\d_]+)\z/s && eval "$1" != $]) {
+            my $item = $File::Find::name;
+            if(-d) {
+                if($dirs_visited{$item}) {
+                    warn "Directory '$item' already seen, skipping.\n"
+                        if($opts{-verbose});
+                    $File::Find::prune = 1;
+                    return;
+                }
+                else {
+                    $dirs_visited{$item} = 1;
+                }
+                if($opts{-perl} && /^(\d+\.[\d_]+)\z/s && eval "$1" != $]) {
                     $File::Find::prune = 1;
                     warn "Perl $] version mismatch on $_, skipping.\n"
-		        if($opts{-verbose});
-		}
-		return;
-	    }
+                        if($opts{-verbose});
+                }
+                return;
+            }
             if($name = _check_and_extract_name($item, $opts{-verbose}, $root_rx)) {
                 _check_for_duplicates($item, $name, \%names, \%pods);
             }
-	}, $try); # end of File::Find::find
+        }, $try); # end of File::Find::find
     }
     chdir $pwd;
     %pods;
@@ -203,8 +208,8 @@ sub _check_for_duplicates {
     my ($file, $name, $names_ref, $pods_ref) = @_;
     if($$names_ref{$name}) {
         warn "Duplicate POD found (shadowing?): $name ($file)\n";
-	warn "    Already seen in ",
-	    join(' ', grep($$pods_ref{$_} eq $name, keys %$pods_ref)),"\n";
+        warn "    Already seen in ",
+            join(' ', grep($$pods_ref{$_} eq $name, keys %$pods_ref)),"\n";
     }
     else {
         $$names_ref{$name} = 1;
@@ -215,15 +220,16 @@ sub _check_for_duplicates {
 sub _check_and_extract_name {
     my ($file, $verbose, $root_rx) = @_;
 
-    # check extension or executable
-    unless($file =~ /\.(pod|pm|pl)\z/i || (-f $file && -x _ && -T _)) {
+    # check extension or executable flag
+    # this involves testing the .bat extension on Win32!
+    unless($file =~ /\.(pod|pm|plx?)\z/i || (-f $file && -x _ && -T _)) {
         return undef;
     }
 
     # check for one line of POD
     unless(open(POD,"<$file")) {
         warn "Error: $file is unreadable: $!\n";
-	return undef;
+        return undef;
     }
     local $/ = undef;
     my $pod = <POD>;
@@ -245,8 +251,8 @@ sub _check_and_extract_name {
     else {
         $name =~ s:^.*/::s;
     }
-    $name =~ s/\.(pod|pm|pl)\z//i;
-    $name =~ s!/+!::!g;
+    _simplify($name);
+    $name =~ s!/+!::!g; #/
     $name;
 }
 
@@ -254,9 +260,18 @@ sub _check_and_extract_name {
 # basename & strip extension
 sub simplify_name {
     my ($str) = @_;
+    # remove all path components
     $str =~ s:^.*/::s;
-    $str =~ s:\.p([lm]|od)\z::i;
+    _simplify($str);
     $str;
+}
+
+# internal sub only
+sub _simplify {
+    # strip Perl's own extensions
+    $_[0] =~ s/\.(pod|pm|plx?)\z//i;
+    # strip meaningless extensions on Win32 and OS/2
+    $_[0] =~ s/\.(bat|exe|cmd)\z//i if($^O =~ /win|os2/i);
 }
 
 1;

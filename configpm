@@ -38,6 +38,9 @@ sub import {
 }
 
 ENDOFBEG_NOQ
+die "Perl lib version ($myver) doesn't match executable version (\$])"
+    unless \$^V;
+
 \$^V eq $myver
   or die "Perl lib version ($myver) doesn't match executable version (" .
     (sprintf "v%vd",\$^V) . ")";

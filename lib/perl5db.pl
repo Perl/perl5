@@ -1828,7 +1828,7 @@ sub parse_options {
     # too dangerous to let intuitive usage overwrite important things
     # defaultion should never be the default
     my %opt_needs_val = map { ( $_ => 1 ) } qw{
-        arrayDepth hashDepth LineInfo maxTraceLen noTTY ornaments
+        arrayDepth hashDepth LineInfo maxTraceLen ornaments
         pager quote ReadLine recallCommand RemotePort ShellBang TTY
     };
     while (length) {
