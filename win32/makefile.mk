@@ -1037,31 +1037,31 @@ $(PERL95_OBJ)	: $(CORE_H)
 $(X2P_OBJ)	: $(CORE_H)
 
 perldll.def : $(MINIPERL) $(CONFIGPM) ..\global.sym ..\pp.sym ..\makedef.pl
-	$(MINIPERL) -w ..\makedef.pl PLATFORM=win32 $(OPTIMIZE) $(DEFINES) $(BUILDOPT) \
-	    CCTYPE=$(CCTYPE) > perldll.def
+	$(MINIPERL) -w ..\makedef.pl PLATFORM=win32 $(OPTIMIZE) $(DEFINES) \
+	$(BUILDOPT) CCTYPE=$(CCTYPE) > perldll.def
 
 $(PERLDLL): perldll.def $(PERLDLL_OBJ)
 .IF "$(CCTYPE)" == "BORLAND"
-	$(LINK32) -Tpd -ap $(LINK_FLAGS) \
+	$(LINK32) -Tpd -ap $(BLINK_FLAGS) \
 	    @$(mktmp c0d32$(o) $(PERLDLL_OBJ:s,\,\\)\n \
 		$@,\n \
 		$(LIBFILES)\n \
 		perldll.def\n)
 	$(IMPLIB) $*.lib $@
 .ELIF "$(CCTYPE)" == "GCC"
-	$(LINK32) -mdll -o $@ -Wl,--base-file -Wl,perl.base $(LINK_FLAGS) \
+	$(LINK32) -mdll -o $@ -Wl,--base-file -Wl,perl.base $(BLINK_FLAGS) \
 	    $(mktmp $(LKPRE) $(PERLDLL_OBJ:s,\,\\) $(LIBFILES) $(LKPOST))
 	dlltool --output-lib $(PERLIMPLIB) \
                 --dllname $(PERLDLL:b).dll \
                 --def perldll.def \
                 --base-file perl.base \
                 --output-exp perl.exp
-	$(LINK32) -mdll -o $@ $(LINK_FLAGS) \
+	$(LINK32) -mdll -o $@ $(BLINK_FLAGS) \
 	    $(mktmp $(LKPRE) $(PERLDLL_OBJ:s,\,\\) $(LIBFILES) \
 		perl.exp $(LKPOST))
 .ELSE
 	$(LINK32) -dll -def:perldll.def -out:$@ \
-	    @$(mktmp $(LINK_FLAGS) $(LIBFILES) $(PERLDLL_OBJ:s,\,\\))
+	    @$(mktmp $(BLINK_FLAGS) $(LIBFILES) $(PERLDLL_OBJ:s,\,\\))
 .ENDIF
 	$(XCOPY) $(PERLIMPLIB) $(COREDIR)
 
