@@ -250,5 +250,4 @@ typedef IV IV64;
 	    if (strNE(str, STRINGIFY(BYTEORDER))) {		\
 		HEADER_FAIL("different byteorder", 0, 0);	\
 	    }							\
-	    Safefree(str);					\
 	} STMT_END
