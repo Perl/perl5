@@ -227,3 +227,27 @@ esac
 EOCBU
 
 lddlflags="$lddlflags $lddllibc"
+
+# This script UU/use64bits.cbu will get 'called-back' by Configure 
+# after it has prompted the user for whether to use 64 bits.
+cat > UU/use64bits.cbu <<'EOCBU'
+case "$use64bits" in
+$define|true|[yY]*)
+	    case "`uname -r`" in
+	    3.*|4.[012].*)
+		cat >&4 <<EOM
+AIX `uname -r` does not support 64-bit interfaces.
+You should upgrade to at least AIX 4.3.
+EOM
+		exit 1
+		;;
+	    esac
+	    ccflags="$ccflags `getconf XBS5_LPBIG_OFFBIG_CFLAGS`"
+    	    ccflags="$ccflags -DUSE_LONG_LONG"
+	    ldflags="$ldflags `getconf XBS5_LPBIG_OFFBIG_LDFLAGS`"
+	    libswanted="$libswanted `getconf XBS5_LPBIG_OFFBIG_LIBS`"
+	    # When a 64-bit cc becomes available $archname64
+	    # may need setting so that $archname gets it attached.
+	    ;;
+esac
+EOCBU
