@@ -10,7 +10,7 @@ package B::Deparse;
 use Carp 'cluck', 'croak';
 use B qw(class main_root main_start main_cv svref_2object opnumber cstring
 	 OPf_WANT OPf_WANT_VOID OPf_WANT_SCALAR OPf_WANT_LIST
-	 OPf_KIDS OPf_REF OPf_STACKED OPf_SPECIAL
+	 OPf_KIDS OPf_REF OPf_STACKED OPf_SPECIAL OPf_MOD
 	 OPpLVAL_INTRO OPpOUR_INTRO OPpENTERSUB_AMPER OPpSLICE OPpCONST_BARE
 	 OPpTRANS_SQUASH OPpTRANS_DELETE OPpTRANS_COMPLEMENT OPpTARGET_MY
 	 OPpCONST_ARYBASE OPpEXISTS_SUB OPpSORT_NUMERIC OPpSORT_INTEGER
@@ -961,6 +961,11 @@ sub pp_mapstart { # see also mapwhile
     return "XXX";
 }
 
+sub pp_method_named {
+    cluck "unexpected OP_METHOD_NAMED";
+    return "XXX";
+}
+
 sub pp_flip { # see also flop
     cluck "unexpected OP_FLIP";
     return "XXX";
@@ -1820,7 +1825,8 @@ sub binop {
 	($left, $right) = ($right, $left);
     }
     $left = $self->deparse_binop_left($op, $left, $prec);
-    $left = "($left)" if $flags & LIST_CONTEXT && $left =~ /^\$/;
+    $left = "($left)" if $flags & LIST_CONTEXT
+		&& $left !~ /^(my|our|local|)[\@\(]/;
     $right = $self->deparse_binop_right($op, $right, $prec);
     return $self->maybe_parens("$left $opname$eq $right", $cx, $prec);
 }
@@ -2424,6 +2430,7 @@ sub pp_leavetry {
 BEGIN { eval "sub OP_CONST () {" . opnumber("const") . "}" }
 BEGIN { eval "sub OP_STRINGIFY () {" . opnumber("stringify") . "}" }
 BEGIN { eval "sub OP_RV2SV () {" . opnumber("rv2sv") . "}" }
+BEGIN { eval "sub OP_LIST () {" . opnumber("list") . "}" }
 
 sub pp_null {
     my $self = shift;
@@ -2532,6 +2539,11 @@ sub pp_aelemfast {
 sub rv2x {
     my $self = shift;
     my($op, $cx, $type) = @_;
+
+    if (class($op) eq 'NULL' || !$op->can("first")) {
+	Carp::cluck("Unexpected op in pp_rv2x");
+	return 'XXX';
+    }
     my $kid = $op->first;
     my $str = $self->deparse($kid, 0);
     return $self->stash_variable($type, $str) if is_scalar($kid);
@@ -2555,7 +2567,17 @@ sub pp_av2arylen {
 }
 
 # skip down to the old, ex-rv2cv
-sub pp_rv2cv { $_[0]->rv2x($_[1]->first->first->sibling, $_[2], "&") }
+sub pp_rv2cv {
+    my ($self, $op, $cx) = @_;
+    if (!null($op->first) && $op->first->name eq 'null' &&
+	$op->first->targ eq OP_LIST)
+    {
+	return $self->rv2x($op->first->first->sibling, $cx, "&")
+    }
+    else {
+	return $self->rv2x($op, $cx, "")
+    }
+}
 
 sub pp_rv2av {
     my $self = shift;
@@ -2737,7 +2759,8 @@ sub method {
     } else {
 	$obj = $kid;
 	$kid = $kid->sibling;
-	for (; not null $kid->sibling; $kid = $kid->sibling) {
+	for (; !null ($kid->sibling) && $kid->name ne "method_named";
+	      $kid = $kid->sibling) {
 	    push @exprs, $self->deparse($kid, 6);
 	}
 	$meth = $kid;
@@ -2847,7 +2870,7 @@ sub pp_entersub {
     my $prefix = "";
     my $amper = "";
     my($kid, @exprs);
-    if ($op->flags & OPf_SPECIAL) {
+    if ($op->flags & OPf_SPECIAL && !($op->flags & OPf_MOD)) {
 	$prefix = "do ";
     } elsif ($op->private & OPpENTERSUB_AMPER) {
 	$amper = "&";
@@ -2869,7 +2892,7 @@ sub pp_entersub {
 	}
 	$simple = 1; # only calls of named functions can be prototyped
 	$kid = $self->deparse($kid, 24);
-    } elsif (is_scalar $kid->first) {
+    } elsif (is_scalar ($kid->first) && $kid->first->name ne 'rv2cv') {
 	$amper = "&";
 	$kid = $self->deparse($kid, 24);
     } else {
@@ -4038,11 +4061,6 @@ B::Deparse will produce a pragma at the correct point in the program.
 Since the effects of pragmas are often lexically scoped, this can mean
 that the pragma holds sway over a different portion of the program
 than in the input file.
-
-=item *
-
-Lvalue method calls are not yet fully supported. (Ordinary lvalue
-subroutine calls ought to be okay though.)
 
 =item *
 
