@@ -74,7 +74,7 @@ Note the mistake in the first line was specifying the decimal literal
 644, rather than the intended octal literal 0644.  The problem can
 be seen with:
 
-    printf("%o",644); # prints 01204
+    printf("%#o",644); # prints 01204
 
 Surely you had not intended C<chmod(01204, $file);> - did you?  If you
 want to use numeric literals as arguments to chmod() et al. then please
