@@ -2110,7 +2110,7 @@ case 134:
 break;
 case 135:
 #line 515 "perly.y"
-{ yyval.opval = newUNOP(OP_DOFILE, 0, scalar(yyvsp[0].opval)); }
+{ yyval.opval = dofile(yyvsp[0].opval); }
 break;
 case 136:
 #line 517 "perly.y"

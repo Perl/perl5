@@ -270,6 +270,7 @@ do_tell
 do_trans
 do_vecset
 do_vop
+dofile
 dofindlabel
 dopoptoeval
 dounwind

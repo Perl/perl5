@@ -911,6 +911,8 @@
 #define do_vecset           pPerl->Perl_do_vecset
 #undef  do_vop
 #define do_vop              pPerl->Perl_do_vop
+#undef  dofile
+#define dofile              pPerl->Perl_dofile
 #undef  dowantarray
 #define dowantarray         pPerl->Perl_dowantarray
 #undef  dump_all

@@ -159,6 +159,7 @@
 #define do_trans		Perl_do_trans
 #define do_vecset		Perl_do_vecset
 #define do_vop			Perl_do_vop
+#define dofile			Perl_dofile
 #define dofindlabel		Perl_dofindlabel
 #define dopoptoeval		Perl_dopoptoeval
 #define dounwind		Perl_dounwind

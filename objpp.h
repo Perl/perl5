@@ -299,6 +299,8 @@
 #define do_report_used    CPerlObj::do_report_used
 #undef  docatch
 #define docatch           CPerlObj::docatch
+#undef  dofile
+#define dofile            CPerlObj::Perl_dofile
 #undef  dowantarray
 #define dowantarray       CPerlObj::Perl_dowantarray
 #undef  dump

@@ -512,7 +512,7 @@ term	:	term ASSIGNOP term
 			{ $$ = newUNOP(OP_ENTERSUB, OPf_STACKED,
 			    append_elem(OP_LIST, $3, scalar($2))); }
 	|	DO term	%prec UNIOP
-			{ $$ = newUNOP(OP_DOFILE, 0, scalar($2)); }
+			{ $$ = dofile($2); }
 	|	DO block	%prec '('
 			{ $$ = newUNOP(OP_NULL, OPf_SPECIAL, scope($2)); }
 	|	DO WORD '(' ')'

@@ -2580,6 +2580,7 @@ utilize(int aver, I32 floor, OP *version, OP *id, OP *arg)
     OP *rqop;
     OP *imop;
     OP *veop;
+    GV *gv;
 
     if (id->op_type != OP_CONST)
 	croak("Module name must be constant");
@@ -2631,8 +2632,21 @@ utilize(int aver, I32 floor, OP *version, OP *id, OP *arg)
 			newUNOP(OP_METHOD, 0, meth)));
     }
 
-    /* Fake up a require */
-    rqop = newUNOP(OP_REQUIRE, 0, id);
+    /* Fake up a require, handle override, if any */
+    gv = gv_fetchpv("require", FALSE, SVt_PVCV);
+    if (!(gv && GvIMPORTED_CV(gv)))
+	gv = gv_fetchpv("CORE::GLOBAL::require", FALSE, SVt_PVCV);
+
+    if (gv && GvIMPORTED_CV(gv)) {
+	rqop = ck_subr(newUNOP(OP_ENTERSUB, OPf_STACKED,
+			       append_elem(OP_LIST, id,
+					   scalar(newUNOP(OP_RV2CV, 0,
+							  newGVOP(OP_GV, 0,
+								  gv))))));
+    }
+    else {
+	rqop = newUNOP(OP_REQUIRE, 0, id);
+    }
 
     /* Fake up the BEGIN {}, which does its thing immediately. */
     newSUB(floor,
@@ -2646,6 +2660,29 @@ utilize(int aver, I32 floor, OP *version, OP *id, OP *arg)
 
     PL_copline = NOLINE;
     PL_expect = XSTATE;
+}
+
+OP *
+dofile(OP *term)
+{
+    OP *doop;
+    GV *gv;
+
+    gv = gv_fetchpv("do", FALSE, SVt_PVCV);
+    if (!(gv && GvIMPORTED_CV(gv)))
+	gv = gv_fetchpv("CORE::GLOBAL::do", FALSE, SVt_PVCV);
+
+    if (gv && GvIMPORTED_CV(gv)) {
+	doop = ck_subr(newUNOP(OP_ENTERSUB, OPf_STACKED,
+			       append_elem(OP_LIST, term,
+					   scalar(newUNOP(OP_RV2CV, 0,
+							  newGVOP(OP_GV, 0,
+								  gv))))));
+    }
+    else {
+	doop = newUNOP(OP_DOFILE, 0, scalar(term));
+    }
+    return doop;
 }
 
 OP *

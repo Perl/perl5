@@ -129,6 +129,7 @@ VIRTUAL Off_t	do_tell _((GV* gv));
 VIRTUAL I32	do_trans _((SV* sv));
 VIRTUAL void	do_vecset _((SV* sv));
 VIRTUAL void	do_vop _((I32 optype, SV* sv, SV* left, SV* right));
+VIRTUAL OP*	dofile _((OP* term));
 VIRTUAL I32	dowantarray _((void));
 VIRTUAL void	dump_all _((void));
 VIRTUAL void	dump_eval _((void));
