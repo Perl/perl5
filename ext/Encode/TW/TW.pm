@@ -1,12 +1,9 @@
 package Encode::TW;
-our $VERSION = do { my @r = (q$Revision: 0.94 $ =~ /\d+/g); sprintf "%d."."%02d" x $#r, @r };
+our $VERSION = do { my @r = (q$Revision: 0.96 $ =~ /\d+/g); sprintf "%d."."%02d" x $#r, @r };
 
 use Encode;
 use XSLoader;
 XSLoader::load('Encode::TW',$VERSION);
-
-Encode::define_alias( qr/big-?5$/i		=> '"big5"' );
-Encode::define_alias( qr/big5-hk(?:scs)?/i	=> '"big5-hkscs"' );
 
 1;
 __END__
@@ -32,7 +29,8 @@ Encodings supported are as follows.
                                 Hong Kong
   cp950		                Code Page 950 
                                 (Big5 + Microsoft vendor mappings)
-  
+  --------------------------------------------------------------------
+
 To find how to use this module in detail, see L<Encode>.
 
 =head1 NOTES

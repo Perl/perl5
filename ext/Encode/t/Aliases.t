@@ -1,10 +1,8 @@
 #!../perl
 
 use strict;
-use Encode::CN;
-use Encode::JP;
-use Encode::KR;
-use Encode::TW;
+use Encode;
+use Encode::Alias;
 
 my %a2c;
 
@@ -55,7 +53,7 @@ BEGIN {
 	}
 }
 
-use Test::More tests => (scalar keys %a2c) * 2;
+use Test::More tests => (scalar keys %a2c) * 3;
 
 print "# alias test\n";
 
@@ -66,8 +64,8 @@ foreach my $a (keys %a2c){
 
 # now we override some of the aliases and see if it works fine
 
-Encode::define_alias( qr/shift.*jis$/i  => '"macjapan"' );
-Encode::define_alias( qr/sjis$/i        => '"cp932"' );
+define_alias( qr/shift.*jis$/i  => '"macjapan"' );
+define_alias( qr/sjis$/i        => '"cp932"' );
 
 @a2c{qw(Shift_JIS x-sjis)} = qw(macjapan cp932);
 
@@ -76,6 +74,14 @@ print "# alias test with alias overrides\n";
 foreach my $a (keys %a2c){	     
     my $e = Encode::find_encoding($a);
     is((defined($e) and $e->name), $a2c{$a});
+}
+
+print "# alias undef test\n";
+
+Encode::Alias->undef_aliases;
+foreach my $a (keys %a2c){	     
+    my $e = Encode::find_encoding($a);
+    ok(!defined($e));
 }
 
 __END__

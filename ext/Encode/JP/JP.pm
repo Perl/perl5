@@ -5,20 +5,13 @@ BEGIN {
     }
 }
 use Encode;
-our $VERSION = do { my @r = (q$Revision: 0.94 $ =~ /\d+/g); sprintf "%d."."%02d" x $#r, @r };
+our $VERSION = do { my @r = (q$Revision: 0.96 $ =~ /\d+/g); sprintf "%d."."%02d" x $#r, @r };
 
 use XSLoader;
 XSLoader::load('Encode::JP',$VERSION);
 
 use Encode::JP::JIS;
 use Encode::JP::ISO_2022_JP;
-
-Encode::define_alias( qr/euc.*jp$/i     => '"euc-jp"' );
-Encode::define_alias( qr/jp.*euc/i      => '"euc-jp"' );
-Encode::define_alias( qr/ujis$/i        => '"euc-jp"' );
-Encode::define_alias( qr/shift.*jis$/i  => '"shiftjis"' );
-Encode::define_alias( qr/sjis$/i        => '"shiftjis"' );
-Encode::define_alias( qr/^jis$/i        => '"7bit-jis"' );
 
 1;
 __END__
@@ -49,7 +42,8 @@ supported are as follows.
 				(7bit JIS with all Halfwidth Kana 
 				 converted to Fullwidth)
   macjapan      Mac Japan	(Shift JIS + Apple vendor mappings)
-  cp932         Code Page 932	(Shift JIS + Microsoft vendor mappings)
+  cp932         Code Page 932	(Shift JIS + MS/IBM vendor mappings)
+  --------------------------------------------------------------------
 
 =head1 DESCRIPTION
 

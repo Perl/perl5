@@ -1,13 +1,10 @@
 package Encode::CN;
-our $VERSION = do { my @r = (q$Revision: 0.95 $ =~ /\d+/g); sprintf "%d."."%02d" x $#r, @r };
+our $VERSION = do { my @r = (q$Revision: 0.96 $ =~ /\d+/g); sprintf "%d."."%02d" x $#r, @r };
 
 use Encode;
 use Encode::CN::HZ;
 use XSLoader;
 XSLoader::load('Encode::CN',$VERSION);
-
-Encode::define_alias( qr/euc.*cn$/i     => '"euc-cn"' );
-Encode::define_alias( qr/cn.*euc/i      => '"euc-cn"' );
 
 # Relocated from Encode.pm
 # CP936 doesn't have vendor-addon for GBK, so they're identical.
@@ -41,6 +38,7 @@ Encodings supported are as follows.
   cp936				Code Page 936, also known as GBK 
 				(Extended GuoBiao)
   hz				7-bit escaped GB2312 encoding
+  --------------------------------------------------------------------
 
 To find how to use this module in detail, see L<Encode>.
 

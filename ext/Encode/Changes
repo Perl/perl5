@@ -1,8 +1,45 @@
 # Revision history for Perl extension Encode.
 #
-# $Id: Changes,v 0.95 2002/03/21 15:52:20 dankogai Exp dankogai $
+# $Id: Changes,v 0.96 2002/03/22 22:22:53 dankogai Exp dankogai $
 #
-0.95  Thu Mar 22 2002
+
+0.96  Sat Mar 23 2002
+!     TW/TW.pm
+!     lib/Encode/Encoding.pm
+!     lib/Encode/Alias.pm
+!     lib/Encode/Supported.pod
+!     KR/KR.pm
+  Pod Fixes by Michael G Schwern <schwern@pobox.com> via jhi
+  Message-ID: <20020322073908.GB10539@blackrider>
+! Makefile.PL
+! Encode.pm
+  "...I think we should include ISO 8859-1 as well." -- NI-S
+  Message-Id: <20020322120230.1332.8@bactrian.elixent.com>
+! JP/JP.pm
+! CN/CN.pm
+! KR/KR.pm
+! TW/TW.pm
+! lib/Encode/Alias.pm
+  alias definitions  relocated to Encode::Alias so module autoloading
+  works for aliases also.
+! Encode.pm
+  encodings() now accepts args to check ExtModules.
++ Byte/Byte.pm
++ Byte/Makefile.PL
++ EBCDIC/EBCDIC.pm
++ EBCDIC/Makefile.PL
++ Symbol/Makefile.PL
++ Symbol/Symbol.pm
+! Encode.pm
+! Encode.xs
+  Latin and single byte encodings are reorganized so they are
+  demand-loaded like Encode::XX.  Now only ascii is compiled into
+  Encode itself. 
+! lib/Encode/Alias.pm
+  for my $k (keys %hash){ delete $hash{$k}; }
+   is depreciated; fixed.      
+
+0.95  Fri Mar 22 2002
   In this update, pod rewrites and alias fixes are the main issues
 + lib/Encode/Supported.pod
   Describes supported encodings
@@ -30,6 +67,7 @@
   gbk => cp936 relocated to CN.pm
 ! t/CJKalias.t
   Test::More with plans (by jhi)
+
 0.94  Thu Mar 21 2002
 + lib/Encode/Description.pod
 ! lib/Encode/Encoding.pm

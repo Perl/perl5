@@ -4,33 +4,10 @@ use ExtUtils::MakeMaker;
 
 my %tables = 
     (
-     8859 => ['ascii.ucm',  'koi8-r.ucm', 'viscii.ucm',
-	      'ibm-1250.ucm',  'ibm-1251.ucm',
-	      'ibm-1253.ucm',  'ibm-1254.ucm',
-	      'ibm-1255.ucm',  'ibm-1256.ucm',
-	      'ibm-1257.ucm',   'ibm-1258.ucm',
-	      'ibm-1252.ucm',
-	      qw(macCentEuro.enc  macCroatian.enc 
-		 macCyrillic.enc  macDingbats.enc 
-		 macGreek.enc     macIceland.enc 
-		 macRoman.enc 	  macRumanian.enc 
-		 macSami.enc 	  macThai.enc 
-		 macTurkish.enc	  macUkraine.enc),
-	      ],
-     EBCDIC  => ['cp1047.ucm','cp37.ucm','posix-bc.ucm'],
-     Symbols => ['symbol.ucm','dingbats.ucm'],
+     defcodes => ['ascii.ucm',
+		 '8859-1.ucm',
+		 ]
      );
-
-opendir(ENC,'Encode');
-while (defined(my $file = readdir(ENC)))
-{
-    if ($file =~ /8859.*\.ucm/)
-    {
-	push(@{$tables{8859}},$file);
-    }
-}
-closedir(ENC);
-
 
 WriteMakefile(
 	      NAME		=> "Encode",

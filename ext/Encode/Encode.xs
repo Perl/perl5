@@ -5,10 +5,10 @@
 #include "XSUB.h"
 #define U8 U8
 #include "encode.h"
-#include "8859.h"
-#include "EBCDIC.h"
-#include "Symbols.h"
-
+/* #include "8859.h" */
+/* #include "EBCDIC.h" */
+/* #include "Symbols.h" */
+#include "defcodes.h"
 
 #define UNIMPLEMENTED(x,y) y x (SV *sv, char *encoding) {dTHX;   \
                          Perl_croak(aTHX_ "panic_unimplemented"); \
@@ -782,7 +782,8 @@ BOOT:
 #if defined(USE_PERLIO) && !defined(USE_SFIO)
  PerlIO_define_layer(aTHX_ &PerlIO_encode);
 #endif
-#include "8859_def.h"
-#include "EBCDIC_def.h"
-#include "Symbols_def.h"
+/* #include "8859_def.h" */
+/* #include "EBCDIC_def.h" */
+/* #include "Symbols_def.h" */
+#include "defcodes_def.h"
 }

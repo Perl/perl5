@@ -1,12 +1,9 @@
 package Encode::KR;
-our $VERSION = do { my @r = (q$Revision: 0.94 $ =~ /\d+/g); sprintf "%d."."%02d" x $#r, @r };
+our $VERSION = do { my @r = (q$Revision: 0.96 $ =~ /\d+/g); sprintf "%d."."%02d" x $#r, @r };
 
 use Encode;
 use XSLoader;
 XSLoader::load('Encode::KR',$VERSION);
-
-Encode::define_alias( qr/euc.*kr$/i     => '"euc-kr"' );
-Encode::define_alias( qr/kr.*euc/i      => '"euc-kr"' );
 
 1;
 __END__
@@ -33,6 +30,7 @@ are as follows.
   ksc5601			Korean standard code set
   cp949				Code Page 949 
 				(EUC-KR + Unified Hangul Code)
+  --------------------------------------------------------------------
   
 To find how to use this module in detail, see L<Encode>.
 
