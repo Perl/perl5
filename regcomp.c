@@ -2881,6 +2881,8 @@ tryagain:
 			    else {
 				numlen = 1;	/* allow underscores */
 				ender = (UV)scan_hex(p + 1, e - p - 1, &numlen);
+				if (ender > 0xff)
+				    RExC_utf8 = 1;
 				/* numlen is generous */
 				if (numlen + len >= 127) {
 				    p--;
