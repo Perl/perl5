@@ -55,8 +55,8 @@ there isn't one.  Optional.  Default is fileno($fh).
 
 =item $obj->READ($buffer,$len,$fh)
 
-Returns the number of octets placed in $buffer (must be less that $len).
-Optional.  Default is to use FILL instead.
+Returns the number of octets placed in $buffer (must be less than or
+equal to $len).  Optional.  Default is to use FILL instead.
 
 =item $obj->WRITE($buffer,$fh)
 

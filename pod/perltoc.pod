@@ -2198,8 +2198,7 @@ chcp, dataset access, OS/390, z/OS iconv, locales
 
 attributes, attrs, autouse, base, blib, bytes, charnames, constant,
 diagnostics, fields, filetest, integer, less, locale, open, ops, overload,
-re, sigtrap, strict, subs, unicode::distinct, utf8, vars, warnings,
-warnings::register
+re, sigtrap, strict, subs, utf8, vars, warnings, warnings::register
 
 =item Standard Modules
 
@@ -2239,10 +2238,11 @@ Pod::Usage, SDBM_File, Safe, Search::Dict, SelectSaver, SelfLoader, Shell,
 Socket, Storable, Switch, Symbol, Term::ANSIColor, Term::Cap,
 Term::Complete, Term::ReadLine, Test, Test::Harness, Test::More,
 Test::Simple, Text::Abbrev, Text::Balanced, Text::ParseWords,
-Text::Soundex, Text::Tabs, Text::Wrap, Tie::Array, Tie::Handle, Tie::Hash,
-Tie::RefHash, Tie::Scalar, Tie::SubstrHash, Time::Local, Time::gmtime,
-Time::localtime, Time::tm, UNIVERSAL, UnicodeCD, User::grent, User::pwent,
-Win32
+Text::Soundex, Text::Tabs, Text::Wrap, Thread, Thread::Queue,
+Thread::Semaphore, Thread::Signal, Thread::Specific, Tie::Array,
+Tie::Handle, Tie::Hash, Tie::RefHash, Tie::Scalar, Tie::SubstrHash,
+Time::Local, Time::gmtime, Time::localtime, Time::tm, UNIVERSAL, UnicodeCD,
+User::grent, User::pwent, Win32
 
 =item Extension Modules
 
@@ -4515,9 +4515,13 @@ DEFINES, USE_MULTI = define, #PERL_MALLOC = define, CFG = Debug
 
 =item PERL_DESTRUCT_LEVEL
 
+=item Profiling
+
 =item Gprof Profiling
 
 -a, -b, -e routine, -f routine, -s, -z
+
+=item GCC gcov Profiling
 
 =item Pixie Profiling
 
@@ -6186,7 +6190,7 @@ Buildtype.bat, SetNWBld.bat, MPKBuild.bat
 
 =item Acknowledgements
 
-=item Author
+=item Authors
 
 =item Date
 

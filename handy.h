@@ -341,7 +341,7 @@ Converts the specified character to lowercase.
 #   define isLOWER(c)	((c) >= 'a' && (c) <= 'z')
 #   define isALNUMC(c)	(isALPHA(c) || isDIGIT(c))
 #   define isASCII(c)	((c) <= 127)
-#   define isCNTRL(c)	((c) < ' ')
+#   define isCNTRL(c)	((c) < ' ' || (c) == 127)
 #   define isGRAPH(c)	(isALNUM(c) || isPUNCT(c))
 #   define isPRINT(c)	(((c) > 32 && (c) < 127) || (c) == ' ')
 #   define isPUNCT(c)	(((c) >= 33 && (c) <= 47) || ((c) >= 58 && (c) <= 64)  || ((c) >= 91 && (c) <= 96) || ((c) >= 123 && (c) <= 126))

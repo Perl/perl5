@@ -1,0 +1,11 @@
+# Encoding file: iso2022-cn, escape-driven
+E
+name		iso2022-cn
+init		{}
+final		{}
+ascii		{}
+gb2312		\x1b$)A
+cns11643-1	\x1b$)G
+cns11643-2	\x1b$*H
+
+

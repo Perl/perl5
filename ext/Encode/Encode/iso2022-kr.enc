@@ -3,5 +3,5 @@ E
 name		iso2022-kr
 init		\x1b$)C
 final		{}
-ascii		\x0f
-ksc5601		\x0e
+ascii		{}
+ksc5601		\x1b$)C

@@ -70,7 +70,14 @@ $esc_str{$kr} = {qw(
 my $num_esc = $n * keys(%esc_str);
 foreach (values %esc_str){ $num_esc += $n * keys %$_ }
 
+my $FS_preserves_case = 1; # Unix e.g.
+if ($^O eq 'VMS') { # || $^O eq ...
+    $FS_preserves_case = 0;
+}
 my $hz = 'HZ'; # HanZi
+if (!$FS_preserves_case) {
+    $hz = 'hz'; # HanZi
+}
 
 my @hz_txt = (
   "~~in GB.~{<:Ky2;S{#,NpJ)l6HK!#~}Bye.~~",
