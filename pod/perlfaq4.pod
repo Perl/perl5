@@ -28,6 +28,24 @@ L<"Floating Point Arithmetic"|perlop> for more details.
 
 	my $number = sprintf "%.2f", 10/3;
 
+=head2 Why is int() broken?
+
+Your int() is most probably working just fine.  It's the numbers that
+aren't quite what you think.
+
+First, see the above item "Why am I getting long decimals
+(eg, 19.9499999999999) instead of the numbers I should be getting
+(eg, 19.95)?".
+
+For example, this
+
+    print int(0.6/0.2-2), "\n";
+
+will in most computers print 0, not 1, because even such simple
+numbers as 0.6 and 0.2 cannot be presented exactly by floating-point
+numbers.  What you think in the above as 'three' is really more like
+2.9999999999999995559.
+
 =head2 Why isn't my octal data interpreted correctly?
 
 Perl only understands octal and hex numbers as such when they occur as

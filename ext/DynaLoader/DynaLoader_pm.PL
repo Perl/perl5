@@ -29,7 +29,7 @@ package DynaLoader;
 
 use vars qw($VERSION *AUTOLOAD);
 
-$VERSION = 1.04;	# avoid typo warning
+$VERSION = '1.04';	# avoid typo warning
 
 require AutoLoader;
 *AUTOLOAD = \&AutoLoader::AUTOLOAD;

@@ -6,7 +6,7 @@
 
 $| = 1;
 
-print "1..1033\n";
+print "1..1055\n";
 
 BEGIN {
     chdir 't' if -d 't';
@@ -3243,5 +3243,15 @@ ok("  \x{1E01}x" =~ qr/\x{1E00}X/i,
     ok("\xc4\xc4\xc4" !~ /(\x{100}+?)/, "[perl #23769] don't match first byte of utf8 representation");
 }
 
-# last test 1033
+for (120 .. 130) {
+    my $head = 'x' x $_;
+    for my $tail ('\x{0061}', '\x{1234}') {
+	ok(
+	    eval qq{ "$head$tail" =~ /$head$tail/ },
+	    '\x{...} misparsed in regexp near 127 char EXACT limit'
+	);
+    }
+}
+
+# last test 1055
 

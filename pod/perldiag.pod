@@ -163,6 +163,15 @@ error.
 that expected a numeric value instead.  If you're fortunate the message
 will identify which operator was so unfortunate.
 
+=item Argument list not closed for PerlIO layer "%s"
+
+(W layer) When pushing a layer with arguments onto the Perl I/O system you
+forgot the ) that closes the argument list.  (Layers take care of transforming
+data between external and internal representations.)  Perl stopped parsing
+the layer list at this point and did not attempt to push this layer.
+If your program didn't explicitly request the failing operation, it may be
+the result of the value of the environment variable PERLIO.
+
 =item Array @%s missing the @ in argument %d of %s()
 
 (D deprecated) Really old Perl let you omit the @ on array names in some
@@ -1336,16 +1345,6 @@ define a C<$VERSION.>
 (F) You cannot put a repeat count of any kind right after the '/' code.
 See L<perlfunc/pack>.
 
-=item %s "\x%s" does not map to Unicode
-
-When reading in different encodings Perl tries to map everything
-into Unicode characters.  The bytes you read in are not legal in
-this encoding, for example
-
-    utf8 "\xE4" does not map to Unicode
-
-if you try to read in the a-diaereses Latin-1 as UTF-8.
-
 =item Don't know how to handle magic of type '%s'
 
 (P) The internal handling of magical variables has been cursed.
@@ -1871,6 +1870,13 @@ elements of an attribute list.  If the previous attribute had a
 parenthesised parameter list, perhaps that list was terminated too soon.
 See L<attributes>.
 
+=item Invalid separator character %s in PerlIO layer specification %s
+
+(W layer) When pushing layers onto the Perl I/O system, something other than a
+colon or whitespace was seen between the elements of a layer list.
+If the previous attribute had a parenthesised parameter list, perhaps that
+list was terminated too soon.
+
 =item Invalid type '%s' in %s
 
 (F) The given character is not a valid pack or unpack type.
@@ -1887,6 +1893,12 @@ strange for a machine that supports C.
 
 (W unopened) You tried ioctl() on a filehandle that was never opened.
 Check you control flow and number of arguments.
+
+=item IO layers (like "%s") unavailable
+
+(F) Your Perl has not been configured to have PerlIO, and therefore
+you cannot use IO layers.  To have PerlIO Perl must be configured
+with 'useperlio'.
 
 =item IO::Socket::atmark not implemented on this architecture
 
@@ -2837,31 +2849,6 @@ redirected it with select().)
 (F) This is an educated guess made in conjunction with the message
 "Can't locate object method \"%s\" via package \"%s\"".  It often means
 that a method requires a package that has not been loaded.
-
-=item perlio: argument list not closed for layer "%s"
-
-(W layer) When pushing a layer with arguments onto the Perl I/O system you
-forgot the ) that closes the argument list.  (Layers take care of transforming
-data between external and internal representations.)  Perl stopped parsing
-the layer list at this point and did not attempt to push this layer.
-If your program didn't explicitly request the failing operation, it may be
-the result of the value of the environment variable PERLIO.
-
-=item perlio: invalid separator character %s in layer specification list %s
-
-(W layer) When pushing layers onto the Perl I/O system, something other than a
-colon or whitespace was seen between the elements of a layer list.
-If the previous attribute had a parenthesised parameter list, perhaps that
-list was terminated too soon.
-
-=item perlio: unknown layer "%s"
-
-(W layer) An attempt was made to push an unknown layer onto the Perl I/O
-system.  (Layers take care of transforming data between external and
-internal representations.)  Note that some layers, such as C<mmap>,
-are not supported in all environments.  If your program didn't
-explicitly request the failing operation, it may be the result of the
-value of the environment variable PERLIO.
 
 =item Perl %s required--this is only version %s, stopped
 
@@ -3886,6 +3873,15 @@ order.
 of valid modes: C<< < >>, C<< > >>, C<<< >> >>>, C<< +< >>,
 C<< +> >>, C<<< +>> >>>, C<-|>, C<|->, C<< <& >>, C<< >& >>.
 
+=item Unknown PerlIO layer "%s"
+
+(W layer) An attempt was made to push an unknown layer onto the Perl I/O
+system.  (Layers take care of transforming data between external and
+internal representations.)  Note that some layers, such as C<mmap>,
+are not supported in all environments.  If your program didn't
+explicitly request the failing operation, it may be the result of the
+value of the environment variable PERLIO.
+
 =item Unknown process %x sent message to prime_env_iter: %s
 
 (P) An error peculiar to VMS.  Perl was reading values for %ENV before
@@ -4401,6 +4397,28 @@ anonymous, using the C<sub {}> syntax.  Perl has specific support for
 shared variables in nested anonymous subroutines; a named subroutine in
 between interferes with this feature.
 
+=item Variable "%s" is not imported%s
+
+(F) While "use strict" in effect, you referred to a global variable that
+you apparently thought was imported from another module, because
+something else of the same name (usually a subroutine) is exported by
+that module.  It usually means you put the wrong funny character on the
+front of your variable.
+
+=item Variable length lookbehind not implemented in regex; marked by <-- HERE in m/%s/
+
+(F) Lookbehind is allowed only for subexpressions whose length is fixed and
+known at compile time. The <-- HERE shows in the regular expression about
+where the problem was discovered. See L<perlre>.
+
+=item "%s" variable %s masks earlier declaration in same %s
+
+(W misc) A "my" or "our" variable has been redeclared in the current
+scope or statement, effectively eliminating all access to the previous
+instance.  This is almost always a typographical error.  Note that the
+earlier variable will still exist until the end of the scope or until
+all closure referents to it are destroyed.
+
 =item Variable syntax
 
 (A) You've accidentally run your script through B<csh> instead
@@ -4485,6 +4503,16 @@ of the codes @, /, U, u, w or a *-length. Redesign the template.
 
 (W closed) The filehandle you're writing to got itself closed sometime
 before now.  Check your control flow.
+
+=item %s "\x%s" does not map to Unicode
+
+When reading in different encodings Perl tries to map everything
+into Unicode characters.  The bytes you read in are not legal in
+this encoding, for example
+
+    utf8 "\xE4" does not map to Unicode
+
+if you try to read in the a-diaereses Latin-1 as UTF-8.
 
 =item 'X' outside of string
 
