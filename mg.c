@@ -2267,8 +2267,7 @@ Perl_magic_set(pTHX_ SV *sv, MAGIC *mg)
 	    s = PL_origargv[0]+i;
 	    *s++ = '\0';
 	    while (++i < (I32)PL_origalen)
-		*s++ = ' ';
-	    s = PL_origargv[0]+i;
+		*s++ = '\0';
 	    for (i = 1; i < PL_origargc; i++)
 		PL_origargv[i] = Nullch;
 	}
