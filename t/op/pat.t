@@ -6,7 +6,7 @@
 
 $| = 1;
 
-print "1..792\n";
+print "1..794\n";
 
 BEGIN {
     chdir 't' if -d 't';
@@ -2410,4 +2410,11 @@ print "# some Unicode properties\n";
 	/^(\X)!/ &&
 	$1 eq "\N{LATIN CAPITAL LETTER E}\N{COMBINING GRAVE ACCENT}" ?
 	"ok 792\n" : "not ok 792 # $1\n";
+}
+
+{
+    print "#\\C and \\X\n";
+
+    print "!abc!" =~ /a\Cc/ ? "ok 793\n" : "not ok 793\n";
+    print "!abc!" =~ /a\Xc/ ? "ok 794\n" : "not ok 794\n";
 }
