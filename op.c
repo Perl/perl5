@@ -1573,7 +1573,7 @@ newPROG(OP *o)
 	    CV *cv = perl_get_cv("DB::postponed", FALSE);
 	    if (cv) {
 		dSP;
-		PUSHMARK(sp);
+		PUSHMARK(SP);
 		XPUSHs((SV*)compiling.cop_filegv);
 		PUTBACK;
 		perl_call_sv((SV*)cv, G_DISCARD);
@@ -3466,7 +3466,7 @@ newSUB(I32 floor, OP *o, OP *proto, OP *block)
 	    if (HvFILL(hv) > 0 && hv_exists(hv, SvPVX(tmpstr), SvCUR(tmpstr))
 		  && (cv = GvCV(db_postponed))) {
 		dSP;
-		PUSHMARK(sp);
+		PUSHMARK(SP);
 		XPUSHs(tmpstr);
 		PUTBACK;
 		perl_call_sv((SV*)cv, G_DISCARD);

@@ -535,7 +535,7 @@ PP(pp_grepstart)
     djSP;
     SV *src;
 
-    if (stack_base + *markstack_ptr == sp) {
+    if (stack_base + *markstack_ptr == SP) {
 	(void)POPMARK;
 	if (GIMME_V == G_SCALAR)
 	    XPUSHs(&sv_no);
@@ -574,7 +574,7 @@ PP(pp_mapstart)
 PP(pp_mapwhile)
 {
     djSP;
-    I32 diff = (sp - stack_base) - *markstack_ptr;
+    I32 diff = (SP - stack_base) - *markstack_ptr;
     I32 count;
     I32 shift;
     SV** src;
@@ -584,11 +584,11 @@ PP(pp_mapwhile)
     if (diff) {
 	if (diff > markstack_ptr[-1] - markstack_ptr[-2]) {
 	    shift = diff - (markstack_ptr[-1] - markstack_ptr[-2]);
-	    count = (sp - stack_base) - markstack_ptr[-1] + 2;
+	    count = (SP - stack_base) - markstack_ptr[-1] + 2;
 	    
-	    EXTEND(sp,shift);
-	    src = sp;
-	    dst = (sp += shift);
+	    EXTEND(SP,shift);
+	    src = SP;
+	    dst = (SP += shift);
 	    markstack_ptr[-1] += shift;
 	    *markstack_ptr += shift;
 	    while (--count)
@@ -791,7 +791,7 @@ PP(pp_flip)
 	    }
 	    else {
 		sv_setiv(targ, 0);
-		sp--;
+		SP--;
 		RETURNOP(((CONDOP*)cUNOP->op_first)->op_false);
 	    }
 	}
@@ -1285,7 +1285,7 @@ PP(pp_dbstate)
 
     if (op->op_private || SvIV(DBsingle) || SvIV(DBsignal) || SvIV(DBtrace))
     {
-	SV **sp;
+	djSP;
 	register CV *cv;
 	register PERL_CONTEXT *cx;
 	I32 gimme = G_ARRAY;
@@ -1307,10 +1307,10 @@ PP(pp_dbstate)
 	SAVESTACK_POS();
 	debug = 0;
 	hasargs = 0;
-	sp = stack_sp;
+	SPAGAIN;
 
 	push_return(op->op_next);
-	PUSHBLOCK(cx, CXt_SUB, sp);
+	PUSHBLOCK(cx, CXt_SUB, SP);
 	PUSHSUB(cx);
 	CvDEPTH(cv)++;
 	(void)SvREFCNT_inc(cv);
@@ -1360,7 +1360,7 @@ PP(pp_enteriter)
 	cx->blk_loop.iterary = (AV*)SvREFCNT_inc(POPs);
     else {
 	cx->blk_loop.iterary = curstack;
-	AvFILLp(curstack) = sp - stack_base;
+	AvFILLp(curstack) = SP - stack_base;
 	cx->blk_loop.iterix = MARK - stack_base;
     }
 
@@ -1752,15 +1752,15 @@ PP(pp_goto)
 	    if (CvXSUB(cv)) {
 		if (CvOLDSTYLE(cv)) {
 		    I32 (*fp3)_((int,int,int));
-		    while (sp > mark) {
-			sp[1] = sp[0];
-			sp--;
+		    while (SP > mark) {
+			SP[1] = SP[0];
+			SP--;
 		    }
 		    fp3 = (I32(*)_((int,int,int)))CvXSUB(cv);
 		    items = (*fp3)(CvXSUBANY(cv).any_i32,
 		                   mark - stack_base + 1,
 				   items);
-		    sp = stack_base + items;
+		    SP = stack_base + items;
 		}
 		else {
 		    stack_sp--;		/* There is no cv arg. */
@@ -1834,9 +1834,9 @@ PP(pp_goto)
 		    items = AvFILLp(av) + 1;
 		    if (items) {
 			/* Mark is at the end of the stack. */
-			EXTEND(sp, items);
-			Copy(AvARRAY(av), sp + 1, items, SV*);
-			sp += items;
+			EXTEND(SP, items);
+			Copy(AvARRAY(av), SP + 1, items, SV*);
+			SP += items;
 			PUTBACK ;		    
 		    }
 		}
@@ -2337,7 +2337,7 @@ doeval(int gimme, OP** startop)
 	CV *cv = perl_get_cv("DB::postponed", FALSE);
 	if (cv) {
 	    dSP;
-	    PUSHMARK(sp);
+	    PUSHMARK(SP);
 	    XPUSHs((SV*)compiling.cop_filegv);
 	    PUTBACK;
 	    perl_call_sv((SV*)cv, G_DISCARD);
@@ -2650,7 +2650,7 @@ PP(pp_leaveeval)
     lex_end();
 
     if (optype == OP_REQUIRE &&
-	!(gimme == G_SCALAR ? SvTRUE(*sp) : sp > newsp))
+	!(gimme == G_SCALAR ? SvTRUE(*SP) : SP > newsp))
     {
 	/* Unassume the success we assumed earlier. */
 	char *name = cx->blk_eval.old_name;

@@ -1092,7 +1092,7 @@ perl_call_argv(char *sub_name, I32 flags, register char **argv)
 {
     dSP;
 
-    PUSHMARK(sp);
+    PUSHMARK(SP);
     if (argv) {
 	while (*argv) {
 	    XPUSHs(sv_2mortal(newSVpv(*argv,0)));
@@ -1132,9 +1132,8 @@ perl_call_sv(SV *sv, I32 flags)
        
           		/* See G_* flags in cop.h */
 {
-    dTHR;
+    dSP;
     LOGOP myop;		/* fake syntax tree node */
-    SV** sp = stack_sp;
     I32 oldmark;
     I32 retval;
     I32 oldscope;
@@ -1276,10 +1275,9 @@ perl_eval_sv(SV *sv, I32 flags)
        
           		/* See G_* flags in cop.h */
 {
-    dTHR;
+    dSP;
     UNOP myop;		/* fake syntax tree node */
-    SV** sp = stack_sp;
-    I32 oldmark = sp - stack_base;
+    I32 oldmark = SP - stack_base;
     I32 retval;
     I32 oldscope;
     dJMPENV;
@@ -1366,7 +1364,7 @@ perl_eval_pv(char *p, I32 croak_on_error)
     dSP;
     SV* sv = newSVpv(p, 0);
 
-    PUSHMARK(sp);
+    PUSHMARK(SP);
     perl_eval_sv(sv, G_SCALAR);
     SvREFCNT_dec(sv);
 

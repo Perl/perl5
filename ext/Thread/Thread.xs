@@ -117,8 +117,8 @@ threadstart(void *arg)
     PUTBACK;
     perl_call_sv(sv, G_ARRAY|G_EVAL);
     SPAGAIN;
-    retval = sp - (stack_base + oldmark);
-    sp = stack_base + oldmark + 1;
+    retval = SP - (stack_base + oldmark);
+    SP = stack_base + oldmark + 1;
     if (SvCUR(thr->errsv)) {
 	MUTEX_LOCK(&thr->mutex);
 	thr->flags |= THRf_DID_DIE;
@@ -131,12 +131,12 @@ threadstart(void *arg)
 	DEBUG_L(STMT_START {
 	    for (i = 1; i <= retval; i++) {
 		PerlIO_printf(PerlIO_stderr(), "%p return[%d] = %s\n",
-				thr, i, SvPEEK(sp[i - 1]));
+				thr, i, SvPEEK(SP[i - 1]));
 	    }
 	} STMT_END);
 	av_store(av, 0, &sv_yes);
-	for (i = 1; i <= retval; i++, sp++)
-	    sv_setsv(*av_fetch(av, i, TRUE), SvREFCNT_inc(*sp));
+	for (i = 1; i <= retval; i++, SP++)
+	    sv_setsv(*av_fetch(av, i, TRUE), SvREFCNT_inc(*SP));
     }
 
   finishoff:
@@ -219,7 +219,7 @@ newthread (SV *startsv, AV *initargs, char *classname)
 			  "%p: newthread (%p), tid is %u, preparing stack\n",
 			  savethread, thr, thr->tid));
     /* The following pushes the arg list and startsv onto the *new* stack */
-    PUSHMARK(sp);
+    PUSHMARK(SP);
     /* Could easily speed up the following greatly */
     for (i = 0; i <= AvFILL(initargs); i++)
 	XPUSHs(SvREFCNT_inc(*av_fetch(initargs, i, FALSE)));
@@ -543,7 +543,7 @@ list(classname)
 	/* Truncate any unneeded slots in av */
 	av_fill(av, n - 1);
 	/* Finally, push all the new objects onto the stack and drop av */
-	EXTEND(sp, n);
+	EXTEND(SP, n);
 	for (svp = AvARRAY(av); n > 0; n--, svp++)
 	    PUSHs(*svp);
 	(void)sv_2mortal((SV*)av);

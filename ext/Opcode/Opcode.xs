@@ -252,7 +252,7 @@ _safe_call_sv(package, mask, codesv)
     sv_free((SV*)GvHV(gv));
     GvHV(gv) = (HV*)SvREFCNT_inc(defstash);
 
-    PUSHMARK(sp);
+    PUSHMARK(SP);
     perl_call_sv(codesv, GIMME|G_EVAL|G_KEEPERR); /* use callers context */
     SPAGAIN; /* for the PUTBACK added by xsubpp */
     LEAVE;

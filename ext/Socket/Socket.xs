@@ -828,7 +828,7 @@ unpack_sockaddr_in(sin_sv)
 	port = ntohs(addr.sin_port);
 	ip_address = addr.sin_addr;
 
-	EXTEND(sp, 2);
+	EXTEND(SP, 2);
 	PUSHs(sv_2mortal(newSViv((IV) port)));
 	PUSHs(sv_2mortal(newSVpv((char *)&ip_address,sizeof ip_address)));
 	}
