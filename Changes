@@ -30,7 +30,366 @@ or any other branch.
 --------------
 Version v5.7.1		Development release working toward v5.8
 --------------
-
+____________________________________________________________________________
+[  9257] By: jhi                                   on 2001/03/20  05:04:25
+        Log: tr/// UTF-8 tests for Inaba Hiroto's latest patches.
+     Branch: perl
+	   ! t/op/tr.t
+____________________________________________________________________________
+[  9256] By: jhi                                   on 2001/03/20  04:43:12
+        Log: Subject: [PATCH: 5.6.1-trial3] test fixes and installation cleanliness for OS/390
+             From: Peter Prymmer <pvhp@forte.com>
+             Date: Mon, 19 Mar 2001 16:43:13 -0800 (PST)
+             Message-ID: <Pine.OSF.4.10.10103191627310.162127-100000@aspara.forte.com>
+     Branch: maint-5.6/perl
+	   ! installperl t/comp/proto.t t/comp/require.t t/op/regmesg.t
+____________________________________________________________________________
+[  9255] By: jhi                                   on 2001/03/19  23:17:17
+        Log: substr($bytestr, i, n, $charstr)
+     Branch: perl
+	   ! Todo-5.6 pp.c t/op/substr.t
+____________________________________________________________________________
+[  9254] By: jhi                                   on 2001/03/19  22:25:09
+        Log: Rearrange the make test target prerequisites so that
+             in a parallel make 'all' is finished before 'test'.
+     Branch: perl
+	   ! Makefile.SH
+____________________________________________________________________________
+[  9253] By: jhi                                   on 2001/03/19  21:48:07
+        Log: Subject: PATCH: cosmetic tweak in pp_ctl.c
+             From: Robin Houston <robin@kitsite.com>
+             Date: Mon, 19 Mar 2001 15:48:41 +0000
+             Message-ID: <20010319154841.A28174@puffinry.freeserve.co.uk>
+     Branch: perl
+	   ! pp_ctl.c
+____________________________________________________________________________
+[  9252] By: jhi                                   on 2001/03/19  21:42:27
+        Log: Integrate perlio.
+     Branch: perl
+	  !> doop.c perly.c perly.y sv.c t/camel-III/vstring.t t/op/each.t
+	  !> t/op/length.t t/op/pack.t t/op/ver.t toke.c utf8.c utf8.h
+	  !> utfebcdic.h vms/perly_c.vms
+____________________________________________________________________________
+[  9251] By: jhi                                   on 2001/03/19  21:31:28
+        Log: Integrate changes #9244,9247,9250 from maintperl into mainline.
+             
+             Dynaloading in 64-bit AIX with vac.
+     Branch: perl
+	  !> ext/DynaLoader/dl_aix.xs ext/DynaLoader/hints/aix.pl
+	  !> hints/aix.sh
+____________________________________________________________________________
+[  9250] By: jhi                                   on 2001/03/19  21:18:00
+        Log: A more robust solution for the 64bitall AIX dynaloading
+             problem, from Jens-Uwe Mager.
+     Branch: maint-5.6/perl
+	   ! ext/DynaLoader/dl_aix.xs ext/DynaLoader/hints/aix.pl
+____________________________________________________________________________
+[  9249] By: nick                                  on 2001/03/19  20:59:37
+        Log: Integrate mainline.
+     Branch: perlio
+	  !> (integrate 42 files)
+____________________________________________________________________________
+[  9248] By: nick                                  on 2001/03/19  20:22:07
+        Log: Tweak to perly.y to allow -DDEBUGGING to compile on OS390.
+             (Building on OS390 uses native YACC and YYDEBUG has other
+             side effects.)
+     Branch: perlio
+	   ! perly.c perly.y vms/perly_c.vms
+____________________________________________________________________________
+[  9247] By: jhi                                   on 2001/03/19  19:59:53
+        Log: 64-bit AIX dynaloading problem (see #9244) idea
+             from Jens-Uwe Mager.
+     Branch: maint-5.6/perl
+	   ! ext/DynaLoader/dl_aix.xs
+____________________________________________________________________________
+[  9246] By: nick                                  on 2001/03/19  19:27:57
+        Log: More EBCDIC fixes.
+     Branch: perlio
+	   ! doop.c sv.c t/camel-III/vstring.t t/op/each.t t/op/length.t
+	   ! t/op/pack.t t/op/ver.t toke.c utf8.c utf8.h utfebcdic.h
+____________________________________________________________________________
+[  9245] By: jhi                                   on 2001/03/19  19:05:19
+        Log: Integrate change #9243 from mainline into maintperl.
+             
+             Subject: [PATCH perl-5.6.1-TRIAL3/README.vmesa] bad =item paragraphs
+     Branch: maint-5.6/perl
+	  !> README.vmesa
+____________________________________________________________________________
+[  9244] By: jhi                                   on 2001/03/19  19:03:15
+        Log: Get 64bitall AIX building, but still does not test okay:
+             dynaloading anything fails, for example for op/defins:
+             Can't load '../lib/auto/File/Glob/Glob.so' for module File::Glob: loadbind: A system call received a parameter that is not valid. at ../lib/XSLoader.pm line 75. at ../lib/File/Glob.pm line 99
+             (update: fixed by #9247,9250)
+     Branch: maint-5.6/perl
+	   ! hints/aix.sh
+____________________________________________________________________________
+[  9243] By: jhi                                   on 2001/03/19  19:00:16
+        Log: Subject: [PATCH perl-5.6.1-TRIAL3/README.vmesa] bad =item paragraphs
+             From: Robin Barker <rmb1@cise.npl.co.uk>
+             Date: Mon, 19 Mar 2001 18:01:57 GMT
+             Message-Id: <200103191801.SAA01072@tempest.npl.co.uk>
+     Branch: perl
+	   ! README.vmesa
+____________________________________________________________________________
+[  9242] By: jhi                                   on 2001/03/19  18:58:43
+        Log: UTF-8 tr/// battle continues, ammunition from Inaba Hiroto.
+             
+             TODO: tests.
+     Branch: perl
+	   ! doop.c op.c
+____________________________________________________________________________
+[  9241] By: gsar                                  on 2001/03/19  17:34:46
+        Log: VMSify tests (from Charles Lane)
+     Branch: maint-5.6/perl
+	   ! t/lib/filehand.t t/lib/texttabs.t
+____________________________________________________________________________
+[  9240] By: jhi                                   on 2001/03/19  14:24:26
+        Log: Integrate change #9233 from maintperl into mainline.
+             
+             some refcounts were incorrect in perl_clone()
+     Branch: perl
+	  !> sv.c
+____________________________________________________________________________
+[  9239] By: gsar                                  on 2001/03/19  09:23:17
+        Log: this is 5.6.1-trial3
+     Branch: maint-5.6/perl
+	   ! Changes
+____________________________________________________________________________
+[  9238] By: gsar                                  on 2001/03/19  08:47:04
+        Log: some new symbols are only available under ithreads
+     Branch: maint-5.6/perl
+	   ! makedef.pl
+____________________________________________________________________________
+[  9237] By: gsar                                  on 2001/03/19  08:42:28
+        Log: update patchlevel.h, Changes, &c.
+     Branch: maint-5.6/perl
+	   ! Changes patchlevel.h pod/perlhist.pod
+	  !> AUTHORS
+____________________________________________________________________________
+[  9236] By: gsar                                  on 2001/03/19  08:17:49
+        Log: integrate changes#8068,8717 from mainline
+             
+             [PATCH 5.7.0@8047] RE: [ID 20001013.009] DB_File issues warning when setting element to    undef
+             
+             [PATCH CPAN 1.59_51] warning message (not!)
+     Branch: maint-5.6/perl
+	  !> ext/GDBM_File/GDBM_File.pm ext/GDBM_File/typemap
+	  !> ext/NDBM_File/NDBM_File.pm ext/NDBM_File/typemap
+	  !> ext/ODBM_File/ODBM_File.pm ext/ODBM_File/typemap
+	  !> ext/SDBM_File/SDBM_File.pm ext/SDBM_File/typemap lib/CPAN.pm
+	  !> t/lib/gdbm.t t/lib/ndbm.t t/lib/odbm.t t/lib/sdbm.t
+____________________________________________________________________________
+[  9235] By: gsar                                  on 2001/03/19  08:07:09
+        Log: integrate changes#8617,8713,8715,8716,8721,8953,8963 from mainline
+             
+             [PATCH] Add missing CV flags to dump.c
+             
+             Re: [patch] Re: PL_ptr_table
+             
+             Fixup non-ithread build after 8713
+             
+             Generated files form 8713 etc.
+             
+             Correct the correction :-(
+             
+             Documenting coderef @INC (Re: CPAN "make this script work" feature)
+             
+             Subject: Re: sync sync sync: have I missed any patches?
+             Replace djSP with dSP.
+     Branch: maint-5.6/perl
+	  !> cop.h doio.c doop.c dump.c embed.h embed.pl ext/B/B/C.pm
+	  !> ext/B/B/CC.pm global.sym objXSUB.h perl.c perlapi.c
+	  !> pod/perlhack.pod pp.c pp.h pp_ctl.c pp_hot.c pp_sys.c proto.h
+	  !> sv.c sv.h win32/perlhost.h
+____________________________________________________________________________
+[  9234] By: gsar                                  on 2001/03/19  07:22:05
+        Log: revert the change#9090 integrate for now (change looks somewhat
+             incomplete in that [ha]v_exists() need something similar; lacks
+             tests; &c.)
+     Branch: maint-5.6/perl
+	   ! hv.c
+____________________________________________________________________________
+[  9233] By: gsar                                  on 2001/03/19  07:10:01
+        Log: some refcounts were incorrect in perl_clone(); avoid hang in global
+             destruction when there are unreferenced scalars (SvREFCNT==0)
+     Branch: maint-5.6/perl
+	   ! sv.c
+____________________________________________________________________________
+[  9232] By: jhi                                   on 2001/03/19  05:11:02
+        Log: Regen api and toc.
+     Branch: maint-5.6/perl
+	   ! pod/perlapi.pod pod/perltoc.pod
+____________________________________________________________________________
+[  9231] By: jhi                                   on 2001/03/19  04:06:03
+        Log: Integrate changes in #9070,9072,9101 from mainline into maintperl,
+             add a lost line in pp.c:pp_chop(), update to new op/chop.
+             
+             Clarify the description differentiating for and while; inspired by
+             
+             Subject: [ID 20010306.004] || != named unary operator
+             
+             The $Is_MacOS needs to be declared.
+     Branch: maint-5.6/perl
+	   ! pp.c t/op/chop.t
+	  !> lib/ExtUtils/Manifest.pm pod/perlop.pod pod/perlsyn.pod
+____________________________________________________________________________
+[  9230] By: jhi                                   on 2001/03/19  03:48:16
+        Log: Integrate changes #7971(perlio),8982,9061,9062,9068,9069,
+             9079,9083,9089,9090,9091 from mainline to maintperl.
+             
+             Quieten some noise in Win32 builds
+             
+             Fixes the bugs 20010221.005 and 20010221.008: "the taint checker..."
+             
+             The perlretut was still talking about the old \p and \P
+             definitions.
+             
+             More tweakage on the Unicode character class descriptions.
+             
+             Subject: Re: [ID 20010305.012] chop() against list assignment returns char chopped from el zero
+             
+             Subject: 'no *POSIX' Patch speeding up make on BS2000 
+             
+             Subject: [PATCH] perldata.pod here-doc docs
+             
+             Add /sbin and /usr/sbin to the list of directories scanned
+             for setuid programs.  Takes care of bug id 20010309.003.
+             
+             Subject: Re: [ID 19990808.001] [PATCH] FETCH triggered on exists()
+             
+             In op/stat #35 better to scan all the potential directories
+             for setuids, not just the first one.
+     Branch: maint-5.6/perl
+	   ! Makefile.SH
+	  !> doio.c hv.c lib/unicode/mktables.PL makedepend.SH perl.h
+	  !> pod/perldata.pod pod/perlretut.pod pp.c t/op/chop.t
+	  !> t/op/stat.t toke.c win32/win32.h
+____________________________________________________________________________
+[  9229] By: jhi                                   on 2001/03/19  02:31:50
+        Log: Subject: [MacPerl-Porters] [PATCH] Portability fixes for Mac OS / maint-5.6
+             From: Chris Nandor <pudge@pobox.com>
+             Date: Sat, 10 Mar 2001 14:22:19 -0500
+             Message-Id: <p0501042db6cf0a8d0b63@[10.0.1.177]>
+     Branch: maint-5.6/perl
+	   ! ext/B/defsubs_h.PL ext/DynaLoader/dl_mac.xs
+	   ! ext/Errno/Errno_pm.PL lib/ExtUtils/Manifest.pm perlsfio.h
+	   ! t/lib/b.t t/lib/errno.t
+____________________________________________________________________________
+[  9228] By: jhi                                   on 2001/03/19  02:29:59
+        Log: Integrate changes #9113,9122 from mainline into maintperl.
+             
+             Subject: [PATCH: perl@9092, dist-3.0@70] OS/390 mydomain last gasp before silly guess (was Re: What do I need to build EBCDIC perl?)
+     Branch: maint-5.6/perl
+	  !> Configure README.os390 hints/os390.sh
+____________________________________________________________________________
+[  9227] By: jhi                                   on 2001/03/19  02:22:35
+        Log: Integrate #9115,9121,9128,9163,9171,9174,9175 from mainline
+             into maintperl.
+             
+             Subject: Re: [ID 20010305.005] "use integer" doesn't make rand() return integers
+             
+             Forgot to check-in the larger part of #9120, duh.
+             
+             Subject: Another patch for integer.pm POD 
+             
+             h2ph strictness and cleanliness from Kurt Starsinic.
+             
+             Borland filename case problem.
+             
+             h2ph strictness and cleanliness from Kurt Starsinic.
+             
+             Subject: [PATCH] the uncontroversial doc patches
+     Branch: maint-5.6/perl
+	  +> win32/sncfnmcs.pl
+	  !> MANIFEST README.os2 README.win32 ext/GDBM_File/GDBM_File.pm
+	  !> ext/GDBM_File/GDBM_File.xs lib/integer.pm
+	  !> pod/perl5005delta.pod pod/perldebtut.pod pod/perlfunc.pod
+	  !> pod/perlhack.pod pod/perllexwarn.pod pod/perllocale.pod
+	  !> pod/perllol.pod pod/perlmod.pod pod/perlmodlib.pod
+	  !> pod/perlport.pod pod/perlrun.pod pod/perltoc.pod
+	  !> pod/perlxs.pod pod/perlxstut.pod utils/h2ph.PL
+____________________________________________________________________________
+[  9226] By: jhi                                   on 2001/03/19  02:10:21
+        Log: Integrate changes #9207,9214 from mainline into maintperl.
+             
+             podchecker relaxations: =over has an *optional* number after it,
+             and whitespace in L<> is okay.
+     Branch: maint-5.6/perl
+	  !> lib/Pod/Checker.pm lib/Pod/ParseUtils.pm pod/perlpod.pod
+	  !> t/pod/poderrs.xr
+____________________________________________________________________________
+[  9225] By: jhi                                   on 2001/03/19  02:07:38
+        Log: Integrate change #9219 from maintperl into mainline.
+             
+             remove duplicated tests
+     Branch: perl
+	  !> t/op/re_tests
+____________________________________________________________________________
+[  9224] By: jhi                                   on 2001/03/19  02:06:11
+        Log: Integrate change #9223 from mainline to maintperl.
+             
+             Document -Dmksymlinks.
+     Branch: maint-5.6/perl
+	  !> INSTALL
+____________________________________________________________________________
+[  9223] By: jhi                                   on 2001/03/19  02:01:25
+        Log: Document -Dmksymlinks.
+     Branch: perl
+	   ! INSTALL
+____________________________________________________________________________
+[  9222] By: jhi                                   on 2001/03/19  01:15:35
+        Log: The -Dmksymlinks wasn't working for maintperl.
+     Branch: maint-5.6/perl
+	   ! Configure
+____________________________________________________________________________
+[  9221] By: jhi                                   on 2001/03/19  00:49:43
+        Log: Cleanup pixie residue.
+     Branch: perl
+	   ! Makefile.SH
+____________________________________________________________________________
+[  9220] By: jhi                                   on 2001/03/19  00:44:47
+        Log: Document the use of pixie/prof; create make targets for it.
+             
+             TODO: make t/TEST pixie-aware.
+     Branch: perl
+	   ! Makefile.SH pod/perlhack.pod
+____________________________________________________________________________
+[  9219] By: gsar                                  on 2001/03/19  00:16:55
+        Log: remove duplicated tests
+     Branch: maint-5.6/perl
+	   ! t/op/re_tests
+____________________________________________________________________________
+[  9218] By: jhi                                   on 2001/03/18  23:59:31
+        Log: Document Third Degree some more, and also PERL_DESTRUCT_LEVEL.
+     Branch: perl
+	   ! pod/perlhack.pod pod/perlobj.pod pod/perlrun.pod
+____________________________________________________________________________
+[  9217] By: jhi                                   on 2001/03/18  23:25:20
+        Log: Rewrite the tests section of Makefile to be less redundant
+             and to allow for more flexible test targets, many recursive
+             make calls introduced.
+     Branch: perl
+	   ! Makefile.SH
+____________________________________________________________________________
+[  9216] By: jhi                                   on 2001/03/18  22:30:04
+        Log: Document the use of Third Degree (sparsely).
+     Branch: perl
+	   ! pod/perlhack.pod t/TEST
+____________________________________________________________________________
+[  9215] By: jhi                                   on 2001/03/18  22:10:30
+        Log: Make targets for testing with Third Degree.
+     Branch: perl
+	   ! Makefile.SH
+____________________________________________________________________________
+[  9214] By: jhi                                   on 2001/03/18  21:08:53
+        Log: The podchecker relaxations need to mirrored also at the tests.
+     Branch: perl
+	   ! t/pod/poderrs.xr
+____________________________________________________________________________
+[  9213] By: jhi                                   on 2001/03/18  20:56:21
+        Log: Update Changes.
+     Branch: perl
+	   ! Changes patchlevel.h
 ____________________________________________________________________________
 [  9212] By: jhi                                   on 2001/03/18  20:36:59
         Log: Looking for config.sh in parent directories isn't
@@ -157,7 +516,7 @@ ____________________________________________________________________________
 ____________________________________________________________________________
 [  9194] By: jhi                                   on 2001/03/18  05:29:59
         Log: Sarathy's clear_pmop patch with Radu Greab's fix,
-             Inaba-san's, Nick Clark's, and Vadim Konovalov's tests.
+             Hiroto's, Nick Clark's, and Vadim Konovalov's tests.
      Branch: perl
 	   ! op.c op.h t/op/misc.t t/op/pat.t
 ____________________________________________________________________________
