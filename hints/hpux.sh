@@ -428,7 +428,7 @@ else
     echo "Testing for a certain gcc bug is fixed in your compiler..."
 
     # Try compiling the test case.
-    if $cc -o t001 -O $ccflags $ldflags ../hints/t001.c; then
+    if $cc -o t001 -O $ccflags $ldflags -lm ../hints/t001.c; then
        gccbug=`$run ./t001`
        case "$gccbug" in
            *fails*)
