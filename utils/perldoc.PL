@@ -51,7 +51,7 @@ if (@ARGV<1) {
 	my $me = $0;		# Editing $0 is unportable
 	$me =~ s,.*/,,;
 	die <<EOF;
-Usage: $me [-h] [-r] [-i] [-v] [-t] [-u] [-m] [-l] [-F] [-X] PageName|ModuleName|ProgramName
+Usage: $me [-h] [-r] [-i] [-v] [-t] [-u] [-m] [-n program] [-l] [-F] [-X] PageName|ModuleName|ProgramName
        $me -f PerlFunc
        $me -q FAQKeywords
 
@@ -87,6 +87,7 @@ Options:
              (-t is the default on win32)
     -u	 Display unformatted pod text
     -m   Display module's file in its entirety
+    -n   Specify replacement for nroff
     -l   Display the module's file name
     -F   Arguments are file names, not modules
     -v	 Verbosely describe what's going on
@@ -121,7 +122,7 @@ if (defined $ENV{"PERLDOC"}) {
 }
 !NO!SUBS!
 
-my $getopts = "mhtluvriFf:Xq:";
+my $getopts = "mhtluvriFf:Xq:n:";
 print OUT <<"!GET!OPTS!";
 
 use vars qw( @{[map "\$opt_$_", ($getopts =~ /\w/g)]} );
@@ -132,6 +133,7 @@ getopts("$getopts") || usage;
 print OUT <<'!NO!SUBS!';
 
 usage if $opt_h;
+$opt_n = "nroff" if !$opt_n;
 
 my $podidx;
 if ($opt_X) {
@@ -321,7 +323,7 @@ sub printout {
 	close OUT;
     }
     elsif (not $opt_u) {
-	my $cmd = "pod2man --lax $file | nroff -man";
+	my $cmd = "pod2man --lax $_ | $opt_n -man";
 	$cmd .= " | col -x" if $^O =~ /hpux/;
 	my $rslt = `$cmd`;
 	$rslt = filter_nroff($rslt) if $filter;
