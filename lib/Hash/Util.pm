@@ -94,14 +94,14 @@ sub lock_keys (\%;@) {
         Internals::SvREADONLY %$hash, 1;
     }
 
-    return undef;
+    return;
 }
 
 sub unlock_keys (\%) {
     my($hash) = shift;
 
     Internals::SvREADONLY %$hash, 0;
-    return undef;
+    return;
 }
 
 =item lock_value
