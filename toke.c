@@ -2180,7 +2180,7 @@ Perl_yylex(pTHX)
     bool bof = FALSE;
 
     /* check if there's an identifier for us to look at */
-    if (PL_pending_ident) 
+    if (PL_pending_ident)
         return S_pending_ident(aTHX);
 
     /* no identifier pending identification */
@@ -6668,12 +6668,12 @@ S_scan_inputsymbol(pTHX_ char *start)
 	    (void)strcpy(d,"ARGV");
 
 	/* Check whether readline() is overriden */
-	if ((gv_readline = gv_fetchpv("readline", FALSE, SVt_PVCV))
-		&& GvCVu(gv_readline) && GvIMPORTED_CV(gv_readline)
-		||
-		(gvp = (GV**)hv_fetch(PL_globalstash, "readline", 8, FALSE))
-		&& (gv_readline = *gvp) != (GV*)&PL_sv_undef
+	if (((gv_readline = gv_fetchpv("readline", FALSE, SVt_PVCV))
 		&& GvCVu(gv_readline) && GvIMPORTED_CV(gv_readline))
+		||
+		((gvp = (GV**)hv_fetch(PL_globalstash, "readline", 8, FALSE))
+		&& (gv_readline = *gvp) != (GV*)&PL_sv_undef
+		&& GvCVu(gv_readline) && GvIMPORTED_CV(gv_readline)))
 	    readline_overriden = TRUE;
 
 	/* if <$fh>, create the ops to turn the variable into a

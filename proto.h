@@ -1045,6 +1045,7 @@ STATIC void	S_apply_attrs(pTHX_ HV *stash, SV *target, OP *attrs, bool for_my);
 STATIC void	S_apply_attrs_my(pTHX_ HV *stash, OP *target, OP *attrs, OP **imopsp);
 #  if defined(PL_OP_SLAB_ALLOC)
 STATIC void*	S_Slab_Alloc(pTHX_ int m, size_t sz);
+STATIC void	S_Slab_Free(pTHX_ void *);
 #  endif
 #endif
 
@@ -1106,7 +1107,7 @@ STATIC I32	S_dopoptoeval(pTHX_ I32 startingblock);
 STATIC I32	S_dopoptolabel(pTHX_ char *label);
 STATIC I32	S_dopoptoloop(pTHX_ I32 startingblock);
 STATIC I32	S_dopoptosub(pTHX_ I32 startingblock);
-STATIC I32	S_dopoptosub_at(pTHX_ PERL_CONTEXT* cxstk, I32 startingblock);
+STATIC I32	S_dopoptosub_at(pTHX_ PERL_CONTEXT* cxstk, I32 startingblock);
 STATIC void	S_save_lines(pTHX_ AV *array, SV *sv);
 STATIC OP*	S_doeval(pTHX_ int gimme, OP** startop);
 STATIC PerlIO *	S_doopen_pmc(pTHX_ const char *name, const char *mode);
