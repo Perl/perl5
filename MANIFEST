@@ -631,8 +631,8 @@ t/comp/decl.t		See if declarations work
 t/comp/multiline.t	See if multiline strings work
 t/comp/package.t	See if packages work
 t/comp/proto.t		See if function prototypes work
-t/comp/require.t	See if require works
 t/comp/redef.t		See if we get correct warnings on redefined subs
+t/comp/require.t	See if require works
 t/comp/script.t		See if script invokation works
 t/comp/term.t		See if more terms work
 t/comp/use.t		See if pragmas work
@@ -826,6 +826,7 @@ win32/Makefile		Win32 makefile for NMAKE (Visual C++ build)
 win32/TEST		Win32 port
 win32/autosplit.pl	Win32 port
 win32/bin/network.pl	Win32 port
+win32/bin/perlglob.pl	Win32 globbing
 win32/bin/pl2bat.pl	wrap perl scripts into batch files
 win32/bin/runperl.pl	run perl script via batch file namesake
 win32/bin/search.pl	Win32 port
@@ -854,8 +855,6 @@ win32/runperl.c		Win32 port
 win32/splittree.pl	Win32 port
 win32/win32.c		Win32 port
 win32/win32.h		Win32 port
-win32/win32io.c		Win32 port
-win32/win32io.h		Win32 port
 win32/win32iop.h	Win32 port
 win32/win32sck.c	Win32 port
 writemain.SH		Generate perlmain.c from miniperlmain.c+extensions

@@ -24,11 +24,6 @@ void Perl_DJGPP_init();
 #define dXSUB_SYS
 #define TMPPATH "plXXXXXX"
 
-#ifdef WIN32
-#define HAS_UTIME
-#define HAS_KILL
-#endif
-
 /*
  * 5.003_07 and earlier keyed on #ifdef MSDOS for determining if we were 
  * running on DOS, *and* if we had to cope with 16 bit memory addressing 
@@ -53,6 +48,14 @@ void Perl_DJGPP_init();
  *	of bytes occurs on read or write operations.
  */
 #undef USEMYBINMODE
+
+/* Stat_t:
+ *	This symbol holds the type used to declare buffers for information
+ *	returned by stat().  It's usually just struct stat.  It may be necessary
+ *	to include <sys/stat.h> and <sys/types.h> to get any typedef'ed
+ *	information.
+ */
+#define Stat_t struct stat
 
 /* USE_STAT_RDEV:
  *	This symbol is defined if this system has a stat structure declaring
@@ -94,12 +97,16 @@ void Perl_DJGPP_init();
 #ifndef WIN32
 #  define Stat(fname,bufptr) stat((fname),(bufptr))
 #else
-#  define Stat(fname,bufptr) win32_stat((fname),(bufptr))
-#  define my_getenv(var)  getenv(var)
+#  define HAS_IOCTL
+#  define HAS_UTIME
+#  define HAS_KILL
+#  define HAS_WAIT
+#  define HAS_CHOWN
 /*
- * the following are standard library calls (stdio in particular)
- * that is being redirected to the perl DLL. This is needed for 
- * Dynaloading any modules that called stdio functions
+ * This provides a layer of functions and macros to ensure extensions will
+ * get to use the same RTL functions as the core.
  */
-#  include <win32iop.h>
+#  ifndef HASATTRIBUTE
+#    include <win32iop.h>
+#  endif
 #endif	/* WIN32 */

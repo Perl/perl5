@@ -2,20 +2,10 @@
  * "The Road goes ever on and on, down from the door where it began."
  */
 
-#ifdef __cplusplus
-extern "C" {
-#endif
 
 #include "EXTERN.h"
 #include "perl.h"
 #include "XSUB.h"
-
-#ifdef __cplusplus
-}
-#  define EXTERN_C extern "C"
-#else
-#  define EXTERN_C extern
-#endif
 
 static void xs_init _((void));
 
@@ -24,9 +14,6 @@ RunPerl(int argc, char **argv, char **env, void *iosubsystem)
 {
     int exitstatus;
     PerlInterpreter *my_perl;
-    void *pOldIOSubsystem;
-
-    pOldIOSubsystem = SetIOSubSystem(iosubsystem);
 
     PERL_SYS_INIT(&argc,&argv);
 
@@ -47,12 +34,10 @@ RunPerl(int argc, char **argv, char **env, void *iosubsystem)
 
     PERL_SYS_TERM();
 
-    SetIOSubSystem(pOldIOSubsystem);
-
     return (exitstatus);
 }
 
-extern HANDLE PerlDllHandle;
+extern HANDLE w32_perldll_handle;
 
 BOOL APIENTRY
 DllMain(HANDLE hModule,		/* DLL module handle */
@@ -71,7 +56,7 @@ DllMain(HANDLE hModule,		/* DLL module handle */
 	setmode( fileno( stderr ), O_BINARY );
 	_fmode = O_BINARY;
 #endif
-	PerlDllHandle = hModule;
+	w32_perldll_handle = hModule;
 	break;
 
 	/* The DLL is detaching from a process due to
