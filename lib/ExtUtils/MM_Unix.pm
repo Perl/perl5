@@ -5,7 +5,7 @@ use Config;
 use File::Basename qw(basename dirname fileparse);
 use DirHandle;
 use strict;
-use vars qw($VERSION $Is_Mac $Is_OS2 $Is_VMS $Is_Win32 $Is_Dos
+use vars qw($VERSION $Is_Mac $Is_OS2 $Is_VMS $Is_Win32 $Is_Dos $Is_PERL_OBJECT
 	    $Verbose %pm %static $Xsubpp_Version);
 
 $VERSION = substr q$Revision: 1.126 $, 10;
@@ -18,6 +18,8 @@ $Is_OS2 = $^O eq 'os2';
 $Is_Mac = $^O eq 'MacOS';
 $Is_Win32 = $^O eq 'MSWin32';
 $Is_Dos = $^O eq 'dos';
+
+$Is_PERL_OBJECT   = 1 if $Config{'ccflags'} =~ /-DPERL_OBJECT/;
 
 if ($Is_VMS = $^O eq 'VMS') {
     require VMS::Filespec;
@@ -212,6 +214,7 @@ sub ExtUtils::MM_Unix::pm_to_blib ;
 sub ExtUtils::MM_Unix::post_constants ;
 sub ExtUtils::MM_Unix::post_initialize ;
 sub ExtUtils::MM_Unix::postamble ;
+sub ExtUtils::MM_Unix::ppd ;
 sub ExtUtils::MM_Unix::prefixify ;
 sub ExtUtils::MM_Unix::processPL ;
 sub ExtUtils::MM_Unix::realclean ;
@@ -371,7 +374,7 @@ sub cflags {
 	$self->{uc $_} ||= $cflags{$_}
     }
 
-    if ($self->{CAPI}) {
+    if ($self->{CAPI} && $Is_PERL_OBJECT == 1) {
         $self->{CCFLAGS} =~ s/-DPERL_OBJECT(\s|$)//;
         $self->{CCFLAGS} .= '-DPERL_CAPI';
         if ($Is_Win32 && $Config{'cc'} =~ /^cl.exe/i) {
@@ -2596,6 +2599,32 @@ sub parse_version {
     return $result;
 }
 
+=item parse_abstract
+
+parse a file and return what you think is the ABSTRACT
+
+=cut
+
+sub parse_abstract {
+    my($self,$parsefile) = @_;
+    my $result;
+    local *FH;
+    local $/ = "\n";
+    open(FH,$parsefile) or die "Could not open '$parsefile': $!";
+    my $inpod = 0;
+    my $package = $self->{DISTNAME};
+    $package =~ s/-/::/;
+    while (<FH>) {
+        $inpod = /^=(?!cut)/ ? 1 : /^=cut/ ? 0 : $inpod;
+        next if !$inpod;
+        chop;
+        next unless /^($package\s-\s)(.*)/;
+        $result = $2;
+        last;
+    }
+    close FH;
+    return $result;
+}
 
 =item pasthru (o)
 
@@ -2693,6 +2722,57 @@ $(OBJECT) : $(PERL_HDRS)
     push @m, join(" ", values %{$self->{XS}})." : \$(XSUBPPDEPS)\n"  if %{$self->{XS}};
 
     join "\n", @m;
+}
+
+=item ppd
+
+Defines target that creates a PPD (Perl Package Description) file
+for a binary distribution.
+
+=cut
+
+sub ppd {
+    my($self) = @_;
+    my(@m);
+    if ($self->{ABSTRACT_FROM}){
+        $self->{ABSTRACT} = $self->parse_abstract($self->{ABSTRACT_FROM}) or
+            Carp::carp "WARNING: Setting ABSTRACT via file '$self->{ABSTRACT_FROM}' failed\n";
+    }
+    my ($pack_ver) = join ",", (split (/\./, $self->{VERSION}), (0) x 4) [0 .. 3];
+    push(@m, "# Creates a PPD (Perl Package Description) for a binary distribution.\n");
+    push(@m, "ppd:\n");
+    push(@m, "\t\@\$(PERL) -e \"print qq{<SOFTPKG NAME=\\\"$self->{DISTNAME}\\\" VERSION=\\\"$pack_ver\\\">\\n}");
+    push(@m, ". qq{\\t<TITLE>$self->{DISTNAME}</TITLE>\\n}");
+    my $abstract = $self->{ABSTRACT};
+    $abstract =~ s/</&lt;/g;
+    $abstract =~ s/>/&gt;/g;
+    push(@m, ". qq{\\t<ABSTRACT>$abstract</ABSTRACT>\\n}");
+    my ($author) = $self->{AUTHOR};
+    $author =~ s/@/\\@/g;
+    push(@m, ". qq{\\t<AUTHOR>$author</AUTHOR>\\n}");
+    push(@m, ". qq{\\t<IMPLEMENTATION>\\n}");
+    my ($prereq);
+    foreach $prereq (sort keys %{$self->{PREREQ_PM}}) {
+        my $pre_req = $prereq;
+        $pre_req =~ s/::/-/g;
+        push(@m, ". qq{\\t\\t<DEPENDENCY NAME=\\\"$pre_req\\\" />\\n}");
+    }
+    push(@m, ". qq{\\t\\t<OS NAME=\\\"\$(OSNAME)\\\" />\\n}");
+    my ($bin_location) = $self->{BINARY_LOCATION};
+    $bin_location =~ s/\\/\\\\/g;
+    if ($self->{PPM_INSTALL_SCRIPT}) {
+        if ($self->{PPM_INSTALL_EXEC}) {
+            push(@m, " . qq{\\t\\t<INSTALL EXEC=\\\"$self->{PPM_INSTALL_EXEC}\\\">$self->{PPM_INSTALL_SCRIPT}</INSTALL>\\n}");
+        }
+        else {
+            push(@m, " . qq{\\t\\t<INSTALL>$self->{PPM_INSTALL_SCRIPT}</INSTALL>\\n}");
+        }
+    }
+    push(@m, ". qq{\\t\\t<CODEBASE HREF=\\\"$bin_location\\\" />\\n}");
+    push(@m, ". qq{\\t</IMPLEMENTATION>\\n}");
+    push(@m, ". qq{</SOFTPKG>\\n}\" > $self->{DISTNAME}.ppd");
+
+    join("", @m);   
 }
 
 =item perm_rw (o)
