@@ -406,7 +406,7 @@ sub tab {
 
 __END__
 
-# New ops always go at the very end
+# New ops always go at the end, just before 'custom'
 
 # A recapitulation of the format of this file:
 # The file consists of five columns: the name of the op, an English
