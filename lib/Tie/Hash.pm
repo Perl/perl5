@@ -136,12 +136,13 @@ element being a hash reference, and the remaining methods should operate on the
 hash C<< %{ $_[0]->[0] } >>:
 
   package ReportHash;
-  our @ISA = 'Tie::StdHash';
+  our @ISA = 'Tie::ExtraHash';
 
   sub TIEHASH  {
-    my $storage = bless {}, shift;
+    my $class = shift;
+    my $storage = bless [{}, @_], $class;
     warn "New ReportHash created, stored in $storage.\n";
-    [$storage, @_]
+    $storage;
   }
   sub STORE    {
     warn "Storing data with key $_[1] at $_[0].\n";
