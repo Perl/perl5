@@ -2611,7 +2611,7 @@ Perl_sv_setsv(pTHX_ SV *dstr, register SV *sstr)
 		    else
 			dref = (SV*)GvAV(dstr);
 		    GvAV(dstr) = (AV*)sref;
-		    if (GvIMPORTED_AV_off(dstr)
+		    if (!GvIMPORTED_AV(dstr)
 			&& CopSTASH_ne(PL_curcop, GvSTASH(dstr)))
 		    {
 			GvIMPORTED_AV_on(dstr);
@@ -2623,7 +2623,7 @@ Perl_sv_setsv(pTHX_ SV *dstr, register SV *sstr)
 		    else
 			dref = (SV*)GvHV(dstr);
 		    GvHV(dstr) = (HV*)sref;
-		    if (GvIMPORTED_HV_off(dstr)
+		    if (!GvIMPORTED_HV(dstr)
 			&& CopSTASH_ne(PL_curcop, GvSTASH(dstr)))
 		    {
 			GvIMPORTED_HV_on(dstr);
@@ -2674,7 +2674,7 @@ Perl_sv_setsv(pTHX_ SV *dstr, register SV *sstr)
 			GvASSUMECV_on(dstr);
 			PL_sub_generation++;
 		    }
-		    if (GvIMPORTED_CV_off(dstr)
+		    if (!GvIMPORTED_CV(dstr)
 			&& CopSTASH_ne(PL_curcop, GvSTASH(dstr)))
 		    {
 			GvIMPORTED_CV_on(dstr);
@@ -2693,7 +2693,7 @@ Perl_sv_setsv(pTHX_ SV *dstr, register SV *sstr)
 		    else
 			dref = (SV*)GvSV(dstr);
 		    GvSV(dstr) = sref;
-		    if (GvIMPORTED_SV_off(dstr)
+		    if (!GvIMPORTED_SV(dstr)
 			&& CopSTASH_ne(PL_curcop, GvSTASH(dstr)))
 		    {
 			GvIMPORTED_SV_on(dstr);

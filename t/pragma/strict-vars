@@ -27,6 +27,15 @@ EXPECT
 # strict vars - no error
 use strict 'vars' ;
 use vars qw( $freddy) ;
+BEGIN { *freddy = \$joe::shmoe; }
+$freddy = 2 ;
+EXPECT
+
+########
+
+# strict vars - no error
+use strict 'vars' ;
+use vars qw( $freddy) ;
 local $abc::joe ;
 my $fred ;
 my $b = \$fred ;
