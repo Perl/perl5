@@ -257,7 +257,7 @@ distribution available at http://www.perl.com/CPAN/src/index.html
         4) compilers: Borland, Cygwin, Mingw32 EGCS/GCC, VC++
 
 The following platforms worked for the previous major release
-(5.005_04 being the latest maintenance release of that, as of early
+(5.005_03 being the latest maintenance release of that, as of early
 March 2000), but be did not manage to test these in time for the 5.6.0
 release of Perl.  There is a very good chance that these will work
 just fine with 5.6.0.
@@ -278,7 +278,7 @@ just fine with 5.6.0.
 	SVR4
 	Ultrix
 
-The following platform worked for the previous major release (5.005_04
+The following platform worked for the previous major release (5.005_03
 being the latest maintenance release of that, as of early March 2000).
 However, standardization on UTF-8 as the internal string representation
 in 5.6.0 has introduced incompatibilities in this EBCDIC platform.
