@@ -32,6 +32,245 @@ Version v5.7.1		Development release working toward v5.8
 --------------
 
 ____________________________________________________________________________
+[  9124] By: jhi                                   on 2001/03/13  14:22:45
+        Log: Workaround for the buggy ("internal compiler error")
+             AIX C compiler 5.0.1.0: skip the optimization for regcomp.c
+             (and ext/re/re_comp.c).  The MakeMaker dark magic courtesy
+             of Andreas König.
+     Branch: perl
+	   ! ext/re/Makefile.PL hints/aix.sh
+____________________________________________________________________________
+[  9123] By: jhi                                   on 2001/03/13  03:24:34
+        Log: Typo in #9114.
+     Branch: metaconfig
+	   ! U/modified/myhostname.U
+____________________________________________________________________________
+[  9122] By: jhi                                   on 2001/03/13  03:24:06
+        Log: Typo in #9113.
+     Branch: perl
+	   ! Configure
+____________________________________________________________________________
+[  9121] By: jhi                                   on 2001/03/13  01:53:05
+        Log: Forgot to check-in the larger part of #9120, duh.
+     Branch: perl
+	   ! README.os2
+____________________________________________________________________________
+[  9120] By: jhi                                   on 2001/03/13  01:51:31
+        Log: Subject: [PATCH 5.6.1] OS/2 docs
+             From: Ilya Zakharevich <ilya@math.ohio-state.edu>
+             Date: Mon, 12 Mar 2001 03:27:32 -0500
+             Message-ID: <20010312032732.A19283@math.ohio-state.edu>
+     Branch: perl
+	   ! os2/Changes
+____________________________________________________________________________
+[  9119] By: jhi                                   on 2001/03/13  01:49:41
+        Log: Integrate change #9116 from maintperl into mainline.
+             
+             Win32::GetCwd() returns C: instead of C:\ in the root directory
+             under ithreads
+     Branch: perl
+	  !> win32/perlhost.h
+____________________________________________________________________________
+[  9118] By: jhi                                   on 2001/03/13  01:13:39
+        Log: Add Switch 2.01, resort MANIFEST (forgot that in #9117)
+     Branch: perl
+	   + lib/Switch.pm t/lib/switch.t
+	   ! MANIFEST
+____________________________________________________________________________
+[  9117] By: jhi                                   on 2001/03/13  01:03:17
+        Log: Add Text::Balanced 1.83.
+     Branch: perl
+	   + lib/Text/Balanced.pm lib/Text/Balanced.pod t/lib/tb-genxt.t
+	   + t/lib/tb-xbrak.t t/lib/tb-xcode.t t/lib/tb-xdeli.t
+	   + t/lib/tb-xmult.t t/lib/tb-xquot.t t/lib/tb-xtagg.t
+	   + t/lib/tb-xvari.t
+	   ! MANIFEST
+____________________________________________________________________________
+[  9116] By: gsar                                  on 2001/03/13  00:55:53
+        Log: Win32::GetCwd() returns C: instead of C:\ in the root directory
+             under ithreads
+     Branch: maint-5.6/perl
+	   ! win32/perlhost.h
+____________________________________________________________________________
+[  9115] By: jhi                                   on 2001/03/13  00:54:09
+        Log: Subject: Re: [ID 20010305.005] "use integer" doesn't make rand() return integers
+             From: "John L. Allen" <allen@grumman.com>
+             Date: Tue, 6 Mar 2001 10:50:51 -0500 (EST)
+             Message-ID: <Pine.SOL.3.91.1010306103113.9094A-100000@gateway.grumman.com>
+             
+             use integer document clarification.
+     Branch: perl
+	   ! lib/integer.pm
+____________________________________________________________________________
+[  9114] By: jhi                                   on 2001/03/13  00:38:54
+        Log: Metaconfig unit change for #9113.
+     Branch: metaconfig
+	   ! U/modified/myhostname.U
+____________________________________________________________________________
+[  9113] By: jhi                                   on 2001/03/13  00:38:35
+        Log: Subject: [PATCH: perl@9092, dist-3.0@70] OS/390 mydomain last gasp before silly guess (was Re: What do I need to build EBCDIC perl?)
+             From: Peter Prymmer <pvhp@forte.com>
+             Date: Mon, 12 Mar 2001 16:25:56 -0800 (PST)
+             Message-ID: <Pine.OSF.4.10.10103121619020.180841-100000@aspara.forte.com>
+     Branch: perl
+	   ! Configure README.os390 hints/os390.sh
+____________________________________________________________________________
+[  9112] By: jhi                                   on 2001/03/13  00:29:00
+        Log: Integrate perlio.
+     Branch: perl
+	  !> sv.c utf8.h
+____________________________________________________________________________
+[  9111] By: nick                                  on 2001/03/12  21:16:33
+        Log: Integrate mainline.
+     Branch: perlio
+	  +> t/op/anonsub.t
+	  !> MANIFEST embed.h embed.pl op.c op.h pod/perlapi.pod pp_ctl.c
+	  !> proto.h sv.c
+____________________________________________________________________________
+[  9110] By: nick                                  on 2001/03/12  21:00:13
+        Log: #ifdef'ed out code for 'USE_BYTES_DOWNGRADES' case.
+     Branch: perlio
+	   ! sv.c utf8.h
+____________________________________________________________________________
+[  9109] By: jhi                                   on 2001/03/12  16:04:47
+        Log: Integrate change #9108 from maintperl to mainline.
+             
+             fix memory leak in C<sub X { sub {} }> arising from a refcount
+             loop between the outer sub and the inner prototype anonsub
+             
+             this also enables closures returned by subroutines that
+             subsequently get redefined to work without generating coredumps :)
+             
+             completely removed the free_closures() hack--it shouldn't be
+             needed anymore
+     Branch: perl
+	  +> t/op/anonsub.t
+	  !> MANIFEST embed.h embed.pl op.c op.h pod/perlapi.pod pp_ctl.c
+	  !> proto.h sv.c
+____________________________________________________________________________
+[  9108] By: gsar                                  on 2001/03/12  10:21:31
+        Log: fix memory leak in C<sub X { sub {} }> arising from a refcount
+             loop between the outer sub and the inner prototype anonsub
+             
+             this also enables closures returned by subroutines that
+             subsequently get redefined to work without generating coredumps :)
+             
+             completely removed the free_closures() hack--it shouldn't be
+             needed anymore
+     Branch: maint-5.6/perl
+	   + t/op/anonsub.t
+	   ! MANIFEST embed.h embed.pl op.c op.h pod/perlapi.pod pp_ctl.c
+	   ! proto.h sv.c
+____________________________________________________________________________
+[  9107] By: jhi                                   on 2001/03/12  05:15:31
+        Log: Integrate perlio.
+     Branch: perl
+	  !> ext/Encode/Encode.xs makedef.pl regcomp.c sv.c toke.c utf8.c
+____________________________________________________________________________
+[  9106] By: nick                                  on 2001/03/11  20:10:12
+        Log: regcomp.c is working in native space, not Unicode space (if different)
+             as it is doing compare against 'W' in \W etc.
+     Branch: perlio
+	   ! regcomp.c
+____________________________________________________________________________
+[  9105] By: nick                                  on 2001/03/11  19:39:34
+        Log: Audit #ifdef EBCDIC and #ifndef ASCIIish, replace latter with former.
+             Use ASCII_TO_NATIVE and NATIVE_TO_ASCII to avoid some #ifs.
+     Branch: perlio
+	   ! regcomp.c toke.c utf8.c
+____________________________________________________________________________
+[  9104] By: nick                                  on 2001/03/11  18:15:44
+        Log: Put utf8_downgrade in CRIPPLED_CC versions of SvPVbyte* before I forget.
+     Branch: perlio
+	   ! sv.c
+____________________________________________________________________________
+[  9103] By: nick                                  on 2001/03/11  18:03:28
+        Log: Integrate mainline (for regexp stuff).
+     Branch: perlio
+	  !> ext/B/defsubs_h.PL ext/DynaLoader/dl_mac.xs
+	  !> ext/Encode/Encode.xs ext/Errno/Errno_pm.PL
+	  !> lib/ExtUtils/Manifest.pm regcomp.c regexec.c t/lib/b.t
+	  !> t/lib/errno.t t/op/pat.t
+____________________________________________________________________________
+[  9102] By: nick                                  on 2001/03/11  17:44:20
+        Log: USE_SFIO issues as observed by Chris Nandor <pudge@pobox.com>
+             - exclude layer syms in makedef.pl for sfio
+             - also inhibit Encode from trying to build ":encode()" layer.
+     Branch: perlio
+	   ! ext/Encode/Encode.xs makedef.pl
+____________________________________________________________________________
+[  9101] By: jhi                                   on 2001/03/10  22:38:13
+        Log: The $Is_MacOS needs to be declared.
+     Branch: perl
+	   ! lib/ExtUtils/Manifest.pm
+____________________________________________________________________________
+[  9100] By: jhi                                   on 2001/03/10  22:14:29
+        Log: Use #if defined(USE_PERLIO) && !defined(USE_SFIO) instead of just
+             #ifdef USE_PERLIO in Encode.xs so that the perlio symbols don't
+             pollute the symbolspace if using sfio.
+     Branch: perl
+	   ! ext/Encode/Encode.xs
+____________________________________________________________________________
+[  9099] By: jhi                                   on 2001/03/10  21:58:48
+        Log: Subject: [PATCH] Portability fixes for Mac OS / bleadperl
+             Date: Sat, 10 Mar 2001 14:23:55 -0500
+             From: Chris Nandor <pudge@pobox.com>
+             Message-Id: <p05010401b6d02f70211f@[10.0.1.177]>
+     Branch: perl
+	   ! ext/B/defsubs_h.PL ext/DynaLoader/dl_mac.xs
+	   ! ext/Errno/Errno_pm.PL lib/ExtUtils/Manifest.pm t/lib/b.t
+	   ! t/lib/errno.t
+____________________________________________________________________________
+[  9098] By: jhi                                   on 2001/03/10  21:38:30
+        Log: Fix for ID 20010306.008, UTF-8 and \w without 'use utf8' coredump.
+     Branch: perl
+	   ! regcomp.c regexec.c t/op/pat.t
+____________________________________________________________________________
+[  9097] By: jhi                                   on 2001/03/10  14:38:07
+        Log: Integrate perlio.
+     Branch: perl
+	  !> doop.c embed.h embed.pl ext/Encode/Encode.xs global.sym
+	  !> handy.h objXSUB.h op.c perl.c perlapi.c pp.c pp_ctl.c proto.h
+	  !> regcomp.c regexec.c sv.c toke.c utf8.c utf8.h
+____________________________________________________________________________
+[  9096] By: nick                                  on 2001/03/10  11:55:43
+        Log: EBCDIC sanity - phase I
+             - rename utf8/uv functions to indicate what sort of uv they provide (uvuni/uvchr)
+             - use utf8n_xxxx (c.f. pvn) for forms which take length.
+             - back out vN.N and $^V exceptions to e2a/a2e
+             - make "locale" isxxx macros be uvchr (may be redundant?)
+             
+             Not clear yet that toUPPER_uni et. al. return being handled correctly.
+             The tr// and rexexp stuff still needs an audit, assumption is they are working
+             in Unicode space.
+             
+             Need to provide v5.6 names for XS modules (decide is uni or chr ?).
+     Branch: perlio
+	   ! doop.c embed.h embed.pl ext/Encode/Encode.xs global.sym
+	   ! handy.h objXSUB.h op.c perl.c perlapi.c pp.c pp_ctl.c proto.h
+	   ! regcomp.c regexec.c sv.c toke.c utf8.c utf8.h
+____________________________________________________________________________
+[  9095] By: jhi                                   on 2001/03/09  22:10:01
+        Log: Integrate perlio.
+     Branch: perl
+	  !> dump.c
+____________________________________________________________________________
+[  9094] By: nick                                  on 2001/03/09  17:36:38
+        Log: Builds an passes all tests after integrate and this tweak.
+     Branch: perlio
+	   ! dump.c
+____________________________________________________________________________
+[  9093] By: nick                                  on 2001/03/09  17:16:03
+        Log: Integrate mainline (does not build - sv_catpvf issue in dump.c)
+     Branch: perlio
+	  +> lib/unicode/Scripts.txt t/lib/sigaction.t
+	  !> (integrate 79 files)
+____________________________________________________________________________
+[  9092] By: jhi                                   on 2001/03/09  15:28:26
+        Log: Update Changes.
+     Branch: perl
+	   ! Changes patchlevel.h
+____________________________________________________________________________
 [  9091] By: jhi                                   on 2001/03/09  15:25:05
         Log: In op/stat #35 better to scan all the potential directories
              for setuids, not just the first one.

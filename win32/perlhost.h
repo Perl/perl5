@@ -2185,10 +2185,10 @@ CPerlHost::GetChildDir(void)
     New(0, ptr, MAX_PATH+1, char);
     if(ptr) {
 	m_pvDir->GetCurrentDirectoryA(MAX_PATH+1, ptr);
-	length = strlen(ptr)-1;
-	if(length > 0) {
-	    if((ptr[length] == '\\') || (ptr[length] == '/'))
-		ptr[length] = 0;
+	length = strlen(ptr);
+	if (length > 3) {
+	    if ((ptr[length-1] == '\\') || (ptr[length-1] == '/'))
+		ptr[length-1] = 0;
 	}
     }
     return ptr;
