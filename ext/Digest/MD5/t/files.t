@@ -175,7 +175,6 @@ sub digest_file
     #print "$file $method\n";
 
     open(FILE, $file) or die "Can't open $file: $!";
-    eval { binmode(FILE, ":bytes") }; # Perl 5.8.0+ only
     my $digest = Digest::MD5->new->addfile(*FILE)->$method();
     close(FILE);
 
@@ -187,7 +186,7 @@ sub cat_file
     my($file) = @_;
     local $/;  # slurp
     open(FILE, $file) or die "Can't open $file: $!";
-    eval { binmode(FILE, ":bytes") }; # Perl 5.8.0+ only
+    binmode(FILE);
     my $tmp = <FILE>;
     close(FILE);
     $tmp;

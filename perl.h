@@ -3828,9 +3828,8 @@ typedef struct am_table_short AMTS;
 #   define Atoul(s)	Strtoul(s, (char **)NULL, 10)
 #endif
 
-#if !defined(PERLIO_IS_STDIO) && defined(HASATTRIBUTE)
+#if !defined(PERLIO_IS_STDIO)
 /*
- * Now we have __attribute__ out of the way
  * Remap printf
  */
 #undef printf

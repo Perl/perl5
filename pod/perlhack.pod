@@ -215,7 +215,19 @@ changed.  The current state of the main trunk of repository, and patches
 that describe the individual changes that have happened since the last
 public release are available at this location:
 
+    http://public.activestate.com/gsar/APC/
     ftp://ftp.linux.activestate.com/pub/staff/gsar/APC/
+
+If you're looking for a particular change, or a change that affected
+a particular set of files, you may find the B<Perl Repository Browser>
+useful:
+
+    http://public.activestate.com/cgi-bin/perlbrowse
+
+You may also want to subscribe to the perl5-changes mailing list to
+receive a copy of each patch that gets submitted to the maintenance
+and development "branches" of the perl repository.  See
+http://lists.perl.org/ for subscription information.
 
 If you are a member of the perl5-porters mailing list, it is a good
 thing to keep in touch with the most recent changes. If not only to
@@ -368,22 +380,13 @@ from Andreas König to have better control over the patching process.
 Since you don't have to apply the patches yourself, you are sure all
 files in the source tree are in the right state.
 
-=item It's more recent
-
-According to Gurusamy Sarathy:
-
-   "... The rsync mirror is automatic and syncs with the repository
-    every five minutes.
-
-   "Updating the patch  area  still  requires  manual  intervention
-    (with all the goofiness that implies,  which you've noted)  and
-    is typically on a daily cycle.   Making this process  automatic
-    is on my tuit list, but don't ask me when."
-
 =item It's more reliable
 
-Well, since the patches are updated by hand, I don't have to say any
-more ... (see Sarathy's remark).
+While both the rsync-able source and patch areas are automatically
+updated every few minutes, keep in mind that applying patches may
+sometimes mean careful hand-holding, especially if your version of
+the C<patch> program does not understand how to deal with new files,
+files with 8-bit characters, or files without trailing newlines.
 
 =back
 

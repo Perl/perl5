@@ -458,6 +458,8 @@ DISCIPLINE can be either of C<:raw> for binary mode or C<:crlf> for
 "text" mode.  If the DISCIPLINE is omitted, it defaults to C<:raw>.
 Returns true on success, C<undef> on failure.  To mark FILEHANDLE as
 UTF-8, use C<:utf8>, and to mark it as bytes, use C<:bytes>.
+For backward compatibility binmode(FILEHANDLE) also implicitly
+marks the handle as bytes.
 
 The C<:raw> are C<:clrf>, and any other directives of the form
 C<:...>, are called I/O I<disciplines>.  The C<open> pragma can be

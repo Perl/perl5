@@ -95,7 +95,6 @@ sub store_and_retrieve {
   unlink $file or die "Can't unlink '$file': $!";
   open FH, ">$file" or die "Can't open '$file': $!";
   binmode FH;
-  eval { binmode(FH, ":bytes") }; # Perl 5.8.0+ only
   print FH $data or die "Can't print to '$file': $!";
   close FH or die "Can't close '$file': $!";
 
@@ -259,7 +258,6 @@ sub slurp {
   local (*FH, $/);
   open FH, "<$file" or die "Can't open '$file': $!";
   binmode FH;
-  eval { binmode(FH, ":bytes") }; # Perl 5.8.0+ only
   my $contents = <FH>;
   die "Can't read $file: $!" unless defined $contents;
   return $contents;

@@ -181,6 +181,11 @@ been led to believe that STDIN should be UTF-8, but then STDIN coming
 in from another command is not UTF-8, Perl will complain about the
 malformed UTF-8.
 
+All features that combine Unicode and I/O also require using the new
+PerlIO feature.  Almost all Perl 5.8 platforms do use PerlIO, though:
+you can see whether yours is by running "perl -V" and looking for
+C<useperlio=define>.
+
 =head2 Unicode and EBCDIC
 
 Perl 5.8.0 also supports Unicode on EBCDIC platforms.  There,
@@ -428,9 +433,7 @@ UTF-8 encoded.  A C<use open ':utf8'> would have avoided the bug, or
 explicitly opening also the F<file> for input as UTF-8.
 
 B<NOTE>: the C<:utf8> and C<:encoding> features work only if your
-Perl has been built with the new "perlio" feature.  Almost all 
-Perl 5.8 platforms do use "perlio", though: you can see whether
-yours is by running "perl -V" and looking for C<useperlio=define>.
+Perl has been built with the new PerlIO feature.
 
 =head2 Displaying Unicode As Text
 

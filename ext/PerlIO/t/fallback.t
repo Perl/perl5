@@ -48,7 +48,8 @@ close($fh);
 
 {
     no utf8;
-    open($fh,">:bytes",$file) || die "File cannot be re-opened";
+    open($fh,">$file") || die "File cannot be re-opened";
+    binmode($fh);
     print $fh "\xA30.02\n";
     close($fh);
 }
@@ -70,6 +71,3 @@ close($fh);
 END {
     1 while unlink($file);
 }
-
-
-
