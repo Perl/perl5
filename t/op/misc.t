@@ -59,12 +59,12 @@ $a = ":="; split /($a)/o, "a:=b:=c"; print "@_"
 EXPECT
 a := b := c
 ########
-use integer;
 $cusp = ~0 ^ (~0 >> 1);
+use integer;
 $, = " ";
-print +($cusp - 1) % 8, $cusp % 8, -$cusp % 8, ($cusp + 1) % 8, "!\n";
+print +($cusp - 1) % 8, $cusp % 8, -$cusp % 8, 8 | (($cusp + 1) % 8 + 7), "!\n";
 EXPECT
--1 0 0 1 !
+7 0 0 8 !
 ########
 $foo=undef; $foo->go;
 EXPECT

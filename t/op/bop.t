@@ -39,7 +39,7 @@ print (((1 << ($bits - 1)) == $cusp &&
 	do { use integer; 1 << ($bits - 1) } == -$cusp)
        ? "ok 11\n" : "not ok 11\n");
 print ((($cusp >> 1) == ($cusp / 2) &&
-	do { use integer; $cusp >> 1 } == -($cusp / 2))
+       do { use integer; abs($cusp >> 1) } == ($cusp / 2))
        ? "ok 12\n" : "not ok 12\n");
 
 $Aaz = chr(ord("A") & ord("z"));

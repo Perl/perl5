@@ -1199,15 +1199,8 @@ PP(pp_ncmp)
     {
       dPOPTOPnnrl;
       I32 value;
-#ifdef __osf__ /* XXX Configure probe for isnan and isnanl needed XXX */
-#if defined(USE_LONG_DOUBLE) && defined(HAS_LONG_DOUBLE)
-#define Perl_isnan isnanl
-#else
-#define Perl_isnan isnan
-#endif
-#endif
 
-#ifdef __osf__ /* XXX fix in 5.6.1 --jhi */
+#ifdef Perl_isnan
       if (Perl_isnan(left) || Perl_isnan(right)) {
 	  SETs(&PL_sv_undef);
 	  RETURN;
@@ -4743,10 +4736,14 @@ PP(pp_pack)
 		    DIE(aTHX_ "Cannot compress negative numbers");
 
 		if (
-#ifdef CXUX_BROKEN_CONSTANT_CONVERT
-		    adouble <= UV_MAX_cxux
+#if UVSIZE > 4 && UVSIZE >= NVSIZE
+		    adouble <= 0xffffffff
 #else
+#   ifdef CXUX_BROKEN_CONSTANT_CONVERT
+		    adouble <= UV_MAX_cxux
+#   else
 		    adouble <= UV_MAX
+#   endif
 #endif
 		    )
 		{

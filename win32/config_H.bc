@@ -183,6 +183,13 @@
  */
 /*#define HAS_FORK		/**/
 
+/* HAS_FREXPL:
+ *	This symbol, if defined, indicates that the frexpl routine is
+ *	available to break a long double floating-point number into
+ *	a normalized fraction and an integral power of 2.
+ */
+/*#define HAS_FREXPL		/**/
+
 /* HAS_FSETPOS:
  *	This symbol, if defined, indicates that the fsetpos routine is
  *	available to set the file position indicator, similar to fseek().
@@ -1620,6 +1627,18 @@
  */
 #define HAS_ISASCII		/**/
 
+/* HAS_ISNAN:
+ *	This symbol, if defined, indicates that the isnan routine is
+ *	available to check whether a double is a NaN.
+ */
+#define HAS_ISNAN		/**/
+
+/* HAS_ISNANL:
+ *	This symbol, if defined, indicates that the isnanl routine is
+ *	available to check whether a long double is a NaN.
+ */
+/*#define HAS_ISNANL		/**/
+
 /* HAS_LDBL_DIG:
  *	This symbol, if defined, indicates that this system's <float.h>
  *	or <limits.h> defines the symbol LDBL_DIG, which is the number
@@ -1712,6 +1731,13 @@
  *	available to modify the access protection of a memory mapped file.
  */
 /*#define HAS_MPROTECT		/**/
+
+/* HAS_MODFL:
+ *	This symbol, if defined, indicates that the modfl routine is
+ *	available to split a long double x into a fractional part f and
+ *	an integer part i such that |f| < 1.0 and (f + i) = x.
+ */
+/*#define HAS_MODFL		/**/
 
 /* HAS_MSG:
  *	This symbol, if defined, indicates that the entire msg*(2) library is

@@ -198,7 +198,6 @@ static char zero_but_true[ZBTLEN + 1] = "0 but true";
 #   if defined(I_SYS_SECURITY)
 #       include <sys/security.h>
 #   endif
-    /* XXX Configure test needed for eaccess */
 #   ifdef ACC_SELF
         /* HP SecureWare */
 #       define PERL_EFF_ACCESS_R_OK(p) (eaccess((p), R_OK, ACC_SELF))
@@ -4086,14 +4085,14 @@ PP(pp_gmtime)
 	SV *tsv;
 	if (!tmbuf)
 	    RETPUSHUNDEF;
-	tsv = Perl_newSVpvf(aTHX_ "%s %s %2d %02d:%02d:%02d %d",
+	tsv = Perl_newSVpvf(aTHX_ "%s %s %2"IVdf" %02"IVdf":%02"IVdf":%02"IVdf" %"IVdf,
 			    dayname[tmbuf->tm_wday],
 			    monname[tmbuf->tm_mon],
-			    tmbuf->tm_mday,
-			    tmbuf->tm_hour,
-			    tmbuf->tm_min,
-			    tmbuf->tm_sec,
-			    tmbuf->tm_year + 1900);
+			    (IV)tmbuf->tm_mday,
+			    (IV)tmbuf->tm_hour,
+			    (IV)tmbuf->tm_min,
+			    (IV)tmbuf->tm_sec,
+			    (IV)tmbuf->tm_year + 1900);
 	PUSHs(sv_2mortal(tsv));
     }
     else if (tmbuf) {

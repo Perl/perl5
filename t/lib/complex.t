@@ -159,20 +159,18 @@ test_dbz(
 	 'acsch(0)',
 	 'asec(0)',
 	 'asech(0)',
-	 'atan(-$i)',
 	 'atan($i)',
 #	 'atanh(-1)',	# Log of zero.
 	 'atanh(+1)',
 	 'cot(0)',
 	 'coth(0)',
 	 'csc(0)',
-	 'tan($pip2)',
 	 'csch(0)',
-	 'tan($pip2)',
 	);
 
 test_loz(
 	 'log($zero)',
+	 'atan(-$i)',
 	 'acot(-$i)',
 	 'atanh(-1)',
 	 'acoth(-1)',
@@ -187,7 +185,7 @@ sub test_broot {
 	eval 'root(2, $op)';
 	(\$bad) = (\$@ =~ /(.+)/);
 	print "# $test op = $op badroot? \$bad...\n";
-	print 'not ' unless (\$@ =~ /root must be/);
+	print 'not ' unless (\$@ =~ /root rank must be/);
 EOT
         push(@script, qq(print "ok $test\\n";\n));
     }

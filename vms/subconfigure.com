@@ -69,6 +69,7 @@ $ myname = myhostname
 $ IF myname .EQS. "" THEN myname = F$TRNLNM("SYS$NODE")
 $!
 $! ##ADD NEW CONSTANTS HERE##
+$ perl_d_isnan= = "define"
 $ perl_sizesize = "4"
 $ perl_shmattype = ""
 $ perl_mmaptype = ""
@@ -486,6 +487,9 @@ $   perl_d_quad = "define"
 $   perl_quadtype = "long long"
 $   perl_uquadtype = "unsigned long long"
 $   perl_quadkind  = "QUAD_IS_LONG_LONG"
+$   perl_d_frexpl = "define"
+$   perl_d_isnanl = "define"
+$   perl_d_modfl = "define"
 $ ELSE
 $   perl_d_PRIfldbl = "undef"
 $   perl_d_PRIgldbl = "undef"
@@ -503,6 +507,9 @@ $   perl_d_quad = "undef"
 $   perl_quadtype = "long"
 $   perl_uquadtype = "unsigned long"
 $   perl_quadkind  = "QUAD_IS_LONG"
+$   perl_d_frexpl = "undef"
+$   perl_d_isnanl = "undef"
+$   perl_d_modfl = "undef"
 $ ENDIF
 $!
 $! Now some that we build up
@@ -4246,6 +4253,10 @@ $ WC "uvoformat='" + perl_uvoformat + "'"
 $ WC "uvxformat='" + perl_uvxformat + "'"
 $ WC "d_vms_case_sensitive_symbols='" + d_vms_be_case_sensitive + "'"
 $ WC "sizesize='" + perl_sizesize + "'"
+$ WC "d_frexpl='" + perl_d_frexpl + "'"
+$ WC "d_isnan='" + perl_d_isnan + "'"
+$ WC "d_isnanl='" + perl_d_isnanl + "'"
+$ WC "d_modfl='" + perl_d_modfl + "'"
 $!
 $! ##WRITE NEW CONSTANTS HERE##
 $!
