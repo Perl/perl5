@@ -158,19 +158,19 @@ int cnt;
 void
 PerlIO_set_ptrcnt(f,ptr,cnt)
 PerlIO *f;
-char *ptr;
+STDCHAR *ptr;
 int cnt;
 {
 #ifdef FILE_bufsiz
- char *e = (char *)(FILE_base(f) + FILE_bufsiz(f));
- int ec  = e - ptr;
+ STDCHAR *e = FILE_base(f) + FILE_bufsiz(f);
+ int ec = e - ptr;
  if (ptr > e + 1)
   warn("Setting ptr %p > end+1 %p\n", ptr, e + 1);
  if (cnt != ec)
   warn("Setting cnt to %d, ptr implies %d\n",cnt,ec);
 #endif
 #if defined(USE_STDIO_PTR) && defined(STDIO_PTR_LVALUE)
- FILE_ptr(f) = (STDCHAR *) ptr;
+ FILE_ptr(f) = ptr;
 #else
  croak("Cannot set 'ptr' of FILE * on this system");
 #endif
@@ -208,12 +208,12 @@ PerlIO *f;
 }
 
 #undef PerlIO_get_ptr
-char *
+STDCHAR *
 PerlIO_get_ptr(f)
 PerlIO *f;
 {
 #ifdef FILE_ptr
- return (char *) FILE_ptr(f);
+ return FILE_ptr(f);
 #else
  croak("Cannot get 'ptr' of FILE * on this system");
  return NULL;
@@ -221,12 +221,12 @@ PerlIO *f;
 }
 
 #undef PerlIO_get_base
-char *
+STDCHAR *
 PerlIO_get_base(f)
 PerlIO *f;
 {
 #ifdef FILE_base
- return (char *) FILE_base(f);
+ return FILE_base(f);
 #else
  croak("Cannot get 'base' of FILE * on this system");
  return NULL;

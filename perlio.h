@@ -161,7 +161,7 @@ extern int	PerlIO_fast_gets	_((PerlIO *));
 extern int	PerlIO_canset_cnt	_((PerlIO *));
 #endif
 #ifndef PerlIO_get_ptr
-extern char *	PerlIO_get_ptr		_((PerlIO *));
+extern STDCHAR * PerlIO_get_ptr		_((PerlIO *));
 #endif
 #ifndef PerlIO_get_cnt
 extern int	PerlIO_get_cnt		_((PerlIO *));
@@ -170,10 +170,10 @@ extern int	PerlIO_get_cnt		_((PerlIO *));
 extern void	PerlIO_set_cnt		_((PerlIO *,int));
 #endif
 #ifndef PerlIO_set_ptrcnt
-extern void	PerlIO_set_ptrcnt	_((PerlIO *,char *,int));
+extern void	PerlIO_set_ptrcnt	_((PerlIO *,STDCHAR *,int));
 #endif
 #ifndef PerlIO_get_base
-extern char *	PerlIO_get_base		_((PerlIO *));
+extern STDCHAR * PerlIO_get_base	_((PerlIO *));
 #endif
 #ifndef PerlIO_get_bufsiz
 extern int	PerlIO_get_bufsiz	_((PerlIO *));
