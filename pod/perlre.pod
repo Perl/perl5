@@ -6,13 +6,13 @@ perlre - Perl regular expressions
 
 This page describes the syntax of regular expressions in Perl.  For a
 description of how to I<use> regular expressions in matching
-operations, plus various examples of the same, see C<m//> and C<s///> in
-L<perlop>.
+operations, plus various examples of the same, see discussion
+of C<m//>, C<s///>, and C<??> in L<perlop/Regexp Quote-Like Operators>.
 
 The matching operations can have various modifiers.  The modifiers
 that relate to the interpretation of the regular expression inside
-are listed below.  For the modifiers that alter the behaviour of the
-operation, see L<perlop/"m//"> and L<perlop/"s//">.
+are listed below.  For the modifiers that alter the way regular expression
+is used by Perl, see L<perlop/Regexp Quote-Like Operators>.
 
 =over 4
 
