@@ -18,6 +18,13 @@
 #endif
 
 #ifdef PerlIO
+#ifdef MACOS_TRADITIONAL
+#define PERLIO_IS_STDIO 1
+#undef setbuf
+#undef setvbuf
+#define setvbuf		_stdsetvbuf
+#define setbuf(f,b)	( __sf_setbuf(f,b) )
+#endif
 typedef int SysRet;
 typedef PerlIO * InputStream;
 typedef PerlIO * OutputStream;
