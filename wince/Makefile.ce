@@ -725,6 +725,7 @@ $(CONFIGPM): .\config.h ..\config.sh ..\minimod.pl
 	cd .. && $(HPERL) configpm --cross=$(CROSS_NAME) --no-glossary
 	-mkdir $(XCOREDIR)
 	$(XCOPY) ..\*.h $(XCOREDIR)\*.*
+	$(XCOPY) ..\*.inc $(XCOREDIR)\*.*
 	$(XCOPY) *.h $(XCOREDIR)\*.*
 	$(XCOPY) ..\ext\re\re.pm $(LIBDIR)\*.*
 	$(RCOPY) include $(XCOREDIR)\*.*
