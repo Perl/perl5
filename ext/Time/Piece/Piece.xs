@@ -14,7 +14,7 @@ MODULE = Time::Piece         PACKAGE = Time::Piece
 PROTOTYPES: ENABLE
 
 char *
-_strftime(fmt, sec, min, hour, mday, mon, year, wday = -1, yday = -1, isdst = -1)
+__strftime(fmt, sec, min, hour, mday, mon, year, wday = -1, yday = -1, isdst = -1)
 	char *		fmt
 	int		sec
 	int		min

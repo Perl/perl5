@@ -12,7 +12,7 @@ BEGIN {
     }
 }
 
-print "1..75\n";
+print "1..85\n";
 
 use Time::Piece;
 
@@ -29,7 +29,7 @@ print "ok 3\n";
 print "not " unless $t->min == 34;
 print "ok 4\n";
 
-#print "not " unless $t->minute == 34;
+print "not " unless $t->minute == 34;
 print "ok 5\n";
 
 print "not " unless $t->hour == 12;
@@ -47,10 +47,10 @@ print "ok 9\n";
 print "not " unless $t->_mon == 1;
 print "ok 10\n";
 
-#print "not " unless $t->monname eq 'Feb';
+print "not " unless $t->monname eq 'Feb';
 print "ok 11\n";
 
-print "not " unless $t->month eq 'Feb';
+print "not " unless $t->month eq 'February';
 print "ok 12\n";
 
 print "not " unless $t->year == 2000;
@@ -71,7 +71,7 @@ print "ok 17\n";
 print "not " unless $t->wdayname eq 'Tue';
 print "ok 18\n";
 
-print "not " unless $t->day eq 'Tue';
+print "not " unless $t->weekday eq 'Tuesday';
 print "ok 19\n";
 
 print "not " unless $t->yday == 59;
@@ -131,117 +131,130 @@ print "ok 36\n";
 
 if ($Config{d_strftime}) {
 
-    # %a, %A, %b, %B, %c are locale-dependent
-
-    # %C is unportable: sometimes its like asctime(3) or date(1),
-    # sometimes it's the century (and whether for 2000 the century is
-    # 20 or 19, is fun, too..as far as I can read SUSv2 it should be 20.)
-
-    print "not " unless $t->strftime('%d') == 29;
+    print "not " unless $t->strftime('%a') eq 'Tue';
     print "ok 37\n";
 
-    print "not " unless $t->strftime('%D') eq '02/29/00'; # Yech!
+    print "not " unless $t->strftime('%A') eq 'Tuesday';
     print "ok 38\n";
 
-    print "not " unless $t->strftime('%e') eq '29'; # should test with < 10
+    print "not " unless $t->strftime('%b') eq 'Feb';
     print "ok 39\n";
 
-    print "not " unless $t->strftime('%H') eq '12'; # should test with < 10
+    print "not " unless $t->strftime('%B') eq 'February';
     print "ok 40\n";
 
-     # %h is locale-dependent
-
-    print "not " unless $t->strftime('%I') eq '12'; # should test with < 10
+    print "not " unless $t->strftime('%c') eq 'Tue Feb 29 12:34:56 2000';
     print "ok 41\n";
 
-    print "not " unless $t->strftime('%j') == 60; # why ->yday+1 ?
+    print "not " unless $t->strftime('%C') == 20;
     print "ok 42\n";
 
-    print "not " unless $t->strftime('%M') eq '34'; # should test with < 10
+    print "not " unless $t->strftime('%d') == 29;
     print "ok 43\n";
 
-    # %p, %P, and %r are not widely implemented,
-    # and are possibly unportable (am or AM or a.m., and so on)
-
-    print "not " unless $t->strftime('%R') eq '12:34'; # should test with > 12
+    print "not " unless $t->strftime('%D') eq '02/29/00'; # Yech!
     print "ok 44\n";
 
-    print "not " unless $t->strftime('%S') eq '56'; # should test with < 10
+    print "not " unless $t->strftime('%e') eq '29'; # should test with < 10
     print "ok 45\n";
 
-    print "not " unless $t->strftime('%T') eq '12:34:56'; # < 12 and > 12
+    print "not " unless $t->strftime('%H') eq '12'; # should test with < 10
     print "ok 46\n";
 
-    # There are bugs in the implementation of %u in many platforms.
-    # (e.g. Linux seems to think, despite the man page, that %u
-    # 1-based on Sunday...)
-
-    print "not " unless $t->strftime('%U') eq '09'; # Sun cmp Mon
+    print "not " unless $t->strftime('%b') eq 'Feb';
     print "ok 47\n";
 
-    print "not " unless $t->strftime('%V') eq '09'; # Sun cmp Mon
+    print "not " unless $t->strftime('%I') eq '12'; # should test with < 10
     print "ok 48\n";
 
-    print "not " unless $t->strftime('%w') == 2;
+    print "not " unless $t->strftime('%j') eq '059';
     print "ok 49\n";
 
-    print "not " unless $t->strftime('%W') eq '09'; # Sun cmp Mon
+    print "not " unless $t->strftime('%M') eq '34'; # should test with < 10
     print "ok 50\n";
 
-    # %x is locale and implementation dependent.
-
-    print "not " unless $t->strftime('%y') == 0; # should test with 1999
+    print "not " unless $t->strftime('%p') eq 'am';
     print "ok 51\n";
 
-    print "not " unless $t->strftime('%Y') eq '2000';
+    print "not " unless $t->strftime('%r') eq '12:34:56 am';
     print "ok 52\n";
 
-    # %Z is locale and implementation dependent
-    # (there is NO standard for timezone names)
+    print "not " unless $t->strftime('%R') eq '12:34'; # should test with > 12
+    print "ok 53\n";
+
+    print "not " unless $t->strftime('%S') eq '56'; # should test with < 10
+    print "ok 54\n";
+
+    print "not " unless $t->strftime('%T') eq '12:34:56'; # < 12 and > 12
+    print "ok 55\n";
+
+    print "not " unless $t->strftime('%u') == 2;
+    print "ok 56\n";
+
+    print "not " unless $t->strftime('%U') eq '09'; # Sun cmp Mon
+    print "ok 57\n";
+
+    print "not " unless $t->strftime('%V') eq '09'; # Sun cmp Mon
+    print "ok 58\n";
+
+    print "not " unless $t->strftime('%w') == 2;
+    print "ok 59\n";
+
+    print "not " unless $t->strftime('%W') eq '09'; # Sun cmp Mon
+    print "ok 60\n";
+
+    print "not " unless $t->strftime('%x') eq '02/29/00'; # Yech!
+    print "ok 61\n";
+
+    print "not " unless $t->strftime('%y') == 0; # should test with 1999
+    print "ok 62\n";
+
+    print "not " unless $t->strftime('%Y') eq '2000';
+    print "ok 63\n";
+
+    # %Z can't be tested, too unportable
 
 } else {
-    for (38...52) {
+    for (38...63) {
 	print "ok $_ # Skip: no strftime\n";
     }
 }
 
-print "not " unless $t->date("") eq '20000229';
-print "ok 53\n";
-
 print "not " unless $t->ymd("") eq '20000229';
-print "ok 54\n";
+print "ok 64\n";
+
 print "not " unless $t->mdy("/") eq '02/29/2000';
-print "ok 55\n";
+print "ok 65\n";
 
 print "not " unless $t->dmy(".") eq '29.02.2000';
-print "ok 56\n";
+print "ok 66\n";
 
 print "not " unless $t->date_separator() eq '-';
-print "ok 57\n";
+print "ok 67\n";
 
 $t->date_separator("/");
 
 print "not " unless $t->ymd eq '2000/02/29';
-print "ok 58\n";
+print "ok 68\n";
 
 print "not " unless $t->date_separator() eq '/';
-print "ok 59\n";
+print "ok 69\n";
 
 $t->date_separator("-");
 
 print "not " unless $t->hms(".") eq '12.34.56';
-print "ok 60\n";
+print "ok 70\n";
 
 print "not " unless $t->time_separator() eq ':';
-print "ok 61\n";
+print "ok 71\n";
 
 $t->time_separator(".");
 
 print "not " unless $t->hms eq '12.34.56';
-print "ok 62\n";
+print "ok 72\n";
 
 print "not " unless $t->time_separator() eq '.';
-print "ok 63\n";
+print "ok 73\n";
 
 $t->time_separator(":");
 
@@ -249,55 +262,55 @@ my @fidays = qw( sunnuntai maanantai tiistai keskiviikko torstai
 	         perjantai lauantai );
 my @frdays = qw( Dimanche Lundi Merdi Mercredi Jeudi Vendredi Samedi );
 
-print "not " unless $t->day(@fidays) eq "tiistai";
-print "ok 64\n";
+print "not " unless $t->weekday(@fidays) eq "tiistai";
+print "ok 74\n";
 
-my @days = $t->day_list();
+my @days = $t->weekday_names();
 
-$t->day_list(@frdays);
+$t->weekday_names(@frdays);
 
-print "not " unless $t->day eq "Merdi";
-print "ok 65\n";
+print "not " unless $t->weekday eq "Merdi";
+print "ok 75\n";
 
-$t->day_list(@days);
+$t->weekday_names(@days);
 
-print "not " unless $t->day eq "Tue";
-print "ok 66\n";
+print "not " unless $t->weekday eq "Tuesday";
+print "ok 76\n";
 
-my @months = $t->mon_list();
+my @months = $t->mon_names();
 
 my @dumonths = qw(januari februari maart april mei juni
 	          juli augustus september oktober november december);
 
 print "not " unless $t->month(@dumonths) eq "februari";
-print "ok 67\n";
+print "ok 77\n";
 
-$t->mon_list(@dumonths);
+$t->month_names(@dumonths);
 
 print "not " unless $t->month eq "februari";
-print "ok 68\n";
+print "ok 78\n";
 
-$t->mon_list(@months);
+$t->mon_names(@months);
 
-print "not " unless $t->month eq "Feb";
-print "ok 69\n";
+print "not " unless $t->monname eq "Feb";
+print "ok 79\n";
 
 print "not " unless
     $t->datetime(date => '/', T => ' ', time => '-') eq "2000/02/29 12-34-56";
-print "ok 70\n";
+print "ok 80\n";
 
-print "not " unless $t->is_leap_year; # should test more with different dates
-print "ok 71\n";
+print "not " unless $t->is_leap_year;
+print "ok 81\n";
 
 print "not " unless $t->month_last_day == 29; # test more
-print "ok 72\n";
+print "ok 82\n";
 
 print "not " if Time::Piece::_is_leap_year(1900);
-print "ok 73\n";
+print "ok 83\n";
 
 print "not " if Time::Piece::_is_leap_year(1901);
-print "ok 74\n";
+print "ok 84\n";
 
 print "not " unless Time::Piece::_is_leap_year(1904);
-print "ok 75\n";
+print "ok 85\n";
 

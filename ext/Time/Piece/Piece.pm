@@ -26,8 +26,12 @@ bootstrap Time::Piece $VERSION;
 
 my $DATE_SEP = '-';
 my $TIME_SEP = ':';
-my @MON_LIST = qw(Jan Feb Mar Apr May Jun Jul Aug Sep Oct Nov Dec);
-my @DAY_LIST = qw(Sun Mon Tue Wed Thu Fri Sat);
+my @MON_NAMES = qw(Jan Feb Mar Apr May Jun Jul Aug Sep Oct Nov Dec);
+my @WDAY_NAMES = qw(Sun Mon Tue Wed Thu Fri Sat);
+my @MONTH_NAMES = qw(January February March April May June
+		     July August September October Novemeber December);
+my @WEEKDAY_NAMES = qw(Sunday Monday Tuesday Wednesday
+		       Thursday Friday Saturday);
 
 use constant 'c_sec' => 0;
 use constant 'c_min' => 1;
@@ -97,31 +101,35 @@ sub import {
 
 ## Methods ##
 
-sub sec {
+sub s {
     my $time = shift;
     $time->[c_sec];
 }
 
-*second = \&sec;
+*sec = \&s;
+*second = \&s;
 
 sub min {
     my $time = shift;
     $time->[c_min];
 }
 
-*minute = \&minute;
+*minute = \&min;
 
-sub hour {
+sub h {
     my $time = shift;
     $time->[c_hour];
 }
 
-sub mday {
+*hour = \&h;
+
+sub d {
     my $time = shift;
     $time->[c_mday];
 }
 
-*day_of_month = \&mday;
+*mday = \&d;
+*day_of_month = \&d;
 
 sub mon {
     my $time = shift;
@@ -133,23 +141,40 @@ sub _mon {
     $time->[c_mon];
 }
 
-sub month {
+sub monname {
     my $time = shift;
     if (@_) {
         return $_[$time->[c_mon]];
     }
-    elsif (@MON_LIST) {
-        return $MON_LIST[$time->[c_mon]];
+    elsif (@MON_NAMES) {
+        return $MON_NAMES[$time->[c_mon]];
+    }
+    else {
+        return $time->strftime('%b');
+    }
+}
+
+sub monthname {
+    my $time = shift;
+    if (@_) {
+        return $_[$time->[c_mon]];
+    }
+    elsif (@MONTH_NAMES) {
+        return $MONTH_NAMES[$time->[c_mon]];
     }
     else {
         return $time->strftime('%B');
     }
 }
 
-sub year {
+*month = \&monthname;
+
+sub y {
     my $time = shift;
     $time->[c_year] + 1900;
 }
+
+*year = \&y;
 
 sub _year {
     my $time = shift;
@@ -173,15 +198,29 @@ sub wdayname {
     if (@_) {
         return $_[$time->[c_wday]];
     }
-    elsif (@DAY_LIST) {
-        return $DAY_LIST[$time->[c_wday]];
+    elsif (@WDAY_NAMES) {
+        return $WDAY_NAMES[$time->[c_wday]];
+    }
+    else {
+        return $time->strftime('%a');
+    }
+}
+
+sub weekdayname {
+    my $time = shift;
+    if (@_) {
+        return $_[$time->[c_wday]];
+    }
+    elsif (@WEEKDAY_NAMES) {
+        return $WEEKDAY_NAMES[$time->[c_wday]];
     }
     else {
         return $time->strftime('%A');
     }
 }
 
-*day = \&wdayname;
+*weekdayname = \&weekdayname;
+*weekday = \&weekdayname;
 
 sub yday {
     my $time = shift;
@@ -318,26 +357,197 @@ sub month_last_day {
     return $MON_LAST[$_mon] + ($_mon == 1 ? _is_leap_year($year) : 0);
 }
 
+use vars qw($_ftime);
+
+$_ftime =
+{
+ '%' => sub {
+     return "%";
+ }, 
+ 'a' => sub {
+     my ($format, $time, @rest) = @_;
+     $time->wdayname(@rest);
+ }, 
+ 'A' => sub {
+     my ($format, $time, @rest) = @_;
+     $time->weekdayname(@rest);
+ }, 
+ 'b' => sub {
+     my ($format, $time, @rest) = @_;
+     $time->monname(@rest);
+ }, 
+ 'B' => sub {
+     my ($format, $time, @rest) = @_;
+     $time->monthname(@rest);
+ }, 
+ 'c' => sub {
+     my ($format, $time, @rest) = @_;
+     $time->cdate(@rest);
+ }, 
+ 'C' => sub {
+     my ($format, $time, @rest) = @_;
+     sprintf("%02d", int($time->y(@rest) / 100));
+ }, 
+ 'd' => sub {
+     my ($format, $time, @rest) = @_;
+     sprintf("%02d", $time->d(@rest));
+ }, 
+ 'D' => sub {
+     my ($format, $time, @rest) = @_;
+     join("/",
+	  $_ftime->{'m'}->('m', $time, @rest),
+	  $_ftime->{'d'}->('d', $time, @rest),
+	  $_ftime->{'y'}->('y', $time, @rest));
+ }, 
+ 'e' => sub {
+     my ($format, $time, @rest) = @_;
+     sprintf("%2d", $time->d(@rest));
+ }, 
+ 'f' => sub {
+     my ($format, $time, @rest) = @_;
+     $time->monname(@rest);
+ }, 
+ 'H' => sub {
+     my ($format, $time, @rest) = @_;
+     sprintf("%02d", $time->h(@rest));
+ }, 
+ 'I' => sub {
+     my ($format, $time, @rest) = @_;
+     my $h = $time->h(@rest);
+     sprintf("%02d", $h == 0 ? 12 : ($h < 13 ? $h : $h % 12));
+ }, 
+ 'j' => sub {
+     my ($format, $time, @rest) = @_;
+     sprintf("%03d", $time->yday(@rest));
+ }, 
+ 'm' => sub {
+     my ($format, $time, @rest) = @_;
+     sprintf("%02d", $time->mon(@rest));
+ }, 
+ 'M' => sub {
+     my ($format, $time, @rest) = @_;
+     sprintf("%02d", $time->min(@rest));
+ }, 
+ 'n' => sub {
+     return "\n";
+ }, 
+ 'p' => sub {
+     my ($format, $time, @rest) = @_;
+     my $h = $time->h(@rest);
+     $h == 0 ? 'pm' : ($h < 13 ? 'am' : 'pm');
+ }, 
+ 'r' => sub {
+     my ($format, $time, @rest) = @_;
+     join(":",
+	  $_ftime->{'I'}->('I', $time, @rest),
+	  $_ftime->{'M'}->('M', $time, @rest),
+	  $_ftime->{'S'}->('S', $time, @rest)) .
+	      " " . $_ftime->{'p'}->('p', $time, @rest);
+ }, 
+ 'R' => sub {
+     my ($format, $time, @rest) = @_;
+     join(":",
+	  $_ftime->{'H'}->('H', $time, @rest),
+	  $_ftime->{'M'}->('M', $time, @rest));
+ }, 
+ 'S' => sub {
+     my ($format, $time, @rest) = @_;
+     sprintf("%02d", $time->s(@rest));
+ }, 
+ 't' => sub {
+     return "\t";
+ }, 
+ 'T' => sub {
+     my ($format, $time, @rest) = @_;
+     join(":",
+	  $_ftime->{'H'}->('H', $time, @rest),
+	  $_ftime->{'M'}->('M', $time, @rest),
+	  $_ftime->{'S'}->('S', $time, @rest));
+ }, 
+ 'u' => sub {
+     my ($format, $time, @rest) = @_;
+     ($time->wday(@rest) + 5) % 7 + 1;
+ }, 
+ 'V' => sub {
+     my ($format, $time, @rest) = @_;
+     sprintf("%02d", $time->week(@rest));
+ }, 
+ 'w' => sub {
+     my ($format, $time, @rest) = @_;
+     $time->_wday(@rest);
+ }, 
+ 'x' => sub {
+     my ($format, $time, @rest) = @_;
+     join("/",
+	  $_ftime->{'m'}->('m', $time, @rest),
+	  $_ftime->{'d'}->('d', $time, @rest),
+	  $_ftime->{'y'}->('y', $time, @rest));
+ },
+ 'y' => sub {
+     my ($format, $time, @rest) = @_;
+     sprintf("%02d", $time->y(@rest) % 100);
+ }, 
+ 'Y' => sub {
+     my ($format, $time, @rest) = @_;
+     sprintf("%4d", $time->y(@rest));
+ }, 
+};
+
+sub _ftime {
+    my ($format, $time, @rest) = @_;
+    if (exists $_ftime->{$format}) {
+	# We are passing format to the anonsubs so that
+	# one can share the same sub among several formats.
+	return $_ftime->{$format}->($format, $time, @rest);
+    }
+    return $time->_strftime("%$format"); # cheat
+}
+
 sub strftime {
     my $time = shift;
     my $format = @_ ? shift(@_) : "%a, %d %b %Y %H:%M:%S %Z";
-    return _strftime($format, (@$time)[c_sec..c_isdst]);
+    $format =~ s/%(.)/_ftime($1, $time, @_)/ge;
+    return $format;
 }
 
-sub day_list {
+sub _strftime {
+    my $time = shift;
+    my $format = @_ ? shift(@_) : "%a, %d %b %Y %H:%M:%S %Z";
+    return __strftime($format, (@$time)[c_sec..c_isdst]);
+}
+
+sub wday_names {
     shift if ref($_[0]) && $_[0]->isa(__PACKAGE__); # strip first if called as a method
-    my @old = @DAY_LIST;
+    my @old = @WDAY_NAMES;
     if (@_) {
-        @DAY_LIST = @_;
+        @WDAY_NAMES = @_;
     }
     return @old;
 }
 
-sub mon_list {
+sub weekday_names {
     shift if ref($_[0]) && $_[0]->isa(__PACKAGE__); # strip first if called as a method
-    my @old = @MON_LIST;
+    my @old = @WEEKDAY_NAMES;
     if (@_) {
-        @MON_LIST = @_;
+        @WEEKDAY_NAMES = @_;
+    }
+    return @old;
+}
+
+sub mon_names {
+    shift if ref($_[0]) && $_[0]->isa(__PACKAGE__); # strip first if called as a method
+    my @old = @MON_NAMES;
+    if (@_) {
+        @MON_NAMES = @_;
+    }
+    return @old;
+}
+
+sub month_names {
+    shift if ref($_[0]) && $_[0]->isa(__PACKAGE__); # strip first if called as a method
+    my @old = @MONTH_NAMES;
+    if (@_) {
+        @MONTH_NAMES = @_;
     }
     return @old;
 }
@@ -455,57 +665,72 @@ also a new() constructor provided, which is the same as localtime(), except
 when passed a Time::Piece object, in which case it's a copy constructor. The
 following methods are available on the object:
 
-    $t->sec                 # also available as $t->second
-    $t->min                 # also available as $t->minute
-    $t->hour                # 24 hour
-    $t->mday                # also available as $t->day_of_month
-    $t->mon                 # 1 = January
-    $t->_mon                # 0 = January
-    $t->monname             # February
-    $t->month               # same as $t->monname
-    $t->year                # based at 0 (year 0 AD is, of course 1 BC)
-    $t->_year               # year minus 1900
-    $t->wday                # 1 = Sunday
-    $t->_wday               # 0 = Sunday
-    $t->day_of_week         # 0 = Sunday
-    $t->wdayname            # Tuesday
-    $t->day                 # same as wdayname
-    $t->yday                # also available as $t->day_of_year, 0 = Jan 01
-    $t->isdst               # also available as $t->daylight_savings
+    $t->s                    # 0..61 [1]
+                             # and 61: leap second and double leap second
+    $t->sec                  # same as $t->s
+    $t->second               # same as $t->s
+    $t->min                  # 0..59
+    $t->h                    # 0..24
+    $t->hour                 # same as $t->h
+    $t->d                    # 1..31
+    $t->mday                 # same as $t->d
+    $t->mon                  # 1 = January
+    $t->_mon                 # 0 = January
+    $t->monname              # Feb
+    $t->monthname            # February
+    $t->month                # same as $t->monthname
+    $t->y                    # based at 0 (year 0 AD is, of course 1 BC)
+    $t->year                 # same as $t->y
+    $t->_year                # year minus 1900
+    $t->wday                 # 1 = Sunday
+    $t->day_of_week          # 0 = Sunday
+    $t->_wday                # 0 = Sunday
+    $t->wdayname             # Tue
+    $t->weekdayname          # Tuesday
+    $t->weekday              # same as weekdayname
+    $t->yday                 # also available as $t->day_of_year, 0 = Jan 01
+    $t->isdst                # also available as $t->daylight_savings
+    $t->daylight_savings     # same as $t->isdst
 
-    $t->hms                 # 12:34:56
-    $t->hms(".")            # 12.34.56
-    $t->time                # same as $t->hms
+    $t->hms                  # 12:34:56
+    $t->hms(".")             # 12.34.56
+    $t->time                 # same as $t->hms
 
-    $t->ymd                 # 2000-02-29
-    $t->date                # same as $t->ymd
-    $t->mdy                 # 02-29-2000
-    $t->mdy("/")            # 02/29/2000
-    $t->dmy                 # 29-02-2000
-    $t->dmy(".")            # 29.02.2000
-    $t->datetime            # 2000-02-29T12:34:56 (ISO 8601)
-    $t->cdate               # Tue Feb 29 12:34:56 2000
-    "$t"                    # same as $t->cdate
+    $t->ymd                  # 2000-02-29
+    $t->date                 # same as $t->ymd
+    $t->mdy                  # 02-29-2000
+    $t->mdy("/")             # 02/29/2000
+    $t->dmy                  # 29-02-2000
+    $t->dmy(".")             # 29.02.2000
+    $t->datetime             # 2000-02-29T12:34:56 (ISO 8601)
+    $t->cdate                # Tue Feb 29 12:34:56 2000
+    "$t"                     # same as $t->cdate
    
-    $t->epoch               # seconds since the epoch
-    $t->tzoffset            # timezone offset in a Time::Seconds object
+    $t->epoch                # seconds since the epoch
+    $t->tzoffset             # timezone offset in a Time::Seconds object
 
-    $t->julian_day          # number of days since Julian period began
-    $t->mjd                 # modified Julian day
+    $t->julian_day           # number of days since Julian period began
+    $t->mjd                  # modified Julian day
 
-    $t->week                # week number (ISO 8601)
+    $t->week                 # week number (ISO 8601)
 
-    $t->is_leap_year        # true if it its
-    $t->month_last_day      # 28-31
+    $t->is_leap_year         # true if it its
+    $t->month_last_day       # 28-31
 
-    $t->time_separator($s)  # set the default separator (default ":")
-    $t->date_separator($s)  # set the default separator (default "-")
-    $t->day_list(@days)     # set the default weekdays
-    $t->mon_list(@days)     # set the default months
+    $t->time_separator($s)   # set the default separator (default ":")
+    $t->date_separator($s)   # set the default separator (default "-")
+    $t->wday(@days)          # set the default weekdays, abbreviated
+    $t->weekday_names(@days) # set the default weekdays
+    $t->mon_names(@days)     # set the default months, abbreviated
+    $t->month_names(@days)   # set the default months
 
-    $t->strftime(FORMAT)    # same as POSIX::strftime (without the overhead
-                            # of the full POSIX extension)
-    $t->strftime()          # "Tue, 29 Feb 2000 12:34:56 GMT"
+    $t->strftime($format)    # data and time formatting
+    $t->strftime()           # "Tue, 29 Feb 2000 12:34:56 GMT"
+
+    $t->_strftime($format)   # same as POSIX::strftime (without the
+                             # overhead of the full POSIX extension),
+                             # calls the operating system libraries,
+                             # as opposed to $t->strftime()
 
 =head2 Local Locales
 
@@ -520,11 +745,11 @@ using locales.
 
 These settings can be overriden globally too:
 
-  Time::Piece::day_list(@days);
+  Time::Piece::weekday_names(@days);
 
 Or for months:
 
-  Time::Piece::mon_list(@months);
+  Time::Piece::month_names(@months);
 
 And locally for months:
 

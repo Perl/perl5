@@ -1053,7 +1053,7 @@ more than once.
 Calls a non-destructive version of C<sv_setsv> if dsv is not the same as
 ssv. May evaluate arguments more than once.
 
-=for apidoc Am|void|SvGROW|SV* sv|STRLEN len
+=for apidoc Am|char *|SvGROW|SV* sv|STRLEN len
 Expands the character buffer in the SV so that it has room for the
 indicated number of bytes (remember to reserve space for an extra trailing
 NUL character).  Calls C<sv_grow> to perform the expansion if necessary. 

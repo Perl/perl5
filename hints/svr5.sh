@@ -157,7 +157,7 @@ fi
 # lddlflags : must tell the linker to output a shared library
 
 # use shared perl lib if the user doesn't choose otherwise
-if test "x$useshrplib" == "x"; then
+if test "x$useshrplib" = "x"; then
     useshrplib='true'
 fi
 

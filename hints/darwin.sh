@@ -65,3 +65,14 @@ usevfork='true';
 # malloc works
 usemymalloc='n';
 
+##
+# Build process
+##
+
+# Locales aren't feeling well.
+LC_ALL=C; export LC_ALL;
+
+# The HFS+ will throw "make depend" into confusion since
+# Makefile and makefile are the same.
+firstmakefile=GNUmakefile;
+

@@ -423,6 +423,8 @@ LE<lt>E<gt>, but other things in this section probably should be when
 appropriate.  You may need to use the C<LE<lt>...|...E<gt>> syntax to keep
 B<pod2man> and B<pod2text> from being too verbose; see perlpod(1).
 
+If the package has a mailing list, include a URL here.
+
 If the package has a web site, include a URL here.
 
 =item AUTHOR
@@ -433,10 +435,28 @@ so that users have a way of contacting you is a good idea.  Remember that
 program documentation tends to roam the wild for far longer than you expect
 and pick an e-mail address that's likely to last if possible.
 
+=item COPYRIGHT AND LICENSE
+
+For copyright
+
+  Copyright YEAR(s) by YOUR NAME(s)
+
+(No, (C) is not needed.  No, "all rights reserved" is not needed.)
+
+For licensing the easiest way is to use the same licensing as Perl itself:
+
+  This library is free software; you can redistribute it and/or modify
+  it under the same terms as Perl itself. 
+
+This makes it easy for people to use your module with Perl.  Note that
+this licensing is neither an endorsement or a requirement, you are of
+course free to choose any licensing.
+
 =item HISTORY
 
-Programs derived from other sources sometimes have this, or you might keep a
-modification log here.
+Programs derived from other sources sometimes have this, or you might
+keep a modification log here.  If the log gets overly long or detailed,
+consider maintaining it in a separate file, though.
 
 =back
 

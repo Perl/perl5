@@ -2718,8 +2718,14 @@ sed %s -e \"/^[^#]/b\" \
 	}
 #endif
 #endif
+#ifdef IAMSUID
+	errno = EPERM;
+	Perl_croak(aTHX_ "Can't open perl script: %s\n",
+		   Strerror(errno));
+#else
 	Perl_croak(aTHX_ "Can't open perl script \"%s\": %s\n",
 		   CopFILE(PL_curcop), Strerror(errno));
+#endif
     }
 }
 

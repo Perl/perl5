@@ -655,4 +655,8 @@ new_pmop "abcdef"; reset;
 new_pmop "abcdef"; reset;
 new_pmop "abcdef"; reset;
 new_pmop "abcdef"; reset;
-
+########
+# David Dyck
+# coredump in 5.7.1
+close STDERR; die;
+EXPECT

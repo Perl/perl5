@@ -504,11 +504,13 @@ Perl_do_openn(pTHX_ GV *gv, register char *name, I32 len, int as_raw,
     if (ckWARN(WARN_IO)) {
 	if ((IoTYPE(io) == IoTYPE_RDONLY) &&
 	    (fp == PerlIO_stdout() || fp == PerlIO_stderr())) {
-		Perl_warner(aTHX_ WARN_IO, "'std%s' opened only for input",
-				(fp == PerlIO_stdout()) ? "out" : "err");
+		Perl_warner(aTHX_ WARN_IO,
+			    "Filehandle STD%s opened only for input",
+			    (fp == PerlIO_stdout()) ? "OUT" : "ERR");
 	}
 	else if ((IoTYPE(io) == IoTYPE_WRONLY) && fp == PerlIO_stdin()) {
-		Perl_warner(aTHX_ WARN_IO, "'stdin' opened only for output");
+		Perl_warner(aTHX_ WARN_IO,
+			    "Filehandle STDIN opened only for output");
 	}
     }
 

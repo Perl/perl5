@@ -3563,7 +3563,9 @@ PP(pp_hslice)
 	while (++MARK <= SP) {
 	    SV *keysv = *MARK;
 	    SV **svp;
-	    I32 preeminent = SvRMAGICAL(hv) ? 1 : hv_exists_ent(hv, keysv, 0);
+	    I32 preeminent = SvRMAGICAL(hv) ? 1 :
+				realhv ? hv_exists_ent(hv, keysv, 0)
+				       : avhv_exists_ent((AV*)hv, keysv, 0);
 	    if (realhv) {
 		HE *he = hv_fetch_ent(hv, keysv, lval, 0);
 		svp = he ? &HeVAL(he) : 0;

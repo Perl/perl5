@@ -137,6 +137,7 @@ S_more_sv(pTHX)
     if (PL_nice_chunk) {
 	sv_add_arena(PL_nice_chunk, PL_nice_chunk_size, 0);
 	PL_nice_chunk = Nullch;
+        PL_nice_chunk_size = 0;
     }
     else {
 	char *chunk;                /* must use New here to match call to */
@@ -1730,7 +1731,7 @@ Perl_sv_2iv(pTHX_ register SV *sv)
 	if (SvROK(sv)) {
 	  SV* tmpstr;
           if (SvAMAGIC(sv) && (tmpstr=AMG_CALLun(sv,numer)) &&
-                  (SvRV(tmpstr) != SvRV(sv)))
+                (SvTYPE(tmpstr) != SVt_RV || (SvRV(tmpstr) != SvRV(sv))))
 	      return SvIV(tmpstr);
 	  return PTR2IV(SvRV(sv));
 	}
@@ -1984,7 +1985,7 @@ Perl_sv_2uv(pTHX_ register SV *sv)
 	if (SvROK(sv)) {
 	  SV* tmpstr;
           if (SvAMAGIC(sv) && (tmpstr=AMG_CALLun(sv,numer)) &&
-                  (SvRV(tmpstr) != SvRV(sv)))
+                (SvTYPE(tmpstr) != SVt_RV || (SvRV(tmpstr) != SvRV(sv))))
 	      return SvUV(tmpstr);
 	  return PTR2UV(SvRV(sv));
 	}
@@ -2268,7 +2269,7 @@ Perl_sv_2nv(pTHX_ register SV *sv)
 	if (SvROK(sv)) {
 	  SV* tmpstr;
           if (SvAMAGIC(sv) && (tmpstr=AMG_CALLun(sv,numer)) &&
-                  (SvRV(tmpstr) != SvRV(sv)))
+                (SvTYPE(tmpstr) != SVt_RV || (SvRV(tmpstr) != SvRV(sv))))
 	      return SvNV(tmpstr);
 	  return PTR2NV(SvRV(sv));
 	}
@@ -2684,7 +2685,7 @@ Perl_sv_2pv(pTHX_ register SV *sv, STRLEN *lp)
 	if (SvROK(sv)) {
 	    SV* tmpstr;
             if (SvAMAGIC(sv) && (tmpstr=AMG_CALLun(sv,string)) &&
-                    (SvRV(tmpstr) != SvRV(sv)))
+                (SvTYPE(tmpstr) != SVt_RV || (SvRV(tmpstr) != SvRV(sv))))
 		return SvPV(tmpstr,*lp);
 	    sv = (SV*)SvRV(sv);
 	    if (!sv)
@@ -2924,7 +2925,7 @@ Perl_sv_2bool(pTHX_ register SV *sv)
     if (SvROK(sv)) {
 	SV* tmpsv;
         if (SvAMAGIC(sv) && (tmpsv=AMG_CALLun(sv,bool_)) &&
-                (SvRV(tmpsv) != SvRV(sv)))
+                (SvTYPE(tmpsv) != SVt_RV || (SvRV(tmpsv) != SvRV(sv))))
 	    return SvTRUE(tmpsv);
       return SvRV(sv) != 0;
     }
