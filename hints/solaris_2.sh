@@ -392,6 +392,13 @@ Cannot continue, aborting.
 EOM
 		exit 1
 	    fi 
+	    if test -n "$workshoplibs"; then
+		loclibpth=`echo $loclibpth | sed -e "s% $workshoplibs%%" `
+		for lib in $workshoplibs; do
+		    loclibpth="$loclibpth $lib/sparcv9"
+		done
+		loclibpth="$loclibpth $workshoplibs"
+	    fi 
 	    loclibpth="$loclibpth /usr/lib/sparcv9"
 	    case "$cc -v 2>/dev/null" in
 	    *gcc*)
@@ -446,10 +453,10 @@ cat > UU/uselongdouble.cbu <<'EOCBU'
 case "$uselongdouble-$uselongdouble_done" in
 "$define-"|true-|[yY]*-)
 	case "$ccisworkshop" in
-	'')
-		cat <<EOM
+	'')	cat <<EOM
 
-I do not see the libsunmath.so; therefore I cannot do long doubles, sorry.
+I do not see the Sun Workshop compiler; therefore there is no libsunmath.so;
+therefore I cannot do long doubles, sorry.  Cannot continue, aborting.
 
 EOM
 		exit 1
