@@ -34,8 +34,8 @@ $ENV{SERVER_PROTOCOL} = 'HTTP/1.0';
 $ENV{SERVER_PORT} = 8080;
 $ENV{SERVER_NAME} = 'the.good.ship.lollypop.com';
 
-test(2,start_form(-action=>'foobar',-method=>GET) eq 
-     qq(<form method="GET" action="foobar" enctype="application/x-www-form-urlencoded">\n),
+test(2,start_form(-action=>'foobar',-method=>'get') eq 
+     qq(<form method="get" action="foobar" enctype="application/x-www-form-urlencoded">\n),
      "start_form()");
 
 test(3,submit() eq qq(<input type="submit" name=".submit" />),"submit()");
@@ -51,32 +51,31 @@ test(10,checkbox(-name=>'weather',-value=>'nice',-label=>'forecast') eq
      qq(<input type="checkbox" name="weather" value="nice" />forecast),
      "checkbox()");
 test(11,checkbox(-name=>'weather',-value=>'nice',-label=>'forecast',-checked=>1,-override=>1) eq 
-     qq(<input type="checkbox" name="weather" value="nice" checked="yes" />forecast),
+     qq(<input type="checkbox" name="weather" value="nice" checked />forecast),
      "checkbox()");
 test(12,checkbox(-name=>'weather',-value=>'dull',-label=>'forecast') eq 
-     qq(<input type="checkbox" name="weather" value="dull" checked="yes" />forecast),
+     qq(<input type="checkbox" name="weather" value="dull" checked />forecast),
      "checkbox()");
 
 test(13,radio_group(-name=>'game') eq 
-     qq(<input type="radio" name="game" value="chess" checked="yes" />chess <input type="radio" name="game" value="checkers" />checkers),
+     qq(<input type="radio" name="game" value="chess" checked />chess <input type="radio" name="game" value="checkers" />checkers),
      'radio_group()');
 test(14,radio_group(-name=>'game',-labels=>{'chess'=>'ping pong'}) eq 
-     qq(<input type="radio" name="game" value="chess" checked="yes" />ping pong <input type="radio" name="game" value="checkers" />checkers),
+     qq(<input type="radio" name="game" value="chess" checked />ping pong <input type="radio" name="game" value="checkers" />checkers),
      'radio_group()');
 
 test(15, checkbox_group(-name=>'game',-Values=>[qw/checkers chess cribbage/]) eq 
-     qq(<input type="checkbox" name="game" value="checkers" checked="yes" />checkers <input type="checkbox" name="game" value="chess" checked="yes" />chess <input type="checkbox" name="game" value="cribbage" />cribbage),
+     qq(<input type="checkbox" name="game" value="checkers" checked />checkers <input type="checkbox" name="game" value="chess" checked />chess <input type="checkbox" name="game" value="cribbage" />cribbage),
      'checkbox_group()');
 
 test(16, checkbox_group(-name=>'game',-values=>[qw/checkers chess cribbage/],-defaults=>['cribbage'],-override=>1) eq 
-     qq(<input type="checkbox" name="game" value="checkers" />checkers <input type="checkbox" name="game" value="chess" />chess <input type="checkbox" name="game" value="cribbage" checked="yes" />cribbage),
+     qq(<input type="checkbox" name="game" value="checkers" />checkers <input type="checkbox" name="game" value="chess" />chess <input type="checkbox" name="game" value="cribbage" checked />cribbage),
      'checkbox_group()');
-
 test(17, popup_menu(-name=>'game',-values=>[qw/checkers chess cribbage/],-default=>'cribbage',-override=>1) eq <<END,'checkbox_group()');
 <select name="game">
 <option  value="checkers">checkers</option>
 <option  value="chess">chess</option>
-<option selected="yes" value="cribbage">cribbage</option>
+<option selected value="cribbage">cribbage</option>
 </select>
 END
 
