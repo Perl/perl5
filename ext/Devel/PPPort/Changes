@@ -1,3 +1,8 @@
+2.008 - 20th October 2003
+
+    * eval_(pv|sv) added
+    * PERL_MAGIC_* added
+
 2.007 - 18th September 2003
 
     * small fix in grok_numeric_radix: variable was used uninitialized
