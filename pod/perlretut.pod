@@ -111,7 +111,8 @@ to arbitrary delimiters by putting an C<'m'> out front:
 
     "Hello World" =~ m!World!;   # matches, delimited by '!'
     "Hello World" =~ m{World};   # matches, note the matching '{}'
-    "/usr/bin/perl" =~ m"/perl"; # matches, '/' becomes ordinary char
+    "/usr/bin/perl" =~ m"/perl"; # matches after '/usr/bin',
+                                 # '/' becomes an ordinary char
 
 C</World/>, C<m!World!>, and C<m{World}> all represent the
 same thing.  When, e.g., C<""> is used as a delimiter, the forward
@@ -195,7 +196,6 @@ evaluated for matching purposes.  So we have:
     $foo = 'house';
     'housecat' =~ /$foo/;      # matches
     'cathouse' =~ /cat$foo/;   # matches
-    'housecat' =~ /$foocat/;   # doesn't match, there is no $foocat
     'housecat' =~ /${foo}cat/; # matches
 
 So far, so good.  With the knowledge above you can already perform
@@ -297,7 +297,7 @@ to be possibly matched inside.  Here are some examples:
     /cat/;       # matches 'cat'
     /[bcr]at/;   # matches 'bat, 'cat', or 'rat'
     /item[0123456789]/;  # matches 'item0' or ... or 'item9'
-    "abc" =~ /[cab/;     # matches 'a'
+    "abc" =~ /[cab]/;    # matches 'a'
 
 In the last statement, even though C<'c'> is the first character in
 the class, C<'a'> matches because the first character position in the
@@ -326,7 +326,7 @@ special characters C<]$\> are handled:
 
    /[\]c]def/; # matches ']def' or 'cdef'
    $x = 'bcr';
-   /[$x]at/;   # matches 'bat, 'cat', or 'rat'
+   /[$x]at/;   # matches 'bat', 'cat', or 'rat'
    /[\$x]at/;  # matches '$at' or 'xat'
    /[\\$x]at/; # matches '\at', 'bat, 'cat', or 'rat'
 
@@ -353,7 +353,7 @@ all equivalent.
 
 The special character C<^> in the first position of a character class
 denotes a B<negated character class>, which matches any character but
-those in the bracket.  Both C<[...]> and C<[^...]> must match a
+those in the brackets.  Both C<[...]> and C<[^...]> must match a
 character, or the match fails.  Then
 
     /[^a]at/;  # doesn't match 'aat' or 'at', but matches
@@ -743,7 +743,7 @@ of the string after the match.  An example:
 In the second match, S<C<$` = ''> > because the regexp matched at the
 first character position in the string and stopped, it never saw the
 second 'the'.  It is important to note that using C<$`> and C<$'>
-slows down regexp matching quite a bit, and C<$&> slows it down to a
+slows down regexp matching quite a bit, and C< $& > slows it down to a
 lesser extent, because if they are used in one regexp in a program,
 they are generated for <all> regexps in the program.  So if raw
 performance is a goal of your application, they should be avoided.
@@ -829,7 +829,7 @@ One might initially guess that perl would find the C<at> in C<cat> and
 stop there, but that wouldn't give the longest possible string to the
 first quantifier C<.*>.  Instead, the first quantifier C<.*> grabs as
 much of the string as possible while still having the regexp match.  In
-this example, that means having the C<at> sequence with the final <at>
+this example, that means having the C<at> sequence with the final C<at>
 in the string.  The other important principle illustrated here is that
 when there are two or more elements in a regexp, the I<leftmost>
 quantifier, if there is one, gets to grab as much the string as
@@ -1616,7 +1616,7 @@ it matches I<any> byte 0-255.  So
     $x =~ /\C/;  # matches, but dangerous!
 
 The last regexp matches, but is dangerous because the string
-I<character> position is no longer synchronized to the string <byte>
+I<character> position is no longer synchronized to the string I<byte>
 position.  This generates the warning 'Malformed UTF-8
 character'.  C<\C> is best used for matching the binary data in strings
 with binary data intermixed with Unicode characters.
@@ -1875,7 +1875,7 @@ The lookahead and lookbehind assertions are generalizations of the
 anchor concept.  Lookahead and lookbehind are zero-width assertions
 that let us specify which characters we want to test for.  The
 lookahead assertion is denoted by C<(?=regexp)> and the lookbehind
-assertion is denoted by C<(?<=fixed-regexp)>.  Some examples are
+assertion is denoted by C<< (?<=fixed-regexp) >>.  Some examples are
 
     $x = "I catch the housecat 'Tom-cat' with catnip";
     $x =~ /cat(?=\s+)/;  # matches 'cat' in 'housecat'
@@ -1886,16 +1886,16 @@ assertion is denoted by C<(?<=fixed-regexp)>.  Some examples are
     $x =~ /(?<=\s)cat(?=\s)/; # doesn't match; no isolated 'cat' in
                               # middle of $x
 
-Note that the parentheses in C<(?=regexp)> and C<(?<=regexp)> are
+Note that the parentheses in C<(?=regexp)> and C<< (?<=regexp) >> are
 non-capturing, since these are zero-width assertions.  Thus in the
 second regexp, the substrings captured are those of the whole regexp
-itself.   Lookahead C<(?=regexp)> can match arbitrary regexps, but
-lookbehind C<(?<=fixed-regexp)> only works for regexps of fixed
-width, i.e., a fixed number of characters long.  Thus C<(?<=(ab|bc))>
-is fine, but C<(?<=(ab)*)> is not.  The negated versions of the
-lookahead and lookbehind assertions are denoted by C<(?!regexp)>
-and C<(?<!fixed-regexp)> respectively.  They evaluate true if the
-regexps do I<not> match:
+itself.  Lookahead C<(?=regexp)> can match arbitrary regexps, but
+lookbehind C<< (?<=fixed-regexp) >> only works for regexps of fixed
+width, i.e., a fixed number of characters long.  Thus
+C<< (?<=(ab|bc)) >> is fine, but C<< (?<=(ab)*) >> is not.  The
+negated versions of the lookahead and lookbehind assertions are
+denoted by C<(?!regexp)> and C<< (?<!fixed-regexp) >> respectively.
+They evaluate true if the regexps do I<not> match:
 
     $x = "foobar";
     $x =~ /foo(?!bar)/;  # doesn't match, 'bar' follows 'foo'
@@ -2016,9 +2016,9 @@ match.  For instance,
 
 matches a DNA sequence such that it either ends in C<AAG>, or some
 other base pair combination and C<C>.  Note that the form is
-C<(?(?<=AA)G|C)> and not C<(?((?<=AA))G|C)>; for the lookahead,
-lookbehind or code assertions, the parentheses around the conditional
-are not needed.
+C<< (?(?<=AA)G|C) >> and not C<< (?((?<=AA))G|C) >>; for the
+lookahead, lookbehind or code assertions, the parentheses around the
+conditional are not needed.
 
 =head2 A bit of magic: executing Perl code in a regular expression
 
@@ -2101,7 +2101,6 @@ properly in the presence of backtracking.
 This example uses a code expression in a conditional to match the
 article 'the' in either English or German:
 
-    use re 'eval';
     $lang = 'DE';  # use German
     ...
     $text = "das";
@@ -2119,24 +2118,47 @@ C<(?((?{...}))yes-regexp|no-regexp)>.  In other words, in the case of a
 code expression, we don't need the extra parentheses around the
 conditional.
 
-The S<C<use re 'eval';> > statement is needed because we are both
-interpolating the variable C<$lang> I<and> evaluating code
-within the regexp.  From a security point of view, this can be
-dangerous.  It is dangerous because many programmers who write search
-engines often take user input and plug it directly into a regexp:
+If you try to use code expressions with interpolating variables, perl
+may surprise you:
+
+    $bar = 5;
+    $pat = '(?{ 1 })';
+    /foo(?{ $bar })bar/; # compiles ok, $bar not interpolated
+    /foo(?{ 1 })$bar/;   # compile error!
+    /foo${pat}bar/;      # compile error!
+
+    $pat = qr/(?{ $foo = 1 })/;  # precompile code regexp
+    /foo${pat}bar/;      # compiles ok
+
+If a regexp has (1) code expressions and interpolating variables,or
+(2) a variable that interpolates a code expression, perl treats the
+regexp as an error. If the code expression is precompiled into a
+variable, however, interpolating is ok. The question is, why is this
+an error?
+
+The reason is that variable interpolation and code expressions
+together pose a security risk.  The combination is dangerous because
+many programmers who write search engines often take user input and
+plug it directly into a regexp:
 
     $regexp = <>;       # read user-supplied regexp
     $chomp $regexp;     # get rid of possible newline
     $text =~ /$regexp/; # search $text for the $regexp
 
-If the C<$regexp> variable is used in a code expression, the user
-could then execute arbitrary Perl code.  For instance, some joker could
+If the C<$regexp> variable contains a code expression, the user could
+then execute arbitrary Perl code.  For instance, some joker could
 search for S<C<system('rm -rf *');> > to erase your files.  In this
 sense, the combination of interpolation and code expressions B<taints>
 your regexp.  So by default, using both interpolation and code
-expressions in the same regexp is not allowed.  Only by invoking
-S<C<use re 'eval';> > can one use both interpolation and code
-expressions in the same regexp.
+expressions in the same regexp is not allowed.  If you're not
+concerned about malicious users, it is possible to bypass this
+security check by invoking S<C<use re 'eval'> >:
+
+    use re 'eval';       # throw caution out the door
+    $bar = 5;
+    $pat = '(?{ 1 })';
+    /foo(?{ 1 })$bar/;   # compiles ok
+    /foo${pat}bar/;      # compiles ok
 
 Another form of code expression is the S<B<pattern code expression> >.
 The pattern code expression is like a regular code expression, except
@@ -2153,7 +2175,6 @@ This final example contains both ordinary and pattern code
 expressions.   It detects if a binary string C<1101010010001...> has a
 Fibonacci spacing 0,1,1,2,3,5,...  of the C<1>'s:
 
-    use re 'eval';
     $s0 = 0; $s1 = 1; # initial conditions
     $x = "1101010010001000001";
     print "It is a Fibonacci sequence\n"
@@ -2197,7 +2218,8 @@ almost necessary in creating and debugging regexps.
 Speaking of debugging, there are several pragmas available to control
 and debug regexps in Perl.  We have already encountered one pragma in
 the previous section, S<C<use re 'eval';> >, that allows variable
-interpolation in a regexp with code expressions.  The other pragmas are
+interpolation and code expressions to coexist in a regexp.  The other
+pragmas are
 
     use re 'taint';
     $tainted = <>;
@@ -2208,7 +2230,7 @@ variable to be tainted as well.  This is not normally the case, as
 regexps are often used to extract the safe bits from a tainted
 variable.  Use C<taint> when you are not extracting safe bits, but are
 performing some other processing.  Both C<taint> and C<eval> pragmas
-are lexically scoped, which mean they have are in effect only until
+are lexically scoped, which means they are in effect only until
 the end of the block enclosing the pragmas.
 
     use re 'debug';
@@ -2352,10 +2374,9 @@ This document may be distributed under the same terms as Perl itself.
 The inspiration for the stop codon DNA example came from the ZIP
 code example in chapter 7 of I<Mastering Regular Expressions>.
 
-The author would like to thank
-Jeff Pinyan,
-Peter Haworth,
-Ronald J Kimball,
-and Joe Smith for all their helpful comments.
+The author would like to thank Jeff Pinyan, Andrew Johnson, Peter
+Haworth, Ronald J Kimball, and Joe Smith for all their helpful
+comments.
 
 =cut
+
