@@ -651,7 +651,7 @@ setuid perl scripts securely.\n");
 	    LEAVE;
 	FREETMPS;
 	PL_curstash = PL_defstash;
-	if (PL_endav)
+	if (PL_endav && !PL_minus_c)
 	    call_list(oldscope, PL_endav);
 	return STATUS_NATIVE_EXPORT;
     case 3:
@@ -1023,7 +1023,7 @@ perl_run(pTHXx)
 	    LEAVE;
 	FREETMPS;
 	PL_curstash = PL_defstash;
-	if (PL_endav)
+	if (PL_endav && !PL_minus_c)
 	    call_list(oldscope, PL_endav);
 #ifdef MYMALLOC
 	if (PerlEnv_getenv("PERL_DEBUG_MSTATS"))
@@ -3019,7 +3019,7 @@ Perl_call_list(pTHX_ I32 oldscope, AV *paramList)
 		LEAVE;
 	    FREETMPS;
 	    PL_curstash = PL_defstash;
-	    if (PL_endav)
+	    if (PL_endav && !PL_minus_c)
 		call_list(oldscope, PL_endav);
 	    PL_curcop = &PL_compiling;
 	    PL_curcop->cop_line = oldline;
