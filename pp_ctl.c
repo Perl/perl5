@@ -2559,7 +2559,7 @@ Perl_sv_compile_2op(pTHX_ SV *sv, OP** startop, char *code, PAD** padp)
     char *tmpbuf = tbuf;
     char *safestr;
     int runtime;
-    CV* runcv;
+    CV* runcv = Nullcv;	/* initialise to avoid compiler warnings */
 
     ENTER;
     lex_start(sv);
