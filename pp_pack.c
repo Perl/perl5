@@ -513,7 +513,9 @@ Perl_unpack_str(pTHX_ char *pat, register char *patend, register char *s, char *
 /*
 =for apidoc unpackstring
 
-The engine implementing unpack() Perl function.
+The engine implementing unpack() Perl function. C<unpackstring> puts the
+extracted list items on the stack and returns the number of elements.
+Issue C<PUTBACK> before and C<SPAGAIN> after the call to this function.
 
 =cut */
 

@@ -156,12 +156,14 @@ if test -f /etc/issue -a -f /etc/.relid; then
     # libcrypt contains nothing libc wouldn't have.
     libswanted=`echo " $libswanted " | sed -e 's/ crypt / /'`
     # With the NCR High Performance C Compiler R3.0c, miniperl fails
-    # t/op/regexp.t test 461 unless we compile with optimize=-g.
+    # t/op/regexp.t test 461 unless we compile with optimize=-O0.
     # Volunteers are needed to determine just which files need special
-    # treatment.  For now, use optimize=-g for everything.
+    # treatment.  For now, use optimize=-O0 for everything.
     #
+    d_usleep='undef'
+    d_ualarm='undef'
     case "$optimize" in
-    '') optimize='-g' ;;
+    '') optimize='-O0' ;;
     esac
 fi
 
