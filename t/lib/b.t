@@ -10,7 +10,7 @@ use warnings;
 use strict;
 use Config;
 
-print "1..15\n";
+print "1..17\n";
 
 my $test = 1;
 
@@ -78,9 +78,6 @@ LINE: while (defined($_ = <ARGV>)) {
     @F = split(/\s+/, $_, 0);
     '???'
 }
-continue {
-    '???'
-}
 
 EOF
 print "# [$a]\n\# vs\n# [$b]\nnot " if $a ne $b;
@@ -146,3 +143,14 @@ if ($is_thread) {
     print "# [$a]\nnot " unless $a =~ /sv_undef.*PVNV.*%one.*sv_undef.*HV/s;
 }
 ok;
+
+# Bug 20001204.07
+{
+my $foo = $deparse->coderef2text(sub { { 234; }});
+# Constants don't get optimised here.
+print "not " unless $foo =~ /{.*{.*234;.*}.*}/sm;
+ok;
+$foo = $deparse->coderef2text(sub { { 234; } continue { 123; } });
+print "not " unless $foo =~ /{.*{.*234;.*}.*continue.*{.*123.*}/sm; 
+ok;
+}
