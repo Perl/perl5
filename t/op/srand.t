@@ -3,7 +3,7 @@
 # Test srand.
 
 use strict;
-use Test::More tests => 3;
+use Test::More tests => 4;
 
 # Generate a load of random numbers.
 # int() avoids possible floating point error.
@@ -30,6 +30,19 @@ srand(1138);
 ok( !eq_array(\@first_run, \@second_run),
                                  'srand(), different arg, different rands' );
 
+
+# Check that srand() isn't affected by $_
+{   
+    local $_ = 42;
+    srand();
+    @first_run  = mk_rand;
+
+    srand(42);
+    @second_run = mk_rand;
+
+    ok( !eq_array(\@first_run, \@second_run),
+                       'srand(), no arg, not affected by $_');
+}
 
 # This test checks whether Perl called srand for you.
 @first_run  = `$^X -le "print int rand 100 for 1..100"`;
