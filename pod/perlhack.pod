@@ -1283,13 +1283,156 @@ We end up with a patch looking a little like this:
 And finally, we submit it, with our rationale, to perl5-porters. Job
 done!
 
+=head1 EXTERNAL TOOLS FOR DEBUGGING PERL
+
+Sometimes it helps to use external tools while debugging and
+testing Perl.  This section tries to guide you through using
+some common testing and debugging tools with Perl.  This is
+meant as a guide to interfacing these tools with Perl, not
+as any kind of guide to the use of the tools themselves.
+
+=head2 Rational Software's Purify
+
+Purify is a commercial tool that is helpful in identifying
+memory overruns, wild pointers, memory leaks and other such
+badness.  Perl must be compiled in a specific way for
+optimal testing with Purify.  Purify is available under
+Windows NT, Solaris, HP-UX, SGI, and Siemens Unix.
+
+The only currently known leaks happen when there are
+compile-time errors within eval or require.  (Fixing these
+is non-trivial, unfortunately, but they must be fixed
+eventually.)
+
+=head2 Purify on Unix
+
+On Unix, Purify creates a new Perl binary.  To get the most
+benefit out of Purify, you should create the perl to Purify
+using:
+
+    sh Configure -Accflags=-DPURIFY -Doptimize='-g' \
+     -Uusemymalloc -Dusemultiplicity
+
+where these arguments mean:
+
+=over 4
+
+=item -Accflags=-DPURIFY
+
+Disables Perl's arena memory allocation functions, as well as
+forcing use of memory allocation functions derived from the
+system malloc.
+
+=item -Doptimize='-g'
+
+Adds debugging information so that you see the exact source
+statements where the problem occurs.  Without this flag, all
+you will see is the source filename of where the error occurred.
+
+=item -Uusemymalloc
+
+Disable Perl's malloc so that Purify can more closely monitor
+allocations and leaks.  Using Perl's malloc will make Purify
+report most leaks in the "potential" leaks category.
+
+=item -Dusemultiplicity
+
+Enabling the multiplicity option allows perl to clean up
+thoroughly when the interpreter shuts down, which reduces the
+number of bogus leak reports from Purify.
+
+=back
+
+Once you've compiled a perl suitable for Purify'ing, then you
+can just:
+
+    make pureperl   
+
+which creates a binary named 'pureperl' that has been Purify'ed.
+This binary is used in place of the standard 'perl' binary
+when you want to debug Perl memory problems.
+
+As an example, to show any memory leaks produced during the
+standard Perl testset you would create and run the Purify'ed
+perl as:
+
+    make pureperl
+    cd t
+    ../pureperl -I../lib harness 
+
+which would run Perl on test.pl and report any memory problems.
+
+Purify outputs messages in "Viewer" windows by default.  If
+you don't have a windowing environment or if you simply
+want the Purify output to unobtrusively go to a log file
+instead of to the interactive window, use these following
+options to output to the log file "perl.log":
+
+    setenv PURIFYOPTIONS "-chain-length=25 -windows=no \
+     -log-file=perl.log -append-logfile=yes"
+
+If you plan to use the "Viewer" windows, then you only need this option:
+
+    setenv PURIFYOPTIONS "-chain-length=25"
+
+=head2 Purify on NT
+
+Purify on Windows NT instruments the Perl binary 'perl.exe'
+on the fly.  There are several options in the makefile you
+should change to get the most use out of Purify:
+
+=over 4
+
+=item DEFINES
+
+You should add -DPURIFY to the DEFINES line so the DEFINES
+line looks something like:
+
+    DEFINES = -DWIN32 -D_CONSOLE -DNO_STRICT $(CRYPT_FLAG) -DPURIFY=1 
+
+to disable Perl's arena memory allocation functions, as
+well as to force use of memory allocation functions derived
+from the system malloc.
+
+=item USE_MULTI = define
+
+Enabling the multiplicity option allows perl to clean up
+thoroughly when the interpreter shuts down, which reduces the
+number of bogus leak reports from Purify.
+
+=item #PERL_MALLOC = define
+
+Disable Perl's malloc so that Purify can more closely monitor
+allocations and leaks.  Using Perl's malloc will make Purify
+report most leaks in the "potential" leaks category.
+
+=item CFG = Debug
+
+Adds debugging information so that you see the exact source
+statements where the problem occurs.  Without this flag, all
+you will see is the source filename of where the error occurred.
+
+=back
+
+As an example, to show any memory leaks produced during the
+standard Perl testset you would create and run Purify as:
+
+    cd win32
+    make
+    cd ../t
+    purify ../perl -I../lib harness 
+
+which would instrument Perl in memory, run Perl on test.pl,
+then finally report any memory problems.
+
 =head2 CONCLUSION
 
 We've had a brief look around the Perl source, an overview of the stages
 F<perl> goes through when it's running your code, and how to use a
-debugger to poke at the Perl guts. Finally, we took a very simple
-problem and demonstrated how to solve it fully - with documentation,
-regression tests, and finally a patch for submission to p5p.
+debugger to poke at the Perl guts. We took a very simple problem and
+demonstrated how to solve it fully - with documentation, regression
+tests, and finally a patch for submission to p5p.  Finally, we talked
+about how to use external tools to debug and test Perl.
 
 I'd now suggest you read over those references again, and then, as soon
 as possible, get your hands dirty. The best way to learn is by doing,
