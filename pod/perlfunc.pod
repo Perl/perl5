@@ -3547,7 +3547,7 @@ replaces them with the elements of LIST, if any.  In list context,
 returns the elements removed from the array.  In scalar context,
 returns the last element removed, or C<undef> if no elements are
 removed.  The array grows or shrinks as necessary.
-If OFFSET is negative then it start that far from the end of the array.
+If OFFSET is negative then it starts that far from the end of the array.
 If LENGTH is omitted, removes everything from OFFSET onward.
 If LENGTH is negative, leave that many elements off the end of the array.
 The following equivalences hold (assuming C<$[ == 0>):
@@ -3606,7 +3606,9 @@ characters at each point it matches that way.  For example:
 
     print join(':', split(/ */, 'hi there'));
 
-produces the output 'h:i:t:h:e:r:e'.
+produces the output 'h:i:t:h:e:r:e'. It does not match the
+null at the start or end of the string (note that this behavior
+differs from that of the equivalent regular expression).
 
 The LIMIT parameter can be used to split a line partially
 
