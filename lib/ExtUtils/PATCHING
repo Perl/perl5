@@ -32,6 +32,10 @@ Reporting bugs
   deliberately.  Even if it was done deliberately, we still want to hear
   if it caused problems.
 
+- If you're testing MakeMaker against a development version of Perl,
+  please also check it against the latest stable version.  This makes it
+  easier to figure out if its MakeMaker or Perl at fault.
+
 
 Patching details
 

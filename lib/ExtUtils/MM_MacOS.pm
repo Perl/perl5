@@ -12,7 +12,7 @@ require ExtUtils::MM_Unix;
 @ISA = qw( ExtUtils::MM_Any ExtUtils::MM_Unix );
 
 use vars qw($VERSION);
-$VERSION = '1.05';
+$VERSION = '1.06';
 
 use Config;
 use Cwd 'cwd';
@@ -537,6 +537,7 @@ sub init_dirscan {	# --- File and Directory Lists (.xs .pm .pod etc)
 	next if ($name =~ /^\./ or $ignore{$name});
 	next unless $self->libscan($name);
 	if (-d $name){
+            next if $self->{NORECURS};
 	    $dir{$name} = $name if (-f ":$name:Makefile.PL");
 	} elsif ($name =~ /\.xs$/){
 	    my($c); ($c = $name) =~ s/\.xs$/.c/;

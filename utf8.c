@@ -831,7 +831,8 @@ Perl_utf16_to_utf8(pTHX_ U8* p, U8* d, I32 bytelen, I32 *newlen)
 	    continue;
 	}
 	if (uv >= 0xd800 && uv < 0xdbff) {	/* surrogates */
-	    UV low = *p++;
+	    UV low = (p[0] << 8) + p[1];
+	    p += 2;
 	    if (low < 0xdc00 || low >= 0xdfff)
 		Perl_croak(aTHX_ "Malformed UTF-16 surrogate");
 	    uv = ((uv - 0xd800) << 10) + (low - 0xdc00) + 0x10000;

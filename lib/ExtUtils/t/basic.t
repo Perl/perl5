@@ -16,10 +16,11 @@ BEGIN {
 use strict;
 use Config;
 
-use Test::More tests => 54;
+use Test::More tests => 73;
 use MakeMaker::Test::Utils;
 use File::Find;
 use File::Spec;
+use File::Path;
 
 # 'make disttest' sets a bunch of environment variables which interfere
 # with our testing.
@@ -37,7 +38,7 @@ my $Touch_Time = calibrate_mtime();
 
 $| = 1;
 
-ok( chdir 'Big-Dummy', "chdir'd to Big-Dummy" ) ||
+ok( chdir('Big-Dummy'), "chdir'd to Big-Dummy" ) ||
   diag("chdir failed: $!");
 
 my @mpl_out = run(qq{$perl Makefile.PL "PREFIX=../dummy-install"});
@@ -132,7 +133,7 @@ ok( $files{'perllocal.pod'},'  perllocal.pod created' );
 
 
 SKIP: {
-    skip "VMS install targets do not preserve PREFIX", 8 if $Is_VMS;
+    skip "VMS install targets do not preserve $(PREFIX)", 8 if $Is_VMS;
 
     $install_out = run("$make install PREFIX=elsewhere");
     is( $?, 0, 'install with PREFIX override' ) || diag $install_out;
@@ -146,6 +147,68 @@ SKIP: {
     ok( $files{'Liar.pm'},      '  Liar.pm installed'  );
     ok( $files{'.packlist'},    '  packlist created'   );
     ok( $files{'perllocal.pod'},'  perllocal.pod created' );
+    rmtree('elsewhere');
+}
+
+
+SKIP: {
+    skip "VMS install targets do not preserve $(DESTDIR)", 10 if $Is_VMS;
+
+    $install_out = run("$make install PREFIX= DESTDIR=other");
+    is( $?, 0, 'install with DESTDIR' ) || 
+        diag $install_out;
+    like( $install_out, qr/^Installing /m );
+    like( $install_out, qr/^Writing /m );
+
+    ok( -d 'other',  '  destdir created' );
+    %files = ();
+    my $perllocal;
+    find( sub { 
+        $files{$_} = $File::Find::name;
+    }, 'other' );
+    ok( $files{'Dummy.pm'},     '  Dummy.pm installed' );
+    ok( $files{'Liar.pm'},      '  Liar.pm installed'  );
+    ok( $files{'.packlist'},    '  packlist created'   );
+    ok( $files{'perllocal.pod'},'  perllocal.pod created' );
+
+    ok( open(PERLLOCAL, $files{'perllocal.pod'} ) ) || 
+        diag("Can't open $files{'perllocal.pod'}: $!");
+    { local $/;
+      unlike(<PERLLOCAL>, qr/other/, 'DESTDIR should not appear in perllocal');
+    }
+    close PERLLOCAL;
+
+# TODO not available in the min version of Test::Harness we require
+#    ok( open(PACKLIST, $files{'.packlist'} ) ) || 
+#        diag("Can't open $files{'.packlist'}: $!");
+#    { local $/;
+#      local $TODO = 'DESTDIR still in .packlist';
+#      unlike(<PACKLIST>, qr/other/, 'DESTDIR should not appear in .packlist');
+#    }
+#    close PACKLIST;
+
+    rmtree('other');
+}
+
+
+SKIP: {
+    skip "VMS install targets do not preserve $(PREFIX)", 9 if $Is_VMS;
+
+    $install_out = run("$make install PREFIX=elsewhere DESTDIR=other/");
+    is( $?, 0, 'install with PREFIX override and DESTDIR' ) || 
+        diag $install_out;
+    like( $install_out, qr/^Installing /m );
+    like( $install_out, qr/^Writing /m );
+
+    ok( !-d 'elsewhere',       '  install dir not created' );
+    ok( -d 'other/elsewhere',  '  destdir created' );
+    %files = ();
+    find( sub { $files{$_} = $File::Find::name; }, 'other/elsewhere' );
+    ok( $files{'Dummy.pm'},     '  Dummy.pm installed' );
+    ok( $files{'Liar.pm'},      '  Liar.pm installed'  );
+    ok( $files{'.packlist'},    '  packlist created'   );
+    ok( $files{'perllocal.pod'},'  perllocal.pod created' );
+    rmtree('other');
 }
 
 

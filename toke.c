@@ -7970,10 +7970,10 @@ Perl_scan_vstring(pTHX_ char *s, SV *sv)
 	pos++;
     if ( *pos != '.') {
 	/* this may not be a v-string if followed by => */
-	start = pos;
-	while (start < PL_bufend && isSPACE(*start))
-	    ++start;
-	if ((PL_bufend - start) >= 2 && *start == '=' && start[1] == '>' ) {
+	char *next = pos;
+	while (next < PL_bufend && isSPACE(*next))
+	    ++next;
+	if ((PL_bufend - next) >= 2 && *next == '=' && next[1] == '>' ) {
 	    /* return string not v-string */
 	    sv_setpvn(sv,(char *)s,pos-s);
 	    return pos;

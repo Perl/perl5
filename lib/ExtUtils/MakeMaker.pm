@@ -2,7 +2,7 @@ package ExtUtils::MakeMaker;
 
 BEGIN {require 5.005_03;}
 
-$VERSION = '6.10_07';
+$VERSION = '6.11';
 ($Revision) = q$Revision: 1.117 $ =~ /Revision:\s+(\S+)/;
 
 require Exporter;

@@ -12,14 +12,18 @@ BEGIN {
 chdir 't';
 
 BEGIN {
-    1 while unlink 'ecmdfile', 'newfile';
+    $Testfile = 'testfile.foo';
+}
+
+BEGIN {
+    1 while unlink $Testfile, 'newfile';
     # forcibly remove ecmddir/temp2, but don't import mkpath
     use File::Path ();
     File::Path::rmtree( 'ecmddir' );
 }
 
 BEGIN {
-    use Test::More tests => 27;
+    use Test::More tests => 26;
     use File::Spec;
 }
 
@@ -31,35 +35,6 @@ BEGIN {
 }
 
 {
-    # get a file in the current directory, replace last char with wildcard 
-    my $file;
-    {
-        local *DIR;
-        opendir(DIR, File::Spec->curdir());
-        while ($file = readdir(DIR)) {
-            $file =~ s/\.\z// if $^O eq 'VMS';
-            last if $file =~ /^\w/;
-        }
-        closedir DIR;
-    }
-
-
-    # % means 'match one character' on VMS.  Everything else is ?
-    my $match_char = $^O eq 'VMS' ? '%' : '?';
-    ($ARGV[0] = $file) =~ s/.\z/$match_char/;
-
-    # this should find the file
-    ExtUtils::Command::expand_wildcards();
-
-    is( scalar @ARGV, 1, 'found one file' );
-    like( $ARGV[0], qr/$file/, 'expanded wildcard ? successfully' );
-
-    # try it with the asterisk now
-    ($ARGV[0] = $file) =~ s/.{3}\z/\*/;
-    ExtUtils::Command::expand_wildcards();
-
-    ok( (grep { qr/$file/ } @ARGV), 'expanded wildcard * successfully' );
-
     # concatenate this file with itself
     # be extra careful the regex doesn't match itself
     use TieOut;
@@ -79,20 +54,20 @@ BEGIN {
         'concatenation worked' );
 
     # the truth value here is reversed -- Perl true is C false
-    @ARGV = ( 'ecmdfile' );
+    @ARGV = ( $Testfile );
     ok( test_f(), 'testing non-existent file' );
 
-    @ARGV = ( 'ecmdfile' );
-    cmp_ok( ! test_f(), '==', (-f 'ecmdfile'), 'testing non-existent file' );
+    @ARGV = ( $Testfile );
+    cmp_ok( ! test_f(), '==', (-f $Testfile), 'testing non-existent file' );
 
     # these are destructive, have to keep setting @ARGV
-    @ARGV = ( 'ecmdfile' );
+    @ARGV = ( $Testfile );
     touch();
 
-    @ARGV = ( 'ecmdfile' );
+    @ARGV = ( $Testfile );
     ok( test_f(), 'now creating that file' );
 
-    @ARGV = ( 'ecmdfile' );
+    @ARGV = ( $Testfile );
     ok( -e $ARGV[0], 'created!' );
 
     my ($now) = time;
@@ -112,20 +87,20 @@ BEGIN {
     my $new_stamp = (stat('newfile'))[9];
     cmp_ok( abs($new_stamp - $stamp), '>=', 2,  'newer file created' );
 
-    @ARGV = qw(newfile ecmdfile);
+    @ARGV = ('newfile', $Testfile);
     eqtime();
 
-    $stamp = (stat('ecmdfile'))[9];
+    $stamp = (stat($Testfile))[9];
     cmp_ok( abs($new_stamp - $stamp), '<=', 1, 'eqtime' );
 
     # eqtime use to clear the contents of the file being equalized!
-    open(FILE, '>>ecmdfile') || die $!;
+    open(FILE, ">>$Testfile") || die $!;
     print FILE "Foo";
     close FILE;
 
-    @ARGV = qw(newfile ecmdfile);
+    @ARGV = ('newfile', $Testfile);
     eqtime();
-    ok( -s 'ecmdfile', "eqtime doesn't clear the file being equalized" );
+    ok( -s $Testfile, "eqtime doesn't clear the file being equalized" );
 
     SKIP: {
         if ($^O eq 'amigaos' || $^O eq 'os2' || $^O eq 'MSWin32' ||
@@ -136,32 +111,32 @@ BEGIN {
         }
 
         # change a file to execute-only
-        @ARGV = ( '0100', 'ecmdfile' );
+        @ARGV = ( '0100', $Testfile );
         ExtUtils::Command::chmod();
 
-        is( ((stat('ecmdfile'))[2] & 07777) & 0700,
+        is( ((stat($Testfile))[2] & 07777) & 0700,
             0100, 'change a file to execute-only' );
 
         # change a file to read-only
-        @ARGV = ( '0400', 'ecmdfile' );
+        @ARGV = ( '0400', $Testfile );
         ExtUtils::Command::chmod();
 
-        is( ((stat('ecmdfile'))[2] & 07777) & 0700,
+        is( ((stat($Testfile))[2] & 07777) & 0700,
             ($^O eq 'vos' ? 0500 : 0400), 'change a file to read-only' );
 
         # change a file to write-only
-        @ARGV = ( '0200', 'ecmdfile' );
+        @ARGV = ( '0200', $Testfile );
         ExtUtils::Command::chmod();
 
-        is( ((stat('ecmdfile'))[2] & 07777) & 0700,
+        is( ((stat($Testfile))[2] & 07777) & 0700,
             ($^O eq 'vos' ? 0700 : 0200), 'change a file to write-only' );
     }
 
     # change a file to read-write
-    @ARGV = ( '0600', 'ecmdfile' );
+    @ARGV = ( '0600', $Testfile );
     ExtUtils::Command::chmod();
 
-    is( ((stat('ecmdfile'))[2] & 07777) & 0700,
+    is( ((stat($Testfile))[2] & 07777) & 0700,
         ($^O eq 'vos' ? 0700 : 0600), 'change a file to read-write' );
 
     # mkpath
@@ -172,33 +147,57 @@ BEGIN {
     ok( -e $ARGV[0], 'temp directory created' );
 
     # copy a file to a nested subdirectory
-    unshift @ARGV, 'ecmdfile';
+    unshift @ARGV, $Testfile;
     cp();
 
-    ok( -e File::Spec->join( 'ecmddir', 'temp2', 'ecmdfile' ), 'copied okay' );
+    ok( -e File::Spec->join( 'ecmddir', 'temp2', $Testfile ), 'copied okay' );
 
     # cp should croak if destination isn't directory (not a great warning)
-    @ARGV = ( 'ecmdfile' ) x 3;
+    @ARGV = ( $Testfile ) x 3;
     eval { cp() };
 
     like( $@, qr/Too many arguments/, 'cp croaks on error' );
 
     # move a file to a subdirectory
-    @ARGV = ( 'ecmdfile', 'ecmddir' );
+    @ARGV = ( $Testfile, 'ecmddir' );
     mv();
 
-    ok( ! -e 'ecmdfile', 'moved file away' );
-    ok( -e File::Spec->join( 'ecmddir', 'ecmdfile' ), 'file in new location' );
+    ok( ! -e $Testfile, 'moved file away' );
+    ok( -e File::Spec->join( 'ecmddir', $Testfile ), 'file in new location' );
 
     # mv should also croak with the same wacky warning
-    @ARGV = ( 'ecmdfile' ) x 3;
+    @ARGV = ( $Testfile ) x 3;
 
     eval { mv() };
     like( $@, qr/Too many arguments/, 'mv croaks on error' );
 
+    # Test expand_wildcards()
+    {
+        my $file = $Testfile;
+        @ARGV = ();
+        chdir 'ecmddir';
+
+        # % means 'match one character' on VMS.  Everything else is ?
+        my $match_char = $^O eq 'VMS' ? '%' : '?';
+        ($ARGV[0] = $file) =~ s/.\z/$match_char/;
+
+        # this should find the file
+        ExtUtils::Command::expand_wildcards();
+
+        is_deeply( \@ARGV, [$file], 'expanded wildcard ? successfully' );
+
+        # try it with the asterisk now
+        ($ARGV[0] = $file) =~ s/.{3}\z/\*/;
+        ExtUtils::Command::expand_wildcards();
+
+        is_deeply( \@ARGV, [$file], 'expanded wildcard * successfully' );
+
+        chdir File::Spec->updir;
+    }
+
     # remove some files
-    my @files = @ARGV = ( File::Spec->catfile( 'ecmddir', 'ecmdfile' ),
-    File::Spec->catfile( 'ecmddir', 'temp2', 'ecmdfile' ) );
+    my @files = @ARGV = ( File::Spec->catfile( 'ecmddir', $Testfile ),
+    File::Spec->catfile( 'ecmddir', 'temp2', $Testfile ) );
     rm_f();
 
     ok( ! -e $_, "removed $_ successfully" ) for (@ARGV);
@@ -210,6 +209,6 @@ BEGIN {
 }
 
 END {
-    1 while unlink 'ecmdfile', 'newfile';
+    1 while unlink $Testfile, 'newfile';
     File::Path::rmtree( 'ecmddir' );
 }

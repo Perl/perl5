@@ -596,6 +596,8 @@ if ($define{'MYMALLOC'}) {
 		    Perl_get_mstats
 		    Perl_strdup
 		    Perl_putenv
+		    MallocCfg_ptr
+		    MallocCfgP_ptr
 		    )];
     if ($define{'USE_5005THREADS'} || $define{'USE_ITHREADS'}) {
 	emit_symbols [qw(
@@ -614,6 +616,8 @@ else {
 		    Perl_dump_mstats
 		    Perl_get_mstats
 		    Perl_malloced_size
+		    MallocCfg_ptr
+		    MallocCfgP_ptr
 		    )];
 }
 
@@ -805,6 +809,7 @@ my @layer_syms = qw(
 		    PerlIO_arg_fetch
 		    PerlIO_debug
 		    PerlIO_define_layer
+		    PerlIO_isutf8
 		    PerlIO_layer_fetch
 		    PerlIO_list_free
 		    PerlIO_modestr

@@ -44,6 +44,25 @@ always be cross-platform.
 
 =over 4
 
+=item installvars
+
+    my @installvars = $mm->installvars;
+
+A list of all the INSTALL* variables without the INSTALL prefix.  Useful
+for iteration or building related variable sets.
+
+=cut
+
+sub installvars {
+    return qw(PRIVLIB SITELIB  VENDORLIB
+              ARCHLIB SITEARCH VENDORARCH
+              BIN     SITEBIN  VENDORBIN
+              SCRIPT
+              MAN1DIR SITEMAN1DIR VENDORMAN1DIR
+              MAN3DIR SITEMAN3DIR VENDORMAN3DIR
+             );
+}
+
 =item os_flavor_is
 
     $mm->os_flavor_is($this_flavor);

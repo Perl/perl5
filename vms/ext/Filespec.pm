@@ -339,7 +339,7 @@ sub candelete ($) {
   return '' unless -w $fspec;
   $fspec =~ s#/$##;
   if ($fspec =~ m#/#) {
-    ($parent = $fspec) =~ s#/[^/]+$#;
+    ($parent = $fspec) =~ s#/[^/]+$##;
     return (-w $parent);
   }
   elsif ($parent = fileify($fspec)) { # fileify() here to expand lnms

@@ -3088,7 +3088,11 @@ Perl_sv_2pv_flags(pTHX_ register SV *sv, STRLEN *lp, I32 flags)
 				    s = "REF";
 				else
 				    s = "SCALAR";		break;
-		case SVt_PVLV:	s = SvROK(sv) ? "REF":"LVALUE";	break;
+		case SVt_PVLV:	s = SvROK(sv) ? "REF"
+				/* tied lvalues should appear to be
+				 * scalars for backwards compatitbility */
+				: (LvTYPE(sv) == 't' || LvTYPE(sv) == 'T')
+				    ? "SCALAR" : "LVALUE";	break;
 		case SVt_PVAV:	s = "ARRAY";			break;
 		case SVt_PVHV:	s = "HASH";			break;
 		case SVt_PVCV:	s = "CODE";			break;
@@ -7556,7 +7560,12 @@ Perl_sv_reftype(pTHX_ SV *sv, int ob)
 				    return "REF";
 				else
 				    return "SCALAR";
-	case SVt_PVLV:		return SvROK(sv) ? "REF" : "LVALUE";
+				
+	case SVt_PVLV:		return SvROK(sv) ? "REF"
+				/* tied lvalues should appear to be
+				 * scalars for backwards compatitbility */
+				: (LvTYPE(sv) == 't' || LvTYPE(sv) == 'T')
+				    ? "SCALAR" : "LVALUE";
 	case SVt_PVAV:		return "ARRAY";
 	case SVt_PVHV:		return "HASH";
 	case SVt_PVCV:		return "CODE";
@@ -10412,7 +10421,7 @@ Perl_ss_dup(pTHX_ PerlInterpreter *proto_perl, CLONE_PARAMS* param)
 
 Create and return a new interpreter by cloning the current one.
 
-perl_clone takes these flags as paramters:
+perl_clone takes these flags as parameters:
 
 CLONEf_COPY_STACKS - is used to, well, copy the stacks also, 
 without it we only clone the data and zero the stacks, 

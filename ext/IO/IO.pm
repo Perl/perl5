@@ -13,7 +13,7 @@ XSLoader::load 'IO', $VERSION;
 sub import {
     shift;
 
-    warnings::warnif('deprecated', qq{parameterless "use IO" deprecated})
+    warnings::warnif('deprecated', qq{Parameterless "use IO" deprecated})
         if @_ == 0 ;
     
     my @l = @_ ? @_ : qw(Handle Seekable File Pipe Socket Dir);
