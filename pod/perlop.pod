@@ -119,7 +119,7 @@ you increment a variable that is numeric, or that has ever been used in
 a numeric context, you get a normal increment.  If, however, the
 variable has been used in only string contexts since it was set, and
 has a value that is not the empty string and matches the pattern
-C</^[a-zA-Z]*[0-9]*$/>, the increment is done as a string, preserving each
+C</^[a-zA-Z]*[0-9]*\z/>, the increment is done as a string, preserving each
 character within its range, with carry:
 
     print ++($foo = '99');	# prints '100'
