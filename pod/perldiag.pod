@@ -2070,18 +2070,6 @@ to use parens. In any case, a hash requires key/value B<pairs>.
     %hash = ( one => 1, two => 2, );	# right
     %hash = qw( one 1 two 2 );			# also fine
 
-=item Reference found where even-sized list expected
-
-(W) You gave a single reference where Perl was expecting a list with
-an even number of elements (for assignment to a hash). This
-usually means that you used the anon hash constructor when you meant 
-to use parens. In any case, a hash requires key/value B<pairs>.
-
-    %hash = { one => 1, two => 2, };	# WRONG
-    %hash = [ qw/ an anon array / ];	# WRONG
-    %hash = ( one => 1, two => 2, );	# right
-    %hash = qw( one 1 two 2 );			# also fine
-
 =item Reference miscount in sv_replace()
 
 (W) The internal sv_replace() function was handed a new SV with a
