@@ -2,6 +2,10 @@ use File::Spec;
 
 require "test.pl";
 
+sub unidump {
+    join " ", map { sprintf "%04X", $_ } unpack "U*", $_[0];
+}
+
 sub casetest {
     my ($base, $spec, $func) = @_;
     my $file = File::Spec->catfile(File::Spec->catdir(File::Spec->updir,
@@ -49,30 +53,32 @@ sub casetest {
     my $test = 1;
 
     for my $i (sort { hex $a <=> hex $b } keys %simple) {
-	my $w = "$i -> $simple{$i}";
+	my $w = $simple{$i};
 	my $c = pack "U0U", hex $i;
 	my $d = $func->($c);
+	my $e = unidump($d);
 	print $d eq pack("U0U", hex $simple{$i}) ?
-	    "ok $test # $w\n" : "not ok $test # $w\n";
+	    "ok $test # $i -> $w\n" : "not ok $test # $i -> $e ($w)\n";
 	$test++;
     }
 
     for my $i (sort { hex $a <=> hex $b } keys %$spec) {
-	my $w = qq[$i -> "] . display($spec->{$i}) . qq["];
+	my $w = unidump($spec->{$i});
 	my $c = pack "U0U", hex $i;
 	my $d = $func->($c);
+	my $e = unidump($d);
 	print $d eq $spec->{$i} ?
-	    "ok $test # $w\n" : "not ok $test # $w\n";
+	    "ok $test # $i -> $w\n" : "not ok $test # $i -> $e ($w)\n";
 	$test++;
     }
 
-
     for my $i (sort { $a <=> $b } keys %none) {
-	my $w = sprintf "%04X -> %04X", $i, $i;
-	my $c = pack "U0U", $i;
+	my $w = $i = sprintf "%04X", $i;
+	my $c = pack "U0U", hex $i;
 	my $d = $func->($c);
+	my $e = unidump($d);
 	print $d eq $c ?
-	    "ok $test # $w\n" : "not ok $test # $w\n";
+	    "ok $test # $i -> $w\n" : "not ok $test # $i -> $e ($w)\n";
 	$test++;
     }
 }
