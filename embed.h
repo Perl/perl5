@@ -336,8 +336,11 @@
 #define vload_module		Perl_vload_module
 #define localize		Perl_localize
 #define looks_like_number	Perl_looks_like_number
+#define grok_bin		Perl_grok_bin
+#define grok_hex		Perl_grok_hex
 #define grok_number		Perl_grok_number
 #define grok_numeric_radix	Perl_grok_numeric_radix
+#define grok_oct		Perl_grok_oct
 #define magic_clearenv		Perl_magic_clearenv
 #define magic_clear_all_env	Perl_magic_clear_all_env
 #define magic_clearpack		Perl_magic_clearpack
@@ -1849,8 +1852,11 @@
 #define vload_module(a,b,c,d)	Perl_vload_module(aTHX_ a,b,c,d)
 #define localize(a,b)		Perl_localize(aTHX_ a,b)
 #define looks_like_number(a)	Perl_looks_like_number(aTHX_ a)
+#define grok_bin(a,b,c,d)	Perl_grok_bin(aTHX_ a,b,c,d)
+#define grok_hex(a,b,c,d)	Perl_grok_hex(aTHX_ a,b,c,d)
 #define grok_number(a,b,c)	Perl_grok_number(aTHX_ a,b,c)
 #define grok_numeric_radix(a,b)	Perl_grok_numeric_radix(aTHX_ a,b)
+#define grok_oct(a,b,c,d)	Perl_grok_oct(aTHX_ a,b,c,d)
 #define magic_clearenv(a,b)	Perl_magic_clearenv(aTHX_ a,b)
 #define magic_clear_all_env(a,b)	Perl_magic_clear_all_env(aTHX_ a,b)
 #define magic_clearpack(a,b)	Perl_magic_clearpack(aTHX_ a,b)

@@ -1404,8 +1404,11 @@ Apd	|void	|load_module|U32 flags|SV* name|SV* ver|...
 Ap	|void	|vload_module|U32 flags|SV* name|SV* ver|va_list* args
 p	|OP*	|localize	|OP* arg|I32 lexical
 Apd	|I32	|looks_like_number|SV* sv
+Apd	|UV	|grok_bin	|char* start|STRLEN* len|I32* flags|NV *result
+Apd	|UV	|grok_hex	|char* start|STRLEN* len|I32* flags|NV *result
 Apd	|int	|grok_number	|const char *pv|STRLEN len|UV *valuep
 Apd	|bool	|grok_numeric_radix|const char **sp|const char *send
+Apd	|UV	|grok_oct	|char* start|STRLEN* len|I32* flags|NV *result
 p	|int	|magic_clearenv	|SV* sv|MAGIC* mg
 p	|int	|magic_clear_all_env|SV* sv|MAGIC* mg
 p	|int	|magic_clearpack|SV* sv|MAGIC* mg
@@ -1694,10 +1697,10 @@ p	|OP*	|scalar		|OP* o
 p	|OP*	|scalarkids	|OP* o
 p	|OP*	|scalarseq	|OP* o
 p	|OP*	|scalarvoid	|OP* o
-Ap	|NV	|scan_bin	|char* start|STRLEN len|STRLEN* retlen
-Ap	|NV	|scan_hex	|char* start|STRLEN len|STRLEN* retlen
+Apd	|NV	|scan_bin	|char* start|STRLEN len|STRLEN* retlen
+Apd	|NV	|scan_hex	|char* start|STRLEN len|STRLEN* retlen
 Ap	|char*	|scan_num	|char* s|YYSTYPE *lvalp
-Ap	|NV	|scan_oct	|char* start|STRLEN len|STRLEN* retlen
+Apd	|NV	|scan_oct	|char* start|STRLEN len|STRLEN* retlen
 p	|OP*	|scope		|OP* o
 Ap	|char*	|screaminstr	|SV* bigsv|SV* littlesv|I32 start_shift \
 				|I32 end_shift|I32 *state|I32 last

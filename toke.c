@@ -1434,8 +1434,9 @@ S_scan_const(pTHX_ char *start)
 	    case '0': case '1': case '2': case '3':
 	    case '4': case '5': case '6': case '7':
 		{
-		    STRLEN len = 0;	/* disallow underscores */
-		    uv = (UV)scan_oct(s, 3, &len);
+                    I32 flags = 0;
+                    STRLEN len = 3;
+		    uv = grok_oct(s, &len, &flags, NULL);
 		    s += len;
 		}
 		goto NUM_ESCAPE_INSERT;
@@ -1445,20 +1446,23 @@ S_scan_const(pTHX_ char *start)
 		++s;
 		if (*s == '{') {
 		    char* e = strchr(s, '}');
-		    STRLEN len = 1;		/* allow underscores */
+                    I32 flags = PERL_SCAN_ALLOW_UNDERSCORES;
+		    STRLEN len;
 
+                    ++s;
 		    if (!e) {
 			yyerror("Missing right brace on \\x{}");
-			++s;
 			continue;
 		    }
-		    uv = (UV)scan_hex(s + 1, e - s - 1, &len);
+                    len = e - s;
+		    uv = grok_hex(s, &len, &flags, NULL);
 		    s = e + 1;
 		}
 		else {
 		    {
-			STRLEN len = 0;		/* disallow underscores */
-			uv = (UV)scan_hex(s, 2, &len);
+			STRLEN len = 2;
+                        I32 flags = 0;
+			uv = grok_hex(s, &len, &flags, NULL);
 			s += len;
 		    }
 		}

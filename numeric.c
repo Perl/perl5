@@ -105,156 +105,161 @@ Perl_huge(void)
 }
 #endif
 
-NV
-Perl_scan_bin(pTHX_ char *start, STRLEN len, STRLEN *retlen)
-{
-    register char *s = start;
-    register NV rnv = 0.0;
-    register UV ruv = 0;
-    register bool seenb = FALSE;
-    register bool overflowed = FALSE;
+/*
+=for apidoc grok_bin
+
+converts a string representing a binary number to numeric form.
+
+On entry I<start> and I<*len> give the string to scan, I<*flags> gives
+conversion flags, and I<result> should be NULL or a pointer to an NV.
+The scan stops at the end of the string, or the first invalid character.
+On return I<*len> is set to the length scanned string, and I<*flags> gives
+output flags.
+
+If the value is <= UV_MAX it is returned as a UV, the output flags are clear,
+and nothing is written to I<*result>. If the value is > UV_MAX C<grok_bin>
+returns UV_MAX, sets C<PERL_SCAN_GREATER_THAN_UV_MAX> in the output flags,
+and writes the value to I<*result> (or the value is discarded if I<result>
+is NULL).
+
+The hex number may optinally be prefixed with "0b" or "b". If
+C<PERL_SCAN_ALLOW_UNDERSCORES> is set in I<*flags> on entry then the binary
+number may use '_' characters to separate digits.
+
+=cut
+ */
+
+UV
+Perl_grok_bin(pTHX_ char *start, STRLEN *len_p, I32 *flags, NV *result) {
+    const char *s = start;
+    STRLEN len = *len_p;
+    UV value = 0;
+    NV value_nv = 0;
+
+    const UV max_div_2 = UV_MAX / 2;
+    bool allow_underscores = *flags & PERL_SCAN_ALLOW_UNDERSCORES;
+    bool overflowed = FALSE;
+
+    /* strip off leading b or 0b.
+       for compatibility silently suffer "b" and "0b" as valid binary numbers.
+    */
+    if (len >= 1) {
+	if (s[0] == 'b') {
+	    s++;
+	    len--;
+	}
+	else if (len >= 2 && s[0] == '0' && s[1] == 'b') {
+	    s+=2;
+	    len-=2;
+	}
+    }
 
     for (; len-- && *s; s++) {
-	if (!(*s == '0' || *s == '1')) {
-	    if (*s == '_' && len && *retlen
-		&& (s[1] == '0' || s[1] == '1'))
-	    {
-		--len;
-		++s;
-	    }
-	    else if (seenb == FALSE && *s == 'b' && ruv == 0) {
-		/* Disallow 0bbb0b0bbb... */
-		seenb = TRUE;
-		continue;
-	    }
-	    else {
-		if (ckWARN(WARN_DIGIT))
-		    Perl_warner(aTHX_ WARN_DIGIT,
-				"Illegal binary digit '%c' ignored", *s);
-		break;
-	    }
-	}
-	if (!overflowed) {
-	    register UV xuv = ruv << 1;
-
-	    if ((xuv >> 1) != ruv) {
-		overflowed = TRUE;
-		rnv = (NV) ruv;
-		if (ckWARN_d(WARN_OVERFLOW))
-		    Perl_warner(aTHX_ WARN_OVERFLOW,
-				"Integer overflow in binary number");
-	    }
-	    else
-		ruv = xuv | (*s - '0');
-	}
-	if (overflowed) {
-	    rnv *= 2;
+        char bit = *s;
+        if (bit == '0' || bit == '1') {
+            /* Write it in this wonky order with a goto to attempt to get the
+               compiler to make the common case integer-only loop pretty tight.
+               With gcc seems to be much straighter code than old scan_bin.  */
+          redo:
+            if (!overflowed) {
+                if (value <= max_div_2) {
+                    value = (value << 1) | (bit - '0');
+                    continue;
+                }
+                /* Bah. We're just overflowed.  */
+                if (ckWARN_d(WARN_OVERFLOW))
+                    Perl_warner(aTHX_ WARN_OVERFLOW,
+                                "Integer overflow in binary number");
+                overflowed = TRUE;
+                value_nv = (NV) value;
+            }
+            value_nv *= 2.0;
 	    /* If an NV has not enough bits in its mantissa to
 	     * represent an UV this summing of small low-order numbers
 	     * is a waste of time (because the NV cannot preserve
 	     * the low-order bits anyway): we could just remember when
-	     * did we overflow and in the end just multiply rnv by the
+	     * did we overflow and in the end just multiply value_nv by the
 	     * right amount. */
-	    rnv += (*s - '0');
-	}
+            value_nv += (NV)(bit - '0');
+            continue;
+        }
+        if (bit == '_' && len && allow_underscores && (bit = s[1])
+            && (bit == '0' || bit == '1'))
+	    {
+		--len;
+		++s;
+                goto redo;
+	    }
+        if (ckWARN(WARN_DIGIT))
+            Perl_warner(aTHX_ WARN_DIGIT,
+                        "Illegal binary digit '%c' ignored", *s);
+        break;
     }
-    if (!overflowed)
-	rnv = (NV) ruv;
-    if (   ( overflowed && rnv > 4294967295.0)
+    
+    if (   ( overflowed && value_nv > 4294967295.0)
 #if UVSIZE > 4
-	|| (!overflowed && ruv > 0xffffffff  )
+	|| (!overflowed && value > 0xffffffff  )
 #endif
 	) {
 	if (ckWARN(WARN_PORTABLE))
 	    Perl_warner(aTHX_ WARN_PORTABLE,
 			"Binary number > 0b11111111111111111111111111111111 non-portable");
     }
-    *retlen = s - start;
-    return rnv;
+    *len_p = s - start;
+    if (!overflowed) {
+        *flags = 0;
+        return value;
+    }
+    *flags = PERL_SCAN_GREATER_THAN_UV_MAX;
+    if (result)
+        *result = value_nv;
+    return UV_MAX;
 }
 
-NV
-Perl_scan_oct(pTHX_ char *start, STRLEN len, STRLEN *retlen)
-{
-    register char *s = start;
-    register NV rnv = 0.0;
-    register UV ruv = 0;
-    register bool overflowed = FALSE;
+/*
+=for apidoc grok_hex
 
-    for (; len-- && *s; s++) {
-	if (!(*s >= '0' && *s <= '7')) {
-	    if (*s == '_' && len && *retlen
-		&& (s[1] >= '0' && s[1] <= '7'))
-	    {
-		--len;
-		++s;
-	    }
-	    else {
-		/* Allow \octal to work the DWIM way (that is, stop scanning
-		 * as soon as non-octal characters are seen, complain only iff
-		 * someone seems to want to use the digits eight and nine). */
-		if (*s == '8' || *s == '9') {
-		    if (ckWARN(WARN_DIGIT))
-			Perl_warner(aTHX_ WARN_DIGIT,
-				    "Illegal octal digit '%c' ignored", *s);
-		}
-		break;
-	    }
-	}
-	if (!overflowed) {
-	    register UV xuv = ruv << 3;
+converts a string representing a hex number to numeric form.
 
-	    if ((xuv >> 3) != ruv) {
-		overflowed = TRUE;
-		rnv = (NV) ruv;
-		if (ckWARN_d(WARN_OVERFLOW))
-		    Perl_warner(aTHX_ WARN_OVERFLOW,
-				"Integer overflow in octal number");
-	    }
-	    else
-		ruv = xuv | (*s - '0');
-	}
-	if (overflowed) {
-	    rnv *= 8.0;
-	    /* If an NV has not enough bits in its mantissa to
-	     * represent an UV this summing of small low-order numbers
-	     * is a waste of time (because the NV cannot preserve
-	     * the low-order bits anyway): we could just remember when
-	     * did we overflow and in the end just multiply rnv by the
-	     * right amount of 8-tuples. */
-	    rnv += (NV)(*s - '0');
-	}
-    }
-    if (!overflowed)
-	rnv = (NV) ruv;
-    if (   ( overflowed && rnv > 4294967295.0)
-#if UVSIZE > 4
-	|| (!overflowed && ruv > 0xffffffff  )
-#endif
-	) {
-	if (ckWARN(WARN_PORTABLE))
-	    Perl_warner(aTHX_ WARN_PORTABLE,
-			"Octal number > 037777777777 non-portable");
-    }
-    *retlen = s - start;
-    return rnv;
-}
+On entry I<start> and I<*len> give the string to scan, I<*flags> gives
+conversion flags, and I<result> should be NULL or a pointer to an NV.
+The scan stops at the end of the string, or the first non-hex-digit character.
+On return I<*len> is set to the length scanned string, and I<*flags> gives
+output flags.
 
-NV
-Perl_scan_hex(pTHX_ char *start, STRLEN len, STRLEN *retlen)
-{
-    register char *s = start;
-    register NV rnv = 0.0;
-    register UV ruv = 0;
-    register bool overflowed = FALSE;
-    char *hexdigit;
+If the value is <= UV_MAX it is returned as a UV, the output flags are clear,
+and nothing is written to I<*result>. If the value is > UV_MAX C<grok_hex>
+returns UV_MAX, sets C<PERL_SCAN_GREATER_THAN_UV_MAX> in the output flags,
+and writes the value to I<*result> (or the value is discarded if I<result>
+is NULL).
 
-    if (len > 2) {
+The hex number may optinally be prefixed with "0x" or "x". If
+C<PERL_SCAN_ALLOW_UNDERSCORES> is set in I<*flags> on entry then the hex
+number may use '_' characters to separate digits.
+
+=cut
+ */
+
+UV
+Perl_grok_hex(pTHX_ char *start, STRLEN *len_p, I32 *flags, NV *result) {
+    const char *s = start;
+    STRLEN len = *len_p;
+    UV value = 0;
+    NV value_nv = 0;
+
+    const UV max_div_16 = UV_MAX / 16;
+    bool allow_underscores = *flags & PERL_SCAN_ALLOW_UNDERSCORES;
+    bool overflowed = FALSE;
+    const char *hexdigit;
+
+    /* strip off leading x or 0x.
+       for compatibility silently suffer "x" and "0x" as valid hex numbers.  */
+    if (len >= 1) {
 	if (s[0] == 'x') {
 	    s++;
 	    len--;
 	}
-	else if (len > 3 && s[0] == '0' && s[1] == 'x') {
+	else if (len >= 2 && s[0] == '0' && s[1] == 'x') {
 	    s+=2;
 	    len-=2;
 	}
@@ -262,57 +267,200 @@ Perl_scan_hex(pTHX_ char *start, STRLEN len, STRLEN *retlen)
 
     for (; len-- && *s; s++) {
 	hexdigit = strchr((char *) PL_hexdigit, *s);
-	if (!hexdigit) {
-	    if (*s == '_' && len && *retlen && s[1]
-		&& (hexdigit = strchr((char *) PL_hexdigit, s[1])))
-	    {
-		--len;
-		++s;
-	    }
-	    else {
-		if (ckWARN(WARN_DIGIT))
-		    Perl_warner(aTHX_ WARN_DIGIT,
-				"Illegal hexadecimal digit '%c' ignored", *s);
-		break;
-	    }
-	}
-	if (!overflowed) {
-	    register UV xuv = ruv << 4;
-
-	    if ((xuv >> 4) != ruv) {
-		overflowed = TRUE;
-		rnv = (NV) ruv;
-		if (ckWARN_d(WARN_OVERFLOW))
-		    Perl_warner(aTHX_ WARN_OVERFLOW,
-				"Integer overflow in hexadecimal number");
-	    }
-	    else
-		ruv = xuv | ((hexdigit - PL_hexdigit) & 15);
-	}
-	if (overflowed) {
-	    rnv *= 16.0;
+        if (hexdigit) {
+            /* Write it in this wonky order with a goto to attempt to get the
+               compiler to make the common case integer-only loop pretty tight.
+               With gcc seems to be much straighter code than old scan_hex.  */
+          redo:
+            if (!overflowed) {
+                if (value <= max_div_16) {
+                    value = (value << 4) | ((hexdigit - PL_hexdigit) & 15);
+                    continue;
+                }
+                /* Bah. We're just overflowed.  */
+                if (ckWARN_d(WARN_OVERFLOW))
+                    Perl_warner(aTHX_ WARN_OVERFLOW,
+                                "Integer overflow in hexadecimal number");
+                overflowed = TRUE;
+                value_nv = (NV) value;
+            }
+            value_nv *= 16.0;
 	    /* If an NV has not enough bits in its mantissa to
 	     * represent an UV this summing of small low-order numbers
 	     * is a waste of time (because the NV cannot preserve
 	     * the low-order bits anyway): we could just remember when
-	     * did we overflow and in the end just multiply rnv by the
+	     * did we overflow and in the end just multiply value_nv by the
 	     * right amount of 16-tuples. */
-	    rnv += (NV)((hexdigit - PL_hexdigit) & 15);
-	}
+            value_nv += (NV)((hexdigit - PL_hexdigit) & 15);
+            continue;
+        }
+        if (*s == '_' && len && allow_underscores && s[1]
+		&& (hexdigit = strchr((char *) PL_hexdigit, s[1])))
+	    {
+		--len;
+		++s;
+                goto redo;
+	    }
+        if (ckWARN(WARN_DIGIT))
+            Perl_warner(aTHX_ WARN_DIGIT,
+                        "Illegal hexadecimal digit '%c' ignored", *s);
+        break;
     }
-    if (!overflowed)
-	rnv = (NV) ruv;
-    if (   ( overflowed && rnv > 4294967295.0)
+    
+    if (   ( overflowed && value_nv > 4294967295.0)
 #if UVSIZE > 4
-	|| (!overflowed && ruv > 0xffffffff  )
+	|| (!overflowed && value > 0xffffffff  )
 #endif
 	) {
 	if (ckWARN(WARN_PORTABLE))
 	    Perl_warner(aTHX_ WARN_PORTABLE,
 			"Hexadecimal number > 0xffffffff non-portable");
     }
-    *retlen = s - start;
-    return rnv;
+    *len_p = s - start;
+    if (!overflowed) {
+        *flags = 0;
+        return value;
+    }
+    *flags = PERL_SCAN_GREATER_THAN_UV_MAX;
+    if (result)
+        *result = value_nv;
+    return UV_MAX;
+}
+
+/*
+=for apidoc grok_oct
+
+
+=cut
+ */
+
+UV
+Perl_grok_oct(pTHX_ char *start, STRLEN *len_p, I32 *flags, NV *result) {
+    const char *s = start;
+    STRLEN len = *len_p;
+    UV value = 0;
+    NV value_nv = 0;
+
+    const UV max_div_8 = UV_MAX / 8;
+    bool allow_underscores = *flags & PERL_SCAN_ALLOW_UNDERSCORES;
+    bool overflowed = FALSE;
+
+    for (; len-- && *s; s++) {
+         /* gcc 2.95 optimiser not smart enough to figure that this subtraction
+            out front allows slicker code.  */
+        int digit = *s - '0';
+        if (digit >= 0 && digit <= 7) {
+            /* Write it in this wonky order with a goto to attempt to get the
+               compiler to make the common case integer-only loop pretty tight.
+            */
+          redo:
+            if (!overflowed) {
+                if (value <= max_div_8) {
+                    value = (value << 3) | digit;
+                    continue;
+                }
+                /* Bah. We're just overflowed.  */
+                if (ckWARN_d(WARN_OVERFLOW))
+                    Perl_warner(aTHX_ WARN_OVERFLOW,
+                                "Integer overflow in octal number");
+                overflowed = TRUE;
+                value_nv = (NV) value;
+            }
+            value_nv *= 8.0;
+	    /* If an NV has not enough bits in its mantissa to
+	     * represent an UV this summing of small low-order numbers
+	     * is a waste of time (because the NV cannot preserve
+	     * the low-order bits anyway): we could just remember when
+	     * did we overflow and in the end just multiply value_nv by the
+	     * right amount of 8-tuples. */
+            value_nv += (NV)digit;
+            continue;
+        }
+        if (digit == ('_' - '0') && len && allow_underscores
+            && (digit = s[1] - '0') && (digit >= 0 && digit <= 7))
+	    {
+		--len;
+		++s;
+                goto redo;
+	    }
+        /* Allow \octal to work the DWIM way (that is, stop scanning
+         * as soon as non-octal characters are seen, complain only iff
+         * someone seems to want to use the digits eight and nine). */
+        if (digit == 8 || digit == 9) {
+            if (ckWARN(WARN_DIGIT))
+                Perl_warner(aTHX_ WARN_DIGIT,
+                            "Illegal octal digit '%c' ignored", *s);
+        }
+        break;
+    }
+    
+    if (   ( overflowed && value_nv > 4294967295.0)
+#if UVSIZE > 4
+	|| (!overflowed && value > 0xffffffff  )
+#endif
+	) {
+	if (ckWARN(WARN_PORTABLE))
+	    Perl_warner(aTHX_ WARN_PORTABLE,
+			"Octal number > 037777777777 non-portable");
+    }
+    *len_p = s - start;
+    if (!overflowed) {
+        *flags = 0;
+        return value;
+    }
+    *flags = PERL_SCAN_GREATER_THAN_UV_MAX;
+    if (result)
+        *result = value_nv;
+    return UV_MAX;
+}
+
+/*
+=for apidoc scan_bin
+
+For backwards compatibility. Use C<grok_bin> instead.
+
+=for apidoc scan_hex
+
+For backwards compatibility. Use C<grok_hex> instead.
+
+=for apidoc scan_oct
+
+For backwards compatibility. Use C<grok_oct> instead.
+
+=cut
+ */
+
+NV
+Perl_scan_bin(pTHX_ char *start, STRLEN len, STRLEN *retlen)
+{
+    NV rnv;
+    I32 flags = *retlen ? PERL_SCAN_ALLOW_UNDERSCORES : 0;
+    UV ruv = grok_bin (start, &len, &flags, &rnv);
+
+    *retlen = len;
+    return (flags & PERL_SCAN_GREATER_THAN_UV_MAX) ? rnv : (NV)ruv;
+}
+
+NV
+Perl_scan_oct(pTHX_ char *start, STRLEN len, STRLEN *retlen)
+{
+    NV rnv;
+    I32 flags = *retlen ? PERL_SCAN_ALLOW_UNDERSCORES : 0;
+    UV ruv = grok_oct (start, &len, &flags, &rnv);
+
+    *retlen = len;
+    return (flags & PERL_SCAN_GREATER_THAN_UV_MAX) ? rnv : (NV)ruv;
+}
+
+NV
+Perl_scan_hex(pTHX_ char *start, STRLEN len, STRLEN *retlen)
+{
+    NV rnv;
+    I32 flags = *retlen ? PERL_SCAN_ALLOW_UNDERSCORES : 0;
+    UV ruv = grok_hex (start, &len, &flags, &rnv);
+
+    *retlen = len;
+    return (flags & PERL_SCAN_GREATER_THAN_UV_MAX) ? rnv : (NV)ruv;
 }
 
 /*

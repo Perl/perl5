@@ -3035,8 +3035,9 @@ tryagain:
 				vFAIL("Missing right brace on \\x{}");
 			    }
 			    else {
-				numlen = 1;	/* allow underscores */
-				ender = (UV)scan_hex(p + 1, e - p - 1, &numlen);
+                                I32 flags = PERL_SCAN_ALLOW_UNDERSCORES;
+                                numlen = e - p - 1;
+				ender = grok_hex(p + 1, &numlen, &flags, NULL);
 				if (ender > 0xff)
 				    RExC_utf8 = 1;
 				/* numlen is generous */
@@ -3048,8 +3049,9 @@ tryagain:
 			    }
 			}
 			else {
-			    numlen = 0;		/* disallow underscores */
-			    ender = (UV)scan_hex(p, 2, &numlen);
+                            I32 flags = 0;
+			    numlen = 2;
+			    ender = grok_hex(p, &numlen, &flags, NULL);
 			    p += numlen;
 			}
 			break;
@@ -3062,8 +3064,9 @@ tryagain:
 		    case '5': case '6': case '7': case '8':case '9':
 			if (*p == '0' ||
 			  (isDIGIT(p[1]) && atoi(p) >= RExC_npar) ) {
-			    numlen = 0;		/* disallow underscores */
-			    ender = (UV)scan_oct(p, 3, &numlen);
+                            I32 flags = 0;
+			    numlen = 3;
+			    ender = grok_oct(p, &numlen, &flags, NULL);
 			    p += numlen;
 			}
 			else {
@@ -3442,18 +3445,19 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state)
 	    case 'a':	value = ASCII_TO_NATIVE('\007');break;
 	    case 'x':
 		if (*RExC_parse == '{') {
+                    I32 flags = PERL_SCAN_ALLOW_UNDERSCORES;
 		    e = strchr(RExC_parse++, '}');
                     if (!e)
                         vFAIL("Missing right brace on \\x{}");
-		    numlen = 1;		/* allow underscores */
-		    value = (UV)scan_hex(RExC_parse,
-					 e - RExC_parse,
-					 &numlen);
+
+		    numlen = e - RExC_parse;
+		    value = grok_hex(RExC_parse, &numlen, &flags, NULL);
 		    RExC_parse = e + 1;
 		}
 		else {
-		    numlen = 0;		/* disallow underscores */
-		    value = (UV)scan_hex(RExC_parse, 2, &numlen);
+                    I32 flags = 0;
+		    numlen = 2;
+		    value = grok_hex(RExC_parse, &numlen, &flags, NULL);
 		    RExC_parse += numlen;
 		}
 		break;
@@ -3463,10 +3467,13 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state)
 		break;
 	    case '0': case '1': case '2': case '3': case '4':
 	    case '5': case '6': case '7': case '8': case '9':
-		numlen = 0;		/* disallow underscores */
-		value = (UV)scan_oct(--RExC_parse, 3, &numlen);
+            {
+                I32 flags = 0;
+		numlen = 3;
+		value = grok_oct(--RExC_parse, &numlen, &flags, NULL);
 		RExC_parse += numlen;
 		break;
+            }
 	    default:
 		if (!SIZE_ONLY && ckWARN(WARN_REGEXP) && isALPHA(value))
 		    vWARN2(RExC_parse,

@@ -2133,7 +2133,8 @@ L</oct>.)  If EXPR is omitted, uses C<$_>.
     print hex 'aF';   # same
 
 Hex strings may only represent integers.  Strings that would cause
-integer overflow trigger a warning.
+integer overflow trigger a warning.  Leading whitespace is not stripped,
+unlike oct().
 
 =item import
 
@@ -2630,8 +2631,9 @@ See the L</use> function, which C<no> is the opposite of.
 Interprets EXPR as an octal string and returns the corresponding
 value.  (If EXPR happens to start off with C<0x>, interprets it as a
 hex string.  If EXPR starts off with C<0b>, it is interpreted as a
-binary string.)  The following will handle decimal, binary, octal, and
-hex in the standard Perl or C notation:
+binary string.  Leading whitespace is ignored in all three cases.)
+The following will handle decimal, binary, octal, and hex in the standard
+Perl or C notation:
 
     $val = oct($val) if $val =~ /^0/;
 

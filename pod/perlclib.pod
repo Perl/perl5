@@ -165,7 +165,7 @@ table, C<c> is a C<char>, and C<u> is a Unicode codepoint.
     strtol(s, *p, n)            Strtol(s, *p, n)
     strtoul(s, *p, n)           Strtoul(s, *p, n)
 
-Notice also the C<scan_bin>, C<scan_hex>, and C<scan_oct> functions in
+Notice also the C<grok_bin>, C<grok_hex>, and C<grok_oct> functions in
 F<numeric.c> for converting strings representing numbers in the respective
 bases into C<NV>s.
 

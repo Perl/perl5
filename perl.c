@@ -2144,8 +2144,9 @@ Perl_moreswitches(pTHX_ char *s)
     switch (*s) {
     case '0':
     {
-	numlen = 0;			/* disallow underscores */
-	rschar = (U32)scan_oct(s, 4, &numlen);
+        I32 flags = 0;
+	numlen = 4;
+	rschar = (U32)grok_oct(s, &numlen, &flags, NULL);
 	SvREFCNT_dec(PL_nrs);
 	if (rschar & ~((U8)~0))
 	    PL_nrs = &PL_sv_undef;
@@ -2276,9 +2277,10 @@ Perl_moreswitches(pTHX_ char *s)
 	    PL_ors_sv = Nullsv;
 	}
 	if (isDIGIT(*s)) {
+            I32 flags = 0;
 	    PL_ors_sv = newSVpvn("\n",1);
-	    numlen = 0;			/* disallow underscores */
-	    *SvPVX(PL_ors_sv) = (char)scan_oct(s, 3 + (*s == '0'), &numlen);
+	    numlen = 3 + (*s == '0');
+	    *SvPVX(PL_ors_sv) = (char)grok_oct(s, &numlen, &flags, NULL);
 	    s += numlen;
 	}
 	else {
