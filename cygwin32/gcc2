@@ -6,7 +6,9 @@
 #  jc 3/24/97
 #
 
+PERLPATH=/perl5.005
+
 case "$*" in
-*-buildperl*)	miniperl perlgcc "$@" ;;
+*-buildperl*)	$PERLPATH/miniperl perlgcc "$@" ;;
 *)		gcc "$@" ;;
 esac

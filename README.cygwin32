@@ -6,11 +6,11 @@ project and the Cygwin32 API.
 1)  Copy the contents of the cygwin32 directory to the Perl source
     root directory.
 
-2)  Modify the ld2 script by making the PERLPATH variable contain the
-    Perl source root directory.  For example, if you extracted perl to
-    "/perl5.004", change the script so it contains the line:
+2)  Modify the ld2 and gcc2 scripts by making the PERLPATH variable contain
+    the Perl source root directory.  For example, if you extracted perl to
+    "/perl5.005", change the scripts so they contain the line:
 
-	PERLPATH=/perl5.004
+	PERLPATH=/perl5.005
 
 3)  Copy the two scripts ld2 and gcc2 from the cygwin32 subdirectory to a
     directory in your PATH environment variable.  For example, copy to
