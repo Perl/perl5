@@ -1056,7 +1056,7 @@ general usage issues for all EBCDIC Perls.  Send a message body of
 =item  *
 
 AS/400 Perl information at
-ttp://as400.rochester.ibm.com/
+http://as400.rochester.ibm.com/
 as well as on CPAN in the F<ports/> directory.
 
 =back

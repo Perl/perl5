@@ -2791,7 +2791,7 @@ Doing so has no effect.
 (W internal) The internal sv_replace() function was handed a new SV with
 a reference count of other than 1.
 
-=item Reference to nonexistant group before << HERE in regex m/%s/
+=item Reference to nonexistent group before << HERE in regex m/%s/
 
 (F) You used something like C<\7> in your regular expression, but there are
 not at least seven sets of capturing parentheses in the expression. If you

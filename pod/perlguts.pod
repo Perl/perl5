@@ -2106,12 +2106,12 @@ However, you must not do this, for example:
         sv_utf8_upgrade(left);
 
 If you do this in a binary operator, you will actually change one of the
-strings that came into the operator, and, while it shouldn't be noticable
+strings that came into the operator, and, while it shouldn't be noticeable
 by the end user, it can cause problems.
 
 Instead, C<bytes_to_utf8> will give you a UTF8-encoded B<copy> of its
 string argument. This is useful for having the data available for
-comparisons and so on, without harming the orginal SV. There's also
+comparisons and so on, without harming the original SV. There's also
 C<utf8_to_bytes> to go the other way, but naturally, this will fail if
 the string contains any characters above 255 that can't be represented
 in a single byte.

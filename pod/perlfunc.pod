@@ -5482,7 +5482,7 @@ If BITS is 8, "elements" coincide with bytes of the input string.
 
 If BITS is 16 or more, bytes of the input string are grouped into chunks
 of size BITS/8, and each group is converted to a number as with
-pack()/unpack() with big-endian formats C<n>/C<N> (and analoguously
+pack()/unpack() with big-endian formats C<n>/C<N> (and analogously
 for BITS==64).  See L<"pack"> for details.
 
 If bits is 4 or less, the string is broken into bytes, then the bits

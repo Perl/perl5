@@ -1006,7 +1006,7 @@ XXX.
 =head1 BUGS
 
 This pod document contains literal Latin 1 characters and may encounter 
-translation difficulties.  In particular one populer nroff implementation 
+translation difficulties.  In particular one popular nroff implementation 
 was known to strip accented characters to their unaccented counterparts 
 while attempting to view this document through the B<pod2man> program 
 (for example, you may see a plain C<y> rather than one with a diaeresis 
