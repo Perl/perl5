@@ -9,7 +9,7 @@
 
 /*
  * 'I see,' laughed Strider.  'I look foul and feel fair.  Is that it?
- * All that is gold does not glitter, not all those that wander are lost.'
+ * All that is gold does not glitter, not all those who wander are lost.'
  */
 
 %{
