@@ -1890,7 +1890,8 @@ Perl_fold_constants(pTHX_ register OP *o)
 	goto nope;		/* Don't try to run w/ errors */
 
     for (curop = LINKLIST(o); curop != o; curop = LINKLIST(curop)) {
-	if (curop->op_type != OP_CONST &&
+	if ((curop->op_type != OP_CONST ||
+	     (curop->op_private & OPpCONST_BARE)) &&
 	    curop->op_type != OP_LIST &&
 	    curop->op_type != OP_SCALAR &&
 	    curop->op_type != OP_NULL &&
