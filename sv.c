@@ -9615,14 +9615,16 @@ Perl_sv_vcatpvfn(pTHX_ SV *sv, const char *pat, STRLEN patlen, va_list *args, SV
 #ifdef CHECK_FORMAT
 	    if (left) {
 		left = FALSE;
-		if (width > 0) {
+	        if (!width)
+		    goto format_sv;	/* %-p	-> %_	*/
+		if (vectorize) {
 		    width = 0;
-		    if (vectorize) 
-			goto format_d;
-		    precis = width;
-		    has_precis = TRUE;
+		    goto format_d;	/* %-1p	-> %vd	*/	
 		}
-		goto format_sv;
+		precis = width;
+		has_precis = TRUE;
+		width = 0;
+		goto format_sv;		/* %-Np	-> %.N_	*/	
 	    }
 #endif
 	    if (alt || vectorize)

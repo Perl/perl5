@@ -719,37 +719,32 @@ If you have gcc, you can test the correct use of printf-style
 arguments.  Run C<Configure> with S<-Dccflags='-DCHECK_FORMAT
 -Wformat'> (and S<-Dcc=gcc>, if you are not on a system where C<cc>
 is C<gcc>) and run C<make>.  The compiler will produce warnings of
-incorrect use of format arguments.  CHECK_FORMAT changes perl-defined
-formats to common formats, so DO NOT USE the executable produced by
-this process.
+incorrect use of format arguments.  
 
-A more accurate approach is the following commands:
+As of change 23767, CHECK_FORMAT changes perl-defined formats
+to obscure (but standard) formats, and then traps the obscure
+format.  The resulting perl executable operates properly but 
+you should not use the executable produced by this process.
 
 =over 4
 
 =item *
-
-build miniperl with -DCHECK_FORMAT 
-
-    make clean
-    make miniperl OPTIMIZE=-DCHECK_FORMAT >& mini.log	
-
-=item *
-
-build a clean miniperl,
-and build everything else from that with -DCHECK_FORMAT
+ 
+A more accurate approach is the following commands:
 
     make clean
-    make miniperl	
     make all OPTIMIZE='-DCHECK_FORMAT -Wformat' >& make.log  
-		
+    perl -nwe 'print if /^\S+:/ and not /^make\b/' make.log
+
 =item *
 
-clean up, and print warnings from the log files
+A more thorough approach to compiler warnings is
 
     make clean
-    perl -nwe 'print if /^\S+:/ and not /^make\b/' \
-	mini.log make.log
+    make miniperl OPTIMIZE=-O\ -DCHECK_FORMAT >& make.log
+    make all OPTIMIZE=-O\ -DCHECK_FORMAT\ -Wall\ -Wno-unused\
+			    -Wno-uninitialized >>& make.log
+    perl -nwe 'print if /^\S+:/ and not /^make\b/' make.log
 
 =back
 
