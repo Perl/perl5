@@ -372,7 +372,7 @@ Beyond this, magazines that frequently carry high-quality articles
 on Perl are I<Web Techniques> (see http://www.webtechniques.com/),
 I<Performance Computing> (http://www.performance-computing.com/), and Usenix's
 newsletter/magazine to its members, I<login:>, at http://www.usenix.org/.
-Randal's Web Technique's columns are available on the web at
+Randal's Web Techniques columns are available on the web at
 http://www.stonehenge.com/merlyn/WebTechniques/ .
 
 =head2 Perl on the Net: FTP and WWW Access
