@@ -20,7 +20,7 @@
 
 # $Id: Head.U,v 3.0.1.9 1997/02/28 15:02:09 ram Exp $
 #
-# Generated on Wed Jun 20 22:37:47 EET DST 2001 [metaconfig 3.0 PL70]
+# Generated on Thu Jun 21 18:44:48 EET DST 2001 [metaconfig 3.0 PL70]
 # (with additional metaconfig patches by perlbug@perl.org)
 
 cat >c1$$ <<EOF
@@ -2377,11 +2377,13 @@ $define|true|[yY]*)
 	esac
 	case "$src" in
 	/*) run=$src/Cross/run
+	    targetmkdir=$src/Cross/mkdir
 	    to=$src/Cross/to
 	    from=$src/Cross/from
 	    ;;
 	*)  pwd=`$test -f ../Configure & cd ..; pwd`
 	    run=$pwd/Cross/run
+	    targetmkdir=$pwd/Cross/mkdirkrun
 	    to=$pwd/Cross/to
 	    from=$pwd/Cross/from
 	    ;;
@@ -2416,13 +2418,37 @@ $define|true|[yY]*)
 	ssh|rsh)
 	    cat >$run <<EOF
 #!/bin/sh
+case "\$1" in
+-cwd)
+  shift
+  cwd=\$1
+  shift
+  ;;
+esac
+case "\$cwd" in
+'') cwd=$targetdir ;;
+esac
 exe=\$1
 shift
-$to \$exe
-$targetrun -l $targetuser $targethost "cd $targetdir && ./\$exe \$@"
+if $test ! -f \$exe.xok; then
+  $to \$exe
+  $touch \$exe.xok
+fi
+$targetrun -l $targetuser $targethost "cd \$cwd && ./\$exe \$@"
 EOF
 	    ;;
 	*)  echo "Unknown targetrun '$targetrun'" >&4
+	    exit 1
+	    ;;
+	esac
+	case "$targetmkdir" in
+	*/Cross/mkdir)
+	    cat >$targetmkdir <<EOF
+#!/bin/sh
+$targetrun -l $targetuser $targethost "mkdir -p \$@"
+EOF
+	    ;;
+	*)  echo "Unknown targetmkdir '$targetmkdir'" >&4
 	    exit 1
 	    ;;
 	esac
@@ -2432,14 +2458,36 @@ EOF
 #!/bin/sh
 for f in \$@
 do
-  $targetto $q \$f $targetuser@$targethost:$targetdir/. || exit 1
+  case "\$f" in
+  /*)
+    $targetmkdir \`dirname \$f\`
+    $targetto $q \$f $targetuser@$targethost:\$f            || exit 1
+    ;;
+  *)
+    $targetmkdir $targetdir/\`dirname \$f\`
+    $targetto $q \$f $targetuser@$targethost:$targetdir/\$f || exit 1
+    ;;
+  esac
 done
 exit 0
 EOF
 	    ;;
 	cp) cat >$to <<EOF
 #!/bin/sh
-cp \$@ $targetdir/.
+for f in \$@
+do
+  case "\$f" in
+  /*)
+    $mkdir -p $targetdir/\`dirname \$f\`
+    $cp \$f $targetdir/\$f || exit 1
+    ;;
+  *)
+    $targetmkdir $targetdir/\`dirname \$f\`
+    $cp \$f $targetdir/\$f || exit 1
+    ;;
+  esac
+done
+exit 0
 EOF
 	    ;;
 	*)  echo "Unknown targetto '$targetto'" >&4
@@ -2452,6 +2500,7 @@ EOF
 #!/bin/sh
 for f in \$@
 do
+  $rm -f \$f
   $targetfrom $q $targetuser@$targethost:$targetdir/\$f . || exit 1
 done
 exit 0
@@ -2461,6 +2510,7 @@ EOF
 #!/bin/sh
 for f in \$@
 do
+  $rm -f \$f
   cp $targetdir/\$f . || exit 1
 done
 exit 0
@@ -13793,7 +13843,6 @@ if $test "X$fflushNULL" = X -o "X$fflushall" = X; then
     output=''
     set try -DTRY_FPUTC
     if eval $compile; then
-	    $rm -f try.out
  	    $run ./try 2>/dev/null
 	    code="$?"
 	    $from try.out
@@ -13805,7 +13854,6 @@ if $test "X$fflushNULL" = X -o "X$fflushall" = X; then
     '')
 	    set try -DTRY_FPRINTF
 	    if eval $compile; then
-		    $rm -f try.out
  		    $run ./try 2>/dev/null
 		    code="$?"
 		    $from try.out
@@ -13820,7 +13868,6 @@ fi
 case "$fflushNULL" in
 '') 	set try -DTRY_FFLUSH_NULL $output
 	if eval $compile; then
-	        $rm -f try.out
 	    	$run ./try 2>/dev/null
 		code="$?"
 		$from try.out
@@ -13945,7 +13992,6 @@ EOM
 				$cat >&4 <<EOM
 (Now testing the other method--but note that this also may fail.)
 EOM
-				$rm -f try.out
 				$run ./try 2>/dev/null
 				code=$?
 				$from try.out
