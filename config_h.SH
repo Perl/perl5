@@ -2959,7 +2959,7 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
  */
 /* SIG_SIZE:
  *	This variable contains the number of elements of the sig_name
- *	and sig_num arrays, including the final NULL entry.
+ *	and sig_num arrays, excluding the final NULL entry.
  */
 #define SIG_NAME $sig_name_init		/**/
 #define SIG_NUM  $sig_num_init		/**/

@@ -2935,7 +2935,7 @@
  */
 /* SIG_SIZE:
  *	This variable contains the number of elements of the sig_name
- *	and sig_num arrays, including the final NULL entry.
+ *	and sig_num arrays, excluding the final NULL entry.
  */
 #define SIG_NAME 0		/**/
 #define SIG_NUM  0		/**/
