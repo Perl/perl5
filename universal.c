@@ -186,11 +186,8 @@ Perl_boot_core_UNIVERSAL(pTHX)
     newXS("UNIVERSAL::can",             XS_UNIVERSAL_can,         file);
     newXS("UNIVERSAL::VERSION", 	XS_UNIVERSAL_VERSION, 	  file);
     {
-	/* create the package stash for version objects */
-	HV *hv = get_hv("version::OVERLOAD",TRUE);
-	SV *sv = *hv_fetch(hv,"register",8,1);
-	sv_inc(sv);
-	SvSETMAGIC(sv);
+	/* register the overloading (type 'A') magic */
+	PL_amagic_generation++;
 	/* Make it findable via fetchmethod */
 	newXS("version::()", XS_version_noop, file);
 	newXS("version::new", XS_version_new, file);
@@ -334,48 +331,17 @@ XS(XS_UNIVERSAL_VERSION)
 			     "%s defines neither package nor VERSION--version check failed", str);
 	     }
 	}
-	if (!SvNIOK(sv) && SvPOK(sv)) {
-	    char *str = SvPVx(sv,len);
-	    while (len) {
-		--len;
-		/* XXX could DWIM "1.2.3" here */
-		if (!isDIGIT(str[len]) && str[len] != '.' && str[len] != '_')
-		    break;
-	    }
-	    if (len) {
-		if (SvNOK(req) && SvPOK(req)) {
-		    /* they said C<use Foo v1.2.3> and $Foo::VERSION
-		     * doesn't look like a float: do string compare */
-		    if (sv_cmp(req,sv) == 1) {
-			Perl_croak(aTHX_ "%s v%"VDf" required--"
-				   "this is only v%"VDf,
-				   HvNAME(pkg), req, sv);
-		    }
-		    goto finish;
-		}
-		/* they said C<use Foo 1.002_003> and $Foo::VERSION
-		 * doesn't look like a float: force numeric compare */
-		(void)SvUPGRADE(sv, SVt_PVNV);
-		SvNVX(sv) = str_to_version(sv);
-		SvPOK_off(sv);
-		SvNOK_on(sv);
-	    }
-	}
-	/* if we get here, we're looking for a numeric comparison,
-	 * so force the required version into a float, even if they
-	 * said C<use Foo v1.2.3> */
-	if (SvNOK(req) && SvPOK(req)) {
-	    NV n = SvNV(req);
-	    req = sv_newmortal();
-	    sv_setnv(req, n);
-	}
+	if ( !sv_derived_from(sv, "version"))
+	    sv = new_version(sv);
 
-	if (SvNV(req) > SvNV(sv))
+	if ( !sv_derived_from(req, "version"))
+	    req = new_version(req);
+
+	if ( vcmp( SvRV(req), SvRV(sv) ) > 0 )
 	    Perl_croak(aTHX_ "%s version %s required--this is only version %s",
-		       HvNAME(pkg), SvPV_nolen(req), SvPV_nolen(sv));
+		HvNAME(pkg), SvPV(req,PL_na), SvPV(sv,PL_na));
     }
 
-finish:
     ST(0) = sv;
 
     XSRETURN(1);
@@ -417,12 +383,7 @@ XS(XS_version_stringify)
                 Perl_croak(aTHX_ "lobj is not of type version");
 
 {
-    SV  *vs = NEWSV(92,5);
-    if ( lobj == SvRV(PL_patchlevel) )
-	sv_catsv(vs,lobj);
-    else
-	vstringify(vs,lobj);
-    PUSHs(vs);
+    PUSHs(vstringify(lobj));
 }
 
 	PUTBACK;
@@ -447,9 +408,7 @@ XS(XS_version_numify)
                 Perl_croak(aTHX_ "lobj is not of type version");
 
 {
-    SV  *vs = NEWSV(92,5);
-    vnumify(vs,lobj);
-    PUSHs(vs);
+    PUSHs(vnumify(lobj));
 }
 
 	PUTBACK;
@@ -487,11 +446,11 @@ XS(XS_version_vcmp)
 
     if ( swap )
     {
-        rs = newSViv(sv_cmp(rvs,lobj));
+        rs = newSViv(vcmp(rvs,lobj));
     }
     else
     {
-        rs = newSViv(sv_cmp(lobj,rvs));
+        rs = newSViv(vcmp(lobj,rvs));
     }
 
     PUSHs(rs);
@@ -520,7 +479,7 @@ XS(XS_version_boolean)
 
 {
     SV	*rs;
-    rs = newSViv(sv_cmp(lobj,Nullsv));
+    rs = newSViv( vcmp(lobj,new_version(newSVpvn("0",1))) );
     PUSHs(rs);
 }
 

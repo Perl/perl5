@@ -538,8 +538,9 @@ Apd	|char*	|scan_vstring	|char *vstr|SV *sv
 Apd	|char*	|scan_version	|char *vstr|SV *sv
 Apd	|SV*	|new_version	|SV *ver
 Apd	|SV*	|upg_version	|SV *ver
-Apd	|SV*	|vnumify	|SV *sv|SV *vs
-Apd	|SV*	|vstringify	|SV *sv|SV *vs
+Apd	|SV*	|vnumify	|SV *vs
+Apd	|SV*	|vstringify	|SV *vs
+Apd	|int	|vcmp		|SV *lvs|SV *rvs
 p	|PerlIO*|nextargv	|GV* gv
 Ap	|char*	|ninstr		|const char* big|const char* bigend \
 				|const char* little|const char* lend

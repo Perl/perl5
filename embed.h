@@ -484,6 +484,7 @@
 #define upg_version		Perl_upg_version
 #define vnumify			Perl_vnumify
 #define vstringify		Perl_vstringify
+#define vcmp			Perl_vcmp
 #define nextargv		Perl_nextargv
 #define ninstr			Perl_ninstr
 #define oopsCV			Perl_oopsCV
@@ -2060,8 +2061,9 @@
 #define scan_version(a,b)	Perl_scan_version(aTHX_ a,b)
 #define new_version(a)		Perl_new_version(aTHX_ a)
 #define upg_version(a)		Perl_upg_version(aTHX_ a)
-#define vnumify(a,b)		Perl_vnumify(aTHX_ a,b)
-#define vstringify(a,b)		Perl_vstringify(aTHX_ a,b)
+#define vnumify(a)		Perl_vnumify(aTHX_ a)
+#define vstringify(a)		Perl_vstringify(aTHX_ a)
+#define vcmp(a,b)		Perl_vcmp(aTHX_ a,b)
 #define nextargv(a)		Perl_nextargv(aTHX_ a)
 #define ninstr(a,b,c,d)		Perl_ninstr(aTHX_ a,b,c,d)
 #define oopsCV(a)		Perl_oopsCV(aTHX_ a)

@@ -402,7 +402,7 @@ Found in file pad.c
 =item cv_clone
 
 Clone a CV: make a new CV which points to the same code etc, but which
-has a newly-created pad done by copying the prototype pad and capturing
+has a newly-created pad built by copying the prototype pad and capturing
 any outer lexicals.
 
 	CV*	cv_clone(CV* proto)
@@ -491,7 +491,6 @@ Check for duplicate declarations: report any of:
        as C<ourstash>
 C<is_our> indicates that the name to check is an 'our' declaration
 
-
 	void	pad_check_dup(char* name, bool is_our, HV* ourstash)
 
 =for hackers
@@ -511,9 +510,10 @@ Found in file pad.c
 
 =item pad_findmy
 
-Given a lexical name, try to find it's offset, first in the current pad,
+Given a lexical name, try to find its offset, first in the current pad,
 or failing that, in the pads of any lexically enclosing subs (including
-the complications introduced by eval). If the name is found in an outer pad, then a fake entry is added to the current pad.
+the complications introduced by eval). If the name is found in an outer pad,
+then a fake entry is added to the current pad.
 Returns the offset in the current pad, or NOT_IN_PAD on failure.
 
 	PADOFFSET	pad_findmy(char* name)
@@ -552,7 +552,7 @@ Found in file pad.c
 
 =item pad_new
 
-Create a new comnpiling padlist, saving and updating the various global
+Create a new compiling padlist, saving and updating the various global
 vars at the same time as creating the pad itself. The following flags
 can be OR'ed together:
 
