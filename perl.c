@@ -3430,10 +3430,6 @@ S_init_postdump_symbols(pTHX_ register int argc, register char **argv, register 
     char *s;
     SV *sv;
     GV* tmpgv;
-#ifdef NEED_ENVIRON_DUP_FOR_MODIFY
-    char **dup_env_base = 0;
-    int dup_env_count = 0;
-#endif
 
     PL_toptarget = NEWSV(0,0);
     sv_upgrade(PL_toptarget, SVt_PVFM);
@@ -3482,46 +3478,20 @@ S_init_postdump_symbols(pTHX_ register int argc, register char **argv, register 
 	    env = environ;
 	if (env != environ)
 	    environ[0] = Nullch;
-#ifdef NEED_ENVIRON_DUP_FOR_MODIFY
-	{
-	    char **env_base;
-	    for (env_base = env; *env; env++)
-		dup_env_count++;
-	    if ((dup_env_base = (char **)
-		 safesysmalloc( sizeof(char *) * (dup_env_count+1) ))) {
-		char **dup_env;
-		for (env = env_base, dup_env = dup_env_base;
-		     *env;
-		     env++, dup_env++) {
-		    /* With environ one needs to use safesysmalloc(). */
-		    *dup_env = safesysmalloc(strlen(*env) + 1);
-		    (void)strcpy(*dup_env, *env);
-		}
-		*dup_env = Nullch;
-		env = dup_env_base;
-	    } /* else what? */
-	}
-#endif /* NEED_ENVIRON_DUP_FOR_MODIFY */
 	if (env)
 	  for (; *env; env++) {
 	    if (!(s = strchr(*env,'=')))
 		continue;
-	    *s++ = '\0';
 #if defined(MSDOS)
+	    *s = '\0';
 	    (void)strupr(*env);
-#endif
-	    sv = newSVpv(s--,0);
-	    (void)hv_store(hv, *env, s - *env, sv, 0);
 	    *s = '=';
+#endif
+	    sv = newSVpv(s+1, 0);
+	    (void)hv_store(hv, *env, s - *env, sv, 0);
+	    if (env != environ)
+	        mg_set(sv);
 	  }
-#ifdef NEED_ENVIRON_DUP_FOR_MODIFY
-	if (dup_env_base) {
-	    char **dup_env;
-	    for (dup_env = dup_env_base; *dup_env; dup_env++)
-		safesysfree(*dup_env);
-	    safesysfree(dup_env_base);
-	}
-#endif /* NEED_ENVIRON_DUP_FOR_MODIFY */
 #endif /* USE_ENVIRON_ARRAY */
     }
     TAINT_NOT;

@@ -1814,13 +1814,6 @@ typedef struct clone_params CLONE_PARAMS;
 #  define USE_ENVIRON_ARRAY
 #endif
 
-#ifdef JPL
-    /* E.g. JPL needs to operate on a copy of the real environment.
-     * JDK 1.2 and 1.3 seem to get upset if the original environment
-     * is diddled with. */
-#   define NEED_ENVIRON_DUP_FOR_MODIFY
-#endif
-
 /*
  * initialise to avoid floating-point exceptions from overflow, etc
  */
