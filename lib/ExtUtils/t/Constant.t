@@ -1,5 +1,3 @@
-#!/usr/bin/perl -w
-
 print "1..48\n";
 
 BEGIN {
