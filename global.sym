@@ -200,6 +200,7 @@ rsfp
 rsfp_filters
 rshift_amg
 rshift_ass_amg
+runops
 savestack
 savestack_ix
 savestack_max
@@ -1015,7 +1016,6 @@ rsignal
 rsignal_save
 rsignal_state
 rsignal_restore
-runops
 rxres_free
 rxres_restore
 rxres_save
@@ -1096,6 +1096,7 @@ sv_2uv
 sv_add_arena
 sv_backoff
 sv_bless
+sv_bless3
 sv_catpvf
 sv_catpv
 sv_catpvn

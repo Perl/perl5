@@ -398,7 +398,10 @@ Sighandler_t rsignal _((int, Sighandler_t));
 int	rsignal_restore _((int, Sigsave_t*));
 int	rsignal_save _((int, Sighandler_t, Sigsave_t*));
 Sighandler_t rsignal_state _((int));
-int	runops _((void));
+int	runops_standard _((void));
+#ifdef DEBUGGING
+int	runops_debug _((void));
+#endif
 void	rxres_free _((void** rsp));
 void	rxres_restore _((void** rsp, REGEXP* rx));
 void	rxres_save _((void** rsp, REGEXP* rx));
@@ -465,6 +468,7 @@ UV	sv_2uv _((SV* sv));
 void	sv_add_arena _((char* ptr, U32 size, U32 flags));
 int	sv_backoff _((SV* sv));
 SV*	sv_bless _((SV* sv, HV* stash));
+SV*	sv_bless3 _((SV* sv, HV* stash, bool zaptilde));
 void	sv_catpvf _((SV* sv, const char* pat, ...));
 void	sv_catpv _((SV* sv, char* ptr));
 void	sv_catpvn _((SV* sv, char* ptr, STRLEN len));
