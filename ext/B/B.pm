@@ -36,7 +36,7 @@ use strict;
 @B::PVIV::ISA = qw(B::PV B::IV);
 @B::PVNV::ISA = qw(B::PV B::NV);
 @B::PVMG::ISA = 'B::PVNV';
-# Change in the inheritance hierarchy post 5.8
+# Change in the inheritance hierarchy post 5.9.0
 @B::PVLV::ISA = $] > 5.009 ? 'B::GV' : 'B::PVMG';
 @B::BM::ISA = 'B::PVMG';
 @B::AV::ISA = 'B::PVMG';
@@ -530,8 +530,8 @@ using this module.
 B::IV, B::NV, B::RV, B::PV, B::PVIV, B::PVNV, B::PVMG, B::BM, B::PVLV,
 B::AV, B::HV, B::CV, B::GV, B::FM, B::IO. These classes correspond in
 the obvious way to the underlying C structures of similar names. The
-inheritance hierarchy mimics the underlying C "inheritance". For 5.9 and
-later this is:
+inheritance hierarchy mimics the underlying C "inheritance". For 5.9.1
+and later this is:
 
                              B::SV
                                |
@@ -557,8 +557,8 @@ later this is:
                                       B::FM
 
 
-For 5.8 and earlier, PVLV is a direct subclass of PVMG, so the base of this
-diagram is
+For 5.9.0 and earlier, PVLV is a direct subclass of PVMG, so the base
+of this diagram is
 
                            |
                         B::PVMG
