@@ -185,25 +185,33 @@ nw_getservent(void)
 void
 nw_sethostent(int stayopen)
 {
+#ifdef HAS_SETHOSTENT
 	sethostent(stayopen);
+#endif
 }
 
 void
 nw_setnetent(int stayopen)
 {
+#ifdef HAS_SETNETENT
 	setnetent(stayopen);
+#endif
 }
 
 void
 nw_setprotoent(int stayopen)
 {
+#ifdef HAS_SETPROTENT
 	setprotoent(stayopen);
+#endif
 }
 
 void
 nw_setservent(int stayopen)
 {
+#ifdef HAS_SETSERVENT
 	setservent(stayopen);
+#endif
 }
 
 int

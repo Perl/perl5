@@ -52,7 +52,7 @@ if( $^O eq 'MSWin32' ) {
 }
 $Is{UWIN}   = 1 if $^O eq 'uwin';
 $Is{Cygwin} = 1 if $^O eq 'cygwin';
-$Is{NW5}    = 1 if $Config{osname} eq 'NetWare';  # intentional
+$Is{NW5}    = 1 if $Config{'osname'} eq 'NetWare';  # intentional
 $Is{BeOS}   = 1 if $^O =~ /beos/i;    # XXX should this be that loose?
 $Is{DOS}    = 1 if $^O eq 'dos';
 

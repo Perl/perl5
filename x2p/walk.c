@@ -34,7 +34,11 @@ static void tab ( STR *str, int lvl );
 
 int prewalk ( int numit, int level, int node, int *numericptr );
 STR * walk ( int useval, int level, int node, int *numericptr, int minprec );
-
+#ifdef NETWARE
+char *savestr(char *str);
+char *cpytill(register char *to, register char *from, register int delim);
+char *instr(char *big, char *little);
+#endif
 
 STR *
 walk(int useval, int level, register int node, int *numericptr, int minprec)

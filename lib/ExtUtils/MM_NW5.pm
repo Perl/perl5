@@ -21,6 +21,12 @@ the semantics.
 use Config;
 use File::Basename;
 
+#require Exporter;
+
+#use ExtUtils::MakeMaker;
+#Exporter::import('ExtUtils::MakeMaker',
+#       qw( $Verbose &neatvalue));
+
 use vars qw(@ISA $VERSION);
 $VERSION = '2.01_01';
 
@@ -30,14 +36,16 @@ require ExtUtils::MM_Win32;
 use ExtUtils::MakeMaker qw( &neatvalue );
 
 $ENV{EMXSHELL} = 'sh'; # to run `commands`
+#unshift @MM::ISA, 'ExtUtils::MM_NW5';
 
-$BORLAND  = 1 if $Config{'cc'} =~ /^bcc/i;
-$GCC      = 1 if $Config{'cc'} =~ /^gcc/i;
-$DMAKE    = 1 if $Config{'make'} =~ /^dmake/i;
-$NMAKE    = 1 if $Config{'make'} =~ /^nmake/i;
+$BORLAND = 1 if $Config{'cc'} =~ /^bcc/i;
+$GCC     = 1 if $Config{'cc'} =~ /^gcc/i;
+$DMAKE = 1 if $Config{'make'} =~ /^dmake/i;
+$NMAKE = 1 if $Config{'make'} =~ /^nmake/i;
 $PERLMAKE = 1 if $Config{'make'} =~ /^pmake/i;
 
 
+	
 sub init_others
 {
  my ($self) = @_;
@@ -51,7 +59,7 @@ sub init_others
  
  # Additional import file specified from Makefile.pl
  if($self->{'base_import'}) {
-	$self->{'BASE_IMPORT'} .= ',' . $self->{'base_import'};
+	$self->{'BASE_IMPORT'} .= ', ' . $self->{'base_import'};
  }
  
  $self->{'NLM_VERSION'} = $Config{'nlm_version'};
@@ -65,16 +73,15 @@ sub init_others
 Initializes lots of constants and .SUFFIXES and .PHONY
 
 =cut
-
 # NetWare override
 sub const_cccmd {
     my($self,$libperl)=@_;
     return $self->{CONST_CCCMD} if $self->{CONST_CCCMD};
     return '' unless $self->needs_linking();
-    return $self->{CONST_CCCMD} =
-	q{CCCMD = $(CC) $(INC) $(CCFLAGS) $(OPTIMIZE) \\
-	$(PERLTYPE) $(MPOLLUTE) \\
-	-DVERSION="$(VERSION)" -DXS_VERSION="$(XS_VERSION)"};
+    return $self->{CONST_CCCMD} = 
+	q{CCCMD = $(CC) $(CCFLAGS) $(INC) $(OPTIMIZE) \\
+	$(PERLTYPE) $(MPOLLUTE) -o $@ \\
+	-DVERSION=\"$(VERSION)\" -DXS_VERSION=\"$(XS_VERSION)\"};
 }
 
 sub constants {
@@ -94,9 +101,9 @@ sub constants {
 	      PERL_ARCHLIB SITELIBEXP SITEARCHEXP LIBPERL_A MYEXTLIB
 	      FIRST_MAKEFILE MAKE_APERL_FILE PERLMAINCC PERL_SRC
 	      PERL_INC PERL FULLPERL LIBPTH BASE_IMPORT PERLRUN
-          FULLPERLRUN PERLRUNINST FULLPERLRUNINST
-          FULL_AR PERL_CORE NLM_VERSION MPKTOOL TOOLPATH
-
+		  FULLPERLRUN PERLRUNINST FULL_AR PERL_CORE FULLPERLRUNINST
+		  NLM_VERSION MPKTOOL TOOLPATH
+		  
 	      / ) {
 	next unless defined $self->{$tmp};
 	push @m, "$tmp = $self->{$tmp}\n";
@@ -109,11 +116,12 @@ sub constants {
 	# If the final binary name is greater than 8 chars,
 	# truncate it here and rename it after creation
 	# otherwise, Watcom Linker fails
+	
 	if(length($self->{'BASEEXT'}) > 8) {
-		$self->{'NLM_SHORT_NAME'} = substr($self->{'NAME'},0,8);
+		$self->{'NLM_SHORT_NAME'} = substr($self->{'BASEEXT'},0,8);
 		push @m, "NLM_SHORT_NAME = $self->{'NLM_SHORT_NAME'}\n";
 	}
-
+	
     push @m, qq{
 VERSION_MACRO = VERSION
 DEFINE_VERSION = -D\$(VERSION_MACRO)=\\\"\$(VERSION)\\\"
@@ -123,18 +131,26 @@ XS_DEFINE_VERSION = -D\$(XS_VERSION_MACRO)=\\\"\$(XS_VERSION)\\\"
 
 	# Get the include path and replace the spaces with ;
 	# Copy this to makefile as INCLUDE = d:\...;d:\;
-	(my $inc = $Config{'incpath'}) =~ s/ /;/g;
+	(my $inc = $Config{'incpath'}) =~ s/([ ]*)-I/;/g;
+
+=head
+	# Commented by Ananth since the below code was not adding the DBI path
+	# and compilation was failing due to non-availability of the correct path. 3 Jan 2002
 
 	# Get the additional include path and append to INCLUDE, keep it in
 	# INC will give problems during compilation, hence reset it after getting
 	# the value
-	(my $add_inc = $self->{'INC'}) =~ s/ -I/;/g;
+##	(my $add_inc = $self->{'INC'}) =~ s/ -I/;/g;
 	$self->{'INC'} = '';
- 	push @m, qq{
+	push @m, qq{
 INCLUDE = $inc;$add_inc;
 };
+=cut
 
-	# Set the path to Watcom binaries which might not have been set in
+push @m, qq{
+INCLUDE = $inc;
+};
+	# Set the path to CodeWarrior binaries which might not have been set in
 	# any other place
 	push @m, qq{
 PATH = \$(PATH);\$(TOOLPATH)
@@ -253,7 +269,6 @@ PM_TO_BLIB = }.join(" \\\n\t", %{$self->{PM}}).q{
     join('',@m);
 }
 
-
 =item dynamic_lib (o)
 
 Defines how to produce the *.so (or equivalent) files.
@@ -285,56 +300,70 @@ $(INST_DYNAMIC): $(OBJECT) $(MYEXTLIB) $(BOOTSTRAP)
 #      .q{$(MYEXTLIB) $(PERL_ARCHIVE) $(LDLOADLIBS) -def:$(EXPORT_LIST)});
 
 		# Create xdc data for an MT safe NLM in case of mpk build
+#	if ( scalar(keys %XS) == 0 ) { return; }
+    		push(@m, 
+    		q{	@echo Export boot_$(BOOT_SYMBOL) > $(BASEEXT).def
+}); 
+	push(@m, 
+    q{	@echo $(BASE_IMPORT) >> $(BASEEXT).def 
+});
+	push(@m, 
+    q{	@echo Import @$(PERL_INC)\perl.imp >> $(BASEEXT).def 
+});  
+
 		if ( $self->{CCFLAGS} =~ m/ -DMPK_ON /) {
 			$mpk=1;
-			push @m, ' $(MPKTOOL) $(BASEEXT).xdc
+			push @m, '	$(MPKTOOL) $(XDCFLAGS) $(BASEEXT).xdc
+';
+			push @m, '	@echo xdcdata $(BASEEXT).xdc >> $(BASEEXT).def
 ';
 		} else {
 			$mpk=0;
 		}
-
+		
 		push(@m,
-			q{ $(LD) Form Novell NLM '$(DISTNAME) Extension, XS_VERSION=$(XS_VERSION)'} 
+			q{	$(LD) $(LDFLAGS) $(OBJECT:.obj=.obj) } 
 			);
 
+		push(@m,
+			q{	-desc "Perl 5.7.3 Extension ($(BASEEXT))	XS_VERSION: $(XS_VERSION)" -nlmversion $(NLM_VERSION) } 
+			);
+			
 		# Taking care of long names like FileHandle, ByteLoader, SDBM_File etc
 		if($self->{NLM_SHORT_NAME}) {
 			# In case of nlms with names exceeding 8 chars, build nlm in the 
 			# current dir, rename and move to auto\lib.  If we create in auto\lib
 			# in the first place, we can't rename afterwards.
 			push(@m,
-				q{ Name $(NLM_SHORT_NAME).$(DLEXT)}
+				q{ -o $(NLM_SHORT_NAME).$(DLEXT)}
 				);
 		} else {
 			push(@m,
-				q{ Name $(INST_AUTODIR)\\$(BASEEXT).$(DLEXT)}
+				q{ -o $(INST_AUTODIR)\\$(BASEEXT).$(DLEXT)}
 				);
 		}
 
-		push(@m,
-		   q{ Option Quiet Option Version = $(NLM_VERSION) Option Caseexact Option NoDefaultLibs Option screenname 'none' Option Synchronize }
-		   );
-
-		if ($mpk) {
-		push (@m, 
-		q{ Option XDCDATA=$(BASEEXT).xdc }
-		);
-		}
+		
+#		if ($mpk) {
+#		push (@m, 
+#		q{ Option XDCDATA=$(BASEEXT).xdc }
+#		);
+#		}
 
 		# Add additional lib files if any (SDBM_File)
 		if($self->{MYEXTLIB}) {
 			push(@m,
-				q{ Library $(MYEXTLIB) }
+				q{ $(MYEXTLIB) }
 				);
 		}
 
 #For now lets comment all the Watcom lib calls
 #q{ LibPath $(LIBPTH) Library plib3s.lib Library math3s.lib Library clib3s.lib Library emu387.lib Library $(PERL_ARCHIVE) Library $(PERL_INC)\Main.lib}
-
+        
+       
 		push(@m,
-				q{ Library $(PERL_ARCHIVE) Library $(PERL_INC)\Main.lib}			   
-			   .q{ Export boot_$(BOOT_SYMBOL) $(BASE_IMPORT) }
-			   .q{ FILE $(OBJECT:.obj=,)}
+				q{ $(PERL_INC)\Main.lib}
+			   .q{ -commandfile $(BASEEXT).def }
 			);
 
 		# If it is having a short name, rename it 
@@ -352,6 +381,11 @@ $(INST_DYNAMIC): $(OBJECT) $(MYEXTLIB) $(BOOTSTRAP)
 ';
 
     push @m, $self->dir_target('$(INST_ARCHAUTODIR)');
+# }  else {
+#	push @m, '
+#	@$(NOOP)
+#';
+# }
     join('',@m);
 }
 
@@ -362,5 +396,4 @@ __END__
 =back
 
 =cut 
-
 

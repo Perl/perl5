@@ -31,6 +31,10 @@ int oper3(int type, int arg1, int arg2, int arg3);
 int oper4(int type, int arg1, int arg2, int arg3, int arg4);
 int oper5(int type, int arg1, int arg2, int arg3, int arg4, int arg5);
 STR *walk(int useval, int level, register int node, int *numericptr, int minprec);
+#ifdef NETWARE
+char *savestr(char *str);
+char *cpy2(register char *to, register char *from, register int delim);
+#endif
 
 #if defined(OS2) || defined(WIN32) || defined(NETWARE)
 static void usage(void);
@@ -57,6 +61,7 @@ main(register int argc, register char **argv, register char **env)
     register STR *str;
     int i;
     STR *tmpstr;
+    /* char *namelist;    */
 
 	#ifdef NETWARE
 		fnInitGpfGlobals();	/* For importing the CLIB calls in place of Watcom calls */

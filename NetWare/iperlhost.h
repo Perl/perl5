@@ -36,8 +36,8 @@ public:
 	virtual void PerlDestroy(PerlInterpreter *my_perl) = 0;
 	virtual void PerlFree(PerlInterpreter *my_perl) = 0;
 
-	virtual bool RegisterWithThreadTable(void)=0;
-	virtual bool UnregisterWithThreadTable(void)=0;
+	//virtual bool RegisterWithThreadTable(void)=0;
+	//virtual bool UnregisterWithThreadTable(void)=0;
 };
 
 extern "C" IPerlHost* AllocStdPerl();

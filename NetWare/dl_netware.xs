@@ -111,7 +111,7 @@ dl_load_file(filename,flags=0)
 			//initialize UCS, this has to be terminated when the script finishes execution
 			//Is the script intending to use UCS Extensions?
 			//This should be done once per script execution
-			if ((strcmp(mod_name,"Perl2UCS.nlp")==0) || (strcmp(mod_name,"UCSExt.nlp")==0))
+			if ((strcmp(mod_name,"Perl2UCS.nlm")==0) || (strcmp(mod_name,"UCSExt.nlm")==0))
 			{
 				unsigned int moduleHandle = 0;
 				moduleHandle = FindNLMHandle("UCSCORE.NLM");
