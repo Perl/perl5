@@ -4,7 +4,7 @@
 
 SRCDIR     = ..
 PV         = 57
-INST_VER   = 5.7.2
+INST_VER   = 5.7.3
 PERLCEDIR  = H:\src\wince\perl\wince
 WCEROOT    = N:\Windows CE Tools
 WCEROOT    = D:\Windows CE Tools
