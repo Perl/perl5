@@ -1,8 +1,5 @@
 #!./perl -w
 
-use strict;
-use vars qw($DEBUG);
-
 my $w;
 
 BEGIN {
@@ -16,6 +13,9 @@ BEGIN {
        print $_[0];
    };
 }
+
+use strict;
+use vars qw($DEBUG);
 
 package B1;
 use fields qw(b1 b2 b3);
