@@ -28,6 +28,7 @@ compcv
 comppad
 comppad_name
 comppad_name_fill
+comppad_name_floor
 concat_amg
 concat_ass_amg
 cop_seqmax
@@ -36,6 +37,7 @@ cryptseen
 cshlen
 cshname
 curcop
+curcopdb
 curinterp
 curpad
 dc
@@ -148,6 +150,8 @@ pow_ass_amg
 ppaddr
 profiledata
 provide_ref
+psig_ptr
+psig_name
 qrt_amg
 rcsid
 reall_srchlen
@@ -206,7 +210,6 @@ sin_amg
 sle_amg
 slt_amg
 sne_amg
-stack
 stack_base
 stack_max
 stack_sp
@@ -300,7 +303,6 @@ cando
 cast_ulong
 check_uni
 checkcomma
-chsize
 ck_aelem
 ck_concat
 ck_delete
@@ -416,6 +418,7 @@ gv_fetchpv
 gv_fullname
 gv_init
 gv_stashpv
+gv_stashpvn
 gv_stashsv
 he_delayfree
 he_free
@@ -423,16 +426,21 @@ he_root
 hoistmust
 hv_clear
 hv_delete
+hv_delete_ent
 hv_exists
+hv_exists_ent
 hv_fetch
+hv_fetch_ent
 hv_iterinit
 hv_iterkey
+hv_iterkeysv
 hv_iternext
 hv_iternextsv
 hv_iterval
 hv_magic
 hv_stashpv
 hv_store
+hv_store_ent
 hv_undef
 ibcmp
 ingroup
@@ -451,12 +459,14 @@ localize
 looks_like_number
 magic_clearenv
 magic_clearpack
+magic_clearsig
 magic_existspack
 magic_get
 magic_getarylen
 magic_getglob
 magic_getpack
 magic_getpos
+magic_getsig
 magic_gettaint
 magic_getuvar
 magic_len
@@ -496,6 +506,7 @@ mstats
 my
 my_bcopy
 my_bzero
+my_chsize
 my_exit
 my_htonl
 my_lstat
@@ -982,6 +993,7 @@ scope
 screaminstr
 setdefout
 setenv_getix
+sharepvn
 sighandler
 skipspace
 stack_grow
@@ -1049,6 +1061,7 @@ taint_proper
 too_few_arguments
 too_many_arguments
 unlnk
+unsharepvn
 utilize
 wait4pid
 warn
