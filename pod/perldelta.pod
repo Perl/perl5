@@ -3372,6 +3372,15 @@ failures.  Most of the rest point at problems with SysV IPC.
 
 Use PDL 2.3.4 or later.
 
+=head2 Perl_get_sv
+
+You may get errors like 'Undefined symbol "Perl_get_sv"' or
+"can't resolve symbol 'Perl_get_sv'".  This probably means that
+you are trying to use an older shared Perl library with Perl 5.8.0
+executable.  Perl used to have such a subroutine, but that is no more
+the case.  Check your shared library path, and any shared Perl
+libraries in those directories.
+
 =head2 Term::ReadKey not working on Win32
 
 Use Term::ReadKey 2.20 or later.
