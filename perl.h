@@ -1466,6 +1466,8 @@ typedef pthread_key_t	perl_key;
 # else
 #  ifdef FFLUSH_ALL
 #   define PERL_FLUSHALL_FOR_CHILD	my_fflush_all()
+#  else
+#   define PERL_FLUSHALL_FOR_CHILD	(void)0
 #  endif
 # endif
 #endif
