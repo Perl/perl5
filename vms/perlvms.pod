@@ -508,7 +508,7 @@ true, a warning message is printed, and C<undef> is returned.
 In most cases, C<kill> kill is implemented via the CRTL's C<kill()>
 function, so it will behave according to that function's
 documentation.  If you send a SIGKILL, however, the $DELPRC system
-service is is called directly.  This insures that the target
+service is called directly.  This insures that the target
 process is actually deleted, if at all possible.  (The CRTL's C<kill()>
 function is presently implemented via $FORCEX, which is ignored by
 supervisor-mode images like DCL.)

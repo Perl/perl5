@@ -118,7 +118,7 @@ modify the Registry yourself.
 
 =item Macintosh
 
-Macintosh perl scripts will have the the appropriate Creator and
+Macintosh perl scripts will have the appropriate Creator and
 Type, so that double-clicking them will invoke the perl application.
 
 =back
