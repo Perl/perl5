@@ -220,6 +220,8 @@ TRNL = '$trnl'
 
 OPTIMIZE = $optimize
 
+EXTRAS = $extras
+
 !GROK!THIS!
 # not used by Makefile but by installperl;
 # mentioned here so that metaconfig picks these up
@@ -680,7 +682,7 @@ install-silent:
 no-install:
 	$(MAKE) install.perl install.man STRIPFLAGS=$(STRIPFLAGS) INSTALLFLAGS=-n
 
-install.perl:	all installperl
+install.perl:	all installperl extras.lst
 	if [ -n "$(COMPILE)" ]; \
 	then \
 		cd utils; $(MAKE) compile; \
