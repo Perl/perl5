@@ -271,10 +271,9 @@ struct regnode_2 {
 
 #endif 
 
-/* I16_MAX is no good for REG_INFTY because sizeof(short) > 2
- * is perfectly fine.  In Cray C90 sizeof(short) == 4,
- * in Cray T90 sizeof(short) == 8. */
-#define REG_INFTY ((1<<15)-1)
+#ifndef
+#  define REG_INFTY I16_MAX
+#endif
 
 #ifdef REGALIGN
 #  define ARG_VALUE(arg) (arg)
