@@ -121,9 +121,20 @@ print $@ =~ /foo bar/ ? "ok 29\n" : "not ok 29\n";
 # --- rdo
   
 my $t = 30;
-$cpt->rdo('/non/existant/file.name');
-# The regexp is getting rather baroque.
-print $! =~ /No such file|file specification syntax error|A file or directory in the path name does not exist|Invalid argument|Device not configured|file not found/i ? "ok $t\n" : "not ok $t # $!\n"; $t++;
+$! = 0;
+my $nosuch = '/non/existant/file.name';
+open(NOSUCH, $nosuch);
+if ($@) {
+    my $errno  = $!;
+    die "Eek! Attempting to open $nosuch failed, but \$! is still 0" unless $!;
+    $! = 0;
+    $cpt->rdo($nosuch);
+    print $! == $errno ? "ok $t\n" : sprintf "not ok $t # \"$!\" is %d (expected %d)\n", $!, $errno; $t++;
+} else {
+    die "Eek! Didn't expect $nosuch to be there.";
+}
+close(NOSUCH);
+
 # test #31 is gone.
 print 1 ? "ok $t\n" : "not ok $t\n#$@/$!\n"; $t++;
   
