@@ -1,4 +1,4 @@
-/* $Header: doarg.c,v 3.0.1.6 90/08/09 02:48:38 lwall Locked $
+/* $Header: doarg.c,v 3.0.1.7 90/08/13 22:14:15 lwall Locked $
  *
  *    Copyright (c) 1989, Larry Wall
  *
@@ -6,6 +6,10 @@
  *    as specified in the README file that comes with the perl 3.0 kit.
  *
  * $Log:	doarg.c,v $
+ * Revision 3.0.1.7  90/08/13  22:14:15  lwall
+ * patch28: the NSIG hack didn't work on Xenix
+ * patch28: defined(@array) and defined(%array) didn't work right
+ * 
  * Revision 3.0.1.6  90/08/09  02:48:38  lwall
  * patch19: fixed double include of <signal.h>
  * patch19: pack/unpack can now do native float and double
@@ -49,7 +53,7 @@
 #include "EXTERN.h"
 #include "perl.h"
 
-#ifndef NSIG
+#if !defined(NSIG) || defined(M_UNIX) || defined(M_XENIX)
 #include <signal.h>
 #endif
 
@@ -1155,22 +1159,24 @@ int *arglast;
     register int type;
     register int retarg = arglast[0] + 1;
     int retval;
+    ARRAY *ary;
+    HASH *hash;
 
     if ((arg[1].arg_type & A_MASK) != A_LEXPR)
 	fatal("Illegal argument to defined()");
     arg = arg[1].arg_ptr.arg_arg;
     type = arg->arg_type;
 
-    if (type == O_ARRAY || type == O_LARRAY)
-	retval = stab_xarray(arg[1].arg_ptr.arg_stab) != 0;
-    else if (type == O_HASH || type == O_LHASH)
-	retval = stab_xhash(arg[1].arg_ptr.arg_stab) != 0;
-    else if (type == O_ASLICE || type == O_LASLICE)
-	retval = stab_xarray(arg[1].arg_ptr.arg_stab) != 0;
-    else if (type == O_HSLICE || type == O_LHSLICE)
-	retval = stab_xhash(arg[1].arg_ptr.arg_stab) != 0;
-    else if (type == O_SUBR || type == O_DBSUBR)
+    if (type == O_SUBR || type == O_DBSUBR)
 	retval = stab_sub(arg[1].arg_ptr.arg_stab) != 0;
+    else if (type == O_ARRAY || type == O_LARRAY ||
+	     type == O_ASLICE || type == O_LASLICE )
+	retval = ((ary = stab_xarray(arg[1].arg_ptr.arg_stab)) != 0
+	    && ary->ary_max >= 0 );
+    else if (type == O_HASH || type == O_LHASH ||
+	     type == O_HSLICE || type == O_LHSLICE )
+	retval = ((hash = stab_xhash(arg[1].arg_ptr.arg_stab)) != 0
+	    && hash->tbl_array);
     else
 	retval = FALSE;
     str_numset(str,(double)retval);

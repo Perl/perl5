@@ -1,4 +1,4 @@
-/* $Header: hash.c,v 3.0.1.4 90/08/09 03:50:22 lwall Locked $
+/* $Header: hash.c,v 3.0.1.5 90/08/13 22:18:27 lwall Locked $
  *
  *    Copyright (c) 1989, Larry Wall
  *
@@ -6,6 +6,9 @@
  *    as specified in the README file that comes with the perl 3.0 kit.
  *
  * $Log:	hash.c,v $
+ * Revision 3.0.1.5  90/08/13  22:18:27  lwall
+ * patch28: defined(@array) and defined(%array) didn't work right
+ * 
  * Revision 3.0.1.4  90/08/09  03:50:22  lwall
  * patch19: dbmopen(name, 'filename', undef) now refrains from creating
  * 
@@ -55,6 +58,12 @@ int lval;
 
     if (!tb)
 	return Nullstr;
+    if (!tb->tbl_array) {
+	if (lval)
+	    Newz(503,tb->tbl_array, tb->tbl_max + 1, HENT*);
+	else
+	    return Nullstr;
+    }
 
     /* The hash function we use on symbols has to be equal to the first
      * character when taken modulo 128, so that str_reset() can be implemented
@@ -141,6 +150,9 @@ register int hash;
 	}
     }
 
+    if (!tb->tbl_array)
+	Newz(505,tb->tbl_array, tb->tbl_max + 1, HENT*);
+
     oentry = &(tb->tbl_array[hash & tb->tbl_max]);
     i = 1;
 
@@ -210,7 +222,7 @@ int klen;
     datum dkey;
 #endif
 
-    if (!tb)
+    if (!tb || !tb->tbl_array)
 	return Nullstr;
     if (!tb->tbl_coeffsize)
 	hash = *key + 128 * key[1] + 128 * key[klen-1];
@@ -314,7 +326,6 @@ unsigned int lookat;
 	tb->tbl_max = 127;		/* it's a symbol table */
 	tb->tbl_dosplit = 128;		/* so never split */
     }
-    Newz(503,tb->tbl_array, tb->tbl_max + 1, HENT*);
     tb->tbl_fill = 0;
 #ifdef SOME_DBM
     tb->tbl_dbm = 0;
@@ -352,7 +363,7 @@ register HASH *tb;
     register HENT *hent;
     register HENT *ohent = Null(HENT*);
 
-    if (!tb)
+    if (!tb || !tb->tbl_array)
 	return;
     (void)hiterinit(tb);
     while (hent = hiternext(tb)) {	/* concise but not very efficient */
@@ -438,6 +449,8 @@ register HASH *tb;
 	return entry;
     }
 #endif
+    if (!tb->tbl_array)
+	Newz(506,tb->tbl_array, tb->tbl_max + 1, HENT*);
     do {
 	if (entry)
 	    entry = entry->hent_next;

@@ -1,4 +1,4 @@
-char rcsid[] = "$Header: perly.c,v 3.0.1.6 90/08/09 04:55:50 lwall Locked $\nPatch level: ###\n";
+char rcsid[] = "$Header: perly.c,v 3.0.1.7 90/08/13 22:22:22 lwall Locked $\nPatch level: ###\n";
 /*
  *    Copyright (c) 1989, Larry Wall
  *
@@ -6,6 +6,9 @@ char rcsid[] = "$Header: perly.c,v 3.0.1.6 90/08/09 04:55:50 lwall Locked $\nPat
  *    as specified in the README file that comes with the perl 3.0 kit.
  *
  * $Log:	perly.c,v $
+ * Revision 3.0.1.7  90/08/13  22:22:22  lwall
+ * patch28: defined(@array) and defined(%array) didn't work right
+ * 
  * Revision 3.0.1.6  90/08/09  04:55:50  lwall
  * patch19: added -x switch to extract script from input trash
  * patch19: Added -c switch to do compilation only
@@ -571,6 +574,8 @@ FIX YOUR KERNEL, PUT A C WRAPPER AROUND THIS SCRIPT, OR USE -u AND UNDUMP!\n");
     savestack = anew(Nullstab);		/* for saving non-local values */
     stack = anew(Nullstab);		/* for saving non-local values */
     stack->ary_flags = 0;		/* not a real array */
+    afill(stack,63); afill(stack,-1);	/* preextend stack */
+    afill(savestack,63); afill(savestack,-1);
 
     /* now parse the script */
 
@@ -845,7 +850,7 @@ int *arglast;
 		if (instr(tokenbuf,".h "))
 		    strcat(tokenbuf," (change .h to .ph maybe?)");
 		if (instr(tokenbuf,".ph "))
-		    strcat(tokenbuf," (did you run makelib?)");
+		    strcat(tokenbuf," (did you run h2ph?)");
 		fatal("%s",tokenbuf);
 	    }
 	    if (gimme != G_ARRAY)

@@ -1,7 +1,10 @@
 ''' Beginning of part 2
-''' $Header: perl_man.2,v 3.0.1.7 90/08/09 04:27:04 lwall Locked $
+''' $Header: perl_man.2,v 3.0.1.8 90/08/13 22:21:00 lwall Locked $
 '''
 ''' $Log:	perl.man.2,v $
+''' Revision 3.0.1.8  90/08/13  22:21:00  lwall
+''' patch28: documented that you can't interpolate $) or $| in pattern
+''' 
 ''' Revision 3.0.1.7  90/08/09  04:27:04  lwall
 ''' patch19: added require operator
 ''' 
@@ -1074,6 +1077,7 @@ If the final delimiter is followed by the optional letter \*(L'i\*(R', the match
 done in a case-insensitive manner.
 PATTERN may contain references to scalar variables, which will be interpolated
 (and the pattern recompiled) every time the pattern search is evaluated.
+(Note that $) and $| may not be interpolated because they look like end-of-string tests.)
 If you want such a pattern to be compiled only once, add an \*(L"o\*(R" after
 the trailing delimiter.
 This avoids expensive run-time recompilations, and

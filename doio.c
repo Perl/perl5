@@ -1,4 +1,4 @@
-/* $Header: doio.c,v 3.0.1.9 90/08/09 02:56:19 lwall Locked $
+/* $Header: doio.c,v 3.0.1.10 90/08/13 22:14:29 lwall Locked $
  *
  *    Copyright (c) 1989, Larry Wall
  *
@@ -6,6 +6,10 @@
  *    as specified in the README file that comes with the perl 3.0 kit.
  *
  * $Log:	doio.c,v $
+ * Revision 3.0.1.10  90/08/13  22:14:29  lwall
+ * patch28: close-on-exec problems on dup'ed file descriptors
+ * patch28: F_FREESP wasn't implemented the way I thought
+ * 
  * Revision 3.0.1.9  90/08/09  02:56:19  lwall
  * patch19: various MSDOS and OS/2 patches folded in
  * patch19: prints now check error status better
@@ -65,6 +69,10 @@
 #ifdef SOCKET
 #include <sys/socket.h>
 #include <netdb.h>
+#endif
+
+#if defined(SELECT) && (defined(M_UNIX) || defined(M_XENIX))
+#include <sys/select.h>
 #endif
 
 #ifdef I_PWD
@@ -237,8 +245,7 @@ int len;
     }
 #if defined(FCNTL) && defined(F_SETFD)
     fd = fileno(fp);
-    if (fd >= 3)
-	fcntl(fd,F_SETFD,1);
+    fcntl(fd,F_SETFD,fd >= 3);
 #endif
     stio->ifp = fp;
     if (writing) {
@@ -657,6 +664,58 @@ int *arglast;
     return sp;
 }
 
+#if !defined(TRUNCATE) && !defined(CHSIZE) && defined(F_FREESP)
+	    /* code courtesy of Pim Zandbergen */
+#define CHSIZE
+
+int chsize(fd, length)
+int fd;			/* file descriptor */
+off_t length;		/* length to set file to */
+{
+    extern long lseek();
+    struct flock fl;
+    struct stat filebuf;
+
+    if (fstat(fd, &filebuf) < 0)
+	return -1;
+
+    if (filebuf.st_size < length) {
+
+	/* extend file length */
+
+	if ((lseek(fd, (length - 1), 0)) < 0)
+	    return -1;
+
+	/* write a "0" byte */
+
+	if ((write(fd, "", 1)) != 1)
+	    return -1;
+    }
+    else {
+	/* truncate length */
+
+	fl.l_whence = 0;
+	fl.l_len = 0;
+	fl.l_start = length;
+	fl.l_type = F_WRLCK;    /* write lock on file space */
+
+	/*
+	* This relies on the UNDOCUMENTED F_FREESP argument to
+	* fcntl(2), which truncates the file so that it ends at the
+	* position indicated by fl.l_start.
+	*
+	* Will minor miracles never cease?
+	*/
+
+	if (fcntl(fd, F_FREESP, &fl) < 0)
+	    return -1;
+
+    }
+
+    return 0;
+}
+#endif /* F_FREESP */
+
 int
 do_truncate(str,arg,gimme,arglast)
 STR *str;
@@ -670,7 +729,7 @@ int *arglast;
     int result = 1;
     STAB *tmpstab;
 
-#if defined(TRUNCATE) || defined(CHSIZE) || defined(F_FREESP)
+#if defined(TRUNCATE) || defined(CHSIZE)
 #ifdef TRUNCATE
     if ((arg[1].arg_type & A_MASK) == A_WORD) {
 	tmpstab = arg[1].arg_ptr.arg_stab;
@@ -681,9 +740,6 @@ int *arglast;
     else if (truncate(str_get(ary->ary_array[sp]), len) < 0)
 	result = 0;
 #else
-#ifndef CHSIZE
-#define chsize(f,l) fcntl(f,F_FREESP,l)
-#endif
     if ((arg[1].arg_type & A_MASK) == A_WORD) {
 	tmpstab = arg[1].arg_ptr.arg_stab;
 	if (!stab_io(tmpstab) ||

@@ -1,4 +1,4 @@
-/* $Header: array.c,v 3.0.1.1 89/11/17 15:02:52 lwall Locked $
+/* $Header: array.c,v 3.0.1.2 90/08/13 21:52:20 lwall Locked $
  *
  *    Copyright (c) 1989, Larry Wall
  *
@@ -6,6 +6,9 @@
  *    as specified in the README file that comes with the perl 3.0 kit.
  *
  * $Log:	array.c,v $
+ * Revision 3.0.1.2  90/08/13  21:52:20  lwall
+ * patch28: defined(@array) and defined(%array) didn't work right
+ * 
  * Revision 3.0.1.1  89/11/17  15:02:52  lwall
  * patch5: nested foreach on same array didn't work
  * 
@@ -70,10 +73,16 @@ STR *val;
 	    }
 	}
 	else {
-	    newmax = key + ar->ary_max / 5;
-	  resize:
-	    Renew(ar->ary_alloc,newmax+1, STR*);
-	    Zero(&ar->ary_alloc[ar->ary_max+1], newmax - ar->ary_max, STR*);
+	    if (ar->ary_alloc) {
+		newmax = key + ar->ary_max / 5;
+	      resize:
+		Renew(ar->ary_alloc,newmax+1, STR*);
+		Zero(&ar->ary_alloc[ar->ary_max+1], newmax - ar->ary_max, STR*);
+	    }
+	    else {
+		newmax = key < 4 ? 4 : key;
+		Newz(2,ar->ary_alloc, newmax+1, STR*);
+	    }
 	    ar->ary_array = ar->ary_alloc;
 	    ar->ary_max = newmax;
 	}
@@ -100,12 +109,10 @@ STAB *stab;
     register ARRAY *ar;
 
     New(1,ar,1,ARRAY);
-    Newz(2,ar->ary_alloc,5,STR*);
-    ar->ary_array = ar->ary_alloc;
     ar->ary_magic = Str_new(7,0);
+    ar->ary_alloc = ar->ary_array = 0;
     str_magic(ar->ary_magic, stab, '#', Nullch, 0);
-    ar->ary_fill = -1;
-    ar->ary_max = 4;
+    ar->ary_max = ar->ary_fill = -1;
     ar->ary_flags = ARF_REAL;
     return ar;
 }
@@ -136,7 +143,7 @@ register ARRAY *ar;
 {
     register int key;
 
-    if (!ar || !(ar->ary_flags & ARF_REAL))
+    if (!ar || !(ar->ary_flags & ARF_REAL) || ar->ary_max < 0)
 	return;
     if (key = ar->ary_array - ar->ary_alloc) {
 	ar->ary_max += key;

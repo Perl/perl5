@@ -1,4 +1,4 @@
-/* $Header: dolist.c,v 3.0.1.8 90/08/09 03:15:56 lwall Locked $
+/* $Header: dolist.c,v 3.0.1.9 90/08/13 22:15:35 lwall Locked $
  *
  *    Copyright (c) 1989, Larry Wall
  *
@@ -6,6 +6,9 @@
  *    as specified in the README file that comes with the perl 3.0 kit.
  *
  * $Log:	dolist.c,v $
+ * Revision 3.0.1.9  90/08/13  22:15:35  lwall
+ * patch28: defined(@array) and defined(%array) didn't work right
+ * 
  * Revision 3.0.1.8  90/08/09  03:15:56  lwall
  * patch19: certain kinds of matching cause "panic: hint"
  * patch19: $' broke on embedded nulls
@@ -1109,6 +1112,10 @@ int *arglast;
     if (after < 0) {				/* not that much array */
 	length += after;			/* offset+length now in array */
 	after = 0;
+	if (!ary->ary_alloc) {
+	    afill(ary,0);
+	    afill(ary,-1);
+	}
     }
 
     /* At this point, sp .. max-1 is our new LIST */

@@ -1,6 +1,6 @@
 #!./perl
 
-# $Header: io.fs,v 3.0 89/10/18 15:26:20 lwall Locked $
+# $Header: io.fs,v 3.0.1.1 90/08/13 22:31:17 lwall Locked $
 
 print "1..22\n";
 
@@ -61,8 +61,10 @@ if ($foo == 1) {print "ok 16\n";} else {print "not ok 16 $foo\n";}
 ($dev,$ino,$mode,$nlink,$uid,$gid,$rdev,$size,$atime,$mtime,$ctime,
     $blksize,$blocks) = stat('b');
 if ($ino) {print "ok 17\n";} else {print "not ok 17\n";}
-if ($atime == 500000000 && $mtime == 500000001)
-    {print "ok 18\n";} else {print "not ok 18 $atime $mtime\n";}
+if (($atime == 500000000 && $mtime == 500000001) || $wd =~ m#/afs/#)
+    {print "ok 18\n";}
+else
+    {print "not ok 18 $atime $mtime\n";}
 
 if ((unlink 'b') == 1) {print "ok 19\n";} else {print "not ok 19\n";}
 ($dev,$ino,$mode,$nlink,$uid,$gid,$rdev,$size,$atime,$mtime,$ctime,

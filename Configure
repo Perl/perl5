@@ -8,7 +8,7 @@
 # and edit it to reflect your system.  Some packages may include samples
 # of config.h for certain machines, so you might look for one of those.)
 #
-# $Header: Configure,v 3.0.1.8 90/08/09 01:47:24 lwall Locked $
+# $Header: Configure,v 3.0.1.9 90/08/13 21:48:46 lwall Locked $
 #
 # Yes, you may rip this off to use in other distribution packages.
 # (Note: this Configure script was generated automatically.  Rather than
@@ -262,7 +262,7 @@ attrlist="$attrlist i186 __m88k__ m88k DGUX __DGUX__"
 pth="/usr/ucb /bin /usr/bin /usr/local /usr/local/bin /usr/lbin /usr/plx /usr/5bin /vol/local/bin /etc /usr/lib /lib /usr/local/lib /sys5.3/bin /sys5.3/usr/bin /bsd4.3/bin /bsd4.3/usr/bin /bsd4.3/usr/ucb"
 d_newshome="/usr/NeWS"
 defvoidused=7
-libswanted="net_s net nsl_s nsl socket nm ndir ndbm dbm sun bsd BSD x c_s"
+libswanted="net_s net nsl_s nsl socket nm ndir ndbm dbm sun m bsd BSD x c_s"
 inclwanted='/usr/netinclude /usr/include/sun /usr/include/bsd /usr/include/lan'
 : some greps do not return status, grrr.
 echo "grimblepritz" >grimble

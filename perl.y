@@ -1,4 +1,4 @@
-/* $Header: perl.y,v 3.0.1.7 90/08/09 04:17:44 lwall Locked $
+/* $Header: perl.y,v 3.0.1.8 90/08/13 22:19:55 lwall Locked $
  *
  *    Copyright (c) 1989, Larry Wall
  *
@@ -6,6 +6,9 @@
  *    as specified in the README file that comes with the perl 3.0 kit.
  *
  * $Log:	perl.y,v $
+ * Revision 3.0.1.8  90/08/13  22:19:55  lwall
+ * patch28: lowercase unquoted strings caused infinite loop
+ * 
  * Revision 3.0.1.7  90/08/09  04:17:44  lwall
  * patch19: did preliminary work toward debugging packages and evals
  * patch19: added require operator
@@ -776,17 +779,16 @@ hshword	:	WORD
  */
 
 bareword:	WORD
-			{ char *s = $1;
+			{ char *s;
 			    $$ = op_new(1);
 			    $$->arg_type = O_ITEM;
 			    $$[1].arg_type = A_SINGLE;
 			    $$[1].arg_ptr.arg_str = str_make($1,0);
-			    while (*s) {
-				if (!islower(*s))
-				    break;
-			    }
+			    for (s = $1; *s && islower(*s); s++) ;
 			    if (dowarn && !*s)
-				warn("\"%s\" may clash with future reserved word", $1);
+				warn(
+				  "\"%s\" may clash with future reserved word",
+				  $1 );
 			}
 
 %% /* PROGRAM */

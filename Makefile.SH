@@ -25,9 +25,12 @@ esac
 
 echo "Extracting Makefile (with variable substitutions)"
 cat >Makefile <<!GROK!THIS!
-# $Header: Makefile.SH,v 3.0.1.7 90/08/09 02:19:56 lwall Locked $
+# $Header: Makefile.SH,v 3.0.1.8 90/08/13 21:50:49 lwall Locked $
 #
 # $Log:	Makefile.SH,v $
+# Revision 3.0.1.8  90/08/13  21:50:49  lwall
+# patch28: not all yaccs are the same
+# 
 # Revision 3.0.1.7  90/08/09  02:19:56  lwall
 # patch19: Configure now asks where you want to put scripts
 # patch19: Added support for linked-in C subroutines
@@ -285,7 +288,8 @@ perly.h: perl.c
 	touch perly.h
 
 perl.c: perl.y
-	@ echo Expect 29 shift/reduce and 59 reduce/reduce conflicts...
+	@ echo 'Expect either' 29 shift/reduce and 59 reduce/reduce conflicts...
+	@ echo '           or' 27 shift/reduce and 61 reduce/reduce conflicts...
 	$(YACC) -d perl.y
 	mv y.tab.c perl.c
 	mv y.tab.h perly.h

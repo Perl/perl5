@@ -1,8 +1,10 @@
 #!./perl
 
-# $Header: op.stat,v 3.0.1.3 90/02/28 18:36:51 lwall Locked $
+# $Header: op.stat,v 3.0.1.4 90/08/13 22:31:36 lwall Locked $
 
 print "1..56\n";
+
+chop($cwd = `pwd`);
 
 unlink "Op.stat.tmp";
 open(foo, ">Op.stat.tmp");
@@ -23,7 +25,12 @@ sleep 2;
     $blksize,$blocks) = stat('Op.stat.tmp');
 
 if ($nlink == 2) {print "ok 3\n";} else {print "not ok 3\n";}
-if ($mtime && $mtime != $ctime) {print "ok 4\n";} else {print "not ok 4\n";}
+if (($mtime && $mtime != $ctime) || $cwd =~ m#/afs/#) {
+    print "ok 4\n";
+}
+else {
+    print "not ok 4\n";
+}
 print "#4	:$mtime: != :$ctime:\n";
 
 `cp /dev/null Op.stat.tmp`;
@@ -88,7 +95,6 @@ if (! -b '.') {print "ok 34\n";} else {print "not ok 34\n";}
 
 $cnt = $uid = 0;
 
-chop($cwd = `pwd`);
 die "Can't run op.stat test 35 without pwd working" unless $cwd;
 chdir '/usr/bin' || die "Can't cd to /usr/bin";
 while (<*>) {

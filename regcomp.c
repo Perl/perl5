@@ -7,9 +7,12 @@
  * blame Henry for some of the lack of readability.
  */
 
-/* $Header: regcomp.c,v 3.0.1.4 90/08/09 05:05:33 lwall Locked $
+/* $Header: regcomp.c,v 3.0.1.5 90/08/13 22:23:29 lwall Locked $
  *
  * $Log:	regcomp.c,v $
+ * Revision 3.0.1.5  90/08/13  22:23:29  lwall
+ * patch28: /x{m}/ didn't work right
+ * 
  * Revision 3.0.1.4  90/08/09  05:05:33  lwall
  * patch19: sped up /x+y/ patterns greatly by not retrying on every x
  * patch19: inhibited backoff on patterns anchored to the end like /\s+$/
@@ -474,6 +477,8 @@ int *flagp;
 		    reginsert(CURLY, ret);
 		    if (*max == ',')
 			max++;
+		    else
+			max = regparse;
 		    tmp = atoi(max);
 		    if (tmp && tmp < iter)
 			fatal("Can't do {n,m} with n > m");

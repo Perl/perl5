@@ -1,4 +1,4 @@
-/* $Header: toke.c,v 3.0.1.8 90/08/09 05:39:58 lwall Locked $
+/* $Header: toke.c,v 3.0.1.9 90/08/13 22:37:25 lwall Locked $
  *
  *    Copyright (c) 1989, Larry Wall
  *
@@ -6,6 +6,9 @@
  *    as specified in the README file that comes with the perl 3.0 kit.
  *
  * $Log:	toke.c,v $
+ * Revision 3.0.1.9  90/08/13  22:37:25  lwall
+ * patch28: defined(@array) and defined(%array) didn't work right
+ * 
  * Revision 3.0.1.8  90/08/09  05:39:58  lwall
  * patch19: added require operator
  * patch19: added -x switch to extract script from input trash
@@ -424,7 +427,7 @@ yylex()
     case '%':
 	if (expectterm) {
 	    s = scanreg(s,bufend,tokenbuf);
-	    yylval.stabval = stabent(tokenbuf,TRUE);
+	    yylval.stabval = hadd(stabent(tokenbuf,TRUE));
 	    TERM(HSH);
 	}
 	s++;

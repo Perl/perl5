@@ -1,4 +1,4 @@
-/* $Header: stab.c,v 3.0.1.7 90/08/09 05:17:48 lwall Locked $
+/* $Header: stab.c,v 3.0.1.8 90/08/13 22:30:17 lwall Locked $
  *
  *    Copyright (c) 1989, Larry Wall
  *
@@ -6,6 +6,9 @@
  *    as specified in the README file that comes with the perl 3.0 kit.
  *
  * $Log:	stab.c,v $
+ * Revision 3.0.1.8  90/08/13  22:30:17  lwall
+ * patch28: the NSIG hack didn't work right on Xenix
+ * 
  * Revision 3.0.1.7  90/08/09  05:17:48  lwall
  * patch19: fixed double include of <signal.h>
  * patch19: $' broke on embedded nulls
@@ -47,7 +50,7 @@
 #include "EXTERN.h"
 #include "perl.h"
 
-#ifndef NSIG
+#if !defined(NSIG) || defined(M_UNIX) || defined(M_XENIX)
 #include <signal.h>
 #endif
 

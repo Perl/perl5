@@ -1,4 +1,4 @@
-/* $Header: eval.c,v 3.0.1.7 90/08/09 03:33:44 lwall Locked $
+/* $Header: eval.c,v 3.0.1.8 90/08/13 22:17:14 lwall Locked $
  *
  *    Copyright (c) 1989, Larry Wall
  *
@@ -6,6 +6,11 @@
  *    as specified in the README file that comes with the perl 3.0 kit.
  *
  * $Log:	eval.c,v $
+ * Revision 3.0.1.8  90/08/13  22:17:14  lwall
+ * patch28: the NSIG hack didn't work right on Xenix
+ * patch28: defined(@array) and defined(%array) didn't work right
+ * patch28: rename was busted on systems without rename system call
+ * 
  * Revision 3.0.1.7  90/08/09  03:33:44  lwall
  * patch19: made ~ do vector operation on strings like &, | and ^
  * patch19: dbmopen(%name...) didn't work right
@@ -60,7 +65,7 @@
 #include "EXTERN.h"
 #include "perl.h"
 
-#ifndef NSIG
+#if !defined(NSIG) || defined(M_UNIX) || defined(M_XENIX)
 #include <signal.h>
 #endif
 
@@ -1539,7 +1544,7 @@ register int sp;
 #ifdef RENAME
 	value = (double)(rename(tmps,tmps2) >= 0);
 #else
-	if (same_dirent(tmps2, tmps)	/* can always rename to same name */
+	if (same_dirent(tmps2, tmps))	/* can always rename to same name */
 	    anum = 1;
 	else {
 	    if (euid || stat(tmps2,&statbuf) < 0 ||

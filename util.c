@@ -1,4 +1,4 @@
-/* $Header: util.c,v 3.0.1.6 90/08/09 05:44:55 lwall Locked $
+/* $Header: util.c,v 3.0.1.7 90/08/13 22:40:26 lwall Locked $
  *
  *    Copyright (c) 1989, Larry Wall
  *
@@ -6,6 +6,10 @@
  *    as specified in the README file that comes with the perl 3.0 kit.
  *
  * $Log:	util.c,v $
+ * Revision 3.0.1.7  90/08/13  22:40:26  lwall
+ * patch28: the NSIG hack didn't work right on Xenix
+ * patch28: rename was busted on systems without rename system call
+ * 
  * Revision 3.0.1.6  90/08/09  05:44:55  lwall
  * patch19: fixed double include of <signal.h>
  * patch19: various MSDOS and OS/2 patches folded in
@@ -40,7 +44,7 @@
 #include "EXTERN.h"
 #include "perl.h"
 
-#ifndef NSIG
+#if !defined(NSIG) || defined(M_UNIX) || defined(M_XENIX)
 #include <signal.h>
 #endif
 
@@ -1428,13 +1432,13 @@ char *b;
     if (strNE(a,b))
 	return FALSE;
     if (fa == a)
-	strcpy(tmpbuf,".")
+	strcpy(tmpbuf,".");
     else
 	strncpy(tmpbuf, a, fa - a);
     if (stat(tmpbuf, &tmpstatbuf1) < 0)
 	return FALSE;
     if (fb == b)
-	strcpy(tmpbuf,".")
+	strcpy(tmpbuf,".");
     else
 	strncpy(tmpbuf, b, fb - b);
     if (stat(tmpbuf, &tmpstatbuf2) < 0)
