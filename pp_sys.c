@@ -187,6 +187,10 @@ static char zero_but_true[ZBTLEN + 1] = "0 but true";
 #  include <sys/access.h>
 #endif
 
+#if defined(HAS_FCNTL) && defined(F_SETFD) && !defined(FD_CLOEXEC)
+#  define FD_CLOEXEC 1		/* NeXT needs this */
+#endif
+
 #undef PERL_EFF_ACCESS_R_OK	/* EFFective uid/gid ACCESS R_OK */
 #undef PERL_EFF_ACCESS_W_OK
 #undef PERL_EFF_ACCESS_X_OK
@@ -1561,8 +1565,8 @@ PP(pp_sysread)
 	    length = -1;
     }
     if (length < 0) {
-	if (IoTYPE(io) == '>' || IoIFP(io) == PerlIO_stdout()
-	    || IoIFP(io) == PerlIO_stderr())
+	if ((IoTYPE(io) == '>' || IoIFP(io) == PerlIO_stdout()
+	    || IoIFP(io) == PerlIO_stderr()) && ckWARN(WARN_IO))
 	{
 	    SV* sv = sv_newmortal();
 	    gv_efullname3(sv, gv, Nullch);

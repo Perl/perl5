@@ -48,10 +48,10 @@
     Deep recursion on subroutine \"%s\"
 	sub fred
 	{
-    	goto &fred() if $a++ < 200
+    	  fred() if $a++ < 200
 	}
 	 
-	goto &fred()
+	fred()
 
       (in cleanup) foo bar
 	package Foo;
@@ -179,10 +179,10 @@ use warnings 'recursion' ;
 BEGIN { warn "PREFIX\n" ;}
 sub fred
 {
-    goto &fred() if $a++ < 200
+    fred() if $a++ < 200
 }
  
-goto &fred()
+fred()
 EXPECT
 Deep recursion on subroutine "main::fred" at - line 6.
 ########
@@ -191,12 +191,11 @@ no warnings 'recursion' ;
 BEGIN { warn "PREFIX\n" ;}
 sub fred
 {
-    goto &fred() if $a++ < 200
+    fred() if $a++ < 200
 }
  
-goto &fred()
+fred()
 EXPECT
-Can't find label
 ########
 # pp_ctl.c
 use warnings 'unsafe' ;

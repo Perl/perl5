@@ -1921,13 +1921,16 @@ PP(pp_leavesub)
 		    *MARK = SvREFCNT_inc(TOPs);
 		    FREETMPS;
 		    sv_2mortal(*MARK);
-		} else {
+		}
+		else {
 		    FREETMPS;
 		    *MARK = sv_mortalcopy(TOPs);
 		}
-	    } else
+	    }
+	    else
 		*MARK = SvTEMP(TOPs) ? TOPs : sv_mortalcopy(TOPs);
-	} else {
+	}
+	else {
 	    MEXTEND(MARK, 0);
 	    *MARK = &PL_sv_undef;
 	}
@@ -1949,6 +1952,138 @@ PP(pp_leavesub)
     LEAVE;
     return pop_return();
 }
+
+/* This duplicates the above code because the above code must not
+ * get any slower by more conditions */
+PP(pp_leavesublv)
+{
+    djSP;
+    SV **mark;
+    SV **newsp;
+    PMOP *newpm;
+    I32 gimme;
+    register PERL_CONTEXT *cx;
+    struct block_sub cxsub;
+
+    POPBLOCK(cx,newpm);
+    POPSUB1(cx);	/* Delay POPSUB2 until stack values are safe */
+ 
+    TAINT_NOT;
+
+    if (cx->blk_sub.lval & OPpENTERSUB_INARGS) {
+	/* We are an argument to a function or grep().
+	 * This kind of lvalueness was legal before lvalue
+	 * subroutines too, so be backward compatible:
+	 * cannot report errors.  */
+
+	/* Scalar context *is* possible, on the LHS of -> only,
+	 * as in f()->meth().  But this is not an lvalue. */
+	if (gimme == G_SCALAR)
+	    goto temporise;
+	if (gimme == G_ARRAY) {
+	    if (!CvLVALUE(cxsub.cv))
+		goto temporise_array;
+	    EXTEND_MORTAL(SP - newsp);
+	    for (mark = newsp + 1; mark <= SP; mark++) {
+		if (SvTEMP(*mark))
+		    /* empty */ ;
+		else if (SvFLAGS(*mark) & (SVs_PADTMP | SVf_READONLY))
+		    *mark = sv_mortalcopy(*mark);
+		else {
+		    /* Can be a localized value subject to deletion. */
+		    PL_tmps_stack[++PL_tmps_ix] = *mark;
+		    SvREFCNT_inc(*mark);
+		}
+	    }
+	}
+    }
+    else if (cx->blk_sub.lval) {     /* Leave it as it is if we can. */
+	/* Here we go for robustness, not for speed, so we change all
+	 * the refcounts so the caller gets a live guy. Cannot set
+	 * TEMP, so sv_2mortal is out of question. */
+	if (!CvLVALUE(cxsub.cv))
+	    Perl_croak(aTHX_ "Can't modify non-lvalue subroutine call");
+	if (gimme == G_SCALAR) {
+	    MARK = newsp + 1;
+	    EXTEND_MORTAL(1);
+	    if (MARK == SP) {
+		if (SvFLAGS(TOPs) & (SVs_TEMP | SVs_PADTMP | SVf_READONLY))
+		    Perl_croak(aTHX_ "Can't return a %s from lvalue subroutine",
+			SvREADONLY(TOPs) ? "readonly value" : "temporary");
+		else {                  /* Can be a localized value
+					 * subject to deletion. */
+		    PL_tmps_stack[++PL_tmps_ix] = *mark;
+		    SvREFCNT_inc(*mark);
+		}
+	    }
+	    else                        /* Should not happen? */
+		Perl_croak(aTHX_ "%s returned from lvalue subroutine in scalar context",
+		    (MARK > SP ? "Empty array" : "Array"));
+	    SP = MARK;
+	}
+	else if (gimme == G_ARRAY) {
+	    EXTEND_MORTAL(SP - newsp);
+	    for (mark = newsp + 1; mark <= SP; mark++) {
+		if (SvFLAGS(*mark) & (SVs_TEMP | SVs_PADTMP | SVf_READONLY))
+		/* Might be flattened array after $#array =  */
+		Perl_croak(aTHX_ "Can't return %s from lvalue subroutine",
+			(*mark != &PL_sv_undef)
+			? (SvREADONLY(TOPs)
+			    ? "a readonly value" : "a temporary")
+			: "an uninitialized value");
+		else {
+		    mortalize:
+		    /* Can be a localized value subject to deletion. */
+		    PL_tmps_stack[++PL_tmps_ix] = *mark;
+		    SvREFCNT_inc(*mark);
+		}
+	    }
+	}
+    }
+    else {
+	if (gimme == G_SCALAR) {
+	  temporise:
+	    MARK = newsp + 1;
+	    if (MARK <= SP) {
+		if (cxsub.cv && CvDEPTH(cxsub.cv) > 1) {
+		    if (SvTEMP(TOPs)) {
+			*MARK = SvREFCNT_inc(TOPs);
+			FREETMPS;
+			sv_2mortal(*MARK);
+		    }
+		    else {
+			FREETMPS;
+			*MARK = sv_mortalcopy(TOPs);
+		    }
+		}
+		else
+		    *MARK = SvTEMP(TOPs) ? TOPs : sv_mortalcopy(TOPs);
+	    }
+	    else {
+		MEXTEND(MARK, 0);
+		*MARK = &PL_sv_undef;
+	    }
+	    SP = MARK;
+	}
+	else if (gimme == G_ARRAY) {
+	  temporise_array:
+	    for (MARK = newsp + 1; MARK <= SP; MARK++) {
+		if (!SvTEMP(*MARK)) {
+		    *MARK = sv_mortalcopy(*MARK);
+		    TAINT_NOT;  /* Each item is independent */
+		}
+	    }
+	}
+    }
+    PUTBACK;
+    
+    POPSUB2();		/* Stack values are safe: release CV and @_ ... */
+    PL_curpm = newpm;	/* ... and pop $1 et al */
+
+    LEAVE;
+    return pop_return();
+}
+
 
 STATIC CV *
 S_get_db_sub(pTHX_ SV **svp, CV *cv)
@@ -2193,7 +2328,8 @@ try_autoload:
 			    "entersub: %p grabbing %p:%s in stash %s\n",
 			    thr, cv, SvPEEK((SV*)cv), CvSTASH(cv) ?
 	    			HvNAME(CvSTASH(cv)) : "(none)"));
-	    } else {
+	    }
+	    else {
 		/* Make a new clone. */
 		CV *clonecv;
 		SvREFCNT_inc(cv); /* don't let it vanish from under us */

@@ -30,8 +30,14 @@
 #  define  Perl_set_numeric_local	perl_set_numeric_local
 #  define  Perl_set_numeric_standard	perl_set_numeric_standard
 #  define  PERL_POLLUTE
-#  ifndef EMBEDMYMALLOC
-#    define  PERL_POLLUTE_MALLOC
+/* malloc() pollution was the default in earlier versions, so enable
+ * it for bincompat; but not for systems that used to do prevent that,
+ * or when they ask for {HIDE,EMBED}MYMALLOC */
+#  if !defined(EMBEDMYMALLOC) && !defined(HIDEMYMALLOC)
+#    if !defined(NeXT) && !defined(__NeXT) && !defined(__MACHTEN__) && \
+        !defined(__QNX__)
+#      define  PERL_POLLUTE_MALLOC
+#    endif
 #  endif
 #endif
 
@@ -1023,6 +1029,7 @@
 #define ck_glob			Perl_ck_glob
 #define ck_grep			Perl_ck_grep
 #define ck_index		Perl_ck_index
+#define ck_join			Perl_ck_join
 #define ck_lengthconst		Perl_ck_lengthconst
 #define ck_lfun			Perl_ck_lfun
 #define ck_listiob		Perl_ck_listiob
@@ -1212,6 +1219,7 @@
 #define pp_leaveeval		Perl_pp_leaveeval
 #define pp_leaveloop		Perl_pp_leaveloop
 #define pp_leavesub		Perl_pp_leavesub
+#define pp_leavesublv		Perl_pp_leavesublv
 #define pp_leavetry		Perl_pp_leavetry
 #define pp_leavewrite		Perl_pp_leavewrite
 #define pp_left_shift		Perl_pp_left_shift
@@ -2349,6 +2357,7 @@
 #define ck_glob(a)		Perl_ck_glob(aTHX_ a)
 #define ck_grep(a)		Perl_ck_grep(aTHX_ a)
 #define ck_index(a)		Perl_ck_index(aTHX_ a)
+#define ck_join(a)		Perl_ck_join(aTHX_ a)
 #define ck_lengthconst(a)	Perl_ck_lengthconst(aTHX_ a)
 #define ck_lfun(a)		Perl_ck_lfun(aTHX_ a)
 #define ck_listiob(a)		Perl_ck_listiob(aTHX_ a)
@@ -2538,6 +2547,7 @@
 #define pp_leaveeval()		Perl_pp_leaveeval(aTHX)
 #define pp_leaveloop()		Perl_pp_leaveloop(aTHX)
 #define pp_leavesub()		Perl_pp_leavesub(aTHX)
+#define pp_leavesublv()		Perl_pp_leavesublv(aTHX)
 #define pp_leavetry()		Perl_pp_leavetry(aTHX)
 #define pp_leavewrite()		Perl_pp_leavewrite(aTHX)
 #define pp_left_shift()		Perl_pp_left_shift(aTHX)
@@ -4581,6 +4591,8 @@
 #define ck_grep			Perl_ck_grep
 #define Perl_ck_index		CPerlObj::Perl_ck_index
 #define ck_index		Perl_ck_index
+#define Perl_ck_join		CPerlObj::Perl_ck_join
+#define ck_join			Perl_ck_join
 #define Perl_ck_lengthconst	CPerlObj::Perl_ck_lengthconst
 #define ck_lengthconst		Perl_ck_lengthconst
 #define Perl_ck_lfun		CPerlObj::Perl_ck_lfun
@@ -4959,6 +4971,8 @@
 #define pp_leaveloop		Perl_pp_leaveloop
 #define Perl_pp_leavesub	CPerlObj::Perl_pp_leavesub
 #define pp_leavesub		Perl_pp_leavesub
+#define Perl_pp_leavesublv	CPerlObj::Perl_pp_leavesublv
+#define pp_leavesublv		Perl_pp_leavesublv
 #define Perl_pp_leavetry	CPerlObj::Perl_pp_leavetry
 #define pp_leavetry		Perl_pp_leavetry
 #define Perl_pp_leavewrite	CPerlObj::Perl_pp_leavewrite

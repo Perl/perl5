@@ -303,8 +303,14 @@ print EM <<'END';
 #  define  Perl_set_numeric_local	perl_set_numeric_local
 #  define  Perl_set_numeric_standard	perl_set_numeric_standard
 #  define  PERL_POLLUTE
-#  ifndef EMBEDMYMALLOC
-#    define  PERL_POLLUTE_MALLOC
+/* malloc() pollution was the default in earlier versions, so enable
+ * it for bincompat; but not for systems that used to do prevent that,
+ * or when they ask for {HIDE,EMBED}MYMALLOC */
+#  if !defined(EMBEDMYMALLOC) && !defined(HIDEMYMALLOC)
+#    if !defined(NeXT) && !defined(__NeXT) && !defined(__MACHTEN__) && \
+        !defined(__QNX__)
+#      define  PERL_POLLUTE_MALLOC
+#    endif
 #  endif
 #endif
 

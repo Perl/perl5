@@ -611,6 +611,45 @@ Perl will print
 The behavior of local() on non-existent members of composite
 types is subject to change in future.
 
+=head2 Lvalue subroutines
+
+B<WARNING>: Lvalue subroutines are still experimental and the implementation
+may change in future versions of Perl.
+
+It is possible to return a modifiable value from a subroutine.
+To do this, you have to declare the subroutine to return an lvalue.
+
+    my $val;
+    sub canmod : lvalue {
+	$val;
+    }
+    sub nomod {
+	$val;
+    }
+
+    canmod() = 5;   # assigns to $val
+    nomod()  = 5;   # ERROR
+
+The scalar/list context for the subroutine and for the right-hand
+side of assignment is determined as if the subroutine call is replaced
+by a scalar. For example, consider:
+
+    data(2,3) = get_data(3,4);
+
+Both subroutines here are called in a scalar context, while in:
+
+    (data(2,3)) = get_data(3,4);
+
+and in:
+
+    (data(2),data(3)) = get_data(3,4);
+
+all the subroutines are called in a list context.
+
+The current implementation does not allow arrays and hashes to be
+returned from lvalue subroutines directly.  You may return a
+reference instead.  This restriction may be lifted in future.
+
 =head2 Passing Symbol Table Entries (typeglobs)
 
 B<WARNING>: The mechanism described in this section was originally

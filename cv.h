@@ -62,6 +62,7 @@ struct xpvcv {
 				   (esp. useful for special XSUBs) */
 #define CVf_METHOD	0x0040	/* CV is explicitly marked as a method */
 #define CVf_LOCKED	0x0080	/* CV locks itself or first arg on entry */
+#define CVf_LVALUE	0x0100  /* CV return value can be used as lvalue */
 
 #define CvCLONE(cv)		(CvFLAGS(cv) & CVf_CLONE)
 #define CvCLONE_on(cv)		(CvFLAGS(cv) |= CVf_CLONE)
@@ -96,6 +97,10 @@ struct xpvcv {
 #define CvLOCKED(cv)		(CvFLAGS(cv) & CVf_LOCKED)
 #define CvLOCKED_on(cv)		(CvFLAGS(cv) |= CVf_LOCKED)
 #define CvLOCKED_off(cv)	(CvFLAGS(cv) &= ~CVf_LOCKED)
+
+#define CvLVALUE(cv)		(CvFLAGS(cv) & CVf_LVALUE)
+#define CvLVALUE_on(cv)		(CvFLAGS(cv) |= CVf_LVALUE)
+#define CvLVALUE_off(cv)	(CvFLAGS(cv) &= ~CVf_LVALUE)
 
 #define CvEVAL(cv)		(CvUNIQUE(cv) && !SvFAKE(cv))
 #define CvEVAL_on(cv)		(CvUNIQUE_on(cv),SvFAKE_off(cv))

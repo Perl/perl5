@@ -4981,6 +4981,13 @@ Perl_ck_index(pTHXo_ OP *o)
     return ((CPerlObj*)pPerl)->Perl_ck_index(o);
 }
 
+#undef  Perl_ck_join
+OP *
+Perl_ck_join(pTHXo_ OP *o)
+{
+    return ((CPerlObj*)pPerl)->Perl_ck_join(o);
+}
+
 #undef  Perl_ck_lengthconst
 OP *
 Perl_ck_lengthconst(pTHXo_ OP *o)
@@ -6302,6 +6309,13 @@ OP *
 Perl_pp_leavesub(pTHXo)
 {
     return ((CPerlObj*)pPerl)->Perl_pp_leavesub();
+}
+
+#undef  Perl_pp_leavesublv
+OP *
+Perl_pp_leavesublv(pTHXo)
+{
+    return ((CPerlObj*)pPerl)->Perl_pp_leavesublv();
 }
 
 #undef  Perl_pp_leavetry

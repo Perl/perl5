@@ -1,18 +1,25 @@
   regcomp.c	AOK
 
-  %.*s matches null string many times   
-
-	$a = "ABC123" ; $a =~ /(?=a)*/'
-
-  Strange *+?{} on zero-length expression
-
+  Strange *+?{} on zero-length expression	[S_study_chunk]
 	/(?=a)?/
 
-  Character class syntax [. .] is reserved for future extensions
-  Character class syntax [= =] is reserved for future extensions
+  %.*s matches null string many times   	[S_regpiece]
+	$a = "ABC123" ; $a =~ /(?=a)*/'
+
+  /%.127s/: Unrecognized escape \\%c passed through"	[S_regatom] 
+  	/\m/
+
+  Character class syntax [. .] is reserved for future extensions [S_regpposixcc]
+
+  Character class syntax [= =] is reserved for future extensions [S_checkposixcc]
+
+  Character class syntax [%c %c] belongs inside character classes [S_checkposixcc] 
+  
+
+  
 
 __END__
-# regcomp.c
+# regcomp.c [S_regpiece]
 use warnings 'unsafe' ;
 my $a = "ABC123" ; 
 $a =~ /(?=a)*/ ;
@@ -21,7 +28,7 @@ $a =~ /(?=a)*/ ;
 EXPECT
 (?=a)* matches null string many times at - line 4.
 ########
-# regcomp.c
+# regcomp.c [S_study_chunk]
 use warnings 'unsafe' ;
 $_ = "" ;
 /(?=a)?/;
@@ -30,7 +37,14 @@ no warnings 'unsafe' ;
 EXPECT
 Strange *+?{} on zero-length expression at - line 4.
 ########
-# regcomp.c
+# regcomp.c [S_regatom]
+use warnings 'unsafe' ;
+$a =~ /\m/ ;
+no warnings 'unsafe' ;
+EXPECT
+Unrecognized escape \m passed through at - line 3.
+########
+# regcomp.c [S_regpposixcc S_checkposixcc]
 use warnings 'unsafe' ;
 $_ = "" ;
 /[:alpha:]/;

@@ -508,7 +508,7 @@ hslice		hash slice		ck_null		m@	H L
 unpack		unpack			ck_fun		@	S S
 pack		pack			ck_fun		mst@	S L
 split		split			ck_split	t@	S S S
-join		join			ck_fun		msT@	S L
+join		join			ck_join		msT@	S L
 
 # List operators.
 
@@ -549,6 +549,7 @@ orassign	logical or assignment	ck_null		s|
 method		method lookup		ck_method	d1
 entersub	subroutine entry	ck_subr		dmt1	L
 leavesub	subroutine exit		ck_null		1	
+leavesublv	lvalue subroutine exit	ck_null		1	
 caller		caller			ck_fun		t%	S?
 warn		warn			ck_fun		imst@	L
 die		die			ck_fun		dimst@	L

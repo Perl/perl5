@@ -19,6 +19,7 @@ Perl_ck_fun_locale
 Perl_ck_glob
 Perl_ck_grep
 Perl_ck_index
+Perl_ck_join
 Perl_ck_lengthconst
 Perl_ck_lfun
 Perl_ck_listiob
@@ -203,6 +204,7 @@ Perl_pp_orassign
 Perl_pp_method
 Perl_pp_entersub
 Perl_pp_leavesub
+Perl_pp_leavesublv
 Perl_pp_caller
 Perl_pp_warn
 Perl_pp_die

@@ -92,7 +92,7 @@ typedef U32 PADOFFSET;
 	   : dowantarray())
 
 /* Private for lvalues */
-#define OPpLVAL_INTRO	128	/* Lvalue must be localized */
+#define OPpLVAL_INTRO	128	/* Lvalue must be localized or lvalue sub */
 
 /* Private for OP_AASSIGN */
 #define OPpASSIGN_COMMON	64	/* Left & right have syms in common. */
@@ -128,6 +128,7 @@ typedef U32 PADOFFSET;
   /* OP_RV2CV only */
 #define OPpENTERSUB_AMPER	8	/* Used & form to call. */
 #define OPpENTERSUB_NOPAREN	128	/* bare sub call (without parens) */
+#define OPpENTERSUB_INARGS	4	/* Lval used as arg to a sub. */
   /* OP_GV only */
 #define OPpEARLY_CV		32	/* foo() called before sub foo was parsed */
   /* OP_?ELEM only */
