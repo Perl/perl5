@@ -25,7 +25,7 @@ with all the defaults are:
 Each of these is explained in further detail below.
 
 B<NOTE>: starting from the release 5.6.0, Perl will use a version
-scheme where even-numbered subreleases (like 5.6) are stable
+scheme where even-numbered subreleases (like 5.6 and 5.8) are stable
 maintenance releases and odd-numbered subreleases (like 5.7) are
 unstable development releases.  Development releases should not be
 used in production environments.  Fixes and new features are first
@@ -111,7 +111,7 @@ those extensions.
 Pure perl modules without XS or C code should continue to work fine
 without reinstallation.  See the discussions below on
 L<"Coexistence with earlier versions of perl5"> and
-L<"Upgrading from 5.005 to 5.6"> for more details.
+L<"Upgrading from 5.005 or 5.6 to 5.8.0"> for more details.
 
 The standard extensions supplied with Perl will be handled automatically.
 
@@ -363,7 +363,7 @@ output, you can run
 	sh Configure -des
 
 Note: for development releases (odd subreleases, like 5.7, as opposed
-to maintenance releases which have even subreleases, like 5.6)
+to maintenance releases which have even subreleases, like 5.6 and 5.8)
 if you want to use Configure -d, you will also need to supply -Dusedevel
 to Configure, because the default answer to the question "do you really
 want to Configure a development version?" is "no".  The -Dusedevel
@@ -419,9 +419,9 @@ The directories set up by Configure fall into three broad categories.
 
 =item Directories for the perl distribution
 
-By default, Configure will use the following directories for 5.6.0.
+By default, Configure will use the following directories for 5.8.0.
 $version is the full perl version number, including subversion, e.g.
-5.6.0 or 5.6.1, and $archname is a string like sun4-sunos,
+5.8.0 or 5.8.1, and $archname is a string like sun4-sunos,
 determined by Configure.  The full definitions of all Configure
 variables are in the file Porting/Glossary.
 
@@ -537,6 +537,11 @@ directories to add to @INC.  By default, it will be empty.
 Perl will search these directories (including architecture and
 version-specific subdirectories) for add-on modules and extensions.
 
+For example, if you have a bundle of perl libraries from a previous 
+installation, perhaps in a strange place:
+
+	Configure -Dotherlibdirs=/usr/lib/perl5/site_perl/5.6.1
+
 =item APPLLIB_EXP
 
 There is one other way of adding paths to @INC at perl build time, and
@@ -564,7 +569,7 @@ without resetting MANPATH.
 
 You can continue to use the old default from the command line with
 
-	sh Configure -Dman3dir=/usr/local/lib/perl5/5.6.0/man/man3
+	sh Configure -Dman3dir=/usr/local/lib/perl5/5.8.0/man/man3
 
 Some users also prefer to use a .3pm suffix.  You can do that with
 
@@ -602,13 +607,13 @@ library directory structure is slightly simplified.  Instead of
 suggesting $prefix/lib/perl5/, Configure will suggest $prefix/lib.
 
 Thus, for example, if you Configure with
--Dprefix=/opt/perl, then the default library directories for 5.6.0 are
+-Dprefix=/opt/perl, then the default library directories for 5.8.0 are
 
     Configure variable	Default value
-	$privlib	/opt/perl/lib/5.6.0
-	$archlib	/opt/perl/lib/5.6.0/$archname
-	$sitelib	/opt/perl/lib/site_perl/5.6.0
-	$sitearch	/opt/perl/lib/site_perl/5.6.0/$archname
+	$privlib	/opt/perl/lib/5.8.0
+	$archlib	/opt/perl/lib/5.8.0/$archname
+	$sitelib	/opt/perl/lib/site_perl/5.8.0
+	$sitearch	/opt/perl/lib/site_perl/5.8.0/$archname
 
 =head2 Changing the installation directory
 
@@ -684,7 +689,7 @@ If the generated Policy.sh file is unsuitable, you may freely edit it
 to contain any valid shell commands.  It will be run just after the
 platform-specific hints files.
 
-Note:  Since the directory hierarchy for 5.6.0 contains a number of
+Note:  Since the directory hierarchy since 5.6.0 contains a number of
 new vendor* and site* entries, your Policy.sh file will probably not
 set them to your desired values.  I encourage you to run Configure
 interactively to be sure it puts things where you want them.
@@ -2122,14 +2127,18 @@ present only in 5.6.0.  That new module will get installed into
 but will not interfere with the 5.005_03 version.
 
 The last entry, /usr/local/lib/perl5/site_perl/, is there so that
-5.6.0 will look for 5.004-era pure perl modules.
+5.6.0 and above will look for 5.004-era pure perl modules.
 
-Lastly, suppose you now install version 5.6.1, which we'll assume is
-binary compatible with 5.6.0 and 5.005.  The directories searched
-by 5.6.1 (if you don't change the Configure defaults) will be:
+Lastly, suppose you later installed 5.6.1, and finally install version
+5.8.0, which we'll assume is backwards binary compatible with 5.6.0
+and 5.005.  The directories searched by 5.8.0 (if you don't change the
+Configure defaults) will be:
 
-	/usr/local/lib/perl5/5.6.1/$archname
-	/usr/local/lib/perl5/5.6.1
+	/usr/local/lib/perl5/5.8.0/$archname
+	/usr/local/lib/perl5/5.8.0
+	/usr/local/lib/perl5/site_perl/5.8.0/$archname
+	/usr/local/lib/perl5/site_perl/5.8.0
+
 	/usr/local/lib/perl5/site_perl/5.6.1/$archname
 	/usr/local/lib/perl5/site_perl/5.6.1
 
@@ -2138,11 +2147,12 @@ by 5.6.1 (if you don't change the Configure defaults) will be:
 
 	/usr/local/lib/perl5/site_perl/5.005/$archname
 	/usr/local/lib/perl5/site_perl/5.005
+
 	/usr/local/lib/perl5/site_perl/
 
 Assuming the users in your site are still actively using perl 5.6.0 and
-5.005 after you installed 5.6.1, you can continue to install add-on
-extensions using any of perl 5.6.1, 5.6.0, or 5.005.  The installations
+5.005 after you installed 5.8.0, you can continue to install add-on
+extensions using any of perl 5.8.0, 5.6.1, 5.6.0, or 5.005.  The installations
 of these different versions remain distinct, but remember that the newer
 versions of perl are automatically set up to search the site libraries of
 the older ones.  This means that installing a new extension with 5.005
@@ -2177,12 +2187,12 @@ seriously consider using a separate directory, since development
 subversions may not have all the compatibility wrinkles ironed out
 yet.
 
-=head2 Upgrading from 5.005 to 5.6.0
+=head2 Upgrading from 5.005 or 5.6.0 to 5.8.0
 
-Most extensions built and installed with versions of perl
-prior to 5.005_50 will not need to be recompiled to be used with
-5.6.0.  If you find you do need to rebuild an extension with 5.6.0,
-you may safely do so without disturbing the 5.005 installation.
+Most extensions built and installed with versions of perl prior to
+5.005_50 and 5.6.0 will not need to be recompiled to be used with 5.8.0.
+If you find you do need to rebuild an extension with 5.8.0, you may 
+safely do so without disturbing the 5.005 or 5.6.0 installations.  
 (See L<"Coexistence with earlier versions of perl5"> above.)
 
 See your installed copy of the perllocal.pod file for a (possibly
