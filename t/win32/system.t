@@ -40,7 +40,7 @@ main(int ac, char **av)
 {
     int i;
 #ifdef __BORLANDC__
-    char *h,*s = GetCommandLine();
+    char *s = GetCommandLine();
     int j=0;
     av[0] = s;
     if (s[0]=='"') {

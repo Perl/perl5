@@ -1348,6 +1348,15 @@ Perl_to_utf8_case(pTHX_ U8 *p, U8* ustrp, STRLEN *lenp, SV **swashp, char *norma
 	 HE *he;
 	 SV *val;
 	
+#if defined(UNDER_CE) && defined(MIPS)
+/*strange: compiler complaints that I redefine macro UVXf and points where
+           it was first defined. I copied line from there without any changes.
+           Nothing should change.
+           But when I do not do this, there is an error on a line with
+              Perl_newSVpvf(aTHX_ "%04"UVXf, uv1)
+*/
+#define	UVXf		"lX"		/**/
+#endif
 	 if ((hv    = get_hv(special, FALSE)) &&
 	     (keysv = sv_2mortal(Perl_newSVpvf(aTHX_ "%04"UVXf, uv1))) &&
 	     (he    = hv_fetch_ent(hv, keysv, FALSE, 0)) &&

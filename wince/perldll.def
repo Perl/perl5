@@ -1,4 +1,4 @@
-LIBRARY Perl57
+LIBRARY Perl
 
 EXPORTS
 	PL_AMG_names
@@ -405,20 +405,10 @@ EXPORTS
 	PL_yynerrs
 	PL_yyval
 	PerlIO_canset_cnt
-	PerlIO_clearerr
-	PerlIO_close
-	PerlIO_eof
-	PerlIO_error
 	PerlIO_exportFILE
 	PerlIO_fast_gets
 	PerlIO_fdopen
-	PerlIO_fileno
 	PerlIO_findFILE
-	PerlIO_flush
-	PerlIO_get_base
-	PerlIO_get_bufsiz
-	PerlIO_get_cnt
-	PerlIO_get_ptr
 	PerlIO_getc
 	PerlIO_getname
 	PerlIO_getpos
@@ -430,26 +420,16 @@ EXPORTS
 	PerlIO_printf
 	PerlIO_putc
 	PerlIO_puts
-	PerlIO_read
 	PerlIO_releaseFILE
 	PerlIO_reopen
 	PerlIO_rewind
-	PerlIO_seek
-	PerlIO_set_cnt
-	PerlIO_set_ptrcnt
-	PerlIO_setlinebuf
 	PerlIO_setpos
 	PerlIO_sprintf
-	PerlIO_stderr
-	PerlIO_stdin
-	PerlIO_stdout
 	PerlIO_stdoutf
-	PerlIO_tell
 	PerlIO_tmpfile
 	PerlIO_ungetc
 	PerlIO_vprintf
 	PerlIO_vsprintf
-	PerlIO_write
 	Perl_Gv_AMupdate
 	Perl_amagic_call
 	Perl_av_clear
@@ -771,7 +751,6 @@ EXPORTS
 	Perl_set_numeric_local
 	Perl_set_numeric_radix
 	Perl_set_numeric_standard
-	Perl_sharepvn
 	Perl_stack_grow
 	Perl_start_subparse
 	Perl_str_to_version

@@ -56,7 +56,7 @@ is($line,"\x{FFFD}0.02\n","Unicode replacement char");
 close($fh);
 
 END {
-#   unlink($file);
+    1 while unlink($file);
 }
 
 

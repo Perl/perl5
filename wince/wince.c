@@ -352,6 +352,20 @@ win32_times(struct tms *timebuf)
   return -1;
 }
 
+/* TODO */
+bool
+win32_signal()
+{
+  Perl_croak_nocontext("signal() TBD on this platform");
+  return FALSE;
+}
+DllExport void
+win32_clearenv()
+{
+  return;
+}
+
+
 DllExport char ***
 win32_environ(void)
 {
@@ -554,11 +568,7 @@ win32_uname(struct utsname *name)
 	char *arch;
 	GetSystemInfo(&info);
 
-#if defined(__BORLANDC__) || defined(__MINGW32__)
-	switch (info.u.s.wProcessorArchitecture) {
-#else
 	switch (info.wProcessorArchitecture) {
-#endif
 	case PROCESSOR_ARCHITECTURE_INTEL:
 	    arch = "x86"; break;
 	case PROCESSOR_ARCHITECTURE_MIPS:
@@ -1616,3 +1626,13 @@ isnan(double d)
   return _isnan(d);
 }
 
+int
+win32_open_osfhandle(intptr_t osfhandle, int flags)
+{
+    int fh;
+    char fileflags=0;		/* _osfile flags */
+
+    XCEMessageBoxA(NULL, "NEED TO IMPLEMENT a place in ../wince/wince.c(win32_open_osfhandle)", "Perl(developer)", 0);
+    Perl_croak_nocontext("win32_open_osfhandle() TBD on this platform");
+    return 0;
+}
