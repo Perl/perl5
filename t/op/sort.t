@@ -5,7 +5,7 @@ BEGIN {
     @INC = '../lib';
 }
 use warnings;
-print "1..75\n";
+print "1..99\n";
 
 # these shouldn't hang
 {
@@ -391,6 +391,137 @@ sub ok {
     ok "@a", "c b a x", "un-inplace sort with function of lexical 2";
 }
 
+# Test optimisations of reversed sorts. As we now guarantee stability by
+# default, # optimisations which do not provide this are bogus.
+
+{
+    package Oscalar;
+    use overload (qw("" stringify 0+ numify fallback 1));
+
+    sub new {
+	bless [$_[1], $_[2]], $_[0];
+    }
+
+    sub stringify { $_[0]->[0] }
+
+    sub numify { $_[0]->[1] }
+}
+
+sub generate {
+    my $count = 0;
+    map {new Oscalar $_, $count++} qw(A A A B B B C C C);
+}
+
+my @input = &generate;
+my @output = sort @input;
+ok join(" ", map {0+$_} @output), "0 1 2 3 4 5 6 7 8", "Simple stable sort";
+
+@input = &generate;
+@input = sort @input;
+ok join(" ", map {0+$_} @input), "0 1 2 3 4 5 6 7 8",
+    "Simple stable in place sort";
+
+# This won't be very interesting
+@input = &generate;
+@output = sort {$a <=> $b} @input;
+ok "@output", "A A A B B B C C C", 'stable $a <=> $b sort';
+
+@input = &generate;
+@output = sort {$a cmp $b} @input;
+ok join(" ", map {0+$_} @output), "0 1 2 3 4 5 6 7 8", 'stable $a cmp $b sort';
+
+@input = &generate;
+@input = sort {$a cmp $b} @input;
+ok join(" ", map {0+$_} @input), "0 1 2 3 4 5 6 7 8",
+    'stable $a cmp $b in place sort';
+
+@input = &generate;
+@output = sort {$b cmp $a} @input;
+ok join(" ", map {0+$_} @output), "6 7 8 3 4 5 0 1 2", 'stable $b cmp $a sort';
+
+@input = &generate;
+@input = sort {$b cmp $a} @input;
+ok join(" ", map {0+$_} @input), "6 7 8 3 4 5 0 1 2",
+    'stable $b cmp $a in place sort';
+
+@output = reverse sort @input;
+ok join(" ", map {0+$_} @output), "8 7 6 5 4 3 2 1 0", "Reversed stable sort";
+
+@input = &generate;
+@input = reverse sort @input;
+ok join(" ", map {0+$_} @input), "8 7 6 5 4 3 2 1 0",
+    "Reversed stable in place sort";
 
 
+@input = &generate;
+@output = reverse sort {$a cmp $b} @input;
+ok join(" ", map {0+$_} @output), "8 7 6 5 4 3 2 1 0",
+    'reversed stable $a cmp $b sort';
 
+@input = &generate;
+@input = reverse sort {$a cmp $b} @input;
+ok join(" ", map {0+$_} @input), "8 7 6 5 4 3 2 1 0",
+    'revesed stable $a cmp $b in place sort';
+
+@input = &generate;
+@output = reverse sort {$b cmp $a} @input;
+ok join(" ", map {0+$_} @output), "2 1 0 5 4 3 8 7 6",
+    'reversed stable $b cmp $a sort';
+
+@input = &generate;
+@input = reverse sort {$b cmp $a} @input;
+ok join(" ", map {0+$_} @input), "2 1 0 5 4 3 8 7 6",
+    'revesed stable $b cmp $a in place sort';
+
+
+# And now with numbers
+
+sub generate1 {
+    my $count = 'A';
+    map {new Oscalar $count++, $_} 0, 0, 0, 1, 1, 1, 2, 2, 2;
+}
+
+# This won't be very interesting
+@input = &generate1;
+@output = sort {$a cmp $b} @input;
+ok "@output", "A B C D E F G H I", 'stable $a cmp $b sort';
+
+@input = &generate1;
+@output = sort {$a <=> $b} @input;
+ok "@output", "A B C D E F G H I", 'stable $a <=> $b sort';
+
+@input = &generate1;
+@input = sort {$a <=> $b} @input;
+ok "@input", "A B C D E F G H I", 'stable $a <=> $b in place sort';
+
+@input = &generate1;
+@output = sort {$b <=> $a} @input;
+ok "@output", "G H I D E F A B C", 'stable $b <=> $a sort';
+
+@input = &generate1;
+@input = sort {$b <=> $a} @input;
+ok "@input", "G H I D E F A B C", 'stable $b <=> $a in place sort';
+
+# These two are actually doing string cmp on 0 1 and 2
+@output = reverse sort @input;
+ok "@output", "I H G F E D C B A", "Reversed stable sort";
+
+@input = &generate1;
+@input = reverse sort @input;
+ok "@input", "I H G F E D C B A", "Reversed stable in place sort";
+
+@input = &generate1;
+@output = reverse sort {$a <=> $b} @input;
+ok "@output", "I H G F E D C B A", 'reversed stable $a <=> $b sort';
+
+@input = &generate1;
+@input = reverse sort {$a <=> $b} @input;
+ok "@input", "I H G F E D C B A", 'revesed stable $a <=> $b in place sort';
+
+@input = &generate1;
+@output = reverse sort {$b <=> $a} @input;
+ok "@output", "C B A F E D I H G", 'reversed stable $b <=> $a sort';
+
+@input = &generate1;
+@input = reverse sort {$b <=> $a} @input;
+ok "@input", "C B A F E D I H G", 'revesed stable $b <=> $a in place sort';

@@ -5913,7 +5913,7 @@ S_simplify_sort(pTHX_ OP *o)
 {
     register OP *kid = cLISTOPo->op_first->op_sibling;	/* get past pushmark */
     OP *k;
-    int reversed;
+    int descending;
     GV *gv;
     if (!(o->op_flags & OPf_STACKED))
 	return;
@@ -5942,11 +5942,16 @@ S_simplify_sort(pTHX_ OP *o)
     if (GvSTASH(gv) != PL_curstash)
 	return;
     if (strEQ(GvNAME(gv), "a"))
-	reversed = 0;
+	descending = 0;
     else if (strEQ(GvNAME(gv), "b"))
-	reversed = 1;
+	descending = 1;
     else
 	return;
+
+    /* FIXME once we have proper descending support in pp_sort */
+    if (descending)
+      return;
+
     kid = k;						/* back to cmp */
     if (kBINOP->op_last->op_type != OP_RV2SV)
 	return;
@@ -5956,13 +5961,13 @@ S_simplify_sort(pTHX_ OP *o)
     kid = kUNOP->op_first;				/* get past rv2sv */
     gv = kGVOP_gv;
     if (GvSTASH(gv) != PL_curstash
-	|| ( reversed
+	|| ( descending
 	    ? strNE(GvNAME(gv), "a")
 	    : strNE(GvNAME(gv), "b")))
 	return;
     o->op_flags &= ~(OPf_STACKED | OPf_SPECIAL);
-    if (reversed)
-	o->op_private |= OPpSORT_REVERSE;
+    if (descending)
+	o->op_private |= OPpSORT_DESCEND;
     if (k->op_type == OP_NCMP)
 	o->op_private |= OPpSORT_NUMERIC;
     if (k->op_type == OP_I_NCMP)

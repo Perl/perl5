@@ -203,8 +203,9 @@ Deprecated.  Use C<GIMME_V> instead.
 /* Private for OP_SORT */
 #define OPpSORT_NUMERIC		1	/* Optimized away { $a <=> $b } */
 #define OPpSORT_INTEGER		2	/* Ditto while under "use integer" */
-#define OPpSORT_REVERSE		4	/* Descending sort */
+#define OPpSORT_REVERSE		4	/* Reversed sort */
 #define OPpSORT_INPLACE		8	/* sort in-place; eg @a = sort @a */
+#define OPpSORT_DESCEND		16	/* Descending sort */
 /* Private for OP_THREADSV */
 #define OPpDONE_SVREF		64	/* Been through newSVREF once */
 
