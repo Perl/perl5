@@ -696,7 +696,15 @@ os390|posix-bc)
     if cd x2p
     then
         rm -f y.tab.c y.tab.h
-        yacc a2p.y >/dev/null 2>&1
+        case "$osname" in
+        posix-bc)
+           # we are using two different yaccs in BS2000 Posix!
+           byacc a2p.y >/dev/null 2>&1
+           ;;
+        *) # e.g. os390
+           yacc  a2p.y >/dev/null 2>&1
+           ;;
+        esac
         if cmp -s y.tab.c a2p.c
         then
             rm -f y.tab.c
