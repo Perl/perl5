@@ -89,13 +89,11 @@
 
      defined(@array) is deprecated
      (Maybe you should just omit the defined()?)
-	defined @a ;
 	my @a ; defined @a ;
 	defined (@a = (1,2,3)) ;
 
      defined(%hash) is deprecated
      (Maybe you should just omit the defined()?)
-	defined %h ;
 	my %h ; defined %h ;
 
     Mandatory Warnings 
@@ -739,13 +737,6 @@ Statement unlikely to be reached at - line 4.
 ########
 # op.c
 use warning 'deprecated' ;
-defined(@a);
-EXPECT
-defined(@array) is deprecated at - line 3.
-(Maybe you should just omit the defined()?)
-########
-# op.c
-use warning 'deprecated' ;
 my @a; defined(@a);
 EXPECT
 defined(@array) is deprecated at - line 3.
@@ -756,13 +747,6 @@ use warning 'deprecated' ;
 defined(@a = (1,2,3));
 EXPECT
 defined(@array) is deprecated at - line 3.
-(Maybe you should just omit the defined()?)
-########
-# op.c
-use warning 'deprecated' ;
-defined(%h);
-EXPECT
-defined(%hash) is deprecated at - line 3.
 (Maybe you should just omit the defined()?)
 ########
 # op.c
