@@ -492,7 +492,7 @@ package DB;
 use IO::Handle;
 
 # Debugger for Perl 5.00x; perl5db.pl patch level:
-$VERSION = 1.21;
+$VERSION = 1.22;
 $header  = "perl5db.pl version $VERSION";
 
 =head1 DEBUGGER ROUTINES
@@ -894,9 +894,11 @@ sub eval {
 # Changes: 1.20: Feb 17, 2003 Richard Foley <richard.foley@rfi.net>
 #   + pre'n'post commands no longer trashed with no args
 #   + watch val joined out of eval()
-# Changes: 1.21: Jun 04, 2002 Joe McMahon (mcmahon@ibiblio.org)
+# Changes: 1.21: Jun 04, 2003 Joe McMahon <mcmahon@ibiblio.org>
 #   + Added comments and reformatted source. No bug fixes/enhancements.
 #   + Includes cleanup by Robin Barker and Jarkko Hietaniemi.
+# Changes: 1.22  Jun 09, 2003 Alex Vandiver <alexmv@MIT.EDU>
+    + Flush stdout/stderr before the debugger prompt is printed.
 
 ####################################################################
 
@@ -7883,13 +7885,13 @@ all the matches qualified to the current package.
 
 Much like the above, except we have to do a little more cleanup:
 
-=over 4 
-
 =cut
 
     if ($text =~ /^[\$@%](.*)::(.*)/) {    # symbols in a package
 
 =pod
+
+=over 4 
 
 =item * Determine the package that the symbol is in. Put it in C<::> (effectively C<main::>) if no package is specified.
 
@@ -7936,14 +7938,14 @@ Much like the above, except we have to do a little more cleanup:
 
 =head3 Symbol completion: current package or package C<main>.
 
-=over 4
-
 =cut
 
 
     if ($text =~ /^[\$@%]/) {    # symbols (in $package + packages in main)
 
 =pod
+
+=over 4
 
 =item * If it's C<main>, delete main to just get C<::> leading.
 
