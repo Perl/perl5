@@ -3588,15 +3588,23 @@ PP(pp_mkdir)
 #ifndef HAS_MKDIR
     int oldumask;
 #endif
-    STRLEN n_a;
+    STRLEN len;
     char *tmps;
+    bool copy = FALSE;
 
     if (MAXARG > 1)
 	mode = POPi;
     else
 	mode = 0777;
 
-    tmps = SvPV(TOPs, n_a);
+    tmps = SvPV(TOPs, len);
+    /* Different operating and file systems take differently to
+     * trailing slashes.  To err on the side of portability, we
+     * snip away one trailing slash. */
+    if (tmps[len-1] == '/') {
+	tmps = savepvn(tmps, len - 1); 
+	copy = TRUE;
+    }
 
     TAINT_PROPER("mkdir");
 #ifdef HAS_MKDIR
@@ -3607,6 +3615,8 @@ PP(pp_mkdir)
     PerlLIO_umask(oldumask);
     PerlLIO_chmod(tmps, (mode & ~oldumask) & 0777);
 #endif
+    if (copy)
+	Safefree(tmps);
     RETURN;
 }
 
