@@ -376,18 +376,6 @@ sed <<!GROK!THIS! >config.h -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un-
  */
 #$d_mktime HAS_MKTIME		/**/
 
-/* HAS_MSYNC:
- *	This symbol, if defined, indicates that the msync system call is
- *	available to synchronize a mapped file.
- */
-#$d_msync HAS_MSYNC		/**/
-
-/* HAS_MUNMAP:
- *	This symbol, if defined, indicates that the munmap system call is
- *	available to unmap a region, usually mapped by mmap().
- */
-#$d_munmap HAS_MUNMAP		/**/
-
 /* HAS_NICE:
  *	This symbol, if defined, indicates that the nice routine is
  *	available.
@@ -1789,18 +1777,6 @@ sed <<!GROK!THIS! >config.h -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un-
  */
 #$d_memchr HAS_MEMCHR	/**/
 
-/* HAS_MMAP:
- *	This symbol, if defined, indicates that the mmap system call is
- *	available to map a file into memory.
- */
-/* Mmap_t:
- *	This symbol holds the return type of the mmap() system call
- *	(and simultaneously the type of the first argument).
- *	Usually set to 'void *' or 'cadd_t'.
- */
-#$d_mmap HAS_MMAP		/**/
-#define Mmap_t $mmaptype	/**/
-
 /* HAS_MSG:
  *	This symbol, if defined, indicates that the entire msg*(2) library is
  *	supported (IPC mechanism based on message queues).
@@ -1907,26 +1883,6 @@ sed <<!GROK!THIS! >config.h -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un-
  *	Checking just with #ifdef might not be enough because this symbol
  *	has been known to be an enum.
  */
-/* HAS_SENDMSG:
- *	This symbol, if defined, indicates that the sendmsg is supported
- *	to send messages between sockets.  You will also need struct
- *	iovec from <sys/uio.h>, HAS_STRUCT_IOVEC and I_SYSUIO.
- */
-/* HAS_RECVMSG:
- *	This symbol, if defined, indicates that the recvmsg is supported
- *	to send messages between sockets.  You will also need struct
- *	iovec from <sys/uio.h>, HAS_STRUCT_IOVEC and I_SYSUIO.
- */
-/* HAS_STRUCT_MSGHDR:
- *	This symbol, if defined, indicates that the struct msghdr
- *	(BSD 4.3 or 4.4) is supported.  You will also need struct
- *	iovec from <sys/uio.h>, HAS_STRUCT_IOVEC and I_SYSUIO.
- */
-/* HAS_STRUCT_CMSGHDR:
- *	This symbol, if defined, indicates that the struct cmsghdr
- *	(BSD 4.4) is supported.  You will also need struct
- *	iovec from <sys/uio.h>, HAS_STRUCT_IOVEC and I_SYSUIO.
- */
 #$d_socket	HAS_SOCKET		/**/
 #$d_sockpair	HAS_SOCKETPAIR	/**/
 #$d_msg_ctrunc	HAS_MSG_CTRUNC	/**/
@@ -1935,10 +1891,6 @@ sed <<!GROK!THIS! >config.h -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un-
 #$d_msg_peek	HAS_MSG_PEEK	/**/
 #$d_msg_proxy	HAS_MSG_PROXY	/**/
 #$d_scm_rights	HAS_SCM_RIGHTS	/**/
-#$d_sendmsg	HAS_SENDMSG	/**/
-#$d_recvmsg	HAS_RECVMSG	/**/
-#$d_msghdr_s	HAS_STRUCT_MSGHDR	/**/
-#$d_cmsghdr_s	HAS_STRUCT_CMSGHDR	/**/
 
 /* USE_STAT_BLOCKS:
  *	This symbol is defined if this system has a stat structure declaring
@@ -2080,12 +2032,7 @@ sed <<!GROK!THIS! >config.h -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un-
  *	This symbol, if defined, indicates that <sys/uio.h> exists and
  *	should be included.
  */
-/* HAS_STRUCT_IOVEC:
- *	This symbol, if defined, indicates that the struct iovec
- *	to do scatter writes/gather reads is supported.
- */
 #$i_sysuio	I_SYSUIO		/**/
-#$d_iovec_s	HAS_STRUCT_IOVEC		/**/
 
 /* Free_t:
  *	This variable contains the return type of free().  It is usually
@@ -2253,25 +2200,6 @@ sed <<!GROK!THIS! >config.h -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un-
  */
 #$d_ldbl_dig HAS_LDBL_DIG 	/* */
 
-/* HAS_MADVISE:
- *	This symbol, if defined, indicates that the madvise system call is
- *	available to map a file into memory.
- */
-#$d_madvise HAS_MADVISE		/**/
-
-/* HAS_MPROTECT:
- *	This symbol, if defined, indicates that the mprotect system call is
- *	available to modify the access protection of a memory mapped file.
- */
-#$d_mprotect HAS_MPROTECT		/**/
-
-/* HAS_READV:
- *	This symbol, if defined, indicates that the readv routine is
- *	available to do gather reads.  You will also need <sys/uio.h>
- *	and there I_SYSUIO.
- */
-#$d_readv HAS_READV		/**/
-
 /* HAS_SETSPENT:
  *	This symbol, if defined, indicates that the setspent system call is
  *	available to initialize the scan of SysV shadow password entries.
@@ -2326,12 +2254,6 @@ sed <<!GROK!THIS! >config.h -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un-
  *	available to query file system statistics by dev_t.
  */
 #$d_ustat HAS_USTAT		/**/
-
-/* HAS_WRITEV:
- *	This symbol, if defined, indicates that the writev routine is
- *	available to do scatter writes.
- */
-#$d_writev HAS_WRITEV		/**/
 
 /* USE_DYNAMIC_LOADING:
  *	This symbol, if defined, indicates that dynamic loading of
@@ -2407,12 +2329,6 @@ sed <<!GROK!THIS! >config.h -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un-
  *	should be included.
  */
 #$i_socks	I_SOCKS		/**/
-
-/* I_SYS_MMAN:
- *	This symbol, if defined, indicates that <sys/mman.h> exists and
- *	should be included.
- */
-#$i_sysmman	I_SYS_MMAN		/**/
 
 /* I_SYS_MOUNT:
  *	This symbol, if defined, indicates that <sys/mount.h> exists and

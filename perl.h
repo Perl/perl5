@@ -3186,20 +3186,6 @@ typedef struct am_table_short AMTS;
 #   endif
 #endif
 
-/* Mention
-
-   INSTALL_USR_BIN_PERL
-
-   I_SYS_MMAN
-   HAS_MMAP
-   HAS_MUNMAP
-   HAS_MPROTECT
-   HAS_MSYNC
-   HAS_MADVISE
-   Mmap_t
-
-   here so that Configure picks them up. */
-
 #ifdef IAMSUID
 
 #ifdef I_SYS_STATVFS

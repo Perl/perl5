@@ -378,18 +378,6 @@
  */
 #define HAS_MKTIME		/**/
 
-/* HAS_MSYNC:
- *	This symbol, if defined, indicates that the msync system call is
- *	available to synchronize a mapped file.
- */
-/*#define HAS_MSYNC		/**/
-
-/* HAS_MUNMAP:
- *	This symbol, if defined, indicates that the munmap system call is
- *	available to unmap a region, usually mapped by mmap().
- */
-/*#define HAS_MUNMAP		/**/
-
 /* HAS_NICE:
  *	This symbol, if defined, indicates that the nice routine is
  *	available.
@@ -1697,18 +1685,6 @@
  */
 #define HAS_MEMCHR	/**/
 
-/* HAS_MMAP:
- *	This symbol, if defined, indicates that the mmap system call is
- *	available to map a file into memory.
- */
-/* Mmap_t:
- *	This symbol holds the return type of the mmap() system call
- *	(and simultaneously the type of the first argument).
- *	Usually set to 'void *' or 'cadd_t'.
- */
-/*#define HAS_MMAP		/**/
-#define Mmap_t void *	/**/
-
 /* HAS_MSG:
  *	This symbol, if defined, indicates that the entire msg*(2) library is
  *	supported (IPC mechanism based on message queues).
@@ -1815,26 +1791,6 @@
  *	Checking just with #ifdef might not be enough because this symbol
  *	has been known to be an enum.
  */
-/* HAS_SENDMSG:
- *	This symbol, if defined, indicates that the sendmsg is supported
- *	to send messages between sockets.  You will also need struct
- *	iovec from <sys/uio.h>, HAS_STRUCT_IOVEC and I_SYSUIO.
- */
-/* HAS_RECVMSG:
- *	This symbol, if defined, indicates that the recvmsg is supported
- *	to send messages between sockets.  You will also need struct
- *	iovec from <sys/uio.h>, HAS_STRUCT_IOVEC and I_SYSUIO.
- */
-/* HAS_STRUCT_MSGHDR:
- *	This symbol, if defined, indicates that the struct msghdr
- *	(BSD 4.3 or 4.4) is supported.  You will also need struct
- *	iovec from <sys/uio.h>, HAS_STRUCT_IOVEC and I_SYSUIO.
- */
-/* HAS_STRUCT_CMSGHDR:
- *	This symbol, if defined, indicates that the struct cmsghdr
- *	(BSD 4.4) is supported.  You will also need struct
- *	iovec from <sys/uio.h>, HAS_STRUCT_IOVEC and I_SYSUIO.
- */
 #define	HAS_SOCKET		/**/
 /*#define	HAS_SOCKETPAIR	/**/
 /*#define	HAS_MSG_CTRUNC	/**/
@@ -1843,10 +1799,6 @@
 /*#define	HAS_MSG_PEEK	/**/
 /*#define	HAS_MSG_PROXY	/ **/
 /*#define	HAS_SCM_RIGHTS	/**/
-/*##define	HAS_SENDMSG	/**/
-/*##define	HAS_RECVMSG	/**/
-/*##define	HAS_STRUCT_MSGHDR	/**/
-/*##define	HAS_STRUCT_CMSGHDR	/**/
 
 /* USE_STAT_BLOCKS:
  *	This symbol is defined if this system has a stat structure declaring
@@ -1984,12 +1936,6 @@
 /*#define PWGECOS	/**/
 /*#define PWPASSWD	/**/
 
-/* I_SYSUIO:
- *	This symbol, if defined, indicates that <sys/uio.h> exists and
- *	should be included.
- */
-#/*define	I_SYSUIO		/**/
-
 /* Free_t:
  *	This variable contains the return type of free().  It is usually
  * void, but occasionally int.
@@ -2109,25 +2055,6 @@
  */
 /*#define HAS_HASMNTOPT		/ **/
 
-/* HAS_MADVISE:
- *	This symbol, if defined, indicates that the madvise system call is
- *	available to map a file into memory.
- */
-/*#define HAS_MADVISE		/**/
-
-/* HAS_MPROTECT:
- *	This symbol, if defined, indicates that the mprotect system call is
- *	available to modify the access protection of a memory mapped file.
- */
-/*#define HAS_MPROTECT		/**/
-
-/* HAS_READV:
- *	This symbol, if defined, indicates that the readv routine is
- *	available to do gather reads.  You will also need <sys/uio.h>
- *	and there I_SYSUIO.
- */
-/*#define HAS_READV		/**/
-
 /* USE_SFIO:
  *	This symbol, if defined, indicates that sfio should
  *	be used.
@@ -2161,12 +2088,6 @@
  *		extern long telldir _((DIR*));
  */
 #define	HAS_TELLDIR_PROTO	/**/
-
-/* HAS_WRITEV:
- *	This symbol, if defined, indicates that the writev routine is
- *	available to do scatter writes.
- */
-/*#define HAS_WRITEV		/**/
 
 /* USE_DYNAMIC_LOADING:
  *	This symbol, if defined, indicates that dynamic loading of
@@ -2230,12 +2151,6 @@
  *	should be included.
  */
 /*#define	I_POLL		/**/
-
-/* I_SYS_MMAN:
- *	This symbol, if defined, indicates that <sys/mman.h> exists and
- *	should be included.
- */
-/*#define	I_SYS_MMAN		/**/
 
 /* I_SYS_MOUNT:
  *	This symbol, if defined, indicates that <sys/mount.h> exists and

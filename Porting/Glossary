@@ -376,10 +376,6 @@ d_closedir (d_closedir.U):
 	This variable conditionally defines HAS_CLOSEDIR if closedir() is
 	available.
 
-d_cmsghdr_s (d_socket.U):
-	This variable conditionally defines the HAS_STRUCT_CMSGHDR symbol,
-	which indicates that the the struct cmsghdr is supported.
-
 d_const (d_const.U):
 	This variable conditionally defines the HASCONST symbol, which
 	indicates to the C program that this C compiler knows about the
@@ -810,10 +806,6 @@ d_lstat (d_lstat.U):
 	This variable conditionally defines HAS_LSTAT if lstat() is
 	available to do file stats on symbolic links.
 
-d_madvise (d_madvise.U):
-	This variable conditionally defines HAS_MADVISE if madvise() is
-	available to map a file into memory.
-
 d_mblen (d_mblen.U):
 	This variable conditionally defines the HAS_MBLEN symbol, which
 	indicates to the C program that the mblen() routine is available
@@ -867,14 +859,6 @@ d_mktime (d_mktime.U):
 	This variable conditionally defines the HAS_MKTIME symbol, which
 	indicates to the C program that the mktime() routine is available.
 
-d_mmap (d_mmap.U):
-	This variable conditionally defines HAS_MMAP if mmap() is
-	available to map a file into memory.
-
-d_mprotect (d_mprotect.U):
-	This variable conditionally defines HAS_MPROTECT if mprotect() is
-	available to modify the access protection of a memory mapped file.
-
 d_msg (d_msg.U):
 	This variable conditionally defines the HAS_MSG symbol, which
 	indicates that the entire msg*(2) library is present.
@@ -912,10 +896,6 @@ d_msgget (d_msgget.U):
 	This variable conditionally defines the HAS_MSGGET symbol, which
 	indicates to the C program that the msgget() routine is available.
 
-d_msghdr_s (d_socket.U):
-	This variable conditionally defines the HAS_STRUCT_MSGHDR symbol,
-	which indicates that the struct msghdr is supported.
-
 d_msgrcv (d_msgrcv.U):
 	This variable conditionally defines the HAS_MSGRCV symbol, which
 	indicates to the C program that the msgrcv() routine is available.
@@ -923,14 +903,6 @@ d_msgrcv (d_msgrcv.U):
 d_msgsnd (d_msgsnd.U):
 	This variable conditionally defines the HAS_MSGSND symbol, which
 	indicates to the C program that the msgsnd() routine is available.
-
-d_msync (d_msync.U):
-	This variable conditionally defines HAS_MSYNC if msync() is
-	available to synchronize a mapped file.
-
-d_munmap (d_munmap.U):
-	This variable conditionally defines HAS_MUNMAP if munmap() is
-	available to unmap a region mapped by mmap().
 
 d_mymalloc (mallocsrc.U):
 	This variable conditionally defines MYMALLOC in case other parts
@@ -1089,14 +1061,6 @@ d_readlink (d_readlink.U):
 	indicates to the C program that the readlink() routine is available
 	to read the value of a symbolic link.
 
-d_readv (d_readv.U):
-	This variable conditionally defines the HAS_READV symbol, which
-	indicates to the C program that the readv() routine is available.
-
-d_recvmsg (d_socket.U):
-	This variable conditionally defines the HAS_RECVMSG symbol,
-	which indicates that the recvmsg is supported.
-
 d_rename (d_rename.U):
 	This variable conditionally defines the HAS_RENAME symbol, which
 	indicates to the C program that the rename() routine is available
@@ -1165,10 +1129,6 @@ d_semget (d_semget.U):
 d_semop (d_semop.U):
 	This variable conditionally defines the HAS_SEMOP symbol, which
 	indicates to the C program that the semop() routine is available.
-
-d_sendmsg (d_socket.U):
-	This variable conditionally defines the HAS_SENDMSG symbol,
-	which indicates that the sendmsg is supported.
 
 d_setegid (d_setegid.U):
 	This variable conditionally defines the HAS_SETEGID symbol, which
@@ -1556,10 +1516,6 @@ d_wctomb (d_wctomb.U):
 	This variable conditionally defines the HAS_WCTOMB symbol, which
 	indicates to the C program that the wctomb() routine is available
 	to convert a wide character to a multibyte.
-
-d_writev (d_writev.U):
-	This variable conditionally defines the HAS_WRITEV symbol, which
-	indicates to the C program that the writev() routine is available.
 
 d_xenix (Guess.U):
 	This variable conditionally defines the symbol XENIX, which alerts
@@ -1951,10 +1907,6 @@ i_sysioctl (i_sysioctl.U):
 	This variable conditionally defines the I_SYS_IOCTL symbol, which
 	indicates to the C program that <sys/ioctl.h> exists and should
 	be included.
-
-i_sysmman (i_sysmman.U):
-	This variable conditionally defines the I_SYS_MMAN symbol, and
-	indicates whether a C program should include <sys/mman.h>.
 
 i_sysmount (i_sysmount.U):
 	This variable conditionally defines the I_SYSMOUNT symbol,
@@ -2410,11 +2362,6 @@ mkdir (Loc.U):
 	This variable is used internally by Configure to determine the
 	full pathname (if any) of the mkdir program.  After Configure runs,
 	the value is reset to a plain "mkdir" and is not useful.
-
-mmaptype (d_mmap.U):
-	This symbol contains the type of pointer returned by mmap()
-	(and simultaneously the type of the first argument).
-	It can be 'void *' or 'caddr_t'.
 
 models (models.U):
 	This variable contains the list of memory models supported by this
