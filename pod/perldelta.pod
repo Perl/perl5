@@ -1452,6 +1452,14 @@ as perlI<platform>:
     perlnetware perlos2 perlos390 perlplan9 perlqnx perlsolaris
     perltru64 perluts perlvmesa perlvms perlvos perlwin32
 
+Eastern Asian Perl users are now welcomed in their own languages:
+README.jp (Japanese), README.ko (Korean), README.cn (simplified
+Chinese) and README.tw (traditional Chinese), which are written in
+normal pod but encoded in EUC-JP, EUC-KR, EUC-CN and Big5.  These
+will get installed as
+
+   perljp perlko perlcn perltw
+
 =over 4
 
 =item *
