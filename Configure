@@ -20,7 +20,7 @@
 
 # $Id: Head.U,v 3.0.1.9 1997/02/28 15:02:09 ram Exp $
 #
-# Generated on Sun Mar  5 02:50:05 EET 2000 [metaconfig 3.0 PL70]
+# Generated on Sun Mar  5 23:53:58 EET 2000 [metaconfig 3.0 PL70]
 # (with additional metaconfig patches by perlbug@perl.com)
 
 cat >/tmp/c1$$ <<EOF
@@ -864,6 +864,7 @@ sitebin=''
 sitebinexp=''
 installsitelib=''
 sitelib=''
+sitelib_stem=''
 sitelibexp=''
 siteprefix=''
 siteprefixexp=''
@@ -906,6 +907,10 @@ usethreads=''
 incpath=''
 mips_type=''
 usrinc=''
+d_vendorarch=''
+installvendorarch=''
+vendorarch=''
+vendorarchexp=''
 d_vendorbin=''
 installvendorbin=''
 vendorbin=''
@@ -913,6 +918,7 @@ vendorbinexp=''
 d_vendorlib=''
 installvendorlib=''
 vendorlib=''
+vendorlib_stem=''
 vendorlibexp=''
 usevendorprefix=''
 vendorprefix=''
@@ -5314,11 +5320,42 @@ case "$vendorprefix" in
 	vendorlibexp="$ansexp"
 	;;
 esac
+vendorlib_stem=`echo "$vendorlibexp" | sed "s,/$version$,,"`
 : Change installation prefix, if necessary.
 if $test X"$prefix" != X"$installprefix"; then
 	installvendorlib=`echo $vendorlibexp | $sed "s#^$prefix#$installprefix#"`
 else
 	installvendorlib="$vendorlibexp"
+fi
+
+case "$vendorprefix" in
+'')	d_vendorarch="$undef"
+	vendorarch=''
+	vendorarchexp=''
+	;;
+*)	d_vendorarch="$define"
+	: determine where vendor-supplied architecture-dependent libraries go.
+	: vendorlib  default is /usr/local/lib/perl5/vendor_perl/$version
+	: vendorarch default is /usr/local/lib/perl5/vendor_perl/$version/$archname
+	: vendorlib may have an optional trailing /share.
+	case "$vendorarch" in
+	'')	dflt=`echo $vendorlib | $sed 's,/share$,,'`
+		dflt="$dflt/$archname"
+		;;
+	*)	dflt="$vendorarch" ;;
+	esac
+	fn=d~+
+	rp='Pathname for vendor-supplied architecture-dependent files?'
+	. ./getfile
+	vendorarch="$ans"
+	vendorarchexp="$ansexp"
+	;;
+esac
+: Change installation prefix, if necessary.
+if $test X"$prefix" != X"$installprefix"; then
+	installvendorarch=`echo $vendorarchexp | sed "s#^$prefix#$installprefix#"`
+else
+	installvendorarch="$vendorarchexp"
 fi
 
 : Cruising for prototypes
@@ -5467,6 +5504,7 @@ rp='Pathname for the site-specific library files?'
 . ./getfile
 sitelib="$ans"
 sitelibexp="$ansexp"
+sitelib_stem=`echo "$sitelibexp" | sed "s,/$version$,,"`
 : Change installation prefix, if necessary.
 if $test X"$prefix" != X"$installprefix"; then
 	installsitelib=`echo $sitelibexp | $sed "s#^$prefix#$installprefix#"`
@@ -5573,7 +5611,7 @@ $rm -f getverlist
 echo " "
 if $test -d /usr/bin -a "X$installbin" != X/usr/bin; then
 	$cat <<EOM
-Many scripts expect to perl to be installed as /usr/bin/perl.
+Many scripts expect perl to be installed as /usr/bin/perl.
 I can install the perl you are about to compile also as /usr/bin/perl
 (in addition to $installbin/perl).
 EOM
@@ -15245,6 +15283,7 @@ d_umask='$d_umask'
 d_uname='$d_uname'
 d_union_semun='$d_union_semun'
 d_ustat='$d_ustat'
+d_vendorarch='$d_vendorarch'
 d_vendorbin='$d_vendorbin'
 d_vendorlib='$d_vendorlib'
 d_vfork='$d_vfork'
@@ -15406,6 +15445,7 @@ installsitebin='$installsitebin'
 installsitelib='$installsitelib'
 installstyle='$installstyle'
 installusrbinperl='$installusrbinperl'
+installvendorarch='$installvendorarch'
 installvendorbin='$installvendorbin'
 installvendorlib='$installvendorlib'
 intsize='$intsize'
@@ -15561,6 +15601,7 @@ sitearchexp='$sitearchexp'
 sitebin='$sitebin'
 sitebinexp='$sitebinexp'
 sitelib='$sitelib'
+sitelib_stem='$sitelib_stem'
 sitelibexp='$sitelibexp'
 siteprefix='$siteprefix'
 siteprefixexp='$siteprefixexp'
@@ -15645,9 +15686,12 @@ uvsize='$uvsize'
 uvtype='$uvtype'
 uvuformat='$uvuformat'
 uvxformat='$uvxformat'
+vendorarch='$vendorarch'
+vendorarchexp='$vendorarchexp'
 vendorbin='$vendorbin'
 vendorbinexp='$vendorbinexp'
 vendorlib='$vendorlib'
+vendorlib_stem='$vendorlib_stem'
 vendorlibexp='$vendorlibexp'
 vendorprefix='$vendorprefix'
 vendorprefixexp='$vendorprefixexp'

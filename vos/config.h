@@ -1186,14 +1186,18 @@
  *	This macro surrounds its token with double quotes.
  */
 #if 42 == 1
-#define CAT2(a,b)a/**/b
-#define STRINGIFY(a)"a"
+#  define CAT2(a,b)	a/**/b
+#  define STRINGIFY(a)	"a"
 		/* If you can get stringification with catify, tell me how! */
 #endif
 #if 42 == 42
-#define CAT2(a,b)a ## b
-#define StGiFy(a)# a
-#define STRINGIFY(a)StGiFy(a)
+#  define PeRl_CaTiFy(a, b)	a ## b	
+#  define PeRl_StGiFy(a)	#a
+/* the additional level of indirection enables these macros to be
+ * used as arguments to other macros.  See K&R 2nd ed., page 231. */
+#  define CAT2(a,b)	PeRl_CaTiFy(a,b)
+#  define StGiFy(a)	PeRl_StGiFy(a)
+#  define STRINGIFY(a)	PeRl_StGiFy(a)
 #endif
 #if 42 != 1 && 42 != 42
 #include "Bletch: How does this C preprocessor catenate tokens?"
@@ -1608,7 +1612,7 @@
  *     Usually the <inttypes.h> needs to be included, but sometimes
  *	<sys/types.h> is enough.
  */
-#     HAS_INT64_T               /**/
+/*#define     HAS_INT64_T               /**/
 
 /* HAS_ISASCII:
  *	This manifest constant lets the C program know that isascii 
@@ -1674,21 +1678,21 @@
  *	This symbol, if defined, indicates that the mkdtemp routine is
  *	available to exclusively create a uniquely named temporary directory.
  */
-# HAS_MKDTEMP		/**/
+/*#define HAS_MKDTEMP		/**/
 
 /* HAS_MKSTEMP:
  *	This symbol, if defined, indicates that the mkstemp routine is
  *	available to exclusively create and open a uniquely named
  *	temporary file.
  */
-# HAS_MKSTEMP		/**/
+/*#define HAS_MKSTEMP		/**/
 
 /* HAS_MKSTEMPS:
  *	This symbol, if defined, indicates that the mkstemps routine is
  *	available to excluslvely create and open a uniquely named
  *	(with a suffix) temporary file.
  */
-# HAS_MKSTEMPS		/**/
+/*#define HAS_MKSTEMPS		/**/
 
 /* HAS_MMAP:
  *	This symbol, if defined, indicates that the mmap system call is
@@ -2362,13 +2366,13 @@
  *	This symbol, if defined, indicates that <syslog.h> exists and
  *	should be included.
  */
-#	I_SYSLOG		/**/
+/*#define	I_SYSLOG		/**/
 
 /* I_SYSMODE:
  *	This symbol, if defined, indicates that <sys/mode.h> exists and
  *	should be included.
  */
-#	I_SYSMODE		/**/
+/*#define	I_SYSMODE		/**/
 
 /* I_SYS_MOUNT:
  *	This symbol, if defined, indicates that <sys/mount.h> exists and
@@ -2397,7 +2401,7 @@
  *	This symbol, if defined, indicates that <sys/utsname.h> exists and
  *	should be included.
  */
-#	I_SYSUTSNAME		/**/
+#define	I_SYSUTSNAME		/**/
 
 /* I_SYS_VFS:
  *	This symbol, if defined, indicates that <sys/vfs.h> exists and
@@ -2434,7 +2438,7 @@
  *	for a C initialization string.  See the inc_version_list entry
  *	in Porting/Glossary for more details.
  */
-#define PERL_INC_VERSION_LIST 		/**/
+#define PERL_INC_VERSION_LIST 0		/**/
 
 /* INSTALL_USR_BIN_PERL:
  *	This symbol, if defined, indicates that Perl is to be installed
@@ -2770,8 +2774,8 @@
  *	This symbol contains the ~name expanded version of SITEARCH, to be used
  *	in programs that are not prepared to deal with ~ expansion at run-time.
  */
-#define SITEARCH ""		/**/
-#define SITEARCH_EXP ""		/**/
+/*#define SITEARCH ""		/**/
+/*#define SITEARCH_EXP ""		/**/
 
 /* SITELIB:
  *	This symbol contains the name of the private library for this package.
@@ -2788,8 +2792,14 @@
  *	This symbol contains the ~name expanded version of SITELIB, to be used
  *	in programs that are not prepared to deal with ~ expansion at run-time.
  */
+/* SITELIB_STEM:
+ *	This define is SITELIB_EXP with any trailing version-specific component
+ *	removed.  The elements in inc_version_list (inc_version_list.U) can
+ *	be tacked onto this variable to generate a list of directories to search.
+ */
 #define SITELIB "/system/ported/perl/lib/site/5.005"		/**/
 #define SITELIB_EXP "/system/ported/perl/lib/site/5.005"		/**/
+#define SITELIB_STEM "/system/ported/perl/lib/site"		/**/
 
 /* Size_t:
  *	This symbol holds the type used to declare length parameters
@@ -2932,17 +2942,29 @@
  *	be built to use the old draft POSIX threads API.
  */
 /*#define	USE_5005THREADS		/**/
-#	USE_ITHREADS		/**/
+/*#define	USE_ITHREADS		/**/
 #if defined(USE_5005THREADS) && !defined(USE_ITHREADS)
 #define		USE_THREADS		/* until src is revised*/
 #endif
 /*#define	OLD_PTHREADS_API		/**/
 
+/* PERL_VENDORARCH_EXP:
+ *	This symbol contains the ~name expanded version of PERL_VENDORARCH, to be used
+ *	in programs that are not prepared to deal with ~ expansion at run-time.
+ */
+#define PERL_VENDORARCH_EXP ""		/**/
+
 /* PERL_VENDORLIB_EXP:
  *	This symbol contains the ~name expanded version of VENDORLIB, to be used
  *	in programs that are not prepared to deal with ~ expansion at run-time.
  */
+/* PERL_VENDORLIB_STEM:
+ *	This define is PERL_VENDORLIB_EXP with any trailing version-specific component
+ *	removed.  The elements in inc_version_list (inc_version_list.U) can
+ *	be tacked onto this variable to generate a list of directories to search.
+ */
 #define PERL_VENDORLIB_EXP ""		/**/
+#define PERL_VENDORLIB_STEM ""		/**/
 
 /* VOIDFLAGS:
  *	This symbol indicates how much support of the void type is given by this

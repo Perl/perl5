@@ -17,7 +17,7 @@
 /*
  * Package name      : perl5
  * Source directory  : .
- * Configuration time: Fri Mar  3 17:00:59 EET 2000
+ * Configuration time: Mon Mar  6 00:00:30 EET 2000
  * Configured by     : jhi
  * Target system     : osf1 alpha.hut.fi v4.0 878 alpha 
  */
@@ -1098,8 +1098,8 @@
  *	This symbol contains the ~name expanded version of ARCHLIB, to be used
  *	in programs that are not prepared to deal with ~ expansion at run-time.
  */
-#define ARCHLIB "/opt/perl/lib/5.5.670/alpha-dec_osf-thread-multi"		/**/
-#define ARCHLIB_EXP "/opt/perl/lib/5.5.670/alpha-dec_osf-thread-multi"		/**/
+#define ARCHLIB "/opt/perl/lib/5.6.0/alpha-dec_osf-thread-multi"		/**/
+#define ARCHLIB_EXP "/opt/perl/lib/5.6.0/alpha-dec_osf-thread-multi"		/**/
 
 /* ARCHNAME:
  *	This symbol holds a string representing the architecture name.
@@ -1190,14 +1190,18 @@
  *	This macro surrounds its token with double quotes.
  */
 #if 42 == 1
-#define CAT2(a,b)a/**/b
-#define STRINGIFY(a)"a"
+#  define CAT2(a,b)	a/**/b
+#  define STRINGIFY(a)	"a"
 		/* If you can get stringification with catify, tell me how! */
 #endif
 #if 42 == 42
-#define CAT2(a,b)a ## b
-#define StGiFy(a)# a
-#define STRINGIFY(a)StGiFy(a)
+#  define PeRl_CaTiFy(a, b)	a ## b	
+#  define PeRl_StGiFy(a)	#a
+/* the additional level of indirection enables these macros to be
+ * used as arguments to other macros.  See K&R 2nd ed., page 231. */
+#  define CAT2(a,b)	PeRl_CaTiFy(a,b)
+#  define StGiFy(a)	PeRl_StGiFy(a)
+#  define STRINGIFY(a)	PeRl_StGiFy(a)
 #endif
 #if 42 != 1 && 42 != 42
 #include "Bletch: How does this C preprocessor catenate tokens?"
@@ -2675,8 +2679,8 @@
  *	This symbol contains the ~name expanded version of PRIVLIB, to be used
  *	in programs that are not prepared to deal with ~ expansion at run-time.
  */
-#define PRIVLIB "/opt/perl/lib/5.5.670"		/**/
-#define PRIVLIB_EXP "/opt/perl/lib/5.5.670"		/**/
+#define PRIVLIB "/opt/perl/lib/5.6.0"		/**/
+#define PRIVLIB_EXP "/opt/perl/lib/5.6.0"		/**/
 
 /* PTRSIZE:
  *	This symbol contains the size of a pointer, so that the C preprocessor
@@ -2774,8 +2778,8 @@
  *	This symbol contains the ~name expanded version of SITEARCH, to be used
  *	in programs that are not prepared to deal with ~ expansion at run-time.
  */
-#define SITEARCH "/opt/perl/lib/site_perl/5.5.670/alpha-dec_osf-thread-multi"		/**/
-#define SITEARCH_EXP "/opt/perl/lib/site_perl/5.5.670/alpha-dec_osf-thread-multi"		/**/
+#define SITEARCH "/opt/perl/lib/site_perl/5.6.0/alpha-dec_osf-thread-multi"		/**/
+#define SITEARCH_EXP "/opt/perl/lib/site_perl/5.6.0/alpha-dec_osf-thread-multi"		/**/
 
 /* SITELIB:
  *	This symbol contains the name of the private library for this package.
@@ -2792,8 +2796,14 @@
  *	This symbol contains the ~name expanded version of SITELIB, to be used
  *	in programs that are not prepared to deal with ~ expansion at run-time.
  */
-#define SITELIB "/opt/perl/lib/site_perl/5.5.670"		/**/
-#define SITELIB_EXP "/opt/perl/lib/site_perl/5.5.670"		/**/
+/* SITELIB_STEM:
+ *	This define is SITELIB_EXP with any trailing version-specific component
+ *	removed.  The elements in inc_version_list (inc_version_list.U) can
+ *	be tacked onto this variable to generate a list of directories to search.
+ */
+#define SITELIB "/opt/perl/lib/site_perl/5.6.0"		/**/
+#define SITELIB_EXP "/opt/perl/lib/site_perl/5.6.0"		/**/
+#define SITELIB_STEM "/opt/perl/lib/site_perl"		/**/
 
 /* Size_t:
  *	This symbol holds the type used to declare length parameters
@@ -2942,11 +2952,23 @@
 #endif
 /*#define	OLD_PTHREADS_API		/ **/
 
+/* PERL_VENDORARCH_EXP:
+ *	This symbol contains the ~name expanded version of PERL_VENDORARCH, to be used
+ *	in programs that are not prepared to deal with ~ expansion at run-time.
+ */
+/*#define PERL_VENDORARCH_EXP ""		/ **/
+
 /* PERL_VENDORLIB_EXP:
  *	This symbol contains the ~name expanded version of VENDORLIB, to be used
  *	in programs that are not prepared to deal with ~ expansion at run-time.
  */
+/* PERL_VENDORLIB_STEM:
+ *	This define is PERL_VENDORLIB_EXP with any trailing version-specific component
+ *	removed.  The elements in inc_version_list (inc_version_list.U) can
+ *	be tacked onto this variable to generate a list of directories to search.
+ */
 /*#define PERL_VENDORLIB_EXP ""		/ **/
+/*#define PERL_VENDORLIB_STEM ""		/ **/
 
 /* VOIDFLAGS:
  *	This symbol indicates how much support of the void type is given by this
@@ -2976,7 +2998,7 @@
 /* PERL_XS_APIVERSION:
  *	This variable contains the version of the oldest perl binary
  *	compatible with the present perl.  perl.c:incpush() and
- *	lib/lib.pm will automatically search in /opt/perl/lib/site_perl/5.5.670/alpha-dec_osf-thread-multi for older
+ *	lib/lib.pm will automatically search in /opt/perl/lib/site_perl/5.6.0/alpha-dec_osf-thread-multi for older
  *	directories across major versions back to xs_apiversion.
  *	This is only useful if you have a perl library directory tree
  *	structured like the default one.
@@ -2995,7 +3017,7 @@
  *	compatible with the present perl.  (That is, pure perl modules
  *	written for pm_apiversion will still work for the current
  *	version).  perl.c:incpush() and lib/lib.pm will automatically
- *	search in /opt/perl/lib/site_perl/5.5.670 for older directories across major versions
+ *	search in /opt/perl/lib/site_perl/5.6.0 for older directories across major versions
  *	back to pm_apiversion.  This is only useful if you have a perl
  *	library directory tree structured like the default one.  The
  *	versioned site_perl library was introduced in 5.005, so that's
@@ -3005,7 +3027,7 @@
  *	(presumably) be similar.
  *	See the INSTALL file for how this works.
  */
-#define PERL_XS_APIVERSION "5.5.670"
+#define PERL_XS_APIVERSION "5.6.0"
 #define PERL_PM_APIVERSION "5.005"
 
 /* HAS_GETFSSTAT:

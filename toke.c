@@ -6938,10 +6938,9 @@ Perl_scan_num(pTHX_ char *start)
 	/* make an sv from the string */
 	sv = NEWSV(92,0);
 
-#if ( defined(USE_64_BIT_INT) && \
-	(!defined(HAS_STRTOLL)|| !defined(HAS_STRTOULL))) || \
-    (!defined(USE_64_BIT_INT) && \
-	(!defined(HAS_STRTOL) || !defined(HAS_STRTOUL)))
+	/* unfortunately this monster needs to be on one line or
+	   makedepend will be confused. */
+#if (defined(USE_64_BIT_INT) && (!defined(HAS_STRTOLL)|| !defined(HAS_STRTOULL))) || (!defined(USE_64_BIT_INT) && (!defined(HAS_STRTOL) || !defined(HAS_STRTOUL)))
 
 	/*
 	   No working strto[u]l[l]. Since atoi() doesn't do range checks,

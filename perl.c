@@ -3230,7 +3230,7 @@ S_init_perllib(pTHX)
     }
 
 /* Use the ~-expanded versions of APPLLIB (undocumented),
-    ARCHLIB PRIVLIB SITEARCH and SITELIB 
+    ARCHLIB PRIVLIB SITEARCH SITELIB VENDORARCH and VENDORLIB
 */
 #ifdef APPLLIB_EXP
     incpush(APPLLIB_EXP, TRUE);
@@ -3240,7 +3240,7 @@ S_init_perllib(pTHX)
     incpush(ARCHLIB_EXP, FALSE);
 #endif
 #ifndef PRIVLIB_EXP
-#define PRIVLIB_EXP "/usr/local/lib/perl5:/usr/local/lib/perl"
+#  define PRIVLIB_EXP "/usr/local/lib/perl5:/usr/local/lib/perl"
 #endif
 #if defined(WIN32) 
     incpush(PRIVLIB_EXP, TRUE);
@@ -3248,35 +3248,54 @@ S_init_perllib(pTHX)
     incpush(PRIVLIB_EXP, FALSE);
 #endif
 
-#if defined(WIN32)
-    incpush(SITELIB_EXP, TRUE);	/* XXX Win32 needs inc_version_list support */
-#else
-#ifdef SITELIB_EXP
-    {
-	char *path = SITELIB_EXP;
+#ifdef SITEARCH_EXP
+#  if defined(WIN32)
+    incpush(SITEARCH_EXP, TRUE);
+#  else
+    incpush(SITEARCH_EXP, FALSE);
+#  endif
+#endif
 
-	if (path) {
-	    char buf[1024];
-	    char *ver = strrchr(path,'/');	/* XXX Hack, Configure var needed */
-	    if (ver && ver[1] == (STRINGIFY(PERL_REVISION))[0]
-		&& strlen(path) < sizeof(buf))
-	    {
-		strcpy(buf,path);
-		buf[ver-path] = '\0';
-		path = buf;
-	    }
-	    incpush(path, TRUE);
-	}
-    }
+#ifdef SITELIB_EXP
+#  if defined(WIN32)
+    incpush(SITELIB_EXP, TRUE);
+#  else
+    incpush(SITELIB_EXP, FALSE);
+#  endif
 #endif
+
+#ifdef SITELIB_STEM /* Search for version-specific dirs below here */
+#  if defined(WIN32)
+    /* XXX Win32 needs inc_version_list support */
+#  else
+    incpush(SITELIB_STEM, TRUE);
+#  endif
 #endif
-#if defined(PERL_VENDORLIB_EXP)
-#if defined(WIN32) 
+
+#ifdef PERL_VENDORARCH_EXP
+#  if defined(WIN32)
+    incpush(PERL_VENDORARCH_EXP, TRUE);
+#  else
+    incpush(PERL_VENDORARCH_EXP, FALSE);
+#  endif
+#endif
+
+#ifdef PERL_VENDORLIB_EXP
+#  if defined(WIN32)
     incpush(PERL_VENDORLIB_EXP, TRUE);
-#else
+#  else
     incpush(PERL_VENDORLIB_EXP, FALSE);
+#  endif
 #endif
+
+#ifdef PERL_VENDORLIB_STEM /* Search for version-specific dirs below here */
+#  if defined(WIN32)
+    /* XXX Win32 needs inc_version_list support */
+#  else
+    incpush(PERL_VENDORLIB_STEM, TRUE);
+#  endif
 #endif
+
     if (!PL_tainting)
 	incpush(".", FALSE);
 }
