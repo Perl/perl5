@@ -47,7 +47,12 @@ $version = "950918.5";
 $stripped=0;
 
 &init;
-$rc_file = join('/', $ENV{'HOME'}, ".search");
+if (exists $ENV{'HOME'}) {
+    $rc_file = join('/', $ENV{'HOME'}, ".search");
+}
+else {
+    $rc_file = "";
+}
 
 &check_args;
 
