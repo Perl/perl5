@@ -2,12 +2,12 @@
 
 package Getopt::Long;
 
-# RCS Status      : $Id: GetoptLong.pm,v 2.65 2003-05-19 17:44:13+02 jv Exp $
+# RCS Status      : $Id: GetoptLong.pm,v 2.67 2003-06-24 23:18:55+02 jv Exp jv $
 # Author          : Johan Vromans
 # Created On      : Tue Sep 11 15:00:12 1990
 # Last Modified By: Johan Vromans
-# Last Modified On: Mon May 19 17:43:33 2003
-# Update Count    : 1330
+# Last Modified On: Sun Sep 21 13:16:30 2003
+# Update Count    : 1363
 # Status          : Released
 
 ################ Copyright ################
@@ -35,10 +35,10 @@ use 5.004;
 use strict;
 
 use vars qw($VERSION);
-$VERSION        =  2.33;
+$VERSION        =  2.3303;
 # For testing versions only.
-#use vars qw($VERSION_STRING);
-#$VERSION_STRING = "2.32_06";
+use vars qw($VERSION_STRING);
+$VERSION_STRING = "2.33_03";
 
 use Exporter;
 use vars qw(@ISA @EXPORT @EXPORT_OK);
@@ -259,25 +259,28 @@ sub GetOptions(@) {
 
     $error = '';
 
-    print STDERR ("Getopt::Long $Getopt::Long::VERSION (",
-		  '$Revision: 2.65 $', ") ",
-		  "called from package \"$pkg\".",
-		  "\n  ",
-		  "ARGV: (@ARGV)",
-		  "\n  ",
-		  "autoabbrev=$autoabbrev,".
-		  "bundling=$bundling,",
-		  "getopt_compat=$getopt_compat,",
-		  "gnu_compat=$gnu_compat,",
-		  "order=$order,",
-		  "\n  ",
-		  "ignorecase=$ignorecase,",
-		  "autohelp=$auto_help,",
-		  "autoversion=$auto_version,",
-		  "passthrough=$passthrough,",
-		  "genprefix=\"$genprefix\".",
-		  "\n")
-	if $debug;
+    if ( $debug ) {
+	# Avoid some warnings if debugging.
+	local ($^W) = 0;
+	print STDERR
+	  ("Getopt::Long $Getopt::Long::VERSION (",
+	   '$Revision: 2.67 $', ") ",
+	   "called from package \"$pkg\".",
+	   "\n  ",
+	   "ARGV: (@ARGV)",
+	   "\n  ",
+	   "autoabbrev=$autoabbrev,".
+	   "bundling=$bundling,",
+	   "getopt_compat=$getopt_compat,",
+	   "gnu_compat=$gnu_compat,",
+	   "order=$order,",
+	   "\n  ",
+	   "ignorecase=$ignorecase,",
+	   "requested_version=$requested_version,",
+	   "passthrough=$passthrough,",
+	   "genprefix=\"$genprefix\".",
+	   "\n");
+    }
 
     # Check for ref HASH as first argument.
     # First argument may be an object. It's OK to use this as long
@@ -371,7 +374,18 @@ sub GetOptions(@) {
 	    elsif ( $rl eq "HASH" ) {
 		$opctl{$name}[CTL_DEST] = CTL_DEST_HASH;
 	    }
-	    elsif ( $rl eq "SCALAR" || $rl eq "CODE" ) {
+	    elsif ( $rl eq "SCALAR" ) {
+#		if ( $opctl{$name}[CTL_DEST] == CTL_DEST_ARRAY ) {
+#		    my $t = $linkage{$orig};
+#		    $$t = $linkage{$orig} = [];
+#		}
+#		elsif ( $opctl{$name}[CTL_DEST] == CTL_DEST_HASH ) {
+#		}
+#		else {
+		    # Ok.
+#		}
+	    }
+	    elsif ( $rl eq "CODE" ) {
 		# Ok.
 	    }
 	    else {
@@ -411,12 +425,14 @@ sub GetOptions(@) {
 	    $opctl{version} = ['','version',0,CTL_DEST_CODE,undef];
 	    $linkage{version} = \&VersionMessage;
 	}
+	$auto_version = 1;
     }
     if ( defined($auto_help) ? $auto_help : ($requested_version >= 2.3203) ) {
 	if ( !defined($opctl{help}) && !defined($opctl{'?'}) ) {
 	    $opctl{help} = $opctl{'?'} = ['','help',0,CTL_DEST_CODE,undef];
 	    $linkage{help} = \&HelpMessage;
 	}
+	$auto_help = 1;
     }
 
     # Show the options tables if debugging.
@@ -479,6 +495,26 @@ sub GetOptions(@) {
 		            else {
 			        ${$linkage{$opt}} = $arg;
 			    }
+			}
+			elsif ( $ctl->[CTL_DEST] == CTL_DEST_ARRAY ) {
+			    print STDERR ("=> ref(\$L{$opt}) auto-vivified",
+					  " to ARRAY\n")
+			      if $debug;
+			    my $t = $linkage{$opt};
+			    $$t = $linkage{$opt} = [];
+			    print STDERR ("=> push(\@{\$L{$opt}, \"$arg\")\n")
+			      if $debug;
+			    push (@{$linkage{$opt}}, $arg);
+			}
+			elsif ( $ctl->[CTL_DEST] == CTL_DEST_HASH ) {
+			    print STDERR ("=> ref(\$L{$opt}) auto-vivified",
+					  " to HASH\n")
+			      if $debug;
+			    my $t = $linkage{$opt};
+			    $$t = $linkage{$opt} = {};
+			    print STDERR ("=> \$\$L{$opt}->{$key} = \"$arg\"\n")
+			      if $debug;
+			    $linkage{$opt}->{$key} = $arg;
 			}
 			else {
 			    print STDERR ("=> \$\$L{$opt} = \"$arg\"\n")
@@ -828,6 +864,15 @@ sub FindOption ($$$$) {
 		  if defined $opctl->{$_}->[CTL_CNAME];
 		$hit{$_} = 1;
 	    }
+	    # Remove auto-supplied options (version, help).
+	    if ( keys(%hit) == 2 ) {
+		if ( $auto_version && exists($hit{version}) ) {
+		    delete $hit{version};
+		}
+		elsif ( $auto_help && exists($hit{help}) ) {
+		    delete $hit{help};
+		}
+	    }
 	    # Now see if it really is ambiguous.
 	    unless ( keys(%hit) == 1 ) {
 		return (0) if $passthrough;
@@ -857,6 +902,11 @@ sub FindOption ($$$$) {
     my $ctl = $opctl->{$tryopt};
     unless  ( defined $ctl ) {
 	return (0) if $passthrough;
+	# Pretend one char when bundling.
+	if ( $bundling == 1) {
+	    $opt = substr($opt,0,1);
+            unshift (@ARGV, $starter.$rest) if defined $rest;
+	}
 	warn ("Unknown option: ", $opt, "\n");
 	$error++;
 	return (1, undef);
@@ -1450,19 +1500,23 @@ use multiple directories to search for library files:
 To accomplish this behaviour, simply specify an array reference as the
 destination for the option:
 
-    my @libfiles = ();
     GetOptions ("library=s" => \@libfiles);
 
-Used with the example above, C<@libfiles> would contain two strings
-upon completion: C<"lib/srdlib"> and C<"lib/extlib">, in that order.
-It is also possible to specify that only integer or floating point
-numbers are acceptible values.
+Alternatively, you can specify that the option can have multiple
+values by adding a "@", and pass a scalar reference as the
+destination:
+
+    GetOptions ("library=s@" => \$libfiles);
+
+Used with the example above, C<@libfiles> (or C<@$libfiles>) would
+contain two strings upon completion: C<"lib/srdlib"> and
+C<"lib/extlib">, in that order. It is also possible to specify that
+only integer or floating point numbers are acceptible values.
 
 Often it is useful to allow comma-separated lists of values as well as
 multiple occurrences of the options. This is easy using Perl's split()
 and join() operators:
 
-    my @libfiles = ();
     GetOptions ("library=s" => \@libfiles);
     @libfiles = split(/,/,join(',',@libfiles));
 
@@ -1475,17 +1529,20 @@ If the option destination is a reference to a hash, the option will
 take, as value, strings of the form I<key>C<=>I<value>. The value will
 be stored with the specified key in the hash.
 
-    my %defines = ();
     GetOptions ("define=s" => \%defines);
+
+Alternatively you can use:
+
+    GetOptions ("define=s%" => \$defines);
 
 When used with command line options:
 
     --define os=linux --define vendor=redhat
 
-the hash C<%defines> will contain two keys, C<"os"> with value
-C<"linux> and C<"vendor"> with value C<"redhat">.
-It is also possible to specify that only integer or floating point
-numbers are acceptible values. The keys are always taken to be strings.
+the hash C<%defines> (or C<%$defines>) will contain two keys, C<"os">
+with value C<"linux> and C<"vendor"> with value C<"redhat">. It is
+also possible to specify that only integer or floating point numbers
+are acceptible values. The keys are always taken to be strings.
 
 =head2 User-defined subroutines to handle options
 
@@ -2014,6 +2071,10 @@ program name, its version (if $main::VERSION is defined), and the
 versions of Getopt::Long and Perl. The message will be written to
 standard output and processing will terminate.
 
+C<auto_version> will be enabled if the calling program explicitly
+specified a version number higher than 2.32 in the C<use> or
+C<require> statement.
+
 =item auto_help (default:disabled)
 
 Automatically provide support for the B<--help> and B<-?> options if
@@ -2022,6 +2083,10 @@ the application did not specify a handler for this option itself.
 Getopt::Long will provide a help message using module L<Pod::Usage>. The
 message, derived from the SYNOPSIS POD section, will be written to
 standard output and processing will terminate.
+
+C<auto_help> will be enabled if the calling program explicitly
+specified a version number higher than 2.32 in the C<use> or
+C<require> statement.
 
 =item pass_through (default: disabled)
 
@@ -2209,23 +2274,6 @@ strongly encouraged to use the C<Configure> routine that was introduced
 in version 2.17. Besides, it is much easier.
 
 =head1 Trouble Shooting
-
-=head2 Warning: Ignoring '!' modifier for short option
-
-This warning is issued when the '!' modifier is applied to a short
-(one-character) option and bundling is in effect. E.g.,
-
-    Getopt::Long::Configure("bundling");
-    GetOptions("foo|f!" => \$foo);
-
-Note that older Getopt::Long versions did not issue a warning, because
-the '!' modifier was applied to the first name only. This bug was
-fixed in 2.22.
-
-Solution: separate the long and short names and apply the '!' to the
-long names only, e.g.,
-
-    GetOptions("foo!" => \$foo, "f" => \$foo);
 
 =head2 GetOptions does not return a false result when an option is not supplied
 
