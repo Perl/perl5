@@ -498,7 +498,7 @@ S_require_errno(pTHX_ GV *gv)
 	PUTBACK;
 	ENTER;
 	save_scalar(gv); /* keep the value of $! */
-	require_pv("Errno.pm");
+	load_module(aTHX_ PERL_LOADMOD_NOIMPORT, newSVpvn("Errno",5), Nullsv);
 	LEAVE;
 	SPAGAIN;
 	stash = gv_stashpvn("Errno",5,FALSE);
