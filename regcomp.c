@@ -4415,7 +4415,7 @@ Perl_regprop(pTHX_ SV *sv, regnode *o)
 
     if (k == EXACT) {
         SV *dsv = sv_2mortal(newSVpvn("", 0));
-	bool do_utf8 = PL_reg_match_utf8;
+	bool do_utf8 = DO_UTF8(sv);
 	char *s    = do_utf8 ?
 	  pv_uni_display(dsv, (U8*)STRING(o), STR_LEN(o), 60, 0) :
 	  STRING(o);

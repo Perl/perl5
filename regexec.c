@@ -1542,8 +1542,8 @@ Perl_regexec_flags(pTHX_ register regexp *prog, char *stringarg, register char *
     }
 
     DEBUG_r({
-	 char *s   = UTF ? sv_uni_display(dsv, sv, 60, 0) : startpos;
-	 int   len = UTF ? strlen(s) : strend - startpos;
+	 char *s   = do_utf8 ? sv_uni_display(dsv, sv, 60, 0) : startpos;
+	 int   len = do_utf8 ? strlen(s) : strend - startpos;
 	 if (!PL_colorset)
 	     reginitcolors();
 	 PerlIO_printf(Perl_debug_log,
@@ -2070,13 +2070,13 @@ S_regmatch(pTHX_ regnode *prog)
 		? (5 + taill) - l : locinput - PL_bostr;
 	    int pref0_len;
 
-	    while (UTF8_IS_CONTINUATION(*(U8*)(locinput - pref_len)))
+	    while (do_utf8 && UTF8_IS_CONTINUATION(*(U8*)(locinput - pref_len)))
 		pref_len++;
 	    pref0_len = pref_len  - (locinput - PL_reg_starttry);
 	    if (l + pref_len < (5 + taill) && l < PL_regeol - locinput)
 		l = ( PL_regeol - locinput > (5 + taill) - pref_len
 		      ? (5 + taill) - pref_len : PL_regeol - locinput);
-	    while (UTF8_IS_CONTINUATION(*(U8*)(locinput + l)))
+	    while (do_utf8 && UTF8_IS_CONTINUATION(*(U8*)(locinput + l)))
 		l--;
 	    if (pref0_len < 0)
 		pref0_len = 0;
@@ -2085,21 +2085,21 @@ S_regmatch(pTHX_ regnode *prog)
 	    regprop(prop, scan);
 	    {
 	      char *s0 =
-		UTF ?
+		do_utf8 ?
 		pv_uni_display(dsv0, (U8*)(locinput - pref_len),
 			       pref0_len, 60, 0) :
 		locinput - pref_len;
-	      int len0 = UTF ? strlen(s0) : pref0_len;
-	      char *s1 = UTF ?
+	      int len0 = do_utf8 ? strlen(s0) : pref0_len;
+	      char *s1 = do_utf8 ?
 		pv_uni_display(dsv1, (U8*)(locinput - pref_len + pref0_len),
 			       pref_len - pref0_len, 60, 0) :
 		locinput - pref_len + pref0_len;
-	      int len1 = UTF ? strlen(s1) : pref_len - pref0_len;
-	      char *s2 = UTF ?
+	      int len1 = do_utf8 ? strlen(s1) : pref_len - pref0_len;
+	      char *s2 = do_utf8 ?
 		pv_uni_display(dsv2, (U8*)locinput,
 			       PL_regeol - locinput, 60, 0) :
 		locinput;
-	      int len2 = UTF ? strlen(s2) : l;
+	      int len2 = do_utf8 ? strlen(s2) : l;
 	      PerlIO_printf(Perl_debug_log,
 			    "%4"IVdf" <%s%.*s%s%s%.*s%s%s%s%.*s%s>%*s|%3"IVdf":%*s%s\n",
 			    (IV)(locinput - PL_bostr),
