@@ -600,6 +600,9 @@ The value for C<$offset> in Unix will be C<0>, but in Mac OS will be
 some large number.  C<$offset> can then be added to a Unix time value
 to get what should be the proper value on any system.
 
+On Windows (at least), you shouldn't pass a negative value to C<gmtime> or
+C<localtime>.
+
 =head2 Character sets and character encoding
 
 Assume very little about character sets.
