@@ -616,9 +616,11 @@ for (@locales) {
 }
 EXPECT
 ########
+# [ID 20001202.002] and change #8066 added 'at -e line 1';
+# reversed again as a result of [perl #17763]
 die qr(x)
 EXPECT
-(?-xism:x) at - line 1.
+(?-xism:x)
 ########
 # 20001210.003 mjd@plover.com
 format REMITOUT_TOP =
