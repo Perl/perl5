@@ -1,24 +1,27 @@
 package Encode;
+use strict;
 
-$VERSION = 0.01;
+our $VERSION = 0.02;
 
 require DynaLoader;
 require Exporter;
 
-@ISA = qw(Exporter DynaLoader);
+our @ISA = qw(Exporter DynaLoader);
 
 # Public, encouraged API is exported by default
-@EXPORT = qw (
+our @EXPORT = qw (
   encode
   decode
   encode_utf8
   decode_utf8
   find_encoding
+  encodings
 );
 
-@EXPORT_OK =
+our @EXPORT_OK =
     qw(
-       encodings
+       define_encoding
+       define_alias
        from_to
        is_utf8
        is_8bit
@@ -35,71 +38,97 @@ bootstrap Encode ();
 
 use Carp;
 
-# The global hash is declared in XS code
-$encoding{Unicode}      = bless({},'Encode::Unicode');
-$encoding{utf8}         = bless({},'Encode::utf8');
-$encoding{'iso10646-1'} = bless({},'Encode::iso10646_1');
+# Make a %encoding package variable to allow a certain amount of cheating
+our %encoding;
+my @alias;  # ordered matching list
+my %alias;  # cached known aliases
 
 sub encodings
 {
  my ($class) = @_;
- foreach my $dir (@INC)
-  {
-   if (opendir(my $dh,"$dir/Encode"))
-    {
-     while (defined(my $name = readdir($dh)))
-      {
-       if ($name =~ /^(.*)\.enc$/)
-        {
-         next if exists $encoding{$1};
-         $encoding{$1} = "$dir/$name";
-        }
-      }
-     closedir($dh);
-    }
-  }
  return keys %encoding;
 }
 
-sub loadEncoding
+sub findAlias
 {
- my ($class,$name,$file) = @_;
- if (open(my $fh,$file))
+ my $class = shift;
+ local $_ = shift;
+ unless (exists $alias{$_})
   {
-   my $type;
-   while (1)
+   for (my $i=0; $i < @alias; $i += 2)
     {
-     my $line = <$fh>;
-     $type = substr($line,0,1);
-     last unless $type eq '#';
+     my $alias = $alias[$i];
+     my $val   = $alias[$i+1];
+     my $new;
+     if (ref($alias) eq 'Regexp' && $_ =~ $alias)
+      {
+       $new = eval $val;
+      }
+     elsif (ref($alias) eq 'CODE')
+      {
+       $new = &{$alias}($val)
+      }
+     elsif (lc($_) eq $alias)
+      {
+       $new = $val;
+      }
+     if (defined($new))
+      {
+       next if $new eq $_; # avoid (direct) recursion on bugs
+       my $enc = (ref($new)) ? $new : find_encoding($new);
+       if ($enc)
+        {
+         $alias{$_} = $enc;
+         last;
+        }
+      }
     }
-   $class .= ('::'.(($type eq 'E') ? 'Escape' : 'Table'));
-   #warn "Loading $file";
-   return $class->read($fh,$name,$type);
   }
- else
+ return $alias{$_};
+}
+
+sub define_alias
+{
+ while (@_)
   {
-   return undef;
+   my ($alias,$name) = splice(@_,0,2);
+   push(@alias, $alias => $name);
   }
+}
+
+define_alias( qr/^iso(\d+-\d+)$/i => '"iso-$1"' );
+define_alias( qr/^(\S+)\s+(.*)$/i => '"$1-$2"' );
+#define_alias( sub { return /^iso-(\d+-\d+)$/i  ? "iso$1" : '' } );
+define_alias( 'ascii' => 'US-ascii');
+define_alias( 'ibm-1047' => 'cp1047');
+
+sub define_encoding
+{
+ my $obj  = shift;
+ my $name = shift;
+ $encoding{$name} = $obj;
+ my $lc = lc($name);
+ define_alias($lc => $obj) unless $lc eq $name;
+ while (@_)
+  {
+   my $alias = shift;
+   define_alias($alias,$obj);
+  }
+ return $obj;
 }
 
 sub getEncoding
 {
  my ($class,$name) = @_;
  my $enc;
- unless (ref($enc = $encoding{$name}))
+ if (exists $encoding{$name})
   {
-   $enc = $class->loadEncoding($name,$enc) if defined $enc;
-   unless (ref($enc))
-    {
-     foreach my $dir (@INC)
-      {
-       last if ($enc = $class->loadEncoding($name,"$dir/Encode/$name.enc"));
-      }
-    }
-   $encoding{$name} = $enc;
+   return $encoding{$name};
   }
- return $enc;
+ else
+  {
+   return $class->findAlias($name);
+  }
 }
 
 sub find_encoding
@@ -159,6 +188,17 @@ sub decode_utf8
 package Encode::Encoding;
 # Base class for classes which implement encodings
 
+sub Define
+{
+ my $obj = shift;
+ my $canonical = shift;
+ $obj = bless { Name => $canonical },$obj unless ref $obj;
+ # warn "$canonical => $obj\n";
+ Encode::define_encoding($obj, $canonical, @_);
+}
+
+sub name { shift->{'Name'} }
+
 # Temporary legacy methods
 sub toUnicode    { shift->decode(@_) }
 sub fromUnicode  { shift->encode(@_) }
@@ -174,7 +214,7 @@ use base 'Encode::Encoding';
 # Dummy package that provides the encode interface but leaves data
 # as UTF-8 encoded. It is here so that from_to() works.
 
-sub name { 'Unicode' }
+__PACKAGE__->Define('Unicode');
 
 sub decode
 {
@@ -188,12 +228,11 @@ sub decode
 
 package Encode::utf8;
 use base 'Encode::Encoding';
-
 # package to allow long-hand
 #   $octets = encode( utf8 => $string );
 #
 
-sub name { 'utf8' }
+__PACKAGE__->Define(qw(UTF-8 utf8));
 
 sub decode
 {
@@ -215,131 +254,12 @@ sub encode
  return $octets;
 }
 
-package Encode::Table;
-use base 'Encode::Encoding';
-
-sub read
-{
- my ($class,$fh,$name,$type) = @_;
- my $rep = $class->can("rep_$type");
- my ($def,$sym,$pages) = split(/\s+/,scalar(<$fh>));
- my @touni;
- my %fmuni;
- my $count = 0;
- $def = hex($def);
- while ($pages--)
-  {
-   my $line = <$fh>;
-   chomp($line);
-   my $page = hex($line);
-   my @page;
-   my $ch = $page * 256;
-   for (my $i = 0; $i < 16; $i++)
-    {
-     my $line = <$fh>;
-     for (my $j = 0; $j < 16; $j++)
-      {
-       my $val = hex(substr($line,0,4,''));
-       if ($val || !$ch)
-        {
-         my $uch = chr($val);
-         push(@page,$uch);
-         $fmuni{$uch} = $ch;
-         $count++;
-        }
-       else
-        {
-         push(@page,undef);
-        }
-       $ch++;
-      }
-    }
-   $touni[$page] = \@page;
-  }
-
- return bless {Name  => $name,
-               Rep   => $rep,
-               ToUni => \@touni,
-               FmUni => \%fmuni,
-               Def   => $def,
-               Num   => $count,
-              },$class;
-}
-
-sub name { shift->{'Name'} }
-
-sub rep_S { 'C' }
-
-sub rep_D { 'n' }
-
-sub rep_M { ($_[0] > 255) ? 'n' : 'C' }
-
-sub representation
-{
- my ($obj,$ch) = @_;
- $ch = 0 unless @_ > 1;
- $obj-{'Rep'}->($ch);
-}
-
-sub decode
-{
- my ($obj,$str,$chk) = @_;
- my $rep   = $obj->{'Rep'};
- my $touni = $obj->{'ToUni'};
- my $uni   = '';
- while (length($str))
-  {
-   my $ch = ord(substr($str,0,1,''));
-   my $x;
-   if (&$rep($ch) eq 'C')
-    {
-     $x = $touni->[0][$ch];
-    }
-   else
-    {
-     $x = $touni->[$ch][ord(substr($str,0,1,''))];
-    }
-   unless (defined $x)
-    {
-     last if $chk;
-     # What do we do here ?
-     $x = '';
-    }
-   $uni .= $x;
-  }
- $_[1] = $str if $chk;
- return $uni;
-}
-
-sub encode
-{
- my ($obj,$uni,$chk) = @_;
- my $fmuni = $obj->{'FmUni'};
- my $str   = '';
- my $def   = $obj->{'Def'};
- my $rep   = $obj->{'Rep'};
- while (length($uni))
-  {
-   my $ch = substr($uni,0,1,'');
-   my $x  = $fmuni->{chr(ord($ch))};
-   unless (defined $x)
-    {
-     last if ($chk);
-     $x = $def;
-    }
-   $str .= pack(&$rep($x),$x);
-  }
- $_[1] = $uni if $chk;
- return $str;
-}
-
 package Encode::iso10646_1;
 use base 'Encode::Encoding';
-
-# Encoding is 16-bit network order Unicode
+# Encoding is 16-bit network order Unicode (no surogates)
 # Used for X font encodings
 
-sub name { 'iso10646-1' }
+__PACKAGE__->Define(qw(UCS-2 iso10646-1));
 
 sub decode
 {
@@ -372,38 +292,6 @@ sub encode
   }
  $_[1] = $uni if $chk;
  return $str;
-}
-
-
-package Encode::Escape;
-use base 'Encode::Encoding';
-
-use Carp;
-
-sub read
-{
- my ($class,$fh,$name) = @_;
- my %self = (Name => $name, Num => 0);
- while (<$fh>)
-  {
-   my ($key,$val) = /^(\S+)\s+(.*)$/;
-   $val =~ s/^\{(.*?)\}/$1/g;
-   $val =~ s/\\x([0-9a-f]{2})/chr(hex($1))/ge;
-   $self{$key} = $val;
-  }
- return bless \%self,$class;
-}
-
-sub name { shift->{'Name'} }
-
-sub decode
-{
- croak("Not implemented yet");
-}
-
-sub encode
-{
- croak("Not implemented yet");
 }
 
 # switch back to Encode package in case we ever add AutoLoader
@@ -564,8 +452,6 @@ Because of all the alias issues, and because in the general case
 encodings have state C<Encode> uses the encoding object internally
 once an operation is in progress.
 
-I<Aliasing is not yet implemented.>
-
 =head1 PERL ENCODING API
 
 =head2 Generic Encoding Interface
@@ -686,7 +572,7 @@ UTF-16 is similar to UCS-2, 16 bit or 2-byte chunks.
 UCS-2 can only represent 0..0xFFFF, while UTF-16 has a "surogate pair"
 scheme which allows it to cover the whole Unicode range.
 
-Encode implements big-endian UCS-2 as the encoding "iso10646-1" as that
+Encode implements big-endian UCS-2 aliased to "iso10646-1" as that
 happens to be the name used by that representation when used with X11 fonts.
 
 UTF-32 or UCS-4 is 32-bit or 4-byte chunks.  Perl's logical characters
@@ -701,10 +587,61 @@ to transfer strings in this form (e.g. to write them to a file) would need to
 
 depending on the endian required.
 
-No UTF-32 encodings are not yet implemented.
+No UTF-32 encodings are implemented yet.
 
 Both UCS-2 and UCS-4 style encodings can have "byte order marks" by representing
 the code point 0xFFFE as the very first thing in a file.
+
+=head2 Listing available encodings
+
+  use Encode qw(encodings);
+  @list = encodings();
+
+Returns a list of the canonical names of the available encodings.
+
+=head2 Defining Aliases
+
+  use Encode qw(define_alias);
+  define_alias( newName => ENCODING);
+
+Allows newName to be used as am alias for ENCODING. ENCODING may be either the
+name of an encoding or and encoding object (as above).
+
+Currently I<newName> can be specified in the following ways:
+
+=over 4
+
+=item As a simple string.
+
+=item As a qr// compiled regular expression, e.g.:
+
+  define_alias( qr/^iso8859-(\d+)$/i => '"iso-8859-$1"' );
+
+In this case if I<ENCODING> is not a reference it is C<eval>-ed to allow
+C<$1> etc. to be subsituted.
+The example is one way to names as used in X11 font names to alias the MIME names for the
+iso-8859-* family.
+
+=item As a code reference, e.g.:
+
+  define_alias( sub { return /^iso8859-(\d+)$/i ? "iso-8859-$1" : undef } , '');
+
+In this case C<$_> will be set to the name that is being looked up and
+I<ENCODING> is passed to the sub as its first argument.
+The example is another way to names as used in X11 font names to alias the MIME names for
+the iso-8859-* family.
+
+=back
+
+=head2 Defining Encodings
+
+  use Encode qw(define_alias);
+  define_encoding( $object, 'canonicalName' [,alias...]);
+
+Causes I<canonicalName> to be associated with I<$object>.
+The object should provide the interface described in L</"IMPLEMENTATION CLASSES"> below.
+If more than two arguments are provided then additional arguments are taken
+as aliases for I<$object> as for C<define_alias>.
 
 =head1 Encoding and IO
 
@@ -714,7 +651,7 @@ If perl is configured to use the new 'perlio' IO system then
 C<Encode> provides a "layer" (See L<perliol>) which can transform
 data as it is read or written.
 
-     open(my $ilyad,'>:encoding(iso8859-7)','ilyad.greek');
+     open(my $ilyad,'>:encoding(iso-8859-7)','ilyad.greek');
      print $ilyad @epic;
 
 In addition the new IO system can also be configured to read/write
@@ -816,8 +753,7 @@ not a string.
 
 As mentioned above encodings are (in the current implementation at least)
 defined by objects. The mapping of encoding name to object is via the
-C<%Encode::encodings> hash. (It is a package hash to allow XS code to get
-at it.)
+C<%encodings> hash.
 
 The values of the hash can currently be either strings or objects.
 The string form may go away in the future. The string form occurs
@@ -883,7 +819,16 @@ and additional parameter.
 
 It is also highly desirable that encoding classes inherit from C<Encode::Encoding>
 as a base class. This allows that class to define additional behaviour for
-all encoding objects.
+all encoding objects. For example built in Unicode, UCS-2 and UTF-8 classes
+use :
+
+  package Encode::MyEncoding;
+  use base qw(Encode::Encoding);
+
+  __PACKAGE__->Define(qw(myCanonical myAlias));
+
+To create an object with bless {Name => ...},$class, and call define_encoding.
+They inherit their C<name> method from C<Encode::Encoding>.
 
 =head2 Compiled Encodings
 

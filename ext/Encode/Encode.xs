@@ -60,13 +60,12 @@ PerlIOEncode_pushed(PerlIO *f, const char *mode,const char *arg,STRLEN len)
  ENTER;
  SAVETMPS;
  PUSHMARK(sp);
- XPUSHs(sv_2mortal(newSVpv("Encode",0)));
  XPUSHs(sv_2mortal(newSVpvn(arg,len)));
  PUTBACK;
- if (perl_call_method("getEncoding",G_SCALAR) != 1)
+ if (perl_call_pv("Encode::find_encoding",G_SCALAR) != 1)
   {
    /* should never happen */
-   Perl_die(aTHX_ "Encode::getEncoding did not return a value");
+   Perl_die(aTHX_ "Encode::find_encoding did not return a value");
    return -1;
   }
  SPAGAIN;
@@ -330,15 +329,19 @@ PerlIO_funcs PerlIO_encode = {
 void
 Encode_Define(pTHX_ encode_t *enc)
 {
- HV *hash  = get_hv("Encode::encoding",GV_ADD|GV_ADDMULTI);
+ dSP;
  HV *stash = gv_stashpv("Encode::XS", TRUE);
  SV *sv    = sv_bless(newRV_noinc(newSViv(PTR2IV(enc))),stash);
  int i = 0;
+ PUSHMARK(sp);
+ XPUSHs(sv);
  while (enc->name[i])
   {
    const char *name = enc->name[i++];
-   hv_store(hash,name,strlen(name),SvREFCNT_inc(sv),0);
+   XPUSHs(sv_2mortal(newSVpvn(name,strlen(name))));
   }
+ PUTBACK;
+ call_pv("Encode::define_encoding",G_DISCARD);
  SvREFCNT_dec(sv);
 }
 

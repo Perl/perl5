@@ -8,15 +8,15 @@ BEGIN {
     }
 }
 use Test;
-use Encode qw(from_to encode decode encode_utf8 decode_utf8);
+use Encode qw(from_to encode decode encode_utf8 decode_utf8 find_encoding);
 use charnames qw(greek);
-my @encodings = grep(/iso8859/,Encode::encodings());
+my @encodings = grep(/iso-?8859/,Encode::encodings());
 my $n = 2;
 my @character_set = ('0'..'9', 'A'..'Z', 'a'..'z');
 my @source = qw(ascii iso8859-1 cp1250);
 my @destiny = qw(cp1047 cp37 posix-bc);
 my @ebcdic_sets = qw(cp1047 cp37 posix-bc);
-plan test => 33+$n*@encodings + 2*@source*@destiny*@character_set + 2*@ebcdic_sets*256;
+plan test => 38+$n*@encodings + 2*@source*@destiny*@character_set + 2*@ebcdic_sets*256;
 my $str = join('',map(chr($_),0x20..0x7E));
 my $cpy = $str;
 ok(length($str),from_to($cpy,'iso8859-1','Unicode'),"Length Wrong");
@@ -90,6 +90,15 @@ foreach my $enc_eb (@ebcdic_sets)
     ok($ord,ord($str),"$enc_as mangled translating $ord to $enc_eb and back");
    }
  }
+
+my $mime = find_encoding('iso-8859-2');
+ok(defined($mime),1,"Cannot find MIME-ish'iso-8859-2'");
+my $x11 = find_encoding('iso8859-2');
+ok(defined($x11),1,"Cannot find X11-ish 'iso8859-2'");
+ok($mime,$x11,"iso8598-2 and iso-8859-2 not same");
+my $spc = find_encoding('iso 8859-2');
+ok(defined($spc),1,"Cannot find 'iso 8859-2'");
+ok($spc,$mime,"iso 8859-2 and iso-8859-2 not same");
 
 for my $i (256,128,129,256)
  {

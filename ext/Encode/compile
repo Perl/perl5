@@ -143,7 +143,7 @@ sub cmp_name
 foreach my $enc (sort cmp_name @encfiles)
  {
   my ($name,$sfx) = $enc =~ /^.*?([\w-]+)\.(enc|ucm)$/;
-  $name = delete $opt{'n'} if exists $opt{'n'};
+  $name = $opt{'n'} if exists $opt{'n'};
   if (open(E,$enc))
    {
     if ($sfx eq 'enc')
@@ -241,7 +241,7 @@ sub compile_ucm
   }
  else
   {
-   # $name = lc($cs);
+   $name = $cs unless exists $opt{'n'};
   }
  my $erep;
  my $urep;

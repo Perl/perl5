@@ -1,5 +1,5 @@
-# Written $Id: //depot/perlio/ext/Encode/compile#14 $
-# compile -n cp1250 -o Encode/cp1250.ucm Encode/cp1250.enc
+# Written $Id: //depot/perlio/ext/Encode/compile#15 $
+# ./compile -n cp1250 -o Encode/cp1250.ucm Encode/cp1250.enc
 <code_set_name> "cp1250"
 <mb_cur_min> 1
 <mb_cur_max> 1

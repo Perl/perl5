@@ -1,6 +1,6 @@
-# Written $Id: //depot/perlio/ext/Encode/compile#14 $
-# compile -n iso8859-16 -o Encode/iso8859-16.ucm Encode/iso8859-16.enc
-<code_set_name> "iso8859-16"
+# Written $Id: //depot/perlio/ext/Encode/compile#15 $
+# ./compile -n iso-8859-16 -o Encode/iso8859-16.ucm Encode/iso8859-16.enc
+<code_set_name> "iso-8859-16"
 <mb_cur_min> 1
 <mb_cur_max> 1
 <subchar> \x3F
