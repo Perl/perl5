@@ -110,12 +110,12 @@ delete $ENV{PATHEXT} unless $had_pathext;
 }
 
 # init_others(): check if all keys are created and set?
-# qw( TOUCH CHMOD CP RM_F RM_RF MV NOOP TEST_F LD AR LDLOADLIBS DEV_NUL )
+# qw( TOUCH CHMOD CP RM_F RM_RF MV NOOP TEST_F AR LDLOADLIBS DEV_NUL )
 {
     my $mm_w32 = bless( { BASEEXT => 'Foo' }, 'MM' );
     $mm_w32->init_others();
     my @keys = qw( TOUCH CHMOD CP RM_F RM_RF MV NOOP 
-                   TEST_F LD AR LDLOADLIBS DEV_NULL );
+                   TEST_F AR LDLOADLIBS DEV_NULL );
     for my $key ( @keys ) {
         ok( $mm_w32->{ $key }, "init_others: $key" );
     }
@@ -192,6 +192,7 @@ delete $ENV{PATH} unless $had_path;
     my $after   = '';
     $MM->init_linker;
 
+    ok( $MM->{ LD }, "init_linker sets LD" );
     is( $MM->{PERL_ARCHIVE},        $libperl,   'PERL_ARCHIVE' );
     is( $MM->{PERL_ARCHIVE_AFTER},  $after,     'PERL_ARCHIVE_AFTER' );
     is( $MM->{EXPORT_LIST},         $export,    'EXPORT_LIST' );

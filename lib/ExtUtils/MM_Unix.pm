@@ -1886,17 +1886,19 @@ usually solves this kind of problem.
 
 =item init_others
 
-Initializes EXTRALIBS, BSLOADLIBS, LDLOADLIBS, LIBS, LD_RUN_PATH, LD,
+Initializes EXTRALIBS, BSLOADLIBS, LDLOADLIBS, LIBS, LD_RUN_PATH,
 OBJECT, BOOTDEP, PERLMAINCC, LDFROM, LINKTYPE, SHELL, NOOP,
 FIRST_MAKEFILE, MAKEFILE_OLD, NOECHO, RM_F, RM_RF, TEST_F,
 TOUCH, CP, MV, CHMOD, UMASK_NULL, ECHO, ECHO_N
+
+LD is initialized in init_linker()
 
 =cut
 
 sub init_others {	# --- Initialize Other Attributes
     my($self) = shift;
 
-    $self->{LD} ||= 'ld';
+
 
     # Compute EXTRALIBS, BSLOADLIBS and LDLOADLIBS from $self->{LIBS}
     # Lets look at $self->{LIBS} carefully: It may be an anon array, a string or
@@ -2237,10 +2239,14 @@ sub init_INSTALL {
 
 Unix has no need of special linker flags.
 
+However this does initialize the default linker if it has not already been set. It uses
+the value from Config and then falls back to 'ld'
+
 =cut
 
 sub init_linker {
     my($self) = shift;
+    $self->{LD} ||= $Config{ld} || 'ld';
     $self->{PERL_ARCHIVE} ||= '';
     $self->{PERL_ARCHIVE_AFTER} ||= '';
     $self->{EXPORT_LIST}  ||= '';
