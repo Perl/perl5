@@ -171,8 +171,11 @@ CODE:
 	SvCUR_set(result,d - (U8 *)SvPVX(result));
     }
     if (s < e) {
+	/* unlikely to happen because it's fixed-length -- dankogai */
+	if (check & ENCODE_WARN_ON_ERR){
 	    Perl_warner(aTHX_ packWARN(WARN_UTF8),"%"SVf":Partial character",
 			*hv_fetch((HV *)SvRV(obj),"Name",4,0));
+	}
     }
     if (check && !(check & ENCODE_LEAVE_SRC)){
 	if (s < e) {
@@ -242,8 +245,16 @@ CODE:
 	}
     }
     if (s < e) {
-	Perl_warner(aTHX_ packWARN(WARN_UTF8),"%"SVf":Partial character",
-		    *hv_fetch((HV *)SvRV(obj),"Name",4,0));
+	/* UTF-8 partial char happens often on PerlIO.
+	   Since this is okay and normal, we do not warn.
+	   But this is critical when you choose to LEAVE_SRC
+	   in which case we die */
+	if (check & (ENCODE_DIE_ON_ERR|ENCODE_LEAVE_SRC)){
+	    Perl_croak(aTHX_ "%"SVf":partial character is not allowed "
+		       "when CHECK = 0x%" UVuf,
+		       *hv_fetch((HV *)SvRV(obj),"Name",4,0), check);
+	}
+	
     }
     if (check && !(check & ENCODE_LEAVE_SRC)){
 	if (s < e) {
@@ -254,7 +265,7 @@ CODE:
 	    SvCUR_set(utf8,0);
 	}
 	*SvEND(utf8) = '\0';
-    }
+    } 
     XSRETURN(1);
 }
 
