@@ -736,6 +736,49 @@ int whence;
     return -1L;
 }
 
+int
+do_binmode(fp, iotype, flag)
+    PerlIO *fp;
+    int iotype;
+    int flag;
+{
+    if (flag != TRUE)
+	croak("panic: unsetting binmode"); /* Not implemented yet */
+#ifdef DOSISH
+#ifdef atarist
+    if (!PerlIO_flush(fp) && (fp->_flag |= _IOBIN))
+	return 1;
+    else
+	return 0;
+#else
+    if (setmode(PerlIO_fileno(fp), OP_BINARY) != -1) {
+#if defined(WIN32) && defined(__BORLANDC__)
+	/* The translation mode of the stream is maintained independent
+	 * of the translation mode of the fd in the Borland RTL (heavy
+	 * digging through their runtime sources reveal).  User has to
+	 * set the mode explicitly for the stream (though they don't
+	 * document this anywhere). GSAR 97-5-24
+	 */
+	PerlIO_seek(fp,0L,0);
+	fp->flags |= _F_BIN;
+#endif
+	return 1;
+    }
+    else
+	return 0;
+#endif
+#else
+#if defined(USEMYBINMODE)
+    if (my_binmode(fp,iotype) != NULL)
+	return 1;
+    else
+	return 0;
+#else
+    return 1;
+#endif
+#endif
+}
+
 #if !defined(HAS_TRUNCATE) && !defined(HAS_CHSIZE) && defined(F_FREESP)
 	/* code courtesy of William Kucharski */
 #define HAS_CHSIZE
