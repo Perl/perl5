@@ -490,7 +490,14 @@ struct xpvio {
 #define SvTAINTED_on(sv)  STMT_START{ if(tainting){sv_taint(sv);}   }STMT_END
 #define SvTAINTED_off(sv) STMT_START{ if(tainting){sv_untaint(sv);} }STMT_END
 
-#define SvTAINT(sv)	  STMT_START{ if(tainted){SvTAINTED_on(sv);} }STMT_END
+#define SvTAINT(sv)			\
+    STMT_START {			\
+	if (tainting) {			\
+	    dTHR;			\
+	    if (tainted)		\
+		SvTAINTED_on(sv);	\
+	}				\
+    } STMT_END
 
 #define SvPV_force(sv, lp) sv_pvn_force(sv, &lp)
 #define SvPV(sv, lp) sv_pvn(sv, &lp)

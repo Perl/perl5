@@ -2099,8 +2099,15 @@ esac
 rp='What is your architecture name'
 . ./myread
 case "$usethreads" in
-$define)  archname="$ans-thread"
-          echo "Threads selected... architecture name is now $archname." >&4
+$define)  echo "Threads selected." >&4
+          case "$ans" in
+          *-thread) echo "...and architecture name already ends in -thread." >&4
+                    archname="$ans"
+                    ;;
+          *)        archname="$ans-thread"
+                    echo "...setting architecture name to $archname." >&4
+                    ;;
+          esac
           ;;
 *)        archname="$ans" ;;
 esac
@@ -9913,12 +9920,6 @@ if test "X$usethreads" != X; then
     if test "X$d_pthreads_created_joinable" = X; then
 	echo >&4 "Checking whether pthreads are created joinable."
 	$cat >try.c <<EOCP
-/* Note: this program returns 1 if detached, 0 if not.
- * Easier this way because the PTHREAD_CREATE_DETACHED is more
- * portable than the obsolete PTHREAD_CREATE_UNDETACHED.
- * Testing for joinable (aka undetached) as opposed to detached
- * is then again logically more sensible because that's
- * the more modern default state in the pthreads implementations. */
 #include <pthread.h>
 #include <stdio.h>
 int main() {
@@ -9935,21 +9936,21 @@ EOCP
 	: Compile and link separately because the used cc might not be
 	: able to link the right CRT and libs for pthreading.
 	if $cc $ccflags -c try.c >/dev/null 2>&1 &&
-	   $ld $lddlflags $ldflags -o try try$obj_ext $libs >/dev/null 2>&1; then
+	   $ld $ldflags -o try try$obj_ext $libs >/dev/null 2>&1; then
 	    yyy=`./try`
 	else
 	    echo "(I can't execute the test program--assuming they are.)"
 	    yyy=joinable
 	fi
 	case "$yyy" in
-	joinable)
+	detached)
+	    val="$undef"
+	    echo "Nope, they aren't."
+	    ;;
+	*)
 	    val="$define"
 	    echo "Yup, they are."
 	    ;;
-	*)
-	    val="$undef"
-	    echo "Nope, they aren't."
-	;;
 	esac
 	set d_pthreads_created_joinable
 	eval $setvar

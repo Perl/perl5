@@ -5,7 +5,6 @@
 #else
 
 /* POSIXish threads */
-typedef pthread_t perl_os_thread;
 #ifdef OLD_PTHREADS_API
 #  define pthread_mutexattr_init(a) pthread_mutexattr_create(a)
 #  define pthread_mutexattr_settype(a,t) pthread_mutexattr_setkind_np(a,t)

@@ -979,6 +979,7 @@ typedef I32 (*filter_t) _((int, SV *, int));
 #      include <win32thread.h>
 #    else
 #      include <pthread.h>
+typedef pthread_t perl_os_thread;
 typedef pthread_mutex_t perl_mutex;
 typedef pthread_cond_t perl_cond;
 typedef pthread_key_t perl_key;
