@@ -4980,6 +4980,7 @@ Perl_sv_realpath(pTHX_ SV *sv, char *path, STRLEN len)
 
     return TRUE;
 #else
+    {
     DIR *parent;
     Direntry_t *dp;
     char dotdots[MAXPATHLEN] = { 0 };
@@ -5082,6 +5083,7 @@ Perl_sv_realpath(pTHX_ SV *sv, char *path, STRLEN len)
     SvPOK_only(sv);
 
     return TRUE;
+    }
 #endif
 #else
     return FALSE;
