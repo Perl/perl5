@@ -1978,6 +1978,14 @@ d_strftime (d_strftime.U):
 	This variable conditionally defines the HAS_STRFTIME symbol, which
 	indicates to the C program that the strftime() routine is available.
 
+d_strlcat (d_strlcat.U):
+	This variable conditionally defines the HAS_STRLCAT symbol, which
+	indicates to the C program that the strlcat () routine is available.
+
+d_strlcpy (d_strlcpy.U):
+	This variable conditionally defines the HAS_STRLCPY symbol, which
+	indicates to the C program that the strlcpy () routine is available.
+
 d_strtod (d_strtod.U):
 	This variable conditionally defines the HAS_STRTOD symbol, which
 	indicates to the C program that the strtod() routine is available
@@ -4602,6 +4610,10 @@ uselargefiles (uselfs.U):
 uselongdouble (uselongdbl.U):
 	This variable conditionally defines the USE_LONG_DOUBLE symbol,
 	and indicates that long doubles should be used when available.
+
+usemallocwrap (mallocsrc.U):
+	This variable contains y if we are wrapping malloc to prevent
+	integer overflow during size calculations.
 
 usemorebits (usemorebits.U):
 	This variable conditionally defines the USE_MORE_BITS symbol,
