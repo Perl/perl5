@@ -6,7 +6,7 @@
 
 $| = 1;
 
-print "1..858\n";
+print "1..860\n";
 
 BEGIN {
     chdir 't' if -d 't';
@@ -2675,22 +2675,6 @@ print "# some Unicode properties\n";
 }
 
 {
-    print "# [ID 20020124.005]\n";
-
-    # Fixed by #14795.
-
-    $char = "\x{f00f}";
-    $x = "$char b $char";
-
-    $x =~ s{($char)}{
-	"c" =~ /d/;
-	"x";
-    }ge;
-
-    print $x eq "x b x" ? "ok 855\n" : "not ok 855\n";
-}
-
-{
     print "# UTF-8 hash keys and /\$/\n";
     # http://www.xray.mpe.mpg.de/mailing-lists/perl5-porters/2002-01/msg01327.html
 
@@ -2698,11 +2682,27 @@ print "# some Unicode properties\n";
     my $v = substr($u,0,1);
     my $w = substr($u,1,1);
     my %u = ( $u => $u, $v => $v, $w => $w );
-    my $i = 856; 
+    my $i = 855; 
     for (keys %u) {
 	my $m1 = /^\w*$/ ? 1 : 0;
 	my $m2 = $u{$_}=~/^\w*$/ ? 1 : 0;
 	print $m1 == $m2 ? "ok $i\n" : "not ok $i # $m1 $m2\n";
 	$i++;
     }
+}
+
+{
+    print "# [ID 20020124.005]\n";
+    # Fixed by #14795.
+    my $i = 858;
+    for my $char ("a", "\x{df}", "\x{100}"){
+	$x = "$char b $char";
+	$x =~ s{($char)}{
+	    "c" =~ /c/;
+	    "x";
+	}ge;
+	print substr($x,0,1) eq substr($x,-1,1) ?
+	    "ok $i\n" : "not ok $i # debug: $x\n";
+ 	$i++;
+   }
 }
