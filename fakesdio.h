@@ -5,42 +5,44 @@
 #define _CANNOT "CANNOT"
 #undef FILE
 #define FILE			PerlIO
-#undef fprintf
-#undef tmpfile
+#undef clearerr
 #undef fclose
-#undef fopen
-#undef vfprintf
+#undef fdopen
+#undef feof
+#undef ferror
+#undef fflush
 #undef fgetc
-#undef getc_unlocked
-#undef fputc
-#undef putc_unlocked
-#undef fputs
-#undef ungetc
-#undef fread
-#undef fwrite
 #undef fgetpos
+#undef fgets
+#undef fileno
+#undef fopen
+#undef fprintf
+#undef fputc
+#undef fputs
+#undef fread
+#undef freopen
+#undef fscanf
 #undef fseek
 #undef fsetpos
 #undef ftell
-#undef rewind
-#undef fdopen
-#undef popen
-#undef pclose
+#undef fwrite
+#undef getc
+#undef getc_unlocked
 #undef getw
+#undef pclose
+#undef popen
+#undef putc
+#undef putc_unlocked
 #undef putw
-#undef freopen
+#undef rewind
 #undef setbuf
 #undef setvbuf
-#undef fscanf
-#undef fgets
+#undef stderr
 #undef stdin
 #undef stdout
-#undef stderr
-#undef getc
-#undef putc
-#undef clearerr
-#undef feof
-#undef ferror
+#undef tmpfile
+#undef ungetc
+#undef vfprintf
 #define fprintf			PerlIO_printf
 #define stdin			PerlIO_stdin()
 #define stdout			PerlIO_stdout()
@@ -54,14 +56,8 @@
 #define fputc(c,f)		PerlIO_putc(f,c)
 #define fputs(s,f)		PerlIO_puts(f,s)
 #define getc(f)			PerlIO_getc(f)
-#ifdef getc_unlocked
-#undef getc_unlocked
-#endif
 #define getc_unlocked(f)	PerlIO_getc(f)
 #define putc(c,f)		PerlIO_putc(f,c)
-#ifdef putc_unlocked
-#undef putc_unlocked
-#endif
 #define putc_unlocked(c,f)	PerlIO_putc(c,f)
 #define ungetc(c,f)		PerlIO_ungetc(f,c)
 #if 0
