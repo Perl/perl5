@@ -2916,8 +2916,9 @@ S_doeval(pTHX_ int gimme, OP** startop, CV* outside, U32 seq)
 }
 
 STATIC PerlIO *
-S_doopen_pmc(pTHX_ const char *name, const char *mode)
+S_doopen_pm(pTHX_ const char *name, const char *mode)
 {
+#ifndef PERL_DISABLE_PMC
     STRLEN namelen = strlen(name);
     PerlIO *fp;
 
@@ -2945,6 +2946,9 @@ S_doopen_pmc(pTHX_ const char *name, const char *mode)
 	fp = PerlIO_open(name, mode);
     }
     return fp;
+#else
+    return PerlIO_open(name, mode);
+#endif /* !PERL_DISABLE_PMC */
 }
 
 PP(pp_require)
@@ -3043,7 +3047,7 @@ PP(pp_require)
 
     if (path_is_absolute(name)) {
 	tryname = name;
-	tryrsfp = doopen_pmc(name,PERL_SCRIPT_MODE);
+	tryrsfp = doopen_pm(name,PERL_SCRIPT_MODE);
     }
 #ifdef MACOS_TRADITIONAL
     if (!tryrsfp) {
@@ -3052,7 +3056,7 @@ PP(pp_require)
 	MacPerl_CanonDir(name, newname, 1);
 	if (path_is_absolute(newname)) {
 	    tryname = newname;
-	    tryrsfp = doopen_pmc(newname,PERL_SCRIPT_MODE);
+	    tryrsfp = doopen_pm(newname,PERL_SCRIPT_MODE);
 	}
     }
 #endif
@@ -3207,7 +3211,7 @@ PP(pp_require)
 #endif
 		    TAINT_PROPER("require");
 		    tryname = SvPVX(namesv);
-		    tryrsfp = doopen_pmc(tryname, PERL_SCRIPT_MODE);
+		    tryrsfp = doopen_pm(tryname, PERL_SCRIPT_MODE);
 		    if (tryrsfp) {
 			if (tryname[0] == '.' && tryname[1] == '/')
 			    tryname += 2;

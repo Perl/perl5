@@ -2,7 +2,7 @@ package Encode::Alias;
 use strict;
 no warnings 'redefine';
 use Encode;
-our $VERSION = do { my @r = (q$Revision: 1.35 $ =~ /\d+/g); sprintf "%d."."%02d" x $#r, @r };
+our $VERSION = do { my @r = (q$Revision: 1.36 $ =~ /\d+/g); sprintf "%d."."%02d" x $#r, @r };
 our $DEBUG = 0;
 
 use base qw(Exporter);

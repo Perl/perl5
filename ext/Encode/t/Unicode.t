@@ -1,5 +1,5 @@
 #
-# $Id: Unicode.t,v 1.9 2002/05/06 10:26:48 dankogai Exp $
+# $Id: Unicode.t,v 1.12 2003/05/21 08:41:11 dankogai Exp $
 #
 # This script is written entirely in ASCII, even though quoted literals
 # do include non-BMP unicode characters -- Are you happy, jhi?
@@ -119,12 +119,12 @@ for my $file (@file){
     open my $fh, '<', $path or die "$path:$!";
     my $content;
     if (PerlIO::Layer->find('perlio')){
-       binmode $fh => ':utf8';
-       $content = join('' => <$fh>);
+	binmode $fh => ':utf8';
+	$content = join('' => <$fh>);
     }else{ # ugh!
-       binmode $fh;
-       $content = join('' => <$fh>);
-       Encode::_utf8_on($content)
+	binmode $fh;
+	$content = join('' => <$fh>);
+	Encode::_utf8_on($content)
     }
     close $fh;
     is(decode("UTF-7", encode("UTF-7", $content)), $content, 
