@@ -19,6 +19,10 @@ alignbytes=8
 
 usemymalloc='n'
 
+# Intuiting the existence of system calls under AIX is difficult,
+# at best; the safest technique is to find them empirically.
+usenm='undef'
+
 so="a"
 dlext="so"
 
@@ -97,6 +101,6 @@ EOM
     # Make sure the c_r library is before the c library or
     # make will fail.
     set `echo X "$libswanted "| sed -e 's/ c / c_r c /'`
-    shift
+p    shift
     libswanted="$*"
 fi
