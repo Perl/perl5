@@ -99,7 +99,8 @@ esac
 case "$osvers" in
 0.*|1.0*) ;;
 
-3.0*)   objformat=`/usr/bin/objformat`
+3.*|4.0*)
+        objformat=`/usr/bin/objformat`
         if [ x$objformat = xelf ]; then
             libpth="/usr/lib /usr/local/lib"
             glibpth="/usr/lib /usr/local/lib"
@@ -145,7 +146,7 @@ cat > UU/usethreads.cbu <<'EOCBU'
 case "$usethreads" in
 $define|true|[yY]*)
         case "$osvers" in  
-        [34].*) ldflags="-pthread $ldflags"
+        3.*|4.0*) ldflags="-pthread $ldflags"
               ;;
         2.2*) if [ ! -r /usr/lib/libc_r ]; then
               cat <<'EOM' >&4
