@@ -5,7 +5,7 @@ use Cwd;
 use vars qw(@ISA $VERSION);
 require File::Spec::Unix;
 
-$VERSION = '1.1';
+$VERSION = '1.2';
 
 @ISA = qw(File::Spec::Unix);
 
@@ -243,34 +243,6 @@ sub catpath {
 }
 
 
-=item abs2rel
-
-Takes a destination path and an optional base path returns a relative path
-from the base path to the destination path:
-
-    $rel_path = File::Spec->abs2rel( $destination ) ;
-    $rel_path = File::Spec->abs2rel( $destination, $base ) ;
-
-If $base is not present or '', then L</cwd()> is used. If $base is relative, 
-then it is converted to absolute form using L</rel2abs()>. This means that it
-is taken to be relative to L<cwd()>.
-
-On systems with the concept of a volume, this assumes that both paths 
-are on the $destination volume, and ignores the $base volume.
-
-On systems that have a grammar that indicates filenames, this ignores the 
-$base filename as well. Otherwise all path components are assumed to be
-directories.
-
-If $path is relative, it is converted to absolute form using L</rel2abs()>.
-This means that it is taken to be relative to L</cwd()>.
-
-Based on code written by Shigio Yamaguchi.
-
-No checks against the filesystem are made. 
-
-=cut
-
 sub abs2rel {
     my($self,$path,$base) = @_;
 
@@ -340,33 +312,8 @@ sub abs2rel {
     ) ;
 }
 
-=item rel2abs
 
-Converts a relative path to an absolute path. 
-
-    $abs_path = File::Spec->rel2abs( $destination ) ;
-    $abs_path = File::Spec->rel2abs( $destination, $base ) ;
-
-If $base is not present or '', then L<cwd()> is used. If $base is relative, 
-then it is converted to absolute form using L</rel2abs()>. This means that it
-is taken to be relative to L</cwd()>.
-
-Assumes that both paths are on the $base volume, and ignores the 
-$destination volume. 
-
-On systems that have a grammar that indicates filenames, this ignores the 
-$base filename as well. Otherwise all path components are assumed to be
-directories.
-
-If $path is absolute, it is cleaned up and returned using L</canonpath()>.
-
-Based on code written by Shigio Yamaguchi.
-
-No checks against the filesystem are made. 
-
-=cut
-
-sub rel2abs($;$;) {
+sub rel2abs {
     my ($self,$path,$base ) = @_;
 
     if ( ! $self->file_name_is_absolute( $path ) ) {

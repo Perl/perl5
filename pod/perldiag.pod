@@ -747,6 +747,12 @@ the file, say, by doing C<make install>.
 functioning as a class, but that package doesn't define that particular
 method, nor does any of its base classes.  See L<perlobj>.
 
+=item (perhaps you forgot to load "%s"?)
+
+(F) This is an educated guess made in conjunction with the message
+"Can't locate object method \"%s\" via package \"%s\"".  It often means
+that a method requires a package that has not been loaded.
+
 =item Can't locate package %s for @%s::ISA
 
 (W syntax) The @ISA array contained the name of another package that
@@ -3424,6 +3430,12 @@ attribute too soon.  See L<attributes>.
 an attribute list, but the matching closing (right) parenthesis
 character was not found.  You may need to add (or remove) a backslash
 character to get your parentheses to balance.  See L<attributes>.
+
+=item Unterminated compressed integer
+
+(F) An argument to unpack("w",...) was incompatible with the BER
+compressed integer format and could not be converted to an integer.
+See L<perlfunc/pack>.
 
 =item Unterminated <> operator
 

@@ -659,6 +659,10 @@ perl_destruct(pTHXx)
     SvREFCNT_dec(PL_fdpid);		/* needed in io_close() */
     PL_fdpid = Nullav;
 
+#ifdef HAVE_INTERP_INTERN
+    sys_intern_clear();
+#endif
+
     /* Destruct the global string table. */
     {
 	/* Yell and reset the HeVAL() slots that are still holding refcounts,
@@ -708,9 +712,6 @@ perl_destruct(pTHXx)
     if (PL_sv_count != 0 && ckWARN_d(WARN_INTERNAL))
 	Perl_warner(aTHX_ WARN_INTERNAL,"Scalars leaked: %ld\n", (long)PL_sv_count);
 
-    sv_free_arenas();
-
-    /* No SVs have survived, need to clean out */
     Safefree(PL_origfilename);
     Safefree(PL_reg_start_tmp);
     if (PL_reg_curpm)
@@ -718,6 +719,8 @@ perl_destruct(pTHXx)
     Safefree(PL_reg_poscache);
     Safefree(HeKEY_hek(&PL_hv_fetch_ent_mh));
     Safefree(PL_op_mask);
+    Safefree(PL_psig_ptr);
+    Safefree(PL_psig_name);
     nuke_stacks();
     PL_hints = 0;		/* Reset hints. Should hints be per-interpreter ? */
     
@@ -739,6 +742,8 @@ perl_destruct(pTHXx)
     Safefree(PL_thrsv);
     PL_thrsv = Nullsv;
 #endif /* USE_THREADS */
+
+    sv_free_arenas();
 
     /* As the absolutely last thing, free the non-arena SV for mess() */
 

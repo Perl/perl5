@@ -438,14 +438,14 @@ Perl_gv_autoload4(pTHX_ HV *stash, const char *name, STRLEN len, I32 method)
     ENTER;
 
 #ifdef USE_THREADS
-    Perl_lock(aTHX_ (SV *)varstash);
+    sv_lock((SV *)varstash);
 #endif
     if (!isGV(vargv))
 	gv_init(vargv, varstash, autoload, autolen, FALSE);
     LEAVE;
     varsv = GvSV(vargv);
 #ifdef USE_THREADS
-    Perl_lock(aTHX_ varsv);
+    sv_lock(varsv);
 #endif
     sv_setpv(varsv, HvNAME(stash));
     sv_catpvn(varsv, "::", 2);

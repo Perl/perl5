@@ -246,6 +246,8 @@ START_EXTERN_C
 #define PL_glob_index		(*Perl_Iglob_index_ptr(aTHXo))
 #undef  PL_globalstash
 #define PL_globalstash		(*Perl_Iglobalstash_ptr(aTHXo))
+#undef  PL_he_arenaroot
+#define PL_he_arenaroot		(*Perl_Ihe_arenaroot_ptr(aTHXo))
 #undef  PL_he_root
 #define PL_he_root		(*Perl_Ihe_root_ptr(aTHXo))
 #undef  PL_hintgv
@@ -568,26 +570,48 @@ START_EXTERN_C
 #define PL_xiv_arenaroot	(*Perl_Ixiv_arenaroot_ptr(aTHXo))
 #undef  PL_xiv_root
 #define PL_xiv_root		(*Perl_Ixiv_root_ptr(aTHXo))
+#undef  PL_xnv_arenaroot
+#define PL_xnv_arenaroot	(*Perl_Ixnv_arenaroot_ptr(aTHXo))
 #undef  PL_xnv_root
 #define PL_xnv_root		(*Perl_Ixnv_root_ptr(aTHXo))
+#undef  PL_xpv_arenaroot
+#define PL_xpv_arenaroot	(*Perl_Ixpv_arenaroot_ptr(aTHXo))
 #undef  PL_xpv_root
 #define PL_xpv_root		(*Perl_Ixpv_root_ptr(aTHXo))
+#undef  PL_xpvav_arenaroot
+#define PL_xpvav_arenaroot	(*Perl_Ixpvav_arenaroot_ptr(aTHXo))
 #undef  PL_xpvav_root
 #define PL_xpvav_root		(*Perl_Ixpvav_root_ptr(aTHXo))
+#undef  PL_xpvbm_arenaroot
+#define PL_xpvbm_arenaroot	(*Perl_Ixpvbm_arenaroot_ptr(aTHXo))
 #undef  PL_xpvbm_root
 #define PL_xpvbm_root		(*Perl_Ixpvbm_root_ptr(aTHXo))
+#undef  PL_xpvcv_arenaroot
+#define PL_xpvcv_arenaroot	(*Perl_Ixpvcv_arenaroot_ptr(aTHXo))
 #undef  PL_xpvcv_root
 #define PL_xpvcv_root		(*Perl_Ixpvcv_root_ptr(aTHXo))
+#undef  PL_xpvhv_arenaroot
+#define PL_xpvhv_arenaroot	(*Perl_Ixpvhv_arenaroot_ptr(aTHXo))
 #undef  PL_xpvhv_root
 #define PL_xpvhv_root		(*Perl_Ixpvhv_root_ptr(aTHXo))
+#undef  PL_xpviv_arenaroot
+#define PL_xpviv_arenaroot	(*Perl_Ixpviv_arenaroot_ptr(aTHXo))
 #undef  PL_xpviv_root
 #define PL_xpviv_root		(*Perl_Ixpviv_root_ptr(aTHXo))
+#undef  PL_xpvlv_arenaroot
+#define PL_xpvlv_arenaroot	(*Perl_Ixpvlv_arenaroot_ptr(aTHXo))
 #undef  PL_xpvlv_root
 #define PL_xpvlv_root		(*Perl_Ixpvlv_root_ptr(aTHXo))
+#undef  PL_xpvmg_arenaroot
+#define PL_xpvmg_arenaroot	(*Perl_Ixpvmg_arenaroot_ptr(aTHXo))
 #undef  PL_xpvmg_root
 #define PL_xpvmg_root		(*Perl_Ixpvmg_root_ptr(aTHXo))
+#undef  PL_xpvnv_arenaroot
+#define PL_xpvnv_arenaroot	(*Perl_Ixpvnv_arenaroot_ptr(aTHXo))
 #undef  PL_xpvnv_root
 #define PL_xpvnv_root		(*Perl_Ixpvnv_root_ptr(aTHXo))
+#undef  PL_xrv_arenaroot
+#define PL_xrv_arenaroot	(*Perl_Ixrv_arenaroot_ptr(aTHXo))
 #undef  PL_xrv_root
 #define PL_xrv_root		(*Perl_Ixrv_root_ptr(aTHXo))
 #undef  PL_yychar

@@ -21,11 +21,11 @@
 
 
 #define HALF_UPGRADE(start,end) {                                    \
-                                U8* new;                             \
+                                U8* newstr;                          \
                                 STRLEN len;                          \
                                 len = end-start;                     \
-                                new = bytes_to_utf8(start, &len);    \
-                                Copy(new,start,len,U8*);             \
+                                newstr = bytes_to_utf8(start, &len); \
+                                Copy(newstr,start,len,U8*);          \
                                 end = start + len;                   \
                                 }
 

@@ -42,9 +42,14 @@ S_more_he(pTHX)
 {
     register HE* he;
     register HE* heend;
-    New(54, PL_he_root, 1008/sizeof(HE), HE);
-    he = PL_he_root;
+    XPV *ptr;
+    New(54, ptr, 1008/sizeof(XPV), XPV);
+    ptr->xpv_pv = (char*)PL_he_arenaroot;
+    PL_he_arenaroot = ptr;
+
+    he = (HE*)ptr;
     heend = &he[1008 / sizeof(HE) - 1];
+    PL_he_root = ++he;
     while (he < heend) {
         HeNEXT(he) = (HE*)(he + 1);
         he++;

@@ -259,6 +259,7 @@ elsif ($PLATFORM eq 'aix') {
 		     Perl_safexrealloc
 		     Perl_same_dirent
 		     Perl_unlnk
+		     Perl_sys_intern_clear
 		     Perl_sys_intern_dup
 		     Perl_sys_intern_init
 		     PL_cryptseen
@@ -420,7 +421,7 @@ unless ($define{'USE_5005THREADS'}) {
 		    Perl_find_threadsv
 		    Perl_unlock_condpair
 		    Perl_magic_mutexfree
-		    Perl_lock
+		    Perl_sv_lock
 		    )];
 }
 

@@ -451,7 +451,7 @@ Use VMS syntax when converting filespecs.
 
 =cut
 
-sub rel2abs($;$;) {
+sub rel2abs {
     my $self = shift ;
     return vmspath(File::Spec::Unix::rel2abs( $self, @_ ))
         if ( join( '', @_ ) =~ m{/} ) ;

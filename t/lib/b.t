@@ -82,7 +82,8 @@ ok;
 
 chomp($a = `$^X -I../lib -MB::Stash -Mwarnings -e1`);
 $a = join ',', sort split /,/, $a;
-$a =~ s/-uWin32,//;
+$a =~ s/-uWin32,// if $^O eq 'MSWin32';
+$a =~ s/-u(Cwd|File|File::Copy|OS2),//g if $^O eq 'os2';
 if ($Config{static_ext} eq ' ') {
   $b = '-uCarp,-uCarp::Heavy,-uDB,-uExporter,-uExporter::Heavy,-uattributes,'
      . '-umain,-uwarnings';

@@ -2495,13 +2495,13 @@ first to get the correct constant definitions.  If CMD is C<IPC_STAT>,
 then ARG must be a variable which will hold the returned C<msqid_ds>
 structure.  Returns like C<ioctl>: the undefined value for error,
 C<"0 but true"> for zero, or the actual return value otherwise.  See also
-C<IPC::SysV> and C<IPC::Semaphore> documentation.
+L<perlipc/"SysV IPC">, C<IPC::SysV>, and C<IPC::Semaphore> documentation.
 
 =item msgget KEY,FLAGS
 
 Calls the System V IPC function msgget(2).  Returns the message queue
-id, or the undefined value if there is an error.  See also C<IPC::SysV>
-and C<IPC::Msg> documentation.
+id, or the undefined value if there is an error.  See also
+L<perlipc/"SysV IPC"> and C<IPC::SysV> and C<IPC::Msg> documentation.
 
 =item msgrcv ID,VAR,SIZE,TYPE,FLAGS
 
@@ -2511,7 +2511,8 @@ SIZE.  Note that when a message is received, the message type as a
 native long integer will be the first thing in VAR, followed by the
 actual message.  This packing may be opened with C<unpack("l! a*")>.
 Taints the variable.  Returns true if successful, or false if there is
-an error.  See also C<IPC::SysV> and C<IPC::SysV::Msg> documentation.
+an error.  See also L<perlipc/"SysV IPC">, C<IPC::SysV>, and
+C<IPC::SysV::Msg> documentation.
 
 =item msgsnd ID,MSG,FLAGS
 
@@ -3943,13 +3944,15 @@ semid_ds structure or semaphore value array.  Returns like C<ioctl>:
 the undefined value for error, "C<0 but true>" for zero, or the actual
 return value otherwise.  The ARG must consist of a vector of native
 short integers, which may be created with C<pack("s!",(0)x$nsem)>.
-See also C<IPC::SysV> and C<IPC::Semaphore> documentation.
+See also L<perlipc/"SysV IPC">, C<IPC::SysV>, C<IPC::Semaphore>
+documentation.
 
 =item semget KEY,NSEMS,FLAGS
 
 Calls the System V IPC function semget.  Returns the semaphore id, or
-the undefined value if there is an error.  See also C<IPC::SysV> and
-C<IPC::SysV::Semaphore> documentation.
+the undefined value if there is an error.  See also
+L<perlipc/"SysV IPC">, C<IPC::SysV>, C<IPC::SysV::Semaphore>
+documentation.
 
 =item semop KEY,OPSTRING
 
@@ -3964,8 +3967,9 @@ following code waits on semaphore $semnum of semaphore id $semid:
     $semop = pack("sss", $semnum, -1, 0);
     die "Semaphore trouble: $!\n" unless semop($semid, $semop);
 
-To signal the semaphore, replace C<-1> with C<1>.  See also C<IPC::SysV>
-and C<IPC::SysV::Semaphore> documentation.
+To signal the semaphore, replace C<-1> with C<1>.  See also
+L<perlipc/"SysV IPC">, C<IPC::SysV>, and C<IPC::SysV::Semaphore>
+documentation.
 
 =item send SOCKET,MSG,FLAGS,TO
 
@@ -4025,13 +4029,13 @@ first to get the correct constant definitions.  If CMD is C<IPC_STAT>,
 then ARG must be a variable which will hold the returned C<shmid_ds>
 structure.  Returns like ioctl: the undefined value for error, "C<0> but
 true" for zero, or the actual return value otherwise.
-See also C<IPC::SysV> documentation.
+See also L<perlipc/"SysV IPC"> and C<IPC::SysV> documentation.
 
 =item shmget KEY,SIZE,FLAGS
 
 Calls the System V IPC function shmget.  Returns the shared memory
 segment id, or the undefined value if there is an error.
-See also C<IPC::SysV> documentation.
+See also L<perlipc/"SysV IPC"> and C<IPC::SysV> documentation.
 
 =item shmread ID,VAR,POS,SIZE
 
@@ -4043,8 +4047,8 @@ detaching from it.  When reading, VAR must be a variable that will
 hold the data read.  When writing, if STRING is too long, only SIZE
 bytes are used; if STRING is too short, nulls are written to fill out
 SIZE bytes.  Return true if successful, or false if there is an error.
-shmread() taints the variable. See also C<IPC::SysV> documentation and
-the C<IPC::Shareable> module from CPAN.
+shmread() taints the variable. See also L<perlipc/"SysV IPC">,
+C<IPC::SysV> documentation, and the C<IPC::Shareable> module from CPAN.
 
 =item shutdown SOCKET,HOW
 

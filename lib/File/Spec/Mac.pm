@@ -4,7 +4,7 @@ use strict;
 use vars qw(@ISA $VERSION);
 require File::Spec::Unix;
 
-$VERSION = '1.1';
+$VERSION = '1.2';
 
 @ISA = qw(File::Spec::Unix);
 
@@ -192,12 +192,16 @@ folder named "HD" in the current working directory on a drive named "HD"),
 relative wins.  Use ":" in the appropriate place in the path if you want to
 distinguish unambiguously.
 
+As a special case, the file name '' is always considered to be absolute.
+
 =cut
 
 sub file_name_is_absolute {
     my ($self,$file) = @_;
     if ($file =~ /:/) {
 	return ($file !~ m/^:/s);
+    } elsif ( $file eq '' ) {
+        return 1 ;
     } else {
 	return (! -e ":$file");
     }
@@ -307,6 +311,12 @@ sub catpath {
 
 =item abs2rel
 
+See L<File::Spec::Unix/abs2rel> for general documentation.
+
+Unlike C<File::Spec::Unix->abs2rel()>, this function will make
+checks against the local filesystem if necessary.  See
+L</file_name_is_absolute> for details.
+
 =cut
 
 sub abs2rel {
@@ -344,31 +354,15 @@ sub abs2rel {
 
 =item rel2abs
 
-Converts a relative path to an absolute path. 
+See L<File::Spec::Unix/rel2abs> for general documentation.
 
-    $abs_path = File::Spec->rel2abs( $destination ) ;
-    $abs_path = File::Spec->rel2abs( $destination, $base ) ;
-
-If $base is not present or '', then L<cwd()> is used. If $base is relative, 
-then it is converted to absolute form using L</rel2abs()>. This means that it
-is taken to be relative to L<cwd()>.
-
-On systems with the concept of a volume, this assumes that both paths 
-are on the $base volume, and ignores the $destination volume. 
-
-On systems that have a grammar that indicates filenames, this ignores the 
-$base filename as well. Otherwise all path components are assumed to be
-directories.
-
-If $path is absolute, it is cleaned up and returned using L</canonpath()>.
-
-Based on code written by Shigio Yamaguchi.
-
-No checks against the filesystem are made. 
+Unlike C<File::Spec::Unix->rel2abs()>, this function will make
+checks against the local filesystem if necessary.  See
+L</file_name_is_absolute> for details.
 
 =cut
 
-sub rel2abs($;$;) {
+sub rel2abs {
     my ($self,$path,$base ) = @_;
 
     if ( ! $self->file_name_is_absolute( $path ) ) {

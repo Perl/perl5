@@ -194,6 +194,7 @@ Perl_sv_free_arenas(pTHX)
 {
     SV* sva;
     SV* svanext;
+    XPV *arena, *arenanext;
 
     /* Free arenas here, but be careful about fake ones.  (We assume
        contiguity of the fake ones with the corresponding real ones.) */
@@ -206,6 +207,84 @@ Perl_sv_free_arenas(pTHX)
 	if (!SvFAKE(sva))
 	    Safefree((void *)sva);
     }
+
+    for (arena = PL_xiv_arenaroot; arena; arena = arenanext) {
+	arenanext = (XPV*)arena->xpv_pv;
+	Safefree(arena);
+    }
+    PL_xiv_arenaroot = 0;
+
+    for (arena = PL_xnv_arenaroot; arena; arena = arenanext) {
+	arenanext = (XPV*)arena->xpv_pv;
+	Safefree(arena);
+    }
+    PL_xnv_arenaroot = 0;
+
+    for (arena = PL_xrv_arenaroot; arena; arena = arenanext) {
+	arenanext = (XPV*)arena->xpv_pv;
+	Safefree(arena);
+    }
+    PL_xrv_arenaroot = 0;
+
+    for (arena = PL_xpv_arenaroot; arena; arena = arenanext) {
+	arenanext = (XPV*)arena->xpv_pv;
+	Safefree(arena);
+    }
+    PL_xpv_arenaroot = 0;
+
+    for (arena = (XPV*)PL_xpviv_arenaroot; arena; arena = arenanext) {
+	arenanext = (XPV*)arena->xpv_pv;
+	Safefree(arena);
+    }
+    PL_xpviv_arenaroot = 0;
+
+    for (arena = (XPV*)PL_xpvnv_arenaroot; arena; arena = arenanext) {
+	arenanext = (XPV*)arena->xpv_pv;
+	Safefree(arena);
+    }
+    PL_xpvnv_arenaroot = 0;
+
+    for (arena = (XPV*)PL_xpvcv_arenaroot; arena; arena = arenanext) {
+	arenanext = (XPV*)arena->xpv_pv;
+	Safefree(arena);
+    }
+    PL_xpvcv_arenaroot = 0;
+
+    for (arena = (XPV*)PL_xpvav_arenaroot; arena; arena = arenanext) {
+	arenanext = (XPV*)arena->xpv_pv;
+	Safefree(arena);
+    }
+    PL_xpvav_arenaroot = 0;
+
+    for (arena = (XPV*)PL_xpvhv_arenaroot; arena; arena = arenanext) {
+	arenanext = (XPV*)arena->xpv_pv;
+	Safefree(arena);
+    }
+    PL_xpvhv_arenaroot = 0;
+
+    for (arena = (XPV*)PL_xpvmg_arenaroot; arena; arena = arenanext) {
+	arenanext = (XPV*)arena->xpv_pv;
+	Safefree(arena);
+    }
+    PL_xpvmg_arenaroot = 0;
+
+    for (arena = (XPV*)PL_xpvlv_arenaroot; arena; arena = arenanext) {
+	arenanext = (XPV*)arena->xpv_pv;
+	Safefree(arena);
+    }
+    PL_xpvlv_arenaroot = 0;
+
+    for (arena = (XPV*)PL_xpvbm_arenaroot; arena; arena = arenanext) {
+	arenanext = (XPV*)arena->xpv_pv;
+	Safefree(arena);
+    }
+    PL_xpvbm_arenaroot = 0;
+
+    for (arena = (XPV*)PL_he_arenaroot; arena; arena = arenanext) {
+	arenanext = (XPV*)arena->xpv_pv;
+	Safefree(arena);
+    }
+    PL_he_arenaroot = 0;
 
     if (PL_nice_chunk)
 	Safefree(PL_nice_chunk);
@@ -300,7 +379,12 @@ S_more_xnv(pTHX)
 {
     register NV* xnv;
     register NV* xnvend;
-    New(711, xnv, 1008/sizeof(NV), NV);
+    XPV *ptr;
+    New(711, ptr, 1008/sizeof(XPV), XPV);
+    ptr->xpv_pv = (char*)PL_xnv_arenaroot;
+    PL_xnv_arenaroot = ptr;
+
+    xnv = (NV*) ptr;
     xnvend = &xnv[1008 / sizeof(NV) - 1];
     xnv += (sizeof(XPVIV) - 1) / sizeof(NV) + 1; /* fudge by sizeof XPVIV */
     PL_xnv_root = xnv;
@@ -338,9 +422,15 @@ S_more_xrv(pTHX)
 {
     register XRV* xrv;
     register XRV* xrvend;
-    New(712, PL_xrv_root, 1008/sizeof(XRV), XRV);
-    xrv = PL_xrv_root;
+    XPV *ptr;
+    New(712, ptr, 1008/sizeof(XPV), XPV);
+    ptr->xpv_pv = (char*)PL_xrv_arenaroot;
+    PL_xrv_arenaroot = ptr;
+
+    xrv = (XRV*) ptr;
     xrvend = &xrv[1008 / sizeof(XRV) - 1];
+    xrv += (sizeof(XPV) - 1) / sizeof(XRV) + 1;
+    PL_xrv_root = xrv;
     while (xrv < xrvend) {
 	xrv->xrv_rv = (SV*)(xrv + 1);
 	xrv++;
@@ -375,9 +465,12 @@ S_more_xpv(pTHX)
 {
     register XPV* xpv;
     register XPV* xpvend;
-    New(713, PL_xpv_root, 1008/sizeof(XPV), XPV);
-    xpv = PL_xpv_root;
+    New(713, xpv, 1008/sizeof(XPV), XPV);
+    xpv->xpv_pv = (char*)PL_xpv_arenaroot;
+    PL_xpv_arenaroot = xpv;
+
     xpvend = &xpv[1008 / sizeof(XPV) - 1];
+    PL_xpv_root = ++xpv;
     while (xpv < xpvend) {
 	xpv->xpv_pv = (char*)(xpv + 1);
 	xpv++;
@@ -407,22 +500,23 @@ S_del_xpviv(pTHX_ XPVIV *p)
     UNLOCK_SV_MUTEX;
 }
 
-
 STATIC void
 S_more_xpviv(pTHX)
 {
     register XPVIV* xpviv;
     register XPVIV* xpvivend;
-    New(714, PL_xpviv_root, 1008/sizeof(XPVIV), XPVIV);
-    xpviv = PL_xpviv_root;
+    New(714, xpviv, 1008/sizeof(XPVIV), XPVIV);
+    xpviv->xpv_pv = (char*)PL_xpviv_arenaroot;
+    PL_xpviv_arenaroot = xpviv;
+
     xpvivend = &xpviv[1008 / sizeof(XPVIV) - 1];
+    PL_xpviv_root = ++xpviv;
     while (xpviv < xpvivend) {
 	xpviv->xpv_pv = (char*)(xpviv + 1);
 	xpviv++;
     }
     xpviv->xpv_pv = 0;
 }
-
 
 STATIC XPVNV*
 S_new_xpvnv(pTHX)
@@ -446,23 +540,23 @@ S_del_xpvnv(pTHX_ XPVNV *p)
     UNLOCK_SV_MUTEX;
 }
 
-
 STATIC void
 S_more_xpvnv(pTHX)
 {
     register XPVNV* xpvnv;
     register XPVNV* xpvnvend;
-    New(715, PL_xpvnv_root, 1008/sizeof(XPVNV), XPVNV);
-    xpvnv = PL_xpvnv_root;
+    New(715, xpvnv, 1008/sizeof(XPVNV), XPVNV);
+    xpvnv->xpv_pv = (char*)PL_xpvnv_arenaroot;
+    PL_xpvnv_arenaroot = xpvnv;
+
     xpvnvend = &xpvnv[1008 / sizeof(XPVNV) - 1];
+    PL_xpvnv_root = ++xpvnv;
     while (xpvnv < xpvnvend) {
 	xpvnv->xpv_pv = (char*)(xpvnv + 1);
 	xpvnv++;
     }
     xpvnv->xpv_pv = 0;
 }
-
-
 
 STATIC XPVCV*
 S_new_xpvcv(pTHX)
@@ -486,23 +580,23 @@ S_del_xpvcv(pTHX_ XPVCV *p)
     UNLOCK_SV_MUTEX;
 }
 
-
 STATIC void
 S_more_xpvcv(pTHX)
 {
     register XPVCV* xpvcv;
     register XPVCV* xpvcvend;
-    New(716, PL_xpvcv_root, 1008/sizeof(XPVCV), XPVCV);
-    xpvcv = PL_xpvcv_root;
+    New(716, xpvcv, 1008/sizeof(XPVCV), XPVCV);
+    xpvcv->xpv_pv = (char*)PL_xpvcv_arenaroot;
+    PL_xpvcv_arenaroot = xpvcv;
+
     xpvcvend = &xpvcv[1008 / sizeof(XPVCV) - 1];
+    PL_xpvcv_root = ++xpvcv;
     while (xpvcv < xpvcvend) {
 	xpvcv->xpv_pv = (char*)(xpvcv + 1);
 	xpvcv++;
     }
     xpvcv->xpv_pv = 0;
 }
-
-
 
 STATIC XPVAV*
 S_new_xpvav(pTHX)
@@ -526,23 +620,23 @@ S_del_xpvav(pTHX_ XPVAV *p)
     UNLOCK_SV_MUTEX;
 }
 
-
 STATIC void
 S_more_xpvav(pTHX)
 {
     register XPVAV* xpvav;
     register XPVAV* xpvavend;
-    New(717, PL_xpvav_root, 1008/sizeof(XPVAV), XPVAV);
-    xpvav = PL_xpvav_root;
+    New(717, xpvav, 1008/sizeof(XPVAV), XPVAV);
+    xpvav->xav_array = (char*)PL_xpvav_arenaroot;
+    PL_xpvav_arenaroot = xpvav;
+
     xpvavend = &xpvav[1008 / sizeof(XPVAV) - 1];
+    PL_xpvav_root = ++xpvav;
     while (xpvav < xpvavend) {
 	xpvav->xav_array = (char*)(xpvav + 1);
 	xpvav++;
     }
     xpvav->xav_array = 0;
 }
-
-
 
 STATIC XPVHV*
 S_new_xpvhv(pTHX)
@@ -566,22 +660,23 @@ S_del_xpvhv(pTHX_ XPVHV *p)
     UNLOCK_SV_MUTEX;
 }
 
-
 STATIC void
 S_more_xpvhv(pTHX)
 {
     register XPVHV* xpvhv;
     register XPVHV* xpvhvend;
-    New(718, PL_xpvhv_root, 1008/sizeof(XPVHV), XPVHV);
-    xpvhv = PL_xpvhv_root;
+    New(718, xpvhv, 1008/sizeof(XPVHV), XPVHV);
+    xpvhv->xhv_array = (char*)PL_xpvhv_arenaroot;
+    PL_xpvhv_arenaroot = xpvhv;
+
     xpvhvend = &xpvhv[1008 / sizeof(XPVHV) - 1];
+    PL_xpvhv_root = ++xpvhv;
     while (xpvhv < xpvhvend) {
 	xpvhv->xhv_array = (char*)(xpvhv + 1);
 	xpvhv++;
     }
     xpvhv->xhv_array = 0;
 }
-
 
 STATIC XPVMG*
 S_new_xpvmg(pTHX)
@@ -605,23 +700,23 @@ S_del_xpvmg(pTHX_ XPVMG *p)
     UNLOCK_SV_MUTEX;
 }
 
-
 STATIC void
 S_more_xpvmg(pTHX)
 {
     register XPVMG* xpvmg;
     register XPVMG* xpvmgend;
-    New(719, PL_xpvmg_root, 1008/sizeof(XPVMG), XPVMG);
-    xpvmg = PL_xpvmg_root;
+    New(719, xpvmg, 1008/sizeof(XPVMG), XPVMG);
+    xpvmg->xpv_pv = (char*)PL_xpvmg_arenaroot;
+    PL_xpvmg_arenaroot = xpvmg;
+
     xpvmgend = &xpvmg[1008 / sizeof(XPVMG) - 1];
+    PL_xpvmg_root = ++xpvmg;
     while (xpvmg < xpvmgend) {
 	xpvmg->xpv_pv = (char*)(xpvmg + 1);
 	xpvmg++;
     }
     xpvmg->xpv_pv = 0;
 }
-
-
 
 STATIC XPVLV*
 S_new_xpvlv(pTHX)
@@ -645,22 +740,23 @@ S_del_xpvlv(pTHX_ XPVLV *p)
     UNLOCK_SV_MUTEX;
 }
 
-
 STATIC void
 S_more_xpvlv(pTHX)
 {
     register XPVLV* xpvlv;
     register XPVLV* xpvlvend;
-    New(720, PL_xpvlv_root, 1008/sizeof(XPVLV), XPVLV);
-    xpvlv = PL_xpvlv_root;
+    New(720, xpvlv, 1008/sizeof(XPVLV), XPVLV);
+    xpvlv->xpv_pv = (char*)PL_xpvlv_arenaroot;
+    PL_xpvlv_arenaroot = xpvlv;
+
     xpvlvend = &xpvlv[1008 / sizeof(XPVLV) - 1];
+    PL_xpvlv_root = ++xpvlv;
     while (xpvlv < xpvlvend) {
 	xpvlv->xpv_pv = (char*)(xpvlv + 1);
 	xpvlv++;
     }
     xpvlv->xpv_pv = 0;
 }
-
 
 STATIC XPVBM*
 S_new_xpvbm(pTHX)
@@ -684,15 +780,17 @@ S_del_xpvbm(pTHX_ XPVBM *p)
     UNLOCK_SV_MUTEX;
 }
 
-
 STATIC void
 S_more_xpvbm(pTHX)
 {
     register XPVBM* xpvbm;
     register XPVBM* xpvbmend;
-    New(721, PL_xpvbm_root, 1008/sizeof(XPVBM), XPVBM);
-    xpvbm = PL_xpvbm_root;
+    New(721, xpvbm, 1008/sizeof(XPVBM), XPVBM);
+    xpvbm->xpv_pv = (char*)PL_xpvbm_arenaroot;
+    PL_xpvbm_arenaroot = xpvbm;
+
     xpvbmend = &xpvbm[1008 / sizeof(XPVBM) - 1];
+    PL_xpvbm_root = ++xpvbm;
     while (xpvbm < xpvbmend) {
 	xpvbm->xpv_pv = (char*)(xpvbm + 1);
 	xpvbm++;
@@ -7436,17 +7534,29 @@ perl_clone_using(PerlInterpreter *proto_perl, UV flags,
     /* arena roots */
     PL_xiv_arenaroot	= NULL;
     PL_xiv_root		= NULL;
+    PL_xnv_arenaroot	= NULL;
     PL_xnv_root		= NULL;
+    PL_xrv_arenaroot	= NULL;
     PL_xrv_root		= NULL;
+    PL_xpv_arenaroot	= NULL;
     PL_xpv_root		= NULL;
+    PL_xpviv_arenaroot	= NULL;
     PL_xpviv_root	= NULL;
+    PL_xpvnv_arenaroot	= NULL;
     PL_xpvnv_root	= NULL;
+    PL_xpvcv_arenaroot	= NULL;
     PL_xpvcv_root	= NULL;
+    PL_xpvav_arenaroot	= NULL;
     PL_xpvav_root	= NULL;
+    PL_xpvhv_arenaroot	= NULL;
     PL_xpvhv_root	= NULL;
+    PL_xpvmg_arenaroot	= NULL;
     PL_xpvmg_root	= NULL;
+    PL_xpvlv_arenaroot	= NULL;
     PL_xpvlv_root	= NULL;
+    PL_xpvbm_arenaroot	= NULL;
     PL_xpvbm_root	= NULL;
+    PL_he_arenaroot	= NULL;
     PL_he_root		= NULL;
     PL_nice_chunk	= NULL;
     PL_nice_chunk_size	= 0;

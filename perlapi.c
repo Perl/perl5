@@ -3533,6 +3533,15 @@ Perl_runops_debug(pTHXo)
 {
     return ((CPerlObj*)pPerl)->Perl_runops_debug();
 }
+#if defined(USE_THREADS)
+
+#undef  Perl_sv_lock
+SV*
+Perl_sv_lock(pTHXo_ SV *sv)
+{
+    return ((CPerlObj*)pPerl)->Perl_sv_lock(sv);
+}
+#endif
 
 #undef  Perl_sv_catpvf_mg
 void
@@ -3982,6 +3991,13 @@ Perl_ptr_table_split(pTHXo_ PTR_TBL_t *tbl)
 }
 #endif
 #if defined(HAVE_INTERP_INTERN)
+
+#undef  Perl_sys_intern_clear
+void
+Perl_sys_intern_clear(pTHXo)
+{
+    ((CPerlObj*)pPerl)->Perl_sys_intern_clear();
+}
 
 #undef  Perl_sys_intern_init
 void

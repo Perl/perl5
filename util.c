@@ -2397,9 +2397,9 @@ Perl_my_popen(pTHX_ char *cmd, char *mode)
 	PerlLIO_close(p[This]);
 	p[This] = p[that];
     }
-    MUTEX_LOCK(&PL_fdpid_mutex);
+    LOCK_FDPID_MUTEX;
     sv = *av_fetch(PL_fdpid,p[This],TRUE);
-    MUTEX_UNLOCK(&PL_fdpid_mutex);
+    UNLOCK_FDPID_MUTEX;
     (void)SvUPGRADE(sv,SVt_IV);
     SvIVX(sv) = pid;
     PL_forkprocess = pid;
@@ -2616,9 +2616,9 @@ Perl_my_pclose(pTHX_ PerlIO *ptr)
     int saved_win32_errno;
 #endif
 
-    MUTEX_LOCK(&PL_fdpid_mutex);
+    LOCK_FDPID_MUTEX;
     svp = av_fetch(PL_fdpid,PerlIO_fileno(ptr),TRUE);
-    MUTEX_UNLOCK(&PL_fdpid_mutex);
+    UNLOCK_FDPID_MUTEX;
     pid = SvIVX(*svp);
     SvREFCNT_dec(*svp);
     *svp = &PL_sv_undef;
@@ -3487,7 +3487,7 @@ Perl_condpair_magic(pTHX_ SV *sv)
 }
 
 SV *
-Perl_lock(pTHX_ SV *osv)
+Perl_sv_lock(pTHX_ SV *osv)
 {
     MAGIC *mg;
     SV *sv = osv;
@@ -3503,17 +3503,18 @@ Perl_lock(pTHX_ SV *osv)
     MUTEX_LOCK(MgMUTEXP(mg));
     if (MgOWNER(mg) == thr)
 	MUTEX_UNLOCK(MgMUTEXP(mg));
-     else {
+    else {
 	while (MgOWNER(mg))
 	    COND_WAIT(MgOWNERCONDP(mg), MgMUTEXP(mg));
 	MgOWNER(mg) = thr;
-	DEBUG_S(PerlIO_printf(Perl_debug_log, "0x%"UVxf": Perl_lock lock 0x%"UVxf"\n",
+	DEBUG_S(PerlIO_printf(Perl_debug_log,
+			      "0x%"UVxf": Perl_lock lock 0x%"UVxf"\n",
 			      PTR2UV(thr), PTR2UV(sv));)
 	MUTEX_UNLOCK(MgMUTEXP(mg));
 	SAVEDESTRUCTOR_X(Perl_unlock_condpair, sv);
     }
-  SvUNLOCK(sv);
-  return sv;
+    SvUNLOCK(sv);
+    return sv;
 }
 
 /*

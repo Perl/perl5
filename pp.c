@@ -5263,7 +5263,7 @@ PP(pp_lock)
     dTOPss;
     SV *retsv = sv;
 #ifdef USE_THREADS
-    Perl_lock(aTHX_ sv);
+    sv_lock(sv);
 #endif /* USE_THREADS */
     if (SvTYPE(retsv) == SVt_PVAV || SvTYPE(retsv) == SVt_PVHV
 	|| SvTYPE(retsv) == SVt_PVCV) {

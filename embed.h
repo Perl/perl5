@@ -765,6 +765,9 @@
 #endif
 #define runops_standard		Perl_runops_standard
 #define runops_debug		Perl_runops_debug
+#if defined(USE_THREADS)
+#define sv_lock			Perl_sv_lock
+#endif
 #define sv_catpvf_mg		Perl_sv_catpvf_mg
 #define sv_vcatpvf_mg		Perl_sv_vcatpvf_mg
 #define sv_catpv_mg		Perl_sv_catpv_mg
@@ -837,6 +840,7 @@
 #define ptr_table_split		Perl_ptr_table_split
 #endif
 #if defined(HAVE_INTERP_INTERN)
+#define sys_intern_clear	Perl_sys_intern_clear
 #define sys_intern_init		Perl_sys_intern_init
 #endif
 #if defined(PERL_OBJECT)
@@ -1131,7 +1135,6 @@
 #define xstat			S_xstat
 #  endif
 #endif
-#define lock			Perl_lock
 #if defined(PERL_OBJECT)
 #endif
 #define ck_anoncode		Perl_ck_anoncode
@@ -2214,6 +2217,9 @@
 #endif
 #define runops_standard()	Perl_runops_standard(aTHX)
 #define runops_debug()		Perl_runops_debug(aTHX)
+#if defined(USE_THREADS)
+#define sv_lock(a)		Perl_sv_lock(aTHX_ a)
+#endif
 #define sv_vcatpvf_mg(a,b,c)	Perl_sv_vcatpvf_mg(aTHX_ a,b,c)
 #define sv_catpv_mg(a,b)	Perl_sv_catpv_mg(aTHX_ a,b)
 #define sv_catpvn_mg(a,b,c)	Perl_sv_catpvn_mg(aTHX_ a,b,c)
@@ -2282,6 +2288,7 @@
 #define ptr_table_split(a)	Perl_ptr_table_split(aTHX_ a)
 #endif
 #if defined(HAVE_INTERP_INTERN)
+#define sys_intern_clear()	Perl_sys_intern_clear(aTHX)
 #define sys_intern_init()	Perl_sys_intern_init(aTHX)
 #endif
 #if defined(PERL_OBJECT)
@@ -2575,7 +2582,6 @@
 #define xstat(a)		S_xstat(aTHX_ a)
 #  endif
 #endif
-#define lock(a)			Perl_lock(aTHX_ a)
 #if defined(PERL_OBJECT)
 #endif
 #define ck_anoncode(a)		Perl_ck_anoncode(aTHX_ a)
@@ -4335,6 +4341,10 @@
 #define runops_standard		Perl_runops_standard
 #define Perl_runops_debug	CPerlObj::Perl_runops_debug
 #define runops_debug		Perl_runops_debug
+#if defined(USE_THREADS)
+#define Perl_sv_lock		CPerlObj::Perl_sv_lock
+#define sv_lock			Perl_sv_lock
+#endif
 #define Perl_sv_catpvf_mg	CPerlObj::Perl_sv_catpvf_mg
 #define sv_catpvf_mg		Perl_sv_catpvf_mg
 #define Perl_sv_vcatpvf_mg	CPerlObj::Perl_sv_vcatpvf_mg
@@ -4472,6 +4482,8 @@
 #define ptr_table_split		Perl_ptr_table_split
 #endif
 #if defined(HAVE_INTERP_INTERN)
+#define Perl_sys_intern_clear	CPerlObj::Perl_sys_intern_clear
+#define sys_intern_clear	Perl_sys_intern_clear
 #define Perl_sys_intern_init	CPerlObj::Perl_sys_intern_init
 #define sys_intern_init		Perl_sys_intern_init
 #endif
@@ -4996,8 +5008,6 @@
 #define xstat			S_xstat
 #  endif
 #endif
-#define Perl_lock		CPerlObj::Perl_lock
-#define lock			Perl_lock
 #if defined(PERL_OBJECT)
 #endif
 #define Perl_ck_anoncode	CPerlObj::Perl_ck_anoncode

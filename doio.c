@@ -476,13 +476,13 @@ Perl_do_open9(pTHX_ GV *gv, register char *name, I32 len, int as_raw,
 	    SV *sv;
 
 	    PerlLIO_dup2(PerlIO_fileno(fp), fd);
-	    MUTEX_LOCK(&PL_fdpid_mutex);
+	    LOCK_FDPID_MUTEX;
 	    sv = *av_fetch(PL_fdpid,PerlIO_fileno(fp),TRUE);
 	    (void)SvUPGRADE(sv, SVt_IV);
 	    pid = SvIVX(sv);
 	    SvIVX(sv) = 0;
 	    sv = *av_fetch(PL_fdpid,fd,TRUE);
-	    MUTEX_UNLOCK(&PL_fdpid_mutex);
+	    UNLOCK_FDPID_MUTEX;
 	    (void)SvUPGRADE(sv, SVt_IV);
 	    SvIVX(sv) = pid;
 	    if (!was_fdopen)

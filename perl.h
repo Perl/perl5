@@ -164,8 +164,8 @@ class CPerlObj;
 #define aTHXo_			this,
 #define PERL_OBJECT_THIS	aTHXo
 #define PERL_OBJECT_THIS_	aTHXo_
-#define dTHXoa(a)		pTHXo = a
-#define dTHXo			dTHXoa(PERL_GET_THX)
+#define dTHXoa(a)		pTHXo = (CPerlObj*)a
+#define dTHXo			pTHXo = PERL_GET_THX
 
 #define pTHXx		void
 #define pTHXx_
@@ -180,15 +180,16 @@ struct perl_thread;
 #    define pTHX	register struct perl_thread *thr
 #    define aTHX	thr
 #    define dTHR	dNOOP
+#    define dTHXa(a)	pTHX = (struct perl_thread*)a
 #  else
 #    ifndef MULTIPLICITY
 #      define MULTIPLICITY
 #    endif
 #    define pTHX	register PerlInterpreter *my_perl
 #    define aTHX	my_perl
+#    define dTHXa(a)	pTHX = (PerlInterpreter*)a
 #  endif
-#  define dTHXa(a)	pTHX = a
-#  define dTHX		dTHXa(PERL_GET_THX)
+#  define dTHX		pTHX = PERL_GET_THX
 #  define pTHX_		pTHX,
 #  define aTHX_		aTHX,
 #  define pTHX_1	2	

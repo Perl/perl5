@@ -7391,27 +7391,6 @@ Perl_yyerror(pTHX_ char *s)
 }
 
 
-#ifdef PERL_OBJECT
-#include "XSUB.h"
-#endif
-
-/*
- * restore_rsfp
- * Restore a source filter.
- */
-
-static void
-restore_rsfp(pTHXo_ void *f)
-{
-    PerlIO *fp = (PerlIO*)f;
-
-    if (PL_rsfp == PerlIO_stdin())
-	PerlIO_clearerr(PL_rsfp);
-    else if (PL_rsfp && (PL_rsfp != fp))
-	PerlIO_close(PL_rsfp);
-    PL_rsfp = fp;
-}
-
 STATIC char*
 S_swallow_bom(pTHX_ char *s) {
     STRLEN slen;
@@ -7462,4 +7441,25 @@ S_swallow_bom(pTHX_ char *s) {
        Perl_croak(aTHX_ "Unsupported script encoding");
 } 
 return s;
+}
+
+#ifdef PERL_OBJECT
+#include "XSUB.h"
+#endif
+
+/*
+ * restore_rsfp
+ * Restore a source filter.
+ */
+
+static void
+restore_rsfp(pTHXo_ void *f)
+{
+    PerlIO *fp = (PerlIO*)f;
+
+    if (PL_rsfp == PerlIO_stdin())
+	PerlIO_clearerr(PL_rsfp);
+    else if (PL_rsfp && (PL_rsfp != fp))
+	PerlIO_close(PL_rsfp);
+    PL_rsfp = fp;
 }

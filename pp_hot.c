@@ -1390,8 +1390,7 @@ Perl_do_readline(pTHX)
 /* delay EOF state for a snarfed empty file */
 #define SNARF_EOF(gimme,rs,io,sv) \
     (gimme != G_SCALAR || SvCUR(sv)					\
-     || !RsSNARF(rs) || (IoFLAGS(io) & IOf_NOLINE)			\
-     || ((IoFLAGS(io) |= IOf_NOLINE), FALSE))
+     || (IoFLAGS(io) & IOf_NOLINE) || !RsSNARF(rs))
 
     for (;;) {
 	if (!sv_gets(sv, fp, offset)
@@ -1424,6 +1423,7 @@ Perl_do_readline(pTHX)
 	    SvTAINTED_on(sv);
 	}
 	IoLINES(io)++;
+	IoFLAGS(io) |= IOf_NOLINE;
 	SvSETMAGIC(sv);
 	XPUSHs(sv);
 	if (type == OP_GLOB) {
@@ -2659,6 +2659,7 @@ try_autoload:
 	    cx->blk_sub.savearray = GvAV(PL_defgv);
 	    GvAV(PL_defgv) = (AV*)SvREFCNT_inc(av);
 #endif /* USE_THREADS */
+	    cx->blk_sub.oldcurpad = PL_curpad;
 	    cx->blk_sub.argarray = av;
 	    ++MARK;
 
@@ -2883,6 +2884,7 @@ S_method_common(pTHX_ SV* meth, U32* hashp)
 	char* leaf = name;
 	char* sep = Nullch;
 	char* p;
+	GV* gv;
 
 	for (p = name; *p; p++) {
 	    if (*p == '\'')
@@ -2898,9 +2900,18 @@ S_method_common(pTHX_ SV* meth, U32* hashp)
 	    packname = name;
 	    packlen = sep - name;
 	}
-	Perl_croak(aTHX_
-		   "Can't locate object method \"%s\" via package \"%s\"",
-		   leaf, packname);
+	gv = gv_fetchpv(packname, 0, SVt_PVHV);
+	if (gv && isGV(gv)) {
+	    Perl_croak(aTHX_
+		       "Can't locate object method \"%s\" via package \"%s\"",
+		       leaf, packname);
+	}
+	else {
+	    Perl_croak(aTHX_
+		       "Can't locate object method \"%s\" via package \"%s\""
+		       " (perhaps you forgot to load \"%s\"?)",
+		       leaf, packname, packname);
+	}
     }
     return isGV(gv) ? (SV*)GvCV(gv) : (SV*)gv;
 }
