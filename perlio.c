@@ -2726,7 +2726,11 @@ PerlIOStdio_invalidate_fileno(pTHX_ FILE *f)
     f->__fileH = 0xff;
     f->__fileL = 0xff;
     return 1;
-#  elif defined(_AIX)
+   /* Next one ->_file seems to be a reasonable fallback 
+      For OSF only have confirmation for Tru64 (alpha)
+      but assume other OSFs will be similar.
+    */    
+#  elif defined(_AIX) || defined(__osf__)
     f->_file = -1;
     return 1;
 #  elif defined(__FreeBSD__)
