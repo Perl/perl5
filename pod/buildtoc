@@ -556,9 +556,9 @@ SNIP
 
 sub generate_nmake_1 {
   # XXX Fix this with File::Spec
-  (map {sprintf "\tcopy ..\\README.%-8s .\\perl$_.pod\n", $_}
+  (map {sprintf "\tcopy ..\\README.%-8s ..\\pod\\perl$_.pod\n", $_}
     sort keys %Readmes),
-      (map {"\tcopy $Copies{$_} $_\n"} sort keys %Copies);
+      (map {"\tcopy ..\\pod\\$Copies{$_} ..\\pod\\$_\n"} sort keys %Copies);
 }
 
 # This doesn't have a trailing newline
@@ -608,7 +608,7 @@ sub do_nmake {
   1 while $makefile =~ s/\0\tcopy .*\n/\0/gm;
   $makefile =~ s/\0+/join ("", &generate_nmake_1)/se;
 
-  $makefile =~ s{(cd \$\(PODDIR\)\n\t-del /f [^\n]+).*?(pod2html)}
+  $makefile =~ s{(del /f [^\n]+checkpods[^\n]+).*?(pod2html)}
     {"$1\n" . &generate_nmake_2."\n\t    $2"}se;
   $makefile;
 }
