@@ -27,7 +27,7 @@ my $tmpfile = 'foo.tmp';
 $tb->output($tmpfile);
 $tb->failure_output($tmpfile);
 $tb->todo_output($tmpfile);
-END { unlink $tmpfile }
+END { 1 while unlink $tmpfile }
 
 # This won't print since we just sent output off to oblivion.
 $tb->ok(0, "And a failure for fun");

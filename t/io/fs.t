@@ -373,4 +373,4 @@ if ($^O eq 'VMS') {
 ok(-d 'tmp1', "rename on directories working");
 
 # need to remove 'tmp' if rename() in test 28 failed!
-END { rmdir 'tmp1'; rmdir 'tmp'; unlink "Iofs.tmp"; }
+END { rmdir 'tmp1'; rmdir 'tmp'; 1 while unlink "Iofs.tmp"; }
