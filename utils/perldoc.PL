@@ -380,14 +380,23 @@ if ($opt_f) {
        ++$found if /^\w/;	# found descriptive text
    }
    if (@pod) {
+	my $lines = $ENV{LINES} || 24;
+
        if ($opt_t) {
 	   open(FORMATTER, "| pod2text") || die "Can't start filter";
 	   print FORMATTER "=over 8\n\n";
 	   print FORMATTER @pod;
 	   print FORMATTER "=back\n";
 	   close(FORMATTER);
-       } else {
+       } elsif (@pod < $lines-2) {
 	   print @pod;
+       } else {
+	   foreach $pager (@pagers) {
+		open (PAGER, "| $pager") or next;
+		print PAGER @pod ;
+		close(PAGER) or next;
+		last;
+	   }
        }
    } else {
        die "No documentation for perl function `$opt_f' found\n";
