@@ -23,15 +23,20 @@ To install this module type the following:
 To install scripts under bin/ directories also,
 
    perl Makefile.PL MORE_SCRIPTS
-   make
-   make test
-   make install
+   make && make test && make install
 
-by default, only bin/enc2xs is installed.
+by default, only enc2xs and piconv are installed.
+
+To install *.ucm files also, say
+
+   perl Makefile.PL INSTALL_UCM
+   make && make test && make install
+
+by default, *.ucm are not installed.
 
 DEPENDENCIES
 
-This module requires perl5.7.2 or later.
+This module requires perl5.7.3 or later.
 
 QUESTIONS?
 

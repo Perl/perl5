@@ -168,7 +168,7 @@ print "ok 25\n";
 
 # some more eq, cmp
 
-my $byte=pack("C*", 0xDF);
+$byte=pack("C*", 0xDF);
 
 print "not " unless pack("U*", 0x3AF) eq $byte;
 print "ok 26\n";
@@ -182,5 +182,9 @@ print "not " unless ((pack("U*", 0x3B0)       cmp $byte) ==  1) &&
 	            ((pack("U*", 0x3AF) cmp pack("C*",0xDF,0x20))==-1);
 print "ok 28\n";
 
-# Used to core dump in 5.7.3
-print ord undef == 0 ? "ok 29\n" : "not ok 29\n";
+
+{
+    # Used to core dump in 5.7.3
+    no warnings; # so test goes noiselessly
+    print ord(undef) == 0 ? "ok 29\n" : "not ok 29\n";
+}

@@ -8,74 +8,12 @@ EBCDIC/EBCDIC.pm       Encode extension
 EBCDIC/Makefile.PL     Encode extension
 Encode.pm			Encode extension
 Encode.xs		Encode extension
-Encode/8859-1.ucm	Unicode Character Map
-Encode/8859-10.ucm	Unicode Character Map
-Encode/8859-11.ucm	Unicode Character Map
-Encode/8859-13.ucm	Unicode Character Map
-Encode/8859-14.ucm	Unicode Character Map
-Encode/8859-15.ucm	Unicode Character Map
-Encode/8859-16.ucm	Unicode Character Map
-Encode/8859-2.ucm	Unicode Character Map
-Encode/8859-3.ucm	Unicode Character Map
-Encode/8859-4.ucm	Unicode Character Map
-Encode/8859-5.ucm	Unicode Character Map
-Encode/8859-6.ucm	Unicode Character Map
-Encode/8859-7.ucm	Unicode Character Map
-Encode/8859-8.ucm	Unicode Character Map
-Encode/8859-9.ucm	Unicode Character Map
-Encode/ascii.ucm	Unicode Character Map
-Encode/big5-hkscs.ucm	Unicode Character Map
-Encode/big5.ucm	Unicode Character Map
-Encode/cp1047.ucm	Unicode Character Map
-Encode/cp1250.ucm	Unicode Character Map
-Encode/cp37.ucm	Unicode Character Map
-Encode/cp932.ucm	Unicode Character Map
-Encode/cp936.ucm	Unicode Character Map
-Encode/cp949.ucm	Unicode Character Map
-Encode/cp950.ucm	Unicode Character Map
-Encode/dingbats.ucm	Unicode Character Map
+Encode/Changes.e2x		Skelton file for enc2xs
+Encode/Makefile_PL.e2x	Skelton file for enc2xs
+Encode/README.e2x		Skelton file for enc2xs
+Encode/_PM.e2x		Skelton file for enc2xs
+Encode/_T.e2x		Skelton file for enc2xs
 Encode/encode.h		Encode extension header file
-Encode/euc-cn.ucm	Unicode Character Map
-Encode/euc-jp.ucm	Unicode Character Map
-Encode/euc-kr.ucm	Unicode Character Map
-Encode/gb12345.ucm	Unicode Character Map
-Encode/gb2312.ucm	Unicode Character Map
-Encode/gsm0338.ucm	Unicode Character Map
-Encode/hp-roman8.ucm	Unicode Character Map
-Encode/ibm-1250.ucm	Unicode Character Map
-Encode/ibm-1251.ucm	Unicode Character Map
-Encode/ibm-1252.ucm	Unicode Character Map
-Encode/ibm-1253.ucm	Unicode Character Map
-Encode/ibm-1254.ucm	Unicode Character Map
-Encode/ibm-1255.ucm	Unicode Character Map
-Encode/ibm-1256.ucm	Unicode Character Map
-Encode/ibm-1257.ucm	Unicode Character Map
-Encode/ibm-1258.ucm	Unicode Character Map
-Encode/ir-165.ucm	Unicode Character Map
-Encode/jis0201.ucm	Unicode Character Map
-Encode/johab.ucm	Unicode Character Map
-Encode/koi8-f.ucm	Unicode Character Map
-Encode/koi8-r.ucm	Unicode Character Map
-Encode/koi8-u.ucm	Unicode Character Map
-Encode/ksc5601.ucm	Unicode Character Map
-Encode/macCentEuro.ucm	Unicode Character Map
-Encode/macCroatian.ucm	Unicode Character Map
-Encode/macCyrillic.ucm	Unicode Character Map
-Encode/macDingbats.ucm	Unicode Character Map
-Encode/macGreek.ucm	Unicode Character Map
-Encode/macIceland.ucm	Unicode Character Map
-Encode/macJapan.ucm	Unicode Character Map
-Encode/macRoman.ucm	Unicode Character Map
-Encode/macRumanian.ucm	Unicode Character Map
-Encode/macSami.ucm	Unicode Character Map
-Encode/macThai.ucm	Unicode Character Map
-Encode/macTurkish.ucm	Unicode Character Map
-Encode/macUkraine.ucm	Unicode Character Map
-Encode/nextstep.ucm	Unicode Character Map
-Encode/posix-bc.ucm	Unicode Character Map
-Encode/shiftjis.ucm	Unicode Character Map
-Encode/symbol.ucm	Unicode Character Map
-Encode/viscii.ucm	Unicode Character Map
 JP/JP.pm		Encode extension
 JP/Makefile.PL	Encode extension
 KR/KR.pm		Encode extension
@@ -89,7 +27,9 @@ TW/Makefile.PL	Encode extension
 TW/TW.pm		Encode extension
 bin/enc2xs	Encode module generator
 bin/piconv	iconv by perl
+bin/ucm2table	Table Generator for testing
 encengine.c		Encode extension
+encoding.pm	Perl Pragmactic Module
 lib/Encode/10646_1.pm	Encode extension
 lib/Encode/Alias.pm	        Encode extension
 lib/Encode/CJKConstants.pm	Encode extension
@@ -112,12 +52,80 @@ t/Encode.t		Encode extension test
 t/JP.t		Encode extension test
 t/KR.t		Encode extension test
 t/TW.t		Encode extension test
+t/encoding.t	encoding extension test
 t/gb2312.euc	test data
 t/gb2312.ref	test data
 t/jisx0208.euc	test data
 t/jisx0208.ref	test data
 t/jisx0212.euc	test data
 t/jisx0212.ref	test data
+t/jperl.t	encoding extension test
 t/ksc5601.euc	test data
 t/ksc5601.ref	test data
-ucm2table	Table Generator for testing
+ucm/8859-1.ucm	Unicode Character Map
+ucm/8859-10.ucm	Unicode Character Map
+ucm/8859-11.ucm	Unicode Character Map
+ucm/8859-13.ucm	Unicode Character Map
+ucm/8859-14.ucm	Unicode Character Map
+ucm/8859-15.ucm	Unicode Character Map
+ucm/8859-16.ucm	Unicode Character Map
+ucm/8859-2.ucm	Unicode Character Map
+ucm/8859-3.ucm	Unicode Character Map
+ucm/8859-4.ucm	Unicode Character Map
+ucm/8859-5.ucm	Unicode Character Map
+ucm/8859-6.ucm	Unicode Character Map
+ucm/8859-7.ucm	Unicode Character Map
+ucm/8859-8.ucm	Unicode Character Map
+ucm/8859-9.ucm	Unicode Character Map
+ucm/ascii.ucm	Unicode Character Map
+ucm/big5-hkscs.ucm	Unicode Character Map
+ucm/big5.ucm	Unicode Character Map
+ucm/cp1047.ucm	Unicode Character Map
+ucm/cp1250.ucm	Unicode Character Map
+ucm/cp37.ucm	Unicode Character Map
+ucm/cp932.ucm	Unicode Character Map
+ucm/cp936.ucm	Unicode Character Map
+ucm/cp949.ucm	Unicode Character Map
+ucm/cp950.ucm	Unicode Character Map
+ucm/dingbats.ucm	Unicode Character Map
+ucm/euc-cn.ucm	Unicode Character Map
+ucm/euc-jp.ucm	Unicode Character Map
+ucm/euc-kr.ucm	Unicode Character Map
+ucm/gb12345.ucm	Unicode Character Map
+ucm/gb2312.ucm	Unicode Character Map
+ucm/gsm0338.ucm	Unicode Character Map
+ucm/hp-roman8.ucm	Unicode Character Map
+ucm/ibm-1250.ucm	Unicode Character Map
+ucm/ibm-1251.ucm	Unicode Character Map
+ucm/ibm-1252.ucm	Unicode Character Map
+ucm/ibm-1253.ucm	Unicode Character Map
+ucm/ibm-1254.ucm	Unicode Character Map
+ucm/ibm-1255.ucm	Unicode Character Map
+ucm/ibm-1256.ucm	Unicode Character Map
+ucm/ibm-1257.ucm	Unicode Character Map
+ucm/ibm-1258.ucm	Unicode Character Map
+ucm/ir-165.ucm	Unicode Character Map
+ucm/jis0201.ucm	Unicode Character Map
+ucm/johab.ucm	Unicode Character Map
+ucm/koi8-f.ucm	Unicode Character Map
+ucm/koi8-r.ucm	Unicode Character Map
+ucm/koi8-u.ucm	Unicode Character Map
+ucm/ksc5601.ucm	Unicode Character Map
+ucm/macCentEuro.ucm	Unicode Character Map
+ucm/macCroatian.ucm	Unicode Character Map
+ucm/macCyrillic.ucm	Unicode Character Map
+ucm/macDingbats.ucm	Unicode Character Map
+ucm/macGreek.ucm	Unicode Character Map
+ucm/macIceland.ucm	Unicode Character Map
+ucm/macJapan.ucm	Unicode Character Map
+ucm/macRoman.ucm	Unicode Character Map
+ucm/macRumanian.ucm	Unicode Character Map
+ucm/macSami.ucm	Unicode Character Map
+ucm/macThai.ucm	Unicode Character Map
+ucm/macTurkish.ucm	Unicode Character Map
+ucm/macUkraine.ucm	Unicode Character Map
+ucm/nextstep.ucm	Unicode Character Map
+ucm/posix-bc.ucm	Unicode Character Map
+ucm/shiftjis.ucm	Unicode Character Map
+ucm/symbol.ucm	Unicode Character Map
+ucm/viscii.ucm	Unicode Character Map

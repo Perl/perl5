@@ -98,7 +98,7 @@ END
 sub postamble
 {
     my $self = shift;
-    my $dir  = $self->catdir($self->updir,'Encode');
+    my $dir  = $self->catdir($self->updir,'ucm');
     my $str  = "# $name\$(OBJ_EXT) depends on .h and _def.h files not .c files - but all written by enc2xs\n";
     $str    .= "$name.c : $name.xs ";
     foreach my $table (keys %tables)

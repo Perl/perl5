@@ -1,6 +1,6 @@
 package Encode;
 use strict;
-our $VERSION = do { my @r = (q$Revision: 1.1 $ =~ /\d+/g); sprintf "%d."."%02d" x $#r, @r };
+our $VERSION = do { my @r = (q$Revision: 1.11 $ =~ /\d+/g); sprintf "%d."."%02d" x $#r, @r };
 our $DEBUG = 0;
 
 require DynaLoader;
@@ -90,13 +90,13 @@ unless ($ON_EBCDIC) { # CJK added to autoload unless EBCDIC env
 	     );
 }
 
-for my $k (qw(centeuro croatian cyrillic dingbats greek
-	      iceland roman rumanian sami 
-	      thai turkish  ukraine))
+for my $k (qw{ CentralEurRoman  Croatian  Cyrillic   Greek
+	       Iceland          Roman     Rumanian   Sami
+	       Thai             Turkish   Ukrainian
+	     })
 {
     $ExtModule{"mac$k"} = 'Encode/Byte.pm';
 }
-
 
 sub encodings
 {
@@ -199,7 +199,7 @@ sub from_to
     return undef if ($check && length($string));
     $string = $t->encode($uni,$check);
     return undef if ($check && length($uni));
-    return length($_[0] = $string);
+    return defined($_[0] = $string) ? length($string) : undef ;
 }
 
 sub encode_utf8
@@ -333,7 +333,7 @@ For example to convert ISO-8859-1 data to UTF-8:
 
   $utf8 = decode("iso-8859-1", $latin1);
 
-=item from_to($string, FROM_ENCODING, TO_ENCODING[, CHECK])
+=item [$length =] from_to($string, FROM_ENCODING, TO_ENCODING[, CHECK])
 
 Convert B<in-place> the data between two encodings.  How did the data
 in $string originally get to be in FROM_ENCODING?  Either using
@@ -351,6 +351,9 @@ and to convert it back:
 
 Note that because the conversion happens in place, the data to be
 converted cannot be a string constant, it must be a scalar variable.
+
+from_to() return the length of the converted string on success, undef
+otherwise.
 
 =back
 
@@ -384,9 +387,9 @@ To add new alias to a given encoding,  Use;
   use Encode::Alias;
   define_alias(newName => ENCODING);
 
-After that, newName can be to be used as am alias for ENCODING.
-ENCODING may be either the name of an encoding or and I<encoding 
-object>
+After that, newName can be used as an alias for ENCODING.
+ENCODING may be either the name of an encoding or an I<encoding
+ object>
 
 See L<Encode::Alias> on details.
 

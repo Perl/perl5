@@ -1,6 +1,6 @@
 package Encode::Byte;
 use Encode;
-our $VERSION = do { my @r = (q$Revision: 1.0 $ =~ /\d+/g); sprintf "%d."."%02d" x $#r, @r };
+our $VERSION = do { my @r = (q$Revision: 1.2 $ =~ /\d+/g); sprintf "%d."."%02d" x $#r, @r };
 
 use XSLoader;
 XSLoader::load('Encode::Byte',$VERSION);
@@ -74,7 +74,7 @@ supported are as follows.
   MacSami
   MacGreek 
   MacThai
-  MacIcelandic    
+  MacIceland
   MacTurkish
   MacUkrainian
 

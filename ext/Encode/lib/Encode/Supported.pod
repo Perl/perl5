@@ -97,9 +97,9 @@ non-ASCII characters.
   MacCyrillic
   MacRomanian
   MacSami
-  MacGreek 
+  MacGreek
   MacThai
-  MacIcelandic    
+  MacIceland    
   MacTurkish
   MacUkrainian
 
