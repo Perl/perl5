@@ -2,8 +2,12 @@ Thread		T_IVOBJ
 
 INPUT
 T_IVOBJ
-	if (sv_isobject($arg))
+	if (sv_isobject($arg)) {
 	    $var = ($type) SvIV((SV*)SvRV($arg));
+	    DEBUG_L(PerlIO_printf(PerlIO_stderr(),
+				  \"XSUB ${func_name}: 0x%lx\\n\",
+				  (unsigned long)$var););
+	}
 	else
 	    croak(\"$var is not an object\")
 T_IVREF
@@ -15,3 +19,5 @@ T_IVREF
 OUTPUT
 T_IVOBJ	
 	sv_setref_iv($arg, \"${ntype}\", (IV)($var));
+    	DEBUG_L(PerlIO_printf(PerlIO_stderr(), \"XSUB $func_name: 0x%lx\\n\",
+			      (unsigned long)$var););
