@@ -1016,7 +1016,35 @@ unless ($aaa) {
   main::test($x+0 =~ /Recurse=ARRAY/);		# 221
 }
 
+# BugID 20010422.003
+package Foo;
 
+use overload
+  'bool' => sub { return !$_[0]->is_zero() || undef; }
+;
+ 
+sub is_zero
+  {
+  my $self = shift;
+  return $self->{var} == 0;
+  }
+
+sub new
+  {
+  my $class = shift;
+  my $self =  {};
+  $self->{var} = shift;
+  bless $self,$class;
+  }
+
+package main;
+
+use strict;
+
+my $r = Foo->new(8);
+$r = Foo->new(0);
+
+test(($r || 0) == 0); # 221
 
 # Last test is:
 sub last {221}
