@@ -4699,7 +4699,8 @@ savepv, savepvn, savesharedpv, StructCopy, Zero
 
 fbm_compile, fbm_instr, form, getcwd_sv, new_version, scan_version, strEQ,
 strGE, strGT, strLE, strLT, strNE, strnEQ, strnNE, sv_nolocking,
-sv_nosharing, sv_nounlocking, upg_version, vcmp, vnumify, vstringify
+sv_nosharing, sv_nounlocking, upg_version, vcmp, vnormal, vnumify,
+vstringify
 
 =item Numeric functions
 
@@ -5508,7 +5509,7 @@ B<-V>
 
 =back
 
-=head2 perldelta - what is new for perl v5.9.1
+=head2 perldelta - what is new for perl v5.9.2
 
 =over 4
 
@@ -5516,31 +5517,9 @@ B<-V>
 
 =item Incompatible Changes
 
-=over 4
-
-=item substr() lvalues are no longer fixed-length
-
-=item The C<:unique> attribute is only meaningful for globals
-
-=back
-
 =item Core Enhancements
 
-=over 4
-
-=item Lexical C<$_>
-
-=item Tied hashes in scalar context
-
-=item Formats
-
-=item Stacked filetest operators
-
-=back
-
 =item Modules and Pragmata
-
-Benchmark, Carp, Exporter, FindBin, List::Util, threads::shared
 
 =item Utility Changes
 
@@ -5548,35 +5527,13 @@ Benchmark, Carp, Exporter, FindBin, List::Util, threads::shared
 
 =item Performance Enhancements
 
+=item Installation and Configuration Improvements
+
 =item Selected Bug Fixes
-
-=over 4
-
-=item UTF-8 bugs
-
-=item Threading bugs
-
-=item More bugs
-
-=back
 
 =item New or Changed Diagnostics
 
 =item Changed Internals
-
-=over 4
-
-=item Reordering of SVt_* constants
-
-=item Removal of CPP symbols
-
-=item Less space is used by ops
-
-=item New parser
-
-=back
-
-=item Configuration and Building
 
 =item Known Problems
 
@@ -5585,8 +5542,6 @@ Benchmark, Carp, Exporter, FindBin, List::Util, threads::shared
 =item Platform Specific Problems
 
 =back
-
-=item To-do for perl 5.10.0
 
 =item Reporting Bugs
 
@@ -5874,6 +5829,64 @@ Win32::GetOSVersion
 =back
 
 =item TODO
+
+=item Reporting Bugs
+
+=item SEE ALSO
+
+=back
+
+=head2 perl584delta, perldelta - what is new for perl v5.8.4
+
+=over 4
+
+=item DESCRIPTION
+
+=item Incompatible Changes
+
+=item Core Enhancements
+
+=over 4
+
+=item Malloc wrapping
+
+=item Unicode Character Database 4.0.1
+
+=item suidperl less insecure
+
+=item format
+
+=back
+
+=item Modules and Pragmata
+
+=over 4
+
+=item Updated modules
+
+Attribute::Handlers, B, Benchmark, CGI, Carp, Cwd, Exporter, File::Find,
+IO, IPC::Open3, Local::Maketext, Math::BigFloat, Math::BigInt,
+Math::BigRat, MIME::Base64, ODBM_File, POSIX, Shell, Socket, Storable,
+Switch, Sys::Syslog, Term::ANSIColor, Time::HiRes, Unicode::UCD, Win32,
+base, open, threads, utf8
+
+=back
+
+=item Performance Enhancements
+
+=item Utility Changes
+
+=item Installation and Configuration Improvements
+
+=item Selected Bug Fixes
+
+=item New or Changed Diagnostics
+
+=item Changed Internals
+
+=item Future Directions
+
+=item Platform Specific Problems
 
 =item Reporting Bugs
 
@@ -10207,8 +10220,8 @@ Numeric Versions, Quoted Versions
 
 =item Object Methods
 
-New Operator, qv(), Stringification, Numification, Comparison operators,
-Logical Operators
+New Operator, qv(), Normal Form, Numification, Stringification, Comparison
+operators, Logical Operators
 
 =item Quoting
 
@@ -10675,9 +10688,31 @@ B<-ffreetmps-each-bblock>, B<-ffreetmps-each-loop>, B<-fomit-taint>, B<-On>
 
 =item OPTIONS
 
-B<-basic>, B<-exec>, B<-tree>, B<-compact>, B<-loose>, B<-vt>, B<-ascii>,
-B<-main>, B<-base>I<n>, B<-bigendian>, B<-littleendian>, B<-concise>,
-B<-terse>, B<-linenoise>, B<-debug>, B<-env>
+=over 4
+
+=item Options for Opcode Ordering
+
+B<-basic>, B<-exec>, B<-tree>
+
+=item Options for Line-Style
+
+B<-concise>, B<-terse>, B<-linenoise>, B<-debug>, B<-env>
+
+=item Options for tree-specific formatting
+
+B<-compact>, B<-loose>, B<-vt>, B<-ascii>
+
+=item Options controlling sequence numbering
+
+B<-base>I<n>, B<-bigendian>, B<-littleendian>
+
+=item Other options
+
+B<-main>, B<-banner>
+
+=item Option Stickiness
+
+=back
 
 =item FORMATTING SPECIFICATIONS
 
@@ -10701,6 +10736,26 @@ B<#svval>, B<#targ>, B<#targarg>, B<#targarglife>, B<#typenum>
 =back
 
 =item Using B::Concise outside of the O framework
+
+=over 4
+
+=item Example: Altering Concise Renderings
+
+=item set_style()
+
+=item set_style_standard($name)
+
+=item add_style()
+
+=item add_callback()
+
+=item Running B::Concise::compile()
+
+=item B::Concise::reset_sequence()
+
+=item Errors
+
+=back
 
 =item AUTHOR
 
@@ -17554,23 +17609,23 @@ hostfqdn (), hostname (), hostdomain ()
 
 =item CONSTRUCTOR
 
-new (HOST [,OPTIONS])
+new ([ HOST ] [, OPTIONS ])
 
 =item METHODS
 
 login ([LOGIN [,PASSWORD [, ACCOUNT] ] ]), authorize ( [AUTH [, RESP]]),
 site (ARGS), ascii, binary, rename ( OLDNAME, NEWNAME ), delete ( FILENAME
 ), cwd ( [ DIR ] ), cdup (), pwd (), restart ( WHERE ), rmdir ( DIR [,
-RECURSE ]), mkdir ( DIR [, RECURSE ]), ls ( [ DIR ] ), alloc ( SIZE [,
-RECORD_SIZE] ), dir ( [ DIR ] ), get ( REMOTE_FILE [, LOCAL_FILE [, WHERE]]
-), put ( LOCAL_FILE [, REMOTE_FILE ] ), put_unique ( LOCAL_FILE [,
-REMOTE_FILE ] ), append ( LOCAL_FILE [, REMOTE_FILE ] ), unique_name (),
-mdtm ( FILE ), size ( FILE ), supported ( CMD ), hash (
-[FILEHANDLE_GLOB_REF],[ BYTES_PER_HASH_MARK] ), nlst ( [ DIR ] ), list ( [
-DIR ] ), retr ( FILE ), stor ( FILE ), stou ( FILE ), appe ( FILE ), port (
-[ PORT ] ), pasv (), pasv_xfer ( SRC_FILE, DEST_SERVER [, DEST_FILE ] ),
-pasv_xfer_unique ( SRC_FILE, DEST_SERVER [, DEST_FILE ] ), pasv_wait (
-NON_PASV_SERVER ), abort (), quit ()
+RECURSE ]), mkdir ( DIR [, RECURSE ]), alloc ( SIZE [, RECORD_SIZE] ), ls (
+[ DIR ] ), dir ( [ DIR ] ), get ( REMOTE_FILE [, LOCAL_FILE [, WHERE]] ),
+put ( LOCAL_FILE [, REMOTE_FILE ] ), put_unique ( LOCAL_FILE [, REMOTE_FILE
+] ), append ( LOCAL_FILE [, REMOTE_FILE ] ), unique_name (), mdtm ( FILE ),
+size ( FILE ), supported ( CMD ), hash ( [FILEHANDLE_GLOB_REF],[
+BYTES_PER_HASH_MARK] ), nlst ( [ DIR ] ), list ( [ DIR ] ), retr ( FILE ),
+stor ( FILE ), stou ( FILE ), appe ( FILE ), port ( [ PORT ] ), pasv (),
+pasv_xfer ( SRC_FILE, DEST_SERVER [, DEST_FILE ] ), pasv_xfer_unique (
+SRC_FILE, DEST_SERVER [, DEST_FILE ] ), pasv_wait ( NON_PASV_SERVER ),
+abort (), quit ()
 
 =over 4
 
@@ -17663,14 +17718,15 @@ MESSAGE-SPEC, PATTERN, Examples, C<[^]-]>, C<*bdc>, C<[0-9a-zA-Z]>, C<a??d>
 
 =item CONSTRUCTOR
 
-new ( [ HOST, ] [ OPTIONS ] )
+new ( [ HOST ] [, OPTIONS ] 0
 
 =item METHODS
 
-user ( USER ), pass ( PASS ), login ( [ USER [, PASS ]] ), apop ( [ USER [,
-PASS ]] ), top ( MSGNUM [, NUMLINES ] ), list ( [ MSGNUM ] ), get ( MSGNUM
-[, FH ] ), getfh ( MSGNUM ), last (), popstat (), ping ( USER ), uidl ( [
-MSGNUM ] ), delete ( MSGNUM ), reset (), quit ()
+auth ( USERNAME, PASSWORD ), user ( USER ), pass ( PASS ), login ( [ USER
+[, PASS ]] ), apop ( [ USER [, PASS ]] ), banner (), capa (),  capabilities
+(), top ( MSGNUM [, NUMLINES ] ), list ( [ MSGNUM ] ), get ( MSGNUM [, FH ]
+), getfh ( MSGNUM ), last (), popstat (), ping ( USER ), uidl ( [ MSGNUM ]
+), delete ( MSGNUM ), reset (), quit ()
 
 =item NOTES
 
@@ -17727,17 +17783,17 @@ $p->hires( { 0 | 1 } );, $p->bind($local_addr);, $p->open($host);, $p->ack(
 
 =item CONSTRUCTOR
 
-new Net::SMTP [ HOST, ] [ OPTIONS ]
+new ( [ HOST ] [, OPTIONS ] )
 
 =item METHODS
 
-banner (), domain (), hello ( DOMAIN ), etrn ( DOMAIN ), auth ( USERNAME,
-PASSWORD ), mail ( ADDRESS [, OPTIONS] ), send ( ADDRESS ), send_or_mail (
-ADDRESS ), send_and_mail ( ADDRESS ), reset (), recipient ( ADDRESS [,
-ADDRESS [ ...]] [, OPTIONS ] ), to ( ADDRESS [, ADDRESS [...]] ), cc (
-ADDRESS [, ADDRESS [...]] ), bcc ( ADDRESS [, ADDRESS [...]] ), data ( [
-DATA ] ), expand ( ADDRESS ), verify ( ADDRESS ), help ( [ $subject ] ),
-quit ()
+banner (), domain (), hello ( DOMAIN ), host (), etrn ( DOMAIN ), auth (
+USERNAME, PASSWORD ), mail ( ADDRESS [, OPTIONS] ), send ( ADDRESS ),
+send_or_mail ( ADDRESS ), send_and_mail ( ADDRESS ), reset (), recipient (
+ADDRESS [, ADDRESS, [...]] [, OPTIONS ] ), to ( ADDRESS [, ADDRESS [...]]
+), cc ( ADDRESS [, ADDRESS [...]] ), bcc ( ADDRESS [, ADDRESS [...]] ),
+data ( [ DATA ] ), expand ( ADDRESS ), verify ( ADDRESS ), help ( [
+$subject ] ), quit ()
 
 =item ADDRESSES
 
@@ -21159,6 +21215,8 @@ $which )
 
 =item Ambiguous Local Times (DST)
 
+=item Non-Existent Local Times (DST)
+
 =item Negative Epoch Values
 
 =back
@@ -21472,39 +21530,6 @@ functions
 =item HISTORY
 
 March 18th, 2000
-
-=back
-
-=head2 Win32 - Interfaces to some Win32 API Functions
-
-=over 4
-
-=item DESCRIPTION
-
-=over 4
-
-=item Alphabetical Listing of Win32 Functions
-
-Win32::AbortSystemShutdown(MACHINE), Win32::BuildNumber(),
-Win32::CopyFile(FROM, TO, OVERWRITE), Win32::DomainName(),
-Win32::ExpandEnvironmentStrings(STRING), Win32::FormatMessage(ERRORCODE),
-Win32::FsType(), Win32::FreeLibrary(HANDLE), Win32::GetArchName(),
-Win32::GetChipName(), Win32::GetCwd(), Win32::GetFolderPath(FOLDER [,
-CREATE]), Win32::GetFullPathName(FILENAME), Win32::GetLastError(),
-Win32::GetLongPathName(PATHNAME), Win32::GetNextAvailDrive(),
-Win32::GetOSVersion(), Win32::GetOSName(),
-Win32::GetShortPathName(PATHNAME), Win32::GetProcAddress(INSTANCE,
-PROCNAME), Win32::GetTickCount(), Win32::InitiateSystemShutdown,
-Win32::IsWinNT(), Win32::IsWin95(), Win32::LoadLibrary(LIBNAME),
-Win32::LoginName(), Win32::LookupAccountName(SYSTEM, ACCOUNT, DOMAIN, SID,
-SIDTYPE), Win32::LookupAccountSID(SYSTEM, SID, ACCOUNT, DOMAIN, SIDTYPE),
-Win32::MsgBox(MESSAGE [, FLAGS [, TITLE]]), Win32::NodeName(),
-Win32::RegisterServer(LIBRARYNAME), Win32::SetChildShowWindow(SHOWWINDOW),
-Win32::SetCwd(NEWDIRECTORY), Win32::SetLastError(ERROR),
-Win32::Sleep(TIME), Win32::Spawn(COMMAND, ARGS, PID),
-Win32::UnregisterServer(LIBRARYNAME)
-
-=back
 
 =back
 
