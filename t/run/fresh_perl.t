@@ -844,3 +844,17 @@ ok 1
 ######## [ID 20020623.009] nested eval/sub segfaults
 $eval = eval 'sub { eval "sub { %S }" }';
 $eval->({});
+######## [perl #17951] Strange UTF error
+-W
+# From: "John Kodis" <kodis@mail630.gsfc.nasa.gov>
+# Newsgroups: comp.lang.perl.moderated
+# Subject: Strange UTF error
+# Date: Fri, 11 Oct 2002 16:19:58 -0400
+# Message-ID: <pan.2002.10.11.20.19.48.407190@mail630.gsfc.nasa.gov>
+$_ = "foobar\n";
+utf8::upgrade($_); # the original code used a UTF-8 locale (affects STDIN)
+# matching is actually irrelevant: avoiding several dozen of these
+# Illegal hexadecimal digit '	' ignored at /usr/lib/perl5/5.8.0/utf8_heavy.pl line 152
+# is what matters.
+/^([[:digit:]]+)/;
+EXPECT
