@@ -143,9 +143,11 @@ in older Perl releases:
     dTHXa
     dTHXoa
     dUNDERBAR
+    END_EXTERN_C
     ERRSV
     eval_pv
     eval_sv
+    EXTERN_C
     get_av
     get_cv
     get_hv
@@ -183,6 +185,7 @@ in older Perl releases:
     mXPUSHp
     mXPUSHu
     MY_CXT
+    MY_CXT_CLONE
     MY_CXT_INIT
     newCONSTSUB
     newRV_inc
@@ -196,6 +199,7 @@ in older Perl releases:
     NVgf
     NVTYPE
     PERL_BCDVERSION
+    PERL_GCC_BRACE_GROUPS_FORBIDDEN
     PERL_INT_MAX
     PERL_INT_MIN
     PERL_LONG_MAX
@@ -305,7 +309,10 @@ in older Perl releases:
     PUSHmortal
     PUSHu
     SAVE_DEFSV
+    START_EXTERN_C
     START_MY_CXT
+    STMT_END
+    STMT_START
     sv_2pv_nolen
     sv_2pvbyte
     sv_2uv
@@ -866,7 +873,7 @@ require DynaLoader;
 use strict;
 use vars qw($VERSION @ISA $data);
 
-$VERSION = do { my @r = '$Snapshot: /Devel-PPPort/3.01 $' =~ /(\d+\.\d+(?:_\d+)?)/; @r ? $r[0] : '9.99' };
+$VERSION = do { my @r = '$Snapshot: /Devel-PPPort/3.02 $' =~ /(\d+\.\d+(?:_\d+)?)/; @r ? $r[0] : '9.99' };
 
 @ISA = qw(DynaLoader);
 
@@ -1300,9 +1307,11 @@ CvPADLIST|||
 CvSTASH|||
 CvWEAKOUTSIDE|||
 DEFSV|5.004050||p
+END_EXTERN_C|5.005000||p
 ENTER|||
 ERRSV|5.004050||p
 EXTEND|||
+EXTERN_C|5.005000||p
 FREETMPS|||
 GIMME_V||5.004000|n
 GIMME|||n
@@ -1343,6 +1352,7 @@ IVdf|5.006000||p
 LEAVE|||
 LVRET|||
 MARK|||
+MY_CXT_CLONE|5.009002||p
 MY_CXT_INIT|5.007003||p
 MY_CXT|5.007003||p
 MoveD|5.009002||p
@@ -1379,6 +1389,7 @@ PAD_SET_CUR|||
 PAD_SVl|||
 PAD_SV|||
 PERL_BCDVERSION|5.009002||p
+PERL_GCC_BRACE_GROUPS_FORBIDDEN|5.008001||p
 PERL_INT_MAX|5.004000||p
 PERL_INT_MIN|5.004000||p
 PERL_LONG_MAX|5.004000||p
@@ -1452,34 +1463,34 @@ PL_compiling|5.004050||p
 PL_copline|5.005000||p
 PL_curcop|5.004050||p
 PL_curstash|5.004050||p
-PL_debstash|||p
+PL_debstash|5.004050||p
 PL_defgv|5.004050||p
-PL_diehook|||p
+PL_diehook|5.004050||p
 PL_dirty|5.004050||p
 PL_dowarn|||pn
-PL_errgv|||p
+PL_errgv|5.004050||p
 PL_hexdigit|5.005000||p
 PL_hints|5.005000||p
 PL_last_in_gv|||n
 PL_modglobal||5.005000|n
 PL_na|5.004050||pn
-PL_no_modify|||p
+PL_no_modify|5.006000||p
 PL_ofs_sv|||n
-PL_perl_destruct_level|||p
+PL_perl_destruct_level|5.004050||p
 PL_perldb|5.004050||p
-PL_ppaddr|||p
+PL_ppaddr|5.006000||p
 PL_rsfp_filters|5.004050||p
 PL_rsfp|5.004050||p
 PL_rs|||n
-PL_stack_base|||p
-PL_stack_sp|||p
+PL_stack_base|5.004050||p
+PL_stack_sp|5.004050||p
 PL_stdingv|5.004050||p
-PL_sv_arenaroot|||p
+PL_sv_arenaroot|5.004050||p
 PL_sv_no|5.004050||pn
 PL_sv_undef|5.004050||pn
 PL_sv_yes|5.004050||pn
-PL_tainted|||p
-PL_tainting|||p
+PL_tainted|5.004050||p
+PL_tainting|5.004050||p
 POPi|||n
 POPl|||n
 POPn|||n
@@ -1533,7 +1544,10 @@ SAVETMPS|||
 SAVE_DEFSV|5.004050||p
 SPAGAIN|||
 SP|||
+START_EXTERN_C|5.005000||p
 START_MY_CXT|5.007003||p
+STMT_END|||p
+STMT_START|||p
 ST|||
 SVt_IV|||
 SVt_NV|||
@@ -3915,6 +3929,40 @@ typedef NVTYPE NV;
 #  endif
 
 #endif /* !INT2PTR */
+
+#undef START_EXTERN_C
+#undef END_EXTERN_C
+#undef EXTERN_C
+#ifdef __cplusplus
+#  define START_EXTERN_C extern "C" {
+#  define END_EXTERN_C }
+#  define EXTERN_C extern "C"
+#else
+#  define START_EXTERN_C
+#  define END_EXTERN_C
+#  define EXTERN_C extern
+#endif
+
+#ifndef PERL_GCC_BRACE_GROUPS_FORBIDDEN
+#  if defined(__STRICT_ANSI__) && defined(PERL_GCC_PEDANTIC)
+#    define PERL_GCC_BRACE_GROUPS_FORBIDDEN
+#  endif
+#endif
+
+#undef STMT_START
+#undef STMT_END
+#if defined(__GNUC__) && !defined(PERL_GCC_BRACE_GROUPS_FORBIDDEN) && !defined(__cplusplus)
+#  define STMT_START	(void)(	/* gcc supports ``({ STATEMENTS; })'' */
+#  define STMT_END	)
+#else
+#  if defined(VOIDFLAGS) && (VOIDFLAGS) && (defined(sun) || defined(__sun__)) && !defined(__GNUC__)
+#    define STMT_START	if (1)
+#    define STMT_END	else (void)0
+#  else
+#    define STMT_START	do
+#    define STMT_END	while (0)
+#  endif
+#endif
 #ifndef boolSV
 #  define boolSV(b)                      ((b) ? &PL_sv_yes : &PL_sv_no)
 #endif
@@ -4297,6 +4345,13 @@ DPPP_(my_newCONSTSUB)(HV *stash, char *name, SV *sv)
 	Zero(my_cxtp, 1, my_cxt_t);					\
 	sv_setuv(my_cxt_sv, PTR2UV(my_cxtp))
 
+/* Clones the per-interpreter data. */
+#define MY_CXT_CLONE \
+	dMY_CXT_SV;							\
+	my_cxt_t *my_cxtp = (my_cxt_t*)SvPVX(newSV(sizeof(my_cxt_t)-1));\
+	Copy(INT2PTR(my_cxt_t*, SvUV(my_cxt_sv)), my_cxtp, 1, my_cxt_t);\
+	sv_setuv(my_cxt_sv, PTR2UV(my_cxtp))
+
 /* This macro must be used to access members of the my_cxt_t structure.
  * e.g. MYCXT.some_data */
 #define MY_CXT		(*my_cxtp)
@@ -4316,6 +4371,7 @@ DPPP_(my_newCONSTSUB)(HV *stash, char *name, SV *sv)
 #define dMY_CXT_SV	dNOOP
 #define dMY_CXT		dNOOP
 #define MY_CXT_INIT	NOOP
+#define MY_CXT_CLONE	NOOP
 #define MY_CXT		my_cxt
 
 #define pMY_CXT		void

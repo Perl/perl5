@@ -1,3 +1,14 @@
+3.02 - 2004-09-08
+
+    * added support for the following API:
+        END_EXTERN_C
+        EXTERN_C
+        MY_CXT_CLONE
+        PERL_GCC_BRACE_GROUPS_FORBIDDEN
+        START_EXTERN_C
+        STMT_END
+        STMT_START
+
 3.01 - 2004-08-23
 
     * patchlevel.h tweak
