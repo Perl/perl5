@@ -5735,10 +5735,8 @@ S_utf8_mg_pos_init(pTHX_ SV *sv, MAGIC **mgp, STRLEN **cachep, I32 i, I32 *offse
     bool found = FALSE; 
 
     if (SvMAGICAL(sv) && !SvREADONLY(sv)) {
-	if (!*mgp) {
-	    sv_magic(sv, 0, PERL_MAGIC_utf8, 0, 0);
-	    *mgp = mg_find(sv, PERL_MAGIC_utf8);
-	}
+	if (!*mgp)
+	    *mgp = sv_magicext(sv, 0, PERL_MAGIC_utf8, &PL_vtbl_utf8, 0, 0);
 	assert(*mgp);
 
 	if ((*mgp)->mg_ptr)
@@ -5831,6 +5829,12 @@ S_utf8_mg_pos(pTHX_ SV *sv, MAGIC **mgp, STRLEN **cachep, I32 i, I32 *offsetp, I
 		      /* Update the cache. */
 		      (*cachep)[i]   = (STRLEN)uoff;
 		      (*cachep)[i+1] = p - start;
+
+		      /* Drop the stale "length" cache */
+		      if (i == 0) {
+			  (*cachep)[2] = 0;
+			  (*cachep)[3] = 0;
+		      }
  
 		      found = TRUE;
 		 }
