@@ -31,6 +31,236 @@ or any other branch.
 Version v5.7.2		Development release working toward v5.8
 --------------
 ____________________________________________________________________________
+[ 13048] By: jhi                                   on 2001/11/16  14:46:17
+        Log: Subject: Re: [PATCH regcomp.[ch], regexp.h, pp_hot.c, t/op/re_tests] lazy $& and \Z fix
+             From: "Jeff 'japhy' Pinyan" <jeffp@crusoe.net> 
+             Date: Wed, 14 Nov 2001 16:35:29 -0500 (EST) 
+             Message-ID: <Pine.GSO.4.21.0111141634020.16649-100000@crusoe.crusoe.net>
+     Branch: perl
+	   ! pp_hot.c regcomp.c regcomp.h regexp.h t/op/re_tests
+____________________________________________________________________________
+[ 13047] By: jhi                                   on 2001/11/16  14:37:32
+        Log: Rename perlunintro to perluniintro; regen toc.
+     Branch: perl
+	   + pod/perluniintro.pod
+	   - pod/perlunintro.pod
+	   ! MANIFEST pod/buildtoc.PL pod/perl.pod pod/perltoc.pod
+____________________________________________________________________________
+[ 13046] By: jhi                                   on 2001/11/16  14:14:38
+        Log: Document the negated lookeahead trick to emulate
+             character class subtraction.
+     Branch: perl
+	   ! pod/perlunicode.pod
+____________________________________________________________________________
+[ 13045] By: jhi                                   on 2001/11/16  14:08:43
+        Log: Subject: [PATCH perl@13023] Unicode General Category: Cn
+             From: SADAHIRO Tomoyuki <bqw10602@nifty.com>
+             Date: Fri, 16 Nov 2001 23:31:04 +0900
+             Message-Id: <20011116232709.23CF.BQW10602@nifty.com>
+             
+             (with the tweak that Cntrl is not C, it's Cc)
+     Branch: perl
+	   ! lib/unicore/In/163.pl lib/unicore/Is/C.pl lib/unicore/Is/Cn.pl
+	   ! lib/unicore/mktables
+____________________________________________________________________________
+[ 13044] By: jhi                                   on 2001/11/16  13:42:44
+        Log: Subject: [PATCH current] runtime runops switch
+             From: Ilya Zakharevich <ilya@math.ohio-state.edu>
+             Date: Fri, 16 Nov 2001 00:48:09 -0500
+             Message-ID: <20011116004809.A934@math.ohio-state.edu>
+     Branch: perl
+	   ! dump.c embed.h embed.pl ext/Devel/Peek/Peek.pm
+	   ! ext/Devel/Peek/Peek.xs perl.h pod/perlapi.pod
+	   ! pod/perlintern.pod proto.h run.c
+____________________________________________________________________________
+[ 13043] By: jhi                                   on 2001/11/16  13:24:28
+        Log: Further discourage old Thread code; tell how to tell
+             the difference.
+     Branch: perl
+	   ! lib/Thread.pm
+____________________________________________________________________________
+[ 13042] By: jhi                                   on 2001/11/16  13:16:13
+        Log: A missing return; from Charles Lane.
+     Branch: perl
+	   ! vms/vms.c
+____________________________________________________________________________
+[ 13041] By: ams                                   on 2001/11/16  12:11:14
+        Log: Subject: [PATCH] Doc spellcheck + podcheck
+             From: Autrijus Tang <autrijus@egb.elixus.org>
+             Date: Thu, 15 Nov 2001 22:49:05 -0800
+             Message-Id: <20011116064905.GA44092@egb.elixus.org>
+             
+             Subject: [PATCH] podcheck+spellcheck, the rest of the story
+             From: Autrijus Tang <autrijus@egb.elixus.org>
+             Date: Fri, 16 Nov 2001 00:42:20 -0800
+             Message-Id: <20011116084220.GA44295@egb.elixus.org>
+             
+             Subject: Re: [PATCH] podcheck+spellcheck, the rest of the story
+             From: Nicholas Clark <nick@ccl4.org>
+             Date: Fri, 16 Nov 2001 10:32:01 +0000
+             Message-Id: <20011116103200.F62891@plum.flirble.org>
+             (Applied after suitable de-mangling.)
+     Branch: perl
+	   ! README.aix README.dgux README.dos README.epoc README.hpux
+	   ! README.mint README.mpeix README.netware README.os2
+	   ! README.os390 README.plan9 README.qnx README.solaris
+	   ! README.threads doio.c pod/perl571delta.pod
+	   ! pod/perl572delta.pod pod/perlapi.pod pod/perlapio.pod
+	   ! pod/perldata.pod pod/perlebcdic.pod pod/perlfaq4.pod
+	   ! pod/perlfunc.pod pod/perlguts.pod pod/perlhack.pod
+	   ! pod/perliol.pod pod/perlpod.pod pod/perlpodspec.pod
+	   ! pod/perlrequick.pod pod/perlretut.pod pod/perltodo.pod
+	   ! pod/perlunicode.pod pod/perlvar.pod pp_ctl.c sharedsv.c
+____________________________________________________________________________
+[ 13040] By: jhi                                   on 2001/11/16  04:48:16
+        Log: Avoid redefinedness warning for now.
+     Branch: perl
+	   ! lib/Thread.pm
+____________________________________________________________________________
+[ 13039] By: jhi                                   on 2001/11/16  04:44:30
+        Log: use strict.
+     Branch: perl
+	   ! lib/Thread.pm
+____________________________________________________________________________
+[ 13038] By: jhi                                   on 2001/11/16  04:40:19
+        Log: Subject: [PATCH Perl@13023] subprocess command line size increase
+             From: lane@DUPHY4.Physics.Drexel.Edu (Charles Lane) 
+             Date: Thu, 15 Nov 2001 22:54:47 EST 
+             Message-Id: <011115225352.2db1e@DUPHY4.Physics.Drexel.Edu>         
+     Branch: perl
+	   ! vms/vms.c vms/vmspipe.com
+____________________________________________________________________________
+[ 13037] By: jhi                                   on 2001/11/16  04:38:47
+        Log: Subject: [PATCH lib/File/stat.t] Fix AIX Failure (was Re: Smoke 12998 /pro/3gl/CPAN/perl-current)
+             From: "chromatic" <chromatic@rmci.net>
+             Date: Thu, 15 Nov 2001 19:54:23 -0700
+             Message-ID: <20011116030139.6821.qmail@onion.perl.org>
+     Branch: perl
+	   ! lib/File/stat.t
+____________________________________________________________________________
+[ 13036] By: jhi                                   on 2001/11/16  04:37:52
+        Log: Make Thread a wrapper for both ithreads and 5005threads.
+             Needs a lot of work and Arthur's eyeballing (and finishing
+             few missing odds and ends of threads.pm).  Now Thread
+             is an extension without its own .pm.
+             
+             If there are people who have experience working with
+             either the 5005threads or the ithreads: cleaning up
+             the documentation (Thread.pm, threads.pm, and perl*thrtut.pod),
+             and porting the various Thread::* modules, like Thread::Queue,
+             to work also with ithreads, is needed.
+             
+             Removed the 5005threads requirement from the 5005 tests
+             for easier testing (not all of them work yet since
+             they use the Thread::* modules that have not been made
+             to work with ithreads).  Leave the 5005 tests named as
+             *.tx so that they are not run by "make test".
+     Branch: perl
+	   + lib/Thread.pm
+	   - ext/Thread/Thread.pm
+	   ! MANIFEST ext/Thread/Makefile.PL ext/Thread/create.tx
+	   ! ext/Thread/die.tx ext/Thread/die2.tx ext/Thread/io.tx
+	   ! ext/Thread/join.tx ext/Thread/join2.tx ext/Thread/list.tx
+	   ! ext/Thread/lock.tx ext/Thread/queue.tx ext/Thread/specific.tx
+	   ! ext/Thread/sync.tx ext/Thread/sync2.tx ext/Thread/unsync.tx
+	   ! ext/Thread/unsync2.tx ext/Thread/unsync3.tx
+	   ! ext/Thread/unsync4.tx ext/threads/threads.pm pod/perlfunc.pod
+____________________________________________________________________________
+[ 13035] By: jhi                                   on 2001/11/16  03:30:38
+        Log: $VERSION "a5" doesn't quite work.
+     Branch: perl
+	   ! ext/B/Makefile.PL
+____________________________________________________________________________
+[ 13034] By: jhi                                   on 2001/11/16  00:38:41
+        Log: Add the fruits of Larry Shatzer's version verifying script.
+             (There are some straddlers, but they will be fixed in the
+             upcoming releases of the modules.)
+     Branch: perl
+	   ! bytecode.pl ext/B/B.pm ext/B/B/Asmdata.pm ext/B/B/Bblock.pm
+	   ! ext/B/B/Bytecode.pm ext/B/B/C.pm ext/B/B/CC.pm
+	   ! ext/B/B/Debug.pm ext/B/B/Disassembler.pm ext/B/B/Lint.pm
+	   ! ext/B/B/Showlex.pm ext/B/B/Stackobj.pm ext/B/B/Stash.pm
+	   ! ext/B/B/Terse.pm ext/B/B/Xref.pm ext/B/O.pm
+	   ! ext/Encode/Encode/Tcl.pm ext/Opcode/ops.pm
+	   ! ext/Thread/Thread/Queue.pm ext/Thread/Thread/Semaphore.pm
+	   ! ext/Thread/Thread/Signal.pm ext/Thread/Thread/Specific.pm
+	   ! lib/ExtUtils/MM_NW5.pm lib/Locale/Constants.pm lib/vmsish.pm
+	   ! os2/OS2/REXX/DLL/DLL.pm vms/ext/Filespec.pm win32/FindExt.pm
+	   ! wince/FindExt.pm
+____________________________________________________________________________
+[ 13033] By: jhi                                   on 2001/11/16  00:37:36
+        Log: Add Larry Shatzer's VERSION verifying script.
+     Branch: perl
+	   + Porting/checkVERSION.pl
+	   ! MANIFEST Porting/pumpkin.pod
+____________________________________________________________________________
+[ 13032] By: jhi                                   on 2001/11/16  00:09:31
+        Log: Subject: [PATCH t/io/argv.t OR t/test.pl] runperl(), \n and stdin
+             From: Michael G Schwern <schwern@pobox.com>
+             Date: Thu, 15 Nov 2001 19:26:40 -0500
+             Message-ID: <20011115192640.R31399@blackrider>
+     Branch: perl
+	   ! t/test.pl
+____________________________________________________________________________
+[ 13031] By: jhi                                   on 2001/11/15  23:18:19
+        Log: Document the MY_CXT business; from Paul Marquess.
+     Branch: perl
+	   ! pod/perlxs.pod
+____________________________________________________________________________
+[ 13030] By: jhi                                   on 2001/11/15  22:03:46
+        Log: VMSCMD synch attempt.
+     Branch: perl
+	   ! vms/vms.c vms/vmsish.h
+____________________________________________________________________________
+[ 13029] By: jhi                                   on 2001/11/15  21:35:36
+        Log: Advise against -P as instructed by Schwern.
+     Branch: perl
+	   ! pod/perlrun.pod
+____________________________________________________________________________
+[ 13028] By: jhi                                   on 2001/11/15  21:21:29
+        Log: Subject: [PATCH] v-strings as Objects Step 1
+             From: John Peacock <jpeacock@rowman.com>
+             Date: Thu, 15 Nov 2001 12:41:04 -0500
+             Message-ID: <3BF3FE30.70D7EDCA@rowman.com>
+     Branch: perl
+	   ! embed.h embed.pl global.sym pod/perlapi.pod proto.h toke.c
+	   ! util.c
+____________________________________________________________________________
+[ 13027] By: jhi                                   on 2001/11/15  21:16:57
+        Log: Subject: [PATCH] -x  (was Re: [PATCH] new tests for command-line switches)
+             From: Michael G Schwern <schwern@pobox.com>
+             Date: Thu, 15 Nov 2001 12:47:59 -0500
+             Message-ID: <20011115124759.E31399@blackrider>
+     Branch: perl
+	   + t/run/switchx.aux t/run/switchx.t
+	   ! MANIFEST t/run/switches.t
+____________________________________________________________________________
+[ 13026] By: jhi                                   on 2001/11/15  20:55:31
+        Log: Upgrade to Getopt::Long 2.26_03.
+     Branch: perl
+	   ! lib/Getopt/Long.pm
+____________________________________________________________________________
+[ 13025] By: ams                                   on 2001/11/15  20:46:22
+        Log: Subject: [PATCH vms/vms.c] VMSCMD missing
+             From: Michael G Schwern <schwern@pobox.com>
+             Date: Thu, 15 Nov 2001 16:24:11 -0500
+             Message-Id: <20011115162411.M31399@blackrider>
+     Branch: perl
+	   ! vms/vms.c
+____________________________________________________________________________
+[ 13024] By: ams                                   on 2001/11/15  19:32:06
+        Log: Subject: Re: [ID 20010713.001] use lib segmentation fault
+             From: rspier@pobox.com (Robert Spier)
+             Date: Thu, 15 Nov 2001 11:19:21 -0800
+             Message-Id: <15348.5433.732364.963687@rls.cx>
+     Branch: perl
+	   ! op.c
+____________________________________________________________________________
+[ 13023] By: jhi                                   on 2001/11/15  15:35:48
+        Log: Update Changes.
+     Branch: perl
+	   ! Changes patchlevel.h
+____________________________________________________________________________
 [ 13022] By: jhi                                   on 2001/11/15  15:11:37
         Log: Subject: [PATCH] new tests for command-line switches
              From: Rafael Garcia-Suarez <rgarciasuarez@free.fr>
