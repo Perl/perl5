@@ -400,6 +400,7 @@ Perl_re_intuit_start(pTHX_ regexp *prog, SV *sv, char *strpos,
     char *i_strpos = strpos;
     SV *dsv = PERL_DEBUG_PAD_ZERO(0);
 #endif
+    RX_MATCH_UTF8_set(prog,do_utf8);
 
     if (prog->reganch & ROPT_UTF8) {
 	DEBUG_r(PerlIO_printf(Perl_debug_log,
@@ -1615,6 +1616,7 @@ Perl_regexec_flags(pTHX_ register regexp *prog, char *stringarg, register char *
     SV *dsv0 = PERL_DEBUG_PAD_ZERO(0);
     SV *dsv1 = PERL_DEBUG_PAD_ZERO(1);
 #endif
+    RX_MATCH_UTF8_set(prog,do_utf8);
 
     PL_regcc = 0;
 

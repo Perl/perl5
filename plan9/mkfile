@@ -35,9 +35,9 @@ ext_xs = IO.xs Socket.xs Opcode.xs  dl_none.xs Fcntl.xs POSIX.xs
 ext_c = ${ext_xs:%.xs=%.c}
 ext_obj = ${ext_xs:%.xs=%.$O}
 
-obj = gv.$O toke.$O perly.$O op.$O regcomp.$O dump.$O util.$O mg.$O  hv.$O av.$O run.$O pp_hot.$O sv.$O pp.$O scope.$O pp_ctl.$O pp_sys.$O doop.$O doio.$O regexec.$O taint.$O deb.$O globals.$O plan9.$O universal.$O perlio.$O locale.$O numeric.$O pp_sort.$O pp_pack.$O reentr.$O
+obj = av.$O deb.$O doio.$O doop.$O dump.$O globals.$O gv.$O hv.$O locale.$O malloc.$O mg.$O numeric.$O op.$O pad.$O perlapi.$O perlio.$O perly.$O pp.$O pp_ctl.$O pp_hot.$O pp_pack.$O pp_sort.$O pp_sys.$O reentr.$O regcomp.$O regexec.$O run.$O scope.$O sv.$O taint.$O toke.$O universal.$O utf8.$O util.$O xsutils.$O
 
-OBJS = perl.$O $obj
+OBJS = perl.$O plan9.$O $obj
 
 testlist = base/*.t comp/*.t cmd/*.t io/*.t op/*.t
 
