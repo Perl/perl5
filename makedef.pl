@@ -1277,13 +1277,16 @@ PerlIOBuf_tell
 PerlIOBuf_unread
 PerlIOBuf_write
 PerlIO_allocate
+PerlIO_apply_layera
 PerlIO_apply_layers
 PerlIO_arg_fetch
 PerlIO_binmode
+PerlIO_debug
 PerlIO_define_layer
 PerlIO_define_layer
 PerlIO_getpos
 PerlIO_init
+PerlIO_layer_fetch
 PerlIO_modestr
 PerlIO_pending
 PerlIO_perlio
