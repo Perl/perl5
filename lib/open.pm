@@ -71,9 +71,10 @@ sub import {
 		} else {
 		    $layer = "encoding($locale_encoding)";
 		}
-	    }
-	    unless(PerlIO::Layer::->find($layer)) {
-		carp("Unknown discipline layer '$layer'");
+	    } else {
+		unless(PerlIO::Layer::->find($layer)) {
+		    carp("Unknown discipline layer '$layer'");
+		}
 	    }
 	    push(@val,":$layer");
 	    if ($layer =~ /^(crlf|raw)$/) {
