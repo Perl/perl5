@@ -55,6 +55,7 @@ sub MkDir($$) {
 
 sub wanted {
   print "# '$_' => 1\n";
+  s#\.$## if ($^O eq 'VMS' && $_ ne '.');
   Check( $Expect{$_} );
   delete $Expect{$_};
   $File::Find::prune=1 if  $_ eq 'faba';
@@ -62,6 +63,7 @@ sub wanted {
 
 sub dn_wanted {
   my $n = $File::Find::name;
+  $n =~ s#\.$## if ($^O eq 'VMS' && $n ne '.');
   print "# '$n' => 1\n";
   my $i = rindex($n,'/');
   my $OK = exists($Expect{$n});
@@ -74,6 +76,7 @@ sub dn_wanted {
 
 sub d_wanted {
   print "# '$_' => 1\n";
+  s#\.$## if ($^O eq 'VMS' && $_ ne '.');
   my $i = rindex($_,'/');
   my $OK = exists($Expect{$_});
   if ( $OK ) {

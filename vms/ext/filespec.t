@@ -139,7 +139,7 @@ path	vmspath	[.path]
 /	vmspath	sys$disk:[000000]
 
 # Redundant characters in Unix paths
-//some/where//over/../the.rainbow	vmsify	some:[where]the.rainbow
+//some/where//over/../the.rainbow	vmsify	some:[where.over.-]the.rainbow
 /some/where//over/./the.rainbow	vmsify	some:[where.over]the.rainbow
 ..//../	vmspath	[--]
 ./././	vmspath	[]

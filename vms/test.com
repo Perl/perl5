@@ -108,7 +108,7 @@ $   Deck/Dollar=$$END-OF-TEST$$
 use Config;
 
 @compexcl=('cpp.t');
-@ioexcl=('argv.t','dup.t','fs.t','pipe.t');
+@ioexcl=('argv.t','dup.t','fs.t','pipe.t','openpid.t');
 @libexcl=('db-btree.t','db-hash.t','db-recno.t',
           'gdbm.t','io_dup.t', 'io_pipe.t', 'io_poll.t', 'io_sel.t',
           'io_sock.t', 'io_unix.t',

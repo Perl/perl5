@@ -5,6 +5,7 @@ use vars qw(@ISA);
 require File::Spec::Unix;
 @ISA = qw(File::Spec::Unix);
 
+use Cwd;
 use File::Basename;
 use VMS::Filespec;
 
@@ -141,10 +142,12 @@ sub canonpath {
       else          { return vmsify($path);  }
     }
     else {
-      $path =~ s-\]\[--g;  $path =~ s/><//g;    # foo.][bar       ==> foo.bar
-      $path =~ s/([\[<])000000\./$1/;           # [000000.foo     ==> foo
-      $path =~ s/[\[<\.]([^\[<\.]+)\.-\.\1//g;  # bar.foo.-.foo   ==> bar.
-      if ($reduce_ricochet) { $path =~ s/[^\[\-<.]+\.\-//g; }
+      $path =~ s-\]\[--g;  $path =~ s/><//g;         # foo.][bar       ==> foo.bar
+      $path =~ s/([\[<])000000\./$1/;                # [000000.foo     ==> foo
+      if ($reduce_ricochet) { 
+        $path =~ s/\.[^\[<\.]+\.-([\]\>])/$1/g;
+        $path =~ s/([\[<\.])([^\[<\.]+)\.-\.?/$1/g;
+      }
       return $path;
     }
 }

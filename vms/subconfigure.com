@@ -85,6 +85,8 @@ $ perl_d_iconv="undef"
 $ perl_d_madvise="undef"
 $ perl_selectminbits=32
 $ perl_d_msync="undef"
+$ perl_d_vendorarch="define"
+$ perl_vendorarchexp=""
 $ perl_d_mprotect="undef"
 $ perl_d_munmap="undef"
 $ perl_crosscompile="undef"
@@ -3536,7 +3538,7 @@ $ size_name = "u32size"
 $ gosub type_size_check
 $ perl_u32size="''line'"
 $
-$ If use_64bitint
+$ If use64bitint
 $ Then
 $   type = "''perl_i64type'"
 $   size_name = "i64size"
@@ -4120,6 +4122,8 @@ $ WC "d_sqrtl='" + perl_d_sqrtl + "'"
 $ WC "d_statfs_f_flags='" + perl_d_statfs_f_flags + "'"
 $ WC "d_statfs_s='" + perl_d_statfs_s + "'"
 $ WC "d_ustat='" + perl_d_ustat + "'"
+$ WC "d_vendorarch='" + perl_d_vendorarch + "'"
+$ WC "vendorarchexp='" + perl_vendorarchexp + "'"
 $ WC "i_sysstatfs='" + perl_i_sysstatfs + "'"
 $ WC "i_sysvfs='" + perl_i_sysvfs + "'"
 $ WC "i_ustat='" + perl_i_ustat + "'"
@@ -4328,6 +4332,7 @@ $    If ext .eqs. " " Then Goto done
 $    Define/User Perl_Env_Tables CLISYM_LOCAL
 $    miniperl
      ($extdir = $ENV{'ext'}) =~ s/::/./g;
+     $extdir =~ s#/#.#g;
      if ($extdir =~ /^vms/i) { $extdir =~ s/vms/.vms.ext/i; }
      else                    { $extdir = ".ext.$extdir";   }
      ($ENV{'extdir'} = "[$extdir]");
