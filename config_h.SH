@@ -2143,6 +2143,18 @@ sed <<!GROK!THIS! >config.h -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un-
 #define M_VOID			/* Xenix strikes again */
 #endif
 
+/* HAS_ATOLF:
+ *	This symbol, if defined, indicates that the atolf routine is
+ *	available to convert strings into long doubles.
+ */
+#$d_atolf HAS_ATOLF		/**/
+
+/* HAS_ATOLL:
+ *	This symbol, if defined, indicates that the atoll routine is
+ *	available to convert strings into long longs.
+ */
+#$d_atoll HAS_ATOLL		/**/
+
 /* PERL_BINCOMPAT_5005:
  *	This symbol, if defined, indicates that Perl 5.006 should be
  *	binary-compatible with Perl 5.005.  This is impossible for builds
@@ -2459,6 +2471,33 @@ sed <<!GROK!THIS! >config.h -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un-
 #$d_off64_t      HAS_OFF64_T    	/**/
 #$d_dirent64_s   HAS_STRUCT_DIRENT64 	/**/
 
+/* PERL_PRIfldbl:
+ *	This symbol, if defined, contains the string used by stdio to
+ *	format long doubles (format 'f') for output.
+ */
+/* PERL_PRIgldbl:
+ *	This symbol, if defined, contains the string used by stdio to
+ *	format long doubles (format 'g') for output.
+ */
+#$d_PRIfldbl PERL_PRIfldbl	$sPRIfldbl	/**/
+#$d_PRIgldbl PERL_PRIgldbl	$sPRIgldbl	/**/
+
+/* PERL_PRId64:
+ *	This symbol, if defined, contains the string used by stdio to
+ *	format 64-bit decimal numbers (format 'd') for output.
+ */
+/* PERL_PRIu64:
+ *	This symbol, if defined, contains the string used by stdio to
+ *	format 64-bit unsigned decimal numbers (format 'u') for output.
+ */
+/* PERL_PRIx64:
+ *	This symbol, if defined, contains the string used by stdio to
+ *	format 64-bit hexadecimal numbers (format 'x') for output.
+ */
+#$d_PRId64 PERL_PRId64	$sPRId64	/**/
+#$d_PRIu64 PERL_PRIu64	$sPRIu64	/**/
+#$d_PRIx64 PERL_PRIx64	$sPRIx64	/**/
+
 /* SELECT_MIN_BITS:
  *	This symbol holds the minimum number of bits operated by select.
  *	That is, if you do select(n, ...), how many bits at least will be
@@ -2531,6 +2570,12 @@ sed <<!GROK!THIS! >config.h -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un-
  */
 #$d_stdio_stream_array	HAS_STDIO_STREAM_ARRAY	/**/
 #define STDIO_STREAM_ARRAY	$stdio_stream_array
+
+/* HAS_STRTOULL:
+ *	This symbol, if defined, indicates that the strtoull routine is
+ *	available to convert strings into unsigned long longs.
+ */
+#$d_strtoull HAS_STRTOULL		/**/
 
 /* USE_64_BITS:
  *	This symbol, if defined, indicates that 64-bit interfaces should

@@ -588,10 +588,10 @@ PP(pp_formline)
 		RESTORE_NUMERIC_LOCAL();
 #if defined(USE_LONG_DOUBLE)
 		if (arg & 256) {
-		    sprintf(t, "%#*.*Lf",
+		    sprintf(t, "%#*.*" PERL_PRIfldbl,
 			    (int) fieldsize, (int) arg & 255, value);
 		} else {
-		    sprintf(t, "%*.0Lf", (int) fieldsize, value);
+		    sprintf(t, "%*.0" PERL_PRIfldbl, (int) fieldsize, value);
 		}
 #else
 		if (arg & 256) {

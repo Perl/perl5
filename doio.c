@@ -1001,10 +1001,17 @@ Perl_do_print(pTHX_ register SV *sv, PerlIO *fp)
 	if (SvIOK(sv)) {
 	    if (SvGMAGICAL(sv))
 		mg_get(sv);
-	    if (SvIsUV(sv))		/* XXXX 64-bit? */
+#ifdef IV_IS_QUAD
+	    if (SvIsUV(sv))
+		PerlIO_printf(fp, "%" PERL_PRIu64, (UV)SvUVX(sv));
+	    else
+		PerlIO_printf(fp, "%" PERL_PRId64, (IV)SvIVX(sv));
+#else
+	    if (SvIsUV(sv))
 		PerlIO_printf(fp, "%lu", (unsigned long)SvUVX(sv));
 	    else
 		PerlIO_printf(fp, "%ld", (long)SvIVX(sv));
+#endif
 	    return !PerlIO_error(fp);
 	}
 	/* FALL THROUGH */

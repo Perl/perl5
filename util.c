@@ -1406,15 +1406,27 @@ Perl_mess(pTHX_ const char *pat, va_list *args)
     if (!SvCUR(sv) || *(SvEND(sv) - 1) != '\n') {
 	dTHR;
 	if (PL_curcop->cop_line)
+#ifdef IV_IS_QUAD
+	    Perl_sv_catpvf(aTHX_ sv, " at %_ line %" PERL_PRId64,
+		      GvSV(PL_curcop->cop_filegv), (IV)PL_curcop->cop_line);
+#else
 	    Perl_sv_catpvf(aTHX_ sv, " at %_ line %ld",
 		      GvSV(PL_curcop->cop_filegv), (long)PL_curcop->cop_line);
+#endif
 	if (GvIO(PL_last_in_gv) && IoLINES(GvIOp(PL_last_in_gv))) {
 	    bool line_mode = (RsSIMPLE(PL_rs) &&
 			      SvCUR(PL_rs) == 1 && *SvPVX(PL_rs) == '\n');
+#ifdef IV_IS_QUAD
+	    Perl_sv_catpvf(aTHX_ sv, ", <%s> %s %" PERL_PRId64,
+		      PL_last_in_gv == PL_argvgv ? "" : GvNAME(PL_last_in_gv),
+		      line_mode ? "line" : "chunk", 
+		      (IV)IoLINES(GvIOp(PL_last_in_gv)));
+#else
 	    Perl_sv_catpvf(aTHX_ sv, ", <%s> %s %ld",
 		      PL_last_in_gv == PL_argvgv ? "" : GvNAME(PL_last_in_gv),
 		      line_mode ? "line" : "chunk", 
 		      (long)IoLINES(GvIOp(PL_last_in_gv)));
+#endif
 	}
 #ifdef USE_THREADS
 	if (thr->tid)

@@ -3562,8 +3562,13 @@ Perl_yylex(pTHX)
 	    TERM(THING);
 
 	case KEY___LINE__:
-	    yylval.opval = (OP*)newSVOP(OP_CONST, 0,
-				    Perl_newSVpvf(aTHX_ "%ld", (long)PL_curcop->cop_line));
+#ifdef IV_IS_QUAD
+            yylval.opval = (OP*)newSVOP(OP_CONST, 0,
+                                    Perl_newSVpvf(aTHX_ "%" PERL_PRId64, (IV)PL_curcop->cop_line));
+#else
+            yylval.opval = (OP*)newSVOP(OP_CONST, 0,
+                                    Perl_newSVpvf(aTHX_ "%ld", (long)PL_curcop->cop_line));
+#endif
 	    TERM(THING);
 
 	case KEY___PACKAGE__:
@@ -6745,16 +6750,28 @@ Perl_yyerror(pTHX_ char *s)
 	where = SvPVX(where_sv);
     }
     msg = sv_2mortal(newSVpv(s, 0));
+#ifdef IV_IS_QUAD
+    Perl_sv_catpvf(aTHX_ msg, " at %_ line %" PERL_PRId64 ", ",
+              GvSV(PL_curcop->cop_filegv), (IV)PL_curcop->cop_line);
+#else
     Perl_sv_catpvf(aTHX_ msg, " at %_ line %ld, ",
-	      GvSV(PL_curcop->cop_filegv), (long)PL_curcop->cop_line);
+              GvSV(PL_curcop->cop_filegv), (long)PL_curcop->cop_line);
+#endif
     if (context)
 	Perl_sv_catpvf(aTHX_ msg, "near \"%.*s\"\n", contlen, context);
     else
 	Perl_sv_catpvf(aTHX_ msg, "%s\n", where);
     if (PL_multi_start < PL_multi_end && (U32)(PL_curcop->cop_line - PL_multi_end) <= 1) {
-	Perl_sv_catpvf(aTHX_ msg,
-	"  (Might be a runaway multi-line %c%c string starting on line %ld)\n",
-		(int)PL_multi_open,(int)PL_multi_close,(long)PL_multi_start);
+#ifdef IV_IS_QUAD
+        Perl_sv_catpvf(aTHX_ msg,
+        "  (Might be a runaway multi-line %c%c string starting on line %" PERL_\
+PRId64 ")\n",
+                (int)PL_multi_open,(int)PL_multi_close,(IV)PL_multi_start);
+#else
+        Perl_sv_catpvf(aTHX_ msg,
+        "  (Might be a runaway multi-line %c%c string starting on line %ld)\n",
+                (int)PL_multi_open,(int)PL_multi_close,(long)PL_multi_start);
+#endif
         PL_multi_end = 0;
     }
     if (PL_in_eval & EVAL_WARNONLY)

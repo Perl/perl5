@@ -817,9 +817,15 @@ PP(pp_untie)
         MAGIC * mg ;
         if (mg = SvTIED_mg(sv, how)) {
             if (mg && SvREFCNT(SvRV(mg->mg_obj)) > 1)  
+#ifdef IV_IS_QUAD
+		Perl_warner(aTHX_ WARN_UNTIE,
+		    "untie attempted while %" PERL_PRIu64 " inner references still exist",
+		    (UV)SvREFCNT(SvRV(mg->mg_obj)) - 1 ) ;
+#else
 		Perl_warner(aTHX_ WARN_UNTIE,
 		    "untie attempted while %lu inner references still exist",
 		    (unsigned long)SvREFCNT(SvRV(mg->mg_obj)) - 1 ) ;
+#endif
         }
     }
  
