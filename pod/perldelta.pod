@@ -532,6 +532,20 @@ Rather than relying on C's argv[0] (which may not contain a full pathname)
 where possible $^X is now set by asking the operating system.
 (eg by reading F</proc/self/exe> on Linux, F</proc/curproc/file> on FreeBSD)
 
+=item *
+
+A new variable, C<${^TAINT}>, indicates whether taint mode is enabled.
+
+=item *
+
+You can now override the readline() builtin, and this overrides also
+the <FILEHANDLE> angle bracket operator.
+
+=item *
+
+The command-line options -s and -F are now recognized on the shebang
+(#!) line.
+
 =back
 
 =head1 Modules and Pragmata
@@ -994,6 +1008,11 @@ correctly changes directories when chasing symbolic links.  Callbacks
 
 File::Find is now (again) reentrant.  It also has been made
 more portable.
+
+=item *
+
+The warnings issued by File::Find now belong to their own category.
+You can enable/disable them with C<use/no warnings 'File::Find';>.
 
 =item *
 
@@ -2368,6 +2387,11 @@ the entire regex.  You will an optional warning if you try to do otherwise.
 
 Using arrays or hashes as references (e.g. C<< %foo-&gt;{bar} >>
 has been deprecated for a while.  Now you will get an optional warning.
+
+=item *
+
+Using C<sort> in scalar context now issues an optional warning.
+This didn't do anything useful, as the sort was not performed.
 
 =back
 
