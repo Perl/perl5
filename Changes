@@ -95,6 +95,80 @@ Version v5.7.0		Development release working toward v5.8
 --------------
 
 ____________________________________________________________________________
+[  6726] By: jhi                                   on 2000/08/20  20:41:44
+        Log: The veryclean target needs to clobber.
+     Branch: perl
+	   ! Makefile.SH
+____________________________________________________________________________
+[  6725] By: jhi                                   on 2000/08/20  20:37:38
+        Log: Document odd vs even subreleases and -Dusedevel.
+     Branch: perl
+	   ! INSTALL
+____________________________________________________________________________
+[  6724] By: jhi                                   on 2000/08/20  19:58:05
+        Log: Use temporary directory instead of current directory.
+             
+             Subject: Re: [ID 20000816.011] Test failure in lib/ftmp-security.t
+             From: Tim Jenness <timj@jach.hawaii.edu>
+             Date: Sat, 19 Aug 2000 10:26:07 -1000 (HST)
+             Message-ID: <Pine.LNX.4.21.0008191015090.13727-100000@lapaki.jach.hawaii.edu>
+     Branch: perl
+	   ! t/lib/ftmp-security.t
+____________________________________________________________________________
+[  6723] By: jhi                                   on 2000/08/20  19:55:55
+        Log: Subject: [PATCH] Silence MakeMaker (Was: installman)
+             From: andreas.koenig@anima.de (Andreas J. Koenig)
+             Date: 20 Aug 2000 15:52:03 +0200
+             Message-ID: <m3em3khwfw.fsf_-_@ak-71.mind.de>
+     Branch: perl
+	   ! lib/ExtUtils/MM_Unix.pm
+____________________________________________________________________________
+[  6722] By: jhi                                   on 2000/08/20  19:46:01
+        Log: Update to CGI 2.72, from Lincoln Stein.
+     Branch: perl
+	   ! lib/CGI.pm
+____________________________________________________________________________
+[  6721] By: jhi                                   on 2000/08/20  19:43:54
+        Log: Subject: Re: [ID 20000819.002] Not OK: perl v5.7.0 +SUIDMAIL +DEVEL6707 on i686-linux 2.2.5-16 (UNINSTALLED)
+             From: Radu Greab <radu@netsoft.ro>
+             Date: Sun, 20 Aug 2000 18:03:26 +0300 (EEST)
+             Message-ID: <Pine.LNX.4.10.10008201753260.1292-100000@busy.netsoft.ro>
+     Branch: perl
+	   ! ext/GDBM_File/GDBM_File.xs
+____________________________________________________________________________
+[  6720] By: jhi                                   on 2000/08/20  19:42:01
+        Log: pp_open() could pass an uninitialized filename down to do_open9().
+     Branch: perl
+	   ! pp_sys.c
+____________________________________________________________________________
+[  6719] By: jhi                                   on 2000/08/20  14:06:41
+        Log: UTF8 concat fixes.
+             
+             Subject: [PATCH @6713] Re: [ID 20000815.006] latest patched perl core dumps
+             From: Hugo <hv@crypt.compulink.co.uk>
+             Date: Sun, 20 Aug 2000 07:30:46 +0100
+             Message-Id: <200008200630.HAA18053@crypt.compulink.co.uk>
+     Branch: perl
+	   ! pp_hot.c t/op/append.t
+____________________________________________________________________________
+[  6718] By: jhi                                   on 2000/08/20  02:09:37
+        Log: Let's try #6717 again.
+     Branch: perl
+	   ! lib/File/Temp.pm
+____________________________________________________________________________
+[  6717] By: jhi                                   on 2000/08/20  01:56:55
+        Log: Subject: [PATCH perl@6698] File::Temp fix-ups for OpenVMS
+             From: "Craig A. Berry" <craig.berry@metamorgs.com>
+             Date: Sat, 19 Aug 2000 18:15:39 -0500
+             Message-Id: <p04320402b5c4c10bc280@[192.168.56.169]>
+     Branch: perl
+	   ! lib/File/Temp.pm
+____________________________________________________________________________
+[  6716] By: jhi                                   on 2000/08/19  15:50:11
+        Log: Update Changes.
+     Branch: perl
+	   ! Changes patchlevel.h
+____________________________________________________________________________
 [  6715] By: jhi                                   on 2000/08/19  15:39:09
         Log: Subject: [ID 20000817.023] endianness description in perlfunc.pod
              From: Jonathan D Johnston <jdjohnston2@juno.com>
