@@ -8612,7 +8612,7 @@ Perl_re_dup(pTHX_ REGEXP *r, CLONE_PARAMS *param)
     Copy(r->offsets, ret->offsets, 2*len+1, U32);
 
     ret->precomp        = SAVEPV(r->precomp);
-    ret->refcnt         = r->refcnt;
+    ret->refcnt         = 1;
     ret->minlen         = r->minlen;
     ret->prelen         = r->prelen;
     ret->nparens        = r->nparens;
