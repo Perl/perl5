@@ -934,6 +934,13 @@ Perl_leave_scope(pTHX_ I32 base)
 	    }
 	    *(I32*)&PL_hints = (I32)SSPOPINT;
 	    break;
+	case SAVEt_COMPPAD:
+	    PL_comppad = (AV*)SSPOPPTR;
+	    if (PL_comppad)
+		PL_curpad = AvARRAY(PL_comppad);
+	    else
+		PL_curpad = Null(SV**);
+	    break;
 	default:
 	    Perl_croak(aTHX_ "panic: leave_scope inconsistency");
 	}

@@ -4084,8 +4084,7 @@ S_cv_clone2(pTHX_ CV *proto, CV *outside)
     assert(!CvUNIQUE(proto));
 
     ENTER;
-    SAVEVPTR(PL_curpad);
-    SAVESPTR(PL_comppad);
+    SAVECOMPPAD();
     SAVESPTR(PL_comppad_name);
     SAVESPTR(PL_compcv);
 

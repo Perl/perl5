@@ -12,7 +12,7 @@ BEGIN {
 
 use Config;
 
-print "1..170\n";
+print "1..171\n";
 
 my $test = 1;
 sub test (&) {
@@ -172,6 +172,15 @@ test {
   $foo[4]->()->(4)
 };
 
+{
+    my $w;
+    $w = sub {
+	my ($i) = @_;
+	test { $i == 10 };
+	sub { $w };
+    };
+    $w->(10);
+}
 
 # Additional tests by Tom Phoenix <rootbeer@teleport.com>.
 

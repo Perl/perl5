@@ -31,6 +31,7 @@
 #define SAVEt_DESTRUCTOR_X	30
 #define SAVEt_VPTR		31
 #define SAVEt_I8		32
+#define SAVEt_COMPPAD		33
 
 #define SSCHECK(need) if (PL_savestack_ix + need > PL_savestack_max) savestack_grow()
 #define SSPUSHINT(i) (PL_savestack[PL_savestack_ix++].any_i32 = (I32)(i))
@@ -130,6 +131,19 @@ Closing bracket on a callback.  See C<ENTER> and L<perlcall>.
 	    SSPUSHINT(PL_hints);		\
 	    SSPUSHINT(SAVEt_HINTS);		\
 	}					\
+    } STMT_END
+
+#define SAVECOMPPAD() \
+    STMT_START {						\
+	if (PL_comppad && PL_curpad == AvARRAY(PL_comppad)) {	\
+	    SSCHECK(2);						\
+	    SSPUSHPTR((SV*)PL_comppad);				\
+	    SSPUSHINT(SAVEt_COMPPAD);				\
+	}							\
+	else {							\
+	    SAVEVPTR(PL_curpad);				\
+	    SAVESPTR(PL_comppad);				\
+	}							\
     } STMT_END
 
 #ifdef USE_ITHREADS

@@ -7039,8 +7039,7 @@ Perl_start_subparse(pTHX_ I32 is_format, U32 flags)
     SAVEI32(PL_subline);
     save_item(PL_subname);
     SAVEI32(PL_padix);
-    SAVEVPTR(PL_curpad);
-    SAVESPTR(PL_comppad);
+    SAVECOMPPAD();
     SAVESPTR(PL_comppad_name);
     SAVESPTR(PL_compcv);
     SAVEI32(PL_comppad_name_fill);
