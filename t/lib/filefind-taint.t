@@ -4,15 +4,13 @@
 my %Expect_File = (); # what we expect for $_ 
 my %Expect_Name = (); # what we expect for $File::Find::name/fullname
 my %Expect_Dir  = (); # what we expect for $File::Find::dir
-my $symlink_exists = eval { symlink("",""); 1 };
-my $cwd;
-my $cwd_untainted;
-
-use Config;
+my ($cwd, $cwd_untainted);
 
 BEGIN {
     chdir 't' if -d 't';
     unshift @INC => '../lib';
+
+    require Config;
 
     for (keys %ENV) { # untaint ENV
 	($ENV{$_}) = $ENV{$_} =~ /(.*)/;
@@ -35,14 +33,13 @@ BEGIN {
     $ENV{'PATH'} = join($sep,@path);
 }
 
-
+my $symlink_exists = eval { symlink("",""); 1 };
 if ( $symlink_exists ) { print "1..45\n"; }
 else                   { print "1..27\n";  }
 
 use File::Find;
 use File::Spec;
 use Cwd;
-
 
 cleanup();
 
@@ -127,7 +124,6 @@ sub wanted_File_Dir_prune {
     &wanted_File_Dir;
     $File::Find::prune=1 if  $_ eq 'faba';
 }
-
 
 sub simple_wanted {
     print "# \$File::Find::dir => '$File::Find::dir'\n";
@@ -249,7 +245,6 @@ sub file_path_name {
     $path = ":$path" if (($^O eq 'MacOS') && ($path !~ /:/));
     return $path;
 }
-
 
 
 MkDir( dir_path('for_find'), 0770 );
