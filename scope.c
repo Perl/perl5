@@ -350,9 +350,8 @@ Perl_save_hash(pTHX_ GV *gv)
 void
 Perl_save_item(pTHX_ register SV *item)
 {
-    register SV *sv = NEWSV(0,0);
+    register SV *sv = newSVsv(item);
 
-    sv_setsv(sv,item);
     SSCHECK(3);
     SSPUSHPTR(item);		/* remember the pointer */
     SSPUSHPTR(sv);		/* remember the value */

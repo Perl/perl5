@@ -1008,9 +1008,8 @@ PP(pp_aassign)
 	    i = 0;
 	    while (relem <= lastrelem) {	/* gobble up all the rest */
 		SV **didstore;
-		sv = NEWSV(28,0);
 		assert(*relem);
-		sv_setsv(sv,*relem);
+		sv = newSVsv(*relem);
 		*(relem++) = sv;
 		didstore = av_store(ary,i++,sv);
 		if (magic) {
@@ -2214,8 +2213,7 @@ PP(pp_subst)
       have_a_cow:
 #endif
 	rxtainted |= RX_MATCH_TAINTED(rx);
-	dstr = NEWSV(25, len);
-	sv_setpvn(dstr, m, s-m);
+	dstr = newSVpvn(m, s-m);
 	if (DO_UTF8(TARG))
 	    SvUTF8_on(dstr);
 	PL_curpm = pm;

@@ -1692,8 +1692,7 @@ PP(pp_sort)
 	SV *sv;
 	SV** base, **didstore;
 	for (base = ORIGMARK+1, i=0; i < max; i++) {
-	    sv = NEWSV(28,0);
-	    sv_setsv(sv, base[i]);
+	    sv = newSVsv(base[i]);
 	    base[i] = sv;
 	}
 	av_clear(av);

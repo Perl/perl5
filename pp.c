@@ -4186,8 +4186,7 @@ PP(pp_splice)
     /* make new elements SVs now: avoid problems if they're from the array */
     for (dst = MARK, i = newlen; i; i--) {
         SV *h = *dst;
-	*dst = NEWSV(46, 0);
-	sv_setsv(*dst++, h);
+	*dst++ = newSVsv(h);
     }
 
     if (diff < 0) {				/* shrinking the area */
@@ -4395,8 +4394,7 @@ PP(pp_unshift)
     else {
 	av_unshift(ary, SP - MARK);
 	while (MARK < SP) {
-	    sv = NEWSV(27, 0);
-	    sv_setsv(sv, *++MARK);
+	    sv = newSVsv(*++MARK);
 	    (void)av_store(ary, i++, sv);
 	}
     }
@@ -4581,8 +4579,7 @@ PP(pp_split)
 	    if (m >= strend)
 		break;
 
-	    dstr = NEWSV(30, m-s);
-	    sv_setpvn(dstr, s, m-s);
+	    dstr = newSVpvn(s, m-s);
 	    if (make_mortal)
 		sv_2mortal(dstr);
 	    if (do_utf8)
@@ -4603,8 +4600,7 @@ PP(pp_split)
 	    m++;
 	    if (m >= strend)
 		break;
-	    dstr = NEWSV(30, m-s);
-	    sv_setpvn(dstr, s, m-s);
+	    dstr = newSVpvn(s, m-s);
 	    if (make_mortal)
 		sv_2mortal(dstr);
 	    if (do_utf8)
@@ -4629,8 +4625,7 @@ PP(pp_split)
 		for (m = s; m < strend && *m != c; m++) ;
 		if (m >= strend)
 		    break;
-		dstr = NEWSV(30, m-s);
-		sv_setpvn(dstr, s, m-s);
+		dstr = newSVpvn(s, m-s);
 		if (make_mortal)
 		    sv_2mortal(dstr);
 		if (do_utf8)
@@ -4651,8 +4646,7 @@ PP(pp_split)
 			     csv, multiline ? FBMrf_MULTILINE : 0)) )
 #endif
 	    {
-		dstr = NEWSV(31, m-s);
-		sv_setpvn(dstr, s, m-s);
+		dstr = newSVpvn(s, m-s);
 		if (make_mortal)
 		    sv_2mortal(dstr);
 		if (do_utf8)
@@ -4685,8 +4679,7 @@ PP(pp_split)
 		strend = s + (strend - m);
 	    }
 	    m = rx->startp[0] + orig;
-	    dstr = NEWSV(32, m-s);
-	    sv_setpvn(dstr, s, m-s);
+	    dstr = newSVpvn(s, m-s);
 	    if (make_mortal)
 		sv_2mortal(dstr);
 	    if (do_utf8)
@@ -4701,8 +4694,7 @@ PP(pp_split)
 		       parens that didn't match -- they should be set to
 		       undef, not the empty string */
 		    if (m >= orig && s >= orig) {
-			dstr = NEWSV(33, m-s);
-			sv_setpvn(dstr, s, m-s);
+			dstr = newSVpvn(s, m-s);
 		    }
 		    else
 			dstr = &PL_sv_undef;  /* undef, not "" */
@@ -4724,8 +4716,7 @@ PP(pp_split)
     /* keep field after final delim? */
     if (s < strend || (iters && origlimit)) {
         STRLEN l = strend - s;
-	dstr = NEWSV(34, l);
-	sv_setpvn(dstr, s, l);
+	dstr = newSVpvn(s, l);
 	if (make_mortal)
 	    sv_2mortal(dstr);
 	if (do_utf8)

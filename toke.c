@@ -275,9 +275,7 @@ S_tokereport(pTHX_ char* s, I32 rv)
 	char *name = Nullch;
 	enum token_type type = TOKENTYPE_NONE;
 	struct debug_tokens *p;
-        SV* report = NEWSV(0, 60);
-
-        Perl_sv_catpvf(aTHX_ report, "<== ");
+        SV* report = newSVpvn("<== ", 4);
 
 	for (p = debug_tokens; p->token; p++) {
 	    if (p->token == (int)rv) {
