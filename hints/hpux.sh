@@ -5,6 +5,8 @@
 # Determine the architecture type of this system.
 # Keep leading tab below -- Configure Black Magic -- RAM, 03/02/97
 	xxOsRevMajor=`uname -r | sed -e 's/^[^0-9]*//' | cut -d. -f1`;
+	xxOsRevMinor=`uname -r | sed -e 's/^[^0-9]*//' | cut -d. -f2`;
+	xxOsRev=`expr 100 \* $xxOsRevMajor + $xxOsRevMinor`
 if [ "$xxOsRevMajor" -ge 10 ]; then
     # This system is running >= 10.x
 
@@ -137,7 +139,12 @@ case `$cc -v 2>&1`"" in
 	    ccversion=`which cc | xargs what | awk '/Compiler/{print $2}/Itanium/{print $6,$7}'`
 	    case "$ccflags" in
                "-Ae "*) ;;
-               *) ccflags="-Ae $cc_cppflags -Wl,+vnocompatwarnings" ;;
+		*)  ccflags="-Ae $cc_cppflags"
+		    # +vnocompatwarnings not known in 10.10 and older
+		    if [ $xxOsRev -ge 1020 ]; then
+			ccflags="$cc_cppflags -Wl,+vnocompatwarnings"
+			fi
+		    ;;
                esac
 	    # Needed because cpp does only support -Aa (not -Ae)
 	    cpplast='-'
@@ -397,6 +404,9 @@ case "$ccisgcc" in
     esac
 
 ## LARGEFILES
+if [ $xxOsRev -lt 1020 ]; then
+    uselargefiles="$undef"
+    fi
 
 #case "$uselargefiles-$ccisgcc" in
 #    "$define-$define"|'-define') 
