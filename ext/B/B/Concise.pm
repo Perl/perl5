@@ -443,7 +443,7 @@ $priv{$_}{64} = "RTIME" for ("match", "subst", "substcont");
 $priv{"repeat"}{64} = "DOLIST";
 $priv{"leaveloop"}{64} = "CONT";
 @{$priv{$_}}{32,64,96} = ("DREFAV", "DREFHV", "DREFSV")
-  for ("entersub", map("rv2${_}v", "a", "s", "h", "g"), "aelem", "helem");
+  for (qw(rv2gv rv2sv padsv aelem helem));
 $priv{"entersub"}{16} = "DBG";
 $priv{"entersub"}{32} = "TARG";
 @{$priv{$_}}{4,8,128} = ("INARGS","AMPER","NO()") for ("entersub", "rv2cv");
