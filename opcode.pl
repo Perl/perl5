@@ -1,6 +1,5 @@
 #!/usr/bin/perl
 
-chmod 0666, "opcode.h", "opnames.h";
 unlink "opcode.h", "opnames.h";
 open(OC, ">opcode.h") || die "Can't create opcode.h: $!\n";
 open(ON, ">opnames.h") || die "Can't create opnames.h: $!\n";
