@@ -739,8 +739,6 @@ t/op/hashwarn.t		See if hash warnings work
 t/op/inc.t		See if inc/dec of integers near 32 bit limit work
 t/op/index.t		See if index works
 t/op/int.t		See if int works
-t/op/ipcmsg.t		See if msg* ops work
-t/op/ipcsem.t		See if sem* ops work
 t/op/join.t		See if join works
 t/op/list.t		See if array lists work
 t/op/local.t		See if local works

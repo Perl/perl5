@@ -1418,18 +1418,6 @@ SV **sp;
     return -1;			/* should never happen */
 }
 
-#if defined(__sun) && defined(__SVR4) /* XXX Need metaconfig test */
-/* Solaris manpage says that it uses (like linux)
-   int semctl (int semid, int semnum, int cmd, union semun arg)
-   but the system include files do not define union semun !!!!
-*/
-union semun {
-     int val;
-     struct semid_ds *buf;
-     ushort *array;
-};
-#endif
-
 I32
 do_ipcctl(optype, mark, sp)
 I32 optype;
@@ -1440,10 +1428,6 @@ SV **sp;
     char *a;
     I32 id, n, cmd, infosize, getinfo;
     I32 ret = -1;
-#if defined(__linux__) || (defined(__sun) && defined(__SVR4))
-/* XXX Need metaconfig test */
-    union semun unsemds;
-#endif
 
     id = SvIVx(*++mark);
     n = (optype == OP_SEMCTL) ? SvIVx(*++mark) : 0;
@@ -1473,27 +1457,13 @@ SV **sp;
 	else if (cmd == GETALL || cmd == SETALL)
 	{
 	    struct semid_ds semds;
-#if defined(__linux__) || (defined(__sun) && defined(__SVR4))
-	/* XXX Need metaconfig test */
-/* linux and Solaris2 uses :
-   int semctl (int semid, int semnum, int cmd, union semun arg)
-       union semun {
-            int val;
-            struct semid_ds *buf;
-            ushort *array;
-       };
-*/
-            union semun semun;
+	    union semun semun;
+
             semun.buf = &semds;
-	    if (semctl(id, 0, IPC_STAT, semun) == -1)
-#else
-	    if (semctl(id, 0, IPC_STAT, &semds) == -1)
-#endif
+	    if (Semctl(id, 0, IPC_STAT, semun) == -1)
 		return -1;
 	    getinfo = (cmd == GETALL);
-	    infosize = semds.sem_nsems * sizeof(short);
-		/* "short" is technically wrong but much more portable
-		   than guessing about u_?short(_t)? */
+	    infosize = semds.sem_nsems * sizeof(unsigned short);
 	}
 	break;
 #endif
@@ -1527,6 +1497,7 @@ SV **sp;
     SETERRNO(0,0);
     switch (optype)
     {
+      union semun unsemds;
 #ifdef HAS_MSG
     case OP_MSGCTL:
 	ret = msgctl(id, cmd, (struct msqid_ds *)a);
@@ -1534,13 +1505,8 @@ SV **sp;
 #endif
 #ifdef HAS_SEM
     case OP_SEMCTL:
-#if defined(__linux__) || (defined(__sun) && defined(__SVR4))
-	/* XXX Need metaconfig test */
         unsemds.buf = (struct semid_ds *)a;
-	ret = semctl(id, n, cmd, unsemds);
-#else
-	ret = semctl(id, n, cmd, (struct semid_ds *)a);
-#endif
+	ret = Semctl(id, n, cmd, unsemds);
 	break;
 #endif
 #ifdef HAS_SHM
