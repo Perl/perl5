@@ -2463,8 +2463,11 @@ PP(pp_goto)
 	    cx = &cxstack[ix];
 	    switch (CxTYPE(cx)) {
 	    case CXt_EVAL:
-		gotoprobe = PL_eval_root; /* XXX not good for nested eval */
-		break;
+                if (CxREALEVAL(cx)) {
+		    gotoprobe = PL_eval_root; /* XXX not good for nested eval */
+		    break;
+                }
+                /* else fall through */
 	    case CXt_LOOP:
 		gotoprobe = cx->blk_oldcop->op_sibling;
 		break;
@@ -3506,7 +3509,6 @@ PP(pp_entertry)
     push_return(cLOGOP->op_other->op_next);
     PUSHBLOCK(cx, (CXt_EVAL|CXp_TRYBLOCK), SP);
     PUSHEVAL(cx, 0, 0);
-    PL_eval_root = PL_op;		/* Only needed so that goto works right. */
 
     PL_in_eval = EVAL_INEVAL;
     sv_setpv(ERRSV,"");

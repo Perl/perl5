@@ -2,7 +2,7 @@
 
 # "This IS structured code.  It's just randomly structured."
 
-print "1..19\n";
+print "1..21\n";
 
 while ($?) {
     $foo = 1;
@@ -105,6 +105,29 @@ FORL2: for($y="ok 19\n"; 1;) {
   ($y, $z) = ("not ok 19\n", 1);
   goto FORL2;
 }
+
+# Does goto work correctly within a try block?
+#  (BUG ID 20000313.004)
+
+my $ok = 0;
+eval {
+  my $variable = 1;
+  goto LABEL20;
+  LABEL20: $ok = 1 if $variable;
+};
+print ($ok&&!$@ ? "ok 20\n" : "not ok 20\n");
+
+# And within an eval-string?
+
+
+$ok = 0;
+eval q{
+  my $variable = 1;
+  goto LABEL21;
+  LABEL21: $ok = 1 if $variable;
+};
+print ($ok&&!$@ ? "ok 21\n" : "not ok 21\n");
+
 
 exit;
 
