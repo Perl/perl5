@@ -4257,11 +4257,11 @@ Perl_sv_force_normal_flags(pTHX_ register SV *sv, U32 flags)
 	    char *pvx = SvPVX(sv);
 	    STRLEN len = SvCUR(sv);
             U32 hash   = SvUVX(sv);
+	    SvFAKE_off(sv);
+	    SvREADONLY_off(sv);
 	    SvGROW(sv, len + 1);
 	    Move(pvx,SvPVX(sv),len,char);
 	    *SvEND(sv) = '\0';
-	    SvFAKE_off(sv);
-	    SvREADONLY_off(sv);
 	    unsharepvn(pvx, SvUTF8(sv) ? -(I32)len : len, hash);
 	}
 	else if (IN_PERL_RUNTIME)
@@ -6097,7 +6097,13 @@ Perl_sv_gets(pTHX_ register SV *sv, register PerlIO *fp, I32 append)
     I32 rspara = 0;
     I32 recsize;
 
-    SV_CHECK_THINKFIRST(sv);
+    if (SvTHINKFIRST(sv))
+	sv_force_normal_flags(sv, append ? 0 : SV_COW_DROP_PV);
+    /* XXX. If you make this PVIV, then copy on write can copy scalars read
+       from <>.
+       However, perlbench says it's slower, because the existing swipe code
+       is faster than copy on write.
+       Swings and roundabouts.  */
     (void)SvUPGRADE(sv, SVt_PV);
 
     SvSCREAM_off(sv);
