@@ -1242,134 +1242,106 @@ PP(pp_subtract)
     djSP; dATARGET; bool useleft; tryAMAGICbin(subtr,opASSIGN);
     useleft = USE_LEFT(TOPm1s);
 #ifdef PERL_PRESERVE_IVUV
-    /* We must see if we can perform the addition with integers if possible,
-       as the integer code detects overflow while the NV code doesn't.
-       If either argument hasn't had a numeric conversion yet attempt to get
-       the IV. It's important to do this now, rather than just assuming that
-       it's not IOK as a PV of "9223372036854775806" may not take well to NV
-       addition, and an SV which is NOK, NV=6.0 ought to be coerced to
-       integer in case the second argument is IV=9223372036854775806
-       We can (now) rely on sv_2iv to do the right thing, only setting the
-       public IOK flag if the value in the NV (or PV) slot is truly integer.
-
-       A side effect is that this also aggressively prefers integer maths over
-       fp maths for integer values.  */
+    /* See comments in pp_add (in pp_hot.c) about Overflow, and how
+       "bad things" happen if you rely on signed integers wrapping.  */
     SvIV_please(TOPs);
     if (SvIOK(TOPs)) {
 	/* Unless the left argument is integer in range we are going to have to
 	   use NV maths. Hence only attempt to coerce the right argument if
 	   we know the left is integer.  */
+	register UV auv;
+	bool auvok;
+	bool a_valid = 0;
+
 	if (!useleft) {
-	    /* left operand is undef, treat as zero. + 0 is identity. */
-	    if (SvUOK(TOPs)) {
-		dPOPuv; /* Scary macros. Lets put a sequence point (;) here */
-		if (value <= (UV)IV_MIN) {
-		    /* 2s complement assumption.  */
-		    SETi(-(IV)value);
-		    RETURN;
-		} /* else drop through into NVs below */
-	    } else {
-		dPOPiv;
-		SETu((UV)-value);
-		RETURN;
-	    }
+	    auv = 0;
+	    a_valid = auvok = 1;
+	    /* left operand is undef, treat as zero.  */
 	} else {
 	    /* Left operand is defined, so is it IV? */
 	    SvIV_please(TOPm1s);
 	    if (SvIOK(TOPm1s)) {
-		bool auvok = SvUOK(TOPm1s);
-		bool buvok = SvUOK(TOPs);
-	
-		if (!auvok && !buvok) { /* ## IV - IV ## */
-		    IV aiv = SvIVX(TOPm1s);
-		    IV biv = SvIVX(TOPs);
-		    IV result = aiv - biv;
-		
-		    if (biv >= 0 ? (result < aiv) : (result >= aiv)) {
-			SP--;
-			SETi( result );
-			RETURN;
+		if ((auvok = SvUOK(TOPm1s)))
+		    auv = SvUVX(TOPm1s);
+		else {
+		    register IV aiv = SvIVX(TOPm1s);
+		    if (aiv >= 0) {
+			auv = aiv;
+			auvok = 1;	/* Now acting as a sign flag.  */
+		    } else { /* 2s complement assumption for IV_MIN */
+			auv = (UV)-aiv;
 		    }
-		    /* +ve - +ve can't overflow. (worst case 0 - IV_MAX) */
-		    /* -ve - -ve can't overflow. (worst case -1 - IV_MIN) */
-		    /* -ve - +ve can only overflow too negative. */
-		    /* leaving +ve - -ve, which will go UV */
-		    if (aiv >= 0 && biv < 0) { /* assert don't need biv <0 */
-			/* 2s complement assumption for IV_MIN */
-			UV result = (UV)aiv + (UV)-biv;
-			/* UV + UV must get bigger. +ve IV + +ve IV +1 can't
-			   overflow UV (2s complement assumption */
-			assert (result >= (UV) aiv);
-			SP--;
-			SETu( result );
-			RETURN;
-		    }
-		    /* Overflow, drop through to NVs */
-		} else if (auvok && buvok) {	/* ## UV - UV ## */
-		    UV auv = SvUVX(TOPm1s);
-		    UV buv = SvUVX(TOPs);
-		    IV result;
-		
-		    if (auv >= buv) {
-			SP--;
-			SETu( auv - buv );
-			RETURN;
-		    }
-		    /* Blatant 2s complement assumption.  */
-		    result = (IV)(auv - buv);
-		    if (result < 0) {
-			SP--;
-			SETi( result );
-			RETURN;
-		    }
-		    /* Overflow on IV - IV, drop through to NVs */
-		} else if (auvok) {	/* ## Mixed UV - IV ## */
-		    UV auv = SvUVX(TOPm1s);
-		    IV biv = SvIVX(TOPs);
+		}
+		a_valid = 1;
+	    }
+	}
+	if (a_valid) {
+	    bool result_good = 0;
+	    UV result;
+	    register UV buv;
+	    bool buvok = SvUOK(TOPs);
+	    
+	    if (buvok)
+		buv = SvUVX(TOPs);
+	    else {
+		register IV biv = SvIVX(TOPs);
+		if (biv >= 0) {
+		    buv = biv;
+		    buvok = 1;
+		} else
+		    buv = (UV)-biv;
+	    }
+	    /* ?uvok if value is >= 0. basically, flagged as UV if it's +ve,
+	       else "IV" now, independant of how it came in.
+	       if a, b represents positive, A, B negative, a maps to -A etc
+	       a - b =>  (a - b)
+	       A - b => -(a + b)
+	       a - B =>  (a + b)
+	       A - B => -(a - b)
+	       all UV maths. negate result if A negative.
+	       subtract if signs same, add if signs differ. */
 
-		    if (biv < 0) {
-			/* 2s complement assumptions for IV_MIN */
-			UV result = auv + ((UV)-biv);
-			/* UV + UV can only get bigger... */
-			if (result >= auv) {
-			    SP--;
-			    SETu( result );
-			    RETURN;
-			}
-			/* and if it gets too big for UV then it's NV time.  */
-		    } else if (auv > (UV)IV_MAX) {
-			/* I think I'm making an implicit 2s complement
-			   assumption that IV_MIN == -IV_MAX - 1 */
-			/* biv is >= 0 */
-			UV result = auv - (UV)biv;
-			assert (result <= auv);
-			SP--;
-			SETu( result );
-			RETURN;
-		    } else {
-			/* biv is >= 0 */
-			IV result = (IV)auv - biv;
-			assert (result <= (IV)auv);
-			SP--;
-			SETi( result );
-			RETURN;
+	    if (auvok ^ buvok) {
+		/* Signs differ.  */
+		result = auv + buv;
+		if (result >= auv)
+		    result_good = 1;
+	    } else {
+		/* Signs same */
+		if (auv >= buv) {
+		    result = auv - buv;
+		    /* Must get smaller */
+		    if (result <= auv)
+			result_good = 1;
+		} else {
+		    result = buv - auv;
+		    if (result <= buv) {
+			/* result really should be -(auv-buv). as its negation
+			   of true value, need to swap our result flag  */
+			auvok = !auvok;
+			result_good = 1;
 		    }
-		} else {		/* ## Mixed IV - UV ## */
-		    IV aiv = SvIVX(TOPm1s);
-		    UV buv = SvUVX(TOPs);
-		    IV result = aiv - (IV)buv; /* 2s complement assumption. */
-		
-		    /* result must not get larger. */
-		    if (result <= aiv) {
-			SP--;
-			SETi( result );
-			RETURN;
-		    } /* end of IV-IV / UV-UV / UV-IV / IV-UV */
 		}
 	    }
+	    if (result_good) {
+		SP--;
+		if (auvok)
+		    SETu( result );
+		else {
+		    /* Negate result */
+		    if (result <= (UV)IV_MIN)
+			SETi( -(IV)result );
+		    else {
+			/* result valid, but out of range for IV.  */
+			SETn( -(NV)result );
+		    }
+		}
+		RETURN;
+	    } /* Overflow, drop through to NVs.  */
 	}
     }
 #endif
+    useleft = USE_LEFT(TOPm1s);
     {
 	dPOPnv;
 	if (!useleft) {
