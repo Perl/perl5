@@ -978,7 +978,7 @@ specific rule.
 SCO prior to 3.2.4 may be missing dbmclose().  An upgrade to 3.2.4
 that includes libdbm.nfs (which includes dbmclose()) may be available.
 
-=item Warning (will try anyway): No library found for -lposix
+=item Note (probably harmless): No library found for -lsomething
 
 If you see such a message during the building of an extension, but
 the extension passes its tests anyway (see L<"make test"> below),
@@ -987,13 +987,14 @@ Makefile.PL goes looking for various libraries needed on various
 systems; few systems will need all the possible libraries listed.
 For example, a system may have -lcposix or -lposix, but it's
 unlikely to have both, so most users will see warnings for the one
-they don't have.  The message 'will try anyway' is intended to
-reassure you that the process is continuing.
+they don't have.  The phrase 'probably harmless' is intended to
+reassure you that nothing unusual is happening, and the build
+process is continuing.
 
 On the other hand, if you are building GDBM_File and you get the
 message
 
-    Warning (will try anyway): No library found for -lgdbm
+    Note (probably harmless): No library found for -lgdbm
 
 then it's likely you're going to run into trouble somewhere along
 the line, since it's hard to see how you can use the GDBM_File

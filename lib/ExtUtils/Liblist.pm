@@ -2,7 +2,7 @@ package ExtUtils::Liblist;
 use vars qw($VERSION);
 # Broken out of MakeMaker from version 4.11
 
-$VERSION = substr q$Revision: 1.22 $, 10;
+$VERSION = substr q$Revision: 1.2201 $, 10;
 
 use Config;
 use Cwd 'cwd';
@@ -173,7 +173,8 @@ sub _unix_os2_ext {
 	    }
 	    last;	# found one here so don't bother looking further
 	}
-	print STDOUT "Warning (will try anyway): No library found for -l$thislib\n"
+	print STDOUT "Note (probably harmless): "
+		     ."No library found for -l$thislib\n"
 	    unless $found_lib>0;
     }
     return ('','','','') unless $found;
@@ -256,11 +257,13 @@ sub _vms_ext {
           if    ($test =~ /(?:$so|exe)$/i)      { $type = 'sh'; }
           elsif ($test =~ /(?:$lib_ext|olb)$/i) { $type = 'olb'; }
           elsif ($test =~ /(?:$obj_ext|obj)$/i) {
-            print STDOUT "Warning (will try anyway): Plain object file $test found in library list\n";
+            print STDOUT "Note (probably harmless): "
+			 ."Plain object file $test found in library list\n";
             $type = 'obj';
           }
           else {
-            print STDOUT "Warning (will try anyway): Unknown library type for $test; assuming shared\n";
+            print STDOUT "Note (probably harmless): "
+			 ."Unknown library type for $test; assuming shared\n";
             $type = 'sh';
           }
         }
@@ -278,7 +281,8 @@ sub _vms_ext {
         elsif (not length($ctype) and  # If we've got a lib already, don't bother
                ( -f ($test = VMS::Filespec::rmsexpand($name,$obj_ext)) or
                  -f ($test = VMS::Filespec::rmsexpand($name,'.obj'))))  {
-          print STDOUT "Warning (will try anyway): Plain object file $test found in library list\n";
+          print STDOUT "Note (probably harmless): "
+		       ."Plain object file $test found in library list\n";
           $type = 'obj';
           $name = $test unless $test =~ /obj;?\d*$/i;
         }
@@ -294,7 +298,8 @@ sub _vms_ext {
         next LIB;
       }
     }
-    print STDOUT "Warning (will try anyway): No library found for $lib\n";
+    print STDOUT "Note (probably harmless): "
+		 ."No library found for $lib\n";
   }
 
   @libs = sort keys %obj;
