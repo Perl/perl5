@@ -26,6 +26,7 @@ esac
 linklibperl='$(LIBPERL)'
 shrpldflags='$(LDDLFLAGS)'
 ldlibpth=''
+DPERL_EXTERNAL_GLOB='-DPERL_EXTERNAL_GLOB'
 case "$useshrplib" in
 true)
 	# Prefix all runs of 'miniperl' and 'perl' with 
@@ -75,6 +76,11 @@ true)
 		;;
 	hpux*)
 		linklibperl="-L `pwd | sed 's/\/UU$//'` -Wl,+s -Wl,+b$archlibexp/CORE -lperl"
+		;;
+	os390*)
+		shrpldflags='-W l,dll'
+		linklibperl='libperl.x'
+		DPERL_EXTERNAL_GLOB=''
 		;;
 	esac
 	case "$ldlibpthname" in
@@ -299,12 +305,16 @@ utilities:	miniperl lib/Config.pm $(plextract) FORCE
 FORCE:
 	@sh -c true
 
-opmini$(OBJ_EXT): op.c config.h
-	$(RMS) opmini.c
-	$(LNS) op.c opmini.c
-	$(CCCMD) $(PLDLFLAGS) -DPERL_EXTERNAL_GLOB opmini.c
-	$(RMS) opmini.c
+!NO!SUBS!
+$spitshell >>Makefile <<!GROK!THIS!
+opmini\$(OBJ_EXT): op.c config.h
+	\$(RMS) opmini.c
+	\$(LNS) op.c opmini.c
+	\$(CCCMD) \$(PLDLFLAGS) $DPERL_EXTERNAL_GLOB opmini.c
+	\$(RMS) opmini.c
 
+!GROK!THIS!
+$spitshell >>Makefile <<'!NO!SUBS!'
 miniperlmain$(OBJ_EXT): miniperlmain.c
 	$(CCCMD) $(PLDLFLAGS) $*.c
 
@@ -404,7 +414,7 @@ $(LIBPERL): $& perl$(OBJ_EXT) $(obj) $(LIBPERLEXPORT)
 	case "$useshrplib" in
 	true)
 		$spitshell >>Makefile <<'!NO!SUBS!'
-	$(LD) $(SHRPLDFLAGS) -o $@ perl$(OBJ_EXT) $(obj)
+	$(LD) -o $@ $(SHRPLDFLAGS) perl$(OBJ_EXT) $(obj)
 !NO!SUBS!
 		case "$osname" in
 		aix)
@@ -469,16 +479,16 @@ miniperl: $& miniperlmain$(OBJ_EXT) $(LIBPERL) opmini$(OBJ_EXT)
 	$spitshell >>Makefile <<'!NO!SUBS!'
 
 perl: $& perlmain$(OBJ_EXT) $(LIBPERL) $(DYNALOADER) $(static_ext) ext.libs $(PERLEXPORT)
-	$(SHRPENV) $(LDLIBPTH) $(CC) $(CLDFLAGS) $(CCDLFLAGS) -o perl perlmain$(OBJ_EXT) $(DYNALOADER) $(static_ext) $(LLIBPERL) `cat ext.libs` $(libs)
+	$(SHRPENV) $(LDLIBPTH) $(CC) -o perl $(CLDFLAGS) $(CCDLFLAGS) perlmain$(OBJ_EXT) $(DYNALOADER) $(static_ext) $(LLIBPERL) `cat ext.libs` $(libs)
 
 pureperl: $& perlmain$(OBJ_EXT) $(LIBPERL) $(DYNALOADER) $(static_ext) ext.libs $(PERLEXPORT)
-	$(SHRPENV) $(LDLIBPTH) purify $(CC) $(CLDFLAGS) $(CCDLFLAGS) -o pureperl perlmain$(OBJ_EXT) $(DYNALOADER) $(static_ext) $(LLIBPERL) `cat ext.libs` $(libs)
+	$(SHRPENV) $(LDLIBPTH) purify $(CC) -o pureperl $(CLDFLAGS) $(CCDLFLAGS) perlmain$(OBJ_EXT) $(DYNALOADER) $(static_ext) $(LLIBPERL) `cat ext.libs` $(libs)
 
 purecovperl: $& perlmain$(OBJ_EXT) $(LIBPERL) $(DYNALOADER) $(static_ext) ext.libs $(PERLEXPORT)
-	$(SHRPENV) $(LDLIBPTH) purecov $(CC) $(CLDFLAGS) $(CCDLFLAGS) -o purecovperl perlmain$(OBJ_EXT) $(DYNALOADER) $(static_ext) $(LLIBPERL) `cat ext.libs` $(libs)
+	$(SHRPENV) $(LDLIBPTH) purecov $(CC) -o purecovperl $(CLDFLAGS) $(CCDLFLAGS) perlmain$(OBJ_EXT) $(DYNALOADER) $(static_ext) $(LLIBPERL) `cat ext.libs` $(libs)
 
 quantperl: $& perlmain$(OBJ_EXT) $(LIBPERL) $(DYNALOADER) $(static_ext) ext.libs $(PERLEXPORT)
-	$(SHRPENV) $(LDLIBPTH) quantify $(CC) $(CLDFLAGS) $(CCDLFLAGS) -o quantperl perlmain$(OBJ_EXT) $(DYNALOADER) $(static_ext) $(LLIBPERL) `cat ext.libs` $(libs)
+	$(SHRPENV) $(LDLIBPTH) quantify $(CC) -o quantperl $(CLDFLAGS) $(CCDLFLAGS) perlmain$(OBJ_EXT) $(DYNALOADER) $(static_ext) $(LLIBPERL) `cat ext.libs` $(libs)
 
 # This version, if specified in Configure, does ONLY those scripts which need
 # set-id emulation.  Suidperl must be setuid root.  It contains the "taint"
@@ -486,7 +496,7 @@ quantperl: $& perlmain$(OBJ_EXT) $(LIBPERL) $(DYNALOADER) $(static_ext) ext.libs
 # has been invoked correctly.
 
 suidperl: $& sperl$(OBJ_EXT) perlmain$(OBJ_EXT) $(LIBPERL) $(DYNALOADER) $(static_ext) ext.libs $(PERLEXPORT)
-	$(SHRPENV) $(LDLIBPTH) $(CC) $(CLDFLAGS) $(CCDLFLAGS) -o suidperl perlmain$(OBJ_EXT) sperl$(OBJ_EXT) $(DYNALOADER) $(static_ext) $(LLIBPERL) `cat ext.libs` $(libs)
+	$(SHRPENV) $(LDLIBPTH) $(CC) -o suidperl $(CLDFLAGS) $(CCDLFLAGS) perlmain$(OBJ_EXT) sperl$(OBJ_EXT) $(DYNALOADER) $(static_ext) $(LLIBPERL) `cat ext.libs` $(libs)
 
 !NO!SUBS!
 
@@ -494,7 +504,7 @@ fi
 
 $spitshell >>Makefile <<'!NO!SUBS!'
 
-sperl$(OBJ_EXT): perl.c perly.h patchlevel.h $(h)
+sperl$(OBJ_EXT): perl.c $(h)
 	$(RMS) sperl.c
 	$(LNS) perl.c sperl.c
 	$(CCCMD) -DIAMSUID sperl.c
@@ -748,7 +758,7 @@ _verycleaner:
 # If the source file has a /*NOSTRICT*/ somewhere, ignore the lint message
 # for that spot.
 
-lint: perly.c $(c)
+lint: $(c)
 	lint $(lintflags) $(defs) perly.c $(c) > perl.fuzz
 
 # Need to unset during recursion to go out of loop.
