@@ -806,6 +806,7 @@ PERL_CALLCONV void	Perl_warner(pTHX_ U32 err, const char* pat, ...)
 PERL_CALLCONV void	Perl_vwarner(pTHX_ U32 err, const char* pat, va_list* args);
 PERL_CALLCONV void	Perl_watch(pTHX_ char** addr);
 PERL_CALLCONV I32	Perl_whichsig(pTHX_ char* sig);
+PERL_CALLCONV void	Perl_write_to_stderr(pTHX_ const char* message, int msglen);
 PERL_CALLCONV int	Perl_yyerror(pTHX_ char* s);
 #ifdef USE_PURE_BISON
 PERL_CALLCONV int	Perl_yylex_r(pTHX_ YYSTYPE *lvalp, int *lcharp);

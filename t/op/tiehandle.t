@@ -77,7 +77,7 @@ package main;
 
 use Symbol;
 
-print "1..40\n";
+print "1..41\n";
 
 my $fh = gensym;
 
@@ -228,6 +228,11 @@ ok($r == 1);
     @expect = (PRINT => $ob,"sometext\n");
 
     Implement::compare(PRINT => @received);
+
+    use warnings;
+    print undef;
+
+    ok($received[1] =~ /Use of uninitialized value/);
 }
 
 {

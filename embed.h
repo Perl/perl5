@@ -1124,6 +1124,9 @@
 #endif
 #define whichsig		Perl_whichsig
 #ifdef PERL_CORE
+#define write_to_stderr		Perl_write_to_stderr
+#endif
+#ifdef PERL_CORE
 #define yyerror			Perl_yyerror
 #endif
 #ifdef USE_PURE_BISON
@@ -3599,6 +3602,9 @@
 #define watch(a)		Perl_watch(aTHX_ a)
 #endif
 #define whichsig(a)		Perl_whichsig(aTHX_ a)
+#ifdef PERL_CORE
+#define write_to_stderr(a,b)	Perl_write_to_stderr(aTHX_ a,b)
+#endif
 #ifdef PERL_CORE
 #define yyerror(a)		Perl_yyerror(aTHX_ a)
 #endif
