@@ -2148,7 +2148,7 @@ fd_on_nosuid_fs(int fd)
     on_nosuid  = check_okay && (stfs.f_flags & PERL_MOUNT_NOSUID);
 #           endif
 #       else
-#           if defined(HAS_GETMNENT) && defined(HAS_HASMNTOPT) && defined(MNTOPT_NOSUID)
+#           if defined(HAS_GETMNTENT) && defined(HAS_HASMNTOPT) && defined(MNTOPT_NOSUID)
     FILE		*mtab = fopen("/etc/mtab", "r");
     struct mntent	*entry;
     struct stat		stb, fsb;
