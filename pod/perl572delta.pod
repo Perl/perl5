@@ -36,14 +36,30 @@ used because it simply does not work with 8-byte pointers.  Also,
 usually the system malloc on such platforms are much better optimized
 for such large memory models than the Perl malloc.
 
-=head2 Future Deprecations
+=head2 AIX Dynaloading
+
+The AIX dynaloading now uses the native dlopen interface of AIX,
+(given the AIX is recent enough) instead of the old emulated interface.
+This will probably break backward compatibility with compiled modules.
+
+=head2 Socket Extension Dynamic in VMS
+
+The Socket extension is now dynamically loaded instead of being
+statically built in.  This may or may not be a problem with ancient
+TCP/IP stacks of VMS: we do not know since we weren't able to test
+Perl in such configurations.
+
+=head2 Deprecations
 
 The current user-visible implementation of pseudo-hashes (the weird
 use of the first array element) is deprecated starting from Perl 5.8.0
-and will be removed in Perl 5.10.0, and the feature will be implemented
-differently.  Not only is the current interface rather ugly, but the
-current implementation slows down normal array and hash use quite
-noticeably. The 'fields' pragma interface will remain available.
+and will be removed in Perl 5.10.0, and the feature will be
+implemented differently.  Not only is the current interface rather
+ugly, but the current implementation slows down normal array and hash
+use quite noticeably. The 'fields' pragma interface will remain
+available.
+
+The syntaxes C<@a->[...]> and  C<@h->{...}> have now been deprecated.
 
 The suidperl is also considered to be too much a risk to continue
 maintaining and the suidperl code is likely to be removed in a future
@@ -51,11 +67,11 @@ release.
 
 =head1 Core Enhancements
 
-In general a lot of fixing has happened in the area of Perl's understanding
-of numbers, both integer and floating point.  Since in many systems the
-standard number parsing functions like C<strtoul()> and C<atof()> seem
-to have bugs, Perl tries to work around their deficiencies.  This results
-hopefully in more accurate numbers.
+In general a lot of fixing has happened in the area of Perl's
+understanding of numbers, both integer and floating point.  Since in
+many systems the standard number parsing functions like C<strtoul()>
+and C<atof()> seem to have bugs, Perl tries to work around their
+deficiencies.  This results hopefully in more accurate numbers.
 
 =over 4
 
@@ -67,12 +83,23 @@ B<between digits>.
 
 =item *
 
-VMS now works under PerlIO.
+GMAGIC (right-hand side magic) could in many cases such as concatenation
+of string be invoked too many times.
 
 =item *
 
-GMAGIC (right-hand side magic) could in many cases such as concatenation
-of string be invoked too many times.
+Lexicals I: lexicals outside an eval "" weren't resolved
+correctly inside a subroutine definition inside the eval "" if they
+were not already referenced in the top level of the eval""ed code.
+
+=item *
+
+Lexicals II: lexicals leaked at file scope into subroutines that
+were declared before the lexicals.
+
+=item *
+
+Lvalue subroutines can now return C<undef> in list context.
 
 =item *
 
@@ -87,12 +114,20 @@ The C<op_clear> and C<op_null> are now exported.
 =item *
 
 L<utime> now supports C<utime undef, undef, @files> to change the
-times to the current time.
+file timestamps to the current time.
 
 =item *
 
 The Perl parser has been stress tested using both random input and
 Markov chain input.
+
+=item *
+
+C<eval "v200"> now works.
+
+=item *
+
+VMS now works under PerlIO.
 
 =back
 
@@ -117,6 +152,8 @@ L<I18N::LangTags> - functions for dealing with RFC3066-style language tags
 =item *
 
 L<libnet> - a collection of perl5 modules related to network programming
+
+Perl installation leaves libnet unconfigured, use F<libnetcfg> to configure.
 
 =item *
 
@@ -153,6 +190,8 @@ L<Time::HiRes> - high resolution ualarm, usleep, and gettimeofday
 =item *
 
 L<Time::Piece> - Object Oriented time objects
+
+(Previously known as L<Time::Object>.)
 
 =back
 
@@ -197,7 +236,13 @@ size of the returned list of filenames.
 
 =item *
 
-L<vars> now supports declaring qualified variables.
+L<IO::Socket::INET> now supports C<LocalPort> of zero (usually meaning
+that the operating system will make one up.)
+
+=item *
+
+The L<vars> pragma now supports declaring fully qualified variables.
+(Something that C<our()> does not and will not support.)
 
 =back
 
@@ -208,6 +253,10 @@ L<vars> now supports declaring qualified variables.
 =item *
 
 The F<emacs/e2ctags.pl> is now much faster.
+
+=item *
+
+L<h2ph> now supports C trigraphs.
 
 =item *
 
@@ -258,6 +307,11 @@ The F<Todo> and F<Todo-5.6> files have been merged into L<perltodo>.
 Use of the F<gprof> tool to profile Perl has been documented in
 L<perlhack>.  There is a make target "perl.gprof" for generating a
 gprofiled Perl executable.
+
+=item *
+
+(Code documentation) F<perly.c> and F<sv.c> have now been extensively
+commented.
 
 =back
 
@@ -461,6 +515,12 @@ vac version 5.0.1.0, that has been known to compile Perl correctly.
 "lslpp -L|grep vac.C" will tell you the vac version.
 
 =back
+
+=head2 Amiga Perl Invoking Mystery
+
+One cannot call Perl using the C<volume:> syntax, that is, C<perl -v>
+works, but for example C<bin:perl -v> doesn't.  The exact reason is
+known but the current suspect is the F<ixemul> library.
 
 =head2 lib/ftmp-security tests warn 'system possibly insecure'
 
