@@ -1842,11 +1842,14 @@ it under the same terms as Perl itself.
 _RMEND_
 close(RM) || die "Can't close $ext$modpname/README: $!\n";
 
-warn "Writing $ext$modpname/test.pl\n";
-open(EX, ">test.pl") || die "Can't create $ext$modpname/test.pl: $!\n";
+my $testdir  = "t";
+my $testfile = "$testdir/1.t";
+mkdir "$testdir" or die "Cannot mkdir $testdir: $!\n";
+warn "Writing $ext$modpname/$testfile\n";
+open EX, ">$testfile" or die "Can't create $ext$modpname/$testfile: $!\n";
 print EX <<'_END_';
 # Before `make install' is performed this script should be runnable with
-# `make test'. After `make install' it should work as `perl test.pl'
+# `make test'. After `make install' it should work as `perl 1.t'
 
 #########################
 
@@ -1867,7 +1870,7 @@ ok(1); # If we made it this far, we're ok.
 # its man page ( perldoc Test ) for help writing this test script.
 
 _END_
-close(EX) || die "Can't close $ext$modpname/test.pl: $!\n";
+close(EX) || die "Can't close $ext$modpname/$testfile: $!\n";
 
 unless ($opt_C) {
   warn "Writing $ext$modpname/Changes\n";
@@ -1887,7 +1890,7 @@ EOP
 
 warn "Writing $ext$modpname/MANIFEST\n";
 open(MANI,'>MANIFEST') or die "Can't create MANIFEST: $!";
-my @files = <*>;
+my @files = grep { -f } (<*>, <t/*>);
 if (!@files) {
   eval {opendir(D,'.');};
   unless ($@) { @files = readdir(D); closedir(D); }
