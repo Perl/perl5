@@ -17,11 +17,7 @@ use vars qw(@ISA @EXPORT $VERSION
 	    );
 use strict;
 
-$VERSION = sprintf("%d.%02d", q$Revision: 1.2501 $ =~ /(\d+)\.(\d+)/);
-#for the namespace change
-$Devel::embed::VERSION = "99.99";
-
-sub Version { $VERSION; }
+$VERSION = sprintf("%d.%02d", q$Revision: 1.2505 $ =~ /(\d+)\.(\d+)/);
 
 @ISA = qw(Exporter);
 @EXPORT = qw(&xsinit &ldopts 
@@ -34,6 +30,18 @@ sub Version { $VERSION; }
 
 $Verbose = 0;
 $lib_ext = $Config{lib_ext} || '.a';
+
+sub is_cmd { $0 eq '-e' }
+
+sub my_return {
+    my $val = shift;
+    if(is_cmd) {
+	print $val;
+    }
+    else {
+	return $val;
+    }
+}
 
 sub xsinit { 
     my($file, $std, $mods) = @_;
@@ -213,24 +221,23 @@ sub ldopts {
     print STDERR "ldopts: '$linkage'\n" if $Verbose;
 
     return $linkage if scalar @_;
-    print "$linkage\n";
+    my_return("$linkage\n");
 }
 
 sub ccflags {
-   print " $Config{ccflags} ";
+    my_return(" $Config{ccflags} ");
 }
 
 sub ccdlflags {
-   print " $Config{ccdlflags} ";
+    my_return(" $Config{ccdlflags} ");
 }
 
 sub perl_inc {
-   print " -I$Config{archlibexp}/CORE ";
+    my_return(" -I$Config{archlibexp}/CORE ");
 }
 
 sub ccopts {
-   ccflags;
-   perl_inc;
+   ccflags . perl_inc;
 }
 
 sub canon {
