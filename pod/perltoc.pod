@@ -5533,12 +5533,14 @@ B<-V>
 Attribute::Handlers, B, Benchmark, CGI, Carp, Cwd, Exporter, File::Find,
 IO, IPC::Open3, Local::Maketext, Math::BigFloat, Math::BigInt,
 Math::BigRat, MIME::Base64, ODBM_File, POSIX, Shell, Socket, Storable,
-Switch, Sys::Syslog, Term::ANSIColor, Term::Unicode, Time::HiRes,
-Unicode::UCD, Win32, base, open, threads, utf8
+Switch, Sys::Syslog, Term::ANSIColor, Time::HiRes, Unicode::UCD, Win32,
+base, open, threads, utf8
 
 =back
 
 =item Performance Enhancements
+
+=item Utility Changes
 
 =item Installation and Configuration Improvements
 
@@ -5549,6 +5551,8 @@ Unicode::UCD, Win32, base, open, threads, utf8
 =item Changed Internals
 
 =item Future Directions
+
+=item Platform Specific Problems
 
 =item Reporting Bugs
 
@@ -5587,12 +5591,14 @@ Unicode::UCD, Win32, base, open, threads, utf8
 Attribute::Handlers, B, Benchmark, CGI, Carp, Cwd, Exporter, File::Find,
 IO, IPC::Open3, Local::Maketext, Math::BigFloat, Math::BigInt,
 Math::BigRat, MIME::Base64, ODBM_File, POSIX, Shell, Socket, Storable,
-Switch, Sys::Syslog, Term::ANSIColor, Term::Unicode, Time::HiRes,
-Unicode::UCD, Win32, base, open, threads, utf8
+Switch, Sys::Syslog, Term::ANSIColor, Time::HiRes, Unicode::UCD, Win32,
+base, open, threads, utf8
 
 =back
 
 =item Performance Enhancements
+
+=item Utility Changes
 
 =item Installation and Configuration Improvements
 
@@ -5603,6 +5609,8 @@ Unicode::UCD, Win32, base, open, threads, utf8
 =item Changed Internals
 
 =item Future Directions
+
+=item Platform Specific Problems
 
 =item Reporting Bugs
 
