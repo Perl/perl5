@@ -108,12 +108,13 @@ typedef I16TYPE I16;
 typedef U16TYPE U16;
 typedef I32TYPE I32;
 typedef U32TYPE U32;
-typedef I32TYPE I32;
-typedef U32TYPE U32;
 #ifdef Quad_t
 typedef I64TYPE I64;
 typedef U64TYPE U64;
 #endif
+
+/* Mention I8SIZE, U8SIZE, I16SIZE, U16SIZE, I32SIZE, U32SIZE,
+   I64SIZE, and U64SIZE here so that metaconfig pulls them in. */
 
 #if defined(UINT8_MAX) && defined(INT16_MAX) && defined(INT32_MAX)
 

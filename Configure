@@ -20,7 +20,7 @@
 
 # $Id: Head.U,v 3.0.1.9 1997/02/28 15:02:09 ram Exp $
 #
-# Generated on Sat Oct 30 01:07:44 EET DST 1999 [metaconfig 3.0 PL70]
+# Generated on Sat Oct 30 02:37:12 EET DST 1999 [metaconfig 3.0 PL70]
 # (with additional metaconfig patches by perlbug@perl.com)
 
 cat >/tmp/c1$$ <<EOF
@@ -572,6 +572,7 @@ fflushNULL=''
 fflushall=''
 fpossize=''
 fpostype=''
+gidformat=''
 gidsign=''
 gidsize=''
 gidtype=''
@@ -842,6 +843,7 @@ stdio_stream_array=''
 d_strtoull=''
 sysman=''
 trnl=''
+uidformat=''
 uidsign=''
 uidsize=''
 uidtype=''
@@ -8537,10 +8539,10 @@ EOCP
 set try
 if eval $compile; then
 	val="$define"
-	echo " Yup, it does."
+	echo "Yes, it does."
 else
 	val="$undef"
-	echo " Nope, it doesn't."
+	echo "No, it doesn't."
 	case "$lseeksize" in
 	8) echo "(This is okay because your off_t is 64 bits wide.)" ;;
 	esac
@@ -8559,10 +8561,10 @@ EOCP
 set try
 if eval $compile; then
 	val="$define"
-	echo " Yup, it does."
+	echo "Yes, it does."
 else
 	val="$undef"
-	echo " Nope, it doesn't."
+	echo "No, it doesn't."
 	case "$fpossize" in
 	8) echo "(This is okay because your fpos_t is 64 bits wide.)" ;;
 	esac
@@ -8607,8 +8609,8 @@ echo "Checking to see if your system supports struct fs_data..." >&4
 set d_fs_data_s fs_data $i_systypes sys/types.h $i_sysparam sys/param.h $i_sysmount sys/mount.h
 eval $hasstruct
 case "$d_fs_data_s" in
-"$define")      echo "Yup, it does."     ;;
-*)              echo "Nope, it doesn't." ;;
+"$define")      echo "Yes, it does."   ;;
+*)              echo "No, it doesn't." ;;
 esac
 
 : see if fseeko exists
@@ -10346,8 +10348,8 @@ echo "Checking to see if your system supports struct statfs..." >&4
 set d_statfs_s statfs $i_systypes sys/types.h $i_sysparam sys/param.h $i_sysmount sys/mount.h $i_sysvfs sys/vfs.h $i_sysstatfs sys/statfs.h
 eval $hasstruct
 case "$d_statfs_s" in
-"$define")      echo "Yup, it does."     ;;
-*)              echo "Nope, it doesn't." ;;
+"$define")      echo "Yes, it does."   ;;
+*)              echo "No, it doesn't." ;;
 esac
 
 
@@ -10366,8 +10368,8 @@ define)
 	;;
 esac
 case "$d_statfs_f_flags" in
-"$define")      echo "Yup, it does."     ;;
-*)              echo "Nope, it doesn't." ;;
+"$define")      echo "Yes, it does."   ;;
+*)              echo "No, it doesn't." ;;
 esac
 
 : see if _ptr and _cnt from stdio act std
@@ -11675,6 +11677,36 @@ case "$gidtype" in
 *_t) zzz="$gidtype"	;;
 *)   zzz="gid"		;;
 esac
+echo "Checking the size of $zzz..." >&4 
+cat > try.c <<EOCP
+#include <sys/types.h>
+#include <stdio.h>
+int main() {
+    printf("%d\n", sizeof($gidtype));
+}
+EOCP
+set try
+if eval $compile_ok; then
+	yyy=`./try`
+	case "$yyy" in
+	'')	gidsize=4
+		echo "(I can't execute the test program--guessing $gidsize.)" >&4
+		;;
+	*)	gidsize=$yyy
+		echo "Your $zzz size is $gidsize bytes."
+		;;
+	esac
+else
+	gidsize=4
+	echo "(I can't compile the test program--guessing $gidsize.)" >&4
+fi
+
+
+echo " "
+case "$gidtype" in
+*_t) zzz="$gidtype"	;;
+*)   zzz="gid"		;;
+esac
 echo "Checking the sign of $zzz..." >&4 
 cat > try.c <<EOCP
 #include <sys/types.h>
@@ -11706,65 +11738,6 @@ else
 	echo "(I can't compile the test program--guessing unsigned.)" >&4
 fi
 
-
-echo " "
-case "$gidtype" in
-*_t) zzz="$gidtype"	;;
-*)   zzz="gid"		;;
-esac
-echo "Checking the size of $zzz..." >&4 
-cat > try.c <<EOCP
-#include <sys/types.h>
-#include <stdio.h>
-int main() {
-    printf("%d\n", sizeof($gidtype));
-}
-EOCP
-set try
-if eval $compile_ok; then
-	yyy=`./try`
-	case "$yyy" in
-	'')	gidsize=4
-		echo "(I can't execute the test program--guessing $gidsize.)" >&4
-		;;
-	*)	gidsize=$yyy
-		echo "Your $zzz size is $gidsize bytes."
-		;;
-	esac
-else
-	gidsize=4
-	echo "(I can't compile the test program--guessing $gidsize.)" >&4
-fi
-
-
-: see if getgroups exists
-set getgroups d_getgrps
-eval $inlibc
-
-: see if setgroups exists
-set setgroups d_setgrps
-eval $inlibc
-
-
-: Find type of 2nd arg to 'getgroups()' and 'setgroups()'
-echo " "
-case "$d_getgrps$d_setgrps" in
-*define*)
-	case "$groupstype" in
-	'') dflt="$gidtype" ;;
-	*)  dflt="$groupstype" ;;
-	esac
-	$cat <<EOM
-What type of pointer is the second argument to getgroups() and setgroups()?
-Usually this is the same as group ids, $gidtype, but not always.
-
-EOM
-	rp='What type pointer is the second argument to getgroups() and setgroups()?'
-	. ./myread
-	groupstype="$ans"
-	;;
-*)  groupstype="$gidtype";;
-esac
 
 
 echo " "
@@ -11904,64 +11877,81 @@ int main() {
   uint32_t u = UINT32_MAX;
   printf("int32_t\n");
 #endif
-#ifdef INT64
-   int64_t i =  INT64_MAX;
-  uint64_t u = UINT64_MAX;
-  printf("int64_t\n");
-#endif
 }
 EOCP
-set try -DINT8
-if eval $compile; then
-	case "`./try$exe_ext`" in
-	int8_t)	i8type=int8_t
-		u8type=uint8_t
-		i8size=1
-		u8size=1
-		;;
-	esac
-fi
+
 case "$i8type" in
-'')	i8type=char
-	u8type="unsigned char"
-	i8size=$charsize
-	u8size=$charsize
-	;;
-esac
-set try -DINT16
-if eval $compile; then
-	case "`./try$exe_ext`" in
-	int16_t)
-		i16type=int16_t
-		u16type=uint16_t
-		i16size=2
-		u16size=2
+'')	case "$charsize" in
+	1)	i8type=char
+		u8type="unsigned char"
+		i8size=$charsize
+		u8size=$charsize
 		;;
 	esac
-fi
+	;;
+esac
+case "$i8type" in
+'')	set try -DINT8
+	if eval $compile; then
+		case "`./try$exe_ext`" in
+		int8_t)	i8type=int8_t
+			u8type=uint8_t
+			i8size=1
+			u8size=1
+			;;
+		esac
+	fi
+	;;
+esac
+case "$i8type" in
+'')	if $test $charsize -ge 1; then
+		i8type=char
+		u8type="unsigned char"
+		i8size=$charsize
+		u8size=$charsize
+	fi
+	;;
+esac
+
 case "$i16type" in
-'')	i16type=short
-	u16type="unsigned short"
-	i16size=$shortsize
-	u16size=$shortsize
-	;;
-esac
-set try -DINT32
-if eval $compile; then
-	case "`./try$exe_ext`" in
-	int32_t)
-		i32type=int32_t
-		u32type=uint32_t
-		i32size=4
-		u32size=4
+'')	case "$shortsize" in
+	2)	i16type=short
+		u16type="unsigned short"
+		i16size=$shortsize
+		u16size=$shortsize
 		;;
 	esac
-fi
+	;;
+esac
+case "$i16type" in
+'')	set try -DINT16
+	if eval $compile; then
+		case "`./try$exe_ext`" in
+		int16_t)
+			i16type=int16_t
+			u16type=uint16_t
+			i16size=2
+			u16size=2
+			;;
+		esac
+	fi
+	;;
+esac
+case "$i16type" in
+'')	if $test $shortsize -ge 2; then
+		i16type=short
+		u16type="unsigned short"
+		i16size=$shortsize
+		u16size=$shortsize
+	fi
+	;;
+esac
+
 case "$i32type" in
 '')	case "$longsize" in
 	4)	i32type=long
 		u32type="unsigned long"
-		i32size=longsize
+		i32size=$longsize
 		u32size=$longsize
 		;;
 	*)	case "$intsize" in
@@ -11975,17 +11965,30 @@ case "$i32type" in
 	esac
 	;;
 esac
-set try -DINT64
-if eval $compile; then
-	case "`./try$exe_ext`" in
-	int64_t)
-		i64type=int64_t
-		u64type=uint64_t
-		i64size=8
-		u64size=8
-		;;
-	esac
-fi
+case "$i32type" in
+'')	set try -DINT32
+	if eval $compile; then
+		case "`./try$exe_ext`" in
+		int32_t)
+			i32type=int32_t
+			u32type=uint32_t
+			i32size=4
+			u32size=4
+			;;
+		esac
+	fi
+	;;
+esac
+case "$i32type" in
+'')	if $test $intsize -ge 4; then
+		i32type=int
+		u32type="unsigned int"
+		i32size=$intsize
+		u32size=$intsize
+	fi
+	;;
+esac
+
 case "$i64type" in
 '')	case "$quadtype" in
 	'')	;;
@@ -12193,6 +12196,74 @@ case "$ivdformat" in
 '') echo "$0: Fatal: failed to find format strings, cannot continue." >& 4
     exit 1
     ;;
+esac
+
+
+echo " "
+$echo "Checking the format string to be used for gids..." >&4
+
+case "$gidsign" in
+-1)	if $test X"$gidsize" = X"$ivsize"; then
+		gidformat="$ivdformat"
+	else
+		if $test X"$gidsize" = X"$longsize"; then
+			gidformat='"ld"'
+		else
+			if $test X"$gidsize" = X"$intsize"; then
+				gidformat='"d"'
+			else
+				if $test X"$gidsize" = X"$shortsize"; then
+					gidformat='"hd"'
+				fi
+			fi
+		fi
+	fi
+	;;
+*)	if $test X"$gidsize" = X"$uvsize"; then
+		gidformat="$uvuformat"
+	else
+		if $test X"$gidsize" = X"$longsize"; then
+			gidformat='"lu"'
+		else
+			if $test X"$gidsize" = X"$intsize"; then
+				gidformat='"u"'
+			else
+				if $test X"$gidsize" = X"$shortsize"; then
+					gidformat='"hu"'
+				fi
+			fi
+		fi
+	fi
+	;;
+esac
+
+: see if getgroups exists
+set getgroups d_getgrps
+eval $inlibc
+
+: see if setgroups exists
+set setgroups d_setgrps
+eval $inlibc
+
+
+: Find type of 2nd arg to 'getgroups()' and 'setgroups()'
+echo " "
+case "$d_getgrps$d_setgrps" in
+*define*)
+	case "$groupstype" in
+	'') dflt="$gidtype" ;;
+	*)  dflt="$groupstype" ;;
+	esac
+	$cat <<EOM
+What type of pointer is the second argument to getgroups() and setgroups()?
+Usually this is the same as group ids, $gidtype, but not always.
+
+EOM
+	rp='What type pointer is the second argument to getgroups() and setgroups()?'
+	. ./myread
+	groupstype="$ans"
+	;;
+*)  groupstype="$gidtype";;
 esac
 
 echo " "
@@ -13006,6 +13077,35 @@ case "$uidtype" in
 *_t) zzz="$uidtype"	;;
 *)   zzz="uid"		;;
 esac
+echo "Checking the size of $zzz..." >&4 
+cat > try.c <<EOCP
+#include <sys/types.h>
+#include <stdio.h>
+int main() {
+    printf("%d\n", sizeof($uidtype));
+}
+EOCP
+set try
+if eval $compile_ok; then
+	yyy=`./try`
+	case "$yyy" in
+	'')	uidsize=4
+		echo "(I can't execute the test program--guessing $uidsize.)" >&4
+		;;
+	*)	uidsize=$yyy
+		echo "Your $zzz size is $uidsize bytes."
+		;;
+	esac
+else
+	uidsize=4
+	echo "(I can't compile the test program--guessing $uidsize.)" >&4
+fi
+
+echo " "
+case "$uidtype" in
+*_t) zzz="$uidtype"	;;
+*)   zzz="uid"		;;
+esac
 echo "Checking the sign of $zzz..." >&4
 cat > try.c <<EOCP
 #include <sys/types.h>
@@ -13038,34 +13138,44 @@ else
 fi
 
 
+
 echo " "
-case "$uidtype" in
-*_t) zzz="$uidtype"	;;
-*)   zzz="uid"		;;
+$echo "Checking the format string to be used for uids..." >&4
+
+case "$uidsign" in
+-1)	if $test X"$uidsize" = X"$ivsize"; then
+		uidformat="$ivdformat"
+	else
+		if $test X"$uidsize" = X"$longsize"; then
+			uidformat='"ld"'
+		else
+			if $test X"$uidsize" = X"$intsize"; then
+				uidformat='"d"'
+			else
+				if $test X"$uidsize" = X"$shortsize"; then
+					uidformat='"hd"'
+				fi
+			fi
+		fi
+	fi
+	;;
+*)	if $test X"$uidsize" = X"$uvsize"; then
+		uidformat="$uvuformat"
+	else
+		if $test X"$uidsize" = X"$longsize"; then
+			uidformat='"lu"'
+		else
+			if $test X"$uidsize" = X"$intsize"; then
+				uidformat='"u"'
+			else
+				if $test X"$uidsize" = X"$shortsize"; then
+					uidformat='"hu"'
+				fi
+			fi
+		fi
+	fi
+	;;
 esac
-echo "Checking the size of $zzz..." >&4 
-cat > try.c <<EOCP
-#include <sys/types.h>
-#include <stdio.h>
-int main() {
-    printf("%d\n", sizeof($uidtype));
-}
-EOCP
-set try
-if eval $compile_ok; then
-	yyy=`./try`
-	case "$yyy" in
-	'')	uidsize=4
-		echo "(I can't execute the test program--guessing $uidsize.)" >&4
-		;;
-	*)	uidsize=$yyy
-		echo "Your $zzz size is $uidsize bytes."
-		;;
-	esac
-else
-	uidsize=4
-	echo "(I can't compile the test program--guessing $uidsize.)" >&4
-fi
 
 : see if dbm.h is available
 : see if dbmclose exists
@@ -14282,6 +14392,7 @@ full_ar='$full_ar'
 full_csh='$full_csh'
 full_sed='$full_sed'
 gccversion='$gccversion'
+gidformat='$gidformat'
 gidsign='$gidsign'
 gidsize='$gidsize'
 gidtype='$gidtype'
@@ -14586,6 +14697,7 @@ u64size='$u64size'
 u64type='$u64type'
 u8size='$u8size'
 u8type='$u8type'
+uidformat='$uidformat'
 uidsign='$uidsign'
 uidsize='$uidsize'
 uidtype='$uidtype'

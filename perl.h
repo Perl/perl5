@@ -901,8 +901,8 @@ Free_t   Perl_mfree (Malloc_t where);
     --Andy Dougherty	August 1996
 */
 
-typdef IVTYPE IV;
-typdef UVTYPE UV;
+typedef IVTYPE IV;
+typedef UVTYPE UV;
 
 #ifdef USE_64_BITS
 #  if QUADCASE == 4 && defined(INT64_MAX) /* quad is int64_t */
@@ -1048,7 +1048,7 @@ typdef UVTYPE UV;
 # endif
 #endif
 
-typdef NVTYPE NV;
+typedef NVTYPE NV;
 
 #ifdef USE_LONG_DOUBLE
 #   define NV_DIG LDBL_DIG
@@ -1840,84 +1840,6 @@ typedef I32 CHECKPOINT;
 #       else
 #           if IVSIZE >= NVSIZE
 #               undef IV_FITS_IN_NV
-#           endif
-#       endif
-#   endif
-#endif
-
-/* The Uid_t_f and Gid_t_f definitely look like a job for metaconfig. */
-
-#if Uid_t_SIGN == -1
-#   if Uid_t_SIZE == IVSIZE
-#       define Uid_t_f IVdf
-#   else
-#       if Uid_t_SIZE == LONGSIZE
-#           define Uid_t_f "ld"
-#       else
-#           if Uid_t_SIZE == INTSIZE
-#               define Uid_t_f "d"
-#           else
-#               if Uid_t_SIZE == SHORTSIZE
-#                   define Uid_t_f "hd"
-#               else
-	            /* You tell me. */
-#               endif
-#           endif
-#       endif
-#   endif
-#else
-#   if Uid_t_SIZE == UVSIZE
-#       define Uid_t_f UVuf
-#   else
-#       if Uid_t_SIZE == LONGSIZE
-#           define Uid_t_f "lu"
-#       else
-#           if Uid_t_SIZE == INTSIZE
-#               define Uid_t_f "u"
-#           else
-#               if Uid_t_SIZE == SHORTSIZE
-#                   define Uid_t_f "hu"
-#               else
-	            /* You tell me. */
-#               endif
-#           endif
-#       endif
-#   endif
-#endif
-
-#if Gid_t_SIGN == -1
-#   if Gid_t_SIZE == IVSIZE
-#       define Gid_t_f IVdf
-#   else
-#       if Gid_t_SIZE == LONGSIZE
-#           define Gid_t_f "ld"
-#       else
-#           if Gid_t_SIZE == INTSIZE
-#               define Gid_t_f "d"
-#           else
-#               if Gid_t_SIZE == SHORTSIZE
-#                   define Gid_t_f "hd"
-#               else
-	            /* You tell me. */
-#               endif
-#           endif
-#       endif
-#   endif
-#else
-#   if Gid_t_SIZE == UVSIZE
-#       define Gid_t_f UVuf
-#   else
-#       if Gid_t_SIZE == LONGSIZE
-#           define Gid_t_f "lu"
-#       else
-#           if Gid_t_SIZE == INTSIZE
-#               define Gid_t_f "u"
-#           else
-#               if Gid_t_SIZE == SHORTSIZE
-#                   define Gid_t_f "hu"
-#               else
-	            /* You tell me. */
-#               endif
 #           endif
 #       endif
 #   endif

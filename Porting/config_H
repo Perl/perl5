@@ -17,7 +17,7 @@
 /*
  * Package name      : perl5
  * Source directory  : .
- * Configuration time: Fri Oct 29 18:38:18 EET DST 1999
+ * Configuration time: Sat Oct 30 02:40:27 EET DST 1999
  * Configured by     : jhi
  * Target system     : osf1 alpha.hut.fi v4.0 878 alpha 
  */
@@ -983,6 +983,23 @@
  *	It has the values "unsigned char" or "char".
  */
 #define STDCHAR unsigned char	/**/
+
+/* Quad_t:
+ *	This symbol holds the type used for 64-bit integers.
+ *	It can be int, long, long long, int64_t etc...
+ */
+/* QUADCASE:
+ *	This symbol, if defined, encodes the type of a quad:
+ *	1 = int, 2 = long, 3 = long long, 4 = int64_t.
+ */
+/* Uquad_t:
+ *	This symbol holds the type used for unsigned 64-bit integers.
+ *	It can be unsigned int, unsigned long, unsigned long long,
+ *	uint64_t etc...
+ */
+#define Quad_t long
+#define Uquad_t unsigned long
+#define QUADCASE 2
 
 /* HAS_ACCESSX:
  *	This symbol, if defined, indicates that the accessx routine is
@@ -2371,26 +2388,119 @@
 #define PERL_PRIfldbl	"f"	/**/
 #define PERL_PRIgldbl	"g"	/**/
 
-/* PERL_PRId64:
- *	This symbol, if defined, contains the string used by stdio to
- *	format 64-bit decimal numbers (format 'd') for output.
+/* IVTYPE:
+ *	This symbol defines the C type used for Perl's IV.
  */
-/* PERL_PRIu64:
- *	This symbol, if defined, contains the string used by stdio to
- *	format 64-bit unsigned decimal numbers (format 'u') for output.
+/* UVTYPE:
+ *	This symbol defines the C type used for Perl's UV.
  */
-/* PERL_PRIo64:
- *	This symbol, if defined, contains the string used by stdio to
- *	format 64-bit octal numbers (format 'o') for output.
+/* I8TYPE:
+ *	This symbol defines the C type used for Perl's I8.
  */
-/* PERL_PRIx64:
- *	This symbol, if defined, contains the string used by stdio to
- *	format 64-bit hexadecimal numbers (format 'x') for output.
+/* U8TYPE:
+ *	This symbol defines the C type used for Perl's U8.
  */
-#define PERL_PRId64	"ld"	/**/
-#define PERL_PRIu64	"lu"	/**/
-#define PERL_PRIo64	"lo"	/**/
-#define PERL_PRIx64	"lx"	/**/
+/* I16TYPE:
+ *	This symbol defines the C type used for Perl's I16.
+ */
+/* U16TYPE:
+ *	This symbol defines the C type used for Perl's U16.
+ */
+/* I32TYPE:
+ *	This symbol defines the C type used for Perl's I32.
+ */
+/* U32TYPE:
+ *	This symbol defines the C type used for Perl's U32.
+ */
+/* I64TYPE:
+ *	This symbol defines the C type used for Perl's I64.
+ */
+/* U64TYPE:
+ *	This symbol defines the C type used for Perl's U64.
+ */
+/* NVTYPE:
+ *	This symbol defines the C type used for Perl's NV.
+ */
+/* IVSIZE:
+ *	This symbol contains the sizeof(IV).
+ */
+/* UVSIZE:
+ *	This symbol contains the sizeof(UV).
+ */
+/* I8SIZE:
+ *	This symbol contains the sizeof(I8).
+ */
+/* U8SIZE:
+ *	This symbol contains the sizeof(U8).
+ */
+/* I16SIZE:
+ *	This symbol contains the sizeof(I16).
+ */
+/* U16SIZE:
+ *	This symbol contains the sizeof(U16).
+ */
+/* I32SIZE:
+ *	This symbol contains the sizeof(I32).
+ */
+/* U32SIZE:
+ *	This symbol contains the sizeof(U32).
+ */
+/* I64SIZE:
+ *	This symbol contains the sizeof(I64).
+ */
+/* U64SIZE:
+ *	This symbol contains the sizeof(U64).
+ */
+/* NVSIZE:
+ *	This symbol contains the sizeof(NV).
+ */
+#define	IVTYPE		long		/**/
+#define	UVTYPE		unsigned long		/**/
+#define	I8TYPE		char		/**/
+#define	U8TYPE		unsigned char		/**/
+#define	I16TYPE		short	/**/
+#define	U16TYPE		unsigned short	/**/
+#define	I32TYPE		int	/**/
+#define	U32TYPE		unsigned int	/**/
+#ifdef Quad_t
+#define	I64TYPE		long	/**/
+#define	U64TYPE		unsigned long	/**/
+#endif
+#define	NVTYPE		double		/**/
+#define	IVSIZE		8		/**/
+#define	UVSIZE		8		/**/
+#define	I8SIZE		1		/**/
+#define	U8SIZE		1		/**/
+#define	I16SIZE		2	/**/
+#define	U16SIZE		2	/**/
+#define	I32SIZE		4	/**/
+#define	U32SIZE		4	/**/
+#ifdef Quad_t
+#define	I64SIZE		8	/**/
+#define	U64SIZE		8	/**/
+#endif
+#define	NVSIZE		8		/**/
+
+/* IVdf:
+ *	This symbol defines the format string used for printing a Perl IV
+ *	as a signed decimal integer.
+ */
+/* UVuf:
+ *	This symbol defines the format string used for printing a Perl UV
+ *	as an unsigned decimal integer.
+ */
+/* UVof:
+ *	This symbol defines the format string used for printing a Perl UV
+ *	as an unsigned octal integer.
+ */
+/* UVxf:
+ *	This symbol defines the format string used for printing a Perl UV
+ *	as an unsigned hexadecimal integer.
+ */
+#define	IVdf		"ld"		/**/
+#define	UVuf		"lu"		/**/
+#define	UVof		"lo"		/**/
+#define	UVxf		"lx"		/**/
 
 /* SELECT_MIN_BITS:
  *	This symbol holds the minimum number of bits operated by select.
@@ -2675,16 +2785,10 @@
  */
 #define Fpos_t fpos_t		/* File position type */
 
-/* Gid_t_SIGN:
- *	This symbol holds the signedess of a Gid_t.
- *	1 for unsigned, -1 for signed.
+/* Gid_t_f:
+ *	This symbol defines the format string used for printing a Gid_t.
  */
-#define Gid_t_SIGN	1		/* GID sign */
-
-/* Gid_t_SIZE:
- *	This symbol holds the size of a Gid_t in bytes.
- */
-#define Gid_t_SIZE 4		/* GID size */
+#define	Gid_t_f		"u"		/**/
 
 /* Gid_t:
  *	This symbol holds the return type of getgid() and the type of
@@ -2721,23 +2825,6 @@
  */
 #define Pid_t pid_t		/* PID type */
 
-/* Quad_t:
- *	This symbol holds the type used for 64-bit integers.
- *	It can be int, long, long long, int64_t etc...
- */
-/* QUADCASE:
- *	This symbol, if defined, encodes the type of a quad:
- *	1 = int, 2 = long, 3 = long long, 4 = int64_t.
- */
-/* Uquad_t:
- *	This symbol holds the type used for unsigned 64-bit integers.
- *	It can be unsigned int, unsigned long, unsigned long long,
- *	uint64_t etc...
- */
-#define Quad_t long
-#define Uquad_t unsigned long
-#define QUADCASE 2
-
 /* Size_t:
  *	This symbol holds the type used to declare length parameters
  *	for string functions.  It is usually size_t, but may be
@@ -2746,16 +2833,10 @@
  */
 #define Size_t size_t	 /* length paramater for string functions */
 
-/* Uid_t_SIGN:
- *	This symbol holds the signedess of a Uid_t.
- *	1 for unsigned, -1 for signed.
+/* Uid_t_f:
+ *	This symbol defines the format string used for printing a Uid_t.
  */
-#define Uid_t_SIGN	1		/* UID sign */
-
-/* Uid_t_SIZE:
- *	This symbol holds the size of a Uid_t in bytes.
- */
-#define Uid_t_SIZE 4		/* UID size */
+#define	Uid_t_f		"u"		/**/
 
 /* Uid_t:
  *	This symbol holds the type used to declare user ids in the kernel.

@@ -998,6 +998,23 @@ sed <<!GROK!THIS! >config.h -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un-
  */
 #define STDCHAR $stdchar	/**/
 
+/* Quad_t:
+ *	This symbol holds the type used for 64-bit integers.
+ *	It can be int, long, long long, int64_t etc...
+ */
+/* QUADCASE:
+ *	This symbol, if defined, encodes the type of a quad:
+ *	1 = int, 2 = long, 3 = long long, 4 = int64_t.
+ */
+/* Uquad_t:
+ *	This symbol holds the type used for unsigned 64-bit integers.
+ *	It can be unsigned int, unsigned long, unsigned long long,
+ *	uint64_t etc...
+ */
+#define Quad_t $quadtype
+#define Uquad_t $uquadtype
+#define QUADCASE $quadcase
+
 /* HAS_ACCESSX:
  *	This symbol, if defined, indicates that the accessx routine is
  *	available to do extended access checks.
@@ -2424,6 +2441,30 @@ sed <<!GROK!THIS! >config.h -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un-
 /* UVSIZE:
  *	This symbol contains the sizeof(UV).
  */
+/* I8SIZE:
+ *	This symbol contains the sizeof(I8).
+ */
+/* U8SIZE:
+ *	This symbol contains the sizeof(U8).
+ */
+/* I16SIZE:
+ *	This symbol contains the sizeof(I16).
+ */
+/* U16SIZE:
+ *	This symbol contains the sizeof(U16).
+ */
+/* I32SIZE:
+ *	This symbol contains the sizeof(I32).
+ */
+/* U32SIZE:
+ *	This symbol contains the sizeof(U32).
+ */
+/* I64SIZE:
+ *	This symbol contains the sizeof(I64).
+ */
+/* U64SIZE:
+ *	This symbol contains the sizeof(U64).
+ */
 /* NVSIZE:
  *	This symbol contains the sizeof(NV).
  */
@@ -2442,6 +2483,12 @@ sed <<!GROK!THIS! >config.h -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un-
 #define	NVTYPE		$nvtype		/**/
 #define	IVSIZE		$ivsize		/**/
 #define	UVSIZE		$uvsize		/**/
+#define	I8SIZE		$i8size		/**/
+#define	U8SIZE		$u8size		/**/
+#define	I16SIZE		$i16size	/**/
+#define	U16SIZE		$u16size	/**/
+#define	I32SIZE		$i32size	/**/
+#define	U32SIZE		$u32size	/**/
 #ifdef Quad_t
 #define	I64SIZE		$i64size	/**/
 #define	U64SIZE		$u64size	/**/
@@ -2752,16 +2799,10 @@ sed <<!GROK!THIS! >config.h -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un-
  */
 #define Fpos_t $fpostype		/* File position type */
 
-/* Gid_t_SIGN:
- *	This symbol holds the signedess of a Gid_t.
- *	1 for unsigned, -1 for signed.
+/* Gid_t_f:
+ *	This symbol defines the format string used for printing a Gid_t.
  */
-#define Gid_t_SIGN	$gidsign		/* GID sign */
-
-/* Gid_t_SIZE:
- *	This symbol holds the size of a Gid_t in bytes.
- */
-#define Gid_t_SIZE $gidsize		/* GID size */
+#define	Gid_t_f		$gidformat		/**/
 
 /* Gid_t:
  *	This symbol holds the return type of getgid() and the type of
@@ -2798,23 +2839,6 @@ sed <<!GROK!THIS! >config.h -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un-
  */
 #define Pid_t $pidtype		/* PID type */
 
-/* Quad_t:
- *	This symbol holds the type used for 64-bit integers.
- *	It can be int, long, long long, int64_t etc...
- */
-/* QUADCASE:
- *	This symbol, if defined, encodes the type of a quad:
- *	1 = int, 2 = long, 3 = long long, 4 = int64_t.
- */
-/* Uquad_t:
- *	This symbol holds the type used for unsigned 64-bit integers.
- *	It can be unsigned int, unsigned long, unsigned long long,
- *	uint64_t etc...
- */
-#define Quad_t $quadtype
-#define Uquad_t $uquadtype
-#define QUADCASE $quadcase
-
 /* Size_t:
  *	This symbol holds the type used to declare length parameters
  *	for string functions.  It is usually size_t, but may be
@@ -2823,16 +2847,10 @@ sed <<!GROK!THIS! >config.h -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un-
  */
 #define Size_t $sizetype	 /* length paramater for string functions */
 
-/* Uid_t_SIGN:
- *	This symbol holds the signedess of a Uid_t.
- *	1 for unsigned, -1 for signed.
+/* Uid_t_f:
+ *	This symbol defines the format string used for printing a Uid_t.
  */
-#define Uid_t_SIGN	$uidsign		/* UID sign */
-
-/* Uid_t_SIZE:
- *	This symbol holds the size of a Uid_t in bytes.
- */
-#define Uid_t_SIZE $uidsize		/* UID size */
+#define	Uid_t_f		$uidformat		/**/
 
 /* Uid_t:
  *	This symbol holds the type used to declare user ids in the kernel.
