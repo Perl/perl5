@@ -24,6 +24,9 @@ allow selecting particular classes of magical variable.
 
 	bool	is_gv_magical(char *name, STRLEN len, U32 flags)
 
+=for hackers
+Found in file gv.c
+
 =back
 
 =head1 AUTHORS

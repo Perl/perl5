@@ -1849,6 +1849,14 @@
 #define Perl_utf8_hop		pPerl->Perl_utf8_hop
 #undef  utf8_hop
 #define utf8_hop		Perl_utf8_hop
+#undef  Perl_utf8_to_bytes
+#define Perl_utf8_to_bytes	pPerl->Perl_utf8_to_bytes
+#undef  utf8_to_bytes
+#define utf8_to_bytes		Perl_utf8_to_bytes
+#undef  Perl_bytes_to_utf8
+#define Perl_bytes_to_utf8	pPerl->Perl_bytes_to_utf8
+#undef  bytes_to_utf8
+#define bytes_to_utf8		Perl_bytes_to_utf8
 #undef  Perl_utf8_to_uv
 #define Perl_utf8_to_uv		pPerl->Perl_utf8_to_uv
 #undef  utf8_to_uv

@@ -5230,6 +5230,82 @@ rmscopy_fromperl(pTHX_ CV *cv)
   XSRETURN(1);
 }
 
+
+void
+mod2fname(CV *cv)
+{
+  dXSARGS;
+  char ultimate_name[NAM$C_MAXRSS+1], work_name[NAM$C_MAXRSS*8 + 1],
+       workbuff[NAM$C_MAXRSS*1 + 1];
+  int total_namelen = 3, counter, num_entries;
+  /* ODS-5 ups this, but we want to be consistent, so... */
+  int max_name_len = 39;
+  AV *in_array = (AV *)SvRV(ST(0));
+
+  num_entries = av_len(in_array);
+
+  /* All the names start with PL_. */
+  strcpy(ultimate_name, "PL_");
+
+  /* Clean up our working buffer */
+  Zero(work_name, sizeof(work_name), char);
+
+  /* Run through the entries and build up a working name */
+  for(counter = 0; counter <= num_entries; counter++) {
+    /* If it's not the first name then tack on a __ */
+    if (counter) {
+      strcat(work_name, "__");
+    }
+    strcat(work_name, SvPV(*av_fetch(in_array, counter, FALSE),
+			   PL_na));
+  }
+
+  /* Check to see if we actually have to bother...*/
+  if (strlen(work_name) + 3 <= max_name_len) {
+    strcat(ultimate_name, work_name);
+  } else {
+    /* It's too darned big, so we need to go strip. We use the same */
+    /* algorithm as xsubpp does. First, strip out doubled __ */
+    char *source, *dest, last;
+    dest = workbuff;
+    last = 0;
+    for (source = work_name; *source; source++) {
+      if (last == *source && last == '_') {
+	continue;
+      }
+      *dest++ = *source;
+      last = *source;
+    }
+    /* Go put it back */
+    strcpy(work_name, workbuff);
+    /* Is it still too big? */
+    if (strlen(work_name) + 3 > max_name_len) {
+      /* Strip duplicate letters */
+      last = 0;
+      dest = workbuff;
+      for (source = work_name; *source; source++) {
+	if (last == toupper(*source)) {
+	continue;
+	}
+	*dest++ = *source;
+	last = toupper(*source);
+      }
+      strcpy(work_name, workbuff);
+    }
+
+    /* Is it *still* too big? */
+    if (strlen(work_name) + 3 > max_name_len) {
+      /* Too bad, we truncate */
+      work_name[max_name_len - 2] = 0;
+    }
+    strcat(ultimate_name, work_name);
+  }
+
+  /* Okay, return it */
+  ST(0) = sv_2mortal(newSVpv(ultimate_name, 0));
+  XSRETURN(1);
+}
+
 void
 init_os_extras()
 {
@@ -5250,6 +5326,7 @@ init_os_extras()
   newXSproto("VMS::Filespec::vmspath",vmspath_fromperl,file,"$");
   newXSproto("VMS::Filespec::unixpath",unixpath_fromperl,file,"$");
   newXSproto("VMS::Filespec::candelete",candelete_fromperl,file,"$");
+  newXSproto("DynaLoader::mod2fname", mod2fname, file, "$");
   newXS("File::Copy::rmscopy",rmscopy_fromperl,file);
 
   return;

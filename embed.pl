@@ -1083,10 +1083,10 @@ my %docfuncs;
 
 sub autodoc ($$) { # parse a file and extract documentation info
     my($fh,$file) = @_;
-    my($in, $doc);
-
+    my($in, $doc, $line);
 FUNC:
     while (defined($in = <$fh>)) {
+	$line++;
 	if ($in =~ /^=for\s+apidoc\s+(.*)\n/) {
 	    my $proto = $1;
 	    $proto = "||$proto" unless $proto =~ /\|/;
@@ -1094,7 +1094,12 @@ FUNC:
 	    my $docs = "";
 DOC:
 	    while (defined($doc = <$fh>)) {
+		$line++;
 		last DOC if $doc =~ /^=\w+/;
+		if ($doc =~ m:^\*/$:) {
+		    warn "=cut missing? $file:$line:$doc";;
+		    last DOC;
+		}
 		$docs .= $doc;
 	    }
 	    $docs = "\n$docs" if $docs and $docs !~ /^\n/;
@@ -1109,9 +1114,13 @@ DOC:
 	    else {
 		$docfuncs{$name} = [$flags, $docs, $ret, $file, @args];
 	    }
-	    if ($doc =~ /^=for/) {
-		$in = $doc;
-		redo FUNC;
+	    if (defined $doc) {
+		if ($doc =~ /^=for/) {
+		    $in = $doc;
+		    redo FUNC;
+		}
+	    } else {
+		warn "$file:$line:$in";
 	    }
 	}
     }
@@ -1172,6 +1181,8 @@ walk_table {	# load documented functions into approriate hash
 } \*DOC;
 
 for (sort keys %docfuncs) {
+    # Have you used a full for apidoc or just a func name?  
+    # Have you used Ap instead of Am in the for apidoc?
     warn "Unable to place $_!\n";
 }
 

@@ -721,6 +721,8 @@
 #define utf16_to_utf8_reversed	Perl_utf16_to_utf8_reversed
 #define utf8_distance		Perl_utf8_distance
 #define utf8_hop		Perl_utf8_hop
+#define utf8_to_bytes		Perl_utf8_to_bytes
+#define bytes_to_utf8		Perl_bytes_to_utf8
 #define utf8_to_uv		Perl_utf8_to_uv
 #define uv_to_utf8		Perl_uv_to_utf8
 #define vivify_defelem		Perl_vivify_defelem
@@ -849,8 +851,6 @@
 #define do_trans_UU_simple	S_do_trans_UU_simple
 #define do_trans_UU_count	S_do_trans_UU_count
 #define do_trans_UU_complex	S_do_trans_UU_complex
-#define do_trans_UC_simple	S_do_trans_UC_simple
-#define do_trans_CU_simple	S_do_trans_CU_simple
 #define do_trans_UC_trivial	S_do_trans_UC_trivial
 #define do_trans_CU_trivial	S_do_trans_CU_trivial
 #endif
@@ -2169,6 +2169,8 @@
 #define utf16_to_utf8_reversed(a,b,c)	Perl_utf16_to_utf8_reversed(aTHX_ a,b,c)
 #define utf8_distance(a,b)	Perl_utf8_distance(aTHX_ a,b)
 #define utf8_hop(a,b)		Perl_utf8_hop(aTHX_ a,b)
+#define utf8_to_bytes(a,b)	Perl_utf8_to_bytes(aTHX_ a,b)
+#define bytes_to_utf8(a,b)	Perl_bytes_to_utf8(aTHX_ a,b)
 #define utf8_to_uv(a,b)		Perl_utf8_to_uv(aTHX_ a,b)
 #define uv_to_utf8(a,b)		Perl_uv_to_utf8(aTHX_ a,b)
 #define vivify_defelem(a)	Perl_vivify_defelem(aTHX_ a)
@@ -2291,8 +2293,6 @@
 #define do_trans_UU_simple(a)	S_do_trans_UU_simple(aTHX_ a)
 #define do_trans_UU_count(a)	S_do_trans_UU_count(aTHX_ a)
 #define do_trans_UU_complex(a)	S_do_trans_UU_complex(aTHX_ a)
-#define do_trans_UC_simple(a)	S_do_trans_UC_simple(aTHX_ a)
-#define do_trans_CU_simple(a)	S_do_trans_CU_simple(aTHX_ a)
 #define do_trans_UC_trivial(a)	S_do_trans_UC_trivial(aTHX_ a)
 #define do_trans_CU_trivial(a)	S_do_trans_CU_trivial(aTHX_ a)
 #endif
@@ -4250,6 +4250,10 @@
 #define utf8_distance		Perl_utf8_distance
 #define Perl_utf8_hop		CPerlObj::Perl_utf8_hop
 #define utf8_hop		Perl_utf8_hop
+#define Perl_utf8_to_bytes	CPerlObj::Perl_utf8_to_bytes
+#define utf8_to_bytes		Perl_utf8_to_bytes
+#define Perl_bytes_to_utf8	CPerlObj::Perl_bytes_to_utf8
+#define bytes_to_utf8		Perl_bytes_to_utf8
 #define Perl_utf8_to_uv		CPerlObj::Perl_utf8_to_uv
 #define utf8_to_uv		Perl_utf8_to_uv
 #define Perl_uv_to_utf8		CPerlObj::Perl_uv_to_utf8
@@ -4483,10 +4487,6 @@
 #define do_trans_UU_count	S_do_trans_UU_count
 #define S_do_trans_UU_complex	CPerlObj::S_do_trans_UU_complex
 #define do_trans_UU_complex	S_do_trans_UU_complex
-#define S_do_trans_UC_simple	CPerlObj::S_do_trans_UC_simple
-#define do_trans_UC_simple	S_do_trans_UC_simple
-#define S_do_trans_CU_simple	CPerlObj::S_do_trans_CU_simple
-#define do_trans_CU_simple	S_do_trans_CU_simple
 #define S_do_trans_UC_trivial	CPerlObj::S_do_trans_UC_trivial
 #define do_trans_UC_trivial	S_do_trans_UC_trivial
 #define S_do_trans_CU_trivial	CPerlObj::S_do_trans_CU_trivial

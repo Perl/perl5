@@ -460,6 +460,8 @@ Perl_utf16_to_utf8
 Perl_utf16_to_utf8_reversed
 Perl_utf8_distance
 Perl_utf8_hop
+Perl_utf8_to_bytes
+Perl_bytes_to_utf8
 Perl_utf8_to_uv
 Perl_uv_to_utf8
 Perl_warn
