@@ -466,6 +466,28 @@ perl_destruct(pTHXx)
     }
 #endif
 
+#ifdef USE_ITHREADS
+    /* the syntax tree is shared between clones
+     * so op_free(PL_main_root) only ReREFCNT_dec's
+     * REGEXPs in the parent interpreter
+     * we need to manually ReREFCNT_dec for the clones
+     */
+    {
+        I32 i = AvFILLp(PL_regex_padav) + 1;
+        SV **ary = AvARRAY(PL_regex_padav);
+
+        while (i) {
+            REGEXP *re = (REGEXP *)SvIVX(ary[--i]);
+            if (re && (re->refcnt > 0)) {
+                ReREFCNT_dec(re);
+            }
+        }
+    }
+    SvREFCNT_dec(PL_regex_padav);
+    PL_regex_padav = Nullav;
+    PL_regex_pad = NULL;
+#endif
+
     /* loosen bonds of global variables */
 
     if(PL_rsfp) {
