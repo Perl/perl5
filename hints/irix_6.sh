@@ -32,6 +32,12 @@
 # Don't bother with -n32 unless you have the 7.1 or later compilers.
 #     But there's no quick and light-weight way to check in 6.2.
 
+# NOTE: some IRIX cc versions, e.g. 7.3.1.1m (try cc -version)
+# have been known to have issues (coredumps) when compiling perl.c.
+# Dropping optimization to -O2 and removing -LNO,-INLINE, etc,
+# and most importantly removing -OPT:fast_IO=ON, has been known
+# to help. -- Allen Smith <easmith@beatrice.rutgers.edu>
+
 # Let's assume we want to use 'cc -n32' by default, unless the
 # necessary libm is missing (which has happened at least twice)
 case "$cc" in
