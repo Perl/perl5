@@ -20,7 +20,7 @@ use vars qw($VERSION @ISA
 
 use ExtUtils::MakeMaker qw($Verbose neatvalue);
 
-$VERSION = '1.45';
+$VERSION = '1.45_01';
 
 require ExtUtils::MM_Any;
 @ISA = qw(ExtUtils::MM_Any);
@@ -296,7 +296,7 @@ clean :: clean_subdirs
                          $(INST_ARCHAUTODIR)/extralibs.all
                          $(INST_ARCHAUTODIR)/extralibs.ld
 			 perlmain.c tmon.out mon.out so_locations 
-                         blibdirs pm_to_blib
+                         blibdirs.exists pm_to_blib
 			 *$(OBJ_EXT) *$(LIB_EXT) perl.exe perl perl$(EXE_EXT)
 			 $(BOOTSTRAP) $(BASEEXT).bso
 			 $(BASEEXT).def lib$(BASEEXT).def
@@ -614,10 +614,10 @@ MAKE_FRAG
 
     }
 
-    # So these new .exists targets get called along with blibdirs.
+    # So these new .exists targets get called along with blibdirs.exists.
     my $blib_addition = '';
     $blib_addition = <<MAKE_FRAG if @targs;
-blibdirs :: @targs
+blibdirs.exists :: @targs
 	\$(NOECHO) \$(NOOP)
 
 MAKE_FRAG
@@ -1078,7 +1078,7 @@ BOOTSTRAP = $(BASEEXT).bs
 # As Mkbootstrap might not write a file (if none is required)
 # we use touch to prevent make continually trying to remake it.
 # The DynaLoader only reads a non-empty file.
-$(BOOTSTRAP): $(FIRST_MAKEFILE) $(BOOTDEP) blibdirs
+$(BOOTSTRAP): $(FIRST_MAKEFILE) $(BOOTDEP) blibdirs.exists
 	$(NOECHO) $(ECHO) "Running Mkbootstrap for $(NAME) ($(BSLOADLIBS))"
 	$(NOECHO) $(PERLRUN) \
 		"-MExtUtils::Mkbootstrap" \
@@ -1086,7 +1086,7 @@ $(BOOTSTRAP): $(FIRST_MAKEFILE) $(BOOTDEP) blibdirs
 	$(NOECHO) $(TOUCH) $(BOOTSTRAP)
 	$(CHMOD) $(PERM_RW) $@
 
-$(INST_BOOT): $(BOOTSTRAP) blibdirs
+$(INST_BOOT): $(BOOTSTRAP) blibdirs.exists
 	$(NOECHO) $(RM_RF) $(INST_BOOT)
 	-$(CP) $(BOOTSTRAP) $(INST_BOOT)
 	$(CHMOD) $(PERM_RW) $@
@@ -1121,7 +1121,7 @@ OTHERLDFLAGS = '.$ld_opt.$otherldflags.'
 INST_DYNAMIC_DEP = '.$inst_dynamic_dep.'
 INST_DYNAMIC_FIX = '.$ld_fix.'
 
-$(INST_DYNAMIC): $(OBJECT) $(MYEXTLIB) $(BOOTSTRAP) blibdirs $(EXPORT_LIST) $(PERL_ARCHIVE) $(PERL_ARCHIVE_AFTER) $(INST_DYNAMIC_DEP)
+$(INST_DYNAMIC): $(OBJECT) $(MYEXTLIB) $(BOOTSTRAP) blibdirs.exists $(EXPORT_LIST) $(PERL_ARCHIVE) $(PERL_ARCHIVE_AFTER) $(INST_DYNAMIC_DEP)
 ');
     if ($armaybe ne ':'){
 	$ldfrom = 'tmp$(LIB_EXT)';
@@ -2641,7 +2641,7 @@ realclean ::
 	last unless defined $from;
 	my $todir = dirname($to);
 	push @m, "
-$to : $from \$(FIRST_MAKEFILE) blibdirs
+$to : $from \$(FIRST_MAKEFILE) blibdirs.exists
 	\$(NOECHO) \$(RM_F) $to
 	\$(CP) $from $to
 	\$(FIXIN) $to
@@ -2889,7 +2889,7 @@ LLIBPERL    = $llibperl
 ";
 
     push @m, "
-\$(INST_ARCHAUTODIR)/extralibs.all: blibdirs ".join(" \\\n\t", @$extra).'
+\$(INST_ARCHAUTODIR)/extralibs.all: blibdirs.exists ".join(" \\\n\t", @$extra).'
 	$(NOECHO) $(RM_F)  $@
 	$(NOECHO) $(TOUCH) $@
 ';
@@ -3698,7 +3698,7 @@ sub static_lib {
     my(@m);
     push(@m, <<'END');
 
-$(INST_STATIC): $(OBJECT) $(MYEXTLIB) blibdirs
+$(INST_STATIC): $(OBJECT) $(MYEXTLIB) blibdirs.exists
 	$(RM_RF) $@
 END
 
@@ -4030,7 +4030,7 @@ pure_all :: config pm_to_blib subdirs linkext
 subdirs :: $(MYEXTLIB)
 	$(NOECHO) $(NOOP)
 
-config :: $(FIRST_MAKEFILE) blibdirs
+config :: $(FIRST_MAKEFILE) blibdirs.exists
 	$(NOECHO) $(NOOP)
 ';
 

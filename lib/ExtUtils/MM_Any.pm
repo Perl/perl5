@@ -2,7 +2,7 @@ package ExtUtils::MM_Any;
 
 use strict;
 use vars qw($VERSION @ISA);
-$VERSION = 0.09;
+$VERSION = 0.09_01;
 @ISA = qw(File::Spec);
 
 use Config;
@@ -91,7 +91,7 @@ sub os_flavor_is {
 
     my $make_frag = $mm->blibdirs_target;
 
-Creates the blibdirs target which creates all the directories we use in
+Creates the blibdirs.exists target which creates all the directories we use in
 blib/.
 
 =cut
@@ -107,9 +107,9 @@ sub blibdirs_target {
     my @mkpath = $self->split_command('$(NOECHO) $(MKPATH)', @dirs);
     my @chmod  = $self->split_command('$(NOECHO) $(CHMOD) 755', @dirs);
 
-    my $make = "\nblibdirs :: Makefile.PL \n";
+    my $make = "\nblibdirs.exists :: Makefile.PL \n";
     $make .= join "", map { "\t$_\n" } @mkpath, @chmod;
-    $make .= "\t\$(NOECHO) \$(TOUCH) blibdirs\n\n";
+    $make .= "\t\$(NOECHO) \$(TOUCH) blibdirs.exists\n\n";
 
     return $make;
 }

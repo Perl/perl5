@@ -232,10 +232,13 @@ while( my($type, $vars) = each %Install_Vars) {
 
     is( $mm->{INSTALLMAN1DIR}, File::Spec->catdir('foo', 'bar') );
     is( $mm->{INSTALLMAN3DIR}, File::Spec->catdir('foo', 'baz') );
-    is( $mm->{INSTALLSITEMAN1DIR},   '$(INSTALLMAN1DIR)' );
-    is( $mm->{INSTALLSITEMAN3DIR},   '$(INSTALLMAN3DIR)' );
-    is( $mm->{INSTALLVENDORMAN1DIR}, '$(INSTALLMAN1DIR)' );
-    is( $mm->{INSTALLVENDORMAN3DIR}, '$(INSTALLMAN3DIR)' );
+    SKIP: {
+      skip "VMS must expand macros in INSTALL* vars", 4 if $Is_VMS;
+      is( $mm->{INSTALLSITEMAN1DIR},   '$(INSTALLMAN1DIR)' );
+      is( $mm->{INSTALLSITEMAN3DIR},   '$(INSTALLMAN3DIR)' );
+      is( $mm->{INSTALLVENDORMAN1DIR}, '$(INSTALLMAN1DIR)' );
+      is( $mm->{INSTALLVENDORMAN3DIR}, '$(INSTALLMAN3DIR)' );
+    }
 }
 
 
@@ -266,8 +269,11 @@ while( my($type, $vars) = each %Install_Vars) {
 
     is( $mm->{INSTALLMAN1DIR}, File::Spec->catdir('foo', 'bar') );
     is( $mm->{INSTALLMAN3DIR}, File::Spec->catdir('foo', 'baz') );
-    is( $mm->{INSTALLSITEMAN1DIR},   '$(INSTALLMAN1DIR)' );
-    is( $mm->{INSTALLSITEMAN3DIR},   '$(INSTALLMAN3DIR)' );
+    SKIP: {
+      skip "VMS must expand macros in INSTALL* vars", 2 if $Is_VMS;
+      is( $mm->{INSTALLSITEMAN1DIR},   '$(INSTALLMAN1DIR)' );
+      is( $mm->{INSTALLSITEMAN3DIR},   '$(INSTALLMAN3DIR)' );
+    }
     is( $mm->{INSTALLVENDORMAN1DIR}, '' );
     is( $mm->{INSTALLVENDORMAN3DIR}, '' );
 }

@@ -23,7 +23,7 @@ use Config;
 use File::Basename;
 
 use vars qw(@ISA $VERSION);
-$VERSION = '2.07';
+$VERSION = '2.07_01';
 
 require ExtUtils::MM_Win32;
 @ISA = qw(ExtUtils::MM_Win32);
@@ -152,7 +152,7 @@ sub static_lib {
     return '' unless $self->has_link_code;
 
     my $m = <<'END';
-$(INST_STATIC): $(OBJECT) $(MYEXTLIB) blibdirs
+$(INST_STATIC): $(OBJECT) $(MYEXTLIB) blibdirs.exists
 	$(RM_RF) $@
 END
 
