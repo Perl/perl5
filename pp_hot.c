@@ -901,15 +901,7 @@ PP(pp_rv2hv)
     }
     else if (gimme == G_SCALAR) {
 	dTARGET;
-	if (SvRMAGICAL(hv) && mg_find((SV *)hv, PERL_MAGIC_tied))
-	    Perl_croak(aTHX_ "Can't provide tied hash usage; "
-		       "use keys(%%hash) to test if empty");
-	if (HvFILL(hv))
-            Perl_sv_setpvf(aTHX_ TARG, "%"IVdf"/%"IVdf,
-			   (IV)HvFILL(hv), (IV)HvMAX(hv) + 1);
-	else
-	    sv_setiv(TARG, 0);
-	
+    TARG = Perl_hv_scalar(hv);
 	SETTARG;
     }
     RETURN;

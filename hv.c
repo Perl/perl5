@@ -786,6 +786,35 @@ S_hv_magic_check(pTHX_ HV *hv, bool *needs_copy, bool *needs_store)
 }
 
 /*
+=for apidoc hv_scalar
+
+Evaluates the hash in scalar context and returns the result. Handles magic when the hash is tied.
+
+=cut
+*/
+
+SV *
+Perl_hv_scalar(pTHX_ HV *hv)
+{
+    MAGIC *mg;
+    SV *sv;
+    
+    if ((SvRMAGICAL(hv) && (mg = mg_find((SV*)hv, PERL_MAGIC_tied)))) {
+        sv = magic_scalarpack(hv, mg);
+        return sv;
+    } 
+
+    sv = sv_newmortal();
+    if (HvFILL((HV*)hv)) 
+        Perl_sv_setpvf(aTHX_ sv, "%ld/%ld",
+                (long)HvFILL(hv), (long)HvMAX(hv) + 1);
+    else
+        sv_setiv(sv, 0);
+    
+    return sv;
+}
+
+/*
 =for apidoc hv_delete
 
 Deletes a key/value pair in the hash.  The value SV is removed from the

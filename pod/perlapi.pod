@@ -1280,6 +1280,15 @@ Adds magic to a hash.  See C<sv_magic>.
 =for hackers
 Found in file hv.c
 
+=item hv_scalar
+
+Evaluates the hash in scalar context and returns the result. Handles magic when the hash is tied.
+
+	SV*	hv_scalar(HV* hv)
+
+=for hackers
+Found in file hv.c
+
 =item hv_store
 
 Stores an SV in a hash.  The hash key is specified as C<key> and C<klen> is

@@ -106,15 +106,7 @@ PP(pp_padhv)
 	RETURNOP(do_kv());
     }
     else if (gimme == G_SCALAR) {
-	SV* sv = sv_newmortal();
-        if (SvRMAGICAL(TARG) && mg_find(TARG, PERL_MAGIC_tied))
-	     Perl_croak(aTHX_ "Can't provide tied hash usage; "
-			"use keys(%%hash) to test if empty");
-	if (HvFILL((HV*)TARG))
-	    Perl_sv_setpvf(aTHX_ sv, "%ld/%ld",
-		      (long)HvFILL((HV*)TARG), (long)HvMAX((HV*)TARG) + 1);
-	else
-	    sv_setiv(sv, 0);
+	SV* sv = Perl_hv_scalar((HV*)TARG);
 	SETs(sv);
     }
     RETURN;

@@ -280,6 +280,7 @@ ApMd	|HE*	|hv_iternext_flags|HV* tb|I32 flags
 Apd	|SV*	|hv_iterval	|HV* tb|HE* entry
 Ap	|void	|hv_ksplit	|HV* hv|IV newmax
 Apd	|void	|hv_magic	|HV* hv|GV* gv|int how
+Apd	|SV*	|hv_scalar	|HV* hv|
 Apd	|SV**	|hv_store	|HV* tb|const char* key|I32 klen|SV* val \
 				|U32 hash
 Apd	|HE*	|hv_store_ent	|HV* tb|SV* key|SV* val|U32 hash
@@ -397,6 +398,7 @@ p	|int	|magic_nextpack	|SV* sv|MAGIC* mg|SV* key
 p	|U32	|magic_regdata_cnt|SV* sv|MAGIC* mg
 p	|int	|magic_regdatum_get|SV* sv|MAGIC* mg
 p	|int	|magic_regdatum_set|SV* sv|MAGIC* mg
+p	|SV*	|magic_scalarpack|HV* hv|MAGIC*	mg
 p	|int	|magic_set	|SV* sv|MAGIC* mg
 p	|int	|magic_setamagic|SV* sv|MAGIC* mg
 p	|int	|magic_setarylen|SV* sv|MAGIC* mg

@@ -5871,6 +5871,7 @@ A class implementing a hash should have the following methods:
     EXISTS this, key
     FIRSTKEY this
     NEXTKEY this, lastkey
+    SCALAR this
     DESTROY this
     UNTIE this
 
