@@ -1986,7 +1986,7 @@ yylex(void)
 	}
 	goto retry;
     case '\r':
-#ifndef WIN32CHEAT
+#ifdef PERL_STRICT_CR
 	warn("Illegal character \\%03o (carriage return)", '\r');
 	croak(
       "(Maybe you didn't strip carriage returns after a network transfer?)\n");
