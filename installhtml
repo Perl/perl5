@@ -236,7 +236,12 @@ foreach $dir (@splithead) {
     @data = ();
     while (<H>) {
 	last if /NAME=/;
-	s,HREF="#(.*)">,HREF="$file/$1.html">,g;
+	$_ =~ s{HREF="#(.*)">}{
+	    my $url = "$file/$1.html" ;
+            $url = Pod::Html::relativize_url( $url, "$file.html" )
+                if ( ! defined $opt_htmlroot || $opt_htmlroot eq '' ) ;
+            "HREF=\"$url\">" ;
+        }eg;
 	push @data, $_;
     } 
     close(H);
@@ -320,9 +325,14 @@ sub create_index {
 	if (defined $lcp1 and $lcp1 eq '<P>') { # Uninteresting.  Try again.
 	   ($lcp1,$lcp2) = ($name =~ m,/H1>\s<P>\s(\S+)\s[\s-]*(.*?)\s*$,sm);
 	}
-	print HTML qq(<A HREF="$dir/$file">);
+	my $url= "$dir/$file" ;
+	if ( ! defined $opt_htmlroot || $opt_htmlroot eq '' ) {
+	    $url = Pod::Html::relativize_url( "$dir/$file", $html ) ;
+	}
+
+	print HTML qq(<A HREF="$url">);
 	print HTML "<DT>$lcp1</A><DD>$lcp2\n" if defined $lcp1;
-#	print HTML qq(<A HREF="$dir/$file">$lcp1</A><BR>\n") if defined $lcp1;
+#	print HTML qq(<A HREF="$url">$lcp1</A><BR>\n") if defined $lcp1;
 
 	next;
 

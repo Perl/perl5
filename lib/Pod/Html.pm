@@ -2,10 +2,10 @@ package Pod::Html;
 
 use Pod::Functions;
 use Getopt::Long;	# package for handling command-line parameters
-use File::PathConvert 0.84 ;   # Used to do relative URLs
+use File::Spec::Unix;
 require Exporter;
 use vars qw($VERSION);
-$VERSION = 1.01;
+$VERSION = 1.02;
 @ISA = Exporter;
 @EXPORT = qw(pod2html htmlify);
 use Cwd;
@@ -50,7 +50,9 @@ Displays the usage message.
     --htmldir=name
 
 Sets the directory in which the resulting HTML file is placed.  This
-is used to generate relative links to other files.
+is used to generate relative links to other files. Not passing this
+causes all links to be absolute, since this is the value that tells
+Pod::Html the root of the documentation tree.
 
 =item htmlroot
 
@@ -177,13 +179,13 @@ my $itemcache = "pod2html-itemcache";
 
 my @begin_stack = ();		# begin/end stack
 
-my @libpods = ();		# files to search for links from C<> directives
-my $htmlroot = "/";		# http-server base directory from which all
+my @libpods = ();	    	# files to search for links from C<> directives
+my $htmlroot = "/";	    	# http-server base directory from which all
 				#   relative paths in $podpath stem.
 my $htmldir = "";		# The directory to which the html pages
 				# will (eventually) be written.
 my $htmlfile = "";		# write to stdout by default
-my $htmlfileurl = "";		# The url that other files would use to
+my $htmlfileurl = "" ;		# The url that other files would use to
 				# refer to this file.  This is only used
 				# to make relative urls that point to
 				# other files.
@@ -297,14 +299,19 @@ sub pod2html {
     } 
     $htmlfile = "-" unless $htmlfile;	# stdout
     $htmlroot = "" if $htmlroot eq "/";	# so we don't get a //
-    $htmldir =~ s#/$## ;		# so we don't get a //
-    if (  $htmldir ne ''
-	  && substr( $htmlfile, 0, length( $htmldir ) ) eq $htmldir
-       )
+    $htmldir =~ s#/$## ;                # so we don't get a //
+    if (  $htmlroot eq ''
+       && defined( $htmldir ) 
+       && $htmldir ne ''
+       && substr( $htmlfile, 0, length( $htmldir ) ) eq $htmldir 
+       ) 
     {
-	$htmlfileurl= "$htmlroot/" . substr( $htmlfile, length( $htmldir ) + 1 );
+	# Set the 'base' url for this file, so that we can use it
+	# as the location from which to calculate relative links 
+	# to other files. If this is '', then absolute links will
+	# be used throughout.
+        $htmlfileurl= "$htmldir/" . substr( $htmlfile, length( $htmldir ) + 1);
     }
-    File::PathConvert::setfstype( 'URL' ) ;
 
     # read the pod a paragraph at a time
     warn "Scanning for sections in input file(s)\n" if $verbose;
@@ -487,15 +494,13 @@ Usage:  $0 --help --htmlroot=<name> --infile=<name> --outfile=<name>
 END_OF_USAGE
 
 sub parse_command_line {
-    my ($opt_flush,$opt_help,$opt_htmldir,$opt_htmlroot,$opt_index,$opt_infile
-,$opt_libpods,$opt_netscape,$opt_outfile,$opt_podpath,$opt_podroot,$opt_norecur
-se,$opt_recurse,$opt_title,$opt_verbose);
+    my ($opt_flush,$opt_help,$opt_htmldir,$opt_htmlroot,$opt_index,$opt_infile,$opt_libpods,$opt_netscape,$opt_outfile,$opt_podpath,$opt_podroot,$opt_norecurse,$opt_recurse,$opt_title,$opt_verbose);
     my $result = GetOptions(
-			    'flush'	 => \$opt_flush,
-			    'help'	 => \$opt_help,
-			    'htmldir=s'	 => \$opt_htmldir,
+			    'flush'      => \$opt_flush,
+			    'help'       => \$opt_help,
+			    'htmldir=s'  => \$opt_htmldir,
 			    'htmlroot=s' => \$opt_htmlroot,
-			    'index!'	 => \$opt_index,
+			    'index!'     => \$opt_index,
 			    'infile=s'   => \$opt_infile,
 			    'libpods=s'  => \$opt_libpods,
 			    'netscape!'  => \$opt_netscape,
@@ -568,7 +573,7 @@ sub get_cache {
 sub cache_key {
     my($dircache, $itemcache, $podpath, $podroot, $recurse) = @_;
     return join('!', $dircache, $itemcache, $recurse,
-		@$podpath, $podroot, stat($dircache), stat($itemcache));
+	@$podpath, $podroot, stat($dircache), stat($itemcache));
 }
 
 #
@@ -674,7 +679,9 @@ sub scan_podpath {
 	next unless defined $pages{$libpod} && $pages{$libpod};
 
 	# if there is a directory then use the .pod and .pm files within it.
-	if ($pages{$libpod} =~ /([^:]*[^(\.pod|\.pm)]):/) {
+	# NOTE: Only finds the first so-named directory in the tree.
+#	if ($pages{$libpod} =~ /([^:]*[^(\.pod|\.pm)]):/) {
+	if ($pages{$libpod} =~ /([^:]*(?<!\.pod)(?<!\.pm)):/) {
 	    #  find all the .pod and .pm files within the directory
 	    $dirname = $1;
 	    opendir(DIR, $dirname) ||
@@ -1126,11 +1133,25 @@ sub process_text {
 		  }xeg;
 #	$rest =~ s/(<A HREF=)([^>:]*:)?([^>:]*)\.pod:([^>:]*:)?/$1$3.html/g;
 	$rest =~ s{
-		    (<A\ HREF="?)([^>:]*:)?([^>:]*)\.pod:([^>:]*:)?
-		   }{
-		     my $url=
-			File::PathConvert::abs2rel( "$3.html", $htmlfileurl );
-#		    print( "	$htmlfileurl $3.html [$url]\n" ) ;
+		    (<A\ HREF="?) ([^>:]*:)? ([^>:]*) \.pod: ([^>:]*:)?
+                  }{
+                    my $url ;
+                    if ( $htmlfileurl ne '' ) {
+			# Here, we take advantage of the knowledge 
+			# that $htmlfileurl ne '' implies $htmlroot eq ''.
+			# Since $htmlroot eq '', we need to prepend $htmldir
+			# on the fron of the link to get the absolute path
+			# of the link's target. We check for a leading '/'
+			# to avoid corrupting links that are #, file:, etc.
+			my $old_url = $3 ;
+			$old_url = "$htmldir$old_url"
+			    if ( $old_url =~ m{^\/} ) ;
+			$url = relativize_url( "$old_url.html", $htmlfileurl );
+# print( "  a: [$old_url.html,$htmlfileurl,$url]\n" ) ;
+		    }
+		    else {
+			$url = "$3.html" ;
+		    }
 		    "$1$url" ;
 		  }xeg;
 
@@ -1156,7 +1177,8 @@ sub process_text {
   $rest =~ s{
         \b                          # start at word boundary
         (                           # begin $1  {
-          $urls     :[^:]           # need resource and a colon
+          $urls     :               # need resource and a colon
+	  (?!:)                     # Ignore File::, among others.
           [$any] +?                 # followed by on or more
                                     #  of any valid character, but
                                     #  be conservative and take only
@@ -1428,6 +1450,9 @@ sub process_L {
 	    $section = $page;
 	    $page = "";
 	}
+
+	# remove trailing punctuation, like ()
+	$section =~ s/\W*$// ;
     }
 
     $page83=dosify($page);
@@ -1438,6 +1463,29 @@ sub process_L {
     } elsif ( $page =~ /::/ ) {
 	$linktext  = ($section ? "$section" : "$page");
 	$page =~ s,::,/,g;
+	# Search page cache for an entry keyed under the html page name,
+	# then look to see what directory that page might be in.  NOTE:
+	# this will only find one page. A better solution might be to produce
+	# an intermediate page that is an index to all such pages.
+	my $page_name = $page ;
+	$page_name =~ s,^.*/,, ;
+	if ( defined( $pages{ $page_name } ) && 
+	     $pages{ $page_name } =~ /([^:]*$page)\.(?:pod|pm):/ 
+	   ) {
+	    $page = $1 ;
+	}
+	else {
+	    # NOTE: This branch assumes that all A::B pages are located in
+	    # $htmlroot/A/B.html . This is often incorrect, since they are
+	    # often in $htmlroot/lib/A/B.html or such like. Perhaps we could
+	    # analyze the contents of %pages and figure out where any
+	    # cousins of A::B are, then assume that.  So, if A::B isn't found,
+	    # but A::C is found in lib/A/C.pm, then A::B is assumed to be in
+	    # lib/A/B.pm. This is also limited, but it's an improvement.
+	    # Maybe a hints file so that the links point to the correct places
+	    # non-theless?
+	    # Also, maybe put a warn "$0: cannot resolve..." here.
+	}
 	$link = "$htmlroot/$page.html";
 	$link .= "#" . htmlify(0,$section) if ($section);
     } elsif (!defined $pages{$page}) {
@@ -1450,7 +1498,8 @@ sub process_L {
 
 	# if there is a directory by the name of the page, then assume that an
 	# appropriate section will exist in the subdirectory
-	if ($section ne "" && $pages{$page} =~ /([^:]*[^(\.pod|\.pm)]):/) {
+#	if ($section ne "" && $pages{$page} =~ /([^:]*[^(\.pod|\.pm)]):/) {
+	if ($section ne "" && $pages{$page} =~ /([^:]*(?<!\.pod)(?<!\.pm)):/) {
 	    $link = "$htmlroot/$1/$section.html";
 
 	# since there is no directory by the name of the page, the section will
@@ -1474,13 +1523,61 @@ sub process_L {
 
     process_text(\$linktext, 0);
     if ($link) {
-        my $url= File::PathConvert::abs2rel( $link, $htmlfileurl ) ;
-#        print( "    $htmlfileurl $link [$url]\n" ) ;
+	# Here, we take advantage of the knowledge that $htmlfileurl ne ''
+	# implies $htmlroot eq ''. This means that the link in question
+	# needs a prefix of $htmldir if it begins with '/'. The test for
+	# the initial '/' is done to avoid '#'-only links, and to allow
+	# for other kinds of links, like file:, ftp:, etc.
+        my $url ;
+        if (  $htmlfileurl ne '' ) {
+            $link = "$htmldir$link"
+		if ( $link =~ m{^/} ) ;
+            
+            $url = relativize_url( $link, $htmlfileurl ) ;
+# print( "  b: [$link,$htmlfileurl,$url]\n" ) ;
+	}
+	else {
+            $url = $link ;
+	}
+
 	$s1 = "<A HREF=\"$url\">$linktext</A>";
     } else {
 	$s1 = "<EM>$linktext</EM>";
     }
     return $s1;
+}
+
+#
+# relativize_url - convert an absolute URL to one relative to a base URL.
+# Assumes both end in a filename.
+#
+sub relativize_url {
+    my ($dest,$source) = @_ ;
+
+    my ($dest_volume,$dest_directory,$dest_file) = 
+        File::Spec::Unix->splitpath( $dest ) ;
+    $dest = File::Spec::Unix->catpath( $dest_volume, $dest_directory, '' ) ;
+
+    my ($source_volume,$source_directory,$source_file) = 
+        File::Spec::Unix->splitpath( $source ) ;
+    $source = File::Spec::Unix->catpath( $source_volume, $source_directory, '' ) ;
+
+    my $rel_path = '' ;
+    if ( $dest ne '' ) {
+       $rel_path = File::Spec::Unix->abs2rel( $dest, $source ) ;
+    }
+
+    if ( $rel_path ne ''                && 
+         substr( $rel_path, -1 ) ne '/' &&
+         substr( $dest_file, 0, 1 ) ne '#' 
+        ) {
+        $rel_path .= "/$dest_file" ;
+    }
+    else {
+        $rel_path .= "$dest_file" ;
+    }
+
+    return $rel_path ;
 }
 
 #
@@ -1517,8 +1614,16 @@ sub process_C {
     if ($doref && defined $items{$s1}) {
         if ( $items{$s1} ) {
             my $link = "$htmlroot/$items{$s1}#item_" . htmlify(0,$s2) ;
-            my $url = File::PathConvert::abs2rel( $link, $htmlfileurl ) ;
-#            print( "    $htmlfileurl $link [$url]\n" ) ;
+	    # Here, we take advantage of the knowledge that $htmlfileurl ne ''
+	    # implies $htmlroot eq ''.
+            my $url ;
+            if (  $htmlfileurl ne '' ) {
+                $link = "$htmldir$link" ;
+                $url = relativize_url( $link, $htmlfileurl ) ;
+	    }
+	    else {
+                $url = $link ;
+	    }
 	    $s1 = "<A HREF=\"$url\">$str</A>" ;
         }
         else {
@@ -1578,6 +1683,18 @@ sub process_S {
 #
 sub process_X {
     return '';
+}
+
+
+#
+# Adapted from Nick Ing-Simmons' PodToHtml package.
+sub relative_url {
+    my $source_file = shift ;
+    my $destination_file = shift;
+
+    my $source = URI::file->new_abs($source_file);
+    my $uo = URI::file->new($destination_file,$source)->abs;
+    return $uo->rel->as_string;
 }
 
 
