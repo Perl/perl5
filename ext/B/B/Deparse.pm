@@ -2423,6 +2423,7 @@ sub pp_leavetry {
 
 BEGIN { eval "sub OP_CONST () {" . opnumber("const") . "}" }
 BEGIN { eval "sub OP_STRINGIFY () {" . opnumber("stringify") . "}" }
+BEGIN { eval "sub OP_RV2SV () {" . opnumber("rv2sv") . "}" }
 
 sub pp_null {
     my $self = shift;
@@ -2974,6 +2975,12 @@ sub re_uninterp {
     return $str;
 }
 
+sub re_uninterp_extended {
+    my ($str) = @_;
+    $str =~ s/^([^#]*)/re_uninterp($1)/emg;
+    return $str;
+}
+
 # character escapes, but not delimiters that might need to be escaped
 sub escape_str { # ASCII, UTF8
     my($str) = @_;
@@ -2987,6 +2994,14 @@ sub escape_str { # ASCII, UTF8
     $str =~ s/\r/\\r/g;
     $str =~ s/([\cA-\cZ])/'\\c' . chr(ord('@') + ord($1))/ge;
     $str =~ s/([\0\033-\037\177-\377])/'\\' . sprintf("%03o", ord($1))/ge;
+    return $str;
+}
+
+sub escape_extended_re {
+    my($str) = @_;
+    $str =~ s/(.)/ord($1)>255 ? sprintf("\\x{%x}", ord($1)) : $1/eg;
+    $str =~ s/([\0\033-\037\177-\377])/'\\' . sprintf("%03o", ord($1))/ge;
+    $str =~ s/\n/\n\f/g;
     return $str;
 }
 
@@ -3408,14 +3423,18 @@ sub pp_trans {
 # Like dq(), but different
 sub re_dq {
     my $self = shift;
-    my $op = shift;
+    my ($op, $extended) = @_;
+
     my $type = $op->name;
     if ($type eq "const") {
 	return '$[' if $op->private & OPpCONST_ARYBASE;
-	return re_uninterp(escape_str(re_unback($self->const_sv($op)->as_string)));
+	my $unbacked = re_unback($self->const_sv($op)->as_string);
+	return re_uninterp_extended(escape_extended_re($unbacked))
+	    if $extended;
+	return re_uninterp(escape_str($unbacked));
     } elsif ($type eq "concat") {
-	my $first = $self->re_dq($op->first);
-	my $last  = $self->re_dq($op->last);
+	my $first = $self->re_dq($op->first, $extended);
+	my $last  = $self->re_dq($op->last,  $extended);
 	# Disambiguate "${foo}bar", "${foo}{bar}", "${foo}[1]"
 	if ($last =~ /^[A-Z\\\^\[\]_?]/) {
 	    $first =~ s/([\$@])\^$/${1}{^}/;
@@ -3425,15 +3444,15 @@ sub re_dq {
 	}
 	return $first . $last;
     } elsif ($type eq "uc") {
-	return '\U' . $self->re_dq($op->first->sibling) . '\E';
+	return '\U' . $self->re_dq($op->first->sibling, $extended) . '\E';
     } elsif ($type eq "lc") {
-	return '\L' . $self->re_dq($op->first->sibling) . '\E';
+	return '\L' . $self->re_dq($op->first->sibling, $extended) . '\E';
     } elsif ($type eq "ucfirst") {
-	return '\u' . $self->re_dq($op->first->sibling);
+	return '\u' . $self->re_dq($op->first->sibling, $extended);
     } elsif ($type eq "lcfirst") {
-	return '\l' . $self->re_dq($op->first->sibling);
+	return '\l' . $self->re_dq($op->first->sibling, $extended);
     } elsif ($type eq "quotemeta") {
-	return '\Q' . $self->re_dq($op->first->sibling) . '\E';
+	return '\Q' . $self->re_dq($op->first->sibling, $extended) . '\E';
     } elsif ($type eq "join") {
 	return $self->deparse($op->last, 26); # was join($", @ary)
     } else {
@@ -3441,13 +3460,54 @@ sub re_dq {
     }
 }
 
-sub pp_regcomp {
+sub pure_string {
+    my ($self, $op) = @_;
+    my $type = $op->name;
+
+    if ($type eq 'const') {
+	return 1;
+    }
+    elsif ($type =~ /^[ul]c(first)?$/ || $type eq 'quotemeta') {
+	return $self->pure_string($op->first->sibling);
+    }
+    elsif ($type eq 'join') {
+	my $join_op = $op->first->sibling;  # Skip pushmark
+	return 0 unless $join_op->name eq 'null' && $join_op->targ eq OP_RV2SV;
+
+	my $gvop = $join_op->first;
+	return 0 unless $gvop->name eq 'gvsv';
+        return 0 unless '"' eq $self->gv_name($self->gv_or_padgv($gvop));
+
+	return 0 unless ${$join_op->sibling} eq ${$op->last};
+	return 0 unless $op->last->name =~ /^(rv2|pad)av$/;
+    }
+    elsif ($type eq 'concat') {
+	return $self->pure_string($op->first)
+            && $self->pure_string($op->last);
+    }
+    elsif (is_scalar($op) || $type =~ /^[ah]elem(fast)?$/) {
+	return 1;
+    }
+    else {
+	return 0;
+    }
+
+    return 1;
+}
+
+sub regcomp {
     my $self = shift;
-    my($op, $cx) = @_;
+    my($op, $cx, $extended) = @_;
     my $kid = $op->first;
     $kid = $kid->first if $kid->name eq "regcmaybe";
     $kid = $kid->first if $kid->name eq "regcreset";
-    return $self->re_dq($kid);
+    return ($self->re_dq($kid, $extended), 1) if $self->pure_string($kid);
+    return ($self->deparse($kid, $cx), 0);
+}
+
+sub pp_regcomp {
+    my ($self, $op, $cx) = @_;
+    return (($self->regcomp($op, $cx, 0))[0]);
 }
 
 # osmic acid -- see osmium tetroxide
@@ -3467,10 +3527,19 @@ sub matchop {
 	$var = $self->deparse($kid, 20);
 	$kid = $kid->sibling;
     }
+    my $quote = 1;
+    my $extended = ($op->pmflags & PMf_EXTENDED);
     if (null $kid) {
-	$re = re_uninterp(escape_str(re_unback($op->precomp)));
+	my $unbacked = re_unback($op->precomp);
+	if ($extended) {
+	    $re = re_uninterp_extended(escape_extended_re($unbacked));
+	} else {
+	    $re = re_uninterp(escape_str(re_unback($op->precomp)));
+	}
+    } elsif ($kid->name ne 'regcomp') {
+	Carp::cluck("found ".$kid->name." where regcomp expected");
     } else {
-	$re = $self->deparse($kid, 1);
+	($re, $quote) = $self->regcomp($kid, 1, $extended);
     }
     my $flags = "";
     $flags .= "c" if $op->pmflags & PMf_CONTINUE;
@@ -3484,10 +3553,10 @@ sub matchop {
     if ($op->pmflags & PMf_ONCE) { # only one kind of delimiter works here
 	$re =~ s/\?/\\?/g;
 	$re = "?$re?";
-    } else {
+    } elsif ($quote) {
 	$re = single_delim($name, $delim, $re);
     }
-    $re = $re . $flags;
+    $re = $re . $flags if $quote;
     if ($binop) {
 	return $self->maybe_parens("$var =~ $re", $cx, 20);
     } else {
@@ -3974,24 +4043,6 @@ than in the input file.
 
 Lvalue method calls are not yet fully supported. (Ordinary lvalue
 subroutine calls ought to be okay though.)
-
-=item *
-
-If you have a regex which is anything other than a literal of some
-kind, B::Deparse will produce incorrect output.
-e.g. C<$foo =~ give_me_a_regex()> will come back as
-C<$foo =~ /give_me_a_regex()/>
-
-=item *
-
-  m{ #foo
-      bar }x
-
-comes out as
-
-  m/#foo\n    bar/x)
-
-which isn't right.
 
 =item *
 
