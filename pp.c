@@ -1263,7 +1263,7 @@ PP(pp_slt)
     dSP; tryAMAGICbinSET(slt,0);
     {
       dPOPTOPssrl;
-      int cmp = ((PL_op->op_private & OPpLOCALE)
+      int cmp = (IN_LOCALE_RUNTIME
 		 ? sv_cmp_locale(left, right)
 		 : sv_cmp(left, right));
       SETs(boolSV(cmp < 0));
@@ -1276,7 +1276,7 @@ PP(pp_sgt)
     dSP; tryAMAGICbinSET(sgt,0);
     {
       dPOPTOPssrl;
-      int cmp = ((PL_op->op_private & OPpLOCALE)
+      int cmp = (IN_LOCALE_RUNTIME
 		 ? sv_cmp_locale(left, right)
 		 : sv_cmp(left, right));
       SETs(boolSV(cmp > 0));
@@ -1289,7 +1289,7 @@ PP(pp_sle)
     dSP; tryAMAGICbinSET(sle,0);
     {
       dPOPTOPssrl;
-      int cmp = ((PL_op->op_private & OPpLOCALE)
+      int cmp = (IN_LOCALE_RUNTIME
 		 ? sv_cmp_locale(left, right)
 		 : sv_cmp(left, right));
       SETs(boolSV(cmp <= 0));
@@ -1302,7 +1302,7 @@ PP(pp_sge)
     dSP; tryAMAGICbinSET(sge,0);
     {
       dPOPTOPssrl;
-      int cmp = ((PL_op->op_private & OPpLOCALE)
+      int cmp = (IN_LOCALE_RUNTIME
 		 ? sv_cmp_locale(left, right)
 		 : sv_cmp(left, right));
       SETs(boolSV(cmp >= 0));
@@ -1335,7 +1335,7 @@ PP(pp_scmp)
     dSP; dTARGET;  tryAMAGICbin(scmp,0);
     {
       dPOPTOPssrl;
-      int cmp = ((PL_op->op_private & OPpLOCALE)
+      int cmp = (IN_LOCALE_RUNTIME
 		 ? sv_cmp_locale(left, right)
 		 : sv_cmp(left, right));
       SETi( cmp );
@@ -2366,7 +2366,7 @@ PP(pp_ucfirst)
 	U8 *tend;
 	UV uv = utf8_to_uv(s, slen, &ulen, 0);
 
-	if (PL_op->op_private & OPpLOCALE) {
+	if (IN_LOCALE_RUNTIME) {
 	    TAINT;
 	    SvTAINTED_on(sv);
 	    uv = toTITLE_LC_uni(uv);
@@ -2398,7 +2398,7 @@ PP(pp_ucfirst)
 	}
 	s = (U8*)SvPV_force(sv, slen);
 	if (*s) {
-	    if (PL_op->op_private & OPpLOCALE) {
+	    if (IN_LOCALE_RUNTIME) {
 		TAINT;
 		SvTAINTED_on(sv);
 		*s = toUPPER_LC(*s);
@@ -2425,7 +2425,7 @@ PP(pp_lcfirst)
 	U8 *tend;
 	UV uv = utf8_to_uv(s, slen, &ulen, 0);
 
-	if (PL_op->op_private & OPpLOCALE) {
+	if (IN_LOCALE_RUNTIME) {
 	    TAINT;
 	    SvTAINTED_on(sv);
 	    uv = toLOWER_LC_uni(uv);
@@ -2457,7 +2457,7 @@ PP(pp_lcfirst)
 	}
 	s = (U8*)SvPV_force(sv, slen);
 	if (*s) {
-	    if (PL_op->op_private & OPpLOCALE) {
+	    if (IN_LOCALE_RUNTIME) {
 		TAINT;
 		SvTAINTED_on(sv);
 		*s = toLOWER_LC(*s);
@@ -2496,7 +2496,7 @@ PP(pp_uc)
 	    (void)SvPOK_only(TARG);
 	    d = (U8*)SvPVX(TARG);
 	    send = s + len;
-	    if (PL_op->op_private & OPpLOCALE) {
+	    if (IN_LOCALE_RUNTIME) {
 		TAINT;
 		SvTAINTED_on(TARG);
 		while (s < send) {
@@ -2528,7 +2528,7 @@ PP(pp_uc)
 	if (len) {
 	    register U8 *send = s + len;
 
-	    if (PL_op->op_private & OPpLOCALE) {
+	    if (IN_LOCALE_RUNTIME) {
 		TAINT;
 		SvTAINTED_on(sv);
 		for (; s < send; s++)
@@ -2570,7 +2570,7 @@ PP(pp_lc)
 	    (void)SvPOK_only(TARG);
 	    d = (U8*)SvPVX(TARG);
 	    send = s + len;
-	    if (PL_op->op_private & OPpLOCALE) {
+	    if (IN_LOCALE_RUNTIME) {
 		TAINT;
 		SvTAINTED_on(TARG);
 		while (s < send) {
@@ -2603,7 +2603,7 @@ PP(pp_lc)
 	if (len) {
 	    register U8 *send = s + len;
 
-	    if (PL_op->op_private & OPpLOCALE) {
+	    if (IN_LOCALE_RUNTIME) {
 		TAINT;
 		SvTAINTED_on(sv);
 		for (; s < send; s++)

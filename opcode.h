@@ -1178,13 +1178,13 @@ EXT OP * (CPERLscope(*PL_check)[]) (pTHX_ OP *op) = {
 	MEMBER_TO_FPTR(Perl_ck_null),	/* i_ne */
 	MEMBER_TO_FPTR(Perl_ck_null),	/* ncmp */
 	MEMBER_TO_FPTR(Perl_ck_null),	/* i_ncmp */
-	MEMBER_TO_FPTR(Perl_ck_scmp),	/* slt */
-	MEMBER_TO_FPTR(Perl_ck_scmp),	/* sgt */
-	MEMBER_TO_FPTR(Perl_ck_scmp),	/* sle */
-	MEMBER_TO_FPTR(Perl_ck_scmp),	/* sge */
+	MEMBER_TO_FPTR(Perl_ck_null),	/* slt */
+	MEMBER_TO_FPTR(Perl_ck_null),	/* sgt */
+	MEMBER_TO_FPTR(Perl_ck_null),	/* sle */
+	MEMBER_TO_FPTR(Perl_ck_null),	/* sge */
 	MEMBER_TO_FPTR(Perl_ck_null),	/* seq */
 	MEMBER_TO_FPTR(Perl_ck_null),	/* sne */
-	MEMBER_TO_FPTR(Perl_ck_scmp),	/* scmp */
+	MEMBER_TO_FPTR(Perl_ck_null),	/* scmp */
 	MEMBER_TO_FPTR(Perl_ck_bitop),	/* bit_and */
 	MEMBER_TO_FPTR(Perl_ck_bitop),	/* bit_xor */
 	MEMBER_TO_FPTR(Perl_ck_bitop),	/* bit_or */
@@ -1209,15 +1209,15 @@ EXT OP * (CPERLscope(*PL_check)[]) (pTHX_ OP *op) = {
 	MEMBER_TO_FPTR(Perl_ck_fun),	/* vec */
 	MEMBER_TO_FPTR(Perl_ck_index),	/* index */
 	MEMBER_TO_FPTR(Perl_ck_index),	/* rindex */
-	MEMBER_TO_FPTR(Perl_ck_fun_locale),	/* sprintf */
+	MEMBER_TO_FPTR(Perl_ck_fun),	/* sprintf */
 	MEMBER_TO_FPTR(Perl_ck_fun),	/* formline */
 	MEMBER_TO_FPTR(Perl_ck_fun),	/* ord */
 	MEMBER_TO_FPTR(Perl_ck_fun),	/* chr */
 	MEMBER_TO_FPTR(Perl_ck_fun),	/* crypt */
-	MEMBER_TO_FPTR(Perl_ck_fun_locale),	/* ucfirst */
-	MEMBER_TO_FPTR(Perl_ck_fun_locale),	/* lcfirst */
-	MEMBER_TO_FPTR(Perl_ck_fun_locale),	/* uc */
-	MEMBER_TO_FPTR(Perl_ck_fun_locale),	/* lc */
+	MEMBER_TO_FPTR(Perl_ck_fun),	/* ucfirst */
+	MEMBER_TO_FPTR(Perl_ck_fun),	/* lcfirst */
+	MEMBER_TO_FPTR(Perl_ck_fun),	/* uc */
+	MEMBER_TO_FPTR(Perl_ck_fun),	/* lc */
 	MEMBER_TO_FPTR(Perl_ck_fun),	/* quotemeta */
 	MEMBER_TO_FPTR(Perl_ck_rvconst),	/* rv2av */
 	MEMBER_TO_FPTR(Perl_ck_null),	/* aelemfast */

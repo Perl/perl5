@@ -2244,8 +2244,8 @@ Perl_fold_constants(pTHX_ register OP *o)
     case OP_SLE:
     case OP_SGE:
     case OP_SCMP:
-
-	if (o->op_private & OPpLOCALE)
+	/* XXX what about the numeric ops? */
+	if (PL_hints & HINT_LOCALE)
 	    goto nope;
     }
 
@@ -3521,7 +3521,7 @@ Perl_newSTATEOP(pTHX_ I32 flags, char *label, OP *o)
 	cop->op_ppaddr = PL_ppaddr[ OP_NEXTSTATE ];
     }
     cop->op_flags = flags;
-    cop->op_private = (PL_hints & HINT_BYTE);
+    cop->op_private = (PL_hints & (HINT_BYTE|HINT_LOCALE));
 #ifdef NATIVE_HINTS
     cop->op_private |= NATIVE_HINTS;
 #endif
@@ -5446,13 +5446,6 @@ Perl_ck_ftst(pTHX_ OP *o)
 	else
 	    o = newUNOP(type, 0, newDEFSVOP());
     }
-#ifdef USE_LOCALE
-    if (type == OP_FTTEXT || type == OP_FTBINARY) {
-	o->op_private = 0;
-	if (PL_hints & HINT_LOCALE)
-	    o->op_private |= OPpLOCALE;
-    }
-#endif
     return o;
 }
 
@@ -5853,29 +5846,7 @@ Perl_ck_listiob(pTHX_ OP *o)
     if (!kid)
 	append_elem(o->op_type, o, newDEFSVOP());
 
-    o = listkids(o);
-
-    o->op_private = 0;
-#ifdef USE_LOCALE
-    if (PL_hints & HINT_LOCALE)
-	o->op_private |= OPpLOCALE;
-#endif
-
-    return o;
-}
-
-OP *
-Perl_ck_fun_locale(pTHX_ OP *o)
-{
-    o = ck_fun(o);
-
-    o->op_private = 0;
-#ifdef USE_LOCALE
-    if (PL_hints & HINT_LOCALE)
-	o->op_private |= OPpLOCALE;
-#endif
-
-    return o;
+    return listkids(o);
 }
 
 OP *
@@ -5905,18 +5876,6 @@ Perl_ck_sassign(pTHX_ OP *o)
 	    return kid;
 	}
     }
-    return o;
-}
-
-OP *
-Perl_ck_scmp(pTHX_ OP *o)
-{
-    o->op_private = 0;
-#ifdef USE_LOCALE
-    if (PL_hints & HINT_LOCALE)
-	o->op_private |= OPpLOCALE;
-#endif
-
     return o;
 }
 
@@ -6096,11 +6055,6 @@ OP *
 Perl_ck_sort(pTHX_ OP *o)
 {
     OP *firstkid;
-    o->op_private = 0;
-#ifdef USE_LOCALE
-    if (PL_hints & HINT_LOCALE)
-	o->op_private |= OPpLOCALE;
-#endif
 
     if (o->op_type == OP_SORT && o->op_flags & OPf_STACKED)
 	simplify_sort(o);

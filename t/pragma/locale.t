@@ -9,6 +9,7 @@ BEGIN {
 	print "1..0\n";
 	exit;
     }
+    $| = 1;
 }
 
 use strict;
@@ -643,7 +644,7 @@ foreach $Locale (@Locale) {
 	tryneoalpha($Locale, 107, $c == $d);
 
 	{
-	    no locale;
+#	    no locale; # XXX did this ever work correctly?
 	
 	    my $e = "$x";
 

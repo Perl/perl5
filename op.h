@@ -184,10 +184,6 @@ Deprecated.  Use C<GIMME_V> instead.
 /* Private for OP_EXISTS */
 #define OPpEXISTS_SUB		64	/* Checking for &sub, not {} or [].  */
 
-/* Private for OP_SORT, OP_PRTF, OP_SPRINTF, OP_FTTEXT, OP_FTBINARY, */
-/*             string comparisons, and case changers. */
-#define OPpLOCALE		64	/* Use locale */
-
 /* Private for OP_SORT */
 #define OPpSORT_NUMERIC		1	/* Optimized away { $a <=> $b } */
 #define OPpSORT_INTEGER		2	/* Ditto while under "use integer" */
