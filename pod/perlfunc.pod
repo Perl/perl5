@@ -4375,6 +4375,15 @@ characters at each point it matches that way.  For example:
 
 produces the output 'h:i:t:h:e:r:e'.
 
+Empty leading (or trailing) fields are produced when there positive width
+matches at the beginning (or end) of the string; a zero-width match at the
+beginning (or end) of the string does not produce an empty field.  For
+example:
+
+   print join(':', split(/(?=\w)/, 'hi there!'));
+
+produces the output 'h:i :t:h:e:r:e!'.
+
 The LIMIT parameter can be used to split a line partially
 
     ($login, $passwd, $remainder) = split(/:/, $_, 3);
