@@ -1,11 +1,23 @@
 $!  Test.Com - DCL driver for perl5 regression tests
 $!
-$!  Version 1.0  30-Sep-1994
+$!  Version 1.1   4-Dec-1995
 $!  Charles Bailey  bailey@genetics.upenn.edu
 $
 $!  A little basic setup
 $   On Error Then Goto wrapup
-$   Set Default [.t]
+$   olddef = F$Environment("Default")
+$   If F$Search("t.dir").nes.""
+$   Then
+$       Set Default [.t]
+$   Else
+$       If F$TrnLNm("Perl_Root").nes.""
+$       Then 
+$           Set Default Perl_Root:[t]
+$       Else
+$           Write Sys$Error "Can't find test directory"
+$           Exit 44
+$       EndIf
+$   EndIf
 $
 $!  Pick up a copy of perl to use for the tests
 $   Delete/Log/NoConfirm Perl.;*
@@ -58,6 +70,8 @@ $   Delete/Log/NoConfirm Echo.Obj;*
 $   echo = "$" + F$Parse("Echo.Exe")
 $
 $!  And do it
+$   testdir = "Directory/NoHead/NoTrail/Column=1"
+$   Define/User Perlshr Sys$Disk:[-]PerlShr.Exe
 $   MCR Sys$Disk:[]Perl.
 $   Deck/Dollar=$$END-OF-TEST$$
 # $RCSfile: TEST,v $$Revision: 4.1 $$Date: 92/08/07 18:27:00 $
@@ -86,7 +100,7 @@ $| = 1;
 chdir 't' if -f 't/TEST';
 
 if ($ARGV[0] eq '') {
-    @files = split(/[ \n]/, `\$ dir/col=1/nohead/notrail [...]*.t;`);
+    @files = split(/[ \n]/, `\$ testdir [...]*.t;`);
     foreach (@files) {
       $fname = $_;
       $fname =~ s/.*\]([\w\$\-]+\.T);.*/$1/;
@@ -179,5 +193,5 @@ print sprintf("u=%g  s=%g  cu=%g  cs=%g  files=%d  tests=%d\n",
 $$END-OF-TEST$$
 $ wrapup:
 $   If F$Search("Echo.Exe").nes."" Then Delete/Log/NoConfirm Echo.Exe;*
-$   Set Default [-]
+$   Set Default &olddef
 $   Exit

@@ -8,10 +8,10 @@
  * GenConfig.pl when producing Config.pm.
  *
  * config.h for VMS
- * Version: 5.1.5
+ * Version: 5.2.b1
  */                 
 
-/* Configuration time:  8-Jun-1995 17:00
+/* Configuration time:  4-Dec-1995 17:00
  * Configured by: Charles Bailey  bailey@genetics.upenn.edu
  * Target system: VMS
  */
@@ -19,17 +19,38 @@
 #ifndef _config_h_
 #define _config_h_
 
+/* CAT2:
+ *	This macro catenates 2 tokens together.
+ */
+/* STRINGIFY:
+ *	This macro surrounds its token with double quotes.
+ */
+#ifdef __STDC__
+#define CAT2(a,b)a ## b
+#define CAT3(a,b,c)a ## b ## c
+#define CAT4(a,b,c,d)a ## b ## c ##d
+#define CAT5(a,b,c,d,e)a ## b ## c ## d ## e
+#define StGiFy(a) # a
+#define STRINGIFY(A)StGiFy(a)
+#define SCAT2(a,b)StGiFy(a) StGiFy(b)
+#define SCAT3(a,b,c)StGiFy(a) StGiFy(b) StGiFy(c)
+#define SCAT4(a,b,c,d)StGiFy(a) StGiFy(b) StGiFy(c) StGiFy(d)
+#define SCAT5(a,b,c,d,e)StGiFy(a) StGiFy(b) StGiFy(c) StGiFy(d) StGiFy(e)
+#else
+#define CAT2(a,b)a/**/b
+#define CAT3(a,b,c)a/**/b/**/c
+#define CAT4(a,b,c,d)a/**/b/**/c/**/d
+#define CAT5(a,b,c,d,e)a/**/b/**/c/**/d/**/e
+#define STRINGIFY(a)"a"
+#endif
+
+/* config-start */
+
 /* MEM_ALIGNBYTES:
  *	This symbol contains the number of bytes required to align a
  *	double. Usual values are 2, 4 and 8.
  */
 #define MEM_ALIGNBYTES 8	/**/
-
-/* BYTEORDER:
- *	This symbol hold the hexadecimal constant defined in byteorder,
- *	i.e. 0x1234 or 0x4321, etc...
- */
-#define BYTEORDER 0x1234	/* large digits for MSB */
 
 /* ARCHLIB_EXP:
  *	This variable, if defined, holds the name of the directory in
@@ -44,26 +65,6 @@
 #define ARCHLIB_EXP "/perl_root/lib/VMS_AXP"  /* config-skip */
 #else
 #define ARCHLIB_EXP "/perl_root/lib/VMS_VAX" /* config-skip */
-#endif
-
-/* CAT2:
- *	This macro catenates 2 tokens together.
- */
-/* STRINGIFY:
- *	This macro surrounds its token with double quotes.
- */
-#ifdef __STDC__
-#define CAT2(a,b) a##b	 /* config-skip */
-#define CAT3(a,b,c) a##b##c	 /* config-skip */
-#define CAT4(a,b,c,d) a##b##c##d	 /* config-skip */
-#define CAT5(a,b,c,d,e) a##b##c##d##e	 /* config-skip */
-#define STRINGIFY(a) #a	 /* config-skip */
-#else
-#define CAT2(a,b) a/**/b	 /* config-skip */
-#define CAT3(a,b,c) a/**/b/**/c	 /* config-skip */
-#define CAT4(a,b,c,d) a/**/b/**/c/**/d	 /* config-skip */
-#define CAT5(a,b,c,d,e) a/**/b/**/c/**/d/**/e	 /* config-skip */
-#define STRINGIFY(a) "a"	 /* config-skip */
 #endif
 
 /* CPPSTDIN:
@@ -113,14 +114,6 @@
 #define	CASTNEGFLOAT		/**/
 #define CASTFLAGS 0		/**/
 
-/* CHARSPRINTF:
- *	This symbol is defined if this system declares "char *sprintf()" in
- *	stdio.h.  The trend seems to be to declare it as "int sprintf()".  It
- *	is up to the package author to declare sprintf correctly based on the
- *	symbol.
- */
-#undef	CHARSPRINTF 	/**/
-
 /* HAS_CHSIZE:
  *	This symbol, if defined, indicates that the chsize routine is available
  *	to truncate files.  You might need a -lx to get this routine.
@@ -143,6 +136,12 @@
  *	to encrypt passwords and the like.
  */
 #undef HAS_CRYPT		/**/
+
+/* BYTEORDER:
+ *	This symbol hold the hexadecimal constant defined in byteorder,
+ *	i.e. 0x1234 or 0x4321, etc...
+ */
+#define BYTEORDER 0x1234	/* large digits for MSB */
 
 /* CSH:
  *	This symbol, if defined, indicates that the C-shell exists.
@@ -312,6 +311,12 @@
  */
 #define HAS_OPEN3		/**/
 
+/* HAS_POLL:
+ *	This symbol, if defined, indicates that the poll routine is
+ *	available to poll active file descriptors.
+ */
+#undef HAS_POLL		/**/
+
 /* HAS_READDIR:
  *	This symbol, if defined, indicates that the readdir routine is
  *	available to read directory entries. You may have to include
@@ -350,13 +355,6 @@
  *	new process to exec /bin/rmdir.
  */
 #define HAS_RMDIR		/**/
-
-/* HAS_SELECT:
- *	This symbol, if defined, indicates that the select routine is
- *	available to select active file descriptors. If the timeout field
- *	is used, <sys/time.h> may need to be included.
- */
-#undef HAS_SELECT	/**/
 
 /* HAS_SEM:
  *	This symbol, if defined, indicates that the entire sem*(2) library is
@@ -489,7 +487,8 @@
 /* VMS:
  * Regular FILE * are pretty close to meeting these criteria, but socket
  * I/O uses a summy FILE *, and Perl doesn't distinguish between socket
- * and non-socket filehandles. */
+ * and non-socket filehandles.
+ */
 #undef USE_STDIO_PTR 	/**/
 #undef USE_STDIO_BASE 	/**/
 
@@ -768,12 +767,6 @@
  */
 #undef	I_SYS_IOCTL		/**/
 
-/* HAS_IOCTL:
- *	This symbol, if defined, indicates that the ioctl() routine is
- *	available to set I/O characteristics
- */
-#undef	HAS_IOCTL		/**/
-
 /* I_SYS_NDIR:
  *	This symbol, if defined, indicates to the C program that it should
  *	include <sys/ndir.h>.
@@ -785,6 +778,17 @@
  *	include <sys/select.h> in order to get definition of struct timeval.
  */
 #undef I_SYS_SELECT	/**/
+
+/* I_DBM:
+ *	This symbol, if defined, indicates that <dbm.h> exists and should
+ *	be included.
+ */
+/* I_RPCSVC_DBM:
+ *	This symbol, if defined, indicates that <rpcsvc/dbm.h> exists and
+ *	should be included.
+ */
+#undef I_DBM	/**/
+#undef I_RPCSVC_DBM	/**/
 
 /* I_SYS_STAT:
  *	This symbol, if defined, indicates to the C program that it should
@@ -803,6 +807,12 @@
  *	include <sys/types.h>.
  */
 #define	I_SYS_TYPES		/**/
+
+/* I_SYS_UN:
+ *	This symbol, if defined, indicates to the C program that it should
+ *	include <sys/un.h> to get UNIX domain socket definitions.
+ */
+#undef I_SYS_UN		/**/
 
 /* I_TERMIO:
  *	This symbol, if defined, indicates that the program should include
@@ -852,21 +862,10 @@
  */
 #undef I_UTIME		/**/
 
-/* HAS_UTIME:
- *	This symbol, if defined, indicates that the routine utime() is
- *	available to update the access and modification times of files.
- */
-#define HAS_UTIME		/**/
-
-/* I_STDARG:
- *	This symbol, if defined, indicates that <stdarg.h> exists and should
- *	be included.
- */
 /* I_VARARGS:
  *	This symbol, if defined, indicates to the C program that it should
  *	include <varargs.h>.
  */
-#define I_STDARG		/**/
 #undef I_VARARGS		/**/
 
 
@@ -875,13 +874,6 @@
  *	include vfork.h.
  */
 #undef I_VFORK	/**/
-
-/* INTSIZE:
- *	This symbol contains the size of an int, so that the C preprocessor
- *	can make decisions based on it.
- */
-#define INTSIZE 4		/**/
-
 
 /* CAN_PROTOTYPE:
  *	If defined, this macro indicates that the C compiler can handle
@@ -914,7 +906,7 @@
  *	is defined, and 'int *' otherwise.  This is only useful if you 
  *	have select(), of course.
  */
-#define Select_fd_set_t 	fd_set *	/**/
+#define Select_fd_set_t 	int *	/**/
 
 /* STDCHAR:
  *	This symbol is defined to be the type of char used in stdio.h.
@@ -922,44 +914,11 @@
  */
 #define STDCHAR char	/**/
 
-/* VOIDFLAGS:
- *	This symbol indicates how much support of the void type is given by this
- *	compiler.  What various bits mean:
- *
- *	    1 = supports declaration of void
- *	    2 = supports arrays of pointers to functions returning void
- *	    4 = supports comparisons between pointers to void functions and
- *		    addresses of void functions
- *	    8 = suports declaration of generic void pointers
- *
- *	The package designer should define VOIDUSED to indicate the requirements
- *	of the package.  This can be done either by #defining VOIDUSED before
- *	including config.h, or by defining defvoidused in Myinit.U.  If the
- *	latter approach is taken, only those flags will be tested.  If the
- *	level of void support necessary is not present, defines void to int.
- */
-#ifndef VOIDUSED
-#define VOIDUSED 15
-#endif
-#define VOIDFLAGS 15
-#if (VOIDFLAGS & VOIDUSED) != VOIDUSED
-#define void int		/* is void to be avoided? */  /* config-skip */
-#define M_VOID			/* Xenix strikes again */     /* config-skip */
-#endif
-
 /* UNLINK_ALL_VERSIONS:
  *	This symbol, if defined, indicates that the program should arrange
  *	to remove all versions of a file if unlink() is called.
  */
 #undef UNLINK_ALL_VERSIONS		/**/
-
-/* VMS:
- *	This symbol, if defined, indicates that the program is running under
- *	VMS.  It's a symbol automagically defined by all VMS C compilers I've seen.
- * Just in case, however . . . */
-#ifndef VMS
-#define VMS		/**/
-#endif
 
 /* LOC_SED:
  *	This symbol holds the complete pathname to the sed program.
@@ -977,6 +936,19 @@
  *	available.
  */
 #define HAS_ALARM		/**/
+
+/* HASATTRIBUTE:
+ *	This symbol indicates the C compiler can check for function attributes,
+ *	such as printf formats. This is normally only supported by GNU cc.
+ */
+#ifdef __GNUC__
+#  define HASATTRIBUTE 	/*config-skip*/
+#else
+#  undef HASATTRIBUTE 	/*config-skip*/
+#endif
+#ifndef HASATTRIBUTE
+#define __attribute__(_arg_)
+#endif
 
 /* CASTI32:
  *	This symbol is defined if the C compiler can cast negative
@@ -1038,12 +1010,6 @@
  */
 #undef HAS_GETPPID		/**/
 
-/* HAS_GETGRENT:
- *	This symbol, if defined, indicates that the getgrent routine is
- *	available.
- */
-#undef HAS_GETGRENT		/**/
-
 /* HAS_HTONL:
  *	This symbol, if defined, indicates that the htonl() routine (and
  *	friends htons() ntohl() ntohs()) are available to do network
@@ -1086,13 +1052,6 @@
  *	available.
  */
 #define HAS_NICE		/**/
-
-/* HAS_PASSWD:
- *	This symbol, if defined, indicates that the getpwnam(),
- *	getpwuid(), and getpwent() routines are available to 
- *	get password entries.
- */
-#define HAS_PASSWD		/**/
 
 /* HAS_PAUSE:
  *	This symbol, if defined, indicates that the pause routine is
@@ -1174,14 +1133,6 @@
  */
 #define HAS_UMASK		/**/
 
-/* VOIDSIG:
- *	This symbol is defined if this system declares "void (*signal(...))()" in
- *	signal.h.  The old way was to declare it as "int (*signal(...))()".  It
- *	is up to the package author to declare things correctly based on the
- *	symbol.
- */
-#define VOIDSIG 	/**/
-
 /* HAS_WCTOMB:
  *	This symbol, if defined, indicates that the wctomb routine is available
  *	to covert a wide character to a multibyte.
@@ -1202,7 +1153,11 @@
  *	It can be int, ushort, uid_t, etc... It may be necessary to include
  *	<sys/types.h> to get any typedef'ed information.
  */
-#define Gid_t unsigned int		/* Type for getgid(), etc... */
+#if defined(__DECC) && defined(__DECC_VER) && (__DECC_VER >= 500000)
+#  define Gid_t gid_t		/* config-skip */
+#else
+#  define Gid_t unsigned int	/* config-skip */
+#endif
 
 /* I_DLFCN:
  *	This symbol, if defined, indicates that <dlfcn.h> exists and should
@@ -1223,12 +1178,23 @@
  */
 #define I_MATH		/**/
 
+/* I_LOCALE:
+ *	This symbol, if defined, indicates to the C program that it should
+ *	include <locale.h>.
+ */
+#undef	I_LOCALE		/**/
+
 /* I_SYS_STAT:
  *	This symbol, if defined, indicates to the C program that it should
  *	include <sys/stat.h>.
  */
 #define I_SYS_STAT		/**/
 
+/* INTSIZE:
+ *	This symbol contains the size of an int, so that the C preprocessor
+ *	can make decisions based on it.
+ */
+#define INTSIZE 4		/**/
 
 /* Off_t:
  *	This symbol holds the type used to declare offsets in the kernel.
@@ -1236,15 +1202,52 @@
  *	<sys/types.h> to get any typedef'ed information.
  */
 #define Off_t int		/* <offset> type */
+
+/* Free_t:
+ *	This variable contains the return type of free().  It is usually
+ * void, but occasionally int.
+ */
 /* Malloc_t:
  *	This symbol is the type of pointer returned by malloc and realloc.
  */
 #define Malloc_t void *			/**/
+#define Free_t void			/**/
 
 /* MYMALLOC:
  *	This symbol, if defined, indicates that we're using our own malloc.
  */
 #undef MYMALLOC			/**/
+
+/* SIG_NAME:
+ *	This symbol contains a list of signal names in order. This is intended
+ *	to be used as a static array initialization, like this:
+ *		char *sig_name[] = { SIG_NAME };
+ *	The signals in the list are separated with commas, and each signal
+ *	is surrounded by double quotes. There is no leading SIG in the signal
+ *	name, i.e. SIGQUIT is known as "QUIT". Duplicates are allowed.
+ *	The signal number for sig_name[i] is stored in sig_num[i].
+ *	The last element is 0 to terminate the list with a NULL.  This
+ *	corresponds to the 0 at the end of the sig_num list.
+ *	See SIG_NUM and SIG_MAX.
+ */
+#define SIG_NAME "ZERO","HUP","INT","QUIT","ILL","TRAP","IOT","EMT","FPE",\
+                 "KILL","BUS","SEGV","SYS","PIPE","ALRM","TERM",\
+                 "ABRT","USR1","USR2",0
+
+/* SIG_NUM:
+ *	This symbol contains a list of signal number, in the same order as the
+ *	SIG_NAME list. It is suitable for static array initialization, as in:
+ *		int sig_num[] = { SIG_NUM };
+ *	The signals in the list are separated with commas, and the indices
+ *	within that list and the SIG_NAME list match, so it's easy to compute
+ *	the signal name from a number or vice versa at the price of a small
+ *	dynamic linear lookup. Duplicates are allowed, so you can't assume
+ *	sig_num[i] == i.  Instead, the signal number corresponding to
+ * sig_name[i] is sig_number[i].
+ * The last element is 0, corresponding to the 0 at the end of
+ * the sig_name list.
+ */
+#define SIG_NUM 0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,6,16,17,0	/**/
 
 /* Mode_t:
  *	This symbol holds the type used to declare file modes 
@@ -1264,6 +1267,39 @@
  */
 #define SSize_t int	 /* signed count of bytes */
 
+/* VAL_O_NONBLOCK:
+ *	This symbol is to be used during open() or fcntl(F_SETFL) to turn on
+ *	non-blocking I/O for the file descriptor. Note that there is no way
+ *	back, i.e. you cannot turn it blocking again this way. If you wish to
+ *	alternatively switch between blocking and non-blocking, use the
+ *	ioctl(FIOSNBIO) call instead, but that is not supported by all devices.
+ */
+/* VAL_EAGAIN:
+ *	This symbol holds the errno error code set by read() when no data was
+ *	present on the non-blocking file descriptor.
+ */
+/* RD_NODATA:
+ *	This symbol holds the return code from read() when no data is present
+ *	on the non-blocking file descriptor. Be careful! If EOF_NONBLOCK is
+ *	not defined, then you can't distinguish between no data and EOF by
+ *	issuing a read(). You'll have to find another way to tell for sure!
+ */
+/* EOF_NONBLOCK:
+ *	This symbol, if defined, indicates to the C program that a read() on
+ *	a non-blocking file descriptor will return 0 on EOF, and not the value
+ *	held in RD_NODATA (-1 usually, in that case!).
+ */
+#define VAL_O_NONBLOCK
+#define VAL_EAGAIN
+#define RD_NODATA
+#undef EOF_NONBLOCK
+
+/* OLDARCHLIB_EXP:
+ *	This symbol contains the ~name expanded version of OLDARCHLIB, to be
+ *	used in programs that are not prepared to deal with ~ expansion at 
+ *	run-time.
+ */
+#define OLDARCHLIB_EXP "/perl_root/lib"		/**/
 
 /* PRIVLIB_EXP:
  *	This symbol contains the name of the private library for this package.
@@ -1273,6 +1309,18 @@
  */
 #define PRIVLIB_EXP "/perl_root/lib"		/**/
 
+/* SITELIB_EXP:
+ *	This symbol contains the ~name expanded version of SITELIB, to be used
+ *	in programs that are not prepared to deal with ~ expansion at run-time.
+ */
+#undef SITELIB_EXP		/**/
+
+/* SITEARCH_EXP:
+ *	This symbol contains the ~name expanded version of SITEARCH, to be used
+ *	in programs that are not prepared to deal with ~ expansion at run-time.
+ */
+#undef SITEARCH_EXP		/**/
+
 /* SCRIPTDIR:
  *	This symbol holds the name of the directory in which the user wants
  *	to put publicly executable scripts for the package in question.  It
@@ -1280,17 +1328,6 @@
  *	Programs must be prepared to deal with ~name expansion.
  */
 #define SCRIPTDIR "/perl_root/script"	/**/
-
-/* SIG_NAME:
- *	This symbol contains a list of signal names in order. This is intended
- *	to be used as a static array initialization, like this:
- *		char *sig_name[] = { SIG_NAME };
- *	The signals in the list are separated with commas, and each signal
- *	is surrounded by double quotes. There is no leading SIG in the signal
- *	name, i.e. SIGQUIT is known as "QUIT".
- */
-#define SIG_NAME "HUP","INT","QUIT","ILL","TRAP","IOT","EMT","FPE","KILL",\
-                 "BUS","SEGV","SYS","PIPE","ALRM","TERM"
 
 /* Size_t:
  *	This symbol holds the type used to declare length parameters
@@ -1361,27 +1398,11 @@
 #undef SETUID_SCRIPTS_ARE_SECURE_NOW	/**/
 #undef DOSUID		/**/
 
-/* Gconvert:
- *	This preprocessor macro is defined to convert a floating point
- *	number to a string without a trailing decimal point.  This
- *	emulates the behavior of sprintf("%g"), but is sometimes much more
- *	efficient.  If gconvert() is not available, but gcvt() drops the
- *	trailing decimal point, then gcvt() is used.  If all else fails,
- *	a macro using sprintf("%g") is used.
- */
-#define Gconvert(x,n,t,b) my_gconvert(x,n,t,b)
-
 /* HAS_ISASCII:
  *	This manifest constant lets the C program know that the
  *	isascii is available.
  */
 #define HAS_ISASCII		/**/
-
-/* USE_LINUX_STDIO:
- *	This symbol is defined if this system has a FILE structure declaring
- *	_IO_read_base, _IO_read_ptr, and _IO_read_end in stdio.h.
- */
-#undef USE_LINUX_STDIO 	/**/
 
 /* HAS_LOCALECONV:
  *	This symbol, if defined, indicates that the localeconv routine is
@@ -1442,11 +1463,53 @@
  */
 #undef HAS_SYSCONF     /**/
 
+/* Gconvert:
+ *	This preprocessor macro is defined to convert a floating point
+ *	number to a string without a trailing decimal point.  This
+ *	emulates the behavior of sprintf("%g"), but is sometimes much more
+ *	efficient.  If gconvert() is not available, but gcvt() drops the
+ *	trailing decimal point, then gcvt() is used.  If all else fails,
+ *	a macro using sprintf("%g") is used.  Arguments for the Gconvert
+ *	macro are: value, number of digits, whether trailing zeros should
+ *	be retained, and the output buffer.
+ *	Possible values are:
+ *		d_Gconvert='gconvert((x),(n),(t),(b))'
+ *		d_Gconvert='gcvt((x),(n),(b))'
+ *		d_Gconvert='sprintf((b),"%.*g",(n),(x))'
+ *	The last two assume trailing zeros should not be kept.
+ */
+#define Gconvert(x,n,t,b) my_gconvert(x,n,t,b)
+
 /* USE_DYNAMIC_LOADING:
  *	This symbol, if defined, indicates that dynamic loading of
  *	some sort is available.
  */
 #define USE_DYNAMIC_LOADING		/**/
+
+/* VOIDFLAGS:
+ *	This symbol indicates how much support of the void type is given by this
+ *	compiler.  What various bits mean:
+ *
+ *	    1 = supports declaration of void
+ *	    2 = supports arrays of pointers to functions returning void
+ *	    4 = supports comparisons between pointers to void functions and
+ *		    addresses of void functions
+ *	    8 = suports declaration of generic void pointers
+ *
+ *	The package designer should define VOIDUSED to indicate the requirements
+ *	of the package.  This can be done either by #defining VOIDUSED before
+ *	including config.h, or by defining defvoidused in Myinit.U.  If the
+ *	latter approach is taken, only those flags will be tested.  If the
+ *	level of void support necessary is not present, defines void to int.
+ */
+#ifndef VOIDUSED
+#define VOIDUSED 15
+#endif
+#define VOIDFLAGS 15
+#if (VOIDFLAGS & VOIDUSED) != VOIDUSED
+#define void int		/* is void to be avoided? */  /* config-skip */
+#define M_VOID			/* Xenix strikes again */     /* config-skip */
+#endif
 
 #ifdef VMS_DO_SOCKETS
 /* HAS_SOCKET:
@@ -1488,11 +1551,31 @@
 #define Groups_t unsigned int	/* Type for 2nd arg to getgroups() */  /* config-skip */
 #endif
 
+/* DB_Prefix_t:
+ *	This symbol contains the type of the prefix structure element
+ *	in the <db.h> header file.  In older versions of DB, it was
+ *	int, while in newer ones it is u_int32_t.
+ */
+/* DB_Hash_t:
+ *	This symbol contains the type of the prefix structure element
+ *	in the <db.h> header file.  In older versions of DB, it was
+ *	int, while in newer ones it is size_t.
+ */
+#undef DB_Hash_t	/**/
+#undef DB_Prefix_t	/**/
+
 /* I_NET_ERRNO:
  *	This symbol, if defined, indicates that <net/errno.h> exists and 
  *	should be included.
 */
 #undef I_NET_ERRNO		/**/          /* config-skip */
+
+/* HAS_SELECT:
+ *	This symbol, if defined, indicates that the select routine is
+ *	available to select active file descriptors. If the timeout field
+ *	is used, <sys/time.h> may need to be included.
+ */
+#define HAS_SELECT	/**/              /* config-skip */
 
 #else /* VMS_DO_SOCKETS */
 
@@ -1501,6 +1584,7 @@
 #undef HAS_GETHOSTENT		/**/      /* config-skip */
 #undef I_NETINET_IN	/**/              /* config-skip */
 #undef I_NET_ERRNO		/**/          /* config-skip */
+#undef HAS_SELECT	/**/              /* config-skip */
 
 #endif /* !VMS_DO_SOCKETS */
 

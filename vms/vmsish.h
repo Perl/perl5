@@ -2,7 +2,8 @@
  *
  * VMS-specific C header file for perl5.
  *
- * Last revised: 12-Dec-1994 by Charles Bailey  bailey@genetics.upenn.edu
+ * Last revised: 01-Oct-1995 by Charles Bailey  bailey@genetics.upenn.edu
+ * Version: 5.2.b1
  */
 
 #ifndef __vmsish_h_included
@@ -20,6 +21,15 @@
  */
 #ifdef __DECC
 #  pragma message disable (GLOBALEXT,NOSHAREEXT,ADDRCONSTEXT)
+#endif
+
+/* Suppress compiler warnings from DECC for VMS-specific extensions:
+ * GLOBALEXT, NOSHAREEXT: global[dr]ef declarations
+ * ADDRCONSTEXT,NEEDCONSTEXT: initialization of data with non-constant values
+ *                            (e.g. pointer fields of descriptors)
+ */
+#ifdef __DECC
+#  pragma message disable (GLOBALEXT,NOSHAREEXT,ADDRCONSTEXT,NEEDCONSTEXT)
 #endif
 
 /* DEC's C compilers and gcc use incompatible definitions of _to(upp|low)er() */
@@ -52,6 +62,13 @@
 #include <file.h>  /* it's not <sys/file.h>, so don't use I_SYS_FILE */
 #define unlink kill_file
 
+/*  The VMS C RTL has vfork() but not fork().  Both actually work in a way
+ *  that's somewhere between Unix vfork() and VMS lib$spawn(), so it's
+ *  probably not a good idea to use them much.  That said, we'll try to
+ *  use vfork() in either case.
+ */
+#define fork vfork
+
 /* Macros to set errno using the VAX thread-safe calls, if present */
 #if (defined(__DECC) || defined(__DECCXX)) && !defined(__ALPHA)
 #  define set_errno(v)      (cma$tis_errno_set_value(v))
@@ -62,30 +79,56 @@
 #endif
 
 /* Handy way to vet calls to VMS system services and RTL routines. */
-#define _ckvmssts(call) { register unsigned long int __ckvms_sts; \
+#define _ckvmssts(call) do { register unsigned long int __ckvms_sts; \
   if (!((__ckvms_sts=(call))&1)) { \
   set_errno(EVMSERR); set_vaxc_errno(__ckvms_sts); \
-  croak("Fatal VMS error at %s, line %d",__FILE__,__LINE__); } }
+  croak("Fatal VMS error (status=%d) at %s, line %d", \
+  __ckvms_sts,__FILE__,__LINE__); } } while (0);
 
 #ifdef VMS_DO_SOCKETS
 #include "sockadapt.h"
 #endif
 
-/*
- * The following symbols are defined (or undefined) according to the RTL
- * support VMS provides for the corresponding functions.  These don't
- * appear in config.h, so they're dealt with here.
- */
 #define HAS_KILL
 #define HAS_WAIT
 
-/*  The VMS C RTL has vfork() but not fork().  Both actually work in a way
- *  that's somewhere between Unix vfork() and VMS lib$spawn(), so it's
- *  probably not a good idea to use them much.  That said, we'll try to
- *  use vfork() in either case.
- */
-#define fork vfork
+/* VMS:
+ *	This symbol, if defined, indicates that the program is running under
+ *	VMS.  It's a symbol automagically defined by all VMS C compilers I've seen.
+ * Just in case, however . . . */
+#ifndef VMS
+#define VMS		/**/
+#endif
 
+/* HAS_IOCTL:
+ *	This symbol, if defined, indicates that the ioctl() routine is
+ *	available to set I/O characteristics
+ */
+#undef	HAS_IOCTL		/**/
+ 
+/* HAS_UTIME:
+ *	This symbol, if defined, indicates that the routine utime() is
+ *	available to update the access and modification times of files.
+ */
+#define HAS_UTIME		/**/
+
+/* HAS_GROUP
+ *	This symbol, if defined, indicates that the getgrnam(),
+ *	getgrgid(), and getgrent() routines are available to 
+ *	get group entries.
+ */
+#undef HAS_GROUP		/**/
+
+/* HAS_PASSWD
+ *	This symbol, if defined, indicates that the getpwnam(),
+ *	getpwuid(), and getpwent() routines are available to 
+ *	get password entries.
+ */
+#define HAS_PASSWD		/**/
+
+#define HAS_KILL
+#define HAS_WAIT
+  
 /*
  * fwrite1() should be a routine with the same calling sequence as fwrite(),
  * but which outputs all of the bytes requested as a single stream (unlike
@@ -116,6 +159,13 @@ struct tms {
   clock_t tms_cutime;   /* user time, children */
   clock_t tms_cstime;   /* system time, children - always 0 on VMS */
 };
+
+/* Prior to VMS 7.0, the CRTL gmtime() routine was a stub which always
+ * returned NULL.  Substitute our own routine, which uses the logical
+ * SYS$TIMEZONE_DIFFERENTIAL, whcih the native UTC support routines
+ * in VMS 6.0 or later use.*
+ */
+#define gmtime(t) my_gmtime(t)
 
 /* VMS doesn't use a real sys_nerr, but we need this when scanning for error
  * messages in text strings . . .
@@ -271,6 +321,7 @@ void	seekdir _((DIR *, long));
 void	closedir _((DIR *));
 void	vmsreaddirversions _((DIR *, int));
 void	getredirection _((int *, char ***));
+struct tm *my_gmtime _((const time_t *));
 I32	cando_by_name _((I32, I32, char *));
 int	flex_fstat _((int, struct stat *));
 int	flex_stat _((char *, struct stat *));

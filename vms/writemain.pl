@@ -18,7 +18,6 @@ open (OUT,">${dir}perlmain.c")
   || die "$0: Can't open ${dir}perlmain.c: $!\n";
 
 while (<IN>) {
-  s/INTERN\.h/EXTERN\.h/;
   print OUT;
   last if /Do not delete this line--writemain depends on it/;
 }
@@ -31,6 +30,13 @@ if (!$ok) {
   die "$0: Can't find marker line in ${dir}miniperlmain.c - aborting\n";
 }
 
+
+print OUT <<'EOH';
+
+static void
+xs_init()
+{
+EOH
 
 if (@ARGV) {
   # Allow for multiple names in one quoted group

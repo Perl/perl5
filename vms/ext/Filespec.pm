@@ -42,8 +42,8 @@ behaves like a normal Perl extension (in fact, you're using Perl
 substitutes to emulate the necessary VMS system calls).
 
 Each of these routines accepts a file specification in either VMS or
-Unix syntax, and returns the converted file specification, ir undef if
-an error occurs.  The conversions are, for the most part, simply
+Unix syntax, and returns the converted file specification, or C<undef>
+if an error occurs.  The conversions are, for the most part, simply
 string manipulations; the routines do not check the details of syntax
 (e.g. that only legal characters are used).  There is one exception:
 when running under VMS, conversions from VMS syntax use the $PARSE
@@ -69,6 +69,10 @@ Converts a directory specification to a path - that is, a string you
 can prepend to a file name to form a valid file specification.  If the
 input file specification uses VMS syntax, the returned path does, too;
 likewise for Unix syntax (Unix paths are guaranteed to end with '/').
+Note that this routine will insist that the input be a legal directory
+file specification; the file type and version, if specified, must be
+F<.DIR;1>.  For compatibility with Unix usage, the type and version
+may also be omitted.
 
 =head2 fileify
 
@@ -76,7 +80,9 @@ Converts a directory specification to the file specification of the
 directory file - that is, a string you can pass to functions like
 C<stat> or C<rmdir> to manipulate the directory file.  If the
 input directory specification uses VMS syntax, the returned file
-specification does, too; likewise for Unix syntax.
+specification does, too; likewise for Unix syntax.  As with
+C<pathify>, the input file specification must have a type and
+version of F<.DIR;1>, or the type and version must be omitted.
 
 =head2 vmspath
 
@@ -98,21 +104,22 @@ C<candelete> becomes part of the Perl core.
 
 =head1 REVISION
 
-This document was last revised 08-Mar-1995, for Perl 5.001.
+This document was last revised 08-Dec-1995, for Perl 5.002.
 
 =cut
 
 package VMS::Filespec;
 
-# If you want to use this package on a non-VMS system, uncomment
-# the following line, and add AutoLoader to @ISA.
-# require AutoLoader;
+# If you want to use this package on a non-VMS system,
+# uncomment the following line.
+# use AutoLoader;
 require Exporter;
 
 @ISA = qw( Exporter );
-@EXPORT = qw( &rmsexpand &vmsify &unixify &pathify 
-              &fileify &vmspath &unixpath &candelete);
+@EXPORT = qw( &vmsify &unixify &pathify  &fileify
+              &vmspath &unixpath &candelete);
 
+@EXPORT_OK = qw( &rmsexpand );
 1;
 
 

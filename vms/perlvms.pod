@@ -1,4 +1,8 @@
-=head1 Notes on Perl 5 for VMS
+=head1 NAME
+
+perlvms - VMS-specific documentation for Perl
+
+=head1 DESCRIPTION
 
 Gathered below are notes describing details of Perl 5's 
 behavior on VMS.  They are a supplement to the regular Perl 5 
@@ -15,9 +19,9 @@ sleep when writing Perl scripts on VMS.  If you find we've
 missed something you think should appear here, please don't 
 hesitate to drop a line to vmsperl@genetics.upenn.edu.
 
-=head1 Organization of Perl
+=head1 Organization of Perl Images
 
-=head2 Perl Images
+=head2 Core Images
 
 During the installation process, three Perl images are produced.
 F<Miniperl.Exe> is an executable image which contains all of
@@ -75,7 +79,7 @@ for the extension, and F<Makefile.PL>, a Perl script which uses
 the C<MakeMaker> library modules supplied with Perl to generate
 a F<Descrip.MMS> file for the extension.
 
-=head3 Installing static extensions
+=head2 Installing static extensions
 
 Since static extensions are incorporated directly into
 F<PerlShr.Exe>, you'll have to rebuild Perl to incorporate a
@@ -94,32 +98,43 @@ of the extension, with all C<::> replaced by C<.> (e.g.
 the library module for extension Foo::Bar would be copied
 to a F<[.Foo.Bar]> subdirectory).
 
-=head3 Installic dynamic extensions
+=head2 Installing dynamic extensions
 
-First, you'll need to compile the XS code into a shareable image,
-either by hand or using the F<Descrip.MMS> supplied with the
-extension.  If you're building the shareable image by hand, please
-note the following points:
-    - The shareable image must be linked to F<PerlShr.Exe>, so it
-      has access to Perl's global variables and routines.  In
-      order to specify the correct attributes for psects in
-      F<PerlShr.Exe>, you should include the linker options file
-      F<PerlShr_Attr.Opt> in the Link command.  (This file is
-      generated when F<PerlShr.Exe> is built, and is found in the
-      main Perl source directory.
-    - The entry point for the C<boot_>I<Extname> routine (where
-      I<Extname> is the name of the extension, with all C<::>
-      replaced by C<__>) must be a universal symbol.  No other
-      universal symbols are required to use the shareable image
-      with Perl, though you may want to include additional
-      universal symbols if you plan to share code or data among
-      different extensions.
-The shareable image can be placed in any of several locations:
-   - the F<[.Auto.>I<Extname>F<]> subdirectory of one of
-     the directories in C<@INC>, where I<Extname> is the
-     name of the extension, with each C<::> translated to C<.>
-     (e.g. for extension Foo::Bar, you would use the
-     F<[.Auto.Foo.Bar]> subdirectory), or
+In general, the distributed kit for a Perl extension includes
+a file named Makefile.PL, which is a Perl program which is used
+to create a F<Descrip.MMS> file which can be used to build and
+install the files required by the extension.  The kit should be
+unpacked into a directory tree E<not> under the main Perl source
+directory, and the procedure for building the extension is simply
+
+=over 4
+
+    $ perl Makefile.PL  ! Create Descrip.MMS
+    $ mmk               ! Build necessary files
+    $ mmk test          ! Run test code, if supplied
+    $ mmk install       ! Install into public Perl tree
+
+=back
+
+VMS support for this process in the current release of Perl
+is sufficient to handle most extensions.  However, it does
+not yet recognize extra libraries required to build shareable
+images which are part of an extension, so these must be added
+to the linker options file for the extension by hand.  For
+instance, if the F<PGPLOT> extension to Perl requires the
+F<PGPLOTSHR.EXE> shareable image in order to properly link
+the Perl extension, then the line C<PGPLOTSHR/Share> must
+be added to the linker options file F<PGPLOT.Opt> produced
+during the build process for the Perl extension.
+
+By default, the shareable image for an extension is placed
+in the F<[.Lib.Auto.I<Arch>.I<Extname>]> directory of the
+installed Perl directory tree (where I<Arch> is F<VMS_VAX> or
+F<VMS_AXP>, and I<Extname> is the name of the extension, with
+each C<::> translated to C<.>).  However, it can be manually
+placed in any of several locations:
+   - the F<[.Lib.Auto.I<Extname>]> subdirectory of one of
+     the directories in C<@INC>, or
    - one of the directories in C<@INC>, or
    - a directory which the extensions Perl library module
      passes to the DynaLoader when asking it to map
@@ -129,10 +144,6 @@ If the shareable image isn't in any of these places, you'll need
 to define a logical name I<Extshortname>, where I<Extshortname>
 is the portion of the extension's name after the last C<::>, which
 translates to the full file specification of the shareable image.
-
-Once you've got the shareable image set up, you should copy the
-extension's Perl library module to the appropriate library directory
-(see the section above on installing static extensions).
 
 =head1 Installation
 
@@ -260,20 +271,20 @@ Perl functions were implemented in the VMS port of Perl
     close, closedir, cos, defined, delete, die, do,
     each, endpwent, eof, eval, exec*, exists, exit,
     exp, fileno, fork*, getc, getpwent*, getpwnam*,
-    getpwuid*, glob, goto, grep, hex, import, index,
-    int, join, keys, kill, last, lc, lcfirst, length,
-    local, localtime, log, m//, map, mkdir, my, next,
-    no, oct, open, opendir, ord, pack, pipe, pop, pos,
-    print, printf, push, q//, qq//, qw//, qx//,
+    getpwuid*, glob, gmtime*, goto, grep, hex, import,
+    index, int, join, keys, kill*, last, lc, lcfirst,
+    length, local, localtime, log, m//, map, mkdir, my,
+    next, no, oct, open, opendir, ord, pack, pipe, pop,
+    pos, print, printf, push, q//, qq//, qw//, qx//,
     quotemeta, rand, read, readdir, redo, ref, rename,
     require, reset, return, reverse, rewinddir, rindex,
-    rmdir, s///, scalar, seek, seekdir, select(internal)*,
-    setpwent, shift, sin, sleep, sort, splice, split,
-    sprintf, sqrt, srand, stat, study, substr, sysread,
-    system*, syswrite, tell, telldir, tie, time, times*,
-    tr///, uc, ucfirst, umask, undef, unlink*, unpack,
-    untie, unshift, use, utime*, values, vec, wait,
-    waitpid*, wantarray, warn, write, y///
+    rmdir, s///, scalar, seek, seekdir, select(internal),
+    select (system call)*, setpwent, shift, sin, sleep,
+    sort, splice, split, sprintf, sqrt, srand, stat,
+    study, substr, sysread, system*, syswrite, tell,
+    telldir, tie, time, times*, tr///, uc, ucfirst, umask,
+    undef, unlink*, unpack, untie, unshift, use, utime*,
+    values, vec, wait, waitpid*, wantarray, warn, write, y///
 
 The following functions were not implemented in the VMS port, 
 and calling them produces a fatal error (usually) or 
@@ -282,11 +293,11 @@ undefined behavior (rarely, we hope):
     chroot, crypt, dbmclose, dbmopen, dump, fcntl,
     flock, getlogin, getpgrp, getppid, getpriority,
     getgrent, kill, getgrgid, getgrnam, setgrent,
-    endgrent, gmtime, ioctl, link, lstst, msgctl,
-    msgget, msgsend, msgrcv, readlink,
-    select(system call), semctl, semget, semop,
-    setpgrp, setpriority, shmctl, shmget, shmread,
-    shmwrite, socketpair, symlink, syscall, truncate
+    endgrent, ioctl, link, lstst, msgctl, msgget,
+    msgsend, msgrcv, readlink, select(system call),
+    semctl, semget, semop, setpgrp, setpriority, shmctl,
+    shmget, shmread, shmwrite, socketpair, symlink,
+    syscall, truncate
 
 The following functions may or may not be implemented, 
 depending on what type of socket support you've built into 
@@ -380,6 +391,39 @@ contains the login directory in Unix syntax. The C<$gcos> item
 contains the owner field from the UAF record.  The C<$quota>
 item is not used.
 
+=item gmtime
+
+The C<gmtime> operator will function properly if you have a
+working CRTL C<gmtime()> routine, or if the logical name
+SYS$TIMEZONE_DIFFERENTIAL is defined as the number of seconds
+which must be added to UTC to yield local time.  (This logical
+name is defined automatically if you are running a version of
+VMS with built-in UTC support.)  If neither of these cases is
+true, a warning message is printed, and C<undef> is returned.
+
+=item kill
+
+In most cases, C<kill> kill is implemented via the CRTL's C<kill()>
+function, so it will behave according to that function's
+documentation.  If you send a SIGKILL, however, the $DELPRC system
+service is is called directly.  This insures that the target
+process is actually deleted, if at all possible.  (The CRTL's C<kill()>
+function is presently implemented via $FORCEX, which is ignored by
+supervisor-mode images like DCL.)
+
+Also, negative signal values don't do anything special under
+VMS; they're just converted to the corresponding positive value.
+
+=item select (system call)
+
+If Perl was not built with socket support, the system call
+version of C<select> is not available at all.  If socket
+support is present, then the system call version of
+C<select> functions only for file descriptors attached
+to sockets.  It will not provide information about regular
+files or pipes, since the CRTL C<select()> routine does not
+provide this functionality.
+
 =item stat EXPR
 
 Since VMS keeps track of files according to a different scheme
@@ -393,7 +437,7 @@ though, so caveat scriptor.
 
 The C<system> operator creates a subprocess, and passes its 
 arguments to the subprocess for execution as a DCL command.  
-Since the subprocess is created directly via lib$spawn, any 
+Since the subprocess is created directly via C<lib$spawn()>, any 
 valid DCL command string may be specified.  If LIST consists
 of the empty string, C<system> spawns an interactive DCL subprocess,
 in the same fashion as typiing B<SPAWN> at the DCL prompt.
@@ -469,4 +513,9 @@ The FLAGS argument is ignored in all cases.
 =head1 Revision date
 
 This document was last updated on 16-Dec-1994, for Perl 5, 
-patchlevel 0.
+patchlevel 2.
+
+=head1 AUTHOR
+
+Charles Bailey  bailey@genetics.upenn.edu
+

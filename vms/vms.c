@@ -2,8 +2,8 @@
  *
  * VMS-specific routines for perl5
  *
- * Last revised:  5-Jun-1995 by Charles Bailey  bailey@genetics.upenn.edu
- * Version: 5.1.5
+ * Last revised: 22-Nov-1995 by Charles Bailey  bailey@genetics.upenn.edu
+ * Version: 5.2.0
  */
 
 #include <acedef.h>
@@ -220,7 +220,8 @@ kill_file(char *name)
     }
     /* Grab any existing ACEs with this identifier in case we fail */
     aclsts = fndsts = sys$change_acl(0,&type,&fildsc,findlst,0,0,&cxt);
-    if ( fndsts & 1 || fndsts == SS$_ACLEMPTY || fndsts == SS$_NOENTRY) {
+    if ( fndsts & 1 || fndsts == SS$_ACLEMPTY || fndsts == SS$_NOENTRY
+                    || fndsts == SS$_NOMOREACE ) {
       /* Add the new ACE . . . */
       if (!((aclsts = sys$change_acl(0,&type,&fildsc,addlst,0,0,0)) & 1))
         goto yourroom;
@@ -304,7 +305,7 @@ int my_utime(char *file, struct utimbuf *utimes)
     set_vaxc_errno(LIB$_INVARG);
     return -1;
   }
-  if (tovmsspec(file,vmsspec) == NULL) return -1;
+  if (do_tovmsspec(file,vmsspec,0) == NULL) return -1;
 
   if (utimes != NULL) {
     /* Convert Unix time    (seconds since 01-JAN-1970 00:00:00.00)
@@ -541,6 +542,7 @@ my_popen(char *cmd, char *mode)
     info->next=open_pipes;  /* prepend to list */
     open_pipes=info;
         
+    forkprocess = info->pid;
     return info->fp;
 }
 /*}}}*/
@@ -670,6 +672,13 @@ my_gconvert(double val, int ndig, int trail, char *buf)
 **   tovmspath() - convert a directory spec into a VMS-style path.
 **   tounixspec() - convert any file spec into a Unix-style file spec.
 **   tovmsspec() - convert any file spec into a VMS-style spec.
+**
+** Copyright 1995 by Charles Bailey  <bailey@genetics.upenn.edu>
+** Permission is given for non-commercial use of this code according
+** to the terms of the GNU General Public License or the Perl
+** Artistic License.  Copies of each may be found in the Perl
+** standard distribution.  This software is supplied without any
+** warranty whatsoever.
  */
 
 static char *do_tounixspec(char *, char *, int);
@@ -683,11 +692,15 @@ static char *do_fileify_dirspec(char *dir,char *buf,int ts)
     char trndir[NAM$C_MAXRSS+1], vmsdir[NAM$C_MAXRSS+1];
 
     if (dir == NULL) return NULL;
-    strcpy(trndir,dir);
-    while (!strpbrk(trndir,"/]:>") && my_trnlnm(trndir,trndir) != NULL) ;
-    dir = trndir;
-
     dirlen = strlen(dir);
+    if (dir[dirlen-1] == '/') dir[--dirlen] = '\0';
+    if (!strpbrk(dir+1,"/]>:")) {
+      strcpy(trndir,*dir == '/' ? dir + 1: dir);
+      while (!strpbrk(trndir,"/]>:>") && my_trnlnm(trndir,trndir) != NULL) ;
+      dir = trndir;
+      dirlen = strlen(dir);
+    }
+
     if (!strpbrk(dir,"]:>")) { /* Unix-style path or plain dir name */
       if (dir[0] == '.') {
         if (dir[1] == '\0' || (dir[1] == '/' && dir[2] == '\0'))
@@ -752,7 +765,7 @@ static char *do_fileify_dirspec(char *dir,char *buf,int ts)
       }
       retlen = dirlen + (addmfd ? 13 : 6);
       if (buf) retspec = buf;
-      else if (ts) New(7009,retspec,retlen+6,char);
+      else if (ts) New(7009,retspec,retlen+1,char);
       else retspec = __fileify_retbuf;
       if (addmfd) {
         dirlen = lastdir - dir;
@@ -771,7 +784,7 @@ static char *do_fileify_dirspec(char *dir,char *buf,int ts)
     }
     else {  /* VMS-style directory spec */
       char esa[NAM$C_MAXRSS+1], term;
-      unsigned long int cmplen, hasdev, hasdir, hastype, hasver;
+      unsigned long int sts, cmplen, hasdev, hasdir, hastype, hasver;
       struct FAB dirfab = cc$rms_fab;
       struct NAM savnam, dirnam = cc$rms_nam;
 
@@ -782,23 +795,31 @@ static char *do_fileify_dirspec(char *dir,char *buf,int ts)
       dirfab.fab$b_dns = 6;
       dirnam.nam$b_ess = NAM$C_MAXRSS;
       dirnam.nam$l_esa = esa;
-      if (!(sys$parse(&dirfab)&1)) {
-        set_errno(EVMSERR);
-        set_vaxc_errno(dirfab.fab$l_sts);
-        return NULL;
-      }
-      savnam = dirnam;
-      if (sys$search(&dirfab)&1) {  /* Does the file really exist? */
-        /* Yes; fake the fnb bits so we'll check type below */
-        dirnam.nam$l_fnb |= NAM$M_EXP_TYPE | NAM$M_EXP_VER;
-      }
-      else {
-        if (dirfab.fab$l_sts != RMS$_FNF) {
+      if (!((sts = sys$parse(&dirfab))&1)) {
+        if (dirfab.fab$l_sts == RMS$_DIR) {
+          dirnam.nam$b_nop |= NAM$M_SYNCHK;
+          sts = sys$parse(&dirfab) & 1;
+        }
+        if (!sts) {
           set_errno(EVMSERR);
           set_vaxc_errno(dirfab.fab$l_sts);
           return NULL;
         }
-        dirnam = savnam; /* No; just work with potential name */
+      }
+      else {
+        savnam = dirnam;
+        if (sys$search(&dirfab)&1) {  /* Does the file really exist? */
+          /* Yes; fake the fnb bits so we'll check type below */
+          dirnam.nam$l_fnb |= NAM$M_EXP_TYPE | NAM$M_EXP_VER;
+        }
+        else {
+          if (dirfab.fab$l_sts != RMS$_FNF) {
+            set_errno(EVMSERR);
+            set_vaxc_errno(dirfab.fab$l_sts);
+            return NULL;
+          }
+          dirnam = savnam; /* No; just work with potential name */
+        }
       }
       if (!(dirnam.nam$l_fnb & (NAM$M_EXP_DEV | NAM$M_EXP_DIR))) {
         cp1 = strchr(esa,']');
@@ -822,7 +843,7 @@ static char *do_fileify_dirspec(char *dir,char *buf,int ts)
       if (dirnam.nam$l_fnb & NAM$M_EXP_NAME) {
         /* They provided at least the name; we added the type, if necessary, */
         if (buf) retspec = buf;                            /* in sys$parse() */
-        else if (ts) New(7011,retspec,dirnam.nam$b_esl,char);
+        else if (ts) New(7011,retspec,dirnam.nam$b_esl+1,char);
         else retspec = __fileify_retbuf;
         strcpy(retspec,esa);
         return retspec;
@@ -836,7 +857,7 @@ static char *do_fileify_dirspec(char *dir,char *buf,int ts)
         /* There's more than one directory in the path.  Just roll back. */
         *cp1 = term;
         if (buf) retspec = buf;
-        else if (ts) New(7011,retspec,retlen+6,char);
+        else if (ts) New(7011,retspec,retlen+7,char);
         else retspec = __fileify_retbuf;
         strcpy(retspec,esa);
       }
@@ -851,7 +872,7 @@ static char *do_fileify_dirspec(char *dir,char *buf,int ts)
           }
           retlen = dirnam.nam$b_esl - 9; /* esa - '][' - '].DIR;1' */
           if (buf) retspec = buf;
-          else if (ts) New(7012,retspec,retlen+14,char);
+          else if (ts) New(7012,retspec,retlen+16,char);
           else retspec = __fileify_retbuf;
           cp1 = strstr(esa,"][");
           dirlen = cp1 - esa;
@@ -879,7 +900,7 @@ static char *do_fileify_dirspec(char *dir,char *buf,int ts)
         }
         else {  /* This is a top-level dir.  Add the MFD to the path. */
           if (buf) retspec = buf;
-          else if (ts) New(7012,retspec,retlen+14,char);
+          else if (ts) New(7012,retspec,retlen+16,char);
           else retspec = __fileify_retbuf;
           cp1 = esa;
           cp2 = retspec;
@@ -938,7 +959,7 @@ static char *do_pathify_dirspec(char *dir,char *buf, int ts)
         }
       }
       if (buf) retpath = buf;
-      else if (ts) New(7013,retpath,retlen,char);
+      else if (ts) New(7013,retpath,retlen+1,char);
       else retpath = __pathify_retbuf;
       strncpy(retpath,dir,retlen-1);
       if (retpath[retlen-2] != '/') { /* If the path doesn't already end */
@@ -949,7 +970,7 @@ static char *do_pathify_dirspec(char *dir,char *buf, int ts)
     }
     else {  /* VMS-style directory spec */
       char esa[NAM$C_MAXRSS+1];
-      unsigned long int cmplen;
+      unsigned long int sts, cmplen;
       struct FAB dirfab = cc$rms_fab;
       struct NAM savnam, dirnam = cc$rms_nam;
 
@@ -959,7 +980,7 @@ static char *do_pathify_dirspec(char *dir,char *buf, int ts)
           dir[dirfab.fab$b_fns-1] == '>' ||
           dir[dirfab.fab$b_fns-1] == ':') { /* It's already a VMS 'path' */
         if (buf) retpath = buf;
-        else if (ts) New(7014,retpath,strlen(dir),char);
+        else if (ts) New(7014,retpath,strlen(dir)+1,char);
         else retpath = __pathify_retbuf;
         strcpy(retpath,dir);
         return retpath;
@@ -967,23 +988,30 @@ static char *do_pathify_dirspec(char *dir,char *buf, int ts)
       dirfab.fab$l_dna = ".DIR;1";
       dirfab.fab$b_dns = 6;
       dirfab.fab$l_nam = &dirnam;
-      dirnam.nam$b_ess = (unsigned char) sizeof esa;
+      dirnam.nam$b_ess = (unsigned char) sizeof esa - 1;
       dirnam.nam$l_esa = esa;
-      if (!(sys$parse(&dirfab)&1)) {
-        set_errno(EVMSERR);
-        set_vaxc_errno(dirfab.fab$l_sts);
-        return NULL;
-      }
-      savnam = dirnam;
-      if (!(sys$search(&dirfab)&1)) {  /* Does the file really exist? */
-        if (dirfab.fab$l_sts != RMS$_FNF) {
+      if (!((sts = sys$parse(&dirfab))&1)) {
+        if (dirfab.fab$l_sts == RMS$_DIR) {
+          dirnam.nam$b_nop |= NAM$M_SYNCHK;
+          sts = sys$parse(&dirfab) & 1;
+        }
+        if (!sts) {
           set_errno(EVMSERR);
           set_vaxc_errno(dirfab.fab$l_sts);
           return NULL;
         }
-        dirnam = savnam; /* No; just work with potential name */
       }
-
+      else {
+        savnam = dirnam;
+        if (!(sys$search(&dirfab)&1)) {  /* Does the file really exist? */
+          if (dirfab.fab$l_sts != RMS$_FNF) {
+            set_errno(EVMSERR);
+            set_vaxc_errno(dirfab.fab$l_sts);
+            return NULL;
+          }
+          dirnam = savnam; /* No; just work with potential name */
+        }
+      }
       if (dirnam.nam$l_fnb & NAM$M_EXP_TYPE) {  /* Was type specified? */
         /* Yep; check version while we're at it, if it's there. */
         cmplen = (dirnam.nam$l_fnb & NAM$M_EXP_VER) ? 6 : 4;
@@ -1024,11 +1052,20 @@ static char *do_tounixspec(char *spec, char *buf, int ts)
 {
   static char __tounixspec_retbuf[NAM$C_MAXRSS+1];
   char *dirend, *rslt, *cp1, *cp2, *cp3, tmp[NAM$C_MAXRSS+1];
-  int devlen, dirlen;
+  int devlen, dirlen, retlen = NAM$C_MAXRSS+1, dashes = 0;
 
   if (spec == NULL) return NULL;
+  if (strlen(spec) > NAM$C_MAXRSS) return NULL;
   if (buf) rslt = buf;
-  else if (ts) New(7015,rslt,NAM$C_MAXRSS+1,char);
+  else if (ts) {
+    retlen = strlen(spec);
+    cp1 = strchr(spec,'[');
+    if (!cp1) cp1 = strchr(spec,'<');
+    if (cp1) {
+      for (cp1++; *cp1 == '-'; cp1++) dashes++; /* VMS  '-' ==> Unix '../' */
+    }
+    New(7015,rslt,retlen+1+2*dashes,char);
+  }
   else rslt = __tounixspec_retbuf;
   if (strchr(spec,'/') != NULL) {
     strcpy(rslt,spec);
@@ -1072,15 +1109,17 @@ static char *do_tounixspec(char *spec, char *buf, int ts)
         while (*cp3 != ':' && *cp3) cp3++;
         *(cp3++) = '\0';
         if (strchr(cp3,']') != NULL) break;
-      } while (((cp3 = getenv(tmp)) != NULL) && strcpy(tmp,cp3));
+      } while (((cp3 = my_getenv(tmp)) != NULL) && strcpy(tmp,cp3));
       cp3 = tmp;
       while (*cp3) *(cp1++) = *(cp3++);
       *(cp1++) = '/';
-      if ((devlen = strlen(tmp)) + (dirlen = strlen(cp2)) + 1 > NAM$C_MAXRSS) {
-        if (ts) Safefree(rslt);
-        set_errno(ERANGE);
-        set_errno(RMS$_SYN);
-        return NULL;
+      if (ts &&
+          ((devlen = strlen(tmp)) + (dirlen = strlen(cp2)) + 1 > retlen)) {
+        int offset = cp1 - rslt;
+
+        retlen = devlen + dirlen;
+        Renew(rslt,retlen+1+2*dashes,char);
+        cp1 = rslt + offset;
       }
     }
     else cp2++;
@@ -1093,8 +1132,12 @@ static char *do_tounixspec(char *spec, char *buf, int ts)
     else if (*cp2 == ']' || *cp2 == '>') *(cp1++) = '/';
     else if (*cp2 == '.') {
       *(cp1++) = '/';
-      while (*(cp2+1) == ']' || *(cp2+1) == '>' ||
-             *(cp2+1) == '[' || *(cp2+1) == '<') cp2++;
+      if (*(cp2+1) == ']' || *(cp2+1) == '>') {
+        while (*(cp2+1) == ']' || *(cp2+1) == '>' ||
+               *(cp2+1) == '[' || *(cp2+1) == '<') cp2++;
+        if (!strncmp(cp2,"[000000",7) && (*(cp2+7) == ']' ||
+            *(cp2+7) == '>' || *(cp2+7) == '.')) cp2 += 7;
+      }
     }
     else if (*cp2 == '-') {
       if (*(cp2-1) == '[' || *(cp2-1) == '<' || *(cp2-1) == '.') {
@@ -1127,12 +1170,13 @@ char *tounixspec_ts(char *spec, char *buf) { return do_tounixspec(spec,buf,1); }
 /*{{{ char *tovmsspec[_ts](char *path, char *buf)*/
 static char *do_tovmsspec(char *path, char *buf, int ts) {
   static char __tovmsspec_retbuf[NAM$C_MAXRSS+1];
-  register char *rslt, *dirend, *cp1, *cp2;
-  register unsigned long int infront = 0;
+  char *rslt, *dirend;
+  register char *cp1, *cp2;
+  unsigned long int infront = 0, hasdir = 1;
 
   if (path == NULL) return NULL;
   if (buf) rslt = buf;
-  else if (ts) New(7016,rslt,strlen(path)+3,char);
+  else if (ts) New(7016,rslt,strlen(path)+9,char);
   else rslt = __tovmsspec_retbuf;
   if (strpbrk(path,"]:>") ||
       (dirend = strrchr(path,'/')) == NULL) {
@@ -1151,11 +1195,37 @@ static char *do_tovmsspec(char *path, char *buf, int ts) {
   cp1 = rslt;
   cp2 = path;
   if (*cp2 == '/') {
+    char trndev[NAM$C_MAXRSS+1];
+    int islnm, rooted;
+    STRLEN trnend;
+
     while (*(++cp2) != '/' && *cp2) *(cp1++) = *cp2;
-    *(cp1++) = ':';
-    *(cp1++) = '[';
-    if (cp2 == dirend) while (infront++ < 6) *(cp1++) = '0';
-    else cp2++;
+    *cp1 = '\0';
+    islnm =  (my_trnlnm(rslt,trndev) != Nullch);
+    trnend = islnm ? strlen(trndev) - 1 : 0;
+    islnm =  trnend ? (trndev[trnend] == ']' || trndev[trnend] == '>') : 0;
+    rooted = islnm ? (trndev[trnend-1] == '.') : 0;
+    /* If the first element of the path is a logical name, determine
+     * whether it has to be translated so we can add more directories. */
+    if (!islnm || rooted) {
+      *(cp1++) = ':';
+      *(cp1++) = '[';
+      if (cp2 == dirend) while (infront++ < 6) *(cp1++) = '0';
+      else cp2++;
+    }
+    else {
+      if (cp2 != dirend) {
+        if (!buf && ts) Renew(rslt,strlen(path)-strlen(rslt)+trnend+4,char);
+        strcpy(rslt,trndev);
+        cp1 = rslt + trnend;
+        *(cp1++) = '.';
+        cp2++;
+      }
+      else {
+        *(cp1++) = ':';
+        hasdir = 0;
+      }
+    }
   }
   else {
     *(cp1++) = '[';
@@ -1200,7 +1270,7 @@ static char *do_tovmsspec(char *path, char *buf, int ts) {
       else *(cp1++) = '_';  /* fix up syntax - '.' in name not allowed */
     }
     else {
-      if (*(cp1-1) == '-')  *(cp1++) = '.';
+      if (!infront && *(cp1-1) == '-')  *(cp1++) = '.';
       if (*cp2 == '/')      *(cp1++) = '.';
       else if (*cp2 == '.') *(cp1++) = '_';
       else                  *(cp1++) =  *cp2;
@@ -1208,7 +1278,7 @@ static char *do_tovmsspec(char *path, char *buf, int ts) {
     }
   }
   if (*(cp1-1) == '.') cp1--; /* Unix spec ending in '/' ==> trailing '.' */
-  *(cp1++) = ']';
+  if (hasdir) *(cp1++) = ']';
   if (*cp2) cp2++;  /* check in case we ended with trailing '..' */
   while (*cp2) *(cp1++) = *(cp2++);
   *cp1 = '\0';
@@ -1233,7 +1303,7 @@ static char *do_tovmspath(char *path, char *buf, int ts) {
   if (buf) return buf;
   else if (ts) {
     vmslen = strlen(vmsified);
-    New(7017,cp,vmslen,char);
+    New(7017,cp,vmslen+1,char);
     memcpy(cp,vmsified,vmslen);
     cp[vmslen] = '\0';
     return cp;
@@ -1262,7 +1332,7 @@ static char *do_tounixpath(char *path, char *buf, int ts) {
   if (buf) return buf;
   else if (ts) {
     unixlen = strlen(unixified);
-    New(7017,cp,unixlen,char);
+    New(7017,cp,unixlen+1,char);
     memcpy(cp,unixified,unixlen);
     cp[unixlen] = '\0';
     return cp;
@@ -1377,7 +1447,7 @@ getredirection(int *ac, char ***av)
     ap = argv[argc-1];
     if (0 == strcmp("&", ap))
 	exit(background_process(--argc, argv));
-    if ('&' == ap[strlen(ap)-1])
+    if (*ap && '&' == ap[strlen(ap)-1])
 	{
 	ap[strlen(ap)-1] = '\0';
 	exit(background_process(argc, argv));
@@ -2088,7 +2158,7 @@ static struct dsc$descriptor_s VMScmd = {0,DSC$K_DTYPE_T,DSC$K_CLASS_S,Nullch};
 static void
 vms_execfree() {
   if (Cmd) {
-    safefree(Cmd);
+    Safefree(Cmd);
     Cmd = Nullch;
   }
   if (VMScmd.dsc$a_pointer) {
@@ -2121,7 +2191,7 @@ setup_argstr(SV *really, SV **mark, SV **sp)
       cmdlen += rlen ? rlen + 1 : 0;
     }
   }
-  New(401,Cmd,cmdlen,char);
+  New(401,Cmd,cmdlen+1,char);
 
   if (tmps && *tmps) {
     strcpy(Cmd,tmps);
@@ -2165,9 +2235,12 @@ setup_cmddsc(char *cmd, int check_img)
   }
   else isdcl = 1;
   if (isdcl) {  /* It's a DCL command, just do it. */
-    VMScmd.dsc$a_pointer = cmd;
     VMScmd.dsc$w_length = strlen(cmd);
-    if (cmd == Cmd) Cmd = Nullch; /* clear Cmd so vms_execfree isok */
+    if (cmd == Cmd) {
+       VMScmd.dsc$a_pointer = Cmd;
+       Cmd = Nullch;  /* Don't try to free twice in vms_execfree() */
+    }
+    else VMScmd.dsc$a_pointer = savepvn(cmd,VMScmd.dsc$w_length);
   }
   else {                           /* assume first token is an image spec */
     cmd = s;
@@ -2188,7 +2261,7 @@ setup_cmddsc(char *cmd, int check_img)
       s = resspec;
       while (*s && !isspace(*s)) s++;
       *s = '\0';
-      New(402,VMScmd.dsc$a_pointer,6 + s - resspec + (rest ? strlen(rest) : 0),char);
+      New(402,VMScmd.dsc$a_pointer,7 + s - resspec + (rest ? strlen(rest) : 0),char);
       strcpy(VMScmd.dsc$a_pointer,"$ MCR ");
       strcat(VMScmd.dsc$a_pointer,resspec);
       if (rest) strcat(VMScmd.dsc$a_pointer,rest);
@@ -2562,6 +2635,57 @@ void my_endpwent()
 }
 /*}}}*/
 
+
+/* my_gmtime
+ * If the CRTL has a real gmtime(), use it, else look for the logical
+ * name SYS$TIMEZONE_DIFFERENTIAL used by the native UTC routines on
+ * VMS >= 6.0.  Can be manually defined under earlier versions of VMS
+ * to translate to the number of seconds which must be added to UTC
+ * to get to the local time of the system.
+ * Contributed by Chuck Lane  <lane@duphy4.physics.drexel.edu>
+ */
+
+/*{{{struct tm *my_gmtime(const time_t *time)*/
+/* We #defined 'gmtime' as 'my_gmtime' in vmsish.h.  #undef it here
+ * so we can call the CRTL's routine to see if it works.
+ */
+#undef gmtime
+struct tm *
+my_gmtime(const time_t *time)
+{
+  static int gmtime_emulation_type;
+  static time_t utc_offset_secs;
+  char *p;
+  time_t when;
+
+  if (gmtime_emulation_type == 0) {
+    gmtime_emulation_type++;
+    when = 300000000;
+    if (gmtime(&when) == NULL) {  /* CRTL gmtime() is just a stub */
+      gmtime_emulation_type++;
+      if ((p = my_getenv("SYS$TIMEZONE_DIFFERENTIAL")) == NULL)
+        gmtime_emulation_type++;
+      else
+        utc_offset_secs = (time_t) atol(p);
+    }
+  }
+
+  switch (gmtime_emulation_type) {
+    case 1:
+      return gmtime(time);
+    case 2:
+      when = *time - utc_offset_secs;
+      return localtime(&when);
+    default:
+      warn("gmtime not supported on this system");
+      return NULL;
+  }
+}  /* end of my_gmtime() */
+/* Reset definition for later calls */
+#define gmtime(t) my_gmtime(t)
+/*}}}*/
+
+
 /*
  * flex_stat, flex_fstat
  * basic stat, but gets it right when asked to stat
@@ -2584,7 +2708,7 @@ void my_endpwent()
  * available, do we try to pack the device name into an integer (flagged by
  * the sign bit (LOCKID_MASK) being set).
  *
- * Note that encode_dev cann guarantee an 1-to-1 correspondence twixt device
+ * Note that encode_dev cannot guarantee an 1-to-1 correspondence twixt device
  * name and its encoded form, but it seems very unlikely that we will find
  * two files on different disks that share the same encoded device names,
  * and even more remote that they will share the same file id (if the test
@@ -2699,7 +2823,7 @@ cando(I32 bit, I32 effective, struct stat *statbufp)
     _ckvmssts(retsts);
     return FALSE;  /* Should never get to here */
   }
-}
+}  /* end of cando() */
 /*}}}*/
 
 /*{{{I32 cando_by_name(I32 bit, I32 effective, char *fname)*/
@@ -2752,7 +2876,7 @@ cando_by_name(I32 bit, I32 effective, char *fname)
   }
 
   retsts = sys$check_access(&objtyp,&namdsc,&usrdsc,armlst);
-  if (retsts == SS$_NOPRIV || retsts == RMS$_FNF ||
+  if (retsts == SS$_NOPRIV || retsts == SS$_NOSUCHOBJ || retsts == RMS$_FNF ||
       retsts == RMS$_DIR   || retsts == RMS$_DEV) return FALSE;
   if (retsts == SS$_NORMAL) {
     if (!privused) return TRUE;
@@ -2788,12 +2912,18 @@ flex_fstat(int fd, struct stat *statbuf)
 /*}}}*/
 
 /*{{{ int flex_stat(char *fspec, struct stat *statbufp)*/
+/* We defined 'stat' as 'mystat' in vmsish.h so that declarations of
+ * 'struct stat' elsewhere in Perl would use our struct.  We go back
+ * to the system version here, since we're actually calling their
+ * stat().
+ */
+#undef stat
 int
-flex_stat(char *fspec, struct stat *statbufp)
+flex_stat(char *fspec, struct mystat *statbufp)
 {
     char fileified[NAM$C_MAXRSS+1];
     int retval,myretval;
-    struct stat tmpbuf;
+    struct mystat tmpbuf;
 
     
     if (statbufp == &statcache) do_tovmsspec(fspec,namecache,0);
@@ -2807,13 +2937,6 @@ flex_stat(char *fspec, struct stat *statbufp)
       statbufp->st_atime = statbufp->st_ctime = statbufp->st_mtime;
       return 0;
     }
-
-/* We defined 'stat' as 'mystat' in vmsish.h so that declarations of
- * 'struct stat' elsewhere in Perl would use our struct.  We go back
- * to the system version here, since we're actually calling their
- * stat().
- */
-#undef stat
 
     if (do_fileify_dirspec(fspec,fileified,0) == NULL) myretval = -1;
     else {
@@ -2835,6 +2958,8 @@ flex_stat(char *fspec, struct stat *statbufp)
     return retval;
 
 }  /* end of flex_stat() */
+/* Reset definition for later calls */
+#define stat mystat
 /*}}}*/
 
 /***  The following glue provides 'hooks' to make some of the routines

@@ -1,5 +1,5 @@
 # Descrip.MMS for perl5 on VMS
-# Last revised  5-Jun-1995 by Charles Bailey  bailey@genetics.upenn.edu
+# Last revised  4-Dec-1995 by Charles Bailey  bailey@genetics.upenn.edu
 #
 #: This file uses MMS syntax, and can be processed using DEC's MMS product,
 #: or the free MMK clone (available by ftp at ftp.spc.edu).  If you want to
@@ -81,10 +81,8 @@ DBGSPECFLAGS =
 XTRADEF = ,GNUC_ATTRIBUTE_CHECK
 XTRAOBJS =
 LIBS1 = GNU_CC:[000000]GCCLIB.OLB/Library
-LIBS2 = Sys$Share:VAXCRTL.Exe/Shareable
+LIBS2 = VAXCRTL/Shareable
 .else
-.first
-	@ If F$TrnLnm("Sys").eqs."" Then Define/NoLog SYS Sys$Library
 XTRAOBJS = 
 LIBS1 = $(XTRAOBJS)
 DBGSPECFLAGS = /Show=(Source,Include,Expansion)
@@ -97,12 +95,14 @@ DBGSPECFLAGS = /Show=(Source,Include,Expansion)
 .first
 	@ Set Process/Privilege=(NoSYSNAM)
 LIBS2 = 
-XTRACCFLAGS = /Include=[]/Prefix=All/Obj=$(MMS$TARGET_NAME)$(O)
+XTRACCFLAGS = /Include=[]/Standard=Relaxed_ANSI/Prefix=All/Obj=$(MMS$TARGET_NAME)$(O)
 XTRADEF =
 .else # VAXC
+.first
+	@ If F$TrnLnm("Sys").eqs."" Then Define/NoLog SYS Sys$Library
 XTRACCFLAGS = /Include=[]/Object=$(O)
 XTRADEF =
-LIBS2 = Sys$Share:VAXCRTL.Exe/Shareable
+LIBS2 = VAXCRTL/Shareable
 .endif
 .endif
 
@@ -111,7 +111,7 @@ LIBS2 = Sys$Share:VAXCRTL.Exe/Shareable
 #: __DEBUG__: builds images with full VMS debugger support
 .ifdef __DEBUG__
 DBGCCFLAGS = /List/Debug/NoOpt$(DBGSPECFLAGS)
-DBGLINKFLAGS = /Debug/Map/Full/Cross
+DBGLINKFLAGS = /Trace/Debug/Map/Full/Cross
 DBG = DBG
 .else
 DBGCCFLAGS = /NoList
@@ -149,14 +149,14 @@ SOCKPM =
 CFLAGS = /Define=(DEBUGGING$(SOCKDEF)$(XTRADEF))$(XTRACCFLAGS)$(DBGCCFLAGS)
 LINKFLAGS = $(DBGLINKFLAGS)
 
-MAKE = MMK
+MAKE = $(MMS)
 MAKEFILE = [.VMS]Descrip.MMS   # this file
 NOOP = continue
 
 # Macros to invoke a copy of miniperl during the build.  Targets which
 # are built using these macros should depend on $(MINIPERL_EXE)
 MINIPERL_EXE = Sys$Disk:[]miniperl$(E)
-MINIPERL = MCR $(MINIPERL_EXE) "-Ilib"
+MINIPERL = MCR $(MINIPERL_EXE) "-I[.lib]"
 XSUBPP = $(MINIPERL) [.lib.extutils]xsubpp
 # Macro to invoke a preexisting copy of Perl.  This is used to regenerate
 # some header files when rebuilding Perl, but premade versions are provided
@@ -237,9 +237,9 @@ CRTLOPTS =,$(CRTL)/Options
 
 all : base extras archcorefiles preplibrary
 	@ $(NOOP)
-base : miniperl$(E) perl$(E) [.lib.$(ARCH)]Config.pm 
+base : miniperl$(E) perl$(E)
 	@ $(NOOP)
-extras : [.lib]DynaLoader.pm [.lib.VMS]Filespec.pm [.lib.extutils]MM_VMS.pm
+extras :  [.lib]Config.pm [.lib.$(ARCH)]Config.pm [.lib]DynaLoader.pm [.lib.VMS]Filespec.pm [.lib.extutils]MM_VMS.pm
 	@ $(NOOP)
 archcorefiles :  $(ac1) $(ac2) $(ac3) $(ac4) $(ac5) $(ac6) $(ac7) $(ac8) $(ac9) $(acs) $(ARCHAUTO)time.stamp
 	@ $(NOOP)
@@ -259,11 +259,11 @@ $(DBG)libperl$(OLB) : $(obj)
 perlmain.c : miniperlmain.c $(MINIPERL_EXE) [.vms]writemain.pl
 	$(MINIPERL) [.VMS]Writemain.pl "$(EXT)"
 
-perl$(E) : perlmain$(O), perlshr$(E), perlshr_attr.opt $(MINIPERL_EXE)
+perl$(E) : perlmain$(O), perlshr$(E), $(MINIPERL_EXE)
 	@ @[.vms]genopt "PerlShr.Opt/Write" "|" "''F$Environment("Default")'$(DBG)PerlShr$(E)/Share"
 	Link $(LINKFLAGS)/Exe=$(DBG)$(MMS$TARGET) perlmain$(O), perlshr.opt/Option, perlshr_attr.opt/Option
 perlshr$(E) : $(DBG)libperl$(OLB) $(extobj) $(DBG)perlshr_xtras.ts
-	Link $(LINKFLAGS)/Share=$(DBG)$(MMS$TARGET) $(extobj) []$(DBG)perlshr_bld.opt/Option, perlshr_attr.opt/Option
+	Link /NoTrace$(LINKFLAGS)/Share=$(DBG)$(MMS$TARGET) $(extobj) []$(DBG)perlshr_bld.opt/Option, perlshr_attr.opt/Option
 # The following files are built in one go by gen_shrfls.pl:
 #  perlshr_attr.opt, $(DBG)perlshr_bld.opt - VAX and AXP
 #  perlshr_gbl*.mar, perlshr_gbl*$(O) - VAX only
@@ -288,7 +288,7 @@ $(DBG)perlshr_xtras.ts : perl.h config.h vmsish.h proto.h [.vms]gen_shrfls.pl $(
 	Copy $(MMS$SOURCE) $(MMS$TARGET)
 
 [.lib]config.pm : [.vms]config.vms [.vms]genconfig.pl $(MINIPERL_EXE)
-	$(MINIPERL) [.VMS]GenConfig.Pl cc=$(CC)$(CFLAGS) ldflags=$(LINKFLAGS)
+	$(MINIPERL) [.VMS]GenConfig.Pl cc=$(CC)$(CFLAGS) ldflags=$(LINKFLAGS) obj_ext=$(O) exe_ext=$(E) lib_ext=$(OLB)
 	$(MINIPERL) ConfigPM.
 
 [.ext.dynaloader]dl_vms.c : [.ext.dynaloader]dl_vms.xs $(MINIPERL_EXE)
@@ -301,7 +301,7 @@ $(DBG)perlshr_xtras.ts : perl.h config.h vmsish.h proto.h [.vms]gen_shrfls.pl $(
 	Copy/Log/NoConfirm [.ext.dynaloader]dynaloader.pm [.lib]DynaLoader.pm
 
 [.lib.VMS]Filespec.pm : [.vms.ext]Filespec.pm
-	@ Create/Directory [.lib.VMS]
+	@ If F$Search("[.lib]VMS.Dir").eqs."" Then Create/Directory [.lib.VMS]
 	Copy/Log/NoConfirm $(MMS$SOURCE) $(MMS$TARGET)
 
 [.lib.ExtUtils]MM_VMS.pm : [.vms.ext]MM_VMS.pm
@@ -310,7 +310,7 @@ $(DBG)perlshr_xtras.ts : perl.h config.h vmsish.h proto.h [.vms]gen_shrfls.pl $(
 preplibrary : $(MINIPERL_EXE) [.lib]DynaLoader.pm [.lib.VMS]Filespec.pm [.lib.ExtUtils]MM_VMS.pm $(SOCKPM)
 	@ Write Sys$Output "Autosplitting Perl library . . ."
 	@ Create/Directory [.lib.auto]
-	@ $(MINIPERL) "-Ilib" -e "use AutoSplit; autosplit_lib_modules(@ARGV)" [.lib]*.pm [.lib.*]*.pm
+	@ $(MINIPERL) -e "use AutoSplit; autosplit_lib_modules(@ARGV)" [.lib]*.pm [.lib.*]*.pm
 
 .ifdef SOCKET
 $(SOCKOBJ) : $(SOCKC) $(SOCKH)
@@ -333,15 +333,18 @@ $(SOCKH) : [.vms]$(SOCKH)
 	Copy/Log/NoConfirm $(MMS$SOURCE) $(MMS$TARGET)
 .endif
 
-opcode.h : opcode.pl
-	@ Write Sys$Output "Don't worry if this fails."
-	- $(INSTPERL) opcode.pl
-keywords.h : keywords.pl
-	@ Write Sys$Output "Don't worry if this fails."
-	- $(INSTPERL) keywords.pl
-embed.h : global.sym interp.sym
-	@ Write Sys$Output "Don't worry if this fails."
-	- $(INSTPERL) [.vms]embed_h.pl
+# The following three header files are generated automatically
+#	keywords.h :	keywords.pl
+#	opcode.h :	opcode.pl
+#	embed.h :	embed.pl global.sym interp.sym
+# The correct versions should be already supplied with the perl kit,
+# in case you don't have perl available.
+# To force them to run, type
+#	MMS regen_headers
+regen_headers :
+	$(INSTPERL) keywords.pl
+	$(INSTPERL) opcode.pl
+	$(INSTPERL) embed.pl
 
 # VMS uses modified perly.[ch] with tags for globaldefs if using DEC compiler
 perly.c : [.vms]perly_c.vms
@@ -353,7 +356,7 @@ perly.h : [.vms]perly_h.vms
 # commented out if you don't have byacc.
 # Altered for VMS by Charles Bailey  bailey@genetics.upenn.edu
 # perly.c:
-# 	@ Write Sys$Output 'Expect' 80 shift/reduce and 62 reduce/reduce conflicts
+# 	@ Write Sys$Output "Expect 80 shift/reduce and 62 reduce/reduce conflicts"
 # 	\$(BYACC) -d perly.y
 # Has to be done by hand or by POSIX shell under VMS
 # 	sh \$(shellflags) ./perly.fixer y.tab.c perly.c
@@ -363,108 +366,108 @@ perly.h : [.vms]perly_h.vms
 perly$(O) : perly.c, perly.h, $(h)
 	$(CC) $(CFLAGS) $(MMS$SOURCE)
 
-test : perl$(E)
+test : all
 	- @[.VMS]Test.Com
 
 # CORE subset for MakeMaker, so we can build Perl without sources
 # Should move to VMS installperl when we get one
 $(ARCHCORE)EXTERN.h : EXTERN.h
-	@ Create/Directory $(ARCHCORE)
+	@ If F$Search("[.lib.$(ARCH)]CORE.dir").eqs."" Then Create/Directory $(ARCHCORE)
 	Copy/Log $(MMS$SOURCE) $(MMS$TARGET)
 $(ARCHCORE)INTERN.h : INTERN.h
-	@ Create/Directory $(ARCHCORE)
+	@ If F$Search("[.lib.$(ARCH)]CORE.dir").eqs."" Then Create/Directory $(ARCHCORE)
 	Copy/Log $(MMS$SOURCE) $(MMS$TARGET)
 $(ARCHCORE)XSUB.h : XSUB.h
-	@ Create/Directory $(ARCHCORE)
+	@ If F$Search("[.lib.$(ARCH)]CORE.dir").eqs."" Then Create/Directory $(ARCHCORE)
 	Copy/Log $(MMS$SOURCE) $(MMS$TARGET)
 $(ARCHCORE)av.h : av.h
-	@ Create/Directory $(ARCHCORE)
+	@ If F$Search("[.lib.$(ARCH)]CORE.dir").eqs."" Then Create/Directory $(ARCHCORE)
 	Copy/Log $(MMS$SOURCE) $(MMS$TARGET)
 $(ARCHCORE)config.h : config.h
-	@ Create/Directory $(ARCHCORE)
+	@ If F$Search("[.lib.$(ARCH)]CORE.dir").eqs."" Then Create/Directory $(ARCHCORE)
 	Copy/Log $(MMS$SOURCE) $(MMS$TARGET)
 $(ARCHCORE)cop.h : cop.h
-	@ Create/Directory $(ARCHCORE)
+	@ If F$Search("[.lib.$(ARCH)]CORE.dir").eqs."" Then Create/Directory $(ARCHCORE)
 	Copy/Log $(MMS$SOURCE) $(MMS$TARGET)
 $(ARCHCORE)cv.h : cv.h
-	@ Create/Directory $(ARCHCORE)
+	@ If F$Search("[.lib.$(ARCH)]CORE.dir").eqs."" Then Create/Directory $(ARCHCORE)
 	Copy/Log $(MMS$SOURCE) $(MMS$TARGET)
 $(ARCHCORE)embed.h : embed.h
-	@ Create/Directory $(ARCHCORE)
+	@ If F$Search("[.lib.$(ARCH)]CORE.dir").eqs."" Then Create/Directory $(ARCHCORE)
 	Copy/Log $(MMS$SOURCE) $(MMS$TARGET)
 $(ARCHCORE)form.h : form.h
-	@ Create/Directory $(ARCHCORE)
+	@ If F$Search("[.lib.$(ARCH)]CORE.dir").eqs."" Then Create/Directory $(ARCHCORE)
 	Copy/Log $(MMS$SOURCE) $(MMS$TARGET)
 $(ARCHCORE)gv.h : gv.h
-	@ Create/Directory $(ARCHCORE)
+	@ If F$Search("[.lib.$(ARCH)]CORE.dir").eqs."" Then Create/Directory $(ARCHCORE)
 	Copy/Log $(MMS$SOURCE) $(MMS$TARGET)
 $(ARCHCORE)handy.h : handy.h
-	@ Create/Directory $(ARCHCORE)
+	@ If F$Search("[.lib.$(ARCH)]CORE.dir").eqs."" Then Create/Directory $(ARCHCORE)
 	Copy/Log $(MMS$SOURCE) $(MMS$TARGET)
 $(ARCHCORE)hv.h : hv.h
-	@ Create/Directory $(ARCHCORE)
+	@ If F$Search("[.lib.$(ARCH)]CORE.dir").eqs."" Then Create/Directory $(ARCHCORE)
 	Copy/Log $(MMS$SOURCE) $(MMS$TARGET)
 $(ARCHCORE)keywords.h : keywords.h
-	@ Create/Directory $(ARCHCORE)
+	@ If F$Search("[.lib.$(ARCH)]CORE.dir").eqs."" Then Create/Directory $(ARCHCORE)
 	Copy/Log $(MMS$SOURCE) $(MMS$TARGET)
 $(ARCHCORE)mg.h : mg.h
-	@ Create/Directory $(ARCHCORE)
+	@ If F$Search("[.lib.$(ARCH)]CORE.dir").eqs."" Then Create/Directory $(ARCHCORE)
 	Copy/Log $(MMS$SOURCE) $(MMS$TARGET)
 $(ARCHCORE)op.h : op.h
-	@ Create/Directory $(ARCHCORE)
+	@ If F$Search("[.lib.$(ARCH)]CORE.dir").eqs."" Then Create/Directory $(ARCHCORE)
 	Copy/Log $(MMS$SOURCE) $(MMS$TARGET)
 $(ARCHCORE)opcode.h : opcode.h
-	@ Create/Directory $(ARCHCORE)
+	@ If F$Search("[.lib.$(ARCH)]CORE.dir").eqs."" Then Create/Directory $(ARCHCORE)
 	Copy/Log $(MMS$SOURCE) $(MMS$TARGET)
 $(ARCHCORE)patchlevel.h : patchlevel.h
-	@ Create/Directory $(ARCHCORE)
+	@ If F$Search("[.lib.$(ARCH)]CORE.dir").eqs."" Then Create/Directory $(ARCHCORE)
 	Copy/Log $(MMS$SOURCE) $(MMS$TARGET)
 $(ARCHCORE)perl.h : perl.h
-	@ Create/Directory $(ARCHCORE)
+	@ If F$Search("[.lib.$(ARCH)]CORE.dir").eqs."" Then Create/Directory $(ARCHCORE)
 	Copy/Log $(MMS$SOURCE) $(MMS$TARGET)
 $(ARCHCORE)perly.h : perly.h
-	@ Create/Directory $(ARCHCORE)
+	@ If F$Search("[.lib.$(ARCH)]CORE.dir").eqs."" Then Create/Directory $(ARCHCORE)
 	Copy/Log $(MMS$SOURCE) $(MMS$TARGET)
 $(ARCHCORE)pp.h : pp.h
-	@ Create/Directory $(ARCHCORE)
+	@ If F$Search("[.lib.$(ARCH)]CORE.dir").eqs."" Then Create/Directory $(ARCHCORE)
 	Copy/Log $(MMS$SOURCE) $(MMS$TARGET)
 $(ARCHCORE)proto.h : proto.h
-	@ Create/Directory $(ARCHCORE)
+	@ If F$Search("[.lib.$(ARCH)]CORE.dir").eqs."" Then Create/Directory $(ARCHCORE)
 	Copy/Log $(MMS$SOURCE) $(MMS$TARGET)
 $(ARCHCORE)regcomp.h : regcomp.h
-	@ Create/Directory $(ARCHCORE)
+	@ If F$Search("[.lib.$(ARCH)]CORE.dir").eqs."" Then Create/Directory $(ARCHCORE)
 	Copy/Log $(MMS$SOURCE) $(MMS$TARGET)
 $(ARCHCORE)regexp.h : regexp.h
-	@ Create/Directory $(ARCHCORE)
+	@ If F$Search("[.lib.$(ARCH)]CORE.dir").eqs."" Then Create/Directory $(ARCHCORE)
 	Copy/Log $(MMS$SOURCE) $(MMS$TARGET)
 $(ARCHCORE)scope.h : scope.h
-	@ Create/Directory $(ARCHCORE)
+	@ If F$Search("[.lib.$(ARCH)]CORE.dir").eqs."" Then Create/Directory $(ARCHCORE)
 	Copy/Log $(MMS$SOURCE) $(MMS$TARGET)
 $(ARCHCORE)sv.h : sv.h
-	@ Create/Directory $(ARCHCORE)
+	@ If F$Search("[.lib.$(ARCH)]CORE.dir").eqs."" Then Create/Directory $(ARCHCORE)
 	Copy/Log $(MMS$SOURCE) $(MMS$TARGET)
 $(ARCHCORE)util.h : util.h
-	@ Create/Directory $(ARCHCORE)
+	@ If F$Search("[.lib.$(ARCH)]CORE.dir").eqs."" Then Create/Directory $(ARCHCORE)
 	Copy/Log $(MMS$SOURCE) $(MMS$TARGET)
 $(ARCHCORE)vmsish.h : vmsish.h
-	@ Create/Directory $(ARCHCORE)
+	@ If F$Search("[.lib.$(ARCH)]CORE.dir").eqs."" Then Create/Directory $(ARCHCORE)
 	Copy/Log $(MMS$SOURCE) $(MMS$TARGET)
 .ifdef SOCKET
 $(ARCHCORE)$(SOCKH) : $(SOCKH)
-	@ Create/Directory $(ARCHCORE)
+	@ If F$Search("[.lib.$(ARCH)]CORE.dir").eqs."" Then Create/Directory $(ARCHCORE)
 	Copy/Log $(MMS$SOURCE) $(MMS$TARGET)
 .endif
 $(ARCHCORE)$(DBG)libperl$(OLB) : $(DBG)libperl$(OLB) $(DBG)perlshr_xtras.ts
-	@ Create/Directory $(ARCHCORE)
+	@ If F$Search("[.lib.$(ARCH)]CORE.dir").eqs."" Then Create/Directory $(ARCHCORE)
 	Copy/Log $(MMS$SOURCE) $(MMS$TARGET)
 $(ARCHCORE)perlshr_attr.opt : $(DBG)perlshr_xtras.ts
-	@ Create/Directory $(ARCHCORE)
+	@ If F$Search("[.lib.$(ARCH)]CORE.dir").eqs."" Then Create/Directory $(ARCHCORE)
 	Copy/Log perlshr_attr.opt $(MMS$TARGET)
 $(ARCHCORE)$(DBG)perlshr_bld.opt : $(DBG)perlshr_xtras.ts
-	@ Create/Directory $(ARCHCORE)
+	@ If F$Search("[.lib.$(ARCH)]CORE.dir").eqs."" Then Create/Directory $(ARCHCORE)
 	Copy/Log $(DBG)perlshr_bld.opt $(MMS$TARGET)
 $(ARCHAUTO)time.stamp :
-	@ Create/Directory $(ARCHAUTO)
+	@ If F$Search("[.lib.$(ARCH)]auto.dir").eqs."" Then Create/Directory $(ARCHAUTO)
 	@ If F$Search("$(MMS$TARGET)").eqs."" Then Copy/NoConfirm _NLA0: $(MMS$TARGET)
 
 # AUTOMATICALLY GENERATED MAKE DEPENDENCIES--PUT NOTHING BELOW THIS LINE
@@ -1131,6 +1134,9 @@ tidy : cleanlis
 	- If F$Search("[.Lib.Auto...]*.al;-1").nes."" Then Purge/NoConfirm/Log [.Lib.Auto...]*.al
 	- If F$Search("[.Lib.Auto...]autosplit.ix;-1").nes."" Then Purge/NoConfirm/Log [.Lib.Auto...]autosplit.ix
 	- If F$Search("[.Lib]DynaLoader.pm;-1").nes."" Then Purge/NoConfirm/Log [.Lib]DynaLoader.pm
+	- If F$Search("[.Lib]Socket.pm;-1").nes."" Then Purge/NoConfirm/Log [.Lib]Socket.pm
+	- If F$Search("[.Lib]Config.pm;-1").nes."" Then Purge/NoConfirm/Log [.Lib]Config.pm
+	- If F$Search("[.Lib.$(ARCH)]Config.pm;-1").nes."" Then Purge/NoConfirm/Log [.Lib.$(ARCH)]Config.pm
 	- If F$Search("[.Lib.VMS]*.*;-1").nes."" Then Purge/NoConfirm/Log [.Lib.VMS]*.*
 	- If F$Search("[.Lib.ExtUtils]MM_VMS.pm;-1").nes."" Then Purge/NoConfirm/Log [.Lib.ExtUtils]MM_VMS.pm
 	- If F$Search("$(ARCHCORE)*.*").nes."" Then Purge/NoConfirm/Log $(ARCHCORE)*.*
@@ -1163,6 +1169,8 @@ realclean : clean
 	- If F$Search("[.Lib]DynaLoader.pm").nes."" Then Delete/NoConfirm/Log [.Lib]DynaLoader.pm;*
 	- If F$Search("[.Lib.ExtUtils]MM_VMS.pm").nes."" Then Delete/NoConfirm/Log [.Lib.ExtUtils]MM_VMS.pm;*
 	- If F$Search("*$(E)").nes."" Then Delete/NoConfirm/Log *$(E);*
+	- If F$Search("[.Lib]Config.pm").nes."" Then Delete/NoConfirm/Log [.Lib]Config.pm;*
+	- If F$Search("[.Lib.$(ARCH)]Config.pm").nes."" Then Delete/NoConfirm/Log [.Lib.$(ARCH)]Config.pm;*
 
 cleansrc : clean
 	- If F$Search("*.C;-1").nes."" Then Purge/NoConfirm/Log *.C
@@ -1175,7 +1183,3 @@ cleansrc : clean
 	- If F$Search("[.VMS]*.VMS;-1").nes."" Then Purge/NoConfirm/Log [.VMS]*.VMS
 	- If F$Search("[.VMS...]*.pm;-1").nes."" Then Purge/NoConfirm/Log [.VMS...]*.pm
 	- If F$Search("[.VMS...]*.xs;-1").nes."" Then Purge/NoConfirm/Log [.VMS...]*.xs
-	- If F$Search("[.Lib.Auto...]*.al").nes."" Then Delete/NoConfirm/Log [.Lib.Auto...]*.al;*
-	- If F$Search("[.Lib.Auto...]autosplit.ts").nes."" Then Delete/NoConfirm/Log [.Lib.Auto...]autosplit.ts;*
-	- If F$Search("[.Lib.$(ARCH)]Config.pm").nes."" Then Delete/NoConfirm/Log [.Lib.$(ARCH)]Config.pm;*
-	- If F$Search("[.Lib]Config.pm").nes."" Then Delete/NoConfirm/Log [.Lib]Config.pm;*

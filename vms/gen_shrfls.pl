@@ -34,7 +34,7 @@
 #     (i.e. /Define=DEBUGGING,EMBED,MULTIPLICITY)?
 #
 # Author: Charles Bailey  bailey@genetics.upenn.edu
-# Revised: 28-May-1995
+# Revised:  4-Dec-1995
 
 require 5.000;
 
@@ -65,7 +65,7 @@ if ($docc) {
   $isvaxc = 0;
   $isgcc = `$cc_cmd _nla0:/Version` =~ /GNU/
            or 0; # make debug output nice
-  $isvaxc = (!$isgcc && $isvax && `$cc_cmd /ansi_alias _nla0:` =~ /IVQUAL/)
+  $isvaxc = (!$isgcc && $isvax && `$cc_cmd /prefix=all _nla0:` =~ /IVQUAL/)
             or 0; # again, make debug output nice
   print "\$isgcc: $isgcc\n" if $debug;
   print "\$isvaxc: $isvaxc\n" if $debug;
@@ -97,7 +97,7 @@ print "\$extnames: \\$extnames\\\n" if $debug;
 $rtlopt = shift @ARGV;
 print "\$rtlopt: \\$rtlopt\\\n" if $debug;
 
-# This part gets tricky.  VAXC creates creating global symbols for the
+# This part gets tricky.  VAXC creates global symbols for each of the
 # constants in an enum if that enum is ever used as the data type of a
 # global[dr]ef.  We have to detect enums which are used in this way, so we
 # can set up the constants as universal symbols, since anything which
