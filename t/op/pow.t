@@ -16,7 +16,10 @@ my @pow = ([3,30,1e-14], [4,32,0], [5,20,1e-14], [2.5, 10,,1e-14], [-2, 69,0]);
 my $tests;
 $tests += $_->[1] foreach @pow;
 
-plan tests => 1 + $bits_in_uv + $tests;
+plan tests => 2 + $bits_in_uv + $tests;
+
+# This gave positive 27 before change #20167
+is((-3)**3, -27, "(negative int) ** (odd power) is negative");
 
 # Ought to be 32, 64, 36 or something like that.
 
