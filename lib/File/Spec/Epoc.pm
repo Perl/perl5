@@ -24,7 +24,7 @@ This package is still work in progress ;-)
 o.flebbe@gmx.de
 
 
-=over
+=over 4
 
 =item devnull
 
@@ -62,11 +62,12 @@ Takes no argument, returns the environment variable PATH as an array. Since
 there is no search path supported, it returns undef, sorry.
 
 =cut
+
 sub path {
     return undef;
 }
 
-=item canonpath
+=item canonpath()
 
 No physical check on the filesystem, but a logical cleanup of a
 path. On UNIX eliminated successive slashes and successive "/.".
@@ -133,7 +134,7 @@ sub splitpath {
 
 =item splitdir
 
-The opposite of L</catdir()>.
+The opposite of L<catdir()|File::Spec/catdir()>.
 
     @dirs = File::Spec->splitdir( $directories );
 
@@ -220,9 +221,9 @@ from the base path to the destination path:
     $rel_path = File::Spec->abs2rel( $destination ) ;
     $rel_path = File::Spec->abs2rel( $destination, $base ) ;
 
-If $base is not present or '', then L</cwd()> is used. If $base is relative, 
+If $base is not present or '', then L<cwd()|Cwd> is used. If $base is relative, 
 then it is converted to absolute form using L</rel2abs()>. This means that it
-is taken to be relative to L<cwd()>.
+is taken to be relative to L<cwd()|Cwd>.
 
 On systems with the concept of a volume, this assumes that both paths 
 are on the $destination volume, and ignores the $base volume.
@@ -232,7 +233,7 @@ $base filename as well. Otherwise all path components are assumed to be
 directories.
 
 If $path is relative, it is converted to absolute form using L</rel2abs()>.
-This means that it is taken to be relative to L</cwd()>.
+This means that it is taken to be relative to L<cwd()|Cwd>.
 
 Based on code written by Shigio Yamaguchi.
 
@@ -310,16 +311,16 @@ sub abs2rel {
     ) ;
 }
 
-=item rel2abs
+=item rel2abs()
 
 Converts a relative path to an absolute path. 
 
     $abs_path = File::Spec->rel2abs( $destination ) ;
     $abs_path = File::Spec->rel2abs( $destination, $base ) ;
 
-If $base is not present or '', then L<cwd()> is used. If $base is relative, 
+If $base is not present or '', then L<cwd()|Cwd> is used. If $base is relative, 
 then it is converted to absolute form using L</rel2abs()>. This means that it
-is taken to be relative to L</cwd()>.
+is taken to be relative to L<cwd()|Cwd>.
 
 Assumes that both paths are on the $base volume, and ignores the 
 $destination volume. 
