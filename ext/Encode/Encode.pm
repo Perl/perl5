@@ -96,7 +96,8 @@ sub define_alias
   }
 }
 
-define_alias( qr/^iso(\d+-\d+)$/i => '"iso-$1"' );
+define_alias( qr/^iso\W?(\d+)\W(\d+)$/i => '"iso-$1-$2"' );
+define_alias( qr/^(?:iso\W?)?(?:8859|latin)\W(\d+)$/i => '"iso-8859-$1"' );
 define_alias( qr/^(\S+)\s+(.*)$/i => '"$1-$2"' );
 #define_alias( sub { return /^iso-(\d+-\d+)$/i  ? "iso$1" : '' } );
 define_alias( 'ascii' => 'US-ascii');
