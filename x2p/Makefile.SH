@@ -34,6 +34,19 @@ mallocobj = $mallocobj
 shellflags = $shellflags
 
 libs = $libs
+
+# These variables will be used in a future version to make
+# the make file more portable to non-unix systems.
+AR = $ar
+EXE_EXT = $exe_ext
+LIB_EXT = $lib_ext
+OBJ_EXT = $obj_ext
+PATH_SEP = $path_sep
+
+FIRSTMAKEFILE = $firstmakefile
+
+.SUFFIXES: .c \$(OBJ_EXT)
+
 !GROK!THIS!
 
 cat >>Makefile <<'!NO!SUBS!'
@@ -60,21 +73,21 @@ h = EXTERN.h INTERN.h ../config.h handy.h hash.h a2p.h str.h util.h
 
 c = hash.c $(mallocsrc) str.c util.c walk.c
 
-obj = hash.o $(mallocobj) str.o util.o walk.o
+obj = hash$(OBJ_EXT) $(mallocobj) str$(OBJ_EXT) util$(OBJ_EXT) walk$(OBJ_EXT)
 
 lintflags = -phbvxac
 
 # grrr
 SHELL = /bin/sh
 
-.c.o:
+.c$(OBJ_EXT):
 	$(CCCMD) $*.c
 
 all: $(public) $(private) $(util)
 	touch all
 
-a2p: $(obj) a2p.o
-	$(CC) $(LDFLAGS) $(obj) a2p.o $(libs) -o a2p
+a2p: $(obj) a2p$(OBJ_EXT)
+	$(CC) $(LDFLAGS) $(obj) a2p$(OBJ_EXT) $(libs) -o a2p
 
 # I now supply a2p.c with the kits, so the following section is
 # used only if you force byacc to run by saying
@@ -90,15 +103,15 @@ run_byacc:	FORCE
 a2p.c: a2p.y
 	-@touch a2p.c
 
-a2p.o: a2p.c a2py.c a2p.h EXTERN.h util.h INTERN.h handy.h ../config.h str.h hash.h
+a2p$(OBJ_EXT): a2p.c a2py.c a2p.h EXTERN.h util.h INTERN.h handy.h ../config.h str.h hash.h
 	$(CCCMD) $(LARGE) a2p.c
 
 clean:
-	rm -f a2p *.o
+	rm -f a2p *$(OBJ_EXT)
 
 realclean: clean
 	rm -f *.orig core $(addedbyconf) all malloc.c
-	rm -f makefile makefile.old
+	rm -f $(FIRSTMAKEFILE) $(FIRSTMAKEFILE).old
 
 # The following lint has practically everything turned on.  Unfortunately,
 # you have to wade through a lot of mumbo jumbo that can't be suppressed.
@@ -109,7 +122,7 @@ lint:
 	lint $(lintflags) $(defs) $(c) > a2p.fuzz
 
 depend: $(mallocsrc) ../makedepend
-	../makedepend
+	sh ../makedepend
 
 clist:
 	echo $(c) | tr ' ' '\012' >.clist
@@ -140,7 +153,7 @@ $eunicefix Makefile
 case `pwd` in
 *SH)
     $rm -f ../Makefile
-    ln Makefile ../Makefile
+    $ln Makefile ../Makefile
     ;;
 esac
-rm -f makefile
+rm -f $firstmakefile
