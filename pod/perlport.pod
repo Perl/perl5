@@ -564,7 +564,7 @@ permissions between the permissions check and the actual operation.
 Just try the operation.)
 
 Don't assume the UNIX user and group semantics: especially, don't
-expect the C<$E<lt>> and C<$E<gt>> (or the E<$(> and E<$)>) to work
+expect the C<< $< >> and C<< $> >> (or the C<$(> and C<$)>) to work
 for switching identities (or memberships).
 
 Don't assume set-uid and set-gid semantics. (And even if you do,
