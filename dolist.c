@@ -1,4 +1,4 @@
-/* $Header: dolist.c,v 3.0 89/10/18 15:11:02 lwall Locked $
+/* $Header: dolist.c,v 3.0.1.1 89/10/26 23:11:51 lwall Locked $
  *
  *    Copyright (c) 1989, Larry Wall
  *
@@ -6,6 +6,10 @@
  *    as specified in the README file that comes with the perl 3.0 kit.
  *
  * $Log:	dolist.c,v $
+ * Revision 3.0.1.1  89/10/26  23:11:51  lwall
+ * patch1: split in a subroutine wrongly freed referenced arguments
+ * patch1: reverse didn't work
+ * 
  * Revision 3.0  89/10/18  15:11:02  lwall
  * 3.0 baseline
  * 
@@ -285,8 +289,12 @@ int *arglast;
 #endif
     ary = stab_xarray(spat->spat_repl[1].arg_ptr.arg_stab);
     if (ary && ((ary->ary_flags & ARF_REAL) || gimme != G_ARRAY)) {
-	ary->ary_flags |= ARF_REAL;
 	realarray = 1;
+	if (!(ary->ary_flags & ARF_REAL)) {
+	    ary->ary_flags |= ARF_REAL;
+	    for (i = ary->ary_fill; i >= 0; i--)
+		ary->ary_array[i] = Nullstr;	/* don't free mere refs */
+	}
 	ary->ary_fill = -1;
 	sp = -1;	/* temporarily switch stacks */
     }
@@ -754,8 +762,11 @@ int *arglast;
     }
     while (i-- > 0) {
 	*up++ = *down;
-	*down-- = *up;
+	if (i-- > 0)
+	    *down-- = *up;
     }
+    i = arglast[2] - arglast[1];
+    Copy(down+1,up,i/2,STR*);
     return arglast[2] - 1;
 }
 

@@ -1,4 +1,4 @@
-/* $Header: perl.h,v 3.0 89/10/18 15:21:21 lwall Locked $
+/* $Header: perl.h,v 3.0.1.1 89/10/26 23:17:08 lwall Locked $
  *
  *    Copyright (c) 1989, Larry Wall
  *
@@ -6,6 +6,11 @@
  *    as specified in the README file that comes with the perl 3.0 kit.
  *
  * $Log:	perl.h,v $
+ * Revision 3.0.1.1  89/10/26  23:17:08  lwall
+ * patch1: vfork now conditionally defined based on VFORK
+ * patch1: DEC risc machines have a buggy memcmp
+ * patch1: perl.h now includes <netinet/in.h> if it exists
+ * 
  * Revision 3.0  89/10/18  15:21:21  lwall
  * 3.0 baseline
  * 
@@ -24,6 +29,14 @@
 #   endif
 #endif
 
+#ifndef VFORK
+#   define vfork fork
+#endif
+
+#if defined(MEMCMP) && defined(mips) && BYTEORDER == 01234
+#undef MEMCMP
+#endif
+
 #ifdef MEMCPY
 extern char *memcpy(), *memset();
 #define bcopy(s1,s2,l) memcpy(s2,s1,l)
@@ -37,6 +50,10 @@ extern char *memcpy(), *memset();
 #include <ctype.h>
 #include <setjmp.h>
 #include <sys/param.h>	/* if this needs types.h we're still wrong */
+
+#ifdef I_NETINET_IN
+#include <netinet/in.h>
+#endif
 
 #ifndef _TYPES_		/* If types.h defines this it's easy. */
 #ifndef major		/* Does everyone's types.h define this? */

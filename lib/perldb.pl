@@ -1,6 +1,6 @@
 package DB;
 
-$header = '$Header: perldb.pl,v 3.0 89/10/18 15:19:46 lwall Locked $';
+$header = '$Header: perldb.pl,v 3.0.1.1 89/10/26 23:14:02 lwall Locked $';
 #
 # This file is automatically included if you do perl -d.
 # It's probably not useful to include this yourself.
@@ -10,6 +10,9 @@ $header = '$Header: perldb.pl,v 3.0 89/10/18 15:19:46 lwall Locked $';
 # have a breakpoint.  It also inserts a do 'perldb.pl' before the first line.
 #
 # $Log:	perldb.pl,v $
+# Revision 3.0.1.1  89/10/26  23:14:02  lwall
+# patch1: RCS expanded an unintended $Header in lib/perldb.pl
+# 
 # Revision 3.0  89/10/18  15:19:46  lwall
 # 3.0 baseline
 # 
@@ -25,7 +28,7 @@ $| = 1;				# for DB'OUT
 select(STDOUT);
 $| = 1;				# for real STDOUT
 
-$header =~ s/\$Header: perldb.pl,v 3.0 89/10/18 15:19:46 lwall Locked $/$1$2/;
+$header =~ s/.Header: ([^,]+),v(\s+\S+\s+\S+).*$/$1$2/;
 print OUT "\nLoading DB from $header\n\n";
 
 sub DB {

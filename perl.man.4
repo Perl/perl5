@@ -1,7 +1,10 @@
 ''' Beginning of part 4
-''' $Header: perl.man.4,v 3.0 89/10/18 15:21:55 lwall Locked $
+''' $Header: perl.man.4,v 3.0.1.1 89/10/26 23:18:43 lwall Locked $
 '''
 ''' $Log:	perl.man.4,v $
+''' Revision 3.0.1.1  89/10/26  23:18:43  lwall
+''' patch1: documented the desirability of unnecessary parentheses
+''' 
 ''' Revision 3.0  89/10/18  15:21:55  lwall
 ''' 3.0 baseline
 ''' 
@@ -992,6 +995,18 @@ doesn't mean that you have to make use of the defaults.
 The defaults are there for lazy systems programmers writing one-shot
 programs.
 If you want your program to be readable, consider supplying the argument.
+.Sp
+Along the same lines, just because you
+.I can
+omit parentheses in many places doesn't mean that you ought to:
+.nf
+
+	return print reverse sort num values array;
+	return print(reverse(sort num (values(%array))));
+
+.fi
+When in doubt, parenthesize.
+At the very least it will let some poor schmuck bounce on the % key in vi.
 .Ip 2. 4 4
 Don't go through silly contortions to exit a loop at the top or the
 bottom, when
@@ -1017,6 +1032,8 @@ See last example.
 .Ip 6. 4 4
 For portability, when using features that may not be implemented on every
 machine, test the construct in an eval to see if it fails.
+If you know what version or patchlevel a particular feature was implemented,
+you can test $] to see if it will be there.
 .Ip 4. 4 4
 Choose mnemonic indentifiers.
 .Ip 5. 4 4

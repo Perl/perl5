@@ -2,9 +2,12 @@
  * kit sizes from getting too big.
  */
 
-/* $Header: evalargs.xc,v 3.0 89/10/18 15:17:16 lwall Locked $
+/* $Header: evalargs.xc,v 3.0.1.1 89/10/26 23:12:55 lwall Locked $
  *
  * $Log:	evalargs.xc,v $
+ * Revision 3.0.1.1  89/10/26  23:12:55  lwall
+ * patch1: glob didn't free a temporary string
+ * 
  * Revision 3.0  89/10/18  15:17:16  lwall
  * 3.0 baseline
  * 
@@ -275,6 +278,7 @@
 			}
 			(void)do_open(last_in_stab,tmpstr->str_ptr);
 			fp = stab_io(last_in_stab)->ifp;
+			str_free(tmpstr);
 		    }
 		}
 	    }

@@ -1,4 +1,4 @@
-/* $Header: perl.y,v 3.0 89/10/18 15:22:04 lwall Locked $
+/* $Header: perl.y,v 3.0.1.1 89/10/26 23:20:41 lwall Locked $
  *
  *    Copyright (c) 1989, Larry Wall
  *
@@ -6,6 +6,10 @@
  *    as specified in the README file that comes with the perl 3.0 kit.
  *
  * $Log:	perl.y,v $
+ * Revision 3.0.1.1  89/10/26  23:20:41  lwall
+ * patch1: grandfathered "format stdout"
+ * patch1: operator(); is now normally equivalent to operator;
+ * 
  * Revision 3.0  89/10/18  15:22:04  lwall
  * 3.0 baseline
  * 
@@ -276,7 +280,13 @@ decl	:	format
 	;
 
 format	:	FORMAT WORD '=' FORMLIST
-			{ stab_form(stabent($2,TRUE)) = $4; Safefree($2);}
+			{ if (strEQ($2,"stdout"))
+			    stab_form(stabent("STDOUT",TRUE)) = $4;
+			  else if (strEQ($2,"stderr"))
+			    stab_form(stabent("STDERR",TRUE)) = $4;
+			  else
+			    stab_form(stabent($2,TRUE)) = $4;
+			  Safefree($2);}
 	|	FORMAT '=' FORMLIST
 			{ stab_form(stabent("STDOUT",TRUE)) = $3; }
 	;
@@ -632,6 +642,10 @@ term	:	'-' term %prec UMINUS
 			    Nullarg, Nullarg)); }
 	|	FUNC0
 			{ $$ = make_op($1, 0, Nullarg, Nullarg, Nullarg); }
+	|	FUNC1 '(' ')'
+			{ $$ = make_op($1, 1, Nullarg, Nullarg, Nullarg);
+			  if ($1 == O_EVAL || $1 == O_RESET)
+			    $$ = fixeval($$); }
 	|	FUNC1 '(' expr ')'
 			{ $$ = make_op($1, 1, $3, Nullarg, Nullarg);
 			  if ($1 == O_EVAL || $1 == O_RESET)

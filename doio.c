@@ -1,4 +1,4 @@
-/* $Header: doio.c,v 3.0 89/10/18 15:10:54 lwall Locked $
+/* $Header: doio.c,v 3.0.1.1 89/10/26 23:10:05 lwall Locked $
  *
  *    Copyright (c) 1989, Larry Wall
  *
@@ -6,6 +6,9 @@
  *    as specified in the README file that comes with the perl 3.0 kit.
  *
  * $Log:	doio.c,v $
+ * Revision 3.0.1.1  89/10/26  23:10:05  lwall
+ * patch1: Configure now checks for BSD shadow passwords
+ * 
  * Revision 3.0  89/10/18  15:10:54  lwall
  * 3.0 baseline
  * 
@@ -1580,6 +1583,9 @@ int *arglast;
 	(void)astore(ary, ++sp, str = str_static(&str_no));
 	str_numset(str, (double)pwent->pw_gid);
 	(void)astore(ary, ++sp, str = str_static(&str_no));
+#ifdef PWCHANGE
+	str_numset(str, (double)pwent->pw_change);
+#else
 #ifdef PWQUOTA
 	str_numset(str, (double)pwent->pw_quota);
 #else
@@ -1587,14 +1593,23 @@ int *arglast;
 	str_set(str, pwent->pw_age);
 #endif
 #endif
+#endif
 	(void)astore(ary, ++sp, str = str_static(&str_no));
+#ifdef PWCLASS
+	str_set(str,pwent->pw_class);
+#else
 	str_set(str, pwent->pw_comment);
+#endif
 	(void)astore(ary, ++sp, str = str_static(&str_no));
 	str_set(str, pwent->pw_gecos);
 	(void)astore(ary, ++sp, str = str_static(&str_no));
 	str_set(str, pwent->pw_dir);
 	(void)astore(ary, ++sp, str = str_static(&str_no));
 	str_set(str, pwent->pw_shell);
+#ifdef PWEXPIRE
+	(void)astore(ary, ++sp, str = str_static(&str_no));
+	str_numset(str, (double)pwent->pw_expire);
+#endif
     }
 
     return sp;

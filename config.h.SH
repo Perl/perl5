@@ -385,11 +385,10 @@ sed <<!GROK!THIS! >config.h -e 's!^#undef!/\*#undef!'
  */
 #$d_varargs	VARARGS		/**/
 
-/* vfork:
- *	This symbol, if defined, remaps the vfork routine to fork if the
- *	vfork() routine isn't supported here.
+/* VFORK:
+ *	This symbol, if defined, indicates that vfork() exists.
  */
-#$d_vfork	vfork fork	/**/
+#$d_vfork	VFORK	/**/
 
 /* VOIDSIG:
  *	This symbol is defined if this system declares "void (*signal())()" in
@@ -443,6 +442,12 @@ sed <<!GROK!THIS! >config.h -e 's!^#undef!/\*#undef!'
  */
 #$i_grp	I_GRP		/**/
 
+/* I_NETINET_IN:
+ *	This symbol, if defined, indicates to the C program that it should
+ *	include netinet/in.h.
+ */
+#$i_niin	I_NETINET_IN		/**/
+
 /* I_PWD:
  *	This symbol, if defined, indicates to the C program that it should
  *	include pwd.h.
@@ -455,9 +460,24 @@ sed <<!GROK!THIS! >config.h -e 's!^#undef!/\*#undef!'
  *	This symbol, if defined, indicates to the C program that struct passwd
  *	contains pw_age.
  */
+/* PWCHANGE:
+ *	This symbol, if defined, indicates to the C program that struct passwd
+ *	contains pw_change.
+ */
+/* PWCLASS:
+ *	This symbol, if defined, indicates to the C program that struct passwd
+ *	contains pw_class.
+ */
+/* PWEXPIRE:
+ *	This symbol, if defined, indicates to the C program that struct passwd
+ *	contains pw_expire.
+ */
 #$i_pwd	I_PWD		/**/
 #$d_pwquota	PWQUOTA		/**/
 #$d_pwage	PWAGE		/**/
+#$d_pwage	PWCHANGE	/**/
+#$d_pwage	PWCLASS		/**/
+#$d_pwage	PWEXPIRE	/**/
 
 /* I_SYSDIR:
  *	This symbol, if defined, indicates to the C program that it should

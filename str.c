@@ -1,4 +1,4 @@
-/* $Header: str.c,v 3.0 89/10/18 15:23:38 lwall Locked $
+/* $Header: str.c,v 3.0.1.1 89/10/26 23:23:41 lwall Locked $
  *
  *    Copyright (c) 1989, Larry Wall
  *
@@ -6,6 +6,10 @@
  *    as specified in the README file that comes with the perl 3.0 kit.
  *
  * $Log:	str.c,v $
+ * Revision 3.0.1.1  89/10/26  23:23:41  lwall
+ * patch1: string ordering tests were wrong
+ * patch1: $/ now works even when STDSTDIO undefined
+ * 
  * Revision 3.0  89/10/18  15:23:38  lwall
  * 3.0 baseline
  * 
@@ -604,14 +608,14 @@ register STR *str2;
 	if (retval = memcmp(str1->str_ptr, str2->str_ptr, str1->str_cur))
 	    return retval;
 	else
-	    return 1;
+	    return -1;
     }
     else if (retval = memcmp(str1->str_ptr, str2->str_ptr, str2->str_cur))
 	return retval;
     else if (str1->str_cur == str2->str_cur)
 	return 0;
     else
-	return -1;
+	return 1;
 }
 
 char *
@@ -620,8 +624,6 @@ register STR *str;
 register FILE *fp;
 int append;
 {
-#ifdef STDSTDIO		/* Here is some breathtakingly efficient cheating */
-
     register char *bp;		/* we're going to steal some values */
     register int cnt;		/*  from the stdio struct and put EVERYTHING */
     register STDCHAR *ptr;	/*   in the innermost loop into registers */
@@ -636,6 +638,8 @@ int append;
 	newline = '\n';
 	oldbp = Nullch;			/* remember last \n position (none) */
     }
+#ifdef STDSTDIO		/* Here is some breathtakingly efficient cheating */
+
     cnt = fp->_cnt;			/* get count into register */
     str->str_nok = 0;			/* invalidate number */
     str->str_pok = 1;			/* validate pointer */
@@ -686,16 +690,28 @@ thats_really_all_folks:
 
 #else /* !STDSTDIO */	/* The big, slow, and stupid way */
 
-    static char buf[8192];
+    {
+	static char buf[8192];
+	char * bpe = buf + sizeof(buf) - 3;
 
-    if (fgets(buf, sizeof buf, fp) != Nullch) {
+screamer:
+	bp = buf;
+filler:
+	while ((i = getc(fp)) != EOF && (*bp++ = i) != newline && bp < bpe);
+	if (i == newline && get_paragraph &&
+	    (i = getc(fp)) != EOF && (*bp++ = i) != newline && bp < bpe)
+	    goto filler;
+
+	*bp = '\0';
 	if (append)
 	    str_cat(str, buf);
 	else
 	    str_set(str, buf);
+	if (i != newline && i != EOF) {
+	    append = -1;
+	    goto screamer;
+	}
     }
-    else
-	str_set(str, No);
 
 #endif /* STDSTDIO */
 

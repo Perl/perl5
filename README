@@ -65,8 +65,9 @@ Installation
     This will run the regression tests on the perl you just made.
     If it doesn't say "All tests successful" then something went wrong.
     See the README in the t subdirectory.  Note that you can't run it
-    in background if this disables opening of /dev/tty.  If in doubt, just
-    cd to the t directory and run TEST by hand.
+    in background if this disables opening of /dev/tty.  If "make test"
+    bombs out, just cd to the t directory and run TEST by hand to see if
+    it makes any difference.
 
 6)  make install
 

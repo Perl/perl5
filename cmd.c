@@ -1,4 +1,4 @@
-/* $Header: cmd.c,v 3.0 89/10/18 15:09:02 lwall Locked $
+/* $Header: cmd.c,v 3.0.1.1 89/10/26 23:04:21 lwall Locked $
  *
  *    Copyright (c) 1989, Larry Wall
  *
@@ -6,6 +6,9 @@
  *    as specified in the README file that comes with the perl 3.0 kit.
  *
  * $Log:	cmd.c,v $
+ * Revision 3.0.1.1  89/10/26  23:04:21  lwall
+ * patch1: heuristically disabled optimization could cause core dump
+ * 
  * Revision 3.0  89/10/18  15:09:02  lwall
  * 3.0 baseline
  * 
@@ -416,8 +419,6 @@ until_loop:
 		}
 	    }
 	    if (--cmd->c_short->str_u.str_useful < 0) {
-		str_free(cmd->c_short);
-		cmd->c_short = Nullstr;
 		cmdflags &= ~CF_OPTIMIZE;
 		cmdflags |= CFT_EVAL;	/* never try this optimization again */
 		cmd->c_flags = cmdflags;

@@ -1,4 +1,4 @@
-/* $Header: toke.c,v 3.0 89/10/18 15:32:33 lwall Locked $
+/* $Header: toke.c,v 3.0.1.1 89/10/26 23:26:21 lwall Locked $
  *
  *    Copyright (c) 1989, Larry Wall
  *
@@ -6,6 +6,9 @@
  *    as specified in the README file that comes with the perl 3.0 kit.
  *
  * $Log:	toke.c,v $
+ * Revision 3.0.1.1  89/10/26  23:26:21  lwall
+ * patch1: disambiguated word after "sort" better
+ * 
  * Revision 3.0  89/10/18  15:32:33  lwall
  * 3.0 baseline
  * 
@@ -865,7 +868,15 @@ yylex()
 		    fatal("sort is now a reserved word");
 		if (isascii(*s) && (isalpha(*s) || *s == '_')) {
 		    for (d = s; isalpha(*d) || isdigit(*d) || *d == '_'; d++) ;
-		    if (d >= bufend || isspace(*d))
+		    strncpy(tokenbuf,s,d-s);
+		    if (strNE(tokenbuf,"keys") &&
+			strNE(tokenbuf,"values") &&
+			strNE(tokenbuf,"split") &&
+			strNE(tokenbuf,"grep") &&
+			strNE(tokenbuf,"readdir") &&
+			strNE(tokenbuf,"unpack") &&
+			strNE(tokenbuf,"do") &&
+			(d >= bufend || isspace(*d)) )
 			*(--s) = '\\';	/* force next ident to WORD */
 		}
 		LOP(O_SORT);

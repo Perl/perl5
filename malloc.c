@@ -1,6 +1,10 @@
-/* $Header: malloc.c,v 3.0 89/10/18 15:20:39 lwall Locked $
+/* $Header: malloc.c,v 3.0.1.1 89/10/26 23:15:05 lwall Locked $
  *
  * $Log:	malloc.c,v $
+ * Revision 3.0.1.1  89/10/26  23:15:05  lwall
+ * patch1: some declarations were missing from malloc.c
+ * patch1: sparc machines had alignment problems in malloc.c
+ * 
  * Revision 3.0  89/10/18  15:20:39  lwall
  * 3.0 baseline
  * 
@@ -27,6 +31,8 @@ static char sccsid[] = "@(#)malloc.c	4.3 (Berkeley) 9/16/83";
 #include "EXTERN.h"
 #include "perl.h"
 
+static findbucket(), morecore();
+
 /* I don't much care whether these are defined in sys/types.h--LAW */
 
 #define u_char unsigned char
@@ -44,7 +50,7 @@ static char sccsid[] = "@(#)malloc.c	4.3 (Berkeley) 9/16/83";
  */
 union	overhead {
 	union	overhead *ov_next;	/* when free */
-#ifdef mips
+#if defined (mips) || defined (sparc)
 	double  strut;			/* alignment problems */
 #endif
 	struct {

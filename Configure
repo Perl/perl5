@@ -8,14 +8,14 @@
 # and edit it to reflect your system.  Some packages may include samples
 # of config.h for certain machines, so you might look for one of those.)
 #
-# $Header: Configure,v 3.0 89/10/18 15:04:55 lwall Locked $
+# $Header: Configure,v 3.0.1.1 89/10/26 22:58:02 lwall Locked $
 #
 # Yes, you may rip this off to use in other distribution packages.
 # (Note: this Configure script was generated automatically.  Rather than
 # working with this copy of Configure, you may wish to get metaconfig.)
 
 : sanity checks
-PATH='.:/bin:/usr/bin:/usr/local/bin:/usr/ucb:/usr/local:/usr/lbin:/etc:/usr/new:/usr/new/bin:/usr/nbin'
+PATH=".:/bin:/usr/bin:/usr/local/bin:/usr/ucb:/usr/local:/usr/lbin:/etc:/usr/new:/usr/new/bin:/usr/nbin:$PATH"
 export PATH || (echo "OOPS, this isn't sh.  Desperation time.  I will feed myself to sh."; sh $0; kill $$)
 
 if test ! -t 0; then
@@ -157,6 +157,7 @@ i_dirent=''
 d_dirnamlen=''
 i_fcntl=''
 i_grp=''
+i_niin=''
 i_pwd=''
 d_pwquota=''
 d_pwage=''
@@ -424,7 +425,6 @@ Mcc
 cpp
 egrep
 test
-uname
 "
 for file in $loclist; do
     xxx=`loc $file $file $pth`
@@ -513,21 +513,17 @@ esac
 rmlist="$rmlist loc"
 
 : get list of predefined functions in a handy place
-if $test -n "$uname"; then
-	os=`$uname -s`
-else
-	os=unknown
-fi
 echo " "
-if test -f /lib/libc.a; then
+set /usr/lib/libc.so.[0-9]*
+eval set \$$#
+if test -f "$1"; then
+    echo "Your shared C library is in $1."
+    libc="$1"
+elif test -f /lib/libc.a; then
     echo "Your C library is in /lib/libc.a.  You're normal."
     libc=/lib/libc.a
 else
-    if test "$os" = DomainOS ; then
-	ans=`loc libc blurfl/dyick $libpth`
-    else
-	ans=`loc libc.a blurfl/dyick $libpth`
-    fi
+    ans=`loc libc.a blurfl/dyick $libpth`
     if test ! -f "$ans"; then
 	ans=`loc clib blurfl/dyick $libpth`
     fi
@@ -573,11 +569,9 @@ $sed -n -e 's/^.* [AT]  *_[_.]*//p' -e 's/^.* [AT] //p' <libc.tmp >libc.list
 if $contains '^printf$' libc.list >/dev/null 2>&1; then
     echo "done"
 else
-    if test "$os" = DomainOS ; then
-        $sed -n -e 's/^__*//' -e 's/^\([a-zA-Z_0-9$]*\).*xtern.*/\1/p' <libc.tmp >libc.list
-    else
+    $sed -n -e 's/^__*//' -e 's/^\([a-zA-Z_0-9$]*\).*xtern.*/\1/p' <libc.tmp >libc.list
+    $contains '^printf$' libc.list >/dev/null 2>&1 || \
 	$sed -n -e 's/^.* D __*//p' -e 's/^.* D //p' <libc.tmp >libc.list
-    fi
     $contains '^printf$' libc.list >/dev/null 2>&1 || \
        $sed -n -e 's/^_//' \
 	      -e 's/^\([a-zA-Z_0-9]*\).*xtern.*text.*/\1/p' <libc.tmp >libc.list
@@ -1102,7 +1096,7 @@ esac
 
 case "$ccflags" in
 '') case "$cc" in
-    gcc) dflt='-fpcc_struct_return';;
+    gcc) dflt='-fpcc-struct-return';;
     *) dflt='none';;
     esac
     ;;
@@ -1553,7 +1547,7 @@ else
     echo "dbm.h not found."
 fi
 
-: see if this is an pwd system
+: see if this is a pwd system
 echo " "
 if $test -r /usr/include/pwd.h ; then
     i_pwd="$define"
@@ -1568,10 +1562,28 @@ if $test -r /usr/include/pwd.h ; then
     else
 	d_pwage="$undef"
     fi
+    if $contains 'pw_change' /usr/include/pwd.h >/dev/null 2>&1; then
+	d_pwchange="$define"
+    else
+	d_pwchange="$undef"
+    fi
+    if $contains 'pw_class' /usr/include/pwd.h >/dev/null 2>&1; then
+	d_pwclass="$define"
+    else
+	d_pwclass="$undef"
+    fi
+    if $contains 'pw_expire' /usr/include/pwd.h >/dev/null 2>&1; then
+	d_pwexpire="$define"
+    else
+	d_pwexpire="$undef"
+    fi
 else
     i_pwd="$undef"
     d_pwquota="$undef"
     d_pwage="$undef"
+    d_pwchange="$undef"
+    d_pwclass="$undef"
+    d_pwexpire="$undef"
     echo "No pwd.h found."
 fi
 
@@ -1868,7 +1880,7 @@ case "$gidtype" in
 esac
 cont=true
 echo " "
-rp="What type are group ids on this system declared as? [$dflt]"
+rp="What type are the group ids are returned by getgroups()? [$dflt]"
 $echo $n "$rp $c"
 . myread
 gidtype="$ans"
@@ -1891,6 +1903,16 @@ if $test -r /usr/include/grp.h ; then
 else
     i_grp="$undef"
     echo "No grp.h found."
+fi
+
+: see if this is a netinet/in.h system
+echo " "
+if $test -r /usr/include/netinet/in.h ; then
+    i_niin="$define"
+    echo "netinet/in.h found."
+else
+    i_niin="$undef"
+    echo "No netinet/in.h found."
 fi
 
 : see if this is a sys/dir.h system
@@ -2070,7 +2092,7 @@ case "$uidtype" in
 esac
 cont=true
 echo " "
-rp="What type are user ids on this system declared as? [$dflt]"
+rp="What type are user ids returned by getuid(), etc.? [$dflt]"
 $echo $n "$rp $c"
 . myread
 uidtype="$ans"
@@ -2307,6 +2329,7 @@ i_dirent='$i_dirent'
 d_dirnamlen='$d_dirnamlen'
 i_fcntl='$i_fcntl'
 i_grp='$i_grp'
+i_niin='$i_niin'
 i_pwd='$i_pwd'
 d_pwquota='$d_pwquota'
 d_pwage='$d_pwage'

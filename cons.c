@@ -1,4 +1,4 @@
-/* $Header: cons.c,v 3.0 89/10/18 15:10:23 lwall Locked $
+/* $Header: cons.c,v 3.0.1.1 89/10/26 23:09:01 lwall Locked $
  *
  *    Copyright (c) 1989, Larry Wall
  *
@@ -6,6 +6,10 @@
  *    as specified in the README file that comes with the perl 3.0 kit.
  *
  * $Log:	cons.c,v $
+ * Revision 3.0.1.1  89/10/26  23:09:01  lwall
+ * patch1: numeric switch optimization was broken
+ * patch1: unless was broken when run under the debugger
+ * 
  * Revision 3.0  89/10/18  15:10:23  lwall
  * 3.0 baseline
  * 
@@ -285,11 +289,11 @@ int count;
 
     Newz(105,loc, max - min + 3, CMD*);
     loc++;
+    max -= min;
+    max++;
     while (count--) {
 	i = (int)str_gnum(cur->c_short);
 	i -= min;
-	max -= min;
-	max++;
 	switch(cur->c_slen) {
 	case O_LE:
 	    i++;
@@ -314,6 +318,7 @@ int count;
     }
     loc--;
     min--;
+    max++;
     for (i = 0; i <= max; i++)
 	if (!loc[i])
 	    loc[i] = cur;
@@ -378,7 +383,7 @@ CMD *cur;
 	stab2arg(A_WORD,DBstab),
 	make_list(arg),
 	Nullarg);
-    cmd->c_flags |= CF_COND;
+    cmd->c_flags |= CF_COND|CF_DBSUB;
     cmd->c_line = head->c_line;
     cmd->c_label = head->c_label;
     cmd->c_file = filename;
@@ -797,12 +802,14 @@ register ARG *arg;
 
 CMD *
 invert(cmd)
-register CMD *cmd;
+CMD *cmd;
 {
-    if (cmd->c_head)
-	cmd->c_head->c_flags ^= CF_INVERT;
-    else
-	cmd->c_flags ^= CF_INVERT;
+    register CMD *targ = cmd;
+    if (targ->c_head)
+	targ = targ->c_head;
+    if (targ->c_flags & CF_DBSUB)
+	targ = targ->c_next;
+    targ->c_flags ^= CF_INVERT;
     return cmd;
 }
 

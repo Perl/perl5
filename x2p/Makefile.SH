@@ -18,9 +18,12 @@ case "$mallocsrc" in
 esac
 echo "Extracting x2p/Makefile (with variable substitutions)"
 cat >Makefile <<!GROK!THIS!
-# $Header: Makefile.SH,v 3.0 89/10/18 15:33:52 lwall Locked $
+# $Header: Makefile.SH,v 3.0.1.1 89/10/26 23:29:11 lwall Locked $
 #
 # $Log:	Makefile.SH,v $
+# Revision 3.0.1.1  89/10/26  23:29:11  lwall
+# patch1: in x2p/Makefile.SH, added dependency on ../config.sh
+# 
 # Revision 3.0  89/10/18  15:33:52  lwall
 # 3.0 baseline
 # 
@@ -143,6 +146,10 @@ hlist:
 
 shlist:
 	echo $(sh) | tr ' ' '\012' >.shlist
+
+config.sh: ../config.sh
+	rm -f config.sh
+	ln ../config.sh .
 
 # AUTOMATICALLY GENERATED MAKE DEPENDENCIES--PUT NOTHING BELOW THIS LINE
 $(obj):

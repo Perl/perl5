@@ -1,4 +1,4 @@
-/* $Header: arg.h,v 3.0 89/10/18 15:08:27 lwall Locked $
+/* $Header: arg.h,v 3.0.1.1 89/10/26 23:02:35 lwall Locked $
  *
  *    Copyright (c) 1989, Larry Wall
  *
@@ -6,6 +6,9 @@
  *    as specified in the README file that comes with the perl 3.0 kit.
  *
  * $Log:	arg.h,v $
+ * Revision 3.0.1.1  89/10/26  23:02:35  lwall
+ * patch1: reverse didn't work
+ * 
  * Revision 3.0  89/10/18  15:08:27  lwall
  * 3.0 baseline
  * 
@@ -805,7 +808,7 @@ char opargs[MAXO+1] = {
 	A(3,3,0),	/* AASSIGN */
 	A(0,0,0),	/* SASSIGN */
 	A(0,0,0),	/* DUMP */
-	A(0,0,0),	/* REVERSE */
+	A(0,3,0),	/* REVERSE */
 	A(1,0,0),	/* ADDROF */
 	A(1,1,1),	/* SOCKET */
 	A(1,1,0),	/* BIND */

@@ -1,4 +1,4 @@
-/* $Header: cmd.h,v 3.0 89/10/18 15:09:15 lwall Locked $
+/* $Header: cmd.h,v 3.0.1.1 89/10/26 23:05:43 lwall Locked $
  *
  *    Copyright (c) 1989, Larry Wall
  *
@@ -6,6 +6,9 @@
  *    as specified in the README file that comes with the perl 3.0 kit.
  *
  * $Log:	cmd.h,v $
+ * Revision 3.0.1.1  89/10/26  23:05:43  lwall
+ * patch1: unless was broken when run under the debugger
+ * 
  * Revision 3.0  89/10/18  15:09:15  lwall
  * 3.0 baseline
  * 
@@ -53,6 +56,7 @@ char *cmdname[] = {
 #define CF_ONCE 010000	/* we've already pushed the label on the stack */
 #define CF_FLIP 020000	/* on a match do flipflop */
 #define CF_TERM 040000	/* value of this cmd might be returned */
+#define CF_DBSUB 0100000 /* this is an inserted cmd for debugging */
 
 #define CFT_FALSE 0	/* c_expr is always false */
 #define CFT_TRUE 1	/* c_expr is always true */

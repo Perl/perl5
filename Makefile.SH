@@ -25,9 +25,12 @@ esac
 
 echo "Extracting Makefile (with variable substitutions)"
 cat >Makefile <<!GROK!THIS!
-# $Header: Makefile.SH,v 3.0 89/10/18 15:06:43 lwall Locked $
+# $Header: Makefile.SH,v 3.0.1.1 89/10/26 23:00:38 lwall Locked $
 #
 # $Log:	Makefile.SH,v $
+# Revision 3.0.1.1  89/10/26  23:00:38  lwall
+# patch1: Makefile.SH needed some more .h dependecies
+# 
 # Revision 3.0  89/10/18  15:06:43  lwall
 # 3.0 baseline
 # 
@@ -125,122 +128,121 @@ taintperl: tperl.o tperly.o $(tobj)
 
 # Replicating all this junk is yucky, but I don't see a portable way to fix it.
 
-tperl.o: perl.c perly.h perl.h EXTERN.h regexp.h util.h INTERN.h handy.h \
-    config.h stab.h
+tperl.o: perl.c perly.h $(h)
 	/bin/rm -f tperl.c
 	$(SLN) perl.c tperl.c
 	$(CC) -c -DTAINT $(CFLAGS) $(LARGE) tperl.c
 	/bin/rm -f tperl.c
 
-tperly.o: perly.c
+tperly.o: perly.c perly.h $(h)
 	/bin/rm -f tperly.c
 	$(SLN) perly.c tperly.c
 	$(CC) -c -DTAINT $(CFLAGS) $(LARGE) tperly.c
 	/bin/rm -f tperly.c
 
-sperly.o: perly.c perl.h handy.h perly.h patchlevel.h
+sperly.o: perly.c perly.h patchlevel.h $(h)
 	/bin/rm -f sperly.c
 	$(SLN) perly.c sperly.c
 	$(CC) -c -DTAINT -DIAMSUID $(CFLAGS) $(LARGE) sperly.c
 	/bin/rm -f sperly.c
 
-tarray.o: array.c
+tarray.o: array.c $(h)
 	/bin/rm -f tarray.c
 	$(SLN) array.c tarray.c
 	$(CC) -c -DTAINT $(CFLAGS) $(LARGE) tarray.c
 	/bin/rm -f tarray.c
 
-tcmd.o: cmd.c
+tcmd.o: cmd.c $(h)
 	/bin/rm -f tcmd.c
 	$(SLN) cmd.c tcmd.c
 	$(CC) -c -DTAINT $(CFLAGS) $(LARGE) tcmd.c
 	/bin/rm -f tcmd.c
 
-tcons.o: cons.c
+tcons.o: cons.c $(h)
 	/bin/rm -f tcons.c
 	$(SLN) cons.c tcons.c
 	$(CC) -c -DTAINT $(CFLAGS) $(LARGE) tcons.c
 	/bin/rm -f tcons.c
 
-tconsarg.o: consarg.c
+tconsarg.o: consarg.c $(h)
 	/bin/rm -f tconsarg.c
 	$(SLN) consarg.c tconsarg.c
 	$(CC) -c -DTAINT $(CFLAGS) $(LARGE) tconsarg.c
 	/bin/rm -f tconsarg.c
 
-tdoarg.o: doarg.c
+tdoarg.o: doarg.c $(h)
 	/bin/rm -f tdoarg.c
 	$(SLN) doarg.c tdoarg.c
 	$(CC) -c -DTAINT $(CFLAGS) $(LARGE) tdoarg.c
 	/bin/rm -f tdoarg.c
 
-tdoio.o: doio.c
+tdoio.o: doio.c $(h)
 	/bin/rm -f tdoio.c
 	$(SLN) doio.c tdoio.c
 	$(CC) -c -DTAINT $(CFLAGS) $(LARGE) tdoio.c
 	/bin/rm -f tdoio.c
 
-tdolist.o: dolist.c
+tdolist.o: dolist.c $(h)
 	/bin/rm -f tdolist.c
 	$(SLN) dolist.c tdolist.c
 	$(CC) -c -DTAINT $(CFLAGS) $(LARGE) tdolist.c
 	/bin/rm -f tdolist.c
 
-tdump.o: dump.c
+tdump.o: dump.c $(h)
 	/bin/rm -f tdump.c
 	$(SLN) dump.c tdump.c
 	$(CC) -c -DTAINT $(CFLAGS) $(LARGE) tdump.c
 	/bin/rm -f tdump.c
 
-teval.o: eval.c
+teval.o: eval.c $(h)
 	/bin/rm -f teval.c
 	$(SLN) eval.c teval.c
 	$(CC) -c -DTAINT $(CFLAGS) $(LARGE) teval.c
 	/bin/rm -f teval.c
 
-tform.o: form.c
+tform.o: form.c $(h)
 	/bin/rm -f tform.c
 	$(SLN) form.c tform.c
 	$(CC) -c -DTAINT $(CFLAGS) $(LARGE) tform.c
 	/bin/rm -f tform.c
 
-thash.o: hash.c
+thash.o: hash.c $(h)
 	/bin/rm -f thash.c
 	$(SLN) hash.c thash.c
 	$(CC) -c -DTAINT $(CFLAGS) $(LARGE) thash.c
 	/bin/rm -f thash.c
 
-tregcomp.o: regcomp.c
+tregcomp.o: regcomp.c $(h)
 	/bin/rm -f tregcomp.c
 	$(SLN) regcomp.c tregcomp.c
 	$(CC) -c -DTAINT $(CFLAGS) $(LARGE) tregcomp.c
 	/bin/rm -f tregcomp.c
 
-tregexec.o: regexec.c
+tregexec.o: regexec.c $(h)
 	/bin/rm -f tregexec.c
 	$(SLN) regexec.c tregexec.c
 	$(CC) -c -DTAINT $(CFLAGS) $(LARGE) tregexec.c
 	/bin/rm -f tregexec.c
 
-tstab.o: stab.c
+tstab.o: stab.c $(h)
 	/bin/rm -f tstab.c
 	$(SLN) stab.c tstab.c
 	$(CC) -c -DTAINT $(CFLAGS) $(LARGE) tstab.c
 	/bin/rm -f tstab.c
 
-tstr.o: str.c
+tstr.o: str.c $(h)
 	/bin/rm -f tstr.c
 	$(SLN) str.c tstr.c
 	$(CC) -c -DTAINT $(CFLAGS) $(LARGE) tstr.c
 	/bin/rm -f tstr.c
 
-ttoke.o: toke.c
+ttoke.o: toke.c $(h)
 	/bin/rm -f ttoke.c
 	$(SLN) toke.c ttoke.c
 	$(CC) -c -DTAINT $(CFLAGS) $(LARGE) ttoke.c
 	/bin/rm -f ttoke.c
 
-tutil.o: util.c
+tutil.o: util.c $(h)
 	/bin/rm -f tutil.c
 	$(SLN) util.c tutil.c
 	$(CC) -c -DTAINT $(CFLAGS) $(LARGE) tutil.c
@@ -252,8 +254,7 @@ perl.c perly.h: perl.y
 	mv y.tab.c perl.c
 	mv y.tab.h perly.h
 
-perl.o: perl.c perly.h perl.h EXTERN.h regexp.h util.h INTERN.h handy.h \
-    config.h arg.h stab.h
+perl.o: perl.c perly.h $(h)
 	$(CC) -c $(CFLAGS) $(LARGE) perl.c
 
 perl.man: perl.man.1 perl.man.2 perl.man.3 perl.man.4 patchlevel.h perl
