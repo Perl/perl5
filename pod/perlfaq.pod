@@ -6,7 +6,7 @@ perlfaq - frequently asked questions about Perl ($Date: 1999/05/23 20:38:02 $)
 
 This document is structured into the following sections:
 
-=over
+=over 4
 
 =item perlfaq: Structural overview of the FAQ.
 

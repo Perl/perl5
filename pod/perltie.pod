@@ -71,7 +71,7 @@ calls.  Here's the preamble of the class.
     use strict;
     $Nice::DEBUG = 0 unless defined $Nice::DEBUG;
 
-=over
+=over 4
 
 =item TIESCALAR classname, LIST
 
@@ -225,7 +225,7 @@ The preamble code for the class is as follows:
     use Carp;
     use strict;
 
-=over
+=over 4
 
 =item TIEARRAY classname, LIST
 
@@ -400,7 +400,7 @@ that calls it.
 
 Here are the methods for the DotFiles tied hash.
 
-=over
+=over 4
 
 =item TIEHASH classname, LIST
 
@@ -655,7 +655,7 @@ In our example we're going to create a shouting handle.
 
     package Shout;
 
-=over
+=over 4
 
 =item TIEHANDLE classname, LIST
 

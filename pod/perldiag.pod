@@ -1116,8 +1116,8 @@ workarounds.
 
 =item Copy method did not return a reference
 
-(F) The method which overloads "=" is buggy. See L<overload/Copy
-Constructor>.
+(F) The method which overloads "=" is buggy. See 
+L<overload/Copy Constructor>.
 
 =item CORE::%s is not a keyword
 
@@ -1660,8 +1660,8 @@ shows in the regular expression about where the problem was discovered.
 
 (W syntax) You've run afoul of the rule that says that any list operator
 followed by parentheses turns into a function, with all the list
-operators arguments found inside the parentheses.  See L<perlop/Terms
-and List Operators (Leftward)>.
+operators arguments found inside the parentheses.  See 
+L<perlop/Terms and List Operators (Leftward)>.
 
 =item Invalid %s attribute: %s
 

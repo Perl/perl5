@@ -786,7 +786,7 @@ regardless of whether or not the array has been used or declared
 already.  The fatal error has been downgraded to an optional warning:
 
         Possible unintended interpolation of @example in string
-        
+
 This warns you that C<"fred@example.com"> is going to turn into
 C<fred.com> if you don't backslash the C<@>.
 See http://www.plover.com/~mjd/perl/at-error.html for more details
@@ -1837,7 +1837,8 @@ run in compile-only mode.  Since this is typically not the expected
 behavior, END blocks are not executed anymore when the C<-c> switch
 is used, or if compilation fails.
 
-See L<CHECK blocks> for how to run things when the compile phase ends.
+See L</"Support for CHECK blocks"> for how to run things when the compile 
+phase ends.
 
 =head2 Potential to leak DATA filehandles
 
@@ -2782,7 +2783,7 @@ See L<perlguts/"Memory Allocation"> for further information about that.
 
 =head2 Compatible C Source API Changes
 
-=over
+=over 4
 
 =item C<PATCHLEVEL> is now C<PERL_VERSION>
 

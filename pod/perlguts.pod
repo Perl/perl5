@@ -1088,7 +1088,7 @@ an C<ENTER>/C<LEAVE> pair.
 
 Inside such a I<pseudo-block> the following service is available:
 
-=over
+=over 4
 
 =item C<SAVEINT(int i)>
 
@@ -1161,7 +1161,7 @@ provide pointers to the modifiable data explicitly (either C pointers,
 or Perlish C<GV *>s).  Where the above macros take C<int>, a similar 
 function takes C<int *>.
 
-=over
+=over 4
 
 =item C<SV* save_scalar(GV *gv)>
 

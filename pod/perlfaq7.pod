@@ -560,8 +560,8 @@ In summary, local() doesn't make what you think of as private, local
 variables.  It gives a global variable a temporary value.  my() is
 what you're looking for if you want private variables.
 
-See L<perlsub/"Private Variables via my()"> and L<perlsub/"Temporary
-Values via local()"> for excruciating details.
+See L<perlsub/"Private Variables via my()"> and 
+L<perlsub/"Temporary Values via local()"> for excruciating details.
 
 =head2 How can I access a dynamic variable while a similarly named lexical is in scope?
 

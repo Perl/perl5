@@ -1,5 +1,3 @@
-=pod
-
 =head1 NAME
 
 perlhist - the Perl history records

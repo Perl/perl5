@@ -525,7 +525,7 @@ The hints files for most Unix platforms have seen incremental improvements.
 
 =head2 New Modules
 
-=over
+=over 4
 
 =item B
 
@@ -596,7 +596,7 @@ Various pragmata to control behavior of regular expressions.
 
 =head2 Changes in existing modules
 
-=over
+=over 4
 
 =item Benchmark
 
@@ -702,7 +702,7 @@ L<perlthrtut> gives a tutorial on threads.
 
 =head1 New Diagnostics
 
-=over
+=over 4
 
 =item Ambiguous call resolved as CORE::%s(), qualify as such or use &
 
@@ -916,7 +916,7 @@ fix the problem can be found in L<perllocale/"LOCALE PROBLEMS">.
 
 =head1 Obsolete Diagnostics
 
-=over
+=over 4
 
 =item Can't mktemp()
 

@@ -232,8 +232,6 @@ C<%INC> now localised in a Safe compartment so that use/require work.
 
 The Shell module now has an OO interface.
 
-=item *
-
 =back
 
 =head1 Utility Changes
@@ -726,6 +724,8 @@ winsock handle leak fixed.
 
 =back
 
+=back
+
 =head1 New or Changed Diagnostics
 
 All regular expression compilation error messages are now hopefully
@@ -852,6 +852,8 @@ made in other platforms.
 
 st-store.t and st-retrieve may fail with Compaq C 6.2 on OpenVMS Alpha 7.2.
 
+=back
+
 =head2 Threads Are Still Experimental
 
 Multithreading is still an experimental feature.  Some platforms
@@ -880,8 +882,6 @@ and another known thread-related warning is
 The compiler suite is slowly getting better but is nowhere near
 working order yet.  The backend part that has seen perhaps the most
 progress is the bytecode compiler.
-
-=back
 
 =head1 Reporting Bugs
 

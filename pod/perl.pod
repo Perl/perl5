@@ -189,7 +189,7 @@ But wait, there's more...
 Begun in 1993 (see L<perlhist>), Perl version 5 is nearly a complete
 rewrite that provides the following additional benefits:
 
-=over
+=over 4
 
 =item * modularity and reusability using innumerable modules 
 

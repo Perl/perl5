@@ -1031,7 +1031,7 @@ the tied C<push> is implemented; see C<av_push> in F<av.c>:
      7	call_method("PUSH", G_SCALAR|G_DISCARD);
      8	LEAVE;
      9	POPSTACK;
-       
+
 The lines which concern the mark stack are the first, fifth and last
 lines: they save away, restore and remove the current position of the
 argument stack. 
@@ -1154,7 +1154,7 @@ useful options are probably
 
 Some of the functionality of the debugging code can be achieved using XS
 modules.
-    
+
     -Dr => use re 'debug'
     -Dx => use O 'Debug'
 
@@ -1216,7 +1216,7 @@ Run until the next breakpoint.
 
 Run until the end of the current function, then stop again.
 
-=item
+=item 'enter'
 
 Just pressing Enter will do the most recent operation again - it's a
 blessing when stepping through miles of source code.
@@ -1460,7 +1460,7 @@ this text in the description of C<pack>:
 All done. Now let's create the patch. F<Porting/patching.pod> tells us
 that if we're making major changes, we should copy the entire directory
 to somewhere safe before we begin fiddling, and then do
-    
+
     diff -ruN old new > patch
 
 However, we know which files we've changed, and we can simply do this:

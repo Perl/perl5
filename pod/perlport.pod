@@ -1213,7 +1213,7 @@ A free perl5-based PERL.NLM for Novell Netware is available in
 precompiled binary and source code form from http://www.novell.com/
 as well as from CPAN.
 
-=item 
+=item  *
 
 Plan 9, F<README.plan9>
 

@@ -294,8 +294,8 @@ pair to make it easy to sort the hash in insertion order.
     }
 
 For passing filehandles to functions, the easiest way is to 
-preface them with a star, as in func(*STDIN).  See L<perlfaq7/"Passing
-Filehandles"> for details.
+preface them with a star, as in func(*STDIN).  
+See L<perlfaq7/"Passing Filehandles"> for details.
 
 If you want to create many anonymous handles, you should check out the
 Symbol, FileHandle, or IO::Handle (etc.) modules.  Here's the equivalent
@@ -675,8 +675,8 @@ for your own system's idiosyncrasies (sometimes called "features").
 Slavish adherence to portability concerns shouldn't get in the way of
 your getting your job done.)
 
-For more information on file locking, see also L<perlopentut/"File
-Locking"> if you have it (new for 5.6).
+For more information on file locking, see also 
+L<perlopentut/"File Locking"> if you have it (new for 5.6).
 
 =back
 

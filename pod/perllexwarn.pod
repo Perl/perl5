@@ -468,7 +468,7 @@ Consider this example:
         bless [], $class ;
     }
 
-   
+
     1 ;
 
 The code below makes use of both modules, but it only enables warnings from 
