@@ -1024,15 +1024,19 @@ PP(pp_sselect)
     Zero(&fd_sets[0], 4, char*);
 #endif
 
-#  if SELECT_MIN_BITS > 1
+#  if SELECT_MIN_BITS == 1
+    growsize = sizeof(fd_set);
+#  else
+#   if defined(__GLIBC__) && defined(__FD_SETSIZE)
+#      undef SELECT_MIN_BITS
+#      define SELECT_MIN_BITS __FD_SETSIZE
+#   endif
     /* If SELECT_MIN_BITS is greater than one we most probably will want
      * to align the sizes with SELECT_MIN_BITS/8 because for example
      * in many little-endian (Intel, Alpha) systems (Linux, OS/2, Digital
      * UNIX, Solaris, NeXT, Darwin) the smallest quantum select() operates
      * on (sets/tests/clears bits) is 32 bits.  */
     growsize = maxlen + (SELECT_MIN_BITS/8 - (maxlen % (SELECT_MIN_BITS/8)));
-#  else
-    growsize = sizeof(fd_set);
 #  endif
 
     sv = SP[4];
