@@ -979,38 +979,59 @@ S_find_byclass(pTHX_ regexp * prog, regnode *c, char *s, char *strend, char *sta
 		 * Fortunately, not getting this right is allowed
 		 * for Unicode Regular Expression Support level 1,
 		 * only one-to-one matching is required. --jhi */
+
 		if (c1 == c2) {
 		    while (s <= e) {
 		        c = utf8_to_uvchr((U8*)s, &len);
-			uvchr_to_utf8(tmpbuf, c);
-			to_utf8_fold(tmpbuf, foldbuf, &foldlen);
-			f = utf8_to_uvchr(foldbuf, 0);
-			
-			if ( ((c == c1 && ln == len) ||
-			      (f == c1 && ln == foldlen) ||
-			      !ibcmp_utf8(s, do_utf8, (I32)(strend - s),
-					  m, UTF, (I32)ln))
+			if ( c == c1
+			     && (ln == len ||
+				 !ibcmp_utf8(s, do_utf8, strend - s,
+					     m, UTF, ln))
 			     && (norun || regtry(prog, s)) )
 			    goto got_it;
+			else {
+			     uvchr_to_utf8(tmpbuf, c);
+			     to_utf8_fold(tmpbuf, foldbuf, &foldlen);
+			     f = utf8_to_uvchr(foldbuf, 0);
+			     if ( f != c
+				  && (f == c1 || f == c2)
+				  && (ln == foldlen ||
+				      !ibcmp_utf8((char *)foldbuf,
+						  do_utf8, foldlen,
+						  m, UTF, ln))
+				  && (norun || regtry(prog, s)) )
+				  goto got_it;
+			}
 			s += len;
 		    }
 		}
 		else {
 		    while (s <= e) {
 		        c = utf8_to_uvchr((U8*)s, &len);
-			uvchr_to_utf8(tmpbuf, c);
-			to_utf8_fold(tmpbuf, foldbuf, &foldlen);
-			f = utf8_to_uvchr(foldbuf, 0);
-			
+
 			if (c == (UV)UNICODE_GREEK_CAPITAL_LETTER_SIGMA ||
 			    c == (UV)UNICODE_GREEK_SMALL_LETTER_FINAL_SIGMA)
 			    c = (UV)UNICODE_GREEK_SMALL_LETTER_SIGMA;
-			if ( (((c == c1 || c == c2) && ln == len) ||
-			      ((f == c1 || f == c2) && ln == foldlen) ||
-			      !ibcmp_utf8(s, do_utf8, (I32)(strend - s),
-					  m, UTF, (I32)ln))
+
+			if ( (c == c1 || c == c2)
+			     && (ln == len ||
+				 !ibcmp_utf8(s, do_utf8, strend - s,
+					     m, UTF, ln))
 			     && (norun || regtry(prog, s)) )
 			    goto got_it;
+			else {
+			     uvchr_to_utf8(tmpbuf, c);
+			     to_utf8_fold(tmpbuf, foldbuf, &foldlen);
+			     f = utf8_to_uvchr(foldbuf, 0);
+			     if ( f != c
+				  && (f == c1 || f == c2)
+				  && (ln == foldlen ||
+				      !ibcmp_utf8((char *)foldbuf,
+						  do_utf8, foldlen,
+						  m, UTF, ln))
+				  && (norun || regtry(prog, s)) )
+				  goto got_it;
+			}
 			s += len;
 		    }
 		}
@@ -2372,10 +2393,21 @@ S_regmatch(pTHX_ regnode *prog)
 			       sayNO;
 			  if (UTF8SKIP(s) != UTF8SKIP(l) ||
 			      memNE(s, (char*)l, UTF8SKIP(s))) {
-			       to_utf8_fold((U8*)l, tmpbuf, &ulen);
-			       if (UTF8SKIP(s) != ulen ||
-				   memNE(s, (char*)tmpbuf, ulen))
-				    sayNO;
+			       U8 lfoldbuf[UTF8_MAXLEN_FOLD+1];
+			       STRLEN lfoldlen;
+
+			       to_utf8_fold((U8*)l, lfoldbuf, &lfoldlen);
+			       if (UTF8SKIP(s) != lfoldlen ||
+				   memNE(s, (char*)lfoldbuf, lfoldlen)) {
+				    U8 sfoldbuf[UTF8_MAXLEN_FOLD+1];
+				    STRLEN sfoldlen;
+
+				    to_utf8_fold((U8*)s, sfoldbuf, &sfoldlen);
+				    if (sfoldlen != lfoldlen ||
+					memNE((char*)sfoldbuf,
+					      (char*)lfoldbuf, lfoldlen))
+				      sayNO;
+			       }
 			  }
 			  l += UTF8SKIP(l);
 			  s += UTF8SKIP(s);
