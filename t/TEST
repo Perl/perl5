@@ -5,6 +5,10 @@
 
 $| = 1;
 
+# Let tests know they're running in the perl core.  Useful for modules
+# which live dual lives on CPAN.
+$ENV{PERL_CORE} = 1;
+
 # Cheesy version of Getopt::Std.  Maybe we should replace it with that.
 if ($#ARGV >= 0) {
     foreach my $idx (0..$#ARGV) {

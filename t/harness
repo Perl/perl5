@@ -14,6 +14,10 @@ use Test::Harness;
 $Test::Harness::switches = "";    # Too much noise otherwise
 $Test::Harness::verbose = shift if @ARGV && $ARGV[0] eq '-v';
 
+# Let tests know they're running in the perl core.  Useful for modules
+# which live dual lives on CPAN.
+$ENV{PERL_CORE} = 1;
+
 #fudge DATA for now.
 %datahandle = qw(
 		lib/bigint.t		1
