@@ -657,9 +657,9 @@ my @layer_syms = qw(
 			 PerlIO_push
 			 PerlIO_sv_dup
 			 PerlIO_unread
-			 Perl_Idef_layerlist_ptr
-			 Perl_Iknown_layers_ptr
-			 Perl_Iperlio_ptr
+			 PL_def_layerlist
+			 PL_known_layers
+			 PL_perlio
 );
 
 if ($define{'USE_PERLIO'}) {
