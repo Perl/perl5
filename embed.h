@@ -4642,7 +4642,7 @@
 #define hv_delete_common(a,b,c,d,e,f,g)	S_hv_delete_common(aTHX_ a,b,c,d,e,f,g)
 #endif
 #ifdef PERL_CORE
-#define hv_exists_common(a,b,c,d,e)	S_hv_exists_common(aTHX_ a,b,c,d,e)
+#define hv_exists_common(a,b,c,d,e,f)	S_hv_exists_common(aTHX_ a,b,c,d,e,f)
 #endif
 #ifdef PERL_CORE
 #define hv_fetch_common(a,b,c,d,e,f,g)	S_hv_fetch_common(aTHX_ a,b,c,d,e,f,g)

@@ -959,9 +959,19 @@ C<klen> is the length of the key.
 */
 
 bool
-Perl_hv_exists(pTHX_ HV *hv, const char *key, I32 klen)
+Perl_hv_exists(pTHX_ HV *hv, const char *key, I32 klen_i32)
 {
-    return hv_exists_common(hv, NULL, key, klen, 0);
+    STRLEN klen;
+    int flags;
+
+    if (klen_i32 < 0) {
+	klen = -klen_i32;
+	flags = HVhek_UTF8;
+    } else {
+	klen = klen_i32;
+	flags = 0;
+    }
+    return hv_exists_common(hv, NULL, key, klen, flags, 0);
 }
 
 /*
@@ -977,35 +987,29 @@ computed.
 bool
 Perl_hv_exists_ent(pTHX_ HV *hv, SV *keysv, U32 hash)
 {
-    return hv_exists_common(hv, keysv, NULL, 0, hash);
+    return hv_exists_common(hv, keysv, NULL, 0, 0, hash);
 }
 
 bool
-S_hv_exists_common(pTHX_ HV *hv, SV *keysv, const char *key, I32 klen_i32,
-		   U32 hash)
+S_hv_exists_common(pTHX_ HV *hv, SV *keysv, const char *key, STRLEN klen,
+		   int k_flags, U32 hash)
 {
     register XPVHV* xhv;
-    STRLEN klen;
     register HE *entry;
     SV *sv;
     bool is_utf8;
     const char *keysave;
-    int k_flags = 0;
+    int masked_flags;
 
     if (!hv)
 	return 0;
 
     if (keysv) {
 	key = SvPV(keysv, klen);
+	k_flags = 0;
 	is_utf8 = (SvUTF8(keysv) != 0);
     } else {
-	if (klen_i32 < 0) {
-	    klen = -klen_i32;
-	    is_utf8 = TRUE;
-	} else {
-	    klen = klen_i32;
-	    is_utf8 = FALSE;
-	}
+	is_utf8 = ((k_flags & HVhek_UTF8) ? TRUE : FALSE);
     }
     keysave = key;
 
@@ -1051,15 +1055,27 @@ S_hv_exists_common(pTHX_ HV *hv, SV *keysv, const char *key, I32 klen_i32,
 
     if (is_utf8) {
 	key = (char*)bytes_from_utf8((U8*)key, &klen, &is_utf8);
+
+	if (k_flags & HVhek_FREEKEY) {
+	    /* This shouldn't happen if our caller does what we expect,
+	       but strictly the API allows it.  */
+	    Safefree(keysave);
+	}
+
         if (is_utf8)
-            k_flags = HVhek_UTF8;
+            k_flags |= HVhek_UTF8;
+	else
+            k_flags &= ~HVhek_UTF8;
         if (key != keysave)
-            k_flags |= HVhek_FREEKEY;
+            k_flags |= HVhek_WASUTF8 | HVhek_FREEKEY;
     }
+
     if (HvREHASH(hv)) {
 	PERL_HASH_INTERNAL(hash, key, klen);
     } else if (!hash)
 	PERL_HASH(hash, key, klen);
+
+    masked_flags = (k_flags & HVhek_MASK);
 
 #ifdef DYNAMIC_ENV_FETCH
     if (!xhv->xhv_array /* !HvARRAY(hv) */) entry = Null(HE*);
@@ -1074,7 +1090,7 @@ S_hv_exists_common(pTHX_ HV *hv, SV *keysv, const char *key, I32 klen_i32,
 	    continue;
 	if (HeKEY(entry) != key && memNE(HeKEY(entry),key,klen))	/* is this it? */
 	    continue;
-	if ((HeKFLAGS(entry) ^ k_flags) & HVhek_UTF8)
+	if ((HeKFLAGS(entry) ^ masked_flags) & HVhek_UTF8)
 	    continue;
 	if (k_flags & HVhek_FREEKEY)
 	    Safefree(key);
