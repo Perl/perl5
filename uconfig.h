@@ -3332,6 +3332,22 @@
 #define PERL_XS_APIVERSION "5.005"
 #define PERL_PM_APIVERSION "5.005"
 
+/* HAS_DBMINIT_PROTO:
+ *	This symbol, if defined, indicates that the system provides
+ *	a prototype for the dbminit() function.  Otherwise, it is up
+ *	to the program to supply one.  A good guess is
+ *		extern int dbminit(char *);
+ */
+/*#define	HAS_DBMINIT_PROTO	/ **/
+
+/* HAS_FLOCK_PROTO:
+ *	This symbol, if defined, indicates that the system provides
+ *	a prototype for the flock() function.  Otherwise, it is up
+ *	to the program to supply one.  A good guess is
+ *		extern int flock(int, int);
+ */
+/*#define	HAS_FLOCK_PROTO	/ **/
+
 /* HAS_REALPATH:
  *	This symbol, if defined, indicates that the realpath routine is
  *	available to do resolve paths.
@@ -3350,6 +3366,14 @@
  *	available to test whether a socket is at the out-of-band mark.
  */
 /*#define HAS_SOCKATMARK		/ **/
+
+/* HAS_SOCKATMARK_PROTO:
+ *	This symbol, if defined, indicates that the system provides
+ *	a prototype for the sockatmark() function.  Otherwise, it is up
+ *	to the program to supply one.  A good guess is
+ *		extern int sockatmark _((int));
+ */
+/*#define	HAS_SOCKATMARK_PROTO	/ **/
 
 /* HAS_SETRESGID_PROTO:
  *	This symbol, if defined, indicates that the system provides
@@ -3373,10 +3397,27 @@
  */
 /*#define HAS_STRFTIME		/ **/
 
+/* HAS_SYSCALL_PROTO:
+ *	This symbol, if defined, indicates that the system provides
+ *	a prototype for the syscall() function.  Otherwise, it is up
+ *	to the program to supply one.  Good guesses are
+ *		extern int syscall(int,  ...);
+ *		extern int syscall(long, ...);
+ */
+/*#define	HAS_SYSCALL_PROTO	/ **/
+
 /* U32_ALIGNMENT_REQUIRED:
  *	This symbol, if defined, indicates that you must access
  *	character data through U32-aligned pointers.
  */
 #define U32_ALIGNMENT_REQUIRED	/**/
+
+/* HAS_USLEEP_PROTO:
+ *	This symbol, if defined, indicates that the system provides
+ *	a prototype for the usleep() function.  Otherwise, it is up
+ *	to the program to supply one.  A good guess is
+ *		extern int usleep(useconds_t);
+ */
+/*#define	HAS_USLEEP_PROTO	/ **/
 
 #endif

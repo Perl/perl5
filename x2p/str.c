@@ -77,7 +77,7 @@ void
 str_nset(register STR *str, register char *ptr, register int len)
 {
     GROWSTR(&(str->str_ptr), &(str->str_len), len + 1);
-    bcopy(ptr,str->str_ptr,len);
+    memcpy(str->str_ptr,ptr,len);
     str->str_cur = len;
     *(str->str_ptr+str->str_cur) = '\0';
     str->str_nok = 0;		/* invalidate number */
@@ -93,7 +93,7 @@ str_set(register STR *str, register char *ptr)
 	ptr = "";
     len = strlen(ptr);
     GROWSTR(&(str->str_ptr), &(str->str_len), len + 1);
-    bcopy(ptr,str->str_ptr,len+1);
+    memcpy(str->str_ptr,ptr,len+1);
     str->str_cur = len;
     str->str_nok = 0;		/* invalidate number */
     str->str_pok = 1;		/* validate pointer */
@@ -107,7 +107,7 @@ str_chop(register STR *str, register char *ptr)	/* like set but assuming ptr is 
     if (!(str->str_pok))
 	str_2ptr(str);
     str->str_cur -= (ptr - str->str_ptr);
-    bcopy(ptr,str->str_ptr, str->str_cur + 1);
+    memcpy(str->str_ptr, ptr, str->str_cur + 1);
     str->str_nok = 0;		/* invalidate number */
     str->str_pok = 1;		/* validate pointer */
 }
@@ -118,7 +118,7 @@ str_ncat(register STR *str, register char *ptr, register int len)
     if (!(str->str_pok))
 	str_2ptr(str);
     GROWSTR(&(str->str_ptr), &(str->str_len), str->str_cur + len + 1);
-    bcopy(ptr,str->str_ptr+str->str_cur,len);
+    memcpy(str->str_ptr+str->str_cur, ptr, len);
     str->str_cur += len;
     *(str->str_ptr+str->str_cur) = '\0';
     str->str_nok = 0;		/* invalidate number */
@@ -145,7 +145,7 @@ str_cat(register STR *str, register char *ptr)
 	str_2ptr(str);
     len = strlen(ptr);
     GROWSTR(&(str->str_ptr), &(str->str_len), str->str_cur + len + 1);
-    bcopy(ptr,str->str_ptr+str->str_cur,len+1);
+    memcpy(str->str_ptr+str->str_cur, ptr, len+1);
     str->str_cur += len;
     str->str_nok = 0;		/* invalidate number */
     str->str_pok = 1;		/* validate pointer */
@@ -197,7 +197,7 @@ str_new(int len)
     }
     else {
 	str = (STR *) safemalloc(sizeof(STR));
-	bzero((char*)str,sizeof(STR));
+	memset((char*)str,0,sizeof(STR));
     }
     if (len)
 	GROWSTR(&(str->str_ptr), &(str->str_len), len + 1);

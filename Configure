@@ -20,7 +20,7 @@
 
 # $Id: Head.U,v 3.0.1.9 1997/02/28 15:02:09 ram Exp $
 #
-# Generated on Mon Jun  4 06:11:38 EET DST 2001 [metaconfig 3.0 PL70]
+# Generated on Mon Jun  4 18:28:57 EET DST 2001 [metaconfig 3.0 PL70]
 # (with additional metaconfig patches by perlbug@perl.org)
 
 cat >c1$$ <<EOF
@@ -333,6 +333,7 @@ d_csh=''
 full_csh=''
 d_cuserid=''
 d_dbl_dig=''
+d_dbminitproto=''
 d_difftime=''
 d_dlerror=''
 d_dlopen=''
@@ -358,6 +359,7 @@ d_fds_bits=''
 d_fgetpos=''
 d_flexfnam=''
 d_flock=''
+d_flockproto=''
 d_fork=''
 d_fpos64_t=''
 d_frexpl=''
@@ -531,6 +533,7 @@ d_sigaction=''
 d_sigprocmask=''
 d_sigsetjmp=''
 d_sockatmark=''
+d_sockatmarkproto=''
 d_msg_ctrunc=''
 d_msg_dontroute=''
 d_msg_oob=''
@@ -583,6 +586,7 @@ d_strtouq=''
 d_strxfrm=''
 d_symlink=''
 d_syscall=''
+d_syscallproto=''
 d_sysconf=''
 d_system=''
 d_tcgetpgrp=''
@@ -601,6 +605,7 @@ d_semctl_semid_ds=''
 d_semctl_semun=''
 d_union_semun=''
 d_usleep=''
+d_usleepproto=''
 d_ustat=''
 d_vfork=''
 usevfork=''
@@ -8040,28 +8045,6 @@ if $test X"$sPRIfldbl" = X; then
 #include <stdio.h>
 int main() {
   long double d = 123.456;
-  printf("%.3llf\n", d);
-}
-EOCP
-	set try
-	if eval $compile; then
-		yyy=`./try$exe_ext`
-		case "$yyy" in
-		123.456)
-			sPRIfldbl='"llf"'; sPRIgldbl='"llg"'; sPRIeldbl='"lle"';
-                	sPRIFUldbl='"llF"'; sPRIGUldbl='"llG"'; sPRIEUldbl='"llE"';
-			echo "We will use %llf."
-			;;
-		esac
-	fi
-fi
-
-if $test X"$sPRIfldbl" = X; then
-	$cat >try.c <<'EOCP'
-#include <sys/types.h>
-#include <stdio.h>
-int main() {
-  long double d = 123.456;
   printf("%.3Lf\n", d);
 }
 EOCP
@@ -8073,6 +8056,28 @@ EOCP
 			sPRIfldbl='"Lf"'; sPRIgldbl='"Lg"'; sPRIeldbl='"Le"';
                 	sPRIFUldbl='"LF"'; sPRIGUldbl='"LG"'; sPRIEUldbl='"LE"';
 			echo "We will use %Lf."
+			;;
+		esac
+	fi
+fi
+
+if $test X"$sPRIfldbl" = X; then
+	$cat >try.c <<'EOCP'
+#include <sys/types.h>
+#include <stdio.h>
+int main() {
+  long double d = 123.456;
+  printf("%.3llf\n", d);
+}
+EOCP
+	set try
+	if eval $compile; then
+		yyy=`./try$exe_ext`
+		case "$yyy" in
+		123.456)
+			sPRIfldbl='"llf"'; sPRIgldbl='"llg"'; sPRIeldbl='"lle"';
+                	sPRIFUldbl='"llF"'; sPRIGUldbl='"llG"'; sPRIEUldbl='"llE"';
+			echo "We will use %llf."
 			;;
 		esac
 	fi
@@ -9005,6 +9010,60 @@ $rm -f dbl_dig.?
 set d_dbl_dig
 eval $setvar
 
+hasproto='varname=$1; func=$2; shift; shift;
+while $test $# -ge 2; do
+	case "$1" in
+	$define) echo "#include <$2>";;
+	esac ;
+    shift 2;
+done > try.c;
+$cppstdin $cppflags $cppminus < try.c > tryout.c 2>/dev/null;
+if $contains "$func.*(" tryout.c >/dev/null 2>&1; then
+	echo "$func() prototype found.";
+	val="$define";
+else
+	echo "$func() prototype NOT found.";
+	val="$undef";
+fi;
+set $varname;
+eval $setvar;
+$rm -f try.c tryout.c'
+
+: see if dbm.h is available
+: see if dbmclose exists
+set dbmclose d_dbmclose
+eval $inlibc
+
+case "$d_dbmclose" in
+$define)
+	set dbm.h i_dbm
+	eval $inhdr
+	case "$i_dbm" in
+	$define)
+		val="$undef"
+		set i_rpcsvcdbm
+		eval $setvar
+		;;
+	*)	set rpcsvc/dbm.h i_rpcsvcdbm
+		eval $inhdr
+		;;
+	esac
+	;;
+*)	echo "We won't be including <dbm.h>"
+	val="$undef"
+	set i_dbm
+	eval $setvar
+	val="$undef"
+	set i_rpcsvcdbm
+	eval $setvar
+	;;
+esac
+
+: see if prototype for dbminit is available
+echo " "
+set d_dbminitproto dbminit $i_dbm dbm.h
+eval $hasproto
+
 : see if difftime exists
 set difftime d_difftime
 eval $inlibc
@@ -9193,25 +9252,6 @@ $rm -f fred fred.? dyna.$dlext dyna.? tmp-dyna.?
 
 set d_dlsymun
 eval $setvar
-
-hasproto='varname=$1; func=$2; shift; shift;
-while $test $# -ge 2; do
-	case "$1" in
-	$define) echo "#include <$2>";;
-	esac ;
-    shift 2;
-done > try.c;
-$cppstdin $cppflags $cppminus < try.c > tryout.c 2>/dev/null;
-if $contains "$func.*(" tryout.c >/dev/null 2>&1; then
-	echo "$func() prototype found.";
-	val="$define";
-else
-	echo "$func() prototype NOT found.";
-	val="$undef";
-fi;
-set $varname;
-eval $setvar;
-$rm -f try.c tryout.c'
 
 : see if prototype for drand48 is available
 echo " "
@@ -9745,6 +9785,35 @@ eval $inlibc
 : see if flock exists
 set flock d_flock
 eval $inlibc
+
+: see if this is a sys/file.h system
+val=''
+set sys/file.h val
+eval $inhdr
+
+: do we need to include sys/file.h ?
+case "$val" in
+"$define")
+	echo " "
+	if $h_sysfile; then
+		val="$define"
+		echo "We'll be including <sys/file.h>." >&4
+	else
+		val="$undef"
+		echo "We won't be including <sys/file.h>." >&4
+	fi
+	;;
+*)
+	h_sysfile=false
+	;;
+esac
+set i_sysfile
+eval $setvar
+
+: see if prototype for flock is available
+echo " "
+set d_flockproto flock $i_sysfile sys/file.h
+eval $hasproto
 
 : see if fork exists
 set fork d_fork
@@ -11879,6 +11948,11 @@ $rm -f try.c try
 set sockatmark d_sockatmark
 eval $inlibc
 
+: see if prototype for sockatmark is available
+echo " "
+set d_sockatmarkproto sockatmark $d_socket sys/socket.h
+eval $hasproto
+
 : see if socks5_init exists
 set socks5_init d_socks5_init
 eval $inlibc
@@ -12556,6 +12630,11 @@ eval $inlibc
 set syscall d_syscall
 eval $inlibc
 
+: see if prototype for syscall is available
+echo " "
+set d_syscallproto syscall $i_unistd unistd.h
+eval $hasproto
+
 : see if sysconf exists
 set sysconf d_sysconf
 eval $inlibc
@@ -12793,6 +12872,11 @@ eval $inlibc
 : see if usleep exists
 set usleep d_usleep
 eval $inlibc
+
+: see if prototype for usleep is available
+echo " "
+set d_usleepproto usleep $i_unistd unistd.h
+eval $hasproto
 
 : see if ustat exists
 set ustat d_ustat
@@ -13821,28 +13905,6 @@ EOCP
 	fi
 fi
 
-if $test X"$sPRId64" = X -a X"$quadtype" = X"long long"; then
-	$cat >try.c <<'EOCP'
-#include <sys/types.h>
-#include <stdio.h>
-int main() {
-  long long q = 12345678901LL; /* AIX cc requires the LL suffix. */
-  printf("%lld\n", q);
-}
-EOCP
-	set try
-	if eval $compile; then
-		yyy=`./try$exe_ext`
-		case "$yyy" in
-		12345678901)
-			sPRId64='"lld"'; sPRIi64='"lli"'; sPRIu64='"llu"';
-                	sPRIo64='"llo"'; sPRIx64='"llx"'; sPRIXU64='"llX"';
-			echo "We will use the %lld style."
-			;;
-		esac
-	fi
-fi
-
 if $test X"$sPRId64" = X -a X"$quadtype" != X; then
 	$cat >try.c <<EOCP
 #include <sys/types.h>
@@ -13860,6 +13922,28 @@ EOCP
 			sPRId64='"Ld"'; sPRIi64='"Li"'; sPRIu64='"Lu"';
                 	sPRIo64='"Lo"'; sPRIx64='"Lx"'; sPRIXU64='"LX"';
 			echo "We will use %Ld."
+			;;
+		esac
+	fi
+fi
+
+if $test X"$sPRId64" = X -a X"$quadtype" = X"long long"; then
+	$cat >try.c <<'EOCP'
+#include <sys/types.h>
+#include <stdio.h>
+int main() {
+  long long q = 12345678901LL; /* AIX cc requires the LL suffix. */
+  printf("%lld\n", q);
+}
+EOCP
+	set try
+	if eval $compile; then
+		yyy=`./try$exe_ext`
+		case "$yyy" in
+		12345678901)
+			sPRId64='"lld"'; sPRIi64='"lli"'; sPRIu64='"llu"';
+                	sPRIo64='"llo"'; sPRIx64='"llx"'; sPRIXU64='"llX"';
+			echo "We will use the %lld style."
 			;;
 		esac
 	fi
@@ -15226,60 +15310,6 @@ case "$yacc" in
 	;;
 esac
 
-: see if dbm.h is available
-: see if dbmclose exists
-set dbmclose d_dbmclose
-eval $inlibc
-
-case "$d_dbmclose" in
-$define)
-	set dbm.h i_dbm
-	eval $inhdr
-	case "$i_dbm" in
-	$define)
-		val="$undef"
-		set i_rpcsvcdbm
-		eval $setvar
-		;;
-	*)	set rpcsvc/dbm.h i_rpcsvcdbm
-		eval $inhdr
-		;;
-	esac
-	;;
-*)	echo "We won't be including <dbm.h>"
-	val="$undef"
-	set i_dbm
-	eval $setvar
-	val="$undef"
-	set i_rpcsvcdbm
-	eval $setvar
-	;;
-esac
-
-: see if this is a sys/file.h system
-val=''
-set sys/file.h val
-eval $inhdr
-
-: do we need to include sys/file.h ?
-case "$val" in
-"$define")
-	echo " "
-	if $h_sysfile; then
-		val="$define"
-		echo "We'll be including <sys/file.h>." >&4
-	else
-		val="$undef"
-		echo "We won't be including <sys/file.h>." >&4
-	fi
-	;;
-*)
-	h_sysfile=false
-	;;
-esac
-set i_sysfile
-eval $setvar
-
 : see if fcntl.h is there
 val=''
 set fcntl.h val
@@ -15503,12 +15533,12 @@ $awk \\
 EOSH
 cat <<'EOSH' >> Cppsym.try
 'length($1) > 0 {
-    printf "#ifdef %s\n#if %s+0\nprintf(\"%s=%%ld\\n\", %s);\n#else\nprintf(\"%s\\n\");\n#endif\n#endif\n", $1, $1, $1, $1, $1
-    printf "#ifdef _%s\n#if _%s+0\nprintf(\"_%s=%%ld\\n\", _%s);\n#else\nprintf(\"_%s\\n\");\n#endif\n#endif\n", $1, $1, $1, $1, $1
-    printf "#ifdef __%s\n#if __%s+0\nprintf(\"__%s=%%ld\\n\", __%s);\n#else\nprintf(\"__%s\\n\");\n#endif\n#endif\n", $1, $1, $1, $1, $1
-    printf "#ifdef __%s__\n#if __%s__+0\nprintf(\"__%s__=%%ld\\n\", __%s__);\n#else\nprintf(\"__%s__\\n\");\n#endif\n#endif\n", $1, $1, $1, $1, $1
+    printf "#ifdef %s\n#if %s+0\nprintf(\"%s=%%ld\\n\", (long)%s);\n#else\nprintf(\"%s\\n\");\n#endif\n#endif\n", $1, $1, $1, $1, $1
+    printf "#ifdef _%s\n#if _%s+0\nprintf(\"_%s=%%ld\\n\", (long)_%s);\n#else\nprintf(\"_%s\\n\");\n#endif\n#endif\n", $1, $1, $1, $1, $1
+    printf "#ifdef __%s\n#if __%s+0\nprintf(\"__%s=%%ld\\n\", (long)__%s);\n#else\nprintf(\"__%s\\n\");\n#endif\n#endif\n", $1, $1, $1, $1, $1
+    printf "#ifdef __%s__\n#if __%s__+0\nprintf(\"__%s__=%%ld\\n\", (long)__%s__);\n#else\nprintf(\"__%s__\\n\");\n#endif\n#endif\n", $1, $1, $1, $1, $1
 }'	 >> try.c
-echo '}' >> try.c
+echo 'return 0;}' >> try.c
 EOSH
 cat <<EOSH >> Cppsym.try
 ccflags="$ccflags"
@@ -16246,6 +16276,7 @@ d_crypt='$d_crypt'
 d_csh='$d_csh'
 d_cuserid='$d_cuserid'
 d_dbl_dig='$d_dbl_dig'
+d_dbminitproto='$d_dbminitproto'
 d_difftime='$d_difftime'
 d_dirnamlen='$d_dirnamlen'
 d_dlerror='$d_dlerror'
@@ -16273,6 +16304,7 @@ d_fds_bits='$d_fds_bits'
 d_fgetpos='$d_fgetpos'
 d_flexfnam='$d_flexfnam'
 d_flock='$d_flock'
+d_flockproto='$d_flockproto'
 d_fork='$d_fork'
 d_fpathconf='$d_fpathconf'
 d_fpos64_t='$d_fpos64_t'
@@ -16459,6 +16491,7 @@ d_sigaction='$d_sigaction'
 d_sigprocmask='$d_sigprocmask'
 d_sigsetjmp='$d_sigsetjmp'
 d_sockatmark='$d_sockatmark'
+d_sockatmarkproto='$d_sockatmarkproto'
 d_socket='$d_socket'
 d_socklen_t='$d_socklen_t'
 d_sockpair='$d_sockpair'
@@ -16495,6 +16528,7 @@ d_strxfrm='$d_strxfrm'
 d_suidsafe='$d_suidsafe'
 d_symlink='$d_symlink'
 d_syscall='$d_syscall'
+d_syscallproto='$d_syscallproto'
 d_sysconf='$d_sysconf'
 d_sysernlst='$d_sysernlst'
 d_syserrlst='$d_syserrlst'
@@ -16513,6 +16547,7 @@ d_umask='$d_umask'
 d_uname='$d_uname'
 d_union_semun='$d_union_semun'
 d_usleep='$d_usleep'
+d_usleepproto='$d_usleepproto'
 d_ustat='$d_ustat'
 d_vendorarch='$d_vendorarch'
 d_vendorbin='$d_vendorbin'

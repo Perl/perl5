@@ -506,6 +506,14 @@ register struct op *Perl_op asm(stringify(OP_IN_REGISTER));
 #   include <unistd.h>
 #endif
 
+#ifndef HAS_SYSCALL_PROTO
+int syscall(int, ...);
+#endif
+
+#ifndef HAS_USLEEP_PROTO
+int usleep(useconds_t);
+#endif
+
 #ifdef PERL_MICRO /* Last chance to export Perl_my_swap */
 #  define MYSWAP
 #endif
@@ -755,6 +763,12 @@ typedef struct perl_mstats perl_mstats_t;
 #   include <net/errno.h>
 #  endif
 # endif
+#endif
+
+/* sockatmark() is so new that many places might have it hidden
+ * behind some -D_BLAH_BLAH_SOURCE guard. */
+#ifndef HAS_SOCKATMARK_PROTO
+int sockatmark(int);
 #endif
 
 #ifdef SETERRNO
@@ -3641,6 +3655,10 @@ typedef struct am_table_short AMTS;
 
 #ifdef I_SYS_FILE
 #  include <sys/file.h>
+#endif
+
+#ifndef HAS_FLOCK_PROTO
+int flock(int fd, int op);
 #endif
 
 #ifndef O_RDONLY
