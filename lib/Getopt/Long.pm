@@ -1,11 +1,11 @@
 # GetOpt::Long.pm -- POSIX compatible options parsing
 
-# RCS Status      : $Id: GetoptLong.pm,v 2.3 1996-04-05 21:03:05+02 jv Exp $
+# RCS Status      : $Id: GetoptLong.pm,v 2.4 1996-10-02 11:16:26+02 jv Exp $
 # Author          : Johan Vromans
 # Created On      : Tue Sep 11 15:00:12 1990
 # Last Modified By: Johan Vromans
-# Last Modified On: Fri Apr  5 21:02:52 1996
-# Update Count    : 433
+# Last Modified On: Wed Oct  2 11:13:12 1996
+# Update Count    : 500
 # Status          : Released
 
 package Getopt::Long;
@@ -14,9 +14,10 @@ require Exporter;
 
 @ISA = qw(Exporter);
 @EXPORT = qw(&GetOptions $REQUIRE_ORDER $PERMUTE $RETURN_IN_ORDER);
-$VERSION = sprintf("%d.%02d", '$Revision: 2.3 $ ' =~ /(\d+)\.(\d+)/);
+$VERSION = sprintf("%d.%02d", '$Revision: 2.4 $ ' =~ /(\d+)\.(\d+)/);
 use vars qw($autoabbrev $getopt_compat $ignorecase $bundling $order
-	    $error $debug $REQUIRE_ORDER $PERMUTE $RETURN_IN_ORDER
+	    $passthrough $error $debug 
+	    $REQUIRE_ORDER $PERMUTE $RETURN_IN_ORDER
 	    $VERSION $major_version $minor_version);
 use strict;
 
@@ -85,7 +86,7 @@ followed by an argument specifier. Values for argument specifiers are:
 
 =over 8
 
-=item E<lt>noneE<gt>
+=item <none>
 
 Option does not take an argument. 
 The option variable will be set to 1.
@@ -170,6 +171,17 @@ the assignment
 
   $optctl{"sizes"} = [24, 48];
 
+For hash options (an option whose argument looks like "name=value"),
+a reference to a hash is used, e.g.:
+
+  %optctl = ();
+  &GetOptions (\%optctl, "define=s%");
+
+with command line "--define foo=hello --define bar=world" will perform the
+equivalent of the assignment
+
+  $optctl{"define"} = {foo=>'hello', bar=>'world')
+
 If no linkage is explicitly specified and no ref HASH is passed,
 GetOptions will put the value in a global variable named after the
 option, prefixed by "opt_". To yield a usable Perl variable,
@@ -191,7 +203,7 @@ A lone dash B<-> is considered an option, the corresponding Perl
 identifier is $opt_ .
 
 The linkage specifier can be a reference to a scalar, a reference to
-an array or a reference to a subroutine.
+an array, a reference to a hash or a reference to a subroutine.
 
 If a REF SCALAR is supplied, the new value is stored in the referenced
 variable. If the option occurs more than once, the previous value is
@@ -199,6 +211,11 @@ overwritten.
 
 If a REF ARRAY is supplied, the new value is appended (pushed) to the
 referenced array. 
+
+If a REF HASH is supplied, the option value should look like "key" or
+"key=value" (if the "=value" is omitted then a value of 1 is implied).
+In this case, the element of the referenced hash with the key "key"
+is assigned "value". 
 
 If a REF CODE is supplied, the referenced subroutine is called with
 two arguments: the option name and the option value.
@@ -208,7 +225,7 @@ The option name is always the true name, not an abbreviation or alias.
 
 The option name may actually be a list of option names, separated by
 "|"s, e.g. "foo|bar|blech=s". In this example, "foo" is the true name
-of this option. If no linkage is specified, options "foo", "bar" and
+op this option. If no linkage is specified, options "foo", "bar" and
 "blech" all will set $opt_foo.
 
 Option names may be abbreviated to uniqueness, depending on
@@ -216,7 +233,7 @@ configuration variable $Getopt::Long::autoabbrev.
 
 =head2 Non-option call-back routine
 
-A special option specifier, E<lt>E<gt>, can be used to designate a subroutine
+A special option specifier, <>, can be used to designate a subroutine
 to handle non-option arguments. GetOptions will immediately call this
 subroutine for every non-option it encounters in the options list.
 This subroutine gets the name of the non-option passed.
@@ -246,11 +263,18 @@ In fact, the Perl 5 version of newgetopt.pl is just a wrapper around
 the module.
 
 If an "@" sign is appended to the argument specifier, the option is
-treated as an array.  Value(s) are not set, but pushed into array
-@opt_name. This only applies if no linkage is supplied.
+treated as an array. Value(s) are not set, but pushed into array
+@opt_name. If explicit linkage is supplied, this must be a reference
+to an ARRAY.
+
+If an "%" sign is appended to the argument specifier, the option is
+treated as a hash. Value(s) of the form "name=value" are set by
+setting the element of the hash %opt_name with key "name" to "value"
+(if the "=value" portion is omitted it defaults to 1). If explicit
+linkage is supplied, this must be a reference to a HASH.
 
 If configuration variable $Getopt::Long::getopt_compat is set to a
-non-zero value, options that start with "+" may also include their
+non-zero value, options that start with "+" or "-" may also include their
 arguments, e.g. "+foo=bar". This is for compatiblity with older
 implementations of the GNU "getopt" routine.
 
@@ -292,11 +316,11 @@ Example of using variable references:
 With command line options "-foo blech -bar 24 -ar xx -ar yy" 
 this will result in:
 
-   $foo = 'blech'
+   $bar = 'blech'
    $opt_bar = 24
    @ar = ('xx','yy')
 
-Example of using the E<lt>E<gt> option specifier:
+Example of using the <> option specifier:
 
    @ARGV = qw(-foo 1 bar -foo 2 blech);
    &GetOptions("foo=i", \$myfoo, "<>", \&mysub);
@@ -404,6 +428,16 @@ Ignore case when matching options. Default is 1. When bundling is in
 effect, case is ignored on single-character options only if
 $Getopt::Long::ignorecase is greater than 1.
 
+=item $Getopt::Long::passthrough
+
+Unknown options are passed through in @ARGV instead of being flagged
+as errors. This makes it possible to write wrapper scripts that
+process only part of the user supplied options, and passes the
+remaining options to some other program.
+
+This can be very confusing, especially when $Getopt::Long::order is
+set to $PERMUTE.
+
 =item $Getopt::Long::VERSION
 
 The version number of this Getopt::Long implementation in the format
@@ -454,14 +488,14 @@ my $gen_prefix;			# generic prefix (option starters)
 
 # Handle POSIX compliancy.
 if ( defined $ENV{"POSIXLY_CORRECT"} ) {
-    $gen_prefix = "--|-";
+    $gen_prefix = "(--|-)";
     $autoabbrev = 0;		# no automatic abbrev of options
     $bundling = 0;		# no bundling of single letter switches
     $getopt_compat = 0;		# disallow '+' to start options
     $order = $REQUIRE_ORDER;
 }
 else {
-    $gen_prefix = "--|-|\\+";
+    $gen_prefix = "(--|-|\\+)";
     $autoabbrev = 1;		# automatic abbrev of options
     $bundling = 0;		# bundling off by default
     $getopt_compat = 1;		# allow '+' to start options
@@ -472,35 +506,41 @@ else {
 $debug = 0;			# for debugging
 $error = 0;			# error tally
 $ignorecase = 1;		# ignore case when matching options
+$passthrough = 0;		# leave unrecognized options alone
 ($major_version, $minor_version) = $VERSION =~ /^(\d+)\.(\d+)/;
+
+use vars qw($genprefix %opctl @opctl %bopctl $opt $arg $argend $array);
+use vars qw(%aliases $hash $key);
 
 ################ Subroutines ################
 
 sub GetOptions {
 
     my @optionlist = @_;	# local copy of the option descriptions
-    my $argend = '--';		# option list terminator
-    my %opctl;			# table of arg.specs (long and abbrevs)
-    my %bopctl;			# table of arg.specs (bundles)
+    local ($argend) = '--';		# option list terminator
+    local (%opctl);			# table of arg.specs (long and abbrevs)
+    local (%bopctl);			# table of arg.specs (bundles)
     my $pkg = (caller)[0];	# current context
 				# Needed if linkage is omitted.
-    my %aliases;		# alias table
+    local (%aliases);		# alias table
     my @ret = ();		# accum for non-options
     my %linkage;		# linkage
     my $userlinkage;		# user supplied HASH
-    my $genprefix = $gen_prefix; # so we can call the same module more 
+    local ($genprefix) = $gen_prefix; # so we can call the same module more 
 				# than once in differing environments
     $error = 0;
 
-    print STDERR ('GetOptions $Revision: 2.3 $ ',
+    print STDERR ('GetOptions $Revision: 2.4 $ ',
 		  "[GetOpt::Long $Getopt::Long::VERSION] -- ",
 		  "called from package \"$pkg\".\n",
+		  "  (@ARGV)\n",
 		  "  autoabbrev=$autoabbrev".
 		  ",bundling=$bundling",
 		  ",getopt_compat=$getopt_compat",
-		  ",genprefix=\"$genprefix\"",
 		  ",order=$order",
-		  ",ignorecase=$ignorecase",
+		  ",\n  ignorecase=$ignorecase",
+		  ",passthrough=$passthrough",
+		  ",genprefix=\"$genprefix\"",
 		  ".\n")
 	if $debug;
 
@@ -525,8 +565,8 @@ sub GetOptions {
     while ( @optionlist > 0 ) {
 	my $opt = shift (@optionlist);
 
-	# Strip leading prefix so people can specify "-foo=i" if they like.
-	$opt = $2 if $opt =~ /^($genprefix)+([\x00-\xff]*)/;
+	# Strip leading prefix so people can specify "--foo=i" if they like.
+	$opt = $' if $opt =~ /^($genprefix)+/;
 
 	if ( $opt eq '<>' ) {
 	    if ( (defined $userlinkage)
@@ -545,7 +585,7 @@ sub GetOptions {
 	    next;
 	}
 
-	if ( $opt !~ /^(\w+[-\w|]*)?(!|[=:][infse]@?)?$/ ) {
+	if ( $opt !~ /^(\w+[-\w|]*)?(!|[=:][infse][@%]?)?$/ ) {
 	    warn ("Error in option spec: \"", $opt, "\"\n");
 	    $error++;
 	    next;
@@ -560,7 +600,9 @@ sub GetOptions {
 	else {
 	    # Handle alias names
 	    my @o =  split (/\|/, $o);
-	    $o = $o[0];
+	    my $linko = $o = $o[0];
+	    # Force an alias if the option name is not locase.
+	    $a = $o unless $o eq lc($o);
 	    $o = lc ($o)
 		if $ignorecase > 1 
 		    || ($ignorecase
@@ -593,6 +635,7 @@ sub GetOptions {
 		    $a = $_;
 		}
 	    }
+	    $o = $linko;
 	}
 
 	# If no linkage is supplied in the @optionlist, copy it from
@@ -616,8 +659,16 @@ sub GetOptions {
 	if ( @optionlist > 0 && ref($optionlist[0]) ) {
 	    print STDERR ("=> link \"$o\" to $optionlist[0]\n")
 		if $debug;
-	    if ( ref($optionlist[0]) =~ /^(SCALAR|ARRAY|CODE)$/ ) {
+	    if ( ref($optionlist[0]) =~ /^(SCALAR|CODE)$/ ) {
 		$linkage{$o} = shift (@optionlist);
+	    }
+	    elsif ( ref($optionlist[0]) =~ /^(ARRAY)$/ ) {
+		$linkage{$o} = shift (@optionlist);
+		$opctl{$o} .= '@' unless $opctl{$o} =~ /\@$/;
+	    }
+	    elsif ( ref($optionlist[0]) =~ /^(HASH)$/ ) {
+		$linkage{$o} = shift (@optionlist);
+		$opctl{$o} .= '%' unless $opctl{$o} =~ /\%$/;
 	    }
 	    else {
 		warn ("Invalid option linkage for \"", $opt, "\"\n");
@@ -629,10 +680,15 @@ sub GetOptions {
 	    # Make sure a valid perl identifier results.
 	    my $ov = $o;
 	    $ov =~ s/\W/_/g;
-	    if ( defined($c) && $c =~ /@/ ) {
+	    if ( $c =~ /@/ ) {
 		print STDERR ("=> link \"$o\" to \@$pkg","::opt_$ov\n")
 		    if $debug;
 		eval ("\$linkage{\$o} = \\\@".$pkg."::opt_$ov;");
+	    }
+	    elsif ( $c =~ /%/ ) {
+		print STDERR ("=> link \"$o\" to \%$pkg","::opt_$ov\n")
+		    if $debug;
+		eval ("\$linkage{\$o} = \\\%".$pkg."::opt_$ov;");
 	    }
 	    else {
 		print STDERR ("=> link \"$o\" to \$$pkg","::opt_$ov\n")
@@ -646,7 +702,7 @@ sub GetOptions {
     return 0 if $error;
 
     # Sort the possible long option names.
-    my @opctl = sort(keys (%opctl)) if $autoabbrev;
+    local (@opctl) = sort(keys (%opctl)) if $autoabbrev;
 
     # Show the options tables if debugging.
     if ( $debug ) {
@@ -663,24 +719,20 @@ sub GetOptions {
 	}
     }
 
-    my $opt;			# current option
-    my $arg;			# current option value, if any
-    my $array;			# current option is array typed
+    local ($opt);			# current option
+    local ($arg);			# current option value, if any
+    local ($array);			# current option is array typed
+    local ($hash);			# current option is hash typed
+    local ($key);			# hash key for a hash option
 
     # Process argument list
     while ( @ARGV > 0 ) {
 
-	# >>> See also the continue block <<<
-
 	#### Get next argument ####
-
-	my $starter;		# option starter string, e.g. '-' or '--'
-	my $rest = undef;	# remainder from unbundling
-	my $optarg = undef;	# value supplied with --opt=value
 
 	$opt = shift (@ARGV);
 	$arg = undef;
-	$array = 0;
+	$array = $hash = 0;
 	print STDERR ("=> option \"", $opt, "\"\n") if $debug;
 
 	#### Determine what we have ####
@@ -693,21 +745,76 @@ sub GetOptions {
 	    return ($error == 0);
 	}
 
-	if ( $opt =~ /^($genprefix)([\x00-\xff]*)/ ) {
-	    # Looks like an option.
-	    $opt = $2;		# option name (w/o prefix)
-	    $starter = $1;	# option starter
+	my $tryopt = $opt;
 
-	    # If it is a long option, it may include the value.
-	    if (($starter eq "--" 
-		 || ($getopt_compat && $starter eq "+"))
-		&& $opt =~ /^([^=]+)=([\x00-\xff]*)/ ) {
-		$opt = $1;
-		$optarg = $2;
-		print STDERR ("=> option \"", $opt, 
-			      "\", optarg = \"$optarg\"\n") if $debug;
+	# find_option operates on the GLOBAL $opt and $arg!
+	if ( &find_option ) {
+	    
+	    # find_option undefines $opt in case of errors.
+	    next unless defined $opt;
+
+	    if ( defined $arg ) {
+		$opt = $aliases{$opt} if defined $aliases{$opt};
+
+		if ( defined $linkage{$opt} ) {
+		    print STDERR ("=> ref(\$L{$opt}) -> ",
+				  ref($linkage{$opt}), "\n") if $debug;
+
+		    if ( ref($linkage{$opt}) eq 'SCALAR' ) {
+			print STDERR ("=> \$\$L{$opt} = \"$arg\"\n") if $debug;
+			${$linkage{$opt}} = $arg;
+		    }
+		    elsif ( ref($linkage{$opt}) eq 'ARRAY' ) {
+			print STDERR ("=> push(\@{\$L{$opt}, \"$arg\")\n")
+			    if $debug;
+			push (@{$linkage{$opt}}, $arg);
+		    }
+		    elsif ( ref($linkage{$opt}) eq 'HASH' ) {
+			print STDERR ("=> \$\$L{$opt}->{$key} = \"$arg\"\n")
+			    if $debug;
+			$linkage{$opt}->{$key} = $arg;
+		    }
+		    elsif ( ref($linkage{$opt}) eq 'CODE' ) {
+			print STDERR ("=> &L{$opt}(\"$opt\", \"$arg\")\n")
+			    if $debug;
+			&{$linkage{$opt}}($opt, $arg);
+		    }
+		    else {
+			print STDERR ("Invalid REF type \"", ref($linkage{$opt}),
+				      "\" in linkage\n");
+			die ("Getopt::Long -- internal error!\n");
+		    }
+		}
+		# No entry in linkage means entry in userlinkage.
+		elsif ( $array ) {
+		    if ( defined $userlinkage->{$opt} ) {
+			print STDERR ("=> push(\@{\$L{$opt}}, \"$arg\")\n")
+			    if $debug;
+			push (@{$userlinkage->{$opt}}, $arg);
+		    }
+		    else {
+			print STDERR ("=>\$L{$opt} = [\"$arg\"]\n")
+			    if $debug;
+			$userlinkage->{$opt} = [$arg];
+		    }
+		}
+		elsif ( $hash ) {
+		    if ( defined $userlinkage->{$opt} ) {
+			print STDERR ("=> \$L{$opt}->{$key} = \"$arg\"\n")
+			    if $debug;
+			$userlinkage->{$opt}->{$key} = $arg;
+		    }
+		    else {
+			print STDERR ("=>\$L{$opt} = {$key => \"$arg\"}\n")
+			    if $debug;
+			$userlinkage->{$opt} = {$key => $arg};
+		    }
+		}
+		else {
+		    print STDERR ("=>\$L{$opt} = \"$arg\"\n") if $debug;
+		    $userlinkage->{$opt} = $arg;
+		}
 	    }
-
 	}
 
 	# Not an option. Save it if we $PERMUTE and don't have a <>.
@@ -715,12 +822,12 @@ sub GetOptions {
 	    # Try non-options call-back.
 	    my $cb;
 	    if ( (defined ($cb = $linkage{'<>'})) ) {
-		&$cb($opt);
+		&$cb($tryopt);
 	    }
 	    else {
-		print STDERR ("=> saving \"$opt\" ",
+		print STDERR ("=> saving \"$tryopt\" ",
 			      "(not an option, may permute)\n") if $debug;
-		push (@ret, $opt);
+		push (@ret, $tryopt);
 	    }
 	    next;
 	}
@@ -728,216 +835,10 @@ sub GetOptions {
 	# ...otherwise, terminate.
 	else {
 	    # Push this one back and exit.
-	    unshift (@ARGV, $opt);
+	    unshift (@ARGV, $tryopt);
 	    return ($error == 0);
 	}
 
-	#### Look it up ###
-
-	my $tryopt = $opt;	# option to try
-	my $optbl = \%opctl;	# table to look it up (long names)
-
-	if ( $bundling && $starter eq '-' ) {
-	    # Unbundle single letter option.
-	    $rest = substr ($tryopt, 1);
-	    $tryopt = substr ($tryopt, 0, 1);
-	    $tryopt = lc ($tryopt) if $ignorecase > 1;
-	    print STDERR ("=> $starter$tryopt unbundled from ",
-			  "$starter$tryopt$rest\n") if $debug;
-	    $rest = undef unless $rest ne '';
-	    $optbl = \%bopctl;	# look it up in the short names table
-	} 
-
-	# Try auto-abbreviation.
-	elsif ( $autoabbrev ) {
-	    # Downcase if allowed.
-	    $tryopt = $opt = lc ($opt) if $ignorecase;
-	    # Turn option name into pattern.
-	    my $pat = quotemeta ($opt);
-	    # Look up in option names.
-	    my @hits = grep (/^$pat/, @opctl);
-	    print STDERR ("=> ", scalar(@hits), " hits (@hits) with \"$pat\" ",
-			  "out of ", scalar(@opctl), "\n") if $debug;
-
-	    # Check for ambiguous results.
-	    unless ( (@hits <= 1) || (grep ($_ eq $opt, @hits) == 1) ) {
-		print STDERR ("Option ", $opt, " is ambiguous (",
-			      join(", ", @hits), ")\n");
-		$error++;
-		next;
-	    }
-
-	    # Complete the option name, if appropriate.
-	    if ( @hits == 1 && $hits[0] ne $opt ) {
-		$tryopt = $hits[0];
-		print STDERR ("=> option \"$opt\" -> \"$tryopt\"\n")
-		    if $debug;
-	    }
-	}
-
-	# Check validity by fetching the info.
-	my $type = $optbl->{$tryopt};
-	unless  ( defined $type ) {
-	    warn ("Unknown option: ", $opt, "\n");
-	    $error++;
-	    next;
-	}
-	# Apparently valid.
-	$opt = $tryopt;
-	print STDERR ("=> found \"$type\" for ", $opt, "\n") if $debug;
-
-	#### Determine argument status ####
-
-	# If it is an option w/o argument, we're almost finished with it.
-	if ( $type eq '' || $type eq '!' ) {
-	    if ( defined $optarg ) {
-		print STDERR ("Option ", $opt, " does not take an argument\n");
-		$error++;
-	    }
-	    elsif ( $type eq '' ) {
-		$arg = 1;		# supply explicit value
-	    }
-	    else {
-		substr ($opt, 0, 2) = ''; # strip NO prefix
-		$arg = 0;		# supply explicit value
-	    }
-	    # When unbundling, unshift the rest with the starter.
-	    unshift (@ARGV, $starter.$rest) if defined $rest;
-	    next;
-	}
-
-	# Get mandatory status and type info.
-	my $mand;
-	($mand, $type, $array) = $type =~ /^(.)(.)(@?)$/;
-
-	# Check if there is an option argument available.
-	if ( defined $optarg ? ($optarg eq '') 
-	     : !(defined $rest || @ARGV > 0) ) {
-	    # Complain if this option needs an argument.
-	    if ( $mand eq "=" ) {
-		print STDERR ("Option ", $opt, " requires an argument\n");
-		$error++;
-	    }
-	    if ( $mand eq ":" ) {
-		$arg = $type eq "s" ? '' : 0;
-	    }
-	    next;
-	}
-
-	# Get (possibly optional) argument.
-	$arg = (defined $rest ? $rest
-		: (defined $optarg ? $optarg : shift (@ARGV)));
-
-	#### Check if the argument is valid for this option ####
-
-	if ( $type eq "s" ) {	# string
-	    # A mandatory string takes anything. 
-	    next if $mand eq "=";
-
-	    # An optional string takes almost anything. 
-	    next if defined $optarg || defined $rest;
-	    next if $arg eq "-"; # ??
-
-	    # Check for option or option list terminator.
-	    if ($arg eq $argend ||
-		$arg =~ /^$genprefix.+/) {
-		# Push back.
-		unshift (@ARGV, $arg);
-		# Supply empty value.
-		$arg = '';
-	    }
-	    next;
-	}
-
-	if ( $type eq "n" || $type eq "i" ) { # numeric/integer
-	    if ( $arg !~ /^-?[0-9]+$/ ) {
-		if ( defined $optarg || $mand eq "=" ) {
-		    print STDERR ("Value \"", $arg, "\" invalid for option ",
-				  $opt, " (number expected)\n");
-		    $error++;
-		    undef $arg;	# don't assign it
-		    # Push back.
-		    unshift (@ARGV, $starter.$rest) if defined $rest;
-		}
-		else {
-		    # Push back.
-		    unshift (@ARGV, defined $rest ? $starter.$rest : $arg);
-		    # Supply default value.
-		    $arg = 0;
-		}
-	    }
-	    next;
-	}
-
-	if ( $type eq "f" ) { # fixed real number, int is also ok
-	    if ( $arg !~ /^-?[0-9.]+$/ ) {
-		if ( defined $optarg || $mand eq "=" ) {
-		    print STDERR ("Value \"", $arg, "\" invalid for option ",
-				  $opt, " (real number expected)\n");
-		    $error++;
-		    undef $arg;	# don't assign it
-		    # Push back.
-		    unshift (@ARGV, $starter.$rest) if defined $rest;
-		}
-		else {
-		    # Push back.
-		    unshift (@ARGV, defined $rest ? $starter.$rest : $arg);
-		    # Supply default value.
-		    $arg = 0.0;
-		}
-	    }
-	    next;
-	}
-
-	die ("GetOpt::Long internal error (Can't happen)\n");
-    }
-
-    continue {
-	if ( defined $arg ) {
-	    $opt = $aliases{$opt} if defined $aliases{$opt};
-
-	    if ( defined $linkage{$opt} ) {
-		print STDERR ("=> ref(\$L{$opt}) -> ",
-			      ref($linkage{$opt}), "\n") if $debug;
-
-		if ( ref($linkage{$opt}) eq 'SCALAR' ) {
-		    print STDERR ("=> \$\$L{$opt} = \"$arg\"\n") if $debug;
-		    ${$linkage{$opt}} = $arg;
-		}
-		elsif ( ref($linkage{$opt}) eq 'ARRAY' ) {
-		    print STDERR ("=> push(\@{\$L{$opt}, \"$arg\")\n")
-			if $debug;
-		    push (@{$linkage{$opt}}, $arg);
-		}
-		elsif ( ref($linkage{$opt}) eq 'CODE' ) {
-		    print STDERR ("=> &L{$opt}(\"$opt\", \"$arg\")\n")
-			if $debug;
-		    &{$linkage{$opt}}($opt, $arg);
-		}
-		else {
-		    print STDERR ("Invalid REF type \"", ref($linkage{$opt}),
-				  "\" in linkage\n");
-		    die ("Getopt::Long -- internal error!\n");
-		}
-	    }
-	    # No entry in linkage means entry in userlinkage.
-	    elsif ( $array ) {
-		if ( defined $userlinkage->{$opt} ) {
-		    print STDERR ("=> push(\@{\$L{$opt}}, \"$arg\")\n")
-			if $debug;
-		    push (@{$userlinkage->{$opt}}, $arg);
-		}
-		else {
-		    print STDERR ("=>\$L{$opt} = [\"$arg\"]\n")
-			if $debug;
-		    $userlinkage->{$opt} = [$arg];
-		}
-	    }
-	    else {
-		print STDERR ("=>\$L{$opt} = \"$arg\"\n") if $debug;
-		$userlinkage->{$opt} = $arg;
-	    }
-	}
     }
 
     # Finish.
@@ -949,6 +850,209 @@ sub GetOptions {
     }
 
     return ($error == 0);
+}
+
+sub find_option {
+
+    return 0 unless $opt =~ /^$genprefix/;
+
+    $opt = $';
+    my ($starter) = $&;
+
+    my $optarg = undef;	# value supplied with --opt=value
+    my $rest = undef;	# remainder from unbundling
+
+    # If it is a long option, it may include the value.
+    if (($starter eq "--" || $getopt_compat)
+	&& $opt =~ /^([^=]+)=/ ) {
+	$opt = $1;
+	$optarg = $';
+	print STDERR ("=> option \"", $opt, 
+		      "\", optarg = \"$optarg\"\n") if $debug;
+    }
+
+    #### Look it up ###
+
+    my $tryopt = $opt;		# option to try
+    my $optbl = \%opctl;	# table to look it up (long names)
+
+    if ( $bundling && $starter eq '-' ) {
+	# Unbundle single letter option.
+	$rest = substr ($tryopt, 1);
+	$tryopt = substr ($tryopt, 0, 1);
+	$tryopt = lc ($tryopt) if $ignorecase > 1;
+	print STDERR ("=> $starter$tryopt unbundled from ",
+		      "$starter$tryopt$rest\n") if $debug;
+	$rest = undef unless $rest ne '';
+	$optbl = \%bopctl;	# look it up in the short names table
+    } 
+
+    # Try auto-abbreviation.
+    elsif ( $autoabbrev ) {
+	# Downcase if allowed.
+	$tryopt = $opt = lc ($opt) if $ignorecase;
+	# Turn option name into pattern.
+	my $pat = quotemeta ($opt);
+	# Look up in option names.
+	my @hits = grep (/^$pat/, @opctl);
+	print STDERR ("=> ", scalar(@hits), " hits (@hits) with \"$pat\" ",
+		      "out of ", scalar(@opctl), "\n") if $debug;
+
+	# Check for ambiguous results.
+	unless ( (@hits <= 1) || (grep ($_ eq $opt, @hits) == 1) ) {
+	    # See if all matches are for the same option.
+	    my %hit;
+	    foreach ( @hits ) {
+		$_ = $aliases{$_} if defined $aliases{$_};
+		$hit{$_} = 1;
+	    }
+	    # Now see if it really is ambiguous.
+	    unless ( keys(%hit) == 1 ) {
+		return 0 if $passthrough;
+		print STDERR ("Option ", $opt, " is ambiguous (",
+			      join(", ", @hits), ")\n");
+		$error++;
+		undef $opt;
+		return 1;
+	    }
+	    @hits = keys(%hit);
+	}
+
+	# Complete the option name, if appropriate.
+	if ( @hits == 1 && $hits[0] ne $opt ) {
+	    $tryopt = $hits[0];
+	    $tryopt = lc ($tryopt) if $ignorecase;
+	    print STDERR ("=> option \"$opt\" -> \"$tryopt\"\n")
+		if $debug;
+	}
+    }
+
+    # Check validity by fetching the info.
+    my $type = $optbl->{$tryopt};
+    unless  ( defined $type ) {
+	return 0 if $passthrough;
+	warn ("Unknown option: ", $opt, "\n");
+	$error++;
+	return 1;
+    }
+    # Apparently valid.
+    $opt = $tryopt;
+    print STDERR ("=> found \"$type\" for ", $opt, "\n") if $debug;
+
+    #### Determine argument status ####
+
+    # If it is an option w/o argument, we're almost finished with it.
+    if ( $type eq '' || $type eq '!' ) {
+	if ( defined $optarg ) {
+	    return 0 if $passthrough;
+	    print STDERR ("Option ", $opt, " does not take an argument\n");
+	    $error++;
+	    undef $opt;
+	}
+	elsif ( $type eq '' ) {
+	    $arg = 1;		# supply explicit value
+	}
+	else {
+	    substr ($opt, 0, 2) = ''; # strip NO prefix
+	    $arg = 0;		# supply explicit value
+	}
+	unshift (@ARGV, $starter.$rest) if defined $rest;
+	return 1;
+    }
+
+    # Get mandatory status and type info.
+    my $mand;
+    ($mand, $type, $array, $hash) = $type =~ /^(.)(.)(@?)(%?)$/;
+
+    # Check if there is an option argument available.
+    if ( defined $optarg ? ($optarg eq '') 
+	 : !(defined $rest || @ARGV > 0) ) {
+	# Complain if this option needs an argument.
+	if ( $mand eq "=" ) {
+	    return 0 if $passthrough;
+	    print STDERR ("Option ", $opt, " requires an argument\n");
+	    $error++;
+	    undef $opt;
+	}
+	if ( $mand eq ":" ) {
+	    $arg = $type eq "s" ? '' : 0;
+	}
+	return 1;
+    }
+
+    # Get (possibly optional) argument.
+    $arg = (defined $rest ? $rest
+	    : (defined $optarg ? $optarg : shift (@ARGV)));
+
+    # Get key if this is a "name=value" pair for a hash option.
+    $key = undef;
+    if ($hash && defined $arg) {
+	($key, $arg) = ($arg =~ /=/o) ? ($`, $') : ($arg, 1);
+    }
+
+    #### Check if the argument is valid for this option ####
+
+    if ( $type eq "s" ) {	# string
+	# A mandatory string takes anything. 
+	return 1 if $mand eq "=";
+
+	# An optional string takes almost anything. 
+	return 1 if defined $optarg || defined $rest;
+	return 1 if $arg eq "-"; # ??
+
+	# Check for option or option list terminator.
+	if ($arg eq $argend ||
+	    $arg =~ /^$genprefix.+/) {
+	    # Push back.
+	    unshift (@ARGV, $arg);
+	    # Supply empty value.
+	    $arg = '';
+	}
+    }
+
+    elsif ( $type eq "n" || $type eq "i" ) { # numeric/integer
+	if ( $arg !~ /^-?[0-9]+$/ ) {
+	    if ( defined $optarg || $mand eq "=" ) {
+		return 0 if $passthrough;
+		print STDERR ("Value \"", $arg, "\" invalid for option ",
+			      $opt, " (number expected)\n");
+		$error++;
+		undef $opt;
+		# Push back.
+		unshift (@ARGV, $starter.$rest) if defined $rest;
+	    }
+	    else {
+		# Push back.
+		unshift (@ARGV, defined $rest ? $starter.$rest : $arg);
+		# Supply default value.
+		$arg = 0;
+	    }
+	}
+    }
+
+    elsif ( $type eq "f" ) { # real number, int is also ok
+	if ( $arg !~ /^-?[0-9.]+([eE]-?[0-9]+)?$/ ) {
+	    if ( defined $optarg || $mand eq "=" ) {
+		return 0 if  $passthrough;
+		print STDERR ("Value \"", $arg, "\" invalid for option ",
+			      $opt, " (real number expected)\n");
+		$error++;
+		undef $opt;
+		# Push back.
+		unshift (@ARGV, $starter.$rest) if defined $rest;
+	    }
+	    else {
+		# Push back.
+		unshift (@ARGV, defined $rest ? $starter.$rest : $arg);
+		# Supply default value.
+		$arg = 0.0;
+	    }
+	}
+    }
+    else {
+	die ("GetOpt::Long internal error (Can't happen)\n");
+    }
+    return 1;
 }
 
 ################ Package return ################
