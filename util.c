@@ -4040,11 +4040,12 @@ Perl_report_evil_fh(pTHX_ GV *gv, IO *io, I32 op)
 	op == OP_LEAVEWRITE ? "write" :		/* "write exit" not nice */
 	PL_op_desc[op];
     char *pars = OP_IS_FILETEST(op) ? "" : "()";
-    char *type = OP_IS_SOCKET(op) || (io && IoTYPE(io) == IoTYPE_SOCKET) ?
+    char *type = OP_IS_SOCKET(op) ||
+                 (gv && io && IoTYPE(io) == IoTYPE_SOCKET) ?
                      "socket" : "filehandle";
     char *name = NULL;
 
-    if (io && IoTYPE(io) == IoTYPE_CLOSED) {
+    if (gv && io && IoTYPE(io) == IoTYPE_CLOSED) {
 	vile = "closed";
 	warn_type = WARN_CLOSED;
     }
@@ -4078,7 +4079,7 @@ Perl_report_evil_fh(pTHX_ GV *gv, IO *io, I32 op)
     else {
 	Perl_warner(aTHX_ warn_type,
 		    "%s%s on %s %s", func, pars, vile, type);
-	if (io && IoDIRP(io) && !(IoFLAGS(io) & IOf_FAKE_DIRP))
+	if (gv && io && IoDIRP(io) && !(IoFLAGS(io) & IOf_FAKE_DIRP))
 	    Perl_warner(aTHX_ warn_type,
 			"\t(Are you trying to call %s%s on dirhandle?)\n",
 			func, pars);
