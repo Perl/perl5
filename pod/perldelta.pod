@@ -2651,7 +2651,7 @@ warning.  And in Perl 5.005, this special treatment will cease.
 
 =head2 Thread test failures
 
-The subtests 19 and 20 of lib/thread.t test are known to fail due to
+The subtests 19 and 20 of lib/thr5005.t test are known to fail due to
 fundamental problems in the 5.005 threading implementation.  These are
 not new failures--Perl 5.005_0x has the same bugs, but didn't have these
 tests.
