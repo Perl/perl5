@@ -3,15 +3,15 @@ require 5.006;
 require Exporter;
 require DynaLoader;
 use Carp;
+use strict;
 
-@ISA = qw(Exporter DynaLoader);
-@EXPORT = qw(openlog closelog setlogmask syslog);
-@EXPORT_OK = qw(setlogsock);
-$VERSION = '0.06';
+our @ISA = qw(Exporter DynaLoader);
+our @EXPORT = qw(openlog closelog setlogmask syslog);
+our @EXPORT_OK = qw(setlogsock);
+our $VERSION = '0.06';
 
 # it would be nice to try stream/unix first, since that will be
 # most efficient. However streams are dodgy - see _syslog_send_stream
-#my @connectMethods = ( 'stream', 'unix', 'tcp', 'udp' );
 my @connectMethods = ( 'tcp', 'udp', 'unix', 'stream', 'console' );
 if ($^O =~ /^(freebsd|linux)$/) {
     @connectMethods = grep { $_ ne 'udp' } @connectMethods;
@@ -22,8 +22,9 @@ my $transmit_ok = 0;
 my $current_proto = undef;
 my $failed = undef;
 my $fail_time = undef;
+our ($connected, @fallbackMethods, $syslog_send, $host);
 
-use Socket;
+use Socket ':all';
 use Sys::Hostname;
 
 =head1 NAME
@@ -169,36 +170,37 @@ sub AUTOLOAD {
     if ($error) {
 	croak $error;
     }
+    no strict 'refs';
     *$AUTOLOAD = sub { $val };
     goto &$AUTOLOAD;
 }
 
 bootstrap Sys::Syslog $VERSION;
 
-$maskpri = &LOG_UPTO(&LOG_DEBUG);
+our $maskpri = &LOG_UPTO(&LOG_DEBUG);
 
 sub openlog {
-    ($ident, $logopt, $facility) = @_;  # package vars
-    $lo_pid = $logopt =~ /\bpid\b/;
-    $lo_ndelay = $logopt =~ /\bndelay\b/;
-    $lo_nowait = $logopt =~ /\bnowait\b/;
+    our ($ident, $logopt, $facility) = @_;  # package vars
+    our $lo_pid = $logopt =~ /\bpid\b/;
+    our $lo_ndelay = $logopt =~ /\bndelay\b/;
+    our $lo_nowait = $logopt =~ /\bnowait\b/;
     return 1 unless $lo_ndelay;
     &connect;
 } 
 
 sub closelog {
-    $facility = $ident = '';
+    our $facility = our $ident = '';
     &disconnect;
 } 
 
 sub setlogmask {
-    local($oldmask) = $maskpri;
+    my $oldmask = $maskpri;
     $maskpri = shift;
     $oldmask;
 }
  
 sub setlogsock {
-    local($setsock) = shift;
+    my $setsock = shift;
     $syslog_path = shift;
     &disconnect if $connected;
     $transmit_ok = 0;
@@ -260,10 +262,11 @@ sub setlogsock {
 }
 
 sub syslog {
-    local($priority) = shift;
-    local($mask) = shift;
-    local($message, $whoami);
-    local(@words, $num, $numpri, $numfac, $sum);
+    my $priority = shift;
+    my $mask = shift;
+    my ($message, $whoami);
+    my (@words, $num, $numpri, $numfac, $sum);
+    our $facility;
     local($facility) = $facility;	# may need to change temporarily.
 
     croak "syslog: expecting argument \$priority" unless $priority;
@@ -298,7 +301,7 @@ sub syslog {
 
     &connect unless $connected;
 
-    $whoami = $ident;
+    $whoami = our $ident;
 
     if (!$whoami && $mask =~ /^(\S.*?):\s?(.*)/) {
 	$whoami = $1;
@@ -311,7 +314,7 @@ sub syslog {
 		($whoami = 'syslog');
     }
 
-    $whoami .= "[$$]" if $lo_pid;
+    $whoami .= "[$$]" if our $lo_pid;
 
     $mask =~ s/(?<!%)%m/$!/g;
     $mask .= "\n" unless $mask =~ /\n$/;
@@ -363,6 +366,7 @@ sub _syslog_send_console {
     # so we do it in a child process and always return success
     # to the caller.
     if (my $pid = fork) {
+	our $lo_nowait;
 	if ($lo_nowait) {
 	    return 1;
 	} else {
@@ -399,13 +403,13 @@ sub _syslog_send_socket {
 }
 
 sub xlate {
-    local($name) = @_;
+    my($name) = @_;
     return $name+0 if $name =~ /^\s*\d+\s*$/;
     $name = uc $name;
     $name = "LOG_$name" unless $name =~ /^LOG_/;
     $name = "Sys::Syslog::$name";
     # Can't have just eval { &$name } || -1 because some LOG_XXX may be zero.
-    my $value = eval { &$name };
+    my $value = eval { no strict 'refs'; &$name };
     defined $value ? $value : -1;
 }
 
@@ -419,15 +423,16 @@ sub connect {
     my @errs = ();
     my $proto = undef;
     while ($proto = shift(@fallbackMethods)) {
+	no strict 'refs';
 	my $fn = "connect_$proto";
-	$connected = &$fn(\@errs) unless (!defined &$fn);
+	$connected = &$fn(\@errs) if defined &$fn;
 	last if ($connected);
     }
 
     $transmit_ok = 0;
     if ($connected) {
 	$current_proto = $proto;
-        local($old) = select(SYSLOG); $| = 1; select($old);
+        my($old) = select(SYSLOG); $| = 1; select($old);
     } else {
 	@fallbackMethods = ();
 	foreach my $err (@errs) {
