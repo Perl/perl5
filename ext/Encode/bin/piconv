@@ -83,8 +83,8 @@ piconv -- iconv(1), reinvented in perl
 =head1 DESCRIPTION
 
 B<piconv> is perl version of F<iconv>, a character encoding converter
-widely availabe for various unixen today.   This script was primarily
-a technology demostrator for Perl 5.8.0, you can use piconv in the
+widely available for various Unixen today.   This script was primarily
+a technology demonstrator for Perl 5.8.0, you can use piconv in the
 place of iconv for virtually any cases.
 
 piconv converts character encoding of either STDIN or files specified
@@ -97,12 +97,12 @@ Here are list of options.
 =item -f from_encoding
 
 Specifies the encoding you are converting from.  Unlike F<iconv>,
-this option can be ommited.  In such cases the current locale is used.
+this option can be omitted.  In such cases the current locale is used.
 
 =item -t to_encoding
 
 Specifies the encoding you are converting to.  Unlike F<iconv>,
-this option can be ommited.  In such cases the current locale is used.
+this option can be omitted.  In such cases the current locale is used.
 
 Therefore when both -f and -t are omitted, F<piconv> just acts like F<cat>.
 
@@ -117,7 +117,7 @@ F<iconv>.
 
 =item -D
 
-Invokes debugging mode.  primarily for Encode hackers.
+Invokes debugging mode.  Primarily for Encode hackers.
 
 =item -S scheme
 
@@ -132,12 +132,12 @@ Uses Encode::from_to for conversion.  This is the default.
 
 =item decode_encode
 
-Input strings are decode()ed then encode()ed.  A straight step-by-step
+Input strings are decode()d then encode()d.  A straight two-step
 implementation.
 
 =item perlio
 
-The new perlIO layer is used.  NI-S favorite.
+The new perlIO layer is used.  NI-S' favorite.
 
 =back
 
