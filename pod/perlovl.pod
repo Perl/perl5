@@ -2,7 +2,7 @@
 
 perlovl - overload perl mathematical functions [superseded]
 
-=head1
+=head1 DESCRIPTION
 
 This man page has been superseded by L<overload>.
 
