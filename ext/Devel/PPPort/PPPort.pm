@@ -159,7 +159,7 @@ require DynaLoader;
 use strict;
 use vars qw( $VERSION @ISA @EXPORT @EXPORT_OK $data );
 
-$VERSION = "2.008";
+$VERSION = "2.009";
 
 @ISA = qw(Exporter DynaLoader);
 @EXPORT =  qw();
@@ -846,7 +846,7 @@ static UV _grok_oct (char *string, STRLEN *len, I32 *flags, NV *result) {
         _grok_oct((string), (len), (flags), (result))
 #endif
 
-#ifndef grok_bin
+#if !defined(grok_bin) && defined(scan_bin)
 static UV _grok_bin (char *string, STRLEN *len, I32 *flags, NV *result) {
     NV r = scan_bin(string, *len, I32_CAST len);
     if (r > UV_MAX) {
