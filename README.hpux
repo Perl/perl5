@@ -338,10 +338,10 @@ On PA-RISC you need a different compiler for 32-bit applications and for
 64-bit applications. On PA-RISC, 32-bit objects and 64-bit objects do
 not mix. period. There is no different behaviour for HP C-ANSI-C or GNU
 gcc. So if you require your perl binary to use 64-bit libraries, like
-Oracle-64bit, you MUST build a 64bit perl.
+Oracle-64bit, you MUST build a 64-bit perl.
 
-Building a 64bit capable gcc on PA-RISC from source is possible only when
-you have the HP C-ANSI C compiler or an already working 64bit binary of
+Building a 64-bit capable gcc on PA-RISC from source is possible only when
+you have the HP C-ANSI C compiler or an already working 64-bit binary of
 gcc available. Best performance for perl is achieved with HP's native
 compiler.
 
@@ -438,12 +438,12 @@ to hold numbers larger than 2^32 with complete precision.
 
 As of the date of this document, Perl is fully 64-bit compliant on
 HP-UX 11.00 and up for both cc- and gcc builds. If you are about to
-build a 64bit perl with GNU gcc, please read the gcc section carefully.
+build a 64-bit perl with GNU gcc, please read the gcc section carefully.
 
 Should a user wish to experiment with compiling Perl in the LP64
 environment, use the -Duse64bitall flag to Configure.  This will force
 Perl to be compiled in a pure LP64 environment (with the +DD64 flag for
-HP C-ANSI-C, with no additional options for GNU gcc 64bit on PA-RISC,
+HP C-ANSI-C, with no additional options for GNU gcc 64-bit on PA-RISC,
 and with -mlp64 for GNU gcc on Itanium).
 If you want to compile Perl using gcc, you will have to get a version of
 the compiler that supports 64-bit operations.)
@@ -474,7 +474,7 @@ achieved using
 Do not forget the space before the trailing quote.
 
 Also note that this does not (yet) work with all configurations,
-it is known to fail with 64bit versions of GCC.
+it is known to fail with 64-bit versions of GCC.
 
 =head2 GDBM and Threads on HP-UX
 
