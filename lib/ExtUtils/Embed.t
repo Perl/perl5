@@ -6,6 +6,7 @@ BEGIN {
 }
 use Config;
 use ExtUtils::Embed;
+use File::Spec;
 
 open(my $fh,">embed_test.c") || die "Cannot open embed_test.c:$!";
 print $fh <DATA>;
@@ -13,11 +14,38 @@ close($fh);
 
 $| = 1;
 print "1..9\n";
-my @cmd = ($Config{'cc'},-o => 'embed_test',"-I$INC[0]/..",
-           ccopts(),
-           'embed_test.c',"-L$INC[0]/..",'-lperl',ldopts()
-           );
-#print "#@cmd\n";
+my $cc = $Config{'cc'};
+my $cl  = ($^O eq 'MSWin32' && $cc eq 'cl');
+my $exe = 'embedtest' . $Config{'exe_ext'};
+my $inc = File::Spec->catdir($INC[0],"..");
+my $lib = File::Spec->catdir($INC[0],"..");
+my @cmd;
+if ($cl) {
+    push(@cmd,$cc,"-Fe$exe");
+}
+else {
+    push(@cmd,$cc,'-o' => $exe);
+}
+push(@cmd,"-I$inc",ccopts(),'embed_test.c');
+if ($^O eq 'MSWin32') {
+    $inc = File::Spec->catdir($inc,'win32'); 
+    push(@cmd,"-I$inc");
+    $inc = File::Spec->catdir($inc,'include'); 
+    push(@cmd,"-I$inc");
+    if ($cc eq 'cl') {
+	push(@cmd,'-link',"-libpath:$lib",$Config{'libperl'},$Config{'libc'});     
+    }
+    else {
+	push(@cmd,"-L$lib",'-lperl',$Config{'libc'});
+    }
+}
+else {
+    push(@cmd,"-L$lib",'-lperl');
+}
+push(@cmd,ldopts());
+
+ 
+print "#@cmd\n";
 print "not " if system(join(' ',@cmd));
 print "ok 1\n";
 print "not " if system("embed_test");
