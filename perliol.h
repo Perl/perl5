@@ -158,6 +158,7 @@ extern PerlIO *PerlIOBuf_open(pTHX_ PerlIO_funcs *self,
 			      const char *mode, int fd, int imode,
 			      int perm, PerlIO *old, int narg, SV **args);
 extern IV PerlIOBuf_pushed(PerlIO *f, const char *mode, SV *arg);
+extern PerlIO *PerlIOBuf_dup(pTHX_ PerlIO *f, PerlIO *o, CLONE_PARAMS *param);
 extern SSize_t PerlIOBuf_read(PerlIO *f, void *vbuf, Size_t count);
 extern SSize_t PerlIOBuf_unread(PerlIO *f, const void *vbuf, Size_t count);
 extern SSize_t PerlIOBuf_write(PerlIO *f, const void *vbuf, Size_t count);
