@@ -150,6 +150,17 @@ EXPECT
 # op.c
 use warnings 'closure' ;
 sub x {
+      our $x;
+      sub y {
+         $x
+      }
+   }
+EXPECT
+
+########
+# op.c
+use warnings 'closure' ;
+sub x {
       my $x;
       sub y {
          sub { $x }

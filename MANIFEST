@@ -1204,6 +1204,7 @@ t/lib/ansicolor.t	See if Term::ANSIColor works
 t/lib/anydbm.t		See if AnyDBM_File works
 t/lib/attrs.t		See if attrs works with C<sub : attrs>
 t/lib/autoloader.t	See if AutoLoader works
+t/lib/b.t		See if B backends work
 t/lib/basename.t	See if File::Basename works
 t/lib/bigfloat.t	See if bigfloat.pl works
 t/lib/bigfltpm.t	See if BigFloat.pm works
@@ -1297,6 +1298,7 @@ t/lib/socket.t		See if Socket works
 t/lib/soundex.t		See if Soundex works
 t/lib/symbol.t		See if Symbol works
 t/lib/syslfs.t		See if large files work for sysio
+t/lib/syslog.t		See if Sys::Syslog works
 t/lib/textfill.t	See if Text::Wrap::fill works
 t/lib/texttabs.t	See if Text::Tabs works
 t/lib/textwrap.t	See if Text::Wrap::wrap works

@@ -85,7 +85,7 @@ and L<perlref> regarding closures.
 
 The symbol table for a package happens to be stored in the hash of that
 name with two colons appended.  The main symbol table's name is thus
-C<%main::>, or C<%::> for short.  Likewise symbol table for the nested
+C<%main::>, or C<%::> for short.  Likewise the symbol table for the nested
 package mentioned earlier is named C<%OUTER::INNER::>.
 
 The value in each entry of the hash is what you are referring to when you
@@ -115,7 +115,7 @@ Which makes $richard and $dick the same variable, but leaves
 @richard and @dick as separate arrays.  Tricky, eh?
 
 This mechanism may be used to pass and return cheap references
-into or from subroutines if you won't want to copy the whole
+into or from subroutines if you don't want to copy the whole
 thing.  It only works when assigning to dynamic variables, not
 lexicals.
 
@@ -132,7 +132,7 @@ lexicals.
 On return, the reference will overwrite the hash slot in the
 symbol table specified by the *some_hash typeglob.  This
 is a somewhat tricky way of passing around references cheaply
-when you won't want to have to remember to dereference variables
+when you don't want to have to remember to dereference variables
 explicitly.
 
 Another use of symbol tables is for making "constant" scalars.
@@ -141,9 +141,9 @@ Another use of symbol tables is for making "constant" scalars.
 
 Now you cannot alter $PI, which is probably a good thing all in all.
 This isn't the same as a constant subroutine, which is subject to
-optimization at compile-time.  This isn't.  A constant subroutine is one
-prototyped to take no arguments and to return a constant expression.
-See L<perlsub> for details on these.  The C<use constant> pragma is a
+optimization at compile-time.  A constant subroutine is one prototyped
+to take no arguments and to return a constant expression.  See 
+L<perlsub> for details on these.  The C<use constant> pragma is a
 convenient shorthand for these.
 
 You can say C<*foo{PACKAGE}> and C<*foo{NAME}> to find out what name and
@@ -163,7 +163,7 @@ This prints
     You gave me bar::baz
 
 The C<*foo{THING}> notation can also be used to obtain references to the
-individual elements of *foo, see L<perlref>.
+individual elements of *foo.  See L<perlref>.
 
 Subroutine definitions (and declarations, for that matter) need
 not necessarily be situated in the package whose symbol table they
@@ -268,10 +268,10 @@ For more on this, see L<perltoot> and L<perlobj>.
 
 =head2 Perl Modules
 
-A module is just a set of related function in a library file a Perl
-package with the same name as the file.  It is specifically designed
-to be reusable by other modules or programs.  It may do this by
-providing a mechanism for exporting some of its symbols into the
+A module is just a set of related functions in a library file, i.e.,
+a Perl package with the same name as the file.  It is specifically 
+designed to be reusable by other modules or programs.  It may do this
+by providing a mechanism for exporting some of its symbols into the
 symbol table of any package using it.  Or it may function as a class
 definition and make its semantics available implicitly through
 method calls on the class and its objects, without explicitly
@@ -419,19 +419,19 @@ that other module.  In that case, it's easy to use C<require>s instead.
 
 Perl packages may be nested inside other package names, so we can have
 package names containing C<::>.  But if we used that package name
-directly as a filename it would makes for unwieldy or impossible
+directly as a filename it would make for unwieldy or impossible
 filenames on some systems.  Therefore, if a module's name is, say,
 C<Text::Soundex>, then its definition is actually found in the library
 file F<Text/Soundex.pm>.
 
 Perl modules always have a F<.pm> file, but there may also be
 dynamically linked executables (often ending in F<.so>) or autoloaded
-subroutine definitions (often ending in F<.al> associated with the
+subroutine definitions (often ending in F<.al>) associated with the
 module.  If so, these will be entirely transparent to the user of
 the module.  It is the responsibility of the F<.pm> file to load
 (or arrange to autoload) any additional functionality.  For example,
 although the POSIX module happens to do both dynamic loading and
-autoloading, but the user can say just C<use POSIX> to get it all.
+autoloading, the user can say just C<use POSIX> to get it all.
 
 =head1 SEE ALSO
 

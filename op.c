@@ -321,9 +321,12 @@ S_pad_findlex(pTHX_ char *name, PADOFFSET newoff, U32 seq, CV* startcv,
 			}
 		    }
 		    else if (!CvUNIQUE(PL_compcv)) {
-			if (ckWARN(WARN_CLOSURE) && !SvFAKE(sv) && !CvUNIQUE(cv))
+			if (ckWARN(WARN_CLOSURE) && !SvFAKE(sv) && !CvUNIQUE(cv)
+			    && !(SvFLAGS(sv) & SVpad_OUR))
+			{
 			    Perl_warner(aTHX_ WARN_CLOSURE,
 				"Variable \"%s\" will not stay shared", name);
+			}
 		    }
 		}
 		av_store(PL_comppad, newoff, SvREFCNT_inc(oldsv));
@@ -5995,6 +5998,7 @@ Perl_ck_shift(pTHX_ OP *o)
 OP *
 Perl_ck_sort(pTHX_ OP *o)
 {
+    OP *firstkid;
     o->op_private = 0;
 #ifdef USE_LOCALE
     if (PL_hints & HINT_LOCALE)
@@ -6003,10 +6007,10 @@ Perl_ck_sort(pTHX_ OP *o)
 
     if (o->op_type == OP_SORT && o->op_flags & OPf_STACKED)
 	simplify_sort(o);
-    if (o->op_flags & OPf_STACKED) {		     /* may have been cleared */
-	OP *kid = cLISTOPo->op_first->op_sibling;	/* get past pushmark */
+    firstkid = cLISTOPo->op_first->op_sibling;		/* get past pushmark */
+    if (o->op_flags & OPf_STACKED) {			/* may have been cleared */
 	OP *k;
-	kid = kUNOP->op_first;				/* get past null */
+	OP *kid = cUNOPx(firstkid)->op_first;		/* get past null */
 
 	if (kid->op_type == OP_SCOPE || kid->op_type == OP_LEAVE) {
 	    linklist(kid);
@@ -6036,16 +6040,25 @@ Perl_ck_sort(pTHX_ OP *o)
 	    }
 	    peep(k);
 
-	    kid = cLISTOPo->op_first->op_sibling;	/* get past pushmark */
-	    if (o->op_type == OP_SORT)
+	    kid = firstkid;
+	    if (o->op_type == OP_SORT) {
+		/* provide scalar context for comparison function/block */
+		kid = scalar(kid);
 		kid->op_next = kid;
+	    }
 	    else
 		kid->op_next = k;
 	    o->op_flags |= OPf_SPECIAL;
 	}
 	else if (kid->op_type == OP_RV2SV || kid->op_type == OP_PADSV)
-	    null(cLISTOPo->op_first->op_sibling);
+	    null(firstkid);
+
+	firstkid = firstkid->op_sibling;
     }
+
+    /* provide list context for arguments */
+    if (o->op_type == OP_SORT)
+	list(firstkid);
 
     return o;
 }
@@ -6252,7 +6265,9 @@ Perl_ck_subr(pTHX_ OP *o)
 		proto++;
 		arg++;
 		if (o2->op_type != OP_REFGEN && o2->op_type != OP_UNDEF)
-		    bad_type(arg, "block", gv_ename(namegv), o2);
+		    bad_type(arg,
+			arg == 1 ? "block or sub {}" : "sub {}",
+			gv_ename(namegv), o2);
 		break;
 	    case '*':
 		/* '*' allows any scalar type, including bareword */
@@ -6300,8 +6315,8 @@ Perl_ck_subr(pTHX_ OP *o)
 			bad_type(arg, "symbol", gv_ename(namegv), o2);
 		    goto wrapref;
 		case '&':
-		    if (o2->op_type != OP_RV2CV)
-			bad_type(arg, "sub", gv_ename(namegv), o2);
+		    if (o2->op_type != OP_ENTERSUB)
+			bad_type(arg, "subroutine entry", gv_ename(namegv), o2);
 		    goto wrapref;
 		case '$':
 		    if (o2->op_type != OP_RV2SV

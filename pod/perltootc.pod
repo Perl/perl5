@@ -184,7 +184,7 @@ to which beginning Perl programmers attempt to put symbolic references,
 we have much better approaches, like nested hashes or hashes of arrays.
 But there's nothing wrong with using symbolic references to manipulate
 something that is meaningful only from the perspective of the package
-symbol symbol table, like method names or package variables.  In other
+symbol table, like method names or package variables.  In other
 words, when you want to refer to the symbol table, use symbol references.
 
 Clustering all the class attributes in one place has several advantages.

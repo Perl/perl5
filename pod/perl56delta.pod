@@ -1539,7 +1539,7 @@ Rhapsody/Darwin is now supported.
 
 =item *
 
-EPOC is is now supported (on Psion 5).
+EPOC is now supported (on Psion 5).
 
 =item *
 

@@ -4503,7 +4503,7 @@ the sections using `cperl-pod-head-face', `cperl-pod-face',
 	      (if (eq (char-syntax (preceding-char)) ?w) ; else {}
 		  (save-excursion
 		    (forward-sexp -1)
-		    (or (looking-at "\\(else\\|grep\\|map\\|BEGIN\\|END\\)\\>")
+		    (or (looking-at "\\(else\\|grep\\|map\\|BEGIN\\|END\\|CHECK\\|INIT\\)\\>")
 			;; sub f {}
 			(progn
 			  (cperl-backward-to-noncomment lim)
@@ -5242,7 +5242,8 @@ indentation and initial hashes.  Behaves usually outside of comment."
 	       '("if" "until" "while" "elsif" "else" "unless" "for"
 		 "foreach" "continue" "exit" "die" "last" "goto" "next"
 		 "redo" "return" "local" "exec" "sub" "do" "dump" "use"
-		 "require" "package" "eval" "my" "BEGIN" "END")
+		 "require" "package" "eval" "my" "our"
+		 "BEGIN" "END" "CHECK" "INIT")
 	       "\\|")			; Flow control
 	      "\\)\\>") 2)		; was "\\)[ \n\t;():,\|&]"
 					; In what follows we use `type' style
@@ -5321,19 +5322,19 @@ indentation and initial hashes.  Behaves usually outside of comment."
 	    (list
 	     (concat
 	      "\\(^\\|[^$@%&\\]\\)\\<\\("
-	      ;; "AUTOLOAD" "BEGIN" "DESTROY" "END" "__END__" "chomp"
+	      ;; "AUTOLOAD" "BEGIN" "CHECK" "DESTROY" "END" "__END__" "INIT" "chomp"
 	      ;; "chop" "defined" "delete" "do" "each" "else" "elsif"
 	      ;; "eval" "exists" "for" "foreach" "format" "goto"
 	      ;; "grep" "if" "keys" "last" "local" "map" "my" "next"
-	      ;; "no" "package" "pop" "pos" "print" "printf" "push"
+	      ;; "no" "our" "package" "pop" "pos" "print" "printf" "push"
 	      ;; "q" "qq" "qw" "qx" "redo" "return" "scalar" "shift"
 	      ;; "sort" "splice" "split" "study" "sub" "tie" "tr"
 	      ;; "undef" "unless" "unshift" "untie" "until" "use"
 	      ;; "while" "y"
-	      "AUTOLOAD\\|BEGIN\\|cho\\(p\\|mp\\)\\|d\\(e\\(fined\\|lete\\)\\|"
+	      "AUTOLOAD\\|BEGIN\\|CHECK\\|cho\\(p\\|mp\\)\\|d\\(e\\(fined\\|lete\\)\\|"
 	      "o\\)\\|DESTROY\\|e\\(ach\\|val\\|xists\\|ls\\(e\\|if\\)\\)\\|"
-	      "END\\|for\\(\\|each\\|mat\\)\\|g\\(rep\\|oto\\)\\|if\\|keys\\|"
-	      "l\\(ast\\|ocal\\)\\|m\\(ap\\|y\\)\\|n\\(ext\\|o\\)\\|"
+	      "END\\|for\\(\\|each\\|mat\\)\\|g\\(rep\\|oto\\)\\|if\\|INIT\\|keys\\|"
+	      "l\\(ast\\|ocal\\)\\|m\\(ap\\|y\\)\\|n\\(ext\\|o\\)\\|our|"
 	      "p\\(ackage\\|rint\\(\\|f\\)\\|ush\\|o\\(p\\|s\\)\\)\\|"
 	      "q\\(\\|q\\|w\\|x\\|r\\)\\|re\\(turn\\|do\\)\\|s\\(pli\\(ce\\|t\\)\\|"
 	      "calar\\|tudy\\|ub\\|hift\\|ort\\)\\|t\\(r\\|ie\\)\\|"
@@ -5372,7 +5373,7 @@ indentation and initial hashes.  Behaves usually outside of comment."
 	    '("\\<\\(continue\\|next\\|last\\|redo\\|goto\\)\\>[ \t]+\\([a-zA-Z0-9_:]+\\)" ; labels as targets
 	      2 font-lock-constant-face)
 	    (cond ((featurep 'font-lock-extra)
-		   '("^[ \t]*\\(my\\|local\\)[ \t]*\\(([ \t]*\\)?\\([$@%*][a-zA-Z0-9_:]+\\)\\([ \t]*,\\)?"
+		   '("^[ \t]*\\(my\\|local\\|our\\)[ \t]*\\(([ \t]*\\)?\\([$@%*][a-zA-Z0-9_:]+\\)\\([ \t]*,\\)?"
 		     (3 font-lock-variable-name-face)
 		     (4 '(another 4 nil
 				  ("\\=[ \t]*,[ \t]*\\([$@%*][a-zA-Z0-9_:]+\\)\\([ \t]*,\\)?"
@@ -5380,12 +5381,12 @@ indentation and initial hashes.  Behaves usually outside of comment."
 				   (2 '(restart 2 nil) nil t))) 
 			nil t)))	; local variables, multiple
 		  (font-lock-anchored
-		   '("^[ \t{}]*\\(my\\|local\\)[ \t]*\\(([ \t]*\\)?\\([$@%*][a-zA-Z0-9_:]+\\)"
+		   '("^[ \t{}]*\\(my\\|local\\|our\\)[ \t]*\\(([ \t]*\\)?\\([$@%*][a-zA-Z0-9_:]+\\)"
 		     (3 font-lock-variable-name-face)
 		     ("\\=[ \t]*,[ \t]*\\([$@%*][a-zA-Z0-9_:]+\\)"
 		      nil nil
 		      (1 font-lock-variable-name-face))))
-		  (t '("^[ \t{}]*\\(my\\|local\\)[ \t]*\\(([ \t]*\\)?\\([$@%*][a-zA-Z0-9_:]+\\)"
+		  (t '("^[ \t{}]*\\(my\\|local\\|our\\)[ \t]*\\(([ \t]*\\)?\\([$@%*][a-zA-Z0-9_:]+\\)"
 		       3 font-lock-variable-name-face)))
 	    '("\\<for\\(each\\)?[ \t]*\\(\\$[a-zA-Z_][a-zA-Z_0-9]*\\)[ \t]*("
 	      2 font-lock-variable-name-face)))

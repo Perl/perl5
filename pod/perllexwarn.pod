@@ -9,7 +9,7 @@ flag B<-w> and the equivalent Perl variable, C<$^W>.
 
 The pragma works just like the existing "strict" pragma.
 This means that the scope of the warning pragma is limited to the
-enclosing block. It also means that that the pragma setting will not
+enclosing block. It also means that the pragma setting will not
 leak across files (via C<use>, C<require> or C<do>). This allows
 authors to independently define the degree of warning checks that will
 be applied to their module.
@@ -195,7 +195,7 @@ or B<-X> command line flags.
 
 =back
 
-The combined effect of 3 & 4 is that it will will allow code which uses
+The combined effect of 3 & 4 is that it will allow code which uses
 the C<warnings> pragma to control the warning behavior of $^W-type
 code (using a C<local $^W=0>) if it really wants to, but not vice-versa.
 
