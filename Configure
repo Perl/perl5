@@ -20,7 +20,7 @@
 
 # $Id: Head.U,v 3.0.1.9 1997/02/28 15:02:09 ram Exp $
 #
-# Generated on Thu Nov 22 01:31:19 EET 2001 [metaconfig 3.0 PL70]
+# Generated on Thu Nov 22 07:43:52 EET 2001 [metaconfig 3.0 PL70]
 # (with additional metaconfig patches by perlbug@perl.org)
 
 cat >c1$$ <<EOF
@@ -141,6 +141,7 @@ EOM
 esac
 case "$changesh" in
 true)
+	export newsh
 	echo "(Feeding myself to $newsh $reason.)"
 	case "$0" in
 	Configure|*/Configure) exec $newsh $0 "$@";;
@@ -2262,22 +2263,43 @@ case "$lns" in
 	echo "Checking how to test for symbolic links..." >&4
 	$lns blurfl sym
 	if $test "X$issymlink" = X; then
-		sh -c "PATH= test -h sym" >/dev/null 2>&1
+		case "$newsh" in
+		'') sh     -c "PATH= test -h sym" >/dev/null 2>&1 ;;
+		*)  $newsh -c "PATH= test -h sym" >/dev/null 2>&1 ;;
+		esac
 		if test $? = 0; then
 			issymlink="test -h"
+		else
+			echo "Your builtin 'test -h' may be broken." >&4
+			case "$test" in
+			/*)	;;
+			*)	pth=`echo $PATH | sed -e "s/$p_/ /g"`
+				for p in $pth
+				do
+					if test -f "$p/$test"; then
+						test="$p/$test"
+						break
+					fi
+				done
+				;;
+			esac
+			case "$test" in
+			/*)
+				echo "Trying external '$test -h'." >&4
+				issymlink="$test -h"
+				if $test ! -h sym >/dev/null 2>&1; then
+					echo "External '$test -h' is broken, too." >& 4
+					issymlink=''
+				fi
+				;;
+			*)	issymlink='' ;;
+			esac
 		fi		
 	fi
-	case "$issymlink" in
-	"test -h")
-		if $test -h >/dev/null 2>&1; then
-			issymlink="/bin/test -h"
-			echo "Your builtin 'test -h' may be broken, I'm using external '/bin/test -h'." >&4
-		fi
-		;;
-	esac
 	if $test "X$issymlink" = X; then
 		if $test -L sym 2>/dev/null; then
 			issymlink="$test -L"
+			echo "The builtin '$test -L' worked." >&4
 		fi
 	fi
 	if $test "X$issymlink" != X; then
