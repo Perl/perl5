@@ -13,7 +13,16 @@
 # Set these to wherever you want "nmake install" to put your
 # newly built perl.
 INST_DRV	*= c:
-INST_TOP	*= $(INST_DRV)\perl\5004.5x
+INST_TOP	*= $(INST_DRV)\perl
+
+# Comment this out if you DON'T want your perl installation to be versioned.
+# This means that the new installation will overwrite any files from the
+# old installation at the same INST_TOP location.  Leaving it enabled is
+# the safest route, as perl adds the extra version directory to all the
+# locations it installs files to.  If you disable it, an alternative
+# versioned installation can be obtained by setting INST_TOP above to a
+# path that includes an arbitrary version string.
+INST_VER	*= \5.00466
 
 #
 # uncomment to enable threads-capabilities
@@ -57,8 +66,6 @@ CCTYPE		*= BORLAND
 
 #
 # set the install locations of the compiler include/libraries
-# (you'll need to quote the value if it contains spaces: i.e.
-#     CCHOME    *= "f:\Program Files\vc"
 #
 #CCHOME		*= f:\msdev\vc
 CCHOME		*= C:\bc5
@@ -284,8 +291,9 @@ $(o).dll:
 .ENDIF
 
 #
-INST_BIN	= $(INST_TOP)\bin
-INST_LIB	= $(INST_TOP)\lib
+INST_BIN	= $(INST_TOP)$(INST_VER)\bin\$(ARCHNAME)
+INST_SCRIPT	= $(INST_TOP)$(INST_VER)\bin
+INST_LIB	= $(INST_TOP)$(INST_VER)\lib
 INST_POD	= $(INST_LIB)\pod
 INST_HTML	= $(INST_POD)\html
 LIBDIR		= ..\lib
@@ -536,6 +544,7 @@ POD2TEXT	= $(PODDIR)\pod2text
 CFG_VARS	=					\
 		"INST_DRV=$(INST_DRV)"			\
 		"INST_TOP=$(INST_TOP)"			\
+		"INST_VER=$(INST_VER)"			\
 		"archname=$(ARCHNAME)"			\
 		"cc=$(CC)"				\
 		"ccflags=$(OPTIMIZE) $(DEFINES) $(OBJECT)"	\
@@ -598,7 +607,7 @@ regen_config_h:
 	cd .. && perl configpm
 	-del /f $(CFGH_TMPL)
 	-mkdir ..\lib\CORE
-	-perl -I..\lib config_h.PL
+	-perl -I..\lib config_h.PL "INST_VER=$(INST_VER)"
 	rename config.h $(CFGH_TMPL)
 
 $(CONFIGPM) : $(MINIPERL) ..\config.sh config_h.PL ..\minimod.pl
@@ -607,7 +616,8 @@ $(CONFIGPM) : $(MINIPERL) ..\config.sh config_h.PL ..\minimod.pl
 	$(XCOPY) ..\*.h $(COREDIR)\*.*
 	$(XCOPY) *.h $(COREDIR)\*.*
 	$(RCOPY) include $(COREDIR)\*.*
-	$(MINIPERL) -I..\lib config_h.PL || $(MAKE) $(MAKEMACROS) $(CONFIGPM)
+	$(MINIPERL) -I..\lib config_h.PL "INST_VER=$(INST_VER)" \
+	    || $(MAKE) $(MAKEMACROS) $(CONFIGPM)
 
 $(MINIPERL) : $(MINIDIR) $(MINI_OBJ)
 .IF "$(CCTYPE)" == "BORLAND"
@@ -886,8 +896,8 @@ installbare :
 
 installutils : utils
 	$(XCOPY) $(GLOBEXE) $(INST_BIN)\*.*
-	$(XCOPY) bin\*.bat $(INST_BIN)\*.*
-	$(XCOPY) ..\pod\*.bat $(INST_BIN)\*.*
+	$(XCOPY) bin\*.bat $(INST_SCRIPT)\*.*
+	$(XCOPY) ..\pod\*.bat $(INST_SCRIPT)\*.*
 
 installhtml : doc
 	$(RCOPY) html\*.* $(INST_HTML)\*.*

@@ -72,7 +72,7 @@ public:
 };
 
 
-extern char * g_win32_get_stdlib(char *pl);
+extern char * g_win32_get_privlib(char *pl);
 extern char * g_win32_get_sitelib(char *pl);
 class CPerlEnv : public IPerlEnv
 {
@@ -88,7 +88,7 @@ public:
     };
     virtual char* LibPath(char *pl)
     {
-	return g_win32_get_stdlib(pl);
+	return g_win32_get_privlib(pl);
     };
     virtual char* SiteLibPath(char *pl)
     {

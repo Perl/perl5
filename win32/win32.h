@@ -14,7 +14,7 @@
 #  ifdef PERL_GLOBAL_STRUCT
 #    error PERL_GLOBAL_STRUCT cannot be defined with PERL_OBJECT
 #  endif
-#  define win32_get_stdlib PerlEnv_lib_path
+#  define win32_get_privlib PerlEnv_lib_path
 #  define win32_get_sitelib PerlEnv_sitelib_path
 #endif
 
@@ -212,7 +212,7 @@ extern int		do_aspawn(void *really, void **mark, void **sp);
 extern int		do_spawn(char *cmd);
 extern int		do_spawn_nowait(char *cmd);
 extern char		do_exec(char *cmd);
-extern char *		win32_get_stdlib(char *pl);
+extern char *		win32_get_privlib(char *pl);
 extern char *		win32_get_sitelib(char *pl);
 extern int		IsWin95(void);
 extern int		IsWinNT(void);
