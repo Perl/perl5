@@ -2115,13 +2115,13 @@ integer which you can decode using unpack with the C<i> (or C<I>) format.
 
 An example testing if Nagle's algorithm is turned on on a socket:
 
-    use Socket;
+    use Socket qw(:all);
 
     defined(my $tcp = getprotobyname("tcp"))
 	or die "Could not determine the protocol number for tcp";
-    # my $tcp = Socket::IPPROTO_TCP; # Alternative
-    my $packed = getsockopt($socket, $tcp, Socket::TCP_NODELAY)
-	or die "Could not query TCP_NODELAY SOCKEt option: $!";
+    # my $tcp = IPPROTO_TCP; # Alternative
+    my $packed = getsockopt($socket, $tcp, TCP_NODELAY)
+	or die "Could not query TCP_NODELAY socket option: $!";
     my $nodelay = unpack("I", $packed);
     print "Nagle's algorithm is turned ", $nodelay ? "off\n" : "on\n";
 
