@@ -450,12 +450,11 @@ void PerlIO_debug(const char *fmt, ...)
 void
 PerlIO_debug(const char *fmt, ...)
 {
-#ifdef IAMSUID
     static int dbg = 0;
     va_list ap;
     dSYS;
     va_start(ap, fmt);
-    if (!dbg) {
+    if (!dbg && !PL_tainting && PL_uid == PL_euid && PL_gid == PL_egid) {
 	char *s = PerlEnv_getenv("PERLIO_DEBUG");
 	if (s && *s)
 	    dbg = PerlLIO_open3(s, O_WRONLY | O_CREAT | O_APPEND, 0666);
@@ -493,7 +492,6 @@ PerlIO_debug(const char *fmt, ...)
 #endif
     }
     va_end(ap);
-#endif /* IAMSUID */
 }
 
 /*--------------------------------------------------------------------------------------*/
