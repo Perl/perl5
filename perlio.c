@@ -2613,8 +2613,10 @@ char *
 PerlIOStdio_mode(const char *mode, char *tmode)
 {
     char *ret = tmode;
-    while (*mode) {
-	*tmode++ = *mode++;
+    if (mode) {
+	while (*mode) {
+	    *tmode++ = *mode++;
+	}
     }
 #if defined(PERLIO_USING_CRLF) || defined(__CYGWIN__)
     *tmode++ = 'b';
