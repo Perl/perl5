@@ -194,12 +194,12 @@ unless (defined &Time::HiRes::setitimer
 	print "# Tick! $i ", Time::HiRes::tv_interval($r), "\n";
     };	
 
-    print "# setitimer: ", join(" ", setitimer(ITIMER_VIRTUAL, 3, 0.5)), "\n";
+    print "# setitimer: ", join(" ", setitimer(ITIMER_VIRTUAL, 1, 0.5)), "\n";
 
     print "# getitimer: ", join(" ", getitimer(ITIMER_VIRTUAL)), "\n";
 
-    while ($i) {
-	my $j; $j++ for 1..1000;
+    while (getitimer(ITIMER_VIRTUAL)) {
+	my $j; $j++ for 1..1000; # Can't be unbreakable, must test getitimer().
     }
 
     print "# getitimer: ", join(" ", getitimer(ITIMER_VIRTUAL)), "\n";
