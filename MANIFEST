@@ -1446,6 +1446,7 @@ t/io/read.t		See if read works
 t/io/tell.t		See if file seeking works
 t/io/utf8.t		See if file seeking works
 t/lib/1_compile.t	See if the various libraries and extensions compile
+t/lib/MyFilter.pm	Helper file for t/lib/filter-simple.t
 t/lib/abbrev.t		See if Text::Abbrev works
 t/lib/ansicolor.t	See if Term::ANSIColor works
 t/lib/anydbm.t		See if AnyDBM_File works
@@ -1513,6 +1514,7 @@ t/lib/filefunc.t	See if File::Spec::Functions works
 t/lib/filehand.t	See if FileHandle works
 t/lib/filepath.t	See if File::Path works
 t/lib/filespec.t	See if File::Spec works
+t/lib/filter-simple.t	See if Filter::Simple works
 t/lib/filter-util.pl	See if Filter::Util::Call works
 t/lib/filter-util.t	See if Filter::Util::Call works
 t/lib/findbin.t		See if FindBin works
