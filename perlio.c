@@ -795,7 +795,8 @@ PerlIO_parse_layers(pTHX_ PerlIO_list_t *av, const char *names)
 		     * seen as an invalid separator character.
 		     */
 		    char q = ((*s == '\'') ? '"' : '\'');
-		    Perl_warn(aTHX_
+		    if (ckWARN(WARN_LAYER))
+		        Perl_warner(aTHX_ packWARN(WARN_LAYER),
 			      "perlio: invalid separator character %c%c%c in layer specification list %s",
 			      q, *s, q, s);
 		    return -1;
@@ -830,7 +831,8 @@ PerlIO_parse_layers(pTHX_ PerlIO_list_t *av, const char *names)
 			     */
 			case '\0':
 			    e--;
-			    Perl_warn(aTHX_
+		    	    if (ckWARN(WARN_LAYER))
+			        Perl_warner(aTHX_ packWARN(WARN_LAYER),
 				      "perlio: argument list not closed for layer \"%.*s\"",
 				      (int) (e - s), s);
 			    return -1;
@@ -843,6 +845,7 @@ PerlIO_parse_layers(pTHX_ PerlIO_list_t *av, const char *names)
 		    }
 		}
 		if (e > s) {
+		    bool warn_layer = ckWARN(WARN_LAYER);
 		    PerlIO_funcs *layer =
 			PerlIO_find_layer(aTHX_ s, llen, 1);
 		    if (layer) {
@@ -852,7 +855,8 @@ PerlIO_parse_layers(pTHX_ PerlIO_list_t *av, const char *names)
 					 &PL_sv_undef);
 		    }
 		    else {
-			Perl_warn(aTHX_ "perlio: unknown layer \"%.*s\"",
+		    	if (warn_layer)
+			    Perl_warner(aTHX_ packWARN(WARN_LAYER), "perlio: unknown layer \"%.*s\"",
 				  (int) llen, s);
 			return -1;
 		    }
@@ -3581,11 +3585,13 @@ PerlIOCrlf_set_ptrcnt(pTHX_ PerlIO *f, STDCHAR * ptr, SSize_t cnt)
         }
 	chk -= cnt;
 
+#ifdef USE_ATTRIBUTES_FOR_PERLIO
 	if (ptr != chk ) {
-	    Perl_warn(aTHX_ "ptr wrong %p != %p fl=%08" UVxf
+	    Perl_croak(aTHX_ "ptr wrong %p != %p fl=%08" UVxf
 		       " nl=%p e=%p for %d", ptr, chk, flags, c->nl,
 		       b->end, cnt);
 	}
+#endif
     }
     if (c->nl) {
 	if (ptr > c->nl) {

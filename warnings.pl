@@ -19,6 +19,7 @@ my $tree = {
        				'closed'	=> DEFAULT_OFF,
        				'newline'	=> DEFAULT_OFF,
        				'exec'		=> DEFAULT_OFF,
+       				'layer'		=> DEFAULT_OFF,
 			   },
        	'syntax'	=> { 	'ambiguous'	=> DEFAULT_OFF,
 			     	'semicolon'	=> DEFAULT_OFF,
