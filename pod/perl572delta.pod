@@ -156,7 +156,8 @@ L<Time::Piece> - Object Oriented time objects
 
 L<B::Deparse> module has been significantly enhanced.  It now
 can deparse almost all of the standard test suite (so that the
-tests still succeed).
+tests still succeed).  There is a make target "test.deparse"
+for trying this out.
 
 =item *
 
@@ -246,7 +247,9 @@ The F<Todo> and F<Todo-5.6> files have been merged into L<perltodo>.
 
 =item *
 
-Use of the F<gprof> tool to profile Perl has been documented in L<perlhack>.
+Use of the F<gprof> tool to profile Perl has been documented in
+L<perlhack>.  There is a make target "perl.gprof" for generating a
+gprofiled Perl executable.
 
 =back
 
@@ -258,8 +261,8 @@ Use of the F<gprof> tool to profile Perl has been documented in L<perlhack>.
 
 =item *
 
-AIX should now work better with gcc.  Also longdouble support in
-AIX should be better now.
+AIX should now work better with gcc.  Also longdouble support in AIX
+should be better now.  See L<perlaix>.
 
 =item *
 
@@ -267,13 +270,13 @@ AtheOS (http://www.atheos.cx/) is a new platform.
 
 =item *
 
-DG/UX platform now supports the 5.005-style threads.
+DG/UX platform now supports the 5.005-style threads.  See L<perldgux>.
 
 =item *
 
-Several MacOS (Classic) portability patches have been applied.
-We hope to get a fully working port by 5.8.0.  (The remaining
-problems relate to the changed IO model of Perl.)
+Several MacOS (Classic) portability patches have been applied.  We
+hope to get a fully working port by 5.8.0.  (The remaining problems
+relate to the changed IO model of Perl.)  See L<perlmacos>.
 
 =item *
 
@@ -282,7 +285,7 @@ filesystems.  (The case-insensitivity confused the Perl build process.)
 
 =item *
 
-NetWare from Novell is now supported.
+NetWare from Novell is now supported.  See L<perlnetware>.
 
 =item *
 
