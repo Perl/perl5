@@ -2445,7 +2445,7 @@ when you meant
 
     my ($foo, $bar) = @_;
 
-Remember that "my", "our" and "local" bind closer than comma.
+Remember that "my", "our", and "local" bind tighter than comma.
 
 =item Perl %3.3f required--this is only version %s, stopped
 

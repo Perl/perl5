@@ -2260,7 +2260,7 @@ when you meant
 
     my ($foo, $bar) = @_;
 
-Remember that "my", "our" and "local" bind closer than comma.
+Remember that "my", "our", and "local" bind tighter than comma.
 
 =item Possible Y2K bug: %s
 
