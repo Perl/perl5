@@ -181,7 +181,7 @@ Subroutine fred redefined at - line 5.
 ########
 # sv.c
 use warning 'printf' ;
-open F, ">/dev/null" ;
+open F, ">".($^O eq 'VMS'? 'NL:' : '/dev/null') ;
 printf F "%q\n" ;
 my $a = sprintf "%q" ;
 printf F "%" ;

@@ -115,7 +115,7 @@ else    { print "ok 5\n";                          }
   }
   else { print "ok 15\n"; }
 
-  if ($utcmtime - $vmsmtime + $offset > 10) {
+  if ($vmsmtime - $utcmtime + $offset > 10) {
     print "not ok 16  # (stat) UTC: $utcmtime  VMS: $vmsmtime\n";
   }
   else { print "ok 16\n"; }

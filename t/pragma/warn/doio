@@ -44,7 +44,8 @@
 __END__
 # doio.c
 use warning 'io' ;
-open(F, "|$^X -e 1|")
+open(F, '|'.($^O eq 'VMS' ? 'mcr ':'')."$^X -e 1|");
+close(F);
 EXPECT
 Can't do bidirectional pipe at - line 3.
 ########
@@ -111,4 +112,4 @@ use warning 'io' ;
 exec "lskdjfalksdjfdjfkls", "abc" ;
 EXPECT
 OPTION regex
-Can't exec "lskdjfalksdjfdjfkls": .+
+Can't exec "lskdjfalksdjfdjfkls(:? abc)?": .+

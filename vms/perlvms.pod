@@ -715,17 +715,24 @@ that F<PERL_ENV_TABLES> is set up so that the logical name C<story>
 is found, rather than a CLI symbol or CRTL C<environ> element with
 the same name.
 
-When an element of C<%ENV> is set to a non-empty string, the
+When an element of C<%ENV> is set to a defined string, the
 corresponding definition is made in the location to which the
 first translation of F<PERL_ENV_TABLES> points.  If this causes a
 logical name to be created, it is defined in supervisor mode.
+(The same is done if an existing logical name was defined in
+executive or kernel mode; an existing user or supervisor mode
+logical name is reset to the new value.)  If the value is an empty
+string, the logical name's translation is defined as a single NUL
+(ASCII 00) character, since a logical name cannot translate to a
+zero-length string.  (This restriction does not apply to CLI symbols
+or CRTL C<environ> values; they are set to the empty string.)
 An element of the CRTL C<environ> array can be set only if your
 copy of Perl knows about the CRTL's C<setenv()> function.  (This is
 present only in some versions of the DECCRTL; check C<$Config{d_setenv}>
 to see whether your copy of Perl was built with a CRTL that has this
 function.)
           
-When an element of C<%ENV> is set to an empty string or C<undef>,
+When an element of C<%ENV> is set to C<undef>,
 the element is looked up as if it were being read, and if it is
 found, it is deleted.  (An item "deleted" from the CRTL C<environ>
 array is set to the empty string; this can only be done if your
@@ -734,8 +741,9 @@ C<delete> to remove an element from C<%ENV> has a similar effect,
 but after the element is deleted, another attempt is made to
 look up the element, so an inner-mode logical name or a name in
 another location will replace the logical name just deleted.
-It is not possible at present to define a search list logical name
-via %ENV.
+In either case, only the first value found searching PERL_ENV_TABLES
+is altered.  It is not possible at present to define a search list
+logical name via %ENV.
 
 The element C<$ENV{DEFAULT}> is special: when read, it returns
 Perl's current default device and directory, and when set, it

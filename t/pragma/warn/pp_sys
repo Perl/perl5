@@ -113,7 +113,7 @@ ghi
 .
 $= = 1 ;
 $- =1 ;
-open STDOUT, ">/dev/null" ;
+open STDOUT, ">".($^O eq 'VMS'? 'NL:' : '/dev/null') ;
 write ;
 EXPECT
 page overflow at - line 13.

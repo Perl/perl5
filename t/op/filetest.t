@@ -3,6 +3,7 @@
 # There are few filetest operators that are portable enough to test.
 # See pod/perlport.pod for details.
 
+use Config;
 BEGIN {
     chdir 't' if -d 't';
 }
@@ -50,8 +51,12 @@ eval '$> = $oldeuid';	# switch uid back (may not be implemented)
 
 # this would fail for the euid 1
 # (unless we have unpacked the source code as uid 1...)
-print "not " unless -w 'op';
-print "ok 8\n";
+if ($Config{d_seteuid}) {
+    print "not " unless -w 'op';
+    print "ok 8\n";
+} else {
+    print "ok 8 #skipped, no seteuid\n";
+}
 
 print "not " unless -x 'op'; # Hohum.  Are directories -x everywhere?
 print "ok 9\n";

@@ -2,8 +2,8 @@
  *
  * VMS-specific routines for perl5
  *
- * Last revised: 13-Sep-1998 by Charles Bailey  bailey@newman.upenn.edu
- * Version: 5.5.2
+ * Last revised: 24-Apr-1999 by Charles Bailey  bailey@newman.upenn.edu
+ * Version: 5.5.58
  */
 
 #include <acedef.h>
@@ -51,6 +51,10 @@
 #include "EXTERN.h"
 #include "perl.h"
 #include "XSUB.h"
+/* Anticipating future expansion in lexical warnings . . . */
+#ifndef WARN_INTERNAL
+#  define WARN_INTERNAL WARN_MISC
+#endif
 
 /* gcc's header files don't #define direct access macros
  * corresponding to VAXC's variant structs */
@@ -153,9 +157,10 @@ vmstrnenv(const char *lnm, char *eqv, unsigned long int idx,
           retsts = lib$get_symbol(&lnmdsc,&eqvdsc,&eqvlen,0);
           if (retsts & 1) { 
             if (eqvlen > 1024) {
-              if (PL_curinterp && PL_dowarn) warn("Value of CLI symbol \"%s\" too long",lnm);
-              eqvlen = 1024;
               set_errno(EVMSERR); set_vaxc_errno(LIB$_STRTRU);
+              eqvlen = 1024;
+              if (ckWARN(WARN_MISC))
+                warner(WARN_MISC,"Value of CLI symbol \"%s\" too long",lnm);
             }
             strncpy(eqv,eqvdsc.dsc$a_pointer,eqvlen);
           }
@@ -297,7 +302,7 @@ prime_env_iter(void)
 {
   dTHR;
   static int primed = 0;
-  HV *seenhv = NULL, *envhv = GvHVn(PL_envgv);
+  HV *seenhv = NULL, *envhv;
   char cmd[LNM$C_NAMLENGTH+24], mbxnam[LNM$C_NAMLENGTH], *buf = Nullch;
   unsigned short int chan;
 #ifndef CLI$M_TRUSTED
@@ -317,9 +322,10 @@ prime_env_iter(void)
   MUTEX_INIT(&primenv_mutex);
 #endif
 
-  if (primed) return;
+  if (primed || !PL_envgv) return;
   MUTEX_LOCK(&primenv_mutex);
   if (primed) { MUTEX_UNLOCK(&primenv_mutex); return; }
+  envhv = GvHVn(PL_envgv);
   /* Perform a dummy fetch as an lval to insure that the hash table is
    * set up.  Otherwise, the hv_store() will turn into a nullop. */
   (void) hv_fetch(envhv,"DEFAULT",7,TRUE);
@@ -342,8 +348,8 @@ prime_env_iter(void)
       int j;
       for (j = 0; environ[j]; j++) { 
         if (!(start = strchr(environ[j],'='))) {
-          if (PL_curinterp && PL_dowarn) 
-            warn("Ill-formed CRTL environ value \"%s\"\n",environ[j]);
+          if (ckWARN(WARN_INTERNAL)) 
+            warner(WARN_INTERNAL,"Ill-formed CRTL environ value \"%s\"\n",environ[j]);
         }
         else {
           start++;
@@ -411,8 +417,8 @@ prime_env_iter(void)
         }
         continue;
       }
-      if (sts == SS$_BUFFEROVF && PL_curinterp && PL_dowarn)
-        warn("Buffer overflow in prime_env_iter: %s",buf);
+      if (sts == SS$_BUFFEROVF && ckWARN(WARN_INTERNAL))
+        warner(WARN_INTERNAL,"Buffer overflow in prime_env_iter: %s",buf);
 
       for (cp1 = buf; *cp1 && isspace(*cp1); cp1++) ;
       if (*cp1 == '(' || /* Logical name table name */
@@ -424,8 +430,8 @@ prime_env_iter(void)
       while (*cp2 && *cp2 != '=') cp2++;
       while (*cp2 && *cp2 != '"') cp2++;
       for (cp1 = buf + retlen; *cp1 != '"'; cp1--) ;
-      if (!keylen || (cp1 - cp2 <= 0)) {
-        warn("Ill-formed message in prime_env_iter: |%s|",buf);
+      if ((!keylen || (cp1 - cp2 <= 0)) && ckWARN(WARN_INTERNAL)) {
+        warner(WARN_INTERNAL,"Ill-formed message in prime_env_iter: |%s|",buf);
         continue;
       }
       /* Skip "" surrounding translation */
@@ -460,6 +466,7 @@ prime_env_iter(void)
  * vmstrnenv().  If an element is to be deleted, it's removed from
  * the first place it's found.  If it's to be set, it's set in the
  * place designated by the first element of the table vector.
+ * Like setenv() returns 0 for success, non-zero on error.
  */
 int
 vmssetenv(char *lnm, char *eqv, struct dsc$descriptor_s **tabvec)
@@ -483,23 +490,25 @@ vmssetenv(char *lnm, char *eqv, struct dsc$descriptor_s **tabvec)
     lnmdsc.dsc$w_length = cp1 - lnm;
     if (!tabvec || !*tabvec) tabvec = env_tables;
 
-    if (!eqv || !*eqv) {  /* we're deleting a symbol */
+    if (!eqv) {  /* we're deleting n element */
       for (curtab = 0; tabvec[curtab]; curtab++) {
         if (!ivenv && !str$case_blind_compare(tabvec[curtab],&crtlenv)) {
         int i;
-#ifdef HAS_SETENV
           for (i = 0; environ[i]; i++) { /* Iff it's an environ elt, reset */
             if ((cp1 = strchr(environ[i],'=')) && 
                 !strncmp(environ[i],lnm,cp1 - environ[i])) {
-              setenv(lnm,eqv,1);
-              return;
+#ifdef HAS_SETENV
+              return setenv(lnm,eqv,1) ? vaxc$errno : 0;
             }
           }
           ivenv = 1; retsts = SS$_NOLOGNAM;
 #else
-          if (PL_curinterp && PL_dowarn)
-            warn("This Perl can't reset CRTL environ elements (%s)",lnm)
-          ivenv = 1; retsts = SS$_NOSUCHPGM;
+              if (ckWARN(WARN_INTERNAL))
+                warner(WARN_INTERNAL,"This Perl can't reset CRTL environ elements (%s)",lnm);
+              ivenv = 1; retsts = SS$_NOSUCHPGM;
+              break;
+            }
+          }
 #endif
         }
         else if ((tmpdsc.dsc$a_pointer = tabvec[curtab]->dsc$a_pointer) &&
@@ -511,8 +520,8 @@ vmssetenv(char *lnm, char *eqv, struct dsc$descriptor_s **tabvec)
             symtype = LIB$K_CLI_LOCAL_SYM;
           else symtype = LIB$K_CLI_GLOBAL_SYM;
           retsts = lib$delete_symbol(&lnmdsc,&symtype);
-          if (retsts = LIB$_INVSYMNAM) { ivsym = 1; continue; }
-          if (retsts = LIB$_NOSUCHSYM) continue;
+          if (retsts == LIB$_INVSYMNAM) { ivsym = 1; continue; }
+          if (retsts == LIB$_NOSUCHSYM) continue;
           break;
         }
         else if (!ivlnm) {
@@ -527,10 +536,10 @@ vmssetenv(char *lnm, char *eqv, struct dsc$descriptor_s **tabvec)
     else {  /* we're defining a value */
       if (!ivenv && !str$case_blind_compare(tabvec[0],&crtlenv)) {
 #ifdef HAS_SETENV
-        return setenv(lnm,eqv,1) ? vaxc$errno : SS$_NORMAL;
+        return setenv(lnm,eqv,1) ? vaxc$errno : 0;
 #else
-        if (PL_curinterp && PL_dowarn)
-          warn("This Perl can't set CRTL environ elements (%s=%s)",lnm,eqv)
+        if (ckWARN(WARN_INTERNAL))
+          warner(WARN_INTERNAL,"This Perl can't set CRTL environ elements (%s=%s)",lnm,eqv);
         retsts = SS$_NOSUCHPGM;
 #endif
       }
@@ -547,7 +556,10 @@ vmssetenv(char *lnm, char *eqv, struct dsc$descriptor_s **tabvec)
           else symtype = LIB$K_CLI_GLOBAL_SYM;
           retsts = lib$set_symbol(&lnmdsc,&eqvdsc,&symtype);
         }
-        else retsts = lib$set_logical(&lnmdsc,&eqvdsc,tabvec[0],0,0);
+        else {
+          if (!*eqv) eqvdsc.dsc$w_length = 1;
+          retsts = lib$set_logical(&lnmdsc,&eqvdsc,tabvec[0],0,0);
+        }
       }
     }
     if (!(retsts & 1)) {
@@ -567,7 +579,15 @@ vmssetenv(char *lnm, char *eqv, struct dsc$descriptor_s **tabvec)
        set_vaxc_errno(retsts);
        return (int) retsts || 44; /* retsts should never be 0, but just in case */
     }
-    else if (retsts != SS$_NORMAL) {  /* alternate success codes */
+    else {
+      /* We reset error values on success because Perl does an hv_fetch()
+       * before each hv_store(), and if the thing we're setting didn't
+       * previously exist, we've got a leftover error message.  (Of course,
+       * this fails in the face of
+       *    $foo = $ENV{nonexistent}; $ENV{existent} = 'foo';
+       * in that the error reported in $! isn't spurious, 
+       * but it's right more often than not.)
+       */
       set_errno(0); set_vaxc_errno(retsts);
       return 0;
     }
@@ -855,19 +875,78 @@ static struct pipe_details *open_pipes = NULL;
 static $DESCRIPTOR(nl_desc, "NL:");
 static int waitpid_asleep = 0;
 
+/* Send an EOF to a mbx.  N.B.  We don't check that fp actually points
+ * to a mbx; that's the caller's responsibility.
+ */
+static unsigned long int
+pipe_eof(FILE *fp)
+{
+  char devnam[NAM$C_MAXRSS+1], *cp;
+  unsigned long int chan, iosb[2], retsts, retsts2;
+  struct dsc$descriptor devdsc = {0, DSC$K_DTYPE_T, DSC$K_CLASS_S, devnam};
+
+  if (fgetname(fp,devnam,1)) {
+    /* It oughta be a mailbox, so fgetname should give just the device
+     * name, but just in case . . . */
+    if ((cp = strrchr(devnam,':')) != NULL) *(cp+1) = '\0';
+    devdsc.dsc$w_length = strlen(devnam);
+    _ckvmssts(sys$assign(&devdsc,&chan,0,0));
+    retsts = sys$qiow(0,chan,IO$_WRITEOF,iosb,0,0,0,0,0,0,0,0);
+    if (retsts & 1) retsts = iosb[0];
+    retsts2 = sys$dassgn(chan);  /* Be sure to deassign the channel */
+    if (retsts & 1) retsts = retsts2;
+    _ckvmssts(retsts);
+    return retsts;
+  }
+  else _ckvmssts(vaxc$errno);  /* Should never happen */
+  return (unsigned long int) vaxc$errno;
+}
+
 static unsigned long int
 pipe_exit_routine()
 {
+    struct pipe_details *info;
     unsigned long int retsts = SS$_NORMAL, abort = SS$_TIMEOUT;
-    int sts;
+    int sts, did_stuff;
 
-    while (open_pipes != NULL) {
-      if (!open_pipes->done) { /* Tap them gently on the shoulder . . .*/
-        _ckvmssts(sys$forcex(&open_pipes->pid,0,&abort));
-        sleep(1);
+    /* 
+     first we try sending an EOF...ignore if doesn't work, make sure we
+     don't hang
+    */
+    did_stuff = 0;
+    info = open_pipes;
+
+    while (info) {
+      if (info->mode != 'r' && !info->done) {
+        if (pipe_eof(info->fp) & 1) did_stuff = 1;
       }
-      if (!open_pipes->done)  /* We tried to be nice . . . */
-        _ckvmssts(sys$delprc(&open_pipes->pid,0));
+      info = info->next;
+    }
+    if (did_stuff) sleep(1);   /* wait for EOF to have an effect */
+
+    did_stuff = 0;
+    info = open_pipes;
+    while (info) {
+      if (!info->done) { /* Tap them gently on the shoulder . . .*/
+        sts = sys$forcex(&info->pid,0,&abort);
+        if (!(sts&1) && sts != SS$_NONEXPR) _ckvmssts(sts); 
+        did_stuff = 1;
+      }
+      info = info->next;
+    }
+    if (did_stuff) sleep(1);    /* wait for them to respond */
+
+    info = open_pipes;
+    while (info) {
+      if (!info->done) {  /* We tried to be nice . . . */
+        sts = sys$delprc(&info->pid,0);
+        if (!(sts&1) && sts != SS$_NONEXPR) _ckvmssts(sts); 
+        info->done = 1; /* so my_pclose doesn't try to write EOF */
+      }
+      info = info->next;
+    }
+
+    while(open_pipes) {
       if ((sts = my_pclose(open_pipes->fp)) == -1) retsts = vaxc$errno;
       else if (!(sts & 1)) retsts = sts;
     }
@@ -981,25 +1060,7 @@ I32 my_pclose(FILE *fp)
     /* If we were writing to a subprocess, insure that someone reading from
      * the mailbox gets an EOF.  It looks like a simple fclose() doesn't
      * produce an EOF record in the mailbox.  */
-    if (info->mode != 'r') {
-      char devnam[NAM$C_MAXRSS+1], *cp;
-      unsigned long int chan, iosb[2], retsts, retsts2;
-      struct dsc$descriptor devdsc = {0, DSC$K_DTYPE_T, DSC$K_CLASS_S, devnam};
-
-      if (fgetname(info->fp,devnam,1)) {
-        /* It oughta be a mailbox, so fgetname should give just the device
-         * name, but just in case . . . */
-        if ((cp = strrchr(devnam,':')) != NULL) *(cp+1) = '\0';
-        devdsc.dsc$w_length = strlen(devnam);
-        _ckvmssts(sys$assign(&devdsc,&chan,0,0));
-        retsts = sys$qiow(0,chan,IO$_WRITEOF,iosb,0,0,0,0,0,0,0,0);
-        if (retsts & 1) retsts = iosb[0];
-        retsts2 = sys$dassgn(chan);  /* Be sure to deassign the channel */
-        if (retsts & 1) retsts = retsts2;
-        _ckvmssts(retsts);
-      }
-      else _ckvmssts(vaxc$errno);  /* Should never happen */
-    }
+    if (info->mode != 'r' && !info->done) pipe_eof(info->fp);
     PerlIO_close(info->fp);
 
     if (info->done) retsts = info->completion;
@@ -1038,11 +1099,11 @@ my_waitpid(Pid_t pid, int *statusp, int flags)
       unsigned long int ownercode = JPI$_OWNER, ownerpid, mypid;
       unsigned long int interval[2],sts;
 
-      if (PL_dowarn) {
+      if (ckWARN(WARN_EXEC)) {
         _ckvmssts(lib$getjpi(&ownercode,&pid,0,&ownerpid,0,0));
         _ckvmssts(lib$getjpi(&ownercode,0,0,&mypid,0,0));
         if (ownerpid != mypid)
-          warn("pid %x not a child",pid);
+          warner(WARN_EXEC,"pid %x not a child",pid);
       }
 
       _ckvmssts(sys$bintim(&intdsc,interval));
@@ -1118,7 +1179,7 @@ do_rmsexpand(char *filespec, char *outbuf, int ts, char *defspec, unsigned opts)
   struct FAB myfab = cc$rms_fab;
   struct NAM mynam = cc$rms_nam;
   STRLEN speclen;
-  unsigned long int retsts, haslower = 0, isunix = 0;
+  unsigned long int retsts, trimver, trimtype, haslower = 0, isunix = 0;
 
   if (!filespec || !*filespec) {
     set_vaxc_errno(LIB$_INVARG); set_errno(EINVAL);
@@ -1187,13 +1248,37 @@ do_rmsexpand(char *filespec, char *outbuf, int ts, char *defspec, unsigned opts)
     if (islower(*out)) { haslower = 1; break; }
   if (mynam.nam$b_rsl) { out = outbuf; speclen = mynam.nam$b_rsl; }
   else                 { out = esa;    speclen = mynam.nam$b_esl; }
-  if (!(mynam.nam$l_fnb & NAM$M_EXP_VER) &&
-      (!defspec || !*defspec || !strchr(myfab.fab$l_dna,';')))
-    speclen = mynam.nam$l_ver - out;
-  if (!(mynam.nam$l_fnb & NAM$M_EXP_TYPE) &&
-      (!defspec || !*defspec || defspec[myfab.fab$b_dns-1] != '.' ||
-       defspec[myfab.fab$b_dns-2] == '.'))
-    speclen = mynam.nam$l_type - out;
+  /* Trim off null fields added by $PARSE
+   * If type > 1 char, must have been specified in original or default spec
+   * (not true for version; $SEARCH may have added version of existing file).
+   */
+  trimver  = !(mynam.nam$l_fnb & NAM$M_EXP_VER);
+  trimtype = !(mynam.nam$l_fnb & NAM$M_EXP_TYPE) &&
+             (mynam.nam$l_ver - mynam.nam$l_type == 1);
+  if (trimver || trimtype) {
+    if (defspec && *defspec) {
+      char defesa[NAM$C_MAXRSS];
+      struct FAB deffab = cc$rms_fab;
+      struct NAM defnam = cc$rms_nam;
+     
+      deffab.fab$l_nam = &defnam;
+      deffab.fab$l_fna = defspec;  deffab.fab$b_fns = myfab.fab$b_dns;
+      defnam.nam$l_esa = defesa;   defnam.nam$b_ess = sizeof defesa;
+      defnam.nam$b_nop = NAM$M_SYNCHK;
+      if (sys$parse(&deffab,0,0) & 1) {
+        if (trimver)  trimver  = !(defnam.nam$l_fnb & NAM$M_EXP_VER);
+        if (trimtype) trimtype = !(defnam.nam$l_fnb & NAM$M_EXP_TYPE); 
+      }
+    }
+    if (trimver) speclen = mynam.nam$l_ver - out;
+    if (trimtype) {
+      /* If we didn't already trim version, copy down */
+      if (speclen > mynam.nam$l_ver - out)
+        memcpy(mynam.nam$l_type, mynam.nam$l_ver, 
+               speclen - (mynam.nam$l_ver - out));
+      speclen -= mynam.nam$l_ver - mynam.nam$l_type; 
+    }
+  }
   /* If we just had a directory spec on input, $PARSE "helpfully"
    * adds an empty name and type for us */
   if (mynam.nam$l_name == mynam.nam$l_type &&
@@ -3116,12 +3201,12 @@ seekdir(DIR *dd, long count)
  * in 'VMSish fashion' (i.e. not after a call to vfork) The args
  * are concatenated to form a DCL command string.  If the first arg
  * begins with '$' (i.e. the perl script had "\$ Type" or some such),
- * the the command string is hrnded off to DCL directly.  Otherwise,
+ * the the command string is handed off to DCL directly.  Otherwise,
  * the first token of the command is taken as the filespec of an image
  * to run.  The filespec is expanded using a default type of '.EXE' and
- * the process defaults for device, directory, etc., and the resultant
+ * the process defaults for device, directory, etc., and if found, the resultant
  * filespec is invoked using the DCL verb 'MCR', and passed the rest of
- * the command string as parameters.  This is perhaps a bit compicated,
+ * the command string as parameters.  This is perhaps a bit complicated,
  * but I hope it will form a happy medium between what VMS folks expect
  * from lib$spawn and what Unix folks expect from exec.
  */
@@ -3187,8 +3272,10 @@ setup_argstr(SV *really, SV **mark, SV **sp)
   else *PL_Cmd = '\0';
   while (++mark <= sp) {
     if (*mark) {
-      strcat(PL_Cmd," ");
-      strcat(PL_Cmd,SvPVx(*mark,n_a));
+      char *s = SvPVx(*mark,n_a);
+      if (!*s) continue;
+      if (*PL_Cmd) strcat(PL_Cmd," ");
+      strcat(PL_Cmd,s);
     }
   }
   return PL_Cmd;
@@ -3203,7 +3290,7 @@ setup_cmddsc(char *cmd, int check_img)
   $DESCRIPTOR(defdsc,".EXE");
   $DESCRIPTOR(resdsc,resspec);
   struct dsc$descriptor_s imgdsc = {0, DSC$K_DTYPE_T, DSC$K_CLASS_S, 0};
-  unsigned long int cxt = 0, flags = 1, retsts;
+  unsigned long int cxt = 0, flags = 1, retsts = SS$_NORMAL;
   register char *s, *rest, *cp;
   register int isdcl = 0;
 
@@ -3221,43 +3308,45 @@ setup_cmddsc(char *cmd, int check_img)
     }
   }
   else isdcl = 1;
-  if (isdcl) {  /* It's a DCL command, just do it. */
-    VMScmd.dsc$w_length = strlen(cmd);
-    if (cmd == PL_Cmd) {
-       VMScmd.dsc$a_pointer = PL_Cmd;
-       PL_Cmd = Nullch;  /* Don't try to free twice in vms_execfree() */
-    }
-    else VMScmd.dsc$a_pointer = savepvn(cmd,VMScmd.dsc$w_length);
-  }
-  else {                           /* assume first token is an image spec */
+  if (!isdcl) {
     cmd = s;
     while (*s && !isspace(*s)) s++;
     rest = *s ? s : 0;
     imgdsc.dsc$a_pointer = cmd;
     imgdsc.dsc$w_length = s - cmd;
     retsts = lib$find_file(&imgdsc,&resdsc,&cxt,&defdsc,0,0,&flags);
-    if (!(retsts & 1)) {
-      /* just hand off status values likely to be due to user error */
-      if (retsts == RMS$_FNF || retsts == RMS$_DNF ||
-          retsts == RMS$_DEV || retsts == RMS$_DIR || retsts == RMS$_SYN ||
-         (retsts & STS$M_CODE) == (SHR$_NOWILD & STS$M_CODE)) return retsts;
-      else { _ckvmssts(retsts); }
-    }
-    else {
+    if (retsts & 1) {
       _ckvmssts(lib$find_file_end(&cxt));
       s = resspec;
       while (*s && !isspace(*s)) s++;
       *s = '\0';
-      if (!cando_by_name(S_IXUSR,0,resspec)) return RMS$_PRV;
-      New(402,VMScmd.dsc$a_pointer,7 + s - resspec + (rest ? strlen(rest) : 0),char);
-      strcpy(VMScmd.dsc$a_pointer,"$ MCR ");
-      strcat(VMScmd.dsc$a_pointer,resspec);
-      if (rest) strcat(VMScmd.dsc$a_pointer,rest);
-      VMScmd.dsc$w_length = strlen(VMScmd.dsc$a_pointer);
+      if (cando_by_name(S_IXUSR,0,resspec)) {
+        New(402,VMScmd.dsc$a_pointer,7 + s - resspec + (rest ? strlen(rest) : 0),char);
+        strcpy(VMScmd.dsc$a_pointer,"$ MCR ");
+        strcat(VMScmd.dsc$a_pointer,resspec);
+        if (rest) strcat(VMScmd.dsc$a_pointer,rest);
+        VMScmd.dsc$w_length = strlen(VMScmd.dsc$a_pointer);
+        return retsts;
+      }
+      else retsts = RMS$_PRV;
     }
   }
+  /* It's either a DCL command or we couldn't find a suitable image */
+  VMScmd.dsc$w_length = strlen(cmd);
+  if (cmd == PL_Cmd) {
+    VMScmd.dsc$a_pointer = PL_Cmd;
+    PL_Cmd = Nullch;  /* Don't try to free twice in vms_execfree() */
+  }
+  else VMScmd.dsc$a_pointer = savepvn(cmd,VMScmd.dsc$w_length);
+  if (!(retsts & 1)) {
+    /* just hand off status values likely to be due to user error */
+    if (retsts == RMS$_FNF || retsts == RMS$_DNF || retsts == RMS$_PRV ||
+        retsts == RMS$_DEV || retsts == RMS$_DIR || retsts == RMS$_SYN ||
+       (retsts & STS$M_CODE) == (SHR$_NOWILD & STS$M_CODE)) return retsts;
+    else { _ckvmssts(retsts); }
+  }
 
-  return (VMScmd.dsc$w_length > 255 ? CLI$_BUFOVF : SS$_NORMAL);
+  return (VMScmd.dsc$w_length > 255 ? CLI$_BUFOVF : retsts);
 
 }  /* end of setup_cmddsc() */
 
@@ -3324,8 +3413,10 @@ vms_do_exec(char *cmd)
         set_errno(EVMSERR); 
     }
     set_vaxc_errno(retsts);
-    if (PL_dowarn)
-      warn("Can't exec \"%s\": %s", VMScmd.dsc$a_pointer, Strerror(errno));
+    if (ckWARN(WARN_EXEC)) {
+      warner(WARN_EXEC,"Can't exec \"%*s\": %s",
+             VMScmd.dsc$w_length, VMScmd.dsc$a_pointer, Strerror(errno));
+    }
     vms_execfree();
   }
 
@@ -3381,9 +3472,12 @@ do_spawn(char *cmd)
         set_errno(EVMSERR); 
     }
     set_vaxc_errno(sts);
-    if (PL_dowarn)
-      warn("Can't spawn \"%s\": %s",
-           hadcmd ? VMScmd.dsc$a_pointer : "", Strerror(errno));
+    if (ckWARN(WARN_EXEC)) {
+      warner(WARN_EXEC,"Can't spawn \"%*s\": %s",
+             hadcmd ? VMScmd.dsc$w_length :  0,
+             hadcmd ? VMScmd.dsc$a_pointer : "",
+             Strerror(errno));
+    }
   }
   vms_execfree();
   return substs;

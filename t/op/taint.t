@@ -19,6 +19,13 @@ use Config;
 # just because Errno possibly failing.
 eval { require Errno; import Errno };
 
+BEGIN {
+  if ($^O eq 'VMS' && !defined($Config{d_setenv})) {
+      $ENV{PATH} = $ENV{PATH};
+      $ENV{TERM} = $ENV{TERM} ne ''? $ENV{TERM} : 'dummy';
+  }
+}
+
 my $Is_VMS = $^O eq 'VMS';
 my $Is_MSWin32 = $^O eq 'MSWin32';
 my $Is_Dos = $^O eq 'dos';
@@ -33,7 +40,7 @@ if ($Is_VMS) {
     }
     eval <<EndOfCleanup;
 	END {
-	    \$ENV{PATH} = '';
+	    \$ENV{PATH} = '' if $Config{d_setenv};
 	    warn "# Note: logical name 'PATH' may have been deleted\n";
 	    \@ENV{keys %old} = values %old;
 	}
