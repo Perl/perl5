@@ -120,7 +120,7 @@ variable first.
 B<Make Rule 2>
 
 C<[ ITEMS ]> makes a new, anonymous array, and returns a reference to
-that array. C<{ ITEMS }> makes a new, anonymous hash. and returns a
+that array.  C<{ ITEMS }> makes a new, anonymous hash, and returns a
 reference to that hash.
 
     $aref = [ 1, "foo", undef, 13 ];  
@@ -171,10 +171,10 @@ Arrays:
 
 
 On each line are two expressions that do the same thing.  The
-left-hand versions operate on the array C<@a>, and the right-hand
-versions operate on the array that is referred to by C<$aref>, but
-once they find the array they're operating on, they do the same things
-to the arrays.
+left-hand versions operate on the array C<@a>.  The right-hand
+versions operate on the array that is referred to by C<$aref>.  Once
+they find the array they're operating on, both versions do the same
+things to the arrays.
 
 Using a hash reference is I<exactly> the same:
 
@@ -332,6 +332,13 @@ structure will look like this:
 We'll look at output first.  Supposing we already have this structure,
 how do we print it out?
 
+    8   foreach $country (sort keys %table) {
+    9     print "$country: ";
+   10     my @cities = @{$table{$country}};
+   11     print join ', ', sort @cities;
+   12     print ".\n";
+   13	}
+
 C<%table> is an
 ordinary hash, and we get a list of keys from it, sort the keys, and
 loop over the keys as usual.  The only use of references is in line 10.
@@ -349,7 +356,7 @@ Having gotten the list of cities, we sort it, join it, and print it
 out as usual.
 
 Lines 2-7 are responsible for building the structure in the first
-place; here they are again:
+place.  Here they are again:
 
     2   while (<>) {
     3    chomp;
@@ -420,7 +427,7 @@ other references.
 
 =item *
 
-In B<USE RULE 1>, you can omit the curly brackets whenever the thing
+In B<Use Rule 1>, you can omit the curly brackets whenever the thing
 inside them is an atomic scalar variable like C<$aref>.  For example,
 C<@$aref> is the same as C<@{$aref}>, and C<$$aref[1]> is the same as
 C<${$aref}[1]>.  If you're just starting out, you may want to adopt
@@ -446,11 +453,11 @@ initialized with the contents of the array referred to by C<$aref1>.
 
 Similarly, to copy an anonymous hash, you can use
 
-        $href = {%{$href}};
+        $href2 = {%{$href1}};
 
 =item * 
 
-To see if a variable contains a reference, use the `ref' function.  It
+To see if a variable contains a reference, use the C<ref> function.  It
 returns true if its argument is a reference.  Actually it's a little
 better than that: It returns C<HASH> for hash references and C<ARRAY>
 for array references.
@@ -472,7 +479,9 @@ C<==> instead because it's much faster.)
 
 You can use a string as if it were a reference.  If you use the string
 C<"foo"> as an array reference, it's taken to be a reference to the
-array C<@foo>.  This is called a I<soft reference> or I<symbolic reference>.
+array C<@foo>.  This is called a I<soft reference> or I<symbolic
+reference>.  The declaration C<use strict 'refs'> disables this
+feature, which can cause all sorts of trouble if you use it by accident.
 
 =back
 
@@ -492,7 +501,7 @@ to do with references.
 
 =head1 Credits
 
-Author: Mark-Jason Dominus, Plover Systems (C<mjd-perl-ref+@plover.com>)
+Author: Mark Jason Dominus, Plover Systems (C<mjd-perl-ref+@plover.com>)
 
 This article originally appeared in I<The Perl Journal>
 ( http://www.tpj.com/ ) volume 3, #2.  Reprinted with permission.  
