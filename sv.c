@@ -2327,7 +2327,7 @@ Perl_sv_utf8_downgrade(pTHX_ register SV* sv, bool fail_ok)
         while (c < SvEND(sv)) {
             if (*c & 0x80) {
                 I32 len;
-                UV uv = utf8_to_uv(c, &len);
+                UV uv = utf8_to_uv((U8*)c, &len);
                 if (uv >= 256) {
 		    if (fail_ok)
 			return FALSE;
@@ -2351,7 +2351,7 @@ Perl_sv_utf8_downgrade(pTHX_ register SV* sv, bool fail_ok)
             while (src < SvEND(sv)) {
                 if (*src & 0x80) {
                     I32 len;
-                    U8 u = (U8)utf8_to_uv(src, &len);
+                    U8 u = (U8)utf8_to_uv((U8*)src, &len);
                     *dst++ = u;
                     src += len;
                 }
