@@ -8,7 +8,10 @@
  *                      files when the interpreter exits
  */
 
-#define MY_CXT_KEY "DynaLoader_guts"
+#ifndef XS_VERSION
+#  define XS_VERSION "0"
+#endif
+#define MY_CXT_KEY "DynaLoader::_guts"##XS_VERSION
 
 typedef struct {
     char *	x_dl_last_error;	/* pointer to allocated memory for
@@ -26,62 +29,19 @@ typedef struct {
 #endif
 } my_cxt_t;
 
-/* XXX most of this is boilerplate code that should abstracted further into
- * macros and exposed via XSUB.h */
+START_MY_CXT
 
-#if defined(USE_ITHREADS)
-
-#define dMY_CXT_SV \
-	SV *my_cxt_sv = *hv_fetch(PL_modglobal, MY_CXT_KEY,		\
-				  sizeof(MY_CXT_KEY)-1, TRUE)
-
-/* we allocate my_cxt in a Perl SV so that it will be released when
- * the interpreter goes away */
-#define dMY_CXT_INIT \
-	dMY_CXT_SV;							\
-	/* newSV() allocates one more than needed */			\
-	my_cxt_t *my_cxt = (my_cxt_t*)SvPVX(newSV(sizeof(my_cxt_t)-1));	\
-	Zero(my_cxt, 1, my_cxt_t);					\
-	sv_setuv(my_cxt_sv, (UV)my_cxt);
-
-#define dMY_CXT	\
-	dMY_CXT_SV;							\
-	my_cxt_t *my_cxt = (my_cxt_t*)SvUV(my_cxt_sv)
-
-#define dl_last_error	(my_cxt->x_dl_last_error)
-#define dl_nonlazy	(my_cxt->x_dl_nonlazy)
+#define dl_last_error	(MY_CXT.x_dl_last_error)
+#define dl_nonlazy	(MY_CXT.x_dl_nonlazy)
 #ifdef DL_LOADONCEONLY
-#define dl_loaded_files	(my_cxt->x_dl_loaded_files)
+#define dl_loaded_files	(MY_CXT.x_dl_loaded_files)
 #endif
 #ifdef DL_CXT_EXTRA
-#define dl_cxtx		(my_cxt->x_dl_cxtx)
+#define dl_cxtx		(MY_CXT.x_dl_cxtx)
 #endif
 #ifdef DEBUGGING
-#define dl_debug	(my_cxt->x_dl_debug)
+#define dl_debug	(MY_CXT.x_dl_debug)
 #endif
-
-#else /* USE_ITHREADS */
-
-static my_cxt_t my_cxt;
-
-#define dMY_CXT_SV	dNOOP
-#define dMY_CXT_INIT	dNOOP
-#define dMY_CXT		dNOOP
-
-#define dl_last_error	(my_cxt.x_dl_last_error)
-#define dl_nonlazy	(my_cxt.x_dl_nonlazy)
-#ifdef DL_LOADONCEONLY
-#define dl_loaded_files	(my_cxt.x_dl_loaded_files)
-#endif
-#ifdef DL_CXT_EXTRA
-#define dl_cxtx		(my_cxt.x_dl_cxtx)
-#endif
-#ifdef DEBUGGING
-#define dl_debug	(my_cxt.x_dl_debug)
-#endif
-
-#endif /* !defined(USE_ITHREADS) */
-
 
 #ifdef DEBUGGING
 #define DLDEBUG(level,code) \
@@ -123,7 +83,7 @@ static void
 dl_generic_private_init(pTHX)	/* called by dl_*.xs dl_private_init() */
 {
     char *perl_dl_nonlazy;
-    dMY_CXT_INIT;
+    MY_CXT_INIT;
 
     dl_last_error = NULL;
     dl_nonlazy = 0;
