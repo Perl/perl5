@@ -113,11 +113,30 @@ use fields qw(b1 d1 _b1 _d1);  # hide b1
 
 package main;
 
+# If we are 5.8.1 or higher but less than 5.9,
+# we mute the warnings about pseudo-hashes.
+my $mute = $] >= 5.008001 && $] < 5.009 ?
+    sub {
+	print STDERR $_[0] unless $_[0] =~ /^Pseudo-hashes are deprecated /
+    } :
+    sub {
+        print STDERR $_[0]
+    } ;
+
 sub fstr {
    my $h = shift;
    my @tmp;
-   for my $k (sort {$h->{$a} <=> $h->{$b}} keys %$h) {
-	my $v = $h->{$k};
+   my @h;
+   {
+       local $SIG{__WARN__} = $mute;
+       @h = sort {$h->{$a} <=> $h->{$b}} keys %$h;
+   }
+   for my $k (@h) {
+        my $v;
+        {
+	    local $SIG{__WARN__} = $mute;
+	    $v = $h->{$k};
+	}
         push(@tmp, "$k:$v");
    }
    my $str = join(",", @tmp);
@@ -185,6 +204,7 @@ ok( fstr($ph) eq 'a:1,b:2,c:3' );
 # The way exists() works with psuedohashes changed from 5.005 to 5.6
 $ph = fields::phash([qw/a b c/], [1]);
 if( $] > 5.006 ) {
+    local $SIG{__WARN__} = $mute;
     ok( !( exists $ph->{b} or exists $ph->{c} or !exists $ph->{a} ) );
 }
 else {
