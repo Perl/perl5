@@ -984,6 +984,18 @@ PERL_CALLCONV void	Perl_ptr_table_free(pTHX_ PTR_TBL_t *tbl);
 PERL_CALLCONV void	Perl_sys_intern_clear(pTHX);
 PERL_CALLCONV void	Perl_sys_intern_init(pTHX);
 #endif
+#if defined(PERL_CUSTOM_OPS)
+PERL_CALLCONV char *	Perl_custom_op_name(pTHX_ OP* op);
+PERL_CALLCONV char *	Perl_custom_op_desc(pTHX_ OP* op);
+#endif
+#if defined(PERL_CUSTOM_OPS)
+PERL_CALLCONV char *	Perl_custom_op_name(pTHX_ OP* op);
+PERL_CALLCONV char *	Perl_custom_op_desc(pTHX_ OP* op);
+#endif
+#if defined(PERL_CUSTOM_OPS)
+PERL_CALLCONV char *	Perl_custom_op_name(pTHX_ OP* op);
+PERL_CALLCONV char *	Perl_custom_op_desc(pTHX_ OP* op);
+#endif
 
 #if defined(PERL_OBJECT)
 protected:

@@ -4213,6 +4213,54 @@ Perl_sys_intern_init(pTHXo)
     ((CPerlObj*)pPerl)->Perl_sys_intern_init();
 }
 #endif
+#if defined(PERL_CUSTOM_OPS)
+
+#undef  Perl_custom_op_name
+char *
+Perl_custom_op_name(pTHXo_ OP* op)
+{
+    return ((CPerlObj*)pPerl)->Perl_custom_op_name(op);
+}
+
+#undef  Perl_custom_op_desc
+char *
+Perl_custom_op_desc(pTHXo_ OP* op)
+{
+    return ((CPerlObj*)pPerl)->Perl_custom_op_desc(op);
+}
+#endif
+#if defined(PERL_CUSTOM_OPS)
+
+#undef  Perl_custom_op_name
+char *
+Perl_custom_op_name(pTHXo_ OP* op)
+{
+    return ((CPerlObj*)pPerl)->Perl_custom_op_name(op);
+}
+
+#undef  Perl_custom_op_desc
+char *
+Perl_custom_op_desc(pTHXo_ OP* op)
+{
+    return ((CPerlObj*)pPerl)->Perl_custom_op_desc(op);
+}
+#endif
+#if defined(PERL_CUSTOM_OPS)
+
+#undef  Perl_custom_op_name
+char *
+Perl_custom_op_name(pTHXo_ OP* op)
+{
+    return ((CPerlObj*)pPerl)->Perl_custom_op_name(op);
+}
+
+#undef  Perl_custom_op_desc
+char *
+Perl_custom_op_desc(pTHXo_ OP* op)
+{
+    return ((CPerlObj*)pPerl)->Perl_custom_op_desc(op);
+}
+#endif
 #if defined(PERL_OBJECT)
 #else
 #endif

@@ -180,6 +180,10 @@ START_EXTERN_C
 #define PL_curstname		(*Perl_Icurstname_ptr(aTHXo))
 #undef  PL_curthr
 #define PL_curthr		(*Perl_Icurthr_ptr(aTHXo))
+#undef  PL_custom_op_descs
+#define PL_custom_op_descs	(*Perl_Icustom_op_descs_ptr(aTHXo))
+#undef  PL_custom_op_names
+#define PL_custom_op_names	(*Perl_Icustom_op_names_ptr(aTHXo))
 #undef  PL_dbargs
 #define PL_dbargs		(*Perl_Idbargs_ptr(aTHXo))
 #undef  PL_debstash

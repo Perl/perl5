@@ -223,6 +223,8 @@
 #define PL_curcopdb		(PERL_GET_INTERP->Icurcopdb)
 #define PL_curstname		(PERL_GET_INTERP->Icurstname)
 #define PL_curthr		(PERL_GET_INTERP->Icurthr)
+#define PL_custom_op_descs	(PERL_GET_INTERP->Icustom_op_descs)
+#define PL_custom_op_names	(PERL_GET_INTERP->Icustom_op_names)
 #define PL_dbargs		(PERL_GET_INTERP->Idbargs)
 #define PL_debstash		(PERL_GET_INTERP->Idebstash)
 #define PL_debug		(PERL_GET_INTERP->Idebug)
@@ -509,6 +511,8 @@
 #define PL_curcopdb		(vTHX->Icurcopdb)
 #define PL_curstname		(vTHX->Icurstname)
 #define PL_curthr		(vTHX->Icurthr)
+#define PL_custom_op_descs	(vTHX->Icustom_op_descs)
+#define PL_custom_op_names	(vTHX->Icustom_op_names)
 #define PL_dbargs		(vTHX->Idbargs)
 #define PL_debstash		(vTHX->Idebstash)
 #define PL_debug		(vTHX->Idebug)
@@ -934,6 +938,8 @@
 #define PL_curcopdb		(aTHXo->interp.Icurcopdb)
 #define PL_curstname		(aTHXo->interp.Icurstname)
 #define PL_curthr		(aTHXo->interp.Icurthr)
+#define PL_custom_op_descs	(aTHXo->interp.Icustom_op_descs)
+#define PL_custom_op_names	(aTHXo->interp.Icustom_op_names)
 #define PL_dbargs		(aTHXo->interp.Idbargs)
 #define PL_debstash		(aTHXo->interp.Idebstash)
 #define PL_debug		(aTHXo->interp.Idebug)
@@ -1221,6 +1227,8 @@
 #define PL_Icurcopdb		PL_curcopdb
 #define PL_Icurstname		PL_curstname
 #define PL_Icurthr		PL_curthr
+#define PL_Icustom_op_descs	PL_custom_op_descs
+#define PL_Icustom_op_names	PL_custom_op_names
 #define PL_Idbargs		PL_dbargs
 #define PL_Idebstash		PL_debstash
 #define PL_Idebug		PL_debug
