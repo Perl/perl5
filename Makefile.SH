@@ -666,7 +666,7 @@ preplibrary: miniperl$(EXE_EXT) lib/Config.pm lib/lib.pm $(PREPLIBRARY_LIBPERL)
 # Take care to avoid modifying lib/Config.pm without reason
 # (If trying to create a new port and having problems with the configpm script,
 # try 'make minitest' and/or commenting out the tests at the end of configpm.)
-lib/Config.pm: config.sh miniperl$(EXE_EXT) configpm
+lib/Config.pm: config.sh miniperl$(EXE_EXT) configpm Porting/Glossary
 	$(LDLIBPTH) ./miniperl -Ilib configpm configpm.tmp
 	sh mv-if-diff configpm.tmp $@
 
