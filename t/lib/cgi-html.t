@@ -82,7 +82,12 @@ test(19,end_h3 eq '</h3>');
 test(20,start_table({-border=>undef}) eq '<table border>');
 test(21,h1(escapeHTML("this is <not> \x8bright\x9b")) eq '<h1>this is &lt;not&gt; &#139;right&#155;</h1>');
 charset('utf-8');
+if (ord("\t") == 9) {
 test(22,h1(escapeHTML("this is <not> \x8bright\x9b")) eq '<h1>this is &lt;not&gt; ‹right›</h1>');
+}
+else {
+test(22,h1(escapeHTML("this is <not> \x8bright\x9b")) eq '<h1>this is &lt;not&gt; »rightº</h1>');
+}
 test(23,i(p('hello there')) eq '<i><p>hello there</p></i>');
 my $q = new CGI;
 test(24,$q->h1('hi') eq '<h1>hi</h1>');
