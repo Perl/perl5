@@ -231,11 +231,13 @@ sub TIEHASH { bless [] }
 sub FETCH {
     my ($self, $errname) = @_;
     my $proto = prototype("Errno::$errname");
+    my $errno = "";
     if (defined($proto) && $proto eq "") {
 	no strict 'refs';
-        return $! == &$errname;
+	$errno = &$errname;
+        $errno = 0 unless $! == $errno;
     }
-    return "";
+    return $errno;
 }
 
 sub STORE {
@@ -256,7 +258,7 @@ sub NEXTKEY {
 }
 
 sub FIRSTKEY {
-    my $s = scalar keys %Errno::;
+    my $s = scalar keys %Errno::;	# initialize iterator
     goto &NEXTKEY;
 }
 
@@ -286,7 +288,7 @@ defined in your system C<errno.h> include file. It has a single export
 tag, C<:POSIX>, which will export all POSIX defined error numbers.
 
 C<Errno> also makes C<%!> magic such that each element of C<%!> has a
-non-zero value only if C<$!> is set to that value, eg
+non-zero value only if C<$!> is set to that value. For example:
 
     use Errno;
     
@@ -298,9 +300,19 @@ non-zero value only if C<$!> is set to that value, eg
         } 
     } 
 
-If a specified constant C<EFOO> doesn't exist on the system, C<$!{EFOO}>
-has a false value.  You may use C<exists $!{EFOO}> to check whether the
+If a specified constant C<EFOO> does not exist on the system, C<$!{EFOO}>
+returns C<"">.  You may use C<exists $!{EFOO}> to check whether the
 constant is available on the system.
+
+=head1 CAVEATS
+
+Importing a particular constant may not be very portable, because the
+import will fail on platforms that do not have that constant.  A more
+portable way to set C<$!> to a valid value is to use:
+
+    if (exists &Errno::EFOO) {
+        $! = &Errno::EFOO;
+    }
 
 =head1 AUTHOR
 
