@@ -2865,6 +2865,10 @@ This is a known bug in the glibc 2.2.5 with long long integers.
 
 No known fix.
 
+=head2 libwww-perl (LWP) fails base/date #51
+
+Use libwww-perl 5.65 or later.
+
 =head2 Mac OS X
 
 Please remember to set your environment variable LC_ALL to "C"
