@@ -18,322 +18,613 @@
 #include <signal.h>
 #endif
 
-I32
-do_trans(SV *sv, OP *arg)
+static I32
+do_trans_CC_simple(SV *sv)
 {
     dTHR;
-    register U8 *s;
-    register U8 *send;
-    register U8 *d;
-    register I32 matches = 0;
-    register I32 squash = PL_op->op_private & OPpTRANS_SQUASH;
+    U8 *s;
+    U8 *send;
+    I32 matches = 0;
     STRLEN len;
+    short *tbl;
+    I32 ch;
 
-    if (SvREADONLY(sv) && !(PL_op->op_private & OPpTRANS_COUNTONLY))
-	croak(no_modify);
+    tbl = (short*)cPVOP->op_pv;
+    if (!tbl)
+	croak("panic: do_trans");
 
-    if (PL_op->op_private & (OPpTRANS_FROM_UTF|OPpTRANS_TO_UTF)) {
-	SV* rv = (SV*)cSVOP->op_sv;
-	HV* hv = (HV*)SvRV(rv);
-	SV** svp = hv_fetch(hv, "NONE", 4, FALSE);
-	UV none = svp ? SvUV(*svp) : 0x7fffffff;
-	UV extra = none + 1;
-	I32 del = PL_op->op_private & OPpTRANS_DELETE;
-	UV final;
-	register UV uv;
-	UV puv;
-	register I32 from_utf = PL_op->op_private & OPpTRANS_FROM_UTF;
-	register I32 to_utf = PL_op->op_private & OPpTRANS_TO_UTF;
+    s = (U8*)SvPV(sv, len);
+    send = s + len;
 
-	s = (U8*)SvPV(sv, len);
-	if (!len)
-	    return 0;
-	if (!SvPOKp(sv))
-	    s = (U8*)SvPV_force(sv, len);
-	(void)SvPOK_only(sv);
-	send = s + len;
-	DEBUG_t( deb("2.TBL\n"));
-	if (PL_op->op_private == (OPpTRANS_FROM_UTF|OPpTRANS_TO_UTF)) {	/* no other flags */
-	    svp = hv_fetch(hv, "FINAL", 5, FALSE);
-	    if (svp)
-		final = SvUV(*svp);
+    while (s < send) {
+	if ((ch = tbl[*s]) >= 0) {
+	    matches++;
+	    *s = ch;
+	}
+	s++;
+    }
+    SvSETMAGIC(sv);
 
-	    d = s;
-	    while (s < send) {
-		if ((uv = swash_fetch(rv, s)) < none) {
-		    s += UTF8SKIP(s);
-		    matches++;
-		    d = uv_to_utf8(d, uv);
-		}
-		else if (uv == none) {
-		    int i;
-		    for (i = UTF8SKIP(s); i; i--)
-			*d++ = *s++;
-		}
-		else if (uv == extra) {
-		    s += UTF8SKIP(s);
-		    matches++;
-		    d = uv_to_utf8(d, final);
-		}
+    return matches;
+}
+
+static I32
+do_trans_CC_count(SV *sv)
+{
+    dTHR;
+    U8 *s;
+    U8 *send;
+    I32 matches = 0;
+    STRLEN len;
+    short *tbl;
+
+    tbl = (short*)cPVOP->op_pv;
+    if (!tbl)
+	croak("panic: do_trans");
+
+    s = (U8*)SvPV(sv, len);
+    send = s + len;
+
+    while (s < send) {
+	if (tbl[*s] >= 0)
+	    matches++;
+	s++;
+    }
+
+    return matches;
+}
+
+static I32
+do_trans_CC_complex(SV *sv)
+{
+    dTHR;
+    U8 *s;
+    U8 *send;
+    U8 *d;
+    I32 matches = 0;
+    STRLEN len;
+    short *tbl;
+    I32 ch;
+
+    tbl = (short*)cPVOP->op_pv;
+    if (!tbl)
+	croak("panic: do_trans");
+
+    s = (U8*)SvPV(sv, len);
+    send = s + len;
+
+    d = s;
+    if (PL_op->op_private & OPpTRANS_SQUASH) {
+	U8* p = send;
+
+	while (s < send) {
+	    if ((ch = tbl[*s]) >= 0) {
+		*d = ch;
+		matches++;
+		if (p == d - 1 && *p == *d)
+		    matches--;
 		else
-		    s += UTF8SKIP(s);
+		    p = d++;
 	    }
-	    *d = '\0';
-	    SvCUR_set(sv, d - (U8*)SvPVX(sv));
-	    SvSETMAGIC(sv);
+	    else if (ch == -1)		/* -1 is unmapped character */
+		*d++ = *s;		/* -2 is delete character */
+	    s++;
 	}
-	else if (PL_op->op_private == OPpTRANS_FROM_UTF) {	/* no other flags */
-	    svp = hv_fetch(hv, "FINAL", 5, FALSE);
-	    if (svp)
-		final = SvUV(*svp);
-
-	    d = s;
-	    while (s < send) {
-		if ((uv = swash_fetch(rv, s)) < none) {
-		    s += UTF8SKIP(s);
-		    matches++;
-		    *d++ = (U8)uv;
-		}
-		else if (uv == none) {
-		    I32 ulen;
-		    uv = utf8_to_uv(s, &ulen);
-		    s += ulen;
-		    *d++ = (U8)uv;
-		}
-		else if (uv == extra) {
-		    s += UTF8SKIP(s);
-		    matches++;
-		    *d++ = (U8)final;
-		}
-		else
-		    s += UTF8SKIP(s);
-	    }
-	    *d = '\0';
-	    SvCUR_set(sv, d - (U8*)SvPVX(sv));
-	    SvSETMAGIC(sv);
-	}
-	else if (PL_op->op_private == OPpTRANS_TO_UTF) {	/* no other flags */
-	    svp = hv_fetch(hv, "FINAL", 5, FALSE);
-	    if (svp)
-		final = SvUV(*svp);
-
-	    d = s;
-	    while (s < send) {
-		U8 tmpbuf[10];
-		uv_to_utf8(tmpbuf, *s);		/* XXX suboptimal */
-		if ((uv = swash_fetch(rv, tmpbuf)) < none) {
-		    s += UTF8SKIP(s);
-		    matches++;
-		    d = uv_to_utf8(d, uv);
-		}
-		else if (uv == none) {
-		    I32 ulen;
-		    uv = utf8_to_uv(s, &ulen);
-		    s += ulen;
-		    d = uv_to_utf8(d, uv);
-		}
-		else if (uv == extra) {
-		    s += UTF8SKIP(s);
-		    matches++;
-		    d = uv_to_utf8(d, final);
-		}
-		else
-		    s += UTF8SKIP(s);
-	    }
-	    *d = '\0';
-	    SvCUR_set(sv, d - (U8*)SvPVX(sv));
-	    SvSETMAGIC(sv);
-	}
-	else if (PL_op->op_private & OPpTRANS_COUNTONLY) {
-	    if (from_utf) {
-		while (s < send) {
-		    if (swash_fetch(rv, s) < none)
-			matches++;
-		    s += UTF8SKIP(s);
-		}
-	    }
-	    else {
-		while (s < send) {
-		    U8 tmpbuf[10];
-		    uv_to_utf8(tmpbuf, *s);	/* XXX suboptimal */
-		    if (swash_fetch(rv, tmpbuf) < none)
-			matches++;
-		    s += UTF8SKIP(s);
-		}
-	    }
-	}
-	else {
-	    I32 bits = 16;
-	    U8 *dst;
-
-	    svp = hv_fetch(hv, "BITS", 4, FALSE);
-	    if (svp)
-		bits = (I32)SvIV(*svp);
-
-	    svp = hv_fetch(hv, "FINAL", 5, FALSE);
-	    if (svp)
-		final = SvUV(*svp);
-
-	    Newz(801, d, len * (bits >> 3) + 1, U8);
-	    dst = d;
-
-	    puv = 0xfeedface;
-	    if (squash) {
-		while (s < send) {
-		    if (from_utf)
-			uv = swash_fetch(rv, s);
-		    else {
-			U8 tmpbuf[10];
-			uv_to_utf8(tmpbuf, *s);	/* XXX suboptimal */
-			uv = swash_fetch(rv, tmpbuf);
-		    }
-		    if (uv < none) {
-			matches++;
-			if (uv != puv) {
-			    if (to_utf)
-				d = uv_to_utf8(d, uv);
-			    else
-				*d++ = (U8)uv;
-			}
-			puv = uv;
-			s += UTF8SKIP(s);
-			continue;
-		    }
-		    else if (uv == none) {	/* "none" is unmapped character */
-			int i;
-			if (to_utf) {
-			    for (i = UTF8SKIP(s); i; --i)
-				*d++ = *s++;
-			}
-			else {
-			    I32 ulen;
-			    *d++ = (U8)utf8_to_uv(s, &ulen);
-			    s += ulen;
-			}
-			puv = 0xfeedface;
-			continue;
-		    }
-		    else if (uv == extra && !del) {
-			matches++;
-			if (to_utf)
-			    d = uv_to_utf8(d, final);
-			else
-			    *d++ = (U8)final;
-			s += UTF8SKIP(s);
-			puv = 0xfeedface;
-			continue;
-		    }
-		    matches++;		/* "none+1" is delete character */
-		    s += UTF8SKIP(s);
-		}
-	    }
-	    else {
-		while (s < send) {
-		    if (from_utf)
-			uv = swash_fetch(rv, s);
-		    else {
-			U8 tmpbuf[10];
-			uv_to_utf8(tmpbuf, *s);	/* XXX suboptimal */
-			uv = swash_fetch(rv, tmpbuf);
-		    }
-		    if (uv < none) {
-			if (to_utf)
-			    d = uv_to_utf8(d, uv);
-			else
-			    *d++ = (U8)uv;
-			matches++;
-			s += UTF8SKIP(s);
-			continue;
-		    }
-		    else if (uv == none) {	/* "none" is unmapped character */
-			int i;
-			if (to_utf) {
-			    for (i = UTF8SKIP(s); i; --i)
-				*d++ = *s++;
-			}
-			else {
-			    I32 ulen;
-			    *d++ = (U8)utf8_to_uv(s, &ulen);
-			    s += ulen;
-			}
-			continue;
-		    }
-		    else if (uv == extra && !del) {
-			matches++;
-			if (to_utf)
-			    d = uv_to_utf8(d, final);
-			else
-			    *d++ = (U8)final;
-			s += UTF8SKIP(s);
-			continue;
-		    }
-		    matches++;		/* "none+1" is delete character */
-		    s += UTF8SKIP(s);
-		}
-	    }
-	    sv_usepvn_mg(sv, (char*)dst, d - dst);
-	}
-	return matches;
     }
     else {
-	register short *tbl;
-	register I32 ch;
-	register U8 *p;
+	while (s < send) {
+	    if ((ch = tbl[*s]) >= 0) {
+		*d = ch;
+		matches++;
+		d++;
+	    }
+	    else if (ch == -1)		/* -1 is unmapped character */
+		*d++ = *s;		/* -2 is delete character */
+	    s++;
+	}
+    }
+    matches += send - d;	/* account for disappeared chars */
+    *d = '\0';
+    SvCUR_set(sv, d - (U8*)SvPVX(sv));
+    SvSETMAGIC(sv);
 
-	tbl = (short*)cPVOP->op_pv;
-	s = (U8*)SvPV(sv, len);
-	if (!len)
-	    return 0;
-	if (!SvPOKp(sv))
-	    s = (U8*)SvPV_force(sv, len);
-	(void)SvPOK_only(sv);
-	send = s + len;
-	if (!tbl || !s)
-	    croak("panic: do_trans");
-	DEBUG_t( deb("2.TBL\n"));
-	if (!PL_op->op_private) {
-	    while (s < send) {
-		if ((ch = tbl[*s]) >= 0) {
-		    matches++;
-		    *s = ch;
-		}
-		s++;
-	    }
-	    SvSETMAGIC(sv);
+    return matches;
+}
+
+static I32
+do_trans_UU_simple(SV *sv)
+{
+    dTHR;
+    U8 *s;
+    U8 *send;
+    U8 *d;
+    I32 matches = 0;
+    STRLEN len;
+
+    SV* rv = (SV*)cSVOP->op_sv;
+    HV* hv = (HV*)SvRV(rv);
+    SV** svp = hv_fetch(hv, "NONE", 4, FALSE);
+    UV none = svp ? SvUV(*svp) : 0x7fffffff;
+    UV extra = none + 1;
+    UV final;
+    UV uv;
+
+    s = (U8*)SvPV(sv, len);
+    send = s + len;
+
+    svp = hv_fetch(hv, "FINAL", 5, FALSE);
+    if (svp)
+	final = SvUV(*svp);
+
+    d = s;
+    while (s < send) {
+	if ((uv = swash_fetch(rv, s)) < none) {
+	    s += UTF8SKIP(s);
+	    matches++;
+	    d = uv_to_utf8(d, uv);
 	}
-	else if (PL_op->op_private & OPpTRANS_COUNTONLY) {
-	    while (s < send) {
-		if (tbl[*s] >= 0)
-		    matches++;
-		s++;
-	    }
+	else if (uv == none) {
+	    int i;
+	    for (i = UTF8SKIP(s); i; i--)
+		*d++ = *s++;
 	}
+	else if (uv == extra) {
+	    s += UTF8SKIP(s);
+	    matches++;
+	    d = uv_to_utf8(d, final);
+	}
+	else
+	    s += UTF8SKIP(s);
+    }
+    *d = '\0';
+    SvCUR_set(sv, d - (U8*)SvPVX(sv));
+    SvSETMAGIC(sv);
+
+    return matches;
+}
+
+static I32
+do_trans_UU_count(SV *sv)
+{
+    dTHR;
+    U8 *s;
+    U8 *send;
+    I32 matches = 0;
+    STRLEN len;
+
+    SV* rv = (SV*)cSVOP->op_sv;
+    HV* hv = (HV*)SvRV(rv);
+    SV** svp = hv_fetch(hv, "NONE", 4, FALSE);
+    UV none = svp ? SvUV(*svp) : 0x7fffffff;
+    UV uv;
+
+    s = (U8*)SvPV(sv, len);
+    send = s + len;
+
+    while (s < send) {
+	if ((uv = swash_fetch(rv, s)) < none) {
+	    s += UTF8SKIP(s);
+	    matches++;
+	}
+    }
+
+    return matches;
+}
+
+static I32
+do_trans_UC_simple(SV *sv)
+{
+    dTHR;
+    U8 *s;
+    U8 *send;
+    U8 *d;
+    I32 matches = 0;
+    STRLEN len;
+
+    SV* rv = (SV*)cSVOP->op_sv;
+    HV* hv = (HV*)SvRV(rv);
+    SV** svp = hv_fetch(hv, "NONE", 4, FALSE);
+    UV none = svp ? SvUV(*svp) : 0x7fffffff;
+    UV extra = none + 1;
+    UV final;
+    UV uv;
+
+    s = (U8*)SvPV(sv, len);
+    send = s + len;
+
+    svp = hv_fetch(hv, "FINAL", 5, FALSE);
+    if (svp)
+	final = SvUV(*svp);
+
+    d = s;
+    while (s < send) {
+	if ((uv = swash_fetch(rv, s)) < none) {
+	    s += UTF8SKIP(s);
+	    matches++;
+	    *d++ = (U8)uv;
+	}
+	else if (uv == none) {
+	    I32 ulen;
+	    uv = utf8_to_uv(s, &ulen);
+	    s += ulen;
+	    *d++ = (U8)uv;
+	}
+	else if (uv == extra) {
+	    s += UTF8SKIP(s);
+	    matches++;
+	    *d++ = (U8)final;
+	}
+	else
+	    s += UTF8SKIP(s);
+    }
+    *d = '\0';
+    SvCUR_set(sv, d - (U8*)SvPVX(sv));
+    SvSETMAGIC(sv);
+
+    return matches;
+}
+
+static I32
+do_trans_CU_simple(SV *sv)
+{
+    dTHR;
+    U8 *s;
+    U8 *send;
+    U8 *d;
+    U8 *dst;
+    I32 matches = 0;
+    STRLEN len;
+
+    SV* rv = (SV*)cSVOP->op_sv;
+    HV* hv = (HV*)SvRV(rv);
+    SV** svp = hv_fetch(hv, "NONE", 4, FALSE);
+    UV none = svp ? SvUV(*svp) : 0x7fffffff;
+    UV extra = none + 1;
+    UV final;
+    UV uv;
+    U8 tmpbuf[10];
+    I32 bits = 16;
+
+    s = (U8*)SvPV(sv, len);
+    send = s + len;
+
+    svp = hv_fetch(hv, "BITS", 4, FALSE);
+    if (svp)
+	bits = (I32)SvIV(*svp);
+
+    svp = hv_fetch(hv, "FINAL", 5, FALSE);
+    if (svp)
+	final = SvUV(*svp);
+
+    Newz(801, d, len * (bits >> 3) + 1, U8);
+    dst = d;
+
+    while (s < send) {
+	uv = *s++;
+	if (uv < 0x80)
+	    tmpbuf[0] = uv;
 	else {
-	    d = s;
-	    p = send;
-	    while (s < send) {
-		if ((ch = tbl[*s]) >= 0) {
-		    *d = ch;
-		    matches++;
-		    if (squash) {
-			if (p == d - 1 && *p == *d)
-			    matches--;
-			else
-			    p = d++;
-		    }
-		    else
-			d++;
-		}
-		else if (ch == -1)		/* -1 is unmapped character */
-		    *d++ = *s;		/* -2 is delete character */
-		s++;
-	    }
-	    matches += send - d;	/* account for disappeared chars */
-	    *d = '\0';
-	    SvCUR_set(sv, d - (U8*)SvPVX(sv));
-	    SvSETMAGIC(sv);
+	    tmpbuf[0] = (( uv >>  6)         | 0xc0);
+	    tmpbuf[1] = (( uv        & 0x3f) | 0x80);
 	}
-	return matches;
+
+	if ((uv = swash_fetch(rv, tmpbuf)) < none) {
+	    matches++;
+	    d = uv_to_utf8(d, uv);
+	}
+	else if (uv == none)
+	    d = uv_to_utf8(d, s[-1]);
+	else if (uv == extra) {
+	    matches++;
+	    d = uv_to_utf8(d, final);
+	}
+    }
+    *d = '\0';
+    sv_usepvn_mg(sv, (char*)dst, d - dst);
+
+    return matches;
+}
+
+/* utf-8 to latin-1 */
+
+static I32
+do_trans_UC_trivial(SV *sv)
+{
+    dTHR;
+    U8 *s;
+    U8 *send;
+    U8 *d;
+    STRLEN len;
+
+    s = (U8*)SvPV(sv, len);
+    send = s + len;
+
+    d = s;
+    while (s < send) {
+	if (*s < 0x80)
+	    *d++ = *s++;
+	else {
+	    I32 ulen;
+	    UV uv = utf8_to_uv(s, &ulen);
+	    s += ulen;
+	    *d++ = (U8)uv;
+	}
+    }
+    *d = '\0';
+    SvCUR_set(sv, d - (U8*)SvPVX(sv));
+    SvSETMAGIC(sv);
+
+    return SvCUR(sv);
+}
+
+/* latin-1 to utf-8 */
+
+static I32
+do_trans_CU_trivial(SV *sv)
+{
+    dTHR;
+    U8 *s;
+    U8 *send;
+    U8 *d;
+    U8 *dst;
+    I32 matches;
+    STRLEN len;
+
+    s = (U8*)SvPV(sv, len);
+    send = s + len;
+
+    Newz(801, d, len * 2 + 1, U8);
+    dst = d;
+
+    matches = send - s;
+
+    while (s < send) {
+	if (*s < 0x80)
+	    *d++ = *s++;
+	else {
+	    UV uv = *s++;
+	    *d++ = (( uv >>  6)         | 0xc0);
+	    *d++ = (( uv        & 0x3f) | 0x80);
+	}
+    }
+    *d = '\0';
+    sv_usepvn_mg(sv, (char*)dst, d - dst);
+
+    return matches;
+}
+
+static I32
+do_trans_UU_complex(SV *sv)
+{
+    dTHR;
+    U8 *s;
+    U8 *send;
+    U8 *d;
+    I32 matches = 0;
+    I32 squash   = PL_op->op_private & OPpTRANS_SQUASH;
+    I32 from_utf = PL_op->op_private & OPpTRANS_FROM_UTF;
+    I32 to_utf   = PL_op->op_private & OPpTRANS_TO_UTF;
+    I32 del      = PL_op->op_private & OPpTRANS_DELETE;
+    SV* rv = (SV*)cSVOP->op_sv;
+    HV* hv = (HV*)SvRV(rv);
+    SV** svp = hv_fetch(hv, "NONE", 4, FALSE);
+    UV none = svp ? SvUV(*svp) : 0x7fffffff;
+    UV extra = none + 1;
+    UV final;
+    UV uv;
+    STRLEN len;
+    U8 *dst;
+
+    s = (U8*)SvPV(sv, len);
+    send = s + len;
+
+    svp = hv_fetch(hv, "FINAL", 5, FALSE);
+    if (svp)
+	final = SvUV(*svp);
+
+    if (PL_op->op_private & OPpTRANS_GROWS) {
+	I32 bits = 16;
+
+	svp = hv_fetch(hv, "BITS", 4, FALSE);
+	if (svp)
+	    bits = (I32)SvIV(*svp);
+
+	Newz(801, d, len * (bits >> 3) + 1, U8);
+	dst = d;
+    }
+    else {
+	d = s;
+	dst = 0;
+    }
+
+    if (squash) {
+	UV puv = 0xfeedface;
+	while (s < send) {
+	    if (from_utf) {
+		uv = swash_fetch(rv, s);
+	    }
+	    else {
+		U8 tmpbuf[2];
+		uv = *s++;
+		if (uv < 0x80)
+		    tmpbuf[0] = uv;
+		else {
+		    tmpbuf[0] = (( uv >>  6)         | 0xc0);
+		    tmpbuf[1] = (( uv        & 0x3f) | 0x80);
+		}
+		uv = swash_fetch(rv, tmpbuf);
+	    }
+	    if (uv < none) {
+		matches++;
+		if (uv != puv) {
+		    if (uv >= 0x80 && to_utf)
+			d = uv_to_utf8(d, uv);
+		    else
+			*d++ = (U8)uv;
+		    puv = uv;
+		}
+		if (from_utf)
+		    s += UTF8SKIP(s);
+		continue;
+	    }
+	    else if (uv == none) {	/* "none" is unmapped character */
+		if (from_utf) {
+		    if (*s < 0x80)
+			*d++ = *s++;
+		    else if (to_utf) {
+			int i;
+			for (i = UTF8SKIP(s); i; --i)
+			    *d++ = *s++;
+		    }
+		    else {
+			I32 ulen;
+			*d++ = (U8)utf8_to_uv(s, &ulen);
+			s += ulen;
+		    }
+		}
+		else {	/* must be to_utf only */
+		    d = uv_to_utf8(d, s[-1]);
+		}
+		puv = 0xfeedface;
+		continue;
+	    }
+	    else if (uv == extra && !del) {
+		matches++;
+		if (uv != puv) {
+		    if (final >= 0x80 && to_utf)
+			d = uv_to_utf8(d, final);
+		    else
+			*d++ = (U8)final;
+		    puv = final;
+		}
+		if (from_utf)
+		    s += UTF8SKIP(s);
+		continue;
+	    }
+	    matches++;		/* "none+1" is delete character */
+	    if (from_utf)
+		s += UTF8SKIP(s);
+	}
+    }
+    else {
+	while (s < send) {
+	    if (from_utf) {
+		uv = swash_fetch(rv, s);
+	    }
+	    else {
+		U8 tmpbuf[2];
+		uv = *s++;
+		if (uv < 0x80)
+		    tmpbuf[0] = uv;
+		else {
+		    tmpbuf[0] = (( uv >>  6)         | 0xc0);
+		    tmpbuf[1] = (( uv        & 0x3f) | 0x80);
+		}
+		uv = swash_fetch(rv, tmpbuf);
+	    }
+	    if (uv < none) {
+		matches++;
+		if (uv >= 0x80 && to_utf)
+		    d = uv_to_utf8(d, uv);
+		else
+		    *d++ = (U8)uv;
+		if (from_utf)
+		    s += UTF8SKIP(s);
+		continue;
+	    }
+	    else if (uv == none) {	/* "none" is unmapped character */
+		if (from_utf) {
+		    if (*s < 0x80)
+			*d++ = *s++;
+		    else if (to_utf) {
+			int i;
+			for (i = UTF8SKIP(s); i; --i)
+			    *d++ = *s++;
+		    }
+		    else {
+			I32 ulen;
+			*d++ = (U8)utf8_to_uv(s, &ulen);
+			s += ulen;
+		    }
+		}
+		else {	/* must be to_utf only */
+		    d = uv_to_utf8(d, s[-1]);
+		}
+		continue;
+	    }
+	    else if (uv == extra && !del) {
+		matches++;
+		if (final >= 0x80 && to_utf)
+		    d = uv_to_utf8(d, final);
+		else
+		    *d++ = (U8)final;
+		if (from_utf)
+		    s += UTF8SKIP(s);
+		continue;
+	    }
+	    matches++;		/* "none+1" is delete character */
+	    if (from_utf)
+		s += UTF8SKIP(s);
+	}
+    }
+    if (dst)
+	sv_usepvn(sv, (char*)dst, d - dst);
+    else {
+	*d = '\0';
+	SvCUR_set(sv, d - (U8*)SvPVX(sv));
+    }
+    SvSETMAGIC(sv);
+
+    return matches;
+}
+
+I32
+do_trans(SV *sv)
+{
+    STRLEN len;
+
+    if (SvREADONLY(sv) && !(PL_op->op_private & OPpTRANS_IDENTICAL))
+	croak(no_modify);
+
+    (void)SvPV(sv, len);
+    if (!len)
+	return 0;
+    if (!SvPOKp(sv))
+	(void)SvPV_force(sv, len);
+    (void)SvPOK_only(sv);
+
+    DEBUG_t( deb("2.TBL\n"));
+
+    switch (PL_op->op_private & 63) {
+    case 0:
+	return do_trans_CC_simple(sv);
+
+    case OPpTRANS_FROM_UTF:
+	return do_trans_UC_simple(sv);
+
+    case OPpTRANS_TO_UTF:
+	return do_trans_CU_simple(sv);
+
+    case OPpTRANS_FROM_UTF|OPpTRANS_TO_UTF:
+	return do_trans_UU_simple(sv);
+
+    case OPpTRANS_IDENTICAL:
+	return do_trans_CC_count(sv);
+
+    case OPpTRANS_FROM_UTF|OPpTRANS_IDENTICAL:
+	return do_trans_UC_trivial(sv);
+
+    case OPpTRANS_TO_UTF|OPpTRANS_IDENTICAL:
+	return do_trans_CU_trivial(sv);
+
+    case OPpTRANS_FROM_UTF|OPpTRANS_TO_UTF|OPpTRANS_IDENTICAL:
+	return do_trans_UU_count(sv);
+
+    default:
+	if (PL_op->op_private & (OPpTRANS_FROM_UTF|OPpTRANS_TO_UTF))
+	    return do_trans_UU_complex(sv); /* could be UC or CU too */
+	else
+	    return do_trans_CC_complex(sv);
     }
 }
 

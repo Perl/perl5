@@ -2156,8 +2156,17 @@ pmtrans(OP *o, OP *expr, OP *repl)
 	}
 	else if (!rlen && !del) {
 	    r = t; rlen = tlen; rend = tend;
-	    if (!squash && to_utf && from_utf)
-		o->op_private |= OPpTRANS_COUNTONLY;
+	}
+	if (!squash) {
+	    if (to_utf && from_utf) {	/* only counting characters */
+		if (t == r || (tlen == rlen && memEQ(t, r, tlen)))
+		    o->op_private |= OPpTRANS_IDENTICAL;
+	    }
+	    else {	/* straight latin-1 translation */
+		if (tlen == 4 && memEQ(t, "\0\377\303\277", 4) &&
+		    rlen == 4 && memEQ(r, "\0\377\303\277", 4))
+		    o->op_private |= OPpTRANS_IDENTICAL;
+	    }
 	}
 
 	while (t < tend || tfirst <= tlast) {
@@ -2286,7 +2295,7 @@ pmtrans(OP *o, OP *expr, OP *repl)
 	if (!rlen && !del) {
 	    r = t; rlen = tlen;
 	    if (!squash)
-		o->op_private |= OPpTRANS_COUNTONLY;
+		o->op_private |= OPpTRANS_IDENTICAL;
 	}
 	for (i = 0; i < 256; i++)
 	    tbl[i] = -1;

@@ -669,7 +669,7 @@ PP(pp_trans)
 	EXTEND(SP,1);
     }
     TARG = sv_newmortal();
-    PUSHi(do_trans(sv, PL_op));
+    PUSHi(do_trans(sv));
     RETURN;
 }
 

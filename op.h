@@ -103,13 +103,15 @@ typedef U32 PADOFFSET;
 #define OPpRUNTIME		64	/* Pattern coming in on the stack */
 
 /* Private for OP_TRANS */
-#define OPpTRANS_GROWS		1
-#define OPpTRANS_FROM_UTF	2
-#define OPpTRANS_TO_UTF		4
-#define OPpTRANS_COUNTONLY	8
-#define OPpTRANS_SQUASH		16
-#define OPpTRANS_DELETE		32
-#define OPpTRANS_COMPLEMENT	64
+#define OPpTRANS_FROM_UTF	1
+#define OPpTRANS_TO_UTF		2
+#define OPpTRANS_IDENTICAL	4
+	/* When CU or UC, means straight latin-1 to utf-8 or vice versa */
+	/* Otherwise, IDENTICAL means the right side is the same as the left */
+#define OPpTRANS_SQUASH		8
+#define OPpTRANS_DELETE		16
+#define OPpTRANS_COMPLEMENT	32
+#define OPpTRANS_GROWS		64
 
 /* Private for OP_REPEAT */
 #define OPpREPEAT_DOLIST	64	/* List replication. */
