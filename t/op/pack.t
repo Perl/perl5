@@ -6,7 +6,7 @@ BEGIN {
     require './test.pl';
 }
 
-plan tests => 3943;
+plan tests => 5179;
 
 use strict;
 use warnings;
@@ -791,9 +791,9 @@ foreach (
 	   # print "# junk1=$junk1\n";
 	   my $p = pack $junk1, @list2;
 	   my $half = int( (length $p)/2 );
-	   for my $move ('', "X$half", 'x1', "x$half") {
+	   for my $move ('', "X$half", "X!$half", 'x1', 'x!8', "x$half") {
 	     my $junk = "$junk1 $move";
-	     # print "# junk=$junk list=(@list2)\n";
+	     # print "# junk='$junk', list=(@list2)\n";
 	     $p = pack "$junk $end", @list2, @end;
 	     my @l = unpack "x[$junk] $end", $p;
 	     is(scalar @l, scalar @end);
@@ -808,3 +808,41 @@ foreach (
 # XXXX no spaces are allowed in pack...  In pack only before the slash...
 is(scalar unpack('A /A Z20', pack 'A/A* Z20', 'bcde', 'xxxxx'), 'bcde');
 is(scalar unpack('A /A /A Z20', '3004bcde'), 'bcde');
+
+{ # X! and x!
+  my $t = 'C[3]  x!8 C[2]';
+  my @a = (0x73..0x77);
+  my $p = pack($t, @a);
+  is($p, "\x73\x74\x75\0\0\0\0\0\x76\x77");
+  my @b = unpack $t, $p;
+  is(scalar @b, scalar @a);
+  is("@b", "@a", 'x!8');
+  $t = 'x[5] C[6] X!8 C[2]';
+  @a = (0x73..0x7a);
+  $p = pack($t, @a);
+  is($p, "\0\0\0\0\0\x73\x74\x75\x79\x7a");
+  @b = unpack $t, $p;
+  @a = (0x73..0x75, 0x79, 0x7a, 0x79, 0x7a);
+  is(scalar @b, scalar @a);
+  is("@b", "@a");
+}
+
+{ # struct {char c1; double d; char cc[2];}
+  my $t = 'C x![d] d C[2]';
+  my @a = (173, 1.283476517e-45, 42, 215);
+  my $p = pack $t, @a;
+  ok( length $p);
+  my @b = unpack "$t X[$t] $t", $p;	# Extract, step back, extract again
+  is(scalar @b, 2 * scalar @a);
+  is("@b", "@a @a");
+
+  my $warning;
+  local $SIG{__WARN__} = sub {
+      $warning = $_[0];
+  };
+  @b = unpack "x[C] x[$t] X[$t] X[C] $t", "$p\0";
+
+  is($warning, undef);
+  is(scalar @b, scalar @a);
+  is("@b", "@a");
+}

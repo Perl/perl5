@@ -148,6 +148,8 @@ S_group_end(pTHX_ register char *pat, register char *patend, char ender)
     Perl_croak(aTHX_ "No group ending character `%c' found", ender);
 }
 
+#define TYPE_IS_SHRIEKING	0x100
+
 /* Returns the sizeof() struct described by pat */
 STATIC I32
 S_measure_struct(pTHX_ char *pat, register char *patend)
@@ -170,12 +172,16 @@ S_measure_struct(pTHX_ char *pat, register char *patend)
 	natint = 0;
 #endif
 	if (*pat == '!') {
-	    static const char *natstr = "sSiIlL";
+	    static const char *natstr = "sSiIlLxX";
 
 	    if (strchr(natstr, datumtype)) {
+		if (datumtype == 'x' || datumtype == 'X') {
+		    datumtype |= TYPE_IS_SHRIEKING;
+		} else {		/* XXXX Should be redone similarly! */
 #ifdef PERL_NATINT_PACK
-		natint = 1;
+		    natint = 1;
 #endif
+		}
 		pat++;
 	    }
 	    else
@@ -219,14 +225,33 @@ S_measure_struct(pTHX_ char *pat, register char *patend)
 		len = 1;
 	    else if (star > 0)	/* Star */
 		Perl_croak(aTHX_ "%s not allowed in length fields", "count *");
+ 	    /* XXXX Theoretically, we need to measure many times at different
+ 	       positions, since the subexpression may contain
+ 	       alignment commands, but be not of aligned length.
+ 	       Need to detect this and croak().  */
 	    size = measure_struct(beg, end);
 	    break;
 	}
+ 	case 'X' | TYPE_IS_SHRIEKING:
+ 	    /* XXXX Is this useful?  Then need to treat MEASURE_BACKWARDS. */
+ 	    if (!len)			/* Avoid division by 0 */
+ 		len = 1;
+ 	    len = total % len;		/* Assumed: the start is aligned. */
+ 	    /* FALL THROUGH */
 	case 'X':
 	    size = -1;
 	    if (total < len)
 		Perl_croak(aTHX_ "X outside of string");
 	    break;
+ 	case 'x' | TYPE_IS_SHRIEKING:
+ 	    if (!len)			/* Avoid division by 0 */
+ 		len = 1;
+ 	    star = total % len;		/* Assumed: the start is aligned. */
+ 	    if (star)			/* Other portable ways? */
+ 		len = len - star;
+ 	    else
+ 		len = 0;
+ 	    /* FALL THROUGH */
 	case 'x':
 	case 'A':
 	case 'Z':
@@ -317,7 +342,7 @@ S_measure_struct(pTHX_ char *pat, register char *patend)
 STATIC I32
 S_find_count(pTHX_ char **ppat, register char *patend, int *star)
 {
-    register char *pat = *ppat;
+    char *pat = *ppat;
     I32 len;
 
     *star = 0;
@@ -328,27 +353,22 @@ S_find_count(pTHX_ char **ppat, register char *patend, int *star)
 	*star = 1;
 	len = -1;
     }
-    else if (isDIGIT(*pat) || *pat == '[') {
-	bool brackets = *pat == '[';
-
-	if (brackets) {
-	    ++pat, len = 0;
-	    if (!isDIGIT(*pat)) {
-		char *end = group_end(pat, patend, ']');
-
-		*ppat = end + 1;
-		return measure_struct(pat, end);
-	    }
-	}	
-	else
-	    len = *pat++ - '0';
+    else if (isDIGIT(*pat)) {
+	len = *pat++ - '0';
 	while (isDIGIT(*pat)) {
 	    len = (len * 10) + (*pat++ - '0');
-	    if (len < 0)
-		Perl_croak(aTHX_ "Repeat count in unpack overflows");
+	    if (len < 0)		/* 50% chance of catching... */
+		Perl_croak(aTHX_ "Repeat count in pack/unpack overflows");
 	}
-	if (brackets && *pat++ != ']')
-	    Perl_croak(aTHX_ "No repeat count ender ] found after digits");
+    }
+    else if (*pat == '[') {
+	char *end = group_end(++pat, patend, ']');
+
+	len = 0;
+	*ppat = end + 1;
+	if (isDIGIT(*pat))
+	    return find_count(&pat, end, star);
+	return measure_struct(pat, end);
     }
     else
 	len = *star = -1;
@@ -434,12 +454,16 @@ Perl_unpack_str(pTHX_ char *pat, register char *patend, register char *s, char *
 	     && (datumtype != '/') )
             break;
 	if (*pat == '!') {
-	    static const char natstr[] = "sSiIlL";
+	    static const char natstr[] = "sSiIlLxX";
 
 	    if (strchr(natstr, datumtype)) {
+		if (datumtype == 'x' || datumtype == 'X') {
+		    datumtype |= TYPE_IS_SHRIEKING;
+		} else {		/* XXXX Should be redone similarly! */
 #ifdef PERL_NATINT_PACK
-		natint = 1;
+		    natint = 1;
 #endif
+		}
 		pat++;
 	    }
 	    else
@@ -500,11 +524,25 @@ Perl_unpack_str(pTHX_ char *pat, register char *patend, register char *s, char *
 		Perl_croak(aTHX_ "@ outside of string");
 	    s = strbeg + len;
 	    break;
+ 	case 'X' | TYPE_IS_SHRIEKING:
+ 	    if (!len)			/* Avoid division by 0 */
+ 		len = 1;
+ 	    len = (s - strbeg) % len;
+ 	    /* FALL THROUGH */
 	case 'X':
 	    if (len > s - strbeg)
 		Perl_croak(aTHX_ "X outside of string");
 	    s -= len;
 	    break;
+ 	case 'x' | TYPE_IS_SHRIEKING:
+ 	    if (!len)			/* Avoid division by 0 */
+ 		len = 1;
+ 	    aint = (s - strbeg) % len;
+ 	    if (aint)			/* Other portable ways? */
+ 		len = len - aint;
+ 	    else
+ 		len = 0;
+ 	    /* FALL THROUGH */
 	case 'x':
 	    if (len > strend - s)
 		Perl_croak(aTHX_ "x outside of string");
@@ -1598,12 +1636,16 @@ Perl_pack_cat(pTHX_ SV *cat, char *pat, register char *patend, register SV **beg
 	natint = 0;
 #endif
         if (*pat == '!') {
-	    static const char natstr[] = "sSiIlL";
+	    static const char natstr[] = "sSiIlLxX";
 
 	    if (strchr(natstr, datumtype)) {
+		if (datumtype == 'x' || datumtype == 'X') {
+		    datumtype |= TYPE_IS_SHRIEKING;
+		} else {		/* XXXX Should be redone similarly! */
 #ifdef PERL_NATINT_PACK
-		natint = 1;
+		    natint = 1;
 #endif
+		}
 		pat++;
 	    }
 	    else
@@ -1665,6 +1707,11 @@ Perl_pack_cat(pTHX_ SV *cat, char *pat, register char *patend, register SV **beg
 	    beglist = savebeglist;
 	    break;
 	}
+	case 'X' | TYPE_IS_SHRIEKING:
+	    if (!len)			/* Avoid division by 0 */
+		len = 1;
+	    len = (SvCUR(cat)) % len;
+	    /* FALL THROUGH */
 	case 'X':
 	  shrink:
 	    if (SvCUR(cat) < len)
@@ -1672,6 +1719,15 @@ Perl_pack_cat(pTHX_ SV *cat, char *pat, register char *patend, register SV **beg
 	    SvCUR(cat) -= len;
 	    *SvEND(cat) = '\0';
 	    break;
+	case 'x' | TYPE_IS_SHRIEKING:
+	    if (!len)			/* Avoid division by 0 */
+		len = 1;
+	    aint = (SvCUR(cat)) % len;
+	    if (aint)			/* Other portable ways? */
+		len = len - aint;
+	    else
+		len = 0;
+	    /* FALL THROUGH */
 	case 'x':
 	  grow:
 	    while (len >= 10) {

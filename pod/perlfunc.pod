@@ -3188,7 +3188,11 @@ brackets, as in C<pack 'C[80]', @arr>.
 
 One can replace the numeric repeat count by a template enclosed in brackets;
 then the packed length of this template in bytes is used as a count.
-For example, C<x[L]> skips a long (it skips the number of bytes in a long).
+For example, C<x[L]> skips a long (it skips the number of bytes in a long);
+the template C<$t X[$t] $t> unpack()s twice what $t unpacks.
+If the template in brackets contains alignment commands (such as C<x![d]>),
+its packed length is calculated as if the start of the template has the maximal
+possible alignment.
 
 When used with C<Z>, C<*> results in the addition of a trailing null
 byte (so the packed result will be one longer than the byte C<length>
@@ -3409,6 +3413,18 @@ A ()-group is a sub-TEMPLATE enclosed in parentheses.  A group may
 take a repeat count, both as postfix, and via the C</> template
 character.
 
+=item *
+
+C<x> and C<X> accept C<!> modifier.  In this case they act as
+alignment commands: they jump forward/back to the closest position
+aligned at a multiple of C<count> bytes.  For example, to pack() or
+unpack() C's C<struct {char c; double d; char cc[2]}> one may need to
+use the template C<C x![d] d C[2]>; this assumes that doubles must be
+aligned on the double's size.
+ 
+For alignment commands C<count> of 0 is equivalent to C<count> of 1;
+both result in no-ops.
+  
 =item *
 
 A comment in a TEMPLATE starts with C<#> and goes to the end of line.
