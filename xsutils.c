@@ -228,11 +228,7 @@ XS(XS_attributes__guess_stash)
 {
     dXSARGS;
     SV *rv, *sv;
-#ifdef dXSTARGET
-    dXSTARGET;
-#else
-    SV * TARG = sv_newmortal();
-#endif
+    dXSTARG;
 
     if (items != 1) {
 usage:
@@ -276,9 +272,7 @@ usage:
 	    sv_setpv(TARG, HvNAME(stash));
     }
 
-#ifdef dXSTARGET
     SvSETMAGIC(TARG);
-#endif
     XSRETURN(1);
 }
 
@@ -286,11 +280,7 @@ XS(XS_attributes_reftype)
 {
     dXSARGS;
     SV *rv, *sv;
-#ifdef dXSTARGET
-    dXSTARGET;
-#else
-    SV * TARG = sv_newmortal();
-#endif
+    dXSTARG;
 
     if (items != 1) {
 usage:
@@ -306,9 +296,7 @@ usage:
 	goto usage;
     sv = SvRV(rv);
     sv_setpv(TARG, sv_reftype(sv, 0));
-#ifdef dXSTARGET
     SvSETMAGIC(TARG);
-#endif
 
     XSRETURN(1);
 }
@@ -316,11 +304,6 @@ usage:
 XS(XS_attributes__warn_reserved)
 {
     dXSARGS;
-#ifdef dXSTARGET
-    dXSTARGET;
-#else
-    SV * TARG = sv_newmortal();
-#endif
 
     if (items != 0) {
 	Perl_croak(aTHX_
@@ -328,11 +311,7 @@ XS(XS_attributes__warn_reserved)
     }
 
     EXTEND(SP,1);
-    ST(0) = TARG;
-    sv_setiv(TARG, ckWARN(WARN_RESERVED) != 0);
-#ifdef dXSTARGET
-    SvSETMAGIC(TARG);
-#endif
+    ST(0) = boolSV(ckWARN(WARN_RESERVED));
 
     XSRETURN(1);
 }
