@@ -9680,6 +9680,7 @@ perl_clone_using(PerlInterpreter *proto_perl, UV flags,
     /* symbol tables */
     PL_defstash		= hv_dup_inc(proto_perl->Tdefstash);
     PL_curstash		= hv_dup(proto_perl->Tcurstash);
+    PL_nullstash       = hv_dup(proto_perl->Inullstash);
     PL_debstash		= hv_dup(proto_perl->Idebstash);
     PL_globalstash	= hv_dup(proto_perl->Iglobalstash);
     PL_curstname	= sv_dup_inc(proto_perl->Icurstname);
