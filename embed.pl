@@ -308,7 +308,9 @@ print EM <<'END';
 #  define  Perl_set_numeric_local	perl_set_numeric_local
 #  define  Perl_set_numeric_standard	perl_set_numeric_standard
 #  define  PERL_POLLUTE
-#  define  PERL_POLLUTE_MALLOC
+#  ifndef EMBEDMYMALLOC
+#    define  PERL_POLLUTE_MALLOC
+#  endif
 #endif
 
 /* Hide global symbols */
