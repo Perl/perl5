@@ -2,48 +2,46 @@
 ;#
 ;# Usage:
 ;#	require 'shellwords.pl';
-;#	@words = &shellwords($line);
+;#	@words = shellwords($line);
 ;#	or
-;#	@words = &shellwords(@lines);
+;#	@words = shellwords(@lines);
 ;#	or
-;#	@words = &shellwords;		# defaults to $_ (and clobbers it)
+;#	@words = shellwords();		# defaults to $_ (and clobbers it)
 
 sub shellwords {
-    package shellwords;
-    local($_) = join('', @_) if @_;
-    local(@words,$snippet,$field);
+    local *_ = \join('', @_) if @_;
+    my (@words, $snippet);
 
-    s/^\s+//;
+    s/\A\s+//;
     while ($_ ne '') {
-	$field = '';
+	my $field = substr($_, 0, 0);	# leave results tainted
 	for (;;) {
-	    use re 'taint'; # leave strings tainted
-	    if (s/^"(([^"\\]|\\.)*)"//) {
-		($snippet = $1) =~ s#\\(.)#$1#g;
+	    if (s/\A"(([^"\\]|\\.)*)"//s) {
+		($snippet = $1) =~ s#\\(.)#$1#sg;
 	    }
-	    elsif (/^"/) {
+	    elsif (/\A"/) {
 		die "Unmatched double quote: $_\n";
 	    }
-	    elsif (s/^'(([^'\\]|\\.)*)'//) {
-		($snippet = $1) =~ s#\\(.)#$1#g;
+	    elsif (s/\A'(([^'\\]|\\.)*)'//s) {
+		($snippet = $1) =~ s#\\(.)#$1#sg;
 	    }
-	    elsif (/^'/) {
+	    elsif (/\A'/) {
 		die "Unmatched single quote: $_\n";
 	    }
-	    elsif (s/^\\(.)//) {
+	    elsif (s/\A\\(.)//s) {
 		$snippet = $1;
 	    }
-	    elsif (s/^([^\s\\'"]+)//) {
+	    elsif (s/\A([^\s\\'"]+)//) {
 		$snippet = $1;
 	    }
 	    else {
-		s/^\s+//;
+		s/\A\s+//;
 		last;
 	    }
 	    $field .= $snippet;
 	}
 	push(@words, $field);
     }
-    @words;
+    return @words;
 }
 1;
