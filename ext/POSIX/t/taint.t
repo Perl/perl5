@@ -10,9 +10,8 @@ BEGIN {
     }
 }
 
-require "./test.pl";
+use Test::More tests => 7;
 use Scalar::Util qw/tainted/;
-plan(tests => 5);
 
 
 use POSIX qw(fcntl_h open read mkfifo);
@@ -30,18 +29,23 @@ my $testfd;
 my $TAINT = substr($^X, 0, 0);
 
 eval { mkfifo($TAINT. "TEST", 0) };
-ok($@ =~ /^Insecure dependency/,              'mkfifo with tainted data');
+like($@, qr/^Insecure dependency/,              'mkfifo with tainted data');
 
 eval { $testfd = open($TAINT. "TEST", O_WRONLY, 0) };
-ok($@ =~ /^Insecure dependency/,              'open with tainted data');
+like($@, qr/^Insecure dependency/,              'open with tainted data');
 
 eval { $testfd = open("TEST", O_RDONLY, 0) };
-ok($@ eq "",                                  'open with untainted data');
+is($@, "",                                  'open with untainted data');
 
 read($testfd, $buffer, 2) if $testfd > 2;
 is( $buffer, "#!",	                          '    read' );
 ok(tainted($buffer),                          '    scalar tainted');
-read($testfd, $buffer[1], 2) if $testfd > 2;
 
-#is( $buffer[1], "./",	                      '    read' );
-#ok(tainted($buffer[1]),                       '    array element tainted');
+TODO: {
+    local $TODO = "POSIX::read won't taint an array element";
+
+    read($testfd, $buffer[1], 2) if $testfd > 2;
+
+    is( $buffer[1], "./",	                      '    read' );
+    ok(tainted($buffer[1]),                       '    array element tainted');
+}
