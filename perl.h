@@ -1456,7 +1456,12 @@ typedef struct pvop PVOP;
 typedef struct loop LOOP;
 
 typedef struct interpreter PerlInterpreter;
-typedef struct sv SV;
+#ifdef UTS
+#   define STRUCT_SV perl_sv /* Amdahl's <ksync.h> has struct sv */
+#else
+#   define STRUCT_SV sv
+#endif
+typedef struct STRUCT_SV SV;
 typedef struct av AV;
 typedef struct hv HV;
 typedef struct cv CV;
