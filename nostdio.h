@@ -68,8 +68,10 @@ struct _FILE;
 #undef tmpfile
 #undef ungetc
 #undef vfprintf
+#undef printf
 
 #define fprintf    _CANNOT _fprintf_
+#define printf     _CANNOT _printf_
 #define stdin      _CANNOT _stdin_
 #define stdout     _CANNOT _stdout_
 #define stderr     _CANNOT _stderr_

@@ -2708,13 +2708,6 @@ PerlIOStdio_close(pTHX_ PerlIO *f)
 	    }
 	    else {
             	/* Tricky - must fclose(stdio) to free memory but not close(fd) */ 
-#ifdef USE_THREADS
-    	    	/* Sarathy pointed out that another thread could reuse
-		   fd after fclose() but before we dup2() below
-		   so take out a MUTEX to shut them out 
-		 */  
-    	    	MUTEX_LOCK(&PerlIO_mutex);
-#endif
 	    	dupfd = PerlLIO_dup(fd);
 	    }
 	}    
@@ -2732,14 +2725,12 @@ PerlIOStdio_close(pTHX_ PerlIO *f)
 	    /* We need to restore fd from the saved copy */
 	    if (PerlLIO_dup2(dupfd,fd) != fd)
 	      result = -1;
-#ifdef USE_THREADS
-    	    MUTEX_UNLOCK(&PerlIO_mutex);
-#endif
 	    if (PerlLIO_close(dupfd) != 0)
 	      result = -1; 
 	}
 	return result;
     } 
+
 }
 
 
