@@ -500,6 +500,8 @@ BeOS is now supported.  See L<README.beos>.
 
 DOS is now supported under the DJGPP tools.  See L<README.dos>.
 
+MiNT is now supported.  See L<README.mint>.
+
 MPE/iX is now supported.  See L<README.mpeix>.
 
 MVS (aka OS390, aka Open Edition) is now supported.  See L<README.os390>.
@@ -529,6 +531,10 @@ Perl compiler and tools.  See L<B>.
 =item Data::Dumper
 
 A module to pretty print Perl data.  See L<Data::Dumper>.
+
+=item Dumpvalue
+
+A module to dump perl values to the screen. See L<Dumpvalue>.
 
 =item Errno
 
@@ -593,6 +599,11 @@ Various pragmata to control behavior of regular expressions.
 
 You can now run tests for I<x> seconds instead of guessing the right
 number of tests to run.
+
+=item Carp
+
+Carp has a new function cluck(). cluck() warns, like carp(), but also adds
+a stack backtrace to the error message, like confess().
 
 =item CGI
 
@@ -680,6 +691,12 @@ sites.
 
 Some more Perl traps are documented now.  See L<perltrap>.
 
+L<perlopentut> gives a tutorial on using open().
+
+L<perlreftut> gives a tutorial on references.
+
+L<perlthrtut> gives a tutorial on threads.
+
 =head1 New Diagnostics
 
 =over
@@ -721,6 +738,10 @@ Something like this will reproduce the error:
     $BADREF = 42;
     process $BADREF 1,2,3;
     $BADREF->process(1,2,3);
+
+=item Can't check filesystem of script "%s" for nosuid
+
+(P) For some reason you can't check the filesystem of the script for nosuid.
 
 =item Can't coerce array into hash
 
@@ -924,6 +945,13 @@ Usually when you want a regular expression this big, there is a better
 way to do it with multiple statements.  See L<perlre>.
 
 =back
+
+=head1 Configuration Changes
+
+You can use "Configure -Uinstallusrbinperl" which causes installperl
+to skip installing perl also as /usr/bin/perl.  This is useful if you
+prefer not to modify /usr/bin for some reason or another but harmful
+because many scripts assume to find Perl in /usr/bin/perl.
 
 =head1 BUGS
 
