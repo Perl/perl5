@@ -40,7 +40,7 @@ have been fixed.
 
 =head2 Updated Modules And Pragmata
 
-The following modules and pragmata have been updated since Perl 5.8.0:
+The following modules and pragmata have been updated since Perl 5.8.1:
 
 =over 4
 
@@ -81,10 +81,11 @@ Documentation improved
 
 =head1 Selected Bug Fixes
 
-C<require> should now behave correctly when repeated attempts are made
-to load a file which fails.
+C<require> should now cache results as expected when repeated attempts are
+made to load a file which fails.
 
-The tokenizer now recovers properly after an unknown filetest operator.
+Some syntax errors involving unrecognized filetest operators are now handled
+correctly by the parser.
 
 =head1 Changed Internals
 
@@ -106,7 +107,7 @@ around their problems as best possible.
 
 =head1 Future Directions
 
-Starting with 5.8.3 I intend to make more frequent maintenance releases,
+Starting with 5.8.3 we intend to make more frequent maintenance releases,
 with a smaller number of changes in each. The intent is to propagate
 bug fixes out to stable releases more rapidly and make upgrading stable
 releases less of an upheaval. Hopefully this will give end users more
