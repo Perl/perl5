@@ -7,10 +7,10 @@ perlmodinstall - Installing CPAN Modules
 You can think of a module as the fundamental unit of reusable Perl
 code; see L<perlmod> for details.  Whenever anyone creates a chunk of
 Perl code that they think will be useful to the world, they register
-as a Perl developer at http://www.perl.com/CPAN/modules/04pause.html
+as a Perl developer at http://www.cpan.org/modules/04pause.html
 so that they can then upload their code to the CPAN.  The CPAN is the
 Comprehensive Perl Archive Network and can be accessed at
-http://www.perl.com/CPAN/.
+http://www.cpan.org/.
 
 This documentation is for people who want to download CPAN modules
 and install them on their own computer.
@@ -68,7 +68,7 @@ directory) and use this approach.
 B<If you're on a Unix or Linux system,>
 
 You can use Andreas Koenig's CPAN module 
-( http://www.perl.com/CPAN/modules/by-module/CPAN ) 
+( http://www.cpan.org/modules/by-module/CPAN ) 
 to automate the following steps, from DECOMPRESS through INSTALL.
 
 A. DECOMPRESS 
