@@ -1047,7 +1047,7 @@ setuid perl scripts securely.\n");
 		   }
 	      }
 	 }
-	 PL_origalen = s - PL_origargv[0];
+	 PL_origalen = s - PL_origargv[0] + 1;
     }
 
     if (PL_do_undump) {
