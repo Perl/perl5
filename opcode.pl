@@ -46,6 +46,9 @@ print "\n#define MAXO ", scalar @ops, "\n\n";
 # Emit op names and descriptions.
 
 print <<END;
+
+START_EXTERN_C
+
 #ifndef DOINIT
 EXT char *PL_op_name[];
 #else
@@ -77,6 +80,8 @@ print <<END;
 };
 #endif
 
+END_EXTERN_C
+
 #ifndef PERL_OBJECT
 START_EXTERN_C
 
@@ -107,6 +112,8 @@ print <<END;
 
 END_EXTERN_C
 #endif	/* PERL_OBJECT */
+
+START_EXTERN_C
 
 #ifndef DOINIT
 EXT OP * (CPERLscope(*PL_ppaddr)[])(pTHX);
@@ -208,6 +215,8 @@ for (@ops) {
 print <<END;
 };
 #endif
+
+END_EXTERN_C
 END
 
 close OC or die "Error closing opcode.h: $!";

@@ -357,6 +357,9 @@ typedef enum {
 
 #define MAXO 348
 
+
+START_EXTERN_C
+
 #ifndef DOINIT
 EXT char *PL_op_name[];
 #else
@@ -1067,6 +1070,8 @@ EXT char *PL_op_desc[] = {
 };
 #endif
 
+END_EXTERN_C
+
 #ifndef PERL_OBJECT
 START_EXTERN_C
 
@@ -1080,6 +1085,8 @@ START_EXTERN_C
 
 END_EXTERN_C
 #endif	/* PERL_OBJECT */
+
+START_EXTERN_C
 
 #ifndef DOINIT
 EXT OP * (CPERLscope(*PL_ppaddr)[])(pTHX);
@@ -2145,3 +2152,5 @@ EXT U32 PL_opargs[] = {
 	0x00000044,	/* threadsv */
 };
 #endif
+
+END_EXTERN_C

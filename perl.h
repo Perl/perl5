@@ -150,7 +150,7 @@ class CPerlObj;
 #else
 #  define START_EXTERN_C 
 #  define END_EXTERN_C 
-#  define EXTERN_C
+#  define EXTERN_C extern
 #endif
 
 #ifdef OP_IN_REGISTER
@@ -1502,14 +1502,14 @@ typedef pthread_key_t	perl_key;
 #ifdef PERL_IMPLICIT_CONTEXT
 #  ifdef USE_THREADS
 struct perl_thread;
-#    define pTHX	struct perl_thread *thr
+#    define pTHX	register struct perl_thread *thr
 #    define aTHX	thr
 #    define dTHXa(a)	pTHX = (struct perl_thread *)a
 #    define dTHX	dTHXa(SvPVX(PL_thrsv))
 #    define dTHR	dNOOP
 #  else
 #    define MULTIPLICITY
-#    define pTHX	PerlInterpreter *my_perl
+#    define pTHX	register PerlInterpreter *my_perl
 #    define aTHX	my_perl
 #    define dTHXa(a)	pTHX = (PerlInterpreter *)a
 #    define dTHX	dTHXa(PL_curinterp)
@@ -1932,17 +1932,10 @@ typedef Sighandler_t Sigsave_t;
 #endif
 
 
-/*
- * These need prototyping here because <proto.h> isn't
- * included until after runops is initialised.
- */
-
-#ifndef PERL_OBJECT
+#ifdef PERL_OBJECT
+typedef int (CPerlObj::*runops_proc_t) (void);
+#else
 typedef int (*runops_proc_t) (pTHX);
-int Perl_runops_standard (pTHX);
-#ifdef DEBUGGING
-int Perl_runops_debug (pTHX);
-#endif
 #endif
 
 /* _ (for $_) must be first in the following list (DEFSV requires it) */
@@ -1972,6 +1965,8 @@ extern char **	environ;	/* environment variables supplied via exec */
 #    endif
 #  endif
 #endif
+
+START_EXTERN_C
 
 /* handy constants */
 EXTCONST char PL_warn_uninit[]
@@ -2231,6 +2226,8 @@ EXTCONST char* PL_block_type[];
 #endif
 #endif
 
+END_EXTERN_C
+
 /*****************************************************************************/
 /* This lexer/parser stuff is currently global since yacc is hard to reenter */
 /*****************************************************************************/
@@ -2349,10 +2346,6 @@ typedef struct exitlistentry {
 
 #ifdef PERL_OBJECT
 extern "C" CPerlObj* perl_alloc (IPerlMem*, IPerlEnv*, IPerlStdIO*, IPerlLIO*, IPerlDir*, IPerlSock*, IPerlProc*);
-
-#ifdef PERL_OBJECT
-typedef int (CPerlObj::*runops_proc_t) (void);
-#endif  /* PERL_OBJECT */
 
 #undef EXT
 #define EXT
@@ -2482,7 +2475,9 @@ END_EXTERN_C
 #define PERLVARIC(var,type,init) EXTCONST type PL_##var INIT(init);
 
 #ifndef PERL_GLOBAL_STRUCT
+START_EXTERN_C
 #include "perlvars.h"
+END_EXTERN_C
 #endif
 
 #ifndef MULTIPLICITY
@@ -2522,6 +2517,8 @@ PERLVAR(object_compatibility[30],	char)
 #undef PERLVAR
 #undef PERLVARI
 #undef PERLVARIC
+
+START_EXTERN_C
 
 #ifdef DOINIT
 
@@ -2726,6 +2723,8 @@ EXTCONST char * PL_AMG_names[NofAMmeth] = {
 #else
 EXTCONST char * PL_AMG_names[NofAMmeth];
 #endif /* def INITAMAGIC */
+
+END_EXTERN_C
 
 struct am_table {
   long was_ok_sub;

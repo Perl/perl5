@@ -10,7 +10,6 @@
 #include "EXTERN.h"
 #include "perl.h"
 #include "XSUB.h"
-#include "INTERN.h"
 
 #ifdef PERL_OBJECT
 #undef PL_op_name

@@ -402,8 +402,8 @@ struct thread_intern {
     lpa[0] = '\0', WideCharToMultiByte(acp, 0, lpw, -1, lpa, nChars, NULL, NULL)
 
 /* place holders for now */
-#define USING_WIDE() 0
-#define GETINTERPMODE() CP_ACP
+#define USING_WIDE()	(IsWinNT())
+#define GETINTERPMODE() (IN_UTF8)
 
 /*
  * This provides a layer of functions and macros to ensure extensions will

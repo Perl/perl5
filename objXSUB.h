@@ -394,8 +394,6 @@
 #define PL_nice_chunk		pPerl->PL_nice_chunk
 #undef  PL_nice_chunk_size
 #define PL_nice_chunk_size	pPerl->PL_nice_chunk_size
-#undef  PL_ninterps
-#define PL_ninterps		pPerl->PL_ninterps
 #undef  PL_nomemok
 #define PL_nomemok		pPerl->PL_nomemok
 #undef  PL_nrs
