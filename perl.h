@@ -2020,6 +2020,14 @@ typedef pthread_key_t	perl_key;
 #  endif
 #endif
 
+#ifndef Nullformat
+#  ifdef CHECK_FORMAT
+#    define Nullformat "%s",""
+#  else
+#    define Nullformat Nullch
+#  endif
+#endif
+
 /* Some unistd.h's give a prototype for pause() even though
    HAS_PAUSE ends up undefined.  This causes the #define
    below to be rejected by the compiler.  Sigh.

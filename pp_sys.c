@@ -468,7 +468,7 @@ PP(pp_die)
 		    sv_setsv(error,*PL_stack_sp--);
 		}
 	    }
-	    DIE(aTHX_ Nullch);
+	    DIE(aTHX_ Nullformat);
 	}
 	else {
 	    if (SvPOK(error) && SvCUR(error))
