@@ -60,3 +60,16 @@ Hmm...You had some extra variables I don't know about...I'll try to keep 'em.
 Read the File::Find documentation for more information.
 
 EOM
+
+# Date: Wed, 18 Sep 1996 11:29:40 +0200
+# From: Dominic Dunlop <domo@tcp.ip.lu>
+# Subject: Re: Perl 5.003 from ftp.tenon.com requires MT 4.0.3
+
+# MachTen 4.0.2 and earlier do not implement System V interprocess
+# communication (message queues, semaphores and shered memory); 4.0.3 has a
+# half-baked implementation which provides the corresponding library
+# functions but does not implement the system calls or provide the header
+# files (or documentation).  The perl installation process correctly divines
+# that System V IPC is not usable in either case.  Do not attempt to persuade
+# it otherwise, or the resulting perl will crash (rather than producing an
+# error message) if you attempt to use the functions.
