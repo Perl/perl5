@@ -1,26 +1,37 @@
-#!/usr/bin/perl -w
+#!/usr/local/bin/perl -w
 # Test for File::Temp - tempfile function
 
 BEGIN {
 	chdir 't' if -d 't';
 	unshift @INC, '../lib';
 	require Test; import Test;
-	plan(tests => 11);
+	plan(tests => 16);
 }
 
 use strict;
 use File::Spec;
 
 # Will need to check that all files were unlinked correctly
-# Set up an END block here to do it 
+# Set up an END block here to do it
 
-my (@files, @dirs); # Array containing list of dirs/files to test
+# Arrays containing list of dirs/files to test
+my (@files, @dirs, @still_there);
+
+# And a test for files that should still be around
+# These are tidied up
+END {
+  foreach (@still_there) {
+    ok( -f $_ );
+    ok( unlink( $_ ) );
+    ok( !(-f $_) );
+  }
+}
 
 # Loop over an array hoping that the files dont exist
 END { foreach (@files) { ok( !(-e $_) )} }
 
 # And a test for directories
-END { foreach (@dirs)  { ok( !(-d $_) )} } 
+END { foreach (@dirs)  { ok( !(-d $_) )} }
 
 # Need to make sure that the END blocks are setup before
 # the ones that File::Temp configures since END blocks are evaluated
@@ -92,6 +103,15 @@ print "# TEMPFILE: Created $tempfile\n";
 
 ok( (-f $tempfile) );
 push(@files, $tempfile);
+
+
+# Create a temporary file that should stay around after
+# it has been closed
+($fh, $tempfile) = tempfile( 'permXXXXXXX', UNLINK => 0 );
+print "# TEMPFILE: Created $tempfile\n";
+ok( -f $tempfile );
+ok( close( $fh ) );
+push( @still_there, $tempfile); # check at END
 
 # Now END block will execute to test the removal of directories
 
