@@ -40,6 +40,15 @@ the numeric mode to use when creating the directories
 It returns a list of all directories (including intermediates, determined
 using the Unix '/' separator) created.
 
+If a system error prevents a directory from being created, then the
+C<mkpath> function throws a fatal error with Perl's C<croak> mechanism.
+This error can be trapped with an C<eval> block:
+
+  eval { mkpath($dir) };
+  if ($@) {
+    print "Couldn't create $dir: $@";
+  }
+
 Similarly, the C<rmtree> function provides a convenient way to delete a
 subtree from the directory structure, much like the Unix command C<rm -r>.
 C<rmtree> takes three arguments:
