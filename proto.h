@@ -808,7 +808,7 @@ PERL_CALLCONV void	Perl_sv_vcatpvfn(pTHX_ SV* sv, const char* pat, STRLEN patlen
 PERL_CALLCONV void	Perl_sv_vsetpvfn(pTHX_ SV* sv, const char* pat, STRLEN patlen, va_list* args, SV** svargs, I32 svmax, bool *maybe_tainted);
 PERL_CALLCONV NV	Perl_str_to_version(pTHX_ SV *sv);
 PERL_CALLCONV SV*	Perl_swash_init(pTHX_ char* pkg, char* name, SV* listsv, I32 minbits, I32 none);
-PERL_CALLCONV UV	Perl_swash_fetch(pTHX_ SV *sv, U8 *ptr);
+PERL_CALLCONV UV	Perl_swash_fetch(pTHX_ SV *sv, U8 *ptr, bool do_utf8);
 PERL_CALLCONV void	Perl_taint_env(pTHX);
 PERL_CALLCONV void	Perl_taint_proper(pTHX_ const char* f, const char* s);
 PERL_CALLCONV UV	Perl_to_utf8_lower(pTHX_ U8 *p);

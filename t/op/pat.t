@@ -5,7 +5,8 @@
 # that does fit that format, add it to op/re_tests, not here.
 
 $| = 1;
-print "1..587\n";
+
+print "1..615\n";
 
 BEGIN {
     chdir 't' if -d 't';
@@ -1302,6 +1303,7 @@ print "ok 247\n";
 {
     # the second half of 20001028.003
 
+    my $X = '';
     $X =~ s/^/chr(1488)/e;
     print "not " unless length $X == 1 && ord($X) == 1488;
     print "ok 260\n";
@@ -1353,10 +1355,11 @@ print "ok 247\n";
 	     "\0"				=> 'Cc',
 	     );
 	
-    for my $char (keys %s) {
+    for my $char (map { s/^\S+ //; $_ }
+                    sort map { sprintf("%06x", ord($_))." $_" } keys %s) {
 	my $class = $s{$char};
-	my $code  = sprintf("%04x", ord($char));
-	printf "# 0x$code\n";
+	my $code  = sprintf("%06x", ord($char));
+	printf "#\n# 0x$code\n#\n";
 	print "# IsAlpha\n";
 	if ($class =~ /^[LM]/) {
 	    print "not " unless $char =~ /\p{IsAlpha}/;
@@ -1382,7 +1385,7 @@ print "ok 247\n";
 	    print "ok $test\n"; $test++;
 	}
 	print "# IsASCII\n";
-	if ($code <= 127) {
+	if ($code le '00007f') {
 	    print "not " unless $char =~ /\p{IsASCII}/;
 	    print "ok $test\n"; $test++;
 	    print "not " if     $char =~ /\P{IsASCII}/;
@@ -1583,3 +1586,104 @@ EOT
     print "not " unless ord($x) == 0x12345678 && length($x) == 1;
     print "ok 587\n";
 }
+
+{
+    my $x = "\x7f";
+
+    print "not " if     $x =~ /[\x80-\xff]/;
+    print "ok 588\n";
+
+    print "not " if     $x =~ /[\x80-\x{100}]/;
+    print "ok 589\n";
+
+    print "not " if     $x =~ /[\x{100}]/;
+    print "ok 590\n";
+
+    print "not " if     $x =~ /\p{InLatin1Supplement}/;
+    print "ok 591\n";
+
+    print "not " unless $x =~ /\P{InLatin1Supplement}/;
+    print "ok 592\n";
+
+    print "not " if     $x =~ /\p{InLatinExtendedA}/;
+    print "ok 593\n";
+
+    print "not " unless $x =~ /\P{InLatinExtendedA}/;
+    print "ok 594\n";
+}
+
+{
+    my $x = "\x80";
+
+    print "not " unless $x =~ /[\x80-\xff]/;
+    print "ok 595\n";
+
+    print "not " unless $x =~ /[\x80-\x{100}]/;
+    print "ok 596\n";
+
+    print "not " if     $x =~ /[\x{100}]/;
+    print "ok 597\n";
+
+    print "not " unless $x =~ /\p{InLatin1Supplement}/;
+    print "ok 598\n";
+
+    print "not " if    $x =~ /\P{InLatin1Supplement}/;
+    print "ok 599\n";
+
+    print "not " if     $x =~ /\p{InLatinExtendedA}/;
+    print "ok 600\n";
+
+    print "not " unless $x =~ /\P{InLatinExtendedA}/;
+    print "ok 601\n";
+}
+
+{
+    my $x = "\xff";
+
+    print "not " unless $x =~ /[\x80-\xff]/;
+    print "ok 602\n";
+
+    print "not " unless $x =~ /[\x80-\x{100}]/;
+    print "ok 603\n";
+
+    print "not " if     $x =~ /[\x{100}]/;
+    print "ok 604\n";
+
+    print "not " unless $x =~ /\p{InLatin1Supplement}/;
+    print "ok 605\n";
+
+    print "not " if     $x =~ /\P{InLatin1Supplement}/;
+    print "ok 606\n";
+
+    print "not " if     $x =~ /\p{InLatinExtendedA}/;
+    print "ok 607\n";
+
+    print "not " unless $x =~ /\P{InLatinExtendedA}/;
+    print "ok 608\n";
+}
+
+{
+    my $x = "\x{100}";
+
+    print "not " if     $x =~ /[\x80-\xff]/;
+    print "ok 609\n";
+
+    print "not " unless $x =~ /[\x80-\x{100}]/;
+    print "ok 610\n";
+
+    print "not " unless $x =~ /[\x{100}]/;
+    print "ok 611\n";
+
+    print "not " if     $x =~ /\p{InLatin1Supplement}/;
+    print "ok 612\n";
+
+    print "not " unless $x =~ /\P{InLatin1Supplement}/;
+    print "ok 613\n";
+
+    print "not " unless $x =~ /\p{InLatinExtendedA}/;
+    print "ok 614\n";
+
+    print "not " if     $x =~ /\P{InLatinExtendedA}/;
+    print "ok 615\n";
+}
+

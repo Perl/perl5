@@ -1024,7 +1024,22 @@ sub scopeop {
     }
 }
 
-sub pp_scope { scopeop(0, @_); }
+sub invoker {
+    my $caller = (caller(2))[3];
+    if ($caller eq "B::Deparse::deparse") {
+	return (caller(3))[3];
+    }
+    else {
+	return $caller;
+    }
+}
+
+sub pp_scope {
+    my ($self, $op, $cx) = @_;
+    my $body = scopeop(0, @_);
+    return $body if $cx > 0 || invoker() ne "B::Deparse::lineseq";
+    return "do {\n\t$body\n\b};";
+}
 sub pp_lineseq { scopeop(0, @_); }
 sub pp_leave { scopeop(1, @_); }
 
@@ -2347,6 +2362,8 @@ sub pp_null {
 	return $self->maybe_parens($self->deparse($op->first, 20) . " =~ "
 				   . $self->deparse($op->first->sibling, 20),
 				   $cx, 20);
+    } elsif ($op->flags & OPf_SPECIAL && $cx == 0 && !$op->targ) {
+	return "do {\n\t". $self->deparse($op->first, $cx) ."\n\b};";
     } else {
 	return $self->deparse($op->first, $cx);
     }
