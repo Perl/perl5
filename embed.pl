@@ -198,6 +198,7 @@ my @extvars = qw(sv_undef sv_yes sv_no na dowarn
 		 diehook
 		 dirty
 		 perl_destruct_level
+		 ppaddr
                 );
 
 sub readsyms (\%$) {
