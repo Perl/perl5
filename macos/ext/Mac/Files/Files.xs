@@ -1,4 +1,4 @@
-/* $Header: /cvsroot/macperl/perl/macos/ext/Mac/Files/Files.xs,v 1.4 2002/01/23 05:44:42 pudge Exp $
+/* $Header: /cvsroot/macperl/perl/macos/ext/Mac/Files/Files.xs,v 1.5 2002/01/30 07:43:54 neeri Exp $
  *
  *    Copyright (c) 1996 Matthias Neeracher
  *
@@ -6,6 +6,9 @@
  *    as specified in the README file.
  *
  * $Log: Files.xs,v $
+ * Revision 1.5  2002/01/30 07:43:54  neeri
+ * Check ownership of CatInfos
+ *
  * Revision 1.4  2002/01/23 05:44:42  pudge
  * Update whitespace etc., from Thomas
  *
@@ -48,16 +51,24 @@
 #include <Errors.h>
 #include <Aliases.h>
 
+#define MACPERL_CATINFO	'MpCI'
+
 typedef FSSpec			RealFSSpec;
 typedef CInfoPBPtr 	CatInfo;
+typedef struct {
+	CInfoPBRec	fInfo;
+	OSType		fOwner;
+	Str63		fName;
+} ExtCatInfo;
 
 static CatInfo NewCatInfo()
 {
-	CatInfo	ci;
-	ci = (CatInfo) malloc(sizeof(CInfoPBRec)+sizeof(Str63));
-	ci->hFileInfo.ioNamePtr = (StringPtr) ((char *)ci+sizeof(CInfoPBRec));
+	ExtCatInfo*	ci;
+	ci = (ExtCatInfo *) malloc(sizeof(ExtCatInfo));
+	ci->fOwner	= MACPERL_CATINFO;
+	ci->fInfo.hFileInfo.ioNamePtr = ci->fName;
 	
-	return ci;
+	return (CatInfo)ci;
 }
 
 MODULE = Mac::Files	PACKAGE = Mac::Files
@@ -214,7 +225,8 @@ void
 DESTROY(cat)
 	CatInfo	cat
 	CODE:
-	free(cat);
+	if (((ExtCatInfo *)cat)->fOwner == MACPERL_CATINFO)
+		free(cat);
 
 
 MODULE = Mac::Files	PACKAGE = Mac::Files
