@@ -67,16 +67,6 @@ sub split_a_file {
   return $output;
 }
 
-# Brackets are valid in VMS filespecs and this test puts filespecs
-# into regexes a lot.
-
-sub _escape_brackets {
-  my $str = shift;
-  $str =~ s/\[/\\\[/g;   
-  $str =~ s/\]/\\\]/g;
-  return $str;
-}
-
 my $i = 0;
 my $dir = File::Spec->catdir($incdir, 'auto');
 if ($^O eq 'VMS') {
@@ -115,9 +105,8 @@ foreach (@tests) {
      while ($output =~ m/(\[.+\])/) {
        $filespec = $1;
        $replacement =  VMS::Filespec::unixify($filespec);
-       $filespec = _escape_brackets($filespec);
        $replacement =~ s/\/$//;
-       $output =~ s/$filespec/$replacement/;
+       $output =~ s/\Q$filespec\E/$replacement/;
      }
   }
 
@@ -174,7 +163,6 @@ foreach (@tests) {
   if ($args{Tests}) {
     foreach my $code (split /\n/, $args{Tests}) {
       next if $code =~ /^\#/;
-      $code =~ s/\[(File::Spec->catfile\(.*\))\]/[_escape_brackets($1)]/ if $^O eq 'VMS';
       defined eval $code or fail(), print "# Code:  $code\n# Error: $@";
     }
   }
