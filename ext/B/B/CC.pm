@@ -73,7 +73,6 @@ BEGIN {
     }
 }
 
-
 my ($module_name);
 my ($debug_op, $debug_stack, $debug_cxstack, $debug_pad, $debug_runtime,
     $debug_shadow, $debug_queue, $debug_lineno, $debug_timings);
@@ -346,8 +345,9 @@ sub dopoptoloop {
 sub dopoptolabel {
     my $label = shift;
     my $cxix = $#cxstack;
-    while ($cxix >= 0 && $cxstack[$cxix]->{type} != CXt_LOOP
-	   && $cxstack[$cxix]->{label} ne $label) {
+    while ($cxix >= 0 &&
+	   ($cxstack[$cxix]->{type} != CXt_LOOP ||
+	    $cxstack[$cxix]->{label} ne $label)) {
 	$cxix--;
     }
     debug "dopoptolabel: returning $cxix" if $debug_cxstack;
@@ -662,11 +662,15 @@ sub numeric_binop {
 	    }
 	} else {
 	    if ($force_int) {
+	        my $rightruntime = new B::Pseudoreg ("IV", "riv");
+	    	runtime(sprintf("$$rightruntime = %s;",$right));
 		runtime(sprintf("sv_setiv(TOPs, %s);",
-				&$operator("TOPi", $right)));
+				&$operator("TOPi", $$rightruntime)));
 	    } else {
+	    	my $rightruntime = new B::Pseudoreg ("double", "rnv");
+	    	runtime(sprintf("$$rightruntime = %s;",$right));
 		runtime(sprintf("sv_setnv(TOPs, %s);",
-				&$operator("TOPn", $right)));
+				&$operator("TOPn",$$rightruntime)));
 	    }
 	}
     } else {
@@ -1405,6 +1409,7 @@ sub cc_main {
 		     );
                  
     }
+    seek(STDOUT,0,0); #prevent print statements from BEGIN{} into the output
     output_boilerplate();
     print "\n";
     output_all("perl_init");
