@@ -1,10 +1,10 @@
 =head1 NAME
 
-perldelta - what's new for perl v5.6.0
+perldelta - what's new for perl v5.6
 
 =head1 DESCRIPTION
 
-This document describes differences between the 5.005 release and the 5.6.0
+This document describes differences between the 5.005 release and the 5.6.1
 release.
 
 =head1 Core Enhancements
@@ -2996,7 +2996,7 @@ warning.  And in Perl 5.005, this special treatment will cease.
 
 If you find what you think is a bug, you might check the
 articles recently posted to the comp.lang.perl.misc newsgroup.
-There may also be information at http://www.perl.com/perl/, the Perl
+There may also be information at http://www.perl.com/, the Perl
 Home Page.
 
 If you believe you have an unreported bug, please run the B<perlbug>
@@ -3017,7 +3017,7 @@ The F<Artistic> and F<Copying> files for copyright information.
 
 =head1 HISTORY
 
-Written by Gurusamy Sarathy <F<gsar@activestate.com>>, with many
+Written by Gurusamy Sarathy <F<gsar@ActiveState.com>>, with many
 contributions from The Perl Porters.
 
 Send omissions or corrections to <F<perlbug@perl.org>>.

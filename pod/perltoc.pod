@@ -1587,7 +1587,7 @@ Proto, LocalPort, Listen, Reuse
 
 =back
 
-=head2 perlfork - Perl's fork() emulation
+=head2 perlfork - Perl's fork() emulation (EXPERIMENTAL, subject to change)
 
 =over 4
 
@@ -1979,7 +1979,8 @@ LC_NUMERIC, LC_TIME, LANG
 
 =back
 
-=head2 perlunicode - Unicode support in Perl
+=head2 perlunicode - Unicode support in Perl (EXPERIMENTAL, subject to
+change)
 
 =over 4
 
@@ -3627,7 +3628,11 @@ C<void save_hptr(HV **hptr)>
 
 =item Background and PERL_IMPLICIT_CONTEXT
 
+=item So what happened to dTHR?
+
 =item How do I use all this in extensions?
+
+=item Should I do anything special if I call perl from multiple threads?
 
 =item Future Plans and PERL_IMPLICIT_SYS
 
@@ -3635,7 +3640,7 @@ C<void save_hptr(HV **hptr)>
 
 =item Internal Functions
 
-A, p, d, s, n, r, f, m, o, j, x
+A, p, d, s, n, r, f, M, o, j, x
 
 =over 4
 
@@ -4385,7 +4390,7 @@ I<The Road goes ever on and on, down from the door where it began.>
 
 =back
 
-=head2 perldelta - what's new for perl v5.6.0
+=head2 perldelta - what's new for perl v5.6
 
 =over 4
 
@@ -5946,13 +5951,12 @@ DATAMODEL_NATIVE specified", sh: ar: not found
 
 =item Configure
 
-- Don't turn on the compiler optimization flag "-O".  There's	  a bug in
-the compiler (APAR PQ18812) that generates some bad code       the
-optimizer is on, - As VM/ESA doesn't fully support the fork() API programs
-relying on	 this call will not work. I've replaced fork()/exec() with
-spawn()       and the standalone exec() with spawn(). This has a side
-effect when	opening unnamed pipes in a shell script: there is no child
-process      generated under
+Don't turn on the compiler optimization flag "-O".  There's a bug in the
+compiler (APAR PQ18812) that generates some bad code the optimizer is on,
+As VM/ESA doesn't fully support the fork() API programs relying on this
+call will not work. I've replaced fork()/exec() with spawn() and the
+standalone exec() with spawn(). This has a side effect when opening unnamed
+pipes in a shell script: there is no child process generated under
 
 =item testing anomalies
 
@@ -8154,7 +8158,7 @@ C<zcat>, C<zip>
 
 =back
 
-=head2 Cwd, getcwd - get pathname of current working directory
+=head2 Cwd - get pathname of current working directory
 
 =over 4
 
@@ -9447,7 +9451,8 @@ C<untaint_pattern>, C<untaint_skip>
 =item DESCRIPTION
 
 C<GLOB_ERR>, C<GLOB_MARK>, C<GLOB_NOCASE>, C<GLOB_NOCHECK>, C<GLOB_NOSORT>,
-C<GLOB_BRACE>, C<GLOB_NOMAGIC>, C<GLOB_QUOTE>, C<GLOB_TILDE>, C<GLOB_CSH>
+C<GLOB_BRACE>, C<GLOB_NOMAGIC>, C<GLOB_QUOTE>, C<GLOB_TILDE>, C<GLOB_CSH>,
+C<GLOB_ALPHASORT>
 
 =item DIAGNOSTICS
 
