@@ -1297,8 +1297,18 @@ do_readline(void)
 	sv = sv_2mortal(NEWSV(57, 80));
 	offset = 0;
     }
+
+/* flip-flop EOF state for a snarfed empty file */
+#define SNARF_EOF(gimme,rs,io,sv) \
+    ((gimme != G_SCALAR || SvCUR(sv)					\
+      || (IoFLAGS(io) & IOf_NOLINE) || IoLINES(io) || !RsSNARF(rs))	\
+	? ((IoFLAGS(io) &= ~IOf_NOLINE), TRUE)				\
+	: ((IoFLAGS(io) |= IOf_NOLINE), FALSE))
+
     for (;;) {
-	if (!sv_gets(sv, fp, offset)) {
+	if (!sv_gets(sv, fp, offset)
+	    && (type == OP_GLOB || SNARF_EOF(gimme, PL_rs, io, sv)))
+	{
 	    PerlIO_clearerr(fp);
 	    if (IoFLAGS(io) & IOf_ARGV) {
 		fp = nextargv(PL_last_in_gv);

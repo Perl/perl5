@@ -250,8 +250,8 @@ line.  Setting it to C<"\n\n"> will blindly assume that the next input
 character belongs to the next paragraph, even if it's a newline.
 (Mnemonic: / is used to delimit line boundaries when quoting poetry.)
 
-    undef $/;
-    $_ = <FH>; 		# whole file now here
+    undef $/;		# enable "slurp" mode
+    $_ = <FH>;		# whole file now here
     s/\n[ \t]+/ /g;
 
 Remember: the value of $/ is a string, not a regexp.  AWK has to be

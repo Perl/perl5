@@ -125,6 +125,25 @@ now correctly prints "3|a", instead of "2|a".
 The new format type 'Z' is useful for packing and unpacking null-terminated
 strings.  See L<perlfunc/"pack">.
 
+=head1 Significant bug fixes
+
+=head2 E<lt>HANDLEE<gt> on empty files
+
+With C<$/> set to C<undef>, slurping an empty file returns a string of
+zero length (instead of C<undef>, as it used to) for the first time the
+HANDLE is read.  Subsequent reads yield C<undef>.
+
+This means that the following will append "foo" to an empty file (it used
+to not do anything before):
+
+    perl -0777 -pi -e 's/^/foo/' empty_file
+
+Note that the behavior of:
+
+    perl -pi -e 's/^/foo/' empty_file
+
+is unchanged (it continues to leave the file empty).
+
 =head1 Supported Platforms
 
 =over 4
@@ -225,7 +244,24 @@ stat(2) might lie, while access(2) knows better.
 
 =head1 Utility Changes
 
+=head2 New Modules
+
+=over
+
 Todo.
+
+=back
+
+=head2 Changes in existing modules
+
+=over
+
+=item Exporter
+
+Exporter::expand() takes an import list and returns the expanded
+list of names.
+
+=back
 
 =head1 Documentation Changes
 

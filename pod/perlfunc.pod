@@ -2841,10 +2841,17 @@ C<chdir()> there, it would have been testing the wrong file.
 
 =item readline EXPR
 
-Reads from the filehandle whose typeglob is contained in EXPR.  In scalar context, a single line
-is read and returned.  In list context, reads until end-of-file is
-reached and returns a list of lines (however you've defined lines
-with C<$/> or C<$INPUT_RECORD_SEPARATOR>).
+Reads from the filehandle whose typeglob is contained in EXPR.  In scalar
+context, each call reads and returns the next line, until end-of-file is
+reached, whereupon the subsequent call returns undef.  In list context,
+reads until end-of-file is reached and returns a list of lines.  Note that
+the notion of "line" used here is however you may have defined it
+with C<$/> or C<$INPUT_RECORD_SEPARATOR>).  See L<perlvar/"$/">.
+
+When C<$/> is set to C<undef> and when readline() is in a scalar
+context (i.e. file slurp mode), it returns C<''> the first time,
+followed by C<undef> subsequently.
+
 This is the internal function implementing the C<E<lt>EXPRE<gt>>
 operator, but you can use it directly.  The C<E<lt>EXPRE<gt>>
 operator is discussed in more detail in L<perlop/"I/O Operators">.

@@ -1445,6 +1445,7 @@ to change.
 =head2 I/O Operators
 
 There are several I/O operators you should know about.
+
 A string enclosed by backticks (grave accents) first undergoes
 variable substitution just like a double quoted string.  It is then
 interpreted as a command, and the output of that command is the value
@@ -1462,9 +1463,12 @@ The generalized form of backticks is C<qx//>.  (Because backticks
 always undergo shell expansion as well, see L<perlsec> for
 security concerns.)
 
-Evaluating a filehandle in angle brackets yields the next line from
-that file (newline, if any, included), or C<undef> at end of file.
-Ordinarily you must assign that value to a variable, but there is one
+In a scalar context, evaluating a filehandle in angle brackets yields the
+next line from that file (newline, if any, included), or C<undef> at
+end-of-file.  When C<$/> is set to C<undef> (i.e. file slurp mode),
+it returns C<''> the first time, followed by C<undef> subsequently.
+
+Ordinarily you must assign the returned value to a variable, but there is one
 situation where an automatic assignment happens.  I<If and ONLY if> the
 input symbol is the only thing inside the conditional of a C<while> or
 C<for(;;)> loop, the value is automatically assigned to the variable
@@ -1501,12 +1505,15 @@ The filehandles STDIN, STDOUT, and STDERR are predefined.  (The
 filehandles C<stdin>, C<stdout>, and C<stderr> will also work except in
 packages, where they would be interpreted as local identifiers rather
 than global.)  Additional filehandles may be created with the open()
-function.  See L<perlfunc/open()> for details on this.
+function.  See L<perlfunc/open> for details on this.
 
 If a E<lt>FILEHANDLEE<gt> is used in a context that is looking for a list, a
 list consisting of all the input lines is returned, one line per list
 element.  It's easy to make a I<LARGE> data space this way, so use with
 care.
+
+E<lt>FILEHANDLEE<gt> may also be spelt readline(FILEHANDLE).  See
+L<perlfunc/readline>.
 
 The null filehandle E<lt>E<gt> is special and can be used to emulate the
 behavior of B<sed> and B<awk>.  Input from E<lt>E<gt> comes either from

@@ -313,6 +313,7 @@ struct xpvio {
 #define IOf_FLUSH 4	/* this fp wants a flush after write op */
 #define IOf_DIDTOP 8	/* just did top of form */
 #define IOf_UNTAINT 16  /* consider this fp (and its data) "safe" */
+#define IOf_NOLINE  32	/* slurped a pseudo-line from empty file */
 
 /* The following macros define implementation-independent predicates on SVs. */
 
