@@ -895,21 +895,14 @@ Free_t   Perl_mfree (Malloc_t where);
 #include <inttypes.h>
 #endif
 
-/*  XXX QUAD stuff is not currently supported on most systems.
-    Specifically, perl internals don't support long long.  Among
-    the many problems is that some compilers support long long,
-    but the underlying library functions (such as sprintf) don't.
-    Some things do work (such as quad pack/unpack on convex);
-    also some systems use long long for the fpos_t typedef.  That
-    seems to work too.
-
+/*
     The IV type is supposed to be long enough to hold any integral
     value or a pointer.
     --Andy Dougherty	August 1996
 */
 
-/*  Much more 64-bit probing added.  Now we should get Quad_t
-    in most systems: int64_t, long long, long, int, will do.
+/*  We should be able to get Quad_t in most systems:
+    all of int64_t, long long, long, int, will work.
 
     Beware of LP32 systems (ILP32, ILP32LL64).  Such systems have been
     used to sizeof(long) == sizeof(foo*).  This is a bad assumption
@@ -921,9 +914,11 @@ Free_t   Perl_mfree (Malloc_t where);
     Summary: a long long system needs to add -DUSE_LONG_LONG to $ccflags
     to get quads -- and if its pointers are still 32 bits, this will break
     binary compatibility.  Casting an IV (a long long) to a pointer will
-    truncate half of the IV away.
+    truncate half of the IV away.  Most systems can just use
+    Configure -Duse64bits to get the -DUSE_LONG_LONG added either by
+    their hints files, or directly by Configure if they are using gcc.
 
-    --jhi		September 1998 */
+    --jhi		September 1999 */
 
 #if INTSIZE == 4 && LONGSIZE == 4 && PTRSIZE == 4
 #   define PERL_ILP32
