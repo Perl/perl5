@@ -1184,7 +1184,7 @@ PP(pp_match)
     s = SvPV(TARG, len);
     strend = s + len;
     if (!s)
-	DIE(aTHX_ "panic: do_match");
+	DIE(aTHX_ "panic: pp_match");
     rxtainted = ((pm->op_pmdynflags & PMdf_TAINTED) ||
 		 (PL_tainted && (pm->op_pmflags & PMf_RETAINT)));
     TAINT_NOT;
@@ -1850,7 +1850,7 @@ PP(pp_subst)
     
   force_it:
     if (!pm || !s)
-	DIE(aTHX_ "panic: do_subst");
+	DIE(aTHX_ "panic: pp_subst");
 
     strend = s + len;
     maxiters = 2*(strend - s) + 10;	/* We can match twice at each

@@ -5772,7 +5772,7 @@ PP(pp_split)
     pm = (PMOP*)POPs;
 #endif
     if (!pm || !s)
-	DIE(aTHX_ "panic: do_split");
+	DIE(aTHX_ "panic: pp_split");
     rx = pm->op_pmregexp;
 
     TAINT_IF((pm->op_pmflags & PMf_LOCALE) &&

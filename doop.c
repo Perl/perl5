@@ -48,7 +48,7 @@ S_do_trans_simple(pTHX_ SV *sv)
 
     tbl = (short*)cPVOP->op_pv;
     if (!tbl)
-	Perl_croak(aTHX_ "panic: do_trans");
+	Perl_croak(aTHX_ "panic: do_trans_simple");
 
     s = (U8*)SvPV(sv, len);
     send = s + len;
@@ -107,7 +107,7 @@ S_do_trans_count(pTHX_ SV *sv)/* SPC - OK */
 
     tbl = (short*)cPVOP->op_pv;
     if (!tbl)
-	Perl_croak(aTHX_ "panic: do_trans");
+	Perl_croak(aTHX_ "panic: do_trans_count");
 
     s = (U8*)SvPV(sv, len);
     send = s + len;
@@ -147,7 +147,7 @@ S_do_trans_complex(pTHX_ SV *sv)/* SPC - NOT OK */
 
     tbl = (short*)cPVOP->op_pv;
     if (!tbl)
-	Perl_croak(aTHX_ "panic: do_trans");
+	Perl_croak(aTHX_ "panic: do_trans_complex");
 
     s = (U8*)SvPV(sv, len);
     send = s + len;

@@ -2405,23 +2405,19 @@ reference.
 (P) We popped the context stack to an eval context, and then discovered
 it wasn't an eval context.
 
-=item panic: do_match
+=item panic: pp_match
 
 (P) The internal pp_match() routine was called with invalid operational
 data.
-
-=item panic: do_split
-
-(P) Something terrible went wrong in setting up for the split.
 
 =item panic: do_subst
 
 (P) The internal pp_subst() routine was called with invalid operational
 data.
 
-=item panic: do_trans
+=item panic: do_trans_%s
 
-(P) The internal do_trans() routine was called with invalid operational
+(P) The internal do_trans routines were called with invalid operational
 data.
 
 =item panic: frexp
@@ -2512,6 +2508,10 @@ and freeing temporaries and lexicals from.
 =item panic: pp_iter
 
 (P) The foreach iterator got called in a non-loop context frame.
+
+=item panic: pp_split
+
+(P) Something terrible went wrong in setting up for the split.
 
 =item panic: realloc
 
