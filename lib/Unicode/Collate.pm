@@ -7,7 +7,7 @@ use Carp;
 
 require Exporter;
 
-our $VERSION = '0.09';
+our $VERSION = '0.10';
 our $PACKAGE = __PACKAGE__;
 
 our @ISA = qw(Exporter);
@@ -68,8 +68,26 @@ sub new
   $self->{rearrange} ||= []; # maybe not U+0000 (an ASCII)
   $self->{rearrange} = [ $self->{rearrange} ] if ! ref $self->{rearrange};
 
-  # open the table file
-  my $file = defined $self->{table} ? $self->{table} : $KeyFile;
+  # open a table file.
+  # if undef is passed explicitly, no file is read.
+  $self->{table} = $KeyFile unless exists $self->{table};
+  $self->read_table if defined $self->{table};
+
+  if($self->{entry}){
+    $self->parseEntry($_) foreach split /\n/, $self->{entry};
+  }
+
+  # keys of $self->{rearrangeHash} are $self->{rearrange}.
+  $self->{rearrangeHash} = {};
+  @{ $self->{rearrangeHash} }{ @{ $self->{rearrange} } } = ();
+
+  return $self;
+}
+
+
+sub read_table {
+  my $self = shift;
+  my $file = $self->{table} ne '' ? $self->{table} : $KeyFile;
   open my $fk, "<$Path/$file" or croak "File does not exist at $Path/$file";
 
   while(<$fk>){
@@ -92,16 +110,8 @@ sub new
     $self->parseEntry($_);
   }
   close $fk;
-  if($self->{entry}){
-    $self->parseEntry($_) foreach split /\n/, $self->{entry};
-  }
-
-  # keys of $self->{rearrangeHash} are $self->{rearrange}.
-  $self->{rearrangeHash} = {};
-  @{ $self->{rearrangeHash} }{ @{ $self->{rearrange} } } = ();
-
-  return $self;
 }
+
 
 ##
 ## get $line, parse it, and write an entry in $self
@@ -209,6 +219,7 @@ sub splitCE
     my $u  = $src[$i];
 
   # non-characters
+    next unless defined $u;
     next if $u < 0 || 0x10FFFF < $u     # out of range
          || 0xD800 < $u && $u < 0xDFFF; # unpaired surrogates
     my $four = $u & 0xFFFF; 
@@ -228,12 +239,14 @@ sub splitCE
   # with Combining Char (UTS#10, 4.2.1), here requires Unicode::Normalize.
     if($getCombinClass && defined $ch)
     {
-      for(my $j = $i+1; $j < @src && $getCombinClass->( $src[$j] ); $j++)
+      for(my $j = $i+1; $j < @src; $j++)
       {
+        next unless defined $src[$j];
+        last unless $getCombinClass->( $src[$j] );
         my $comb = pack 'U', $src[$j];
         next if ! $ent->{ $ch.$comb };
         $ch .= $comb;
-        splice(@src, $j, 1);
+        $src[$j] = undef;
       }
     }
     push @buf, $ch;
@@ -519,7 +532,7 @@ If omitted, forwards at all the levels.
 
 -- see 3.1 Linguistic Features; 3.2.1 File Format, UTR #10.
 
-Overrides a default order or adds a new element
+Overrides a default order or adds a new collation element
 
   entry => <<'ENTRIES', # use the UCA file format
 00E6 ; [.0861.0020.0002.00E6] [.08B1.0020.0002.00E6] # ligature <ae> as <a e>
@@ -558,7 +571,7 @@ Any higher levels than the specified one are ignored.
 
 -- see 4.1 Normalize each input string, UTR #10.
 
-If specified, strings are normalized before preparation sort keys
+If specified, strings are normalized before preparation of sort keys
 (the normalization is executed after preprocess).
 
 As a form name, one of the following names must be used.
@@ -636,6 +649,9 @@ You can use another element table if desired.
 The table file must be in your C<lib/Unicode/Collate> directory.
 
 By default, the file C<lib/Unicode/Collate/allkeys.txt> is used.
+
+If undefined explicitly (as C<table =E<gt> undef>),
+no file is read (you'd define collation elements using L<entry>).
 
 =item undefName
 

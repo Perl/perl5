@@ -1,5 +1,9 @@
 Revision history for Perl extension Unicode::Collate.
 
+0.10  Tue Dec 11 23:26:42 2001
+    - now you are allowed to use no table file.
+    - fix: fetching CE with two or more combining characters.
+
 0.09  Sun Nov 11 17:02:40:18 2001
     - add the following methods: eq, ne, lt, le, gt, le.
     - relies on &Unicode::Normalize::getCombinClass()
