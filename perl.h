@@ -1663,6 +1663,9 @@ typedef struct ptr_tbl PTR_TBL_t;
 #         else
 #           if defined(MACOS_TRADITIONAL)
 #             include "macos/macish.h"
+#	      ifndef NO_ENVIRON_ARRAY
+#               define NO_ENVIRON_ARRAY
+#             endif
 #           else
 #             include "unixish.h"
 #           endif
