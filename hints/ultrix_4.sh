@@ -1,4 +1,4 @@
-ccflags="$ccflags -DLANGUAGE_C -Olimit 2900"
+optimize=-g
 tmp=`(uname -a) 2>/dev/null`
 case "$tmp" in
 *RISC*) cat <<EOF
@@ -12,12 +12,13 @@ EOF
 ;;
 esac
 case "$tmp" in
-*4.1*)
-    eval_cflags='optimize="-g"'
-    teval_cflags='optimize="-g"'
-    toke_cflags='optimize="-g"'
-    ttoke_cflags='optimize="-g"'
-    ;;
-*4.2*) libswanted=`echo $libswanted | sed 's/ malloc / /'` ;;
+*4.1*)	ccflags="$ccflags -DLANGUAGE_C -Olimit 2900" 
+	;;
+*4.2*)	ccflags="$ccflags -DLANGUAGE_C -Olimit 2900"
+	libswanted=`echo $libswanted | sed 's/ malloc / /'`
+	;;
+*4.4*)	ccflags="$ccflags -std -Olimit 2900"
+	ranlib='ranlib'
+	;;
 esac
-
+groupstype='int'

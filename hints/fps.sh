@@ -1,1 +1,1 @@
-ccflags="$ccflags -J -DBADSWITCH"
+ccflags="$ccflags -J"

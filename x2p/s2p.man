@@ -2,21 +2,6 @@
 ''' $RCSfile: s2p.man,v $$Revision: 4.1 $$Date: 92/08/07 18:29:24 $
 ''' 
 ''' $Log:	s2p.man,v $
-''' Revision 4.1  92/08/07  18:29:24  lwall
-''' 
-''' Revision 4.0.1.1  91/06/07  12:19:57  lwall
-''' patch4: s2p now handles embedded newlines better and optimizes common idioms
-''' 
-''' Revision 4.0  91/03/20  01:58:07  lwall
-''' 4.0 baseline.
-''' 
-''' Revision 3.0  89/10/18  15:35:09  lwall
-''' 3.0 baseline
-''' 
-''' Revision 2.0  88/06/05  00:15:59  root
-''' Baseline version 2.0.
-''' 
-''' 
 .de Sh
 .br
 .ne 5

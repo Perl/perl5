@@ -1,8 +1,0 @@
-#!./perl
-$foo = GOOD;
-{ 
-    local(*foo) = \$bar;
-    $bar = BAR;
-    print $foo;
-}
-print $foo;

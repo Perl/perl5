@@ -47,8 +47,6 @@ New things
     Lexical scoping available via "my".  eval can see the current lexical
     variables.
 
-    Saying "package;" requires explicit package name on global symbols.
-
     The preferred package delimiter is now :: rather than '.
 
     tie/untie are now preferred to dbmopen/dbmclose.  Multiple DBM
@@ -58,10 +56,8 @@ New things
     New "and" and "or" operators work just like && and || but with
     a precedence lower than comma, so they work better with list operators.
 
-    New functions include: abs(), chr(), uc(), ucfirst(), lc(), lcfirst()
-
-    require with a bare word now does an immediate require at compile time.
-    So "require POSIX" is equivalent to "BEGIN { require 'POSIX.pm' }".
+    New functions include: abs(), chr(), uc(), ucfirst(), lc(), lcfirst(),
+    chomp(), glob()
 
     require with a number checks to see that the version of Perl that is
     currently running is at least that number.
@@ -86,14 +82,52 @@ New things
     routine, which will be called if a non-existent subroutine is called in
     that package.
 
-    There is now a pragma mechanism, using the keywords "aver" and "deny".
-    Current pragmas are "integer" and "strict".  Unrecognized pragmas
-    are ignored.
+    Several previously added features have been subsumed under the new
+    keywords "use" and "no".  Saying "use Module LIST" is short for
+	BEGIN { require Module; import Module LIST; }
+    The "no" keyword is identical except that it calls "unimport" instead.
+    The earlier pragma mechanism now uses this mechanism, and two new
+    modules have been added to the library to implement "use integer"
+    and variations of "use strict vars, refs, subs".
+
+    Variables may now be interpolated literally into a pattern by prefixing
+    them with \Q, which works just like \U, but backwhacks non-alphanumerics
+    instead.  There is also a corresponding quotemeta function.
+
+    Any quantifier in a regular expression may now be followed by a ? to
+    indicate that the pattern is supposed to match as little as possible.
+
+    Pattern matches may now be followed by an m or s modifier to explicitly
+    request multiline or singleline semantics.  An s modifier makes . match
+    newline.
+
+    Patterns may now contain \A to match only at the beginning of the string,
+    and \Z to match only at the end.  These differ from ^ and $ in that
+    they ignore multiline semantics.  In addition, \G matches where the
+    last interation of m//g or s///g left off.
+
+    Non-backreference-producing parens of various sorts may now be
+    indicated by placing a ? directly after the opening parenthesis,
+    followed by a character that indicates the purpose of the parens.
+    An :, for instance, indicates simple grouping.  (?:a|b|c) will
+    match any of a, b or c without producing a backreference.  It does
+    "eat" the input.  There are also assertions which do not eat the
+    input but do lookahead for you.  (?=stuff) indicates that the next
+    thing must be "stuff".  (?!nonsense) indicates that the next thing
+    must not be "nonsense".
+
+    The negation operator now treats non-numeric strings specially.
+    A -"text" is turned into "-text", so that -bareword is the same
+    as "-bareword".  If the string already begins with a + or -, it
+    is flipped to the other sign.
 
 Incompatibilities
 -----------------
     @ now always interpolates an array in double-quotish strings.  Some programs
     may now need to use backslash to protect any @ that shouldn't interpolate.
+
+    Ordinary variables starting with underscore are no longer forced into
+    package main.
 
     s'$lhs'$rhs' now does no interpolation on either side.  It used to
     interplolate $lhs but not $rhs.
@@ -111,7 +145,7 @@ Incompatibilities
     You can't do a goto into a block that is optimized away.  Darn.
 
     It is no longer syntactically legal to use whitespace as the name
-    of a variable.
+    of a variable, or as a delimiter for any kind of quote construct.
 
     Some error messages will be different.
 
@@ -135,3 +169,13 @@ Incompatibilities
 
     The comma operator in a scalar context is now guaranteed to give a
     scalar context to its arguments.
+
+    The ** operator now binds more tightly than unary minus.
+
+    Setting $#array lower now discards array elements so that destructors
+    work reasonably.
+
+    delete is not guaranteed to return the old value for tied arrays,
+    since this capability may be onerous for some modules to implement.
+
+    Attempts to set $1 through $9 now result in a run-time error.

@@ -23,9 +23,9 @@ if (join('',@ary) eq '1234') {print "ok 8\n";} else {print "not ok 8\n";}
 
 if ($ary[5] eq '') {print "ok 9\n";} else {print "not ok 9\n";}
 
-$#ary += 1;	# see if we can recover element 5
+$#ary += 1;	# see if element 5 gone for good
 if ($#ary == 5) {print "ok 10\n";} else {print "not ok 10\n";}
-if ($ary[5] == 5) {print "ok 11\n";} else {print "not ok 11\n";}
+if (defined $ary[5]) {print "not ok 11\n";} else {print "ok 11\n";}
 
 $[ = 0;
 @foo = ();

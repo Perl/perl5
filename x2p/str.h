@@ -6,14 +6,6 @@
  *    License or the Artistic License, as specified in the README file.
  *
  * $Log:	str.h,v $
- * Revision 4.1  92/08/07  18:29:27  lwall
- * 
- * Revision 4.0.1.1  91/06/07  12:20:22  lwall
- * patch4: new copyright notice
- * 
- * Revision 4.0  91/03/20  01:58:21  lwall
- * 4.0 baseline.
- * 
  */
 
 struct string {

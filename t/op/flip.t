@@ -17,9 +17,9 @@ if ($y eq '12E0123E0') {print "ok 7\n";} else {print "not ok 7\n";}
 
 @a = ('a','b','c','d','e','f','g');
 
-open(of,'../Makefile');
+open(of,'../Configure');
 while (<of>) {
-    (3 .. 5) && $foo .= $_;
+    (3 .. 5) && ($foo .= $_);
 }
 $x = ($foo =~ y/\n/\n/);
 

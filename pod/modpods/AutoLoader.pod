@@ -1,0 +1,16 @@
+=head1 NAME
+
+AutoLoader - load functions only on demand
+
+=head1 SYNOPSIS
+
+    package FOOBAR;
+    use Exporter;
+    use AutoLoader;
+    @ISA = (Exporter, AutoLoader);
+
+=head1 DESCRIPTION
+
+This module tells its users that functions in the FOOBAR package are to be
+autoloaded from F<auto/$AUTOLOAD.al>.  See L<perlsub/"Autoloading">.
+

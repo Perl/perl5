@@ -1,98 +1,63 @@
-/* $RCSfile: toke.c,v $$Revision: 4.1 $$Date: 92/08/07 18:28:39 $
+/*    toke.c
  *
- *    Copyright (c) 1991, Larry Wall
+ *    Copyright (c) 1991-1994, Larry Wall
  *
  *    You may distribute under the terms of either the GNU General Public
  *    License or the Artistic License, as specified in the README file.
  *
- * $Log:	toke.c,v $
- * Revision 4.1  92/08/07  18:28:39  lwall
- * 
- * Revision 4.0.1.7  92/06/11  21:16:30  lwall
- * patch34: expect incorrectly set to indicate start of program or block
- * 
- * Revision 4.0.1.6  92/06/08  16:03:49  lwall
- * patch20: an EXPR may now start with a bareword
- * patch20: print $fh EXPR can now expect term rather than operator in EXPR
- * patch20: added ... as variant on ..
- * patch20: new warning on spurious backslash
- * patch20: new warning on missing $ for foreach variable
- * patch20: "foo"x1024 now legal without space after x
- * patch20: new warning on print accidentally used as function
- * patch20: tr/stuff// wasn't working right
- * patch20: 2. now eats the dot
- * patch20: <@ARGV> now notices @ARGV
- * patch20: tr/// now lets you say \-
- * 
- * Revision 4.0.1.5  91/11/11  16:45:51  lwall
- * patch19: default arg for shift was wrong after first subroutine definition
- * 
- * Revision 4.0.1.4  91/11/05  19:02:48  lwall
- * patch11: \x and \c were subject to double interpretation in regexps
- * patch11: prepared for ctype implementations that don't define isascii()
- * patch11: nested list operators could miscount parens
- * patch11: once-thru blocks didn't display right in the debugger
- * patch11: sort eval "whatever" didn't work
- * patch11: underscore is now allowed within literal octal and hex numbers
- * 
- * Revision 4.0.1.3  91/06/10  01:32:26  lwall
- * patch10: m'$foo' now treats string as single quoted
- * patch10: certain pattern optimizations were botched
- * 
- * Revision 4.0.1.2  91/06/07  12:05:56  lwall
- * patch4: new copyright notice
- * patch4: debugger lost track of lines in eval
- * patch4: //o and s///o now optimize themselves fully at runtime
- * patch4: added global modifier for pattern matches
- * 
- * Revision 4.0.1.1  91/04/12  09:18:18  lwall
- * patch1: perl -de "print" wouldn't stop at the first statement
- * 
- * Revision 4.0  91/03/20  01:42:14  lwall
- * 4.0 baseline.
- * 
+ */
+
+/*
+ *   "It all comes from here, the stench and the peril."  --Frodo
  */
 
 #include "EXTERN.h"
 #include "perl.h"
-#include "perly.h"
 
-static void set_csh();
+static void check_uni _((void));
+static void  force_next _((I32 type));
+static char *force_word _((char *start, int token, int check_keyword, int allow_pack, int allow_tick));
+static SV *q _((SV *sv));
+static char *scan_const _((char *start));
+static char *scan_formline _((char *s));
+static char *scan_heredoc _((char *s));
+static char *scan_ident _((char *s, char *send, char *dest, I32 ck_uni));
+static char *scan_inputsymbol _((char *start));
+static char *scan_pat _((char *start));
+static char *scan_str _((char *start));
+static char *scan_subst _((char *start));
+static char *scan_trans _((char *start));
+static char *scan_word _((char *s, char *dest, int allow_package, STRLEN *slp));
+static char *skipspace _((char *s));
+static void checkcomma _((char *s, char *name, char *what));
+static void force_ident _((char *s, int kind));
+static void incline _((char *s));
+static int intuit_method _((char *s, GV *gv));
+static int intuit_more _((char *s));
+static I32 lop _((I32 f, expectation x, char *s));
+static void missingterm _((char *s));
+static void no_op _((char *what, char *s));
+static void set_csh _((void));
+static I32 sublex_done _((void));
+static I32 sublex_start _((void));
+#ifdef CRIPPLED_CC
+static int uni _((I32 f, char *s));
+#endif
 
 /* The following are arranged oddly so that the guard on the switch statement
  * can get by with a single comparison (if the compiler is smart enough).
  */
 
-#define LEX_NORMAL		8
-#define LEX_INTERPNORMAL	7
-#define LEX_INTERPCASEMOD	6
-#define LEX_INTERPSTART		5
-#define LEX_INTERPEND		4
-#define LEX_INTERPENDMAYBE	3
-#define LEX_INTERPCONCAT	2
-#define LEX_INTERPCONST		1
+#define LEX_NORMAL		9
+#define LEX_INTERPNORMAL	8
+#define LEX_INTERPCASEMOD	7
+#define LEX_INTERPSTART		6
+#define LEX_INTERPEND		5
+#define LEX_INTERPENDMAYBE	4
+#define LEX_INTERPCONCAT	3
+#define LEX_INTERPCONST		2
+#define LEX_FORMLINE		1
 #define LEX_KNOWNEXT		0
-
-static U32		lex_state = LEX_NORMAL;	/* next token is determined */
-static U32		lex_defer;	/* state after determined token */
-static expectation	lex_expect;	/* expect after determined token */
-static I32		lex_brackets;	/* bracket count */
-static I32		lex_formbrack;	/* bracket count at outer format level */
-static I32		lex_fakebrack;	/* outer bracket is mere delimiter */
-static I32		lex_casemods;	/* casemod count */
-static I32		lex_dojoin;	/* doing an array interpolation */
-static I32		lex_starts;	/* how many interps done on level */
-static SV *		lex_stuff;	/* runtime pattern from m// or s/// */
-static SV *		lex_repl;	/* runtime replacement from s/// */
-static OP *		lex_op;		/* extra info to pass back on op */
-static I32		lex_inpat;	/* in pattern $) and $| are special */
-static I32		lex_inwhat;	/* what kind of quoting are we in */
-static char *		lex_brackstack;	/* what kind of brackets to pop */
-
-/* What we know when we're in LEX_KNOWNEXT state. */
-static YYSTYPE	nextval[5];	/* value of next token, if any */
-static I32	nexttype[5];	/* type of next token */
-static I32	nexttoke = 0;
 
 #ifdef I_FCNTL
 #include <fcntl.h>
@@ -112,28 +77,24 @@ static I32	nexttoke = 0;
 #endif
 #define CLINE (copline = (curcop->cop_line < copline ? curcop->cop_line : copline))
 
-#ifdef atarist
-#define PERL_META(c) ((c) | 128)
-#else
-#define META(c) ((c) | 128)
-#endif
-
 #define TOKEN(retval) return (bufptr = s,(int)retval)
 #define OPERATOR(retval) return (expect = XTERM,bufptr = s,(int)retval)
+#define AOPERATOR(retval) return ao((expect = XTERM,bufptr = s,(int)retval))
 #define PREBLOCK(retval) return (expect = XBLOCK,bufptr = s,(int)retval)
+#define PRETERMBLOCK(retval) return (expect = XTERMBLOCK,bufptr = s,(int)retval)
 #define PREREF(retval) return (expect = XREF,bufptr = s,(int)retval)
 #define TERM(retval) return (CLINE, expect = XOPERATOR,bufptr = s,(int)retval)
 #define LOOPX(f) return(yylval.ival=f,expect = XTERM,bufptr = s,(int)LOOPEX)
 #define FTST(f) return(yylval.ival=f,expect = XTERM,bufptr = s,(int)UNIOP)
 #define FUN0(f) return(yylval.ival = f,expect = XOPERATOR,bufptr = s,(int)FUNC0)
 #define FUN1(f) return(yylval.ival = f,expect = XOPERATOR,bufptr = s,(int)FUNC1)
-#define BOop(f) return(yylval.ival=f,expect = XTERM,bufptr = s,(int)BITOROP)
-#define BAop(f) return(yylval.ival=f,expect = XTERM,bufptr = s,(int)BITANDOP)
-#define SHop(f) return(yylval.ival=f,expect = XTERM,bufptr = s,(int)SHIFTOP)
-#define PWop(f) return(yylval.ival=f,expect = XTERM,bufptr = s,(int)POWOP)
+#define BOop(f) return ao((yylval.ival=f,expect = XTERM,bufptr = s,(int)BITOROP))
+#define BAop(f) return ao((yylval.ival=f,expect = XTERM,bufptr = s,(int)BITANDOP))
+#define SHop(f) return ao((yylval.ival=f,expect = XTERM,bufptr = s,(int)SHIFTOP))
+#define PWop(f) return ao((yylval.ival=f,expect = XTERM,bufptr = s,(int)POWOP))
 #define PMop(f) return(yylval.ival=f,expect = XTERM,bufptr = s,(int)MATCHOP)
-#define Aop(f) return(yylval.ival=f,expect = XTERM,bufptr = s,(int)ADDOP)
-#define Mop(f) return(yylval.ival=f,expect = XTERM,bufptr = s,(int)MULOP)
+#define Aop(f) return ao((yylval.ival=f,expect = XTERM,bufptr = s,(int)ADDOP))
+#define Mop(f) return ao((yylval.ival=f,expect = XTERM,bufptr = s,(int)MULOP))
 #define Eop(f) return(yylval.ival=f,expect = XTERM,bufptr = s,(int)EQOP)
 #define Rop(f) return(yylval.ival=f,expect = XTERM,bufptr = s,(int)RELOP)
 
@@ -144,6 +105,7 @@ static I32	nexttoke = 0;
 	expect = XTERM, \
 	bufptr = s, \
 	last_uni = oldbufptr, \
+	last_lop_op = f, \
 	(*s == '(' || (s = skipspace(s), *s == '(') ? (int)FUNC1 : (int)UNIOP) )
 
 #define UNIBRACK(f) return(yylval.ival = f, \
@@ -151,17 +113,25 @@ static I32	nexttoke = 0;
 	last_uni = oldbufptr, \
 	(*s == '(' || (s = skipspace(s), *s == '(') ? (int)FUNC1 : (int)UNIOP) )
 
-/* This does similarly for list operators */
-#define LOP(f) return(yylval.ival = f, \
-	CLINE, \
-	expect = XREF, \
-	bufptr = s, \
-	last_lop = oldbufptr, \
-	last_lop_op = f, \
-	(*s == '(' || (s = skipspace(s), *s == '(') ? (int)FUNC : (int)LSTOP) )
-
 /* grandfather return to old style */
 #define OLDLOP(f) return(yylval.ival=f,expect = XTERM,bufptr = s,(int)LSTOP)
+
+static cryptswitch_t cryptswitch_fp = NULL;
+
+static int
+ao(toketype)
+int toketype;
+{
+    if (*bufptr == '=') {
+	bufptr++;
+	if (toketype == ANDAND)
+	    yylval.ival = OP_ANDASSIGN;
+	else if (toketype == OROR)
+	    yylval.ival = OP_ORASSIGN;
+	toketype = ASSIGNOP;
+    }
+    return toketype;
+}
 
 static void
 no_op(what, s)
@@ -173,8 +143,8 @@ char *s;
     bufptr = s;
     sprintf(tmpbuf, "%s found where operator expected", what);
     yywarn(tmpbuf);
-    if (bufptr == SvPVX(linestr))
-	warn("\t(Missing semicolon on previous line?)\n", what);
+    if (oldbufptr == SvPVX(linestr))
+	warn("\t(Missing semicolon on previous line?)\n");
     bufptr = oldbufptr;
 }
 
@@ -206,6 +176,20 @@ char *s;
 }
 
 void
+deprecate(s)
+char *s;
+{
+    if (dowarn)
+	warn("Use of %s is deprecated", s);
+}
+
+static void
+depcom()
+{
+    deprecate("comma-less variable list");
+}
+
+void
 lex_start(line)
 SV *line;
 {
@@ -218,7 +202,7 @@ SV *line;
     SAVEINT(lex_casemods);
     SAVEINT(lex_starts);
     SAVEINT(lex_state);
-    SAVEINT(lex_inpat);
+    SAVESPTR(lex_inpat);
     SAVEINT(lex_inwhat);
     SAVEINT(curcop->cop_line);
     SAVEPPTR(bufptr);
@@ -227,6 +211,7 @@ SV *line;
     SAVEPPTR(oldoldbufptr);
     SAVESPTR(linestr);
     SAVEPPTR(lex_brackstack);
+    SAVEPPTR(lex_casestack);
     SAVESPTR(rsfp);
 
     lex_state = LEX_NORMAL;
@@ -234,11 +219,12 @@ SV *line;
     expect = XSTATE;
     lex_brackets = 0;
     lex_fakebrack = 0;
-    if (lex_brackstack)
-	SAVEPPTR(lex_brackstack);
     New(899, lex_brackstack, 120, char);
+    New(899, lex_casestack, 12, char);
     SAVEFREEPV(lex_brackstack);
+    SAVEFREEPV(lex_casestack);
     lex_casemods = 0;
+    *lex_casestack = '\0';
     lex_dojoin = 0;
     lex_starts = 0;
     if (lex_stuff)
@@ -254,7 +240,7 @@ SV *line;
 	linestr = sv_2mortal(newSVsv(linestr));
     s = SvPV(linestr, len);
     if (len && s[len-1] != ';') {
-	if (!(SvFLAGS(linestr) & SVs_TEMP));
+	if (!(SvFLAGS(linestr) & SVs_TEMP))
 	    linestr = sv_2mortal(newSVsv(linestr));
 	sv_catpvn(linestr, "\n;", 2);
     }
@@ -332,13 +318,19 @@ register char *s;
 	    if (s < bufend)
 		s++;
 	}
-	if (s < bufend || !rsfp)
+	if (s < bufend || !rsfp || lex_state != LEX_NORMAL)
 	    return s;
 	if ((s = sv_gets(linestr, rsfp, 0)) == Nullch) {
-	    sv_setpv(linestr,";");
+	    if (minus_n || minus_p) {
+		sv_setpv(linestr,minus_p ? ";}continue{print" : "");
+		sv_catpv(linestr,";}");
+		minus_n = minus_p = 0;
+	    }
+	    else
+		sv_setpv(linestr,";");
 	    oldoldbufptr = oldbufptr = bufptr = s = SvPVX(linestr);
-	    bufend = s+1;
-	    if (preprocess)
+	    bufend = SvPVX(linestr) + SvCUR(linestr);
+	    if (preprocess && !in_eval)
 		(void)my_pclose(rsfp);
 	    else if ((FILE*)rsfp == stdin)
 		clearerr(stdin);
@@ -349,6 +341,7 @@ register char *s;
 	}
 	oldoldbufptr = oldbufptr = bufptr = s;
 	bufend = bufptr + SvCUR(linestr);
+	incline(s);
 	if (perldb && curstash != debstash) {
 	    SV *sv = NEWSV(85,0);
 
@@ -356,7 +349,6 @@ register char *s;
 	    sv_setsv(sv,linestr);
 	    av_store(GvAV(curcop->cop_filegv),(I32)curcop->cop_line,sv);
 	}
-	incline(s);
     }
 }
 
@@ -364,12 +356,15 @@ static void
 check_uni() {
     char *s;
     char ch;
+    char *t;
 
     if (oldoldbufptr != last_uni)
 	return;
     while (isSPACE(*last_uni))
 	last_uni++;
     for (s = last_uni; isALNUM(*s) || *s == '-'; s++) ;
+    if ((t = strchr(s, '(')) && t < bufptr)
+	return;
     ch = *s;
     *s = '\0';
     warn("Warning: Use of \"%s\" without parens is ambiguous", last_uni);
@@ -379,9 +374,7 @@ check_uni() {
 #ifdef CRIPPLED_CC
 
 #undef UNI
-#undef LOP
 #define UNI(f) return uni(f,s)
-#define LOP(f) return lop(f,s)
 
 static int
 uni(f,s)
@@ -392,6 +385,7 @@ char *s;
     expect = XTERM;
     bufptr = s;
     last_uni = oldbufptr;
+    last_lop_op = f;
     if (*s == '(')
 	return FUNC1;
     s = skipspace(s);
@@ -401,17 +395,24 @@ char *s;
 	return UNIOP;
 }
 
+#endif /* CRIPPLED_CC */
+
+#define LOP(f,x) return lop(f,x,s)
+
 static I32
-lop(f,s)
+lop(f,x,s)
 I32 f;
+expectation x;
 char *s;
 {
     yylval.ival = f;
     CLINE;
-    expect = XREF;
+    expect = x;
     bufptr = s;
     last_lop = oldbufptr;
     last_lop_op = f;
+    if (nexttoke)
+	return LSTOP;
     if (*s == '(')
 	return FUNC;
     s = skipspace(s);
@@ -420,8 +421,6 @@ char *s;
     else
 	return LSTOP;
 }
-
-#endif /* CRIPPLED_CC */
 
 static void 
 force_next(type)
@@ -437,10 +436,11 @@ I32 type;
 }
 
 static char *
-force_word(start,token,check_keyword,allow_tick)
+force_word(start,token,check_keyword,allow_pack,allow_tick)
 register char *start;
 int token;
 int check_keyword;
+int allow_pack;
 int allow_tick;
 {
     register char *s;
@@ -448,8 +448,11 @@ int allow_tick;
     
     start = skipspace(start);
     s = start;
-    if (isIDFIRST(*s) || (allow_tick && (*s == '\'' || *s == ':'))) {
-	s = scan_word(s, tokenbuf, allow_tick, &len);
+    if (isIDFIRST(*s) ||
+	(allow_pack && *s == ':') ||
+	(allow_tick && *s == '\'') )
+    {
+	s = scan_word(s, tokenbuf, allow_pack, &len);
 	if (check_keyword && keyword(tokenbuf, len))
 	    return start;
 	if (token == METHOD) {
@@ -470,12 +473,20 @@ int allow_tick;
 }
 
 static void
-force_ident(s)
+force_ident(s, kind)
 register char *s;
+int kind;
 {
     if (s && *s) {
 	nextval[nexttoke].opval = (OP*)newSVOP(OP_CONST, 0, newSVpv(s,0));
 	force_next(WORD);
+	if (kind)
+	    gv_fetchpv(s, TRUE,
+		kind == '$' ? SVt_PV :
+		kind == '@' ? SVt_PVAV :
+		kind == '%' ? SVt_PVHV :
+			      SVt_PVGV
+		);
     }
 }
 
@@ -486,23 +497,21 @@ SV *sv;
     register char *s;
     register char *send;
     register char *d;
-    register char delim;
     STRLEN len;
 
     if (!SvLEN(sv))
 	return sv;
 
-    s = SvPV(sv, len);
+    s = SvPV_force(sv, len);
     send = s + len;
     while (s < send && *s != '\\')
 	s++;
     if (s == send)
 	return sv;
     d = s;
-    delim = SvIVX(sv);
     while (s < send) {
 	if (*s == '\\') {
-	    if (s + 1 < send && (s[1] == '\\' || s[1] == delim))
+	    if (s + 1 < send && (s[1] == '\\'))
 		s++;		/* all that, just for this */
 	}
 	*d++ = *s++;
@@ -517,8 +526,6 @@ static I32
 sublex_start()
 {
     register I32 op_type = yylval.ival;
-    SV *sv;
-    STRLEN len;
 
     if (op_type == OP_NULL) {
 	yylval.opval = lex_op;
@@ -538,7 +545,7 @@ sublex_start()
     SAVEINT(lex_casemods);
     SAVEINT(lex_starts);
     SAVEINT(lex_state);
-    SAVEINT(lex_inpat);
+    SAVESPTR(lex_inpat);
     SAVEINT(lex_inwhat);
     SAVEINT(curcop->cop_line);
     SAVEPPTR(bufptr);
@@ -546,6 +553,7 @@ sublex_start()
     SAVEPPTR(oldoldbufptr);
     SAVESPTR(linestr);
     SAVEPPTR(lex_brackstack);
+    SAVEPPTR(lex_casestack);
 
     linestr = lex_stuff;
     lex_stuff = Nullsv;
@@ -558,15 +566,18 @@ sublex_start()
     lex_brackets = 0;
     lex_fakebrack = 0;
     New(899, lex_brackstack, 120, char);
+    New(899, lex_casestack, 12, char);
     SAVEFREEPV(lex_brackstack);
+    SAVEFREEPV(lex_casestack);
     lex_casemods = 0;
+    *lex_casestack = '\0';
     lex_starts = 0;
     lex_state = LEX_INTERPCONCAT;
     curcop->cop_line = multi_start;
 
     lex_inwhat = op_type;
     if (op_type == OP_MATCH || op_type == OP_SUBST)
-	lex_inpat = op_type;
+	lex_inpat = lex_op;
     else
 	lex_inpat = 0;
 
@@ -606,6 +617,7 @@ sublex_done()
 	lex_brackets = 0;
 	lex_fakebrack = 0;
 	lex_casemods = 0;
+	*lex_casestack = '\0';
 	lex_starts = 0;
 	if (SvCOMPILED(lex_repl)) {
 	    lex_state = LEX_INTERPNORMAL;
@@ -638,7 +650,7 @@ char *start;
     I32 len;
     char *leave =
 	lex_inpat
-	    ? "\\.^$@dDwWsSbB+*?|()-nrtfeaxc0123456789[{]}"
+	    ? "\\.^$@AGZdDwWsSbB+*?|()-nrtfeaxc0123456789[{]}"
 	    : (lex_inwhat & OP_TRANS)
 		? ""
 		: "";
@@ -663,32 +675,36 @@ char *start;
 		s++;
 	    }
 	}
-	else if (*s == '@' && s[1] && (isALNUM(s[1]) || strchr(":'{", s[1])))
+	else if (*s == '@' && s[1] && (isALNUM(s[1]) || strchr(":'{$", s[1])))
 	    break;
 	else if (*s == '$') {
 	    if (!lex_inpat)	/* not a regexp, so $ must be var */
 		break;
-	    if (s + 1 < send && s[1] != ')' && s[1] != '|')
+	    if (s + 1 < send && !strchr(")| \n\t", s[1]))
 		break;		/* in regexp, $ might be tail anchor */
 	}
 	if (*s == '\\' && s+1 < send) {
 	    s++;
+#ifdef NOTDEF
 	    if (*s == delim) {
 		*d++ = *s++;
 		continue;
 	    }
+#endif
 	    if (*s && strchr(leave, *s)) {
 		*d++ = '\\';
 		*d++ = *s++;
 		continue;
 	    }
 	    if (lex_inwhat == OP_SUBST && !lex_inpat &&
-		isDIGIT(*s) && !isDIGIT(s[1]))
+		isDIGIT(*s) && *s != '0' && !isDIGIT(s[1]))
 	    {
+		if (dowarn)
+		    warn("\\%c better written as $%c", *s, *s);
 		*--s = '$';
 		break;
 	    }
-	    if (lex_inwhat != OP_TRANS && *s && strchr("lLuUE", *s)) {
+	    if (lex_inwhat != OP_TRANS && *s && strchr("lLuUEQ", *s)) {
 		--s;
 		break;
 	    }
@@ -715,7 +731,7 @@ char *start;
 		s++;
 		*d = *s++;
 		if (isLOWER(*d))
-		    *d = toupper(*d);
+		    *d = toUPPER(*d);
 		*d++ ^= 64;
 		continue;
 	    case 'b':
@@ -827,7 +843,7 @@ register char *s;
 		weight -= seen[un_char] * 10;
 		if (isALNUM(s[1])) {
 		    scan_ident(s,send,tmpbuf,FALSE);
-		    if (strlen(tmpbuf) > 1 && gv_fetchpv(tmpbuf,FALSE, SVt_PV))
+		    if ((int)strlen(tmpbuf) > 1 && gv_fetchpv(tmpbuf,FALSE, SVt_PV))
 			weight -= 100;
 		    else
 			weight -= 10;
@@ -890,7 +906,80 @@ register char *s;
     return TRUE;
 }
 
-static char* exp_name[] = { "OPERATOR", "TERM", "REF", "STATE", "BLOCK" };
+static int
+intuit_method(start,gv)
+char *start;
+GV *gv;
+{
+    char *s = start + (*start == '$');
+    char tmpbuf[1024];
+    STRLEN len;
+    GV* indirgv;
+
+    if (gv) {
+	if (GvIO(gv))
+	    return 0;
+	if (!GvCV(gv))
+	    gv = 0;
+    }
+    s = scan_word(s, tmpbuf, TRUE, &len);
+    if (*start == '$') {
+	if (gv || last_lop_op == OP_PRINT || isUPPER(*tokenbuf))
+	    return 0;
+	s = skipspace(s);
+	bufptr = start;
+	expect = XREF;
+	return *s == '(' ? FUNCMETH : METHOD;
+    }
+    if (!keyword(tmpbuf, len)) {
+	indirgv = gv_fetchpv(tmpbuf,FALSE, SVt_PVCV);
+	if (indirgv && GvCV(indirgv))
+	    return 0;
+	/* filehandle or package name makes it a method */
+	if (!gv || GvIO(indirgv) || gv_stashpv(tmpbuf, FALSE)) {
+	    s = skipspace(s);
+	    nextval[nexttoke].opval =
+		(OP*)newSVOP(OP_CONST, 0,
+			    newSVpv(tmpbuf,0));
+	    nextval[nexttoke].opval->op_private =
+		OPpCONST_BARE;
+	    expect = XTERM;
+	    force_next(WORD);
+	    bufptr = s;
+	    return *s == '(' ? FUNCMETH : METHOD;
+	}
+    }
+    return 0;
+}
+
+static char*
+incl_perldb()
+{
+    if (perldb) {
+	char *pdb = getenv("PERL5DB");
+
+	if (pdb)
+	    return pdb;
+	return "BEGIN { require 'perl5db.pl' }";
+    }
+    return "";
+}
+
+
+/* Encrypted script support: cryptswitch_add() may be called to */
+/* define a function which may manipulate the input stream      */
+/* (via popen() etc) to decode the input if required.           */
+/* At the moment we only allow one cryptswitch function.        */
+void
+cryptswitch_add(funcp)
+    cryptswitch_t funcp;
+{
+    cryptswitch_fp = funcp;
+}
+
+
+static char* exp_name[] =
+	{ "OPERATOR", "TERM", "REF", "STATE", "BLOCK", "TERMBLOCK" };
 
 extern int yychar;		/* last token */
 
@@ -915,6 +1004,7 @@ yylex()
 	if (!nexttoke) {
 	    lex_state = lex_defer;
 	    expect = lex_expect;
+	    lex_defer = LEX_NORMAL;
 	}
 	return(nexttype[nexttoke]);
 
@@ -924,26 +1014,40 @@ yylex()
 	    croak("panic: INTERPCASEMOD");
 #endif
 	if (bufptr == bufend || bufptr[1] == 'E') {
-	    if (lex_casemods <= 1) {
-		if (bufptr != bufend)
-		    bufptr += 2;
-		lex_state = LEX_INTERPSTART;
-	    }
+	    char oldmod;
 	    if (lex_casemods) {
-		--lex_casemods;
+		oldmod = lex_casestack[--lex_casemods];
+		lex_casestack[lex_casemods] = '\0';
+		if (bufptr != bufend && strchr("LUQ", oldmod)) {
+		    bufptr += 2;
+		    lex_state = LEX_INTERPCONCAT;
+		}
 		return ')';
 	    }
+	    if (bufptr != bufend)
+		bufptr += 2;
+	    lex_state = LEX_INTERPCONCAT;
 	    return yylex();
-	}
-	else if (lex_casemods) {
-	    --lex_casemods;
-	    return ')';
 	}
 	else {
 	    s = bufptr + 1;
 	    if (strnEQ(s, "L\\u", 3) || strnEQ(s, "U\\l", 3))
 		tmp = *s, *s = s[2], s[2] = tmp;	/* misordered... */
-	    ++lex_casemods;
+	    if (strchr("LU", *s) &&
+		(strchr(lex_casestack, 'L') || strchr(lex_casestack, 'U')))
+	    {
+		lex_casestack[--lex_casemods] = '\0';
+		return ')';
+	    }
+	    if (lex_casemods > 10) {
+		char* newlb = (char*)realloc(lex_casestack, lex_casemods + 2);
+		if (newlb != lex_casestack) {
+		    SAVEFREEPV(newlb);
+		    lex_casestack = newlb;
+		}
+	    }
+	    lex_casestack[lex_casemods++] = *s;
+	    lex_casestack[lex_casemods] = '\0';
 	    lex_state = LEX_INTERPCONCAT;
 	    nextval[nexttoke].ival = 0;
 	    force_next('(');
@@ -955,6 +1059,8 @@ yylex()
 		nextval[nexttoke].ival = OP_LC;
 	    else if (*s == 'U')
 		nextval[nexttoke].ival = OP_UC;
+	    else if (*s == 'Q')
+		nextval[nexttoke].ival = OP_QUOTEMETA;
 	    else
 		croak("panic: yylex");
 	    bufptr = s + 1;
@@ -977,7 +1083,7 @@ yylex()
 	if (lex_dojoin) {
 	    nextval[nexttoke].ival = 0;
 	    force_next(',');
-	    force_ident("\"");
+	    force_ident("\"", '$');
 	    nextval[nexttoke].ival = 0;
 	    force_next('$');
 	    nextval[nexttoke].ival = 0;
@@ -1043,6 +1149,12 @@ yylex()
 	}
 
 	return yylex();
+    case LEX_FORMLINE:
+	lex_state = LEX_NORMAL;
+	s = scan_formline(bufptr);
+	if (!lex_formbrack)
+	    goto rightbracket;
+	OPERATOR(';');
     }
 
     s = bufptr;
@@ -1053,25 +1165,9 @@ yylex()
     } )
 
   retry:
-#ifdef BADSWITCH
-    if (*s & 128) {
-	if ((*s & 127) == '}') {
-	    *s++ = '}';
-	    TOKEN('}');
-	}
-	else
-	    warn("Unrecognized character \\%03o ignored", *s++ & 255);
-	goto retry;
-    }
-#endif
     switch (*s) {
     default:
-	if ((*s & 127) == '}') {
-	    *s++ = '}';
-	    TOKEN('}');
-	}
-	else
-	    warn("Unrecognized character \\%03o ignored", *s++ & 255);
+	warn("Unrecognized character \\%03o ignored", *s++ & 255);
 	goto retry;
     case 4:
     case 26:
@@ -1086,18 +1182,15 @@ yylex()
 	    goto retry;			/* ignore stray nulls */
 	last_uni = 0;
 	last_lop = 0;
-	if (!preambled) {
+	if (!in_eval && !preambled) {
 	    preambled = TRUE;
-	    sv_setpv(linestr,"");
-	    if (perldb) {
-		char *pdb = getenv("PERLDB");
-
-		sv_catpv(linestr, pdb ? pdb : "BEGIN { require 'perldb.pl' }");
-	    }
+	    sv_setpv(linestr,incl_perldb());
+	    if (autoboot_preamble)
+		sv_catpv(linestr, autoboot_preamble);
 	    if (minus_n || minus_p) {
 		sv_catpv(linestr, "LINE: while (<>) {");
 		if (minus_l)
-		    sv_catpv(linestr,"chop;");
+		    sv_catpv(linestr,"chomp;");
 		if (minus_a){
 		    if (minus_F){
 		      char tmpbuf1[50];
@@ -1113,18 +1206,27 @@ yylex()
 		        sv_catpv(linestr,"@F=split(' ');");
 		}
 	    }
+	    sv_catpv(linestr, "\n");
 	    oldoldbufptr = oldbufptr = s = SvPVX(linestr);
 	    bufend = SvPVX(linestr) + SvCUR(linestr);
+	    if (perldb && curstash != debstash) {
+		SV *sv = NEWSV(85,0);
+
+		sv_upgrade(sv, SVt_PVMG);
+		sv_setsv(sv,linestr);
+		av_store(GvAV(curcop->cop_filegv),(I32)curcop->cop_line,sv);
+	    }
 	    goto retry;
 	}
-#ifdef CRYPTSCRIPT
-	cryptswitch();
-#endif /* CRYPTSCRIPT */
+	/* Give cryptswitch a chance. Note that cryptswitch_fp may */
+	/* be called several times owing to "goto retry;"'s below. */
+	if (cryptswitch_fp)
+		rsfp = (*cryptswitch_fp)(rsfp);
 	do {
 	    if ((s = sv_gets(linestr, rsfp, 0)) == Nullch) {
 	      fake_eof:
 		if (rsfp) {
-		    if (preprocess)
+		    if (preprocess && !in_eval)
 			(void)my_pclose(rsfp);
 		    else if ((FILE*)rsfp == stdin)
 			clearerr(stdin);
@@ -1132,7 +1234,7 @@ yylex()
 			(void)fclose(rsfp);
 		    rsfp = Nullfp;
 		}
-		if (minus_n || minus_p) {
+		if (!in_eval && (minus_n || minus_p)) {
 		    sv_setpv(linestr,minus_p ? ";}continue{print" : "");
 		    sv_catpv(linestr,";}");
 		    oldoldbufptr = oldbufptr = s = SvPVX(linestr);
@@ -1144,8 +1246,18 @@ yylex()
 		sv_setpv(linestr,"");
 		TOKEN(';');	/* not infinite loop because rsfp is NULL now */
 	    }
-	    if (doextract && *s == '#')
-		doextract = FALSE;
+	    if (doextract) {
+		if (*s == '#' && s[1] == '!' && instr(s,"perl"))
+		    doextract = FALSE;
+
+		/* Incest with pod. */
+		if (*s == '=' && strnEQ(s, "=cut", 4)) {
+		    sv_setpv(linestr, "");
+		    oldoldbufptr = oldbufptr = s = SvPVX(linestr);
+		    bufend = SvPVX(linestr) + SvCUR(linestr);
+		    doextract = FALSE;
+		}
+	    }
 	    incline(s);
 	} while (doextract);
 	oldoldbufptr = oldbufptr = bufptr = s;
@@ -1160,10 +1272,10 @@ yylex()
 	if (curcop->cop_line == 1) {
 	    while (s < bufend && isSPACE(*s))
 		s++;
-	    if (*s == ':')	/* for csh's that have to exec sh scripts */
+	    if (*s == ':' && s[1] != ':') /* for csh execing sh scripts */
 		s++;
-	    if (*s == '#' && s[1] == '!') {
-		if (!in_eval && !instr(s,"perl") && !instr(s,"indir") &&
+	    if (!in_eval && *s == '#' && s[1] == '!') {
+		if (!instr(s,"perl") && !instr(s,"indir") &&
 			instr(origargv[0],"perl")) {
 		    char **newargv;
 		    char *cmd;
@@ -1192,17 +1304,31 @@ yylex()
 		    croak("Can't exec %s", cmd);
 		}
 		if (d = instr(s, "perl -")) {
+		    int oldpdb = perldb;
+		    int oldn = minus_n;
+		    int oldp = minus_p;
 		    d += 6;
 		    /*SUPPRESS 530*/
 		    while (d = moreswitches(d)) ;
+		    if (perldb && !oldpdb ||
+			minus_n && !oldn ||
+			minus_p && !oldp)
+		    {
+			sv_setpv(linestr, "");
+			oldoldbufptr = oldbufptr = s = SvPVX(linestr);
+			bufend = SvPVX(linestr) + SvCUR(linestr);
+			preambled = FALSE;
+			if (perldb)
+			    (void)gv_fetchfile(origfilename);
+			goto retry;
+		    }
 		}
 	    }
 	}
 	if (lex_formbrack && lex_brackets <= lex_formbrack) {
-	    s = scan_formline(s);
-	    if (!lex_formbrack)
-		goto rightbracket;
-	    OPERATOR(';');
+	    bufptr = s;
+	    lex_state = LEX_FORMLINE;
+	    return yylex();
 	}
 	goto retry;
     case ' ': case '\t': case '\f': case '\r': case 013:
@@ -1218,10 +1344,9 @@ yylex()
 		s++;
 	    incline(s);
 	    if (lex_formbrack && lex_brackets <= lex_formbrack) {
-		s = scan_formline(s);
-		if (!lex_formbrack)
-		    goto rightbracket;
-		OPERATOR(';');
+		bufptr = s;
+		lex_state = LEX_FORMLINE;
+		return yylex();
 	    }
 	}
 	else {
@@ -1233,6 +1358,7 @@ yylex()
 	if (s[1] && isALPHA(s[1]) && !isALNUM(s[2])) {
 	    s++;
 	    last_uni = oldbufptr;
+	    last_lop_op = OP_FTEREAD;	/* good enough */
 	    switch (*s++) {
 	    case 'r': FTST(OP_FTEREAD);
 	    case 'w': FTST(OP_FTEWRITE);
@@ -1278,7 +1404,7 @@ yylex()
 	    s++;
 	    s = skipspace(s);
 	    if (isIDFIRST(*s)) {
-		s = force_word(s,METHOD,FALSE,TRUE);
+		s = force_word(s,METHOD,FALSE,TRUE,FALSE);
 		TOKEN(ARROW);
 	    }
 	    else
@@ -1313,7 +1439,9 @@ yylex()
 	if (expect != XOPERATOR) {
 	    s = scan_ident(s, bufend, tokenbuf, TRUE);
 	    expect = XOPERATOR;
-	    force_ident(tokenbuf);
+	    force_ident(tokenbuf, '*');
+	    if (!*tokenbuf)
+		PREREF('*');
 	    TERM('*');
 	}
 	s++;
@@ -1345,7 +1473,7 @@ yylex()
 			TERM('%');
 		    }
 		}
-		force_ident(tokenbuf + 1);
+		force_ident(tokenbuf + 1, *tokenbuf);
 	    }
 	    else
 		PREREF('%');
@@ -1356,20 +1484,28 @@ yylex()
 
     case '^':
 	s++;
-	BOop(OP_XOR);
+	BOop(OP_BIT_XOR);
     case '[':
 	lex_brackets++;
 	/* FALL THROUGH */
     case '~':
     case ',':
-    case ':':
 	tmp = *s++;
 	OPERATOR(tmp);
+    case ':':
+	if (s[1] == ':') {
+	    len = 0;
+	    goto just_a_word;
+	}
+	s++;
+	OPERATOR(':');
     case '(':
 	s++;
-	if (last_lop == oldoldbufptr)
+	if (last_lop == oldoldbufptr || last_uni == oldoldbufptr)
 	    oldbufptr = oldoldbufptr;		/* allow print(STDOUT 123) */
-	OPERATOR('(');
+	else
+	    expect = XTERM;
+	TOKEN('(');
     case ';':
 	if (curcop->cop_line < copline)
 	    copline = curcop->cop_line;
@@ -1386,7 +1522,7 @@ yylex()
 	    --lex_brackets;
 	if (lex_state == LEX_INTERPNORMAL) {
 	    if (lex_brackets == 0) {
-		if (*s != '-' || s[1] != '>')
+		if (*s != '[' && *s != '{' && (*s != '-' || s[1] != '>'))
 		    lex_state = LEX_INTERPEND;
 	    }
 	}
@@ -1401,33 +1537,58 @@ yylex()
 		lex_brackstack = newlb;
 	    }
 	}
-	if (oldoldbufptr == last_lop)
-	    lex_brackstack[lex_brackets++] = XTERM;
-	else
-	    lex_brackstack[lex_brackets++] = XOPERATOR;
-	if (expect == XTERM)
-	    OPERATOR(HASHBRACK);
-	else if (expect == XBLOCK || expect == XOPERATOR) {
-	    lex_brackstack[lex_brackets-1] = XSTATE;
-	    expect = XSTATE;
-	}
-	else {
-	    char *t;
-	    s = skipspace(s);
-	    if (*s == '}')
-		OPERATOR(HASHBRACK);
-	    for (t = s;
-		t < bufend &&
-		    (isSPACE(*t) || isALPHA(*t) || *t == '"' || *t == '\'');
-		t++) ;
-	    if (*t == ',' || (*t == '=' && t[1] == '>'))
-		OPERATOR(HASHBRACK);
-	    if (expect == XREF)
-		expect = XTERM;
-	    else {
-		lex_brackstack[lex_brackets-1] = XSTATE;
-		expect = XSTATE;
+	switch (expect) {
+	case XTERM:
+	    if (lex_formbrack) {
+		s--;
+		PRETERMBLOCK(DO);
 	    }
+	    if (oldoldbufptr == last_lop)
+		lex_brackstack[lex_brackets++] = XTERM;
+	    else
+		lex_brackstack[lex_brackets++] = XOPERATOR;
+	    OPERATOR(HASHBRACK);
+	    break;
+	case XBLOCK:
+	case XOPERATOR:
+	    lex_brackstack[lex_brackets++] = XSTATE;
+	    expect = XSTATE;
+	    break;
+	case XTERMBLOCK:
+	    lex_brackstack[lex_brackets++] = XOPERATOR;
+	    expect = XSTATE;
+	    break;
+	default: {
+		char *t;
+		if (oldoldbufptr == last_lop)
+		    lex_brackstack[lex_brackets++] = XTERM;
+		else
+		    lex_brackstack[lex_brackets++] = XOPERATOR;
+		s = skipspace(s);
+		if (*s == '}')
+		    OPERATOR(HASHBRACK);
+		if (isALPHA(*s)) {
+		    for (t = s; t < bufend && isALPHA(*t); t++) ;
+		}
+		else if (*s == '\'' || *s == '"') {
+		    t = strchr(s+1,*s);
+		    if (!t++)
+			t = s;
+		}
+		else
+		    t = s;
+		while (t < bufend && isSPACE(*t))
+		    t++;
+		if ((*t == ',' && !isLOWER(*s)) || (*t == '=' && t[1] == '>'))
+		    OPERATOR(HASHBRACK);
+		if (expect == XREF)
+		    expect = XTERM;
+		else {
+		    lex_brackstack[lex_brackets-1] = XSTATE;
+		    expect = XSTATE;
+		}
+	    }
+	    break;
 	}
 	yylval.ival = curcop->cop_line;
 	if (isSPACE(*s) || *s == '#')
@@ -1449,7 +1610,7 @@ yylex()
 		    bufptr = s;
 		    return yylex();		/* ignore fake brackets */
 		}
-		if (*s != '-' || s[1] != '>')
+		if (*s != '[' && *s != '{' && (*s != '-' || s[1] != '>'))
 		    lex_state = LEX_INTERPEND;
 	    }
 	}
@@ -1459,10 +1620,10 @@ yylex()
 	s++;
 	tmp = *s++;
 	if (tmp == '&')
-	    OPERATOR(ANDAND);
+	    AOPERATOR(ANDAND);
 	s--;
 	if (expect == XOPERATOR) {
-	    if (dowarn && isALPHA(*s) && bufptr == SvPVX(linestr)) {
+	    if (isALPHA(*s) && bufptr == SvPVX(linestr)) {
 		curcop->cop_line--;
 		warn(warn_nosemi);
 		curcop->cop_line++;
@@ -1473,7 +1634,7 @@ yylex()
 	s = scan_ident(s-1, bufend, tokenbuf, TRUE);
 	if (*tokenbuf) {
 	    expect = XOPERATOR;
-	    force_ident(tokenbuf);
+	    force_ident(tokenbuf, '&');
 	}
 	else
 	    PREREF('&');
@@ -1483,7 +1644,7 @@ yylex()
 	s++;
 	tmp = *s++;
 	if (tmp == '|')
-	    OPERATOR(OROR);
+	    AOPERATOR(OROR);
 	s--;
 	BOop(OP_BIT_OR);
     case '=':
@@ -1498,12 +1659,22 @@ yylex()
 	if (dowarn && tmp && isSPACE(*s) && strchr("+-*/%.^&|<",tmp))
 	    warn("Reversed %c= operator",tmp);
 	s--;
-	if (lex_brackets < lex_formbrack && (tmp == '\n' || s[1] == '\n')) {
-	    s--;
-	    expect = XBLOCK;
-	    goto leftbracket;
+	if (isALPHA(tmp) && s == SvPVX(linestr)+1) {
+	    s = bufend;
+	    doextract = TRUE;
+	    goto retry;
 	}
-	OPERATOR('=');
+	if (lex_brackets < lex_formbrack) {
+	    char *t;
+	    for (t = s; *t == ' ' || *t == '\t'; t++) ;
+	    if (*t == '\n' || *t == '#') {
+		s--;
+		expect = XBLOCK;
+		goto leftbracket;
+	    }
+	}
+	yylval.ival = 0;
+	OPERATOR(ASSIGNOP);
     case '!':
 	s++;
 	tmp = *s++;
@@ -1547,42 +1718,80 @@ yylex()
 	Rop(OP_GT);
 
     case '$':
-	if (s[1] == '#'  && (isALPHA(s[2]) || s[2] == '_' || s[2] == '{')) {
-	    s = scan_ident(s+1, bufend, tokenbuf, FALSE);
+	if (s[1] == '#'  && (isALPHA(s[2]) || strchr("_{$", s[2]))) {
+	    s = scan_ident(s+1, bufend, tokenbuf+1, FALSE);
 	    if (expect == XOPERATOR) {
-		if (lex_formbrack && lex_brackets == lex_formbrack)
-		    OPERATOR(','); /* grandfather non-comma-format format */
+		if (lex_formbrack && lex_brackets == lex_formbrack) {
+		    expect = XTERM;
+		    depcom();
+		    return ','; /* grandfather non-comma-format format */
+		}
 		else
 		    no_op("Array length",s);
 	    }
+	    else if (!tokenbuf[1])
+		PREREF(DOLSHARP);
+	    if (!strchr(tokenbuf+1,':')) {
+		tokenbuf[0] = '@';
+		if (tmp = pad_findmy(tokenbuf)) {
+		    nextval[nexttoke].opval = newOP(OP_PADANY, 0);
+		    nextval[nexttoke].opval->op_targ = tmp;
+		    expect = XOPERATOR;
+		    force_next(PRIVATEREF);
+		    TOKEN(DOLSHARP);
+		}
+	    }
 	    expect = XOPERATOR;
-	    force_ident(tokenbuf);
+	    force_ident(tokenbuf+1, *tokenbuf);
 	    TOKEN(DOLSHARP);
 	}
 	s = scan_ident(s, bufend, tokenbuf+1, FALSE);
 	if (expect == XOPERATOR) {
-	    if (lex_formbrack && lex_brackets == lex_formbrack)
-		OPERATOR(',');	/* grandfather non-comma-format format */
+	    if (lex_formbrack && lex_brackets == lex_formbrack) {
+		expect = XTERM;
+		depcom();
+		return ',';	/* grandfather non-comma-format format */
+	    }
 	    else
 		no_op("Scalar",s);
 	}
 	if (tokenbuf[1]) {
+	    expectation oldexpect = expect;
+
+	    /* This kludge not intended to be bulletproof. */
+	    if (tokenbuf[1] == '[' && !tokenbuf[2]) {
+		yylval.opval = newSVOP(OP_CONST, OPf_SPECIAL,
+					newSViv((IV)compiling.cop_arybase));
+		TERM(THING);
+	    }
 	    tokenbuf[0] = '$';
-	    if (dowarn && *s == '[') {
+	    if (dowarn) {
 		char *t;
-		for (t = s+1; isSPACE(*t) || isALNUM(*t) || *t == '$'; t++) ;
-		if (*t++ == ',') {
-		    bufptr = skipspace(bufptr);
-		    while (t < bufend && *t != ']') t++;
-		    warn("Multidimensional syntax %.*s not supported",
-			t-bufptr+1, bufptr);
+		if (*s == '[' && oldexpect != XREF) {
+		    for (t = s+1; isSPACE(*t) || isALNUM(*t) || *t == '$'; t++) ;
+		    if (*t++ == ',') {
+			bufptr = skipspace(bufptr);
+			while (t < bufend && *t != ']') t++;
+			warn("Multidimensional syntax %.*s not supported",
+			    t-bufptr+1, bufptr);
+		    }
+		}
+		if (*s == '{' && strEQ(tokenbuf, "$SIG") &&
+		  (t = strchr(s,'}')) && (t = strchr(t,'='))) {
+		    char tmpbuf[1024];
+		    char *d = tmpbuf;
+		    STRLEN len;
+		    for (t++; isSPACE(*t); t++) ;
+		    t = scan_word(t, tmpbuf, TRUE, &len);
+		    if (*t != '(' && perl_get_cv(tmpbuf, FALSE))
+			warn("You need to quote \"%s\"", tmpbuf);
 		}
 	    }
 	    expect = XOPERATOR;
 	    if (lex_state == LEX_NORMAL && isSPACE(*s)) {
 		bool islop = (last_lop == oldoldbufptr);
 		s = skipspace(s);
-		if (!islop)
+		if (!islop || last_lop_op == OP_GREPSTART)
 		    expect = XOPERATOR;
 		else if (strchr("$@\"'`q", *s))
 		    expect = XTERM;		/* e.g. print $fh "foo" */
@@ -1605,20 +1814,22 @@ yylex()
 		force_next(PRIVATEREF);
 	    }
 	    else if (!strchr(tokenbuf,':')) {
-		if (*s == '[')
-		    tokenbuf[0] = '@';
-		else if (*s == '{')
-		    tokenbuf[0] = '%';
+		if (oldexpect != XREF) {
+		    if (*s == '[')
+			tokenbuf[0] = '@';
+		    else if (*s == '{')
+			tokenbuf[0] = '%';
+		}
 		if (tmp = pad_findmy(tokenbuf)) {
 		    nextval[nexttoke].opval = newOP(OP_PADANY, 0);
 		    nextval[nexttoke].opval->op_targ = tmp;
 		    force_next(PRIVATEREF);
 		}
 		else
-		    force_ident(tokenbuf+1);
+		    force_ident(tokenbuf+1, *tokenbuf);
 	    }
 	    else
-		force_ident(tokenbuf+1);
+		force_ident(tokenbuf+1, *tokenbuf);
 	}
 	else {
 	    if (s == bufend)
@@ -1632,6 +1843,8 @@ yylex()
 	if (expect == XOPERATOR)
 	    no_op("Array",s);
 	if (tokenbuf[1]) {
+	    GV* gv;
+
 	    tokenbuf[0] = '@';
 	    expect = XOPERATOR;
 	    if (in_my) {
@@ -1652,18 +1865,34 @@ yylex()
 		    TERM('@');
 		}
 	    }
-	    if (dowarn && (*s == '[' || *s == '{')) {
-		char *t = s + 1;
-		while (*t && (isALNUM(*t) || strchr(" \t$#+-'\"", *t)))
-		    t++;
-		if (*t == '}' || *t == ']') {
-		    t++;
-		    bufptr = skipspace(bufptr);
-		    warn("Scalar value %.*s better written as $%.*s",
-			t-bufptr, bufptr, t-bufptr-1, bufptr+1);
+
+	    /* Force them to make up their mind on "@foo". */
+	    if (lex_state != LEX_NORMAL &&
+		    ( !(gv = gv_fetchpv(tokenbuf+1, FALSE, SVt_PVAV)) ||
+		      (*tokenbuf == '@'
+			? !GvAV(gv)
+			: !GvHV(gv) )))
+	    {
+		char tmpbuf[1024];
+		sprintf(tmpbuf, "Literal @%s now requires backslash",tokenbuf+1);
+		yyerror(tmpbuf);
+	    }
+
+	    /* Warn about @ where they meant $. */
+	    if (dowarn) {
+		if (*s == '[' || *s == '{') {
+		    char *t = s + 1;
+		    while (*t && (isALNUM(*t) || strchr(" \t$#+-'\"", *t)))
+			t++;
+		    if (*t == '}' || *t == ']') {
+			t++;
+			bufptr = skipspace(bufptr);
+			warn("Scalar value %.*s better written as $%.*s",
+			    t-bufptr, bufptr, t-bufptr-1, bufptr+1);
+		    }
 		}
 	    }
-	    force_ident(tokenbuf+1);
+	    force_ident(tokenbuf+1, *tokenbuf);
 	}
 	else {
 	    if (s == bufend)
@@ -1717,8 +1946,11 @@ yylex()
     case '\'':
 	s = scan_str(s);
 	if (expect == XOPERATOR) {
-	    if (lex_formbrack && lex_brackets == lex_formbrack)
-		OPERATOR(',');	/* grandfather non-comma-format format */
+	    if (lex_formbrack && lex_brackets == lex_formbrack) {
+		expect = XTERM;
+		depcom();
+		return ',';	/* grandfather non-comma-format format */
+	    }
 	    else
 		no_op("String",s);
 	}
@@ -1730,14 +1962,17 @@ yylex()
     case '"':
 	s = scan_str(s);
 	if (expect == XOPERATOR) {
-	    if (lex_formbrack && lex_brackets == lex_formbrack)
-		OPERATOR(',');	/* grandfather non-comma-format format */
+	    if (lex_formbrack && lex_brackets == lex_formbrack) {
+		expect = XTERM;
+		depcom();
+		return ',';	/* grandfather non-comma-format format */
+	    }
 	    else
 		no_op("String",s);
 	}
 	if (!s)
 	    missingterm((char*)0);
-	yylval.ival = OP_SCALAR;
+	yylval.ival = OP_STRINGIFY;
 	TERM(sublex_start());
 
     case '`':
@@ -1795,7 +2030,23 @@ yylex()
 	d = s;
 	s = scan_word(s, tokenbuf, FALSE, &len);
 	
-	switch (tmp = keyword(tokenbuf, len)) {
+	tmp = keyword(tokenbuf, len);
+	if (tmp < 0) {			/* second-class keyword? */
+	    GV* gv;
+	    if (expect != XOPERATOR &&
+	      (*s != ':' || s[1] != ':') &&
+	      (gv = gv_fetchpv(tokenbuf,FALSE, SVt_PVCV)) &&
+	      (GvFLAGS(gv) & GVf_IMPORTED) &&
+	      GvCV(gv))
+	    {
+		tmp = 0;
+	    }
+	    else
+		tmp = -tmp;
+	}
+
+      reserved_word:
+	switch (tmp) {
 
 	default:			/* not a keyword */
 	  just_a_word: {
@@ -1803,21 +2054,24 @@ yylex()
 
 		/* Get the rest if it looks like a package qualifier */
 
-		if (*s == '\'' || *s == ':')
+		if (*s == '\'' || *s == ':' && s[1] == ':') {
 		    s = scan_word(s, tokenbuf + len, TRUE, &len);
+		    if (!len)
+			croak("Bad name after %s::", tokenbuf);
+		}
 
 		/* Do special processing at start of statement. */
 
 		if (expect == XSTATE) {
 		    while (isSPACE(*s)) s++;
 		    if (*s == ':') {	/* It's a label. */
-			yylval.pval = savestr(tokenbuf);
+			yylval.pval = savepv(tokenbuf);
 			s++;
 			CLINE;
 			TOKEN(LABEL);
 		    }
 		}
-		else if (dowarn && expect == XOPERATOR) {
+		else if (expect == XOPERATOR) {
 		    if (bufptr == SvPVX(linestr)) {
 			curcop->cop_line--;
 			warn(warn_nosemi);
@@ -1831,17 +2085,34 @@ yylex()
 
 		gv = gv_fetchpv(tokenbuf,FALSE, SVt_PVCV);
 
+		/* Presume this is going to be a bareword of some sort. */
+
+		CLINE;
+		yylval.opval = (OP*)newSVOP(OP_CONST, 0, newSVpv(tokenbuf,0));
+		yylval.opval->op_private = OPpCONST_BARE;
+
 		/* See if it's the indirect object for a list operator. */
 
-		if (oldoldbufptr && oldoldbufptr < bufptr) {
-		    if (oldoldbufptr == last_lop &&
-			(!gv || !GvCV(gv) || last_lop_op == OP_SORT))
-		    {
-			expect = XTERM;
-			CLINE;
-			yylval.opval = (OP*)newSVOP(OP_CONST, 0,
-			    newSVpv(tokenbuf,0));
-			yylval.opval->op_private = OPpCONST_BARE;
+		if (oldoldbufptr &&
+		    oldoldbufptr < bufptr &&
+		    (oldoldbufptr == last_lop || oldoldbufptr == last_uni) &&
+		    /* NO SKIPSPACE BEFORE HERE! */
+		    (expect == XREF ||
+		     (opargs[last_lop_op] >> OASHIFT & 7) == OA_FILEREF) )
+		{
+		    /* (Now we can afford to cross potential line boundary.) */
+		    s = skipspace(s);
+
+		    /* Two barewords in a row may indicate method call. */
+
+		    if ((isALPHA(*s) || *s == '$') && (tmp=intuit_method(s,gv)))
+			return tmp;
+
+		    /* If not a declared subroutine, it's an indirect object. */
+		    /* (But it's an indir obj regardless for sort.) */
+
+		    if (last_lop_op == OP_SORT || !gv || !GvCV(gv)) {
+			expect = last_lop == oldoldbufptr ? XTERM : XOPERATOR;
 			for (d = tokenbuf; *d && isLOWER(*d); d++) ;
 			if (dowarn && !*d)
 			    warn(warn_reserved, tokenbuf);
@@ -1855,18 +2126,13 @@ yylex()
 		s = skipspace(s);
 		if (*s == '(') {
 		    CLINE;
-		    nextval[nexttoke].opval =
-			(OP*)newSVOP(OP_CONST, 0, newSVpv(tokenbuf,0));
-		    nextval[nexttoke].opval->op_private = OPpCONST_BARE;
+		    nextval[nexttoke].opval = yylval.opval;
 		    expect = XOPERATOR;
 		    force_next(WORD);
 		    TOKEN('&');
 		}
-		CLINE;
-		yylval.opval = (OP*)newSVOP(OP_CONST, 0, newSVpv(tokenbuf,0));
-		yylval.opval->op_private = OPpCONST_BARE;
 
-		/* If followed by var or block, call it a method (maybe). */
+		/* If followed by var or block, call it a method (unless sub) */
 
 		if ((*s == '$' || *s == '{') && (!gv || !GvCV(gv))) {
 		    last_lop = oldbufptr;
@@ -1876,29 +2142,8 @@ yylex()
 
 		/* If followed by a bareword, see if it looks like indir obj. */
 
-		if (isALPHA(*s)) {
-		    char *olds = s;
-		    char tmpbuf[1024];
-		    GV* indirgv;
-		    s = scan_word(s, tmpbuf, TRUE, &len);
-		    if (!keyword(tmpbuf, len)) {
-			SV* tmpsv = newSVpv(tmpbuf,0);
-			indirgv = gv_fetchpv(tmpbuf,FALSE, SVt_PVCV);
-			if (!indirgv || !GvCV(indirgv)) {
-			    if (!gv || !GvCV(gv) || fetch_stash(tmpsv, FALSE)) {
-				nextval[nexttoke].opval =
-				    (OP*)newSVOP(OP_CONST, 0, tmpsv);
-				nextval[nexttoke].opval->op_private =
-				    OPpCONST_BARE;
-				expect = XTERM;
-				force_next(WORD);
-				TOKEN(METHOD);
-			    }
-			}
-			SvREFCNT_dec(tmpsv);
-		    }
-		    s = olds;
-		}
+		if ((isALPHA(*s) || *s == '$') && (tmp = intuit_method(s,gv)))
+		    return tmp;
 
 		/* Not a method, so call it a subroutine (if defined) */
 
@@ -1910,13 +2155,19 @@ yylex()
 			TOKEN('&');
 		    }
 		    last_lop = oldbufptr;
-		    last_lop_op = OP_ENTERSUBR;
+		    last_lop_op = OP_ENTERSUB;
 		    expect = XTERM;
 		    force_next(WORD);
 		    TOKEN(NOAMP);
 		}
-		else if (hints & HINT_STRICT_SUBS) {
-		    warn("Bareword \"%s\" not allowed while \"strict subs\" averred",
+		else if (hints & HINT_STRICT_SUBS &&
+		    strnNE(s,"->",2) &&
+		    last_lop_op != OP_ACCEPT &&
+		    last_lop_op != OP_PIPE_OP &&
+		    last_lop_op != OP_SOCKPAIR)
+		{
+		    warn(
+		     "Bareword \"%s\" not allowed while \"strict subs\" in use",
 			tokenbuf);
 		    ++error_count;
 		}
@@ -1941,25 +2192,26 @@ yylex()
 
 	case KEY___END__: {
 	    GV *gv;
-	    int fd;
 
 	    /*SUPPRESS 560*/
 	    if (!in_eval) {
 		gv = gv_fetchpv("DATA",TRUE, SVt_PVIO);
 		SvMULTI_on(gv);
 		if (!GvIO(gv))
-		    GvIO(gv) = newIO();
-		IoIFP(GvIO(gv)) = rsfp;
-#if defined(HAS_FCNTL) && defined(FFt_SETFD)
-		fd = fileno(rsfp);
-		fcntl(fd,FFt_SETFD,fd >= 3);
+		    GvIOp(gv) = newIO();
+		IoIFP(GvIOp(gv)) = rsfp;
+#if defined(HAS_FCNTL) && defined(F_SETFD)
+		{
+		    int fd = fileno(rsfp);
+		    fcntl(fd,F_SETFD,fd >= 3);
+		}
 #endif
 		if (preprocess)
-		    IoTYPE(GvIO(gv)) = '|';
+		    IoTYPE(GvIOp(gv)) = '|';
 		else if ((FILE*)rsfp == stdin)
-		    IoTYPE(GvIO(gv)) = '-';
+		    IoTYPE(GvIOp(gv)) = '-';
 		else
-		    IoTYPE(GvIO(gv)) = '<';
+		    IoTYPE(GvIOp(gv)) = '<';
 		rsfp = Nullfp;
 	    }
 	    goto fake_eof;
@@ -1969,10 +2221,20 @@ yylex()
 	case KEY_DESTROY:
 	case KEY_BEGIN:
 	case KEY_END:
-	    s = skipspace(s);
-	    if (expect == XSTATE && (minus_p || minus_n || *s == '{' )) {
+	    if (expect == XSTATE) {
 		s = bufptr;
 		goto really_sub;
+	    }
+	    goto just_a_word;
+
+	case KEY_CORE:
+	    if (*s == ':' && s[1] == ':') {
+		s += 2;
+		s = scan_word(s, tokenbuf, FALSE, &len);
+		tmp = keyword(tokenbuf, len);
+		if (tmp < 0)
+		    tmp = -tmp;
+		goto reserved_word;
 	    }
 	    goto just_a_word;
 
@@ -1983,27 +2245,22 @@ yylex()
 	    UNI(OP_ALARM);
 
 	case KEY_accept:
-	    LOP(OP_ACCEPT);
+	    LOP(OP_ACCEPT,XTERM);
 
 	case KEY_and:
 	    OPERATOR(ANDOP);
 
 	case KEY_atan2:
-	    LOP(OP_ATAN2);
-
-	case KEY_aver:
-	    s = force_word(s,WORD,FALSE,FALSE);
-	    yylval.ival = 1;
-	    OPERATOR(HINT);
+	    LOP(OP_ATAN2,XTERM);
 
 	case KEY_bind:
-	    LOP(OP_BIND);
+	    LOP(OP_BIND,XTERM);
 
 	case KEY_binmode:
 	    UNI(OP_BINMODE);
 
 	case KEY_bless:
-	    LOP(OP_BLESS);
+	    LOP(OP_BLESS,XTERM);
 
 	case KEY_chop:
 	    UNI(OP_CHOP);
@@ -2032,19 +2289,19 @@ yylex()
 	    if (!cryptseen++)
 		init_des();
 #endif
-	    LOP(OP_CRYPT);
+	    LOP(OP_CRYPT,XTERM);
 
 	case KEY_chmod:
 	    s = skipspace(s);
 	    if (dowarn && *s != '0' && isDIGIT(*s))
 		yywarn("chmod: mode argument is missing initial 0");
-	    LOP(OP_CHMOD);
+	    LOP(OP_CHMOD,XTERM);
 
 	case KEY_chown:
-	    LOP(OP_CHOWN);
+	    LOP(OP_CHOWN,XTERM);
 
 	case KEY_connect:
-	    LOP(OP_CONNECT);
+	    LOP(OP_CONNECT,XTERM);
 
 	case KEY_chr:
 	    UNI(OP_CHR);
@@ -2055,37 +2312,33 @@ yylex()
 	case KEY_chroot:
 	    UNI(OP_CHROOT);
 
-	case KEY_deny:
-	    s = force_word(s,WORD,FALSE,FALSE);
-	    yylval.ival = 0;
-	    OPERATOR(HINT);
-
 	case KEY_do:
 	    s = skipspace(s);
 	    if (*s == '{')
-		PREBLOCK(DO);
+		PRETERMBLOCK(DO);
 	    if (*s != '\'')
-		s = force_word(s,WORD,FALSE,TRUE);
+		s = force_word(s,WORD,FALSE,TRUE,FALSE);
 	    OPERATOR(DO);
 
 	case KEY_die:
-	    LOP(OP_DIE);
+	    hints |= HINT_BLOCK_SCOPE;
+	    LOP(OP_DIE,XTERM);
 
 	case KEY_defined:
 	    UNI(OP_DEFINED);
 
 	case KEY_delete:
-	    OPERATOR(DELETE);
+	    UNI(OP_DELETE);
 
 	case KEY_dbmopen:
-	    gv_fetchpv("Any_DBM_FILE::ISA", 2, SVt_PVAV);
-	    LOP(OP_DBMOPEN);
+	    gv_fetchpv("AnyDBM_File::ISA", GV_ADDMULTI, SVt_PVAV);
+	    LOP(OP_DBMOPEN,XTERM);
 
 	case KEY_dbmclose:
 	    UNI(OP_DBMCLOSE);
 
 	case KEY_dump:
-	    s = force_word(s,WORD,TRUE,FALSE);
+	    s = force_word(s,WORD,TRUE,FALSE,FALSE);
 	    LOOPX(OP_DUMP);
 
 	case KEY_else:
@@ -2098,12 +2351,15 @@ yylex()
 	case KEY_eq:
 	    Eop(OP_SEQ);
 
+	case KEY_exists:
+	    UNI(OP_EXISTS);
+	    
 	case KEY_exit:
 	    UNI(OP_EXIT);
 
 	case KEY_eval:
 	    s = skipspace(s);
-	    expect = (*s == '{') ? XBLOCK : XTERM;
+	    expect = (*s == '{') ? XTERMBLOCK : XTERM;
 	    UNIBRACK(OP_ENTEREVAL);
 
 	case KEY_eof:
@@ -2117,7 +2373,7 @@ yylex()
 
 	case KEY_exec:
 	    set_csh();
-	    LOP(OP_EXEC);
+	    LOP(OP_EXEC,XREF);
 
 	case KEY_endhostent:
 	    FUN0(OP_EHOSTENT);
@@ -2147,19 +2403,19 @@ yylex()
 	    OPERATOR(FOR);
 
 	case KEY_formline:
-	    LOP(OP_FORMLINE);
+	    LOP(OP_FORMLINE,XTERM);
 
 	case KEY_fork:
 	    FUN0(OP_FORK);
 
 	case KEY_fcntl:
-	    LOP(OP_FCNTL);
+	    LOP(OP_FCNTL,XTERM);
 
 	case KEY_fileno:
 	    UNI(OP_FILENO);
 
 	case KEY_flock:
-	    LOP(OP_FLOCK);
+	    LOP(OP_FLOCK,XTERM);
 
 	case KEY_gt:
 	    Rop(OP_SGT);
@@ -2168,10 +2424,10 @@ yylex()
 	    Rop(OP_SGE);
 
 	case KEY_grep:
-	    LOP(OP_GREPSTART);
+	    LOP(OP_GREPSTART, *s == '(' ? XTERM : XREF);
 
 	case KEY_goto:
-	    s = force_word(s,WORD,TRUE,FALSE);
+	    s = force_word(s,WORD,TRUE,FALSE,FALSE);
 	    LOOPX(OP_GOTO);
 
 	case KEY_gmtime:
@@ -2187,13 +2443,13 @@ yylex()
 	    UNI(OP_GETPGRP);
 
 	case KEY_getpriority:
-	    LOP(OP_GETPRIORITY);
+	    LOP(OP_GETPRIORITY,XTERM);
 
 	case KEY_getprotobyname:
 	    UNI(OP_GPBYNAME);
 
 	case KEY_getprotobynumber:
-	    LOP(OP_GPBYNUMBER);
+	    LOP(OP_GPBYNUMBER,XTERM);
 
 	case KEY_getprotoent:
 	    FUN0(OP_GPROTOENT);
@@ -2214,7 +2470,7 @@ yylex()
 	    UNI(OP_GHBYNAME);
 
 	case KEY_gethostbyaddr:
-	    LOP(OP_GHBYADDR);
+	    LOP(OP_GHBYADDR,XTERM);
 
 	case KEY_gethostent:
 	    FUN0(OP_GHOSTENT);
@@ -2223,16 +2479,16 @@ yylex()
 	    UNI(OP_GNBYNAME);
 
 	case KEY_getnetbyaddr:
-	    LOP(OP_GNBYADDR);
+	    LOP(OP_GNBYADDR,XTERM);
 
 	case KEY_getnetent:
 	    FUN0(OP_GNETENT);
 
 	case KEY_getservbyname:
-	    LOP(OP_GSBYNAME);
+	    LOP(OP_GSBYNAME,XTERM);
 
 	case KEY_getservbyport:
-	    LOP(OP_GSBYPORT);
+	    LOP(OP_GSBYPORT,XTERM);
 
 	case KEY_getservent:
 	    FUN0(OP_GSERVENT);
@@ -2241,7 +2497,7 @@ yylex()
 	    UNI(OP_GETSOCKNAME);
 
 	case KEY_getsockopt:
-	    LOP(OP_GSOCKOPT);
+	    LOP(OP_GSOCKOPT,XTERM);
 
 	case KEY_getgrent:
 	    FUN0(OP_GGRENT);
@@ -2256,7 +2512,8 @@ yylex()
 	    FUN0(OP_GETLOGIN);
 
 	case KEY_glob:
-	    UNI(OP_GLOB);
+	    set_csh();
+	    LOP(OP_GLOB,XTERM);
 
 	case KEY_hex:
 	    UNI(OP_HEX);
@@ -2266,27 +2523,27 @@ yylex()
 	    OPERATOR(IF);
 
 	case KEY_index:
-	    LOP(OP_INDEX);
+	    LOP(OP_INDEX,XTERM);
 
 	case KEY_int:
 	    UNI(OP_INT);
 
 	case KEY_ioctl:
-	    LOP(OP_IOCTL);
+	    LOP(OP_IOCTL,XTERM);
 
 	case KEY_join:
-	    LOP(OP_JOIN);
+	    LOP(OP_JOIN,XTERM);
 
 	case KEY_keys:
 	    UNI(OP_KEYS);
 
 	case KEY_kill:
-	    LOP(OP_KILL);
+	    LOP(OP_KILL,XTERM);
 
 	case KEY_last:
-	    s = force_word(s,WORD,TRUE,FALSE);
+	    s = force_word(s,WORD,TRUE,FALSE,FALSE);
 	    LOOPX(OP_LAST);
-
+	    
 	case KEY_lc:
 	    UNI(OP_LC);
 
@@ -2313,10 +2570,10 @@ yylex()
 	    UNI(OP_LOG);
 
 	case KEY_link:
-	    LOP(OP_LINK);
+	    LOP(OP_LINK,XTERM);
 
 	case KEY_listen:
-	    LOP(OP_LISTEN);
+	    LOP(OP_LISTEN,XTERM);
 
 	case KEY_lstat:
 	    UNI(OP_LSTAT);
@@ -2325,20 +2582,23 @@ yylex()
 	    s = scan_pat(s);
 	    TERM(sublex_start());
 
+	case KEY_map:
+	    LOP(OP_MAPSTART,XREF);
+	    
 	case KEY_mkdir:
-	    LOP(OP_MKDIR);
+	    LOP(OP_MKDIR,XTERM);
 
 	case KEY_msgctl:
-	    LOP(OP_MSGCTL);
+	    LOP(OP_MSGCTL,XTERM);
 
 	case KEY_msgget:
-	    LOP(OP_MSGGET);
+	    LOP(OP_MSGGET,XTERM);
 
 	case KEY_msgrcv:
-	    LOP(OP_MSGRCV);
+	    LOP(OP_MSGRCV,XTERM);
 
 	case KEY_msgsnd:
-	    LOP(OP_MSGSND);
+	    LOP(OP_MSGSND,XTERM);
 
 	case KEY_my:
 	    in_my = TRUE;
@@ -2346,11 +2606,21 @@ yylex()
 	    OPERATOR(LOCAL);
 
 	case KEY_next:
-	    s = force_word(s,WORD,TRUE,FALSE);
+	    s = force_word(s,WORD,TRUE,FALSE,FALSE);
 	    LOOPX(OP_NEXT);
 
 	case KEY_ne:
 	    Eop(OP_SNE);
+
+	case KEY_no:
+	    if (expect != XSTATE)
+		yyerror("\"no\" not allowed in expression");
+	    s = force_word(s,WORD,FALSE,TRUE,FALSE);
+	    yylval.ival = 0;
+	    OPERATOR(USE);
+
+	case KEY_not:
+	    OPERATOR(NOTOP);
 
 	case KEY_open:
 	    s = skipspace(s);
@@ -2362,9 +2632,10 @@ yylex()
 		    warn("Precedence problem: open %.*s should be open(%.*s)",
 			d-s,s, d-s,s);
 	    }
-	    LOP(OP_OPEN);
+	    LOP(OP_OPEN,XTERM);
 
 	case KEY_or:
+	    yylval.ival = OP_OR;
 	    OPERATOR(OROP);
 
 	case KEY_ord:
@@ -2374,31 +2645,34 @@ yylex()
 	    UNI(OP_OCT);
 
 	case KEY_opendir:
-	    LOP(OP_OPEN_DIR);
+	    LOP(OP_OPEN_DIR,XTERM);
 
 	case KEY_print:
 	    checkcomma(s,tokenbuf,"filehandle");
-	    LOP(OP_PRINT);
+	    LOP(OP_PRINT,XREF);
 
 	case KEY_printf:
 	    checkcomma(s,tokenbuf,"filehandle");
-	    LOP(OP_PRTF);
+	    LOP(OP_PRTF,XREF);
 
 	case KEY_push:
-	    LOP(OP_PUSH);
+	    LOP(OP_PUSH,XTERM);
 
 	case KEY_pop:
 	    UNI(OP_POP);
 
+	case KEY_pos:
+	    UNI(OP_POS);
+	    
 	case KEY_pack:
-	    LOP(OP_PACK);
+	    LOP(OP_PACK,XTERM);
 
 	case KEY_package:
-	    s = force_word(s,WORD,FALSE,TRUE);
+	    s = force_word(s,WORD,FALSE,TRUE,FALSE);
 	    OPERATOR(PACKAGE);
 
 	case KEY_pipe:
-	    LOP(OP_PIPE_OP);
+	    LOP(OP_PIPE_OP,XTERM);
 
 	case KEY_q:
 	    s = scan_str(s);
@@ -2406,6 +2680,9 @@ yylex()
 		missingterm((char*)0);
 	    yylval.ival = OP_CONST;
 	    TERM(sublex_start());
+
+	case KEY_quotemeta:
+	    UNI(OP_QUOTEMETA);
 
 	case KEY_qw:
 	    s = scan_str(s);
@@ -2419,13 +2696,19 @@ yylex()
 	    nextval[nexttoke].opval = (OP*)newSVOP(OP_CONST, 0, newSVpv(" ",1));
 	    force_next(THING);
 	    force_next('(');
-	    LOP(OP_SPLIT);
+	    yylval.ival = OP_SPLIT;
+	    CLINE;
+	    expect = XTERM;
+	    bufptr = s;
+	    last_lop = oldbufptr;
+	    last_lop_op = OP_SPLIT;
+	    return FUNC;
 
 	case KEY_qq:
 	    s = scan_str(s);
 	    if (!s)
 		missingterm((char*)0);
-	    yylval.ival = OP_SCALAR;
+	    yylval.ival = OP_STRINGIFY;
 	    if (SvIVX(lex_stuff) == '\'')
 		SvIVX(lex_stuff) = 0;	/* qq'$foo' should intepolate */
 	    TERM(sublex_start());
@@ -2442,18 +2725,20 @@ yylex()
 	    OLDLOP(OP_RETURN);
 
 	case KEY_require:
-	    s = force_word(s,WORD,TRUE,FALSE);
+	    s = force_word(s,WORD,TRUE,TRUE,FALSE);
+	    if (*s == '<')
+		yyerror("<> should be quotes");
 	    UNI(OP_REQUIRE);
 
 	case KEY_reset:
 	    UNI(OP_RESET);
 
 	case KEY_redo:
-	    s = force_word(s,WORD,TRUE,FALSE);
+	    s = force_word(s,WORD,TRUE,FALSE,FALSE);
 	    LOOPX(OP_REDO);
 
 	case KEY_rename:
-	    LOP(OP_RENAME);
+	    LOP(OP_RENAME,XTERM);
 
 	case KEY_rand:
 	    UNI(OP_RAND);
@@ -2462,10 +2747,10 @@ yylex()
 	    UNI(OP_RMDIR);
 
 	case KEY_rindex:
-	    LOP(OP_RINDEX);
+	    LOP(OP_RINDEX,XTERM);
 
 	case KEY_read:
-	    LOP(OP_READ);
+	    LOP(OP_READ,XTERM);
 
 	case KEY_readdir:
 	    UNI(OP_READDIR);
@@ -2482,10 +2767,10 @@ yylex()
 	    UNI(OP_REWINDDIR);
 
 	case KEY_recv:
-	    LOP(OP_RECV);
+	    LOP(OP_RECV,XTERM);
 
 	case KEY_reverse:
-	    LOP(OP_REVERSE);
+	    LOP(OP_REVERSE,XTERM);
 
 	case KEY_readlink:
 	    UNI(OP_READLINK);
@@ -2500,32 +2785,35 @@ yylex()
 	    else
 		TOKEN(1);	/* force error */
 
+	case KEY_chomp:
+	    UNI(OP_CHOMP);
+	    
 	case KEY_scalar:
 	    UNI(OP_SCALAR);
 
 	case KEY_select:
-	    LOP(OP_SELECT);
+	    LOP(OP_SELECT,XTERM);
 
 	case KEY_seek:
-	    LOP(OP_SEEK);
+	    LOP(OP_SEEK,XTERM);
 
 	case KEY_semctl:
-	    LOP(OP_SEMCTL);
+	    LOP(OP_SEMCTL,XTERM);
 
 	case KEY_semget:
-	    LOP(OP_SEMGET);
+	    LOP(OP_SEMGET,XTERM);
 
 	case KEY_semop:
-	    LOP(OP_SEMOP);
+	    LOP(OP_SEMOP,XTERM);
 
 	case KEY_send:
-	    LOP(OP_SEND);
+	    LOP(OP_SEND,XTERM);
 
 	case KEY_setpgrp:
-	    LOP(OP_SETPGRP);
+	    LOP(OP_SETPGRP,XTERM);
 
 	case KEY_setpriority:
-	    LOP(OP_SETPRIORITY);
+	    LOP(OP_SETPRIORITY,XTERM);
 
 	case KEY_sethostent:
 	    FUN1(OP_SHOSTENT);
@@ -2546,28 +2834,28 @@ yylex()
 	    FUN0(OP_SGRENT);
 
 	case KEY_seekdir:
-	    LOP(OP_SEEKDIR);
+	    LOP(OP_SEEKDIR,XTERM);
 
 	case KEY_setsockopt:
-	    LOP(OP_SSOCKOPT);
+	    LOP(OP_SSOCKOPT,XTERM);
 
 	case KEY_shift:
 	    UNI(OP_SHIFT);
 
 	case KEY_shmctl:
-	    LOP(OP_SHMCTL);
+	    LOP(OP_SHMCTL,XTERM);
 
 	case KEY_shmget:
-	    LOP(OP_SHMGET);
+	    LOP(OP_SHMGET,XTERM);
 
 	case KEY_shmread:
-	    LOP(OP_SHMREAD);
+	    LOP(OP_SHMREAD,XTERM);
 
 	case KEY_shmwrite:
-	    LOP(OP_SHMWRITE);
+	    LOP(OP_SHMWRITE,XTERM);
 
 	case KEY_shutdown:
-	    LOP(OP_SHUTDOWN);
+	    LOP(OP_SHUTDOWN,XTERM);
 
 	case KEY_sin:
 	    UNI(OP_SIN);
@@ -2576,10 +2864,10 @@ yylex()
 	    UNI(OP_SLEEP);
 
 	case KEY_socket:
-	    LOP(OP_SOCKET);
+	    LOP(OP_SOCKET,XTERM);
 
 	case KEY_socketpair:
-	    LOP(OP_SOCKPAIR);
+	    LOP(OP_SOCKPAIR,XTERM);
 
 	case KEY_sort:
 	    checkcomma(s,tokenbuf,"subroutine name");
@@ -2587,17 +2875,17 @@ yylex()
 	    if (*s == ';' || *s == ')')		/* probably a close */
 		croak("sort is now a reserved word");
 	    expect = XTERM;
-	    s = force_word(s,WORD,TRUE,TRUE);
-	    LOP(OP_SORT);
+	    s = force_word(s,WORD,TRUE,TRUE,TRUE);
+	    LOP(OP_SORT,XREF);
 
 	case KEY_split:
-	    LOP(OP_SPLIT);
+	    LOP(OP_SPLIT,XTERM);
 
 	case KEY_sprintf:
-	    LOP(OP_SPRINTF);
+	    LOP(OP_SPRINTF,XTERM);
 
 	case KEY_splice:
-	    LOP(OP_SPLICE);
+	    LOP(OP_SPLICE,XTERM);
 
 	case KEY_sqrt:
 	    UNI(OP_SQRT);
@@ -2613,13 +2901,16 @@ yylex()
 	    UNI(OP_STUDY);
 
 	case KEY_substr:
-	    LOP(OP_SUBSTR);
+	    LOP(OP_SUBSTR,XTERM);
 
 	case KEY_format:
 	case KEY_sub:
 	  really_sub:
-	    yylval.ival = start_subparse();
 	    s = skipspace(s);
+	    if (*s == '{' && tmp == KEY_sub) {
+		sv_setpv(subname,"__ANON__");
+		PRETERMBLOCK(ANONSUB);
+	    }
 	    expect = XBLOCK;
 	    if (isIDFIRST(*s) || *s == '\'' || *s == ':') {
 		char tmpbuf[128];
@@ -2631,7 +2922,7 @@ yylex()
 		    sv_catpvn(subname,"::",2);
 		    sv_catpvn(subname,tmpbuf,len);
 		}
-		s = force_word(s,WORD,FALSE,TRUE);
+		s = force_word(s,WORD,FALSE,TRUE,TRUE);
 	    }
 	    else
 		sv_setpv(subname,"?");
@@ -2646,19 +2937,19 @@ yylex()
 
 	case KEY_system:
 	    set_csh();
-	    LOP(OP_SYSTEM);
+	    LOP(OP_SYSTEM,XREF);
 
 	case KEY_symlink:
-	    LOP(OP_SYMLINK);
+	    LOP(OP_SYMLINK,XTERM);
 
 	case KEY_syscall:
-	    LOP(OP_SYSCALL);
+	    LOP(OP_SYSCALL,XTERM);
 
 	case KEY_sysread:
-	    LOP(OP_SYSREAD);
+	    LOP(OP_SYSREAD,XTERM);
 
 	case KEY_syswrite:
-	    LOP(OP_SYSWRITE);
+	    LOP(OP_SYSWRITE,XTERM);
 
 	case KEY_tr:
 	    s = scan_trans(s);
@@ -2671,7 +2962,7 @@ yylex()
 	    UNI(OP_TELLDIR);
 
 	case KEY_tie:
-	    LOP(OP_TIE);
+	    LOP(OP_TIE,XTERM);
 
 	case KEY_time:
 	    FUN0(OP_TIME);
@@ -2680,7 +2971,7 @@ yylex()
 	    FUN0(OP_TMS);
 
 	case KEY_truncate:
-	    LOP(OP_TRUNCATE);
+	    LOP(OP_TRUNCATE,XTERM);
 
 	case KEY_uc:
 	    UNI(OP_UC);
@@ -2700,16 +2991,16 @@ yylex()
 	    OPERATOR(UNLESS);
 
 	case KEY_unlink:
-	    LOP(OP_UNLINK);
+	    LOP(OP_UNLINK,XTERM);
 
 	case KEY_undef:
 	    UNI(OP_UNDEF);
 
 	case KEY_unpack:
-	    LOP(OP_UNPACK);
+	    LOP(OP_UNPACK,XTERM);
 
 	case KEY_utime:
-	    LOP(OP_UTIME);
+	    LOP(OP_UTIME,XTERM);
 
 	case KEY_umask:
 	    s = skipspace(s);
@@ -2718,27 +3009,35 @@ yylex()
 	    UNI(OP_UMASK);
 
 	case KEY_unshift:
-	    LOP(OP_UNSHIFT);
+	    LOP(OP_UNSHIFT,XTERM);
+
+	case KEY_use:
+	    if (expect != XSTATE)
+		yyerror("\"use\" not allowed in expression");
+	    s = force_word(s,WORD,FALSE,TRUE,FALSE);
+	    yylval.ival = 1;
+	    OPERATOR(USE);
 
 	case KEY_values:
 	    UNI(OP_VALUES);
 
 	case KEY_vec:
 	    sawvec = TRUE;
-	    LOP(OP_VEC);
+	    LOP(OP_VEC,XTERM);
 
 	case KEY_while:
 	    yylval.ival = curcop->cop_line;
 	    OPERATOR(WHILE);
 
 	case KEY_warn:
-	    LOP(OP_WARN);
+	    hints |= HINT_BLOCK_SCOPE;
+	    LOP(OP_WARN,XTERM);
 
 	case KEY_wait:
 	    FUN0(OP_WAIT);
 
 	case KEY_waitpid:
-	    LOP(OP_WAITPID);
+	    LOP(OP_WAITPID,XTERM);
 
 	case KEY_wantarray:
 	    FUN0(OP_WANTARRAY);
@@ -2752,6 +3051,10 @@ yylex()
 		Mop(OP_REPEAT);
 	    check_uni();
 	    goto just_a_word;
+
+	case KEY_xor:
+	    yylval.ival = OP_XOR;
+	    OPERATOR(OROP);
 
 	case KEY_y:
 	    s = scan_trans(s);
@@ -2768,8 +3071,8 @@ I32 len;
     switch (*d) {
     case '_':
 	if (d[1] == '_') {
-	    if (strEQ(d,"__LINE__"))		return KEY___LINE__;
-	    if (strEQ(d,"__FILE__"))		return KEY___FILE__;
+	    if (strEQ(d,"__LINE__"))		return -KEY___LINE__;
+	    if (strEQ(d,"__FILE__"))		return -KEY___FILE__;
 	    if (strEQ(d,"__END__"))		return KEY___END__;
 	}
 	break;
@@ -2779,18 +3082,15 @@ I32 len;
     case 'a':
 	switch (len) {
 	case 3:
-	    if (strEQ(d,"and"))			return KEY_and;
-	    if (strEQ(d,"abs"))			return KEY_abs;
-	    break;
-	case 4:
-	    if (strEQ(d,"aver"))		return KEY_aver;
+	    if (strEQ(d,"and"))			return -KEY_and;
+	    if (strEQ(d,"abs"))			return -KEY_abs;
 	    break;
 	case 5:
-	    if (strEQ(d,"alarm"))		return KEY_alarm;
-	    if (strEQ(d,"atan2"))		return KEY_atan2;
+	    if (strEQ(d,"alarm"))		return -KEY_alarm;
+	    if (strEQ(d,"atan2"))		return -KEY_atan2;
 	    break;
 	case 6:
-	    if (strEQ(d,"accept"))		return KEY_accept;
+	    if (strEQ(d,"accept"))		return -KEY_accept;
 	    break;
 	}
 	break;
@@ -2798,37 +3098,41 @@ I32 len;
 	if (strEQ(d,"BEGIN"))			return KEY_BEGIN;
 	break;
     case 'b':
-	if (strEQ(d,"bless"))			return KEY_bless;
-	if (strEQ(d,"bind"))			return KEY_bind;
-	if (strEQ(d,"binmode"))			return KEY_binmode;
+	if (strEQ(d,"bless"))			return -KEY_bless;
+	if (strEQ(d,"bind"))			return -KEY_bind;
+	if (strEQ(d,"binmode"))			return -KEY_binmode;
+	break;
+    case 'C':
+	if (strEQ(d,"CORE"))			return -KEY_CORE;
 	break;
     case 'c':
 	switch (len) {
 	case 3:
-	    if (strEQ(d,"cmp"))			return KEY_cmp;
-	    if (strEQ(d,"chr"))			return KEY_chr;
-	    if (strEQ(d,"cos"))			return KEY_cos;
+	    if (strEQ(d,"cmp"))			return -KEY_cmp;
+	    if (strEQ(d,"chr"))			return -KEY_chr;
+	    if (strEQ(d,"cos"))			return -KEY_cos;
 	    break;
 	case 4:
 	    if (strEQ(d,"chop"))		return KEY_chop;
 	    break;
 	case 5:
-	    if (strEQ(d,"close"))		return KEY_close;
-	    if (strEQ(d,"chdir"))		return KEY_chdir;
-	    if (strEQ(d,"chmod"))		return KEY_chmod;
-	    if (strEQ(d,"chown"))		return KEY_chown;
-	    if (strEQ(d,"crypt"))		return KEY_crypt;
+	    if (strEQ(d,"close"))		return -KEY_close;
+	    if (strEQ(d,"chdir"))		return -KEY_chdir;
+	    if (strEQ(d,"chomp"))		return KEY_chomp;
+	    if (strEQ(d,"chmod"))		return -KEY_chmod;
+	    if (strEQ(d,"chown"))		return -KEY_chown;
+	    if (strEQ(d,"crypt"))		return -KEY_crypt;
 	    break;
 	case 6:
-	    if (strEQ(d,"chroot"))		return KEY_chroot;
-	    if (strEQ(d,"caller"))		return KEY_caller;
+	    if (strEQ(d,"chroot"))		return -KEY_chroot;
+	    if (strEQ(d,"caller"))		return -KEY_caller;
 	    break;
 	case 7:
-	    if (strEQ(d,"connect"))		return KEY_connect;
+	    if (strEQ(d,"connect"))		return -KEY_connect;
 	    break;
 	case 8:
-	    if (strEQ(d,"closedir"))		return KEY_closedir;
-	    if (strEQ(d,"continue"))		return KEY_continue;
+	    if (strEQ(d,"closedir"))		return -KEY_closedir;
+	    if (strEQ(d,"continue"))		return -KEY_continue;
 	    break;
 	}
 	break;
@@ -2841,60 +3145,62 @@ I32 len;
 	    if (strEQ(d,"do"))			return KEY_do;
 	    break;
 	case 3:
-	    if (strEQ(d,"die"))			return KEY_die;
+	    if (strEQ(d,"die"))			return -KEY_die;
 	    break;
 	case 4:
-	    if (strEQ(d,"deny"))		return KEY_deny;
-	    if (strEQ(d,"dump"))		return KEY_dump;
+	    if (strEQ(d,"dump"))		return -KEY_dump;
 	    break;
 	case 6:
 	    if (strEQ(d,"delete"))		return KEY_delete;
 	    break;
 	case 7:
 	    if (strEQ(d,"defined"))		return KEY_defined;
-	    if (strEQ(d,"dbmopen"))		return KEY_dbmopen;
+	    if (strEQ(d,"dbmopen"))		return -KEY_dbmopen;
 	    break;
 	case 8:
-	    if (strEQ(d,"dbmclose"))		return KEY_dbmclose;
+	    if (strEQ(d,"dbmclose"))		return -KEY_dbmclose;
 	    break;
 	}
 	break;
     case 'E':
-	if (strEQ(d,"EQ"))			return KEY_eq;
+	if (strEQ(d,"EQ")) { deprecate(d);	return -KEY_eq;}
 	if (strEQ(d,"END"))			return KEY_END;
 	break;
     case 'e':
 	switch (len) {
 	case 2:
-	    if (strEQ(d,"eq"))			return KEY_eq;
+	    if (strEQ(d,"eq"))			return -KEY_eq;
 	    break;
 	case 3:
-	    if (strEQ(d,"eof"))			return KEY_eof;
-	    if (strEQ(d,"exp"))			return KEY_exp;
+	    if (strEQ(d,"eof"))			return -KEY_eof;
+	    if (strEQ(d,"exp"))			return -KEY_exp;
 	    break;
 	case 4:
 	    if (strEQ(d,"else"))		return KEY_else;
-	    if (strEQ(d,"exit"))		return KEY_exit;
+	    if (strEQ(d,"exit"))		return -KEY_exit;
 	    if (strEQ(d,"eval"))		return KEY_eval;
-	    if (strEQ(d,"exec"))		return KEY_exec;
+	    if (strEQ(d,"exec"))		return -KEY_exec;
 	    if (strEQ(d,"each"))		return KEY_each;
 	    break;
 	case 5:
 	    if (strEQ(d,"elsif"))		return KEY_elsif;
 	    break;
+	case 6:
+	    if (strEQ(d,"exists"))		return KEY_exists;
+	    break;
 	case 8:
-	    if (strEQ(d,"endgrent"))		return KEY_endgrent;
-	    if (strEQ(d,"endpwent"))		return KEY_endpwent;
+	    if (strEQ(d,"endgrent"))		return -KEY_endgrent;
+	    if (strEQ(d,"endpwent"))		return -KEY_endpwent;
 	    break;
 	case 9:
-	    if (strEQ(d,"endnetent"))		return KEY_endnetent;
+	    if (strEQ(d,"endnetent"))		return -KEY_endnetent;
 	    break;
 	case 10:
-	    if (strEQ(d,"endhostent"))		return KEY_endhostent;
-	    if (strEQ(d,"endservent"))		return KEY_endservent;
+	    if (strEQ(d,"endhostent"))		return -KEY_endhostent;
+	    if (strEQ(d,"endservent"))		return -KEY_endservent;
 	    break;
 	case 11:
-	    if (strEQ(d,"endprotoent"))		return KEY_endprotoent;
+	    if (strEQ(d,"endprotoent"))		return -KEY_endprotoent;
 	    break;
 	}
 	break;
@@ -2904,28 +3210,28 @@ I32 len;
 	    if (strEQ(d,"for"))			return KEY_for;
 	    break;
 	case 4:
-	    if (strEQ(d,"fork"))		return KEY_fork;
+	    if (strEQ(d,"fork"))		return -KEY_fork;
 	    break;
 	case 5:
-	    if (strEQ(d,"fcntl"))		return KEY_fcntl;
-	    if (strEQ(d,"flock"))		return KEY_flock;
+	    if (strEQ(d,"fcntl"))		return -KEY_fcntl;
+	    if (strEQ(d,"flock"))		return -KEY_flock;
 	    break;
 	case 6:
 	    if (strEQ(d,"format"))		return KEY_format;
-	    if (strEQ(d,"fileno"))		return KEY_fileno;
+	    if (strEQ(d,"fileno"))		return -KEY_fileno;
 	    break;
 	case 7:
 	    if (strEQ(d,"foreach"))		return KEY_foreach;
 	    break;
 	case 8:
-	    if (strEQ(d,"formline"))		return KEY_formline;
+	    if (strEQ(d,"formline"))		return -KEY_formline;
 	    break;
 	}
 	break;
     case 'G':
 	if (len == 2) {
-	    if (strEQ(d,"GT"))			return KEY_gt;
-	    if (strEQ(d,"GE"))			return KEY_ge;
+	    if (strEQ(d,"GT")) { deprecate(d);	return -KEY_gt;}
+	    if (strEQ(d,"GE")) { deprecate(d);	return -KEY_ge;}
 	}
 	break;
     case 'g':
@@ -2934,72 +3240,72 @@ I32 len;
 	    if (*d == 'p') {
 		switch (len) {
 		case 7:
-		    if (strEQ(d,"ppid"))	return KEY_getppid;
-		    if (strEQ(d,"pgrp"))	return KEY_getpgrp;
+		    if (strEQ(d,"ppid"))	return -KEY_getppid;
+		    if (strEQ(d,"pgrp"))	return -KEY_getpgrp;
 		    break;
 		case 8:
-		    if (strEQ(d,"pwent"))	return KEY_getpwent;
-		    if (strEQ(d,"pwnam"))	return KEY_getpwnam;
-		    if (strEQ(d,"pwuid"))	return KEY_getpwuid;
+		    if (strEQ(d,"pwent"))	return -KEY_getpwent;
+		    if (strEQ(d,"pwnam"))	return -KEY_getpwnam;
+		    if (strEQ(d,"pwuid"))	return -KEY_getpwuid;
 		    break;
 		case 11:
-		    if (strEQ(d,"peername"))	return KEY_getpeername;
-		    if (strEQ(d,"protoent"))	return KEY_getprotoent;
-		    if (strEQ(d,"priority"))	return KEY_getpriority;
+		    if (strEQ(d,"peername"))	return -KEY_getpeername;
+		    if (strEQ(d,"protoent"))	return -KEY_getprotoent;
+		    if (strEQ(d,"priority"))	return -KEY_getpriority;
 		    break;
 		case 14:
-		    if (strEQ(d,"protobyname"))	return KEY_getprotobyname;
+		    if (strEQ(d,"protobyname"))	return -KEY_getprotobyname;
 		    break;
 		case 16:
-		    if (strEQ(d,"protobynumber"))return KEY_getprotobynumber;
+		    if (strEQ(d,"protobynumber"))return -KEY_getprotobynumber;
 		    break;
 		}
 	    }
 	    else if (*d == 'h') {
-		if (strEQ(d,"hostbyname"))	return KEY_gethostbyname;
-		if (strEQ(d,"hostbyaddr"))	return KEY_gethostbyaddr;
-		if (strEQ(d,"hostent"))		return KEY_gethostent;
+		if (strEQ(d,"hostbyname"))	return -KEY_gethostbyname;
+		if (strEQ(d,"hostbyaddr"))	return -KEY_gethostbyaddr;
+		if (strEQ(d,"hostent"))		return -KEY_gethostent;
 	    }
 	    else if (*d == 'n') {
-		if (strEQ(d,"netbyname"))	return KEY_getnetbyname;
-		if (strEQ(d,"netbyaddr"))	return KEY_getnetbyaddr;
-		if (strEQ(d,"netent"))		return KEY_getnetent;
+		if (strEQ(d,"netbyname"))	return -KEY_getnetbyname;
+		if (strEQ(d,"netbyaddr"))	return -KEY_getnetbyaddr;
+		if (strEQ(d,"netent"))		return -KEY_getnetent;
 	    }
 	    else if (*d == 's') {
-		if (strEQ(d,"servbyname"))	return KEY_getservbyname;
-		if (strEQ(d,"servbyport"))	return KEY_getservbyport;
-		if (strEQ(d,"servent"))		return KEY_getservent;
-		if (strEQ(d,"sockname"))	return KEY_getsockname;
-		if (strEQ(d,"sockopt"))		return KEY_getsockopt;
+		if (strEQ(d,"servbyname"))	return -KEY_getservbyname;
+		if (strEQ(d,"servbyport"))	return -KEY_getservbyport;
+		if (strEQ(d,"servent"))		return -KEY_getservent;
+		if (strEQ(d,"sockname"))	return -KEY_getsockname;
+		if (strEQ(d,"sockopt"))		return -KEY_getsockopt;
 	    }
 	    else if (*d == 'g') {
-		if (strEQ(d,"grent"))		return KEY_getgrent;
-		if (strEQ(d,"grnam"))		return KEY_getgrnam;
-		if (strEQ(d,"grgid"))		return KEY_getgrgid;
+		if (strEQ(d,"grent"))		return -KEY_getgrent;
+		if (strEQ(d,"grnam"))		return -KEY_getgrnam;
+		if (strEQ(d,"grgid"))		return -KEY_getgrgid;
 	    }
 	    else if (*d == 'l') {
-		if (strEQ(d,"login"))		return KEY_getlogin;
+		if (strEQ(d,"login"))		return -KEY_getlogin;
 	    }
-	    else if (strEQ(d,"c"))		return KEY_getc;
+	    else if (strEQ(d,"c"))		return -KEY_getc;
 	    break;
 	}
 	switch (len) {
 	case 2:
-	    if (strEQ(d,"gt"))			return KEY_gt;
-	    if (strEQ(d,"ge"))			return KEY_ge;
+	    if (strEQ(d,"gt"))			return -KEY_gt;
+	    if (strEQ(d,"ge"))			return -KEY_ge;
 	    break;
 	case 4:
 	    if (strEQ(d,"grep"))		return KEY_grep;
 	    if (strEQ(d,"goto"))		return KEY_goto;
-	    if (strEQ(d,"glob"))		return KEY_glob;
+	    if (strEQ(d,"glob"))		return -KEY_glob;
 	    break;
 	case 6:
-	    if (strEQ(d,"gmtime"))		return KEY_gmtime;
+	    if (strEQ(d,"gmtime"))		return -KEY_gmtime;
 	    break;
 	}
 	break;
     case 'h':
-	if (strEQ(d,"hex"))			return KEY_hex;
+	if (strEQ(d,"hex"))			return -KEY_hex;
 	break;
     case 'i':
 	switch (len) {
@@ -3007,56 +3313,56 @@ I32 len;
 	    if (strEQ(d,"if"))			return KEY_if;
 	    break;
 	case 3:
-	    if (strEQ(d,"int"))			return KEY_int;
+	    if (strEQ(d,"int"))			return -KEY_int;
 	    break;
 	case 5:
-	    if (strEQ(d,"index"))		return KEY_index;
-	    if (strEQ(d,"ioctl"))		return KEY_ioctl;
+	    if (strEQ(d,"index"))		return -KEY_index;
+	    if (strEQ(d,"ioctl"))		return -KEY_ioctl;
 	    break;
 	}
 	break;
     case 'j':
-	if (strEQ(d,"join"))			return KEY_join;
+	if (strEQ(d,"join"))			return -KEY_join;
 	break;
     case 'k':
 	if (len == 4) {
 	    if (strEQ(d,"keys"))		return KEY_keys;
-	    if (strEQ(d,"kill"))		return KEY_kill;
+	    if (strEQ(d,"kill"))		return -KEY_kill;
 	}
 	break;
     case 'L':
 	if (len == 2) {
-	    if (strEQ(d,"LT"))			return KEY_lt;
-	    if (strEQ(d,"LE"))			return KEY_le;
+	    if (strEQ(d,"LT")) { deprecate(d);	return -KEY_lt;}
+	    if (strEQ(d,"LE")) { deprecate(d);	return -KEY_le;}
 	}
 	break;
     case 'l':
 	switch (len) {
 	case 2:
-	    if (strEQ(d,"lt"))			return KEY_lt;
-	    if (strEQ(d,"le"))			return KEY_le;
-	    if (strEQ(d,"lc"))			return KEY_lc;
+	    if (strEQ(d,"lt"))			return -KEY_lt;
+	    if (strEQ(d,"le"))			return -KEY_le;
+	    if (strEQ(d,"lc"))			return -KEY_lc;
 	    break;
 	case 3:
-	    if (strEQ(d,"log"))			return KEY_log;
+	    if (strEQ(d,"log"))			return -KEY_log;
 	    break;
 	case 4:
 	    if (strEQ(d,"last"))		return KEY_last;
-	    if (strEQ(d,"link"))		return KEY_link;
+	    if (strEQ(d,"link"))		return -KEY_link;
 	    break;
 	case 5:
 	    if (strEQ(d,"local"))		return KEY_local;
-	    if (strEQ(d,"lstat"))		return KEY_lstat;
+	    if (strEQ(d,"lstat"))		return -KEY_lstat;
 	    break;
 	case 6:
-	    if (strEQ(d,"length"))		return KEY_length;
-	    if (strEQ(d,"listen"))		return KEY_listen;
+	    if (strEQ(d,"length"))		return -KEY_length;
+	    if (strEQ(d,"listen"))		return -KEY_listen;
 	    break;
 	case 7:
-	    if (strEQ(d,"lcfirst"))		return KEY_lcfirst;
+	    if (strEQ(d,"lcfirst"))		return -KEY_lcfirst;
 	    break;
 	case 9:
-	    if (strEQ(d,"localtime"))		return KEY_localtime;
+	    if (strEQ(d,"localtime"))		return -KEY_localtime;
 	    break;
 	}
 	break;
@@ -3066,38 +3372,43 @@ I32 len;
 	case 2:
 	    if (strEQ(d,"my"))			return KEY_my;
 	    break;
+	case 3:
+	    if (strEQ(d,"map"))			return KEY_map;
+	    break;
 	case 5:
-	    if (strEQ(d,"mkdir"))		return KEY_mkdir;
+	    if (strEQ(d,"mkdir"))		return -KEY_mkdir;
 	    break;
 	case 6:
-	    if (strEQ(d,"msgctl"))		return KEY_msgctl;
-	    if (strEQ(d,"msgget"))		return KEY_msgget;
-	    if (strEQ(d,"msgrcv"))		return KEY_msgrcv;
-	    if (strEQ(d,"msgsnd"))		return KEY_msgsnd;
+	    if (strEQ(d,"msgctl"))		return -KEY_msgctl;
+	    if (strEQ(d,"msgget"))		return -KEY_msgget;
+	    if (strEQ(d,"msgrcv"))		return -KEY_msgrcv;
+	    if (strEQ(d,"msgsnd"))		return -KEY_msgsnd;
 	    break;
 	}
 	break;
     case 'N':
-	if (strEQ(d,"NE"))			return KEY_ne;
+	if (strEQ(d,"NE")) { deprecate(d);	return -KEY_ne;}
 	break;
     case 'n':
 	if (strEQ(d,"next"))			return KEY_next;
-	if (strEQ(d,"ne"))			return KEY_ne;
+	if (strEQ(d,"ne"))			return -KEY_ne;
+	if (strEQ(d,"not"))			return -KEY_not;
+	if (strEQ(d,"no"))			return KEY_no;
 	break;
     case 'o':
 	switch (len) {
 	case 2:
-	    if (strEQ(d,"or"))			return KEY_or;
+	    if (strEQ(d,"or"))			return -KEY_or;
 	    break;
 	case 3:
-	    if (strEQ(d,"ord"))			return KEY_ord;
-	    if (strEQ(d,"oct"))			return KEY_oct;
+	    if (strEQ(d,"ord"))			return -KEY_ord;
+	    if (strEQ(d,"oct"))			return -KEY_oct;
 	    break;
 	case 4:
-	    if (strEQ(d,"open"))		return KEY_open;
+	    if (strEQ(d,"open"))		return -KEY_open;
 	    break;
 	case 7:
-	    if (strEQ(d,"opendir"))		return KEY_opendir;
+	    if (strEQ(d,"opendir"))		return -KEY_opendir;
 	    break;
 	}
 	break;
@@ -3105,11 +3416,12 @@ I32 len;
 	switch (len) {
 	case 3:
 	    if (strEQ(d,"pop"))			return KEY_pop;
+	    if (strEQ(d,"pos"))			return KEY_pos;
 	    break;
 	case 4:
 	    if (strEQ(d,"push"))		return KEY_push;
-	    if (strEQ(d,"pack"))		return KEY_pack;
-	    if (strEQ(d,"pipe"))		return KEY_pipe;
+	    if (strEQ(d,"pack"))		return -KEY_pack;
+	    if (strEQ(d,"pipe"))		return -KEY_pipe;
 	    break;
 	case 5:
 	    if (strEQ(d,"print"))		return KEY_print;
@@ -3129,39 +3441,40 @@ I32 len;
 	    if (strEQ(d,"qw"))			return KEY_qw;
 	    if (strEQ(d,"qx"))			return KEY_qx;
 	}
+	else if (strEQ(d,"quotemeta"))		return -KEY_quotemeta;
 	break;
     case 'r':
 	switch (len) {
 	case 3:
-	    if (strEQ(d,"ref"))			return KEY_ref;
+	    if (strEQ(d,"ref"))			return -KEY_ref;
 	    break;
 	case 4:
-	    if (strEQ(d,"read"))		return KEY_read;
-	    if (strEQ(d,"rand"))		return KEY_rand;
-	    if (strEQ(d,"recv"))		return KEY_recv;
+	    if (strEQ(d,"read"))		return -KEY_read;
+	    if (strEQ(d,"rand"))		return -KEY_rand;
+	    if (strEQ(d,"recv"))		return -KEY_recv;
 	    if (strEQ(d,"redo"))		return KEY_redo;
 	    break;
 	case 5:
-	    if (strEQ(d,"rmdir"))		return KEY_rmdir;
-	    if (strEQ(d,"reset"))		return KEY_reset;
+	    if (strEQ(d,"rmdir"))		return -KEY_rmdir;
+	    if (strEQ(d,"reset"))		return -KEY_reset;
 	    break;
 	case 6:
 	    if (strEQ(d,"return"))		return KEY_return;
-	    if (strEQ(d,"rename"))		return KEY_rename;
-	    if (strEQ(d,"rindex"))		return KEY_rindex;
+	    if (strEQ(d,"rename"))		return -KEY_rename;
+	    if (strEQ(d,"rindex"))		return -KEY_rindex;
 	    break;
 	case 7:
-	    if (strEQ(d,"require"))		return KEY_require;
-	    if (strEQ(d,"reverse"))		return KEY_reverse;
-	    if (strEQ(d,"readdir"))		return KEY_readdir;
+	    if (strEQ(d,"require"))		return -KEY_require;
+	    if (strEQ(d,"reverse"))		return -KEY_reverse;
+	    if (strEQ(d,"readdir"))		return -KEY_readdir;
 	    break;
 	case 8:
-	    if (strEQ(d,"readlink"))		return KEY_readlink;
-	    if (strEQ(d,"readline"))		return KEY_readline;
-	    if (strEQ(d,"readpipe"))		return KEY_readpipe;
+	    if (strEQ(d,"readlink"))		return -KEY_readlink;
+	    if (strEQ(d,"readline"))		return -KEY_readline;
+	    if (strEQ(d,"readpipe"))		return -KEY_readpipe;
 	    break;
 	case 9:
-	    if (strEQ(d,"rewinddir"))		return KEY_rewinddir;
+	    if (strEQ(d,"rewinddir"))		return -KEY_rewinddir;
 	    break;
 	}
 	break;
@@ -3174,36 +3487,36 @@ I32 len;
 	case 'e':
 	    switch (len) {
 	    case 4:
-		if (strEQ(d,"seek"))		return KEY_seek;
-		if (strEQ(d,"send"))		return KEY_send;
+		if (strEQ(d,"seek"))		return -KEY_seek;
+		if (strEQ(d,"send"))		return -KEY_send;
 		break;
 	    case 5:
-		if (strEQ(d,"semop"))		return KEY_semop;
+		if (strEQ(d,"semop"))		return -KEY_semop;
 		break;
 	    case 6:
-		if (strEQ(d,"select"))		return KEY_select;
-		if (strEQ(d,"semctl"))		return KEY_semctl;
-		if (strEQ(d,"semget"))		return KEY_semget;
+		if (strEQ(d,"select"))		return -KEY_select;
+		if (strEQ(d,"semctl"))		return -KEY_semctl;
+		if (strEQ(d,"semget"))		return -KEY_semget;
 		break;
 	    case 7:
-		if (strEQ(d,"setpgrp"))		return KEY_setpgrp;
-		if (strEQ(d,"seekdir"))		return KEY_seekdir;
+		if (strEQ(d,"setpgrp"))		return -KEY_setpgrp;
+		if (strEQ(d,"seekdir"))		return -KEY_seekdir;
 		break;
 	    case 8:
-		if (strEQ(d,"setpwent"))	return KEY_setpwent;
-		if (strEQ(d,"setgrent"))	return KEY_setgrent;
+		if (strEQ(d,"setpwent"))	return -KEY_setpwent;
+		if (strEQ(d,"setgrent"))	return -KEY_setgrent;
 		break;
 	    case 9:
-		if (strEQ(d,"setnetent"))	return KEY_setnetent;
+		if (strEQ(d,"setnetent"))	return -KEY_setnetent;
 		break;
 	    case 10:
-		if (strEQ(d,"setsockopt"))	return KEY_setsockopt;
-		if (strEQ(d,"sethostent"))	return KEY_sethostent;
-		if (strEQ(d,"setservent"))	return KEY_setservent;
+		if (strEQ(d,"setsockopt"))	return -KEY_setsockopt;
+		if (strEQ(d,"sethostent"))	return -KEY_sethostent;
+		if (strEQ(d,"setservent"))	return -KEY_setservent;
 		break;
 	    case 11:
-		if (strEQ(d,"setpriority"))	return KEY_setpriority;
-		if (strEQ(d,"setprotoent"))	return KEY_setprotoent;
+		if (strEQ(d,"setpriority"))	return -KEY_setpriority;
+		if (strEQ(d,"setprotoent"))	return -KEY_setprotoent;
 		break;
 	    }
 	    break;
@@ -3213,60 +3526,60 @@ I32 len;
 		if (strEQ(d,"shift"))		return KEY_shift;
 		break;
 	    case 6:
-		if (strEQ(d,"shmctl"))		return KEY_shmctl;
-		if (strEQ(d,"shmget"))		return KEY_shmget;
+		if (strEQ(d,"shmctl"))		return -KEY_shmctl;
+		if (strEQ(d,"shmget"))		return -KEY_shmget;
 		break;
 	    case 7:
-		if (strEQ(d,"shmread"))		return KEY_shmread;
+		if (strEQ(d,"shmread"))		return -KEY_shmread;
 		break;
 	    case 8:
-		if (strEQ(d,"shmwrite"))	return KEY_shmwrite;
-		if (strEQ(d,"shutdown"))	return KEY_shutdown;
+		if (strEQ(d,"shmwrite"))	return -KEY_shmwrite;
+		if (strEQ(d,"shutdown"))	return -KEY_shutdown;
 		break;
 	    }
 	    break;
 	case 'i':
-	    if (strEQ(d,"sin"))			return KEY_sin;
+	    if (strEQ(d,"sin"))			return -KEY_sin;
 	    break;
 	case 'l':
-	    if (strEQ(d,"sleep"))		return KEY_sleep;
+	    if (strEQ(d,"sleep"))		return -KEY_sleep;
 	    break;
 	case 'o':
 	    if (strEQ(d,"sort"))		return KEY_sort;
-	    if (strEQ(d,"socket"))		return KEY_socket;
-	    if (strEQ(d,"socketpair"))		return KEY_socketpair;
+	    if (strEQ(d,"socket"))		return -KEY_socket;
+	    if (strEQ(d,"socketpair"))		return -KEY_socketpair;
 	    break;
 	case 'p':
 	    if (strEQ(d,"split"))		return KEY_split;
-	    if (strEQ(d,"sprintf"))		return KEY_sprintf;
+	    if (strEQ(d,"sprintf"))		return -KEY_sprintf;
 	    if (strEQ(d,"splice"))		return KEY_splice;
 	    break;
 	case 'q':
-	    if (strEQ(d,"sqrt"))		return KEY_sqrt;
+	    if (strEQ(d,"sqrt"))		return -KEY_sqrt;
 	    break;
 	case 'r':
-	    if (strEQ(d,"srand"))		return KEY_srand;
+	    if (strEQ(d,"srand"))		return -KEY_srand;
 	    break;
 	case 't':
-	    if (strEQ(d,"stat"))		return KEY_stat;
+	    if (strEQ(d,"stat"))		return -KEY_stat;
 	    if (strEQ(d,"study"))		return KEY_study;
 	    break;
 	case 'u':
-	    if (strEQ(d,"substr"))		return KEY_substr;
+	    if (strEQ(d,"substr"))		return -KEY_substr;
 	    if (strEQ(d,"sub"))			return KEY_sub;
 	    break;
 	case 'y':
 	    switch (len) {
 	    case 6:
-		if (strEQ(d,"system"))		return KEY_system;
+		if (strEQ(d,"system"))		return -KEY_system;
 		break;
 	    case 7:
-		if (strEQ(d,"sysread"))		return KEY_sysread;
-		if (strEQ(d,"symlink"))		return KEY_symlink;
-		if (strEQ(d,"syscall"))		return KEY_syscall;
+		if (strEQ(d,"sysread"))		return -KEY_sysread;
+		if (strEQ(d,"symlink"))		return -KEY_symlink;
+		if (strEQ(d,"syscall"))		return -KEY_syscall;
 		break;
 	    case 8:
-		if (strEQ(d,"syswrite"))	return KEY_syswrite;
+		if (strEQ(d,"syswrite"))	return -KEY_syswrite;
 		break;
 	    }
 	    break;
@@ -3281,67 +3594,71 @@ I32 len;
 	    if (strEQ(d,"tie"))			return KEY_tie;
 	    break;
 	case 4:
-	    if (strEQ(d,"tell"))		return KEY_tell;
-	    if (strEQ(d,"time"))		return KEY_time;
+	    if (strEQ(d,"tell"))		return -KEY_tell;
+	    if (strEQ(d,"time"))		return -KEY_time;
 	    break;
 	case 5:
-	    if (strEQ(d,"times"))		return KEY_times;
+	    if (strEQ(d,"times"))		return -KEY_times;
 	    break;
 	case 7:
-	    if (strEQ(d,"telldir"))		return KEY_telldir;
+	    if (strEQ(d,"telldir"))		return -KEY_telldir;
 	    break;
 	case 8:
-	    if (strEQ(d,"truncate"))		return KEY_truncate;
+	    if (strEQ(d,"truncate"))		return -KEY_truncate;
 	    break;
 	}
 	break;
     case 'u':
 	switch (len) {
 	case 2:
-	    if (strEQ(d,"uc"))			return KEY_uc;
+	    if (strEQ(d,"uc"))			return -KEY_uc;
+	    break;
+	case 3:
+	    if (strEQ(d,"use"))			return KEY_use;
 	    break;
 	case 5:
 	    if (strEQ(d,"undef"))		return KEY_undef;
 	    if (strEQ(d,"until"))		return KEY_until;
 	    if (strEQ(d,"untie"))		return KEY_untie;
-	    if (strEQ(d,"utime"))		return KEY_utime;
-	    if (strEQ(d,"umask"))		return KEY_umask;
+	    if (strEQ(d,"utime"))		return -KEY_utime;
+	    if (strEQ(d,"umask"))		return -KEY_umask;
 	    break;
 	case 6:
 	    if (strEQ(d,"unless"))		return KEY_unless;
-	    if (strEQ(d,"unpack"))		return KEY_unpack;
-	    if (strEQ(d,"unlink"))		return KEY_unlink;
+	    if (strEQ(d,"unpack"))		return -KEY_unpack;
+	    if (strEQ(d,"unlink"))		return -KEY_unlink;
 	    break;
 	case 7:
 	    if (strEQ(d,"unshift"))		return KEY_unshift;
-	    if (strEQ(d,"ucfirst"))		return KEY_ucfirst;
+	    if (strEQ(d,"ucfirst"))		return -KEY_ucfirst;
 	    break;
 	}
 	break;
     case 'v':
-	if (strEQ(d,"values"))			return KEY_values;
-	if (strEQ(d,"vec"))			return KEY_vec;
+	if (strEQ(d,"values"))			return -KEY_values;
+	if (strEQ(d,"vec"))			return -KEY_vec;
 	break;
     case 'w':
 	switch (len) {
 	case 4:
-	    if (strEQ(d,"warn"))		return KEY_warn;
-	    if (strEQ(d,"wait"))		return KEY_wait;
+	    if (strEQ(d,"warn"))		return -KEY_warn;
+	    if (strEQ(d,"wait"))		return -KEY_wait;
 	    break;
 	case 5:
 	    if (strEQ(d,"while"))		return KEY_while;
-	    if (strEQ(d,"write"))		return KEY_write;
+	    if (strEQ(d,"write"))		return -KEY_write;
 	    break;
 	case 7:
-	    if (strEQ(d,"waitpid"))		return KEY_waitpid;
+	    if (strEQ(d,"waitpid"))		return -KEY_waitpid;
 	    break;
 	case 9:
-	    if (strEQ(d,"wantarray"))		return KEY_wantarray;
+	    if (strEQ(d,"wantarray"))		return -KEY_wantarray;
 	    break;
 	}
 	break;
     case 'x':
-	if (len == 1)				return KEY_x;
+	if (len == 1)				return -KEY_x;
+	if (strEQ(d,"xor"))			return -KEY_xor;
 	break;
     case 'y':
 	if (len == 1)				return KEY_y;
@@ -3361,10 +3678,16 @@ char *what;
     char *w;
 
     if (dowarn && *s == ' ' && s[1] == '(') {	/* XXX gotta be a better way */
-	w = strchr(s,')');
-	if (w)
-	    for (w++; *w && isSPACE(*w); w++) ;
-	if (!w || !*w || !strchr(";|}", *w))	/* an advisory hack only... */
+	int level = 1;
+	for (w = s+2; *w && level; w++) {
+	    if (*w == '(')
+		++level;
+	    else if (*w == ')')
+		--level;
+	}
+	if (*w)
+	    for (; *w && isSPACE(*w); w++) ;
+	if (!*w || !strchr(";|})]oa!=", *w))	/* an advisory hack only... */
 	    warn("%s (...) interpreted as function",name);
     }
     while (s < bufend && isSPACE(*s))
@@ -3432,6 +3755,8 @@ I32 ck_uni;
     if (lex_brackets == 0)
 	lex_fakebrack = 0;
     s++;
+    if (isSPACE(*s))
+	s = skipspace(s);
     d = dest;
     if (isDIGIT(*s)) {
 	while (isDIGIT(*s))
@@ -3446,7 +3771,7 @@ I32 ck_uni;
 		*d++ = ':';
 		s++;
 	    }
-	    else if (*s == ':' && s[1] == ':' && isIDFIRST(s[2])) {
+	    else if (*s == ':' && s[1] == ':') {
 		*d++ = *s++;
 		*d++ = *s++;
 	    }
@@ -3461,10 +3786,11 @@ I32 ck_uni;
 	    lex_state = LEX_INTERPENDMAYBE;
 	return s;
     }
-    if (isSPACE(*s) ||
-	(*s == '$' && s[1] && (isALPHA(s[1]) || strchr("$_{", s[1]))))
-	    return s;
+    if (*s == '$' && s[1] && (isALPHA(s[1]) || strchr("$_{", s[1])))
+	return s;
     if (*s == '{') {
+	if (lex_state == LEX_NORMAL)
+	    return s;
 	bracket = s;
 	s++;
     }
@@ -3482,12 +3808,12 @@ I32 ck_uni;
 	    while (isALNUM(*s))
 		*d++ = *s++;
 	    *d = '\0';
-	    if (*s == '[' || *s == '{') {
+	    if ((*s == '[' || *s == '{') && !keyword(dest,d-dest)) {
 		if (lex_brackets)
 		    croak("Can't use delimiter brackets within expression");
 		lex_fakebrack = TRUE;
 		bracket++;
-		lex_brackets++;
+		lex_brackstack[lex_brackets++] = XOPERATOR;
 		return s;
 	    }
 	}
@@ -3506,6 +3832,7 @@ I32 ck_uni;
     return s;
 }
 
+#ifdef NOTDEF
 void
 scan_prefix(pm,string,len)
 PMOP *pm;
@@ -3536,12 +3863,18 @@ I32 len;
 	    else
 		goto defchar;
 	    break;
-	case '.': case '[': case '$': case '(': case ')': case '|': case '+':
+	case '(':
+	    if (d[1] == '?') {		/* All bets off. */
+		SvREFCNT_dec(tmpstr);
+		return;
+	    }
+	    /* FALL THROUGH */
+	case '.': case '[': case '$': case ')': case '|': case '+':
 	case '^':
 	    e = d;
 	    break;
 	case '\\':
-	    if (d[1] && strchr("wWbB0123456789sSdDlLuUExc",d[1])) {
+	    if (d[1] && strchr("AGZwWbB0123456789sSdDlLuUExc",d[1])) {
 		e = d;
 		break;
 	    }
@@ -3590,6 +3923,27 @@ I32 len;
     pm->op_pmshort = tmpstr;
     pm->op_pmslen = d - t;
 }
+#endif
+
+void pmflag(pmfl,ch)
+U16* pmfl;
+int ch;
+{
+    if (ch == 'i') {
+	sawi = TRUE;
+	*pmfl |= PMf_FOLD;
+    }
+    else if (ch == 'g')
+	*pmfl |= PMf_GLOBAL;
+    else if (ch == 'o')
+	*pmfl |= PMf_KEEP;
+    else if (ch == 'm')
+	*pmfl |= PMf_MULTILINE;
+    else if (ch == 's')
+	*pmfl |= PMf_SINGLELINE;
+    else if (ch == 'x')
+	*pmfl |= PMf_EXTENDED;
+}
 
 static char *
 scan_pat(start)
@@ -3597,8 +3951,6 @@ char *start;
 {
     PMOP *pm;
     char *s;
-
-    multi_start = curcop->cop_line;
 
     s = scan_str(start);
     if (!s) {
@@ -3608,24 +3960,11 @@ char *start;
 	croak("Search pattern not terminated");
     }
     pm = (PMOP*)newPMOP(OP_MATCH, 0);
-    if (*start == '?')
+    if (multi_open == '?')
 	pm->op_pmflags |= PMf_ONCE;
 
-    while (*s == 'i' || *s == 'o' || *s == 'g') {
-	if (*s == 'i') {
-	    s++;
-	    sawi = TRUE;
-	    pm->op_pmflags |= PMf_FOLD;
-	}
-	if (*s == 'o') {
-	    s++;
-	    pm->op_pmflags |= PMf_KEEP;
-	}
-	if (*s == 'g') {
-	    s++;
-	    pm->op_pmflags |= PMf_GLOBAL;
-	}
-    }
+    while (*s && strchr("iogmsx", *s))
+	pmflag(&pm->op_pmflags,*s++);
 
     lex_op = (OP*)pm;
     yylval.ival = OP_MATCH;
@@ -3636,14 +3975,13 @@ static char *
 scan_subst(start)
 char *start;
 {
-    register char *s = start;
+    register char *s;
     register PMOP *pm;
     I32 es = 0;
 
-    multi_start = curcop->cop_line;
     yylval.ival = OP_NULL;
 
-    s = scan_str(s);
+    s = scan_str(start);
 
     if (!s) {
 	if (lex_stuff)
@@ -3652,7 +3990,7 @@ char *start;
 	croak("Substitution pattern not terminated");
     }
 
-    if (s[-1] == *start)
+    if (s[-1] == multi_open)
 	s--;
 
     s = scan_str(s);
@@ -3667,24 +4005,13 @@ char *start;
     }
 
     pm = (PMOP*)newPMOP(OP_SUBST, 0);
-    while (*s == 'g' || *s == 'i' || *s == 'e' || *s == 'o') {
+    while (*s && strchr("iogmsex", *s)) {
 	if (*s == 'e') {
 	    s++;
 	    es++;
 	}
-	if (*s == 'g') {
-	    s++;
-	    pm->op_pmflags |= PMf_GLOBAL;
-	}
-	if (*s == 'i') {
-	    s++;
-	    sawi = TRUE;
-	    pm->op_pmflags |= PMf_FOLD;
-	}
-	if (*s == 'o') {
-	    s++;
-	    pm->op_pmflags |= PMf_KEEP;
-	}
+	else
+	    pmflag(&pm->op_pmflags,*s++);
     }
 
     if (es) {
@@ -3692,7 +4019,7 @@ char *start;
 	pm->op_pmflags |= PMf_EVAL;
 	repl = newSVpv("",0);
 	while (es-- > 0)
-	    sv_catpvn(repl, "eval ", 5);
+	    sv_catpv(repl, es ? "eval " : "do ");
 	sv_catpvn(repl, "{ ", 2);
 	sv_catsv(repl, lex_repl);
 	sv_catpvn(repl, " };", 2);
@@ -3748,7 +4075,7 @@ static char *
 scan_trans(start)
 char *start;
 {
-    register char *s = start;
+    register char* s;
     OP *op;
     short *tbl;
     I32 squash;
@@ -3757,14 +4084,14 @@ char *start;
 
     yylval.ival = OP_NULL;
 
-    s = scan_str(s);
+    s = scan_str(start);
     if (!s) {
 	if (lex_stuff)
 	    SvREFCNT_dec(lex_stuff);
 	lex_stuff = Nullsv;
 	croak("Translation pattern not terminated");
     }
-    if (s[-1] == *start)
+    if (s[-1] == multi_open)
 	s--;
 
     s = scan_str(s);
@@ -3846,6 +4173,8 @@ register char *s;
     multi_start = curcop->cop_line;
     multi_open = multi_close = '<';
     tmpstr = NEWSV(87,80);
+    sv_upgrade(tmpstr, SVt_PVIV);
+    SvIVX(tmpstr) = '\\';
     term = *tokenbuf;
     if (!rsfp) {
 	d = s;
@@ -3922,7 +4251,7 @@ char *start;
 	croak("Unterminated <> operator");
 
     if (*d == '$') d++;
-    while (*d && (isALNUM(*d) || *d == '\''))
+    while (*d && (isALNUM(*d) || *d == '\'' || *d == ':'))
 	d++;
     if (d - tokenbuf != len) {
 	yylval.ival = OP_GLOB;
@@ -3937,22 +4266,23 @@ char *start;
 	if (!len)
 	    (void)strcpy(d,"ARGV");
 	if (*d == '$') {
-	    GV *gv = gv_fetchpv(d+1,TRUE, SVt_PV);
-	    lex_op = (OP*)newUNOP(OP_READLINE, 0,
-				    newUNOP(OP_RV2GV, 0,
-					newUNOP(OP_RV2SV, 0,
-					    newGVOP(OP_GV, 0, gv))));
+	    I32 tmp;
+	    if (tmp = pad_findmy(d)) {
+		OP *op = newOP(OP_PADSV, 0);
+		op->op_targ = tmp;
+		lex_op = (OP*)newUNOP(OP_READLINE, 0, newUNOP(OP_RV2GV, 0, op));
+	    }
+	    else {
+		GV *gv = gv_fetchpv(d+1,TRUE, SVt_PV);
+		lex_op = (OP*)newUNOP(OP_READLINE, 0,
+					newUNOP(OP_RV2GV, 0,
+					    newUNOP(OP_RV2SV, 0,
+						newGVOP(OP_GV, 0, gv))));
+	    }
 	    yylval.ival = OP_NULL;
 	}
 	else {
-	    IO *io;
-
 	    GV *gv = gv_fetchpv(d,TRUE, SVt_PVIO);
-	    io = GvIOn(gv);
-	    if (strEQ(d,"ARGV")) {
-		GvAVn(gv);
-		IoFLAGS(io) |= IOf_ARGV|IOf_START;
-	    }
 	    lex_op = (OP*)newUNOP(OP_READLINE, 0, newGVOP(OP_GV, 0, gv));
 	    yylval.ival = OP_NULL;
 	}
@@ -3967,11 +4297,14 @@ char *start;
     SV *sv;
     char *tmps;
     register char *s = start;
-    register char term = *s;
+    register char term;
     register char *to;
     I32 brackets = 1;
 
+    if (isSPACE(*s))
+	s = skipspace(s);
     CLINE;
+    term = *s;
     multi_start = curcop->cop_line;
     multi_open = term;
     if (term && (tmps = strchr("([{< )]}> )]}>",term)))
@@ -3981,7 +4314,7 @@ char *start;
     sv = NEWSV(87,80);
     sv_upgrade(sv, SVt_PVIV);
     SvIVX(sv) = term;
-    SvPOK_only(sv);		/* validate pointer */
+    (void)SvPOK_only(sv);		/* validate pointer */
     s++;
     for (;;) {
 	SvGROW(sv, SvCUR(sv) + (bufend - s) + 1);
@@ -3990,8 +4323,12 @@ char *start;
 	    for (; s < bufend; s++,to++) {
 		if (*s == '\n' && !rsfp)
 		    curcop->cop_line++;
-		if (*s == '\\' && s+1 < bufend && term != '\\')
-		    *to++ = *s++;
+		if (*s == '\\' && s+1 < bufend && term != '\\') {
+		    if (s[1] == term)
+			s++;
+		    else
+			*to++ = *s++;
+		}
 		else if (*s == term)
 		    break;
 		*to = *s;
@@ -4001,8 +4338,12 @@ char *start;
 	    for (; s < bufend; s++,to++) {
 		if (*s == '\n' && !rsfp)
 		    curcop->cop_line++;
-		if (*s == '\\' && s+1 < bufend && term != '\\')
-		    *to++ = *s++;
+		if (*s == '\\' && s+1 < bufend && term != '\\') {
+		    if (s[1] == term)
+			s++;
+		    else
+			*to++ = *s++;
+		}
 		else if (*s == term && --brackets <= 0)
 		    break;
 		else if (*s == multi_open)
@@ -4164,7 +4505,7 @@ register char *s;
 {
     register char *eol;
     register char *t;
-    SV *stuff = newSV(0);
+    SV *stuff = newSVpv("",0);
     bool needargs = FALSE;
 
     while (!needargs) {
@@ -4182,19 +4523,21 @@ register char *s;
 	else
 	    eol = bufend = SvPVX(linestr) + SvCUR(linestr);
 	if (*s != '#') {
-	    sv_catpvn(stuff, s, eol-s);
-	    while (s < eol) {
-		if (*s == '@' || *s == '^') {
-		    needargs = TRUE;
-		    break;
+	    for (t = s; t < eol; t++) {
+		if (*t == '~' && t[1] == '~' && SvCUR(stuff)) {
+		    needargs = FALSE;
+		    goto enough;	/* ~~ must be first line in formline */
 		}
-		s++;
+		if (*t == '@' || *t == '^')
+		    needargs = TRUE;
 	    }
+	    sv_catpvn(stuff, s, eol-s);
 	}
 	s = eol;
 	if (rsfp) {
 	    s = sv_gets(linestr, rsfp, 0);
 	    oldoldbufptr = oldbufptr = bufptr = SvPVX(linestr);
+	    bufend = bufptr + SvCUR(linestr);
 	    if (!s) {
 		s = bufptr;
 		yyerror("Format not terminated");
@@ -4203,12 +4546,16 @@ register char *s;
 	}
 	incline(s);
     }
-    if (SvPOK(stuff)) {
+  enough:
+    if (SvCUR(stuff)) {
 	expect = XTERM;
 	if (needargs) {
+	    lex_state = LEX_NORMAL;
 	    nextval[nexttoke].ival = 0;
 	    force_next(',');
 	}
+	else
+	    lex_state = LEX_FORMLINE;
 	nextval[nexttoke].opval = (OP*)newSVOP(OP_CONST, 0, stuff);
 	force_next(THING);
 	nextval[nexttoke].ival = OP_FORMLINE;
@@ -4246,7 +4593,9 @@ start_subparse()
     SAVEINT(min_intro_pending);
     SAVEINT(max_intro_pending);
     comppad = newAV();
+    SAVEFREESV((SV*)comppad);
     comppad_name = newAV();
+    SAVEFREESV((SV*)comppad_name);
     comppad_name_fill = 0;
     min_intro_pending = 0;
     av_push(comppad, Nullsv);
@@ -4270,22 +4619,19 @@ yyerror(s)
 char *s;
 {
     char tmpbuf[258];
-    char tmp2buf[258];
     char *tname = tmpbuf;
 
     if (bufptr > oldoldbufptr && bufptr - oldoldbufptr < 200 &&
       oldoldbufptr != oldbufptr && oldbufptr != bufptr) {
 	while (isSPACE(*oldoldbufptr))
 	    oldoldbufptr++;
-	cpy7bit(tmp2buf, oldoldbufptr, bufptr - oldoldbufptr);
-	sprintf(tname,"near \"%s\"",tmp2buf);
+	sprintf(tname,"near \"%.*s\"",bufptr - oldoldbufptr, oldoldbufptr);
     }
     else if (bufptr > oldbufptr && bufptr - oldbufptr < 200 &&
       oldbufptr != bufptr) {
 	while (isSPACE(*oldbufptr))
 	    oldbufptr++;
-	cpy7bit(tmp2buf, oldbufptr, bufptr - oldbufptr);
-	sprintf(tname,"near \"%s\"",tmp2buf);
+	sprintf(tname,"near \"%.*s\"",bufptr - oldbufptr, oldbufptr);
     }
     else if (yychar > 255)
 	tname = "next token ???";
@@ -4296,7 +4642,7 @@ char *s;
 	   (lex_state == LEX_KNOWNEXT && lex_defer == LEX_NORMAL))
 	    (void)strcpy(tname,"at end of line");
 	else
-	    (void)strcpy(tname,"at end of string");
+	    (void)strcpy(tname,"within string");
     }
     else if (yychar < 32)
 	(void)sprintf(tname,"next char ^%c",yychar+64);
@@ -4304,10 +4650,12 @@ char *s;
 	(void)sprintf(tname,"next char %c",yychar);
     (void)sprintf(buf, "%s at %s line %d, %s\n",
       s,SvPVX(GvSV(curcop->cop_filegv)),curcop->cop_line,tname);
-    if (curcop->cop_line == multi_end && multi_start < multi_end)
+    if (curcop->cop_line == multi_end && multi_start < multi_end) {
 	sprintf(buf+strlen(buf),
-	  "  (Might be a runaway multi-line %c%c string starting on line %d)\n",
-	  multi_open,multi_close,multi_start);
+	  "  (Might be a runaway multi-line %c%c string starting on line %ld)\n",
+	  multi_open,multi_close,(long)multi_start);
+        multi_end = 0;
+    }
     if (in_eval)
 	sv_catpv(GvSV(gv_fetchpv("@",TRUE, SVt_PV)),buf);
     else

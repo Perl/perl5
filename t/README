@@ -8,4 +8,9 @@ If you put out extra lines with a '#' character on the front, you don't
 have to worry about removing the extra print statements later since TEST
 ignores lines beginning with '#'.
 
+Several tests assume you have sucessfully included the POSIX
+extension.  If you have not, lib/[nos]dbm.t will fail.  Try replacing
+the O_CREAT|O_RDWR with either 0x202 or 0x102 in the tie statements
+and run the tests again.
+
 If you come up with new tests, send them to lwall@netlabs.com.

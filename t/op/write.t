@@ -17,10 +17,12 @@ $foo
 ^<<<<<<...
 $foo
 now @<<the@>>>> for all@|||||men to come @<<<<
-'i' . 's', "time\n", $good, 'to'
+{
+    'i' . 's', "time\n", $good, 'to'
+}
 .
 
-open(OUT, '>Op.write.tmp') || die "Can't create Op.write.tmp";
+open(OUT, '>Op_write.tmp') || die "Can't create Op_write.tmp";
 
 $fox = 'foxiness';
 $good = 'good';
@@ -40,8 +42,8 @@ the course
 of huma...
 now is the time for all good men to come to\n";
 
-if (`cat Op.write.tmp` eq $right)
-    { print "ok 1\n"; unlink 'Op.write.tmp'; }
+if (`cat Op_write.tmp` eq $right)
+    { print "ok 1\n"; unlink 'Op_write.tmp'; }
 else
     { print "not ok 1\n"; }
 
@@ -57,7 +59,7 @@ now @<<the@>>>> for all@|||||men to come @<<<<
 'i' . 's', "time\n", $good, 'to'
 .
 
-open OUT2, '>Op.write.tmp' or die "Can't create Op.write.tmp";
+open OUT2, '>Op_write.tmp' or die "Can't create Op_write.tmp";
 
 $fox = 'foxiness';
 $good = 'good';
@@ -80,8 +82,8 @@ becomes
 necessary
 now is the time for all good men to come to\n";
 
-if (`cat Op.write.tmp` eq $right)
-    { print "ok 2\n"; unlink 'Op.write.tmp'; }
+if (`cat Op_write.tmp` eq $right)
+    { print "ok 2\n"; unlink 'Op_write.tmp'; }
 else
     { print "not ok 2\n"; }
 
@@ -92,6 +94,7 @@ $fox
 jumped
 @*
 $multiline
+and
 ^<<<<<<<<< ~~
 $foo
 now @<<the@>>>> for all@|||||men to come @<<<<
@@ -99,7 +102,7 @@ now @<<the@>>>> for all@|||||men to come @<<<<
 .
 EOFORMAT
 
-open(OUT2, '>Op.write.tmp') || die "Can't create Op.write.tmp";
+open(OUT2, '>Op_write.tmp') || die "Can't create Op_write.tmp";
 
 $fox = 'foxiness';
 $good = 'good';
@@ -114,6 +117,7 @@ jumped
 forescore
 and
 seven years
+and
 when in
 the course
 of human
@@ -122,8 +126,8 @@ becomes
 necessary
 now is the time for all good men to come to\n";
 
-if (`cat Op.write.tmp` eq $right)
-    { print "ok 3\n"; unlink 'Op.write.tmp'; }
+if (`cat Op_write.tmp` eq $right)
+    { print "ok 3\n"; unlink 'Op_write.tmp'; }
 else
     { print "not ok 3\n"; }
 

@@ -4,6 +4,12 @@ sub cacheout'open {
     open($_[0], $_[1]);
 }
 
+# Close as well
+
+sub cacheout'close {
+    close($_[0]);
+}
+
 # But only this sub name is visible to them.
 
 sub cacheout {
@@ -15,7 +21,7 @@ sub cacheout {
 	    local(@lru) = sort {$isopen{$a} <=> $isopen{$b};} keys(%isopen);
 	    splice(@lru, $maxopen / 3);
 	    $numopen -= @lru;
-	    for (@lru) { close $_; delete $isopen{$_}; }
+	    for (@lru) { &close($_); delete $isopen{$_}; }
 	}
 	&open($file, ($saw{$file}++ ? '>>' : '>') . $file)
 	    || die "Can't create $file: $!\n";

@@ -56,10 +56,7 @@ a[^]b]c	adc	y	$&	adc
 ab|cd	abc	y	$&	ab
 ab|cd	abcd	y	$&	ab
 ()ef	def	y	$&-$1	ef-
-()*	-	c	-	-
 *a	-	c	-	-
-^*	-	c	-	-
-$*	-	c	-	-
 (*)b	-	c	-	-
 $b	b	n	-	-
 a\	-	c	-	-
@@ -74,19 +71,13 @@ abc)	-	c	-	-
 a+b+c	aabbabc	y	$&	abc
 a{1,}b{1,}c	aabbabc	y	$&	abc
 a**	-	c	-	-
-a*?	-	c	-	-
-(a*)*	-	c	-	-
-(a*)+	-	c	-	-
-(a|)*	-	c	-	-
-(a*|b)*	-	c	-	-
+a.+?c	abcabc	y	$&	abc
 (a+|b)*	ab	y	$&-$1	ab-b
 (a+|b){0,}	ab	y	$&-$1	ab-b
 (a+|b)+	ab	y	$&-$1	ab-b
 (a+|b){1,}	ab	y	$&-$1	ab-b
 (a+|b)?	ab	y	$&-$1	a-a
 (a+|b){0,1}	ab	y	$&-$1	a-a
-(^)*	-	c	-	-
-(ab|)*	-	c	-	-
 )(	-	c	-	-
 [^ab]*	cde	y	$&	cde
 abc		n	-	-
@@ -95,7 +86,6 @@ a*		y	$&
 ([abc])*bcd	abcd	y	$&-$1	abcd-a
 a|b|c|d|e	e	y	$&	e
 (a|b|c|d|e)f	ef	y	$&-$1	ef-e
-((a*|b))*	-	c	-	-
 abcd*efg	abcdefg	y	$&	abcdefg
 ab*	xabyabbbz	y	$&	ab
 ab*	xayabbbz	y	$&	a
@@ -144,23 +134,23 @@ a[-]?c	ac	y	$&	ac
 'ab*c'i	ABC	y	$&	ABC
 'ab*bc'i	ABC	y	$&	ABC
 'ab*bc'i	ABBC	y	$&	ABBC
-'ab*bc'i	ABBBBC	y	$&	ABBBBC
-'ab{0,}bc'i	ABBBBC	y	$&	ABBBBC
-'ab+bc'i	ABBC	y	$&	ABBC
+'ab*?bc'i	ABBBBC	y	$&	ABBBBC
+'ab{0,}?bc'i	ABBBBC	y	$&	ABBBBC
+'ab+?bc'i	ABBC	y	$&	ABBC
 'ab+bc'i	ABC	n	-	-
 'ab+bc'i	ABQ	n	-	-
 'ab{1,}bc'i	ABQ	n	-	-
 'ab+bc'i	ABBBBC	y	$&	ABBBBC
-'ab{1,}bc'i	ABBBBC	y	$&	ABBBBC
-'ab{1,3}bc'i	ABBBBC	y	$&	ABBBBC
-'ab{3,4}bc'i	ABBBBC	y	$&	ABBBBC
-'ab{4,5}bc'i	ABBBBC	n	-	-
-'ab?bc'i	ABBC	y	$&	ABBC
-'ab?bc'i	ABC	y	$&	ABC
-'ab{0,1}bc'i	ABC	y	$&	ABC
-'ab?bc'i	ABBBBC	n	-	-
-'ab?c'i	ABC	y	$&	ABC
-'ab{0,1}c'i	ABC	y	$&	ABC
+'ab{1,}?bc'i	ABBBBC	y	$&	ABBBBC
+'ab{1,3}?bc'i	ABBBBC	y	$&	ABBBBC
+'ab{3,4}?bc'i	ABBBBC	y	$&	ABBBBC
+'ab{4,5}?bc'i	ABBBBC	n	-	-
+'ab??bc'i	ABBC	y	$&	ABBC
+'ab??bc'i	ABC	y	$&	ABC
+'ab{0,1}?bc'i	ABC	y	$&	ABC
+'ab??bc'i	ABBBBC	n	-	-
+'ab??c'i	ABC	y	$&	ABC
+'ab{0,1}?c'i	ABC	y	$&	ABC
 '^abc$'i	ABC	y	$&	ABC
 '^abc$'i	ABCC	n	-	-
 '^abc'i	ABCC	y	$&	ABC
@@ -170,7 +160,7 @@ a[-]?c	ac	y	$&	ac
 '$'i	ABC	y	$&	
 'a.c'i	ABC	y	$&	ABC
 'a.c'i	AXC	y	$&	AXC
-'a.*c'i	AXYZC	y	$&	AXYZC
+'a.*?c'i	AXYZC	y	$&	AXYZC
 'a.*c'i	AXYZD	n	-	-
 'a[bc]d'i	ABC	n	-	-
 'a[bc]d'i	ABD	y	$&	ABD
@@ -193,10 +183,7 @@ a[-]?c	ac	y	$&	ac
 'ab|cd'i	ABC	y	$&	AB
 'ab|cd'i	ABCD	y	$&	AB
 '()ef'i	DEF	y	$&-$1	EF-
-'()*'i	-	c	-	-
 '*a'i	-	c	-	-
-'^*'i	-	c	-	-
-'$*'i	-	c	-	-
 '(*)b'i	-	c	-	-
 '$b'i	B	n	-	-
 'a\'i	-	c	-	-
@@ -211,19 +198,16 @@ a[-]?c	ac	y	$&	ac
 'a+b+c'i	AABBABC	y	$&	ABC
 'a{1,}b{1,}c'i	AABBABC	y	$&	ABC
 'a**'i	-	c	-	-
-'a*?'i	-	c	-	-
-'(a*)*'i	-	c	-	-
-'(a*)+'i	-	c	-	-
-'(a|)*'i	-	c	-	-
-'(a*|b)*'i	-	c	-	-
+'a.+?c'i	ABCABC	y	$&	ABC
+'a.*?c'i	ABCABC	y	$&	ABC
+'a.{0,5}?c'i	ABCABC	y	$&	ABC
 '(a+|b)*'i	AB	y	$&-$1	AB-B
 '(a+|b){0,}'i	AB	y	$&-$1	AB-B
 '(a+|b)+'i	AB	y	$&-$1	AB-B
 '(a+|b){1,}'i	AB	y	$&-$1	AB-B
 '(a+|b)?'i	AB	y	$&-$1	A-A
 '(a+|b){0,1}'i	AB	y	$&-$1	A-A
-'(^)*'i	-	c	-	-
-'(ab|)*'i	-	c	-	-
+'(a+|b){0,1}?'i	AB	y	$&-$1	-
 ')('i	-	c	-	-
 '[^ab]*'i	CDE	y	$&	CDE
 'abc'i		n	-	-
@@ -232,7 +216,6 @@ a[-]?c	ac	y	$&	ac
 '([abc])*bcd'i	ABCD	y	$&-$1	ABCD-A
 'a|b|c|d|e'i	E	y	$&	E
 '(a|b|c|d|e)f'i	EF	y	$&-$1	EF-E
-'((a*|b))*'i	-	c	-	-
 'abcd*efg'i	ABCDEFG	y	$&	ABCDEFG
 'ab*'i	XABYABBBZ	y	$&	AB
 'ab*'i	XAYABBBZ	y	$&	A
@@ -262,6 +245,8 @@ a[-]?c	ac	y	$&	ac
 '((((((((((a))))))))))\41'i	AA	n	-	-
 '((((((((((a))))))))))\41'i	A!	y	$&	A!
 '(((((((((a)))))))))'i	A	y	$&	A
+'(?:(?:(?:(?:(?:(?:(?:(?:(?:(a))))))))))'i	A	y	$1	A
+'(?:(?:(?:(?:(?:(?:(?:(?:(?:(a|b|c))))))))))'i	C	y	$1	C
 'multiple words of text'i	UH-UH	n	-	-
 'multiple words'i	MULTIPLE WORDS, YEAH	y	$&	MULTIPLE WORDS
 '(.*)c(.*)'i	ABCDE	y	$&-$1-$2	ABCDE-AB-DE
@@ -272,3 +257,11 @@ a[-]?c	ac	y	$&	ac
 'a[-]?c'i	AC	y	$&	AC
 '(abc)\1'i	ABCABC	y	$1	ABC
 '([a-c]*)\1'i	ABCABC	y	$1	ABC
+a(?!b).	abad	y	$&	ad
+a(?=d).	abad	y	$&	ad
+a(?=c|d).	abad	y	$&	ad
+a(?:b|c|d)(.)	ace	y	$1	e
+a(?:b|c|d)*(.)	ace	y	$1	e
+a(?:b|c|d)+?(.)	ace	y	$1	e
+a(?:b|(c|e){1,2}?|d)+?(.)	ace	y	$1$2	ce
+^(.+)?B	AB	y	$1	A

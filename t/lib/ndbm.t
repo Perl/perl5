@@ -3,6 +3,7 @@
 # $RCSfile: dbm.t,v $$Revision: 4.1 $$Date: 92/08/07 18:27:43 $
 
 BEGIN {
+    chdir 't' if -d 't';
     @INC = '../lib';
     require Config; import Config;
     if ($Config{'extensions'} !~ /\bNDBM_File\b/) {
@@ -12,13 +13,15 @@ BEGIN {
 }
 
 require NDBM_File;
+#If Fcntl is not available, try 0x202 or 0x102 for O_RDWR|O_CREAT
+use Fcntl;
 
 print "1..12\n";
 
 unlink <Op.dbmx*>;
 
 umask(0);
-print (tie(%h,NDBM_File,'Op.dbmx', 0x202, 0640) ? "ok 1\n" : "not ok 1\n");
+print (tie(%h,NDBM_File,'Op.dbmx', O_RDWR|O_CREAT, 0640) ? "ok 1\n" : "not ok 1\n");
 
 $Dfile = "Op.dbmx.pag";
 if (! -e $Dfile) {
@@ -52,7 +55,7 @@ $h{'goner2'} = 'snork';
 delete $h{'goner2'};
 
 untie(%h);
-print (tie(%h,NDBM_File,'Op.dbmx', 0x2, 0640) ? "ok 4\n" : "not ok 4\n");
+print (tie(%h,NDBM_File,'Op.dbmx', &O_RDWR, 0640) ? "ok 4\n" : "not ok 4\n");
 
 $h{'j'} = 'J';
 $h{'k'} = 'K';

@@ -1,0 +1,108 @@
+=head1 NAME
+
+Basename - parse file specifications
+
+fileparse - split a pathname into pieces
+
+basename - extract just the filename from a path
+
+dirname - extract just the directory from a path
+
+=head1 SYNOPSIS
+
+    use File::Basename;
+
+    ($name,$path,$suffix) = fileparse($fullname,@suffixlist)
+    fileparse_set_fstype($os_string);
+    $basename = basename($fullname,@suffixlist);
+    $dirname = dirname($fullname);
+
+    ($name,$path,$suffix) = fileparse("lib/File/Basename.pm",".pm");
+    fileparse_set_fstype("VMS");
+    $basename = basename("lib/File/Basename.pm",".pm");
+    $dirname = dirname("lib/File/Basename.pm");
+
+=head1 DESCRIPTION
+
+These routines allow you to parse file specifications into useful
+pieces according using the syntax of different operating systems.
+
+=over 4
+
+=item fileparse_set_fstype
+
+You select the syntax via the routine fileparse_set_fstype().
+If the argument passed to it contains one of the substrings
+"VMS", "MSDOS", or "MacOS", the file specification syntax of that
+operating system is used in future calls to fileparse(),
+basename(), and dirname().  If it contains none of these
+substrings, UNIX syntax is used.  This pattern matching is
+case-insensitive.  If you've selected VMS syntax, and the file
+specification you pass to one of these routines contains a "/",
+they assume you are using UNIX emulation and apply the UNIX syntax
+rules instead, for that function call only.
+
+If you haven't called fileparse_set_fstype(), the syntax is chosen
+by examining the "osname" entry from the C<Config> package
+according to these rules.
+
+=item fileparse
+
+The fileparse() routine divides a file specification into three
+parts: a leading B<path>, a file B<name>, and a B<suffix>.  The
+B<path> contains everything up to and including the last directory
+separator in the input file specification.  The remainder of the input
+file specification is then divided into B<name> and B<suffix> based on
+the optional patterns you specify in C<@suffixlist>.  Each element of
+this list is interpreted as a regular expression, and is matched
+against the end of B<name>.  If this succeeds, the matching portion of
+B<name> is removed and prepended to B<suffix>.  By proper use of
+C<@suffixlist>, you can remove file types or versions for examination.
+
+You are guaranteed that if you concatenate B<path>, B<name>, and
+B<suffix> together in that order, the result will be identical to the
+input file specification.
+
+=back
+
+=head1 EXAMPLES
+
+Using UNIX file syntax:
+
+    ($base,$path,$type) = fileparse('/virgil/aeneid/draft.book7', 
+				    '\.book\d+');
+
+would yield
+
+    $base eq 'draft'
+    $path eq '/virgil/aeneid',
+    $tail eq '.book7'
+
+Similarly, using VMS syntax:
+
+    ($name,$dir,$type) = fileparse('Doc_Root:[Help]Rhetoric.Rnh',
+				   '\..*');
+
+would yield
+
+    $name eq 'Rhetoric'
+    $dir  eq 'Doc_Root:[Help]'
+    $type eq '.Rnh'
+
+=item C<basename>
+
+The basename() routine returns the first element of the list produced
+by calling fileparse() with the same arguments.  It is provided for
+compatibility with the UNIX shell command basename(1).
+
+=item C<dirname>
+
+The dirname() routine returns the directory portion of the input file
+specification.  When using VMS or MacOS syntax, this is identical to the
+second element of the list produced by calling fileparse() with the same
+input file specification.  When using UNIX or MSDOS syntax, the return
+value conforms to the behavior of the UNIX shell command dirname(1).  This
+is usually the same as the behavior of fileparse(), but differs in some
+cases.  For example, for the input file specification F<lib/>, fileparse()
+considers the directory name to be F<lib/>, while dirname() considers the
+directory name to be F<.>).

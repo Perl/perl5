@@ -32,6 +32,8 @@ print "#2\t:$foo: == 4\n";
 if ($foo == 4) {print "ok 2\n";} else {print "not ok 2\n";}
 
 $x = `./perl -e 'goto foo;' 2>&1`;
+if ($x =~ /DCL-W-NOCOMD/) { $x = `\$ mcr sys\$disk:[]perl. -e "goto foo;"`; }
+
 if ($x =~ /label/) {print "ok 3\n";} else {print "not ok 3\n";}
 
 sub foo {

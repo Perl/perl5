@@ -29,7 +29,7 @@ if ($x == '1') {print "ok 4\n";} else {print "not ok 4\n";}
 
 # check <> pseudoliteral
 
-open(try, "/dev/null") || (die "Can't open /dev/null.");
+open(try, "/dev/null") || open(try,"nla0:") || (die "Can't open /dev/null.");
 if (<try> eq '') {
     print "ok 5\n";
 }
@@ -38,5 +38,5 @@ else {
     die "/dev/null IS NOT A CHARACTER SPECIAL FILE!!!!\n" unless -c '/dev/null';
 }
 
-open(try, "../Makefile") || (die "Can't open ../Makefile.");
+open(try, "../Configure") || (die "Can't open ../Configure.");
 if (<try> ne '') {print "ok 6\n";} else {print "not ok 6\n";}

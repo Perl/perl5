@@ -1,24 +1,15 @@
-/* $RCSfile: dump.c,v $$Revision: 4.1 $$Date: 92/08/07 17:20:03 $
+/*    dump.c
  *
- *    Copyright (c) 1991, Larry Wall
+ *    Copyright (c) 1991-1994, Larry Wall
  *
  *    You may distribute under the terms of either the GNU General Public
  *    License or the Artistic License, as specified in the README file.
  *
- * $Log:	dump.c,v $
- * Revision 4.1  92/08/07  17:20:03  lwall
- * Stage 6 Snapshot
- * 
- * Revision 4.0.1.2  92/06/08  13:14:22  lwall
- * patch20: removed implicit int declarations on funcions
- * patch20: fixed confusion between a *var's real name and its effective name
- * 
- * Revision 4.0.1.1  91/06/07  10:58:44  lwall
- * patch4: new copyright notice
- * 
- * Revision 4.0  91/03/20  01:08:25  lwall
- * 4.0 baseline.
- * 
+ */
+
+/*
+ * "'You have talked long in your sleep, Frodo,' said Gandalf gently, 'and
+ * it has not been hard for me to read your mind and memory.'"
  */
 
 #include "EXTERN.h"
@@ -50,12 +41,12 @@ void
 dump_packsubs(stash)
 HV* stash;
 {
-    U32	i;
+    I32	i;
     HE	*entry;
 
     if (!HvARRAY(stash))
 	return;
-    for (i = 0; i <= HvMAX(stash); i++) {
+    for (i = 0; i <= (I32) HvMAX(stash); i++) {
 	for (entry = HvARRAY(stash)[i]; entry; entry = entry->hent_next) {
 	    GV *gv = (GV*)entry->hent_val;
 	    HV *hv;
@@ -63,8 +54,8 @@ HV* stash;
 		dump_sub(gv);
 	    if (GvFORM(gv))
 		dump_form(gv);
-	    if (*entry->hent_key == '_' && (hv = GvHV(gv)) && HvNAME(hv) &&
-	      hv != defstash)
+	    if (entry->hent_key[entry->hent_klen-1] == ':' &&
+	      (hv = GvHV(gv)) && HvNAME(hv) && hv != defstash)
 		dump_packsubs(hv);		/* nested package */
 	}
     }
@@ -78,10 +69,10 @@ GV* gv;
 
     gv_fullname(sv,gv);
     dump("\nSUB %s = ", SvPVX(sv));
-    if (CvUSERSUB(GvCV(gv)))
+    if (CvXSUB(GvCV(gv)))
 	dump("(xsub 0x%x %d)\n",
-	    (long)CvUSERSUB(GvCV(gv)),
-	    CvUSERINDEX(GvCV(gv)));
+	    (long)CvXSUB(GvCV(gv)),
+	    CvXSUBANY(GvCV(gv)).any_i32);
     else if (CvROOT(GvCV(gv)))
 	dump_op(CvROOT(GvCV(gv)));
     else
@@ -105,10 +96,6 @@ GV* gv;
 void
 dump_eval()
 {
-    register I32 i;
-    register GV *gv;
-    register HE *entry;
-
     dump_op(eval_root);
 }
 
@@ -158,10 +145,10 @@ register OP *op;
 	    (void)strcat(buf,"PARENS,");
 	if (op->op_flags & OPf_STACKED)
 	    (void)strcat(buf,"STACKED,");
-	if (op->op_flags & OPf_LVAL)
-	    (void)strcat(buf,"LVAL,");
-	if (op->op_flags & OPf_INTRO)
-	    (void)strcat(buf,"INTRO,");
+	if (op->op_flags & OPf_REF)
+	    (void)strcat(buf,"REF,");
+	if (op->op_flags & OPf_MOD)
+	    (void)strcat(buf,"MOD,");
 	if (op->op_flags & OPf_SPECIAL)
 	    (void)strcat(buf,"SPECIAL,");
 	if (*buf)
@@ -173,6 +160,10 @@ register OP *op;
 	if (op->op_type == OP_AASSIGN) {
 	    if (op->op_private & OPpASSIGN_COMMON)
 		(void)strcat(buf,"COMMON,");
+	}
+	else if (op->op_type == OP_SASSIGN) {
+	    if (op->op_private & OPpASSIGN_BACKWARDS)
+		(void)strcat(buf,"BACKWARDS,");
 	}
 	else if (op->op_type == OP_TRANS) {
 	    if (op->op_private & OPpTRANS_SQUASH)
@@ -186,7 +177,7 @@ register OP *op;
 	    if (op->op_private & OPpREPEAT_DOLIST)
 		(void)strcat(buf,"DOLIST,");
 	}
-	else if (op->op_type == OP_ENTERSUBR ||
+	else if (op->op_type == OP_ENTERSUB ||
 		 op->op_type == OP_RV2SV ||
 		 op->op_type == OP_RV2AV ||
 		 op->op_type == OP_RV2HV ||
@@ -215,6 +206,8 @@ register OP *op;
 	    if (op->op_private & OPpFLIP_LINENUM)
 		(void)strcat(buf,"LINENUM,");
 	}
+	if (op->op_flags & OPf_MOD && op->op_private & OPpLVAL_INTRO)
+	    (void)strcat(buf,"INTRO,");
 	if (*buf) {
 	    buf[strlen(buf)-1] = '\0';
 	    dump("PRIVATE = (%s)\n",buf);
@@ -274,10 +267,10 @@ register OP *op;
 	else
 	    fprintf(stderr, "DONE\n");
 	break;
+    case OP_MAPWHILE:
     case OP_GREPWHILE:
     case OP_OR:
     case OP_AND:
-    case OP_METHOD:
 	dump("OTHER ===> ");
 	if (cLOGOP->op_other)
 	    fprintf(stderr, "%d\n", cLOGOP->op_other->op_seq);
@@ -288,6 +281,8 @@ register OP *op;
     case OP_MATCH:
     case OP_SUBST:
 	dump_pm((PMOP*)op);
+	break;
+    default:
 	break;
     }
     if (op->op_flags & OPf_KIDS) {

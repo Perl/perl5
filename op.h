@@ -1,11 +1,10 @@
-/* $RCSfile: arg.h,v $$Revision: 4.1 $$Date: 92/08/07 17:18:16 $
+/*    op.h
  *
- *    Copyright (c) 1991, Larry Wall
+ *    Copyright (c) 1991-1994, Larry Wall
  *
  *    You may distribute under the terms of either the GNU General Public
  *    License or the Artistic License, as specified in the README file.
  *
- * $Log:	arg.h,v $
  */
 
 /*
@@ -39,10 +38,10 @@ typedef U16 PADOFFSET;
     PADOFFSET	op_targ;		\
     OPCODE	op_type;		\
     U16		op_seq;			\
-    char	op_flags;		\
-    char	op_private;
+    U8		op_flags;		\
+    U8		op_private;
 
-#define GIMME (op->op_flags & OPf_KNOW ? op->op_flags & OPf_LIST : cxstack[cxstack_ix].blk_gimme)
+#define GIMME (op->op_flags & OPf_KNOW ? op->op_flags & OPf_LIST : cxstack[cxstack_ix].blk_gimme & G_ARRAY)
 
 /* Public flags */
 #define OPf_LIST	1	/* Do operator in list context. */
@@ -50,45 +49,55 @@ typedef U16 PADOFFSET;
 #define OPf_KIDS	4	/* There is a firstborn child. */
 #define OPf_PARENS	8	/* This operator was parenthesized. */
 				/*  (Or block needs explicit scope entry.) */
-#define OPf_STACKED	16	/* Some arg is arriving on the stack. */
-#define OPf_LVAL	32	/* Certified reference (lvalue). */
-#define OPf_INTRO	64	/* Lvalue must be localized */
+#define OPf_REF		16	/* Certified reference. */
+				/*  (Return container, not containee). */
+#define OPf_MOD		32	/* Will modify (lvalue). */
+#define OPf_STACKED	64	/* Some arg is arriving on the stack. */
 #define OPf_SPECIAL	128	/* Do something weird for this op: */
 				/*  On local LVAL, don't init local value. */
 				/*  On OP_SORT, subroutine is inlined. */
 				/*  On OP_NOT, inversion was implicit. */
-				/*  On file tests, we fstat filehandle */
+				/*  On OP_LEAVE, don't restore curpm. */
 				/*  On truncate, we truncate filehandle */
 				/*  On control verbs, we saw no label */
 				/*  On flipflop, we saw ... instead of .. */
 				/*  On UNOPs, saw bare parens, e.g. eof(). */
-				/*  On OP_ENTERSUBR || OP_NULL, saw a "do". */
+				/*  On OP_ENTERSUB || OP_NULL, saw a "do". */
 
-/* Private for OP_ASSIGN */
-#define OPpASSIGN_COMMON	1	/* Left & right have syms in common. */
+/* Private for lvalues */
+#define OPpLVAL_INTRO	128	/* Lvalue must be localized */
+
+/* Private for OP_AASSIGN */
+#define OPpASSIGN_COMMON	64	/* Left & right have syms in common. */
+
+/* Private for OP_SASSIGN */
+#define OPpASSIGN_BACKWARDS	64	/* Left & right switched. */
 
 /* Private for OP_TRANS */
-#define OPpTRANS_SQUASH		1
-#define OPpTRANS_DELETE		2
-#define OPpTRANS_COMPLEMENT	4
+#define OPpTRANS_SQUASH		16
+#define OPpTRANS_DELETE		32
+#define OPpTRANS_COMPLEMENT	64
 
 /* Private for OP_REPEAT */
-#define OPpREPEAT_DOLIST	1	/* List replication. */
+#define OPpREPEAT_DOLIST	64	/* List replication. */
 
-/* Private for OP_ENTERSUBR, OP_RV2?V, OP_?ELEM */
+/* Private for OP_ENTERSUB, OP_RV2?V, OP_?ELEM */
   /* (lower bits carry hints) */
-#define OPpDEREF_DB		32	/* Debug subroutine. */
-#define OPpDEREF_AV		64	/* Want ref to AV. */
-#define OPpDEREF_HV		128	/* Want ref to HV. */
+#define OPpDEREF_DB		16	/* Debug subroutine. */
+#define OPpDEREF_AV		32	/* Want ref to AV. */
+#define OPpDEREF_HV		64	/* Want ref to HV. */
 
 /* Private for OP_CONST */
-#define OPpCONST_BARE		1	/* Was a bare word (filehandle?). */
+#define OPpCONST_BARE		64	/* Was a bare word (filehandle?). */
 
 /* Private for OP_FLIP/FLOP */
-#define OPpFLIP_LINENUM		1	/* Range arg potentially a line num. */
+#define OPpFLIP_LINENUM		64	/* Range arg potentially a line num. */
 
 /* Private for OP_LIST */
-#define OPpLIST_GUESSED		1	/* Guessed that pushmark was needed. */
+#define OPpLIST_GUESSED		64	/* Guessed that pushmark was needed. */
+
+/* Private for OP_LEAVE and friends */
+#define OPpLEAVE_VOID		64	/* No need to copy out values. */
 
 struct op {
     BASEOP
@@ -135,21 +144,26 @@ struct pmop {
     PMOP *	op_pmnext;		/* list of all scanpats */
     REGEXP *	op_pmregexp;		/* compiled expression */
     SV *	op_pmshort;		/* for a fast bypass of execute() */
-    short	op_pmflags;
+    U16		op_pmflags;
     char	op_pmslen;
 };
-#define PMf_USED 1			/* pm has been used once already */
-#define PMf_ONCE 2			/* use pattern only once per reset */
-#define PMf_SCANFIRST 4			/* initial constant not anchored */
-#define PMf_ALL 8			/* initial constant is whole pat */
-#define PMf_SKIPWHITE 16		/* skip leading whitespace for split */
-#define PMf_FOLD 32			/* case insensitivity */
-#define PMf_CONST 64			/* subst replacement is constant */
-#define PMf_KEEP 128			/* keep 1st runtime pattern forever */
-#define PMf_GLOBAL 256			/* pattern had a g modifier */
-#define PMf_RUNTIME 512			/* pattern coming in on the stack */
-#define PMf_EVAL 1024			/* evaluating replacement as expr */
-#define PMf_WHITE 2048			/* pattern is \s+ */
+
+#define PMf_USED	0x0001		/* pm has been used once already */
+#define PMf_ONCE	0x0002		/* use pattern only once per reset */
+#define PMf_SCANFIRST	0x0004		/* initial constant not anchored */
+#define PMf_ALL		0x0008		/* initial constant is whole pat */
+#define PMf_SKIPWHITE	0x0010		/* skip leading whitespace for split */
+#define PMf_FOLD	0x0020		/* case insensitivity */
+#define PMf_CONST	0x0040		/* subst replacement is constant */
+#define PMf_KEEP	0x0080		/* keep 1st runtime pattern forever */
+#define PMf_GLOBAL	0x0100		/* pattern had a g modifier */
+#define PMf_RUNTIME	0x0200		/* pattern coming in on the stack */
+#define PMf_EVAL	0x0400		/* evaluating replacement as expr */
+#define PMf_WHITE	0x0800		/* pattern is \s+ */
+#define PMf_MULTILINE	0x1000		/* assume multiple lines */
+#define PMf_SINGLELINE	0x2000		/* assume single line */
+#define PMf_UNUSED	0x4000		/* (unused) */
+#define PMf_EXTENDED	0x8000		/* chuck embedded whitespace */
 
 struct svop {
     BASEOP
@@ -209,4 +223,26 @@ struct loop {
 #define kLOOP ((LOOP*)kid)
 
 #define Nullop Null(OP*)
+
+/* Lowest byte of opargs */
+#define OA_MARK 1
+#define OA_FOLDCONST 2
+#define OA_RETSCALAR 4
+#define OA_TARGET 8
+#define OA_RETINTEGER 16
+#define OA_OTHERINT 32
+#define OA_DANGEROUS 64
+#define OA_DEFGV 128
+
+#define OASHIFT 8
+
+/* Remaining nybbles of opargs */
+#define OA_SCALAR 1
+#define OA_LIST 2
+#define OA_AVREF 3
+#define OA_HVREF 4
+#define OA_CVREF 5
+#define OA_FILEREF 6
+#define OA_SCALARREF 7
+#define OA_OPTIONAL 8
 

@@ -1,0 +1,16 @@
+=head1 NAME
+
+finddepth - traverse a directory structure depth-first
+
+=head1 SYNOPSYS
+
+    use File::Finddepth;
+    finddepth(\&wanted, '/foo','/bar');
+    sub wanted { ... }
+
+=head2 DESCRIPTION
+
+This is just like C<File::Find>, except that it does a depthfirst
+search uses finddepth() rather than find(), and performs a 
+depth-first search.  
+

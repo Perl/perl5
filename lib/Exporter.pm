@@ -2,9 +2,11 @@ package Exporter;
 
 require 5.000;
 
-sub import {
-    my ($callpack, $callfile, $callline) = caller($ExportLevel);
+$ExportLevel = 0;
+
+sub export {
     my $pack = shift;
+    my $callpack = shift;
     my @imports = @_;
     *exports = \@{"${pack}::EXPORT"};
     if (@imports) {
@@ -14,11 +16,14 @@ sub import {
 	if (!%exports) {
 	    grep(s/^&//, @exports);
 	    @exports{@exports} = (1) x  @exports;
+	    foreach $extra (@{"${pack}::EXPORT_OK"}) {
+		$exports{$extra} = 1;
+	    }
 	}
 	foreach $sym (@imports) {
 	    if (!$exports{$sym}) {
 		if ($sym !~ s/^&// || !$exports{$sym}) {
-		    warn "$sym is not exported by the $pack module ",
+		    warn qq["$sym" is not exported by the $pack module ],
 			    "at $callfile line $callline\n";
 		    $oops++;
 		    next;
@@ -42,5 +47,11 @@ sub import {
 		    warn "Can't export symbol: $type$sym\n";
     }
 };
+
+sub import {
+    local ($callpack, $callfile, $callline) = caller($ExportLevel);
+    my $pack = shift;
+    export $pack, $callpack, @_;
+}
 
 1;

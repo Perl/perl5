@@ -34,10 +34,10 @@ sub finddepth {
 	  || (warn("Can't stat $topdir: $!\n"), next);
 	if (-d _) {
 	    if (chdir($topdir)) {
-		$topdir =~ s,/$,, ;
-		&finddepthdir($topdir,$topnlink);
-		($dir,$_) = ($topdir,'.');
-		$name = $topdir;
+		($fixtopdir = $topdir) =~ s,/$,, ;
+		&finddepthdir($fixtopdir,$topnlink);
+		($dir,$_) = ($fixtopdir,'.');
+		$name = $fixtopdir;
 		&wanted;
 	    }
 	    else {

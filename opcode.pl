@@ -33,9 +33,9 @@ print "\n#define MAXO ", scalar @ops, "\n\n";
 
 print <<END;
 #ifndef DOINIT
-extern char *op_name[];
+EXT char *op_name[];
 #else
-char *op_name[] = {
+EXT char *op_name[] = {
 END
 
 for (@ops) {
@@ -51,13 +51,13 @@ END
 # Emit function declarations.
 
 for (sort keys %ckname) {
-    print "OP *\t", &tab(3,$_),"P((OP* op));\n";
+    print "OP *\t", &tab(3,$_),"_((OP* op));\n";
 }
 
 print "\n";
 
 for (@ops) {
-    print "OP *\t", &tab(3, "pp_\L$_"), "P((void));\n";
+    print "OP *\t", &tab(3, "pp_\L$_"), "_((void));\n";
 }
 
 # Emit ppcode switch array.
@@ -65,9 +65,9 @@ for (@ops) {
 print <<END;
 
 #ifndef DOINIT
-extern OP * (*ppaddr[])();
+EXT OP * (*ppaddr[])();
 #else
-OP * (*ppaddr[])() = {
+EXT OP * (*ppaddr[])() = {
 END
 
 for (@ops) {
@@ -84,9 +84,9 @@ END
 
 print <<END;
 #ifndef DOINIT
-extern OP * (*check[])();
+EXT OP * (*check[])();
 #else
-OP * (*check[])() = {
+EXT OP * (*check[])() = {
 END
 
 for (@ops) {
@@ -105,7 +105,7 @@ print <<END;
 #ifndef DOINIT
 EXT U32 opargs[];
 #else
-U32 opargs[] = {
+EXT U32 opargs[] = {
 END
 
 %argnum = (
@@ -128,6 +128,7 @@ for (@ops) {
     $argsum |= 16 if $flags =~ /i/;		# always produces integer
     $argsum |= 32 if $flags =~ /I/;		# has corresponding int op
     $argsum |= 64 if $flags =~ /d/;		# danger, unknown side effects
+    $argsum |= 128 if $flags =~ /u/;		# defaults to $_
     $mul = 256;
     for $arg (split(' ',$args{$_})) {
 	$argnum = ($arg =~ s/\?//) ? 8 : 0;
@@ -165,11 +166,10 @@ pushmark	pushmark		ck_null		s
 wantarray	wantarray		ck_null		is	
 
 const		constant item		ck_svconst	s	
-interp		interpreted string	ck_null		0	
 
 gvsv		scalar variable		ck_null		ds	
 gv		glob value		ck_null		ds	
-padsv		private variable	ck_null		0
+padsv		private variable	ck_null		s
 padav		private array		ck_null		0
 padhv		private hash		ck_null		0
 padany		private something	ck_null		0
@@ -180,17 +180,19 @@ pushre		push regexp		ck_null		0
 
 rv2gv		ref-to-glob cast	ck_rvconst	ds	
 sv2len		scalar value length	ck_null		ist	
-rv2sv		ref-to-scalar cast	ck_rvconst	ds	
+rv2sv		scalar deref		ck_rvconst	ds	
 av2arylen	array length		ck_null		is	
-rv2cv		subroutine reference	ck_rvconst	d
-refgen		reference constructor	ck_null		fst	L
-ref		reference-type operator	ck_fun		st	S?
+rv2cv		subroutine deref	ck_rvconst	d
+anoncode	anonymous subroutine	ck_null		0	
+refgen		reference constructor	ck_spair	m	L
+srefgen		scalar ref constructor	ck_null		fs	S
+ref		reference-type operator	ck_fun		stu	S?
 bless		bless			ck_fun		s	S S?
 
 # Pushy I/O.
 
 backtick	backticks		ck_null		t	
-glob		glob			ck_glob		t	
+glob		glob			ck_glob		t	S S
 readline	<HANDLE>		ck_null		t	
 rcatline	append I/O operator	ck_null		t	
 
@@ -208,24 +210,27 @@ trans		character translation	ck_null		is	S
 sassign		scalar assignment	ck_null		s
 aassign		list assignment		ck_null		t	L L
 
-schop		scalar chop		ck_null		t
-chop		chop			ck_chop		mt	L
-defined		defined operator	ck_rfun		is	S?
+chop		chop			ck_spair	mts	L
+schop		scalar chop		ck_null		stu	S?
+chomp		safe chop		ck_spair	mts	L
+schomp		scalar safe chop	ck_null		stu	S?
+defined		defined operator	ck_rfun		isu	S?
 undef		undef operator		ck_lfun		s	S?
-study		study			ck_fun		st	S?
+study		study			ck_fun		stu	S?
+pos		match position		ck_lfun		stu	S?
 
-preinc		preincrement		ck_lfun		Is	S
-i_preinc	integer preincrement	ck_lfun		is	S
-predec		predecrement		ck_lfun		Is	S
-i_predec	integer predecrement	ck_lfun		is	S
-postinc		postincrement		ck_lfun		Ist	S
-i_postinc	integer postincrement	ck_lfun		ist	S
-postdec		postdecrement		ck_lfun		Ist	S
-i_postdec	integer postdecrement	ck_lfun		ist	S
+preinc		preincrement		ck_lfun		dIs	S
+i_preinc	integer preincrement	ck_lfun		dis	S
+predec		predecrement		ck_lfun		dIs	S
+i_predec	integer predecrement	ck_lfun		dis	S
+postinc		postincrement		ck_lfun		dIst	S
+i_postinc	integer postincrement	ck_lfun		dist	S
+postdec		postdecrement		ck_lfun		dIst	S
+i_postdec	integer postdecrement	ck_lfun		dist	S
 
 # Ordinary operators.
 
-pow		exponentiation		ck_null		Ifst	S S
+pow		exponentiation		ck_null		fst	S S
 
 multiply	multiplication		ck_null		Ifst	S S
 i_multiply	integer multiplication	ck_null		ifst	S S
@@ -240,6 +245,7 @@ i_add		integer addition	ck_null		ifst	S S
 subtract	subtraction		ck_null		Ifst	S S
 i_subtract	integer subtraction	ck_null		ifst	S S
 concat		concatenation		ck_concat	fst	S S
+stringify	string			ck_fun		fst	S
 
 left_shift	left bitshift		ck_null		ifst	S S
 right_shift	right bitshift		ck_null		ifst	S S
@@ -256,7 +262,7 @@ eq		numeric eq		ck_null		Iifs	S S
 i_eq		integer eq		ck_null		ifs	S S
 ne		numeric ne		ck_null		Iifs	S S
 i_ne		integer ne		ck_null		ifs	S S
-ncmp		spaceship		ck_null		Iifst	S S
+ncmp		spaceship operator	ck_null		Iifst	S S
 i_ncmp		integer spaceship	ck_null		ifst	S S
 
 slt		string lt		ck_null		ifs	S S
@@ -267,9 +273,9 @@ seq		string eq		ck_null		ifs	S S
 sne		string ne		ck_null		ifs	S S
 scmp		string comparison	ck_null		ifst	S S
 
-bit_and		bit and			ck_null		fst	S S
-xor		xor			ck_null		fst	S S
-bit_or		bit or			ck_null		fst	S S
+bit_and		bitwise and		ck_null		fst	S S
+bit_xor		bitwise xor		ck_null		fst	S S
+bit_or		bitwise or		ck_null		fst	S S
 
 negate		negate			ck_null		Ifst	S
 i_negate	integer negate		ck_null		ifst	S
@@ -279,22 +285,22 @@ complement	1's complement		ck_null		fst	S
 # High falutin' math.
 
 atan2		atan2			ck_fun		fst	S S
-sin		sin			ck_fun		fst	S?
-cos		cos			ck_fun		fst	S?
+sin		sin			ck_fun		fstu	S?
+cos		cos			ck_fun		fstu	S?
 rand		rand			ck_fun		st	S?
 srand		srand			ck_fun		s	S?
-exp		exp			ck_fun		fst	S?
-log		log			ck_fun		fst	S?
-sqrt		sqrt			ck_fun		fst	S?
+exp		exp			ck_fun		fstu	S?
+log		log			ck_fun		fstu	S?
+sqrt		sqrt			ck_fun		fstu	S?
 
-int		int			ck_fun		fst	S?
-hex		hex			ck_fun		ist	S?
-oct		oct			ck_fun		ist	S?
-abs		abs			ck_fun		fst	S?
+int		int			ck_fun		fstu	S?
+hex		hex			ck_fun		istu	S?
+oct		oct			ck_fun		istu	S?
+abs		abs			ck_fun		fstu	S?
 
 # String stuff.
 
-length		length			ck_lengthconst	ist	S
+length		length			ck_lengthconst	istu	S?
 substr		substr			ck_fun		st	S S S?
 vec		vec			ck_fun		ist	S S S
 
@@ -303,13 +309,14 @@ rindex		rindex			ck_index	ist	S S S?
 
 sprintf		sprintf			ck_fun		mst	S L
 formline	formline		ck_formline	ms	S L
-ord		ord			ck_fun		ifst	S?
-chr		chr			ck_fun		fst	S?
+ord		ord			ck_fun		ifstu	S?
+chr		chr			ck_fun		fstu	S?
 crypt		crypt			ck_fun		fst	S S
-ucfirst		upper case first	ck_fun		ft	S
-lcfirst		lower case first	ck_fun		ft	S
-uc		upper case		ck_fun		ft	S
-lc		lower case		ck_fun		ft	S
+ucfirst		upper case first	ck_fun		fst	S
+lcfirst		lower case first	ck_fun		fst	S
+uc		upper case		ck_fun		fst	S
+lc		lower case		ck_fun		fst	S
+quotemeta	quote metachars		ck_fun		fst	S
 
 # Arrays.
 
@@ -323,7 +330,8 @@ aslice		array slice		ck_null		m	A L
 each		each			ck_fun		t	H
 values		values			ck_fun		t	H
 keys		keys			ck_fun		t	H
-delete		delete			ck_null		s	H S
+delete		delete			ck_delete	s	S
+exists		exists operator		ck_delete	is	S
 rv2hv		associative array deref	ck_rvconst	dt	
 helem		associative array elem	ck_null		s	H S
 hslice		associative array slice	ck_null		m	H L
@@ -339,10 +347,10 @@ join		join			ck_fun		mst	S L
 
 list		list			ck_null		m	L
 lslice		list slice		ck_null		0	H L L
-anonlist	anonymous list		ck_null		m	L
-anonhash	anonymous hash		ck_null		m	L
+anonlist	anonymous list		ck_fun		ms	L
+anonhash	anonymous hash		ck_fun		ms	L
 
-splice		splice			ck_fun		m	A S S? L
+splice		splice			ck_fun		m	A S? S? L
 push		push			ck_fun		imst	A L
 pop		pop			ck_shift	s	A
 shift		shift			ck_shift	s	A
@@ -352,6 +360,9 @@ reverse		reverse			ck_fun		mt	L
 
 grepstart	grep			ck_grep		dm	C L
 grepwhile	grep iterator		ck_null		dt	
+
+mapstart	map			ck_grep		dm	C L
+mapwhile	map iterator		ck_null		dt
 
 # Range stuff.
 
@@ -363,13 +374,14 @@ flop		range (or flop)		ck_null		0
 
 and		logical and		ck_null		0	
 or		logical or		ck_null		0	
+xor		logical xor		ck_null		fs	S S	
 cond_expr	conditional expression	ck_null		0	
 andassign	logical and assignment	ck_null		s	
 orassign	logical or assignment	ck_null		s	
 
 method		method lookup		ck_null		d
-entersubr	subroutine entry	ck_subr		dm	L
-leavesubr	subroutine exit		ck_null		0	
+entersub	subroutine entry	ck_subr		dmt	L
+leavesub	subroutine exit		ck_null		0	
 caller		caller			ck_fun		t	S?
 warn		warn			ck_fun		imst	L
 die		die			ck_fun		dimst	L
@@ -385,7 +397,7 @@ scope		block			ck_null		0
 enteriter	foreach loop entry	ck_null		d	
 iter		foreach loop iterator	ck_null		0	
 enterloop	loop entry		ck_null		d	
-leaveloop	loop exit		ck_null		s	
+leaveloop	loop exit		ck_null		0	
 return		return			ck_fun		dm	L
 last		last			ck_null		ds	
 next		next			ck_null		ds	
@@ -394,8 +406,8 @@ dump		dump			ck_null		ds
 goto		goto			ck_null		ds	
 exit		exit			ck_fun		ds	S?
 
-nswitch		numeric switch		ck_null		d	
-cswitch		character switch	ck_null		d	
+#nswitch		numeric switch		ck_null		d	
+#cswitch		character switch	ck_null		d	
 
 # I/O.
 
@@ -457,50 +469,50 @@ getpeername	getpeername		ck_fun		is	F
 
 # Stat calls.
 
-lstat		lstat			ck_ftst		0	F
-stat		stat			ck_ftst		0	F
-ftrread		-R			ck_ftst		is	F
-ftrwrite	-W			ck_ftst		is	F
-ftrexec		-X			ck_ftst		is	F
-fteread		-r			ck_ftst		is	F
-ftewrite	-w			ck_ftst		is	F
-fteexec		-x			ck_ftst		is	F
-ftis		-e			ck_ftst		is	F
-fteowned	-O			ck_ftst		is	F
-ftrowned	-o			ck_ftst		is	F
-ftzero		-z			ck_ftst		is	F
-ftsize		-s			ck_ftst		ist	F
-ftmtime		-M			ck_ftst		st	F
-ftatime		-A			ck_ftst		st	F
-ftctime		-C			ck_ftst		st	F
-ftsock		-S			ck_ftst		is	F
-ftchr		-c			ck_ftst		is	F
-ftblk		-b			ck_ftst		is	F
-ftfile		-f			ck_ftst		is	F
-ftdir		-d			ck_ftst		is	F
-ftpipe		-p			ck_ftst		is	F
-ftlink		-l			ck_ftst		is	F
-ftsuid		-u			ck_ftst		is	F
-ftsgid		-g			ck_ftst		is	F
-ftsvtx		-k			ck_ftst		is	F
+lstat		lstat			ck_ftst		u	F
+stat		stat			ck_ftst		u	F
+ftrread		-R			ck_ftst		isu	F
+ftrwrite	-W			ck_ftst		isu	F
+ftrexec		-X			ck_ftst		isu	F
+fteread		-r			ck_ftst		isu	F
+ftewrite	-w			ck_ftst		isu	F
+fteexec		-x			ck_ftst		isu	F
+ftis		-e			ck_ftst		isu	F
+fteowned	-O			ck_ftst		isu	F
+ftrowned	-o			ck_ftst		isu	F
+ftzero		-z			ck_ftst		isu	F
+ftsize		-s			ck_ftst		istu	F
+ftmtime		-M			ck_ftst		stu	F
+ftatime		-A			ck_ftst		stu	F
+ftctime		-C			ck_ftst		stu	F
+ftsock		-S			ck_ftst		isu	F
+ftchr		-c			ck_ftst		isu	F
+ftblk		-b			ck_ftst		isu	F
+ftfile		-f			ck_ftst		isu	F
+ftdir		-d			ck_ftst		isu	F
+ftpipe		-p			ck_ftst		isu	F
+ftlink		-l			ck_ftst		isu	F
+ftsuid		-u			ck_ftst		isu	F
+ftsgid		-g			ck_ftst		isu	F
+ftsvtx		-k			ck_ftst		isu	F
 fttty		-t			ck_ftst		is	F
-fttext		-T			ck_ftst		is	F
-ftbinary	-B			ck_ftst		is	F
+fttext		-T			ck_ftst		isu	F
+ftbinary	-B			ck_ftst		isu	F
 
 # File calls.
 
 chdir		chdir			ck_fun		ist	S?
 chown		chown			ck_fun		imst	L
-chroot		chroot			ck_fun		ist	S?
-unlink		unlink			ck_fun		imst	L
+chroot		chroot			ck_fun		istu	S?
+unlink		unlink			ck_fun		imstu	L
 chmod		chmod			ck_fun		imst	L
 utime		utime			ck_fun		imst	L
 rename		rename			ck_fun		ist	S S
 link		link			ck_fun		ist	S S
 symlink		symlink			ck_fun		ist	S S
-readlink	readlink		ck_fun		st	S?
+readlink	readlink		ck_fun		stu	S?
 mkdir		mkdir			ck_fun		ist	S S
-rmdir		rmdir			ck_fun		ist	S?
+rmdir		rmdir			ck_fun		istu	S?
 
 # Directory calls.
 
@@ -521,7 +533,7 @@ exec		exec			ck_exec		dimst	S? L
 kill		kill			ck_fun		dimst	L
 getppid		getppid			ck_null		ist	
 getpgrp		getpgrp			ck_fun		ist	S?
-setpgrp		setpgrp			ck_fun		ist	S S
+setpgrp		setpgrp			ck_fun		ist	S? S?
 getpriority	getpriority		ck_fun		ist	S S
 setpriority	setpriority		ck_fun		ist	S S S
 
@@ -531,7 +543,7 @@ time		time			ck_null		ist
 tms		times			ck_null		0	
 localtime	localtime		ck_fun		t	S?
 gmtime		gmtime			ck_fun		t	S?
-alarm		alarm			ck_fun		ist	S?
+alarm		alarm			ck_fun		istu	S?
 sleep		sleep			ck_fun		ist	S?
 
 # Shared memory.
@@ -556,11 +568,11 @@ semop		semop			ck_fun		imst	S S S
 
 # Eval.
 
-require		require			ck_require	d	S?
+require		require			ck_require	du	S?
 dofile		do 'file'		ck_fun		d	S
 entereval	eval string		ck_eval		d	S
 leaveeval	eval exit		ck_null		0	S
-evalonce	eval constant string	ck_null		d	S
+#evalonce	eval constant string	ck_null		d	S
 entertry	eval block		ck_null		0	
 leavetry	eval block exit		ck_null		0	
 
@@ -589,15 +601,15 @@ eservent	endservent		ck_null		is
 gpwnam		getpwnam		ck_fun		0	S
 gpwuid		getpwuid		ck_fun		0	S
 gpwent		getpwent		ck_null		0	
-spwent		setpwent		ck_null		ist	
-epwent		endpwent		ck_null		ist	
+spwent		setpwent		ck_null		is	
+epwent		endpwent		ck_null		is	
 ggrnam		getgrnam		ck_fun		0	S
 ggrgid		getgrgid		ck_fun		0	S
 ggrent		getgrent		ck_null		0	
-sgrent		setgrent		ck_null		ist	
-egrent		endgrent		ck_null		ist	
+sgrent		setgrent		ck_null		is	
+egrent		endgrent		ck_null		is	
 getlogin	getlogin		ck_null		st	
 
 # Miscellaneous.
 
-syscall		syscall			ck_fun		ist	S L
+syscall		syscall			ck_fun		imst	S L

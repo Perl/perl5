@@ -22,10 +22,11 @@ echo "Extracting h2ph (with variable substitutions)"
 rm -f h2ph
 $spitshell >h2ph <<!GROK!THIS!
 #!$bin/perl
-'di';
-'ig00';
+'di ';
+'ds 00 \"';
+'ig 00 ';
 
-\$perlincl = '$installprivlib';
+\$perlincl = '$archlibexp';
 !GROK!THIS!
 
 : In the following dollars and backticks do not need the extra backslash.
@@ -231,8 +232,8 @@ sub expr {
 
 	# These next few lines are legal in both Perl and nroff.
 
-.00;			# finish .ig
- 
+.00 ;			# finish .ig
+
 'di			\" finish diversion--previous line must be blank
 .nr nl 0-1		\" fake up transition to first page again
 .nr % 0			\" start at page 1

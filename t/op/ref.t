@@ -1,6 +1,6 @@
 #!./perl
 
-print "1..40\n";
+print "1..41\n";
 
 # Test glob operations.
 
@@ -73,7 +73,7 @@ print ${$$ref[2]}[2] == 5 ? "ok 16\n" : "not ok 16\n";
 print scalar @{$$ref[0]} == 0 ? "ok 17\n" : "not ok 17\n";
 
 print $ref->[1] == 2 ? "ok 18\n" : "not ok 18\n";
-print $ref->[2]->[0] == 3 ? "ok 19\n" : "not ok 18\n";
+print $ref->[2]->[0] == 3 ? "ok 19\n" : "not ok 19\n";
 
 # Test references to hashes of references.
 
@@ -151,8 +151,8 @@ DESTROY {
     return unless $string;
     print $string;
 
-    # Test that the object has already been "cursed".
-    print ref shift eq HASH ? "ok 35\n" : "not ok 35\n";
+    # Test that the object has not already been "cursed".
+    print ref shift ne HASH ? "ok 35\n" : "not ok 35\n";
 }
 
 # Now test inheritance of methods.
@@ -180,12 +180,21 @@ sub BASEOBJ'doit {
     $ref->{shift};
 }
 
+package UNIVERSAL;
+@ISA = 'LASTCHANCE';
+
+package LASTCHANCE;
+sub foo { print $_[1] }
+
+package WHATEVER;
+foo WHATEVER "ok 38\n";
+
 package FINALE;
 
 {
-    $ref3 = bless ["ok 40\n"];		# package destruction
-    my $ref2 = bless ["ok 39\n"];	# lexical destruction
-    local $ref1 = bless ["ok 38\n"];	# dynamic destruction
+    $ref3 = bless ["ok 41\n"];		# package destruction
+    my $ref2 = bless ["ok 40\n"];	# lexical destruction
+    local $ref1 = bless ["ok 39\n"];	# dynamic destruction
     1;					# flush any temp values on stack
 }
 

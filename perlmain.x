@@ -1,3 +1,0 @@
-POSIX
-NDBM_File
-ODBM_File

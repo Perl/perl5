@@ -6,14 +6,6 @@
  *    License or the Artistic License, as specified in the README file.
  *
  * $Log:	str.c,v $
- * Revision 4.1  92/08/07  18:29:26  lwall
- * 
- * Revision 4.0.1.1  91/06/07  12:20:08  lwall
- * patch4: new copyright notice
- * 
- * Revision 4.0  91/03/20  01:58:15  lwall
- * 4.0 baseline.
- * 
  */
 
 #include "handy.h"
@@ -195,7 +187,7 @@ char *keeplist;
 		else
 		    *to++ = *from++;
 	    }
-	    else if (index(keeplist,from[1]))
+	    else if (strchr(keeplist,from[1]))
 		*to++ = *from++;
 	    else
 		from++;

@@ -1,1 +1,1 @@
-d_mymalloc='undef'
+usemymalloc='n'

@@ -13,43 +13,6 @@ $header = '$RCSfile: perldb.pl,v $$Revision: 4.1 $$Date: 92/08/07 17:20:59 $';
 # have a breakpoint.  It also inserts a do 'perldb.pl' before the first line.
 #
 # $Log:	perldb.pl,v $
-# Revision 4.1  92/08/07  17:20:59  lwall
-# Stage 6 Snapshot
-# 
-# Revision 4.0  91/03/20  01:18:58  lwall
-# 4.0 baseline.
-# 
-# Revision 3.0.1.6  91/01/11  18:08:58  lwall
-# patch42: @_ couldn't be accessed from debugger
-# 
-# Revision 3.0.1.5  90/11/10  01:40:26  lwall
-# patch38: the debugger wouldn't stop correctly or do action routines
-# 
-# Revision 3.0.1.4  90/10/15  17:40:38  lwall
-# patch29: added caller
-# patch29: the debugger now understands packages and evals
-# patch29: scripts now run at almost full speed under the debugger
-# patch29: more variables are settable from debugger
-# 
-# Revision 3.0.1.3  90/08/09  04:00:58  lwall
-# patch19: debugger now allows continuation lines
-# patch19: debugger can now dump lists of variables
-# patch19: debugger can now add aliases easily from prompt
-# 
-# Revision 3.0.1.2  90/03/12  16:39:39  lwall
-# patch13: perl -d didn't format stack traces of *foo right
-# patch13: perl -d wiped out scalar return values of subroutines
-# 
-# Revision 3.0.1.1  89/10/26  23:14:02  lwall
-# patch1: RCS expanded an unintended $Header in lib/perldb.pl
-# 
-# Revision 3.0  89/10/18  15:19:46  lwall
-# 3.0 baseline
-# 
-# Revision 2.0  88/06/05  00:09:45  root
-# Baseline version 2.0.
-# 
-#
 
 open(IN, "</dev/tty") || open(IN,  "<&STDIN");	# so we don't dingle stdin
 open(OUT,">/dev/tty") || open(OUT, ">&STDOUT");	# so we don't dongle stdout

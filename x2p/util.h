@@ -6,17 +6,6 @@
  *    License or the Artistic License, as specified in the README file.
  *
  * $Log:	util.h,v $
- * Revision 4.1  92/08/07  18:29:30  lwall
- * 
- * Revision 4.0.1.2  91/11/05  19:21:20  lwall
- * patch11: various portability fixes
- * 
- * Revision 4.0.1.1  91/06/07  12:20:43  lwall
- * patch4: new copyright notice
- * 
- * Revision 4.0  91/03/20  01:58:29  lwall
- * 4.0 baseline.
- * 
  */
 
 /* is the string for makedir a directory name or a filename? */

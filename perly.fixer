@@ -1,5 +1,13 @@
 #!/bin/sh
 
+# Fix up yacc output to allow dynamic allocation.  Since perly.c
+# is now provided with the perl source, this should not be necessary.
+#  
+# However, if the user wishes to use byacc, or wishes to try another 
+# compiler compiler (e.g. bison or yacc), this script will get run.
+#
+# Currently, only byacc version 1.8 is supported.
+#
 #  Hacks to make it work with Interactive's SysVr3 Version 2.2
 #   doughera@lafvax.lafayette.edu (Andy Dougherty)   3/23/91
 #
@@ -10,14 +18,33 @@ input=$1
 output=$2
 tmp=/tmp/f$$
 
-if test -f perly.c.diff; then
+if grep 'yaccpar 1.8 (Berkeley)' $input >/dev/null 2>&1; then
     cp $input $output
-    patch -F3 <perly.c.diff
-    rm -rf $input
+    if test -f perly.c.diff; then
+	patch -F3 $output <perly.c.diff
+	rm -rf $input
+    fi
     exit
+elif grep 'yaccpar	1.9 (Berkeley)' $input >/dev/null 2>&1; then
+    if test -f perly.c.dif9; then
+	patch -F3 $output <perly.c.dif9
+	rm -rf $input
+	exit 0
+    else
+	echo "Diffs from byacc-1.9 are not available."
+	echo "If you wish to proceed anyway, do"
+	echo "cp $input $output"
+	echo "cp y.tab.h perly.h"
+	echo "and re-run make. Otherwise, I will use the old perly.c"
+	touch perly.c
+	# Exit with error status to stop make.
+	exit 1
+    fi
 fi
 
 plan="unknown"
+
+# Below, we check for various yaccpar outputs.
 
 #  Test for BSD 4.3 version.
 #  Also tests for the SunOS 4.0.2 version
@@ -25,7 +52,7 @@ egrep 'YYSTYPE[ 	]*yyv\[ *YYMAXDEPTH *\];
 short[  ]*yys\[ *YYMAXDEPTH *\] *;
 yyps *= *&yys\[ *-1 *\];
 yypv *= *&yyv\[ *-1 *\];
-if *\( *\+\+yyps *>=* *&yys\[ *YYMAXDEPTH *\] *\)' $input >$tmp
+if *\( *\+\+yyps *>=* *&yys\[ *YYMAXDEPTH *\] *\)' $input >$tmp 2>/dev/null
 
 set `wc -l $tmp`
 if test "$1" = "5"; then
@@ -33,12 +60,12 @@ if test "$1" = "5"; then
 fi
 
 if test "$plan" = "unknown"; then
-    #   Test for ISC 2.2 version.
+    #   Test for ISC 2.2 version (probably generic SysVr3).
 egrep 'YYSTYPE[ 	]*yyv\[ *YYMAXDEPTH *\];
 int[    ]*yys\[ *YYMAXDEPTH *\] *;
 yyps *= *&yys\[ *-1 *\];
 yypv *= *&yyv\[ *-1 *\];
-if *\( *\+\+yy_ps *>= *&yys\[ *YYMAXDEPTH *\] *\)' $input >$tmp
+if *\( *\+\+yy_ps *>= *&yys\[ *YYMAXDEPTH *\] *\)' $input >$tmp 2>/dev/null
 
     set `wc -l $tmp`
     if test "$1" = "5"; then
@@ -67,8 +94,8 @@ short *maxyyps;
 
 /yypv *= *&yyv\[ *-1 *\];/c\
 \	if (!yyv) {\
-\	    yyv = (YYSTYPE*) malloc(yymaxdepth * sizeof(YYSTYPE));\
-\	    yys = (short*) malloc(yymaxdepth * sizeof(short));\
+\	    yyv = (YYSTYPE*) safemalloc(yymaxdepth * sizeof(YYSTYPE));\
+\	    yys = (short*) safemalloc(yymaxdepth * sizeof(short));\
 \	    if ( !yyv || !yys ) {\
 \		yyerror( "out of memory" );\
 \		return(1);\
@@ -128,8 +155,8 @@ int *maxyyps;
 
 /yypv *= *&yyv\[ *-1 *\];/c\
 \	if (!yyv) {\
-\	    yyv = (YYSTYPE*) malloc(yymaxdepth * sizeof(YYSTYPE));\
-\	    yys = (int*) malloc(yymaxdepth * sizeof(int));\
+\	    yyv = (YYSTYPE*) safemalloc(yymaxdepth * sizeof(YYSTYPE));\
+\	    yys = (int*) safemalloc(yymaxdepth * sizeof(int));\
 \	    maxyyps = &yys[yymaxdepth];\
 \	}\
 \	yyps = &yys[-1];\

@@ -1,0 +1,838 @@
+=head1 NAME
+
+perlcall - Perl calling conventions from C
+
+=head1 DESCRIPTION
+
+B<WARNING : This document is still under construction. 
+There are bound to be a number of inaccuracies, so tread very carefully for now.>
+
+The purpose of this document is to show you how to write I<callbacks>, 
+i.e. how to call Perl from C. The main
+focus is on how to interface back to Perl from a bit of C code that has itself
+been run by Perl, i.e. the 'main' program is a Perl script; you are using it
+to execute
+a section of code written in C; that bit of C code wants you to do something
+with a particular event, so you want a Perl sub to be executed whenever it
+happens.
+
+Examples where this is necessary include
+
+=over 5
+
+=item * 
+
+You have created an XSUB interface to an application's C API.
+
+A fairly common feature in applications is to allow you to define a C
+function that will get called whenever something nasty occurs.
+What we would like is for a Perl sub to be called instead.
+
+=item *
+
+The classic example of where callbacks are used is in an event driven program 
+like for X-windows.
+In this case your register functions to be called whenever a specific events
+occur, e.g. a mouse button is pressed.
+
+=back
+
+Although the techniques described are applicable to embedding Perl
+in a C program, this is not the primary goal of this document. For details
+on embedding Perl in C refer to L<perlembed> (currently unwritten).
+
+Before you launch yourself head first into the rest of this document, it would 
+be a good idea to have read the following two documents - L<perlapi> and L<perlguts>.
+
+This stuff is easier to explain using examples. But first here are a few
+definitions anyway.
+
+=head2 Definitions
+
+Perl has a number of C functions which allow you to call Perl subs. They are
+
+    I32 perl_call_sv(SV* sv, I32 flags) ;
+    I32 perl_call_pv(char *subname, I32 flags) ;
+    I32 perl_call_method(char *methname, I32 flags) ;
+    I32 perl_call_argv(char *subname, I32 flags, register char **argv) ;
+
+The key function is I<perl_call_sv>. All the other functions make use of
+I<perl_call_sv> to do what they do.
+
+I<perl_call_sv> takes two parameters, the first is an SV*. This allows you to 
+specify the Perl sub to be called either as a C string (which has first been 
+converted to an SV) or a reference to a 
+sub. Example 7, shows you how you can make use of I<perl_call_sv>.
+The second parameter, C<flags>, is a general purpose option command. 
+This parameter is common to all the I<perl_call_*> functions. 
+It is discussed in the next section.
+
+The function, I<perl_call_pv>, is similar as I<perl_call_sv> except it 
+expects it's first parameter has to be a C char* which identifies the Perl 
+sub you want to call, e.g. C<perl_call_pv("fred", 0)>.
+
+The function I<perl_call_method> expects its first argument to contain a 
+blessed reference to a class. Using that reference it looks up and calls C<methname> 
+from that class. See example 9.
+
+I<perl_call_argv> calls the Perl sub specified by the C<subname> parameter. 
+It also takes the usual C<flags> parameter. 
+The final parameter, C<argv>, consists of a 
+list of C strings to be sent to the Perl sub. See example 8.
+
+All the functions return a number. This is a count of the number of items
+returned by the Perl sub on the stack.
+
+As a general rule you should I<always> check the return value from these 
+functions.
+Even if you are only expecting a particular number of values to be returned 
+from the Perl sub, there is nothing to stop someone from doing something
+unexpected - don't say you havn't been warned.
+
+=head2 Flag Values
+
+The C<flags> parameter in all the I<perl_call_*> functions consists of any 
+combination of the symbols defined below, OR'ed together.
+
+=over 5
+
+=item  G_SCALAR	
+
+Calls the Perl sub in a scalar context.
+
+Whatever the Perl sub actually returns, we only want a scalar. If the perl sub 
+does return a scalar, the return value from the I<perl_call_*> function 
+will be 1 or 0. If 1, then the value actually returned by the Perl sub will 
+be contained
+on the top of the stack. 
+If 0, then the sub has probably called I<die> or you have 
+used the G_DISCARD flag.
+
+If the Perl sub returns a list, the I<perl_call_*> function will still
+only return 1 or 0. If 1, then the number of elements in the list 
+will be stored on top of the stack.
+The actual values of the list will not be accessable. 
+
+
+G_SCALAR is the default flag setting for all the functions.
+
+=item G_ARRAY	
+
+Calls the Perl sub in a list context.
+
+The return code from the I<perl_call_*> functions will indicate how
+many elements of the stack are used to store the array.
+
+=item G_DISCARD	
+
+If you are not interested in the values returned by the Perl sub then setting
+this flag will make Perl get rid of them automatically for you. This will take
+precedence to either G_SCALAR or G_ARRAY.
+
+If you do 
+not set this flag then you may need to explicitly get rid of temporary values.
+See example 3 for details.
+
+=item G_NOARGS	
+
+If you are not passing any parameters to the Perl sub, you can save a bit of 
+time by setting this flag. It has the effect of of not creating the C<@_> array 
+for the Perl sub.
+
+A point worth noting is that if this flag is specified the Perl sub called can 
+still access an C<@_> array from a previous Perl sub. 
+This functionality can be illustrated with the perl code below
+
+	sub fred
+	  { print "@_\n"  }
+
+	sub joe
+	  { &fred }
+
+	&joe(1,2,3) ;
+
+This will print
+
+	1 2 3
+
+What has happened is that C<fred> accesses the C<@_> array which belongs to C<joe>.
+
+=item G_EVAL	
+
+If the Perl sub you are calling has the ability to terminate 
+abnormally, e.g. by calling I<die> or by not actually existing, and 
+you want to catch this type of event, specify this flag setting. It will put 
+an I<eval { }> around the sub call.
+
+Whenever control returns from the I<perl_call_*> function you need to
+check the C<$@> variable as you would in a normal Perl script. 
+See example 6 for details of how to do this.
+
+
+=back
+
+
+=head1 EXAMPLES
+
+Enough of the definition talk, let's have a few examples.
+
+Perl provides many macros to assist in accessing the Perl stack. 
+These macros should always be used when interfacing to Perl internals.
+Hopefully this should make the code less vulnerable to changes made to
+Perl in the future.
+
+Another point worth noting is that in the first series of examples I have 
+only made use of the I<perl_call_pv> function. 
+This has only been done to ease you into the 
+topic. Wherever possible, if the choice is between using I<perl_call_pv> 
+and I<perl_call_sv>, I would always try to use I<perl_call_sv>.
+
+The code for these examples is stored in the file F<perlcall.tar>. 
+(Once this document settles down, all the example code will be available in the file).
+
+=head2 Example1: No Parameters, Nothing returned
+
+This first trivial example will call a Perl sub, I<PrintUID>, to print 
+out the UID of the process. 
+
+    sub PrintUID
+    {
+        print "UID is $<\n" ;
+    }
+
+and here is the C to call it
+
+    void
+    call_PrintUID()
+    {
+	dSP ;
+
+	PUSHMARK(sp) ;
+        perl_call_pv("PrintUID", G_DISCARD|G_NOARGS) ;
+    }
+
+Simple, eh. 
+
+A few points to note about this example. 
+
+=over 5
+
+=item 1. 
+
+We aren't passing any parameters to I<PrintUID> so G_NOARGS
+can be specified.
+
+=item 2.
+
+Ignore C<dSP> and C<PUSHMARK(sp)> for now. They will be discussed in the next
+example.
+
+=item 3. 
+
+We aren't interested in anything returned from I<PrintUID>, so
+G_DISCARD is specified. Even if I<PrintUID> was changed to actually
+return some value(s), having specified G_DISCARD will mean that they
+will be wiped by the time control returns from I<perl_call_pv>.
+
+=item 4. 
+
+Because we specified G_DISCARD, it is not necessary to check 
+the value returned from I<perl_call_sv>. It will always be 0.
+
+=item 5.
+
+As I<perl_call_pv> is being used, the Perl sub is specified as a C string.
+
+=back
+
+=head2 Example 2: Passing Parameters
+
+Now let's make a slightly more complex example. This time we want 
+to call a Perl sub
+which will take 2 parameters - a string (C<$s>) and an integer (C<$n>). 
+The sub will simply print the first C<$n> characters of the string.
+
+So the Perl sub would look like this
+
+    sub LeftString
+    {
+        my($s, $n) = @_ ;
+        print substr($s, 0, $n), "\n" ;
+    }
+
+The C function required to call I<LeftString> would look like this.
+
+    static void
+    call_LeftString(a, b)
+    char * a ;
+    int b ;
+    {
+        dSP ;
+
+        PUSHMARK(sp) ;
+        XPUSHs(sv_2mortal(newSVpv(a, 0)));
+        XPUSHs(sv_2mortal(newSViv(b)));
+        PUTBACK ;
+
+        perl_call_pv("LeftString", G_DISCARD);
+    }
+
+
+Here are a few notes on the C function I<call_LeftString>.
+
+=over 5
+
+=item 1. 
+
+The only flag specified this time is G_DISCARD. As we are passing 2 
+parameters to the Perl sub this time, we have not specified G_NOARGS.
+
+=item 2. 
+
+Parameters are passed to the Perl sub using the Perl stack.
+This is the purpose of the code beginning with the line C<dSP> and ending
+with the line C<PUTBACK>.
+
+
+=item 3.
+
+If you are going to put something onto the Perl stack, you need to know
+where to put it. This is the purpose of the macro C<dSP> -
+it declares and initialises a local copy of the Perl stack pointer.
+
+All the other macros which will be used in this example require you to
+have used this macro. 
+
+If you are calling a Perl sub directly from an XSUB function, it is 
+not necessary to explicitly use the C<dSP> macro - it will be declared for you.
+
+=item 4.
+
+Any parameters to be pushed onto the stack should be bracketed by the
+C<PUSHMARK> and C<PUTBACK> macros. 
+The purpose of these two macros, in this context, is to automatically count
+the number of parameters you are pushing. Then whenever Perl is creating
+the C<@_> array for the sub, it knows how big to make it.
+
+The C<PUSHMARK> macro tells Perl to make a mental note of the current stack
+pointer. Even if you aren't passing any parameters (like in Example 1) you must 
+still call the C<PUSHMARK> macro before you can call any of 
+the I<perl_call_*> functions - Perl still needs to know that there are 
+no parameters.
+
+The C<PUTBACK> macro sets the global copy of the stack pointer to be the
+same as our local copy. If we didn't do this I<perl_call_pv> wouldn't
+know where the two parameters we pushed were - remember that up to now
+all the stack pointer manipulation we have done is with our local copy,
+I<not> the global copy.
+
+=item 5.
+
+Next, we come to XPUSHs. This is where the parameters actually get
+pushed onto the stack. In this case we are pushing a string and an integer.
+
+See the section I<XSUB's AND  THE ARGUMENT STACK> in L<perlguts> for
+details on how the XPUSH macros work.
+
+=item 6.
+
+Finally, I<LeftString> can now be called via the I<perl_call_pv> function.
+
+=back
+
+=head2 Example 3: Returning a Scalar
+
+Now for an example of dealing with the values returned from a Perl sub.
+
+Here is a Perl sub, I<Adder>,  which takes 2 integer parameters and simply 
+returns their sum.
+
+    sub Adder
+    {
+        my($a, $b) = @_ ;
+        $a + $b ;
+    }
+
+As we are now concerned with the return value from I<Adder>, the C function
+is now a bit more complex.
+
+    static void
+    call_Adder(a, b)
+    int a ;
+    int b ;
+    {
+        dSP ;
+        int count ;
+
+        ENTER ;
+        SAVETMPS;
+
+        PUSHMARK(sp) ;
+        XPUSHs(sv_2mortal(newSViv(a)));
+        XPUSHs(sv_2mortal(newSViv(b)));
+        PUTBACK ;
+
+        count = perl_call_pv("Adder", G_SCALAR);
+
+        SPAGAIN ;
+
+	if (count != 1)
+	    croak("Big trouble\n") ;
+
+	printf ("The sum of %d and %d is %d\n", a, b, POPi) ;
+
+        PUTBACK ;
+        FREETMPS ;
+        LEAVE ;
+    }
+
+
+Points to note this time are
+
+=over 5
+
+=item 1. 
+
+The only flag specified this time was G_SCALAR. That means the @_ array
+will be created and that the value returned by I<Adder> will still
+exist after the call to I<perl_call_pv>.
+
+
+
+=item 2.
+
+Because we are interested in what is returned from I<Adder> we cannot specify
+G_DISCARD. This means that we will have to tidy up the Perl stack and dispose
+of any temporary values ourselves. This is the purpose of 
+
+	ENTER ;
+	SAVETMPS ;
+
+at the start of the function, and
+
+	FREETMPS ;
+	LEAVE ;
+
+at the end. The C<ENTER>/C<SAVETMPS> pair creates a boundary for any 
+temporaries we create. 
+This means that the temporaries we get rid of will be limited to those which
+were created after these calls.
+
+The C<FREETMPS>/C<LEAVE> pair will get rid of any values returned by the Perl 
+sub, plus it will also dump the mortal SV's we created. 
+Having C<ENTER>/C<SAVETMPS> at the beginning
+of the code makes sure that no other mortals are destroyed.
+
+=item 3.
+
+The purpose of the macro C<SPAGAIN> is to refresh the local copy of the
+stack pointer. This is necessary because it is possible that the memory
+allocated to the Perl stack has been re-allocated whilst in the I<perl_call_pv>
+call.
+
+If you are making use of the Perl stack pointer in your code you must always
+refresh the your local copy using SPAGAIN whenever you make use of
+of the I<perl_call_*> functions or any other Perl internal function.
+
+=item 4. 
+
+Although only a single value was expected to be returned from I<Adder>, it is
+still good practice to check the return code from I<perl_call_pv> anyway.
+
+Expecting a single value is not quite the same as knowing that there will
+be one. If someone modified I<Adder> to return a list and we didn't check
+for that possibility and take appropriate action the Perl stack would end 
+up in an inconsistant state. That is something you I<really> don't want
+to ever happen.
+
+=item 5.
+
+The C<POPi> macro is used here to pop the return value from the stack. In this
+case we wanted an integer, so C<POPi> was used.
+
+
+Here is the complete list of POP macros available, along with the types they 
+return.
+
+	POPs	SV
+	POPp	pointer
+	POPn	double
+	POPi	integer
+	POPl	long
+
+=item 6.
+
+The final C<PUTBACK> is used to leave the Perl stack in a consistant state 
+before exiting the function. This is
+necessary because when we popped the return value from the stack with C<POPi> it
+only updated our local copy of the stack pointer. Remember, C<PUTBACK> sets the
+global stack pointer to be the same as our local copy.
+
+=back
+
+
+=head2 Example 4: Returning a list of values
+
+Now, let's extend the previous example to return both the sum of the parameters 
+and the difference.
+
+Here is the Perl sub
+
+    sub AddSubtract
+    {
+       my($a, $b) = @_ ;
+       ($a+$b, $a-$b) ;
+    }
+
+
+and this is the C function
+
+    static void
+    call_AddSubtract(a, b)
+    int a ;
+    int b ;
+    {
+        dSP ;
+        int count ;
+
+        ENTER ;
+        SAVETMPS;
+
+        PUSHMARK(sp) ;
+        XPUSHs(sv_2mortal(newSViv(a)));
+        XPUSHs(sv_2mortal(newSViv(b)));
+        PUTBACK ;
+
+        count = perl_call_pv("AddSubtract", G_ARRAY);
+
+        SPAGAIN ;
+
+	if (count != 2)
+	    croak("Big trouble\n") ;
+
+	printf ("%d - %d = %d\n", a, b, POPi) ;
+	printf ("%d + %d = %d\n", a, b, POPi) ;
+
+        PUTBACK ;
+        FREETMPS ;
+        LEAVE ;
+    }
+
+
+Notes
+
+=over 5
+
+=item 1.
+
+We wanted array context, so we used G_ARRAY.
+
+=item 2.
+
+Not surprisingly there are 2 POPi's this time  because we were retrieving 2
+values from the stack. The main point to note is that they came off the stack in
+reverse order.
+
+=back
+
+=head2 Example 5: Returning Data from Perl via the parameter list
+
+It is also possible to return values directly via the parameter list -
+whether it is actually desirable to do it is another matter entirely.
+
+The Perl sub, I<Inc>, below takes 2 parameters and increments each.
+
+    sub Inc
+    {
+        ++ $_[0] ;
+        ++ $_[1] ;
+    }
+
+and here is a C function to call it.
+
+    static void
+    call_Inc(a, b)
+    int a ;
+    int b ;
+    {
+        dSP ;
+        int count ;
+        SV * sva ;
+        SV * svb ;
+
+        ENTER ;
+        SAVETMPS;
+
+        sva = sv_2mortal(newSViv(a)) ;
+        svb = sv_2mortal(newSViv(b)) ;
+
+        PUSHMARK(sp) ;
+        XPUSHs(sva);
+        XPUSHs(svb);
+        PUTBACK ;
+
+        count = perl_call_pv("Inc", G_DISCARD);
+
+        if (count != 0)
+            croak ("call_Inc : expected 0 return value from 'Inc', got %d\n", count) ;
+
+        printf ("%d + 1 = %d\n", a, SvIV(sva)) ;
+        printf ("%d + 1 = %d\n", b, SvIV(svb)) ;
+
+    	FREETMPS ;
+	LEAVE ; 
+    }
+
+
+
+To be able to access the two parameters that were pushed onto the stack 
+after they return from I<perl_call_pv> it is necessary to make a note of
+their addresses - thus the two variables C<sva> and C<svb>. 
+
+The reason this is necessary is that
+the area of the Perl stack which held them
+will very likely have been overwritten by something else by the time control
+returns from I<perl_call_pv>.
+
+
+
+
+=head2 Example 6: Using G_EVAL
+
+Now an example using G_EVAL. Below is a Perl sub which computes the 
+difference of its 2 parameters. If this would result in a negative result,
+the sub calls I<die>.
+
+
+    sub Subtract
+    {
+	my ($a, $b) = @_ ;
+
+        die "death can be fatal\n" if $a < $b ;
+
+	$a - $b ;
+    }
+
+and some C to call it
+
+    static void
+    call_Subtract(a, b)
+    int a ;
+    int b ;
+    {
+        dSP ;
+        int count ;
+	SV * sv ;
+
+        ENTER ;
+        SAVETMPS;
+
+        PUSHMARK(sp) ;
+        XPUSHs(sv_2mortal(newSViv(a)));
+        XPUSHs(sv_2mortal(newSViv(b)));
+        PUTBACK ;
+
+        count = perl_call_pv("Subtract", G_EVAL|G_SCALAR);
+
+	/* Check the eval first */
+        sv = GvSV(gv_fetchpv("@", TRUE, SVt_PV));
+        if (SvTRUE(sv))
+            printf ("Uh oh - %s\n", SvPV(sv, na)) ;
+
+        SPAGAIN ;
+
+        if (count != 1)
+            croak ("call_Subtract : expected 1 return value from 'Subtract', got %d\n", count) ;
+
+
+	printf ("%d - %d = %d\n", a, b, POPi) ;
+
+        PUTBACK ;
+        FREETMPS ;
+        LEAVE ;
+
+    }
+
+If I<call_Subtract> is called thus
+
+	call_Subtract(4, 5)
+
+the following will be printed
+
+	Uh oh - death can be fatal
+
+Notes
+
+=over 5
+
+=item 1.
+
+We want to be able to catch the I<die> so we have used the G_EVAL flag.
+Not specifying this flag would mean that the program would terminate.
+
+=item 2.
+
+The code 
+
+        sv = GvSV(gv_fetchpv("@", TRUE, SVt_PV));
+        if (SvTRUE(sv))
+            printf ("Uh oh - %s\n", SvPVx(sv, na)) ;
+
+is the equivalent of this bit of Perl
+
+	print "Uh oh - $@\n" if $@ ;
+
+
+
+=back
+
+
+=head2 Example 7: Using perl_call_sv
+
+In all the previous examples I have 'hard-wried' the name of the Perl sub to
+be called from C. 
+Sometimes though, it is necessary to be able to specify the name
+of the Perl sub from within the Perl script.
+
+Consider the Perl code below
+
+	sub fred
+	{
+	    print "Hello there\n" ;
+	}
+
+	CallSub("fred") ;
+
+
+here is a snippet of XSUB which defines I<CallSub>.
+
+	void
+	CallSub(name)
+		char *	name
+		CODE:
+		PUSHMARK(sp) ;
+		perl_call_pv(name, G_DISCARD|G_NOARGS) ;
+
+That is fine as far as it goes. The thing is, it only allows the Perl sub to be
+specified as a string. 
+For perl 4 this was adequate, but Perl 5 allows references to 
+subs and anonymous subs. This is where I<perl_call_sv> is useful.
+
+The code below for I<CallSub> is identical to the previous time except that the
+C<name> parameter is now defined as an SV* and we use I<perl_call_sv> instead of
+I<perl_call_pv>.
+
+	void
+	CallSub(name)
+		SV*	name
+		CODE:
+		PUSHMARK(sp) ;
+		perl_call_sv(name, G_DISCARD|G_NOARGS) ;
+
+As we are using an SV to call I<fred> the following can all be used
+
+	CallSub("fred") ;
+	Callsub(\&fred) ;
+	$ref = \&fred ;
+	CallSub($ref) ;
+	CallSub( sub { print "Hello there\n" } ) ;
+
+As you can see, I<perl_call_sv> gives you greater flexibility in how you 
+can specify the Perl sub.
+
+=head2 Example 8: Using perl_call_argv
+
+Here is a Perl sub which prints whatever parameters are passed to it.
+
+	sub PrintList
+	{
+	    my(@list) = @_ ;
+
+	    foreach (@list) { print "$_\n" }
+	}
+
+and here is an example of I<perl_call_argv> which will call I<PrintList>.
+
+	call_PrintList
+	{
+	    dSP ;
+	    char * words[] = {"alpha", "beta", "gamma", "delta", NULL } ;
+
+	    perl_call_argv("PrintList", words, G_DISCARD) ;
+	}
+
+Note that it is not necessary to call C<PUSHMARK> in this instance. This is
+because I<perl_call_argv> will do it for you.
+
+=head2 Example 9: Using perl_call_method
+
+[This section is under construction]
+
+Consider the following Perl code
+
+	{
+	  package Mine ;
+
+	  sub new     { bless [@_] }
+	  sub Display { print $_[0][1], "\n" }
+	}
+
+	$a = new Mine ('red', 'green', 'blue') ;
+	call_Display($a, 'Display') ;
+
+The method C<Display> just prints out the first element of the list.
+Here is a XSUB implementation of I<call_Display>.
+
+	void
+	call_Display(ref, method)
+            SV *    ref
+            char *  method
+            CODE:
+            PUSHMARK(sp);
+            XPUSHs(ref);
+            PUTBACK;
+
+            perl_call_method(method, G_DISCARD) ;
+
+
+
+
+=head2 Strategies for storing Context Information
+
+[This section is under construction]
+
+One of the trickiest problems to overcome when designing a callback interface 
+is figuring 
+out how to store the mapping between the C callback functions and the 
+Perl equivalent.
+
+Consider the following example.
+
+=head2 Alternate Stack Manipulation
+
+[This section is under construction]
+
+Although I have only made use of the POP* macros to access values returned 
+from Perl subs, it is also possible to bypass these macros and read the 
+stack directly.
+
+The code below is example 4 recoded to 
+
+=head1 SEE ALSO
+
+L<perlapi>, L<perlguts>, L<perlembed>
+
+=head1 AUTHOR
+
+Paul Marquess <pmarquess@bfsec.bt.co.uk>
+
+Special thanks to the following people who assisted in the creation of the 
+document.
+
+Jeff Okamoto, Tim Bunce.
+
+=head1 DATE
+
+Version 0.4, 17th October 1994
+
+

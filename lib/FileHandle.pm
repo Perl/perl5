@@ -1,12 +1,12 @@
 package FileHandle;
 
-BEGIN {
-    require 5.000;
-    require English; import English;
-    require Exporter;
-}
+# Note that some additional FileHandle methods are defined in POSIX.pm.
 
-@ISA = (Exporter);
+require 5.000;
+use English;
+use Exporter;
+
+@ISA = qw(Exporter);
 @EXPORT = qw(
     print
     autoflush
@@ -21,6 +21,7 @@ BEGIN {
     format_top_name
     format_line_break_characters
     format_formfeed
+    cacheout
 );
 
 sub print {
@@ -123,5 +124,51 @@ sub format_formfeed {
     select($old);
     $prev;
 }
+
+
+# --- cacheout functions ---
+
+# Open in their package.
+
+sub cacheout_open {
+    my $pack = caller(1);
+    open(*{$pack . '::' . $_[0]}, $_[1]);
+}
+
+sub cacheout_close {
+    my $pack = caller(1);
+    close(*{$pack . '::' . $_[0]});
+}
+
+# But only this sub name is visible to them.
+
+sub cacheout {
+    ($file) = @_;
+    if (!$cacheout_maxopen){
+	if (open(PARAM,'/usr/include/sys/param.h')) {
+	    local($.);
+	    while (<PARAM>) {
+		$cacheout_maxopen = $1 - 4
+		    if /^\s*#\s*define\s+NOFILE\s+(\d+)/;
+	    }
+	    close PARAM;
+	}
+	$cacheout_maxopen = 16 unless $cacheout_maxopen;
+    }
+    if (!$isopen{$file}) {
+	if (++$cacheout_numopen > $cacheout_maxopen) {
+	    local(@lru) = sort {$isopen{$a} <=> $isopen{$b};} keys(%isopen);
+	    splice(@lru, $cacheout_maxopen / 3);
+	    $cacheout_numopen -= @lru;
+	    for (@lru) { &cacheout_close($_); delete $isopen{$_}; }
+	}
+	&cacheout_open($file, ($saw{$file}++ ? '>>' : '>') . $file)
+	    || croak("Can't create $file: $!");
+    }
+    $isopen{$file} = ++$cacheout_seq;
+}
+
+$cacheout_seq = 0;
+$cacheout_numopen = 0;
 
 1;

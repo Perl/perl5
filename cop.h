@@ -1,61 +1,20 @@
-/* $RCSfile: cmd.h,v $$Revision: 4.1 $$Date: 92/08/07 17:19:19 $
+/*    cop.h
  *
- *    Copyright (c) 1991, Larry Wall
+ *    Copyright (c) 1991-1994, Larry Wall
  *
  *    You may distribute under the terms of either the GNU General Public
  *    License or the Artistic License, as specified in the README file.
  *
- * $Log:	cmd.h,v $
- * Revision 4.1  92/08/07  17:19:19  lwall
- * Stage 6 Snapshot
- * 
- * Revision 4.0.1.2  92/06/08  12:01:02  lwall
- * patch20: removed implicit int declarations on funcions
- * 
- * Revision 4.0.1.1  91/06/07  10:28:50  lwall
- * patch4: new copyright notice
- * patch4: length($`), length($&), length($') now optimized to avoid string copy
- * 
- * Revision 4.0  91/03/20  01:04:34  lwall
- * 4.0 baseline.
- * 
  */
-
-struct acop {
-    GV		*acop_gv;	/* a symbol table entry */
-    OP		*acop_expr;	/* any associated expression */
-};
-
-struct ccop {
-    OP		*ccop_true;	/* normal code to do on if and while */
-    OP		*ccop_alt;	/* else cmd ptr or continue code */
-};
-
-struct scop {
-    OP		**scop_next;	/* array of pointers to commands */
-    short	scop_offset;	/* first value - 1 */
-    short	scop_max;	/* last value + 1 */
-};
 
 struct cop {
     BASEOP
-    OP		*cop_expr;	/* conditional expression */
-    OP		*cop_head;	/* head of this command list */
-    SV		*cop_short;	/* string to match as shortcut */
-    GV		*cop_gv;	/* a symbol table entry, mostly for fp */
-    char	*cop_label;	/* label for this construct */
-    union uop {
-	struct acop acop;	/* normal command */
-	struct ccop ccop;	/* compound command */
-	struct scop scop;	/* switch command */
-    } uop;
-    U32		cop_seq;	/* parse sequence number */
-    short	cop_slen;	/* len of cop_short, if not null */
-    VOL short	cop_flags;	/* optimization flags--see above */
+    char *	cop_label;	/* label for this construct */
     HV *	cop_stash;	/* package line was compiled in */
     GV *	cop_filegv;	/* file the following line # is from */
+    U32		cop_seq;	/* parse sequence number */
+    I32		cop_arybase;	/* array base this line was compiled with */
     line_t      cop_line;       /* line # of this command */
-    char	cop_type;	/* what this command does */
 };
 
 #define Nullcop Null(COP*)
@@ -92,8 +51,7 @@ struct block_sub {
 	}								\
 	if (cx->blk_sub.cv) {						\
 	    if (!(CvDEPTH(cx->blk_sub.cv) = cx->blk_sub.olddepth)) {	\
-		if (CvDELETED(cx->blk_sub.cv))				\
-		    SvREFCNT_dec((SV*)cx->blk_sub.cv);			\
+		SvREFCNT_dec((SV*)cx->blk_sub.cv);			\
 	    }								\
 	}
 
@@ -184,20 +142,20 @@ struct block {
 	cx->blk_oldretsp	= retstack_ix,				\
 	cx->blk_oldpm		= curpm,				\
 	cx->blk_gimme		= gimme;				\
-	DEBUG_l( fprintf(stderr,"Entering block %d, type %s\n",		\
-		    cxstack_ix, block_type[t]); )
+	DEBUG_l( fprintf(stderr,"Entering block %ld, type %s\n",	\
+		    (long)cxstack_ix, block_type[t]); )
 
 /* Exit a block (RETURN and LAST). */
-#define POPBLOCK(cx) cx = &cxstack[cxstack_ix--],			\
+#define POPBLOCK(cx,pm) cx = &cxstack[cxstack_ix--],			\
 	newsp		= stack_base + cx->blk_oldsp,			\
 	curcop		= cx->blk_oldcop,				\
 	markstack_ptr	= markstack + cx->blk_oldmarksp,		\
 	scopestack_ix	= cx->blk_oldscopesp,				\
 	retstack_ix	= cx->blk_oldretsp,				\
-	curpm		= cx->blk_oldpm,				\
+	pm		= cx->blk_oldpm,				\
 	gimme		= cx->blk_gimme;				\
-	DEBUG_l( fprintf(stderr,"Leaving block %d, type %s\n",		\
-		    cxstack_ix+1,block_type[cx->cx_type]); )
+	DEBUG_l( fprintf(stderr,"Leaving block %ld, type %s\n",		\
+		    (long)cxstack_ix+1,block_type[cx->cx_type]); )
 
 /* Continue a block elsewhere (NEXT and REDO). */
 #define TOPBLOCK(cx) cx = &cxstack[cxstack_ix],				\
@@ -264,6 +222,10 @@ struct context {
 #define CXINC (cxstack_ix < cxstack_max ? ++cxstack_ix : (cxstack_ix = cxinc()))
 
 /* "gimme" values */
-#define G_SCALAR 0
-#define G_ARRAY 1
+#define G_SCALAR	0
+#define G_ARRAY		1
 
+/* extra flags for perl_call_* routines */
+#define G_DISCARD	2	/* Call FREETMPS. */
+#define G_EVAL		4	/* Assume eval {} around subroutine call. */
+#define G_NOARGS	8	/* Don't construct a @_ array. */

@@ -13,7 +13,7 @@ END
 sed <global.sym >>embed.h						\
 	-e 's/[ 	]*#.*//'					\
 	-e '/^[ 	]*$/d'						\
-	-e 's/\(.*\)/#define \1		perl_\1/'			\
+	-e 's/\(.*\)/#define \1		Perl_\1/'			\
 	-e 's/\(................	\)	/\1/'
 
 cat <<'END' >> embed.h

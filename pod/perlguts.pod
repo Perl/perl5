@@ -1,0 +1,521 @@
+=head1 NAME
+
+perlguts - Perl's Internal Functions
+
+=head1 DESCRIPTION
+
+This document attempts to describe some of the internal functions of the
+Perl executable.  It is far from complete and probably contains many errors.
+Please refer any questions or comments to the author below.
+
+=head1 Datatypes
+
+Perl has three typedefs that handle Perl's three main data types:
+
+    SV  Scalar Value
+    AV  Array Value
+    HV  Hash Value
+
+Each typedef has specific routines that manipulate the various data type.
+
+=head2 What is an "IV"?
+
+Perl uses a special typedef IV which is large enough to hold either an
+integer or a pointer.
+
+Perl also uses a special typedef I32 which will always be a 32-bit integer.
+
+=head2 Working with SV's
+
+An SV can be created and loaded with one command.  There are four types of
+values that can be loaded: an integer value (IV), a double (NV), a string,
+(PV), and another scalar (SV).
+
+The four routines are:
+
+    SV*  newSViv(IV);
+    SV*  newSVnv(double);
+    SV*  newSVpv(char*, int);
+    SV*  newSVsv(SV*);
+
+To change the value of an *already-existing* scalar, there are five routines:
+
+    void  sv_setiv(SV*, IV);
+    void  sv_setnv(SV*, double);
+    void  sv_setpvn(SV*, char*, int)
+    void  sv_setpv(SV*, char*);
+    void  sv_setsv(SV*, SV*);
+
+Notice that you can choose to specify the length of the string to be
+assigned by using C<sv_setpvn>, or allow Perl to calculate the length by
+using C<sv_setpv>.  Be warned, though, that C<sv_setpv> determines the
+string's length by using C<strlen>, which depends on the string terminating
+with a NUL character.
+
+To access the actual value that an SV points to, you can use the macros:
+
+    SvIV(SV*)
+    SvNV(SV*)
+    SvPV(SV*, STRLEN len)
+
+which will automatically coerce the actual scalar type into an IV, double,
+or string.
+
+In the C<SvPV> macro, the length of the string returned is placed into the
+variable C<len> (this is a macro, so you do I<not> use C<&len>).  If you do not
+care what the length of the data is, use the global variable C<na>.  Remember,
+however, that Perl allows arbitrary strings of data that may both contain
+NUL's and not be terminated by a NUL.
+
+If you simply want to know if the scalar value is TRUE, you can use:
+
+    SvTRUE(SV*)
+
+Although Perl will automatically grow strings for you, if you need to force
+Perl to allocate more memory for your SV, you can use the macro
+
+    SvGROW(SV*, STRLEN newlen)
+
+which will determine if more memory needs to be allocated.  If so, it will
+call the function C<sv_grow>.  Note that C<SvGROW> can only increase, not
+decrease, the allocated memory of an SV.
+
+If you have an SV and want to know what kind of data Perl thinks is stored
+in it, you can use the following macros to check the type of SV you have.
+
+    SvIOK(SV*)
+    SvNOK(SV*)
+    SvPOK(SV*)
+
+You can get and set the current length of the string stored in an SV with
+the following macros:
+
+    SvCUR(SV*)
+    SvCUR_set(SV*, I32 val)
+
+But note that these are valid only if C<SvPOK()> is true.
+
+If you know the name of a scalar variable, you can get a pointer to its SV
+by using the following:
+
+    SV*  perl_get_sv("varname", FALSE);
+
+This returns NULL if the variable does not exist.
+
+If you want to know if this variable (or any other SV) is actually defined,
+you can call:
+
+    SvOK(SV*)
+
+The scalar C<undef> value is stored in an SV instance called C<sv_undef>.  Its
+address can be used whenever an C<SV*> is needed.
+
+There are also the two values C<sv_yes> and C<sv_no>, which contain Boolean
+TRUE and FALSE values, respectively.  Like C<sv_undef>, their addresses can
+be used whenever an C<SV*> is needed.
+
+Do not be fooled into thinking that C<(SV *) 0> is the same as C<&sv_undef>.
+Take this code:
+
+    SV* sv = (SV*) 0;
+    if (I-am-to-return-a-real-value) {
+            sv = sv_2mortal(newSViv(42));
+    }
+    sv_setsv(ST(0), sv);
+
+This code tries to return a new SV (which contains the value 42) if it should
+return a real value, or undef otherwise.  Instead it has returned a null
+pointer which, somewhere down the line, will cause a segmentation violation,
+or just weird results.  Change the zero to C<&sv_undef> in the first line and
+all will be well.
+
+To free an SV that you've created, call C<SvREFCNT_dec(SV*)>.  Normally this
+call is not necessary.  See the section on B<MORTALITY>.
+
+=head2 Private and Public Values
+
+Recall that the usual method of determining the type of scalar you have is
+to use C<Sv[INP]OK> macros.  Since a scalar can be both a number and a string,
+usually these macros will always return TRUE and calling the C<Sv[INP]V>
+macros will do the appropriate conversion of string to integer/double or
+integer/double to string.
+
+If you I<really> need to know if you have an integer, double, or string
+pointer in an SV, you can use the following three macros instead:
+
+    SvIOKp(SV*)
+    SvNOKp(SV*)
+    SvPOKp(SV*)
+
+These will tell you if you truly have an integer, double, or string pointer
+stored in your SV.
+
+In general, though, it's best to just use the C<Sv[INP]V> macros.
+
+=head2 Working with AV's
+
+There are two ways to create and load an AV.  The first method just creates
+an empty AV:
+
+    AV*  newAV();
+
+The second method both creates the AV and initially populates it with SV's:
+
+    AV*  av_make(I32 num, SV **ptr);
+
+The second argument points to an array containing C<num> C<SV*>'s.
+
+Once the AV has been created, the following operations are possible on AV's:
+
+    void  av_push(AV*, SV*);
+    SV*   av_pop(AV*);
+    SV*   av_shift(AV*);
+    void  av_unshift(AV*, I32 num);
+
+These should be familiar operations, with the exception of C<av_unshift>.
+This routine adds C<num> elements at the front of the array with the C<undef>
+value.  You must then use C<av_store> (described below) to assign values
+to these new elements.
+
+Here are some other functions:
+
+    I32   av_len(AV*); /* Returns length of array */
+
+    SV**  av_fetch(AV*, I32 key, I32 lval);
+            /* Fetches value at key offset, but it seems to
+	       set the value to lval if lval is non-zero */
+    SV**  av_store(AV*, I32 key, SV* val);
+            /* Stores val at offset key */
+
+    void  av_clear(AV*);
+            /* Clear out all elements, but leave the array */
+    void  av_undef(AV*);
+            /* Undefines the array, removing all elements */
+
+If you know the name of an array variable, you can get a pointer to its AV
+by using the following:
+
+    AV*  perl_get_av("varname", FALSE);
+
+This returns NULL if the variable does not exist.
+
+=head2 Working with HV's
+
+To create an HV, you use the following routine:
+
+    HV*  newHV();
+
+Once the HV has been created, the following operations are possible on HV's:
+
+    SV**  hv_store(HV*, char* key, U32 klen, SV* val, U32 hash);
+    SV**  hv_fetch(HV*, char* key, U32 klen, I32 lval);
+
+The C<klen> parameter is the length of the key being passed in.  The C<val>
+argument contains the SV pointer to the scalar being stored, and C<hash> is
+the pre-computed hash value (zero if you want C<hv_store> to calculate it
+for you).  The C<lval> parameter indicates whether this fetch is actually a
+part of a store operation.
+
+Remember that C<hv_store> and C<hv_fetch> return C<SV**>'s and not just
+C<SV*>.  In order to access the scalar value, you must first dereference
+the return value.  However, you should check to make sure that the return
+value is not NULL before dereferencing it.
+
+These two functions check if a hash table entry exists, and deletes it.
+
+    bool  hv_exists(HV*, char* key, U32 klen);
+    SV*   hv_delete(HV*, char* key, U32 klen);
+
+And more miscellaneous functions:
+
+    void   hv_clear(HV*);
+            /* Clears all entries in hash table */
+    void   hv_undef(HV*);
+            /* Undefines the hash table */
+
+    I32    hv_iterinit(HV*);
+            /* Prepares starting point to traverse hash table */
+    HE*    hv_iternext(HV*);
+            /* Get the next entry, and return a pointer to a
+               structure that has both the key and value */
+    char*  hv_iterkey(HE* entry, I32* retlen);
+            /* Get the key from an HE structure and also return
+               the length of the key string */
+    SV*     hv_iterval(HV*, HE* entry);
+            /* Return a SV pointer to the value of the HE
+               structure */
+
+If you know the name of a hash variable, you can get a pointer to its HV
+by using the following:
+
+    HV*  perl_get_hv("varname", FALSE);
+
+This returns NULL if the variable does not exist.
+
+The hash algorithm, for those who are interested, is:
+
+    i = klen;
+    hash = 0;
+    s = key;
+    while (i--)
+	hash = hash * 33 + *s++;
+
+=head2 References
+
+References are a special type of scalar that point to other scalar types
+(including references).  To treat an AV or HV as a scalar, it is simply
+a matter of casting an AV or HV to an SV.
+
+To create a reference, use the following command:
+
+    SV*  newRV((SV*) pointer);
+
+Once you have a reference, you can use the following macro with a cast to
+the appropriate typedef (SV, AV, HV):
+
+    SvRV(SV*)
+
+then call the appropriate routines, casting the returned C<SV*> to either an
+C<AV*> or C<HV*>.
+
+To determine, after dereferencing a reference, if you still have a reference,
+you can use the following macro:
+
+    SvROK(SV*)
+
+=head1 XSUB'S and the Argument Stack
+
+The XSUB mechanism is a simple way for Perl programs to access C subroutines.
+An XSUB routine will have a stack that contains the arguments from the Perl
+program, and a way to map from the Perl data structures to a C equivalent.
+
+The stack arguments are accessible through the C<ST(n)> macro, which returns
+the C<n>'th stack argument.  Argument 0 is the first argument passed in the
+Perl subroutine call.  These arguments are C<SV*>, and can be used anywhere
+an C<SV*> is used.
+
+Most of the time, output from the C routine can be handled through use of
+the RETVAL and OUTPUT directives.  However, there are some cases where the
+argument stack is not already long enough to handle all the return values.
+An example is the POSIX tzname() call, which takes no arguments, but returns
+two, the local timezone's standard and summer time abbreviations.
+
+To handle this situation, the PPCODE directive is used and the stack is
+extended using the macro:
+
+    EXTEND(sp, num);
+
+where C<sp> is the stack pointer, and C<num> is the number of elements the
+stack should be extended by.
+
+Now that there is room on the stack, values can be pushed on it using the
+macros to push IV's, doubles, strings, and SV pointers respectively:
+
+    PUSHi(IV)
+    PUSHn(double)
+    PUSHp(char*, I32)
+    PUSHs(SV*)
+
+And now the Perl program calling C<tzname>, the two values will be assigned
+as in:
+
+    ($standard_abbrev, $summer_abbrev) = POSIX::tzname;
+
+An alternate (and possibly simpler) method to pushing values on the stack is
+to use the macros:
+
+    XPUSHi(IV)
+    XPUSHn(double)
+    XPUSHp(char*, I32)
+    XPUSHs(SV*)
+
+These macros automatically adjust the stack for you, if needed.
+
+=head1 Mortality
+
+In Perl, values are normally "immortal" -- that is, they are not freed unless
+explicitly done so (via the Perl C<undef> call or other routines in Perl
+itself).
+
+In the above example with C<tzname>, we needed to create two new SV's to push
+onto the argument stack, that being the two strings.  However, we don't want
+these new SV's to stick around forever because they will eventually be
+copied into the SV's that hold the two scalar variables.
+
+An SV (or AV or HV) that is "mortal" acts in all ways as a normal "immortal"
+SV, AV, or HV, but is only valid in the "current context".  When the Perl
+interpreter leaves the current context, the mortal SV, AV, or HV is
+automatically freed.  Generally the "current context" means a single
+Perl statement.
+
+To create a mortal variable, use the functions:
+
+    SV*  sv_newmortal()
+    SV*  sv_2mortal(SV*)
+    SV*  sv_mortalcopy(SV*)
+
+The first call creates a mortal SV, the second converts an existing SV to
+a mortal SV, the third creates a mortal copy of an existing SV.
+
+The mortal routines are not just for SV's -- AV's and HV's can be made mortal
+by passing their address (and casting them to C<SV*>) to the C<sv_2mortal> or
+C<sv_mortalcopy> routines.
+
+=head1 Creating New Variables
+
+To create a new Perl variable, which can be accessed from your Perl script,
+use the following routines, depending on the variable type.
+
+    SV*  perl_get_sv("varname", TRUE);
+    AV*  perl_get_av("varname", TRUE);
+    HV*  perl_get_hv("varname", TRUE);
+
+Notice the use of TRUE as the second parameter.  The new variable can now
+be set, using the routines appropriate to the data type.
+
+=head1 Stashes and Objects
+
+A stash is a hash table (associative array) that contains all of the
+different objects that are contained within a package.  Each key of the
+hash table is a symbol name (shared by all the different types of
+objects that have the same name), and each value in the hash table is
+called a GV (for Glob Value).  The GV in turn contains references to
+the various objects of that name, including (but not limited to) the
+following:
+    
+    Scalar Value
+    Array Value
+    Hash Value
+    File Handle
+    Directory Handle
+    Format
+    Subroutine
+
+Perl stores various stashes in a GV structure (for global variable) but
+represents them with an HV structure.
+
+To get the HV pointer for a particular package, use the function:
+
+    HV*  gv_stashpv(char* name, I32 create)
+    HV*  gv_stashsv(SV*, I32 create)
+
+The first function takes a literal string, the second uses the string stored
+in the SV.
+
+The name that C<gv_stash*v> wants is the name of the package whose symbol table
+you want.  The default package is called C<main>.  If you have multiply nested
+packages, it is legal to pass their names to C<gv_stash*v>, separated by
+C<::> as in the Perl language itself.
+
+Alternately, if you have an SV that is a blessed reference, you can find
+out the stash pointer by using:
+
+    HV*  SvSTASH(SvRV(SV*));
+
+then use the following to get the package name itself:
+
+    char*  HvNAME(HV* stash);
+
+If you need to return a blessed value to your Perl script, you can use the
+following function:
+
+    SV*  sv_bless(SV*, HV* stash)
+
+where the first argument, an C<SV*>, must be a reference, and the second
+argument is a stash.  The returned C<SV*> can now be used in the same way
+as any other SV.
+
+=head1 Magic
+
+[This section under construction]
+
+=head1 Double-Typed SV's
+
+Scalar variables normally contain only one type of value, an integer,
+double, pointer, or reference.  Perl will automatically convert the
+actual scalar data from the stored type into the requested type.
+
+Some scalar variables contain more than one type of scalar data.  For
+example, the variable C<$!> contains either the numeric value of C<errno>
+or its string equivalent from C<sys_errlist[]>.
+
+To force multiple data values into an SV, you must do two things: use the
+C<sv_set*v> routines to add the additional scalar type, then set a flag
+so that Perl will believe it contains more than one type of data.  The
+four macros to set the flags are:
+
+	SvIOK_on
+	SvNOK_on
+	SvPOK_on
+	SvROK_on
+
+The particular macro you must use depends on which C<sv_set*v> routine
+you called first.  This is because every C<sv_set*v> routine turns on
+only the bit for the particular type of data being set, and turns off
+all the rest.
+
+For example, to create a new Perl variable called "dberror" that contains
+both the numeric and descriptive string error values, you could use the
+following code:
+
+    extern int  dberror;
+    extern char *dberror_list;
+
+    SV* sv = perl_get_sv("dberror", TRUE);
+    sv_setiv(sv, (IV) dberror);
+    sv_setpv(sv, dberror_list[dberror]);
+    SvIOK_on(sv);
+
+If the order of C<sv_setiv> and C<sv_setpv> had been reversed, then the
+macro C<SvPOK_on> would need to be called instead of C<SvIOK_on>.
+
+=head1 Calling Perl Routines from within C Programs
+
+There are four routines that can be used to call a Perl subroutine from
+within a C program.  These four are:
+
+    I32  perl_call_sv(SV*, I32);
+    I32  perl_call_pv(char*, I32);
+    I32  perl_call_method(char*, I32);
+    I32  perl_call_argv(char*, I32, register char**);
+
+The routine most often used should be C<perl_call_sv>.  The C<SV*> argument
+contains either the name of the Perl subroutine to be called, or a reference
+to the subroutine.  The second argument tells the appropriate routine what,
+if any, variables are being returned by the Perl subroutine.
+
+All four routines return the number of arguments that the subroutine returned
+on the Perl stack.
+
+When using these four routines, the programmer must manipulate the Perl stack.
+These include the following macros and functions:
+
+    dSP
+    PUSHMARK()
+    PUTBACK
+    SPAGAIN
+    ENTER
+    SAVETMPS
+    FREETMPS
+    LEAVE
+    XPUSH*()
+
+For more information, consult L<perlcall>.
+
+=head1 Memory Allocation
+
+[This section under construction]
+
+=head1 AUTHOR
+
+Jeff Okamoto <okamoto@corp.hp.com>
+
+With lots of help and suggestions from Dean Roehrich, Malcolm Beattie,
+Andreas Koenig, Paul Hudson, Ilya Zakharevich, Paul Marquess, and Neil
+Bowers.
+
+=head1 DATE
+
+Version 12: 1994/10/16
+
+

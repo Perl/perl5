@@ -1,43 +1,19 @@
-/* $RCSfile: gv.c,v $$Revision: 4.1 $$Date: 92/08/07 18:26:39 $
+/*    gv.c
  *
- *    Copyright (c) 1991, Larry Wall
+ *    Copyright (c) 1991-1994, Larry Wall
  *
  *    You may distribute under the terms of either the GNU General Public
  *    License or the Artistic License, as specified in the README file.
  *
- * $Log:	gv.c,v $
- * Revision 4.1  92/08/07  18:26:39  lwall
- * 
- * Revision 4.0.1.4  92/06/08  15:32:19  lwall
- * patch20: fixed confusion between a *var's real name and its effective name
- * patch20: the debugger now warns you on lines that can't set a breakpoint
- * patch20: the debugger made perl forget the last pattern used by //
- * patch20: paragraph mode now skips extra newlines automatically
- * patch20: ($<,$>) = ... didn't work on some architectures
- * 
- * Revision 4.0.1.3  91/11/05  18:35:33  lwall
- * patch11: length($x) was sometimes wrong for numeric $x
- * patch11: perl now issues warning if $SIG{'ALARM'} is referenced
- * patch11: *foo = undef coredumped
- * patch11: solitary subroutine references no longer trigger typo warnings
- * patch11: local(*FILEHANDLE) had a memory leak
- * 
- * Revision 4.0.1.2  91/06/07  11:55:53  lwall
- * patch4: new copyright notice
- * patch4: added $^P variable to control calling of perldb routines
- * patch4: added $^F variable to specify maximum system fd, default 2
- * patch4: $` was busted inside s///
- * patch4: default top-of-form run_format is now FILEHANDLE_TOP
- * patch4: length($`), length($&), length($') now optimized to avoid string copy
- * patch4: $^D |= 1024 now does syntax tree dump at run-time
- * 
- * Revision 4.0.1.1  91/04/12  09:10:24  lwall
- * patch1: Configure now differentiates getgroups() type from getgid() type
- * patch1: you may now use "die" and "caller" in a signal handler
- * 
- * Revision 4.0  91/03/20  01:39:41  lwall
- * 4.0 baseline.
- * 
+ */
+
+/*
+ *   'Mercy!' cried Gandalf.  'If the giving of information is to be the cure
+ * of your inquisitiveness, I shall spend all the rest of my days answering
+ * you.  What more do you want to know?'
+ *   'The names of all the stars, and of all living things, and the whole
+ * history of Middle-earth and Over-heaven and of the Sundering Seas,'
+ * laughed Pippin.
  */
 
 #include "EXTERN.h"
@@ -49,6 +25,8 @@ GV *
 gv_AVadd(gv)
 register GV *gv;
 {
+    if (!gv || SvTYPE((SV*)gv) != SVt_PVGV)
+	croak("Bad symbol for array");
     if (!GvAV(gv))
 	GvAV(gv) = newAV();
     return gv;
@@ -58,8 +36,21 @@ GV *
 gv_HVadd(gv)
 register GV *gv;
 {
+    if (!gv || SvTYPE((SV*)gv) != SVt_PVGV)
+	croak("Bad symbol for hash");
     if (!GvHV(gv))
 	GvHV(gv) = newHV();
+    return gv;
+}
+
+GV *
+gv_IOadd(gv)
+register GV *gv;
+{
+    if (!gv || SvTYPE((SV*)gv) != SVt_PVGV)
+	croak("Bad symbol for filehandle");
+    if (!GvIOp(gv))
+	GvIOp(gv) = newIO();
     return gv;
 }
 
@@ -73,7 +64,7 @@ char *name;
     sprintf(tmpbuf,"::_<%s", name);
     gv = gv_fetchpv(tmpbuf, TRUE, SVt_PVGV);
     sv_setpv(GvSV(gv), name);
-    if (*name == '/')
+    if (*name == '/' && (instr(name,"/lib/") || instr(name,".pm")))
 	SvMULTI_on(gv);
     if (perldb)
 	hv_magic(GvHVn(gv_AVadd(gv)), gv, 'L');
@@ -102,22 +93,47 @@ int multi;
     GvEGV(gv) = gv;
     sv_magic((SV*)gv, (SV*)gv, '*', name, len);
     GvSTASH(gv) = stash;
-    GvNAME(gv) = nsavestr(name, len);
+    GvNAME(gv) = savepvn(name, len);
     GvNAMELEN(gv) = len;
     if (multi)
 	SvMULTI_on(gv);
 }
 
+static void
+gv_init_sv(gv, sv_type)
+GV* gv;
+I32 sv_type;
+{
+    switch (sv_type) {
+    case SVt_PVIO:
+	(void)GvIOn(gv);
+	break;
+    case SVt_PVAV:
+	(void)GvAVn(gv);
+	break;
+    case SVt_PVHV:
+	(void)GvHVn(gv);
+	break;
+    }
+}
+
 GV *
-gv_fetchmeth(stash, name, len)
+gv_fetchmeth(stash, name, len, level)
 HV* stash;
 char* name;
 STRLEN len;
+I32 level;
 {
     AV* av;
     GV* topgv;
     GV* gv;
     GV** gvp;
+    HV* lastchance;
+
+    if (!stash)
+	return 0;
+    if (level > 100)
+	croak("Recursive inheritance detected");
 
     gvp = (GV**)hv_fetch(stash, name, len, TRUE);
 
@@ -137,14 +153,14 @@ STRLEN len;
 	I32 items = AvFILL(av) + 1;
 	while (items--) {
 	    SV* sv = *svp++;
-	    HV* basestash = fetch_stash(sv, FALSE);
+	    HV* basestash = gv_stashsv(sv, FALSE);
 	    if (!basestash) {
 		if (dowarn)
-		    warn("Can't locate package %s for @%s'ISA",
+		    warn("Can't locate package %s for @%s::ISA",
 			SvPVX(sv), HvNAME(stash));
 		continue;
 	    }
-	    gv = gv_fetchmeth(basestash, name, len);
+	    gv = gv_fetchmeth(basestash, name, len, level + 1);
 	    if (gv) {
 		GvCV(topgv) = GvCV(gv);			/* cache the CV */
 		GvCVGEN(topgv) = sub_generation;	/* valid for now */
@@ -152,6 +168,17 @@ STRLEN len;
 	    }
 	}
     }
+
+    if (!level) {
+	if (lastchance = gv_stashpv("UNIVERSAL", FALSE)) {
+	    if (gv = gv_fetchmeth(lastchance, name, len, level + 1)) {
+		GvCV(topgv) = GvCV(gv);			/* cache the CV */
+		GvCVGEN(topgv) = sub_generation;	/* valid for now */
+		return gv;
+	    }
+	}
+    }
+
     return 0;
 }
 
@@ -161,20 +188,78 @@ HV* stash;
 char* name;
 {
     register char *nend;
+    char *nsplit = 0;
+    GV* gv;
     
     for (nend = name; *nend; nend++) {
-	if (*nend == ':' || *nend == '\'') {
-	    return gv_fetchpv(name, FALSE, SVt_PVCV);
+	if (*nend == ':' || *nend == '\'')
+	    nsplit = nend;
+    }
+    if (nsplit) {
+	char ch;
+	char *origname = name;
+	name = nsplit + 1;
+	ch = *nsplit;
+	if (*nsplit == ':')
+	    --nsplit;
+	*nsplit = '\0';
+	stash = gv_stashpv(origname,TRUE);
+	*nsplit = ch;
+    }
+    gv = gv_fetchmeth(stash, name, nend - name, 0);
+    if (!gv) {
+	CV* cv;
+
+	if (strEQ(name,"import") || strEQ(name,"unimport"))
+	    gv = &sv_yes;
+	else if (strNE(name, "AUTOLOAD")) {
+	    gv = gv_fetchmeth(stash, "AUTOLOAD", 8, 0);
+	    if (gv && (cv = GvCV(gv))) { /* One more chance... */
+		SV *tmpstr = sv_newmortal();
+		sv_catpv(tmpstr,HvNAME(stash));
+		sv_catpvn(tmpstr,"::", 2);
+		sv_catpvn(tmpstr, name, nend - name);
+		sv_setsv(GvSV(CvGV(cv)), tmpstr);
+	    }
 	}
     }
-    return gv_fetchmeth(stash, name, nend - name);
+    return gv;
 }
 
+HV*
+gv_stashpv(name,create)
+char *name;
+I32 create;
+{
+    char tmpbuf[1234];
+    HV *stash;
+    GV *tmpgv;
+    sprintf(tmpbuf,"%.*s::",1200,name);
+    tmpgv = gv_fetchpv(tmpbuf,create, SVt_PVHV);
+    if (!tmpgv)
+	return 0;
+    if (!GvHV(tmpgv))
+	GvHV(tmpgv) = newHV();
+    stash = GvHV(tmpgv);
+    if (!HvNAME(stash))
+	HvNAME(stash) = savepv(name);
+    return stash;
+}
+
+HV*
+gv_stashsv(sv,create)
+SV *sv;
+I32 create;
+{
+    return gv_stashpv(SvPV(sv,na), create);
+}
+
+
 GV *
-gv_fetchpv(nambeg,add,svtype)
+gv_fetchpv(nambeg,add,sv_type)
 char *nambeg;
 I32 add;
-I32 svtype;
+I32 sv_type;
 {
     register char *name = nambeg;
     register GV *gv = 0;
@@ -191,13 +276,16 @@ I32 svtype;
 	{
 	    if (!stash)
 		stash = defstash;
+	    if (!SvREFCNT(stash))	/* symbol table under destruction */
+		return Nullgv;
 
 	    len = namend - name;
 	    if (len > 0) {
-		New(601, tmpbuf, len+2, char);
-		*tmpbuf = '_';
-		Copy(name, tmpbuf+1, len, char);
-		tmpbuf[++len] = '\0';
+		New(601, tmpbuf, len+3, char);
+		Copy(name, tmpbuf, len, char);
+		tmpbuf[len++] = ':';
+		tmpbuf[len++] = ':';
+		tmpbuf[len] = '\0';
 		gvp = (GV**)hv_fetch(stash,tmpbuf,len,add);
 		Safefree(tmpbuf);
 		if (!gvp || *gvp == (GV*)&sv_undef)
@@ -206,6 +294,8 @@ I32 svtype;
 
 		if (SvTYPE(gv) == SVt_PVGV)
 		    SvMULTI_on(gv);
+		else if (!add)
+		    return Nullgv;
 		else
 		    gv_init(gv, stash, nambeg, namend - nambeg, (add & 2));
 
@@ -213,7 +303,7 @@ I32 svtype;
 		    stash = GvHV(gv) = newHV();
 
 		if (!HvNAME(stash))
-		    HvNAME(stash) = nsavestr(nambeg, namend - nambeg);
+		    HvNAME(stash) = savepvn(nambeg, namend - nambeg);
 	    }
 
 	    if (*namend == ':')
@@ -221,9 +311,12 @@ I32 svtype;
 	    namend++;
 	    name = namend;
 	    if (!*name)
-		return gv ? gv : defgv;
+		return gv ? gv : *hv_fetch(defstash, "main::", 6, TRUE);
 	}
     }
+    len = namend - name;
+    if (!len)
+	len = 1;
 
     /* No stash in name, so see how we can default */
 
@@ -256,8 +349,11 @@ I32 svtype;
 	    if (global)
 		stash = defstash;
 	    else if ((COP*)curcop == &compiling) {
-		if (!(hints & HINT_STRICT_VARS) || svtype == SVt_PVCV)
-		    stash = curstash;
+		stash = curstash;
+		if (add && (hints & HINT_STRICT_VARS) && sv_type != SVt_PVCV) {
+		    if (stash && !hv_fetch(stash,name,len,0))
+			stash = 0;
+		}
 	    }
 	    else
 		stash = curcop->cop_stash;
@@ -268,46 +364,85 @@ I32 svtype;
 
     /* By this point we should have a stash and a name */
 
-    if (!stash)
-	croak("Global symbol \"%s\" requires explicit package name", name);
-    len = namend - name;
-    if (!len)
-	len = 1;
+    if (!stash) {
+	if (add) {
+	    warn("Global symbol \"%s\" requires explicit package name", name);
+	    ++error_count;
+	    stash = curstash ? curstash : defstash;	/* avoid core dumps */
+	}
+	else
+	    return Nullgv;
+    }
+
+    if (!SvREFCNT(stash))	/* symbol table under destruction */
+	return Nullgv;
+
     gvp = (GV**)hv_fetch(stash,name,len,add);
     if (!gvp || *gvp == (GV*)&sv_undef)
 	return Nullgv;
     gv = *gvp;
     if (SvTYPE(gv) == SVt_PVGV) {
-	SvMULTI_on(gv);
+	if (add) {
+	    SvMULTI_on(gv);
+	    gv_init_sv(gv, sv_type);
+	}
 	return gv;
     }
 
     /* Adding a new symbol */
 
+    if (add & 4)
+	warn("Had to create %s unexpectedly", nambeg);
     gv_init(gv, stash, name, len, add & 2);
+    gv_init_sv(gv, sv_type);
 
     /* set up magic where warranted */
     switch (*name) {
+    case 'A':
+	if (strEQ(name, "ARGV")) {
+	    IoFLAGS(GvIOn(gv)) |= IOf_ARGV|IOf_START;
+	}
+	break;
+
     case 'a':
     case 'b':
 	if (len == 1)
+	    SvMULTI_on(gv);
+	break;
+    case 'E':
+	if (strnEQ(name, "EXPORT", 6))
 	    SvMULTI_on(gv);
 	break;
     case 'I':
 	if (strEQ(name, "ISA")) {
 	    AV* av = GvAVn(gv);
 	    SvMULTI_on(gv);
-	    sv_magic((SV*)av, (SV*)gv, 'I', 0, 0);
-	    if (add & 2 && strEQ(nambeg,"Any_DBM_File::ISA") && AvFILL(av) == -1)
+	    sv_magic((SV*)av, (SV*)gv, 'I', Nullch, 0);
+	    if (add & 2 && strEQ(nambeg,"AnyDBM_File::ISA") && AvFILL(av) == -1)
 	    {
-		av_push(av, newSVpv("NDBM_File",0));
-		av_push(av, newSVpv("DB_File",0));
-		av_push(av, newSVpv("GDBM_File",0));
-		av_push(av, newSVpv("SDBM_File",0));
-		av_push(av, newSVpv("ODBM_File",0));
+		char *pname;
+		av_push(av, newSVpv(pname = "NDBM_File",0));
+		gv_stashpv(pname, TRUE);
+		av_push(av, newSVpv(pname = "DB_File",0));
+		gv_stashpv(pname, TRUE);
+		av_push(av, newSVpv(pname = "GDBM_File",0));
+		gv_stashpv(pname, TRUE);
+		av_push(av, newSVpv(pname = "SDBM_File",0));
+		gv_stashpv(pname, TRUE);
+		av_push(av, newSVpv(pname = "ODBM_File",0));
+		gv_stashpv(pname, TRUE);
 	    }
 	}
 	break;
+#ifdef OVERLOAD
+    case 'O':
+        if (strEQ(name, "OVERLOAD")) {
+            HV* hv = GvHVn(gv);
+            SvMULTI_on(gv);
+            sv_magic((SV*)hv, (SV*)gv, 'A', 0, 0);
+        }
+        break;
+#endif /* OVERLOAD */
     case 'S':
 	if (strEQ(name, "SIG")) {
 	    HV *hv;
@@ -318,9 +453,9 @@ I32 svtype;
 
 	    /* initialize signal stack */
 	    signalstack = newAV();
-	    av_store(signalstack, 32, Nullsv);
-	    av_clear(signalstack);
 	    AvREAL_off(signalstack);
+	    av_extend(signalstack, 30);
+	    av_fill(signalstack, 0);
 	}
 	break;
 
@@ -329,21 +464,21 @@ I32 svtype;
 	    break;
 	ampergv = gv;
 	sawampersand = TRUE;
-	goto magicalize;
+	goto ro_magicalize;
 
     case '`':
 	if (len > 1)
 	    break;
 	leftgv = gv;
 	sawampersand = TRUE;
-	goto magicalize;
+	goto ro_magicalize;
 
     case '\'':
 	if (len > 1)
 	    break;
 	rightgv = gv;
 	sawampersand = TRUE;
-	goto magicalize;
+	goto ro_magicalize;
 
     case ':':
 	if (len > 1)
@@ -351,8 +486,13 @@ I32 svtype;
 	sv_setpv(GvSV(gv),chopset);
 	goto magicalize;
 
-    case '!':
     case '#':
+    case '*':
+	if (dowarn && len == 1 && sv_type == SVt_PV)
+	    warn("Use of $%s is deprecated", name);
+	/* FALL THROUGH */
+    case '[':
+    case '!':
     case '?':
     case '^':
     case '~':
@@ -360,8 +500,6 @@ I32 svtype;
     case '-':
     case '%':
     case '.':
-    case '+':
-    case '*':
     case '(':
     case ')':
     case '<':
@@ -369,9 +507,9 @@ I32 svtype;
     case ',':
     case '\\':
     case '/':
-    case '[':
     case '|':
     case '\004':
+    case '\010':
     case '\t':
     case '\020':
     case '\024':
@@ -381,6 +519,7 @@ I32 svtype;
 	    break;
 	goto magicalize;
 
+    case '+':
     case '1':
     case '2':
     case '3':
@@ -390,6 +529,8 @@ I32 svtype;
     case '7':
     case '8':
     case '9':
+      ro_magicalize:
+	SvREADONLY_on(GvSV(gv));
       magicalize:
 	sv_magic(GvSV(gv), (SV*)gv, 0, name, len);
 	break;
@@ -410,9 +551,7 @@ I32 svtype;
 	    SV *sv;
 	    sv = GvSV(gv);
 	    sv_upgrade(sv, SVt_PVNV);
-	    sv_setpv(sv,rcsid);
-	    SvNVX(sv) = atof(patchlevel);
-	    SvNOK_on(sv);
+	    sv_setpv(sv, patchlevel);
 	}
 	break;
     }
@@ -457,7 +596,7 @@ newIO()
     GV *iogv;
 
     io = (IO*)NEWSV(0,0);
-    sv_upgrade(io,SVt_PVIO);
+    sv_upgrade((SV *)io,SVt_PVIO);
     SvREFCNT(io) = 1;
     SvOBJECT_on(io);
     iogv = gv_fetchpv("FileHandle::", TRUE, SVt_PVIO);
@@ -473,34 +612,39 @@ HV* stash;
     register I32 i;
     register GV *gv;
     HV *hv;
+    GV *filegv;
 
     if (!HvARRAY(stash))
 	return;
-    for (i = 0; i <= HvMAX(stash); i++) {
+    for (i = 0; i <= (I32) HvMAX(stash); i++) {
 	for (entry = HvARRAY(stash)[i]; entry; entry = entry->hent_next) {
-	    if (isALPHA(*entry->hent_key)) {
+	    if (entry->hent_key[entry->hent_klen-1] == ':' &&
+		(gv = (GV*)entry->hent_val) && (hv = GvHV(gv)) && HvNAME(hv))
+	    {
+		if (hv != defstash)
+		     gv_check(hv);              /* nested package */
+	    }
+	    else if (isALPHA(*entry->hent_key)) {
 		gv = (GV*)entry->hent_val;
 		if (SvMULTI(gv))
 		    continue;
 		curcop->cop_line = GvLINE(gv);
-		curcop->cop_filegv = GvFILEGV(gv);
-		if (SvMULTI(GvFILEGV(gv)))	/* Filename began with slash */
+		filegv = GvFILEGV(gv);
+		curcop->cop_filegv = filegv;
+		if (filegv && SvMULTI(filegv))	/* Filename began with slash */
 		    continue;
-		warn("Identifier \"%s::%s\" used only once: possible typo", HvNAME(stash), GvNAME(gv));
+		warn("Identifier \"%s::%s\" used only once: possible typo",
+			HvNAME(stash), GvNAME(gv));
 	    }
-	    else if (*entry->hent_key == '_' &&
-		(gv = (GV*)entry->hent_val) &&
-		(hv = GvHV(gv)) && HvNAME(hv) && hv != defstash)
-		     gv_check(hv);              /* nested package */
-						      
 	}
     }
 }
 
 GV *
-newGVgen()
+newGVgen(pack)
+char *pack;
 {
-    (void)sprintf(tokenbuf,"_GEN_%d",gensym++);
+    (void)sprintf(tokenbuf,"%s::_GEN_%ld",pack,(long)gensym++);
     return gv_fetchpv(tokenbuf,TRUE, SVt_PVGV);
 }
 
@@ -568,3 +712,344 @@ register GV *gv;
 	return GvGP(gv_HVadd(gv))->gp_hv;
 }
 #endif			/* Microport 2.4 hack */
+
+#ifdef OVERLOAD
+/* Updates and caches the CV's */
+
+bool
+Gv_AMupdate(stash)
+HV* stash;
+{
+  GV** gvp;
+  HV* hv;
+  GV* gv;
+  CV* cv;
+  MAGIC* mg=mg_find((SV*)stash,'c');
+  AMT *amtp;
+
+  if (mg && (amtp=((AMT*)(mg->mg_ptr)))->was_ok_am == amagic_generation &&
+             amtp->was_ok_sub == sub_generation)
+      return HV_AMAGIC(stash)? TRUE: FALSE;
+  gvp=(GV**)hv_fetch(stash,"OVERLOAD",8,FALSE);
+  sv_unmagic((SV*)stash, 'c');
+
+  DEBUG_o( deb("Recalcing overload magic in package %s\n",HvNAME(stash)) );
+
+  if (gvp && ((gv = *gvp) != (GV*)&sv_undef && (hv = GvHV(gv)))) {
+    int filled=0;
+    int i;
+    char *cp;
+    AMT amt;
+    SV* sv;
+    SV** svp;
+
+/*  if (*(svp)==(SV*)amagic_generation && *(svp+1)==(SV*)sub_generation) {
+      DEBUG_o( deb("Overload magic in package %s up-to-date\n",HvNAME(stash))
+);
+      return HV_AMAGIC(stash)? TRUE: FALSE;
+    }*/
+
+    amt.was_ok_am=amagic_generation;
+    amt.was_ok_sub=sub_generation;
+    amt.fallback=AMGfallNO;
+
+    /* Work with "fallback" key, which we assume to be first in AMG_names */
+
+    if ((cp=((char**)(*AMG_names))[0]) &&
+	(svp=(SV**)hv_fetch(hv,cp,strlen(cp),FALSE)) && (sv = *svp)) {
+      if (SvTRUE(sv)) amt.fallback=AMGfallYES;
+      else if (SvOK(sv)) amt.fallback=AMGfallNEVER;
+    }
+
+    for (i=1;i<NofAMmeth*2;i++) {
+      cv=0;
+
+      if ( (cp=((char**)(*AMG_names))[i]) ) {
+        svp=(SV**)hv_fetch(hv,cp,strlen(cp),FALSE);
+        if (svp && ((sv = *svp) != (GV*)&sv_undef)) {
+          switch (SvTYPE(sv)) {
+            default:
+              if (!SvROK(sv)) {
+                if (!SvOK(sv)) break;
+		gv = gv_fetchmethod(curcop->cop_stash, SvPV(sv, na));
+                if (gv) cv = GvCV(gv);
+                break;
+              }
+              cv = (CV*)SvRV(sv);
+              if (SvTYPE(cv) == SVt_PVCV)
+                  break;
+                /* FALL THROUGH */
+            case SVt_PVHV:
+            case SVt_PVAV:
+	      die("Not a subroutine reference in %%OVERLOAD");
+	      return FALSE;
+            case SVt_PVCV:
+                cv = (CV*)sv;
+                break;
+            case SVt_PVGV:
+                if (!(cv = GvCV((GV*)sv)))
+                    cv = sv_2cv(sv, &stash, &gv, TRUE);
+                break;
+          }
+          if (cv) filled=1;
+	  else {
+	    die("Method for operation %s not found in package %s during blessing\n",
+		cp,HvNAME(stash));
+	    return FALSE;
+	  }
+        }
+      }
+      amt.table[i]=cv;
+    }
+    sv_magic((SV*)stash, 0, 'c', (char*)&amt, sizeof(amt));
+    if (filled) {
+/*    HV_badAMAGIC_off(stash);*/
+      HV_AMAGIC_on(stash);
+      return TRUE;
+    }
+  }
+/*HV_badAMAGIC_off(stash);*/
+  HV_AMAGIC_off(stash);
+  return FALSE;
+}
+
+/* During call to this subroutine stack can be reallocated. It is
+ * advised to call SPAGAIN macro in your code after call */
+
+SV*
+amagic_call(left,right,method,flags)
+SV* left;
+SV* right;
+int method;
+int flags; 
+{
+  MAGIC *mg; 
+  CV *cv; 
+  CV **cvp=NULL, **ocvp=NULL;
+  AMT *amtp, *oamtp;
+  int fl=0, off, off1, lr=0, assign=AMGf_assign & flags, notfound=0;
+  int postpr=0;
+  HV* stash;
+  if (!(AMGf_noleft & flags) && SvAMAGIC(left)
+      && (mg = mg_find((SV*)(stash=SvSTASH(SvRV(left))),'c'))
+      && (ocvp = cvp = ((oamtp=amtp=(AMT*)mg->mg_ptr)->table))
+      && (assign ?
+             ((cv = cvp[off=method+1]) 
+	      || ( amtp->fallback > AMGfallNEVER && /* fallback to
+						     * usual method */
+		  (fl = 1, cv = cvp[off=method]))):
+             (1 && (cv = cvp[off=method]))  )) {
+    lr = -1;			/* Call method for left argument */
+  } else {
+    if (cvp && amtp->fallback > AMGfallNEVER && flags & AMGf_unary) {
+      int logic;
+
+      /* look for substituted methods */
+	 switch (method) {
+	 case inc_amg:
+	   if ((cv = cvp[off=add_ass_amg]) 
+	       || ((cv = cvp[off=add_amg]) && (postpr=1))) {
+	     right = &sv_yes; lr = -1; assign = 1;
+	   }
+	   break;
+	 case dec_amg:
+	   if ((cv = cvp[off=subtr_ass_amg]) 
+	       || ((cv = cvp[off=subtr_amg]) && (postpr=1))) {
+	     right = &sv_yes; lr = -1; assign = 1;
+	   }
+	   break;
+	 case bool__amg:
+	   (void)((cv = cvp[off=numer_amg]) || (cv = cvp[off=string_amg]));
+	   break;
+	 case numer_amg:
+	   (void)((cv = cvp[off=string_amg]) || (cv = cvp[off=bool__amg]));
+	   break;
+	 case string_amg:
+	   (void)((cv = cvp[off=numer_amg]) || (cv = cvp[off=bool__amg]));
+	   break;
+	 case abs_amg:
+	   if ((cvp[off1=lt_amg] || cvp[off1=lt_amg]) 
+	       && ((cv = cvp[off=neg_amg]) || (cv = cvp[off=subtr_amg]))) {
+	     if (off1==lt_amg) {
+	       SV* lessp = amagic_call(left,
+				       sv_2mortal(newSViv(0)),
+				       lt_amg,AMGf_noright);
+	       logic = SvTRUE(lessp);
+	     } else {
+	       SV* lessp = amagic_call(left,
+				       sv_2mortal(newSViv(0)),
+				       ncmp_amg,AMGf_noright);
+	       logic = (SvNV(lessp) < 0);
+	     }
+	     if (logic) {
+	       if (off==subtr_amg) {
+		 right = left;
+		 left = sv_2mortal(newSViv(0));
+		 lr = 1;
+	       }
+	     } else {
+	       return left;
+	     }
+	   }
+	   break;
+	 case neg_amg:
+	   if (cv = cvp[off=subtr_amg]) {
+	     right = left;
+	     left = sv_2mortal(newSViv(0));
+	     lr = 1;
+	   }
+	   break;
+	 default:
+	   goto not_found;
+	 }
+	 if (!cv) goto not_found;
+    } else if (!(AMGf_noright & flags) && SvAMAGIC(right)
+	       && (mg = mg_find((SV*)(stash=SvSTASH(SvRV(right))),'c'))
+	       && (cvp = ((amtp=(AMT*)mg->mg_ptr)->table))
+	       && (cv = cvp[off=method])) { /* Method for right
+					     * argument found */
+      lr=1;
+    } else if (((ocvp && oamtp->fallback > AMGfallNEVER && (cvp=ocvp)) 
+		|| (cvp && amtp->fallback > AMGfallNEVER && (lr=1)))
+	       && !(flags & AMGf_unary)) {
+				/* We look for substitution for
+				 * comparison operations and
+				 * concatendation */
+      if (method==concat_amg || method==concat_ass_amg
+	  || method==repeat_amg || method==repeat_ass_amg) {
+	return NULL;		/* Delegate operation to string conversion */
+      }
+      off = -1;
+      switch (method) {
+	 case lt_amg:
+	 case le_amg:
+	 case gt_amg:
+	 case ge_amg:
+	 case eq_amg:
+	 case ne_amg:
+	   postpr = 1; off=ncmp_amg; break;
+	 case slt_amg:
+	 case sle_amg:
+	 case sgt_amg:
+	 case sge_amg:
+	 case seq_amg:
+	 case sne_amg:
+	   postpr = 1; off=scmp_amg; break;
+	 }
+      if (off != -1) cv = cvp[off];
+      if (!cv) {
+	goto not_found;
+      }
+    } else {
+    not_found:			/* No method found, either report or die */
+      if (ocvp && (cv=ocvp[nomethod_amg])) { /* Call report method */
+	notfound = 1; lr = -1;
+      } else if (cvp && (cv=cvp[nomethod_amg])) {
+	notfound = 1; lr = 1;
+      } else {
+	char tmpstr[512];
+	sprintf(tmpstr,"Operation `%s': no method found,\n\tleft argument %s%200s,\n\tright argument %s%200s",
+		      ((char**)AMG_names)[off],
+		      SvAMAGIC(left)? 
+		        "in overloaded package ":
+		        "has no overloaded magic",
+		      SvAMAGIC(left)? 
+		        HvNAME(SvSTASH(SvRV(left))):
+		        "",
+		      SvAMAGIC(right)? 
+		        "in overloaded package ":
+		        "has no overloaded magic",
+		      SvAMAGIC(right)? 
+		        HvNAME(SvSTASH(SvRV(right))):
+		        "");
+	if (amtp && amtp->fallback >= AMGfallYES) {
+	  DEBUG_o( deb(tmpstr) );
+	} else {
+	  die(tmpstr);
+	}
+	return NULL;
+      }
+    }
+  }
+  if (!notfound) {
+    DEBUG_o( deb("Operation `%s': method for %s argument found in package %s%s\n",
+		 ((char**)AMG_names)[off],
+		 (lr? "right": "left"),
+		 HvNAME(stash), 
+		 fl? ",\n\tassignment variant used": "") );
+    /* Since we use shallow copy, we need to dublicate the contents,
+       probably we need also to use user-supplied version of coping?
+       */
+    if (assign || method==inc_amg || method==dec_amg) RvDEEPCP(left);
+  }
+  {
+    dSP;
+    BINOP myop;
+    SV* res;
+
+    Zero(&myop, 1, BINOP);
+    myop.op_last = (OP *) &myop;
+    myop.op_next = Nullop;
+    myop.op_flags = OPf_KNOW|OPf_STACKED;
+
+    ENTER;
+    SAVESPTR(op);
+    op = (OP *) &myop;
+    PUTBACK;
+    pp_pushmark();
+
+    EXTEND(sp, notfound + 5);
+    PUSHs(lr>0? right: left);
+    PUSHs(lr>0? left: right);
+    PUSHs( assign ? &sv_undef : (lr>0? &sv_yes: &sv_no));
+    if (notfound) {
+      PUSHs( sv_2mortal(newSVpv(((char**)AMG_names)[off],0)) );
+    }
+    PUSHs((SV*)cv);
+    PUTBACK;
+
+    if (op = pp_entersub())
+      run();
+    LEAVE;
+    SPAGAIN;
+
+    res=POPs;
+    PUTBACK;
+
+    if (notfound) {
+      /* sv_2mortal(res); */
+      return NULL;
+    }
+
+    if (postpr) {
+      int ans;
+      switch (method) {
+      case le_amg:
+      case sle_amg:
+	ans=SvIV(res)<=0; break;
+      case lt_amg:
+      case slt_amg:
+	ans=SvIV(res)<0; break;
+      case ge_amg:
+      case sge_amg:
+	ans=SvIV(res)>=0; break;
+      case gt_amg:
+      case sgt_amg:
+	ans=SvIV(res)>0; break;
+      case eq_amg:
+      case seq_amg:
+	ans=SvIV(res)==0; break;
+      case ne_amg:
+      case sne_amg:
+	ans=SvIV(res)!=0; break;
+      case inc_amg:
+      case dec_amg:
+	SvSetSV(left,res); return res; break;
+      }
+      return ans? &sv_yes: &sv_no;
+    } else {
+      return res;
+    }
+  }
+}
+#endif /* OVERLOAD */

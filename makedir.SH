@@ -16,17 +16,7 @@ echo "Extracting makedir (with variable substitutions)"
 rm -f makedir
 $spitshell >makedir <<!GROK!THIS!
 $startsh
-# $RCSfile: makedir.SH,v $$Revision: 4.1 $$Date: 92/08/07 18:24:23 $
-# 
-# $Log:	makedir.SH,v $
-# Revision 4.1  92/08/07  18:24:23  lwall
-# 
-# Revision 4.0.1.1  92/06/08  14:24:55  lwall
-# patch20: SH files didn't work well with symbolic links
-# 
-# Revision 4.0  91/03/20  01:27:13  lwall
-# 4.0 baseline.
-# 
+# makedir.SH
 # 
 
 export PATH || (echo "OOPS, this isn't sh.  Desperation time.  I will feed myself to sh."; sh \$0; kill \$\$)

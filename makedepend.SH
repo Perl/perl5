@@ -1,63 +1,42 @@
 case $CONFIG in
 '')
-    if test ! -f config.sh; then
-	ln ../config.sh . || \
-	ln ../../config.sh . || \
-	ln ../../../config.sh . || \
-	(echo "Can't find config.sh."; exit 1)
-    fi 2>/dev/null
-    . ./config.sh
-    ;;
+	if test -f config.sh; then TOP=.;
+	elif test -f ../config.sh; then TOP=..;
+	elif test -f ../../config.sh; then TOP=../..;
+	elif test -f ../../../config.sh; then TOP=../../..;
+	elif test -f ../../../../config.sh; then TOP=../../../..;
+	else
+		echo "Can't find config.sh."; exit 1
+	fi
+	. $TOP/config.sh
+	;;
 esac
+: This forces SH files to create target in same directory as SH file.
+: This is so that make depend always knows where to find SH derivatives.
 case "$0" in
 */*) cd `expr X$0 : 'X\(.*\)/'` ;;
 esac
 echo "Extracting makedepend (with variable substitutions)"
 rm -f makedepend
-$spitshell >makedepend <<!GROK!THIS!
-$startsh
-# $RCSfile: makedepend.SH,v $$Revision: 4.1 $$Date: 92/08/07 18:24:20 $
+$spitshell >makedepend <<'!NO!SUBS!'
+# makedepend.SH
 #
-# $Log:	makedepend.SH,v $
-# Revision 4.1  92/08/07  18:24:20  lwall
-# 
-# Revision 4.0.1.4  92/06/08  13:51:24  lwall
-# patch20: various and sundry fixes
-# 
-# Revision 4.0.1.3  91/11/05  17:56:33  lwall
-# patch11: various portability fixes
-# 
-# Revision 4.0.1.2  91/06/07  15:40:06  lwall
-# patch4: fixed cppstdin to run in the right directory
-# 
-# Revision 4.0.1.1  91/06/07  11:20:06  lwall
-# patch4: Makefile is no longer self-modifying code under makedepend
-# 
-# Revision 4.0  91/03/20  01:27:04  lwall
-# 4.0 baseline.
-# 
-# 
 
 export PATH || (echo "OOPS, this isn't sh.  Desperation time.  I will feed myself to sh."; sh \$0; kill \$\$)
 
-cat='$cat'
-cppflags='$cppflags'
-cp='$cp'
-cppstdin='$cppstdin'
-cppminus='$cppminus'
-echo='$echo'
-egrep='$egrep'
-expr='$expr'
-mv='$mv'
-rm='$rm'
-sed='$sed'
-sort='$sort'
-test='$test'
-tr='$tr'
-uniq='$uniq'
-!GROK!THIS!
-
-$spitshell >>makedepend <<'!NO!SUBS!'
+case $CONFIG in
+'')
+	if test -f config.sh; then TOP=.;
+	elif test -f ../config.sh; then TOP=..;
+	elif test -f ../../config.sh; then TOP=../..;
+	elif test -f ../../../config.sh; then TOP=../../..;
+	elif test -f ../../../../config.sh; then TOP=../../../..;
+	else
+		echo "Can't find config.sh."; exit 1
+	fi
+	. $TOP/config.sh
+	;;
+esac
 
 PATH="$PATH:."
 export PATH
@@ -131,7 +110,7 @@ make shlist || ($echo "Searching for .SH files..."; \
 	$echo *.SH | $tr ' ' '\012' | $egrep -v '\*' >.shlist)
 if $test -s .deptmp; then
     for file in `cat .shlist`; do
-	$echo `$expr X$file : 'X\(.*\).SH'`: $file config.sh \; \
+	$echo `$expr X$file : 'X\(.*\).SH'`: $file $TOP/config.sh \; \
 	    /bin/sh $file >> .deptmp
     done
     $echo "Updating $mf..."
@@ -155,14 +134,10 @@ else
     <.deptmp $sed -n 's|c:#include "\(.*\)".*$|o: \1|p' | \
        $sed 's|^[^;]*/||' | \
        $sed -f .hsed >> $mf.new
-    <.deptmp $sed -n 's|c:#include <\(.*\)>.*$|o: /usr/include/\1|p' \
-       >> $mf.new
     <.deptmp $sed -n 's|h:#include "\(.*\)".*$|h: \1|p' | \
        $sed -f .hsed >> $mf.new
-    <.deptmp $sed -n 's|h:#include <\(.*\)>.*$|h: /usr/include/\1|p' \
-       >> $mf.new
     for file in `$cat .shlist`; do
-	$echo `$expr X$file : 'X\(.*\).SH'`: $file config.sh \; \
+	$echo `$expr X$file : 'X\(.*\).SH'`: $file $TOP/config.sh \; \
 	    /bin/sh $file >> $mf.new
     done
 fi

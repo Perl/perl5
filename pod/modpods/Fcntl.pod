@@ -1,0 +1,20 @@
+=head1 NAME
+
+Fcntl - load the C Fcntl.h defines
+
+=head1 SYNOPSIS
+
+    use Fcntl;
+
+=head1 DESCRIPTION
+
+This module is just a translation of the C F<fnctl.h> file.
+Unlike the old mechanism of requiring a translated F<fnctl.ph>
+file, this uses the B<h2xs> program (see the Perl source distribution)
+and your native C compiler.  This means that it has a 
+far more likely chance of getting the numbers right.
+
+=head1 NOTE
+
+Only C<#define> symbols get translated; you must still correctly
+pack up your own arguments to pass as args for locking functions, etc.

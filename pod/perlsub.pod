@@ -1,0 +1,195 @@
+=head1 NAME
+
+perlsub - Perl subroutines
+
+=head1 SYNOPSIS
+
+To declare subroutines:
+
+    sub NAME;	   # A "forward" declaration.
+    sub NAME BLOCK # A declaration and a definition.
+
+To import subroutines:
+
+    use PACKAGE qw(NAME1 NAME2 NAME3);
+
+To call subroutines:
+
+    &NAME	   # Passes current @_ to subroutine.
+    &NAME(LIST);   # Parens required with & form.
+    NAME(LIST);	   # & is optional with parens.
+    NAME LIST;	   # Parens optional if predeclared/imported.
+
+=head1 DESCRIPTION
+
+Any arguments passed to the routine come in as array @_, that is
+($_[0], $_[1], ...).  The array @_ is a local array, but its values are
+references to the actual scalar parameters.  The return value of the
+subroutine is the value of the last expression evaluated, and can be
+either an array value or a scalar value.  Alternately, a return
+statement may be used to specify the returned value and exit the
+subroutine.  To create local variables see the local() and my()
+operators.
+
+A subroutine may called using the "&" prefix.  The "&" is optional in Perl
+5, and so are the parens if the subroutine has been predeclared.
+(Note, however, that the "&" is I<NOT> optional when you're just naming the
+subroutine, such as when it's used as an argument to defined() or
+undef().  Nor is it optional when you want to do an indirect subroutine
+call with a subroutine name or reference using the C<&$subref()> or
+C<&{$subref}()> constructs.  See L<perlref> for more on that.)
+
+Example:
+
+    sub MAX {
+	my $max = pop(@_);
+	foreach $foo (@_) {
+	    $max = $foo if $max < $foo;
+	}
+	$max;
+    }
+
+    ...
+    $bestday = &MAX($mon,$tue,$wed,$thu,$fri);
+
+Example:
+
+    # get a line, combining continuation lines
+    #  that start with whitespace
+
+    sub get_line {
+	$thisline = $lookahead;
+	LINE: while ($lookahead = <STDIN>) {
+	    if ($lookahead =~ /^[ \t]/) {
+		$thisline .= $lookahead;
+	    }
+	    else {
+		last LINE;
+	    }
+	}
+	$thisline;
+    }
+
+    $lookahead = <STDIN>;	# get first line
+    while ($_ = get_line()) {
+	...
+    }
+
+Use array assignment to a local list to name your formal arguments:
+
+    sub maybeset {
+	my($key, $value) = @_;
+	$foo{$key} = $value unless $foo{$key};
+    }
+
+This also has the effect of turning call-by-reference into
+call-by-value, since the assignment copies the values.
+
+Subroutines may be called recursively.  If a subroutine is called using
+the "&" form, the argument list is optional.  If omitted, no @_ array is
+set up for the subroutine; the @_ array at the time of the call is
+visible to subroutine instead.
+
+    &foo(1,2,3);	# pass three arguments
+    foo(1,2,3);		# the same
+
+    foo();		# pass a null list
+    &foo();		# the same
+    &foo;		# pass no arguments--more efficient
+
+=head2 Passing Symbol Table Entries
+
+[Note:  The mechanism described in this section works fine in Perl 5, but
+the new reference mechanism is generally easier to work with.  See L<perlref>.]
+
+Sometimes you don't want to pass the value of an array to a subroutine
+but rather the name of it, so that the subroutine can modify the global
+copy of it rather than working with a local copy.  In perl you can
+refer to all the objects of a particular name by prefixing the name
+with a star: C<*foo>.  This is often known as a "type glob", since the
+star on the front can be thought of as a wildcard match for all the
+funny prefix characters on variables and subroutines and such.
+
+When evaluated, the type glob produces a scalar value that represents
+all the objects of that name, including any filehandle, format or
+subroutine.  When assigned to, it causes the name mentioned to refer to
+whatever "*" value was assigned to it.  Example:
+
+    sub doubleary {
+	local(*someary) = @_;
+	foreach $elem (@someary) {
+	    $elem *= 2;
+	}
+    }
+    doubleary(*foo);
+    doubleary(*bar);
+
+Note that scalars are already passed by reference, so you can modify
+scalar arguments without using this mechanism by referring explicitly
+to $_[0] etc.  You can modify all the elements of an array by passing
+all the elements as scalars, but you have to use the * mechanism (or
+the equivalent reference mechanism) to push, pop or change the size of
+an array.  It will certainly be faster to pass the typeglob (or reference).
+
+Even if you don't want to modify an array, this mechanism is useful for
+passing multiple arrays in a single LIST, since normally the LIST
+mechanism will merge all the array values so that you can't extract out
+the individual arrays.
+
+=head2 Overriding builtin functions
+
+Many builtin functions may be overridden, though this should only be
+tried occasionally and for good reason.  Typically this might be
+done by a package attempting to emulate missing builtin functionality
+on a non-Unix system.
+
+Overriding may only be done by importing the name from a
+module--ordinary predeclaration isn't good enough.  However, the
+C<subs> pragma (compiler directive) lets you, in effect, predeclare subs
+via the import syntax, and these names may then override the builtin ones:
+
+    use subs 'chdir', 'chroot', 'chmod', 'chown';
+    chdir $somewhere;
+    sub chdir { ... }
+
+Library modules should not in general export builtin names like "open"
+or "chdir" as part of their default @EXPORT list, since these may
+sneak into someone else's namespace and change the semantics unexpectedly.
+Instead, if the module adds the name to the @EXPORT_OK list, then it's
+possible for a user to import the name explicitly, but not implicitly.
+That is, they could say
+
+    use Module 'open';
+
+and it would import the open override, but if they said
+
+    use Module;
+
+they would get the default imports without the overrides.
+
+=head2 Autoloading
+
+If you call a subroutine that is undefined, you would ordinarily get an
+immediate fatal error complaining that the subroutine doesn't exist.
+(Likewise for subroutines being used as methods, when the method
+doesn't exist in any of the base classes of the class package.) If,
+however, there is an C<AUTOLOAD> subroutine defined in the package or
+packages that were searched for the original subroutine, then that
+C<AUTOLOAD> subroutine is called with the arguments that would have been
+passed to the original subroutine.  The fully qualified name of the
+original subroutine magically appears in the $AUTOLOAD variable in the
+same package as the C<AUTOLOAD> routine.  The name is not passed as an
+ordinary argument because, er, well, just because, that's why...
+
+Most C<AUTOLOAD> routines will load in a definition for the subroutine in
+question using eval, and then execute that subroutine using a special
+form of "goto" that erases the stack frame of the C<AUTOLOAD> routine
+without a trace.  (See the standard C<AutoLoader> module, for example.)
+But an C<AUTOLOAD> routine can also just emulate the routine and never
+define it.  A good example of this is the standard Shell module, which
+can treat undefined subroutine calls as calls to Unix programs.
+
+There are mechanisms available for modules to help them split themselves
+up into autoloadable files to be used with the standard AutoLoader module.
+See the document on extensions.
+

@@ -1,11 +1,18 @@
-#!./miniperl
+#!./miniperl -w
 
 @ARGV = "./config.sh";
+$config_pm = 'lib/Config.pm';
 
-open STDOUT, ">lib/Config.pm"
-    or die "Can't open lib/Config.pm: $!\n";
+# list names to put first (and hence lookup fastest)
+@fast = qw(osname osvers so libpth archlib
+	sharpbang startsh shsharp
+	dynamic_ext static_ext extensions dl_src
+	sig_name ccflags cppflags intsize);
+
+
+open CONFIG, ">$config_pm" or die "Can't open $config_pm: $!\n";
 $myver = sprintf("%.3f", $]);
-print <<"ENDOFBEG";
+print CONFIG <<"ENDOFBEG";
 package Config;
 require Exporter;
 \@ISA = (Exporter);
@@ -14,15 +21,101 @@ require Exporter;
 \$] == $myver or die sprintf
     "Perl lib version ($myver) doesn't match executable version (%.3f)\\n", \$];
 
+# This file was created by configpm when Perl was built. Any changes
+# made to this file will be lost the next time perl is built.
+
 ENDOFBEG
 
+@fast{@fast} = @fast;
+@non_v=();
+@v_fast=();
+@v_others=();
+
 while (<>) {
-    s:^#!/bin/sh::;
-    s/'undef'/undef/;	# So we can say "if $Config{'foo'}".
-    s/=true$/='true'/;	# Catch CONFIG=true line from Configure.
-    s/^(\w+)=/\$Config{'$1'} = /;
-    s/$/;/ unless (/^#/ || /^$/);
-    print $_;
+    next if m:^#!/bin/sh:;
+    # Catch CONFIG=true and PATCHLEVEL=n line from Configure.
+    s/^(\w+)=(true|\d+)\s*$/$1='$2'\n/;
+    unless (m/^(\w+)='(.*)'\s*$/){
+	push(@non_v, "#$_"); # not a name='value' line
+	next;
+    }
+    if (!$fast{$1}){ push(@v_others, $_); next; }
+    push(@v_fast,$_);
 }
-print "1;\n";
+
+foreach(@non_v){ print CONFIG $_ }
+
+print CONFIG "\n",
+    "\$config_sh=<<'!END!OF!CONFIG!';\n",
+    join("", @v_fast, sort @v_others),
+    "!END!OF!CONFIG!\n\n";
+
+
+print CONFIG <<'ENDOFEND';
+
+tie %Config, Config;
+sub TIEHASH { bless {} }
+sub FETCH { 
+    # check for cached value (which maybe undef so we use exists not defined)
+    return $_[0]->{$_[1]} if (exists $_[0]->{$_[1]});
+ 
+    my($value); # search for the item in the big $config_sh string
+    return undef unless (($value) = $config_sh =~ m/^$_[1]='(.*)'\s*$/m);
+ 
+    $value = undef if $value eq 'undef'; # So we can say "if $Config{'foo'}".
+    $_[0]->{$_[1]} = $value; # cache it
+    return $value;
+}
+ 
+sub FIRSTKEY {
+    $prevpos = 0;
+    my $key;
+    ($key) = $config_sh =~ m/^(.*)=/;
+    $key;
+}
+
+sub NEXTKEY {
+    my ($pos, $len);
+    $pos = $prevpos;
+    $pos = index( $config_sh, "\n", $pos) + 1;
+    $prevpos = $pos;
+    $len = index( $config_sh, "=", $pos) - $pos;
+    $len > 0 ? substr( $config_sh, $pos, $len) : undef;
+}
+
+sub EXISTS{ 
+     exists($_[0]->{$_[1]})  or  $config_sh =~ m/^$_[1]=/m; 
+}
+
+sub readonly { die "\%Config::Config is read-only\n" }
+
+sub STORE { &readonly }
+sub DELETE{ &readonly }
+sub CLEAR { &readonly }
+
+
+1;
+ENDOFEND
+
+close(CONFIG);
+
+# Now do some simple tests on the Config.pm file we have created
+unshift(@INC,'lib');
+require $config_pm;
+import Config;
+
+die "$0: $config_pm not valid"
+	unless $Config{'CONFIG'} eq 'true';
+
+die "$0: error processing $config_pm"
+	if defined($Config{'an impossible name'})
+	or $Config{'CONFIG'} ne 'true' # test cache
+	;
+
+die "$0: error processing $config_pm"
+	if eval '$Config{"cc"} = 1'
+	or eval 'delete $Config{"cc"}'
+	;
+
+
 exit 0;

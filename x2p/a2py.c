@@ -6,26 +6,13 @@
  *    License or the Artistic License, as specified in the README file.
  *
  * $Log:	a2py.c,v $
- * Revision 4.1  92/08/07  18:29:14  lwall
- * 
- * Revision 4.0.1.2  92/06/08  16:15:16  lwall
- * patch20: in a2p, now warns about spurious backslashes
- * patch20: in a2p, now allows [ to be backslashed in pattern
- * patch20: in a2p, now allows numbers of the form 2.
- * 
- * Revision 4.0.1.1  91/06/07  12:12:59  lwall
- * patch4: new copyright notice
- * 
- * Revision 4.0  91/03/20  01:57:26  lwall
- * 4.0 baseline.
- * 
  */
 
 #ifdef OS2
 #include "../patchlevel.h"
 #endif
 #include "util.h"
-char *index();
+char *strchr();
 
 char *filename;
 char *myname;
@@ -36,7 +23,7 @@ STR *walk();
 #ifdef OS2
 usage()
 {
-    printf("\nThis is the AWK to PERL translator, version 4.0, patchlevel %d\n", PATCHLEVEL);
+    printf("\nThis is the AWK to PERL translator, version 5.0, patchlevel %d\n", PATCHLEVEL);
     printf("\nUsage: %s [-D<number>] [-F<char>] [-n<fieldlist>] [-<number>] filename\n", myname);
     printf("\n  -D<number>      sets debugging flags."
            "\n  -F<character>   the awk script to translate is always invoked with"
@@ -170,7 +157,7 @@ register char **env;
 			# this emulates #! processing on NIH machines.\n\
 			# (remove #! line above if indigestible)\n\n");
     str_cat(str,
-      "eval '$'.$1.'$2;' while $ARGV[0] =~ /^([A-Za-z_]+=)(.*)/ && shift;\n");
+      "eval '$'.$1.'$2;' while $ARGV[0] =~ /^([A-Za-z_0-9]+=)(.*)/ && shift;\n");
     str_cat(str,
       "			# process any FOO=bar switches\n\n");
     if (do_opens && opens) {
@@ -211,7 +198,7 @@ yylex()
   retry:
 #ifdef YYDEBUG
     if (yydebug)
-	if (index(s,'\n'))
+	if (strchr(s,'\n'))
 	    fprintf(stderr,"Tokener at %s",s);
 	else
 	    fprintf(stderr,"Tokener at %s\n",s);
@@ -871,7 +858,7 @@ register char *s;
 	    else
 		s++;
 	}
-	if (index("eE",*s) && index("+-0123456789",s[1])) {
+	if (strchr("eE",*s) && strchr("+-0123456789",s[1])) {
 	    *d++ = *s++;
 	    if (*s == '+' || *s == '-')
 		*d++ = *s++;

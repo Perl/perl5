@@ -1,0 +1,267 @@
+=head1 NAME
+
+perlsyn - Perl syntax
+
+=head1 DESCRIPTION
+
+A Perl script consists of a sequence of declarations and statements.
+The only things that need to be declared in Perl are report formats
+and subroutines.  See the sections below for more information on those
+declarations.  All uninitialized user-created objects are assumed to
+start with a null or 0 value until they are defined by some explicit
+operation such as assignment.  (Though you can get warnings about the
+use of undefined values if you like.)  The sequence of statements is
+executed just once, unlike in B<sed> and B<awk> scripts, where the
+sequence of statements is executed for each input line.  While this means
+that you must explicitly loop over the lines of your input file (or
+files), it also means you have much more control over which files and
+which lines you look at.  (Actually, I'm lying--it is possible to do an
+implicit loop with either the B<-n> or B<-p> switch.  It's just not the
+mandatory default like it is in B<sed> and B<awk>.)
+
+Perl is, for the most part, a free-form language.  (The only
+exception to this is format declarations, for obvious reasons.) Comments
+are indicated by the "#" character, and extend to the end of the line.  If
+you attempt to use C</* */> C-style comments, it will be interpreted
+either as division or pattern matching, depending on the context, and C++
+C<//> comments just look like a null regular expression, So don't do
+that.
+
+A declaration can be put anywhere a statement can, but has no effect on
+the execution of the primary sequence of statements--declarations all
+take effect at compile time.  Typically all the declarations are put at
+the beginning or the end of the script.
+
+As of Perl 5, declaring a subroutine allows a subroutine name to be used
+as if it were a list operator from that point forward in the program.  You
+can declare a subroutine without defining it by saying just
+
+    sub myname;
+    $me = myname $0 		or die "can't get myname";
+
+Note that it functions as a list operator though, not a unary
+operator, so be careful to use C<or> instead of C<||> there.
+
+Subroutines declarations can also be imported by a C<use> statement.
+
+Also as of Perl 5, a statement sequence may contain declarations of
+lexically scoped variables, but apart from declaring a variable name,
+the declaration acts like an ordinary statement, and is elaborated within
+the sequence of statements as if it were an ordinary statement.
+
+=head2 Simple statements
+
+The only kind of simple statement is an expression evaluated for its
+side effects.  Every simple statement must be terminated with a
+semicolon, unless it is the final statement in a block, in which case
+the semicolon is optional.  (A semicolon is still encouraged there if the
+block takes up more than one line, since you may add another line.)
+Note that there are some operators like C<eval {}> and C<do {}> that look
+like compound statements, but aren't (they're just TERMs in an expression), 
+and thus need an explicit termination
+if used as the last item in a statement.
+
+Any simple statement may optionally be followed by a I<SINGLE> modifier,
+just before the terminating semicolon (or block ending).  The possible
+modifiers are:
+
+    if EXPR
+    unless EXPR
+    while EXPR
+    until EXPR
+
+The C<if> and C<unless> modifiers have the expected semantics,
+presuming you're a speaker of English.  The C<while> and C<until>
+modifiers also have the usual "while loop" semantics (conditional
+evaluated first), except when applied to a do-BLOCK (or to the
+now-deprecated do-SUBROUTINE statement), in which case the block
+executes once before the conditional is evaluated.  This is so that you
+can write loops like:
+
+    do {
+	$_ = <STDIN>;
+	...
+    } until $_ eq ".\n";
+
+See L<perlfunc/do>.  Note also that the loop control
+statements described later will I<NOT> work in this construct, since
+modifiers don't take loop labels.  Sorry.  You can always wrap
+another block around it to do that sort of thing.)
+
+=head2 Compound statements
+
+In Perl, a sequence of statements that defines a scope is called a block.
+Sometimes a block is delimited by the file containing it (in the case
+of a required file, or the program as a whole), and sometimes a block
+is delimited by the extent of a string (in the case of an eval).
+
+But generally, a block is delimited by curly brackets, also known as braces.
+We will call this syntactic construct a BLOCK.
+
+The following compound statements may be used to control flow:
+
+    if (EXPR) BLOCK
+    if (EXPR) BLOCK else BLOCK
+    if (EXPR) BLOCK elsif (EXPR) BLOCK ... else BLOCK
+    LABEL while (EXPR) BLOCK
+    LABEL while (EXPR) BLOCK continue BLOCK
+    LABEL for (EXPR; EXPR; EXPR) BLOCK
+    LABEL foreach VAR (ARRAY) BLOCK
+    LABEL BLOCK continue BLOCK
+
+Note that, unlike C and Pascal, these are defined in terms of BLOCKs,
+not statements.  This means that the curly brackets are I<required>--no
+dangling statements allowed.  If you want to write conditionals without
+curly brackets there are several other ways to do it.  The following
+all do the same thing:
+
+    if (!open(FOO)) { die "Can't open $FOO: $!"; }
+    die "Can't open $FOO: $!" unless open(FOO);
+    open(FOO) or die "Can't open $FOO: $!";	# FOO or bust!
+    open(FOO) ? 'hi mom' : die "Can't open $FOO: $!";
+			# a bit exotic, that last one
+
+The C<if> statement is straightforward.  Since BLOCKs are always
+bounded by curly brackets, there is never any ambiguity about which
+C<if> an C<else> goes with.  If you use C<unless> in place of C<if>,
+the sense of the test is reversed.
+
+The C<while> statement executes the block as long as the expression is
+true (does not evaluate to the null string or 0 or "0").  The LABEL is
+optional, and if present, consists of an identifier followed by a
+colon.  The LABEL identifies the loop for the loop control statements
+C<next>, C<last>, and C<redo> (see below).  If there is a C<continue>
+BLOCK, it is always executed just before the conditional is about to be
+evaluated again, just like the third part of a C<for> loop in C.
+Thus it can be used to increment a loop variable, even when the loop
+has been continued via the C<next> statement (which is similar to the C
+C<continue> statement).
+
+If the word C<while> is replaced by the word C<until>, the sense of the
+test is reversed, but the conditional is still tested before the first
+iteration.
+
+In either the C<if> or the C<while> statement, you may replace "(EXPR)"
+with a BLOCK, and the conditional is true if the value of the last
+statement in that block is true.  (This feature continues to work in Perl
+5 but is deprecated.  Please change any occurrences of "if BLOCK" to
+"if (do BLOCK)".)
+
+The C-style C<for> loop works exactly like the corresponding C<while> loop:
+
+    for ($i = 1; $i < 10; $i++) {
+	...
+    }
+
+is the same as
+
+    $i = 1;
+    while ($i < 10) {
+	...
+    } continue {
+	$i++;
+    }
+
+The foreach loop iterates over a normal list value and sets the
+variable VAR to be each element of the list in turn.  The variable is
+implicitly local to the loop (unless declared previously with C<my>),
+and regains its former value upon exiting the loop.  The C<foreach>
+keyword is actually a synonym for the C<for> keyword, so you can use
+C<foreach> for readability or C<for> for brevity.  If VAR is omitted, $_
+is set to each value.  If ARRAY is an actual array (as opposed to an
+expression returning a list value), you can modify each element of the
+array by modifying VAR inside the loop.  Examples:
+
+    for (@ary) { s/foo/bar/; }
+
+    foreach $elem (@elements) {
+	$elem *= 2;
+    }
+
+    for ((10,9,8,7,6,5,4,3,2,1,'BOOM')) {
+	print $_, "\n"; sleep(1);
+    }
+
+    for (1..15) { print "Merry Christmas\n"; }
+
+    foreach $item (split(/:[\\\n:]*/, $ENV{'TERMCAP'})) {
+	print "Item: $item\n";
+    }
+
+A BLOCK by itself (labeled or not) is semantically equivalent to a loop
+that executes once.  Thus you can use any of the loop control
+statements in it to leave or restart the block.  The C<continue> block
+is optional.  This construct is particularly nice for doing case
+structures.
+
+    SWITCH: {
+	if (/^abc/) { $abc = 1; last SWITCH; }
+	if (/^def/) { $def = 1; last SWITCH; }
+	if (/^xyz/) { $xyz = 1; last SWITCH; }
+	$nothing = 1;
+    }
+
+There is no official switch statement in Perl, because there are
+already several ways to write the equivalent.  In addition to the
+above, you could write
+
+    SWITCH: {
+	$abc = 1, last SWITCH  if /^abc/;
+	$def = 1, last SWITCH  if /^def/;
+	$xyz = 1, last SWITCH  if /^xyz/;
+	$nothing = 1;
+    }
+
+(That's actually not as strange as it looks one you realize that you can
+use loop control "operators" within an expression,  That's just the normal
+C comma operator.)
+
+or
+
+    SWITCH: {
+	/^abc/ && do { $abc = 1; last SWITCH; };
+	/^def/ && do { $def = 1; last SWITCH; };
+	/^xyz/ && do { $xyz = 1; last SWITCH; };
+	$nothing = 1;
+    }
+
+or formatted so it stands out more as a "proper" switch statement:
+
+    SWITCH: {
+	/^abc/ 	    && do { 
+			    $abc = 1; 
+			    last SWITCH; 
+		       };
+
+	/^def/ 	    && do { 
+			    $def = 1; 
+			    last SWITCH; 
+		       };
+
+	/^xyz/ 	    && do { 
+			    $xyz = 1; 
+			    last SWITCH; 
+		        };
+	$nothing = 1;
+    }
+
+or
+
+    SWITCH: {
+	/^abc/ and $abc = 1, last SWITCH;
+	/^def/ and $def = 1, last SWITCH;
+	/^xyz/ and $xyz = 1, last SWITCH;
+	$nothing = 1;
+    }
+
+or even, horrors,
+
+    if (/^abc/)
+	{ $abc = 1 }
+    elsif (/^def/)
+	{ $def = 1 }
+    elsif (/^xyz/)
+	{ $xyz = 1 }
+    else
+	{ $nothing = 1 }
+

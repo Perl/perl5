@@ -1,3 +1,10 @@
+/*    regexec.c
+ */
+
+/*
+ * "One Ring to rule them all, One Ring to find them..."
+ */
+
 /* NOTE: this is derived from Henry Spencer's regexp code, and should not
  * confused with the original package (see point 3 below).  Thanks, Henry!
  */
@@ -7,31 +14,6 @@
  * blame Henry for some of the lack of readability.
  */
 
-/* $RCSfile: regexec.c,v $$Revision: 4.1 $$Date: 92/08/07 18:26:32 $
- *
- * $Log:	regexec.c,v $
- * Revision 4.1  92/08/07  18:26:32  lwall
- * 
- * Revision 4.0.1.4  92/06/08  15:25:50  lwall
- * patch20: pattern modifiers i and g didn't interact right
- * patch20: in some cases $` and $' didn't get set by match
- * patch20: /x{0}/ was wrongly interpreted as /x{0,}/
- * 
- * Revision 4.0.1.3  91/11/05  18:23:55  lwall
- * patch11: prepared for ctype implementations that don't define isascii()
- * patch11: initial .* in pattern had dependency on value of $*
- * 
- * Revision 4.0.1.2  91/06/07  11:50:33  lwall
- * patch4: new copyright notice
- * patch4: // wouldn't use previous pattern if it started with a null character
- * 
- * Revision 4.0.1.1  91/04/12  09:07:39  lwall
- * patch1: regexec only allocated space for 9 subexpresssions
- * 
- * Revision 4.0  91/03/20  01:39:16  lwall
- * 4.0 baseline.
- * 
- */
 /*SUPPRESS 112*/
 /*
  * regcomp and regexec -- regsub and regerror are not used in perl
@@ -55,7 +37,7 @@
  *
  ****    Alterations to Henry's code are...
  ****
- ****    Copyright (c) 1991, Larry Wall
+ ****    Copyright (c) 1991-1994, Larry Wall
  ****
  ****    You may distribute under the terms of either the GNU General Public
  ****    License or the Artistic License, as specified in the README file.
@@ -73,8 +55,81 @@
 #endif
 
 #ifdef DEBUGGING
-I32 regnarrate = 0;
+static I32 regnarrate = 0;
+static char* regprogram = 0;
 #endif
+
+/* Current curly descriptor */
+typedef struct curcur CURCUR;
+struct curcur {
+    int		parenfloor;	/* how far back to strip paren data */
+    int		cur;		/* how many instances of scan we've matched */
+    int		min;		/* the minimal number of scans to match */
+    int		max;		/* the maximal number of scans to match */
+    int		minmod;		/* whether to work our way up or down */
+    char *	scan;		/* the thing to match */
+    char *	next;		/* what has to match after it */
+    char *	lastloc;	/* where we started matching this scan */
+    CURCUR *	oldcc;		/* current curly before we started this one */
+};
+
+static CURCUR* regcc;
+
+typedef I32 CHECKPOINT;
+
+CHECKPOINT regcppush _((I32 parenfloor));
+char * regcppop _((void));
+
+CHECKPOINT
+regcppush(parenfloor)
+I32 parenfloor;
+{
+    int retval = savestack_ix;
+    int i = (regsize - parenfloor) * 3;
+    int p;
+
+    SSCHECK(i + 5);
+    for (p = regsize; p > parenfloor; p--) {
+	SSPUSHPTR(regendp[p]);
+	SSPUSHPTR(regstartp[p]);
+	SSPUSHINT(p);
+    }
+    SSPUSHINT(regsize);
+    SSPUSHINT(*reglastparen);
+    SSPUSHPTR(reginput);
+    SSPUSHINT(i + 3);
+    SSPUSHINT(SAVEt_REGCONTEXT);
+    return retval;
+}
+
+char*
+regcppop()
+{
+    I32 i = SSPOPINT;
+    U32 paren = 0;
+    char *input;
+    char *tmps;
+    assert(i == SAVEt_REGCONTEXT);
+    i = SSPOPINT;
+    input = (char *) SSPOPPTR;
+    *reglastparen = SSPOPINT;
+    regsize = SSPOPINT;
+    for (i -= 3; i > 0; i -= 3) {
+	paren = (U32)SSPOPINT;
+	regstartp[paren] = (char *) SSPOPPTR;
+	tmps = (char*)SSPOPPTR;
+	if (paren <= *reglastparen)
+	    regendp[paren] = tmps;
+    }
+    for (paren = *reglastparen + 1; paren <= regnpar; paren++) {
+	if (paren > regsize)
+	    regstartp[paren] = Nullch;
+	regendp[paren] = Nullch;
+    }
+    return input;
+}
+
+#define regcpblow(cp) leave_scope(cp)
 
 /*
  * regexec and friends
@@ -83,9 +138,10 @@ I32 regnarrate = 0;
 /*
  * Forwards.
  */
-STATIC I32 regtry();
-STATIC I32 regmatch();
-STATIC I32 regrepeat();
+
+static I32 regmatch _((char *prog));
+static I32 regrepeat _((char *p, I32 max));
+static I32 regtry _((regexp *prog, char *startpos));
 
 /*
  - regexec - match a regexp against a string
@@ -100,404 +156,393 @@ I32 minend;	/* end of match must be at least minend after stringarg */
 SV *screamer;
 I32 safebase;	/* no need to remember string in subbase */
 {
-	register char *s;
-	register I32 i;
-	register char *c;
-	register char *string = stringarg;
-	register I32 tmp;
-	I32 minlen = 0;		/* must match at least this many chars */
-	I32 dontbother = 0;	/* how many characters not to try at end */
+    register char *s;
+    register I32 i;
+    register char *c;
+    register char *startpos = stringarg;
+    register I32 tmp;
+    I32 minlen = 0;		/* must match at least this many chars */
+    I32 dontbother = 0;	/* how many characters not to try at end */
+    CURCUR cc;
 
-	/* Be paranoid... */
-	if (prog == NULL || string == NULL) {
-		croak("NULL regexp parameter");
-		return(0);
-	}
+    cc.cur = 0;
+    regcc = &cc;
 
-	if (string == strbeg)	/* is ^ valid at stringarg? */
-	    regprev = '\n';
-	else {
-	    regprev = stringarg[-1];
-	    if (!multiline && regprev == '\n')
-		regprev = '\0';		/* force ^ to NOT match */
-	}
-	regprecomp = prog->precomp;
-	/* Check validity of program. */
-	if (UCHARAT(prog->program) != MAGIC) {
-		FAIL("corrupted regexp program");
-	}
-
-	if (prog->do_folding) {
-		i = strend - string;
-		New(1101,c,i+1,char);
-		Copy(string, c, i+1, char);
-		string = c;
-		strend = string + i;
-		for (s = string; s < strend; s++)
-			if (isUPPER(*s))
-				*s = tolower(*s);
-	}
-
-	/* If there is a "must appear" string, look for it. */
-	s = string;
-	if (prog->regmust != Nullsv &&
-	    (!(prog->reganch & ROPT_ANCH)
-	     || (multiline && prog->regback >= 0)) ) {
-		if (stringarg == strbeg && screamer) {
-			if (screamfirst[BmRARE(prog->regmust)] >= 0)
-				s = screaminstr(screamer,prog->regmust);
-			else
-				s = Nullch;
-		}
-#ifndef lint
-		else
-			s = fbm_instr((unsigned char*)s, (unsigned char*)strend,
-			    prog->regmust);
+#ifdef DEBUGGING
+    regnarrate = debug & 512;
+    regprogram = prog->program;
 #endif
-		if (!s) {
-			++BmUSEFUL(prog->regmust);	/* hooray */
-			goto phooey;	/* not present */
-		}
-		else if (prog->regback >= 0) {
-			s -= prog->regback;
-			if (s < string)
-			    s = string;
-			minlen = prog->regback + SvCUR(prog->regmust);
-		}
-		else if (--BmUSEFUL(prog->regmust) < 0) { /* boo */
-			SvREFCNT_dec(prog->regmust);
-			prog->regmust = Nullsv;	/* disable regmust */
-			s = string;
-		}
-		else {
-			s = string;
-			minlen = SvCUR(prog->regmust);
-		}
+
+    /* Be paranoid... */
+    if (prog == NULL || startpos == NULL) {
+	croak("NULL regexp parameter");
+	return 0;
+    }
+
+    if (startpos == strbeg)	/* is ^ valid at stringarg? */
+	regprev = '\n';
+    else {
+	regprev = stringarg[-1];
+	if (!multiline && regprev == '\n')
+	    regprev = '\0';		/* force ^ to NOT match */
+    }
+    regprecomp = prog->precomp;
+    regnpar = prog->nparens;
+    /* Check validity of program. */
+    if (UCHARAT(prog->program) != MAGIC) {
+	FAIL("corrupted regexp program");
+    }
+
+    if (prog->do_folding) {
+	i = strend - startpos;
+	New(1101,c,i+1,char);
+	Copy(startpos, c, i+1, char);
+	startpos = c;
+	strend = startpos + i;
+	for (s = startpos; s < strend; s++)
+	    if (isUPPER(*s))
+		*s = toLOWER(*s);
+    }
+
+    /* If there is a "must appear" string, look for it. */
+    s = startpos;
+    if (prog->regmust != Nullsv &&
+	(!(prog->reganch & ROPT_ANCH)
+	 || (multiline && prog->regback >= 0)) )
+    {
+	if (stringarg == strbeg && screamer) {
+	    if (screamfirst[BmRARE(prog->regmust)] >= 0)
+		    s = screaminstr(screamer,prog->regmust);
+	    else
+		    s = Nullch;
 	}
-
-	/* Mark beginning of line for ^ . */
-	regbol = string;
-
-	/* Mark end of line for $ (and such) */
-	regeol = strend;
-
-	/* see how far we have to get to not match where we matched before */
-	regtill = string+minend;
-
-	/* Allocate our backreference arrays */
-	if ( regmyp_size < prog->nparens + 1 ) {
-	    /* Allocate or enlarge the arrays */
-	    regmyp_size = prog->nparens + 1;
-	    if ( regmyp_size < 10 ) regmyp_size = 10;	/* minimum */
-	    if ( regmystartp ) {
-		/* reallocate larger */
-		Renew(regmystartp,regmyp_size,char*);
-		Renew(regmyendp,  regmyp_size,char*);
-	    }
-	    else {
-		/* Initial allocation */
-		New(1102,regmystartp,regmyp_size,char*);
-		New(1102,regmyendp,  regmyp_size,char*);
-	    }
-	
+	else
+	    s = fbm_instr((unsigned char*)s, (unsigned char*)strend,
+		prog->regmust);
+	if (!s) {
+	    ++BmUSEFUL(prog->regmust);	/* hooray */
+	    goto phooey;	/* not present */
 	}
+	else if (prog->regback >= 0) {
+	    s -= prog->regback;
+	    if (s < startpos)
+		s = startpos;
+	    minlen = prog->regback + SvCUR(prog->regmust);
+	}
+	else if (!prog->naughty && --BmUSEFUL(prog->regmust) < 0) { /* boo */
+	    SvREFCNT_dec(prog->regmust);
+	    prog->regmust = Nullsv;	/* disable regmust */
+	    s = startpos;
+	}
+	else {
+	    s = startpos;
+	    minlen = SvCUR(prog->regmust);
+	}
+    }
 
-	/* Simplest case:  anchored match need be tried only once. */
-	/*  [unless multiline is set] */
-	if (prog->reganch & ROPT_ANCH) {
-		if (regtry(prog, string))
+    /* Mark beginning of line for ^ . */
+    regbol = startpos;
+
+    /* Mark end of line for $ (and such) */
+    regeol = strend;
+
+    /* see how far we have to get to not match where we matched before */
+    regtill = startpos+minend;
+
+    /* Simplest case:  anchored match need be tried only once. */
+    /*  [unless multiline is set] */
+    if (prog->reganch & ROPT_ANCH) {
+	if (regtry(prog, startpos))
+	    goto got_it;
+	else if (multiline || (prog->reganch & ROPT_IMPLICIT)) {
+	    if (minlen)
+		dontbother = minlen - 1;
+	    strend -= dontbother;
+	    /* for multiline we only have to try after newlines */
+	    if (s > startpos)
+		s--;
+	    while (s < strend) {
+		if (*s++ == '\n') {
+		    if (s < strend && regtry(prog, s))
 			goto got_it;
-		else if (multiline || (prog->reganch & ROPT_IMPLICIT)) {
-			if (minlen)
-			    dontbother = minlen - 1;
-			strend -= dontbother;
-			/* for multiline we only have to try after newlines */
-			if (s > string)
-			    s--;
-			while (s < strend) {
-			    if (*s++ == '\n') {
-				if (s < strend && regtry(prog, s))
-				    goto got_it;
-			    }
-			}
 		}
-		goto phooey;
+	    }
 	}
+	goto phooey;
+    }
 
-	/* Messy cases:  unanchored match. */
-	if (prog->regstart) {
-		if (prog->reganch & ROPT_SKIP) {  /* we have /x+whatever/ */
-		    /* it must be a one character string */
-		    i = SvPVX(prog->regstart)[0];
-		    while (s < strend) {
-			    if (*s == i) {
-				    if (regtry(prog, s))
-					    goto got_it;
-				    s++;
-				    while (s < strend && *s == i)
-					s++;
-			    }
-			    s++;
-		    }
+    /* Messy cases:  unanchored match. */
+    if (prog->regstart) {
+	if (prog->reganch & ROPT_SKIP) {  /* we have /x+whatever/ */
+	    /* it must be a one character string */
+	    i = SvPVX(prog->regstart)[0];
+	    while (s < strend) {
+		if (*s == i) {
+		    if (regtry(prog, s))
+			goto got_it;
+		    s++;
+		    while (s < strend && *s == i)
+			s++;
 		}
-		else if (SvPOK(prog->regstart) == 3) {
-		    /* We know what string it must start with. */
-#ifndef lint
-		    while ((s = fbm_instr((unsigned char*)s,
-		      (unsigned char*)strend, prog->regstart)) != NULL)
-#else
-		    while (s = Nullch)
-#endif
-		    {
-			    if (regtry(prog, s))
-				    goto got_it;
-			    s++;
-		    }
-		}
-		else {
-		    c = SvPVX(prog->regstart);
-		    while ((s = ninstr(s, strend,
-		      c, c + SvCUR(prog->regstart) )) != NULL) {
-			    if (regtry(prog, s))
-				    goto got_it;
-			    s++;
-		    }
-		}
-		goto phooey;
+		s++;
+	    }
 	}
-	/*SUPPRESS 560*/
-	if (c = prog->regstclass) {
-		I32 doevery = (prog->reganch & ROPT_SKIP) == 0;
-
-		if (minlen)
-		    dontbother = minlen - 1;
-		strend -= dontbother;	/* don't bother with what can't match */
-		tmp = 1;
-		/* We know what class it must start with. */
-		switch (OP(c)) {
-		case ANYOF:
-		    c = OPERAND(c);
-		    while (s < strend) {
-			    i = UCHARAT(s);
-			    if (!(c[i >> 3] & (1 << (i&7)))) {
-				    if (tmp && regtry(prog, s))
-					    goto got_it;
-				    else
-					    tmp = doevery;
-			    }
-			    else
-				    tmp = 1;
-			    s++;
-		    }
-		    break;
-		case BOUND:
-		    if (minlen)
-			dontbother++,strend--;
-		    if (s != string) {
-			i = s[-1];
-			tmp = isALNUM(i);
-		    }
-		    else
-			tmp = isALNUM(regprev);	/* assume not alphanumeric */
-		    while (s < strend) {
-			    i = *s;
-			    if (tmp != isALNUM(i)) {
-				    tmp = !tmp;
-				    if (regtry(prog, s))
-					    goto got_it;
-			    }
-			    s++;
-		    }
-		    if ((minlen || tmp) && regtry(prog,s))
-			    goto got_it;
-		    break;
-		case NBOUND:
-		    if (minlen)
-			dontbother++,strend--;
-		    if (s != string) {
-			i = s[-1];
-			tmp = isALNUM(i);
-		    }
-		    else
-			tmp = isALNUM(regprev);	/* assume not alphanumeric */
-		    while (s < strend) {
-			    i = *s;
-			    if (tmp != isALNUM(i))
-				    tmp = !tmp;
-			    else if (regtry(prog, s))
-				    goto got_it;
-			    s++;
-		    }
-		    if ((minlen || !tmp) && regtry(prog,s))
-			    goto got_it;
-		    break;
-		case ALNUM:
-		    while (s < strend) {
-			    i = *s;
-			    if (isALNUM(i)) {
-				    if (tmp && regtry(prog, s))
-					    goto got_it;
-				    else
-					    tmp = doevery;
-			    }
-			    else
-				    tmp = 1;
-			    s++;
-		    }
-		    break;
-		case NALNUM:
-		    while (s < strend) {
-			    i = *s;
-			    if (!isALNUM(i)) {
-				    if (tmp && regtry(prog, s))
-					    goto got_it;
-				    else
-					    tmp = doevery;
-			    }
-			    else
-				    tmp = 1;
-			    s++;
-		    }
-		    break;
-		case SPACE:
-		    while (s < strend) {
-			    if (isSPACE(*s)) {
-				    if (tmp && regtry(prog, s))
-					    goto got_it;
-				    else
-					    tmp = doevery;
-			    }
-			    else
-				    tmp = 1;
-			    s++;
-		    }
-		    break;
-		case NSPACE:
-		    while (s < strend) {
-			    if (!isSPACE(*s)) {
-				    if (tmp && regtry(prog, s))
-					    goto got_it;
-				    else
-					    tmp = doevery;
-			    }
-			    else
-				    tmp = 1;
-			    s++;
-		    }
-		    break;
-		case DIGIT:
-		    while (s < strend) {
-			    if (isDIGIT(*s)) {
-				    if (tmp && regtry(prog, s))
-					    goto got_it;
-				    else
-					    tmp = doevery;
-			    }
-			    else
-				    tmp = 1;
-			    s++;
-		    }
-		    break;
-		case NDIGIT:
-		    while (s < strend) {
-			    if (!isDIGIT(*s)) {
-				    if (tmp && regtry(prog, s))
-					    goto got_it;
-				    else
-					    tmp = doevery;
-			    }
-			    else
-				    tmp = 1;
-			    s++;
-		    }
-		    break;
-		}
+	else if (SvPOK(prog->regstart) == 3) {
+	    /* We know what string it must start with. */
+	    while ((s = fbm_instr((unsigned char*)s,
+	      (unsigned char*)strend, prog->regstart)) != NULL)
+	    {
+		if (regtry(prog, s))
+		    goto got_it;
+		s++;
+	    }
 	}
 	else {
-		if (minlen)
-		    dontbother = minlen - 1;
-		strend -= dontbother;
-		/* We don't know much -- general case. */
-		do {
-			if (regtry(prog, s))
-				goto got_it;
-		} while (s++ < strend);
+	    c = SvPVX(prog->regstart);
+	    while ((s = ninstr(s, strend, c, c + SvCUR(prog->regstart))) != NULL)
+	    {
+		if (regtry(prog, s))
+		    goto got_it;
+		s++;
+	    }
 	}
-
-	/* Failure. */
 	goto phooey;
+    }
+    /*SUPPRESS 560*/
+    if (c = prog->regstclass) {
+	I32 doevery = (prog->reganch & ROPT_SKIP) == 0;
 
-    got_it:
-	prog->subbeg = strbeg;
-	prog->subend = strend;
-	if ((!safebase && (prog->nparens || sawampersand)) || prog->do_folding){
-		strend += dontbother;	/* uncheat */
-		i = strend - string + (stringarg - strbeg);
-		if (safebase) {			/* no need for $digit later */
-		    s = strbeg;
-		    prog->subend = s+i;
+	if (minlen)
+	    dontbother = minlen - 1;
+	strend -= dontbother;	/* don't bother with what can't match */
+	tmp = 1;
+	/* We know what class it must start with. */
+	switch (OP(c)) {
+	case ANYOF:
+	    c = OPERAND(c);
+	    while (s < strend) {
+		i = UCHARAT(s);
+		if (!(c[i >> 3] & (1 << (i&7)))) {
+		    if (tmp && regtry(prog, s))
+			goto got_it;
+		    else
+			tmp = doevery;
 		}
-		else if (strbeg != prog->subbase) {
-		    s = nsavestr(strbeg,i);	/* so $digit will work later */
-		    if (prog->subbase)
-			    Safefree(prog->subbase);
-		    prog->subbeg = prog->subbase = s;
-		    prog->subend = s+i;
+		else
+		    tmp = 1;
+		s++;
+	    }
+	    break;
+	case BOUND:
+	    if (minlen)
+		dontbother++,strend--;
+	    if (s != startpos) {
+		i = s[-1];
+		tmp = isALNUM(i);
+	    }
+	    else
+		tmp = isALNUM(regprev);	/* assume not alphanumeric */
+	    while (s < strend) {
+		i = *s;
+		if (tmp != isALNUM(i)) {
+		    tmp = !tmp;
+		    if (regtry(prog, s))
+			goto got_it;
 		}
-		else {
-		    prog->subbeg = s = prog->subbase;
-		    prog->subend = s+i;
+		s++;
+	    }
+	    if ((minlen || tmp) && regtry(prog,s))
+		goto got_it;
+	    break;
+	case NBOUND:
+	    if (minlen)
+		dontbother++,strend--;
+	    if (s != startpos) {
+		i = s[-1];
+		tmp = isALNUM(i);
+	    }
+	    else
+		tmp = isALNUM(regprev);	/* assume not alphanumeric */
+	    while (s < strend) {
+		i = *s;
+		if (tmp != isALNUM(i))
+		    tmp = !tmp;
+		else if (regtry(prog, s))
+		    goto got_it;
+		s++;
+	    }
+	    if ((minlen || !tmp) && regtry(prog,s))
+		goto got_it;
+	    break;
+	case ALNUM:
+	    while (s < strend) {
+		i = *s;
+		if (isALNUM(i)) {
+		    if (tmp && regtry(prog, s))
+			goto got_it;
+		    else
+			tmp = doevery;
 		}
-		s += (stringarg - strbeg);
-		for (i = 0; i <= prog->nparens; i++) {
-			if (prog->endp[i]) {
-			    prog->startp[i] = s + (prog->startp[i] - string);
-			    prog->endp[i] = s + (prog->endp[i] - string);
-			}
+		else
+		    tmp = 1;
+		s++;
+	    }
+	    break;
+	case NALNUM:
+	    while (s < strend) {
+		i = *s;
+		if (!isALNUM(i)) {
+		    if (tmp && regtry(prog, s))
+			goto got_it;
+		    else
+			tmp = doevery;
 		}
-		if (prog->do_folding)
-			Safefree(string);
+		else
+		    tmp = 1;
+		s++;
+	    }
+	    break;
+	case SPACE:
+	    while (s < strend) {
+		if (isSPACE(*s)) {
+		    if (tmp && regtry(prog, s))
+			goto got_it;
+		    else
+			tmp = doevery;
+		}
+		else
+		    tmp = 1;
+		s++;
+	    }
+	    break;
+	case NSPACE:
+	    while (s < strend) {
+		if (!isSPACE(*s)) {
+		    if (tmp && regtry(prog, s))
+			goto got_it;
+		    else
+			tmp = doevery;
+		}
+		else
+		    tmp = 1;
+		s++;
+	    }
+	    break;
+	case DIGIT:
+	    while (s < strend) {
+		if (isDIGIT(*s)) {
+		    if (tmp && regtry(prog, s))
+			goto got_it;
+		    else
+			tmp = doevery;
+		}
+		else
+		    tmp = 1;
+		s++;
+	    }
+	    break;
+	case NDIGIT:
+	    while (s < strend) {
+		if (!isDIGIT(*s)) {
+		    if (tmp && regtry(prog, s))
+			goto got_it;
+		    else
+			tmp = doevery;
+		}
+		else
+		    tmp = 1;
+		s++;
+	    }
+	    break;
 	}
-	return(1);
+    }
+    else {
+	if (minlen)
+	    dontbother = minlen - 1;
+	strend -= dontbother;
+	/* We don't know much -- general case. */
+	do {
+	    if (regtry(prog, s))
+		goto got_it;
+	} while (s++ < strend);
+    }
 
-    phooey:
+    /* Failure. */
+    goto phooey;
+
+got_it:
+    prog->subbeg = strbeg;
+    prog->subend = strend;
+    if ((!safebase && (prog->nparens || sawampersand)) || prog->do_folding) {
+	strend += dontbother;	/* uncheat */
+	i = strend - startpos + (stringarg - strbeg);
+	if (safebase) {			/* no need for $digit later */
+	    s = strbeg;
+	    prog->subend = s+i;
+	}
+	else if (strbeg != prog->subbase) {
+	    s = savepvn(strbeg,i);	/* so $digit will work later */
+	    if (prog->subbase)
+		Safefree(prog->subbase);
+	    prog->subbeg = prog->subbase = s;
+	    prog->subend = s+i;
+	}
+	else {
+	    prog->subbeg = s = prog->subbase;
+	    prog->subend = s+i;
+	}
+	s += (stringarg - strbeg);
+	for (i = 0; i <= prog->nparens; i++) {
+	    if (prog->endp[i]) {
+		prog->startp[i] = s + (prog->startp[i] - startpos);
+		prog->endp[i] = s + (prog->endp[i] - startpos);
+	    }
+	}
 	if (prog->do_folding)
-		Safefree(string);
-	return(0);
+	    Safefree(startpos);
+    }
+    return 1;
+
+phooey:
+    if (prog->do_folding)
+	Safefree(startpos);
+    return 0;
 }
 
 /*
  - regtry - try match at specific point
  */
 static I32			/* 0 failure, 1 success */
-regtry(prog, string)
+regtry(prog, startpos)
 regexp *prog;
-char *string;
+char *startpos;
 {
-	register I32 i;
-	register char **sp;
-	register char **ep;
+    register I32 i;
+    register char **sp;
+    register char **ep;
 
-	reginput = string;
-	regstartp = prog->startp;
-	regendp = prog->endp;
-	reglastparen = &prog->lastparen;
-	prog->lastparen = 0;
+    reginput = startpos;
+    regstartp = prog->startp;
+    regendp = prog->endp;
+    reglastparen = &prog->lastparen;
+    prog->lastparen = 0;
+    regsize = 0;
 
-	sp = prog->startp;
-	ep = prog->endp;
-	if (prog->nparens) {
-		for (i = prog->nparens; i >= 0; i--) {
-			*sp++ = NULL;
-			*ep++ = NULL;
-		}
+    sp = prog->startp;
+    ep = prog->endp;
+    if (prog->nparens) {
+	for (i = prog->nparens; i >= 0; i--) {
+	    *sp++ = NULL;
+	    *ep++ = NULL;
 	}
-	if (regmatch(prog->program + 1) && reginput >= regtill) {
-		prog->startp[0] = string;
-		prog->endp[0] = reginput;
-		return(1);
-	} else
-		return(0);
+    }
+    if (regmatch(prog->program + 1) && reginput >= regtill) {
+	prog->startp[0] = startpos;
+	prog->endp[0] = reginput;
+	return 1;
+    }
+    else
+	return 0;
 }
 
 /*
@@ -518,296 +563,405 @@ static I32			/* 0 failure, 1 success */
 regmatch(prog)
 char *prog;
 {
-	register char *scan;	/* Current node. */
-	char *next;		/* Next node. */
-	register I32 nextchar;
-	register I32 n;		/* no or next */
-	register I32 ln;        /* len or last */
-	register char *s;	/* operand or save */
-	register char *locinput = reginput;
+    register char *scan;	/* Current node. */
+    char *next;			/* Next node. */
+    register I32 nextchar;
+    register I32 n;		/* no or next */
+    register I32 ln;		/* len or last */
+    register char *s;		/* operand or save */
+    register char *locinput = reginput;
+    int minmod = 0;
 
-	nextchar = *locinput;
-	scan = prog;
+    nextchar = *locinput;
+    scan = prog;
+    while (scan != NULL) {
 #ifdef DEBUGGING
-	if (scan != NULL && regnarrate)
-		fprintf(stderr, "%s(\n", regprop(scan));
-#endif
-	while (scan != NULL) {
-#ifdef DEBUGGING
-		if (regnarrate)
-			fprintf(stderr, "%s...\n", regprop(scan));
+	if (regnarrate)
+	    fprintf(stderr, "%2d%-8.8s\t<%.10s>\n",
+		scan - regprogram, regprop(scan), locinput);
 #endif
 
 #ifdef REGALIGN
-		next = scan + NEXT(scan);
-		if (next == scan)
-		    next = NULL;
+	next = scan + NEXT(scan);
+	if (next == scan)
+	    next = NULL;
 #else
-		next = regnext(scan);
+	next = regnext(scan);
 #endif
 
-		switch (OP(scan)) {
-		case BOL:
-			if (locinput == regbol ? regprev == '\n' :
-			    ((nextchar || locinput < regeol) &&
-			      locinput[-1] == '\n') )
-			{
-				/* regtill = regbol; */
-				break;
-			}
-			return(0);
-		case EOL:
-			if ((nextchar || locinput < regeol) && nextchar != '\n')
-				return(0);
-			if (!multiline && regeol - locinput > 1)
-				return 0;
-			/* regtill = regbol; */
-			break;
-		case ANY:
-			if ((nextchar == '\0' && locinput >= regeol) ||
-			  nextchar == '\n')
-				return(0);
-			nextchar = *++locinput;
-			break;
-		case EXACTLY:
-			s = OPERAND(scan);
-			ln = *s++;
-			/* Inline the first character, for speed. */
-			if (*s != nextchar)
-				return(0);
-			if (regeol - locinput < ln)
-				return 0;
-			if (ln > 1 && bcmp(s, locinput, ln) != 0)
-				return(0);
-			locinput += ln;
-			nextchar = *locinput;
-			break;
-		case ANYOF:
-			s = OPERAND(scan);
-			if (nextchar < 0)
-				nextchar = UCHARAT(locinput);
-			if (s[nextchar >> 3] & (1 << (nextchar&7)))
-				return(0);
-			if (!nextchar && locinput >= regeol)
-				return 0;
-			nextchar = *++locinput;
-			break;
-		case ALNUM:
-			if (!nextchar)
-				return(0);
-			if (!isALNUM(nextchar))
-				return(0);
-			nextchar = *++locinput;
-			break;
-		case NALNUM:
-			if (!nextchar && locinput >= regeol)
-				return(0);
-			if (isALNUM(nextchar))
-				return(0);
-			nextchar = *++locinput;
-			break;
-		case NBOUND:
-		case BOUND:
-			if (locinput == regbol)	/* was last char in word? */
-				ln = isALNUM(regprev);
-			else 
-				ln = isALNUM(locinput[-1]);
-			n = isALNUM(nextchar); /* is next char in word? */
-			if ((ln == n) == (OP(scan) == BOUND))
-				return(0);
-			break;
-		case SPACE:
-			if (!nextchar && locinput >= regeol)
-				return(0);
-			if (!isSPACE(nextchar))
-				return(0);
-			nextchar = *++locinput;
-			break;
-		case NSPACE:
-			if (!nextchar)
-				return(0);
-			if (isSPACE(nextchar))
-				return(0);
-			nextchar = *++locinput;
-			break;
-		case DIGIT:
-			if (!isDIGIT(nextchar))
-				return(0);
-			nextchar = *++locinput;
-			break;
-		case NDIGIT:
-			if (!nextchar && locinput >= regeol)
-				return(0);
-			if (isDIGIT(nextchar))
-				return(0);
-			nextchar = *++locinput;
-			break;
-		case REF:
-			n = ARG1(scan);  /* which paren pair */
-			s = regmystartp[n];
-			if (!s)
-			    return(0);
-			if (!regmyendp[n])
-			    return(0);
-			if (s == regmyendp[n])
-			    break;
-			/* Inline the first character, for speed. */
-			if (*s != nextchar)
-				return(0);
-			ln = regmyendp[n] - s;
-			if (locinput + ln > regeol)
-				return 0;
-			if (ln > 1 && bcmp(s, locinput, ln) != 0)
-				return(0);
-			locinput += ln;
-			nextchar = *locinput;
-			break;
+	switch (OP(scan)) {
+	case BOL:
+	    if (locinput == regbol
+		? regprev == '\n'
+		: ((nextchar || locinput < regeol) && locinput[-1] == '\n') )
+	    {
+		/* regtill = regbol; */
+		break;
+	    }
+	    return 0;
+	case MBOL:
+	    if (locinput == regbol
+		? regprev == '\n'
+		: ((nextchar || locinput < regeol) && locinput[-1] == '\n') )
+	    {
+		break;
+	    }
+	    return 0;
+	case SBOL:
+	    if (locinput == regbol && regprev == '\n')
+		break;
+	    return 0;
+	case GBOL:
+	    if (locinput == regbol)
+		break;
+	    return 0;
+	case EOL:
+	    if (multiline)
+		goto meol;
+	    else
+		goto seol;
+	case MEOL:
+	  meol:
+	    if ((nextchar || locinput < regeol) && nextchar != '\n')
+		return 0;
+	    break;
+	case SEOL:
+	  seol:
+	    if ((nextchar || locinput < regeol) && nextchar != '\n')
+		return 0;
+	    if (regeol - locinput > 1)
+		return 0;
+	    break;
+	case SANY:
+	    if (!nextchar && locinput >= regeol)
+		return 0;
+	    nextchar = *++locinput;
+	    break;
+	case ANY:
+	    if (!nextchar && locinput >= regeol || nextchar == '\n')
+		return 0;
+	    nextchar = *++locinput;
+	    break;
+	case EXACTLY:
+	    s = OPERAND(scan);
+	    ln = *s++;
+	    /* Inline the first character, for speed. */
+	    if (*s != nextchar)
+		return 0;
+	    if (regeol - locinput < ln)
+		return 0;
+	    if (ln > 1 && bcmp(s, locinput, ln) != 0)
+		return 0;
+	    locinput += ln;
+	    nextchar = *locinput;
+	    break;
+	case ANYOF:
+	    s = OPERAND(scan);
+	    if (nextchar < 0)
+		nextchar = UCHARAT(locinput);
+	    if (s[nextchar >> 3] & (1 << (nextchar&7)))
+		return 0;
+	    if (!nextchar && locinput >= regeol)
+		return 0;
+	    nextchar = *++locinput;
+	    break;
+	case ALNUM:
+	    if (!nextchar)
+		return 0;
+	    if (!isALNUM(nextchar))
+		return 0;
+	    nextchar = *++locinput;
+	    break;
+	case NALNUM:
+	    if (!nextchar && locinput >= regeol)
+		return 0;
+	    if (isALNUM(nextchar))
+		return 0;
+	    nextchar = *++locinput;
+	    break;
+	case NBOUND:
+	case BOUND:
+	    if (locinput == regbol)	/* was last char in word? */
+		ln = isALNUM(regprev);
+	    else 
+		ln = isALNUM(locinput[-1]);
+	    n = isALNUM(nextchar); /* is next char in word? */
+	    if ((ln == n) == (OP(scan) == BOUND))
+		return 0;
+	    break;
+	case SPACE:
+	    if (!nextchar && locinput >= regeol)
+		return 0;
+	    if (!isSPACE(nextchar))
+		return 0;
+	    nextchar = *++locinput;
+	    break;
+	case NSPACE:
+	    if (!nextchar)
+		return 0;
+	    if (isSPACE(nextchar))
+		return 0;
+	    nextchar = *++locinput;
+	    break;
+	case DIGIT:
+	    if (!isDIGIT(nextchar))
+		return 0;
+	    nextchar = *++locinput;
+	    break;
+	case NDIGIT:
+	    if (!nextchar && locinput >= regeol)
+		return 0;
+	    if (isDIGIT(nextchar))
+		return 0;
+	    nextchar = *++locinput;
+	    break;
+	case REF:
+	    n = ARG1(scan);  /* which paren pair */
+	    s = regstartp[n];
+	    if (!s)
+		return 0;
+	    if (!regendp[n])
+		return 0;
+	    if (s == regendp[n])
+		break;
+	    /* Inline the first character, for speed. */
+	    if (*s != nextchar)
+		return 0;
+	    ln = regendp[n] - s;
+	    if (locinput + ln > regeol)
+		return 0;
+	    if (ln > 1 && bcmp(s, locinput, ln) != 0)
+		return 0;
+	    locinput += ln;
+	    nextchar = *locinput;
+	    break;
 
-		case NOTHING:
-			break;
-		case BACK:
-			break;
-		case OPEN:
-			n = ARG1(scan);  /* which paren pair */
-			reginput = locinput;
+	case NOTHING:
+	    break;
+	case BACK:
+	    break;
+	case OPEN:
+	    n = ARG1(scan);  /* which paren pair */
+	    regstartp[n] = locinput;
+	    if (n > regsize)
+		regsize = n;
+	    break;
+	case CLOSE:
+	    n = ARG1(scan);  /* which paren pair */
+	    regendp[n] = locinput;
+	    if (n > *reglastparen)
+		*reglastparen = n;
+	    break;
+	case CURLYX: {
+		CURCUR cc;
+		CHECKPOINT cp = savestack_ix;
+		cc.oldcc = regcc;
+		regcc = &cc;
+		cc.parenfloor = *reglastparen;
+		cc.cur = -1;
+		cc.min = ARG1(scan);
+		cc.max  = ARG2(scan);
+		cc.scan = NEXTOPER(scan) + 4;
+		cc.next = next;
+		cc.minmod = minmod;
+		cc.lastloc = 0;
+		reginput = locinput;
+		n = regmatch(PREVOPER(next));	/* start on the WHILEM */
+		regcpblow(cp);
+		regcc = cc.oldcc;
+		return n;
+	    }
+	    /* NOT REACHED */
+	case WHILEM: {
+		/*
+		 * This is really hard to understand, because after we match
+		 * what we're trying to match, we must make sure the rest of
+		 * the RE is going to match for sure, and to do that we have
+		 * to go back UP the parse tree by recursing ever deeper.  And
+		 * if it fails, we have to reset our parent's current state
+		 * that we can try again after backing off.
+		 */
 
-			regmystartp[n] = locinput;	/* for REF */
-			if (regmatch(next)) {
-				/*
-				 * Don't set startp if some later
-				 * invocation of the same parentheses
-				 * already has.
-				 */
-				if (regstartp[n] == NULL)
-					regstartp[n] = locinput;
-				return(1);
-			} else
-				return(0);
-			/* NOTREACHED */
-		case CLOSE: {
-				n = ARG1(scan);  /* which paren pair */
-				reginput = locinput;
+		CURCUR* cc = regcc;
+		n = cc->cur + 1;
+		reginput = locinput;
 
-				regmyendp[n] = locinput;	/* for REF */
-				if (regmatch(next)) {
-					/*
-					 * Don't set endp if some later
-					 * invocation of the same parentheses
-					 * already has.
-					 */
-					if (regendp[n] == NULL) {
-						regendp[n] = locinput;
-						if (n > *reglastparen)
-						    *reglastparen = n;
-					}
-					return(1);
-				} else
-					return(0);
-			}
-			/*NOTREACHED*/
-		case BRANCH: {
-				if (OP(next) != BRANCH)		/* No choice. */
-					next = NEXTOPER(scan);	/* Avoid recursion. */
-				else {
-					do {
-						reginput = locinput;
-						if (regmatch(NEXTOPER(scan)))
-							return(1);
-#ifdef REGALIGN
-						/*SUPPRESS 560*/
-						if (n = NEXT(scan))
-						    scan += n;
-						else
-						    scan = NULL;
-#else
-						scan = regnext(scan);
-#endif
-					} while (scan != NULL && OP(scan) == BRANCH);
-					return(0);
-					/* NOTREACHED */
-				}
-			}
-			break;
-#ifdef NOTYET
-		case MINCURLY:
-			ln = ARG1(scan);  /* min to match */
-			n  = -ARG2(scan);  /* max to match */
-			scan = NEXTOPER(scan) + 4;
-			goto repeat;
-#endif
-		case CURLY:
-			ln = ARG1(scan);  /* min to match */
-			n  = ARG2(scan);  /* max to match */
-			scan = NEXTOPER(scan) + 4;
-			goto repeat;
-		case STAR:
-			ln = 0;
-			n = 32767;
-			scan = NEXTOPER(scan);
-			goto repeat;
-		case PLUS:
-			/*
-			 * Lookahead to avoid useless match attempts
-			 * when we know what character comes next.
-			 */
-			ln = 1;
-			n = 32767;
-			scan = NEXTOPER(scan);
-		    repeat:
-			if (OP(next) == EXACTLY)
-				nextchar = *(OPERAND(next)+1);
-			else
-				nextchar = -1000;
-			reginput = locinput;
-			if (n < 0) {
-			    n = -n;
-			    while (n >= ln) {
-				    /* If it could work, try it. */
-				    if (nextchar == -1000 ||
-					*reginput == nextchar)
-					    if (regmatch(next))
-						    return(1);
-				    /* Couldn't or didn't -- back up. */
-				    ln++;
-				    reginput = locinput + ln;
-			    }
-			}
-			else {
-			    n = regrepeat(scan, n);
-			    if (!multiline && OP(next) == EOL && ln < n)
-				ln = n;			/* why back off? */
-			    while (n >= ln) {
-				    /* If it could work, try it. */
-				    if (nextchar == -1000 ||
-					*reginput == nextchar)
-					    if (regmatch(next))
-						    return(1);
-				    /* Couldn't or didn't -- back up. */
-				    n--;
-				    reginput = locinput + n;
-			    }
-			}
-			return(0);
-		case END:
-			reginput = locinput; /* put where regtry can find it */
-			return(1);	/* Success! */
-		default:
-			printf("%x %d\n",scan,scan[1]);
-			FAIL("regexp memory corruption");
+		/* If degenerate scan matches "", assume scan done. */
+
+		if (locinput == cc->lastloc) {
+		    regcc = cc->oldcc;
+		    ln = regcc->cur;
+		    if (regmatch(cc->next))
+			return TRUE;
+		    regcc->cur = ln;
+		    regcc = cc;
+		    return FALSE;
 		}
 
-		scan = next;
-	}
+		/* First just match a string of min scans. */
 
-	/*
-	 * We get here only if there's trouble -- normally "case END" is
-	 * the terminating point.
-	 */
-	FAIL("corrupted regexp pointers");
-	/*NOTREACHED*/
-#ifdef lint
-	return 0;
+		if (n < cc->min) {
+		    cc->cur = n;
+		    cc->lastloc = locinput;
+		    return regmatch(cc->scan);
+		}
+
+		/* Prefer next over scan for minimal matching. */
+
+		if (cc->minmod) {
+		    regcc = cc->oldcc;
+		    ln = regcc->cur;
+		    if (regmatch(cc->next))
+			return TRUE;	/* All done. */
+		    regcc->cur = ln;
+		    regcc = cc;
+
+		    if (n >= cc->max)	/* Maximum greed exceeded? */
+			return FALSE;
+
+		    /* Try scanning more and see if it helps. */
+		    reginput = locinput;
+		    cc->cur = n;
+		    cc->lastloc = locinput;
+		    return regmatch(cc->scan);
+		}
+
+		/* Prefer scan over next for maximal matching. */
+
+		if (n < cc->max) {	/* More greed allowed? */
+		    regcppush(cc->parenfloor);
+		    cc->cur = n;
+		    cc->lastloc = locinput;
+		    if (regmatch(cc->scan))
+			return TRUE;
+		    regcppop();		/* Restore some previous $<digit>s? */
+		    reginput = locinput;
+		}
+
+		/* Failed deeper matches of scan, so see if this one works. */
+		regcc = cc->oldcc;
+		ln = regcc->cur;
+		if (regmatch(cc->next))
+		    return TRUE;
+		regcc->cur = ln;
+		regcc = cc;
+		return FALSE;
+	    }
+	    /* NOT REACHED */
+	case BRANCH: {
+		if (OP(next) != BRANCH)	  /* No choice. */
+		    next = NEXTOPER(scan);/* Avoid recursion. */
+		else {
+		    do {
+			reginput = locinput;
+			if (regmatch(NEXTOPER(scan)))
+			    return 1;
+#ifdef REGALIGN
+			/*SUPPRESS 560*/
+			if (n = NEXT(scan))
+			    scan += n;
+			else
+			    scan = NULL;
+#else
+			scan = regnext(scan);
 #endif
+		    } while (scan != NULL && OP(scan) == BRANCH);
+		    return 0;
+		    /* NOTREACHED */
+		}
+	    }
+	    break;
+	case MINMOD:
+	    minmod = 1;
+	    break;
+	case CURLY:
+	    ln = ARG1(scan);  /* min to match */
+	    n  = ARG2(scan);  /* max to match */
+	    scan = NEXTOPER(scan) + 4;
+	    goto repeat;
+	case STAR:
+	    ln = 0;
+	    n = 32767;
+	    scan = NEXTOPER(scan);
+	    goto repeat;
+	case PLUS:
+	    /*
+	    * Lookahead to avoid useless match attempts
+	    * when we know what character comes next.
+	    */
+	    ln = 1;
+	    n = 32767;
+	    scan = NEXTOPER(scan);
+	  repeat:
+	    if (OP(next) == EXACTLY)
+		nextchar = *(OPERAND(next)+1);
+	    else
+		nextchar = -1000;
+	    reginput = locinput;
+	    if (minmod) {
+		minmod = 0;
+		if (ln && regrepeat(scan, ln) < ln)
+		    return 0;
+		while (n >= ln) {
+		    /* If it could work, try it. */
+		    if (nextchar == -1000 || *reginput == nextchar)
+			if (regmatch(next))
+			    return 1;
+		    /* Couldn't or didn't -- back up. */
+		    if (regrepeat(scan, 1)) {
+			ln++;
+			reginput = locinput + ln;
+		    }
+		    else
+			return 0;
+		}
+	    }
+	    else {
+		n = regrepeat(scan, n);
+		if (ln < n && regkind[(U8)OP(next)] == EOL &&
+		    (!multiline || OP(next) == SEOL))
+		    ln = n;			/* why back off? */
+		while (n >= ln) {
+		    /* If it could work, try it. */
+		    if (nextchar == -1000 || *reginput == nextchar)
+			if (regmatch(next))
+			    return 1;
+		    /* Couldn't or didn't -- back up. */
+		    n--;
+		    reginput = locinput + n;
+		}
+	    }
+	    return 0;
+	case SUCCEED:
+	case END:
+	    reginput = locinput;	/* put where regtry can find it */
+	    return 1;			/* Success! */
+	case IFMATCH:
+	    reginput = locinput;
+	    scan = NEXTOPER(scan);
+	    if (!regmatch(scan))
+		return 0;
+	    break;
+	case UNLESSM:
+	    reginput = locinput;
+	    scan = NEXTOPER(scan);
+	    if (regmatch(scan))
+		return 0;
+	    break;
+	default:
+	    fprintf(stderr, "%x %d\n",(unsigned)scan,scan[1]);
+	    FAIL("regexp memory corruption");
+	}
+	scan = next;
+    }
+
+    /*
+    * We get here only if there's trouble -- normally "case END" is
+    * the terminating point.
+    */
+    FAIL("corrupted regexp pointers");
+    /*NOTREACHED*/
+    return 0;
 }
 
 /*
@@ -823,65 +977,67 @@ regrepeat(p, max)
 char *p;
 I32 max;
 {
-	register char *scan;
-	register char *opnd;
-	register I32 c;
-	register char *loceol = regeol;
+    register char *scan;
+    register char *opnd;
+    register I32 c;
+    register char *loceol = regeol;
 
-	scan = reginput;
-	if (max != 32767 && max < loceol - scan)
-	    loceol = scan + max;
-	opnd = OPERAND(p);
-	switch (OP(p)) {
-	case ANY:
-		while (scan < loceol && *scan != '\n')
-			scan++;
-		break;
-	case EXACTLY:		/* length of string is 1 */
-		opnd++;
-		while (scan < loceol && *opnd == *scan)
-			scan++;
-		break;
-	case ANYOF:
-		c = UCHARAT(scan);
-		while (scan < loceol && !(opnd[c >> 3] & (1 << (c & 7)))) {
-			scan++;
-			c = UCHARAT(scan);
-		}
-		break;
-	case ALNUM:
-		while (scan < loceol && isALNUM(*scan))
-			scan++;
-		break;
-	case NALNUM:
-		while (scan < loceol && !isALNUM(*scan))
-			scan++;
-		break;
-	case SPACE:
-		while (scan < loceol && isSPACE(*scan))
-			scan++;
-		break;
-	case NSPACE:
-		while (scan < loceol && !isSPACE(*scan))
-			scan++;
-		break;
-	case DIGIT:
-		while (scan < loceol && isDIGIT(*scan))
-			scan++;
-		break;
-	case NDIGIT:
-		while (scan < loceol && !isDIGIT(*scan))
-			scan++;
-		break;
-	default:		/* Oh dear.  Called inappropriately. */
-		FAIL("internal regexp foulup");
-		/* NOTREACHED */
+    scan = reginput;
+    if (max != 32767 && max < loceol - scan)
+      loceol = scan + max;
+    opnd = OPERAND(p);
+    switch (OP(p)) {
+    case ANY:
+	while (scan < loceol && *scan != '\n')
+	    scan++;
+	break;
+    case SANY:
+	scan = loceol;
+	break;
+    case EXACTLY:		/* length of string is 1 */
+	opnd++;
+	while (scan < loceol && *opnd == *scan)
+	    scan++;
+	break;
+    case ANYOF:
+	c = UCHARAT(scan);
+	while (scan < loceol && !(opnd[c >> 3] & (1 << (c & 7)))) {
+	    scan++;
+	    c = UCHARAT(scan);
 	}
+	break;
+    case ALNUM:
+	while (scan < loceol && isALNUM(*scan))
+	    scan++;
+	break;
+    case NALNUM:
+	while (scan < loceol && !isALNUM(*scan))
+	    scan++;
+	break;
+    case SPACE:
+	while (scan < loceol && isSPACE(*scan))
+	    scan++;
+	break;
+    case NSPACE:
+	while (scan < loceol && !isSPACE(*scan))
+	    scan++;
+	break;
+    case DIGIT:
+	while (scan < loceol && isDIGIT(*scan))
+	    scan++;
+	break;
+    case NDIGIT:
+	while (scan < loceol && !isDIGIT(*scan))
+	    scan++;
+	break;
+    default:		/* Called on something of 0 width. */
+	break;		/* So match right here or not at all. */
+    }
 
-	c = scan - reginput;
-	reginput = scan;
+    c = scan - reginput;
+    reginput = scan;
 
-	return(c);
+    return(c);
 }
 
 /*
@@ -894,21 +1050,21 @@ char *
 regnext(p)
 register char *p;
 {
-	register I32 offset;
+    register I32 offset;
 
-	if (p == &regdummy)
-		return(NULL);
+    if (p == &regdummy)
+	return(NULL);
 
-	offset = NEXT(p);
-	if (offset == 0)
-		return(NULL);
+    offset = NEXT(p);
+    if (offset == 0)
+	return(NULL);
 
 #ifdef REGALIGN
-	return(p+offset);
+    return(p+offset);
 #else
-	if (OP(p) == BACK)
-		return(p-offset);
-	else
-		return(p+offset);
+    if (OP(p) == BACK)
+	return(p-offset);
+    else
+	return(p+offset);
 #endif
 }

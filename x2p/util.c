@@ -6,14 +6,6 @@
  *    License or the Artistic License, as specified in the README file.
  *
  * $Log:	util.c,v $
- * Revision 4.1  92/08/07  18:29:29  lwall
- * 
- * Revision 4.0.1.1  91/06/07  12:20:35  lwall
- * patch4: new copyright notice
- * 
- * Revision 4.0  91/03/20  01:58:25  lwall
- * 4.0 baseline.
- * 
  */
 
 #include <stdio.h>
@@ -31,7 +23,6 @@ static char nomem[] = "Out of memory!\n";
 
 /* paranoid version of malloc */
 
-static int an = 0;
 
 char *
 safemalloc(size)
@@ -198,6 +189,14 @@ int newlen;
 	    *strptr = safemalloc((MEM_SIZE)newlen);
 	*curlen = newlen;
     }
+}
+
+/*VARARGS1*/
+croak(pat,a1,a2,a3,a4)
+char *pat;
+{
+    fprintf(stderr,pat,a1,a2,a3,a4);
+    exit(1);
 }
 
 /*VARARGS1*/

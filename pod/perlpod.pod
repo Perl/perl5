@@ -1,0 +1,81 @@
+=head1 NAME
+
+pod - plain old documentation
+
+=head1 DESCRIPTION
+
+A pod-to-whatever translator reads a pod file paragraph by paragraph,
+and translates it to the appropriate output format.  There are
+three kinds of paragraphs:
+
+=over 4
+
+=item *
+
+A verbatim paragraph, distinguished by being indented (that is,
+it starts with space or tab).  It should be reproduced exactly,
+with tabs assumed to be on 8-column boundaries.  There are no
+special formatting escapes, so you can't italicize or anything
+like that.  A \ means \, and nothing else.
+
+=item *
+
+A command.  All command paragraphs start with "=", followed by an
+identifier, followed by arbitrary text that the command can
+use however it pleases.  Currently recognized commands are
+
+    =head1 heading
+    =head2 heading
+    =item text
+    =over N
+    =back
+
+=item *
+
+An ordinary block of text.  It will be filled, and maybe even
+justified.  Certain interior sequences are recognized both
+here and in commands:
+
+    I<text>     italicize text, used for emphasis or variables
+    B<text>     embolden text, used for switches and programs
+    S<text>     text contains non-breaking spaces
+    C<code>	literal code 
+    L<name>     A link (cross reference) to name
+		    L<name>		manpage
+		    L<name/ident>	item in manpage
+		    L<name/"sec">	section in other manpage
+		    L<"sec">		section in this manpage
+					(the quotes are optional)
+    F<file>	Used for filenames
+    Z<>         A zero-width character
+
+That's it.  The intent is simplicity, not power.  I wanted paragraphs
+to look like paragraphs (block format), so that they stand out
+visually, and so that I could run them through fmt easily to reformat
+them (that's F7 in my version of B<vi>).  I wanted the translator (and not
+me) to worry about whether " or ' is a left quote or a right quote
+within filled text, and I wanted it to leave the quotes alone dammit in
+verbatim mode, so I could slurp in a working program, shift it over 4
+spaces, and have it print out, er, verbatim.  And presumably in a
+constant width font.
+
+In particular, you can leave things like this verbatim in your text:
+
+    Perl
+    FILEHANDLE
+    $variable
+    function()
+    manpage(3r)
+
+Doubtless a few other commands or sequences will need to be added along
+the way, but I've gotten along surprisingly well with just these.
+
+Note that I'm not at all claiming this to be sufficient for producing a
+book.  I'm just trying to make an idiot-proof common source for nroff,
+TeX, and other markup languages, as used for online documentation.
+Both B<pod2html> and B<pod2man> translators exist.
+
+=head1 Author
+
+Larry Wall
+

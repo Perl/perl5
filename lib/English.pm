@@ -3,6 +3,8 @@ package English;
 require Exporter;
 @ISA = (Exporter);
 
+local($^W) = 0;
+
 @EXPORT = qw(
 	*ARG
 	$MATCH
@@ -30,6 +32,7 @@ require Exporter;
 	$FORMAT_FORMFEED
 	$CHILD_ERROR
 	$OS_ERROR
+	$ERRNO
 	$EVAL_ERROR
 	$PROCESS_ID
 	$PID
@@ -101,6 +104,7 @@ require Exporter;
 
 	*CHILD_ERROR				= \$?	;
 	*OS_ERROR				= \$!	;
+	    *ERRNO				= \$!	;
 	*EVAL_ERROR				= \$@	;
 
 # Process info.
@@ -131,8 +135,8 @@ require Exporter;
 
 # Deprecated.
 
-	*ARRAY_BASE				= \$[	;
-	*OFMT					= \$#	;
-	*MULTILINE_MATCHING			= \$*	;
+#	*ARRAY_BASE				= \$[	;
+#	*OFMT					= \$#	;
+#	*MULTILINE_MATCHING			= \$*	;
 
 1;

@@ -1,15 +1,35 @@
-/* $RCSfile: op.c,v $$Revision: 4.1 $$Date: 92/08/07 17:19:16 $
+/*    scope.c
  *
- *    Copyright (c) 1991, Larry Wall
+ *    Copyright (c) 1991-1994, Larry Wall
  *
  *    You may distribute under the terms of either the GNU General Public
  *    License or the Artistic License, as specified in the README file.
  *
- * $Log:	op.c,v $
+ */
+
+/*
+ * "For the fashion of Minas Tirith was such that it was built on seven
+ * levels..."
  */
 
 #include "EXTERN.h"
 #include "perl.h"
+
+SV**
+stack_grow(sp, p, n)
+SV** sp;
+SV** p;
+int n;
+{
+    stack_sp = sp;
+    av_extend(stack, (p - stack_base) + (n) + 128);
+#ifdef NOTDEF
+    stack_sp = AvARRAY(stack) + (sp - stack_base);
+    stack_base = AvARRAY(stack);
+    stack_max = stack_base + AvMAX(stack) - 1;
+#endif
+    return stack_sp;
+}
 
 I32
 cxinc()
@@ -58,6 +78,17 @@ pop_scope()
 }
 
 void
+markstack_grow()
+{
+    I32 oldmax = markstack_max - markstack;
+    I32 newmax = oldmax * 3 / 2;
+
+    Renew(markstack, newmax, I32);
+    markstack_ptr = markstack + oldmax;
+    markstack_max = markstack + newmax;
+}
+
+void
 savestack_grow()
 {
     savestack_max = savestack_max * 3 / 2;
@@ -94,11 +125,15 @@ GV *gv;
     SSPUSHINT(SAVEt_SV);
 
     sv = GvSV(gv) = NEWSV(0,0);
-    if (SvTYPE(osv) >= SVt_PVMG && SvMAGIC(osv)) {
+    if (SvTYPE(osv) >= SVt_PVMG && SvMAGIC(osv) && SvTYPE(osv) != SVt_PVGV) {
 	sv_upgrade(sv, SvTYPE(osv));
-	mg_get(osv);
-	SvFLAGS(osv) |= (SvFLAGS(osv) & (SVp_IOK|SVp_NOK|SVp_POK)) >> PRIVSHIFT;
+	if (SvGMAGICAL(osv)) {
+	    mg_get(osv);
+	    SvFLAGS(osv) |= (SvFLAGS(osv) &
+		(SVp_IOK|SVp_NOK|SVp_POK)) >> PRIVSHIFT;
+	}
 	SvMAGIC(sv) = SvMAGIC(osv);
+	SvFLAGS(sv) |= SvMAGICAL(osv);
 	localizing = TRUE;
 	SvSETMAGIC(sv);
 	localizing = FALSE;
@@ -141,9 +176,15 @@ SV **sptr;
     SSPUSHINT(SAVEt_SVREF);
 
     sv = *sptr = NEWSV(0,0);
-    if (SvTYPE(osv) >= SVt_PVMG && SvMAGIC(sv)) {
+    if (SvTYPE(osv) >= SVt_PVMG && SvMAGIC(osv) && SvTYPE(osv) != SVt_PVGV) {
 	sv_upgrade(sv, SvTYPE(osv));
+	if (SvGMAGICAL(osv)) {
+	    mg_get(osv);
+	    SvFLAGS(osv) |= (SvFLAGS(osv) &
+		(SVp_IOK|SVp_NOK|SVp_POK)) >> PRIVSHIFT;
+	}
 	SvMAGIC(sv) = SvMAGIC(osv);
+	SvFLAGS(sv) |= SvMAGICAL(osv);
 	localizing = TRUE;
 	SvSETMAGIC(sv);
 	localizing = FALSE;
@@ -219,6 +260,16 @@ I32 *intp;
     SSPUSHINT(*intp);
     SSPUSHPTR(intp);
     SSPUSHINT(SAVEt_I32);
+}
+
+void
+save_iv(ivp)
+IV *ivp;
+{
+    SSCHECK(3);
+    SSPUSHINT(*ivp);
+    SSPUSHPTR(ivp);
+    SSPUSHINT(SAVEt_IV);
 }
 
 /* Cannot use save_sptr() to store a char* since the SV** cast will
@@ -341,6 +392,17 @@ I32 maxsarg;
 }
 
 void
+save_destructor(f,p)
+void (*f) _((void*));
+void* p;
+{
+    SSCHECK(3);
+    SSPUSHDPTR(f);
+    SSPUSHPTR(p);
+    SSPUSHINT(SAVEt_DESTRUCTOR);
+}
+
+void
 leave_scope(base)
 I32 base;
 {
@@ -359,28 +421,43 @@ I32 base;
 	    value = (SV*)SSPOPPTR;
 	    sv = (SV*)SSPOPPTR;
 	    sv_replace(sv,value);
+	    localizing = TRUE;
 	    SvSETMAGIC(sv);
+	    localizing = FALSE;
 	    break;
         case SAVEt_SV:				/* scalar reference */
 	    value = (SV*)SSPOPPTR;
 	    gv = (GV*)SSPOPPTR;
 	    sv = GvSV(gv);
-	    if (SvTYPE(sv) >= SVt_PVMG && SvMAGIC(sv)) {
+	    if (SvTYPE(sv) >= SVt_PVMG && SvMAGIC(sv) && SvTYPE(sv) != SVt_PVGV){
+		(void)SvUPGRADE(value, SvTYPE(sv));
 		SvMAGIC(value) = SvMAGIC(sv);
+		SvFLAGS(value) |= SvMAGICAL(sv);
+		SvMAGICAL_off(sv);
 		SvMAGIC(sv) = 0;
 	    }
             SvREFCNT_dec(sv);
-            GvSV(gv) = sv = value;
-	    SvSETMAGIC(sv);
+            GvSV(gv) = value;
+	    localizing = TRUE;
+	    SvSETMAGIC(value);
+	    localizing = FALSE;
             break;
         case SAVEt_SVREF:			/* scalar reference */
 	    ptr = SSPOPPTR;
 	    sv = *(SV**)ptr;
-	    if (SvTYPE(sv) >= SVt_PVMG)
+	    value = (SV*)SSPOPPTR;
+	    if (SvTYPE(sv) >= SVt_PVMG && SvTYPE(sv) != SVt_PVGV) {
+		(void)SvUPGRADE(value, SvTYPE(sv));
+		SvMAGIC(value) = SvMAGIC(sv);
+		SvFLAGS(value) |= SvMAGICAL(sv);
+		SvMAGICAL_off(sv);
 		SvMAGIC(sv) = 0;
+	    }
             SvREFCNT_dec(sv);
-	    *(SV**)ptr = sv = (SV*)SSPOPPTR;
-	    SvSETMAGIC(sv);
+	    *(SV**)ptr = value;
+	    localizing = TRUE;
+	    SvSETMAGIC(value);
+	    localizing = FALSE;
             break;
         case SAVEt_AV:				/* array reference */
 	    av = (AV*)SSPOPPTR;
@@ -405,6 +482,10 @@ I32 base;
 	case SAVEt_I32:				/* I32 reference */
 	    ptr = SSPOPPTR;
 	    *(I32*)ptr = (I32)SSPOPINT;
+	    break;
+	case SAVEt_IV:				/* IV reference */
+	    ptr = SSPOPPTR;
+	    *(IV*)ptr = (IV)SSPOPIV;
 	    break;
 	case SAVEt_SPTR:			/* SV* reference */
 	    ptr = SSPOPPTR;
@@ -448,13 +529,15 @@ I32 base;
 	case SAVEt_CLEARSV:
 	    ptr = SSPOPPTR;
 	    sv = *(SV**)ptr;
-	    if (SvREFCNT(sv) <= 1) {	/* Can clear pad variable in place. */
+	    if (SvREFCNT(sv) <= 1) { /* Can clear pad variable in place. */
 		if (SvTHINKFIRST(sv)) {
 		    if (SvREADONLY(sv))
 			croak("panic: leave_scope clearsv");
 		    if (SvROK(sv))
 			sv_unref(sv);
 		}
+		if (SvMAGICAL(sv))
+		    mg_free(sv);
 
 		switch (SvTYPE(sv)) {
 		case SVt_NULL:
@@ -471,9 +554,8 @@ I32 base;
 		    break;
 		default:
 		    if (SvPOK(sv) && SvLEN(sv))
-			SvOOK_off(sv);
-		    SvOK_off(sv);
-		    SvSETMAGIC(sv);
+			(void)SvOOK_off(sv);
+		    (void)SvOK_off(sv);
 		    break;
 		}
 	    }
@@ -491,6 +573,13 @@ I32 base;
 	    hv = (HV*)ptr;
 	    ptr = SSPOPPTR;
 	    hv_delete(hv, (char*)ptr, (U32)SSPOPINT);
+	    break;
+	case SAVEt_DESTRUCTOR:
+	    ptr = SSPOPPTR;
+	    (*SSPOPDPTR)(ptr);
+	    break;
+	case SAVEt_REGCONTEXT:
+	    savestack_ix -= SSPOPINT;	/* regexp must have croaked */
 	    break;
 	default:
 	    croak("panic: leave_scope inconsistency");

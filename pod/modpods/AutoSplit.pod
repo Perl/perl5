@@ -1,0 +1,11 @@
+=head1 NAME
+
+AutoSplit - split a package for autoloading
+
+=head1 DESCRIPTION
+
+This function will split up your program into files that the AutoLoader
+module can handle.  Normally only used to build autoloading Perl library
+modules, especially extensions (like POSIX).  You should look at how
+they're built out for details.
+

@@ -12,7 +12,7 @@ sub backwards { $a lt $b ? 1 : $a gt $b ? -1 : 0; }
 $x = join('', sort @harry);
 print ($x eq 'AbelCaincatdogx' ? "ok 1\n" : "not ok 1\n");
 
-$x = join('', sort backwards @harry);
+$x = join('', sort( backwards @harry));
 print ($x eq 'xdogcatCainAbel' ? "ok 2\n" : "not ok 2\n");
 
 $x = join('', sort @george, 'to', @harry);

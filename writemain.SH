@@ -27,28 +27,67 @@ $startsh
 
 : In the following dollars and backticks do not need the extra backslash.
 $spitshell >>writemain <<'!NO!SUBS!'
-: This script takes the plain miniperlmain.c and writes out perlmain.c
-: which includes all the extensions.
-: The command line arguments name extensions to be used.
-:  E.g.:  sh writemain SDBM_File POSIX > perlmain.c
-:
-args="$*"
-if test X"$args" = "X" ; then
-    cat miniperlmain.c
-else
-    sed '/Do not delete this line--writemain depends on it/q' miniperlmain.c
-    cat << 'EOP'
+# This script takes the plain miniperlmain.c and writes out perlmain.c
+# which includes all the extensions.
+# The command line arguments name extensions to be used.
+#  E.g.:  sh writemain SDBM_File POSIX > perlmain.c
+#
 
-#ifdef USE_DYNAMIC_LOADING
-    boot_DynamicLoader();
-#endif
+orig="$*"
+args=''
+: Remove any .a suffixes and any leading path components
+for file in `echo $orig | sed 's/\.a//g'` ; do
+	case "$file" in
+	ext/*)	file=`echo $file | sed 's:ext/\(.*\)/[^/]*:\1:'`
+		;;
+	*/*)
+		file=`expr X$file : 'X.*/\(.*\)'`
+		;;
+	esac
+	args="$args $file"
+done
 
-EOP
-    for ext in $args; do
-	echo "    newXSUB(\"${ext}::bootstrap\", 0, boot_${ext}, file);"
+
+sed '/Do not delete this line--writemain depends on it/q' miniperlmain.c
+if test X"$args" != "X" ; then
+    echo "    char *file = __FILE__;"
+    ai=''
+
+    for ext in $args ; do
+
+	: $ext will either be 'Name' or 'Name1/Name2' etc
+	: convert ext into cname and mname
+	mname=`echo $ext   | sed 's!/!::!g'`
+	cname=`echo $mname | sed 's!:!_!g'`
+
+	echo "    {   extern void boot_${cname} _((CV* cv));"
+	if test "$ext" = "DynaLoader"; then
+	    : Must NOT install 'DynaLoader::boot_DynaLoader' as 'bootstrap'!
+	    : boot_DynaLoader is called directly in DynaLoader.pm
+	    echo "        newXS(\"${mname}::boot_${ext}\", boot_${cname}, file);"
+	else
+	    echo "        newXS(\"${mname}::bootstrap\", boot_${cname}, file);"
+	fi
+	# does this extension wish to supply automatic booting code?
+    for aifile in ext/$ext/AutoInit.* ; do
+		case $aifile in
+		*.c)echo "	/* autoinit code from $aifile follows: */"
+			echo "	{"; cat $aifile; echo "	}"
+			;;
+		*.pl) ai="$ai `cat $aifile | tr '\012' ' '`;"
+			;;
+		esac
+	done
+	echo "    }"
     done
-    echo '}'
+    if test "X$ai" != "X"; then
+	echo "    autoboot_preamble = \"BEGIN { $ai }\";"
+    fi
 fi
+
+cat << 'EOP'
+}
+EOP
 
 !NO!SUBS!
 chmod 755 writemain

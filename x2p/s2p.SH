@@ -1,21 +1,23 @@
+case $CONFIG in
+'')
+	if test -f config.sh; then TOP=.;
+	elif test -f ../config.sh; then TOP=..;
+	elif test -f ../../config.sh; then TOP=../..;
+	elif test -f ../../../config.sh; then TOP=../../..;
+	elif test -f ../../../../config.sh; then TOP=../../../..;
+	else
+		echo "Can't find config.sh."; exit 1
+	fi
+	. $TOP/config.sh
+	;;
+esac
 : This forces SH files to create target in same directory as SH file.
 : This is so that make depend always knows where to find SH derivatives.
 case "$0" in
 */*) cd `expr X$0 : 'X\(.*\)/'` ;;
 esac
-case $CONFIG in
-'')
-    if test ! -f config.sh; then
-	ln ../config.sh . || \
-	ln -s ../config.sh . || \
-	ln ../../config.sh . || \
-	ln ../../../config.sh . || \
-	(echo "Can't find config.sh."; exit 1)
-    fi 2>/dev/null
-    . ./config.sh
-    ;;
-esac
-echo "Extracting s2p (with variable substitutions)"
+
+echo "Extracting x2p/s2p (with variable substitutions)"
 : This section of the file will have variable substitutions done on it.
 : Move anything that needs config subs from !NO!SUBS! section to !GROK!THIS!.
 : Protect any dollar signs and backticks that you do not want interpreted
@@ -36,20 +38,6 @@ $spitshell >>s2p <<'!NO!SUBS!'
 # $RCSfile: s2p.SH,v $$Revision: 4.1 $$Date: 92/08/07 18:29:23 $
 #
 # $Log:	s2p.SH,v $
-# Revision 4.1  92/08/07  18:29:23  lwall
-# 
-# Revision 4.0.1.2  92/06/08  17:26:31  lwall
-# patch20: s2p didn't output portable startup code
-# patch20: added ... as variant on ..
-# patch20: s2p didn't translate s/pat/\&/ or s/pat/\$/ or s/pat/\\1/ right
-# 
-# Revision 4.0.1.1  91/06/07  12:19:18  lwall
-# patch4: s2p now handles embedded newlines better and optimizes common idioms
-# 
-# Revision 4.0  91/03/20  01:57:59  lwall
-# 4.0 baseline.
-# 
-#
 
 $indent = 4;
 $shiftwidth = 4;

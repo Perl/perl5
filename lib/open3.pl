@@ -90,9 +90,8 @@ sub main'open3 {
 	} else {
 	    open(STDERR, ">&STDOUT") if (fileno(STDERR) != fileno(STDOUT));
 	}
-	exec @cmd;
-
 	local($")=(" ");
+	exec @cmd;
         die "open2: exec of @cmd failed";
     }
 

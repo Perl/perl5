@@ -1,0 +1,31 @@
+=head1 NAME
+
+Collate - compare 8-bit scalar data according to the current locale
+
+=head1 SYNOPSIS
+
+    use Collate;
+    setlocale(LC_COLLATE, 'locale-of-your-choice'); 
+    $s1 = new Collate "scalar_data_1";
+    $s2 = new Collate "scalar_data_2";
+
+=head1 DESCRIPTION
+
+This module provides you with objects that will collate 
+according to your national character set, providing the 
+POSIX setlocale() function should be supported on your system.
+
+You can compare $s1 and $s2 above with
+
+    $s1 le $s2
+
+to extract the data itself, you'll need a dereference: $$s1
+
+This uses POSIX::setlocale The basic collation conversion is done by
+strxfrm() which terminates at NUL characters being a decent C routine.
+collate_xfrm() handles embedded NUL characters gracefully.  Due to C<cmp>
+and overload magic, C<lt>, C<le>, C<eq>, C<ge>, and C<gt> work also.  The
+available locales depend on your operating system; try whether C<locale
+-a> shows them or the more direct approach C<ls /usr/lib/nls/loc> or C<ls
+/usr/lib/nls>.  The locale names are probably something like
+"xx_XX.(ISO)?8859-N".

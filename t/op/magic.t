@@ -12,7 +12,7 @@ if (`echo \$foo` eq "hi there\n") {print "ok 1\n";} else {print "not ok 1\n";}
 unlink 'ajslkdfpqjsjfk';
 $! = 0;
 open(foo,'ajslkdfpqjsjfk');
-if ($! == 2) {print "ok 2\n";} else {print "not ok 2\n";}
+if ($!) {print "ok 2\n";} else {print "not ok 2\n";}
 
 # the next tests are embedded inside system simply because sh spits out
 # a newline onto stderr when a child process kills itself with SIGINT.

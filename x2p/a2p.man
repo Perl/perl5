@@ -2,21 +2,6 @@
 ''' $RCSfile: a2p.man,v $$Revision: 4.1 $$Date: 92/08/07 18:29:10 $
 ''' 
 ''' $Log:	a2p.man,v $
-''' Revision 4.1  92/08/07  18:29:10  lwall
-''' 
-''' Revision 4.0  91/03/20  01:57:11  lwall
-''' 4.0 baseline.
-''' 
-''' Revision 3.0  89/10/18  15:34:22  lwall
-''' 3.0 baseline
-''' 
-''' Revision 2.0.1.1  88/07/11  23:16:25  root
-''' patch2: changes related to 1985 awk
-''' 
-''' Revision 2.0  88/06/05  00:15:36  root
-''' Baseline version 2.0.
-''' 
-''' 
 .de Sh
 .br
 .ne 5

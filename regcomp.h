@@ -1,14 +1,4 @@
-/* $RCSfile: regcomp.h,v $$Revision: 4.1 $$Date: 92/08/07 18:26:31 $
- *
- * $Log:	regcomp.h,v $
- * Revision 4.1  92/08/07  18:26:31  lwall
- * 
- * Revision 4.0.1.1  91/06/07  11:49:40  lwall
- * patch4: no change
- * 
- * Revision 4.0  91/03/20  01:39:09  lwall
- * 4.0 baseline.
- * 
+/*    regcomp.h
  */
 
 /*
@@ -60,27 +50,39 @@
 /* definition	number	opnd?	meaning */
 #define	END	0	/* no	End of program. */
 #define	BOL	1	/* no	Match "" at beginning of line. */
-#define	EOL	2	/* no	Match "" at end of line. */
-#define	ANY	3	/* no	Match any one character. */
-#define	ANYOF	4	/* sv	Match character in (or not in) this class. */
-#define	CURLY	5	/* sv	Match this simple thing {n,m} times. */
-#define	BRANCH	6	/* node	Match this alternative, or the next... */
-#define	BACK	7	/* no	Match "", "next" ptr points backward. */
-#define	EXACTLY	8	/* sv	Match this string (preceded by length). */
-#define	NOTHING	9	/* no	Match empty string. */
-#define	STAR	10	/* node	Match this (simple) thing 0 or more times. */
-#define	PLUS	11	/* node	Match this (simple) thing 1 or more times. */
-#define ALNUM	12	/* no	Match any alphanumeric character */
-#define NALNUM	13	/* no	Match any non-alphanumeric character */
-#define BOUND	14	/* no	Match "" at any word boundary */
-#define NBOUND	15	/* no	Match "" at any word non-boundary */
-#define SPACE	16	/* no	Match any whitespace character */
-#define NSPACE	17	/* no	Match any non-whitespace character */
-#define DIGIT	18	/* no	Match any numeric character */
-#define NDIGIT	19	/* no	Match any non-numeric character */
-#define REF	20	/* num	Match some already matched string */
-#define	OPEN	21	/* num	Mark this point in input as start of #n. */
-#define	CLOSE	22	/* num	Analogous to OPEN. */
+#define MBOL	2	/* no	Same, assuming multiline. */
+#define SBOL	3	/* no	Same, assuming singleline. */
+#define	EOL	4	/* no	Match "" at end of line. */
+#define MEOL	5	/* no	Same, assuming multiline. */
+#define SEOL	6	/* no	Same, assuming singleline. */
+#define	ANY	7	/* no	Match any one character (except newline). */
+#define	SANY	8	/* no	Match any one character. */
+#define	ANYOF	9	/* sv	Match character in (or not in) this class. */
+#define	CURLY	10	/* sv	Match this simple thing {n,m} times. */
+#define	CURLYX	11	/* sv	Match this complex thing {n,m} times. */
+#define	BRANCH	12	/* node	Match this alternative, or the next... */
+#define	BACK	13	/* no	Match "", "next" ptr points backward. */
+#define	EXACTLY	14	/* sv	Match this string (preceded by length). */
+#define	NOTHING	15	/* no	Match empty string. */
+#define	STAR	16	/* node	Match this (simple) thing 0 or more times. */
+#define	PLUS	17	/* node	Match this (simple) thing 1 or more times. */
+#define ALNUM	18	/* no	Match any alphanumeric character */
+#define NALNUM	19	/* no	Match any non-alphanumeric character */
+#define BOUND	20	/* no	Match "" at any word boundary */
+#define NBOUND	21	/* no	Match "" at any word non-boundary */
+#define SPACE	22	/* no	Match any whitespace character */
+#define NSPACE	23	/* no	Match any non-whitespace character */
+#define DIGIT	24	/* no	Match any numeric character */
+#define NDIGIT	25	/* no	Match any non-numeric character */
+#define REF	26	/* num	Match some already matched string */
+#define	OPEN	27	/* num	Mark this point in input as start of #n. */
+#define	CLOSE	28	/* num	Analogous to OPEN. */
+#define MINMOD	29	/* no	Next operator is not greedy. */
+#define GBOL	30	/* no	Matches where last m//g left off. */
+#define IFMATCH	31	/* no	Succeeds if the following matches. */
+#define UNLESSM	32	/* no	Fails if the following matches. */
+#define SUCCEED	33	/* no	Return from a subroutine, basically. */
+#define WHILEM	34	/* no	Do curly processing and see if rest matches. */
 
 /*
  * Opcode notes:
@@ -105,23 +107,65 @@
  */
 
 #ifndef DOINIT
-extern char regarglen[];
+EXT char regarglen[];
 #else
-char regarglen[] = {0,0,0,0,0,4,0,0,0,0,0,0,0,0,0,0,0,0,0,0,2,2,2};
+EXT char regarglen[] = {0,0,0,0,0,0,0,0,0,0,4,4,0,0,0,0,0,0,0,0,0,0,0,0,0,0,2,2,2,0,0,0,0,0};
+#endif
+
+#ifndef DOINIT
+EXT char regkind[];
+#else
+EXT char regkind[] = {
+	END,
+	BOL,
+	BOL,
+	BOL,
+	EOL,
+	EOL,
+	EOL,
+	ANY,
+	ANY,
+	ANYOF,
+	CURLY,
+	CURLY,
+	BRANCH,
+	BACK,
+	EXACTLY,
+	NOTHING,
+	STAR,
+	PLUS,
+	ALNUM,
+	NALNUM,
+	BOUND,
+	NBOUND,
+	SPACE,
+	NSPACE,
+	DIGIT,
+	NDIGIT,
+	REF,
+	OPEN,
+	CLOSE,
+	MINMOD,
+	BOL,
+	BRANCH,
+	BRANCH,
+	END,
+	WHILEM
+};
 #endif
 
 /* The following have no fixed length. */
 #ifndef DOINIT
-extern char varies[];
+EXT char varies[];
 #else
-char varies[] = {BRANCH,BACK,STAR,PLUS,CURLY,REF,0};
+EXT char varies[] = {BRANCH,BACK,STAR,PLUS,CURLY,CURLYX,REF,WHILEM,0};
 #endif
 
 /* The following always have a length of 1. */
 #ifndef DOINIT
-extern char simple[];
+EXT char simple[];
 #else
-char simple[] = {ANY,ANYOF,ALNUM,NALNUM,SPACE,NSPACE,DIGIT,NDIGIT,0};
+EXT char simple[] = {ANY,SANY,ANYOF,ALNUM,NALNUM,SPACE,NSPACE,DIGIT,NDIGIT,0};
 #endif
 
 EXT char regdummy;
@@ -170,8 +214,10 @@ EXT char regdummy;
 
 #ifdef REGALIGN
 #define	NEXTOPER(p)	((p) + 4)
+#define	PREVOPER(p)	((p) - 4)
 #else
 #define	NEXTOPER(p)	((p) + 3)
+#define	PREVOPER(p)	((p) - 3)
 #endif
 
 #define MAGIC 0234
@@ -189,4 +235,4 @@ EXT char regdummy;
 #define UCHARAT(p)	regdummy
 #endif /* lint */
 
-#define	FAIL(m)	croak("/%s/: %s",regprecomp,m)
+#define	FAIL(m)	croak("/%.127s/: %s",regprecomp,m)

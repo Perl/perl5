@@ -1,0 +1,60 @@
+=head1 NAME
+
+Exporter - module to control namespace manipulations
+
+import - import functions into callers namespace
+
+=head1 SYNOPSYS
+
+    package WhatEver;
+    require Exporter;
+    @ISA = (Exporter);
+    @EXPORT    = qw(func1, $foo, %tabs);
+    @EXPORT_OK = qw(sin cos);
+    ...
+    use Whatever;
+    use WhatEver 'sin';
+
+=head1 DESCRIPTION
+
+The Exporter module is used by well-behaved Perl modules to 
+control what they will export into their user's namespace.
+The WhatEver module above has placed in its export list
+the function C<func1()>, the scalar C<$foo>, and the
+hash C<%tabs>.  When someone decides to 
+C<use WhatEver>, they get those identifier grafted
+onto their own namespace.  That means the user of 
+package whatever can use the function func1() instead
+of fully qualifying it as WhatEver::func1().  
+
+You should be careful of such namespace pollution.
+Of course, the user of the WhatEver module is free to 
+use a C<require> instead of a C<use>, which will 
+preserve the sanctity of their namespace.
+
+In particular, you almost certainly shouldn't
+automatically export functions whose names are 
+already used in the language.  For this reason,
+the @EXPORT_OK list contains those function which 
+may be selectively imported, as the sin() function 
+was above.
+See L<perlsub/Overriding builtin functions>.
+
+You can't import names that aren't in either the @EXPORT
+or the @EXPORT_OK list.
+
+Remember that these two constructs are identical:
+
+    use WhatEver;
+
+    BEGIN {
+	require WhatEver;
+	import Module;
+    } 
+
+The import() function above is not predefined in the
+language.  Rather, it's a method in the Exporter module.
+A sneaky library writer could conceivably have an import()
+method that behaved differently from the standard one, but
+that's not very friendly.
+

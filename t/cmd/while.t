@@ -4,7 +4,7 @@
 
 print "1..10\n";
 
-open (tmp,'>Cmd.while.tmp') || die "Can't create Cmd.while.tmp.";
+open (tmp,'>Cmd_while.tmp') || die "Can't create Cmd_while.tmp.";
 print tmp "tvi925\n";
 print tmp "tvi920\n";
 print tmp "vt100\n";
@@ -14,7 +14,7 @@ close tmp;
 
 # test "last" command
 
-open(fh,'Cmd.while.tmp') || die "Can't open Cmd.while.tmp.";
+open(fh,'Cmd_while.tmp') || die "Can't open Cmd_while.tmp.";
 while (<fh>) {
     last if /vt100/;
 }
@@ -23,7 +23,7 @@ if (!eof && /vt100/) {print "ok 1\n";} else {print "not ok 1 $_\n";}
 # test "next" command
 
 $bad = '';
-open(fh,'Cmd.while.tmp') || die "Can't open Cmd.while.tmp.";
+open(fh,'Cmd_while.tmp') || die "Can't open Cmd_while.tmp.";
 while (<fh>) {
     next if /vt100/;
     $bad = 1 if /vt100/;
@@ -33,7 +33,7 @@ if (!eof || /vt100/ || $bad) {print "not ok 2\n";} else {print "ok 2\n";}
 # test "redo" command
 
 $bad = '';
-open(fh,'Cmd.while.tmp') || die "Can't open Cmd.while.tmp.";
+open(fh,'Cmd_while.tmp') || die "Can't open Cmd_while.tmp.";
 while (<fh>) {
     if (s/vt100/VT100/g) {
 	s/VT100/Vt100/g;
@@ -49,7 +49,7 @@ if (!eof || $bad) {print "not ok 3\n";} else {print "ok 3\n";}
 # test "last" command
 
 $badcont = '';
-open(fh,'Cmd.while.tmp') || die "Can't open Cmd.while.tmp.";
+open(fh,'Cmd_while.tmp') || die "Can't open Cmd_while.tmp.";
 line: while (<fh>) {
     if (/vt100/) {last line;}
 } continue {
@@ -62,7 +62,7 @@ if (!$badcont) {print "ok 5\n";} else {print "not ok 5\n";}
 
 $bad = '';
 $badcont = 1;
-open(fh,'Cmd.while.tmp') || die "Can't open Cmd.while.tmp.";
+open(fh,'Cmd_while.tmp') || die "Can't open Cmd_while.tmp.";
 entry: while (<fh>) {
     next entry if /vt100/;
     $bad = 1 if /vt100/;
@@ -76,7 +76,7 @@ if (!$badcont) {print "ok 7\n";} else {print "not ok 7\n";}
 
 $bad = '';
 $badcont = '';
-open(fh,'Cmd.while.tmp') || die "Can't open Cmd.while.tmp.";
+open(fh,'Cmd_while.tmp') || die "Can't open Cmd_while.tmp.";
 loop: while (<fh>) {
     if (s/vt100/VT100/g) {
 	s/VT100/Vt100/g;
@@ -90,7 +90,7 @@ loop: while (<fh>) {
 if (!eof || $bad) {print "not ok 8\n";} else {print "ok 8\n";}
 if (!$badcont) {print "ok 9\n";} else {print "not ok 9\n";}
 
-`/bin/rm -f Cmd.while.tmp`;
+unlink 'Cmd_while.tmp' || `/bin/rm Cmd_While.tmp`;
 
 #$x = 0;
 #while (1) {

@@ -1,19 +1,10 @@
-/* $RCSfile: form.h,v $$Revision: 4.1 $$Date: 92/08/07 18:20:43 $
+/*    form.h
  *
- *    Copyright (c) 1991, Larry Wall
+ *    Copyright (c) 1991-1994, Larry Wall
  *
  *    You may distribute under the terms of either the GNU General Public
  *    License or the Artistic License, as specified in the README file.
  *
- * $Log:	form.h,v $
- * Revision 4.1  92/08/07  18:20:43  lwall
- * 
- * Revision 4.0.1.1  91/06/07  11:08:20  lwall
- * patch4: new copyright notice
- * 
- * Revision 4.0  91/03/20  01:19:37  lwall
- * 4.0 baseline.
- * 
  */
 
 #define FF_END		0

@@ -2,7 +2,7 @@
 
 # $RCSfile: pat.t,v $$Revision: 4.1 $$Date: 92/08/07 18:28:12 $
 
-print "1..51\n";
+print "1..60\n";
 
 $x = "abc\ndef\n";
 
@@ -73,7 +73,7 @@ while ($_ = shift(XXX)) {
     /not ok 26/ && reset 'X';
 }
 
-while (($key,$val) = each(XXX)) {
+while (($key,$val) = each(%XXX)) {
     print "not ok 27\n";
     exit;
 }
@@ -182,3 +182,25 @@ print "abc" =~ /^abc$|$xyz/ ? "ok 49\n" : "not ok 49\n";
 eval '"abc" =~ /a(bc$)|$xyz/; $result = "$&:$1"';
 print $@ eq "" ? "ok 50\n" : "not ok 50\n";
 print $result eq "abc:bc" ? "ok 51\n" : "not ok 51\n";
+
+
+$_="abcfooabcbar";
+$x=/abc/g;
+print $` eq "" ? "ok 52\n" : "not ok 52\n" if $x;
+$x=/abc/g;
+print $` eq "abcfoo" ? "ok 53\n" : "not ok 53\n" if $x;
+$x=/abc/g;
+print $x == 0 ? "ok 54\n" : "not ok 54\n";
+$x=/ABC/gi;
+print $` eq "" ? "ok 55\n" : "not ok 55\n" if $x;
+$x=/ABC/gi;
+print $` eq "abcfoo" ? "ok 56\n" : "not ok 56\n" if $x;
+$x=/ABC/gi;
+print $x == 0 ? "ok 57\n" : "not ok 57\n";
+$x=/abc/g;
+print $' eq "fooabcbar" ? "ok 58\n" : "not ok 58\n" if $x;
+$x=/abc/g;
+print $' eq "bar" ? "ok 59\n" : "not ok 59\n" if $x;
+$_ .= '';
+@x=/abc/g;
+print scalar @x == 2 ? "ok 60\n" : "not ok 60\n";

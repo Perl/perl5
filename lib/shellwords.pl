@@ -17,13 +17,13 @@ sub shellwords {
     while ($_ ne '') {
 	$field = '';
 	for (;;) {
-	    if (s/^"(([^"\\]|\\[\\"])*)"//) {
+	    if (s/^"(([^"\\]|\\.)*)"//) {
 		($snippet = $1) =~ s#\\(.)#$1#g;
 	    }
 	    elsif (/^"/) {
 		die "Unmatched double quote: $_\n";
 	    }
-	    elsif (s/^'(([^'\\]|\\[\\'])*)'//) {
+	    elsif (s/^'(([^'\\]|\\.)*)'//) {
 		($snippet = $1) =~ s#\\(.)#$1#g;
 	    }
 	    elsif (/^'/) {

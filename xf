@@ -211,7 +211,7 @@ while (<>) {
     s/\bSTAB_/GV_/g && study;
     s/\bSF_/GVf_/g && study;
     s/\bSPAT_/PMf_/g && study;
-    s/\bF_/FFt_/g && study;
+    #s/\bF_/FFt_/g && study;
     s/\bFC_/FFf_/g && study;
     s/\bO_/OP_/g && study;
     s/\bC_/COP_/g && study;

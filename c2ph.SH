@@ -37,7 +37,7 @@ $spitshell >>c2ph <<'!NO!SUBS!'
 #   See the usage message for more.  If this isn't enough, read the code.
 #
 
-$RCSID = '$RCSfile: c2ph.SH,v $$Revision: 4.1 $$Date: 92/08/07 17:19:10 $';
+$RCSID = 'c2ph.SH';
 
 
 ######################################################################

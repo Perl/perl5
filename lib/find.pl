@@ -39,8 +39,8 @@ sub find {
 		($dir,$_) = ($topdir,'.');
 		$name = $topdir;
 		&wanted;
-		$topdir =~ s,/$,, ;
-		&finddir($topdir,$topnlink);
+		($fixtopdir = $topdir) =~ s,/$,, ;
+		&finddir($fixtopdir,$topnlink);
 	    }
 	    else {
 		warn "Can't cd to $topdir: $!\n";

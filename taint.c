@@ -1,3 +1,9 @@
+/*
+ * "...we will have peace, when you and all your works have perished--and
+ * the works of your dark master to whom you would deliver us.  You are a
+ * liar, Saruman, and a corrupter of men's hearts."  --Theoden
+ */
+
 #include "EXTERN.h"
 #include "perl.h"
 
@@ -47,14 +53,14 @@ taint_env()
 	if (!svp || *svp == &sv_undef || (mg = mg_find(*svp, 't'))) {
 	    tainted = 1;
 	    if (mg && MgTAINTEDDIR(mg))
-		taint_proper("Insecure directory in %s%s", "PATH");
+		taint_proper("Insecure directory in %s%s", "$ENV{PATH}");
 	    else
-		taint_proper("Insecure %s%s", "PATH");
+		taint_proper("Insecure %s%s", "$ENV{PATH}");
 	}
 	svp = hv_fetch(GvHVn(envgv),"IFS",3,FALSE);
 	if (svp && *svp != &sv_undef && mg_find(*svp, 't')) {
 	    tainted = 1;
-	    taint_proper("Insecure %s%s", "IFS");
+	    taint_proper("Insecure %s%s", "$ENV{IFS}");
 	}
     }
 }

@@ -6,17 +6,6 @@
  *    License or the Artistic License, as specified in the README file.
  *
  * $Log:	a2p.h,v $
- * Revision 4.1  92/08/07  18:29:09  lwall
- * 
- * Revision 4.0.1.2  92/06/08  16:12:23  lwall
- * patch20: hash tables now split only if the memory is available to do so
- * 
- * Revision 4.0.1.1  91/06/07  12:12:27  lwall
- * patch4: new copyright notice
- * 
- * Revision 4.0  91/03/20  01:57:07  lwall
- * 4.0 baseline.
- * 
  */
 
 #define VOIDUSED 1
@@ -229,7 +218,7 @@ union u_ops {
 #else
 #define OPSMAX 50000
 #endif						 	/* 80286 hack */
-union u_ops ops[OPSMAX];
+EXT union u_ops ops[OPSMAX];
 
 #include <stdio.h>
 #include <ctype.h>
@@ -309,7 +298,7 @@ EXT char fswitch INIT(0);
 EXT int saw_FS INIT(0);
 EXT int maxfld INIT(0);
 EXT int arymax INIT(0);
-char *nameary[100];
+EXT char *nameary[100];
 
 EXT STR *opens;
 

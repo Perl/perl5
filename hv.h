@@ -1,22 +1,10 @@
-/* $RCSfile: hash.h,v $$Revision: 4.1 $$Date: 92/08/07 18:21:52 $
+/*    hv.h
  *
- *    Copyright (c) 1991, Larry Wall
+ *    Copyright (c) 1991-1994, Larry Wall
  *
  *    You may distribute under the terms of either the GNU General Public
  *    License or the Artistic License, as specified in the README file.
  *
- * $Log:	hash.h,v $
- * Revision 4.1  92/08/07  18:21:52  lwall
- * 
- * Revision 4.0.1.2  91/11/05  17:24:31  lwall
- * patch11: random cleanup
- * 
- * Revision 4.0.1.1  91/06/07  11:10:33  lwall
- * patch4: new copyright notice
- * 
- * Revision 4.0  91/03/20  01:22:38  lwall
- * 4.0 baseline.
- * 
  */
 
 typedef struct he HE;
@@ -33,7 +21,7 @@ struct xpvhv {
     char *	xhv_array;	/* pointer to malloced string */
     STRLEN	xhv_fill;	/* how full xhv_array currently is */
     STRLEN	xhv_max;	/* subscript of last element of xhv_array */
-    STRLEN	xhv_keys;	/* how many elements in the array */
+    I32		xhv_keys;	/* how many elements in the array */
     double	xnv_nv;		/* numeric value, if any */
     MAGIC*	xmg_magic;	/* magic for scalar array */
     HV*		xmg_stash;	/* class package */
@@ -53,3 +41,20 @@ struct xpvhv {
 #define HvEITER(hv)	((XPVHV*)  SvANY(hv))->xhv_eiter
 #define HvPMROOT(hv)	((XPVHV*)  SvANY(hv))->xhv_pmroot
 #define HvNAME(hv)	((XPVHV*)  SvANY(hv))->xhv_name
+
+#ifdef OVERLOAD
+
+/* Maybe amagical: */
+/* #define HV_AMAGICmb(hv)      (SvFLAGS(hv) & (SVpgv_badAM | SVpgv_AM)) */
+
+#define HV_AMAGIC(hv)        (SvFLAGS(hv) &   SVpgv_AM)
+#define HV_AMAGIC_on(hv)     (SvFLAGS(hv) |=  SVpgv_AM)
+#define HV_AMAGIC_off(hv)    (SvFLAGS(hv) &= ~SVpgv_AM)
+
+/*
+#define HV_AMAGICbad(hv)     (SvFLAGS(hv) & SVpgv_badAM)
+#define HV_badAMAGIC_on(hv)  (SvFLAGS(hv) |= SVpgv_badAM)
+#define HV_badAMAGIC_off(hv) (SvFLAGS(hv) &= ~SVpgv_badAM)
+*/
+
+#endif /* OVERLOAD */

@@ -6,13 +6,18 @@ if ($@) { print "1..0\n"; exit; }
 print "1..3\n";
 
 if (opendir(OP, "op")) { print "ok 1\n"; } else { print "not ok 1\n"; }
-@D = grep(/^[^\.].*\.t$/, readdir(OP));
+@D = grep(/^[^\.].*\.t$/i, readdir(OP));
 closedir(OP);
 
 if (@D > 20 && @D < 100) { print "ok 2\n"; } else { print "not ok 2\n"; }
 
 @R = sort @D;
 @G = <op/*.t>;
+if ($G[0] =~ m#.*\](\w+\.t)#i) {
+    # grep is to convert filespecs returned from glob under VMS to format
+    # identical to that returned by readdir
+    @G = grep(s#.*\](\w+\.t).*#op/$1#i,<op/*.t>);
+}
 while (@R && @G && "op/".$R[0] eq $G[0]) {
 	shift(@R);
 	shift(@G);

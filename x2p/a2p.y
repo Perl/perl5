@@ -7,17 +7,6 @@
  *    License or the Artistic License, as specified in the README file.
  *
  * $Log:	a2p.y,v $
- * Revision 4.1  92/08/07  18:29:12  lwall
- * 
- * Revision 4.0.1.2  92/06/08  16:13:03  lwall
- * patch20: in a2p, getline should allow variable to be array element
- * 
- * Revision 4.0.1.1  91/06/07  12:12:41  lwall
- * patch4: new copyright notice
- * 
- * Revision 4.0  91/03/20  01:57:21  lwall
- * 4.0 baseline.
- * 
  */
 
 #include "INTERN.h"

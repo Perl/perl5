@@ -1,0 +1,41 @@
+#!/bin/sh
+
+# This script is designed to provide a handy summary of the configuration
+# information being used to build perl. This is especially useful if you
+# are requesting help from comp.lang.perl on usenet or via mail.
+
+if test -f config.sh; then TOP=.;
+elif test -f ../config.sh; then TOP=..;
+elif test -f ../../config.sh; then TOP=../..;
+elif test -f ../../../config.sh; then TOP=../../..;
+elif test -f ../../../../config.sh; then TOP=../../../..;
+else
+	echo "Can't find the perl config.sh file produced by Configure"; exit 1
+fi
+. $TOP/config.sh
+
+$spitshell <<!GROK!THIS!
+
+Summary of my $package (patchlevel $PATCHLEVEL) configuration:
+  Platform:
+    osname=$osname, osver=$osvers, archname=$archname
+    uname='$myuname'
+    hint=$hint
+  Compiler:
+    cc='$cc', optimize='$optimize'
+    cppflags='$cppflags'
+    ccflags ='$ccflags'
+    ldflags ='$ldflags'
+    stdchar='$stdchar', d_stdstdio=$d_stdstdio, usevfork=$usevfork
+    voidflags=$voidflags, castflags=$castflags, d_casti32=$d_casti32, d_castneg=$d_castneg
+    intsize=$intsize, alignbytes=$alignbytes, usemymalloc=$usemymalloc, randbits=$randbits
+  Libraries:
+    so=$so
+    libpth=$libpth
+    libs=$libs
+    libc=$libc
+  Dynamic Linking:
+    dlsrc=$dlsrc, dlext=$dlext, d_dlsymun=$d_dlsymun
+    cccdlflags='$cccdlflags', ccdlflags='$ccdlflags', lddlflags='$lddlflags'
+
+!GROK!THIS!

@@ -1,5 +1,0 @@
-#!./perl
-
-require 'dumpvar.pl';
-
-&dumpvar("main");

@@ -1,6 +1,6 @@
 # chat.pl: chat with a server
 # Based on: V2.01.alpha.7 91/06/16
-# Randal L. Schwartz (was <merlyn@iwarp.intel.com>)
+# Randal L. Schwartz (was <merlyn@stonehenge.com>)
 # multihome additions by A.Macpherson@bnr.co.uk
 # allow for /dev/pts based systems by Joe Doupnik <JRD@CC.USU.EDU>
 

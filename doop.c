@@ -1,60 +1,14 @@
-/* $RCSfile: doarg.c,v $$Revision: 4.1 $$Date: 92/08/07 17:19:37 $
+/*    doop.c
  *
- *    Copyright (c) 1991, Larry Wall
+ *    Copyright (c) 1991-1994, Larry Wall
  *
  *    You may distribute under the terms of either the GNU General Public
  *    License or the Artistic License, as specified in the README file.
  *
- * $Log:	doarg.c,v $
- * Revision 4.1  92/08/07  17:19:37  lwall
- * Stage 6 Snapshot
- * 
- * Revision 4.0.1.7  92/06/11  21:07:11  lwall
- * patch34: join with null list attempted negative allocation
- * patch34: sprintf("%6.4s", "abcdefg") didn't print "abcd  "
- * 
- * Revision 4.0.1.6  92/06/08  12:34:30  lwall
- * patch20: removed implicit int declarations on funcions
- * patch20: pattern modifiers i and o didn't interact right
- * patch20: join() now pre-extends target string to avoid excessive copying
- * patch20: fixed confusion between a *var's real name and its effective name
- * patch20: subroutines didn't localize $`, $&, $', $1 et al correctly
- * patch20: usersub routines didn't reclaim temp values soon enough
- * patch20: ($<,$>) = ... didn't work on some architectures
- * patch20: added Atari ST portability
- * 
- * Revision 4.0.1.5  91/11/11  16:31:58  lwall
- * patch19: added little-endian pack/unpack options
- * 
- * Revision 4.0.1.4  91/11/05  16:35:06  lwall
- * patch11: /$foo/o optimizer could access deallocated data
- * patch11: minimum match length calculation in regexp is now cumulative
- * patch11: added some support for 64-bit integers
- * patch11: prepared for ctype implementations that don't define isascii()
- * patch11: sprintf() now supports any length of s field
- * patch11: indirect subroutine calls through magic vars (e.g. &$1) didn't work
- * patch11: defined(&$foo) and undef(&$foo) didn't work
- * 
- * Revision 4.0.1.3  91/06/10  01:18:41  lwall
- * patch10: pack(hh,1) dumped core
- * 
- * Revision 4.0.1.2  91/06/07  10:42:17  lwall
- * patch4: new copyright notice
- * patch4: // wouldn't use previous pattern if it started with a null character
- * patch4: //o and s///o now optimize themselves fully at runtime
- * patch4: added global modifier for pattern matches
- * patch4: undef @array disabled "@array" interpolation
- * patch4: chop("") was returning "\0" rather than ""
- * patch4: vector logical operations &, | and ^ sometimes returned null string
- * patch4: syscall couldn't pass numbers with most significant bit set on sparcs
- * 
- * Revision 4.0.1.1  91/04/11  17:40:14  lwall
- * patch1: fixed undefined environ problem
- * patch1: fixed debugger coredump on subroutines
- * 
- * Revision 4.0  91/03/20  01:06:42  lwall
- * 4.0 baseline.
- * 
+ */
+
+/*
+ * "'So that was the job I felt I had to do when I started,' thought Sam."
  */
 
 #include "EXTERN.h"
@@ -67,8 +21,6 @@
 #ifdef BUGGY_MSC
  #pragma function(memcmp)
 #endif /* BUGGY_MSC */
-
-static void doencodes();
 
 #ifdef BUGGY_MSC
  #pragma intrinsic(memcmp)
@@ -88,8 +40,15 @@ OP *arg;
     register I32 squash = op->op_private & OPpTRANS_SQUASH;
     STRLEN len;
 
+    if (SvREADONLY(sv))
+	croak(no_modify);
     tbl = (short*) cPVOP->op_pv;
     s = SvPV(sv, len);
+    if (!len)
+	return 0;
+    if (!SvPOKp(sv))
+	s = SvPV_force(sv, len);
+    (void)SvPOK_only(sv);
     send = s + len;
     if (!tbl || !s)
 	croak("panic: do_trans");
@@ -214,7 +173,7 @@ register SV **sarg;
 
     sv_setpv(sv,"");
     len--;			/* don't count pattern string */
-    t = s = SvPV(*sarg, arglen);
+    t = s = SvPV(*sarg, arglen);	/* XXX Don't know t is writeable */
     send = s + arglen;
     sarg++;
     for ( ; ; len--) {
@@ -386,13 +345,23 @@ SV *sv;
     register unsigned char *s;
     register unsigned long lval;
     I32 mask;
+    STRLEN targlen;
+    STRLEN len;
 
     if (!targ)
 	return;
-    s = (unsigned char*)SvPVX(targ);
+    s = (unsigned char*)SvPV_force(targ, targlen);
     lval = U_L(SvNV(sv));
     offset = LvTARGOFF(sv);
     size = LvTARGLEN(sv);
+    
+    len = (offset + size + 7) / 8;
+    if (len > targlen) {
+	s = (unsigned char*)SvGROW(targ, len + 1);
+	(void)memzero(s + targlen, len - targlen + 1);
+	SvCUR_set(targ, len);
+    }
+    
     if (size < 8) {
 	mask = (1 << size) - 1;
 	size = offset & 7;
@@ -402,6 +371,7 @@ SV *sv;
 	s[offset] |= lval << size;
     }
     else {
+	offset >>= 3;
 	if (size == 8)
 	    s[offset] = lval & 255;
 	else if (size == 16) {
@@ -422,49 +392,112 @@ do_chop(astr,sv)
 register SV *astr;
 register SV *sv;
 {
-    register char *tmps;
-    register I32 i;
-    AV *ary;
-    HV *hv;
-    HE *entry;
     STRLEN len;
-
-    if (!sv)
-	return;
-    if (SvTHINKFIRST(sv)) {
-	if (SvREADONLY(sv))
-	    croak("Can't chop readonly value");
-	if (SvROK(sv))
-	    sv_unref(sv);
-    }
+    char *s;
+    
     if (SvTYPE(sv) == SVt_PVAV) {
-	I32 max;
-	SV **array = AvARRAY(sv);
-	max = AvFILL(sv);
-	for (i = 0; i <= max; i++)
-	    do_chop(astr,array[i]);
-	return;
+	register I32 i;
+        I32 max;
+	AV* av = (AV*)sv;
+        max = AvFILL(av);
+        for (i = 0; i <= max; i++) {
+	    sv = (SV*)av_fetch(av, i, FALSE);
+	    if (sv && ((sv = *(SV**)sv), sv != &sv_undef))
+		do_chop(astr, sv);
+	}
+        return;
     }
     if (SvTYPE(sv) == SVt_PVHV) {
-	hv = (HV*)sv;
-	(void)hv_iterinit(hv);
-	/*SUPPRESS 560*/
-	while (entry = hv_iternext(hv))
-	    do_chop(astr,hv_iterval(hv,entry));
-	return;
+        HV* hv = (HV*)sv;
+	HE* entry;
+        (void)hv_iterinit(hv);
+        /*SUPPRESS 560*/
+        while (entry = hv_iternext(hv))
+            do_chop(astr,hv_iterval(hv,entry));
+        return;
     }
-    tmps = SvPV(sv, len);
-    if (tmps && len) {
-	tmps += len - 1;
-	sv_setpvn(astr,tmps,1);	/* remember last char */
-	*tmps = '\0';				/* wipe it out */
-	SvCUR_set(sv, tmps - SvPVX(sv));
-	SvNOK_off(sv);
-	SvSETMAGIC(sv);
+    s = SvPV(sv, len);
+    if (len && !SvPOKp(sv))
+	s = SvPV_force(sv, len);
+    if (s && len) {
+	s += --len;
+	sv_setpvn(astr, s, 1);
+	*s = '\0';
+	SvCUR_set(sv, len);
+	SvNIOK_off(sv);
     }
     else
-	sv_setpvn(astr,"",0);
-}
+	sv_setpvn(astr, "", 0);
+    SvSETMAGIC(sv);
+} 
+
+I32
+do_chomp(sv)
+register SV *sv;
+{
+    register I32 count = 0;
+    STRLEN len;
+    char *s;
+    
+    if (SvTYPE(sv) == SVt_PVAV) {
+	register I32 i;
+        I32 max;
+	AV* av = (AV*)sv;
+        max = AvFILL(av);
+        for (i = 0; i <= max; i++) {
+	    sv = (SV*)av_fetch(av, i, FALSE);
+	    if (sv && ((sv = *(SV**)sv), sv != &sv_undef))
+		count += do_chomp(sv);
+	}
+        return count;
+    }
+    if (SvTYPE(sv) == SVt_PVHV) {
+        HV* hv = (HV*)sv;
+	HE* entry;
+        (void)hv_iterinit(hv);
+        /*SUPPRESS 560*/
+        while (entry = hv_iternext(hv))
+            count += do_chomp(hv_iterval(hv,entry));
+        return count;
+    }
+    s = SvPV(sv, len);
+    if (len && !SvPOKp(sv))
+	s = SvPV_force(sv, len);
+    if (s && len) {
+	s += --len;
+	if (rspara) {
+	    if (*s != '\n')
+		goto nope;
+	    ++count;
+	    while (len && s[-1] == '\n') {
+		--len;
+		--s;
+		++count;
+	    }
+	}
+	else if (rslen == 1) {
+	    if (*s != rschar)
+		goto nope;
+	    ++count;
+	} 
+	else {
+	    if (len < rslen - 1)
+		goto nope;
+	    len -= rslen - 1;
+	    s -= rslen - 1;
+	    if (bcmp(s, rs, rslen))
+		goto nope;
+	    count += rslen;
+	}
+
+	*s = '\0';
+	SvCUR_set(sv, len);
+	SvNIOK_off(sv);
+    }
+  nope:
+    SvSETMAGIC(sv);
+    return count;
+} 
 
 void
 do_vop(optype,sv,left,right)
@@ -484,29 +517,17 @@ SV *right;
     register char *lc = SvPV(left, leftlen);
     register char *rc = SvPV(right, rightlen);
     register I32 len;
+    I32 lensave;
 
-    if (SvTHINKFIRST(sv)) {
-	if (SvREADONLY(sv))
-	    croak("Can't do %s to readonly value", op_name[optype]);
-	if (SvROK(sv))
-	    sv_unref(sv);
-    }
+    dc = SvPV_force(sv,na);
     len = leftlen < rightlen ? leftlen : rightlen;
-    if (SvTYPE(sv) < SVt_PV)
-	sv_upgrade(sv, SVt_PV);
-    if (SvCUR(sv) > len)
-	SvCUR_set(sv, len);
-    else if (SvCUR(sv) < len) {
-	SvGROW(sv,len);
-	(void)memzero(SvPVX(sv) + SvCUR(sv), len - SvCUR(sv));
-	SvCUR_set(sv, len);
+    lensave = len;
+    if (SvCUR(sv) < len) {
+	dc = SvGROW(sv,len + 1);
+	(void)memzero(dc + SvCUR(sv), len - SvCUR(sv) + 1);
     }
-    SvPOK_only(sv);
-    dc = SvPVX(sv);
-    if (!dc) {
-	sv_setpvn(sv,"",0);
-	dc = SvPVX(sv);
-    }
+    SvCUR_set(sv, len);
+    (void)SvPOK_only(sv);
 #ifdef LIBERAL
     if (len >= sizeof(long)*4 &&
 	!((long)dc % sizeof(long)) &&
@@ -529,7 +550,7 @@ SV *right;
 		*dl++ = *ll++ & *rl++;
 	    }
 	    break;
-	case OP_XOR:
+	case OP_BIT_XOR:
 	    while (len--) {
 		*dl++ = *ll++ ^ *rl++;
 		*dl++ = *ll++ ^ *rl++;
@@ -553,25 +574,30 @@ SV *right;
 	len = remainder;
     }
 #endif
-    switch (optype) {
-    case OP_BIT_AND:
-	while (len--)
-	    *dc++ = *lc++ & *rc++;
-	break;
-    case OP_XOR:
-	while (len--)
-	    *dc++ = *lc++ ^ *rc++;
-	goto mop_up;
-    case OP_BIT_OR:
-	while (len--)
-	    *dc++ = *lc++ | *rc++;
-      mop_up:
-	len = SvCUR(sv);
-	if (rightlen > len)
-	    sv_catpvn(sv, SvPVX(right) + len, rightlen - len);
-	else if (leftlen > len)
-	    sv_catpvn(sv, SvPVX(left) + len, leftlen - len);
-	break;
+    {
+	char *lsave = lc;
+	char *rsave = rc;
+	
+	switch (optype) {
+	case OP_BIT_AND:
+	    while (len--)
+		*dc++ = *lc++ & *rc++;
+	    break;
+	case OP_BIT_XOR:
+	    while (len--)
+		*dc++ = *lc++ ^ *rc++;
+	    goto mop_up;
+	case OP_BIT_OR:
+	    while (len--)
+		*dc++ = *lc++ | *rc++;
+	  mop_up:
+	    len = lensave;
+	    if (rightlen > len)
+		sv_catpvn(sv, rsave + len, rightlen - len);
+	    else if (leftlen > len)
+		sv_catpvn(sv, lsave + len, leftlen - len);
+	    break;
+	}
     }
 }
 
@@ -581,13 +607,15 @@ dARGS
 {
     dSP;
     HV *hv = (HV*)POPs;
-    register AV *ary = stack;
     I32 i;
     register HE *entry;
     char *tmps;
     SV *tmpstr;
-    I32 dokeys =   (op->op_type == OP_KEYS   || op->op_type == OP_RV2HV);
-    I32 dovalues = (op->op_type == OP_VALUES || op->op_type == OP_RV2HV);
+    I32 dokeys =   (op->op_type == OP_KEYS);
+    I32 dovalues = (op->op_type == OP_VALUES);
+
+    if (op->op_type == OP_RV2HV || op->op_type == OP_PADHV) 
+	dokeys = dovalues = TRUE;
 
     if (!hv)
 	RETURN;

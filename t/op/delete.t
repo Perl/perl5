@@ -2,7 +2,7 @@
 
 # $RCSfile: delete.t,v $$Revision: 4.1 $$Date: 92/08/07 18:27:44 $
 
-print "1..6\n";
+print "1..7\n";
 
 $foo{1} = 'a';
 $foo{2} = 'b';
@@ -27,3 +27,11 @@ $foo{'bar'} = 'y';
 
 $foo = join('',values(foo));
 if ($foo eq 'xy' || $foo eq 'yx') {print "ok 6\n";} else {print "not ok 6\n";}
+
+$refhash{"top"}->{"foo"} = "FOO";
+$refhash{"top"}->{"bar"} = "BAR";
+
+delete $refhash{"top"}->{"bar"};
+@list = keys %{$refhash{"top"}};
+
+print "@list" eq "foo" ? "ok 7\n" : "not ok 7 @list\n";

@@ -3,7 +3,7 @@
 print "1..16\n";
 
 BEGIN { @INC = '../lib' }
-require English; import English;
+use English;
 
 print $PID == $$ ? "ok 1\n" : "not ok 1\n";
 
@@ -29,7 +29,7 @@ $LIST_SEPARATOR = "\n";
 print "@foo";
 undef $OUTPUT_RECORD_SEPARATOR;
 
-eval 'no such function';
+eval 'NO SUCH FUNCTION';
 print "ok 10\n" if $EVAL_ERROR =~ /method/;
 
 print $UID == $< ? "ok 11\n" : "not ok 11\n";

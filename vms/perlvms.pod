@@ -1,0 +1,264 @@
+=head1 Notes on Perl5 for VMS
+
+Gathered below are notes describing details of perl 5's 
+behavior on VMS.  They are a supplement to the regular perl 5 
+documentation, so we have focussed on the ways in which perl 
+5 functions differently under VMS thatn it does under Unix, 
+and on teh interactions between perl and the rest of the 
+operating system.  We haven't tried to duplicate complete 
+descriptions  of perl5 features from the main perl 
+documentation, which can be found in the F<[.pod]> 
+subdirectory of the perl 5 distribution.
+
+We hope these notes will save you from confusion and lost 
+sleep when writing perl scripts on VMS.  If you find we've 
+missed something you think should appear here, please don't 
+hesitate to drop a line to vmsperl@genetics.upenn.edu.
+
+=head2 Installation
+
+Directions for building and installing perl 5 can be found in 
+the file F<ReadMe.VMS> in the main source directory of the 
+perl5 distribution..
+
+=head2 File specifications 
+
+We have tried to make perl aware of both VMS-style and Unix-
+style file specifications wherever possible.  You may use 
+either style, or both, on the command line and in scripts, 
+but you may not combine the two styles within a single fle 
+specfication.  Filenames are, of course, still case-
+insensitive.  For consistency, most perl5 routines return 
+filespecs using lower case latters only, regardless of the 
+case used in the arguments passed to them.  (This is true 
+only when running under VMS; perl5 respects the case-
+sensitivity of OSs like Unix.)
+
+We've tried to minimize the dependence of perl library 
+modules on Unix syntax, but you may find that some of these, 
+as well as some scripts written for Unix systems, will 
+require that you use Unix syntax, since they will assume that 
+'/' is the directory separator, etc.  If you find instances 
+of this in the perl distribution itself, please let us know, 
+so we can try to work around them. 
+
+=head2 Command line redirection
+
+Perl for VMS supports redirection of input and output on the 
+command line, using a subset of Bourne shell syntax:
+    <F<file> reads stdin from F<file>,
+    >F<file> writes stdout to F<file>,
+    >>F<file> appends stdout to F<file>,
+    2>F<file> wrtits stderr to F<file>, and
+    2>>F<file> appends stderr to F<file>. 
+
+In addition, output may be piped to a subprocess, using the  
+character '|'.  Anything after this character on the command 
+line is passed to a subprocess for execution; the subprocess 
+takes the output of perl as its input.
+
+Finally, if the command line ends with '&', the entire 
+command is run in the background as an asynchronous 
+subprocess.
+
+=head2 Pipes
+
+Input and output pipes to perl filehandles are supported; the 
+"file name" is passed to lib$spawn() for asynchronous 
+execution.  You should be careful to close any pipes you have 
+opened in a perl script, lest you leave any "orphaned" 
+subprocesses around when perl exits. 
+
+You may also use backticks to invoke a DCL subprocess, whose 
+output is used as the return value of the expression.  The 
+string between the backticks is passed directly to lib$spawn 
+as the command to execute.  In this case, perl will wait for 
+the subprocess to complete before continuing. 
+
+=head2 Wildcard expansion
+
+File specifications containing wildcards are allowed both on 
+the command line and within perl globs (e.g. <C<*.c>>).  If 
+the wildcard filespec uses VMS syntax, the resultant 
+filespecs will follow VMS syntax; if a Unix-style filespec is 
+passed in, Unix-style filespecs will be returned..
+
+If the wildcard filespec contains a device or directory 
+specification, then the resultant filespecs will also contain 
+a device and directory; otherwise, device and directory 
+information are removed.  VMS-style resultant filespecs will 
+contain a full device and directory, while Unix-style 
+resultant filespecs will contain only as much of a directory 
+path as was present in the input filespec.  For example, if 
+your default directory is Perl_Root:[000000], the expansion 
+of C<[.t]*.*> will yield filespecs  like 
+"perl_root:[t]base.dir", while the expansion of C<t/*/*> will 
+yield filespecs like "t/base.dir".  (This is done to match 
+the behavior of glob expansion performed by Unix shells.) 
+
+Similarly, the resultant filespec will the file version only 
+if one was present in the input filespec.
+
+=head2 %ENV 
+
+Reading the elements of the %ENV array returns the 
+translation of the logical name specified by the key, 
+according to the normal search order of access modes and 
+logical name tables.  In addition, the keys C<home>, 
+C<path>,C<term>, and C<user> return the CRTL "environment 
+variables" of the same names.  The key C<default> returns the 
+current default device and directory specification.
+
+Setting an element of %ENV defines a supervisor-mode logical 
+name in the process logical name table.  B<Undef>ing or 
+B<delete>ing an element of %ENV deletes the equivalent user-
+mode or supervisor-mode logical name from the process logical 
+name table.  If you use B<undef>, the %ENV element remains 
+empty.  If you use B<delete>, another attempt is made at 
+logical name translation after the deletion, so an inner-mode 
+logical name or a name in another logical name table will 
+replace the logical name just deleted.
+
+In all operations on %ENV, the key string is treated as if it 
+were entirely uppercase, regardless of the case actually 
+specified in the perl expression.
+
+=head2 Perl functions
+
+As of the time this document was last revised, the following 
+perl functions were implemented in the VMS port of perl 
+(functions marked with * are discussed in more detail below):
+
+    file tests*, abs, alarm, atan, binmode*, bless,
+    caller, chdir, chmod, chown, chomp, chop, chr,
+    close, closedir, cos, defined, delete, die, do,
+    each, eof, eval, exec*, exists, exit, exp, fileno,
+    fork*, getc, glob, goto, grep, hex, import, index,
+    int, join, keys, kill, last, lc, lcfirst, length,
+    local, localtime, log, m//, map, mkdir, my, next,
+    no, oct, open, opendir, ord, pack, pipe, pop, pos,
+    print, printf, push, q//, qq//, qw//, qx//,
+    quotemeta, rand, read, readdir, redo, ref, rename,
+    require, reset, return, reverse, rewinddir, rindex,
+    rmdir, s///, scalar, seek, seekdir, select(internal)*,
+    shift, sin, sleep, sort, splice, split, sprintf,
+    sqrt, srand, stat, study, substr, sysread, system*,
+    syswrite, tell, telldir, tie, time, times*, tr///,
+    uc, ucfirst, umask, undef, unlink, unpack, untie,
+    unshift, use, values, vec, wait, wantarray, warn,
+    write, y///
+
+The following functions were not implemented in the VMS port, 
+and calling them produces a fatal error (usually) or 
+undefined behavior (rarely, we hope):
+
+    chroot, crypt, dbmclose, dbmopen, dump, fcntl,
+    flock, getlogin, getpgrp, getppid, getpriority,
+    getpwent, getgrent, kill, getgrgid, getgrnam,
+    getpwnam, getpwuid, setpwent, setgrent,
+    endpwent, endgrent, gmtime, ioctl, link, lstst,
+    msgctl, msgget, msgsend, msgrcv, readlink,
+    select(system call), semctl, semget, semop,
+    setpgrp, setpriority, shmctl, shmget, shmread,
+    shmwrite, socketpair, symlink, syscall, truncate,
+    utime, waitpid
+
+The following functions may or may not be implemented, 
+depending on what type of socket support you've built into 
+your copy of perl:
+    accept, bind, connect, getpeername,
+    gethostbyname, getnetbyname, getprotobyname,
+    getservbyname, gethostbyaddr, getnetbyaddr,
+    getprotobynumber, getservbyport, gethostent,
+    getnetent, getprotoent, getservent, sethostent,
+    setnetent, setprotoent, setservent, endhostent,
+    endnetent, endprotoent, endservent, getsockname,
+    getsockopt, listen, recv, send, setsockopt,
+    shutdown, socket
+
+
+=item File tests
+
+The tests -b, -B, -c, -C, -d, -e, -f, -o, -M, -s, -S, -t, -T, 
+and -z work as advertised.  The return values for -r, -w, and 
+-x tell you whether you can actually access the file; this 
+may mot reflect the UIC-based file protections.  Since real 
+and effective UIC don't differ under VMS, -O, -R, -W, and -X 
+are equivalent to -o, -r, -w, and -x.  Similarly, several 
+other tests, including -A, -g, -k, -l,-p, and -u, aren't 
+particularly meaningful under VMS, and the values returned by 
+these tests reflect whatever your CRTL stat() routine does to 
+the equivalent bits in the st_mode field.
+
+=item binmode
+
+The B<binmode> operator has no effect under VMS.  It will 
+return TRUE whenever called, but will not affect I/O 
+operations on the filehandle given as its argument.
+
+=item exec 
+
+The B<exec> operator behaves in one of two different ways.  
+If called after a call to B<fork>, it will invoke the CRTL 
+L<execv()> routine, passing its arguments to the subprocess 
+created by B<fork> for execution.  In this case, it is 
+subject to all limitation that affect L<execv>.  (In 
+particular, this usually means that the command executed in 
+the subprocess must be an image compiled from C source code, 
+and that your options for passing file descriptors and signal 
+handlers to the subprocess are limited.)
+
+If the call to B<exec> does not follow a call to B<fork>, it 
+will cause perl to exit, and to invoke the command given as 
+an argument to B<exec> via lib$do_command.  If the argument 
+begins with a '$' (other than as part of a filespec), then it 
+is executed as a DCL command.  Otherwise, the first token on 
+the command line is treated as the filespec of an image to 
+run, and an attempt is made to invoke it (using F<.Exe> and 
+the process defaults to expand the filespec) and pass the 
+rest of B<exec>'s argument to it as parameters.
+
+You can use B<exec> in both ways within the same script, as 
+long as you call B<fork> and B<exec> in pairs.  Perl only 
+keeps track of whether B<fork> has been called since the last 
+call to B<exec> when figuring out what to do, so multiple 
+calls to B<fork> do not generate multiple levels of "fork 
+context".
+
+=item fork
+
+The B<fork> operator works in the same way as the CRTL 
+L<fork()> routine, which is quite different under VMS than 
+under Unix.  Sepcifically, while B<fork> returns 0 after it 
+is called and the subprocess PID after B<exec> is called, in 
+both cases the thread of execution is within the parent 
+process, so there is no opportunity to perform operations in 
+the subprocess before calling B<exec>.
+
+In general, the use of B<fork> and B<exec> to create 
+subprocess is not recommended under VMS; wherever possible, 
+use the B<system> operator or piped filehandles instead.
+
+=item system
+
+The B<system> operator creates a subprocess, and passes its 
+arguments to the subprocess for execution as a DCL command.  
+Since the subprocess is created directly via lib$spawn, any 
+valid DCL command string may be specified.  Perl waits for 
+the subprocess to complete before continuing execution in the 
+current process.
+
+=item times
+
+The array returned by the B<times> operator is divided up 
+according to the same rules the CRTL L<times()> routine.  
+Therefore, the "system time" elements will always be 0, since 
+there is no difference between "user time" and "system" time 
+under VMS, and the time accumulated by subprocess may or may 
+not appear separately in the "child time" field, depending on 
+whether L<times> keeps track of subprocesses separately.
+
+=head2 Revision date
+
+This document was last updated on 16-Oct-1994, for perl 5, 
+patchlevel 0.

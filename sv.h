@@ -1,49 +1,33 @@
-/* $RCSfile: sv.h,v $$Revision: 4.1 $$Date: 92/08/07 18:26:57 $
+/*    sv.h
  *
- *    Copyright (c) 1991, Larry Wall
+ *    Copyright (c) 1991-1994, Larry Wall
  *
  *    You may distribute under the terms of either the GNU General Public
  *    License or the Artistic License, as specified in the README file.
  *
- * $Log:	sv.h,v $
- * Revision 4.1  92/08/07  18:26:57  lwall
- * 
- * Revision 4.0.1.4  92/06/08  15:41:45  lwall
- * patch20: fixed confusion between a *var's real name and its effective name
- * patch20: removed implicit int declarations on functions
- * 
- * Revision 4.0.1.3  91/11/05  18:41:47  lwall
- * patch11: random cleanup
- * patch11: solitary subroutine references no longer trigger typo warnings
- * 
- * Revision 4.0.1.2  91/06/07  11:58:33  lwall
- * patch4: new copyright notice
- * 
- * Revision 4.0.1.1  91/04/12  09:16:12  lwall
- * patch1: you may now use "die" and "caller" in a signal handler
- * 
- * Revision 4.0  91/03/20  01:40:04  lwall
- * 4.0 baseline.
- * 
  */
 
+#ifdef sv_flags
+#undef sv_flags		/* Convex has this in <signal.h> for sigvec() */
+#endif
+
 typedef enum {
-	SVt_NULL,
-	SVt_IV,
-	SVt_NV,
-	SVt_RV,
-	SVt_PV,
-	SVt_PVIV,
-	SVt_PVNV,
-	SVt_PVMG,
-	SVt_PVBM,
-	SVt_PVLV,
-	SVt_PVAV,
-	SVt_PVHV,
-	SVt_PVCV,
-	SVt_PVGV,
-	SVt_PVFM,
-	SVt_PVIO
+	SVt_NULL,	/* 0 */
+	SVt_IV,		/* 1 */
+	SVt_NV,		/* 2 */
+	SVt_RV,		/* 3 */
+	SVt_PV,		/* 4 */
+	SVt_PVIV,	/* 5 */
+	SVt_PVNV,	/* 6 */
+	SVt_PVMG,	/* 7 */
+	SVt_PVBM,	/* 8 */
+	SVt_PVLV,	/* 9 */
+	SVt_PVAV,	/* 10 */
+	SVt_PVHV,	/* 11 */
+	SVt_PVCV,	/* 12 */
+	SVt_PVGV,	/* 13 */
+	SVt_PVFM,	/* 14 */
+	SVt_PVIO	/* 15 */
 } svtype;
 
 /* Using C's structural equivalence to help emulate C++ inheritance here... */
@@ -115,15 +99,25 @@ struct io {
 #define SVf_NOK		0x00020000	/* has valid public numeric value */
 #define SVf_POK		0x00040000	/* has valid public pointer value */
 #define SVf_ROK		0x00080000	/* has a valid reference pointer */
-#define SVf_OK		0x00100000	/* has defined value */
+
+#define SVf_FAKE	0x00100000	/* glob is just a copy */
 #define SVf_OOK		0x00200000	/* has valid offset value */
 #define SVf_BREAK	0x00400000	/* refcnt is artificially low */
 #define SVf_READONLY	0x00800000	/* may not be modified */
+
+#define SVf_THINKFIRST	(SVf_READONLY|SVf_ROK)
 
 #define SVp_IOK		0x01000000	/* has valid non-public integer value */
 #define SVp_NOK		0x02000000	/* has valid non-public numeric value */
 #define SVp_POK		0x04000000	/* has valid non-public pointer value */
 #define SVp_SCREAM	0x08000000	/* has been studied? */
+
+#define SVf_OK		(SVf_IOK|SVf_NOK|SVf_POK|SVf_ROK| \
+			 SVp_IOK|SVp_NOK|SVp_POK)
+
+#ifdef OVERLOAD
+#define SVf_AMAGIC    0x10000000      /* has magical overloaded methods */
+#endif /* OVERLOAD */
 
 #define PRIVSHIFT 8
 
@@ -136,6 +130,11 @@ struct io {
 #define SVpbm_TAIL	0x20000000
 
 #define SVpgv_MULTI	0x80000000
+
+#ifdef OVERLOAD
+#define SVpgv_AM        0x40000000
+/* #define SVpgv_badAM     0x20000000 */
+#endif /* OVERLOAD */
 
 struct xrv {
     SV *	xrv_rv;		/* pointer to another SV */
@@ -151,14 +150,14 @@ struct xpviv {
     char *	xpv_pv;		/* pointer to malloced string */
     STRLEN	xpv_cur;	/* length of xpv_pv as a C string */
     STRLEN	xpv_len;	/* allocated size */
-    I32		xiv_iv;		/* integer value or pv offset */
+    IV		xiv_iv;		/* integer value or pv offset */
 };
 
 struct xpvnv {
     char *	xpv_pv;		/* pointer to malloced string */
     STRLEN	xpv_cur;	/* length of xpv_pv as a C string */
     STRLEN	xpv_len;	/* allocated size */
-    I32		xiv_iv;		/* integer value or pv offset */
+    IV		xiv_iv;		/* integer value or pv offset */
     double	xnv_nv;		/* numeric value, if any */
 };
 
@@ -166,7 +165,7 @@ struct xpvmg {
     char *	xpv_pv;		/* pointer to malloced string */
     STRLEN	xpv_cur;	/* length of xpv_pv as a C string */
     STRLEN	xpv_len;	/* allocated size */
-    I32		xiv_iv;		/* integer value or pv offset */
+    IV		xiv_iv;		/* integer value or pv offset */
     double	xnv_nv;		/* numeric value, if any */
     MAGIC*	xmg_magic;	/* linked list of magicalness */
     HV*		xmg_stash;	/* class package */
@@ -176,7 +175,7 @@ struct xpvlv {
     char *	xpv_pv;		/* pointer to malloced string */
     STRLEN	xpv_cur;	/* length of xpv_pv as a C string */
     STRLEN	xpv_len;	/* allocated size */
-    I32		xiv_iv;		/* integer value or pv offset */
+    IV		xiv_iv;		/* integer value or pv offset */
     double	xnv_nv;		/* numeric value, if any */
     MAGIC*	xmg_magic;	/* linked list of magicalness */
     HV*		xmg_stash;	/* class package */
@@ -191,7 +190,7 @@ struct xpvgv {
     char *	xpv_pv;		/* pointer to malloced string */
     STRLEN	xpv_cur;	/* length of xpv_pv as a C string */
     STRLEN	xpv_len;	/* allocated size */
-    I32		xiv_iv;		/* integer value or pv offset */
+    IV		xiv_iv;		/* integer value or pv offset */
     double	xnv_nv;		/* numeric value, if any */
     MAGIC*	xmg_magic;	/* linked list of magicalness */
     HV*		xmg_stash;	/* class package */
@@ -206,7 +205,7 @@ struct xpvbm {
     char *	xpv_pv;		/* pointer to malloced string */
     STRLEN	xpv_cur;	/* length of xpv_pv as a C string */
     STRLEN	xpv_len;	/* allocated size */
-    I32		xiv_iv;		/* integer value or pv offset */
+    IV		xiv_iv;		/* integer value or pv offset */
     double	xnv_nv;		/* numeric value, if any */
     MAGIC*	xmg_magic;	/* linked list of magicalness */
     HV*		xmg_stash;	/* class package */
@@ -220,7 +219,7 @@ struct xpvfm {
     char *	xpv_pv;		/* pointer to malloced string */
     STRLEN	xpv_cur;	/* length of xpv_pv as a C string */
     STRLEN	xpv_len;	/* allocated size */
-    I32		xiv_iv;		/* integer value or pv offset */
+    IV		xiv_iv;		/* integer value or pv offset */
     double	xnv_nv;		/* numeric value, if any */
     MAGIC*	xmg_magic;	/* linked list of magicalness */
     HV*		xmg_stash;	/* class package */
@@ -228,12 +227,12 @@ struct xpvfm {
     HV *	xcv_stash;
     OP *	xcv_start;
     OP *	xcv_root;
-    I32	      (*xcv_usersub)();
-    I32		xcv_userindex;
+    void      (*xcv_xsub)_((CV*));
+    ANY		xcv_xsubany;
+    GV *	xcv_gv;
     GV *	xcv_filegv;
     long	xcv_depth;		/* >= 2 indicates recursive call */
     AV *	xcv_padlist;
-    bool	xcv_deleted;
     I32		xfm_lines;
 };
 
@@ -241,7 +240,7 @@ struct xpvio {
     char *	xpv_pv;		/* pointer to malloced string */
     STRLEN	xpv_cur;	/* length of xpv_pv as a C string */
     STRLEN	xpv_len;	/* allocated size */
-    I32		xiv_iv;		/* integer value or pv offset */
+    IV		xiv_iv;		/* integer value or pv offset */
     double	xnv_nv;		/* numeric value, if any */
     MAGIC*	xmg_magic;	/* linked list of magicalness */
     HV*		xmg_stash;	/* class package */
@@ -271,13 +270,17 @@ struct xpvio {
 /* The following macros define implementation-independent predicates on SVs. */
 
 #define SvNIOK(sv)		(SvFLAGS(sv) & (SVf_IOK|SVf_NOK))
+#define SvNIOK_off(sv)		(SvFLAGS(sv) &= ~(SVf_IOK|SVf_NOK| \
+						  SVp_IOK|SVp_NOK))
 
 #define SvOK(sv)		(SvFLAGS(sv) & SVf_OK)
-#define SvOK_on(sv)		(SvFLAGS(sv) |= SVf_OK)
-#define SvOK_off(sv)		(SvFLAGS(sv) &=				   \
-					~(SVf_IOK|SVf_NOK|SVf_POK|SVf_OK|  \
-					  SVp_IOK|SVp_NOK|SVp_POK|SVf_ROK),\
-					SvOOK_off(sv))
+
+#ifdef OVERLOAD
+#define SvOK_off(sv)		(SvFLAGS(sv) &=	~(SVf_OK|SVf_AMAGIC),	\
+							SvOOK_off(sv))
+#else
+#define SvOK_off(sv)		(SvFLAGS(sv) &=	~SVf_OK, SvOOK_off(sv))
+#endif /* OVERLOAD */
 
 #define SvOKp(sv)		(SvFLAGS(sv) & (SVp_IOK|SVp_NOK|SVp_POK))
 #define SvIOKp(sv)		(SvFLAGS(sv) & SVp_IOK)
@@ -289,30 +292,39 @@ struct xpvio {
 
 #define SvIOK(sv)		(SvFLAGS(sv) & SVf_IOK)
 #define SvIOK_on(sv)		(SvOOK_off(sv), \
-				    SvFLAGS(sv) |= (SVf_IOK|SVp_IOK|SVf_OK))
+				    SvFLAGS(sv) |= (SVf_IOK|SVp_IOK))
 #define SvIOK_off(sv)		(SvFLAGS(sv) &= ~(SVf_IOK|SVp_IOK))
 #define SvIOK_only(sv)		(SvOK_off(sv), \
-				    SvFLAGS(sv) |= (SVf_IOK|SVp_IOK|SVf_OK))
+				    SvFLAGS(sv) |= (SVf_IOK|SVp_IOK))
 
 #define SvNOK(sv)		(SvFLAGS(sv) & SVf_NOK)
-#define SvNOK_on(sv)		(SvFLAGS(sv) |= (SVf_NOK|SVp_NOK|SVf_OK))
+#define SvNOK_on(sv)		(SvFLAGS(sv) |= (SVf_NOK|SVp_NOK))
 #define SvNOK_off(sv)		(SvFLAGS(sv) &= ~(SVf_NOK|SVp_NOK))
 #define SvNOK_only(sv)		(SvOK_off(sv), \
-				    SvFLAGS(sv) |= (SVf_NOK|SVp_NOK|SVf_OK))
+				    SvFLAGS(sv) |= (SVf_NOK|SVp_NOK))
 
 #define SvPOK(sv)		(SvFLAGS(sv) & SVf_POK)
-#define SvPOK_on(sv)		(SvFLAGS(sv) |= (SVf_POK|SVp_POK|SVf_OK))
+#define SvPOK_on(sv)		(SvFLAGS(sv) |= (SVf_POK|SVp_POK))
 #define SvPOK_off(sv)		(SvFLAGS(sv) &= ~(SVf_POK|SVp_POK))
 #define SvPOK_only(sv)		(SvOK_off(sv), \
-				    SvFLAGS(sv) |= (SVf_POK|SVp_POK|SVf_OK))
+				    SvFLAGS(sv) |= (SVf_POK|SVp_POK))
 
 #define SvOOK(sv)		(SvFLAGS(sv) & SVf_OOK)
 #define SvOOK_on(sv)		(SvIOK_off(sv), SvFLAGS(sv) |= SVf_OOK)
 #define SvOOK_off(sv)		(SvOOK(sv) && sv_backoff(sv))
 
+#define SvFAKE(sv)		(SvFLAGS(sv) & SVf_FAKE)
+#define SvFAKE_on(sv)		(SvFLAGS(sv) |= SVf_FAKE)
+#define SvFAKE_off(sv)		(SvFLAGS(sv) &= ~SVf_FAKE)
+
 #define SvROK(sv)		(SvFLAGS(sv) & SVf_ROK)
-#define SvROK_on(sv)		(SvFLAGS(sv) |= SVf_ROK|SVf_OK)
+#define SvROK_on(sv)		(SvFLAGS(sv) |= SVf_ROK)
+
+#ifdef OVERLOAD
+#define SvROK_off(sv)		(SvFLAGS(sv) &= ~(SVf_ROK|SVf_AMAGIC))
+#else
 #define SvROK_off(sv)		(SvFLAGS(sv) &= ~SVf_ROK)
+#endif /* OVERLOAD */
 
 #define SvMAGICAL(sv)		(SvFLAGS(sv) & (SVs_GMG|SVs_SMG|SVs_RMG))
 #define SvMAGICAL_on(sv)	(SvFLAGS(sv) |= (SVs_GMG|SVs_SMG|SVs_RMG))
@@ -330,7 +342,20 @@ struct xpvio {
 #define SvRMAGICAL_on(sv)	(SvFLAGS(sv) |= SVs_RMG)
 #define SvRMAGICAL_off(sv)	(SvFLAGS(sv) &= ~SVs_RMG)
 
-#define SvTHINKFIRST(sv)	(SvFLAGS(sv) & (SVf_ROK|SVf_READONLY))
+#ifdef OVERLOAD
+#define SvAMAGIC(sv)         (SvFLAGS(sv) & SVf_AMAGIC)
+#define SvAMAGIC_on(sv)      (SvFLAGS(sv) |= SVf_AMAGIC)
+#define SvAMAGIC_off(sv)     (SvFLAGS(sv) &= ~SVf_AMAGIC)
+
+/*
+#define Gv_AMG(stash) \
+        (HV_AMAGICmb(stash) && \
+         ((!HV_AMAGICbad(stash) && HV_AMAGIC(stash)) || Gv_AMupdate(stash)))
+*/
+#define Gv_AMG(stash)           (amagic_generation && Gv_AMupdate(stash))
+#endif /* OVERLOAD */
+
+#define SvTHINKFIRST(sv)	(SvFLAGS(sv) & SVf_THINKFIRST)
 
 #define SvPADBUSY(sv)		(SvFLAGS(sv) & SVs_PADBUSY)
 
@@ -441,19 +466,21 @@ struct xpvio {
 #define IoTYPE(sv)	((XPVIO*)  SvANY(sv))->xio_type
 #define IoFLAGS(sv)	((XPVIO*)  SvANY(sv))->xio_flags
 
-#define SvTAINT(sv) if (tainting && tainted) sv_magic(sv, 0, 't', 0, 0)
+#define SvTAINT(sv) if (tainting && tainted) sv_magic(sv, Nullsv, 't', Nullch, 0)
 
 #ifdef CRIPPLED_CC
 
-I32 SvIV();
-double SvNV();
+IV SvIV _((SV* sv));
+double SvNV _((SV* sv));
+#define SvPV_force(sv, lp) sv_pvn_force(sv, &lp)
 #define SvPV(sv, lp) sv_pvn(sv, &lp)
-char *sv_pvn();
-I32 SvTRUE();
+char *sv_pvn _((SV *, STRLEN *));
+I32 SvTRUE _((SV *));
 
 #define SvIVx(sv) SvIV(sv)
 #define SvNVx(sv) SvNV(sv)
 #define SvPVx(sv, lp) sv_pvn(sv, &lp)
+#define SvPVx_force(sv, lp) sv_pvn_force(sv, &lp)
 #define SvTRUEx(sv) SvTRUE(sv)
 
 #else /* !CRIPPLED_CC */
@@ -463,6 +490,8 @@ I32 SvTRUE();
 #define SvNV(sv) (SvNOK(sv) ? SvNVX(sv) : sv_2nv(sv))
 
 #define SvPV(sv, lp) (SvPOK(sv) ? ((lp = SvCUR(sv)), SvPVX(sv)) : sv_2pv(sv, &lp))
+
+#define SvPV_force(sv, lp) ((SvFLAGS(sv) & (SVf_POK|SVf_THINKFIRST)) == SVf_POK ? ((lp = SvCUR(sv)), SvPVX(sv)) : sv_pvn_force(sv, &lp))
 
 #define SvTRUE(sv) (						\
     !sv								\
@@ -499,11 +528,11 @@ I32 SvTRUE();
 #define isGV(sv) (SvTYPE(sv) == SVt_PVGV)
 
 #ifndef DOSISH
-#  define SvGROW(sv,len) if (SvLEN(sv) < (len)) sv_grow(sv,len)
+#  define SvGROW(sv,len) (SvLEN(sv) < (len) ? sv_grow(sv,len) : SvPVX(sv))
 #  define Sv_Grow sv_grow
 #else
     /* extra parentheses intentionally NOT placed around "len"! */
-#  define SvGROW(sv,len) if (SvLEN(sv) < (unsigned long)len) \
-		sv_grow(sv,(unsigned long)len)
+#  define SvGROW(sv,len) ((SvLEN(sv) < (unsigned long)len) \
+		? sv_grow(sv,(unsigned long)len) : SvPVX(sv))
 #  define Sv_Grow(sv,len) sv_grow(sv,(unsigned long)(len))
 #endif /* DOSISH */

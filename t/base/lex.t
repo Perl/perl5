@@ -65,7 +65,7 @@ print qq/ok 14\n/;
 print qq(ok 15\n);
 
 print qq
-ok 16\n
+[ok 16\n]
 ;
 
 print q<ok 17

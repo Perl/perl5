@@ -3,20 +3,6 @@
 ;# $RCSfile: pwd.pl,v $$Revision: 4.1 $$Date: 92/08/07 18:24:11 $
 ;#
 ;# $Log:	pwd.pl,v $
-;# Revision 4.1  92/08/07  18:24:11  lwall
-;# 
-;# Revision 4.0.1.1  92/06/08  13:45:22  lwall
-;# patch20: support added to pwd.pl to strip automounter crud
-;# 
-;# Revision 4.0  91/03/20  01:26:03  lwall
-;# 4.0 baseline.
-;# 
-;# Revision 3.0.1.2  91/01/11  18:09:24  lwall
-;# patch42: some .pl files were missing their trailing 1;
-;# 
-;# Revision 3.0.1.1  90/08/09  04:01:24  lwall
-;# patch19: Initial revision
-;# 
 ;#
 ;# Usage:
 ;#	require "pwd.pl";

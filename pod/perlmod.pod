@@ -1,0 +1,472 @@
+=head1 NAME
+
+perlmod - Perl modules (packages)
+
+=head1 DESCRIPTION
+
+=head2 Packages
+
+Perl provides a mechanism for alternate namespaces to protect packages
+from stomping on each others variables.  By default, a Perl script starts
+compiling into the package known as C<main>.  You can switch namespaces
+using the C<package> declaration.  The scope of the package declaration is
+from the declaration itself to the end of the enclosing block (the same
+scope as the local() operator).  Typically it would be the first
+declaration in a file to be included by the C<require> operator.  You can
+switch into a package in more than one place; it merely influences which
+symbol table is used by the compiler for the rest of that block.  You can
+refer to variables and filehandles in other packages by prefixing the
+identifier with the package name and a double colon:
+C<$Package::Variable>.  If the package name is null, the C<main> package
+as assumed.  That is, C<$::sail> is equivalent to C<$main::sail>.
+
+(The old package delimiter was a single quote, but double colon
+is now the preferred delimiter, in part because it's more readable
+to humans, and in part because it's more readable to B<emacs> macros.
+It also makes C++ programmers feel like they know what's going on.)
+
+Packages may be nested inside other packages: C<$OUTER::INNER::var>.  This
+implies nothing about the order of name lookups, however.  All symbols
+are either local to the current package, or must be fully qualified
+from the outer package name down.  For instance, there is nowhere
+within package C<OUTER> that C<$INNER::var> refers to C<$OUTER::INNER::var>.
+It would treat package C<INNER> as a totally separate global package.
+
+Only identifiers starting with letters (or underscore) are stored in a
+package's symbol table.  All other symbols are kept in package C<main>.
+In addition, the identifiers STDIN, STDOUT, STDERR, C<ARGV>,
+ARGVOUT, ENV, INC and SIG are forced to be in package C<main>,
+even when used for other purposes than their built-in one.  Note also
+that, if you have a package called C<m>, C<s> or C<y>, then you can't use
+the qualified form of an identifier since it will be interpreted instead
+as a pattern match, a substitution, or a translation.
+
+(Variables beginning with underscore used to be forced into package
+main, but we decided it was more useful for package writers to be able
+to use leading underscore to indicate private variables and method names.)
+
+Eval()ed strings are compiled in the package in which the eval() was
+compiled.  (Assignments to C<$SIG{}>, however, assume the signal
+handler specified is in the C<main. package.  Qualify the signal handler
+name if you wish to have a signal handler in a package.)  For an
+example, examine F<perldb.pl> in the Perl library.  It initially switches
+to the C<DB> package so that the debugger doesn't interfere with variables
+in the script you are trying to debug.  At various points, however, it
+temporarily switches back to the C<main> package to evaluate various
+expressions in the context of the C<main> package (or wherever you came
+from).  See L<perldebug>.
+
+=head2 Symbol Tables
+
+The symbol table for a package happens to be stored in the associative
+array of that name appended with two colons.  The main symbol table's
+name is thus C<%main::>, or C<%::> for short.  Likewise the nested package
+mentioned earlier is named C<%OUTER::INNER::>.
+
+The value in each entry of the associative array is what you are
+referring to when you use the C<*name> notation.  In fact, the following
+have the same effect, though the first is more efficient because it
+does the symbol table lookups at compile time:
+
+    local(*main::foo) = *main::bar; local($main::{'foo'}) =
+    $main::{'bar'};
+
+You can use this to print out all the variables in a package, for
+instance.  Here is F<dumpvar.pl> from the Perl library:
+
+   package dumpvar;
+   sub main::dumpvar {
+       ($package) = @_;
+       local(*stab) = eval("*${package}::");
+       while (($key,$val) = each(%stab)) {
+	   local(*entry) = $val;
+	   if (defined $entry) {
+	       print "\$$key = '$entry'\n";
+	   }
+
+	   if (defined @entry) {
+	       print "\@$key = (\n";
+	       foreach $num ($[ .. $#entry) {
+		   print "  $num\t'",$entry[$num],"'\n";
+	       }
+	       print ")\n";
+	   }
+
+	   if ($key ne "${package}::" && defined %entry) {
+	       print "\%$key = (\n";
+	       foreach $key (sort keys(%entry)) {
+		   print "  $key\t'",$entry{$key},"'\n";
+	       }
+	       print ")\n";
+	   }
+       }
+   }
+
+Note that even though the subroutine is compiled in package C<dumpvar>,
+the name of the subroutine is qualified so that its name is inserted
+into package C<main>.
+
+Assignment to a symbol table entry performs an aliasing operation,
+i.e.,
+
+    *dick = *richard;
+
+causes variables, subroutines and filehandles accessible via the
+identifier C<richard> to also be accessible via the symbol C<dick>.  If
+you only want to alias a particular variable or subroutine, you can
+assign a reference instead:
+
+    *dick = \$richard;
+
+makes $richard and $dick the same variable, but leaves
+@richard and @dick as separate arrays.  Tricky, eh?
+
+=head2 Package Constructors and Destructors
+
+There are two special subroutine definitions that function as package
+constructors and destructors.  These are the C<BEGIN> and C<END>
+routines.  The C<sub> is optional for these routines.
+
+A C<BEGIN> subroutine is executed as soon as possible, that is, the
+moment it is completely defined, even before the rest of the containing
+file is parsed.  You may have multiple C<BEGIN> blocks within a
+file--they will execute in order of definition.  Because a C<BEGIN>
+block executes immediately, it can pull in definitions of subroutines
+and such from other files in time to be visible to the rest of the
+file.
+
+An C<END> subroutine is executed as late as possible, that is, when the
+interpreter is being exited, even if it is exiting as a result of a
+die() function.  (But not if it's is being blown out of the water by a
+signal--you have to trap that yourself (if you can).)  You may have
+multiple C<END> blocks within a file--they wil execute in reverse
+order of definition; that is: last in, first out (LIFO).
+
+Note that when you use the B<-n> and B<-p> switches to Perl, C<BEGIN>
+and C<END> work just as they do in B<awk>, as a degenerate case.
+
+=head2 Perl Classes
+
+There is no special class syntax in Perl 5, but a package may function
+as a class if it provides subroutines that function as methods.  Such a
+package may also derive some of its methods from another class package
+by listing the other package name in its @ISA array.  For more on
+this, see L<perlobj>.
+
+=head2 Perl Modules
+
+In Perl 5, the notion of packages has been extended into the notion of
+modules.  A module is a package that is defined in a library file of
+the same name, and is designed to be reusable.  It may do this by
+providing a mechanism for exporting some of its symbols into the symbol
+table of any package using it.  Or it may function as a class
+definition and make its semantics available implicitly through method
+calls on the class and its objects, without explicit exportation of any
+symbols.  Or it can do a little of both.
+
+Perl modules are included by saying
+
+    use Module;
+
+or
+
+    use Module LIST;
+
+This is exactly equivalent to
+
+    BEGIN { require "Module.pm"; import Module; }
+
+or
+
+    BEGIN { require "Module.pm"; import Module LIST; }
+
+All Perl module files have the extension F<.pm>.  C<use> assumes this so
+that you don't have to spell out "F<Module.pm>" in quotes.  This also
+helps to differentiate new modules from old F<.pl> and F<.ph> files.
+Module names are also capitalized unless they're functioning as pragmas,
+"Pragmas" are in effect compiler directives, and are sometimes called
+"pragmatic modules" (or even "pragmata" if you're a classicist).
+
+Because the C<use> statement implies a C<BEGIN> block, the importation
+of semantics happens at the moment the C<use> statement is compiled,
+before the rest of the file is compiled.  This is how it is able
+to function as a pragma mechanism, and also how modules are able to
+declare subroutines that are then visible as list operators for
+the rest of the current file.  This will not work if you use C<require>
+instead of C<use>.  Therefore, if you're planning on the module altering
+your namespace, use C<use>; otherwise, use C<require>.  Otherwise you 
+can get into this problem:
+
+    require Cwd;		# make Cwd:: accessible
+    $here = Cwd::getcwd();	
+
+    use Cwd;			# import names from Cwd:: 
+    $here = getcwd();
+
+    require Cwd;	    	# make Cwd:: accessible
+    $here = getcwd(); 		# oops! no main::getcwd()
+
+Perl packages may be nested inside other package names, so we can have
+package names containing C<::>.  But if we used that package name
+directly as a filename it would makes for unwieldy or impossible
+filenames on some systems.  Therefore, if a module's name is, say,
+C<Text::Soundex>, then its definition is actually found in the library
+file F<Text/Soundex.pm>.
+
+Perl modules always have a F<.pm> file, but there may also be dynamically
+linked executables or autoloaded subroutine definitions associated with
+the module.  If so, these will be entirely transparent to the user of
+the module.  It is the responsibility of the F<.pm> file to load (or
+arrange to autoload) any additional functionality.  The POSIX module
+happens to do both dynamic loading and autoloading, but the user can
+just say C<use POSIX> to get it all.
+
+For more information on writing extension modules, see L<perlapi>
+and L<perlguts>.
+
+=head1 NOTE
+
+Perl does not enforce private and public parts of its modules as you may
+have been used to in other languages like C++, Ada, or Modula-17.  Perl
+doesn't have an infatuation with enforced privacy.  It would prefer
+that you stayed out of its living room because you weren't invited, not
+because it has a shotgun.
+
+The module and its user have a contract, part of which is common law,
+and part of which is "written".  Part of the common law contract is
+that a module doesn't pollute any namespace it wasn't asked to.  The
+written contract for the module (AKA documentation) may make other
+provisions.  But then you know when you C<use RedefineTheWorld> that
+you're redefining the world and willing to take the consequences.
+
+=head1 THE PERL MODULE LIBRARY
+
+A number of modules are included the the Perl distribution.  These are
+described below, and all end in F<.pm>.  You may also discover files in 
+the library directory that end in either F<.pl> or F<.ph>.  These are old
+libaries supplied so that old programs that use them still run.  The
+F<.pl> files will all eventually be converted into standard modules, and
+the F<.ph> files made by B<h2ph> will probably end up as extension modules
+made by B<h2xs>.  (Some F<.ph> values may already be available through the
+POSIX module.)  The B<pl2pm> file in the distribution may help in your
+conversion, but it's just a mechanical process, so is far from bullet proof.
+
+=head2 Pragmatic Modules
+
+They work somewhat like pragmas in that they tend to affect the compilation of
+your program, and thus will usually only work well when used within a
+C<use>, or C<no>.  These are locally scoped, so if an inner BLOCK
+may countermand any of these by saying
+
+    no integer;
+    no strict 'refs';
+
+which lasts until the end of that BLOCK.
+
+The following programs are defined (and have their own documentation).
+
+=over 12
+
+=item C<integer>
+
+Perl pragma to compute arithmetic in integer instead of double
+
+=item C<less>
+
+Perl pragma to request less of something from the compiler
+
+=item C<sigtrap>
+
+Perl pragma to enable stack backtrace on unexpected signals
+
+=item C<strict>
+
+Perl pragma to restrict unsafe constructs
+
+=item C<subs>
+
+Perl pragma to predeclare sub names
+
+=back
+
+=head2 Standard Modules
+
+The following modules are all expacted to behave in a well-defined
+manner with respect to namespace pollution because they use the
+Exporter module.
+See their own documentation for details.
+
+=over 12
+
+=item C<Abbrev>
+
+create an abbreviation table from a list
+
+=item C<AnyDBM_File>
+
+provide framework for multiple DBMs 
+
+=item C<AutoLoader>
+
+load functions only on demand
+
+=item C<AutoSplit>
+
+split a package for autoloading
+
+=item C<Basename>
+
+parse file anme and path from a specification
+
+=item C<Benchmark>
+
+benchmark running times of code 
+
+=item C<Carp>
+
+warn or die of errors (from perspective of caller)
+
+=item C<CheckTree>
+
+run many filetest checks on a tree
+
+=item C<Collate>
+
+compare 8-bit scalar data according to the current locale
+
+=item C<Config>
+
+access Perl configuration option
+
+=item C<Cwd>
+
+get pathname of current working directory
+
+=item C<DynaLoader>
+
+Dynamically load C libraries into Perl code 
+
+=item C<English>
+
+use nice English (or B<awk>) names for ugly punctuation variables
+
+=item C<Env>
+
+Perl module that imports environment variables
+
+=item C<Exporter>
+
+module to control namespace manipulations 
+
+=item C<Fcntl>
+
+load the C Fcntl.h defines
+
+=item C<FileHandle>
+
+supply object methods for filehandles 
+
+=item C<Find>
+
+traverse a file tree
+
+=item C<Finddepth>
+
+traverse a directory structure depth-first
+
+=item C<Getopt>
+
+basic and extended getopt(3) processing
+
+=item C<MakeMaker>
+
+generate a Makefile for Perl extension
+
+=item C<Open2>
+
+open a process for both reading and writing
+
+=item C<Open3>
+
+open a process for reading, writing, and error handling
+
+=item C<POSIX>
+
+Perl interface to IEEE 1003.1 namespace
+
+=item C<Ping>
+
+check a host for upness
+
+=item C<Socket>
+
+load the C socket.h defines
+
+=back
+
+=head2 Extension Modules
+
+Extension modules are written in C (or a mix of Perl and C) and get
+dynamically loaded into Perl if and when you need them.  Supported
+extension modules include the Socket, Fcntl, and POSIX modules.
+
+The following are popular C extension modules, which while available at
+Perl 5.0 release time, do not come not bundled (at least, not completely)
+due to their size, volatility, or simply lack of time for adequate testing
+and configuration across the multitude of platforms on which Perl was
+beta-tested.  You are encouraged to look for them in archie(1L), the Perl
+FAQ or Meta-FAQ, the WWW page, and even their authors before randomly
+posting asking for their present condition and disposition.  There's no
+guarantee that the names or addresses below have not changed since printing,
+and in fact, they probably have!
+
+=over 12
+
+=item C<Curses>
+
+Written by William Setzer <F<William_Setzer@ncsu.edu>>, while not
+included with the standard distribution, this extension module ports to
+most systems.  FTP from your nearest Perl archive site, or try
+
+        ftp://ftp.ncsu.edu/pub/math/wsetzer/cursperl5??.tar.gz
+
+It is currently in alpha test, so the name and ftp location may
+change.
+
+
+=item C<DBI>
+
+This is the portable database interface written by
+<F<Tim.Bunce@ig.co.uk>>.  This supersedes the many perl4 ports for
+database extensions.  The official archive for DBperl extensions is
+F<ftp.demon.co.uk:/pub/perl/db>.  This archive contains copies of perl4
+ports for Ingres, Oracle, Sybase, Informix, Unify, Postgres, and
+Interbase, as well as rdb and shql and other non-SQL systems.
+
+=item C<DB_File>
+
+Fastest and most restriction-free of the DBM bindings, this extension module 
+uses the popular Berkeley DB to tie() into your hashes.  This has a
+standardly-distributed man page and dynamic loading extension module, but
+you'll have to fetch the Berkeley code yourself.  See L<DB_File> for
+where.
+
+=item C<Sx>
+
+This extension module is a front to the Athena and Xlib libraries for Perl
+GUI progamming, originally written by by Dominic Giampaolo
+<F<dbg@sgi.com>>, then and rewritten for Sx by FrE<eacute>dE<eacute>ric
+Chauveau <F<fmc@pasteur.fr>>.  It's available for FTP from
+
+    ftp.pasteur.fr:/pub/Perl/Sx.tar.gz
+
+=item C<Tk>
+
+This extension module is an object-oriented Perl5 binding to the popular
+tcl/tk X11 package.  However, you need know no TCL to use it!
+It was written by Malcolm Beattie <F<mbeattie@sable.ox.ac.uk>>.
+If you are unable to locate it using archie(1L) or a similar
+tool, you may try retrieving it from F</private/Tk-october.tar.gz>
+from Malcolm's machine listed above.
+
+=back

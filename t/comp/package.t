@@ -19,9 +19,9 @@ $ABC'dyick = 6;
 
 $xyz = 2;
 
-$main = join(':', sort(keys %::_main));
-$XYZ = join(':', sort(keys %::_XYZ));
-$ABC = join(':', sort(keys %::_ABC));
+$main = join(':', sort(keys %main::));
+$XYZ = join(':', sort(keys %XYZ::));
+$ABC = join(':', sort(keys %ABC::));
 
 print $XYZ eq 'ABC:XYZ:bar:main:xyz' ? "ok 1\n" : "not ok 1 '$XYZ'\n";
 print $ABC eq 'blurfl:dyick' ? "ok 2\n" : "not ok 2 '$ABC'\n";

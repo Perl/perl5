@@ -6,17 +6,6 @@
  *    License or the Artistic License, as specified in the README file.
  *
  * $Log:	handy.h,v $
- * Revision 4.1  92/08/07  18:29:19  lwall
- * 
- * Revision 4.0.1.2  91/06/07  12:15:43  lwall
- * patch4: new copyright notice
- * 
- * Revision 4.0.1.1  91/04/12  09:29:08  lwall
- * patch1: random cleanup in cpp namespace
- * 
- * Revision 4.0  91/03/20  01:57:45  lwall
- * 4.0 baseline.
- * 
  */
 
 #define Null(type) ((type)0)

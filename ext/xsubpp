@@ -1,11 +1,13 @@
 #!./miniperl
+'di ';
+'ds 00 \"';
+'ig 00 ';
 # $Header$ 
 
-$usage = "Usage: xsubpp [-ansi] [-C++] [-except] [-tm typemap] file.xs\n";
+$usage = "Usage: xsubpp [-C++] [-except] [-typemap typemap] file.xs\n";
 
 SWITCH: while ($ARGV[0] =~ s/^-//) {
     $flag = shift @ARGV;
-    $ansiflag = 1,	next SWITCH	if $flag eq 'ansi';
     $spat = shift,	next SWITCH	if $flag eq 's';
     $cplusplus = 1,	next SWITCH	if $flag eq 'C++';
     $except = 1,	next SWITCH	if $flag eq 'except';
@@ -15,6 +17,7 @@ SWITCH: while ($ARGV[0] =~ s/^-//) {
 @ARGV == 1 or die $usage;
 chop($pwd = `pwd`);
 ($dir, $filename) = @ARGV[0] =~ m#(.*)/(.*)#
+	or ($dir, $filename) = @ARGV[0] =~ m#(.*[>\]])(.*)#
 	or ($dir, $filename) = ('.', $ARGV[0]);
 chdir($dir);
 
@@ -43,7 +46,7 @@ foreach $typemap (@tm) {
 	    }
 	    else {
 		s/\s*$//;
-#		$input_expr{$_} = '';
+		$input_expr{$_} = '';
 		$current = \$input_expr{$_};
 	    }
 	}
@@ -53,7 +56,7 @@ foreach $typemap (@tm) {
 	    }
 	    else {
 		s/\s*$//;
-#		$output_expr{$_} = '';
+		$output_expr{$_} = '';
 		$current = \$output_expr{$_};
 	    }
 	}
@@ -76,9 +79,9 @@ sub Q {
 open(F, $filename) || die "cannot open $filename\n";
 
 while (<F>) {
-	last if ($Module, $foo, $Package, $foo1, $Prefix) =
-		/^MODULE\s*=\s*(\w+)(\s+PACKAGE\s*=\s*([\w:]+))?(\s+PREFIX\s*=\s*(\S+))?$/;
-	print $_;
+    last if ($Module, $foo, $Package, $foo1, $Prefix) =
+	/^MODULE\s*=\s*([\w:]+)(\s+PACKAGE\s*=\s*([\w:]+))?(\s+PREFIX\s*=\s*(\S+))?\s*$/;
+    print $_;
 }
 exit 0 if $_ eq "";
 $lastline = $_;
@@ -88,17 +91,20 @@ sub fetch_para {
     @line = ();
     if ($lastline ne "") {
 	if ($lastline =~
-    /^MODULE\s*=\s*(\w+)(\s+PACKAGE\s*=\s*([\w:]+))?(\s+PREFIX\s*=\s*(\S+))?$/) {
+    /^MODULE\s*=\s*([\w:]+)(\s+PACKAGE\s*=\s*([\w:]+))?(\s+PREFIX\s*=\s*(\S+))?\s*$/) {
 	    $Module = $1;
 	    $foo = $2;
 	    $Package = $3;
 	    $foo1 = $4;
 	    $Prefix = $5;
+	    ($Module_cname = $Module) =~ s/\W/_/g;
 	    ($Packid = $Package) =~ s/:/_/g;
 	    $Packprefix = $Package;
 	    $Packprefix .= "::" if defined $Packprefix && $Packprefix ne "";
 	    while (<F>) {
 		chop;
+		next if /^#/ &&
+		    !/^#[ \t]*(if|ifdef|ifndef|else|elif|endif|define|undef)\b/;
 		last if /^\S/;
 	    }
 	    push(@line, $_) if $_ ne "";
@@ -108,7 +114,8 @@ sub fetch_para {
 	}
 	$lastline = "";
 	while (<F>) {
-	    next if /^#/ && !/^#(if|ifdef|else|elif|endif|define|undef)\b/;
+	    next if /^#/ &&
+		!/^#[ \t]*(if|ifdef|ifndef|else|elif|endif|define|undef)\b/;
 	    chop;
 	    if (/^\S/ && @line && $line[-1] eq "") {
 		$lastline = $_;
@@ -118,8 +125,9 @@ sub fetch_para {
 		push(@line, $_);
 	    }
 	}
-	pop(@line) while @line && $line[-1] eq "";
+	pop(@line) while @line && $line[-1] =~ /^\s*$/;
     }
+    $PPCODE = grep(/PPCODE:/, @line);
     scalar @line;
 }
 
@@ -135,6 +143,10 @@ while (&fetch_para) {
 
     # extract return type, function name and arguments
     $ret_type = shift(@line);
+    if ($ret_type =~ /^BOOT:/) {
+        push (@BootCode, @line, "", "") ;
+        next ;
+    }
     if ($ret_type =~ /^static\s+(.*)$/) {
 	    $static = 1;
 	    $ret_type = $1;
@@ -149,10 +161,17 @@ while (&fetch_para) {
     push(@Func_name, "${Packid}_$func_name");
     push(@Func_pname, $pname);
     @args = split(/\s*,\s*/, $orig_args);
-    if (defined($class) && !defined($static)) {
+    if (defined($class)) {
+	if (defined($static)) {
+	    unshift(@args, "CLASS");
+	    $orig_args = "CLASS, $orig_args";
+	    $orig_args =~ s/^CLASS, $/CLASS/;
+	}
+	else {
 	    unshift(@args, "THIS");
 	    $orig_args = "THIS, $orig_args";
 	    $orig_args =~ s/^THIS, $/THIS/;
+	}
     }
     $orig_args =~ s/"/\\"/g;
     $min_args = $num_args = @args;
@@ -172,7 +191,7 @@ while (&fetch_para) {
 		    $defaults{$args[$i]} =~ s/"/\\"/g;
 	    }
     }
-    if (defined($class) && !defined($static)) {
+    if (defined($class)) {
 	    $func_args = join(", ", @args[1..$#args]);
     } else {
 	    $func_args = join(", ", @args);
@@ -180,23 +199,11 @@ while (&fetch_para) {
     @args_match{@args} = 1..@args;
 
     # print function header
-    if ($ansiflag) {
-	print Q<<"EOF";
-#static int
-#XS_${Packid}_$func_name(int, int ax, int items)
+    print Q<<"EOF";
+#XS(XS_${Packid}_$func_name)
 #[[
+#    dXSARGS;
 EOF
-    }
-    else {
-	print Q<<"EOF";
-#static int
-#XS_${Packid}_$func_name(ix, ax, items)
-#register int ix;
-#register int ax;
-#register int items;
-#[[
-EOF
-    }
     if ($elipsis) {
 	$cond = qq(items < $min_args);
     }
@@ -216,6 +223,10 @@ EOF
 #    if ($cond) {
 #	croak("Usage: $pname($orig_args)");
 #    }
+EOF
+
+    print Q<<"EOF" if $PPCODE;
+#    SP -= items;
 EOF
 
     # Now do a block of some sort.
@@ -258,6 +269,9 @@ EOF
 		$_ = shift(@line);
 		last if /^\s*NOT_IMPLEMENTED_YET/;
 		last if /^\s*(PPCODE|CODE|OUTPUT|CLEANUP|CASE)\s*:/;
+		# Catch common error. Much more error checking required here.
+		blurt("Error: no tab in $pname argument declaration '$_'\n")
+			unless (m/\S+\s*\t\s*\S+/);
 		($var_type, $var_name, $var_init) =
 		    /\s*([^\t]+)\s*([^\s=]+)\s*(=.*)?/;
 		if ($var_name =~ /^&/) {
@@ -286,10 +300,17 @@ EOF
 			print "\t$var_name;\n";
 		}
 	}
-	if (!$thisdone && defined($class) && !defined($static)) {
+	if (!$thisdone && defined($class)) {
+	    if (defined($static)) {
+		print "\tchar *";
+		$var_types{"CLASS"} = "char *";
+		&generate_init("char *", 1, "CLASS");
+	    }
+	    else {
 		print "\t$class *";
 		$var_types{"THIS"} = "$class *";
 		&generate_init("$class *", 1, "THIS");
+	    }
 	}
 
 	# do code
@@ -303,14 +324,14 @@ EOF
 			$var_types{"RETVAL"} = $ret_type;
 		}
 		if (/^\s*PPCODE:/) {
-			print "\tdSP;\n";
 			print $deferred;
 			while (@line) {
 				$_ = shift(@line);
-				last if /^\s*(OUTPUT|CLEANUP|CASE)\s*:/;
+				die "PPCODE must be last thing"
+				    if /^\s*(OUTPUT|CLEANUP|CASE)\s*:/;
 				print "$_\n";
 			}
-			print "\tax = sp - stack_base;\n";
+			print "\tPUTBACK;\n\treturn;\n";
 		} elsif (/^\s*CODE:/) {
 			print $deferred;
 			while (@line) {
@@ -318,6 +339,10 @@ EOF
 				last if /^\s*(OUTPUT|CLEANUP|CASE)\s*:/;
 				print "$_\n";
 			}
+		} elsif ($func_name eq "DESTROY") {
+			print $deferred;
+			print "\n\t";
+			print "delete THIS;\n"
 		} else {
 			print $deferred;
 			print "\n\t";
@@ -325,7 +350,12 @@ EOF
 				print "RETVAL = ";
 			}
 			if (defined($static)) {
+			    if ($func_name =~ /^new/) {
+				$func_name = "$class";
+			    }
+			    else {
 				print "$class::";
+			    }
 			} elsif (defined($class)) {
 				print "THIS->";
 			}
@@ -346,7 +376,7 @@ EOF
 			s/^\s+//;
 			($outarg, $outcode) = split(/\t+/);
 			if ($outcode) {
-			print "\t$outcode\n";
+			    print "\t$outcode\n";
 			} else {
 				die "$outarg not an argument"
 				    unless defined($args_match{$outarg});
@@ -383,12 +413,17 @@ EOF
 	    unshift(@line, $_);
 	}
     }
+
     print Q<<EOF if $except;
 #    if (errbuf[0])
 #	croak(errbuf);
 EOF
+
+    print Q<<EOF unless $PPCODE;
+#    XSRETURN(1);
+EOF
+
     print Q<<EOF;
-#    return ax;
 #]]
 #
 EOF
@@ -397,24 +432,32 @@ EOF
 # print initialization routine
 print qq/extern "C"\n/ if $cplusplus;
 print Q<<"EOF";
-#int boot_$Module(ix,ax,items)
-#int ix;
-#int ax;
-#int items;
+#XS(boot_$Module_cname)
 #[[
+#    dXSARGS;
 #    char* file = __FILE__;
 #
 EOF
 
 for (@Func_name) {
     $pname = shift(@Func_pname);
-    print "    newXSUB(\"$pname\", 0, XS_$_, file);\n";
+    print "    newXS(\"$pname\", XS_$_, file);\n";
 }
+
+if (@BootCode)
+{
+    print "\n    /* Initialisation Section */\n\n" ;
+    print grep (s/$/\n/, @BootCode) ;
+    print "    /* End of Initialisation Section */\n\n" ;
+}
+
+print "    ST(0) = &sv_yes;\n";
+print "    XSRETURN(1);\n";
 print "}\n";
 
 sub output_init {
     local($type, $num, $init) = @_;
-    local($arg) = "ST($num)";
+    local($arg) = "ST(" . ($num - 1) . ")";
 
     eval qq/print " $init\\\n"/;
 }
@@ -423,7 +466,7 @@ sub blurt { warn @_; $errors++ }
 
 sub generate_init {
     local($type, $num, $var) = @_;
-    local($arg) = "ST($num)";
+    local($arg) = "ST(" . ($num - 1) . ")";
     local($argoff) = $num - 1;
     local($ntype);
     local($tk);
@@ -443,7 +486,7 @@ sub generate_init {
 	$subexpr =~ s/\$arg/ST(ix_$var)/g;
 	$subexpr =~ s/\n\t/\n\t\t/g;
 	$subexpr =~ s/is not of (.*")/[arg %d] is not of $1, ix_$var + 1/g;
-	$subexpr =~ s/\$var/$var[ix_$var - $argoff]/;
+	$subexpr =~ s/\$var/${var}[ix_$var - $argoff]/;
 	$expr =~ s/DO_ARRAY_ELEM/$subexpr/;
     }
     if (defined($defaults{$var})) {
@@ -461,7 +504,7 @@ sub generate_init {
 
 sub generate_output {
     local($type, $num, $var) = @_;
-    local($arg) = "ST($num)";
+    local($arg) = "ST(" . ($num - ($num != 0)) . ")";
     local($argoff) = $num - 1;
     local($ntype);
 
@@ -483,17 +526,26 @@ sub generate_output {
 		$subexpr =~ s/\$var/${var}[ix_$var]/g;
 		$subexpr =~ s/\n\t/\n\t\t/g;
 		$expr =~ s/DO_ARRAY_ELEM\n/$subexpr/;
-		eval "print qq\f$expr\f";
+		eval "print qq\a$expr\a";
 	    }
-	    elsif ($arg eq 'ST(0)') {
+	    elsif ($var eq 'RETVAL') {
 		if ($expr =~ /^\t\$arg = /) {
-		    eval "print qq\f$expr\f";
+		    eval "print qq\a$expr\a";
 		    print "\tsv_2mortal(ST(0));\n";
 		}
 		else {
 		    print "\tST(0) = sv_newmortal();\n";
-		    eval "print qq\f$expr\f";
+		    eval "print qq\a$expr\a";
 		}
+	    }
+	    elsif ($arg =~ /^ST\(\d+\)$/) {
+		eval "print qq\a$expr\a";
+	    }
+	    elsif ($arg =~ /^ST\(\d+\)$/) {
+		eval "print qq\a$expr\a";
+	    }
+	    elsif ($arg =~ /^ST\(\d+\)$/) {
+		eval "print qq\a$expr\a";
 	    }
     }
 }
@@ -510,3 +562,55 @@ sub map_type {
 }
 
 exit $errors;
+
+##############################################################################
+
+	# These next few lines are legal in both Perl and nroff.
+
+.00 ;			# finish .ig
+ 
+'di			\" finish diversion--previous line must be blank
+.nr nl 0-1		\" fake up transition to first page again
+.nr % 0			\" start at page 1
+'; __END__ ############# From here on it's a standard manual page ############
+.TH XSUBPP 1 "August 9, 1994"
+.AT 3
+.SH NAME
+xsubpp \- compiler to convert Perl XS code into C code
+.SH SYNOPSIS
+.B xsubpp [-C++] [-except] [-typemap typemap] file.xs
+.SH DESCRIPTION
+.I xsubpp
+will compile XS code into C code by embedding the constructs necessary to
+let C functions manipulate Perl values and creates the glue necessary to let
+Perl access those functions.  The compiler uses typemaps to determine how
+to map C function parameters and variables to Perl values.
+.PP
+The compiler will search for typemap files called
+.I typemap.
+It will use the following search path to find default typemaps, with the
+rightmost typemap taking precedence.
+.br
+.nf
+	../../../typemap:../../typemap:../typemap:typemap
+.fi
+.SH OPTIONS
+.TP
+.B \-C++
+.br
+Adds ``extern "C"'' to the C code.
+.TP
+.B \-except
+Adds exception handling stubs to the C code.
+.TP
+.B \-typemap typemap
+Indicates that a user-supplied typemap should take precedence over the
+default typemaps.  This option may be used multiple times, with the last
+typemap having the highest precedence.
+.SH ENVIRONMENT
+No environment variables are used.
+.SH AUTHOR
+Larry Wall
+.SH "SEE ALSO"
+perl(1)
+.ex

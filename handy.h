@@ -1,29 +1,10 @@
-/* $RCSfile: handy.h,v $$Revision: 4.1 $$Date: 92/08/07 18:21:46 $
+/*    handy.h
  *
- *    Copyright (c) 1991, Larry Wall
+ *    Copyright (c) 1991-1994, Larry Wall
  *
  *    You may distribute under the terms of either the GNU General Public
  *    License or the Artistic License, as specified in the README file.
  *
- * $Log:	handy.h,v $
- * Revision 4.1  92/08/07  18:21:46  lwall
- * 
- * Revision 4.0.1.4  92/06/08  13:23:17  lwall
- * patch20: isascii() may now be supplied by a library routine
- * patch20: Perl now distinguishes overlapped copies from non-overlapped
- * 
- * Revision 4.0.1.3  91/11/05  22:54:26  lwall
- * patch11: erratum
- * 
- * Revision 4.0.1.2  91/11/05  17:23:38  lwall
- * patch11: prepared for ctype implementations that don't define isascii()
- * 
- * Revision 4.0.1.1  91/06/07  11:09:56  lwall
- * patch4: new copyright notice
- * 
- * Revision 4.0  91/03/20  01:22:15  lwall
- * 4.0 baseline.
- * 
  */
 
 #if !defined(__STDC__)
@@ -57,31 +38,19 @@
 #define TRUE (1)
 #define FALSE (0)
 
-#ifdef UNICOS
-#define I8	char
-#define U8	unsigned char
-#define I16	short
-#define U16	unsigned short
-#define I32	int
-#define U32	unsigned int
-
-#else
-
 typedef char		I8;
 typedef unsigned char	U8;
 
 typedef short		I16;
 typedef unsigned short	U16;
 
-#if INTSIZE == 4
+#if BYTEORDER > 0x4321
   typedef int		I32;
   typedef unsigned int	U32;
 #else
   typedef long		I32;
   typedef unsigned long	U32;
 #endif
-
-#endif /* UNICOS */
 
 #define Ctl(ch) (ch & 037)
 
@@ -100,6 +69,17 @@ typedef unsigned short	U16;
 #  endif
 #endif
 
+#ifdef USE_NEXT_CTYPE 
+#define isALNUM(c)   (NXIsAlpha((unsigned int)c) || NXIsDigit((unsigned int)c) || c == '_')
+#define isIDFIRST(c) (NXIsAlpha((unsigned int)c) || c == '_')
+#define isALPHA(c)   NXIsAlpha((unsigned int)c)
+#define isSPACE(c)   NXIsSpace((unsigned int)c)
+#define isDIGIT(c)   NXIsDigit((unsigned int)c)
+#define isUPPER(c)   NXIsUpper((unsigned int)c)
+#define isLOWER(c)   NXIsLower((unsigned int)c)
+#define toUPPER(c)   NXToUpper((unsigned int)c)
+#define toLOWER(c)   NXToLower((unsigned int)c)
+#else /* USE_NEXT_CTYPE */
 #if defined(CTYPE256) || (!defined(isascii) && !defined(HAS_ISASCII))
 #define isALNUM(c)   (isalpha((unsigned char)(c)) || isdigit((unsigned char)(c)) || c == '_')
 #define isIDFIRST(c) (isalpha((unsigned char)(c)) || (c) == '_')
@@ -108,6 +88,8 @@ typedef unsigned short	U16;
 #define isDIGIT(c)   isdigit((unsigned char)(c))
 #define isUPPER(c)   isupper((unsigned char)(c))
 #define isLOWER(c)   islower((unsigned char)(c))
+#define toUPPER(c)   toupper((unsigned char)(c))
+#define toLOWER(c)   tolower((unsigned char)(c))
 #else
 #define isALNUM(c)   (isascii(c) && (isalpha(c) || isdigit(c) || c == '_'))
 #define isIDFIRST(c) (isascii(c) && (isalpha(c) || (c) == '_'))
@@ -116,7 +98,10 @@ typedef unsigned short	U16;
 #define isDIGIT(c)   (isascii(c) && isdigit(c))
 #define isUPPER(c)   (isascii(c) && isupper(c))
 #define isLOWER(c)   (isascii(c) && islower(c))
+#define toUPPER(c)   toupper(c)
+#define toLOWER(c)   tolower(c)
 #endif
+#endif /* USE_NEXT_CTYPE */
 
 /* Line numbers are unsigned, 16 bits. */
 typedef U16 line_t;
@@ -129,9 +114,9 @@ typedef U16 line_t;
 #ifndef lint
 #ifndef LEAKTEST
 #ifndef safemalloc
-char *safemalloc();
-char *saferealloc();
-void safefree();
+char *safemalloc _((MEM_SIZE));
+char *saferealloc _((char *, MEM_SIZE));
+void safefree _((char *));
 #endif
 #ifndef MSDOS
 #define New(x,v,n,t)  (v = (t*)safemalloc((MEM_SIZE)((n) * sizeof(t))))

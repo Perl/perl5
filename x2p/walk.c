@@ -6,24 +6,6 @@
  *    License or the Artistic License, as specified in the README file.
  *
  * $Log:	walk.c,v $
- * Revision 4.1  92/08/07  18:29:31  lwall
- * 
- * Revision 4.0.1.3  92/06/08  17:33:46  lwall
- * patch20: in a2p, simplified the filehandle model
- * patch20: in a2p, made RS="" translate to $/ = "\n\n"
- * patch20: in a2p, do {...} while ... was missing some reconstruction code
- * patch20: in a2p, getline should allow variable to be array element
- * 
- * Revision 4.0.1.2  91/11/05  19:25:09  lwall
- * patch11: in a2p, split on whitespace produced extra null field
- * 
- * Revision 4.0.1.1  91/06/07  12:22:04  lwall
- * patch4: new copyright notice
- * patch4: a2p didn't correctly implement -n switch
- * 
- * Revision 4.0  91/03/20  01:58:36  lwall
- * 4.0 baseline.
- * 
  */
 
 #include "handy.h"
@@ -66,7 +48,7 @@ int minprec;			/* minimum precedence without parens */
     int numeric = FALSE;
     STR *fstr;
     int prec = P_MAX;		/* assume no parens needed */
-    char *index();
+    char *strchr();
 
     if (!node) {
 	*numericptr = 0;
@@ -109,7 +91,7 @@ int minprec;			/* minimum precedence without parens */
 	    do_chop = TRUE;
 	if (fswitch) {
 	    str_cat(str,"$FS = '");
-	    if (index("*+?.[]()|^$\\",fswitch))
+	    if (strchr("*+?.[]()|^$\\",fswitch))
 		str_cat(str,"\\");
 	    sprintf(tokenbuf,"%c",fswitch);
 	    str_cat(str,tokenbuf);
@@ -397,8 +379,8 @@ sub Pick {\n\
 		str_set(tmpstr,"gt");
 	    else if (strEQ(t,">="))
 		str_set(tmpstr,"ge");
-	    if (!index(tmpstr->str_ptr,'\'') && !index(tmpstr->str_ptr,'"') &&
-	      !index(tmp2str->str_ptr,'\'') && !index(tmp2str->str_ptr,'"') )
+	    if (!strchr(tmpstr->str_ptr,'\'') && !strchr(tmpstr->str_ptr,'"') &&
+	      !strchr(tmp2str->str_ptr,'\'') && !strchr(tmp2str->str_ptr,'"') )
 		numeric |= 2;
 	}
 	if (numeric & 2) {
@@ -604,7 +586,7 @@ sub Pick {\n\
 		    if (!isalpha(*t) && !isdigit(*t))
 			*t = '_';
 		}
-		if (!index(tokenbuf,'_'))
+		if (!strchr(tokenbuf,'_'))
 		    strcpy(t,"_FH");
 		tmp3str = hfetch(symtab,tokenbuf);
 		if (!tmp3str) {
@@ -693,7 +675,7 @@ sub Pick {\n\
 	    fstr = walk(1,level,ops[node+3].ival,&numarg,P_COMMA+1);
 	    if (str_len(fstr) == 3 && *fstr->str_ptr == '\'') {
 		i = fstr->str_ptr[1] & 127;
-		if (index("*+?.[]()|^$\\",i))
+		if (strchr("*+?.[]()|^$\\",i))
 		    sprintf(tokenbuf,"/\\%c/",i);
 		else if (i == ' ')
 		    sprintf(tokenbuf,"' '");
@@ -1135,7 +1117,7 @@ sub Pick {\n\
 		if (!isalpha(*t) && !isdigit(*t))
 		    *t = '_';
 	    }
-	    if (!index(tokenbuf,'_'))
+	    if (!strchr(tokenbuf,'_'))
 		strcpy(t,"_FH");
 	    str_free(tmpstr);
 	    safefree(s);
@@ -1172,7 +1154,7 @@ sub Pick {\n\
 		    if (!isalpha(*t) && !isdigit(*t))
 			*t = '_';
 		}
-		if (!index(tokenbuf,'_'))
+		if (!strchr(tokenbuf,'_'))
 		    strcpy(t,"_FH");
 		tmp3str = hfetch(symtab,tokenbuf);
 		if (!tmp3str) {
@@ -1448,7 +1430,7 @@ sub Pick {\n\
 	}
 	str_cat(str,"; ");
 	fstr=walk(1,level,ops[node+2].ival,&numarg,P_MIN);
-	if (i && (t = index(fstr->str_ptr,0377))) {
+	if (i && (t = strchr(fstr->str_ptr,0377))) {
 	    if (strnEQ(fstr->str_ptr,s,i))
 		*t = ' ';
 	}
@@ -1464,12 +1446,12 @@ sub Pick {\n\
 	break;
     case OFORIN:
 	tmpstr = walk(0,level,ops[node+1].ival,&numarg,P_MIN);
-	d = index(tmpstr->str_ptr,'$');
+	d = strchr(tmpstr->str_ptr,'$');
 	if (!d)
 	    fatal("Illegal for loop: %s",tmpstr->str_ptr);
-	s = index(d,'{');
+	s = strchr(d,'{');
 	if (!s)
-	    s = index(d,'[');
+	    s = strchr(d,'[');
 	if (!s)
 	    fatal("Illegal for loop: %s",d);
 	*s++ = '\0';

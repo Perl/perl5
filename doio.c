@@ -1,54 +1,17 @@
-/* $RCSfile: doio.c,v $$Revision: 4.1 $$Date: 92/08/07 17:19:42 $
+/*    doio.c
  *
- *    Copyright (c) 1991, Larry Wall
+ *    Copyright (c) 1991-1994, Larry Wall
  *
  *    You may distribute under the terms of either the GNU General Public
  *    License or the Artistic License, as specified in the README file.
  *
- * $Log:	doio.c,v $
- * Revision 4.1  92/08/07  17:19:42  lwall
- * Stage 6 Snapshot
- * 
- * Revision 4.0.1.6  92/06/11  21:08:16  lwall
- * patch34: some systems don't declare h_errno extern in header files
- * 
- * Revision 4.0.1.5  92/06/08  13:00:21  lwall
- * patch20: some machines don't define ENOTSOCK in errno.h
- * patch20: new warnings for failed use of stat operators on filenames with \n
- * patch20: wait failed when STDOUT or STDERR reopened to a pipe
- * patch20: end of file latch not reset on reopen of STDIN
- * patch20: seek(HANDLE, 0, 1) went to eof because of ancient Ultrix workaround
- * patch20: fixed memory leak on system() for vfork() machines
- * patch20: get*by* routines now return something useful in a scalar context
- * patch20: h_errno now accessible via $?
- * 
- * Revision 4.0.1.4  91/11/05  16:51:43  lwall
- * patch11: prepared for ctype implementations that don't define isascii()
- * patch11: perl mistook some streams for sockets because they return mode 0 too
- * patch11: reopening STDIN, STDOUT and STDERR failed on some machines
- * patch11: certain perl errors should set EBADF so that $! looks better
- * patch11: truncate on a closed filehandle could dump
- * patch11: stats of _ forgot whether prior stat was actually lstat
- * patch11: -T returned true on NFS directory
- * 
- * Revision 4.0.1.3  91/06/10  01:21:19  lwall
- * patch10: read didn't work from character special files open for writing
- * patch10: close-on-exec wrongly set on system file descriptors
- * 
- * Revision 4.0.1.2  91/06/07  10:53:39  lwall
- * patch4: new copyright notice
- * patch4: system fd's are now treated specially
- * patch4: added $^F variable to specify maximum system fd, default 2
- * patch4: character special files now opened with bidirectional stdio buffers
- * patch4: taintchecks could improperly modify parent in vfork()
- * patch4: many, many itty-bitty portability fixes
- * 
- * Revision 4.0.1.1  91/04/11  17:41:06  lwall
- * patch1: hopefully straightened out some of the Xenix mess
- * 
- * Revision 4.0  91/03/20  01:07:06  lwall
- * 4.0 baseline.
- * 
+ */
+
+/*
+ * "Far below them they saw the white waters pour into a foaming bowl, and
+ * then swirl darkly about a deep oval basin in the rocks, until they found
+ * their way out again through a narrow gate, and flowed away, fuming and
+ * chattering, into calmer and more level reaches."
  */
 
 #include "EXTERN.h"
@@ -64,6 +27,9 @@
 #endif
 #ifdef HAS_SHM
 #include <sys/shm.h>
+# ifndef HAS_SHMAT_PROTOTYPE
+    extern Shmat_t shmat _((int, char *, int));
+# endif
 #endif
 #endif
 
@@ -77,18 +43,26 @@
 #include <sys/file.h>
 #endif
 
+/* Omit -- it causes too much grief on mixed systems.
+#ifdef I_UNISTD
+#include <unistd.h>
+#endif
+*/
+
 bool
-do_open(gv,name,len)
+do_open(gv,name,len,supplied_fp)
 GV *gv;
 register char *name;
 I32 len;
+FILE *supplied_fp;
 {
     FILE *fp;
-    register IO *io = GvIO(gv);
-    char *myname = savestr(name);
+    register IO *io = GvIOn(gv);
+    char *myname = savepv(name);
     int result;
     int fd;
     int writing = 0;
+    int dodup;
     char mode[3];		/* stdio file mode ("r\0" or "r+\0") */
     FILE *saveifp = Nullfp;
     FILE *saveofp = Nullfp;
@@ -100,9 +74,7 @@ I32 len;
     forkprocess = 1;		/* assume true if no fork */
     while (len && isSPACE(name[len-1]))
 	name[--len] = '\0';
-    if (!io)
-	io = GvIO(gv) = newIO();
-    else if (IoIFP(io)) {
+    if (IoIFP(io)) {
 	fd = fileno(IoIFP(io));
 	if (IoTYPE(io) == '-')
 	    result = 0;
@@ -145,6 +117,8 @@ I32 len;
 	if (strNE(name,"-"))
 	    TAINT_ENV();
 	TAINT_PROPER("piped open");
+	if (dowarn && name[strlen(name)-1] == '|')
+	    warn("Can't do bidirectional pipe");
 	fp = my_popen(name,"w");
 	writing = 1;
     }
@@ -160,29 +134,41 @@ I32 len;
 	writing = 1;
 	if (*name == '&') {
 	  duplicity:
+	    dodup = 1;
 	    name++;
-	    while (isSPACE(*name))
+	    if (*name == '=') {
+		dodup = 0;
 		name++;
-	    if (isDIGIT(*name))
-		fd = atoi(name);
-	    else {
-		gv = gv_fetchpv(name,FALSE,SVt_PVIO);
-		if (!gv || !GvIO(gv)) {
-#ifdef EINVAL
-		    errno = EINVAL;
-#endif
-		    goto say_false;
-		}
-		if (GvIO(gv) && IoIFP(GvIO(gv))) {
-		    fd = fileno(IoIFP(GvIO(gv)));
-		    if (IoTYPE(GvIO(gv)) == 's')
-			IoTYPE(io) = 's';
-		}
-		else
-		    fd = -1;
 	    }
-	    if (!(fp = fdopen(fd = dup(fd),mode))) {
-		close(fd);
+	    if (!*name && supplied_fp)
+		fp = supplied_fp;
+	    else {
+		while (isSPACE(*name))
+		    name++;
+		if (isDIGIT(*name))
+		    fd = atoi(name);
+		else {
+		    IO* thatio;
+		    gv = gv_fetchpv(name,FALSE,SVt_PVIO);
+		    thatio = GvIO(gv);
+		    if (!thatio) {
+#ifdef EINVAL
+			errno = EINVAL;
+#endif
+			goto say_false;
+		    }
+		    if (IoIFP(thatio)) {
+			fd = fileno(IoIFP(thatio));
+			if (IoTYPE(thatio) == 's')
+			    IoTYPE(io) = 's';
+		    }
+		    else
+			fd = -1;
+		}
+		if (dodup)
+		    fd = dup(fd);
+		if (!(fp = fdopen(fd,mode)))
+		    close(fd);
 	    }
 	}
 	else {
@@ -243,7 +229,7 @@ I32 len;
     }
     if (IoTYPE(io) &&
       IoTYPE(io) != '|' && IoTYPE(io) != '-') {
-	if (fstat(fileno(fp),&statbuf) < 0) {
+	if (Fstat(fileno(fp),&statbuf) < 0) {
 	    (void)fclose(fp);
 	    goto say_false;
 	}
@@ -257,8 +243,8 @@ I32 len;
 	    !statbuf.st_mode
 #endif
 	) {
-	    I32 buflen = sizeof tokenbuf;
-	    if (getsockname(fileno(fp), tokenbuf, &buflen) >= 0
+	    int buflen = sizeof tokenbuf;
+	    if (getsockname(fileno(fp), (struct sockaddr *)tokenbuf, &buflen) >= 0
 		|| errno != ENOTSOCK)
 		IoTYPE(io) = 's'; /* some OS's return 0 on fstat()ed socket */
 				/* but some return 0 for streams too, sigh */
@@ -281,11 +267,11 @@ I32 len;
 
 	    dup2(fileno(fp), fd);
 	    sv = *av_fetch(fdpid,fileno(fp),TRUE);
-	    SvUPGRADE(sv, SVt_IV);
+	    (void)SvUPGRADE(sv, SVt_IV);
 	    pid = SvIVX(sv);
 	    SvIVX(sv) = 0;
 	    sv = *av_fetch(fdpid,fd,TRUE);
-	    SvUPGRADE(sv, SVt_IV);
+	    (void)SvUPGRADE(sv, SVt_IV);
 	    SvIVX(sv) = pid;
 	    fclose(fp);
 
@@ -293,9 +279,9 @@ I32 len;
 	fp = saveifp;
 	clearerr(fp);
     }
-#if defined(HAS_FCNTL) && defined(FFt_SETFD)
+#if defined(HAS_FCNTL) && defined(F_SETFD)
     fd = fileno(fp);
-    fcntl(fd,FFt_SETFD,fd > maxsysfd);
+    fcntl(fd,F_SETFD,fd > maxsysfd);
 #endif
     IoIFP(io) = fp;
     if (writing) {
@@ -334,7 +320,7 @@ register GV *gv;
     if (!argvoutgv)
 	argvoutgv = gv_fetchpv("ARGVOUT",TRUE,SVt_PVIO);
     if (filemode & (S_ISUID|S_ISGID)) {
-	fflush(IoIFP(GvIO(argvoutgv)));  /* chmod must follow last write */
+	fflush(IoIFP(GvIOn(argvoutgv)));  /* chmod must follow last write */
 #ifdef HAS_FCHMOD
 	(void)fchmod(lastfd,filemode);
 #else
@@ -349,12 +335,12 @@ register GV *gv;
 	sv_setsv(GvSV(gv),sv);
 	SvSETMAGIC(GvSV(gv));
 	oldname = SvPVx(GvSV(gv), len);
-	if (do_open(gv,oldname,len)) {
+	if (do_open(gv,oldname,len,Nullfp)) {
 	    if (inplace) {
 		TAINT_PROPER("inplace open");
 		if (strEQ(oldname,"-")) {
 		    defoutgv = gv_fetchpv("STDOUT",TRUE,SVt_PVIO);
-		    return IoIFP(GvIO(gv));
+		    return IoIFP(GvIOp(gv));
 		}
 #ifndef FLEXFILENAMES
 		filedev = statbuf.st_dev;
@@ -376,7 +362,7 @@ register GV *gv;
 		    sv_catpv(sv,inplace);
 #endif
 #ifndef FLEXFILENAMES
-		    if (stat(SvPVX(sv),&statbuf) >= 0
+		    if (Stat(SvPVX(sv),&statbuf) >= 0
 		      && statbuf.st_dev == filedev
 		      && statbuf.st_ino == fileino ) {
 			warn("Can't do inplace edit: %s > 14 characters",
@@ -397,7 +383,7 @@ register GV *gv;
 		    do_close(gv,FALSE);
 		    (void)unlink(SvPVX(sv));
 		    (void)rename(oldname,SvPVX(sv));
-		    do_open(gv,SvPVX(sv),SvCUR(GvSV(gv)));
+		    do_open(gv,SvPVX(sv),SvCUR(GvSV(gv)),Nullfp);
 #endif /* MSDOS */
 #else
 		    (void)UNLINK(SvPVX(sv));
@@ -426,15 +412,15 @@ register GV *gv;
 		sv_setpvn(sv,">",1);
 		sv_catpv(sv,oldname);
 		errno = 0;		/* in case sprintf set errno */
-		if (!do_open(argvoutgv,SvPVX(sv),SvCUR(sv))) {
+		if (!do_open(argvoutgv,SvPVX(sv),SvCUR(sv),Nullfp)) {
 		    warn("Can't do inplace edit on %s: %s",
 		      oldname, Strerror(errno) );
 		    do_close(gv,FALSE);
 		    continue;
 		}
 		defoutgv = argvoutgv;
-		lastfd = fileno(IoIFP(GvIO(argvoutgv)));
-		(void)fstat(lastfd,&statbuf);
+		lastfd = fileno(IoIFP(GvIOp(argvoutgv)));
+		(void)Fstat(lastfd,&statbuf);
 #ifdef HAS_FCHMOD
 		(void)fchmod(lastfd,filemode);
 #else
@@ -450,7 +436,7 @@ register GV *gv;
 #endif
 		}
 	    }
-	    return IoIFP(GvIO(gv));
+	    return IoIFP(GvIOp(gv));
 	}
 	else
 	    fprintf(stderr,"Can't open %s: %s\n",SvPV(sv, na), Strerror(errno));
@@ -478,16 +464,12 @@ GV *wgv;
     if (!wgv)
 	goto badexit;
 
-    rstio = GvIO(rgv);
-    wstio = GvIO(wgv);
+    rstio = GvIOn(rgv);
+    wstio = GvIOn(wgv);
 
-    if (!rstio)
-	rstio = GvIO(rgv) = newIO();
-    else if (IoIFP(rstio))
+    if (IoIFP(rstio))
 	do_close(rgv,FALSE);
-    if (!wstio)
-	wstio = GvIO(wgv) = newIO();
-    else if (IoIFP(wstio))
+    if (IoIFP(wstio))
 	do_close(wgv,FALSE);
 
     if (pipe(fd) < 0)
@@ -515,13 +497,13 @@ badexit:
 #endif
 
 bool
-#ifndef STANDARD_C
+#ifndef CAN_PROTOTYPE
 do_close(gv,explicit)
 GV *gv;
 bool explicit;
 #else
 do_close(GV *gv, bool explicit)
-#endif /* STANDARD_C */
+#endif /* CAN_PROTOTYPE */
 {
     bool retval = FALSE;
     register IO *io;
@@ -529,7 +511,7 @@ do_close(GV *gv, bool explicit)
 
     if (!gv)
 	gv = argvgv;
-    if (!gv) {
+    if (!gv || SvTYPE(gv) != SVt_PVGV) {
 	errno = EBADF;
 	return FALSE;
     }
@@ -660,79 +642,7 @@ nuts:
     return FALSE;
 }
 
-I32
-do_ctl(optype,gv,func,argstr)
-I32 optype;
-GV *gv;
-I32 func;
-SV *argstr;
-{
-    register IO *io;
-    register char *s;
-    I32 retval;
-
-    if (!gv || !argstr || !(io = GvIO(gv)) || !IoIFP(io)) {
-	errno = EBADF;	/* well, sort of... */
-	return -1;
-    }
-
-    if (SvPOK(argstr) || !SvNIOK(argstr)) {
-	if (!SvPOK(argstr))
-	    s = SvPV(argstr, na);
-
-#ifdef IOCPARM_MASK
-#ifndef IOCPARM_LEN
-#define IOCPARM_LEN(x)  (((x) >> 16) & IOCPARM_MASK)
-#endif
-#endif
-#ifdef IOCPARM_LEN
-	retval = IOCPARM_LEN(func);	/* on BSDish systes we're safe */
-#else
-	retval = 256;			/* otherwise guess at what's safe */
-#endif
-	if (SvCUR(argstr) < retval) {
-	    Sv_Grow(argstr,retval+1);
-	    SvCUR_set(argstr, retval);
-	}
-
-	s = SvPVX(argstr);
-	s[SvCUR(argstr)] = 17;	/* a little sanity check here */
-    }
-    else {
-	retval = SvIV(argstr);
-#ifdef DOSISH
-	s = (char*)(long)retval;		/* ouch */
-#else
-	s = (char*)retval;		/* ouch */
-#endif
-    }
-
-#ifndef lint
-    if (optype == OP_IOCTL)
-	retval = ioctl(fileno(IoIFP(io)), func, s);
-    else
-#ifdef DOSISH
-	croak("fcntl is not implemented");
-#else
-#ifdef HAS_FCNTL
-	retval = fcntl(fileno(IoIFP(io)), func, s);
-#else
-	croak("fcntl is not implemented");
-#endif
-#endif
-#else /* lint */
-    retval = 0;
-#endif /* lint */
-
-    if (SvPOK(argstr)) {
-	if (s[SvCUR(argstr)] != 17)
-	    croak("Return value overflowed string");
-	s[SvCUR(argstr)] = 0;		/* put our null back */
-    }
-    return retval;
-}
-
-#if !defined(HAS_TRUNCATE) && !defined(HAS_CHSIZE) && defined(FFt_FREESP)
+#if !defined(HAS_TRUNCATE) && !defined(HAS_CHSIZE) && defined(F_FREESP)
 	/* code courtesy of William Kucharski */
 #define HAS_CHSIZE
 
@@ -744,7 +654,7 @@ Off_t length;		/* length to set file to */
     struct flock fl;
     struct stat filebuf;
 
-    if (fstat(fd, &filebuf) < 0)
+    if (Fstat(fd, &filebuf) < 0)
 	return -1;
 
     if (filebuf.st_size < length) {
@@ -765,24 +675,24 @@ Off_t length;		/* length to set file to */
 	fl.l_whence = 0;
 	fl.l_len = 0;
 	fl.l_start = length;
-	fl.l_type = FFt_WRLCK;    /* write lock on file space */
+	fl.l_type = F_WRLCK;    /* write lock on file space */
 
 	/*
-	* This relies on the UNDOCUMENTED FFt_FREESP argument to
+	* This relies on the UNDOCUMENTED F_FREESP argument to
 	* fcntl(2), which truncates the file so that it ends at the
 	* position indicated by fl.l_start.
 	*
 	* Will minor miracles never cease?
 	*/
 
-	if (fcntl(fd, FFt_FREESP, &fl) < 0)
+	if (fcntl(fd, F_FREESP, &fl) < 0)
 	    return -1;
 
     }
 
     return 0;
 }
-#endif /* FFt_FREESP */
+#endif /* F_FREESP */
 
 I32
 looks_like_number(sv)
@@ -840,7 +750,6 @@ register SV *sv;
 FILE *fp;
 {
     register char *tmps;
-    SV* tmpstr;
     STRLEN len;
 
     /* assuming fp is checked earlier */
@@ -865,15 +774,18 @@ FILE *fp;
 	    warn(warn_uninit);
 	return TRUE;
     case SVt_IV:
-	if (SvGMAGICAL(sv))
-	    mg_get(sv);
-	fprintf(fp, "%d", SvIVX(sv));
-	return !ferror(fp);
+	if (SvIOK(sv)) {
+	    if (SvGMAGICAL(sv))
+		mg_get(sv);
+	    fprintf(fp, "%ld", (long)SvIVX(sv));
+	    return !ferror(fp);
+	}
+	/* FALL THROUGH */
     default:
 	tmps = SvPV(sv, len);
 	break;
     }
-    if (len && (fwrite(tmps,1,len,fp) == 0 || ferror(fp)))
+    if (len && (fwrite1(tmps,1,len,fp) == 0 || ferror(fp)))
 	return FALSE;
     return TRUE;
 }
@@ -885,14 +797,14 @@ dARGS
     dSP;
     IO *io;
 
-    if (op->op_flags & OPf_SPECIAL) {
+    if (op->op_flags & OPf_REF) {
 	EXTEND(sp,1);
 	io = GvIO(cGVOP->op_gv);
 	if (io && IoIFP(io)) {
 	    statgv = cGVOP->op_gv;
 	    sv_setpv(statname,"");
 	    laststype = OP_STAT;
-	    return (laststatval = fstat(fileno(IoIFP(io)), &statcache));
+	    return (laststatval = Fstat(fileno(IoIFP(io)), &statcache));
 	}
 	else {
 	    if (cGVOP->op_gv == defgv)
@@ -911,7 +823,7 @@ dARGS
 	statgv = Nullgv;
 	sv_setpv(statname,SvPV(sv, na));
 	laststype = OP_STAT;
-	laststatval = stat(SvPV(sv, na),&statcache);
+	laststatval = Stat(SvPV(sv, na),&statcache);
 	if (laststatval < 0 && dowarn && strchr(SvPV(sv, na), '\n'))
 	    warn(warn_nl, "stat");
 	return laststatval;
@@ -924,7 +836,7 @@ dARGS
 {
     dSP;
     SV *sv;
-    if (op->op_flags & OPf_SPECIAL) {
+    if (op->op_flags & OPf_REF) {
 	EXTEND(sp,1);
 	if (cGVOP->op_gv == defgv) {
 	    if (laststype != OP_LSTAT)
@@ -942,7 +854,7 @@ dARGS
 #ifdef HAS_LSTAT
     laststatval = lstat(SvPV(sv, na),&statcache);
 #else
-    laststatval = stat(SvPV(sv, na),&statcache);
+    laststatval = Stat(SvPV(sv, na),&statcache);
 #endif
     if (laststatval < 0 && dowarn && strchr(SvPV(sv, na), '\n'))
 	warn(warn_nl, "lstat");
@@ -974,6 +886,8 @@ register SV **sp;
 	    execvp(tmps,Argv);
 	else
 	    execvp(Argv[0],Argv);
+	if (dowarn)
+	    warn("Can't exec \"%s\": %s", Argv[0], Strerror(errno));
     }
     do_execfree();
     return FALSE;
@@ -1047,7 +961,7 @@ char *cmd;
 	}
     }
     New(402,Argv, (s - cmd) / 2 + 2, char*);
-    Cmd = nsavestr(cmd, s-cmd);
+    Cmd = savepvn(cmd, s-cmd);
     a = Argv;
     for (s = Cmd; *s;) {
 	while (*s && isSPACE(*s)) s++;
@@ -1064,6 +978,8 @@ char *cmd;
 	    do_execfree();
 	    goto doshell;
 	}
+	if (dowarn)
+	    warn("Can't exec \"%s\": %s", Argv[0], Strerror(errno));
     }
     do_execfree();
     return FALSE;
@@ -1104,9 +1020,9 @@ register SV **sp;
     case OP_CHOWN:
 	TAINT_PROPER("chown");
 	if (sp - mark > 2) {
-	    tot = sp - mark;
 	    val = SvIVx(*++mark);
 	    val2 = SvIVx(*++mark);
+	    tot = sp - mark;
 	    while (++mark <= sp) {
 		if (chown(SvPVx(*mark, na),val,val2))
 		    tot--;
@@ -1160,7 +1076,7 @@ register SV **sp;
 #ifdef HAS_LSTAT
 		if (lstat(s,&statbuf) < 0 || S_ISDIR(statbuf.st_mode))
 #else
-		if (stat(s,&statbuf) < 0 || S_ISDIR(statbuf.st_mode))
+		if (Stat(s,&statbuf) < 0 || S_ISDIR(statbuf.st_mode))
 #endif
 		    tot--;
 		else {
@@ -1170,6 +1086,7 @@ register SV **sp;
 	    }
 	}
 	break;
+#ifdef HAS_UTIME
     case OP_UTIME:
 	TAINT_PROPER("utime");
 	if (sp - mark > 2) {
@@ -1194,12 +1111,13 @@ register SV **sp;
 	else
 	    tot = 0;
 	break;
+#endif
     }
     return tot;
 }
 
 /* Do the permissions allow some operation?  Assumes statcache already set. */
-
+#ifndef VMS /* VMS' cando is in vms.c */
 I32
 cando(bit, effective, statbufp)
 I32 bit;
@@ -1253,6 +1171,7 @@ register struct stat *statbufp;
     return FALSE;
 #endif /* ! MSDOS */
 }
+#endif /* ! VMS */
 
 I32
 ingroup(testgid,effective)
@@ -1266,7 +1185,7 @@ I32 effective;
 #define NGROUPS 32
 #endif
     {
-	GROUPSTYPE gary[NGROUPS];
+	Groups_t gary[NGROUPS];
 	I32 anum;
 
 	anum = getgroups(NGROUPS,gary);
@@ -1323,7 +1242,8 @@ SV **sp;
 {
     SV *astr;
     char *a;
-    I32 id, n, cmd, infosize, getinfo, ret;
+    I32 id, n, cmd, infosize, getinfo;
+    I32 ret = -1;
 
     id = SvIVx(*++mark);
     n = (optype == OP_SEMCTL) ? SvIVx(*++mark) : 0;
@@ -1370,20 +1290,14 @@ SV **sp;
 
     if (infosize)
     {
+	STRLEN len;
 	if (getinfo)
 	{
-	    if (SvTHINKFIRST(astr)) {
-		if (SvREADONLY(astr))
-		    croak("Can't %s to readonly var", op_name[optype]);
-		if (SvROK(astr))
-		    sv_unref(astr);
-	    }
-	    SvGROW(astr, infosize+1);
-	    a = SvPV(astr, na);
+	    SvPV_force(astr, len);
+	    a = SvGROW(astr, infosize+1);
 	}
 	else
 	{
-	    STRLEN len;
 	    a = SvPV(astr, len);
 	    if (len != infosize)
 		croak("Bad arg length for %s, is %d, should be %d",
@@ -1417,6 +1331,7 @@ SV **sp;
     if (getinfo && ret >= 0) {
 	SvCUR_set(astr, infosize);
 	*SvEND(astr) = '\0';
+	SvSETMAGIC(astr);
     }
     return ret;
 }
@@ -1468,11 +1383,9 @@ SV **sp;
 	if (SvROK(mstr))
 	    sv_unref(mstr);
     }
-    mbuf = SvPV(mstr, len);
-    if (len < sizeof(long)+msize+1) {
-	SvGROW(mstr, sizeof(long)+msize+1);
-	mbuf = SvPV(mstr, len);
-    }
+    SvPV_force(mstr, len);
+    mbuf = SvGROW(mstr, sizeof(long)+msize+1);
+    
     errno = 0;
     ret = msgrcv(id, (struct msgbuf *)mbuf, msize, mtype, flags);
     if (ret >= 0) {
@@ -1523,9 +1436,6 @@ SV **sp;
     I32 id, mpos, msize;
     STRLEN len;
     struct shmid_ds shmds;
-#ifndef VOIDSHMAT
-    extern char *shmat P((int, char *, int));
-#endif
 
     id = SvIVx(*++mark);
     mstr = *++mark;
@@ -1538,28 +1448,22 @@ SV **sp;
 	errno = EFAULT;		/* can't do as caller requested */
 	return -1;
     }
-    shm = (char*)shmat(id, (char*)NULL, (optype == OP_SHMREAD) ? SHM_RDONLY : 0);
+    shm = (Shmat_t)shmat(id, (char*)NULL, (optype == OP_SHMREAD) ? SHM_RDONLY : 0);
     if (shm == (char *)-1)	/* I hate System V IPC, I really do */
 	return -1;
-    mbuf = SvPV(mstr, len);
     if (optype == OP_SHMREAD) {
-	if (SvTHINKFIRST(mstr)) {
-	    if (SvREADONLY(mstr))
-		croak("Can't shmread to readonly var");
-	    if (SvROK(mstr))
-		sv_unref(mstr);
-	}
-	if (len < msize) {
-	    SvGROW(mstr, msize+1);
-	    mbuf = SvPV(mstr, len);
-	}
+	SvPV_force(mstr, len);
+	mbuf = SvGROW(mstr, msize+1);
+
 	Copy(shm + mpos, mbuf, msize, char);
 	SvCUR_set(mstr, msize);
 	*SvEND(mstr) = '\0';
+	SvSETMAGIC(mstr);
     }
     else {
 	I32 n;
 
+	mbuf = SvPV(mstr, len);
 	if ((n = len) > msize)
 	    n = msize;
 	Copy(mbuf, shm + mpos, n, char);

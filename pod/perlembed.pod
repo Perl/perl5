@@ -1,0 +1,7 @@
+=head1 NAME
+
+perlembed - how to embed perl in your C or C++ app
+
+=head1 DESCRIPTION
+
+Look at perlmain.c, and do something like that.

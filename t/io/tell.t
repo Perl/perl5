@@ -6,7 +6,7 @@ print "1..13\n";
 
 $TST = 'tst';
 
-open($TST, '../Makefile') || (die "Can't open ../Makefile");
+open($TST, '../Configure') || (die "Can't open ../Configure");
 
 if (eof(tst)) { print "not ok 1\n"; } else { print "ok 1\n"; }
 

@@ -51,10 +51,9 @@
 --------------------------------------------------------------------------
 
 Perl is a language that combines some of the features of C, sed, awk
-and shell.  See the manual page for more hype.  There's also a Nutshell
-Handbook published by O'Reilly & Assoc.  Their U.S. number is
-1-800-998-9938 and their international number is 1-707-829-0515.
-E-mail to nuts@ora.com.
+and shell.  See the manual page for more hype.  There are also two Nutshell
+Handbooks published by O'Reilly & Assoc.  See pod/perlbook.pod
+for more information.
 
 Please read all the directions below before you proceed any further, and
 then follow them carefully.
@@ -65,10 +64,25 @@ in MANIFEST.
 Installation
 
 1)  Run Configure.  This will figure out various things about your system.
-    Some things Configure will figure out for itself, other things it will
-    ask you about.  It will then proceed to make config.h, config.sh, and
-    Makefile.  If you're a hotshot, run Configure -d to take all the
-    defaults and then edit config.sh to patch up any flaws.
+    Some things Configure will figure out for itself, other things it
+    will ask you about.  It will then proceed to make config.h,
+    config.sh, and Makefile. You may have to explicitly say   
+        sh Configure    to ensure that Configure is run under sh.
+    If you're a hotshot, run Configure -d to take all the defaults and
+    then edit config.sh to patch up any flaws.
+
+    Configure supports a number of useful options.  Run Configure -h 
+    to get a listing.  To compile with gcc, for example, you can run 
+    Configure -Dcc=gcc, or answer 'gcc' at the cc prompt.
+    
+    By default, perl will be installed in /usr/local/{bin, lib, man}.
+    You can specify a different prefix for the default installation
+    directory, when Configure prompts you or by using something like
+    Configure -Dprefix=/whatever.
+
+    You can also supply a file config.over to over-ride Configure's
+    guesses.  It will get loaded up at the very end, just before
+    config.sh is created.
 
     You might possibly have to trim # comments from the front of Configure
     if your sh doesn't handle them, but all other # comments will be taken
@@ -82,9 +96,8 @@ Installation
 
     If you have any additional changes to make to the C definitions, they
     can be done in cflags.SH.  For instance, to turn off the optimizer
-    on eval.c, find the line in the switch structure for eval.c and
-    put the command $optimize='-g' before the ;;.  You will probably
-    want to change the entry for teval.c too.  To change the C flags
+    on toke.c, find the line in the switch structure for toke.c and
+    put the command optimize='-g' before the ;;.  To change the C flags
     for all the files, edit config.sh and change either $ccflags or $optimize.
 
 3)  make depend
@@ -111,46 +124,30 @@ Installation
     Makefile.SH, since a default rule only takes effect in the
     absence of a specific rule.
 
-    Most of the following hints are now done automatically by Configure.
+    Many of the following hints are now done automatically by Configure.
+    Some of the hints here were for Perl 4, and are probably obsolete.
+    They're left here for the moment just to give you some ideas for
+    what to try if you're having trouble.
 
-    The 3b2 needs to turn off -O.
-    Compilers with limited switch tables may have to define -DSMALLSWITCHES
-    Domain/OS 10.3 (at least) native C 6.7 may need -opt 2 for eval.c
     AIX/RT may need a -a switch and -DCRIPPLED_CC.
-    AIX RS/6000 needs to use system malloc and avoid -O on eval.c and toke.c.
-    AIX RS/6000 needs -D_NO_PROTO.
-    SUNOS 4.0.[12] needs -DFPUTS_BOTCH.
-    SUNOS 3.[45] should use the system malloc.
-    SGI machines may need -Ddouble="long float" and -O1.
-    Vax-based systems may need to hand assemble teval.s with a -J switch.
-    Ultrix on MIPS machines may need -DLANGUAGE_C.
-    Ultrix 4.0 on MIPS machines may need -Olimit 2900 or so.
     Ultrix 3.[01] on MIPS needs to undefine WAITPID--the system call is busted.
-    MIPS machines need /bin before /bsd43/bin in PATH.
     MIPS machines may need to undef d_volatile.
-    MIPS machines may need to turn off -O on cmd.c, perl.c and tperl.c.
+    MIPS machines may need to turn off -O on some files.
     Some MIPS machines may need to undefine CASTNEGFLOAT.
-    Xenix 386 needs -Sm11000 for yacc, and may need -UM_I86.
-    SCO Xenix may need -m25000 for yacc.  See also README.xenix.
-    Genix needs to use libc rather than libc_s, or #undef VARARGS.
+    Xenix 386 may need -UM_I86.  See also README.xenix.
+    Genix may need to use libc rather than libc_s, or #undef VARARGS.
     NCR Tower 32 (OS 2.01.01) may need -W2,-Sl,2000 and #undef MKDIR.
-    A/UX may appears to work with -O -B/usr/lib/big/ optimizer flags.
-    A/UX needs -lposix to find rewinddir.
+    A/UX may appear to work with -O -B/usr/lib/big/ optimizer flags.
+    A/UX may need -lposix to find rewinddir.
     A/UX may need -ZP -DPOSIX, and -g if big cc is used.
-    FPS machines may need -J and -DBADSWITCH.
     UTS may need one or more of -DCRIPPLED_CC, -K or -g, and undef LSTAT.
-    dynix may need to undefine CASTNEGFLOAT (d_castneg='undef' in config.sh).
-    Dnix (not dynix) may need to remove -O.
-    IRIX 3.3 may need to undefine VFORK.
-    HP/UX may need to pull cerror.o and syscall.o out of libc.a and link
-	them in explicitly.
-    If you get syntax errors on '(', try -DCRIPPLED_CC or -DBADSWITCH or both.
-    Machines with half-implemented dbm routines will need to #undef ODBM & NDBM.
-    If you have GDBM available and want it instead of NDBM, say -DHAS_GDBM.
-    C's that don't try to restore registers on longjmp() may need -DJMPCLOBBER.
-	(Try this if you get random glitches.)
+    If you get syntax errors on '(', try -DCRIPPLED_CC.
+    Machines with half-implemented dbm routines will need to #undef I_ODBM 
+    SCO prior to 3.2.4 may be missing dbmclose().  An upgrade to 3.2.4
+    that includes libdbm.nfs (which includes dbmclose()) may be available.
     If you get duplicates upon linking for malloc et al, say -DHIDEMYMALLOC.
-    Turn on support for 64-bit integers (long longs) with -DQUAD.
+    If you get duplicate function definitions (a perl function has the
+    same name as another function on your system) try -DEMBED.
 
 5)  make test
 
@@ -170,7 +167,12 @@ Installation
     you are not root, you must own the directories in question and you should
     ignore any messages about chown not working.
 
-7)  Read the manual entry before running perl.
+    Most of the documentation in the pod/ directory is also available 
+    in HTML format.  Type
+	cd pod; make html; cd ..
+    to generate the html versions.
+
+7)  Read the manual entries before running perl.
 
 8)  IMPORTANT!  Help save the world!  Communicate any problems and suggested
     patches to me, lwall@netlabs.com (Larry Wall), so we can

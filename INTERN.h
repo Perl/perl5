@@ -1,20 +1,10 @@
-/* $RCSfile: INTERN.h,v $$Revision: 4.1 $$Date: 92/08/07 17:18:04 $
+/*    INTERN.h
  *
- *    Copyright (c) 1991, Larry Wall
+ *    Copyright (c) 1991-1994, Larry Wall
  *
  *    You may distribute under the terms of either the GNU General Public
  *    License or the Artistic License, as specified in the README file.
  *
- * $Log:	INTERN.h,v $
- * Revision 4.1  92/08/07  17:18:04  lwall
- * Stage 6 Snapshot
- * 
- * Revision 4.0.1.1  91/06/07  10:10:42  lwall
- * patch4: new copyright notice
- * 
- * Revision 4.0  91/03/20  00:58:35  lwall
- * 4.0 baseline.
- * 
  */
 
 #undef EXT

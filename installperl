@@ -1,4 +1,7 @@
 #!./perl
+BEGIN { @INC=('./lib', '../lib') }
+
+use File::Find;
 
 $mainperldir = "/usr/bin";
 
@@ -10,8 +13,8 @@ while (@ARGV) {
 
 umask 022;
 
-@scripts = ('cppstdin', 'h2ph', 'c2ph', 'pstruct', 'x2p/s2p', 'x2p/find2perl');
-@manpages = ('perl.man', 'h2ph.man', 'x2p/a2p.man', 'x2p/s2p.man');
+@scripts = ('cppstdin', 'c2ph', 'pstruct', 'x2p/s2p', 'x2p/find2perl');
+@manpages = (<pod/*.man>, 'x2p/a2p.man', 'x2p/s2p.man');
 
 # Read in the config file.
 
@@ -86,40 +89,31 @@ if ($bdev != $ddev || $bino != $dino) {
     &chmod(0755, "$installbin/a2p");
 }
 
-# Make some enemies in the name of standardization.   :-)
-
-($udev,$uino) = stat($mainperldir);
-
-if (-w _ && ($udev != $bdev || $uino != $bino) && !$nonono) {
-    &unlink("$mainperldir/perl");
-    eval 'link("$installbin/perl", "$mainperldir/perl")' ||
-    eval 'symlink("$installbin/perl", "$mainperldir/perl")' ||
-    &cmd("cp $installbin/perl $mainperldir");
-}
-
 # Install scripts.
 
-&makedir($installscr);
+&makedir($installscript);
 
 for (@scripts) {
-    &cmd("cp $_ $installscr");
-    s#.*/##; &chmod(0755, "$installscr/$_");
+    if (-f $_) {   # cppstdin might not exist on this system.
+	&cmd("cp $_ $installscript");
+	s#.*/##; &chmod(0755, "$installscript/$_");
+    }
 }
 
 # Install man pages.
 
-if ($mansrc ne '') {
-    &makedir($mansrc);
+if ($installmansrc ne '') {
+    &makedir($installmansrc);
 
-    ($mdev,$mino) = stat($mansrc);
+    ($mdev,$mino) = stat($installmansrc);
     if ($mdev != $ddev || $mino != $dino) {
 	for (@manpages) {
 	    ($new = $_) =~ s/man$/$manext/;
 	    $new =~ s#.*/##;
-	    print STDERR "  Installing $mansrc/$new\n";
+	    print STDERR "  Installing $installmansrc/$new\n";
 	    next if $nonono;
 	    open(MI,$_) || warn "Can't open $_: $!\n";
-	    open(MO,">$mansrc/$new") || warn "Can't install $mansrc/$new: $!\n";
+	    open(MO,">$installmansrc/$new") || warn "Can't install $installmansrc/$new: $!\n";
 	    print MO ".ds RP Release $release Patchlevel $patchlevel\n";
 	    while (<MI>) {
 		print MO;
@@ -132,33 +126,21 @@ if ($mansrc ne '') {
 
 # Install library files.
 
+$do_installarchlib = $do_installprivlib = 0;
+    
 &makedir($installprivlib);
+&makedir($installarchlib);
 if (chdir "lib") {
+    ($pdev,$pino) = stat($installarchlib);
+    ($ldev,$lino) = stat('.');
+    $do_installarchlib = ($pdev != $ldev || $pino != $lino);
 
     ($pdev,$pino) = stat($installprivlib);
     ($ldev,$lino) = stat('.');
+    $do_installprivlib = ($pdev != $ldev || $pino != $lino);
 
-    if ($pdev != $ldev || $pino != $lino) {
-	# Optimize for quick access.  First the auto directory.
-	system "tar cf - auto | (cd $installprivlib; tar xvf -)";
-	# Next the Perl modules.
-	foreach $file (<*.pm>) {
-	    system "cmp", "-s", $file, "$privlib/$file";
-	    if ($?) {
-		&unlink("$installprivlib/$file");
-		&cmd("cp $file $installprivlib");
-		&chmod(0644, "$installprivlib/$file");
-	    }
-	}
-	# Finally the old library files.
-	foreach $file (<*.pl>) {
-	    system "cmp", "-s", $file, "$privlib/$file";
-	    if ($?) {
-		&unlink("$installprivlib/$file");
-		&cmd("cp $file $installprivlib");
-		&chmod(0644, "$installprivlib/$file");
-	    }
-	}
+    if ($do_installarchlib || $do_installprivlib) {
+	find(\&installlib, '.');
     }
     chdir ".." || die "Can't cd back to source directory: $!\n";
 }
@@ -166,11 +148,81 @@ else {
     warn "Can't cd to lib to install lib files: $!\n";
 }
 
+# Offer to install perl in a "standard" location
+
+($udev,$uino) = stat($mainperldir);
+
+$mainperl_is_instperl = 0;
+
+if (-w _ && ($udev != $bdev || $uino != $bino) && !$nonono) {
+    # First make sure $mainperldir/perl is not already the same as
+    # the perl we just installed
+    if (-x "$mainperldir/perl") {
+	# Use stat so we detect symbolic links transparently 
+	($mpdev, $mpino) = stat("$mainperldir/perl");
+	($ipdev, $ipino) = stat("$installbin/perl");
+	# Try to be clever about mainperl being a symbolic link
+	# to binexp/perl if binexp and installbin are different.
+	$mainperl_is_instperl =
+	    (($mpdev == $ipdev && $mpino == $ipino) ||
+	     (($binexp ne $installbin) &&
+	      (-l "$mainperldir/perl") &&
+	      ((readlink "$mainperldir/perl") eq "$binexp/perl")));
+    }
+    if ((! $mainperl_is_instperl) &&
+	(&yn("Many scripts expect perl to be installed as " .
+	     "$mainperldir/perl.\n" . 
+	     "Do you wish to have $mainperldir/perl be the same as\n" .
+	     "$binexp/perl? [y] ")))
+    {	
+	unlink("$mainperldir/perl");
+	eval 'link("$installbin/perl", "$mainperldir/perl")' ||
+	eval 'symlink("$binexp/perl", "$mainperldir/perl")' ||
+	&cmd("cp $installbin/perl $mainperldir");
+	$mainperl_is_instperl = 1;
+    }
+}
+
+# Check to make sure there aren't other perls around in installer's
+# path.  This is probably UNIX-specific.  Check all absolute directories
+# in the path except for where public executables are supposed to live.
+# Also skip $mainperl if the user opted to have it be a link to the
+# installed perl.
+
+@path = split(/:/, $ENV{"PATH"});
+@otherperls = ();
+for (@path) {
+    next unless m,^/,;
+    next if ($_ eq $binexp);
+    # Use &samepath here because some systems have other dirs linked
+    # to $mainperldir (like SunOS)
+    next if ($mainperl_is_instperl && &samepath($_, $mainperldir));
+    push(@otherperls, "$_/perl") if (-x "$_/perl" && ! -d "$_/perl");
+}
+if (@otherperls) {
+    print STDERR "\nWarning: perl appears in your path in the following " .
+	"locations beyond where\nwe just installed it:\n";
+    for (@otherperls) {
+	print STDERR "    ", $_, "\n";
+    }
+    print STDERR "\n";
+}
+
 print STDERR "  Installation complete\n";
 
 exit 0;
 
 ###############################################################################
+
+sub yn {
+    local($prompt) = @_;
+    local($answer);
+    local($default) = $prompt =~ m/\[([yn])\]\s*$/i;
+    print STDERR $prompt;
+    chop($answer = <STDIN>);
+    $answer = $default if $answer =~ m/^\s*$/;
+    ($answer =~ m/^[yY]/);
+}
 
 sub unlink {
     local(@names) = @_;
@@ -216,5 +268,48 @@ sub makedir {
 
 	print STDERR "  mkdir $dir\n";
 	mkdir($dir, 0777) || warn "Couldn't create $dir: $!\n" unless $nonono;
+    }
+}
+
+sub samepath {
+    local($p1, $p2) = @_;
+    local($dev1, $ino1, $dev2, $ino2);
+
+    if ($p1 ne p2) {
+	($dev1, $ino1) = stat($p1);
+	($dev2, $ino2) = stat($p2);
+	($dev1 == $dev2 && $ino1 == $ino2);
+    }
+    else {
+	1;
+    }
+}
+
+sub installlib {
+    my $dir = $File::Find::dir;
+    $dir =~ s#^\.(?![^/])/?##;
+
+    my $name = $_;
+    $name = "$dir/$name" if $dir ne '';
+
+    my $installlib = $installprivlib;
+    if ((substr($dir, 0, 4) eq 'auto') || ($name eq 'Config.pm')) {
+        $installlib = $installarchlib;
+	return unless $do_installarchlib;
+    } else {
+	return unless $do_installprivlib;
+    }
+
+    &makedir("$installlib/$dir");
+
+    if (-f $_) {
+	system "cmp", "-s", $_, "$installlib/$name";
+	if ($?) {
+	    &unlink("$installlib/$name");
+	    &cmd("cp $_ $installlib/$dir");
+	    &chmod(0644, "$installlib/$name");
+	}
+    } elsif (-d $_) {
+	&makedir("$installlib/$name");
     }
 }

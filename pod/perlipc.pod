@@ -1,0 +1,168 @@
+=head1 NAME
+
+perlipc - Perl interprocess communication
+
+=head1 DESCRIPTION
+
+The IPC facilities of Perl are built on the Berkeley socket mechanism.
+If you don't have sockets, you can ignore this section.  The calls have
+the same names as the corresponding system calls, but the arguments
+tend to differ, for two reasons.  First, Perl file handles work
+differently than C file descriptors.  Second, Perl already knows the
+length of its strings, so you don't need to pass that information.
+
+=head2 Client/Server Communication
+
+Here's a sample TCP client.
+
+    ($them,$port) = @ARGV;
+    $port = 2345 unless $port;
+    $them = 'localhost' unless $them;
+
+    $SIG{'INT'} = 'dokill';
+    sub dokill { kill 9,$child if $child; }
+
+    use Socket;
+
+    $sockaddr = 'S n a4 x8';
+    chop($hostname = `hostname`);
+
+    ($name, $aliases, $proto) = getprotobyname('tcp');
+    ($name, $aliases, $port) = getservbyname($port, 'tcp')
+	unless $port =~ /^\d+$/;
+    ($name, $aliases, $type, $len, $thisaddr) =
+		    gethostbyname($hostname);
+    ($name, $aliases, $type, $len, $thataddr) = gethostbyname($them);
+
+    $this = pack($sockaddr, &AF_INET, 0, $thisaddr);
+    $that = pack($sockaddr, &AF_INET, $port, $thataddr);
+
+    socket(S, &PF_INET, &SOCK_STREAM, $proto) || die "socket: $!";
+    bind(S, $this) || die "bind: $!";
+    connect(S, $that) || die "connect: $!";
+
+    select(S); $| = 1; select(stdout);
+
+    if ($child = fork) {
+	while (<>) {
+	    print S;
+	}
+	sleep 3;
+	do dokill();
+    }
+    else {
+	while (<S>) {
+	    print;
+	}
+    }
+
+And here's a server:
+
+    ($port) = @ARGV;
+    $port = 2345 unless $port;
+
+    use Socket;
+
+    $sockaddr = 'S n a4 x8';
+
+    ($name, $aliases, $proto) = getprotobyname('tcp');
+    ($name, $aliases, $port) = getservbyname($port, 'tcp')
+	unless $port =~ /^\d+$/;
+
+    $this = pack($sockaddr, &AF_INET, $port, "\0\0\0\0");
+
+    select(NS); $| = 1; select(stdout);
+
+    socket(S, &PF_INET, &SOCK_STREAM, $proto) || die "socket: $!";
+    bind(S, $this) || die "bind: $!";
+    listen(S, 5) || die "connect: $!";
+
+    select(S); $| = 1; select(stdout);
+
+    for (;;) {
+	print "Listening again\n";
+	($addr = accept(NS,S)) || die $!;
+	print "accept ok\n";
+
+	($af,$port,$inetaddr) = unpack($sockaddr,$addr);
+	@inetaddr = unpack('C4',$inetaddr);
+	print "$af $port @inetaddr\n";
+
+	while (<NS>) {
+	    print;
+	    print NS;
+	}
+    }
+
+=head2 SysV IPC
+
+Here's a small example showing shared memory usage:
+
+    $IPC_PRIVATE = 0;
+    $IPC_RMID = 0;
+    $size = 2000;
+    $key = shmget($IPC_PRIVATE, $size , 0777 );
+    die if !defined($key);
+
+    $message = "Message #1";
+    shmwrite($key, $message, 0, 60 ) || die "$!";
+    shmread($key,$buff,0,60) || die "$!";
+
+    print $buff,"\n";
+
+    print "deleting $key\n";
+    shmctl($key ,$IPC_RMID, 0) || die "$!";
+
+Here's an example of a semaphore:
+
+    $IPC_KEY = 1234;
+    $IPC_RMID = 0;
+    $IPC_CREATE = 0001000;
+    $key = semget($IPC_KEY, $nsems , 0666 | $IPC_CREATE );
+    die if !defined($key);
+    print "$key\n";
+
+Put this code in a separate file to be run in more that one process
+Call the file F<take>:
+
+    # create a semaphore
+
+    $IPC_KEY = 1234;
+    $key = semget($IPC_KEY,  0 , 0 );
+    die if !defined($key);
+
+    $semnum = 0;
+    $semflag = 0;
+
+    # 'take' semaphore
+    # wait for semaphore to be zero
+    $semop = 0;
+    $opstring1 = pack("sss", $semnum, $semop, $semflag);
+
+    # Increment the semaphore count
+    $semop = 1;
+    $opstring2 = pack("sss", $semnum, $semop,  $semflag);
+    $opstring = $opstring1 . $opstring2;
+
+    semop($key,$opstring) || die "$!";
+
+Put this code in a separate file to be run in more that one process
+Call this file F<give>:
+
+    #'give' the semaphore
+    # run this in the original process and you will see
+    # that the second process continues
+
+    $IPC_KEY = 1234;
+    $key = semget($IPC_KEY, 0, 0);
+    die if !defined($key);
+
+    $semnum = 0;
+    $semflag = 0;
+
+    # Decrement the semaphore count
+    $semop = -1;
+    $opstring = pack("sss", $semnum, $semop, $semflag);
+
+    semop($key,$opstring) || die "$!";
+

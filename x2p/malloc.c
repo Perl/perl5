@@ -1,31 +1,9 @@
 /* $RCSfile: malloc.c,v $$Revision: 4.1 $$Date: 92/08/07 18:24:25 $
  *
  * $Log:	malloc.c,v $
- * Revision 4.1  92/08/07  18:24:25  lwall
- * 
- * Revision 4.0.1.4  92/06/08  14:28:38  lwall
- * patch20: removed implicit int declarations on functions
- * patch20: hash tables now split only if the memory is available to do so
- * patch20: realloc(0, size) now does malloc in case library routines call it
- * 
- * Revision 4.0.1.3  91/11/05  17:57:40  lwall
- * patch11: safe malloc code now integrated into Perl's malloc when possible
- * 
- * Revision 4.0.1.2  91/06/07  11:20:45  lwall
- * patch4: many, many itty-bitty portability fixes
- * 
- * Revision 4.0.1.1  91/04/11  17:48:31  lwall
- * patch1: Configure now figures out malloc ptr type
- * 
- * Revision 4.0  91/03/20  01:28:52  lwall
- * 4.0 baseline.
- * 
  */
 
 #ifndef lint
-/*SUPPRESS 592*/
-static char sccsid[] = "@(#)malloc.c	4.3 (Berkeley) 9/16/83";
-
 #ifdef DEBUGGING
 #define RCHECK
 #endif
@@ -43,9 +21,6 @@ static char sccsid[] = "@(#)malloc.c	4.3 (Berkeley) 9/16/83";
 
 #include "EXTERN.h"
 #include "../perl.h"
-
-static int findbucket();
-static int morecore();
 
 /* I don't much care whether these are defined in sys/types.h--LAW */
 
@@ -80,6 +55,12 @@ union	overhead {
 #define	ov_size		ovu.ovu_size
 #define	ov_rmagic	ovu.ovu_rmagic
 };
+
+#ifdef debug
+static void botch _((char *s));
+#endif
+static void morecore _((int bucket));
+static int findbucket _((union overhead *freep, int srchlen));
 
 #define	MAGIC		0xff		/* magic # on accounting info */
 #define RMAGIC		0x55555555	/* magic # on range info */
@@ -176,21 +157,15 @@ malloc(nbytes)
 	}
 
 #ifdef safemalloc
-#if !(defined(I286) || defined(atarist))
-    DEBUG_m(fprintf(stderr,"0x%x: (%05d) malloc %ld bytes\n",p+1,an++,(long)size));
-#else
-    DEBUG_m(fprintf(stderr,"0x%lx: (%05d) malloc %ld bytes\n",p+1,an++,(long)size));
-#endif
+    DEBUG_m(fprintf(stderr,"0x%lx: (%05d) malloc %ld bytes\n",
+	(unsigned long)(p+1),an++,(long)size));
 #endif /* safemalloc */
 
 	/* remove from linked list */
 #ifdef RCHECK
 	if (*((int*)p) & (sizeof(union overhead) - 1))
-#if !(defined(I286) || defined(atarist))
-	    fprintf(stderr,"Corrupt malloc ptr 0x%x at 0x%x\n",*((int*)p),p);
-#else
-	    fprintf(stderr,"Corrupt malloc ptr 0x%lx at 0x%lx\n",*((int*)p),p);
-#endif
+	    fprintf(stderr,"Corrupt malloc ptr 0x%lx at 0x%lx\n",
+		(unsigned long)*((int*)p),(unsigned long)p);
 #endif
   	nextf[bucket] = p->ov_next;
 	p->ov_magic = MAGIC;
@@ -214,7 +189,7 @@ malloc(nbytes)
 /*
  * Allocate more memory to the indicated bucket.
  */
-static
+static void
 morecore(bucket)
 	register int bucket;
 {
@@ -288,11 +263,7 @@ free(mp)
 	char *cp = (char*)mp;
 
 #ifdef safemalloc
-#if !(defined(I286) || defined(atarist))
-	DEBUG_m(fprintf(stderr,"0x%x: (%05d) free\n",cp,an++));
-#else
-	DEBUG_m(fprintf(stderr,"0x%lx: (%05d) free\n",cp,an++));
-#endif
+    DEBUG_m(fprintf(stderr,"0x%lx: (%05d) free\n",(unsigned long)cp,an++));
 #endif /* safemalloc */
 
   	if (cp == NULL)
@@ -425,17 +396,11 @@ realloc(mp, nbytes)
 
 #ifdef safemalloc
 #ifdef DEBUGGING
-#  if !(defined(I286) || defined(atarist))
-	if (debug & 128) {
-	    fprintf(stderr,"0x%x: (%05d) rfree\n",res,an++);
-	    fprintf(stderr,"0x%x: (%05d) realloc %ld bytes\n",res,an++,(long)size);
-	}
-#  else
-	if (debug & 128) {
-	    fprintf(stderr,"0x%lx: (%05d) rfree\n",res,an++);
-	    fprintf(stderr,"0x%lx: (%05d) realloc %ld bytes\n",res,an++,(long)size);
-	}
-#  endif
+    if (debug & 128) {
+	fprintf(stderr,"0x%lx: (%05d) rfree\n",(unsigned long)res,an++);
+	fprintf(stderr,"0x%lx: (%05d) realloc %ld bytes\n",
+	    (unsigned long)res,an++,(long)size);
+    }
 #endif
 #endif /* safemalloc */
   	return ((Malloc_t)res);

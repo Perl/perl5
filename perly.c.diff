@@ -1,7 +1,78 @@
-*** perly.c.orig	Mon Feb 14 14:24:43 1994
---- perly.c	Mon Feb 14 14:24:44 1994
+*** perly.c.orig	Thu Sep 15 11:18:35 1994
+--- perly.c	Thu Sep 15 11:19:31 1994
 ***************
-*** 1591,1603 ****
+*** 12,79 ****
+      deprecate("\"do\" to call subroutines");
+  }
+  
+- #line 30 "perly.y"
+- typedef union {
+-     I32	ival;
+-     char *pval;
+-     OP *opval;
+-     GV *gvval;
+- } YYSTYPE;
+- #line 23 "y.tab.c"
+- #define WORD 257
+- #define METHOD 258
+- #define FUNCMETH 259
+- #define THING 260
+- #define PMFUNC 261
+- #define PRIVATEREF 262
+- #define LABEL 263
+- #define FORMAT 264
+- #define SUB 265
+- #define ANONSUB 266
+- #define PACKAGE 267
+- #define USE 268
+- #define WHILE 269
+- #define UNTIL 270
+- #define IF 271
+- #define UNLESS 272
+- #define ELSE 273
+- #define ELSIF 274
+- #define CONTINUE 275
+- #define FOR 276
+- #define LOOPEX 277
+- #define DOTDOT 278
+- #define FUNC0 279
+- #define FUNC1 280
+- #define FUNC 281
+- #define RELOP 282
+- #define EQOP 283
+- #define MULOP 284
+- #define ADDOP 285
+- #define DOLSHARP 286
+- #define DO 287
+- #define LOCAL 288
+- #define HASHBRACK 289
+- #define NOAMP 290
+- #define OROP 291
+- #define ANDOP 292
+- #define NOTOP 293
+- #define LSTOP 294
+- #define ASSIGNOP 295
+- #define OROR 296
+- #define ANDAND 297
+- #define BITOROP 298
+- #define BITANDOP 299
+- #define UNIOP 300
+- #define SHIFTOP 301
+- #define MATCHOP 302
+- #define UMINUS 303
+- #define REFGEN 304
+- #define POWOP 305
+- #define PREINC 306
+- #define PREDEC 307
+- #define POSTINC 308
+- #define POSTDEC 309
+- #define ARROW 310
+  #define YYERRCODE 256
+  short yylhs[] = {                                        -1,
+     30,    0,    5,    3,    6,    6,    6,    7,    7,    7,
+--- 12,17 ----
+***************
+*** 1334,1346 ****
   int yynerrs;
   int yyerrflag;
   int yychar;
@@ -12,13 +83,45 @@
 - short yyss[YYSTACKSIZE];
 - YYSTYPE yyvs[YYSTACKSIZE];
 - #define yystacksize YYSTACKSIZE
-  #line 611 "perly.y"
+  #line 544 "perly.y"
    /* PROGRAM */
-  #line 1604 "y.tab.c"
---- 1591,1598 ----
+  #line 1347 "y.tab.c"
+--- 1272,1279 ----
 ***************
-*** 1608,1613 ****
---- 1603,1621 ----
+*** 1347,1360 ****
+--- 1280,1338 ----
+  #define YYABORT goto yyabort
+  #define YYACCEPT goto yyaccept
+  #define YYERROR goto yyerrlab
++ 
++ struct ysv {
++     short* yyss;
++     YYSTYPE* yyvs;
++     int oldyydebug;
++     int oldyynerrs;
++     int oldyyerrflag;
++     int oldyychar;
++     YYSTYPE oldyyval;
++     YYSTYPE oldyylval;
++ };
++ 
++ void
++ yydestruct(ptr)
++ void* ptr;
++ {
++     struct ysv* ysave = (struct ysv*)ptr;
++     if (ysave->yyss) Safefree(ysave->yyss);
++     if (ysave->yyvs) Safefree(ysave->yyvs);
++     yydebug	= ysave->oldyydebug;
++     yynerrs	= ysave->oldyynerrs;
++     yyerrflag	= ysave->oldyyerrflag;
++     yychar	= ysave->oldyychar;
++     yyval	= ysave->oldyyval;
++     yylval	= ysave->oldyylval;
++     Safefree(ysave);
++ }
++ 
+  int
   yyparse()
   {
       register int yym, yyn, yystate;
@@ -27,28 +130,36 @@
 +     short* yyss;
 +     YYSTYPE* yyvs;
 +     unsigned yystacksize = YYSTACKSIZE;
-+     int oldyydebug	= yydebug;
-+     int oldyynerrs	= yynerrs;
-+     int oldyyerrflag	= yyerrflag;
-+     int oldyychar	= yychar;
-+     YYSTYPE oldyyval	= yyval;
-+     YYSTYPE oldyylval	= yylval;
 +     int retval = 0;
-+ 
   #if YYDEBUG
       register char *yys;
       extern char *getenv();
++ #endif
+  
++     struct ysv *ysave = (struct ysv*)safemalloc(sizeof(struct ysv));
++     SAVEDESTRUCTOR(yydestruct, ysave);
++     ysave->oldyydebug	= yydebug;
++     ysave->oldyynerrs	= yynerrs;
++     ysave->oldyyerrflag	= yyerrflag;
++     ysave->oldyychar	= yychar;
++     ysave->oldyyval	= yyval;
++     ysave->oldyylval	= yylval;
++ 
++ #if YYDEBUG
+      if (yys = getenv("YYDEBUG"))
+      {
+          yyn = *yys;
 ***************
-*** 1624,1629 ****
---- 1632,1645 ----
+*** 1367,1372 ****
+--- 1345,1358 ----
       yyerrflag = 0;
       yychar = (-1);
   
 +     /*
 +     ** Initialize private stacks (yyparse may be called from an action)
 +     */
-+     yyss = (short*)malloc(yystacksize*sizeof(short));
-+     yyvs = (YYSTYPE*)malloc(yystacksize*sizeof(YYSTYPE));
++     ysave->yyss = yyss = (short*)safemalloc(yystacksize*sizeof(short));
++     ysave->yyvs = yyvs = (YYSTYPE*)safemalloc(yystacksize*sizeof(YYSTYPE));
 +     if (!yyvs || !yyss)
 + 	goto yyoverflow;
 + 
@@ -56,7 +167,7 @@
       yyvsp = yyvs;
       *yyssp = yystate = 0;
 ***************
-*** 1639,1645 ****
+*** 1382,1388 ****
               yys = 0;
               if (yychar <= YYMAXTOKEN) yys = yyname[yychar];
               if (!yys) yys = "illegal-symbol";
@@ -64,7 +175,7 @@
                       yychar, yys);
           }
   #endif
---- 1655,1661 ----
+--- 1368,1374 ----
               yys = 0;
               if (yychar <= YYMAXTOKEN) yys = yyname[yychar];
               if (!yys) yys = "illegal-symbol";
@@ -73,7 +184,7 @@
           }
   #endif
 ***************
-*** 1649,1660 ****
+*** 1392,1403 ****
       {
   #if YYDEBUG
           if (yydebug)
@@ -86,7 +197,7 @@
           }
           *++yyssp = yystate = yytable[yyn];
           *++yyvsp = yylval;
---- 1665,1688 ----
+--- 1378,1403 ----
       {
   #if YYDEBUG
           if (yydebug)
@@ -102,8 +213,10 @@
 ! 	    int yyps_index = (yyssp - yyss);
 ! 	    int yypv_index = (yyvsp - yyvs);
 ! 	    yystacksize += YYSTACKSIZE;
-! 	    yyvs = (YYSTYPE*)realloc((char*)yyvs,yystacksize * sizeof(YYSTYPE));
-! 	    yyss = (short*)realloc((char*)yyss,yystacksize * sizeof(short));
+! 	    ysave->yyvs = yyvs =
+! 		(YYSTYPE*)realloc((char*)yyvs,yystacksize * sizeof(YYSTYPE));
+! 	    ysave->yyss = yyss =
+! 		(short*)realloc((char*)yyss,yystacksize * sizeof(short));
 ! 	    if (!yyvs || !yyss)
 ! 		goto yyoverflow;
 ! 	    yyssp = yyss + yyps_index;
@@ -112,7 +225,7 @@
           *++yyssp = yystate = yytable[yyn];
           *++yyvsp = yylval;
 ***************
-*** 1690,1701 ****
+*** 1433,1444 ****
               {
   #if YYDEBUG
                   if (yydebug)
@@ -125,7 +238,7 @@
                   }
                   *++yyssp = yystate = yytable[yyn];
                   *++yyvsp = yylval;
---- 1718,1744 ----
+--- 1433,1459 ----
               {
   #if YYDEBUG
                   if (yydebug)
@@ -142,9 +255,9 @@
 ! 		    int yyps_index = (yyssp - yyss);
 ! 		    int yypv_index = (yyvsp - yyvs);
 ! 		    yystacksize += YYSTACKSIZE;
-! 		    yyvs = (YYSTYPE*)realloc((char*)yyvs,
+! 		    ysave->yyvs = yyvs = (YYSTYPE*)realloc((char*)yyvs,
 ! 			yystacksize * sizeof(YYSTYPE));
-! 		    yyss = (short*)realloc((char*)yyss,
+! 		    ysave->yyss = yyss = (short*)realloc((char*)yyss,
 ! 			yystacksize * sizeof(short));
 ! 		    if (!yyvs || !yyss)
 ! 			goto yyoverflow;
@@ -154,7 +267,7 @@
                   *++yyssp = yystate = yytable[yyn];
                   *++yyvsp = yylval;
 ***************
-*** 1705,1712 ****
+*** 1448,1455 ****
               {
   #if YYDEBUG
                   if (yydebug)
@@ -163,7 +276,7 @@
   #endif
                   if (yyssp <= yyss) goto yyabort;
                   --yyssp;
---- 1748,1756 ----
+--- 1463,1471 ----
               {
   #if YYDEBUG
                   if (yydebug)
@@ -174,7 +287,7 @@
                   if (yyssp <= yyss) goto yyabort;
                   --yyssp;
 ***************
-*** 1723,1730 ****
+*** 1466,1473 ****
               yys = 0;
               if (yychar <= YYMAXTOKEN) yys = yyname[yychar];
               if (!yys) yys = "illegal-symbol";
@@ -183,7 +296,7 @@
           }
   #endif
           yychar = (-1);
---- 1767,1775 ----
+--- 1482,1490 ----
               yys = 0;
               if (yychar <= YYMAXTOKEN) yys = yyname[yychar];
               if (!yys) yys = "illegal-symbol";
@@ -194,7 +307,7 @@
   #endif
           yychar = (-1);
 ***************
-*** 1733,1739 ****
+*** 1476,1482 ****
   yyreduce:
   #if YYDEBUG
       if (yydebug)
@@ -202,7 +315,7 @@
                   yystate, yyn, yyrule[yyn]);
   #endif
       yym = yylen[yyn];
---- 1778,1784 ----
+--- 1493,1499 ----
   yyreduce:
   #if YYDEBUG
       if (yydebug)
@@ -211,7 +324,7 @@
   #endif
       yym = yylen[yyn];
 ***************
-*** 2490,2497 ****
+*** 2161,2168 ****
       {
   #if YYDEBUG
           if (yydebug)
@@ -220,7 +333,7 @@
   #endif
           yystate = YYFINAL;
           *++yyssp = YYFINAL;
---- 2535,2543 ----
+--- 2178,2186 ----
       {
   #if YYDEBUG
           if (yydebug)
@@ -231,7 +344,7 @@
           yystate = YYFINAL;
           *++yyssp = YYFINAL;
 ***************
-*** 2505,2511 ****
+*** 2176,2182 ****
                   yys = 0;
                   if (yychar <= YYMAXTOKEN) yys = yyname[yychar];
                   if (!yys) yys = "illegal-symbol";
@@ -239,7 +352,7 @@
                           YYFINAL, yychar, yys);
               }
   #endif
---- 2551,2557 ----
+--- 2194,2200 ----
                   yys = 0;
                   if (yychar <= YYMAXTOKEN) yys = yyname[yychar];
                   if (!yys) yys = "illegal-symbol";
@@ -248,7 +361,7 @@
               }
   #endif
 ***************
-*** 2520,2539 ****
+*** 2191,2210 ****
           yystate = yydgoto[yym];
   #if YYDEBUG
       if (yydebug)
@@ -269,7 +382,7 @@
   yyaccept:
 !     return (0);
   }
---- 2566,2606 ----
+--- 2209,2243 ----
           yystate = yydgoto[yym];
   #if YYDEBUG
       if (yydebug)
@@ -286,8 +399,10 @@
 ! 	int yyps_index = (yyssp - yyss);
 ! 	int yypv_index = (yyvsp - yyvs);
 ! 	yystacksize += YYSTACKSIZE;
-! 	yyvs = (YYSTYPE*)realloc((char*)yyvs,yystacksize * sizeof(YYSTYPE));
-! 	yyss = (short*)realloc((char*)yyss,yystacksize * sizeof(short));
+! 	ysave->yyvs = yyvs =
+! 	    (YYSTYPE*)realloc((char*)yyvs,yystacksize * sizeof(YYSTYPE));
+! 	ysave->yyss = yyss =
+! 	    (short*)realloc((char*)yyss,yystacksize * sizeof(short));
 ! 	if (!yyvs || !yyss)
 ! 	    goto yyoverflow;
 ! 	yyssp = yyss + yyps_index;
@@ -301,13 +416,5 @@
   yyabort:
 !     retval = 1;
   yyaccept:
-!     if (yyss) free(yyss);
-!     if (yyvs) free(yyvs);
-!     yydebug	= oldyydebug;
-!     yynerrs	= oldyynerrs;
-!     yyerrflag	= oldyyerrflag;
-!     yychar	= oldyychar;
-!     yyval	= oldyyval;
-!     yylval	= oldyylval;
 !     return retval;
   }

@@ -37,7 +37,7 @@ while ($test = shift) {
     chop($te);
     print "$te" . '.' x (15 - length($te));
     if ($sharpbang) {
-	open(results,"./$test|") || (print "can't run.\n");
+	open(results,"./$test |") || (print "can't run.\n");
     } else {
 	open(script,"$test") || die "Can't run $test.\n";
 	$_ = <script>;
@@ -47,7 +47,7 @@ while ($test = shift) {
 	} else {
 	    $switch = '';
 	}
-	open(results,"./perl$switch $test|") || (print "can't run.\n");
+	open(results,"./perl$switch $test |") || (print "can't run.\n");
     }
     $ok = 0;
     $next = 0;
