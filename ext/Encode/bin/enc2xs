@@ -8,7 +8,7 @@ BEGIN {
 use strict;
 use Getopt::Std;
 my @orig_ARGV = @ARGV;
-our $VERSION  = do { my @r = (q$Revision: 1.25 $ =~ /\d+/g); sprintf "%d."."%02d" x $#r, @r };
+our $VERSION  = do { my @r = (q$Revision: 1.26 $ =~ /\d+/g); sprintf "%d."."%02d" x $#r, @r };
 
 # These may get re-ordered.
 # RAW is a do_now as inserted by &enter
@@ -888,15 +888,10 @@ sub make_makefile_pl
     $_Now = scalar localtime();
 
     eval { require File::Spec; };
-    warn "Generating Makefile.PL\n";
     _print_expand(File::Spec->catfile($_E2X,"Makefile_PL.e2x"),"Makefile.PL");
-    warn "Generating $_Name.pm\n";
     _print_expand(File::Spec->catfile($_E2X,"_PM.e2x"),        "$_Name.pm");
-    warn "Generating t/$_Name.t\n";
     _print_expand(File::Spec->catfile($_E2X,"_T.e2x"),         "t/$_Name.t");
-    warn "Generating README\n";
     _print_expand(File::Spec->catfile($_E2X,"README.e2x"),     "README");
-    warn "Generating t/$_Name.t\n";
     _print_expand(File::Spec->catfile($_E2X,"Changes.e2x"),    "Changes");
     exit;
 }
@@ -943,9 +938,9 @@ sub make_configlocal_pm
     $_LocalVer = _mkversion();
     $_E2X = find_e2x();
     $_Inc = $INC{"Encode.pm"}; $_Inc =~ s/\.pm$//o;    
-    warn "Writing ", File::Spec->catfile($_Inc,"ConfigLocal.pm"), "\n";
     _print_expand(File::Spec->catfile($_E2X,"ConfigLocal_PM.e2x"),    
-		  File::Spec->catfile($_Inc,"ConfigLocal.pm"));
+		  File::Spec->catfile($_Inc,"ConfigLocal.pm"),
+		  1);
     exit;
 }
 
@@ -959,7 +954,12 @@ sub _print_expand{
     eval { require File::Basename; };
     $@ and die "File::Basename needed.  Are you on miniperl?;\nerror: $@\n";
     File::Basename->import();
-    my ($src, $dst) = @_;
+    my ($src, $dst, $clobber) = @_;
+    if (!$clobber and -e $dst){
+	warn "$dst exists. skipping\n";
+	return;
+    }
+    warn "Generating $dst...\n";
     open my $in, $src or die "$src : $!";
     if ((my $d = dirname($dst)) ne '.'){
 	-d $d or mkdir $d, 0755 or die  "mkdir $d : $!";

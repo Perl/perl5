@@ -1,5 +1,5 @@
 package encoding;
-our $VERSION = do { my @r = (q$Revision: 1.34 $ =~ /\d+/g); sprintf "%d."."%02d" x $#r, @r };
+our $VERSION = do { my @r = (q$Revision: 1.35 $ =~ /\d+/g); sprintf "%d."."%02d" x $#r, @r };
 
 use Encode;
 use strict;
@@ -75,8 +75,13 @@ sub import {
 sub unimport{
     no warnings;
     undef ${^ENCODING};
+    if ($HAS_PERLIO){
+	binmode(STDIN,  ":raw");
+	binmode(STDOUT, ":raw");
+    }else{
     binmode(STDIN);
     binmode(STDOUT);
+    }
     if ($INC{"Filter/Util/Call.pm"}){
 	eval { filter_del() };
     }
@@ -193,10 +198,16 @@ reset to ":raw" (the default unprocessed raw stream of bytes).
 =head2 NOT SCOPED
 
 The pragma is a per script, not a per block lexical.  Only the last
-C<use encoding> or C<no encoding> matters, and it affects B<the whole script>.
-However, the <no encoding> pragma is supported and C<use encoding> can
-appear as many times as you want in a given script.  The multiple use
-of this pragma is discouraged.
+C<use encoding> or C<no encoding> matters, and it affects 
+B<the whole script>.  However, the <no encoding> pragma is supported and 
+B<use encoding> can appear as many times as you want in a given script. 
+The multiple use of this pragma is discouraged.
+
+Because of this nature, the use of this pragma inside the module is
+strongly discouraged (because the influence of this pragma lasts not
+only for the module but the script that uses).  But if you have to,
+make sure you say C<no encoding> at the end of the module so you
+contain the influence of the pragma within the module.
 
 =head2 DO NOT MIX MULTIPLE ENCODINGS
 
