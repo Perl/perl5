@@ -2872,7 +2872,7 @@ Perl_pmtrans(pTHX_ OP *o, OP *expr, OP *repl)
 		}
 	    }
 	}
-	if (!del) {
+	if (!del && (rlen > 0xff || tlen > 0xff)) {
 	    if (j >= rlen)
 		j = rlen - 1;
 	    else
