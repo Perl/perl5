@@ -2,27 +2,18 @@
 use ExtUtils::MakeMaker;
 
 WriteMakefile(
-	NAME => "Devel::PPPort::Harness",
-	VERSION_FROM => 'Harness.pm',
-	
-	
-	XSPROTOARG => '-noprototypes',
-	#PM => {'Harness.pm' => '$(INST_LIBDIR)/Harness.pm'},
-	#XS => {'Harness.xs' => 'Harness.c'},
-	OBJECT => 'Harness$(OBJ_EXT) module2$(OBJ_EXT) module3$(OBJ_EXT)',
-	'dist' => { COMPRESS=>"gzip", SUFFIX=>"gz" },
-	'clean' => { FILES => 'ppport.h'},
-	'depend' => { 'Harness.c'	=> 'ppport.h',
-		      'module2.c'	=> 'ppport.h',
-		      'module3.c'	=> 'ppport.h',
-		    },
+    NAME	=> "Devel::PPPort::Harness",
+    VERSION_FROM=> 'Harness.pm',
+    XSPROTOARG	=> '-noprototypes',
+    OBJECT	=> 'Harness$(OBJ_EXT) module2$(OBJ_EXT) module3$(OBJ_EXT)',
+    'dist'	=> { COMPRESS=>"gzip", SUFFIX=>"gz" },
+    'clean'	=> { FILES => 'ppport.h'},
 
 );
 
 sub MY::postamble {
 
     my $pmfile;
-    my $Ilibdir = '';
 
     if ($^O eq 'VMS') {
         $pmfile = '[-]PPPort.pm';
@@ -35,6 +26,9 @@ sub MY::postamble {
 
 ppport.h:	$pmfile
 	\$(PERL) "-I\$(PERL_ARCHLIB)" "-I\$(PERL_LIB)" -e "require qq{$pmfile}; Devel::PPPort::WriteFile(qq{ppport.h})"     
+
+Harness.xs module2.c module3.c : ppport.h
+	\$(TOUCH) \$@
 
 EOM
  
