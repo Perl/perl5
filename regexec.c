@@ -2603,7 +2603,9 @@ S_regmatch(pTHX_ regnode *prog)
 		    locinput += UTF8SKIP(locinput);
 		if (locinput > PL_regeol)
 		    sayNO;
-	    }
+	    } 
+	    else
+	       locinput++;
 	    nextchr = UCHARAT(locinput);
 	    break;
 	case REFFL:

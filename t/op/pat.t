@@ -2395,12 +2395,19 @@ print "# some Unicode properties\n";
 
     use charnames ':full';
 
-    print "a!"              =~ /\X!/ ? "ok 787\n" : "not ok 787\n";
-    print "\xDF!"           =~ /\X!/ ? "ok 788\n" : "not ok 788\n";
-    print "\x{100}!"        =~ /\X!/ ? "ok 789\n" : "not ok 789\n";
-    print "\x{100}\x{300}!" =~ /\X!/ ? "ok 790\n" : "not ok 790\n";
-    print "\N{LATIN CAPITAL LETTER E}!" =~ /\X!/ ?
-	"ok 791\n" : "not ok 791\n";
-    print "\N{LATIN CAPITAL LETTER E}\N{COMBINING GRAVE ACCENT}!" =~ /\X!/ ?
-	"ok 792\n" : "not ok 792\n";
+    print "a!"              =~ /^(\X)!/ && $1 eq "a" ?
+	"ok 787\n" : "not ok 787 # $1\n";
+    print "\xDF!"           =~ /^(\X)!/ && $1 eq "\xDF" ?
+	"ok 788\n" : "not ok 788 # $1\n";
+    print "\x{100}!"        =~ /^(\X)!/ && $1 eq "\x{100}" ?
+	"ok 789\n" : "not ok 789 # $1\n";
+    print "\x{100}\x{300}!" =~ /^(\X)!/ && $1 eq "\x{100}\x{300}" ?
+	"ok 790\n" : "not ok 790 # $1\n";
+    print "\N{LATIN CAPITAL LETTER E}!" =~ /^(\X)!/ &&
+	$1 eq "\N{LATIN CAPITAL LETTER E}" ?
+	"ok 791\n" : "not ok 791 # $1\n";
+    print "\N{LATIN CAPITAL LETTER E}\N{COMBINING GRAVE ACCENT}!" =~
+	/^(\X)!/ &&
+	$1 eq "\N{LATIN CAPITAL LETTER E}\N{COMBINING GRAVE ACCENT}" ?
+	"ok 792\n" : "not ok 792 # $1\n";
 }
