@@ -2985,23 +2985,22 @@ root of $_.
 
 Sets the random number seed for the C<rand> operator.  If EXPR is omitted,
 uses a semi-random value based on the current time and process ID, among
-other things.
+other things.  In versions of Perl prior to 5.004 the default seed was
+just the current time().  This isn't a particularly good seed, so many
+old programs supply their own seed value (often C<time ^ $$> or C<time ^
+($$ + ($$ << 15))>), but that isn't necessary any more.
 
-Simply seeding with time() and the process ID isn't particularly random,
-especially if they vary together.
-
-Try something like this instead:
-
-    srand( time() ^ ($$ + ($$ << 15)) );
-
-Of course, you'd need something much more random than that for
-serious cryptographic purposes, since it's easy to guess the current time.
-Checksumming the compressed output of one or more rapidly changing operating
-system status programs is the usual method. For example:
+You need something much more random than the default seed for
+cryptographic purposes, though.  Checksumming the compressed output of
+one or more rapidly changing operating system status programs is the
+usual method. For example:
 
     srand (time ^ $$ ^ unpack "%L*", `ps axww | gzip`);
 
-Do I<not>fP call srand() multiple times in your program unless you know
+If you're particularly concerned with this, see the Math::TrulyRandom
+module in CPAN.
+
+Do I<not> call srand() multiple times in your program unless you know
 exactly what you're doing and why you're doing it.  The point of the
 function is to "seed" the rand() function so that rand() can produce
 a different sequence each time you run your program.  Just do it once at the
@@ -3015,8 +3014,7 @@ for a seed can fall prey to the mathematical property that
 
     a^b == (a+1)^(b+1)
 
-one-third of the time.  If you're particularly concerned with this,
-see the Math::TrulyRandom module in CPAN.
+one-third of the time.  So don't do that.
   
 =item stat FILEHANDLE
 
