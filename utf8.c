@@ -192,7 +192,11 @@ Perl_utf8_to_uv(pTHX_ U8* s, STRLEN curlen, STRLEN* retlen, U32 flags)
     dTHR;
     UV uv = *s, ouv;
     STRLEN len = 1;
+#ifdef EBCDIC
+    bool dowarn = 0;
+#else
     bool dowarn = ckWARN_d(WARN_UTF8);
+#endif
     STRLEN expectlen = 0;
     
     if (curlen == 0) {
