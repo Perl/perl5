@@ -44,12 +44,34 @@ $ENV{PERL_DESTRUCT_LEVEL} = 2 unless exists $ENV{PERL_DESTRUCT_LEVEL};
 
 $ENV{EMXSHELL} = 'sh';        # For OS/2
 
-if ($#ARGV == -1) {
-    @ARGV = split(/[ \n]/,
-      `echo base/*.t comp/*.t cmd/*.t run/*.t io/*.t; echo op/*.t pragma/*.t lib/*.t pod/*.t`);
+
+# Roll your own File::Find!
+use TestInit;
+use File::Spec;
+my $curdir = File::Spec->curdir;
+my $updir  = File::Spec->updir;
+
+sub _find_tests {
+    my($dir) = @_;
+    opendir DIR, $dir || die "Trouble opening $dir: $!";
+    foreach my $f (readdir DIR) {
+        next if $f eq $curdir or $f eq $updir;
+
+        my $fullpath = File::Spec->catdir($dir, $f);
+
+        _find_tests($fullpath) if -d $fullpath;
+        push @ARGV, $fullpath if $f =~ /\.t$/;
+    }
+}
+
+unless (@ARGV) {
+    foreach my $dir (qw(base comp cmd run io op pragma lib pod)) {
+        _find_tests($dir);
+    }
 }
 
 # %infinite = ( 'comp/require.t', 1, 'op/bop.t', 1, 'lib/hostname.t', 1 );
+%infinite = ();
 
 if ($deparse) {
     _testprogs('deparse', @ARGV);
