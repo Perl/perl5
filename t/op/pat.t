@@ -6,7 +6,7 @@
 
 $| = 1;
 
-print "1..942\n";
+print "1..944\n";
 
 BEGIN {
     chdir 't' if -d 't';
@@ -3005,4 +3005,15 @@ print "\x{072F}" =~ /\P{Syriac1}/ ? "ok $test\n" : "not ok $test\n"; $test++;
     ++$test;
 }
 
-# last test 942
+{
+    print "# [perl #18857]\n";
+    foreach (0, 1) {
+	$a = v10.v257;
+	chop $a;
+	$a =~ s/^(\s*)(\w*)/$1\u$2/;
+	print $a eq v10 ? "ok $test\n" : "not ok $test\n";
+	$test++;
+    } 
+}
+
+# last test 944
