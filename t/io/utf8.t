@@ -314,8 +314,9 @@ ok( 1 );
 # sysread() and syswrite() tested in lib/open.t since Fcntl is used
 
 {
-    # <FH> on a :utf8 stream should complain immediately
+    # <FH> on a :utf8 stream should complain immediately with -w
     # if it finds bad UTF-8 (:encoding(utf8) works this way)
+    use warnings 'utf8';
     local $SIG{__WARN__} = sub { $@ = shift };
     open F, ">a";
     binmode F;
