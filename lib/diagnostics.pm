@@ -451,6 +451,7 @@ sub death_trap {
 
 sub splainthis {
     local $_ = shift;
+    local $\;
     ### &finish_compilation unless %msg;
     s/\.?\n+$//;
     my $orig = $_;
