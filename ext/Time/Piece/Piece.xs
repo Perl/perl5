@@ -32,9 +32,7 @@ __strftime(fmt, sec, min, hour, mday, mon, year, wday = -1, yday = -1, isdst = -
     CODE:
     #XXX: an sv_strftime() that can make use of the TARG would faster
     buf = my_strftime(fmt, sec, min, hour, mday, mon, year, wday, yday, isdst);
-    if (buf) {
-        RETVAL = buf;
-    }
+    RETVAL = buf;
 
     OUTPUT:
     RETVAL
