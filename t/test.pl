@@ -199,13 +199,13 @@ sub _quote_args {
 sub runperl {
     my %args = @_;
     my $runperl = $^X;
-    if (defined $args{switches}) {
+    if ($args{switches}) {
 	_quote_args(\$runperl, $args{switches});
     }
-    unless (defined $args{nolib}) {
-	if ($is_macos && $args{stderr}) {
+    unless ($args{nolib}) {
+	if ($is_macos) {
 	    $runperl .= ' -I::lib';
-	    # Use UNIX style error message instead of MPW style.
+	    # Use UNIX style error messages instead of MPW style.
 	    $runperl .= ' -MMac::err=unix' if $args{stderr};
 	}
 	else {
@@ -224,11 +224,11 @@ sub runperl {
     }
     if (defined $args{stdin}) {
 	if ($is_mswin || $is_netware || $is_vms) {
-	    $runperl = qq{$^X -e "print q(} .
+	    $runperl = qq{$^X -e "print qq(} .
 		$args{stdin} . q{)" | } . $runperl;
 	}
 	else {
-	    $runperl = qq{$^X -e 'print q(} .
+	    $runperl = qq{$^X -e 'print qq(} .
 		$args{stdin} . q{)' | } . $runperl;
 	}
     }
