@@ -39,7 +39,7 @@ last update of the hierarchy.
 
 The remaining three arguments to C<autosplit> govern other options to the
 autosplitter. If the third argument, I<$keep>, is false, then any pre-existing
-C<.al> files in the autoload directory are removed if they are no longer
+C<*.al> files in the autoload directory are removed if they are no longer
 part of the module (obsoleted functions). The fourth argument, I<$check>,
 instructs C<autosplit> to check the module currently being split to ensure
 that it does include a C<use> specification for the AutoLoader module, and
