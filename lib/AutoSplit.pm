@@ -304,7 +304,16 @@ sub autosplit_file{
 
     if (!$keep){  # don't keep any obsolete *.al files in the directory
 	my(%names);
-	@names{@names} = @names;
+	# perl downcases all filenames on VMS (which upcases all filenames) so
+	# we'd better downcase the sub name list too, or subs with upper case
+	# letters in them will get their .al files deleted right after they're
+	# created. (The mixed case sub name wonn't match the all-lowercase
+	# filename, and so be cleaned up as a scrap file)
+	if ($Is_VMS) {
+	  %names = map {lc($_) => lc($_) } @names;
+	} else {
+	  @names{@names} = @names;      
+	}
 	opendir(OUTDIR,"$autodir/$modpname");
 	foreach(sort readdir(OUTDIR)){
 	    next unless /\.al$/;
