@@ -14,7 +14,7 @@
 UNIMPLEMENTED(_encoded_utf8_to_bytes, I32)
 UNIMPLEMENTED(_encoded_bytes_to_utf8, I32)
 
-#ifdef USE_PERLIO
+#if defined(USE_PERLIO) && !defined(USE_SFIO)
 /* Define an encoding "layer" in the perliol.h sense.
    The layer defined here "inherits" in an object-oriented sense from the
    "perlio" layer with its PerlIOBuf_* "methods".
@@ -640,7 +640,7 @@ _utf8_off(sv)
 
 BOOT:
 {
-#ifdef USE_PERLIO
+#if defined(USE_PERLIO) && !defined(USE_SFIO)
  PerlIO_define_layer(&PerlIO_encode);
 #endif
 #include "iso8859.def"
