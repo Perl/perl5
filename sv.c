@@ -3946,10 +3946,20 @@ Perl_sv_magic(pTHX_ register SV *sv, SV *obj, int how, const char *name, I32 nam
     }
     Newz(702,mg, 1, MAGIC);
     mg->mg_moremagic = SvMAGIC(sv);
-
     SvMAGIC(sv) = mg;
-    if (!obj || obj == sv || how == '#' || how == 'r')
+
+    /* Some magic sontains a reference loop, where the sv and object refer to
+       each other.  To prevent a avoid a reference loop that would prevent such
+       objects being freed, we look for such loops and if we find one we avoid
+       incrementing the object refcount. */
+    if (!obj || obj == sv || how == '#' || how == 'r' ||
+	(SvTYPE(obj) == SVt_PVGV &&
+	    (GvSV(obj) == sv || GvHV(obj) == (HV*)sv || GvAV(obj) == (AV*)sv ||
+	    GvCV(obj) == (CV*)sv || GvIOp(obj) == (IO*)sv ||
+	    GvFORM(obj) == (CV*)sv)))
+    {
 	mg->mg_obj = obj;
+    }
     else {
 	mg->mg_obj = SvREFCNT_inc(obj);
 	mg->mg_flags |= MGf_REFCOUNTED;
