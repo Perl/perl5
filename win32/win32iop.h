@@ -220,7 +220,7 @@ END_EXTERN_C
 #define getchar			win32_getchar
 #define putchar			win32_putchar
 
-#if !defined(MYMALLOC) || !defined(PERLDLL)
+#if !defined(MYMALLOC) || !defined(PERL_CORE)
 #undef malloc
 #undef calloc
 #undef realloc

@@ -151,7 +151,7 @@ typedef  char *		caddr_t;	/* In malloc.c (core address). */
 /* #define PERL_SBRK_VIA_MALLOC	/**/
 #endif
 
-#ifdef PERLDLL
+#if defined(PERLDLL) && !defined(PERL_CORE)
 #define PERL_CORE
 #endif
 

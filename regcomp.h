@@ -440,12 +440,6 @@ const static char reg_off_by_arg[] = {
 };
 #endif
 
-struct reg_data {
-    U32 count;
-    U8 *what;
-    void* data[1];
-};
-
 #define REG_SEEN_ZERO_LEN	1
 #define REG_SEEN_LOOKBEHIND	2
 #define REG_SEEN_GPOS		4
