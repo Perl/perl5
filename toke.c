@@ -2115,6 +2115,9 @@ Perl_yylex(pTHX)
 	char pit = PL_pending_ident;
 	PL_pending_ident = 0;
 
+	DEBUG_T({ PerlIO_printf(Perl_debug_log,
+              "### Tokener saw identifier '%s'\n", PL_tokenbuf); })
+
 	/* if we're in a my(), we can't allow dynamics here.
 	   $foo'bar has already been turned into $foo::bar, so
 	   just check for colons.
@@ -2252,6 +2255,10 @@ Perl_yylex(pTHX)
 	    PL_expect = PL_lex_expect;
 	    PL_lex_defer = LEX_NORMAL;
 	}
+	DEBUG_T({ PerlIO_printf(Perl_debug_log,
+              "### Next token after '%s' was known, type %i\n", PL_bufptr,
+              PL_nexttype[PL_nexttoke]); })
+
 	return(PL_nexttype[PL_nexttoke]);
 
     /* interpolated case modifiers like \L \U, including \Q and \E.
@@ -2283,6 +2290,8 @@ Perl_yylex(pTHX)
 	    return yylex();
 	}
 	else {
+	    DEBUG_T({ PerlIO_printf(Perl_debug_log,
+              "### Saw case modifier at '%s'\n", PL_bufptr); })
 	    s = PL_bufptr + 1;
 	    if (strnEQ(s, "L\\u", 3) || strnEQ(s, "U\\l", 3))
 		tmp = *s, *s = s[2], s[2] = tmp;	/* misordered... */
@@ -2333,6 +2342,8 @@ Perl_yylex(pTHX)
     case LEX_INTERPSTART:
 	if (PL_bufptr == PL_bufend)
 	    return sublex_done();
+	DEBUG_T({ PerlIO_printf(Perl_debug_log,
+              "### Interpolated variable at '%s'\n", PL_bufptr); })
 	PL_expect = XTERM;
 	PL_lex_dojoin = (*PL_bufptr == '@');
 	PL_lex_state = LEX_INTERPNORMAL;
@@ -2429,7 +2440,7 @@ Perl_yylex(pTHX)
     s = PL_bufptr;
     PL_oldoldbufptr = PL_oldbufptr;
     PL_oldbufptr = s;
-    DEBUG_p( {
+    DEBUG_T( {
 	PerlIO_printf(Perl_debug_log, "### Tokener expecting %s at %s\n",
 		      exp_name[PL_expect], s);
     } )
@@ -2449,6 +2460,9 @@ Perl_yylex(pTHX)
 	    PL_last_lop = 0;
 	    if (PL_lex_brackets)
 		yyerror("Missing right curly or square bracket");
+            DEBUG_T( { PerlIO_printf(Perl_debug_log, 
+                        "### Tokener got EOF\n");
+            } )
 	    TOKEN(0);
 	}
 	if (s++ < PL_bufend)
@@ -2797,10 +2811,16 @@ Perl_yylex(pTHX)
 
 	    if (strnEQ(s,"=>",2)) {
 		s = force_word(PL_bufptr,WORD,FALSE,FALSE,FALSE);
+                DEBUG_T( { PerlIO_printf(Perl_debug_log, 
+                            "### Saw unary minus before =>, forcing word '%s'\n", s);
+                } )
 		OPERATOR('-');		/* unary minus */
 	    }
 	    PL_last_uni = PL_oldbufptr;
 	    PL_last_lop_op = OP_FTEREAD;	/* good enough */
+            DEBUG_T( { PerlIO_printf(Perl_debug_log, 
+                        "### Saw file test %c\n", (int)tmp);
+            } )
 	    switch (tmp) {
 	    case 'r': FTST(OP_FTEREAD);
 	    case 'w': FTST(OP_FTEWRITE);
@@ -3576,12 +3596,18 @@ Perl_yylex(pTHX)
     case '0': case '1': case '2': case '3': case '4':
     case '5': case '6': case '7': case '8': case '9':
 	s = scan_num(s, &yylval);
+        DEBUG_T( { PerlIO_printf(Perl_debug_log, 
+                    "### Saw number in '%s'\n", s);
+        } )
 	if (PL_expect == XOPERATOR)
 	    no_op("Number",s);
 	TERM(THING);
 
     case '\'':
 	s = scan_str(s,FALSE,FALSE);
+        DEBUG_T( { PerlIO_printf(Perl_debug_log, 
+                    "### Saw string in '%s'\n", s);
+        } )
 	if (PL_expect == XOPERATOR) {
 	    if (PL_lex_formbrack && PL_lex_brackets == PL_lex_formbrack) {
 		PL_expect = XTERM;
@@ -3598,6 +3624,9 @@ Perl_yylex(pTHX)
 
     case '"':
 	s = scan_str(s,FALSE,FALSE);
+        DEBUG_T( { PerlIO_printf(Perl_debug_log, 
+                    "### Saw string in '%s'\n", s);
+        } )
 	if (PL_expect == XOPERATOR) {
 	    if (PL_lex_formbrack && PL_lex_brackets == PL_lex_formbrack) {
 		PL_expect = XTERM;
@@ -3620,6 +3649,9 @@ Perl_yylex(pTHX)
 
     case '`':
 	s = scan_str(s,FALSE,FALSE);
+        DEBUG_T( { PerlIO_printf(Perl_debug_log, 
+                    "### Saw backtick string in '%s'\n", s);
+        } )
 	if (PL_expect == XOPERATOR)
 	    no_op("Backticks",s);
 	if (!s)
