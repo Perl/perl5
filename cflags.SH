@@ -6,7 +6,7 @@ case $CONFIG in
 	ln ../../../config.sh . || \
 	(echo "Can't find config.sh."; exit 1)
     fi
-    . config.sh
+    . ./config.sh
     ;;
 esac
 : This forces SH files to create target in same directory as SH file.
