@@ -916,6 +916,10 @@ emergency_sbrk(MEM_SIZE size)
 #define	NBUCKETS (32*BUCKETS_PER_POW2 + 1)
 static	union overhead *nextf[NBUCKETS];
 
+#if defined(PURIFY) && !defined(USE_PERL_SBRK)
+#  define USE_PERL_SBRK
+#endif
+
 #ifdef USE_PERL_SBRK
 #define sbrk(a) Perl_sbrk(a)
 Malloc_t Perl_sbrk (int size);
@@ -1902,7 +1906,7 @@ Perl_dump_mstats(pTHX_ char *s)
 
 #ifdef USE_PERL_SBRK
 
-#   if defined(__MACHTEN_PPC__) || defined(NeXT) || defined(__NeXT__)
+#   if defined(__MACHTEN_PPC__) || defined(NeXT) || defined(__NeXT__) || defined(PURIFY)
 #      define PERL_SBRK_VIA_MALLOC
 /*
  * MachTen's malloc() returns a buffer aligned on a two-byte boundary.
