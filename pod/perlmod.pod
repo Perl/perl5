@@ -201,8 +201,8 @@ symbols.  Or it can do a little of both.
 For example, to start a normal module called Fred, create
 a file called Fred.pm and put this at the start of it:
 
-    package 	 Fred;
-    require 	 Exporter;
+    package Fred;
+    use Exporter ();
     @ISA       = qw(Exporter);
     @EXPORT    = qw(func1 func2);
     @EXPORT_OK = qw($sally @listabob %harry func3);
