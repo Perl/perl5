@@ -2800,6 +2800,13 @@ having slightly different types for their first argument.
 
 =back
 
+=head2 Alpha systems with old gccs fail several tests
+
+If you see op/pack, op/pat, op/regexp, or ext/Storable tests failing
+in a Linux/alpha or *BSD/Alpha, it's probably time to upgrade your gcc.
+gccs prior to 2.95.3 are definitely not good enough, and gcc 3.1 may
+be even better.  (RedHat Linux/alpha with gcc 3.1 reported no problems.)
+
 =head2 BeOS
 
 The following tests fail on 5.8.0 Perl in BeOS Personal 5.03:
