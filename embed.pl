@@ -1427,6 +1427,7 @@ p	|OP*	|block_end	|I32 floor|OP* seq
 Ap	|I32	|block_gimme
 p	|int	|block_start	|int full
 p	|void	|boot_core_UNIVERSAL
+p	|void	|boot_core_PerlIO
 Ap	|void	|call_list	|I32 oldscope|AV* av_list
 p	|bool	|cando		|Mode_t mode|Uid_t effective|Stat_t* statbufp
 Ap	|U32	|cast_ulong	|NV f
