@@ -14,7 +14,7 @@ BEGIN {
 # If you find tests are failing, please try adding names to tests to track
 # down where the failure is, and supply your new names as a patch.
 # (Just-in-time test naming)
-plan tests => 145;
+plan tests => 146;
 
 # numerics
 ok ((0xdead & 0xbeef) == 0x9ead);
@@ -321,3 +321,7 @@ $a = "\0\x{100}"; chop($a);
 ok(utf8::is_utf8($a)); # make sure UTF8 flag is still there
 $a = ~$a;
 is($a, "\xFF", "~ works with utf-8");
+
+# [rt.perl.org 33003]
+# This would cause a segfault
+is( runperl(prog => '$#a>>=1; print 1'), 1 );
