@@ -5884,7 +5884,9 @@ screamer2:
 	    /* Accomodate broken VAXC compiler, which applies U8 cast to
 	     * both args of ?: operator, causing EOF to change into 255
 	     */
-#ifdef DJGPP /* This is basically undoing #17270 for DJGPP.  See below. */
+	    /* For some reason #17270 broke things for DJGPP and NetWare.
+	     * Another hunk just below. */
+#if defined(DJGPP) || defined(NETWARE)
 	    if (cnt)
 #else
 	    if (cnt > 0)
@@ -5897,7 +5899,9 @@ screamer2:
 	    }
 	}
 
-#ifndef DJGPP /* This is basically undoing #17270 for DJGPP.  See above.*/
+	/* This is basically undoing #17270 for DJGPP and NetWare.
+	 * Another hunk just above. */
+#if !(defined(DJGPP) || defined(NETWARE))
 	if (cnt > 0)
 #endif
 	{
