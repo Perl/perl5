@@ -82,13 +82,11 @@ variables.  Named parameters are also demonstrated.
 	package Foo;
 
 	sub new {
-		my $type   = shift;
+		my $type = shift;
 		my %params = @_;
-		my $self   = {};
-
-		$self->{High} = $params{High};
-		$self->{Low}  = $params{Low};
-
+		my $self = {};
+		$self->{'High'} = $params{'High'};
+		$self->{'Low'}  = $params{'Low'};
 		bless $self, $type;
 	}
 
@@ -96,25 +94,23 @@ variables.  Named parameters are also demonstrated.
 	package Bar;
 
 	sub new {
-		my $type   = shift;
+		my $type = shift;
 		my %params = @_;
-		my $self   = [];
-
-		$self->[0] = $params{Left};
-		$self->[1] = $params{Right};
-
+		my $self = [];
+		$self->[0] = $params{'Left'};
+		$self->[1] = $params{'Right'};
 		bless $self, $type;
 	}
 
 	package main;
 
-	my $a = Foo->new( High => 42, Low => 11 );
-	print "High = $a->{High}\n";
-	print "Low  = $a->{Low}\n";
+	$a = Foo->new( 'High' => 42, 'Low' => 11 );
+	print "High=$a->{'High'}\n";
+	print "Low=$a->{'Low'}\n";
 
-	my $b = Bar->new( Left => 78, Right => 40 );
-	print "Left  = $b->[0]\n";
-	print "Right = $b->[1]\n";
+	$b = Bar->new( 'Left' => 78, 'Right' => 40 );
+	print "Left=$b->[0]\n";
+	print "Right=$b->[1]\n";
 
 =head1 SCALAR INSTANCE VARIABLES
 
@@ -124,15 +120,15 @@ An anonymous scalar can be used when only one instance variable is needed.
 
 	sub new {
 		my $type = shift;
-		my $self = shift;
-
+		my $self;
+		$self = shift;
 		bless \$self, $type;
 	}
 
 	package main;
 
-	my $a = Foo->new( 42 );
-	print "a = $$a\n";
+	$a = Foo->new( 42 );
+	print "a=$$a\n";
 
 
 =head1 INSTANCE VARIABLE INHERITANCE
@@ -147,29 +143,25 @@ object.
 	sub new {
 		my $type = shift;
 		my $self = {};
-
-		$self->{buz} = 42;
-
+		$self->{'buz'} = 42;
 		bless $self, $type;
 	}
 
 	package Foo;
-	our @ISA = qw( Bar );
+	@ISA = qw( Bar );
 
 	sub new {
 		my $type = shift;
 		my $self = Bar->new;
-
-		$self->{biz} = 11;
-
+		$self->{'biz'} = 11;
 		bless $self, $type;
 	}
 
 	package main;
 
-	my $a = Foo->new;
-	print "buz = $a->{buz}\n";
-	print "biz = $a->{biz}\n";
+	$a = Foo->new;
+	print "buz = ", $a->{'buz'}, "\n";
+	print "biz = ", $a->{'biz'}, "\n";
 
 
 
@@ -183,9 +175,7 @@ relationships between objects.
 	sub new {
 		my $type = shift;
 		my $self = {};
-
-		$self->{buz} = 42;
-
+		$self->{'buz'} = 42;
 		bless $self, $type;
 	}
 
@@ -194,18 +184,16 @@ relationships between objects.
 	sub new {
 		my $type = shift;
 		my $self = {};
-
-		$self->{Bar} = Bar->new;
-		$self->{biz} = 11;
-
+		$self->{'Bar'} = Bar->new;
+		$self->{'biz'} = 11;
 		bless $self, $type;
 	}
 
 	package main;
 
-	my $a = Foo->new;
-	print "buz = $a->{Bar}->{buz}\n";
-	print "biz = $a->{biz}\n";
+	$a = Foo->new;
+	print "buz = ", $a->{'Bar'}->{'buz'}, "\n";
+	print "biz = ", $a->{'biz'}, "\n";
 
 
 
@@ -219,17 +207,14 @@ where that method is defined.
 	package Buz;
 	sub goo { print "here's the goo\n" }
 
-
-	package Bar;
-        our @ISA = qw( Buz );
+	package Bar; @ISA = qw( Buz );
 	sub google { print "google here\n" }
-
 
 	package Baz;
 	sub mumble { print "mumbling\n" }
 
 	package Foo;
-	our @ISA = qw( Bar Baz );
+	@ISA = qw( Bar Baz );
 
 	sub new {
 		my $type = shift;
@@ -251,7 +236,7 @@ where that method is defined.
 
 	package main;
 
-	my $foo = Foo->new;
+	$foo = Foo->new;
 	$foo->mumble;
 	$foo->grr;
 	$foo->goo;
@@ -265,28 +250,24 @@ This example demonstrates an interface for the SDBM class.  This creates a
 
 	package Mydbm;
 
-	use SDBM_File;
-	use Tie::Hash;
-
-	our @ISA = qw( Tie::Hash );
+	require SDBM_File;
+	require Tie::Hash;
+	@ISA = qw( Tie::Hash );
 
 	sub TIEHASH {
 	    my $type = shift;
 	    my $ref  = SDBM_File->new(@_);
-	    bless { dbm => $ref }, $type;
+	    bless {'dbm' => $ref}, $type;
 	}
-
 	sub FETCH {
 	    my $self = shift;
-	    my $ref  = $self->{dbm};
+	    my $ref  = $self->{'dbm'};
 	    $ref->FETCH(@_);
 	}
-
 	sub STORE {
 	    my $self = shift;
-
-	    if ( defined $_[0] ) {
-		my $ref = $self->{dbm};
+	    if (defined $_[0]){
+		my $ref = $self->{'dbm'};
 		$ref->STORE(@_);
 	    } else {
 		die "Cannot STORE an undefined key in Mydbm\n";
@@ -296,13 +277,13 @@ This example demonstrates an interface for the SDBM class.  This creates a
 	package main;
 	use Fcntl qw( O_RDWR O_CREAT );
 
-	tie my %foo, 'Mydbm', 'Sdbm', O_RDWR|O_CREAT, 0640;
-	$foo{bar} = 123;
-	print "foo-bar = $foo{bar}\n";
+	tie %foo, "Mydbm", "Sdbm", O_RDWR|O_CREAT, 0640;
+	$foo{'bar'} = 123;
+	print "foo-bar = $foo{'bar'}\n";
 
-	tie my %bar, 'Mydbm', 'Sdbm2', O_RDWR|O_CREAT, 0640;
-	$bar{Cathy} = 456;
-	print "bar-Cathy = $bar{Cathy}\n";
+	tie %bar, "Mydbm", "Sdbm2", O_RDWR|O_CREAT, 0640;
+	$bar{'Cathy'} = 456;
+	print "bar-Cathy = $bar{'Cathy'}\n";
 
 =head1 THINKING OF CODE REUSE
 
@@ -320,7 +301,6 @@ that it is impossible to override the BAZ() method.
 		my $type = shift;
 		bless {}, $type;
 	}
-
 	sub bar {
 		my $self = shift;
 		$self->FOO::private::BAZ;
@@ -334,7 +314,7 @@ that it is impossible to override the BAZ() method.
 
 	package main;
 
-	my $a = FOO->new;
+	$a = FOO->new;
 	$a->bar;
 
 Now we try to override the BAZ() method.  We would like FOO::bar() to call
@@ -347,7 +327,6 @@ FOO::private::BAZ().
 		my $type = shift;
 		bless {}, $type;
 	}
-
 	sub bar {
 		my $self = shift;
 		$self->FOO::private::BAZ;
@@ -360,9 +339,7 @@ FOO::private::BAZ().
 	}
 
 	package GOOP;
-
-	our @ISA = qw( FOO );
-
+	@ISA = qw( FOO );
 	sub new {
 		my $type = shift;
 		bless {}, $type;
@@ -374,7 +351,7 @@ FOO::private::BAZ().
 
 	package main;
 
-	my $a = GOOP->new;
+	$a = GOOP->new;
 	$a->bar;
 
 To create reusable code we must modify class FOO, flattening class
@@ -387,7 +364,6 @@ method GOOP::BAZ() to be used in place of FOO::BAZ().
 		my $type = shift;
 		bless {}, $type;
 	}
-
 	sub bar {
 		my $self = shift;
 		$self->BAZ;
@@ -398,21 +374,19 @@ method GOOP::BAZ() to be used in place of FOO::BAZ().
 	}
 
 	package GOOP;
-
-	our @ISA = qw( FOO );
+	@ISA = qw( FOO );
 
 	sub new {
 		my $type = shift;
 		bless {}, $type;
 	}
-
 	sub BAZ {
 		print "in GOOP::BAZ\n";
 	}
 
 	package main;
 
-	my $a = GOOP->new;
+	$a = GOOP->new;
 	$a->bar;
 
 =head1 CLASS CONTEXT AND THE OBJECT
@@ -435,12 +409,12 @@ method where that data is located.
 
 	package Bar;
 
-	my %fizzle = ( Password => 'XYZZY' );
+	%fizzle = ( 'Password' => 'XYZZY' );
 
 	sub new {
 		my $type = shift;
 		my $self = {};
-		$self->{fizzle} = \%fizzle;
+		$self->{'fizzle'} = \%fizzle;
 		bless $self, $type;
 	}
 
@@ -451,29 +425,27 @@ method where that data is located.
 		# or %Foo::fizzle.  The object already knows which
 		# we should use, so just ask it.
 		#
-		my $fizzle = $self->{fizzle};
+		my $fizzle = $self->{'fizzle'};
 
-		print "The word is $fizzle->{Password}\n";
+		print "The word is ", $fizzle->{'Password'}, "\n";
 	}
 
 	package Foo;
+	@ISA = qw( Bar );
 
-	our @ISA = qw( Bar );
-
-	my %fizzle = ( Password => 'Rumple' );
+	%fizzle = ( 'Password' => 'Rumple' );
 
 	sub new {
 		my $type = shift;
 		my $self = Bar->new;
-		$self->{fizzle} = \%fizzle;
+		$self->{'fizzle'} = \%fizzle;
 		bless $self, $type;
 	}
 
 	package main;
 
-	my $a = Bar->new;
-	my $b = Foo->new;
-
+	$a = Bar->new;
+	$b = Foo->new;
 	$a->enter;
 	$b->enter;
 
@@ -496,8 +468,7 @@ object will be a BAR not a FOO, even though the constructor is in class FOO.
 	}
 
 	package BAR;
-
-	our @ISA = qw(FOO);
+	@ISA = qw(FOO);
 
 	sub baz {
 		print "in BAR::baz()\n";
@@ -505,7 +476,7 @@ object will be a BAR not a FOO, even though the constructor is in class FOO.
 
 	package main;
 
-	my $a = BAR->new;
+	$a = BAR->new;
 	$a->baz;
 
 =head1 DELEGATION
@@ -522,16 +493,14 @@ behavior by adding custom FETCH() and STORE() methods, if this is desired.
 
 	package Mydbm;
 
-	use SDBM_File;
-	use Tie::Hash;
-
-	our @ISA = qw( Tie::Hash );
-        our $AUTOLOAD;
+	require SDBM_File;
+	require Tie::Hash;
+	@ISA = qw(Tie::Hash);
 
 	sub TIEHASH {
 		my $type = shift;
-		my $ref  = SDBM_File->new(@_);
-		bless { delegate => $ref };
+		my $ref = SDBM_File->new(@_);
+		bless {'delegate' => $ref};
 	}
 
 	sub AUTOLOAD {
@@ -547,12 +516,12 @@ behavior by adding custom FETCH() and STORE() methods, if this is desired.
 		$AUTOLOAD =~ s/^Mydbm:://;
 
 		# Pass the message to the delegate.
-		$self->{delegate}->$AUTOLOAD(@_);
+		$self->{'delegate'}->$AUTOLOAD(@_);
 	}
 
 	package main;
 	use Fcntl qw( O_RDWR O_CREAT );
 
-	tie my %foo, 'Mydbm', 'adbm', O_RDWR|O_CREAT, 0640;
-	$foo{bar} = 123;
-	print "foo-bar = $foo{bar}\n";
+	tie %foo, "Mydbm", "adbm", O_RDWR|O_CREAT, 0640;
+	$foo{'bar'} = 123;
+	print "foo-bar = $foo{'bar'}\n";

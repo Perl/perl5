@@ -224,7 +224,7 @@ by assigning to an element that is off the end of the array.  You
 can truncate an array down to nothing by assigning the null list
 () to it.  The following are equivalent:
 
-    my @whatever = ();
+    @whatever = ();
     $#whatever = -1;
 
 If you evaluate an array in scalar context, it returns the length
@@ -232,6 +232,13 @@ of the array.  (Note that this is not true of lists, which return
 the last value, like the C comma operator, nor of built-in functions,
 which return whatever they feel like returning.)  The following is
 always true:
+
+    scalar(@whatever) == $#whatever - $[ + 1;
+
+Version 5 of Perl changed the semantics of C<$[>: files that don't set
+the value of C<$[> no longer need to worry about whether another
+file changed its value.  (In other words, use of C<$[> is deprecated.)
+So in general you can assume that
 
     scalar(@whatever) == $#whatever + 1;
 
@@ -254,7 +261,6 @@ of sixteen buckets has been touched, and presumably contains all
 You can preallocate space for a hash by assigning to the keys() function.
 This rounds up the allocated buckets to the next power of two:
 
-    my %users = ();
     keys(%users) = 1000;		# allocate 1024 buckets
 
 =head2 Scalar value constructors
@@ -300,8 +306,8 @@ names beginning with $ or @, followed by an optional bracketed
 expression as a subscript.)  The following code segment prints out "The
 price is $Z<>100."
 
-    my $Price = '$100';                 # not interpolated
-    print "The price is $Price.\n";	# interpolated
+    $Price = '$100';	# not interpreted
+    print "The price is $Price.\n";	# interpreted
 
 As in some shells, you can enclose the variable name in braces to
 disambiguate it from following alphanumerics (and underscores).
@@ -310,7 +316,7 @@ this when interpolating a variable into a string to separate the
 variable name from a following double-colon or an apostrophe, since
 these would be otherwise treated as a package separator:
 
-    my $who = "Larry";
+    $who = "Larry";
     print PASSWD "${who}::0:0:Superuser:/:/bin/perl\n";
     print "We use ${who}speak when ${who}'s here.\n";
 
@@ -393,7 +399,7 @@ by joining the elements with the delimiter specified in the C<$">
 variable (C<$LIST_SEPARATOR> in English), space by default.  The
 following are equivalent:
 
-    my $temp = join($", @ARGV);
+    $temp = join($", @ARGV);
     system "echo $temp";
 
     system "echo @ARGV";
@@ -460,7 +466,7 @@ If you want your here-docs to be indented with the
 rest of the code, you'll need to remove leading whitespace
 from each line manually:
 
-    (my $quote = <<'FINIS') =~ s/^\s+//gm;
+    ($quote = <<'FINIS') =~ s/^\s+//gm;
 	The Road goes ever on and on, 
 	down from the door where it began.
     FINIS
@@ -509,23 +515,23 @@ In a context not requiring a list value, the value of what appears
 to be a list literal is simply the value of the final element, as
 with the C comma operator.  For example,
 
-    my @foo = ('cc', '-E', $bar);
+    @foo = ('cc', '-E', $bar);
 
 assigns the entire list value to array @foo, but
 
-    my $foo = ('cc', '-E', $bar);
+    $foo = ('cc', '-E', $bar);
 
 assigns the value of variable $bar to the scalar variable $foo.
 Note that the value of an actual array in scalar context is the
 length of the array; the following assigns the value 3 to $foo:
 
-    my @foo = ('cc', '-E', $bar);
-    my $foo = @foo;		# $foo gets 3
+    @foo = ('cc', '-E', $bar);
+    $foo = @foo;		# $foo gets 3
 
 You may have an optional comma before the closing parenthesis of a
 list literal, so that you can say:
 
-    my @foo = (
+    @foo = (
 	1,
 	2,
 	3,
@@ -534,7 +540,7 @@ list literal, so that you can say:
 To use a here-document to assign an array, one line per element,
 you might use an approach like this:
 
-    my @sauces = <<End_Lines =~ m/(\S.*\S)/g;
+    @sauces = <<End_Lines =~ m/(\S.*\S)/g;
 	normal tomato
 	spicy tomato
 	green chile
@@ -573,13 +579,13 @@ A list value may also be subscripted like a normal array.  You must
 put the list in parentheses to avoid ambiguity.  For example:
 
     # Stat returns list value.
-    my $time = (stat($file))[8];
+    $time = (stat($file))[8];
 
     # SYNTAX ERROR HERE.
-    my $time = stat($file)[8];  # OOPS, FORGOT PARENTHESES
+    $time = stat($file)[8];  # OOPS, FORGOT PARENTHESES
 
     # Find a hex digit.
-    my $hexdigit = ('a','b','c','d','e','f')[$digit-10];
+    $hexdigit = ('a','b','c','d','e','f')[$digit-10];
 
     # A "reverse comma operator".
     return (pop(@foo),pop(@foo))[0];
@@ -587,21 +593,21 @@ put the list in parentheses to avoid ambiguity.  For example:
 Lists may be assigned to only when each element of the list
 is itself legal to assign to:
 
-    my($a, $b, $c) = (1, 2, 3);
+    ($a, $b, $c) = (1, 2, 3);
 
-    ($map{red}, $map{blue}, $map{green}) = (0x00f, 0x0f0, 0xf00);
+    ($map{'red'}, $map{'blue'}, $map{'green'}) = (0x00f, 0x0f0, 0xf00);
 
 An exception to this is that you may assign to C<undef> in a list.
 This is useful for throwing away some of the return values of a
 function:
 
-    my($dev, $ino, undef, undef, $uid, $gid) = stat($file);
+    ($dev, $ino, undef, undef, $uid, $gid) = stat($file);
 
 List assignment in scalar context returns the number of elements
 produced by the expression on the right side of the assignment:
 
-    my $x = (($foo,$bar) = (3,2,1));	# set $x to 3, not 2
-    my $x = (($foo,$bar) = f());        # set $x to f()'s return count
+    $x = (($foo,$bar) = (3,2,1));	# set $x to 3, not 2
+    $x = (($foo,$bar) = f());	        # set $x to f()'s return count
 
 This is handy when you want to do a list assignment in a Boolean
 context, because most list functions return a null list when finished,
@@ -612,7 +618,7 @@ performing an operation in list context and then counting the number of
 return values, by assigning to an empty list and then using that
 assignment in scalar context. For example, this code:
 
-    my $count = () = $string =~ /\d+/g;
+    $count = () = $string =~ /\d+/g;
 
 will place into $count the number of digit groups found in $string.
 This happens because the pattern match is in list context (since it
@@ -622,15 +628,14 @@ context will translate that into the number of elements (here, the
 number of times the pattern matched) and assign that to $count. Note
 that simply using
 
-    my $count = $string =~ /\d+/g;
+    $count = $string =~ /\d+/g;
 
 would not have worked, since a pattern match in scalar context will
 only return true or false, rather than a count of matches.
 
 The final element of a list assignment may be an array or a hash:
 
-    my($a, $b, @rest) = split;
-    # or
+    ($a, $b, @rest) = split;
     my($a, $b, %rest) = @_;
 
 You can actually put an array or hash anywhere in the list, but the first one
@@ -641,7 +646,7 @@ A hash can be initialized using a literal list holding pairs of
 items to be interpreted as a key and a value:
 
     # same as map assignment above
-    my %map = ('red',0x00f,'blue',0x0f0,'green',0xf00);
+    %map = ('red',0x00f,'blue',0x0f0,'green',0xf00);
 
 While literal lists and named arrays are often interchangeable, that's
 not the case for hashes.  Just because you can subscript a list value like
@@ -656,7 +661,7 @@ synonym for a comma, but it also arranges for its left-hand operand to be
 interpreted as a string--if it's a bareword that would be a legal identifier.
 This makes it nice for initializing hashes:
 
-    my %map = (
+    %map = (
 		 red   => 0x00f,
 		 blue  => 0x0f0,
 		 green => 0xf00,
@@ -664,7 +669,7 @@ This makes it nice for initializing hashes:
 
 or for initializing hash references to be used as records:
 
-    my $rec = {
+    $rec = {
 		witch => 'Mable the Merciless',
 		cat   => 'Fluffy the Ferocious',
 		date  => '10/31/1776',
@@ -672,14 +677,12 @@ or for initializing hash references to be used as records:
 
 or for using call-by-named-parameter to complicated functions:
 
-   use CGI;
-   my $query = CGI->new;
-   my $field = $query->radio_group(
+   $field = $query->radio_group(
 	       name      => 'group_name',
                values    => ['eenie','meenie','minie'],
                default   => 'meenie',
                linebreak => 'true',
-               labels    => \%labels,
+               labels    => \%labels
    );
 
 Note that just because a hash is initialized in that order doesn't
@@ -691,36 +694,34 @@ of how to arrange for an output ordering.
 A common way to access an array or a hash is one scalar element at a
 time.  You can also subscript a list to get a single element from it.
 
-    my $whoami = $ENV{"USER"};		  # one element from the hash
-    my $parent = $ISA[0];		  # one element from the array
-    my $dir    = (getpwnam("daemon"))[7]; # likewise, but with list
+    $whoami = $ENV{"USER"};		# one element from the hash
+    $parent = $ISA[0];		        # one element from the array
+    $dir    = (getpwnam("daemon"))[7];	# likewise, but with list
 
 A slice accesses several elements of a list, an array, or a hash
 simultaneously using a list of subscripts.  It's more convenient
 than writing out the individual elements as a list of separate
 scalar values.
 
-    my($him, $her)   = @folks[0,-1];		  # array slice
-    my @them         = @folks[0 .. 3];		  # array slice
-    my($who, $home)  = @ENV{"USER", "HOME"};	  # hash slice
-    my($uid, $dir)   = (getpwnam("daemon"))[2,7]; # list slice
+    ($him, $her)   = @folks[0,-1];		# array slice
+    @them          = @folks[0 .. 3];		# array slice
+    ($who, $home)  = @ENV{"USER", "HOME"};	# hash slice
+    ($uid, $dir)   = (getpwnam("daemon"))[2,7];	# list slice
 
 Since you can assign to a list of variables, you can also assign to
 an array or hash slice.
 
-    my( @days, %colors, @folks );
-    @days[3..5]    = qw(Wed Thu Fri);
+    @days[3..5]    = qw/Wed Thu Fri/;
     @colors{'red','blue','green'} 
 		   = (0xff0000, 0x0000ff, 0x00ff00);
     @folks[0, -1]  = @folks[-1, 0];
 
 The previous assignments are exactly equivalent to
 
-    my( @days, %colors, @folks );
-    ($days[3], $days[4], $days[5]) = qw(Wed Thu Fri);
-    ($colors{red}, $colors{blue}, $colors{green})
+    ($days[3], $days[4], $days[5]) = qw/Wed Thu Fri/;
+    ($colors{'red'}, $colors{'blue'}, $colors{'green'})
 		   = (0xff0000, 0x0000ff, 0x00ff00);
-    ($folks[0], $folks[-1]) = ($folks[-1], $folks[0]);
+    ($folks[0], $folks[-1]) = ($folks[0], $folks[-1]);
 
 Since changing a slice changes the original array or hash that it's
 slicing, a C<foreach> construct will alter some--or even all--of the
@@ -736,19 +737,19 @@ values of the array or hash.
 
 A slice of an empty list is still an empty list.  Thus:
 
-    my @a = ()[1,0];           # @a has no elements
-    my @b = (@a)[0,1];         # @b has no elements
-    my @c = (0,1)[2,3];        # @c has no elements
+    @a = ()[1,0];           # @a has no elements
+    @b = (@a)[0,1];         # @b has no elements
+    @c = (0,1)[2,3];        # @c has no elements
 
 But:
 
-    my @a = (1)[1,0];          # @a has two elements
-    my @b = (1,undef)[1,0,2];  # @b has three elements
+    @a = (1)[1,0];          # @a has two elements
+    @b = (1,undef)[1,0,2];  # @b has three elements
 
 This makes it easy to write loops that terminate when a null list
 is returned:
 
-    while ( my($home, $user) = (getpwent)[7,0] ) {
+    while ( ($home, $user) = (getpwent)[7,0]) {
 	printf "%-8s %s\n", $user, $home;
     }
 
@@ -775,8 +776,6 @@ we have real references, this is seldom needed.
 The main use of typeglobs in modern Perl is create symbol table aliases.
 This assignment:
 
-    {
-     
     *this = *that;
 
 makes $this an alias for $that, @this an alias for @that, %this an alias
@@ -789,18 +788,17 @@ temporarily makes $Here::blue an alias for $There::green, but doesn't
 make @Here::blue an alias for @There::green, or %Here::blue an alias for
 %There::green, etc.  See L<perlmod/"Symbol Tables"> for more examples
 of this.  Strange though this may seem, this is the basis for the whole
-module import/export system.  And none of it works under
-C<use strict 'vars'>.
+module import/export system.
 
 Another use for typeglobs is to pass filehandles into a function or
 to create new filehandles.  If you need to use a typeglob to save away
 a filehandle, do it this way:
 
-    my $fh = *STDOUT;
+    $fh = *STDOUT;
 
 or perhaps as a real reference, like this:
 
-    my $fh = \*STDOUT;
+    $fh = \*STDOUT;
 
 See L<perlsub> for examples of using these as indirect filehandles
 in functions.
@@ -815,7 +813,7 @@ For example:
 	open   (FH, $path) 	    or  return undef;
 	return *FH;
     }
-    my $fh = newopen('/etc/passwd');
+    $fh = newopen('/etc/passwd');
 
 Now that we have the C<*foo{THING}> notation, typeglobs aren't used as much
 for filehandle manipulations, although they're still needed to pass brand
@@ -835,9 +833,8 @@ largely eliminates the need for typeglobs when opening filehandles
 that must be passed around, as in the following example:
 
     sub myopen {
-        my $filename = shift;
-        open my $fh, $filename
-	     or die "Can't open '$filename': $!";
+        open my $fh, "@_"
+	     or die "Can't open '@_': $!";
 	return $fh;
     }
 

@@ -259,15 +259,13 @@ occur when the code that is executing the I<call_*> function has
 itself been called from another Perl subroutine. The code below
 illustrates this
 
-    sub fred {
-      print "@_\n";
-    }
+    sub fred
+      { print "@_\n"  }
 
-    sub joe {
-      &fred;
-    }
+    sub joe
+      { &fred }
 
-    &joe(1,2,3);
+    &joe(1,2,3) ;
 
 This will print
 
@@ -394,9 +392,11 @@ XSUB, the program will immediately terminate.
 
 For example, say you want to call this Perl sub
 
-    sub fred {
-      eval { die "Fatal Error" }
-      print "Trapped error: $@\n" if $@;
+    sub fred
+    {
+        eval { die "Fatal Error" ; }
+        print "Trapped error: $@\n"
+            if $@ ;
     }
 
 via this XSUB
@@ -450,8 +450,9 @@ I<Using call_sv> for details.
 This first trivial example will call a Perl subroutine, I<PrintUID>, to
 print out the UID of the process.
 
-    sub PrintUID {
-      print "UID is $<\n";
+    sub PrintUID
+    {
+        print "UID is $<\n" ;
     }
 
 and here is a C function to call it
@@ -510,9 +511,10 @@ print the first $n characters of the string.
 
 So the Perl subroutine would look like this
 
-    sub LeftString {
-      my($s, $n) = @_ ;
-      print substr($s, 0, $n), "\n";
+    sub LeftString
+    {
+        my($s, $n) = @_ ;
+        print substr($s, 0, $n), "\n" ;
     }
 
 The C function required to call I<LeftString> would look like this.
@@ -641,9 +643,10 @@ subroutine.
 Here is a Perl subroutine, I<Adder>, that takes 2 integer parameters
 and simply returns their sum.
 
-    sub Adder {
-        my($a, $b) = @_;
-        $a + $b;
+    sub Adder
+    {
+        my($a, $b) = @_ ;
+        $a + $b ;
     }
 
 Because we are now concerned with the return value from I<Adder>, the C
@@ -745,9 +748,10 @@ parameters and the difference.
 
 Here is the Perl subroutine
 
-    sub AddSubtract {
-      my($a, $b) = @_;
-      ($a+$b, $a-$b);
+    sub AddSubtract
+    {
+       my($a, $b) = @_ ;
+       ($a+$b, $a-$b) ;
     }
 
 and this is the C function
@@ -870,9 +874,10 @@ whether it is actually desirable to do it is another matter entirely.
 The Perl subroutine, I<Inc>, below takes 2 parameters and increments
 each directly.
 
-    sub Inc {
-      ++$_[0];
-      ++$_[1];
+    sub Inc
+    {
+        ++ $_[0] ;
+        ++ $_[1] ;
     }
 
 and here is a C function to call it.
@@ -928,12 +933,13 @@ Now an example using G_EVAL. Below is a Perl subroutine which computes
 the difference of its 2 parameters. If this would result in a negative
 result, the subroutine calls I<die>.
 
-    sub Subtract {
-      my ($a, $b) = @_;
+    sub Subtract
+    {
+        my ($a, $b) = @_ ;
 
-      die "death can be fatal\n" if $a < $b;
+        die "death can be fatal\n" if $a < $b ;
 
-      $a - $b;
+        $a - $b ;
     }
 
 and some C to call it
@@ -1035,21 +1041,16 @@ Consider this rather facetious example, where we have used an XS
 version of the call_Subtract example above inside a destructor:
 
     package Foo;
-
-    sub new { bless {}, shift }
-
+    sub new { bless {}, $_[0] }
     sub Subtract {
-      my($a,$b) = @_;
-      die "death can be fatal" if $a < $b;
-      $a - $b;
+        my($a,$b) = @_;
+        die "death can be fatal" if $a < $b ;
+        $a - $b;
     }
-
-    sub DESTROY { call_Subtract(5, 4) }
-    sub foo     { die "foo dies"      }
-
+    sub DESTROY { call_Subtract(5, 4); }
+    sub foo { die "foo dies"; }
 
     package main;
-
     eval { Foo->new->foo };
     print "Saw: $@" if $@;             # should be, but isn't
 
@@ -1076,11 +1077,12 @@ within the Perl script.
 
 Consider the Perl code below
 
-    sub fred {
-      print "Hello there\n";
+    sub fred
+    {
+        print "Hello there\n" ;
     }
 
-    CallSubPV("fred");
+    CallSubPV("fred") ;
 
 Here is a snippet of XSUB which defines I<CallSubPV>.
 
@@ -1109,12 +1111,11 @@ I<call_sv> instead of I<call_pv>.
 
 Because we are using an SV to call I<fred> the following can all be used
 
-    CallSubSV("fred");
-    CallSubSV(\&fred);
-
-    my $ref = \&fred;
-    CallSubSV($ref);
-    CallSubSV( sub { print "Hello there\n" } );
+    CallSubSV("fred") ;
+    CallSubSV(\&fred) ;
+    $ref = \&fred ;
+    CallSubSV($ref) ;
+    CallSubSV( sub { print "Hello there\n" } ) ;
 
 As you can see, I<call_sv> gives you much greater flexibility in
 how you can specify the Perl subroutine.
@@ -1143,11 +1144,11 @@ pointer C<rememberSub> in C<CallSavedSub1>, it may or may not still refer
 to the Perl subroutine that was recorded in C<SaveSub1>.  This is
 particularly true for these cases
 
-    SaveSub1(\&fred);
-    CallSavedSub1();
+    SaveSub1(\&fred) ;
+    CallSavedSub1() ;
 
-    SaveSub1( sub { print "Hello there\n" } );
-    CallSavedSub1();
+    SaveSub1( sub { print "Hello there\n" } ) ;
+    CallSavedSub1() ;
 
 By the time each of the C<SaveSub1> statements above have been executed,
 the SV*s which corresponded to the parameters will no longer exist.
@@ -1159,11 +1160,10 @@ for each of the C<CallSavedSub1> lines.
 
 Similarly, with this code
 
-    my $ref = \&fred;
-    SaveSub1($ref);
-
-    $ref = 47;
-    CallSavedSub1();
+    $ref = \&fred ;
+    SaveSub1($ref) ;
+    $ref = 47 ;
+    CallSavedSub1() ;
 
 you can expect one of these messages (which you actually get is dependent on
 the version of Perl you are using)
@@ -1183,11 +1183,10 @@ loudly.
 
 A similar but more subtle problem is illustrated with this code
 
-    my $ref = \&fred;
-    SaveSub1($ref);
-
-    $ref = \&joe;
-    CallSavedSub1();
+    $ref = \&fred ;
+    SaveSub1($ref) ;
+    $ref = \&joe ;
+    CallSavedSub1() ;
 
 This time whenever C<CallSavedSub1> get called it will execute the Perl
 subroutine C<joe> (assuming it exists) rather than C<fred> as was
@@ -1229,12 +1228,11 @@ C<SvSetSV>.
 Here is a Perl subroutine which prints whatever parameters are passed
 to it.
 
-    sub PrintList {
-        my @list = @_;
+    sub PrintList
+    {
+        my(@list) = @_ ;
 
-        foreach (@list) {
-          print "$_\n";
-        }
+        foreach (@list) { print "$_\n" }
     }
 
 and here is an example of I<call_argv> which will call
@@ -1258,22 +1256,25 @@ This is because I<call_argv> will do it for you.
 Consider the following Perl code
 
     {
-      package Mine ;
+        package Mine ;
 
-      sub new {
-        my $type = shift;
-        bless [@_], $type;
-      }
+        sub new
+        {
+            my($type) = shift ;
+            bless [@_]
+        }
 
-      sub Display {
-        my ($self, $index) = @_;
-        print "$index: $self->[$index]\n";
-      }
+        sub Display
+        {
+            my ($self, $index) = @_ ;
+            print "$index: $$self[$index]\n" ;
+        }
 
-      sub PrintID {
-        my $class = shift;
-        print "This is Class $class version 1.0\n";
-      }
+        sub PrintID
+        {
+            my($class) = @_ ;
+            print "This is Class $class version 1.0\n" ;
+        }
     }
 
 It implements just a very simple class to manage an array.  Apart from
@@ -1282,10 +1283,9 @@ virtual. The static method, C<PrintID>, prints out simply the class
 name and a version number. The virtual method, C<Display>, prints out a
 single element of the array.  Here is an all Perl example of using it.
 
-    my $a = Mine->new('red', 'green', 'blue');
-    $a->Display(1);
-
-    Mine->PrintID;
+    $a = new Mine ('red', 'green', 'blue') ;
+    $a->Display(1) ;
+    PrintID Mine;
 
 will print
 
@@ -1342,9 +1342,9 @@ the C<PrintID> and C<Display> methods from C.
 
 So the methods C<PrintID> and C<Display> can be invoked like this
 
-    my $a = Mine->new('red', 'green', 'blue');
-    call_Method($a, 'Display', 1);
-    call_PrintID('Mine', 'PrintID');
+    $a = new Mine ('red', 'green', 'blue') ;
+    call_Method($a, 'Display', 1) ;
+    call_PrintID('Mine', 'PrintID') ;
 
 The only thing to note is that in both the static and virtual methods,
 the method name is not passed via the stack--it is used as the first
@@ -1369,8 +1369,8 @@ currently executing.
 and here is some Perl to test it
 
     PrintContext ;
-    my $a = PrintContext;
-    my @a = PrintContext;
+    $a = PrintContext ;
+    @a = PrintContext ;
 
 The output from that will be
 
@@ -1551,8 +1551,9 @@ registers, C<pcb1>, might look like this
     # Register the sub pcb1
     register_fatal(\&pcb1) ;
 
-    sub pcb1 {
-      die "I'm dying...\n";
+    sub pcb1
+    {
+        die "I'm dying...\n" ;
     }
 
 The mapping between the C callback and the Perl equivalent is stored in
@@ -1651,14 +1652,15 @@ the entry from the hash C<Mapping>.
 
 So the Perl interface would look like this
 
-    sub callback1 {
-      my($handle, $buffer) = @_;
+    sub callback1
+    {
+        my($handle, $buffer) = @_ ;
     }
 
     # Register the Perl callback
-    asynch_read($fh, \&callback1);
+    asynch_read($fh, \&callback1) ;
 
-    asynch_close($fh);
+    asynch_close($fh) ;
 
 The mapping between the C callback and Perl is stored in the global
 hash C<Mapping> this time. Using a hash has the distinct advantage that
