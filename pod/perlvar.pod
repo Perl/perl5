@@ -911,7 +911,7 @@ and B<-C> filetests are based on this value.
 =item $^V
 
 The revision, version, and subversion of the Perl interpreter, represented
-as a string comprised of characters with those ordinals.  Thus in Perl v5.6.0
+as a string composed of characters with those ordinals.  Thus in Perl v5.6.0
 it equals C<chr(5) . chr(6) . chr(0)> and will return true for
 C<$^V eq v5.6.0>.  Note that the characters in this string value can
 potentially be in Unicode range.

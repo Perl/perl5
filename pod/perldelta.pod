@@ -461,7 +461,7 @@ variables.  See L<perlfunc/our>.
 
 =head2 Support for strings represented as a vector of ordinals
 
-Literals of the form v1.2.3.4 are now parsed as a string comprised of
+Literals of the form v1.2.3.4 are now parsed as a string composed of
 of characters with the specified ordinals.  This is an alternative, more
 readable way to construct (possibly unicode) strings instead of
 interpolating characters, as in C<"\x{1}\x{2}\x{3}\x{4}">.
@@ -861,7 +861,7 @@ only during normal running are warranted.  See L<perlvar>.
 
 =head2 New variable $^V contains Perl version in v5.6.0 format
 
-C<$^V> contains the Perl version number as a string comprised of
+C<$^V> contains the Perl version number as a string composed of
 characters whose ordinals match the version numbers, so that it may
 be used in string comparisons.
 

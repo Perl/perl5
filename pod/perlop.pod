@@ -1804,7 +1804,7 @@ in a bit vector.
 
 =head2 Strings of Character
 
-A literal of the form C<v1.20.300.4000> is parsed as a string comprised
+A literal of the form C<v1.20.300.4000> is parsed as a string composed
 of characters with the specified ordinals.  This provides an alternative,
 more readable way to construct strings, rather than use the somewhat less
 readable interpolation form C<"\x{1}\x{14}\x{12c}\x{fa0}">.  This is useful
