@@ -195,7 +195,7 @@ ftok(path, id)
         key_t k = ftok(path, id);
         ST(0) = k == (key_t) -1 ? &PL_sv_undef : sv_2mortal(newSViv(k));
 #else
-        DIE(no_func, "ftok");
+        DIE(PL_no_func, "ftok");
 #endif
 
 int

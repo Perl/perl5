@@ -285,7 +285,7 @@ struct loop {
 
 #define Nullop Null(OP*)
 
-/* Lowest byte of opargs */
+/* Lowest byte of PL_opargs */
 #define OA_MARK 1
 #define OA_FOLDCONST 2
 #define OA_RETSCALAR 4
@@ -316,7 +316,7 @@ struct loop {
 
 #define OASHIFT 12
 
-/* Remaining nybbles of opargs */
+/* Remaining nybbles of PL_opargs */
 #define OA_SCALAR 1
 #define OA_LIST 2
 #define OA_AVREF 3

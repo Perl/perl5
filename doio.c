@@ -1444,7 +1444,7 @@ do_ipcget(I32 optype, SV **mark, SV **sp)
 #endif
 #if !defined(HAS_MSG) || !defined(HAS_SEM) || !defined(HAS_SHM)
     default:
-	croak("%s not implemented", op_desc[optype]);
+	croak("%s not implemented", PL_op_desc[optype]);
 #endif
     }
     return -1;			/* should never happen */
@@ -1501,7 +1501,7 @@ do_ipcctl(I32 optype, SV **mark, SV **sp)
 #endif
 #if !defined(HAS_MSG) || !defined(HAS_SEM) || !defined(HAS_SHM)
     default:
-	croak("%s not implemented", op_desc[optype]);
+	croak("%s not implemented", PL_op_desc[optype]);
 #endif
     }
 

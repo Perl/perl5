@@ -1009,7 +1009,7 @@ char	*mode;
 int
 fork(void)
 {
-    die(no_func, "Unsupported function fork");
+    die(PL_no_func, "Unsupported function fork");
     errno = EINVAL;
     return -1;
 }
