@@ -85,9 +85,9 @@ These work as in normal strings.
    \N{name} A named character
 
    \l  Lowercase next character
-   \u  Uppercase next character
+   \u  Titlecase next character
    \L  Lowercase until \E
-   \U  Titlecase until \E
+   \U  Uppercase until \E
    \Q  Disable pattern metacharacters until \E
    \E  End case modification
 
@@ -222,8 +222,8 @@ Captured groups are numbered according to their I<opening> paren.
 
    split       Use regex to split a string into parts
 
-The first four of these are identical to the escape sequences \l, \u,
-\L, and \U.  For Titlecase, see L</Titlecase>.
+The first four of these are like the escape sequences C<\L>, C<\l>,
+C<\U>, and C<\u>.  For Titlecase, see L</Titlecase>.
 
 =head2 Terminology
 
