@@ -2,6 +2,10 @@
  *
  */
 
+#if defined(PERL_CORE) && !defined(DEBUGGING_MSTATS)
+#  define DEBUGGING_MSTATS
+#endif 
+
 #ifndef lint
 #  if defined(DEBUGGING) && !defined(NO_RCHECK)
 #    define RCHECK

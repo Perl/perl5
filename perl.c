@@ -815,7 +815,7 @@ print \"  \\@INC:\\n    @INC\\n\";");
     LEAVE;
     FREETMPS;
 
-#ifdef DEBUGGING_MSTATS
+#ifdef MYMALLOC
     if ((s=getenv("PERL_DEBUG_MSTATS")) && atoi(s) >= 2)
 	dump_mstats("after compilation:");
 #endif
@@ -852,7 +852,7 @@ PerlInterpreter *sv_interp;
 	if (endav)
 	    call_list(oldscope, endav);
 	FREETMPS;
-#ifdef DEBUGGING_MSTATS
+#ifdef MYMALLOC
 	if (getenv("PERL_DEBUG_MSTATS"))
 	    dump_mstats("after execution:  ");
 #endif
