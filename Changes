@@ -32,6 +32,199 @@ Version v5.7.1		Development release working toward v5.8
 --------------
 
 ____________________________________________________________________________
+[  8452] By: jhi                                   on 2001/01/16  15:42:04
+        Log: Subject: Re: API Cleanup
+             To: perl5-porters@perl.org
+             Date: Tue, 16 Jan 2001 13:42:30 +0000
+             Message-ID: <20010116134230.A13420@pembro26.pmb.ox.ac.uk>
+             
+             Subject: [PATCH] utf8.c documentation
+             From: Simon Cozens <simon@cozens.net>
+             Date: Tue, 16 Jan 2001 13:52:48 +0000
+             Message-ID: <20010116135248.A13496@pembro26.pmb.ox.ac.uk>
+             
+             Subject: Re: API Cleanup
+             From: Simon Cozens <simon@cozens.net>
+             Date: Tue, 16 Jan 2001 14:58:55 +0000
+             Message-ID: <20010116145855.A13794@pembro26.pmb.ox.ac.uk>
+             
+             UTF-8 doc patches.
+     Branch: perl
+	   ! embed.pl pod/perlapi.pod utf8.c
+____________________________________________________________________________
+[  8451] By: jhi                                   on 2001/01/16  14:41:39
+        Log: podlators 1.07, from Russ Allbery.
+     Branch: perl
+	   ! lib/Pod/Man.pm
+____________________________________________________________________________
+[  8450] By: jhi                                   on 2001/01/16  14:24:19
+        Log: Subject: [PATCH: perl@8429] Win32 Makefile fixes
+             From: "Indy Singh" <indy@nusphere.com>
+             Date: Mon, 15 Jan 2001 20:59:40 -0500
+             Message-ID: <07be01c07f5f$fdadf270$d24b7018@cr637287a>
+     Branch: perl
+	   ! win32/Makefile
+____________________________________________________________________________
+[  8449] By: jhi                                   on 2001/01/16  03:42:55
+        Log: Under 5.005 threads and debugging crashed in Debian 2.2 Linux/x86
+             at the setting of the ofs_sv in new_struct_thread() as the
+             thr->Tofs_sv (PL_ofs_sv) was still 0xabab...., SvREFCNT_inc()ing
+             that invited a core dump.
+     Branch: perl
+	   ! util.c
+____________________________________________________________________________
+[  8448] By: jhi                                   on 2001/01/16  01:49:07
+        Log: Subject: [PATCH #3 @8436] Re: Eliminate op_children
+             From: Stephen McCamant <smcc@CSUA.Berkeley.EDU>
+             Date: Mon, 15 Jan 2001 17:14:37 -0800 (PST)
+             Message-ID: <14947.40656.841280.551785@soda.csua.berkeley.edu>
+             
+             Replace #8444 and #8445.
+     Branch: perl
+	   ! ext/B/B.xs ext/B/B/Debug.pm
+____________________________________________________________________________
+[  8447] By: jhi                                   on 2001/01/15  21:05:35
+        Log: Subject: [PATCH] API Variable documentation   
+             From: Simon Cozens <simon@cozens.net>
+             Date: Mon, 15 Jan 2001 19:35:54 +0000
+             Message-ID: <20010115193554.A9919@pembro26.pmb.ox.ac.uk> 
+     Branch: perl
+	   ! pod/perlapi.pod thrdvar.h
+____________________________________________________________________________
+[  8446] By: jhi                                   on 2001/01/15  20:49:20
+        Log: Signedness nit.
+     Branch: perl
+	   ! pp_ctl.c
+____________________________________________________________________________
+[  8445] By: jhi                                   on 2001/01/15  20:28:48
+        Log: (Replaced by #8448)  More op_children traces (cleanup of #8442).
+     Branch: perl
+	   ! ext/B/B/Debug.pm
+____________________________________________________________________________
+[  8444] By: jhi                                   on 2001/01/15  13:09:10
+        Log: (Replaced by #8448)  Traces of op_children (cleanup of #8442)
+     Branch: perl
+	   ! ext/B/B.xs
+____________________________________________________________________________
+[  8443] By: jhi                                   on 2001/01/15  13:06:26
+        Log: Missing from #8439.
+     Branch: perl
+	   ! keywords.h mg.c
+____________________________________________________________________________
+[  8442] By: jhi                                   on 2001/01/15  13:02:38
+        Log: Subject: [PATCH @8436] Eliminate op_children
+             From: Stephen McCamant <smcc@CSUA.Berkeley.EDU>
+             Date: Sun, 14 Jan 2001 03:00:13 -0800 (PST)
+             Message-ID: <14945.32919.44271.685122@soda.csua.berkeley.edu>
+             
+             Subject: [PATCH @8436] Re: Eliminate op_children
+             From: Stephen McCamant <smcc@CSUA.Berkeley.EDU>
+             Date: Sun, 14 Jan 2001 03:23:56 -0800 (PST)
+             Message-ID: <14945.35680.571387.810763@soda.csua.berkeley.edu>
+     Branch: perl
+	   ! bytecode.pl ext/B/B/Asmdata.pm ext/B/B/Bytecode.pm
+	   ! ext/B/B/C.pm ext/ByteLoader/byterun.c ext/ByteLoader/byterun.h
+	   ! op.c op.h
+____________________________________________________________________________
+[  8441] By: jhi                                   on 2001/01/15  12:57:08
+        Log: Use the /^Perl_/-less form of is_lvalue_sub().
+     Branch: perl
+	   ! pp.h
+____________________________________________________________________________
+[  8440] By: jhi                                   on 2001/01/15  05:13:09
+        Log: Revert #8437 and #8438, the Linux large files story is more complex.
+     Branch: metaconfig/U/perl
+	   ! d_fpos64_t.U d_off64_t.U
+     Branch: perl
+	   ! Configure Porting/Glossary Porting/config.sh Porting/config_H
+	   ! config_h.SH configure.com epoc/config.sh perl.h
+	   ! pod/perltoc.pod uconfig.h uconfig.sh vos/config.alpha.def
+	   ! vos/config.alpha.h vos/config.ga.def vos/config.ga.h
+	   ! win32/config.bc win32/config.gc win32/config.vc
+____________________________________________________________________________
+[  8439] By: jhi                                   on 2001/01/15  05:02:24
+        Log: More UTF-8 patches from Inaba Hiroto.
+             - The substr lval was still not okay.
+             - Now pp_stringify and sv_setsv copies source's UTF8 flag
+             even if IN_BYTE.  pp_stringify is called from fold_constants
+             at optimization phase and "\x{100}" was made SvUTF8_off under
+             use bytes (the bytes pragma is for "byte semantics" and not
+             for "do not produce UTF8 data")
+             - New `qu' operator to generate UTF8 string explicitly.
+             Though I agree with the policy "0x00-0xff always produce bytes",
+             sometimes want to such a string to be coded in UTF8.
+             I can use pack"U0a*" but it requires more typing and has
+             runtime overhead.
+             - Fix pp_regcomp bug uncovered by "0x00-0xff always produce bytes"
+             change, the bug apears if a pm has PMdf_UTF8 flag but interpolated
+             string is not UTF8_on and has char 0x80-0xff.
+             
+             TODO: document and test qu.
+     Branch: perl
+	   ! keywords.h keywords.pl mg.c pp.c pp_ctl.c pp_hot.c sv.c
+	   ! t/lib/charnames.t t/op/length.t t/op/substr.t t/pragma/utf8.t
+	   ! toke.c
+____________________________________________________________________________
+[  8438] By: jhi                                   on 2001/01/14  05:10:23
+        Log: Metaconfig unit changes for #8437.
+     Branch: metaconfig/U/perl
+	   ! d_fpos64_t.U d_off64_t.U
+____________________________________________________________________________
+[  8437] By: jhi                                   on 2001/01/14  04:55:34
+        Log: Add <features.h> probing, seems to be needed for (some?)
+             Linux largefileness.
+     Branch: perl
+	   ! Configure Porting/Glossary Porting/config.sh Porting/config_H
+	   ! config_h.SH configure.com epoc/config.sh perl.h
+	   ! pod/perltoc.pod uconfig.h uconfig.sh vos/config.alpha.def
+	   ! vos/config.alpha.h vos/config.ga.def vos/config.ga.h
+	   ! win32/config.bc win32/config.gc win32/config.vc
+____________________________________________________________________________
+[  8436] By: jhi                                   on 2001/01/13  17:47:21
+        Log: Tighten some of the tests a bit.
+     Branch: perl
+	   ! t/pragma/utf8.t
+____________________________________________________________________________
+[  8435] By: jhi                                   on 2001/01/13  17:31:54
+        Log: Integrate perlio.
+     Branch: perl
+	  !> ext/Encode/Makefile.PL ext/Encode/compile win32/config_H.bc
+	  !> win32/config_H.gc win32/config_H.vc
+____________________________________________________________________________
+[  8434] By: nick                                  on 2001/01/13  11:36:53
+        Log: Run dmake regen_config_h for Win32
+     Branch: perlio
+	   ! win32/config_H.bc win32/config_H.gc win32/config_H.vc
+____________________________________________________________________________
+[  8433] By: nick                                  on 2001/01/13  11:31:55
+        Log: VMS friendly patch to Encode compile process
+     Branch: perlio
+	   ! ext/Encode/Makefile.PL ext/Encode/compile
+____________________________________________________________________________
+[  8432] By: nick                                  on 2001/01/13  11:06:44
+        Log: Integrate mainline
+     Branch: perlio
+	  +> ext/B/B/Concise.pm
+	  !> (integrate 52 files)
+____________________________________________________________________________
+[  8431] By: jhi                                   on 2001/01/13  05:55:55
+        Log: Subject: [PATCH @8429] Re: B::Concise -- an improved replacement for B::Terse
+             From: Stephen McCamant <smcc@CSUA.Berkeley.EDU>
+             Date: Fri, 12 Jan 2001 21:45:17 -0800 (PST)
+             Message-ID: <14943.59712.993695.180189@soda.csua.berkeley.edu>
+     Branch: perl
+	   ! ext/B/B/Concise.pm
+____________________________________________________________________________
+[  8430] By: jhi                                   on 2001/01/13  04:24:18
+        Log: The LVRET macro needed an aTHX.
+     Branch: perl
+	   ! pp.h
+____________________________________________________________________________
+[  8429] By: jhi                                   on 2001/01/13  02:12:42
+        Log: Update Changes.
+     Branch: perl
+	   ! Changes patchlevel.h
+____________________________________________________________________________
 [  8428] By: jhi                                   on 2001/01/13  02:08:50
         Log: Subject: Re: [PATCH: perl@8342]  lib/bigfloat.t FAILED at test 351
              From: Peter Prymmer <pvhp@forte.com>

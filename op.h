@@ -229,14 +229,12 @@ struct listop {
     BASEOP
     OP *	op_first;
     OP *	op_last;
-    U32		op_children;
 };
 
 struct pmop {
     BASEOP
     OP *	op_first;
     OP *	op_last;
-    U32		op_children;
     OP *	op_pmreplroot;
     OP *	op_pmreplstart;
     PMOP *	op_pmnext;		/* list of all scanpats */
@@ -292,7 +290,6 @@ struct loop {
     BASEOP
     OP *	op_first;
     OP *	op_last;
-    U32		op_children;
     OP *	op_redoop;
     OP *	op_nextop;
     OP *	op_lastop;

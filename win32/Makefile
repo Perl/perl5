@@ -31,7 +31,7 @@ INST_TOP	= $(INST_DRV)\perl
 # versioned installation can be obtained by setting INST_TOP above to a
 # path that includes an arbitrary version string.
 #
-INST_VER	= \5.7.0
+#INST_VER = \5.7.0
 
 #
 # Comment this out if you DON'T want your perl installation to have
@@ -42,27 +42,27 @@ INST_VER	= \5.7.0
 # the same location.  Commenting it out gives you a simpler
 # installation that is easier to understand for beginners.
 #
-INST_ARCH	= \$(ARCHNAME)
+#INST_ARCH = \$(ARCHNAME)
 
 #
 # uncomment to enable multiple interpreters.  This is need for fork()
 # emulation.
 #
-#USE_MULTI	= define
+USE_MULTI = define
 
 #
 # Beginnings of interpreter cloning/threads; still very incomplete.
 # This should be enabled to get the fork() emulation.  This needs
 # USE_MULTI as well.
 #
-#USE_ITHREADS	= define
+USE_ITHREADS = define
 
 #
 # uncomment to enable the implicit "host" layer for all system calls
 # made by perl.  This needs USE_MULTI above.  This is also needed to
 # get fork().
 #
-#USE_IMP_SYS	= define
+USE_IMP_SYS = define
 
 #
 # uncomment to enable the experimental PerlIO I/O subsystem.
@@ -304,12 +304,6 @@ ARCHNAME	= $(ARCHNAME)-thread
 # VC 6.0 can load the socket dll on demand.  Makes the test suite
 # run in about 10% less time.
 DELAYLOAD	= -DELAYLOAD:wsock32.dll -DELAYLOAD:shell32.dll delayimp.lib
-
-# VC 6.0 seems capable of compiling perl correctly with optimizations
-# enabled.  Anything earlier fails tests.
-!IF "$(CFG)" == ""
-CFG		= Optimize
-!ENDIF
 !ENDIF
 
 ARCHDIR		= ..\lib\$(ARCHNAME)
@@ -366,13 +360,9 @@ OPTIMIZE	= -Od -MD -Zi -DDEBUGGING
 !  ENDIF
 LINK_DBG	= -debug -pdb:none
 !ELSE
-!  IF  "$(CFG)" == "Optimize"
 # -O1 yields smaller code, which turns out to be faster than -O2
 #OPTIMIZE	= -O2 -MD -DNDEBUG
 OPTIMIZE	= -O1 -MD -DNDEBUG
-!  ELSE
-OPTIMIZE	= -Od -MD -DNDEBUG
-!  ENDIF
 LINK_DBG	= -release
 !ENDIF
 

@@ -3440,7 +3440,7 @@ Perl_sv_setsv(pTHX_ SV *dstr, register SV *sstr)
 	    *SvEND(dstr) = '\0';
 	    (void)SvPOK_only(dstr);
 	}
-	if ((sflags & SVf_UTF8) && !IN_BYTE)
+	if (sflags & SVf_UTF8)
 	    SvUTF8_on(dstr);
 	/*SUPPRESS 560*/
 	if (sflags & SVp_NOK) {

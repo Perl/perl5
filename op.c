@@ -2410,13 +2410,6 @@ Perl_convert(pTHX_ I32 type, I32 flags, OP *o)
     if (o->op_type != type)
 	return o;
 
-    if (cLISTOPo->op_children < 7) {
-	/* XXX do we really need to do this if we're done appending?? */
-	for (kid = cLISTOPo->op_first; kid; kid = kid->op_sibling)
-	    last = kid;
-	cLISTOPo->op_last = last;	/* in case check substituted last arg */
-    }
-
     return fold_constants(o);
 }
 
@@ -2444,7 +2437,6 @@ Perl_append_elem(pTHX_ I32 type, OP *first, OP *last)
 	((LISTOP*)first)->op_first = last;
     }
     ((LISTOP*)first)->op_last = last;
-    ((LISTOP*)first)->op_children++;
     return first;
 }
 
@@ -2465,9 +2457,7 @@ Perl_append_list(pTHX_ I32 type, LISTOP *first, LISTOP *last)
 
     first->op_last->op_sibling = last->op_first;
     first->op_last = last->op_last;
-    first->op_children += last->op_children;
-    if (first->op_children)
-	first->op_flags |= OPf_KIDS;
+    first->op_flags |= (last->op_flags & OPf_KIDS);
 
 #ifdef PL_OP_SLAB_ALLOC
 #else
@@ -2500,7 +2490,7 @@ Perl_prepend_elem(pTHX_ I32 type, OP *first, OP *last)
 	    first->op_sibling = ((LISTOP*)last)->op_first;
 	    ((LISTOP*)last)->op_first = first;
 	}
-	((LISTOP*)last)->op_children++;
+	last->op_flags |= OPf_KIDS;
 	return last;
     }
 
@@ -2533,7 +2523,8 @@ Perl_newLISTOP(pTHX_ I32 type, I32 flags, OP *first, OP *last)
 
     listop->op_type = type;
     listop->op_ppaddr = PL_ppaddr[type];
-    listop->op_children = (first != 0) + (last != 0);
+    if (first || last)
+	flags |= OPf_KIDS;
     listop->op_flags = flags;
 
     if (!last && first)
@@ -2553,8 +2544,6 @@ Perl_newLISTOP(pTHX_ I32 type, I32 flags, OP *first, OP *last)
 	if (!last)
 	    listop->op_last = pushop;
     }
-    else if (listop->op_children)
-	listop->op_flags |= OPf_KIDS;
 
     return (OP*)listop;
 }
@@ -6309,7 +6298,6 @@ S_simplify_sort(pTHX_ OP *o)
     kid = cLISTOPo->op_first->op_sibling;
     cLISTOPo->op_first->op_sibling = kid->op_sibling; /* bypass old block */
     op_free(kid);				      /* then delete it */
-    cLISTOPo->op_children--;
 }
 
 OP *

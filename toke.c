@@ -1045,8 +1045,11 @@ STATIC I32
 S_sublex_done(pTHX)
 {
     if (!PL_lex_starts++) {
+	SV *sv = newSVpvn("",0);
+	if (SvUTF8(PL_linestr))
+	    SvUTF8_on(sv);
 	PL_expect = XOPERATOR;
-	yylval.opval = (OP*)newSVOP(OP_CONST, 0, newSVpvn("",0));
+	yylval.opval = (OP*)newSVOP(OP_CONST, 0, sv);
 	return THING;
     }
 
@@ -1173,7 +1176,8 @@ S_scan_const(pTHX_ char *start)
     register char *d = SvPVX(sv);		/* destination for copies */
     bool dorange = FALSE;			/* are we in a translit range? */
     bool didrange = FALSE;		        /* did we just finish a range? */
-    bool has_utf8 = FALSE;			/* embedded \x{} */
+    bool has_utf8 = (PL_linestr && SvUTF8(PL_linestr));
+						/* the constant is UTF8 */
     UV uv;
 
     I32 utf = (PL_lex_inwhat == OP_TRANS && PL_sublex_info.sub_op)
@@ -1313,8 +1317,6 @@ S_scan_const(pTHX_ char *start)
 
 	/* backslashes */
 	if (*s == '\\' && s+1 < send) {
-	    bool to_be_utf8 = FALSE;
-
 	    s++;
 
 	    /* some backslashes we leave behind */
@@ -1383,8 +1385,6 @@ S_scan_const(pTHX_ char *start)
 		    else {
 			STRLEN len = 1;		/* allow underscores */
 			uv = (UV)scan_hex(s + 1, e - s - 1, &len);
-			if (PL_hints & HINT_UTF8)
-			    to_be_utf8 = TRUE;
 		    }
 		    s = e + 1;
 		}
@@ -1408,7 +1408,7 @@ S_scan_const(pTHX_ char *start)
 		 * repertoire.   --jhi */
 		
 		if (uv > 127) {
-		    if (!has_utf8 && (to_be_utf8 || uv > 255)) {
+		    if (!has_utf8 && uv > 255) {
 		        /* Might need to recode whatever we have
 			 * accumulated so far if it contains any
 			 * hibit chars.
@@ -1447,7 +1447,7 @@ S_scan_const(pTHX_ char *start)
                         }
                     }
 
-                    if (to_be_utf8 || has_utf8 || uv > 255) {
+                    if (has_utf8 || uv > 255) {
 		        d = (char*)uv_to_utf8((U8*)d, uv);
 			has_utf8 = TRUE;
                     }
@@ -4711,7 +4711,10 @@ Perl_yylex(pTHX)
 	    TOKEN('(');
 
 	case KEY_qq:
+	case KEY_qu:
 	    s = scan_str(s,FALSE,FALSE);
+	    if (tmp == KEY_qu && is_utf8_string((U8*)s, SvCUR(PL_lex_stuff)))
+		SvUTF8_on(PL_lex_stuff);
 	    if (!s)
 		missingterm((char*)0);
 	    yylval.ival = OP_STRINGIFY;
@@ -5548,6 +5551,7 @@ Perl_keyword(pTHX_ register char *d, I32 len)
 	    if (strEQ(d,"q"))			return KEY_q;
 	    if (strEQ(d,"qr"))			return KEY_qr;
 	    if (strEQ(d,"qq"))			return KEY_qq;
+	    if (strEQ(d,"qu"))			return KEY_qu;
 	    if (strEQ(d,"qw"))			return KEY_qw;
 	    if (strEQ(d,"qx"))			return KEY_qx;
 	}
@@ -7204,10 +7208,9 @@ vstring:
 	    while (isDIGIT(*pos) || *pos == '_')
 		pos++;
 	    if (!isALPHA(*pos)) {
-		UV rev;
+		UV rev, revmax = 0;
 		U8 tmpbuf[UTF8_MAXLEN+1];
 		U8 *tmpend;
-		bool utf8 = FALSE;
 		s++;				/* get past 'v' */
 
 		sv = NEWSV(92,5);
@@ -7234,7 +7237,8 @@ vstring:
 			}
 		    }
 		    tmpend = uv_to_utf8(tmpbuf, rev);
-		    utf8 = utf8 || rev > 127;
+		    if (rev > revmax)
+			revmax = rev;
 		    sv_catpvn(sv, (const char*)tmpbuf, tmpend - tmpbuf);
 		    if (*pos == '.' && isDIGIT(pos[1]))
 			s = ++pos;
@@ -7248,9 +7252,9 @@ vstring:
 
 		SvPOK_on(sv);
 		SvREADONLY_on(sv);
-		if (utf8) {
+		if (revmax > 127) {
 		    SvUTF8_on(sv);
-		    if (!UTF||IN_BYTE)
+		    if (revmax < 256)
 		      sv_utf8_downgrade(sv, TRUE);
 		}
 	    }

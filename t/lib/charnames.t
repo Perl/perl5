@@ -45,7 +45,7 @@ $encoded_bet = "\327\221";
 
 sub to_bytes {
     use bytes;
-    my $bytes = shift;
+    "".shift;
 }
 
 {

@@ -719,196 +719,189 @@ byterun(pTHXo_ register struct byteloader_state *bstate)
 		cLOGOP->op_other = arg;
 		break;
 	    }
-	  case INSN_OP_CHILDREN:		/* 94 */
-	    {
-		U32 arg;
-		BGET_U32(arg);
-		cLISTOP->op_children = arg;
-		break;
-	    }
-	  case INSN_OP_PMREPLROOT:		/* 95 */
+	  case INSN_OP_PMREPLROOT:		/* 94 */
 	    {
 		opindex arg;
 		BGET_opindex(arg);
 		cPMOP->op_pmreplroot = arg;
 		break;
 	    }
-	  case INSN_OP_PMREPLROOTGV:		/* 96 */
+	  case INSN_OP_PMREPLROOTGV:		/* 95 */
 	    {
 		svindex arg;
 		BGET_svindex(arg);
 		*(SV**)&cPMOP->op_pmreplroot = arg;
 		break;
 	    }
-	  case INSN_OP_PMREPLSTART:		/* 97 */
+	  case INSN_OP_PMREPLSTART:		/* 96 */
 	    {
 		opindex arg;
 		BGET_opindex(arg);
 		cPMOP->op_pmreplstart = arg;
 		break;
 	    }
-	  case INSN_OP_PMNEXT:		/* 98 */
+	  case INSN_OP_PMNEXT:		/* 97 */
 	    {
 		opindex arg;
 		BGET_opindex(arg);
 		*(OP**)&cPMOP->op_pmnext = arg;
 		break;
 	    }
-	  case INSN_PREGCOMP:		/* 99 */
+	  case INSN_PREGCOMP:		/* 98 */
 	    {
 		pvcontents arg;
 		BGET_pvcontents(arg);
 		BSET_pregcomp(PL_op, arg);
 		break;
 	    }
-	  case INSN_OP_PMFLAGS:		/* 100 */
+	  case INSN_OP_PMFLAGS:		/* 99 */
 	    {
 		U16 arg;
 		BGET_U16(arg);
 		cPMOP->op_pmflags = arg;
 		break;
 	    }
-	  case INSN_OP_PMPERMFLAGS:		/* 101 */
+	  case INSN_OP_PMPERMFLAGS:		/* 100 */
 	    {
 		U16 arg;
 		BGET_U16(arg);
 		cPMOP->op_pmpermflags = arg;
 		break;
 	    }
-	  case INSN_OP_SV:		/* 102 */
+	  case INSN_OP_SV:		/* 101 */
 	    {
 		svindex arg;
 		BGET_svindex(arg);
 		cSVOP->op_sv = arg;
 		break;
 	    }
-	  case INSN_OP_PADIX:		/* 103 */
+	  case INSN_OP_PADIX:		/* 102 */
 	    {
 		PADOFFSET arg;
 		BGET_U32(arg);
 		cPADOP->op_padix = arg;
 		break;
 	    }
-	  case INSN_OP_PV:		/* 104 */
+	  case INSN_OP_PV:		/* 103 */
 	    {
 		pvcontents arg;
 		BGET_pvcontents(arg);
 		cPVOP->op_pv = arg;
 		break;
 	    }
-	  case INSN_OP_PV_TR:		/* 105 */
+	  case INSN_OP_PV_TR:		/* 104 */
 	    {
 		op_tr_array arg;
 		BGET_op_tr_array(arg);
 		cPVOP->op_pv = arg;
 		break;
 	    }
-	  case INSN_OP_REDOOP:		/* 106 */
+	  case INSN_OP_REDOOP:		/* 105 */
 	    {
 		opindex arg;
 		BGET_opindex(arg);
 		cLOOP->op_redoop = arg;
 		break;
 	    }
-	  case INSN_OP_NEXTOP:		/* 107 */
+	  case INSN_OP_NEXTOP:		/* 106 */
 	    {
 		opindex arg;
 		BGET_opindex(arg);
 		cLOOP->op_nextop = arg;
 		break;
 	    }
-	  case INSN_OP_LASTOP:		/* 108 */
+	  case INSN_OP_LASTOP:		/* 107 */
 	    {
 		opindex arg;
 		BGET_opindex(arg);
 		cLOOP->op_lastop = arg;
 		break;
 	    }
-	  case INSN_COP_LABEL:		/* 109 */
+	  case INSN_COP_LABEL:		/* 108 */
 	    {
 		pvindex arg;
 		BGET_pvindex(arg);
 		cCOP->cop_label = arg;
 		break;
 	    }
-	  case INSN_COP_STASHPV:		/* 110 */
+	  case INSN_COP_STASHPV:		/* 109 */
 	    {
 		pvindex arg;
 		BGET_pvindex(arg);
 		BSET_cop_stashpv(cCOP, arg);
 		break;
 	    }
-	  case INSN_COP_FILE:		/* 111 */
+	  case INSN_COP_FILE:		/* 110 */
 	    {
 		pvindex arg;
 		BGET_pvindex(arg);
 		BSET_cop_file(cCOP, arg);
 		break;
 	    }
-	  case INSN_COP_SEQ:		/* 112 */
+	  case INSN_COP_SEQ:		/* 111 */
 	    {
 		U32 arg;
 		BGET_U32(arg);
 		cCOP->cop_seq = arg;
 		break;
 	    }
-	  case INSN_COP_ARYBASE:		/* 113 */
+	  case INSN_COP_ARYBASE:		/* 112 */
 	    {
 		I32 arg;
 		BGET_I32(arg);
 		cCOP->cop_arybase = arg;
 		break;
 	    }
-	  case INSN_COP_LINE:		/* 114 */
+	  case INSN_COP_LINE:		/* 113 */
 	    {
 		line_t arg;
 		BGET_U16(arg);
 		BSET_cop_line(cCOP, arg);
 		break;
 	    }
-	  case INSN_COP_WARNINGS:		/* 115 */
+	  case INSN_COP_WARNINGS:		/* 114 */
 	    {
 		svindex arg;
 		BGET_svindex(arg);
 		cCOP->cop_warnings = arg;
 		break;
 	    }
-	  case INSN_MAIN_START:		/* 116 */
+	  case INSN_MAIN_START:		/* 115 */
 	    {
 		opindex arg;
 		BGET_opindex(arg);
 		PL_main_start = arg;
 		break;
 	    }
-	  case INSN_MAIN_ROOT:		/* 117 */
+	  case INSN_MAIN_ROOT:		/* 116 */
 	    {
 		opindex arg;
 		BGET_opindex(arg);
 		PL_main_root = arg;
 		break;
 	    }
-	  case INSN_CURPAD:		/* 118 */
+	  case INSN_CURPAD:		/* 117 */
 	    {
 		svindex arg;
 		BGET_svindex(arg);
 		BSET_curpad(PL_curpad, arg);
 		break;
 	    }
-	  case INSN_PUSH_BEGIN:		/* 119 */
+	  case INSN_PUSH_BEGIN:		/* 118 */
 	    {
 		svindex arg;
 		BGET_svindex(arg);
 		BSET_push_begin(PL_beginav, arg);
 		break;
 	    }
-	  case INSN_PUSH_INIT:		/* 120 */
+	  case INSN_PUSH_INIT:		/* 119 */
 	    {
 		svindex arg;
 		BGET_svindex(arg);
 		BSET_push_init(PL_initav, arg);
 		break;
 	    }
-	  case INSN_PUSH_END:		/* 121 */
+	  case INSN_PUSH_END:		/* 120 */
 	    {
 		svindex arg;
 		BGET_svindex(arg);
