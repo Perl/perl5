@@ -92,7 +92,9 @@ sub init_hash { map { $_ => 1 } @_ }
 #
 %skip_lexicals = init_hash qw(pp_enter pp_enterloop);
 %skip_invalidate = init_hash qw(pp_enter pp_enterloop);
-%need_curcop = init_hash qw(pp_rv2gv  pp_bless pp_repeat pp_sort pp_caller pp_reset pp_rv2cv pp_entereval pp_require pp_dofile pp_entertry pp_enterloop pp_enteriter pp_entersub pp_enter);
+%need_curcop = init_hash qw(pp_rv2gv  pp_bless pp_repeat pp_sort
+	 pp_caller pp_reset pp_rv2cv pp_entereval pp_require pp_dofile
+	 pp_entertry pp_enterloop pp_enteriter pp_entersub pp_enter);
 
 sub debug {
     if ($debug_runtime) {
@@ -585,9 +587,43 @@ sub pp_dbstate {
 #sub pp_repeat { $curcop->write_back; default_pp(@_) }
 # The following subs need $curcop->write_back if we decide to support arybase:
 # pp_pos, pp_substr, pp_index, pp_rindex, pp_aslice, pp_lslice, pp_splice
-#sub pp_sort { $curcop->write_back; default_pp(@_) }
 #sub pp_caller { $curcop->write_back; default_pp(@_) }
 #sub pp_reset { $curcop->write_back; default_pp(@_) }
+
+sub pp_sort {
+    my $op = shift;
+    my $ppname = $op->ppaddr;
+    if ($op->flags & OPf_SPECIAL && $op->flags & OPf_STACKED){
+	#this indicates the "sort BLOCK Array" case 
+        #ugly optree surgery required.
+	my $root=$op->first->sibling->first;
+	my $start=$root->first;
+	$op->first->save;
+	$op->first->sibling->save;
+	$root->save;
+	$start->save;
+	my $sym=objsym($start);
+	my $fakeop=cc_queue("pp_sort".$$op,$root,$start);	
+	$init->add(sprintf("($sym)->op_next=%s;",$fakeop));
+    } 
+    $curcop->write_back;
+    write_back_lexicals(); 
+    write_back_stack(); 
+    doop($op);
+    return $op->next;
+}
+
+sub pp_leavesub{
+    my $op = shift;
+    my $ppname = $op->ppaddr;
+    write_back_lexicals() unless $skip_lexicals{$ppname};
+    write_back_stack() unless $skip_stack{$ppname};
+    runtime("if (PL_curstackinfo->si_type == PERLSI_SORT) {");
+    runtime("\tPUTBACK;return 0;");
+    runtime("}");
+    doop($op);
+    return $op->next;
+}
 
 sub pp_gv {
     my $op = shift;
