@@ -599,13 +599,6 @@ Perl_vdeb(pTHXo_ const char* pat, va_list* args)
     ((CPerlObj*)pPerl)->Perl_vdeb(pat, args);
 }
 
-#undef  Perl_deb_growlevel
-void
-Perl_deb_growlevel(pTHXo)
-{
-    ((CPerlObj*)pPerl)->Perl_deb_growlevel();
-}
-
 #undef  Perl_debprofdump
 void
 Perl_debprofdump(pTHXo)

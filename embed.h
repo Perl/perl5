@@ -123,7 +123,6 @@
 #define cxinc			Perl_cxinc
 #define deb			Perl_deb
 #define vdeb			Perl_vdeb
-#define deb_growlevel		Perl_deb_growlevel
 #define debprofdump		Perl_debprofdump
 #define debop			Perl_debop
 #define debstack		Perl_debstack
@@ -1487,7 +1486,6 @@
 #define get_ppaddr()		Perl_get_ppaddr(aTHX)
 #define cxinc()			Perl_cxinc(aTHX)
 #define vdeb(a,b)		Perl_vdeb(aTHX_ a,b)
-#define deb_growlevel()		Perl_deb_growlevel(aTHX)
 #define debprofdump()		Perl_debprofdump(aTHX)
 #define debop(a)		Perl_debop(aTHX_ a)
 #define debstack()		Perl_debstack(aTHX)
@@ -2924,8 +2922,6 @@
 #define deb			Perl_deb
 #define Perl_vdeb		CPerlObj::Perl_vdeb
 #define vdeb			Perl_vdeb
-#define Perl_deb_growlevel	CPerlObj::Perl_deb_growlevel
-#define deb_growlevel		Perl_deb_growlevel
 #define Perl_debprofdump	CPerlObj::Perl_debprofdump
 #define debprofdump		Perl_debprofdump
 #define Perl_debop		CPerlObj::Perl_debop

@@ -83,7 +83,6 @@ VIRTUAL PPADDR_t*	Perl_get_ppaddr(pTHX);
 VIRTUAL I32	Perl_cxinc(pTHX);
 VIRTUAL void	Perl_deb(pTHX_ const char* pat, ...);
 VIRTUAL void	Perl_vdeb(pTHX_ const char* pat, va_list* args);
-VIRTUAL void	Perl_deb_growlevel(pTHX);
 VIRTUAL void	Perl_debprofdump(pTHX);
 VIRTUAL I32	Perl_debop(pTHX_ OP* o);
 VIRTUAL I32	Perl_debstack(pTHX);

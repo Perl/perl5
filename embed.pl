@@ -1078,7 +1078,6 @@ p	|PPADDR_t*|get_ppaddr
 p	|I32	|cxinc
 p	|void	|deb		|const char* pat|...
 p	|void	|vdeb		|const char* pat|va_list* args
-p	|void	|deb_growlevel
 p	|void	|debprofdump
 p	|I32	|debop		|OP* o
 p	|I32	|debstack

@@ -17,13 +17,13 @@
 PERLVAR(Iorigargc,	int)
 PERLVAR(Iorigargv,	char **)
 PERLVAR(Ienvgv,		GV *)
-PERLVAR(Isiggv,		GV *)
 PERLVAR(Iincgv,		GV *)
 PERLVAR(Ihintgv,	GV *)
 PERLVAR(Iorigfilename,	char *)
 PERLVAR(Idiehook,	SV *)
 PERLVAR(Iwarnhook,	SV *)
-PERLVAR(Icddir,		char *)		/* switches */
+
+/* switches */
 PERLVAR(Iminus_c,	bool)
 PERLVARA(Ipatchlevel,10,char)
 PERLVAR(Ilocalpatches,	char **)
@@ -38,14 +38,12 @@ PERLVAR(Idoswitches,	bool)
 PERLVAR(Idowarn,	bool)
 PERLVAR(Idoextract,	bool)
 PERLVAR(Isawampersand,	bool)		/* must save all match strings */
-PERLVAR(Isawstudy,	bool)		/* do fbm_instr on all strings */
-PERLVAR(Isawvec,	bool)
 PERLVAR(Iunsafe,	bool)
 PERLVAR(Iinplace,	char *)
 PERLVAR(Ie_script,	SV *)
 PERLVAR(Iperldb,	U32)
 
-/* This value may be raised by extensions for testing purposes */
+/* This value may be set when embedding for full cleanup  */
 /* 0=none, 1=full, 2=full with checks */
 PERLVARI(Iperl_destruct_level,	int,	0)
 
@@ -70,11 +68,6 @@ PERLVAR(Iargvgv,	GV *)
 PERLVAR(Iargvoutgv,	GV *)
 
 /* shortcuts to regexp stuff */
-/* XXX these three aren't used anywhere */
-PERLVAR(Ileftgv,	GV *)
-PERLVAR(Iampergv,	GV *)
-PERLVAR(Irightgv,	GV *)
-
 /* this one needs to be moved to thrdvar.h and accessed via
  * find_threadsv() when USE_THREADS */
 PERLVAR(Ireplgv,	GV *)
@@ -109,8 +102,6 @@ PERLVAR(Isv_root,	SV*)		/* storage for SVs belonging to interp */
 PERLVAR(Isv_arenaroot,	SV*)		/* list of areas for garbage collection */
 
 /* funky return mechanisms */
-PERLVAR(Ilastspbase,	I32)
-PERLVAR(Ilastsize,	I32)
 PERLVAR(Iforkprocess,	int)		/* so do_open |- can return proc# */
 
 /* subprocess state */
@@ -119,12 +110,6 @@ PERLVAR(Ifdpid,		AV *)		/* keep fd-to-pid mappings for my_popen */
 /* internal state */
 PERLVAR(Itainting,	bool)		/* doing taint checks */
 PERLVARI(Iop_mask,	char *,	NULL)	/* masked operations for safe evals */
-
-/* trace state */
-PERLVAR(Idlevel,	I32)
-PERLVARI(Idlmax,	I32,	128)
-PERLVAR(Idebname,	char *)
-PERLVAR(Idebdelim,	char *)
 
 /* current interpreter roots */
 PERLVAR(Imain_cv,	CV *)
@@ -138,14 +123,11 @@ PERLVARI(Icurcopdb,	COP *,	NULL)
 PERLVARI(Icopline,	line_t,	NOLINE)
 
 /* statics moved here for shared library purposes */
-PERLVAR(Istrchop,	SV)		/* return value from chop */
 PERLVAR(Ifilemode,	int)		/* so nextargv() can preserve mode */
 PERLVAR(Ilastfd,	int)		/* what to preserve mode on */
 PERLVAR(Ioldname,	char *)		/* what to preserve mode on */
 PERLVAR(IArgv,		char **)	/* stuff to free from do_aexec, vfork safe */
 PERLVAR(ICmd,		char *)		/* stuff to free from do_aexec, vfork safe */
-PERLVAR(Imystrk,	SV *)		/* temp key string for do_each() */
-PERLVAR(Ioldlastpm,	PMOP *)		/* for saving regexp context in debugger */
 PERLVAR(Igensym,	I32)		/* next symbol for getsym() to define */
 PERLVAR(Ipreambled,	bool)
 PERLVAR(Ipreambleav,	AV *)
@@ -291,17 +273,16 @@ PERLVAR(Ipadix,		I32)		/* max used index in current "register" pad */
 PERLVAR(Ipadix_floor,	I32)		/* how low may inner block reset padix */
 PERLVAR(Ipad_reset_pending,	I32)	/* reset pad on next attempted alloc */
 
-PERLVAR(Ithisexpr,	I32)		/* name id for nothing_in_common() */
 PERLVAR(Ilast_uni,	char *)		/* position of last named-unary op */
 PERLVAR(Ilast_lop,	char *)		/* position of last list operator */
 PERLVAR(Ilast_lop_op,	OPCODE)		/* last list operator */
 PERLVAR(Iin_my,		I32)		/* we're compiling a "my" (or "our") declaration */
 PERLVAR(Iin_my_stash,	HV *)		/* declared class of this "my" declaration */
 #ifdef FCRYPT
-PERLVAR(Icryptseen,	I32)		/* has fast crypt() been initialized? */
+PERLVAR(Icryptseen,	bool)		/* has fast crypt() been initialized? */
 #endif
 
-PERLVAR(Ihints,	U32)			/* pragma-tic compile-time flags */
+PERLVAR(Ihints,		U32)		/* pragma-tic compile-time flags */
 
 PERLVAR(Idebug,		VOL U32)	/* flags given to -D switch */
 
@@ -364,7 +345,6 @@ PERLVAR(Iglob_index,	int)
 PERLVAR(Isrand_called,	bool)
 PERLVARA(Iuudmap,256,	char)
 PERLVAR(Ibitcount,	char *)
-PERLVAR(Ifilter_debug,	int)
 
 #ifdef USE_THREADS
 PERLVAR(Ithr_key,	perl_key)	/* For per-thread struct perl_thread* */

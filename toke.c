@@ -1772,10 +1772,9 @@ S_incl_perldb(pTHX)
 SV *
 Perl_filter_add(pTHX_ filter_t funcp, SV *datasv)
 {
-    if (!funcp){ /* temporary handy debugging hack to be deleted */
-	PL_filter_debug = atoi((char*)datasv);
-	return NULL;
-    }
+    if (!funcp)
+	return Nullsv;
+
     if (!PL_rsfp_filters)
 	PL_rsfp_filters = newAV();
     if (!datasv)
@@ -1783,12 +1782,8 @@ Perl_filter_add(pTHX_ filter_t funcp, SV *datasv)
     if (!SvUPGRADE(datasv, SVt_PVIO))
         Perl_die(aTHX_ "Can't upgrade filter_add data to SVt_PVIO");
     IoDIRP(datasv) = (DIR*)funcp; /* stash funcp into spare field */
-#ifdef DEBUGGING
-    if (PL_filter_debug) {
-	STRLEN n_a;
-	Perl_warn(aTHX_ "filter_add func %p (%s)", funcp, SvPV(datasv, n_a));
-    }
-#endif /* DEBUGGING */
+    DEBUG_P(PerlIO_printf(Perl_debug_log, "filter_add func %p (%s)\n",
+			  funcp, SvPV_nolen(datasv)));
     av_unshift(PL_rsfp_filters, 1);
     av_store(PL_rsfp_filters, 0, datasv) ;
     return(datasv);
@@ -1799,10 +1794,7 @@ Perl_filter_add(pTHX_ filter_t funcp, SV *datasv)
 void
 Perl_filter_del(pTHX_ filter_t funcp)
 {
-#ifdef DEBUGGING
-    if (PL_filter_debug)
-	Perl_warn(aTHX_ "filter_del func %p", funcp);
-#endif /* DEBUGGING */
+    DEBUG_P(PerlIO_printf(Perl_debug_log, "filter_del func %p", funcp));
     if (!PL_rsfp_filters || AvFILLp(PL_rsfp_filters)<0)
 	return;
     /* if filter is on top of stack (usual case) just pop it off */
@@ -1832,10 +1824,8 @@ Perl_filter_read(pTHX_ int idx, SV *buf_sv, int maxlen)
     if (idx > AvFILLp(PL_rsfp_filters)){       /* Any more filters?	*/
 	/* Provide a default input filter to make life easy.	*/
 	/* Note that we append to the line. This is handy.	*/
-#ifdef DEBUGGING
-	if (PL_filter_debug)
-	    Perl_warn(aTHX_ "filter_read %d: from rsfp\n", idx);
-#endif /* DEBUGGING */
+	DEBUG_P(PerlIO_printf(Perl_debug_log,
+			      "filter_read %d: from rsfp\n", idx));
 	if (maxlen) { 
  	    /* Want a block */
 	    int len ;
@@ -1863,21 +1853,16 @@ Perl_filter_read(pTHX_ int idx, SV *buf_sv, int maxlen)
     }
     /* Skip this filter slot if filter has been deleted	*/
     if ( (datasv = FILTER_DATA(idx)) == &PL_sv_undef){
-#ifdef DEBUGGING
-	if (PL_filter_debug)
-	    Perl_warn(aTHX_ "filter_read %d: skipped (filter deleted)\n", idx);
-#endif /* DEBUGGING */
+	DEBUG_P(PerlIO_printf(Perl_debug_log,
+			      "filter_read %d: skipped (filter deleted)\n",
+			      idx));
 	return FILTER_READ(idx+1, buf_sv, maxlen); /* recurse */
     }
     /* Get function pointer hidden within datasv	*/
     funcp = (filter_t)IoDIRP(datasv);
-#ifdef DEBUGGING
-    if (PL_filter_debug) {
-	STRLEN n_a;
-	Perl_warn(aTHX_ "filter_read %d: via function %p (%s)\n",
-		idx, funcp, SvPV(datasv,n_a));
-    }
-#endif /* DEBUGGING */
+    DEBUG_P(PerlIO_printf(Perl_debug_log,
+			  "filter_read %d: via function %p (%s)\n",
+			  idx, funcp, SvPV_nolen(datasv)));
     /* Call function. The function is expected to 	*/
     /* call "FILTER_READ(idx+1, buf_sv)" first.		*/
     /* Return: <0:error, =0:eof, >0:not eof 		*/
@@ -3858,8 +3843,10 @@ Perl_yylex(pTHX)
 
 	case KEY_crypt:
 #ifdef FCRYPT
-	    if (!PL_cryptseen++)
+	    if (!PL_cryptseen) {
+		PL_cryptseen = TRUE;
 		init_des();
+	    }
 #endif
 	    LOP(OP_CRYPT,XTERM);
 
@@ -4543,7 +4530,6 @@ Perl_yylex(pTHX)
 	    UNI(OP_STAT);
 
 	case KEY_study:
-	    PL_sawstudy++;
 	    UNI(OP_STUDY);
 
 	case KEY_substr:
@@ -4754,7 +4740,6 @@ Perl_yylex(pTHX)
 	    UNI(OP_VALUES);
 
 	case KEY_vec:
-	    PL_sawvec = TRUE;
 	    LOP(OP_VEC,XTERM);
 
 	case KEY_while:

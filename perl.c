@@ -220,11 +220,6 @@ perl_construct(pTHXx)
     PL_fdpid = newAV();			/* for remembering popen pids by fd */
     PL_modglobal = newHV();		/* pointers to per-interpreter module globals */
 
-    DEBUG( {
-	New(51,PL_debname,128,char);
-	New(52,PL_debdelim,128,char);
-    } )
-
     ENTER;
 }
 
@@ -390,8 +385,6 @@ perl_destruct(pTHXx)
     PL_dowarn       = G_WARN_OFF;
     PL_doextract    = FALSE;
     PL_sawampersand = FALSE;	/* must save all match strings */
-    PL_sawstudy     = FALSE;	/* do fbm_instr on all strings */
-    PL_sawvec       = FALSE;
     PL_unsafe       = FALSE;
 
     Safefree(PL_inplace);
@@ -447,7 +440,6 @@ perl_destruct(pTHXx)
 
     /* shortcuts just get cleared */
     PL_envgv = Nullgv;
-    PL_siggv = Nullgv;
     PL_incgv = Nullgv;
     PL_hintgv = Nullgv;
     PL_errgv = Nullgv;
@@ -702,6 +694,7 @@ S_parse_body(pTHX_ va_list args)
     AV* comppadlist;
     register SV *sv;
     register char *s;
+    char *cddir = Nullch;
 
     XSINIT_t xsinit = va_arg(args, XSINIT_t);
 
@@ -870,7 +863,7 @@ print \"  \\@INC:\\n    @INC\\n\";");
 	    PL_doextract = TRUE;
 	    s++;
 	    if (*s)
-		PL_cddir = savepv(s);
+		cddir = s;
 	    break;
 	case 0:
 	    break;
@@ -958,8 +951,12 @@ print \"  \\@INC:\\n    @INC\\n\";");
     }
 #endif
 
-    if (PL_doextract)
+    if (PL_doextract) {
 	find_beginning();
+	if (cddir && PerlDir_chdir(cddir) < 0)
+	    Perl_croak(aTHX_ "Can't chdir to %s",cddir);
+
+    }
 
     PL_main_cv = PL_compcv = (CV*)NEWSV(1104,0);
     sv_upgrade((SV *)PL_compcv, SVt_PVCV);
@@ -1917,7 +1914,6 @@ S_init_interp(pTHX)
     PL_curcop		= &PL_compiling;\
     PL_curcopdb		= NULL;		\
     PL_dbargs		= 0;		\
-    PL_dlmax		= 128;		\
     PL_dumpindent	= 4;		\
     PL_laststatval	= -1;		\
     PL_laststype	= OP_STAT;	\
@@ -1927,7 +1923,6 @@ S_init_interp(pTHX)
     PL_tmps_floor	= -1;		\
     PL_tmps_ix		= -1;		\
     PL_op_mask		= NULL;		\
-    PL_dlmax		= 128;		\
     PL_laststatval	= -1;		\
     PL_laststype	= OP_STAT;	\
     PL_mess_sv		= Nullsv;	\
@@ -2524,8 +2519,6 @@ S_find_beginning(pTHX)
 		    /*SUPPRESS 530*/
 		    while (s = moreswitches(s)) ;
 	    }
-	    if (PL_cddir && PerlDir_chdir(PL_cddir) < 0)
-		Perl_croak(aTHX_ "Can't chdir to %s",PL_cddir);
 	}
     }
 }
@@ -2640,10 +2633,6 @@ S_nuke_stacks(pTHX)
     Safefree(PL_scopestack);
     Safefree(PL_savestack);
     Safefree(PL_retstack);
-    DEBUG( {
-	Safefree(PL_debname);
-	Safefree(PL_debdelim);
-    } )
 }
 
 #ifndef PERL_OBJECT

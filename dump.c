@@ -1115,7 +1115,7 @@ Perl_do_sv_dump(pTHX_ I32 level, PerlIO *file, SV *sv, I32 nest, I32 maxnest, bo
 	Perl_dump_indent(aTHX_ level, file, "    HV = 0x%"UVxf"\n", PTR2UV(GvHV(sv)));
 	Perl_dump_indent(aTHX_ level, file, "    CV = 0x%"UVxf"\n", PTR2UV(GvCV(sv)));
 	Perl_dump_indent(aTHX_ level, file, "    CVGEN = 0x%"UVxf"\n", (UV)GvCVGEN(sv));
-	Perl_dump_indent(aTHX_ level, file, "    LASTEXPR = %"IVdf"\n", (IV)GvLASTEXPR(sv));
+	Perl_dump_indent(aTHX_ level, file, "    GPFLAGS = 0x%"UVxf"\n", (UV)GvGPFLAGS(sv));
 	Perl_dump_indent(aTHX_ level, file, "    LINE = %"IVdf"\n", (IV)GvLINE(sv));
 	Perl_dump_indent(aTHX_ level, file, "    FLAGS = 0x%"UVxf"\n", (UV)GvFLAGS(sv));
 	do_gv_dump (level, file, "    FILEGV", GvFILEGV(sv));

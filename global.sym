@@ -74,7 +74,6 @@ Perl_get_ppaddr
 Perl_cxinc
 Perl_deb
 Perl_vdeb
-Perl_deb_growlevel
 Perl_debprofdump
 Perl_debop
 Perl_debstack

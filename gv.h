@@ -17,7 +17,7 @@ struct gp {
     GV *	gp_egv;		/* effective gv, if *glob */
     CV *	gp_cv;		/* subroutine value */
     U32		gp_cvgen;	/* generational validity of cached gv_cv */
-    I32		gp_lastexpr;	/* used by nothing_in_common() */
+    U32		gp_flags;	/* XXX unused */
     line_t	gp_line;	/* line first declared at (for -w) */
     GV *	gp_filegv;	/* file first declared in (for -w) */
 };
@@ -67,7 +67,7 @@ HV *GvHVn();
 #define GvCVGEN(gv)	(GvGP(gv)->gp_cvgen)
 #define GvCVu(gv)	(GvGP(gv)->gp_cvgen ? Nullcv : GvGP(gv)->gp_cv)
 
-#define GvLASTEXPR(gv)	(GvGP(gv)->gp_lastexpr)
+#define GvGPFLAGS(gv)	(GvGP(gv)->gp_flags)
 
 #define GvLINE(gv)	(GvGP(gv)->gp_line)
 #define GvFILEGV(gv)	(GvGP(gv)->gp_filegv)
