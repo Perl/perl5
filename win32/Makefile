@@ -46,6 +46,14 @@ INST_TOP	= $(INST_DRV)\perl
 #INST_ARCH = \$(ARCHNAME)
 
 #
+# Uncomment this if you want perl to run
+# 	$Config{sitelibexp}\sitecustomize.pl
+# before anything else.  This script can then be set up, for example,
+# to add additional entries to @INC.
+#
+#USE_SITECUST	= define
+
+#
 # uncomment to enable multiple interpreters.  This is need for fork()
 # emulation and for thread support.
 #
@@ -171,6 +179,7 @@ CCLIBDIR	= $(CCHOME)\lib
 #
 
 #
+#
 # This should normally be disabled.  Adding -DPERL_POLLUTE enables support
 # for old symbols by default, at the expense of extreme pollution.  You most
 # probably just want to build modules that won't compile with
@@ -241,6 +250,10 @@ USE_ITHREADS	= undef
 PERL_MALLOC	= undef
 !ENDIF
 
+!IF "$(USE_SITECUST)" == ""
+USE_SITECUST	= undef
+!ENDIF
+
 !IF "$(USE_MULTI)" == ""
 USE_MULTI	= undef
 !ENDIF
@@ -272,6 +285,10 @@ USE_MULTI	= define
 !IF "$(USE_ITHREADS)$(USE_MULTI)" == "defineundef"
 USE_MULTI	= define
 USE_5005THREADS	= undef
+!ENDIF
+
+!IF "$(USE_SITECUST)" == "define"
+BUILDOPT	= $(BUILDOPT) -DUSE_SITECUSTOMIZE
 !ENDIF
 
 !IF "$(USE_MULTI)$(USE_5005THREADS)" != "undefundef"
@@ -846,6 +863,7 @@ CFG_VARS	=					\
 		"usemultiplicity=$(USE_MULTI)"		\
 		"useperlio=$(USE_PERLIO)"		\
 		"uselargefiles=$(USE_LARGE_FILES)"	\
+		"usesitecustomize=$(USE_SITECUST)"	\
 		"LINK_FLAGS=$(LINK_FLAGS:"=\")"		\
 		"optimize=$(OPTIMIZE:"=\")"
 

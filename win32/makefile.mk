@@ -48,6 +48,14 @@ INST_TOP	*= $(INST_DRV)\perl
 #INST_ARCH	*= \$(ARCHNAME)
 
 #
+# Uncomment this if you want perl to run
+# 	$Config{sitelibexp}\sitecustomize.pl
+# before anything else.  This script can then be set up, for example,
+# to add additional entries to @INC.
+#
+#USE_SITECUST	*= define
+
+#
 # uncomment to enable multiple interpreters.  This is need for fork()
 # emulation and for thread support.
 #
@@ -255,6 +263,7 @@ USE_5005THREADS	*= undef
 USE_ITHREADS	!= undef
 .ENDIF
 
+USE_SITECUST	*= undef
 USE_MULTI	*= undef
 USE_ITHREADS	*= undef
 USE_IMP_SYS	*= undef
@@ -286,6 +295,10 @@ USE_MULTI	!= define
 .IF "$(USE_ITHREADS)$(USE_MULTI)" == "defineundef"
 USE_MULTI	!= define
 USE_5005THREADS	!= undef
+.ENDIF
+
+.IF "$(USE_SITECUST)" == "define"
+BUILDOPT	+= -DUSE_SITECUSTOMIZE
 .ENDIF
 
 .IF "$(USE_MULTI)$(USE_5005THREADS)" != "undefundef"
@@ -885,6 +898,7 @@ CFG_VARS	=					\
 		usemultiplicity=$(USE_MULTI)	~	\
 		useperlio=$(USE_PERLIO)		~	\
 		uselargefiles=$(USE_LARGE_FILES)	~	\
+		usesitecustomize=$(USE_SITECUST)	~	\
 		LINK_FLAGS=$(LINK_FLAGS:s/\/\\/)	~	\
 		optimize=$(OPTIMIZE)
 
