@@ -150,7 +150,7 @@ sub rootdir {
     require Mac::Files;
     my $system =  Mac::Files::FindFolder(&Mac::Files::kOnSystemDisk,
 					 &Mac::Files::kSystemFolderType);
-    $system =~ s/:.*\z/:/;
+    $system =~ s/:.*\z/:/s;
     return $system;
 }
 
@@ -228,7 +228,7 @@ sub splitpath {
     my ($volume,$directory,$file) = ('','','');
 
     if ( $nofile ) {
-        ( $volume, $directory ) = $path =~ m@((?:[^:]+(?::|\z))?)(.*)@;
+        ( $volume, $directory ) = $path =~ m@((?:[^:]+(?::|\z))?)(.*)@s;
     }
     else {
         $path =~ 

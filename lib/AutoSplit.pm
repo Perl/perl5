@@ -175,10 +175,10 @@ sub autosplit_lib_modules{
     while(defined($_ = shift @modules)){
 	s#::#/#g;	# incase specified as ABC::XYZ
 	s|\\|/|g;		# bug in ksh OS/2
-	s#^lib/##; # incase specified as lib/*.pm
+	s#^lib/##s; # incase specified as lib/*.pm
 	if ($Is_VMS && /[:>\]]/) { # may need to convert VMS-style filespecs
-	    my ($dir,$name) = (/(.*])(.*)/);
-	    $dir =~ s/.*lib[\.\]]//;
+	    my ($dir,$name) = (/(.*])(.*)/s);
+	    $dir =~ s/.*lib[\.\]]//s;
 	    $dir =~ s#[\.\]]#/#g;
 	    $_ = $dir . $name;
 	}
@@ -201,7 +201,7 @@ sub autosplit_file {
     # where to write output files
     $autodir ||= "lib/auto";
     if ($Is_VMS) {
-	($autodir = VMS::Filespec::unixpath($autodir)) =~ s|/$||;
+	($autodir = VMS::Filespec::unixpath($autodir)) =~ s|/\z||;
 	$filename = VMS::Filespec::unixify($filename); # may have dirs
     }
     unless (-d $autodir){
@@ -215,7 +215,7 @@ sub autosplit_file {
     }
 
     # allow just a package name to be used
-    $filename .= ".pm" unless ($filename =~ m/\.pm$/);
+    $filename .= ".pm" unless ($filename =~ m/\.pm\z/);
 
     open(IN, "<$filename") or die "AutoSplit: Can't open $filename: $!\n";
     my($pm_mod_time) = (stat($filename))[9];
@@ -378,7 +378,7 @@ EOT
 	for my $dir (keys %outdirs) {
 	    opendir(OUTDIR,$dir);
 	    foreach (sort readdir(OUTDIR)){
-		next unless /\.al$/;
+		next unless /\.al\z/;
 		my($file) = "$dir/$_";
 		$file = lc $file if $Is83 or $Is_VMS;
 		next if $outfiles{$file};

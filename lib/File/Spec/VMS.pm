@@ -41,7 +41,7 @@ sub eliminate_macros {
     my($head,$macro,$tail);
 
     # perform m##g in scalar context so it acts as an iterator
-    while ($npath =~ m#(.*?)\$\((\S+?)\)(.*)#g) { 
+    while ($npath =~ m#(.*?)\$\((\S+?)\)(.*)#gs) { 
         if ($self->{$2}) {
             ($head,$macro,$tail) = ($1,$2,$3);
             if (ref $self->{$macro}) {
@@ -59,7 +59,7 @@ sub eliminate_macros {
             $npath = "$head$macro$tail";
         }
     }
-    if ($complex) { $npath =~ s#\cB(.*?)\cB#\${$1}#g; }
+    if ($complex) { $npath =~ s#\cB(.*?)\cB#\${$1}#gs; }
     $npath;
 }
 
@@ -135,7 +135,7 @@ sub canonpath {
     my($self,$path,$reduce_ricochet) = @_;
 
     if ($path =~ m|/|) { # Fake Unix
-      my $pathify = $path =~ m|/$|;
+      my $pathify = $path =~ m|/\z|;
       $path = $self->SUPER::canonpath($path,$reduce_ricochet);
       if ($pathify) { return vmspath($path); }
       else          { return vmsify($path);  }
@@ -165,7 +165,7 @@ sub catdir {
     if (@dirs) {
 	my $path = (@dirs == 1 ? $dirs[0] : $self->catdir(@dirs));
 	my ($spath,$sdir) = ($path,$dir);
-	$spath =~ s/.dir\z//; $sdir =~ s/.dir\z//; 
+	$spath =~ s/\.dir\z//; $sdir =~ s/\.dir\z//; 
 	$sdir = $self->eliminate_macros($sdir) unless $sdir =~ /^[\w\-]+\z/s;
 	$rslt = $self->fixpath($self->eliminate_macros($spath)."/$sdir",1);
 
@@ -197,7 +197,7 @@ sub catfile {
     if (@files) {
 	my $path = (@files == 1 ? $files[0] : $self->catdir(@files));
 	my $spath = $path;
-	$spath =~ s/.dir\z//;
+	$spath =~ s/\.dir\z//;
 	if ($spath =~ /^[^\)\]\/:>]+\)\z/s && basename($file) eq $file) {
 	    $rslt = "$spath$file";
 	}
@@ -349,7 +349,7 @@ Construct a complete filespec using VMS syntax
 sub catpath {
     my($self,$dev,$dir,$file) = @_;
     if ($dev =~ m|^/+([^/]+)|) { $dev =~ "$1:"; }
-    else { $dev .= ':' unless $dev eq '' or $dev =~ /:$/; }
+    else { $dev .= ':' unless $dev eq '' or $dev =~ /:\z/; }
     $dir = vmspath($dir);
     "$dev$dir$file";
 }
@@ -377,7 +377,7 @@ sub splitpath {
     if ( $path =~ m{/} ) {
         $path =~ 
             m{^ ( (?: /[^/]* )? )
-                ( (?: .*/(?:[^/]+.dir)? )? )
+                ( (?: .*/(?:[^/]+\.dir)? )? )
                 (.*)
              }xs;
         $volume    = $1;

@@ -223,7 +223,7 @@ sub realdie { CORE::die(@_); }
 sub id {
     my $level = shift;
     my($pack,$file,$line,$sub) = caller($level);
-    my($id) = $file=~m|([^/]+)$|;
+    my($id) = $file=~m|([^/]+)\z|;
     return ($file,$line,$id);
 }
 
@@ -235,7 +235,7 @@ sub stamp {
 	$id = $file;
 	($pack,$file) = caller($frame++);
     } until !$file;
-    ($id) = $id=~m|([^/]+)$|;
+    ($id) = $id=~m|([^/]+)\z|;
     return "[$time] $id: ";
 }
 
