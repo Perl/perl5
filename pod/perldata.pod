@@ -339,18 +339,10 @@ an expression.
 
 =head3 Version Strings
 
-B<NOTE:> Version strings (v-strings) have been deprecated in Perl
-5.8.1.  Version strings will be removed in some future release after
-Perl 5.8.1.  The marginal benefits of v-strings were greatly
-outweighed by the potential for Surprise and Confusion.
-
-Even the best case for their use, being used as version numbers for
-Perl itself and modules, was not backwards compatible to Perl versions
-earlier than 5.6.0.
-
-If you are using literal v-strings or the C<$^V> variable for version
-comparison, please use either the old numerical way (5.00801
-for Perl 5.8.1, for example) and the variable C<$[> instead.
+B<Note:> Version Strings (v-strings) have been deprecated.  They will
+be removed in some future release after Perl 5.8.1.  The marginal
+benefits of v-strings were greatly outweighed by the potential for
+Surprise and Confusion.
 
 A literal of the form C<v1.20.300.4000> is parsed as a string composed
 of characters with the specified ordinals.  This form, known as
@@ -376,6 +368,8 @@ are not v-strings before the C<< => >> operator (which is usually used
 to separate a hash key from a hash value), instead they are interpreted
 as literal strings ('v65').  They were v-strings from Perl 5.6.0 to
 Perl 5.8.0, but that caused more confusion and breakage than good.
+Multi-number v-strings like C<v65.66> and C<65.66.67> continue to
+be v-strings always.
 
 =head3 Special Literals
 

@@ -4016,19 +4016,20 @@ rename(2) manpage or equivalent system documentation for details.
 Demands a version of Perl specified by VERSION, or demands some semantics
 specified by EXPR or by C<$_> if EXPR is not supplied.
 
-VERSION will be compared to C<$]>.  A fatal error is produced at run
-time if VERSION is greater than the version of the current Perl
-interpreter.  Compare with L</use>, which can do a similar check at
-compile time.
+VERSION may be either a numeric argument such as 5.006, which will be
+compared to C<$]>, or a literal of the form v5.6.1, which will be compared
+to C<$^V> (aka $PERL_VERSION).  A fatal error is produced at run time if
+VERSION is greater than the version of the current Perl interpreter.
+Compare with L</use>, which can do a similar check at compile time.
 
-    require 5.006;	# run time version check for Perl 5.6.0
-    require 5.006_001;	# ditto for 5.6.1
+Specifying VERSION as a literal of the form v5.6.1 should generally be
+avoided, because it leads to misleading error messages under earlier
+versions of Perl which do not support this syntax.  The equivalent numeric
+version should be used instead.
 
-The alternate way of specifying VERSION (introduced in Perl 5.6.0)
-as a literal of the form v5.6.1 should generally be avoided, because
-it leads to misleading error messages under earlier versions of Perl
-which do not support this syntax.  The equivalent numeric version
-should be used instead.
+    require v5.6.1;	# run time version check
+    require 5.6.1;	# ditto
+    require 5.006_001;	# ditto; preferred for backwards compatibility
 
 Otherwise, demands that a library file be included if it hasn't already
 been included.  The file is included via the do-FILE mechanism, which is
@@ -5030,7 +5031,7 @@ of integers, one for each character in the string, separated by
 a given string (a dot C<.> by default). This can be useful for
 displaying ordinal values of characters in arbitrary strings:
 
-  printf "version is v%vd\n", $^V;     # Perl's version (deprecated)
+  printf "version is v%vd\n", $^V;     # Perl's version
 
 Put an asterisk C<*> before the C<v> to override the string to
 use to separate the numbers:
@@ -6130,26 +6131,28 @@ package.  It is exactly equivalent to
 
 except that Module I<must> be a bareword.
 
-VERSION will be compared to C<$]>.  A fatal error is produced if
-VERSION is greater than the version of the current Perl interpreter;
-Perl will not attempt to parse the rest of the file.  Compare with
-L</require>, which can do a similar check at run time.
+VERSION may be either a numeric argument such as 5.006, which will be
+compared to C<$]>, or a literal of the form v5.6.1, which will be compared
+to C<$^V> (aka $PERL_VERSION.  A fatal error is produced if VERSION is
+greater than the version of the current Perl interpreter; Perl will not
+attempt to parse the rest of the file.  Compare with L</require>, which can
+do a similar check at run time.
 
-    use 5.006;		# compile time version check for Perl 5.6.0
-    use 5.006_001;	# ditto for Perl 5.6.1
+Specifying VERSION as a literal of the form v5.6.1 should generally be
+avoided, because it leads to misleading error messages under earlier
+versions of Perl which do not support this syntax.  The equivalent numeric
+version should be used instead.
+
+    use v5.6.1;		# compile time version check
+    use 5.6.1;		# ditto
+    use 5.006_001;	# ditto; preferred for backwards compatibility
 
 This is often useful if you need to check the current Perl version before
 C<use>ing library modules that have changed in incompatible ways from
 older versions of Perl.  (We try not to do this more than we have to.)
 
-The alternate way of specifying VERSION (introduced in Perl 5.6.0)
-as a literal of the form v5.6.1 should generally be avoided, because
-it leads to misleading error messages under earlier versions of Perl
-which do not support this syntax.  The equivalent numeric version
-should be used instead.
-
-The C<BEGIN> forces the C<require> and C<import> to happen at compile time.
-The C<require> makes sure the module is loaded into memory if it hasn't been
+The C<BEGIN> forces the C<require> and C<import> to happen at compile time.  The
+C<require> makes sure the module is loaded into memory if it hasn't been
 yet.  The C<import> is not a builtin--it's just an ordinary static method
 call into the C<Module> package to tell the module to import the list of
 features back into the current package.  The module can implement its

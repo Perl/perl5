@@ -4431,8 +4431,7 @@ information.
 =item v-strings are deprecated (especially those beginning with 'v')
 
 (D deprecated) v-strings are deprecated.  Their semantics and use were
-found to be overly confusing and error-prone.
-See L<perldata/"Version Strings"> for more information.
+overly confusing.
 
 =item Warning: something's wrong
 

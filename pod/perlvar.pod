@@ -924,6 +924,10 @@ inaccuracies you might want to prefer the inequality tests C<< < >>
 and C<< > >> to the tests containing equivalence: C<< <= >>, C<< == >>,
 and C<< >= >>.
 
+The floating point representation can sometimes lead to inaccurate
+numeric comparisons.  See C<$^V> for a more modern representation of
+the Perl version that allows accurate string comparisons.
+
 =item $COMPILING
 
 =item $^C
@@ -1154,15 +1158,6 @@ and is thereafter read-only.
 
 =item $^V
 
-B<NOTE: Version Strings (v-strings) have been deprecated in Perl 5.8.1.
-Version strings will be removed in some future release after Perl 5.8.1.
-The C<$^V> was implemented using v-strings, and therefore its future
-is uncertain.  Please refrain from using the C<$^V> and use the C<$]>
-instead.>
-
-(The following explanation describes the situation as it used to be
-for Perls starting from 5.6.0 up to and including 5.8.0.)
-
 The revision, version, and subversion of the Perl interpreter, represented
 as a string composed of characters with those ordinals.  Thus in Perl v5.6.0
 it equals C<chr(5) . chr(6) . chr(0)> and will return true for
@@ -1183,7 +1178,7 @@ C<"%vd"> conversion:
 See the documentation of C<use VERSION> and C<require VERSION>
 for a convenient way to fail if the running Perl interpreter is too old.
 
-See also C<$]>.
+See also C<$]> for an older representation of the Perl version.
 
 =item $WARNING
 

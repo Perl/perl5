@@ -213,11 +213,6 @@ see the deprecation warnings, use:
 
     no warnings 'deprecated';
 
-Similarly, prefer the old way of using the C<$]> variable and numeric
-comparisons instead of the C<$^V> variable.  The C<$^V> and v-strings
-in general never did work for pre-5.6.0 Perls, so they weren't that
-great for version compatibility checks to begin with.
-
 =head3 (Reminder) Pseudo-hashes are deprecated (really)
 
 Pseudo-hashes were deprecated in Perl 5.8.0 and will be removed in
@@ -671,7 +666,6 @@ Something modified the values being iterated over.  This is not good.
 
 The marginal benefits of v-strings were greatly outweighed by the
 potential for Surprise and Confusion.
-See L<perldata/"Version Strings"> for more information.
 
 =head1 Changed Internals
 
