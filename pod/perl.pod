@@ -17,25 +17,24 @@ For ease of access, the Perl manual has been split up into several sections:
     perl		Perl overview (this section)
     perlfaq		Perl frequently asked questions
     perltoc		Perl documentation table of contents
-    perlbook		Perl book information
 
     perlsyn		Perl syntax
     perldata		Perl data structures
     perlop		Perl operators and precedence
+    perlsub		Perl subroutines
+    perlfunc		Perl builtin functions
     perlreftut		Perl references short introduction
     perldsc		Perl data structures intro
     perllol		Perl data structures: arrays of arrays
     perlrequick		Perl regular expressions quick start
     perlretut		Perl regular expressions tutorial
 
+    perlrun		Perl execution and options
     perllexwarn		Perl warnings and their control
     perldebug		Perl debugging
 
-    perlrun		Perl execution and options
-    perlfunc		Perl builtin functions
     perlopentut		Perl open() tutorial
     perlvar		Perl predefined variables
-    perlsub		Perl subroutines
     perlmod		Perl modules: how they work
     perlpod		Perl plain old documentation
 

@@ -63,25 +63,24 @@ if (-d "pod") {
     perl                
     perlfaq             
     perltoc             
-    perlbook            
 
     perlsyn            
     perldata            
     perlop              
+    perlsub             
+    perlfunc            
     perlreftut          
     perldsc             
     perllol             
     perlrequick         
     perlretut           
 
+    perlrun             
     perllexwarn         
     perldebug           
 
-    perlrun             
-    perlfunc            
     perlopentut         
     perlvar             
-    perlsub             
     perlmod             
     perlpod             
 

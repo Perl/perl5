@@ -325,14 +325,6 @@ DESCRIPTION
 
 =back
 
-=head2 perlbook - Perl book information
-
-=over
-
-=item DESCRIPTION
-
-=back
-
 =head2 perlsyn - Perl syntax
 
 =over
@@ -483,6 +475,153 @@ regular expressions
 =item Floating-point Arithmetic
 
 =item Bigger Numbers
+
+=back
+
+=back
+
+=head2 perlsub - Perl subroutines
+
+=over
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+=over
+
+=item Private Variables via my()
+
+=item Persistent Private Variables
+
+=item Temporary Values via local()
+
+=item Lvalue subroutines
+
+=item Passing Symbol Table Entries (typeglobs)
+
+=item When to Still Use local()
+
+1. You need to give a global variable a temporary value, especially $_, 2.
+You need to create a local file or directory handle or a local function, 3.
+You want to temporarily change just one element of an array or hash
+
+=item Pass by Reference
+
+=item Prototypes
+
+=item Constant Functions
+
+=item Overriding Built-in Functions
+
+=item Autoloading
+
+=item Subroutine Attributes
+
+=back
+
+=item SEE ALSO
+
+=back
+
+=head2 perlfunc - Perl builtin functions
+
+=over
+
+=item DESCRIPTION
+
+=over
+
+=item Perl Functions by Category
+
+Functions for SCALARs or strings, Regular expressions and pattern matching,
+Numeric functions, Functions for real @ARRAYs, Functions for list data,
+Functions for real %HASHes, Input and output functions, Functions for fixed
+length data or records, Functions for filehandles, files, or directories,
+Keywords related to the control flow of your perl program, Keywords related
+to scoping, Miscellaneous functions, Functions for processes and process
+groups, Keywords related to perl modules, Keywords related to classes and
+object-orientedness, Low-level socket functions, System V interprocess
+communication functions, Fetching user and group info, Fetching network
+info, Time-related functions, Functions new in perl5, Functions obsoleted
+in perl5
+
+=item Portability
+
+=item Alphabetical Listing of Perl Functions
+
+I<-X> FILEHANDLE, I<-X> EXPR, I<-X>, abs VALUE, abs, accept
+NEWSOCKET,GENERICSOCKET, alarm SECONDS, alarm, atan2 Y,X, bind SOCKET,NAME,
+binmode FILEHANDLE, DISCIPLINE, binmode FILEHANDLE, bless REF,CLASSNAME,
+bless REF, caller EXPR, caller, chdir EXPR, chmod LIST, chomp VARIABLE,
+chomp LIST, chomp, chop VARIABLE, chop LIST, chop, chown LIST, chr NUMBER,
+chr, chroot FILENAME, chroot, close FILEHANDLE, close, closedir DIRHANDLE,
+connect SOCKET,NAME, continue BLOCK, cos EXPR, crypt PLAINTEXT,SALT,
+dbmclose HASH, dbmopen HASH,DBNAME,MASK, defined EXPR, defined, delete
+EXPR, die LIST, do BLOCK, do SUBROUTINE(LIST), do EXPR, dump LABEL, dump,
+each HASH, eof FILEHANDLE, eof (), eof, eval EXPR, eval BLOCK, exec LIST,
+exec PROGRAM LIST, exists EXPR, exit EXPR, exp EXPR, exp, fcntl
+FILEHANDLE,FUNCTION,SCALAR, fileno FILEHANDLE, flock FILEHANDLE,OPERATION,
+fork, format, formline PICTURE,LIST, getc FILEHANDLE, getc, getlogin,
+getpeername SOCKET, getpgrp PID, getppid, getpriority WHICH,WHO, getpwnam
+NAME, getgrnam NAME, gethostbyname NAME, getnetbyname NAME, getprotobyname
+NAME, getpwuid UID, getgrgid GID, getservbyname NAME,PROTO, gethostbyaddr
+ADDR,ADDRTYPE, getnetbyaddr ADDR,ADDRTYPE, getprotobynumber NUMBER,
+getservbyport PORT,PROTO, getpwent, getgrent, gethostent, getnetent,
+getprotoent, getservent, setpwent, setgrent, sethostent STAYOPEN, setnetent
+STAYOPEN, setprotoent STAYOPEN, setservent STAYOPEN, endpwent, endgrent,
+endhostent, endnetent, endprotoent, endservent, getsockname SOCKET,
+getsockopt SOCKET,LEVEL,OPTNAME, glob EXPR, glob, gmtime EXPR, goto LABEL,
+goto EXPR, goto &NAME, grep BLOCK LIST, grep EXPR,LIST, hex EXPR, hex,
+import, index STR,SUBSTR,POSITION, index STR,SUBSTR, int EXPR, int, ioctl
+FILEHANDLE,FUNCTION,SCALAR, join EXPR,LIST, keys HASH, kill SIGNAL, LIST,
+last LABEL, last, lc EXPR, lc, lcfirst EXPR, lcfirst, length EXPR, length,
+link OLDFILE,NEWFILE, listen SOCKET,QUEUESIZE, local EXPR, localtime EXPR,
+lock, log EXPR, log, lstat FILEHANDLE, lstat EXPR, lstat, m//, map BLOCK
+LIST, map EXPR,LIST, mkdir FILENAME,MASK, mkdir FILENAME, msgctl
+ID,CMD,ARG, msgget KEY,FLAGS, msgrcv ID,VAR,SIZE,TYPE,FLAGS, msgsnd
+ID,MSG,FLAGS, my EXPR, my EXPR : ATTRIBUTES, next LABEL, next, no Module
+LIST, oct EXPR, oct, open FILEHANDLE,MODE,LIST, open FILEHANDLE,EXPR, open
+FILEHANDLE, opendir DIRHANDLE,EXPR, ord EXPR, ord, our EXPR, pack
+TEMPLATE,LIST, package, package NAMESPACE, pipe READHANDLE,WRITEHANDLE, pop
+ARRAY, pop, pos SCALAR, pos, print FILEHANDLE LIST, print LIST, print,
+printf FILEHANDLE FORMAT, LIST, printf FORMAT, LIST, prototype FUNCTION,
+push ARRAY,LIST, q/STRING/, qq/STRING/, qr/STRING/, qx/STRING/, qw/STRING/,
+quotemeta EXPR, quotemeta, rand EXPR, rand, read
+FILEHANDLE,SCALAR,LENGTH,OFFSET, read FILEHANDLE,SCALAR,LENGTH, readdir
+DIRHANDLE, readline EXPR, readlink EXPR, readlink, readpipe EXPR, recv
+SOCKET,SCALAR,LENGTH,FLAGS, redo LABEL, redo, ref EXPR, ref, rename
+OLDNAME,NEWNAME, require VERSION, require EXPR, require, reset EXPR, reset,
+return EXPR, return, reverse LIST, rewinddir DIRHANDLE, rindex
+STR,SUBSTR,POSITION, rindex STR,SUBSTR, rmdir FILENAME, rmdir, s///, scalar
+EXPR, seek FILEHANDLE,POSITION,WHENCE, seekdir DIRHANDLE,POS, select
+FILEHANDLE, select, select RBITS,WBITS,EBITS,TIMEOUT, semctl
+ID,SEMNUM,CMD,ARG, semget KEY,NSEMS,FLAGS, semop KEY,OPSTRING, send
+SOCKET,MSG,FLAGS,TO, send SOCKET,MSG,FLAGS, setpgrp PID,PGRP, setpriority
+WHICH,WHO,PRIORITY, setsockopt SOCKET,LEVEL,OPTNAME,OPTVAL, shift ARRAY,
+shift, shmctl ID,CMD,ARG, shmget KEY,SIZE,FLAGS, shmread ID,VAR,POS,SIZE,
+shmwrite ID,STRING,POS,SIZE, shutdown SOCKET,HOW, sin EXPR, sin, sleep
+EXPR, sleep, socket SOCKET,DOMAIN,TYPE,PROTOCOL, socketpair
+SOCKET1,SOCKET2,DOMAIN,TYPE,PROTOCOL, sort SUBNAME LIST, sort BLOCK LIST,
+sort LIST, splice ARRAY,OFFSET,LENGTH,LIST, splice ARRAY,OFFSET,LENGTH,
+splice ARRAY,OFFSET, splice ARRAY, split /PATTERN/,EXPR,LIMIT, split
+/PATTERN/,EXPR, split /PATTERN/, split, sprintf FORMAT, LIST, sqrt EXPR,
+sqrt, srand EXPR, srand, stat FILEHANDLE, stat EXPR, stat, study SCALAR,
+study, sub BLOCK, sub NAME, sub NAME BLOCK, substr
+EXPR,OFFSET,LENGTH,REPLACEMENT, substr EXPR,OFFSET,LENGTH, substr
+EXPR,OFFSET, symlink OLDFILE,NEWFILE, syscall LIST, sysopen
+FILEHANDLE,FILENAME,MODE, sysopen FILEHANDLE,FILENAME,MODE,PERMS, sysread
+FILEHANDLE,SCALAR,LENGTH,OFFSET, sysread FILEHANDLE,SCALAR,LENGTH, sysseek
+FILEHANDLE,POSITION,WHENCE, system LIST, system PROGRAM LIST, syswrite
+FILEHANDLE,SCALAR,LENGTH,OFFSET, syswrite FILEHANDLE,SCALAR,LENGTH,
+syswrite FILEHANDLE,SCALAR, tell FILEHANDLE, tell, telldir DIRHANDLE, tie
+VARIABLE,CLASSNAME,LIST, tied VARIABLE, time, times, tr///, truncate
+FILEHANDLE,LENGTH, truncate EXPR,LENGTH, uc EXPR, uc, ucfirst EXPR,
+ucfirst, umask EXPR, umask, undef EXPR, undef, unlink LIST, unlink, unpack
+TEMPLATE,EXPR, untie VARIABLE, unshift ARRAY,LIST, use Module VERSION LIST,
+use Module VERSION, use Module LIST, use Module, use VERSION, utime LIST,
+values HASH, vec EXPR,OFFSET,BITS, wait, waitpid PID,FLAGS, wantarray, warn
+LIST, write FILEHANDLE, write EXPR, write, y///
 
 =back
 
@@ -834,6 +973,42 @@ and optimizing the final combined regexp
 
 =back
 
+=head2 perlrun - how to execute the Perl interpreter
+
+=over
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+=over
+
+=item #! and quoting on non-Unix systems
+
+OS/2, MS-DOS, Win95/NT, Macintosh, VMS
+
+=item Location of Perl
+
+=item Command Switches
+
+B<-0>[I<digits>], B<-a>, B<-C>, B<-c>, B<-d>, B<-d:>I<foo>,
+B<-D>I<letters>, B<-D>I<number>, B<-e> I<commandline>, B<-F>I<pattern>,
+B<-h>, B<-i>[I<extension>], B<-I>I<directory>, B<-l>[I<octnum>],
+B<-m>[B<->]I<module>, B<-M>[B<->]I<module>, B<-M>[B<->]I<'module ...'>,
+B<-[mM]>[B<->]I<module=arg[,arg]...>, B<-n>, B<-p>, B<-P>, B<-s>, B<-S>,
+B<-T>, B<-u>, B<-U>, B<-v>, B<-V>, B<-V:>I<name>, B<-w>, B<-W>, B<-X>,
+B<-x> I<directory>
+
+=back
+
+=item ENVIRONMENT
+
+HOME, LOGDIR, PATH, PERL5LIB, PERL5OPT, PERLLIB, PERL5DB, PERL5SHELL
+(specific to the Win32 port), PERL_DEBUG_MSTATS, PERL_DESTRUCT_LEVEL,
+PERL_ROOT (specific to the VMS port), SYS$LOGIN (specific to the VMS port)
+
+=back
+
 =head2 perllexwarn - Perl Lexical Warnings
 
 =over
@@ -923,145 +1098,6 @@ listing
 =item SEE ALSO
 
 =item BUGS
-
-=back
-
-=head2 perlrun - how to execute the Perl interpreter
-
-=over
-
-=item SYNOPSIS
-
-=item DESCRIPTION
-
-=over
-
-=item #! and quoting on non-Unix systems
-
-OS/2, MS-DOS, Win95/NT, Macintosh, VMS
-
-=item Location of Perl
-
-=item Command Switches
-
-B<-0>[I<digits>], B<-a>, B<-C>, B<-c>, B<-d>, B<-d:>I<foo>,
-B<-D>I<letters>, B<-D>I<number>, B<-e> I<commandline>, B<-F>I<pattern>,
-B<-h>, B<-i>[I<extension>], B<-I>I<directory>, B<-l>[I<octnum>],
-B<-m>[B<->]I<module>, B<-M>[B<->]I<module>, B<-M>[B<->]I<'module ...'>,
-B<-[mM]>[B<->]I<module=arg[,arg]...>, B<-n>, B<-p>, B<-P>, B<-s>, B<-S>,
-B<-T>, B<-u>, B<-U>, B<-v>, B<-V>, B<-V:>I<name>, B<-w>, B<-W>, B<-X>,
-B<-x> I<directory>
-
-=back
-
-=item ENVIRONMENT
-
-HOME, LOGDIR, PATH, PERL5LIB, PERL5OPT, PERLLIB, PERL5DB, PERL5SHELL
-(specific to the Win32 port), PERL_DEBUG_MSTATS, PERL_DESTRUCT_LEVEL,
-PERL_ROOT (specific to the VMS port), SYS$LOGIN (specific to the VMS port)
-
-=back
-
-=head2 perlfunc - Perl builtin functions
-
-=over
-
-=item DESCRIPTION
-
-=over
-
-=item Perl Functions by Category
-
-Functions for SCALARs or strings, Regular expressions and pattern matching,
-Numeric functions, Functions for real @ARRAYs, Functions for list data,
-Functions for real %HASHes, Input and output functions, Functions for fixed
-length data or records, Functions for filehandles, files, or directories,
-Keywords related to the control flow of your perl program, Keywords related
-to scoping, Miscellaneous functions, Functions for processes and process
-groups, Keywords related to perl modules, Keywords related to classes and
-object-orientedness, Low-level socket functions, System V interprocess
-communication functions, Fetching user and group info, Fetching network
-info, Time-related functions, Functions new in perl5, Functions obsoleted
-in perl5
-
-=item Portability
-
-=item Alphabetical Listing of Perl Functions
-
-I<-X> FILEHANDLE, I<-X> EXPR, I<-X>, abs VALUE, abs, accept
-NEWSOCKET,GENERICSOCKET, alarm SECONDS, alarm, atan2 Y,X, bind SOCKET,NAME,
-binmode FILEHANDLE, DISCIPLINE, binmode FILEHANDLE, bless REF,CLASSNAME,
-bless REF, caller EXPR, caller, chdir EXPR, chmod LIST, chomp VARIABLE,
-chomp LIST, chomp, chop VARIABLE, chop LIST, chop, chown LIST, chr NUMBER,
-chr, chroot FILENAME, chroot, close FILEHANDLE, close, closedir DIRHANDLE,
-connect SOCKET,NAME, continue BLOCK, cos EXPR, crypt PLAINTEXT,SALT,
-dbmclose HASH, dbmopen HASH,DBNAME,MASK, defined EXPR, defined, delete
-EXPR, die LIST, do BLOCK, do SUBROUTINE(LIST), do EXPR, dump LABEL, dump,
-each HASH, eof FILEHANDLE, eof (), eof, eval EXPR, eval BLOCK, exec LIST,
-exec PROGRAM LIST, exists EXPR, exit EXPR, exp EXPR, exp, fcntl
-FILEHANDLE,FUNCTION,SCALAR, fileno FILEHANDLE, flock FILEHANDLE,OPERATION,
-fork, format, formline PICTURE,LIST, getc FILEHANDLE, getc, getlogin,
-getpeername SOCKET, getpgrp PID, getppid, getpriority WHICH,WHO, getpwnam
-NAME, getgrnam NAME, gethostbyname NAME, getnetbyname NAME, getprotobyname
-NAME, getpwuid UID, getgrgid GID, getservbyname NAME,PROTO, gethostbyaddr
-ADDR,ADDRTYPE, getnetbyaddr ADDR,ADDRTYPE, getprotobynumber NUMBER,
-getservbyport PORT,PROTO, getpwent, getgrent, gethostent, getnetent,
-getprotoent, getservent, setpwent, setgrent, sethostent STAYOPEN, setnetent
-STAYOPEN, setprotoent STAYOPEN, setservent STAYOPEN, endpwent, endgrent,
-endhostent, endnetent, endprotoent, endservent, getsockname SOCKET,
-getsockopt SOCKET,LEVEL,OPTNAME, glob EXPR, glob, gmtime EXPR, goto LABEL,
-goto EXPR, goto &NAME, grep BLOCK LIST, grep EXPR,LIST, hex EXPR, hex,
-import, index STR,SUBSTR,POSITION, index STR,SUBSTR, int EXPR, int, ioctl
-FILEHANDLE,FUNCTION,SCALAR, join EXPR,LIST, keys HASH, kill SIGNAL, LIST,
-last LABEL, last, lc EXPR, lc, lcfirst EXPR, lcfirst, length EXPR, length,
-link OLDFILE,NEWFILE, listen SOCKET,QUEUESIZE, local EXPR, localtime EXPR,
-lock, log EXPR, log, lstat FILEHANDLE, lstat EXPR, lstat, m//, map BLOCK
-LIST, map EXPR,LIST, mkdir FILENAME,MASK, mkdir FILENAME, msgctl
-ID,CMD,ARG, msgget KEY,FLAGS, msgrcv ID,VAR,SIZE,TYPE,FLAGS, msgsnd
-ID,MSG,FLAGS, my EXPR, my EXPR : ATTRIBUTES, next LABEL, next, no Module
-LIST, oct EXPR, oct, open FILEHANDLE,MODE,LIST, open FILEHANDLE,EXPR, open
-FILEHANDLE, opendir DIRHANDLE,EXPR, ord EXPR, ord, our EXPR, pack
-TEMPLATE,LIST, package, package NAMESPACE, pipe READHANDLE,WRITEHANDLE, pop
-ARRAY, pop, pos SCALAR, pos, print FILEHANDLE LIST, print LIST, print,
-printf FILEHANDLE FORMAT, LIST, printf FORMAT, LIST, prototype FUNCTION,
-push ARRAY,LIST, q/STRING/, qq/STRING/, qr/STRING/, qx/STRING/, qw/STRING/,
-quotemeta EXPR, quotemeta, rand EXPR, rand, read
-FILEHANDLE,SCALAR,LENGTH,OFFSET, read FILEHANDLE,SCALAR,LENGTH, readdir
-DIRHANDLE, readline EXPR, readlink EXPR, readlink, readpipe EXPR, recv
-SOCKET,SCALAR,LENGTH,FLAGS, redo LABEL, redo, ref EXPR, ref, rename
-OLDNAME,NEWNAME, require VERSION, require EXPR, require, reset EXPR, reset,
-return EXPR, return, reverse LIST, rewinddir DIRHANDLE, rindex
-STR,SUBSTR,POSITION, rindex STR,SUBSTR, rmdir FILENAME, rmdir, s///, scalar
-EXPR, seek FILEHANDLE,POSITION,WHENCE, seekdir DIRHANDLE,POS, select
-FILEHANDLE, select, select RBITS,WBITS,EBITS,TIMEOUT, semctl
-ID,SEMNUM,CMD,ARG, semget KEY,NSEMS,FLAGS, semop KEY,OPSTRING, send
-SOCKET,MSG,FLAGS,TO, send SOCKET,MSG,FLAGS, setpgrp PID,PGRP, setpriority
-WHICH,WHO,PRIORITY, setsockopt SOCKET,LEVEL,OPTNAME,OPTVAL, shift ARRAY,
-shift, shmctl ID,CMD,ARG, shmget KEY,SIZE,FLAGS, shmread ID,VAR,POS,SIZE,
-shmwrite ID,STRING,POS,SIZE, shutdown SOCKET,HOW, sin EXPR, sin, sleep
-EXPR, sleep, socket SOCKET,DOMAIN,TYPE,PROTOCOL, socketpair
-SOCKET1,SOCKET2,DOMAIN,TYPE,PROTOCOL, sort SUBNAME LIST, sort BLOCK LIST,
-sort LIST, splice ARRAY,OFFSET,LENGTH,LIST, splice ARRAY,OFFSET,LENGTH,
-splice ARRAY,OFFSET, splice ARRAY, split /PATTERN/,EXPR,LIMIT, split
-/PATTERN/,EXPR, split /PATTERN/, split, sprintf FORMAT, LIST, sqrt EXPR,
-sqrt, srand EXPR, srand, stat FILEHANDLE, stat EXPR, stat, study SCALAR,
-study, sub BLOCK, sub NAME, sub NAME BLOCK, substr
-EXPR,OFFSET,LENGTH,REPLACEMENT, substr EXPR,OFFSET,LENGTH, substr
-EXPR,OFFSET, symlink OLDFILE,NEWFILE, syscall LIST, sysopen
-FILEHANDLE,FILENAME,MODE, sysopen FILEHANDLE,FILENAME,MODE,PERMS, sysread
-FILEHANDLE,SCALAR,LENGTH,OFFSET, sysread FILEHANDLE,SCALAR,LENGTH, sysseek
-FILEHANDLE,POSITION,WHENCE, system LIST, system PROGRAM LIST, syswrite
-FILEHANDLE,SCALAR,LENGTH,OFFSET, syswrite FILEHANDLE,SCALAR,LENGTH,
-syswrite FILEHANDLE,SCALAR, tell FILEHANDLE, tell, telldir DIRHANDLE, tie
-VARIABLE,CLASSNAME,LIST, tied VARIABLE, time, times, tr///, truncate
-FILEHANDLE,LENGTH, truncate EXPR,LENGTH, uc EXPR, uc, ucfirst EXPR,
-ucfirst, umask EXPR, umask, undef EXPR, undef, unlink LIST, unlink, unpack
-TEMPLATE,EXPR, untie VARIABLE, unshift ARRAY,LIST, use Module VERSION LIST,
-use Module VERSION, use Module LIST, use Module, use VERSION, utime LIST,
-values HASH, vec EXPR,OFFSET,BITS, wait, waitpid PID,FLAGS, wantarray, warn
-LIST, write FILEHANDLE, write EXPR, write, y///
-
-=back
 
 =back
 
@@ -1178,50 +1214,6 @@ ${^WIDE_SYSTEM_CALLS}, $EXECUTABLE_NAME, $^X, $ARGV, @ARGV, @INC, @_, %INC,
 =back
 
 =item BUGS
-
-=back
-
-=head2 perlsub - Perl subroutines
-
-=over
-
-=item SYNOPSIS
-
-=item DESCRIPTION
-
-=over
-
-=item Private Variables via my()
-
-=item Persistent Private Variables
-
-=item Temporary Values via local()
-
-=item Lvalue subroutines
-
-=item Passing Symbol Table Entries (typeglobs)
-
-=item When to Still Use local()
-
-1. You need to give a global variable a temporary value, especially $_, 2.
-You need to create a local file or directory handle or a local function, 3.
-You want to temporarily change just one element of an array or hash
-
-=item Pass by Reference
-
-=item Prototypes
-
-=item Constant Functions
-
-=item Overriding Built-in Functions
-
-=item Autoloading
-
-=item Subroutine Attributes
-
-=back
-
-=item SEE ALSO
 
 =back
 
