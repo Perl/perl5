@@ -980,35 +980,30 @@ S_find_byclass(pTHX_ regexp * prog, regnode *c, char *s, char *strend, char *sta
 	        U8 tmpbuf [UTF8_MAXLEN+1];
 		U8 foldbuf[UTF8_MAXLEN_FOLD+1];
 		STRLEN len, foldlen;
-
-		/* The ibcmp_utf8() uses to_uni_fold() which is more
-		 * correct folding for Unicode than using lowercase.
-		 * However, it doesn't work quite fully since the folding
-		 * is a one-to-many mapping and the regex optimizer is
-		 * unaware of this, so it may throw out good matches.
-		 * Fortunately, not getting this right is allowed
-		 * for Unicode Regular Expression Support level 1,
-		 * only one-to-one matching is required. --jhi */
-
+		STRLEN mlen = utf8_length((U8*)m, (U8*)(m + ln));
+		U8* l; /* The last byte of the last character in s. */
+		
 		if (c1 == c2) {
 		    while (s <= e) {
 		        c = utf8_to_uvchr((U8*)s, &len);
+			l = utf8_hop((U8*)s, mlen);
 			if ( c == c1
 			     && (ln == len ||
 				 !ibcmp_utf8(s, do_utf8,
-					     strend - s > ln ? ln : strend - s,
+					     l - (U8*)s,
 					     m, UTF, ln))
 			     && (norun || regtry(prog, s)) )
 			    goto got_it;
 			else {
 			     uvchr_to_utf8(tmpbuf, c);
 			     f = to_utf8_fold(tmpbuf, foldbuf, &foldlen);
+			     l = utf8_hop(foldbuf, mlen);
 			     if ( f != c
 				  && (f == c1 || f == c2)
 				  && (ln == foldlen ||
 				      !ibcmp_utf8((char *)foldbuf,
 						  do_utf8,
-						  foldlen > ln ? ln : foldlen,
+						  l - foldbuf,
 						  m, UTF, ln))
 				  && (norun || regtry(prog, s)) )
 				  goto got_it;
@@ -1019,6 +1014,7 @@ S_find_byclass(pTHX_ regexp * prog, regnode *c, char *s, char *strend, char *sta
 		else {
 		    while (s <= e) {
 		        c = utf8_to_uvchr((U8*)s, &len);
+			l = utf8_hop((U8*)s, mlen);
 
 			/* Handle some of the three Greek sigmas cases.
 			  * Note that not all the possible combinations
@@ -1034,19 +1030,20 @@ S_find_byclass(pTHX_ regexp * prog, regnode *c, char *s, char *strend, char *sta
 			if ( (c == c1 || c == c2)
 			     && (ln == len ||
 				 !ibcmp_utf8(s, do_utf8,
-					     strend - s > ln ? ln : strend - s,
+					     l - (U8*)s,
 					     m, UTF, ln))
 			     && (norun || regtry(prog, s)) )
 			    goto got_it;
 			else {
 			     uvchr_to_utf8(tmpbuf, c);
 			     f = to_utf8_fold(tmpbuf, foldbuf, &foldlen);
+			     l = utf8_hop(foldbuf, mlen);
 			     if ( f != c
 				  && (f == c1 || f == c2)
 				  && (ln == foldlen ||
 				      !ibcmp_utf8((char *)foldbuf,
 						  do_utf8,
-						  foldlen > ln ? ln : foldlen,
+						  l - foldbuf,
 						  m, UTF, ln))
 				  && (norun || regtry(prog, s)) )
 				  goto got_it;
@@ -2353,90 +2350,17 @@ S_regmatch(pTHX_ regnode *prog)
 		char *l = locinput;
 		char *e = s + ln;
 
-		if (do_utf8 != (UTF!=0)) {
-		     /* The target and the pattern have differing utf8ness. */
-		     STRLEN ulen1, ulen2;
-		     UV cs, cl;
+		if (do_utf8 || UTF) {
+		     /* Either target or the pattern are utf8. */
+		     STRLEN slen = utf8_length((U8*)s, (U8*)e);
+		     char *lend = (char *)utf8_hop((U8*)l, slen);
 
-		     if (do_utf8) {
-			  /* The target is utf8, the pattern is not utf8. */
-			  while (s < e) {
-			       if (l >= PL_regeol)
-				    sayNO;
-
-			       cs = to_uni_fold(NATIVE_TO_UNI(*(U8*)s),
-						(U8*)s, &ulen1);
-			       cl = utf8_to_uvchr((U8*)l, &ulen2);
-
-			       if (cs != cl) {
-				    cl = to_uni_fold(cl, (U8*)l, &ulen2);
-				    if (ulen1 != ulen2 || cs != cl)
-					 sayNO;
-			       }
-			       l += ulen1;
-			       s ++;
-			  }
-		     }
+		     if (ibcmp_utf8(s, TRUE, e - s,
+				    l, TRUE, lend - l))
+			  sayNO;
 		     else {
-			  /* The target is not utf8, the pattern is utf8. */
-			  while (s < e) {
-			       if (l >= PL_regeol)
-				    sayNO;
-
-			       cs = utf8_to_uvchr((U8*)s, &ulen1);
-
-			       cl = to_uni_fold(NATIVE_TO_UNI(*(U8*)l),
-						(U8*)l, &ulen2);
-
-			       if (cs != cl) {
-				    cs = to_uni_fold(cs, (U8*)s, &ulen1);
-				    if (ulen1 != ulen2 || cs != cl)
-					 sayNO;
-			       }
-			       l ++;
-			       s += ulen1;
-			  }
-		     }
-		     locinput = l;
-		     nextchr = UCHARAT(locinput);
-		     break;
-		}
-
-		if (do_utf8 && UTF) {
-		     /* Both the target and the pattern are utf8. */
-		     U8 lfoldbuf[UTF8_MAXLEN_FOLD+1], *lf;
-		     U8 sfoldbuf[UTF8_MAXLEN_FOLD+1], *sf;
-		     STRLEN lfoldlen, sfoldlen;
-		     STRLEN llen = 0;
-		     STRLEN slen = 0;
-
-		     while (s < e) {
-			  /* Fold them and walk them characterwise.  */
-
-			  if (llen == 0) {
-			       to_utf8_fold((U8*)l, lfoldbuf, &lfoldlen);
-			       lf   = lfoldbuf;
-			       llen = lfoldlen;
-			  }
-
-			  if (slen == 0) {
-			       to_utf8_fold((U8*)s, sfoldbuf, &sfoldlen);
-			       sf   = sfoldbuf;
-			       slen = sfoldlen;
-			  }
-
-			  while (llen && slen) {
-			       if (UTF8SKIP(lf) != UTF8SKIP(sf) ||
-				   memNE((char*)lf, (char*)sf, UTF8SKIP(lf)))
-				    sayNO;
-			       llen -= UTF8SKIP(lf);
-			       lf   += UTF8SKIP(lf);
-			       slen -= UTF8SKIP(sf);
-			       sf   += UTF8SKIP(sf);
-			  }
-			  
-			  l += UTF8SKIP(l);
-			  s += UTF8SKIP(s);
+			  l = lend;
+			  s = e;
 		     }
 		     locinput = l;
 		     nextchr = UCHARAT(locinput);

@@ -1722,45 +1722,51 @@ http://www.unicode.org/unicode/reports/tr21/ (Case Mappings).
 I32
 Perl_ibcmp_utf8(pTHX_ const char *s1, bool u1, register I32 len1, const char *s2, bool u2, register I32 len2)
 {
-     register U8 *p1  = (U8*)s1;
-     register U8 *p2  = (U8*)s2;
+     register U8 *p1  = (U8*)s1, *q1;
+     register U8 *p2  = (U8*)s2, *q2;
      register U8 *e1 = p1 + len1;
      register U8 *e2 = p2 + len2;
-     STRLEN l1, l2;
-     UV c1, c2;
-     STRLEN foldlen1, foldlen2;
+     STRLEN l1 = 0, l2 = 0;
      U8 foldbuf1[UTF8_MAXLEN_FOLD+1];
      U8 foldbuf2[UTF8_MAXLEN_FOLD+1];
+     U8 natbuf[1+1];
+     STRLEN foldlen1, foldlen2;
      
      while (p1 < e1 && p2 < e2) {
-	  if (u1) {
-	       if (p1 + UTF8SKIP(p1) > e1)
-		    break;
-	       c1 = utf8_to_uvchr((U8*)p1, &l1);
-	  } else {
-	       c1 = NATIVE_TO_UNI(*p1);
-	       l1 = 1;
+	  if (l1 == 0) {
+	       if (u1)
+		    to_utf8_fold(p1, foldbuf1, &foldlen1);
+	       else {
+		    natbuf[0] = NATIVE_TO_UNI(*p1);
+		    to_utf8_fold(natbuf, foldbuf1, &foldlen1);
+	       }
+	       q1 = foldbuf1;
+	       l1 = foldlen1;
 	  }
-	  if (u2) {
-	       if (p2 + UTF8SKIP(p2) > e2)
-		    break;
-	       c2 = utf8_to_uvchr((U8*)p2, &l2);
-	  } else {
-	       c2 = NATIVE_TO_UNI(*p2);
-	       l2 = 1;
+	  if (l2 == 0) {
+	       if (u2)
+		    to_utf8_fold(p2, foldbuf2, &foldlen2);
+	       else {
+		    natbuf[0] = NATIVE_TO_UNI(*p1);
+		    to_utf8_fold(natbuf, foldbuf2, &foldlen2);
+	       }
+	       q2 = foldbuf2;
+	       l2 = foldlen2;
 	  }
-	  if (c1 != c2) {
-	       to_uni_fold(c1, foldbuf1, &foldlen1);
-	       c1 = utf8_to_uvchr(foldbuf1, 0);
-	       
-	       to_uni_fold(c2, foldbuf2, &foldlen2);
-	       c2 = utf8_to_uvchr(foldbuf2, 0);
+	  while (l1 && l2) {
+	       if (UTF8SKIP(q1) != UTF8SKIP(q2) ||
+		   memNE((char*)q1, (char*)q2, UTF8SKIP(q1)))
+		   return 1; /* mismatch */
+	       l1 -= UTF8SKIP(q1);
+	       q1 += UTF8SKIP(q1);
+	       l2 -= UTF8SKIP(q2);
+	       q2 += UTF8SKIP(q2);
+	  }
+	  if (l1 == 0)
+	       p1 += u1 ? UTF8SKIP(p1) : 1;
+	  if (l2 == 0)
+	       p2 += u2 ? UTF8SKIP(p2) : 1;
 
-	       if (c1 != c2 || foldlen1 != foldlen2)
-		    return 1; /* mismatch */
-	  }
-	  p1 += l1;
-	  p2 += l2;
      }
      return p1 == e1 && p2 == e2 ? 0 : 1; /* 0 match, 1 mismatch */
 }
