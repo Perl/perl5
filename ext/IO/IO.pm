@@ -4,17 +4,18 @@ package IO;
 
 use XSLoader ();
 use Carp;
+use strict;
+use warnings;
 
-$VERSION = "1.20";
+our $VERSION = "1.20";
 XSLoader::load 'IO', $VERSION;
 
 sub import {
     shift;
-    if (@_ == 0) {
-	require warnings;
-	warnings::warn('deprecated', qq{parameterless "use IO" deprecated})
-		if warnings::enabled('deprecated');
-    }
+
+    warnings::warnif('deprecated', qq{parameterless "use IO" deprecated})
+        if @_ == 0 ;
+    
     my @l = @_ ? @_ : qw(Handle Seekable File Pipe Socket Dir);
 
     eval join("", map { "require IO::" . (/(\w+)/)[0] . ";\n" } @l)
