@@ -953,9 +953,9 @@ sub lineseq {
 	}
 	$expr .= $self->deparse($ops[$i], 0);
 	$expr =~ s/;\n?\z//;
-	push @exprs, $expr if length $expr;
+	push @exprs, $expr;
     }
-    return join(";\n", @exprs);
+    return join(";\n", grep {length} @exprs);
 }
 
 sub scopeop {
