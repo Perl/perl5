@@ -2,33 +2,27 @@ package Exporter;
 
 require 5.006;
 
-use strict;
-no strict 'refs';
+# Be lean.
+#use strict;
+#no strict 'refs';
 
 our $Debug = 0;
 our $ExportLevel = 0;
 our $Verbose ||= 0;
-our $VERSION = '5.565';
+our $VERSION = '5.566';
 $Carp::Internal{Exporter} = 1;
 
-sub export_to_level {
+sub as_heavy {
   require Exporter::Heavy;
-  goto &Exporter::Heavy::heavy_export_to_level;
+  # Unfortunately, this does not work if the caller is aliased as *name = \&foo
+  # Thus the need to create a lot of identical subroutines
+  my $c = (caller(1))[3];
+  $c =~ s/.*:://;
+  \&{"Exporter::Heavy::heavy_$c"};
 }
 
 sub export {
-  require Exporter::Heavy;
-  goto &Exporter::Heavy::heavy_export;
-}
-
-sub export_tags {
-  require Exporter::Heavy;
-  Exporter::Heavy::_push_tags((caller)[0], "EXPORT",    \@_);
-}
-
-sub export_ok_tags {
-  require Exporter::Heavy;
-  Exporter::Heavy::_push_tags((caller)[0], "EXPORT_OK", \@_);
+  goto &{as_heavy()};
 }
 
 sub import {
@@ -65,7 +59,6 @@ sub import {
   *{"$callpkg\::$_"} = \&{"$pkg\::$_"} foreach @_;
 }
 
-
 # Default methods
 
 sub export_fail {
@@ -73,12 +66,25 @@ sub export_fail {
     @_;
 }
 
+# Unfortunately, caller(1)[3] "does not work" if the caller is aliased as
+# *name = \&foo.  Thus the need to create a lot of identical subroutines
+# Otherwise we could have aliased them to export().
 
-sub require_version {
-    require Exporter::Heavy;
-    goto &Exporter::Heavy::require_version;
+sub export_to_level {
+  goto &{as_heavy()};
 }
 
+sub export_tags {
+  goto &{as_heavy()};
+}
+
+sub export_ok_tags {
+  goto &{as_heavy()};
+}
+
+sub require_version {
+  goto &{as_heavy()};
+}
 
 1;
 __END__
