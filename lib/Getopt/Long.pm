@@ -2,12 +2,12 @@
 
 package Getopt::Long;
 
-# RCS Status      : $Id: GetoptLong.pl,v 2.26 2001-01-31 10:20:29+01 jv Exp $
+# RCS Status      : $Id: GetoptLong.pl,v 2.28 2001-08-05 18:41:09+02 jv Exp $
 # Author          : Johan Vromans
 # Created On      : Tue Sep 11 15:00:12 1990
 # Last Modified By: Johan Vromans
-# Last Modified On: Sat Jan  6 17:12:27 2001
-# Update Count    : 748
+# Last Modified On: Sun Aug  5 18:41:06 2001
+# Update Count    : 751
 # Status          : Released
 
 ################ Copyright ################
@@ -35,8 +35,9 @@ use 5.004;
 use strict;
 
 use vars qw($VERSION $VERSION_STRING);
-$VERSION        =  2.25;
-$VERSION_STRING = "2.25";
+$VERSION        =  2.26;
+# For testing versions only.
+#$VERSION_STRING = "2.25_13";
 
 use Exporter;
 use AutoLoader qw(AUTOLOAD);
@@ -215,12 +216,16 @@ __END__
 
 ################ AutoLoading subroutines ################
 
-# RCS Status      : $Id: GetoptLongAl.pl,v 2.30 2001-01-31 10:21:11+01 jv Exp $
+package Getopt::Long;
+
+use strict;
+
+# RCS Status      : $Id: GetoptLongAl.pl,v 2.34 2001-08-05 18:42:45+02 jv Exp $
 # Author          : Johan Vromans
 # Created On      : Fri Mar 27 11:50:30 1998
 # Last Modified By: Johan Vromans
-# Last Modified On: Tue Dec 26 18:01:16 2000
-# Update Count    : 98
+# Last Modified On: Sat Aug  4 17:32:13 2001
+# Update Count    : 128
 # Status          : Released
 
 sub GetOptions {
@@ -244,7 +249,7 @@ sub GetOptions {
     print STDERR ("GetOpt::Long $Getopt::Long::VERSION ",
 		  "called from package \"$pkg\".",
 		  "\n  ",
-		  'GetOptionsAl $Revision: 2.30 $ ',
+		  'GetOptionsAl $Revision: 2.34 $ ',
 		  "\n  ",
 		  "ARGV: (@ARGV)",
 		  "\n  ",
@@ -264,7 +269,7 @@ sub GetOptions {
     # First argument may be an object. It's OK to use this as long
     # as it is really a hash underneath.
     $userlinkage = undef;
-    if ( ref($optionlist[0]) and
+    if ( @optionlist && ref($optionlist[0]) and
 	 "$optionlist[0]" =~ /^(?:.*\=)?HASH\([^\(]*\)$/ ) {
 	$userlinkage = shift (@optionlist);
 	print STDERR ("=> user linkage: $userlinkage\n") if $debug;
@@ -273,7 +278,7 @@ sub GetOptions {
     # See if the first element of the optionlist contains option
     # starter characters.
     # Be careful not to interpret '<>' as option starters.
-    if ( $optionlist[0] =~ /^\W+$/
+    if ( @optionlist && $optionlist[0] =~ /^\W+$/
 	 && !($optionlist[0] eq '<>'
 	      && @optionlist > 0
 	      && ref($optionlist[1])) ) {
@@ -286,7 +291,7 @@ sub GetOptions {
     # Verify correctness of optionlist.
     %opctl = ();
     %bopctl = ();
-    while ( @optionlist > 0 ) {
+    while ( @optionlist ) {
 	my $opt = shift (@optionlist);
 
 	# Strip leading prefix so people can specify "--foo=i" if they like.
@@ -309,7 +314,7 @@ sub GetOptions {
 	}
 
 	# Match option spec. Allow '?' as an alias only.
-	if ( $opt !~ /^((\w+[-\w]*)(\|(\?|\w[-\w]*)?)*)?([!~+]|[=:][infse][@%]?)?$/ ) {
+	if ( $opt !~ /^((\w+[-\w]*)(\|(\?|\w[-\w]*)?)*)?([!~+]|[=:][ionfse][@%]?)?$/ ) {
 	    $error .= "Error in option spec: \"$opt\"\n";
 	    next;
 	}
@@ -346,7 +351,7 @@ sub GetOptions {
 		    $_ = lc ($_) if $ignorecase > 1;
 		    if ( $c eq '!' ) {
 			$opctl{"no$_"} = $c;
-			warn ("Ignoring '!' modifier for short option $_\n");
+			# warn ("Ignoring '!' modifier for short option $_\n");
 			$opctl{$_} = $bopctl{$_} = '';
 		    }
 		    else {
@@ -677,8 +682,10 @@ sub FindOption ($$$$$$$) {
     my $rest = undef;	# remainder from unbundling
 
     # If it is a long option, it may include the value.
-    if (($starter eq "--" || ($getopt_compat && !$bundling))
-	&& $opt =~ /^([^=]+)=(.*)$/s ) {
+    # With getopt_compat, not if bundling.
+    if ( ($starter eq "--" 
+          || ($getopt_compat && ($bundling == 0 || $bundling == 2)))
+	  && $opt =~ /^([^=]+)=(.*)$/s ) {
 	$opt = $1;
 	$optarg = $2;
 	print STDERR ("=> option \"", $opt,
@@ -850,13 +857,23 @@ sub FindOption ($$$$$$$) {
 	}
     }
 
-    elsif ( $type eq "n" || $type eq "i" ) { # numeric/integer
-	if ( $bundling && defined $rest && $rest =~ /^([-+]?[0-9]+)(.*)$/s ) {
+    elsif ( $type eq "n" || $type eq "i" # numeric/integer
+	    || $type eq "o" ) { # dec/oct/hex/bin value
+
+	my $o_valid =
+	  $type eq "o" ? "[-+]?[1-9][0-9]*|0x[0-9a-f]+|0b[01]+|0[0-7]*"
+	    : "[-+]?[0-9]+";
+
+	if ( $bundling && defined $rest && $rest =~ /^($o_valid)(.*)$/si ) {
 	    $arg = $1;
 	    $rest = $2;
+	    $arg = ($type eq "o" && $arg =~ /^0/) ? oct($arg) : 0+$arg;
 	    unshift (@ARGV, $starter.$rest) if defined $rest && $rest ne '';
 	}
-	elsif ( $arg !~ /^[-+]?[0-9]+$/ ) {
+	elsif ( $arg =~ /^($o_valid)$/si ) {
+	    $arg = ($type eq "o" && $arg =~ /^0/) ? oct($arg) : 0+$arg;
+	}
+	else {
 	    if ( defined $optarg || $mand eq "=" ) {
 		if ( $passthrough ) {
 		    unshift (@ARGV, defined $rest ? $starter.$rest : $arg)
@@ -864,7 +881,9 @@ sub FindOption ($$$$$$$) {
 		    return (0);
 		}
 		warn ("Value \"", $arg, "\" invalid for option ",
-		      $opt, " (number expected)\n");
+		      $opt, " (",
+		      $type eq "o" ? "extended " : "",
+		      "number expected)\n");
 		$error++;
 		undef $opt;
 		# Push back.
@@ -1032,7 +1051,12 @@ Getopt::Long - Extended processing of command line options
 =head1 SYNOPSIS
 
   use Getopt::Long;
-  $result = GetOptions (...option-descriptions...);
+  my $data   = "file.dat";
+  my $length = 24;
+  my $verbose;
+  $result = GetOptions ("length=i" => \$length,    # numeric
+                        "file=s"   => \$data,      # string
+			"verbose"  => \$verbose);  # flag
 
 =head1 DESCRIPTION
 
@@ -1363,6 +1387,15 @@ argument to start with C<-> or C<-->.
 
 Integer. An optional leading plus or minus sign, followed by a
 sequence of digits.
+
+=item o
+
+Extended integer, Perl style. This can be either an optional leading
+plus or minus sign, followed by a sequence of digits, or an octal
+string (a zero, optionally followed by '0', '1', .. '7'), or a
+hexadecimal string (C<0x> followed by '0' .. '9', 'a' .. 'f', case
+insensitive), or a binary string (C<0b> followed by a series of '0'
+and '1').
 
 =item f
 
@@ -1885,6 +1918,3 @@ MA 02139, USA.
 
 =cut
 
-# Local Variables:
-# eval: (load-file "pod.el")
-# End:

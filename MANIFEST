@@ -923,6 +923,8 @@ lib/ftp.pl			FTP code (obsolete, use Net::FTP instead)
 lib/getcwd.pl			A getcwd() emulator
 lib/getopt.pl			Perl library supporting option parsing
 lib/Getopt/Long.pm		Fetch command options (GetOptions)
+lib/Getopt/Long/CHANGES		Getopt::Long changes
+lib/Getopt/Long/README		Getopt::Long README
 lib/Getopt/Long/t/basic.t	See if Getopt::Long works
 lib/Getopt/Long/t/compat.t	See if Getopt::Long works
 lib/Getopt/Long/t/linkage.t	See if Getopt::Long works
