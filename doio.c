@@ -140,18 +140,44 @@ Perl_do_openn(pTHX_ GV *gv, register char *name, I32 len, int as_raw,
     if (as_raw) {
         /* sysopen style args, i.e. integer mode and permissions */
 	STRLEN ix = 0;
+	int appendtrunc =
+	     0
+#ifdef O_APPEND	/* Not fully portable. */
+	     |O_APPEND
+#endif
+#ifdef O_TRUNC	/* Not fully portable. */
+	     |O_TRUNC
+#endif
+	     ;
+	int modifyingmode =
+	     O_WRONLY|O_RDWR|O_CREAT|appendtrunc;
+	int ismodifying;
+
 	if (num_svs != 0) {
 	     Perl_croak(aTHX_ "panic: sysopen with multiple args");
 	}
-	if (rawmode & (O_WRONLY|O_RDWR|O_CREAT
-#ifdef O_APPEND	/* Not fully portable. */
-		       |O_APPEND
-#endif
-#ifdef O_TRUNC	/* Not fully portable. */
-		       |O_TRUNC
-#endif
-		       ))
-	    TAINT_PROPER("sysopen");
+	/* It's not always
+
+	   O_RDONLY 0
+	   O_WRONLY 1
+	   O_RDWR   2
+
+	   It might be (in OS/390 and Mac OS Classic it is)
+
+	   O_WRONLY 1
+	   O_RDONLY 2
+	   O_RDWR   3
+
+	   This means that simple & with O_RDWR would look
+	   like O_RDONLY is present.  Therefore we have to
+	   be more careful.
+	*/
+	if ((ismodifying = (rawmode & modifyingmode))) {
+	     if ((ismodifying & O_WRONLY) == O_WRONLY ||
+		 (ismodifying & O_RDWR)   == O_RDWR   ||
+		 (ismodifying & (O_CREAT|appendtrunc)))
+		  TAINT_PROPER("sysopen");
+	}
 	mode[ix++] = '#'; /* Marker to openn to use numeric "sysopen" */
 
 #if defined(USE_64_BIT_RAWIO) && defined(O_LARGEFILE)
