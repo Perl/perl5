@@ -95,7 +95,7 @@ A synonym for abs_path().
 
 =item fast_abs_path
 
-  my $abs_path = abs_path($file);
+  my $abs_path = fast_abs_path($file);
 
 A more dangerous, but potentially faster version of abs_path.
 
