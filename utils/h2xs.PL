@@ -1730,9 +1730,9 @@ $generate_code
 else {
   use File::Copy;
   copy ('fallback.c', '$constsfname.c')
-    or die "Can't copy fallback.c to $constsfname.c: $!";
+    or die "Can't copy fallback.c to $constsfname.c: \$!";
   copy ('fallback.xs', '$constsfname.xs')
-    or die "Can't copy fallback.xs to $constsfname.xs: $!";
+    or die "Can't copy fallback.xs to $constsfname.xs: \$!";
 }
 END
 
