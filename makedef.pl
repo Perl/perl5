@@ -484,6 +484,8 @@ unless ($define{'USE_ITHREADS'}) {
 		    Perl_ptr_table_new
 		    Perl_ptr_table_split
 		    Perl_ptr_table_store
+		    Perl_ptr_table_clear
+		    Perl_ptr_table_free
 		    perl_clone
 		    perl_clone_using
 		    )];
