@@ -31,6 +31,146 @@ or any other branch.
 Version v5.7.2		Development release working toward v5.8
 --------------
 ____________________________________________________________________________
+[ 13439] By: jhi                                   on 2001/12/03  14:22:05
+        Log: perldelta tweaks.
+     Branch: perl
+	   ! pod/perldelta.pod
+____________________________________________________________________________
+[ 13438] By: jhi                                   on 2001/12/03  14:12:08
+        Log: Subject: [PATCH] perlnewmod.pod: Fixed URL for Ken William's Tutorial
+             From: Sam Tregar <sam@tregar.com> 
+             Date: Mon, 3 Dec 2001 00:04:07 -0500 (EST)
+             Message-ID: <Pine.LNX.4.33.0112030002210.24619-100000@localhost.localdomain>
+     Branch: perl
+	   ! pod/perlnewmod.pod
+____________________________________________________________________________
+[ 13437] By: jhi                                   on 2001/12/03  14:08:59
+        Log: microperl casting nit.
+     Branch: perl
+	   ! utf8.c
+____________________________________________________________________________
+[ 13436] By: jhi                                   on 2001/12/03  14:03:21
+        Log: Make sharepvn a macro since all it does is a deref.
+     Branch: perl
+	   ! embed.h embed.pl global.sym hv.c hv.h proto.h
+____________________________________________________________________________
+[ 13435] By: jhi                                   on 2001/12/03  13:38:14
+        Log: perldelta updates.
+     Branch: perl
+	   ! pod/perldelta.pod
+____________________________________________________________________________
+[ 13434] By: jhi                                   on 2001/12/03  13:13:02
+        Log: PPPort update from Paul Marquess.
+     Branch: perl
+	   + ext/Devel/PPPort/Changes ext/Devel/PPPort/PPPort.xs
+	   + ext/Devel/PPPort/module2.c ext/Devel/PPPort/module3.c
+	   + ext/Devel/PPPort/t/test.t
+	   - ext/Devel/PPPort/harness/Harness.pm
+	   - ext/Devel/PPPort/harness/Harness.xs
+	   - ext/Devel/PPPort/harness/Makefile.PL
+	   - ext/Devel/PPPort/harness/module2.c
+	   - ext/Devel/PPPort/harness/module3.c
+	   - ext/Devel/PPPort/harness/t/test.t
+	   ! MANIFEST ext/Devel/PPPort/MANIFEST
+	   ! ext/Devel/PPPort/Makefile.PL ext/Devel/PPPort/PPPort.pm
+	   ! ext/Devel/PPPort/README ext/Devel/PPPort/TODO
+	   ! ext/Devel/PPPort/soak
+____________________________________________________________________________
+[ 13433] By: jhi                                   on 2001/12/03  12:57:23
+        Log: No use talking about dynamic library search patch
+             unless we are having a dynamic build.
+     Branch: perl
+	   ! t/TEST
+____________________________________________________________________________
+[ 13432] By: jhi                                   on 2001/12/02  22:35:04
+        Log: Be more explicit on the List::Util build trick,
+             should also stop unneeded rebuilds on static builds.
+     Branch: perl
+	   ! ext/List/Util/Makefile.PL
+____________________________________________________________________________
+[ 13431] By: jhi                                   on 2001/12/02  22:18:45
+        Log: We need to replace the optimize (-O1) with
+             the -h scalar0 -h vector0, not append them
+             to the ccflags.
+     Branch: perl
+	   ! hints/unicos.sh hints/unicosmk.sh
+____________________________________________________________________________
+[ 13430] By: jhi                                   on 2001/12/02  20:01:24
+        Log: Subject: [PATCH] Shared hash keys 
+             From: Nicholas Clark <nick@ccl4.org>
+             Date: Sun, 2 Dec 2001 20:52:32 +0000
+             Message-ID: <20011202205232.U21702@plum.flirble.org>
+     Branch: perl
+	   ! doop.c t/op/tr.t
+____________________________________________________________________________
+[ 13429] By: jhi                                   on 2001/12/02  19:19:54
+        Log: Better add new files to MANIFEST, too.
+     Branch: perl
+	   ! MANIFEST
+____________________________________________________________________________
+[ 13428] By: jhi                                   on 2001/12/02  18:38:18
+        Log: Subject: {PATCH] perlpacktut.pod
+             From: "Wolfgang Laun" <wolfgang.laun@chello.at> 
+             Date: Sun, 02 Dec 2001 19:55:06 +0100
+             Message-ID: <200112021955060600.009C0EF9@smtp.chello.at>
+     Branch: perl
+	   ! pod/perlpacktut.pod
+____________________________________________________________________________
+[ 13427] By: jhi                                   on 2001/12/02  17:07:57
+        Log: Various small nits found by DJGPP build.
+     Branch: perl
+	   ! doio.c mg.c pp.c util.c
+____________________________________________________________________________
+[ 13426] By: jhi                                   on 2001/12/02  16:55:21
+        Log: Subject: RE: More verbose POD for Carp
+             From: "Benjamin J. Tilly" <ben_tilly@operamail.com>
+             Date: Sun, 2 Dec 2001 11:32:51 -0500
+             Message-ID: <3C0A9748@operamail.com>
+     Branch: perl
+	   ! lib/Carp.pm
+____________________________________________________________________________
+[ 13425] By: jhi                                   on 2001/12/02  16:54:06
+        Log: Add a header for DJGPP with the function prototypes.
+     Branch: perl
+	   + djgpp/djgpp.h
+	   ! MANIFEST djgpp/djgpp.c
+____________________________________________________________________________
+[ 13424] By: jhi                                   on 2001/12/02  01:17:43
+        Log: Subject: [PATCH] chdir() with an empty tainted argument on Win32
+             From: Abe Timmerman <abe@ztreet.demon.nl>
+             Date: Sun, 02 Dec 2001 02:41:25 +0100
+             Message-ID: <j8vi0uorud2fa9vp0q2dpmn7tpr5hqec1d@4ax.com>
+     Branch: perl
+	   ! pp_sys.c
+____________________________________________________________________________
+[ 13423] By: jhi                                   on 2001/12/02  01:05:43
+        Log: There isn't PTR2INT(), there's PTR2IV().
+     Branch: perl
+	   ! ext/Time/HiRes/HiRes.xs
+____________________________________________________________________________
+[ 13422] By: jhi                                   on 2001/12/02  00:56:05
+        Log: Subject: [ID 20011201.170] Time::HiRes in devel-perl causes segfaults for xs users
+             From: Marc Lehmann <root@schmorp.de>
+             Date: Sun, 02 Dec 2001 02:44:53 +0100
+             Message-Id: <E16ALgb-0006Yw-00.pgcc-forever-2001-12-02-02-44-53@fuji.laendle>
+     Branch: perl
+	   ! ext/Time/HiRes/HiRes.xs
+____________________________________________________________________________
+[ 13421] By: jhi                                   on 2001/12/02  00:25:35
+        Log: encode()/decode() examples.
+     Branch: perl
+	   ! ext/Encode/Encode.pm
+____________________________________________________________________________
+[ 13420] By: jhi                                   on 2001/12/02  00:14:38
+        Log: DJGPP tweaks from Laszlo Molnar.
+     Branch: perl
+	   ! djgpp/config.over djgpp/djgppsed.sh
+____________________________________________________________________________
+[ 13419] By: jhi                                   on 2001/12/01  20:52:19
+        Log: Update Changes.
+     Branch: perl
+	   ! Changes patchlevel.h
+____________________________________________________________________________
 [ 13418] By: jhi                                   on 2001/12/01  20:40:03
         Log: Integrate perlio;
              
