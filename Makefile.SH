@@ -508,9 +508,9 @@ quantperl: $& perlmain$(OBJ_EXT) $(LIBPERL) $(DYNALOADER) $(static_ext) ext.libs
 perl.third.config: config.sh
 	@echo "To build perl.third you must Configure -Doptimize=-g -Uusemymalloc, checking..."
 	@grep "^optimize='-g'" config.sh || exit 1
-	@grep "^config_args='.*-Uusemymalloc.*'" config.sh || exit 1
+	@grep "^usemymalloc='n'" config.sh || exit 1
 
-perl.third: perl.third.config perl
+perl.third: /usr/bin/atom perl.third.config perl
 	atom -tool third -L. -all -gp -toolargs="-quiet -invalid -uninit heap+stack+partword+copy -min 0" perl
 
 # This version, if specified in Configure, does ONLY those scripts which need
