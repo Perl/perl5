@@ -2861,7 +2861,7 @@ Perl_yylex(pTHX)
 	    if (ftst) {
 		PL_last_lop_op = ftst;
 		DEBUG_T( { PerlIO_printf(Perl_debug_log,
-                        "### Saw file test %c\n", ftst);
+                        "### Saw file test %c\n", (int)ftst);
 		} )
 		FTST(ftst);
 	    }
@@ -2869,7 +2869,8 @@ Perl_yylex(pTHX)
 		/* Assume it was a minus followed by a one-letter named
 		 * subroutine call (or a -bareword), then. */
 		DEBUG_T( { PerlIO_printf(Perl_debug_log,
-                        "### %c looked like a file test but was not\n", ftst);
+			"### %c looked like a file test but was not\n",
+			(int)ftst);
 		} )
 		s -= 2;
 	    }

@@ -1567,7 +1567,7 @@ STATIC int
 S_sv_2inuv_non_preserve (pTHX_ register SV *sv, I32 numtype) {
     NV nv = SvNVX(sv);		/* Code simpler and had compiler problems if */
     UV nv_as_uv = U_V(nv);	/*  these are not in simple variables.   */
-    DEBUG_c(PerlIO_printf(Perl_debug_log,"sv_2inuv_non '%s', IV=0x%"UVxf" NV=%g inttype=%X\n", SvPVX(sv), SvIVX(sv), nv, numtype));
+    DEBUG_c(PerlIO_printf(Perl_debug_log,"sv_2inuv_non '%s', IV=0x%"UVxf" NV=%g inttype=%"UVxf"\n", SvPVX(sv), SvIVX(sv), nv, (UV)numtype));
     if (nv_as_uv <= (UV)IV_MAX) {
 	(void)SvIOKp_on(sv);
 	(void)SvNOKp_on(sv);
@@ -1625,7 +1625,7 @@ S_sv_2inuv_non_preserve (pTHX_ register SV *sv, I32 numtype) {
 #else
     /* We've just lost integer precision, nothing we could do. */
     SvUVX(sv) = nv_as_uv;
-    DEBUG_c(PerlIO_printf(Perl_debug_log,"sv_2niuv_non UV? '%s', UV=0x%"UVxf" NV=%g U_V(NV)=0x%"UVxf" inttype=%X\n", SvPVX(sv), SvIVX(sv), nv, nv_as_uv, numtype));
+    DEBUG_c(PerlIO_printf(Perl_debug_log,"sv_2niuv_non UV? '%s', UV=0x%"UVxf" NV=%g U_V(NV)=0x%"UVxf" inttype=%"UVxf"\n", SvPVX(sv), SvIVX(sv), nv, nv_as_uv, (UV)numtype));
     /* UV and NV slots equally valid only if we have casting symmetry. */
     if (numtype & IS_NUMBER_NOT_INT) {
 	SvIsUV_on(sv);
@@ -1648,7 +1648,7 @@ S_sv_2inuv_non_preserve (pTHX_ register SV *sv, I32 numtype) {
 STATIC int
 S_sv_2iuv_non_preserve (pTHX_ register SV *sv, I32 numtype)
 {
-    DEBUG_c(PerlIO_printf(Perl_debug_log,"sv_2iuv_non '%s', IV=0x%"UVxf" NV=%g inttype=%X\n", SvPVX(sv), SvIVX(sv), SvNVX(sv), numtype));
+    DEBUG_c(PerlIO_printf(Perl_debug_log,"sv_2iuv_non '%s', IV=0x%"UVxf" NV=%g inttype=%"UVxf"\n", SvPVX(sv), SvIVX(sv), SvNVX(sv), (UV)numtype));
     if (SvNVX(sv) < (NV)IV_MIN) {
 	(void)SvIOKp_on(sv);
 	(void)SvNOK_on(sv);

@@ -415,7 +415,7 @@ Perl_magic_len(pTHX_ SV *sv, MAGIC *mg)
 		    i = Perl_utf8_length(aTHX_ (U8*)s, (U8*)send);
 		}
 		if (i < 0)
-		    Perl_croak(aTHX_ "panic: magic_len: %d", i);
+		    Perl_croak(aTHX_ "panic: magic_len: %"IVdf, (IV)i);
 		return i;
 	    }
 	}
