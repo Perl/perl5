@@ -33,6 +33,13 @@ sub my_catdir {
     $^O eq 'VMS' ? "[$catdir]" : $catdir;
 }
 
+sub my_catfile {
+    shift;
+    return join(my_dirsep, @_) unless $^O eq 'VMS';
+    my $file = pop;
+    return my_catdir (undef, @_) . $file;
+}
+
 sub my_updir {
     shift;
     $^O eq 'VMS' ? "-" : "..";
@@ -43,12 +50,14 @@ BEGIN {
     if ($@) {
 	*File::Spec::catdir = \&my_catdir;
 	*File::Spec::updir  = \&my_updir;
+	*File::Spec::catfile = \&my_catfile;
     }
 }
 
 # Avoid 'used only once' warnings.
 my $nop1 = *File::Spec::catdir;
 my $nop2 = *File::Spec::updir;
+my $nop3 = *File::Spec::catfile;
 
 # if you have 5.004_03 (and some slightly older versions?), xsubpp
 # tries to generate line numbers in the C code generated from the .xs.
@@ -396,9 +405,38 @@ sub doMakefile {
 	    'SUFFIX'   => 'gz',
 	},
         clean => { FILES => "xdefine" },
+        realclean => {FILES=> 'const-c.inc const-xs.inc'},
     );
 
     WriteMakefile(@makefileopts);
+}
+
+sub doConstants {
+    if (eval {require ExtUtils::Constant; 1}) {
+	my @names = (qw(ITIMER_REAL ITIMER_VIRTUAL ITIMER_PROF
+			ITIMER_REALPROF));
+	foreach (qw (d_usleep d_ualarm d_gettimeofday d_getitimer d_setitimer
+		     d_nanosleep)) {
+	    my $macro = $_;
+	    $macro =~ s/d_(.*)/HAS_\U$1/;
+	    push @names, {name => $_, macro => $macro, value => 1,
+			  default => ["IV", "0"]};
+	}
+	ExtUtils::Constant::WriteConstants(
+					   NAME => 'Time::HiRes',
+					   NAMES => \@names,
+					  );
+    } else {
+	foreach my $file ('const-c.inc', 'const-xs.inc') {
+	    my $fallback = File::Spec->catfile('fallback', $file);
+	    local $/;
+	    open IN, "<$fallback" or die "Can't open $fallback: $!";
+	    open OUT, ">$file" or die "Can't open $file: $!";
+	    print OUT <IN> or die $!;
+	    close OUT or die "Can't close $file: $!";
+	    close IN or die "Can't close $fallback: $!";
+	}
+    }
 }
 
 sub main {
@@ -411,6 +449,7 @@ sub main {
       unixinit();
     }
     doMakefile;
+    doConstants;
     my $make = $Config{'make'} || "make";
     unless ($ENV{PERL_CORE}) {
 	print  <<EOM;

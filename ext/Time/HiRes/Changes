@@ -1,5 +1,8 @@
 Revision history for Perl extension Time::HiRes.
 
+1.42
+	- modernize the constants code (from Nicholas Clark)
+
 1.41
 	- At some point the ability to figure our the correct incdir
 	  for EXTERN.h (either a core perl build, or an installed perl)
@@ -11,7 +14,7 @@ Revision history for Perl extension Time::HiRes.
 	  both styles of build should work again.
 
 1.40
-	- Nick Clark noticed that the my_catdir() emulation function
+	- Nicholas Clark noticed that the my_catdir() emulation function
 	  was broken (which means that we didn't really work for Perls
 	  5.002 and 5.003)
 	- inspired by fixing the above made the whole Makefile.PL -w

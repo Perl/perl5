@@ -98,77 +98,14 @@ sv_2pv_nolen(pTHX_ register SV *sv)
 #   undef ITIMER_REALPROF
 #endif
 
-static IV
-constant(char *name, int arg)
-{
-    errno = 0;
-    switch (*name) {
-    case 'd':
-      if (strEQ(name, "d_getitimer"))
-#ifdef HAS_GETITIMER
-	return 1;
-#else
-	return 0;
+/* 5.004 doesn't define PL_sv_undef */
+#ifndef ATLEASTFIVEOHOHFIVE
+#ifndef PL_sv_undef
+#define PL_sv_undef sv_undef
 #endif
-      if (strEQ(name, "d_nanosleep"))
-#ifdef HAS_NANOSLEEP
-	return 1;
-#else
-	return 0;
 #endif
-      if (strEQ(name, "d_setitimer"))
-#ifdef HAS_SETITIMER
-	return 1;
-#else
-	return 0;
-#endif
-      if (strEQ(name, "d_ualarm"))
-#ifdef HAS_UALARM
-	return 1;
-#else
-	return 0;
-#endif
-      if (strEQ(name, "d_usleep"))
-#ifdef HAS_USLEEP
-	return 1;
-#else
-	return 0;
-#endif
-      break;
-    case 'I':
-      if (strEQ(name, "ITIMER_REAL"))
-#ifdef ITIMER_REAL
-	return ITIMER_REAL;
-#else
-	goto not_there;
-#endif
-      if (strEQ(name, "ITIMER_REALPROF"))
-#ifdef ITIMER_REALPROF
-	return ITIMER_REALPROF;
-#else
-	goto not_there;
-#endif
-      if (strEQ(name, "ITIMER_VIRTUAL"))
-#ifdef ITIMER_VIRTUAL
-	return ITIMER_VIRTUAL;
-#else
-	goto not_there;
-#endif
-      if (strEQ(name, "ITIMER_PROF"))
-#ifdef ITIMER_PROF
-	return ITIMER_PROF;
-#else
-	goto not_there;
-#endif
-      break;
-    }
-    errno = EINVAL;
-    return 0;
 
-not_there:
-    errno = ENOENT;
-    return 0;
-}
+#include "const-c.inc"
 
 #if !defined(HAS_GETTIMEOFDAY) && defined(WIN32)
 #define HAS_GETTIMEOFDAY
@@ -699,10 +636,7 @@ BOOT:
 #endif
 #endif
 
-IV
-constant(name, arg)
-	char *		name
-	int		arg
+INCLUDE: const-xs.inc
 
 #if defined(HAS_USLEEP) && defined(HAS_GETTIMEOFDAY)
 

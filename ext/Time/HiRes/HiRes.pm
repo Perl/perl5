@@ -15,18 +15,16 @@ require DynaLoader;
 		 d_usleep d_ualarm d_gettimeofday d_getitimer d_setitimer
 		 d_nanosleep);
 	
-$VERSION = '1.41';
+$VERSION = '1.42';
 $XS_VERSION = $VERSION;
 $VERSION = eval $VERSION;
 
 sub AUTOLOAD {
     my $constname;
-    ($constname= $AUTOLOAD) =~ s/.*:://;
-    my $val = constant($constname, @_ ? $_[0] : 0);
-    if ($!) {
-	my ($pack,$file,$line) = caller;
-	die "Your vendor has not defined Time::HiRes macro $constname, used at $file line $line.\n";
-    }
+    ($constname = $AUTOLOAD) =~ s/.*:://;
+    die "&Time::HiRes::constant not defined" if $constname eq 'constant';
+    my ($error, $val) = constant($constname);
+    if ($error) { die $error; }
     {
 	no strict 'refs';
 	*$AUTOLOAD = sub { $val };
