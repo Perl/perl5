@@ -207,26 +207,26 @@ cat > UU/uselargefiles.cbu <<'EOCBU'
 case "$uselargefiles" in
 ''|$define|true|[yY]*)
 # Keep these at the left margin.
-ccflags_largefiles="`getconf XBS5_ILP32_OFFBIG_CFLAGS 2>/dev/null`"
-ldflags_largefiles="`getconf XBS5_ILP32_OFFBIG_LDFLAGS 2>/dev/null`"
+ccflags_uselargefiles="`getconf XBS5_ILP32_OFFBIG_CFLAGS 2>/dev/null`"
+ldflags_uselargefiles="`getconf XBS5_ILP32_OFFBIG_LDFLAGS 2>/dev/null`"
 	# _Somehow_ in AIX 4.3.1.0 the above getconf call manages to
 	# insert(?) *something* to $ldflags so that later (in Configure) evaluating
 	# $ldflags causes a newline after the '-b64' (the result of the getconf).
 	# (nothing strange shows up in $ldflags even in hexdump;
 	#  so it may be something (a bug) in the shell, instead?)
 	# Try it out: just uncomment the below line and rerun Configure:
-# echo >&4 "AIX 4.3.1.0 $ldflags_largefiles mystery" ; exit 1
+# echo >&4 "AIX 4.3.1.0 $ldflags_uselargefiles mystery" ; exit 1
 	# Just don't ask me how AIX does it, I spent hours wondering.
-	# Therefore the line re-evaluating ldflags_largefiles: it seems to fix
+	# Therefore the line re-evaluating ldflags_uselargefiles: it seems to fix
 	# the whatever it was that AIX managed to break. --jhi
-	ldflags_largefiles="`echo $ldflags_largefiles`"
+	ldflags_uselargefiles="`echo $ldflags_uselargefiles`"
 # Keep this at the left margin.
-libswanted_largefiles="`getconf XBS5_ILP32_OFFBIG_LIBS 2>/dev/null|sed -e 's@^-l@@' -e 's@ -l@ @g`"
-	case "$ccflags_largefiles$ldflags_largefiles$libs_largefiles" in
+libswanted_uselargefiles="`getconf XBS5_ILP32_OFFBIG_LIBS 2>/dev/null|sed -e 's@^-l@@' -e 's@ -l@ @g`"
+	case "$ccflags_uselargefiles$ldflags_uselargefiles$libs_uselargefiles" in
 	'');;
-	*) ccflags="$ccflags $ccflags_largefiles"
-	   ldflags="$ldflags $ldflags_largefiles"
-	   libswanted="$libswanted $libswanted_largefiles"
+	*) ccflags="$ccflags $ccflags_uselargefiles"
+	   ldflags="$ldflags $ldflags_uselargefiles"
+	   libswanted="$libswanted $libswanted_uselargefiles"
 	   ;;
 	esac
 	case "$gccversion" in

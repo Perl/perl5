@@ -379,13 +379,13 @@ case "$uselargefiles" in
 ''|$define|true|[yY]*)
 
 # Keep these in the left margin.
-ccflags_largefiles="`getconf LFS_CFLAGS 2>/dev/null`"
-ldflags_largefiles="`getconf LFS_LDFLAGS 2>/dev/null`"
-libswanted_largefiles="`getconf LFS_LIBS 2>/dev/null|sed -e 's@^-l@@' -e 's@ -l@ @g`"
+ccflags_uselargefiles="`getconf LFS_CFLAGS 2>/dev/null`"
+ldflags_uselargefiles="`getconf LFS_LDFLAGS 2>/dev/null`"
+libswanted_uselargefiles="`getconf LFS_LIBS 2>/dev/null|sed -e 's@^-l@@' -e 's@ -l@ @g`"
 
-    ccflags="$ccflags $ccflags_largefiles"
-    ldflags="$ldflags $ldflags_largefiles"
-    libswanted="$libswanted $libswanted_largefiles"
+    ccflags="$ccflags $ccflags_uselargefiles"
+    ldflags="$ldflags $ldflags_uselargefiles"
+    libswanted="$libswanted $libswanted_uselargefiles"
     ;;
 esac
 EOCBU

@@ -148,13 +148,13 @@ sub FETCH {
     } elsif ($_[1] =~ /^((?:cc|ld)flags|libs(?:wanted)?)_nolargefiles/) {
 	# These are purely virtual, they do not exist, but need to
 	# be computed on demand for largefile-incapable extensions.
-	my $key = "${1}_largefiles";
+	my $key = "${1}_uselargefiles";
 	$value = $Config{$1};
 	my $withlargefiles = $Config{$key};
 	if ($key =~ /^(?:cc|ld)flags_/) {
 	    $value =~ s/\Q$withlargefiles\E\b//;
 	} elsif ($key =~ /^libs/) {
-	    my @lflibswanted = split(' ', $Config{libswanted_largefiles});
+	    my @lflibswanted = split(' ', $Config{libswanted_uselargefiles});
 	    if (@lflibswanted) {
 		my %lflibswanted;
 		@lflibswanted{@lflibswanted} = ();

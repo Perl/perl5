@@ -283,9 +283,9 @@ cat > UU/uselargefiles.cbu <<'EOCBU'
 case "$uselargefiles" in
 ''|$define|true|[yY]*)
 # Keep this in the left margin.
-ccflags_largefiles="-D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64"
+ccflags_uselargefiles="-D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64"
 
-	ccflags="$ccflags $ccflags_largefiles"
+	ccflags="$ccflags $ccflags_uselargefiles"
 	;;
 esac
 EOCBU
