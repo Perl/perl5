@@ -915,6 +915,46 @@ PerlIO_layer_fetch(pTHX_ PerlIO_list_t *av, IV n, PerlIO_funcs *def)
     return def;
 }
 
+IV
+PerlIOPop_pushed(pTHX_ PerlIO *f, const char *mode, SV *arg, PerlIO_funcs *tab)
+{
+    if (PerlIOValid(f)) {
+	PerlIO_flush(f);
+	PerlIO_pop(aTHX_ f);
+	return 0;
+    }
+    return -1;
+}
+
+PerlIO_funcs PerlIO_remove = {
+    sizeof(PerlIO_funcs),
+    "pop",
+    0,
+    PERLIO_K_DUMMY | PERLIO_K_UTF8,
+    PerlIOPop_pushed,
+    NULL,
+    NULL,
+    NULL,
+    NULL,
+    NULL,
+    NULL,
+    NULL,
+    NULL,
+    NULL,
+    NULL,
+    NULL,                       /* flush */
+    NULL,                       /* fill */
+    NULL,
+    NULL,
+    NULL,
+    NULL,
+    NULL,                       /* get_base */
+    NULL,                       /* get_bufsiz */
+    NULL,                       /* get_ptr */
+    NULL,                       /* get_cnt */
+    NULL,                       /* set_ptrcnt */
+};
+
 PerlIO_list_t *
 PerlIO_default_layers(pTHX)
 {
@@ -937,6 +977,7 @@ PerlIO_default_layers(pTHX)
 	PerlIO_define_layer(aTHX_ & PerlIO_mmap);
 #endif
 	PerlIO_define_layer(aTHX_ & PerlIO_utf8);
+	PerlIO_define_layer(aTHX_ & PerlIO_remove);
 	PerlIO_define_layer(aTHX_ & PerlIO_byte);
 	PerlIO_list_push(aTHX_ PL_def_layerlist,
 			 PerlIO_find_layer(aTHX_ osLayer->name, 0, 0),
@@ -1023,18 +1064,6 @@ PerlIO_push(pTHX_ PerlIO *f, PerlIO_funcs *tab, const char *mode, SV *arg)
 	}
     }
     return f;
-}
-
-IV
-PerlIOPop_pushed(pTHX_ PerlIO *f, const char *mode, SV *arg, PerlIO_funcs *tab)
-{
-    PerlIO_pop(aTHX_ f);
-    if (*f) {
-	PerlIO_flush(f);
-	PerlIO_pop(aTHX_ f);
-	return 0;
-    }
-    return -1;
 }
 
 IV
@@ -1690,6 +1719,7 @@ Perl_PerlIO_set_ptrcnt(pTHX_ PerlIO *f, STDCHAR * ptr, int cnt)
 	(*PerlIOBase(f)->tab->Set_ptrcnt) (aTHX_ f, ptr, cnt);
     }
 }
+
 
 /*--------------------------------------------------------------------------------------*/
 /*
