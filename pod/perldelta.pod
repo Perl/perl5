@@ -690,11 +690,13 @@ in split>.
 
 =item *
 
-Support for the C<CLONE> keyword had been added. With ithreads, when a
-new thread is created, all perl data is cloned, however non perl data
-cannot be cloned. C<CLONE> will be executed once for every package
-that has it defined or inherited. It will be called in the context of
-the new thread, so all modifications are made in the new area.
+Support for the C<CLONE> special subroutine had been added.
+With ithreads, when a new thread is created, all Perl data is cloned,
+however non-Perl data cannot be cloned automatically.  In C<CLONE> you
+can do whatever you need to do, like for example handle the cloning of
+non-Perl data, if necessary.  C<CLONE> will be executed once for every
+package that has it defined or inherited.  It will be called in the
+context of the new thread, so all modifications are made in the new area.
 
 See L<perlmod>
 
