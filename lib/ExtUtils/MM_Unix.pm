@@ -3112,18 +3112,19 @@ sub pasthru {
     $sep .= "\\\n\t";
 
     foreach $key (qw(LIB LIBPERL_A LINKTYPE PREFIX OPTIMIZE INC DEFINE)) {
-	if ($key eq 'INC' && defined(my $inc = $self->{INC})) {
+	next unless defined $self->{$key};
+	if ($key eq 'INC') {
 	    # For INC we need to prepend parent directory but
 	    # only iff the parent directory is not absolute.
 	    my ($o, $i) = $Is_VMS ? ('/Include=', 'i') : ('-I', '');
-	    my $newinc = '';
-	    foreach (grep { /\S/ } parse_line(qr/\s*(?$i)$o/, 1, $inc)) {
-		s/^"(.+)"$/$1/o;
+	    my $inc = '';
+	    foreach (grep { /\S/ } parse_line(qr/\s*(?$i)$o/, 1, $self->{INC})) {
+		s/^"(.+)"\s*$/$1/o;
 		my $dir = File::Spec->file_name_is_absolute($_) ? $_ : File::Spec->catdir(File::Spec->updir, $_);
 		$dir = qq["$dir"] if $dir =~ / /;
-		$newinc .= " $o$dir";
+		$inc .= " $o$dir";
 	    }
-	    push @pasthru, "INC=\"$newinc\"";
+	    push @pasthru, "INC=\"$inc\"";
 	} else {
 	    push @pasthru, "$key=\"\$($key)\"";
 	}
