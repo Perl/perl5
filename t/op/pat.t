@@ -1365,10 +1365,11 @@ print "ok 247\n";
     print "ok 263\n";
 }
 
-{
+SKIP: {
     my $test = 264; # till 575
 
-    use charnames ':full';
+    eval 'use charnames ":full"';
+    skip($@, 312) if $@ =~ /dynamic loading not available/;
 
     # This is far from complete testing, there are dozens of character
     # classes in Unicode.  The mixing of literals and \N{...} is
