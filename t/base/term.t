@@ -11,8 +11,9 @@ print "1..7\n";
 # check "" interpretation
 
 $x = "\n";
-# 10 is ASCII/Iso Latin, 21 is EBCDIC.
+# 10 is ASCII/Iso Latin, 13 in Mac OS, 21 is EBCDIC.
 if ($x eq chr(10)) { print "ok 1\n";}
+elsif ($x eq chr(13)) { print "ok 1 # Mac OS\n"; }
 elsif ($x eq chr(21)) { print "ok 1 # EBCDIC\n"; }
 else {print "not ok 1\n";}
 
@@ -39,7 +40,7 @@ if (($x | 1) == 101) {print "ok 5\n";} else {print "not ok 5\n";}
 
 # check <> pseudoliteral
 
-open(try, "/dev/null") || open(try,"nla0:") || (die "Can't open /dev/null.");
+open(try, "/dev/null") || open(try,"Dev:Null") || open(try,"nla0:") || (die "Can't open /dev/null.");
 if (<try> eq '') {
     print "ok 6\n";
 }

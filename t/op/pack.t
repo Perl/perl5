@@ -43,7 +43,7 @@ $sum = 103 if ($Config{ebcdic} eq 'define');
 print +($x = unpack("%32B*", "Now is the time for all good blurfl")) == $sum
 	? "ok 7\n" : "not ok 7 $x\n";
 
-open(BIN, "./perl") || open(BIN, "./perl.exe")
+open(BIN, "./perl") || open(BIN, "./perl.exe") || open(BIN, $^X)
     || die "Can't open ../perl or ../perl.exe: $!\n";
 sysread BIN, $foo, 8192;
 close BIN;

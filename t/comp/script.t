@@ -4,7 +4,8 @@
 
 print "1..3\n";
 
-$PERL = ($^O eq 'MSWin32') ? '.\perl' : './perl';
+$PERL = ($^O eq 'MSWin32') ? '.\perl'
+    : ($^O eq 'MacOS') ? $^X : './perl';
 $x = `$PERL -le "print 'ok';"`;
 
 if ($x eq "ok\n") {print "ok 1\n";} else {print "not ok 1\n";}

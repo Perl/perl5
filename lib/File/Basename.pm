@@ -95,7 +95,7 @@ would yield
     $dir  eq 'Doc_Root:[Help]'
     $type eq '.Rnh'
 
-=over 4
+=over
 
 =item C<basename>
 
@@ -141,7 +141,7 @@ our(@ISA, @EXPORT, $VERSION, $Fileparse_fstype, $Fileparse_igncase);
 require Exporter;
 @ISA = qw(Exporter);
 @EXPORT = qw(fileparse fileparse_set_fstype basename dirname);
-$VERSION = "2.6";
+$VERSION = "2.7";
 
 
 #   fileparse_set_fstype() - specify OS-based rules used in future
@@ -183,6 +183,7 @@ sub fileparse {
   }
   elsif ($fstype =~ /^MacOS/si) {
     ($dirpath,$basename) = ($fullname =~ /^(.*:)?(.*)/s);
+    $dirpath = ':' unless $dirpath;
   }
   elsif ($fstype =~ /^AmigaOS/i) {
     ($dirpath,$basename) = ($fullname =~ /(.*[:\/])?(.*)/s);

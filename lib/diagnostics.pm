@@ -168,7 +168,7 @@ Tom Christiansen <F<tchrist@mox.perl.com>>, 25 June 1995.
 =cut
 
 use strict;
-use 5.005_64;
+use 5.6.0;
 use Carp;
 
 our $VERSION = 1.0;
@@ -194,6 +194,12 @@ my @trypod = (
 # handy for development testing of new warnings etc
 unshift @trypod, "./pod/perldiag.pod" if -e "pod/perldiag.pod";
 (my $PODFILE) = ((grep { -e } @trypod), $trypod[$#trypod])[0];
+
+if ($^O eq 'MacOS') {
+    # just updir one from each lib dir, we'll find it ...
+    ($PODFILE) = grep { -e } map { "$_:pod:perldiag.pod" } @INC;
+}
+
 
 $DEBUG ||= 0;
 my $WHOAMI = ref bless [];  # nobody's business, prolly not even mine
