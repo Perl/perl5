@@ -178,7 +178,7 @@ Optimised C<map> in scalar context
 =head1 Utility Changes
 
 The Perl debugger (F<lib/perl5db.pl>) can now save all debugger commands for
-sourcing later, and can display the parent inheritence tree of a given class.
+sourcing later, and can display the parent inheritance tree of a given class.
 
 =head1 Installation and Configuration Improvements
 
@@ -202,7 +202,7 @@ More utf8 bugs fixed, notably in how C<chomp>, C<chop>, C<send>, and
 C<syswrite> and interact with utf8 data. Concatenation now works correctly
 when C<use bytes;> is in scope.
 
-Pragmta are now correctly propagated into (?{...}) constructions in regexps.
+Pragmata are now correctly propagated into (?{...}) constructions in regexps.
 Code such as
 
    my $x = qr{ ... (??{ $x }) ... };
