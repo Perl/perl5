@@ -70,8 +70,8 @@ while (<TESTS>) {
     $expect = $repl = '-' if $skip_amp and $input =~ /\$[&\`\']/;
     $skip = ($skip_amp ? ($result =~ s/B//i) : ($result =~ s/B//));
     # Certain tests don't work with utf8 (the re_test should be in UTF8)
-    $skip = 1, $reason = 'utf8'
-      if ($^H &= ~0x00000008) && $pat =~ /\[:\^(alnum|print|word|ascii|xdigit):\]/;
+#    $skip = 1, $reason = 'utf8'
+#      if ($^H &= ~0x00000008) && $pat =~ /\[:\^(alnum|print|word|ascii|xdigit):\]/;
     $result =~ s/B//i unless $skip;
     for $study ('', 'study \$subject') {
  	$c = $iters;
