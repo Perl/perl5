@@ -86,7 +86,7 @@ BEGIN {
     $::HaveUtil = ($@ eq "");
 };
 
-my $Version = "1.25";
+my $Version = "1.26";
 
 # Changed in 1.06 to skip Mail::Send and Mail::Util if not available.
 # Changed in 1.07 to see more sendmail execs, and added pipe output.
@@ -116,6 +116,7 @@ my $Version = "1.25";
 # Changed in 1.23 Restore -ok(ay): say 'success'; don't prompt
 # Changed in 1.24 Added '-F<file>' to save report HVDS 98-07-01
 # Changed in 1.25 Warn on failure to open save file. HVDS 98-07-12
+# Changed in 1.26 Don't require -t STDIN for -ok. HVDS 98-07-15
 
 # TODO: - Allow the user to re-name the file on mail failure, and
 #       make sure failure (transmission-wise) of Mail::Send is
@@ -132,7 +133,7 @@ Init();
 
 if ($::opt_h) { Help(); exit; }
 if ($::opt_d) { Dump(*STDOUT); exit; }
-if (!-t STDIN) {
+if (!-t STDIN && !($ok and not $::opt_n)) {
     paraprint <<EOF;
 Please use perlbug interactively. If you want to
 include a file, you can use the -f switch.
