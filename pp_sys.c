@@ -1476,6 +1476,10 @@ PP(pp_sysread)
 	if (bufsize >= 256)
 	    bufsize = 255;
 #endif
+#ifdef OS2	/* At least Warp3+IAK: only the first byte of bufsize set */
+	if (bufsize >= 256)
+	    bufsize = 255;
+#endif
 	buffer = SvGROW(bufsv, length+1);
 	/* 'offset' means 'flags' here */
 	length = PerlSock_recvfrom(PerlIO_fileno(IoIFP(io)), buffer, length, offset,

@@ -2308,7 +2308,8 @@ PP(pp_ucfirst)
 	    s = (U8*)SvPV_force(sv, slen);
 	    Copy(tmpbuf, s, ulen, U8);
 	}
-    } else {
+    }
+    else {
 	if (!SvPADTMP(sv)) {
 	    dTARGET;
 	    sv_setsv(TARG, sv);
@@ -2364,7 +2365,8 @@ PP(pp_lcfirst)
 	    s = (U8*)SvPV_force(sv, slen);
 	    Copy(tmpbuf, s, ulen, U8);
 	}
-    } else {
+    }
+    else {
 	if (!SvPADTMP(sv)) {
 	    dTARGET;
 	    sv_setsv(TARG, sv);
@@ -2405,7 +2407,8 @@ PP(pp_uc)
 	if (!len) {
 	    sv_setpvn(TARG, "", 0);
 	    SETs(TARG);
-	} else {
+	}
+	else {
 	    (void)SvUPGRADE(TARG, SVt_PV);
 	    SvGROW(TARG, (len * 2) + 1);
 	    (void)SvPOK_only(TARG);
@@ -2429,7 +2432,8 @@ PP(pp_uc)
 	    SvCUR_set(TARG, d - (U8*)SvPVX(TARG));
 	    SETs(TARG);
 	}
-    } else {
+    }
+    else {
 	if (!SvPADTMP(sv)) {
 	    dTARGET;
 	    sv_setsv(TARG, sv);
@@ -2474,7 +2478,8 @@ PP(pp_lc)
 	if (!len) {
 	    sv_setpvn(TARG, "", 0);
 	    SETs(TARG);
-	} else {
+	}
+	else {
 	    (void)SvUPGRADE(TARG, SVt_PV);
 	    SvGROW(TARG, (len * 2) + 1);
 	    (void)SvPOK_only(TARG);
@@ -2498,7 +2503,8 @@ PP(pp_lc)
 	    SvCUR_set(TARG, d - (U8*)SvPVX(TARG));
 	    SETs(TARG);
 	}
-    } else {
+    }
+    else {
 	if (!SvPADTMP(sv)) {
 	    dTARGET;
 	    sv_setsv(TARG, sv);
