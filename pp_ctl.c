@@ -357,6 +357,7 @@ PP(pp_formline)
     STRLEN fudge = SvCUR(tmpForm) * (IN_BYTES ? 1 : 3) + 1;
     bool item_is_utf8 = FALSE;
     bool targ_is_utf8 = FALSE;
+    SV * nsv = Nullsv;
 
     if (!SvMAGICAL(tmpForm) || !SvCOMPILED(tmpForm)) {
 	if (SvREADONLY(tmpForm)) {
@@ -417,15 +418,10 @@ PP(pp_formline)
 	case FF_LITERAL:
 	    arg = *fpc++;
 	    if (targ_is_utf8 && !SvUTF8(tmpForm)) {
-		while (arg--) {
-		    if (!NATIVE_IS_INVARIANT(*f)) {
-			U8 ch = NATIVE_TO_ASCII(*f++);
-			*t++ = (U8)UTF8_EIGHT_BIT_HI(ch);
-			*t++ = (U8)UTF8_EIGHT_BIT_LO(ch);
-		    }
-		    else 
-			*t++ = *f++;
-		}
+		SvCUR_set(PL_formtarget, t - SvPVX(PL_formtarget));
+		*t = '\0';
+		sv_catpvn_utf8_upgrade(PL_formtarget, f, arg, nsv);
+		t = SvEND(PL_formtarget);
 		break;
 	    }
 	    if (!targ_is_utf8 && DO_UTF8(tmpForm)) {
@@ -632,6 +628,21 @@ PP(pp_formline)
 			if ( !((*t++ = *s++) & ~31) )
 			    t[-1] = ' ';
 		    }
+		}
+		break;
+	    }
+	    if (targ_is_utf8 && !item_is_utf8) {
+		SvCUR_set(PL_formtarget, t - SvPVX(PL_formtarget));
+		*t = '\0';
+		sv_catpvn_utf8_upgrade(PL_formtarget, s, arg, nsv);
+		for (; t < SvEND(PL_formtarget); t++) {
+#ifdef EBCDIC
+		    int ch = *t++ = *s++;
+		    if (iscntrl(ch))
+#else
+		    if (!(*t & ~31))
+#endif
+			*t = ' ';
 		}
 		break;
 	    }

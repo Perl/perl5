@@ -2722,6 +2722,7 @@ t/uni/tr_eucjp.t		See if Unicode tr/// works
 t/uni/tr_sjis.t			See if Unicode tr/// works
 t/uni/tr_utf8.t			See if Unicode tr/// works
 t/uni/upper.t			See if Unicode casing works
+t/uni/write.t			See if Unicode formats work
 t/win32/longpath.t		Test if Win32::GetLongPathName() works
 t/win32/system.t		See if system works in Win*
 t/win32/system_tests		Test runner for system.t
