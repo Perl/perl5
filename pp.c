@@ -5873,7 +5873,8 @@ PP(pp_split)
 	    s = m;
 	}
     }
-    else if ((rx->reganch & RE_USE_INTUIT) && !rx->nparens
+    else if (do_utf8 == ((rx->reganch & ROPT_UTF8) != 0) &&
+	     (rx->reganch & RE_USE_INTUIT) && !rx->nparens
 	     && (rx->reganch & ROPT_CHECK_ALL)
 	     && !(rx->reganch & ROPT_ANCH)) {
 	int tail = (rx->reganch & RE_INTUIT_TAIL);
