@@ -1710,12 +1710,17 @@ STRLEN *lp;
 #endif
     }
     else if (SvIOKp(sv)) {
+	U32 oldIOK = SvIOK(sv);
 	if (SvTYPE(sv) < SVt_PVIV)
 	    sv_upgrade(sv, SVt_PVIV);
 	olderrno = errno;	/* some Xenix systems wipe out errno here */
 	sv_setpvf(sv, "%Vd", SvIVX(sv));
 	errno = olderrno;
 	s = SvEND(sv);
+	if (oldIOK)
+	    SvIOK_on(sv);
+	else
+	    SvIOKp_on(sv);
     }
     else {
 	if (dowarn && !localizing && !(SvFLAGS(sv) & SVs_PADTMP))
