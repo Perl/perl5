@@ -2330,12 +2330,9 @@ CPerlHost::Getenv(const char *varname)
     if (w32_pseudo_id) {
 	char *pEnv = Find(varname);
 	if (pEnv && !*pEnv)
-	    pEnv = Nullch;
-	return pEnv;
+	    return pEnv;
     }
-    else {
-	return win32_getenv(varname);
-    }
+    return win32_getenv(varname);
 }
 
 int
