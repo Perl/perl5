@@ -35,7 +35,7 @@ my $has_perlio = !eval {
 
 my $tmpfile = 'Op_read.tmp';
 
-1 while unlink $tmpfile;
+END { 1 while unlink $tmpfile }
 
 my (@values, @buffers) = ('', '');
 
@@ -90,6 +90,7 @@ foreach my $value (@values) {
 		    $got = read (FH, $buffer, $length, $offset);
 		    is ($got, length $will_read, "got $what");
 		    is ($buffer, $expect, "buffer $what");
+		    close FH;
 		}
 	    }
 	}
