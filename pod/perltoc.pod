@@ -5560,6 +5560,44 @@ base, open, threads, utf8
 
 =back
 
+=head2 perl585delta, perldelta - what is new for perl v5.8.5
+
+=over 4
+
+=item DESCRIPTION
+
+=item Incompatible Changes
+
+=item Core Enhancements
+
+=item Modules and Pragmata
+
+=item Utility Changes
+
+=item New Documentation
+
+=item Performance Enhancements
+
+=item Installation and Configuration Improvements
+
+=item Selected Bug Fixes
+
+=item New or Changed Diagnostics
+
+=item Changed Internals
+
+=item New Tests
+
+=item Known Problems
+
+=item Platform Specific Problems
+
+=item Reporting Bugs
+
+=item SEE ALSO
+
+=back
+
 =head2 perl584delta, perldelta - what is new for perl v5.8.4
 
 =over 4
