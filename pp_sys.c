@@ -5430,12 +5430,22 @@ PP(pp_ggrent)
 	PUSHs(sv = sv_mortalcopy(&PL_sv_no));
 	sv_setiv(sv, (IV)grent->gr_gid);
 
+#if !(defined(_CRAYMPP) && defined(USE_REENTRANT_API)
 	PUSHs(sv = sv_mortalcopy(&PL_sv_no));
+	/* In UNICOS/mk (_CRAYMPP) the multithreading
+	 * versions (getgrnam_r, getgrgid_r)
+	 * seem to return an illegal pointer
+	 * as the group members list, gr_mem.
+	 * getgrent() doesn't even have a _r version
+	 * but the gr_mem is poisonous anyway.
+	 * So yes, you cannot get the list of group
+	 * members if building multithreaded in UNICOS/mk. */
 	for (elem = grent->gr_mem; elem && *elem; elem++) {
 	    sv_catpv(sv, *elem);
 	    if (elem[1])
 		sv_catpvn(sv, " ", 1);
 	}
+#endif
     }
 
     RETURN;

@@ -2688,12 +2688,16 @@ threads are considered fundamentally broken.
 
 =head2 UNICOS and UNICOS/mk
 
-The io/fs test #31 is failing because in UNICOS and UNICOS/mk
-truncate() cannot be used to grow the size of filehandles, only
-to reduce the size.  The workaround is to truncate files instead
-of filehandles.
+The io/fs test #31 is failing because in UNICOS and UNICOS/mk the Perl
+truncate() cannot be used to grow the size of filehandles, only to
+reduce the size.  The workaround is to truncate files instead of
+filehandles.
 
 =head2 UNICOS/mk
+
+=over 4
+
+=item *
 
 During Configure the test
 
@@ -2717,6 +2721,16 @@ convert C headers to Perl libraries, mainly used to be able to access
 from Perl the constants defined using C preprocessor, cpp.  Because of
 the above error parts of the converted headers will be invisible.
 Luckily, these days the need for h2ph is rare.
+
+=item *
+
+If building Perl with the interpreter threads (ithreads), the
+getgrent(), getgrnam(), and getgrgid() functions cannot return the
+list of the group members due to a bug in the multithreaded support of
+UNICOS/mk.  What this means that in list context the functions will
+return only three values, not four.
+
+=back
 
 =head2 UTS
 
