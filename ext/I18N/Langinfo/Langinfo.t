@@ -24,7 +24,6 @@ my %want =
      ABMON_1	=> "Jan",
      MON_1	=> "January",
      RADIXCHAR	=> ".",
-     YESSTR     => qr{^y(?:es)?$}i,
      AM_STR	=> qr{^(?:am|a\.m\.)$}i,
      THOUSEP	=> "",
      D_T_FMT	=> qr{^%a %b %[de] %H:%M:%S %Y$},
