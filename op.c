@@ -1424,8 +1424,12 @@ register OP *o;
 	    if (curop->op_type == OP_PADSV || curop->op_type == OP_RV2SV) {
 		if (vars++)
 		    return o;
-		if (o->op_type >= OP_LT && o->op_type <= OP_NCMP)
-		    continue;	/* allow $i < 10000 to integerize */
+		if ((o->op_type == OP_LT && curop == ((BINOP*)o)->op_first) ||
+		    (o->op_type == OP_GT && curop == ((BINOP*)o)->op_last))
+		{
+		    /* Allow "$i < 100" and "100 > $i" to integerize */
+		    continue;
+		}
 	    }
 	    return o;
 	}
