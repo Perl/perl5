@@ -161,6 +161,8 @@ extern void	PerlIO_pop		(PerlIO *f);
 
 /* --------------------- Now prototypes for functions --------------- */
 
+START_EXTERN_C
+
 #ifndef NEXT30_NO_ATTRIBUTE
 #ifndef HASATTRIBUTE       /* disable GNU-cc attribute checking? */
 #ifdef  __attribute__      /* Avoid possible redefinition errors */
@@ -316,6 +318,10 @@ extern int	PerlIO_apply_layers	(pTHX_ PerlIO *f, const char *mode, const char *n
 extern int	PerlIO_binmode		(pTHX_ PerlIO *f, int iotype, int omode, const char *names);
 #endif
 
+extern void PerlIO_cleanup(void);
+
 extern void PerlIO_debug(const char *fmt,...);
+
+END_EXTERN_C
 
 #endif /* _PERLIO_H */

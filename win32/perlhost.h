@@ -522,65 +522,65 @@ struct IPerlEnv perlEnv =
 #define IPERL2HOST(x) IPerlStdIO2Host(x)
 
 /* PerlStdIO */
-PerlIO*
+FILE*
 PerlStdIOStdin(struct IPerlStdIO* piPerl)
 {
-    return (PerlIO*)win32_stdin();
+    return win32_stdin();
 }
 
-PerlIO*
+FILE*
 PerlStdIOStdout(struct IPerlStdIO* piPerl)
 {
-    return (PerlIO*)win32_stdout();
+    return win32_stdout();
 }
 
-PerlIO*
+FILE*
 PerlStdIOStderr(struct IPerlStdIO* piPerl)
 {
-    return (PerlIO*)win32_stderr();
+    return win32_stderr();
 }
 
-PerlIO*
+FILE*
 PerlStdIOOpen(struct IPerlStdIO* piPerl, const char *path, const char *mode)
 {
-    return (PerlIO*)win32_fopen(path, mode);
+    return win32_fopen(path, mode);
 }
 
 int
-PerlStdIOClose(struct IPerlStdIO* piPerl, PerlIO* pf)
+PerlStdIOClose(struct IPerlStdIO* piPerl, FILE* pf)
 {
-    return win32_fclose(((FILE*)pf));
+    return win32_fclose((pf));
 }
 
 int
-PerlStdIOEof(struct IPerlStdIO* piPerl, PerlIO* pf)
+PerlStdIOEof(struct IPerlStdIO* piPerl, FILE* pf)
 {
-    return win32_feof((FILE*)pf);
+    return win32_feof(pf);
 }
 
 int
-PerlStdIOError(struct IPerlStdIO* piPerl, PerlIO* pf)
+PerlStdIOError(struct IPerlStdIO* piPerl, FILE* pf)
 {
-    return win32_ferror((FILE*)pf);
+    return win32_ferror(pf);
 }
 
 void
-PerlStdIOClearerr(struct IPerlStdIO* piPerl, PerlIO* pf)
+PerlStdIOClearerr(struct IPerlStdIO* piPerl, FILE* pf)
 {
-    win32_clearerr((FILE*)pf);
+    win32_clearerr(pf);
 }
 
 int
-PerlStdIOGetc(struct IPerlStdIO* piPerl, PerlIO* pf)
+PerlStdIOGetc(struct IPerlStdIO* piPerl, FILE* pf)
 {
-    return win32_getc((FILE*)pf);
+    return win32_getc(pf);
 }
 
 char*
-PerlStdIOGetBase(struct IPerlStdIO* piPerl, PerlIO* pf)
+PerlStdIOGetBase(struct IPerlStdIO* piPerl, FILE* pf)
 {
 #ifdef FILE_base
-    FILE *f = (FILE*)pf;
+    FILE *f = pf;
     return FILE_base(f);
 #else
     return Nullch;
@@ -588,10 +588,10 @@ PerlStdIOGetBase(struct IPerlStdIO* piPerl, PerlIO* pf)
 }
 
 int
-PerlStdIOGetBufsiz(struct IPerlStdIO* piPerl, PerlIO* pf)
+PerlStdIOGetBufsiz(struct IPerlStdIO* piPerl, FILE* pf)
 {
 #ifdef FILE_bufsiz
-    FILE *f = (FILE*)pf;
+    FILE *f = pf;
     return FILE_bufsiz(f);
 #else
     return (-1);
@@ -599,10 +599,10 @@ PerlStdIOGetBufsiz(struct IPerlStdIO* piPerl, PerlIO* pf)
 }
 
 int
-PerlStdIOGetCnt(struct IPerlStdIO* piPerl, PerlIO* pf)
+PerlStdIOGetCnt(struct IPerlStdIO* piPerl, FILE* pf)
 {
 #ifdef USE_STDIO_PTR
-    FILE *f = (FILE*)pf;
+    FILE *f = pf;
     return FILE_cnt(f);
 #else
     return (-1);
@@ -610,10 +610,10 @@ PerlStdIOGetCnt(struct IPerlStdIO* piPerl, PerlIO* pf)
 }
 
 char*
-PerlStdIOGetPtr(struct IPerlStdIO* piPerl, PerlIO* pf)
+PerlStdIOGetPtr(struct IPerlStdIO* piPerl, FILE* pf)
 {
 #ifdef USE_STDIO_PTR
-    FILE *f = (FILE*)pf;
+    FILE *f = pf;
     return FILE_ptr(f);
 #else
     return Nullch;
@@ -621,150 +621,149 @@ PerlStdIOGetPtr(struct IPerlStdIO* piPerl, PerlIO* pf)
 }
 
 char*
-PerlStdIOGets(struct IPerlStdIO* piPerl, PerlIO* pf, char* s, int n)
+PerlStdIOGets(struct IPerlStdIO* piPerl, FILE* pf, char* s, int n)
 {
-    return win32_fgets(s, n, (FILE*)pf);
+    return win32_fgets(s, n, pf);
 }
 
 int
-PerlStdIOPutc(struct IPerlStdIO* piPerl, PerlIO* pf, int c)
+PerlStdIOPutc(struct IPerlStdIO* piPerl, FILE* pf, int c)
 {
-    return win32_fputc(c, (FILE*)pf);
+    return win32_fputc(c, pf);
 }
 
 int
-PerlStdIOPuts(struct IPerlStdIO* piPerl, PerlIO* pf, const char *s)
+PerlStdIOPuts(struct IPerlStdIO* piPerl, FILE* pf, const char *s)
 {
-    return win32_fputs(s, (FILE*)pf);
+    return win32_fputs(s, pf);
 }
 
 int
-PerlStdIOFlush(struct IPerlStdIO* piPerl, PerlIO* pf)
+PerlStdIOFlush(struct IPerlStdIO* piPerl, FILE* pf)
 {
-    return win32_fflush((FILE*)pf);
+    return win32_fflush(pf);
 }
 
 int
-PerlStdIOUngetc(struct IPerlStdIO* piPerl, PerlIO* pf,int c)
+PerlStdIOUngetc(struct IPerlStdIO* piPerl,int c, FILE* pf)
 {
-    return win32_ungetc(c, (FILE*)pf);
+    return win32_ungetc(c, pf);
 }
 
 int
-PerlStdIOFileno(struct IPerlStdIO* piPerl, PerlIO* pf)
+PerlStdIOFileno(struct IPerlStdIO* piPerl, FILE* pf)
 {
-    return win32_fileno((FILE*)pf);
+    return win32_fileno(pf);
 }
 
-PerlIO*
+FILE*
 PerlStdIOFdopen(struct IPerlStdIO* piPerl, int fd, const char *mode)
 {
-    return (PerlIO*)win32_fdopen(fd, mode);
+    return win32_fdopen(fd, mode);
 }
 
-PerlIO*
-PerlStdIOReopen(struct IPerlStdIO* piPerl, const char*path, const char*mode, PerlIO* pf)
+FILE*
+PerlStdIOReopen(struct IPerlStdIO* piPerl, const char*path, const char*mode, FILE* pf)
 {
-    return (PerlIO*)win32_freopen(path, mode, (FILE*)pf);
-}
-
-SSize_t
-PerlStdIORead(struct IPerlStdIO* piPerl, PerlIO* pf, void *buffer, Size_t size)
-{
-    return win32_fread(buffer, 1, size, (FILE*)pf);
+    return win32_freopen(path, mode, (FILE*)pf);
 }
 
 SSize_t
-PerlStdIOWrite(struct IPerlStdIO* piPerl, PerlIO* pf, const void *buffer, Size_t size)
+PerlStdIORead(struct IPerlStdIO* piPerl, void *buffer, Size_t size, Size_t count, FILE* pf)
 {
-    return win32_fwrite(buffer, 1, size, (FILE*)pf);
+    return win32_fread(buffer, size, count, pf);
+}
+
+SSize_t
+PerlStdIOWrite(struct IPerlStdIO* piPerl, const void *buffer, Size_t size, Size_t count, FILE* pf)
+{
+    return win32_fwrite(buffer, size, count, pf);
 }
 
 void
-PerlStdIOSetBuf(struct IPerlStdIO* piPerl, PerlIO* pf, char* buffer)
+PerlStdIOSetBuf(struct IPerlStdIO* piPerl, FILE* pf, char* buffer)
 {
-    win32_setbuf((FILE*)pf, buffer);
+    win32_setbuf(pf, buffer);
 }
 
 int
-PerlStdIOSetVBuf(struct IPerlStdIO* piPerl, PerlIO* pf, char* buffer, int type, Size_t size)
+PerlStdIOSetVBuf(struct IPerlStdIO* piPerl, FILE* pf, char* buffer, int type, Size_t size)
 {
-    return win32_setvbuf((FILE*)pf, buffer, type, size);
+    return win32_setvbuf(pf, buffer, type, size);
 }
 
 void
-PerlStdIOSetCnt(struct IPerlStdIO* piPerl, PerlIO* pf, int n)
+PerlStdIOSetCnt(struct IPerlStdIO* piPerl, FILE* pf, int n)
 {
 #ifdef STDIO_CNT_LVALUE
-    FILE *f = (FILE*)pf;
+    FILE *f = pf;
     FILE_cnt(f) = n;
 #endif
 }
 
 void
-PerlStdIOSetPtrCnt(struct IPerlStdIO* piPerl, PerlIO* pf, char * ptr, int n)
+PerlStdIOSetPtr(struct IPerlStdIO* piPerl, FILE* pf, char * ptr)
 {
 #ifdef STDIO_PTR_LVALUE
-    FILE *f = (FILE*)pf;
+    FILE *f = pf;
     FILE_ptr(f) = ptr;
-    FILE_cnt(f) = n;
 #endif
 }
 
 void
-PerlStdIOSetlinebuf(struct IPerlStdIO* piPerl, PerlIO* pf)
+PerlStdIOSetlinebuf(struct IPerlStdIO* piPerl, FILE* pf)
 {
-    win32_setvbuf((FILE*)pf, NULL, _IOLBF, 0);
+    win32_setvbuf(pf, NULL, _IOLBF, 0);
 }
 
 int
-PerlStdIOPrintf(struct IPerlStdIO* piPerl, PerlIO* pf, const char *format,...)
+PerlStdIOPrintf(struct IPerlStdIO* piPerl, FILE* pf, const char *format,...)
 {
     va_list(arglist);
     va_start(arglist, format);
-    return win32_vfprintf((FILE*)pf, format, arglist);
+    return win32_vfprintf(pf, format, arglist);
 }
 
 int
-PerlStdIOVprintf(struct IPerlStdIO* piPerl, PerlIO* pf, const char *format, va_list arglist)
+PerlStdIOVprintf(struct IPerlStdIO* piPerl, FILE* pf, const char *format, va_list arglist)
 {
-    return win32_vfprintf((FILE*)pf, format, arglist);
+    return win32_vfprintf(pf, format, arglist);
 }
 
 long
-PerlStdIOTell(struct IPerlStdIO* piPerl, PerlIO* pf)
+PerlStdIOTell(struct IPerlStdIO* piPerl, FILE* pf)
 {
-    return win32_ftell((FILE*)pf);
+    return win32_ftell(pf);
 }
 
 int
-PerlStdIOSeek(struct IPerlStdIO* piPerl, PerlIO* pf, off_t offset, int origin)
+PerlStdIOSeek(struct IPerlStdIO* piPerl, FILE* pf, off_t offset, int origin)
 {
-    return win32_fseek((FILE*)pf, offset, origin);
+    return win32_fseek(pf, offset, origin);
 }
 
 void
-PerlStdIORewind(struct IPerlStdIO* piPerl, PerlIO* pf)
+PerlStdIORewind(struct IPerlStdIO* piPerl, FILE* pf)
 {
-    win32_rewind((FILE*)pf);
+    win32_rewind(pf);
 }
 
-PerlIO*
+FILE*
 PerlStdIOTmpfile(struct IPerlStdIO* piPerl)
 {
-    return (PerlIO*)win32_tmpfile();
+    return win32_tmpfile();
 }
 
 int
-PerlStdIOGetpos(struct IPerlStdIO* piPerl, PerlIO* pf, Fpos_t *p)
+PerlStdIOGetpos(struct IPerlStdIO* piPerl, FILE* pf, Fpos_t *p)
 {
-    return win32_fgetpos((FILE*)pf, p);
+    return win32_fgetpos(pf, p);
 }
 
 int
-PerlStdIOSetpos(struct IPerlStdIO* piPerl, PerlIO* pf, const Fpos_t *p)
+PerlStdIOSetpos(struct IPerlStdIO* piPerl, FILE* pf, const Fpos_t *p)
 {
-    return win32_fsetpos((FILE*)pf, p);
+    return win32_fsetpos(pf, p);
 }
 void
 PerlStdIOInit(struct IPerlStdIO* piPerl)
@@ -789,39 +788,39 @@ PerlStdIOGetOSfhandle(struct IPerlStdIO* piPerl, int filenum)
     return win32_get_osfhandle(filenum);
 }
 
-PerlIO*
-PerlStdIOFdupopen(struct IPerlStdIO* piPerl, PerlIO* pf)
+FILE*
+PerlStdIOFdupopen(struct IPerlStdIO* piPerl, FILE* pf)
 {
-    PerlIO* pfdup;
+    FILE* pfdup;
     fpos_t pos;
     char mode[3];
-    int fileno = win32_dup(win32_fileno((FILE*)pf));
+    int fileno = win32_dup(win32_fileno(pf));
 
     /* open the file in the same mode */
 #ifdef __BORLANDC__
-    if(((FILE*)pf)->flags & _F_READ) {
+    if((pf)->flags & _F_READ) {
 	mode[0] = 'r';
 	mode[1] = 0;
     }
-    else if(((FILE*)pf)->flags & _F_WRIT) {
+    else if((pf)->flags & _F_WRIT) {
 	mode[0] = 'a';
 	mode[1] = 0;
     }
-    else if(((FILE*)pf)->flags & _F_RDWR) {
+    else if((pf)->flags & _F_RDWR) {
 	mode[0] = 'r';
 	mode[1] = '+';
 	mode[2] = 0;
     }
 #else
-    if(((FILE*)pf)->_flag & _IOREAD) {
+    if((pf)->_flag & _IOREAD) {
 	mode[0] = 'r';
 	mode[1] = 0;
     }
-    else if(((FILE*)pf)->_flag & _IOWRT) {
+    else if((pf)->_flag & _IOWRT) {
 	mode[0] = 'a';
 	mode[1] = 0;
     }
-    else if(((FILE*)pf)->_flag & _IORW) {
+    else if((pf)->_flag & _IORW) {
 	mode[0] = 'r';
 	mode[1] = '+';
 	mode[2] = 0;
@@ -832,11 +831,11 @@ PerlStdIOFdupopen(struct IPerlStdIO* piPerl, PerlIO* pf)
      * file descriptor so binmode files will be handled
      * correctly
      */
-    pfdup = (PerlIO*)win32_fdopen(fileno, mode);
+    pfdup = win32_fdopen(fileno, mode);
 
     /* move the file pointer to the same position */
-    if (!fgetpos((FILE*)pf, &pos)) {
-	fsetpos((FILE*)pfdup, &pos);
+    if (!fgetpos(pf, &pos)) {
+	fsetpos(pfdup, &pos);
     }
     return pfdup;
 }
@@ -869,7 +868,7 @@ struct IPerlStdIO perlStdIO =
     PerlStdIOSetBuf,
     PerlStdIOSetVBuf,
     PerlStdIOSetCnt,
-    PerlStdIOSetPtrCnt,
+    PerlStdIOSetPtr,
     PerlStdIOSetlinebuf,
     PerlStdIOPrintf,
     PerlStdIOVprintf,
@@ -1586,13 +1585,13 @@ PerlProcPopen(struct IPerlProc* piPerl, const char *command, const char *mode)
 {
     dTHXo;
     PERL_FLUSHALL_FOR_CHILD;
-    return (PerlIO*)win32_popen(command, mode);
+    return win32_popen(command, mode);
 }
 
 int
 PerlProcPclose(struct IPerlProc* piPerl, PerlIO *stream)
 {
-    return win32_pclose((FILE*)stream);
+    return win32_pclose(stream);
 }
 
 int
