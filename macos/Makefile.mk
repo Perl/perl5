@@ -216,6 +216,8 @@ h = $(h1) $(h2) $(h3) $(h4)
 c1 = $(mallocsrc) av.c scope.c op.c doop.c doio.c dump.c hv.c mg.c perlapi.c
 c2 = perl.c perly.c pp.c pp_hot.c pp_ctl.c pp_sys.c regcomp.c regexec.c xsutils.c
 c3 = gv.c sv.c taint.c toke.c util.c deb.c run.c globals.c perlio.c utf8.c universal.c
+# for 5.7/8:
+# numeric.c locale.c pp_pack.c
 cm = SubLaunch.c crypt.c
 mf = DirectoryCopy.c FileCopy.c FSpCompat.c FullPath.c IterateDirectory.c MoreDesktopMgr.c \
 	MoreFiles.c MoreFilesExtras.c Search.c
