@@ -2040,11 +2040,13 @@ Returns the socket option requested, or undef if there is an error.
 
 =item glob
 
-Returns the value of EXPR with filename expansions such as the
-standard Unix shell F</bin/csh> would do.  This is the internal function
-implementing the C<< <*.c> >> operator, but you can use it directly.
-If EXPR is omitted, C<$_> is used.  The C<< <*.c> >> operator is
-discussed in more detail in L<perlop/"I/O Operators">.
+In list context, returns a (possibly empty) list of filename expansions on
+the value of EXPR such as the standard Unix shell F</bin/csh> would do. In
+scalar context, glob iterates through such filename expansions, returning
+undef when the list is exhausted. This is the internal function
+implementing the C<< <*.c> >> operator, but you can use it directly. If
+EXPR is omitted, C<$_> is used.  The C<< <*.c> >> operator is discussed in
+more detail in L<perlop/"I/O Operators">.
 
 Beginning with v5.6.0, this operator is implemented using the standard
 C<File::Glob> extension.  See L<File::Glob> for details.
