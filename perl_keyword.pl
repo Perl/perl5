@@ -1,7 +1,7 @@
 
 # How to generate the logic of the lookup table Perl_keyword() in toke.c
 
-use Devel::Tokenizer::C 0.04;
+use Devel::Tokenizer::C 0.05;
 use strict;
 use warnings;
 
