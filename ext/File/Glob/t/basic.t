@@ -110,6 +110,7 @@ print "ok 7\n";
 # Working on t/TEST often causes this test to fail because it sees Emacs temp
 # and RCS files.  Filter them out, and .pm files too, and patch temp files.
 @a = grep !/(,v$|~$|\.(pm|ori?g|rej)$)/, @a;
+@a = (grep !/test.pl/, @a) if $^O eq 'VMS';
 
 print "# @a\n";
 
@@ -118,7 +119,7 @@ unless (@a == 3
         and $a[1] eq 'a'
         and $a[2] eq 'b')
 {
-    print "not ok 8 # @a";
+    print "not ok 8 # @a\n";
 } else {
     print "ok 8\n";
 }
