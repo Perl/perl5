@@ -1928,7 +1928,7 @@ int yylex(PERL_YYLEX_PARAM_DECL)
 	    PL_last_uni = 0;
 	    PL_last_lop = 0;
 	    if (PL_lex_brackets)
-		yyerror("Missing right bracket");
+		yyerror("Missing right curly or square bracket");
 	    TOKEN(0);
 	}
 	if (s++ < PL_bufend)
@@ -2372,7 +2372,7 @@ int yylex(PERL_YYLEX_PARAM_DECL)
     case ']':
 	s++;
 	if (PL_lex_brackets <= 0)
-	    yyerror("Unmatched right bracket");
+	    yyerror("Unmatched right square bracket");
 	else
 	    --PL_lex_brackets;
 	if (PL_lex_state == LEX_INTERPNORMAL) {
@@ -2529,7 +2529,7 @@ int yylex(PERL_YYLEX_PARAM_DECL)
       rightbracket:
 	s++;
 	if (PL_lex_brackets <= 0)
-	    yyerror("Unmatched right bracket");
+	    yyerror("Unmatched right curly bracket");
 	else
 	    PL_expect = (expectation)PL_lex_brackstack[--PL_lex_brackets];
 	if (PL_lex_brackets < PL_lex_formbrack)

@@ -336,11 +336,11 @@ other references.
 
 =item *
 
-In B<USE RULE 1>, you can omit the curly braces whenever the thing
+In B<USE RULE 1>, you can omit the curly brackets whenever the thing
 inside them is an atomic scalar variable like C<$aref>.  For example,
 C<@$aref> is the same as C<@{$aref}>, and C<$$aref[1]> is the same as
 C<${$aref}[1]>.  If you're just starting out, you may want to adopt
-the habit of always including the curly braces.
+the habit of always including the curly brackets.
 
 =item * 
 
