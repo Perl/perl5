@@ -2792,8 +2792,8 @@ sed <<!GROK!THIS! >config.h -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un-
  *	This symbol contains the ~name expanded version of SITEARCH, to be used
  *	in programs that are not prepared to deal with ~ expansion at run-time.
  */
-#define SITEARCH "$sitearch"		/**/
-#define SITEARCH_EXP "$sitearchexp"		/**/
+#$d_sitearch SITEARCH "$sitearch"		/**/
+#$d_sitearch SITEARCH_EXP "$sitearchexp"		/**/
 
 /* SITELIB:
  *	This symbol contains the name of the private library for this package.

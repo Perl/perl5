@@ -1612,7 +1612,7 @@
  *     Usually the <inttypes.h> needs to be included, but sometimes
  *	<sys/types.h> is enough.
  */
-#     HAS_INT64_T               /**/
+/*#define     HAS_INT64_T               /**/
 
 /* HAS_ISASCII:
  *	This manifest constant lets the C program know that isascii 
@@ -1678,21 +1678,21 @@
  *	This symbol, if defined, indicates that the mkdtemp routine is
  *	available to exclusively create a uniquely named temporary directory.
  */
-# HAS_MKDTEMP		/**/
+/*#define HAS_MKDTEMP		/**/
 
 /* HAS_MKSTEMP:
  *	This symbol, if defined, indicates that the mkstemp routine is
  *	available to exclusively create and open a uniquely named
  *	temporary file.
  */
-# HAS_MKSTEMP		/**/
+/*#define HAS_MKSTEMP		/**/
 
 /* HAS_MKSTEMPS:
  *	This symbol, if defined, indicates that the mkstemps routine is
  *	available to excluslvely create and open a uniquely named
  *	(with a suffix) temporary file.
  */
-# HAS_MKSTEMPS		/**/
+/*#define HAS_MKSTEMPS		/**/
 
 /* HAS_MMAP:
  *	This symbol, if defined, indicates that the mmap system call is
@@ -2366,13 +2366,13 @@
  *	This symbol, if defined, indicates that <syslog.h> exists and
  *	should be included.
  */
-#	I_SYSLOG		/**/
+/*#define	I_SYSLOG		/**/
 
 /* I_SYSMODE:
  *	This symbol, if defined, indicates that <sys/mode.h> exists and
  *	should be included.
  */
-#	I_SYSMODE		/**/
+/*#define	I_SYSMODE		/**/
 
 /* I_SYS_MOUNT:
  *	This symbol, if defined, indicates that <sys/mount.h> exists and
@@ -2401,7 +2401,7 @@
  *	This symbol, if defined, indicates that <sys/utsname.h> exists and
  *	should be included.
  */
-#	I_SYSUTSNAME		/**/
+#define	I_SYSUTSNAME		/**/
 
 /* I_SYS_VFS:
  *	This symbol, if defined, indicates that <sys/vfs.h> exists and
@@ -2438,7 +2438,7 @@
  *	for a C initialization string.  See the inc_version_list entry
  *	in Porting/Glossary for more details.
  */
-#define PERL_INC_VERSION_LIST 		/**/
+#define PERL_INC_VERSION_LIST 0		/**/
 
 /* INSTALL_USR_BIN_PERL:
  *	This symbol, if defined, indicates that Perl is to be installed
@@ -2774,8 +2774,8 @@
  *	This symbol contains the ~name expanded version of SITEARCH, to be used
  *	in programs that are not prepared to deal with ~ expansion at run-time.
  */
-#define SITEARCH ""		/**/
-#define SITEARCH_EXP ""		/**/
+/*#define SITEARCH ""		/**/
+/*#define SITEARCH_EXP ""		/**/
 
 /* SITELIB:
  *	This symbol contains the name of the private library for this package.
@@ -2942,7 +2942,7 @@
  *	be built to use the old draft POSIX threads API.
  */
 /*#define	USE_5005THREADS		/**/
-#	USE_ITHREADS		/**/
+/*#define	USE_ITHREADS		/**/
 #if defined(USE_5005THREADS) && !defined(USE_ITHREADS)
 #define		USE_THREADS		/* until src is revised*/
 #endif
@@ -2952,7 +2952,7 @@
  *	This symbol contains the ~name expanded version of PERL_VENDORARCH, to be used
  *	in programs that are not prepared to deal with ~ expansion at run-time.
  */
-# PERL_VENDORARCH_EXP ""		/**/
+#define PERL_VENDORARCH_EXP ""		/**/
 
 /* PERL_VENDORLIB_EXP:
  *	This symbol contains the ~name expanded version of VENDORLIB, to be used
