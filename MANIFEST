@@ -85,7 +85,6 @@ doio.c			I/O operations
 doop.c			Support code for various operations
 dosish.h		Some defines for MS/DOSish machines
 dump.c			Debugging output
-ebcdic.c		EBCDIC support routines
 eg/ADB			An adb wrapper to put in your crash dir
 eg/README		Intro to example perl scripts
 eg/cgi/RunMeFirst		Setup script for CGI examples
@@ -620,13 +619,13 @@ lib/File/DosGlob.pm	Win32 DOS-globbing module
 lib/File/Find.pm	Routines to do a find
 lib/File/Path.pm	Do things like `mkdir -p' and `rm -r'
 lib/File/Spec.pm	portable operations on file names
+lib/File/Spec/Epoc.pm	portable operations on EPOC file names
 lib/File/Spec/Functions.pm	Function interface to File::Spec object methods
 lib/File/Spec/Mac.pm	portable operations on Mac file names
 lib/File/Spec/OS2.pm	portable operations on OS2 file names
 lib/File/Spec/Unix.pm	portable operations on Unix file names
 lib/File/Spec/VMS.pm	portable operations on VMS file names
 lib/File/Spec/Win32.pm	portable operations on Win32 file names
-lib/File/Spec/Epoc.pm	portable operations on EPOC file names
 lib/File/Temp.pm	create safe temporary files and file handles
 lib/File/stat.pm	By-name interface to Perl's builtin stat
 lib/FileCache.pm	Keep more files open than the system permits
@@ -1648,8 +1647,8 @@ vos/Changes		Changes made to port Perl to the VOS operating system
 vos/build.cm		VOS command macro to build Perl
 vos/compile_perl.cm	VOS command macro to build multiple version of Perl
 vos/config.alpha.def	definitions used by config.pl
-vos/config.ga.def	definitions used by config.pl
 vos/config.alpha.h	config.h for use with alpha VOS POSIX.1 support
+vos/config.ga.def	definitions used by config.pl
 vos/config.ga.h		config.h for use with generally-available VOS POSIX.1 support
 vos/config.pl		script to convert a config_h.SH to a config.h
 vos/configure_perl.cm	VOS command macro to configure perl before building

@@ -444,7 +444,7 @@ S_incline(pTHX_ char *s)
 	s += 4;
     else
 	return;
-    if (*s == ' ' || *s == '\t')
+    if (SPACE_OR_TAB(*s))
 	s++;
     else
 	return;
@@ -2072,9 +2072,6 @@ S_find_in_my_stash(pTHX_ char *pkgname, I32 len)
 */
 
 #ifdef USE_PURE_BISON
-#ifdef __SC__
-#pragma segment Perl_yylex_r
-#endif
 int
 Perl_yylex_r(pTHX_ YYSTYPE *lvalp, int *lcharp)
 {
@@ -7418,6 +7415,9 @@ Perl_start_subparse(pTHX_ I32 is_format, U32 flags)
     return oldsavestack_ix;
 }
 
+#ifdef __SC__
+#pragma segment Perl_yylex
+#endif
 int
 Perl_yywarn(pTHX_ char *s)
 {
@@ -7506,6 +7506,9 @@ Perl_yyerror(pTHX_ char *s)
     PL_in_my_stash = Nullhv;
     return 0;
 }
+#ifdef __SC__
+#pragma segment Main
+#endif
 
 STATIC char*
 S_swallow_bom(pTHX_ U8 *s)

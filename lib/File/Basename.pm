@@ -240,7 +240,13 @@ sub dirname {
         if ($_[0] =~ m#/#) { $fstype = '' }
         else { return $dirname || $ENV{DEFAULT} }
     }
-    if ($fstype =~ /MacOS/i) { return $dirname }
+    if ($fstype =~ /MacOS/i) {
+	if( !length($basename) && $dirname !~ /^[^:]+:\z/) {
+	    $dirname =~ s/([^:]):\z/$1/s;
+	    ($basename,$dirname) = fileparse $dirname;
+	}
+	$dirname .= ":" unless $dirname =~ /:\z/;
+    }
     elsif ($fstype =~ /MSDOS/i) { 
         $dirname =~ s/([^:])[\\\/]*\z/$1/;
         unless( length($basename) ) {
@@ -260,7 +266,7 @@ sub dirname {
         chop $dirname;
         $dirname =~ s#[^:/]+\z## unless length($basename);
     }
-    else { 
+    else {
         $dirname =~ s:(.)/*\z:$1:s;
         unless( length($basename) ) {
 	    local($File::Basename::Fileparse_fstype) = $fstype;

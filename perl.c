@@ -2248,7 +2248,7 @@ Perl_moreswitches(pTHX_ char *s)
 		      "\n\nCopyright 1987-2000, Larry Wall\n");
 #ifdef MACOS_TRADITIONAL
 	PerlIO_printf(PerlIO_stdout(),
-		      "\nMacOS port Copyright (c) 1991-2000, Matthias Neeracher\n");
+		      "\nMac OS port Copyright (c) 1991-2001, Matthias Neeracher\n");
 #endif
 #ifdef MSDOS
 	PerlIO_printf(PerlIO_stdout(),
@@ -3024,8 +3024,7 @@ S_find_beginning(pTHX)
 
     forbid_setid("-x");
 #ifdef MACOS_TRADITIONAL
-    /* Since the Mac OS does not honor !# arguments for us, we do it ourselves */
-    
+    /* Since the Mac OS does not honor #! arguments for us, we do it ourselves */
     while (PL_doextract || gMacPerl_AlwaysExtract) {
 	if ((s = sv_gets(PL_linestr, PL_rsfp, 0)) == Nullch) {
 	    if (!gMacPerl_AlwaysExtract)
@@ -3236,6 +3235,8 @@ S_init_postdump_symbols(pTHX_ register int argc, register char **argv, register 
     char *s;
     SV *sv;
     GV* tmpgv;
+    char **dup_env_base = 0;
+    int dup_env_count = 0;
 
     argc--,argv++;	/* skip name of script */
     if (PL_doswitches) {
@@ -3304,6 +3305,23 @@ S_init_postdump_symbols(pTHX_ register int argc, register char **argv, register 
 	    env = environ;
 	if (env != environ)
 	    environ[0] = Nullch;
+#ifdef NEED_ENVIRON_DUP_FOR_MODIFY
+	{
+	    char **env_base;
+	    for (env_base = env; *env; env++) 
+		dup_env_count++;
+	    if ((dup_env_base = (char **)
+		 safemalloc( sizeof(char *) * (dup_env_count+1) ))) {
+		char **dup_env;
+		for (env = env_base, dup_env = dup_env_base;
+		     *env;
+		     env++, dup_env++)
+		    *dup_env = savepv(*env);
+		*dup_env = Nullch;
+		env = dup_env_base;
+	    } /* else what? */
+	}
+#endif /* NEED_ENVIRON_DUP_FOR_MODIFY */
 	for (; *env; env++) {
 	    if (!(s = strchr(*env,'=')))
 		continue;
@@ -3319,7 +3337,13 @@ S_init_postdump_symbols(pTHX_ register int argc, register char **argv, register 
 	    (void)PerlEnv_putenv(savepv(*env));
 #endif
 	}
-#endif
+	if (dup_env_base) {
+	    char **dup_env;
+	    for (dup_env = dup_env_base; *dup_env; dup_env++)
+		Safefree(*dup_env);
+	    Safefree(dup_env_base);
+	}
+#endif /* USE_ENVIRON_ARRAY */
 #ifdef DYNAMIC_ENV_FETCH
 	HvNAME(hv) = savepv(ENV_HV_NAME);
 #endif
@@ -3528,13 +3552,15 @@ S_incpush(pTHX_ char *p, int addsubdirs, int addoldvers)
 	    if (addsubdirs) {
 #ifdef MACOS_TRADITIONAL
 #define PERL_AV_SUFFIX_FMT	""
-#define PERL_ARCH_FMT 		":%s"
+#define PERL_ARCH_FMT 		"%s:"
+#define PERL_ARCH_FMT_PATH	PERL_FS_VER_FMT PERL_AV_SUFFIX_FMT
 #else
 #define PERL_AV_SUFFIX_FMT 	"/"
 #define PERL_ARCH_FMT 		"/%s"
+#define PERL_ARCH_FMT_PATH	PERL_AV_SUFFIX_FMT PERL_FS_VER_FMT
 #endif
 		/* .../version/archname if -d .../version/archname */
-		Perl_sv_setpvf(aTHX_ subdir, "%"SVf PERL_AV_SUFFIX_FMT PERL_FS_VER_FMT PERL_ARCH_FMT, 
+		Perl_sv_setpvf(aTHX_ subdir, "%"SVf PERL_ARCH_FMT_PATH PERL_ARCH_FMT,
 				libdir,
 			       (int)PERL_REVISION, (int)PERL_VERSION,
 			       (int)PERL_SUBVERSION, ARCHNAME);
@@ -3543,7 +3569,7 @@ S_incpush(pTHX_ char *p, int addsubdirs, int addoldvers)
 		    av_push(GvAVn(PL_incgv), newSVsv(subdir));
 
 		/* .../version if -d .../version */
-		Perl_sv_setpvf(aTHX_ subdir, "%"SVf PERL_AV_SUFFIX_FMT PERL_FS_VER_FMT, libdir,
+		Perl_sv_setpvf(aTHX_ subdir, "%"SVf PERL_ARCH_FMT_PATH, libdir,
 			       (int)PERL_REVISION, (int)PERL_VERSION,
 			       (int)PERL_SUBVERSION);
 		if (PerlLIO_stat(SvPVX(subdir), &tmpstatbuf) >= 0 &&

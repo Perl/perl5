@@ -489,7 +489,11 @@ PerlIO_init(void)
 #ifndef HAS_FSETPOS
 #undef PerlIO_setpos
 int
+#ifdef USE_SFIO
+PerlIO_setpos(PerlIO *f, const Off_t *pos)
+#else
 PerlIO_setpos(PerlIO *f, const Fpos_t *pos)
+#endif
 {
  return PerlIO_seek(f,*pos,0); 
 }
@@ -511,11 +515,19 @@ PerlIO_setpos(PerlIO *f, const Fpos_t *pos)
 #ifndef HAS_FGETPOS
 #undef PerlIO_getpos
 int
+#ifdef USE_SFIO
+PerlIO_getpos(PerlIO *f, Off_t *pos)
+{
+ *pos = PerlIO_seek(f,0,0);
+ return 0;
+}
+#else
 PerlIO_getpos(PerlIO *f, Fpos_t *pos)
 {
  *pos = PerlIO_tell(f);
  return 0;
 }
+#endif
 #else
 #ifndef PERLIO_IS_STDIO
 #undef PerlIO_getpos

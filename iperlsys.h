@@ -472,10 +472,18 @@ extern PerlIO *	PerlIO_stdout	(void);
 extern PerlIO *	PerlIO_stderr	(void);
 #endif
 #ifndef PerlIO_getpos
+#ifdef USE_SFIO
+extern int	PerlIO_getpos		(PerlIO *,Off_t *);
+#else
 extern int	PerlIO_getpos		(PerlIO *,Fpos_t *);
 #endif
+#endif
 #ifndef PerlIO_setpos
+#ifdef USE_SFIO
+extern int	PerlIO_setpos		(PerlIO *,const Off_t *);
+#else
 extern int	PerlIO_setpos		(PerlIO *,const Fpos_t *);
+#endif
 #endif
 #ifndef PerlIO_fdupopen
 extern PerlIO *	PerlIO_fdupopen		(PerlIO *);

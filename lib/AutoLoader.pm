@@ -6,6 +6,7 @@ our(@EXPORT, @EXPORT_OK, $VERSION);
 my $is_dosish;
 my $is_epoc;
 my $is_vms;
+my $is_macos;
 
 BEGIN {
     require Exporter;
@@ -14,7 +15,8 @@ BEGIN {
     $is_dosish = $^O eq 'dos' || $^O eq 'os2' || $^O eq 'MSWin32';
     $is_epoc = $^O eq 'epoc';
     $is_vms = $^O eq 'VMS';
-    $VERSION = '5.57';
+    $is_macos = $^O eq 'MacOS';
+    $VERSION = '5.58';
 }
 
 AUTOLOAD {
@@ -38,7 +40,12 @@ AUTOLOAD {
 	my ($pkg,$func) = ($sub =~ /(.*)::([^:]+)$/);
 	$pkg =~ s#::#/#g;
 	if (defined($filename = $INC{"$pkg.pm"})) {
-	    $filename =~ s#^(.*)$pkg\.pm\z#$1auto/$pkg/$func.al#s;
+	    if ($is_macos) {
+		$pkg =~ tr#/#:#;
+		$filename =~ s#^(.*)$pkg\.pm\z#$1auto:$pkg:$func.al#s;
+	    } else {
+		$filename =~ s#^(.*)$pkg\.pm\z#$1auto/$pkg/$func.al#s;
+	    }
 
 	    # if the file exists, then make sure that it is a
 	    # a fully anchored path (i.e either '/usr/lib/auto/foo/bar.al',
@@ -61,7 +68,7 @@ AUTOLOAD {
 			# XXX todo by VMSmiths
 			$filename = "./$filename";
 		    }
-		    else {
+		    elsif (!$is_macos) {
 			$filename = "./$filename";
 		    }
 		}
