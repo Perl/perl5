@@ -167,13 +167,14 @@ sub share_from {
 	my ($var, $type);
 	$type = $1 if ($var = $arg) =~ s/^(\W)//;
 	# warn "share_from $pkg $type $var";
-	*{$root."::$var"} = (!$type)       ? \&{$pkg."::$var"}
+	my $obj_to_share =  (!$type)       ? \&{$pkg."::$var"}
 			  : ($type eq '&') ? \&{$pkg."::$var"}
 			  : ($type eq '$') ? \${$pkg."::$var"}
 			  : ($type eq '@') ? \@{$pkg."::$var"}
 			  : ($type eq '%') ? \%{$pkg."::$var"}
 			  : ($type eq '*') ?  *{$pkg."::$var"}
 			  : croak(qq(Can't share "$type$var" of unknown type));
+	Opcode::_safe_call_sv($root, $obj->{Mask}, sub { *{$var} = $obj_to_share });
     }
     $obj->share_record($pkg, $vars) unless $no_record or !$vars;
 }
@@ -213,11 +214,11 @@ sub reval {
     # Create anon sub ref in root of compartment.
     # Uses a closure (on $expr) to pass in the code to be executed.
     # (eval on one line to keep line numbers as expected by caller)
-	my $evalcode = sprintf('package %s; sub { eval $expr; }', $root);
+    my $evalcode = sprintf('package %s; sub { eval $expr; }', $root);
     my $evalsub;
 
-	if ($strict) { use strict; $evalsub = eval $evalcode; }
-	else         {  no strict; $evalsub = eval $evalcode; }
+    if ($strict) { use strict; $evalsub = eval $evalcode; }
+    else         {  no strict; $evalsub = eval $evalcode; }
 
     return Opcode::_safe_call_sv($root, $obj->{Mask}, $evalsub);
 }
