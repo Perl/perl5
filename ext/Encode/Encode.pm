@@ -728,8 +728,20 @@ For CHECK see L</"Handling Malformed Data">.
 =head2 Other Encodings of Unicode
 
 UTF-16 is similar to UCS-2, 16 bit or 2-byte chunks.  UCS-2 can only
-represent 0..0xFFFF, while UTF-16 has a "surrogate pair" scheme which
+represent 0..0xFFFF, while UTF-16 has a I<surrogate pair> scheme which
 allows it to cover the whole Unicode range.
+
+Surrogates are code points set aside to encode the 0x01000..0x10FFFF
+range of Unicode code points in pairs of 16-bit units.  The I<high
+surrogates> are the range 0xD800..0xDBFF, and the I<low surrogates>
+are the range 0xDC00..0xDFFFF.  The surrogate encoding is
+
+	$hi = ($uni - 0x10000) / 0x400 + 0xD800;
+	$lo = ($uni - 0x10000) % 0x400 + 0xDC00;
+
+and the decoding is
+
+	$uni = 0x10000 + ($hi - 0xD8000) * 0x400 + ($lo - 0xDC00);
 
 Encode implements big-endian UCS-2 aliased to "iso-10646-1" as that
 happens to be the name used by that representation when used with X11
