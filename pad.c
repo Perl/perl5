@@ -537,9 +537,32 @@ Perl_pad_findmy(pTHX_ char *name)
 {
     SV *out_sv;
     int out_flags;
+    I32 offset;
+    AV *nameav;
+    SV **name_svp;
 
-    return pad_findlex(name, PL_compcv, PL_cop_seqmax, 1,
+    offset =  pad_findlex(name, PL_compcv, PL_cop_seqmax, 1,
 		Null(SV**), &out_sv, &out_flags);
+    if (offset != NOT_IN_PAD) 
+	return offset;
+
+    /* look for an our that's being introduced; this allows
+     *    our $foo = 0 unless defined $foo;
+     * to not give a warning. (Yes, this is a hack) */
+
+    nameav = (AV*)AvARRAY(CvPADLIST(PL_compcv))[0];
+    name_svp = AvARRAY(nameav);
+    for (offset = AvFILLp(nameav); offset > 0; offset--) {
+	SV *namesv = name_svp[offset];
+	if (namesv && namesv != &PL_sv_undef
+	    && !SvFAKE(namesv)
+	    && (SvFLAGS(namesv) & SVpad_OUR)
+	    && strEQ(SvPVX(namesv), name)
+	    && (U32)I_32(SvNVX(namesv)) == PAD_MAX /* min */
+	)
+	    return offset;
+    }
+    return NOT_IN_PAD;
 }
 
 

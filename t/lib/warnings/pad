@@ -168,3 +168,9 @@ our $x;
 EXPECT
 "our" variable $x redeclared at - line 4.
 	(Did you mean "local" instead of "our"?)
+########
+# an our var being introduced should suppress errors about global syms
+use strict;
+use warnings;
+our $x unless $x;
+EXPECT
