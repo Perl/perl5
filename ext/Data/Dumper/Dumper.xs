@@ -753,7 +753,7 @@ DD_dump(pTHX_ SV *val, char *name, STRLEN namelen, SV *retval, HV *seenhv,
 		    return 1;
 		}
 	    }
-	    else {
+	    else if (val != &PL_sv_undef) {
 		SV *namesv;
 		namesv = newSVpvn("\\", 1);
 		sv_catpvn(namesv, name, namelen);
