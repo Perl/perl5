@@ -802,7 +802,7 @@ SV *sv;
 #   define PERL_SCAN_DISALLOW_PREFIX 0x02
 #endif
 
-#if (PERL_VERSION >= 6)
+#if (PERL_VERSION > 6) || ((PERL_VERSION == 6) && (PERL_SUBVERSION >= 1))
 #define I32_CAST
 #else
 #define I32_CAST (I32*)
@@ -885,7 +885,7 @@ bool
 Perl_grok_numeric_radix(pTHX_ const char **sp, const char *send)
 {
 #ifdef USE_LOCALE_NUMERIC
-#if (PERL_VERSION >= 6)
+#if (PERL_VERSION > 6) || ((PERL_VERSION == 6) && (PERL_SUBVERSION >= 1))
     if (PL_numeric_radix_sv && IN_LOCALE) { 
         STRLEN len;
         char* radix = SvPV(PL_numeric_radix_sv, len);
