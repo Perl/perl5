@@ -6727,8 +6727,9 @@ mod2fname(pTHX_ CV *cv)
 }
 
 void
-init_os_extras(pTHX)
+init_os_extras()
 {
+  dTHX;
   char* file = __FILE__;
   char temp_buff[512];
   if (my_trnlnm("DECC$DISABLE_TO_VMS_LOGNAME_TRANSLATION", temp_buff, 0)) {

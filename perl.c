@@ -1304,11 +1304,7 @@ print \"  \\@INC:\\n    @INC\\n\";");
 	(*xsinit)(aTHXo);	/* in case linked C routines want magical variables */
 #ifndef PERL_MICRO
 #if defined(VMS) || defined(WIN32) || defined(DJGPP) || defined(__CYGWIN__) || defined(EPOC)
-#  if defined(VMS)
-    init_os_extras(aTHXo);
-#  else
     init_os_extras();
-#  endif
 #endif
 #endif
 
