@@ -1469,7 +1469,7 @@ S_not_a_number(pTHX_ SV *sv)
 	    *d++ = toCTRL(ch);
 	}
     }
-    if (*s < end) {
+    if (s < end) {
 	*d++ = '.';
 	*d++ = '.';
 	*d++ = '.';
