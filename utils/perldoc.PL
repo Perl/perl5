@@ -170,8 +170,14 @@ if (!($Is_VMS || $Is_MSWin32 || $Is_Dos || $Is_OS2) && ($> == 0 || $< == 0)
            $id = eval { getpwnam("nouser") } unless defined $id;
            $id = -2 unless defined $id;
         eval {
-            $> = $id;  # must do this one first!
-            $< = $id;
+	    # According to Stevens' APUE and various
+	    # (BSD, Solaris, HP-UX) man pages setting
+	    # the real uid first and effective uid second
+	    # is the way to go if one wants to drop privileges,
+	    # because if one changes into an effective uid of
+	    # non-zero, one cannot change the real uid any more.
+            $< = $id; # real uid
+            $> = $id; # effective uid
         };
         last if !$@ && $< && $>;
     }
