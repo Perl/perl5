@@ -8,7 +8,7 @@
 # and edit it to reflect your system.  Some packages may include samples
 # of config.h for certain machines, so you might look for one of those.)
 #
-# $Header: Configure,v 1.0.1.4 88/01/30 08:51:49 root Exp $
+# $Header: Configure,v 1.0.1.5 88/01/30 09:21:20 root Exp $
 #
 # Yes, you may rip this off to use in other distribution packages.
 # (Note: this Configure script was generated automatically.  Rather than
@@ -398,7 +398,7 @@ else
     ans=`loc libc.a blurfl/dyick $libpth`
     if test -f $ans; then
 	echo "Your C library is in $ans, of all places."
-	libc=ans
+	libc=$ans
     else
 	if test -f "$libc"; then
 	    echo "Your C library is in $libc, like you said before."
