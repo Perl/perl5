@@ -1314,10 +1314,8 @@ typedef Sighandler_t Sigsave_t;
 #  endif
 # endif
 # define PAD_SV(po) pad_sv(po)
-# define RUNOPS_DEFAULT runops_debug
 #else
 # define PAD_SV(po) curpad[po]
-# define RUNOPS_DEFAULT runops_standard
 #endif
 
 /****************/
@@ -1394,7 +1392,6 @@ EXT OP *	opsave;		/* save current op register across longjmps */
 #else
 EXT OP *	op;		/* current op--when not in a global register */
 #endif
-EXT int		(*runops) _((void)) INIT(RUNOPS_DEFAULT);
 EXT I32 *	scopestack;	/* blocks we've entered */
 EXT I32		scopestack_ix;
 EXT I32		scopestack_max;

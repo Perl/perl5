@@ -19,8 +19,10 @@
 dEXT char **watchaddr = 0;
 dEXT char *watchok;
 
+#ifndef DEBUGGING
+
 int
-runops_standard() {
+runops() {
     dTHR;
     SAVEI32(runlevel);
     runlevel++;
@@ -31,11 +33,12 @@ runops_standard() {
     return 0;
 }
 
-#ifdef DEBUGGING
+#else
+
 static void debprof _((OP*o));
 
 int
-runops_debug() {
+runops() {
     dTHR;
     if (!op) {
 	warn("NULL OP IN RUN");
