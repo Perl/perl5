@@ -129,7 +129,7 @@ chomp($warn);
 
 # the copy should have given one warning and one error
 is($warn, 'Skipping MANIFEST.SKIP', 'warned about MANIFEST.SKIP' );
-like( $@, qr/^Can't read none: No such file or directory/, 
+like( $@, qr/^Can't read none: /, 
                                                'carped about none' );
 
 # tell ExtUtils::Manifest to use a different file
