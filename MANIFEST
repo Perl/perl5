@@ -184,7 +184,7 @@ ext/B/O.pm		Compiler front-end module (-MO=...)
 ext/B/README		Compiler backend README
 ext/B/TESTS		Compiler backend test data
 ext/B/Todo		Compiler backend Todo list
-ext/B/defsubs.h.PL	Generator for constant subroutines
+ext/B/defsubs_h.PL	Generator for constant subroutines
 ext/B/ramblings/cc.notes	Compiler ramblings: notes on CC backend
 ext/B/ramblings/curcop.runtime	Compiler ramblings: notes on curcop use
 ext/B/ramblings/flip-flop	Compiler ramblings: notes on flip-flop
@@ -1124,7 +1124,7 @@ t/lib/attrs.t		See if attrs works with C<sub : attrs>
 t/lib/autoloader.t	See if AutoLoader works
 t/lib/basename.t	See if File::Basename works
 t/lib/bigfloat.t	See if bigfloat.pl works
-t/lib/bigfloatpm.t	See if BigFloat.pm works
+t/lib/bigfltpm.t	See if BigFloat.pm works
 t/lib/bigint.t		See if bigint.pl works
 t/lib/bigintpm.t	See if BigInt.pm works
 t/lib/cgi-form.t	See if CGI.pm works
