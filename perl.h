@@ -31,7 +31,7 @@
 #    define PERL_IMPLICIT_CONTEXT
 #  endif
 #  ifndef PERL_IMPLICIT_SYS
-#    ifdef WIN32
+#    if defined(WIN32) && !defined(__MINGW32__)
 #      define PERL_IMPLICIT_SYS		/* XXX not implemented everywhere yet */
 #    endif
 #  endif
@@ -42,7 +42,7 @@
 #    define PERL_IMPLICIT_CONTEXT
 #  endif
 #  ifndef PERL_IMPLICIT_SYS
-#    ifdef WIN32
+#    if defined(WIN32) && !defined(__MINGW32__)
 #      define PERL_IMPLICIT_SYS		/* XXX not implemented everywhere yet */
 #    endif
 #  endif
@@ -2139,7 +2139,7 @@ I32 unlnk (char*);
 #  endif
 #endif
 
-typedef Signal_t (*Sighandler_t) (int);
+/* Sighandler_t defined in iperlsys.h */
 
 #ifdef HAS_SIGACTION
 typedef struct sigaction Sigsave_t;
@@ -2635,7 +2635,7 @@ EXT struct perl_vars *PL_VarsPtr INIT(&PL_Vars);
 EXT
 #endif /* WIN32 */
 struct perl_vars *PL_VarsPtr;
-#define PL_Vars (*((PL_VarsPtr) ? PL_VarsPtr : (PL_VarsPtr =  Perl_GetVars())))
+#define PL_Vars (*((PL_VarsPtr) ? PL_VarsPtr : (PL_VarsPtr = Perl_GetVars(aTHX))))
 #endif /* PERL_CORE */
 #endif /* PERL_GLOBAL_STRUCT */
 

@@ -415,7 +415,7 @@ if ($define{'PERL_GLOBAL_STRUCT'})
  {
   my $global = readvar($perlvars_h);
   skip_symbols $global;
-  emit_symbols [qw(Perl_GetVars)];
+  emit_symbol('Perl_GetVars');
   emit_symbols [qw(PL_Vars PL_VarsPtr)] unless $CCTYPE eq 'GCC';
  } 
 

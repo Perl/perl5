@@ -248,6 +248,13 @@ typedef long		gid_t;
 #define flushall	_flushall
 #define fcloseall	_fcloseall
 
+#undef __attribute__
+#define __attribute__(x)
+
+#ifndef CP_UTF8
+#  define CP_UTF8	65001
+#endif
+
 #ifdef PERL_OBJECT
 #  define MEMBER_TO_FPTR(name)	&(name)
 #endif

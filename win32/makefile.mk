@@ -847,7 +847,7 @@ $(CONFIGPM) : $(MINIPERL) ..\config.sh config_h.PL ..\minimod.pl
 	$(XCOPY) ..\ext\re\re.pm $(LIBDIR)\*.*
 	$(RCOPY) include $(COREDIR)\*.*
 	$(MINIPERL) -I..\lib config_h.PL "INST_VER=$(INST_VER)" \
-	    || $(MAKE) $(MAKEMACROS) $(CONFIGPM)
+	    || $(MAKE) $(MAKEMACROS) $(CONFIGPM) $(MAKEFILE)
 
 $(MINIPERL) : $(MINIDIR) $(MINI_OBJ)
 .IF "$(CCTYPE)" == "BORLAND"
