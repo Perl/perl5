@@ -7420,44 +7420,6 @@ Perl_sv_tainted(pTHX_ SV *sv)
     return FALSE;
 }
 
-/*
-=for apidoc sv_setpviv
-
-Copies an integer into the given SV, also updating its string value.
-Does not handle 'set' magic.  See C<sv_setpviv_mg>.
-
-=cut
-*/
-
-void
-Perl_sv_setpviv(pTHX_ SV *sv, IV iv)
-{
-    char buf[TYPE_CHARS(UV)];
-    char *ebuf;
-    char *ptr = uiv_2buf(buf, iv, 0, 0, &ebuf);
-
-    sv_setpvn(sv, ptr, ebuf - ptr);
-}
-
-/*
-=for apidoc sv_setpviv_mg
-
-Like C<sv_setpviv>, but also handles 'set' magic.
-
-=cut
-*/
-
-void
-Perl_sv_setpviv_mg(pTHX_ SV *sv, IV iv)
-{
-    char buf[TYPE_CHARS(UV)];
-    char *ebuf;
-    char *ptr = uiv_2buf(buf, iv, 0, 0, &ebuf);
-
-    sv_setpvn(sv, ptr, ebuf - ptr);
-    SvSETMAGIC(sv);
-}
-
 #if defined(PERL_IMPLICIT_CONTEXT)
 
 /* pTHX_ magic can't cope with varargs, so this is a no-context
