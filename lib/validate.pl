@@ -1,4 +1,4 @@
-;# $Header: validate.pl,v 3.0 89/10/18 15:20:04 lwall Locked $
+;# $Header: validate.pl,v 3.0.1.1 90/08/09 04:03:10 lwall Locked $
 
 ;# The validate routine takes a single multiline string consisting of
 ;# lines containing a filename plus a file test to try on it.  (The
@@ -17,6 +17,7 @@
 ;# The routine returns the number of warnings issued.
 
 ;# Usage:
+;#	require "validate.pl";
 ;#	$warnings += do validate('
 ;#	/vmunix			-e || die
 ;#	/boot			-e || die

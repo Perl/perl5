@@ -1,4 +1,4 @@
-/* $Header: walk.c,v 3.0.1.4 90/03/01 10:32:45 lwall Locked $
+/* $Header: walk.c,v 3.0.1.5 90/08/09 05:55:01 lwall Locked $
  *
  *    Copyright (c) 1989, Larry Wall
  *
@@ -6,6 +6,11 @@
  *    as specified in the README file that comes with the perl 3.0 kit.
  *
  * $Log:	walk.c,v $
+ * Revision 3.0.1.5  90/08/09  05:55:01  lwall
+ * patch19: a2p emited local($_) without a semicolon
+ * patch19: a2p didn't make explicit split on whitespace skip leading whitespace
+ * patch19: foreach on a normal array was iterating on values instead of indexes
+ * 
  * Revision 3.0.1.4  90/03/01  10:32:45  lwall
  * patch9: a2p didn't put a $ on ExitValue
  * 
@@ -182,7 +187,7 @@ int minprec;			/* minimum precedence without parens */
 			    str_cat(str,"    $FNRbase = $. if eof;\n");
 		    }
 		    if (len & 1)
-			str_cat(str,"    local($_)\n");
+			str_cat(str,"    local($_);\n");
 		    if (len & 2)
 			str_cat(str,
 			  "    if ($getline_ok = (($_ = <$fh>) ne ''))");
@@ -325,6 +330,16 @@ sub Pick {\n\
 	str = str_new(0);
 	str_set(str,"!");
 	str_scat(str,fstr=walk(1,level,ops[node+1].ival,&numarg,prec));
+	str_free(fstr);
+	break;
+    case OCOND:
+	prec = P_COND;
+	str = walk(1,level,ops[node+1].ival,&numarg,prec);
+	str_cat(str," ? ");
+	str_scat(str,fstr=walk(1,level,ops[node+2].ival,&numarg,prec+1));
+	str_free(fstr);
+	str_cat(str," : ");
+	str_scat(str,fstr=walk(1,level,ops[node+3].ival,&numarg,prec+1));
 	str_free(fstr);
 	break;
     case OCPAREN:
@@ -679,6 +694,8 @@ sub Pick {\n\
 		i = fstr->str_ptr[1] & 127;
 		if (index("*+?.[]()|^$\\",i))
 		    sprintf(tokenbuf,"/\\%c/",i);
+		else if (i = ' ')
+		    sprintf(tokenbuf,"' '");
 		else
 		    sprintf(tokenbuf,"/%c/",i);
 		str_cat(str,tokenbuf);
@@ -698,7 +715,7 @@ sub Pick {\n\
 	str_cat(str,", ");
 	str_scat(str,fstr=walk(1,level,ops[node+1].ival,&numarg,P_COMMA+1));
 	str_free(fstr);
-	str_cat(str,", 999)");
+	str_cat(str,", 9999)");
 	if (useval) {
 	    str_cat(str,")");
 	}
@@ -1441,7 +1458,7 @@ sub Pick {\n\
 	tmp2str = hfetch(symtab,str->str_ptr);
 	if (tmp2str && atoi(tmp2str->str_ptr)) {
 	    sprintf(tokenbuf,
-	      "foreach %s (@%s) ",
+	      "foreach %s ($[ .. $#%s) ",
 	      s,
 	      d+1);
 	}
@@ -1587,13 +1604,13 @@ int level;
 	str_cat(str,tokenbuf);
     }
     if (const_FS) {
-	sprintf(tokenbuf," = split(/[%c\\n]/, $_, 999);\n",const_FS);
+	sprintf(tokenbuf," = split(/[%c\\n]/, $_, 9999);\n",const_FS);
 	str_cat(str,tokenbuf);
     }
     else if (saw_FS)
-	str_cat(str," = split($FS, $_, 999);\n");
+	str_cat(str," = split($FS, $_, 9999);\n");
     else
-	str_cat(str," = split(' ', $_, 999);\n");
+	str_cat(str," = split(' ', $_, 9999);\n");
     tab(str,level);
 }
 

@@ -1,4 +1,4 @@
-/* $Header: util.c,v 3.0.1.5 90/03/27 16:35:13 lwall Locked $
+/* $Header: util.c,v 3.0.1.6 90/08/09 05:44:55 lwall Locked $
  *
  *    Copyright (c) 1989, Larry Wall
  *
@@ -6,6 +6,11 @@
  *    as specified in the README file that comes with the perl 3.0 kit.
  *
  * $Log:	util.c,v $
+ * Revision 3.0.1.6  90/08/09  05:44:55  lwall
+ * patch19: fixed double include of <signal.h>
+ * patch19: various MSDOS and OS/2 patches folded in
+ * patch19: open(STDOUT,"|command") left wrong descriptor attached to STDOUT
+ * 
  * Revision 3.0.1.5  90/03/27  16:35:13  lwall
  * patch16: MSDOS support
  * patch16: support for machines that can't cast negative floats to unsigned ints
@@ -34,7 +39,10 @@
 
 #include "EXTERN.h"
 #include "perl.h"
+
+#ifndef NSIG
 #include <signal.h>
+#endif
 
 #ifdef I_VFORK
 #  include <vfork.h>
@@ -61,11 +69,21 @@ static int an = 0;
 
 char *
 safemalloc(size)
+#ifdef MSDOS
+unsigned long size;
+#else
 MEM_SIZE size;
+#endif /* MSDOS */
 {
     char *ptr;
     char *malloc();
 
+#ifdef MSDOS
+	if (size > 0xffff) {
+		fprintf(stderr, "Allocation too large: %lx\n", size) FLUSH;
+		exit(1);
+	}
+#endif /* MSDOS */
     ptr = malloc(size?size:1);	/* malloc(0) is NASTY on our system */
 #ifdef DEBUGGING
 #  ifndef I286
@@ -93,11 +111,21 @@ MEM_SIZE size;
 char *
 saferealloc(where,size)
 char *where;
+#ifndef MSDOS
 MEM_SIZE size;
+#else
+unsigned long size;
+#endif /* MSDOS */
 {
     char *ptr;
     char *realloc();
 
+#ifdef MSDOS
+	if (size > 0xffff) {
+		fprintf(stderr, "Reallocation too large: %lx\n", size) FLUSH;
+		exit(1);
+	}
+#endif /* MSDOS */
     if (!where)
 	fatal("Null realloc");
     ptr = realloc(where,size?size:1);	/* realloc(0) is NASTY on our system */
@@ -204,7 +232,8 @@ xstat()
 
 char *
 cpytill(to,from,fromend,delim,retlen)
-register char *to, *from;
+register char *to;
+register char *from;
 register char *fromend;
 register int delim;
 int *retlen;
@@ -406,7 +435,7 @@ int iflag;
     int rarest = 0;
     int frequency = 256;
 
-    str_grow(str,len+258);
+    Str_Grow(str,len+258);
 #ifndef lint
     table = (unsigned char*)(str->str_ptr + len + 1);
 #else
@@ -521,13 +550,24 @@ STR *littlestr;
 #else
     table = Null(unsigned char*);
 #endif
-    s = big + --littlelen;
+    if (--littlelen >= bigend - big)
+	return Nullch;
+    s = big + littlelen;
     oldlittle = little = table - 2;
     if (littlestr->str_pok & SP_CASEFOLD) {	/* case insensitive? */
 	while (s < bigend) {
 	  top1:
 	    if (tmp = table[*s]) {
-		s += tmp;
+#ifdef POINTERRIGOR
+		if (bigend - s > tmp) {
+		    s += tmp;
+		    goto top1;
+		}
+#else
+		if ((s += tmp) < bigend)
+		    goto top1;
+#endif
+		return Nullch;
 	    }
 	    else {
 		tmp = littlelen;	/* less expensive than calling strncmp() */
@@ -551,7 +591,16 @@ STR *littlestr;
 	while (s < bigend) {
 	  top2:
 	    if (tmp = table[*s]) {
-		s += tmp;
+#ifdef POINTERRIGOR
+		if (bigend - s > tmp) {
+		    s += tmp;
+		    goto top2;
+		}
+#else
+		if ((s += tmp) < bigend)
+		    goto top2;
+#endif
+		return Nullch;
 	    }
 	    else {
 		tmp = littlelen;	/* less expensive than calling strncmp() */
@@ -723,9 +772,8 @@ long a1, a2, a3, a4;
     (void)sprintf(s,pat,a1,a2,a3,a4);
     s += strlen(s);
     if (s[-1] != '\n') {
-	if (line) {
-	    (void)sprintf(s," at %s line %ld",
-	      in_eval?filename:origfilename, (long)line);
+	if (curcmd->c_line) {
+	    (void)sprintf(s," at %s line %ld", filename, (long)curcmd->c_line);
 	    s += strlen(s);
 	}
 	if (last_in_stab &&
@@ -821,9 +869,8 @@ va_list args;
 
     s += strlen(s);
     if (s[-1] != '\n') {
-	if (line) {
-	    (void)sprintf(s," at %s line %ld",
-	      in_eval?filename:origfilename, (long)line);
+	if (curcmd->c_line) {
+	    (void)sprintf(s," at %s line %ld", filename, (long)curcmd->c_line);
 	    s += strlen(s);
 	}
 	if (last_in_stab &&
@@ -946,7 +993,13 @@ char *nam, *val;
     New(904, environ[i], strlen(nam) + strlen(val) + 2, char);
 					/* this may or may not be in */
 					/* the old environ structure */
+#ifndef MSDOS
     (void)sprintf(environ[i],"%s=%s",nam,val);/* all that work just for this */
+#else
+    /* MS-DOS requires environment variable names to be in uppercase */
+    strcpy(environ[i],nam); strupr(environ[i],nam);
+    (void)sprintf(environ[i] + strlen(nam),"=%s",val);
+#endif /* MSDOS */
 }
 
 int
@@ -1176,7 +1229,13 @@ char	*mode;
 #undef THIS
 #undef THAT
     }
+    do_execfree();	/* free any memory malloced by child on vfork */
     close(p[that]);
+    if (p[that] < p[this]) {
+	dup2(p[this], p[that]);
+	close(p[this]);
+	p[this] = p[that];
+    }
     str = afetch(pidstatary,p[this],TRUE);
     str_numset(str,(double)pid);
     str->str_cur = 0;
@@ -1206,7 +1265,11 @@ dup2(oldfd,newfd)
 int oldfd;
 int newfd;
 {
-    int fdtmp[10];
+#if defined(FCNTL) && defined(F_DUPFD)
+    close(newfd);
+    fcntl(oldfd, F_DUPFD, newfd);
+#else
+    int fdtmp[20];
     int fdx = 0;
     int fd;
 
@@ -1215,6 +1278,7 @@ int newfd;
 	fdtmp[fdx++] = fd;
     while (fdx > 0)
 	close(fdtmp[--fdx]);
+#endif
 }
 #endif
 
@@ -1223,7 +1287,6 @@ int
 mypclose(ptr)
 FILE *ptr;
 {
-    register int result;
 #ifdef VOIDSIG
     void (*hstat)(), (*istat)(), (*qstat)();
 #else
@@ -1248,6 +1311,8 @@ FILE *ptr;
     if (pid < 0)		/* already exited? */
 	status = str->str_cur;
     else {
+	int result;
+
 	while ((result = wait(&status)) != pid && result >= 0)
 	    pidgone(result,status);
 	if (result < 0)
@@ -1336,3 +1401,45 @@ double f;
     return (unsigned long)along;
 }
 #endif
+
+#ifndef RENAME
+int
+same_dirent(a,b)
+char *a;
+char *b;
+{
+    char *fa = rindex(a,'/');
+    char *fb = rindex(b,'/');
+    struct stat tmpstatbuf1;
+    struct stat tmpstatbuf2;
+#ifndef MAXPATHLEN
+#define MAXPATHLEN 1024
+#endif
+    char tmpbuf[MAXPATHLEN+1];
+
+    if (fa)
+	fa++;
+    else
+	fa = a;
+    if (fb)
+	fb++;
+    else
+	fb = b;
+    if (strNE(a,b))
+	return FALSE;
+    if (fa == a)
+	strcpy(tmpbuf,".")
+    else
+	strncpy(tmpbuf, a, fa - a);
+    if (stat(tmpbuf, &tmpstatbuf1) < 0)
+	return FALSE;
+    if (fb == b)
+	strcpy(tmpbuf,".")
+    else
+	strncpy(tmpbuf, b, fb - b);
+    if (stat(tmpbuf, &tmpstatbuf2) < 0)
+	return FALSE;
+    return tmpstatbuf1.st_dev == tmpstatbuf2.st_dev &&
+	   tmpstatbuf1.st_ino == tmpstatbuf2.st_ino;
+}
+#endif /* !RENAME */
