@@ -759,6 +759,11 @@ that must be passed around, as in the following example:
         # $f implicitly closed here
     }
 
+Note that if an initialized scalar variable is used instead the 
+result is different: C<my $fh='zzz'; open($h, ...)> is equivalent 
+to C<open( *{'kkk'}, ...)>. 
+C<use strict 'refs'> forbids such practice.
+
 Another way to create anonymous filehandles is with the Symbol
 module or with the IO::Handle module and its ilk.  These modules
 have the advantage of not hiding different types of the same name
