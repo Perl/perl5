@@ -131,34 +131,39 @@
 #define REENTRANT_PROTO_I_SBWRE	43
 #define REENTRANT_PROTO_I_SD	44
 #define REENTRANT_PROTO_I_ST	45
-#define REENTRANT_PROTO_I_TISD	46
-#define REENTRANT_PROTO_I_TS	47
-#define REENTRANT_PROTO_I_TSBI	48
-#define REENTRANT_PROTO_I_TSBIR	49
-#define REENTRANT_PROTO_I_TSBWR	50
-#define REENTRANT_PROTO_I_TSR	51
-#define REENTRANT_PROTO_I_UISBWRE	52
-#define REENTRANT_PROTO_S_CBI	53
-#define REENTRANT_PROTO_S_CCSBI	54
-#define REENTRANT_PROTO_S_CIISBIE	55
-#define REENTRANT_PROTO_S_CSBI	56
-#define REENTRANT_PROTO_S_CSBIE	57
-#define REENTRANT_PROTO_S_CWISBIE	58
-#define REENTRANT_PROTO_S_CWISBWIE	59
-#define REENTRANT_PROTO_S_ICSBI	60
-#define REENTRANT_PROTO_S_ISBI	61
-#define REENTRANT_PROTO_S_LISBI	62
-#define REENTRANT_PROTO_S_SBI	63
-#define REENTRANT_PROTO_S_SBIE	64
-#define REENTRANT_PROTO_S_SBW	65
-#define REENTRANT_PROTO_S_TISBI	66
-#define REENTRANT_PROTO_S_TS	67
-#define REENTRANT_PROTO_S_TSBI	68
-#define REENTRANT_PROTO_S_TSBIE	69
-#define REENTRANT_PROTO_S_TWISBIE	70
-#define REENTRANT_PROTO_V_D	71
-#define REENTRANT_PROTO_V_H	72
-#define REENTRANT_PROTO_V_ID	73
+#define REENTRANT_PROTO_I_St	46
+#define REENTRANT_PROTO_I_TISD	47
+#define REENTRANT_PROTO_I_TS	48
+#define REENTRANT_PROTO_I_TSBI	49
+#define REENTRANT_PROTO_I_TSBIR	50
+#define REENTRANT_PROTO_I_TSBWR	51
+#define REENTRANT_PROTO_I_TSR	52
+#define REENTRANT_PROTO_I_TsISBWRE	53
+#define REENTRANT_PROTO_I_UISBWRE	54
+#define REENTRANT_PROTO_I_iS	55
+#define REENTRANT_PROTO_I_lS	56
+#define REENTRANT_PROTO_I_uISBWRE	57
+#define REENTRANT_PROTO_S_CBI	58
+#define REENTRANT_PROTO_S_CCSBI	59
+#define REENTRANT_PROTO_S_CIISBIE	60
+#define REENTRANT_PROTO_S_CSBI	61
+#define REENTRANT_PROTO_S_CSBIE	62
+#define REENTRANT_PROTO_S_CWISBIE	63
+#define REENTRANT_PROTO_S_CWISBWIE	64
+#define REENTRANT_PROTO_S_ICSBI	65
+#define REENTRANT_PROTO_S_ISBI	66
+#define REENTRANT_PROTO_S_LISBI	67
+#define REENTRANT_PROTO_S_SBI	68
+#define REENTRANT_PROTO_S_SBIE	69
+#define REENTRANT_PROTO_S_SBW	70
+#define REENTRANT_PROTO_S_TISBI	71
+#define REENTRANT_PROTO_S_TS	72
+#define REENTRANT_PROTO_S_TSBI	73
+#define REENTRANT_PROTO_S_TSBIE	74
+#define REENTRANT_PROTO_S_TWISBIE	75
+#define REENTRANT_PROTO_V_D	76
+#define REENTRANT_PROTO_V_H	77
+#define REENTRANT_PROTO_V_ID	78
 
 /* Defines for indicating which special features are supported. */
 
@@ -336,7 +341,7 @@
 #else
 #   undef  GETHOSTENT_R_HAS_PTR
 #endif
-#if defined(HAS_GETHOSTBYADDR_R) && (GETHOSTBYADDR_R_PROTO == REENTRANT_PROTO_I_CWISBWRE)
+#if defined(HAS_GETHOSTBYADDR_R) && (GETHOSTBYADDR_R_PROTO == REENTRANT_PROTO_I_CWISBWRE || GETHOSTBYADDR_R_PROTO == REENTRANT_PROTO_I_TsISBWRE)
 #   define GETHOSTBYADDR_R_HAS_PTR
 #else
 #   undef  GETHOSTBYADDR_R_HAS_PTR
@@ -362,7 +367,7 @@
 #else
 #   undef  GETNETENT_R_HAS_PTR
 #endif
-#if defined(HAS_GETNETBYADDR_R) && (GETNETBYADDR_R_PROTO == REENTRANT_PROTO_I_UISBWRE)
+#if defined(HAS_GETNETBYADDR_R) && (GETNETBYADDR_R_PROTO == REENTRANT_PROTO_I_UISBWRE || GETNETBYADDR_R_PROTO == REENTRANT_PROTO_I_uISBWRE)
 #   define GETNETBYADDR_R_HAS_PTR
 #else
 #   undef  GETNETBYADDR_R_HAS_PTR
@@ -440,7 +445,7 @@
 #else
 #   undef  GETHOSTENT_R_HAS_BUFFER
 #endif
-#if defined(HAS_GETHOSTBYADDR_R) && (GETHOSTBYADDR_R_PROTO == REENTRANT_PROTO_I_CWISBWRE || GETHOSTBYADDR_R_PROTO == REENTRANT_PROTO_S_CWISBWIE || GETHOSTBYADDR_R_PROTO == REENTRANT_PROTO_S_CWISBIE || GETHOSTBYADDR_R_PROTO == REENTRANT_PROTO_S_TWISBIE || GETHOSTBYADDR_R_PROTO == REENTRANT_PROTO_S_CIISBIE || GETHOSTBYADDR_R_PROTO == REENTRANT_PROTO_S_CSBIE || GETHOSTBYADDR_R_PROTO == REENTRANT_PROTO_S_TSBIE)
+#if defined(HAS_GETHOSTBYADDR_R) && (GETHOSTBYADDR_R_PROTO == REENTRANT_PROTO_I_CWISBWRE || GETHOSTBYADDR_R_PROTO == REENTRANT_PROTO_S_CWISBWIE || GETHOSTBYADDR_R_PROTO == REENTRANT_PROTO_S_CWISBIE || GETHOSTBYADDR_R_PROTO == REENTRANT_PROTO_S_TWISBIE || GETHOSTBYADDR_R_PROTO == REENTRANT_PROTO_S_CIISBIE || GETHOSTBYADDR_R_PROTO == REENTRANT_PROTO_S_CSBIE || GETHOSTBYADDR_R_PROTO == REENTRANT_PROTO_S_TSBIE || GETHOSTBYADDR_R_PROTO == REENTRANT_PROTO_I_TsISBWRE)
 #   define GETHOSTBYADDR_R_HAS_BUFFER
 #else
 #   undef  GETHOSTBYADDR_R_HAS_BUFFER
@@ -466,7 +471,7 @@
 #else
 #   undef  GETNETENT_R_HAS_BUFFER
 #endif
-#if defined(HAS_GETNETBYADDR_R) && (GETNETBYADDR_R_PROTO == REENTRANT_PROTO_I_UISBWRE || GETNETBYADDR_R_PROTO == REENTRANT_PROTO_I_LISBI || GETNETBYADDR_R_PROTO == REENTRANT_PROTO_S_TISBI || GETNETBYADDR_R_PROTO == REENTRANT_PROTO_S_LISBI)
+#if defined(HAS_GETNETBYADDR_R) && (GETNETBYADDR_R_PROTO == REENTRANT_PROTO_I_UISBWRE || GETNETBYADDR_R_PROTO == REENTRANT_PROTO_I_LISBI || GETNETBYADDR_R_PROTO == REENTRANT_PROTO_S_TISBI || GETNETBYADDR_R_PROTO == REENTRANT_PROTO_S_LISBI || GETNETBYADDR_R_PROTO == REENTRANT_PROTO_I_uISBWRE)
 #   define GETNETBYADDR_R_HAS_BUFFER
 #else
 #   undef  GETNETBYADDR_R_HAS_BUFFER
@@ -544,7 +549,7 @@
 #else
 #   undef  GETHOSTENT_R_HAS_ERRNO
 #endif
-#if defined(HAS_GETHOSTBYADDR_R) && (GETHOSTBYADDR_R_PROTO == REENTRANT_PROTO_I_CWISBWRE || GETHOSTBYADDR_R_PROTO == REENTRANT_PROTO_S_CWISBWIE || GETHOSTBYADDR_R_PROTO == REENTRANT_PROTO_S_CWISBIE || GETHOSTBYADDR_R_PROTO == REENTRANT_PROTO_S_TWISBIE || GETHOSTBYADDR_R_PROTO == REENTRANT_PROTO_S_CIISBIE || GETHOSTBYADDR_R_PROTO == REENTRANT_PROTO_S_CSBIE || GETHOSTBYADDR_R_PROTO == REENTRANT_PROTO_S_TSBIE)
+#if defined(HAS_GETHOSTBYADDR_R) && (GETHOSTBYADDR_R_PROTO == REENTRANT_PROTO_I_CWISBWRE || GETHOSTBYADDR_R_PROTO == REENTRANT_PROTO_S_CWISBWIE || GETHOSTBYADDR_R_PROTO == REENTRANT_PROTO_S_CWISBIE || GETHOSTBYADDR_R_PROTO == REENTRANT_PROTO_S_TWISBIE || GETHOSTBYADDR_R_PROTO == REENTRANT_PROTO_S_CIISBIE || GETHOSTBYADDR_R_PROTO == REENTRANT_PROTO_S_CSBIE || GETHOSTBYADDR_R_PROTO == REENTRANT_PROTO_S_TSBIE || GETHOSTBYADDR_R_PROTO == REENTRANT_PROTO_I_TsISBWRE)
 #   define GETHOSTBYADDR_R_HAS_ERRNO
 #else
 #   undef  GETHOSTBYADDR_R_HAS_ERRNO
@@ -570,7 +575,7 @@
 #else
 #   undef  GETNETENT_R_HAS_ERRNO
 #endif
-#if defined(HAS_GETNETBYADDR_R) && (GETNETBYADDR_R_PROTO == REENTRANT_PROTO_I_UISBWRE)
+#if defined(HAS_GETNETBYADDR_R) && (GETNETBYADDR_R_PROTO == REENTRANT_PROTO_I_UISBWRE || GETNETBYADDR_R_PROTO == REENTRANT_PROTO_I_uISBWRE)
 #   define GETNETBYADDR_R_HAS_ERRNO
 #else
 #   undef  GETNETBYADDR_R_HAS_ERRNO
@@ -715,6 +720,15 @@ typedef struct {
 #endif /* HAS_LOCALTIME_R */
 #ifdef HAS_RANDOM_R
 	struct random_data _random_struct;
+#   if RANDOM_R_PROTO == REENTRANT_PROTO_iS
+	int	_random_retval;
+#   endif
+#   if RANDOM_R_PROTO == REENTRANT_PROTO_lS
+	long	_random_retval;
+#   endif
+#   if RANDOM_R_PROTO == REENTRANT_PROTO_tS
+	int32_t	_random_retval;
+#   endif
 #endif /* HAS_RANDOM_R */
 #ifdef HAS_READDIR_R
 	struct dirent*	_readdir_struct;
@@ -953,6 +967,9 @@ typedef struct {
 #   if !defined(gethostbyaddr) && GETHOSTBYADDR_R_PROTO == REENTRANT_PROTO_I_CII
 #       define gethostbyaddr(a, b, c) (((errno = gethostbyaddr_r(a, b, c))) == 0 ? 1 : (errno == ERANGE ? Perl_reentrant_retry("gethostbyaddr", a, b, c) : 0))
 #   endif
+#   if !defined(gethostbyaddr) && GETHOSTBYADDR_R_PROTO == REENTRANT_PROTO_I_TsISBWRE
+#       define gethostbyaddr(a, b, c) (((errno = gethostbyaddr_r(a, b, c, &PL_reentrant_buffer->_hostent_struct, PL_reentrant_buffer->_hostent_buffer, PL_reentrant_buffer->_hostent_size, &PL_reentrant_buffer->_hostent_ptr, &PL_reentrant_buffer->_hostent_errno))) == 0 ? PL_reentrant_buffer->_hostent_ptr : (errno == ERANGE ? Perl_reentrant_retry("gethostbyaddr", a, b, c) : 0))
+#   endif
 #endif /* HAS_GETHOSTBYADDR_R */
 
 #ifdef HAS_GETHOSTBYNAME_R
@@ -1028,6 +1045,9 @@ typedef struct {
 #   endif
 #   if !defined(getnetbyaddr) && GETNETBYADDR_R_PROTO == REENTRANT_PROTO_I_IISD
 #       define getnetbyaddr(a, b) (((errno = getnetbyaddr_r(a, b, &PL_reentrant_buffer->_netent_struct, &PL_reentrant_buffer->_netent_data))) == 0 ? &PL_reentrant_buffer->_netent_struct : (errno == ERANGE ? Perl_reentrant_retry("getnetbyaddr", a, b) : 0))
+#   endif
+#   if !defined(getnetbyaddr) && GETNETBYADDR_R_PROTO == REENTRANT_PROTO_I_uISBWRE
+#       define getnetbyaddr(a, b) (((errno = getnetbyaddr_r(a, b, &PL_reentrant_buffer->_netent_struct, PL_reentrant_buffer->_netent_buffer, PL_reentrant_buffer->_netent_size, &PL_reentrant_buffer->_netent_ptr, &PL_reentrant_buffer->_netent_errno))) == 0 ? PL_reentrant_buffer->_netent_ptr : (errno == ERANGE ? Perl_reentrant_retry("getnetbyaddr", a, b) : 0))
 #   endif
 #endif /* HAS_GETNETBYADDR_R */
 
@@ -1239,8 +1259,14 @@ typedef struct {
 
 #ifdef HAS_RANDOM_R
 #   undef random
-#   if !defined(random) && RANDOM_R_PROTO == REENTRANT_PROTO_I_TS
-#       define random() (((errno = random_r(T, &PL_reentrant_buffer->_random_struct))) == 0 ? &PL_reentrant_buffer->_random_struct : 0)
+#   if !defined(random) && RANDOM_R_PROTO == REENTRANT_PROTO_I_iS
+#       define random() (random_r(&PL_reentrant_buffer->_random_retval, &PL_reentrant_buffer->_random_struct) == 0 ? PL_reentrant_buffer->_random_retval : 0)
+#   endif
+#   if !defined(random) && RANDOM_R_PROTO == REENTRANT_PROTO_I_lS
+#       define random() (random_r(&PL_reentrant_buffer->_random_retval, &PL_reentrant_buffer->_random_struct) == 0 ? PL_reentrant_buffer->_random_retval : 0)
+#   endif
+#   if !defined(random) && RANDOM_R_PROTO == REENTRANT_PROTO_I_St
+#       define random() (random_r(&PL_reentrant_buffer->_random_struct, &PL_reentrant_buffer->_random_retval) == 0 ? PL_reentrant_buffer->_random_retval : 0)
 #   endif
 #endif /* HAS_RANDOM_R */
 

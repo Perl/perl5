@@ -7,7 +7,7 @@ BEGIN {
 }
 
 require './test.pl';
-plan( tests => 128 );
+plan( tests => 129 );
 
 $x = 'foo';
 $_ = "x";
@@ -527,3 +527,7 @@ $_ = "123";
 s/(1)(2)(3)/$#- (@-)/;
 is($_, "3 (0 0 1 2)", '#20682 @- not visible in replacement');
 
+# [perl #20682] $^N not visible in replacement
+$_ = "abc";
+/(a)/; s/(b)|(c)/-$^N/g;
+is($_,'a-b-c','#20682 $^N not visible in replacement');

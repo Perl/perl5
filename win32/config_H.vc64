@@ -38,6 +38,9 @@
  */
 /*#define HASATTRIBUTE 	/**/
 #ifndef HASATTRIBUTE
+#ifdef __attribute__
+#undef __attribute__
+#endif
 #define __attribute__(_arg_)
 #endif
 

@@ -303,14 +303,16 @@ empty string C<""> for the C<$ENV{PERL_UNICODE}, has the same effect
 as <-CSDL>.  In other words, the standard I/O handles and the default
 C<open()> layer are UTF-8-fied B<but> only if the locale environment
 variables indicate a UTF-8 locale.  This behaviour follows the
-I<implicit> UTF-8 behaviour of Perl 5.8.0.
+I<implicit> (and problematic) UTF-8 behaviour of Perl 5.8.0.
 
-You can use C<-C0> to explicitly disable all the above Unicode features.
-
-See L<perlfunc/open>, and L<open> for more information.
+You can use C<-C0> (or C<"0"> for $ENV{PERL_UNICODE}) to explicitly
+disable all the above Unicode features.
 
 The read-only magic variable C<${^UNICODE}> reflects the numeric value
-of this setting, see L<perlvar/"${^UNICODE}">.
+of this setting.  This is variable is set during Perl startup and is
+thereafter read-only.  If you want runtime effects, use the three-arg
+open() (see L<perlfunc/open), the two-arg binmode() (see L<perlfunc/binmode>),
+and the C<open> pragma (see L<open>).
 
 (In Perls earlier than 5.8.1 the C<-C> switch was a Win32-only switch
 that enabled the use of Unicode-aware "wide system call" Win32 APIs.
@@ -1101,7 +1103,10 @@ C<safe> the safe signals are used.
 
 Equivalent to the B<-C> command-line switch.  Note that this is not
 a boolean variable-- setting this to C<"1"> is not the right way to
-"enable Unicode" (whatever that would mean).
+"enable Unicode" (whatever that would mean).  You can use C<"0"> to
+"disable Unicode", though (or alternatively unset PERL_UNICODE in
+your shell before starting Perl).  See the description of the C<-C>
+switch for more information.
 
 =item SYS$LOGIN (specific to the VMS port)
 

@@ -33,6 +33,8 @@
 #  include <sys/pstat.h>
 #endif
 
+Signal_t Perl_csighandler(int sig);
+
 /* if you only have signal() and it resets on each signal, FAKE_PERSISTENT_SIGNAL_HANDLERS fixes */
 #if !defined(HAS_SIGACTION) && defined(VMS)
 #  define  FAKE_PERSISTENT_SIGNAL_HANDLERS

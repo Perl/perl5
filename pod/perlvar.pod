@@ -1117,9 +1117,10 @@ B<-t> or B<-TU>).
 
 =item ${^UNICODE}
 
-Reflects certain Unicode settings of Perl.  See L<perlrun> for more
-information about the possible values. This variable is set during
-Perl startup and thereafter read-only.
+Reflects certain Unicode settings of Perl.  See L<perlrun>
+documentation for the C<-C> switch for more information about
+the possible values. This variable is set during Perl startup
+and is thereafter read-only.
 
 =item $PERL_VERSION
 
