@@ -224,7 +224,7 @@ sub Self2::PRINT     { $printed = 1; }
     print $c 'Hello';
 }
 die "self-tied glob not PRINTed" unless $printed == 1;
-die "self-tied glob not DESTROYd" unless $destroyed == 1;
+die "self-tied glob not DESTROYed" unless $destroyed == 1;
 EXPECT
 ########
 
@@ -237,7 +237,7 @@ sub Self3::DESTROY   { $destroyed = 1; }
     my $c = geniosym;
     tie *$c, 'Self3', $c;
 }
-die "self-tied IO not DESTROYd" unless $destroyed == 1;
+die "self-tied IO not DESTROYed" unless $destroyed == 1;
 EXPECT
 ########
 
