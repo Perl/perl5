@@ -3,12 +3,15 @@ package Unicode::UCD;
 use strict;
 use warnings;
 
-our $VERSION = '3.1.0';
+our $VERSION = '0.1';
 
 require Exporter;
 
 our @ISA = qw(Exporter);
-our @EXPORT_OK = qw(charinfo charblock charscript);
+our @EXPORT_OK = qw(charinfo
+		    charblock charscript
+		    charblocks charscripts
+		    charinrange);
 
 use Carp;
 
@@ -17,9 +20,6 @@ use Carp;
 Unicode::UCD - Unicode character database
 
 =head1 SYNOPSIS
-
-    use Unicode::UCD 3.1.0;
-    # requires that level of the Unicode character database
 
     use Unicode::UCD 'charinfo';
     my %charinfo   = charinfo($codepoint);
@@ -37,9 +37,10 @@ Database.
 
 =cut
 
-my $UNICODE;
-my $BLOCKS;
-my $SCRIPTS;
+my $UNICODEFH;
+my $BLOCKSFH;
+my $SCRIPTSFH;
+my $VERSIONFH;
 
 sub openunicode {
     my ($rfh, @path) = @_;
@@ -103,15 +104,30 @@ F<CaseFold.txt>, and F<SpecCase.txt> in the Perl distribution.
 
 =cut
 
+sub _getcode {
+    my $arg = shift;
+
+    if ($arg =~ /^\d+$/) {
+	return $arg;
+    } elsif ($arg =~ /^(?:U\+|0x)?([[:xdigit:]]+)$/) {
+	return hex($1);
+    }
+
+    return;
+}
+
 sub charinfo {
-    my $code = shift;
+    my $arg  = shift;
+    my $code = _getcode($arg);
+    croak __PACKAGE__, "::charinfo: unknown code '$arg'"
+	unless defined $code;
     my $hexk = sprintf("%04X", $code);
 
-    openunicode(\$UNICODE, "Unicode.txt");
-    if (defined $UNICODE) {
+    openunicode(\$UNICODEFH, "Unicode.txt");
+    if (defined $UNICODEFH) {
 	use Search::Dict;
-	if (look($UNICODE, "$hexk;") >= 0) {
-	    my $line = <$UNICODE>;
+	if (look($UNICODEFH, "$hexk;") >= 0) {
+	    my $line = <$UNICODEFH>;
 	    chomp $line;
 	    my %prop;
 	    @prop{qw(
@@ -139,7 +155,7 @@ sub _search { # Binary search in a [[lo,hi,prop],[...],...] table.
     my $mid = int(($lo+$hi) / 2);
 
     if ($table->[$mid]->[0] < $code) {
-	if (defined $table->[$mid]->[1] && $table->[$mid]->[1] >= $code) {
+	if ($table->[$mid]->[1] >= $code) {
 	    return $table->[$mid]->[2];
 	} else {
 	    _search($table, $mid + 1, $hi, $code);
@@ -151,35 +167,76 @@ sub _search { # Binary search in a [[lo,hi,prop],[...],...] table.
     }
 }
 
+sub charinrange {
+    my ($range, $arg) = @_;
+    my $code = _getcode($arg);
+    croak __PACKAGE__, "::charinrange: unknown code '$arg'"
+	unless defined $code;
+    _search($range, 0, $#$range, $code);
+}
+
 =head2 charblock
 
     use Unicode::UCD 'charblock';
 
     my $charblock = charblock(0x41);
+    my $charblock = charblock(1234);
+    my $charblock = charblock("0x263a");
+    my $charblock = charblock("U+263a");
 
-charblock() returns the block the character belongs to, e.g.
-C<Basic Latin>.  Note that not all the character positions within all
-blocks are defined.
+    my $ranges    = charblock('Armenian');
+
+With a B<code point argument> charblock() returns the block the character
+belongs to, e.g.  C<Basic Latin>.  Note that not all the character
+positions within all blocks are defined.  A <code point argument>
+is either a decimal or a hexadecimal scalar, or "U+" followed
+by hexadecimals.
+
+If supplied with an argument that can't be a code point, charblock()
+tries to do the opposite and interpret the argument as a character
+block.  The return value is a I<range>: an anonymous list that
+contains anonymous lists, which in turn contain I<start-of-range>,
+I<end-of-range> code point pairs.  You can test whether a code point
+is in a range using the L</charinrange> function.  If the argument is
+not a known charater block, C<undef> is returned.
 
 =cut
 
 my @BLOCKS;
+my %BLOCKS;
 
-sub charblock {
-    my $code = shift;
-
+sub _charblocks {
     unless (@BLOCKS) {
-	if (openunicode(\$BLOCKS, "Blocks.txt")) {
-	    while (<$BLOCKS>) {
+	if (openunicode(\$BLOCKSFH, "Blocks.txt")) {
+	    while (<$BLOCKSFH>) {
 		if (/^([0-9A-F]+)\.\.([0-9A-F]+);\s+(.+)/) {
-		    push @BLOCKS, [ hex($1), hex($2), $3 ];
+		    my ($lo, $hi) = (hex($1), hex($2));
+		    my $subrange = [ $lo, $hi, $3 ];
+		    push @BLOCKS, $subrange;
+		    push @{$BLOCKS{$3}}, $subrange;
 		}
 	    }
-	    close($BLOCKS);
+	    close($BLOCKSFH);
 	}
     }
+}
 
-    _search(\@BLOCKS, 0, $#BLOCKS, $code);
+sub charblock {
+    my $arg = shift;
+
+    _charblocks() unless @BLOCKS;
+
+    my $code = _getcode($arg);
+
+    if (defined $code) {
+	_search(\@BLOCKS, 0, $#BLOCKS, $code);
+    } else {
+	if (exists $BLOCKS{$arg}) {
+	    return $BLOCKS{$arg};
+	} else {
+	    return;
+	}
+    }
 }
 
 =head2 charscript
@@ -187,38 +244,104 @@ sub charblock {
     use Unicode::UCD 'charscript';
 
     my $charscript = charscript(0x41);
+    my $charscript = charscript(1234);
+    my $charscript = charscript("U+263a");
 
-charscript() returns the script the character belongs to, e.g.
-C<Latin>, C<Greek>, C<Han>.
+    my $ranges     = charscript('Thai');
+
+With a B<code point argument> charscript() returns the script the
+character belongs to, e.g.  C<Latin>, C<Greek>, C<Han>.  A <code point
+argument> is either a decimal or a hexadecimal scalar, or "U+"
+followed by hexadecimals.
+
+If supplied with an argument that can't be a code point, charscript()
+tries to do the opposite and interpret the argument as a character
+script.  The return value is a I<range>: an anonymous list that
+contains anonymous lists, which in turn contain I<start-of-range>,
+I<end-of-range> code point pairs.  You can test whether a code point
+is in a range using the L</charinrange> function.  If the argument is
+not a known charater script, C<undef> is returned.
 
 =cut
 
 my @SCRIPTS;
+my %SCRIPTS;
 
-sub charscript {
-    my $code = shift;
-
+sub _charscripts {
     unless (@SCRIPTS) {
-	if (openunicode(\$SCRIPTS, "Scripts.txt")) {
-	    while (<$SCRIPTS>) {
+	if (openunicode(\$SCRIPTSFH, "Scripts.txt")) {
+	    while (<$SCRIPTSFH>) {
 		if (/^([0-9A-F]+)(?:\.\.([0-9A-F]+))?\s+;\s+(\w+)/) {
-		    push @SCRIPTS, [ hex($1), $2 ? hex($2) : undef, $3 ];
+		    my ($lo, $hi) = (hex($1), $2 ? hex($2) : hex($1));
+		    my $script = lc($3);
+		    $script =~ s/\b(\w)/uc($1)/ge;
+		    my $subrange = [ $lo, $hi, $script ];
+		    push @SCRIPTS, $subrange;
+		    push @{$SCRIPTS{$script}}, $subrange;
 		}
 	    }
-	    close($SCRIPTS);
+	    close($SCRIPTSFH);
 	    @SCRIPTS = sort { $a->[0] <=> $b->[0] } @SCRIPTS;
 	}
     }
-
-    _search(\@SCRIPTS, 0, $#SCRIPTS, $code);
 }
 
-=head2 charblock versus charscript
+sub charscript {
+    my $arg = shift;
 
-The difference between a character block and a script is that scripts
-are closer to the linguistic notion of a set of characters required to
-present languages, while block is more of an artifact of the Unicode
-character numbering and separation into blocks of 256 characters.
+    _charscripts() unless @SCRIPTS;
+
+    my $code = _getcode($arg);
+
+    if (defined $code) {
+	_search(\@SCRIPTS, 0, $#SCRIPTS, $code);
+    } else {
+	if (exists $SCRIPTS{$arg}) {
+	    return $SCRIPTS{$arg};
+	} else {
+	    return;
+	}
+    }
+}
+
+=head2 charblocks
+
+    use Unicode::UCD 'charblocks';
+
+    my %charblocks = charblocks();
+
+charblocks() returns a hash with the known block names as the keys,
+and the code point ranges (see L</charblock>) as the values.
+
+=cut
+
+sub charblocks {
+    _charblocks() unless @BLOCKS;
+    return %BLOCKS;
+}
+
+=head2 charscripts
+
+    use Unicode::UCD 'charscripts';
+
+    my %charscripts = charscripts();
+
+charscripts() returns a hash with the known script names as the keys,
+and the code point ranges (see L</charscript>) as the values.
+
+=cut
+
+sub charscripts {
+    _charscripts() unless @SCRIPTS;
+    return %SCRIPTS;
+}
+
+=head2 Blocks versus Scripts
+
+The difference between a block and a script is that scripts are closer
+to the linguistic notion of a set of characters required to present
+languages, while block is more of an artifact of the Unicode character
+numbering and separation into blocks of 256 characters.
 
 For example the Latin B<script> is spread over several B<blocks>, such
 as C<Basic Latin>, C<Latin 1 Supplement>, C<Latin Extended-A>, and
@@ -238,11 +361,47 @@ construct C<\p{In...}> and its negation C<\P{In...}>.
 
 The name of the script or the block comes after the C<In>, for example
 C<\p{InCyrillic}>, C<\P{InBasicLatin}>.  Spaces and dashes ('-') are
-squished away from the names for the C<\p{In...}>, for example
-C<LatinExtendedA> instead of C<Latin Extended-A>.  There are a few
-cases where there exists both a script and a block by the same name,
-in these cases the block version has C<Block> appended: C<\p{InKatakana}>
-is the script, C<\p{InKatakanaBlock}> is the block.
+removed from the names for the C<\p{In...}>, for example
+C<LatinExtendedA> instead of C<Latin Extended-A>.
+
+There are a few cases where there exists both a script and a block by
+the same name, in these cases the block version has C<Block> appended:
+C<\p{InKatakana}> is the script, C<\p{InKatakanaBlock}> is the block.
+
+=head2 charinrange
+
+In addition to using the C<\p{In...}> and C<\P{In...}> constructs, you
+can also test whether a code point is in the I<range> as returned by
+L</charblock> and L</charscript> or as the values of the hash returned
+by L</charblocks> and </charscripts> by using charinrange():
+
+    use Unicode::UCD qw(charscript charinrange);
+
+    $range = charscript('Hiragana');
+    print "looks like hiragana\n" if charinrange($range, $code);
+
+=cut
+
+=head2 Unicode::UCD::UnicodeVersion
+
+Unicode::UCD::UnicodeVersion() returns the version of the Unicode Character
+Database, in other words, the version of the Unicode standard the
+database implements.
+
+=cut
+
+my $UNICODEVERSION;
+
+sub UnicodeVersion {
+    unless (defined $UNICODEVERSION) {
+	openunicode(\$VERSIONFH, "version");
+	chomp($UNICODEVERSION = <$VERSIONFH>);
+	close($VERSIONFH);
+	croak __PACKAGE__, "::VERSION: strange version '$UNICODEVERSION'"
+	    unless $UNICODEVERSION =~ /^\d+(?:\.\d+)+$/;
+    }
+    return $UNICODEVERSION;
+}
 
 =head2 Implementation Note
 

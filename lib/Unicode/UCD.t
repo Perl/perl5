@@ -1,9 +1,9 @@
-use Unicode::UCD 3.1.0;
+use Unicode::UCD;
 
 use Test;
 use strict;
 
-BEGIN { plan tests => 87 };
+BEGIN { plan tests => 103 };
 
 use Unicode::UCD 'charinfo';
 
@@ -91,7 +91,7 @@ ok($charinfo{upper},          '');
 ok($charinfo{lower},          '');
 ok($charinfo{title},          '');
 ok($charinfo{block},          'Hebrew');
-ok($charinfo{script},         'HEBREW');
+ok($charinfo{script},         'Hebrew');
 
 use Unicode::UCD qw(charblock charscript);
 
@@ -119,3 +119,44 @@ ok($charinfo{lower},          '');
 ok($charinfo{title},          '');
 ok($charinfo{block},          'Latin-1 Supplement');
 ok($charinfo{script},         undef);
+
+use Unicode::UCD qw(charblocks charscripts);
+
+my %charblocks = charblocks();
+
+ok(exists $charblocks{Thai});
+ok($charblocks{Thai}->[0]->[0], hex('0e00'));
+ok(!exists $charblocks{PigLatin});
+
+my %charscripts = charscripts();
+
+ok(exists $charscripts{Armenian});
+ok($charscripts{Armenian}->[0]->[0], hex('0531'));
+ok(!exists $charscripts{PigLatin});
+
+my $charscript;
+
+$charscript = charscript("12ab");
+ok($charscript, 'Ethiopic');
+
+$charscript = charscript("0x12ab");
+ok($charscript, 'Ethiopic');
+
+$charscript = charscript("U+12ab");
+ok($charscript, 'Ethiopic');
+
+my $ranges;
+
+$ranges = charscript('Ogham');
+ok($ranges->[0]->[0], hex('1681'));
+ok($ranges->[0]->[1], hex('169a'));
+
+use Unicode::UCD qw(charinrange);
+
+$ranges = charscript('Cherokee');
+ok(!charinrange($ranges, "139f"));
+ok( charinrange($ranges, "13a0"));
+ok( charinrange($ranges, "13f4"));
+ok(!charinrange($ranges, "13f5"));
+
+ok(Unicode::UCD::UnicodeVersion, 3.1);
