@@ -71,6 +71,8 @@ static char sccsid[] = "@(#)glob.c	8.3 (Berkeley) 10/13/93";
 
 #include <EXTERN.h>
 #include <perl.h>
+#include <XSUB.h>
+
 #include "bsd_glob.h"
 #ifdef I_PWD
 #	include <pwd.h>
@@ -160,6 +162,18 @@ static int	 match(Char *, Char *, Char *);
 #ifdef GLOB_DEBUG
 static void	 qprintf(const char *, Char *);
 #endif /* GLOB_DEBUG */
+
+#ifdef PERL_IMPLICIT_CONTEXT
+static Direntry_t *	my_readdir(DIR*);
+
+static Direntry_t *
+my_readdir(DIR *d)
+{
+    return PerlDir_read(d);
+}
+#else
+#define	my_readdir	readdir
+#endif
 
 int
 bsd_glob(const char *pattern, int flags,
@@ -534,10 +548,8 @@ glob2(Char *pathbuf, Char *pathend, Char *pattern, glob_t *pglob)
 		if (*pattern == EOS) {		/* End of pattern? */
 			*pathend = EOS;
 
-#ifdef HAS_LSTAT
 			if (g_lstat(pathbuf, &sb, pglob))
 				return(0);
-#endif /* HAS_LSTAT */
 
 			if (((pglob->gl_flags & GLOB_MARK) &&
 			    pathend[-1] != SEP) && (S_ISDIR(sb.st_mode)
@@ -611,7 +623,7 @@ glob3(Char *pathbuf, Char *pathend, Char *pattern,
 	if (pglob->gl_flags & GLOB_ALTDIRFUNC)
 		readdirfunc = pglob->gl_readdir;
 	else
-		readdirfunc = readdir;
+		readdirfunc = my_readdir;
 	while ((dp = (*readdirfunc)(dirp))) {
 		register U8 *sc;
 		register Char *dc;
@@ -634,7 +646,7 @@ glob3(Char *pathbuf, Char *pathend, Char *pattern,
 	if (pglob->gl_flags & GLOB_ALTDIRFUNC)
 		(*pglob->gl_closedir)(dirp);
 	else
-		closedir(dirp);
+		PerlDir_close(dirp);
 	return(err);
 }
 
@@ -658,7 +670,6 @@ globextend(const Char *path, glob_t *pglob)
 {
 	register char **pathv;
 	register int i;
-	Size_t newsize;
 	char *copy;
 	const Char *p;
 
@@ -669,10 +680,11 @@ globextend(const Char *path, glob_t *pglob)
         printf("\n");
 #endif GLOB_DEBUG
 
-	newsize = sizeof(*pathv) * (2 + pglob->gl_pathc + pglob->gl_offs);
-	pathv = pglob->gl_pathv ?
-		    realloc((char *)pglob->gl_pathv, newsize) :
-		    malloc(newsize);
+	if (pglob->gl_pathv)
+		pathv = Renew(pglob->gl_pathv,
+			      (2 + pglob->gl_pathc + pglob->gl_offs),char*);
+	else
+		New(0,pathv,(2 + pglob->gl_pathc + pglob->gl_offs),char*);
 	if (pathv == NULL)
 		return(GLOB_NOSPACE);
 
@@ -686,7 +698,8 @@ globextend(const Char *path, glob_t *pglob)
 
 	for (p = path; *p++;)
 		continue;
-	if ((copy = malloc(p - path)) != NULL) {
+	New(0, copy, p-path, char);
+	if (copy != NULL) {
 		g_Ctoc(path, copy);
 		pathv[pglob->gl_offs + pglob->gl_pathc++] = copy;
 	}
@@ -756,8 +769,8 @@ bsd_globfree(glob_t *pglob)
 		pp = pglob->gl_pathv + pglob->gl_offs;
 		for (i = pglob->gl_pathc; i--; ++pp)
 			if (*pp)
-				free(*pp);
-		free(pglob->gl_pathv);
+				Safefree(*pp);
+		Safefree(pglob->gl_pathv);
 	}
 }
 
@@ -773,11 +786,10 @@ g_opendir(register Char *str, glob_t *pglob)
 
 	if (pglob->gl_flags & GLOB_ALTDIRFUNC)
 		return((*pglob->gl_opendir)(buf));
-
-	return(opendir(buf));
+	else
+	    return(PerlDir_open(buf));
 }
 
-#ifdef HAS_LSTAT
 static int
 g_lstat(register Char *fn, Stat_t *sb, glob_t *pglob)
 {
@@ -786,9 +798,12 @@ g_lstat(register Char *fn, Stat_t *sb, glob_t *pglob)
 	g_Ctoc(fn, buf);
 	if (pglob->gl_flags & GLOB_ALTDIRFUNC)
 		return((*pglob->gl_lstat)(buf, sb));
-	return(lstat(buf, sb));
-}
+#ifdef HAS_LSTAT
+	return(PerlLIO_lstat(buf, sb));
+#else
+	return(PerlLIO_stat(buf, sb));
 #endif /* HAS_LSTAT */
+}
 
 static int
 g_stat(register Char *fn, Stat_t *sb, glob_t *pglob)
@@ -798,7 +813,7 @@ g_stat(register Char *fn, Stat_t *sb, glob_t *pglob)
 	g_Ctoc(fn, buf);
 	if (pglob->gl_flags & GLOB_ALTDIRFUNC)
 		return((*pglob->gl_stat)(buf, sb));
-	return(stat(buf, sb));
+	return(PerlLIO_stat(buf, sb));
 }
 
 static Char *
