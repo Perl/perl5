@@ -288,10 +288,6 @@ Perl_ithread_run(void * arg) {
 	}
 
 	PerlIO_flush((PerlIO*)NULL);
-	MUTEX_LOCK(&create_destruct_mutex);
-	active_threads--;
-	assert( active_threads >= 0 );
-	MUTEX_UNLOCK(&create_destruct_mutex);
 	MUTEX_LOCK(&thread->mutex);
 	thread->state |= PERL_ITHR_FINISHED;
 
@@ -301,6 +297,11 @@ Perl_ithread_run(void * arg) {
 	} else {
 		MUTEX_UNLOCK(&thread->mutex);
 	}
+	MUTEX_LOCK(&create_destruct_mutex);
+	active_threads--;
+	assert( active_threads >= 0 );
+	MUTEX_UNLOCK(&create_destruct_mutex);
+
 #ifdef WIN32
 	return (DWORD)0;
 #else
