@@ -16,7 +16,7 @@ use File::Spec;
 chdir(dirname($0));
 ($file = basename($0)) =~ s/\.PL$//;
 $file =~ s/\.pl$// if ($Config{'osname'} eq 'OS2');      # "case-forgiving"
-$file =~ s/\.pl$/.com/ if ($Config{'osname'} eq 'VMS');  # "case-forgiving"
+$file =~ s/\.pl$/.com/i if ($Config{'osname'} eq 'VMS');  # "case-forgiving"
 
 my $dprof_pm = File::Spec->catfile(File::Spec->updir, 'ext', 'Devel', 'DProf', 'DProf.pm');
 my $VERSION = 0;
