@@ -44,8 +44,21 @@ while (@{$optref} && $optref->[0] =~ /^([\w_]+)=(.*)$/) {
     shift(@{$optref});
 }
 
-$opt{'dynamic_ext'} = join(' ',FindExt::dynamic_extensions());
-$opt{'nonxs_ext'}   = join(' ',FindExt::noxs_extensions());
+my @dynamic = FindExt::dynamic_extensions();
+my @noxs    = FindExt::noxs_extensions();
+my @known   = sort(@dynamic,split(/\s+/,$opt{'staticext'}),@noxs);
+$opt{'known_extensions'} = join(' ',@known);
+
+if (!$opt{'use5005threads'} || $opt{'use5005threads'} eq 'undef')
+ {
+  @dynamic = grep(!/Thread/,@dynamic);
+  @known   = grep(!/Thread/,@dynamic);
+ }
+
+$opt{'dynamic_ext'} = join(' ',@dynamic);
+$opt{'nonxs_ext'}   = join(' ',@noxs);
+
+$opt{'extensions'} = join(' ',@known);
 
 my $pl_h = '../patchlevel.h';
 
