@@ -1965,16 +1965,16 @@ t/lib/sample-tests/bailout		Test data for Test::Harness
 t/lib/sample-tests/combined		Test data for Test::Harness
 t/lib/sample-tests/descriptive		Test data for Test::Harness
 t/lib/sample-tests/duplicates		Test data for Test::Harness
-t/lib/sample-tests/header_at_end	Test data for Test::Harness
-t/lib/sample-tests/header_at_end_fail	Test::Harness
+t/lib/sample-tests/head_end	        Test data for Test::Harness
+t/lib/sample-tests/head_fail	        Test data for Test::Harness
 t/lib/sample-tests/no_nums		Test data for Test::Harness
 t/lib/sample-tests/simple		Test data for Test::Harness
 t/lib/sample-tests/simple_fail		Test data for Test::Harness
 t/lib/sample-tests/skip			Test data for Test::Harness
 t/lib/sample-tests/skip_all		Test data for Test::Harness
-t/lib/sample-tests/skip_no_msg	Test::Harness
+t/lib/sample-tests/skip_no_msg	        Test data for Test::Harness
 t/lib/sample-tests/todo			Test data for Test::Harness
-t/lib/sample-tests/todo_inline	Test::Harness
+t/lib/sample-tests/todo_inline	        Test data for Test::Harness
 t/lib/sample-tests/with_comments	Test data for Test::Harness
 t/lib/st-dump.pl		See if Storable works
 t/lib/strict/refs		Tests of "use strict 'refs'" for strict.t
