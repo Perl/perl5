@@ -444,7 +444,11 @@ sub _is_header {
         $self->{max}  = $max;
         assert( $self->{max} >= 0,  'Max # of tests looks right' );
 
-        if( defined $extra ) {
+               if( not $max and not $extra) {
+                       #We're skipping, thats for sure
+                       $self->{skip_all} = 'no reason given';
+               }
+               elsif( defined $extra ) {
             my($todo, $skip, $reason) = $extra =~ /$Extra_Header_Re/xo;
 
             $self->{todo} = { map { $_ => 1 } split /\s+/, $todo } if $todo;
