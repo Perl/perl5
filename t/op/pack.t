@@ -12,7 +12,7 @@ my $no_endianness = $] > 5.009 ? '' :
 my $no_signedness = $] > 5.009 ? '' :
   "Signed/unsigned pack modifiers not available on this perl";
 
-plan tests => 13855;
+plan tests => 13856;
 
 use strict;
 use warnings;
@@ -1490,4 +1490,12 @@ is(unpack('c'), 65, "one-arg unpack (change #18751)"); # defaulting to $_
     is(scalar @a, 200,       "[perl #15288]");
     is($a[-1], "01234567\n", "[perl #15288]");
     is($a[-2], "X",          "[perl #15288]");
+}
+
+# checksums
+{
+    # verify that unpack advances correctly wrt a checksum
+    my (@x) = unpack("b10a", "abcd");
+    my (@y) = unpack("%b10a", "abcd");
+    is($x[1], $y[1], "checksum advance ok");
 }

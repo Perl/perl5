@@ -1085,7 +1085,7 @@ S_unpack_rec(pTHX_ register tempsym_t* symptr, register char *s, char *strbeg, c
 		    len -= 8;
 		}
 		if (len) {
-		    bits = *s;
+		    bits = *s++;
 		    if (datumtype == 'b') {
 			while (len-- > 0) {
 			    if (bits & 1) cuv++;
