@@ -495,7 +495,8 @@ Perl_pad_alloc(pTHX_ I32 optype, U32 tmptype)
 		   (sv = names[PL_padix]) && sv != &PL_sv_undef)
 		continue;
 	    sv = *av_fetch(PL_comppad, PL_padix, TRUE);
-	    if (!(SvFLAGS(sv) & (SVs_PADTMP|SVs_PADMY)) && !IS_PADGV(sv))
+	    if (!(SvFLAGS(sv) & (SVs_PADTMP|SVs_PADMY)) &&
+		!IS_PADGV(sv) && !IS_PADCONST(sv))
 		break;
 	}
 	retval = PL_padix;
@@ -6673,7 +6674,7 @@ Perl_peep(pTHX_ register OP *o)
 
 	    /* Make the CONST have a shared SV */
 	    svp = cSVOPx_svp(((BINOP*)o)->op_last);
-	    if (!SvFAKE(sv = *svp) || !SvREADONLY(sv)) {
+	    if ((!SvFAKE(sv = *svp) || !SvREADONLY(sv)) && !IS_PADCONST(sv)) {
 		key = SvPV(sv, keylen);
 		lexname = newSVpvn_share(key, keylen, 0);
 		SvREFCNT_dec(sv);
