@@ -31,6 +31,204 @@ or any other branch.
 Version v5.7.1		Development release working toward v5.8
 --------------
 ____________________________________________________________________________
+[  9944] By: jhi                                   on 2001/05/01  23:33:37
+        Log: Add known-to-be-tested modules to the list-to-be-skipped.
+     Branch: perl
+	   ! t/lib/1_compile.t
+____________________________________________________________________________
+[  9943] By: jhi                                   on 2001/05/01  23:24:40
+        Log: Subject: BorlandC++ fix
+             From: "Vadim Konovalov" <watman@inbox.ru>
+             Date: Mon, 30 Apr 2001 20:12:26 -0700
+             Message-ID: <006e01c0d1ec$8fb1b8d0$406bff87@vad>
+     Branch: perl
+	   ! win32/makefile.mk
+____________________________________________________________________________
+[  9942] By: jhi                                   on 2001/05/01  23:18:02
+        Log: Update to Filter::Simple 0.60, create a test for it.
+     Branch: perl
+	   + t/lib/filter-simple.t
+	   ! MANIFEST lib/Filter/Simple.pm
+____________________________________________________________________________
+[  9941] By: jhi                                   on 2001/05/01  19:47:24
+        Log: Subject: Re: bleadperl: s/// failure with \b and /g 
+             From: Hugo <hv@crypt.compulink.co.uk>
+             Date: Tue, 01 May 2001 20:12:20 +0100
+             Message-Id: <200105011912.UAA06826@crypt.compulink.co.uk>
+     Branch: perl
+	   ! pp_hot.c t/op/re_tests
+____________________________________________________________________________
+[  9940] By: jhi                                   on 2001/05/01  19:42:16
+        Log: Integrate perlio.
+     Branch: perl
+	  !> lib/base.pm t/lib/fields.t
+____________________________________________________________________________
+[  9939] By: jhi                                   on 2001/05/01  19:39:51
+        Log: Subject: [PATCH] Allow appending on a PerlIO::Scalar
+             From: Benjamin Sugars <bsugars@canoe.ca>
+             Date: Tue, 1 May 2001 16:32:03 -0400 (EDT)
+             Message-ID: <Pine.LNX.4.21.0105011627110.1526-100000@marmot.rim.canoe.ca>
+     Branch: perl
+	   ! ext/PerlIO/Scalar/Scalar.xs t/lib/io_scalar.t
+____________________________________________________________________________
+[  9938] By: jhi                                   on 2001/05/01  19:34:09
+        Log: Add NEXT, a pseudo-class for method redispatching.
+             <Damian>NEXT.pm probably offers more bang-for-buck
+             than anything else I've ever written.</Damian>
+     Branch: perl
+	   + lib/NEXT.pm t/lib/next.t
+	   ! MANIFEST
+____________________________________________________________________________
+[  9937] By: jhi                                   on 2001/05/01  19:21:41
+        Log: Update to Switch 2.02.
+     Branch: perl
+	   ! lib/Switch.pm t/lib/switch.t
+____________________________________________________________________________
+[  9936] By: nick                                  on 2001/05/01  19:09:21
+        Log: Fix for base.pm clobbering $VERSION
+     Branch: perlio
+	   ! lib/base.pm
+____________________________________________________________________________
+[  9935] By: nick                                  on 2001/05/01  18:54:38
+        Log: Test for base.pm clobbering $VERSION.
+     Branch: perlio
+	   ! t/lib/fields.t
+____________________________________________________________________________
+[  9934] By: jhi                                   on 2001/05/01  18:39:10
+        Log: Add information about Scalar::Util::blessed.
+     Branch: perl
+	   ! pod/perlobj.pod
+____________________________________________________________________________
+[  9933] By: jhi                                   on 2001/05/01  18:33:51
+        Log: Subject: Extra UNIVERSAL documentation
+             From: Mike Guy <mjtg@cam.ac.uk>
+             Date: Tue, 01 May 2001 20:12:11 +0100
+             Message-Id: <E14ufZD-0007kD-00@libra.cus.cam.ac.uk>
+     Branch: perl
+	   ! pod/perlobj.pod
+____________________________________________________________________________
+[  9932] By: jhi                                   on 2001/05/01  18:26:54
+        Log: Subject: Autoflush in tests as appropriate
+             From: Mike Guy <mjtg@cam.ac.uk>
+             Date: Tue, 01 May 2001 20:05:31 +0100
+             Message-Id: <E14ufSl-0007gS-00@libra.cus.cam.ac.uk>
+     Branch: perl
+	   ! t/lib/syslfs.t t/op/die_exit.t t/op/lex_assign.t t/op/lfs.t
+	   ! t/op/taint.t
+____________________________________________________________________________
+[  9931] By: jhi                                   on 2001/05/01  18:02:29
+        Log: Subject: [PATCH] Multiple consecutive writes on PerlIO::Scalar
+             From: Benjamin Sugars <bsugars@canoe.ca>
+             Date: Tue, 1 May 2001 14:58:24 -0400 (EDT)
+             Message-ID: <Pine.LNX.4.21.0105011431300.1526-100000@marmot.rim.canoe.ca>
+     Branch: perl
+	   ! ext/PerlIO/Scalar/Scalar.xs t/lib/io_scalar.t
+____________________________________________________________________________
+[  9930] By: jhi                                   on 2001/05/01  15:12:26
+        Log: Subject: Re: Finally got a round tuit
+             From: "H.Merijn Brand" <h.m.brand@hccnet.nl>
+             Date: Tue, 01 May 2001 14:14:10 +0200
+             Message-Id: <20010501135740.19E4.H.M.BRAND@hccnet.nl>
+             
+             The -DP part, slightly modified.
+     Branch: perl
+	   ! perl.c
+____________________________________________________________________________
+[  9929] By: jhi                                   on 2001/05/01  14:17:15
+        Log: Subject: Re: Finally got a round tuit
+             From: "H.Merijn Brand" <h.m.brand@hccnet.nl>
+             Date: Tue, 01 May 2001 16:34:06 +0200
+             Message-Id: <20010501163255.19F2.H.M.BRAND@hccnet.nl>
+             
+             cpp and optimization tweaks for HP-UX.
+     Branch: perl
+	   ! hints/hpux.sh
+____________________________________________________________________________
+[  9928] By: jhi                                   on 2001/05/01  13:24:20
+        Log: Tune the scan_num() comments to reality.
+     Branch: perl
+	   ! toke.c
+____________________________________________________________________________
+[  9927] By: jhi                                   on 2001/05/01  13:14:01
+        Log: Subject: [PATCH B::Deparse] optimised sort
+             From: Robin Houston <robin@kitsite.com>
+             Date: Tue, 1 May 2001 14:07:12 +0100
+             Message-ID: <20010501140712.A4266@penderel>
+     Branch: perl
+	   ! ext/B/B/Deparse.pm
+____________________________________________________________________________
+[  9926] By: jhi                                   on 2001/05/01  13:10:53
+        Log: Subject: [PATCH t/lib/b-deparse.t] 
+             From: Robin Houston <robin@kitsite.com>
+             Date: Tue, 1 May 2001 13:37:42 +0100
+             Message-ID: <20010501133742.A4082@penderel>
+     Branch: perl
+	   ! t/lib/b-deparse.t
+____________________________________________________________________________
+[  9925] By: jhi                                   on 2001/05/01  13:10:13
+        Log: Subject: [PATCH B::Deparse] for(;;), sort
+             From: Robin Houston <robin@kitsite.com>
+             Date: Tue, 1 May 2001 13:35:00 +0100
+             Message-ID: <20010501133500.A4061@penderel>
+     Branch: perl
+	   ! ext/B/B/Deparse.pm
+____________________________________________________________________________
+[  9924] By: jhi                                   on 2001/05/01  13:09:22
+        Log: Subject: [PATCH B::Deparse] do, warn, use
+             From: Robin Houston <robin@kitsite.com>
+             Date: Tue, 1 May 2001 13:31:03 +0100
+             Message-ID: <20010501133103.A4041@penderel>
+     Branch: perl
+	   ! ext/B/B/Deparse.pm
+____________________________________________________________________________
+[  9923] By: jhi                                   on 2001/05/01  11:45:36
+        Log: Subject: [PATCH] Test autoflush on fork (Was: Should I remove something?)
+             From: Benjamin Sugars <ben.sugars@home.com>
+             Date: Mon, 30 Apr 2001 22:21:54 -0400 (EDT)
+             Message-ID: <Pine.LNX.4.21.0104302213190.19002-100000@localhost.localdomain>
+     Branch: perl
+	   + t/io/fflush.t
+	   ! MANIFEST
+____________________________________________________________________________
+[  9922] By: jhi                                   on 2001/05/01  11:35:42
+        Log: Subject: [PATCH: perl@9917] more VMS tweaks for addn'l selfstubber tests
+             From: Peter Prymmer <pvhp@forte.com>
+             Date: Mon, 30 Apr 2001 16:26:30 -0700 (PDT)
+             Message-ID: <Pine.OSF.4.10.10104301621200.161547-100000@aspara.forte.com>
+     Branch: perl
+	   ! t/lib/selfstubber.t
+____________________________________________________________________________
+[  9921] By: jhi                                   on 2001/04/30  16:34:33
+        Log: Subject: [PATCH B::Concise] suppress warning
+             From: Robin Houston <robin@kitsite.com>
+             Date: Mon, 30 Apr 2001 16:09:49 +0100
+             Message-ID: <20010430160949.A25086@penderel>
+     Branch: perl
+	   ! ext/B/B/Concise.pm
+____________________________________________________________________________
+[  9920] By: jhi                                   on 2001/04/30  13:56:04
+        Log: Strip the *markers* from #9919.
+     Branch: perl
+	   ! pod/perlfaq.pod pod/perlfaq5.pod
+____________________________________________________________________________
+[  9919] By: jhi                                   on 2001/04/30  13:54:04
+        Log: Subject: [PATCH] (perlfaq/bleadperl) append mode and locking
+             From: Gwyn Judd <b.judd@xtra.co.nz>
+             Date: Sun, 29 Apr 2001 01:47:49 +1200
+             Message-ID: <20010429014749.A4418@thislove>
+     Branch: perl
+	   ! pod/perlfaq.pod pod/perlfaq5.pod
+____________________________________________________________________________
+[  9918] By: jhi                                   on 2001/04/30  13:13:54
+        Log: More_tweakage.
+     Branch: perl
+	   ! pod/perldata.pod pod/perldiag.pod
+____________________________________________________________________________
+[  9917] By: jhi                                   on 2001/04/30  13:01:27
+        Log: Update Changes.
+     Branch: perl
+	   ! Changes patchlevel.h
+____________________________________________________________________________
 [  9916] By: jhi                                   on 2001/04/30  12:57:03
         Log: T_w_e_a_k_a_g_e.
      Branch: perl
