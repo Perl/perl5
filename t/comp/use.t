@@ -5,9 +5,15 @@ BEGIN {
     unshift @INC, '../lib';
 }
 
-print "1..14\n";
+print "1..15\n";
 
 my $i = 1;
+eval "use 5.000";	# implicit semicolon
+if ($@) {
+    print STDERR $@,"\n";
+    print "not ";
+}
+print "ok ",$i++,"\n";
 
 eval "use 5.000;";
 if ($@) {

@@ -277,6 +277,7 @@ S_cl_is_anything(pTHX_ struct regnode_charclass_class *cl)
 STATIC void
 S_cl_init(pTHX_ struct regnode_charclass_class *cl)
 {
+    Zero(cl, 1, struct regnode_charclass_class);
     cl->type = ANYOF;
     cl_anything(cl);
 }
@@ -284,10 +285,9 @@ S_cl_init(pTHX_ struct regnode_charclass_class *cl)
 STATIC void
 S_cl_init_zero(pTHX_ struct regnode_charclass_class *cl)
 {
+    Zero(cl, 1, struct regnode_charclass_class);
     cl->type = ANYOF;
     cl_anything(cl);
-    ANYOF_CLASS_ZERO(cl);
-    ANYOF_BITMAP_ZERO(cl);
     if (LOC)
 	cl->flags |= ANYOF_LOCALE;
 }

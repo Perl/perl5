@@ -825,7 +825,7 @@ S_force_version(pTHX_ char *s)
 	if (*d == 'v')
 	    d++;
         for (; isDIGIT(*d) || *d == '_' || *d == '.'; d++);
-        if ((*d == ';' || isSPACE(*d)) && *(skipspace(d)) != ',') {
+        if (*d == ';' || isSPACE(*d) || *d == '}' || !*d) {
             s = scan_num(s);
             /* real VERSION number -- GBARR */
             version = yylval.opval;
