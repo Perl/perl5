@@ -28,6 +28,25 @@ example from http://www.xray.mpe.mpg.de/mailing-lists/perl5-porters/
 Version v5.8.1		Maintenance release working toward v5.8.1
 --------------
 ____________________________________________________________________________
+[ 19996] By: jhi                                   on 2003/07/04  14:41:18
+        Log: Integrate:
+             [ 19993]
+             Oops.
+             
+             [ 19994]
+             More $0 sad tales.
+             
+             [ 19995]
+             According to Tels our M::BI is _better_ than the 1.64 in CPAN.
+     Branch: maint-5.8/perl
+	  !> ext/Digest/MD5/MD5.xs ext/Digest/MD5/t/files.t
+	  !> lib/Math/BigInt.pm pod/perlvar.pod
+____________________________________________________________________________
+[ 19992] By: jhi                                   on 2003/07/04  13:58:29
+        Log: Update Changes.
+     Branch: maint-5.8/perl
+	   ! Changes patchlevel.h
+____________________________________________________________________________
 [ 19991] By: jhi                                   on 2003/07/04  13:54:33
         Log: Integrate:
              [ 19976]
