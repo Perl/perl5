@@ -45,7 +45,7 @@ struct xpvhv {
 	register U32 hash_PeRlHaSh = 0; \
 	while (i_PeRlHaSh--) \
 	    hash_PeRlHaSh = hash_PeRlHaSh * 33 + *s_PeRlHaSh++; \
-	(hash) = hash_PeRlHaSh; \
+	(hash) = hash_PeRlHaSh + (hash_PeRlHaSh>>5); \
     } STMT_END
 
 
