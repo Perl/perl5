@@ -80,9 +80,9 @@ while (<UTILS>) {
     next if /^#/;
     chomp;
     $_ = $1 if /#.*pod\s*=\s*(\S+)/;
-    my ($where, $what) = m|^(.*)/(.*)|;
+    my ($where, $what) = m|^(.*?)/(\S+)|;
     runpod2man($where, $opts{man1dir}, $opts{man1ext}, $what);
-    if (($where, $what) = /#.*link\s*=\s*(\S+)/) {
+    if (($where, $what) = m|#.*link\s*=\s*(\S+)/(\S+)| {
         runpod2man($where, $opts{man1dir}, $opts{man1ext}, $what);
     }
 }

@@ -7,7 +7,7 @@ utils/perlbug
 utils/pl2pm
 utils/splain
 utils/dproffpp
-x2p/s2p         # link = xsp/psed
+x2p/s2p         # link = x2p/psed
 x2p/findperl
 x2p/a2p         # pod = x2p/a2p.pod
 pod/pod2man
