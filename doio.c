@@ -1058,9 +1058,14 @@ register SV **sp;
     register I32 val;
     register I32 val2;
     register I32 tot = 0;
+    char *what;
     char *s;
     SV **oldmark = mark;
 
+#define APPLY_TAINT_PROPER() \
+    if (!(tainting && tainted)) {} else { goto taint_proper; }
+
+    /* This is a first heuristic; it doesn't catch tainting magic. */
     if (tainting) {
 	while (++mark <= sp) {
 	    if (SvTAINTED(*mark)) {
@@ -1072,25 +1077,33 @@ register SV **sp;
     }
     switch (type) {
     case OP_CHMOD:
-	TAINT_PROPER("chmod");
+	what = "chmod";
+	APPLY_TAINT_PROPER();
 	if (++mark <= sp) {
-	    tot = sp - mark;
 	    val = SvIVx(*mark);
+	    APPLY_TAINT_PROPER();
+	    tot = sp - mark;
 	    while (++mark <= sp) {
-		if (chmod(SvPVx(*mark, na),val))
+		char *name = SvPVx(*mark, na);
+		APPLY_TAINT_PROPER();
+		if (chmod(name, val))
 		    tot--;
 	    }
 	}
 	break;
 #ifdef HAS_CHOWN
     case OP_CHOWN:
-	TAINT_PROPER("chown");
+	what = "chown";
+	APPLY_TAINT_PROPER();
 	if (sp - mark > 2) {
 	    val = SvIVx(*++mark);
 	    val2 = SvIVx(*++mark);
+	    APPLY_TAINT_PROPER();
 	    tot = sp - mark;
 	    while (++mark <= sp) {
-		if (chown(SvPVx(*mark, na),val,val2))
+		char *name = SvPVx(*mark, na);
+		APPLY_TAINT_PROPER();
+		if (chown(name, val, val2))
 		    tot--;
 	    }
 	}
@@ -1098,11 +1111,11 @@ register SV **sp;
 #endif
 #ifdef HAS_KILL
     case OP_KILL:
-	TAINT_PROPER("kill");
+	what = "kill";
+	APPLY_TAINT_PROPER();
 	if (mark == sp)
 	    break;
 	s = SvPVx(*++mark, na);
-	tot = sp - mark;
 	if (isUPPER(*s)) {
 	    if (*s == 'S' && s[1] == 'I' && s[2] == 'G')
 		s += 3;
@@ -1111,6 +1124,8 @@ register SV **sp;
 	}
 	else
 	    val = SvIVx(*mark);
+	APPLY_TAINT_PROPER();
+	tot = sp - mark;
 #ifdef VMS
 	/* kill() doesn't do process groups (job trees?) under VMS */
 	if (val < 0) val = -val;
@@ -1123,6 +1138,7 @@ register SV **sp;
 	    while (++mark <= sp) {
 		I32 proc = SvIVx(*mark);
 		register unsigned long int __vmssts;
+		APPLY_TAINT_PROPER();
 		if (!((__vmssts = sys$delprc(&proc,0)) & 1)) {
 		    tot--;
 		    switch (__vmssts) {
@@ -1145,6 +1161,7 @@ register SV **sp;
 	    val = -val;
 	    while (++mark <= sp) {
 		I32 proc = SvIVx(*mark);
+		APPLY_TAINT_PROPER();
 #ifdef HAS_KILLPG
 		if (killpg(proc,val))	/* BSD */
 #else
@@ -1155,17 +1172,21 @@ register SV **sp;
 	}
 	else {
 	    while (++mark <= sp) {
-		if (kill(SvIVx(*mark),val))
+		I32 proc = SvIVx(*mark);
+		APPLY_TAINT_PROPER();
+		if (kill(proc, val))
 		    tot--;
 	    }
 	}
 	break;
 #endif
     case OP_UNLINK:
-	TAINT_PROPER("unlink");
+	what = "unlink";
+	APPLY_TAINT_PROPER();
 	tot = sp - mark;
 	while (++mark <= sp) {
 	    s = SvPVx(*mark, na);
+	    APPLY_TAINT_PROPER();
 	    if (euid || unsafe) {
 		if (UNLINK(s))
 		    tot--;
@@ -1186,7 +1207,8 @@ register SV **sp;
 	break;
 #ifdef HAS_UTIME
     case OP_UTIME:
-	TAINT_PROPER("utime");
+	what = "utime";
+	APPLY_TAINT_PROPER();
 	if (sp - mark > 2) {
 #if defined(I_UTIME) || defined(VMS)
 	    struct utimbuf utbuf;
@@ -1205,9 +1227,12 @@ register SV **sp;
 	    utbuf.actime = SvIVx(*++mark);    /* time accessed */
 	    utbuf.modtime = SvIVx(*++mark);    /* time modified */
 #endif
+	    APPLY_TAINT_PROPER();
 	    tot = sp - mark;
 	    while (++mark <= sp) {
-		if (utime(SvPVx(*mark, na),&utbuf))
+		char *name = SvPVx(*mark, na);
+		APPLY_TAINT_PROPER();
+		if (utime(name, &utbuf))
 		    tot--;
 	    }
 	}
@@ -1217,6 +1242,12 @@ register SV **sp;
 #endif
     }
     return tot;
+
+  taint_proper:
+    TAINT_PROPER(what);
+    return 0;	/* this should never happen */
+
+#undef APPLY_TAINT_PROPER
 }
 
 /* Do the permissions allow some operation?  Assumes statcache already set. */
