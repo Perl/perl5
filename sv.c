@@ -5309,34 +5309,37 @@ Perl_sv_clear(pTHX_ register SV *sv)
 	if (PL_defstash) {		/* Still have a symbol table? */
 	    dSP;
 	    CV* destructor;
-	    SV tmpref;
 
-	    Zero(&tmpref, 1, SV);
-	    sv_upgrade(&tmpref, SVt_RV);
-	    SvROK_on(&tmpref);
-	    SvREADONLY_on(&tmpref);	/* DESTROY() could be naughty */
-	    SvREFCNT(&tmpref) = 1;
+
 
 	    do {	
 		stash = SvSTASH(sv);
 		destructor = StashHANDLER(stash,DESTROY);
 		if (destructor) {
+		    SV* tmpref = newRV(sv);
+	            SvREADONLY_on(tmpref);   /* DESTROY() could be naughty */
 		    ENTER;
 		    PUSHSTACKi(PERLSI_DESTROY);
-		    SvRV(&tmpref) = SvREFCNT_inc(sv);
 		    EXTEND(SP, 2);
 		    PUSHMARK(SP);
-		    PUSHs(&tmpref);
+		    PUSHs(tmpref);
 		    PUTBACK;
 		    call_sv((SV*)destructor, G_DISCARD|G_EVAL|G_KEEPERR|G_VOID);
-		    SvREFCNT(sv)--;
+		   
+		    
 		    POPSTACK;
 		    SPAGAIN;
 		    LEAVE;
+		    if(SvREFCNT(tmpref) < 2) {
+		        /* tmpref is not kept alive! */
+		        SvREFCNT(sv)--;
+			SvRV(tmpref) = 0;
+			SvROK_off(tmpref);
+		    }
+		    SvREFCNT_dec(tmpref);
 		}
 	    } while (SvOBJECT(sv) && SvSTASH(sv) != stash);
 
-	    del_XRV(SvANY(&tmpref));
 
 	    if (SvREFCNT(sv)) {
 		if (PL_in_clean_objs)
