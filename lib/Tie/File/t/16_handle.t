@@ -14,6 +14,7 @@ print "ok $N\n"; $N++;
 use Fcntl 'O_CREAT', 'O_RDWR';
 sysopen F, $file, O_CREAT | O_RDWR 
   or die "Couldn't create temp file $file: $!; aborting";
+binmode(F);
 
 my $o = tie @a, 'Tie::File', \*F;
 print $o ? "ok $N\n" : "not ok $N\n";
@@ -82,7 +83,7 @@ untie @a;
    if ($@ && $@ =~ /filehandle does not appear to be seekable/) {
      print "ok $N\n";
    } else {
-     print "not ok $N\n";
+     print "not ok $N # $@\n";
    }
    $N++;
 }
