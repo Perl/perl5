@@ -1,6 +1,6 @@
 # -*- Mode: cperl; coding: utf-8; cperl-indent-level: 4 -*-
 package CPAN;
-$VERSION = '1.75_01';
+$VERSION = '1.75_02';
 # $Id: CPAN.pm,v 1.409 2003/07/28 22:07:23 k Exp $
 
 # only used during development:
@@ -774,14 +774,20 @@ sub has_inst {
 });
 	sleep 2;
     } elsif ($mod eq "Module::Signature"){
-	# No point in complaining unless the user can reasonably install it.
-	if (eval { require Crypt::OpenPGP; 1 } or
-	    defined $CPAN::Config->{'gpg'}) {
-	    $CPAN::Frontend->myprint(qq{
+	unless ($Have_warned->{"Module::Signature"}++) {
+	    # No point in complaining unless the user can
+	    # reasonably install and use it.
+	    if (eval { require Crypt::OpenPGP; 1 } ||
+		defined $CPAN::Config->{'gpg'}) {
+		$CPAN::Frontend->myprint(qq{
   CPAN: Module::Signature security checks disabled because Module::Signature
   not installed.  Please consider installing the Module::Signature module.
-});
-	    sleep 2;
+  You also need to be able to connect over the Internet to the public
+  keyservers like pgp.mit.edu (port 11371).
+
+})
+		    sleep 2;
+	    }
 	}
     } else {
 	delete $INC{$file}; # if it inc'd LWP but failed during, say, URI
@@ -7068,6 +7074,21 @@ like
     o conf ncftp "/usr/bin/ncftp -f /home/scott/ncftplogin.cfg"
 
 Your mileage may vary...
+
+=head1 Cryptographically signed modules
+
+Since release 1.72 CPAN.pm has been able to verify cryptographically
+signed module distributions using Module::Signature.  The CPAN modules
+can be signed by their authors, thus giving more security.  The simple
+unsigned MD5 checksums that were used before by CPAN protect mainly
+against accidental file corruption.
+
+You will need to have Module::Signature installed, which in turn
+requires that you have at least one of Crypt::OpenPGP module or the
+command-line F<gpg> tool installed.
+
+You will also need to be able to connect over the Internet to the public
+keyservers, like pgp.mit.edu, and their port 11731 (the HKP protocol).
 
 =head1 FAQ
 
