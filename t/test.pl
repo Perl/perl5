@@ -178,24 +178,38 @@ USE_OK
 #   stdin    => string to feed the stdin
 #   stderr   => redirect stderr to stdout
 #   args     => [ command-line arguments to the perl program ]
+#   verbose  => print the command line
 
 my $is_mswin    = $^O eq 'MSWin32';
 my $is_netware  = $^O eq 'NetWare';
 my $is_macos    = $^O eq 'MacOS';
 my $is_vms      = $^O eq 'VMS';
 
+sub _quote_args {
+    my ($runperl, $args) = @_;
+
+    foreach (@$args) {
+	# In VMS protect with doublequotes because otherwise
+	# DCL will lowercase -- unless already doublequoted.
+	$_ = q(").$_.q(") if $is_vms && !/^\"/;
+	$$runperl .= ' ' . $_;
+    }
+}
+
 sub runperl {
     my %args = @_;
     my $runperl = $^X;
     if (defined $args{switches}) {
-	$runperl .= ' ' . join ' ', map qq("$_"), @{ $args{switches} };
+	_quote_args(\$runperl, $args{switches});
     }
     unless (defined $args{nolib}) {
 	if ($is_macos && $args{stderr}) {
-	    $runperl .= ' -I::lib -MMac::err=unix';
+	    $runperl .= ' -I::lib';
+	    # Use UNIX style error message instead of MPW style.
+	    $runperl .= ' -MMac::err=unix' if $args{stderr};
 	}
 	else {
-	    $runperl .= ' "-I../lib"';
+	    $runperl .= ' "-I../lib"'; # doublequotes because of VMS
 	}
     }
     if (defined $args{prog}) {
@@ -219,10 +233,15 @@ sub runperl {
 	}
     }
     if (defined $args{args}) {
-	$runperl .= ' ' . join ' ', map qq("$_"), @{ $args{args} };
+	_quote_args(\$runperl, $args{args});
     }
-    $runperl .= ' 2>&1' if $args{stderr} && !$is_macos;
-    $runperl .= " \xB3 Dev:Null" if !defined $args{stderr} && $is_macos;
+    $runperl .= ' 2>&1'          if  $args{stderr} && !$is_macos;
+    $runperl .= " \xB3 Dev:Null" if !$args{stderr} &&  $is_macos;
+    if ($args{verbose}) {
+	my $runperldisplay = $runperl;
+	$runperldisplay =~ s/\n/\n\#/g;
+	print "# $runperldisplay\n";
+    }
     my $result = `$runperl`;
     $result =~ s/\n\n/\n/ if $is_vms; # XXX pipes sometimes double these
     return $result;
