@@ -2670,7 +2670,7 @@ Perl_sv_setsv(pTHX_ SV *dstr, register SV *sstr)
 				if(const_sv)
 				    const_changed = sv_cmp(const_sv, 
 					   op_const_sv(CvSTART((CV*)sref), 
-						       Nullcv));
+						       (CV*)sref));
 				/* ahem, death to those who redefine
 				 * active sort subs */
 				if (PL_curstackinfo->si_type == PERLSI_SORT &&
@@ -2678,7 +2678,7 @@ Perl_sv_setsv(pTHX_ SV *dstr, register SV *sstr)
 				    Perl_croak(aTHX_ 
 				    "Can't redefine active sort subroutine %s",
 					  GvENAME((GV*)dstr));
-				if ((const_changed || const_sv) && ckWARN(WARN_REDEFINE))
+				if ((const_changed && const_sv) || ckWARN(WARN_REDEFINE))
 				    Perl_warner(aTHX_ WARN_REDEFINE, const_sv ? 
 					     "Constant subroutine %s redefined"
 					     : "Subroutine %s redefined", 
