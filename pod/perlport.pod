@@ -883,7 +883,7 @@ The value of C<$^O> on VOS is "VOS".  To determine the architecture that
 you are running on without resorting to loading all of C<%Config> you
 can examine the content of the C<@INC> array like so:
 
-    if (grep(/VOS/, @INC)) {
+    if ($^O =~ /VOS/) {
         print "I'm on a Stratus box!\n";
     } else {
         print "I'm not on a Stratus box!\n";
@@ -894,13 +894,13 @@ can examine the content of the C<@INC> array like so:
         print "This box is a Stratus XA/R!\n";
 
     } elsif (grep(/7100/, @INC)) {
-        print "This box is a Stratus HP 7100 or 8000!\n";
+        print "This box is a Stratus HP 7100 or 8xxx!\n";
 
     } elsif (grep(/8000/, @INC)) {
-        print "This box is a Stratus HP 8000!\n";
+        print "This box is a Stratus HP 8xxx!\n";
 
     } else {
-        print "This box is a Stratus 68K...\n";
+        print "This box is a Stratus 68K!\n";
     }
 
 Also see:

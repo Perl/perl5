@@ -54,7 +54,7 @@
  *	This symbol is defined if this system has a stat structure declaring
  *	st_rdev
  */
-#define USE_STAT_RDEV 	/ **/
+/*#define USE_STAT_RDEV 	/ **/
 
 /* ACME_MESS:
  *	This symbol, if defined, indicates that error messages should be 
@@ -89,7 +89,7 @@
  */
 /* #define ALTERNATE_SHEBANG "#!" / **/
 
-#if !defined(NSIG) || defined(M_UNIX) || defined(M_XENIX)
+#if !defined(NSIG) || defined(M_UNIX) || defined(M_XENIX) || defined(__NetBSD__)
 # include <signal.h>
 #endif
 
@@ -114,12 +114,20 @@
 #define Fflush(fp)         fflush(fp)
 #define Mkdir(path,mode)   mkdir((path),(mode))
 
+/* these should be set in a hint file, not here */
 #ifndef PERL_SYS_INIT
 #ifdef PERL_SCO5
-/* this should be set in a hint file, not here */
 #  define PERL_SYS_INIT(c,v)	fpsetmask(0); MALLOC_INIT
 #else
-#  define PERL_SYS_INIT(c,v)	MALLOC_INIT
+#  ifdef POSIX_BC
+#    define PERL_SYS_INIT(c,v)	sigignore(SIGFPE); MALLOC_INIT
+#  else
+#    ifdef CYGWIN
+#      define PERL_SYS_INIT(c,v) Perl_my_setenv_init(&environ); MALLOC_INIT
+#    else
+#      define PERL_SYS_INIT(c,v) MALLOC_INIT
+#    endif
+#  endif
 #endif
 #endif
 
