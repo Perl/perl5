@@ -820,6 +820,16 @@ perl_destruct(pTHXx)
     SvREFCNT(&PL_sv_undef) = 0;
     SvREADONLY_off(&PL_sv_undef);
 
+    {
+        int i;
+        for (i=0; i<=2; i++) {
+            SvREFCNT(PERL_DEBUG_PAD(i)) = 0;
+            sv_clear(PERL_DEBUG_PAD(i));
+            SvANY(PERL_DEBUG_PAD(i)) = NULL;
+            SvFLAGS(PERL_DEBUG_PAD(i)) = 0;
+        }
+    }
+
     if (PL_sv_count != 0 && ckWARN_d(WARN_INTERNAL))
 	Perl_warner(aTHX_ packWARN(WARN_INTERNAL),"Scalars leaked: %ld\n", (long)PL_sv_count);
 
