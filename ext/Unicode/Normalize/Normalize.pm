@@ -171,7 +171,7 @@ you can get its NFC/NFKC string, saying
 
 =head2 Quick Check
 
-(see Annex 8, UAX #15; F<DerivedNormalizationProperties.txt>)
+(see Annex 8, UAX #15; F<DerivedNormalizationProps.txt>)
 
 The following functions check whether the string is in that normalization form.
 
@@ -313,7 +313,7 @@ SADAHIRO Tomoyuki, E<lt>SADAHIRO@cpan.orgE<gt>
 
 Unicode Normalization Forms - UAX #15
 
-=item http://www.unicode.org/Public/UNIDATA/DerivedNormalizationProperties.txt
+=item http://www.unicode.org/Public/UNIDATA/DerivedNormalizationProps.txt
 
 Derived Normalization Properties
 
