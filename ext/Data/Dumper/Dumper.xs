@@ -585,7 +585,7 @@ DD_dump(pTHX_ SV *val, char *name, STRLEN namelen, SV *retval, HV *seenhv,
 	if (SvIOK(val)) {
             STRLEN len;
 	    i = SvIV(val);
-            (void) sprintf(tmpbuf, "%d", i);
+            (void) sprintf(tmpbuf, "%"IVdf, (IV)i);
             len = strlen(tmpbuf);
 	    sv_catpvn(retval, tmpbuf, len);
 	}
@@ -839,7 +839,7 @@ Data_Dumper_Dumpxs(href, ...)
 			STRLEN nchars = 0;
 			sv_setpvn(name, "$", 1);
 			sv_catsv(name, varname);
-			(void) sprintf(tmpbuf, "%"IVdf, (IV)i+1);
+			(void) sprintf(tmpbuf, "%d", i+1);
 			nchars = strlen(tmpbuf);
 			sv_catpvn(name, tmpbuf, nchars);
 		    }

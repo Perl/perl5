@@ -1094,8 +1094,8 @@ S_run_body(pTHX_ va_list args)
     if (!PL_restartop) {
 	DEBUG_x(dump_all());
 	DEBUG(PerlIO_printf(Perl_debug_log, "\nEXECUTING...\n\n"));
-	DEBUG_S(PerlIO_printf(Perl_debug_log, "main thread is 0x%lx\n",
-			      (unsigned long) thr));
+	DEBUG_S(PerlIO_printf(Perl_debug_log, "main thread is 0x%"UVxf"\n",
+			      PTR2UV(thr)));
 
 	if (PL_minus_c) {
 	    PerlIO_printf(Perl_error_log, "%s syntax OK\n", PL_origfilename);
@@ -1765,7 +1765,7 @@ Perl_moreswitches(pTHX_ char *s)
 #if defined(LOCAL_PATCH_COUNT)
 	if (LOCAL_PATCH_COUNT > 0)
 	    printf("\n(with %d registered patch%s, see perl -V for more detail)",
-		LOCAL_PATCH_COUNT, (LOCAL_PATCH_COUNT!=1) ? "es" : "");
+		(int)LOCAL_PATCH_COUNT, (LOCAL_PATCH_COUNT!=1) ? "es" : "");
 #endif
 
 	printf("\n\nCopyright 1987-1999, Larry Wall\n");

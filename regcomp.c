@@ -844,7 +844,7 @@ Perl_pregcomp(pTHX_ char *exp, char *xend, PMOP *pm)
     DEBUG_r(if (!PL_colorset) reginitcolors());
     DEBUG_r(PerlIO_printf(Perl_debug_log, "%sCompiling REx%s `%s%*s%s'\n",
 		      PL_colors[4],PL_colors[5],PL_colors[0],
-		      xend - exp, PL_regprecomp, PL_colors[1]));
+		      (int)(xend - exp), PL_regprecomp, PL_colors[1]));
     PL_regflags = pm->op_pmflags;
     PL_regsawback = 0;
 
@@ -986,8 +986,8 @@ Perl_pregcomp(pTHX_ char *exp, char *xend, PMOP *pm)
 	    r->reganch |= ROPT_SKIP;
 
 	/* Scan is after the zeroth branch, first is atomic matcher. */
-	DEBUG_r(PerlIO_printf(Perl_debug_log, "first at %d\n", 
-			      first - scan + 1));
+	DEBUG_r(PerlIO_printf(Perl_debug_log, "first at %"IVdf"\n", 
+			      (IV)(first - scan + 1)));
 	/*
 	* If there's something expensive in the r.e., find the
 	* longest literal string that must appear and make it the
@@ -3173,12 +3173,12 @@ S_dumpuntil(pTHX_ regnode *start, regnode *node, regnode *last, SV* sv, I32 l)
 	if (OP(node) == OPTIMIZED)
 	    goto after_print;
 	regprop(sv, node);
-	PerlIO_printf(Perl_debug_log, "%4d:%*s%s", node - start, 
+	PerlIO_printf(Perl_debug_log, "%4"IVdf":%*s%s", (IV)(node - start),
 		      2*l + 1, "", SvPVX(sv));
 	if (next == NULL)		/* Next ptr. */
 	    PerlIO_printf(Perl_debug_log, "(0)");
 	else 
-	    PerlIO_printf(Perl_debug_log, "(%d)", next - start);
+	    PerlIO_printf(Perl_debug_log, "(%"IVdf")", (IV)(next - start));
 	(void)PerlIO_putc(Perl_debug_log, '\n');
       after_print:
 	if (PL_regkind[(U8)op] == BRANCHJ) {

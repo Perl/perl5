@@ -1555,8 +1555,8 @@ Perl_vcroak(pTHX_ const char* pat, va_list *args)
     else
 	message = SvPV(msv,msglen);
 
-    DEBUG_S(PerlIO_printf(Perl_debug_log, "croak: 0x%lx %s",
-			  (unsigned long) thr, message));
+    DEBUG_S(PerlIO_printf(Perl_debug_log, "croak: 0x%"UVxf" %s",
+			  PTR2UV(thr), message));
 
     if (PL_diehook) {
 	/* sv_2cv might call Perl_croak() */
@@ -1742,7 +1742,7 @@ Perl_vwarner(pTHX_ U32  err, const char* pat, va_list* args)
 
     if (ckDEAD(err)) {
 #ifdef USE_THREADS
-        DEBUG_S(PerlIO_printf(Perl_debug_log, "croak: 0x%lx %s", (unsigned long) thr, message));
+        DEBUG_S(PerlIO_printf(Perl_debug_log, "croak: 0x%"UVxf" %s", PTR2UV(thr), message));
 #endif /* USE_THREADS */
         if (PL_diehook) {
             /* sv_2cv might call Perl_croak() */

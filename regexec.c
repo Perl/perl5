@@ -176,10 +176,10 @@ S_regcppop(pTHX)
 	    PL_regendp[paren] = tmps;
 	DEBUG_r(
 	    PerlIO_printf(Perl_debug_log,
-			  "     restoring \\%d to %d(%d)..%d%s\n",
-			  paren, PL_regstartp[paren], 
-			  PL_reg_start_tmp[paren] - PL_bostr,
-			  PL_regendp[paren], 
+			  "     restoring \\%"UVuf" to %"IVdf"(%"IVdf")..%"IVdf"%s\n",
+			  (UV)paren, (IV)PL_regstartp[paren], 
+			  (IV)(PL_reg_start_tmp[paren] - PL_bostr),
+			  (IV)PL_regendp[paren], 
 			  (paren > *PL_reglastparen ? "(no)" : ""));
 	);
     }
@@ -314,7 +314,7 @@ Perl_re_intuit_start(pTHX_ regexp *prog, SV *sv, char *strpos,
 		      PL_colors[1],
 		      (strlen(prog->precomp) > 60 ? "..." : ""),
 		      PL_colors[0],
-		      (strend - strpos > 60 ? 60 : strend - strpos),
+		      (int)(strend - strpos > 60 ? 60 : strend - strpos),
 		      strpos, PL_colors[1],
 		      (strend - strpos > 60 ? "..." : ""))
 	);
@@ -777,7 +777,7 @@ Perl_regexec_flags(pTHX_ register regexp *prog, char *stringarg, register char *
 		      PL_colors[1],
 		      (strlen(prog->precomp) > 60 ? "..." : ""),
 		      PL_colors[0],
-		      (strend - startpos > 60 ? 60 : strend - startpos),
+		      (int)(strend - startpos > 60 ? 60 : strend - startpos),
 		      startpos, PL_colors[1],
 		      (strend - startpos > 60 ? "..." : ""))
 	);
@@ -1482,8 +1482,8 @@ S_regtry(pTHX_ regexp *prog, char *startpos)
 
 	PL_reg_eval_set = RS_init;
 	DEBUG_r(DEBUG_s(
-	    PerlIO_printf(Perl_debug_log, "  setting stack tmpbase at %i\n",
-			  PL_stack_sp - PL_stack_base);
+	    PerlIO_printf(Perl_debug_log, "  setting stack tmpbase at %"IVdf"\n",
+			  (IV)(PL_stack_sp - PL_stack_base));
 	    ));
 	SAVEINT(cxstack[cxstack_ix].blk_oldsp);
 	cxstack[cxstack_ix].blk_oldsp = PL_stack_sp - PL_stack_base;
@@ -1646,8 +1646,8 @@ S_regmatch(pTHX_ regnode *prog)
 		pref0_len = pref_len;
 	    regprop(prop, scan);
 	    PerlIO_printf(Perl_debug_log, 
-			  "%4i <%s%.*s%s%s%.*s%s%s%s%.*s%s>%*s|%3d:%*s%s\n",
-			  locinput - PL_bostr, 
+			  "%4"IVdf" <%s%.*s%s%s%.*s%s%s%s%.*s%s>%*s|%3"IVdf":%*s%s\n",
+			  (IV)(locinput - PL_bostr), 
 			  PL_colors[4], pref0_len, 
 			  locinput - pref_len, PL_colors[5],
 			  PL_colors[2], pref_len - pref0_len, 
@@ -1656,7 +1656,7 @@ S_regmatch(pTHX_ regnode *prog)
 			  PL_colors[0], l, locinput, PL_colors[1],
 			  15 - l - pref_len + 1,
 			  "",
-			  scan - PL_regprogram, PL_regindent*2, "",
+			  (IV)(scan - PL_regprogram), PL_regindent*2, "",
 			  SvPVX(prop));
 	} );
 
@@ -3053,8 +3053,8 @@ S_regmatch(pTHX_ regnode *prog)
 		next = NULL;
 	    break;
 	default:
-	    PerlIO_printf(Perl_error_log, "%lx %d\n",
-			  (unsigned long)scan, OP(scan));
+	    PerlIO_printf(Perl_error_log, "%"UVxf" %d\n",
+			  (UV)scan, OP(scan));
 	    Perl_croak(aTHX_ "regexp memory corruption");
 	}
 	scan = next;
