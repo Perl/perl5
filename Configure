@@ -20,7 +20,7 @@
 
 # $Id: Head.U,v 3.0.1.9 1997/02/28 15:02:09 ram Exp $
 #
-# Generated on Fri Aug  4 03:54:52 EET DST 2000 [metaconfig 3.0 PL70]
+# Generated on Fri Aug  4 23:16:51 EET DST 2000 [metaconfig 3.0 PL70]
 # (with additional metaconfig patches by perlbug@perl.com)
 
 cat >/tmp/c1$$ <<EOF
@@ -901,6 +901,9 @@ uidtype=''
 archname64=''
 use64bitall=''
 use64bitint=''
+ccflags_uselargefiles=''
+ldflags_uselargefiles=''
+libswanted_uselargefiles=''
 uselargefiles=''
 uselongdouble=''
 usemorebits=''
@@ -994,6 +997,9 @@ plibpth=''
 libswanted=''
 : some systems want to use only the non-versioned libso:s
 ignore_versioned_solibs=''
+ccflags_uselargefiles=''
+ldflags_uselargefiles=''
+libswanted_uselargefiles=''
 : set usemultiplicity on the Configure command line to enable multiplicity.
 : set usesocks on the Configure command line to enable socks.
 : set usethreads on the Configure command line to enable threads.
@@ -3184,7 +3190,7 @@ case "$gccversion" in
 esac
 case "$gccversion" in
 '') gccosandvers='' ;;
-*) gccosandvers=`$cc -v 2>&1|grep '/specs$'|sed 's!.*/[^-]*-[^-]*-\([^/]*\)/'$gccversion'/specs$!\1!'`
+*) gccosandvers=`$cc -v 2>&1|grep '/specs$'|sed 's!.*/[^-]*-[^-]*-\([^/]*\)/'$gccversion'/specs'$!\1!'`
    case "$gccosandvers" in
    $osname) gccosandvers='' ;; # linux gccs seem to have no linux osvers, grr
    $osname$osvers) ;; # looking good
@@ -15296,6 +15302,7 @@ cc='$cc'
 cccdlflags='$cccdlflags'
 ccdlflags='$ccdlflags'
 ccflags='$ccflags'
+ccflags_uselargefiles='$ccflags_uselargefiles'
 ccsymbols='$ccsymbols'
 cf_by='$cf_by'
 cf_email='$cf_email'
@@ -15784,6 +15791,7 @@ large='$large'
 ld='$ld'
 lddlflags='$lddlflags'
 ldflags='$ldflags'
+ldflags_uselargefiles='$ldflags_uselargefiles'
 ldlibpthname='$ldlibpthname'
 less='$less'
 lib_ext='$lib_ext'
@@ -15796,6 +15804,7 @@ libsfiles='$libsfiles'
 libsfound='$libsfound'
 libspath='$libspath'
 libswanted='$libswanted'
+libswanted_uselargefiles='$libswanted_uselargefiles'
 line='$line'
 lint='$lint'
 lkflags='$lkflags'
