@@ -2951,7 +2951,9 @@ PerlIO_init(void)
 {
  if (!_perlio)
   {
+#ifndef WIN32
    atexit(&PerlIO_cleanup);
+#endif
   }
 }
 

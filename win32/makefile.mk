@@ -95,11 +95,11 @@ USE_IMP_SYS	*= define
 # Visual C++ > 2.x and < 6.x
 #CCTYPE		*= MSVC
 # Visual C++ >= 6.x
-#CCTYPE		*= MSVC60
+CCTYPE		*= MSVC60
 # Borland 5.02 or later
 #CCTYPE		*= BORLAND
 # mingw32+gcc-2.95.2 or better
-CCTYPE		*= GCC
+#CCTYPE		*= GCC
 
 #
 # uncomment this if you are compiling under Windows 95/98 and command.com
@@ -292,9 +292,12 @@ ARCHNAME	!:= $(ARCHNAME)-thread
 # run in about 10% less time.
 DELAYLOAD	*= -DELAYLOAD:wsock32.dll -DELAYLOAD:shell32.dll delayimp.lib
 
+.IF "$(CFG)" == "Debug"
+.ELSE
 # VC 6.0 seems capable of compiling perl correctly with optimizations
 # enabled.  Anything earlier fails tests.
 CFG		*= Optimize
+.ENDIF
 .ENDIF
 
 ARCHDIR		= ..\lib\$(ARCHNAME)
@@ -434,10 +437,14 @@ PERLDLL_RES	=
 .IF  "$(CFG)" == "Debug"
 .IF "$(CCTYPE)" == "MSVC20"
 OPTIMIZE	= -Od -MD -Z7 -DDEBUGGING
-.ELSE
-OPTIMIZE	= -Od -MD -Zi -DDEBUGGING
-.ENDIF
 LINK_DBG	= -debug -pdb:none
+.ELSE
+# -Zi requires .pdb file(s)
+#OPTIMIZE	= -Od -MD -Zi -DDEBUGGING
+#LINK_DBG	= -debug 
+OPTIMIZE	= -O1 -MD -Z7 -DDEBUGGING
+LINK_DBG	= -debug -debugtype:both -pdb:none
+.ENDIF
 .ELSE
 .IF "$(CFG)" == "Optimize"
 # -O1 yields smaller code, which turns out to be faster than -O2
