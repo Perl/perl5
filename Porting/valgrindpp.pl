@@ -196,8 +196,16 @@ sub filter {
   debug(1, "processing $test ($_)\n");
 
   # Get all the valgrind output lines
-  my @l = map { chomp; s/^==\d+==\s?//; $_ }
-          do { my $fh = new IO::File $_ or die "$0: cannot open $_ ($!)\n"; <$fh> };
+  my @l = do {
+    my $fh = new IO::File $_ or die "$0: cannot open $_ ($!)\n";
+    # Process outputs can interrupt each other, so sort by pid first
+    my %pid; local $_;
+    while (<$fh>) {
+      chomp;
+      s/^==(\d+)==\s?// and push @{$pid{$1}}, $_;
+    }
+    map @$_, values %pid;
+  };
 
   # Setup some useful regexes
   my $hexaddr  = '0x[[:xdigit:]]+';
