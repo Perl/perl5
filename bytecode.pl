@@ -20,7 +20,7 @@ while (($from, $tos) = each %alias_to) {
 
 my $c_header = <<'EOT';
 /*
- *      Copyright (c) 1996, 1997 Malcolm Beattie
+ *      Copyright (c) 1996-1998 Malcolm Beattie
  *
  *      You may distribute under the terms of either the GNU General Public
  *      License or the Artistic License, as specified in the README file.
@@ -34,20 +34,12 @@ EOT
 my $perl_header;
 ($perl_header = $c_header) =~ s{[/ ]?\*/?}{#}g;
 
-if (-f "byterun.c") {
-    rename("byterun.c", "byterun.c.old");
-}
-if (-f "byterun.h") {
-    rename("byterun.h", "byterun.h.old");
-}
-if (-f "B/Asmdata.pm") {
-    rename("B/Asmdata.pm", "B/Asmdata.pm.old");
-}
+unlink "byterun.c", "byterun.h", "lib/B/Asmdata.pm";
 
 #
 # Start with boilerplate for Asmdata.pm
 #
-open(ASMDATA_PM, ">B/Asmdata.pm") or die "Asmdata.pm: $!";
+open(ASMDATA_PM, ">lib/B/Asmdata.pm") or die "Asmdata.pm: $!";
 print ASMDATA_PM $perl_header, <<'EOT';
 package B::Asmdata;
 use Exporter;
