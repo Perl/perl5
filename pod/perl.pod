@@ -234,6 +234,7 @@ distribution available at http://www.perl.com/CPAN/src/index.html
 	HP-UX
 	IRIX
 	Linux
+	LynxOS
 	MachTen
 	MPE/iX
 	NetBSD
