@@ -273,6 +273,12 @@ perl_construct(pTHXx)
     New(31337, PL_reentrant_buffer->tmbuff,1, struct tm);
 #endif
 
+#ifdef DEBUGGING
+    sv_setpvn(PERL_DEBUG_PAD(0), "", 0);
+    sv_setpvn(PERL_DEBUG_PAD(1), "", 0);
+    sv_setpvn(PERL_DEBUG_PAD(2), "", 0);
+#endif
+
     /* Note that strtab is a rather special HV.  Assumptions are made
        about not iterating on it, and not adding tie magic to it.
        It is properly deallocated in perl_destruct() */

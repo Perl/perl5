@@ -223,6 +223,7 @@
 #define PL_dbargs		(PERL_GET_INTERP->Idbargs)
 #define PL_debstash		(PERL_GET_INTERP->Idebstash)
 #define PL_debug		(PERL_GET_INTERP->Idebug)
+#define PL_debug_pad		(PERL_GET_INTERP->Idebug_pad)
 #define PL_def_layerlist	(PERL_GET_INTERP->Idef_layerlist)
 #define PL_defgv		(PERL_GET_INTERP->Idefgv)
 #define PL_diehook		(PERL_GET_INTERP->Idiehook)
@@ -516,6 +517,7 @@
 #define PL_dbargs		(vTHX->Idbargs)
 #define PL_debstash		(vTHX->Idebstash)
 #define PL_debug		(vTHX->Idebug)
+#define PL_debug_pad		(vTHX->Idebug_pad)
 #define PL_def_layerlist	(vTHX->Idef_layerlist)
 #define PL_defgv		(vTHX->Idefgv)
 #define PL_diehook		(vTHX->Idiehook)
@@ -812,6 +814,7 @@
 #define PL_Idbargs		PL_dbargs
 #define PL_Idebstash		PL_debstash
 #define PL_Idebug		PL_debug
+#define PL_Idebug_pad		PL_debug_pad
 #define PL_Idef_layerlist	PL_def_layerlist
 #define PL_Idefgv		PL_defgv
 #define PL_Idiehook		PL_diehook
