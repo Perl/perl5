@@ -43,14 +43,14 @@ foreach my $a ("\x7f","\xff")
  }
 
 # Check we have not got an spurious extra keys
-is(join('',sort keys %hash8),"\x7f\xff");
-is(join('',sort keys %hashu),"\x7f\xff\x{1ff}");
+is(join('',sort { ord $a <=> ord $b } keys %hash8),"\x7f\xff");
+is(join('',sort { ord $a <=> ord $b } keys %hashu),"\x7f\xff\x{1ff}");
 
 # Now add a utf8 key to the 8-bit hash
 $hash8{chr(0x1ff)} = 0x1ff;
 
 # Check we have not got an spurious extra keys
-is(join('',sort keys %hash8),"\x7f\xff\x{1ff}");
+is(join('',sort { ord $a <=> ord $b } keys %hash8),"\x7f\xff\x{1ff}");
 
 foreach my $a ("\x7f","\xff","\x{1ff}")
  {
