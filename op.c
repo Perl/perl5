@@ -6751,16 +6751,16 @@ Perl_peep(pTHX_ register OP *o)
 	    if (!theirmark || theirmark->op_type != OP_PUSHMARK)
 		break;
 
-	    ourmark = ((LISTOP *)o)->op_first;
-	    if (!ourmark || ourmark->op_type != OP_PUSHMARK)
-		break;
-
-	    if (ourmark->op_next != o) {
+	    if (theirmark->op_sibling != o) {
 		/* There's something between the mark and the reverse, eg
 		   for (1, reverse (...))
 		   so no go.  */
 		break;
 	    }
+
+	    ourmark = ((LISTOP *)o)->op_first;
+	    if (!ourmark || ourmark->op_type != OP_PUSHMARK)
+		break;
 
 	    ourlast = ((LISTOP *)o)->op_last;
 	    if (!ourlast || ourlast->op_next != o)

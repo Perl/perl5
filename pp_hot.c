@@ -1888,7 +1888,7 @@ PP(pp_iter)
     /* iterate array */
     if (PL_op->op_private & OPpITER_REVERSED) {
 	/* In reverse, use itermax as the min :-)  */
-	if (cx->blk_loop.iterix <= 0)
+	if (cx->blk_loop.iterix <= cx->blk_loop.itermax)
 	    RETPUSHNO;
 
 	if (SvMAGICAL(av) || AvREIFY(av)) {
