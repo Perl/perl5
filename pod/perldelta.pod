@@ -12,10 +12,13 @@ This document describes differences between the 5.6.0 release and the
 =head2 64-bit platforms and malloc
 
 If your pointers are 64 bits wide, the Perl malloc is no more being
-used because it simply does not work with 8-byte pointers.  Also,
+used because it does not work well with 8-byte pointers.  Also,
 usually the system mallocs on such platforms are much better optimized
-for such large memory models than the Perl malloc.  Such platforms
-include 64-bit Alpha, MIPS, HPPA, PPC, and Sparc.
+for such large memory models than the Perl malloc.  Some memory-hungry
+Perl applications like the PDL don't work well with Perl's malloc.
+Finally, other applications than Perl (like modperl) tend to prefer
+the system malloc.  Such platforms include Alpha and 64-bit HPPA,
+MIPS, PPC, and Sparc.
 
 =head2 AIX Dynaloading
 
@@ -66,26 +69,13 @@ The Perl parser has been stress tested using both random input and
 Markov chain input and the few found crashes and lockups have been
 fixed.
 
+=head2 REF(...) Instead Of SCALAR(...)
+
+A reference to a reference now stringify as "REF(0x81485ec)" instead
+of "SCALAR(0x81485ec)" in order to be more consistent with the return
+value of ref().
+
 =head2 Deprecations
-
-The current user-visible implementation of pseudo-hashes (the weird
-use of the first array element) is deprecated starting from Perl 5.8.0
-and will be removed in Perl 5.10.0, and the feature will be
-implemented differently.  Not only is the current interface rather
-ugly, but the current implementation slows down normal array and hash
-use quite noticeably. The C<fields> pragma interface will remain
-available.
-
-The syntaxes C<< @a->[...] >> and  C<< %h->{...}>> have now been deprecated.
-
-After years of trying the suidperl is considered to be too complex to
-ever be considered truly secure.  The suidperl functionality is likely
-to be removed in a future release.
-
-The C<package;> syntax (C<package> without an argument has been
-deprecated.  Its semantics were never that clear and its
-implementation even less so.  If you have used that feature to
-disallow all but fully qualified variables, C<use strict;> instead.
 
 =over 4
 
@@ -96,9 +86,8 @@ it to make some sense, it is forbidden.
 
 =item *
 
-A reference to a reference now stringify as "REF(0x81485ec)" instead
-of "SCALAR(0x81485ec)" in order to be more consistent with the return
-value of ref().
+The obsolete chat2 library that should never have been allowed
+to escape the laboratory has been decommissioned.
 
 =item *
 
@@ -109,43 +98,15 @@ maintained.
 
 =item *
 
-The obsolete chat2 library that should never have been allowed
-to escape the laboratory has been decommissioned.
-
-=item *
-
-The unimplemented POSIX regex features [[.cc.]] and [[=c=]] are still
-recognised but now cause fatal errors.  The previous behaviour of
-ignoring them by default and warning if requested was unacceptable
-since it, in a way, falsely promised that the features could be used.
-
-=item *
-
 The (bogus) escape sequences \8 and \9 now give an optional warning
 ("Unrecognized escape passed through").  There is no need to \-escape
 any C<\w> character.
 
 =item *
 
-lstat(FILEHANDLE) now gives a warning because the operation makes no sense.
-In future releases this may become a fatal error.
-
-=item *
-
-The long deprecated uppercase aliases for the string comparison
-operators (EQ, NE, LT, LE, GE, GT) have now been removed.
-
-=item *
-
-The regular expression captured submatches ($1, $2, ...) are now
-more consistently unset if the match fails, instead of leaving false
-data lying around in them.
-
-=item *
-
-The tr///C and tr///U features have been removed and will not return;
-the interface was a mistake.  Sorry about that.  For similar
-functionality, see pack('U0', ...) and pack('C0', ...).
+The list of filenames from glob() (or <...>) is now by default sorted
+alphabetically to be csh-compliant.  (bsd_glob() does still sort platform
+natively, ASCII or EBCDIC, unless GLOB_ALPHASORT is specified.)
 
 =item *
 
@@ -156,9 +117,53 @@ More details are in L</"Performance Enhancements">.
 
 =item *
 
-The list of filenames from glob() (or <...>) is now by default sorted
-alphabetically to be csh-compliant.  (bsd_glob() does still sort platform
-natively, ASCII or EBCDIC, unless GLOB_ALPHASORT is specified.)
+lstat(FILEHANDLE) now gives a warning because the operation makes no sense.
+In future releases this may become a fatal error.
+
+=item *
+
+The C<package;> syntax (C<package> without an argument has been
+deprecated.  Its semantics were never that clear and its
+implementation even less so.  If you have used that feature to
+disallow all but fully qualified variables, C<use strict;> instead.
+
+=item *
+
+The unimplemented POSIX regex features [[.cc.]] and [[=c=]] are still
+recognised but now cause fatal errors.  The previous behaviour of
+ignoring them by default and warning if requested was unacceptable
+since it, in a way, falsely promised that the features could be used.
+
+=item *
+
+The current user-visible implementation of pseudo-hashes (the weird
+use of the first array element) is deprecated starting from Perl 5.8.0
+and will be removed in Perl 5.10.0, and the feature will be
+implemented differently.  Not only is the current interface rather
+ugly, but the current implementation slows down normal array and hash
+use quite noticeably. The C<fields> pragma interface will remain
+available.
+
+=item *
+
+The syntaxes C<< @a->[...] >> and  C<< %h->{...}>> have now been deprecated.
+
+=item *
+
+After years of trying the suidperl is considered to be too complex to
+ever be considered truly secure.  The suidperl functionality is likely
+to be removed in a future release.
+
+=item *
+
+The long deprecated uppercase aliases for the string comparison
+operators (EQ, NE, LT, LE, GE, GT) have now been removed.
+
+=item *
+
+The tr///C and tr///U features have been removed and will not return;
+the interface was a mistake.  Sorry about that.  For similar
+functionality, see pack('U0', ...) and pack('C0', ...).
 
 =back
 
@@ -702,10 +707,10 @@ parsing algorithms.  See L<Text::Balanced>.
 
 =item *
 
-C<threads> is an interface interpreter threads, by Arthur Bergman.
+C<threads> is an interface to interpreter threads, by Arthur Bergman.
 Interpreter threads (ithreads) is the new thread model introduced in
-Perl 5.6 but then available only as an internal interface for
-extension writers.  See L<threads>.
+Perl 5.6 but only available as an internal interface for extension
+writers (and for Win32 Perl for C<fork()> emulation).  See L<threads>.
 
 =item *
 
@@ -877,7 +882,7 @@ CPAN and in 5.7.2 the Net::Ping::External may be integrated to Perl.
 
 =item *
 
-POSIX::sigaction() is now much more flexible and robust.
+C<POSIX::sigaction()> is now much more flexible and robust.
 You can now install coderef handlers, 'DEFAULT', and 'IGNORE'
 handlers, installing new handlers was not atomic.
 
@@ -1558,9 +1563,9 @@ sort() arguments are now compiled in the right wantarray context
 =item *
 
 Changed the POSIX character class C<[[:space:]]> to include the (very
-rare) vertical tab character.  Added a new POSIX-ish character class
-C<[[:blank:]]> which stands for horizontal whitespace (currently,
-the space and the tab).
+rarely used) vertical tab character.  Added a new POSIX-ish character
+class C<[[:blank:]]> which stands for horizontal whitespace
+(currently, the space and the tab).
 
 =item *
 
@@ -1570,7 +1575,13 @@ behaviour consistent with that of string interpolation.
 
 =item *
 
-L<Sys::Syslog> ignored the C<LOG_AUTH> constant.
+The regular expression captured submatches ($1, $2, ...) are now
+more consistently unset if the match fails, instead of leaving false
+data lying around in them.
+
+=item *
+
+C<Sys::Syslog> ignored the C<LOG_AUTH> constant.
 
 =item *
 
@@ -1832,7 +1843,7 @@ concurrently. (Still 16M per thread.)
 
 =item *
 
-C<File::Spec->tmpdir()> now prefers C:/temp over /tmp
+C<File::Spec-&gt;tmpdir()> now prefers C:/temp over /tmp
 (works better when perl is running as service).
 
 =item *
@@ -1904,8 +1915,8 @@ the entire regex.  You will an optional warning if you try to do otherwise.
 
 =item *
 
-Using arrays or hashes as references (e.g. C<%foo->{bar}> has been
-deprecated for a while.  Now you will get an optional warning.
+Using arrays or hashes as references (e.g. C<< %foo-&gt;{bar} >>
+has been deprecated for a while.  Now you will get an optional warning.
 
 =back
 
@@ -1929,7 +1940,10 @@ For careful hackers only.
 
 =item *
 
-Added rsignal(), whichsig(), do_join() to the publicised API.
+Added rsignal(), whichsig(), do_join(), op_clear, op_null,
+ptr_table_clear(), ptr_table_free(), sv_setref_uv(), and several UTF-8
+interfaces to the publicised API.  For the full list of the available
+APIs see L<perlapi>.
 
 =item *
 
@@ -1937,16 +1951,7 @@ Made possible to propagate customised exceptions via croak()ing.
 
 =item *
 
-Added is_utf8_char(), is_utf8_string(), bytes_to_utf8(), and utf8_to_bytes().
-
-=item *
-
 Now xsubs can have attributes just like subs.
-
-=item *
-
-Some new APIs: ptr_table_clear(), ptr_table_free(), sv_setref_uv().
-For the full list of the available APIs see L<perlapi>.
 
 =item *
 
@@ -1989,11 +1994,7 @@ to F<Porting/repository.pod>.
 
 =item *
 
-There are now several profiling make targets 
-
-=item *
-
-The C<op_clear> and C<op_null> are now exported.
+There are now several profiling make targets.
 
 =back
 
