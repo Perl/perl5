@@ -44,6 +44,71 @@ A few of these variables are considered "read-only".  This means that if
 you try to assign to this variable, either directly or indirectly through
 a reference, you'll raise a run-time exception.
 
+You should be very careful when modifying the default values of most
+special variables described in this document. In most cases you want
+to localize these variables before changing them, since if you don't,
+the change may affect other modules which rely on the default values
+of the special variables that you have changed. This is one of the
+correct ways to read the whole file at once:
+
+    open my $fh, "foo" or die $!;
+    local $/; # enable localized slurp mode
+    my $content = <$fh>;
+    close $fh;
+
+But the following code is quite bad:
+
+    open my $fh, "foo" or die $!;
+    undef $/; # enable slurp mode
+    my $content = <$fh>;
+    close $fh;
+
+since some other module, may want to read data from some file in the
+default "line mode", so if the code we have just presented has been
+executed, the global value of C<$/> is now changed for any other code
+running inside the same Perl interpreter.
+
+Usually when a variable is localized you want to make sure that this
+change affects the shortest scope possible. So unless you are already
+inside some short C<{}> block, you should create one yourself. For
+example:
+
+    my $content = '';
+    open my $fh, "foo" or die $!;
+    {
+        local $/;
+        $content = <$fh>;
+    }
+    close $fh;
+
+Here is an example of how your own code can go broken:
+
+    for (1..5){
+        nasty_break();
+        print "$_ ";
+    }
+    sub nasty_break {
+        $_ = 5;
+        # do something with $_
+    }
+
+You probably expect this code to print:
+
+    1 2 3 4 5
+
+but instead you get:
+
+    5 5 5 5 5
+
+Why? Because nasty_break() modifies C<$_> without localizing it
+first. The fix is to add local():
+
+        local $_ = 5;
+
+It's easy to notice the problem in such a short example, but in more
+complicated code you are looking for trouble if you don't localize
+changes to the special variables.
+
 The following list is ordered by scalar variables first, then the
 arrays, then the hashes.
 
@@ -167,7 +232,7 @@ pattern match (not counting any matches hidden within a BLOCK or eval()
 enclosed by the current BLOCK).  (Mnemonic: C<'> often follows a quoted
 string.)  Example:
 
-    $_ = 'abcdefghi';
+    local $_ = 'abcdefghi';
     /def/;
     print "$`:$&:$'\n";  	# prints abc:def:ghi
 
@@ -298,8 +363,8 @@ blindly assume that the next input character belongs to the next
 paragraph, even if it's a newline.  (Mnemonic: / delimits
 line boundaries when quoting poetry.)
 
-    undef $/;		# enable "slurp" mode
-    $_ = <FH>;		# whole file now here
+    local $/;           # enable "slurp" mode
+    local $_ = <FH>;    # whole file now here
     s/\n[ \t]+/ /g;
 
 Remember: the value of C<$/> is a string, not a regex.  B<awk> has to be
@@ -310,9 +375,9 @@ scalar that's convertible to an integer will attempt to read records
 instead of lines, with the maximum record size being the referenced
 integer.  So this:
 
-    $/ = \32768; # or \"32768", or \$var_containing_32768
-    open(FILE, $myfile);
-    $_ = <FILE>;
+    local $/ = \32768; # or \"32768", or \$var_containing_32768
+    open my $fh, $myfile or die $!;
+    local $_ = <$fh>;
 
 will read a record of no more than 32768 bytes from FILE.  If you're
 not reading from a record-oriented file (or your OS doesn't have
@@ -1204,9 +1269,9 @@ To illustrate the differences between these variables, consider the
 following Perl expression, which uses a single-quoted string:
 
     eval q{
-	open PIPE, "/cdrom/install |";
-	@res = <PIPE>;
-	close PIPE or die "bad pipe: $?, $!";
+	open my $pipe, "/cdrom/install |" or die $!;
+	my @res = <$pipe>;
+	close $pipe or die "bad pipe: $?, $!";
     };
 
 After execution of this statement all 4 variables may have been set.  
