@@ -119,26 +119,21 @@ sub fetch_string {
     my $marker = "$key=";
 
     # Check for the common case, ' delimited
-    my $start = index($Config_SH, "\n$marker$quote_type");
+    my $start = index($Config_SH_expanded, "\n$marker$quote_type");
     # If that failed, check for " delimited
     if ($start == -1) {
         $quote_type = '"';
-        $start = index($Config_SH, "\n$marker$quote_type");
+        $start = index($Config_SH_expanded, "\n$marker$quote_type");
     }
-    return undef if ( ($start == -1) &&  # in case it's first 
-                      (substr($Config_SH, 0, length($marker)) ne $marker) );
-    if ($start == -1) { 
-        # It's the very first thing we found. Skip $start forward
-        # and figure out the quote mark after the =.
-        $start = length($marker) + 1;
-        $quote_type = substr($Config_SH, $start - 1, 1);
-    } 
-    else { 
-        $start += length($marker) + 2;
-    }
+    # Start can never be -1 now, as we've rigged the long string we're
+    # searching with an initial dummy newline.
+    return undef if $start == -1;
 
-    my $value = substr($Config_SH, $start, 
-                       index($Config_SH, "$quote_type\n", $start) - $start);
+    $start += length($marker) + 2;
+
+    my $value = substr($Config_SH_expanded, $start, 
+                       index($Config_SH_expanded, "$quote_type\n", $start)
+		       - $start);
 
     # If we had a double-quote, we'd better eval it so escape
     # sequences and such can be interpolated. Since the incoming
@@ -212,7 +207,7 @@ close CONFIG_SH;
 
 # Calculation for the keys for byteorder
 # This is somewhat grim, but I need to run fetch_string here.
-our $Config_SH = join "\n", @v_fast, @v_others;
+our $Config_SH_expanded = join "\n", @v_fast, @v_others;
 
 my $t = fetch_string ({}, 'ivtype');
 my $s = fetch_string ({}, 'ivsize');
@@ -271,6 +266,8 @@ print CONFIG <<'EOT';
 !END!
 s/(byteorder=)(['"]).*?\2/$1$2$byteorder$2/m;
 our $Config_SH : unique = $_;
+
+our $Config_SH_expanded : unique = "\n$_";
 EOT
 
 print CONFIG $fetch_string;
@@ -330,25 +327,26 @@ my $prevpos = 0;
 
 sub FIRSTKEY {
     $prevpos = 0;
-    substr($Config_SH, 0, index($Config_SH, '=') );
+    substr($Config_SH_expanded, 0, index($Config_SH_expanded, '=') );
 }
 
 sub NEXTKEY {
     # Find out how the current key's quoted so we can skip to its end.
-    my $quote = substr($Config_SH, index($Config_SH, "=", $prevpos)+1, 1);
-    my $pos = index($Config_SH, qq($quote\n), $prevpos) + 2;
-    my $len = index($Config_SH, "=", $pos) - $pos;
+    my $quote = substr($Config_SH_expanded,
+		       index($Config_SH_expanded, "=", $prevpos)+1, 1);
+    my $pos = index($Config_SH_expanded, qq($quote\n), $prevpos) + 2;
+    my $len = index($Config_SH_expanded, "=", $pos) - $pos;
     $prevpos = $pos;
-    $len > 0 ? substr($Config_SH, $pos, $len) : undef;
+    $len > 0 ? substr($Config_SH_expanded, $pos, $len) : undef;
 }
 
 sub EXISTS { 
     return 1 if exists($_[0]->{$_[1]});
 
-    return(index($Config_SH, "\n$_[1]='") != -1 or
-           substr($Config_SH, 0, length($_[1])+2) eq "$_[1]='" or
-           index($Config_SH, "\n$_[1]=\"") != -1 or
-           substr($Config_SH, 0, length($_[1])+2) eq "$_[1]=\"" or
+    return(index($Config_SH_expanded, "\n$_[1]='") != -1 or
+           substr($Config_SH_expanded, 0, length($_[1])+2) eq "$_[1]='" or
+           index($Config_SH_expanded, "\n$_[1]=\"") != -1 or
+           substr($Config_SH_expanded, 0, length($_[1])+2) eq "$_[1]=\"" or
            $_[1] =~ /^(?:(?:cc|ld)flags|libs(?:wanted)?)_nolargefiles$/
           );
 }
@@ -364,7 +362,8 @@ sub config_sh {
 
 sub config_re {
     my $re = shift;
-    return map { chomp; $_ } grep eval{ /^(?:$re)=/ }, split /^/, $Config_SH;
+    return map { chomp; $_ } grep eval{ /^(?:$re)=/ }, split /^/,
+    $Config_SH_expanded;
 }
 
 sub config_vars {
@@ -395,9 +394,9 @@ if ($^O eq 'os2') {
     print CONFIG <<'ENDOFSET';
 my %preconfig;
 if ($OS2::is_aout) {
-    my ($value, $v) = $Config_SH =~ m/^used_aout='(.*)'\s*$/m;
+    my ($value, $v) = $Config_SH_expanded =~ m/^used_aout='(.*)'\s*$/m;
     for (split ' ', $value) {
-        ($v) = $Config_SH =~ m/^aout_$_='(.*)'\s*$/m;
+        ($v) = $Config_SH_expanded =~ m/^aout_$_='(.*)'\s*$/m;
         $preconfig{$_} = $v eq 'undef' ? undef : $v;
     }
 }
