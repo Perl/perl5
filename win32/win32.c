@@ -2369,7 +2369,7 @@ Nt4CreateHardLinkW(
     StreamId.dwStreamId = BACKUP_LINK;
     StreamId.dwStreamAttributes = 0;
     StreamId.dwStreamNameSize = 0;
-#ifdef __BORLANDC__
+#if defined(__BORLANDC__) || defined(__MINGW32__)
     StreamId.Size.u.HighPart = 0;
     StreamId.Size.u.LowPart = dwLen;
 #else

@@ -1884,6 +1884,14 @@ I<not> simply the last two digits of the year.  If you assume it is,
 then you create non-Y2K-compliant programs--and you wouldn't want to do
 that, would you?
 
+The proper way to get a complete 4-digit year is simply:
+
+	$year += 1900;
+
+And to get the last two digits of the year (e.g., '01' in 2001) do:
+
+	$year = sprintf("%02d", $year % 100);
+
 If EXPR is omitted, does C<gmtime(time())>.
 
 In scalar context, returns the ctime(3) value:
@@ -2238,6 +2246,14 @@ number of years since 1900, that is, $year is C<123> in year 2023,
 and I<not> simply the last two digits of the year.  If you assume it is,
 then you create non-Y2K-compliant programs--and you wouldn't want to do
 that, would you?
+
+The proper way to get a complete 4-digit year is simply:
+
+	$year += 1900;
+
+And to get the last two digits of the year (e.g., '01' in 2001) do:
+
+	$year = sprintf("%02d", $year % 100);
 
 If EXPR is omitted, uses the current time (C<localtime(time)>).
 

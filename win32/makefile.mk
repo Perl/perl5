@@ -159,7 +159,7 @@ CCTYPE		*= BORLAND
 # so you may have to set CCHOME explicitly (spaces in the path name should
 # not be quoted)
 #
-CCHOME		*= d:\bc5
+CCHOME		*= c:\bc5
 #CCHOME		*= $(MSVCDIR)
 #CCHOME		*= D:\packages\mingw32
 CCINCDIR	*= $(CCHOME)\include
@@ -302,6 +302,7 @@ CC		= bcc32
 LINK32		= tlink32
 LIB32		= tlib /P128
 IMPLIB		= implib -c
+RSC		= rc
 
 #
 # Options
@@ -338,6 +339,7 @@ CC		= gcc
 LINK32		= gcc
 LIB32		= ar rc
 IMPLIB		= dlltool
+RSC		= rc
 
 o = .o
 a = .a
@@ -393,6 +395,7 @@ PRIV_LINK_FLAGS = -L"$(COREDIR)"
 CC		= cl
 LINK32		= link
 LIB32		= $(LINK32) -lib
+RSC		= rc
 
 #
 # Options
@@ -419,6 +422,9 @@ PERLCRTLIBC	= PerlCRTD.lib
 PERLCRTLIBC	= PerlCRT.lib
 .ENDIF
 .ENDIF
+
+PERLEXE_RES	=
+PERLDLL_RES	=
 
 .IF "$(RUNTIME)" == "-MD"
 LIBC		= $(PERLCRTLIBC)
@@ -495,7 +501,7 @@ LKPOST		= )
 # Rules
 # 
 
-.SUFFIXES : .c $(o) .dll $(a) .exe 
+.SUFFIXES : .c $(o) .dll $(a) .exe .rc .res
 
 .c$(o):
 	$(CC) -c $(null,$(<:d) $(NULL) -I$(<:d)) $(CFLAGS_O) $(OBJOUT_FLAG)$@ $<
@@ -514,6 +520,9 @@ $(o).dll:
 	$(LINK32) -dll -subsystem:windows -implib:$(*B).lib -def:$(*B).def \
 	    -out:$@ $(BLINK_FLAGS) $(LIBFILES) $< $(LIBPERL)  
 .ENDIF
+
+.rc.res:
+	$(RSC) $<
 
 #
 # various targets
@@ -1040,7 +1049,7 @@ perldll.def : $(MINIPERL) $(CONFIGPM) ..\global.sym ..\pp.sym ..\makedef.pl
 	$(MINIPERL) -w ..\makedef.pl PLATFORM=win32 $(OPTIMIZE) $(DEFINES) \
 	$(BUILDOPT) CCTYPE=$(CCTYPE) > perldll.def
 
-$(PERLDLL): perldll.def $(PERLDLL_OBJ)
+$(PERLDLL): perldll.def $(PERLDLL_OBJ) $(PERLDLL_RES)
 .IF "$(CCTYPE)" == "BORLAND"
 	$(LINK32) -Tpd -ap $(BLINK_FLAGS) \
 	    @$(mktmp c0d32$(o) $(PERLDLL_OBJ:s,\,\\)\n \
@@ -1061,7 +1070,7 @@ $(PERLDLL): perldll.def $(PERLDLL_OBJ)
 		perl.exp $(LKPOST))
 .ELSE
 	$(LINK32) -dll -def:perldll.def -out:$@ \
-	    @$(mktmp $(BLINK_FLAGS) $(LIBFILES) $(PERLDLL_OBJ:s,\,\\))
+	    @$(mktmp $(BLINK_FLAGS) $(LIBFILES) $(PERLDLL_RES) $(PERLDLL_OBJ:s,\,\\))
 .ENDIF
 	$(XCOPY) $(PERLIMPLIB) $(COREDIR)
 
@@ -1103,7 +1112,7 @@ perlmain.c : runperl.c
 perlmain$(o) : perlmain.c
 	$(CC) $(CFLAGS_O) -UPERLDLL $(OBJOUT_FLAG)$@ -c perlmain.c
 
-$(PERLEXE): $(PERLDLL) $(CONFIGPM) $(PERLEXE_OBJ)
+$(PERLEXE): $(PERLDLL) $(CONFIGPM) $(PERLEXE_OBJ) $(PERLEXE_RES)
 .IF "$(CCTYPE)" == "BORLAND"
 	$(LINK32) -Tpe -ap $(BLINK_FLAGS) \
 	    @$(mktmp c0x32$(o) $(PERLEXE_OBJ:s,\,\\)\n \
@@ -1114,7 +1123,7 @@ $(PERLEXE): $(PERLDLL) $(CONFIGPM) $(PERLEXE_OBJ)
 	    $(PERLEXE_OBJ) $(PERLIMPLIB) $(LIBFILES)
 .ELSE
 	$(LINK32) -subsystem:console -out:$@ $(BLINK_FLAGS) $(LIBFILES) \
-	    $(PERLEXE_OBJ) $(SETARGV_OBJ) $(PERLIMPLIB) 
+	    $(PERLEXE_OBJ) $(SETARGV_OBJ) $(PERLIMPLIB) $(PERLEXE_RES)
 	copy $(PERLEXE) $(WPERLEXE)
 	editbin /subsystem:windows $(WPERLEXE)
 .ENDIF

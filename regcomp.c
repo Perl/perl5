@@ -2918,7 +2918,7 @@ S_regclass(pTHX)
 		    Perl_warner(aTHX_ WARN_UNSAFE, 
 				"/%.127s/: Unrecognized escape \\%c in character class passed through",
 				PL_regprecomp,
-				value);
+				(int)value);
 		break;
 	    }
 	}
@@ -3391,7 +3391,7 @@ S_regclassutf8(pTHX)
 		    Perl_warner(aTHX_ WARN_UNSAFE, 
 				"/%.127s/: Unrecognized escape \\%c in character class passed through",
 				PL_regprecomp,
-				value);
+				(int)value);
 		break;
 	    }
 	}

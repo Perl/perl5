@@ -18,6 +18,7 @@ WriteMakefile(
 sub MY::postamble {
 	'
 DynaLoader.xs: $(DLSRC)
+	$(RM_F) $@
 	$(CP) $? $@
 
 # Perform very simple tests just to check for major gaffs.

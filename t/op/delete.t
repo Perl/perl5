@@ -1,8 +1,6 @@
 #!./perl
 
-# $RCSfile: delete.t,v $$Revision: 4.1 $$Date: 92/08/07 18:27:44 $
-
-print "1..16\n";
+print "1..17\n";
 
 $foo{1} = 'a';
 $foo{2} = 'b';
@@ -49,3 +47,13 @@ delete $refhash{"top"}->{"bar"};
 @list = keys %{$refhash{"top"}};
 
 print "@list" eq "foo" ? "ok 16\n" : "not ok 16 @list\n";
+
+{
+    my %a = ('bar', 33);
+    my($a) = \(values %a);
+    my $b = \$a{bar};
+    my $c = \delete $a{bar};
+
+    print "not " unless $a == $b && $b == $c;
+    print "ok 17\n";
+}

@@ -2909,7 +2909,8 @@ Perl_yylex(pTHX)
 		    if (++t < PL_bufend
 			&& (!isALNUM(*t)
 			    || ((*t == 'q' || *t == 'x') && ++t < PL_bufend
-				&& !isALNUM(*t)))) {
+				&& !isALNUM(*t))))
+		    {
 			char *tmps;
 			char open, close, term;
 			I32 brackets = 1;
@@ -2940,8 +2941,10 @@ Perl_yylex(pTHX)
 		    }
 		    t++;
 		}
-		else if (isIDFIRST_lazy(s)) {
-		    for (t++; t < PL_bufend && isALNUM_lazy(t); t++) ;
+		else if (isALNUM_lazy(t)) {
+		    t += UTF8SKIP(t);
+		    while (t < PL_bufend && isALNUM_lazy(t))
+			 t += UTF8SKIP(t);
 		}
 		while (t < PL_bufend && isSPACE(*t))
 		    t++;
