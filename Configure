@@ -3738,18 +3738,6 @@ case "$dflt" in
 ' '|'') dflt='none';;
 esac
 
-case "$libsfound" in
-*libm*) ;;
-*) cat <<EOM >&4
-
-I could not find -lm, the mathematics library.
-This means that something went awfully wrong.
-
-EOM
-   exit 1
-   ;;
-esac
-
 $cat <<EOM
 
 In order to compile $package on your machine, a number of libraries
