@@ -1,9 +1,15 @@
 #!./perl
 BEGIN { @INC=('./lib', '../lib') }
 use File::Find;
-use File::Path qw(mkpath);
+use File::Path ();
 use Config;
 use subs qw(unlink rename link chmod);
+
+# override the ones in the rest of the script
+sub mkpath
+{
+  File::Path::mkpath(@_) unless $nonono;
+}
 
 $mainperldir = "/usr/bin";
 $exe_ext = $Config{exe_ext};
@@ -57,8 +63,8 @@ if ($d_dosuid && $>) { die "You must run as root to install suidperl\n"; }
 
    $installbin		|| die "No installbin directory in config.sh\n";
 -d $installbin		|| mkpath($installbin, 1, 0777);
--d $installbin		|| die "$installbin is not a directory\n";
--w $installbin		|| die "$installbin is not writable by you\n"
+-d $installbin		|| $nonono || die "$installbin is not a directory\n";
+-w $installbin		|| $nonono || die "$installbin is not writable by you\n"
 	unless $installbin =~ m#^/afs/# || $nonono;
 
 -x 'perl' . $exe_ext	|| die "perl isn't executable!\n";
@@ -347,6 +353,7 @@ sub samepath {
 sub installlib {
     my $dir = $File::Find::dir;
     $dir =~ s#^\.(?![^/])/?##;
+    local($depth) = $dir ? "lib/$dir" : "lib";
 
     my $name = $_;
     
@@ -373,7 +380,7 @@ sub installlib {
 	    &unlink("$installarchlib/$name");
 	}
 	system "cmp", "-s", $_, "$installlib/$name";
-	if ($?) {
+	if ($? || $nonono) {
 	    &unlink("$installlib/$name");
 	    mkpath("$installlib/$dir", 1, 0777);
 	    cp_if_diff($_, "$installlib/$name");
@@ -403,9 +410,12 @@ sub cp_if_diff {
     my($from,$to)=@_;
     -f $from || die "$0: $from not found";
     system "cmp", "-s", $from, $to;
-    if ($?) {
+    if ($? || $nonono) {
 	my ($atime, $mtime);
 	unlink($to);   # In case we don't have write permissions.
+        if ($nonono) {
+            $from = $depth . "/" . $from if $depth;
+        }
 	cmd("cp $from $to");
 	# Restore timestamps if it's a .a library.
 	if ($to =~ /\.a$/) {
