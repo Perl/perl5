@@ -3384,8 +3384,16 @@ OP *
 ck_anoncode(op)
 OP *op;
 {
-    PADOFFSET ix = pad_alloc(op->op_type, SVs_PADMY);
-    av_store(comppad_name, ix, newSVpv("&", 1));
+    PADOFFSET ix;
+    SV* name;
+
+    name = NEWSV(1106,0);
+    sv_upgrade(name, SVt_PVNV);
+    sv_setpvn(name, "&", 1);
+    SvIVX(name) = -1;
+    SvNVX(name) = 1;
+    ix = pad_alloc(op->op_type, SVs_PADMY);
+    av_store(comppad_name, ix, name);
     av_store(comppad, ix, cSVOP->op_sv);
     SvPADMY_on(cSVOP->op_sv);
     cSVOP->op_sv = Nullsv;
