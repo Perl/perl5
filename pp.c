@@ -2008,12 +2008,12 @@ PP(pp_substr)
 	RETPUSHUNDEF;
     }
     else {
-        if (utfcurlen) {
+	if (utfcurlen)
 	    sv_pos_u2b(sv, &pos, &rem);
-	    SvUTF8_on(TARG);
-	}
 	tmps += pos;
 	sv_setpvn(TARG, tmps, rem);
+	if (utfcurlen)
+	    SvUTF8_on(TARG);
 	if (repl)
 	    sv_insert(sv, pos, rem, repl, repl_len);
 	else if (lvalue) {		/* it's an lvalue! */
@@ -2026,7 +2026,7 @@ PP(pp_substr)
 				"Attempt to use reference as lvalue in substr");
 		}
 		if (SvOK(sv))		/* is it defined ? */
-		    (void)SvPOK_only(sv);
+		    (void)SvPOK_only_UTF8(sv);
 		else
 		    sv_setpvn(sv,"",0);	/* avoid lexical reincarnation */
 	    }
