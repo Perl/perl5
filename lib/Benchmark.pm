@@ -50,6 +50,9 @@ Benchmark - benchmark running times of Perl code
     $count = $t->iters ;
     print "$count loops of other code took:",timestr($t),"\n";
 
+    # enable hires wallclock timing if possible
+    use Benchmark ':hireswallclock';
+
 =head1 DESCRIPTION
 
 The Benchmark module encapsulates a number of routines to help you
@@ -273,6 +276,15 @@ for passing to timestr().
 
 =back
 
+=head2 :hireswallclock
+
+If the Time::HiRes module has been installed, you can specify the
+special tag C<:hireswallclock> for Benchmark (if Time::HiRes is not
+available, the tag will be silently ignored).  This tag will cause the
+wallclock time to be measured in microseconds, instead of integer
+seconds.  Note though that since the speed computations are conducted
+still in CPU seconds.
+
 =head1 NOTES
 
 The data is stored as a list of values from the time and times
@@ -395,6 +407,8 @@ style in. (so that 'none' will suppress output). Make sub new dump its
 debugging output to STDERR, to be consistent with everything else.
 All bugs found while writing a regression test.
 
+September, 2002; by Jarkko Hietaniemi: add ':hireswallclock' special tag.
+
 =cut
 
 # evaluate something in a clean lexical environment
@@ -412,9 +426,31 @@ use Exporter;
 	      clearcache clearallcache disablecache enablecache);
 %EXPORT_TAGS=( all => [ @EXPORT, @EXPORT_OK ] ) ;
 
-$VERSION = 1.05;
+$VERSION = 1.0501;
+
+# --- ':hireswallclock' special handling
+
+my $hirestime;
+
+sub mytime () { time }
 
 &init;
+
+sub BEGIN {
+    if (eval 'require Time::HiRes') {
+	import Time::HiRes qw(time);
+	$hirestime = \&Time::HiRes::time;
+    }
+}
+
+sub import {
+    my $class = shift;
+    if (grep { $_ eq ":hireswallclock" } @_) {
+	@_ = grep { $_ ne ":hireswallclock" } @_;
+	*mytime = $hirestime if defined $hirestime;
+    }
+    Benchmark->export_to_level(1, $class, @_);
+}
 
 sub init {
     $debug = 0;
@@ -440,7 +476,7 @@ sub disablecache  { $cache = 0; }
 
 # --- Functions to process the 'time' data type
 
-sub new { my @t = (time, times, @_ == 2 ? $_[1] : 0);
+sub new { my @t = (mytime, times, @_ == 2 ? $_[1] : 0);
 	  print STDERR "new=@t\n" if $debug;
 	  bless \@t; }
 
@@ -480,11 +516,12 @@ sub timestr {
     return '' if $style eq 'none';
     $style = ($ct>0) ? 'all' : 'noc' if $style eq 'auto';
     my $s = "@t $style"; # default for unknown style
-    $s=sprintf("%2d wallclock secs (%$f usr %$f sys + %$f cusr %$f csys = %$f CPU)",
+    my $w = $hirestime ? "%2g" : "%2d";
+    $s=sprintf("$w wallclock secs (%$f usr %$f sys + %$f cusr %$f csys = %$f CPU)",
 			    $r,$pu,$ps,$cu,$cs,$tt) if $style eq 'all';
-    $s=sprintf("%2d wallclock secs (%$f usr + %$f sys = %$f CPU)",
+    $s=sprintf("$w wallclock secs (%$f usr + %$f sys = %$f CPU)",
 			    $r,$pu,$ps,$pt) if $style eq 'noc';
-    $s=sprintf("%2d wallclock secs (%$f cusr + %$f csys = %$f CPU)",
+    $s=sprintf("$w wallclock secs (%$f cusr + %$f csys = %$f CPU)",
 			    $r,$cu,$cs,$ct) if $style eq 'nop';
     $s .= sprintf(" @ %$f/s (n=$n)", $n / ( $pu + $ps )) if $n && $pu+$ps;
     $s;
