@@ -637,7 +637,8 @@ Perl_pad_swipe(pTHX_ PADOFFSET po)
     DEBUG_X(PerlIO_printf(Perl_debug_log, "Pad 0x%"UVxf" swipe %"IVdf"\n",
 			  PTR2UV(PL_curpad), (IV)po));
 #endif /* USE_5005THREADS */
-    SvPADTMP_off(PL_curpad[po]);
+    if (PL_curpad[po])
+	SvPADTMP_off(PL_curpad[po]);
     PL_curpad[po] = NEWSV(1107,0);
     SvPADTMP_on(PL_curpad[po]);
     if ((I32)po < PL_padix)
@@ -3324,7 +3325,8 @@ Perl_newPADOP(pTHX_ I32 type, I32 flags, SV *sv)
     padop->op_padix = pad_alloc(type, SVs_PADTMP);
     SvREFCNT_dec(PL_curpad[padop->op_padix]);
     PL_curpad[padop->op_padix] = sv;
-    SvPADTMP_on(sv);
+    if (sv)
+	SvPADTMP_on(sv);
     padop->op_next = (OP*)padop;
     padop->op_flags = (U8)flags;
     if (PL_opargs[type] & OA_RETSCALAR)
@@ -3338,7 +3340,8 @@ OP *
 Perl_newGVOP(pTHX_ I32 type, I32 flags, GV *gv)
 {
 #ifdef USE_ITHREADS
-    GvIN_PAD_on(gv);
+    if (gv)
+	GvIN_PAD_on(gv);
     return newPADOP(type, flags, SvREFCNT_inc(gv));
 #else
     return newSVOP(type, flags, SvREFCNT_inc(gv));
