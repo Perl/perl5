@@ -2064,81 +2064,65 @@ PP(pp_method)
     dSP;
     SV* sv;
     SV* ob;
-    HV* stash;
     GV* gv;
+    HV* stash;
+    char* name;
     char* packname;
     STRLEN packlen;
-    char* name;
-    char* origname;
-    char* sep;
-    char* p;
 
+    name = SvPV(TOPs, na);
     sv = *(stack_base + TOPMARK + 1);
-
-    sep = name = origname = SvPV(TOPs, na);
-    for (p = name; *p; p++) {
-	if (*p == '\'')
-	    sep = p, name = p + 1;
-	else if (*p == ':' && *(p + 1) == ':')
-	    sep = p, name = p + 2;
-    }
-    if (name == origname)
-	packname = Nullch;
-    else {
-	packname = origname;
-	packlen = sep - origname;
-
-	/* let gv_fetchmethod() handle SUPER:: */
-	if (packlen == 5 && strnEQ(packname, "SUPER", 5)) {
-	    packname = Nullch;
-	    name = origname;
-	}
-    }
-
+    
     if (SvGMAGICAL(sv))
         mg_get(sv);
     if (SvROK(sv))
 	ob = (SV*)SvRV(sv);
     else {
-	char* tname = Nullch;
-	STRLEN tlen = 0;
 	GV* iogv;
 
+	packname = Nullch;
 	if (!SvOK(sv) ||
-	    !(tname = SvPV(sv, tlen)) ||
-	    !(iogv = gv_fetchpv(tname, FALSE, SVt_PVIO)) ||
-	    !(ob = (SV*)GvIO(iogv)))
+	    !(packname = SvPV(sv, packlen)) ||
+	    !(iogv = gv_fetchpv(packname, FALSE, SVt_PVIO)) ||
+	    !(ob=(SV*)GvIO(iogv)))
 	{
-	    if (!packname) {
-		packname = tname;
-		packlen = tlen;
-	    }
-	    if (!packname || !isALPHA(*packname))
+	    if (!packname || !isIDFIRST(*packname))
   DIE("Can't call method \"%s\" without a package or object reference", name);
+	    stash = gv_stashpvn(packname, packlen, TRUE);
 	    goto fetch;
 	}
-
-	/* working on an IO object */
 	*(stack_base + TOPMARK + 1) = sv_2mortal(newRV((SV*)iogv));
     }
 
     if (!ob || !SvOBJECT(ob))
-	DIE("Can't call method \"%s\" on unblessed reference", origname);
+	DIE("Can't call method \"%s\" on unblessed reference", name);
 
-    if (!packname)
-	stash = SvSTASH(ob);
-    else {
+    stash = SvSTASH(ob);
+
   fetch:
-	stash = gv_stashpvn(packname, packlen, TRUE);
-    }
     gv = gv_fetchmethod(stash, name);
-    if (!gv)
-	DIE("Can't locate object method \"%s\" via package \"%s\"",
-	    name, HvNAME((strnEQ(name, "SUPER", 5) &&
-			  (name[5] == '\'' ||
-			   (name[5] == ':' && name[6] == ':')))
-			 ? curcop->cop_stash : stash));
+    if (!gv) {
+	char* leaf = name;
+	char* sep = Nullch;
+	char* p;
+
+	for (p = name; *p; p++) {
+	    if (*p == '\'')
+		sep = p, leaf = p + 1;
+	    else if (*p == ':' && *(p + 1) == ':')
+		sep = p, leaf = p + 2;
+	}
+	if (!sep || ((sep - name) == 5 && strnEQ(name, "SUPER", 5))) {
+	    packname = HvNAME(sep ? curcop->cop_stash : stash);
+	    packlen = strlen(packname);
+	}
+	else {
+	    packname = name;
+	    packlen = sep - name;
+	}
+	DIE("Can't locate object method \"%s\" via package \"%.*s\"",
+	    leaf, (int)packlen, packname);
+    }
     SETs(isGV(gv) ? (SV*)GvCV(gv) : (SV*)gv);
     RETURN;
 }
-
