@@ -763,10 +763,10 @@ thing, but we'll have to go through the LIST field indirectly.
 This is called when the hash is evaluated in scalar context. In order
 to mimic the behaviour of untied hashes, this method should return a
 false value when the tied hash is considered empty. If this method does
-not exist, perl will make some educated guesses and return false when
-the hash is not inside an iteration. In this case, FIRSTKEY is called
-and the result will be a false value if FIRSTKEY returns the empty list,
-true otherwise.
+not exist, perl will make some educated guesses and return true when
+the hash is inside an iteration. If this isn't the case, FIRSTKEY is
+called, and the result will be a false value if FIRSTKEY returns the empty
+list, true otherwise.
 
 In our example we can just call C<scalar> on the underlying hash
 referenced by C<$self-E<gt>{LIST}>:
