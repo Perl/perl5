@@ -2334,6 +2334,14 @@ PerlIOUnix_pushed(pTHX_ PerlIO *f, const char *mode, SV *arg, PerlIO_funcs *tab)
 {
     IV code = PerlIOBase_pushed(aTHX_ f, mode, arg, tab);
     PerlIOUnix *s = PerlIOSelf(f, PerlIOUnix);
+#if defined(WIN32)
+    struct stat  st;
+    if (fstat(s->fd, &st) == 0) {
+	if (!S_ISREG(st.st_mode)) {
+    	    PerlIOBase(f)->flags |= PERLIO_F_NOTREG;
+	}
+    }
+#endif
     if (*PerlIONext(f)) {
 	/* We never call down so do any pending stuff now */
 	PerlIO_flush(PerlIONext(f));
@@ -2346,6 +2354,7 @@ PerlIOUnix_pushed(pTHX_ PerlIO *f, const char *mode, SV *arg, PerlIO_funcs *tab)
 	s->oflags = mode ? PerlIOUnix_oflags(mode) : -1;
     }
     PerlIOBase(f)->flags |= PERLIO_F_OPEN;
+
     return code;
 }
 
@@ -2460,10 +2469,23 @@ PerlIOUnix_write(pTHX_ PerlIO *f, const void *vbuf, Size_t count)
 IV
 PerlIOUnix_seek(pTHX_ PerlIO *f, Off_t offset, int whence)
 {
-    Off_t new =
-	PerlLIO_lseek(PerlIOSelf(f, PerlIOUnix)->fd, offset, whence);
+    int fd = PerlIOSelf(f, PerlIOUnix)->fd;
+    Off_t new;
+    if (PerlIOBase(f)->flags & PERLIO_F_NOTREG) {
+#ifdef  ESPIPE
+	SETERRNO(ESPIPE, LIB_INVARG);
+#else
+	SETERRNO(EINVAL, LIB_INVARG);
+#endif
+	return -1;
+    } 
+    new  = PerlLIO_lseek(fd, offset, whence);
+    if (new == (Off_t) - 1)
+     {
+      return -1;
+     }
     PerlIOBase(f)->flags &= ~PERLIO_F_EOF;
-    return (new == (Off_t) - 1) ? -1 : 0;
+    return  0;
 }
 
 Off_t
