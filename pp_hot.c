@@ -1719,12 +1719,12 @@ PP(pp_leave)
 	SP = newsp;
     else if (gimme == G_SCALAR) {
 	MARK = newsp + 1;
-	if (MARK <= SP)
+	if (MARK <= SP) {
 	    if (SvFLAGS(TOPs) & (SVs_PADTMP|SVs_TEMP))
 		*MARK = TOPs;
 	    else
 		*MARK = sv_mortalcopy(TOPs);
-	else {
+	} else {
 	    MEXTEND(mark,0);
 	    *MARK = &PL_sv_undef;
 	}
