@@ -1709,7 +1709,7 @@ localize(OP *o, I32 lex)
 	    char *s;
 	    for (s = PL_bufptr; *s && (isALNUM(*s) || (*s & 0x80) || strchr("@$%, ",*s)); s++) ;
 	    if (*s == ';' || *s == '=')
-		warner(WARN_PARENTHESIS, "Parens missing around \"%s\" list",
+		warner(WARN_PARENTHESIS, "Parentheses missing around \"%s\" list",
 				lex ? "my" : "local");
 	}
     }

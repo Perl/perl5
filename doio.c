@@ -470,7 +470,7 @@ nextargv(register GV *gv)
                       || (_djstat_fail_bits & _STFAIL_TRUENAME)!=0
 #endif
                       ) {
-			warn("Can't do inplace edit: %s would not be uniq",
+			warn("Can't do inplace edit: %s would not be unique",
 			  SvPVX(sv) );
 			do_close(gv,FALSE);
 			continue;
