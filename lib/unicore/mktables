@@ -1,3 +1,6 @@
+## !!!!!!!!!!!!!!       IF YOU MODIFY THIS FILE       !!!!!!!!!!!!!!!!!!!!!!!!!
+## Any files created or read by this program should be listed in 'mktables.lst'
+
 #!/usr/bin/perl -w
 require 5.008;	# Needs pack "U". Probably safest to run on 5.8.x
 use strict;
@@ -45,6 +48,63 @@ while (@ARGV)
     } else {
         die "usage: $0 [-v|-q|-C dir] [-maketest]";
     }
+}
+
+if (!$AlwaysWrite) {
+    print "Reading file list...\n"
+        if $Verbose;
+    open my $fh,"<","mktables.lst"
+        or die "Failed to read mktables.lst:$!";
+    my @input =( $0 );
+    my @output;
+    for my $list ( \@input, \@output ) {
+        while (<$fh>) {
+            s/^ \s+ | \s+ $//xg;
+            next if /^ \s* (?: \# .* )? $/x;
+            last if /^ =+ $/x;
+            my ( $file ) = split /\t/, $_;
+            push @$list, $file;
+        }
+        my %dupe;
+        @$list = grep !$dupe{ $_ }++, @$list;
+    }
+    close $fh;
+    die "No input or output files in mktables.lst!"
+        if !@input or !@output;
+    if ( $Verbose ) {
+        print "Expecting ".scalar( @input )." input files. ",
+              "Checking ".scalar( @output )." output files.\n";
+    }
+    my $maxtime = 0;
+    foreach my $in (@input) {
+        my $time = -M $in;
+        die "Missing input file '$in'" unless defined $time;
+        $maxtime = $time if $maxtime < $time;
+    }
+
+    my $ok = 1;
+    foreach my $out (@output) {
+        if ( ! -e $out ) {
+            print "'$out' is missing.\n"
+                if $Verbose;
+            $ok = 0;
+            last;
+        }
+        if ( -M $out > $maxtime ) {
+            print "'$out' is too old.\n"
+                if $Verbose;
+            $ok = 0;
+            last;
+        }
+    }
+    if ($ok) {
+        print "Files seem to be ok, not bothering to rebuild.\n";
+        exit(0);
+    }
+    print "Must rebuild tables.\n"
+        if $Verbose;
+} elsif ($Verbose) {
+    print "Not checking file list as -w option set.\n";
 }
 
 foreach my $lib ('To', 'lib',
