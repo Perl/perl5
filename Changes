@@ -79,6 +79,189 @@ Version 5.005_59        Development release working toward 5.006
 ----------------
 
 ____________________________________________________________________________
+[  3869] By: gsar                                  on 1999/08/02  06:59:09
+        Log: From: "Vishal Bhatia" <vishalb@my-deja.com>
+             Date: Sat, 31 Jul 1999 19:08:33 -0700
+             Message-ID: <LAONLKLELDJAFAAA@my-deja.com>
+             Subject: [PATCH 5.005_58] "use constant" in the compiler
+     Branch: perl
+	   ! ext/B/B/C.pm ext/B/B/CC.pm
+____________________________________________________________________________
+[  3868] By: gsar                                  on 1999/08/02  06:55:51
+        Log: debug build tweak
+     Branch: perl
+	   ! regexec.c
+____________________________________________________________________________
+[  3867] By: gsar                                  on 1999/08/02  06:35:18
+        Log: create vmsperl branch (to be owned and operated by: cbailey)
+     Branch: vmsperl
+	  +> (branch 1476 files)
+____________________________________________________________________________
+[  3866] By: jhi                                   on 1999/08/01  23:34:40
+        Log: so_locations once is enough.
+     Branch: cfgperl
+	   ! Makefile.SH
+____________________________________________________________________________
+[  3865] By: jhi                                   on 1999/08/01  23:13:05
+        Log: Simplicate duplicated code.
+     Branch: cfgperl
+	   ! util.c
+____________________________________________________________________________
+[  3864] By: jhi                                   on 1999/08/01  22:41:41
+        Log: Integrate with Sarathy.  perl.h and util.c required manual resolving.
+     Branch: cfgperl
+	  +> README.cygwin cygwin/Makefile.SHs cygwin/ld2.in
+	  +> cygwin/perlld.in ext/DynaLoader/dl_cygwin.xs hints/cygwin.sh
+	   - README.cygwin32 cygwin32/Makefile.SHs
+	   - cygwin32/build-instructions.READFIRST
+	   - cygwin32/build-instructions.charles-wilson
+	   - cygwin32/build-instructions.sebastien-barre
+	   - cygwin32/build-instructions.steven-morlock
+	   - cygwin32/build-instructions.steven-morlock2 cygwin32/ld2.in
+	   - cygwin32/perlld.in ext/DynaLoader/dl_cygwin32.xs
+	   - hints/cygwin32.sh
+	  !> (integrate 61 files)
+____________________________________________________________________________
+[  3863] By: jhi                                   on 1999/08/01  22:36:02
+        Log: Regen Configure and Glossary once again.
+     Branch: cfgperl
+	   ! Configure Porting/Glossary Porting/config.sh Porting/config_H
+	   ! config_h.SH
+____________________________________________________________________________
+[  3862] By: jhi                                   on 1999/08/01  22:26:09
+        Log: Glossary update for #3861.
+     Branch: cfgperl
+	   ! Configure Porting/Glossary Porting/config.sh Porting/config_H
+	   ! config_h.SH
+____________________________________________________________________________
+[  3861] By: jhi                                   on 1999/08/01  22:22:51
+        Log: 64-bit work.  Now 32-bit platforms get a 100% make test
+             with -Duse64bits (using long long).
+             Tested in Solaris 2.6 sparc  RH Linux 6.0 x86
+             (and Digital IX 4.0D, to get a true 64-bit opinion).  Now e.g.
+             'print unpack "q", pack "q", 12345678901'
+             should work on such 32-bit platforms.
+             Still a lot of printf()s behind -D which wrongly assume
+             that %ld/%lx and (long) are a good combination.
+             Introducing a slew of new macros intended to be used in printf()
+             format strings: e. g. PERL_PRId64 is the string to be used
+             when printing an IV, printf("%" PERL_PRId64 "\n", iv).
+             The PRI... naming follows the C9X naming of <inttypes.h> macros.
+     Branch: cfgperl
+	   ! Configure Porting/Glossary Porting/config.sh Porting/config_H
+	   ! config_h.SH doio.c dump.c mg.c op.c perl.h pp_ctl.c pp_hot.c
+	   ! pp_sys.c scope.c sv.c t/pragma/warn/sv toke.c util.c
+     Branch: metaconfig/U/perl
+	   + atolf.U atoll.U longdblfio.U quadfio.U strtoull.U
+____________________________________________________________________________
+[  3860] By: gsar                                  on 1999/08/01  21:23:18
+        Log: integrate cfgperl contents into mainline
+     Branch: perl
+	   ! toke.c
+	  !> (integrate 29 files)
+____________________________________________________________________________
+[  3859] By: gsar                                  on 1999/08/01  21:13:09
+        Log: From: Nathan Torkington <gnat@frii.com>
+             Date: Sun, 1 Aug 1999 11:23:35 -0600 (MDT)
+             Message-ID: <14244.33431.739419.806927@localhost.frii.com>
+             Subject: [PATCH 5.005_58] ext/B/B/Disassembler.pm patch
+     Branch: perl
+	   ! ext/B/B/Disassembler.pm
+____________________________________________________________________________
+[  3858] By: gsar                                  on 1999/08/01  21:09:15
+        Log: DB_File 1.68 update from Paul Marquess
+     Branch: perl
+	   ! ext/DB_File/Changes ext/DB_File/DB_File.pm
+	   ! ext/DB_File/DB_File.xs t/lib/db-btree.t t/lib/db-hash.t
+	   ! t/lib/db-recno.t
+____________________________________________________________________________
+[  3857] By: gsar                                  on 1999/08/01  21:05:54
+        Log: From: Ilya Zakharevich <ilya@math.ohio-state.edu>
+             Date: Sat, 31 Jul 1999 05:13:38 -0400
+             Message-Id: <199907311407.IAA25038@localhost.frii.com>
+             Subject: [PATCH 5.005_58] More optimizations to REx engine
+     Branch: perl
+	   ! embed.pl embedvar.h ext/Thread/Thread.xs objXSUB.h perl.c
+	   ! perl.h proto.h regcomp.c regexec.c t/op/re_tests thrdvar.h
+____________________________________________________________________________
+[  3856] By: gsar                                  on 1999/08/01  20:59:59
+        Log: slightly modified version of suggested patch
+             From: Ilya Zakharevich <ilya@math.ohio-state.edu>
+             Date: Sat, 31 Jul 1999 04:45:12 -0400
+             Message-Id: <199907311406.IAA25034@localhost.frii.com>
+             Subject: [PATCH 5.005_58] Fix OS/2 build
+     Branch: perl
+	   ! Makefile.SH lib/ExtUtils/MM_OS2.pm lib/ExtUtils/Mksymlists.pm
+	   ! makedef.pl os2/Makefile.SHs os2/diff.configure perl.h sv.h
+____________________________________________________________________________
+[  3855] By: gsar                                  on 1999/08/01  20:49:06
+        Log: cygwin update
+             From: "Fifer, Eric" <EFifer@sanwaint.com>
+             Date: Fri, 30 Jul 1999 18:31:48 +0100
+             Message-Id: <71E287AB0D94D111BBD600600849EC8185EE06@POST>
+             Subject: [ID 19990730.003] PATCH] perl5.005_58 cygwin port
+     Branch: perl
+	   ! doio.c dosish.h lib/File/Spec/Unix.pm mg.c perl.h perlsdio.h
+	   ! pp_sys.c unixish.h util.c
+____________________________________________________________________________
+[  3854] By: gsar                                  on 1999/08/01  20:41:53
+        Log: fixes from Stephen McCamant that address bugs in change#3612
+             (the optimization shouldn't be enabled in expressions where
+             the variable is introduced), and fix Deparse to grok the
+             optimization
+             Date: Thu, 29 Jul 1999 21:21:49 -0500 (CDT)
+             Message-ID: <14241.3133.979257.953396@alias-2.pr.mcs.net>
+             Subject: [PATCH _58] Set OPpTARGET_MY more consistently
+             --
+             Date: Thu, 29 Jul 1999 22:31:16 -0500 (CDT)
+             Message-ID: <14241.7300.181386.763503@alias-2.pr.mcs.net>
+             Subject: [PATCH _58] Disable TARGET_MY-ization on variable introduction
+             --
+             Date: Fri, 30 Jul 1999 22:25:27 -0500 (CDT)
+             Message-Id: <199907310326.VAA24376@localhost.frii.com>
+             Subject: [PATCH _58, long] B::Deparse (was Re: New warning 'Useless use of...')
+     Branch: perl
+	   ! ext/B/B/Deparse.pm op.c
+____________________________________________________________________________
+[  3853] By: gsar                                  on 1999/08/01  20:31:32
+        Log: From: Stephen McCamant <smccam@uclink4.berkeley.edu>
+             Date: Thu, 29 Jul 1999 14:08:50 -0500 (CDT)
+             Message-ID: <14240.42690.292893.605292@alias-2.pr.mcs.net>
+             Subject: [PATCH _58] Two one-liner LOGOP tweaks
+     Branch: perl
+	   ! op.c opcode.h opcode.pl
+____________________________________________________________________________
+[  3852] By: gsar                                  on 1999/08/01  20:29:17
+        Log: rename cygwin32 to cygwin (from Eric Fifer <EFifer@sanwaint.com>)
+     Branch: perl
+	   ! AUTHORS EXTERN.h INSTALL MAINTAIN Makefile.SH Porting/patchls
+	   ! README.cygwin README.win32 XSUB.h cygwin/Makefile.SHs
+	   ! ext/DynaLoader/dl_cygwin.xs ext/POSIX/POSIX.xs
+	   ! ext/SDBM_File/sdbm/pair.c hints/cygwin.sh
+	   ! lib/ExtUtils/MM_Cygwin.pm makedepend.SH perl.h pod/perl.pod
+	   ! pod/perlport.pod pp_sys.c util.c
+____________________________________________________________________________
+[  3851] By: gsar                                  on 1999/08/01  20:20:05
+        Log: move files around for s/cygwin32/cygwin/ renaming
+     Branch: perl
+	  +> README.cygwin cygwin/Makefile.SHs cygwin/ld2.in
+	  +> cygwin/perlld.in ext/DynaLoader/dl_cygwin.xs hints/cygwin.sh
+	   - README.cygwin32 cygwin32/Makefile.SHs
+	   - cygwin32/build-instructions.READFIRST
+	   - cygwin32/build-instructions.charles-wilson
+	   - cygwin32/build-instructions.sebastien-barre
+	   - cygwin32/build-instructions.steven-morlock
+	   - cygwin32/build-instructions.steven-morlock2 cygwin32/ld2.in
+	   - cygwin32/perlld.in ext/DynaLoader/dl_cygwin32.xs
+	   - hints/cygwin32.sh
+	   ! MANIFEST
+____________________________________________________________________________
+[  3850] By: gsar                                  on 1999/08/01  20:05:14
+        Log: posix-bc hints tweak (via private mail from Thomas Dorner
+             <Thomas.Dorner@start.de>)
+     Branch: perl
+	   ! Changes hints/posix-bc.sh
+____________________________________________________________________________
 [  3849] By: gsar                                  on 1999/08/01  19:50:20
         Log: notes on PERL_IMPLICIT_CONTEXT (from a version by Nathan Torkington
              <gnat@frii.com>)

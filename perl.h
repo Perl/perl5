@@ -1027,6 +1027,8 @@ Free_t   Perl_mfree (Malloc_t where);
 #  endif
 #  define IV_SIZEOF 8
 #  define UV_SIZEOF 8
+#  define IV_IS_QUAD
+#  define UV_IS_QUAD
 #else
    typedef          long               IV;
    typedef	    unsigned long      UV;
@@ -1040,6 +1042,15 @@ Free_t   Perl_mfree (Malloc_t where);
 #    define IV_MIN PERL_LONG_MIN
 #    define UV_MAX PERL_ULONG_MAX
 #    define UV_MIN PERL_ULONG_MIN
+#  endif
+#  define UV_SIZEOF LONGSIZE
+#  define IV_SIZEOF LONGSIZE
+#  if LONGSIZE == 8
+#    define IV_IS_QUAD
+#    define UV_IS_QUAD
+#  else
+#    undef IV_IS_QUAD
+#    undef UV_IS_QUAD
 #  endif
 #  define UV_SIZEOF LONGSIZE
 #  define IV_SIZEOF LONGSIZE
@@ -1064,7 +1075,6 @@ Free_t   Perl_mfree (Malloc_t where);
 #   define Perl_atan2 atan2l
 #   define Perl_pow powl
 #   define Perl_floor floorl
-#   define Perl_atof atof
 #   define Perl_fmod fmodl
 #else
     typedef double NV;
@@ -1078,8 +1088,13 @@ Free_t   Perl_mfree (Malloc_t where);
 #   define Perl_atan2 atan2
 #   define Perl_pow pow
 #   define Perl_floor floor
-#   define Perl_atof atof		/* At some point there may be an atolf */
 #   define Perl_fmod fmod
+#endif
+
+#if defined(USE_LONG_DOUBLE) && defined(HAS_LONG_DOUBLE) && defined(HAS_ATOLF)
+#   define Perl_atof atolf
+#else
+#   define Perl_atof atof
 #endif
 
 /* Previously these definitions used hardcoded figures. 
@@ -2956,6 +2971,18 @@ typedef struct am_table_short AMTS;
 #define Atof				Perl_atof
 
 #endif /* !USE_LOCALE_NUMERIC */
+
+#if defined(USE_LONG_LONG) && defined(HAS_LONG_LONG) && defined(HAS_ATOLL)
+#define Atol atoll 
+#else
+#define Atol atol
+#endif
+
+#if defined(USE_LONG_LONG) && defined(HAS_LONG_LONG) && defined(HAS_STRTOULL)
+#define Strtoul strtoull
+#else
+#define Strtoul strtoul
+#endif
 
 #if !defined(PERLIO_IS_STDIO) && defined(HASATTRIBUTE)
 /* 

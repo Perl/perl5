@@ -20,7 +20,7 @@
 
 # $Id: Head.U,v 3.0.1.9 1997/02/28 15:02:09 ram Exp $
 #
-# Generated on Sun Aug  1 00:18:49 EET DST 1999 [metaconfig 3.0 PL70]
+# Generated on Mon Aug  2 01:31:40 EET DST 1999 [metaconfig 3.0 PL70]
 # (with additional metaconfig patches by perlbug@perl.com)
 
 cat >/tmp/c1$$ <<EOF
@@ -278,6 +278,8 @@ d_archlib=''
 installarchlib=''
 archname=''
 myarchname=''
+d_atolf=''
+d_atoll=''
 baserev=''
 bin=''
 binexp=''
@@ -710,6 +712,18 @@ xlibpth=''
 ignore_versioned_solibs=''
 libs=''
 lns=''
+d_PRIEldbl=''
+d_PRIFldbl=''
+d_PRIGldbl=''
+d_PRIeldbl=''
+d_PRIfldbl=''
+d_PRIgldbl=''
+sPRIEldbl=''
+sPRIFldbl=''
+sPRIGldbl=''
+sPRIeldbl=''
+sPRIfldbl=''
+sPRIgldbl=''
 lseeksize=''
 lseektype=''
 make_set_make=''
@@ -770,6 +784,18 @@ privlib=''
 privlibexp=''
 prototype=''
 ptrsize=''
+d_PRIX64=''
+d_PRId64=''
+d_PRIi64=''
+d_PRIo64=''
+d_PRIu64=''
+d_PRIx64=''
+sPRIX64=''
+sPRId64=''
+sPRIi64=''
+sPRIo64=''
+sPRIu64=''
+sPRIx64=''
 drand01=''
 randbits=''
 randfunc=''
@@ -815,6 +841,7 @@ d_ftello64=''
 d_tmpfile64=''
 d_stdio_stream_array=''
 stdio_stream_array=''
+d_strtoull=''
 sysman=''
 trnl=''
 uidtype=''
@@ -6531,6 +6558,497 @@ EOP
 	esac
 fi
 
+: see if inttypes.h is available
+: we want a real compile instead of Inhdr because some systems
+: have an inttypes.h which includes non-existent headers
+echo " "
+$cat >try.c <<EOCP
+#include <inttypes.h>
+int main() {
+	static int32_t foo32 = 0x12345678;
+}
+EOCP
+set try
+if eval $compile; then
+	echo "<inttypes.h> found." >&4
+	val="$define"
+else
+	echo "<inttypes.h> NOT found." >&4
+	val="$undef"
+fi
+$rm -f try.c try
+set i_inttypes
+eval $setvar
+
+: check for int64_t
+case "$use64bits" in
+"$define" )
+	echo " "
+	echo $n "Checking to see if your system supports int64_t...$c" >&4
+	$cat >try.c <<EOCP
+#include <sys/types.h>
+#$i_inttypes I_INTTYPES
+#ifdef I_INTTYPES
+#include <inttypes.h>
+#endif
+int64_t foo() { int64_t x; x = 7; return x; }
+EOCP
+	if $cc $optimize $ccflags -c try.c >/dev/null 2>&1; then
+		val="$define"
+		echo " Yup, it does." >&4
+	else
+		val="$undef"
+		echo " Nope, it doesn't." >&4
+	fi
+	$rm -f try.*
+	;;
+*)	val="$undef"
+	;;
+esac
+set d_int64t
+eval $setvar
+
+
+: check for lengths of integral types
+echo " "
+case "$intsize" in
+'')
+	echo "Checking to see how big your integers are..." >&4
+	$cat >intsize.c <<'EOCP'
+#include <stdio.h>
+int main()
+{
+	printf("intsize=%d;\n", sizeof(int));
+	printf("longsize=%d;\n", sizeof(long));
+	printf("shortsize=%d;\n", sizeof(short));
+	exit(0);
+}
+EOCP
+	set intsize
+	if eval $compile_ok && ./intsize > /dev/null; then
+		eval `./intsize`
+		echo "Your integers are $intsize bytes long."
+		echo "Your long integers are $longsize bytes long."
+		echo "Your short integers are $shortsize bytes long."
+	else
+		$cat >&4 <<EOM
+!
+Help! I can't compile and run the intsize test program: please enlighten me!
+(This is probably a misconfiguration in your system or libraries, and
+you really ought to fix it.  Still, I'll try anyway.)
+!
+EOM
+		dflt=4
+		rp="What is the size of an integer (in bytes)?"
+		. ./myread
+		intsize="$ans"
+		dflt=$intsize
+		rp="What is the size of a long integer (in bytes)?"
+		. ./myread
+		longsize="$ans"
+		dflt=2
+		rp="What is the size of a short integer (in bytes)?"
+		. ./myread
+		shortsize="$ans"
+	fi
+	;;
+esac
+$rm -f intsize intsize.*
+
+: check for long long
+echo " "
+echo $n "Checking to see if your system supports long long...$c" >&4
+echo 'long long foo() { long long x; x = 7; return x; }' > try.c
+if $cc $optimize $ccflags -c try.c >/dev/null 2>&1; then
+	val="$define"
+	echo " Yup, it does." >&4
+else
+	val="$undef"
+	echo " Nope, it doesn't." >&4
+fi
+$rm try.*
+set d_longlong
+eval $setvar
+
+: check for length of long long
+case "${d_longlong}${longlongsize}" in
+$define)
+	echo " "
+	$echo $n "Checking to see how big your long longs are...$c" >&4
+	$cat >try.c <<'EOCP'
+#include <stdio.h>
+int main()
+{
+	printf("%d\n", sizeof(long long));
+}
+EOCP
+	set try
+	if eval $compile_ok; then
+		longlongsize=`./try`
+		$echo " $longlongsize bytes." >&4
+	else
+		dflt='8'
+		echo " "
+		echo "(I can't seem to compile the test program.  Guessing...)"
+		rp="What is the size of a long long (in bytes)?"
+		. ./myread
+		longlongsize="$ans"
+	fi
+	if $test "X$longsize" = "X$longlongsize"; then
+		echo "(That isn't any different from an ordinary long.)"
+	fi	
+	;;
+esac
+$rm -f try.c try
+
+echo " "
+
+case "$d_longlong" in
+$define)
+
+echo "Checking how to print 64-bit integers..." >&4
+
+if $test X"$sPRId64" = X -a X"$intsize" = X8; then
+        quad=int
+	$cat >try.c <<'EOCP'
+#include <sys/types.h>
+#include <stdio.h>
+int main() {
+  int q = 12345678901;
+  printf("%ld\n", q);
+}
+EOCP
+	set try
+	if eval $compile; then
+		yyy=`./try$exe_ext`
+		case "$yyy" in
+		12345678901)
+			sPRId64='"d"'; sPRIi64='"i"'; sPRIu64='"u"';
+                	sPRIo64='"o"'; sPRIx64='"x"'; sPRIX64='"X"';
+			echo "We will use %d."
+			;;
+		esac
+	fi
+fi
+
+if $test X"$sPRId64" = X -a X"$longsize" = X8; then
+        quad=long
+	$cat >try.c <<'EOCP'
+#include <sys/types.h>
+#include <stdio.h>
+int main() {
+  long q = 12345678901;
+  printf("%ld\n", q);
+}
+EOCP
+	set try
+	if eval $compile; then
+		yyy=`./try$exe_ext`
+		case "$yyy" in
+		12345678901)
+			sPRId64='"ld"'; sPRIi64='"li"'; sPRIu64='"lu"';
+                	sPRIo64='"lo"'; sPRIx64='"lx"'; sPRIX64='"lX"';
+			echo "We will use %ld."
+			;;
+		esac
+	fi
+fi
+
+if $test X"$sPRId64" = X -a X"$i_inttypes.h" = X"$define" -a X"$d_int64t" = X"$define"; then
+        quad=int64_t
+	$cat >try.c <<'EOCP'
+#include <sys/types.h>
+#include <inttypes.h>
+#include <stdio.h>
+int main() {
+  int64_t q = 12345678901;
+  printf("%" PRId64 "\n", q);
+}
+EOCP
+	set try
+	if eval $compile; then
+		yyy=`./try$exe_ext`
+		case "$yyy" in
+		12345678901)
+			sPRId64=PRId64; sPRIi64=PRIi64; sPRIu64=PRIu64;
+                	sPRIo64=PRIo64; sPRIx64=PRIx64; sPRIX64=PRIX64;
+			echo "We will use the C9X style."
+			;;
+		esac
+	fi
+fi
+
+if $test X"$sPRId64" = X -a X"$d_longlong" = X"$define" -a X"$longlongsize" = X8; then
+        quad="long long"
+	$cat >try.c <<'EOCP'
+#include <sys/types.h>
+#include <stdio.h>
+int main() {
+  long long q = 12345678901;
+  printf("%lld\n", q);
+}
+EOCP
+	set try
+	if eval $compile; then
+		yyy=`./try$exe_ext`
+		case "$yyy" in
+		12345678901)
+			sPRId64='"lld"'; sPRIi64='"lli"'; sPRIu64='"llu"';
+                	sPRIo64='"llo"'; sPRIx64='"llx"'; sPRIX64='"llX"';
+			echo "We will use the %lld style."
+			;;
+		esac
+	fi
+fi
+
+if $test X"$sPRId64" = X -a X"$quad" != X; then
+	$cat >try.c <<EOCP
+#include <sys/types.h>
+#include <stdio.h>
+int main() {
+  $quad q = 12345678901;
+  printf("%Ld\n", q);
+}
+EOCP
+	set try
+	if eval $compile; then
+		yyy=`./try$exe_ext`
+		case "$yyy" in
+		12345678901)
+			sPRId64='"Ld"'; sPRIi64='"Li"'; sPRIu64='"Lu"';
+                	sPRIo64='"Lo"'; sPRIx64='"Lx"'; sPRIX64='"LX"';
+			echo "We will use %lld."
+			;;
+		esac
+	fi
+fi
+
+if $test X"$sPRId64" = X -a X"$quad" != X; then
+	$cat >try.c <<EOCP
+#include <sys/types.h>
+#include <stdio.h>
+int main() {
+  $quad q = 12345678901;
+  printf("%qd\n", q);
+}
+EOCP
+	set try
+	if eval $compile; then
+		yyy=`./try$exe_ext`
+		case "$yyy" in
+		12345678901)
+			sPRId64='"qd"'; sPRIi64='"qi"'; sPRIu64='"qu"';
+                	sPRIo64='"qo"'; sPRIx64='"qx"'; sPRIX64='"qX"';
+			echo "We will use %qd."
+			;;
+		esac
+	fi
+fi
+
+if $test X"$sPRId64" = X; then
+	echo "Cannot figure out how to print 64-bit integers." >&4
+fi
+
+;;
+esac # case "$d_longlong"
+
+case "$sPRId64" in
+'')	d_PRId64="$undef"; d_PRIi64="$undef"; d_PRIu64="$undef"; 
+	d_PRIo64="$undef"; d_PRIx64="$undef"; d_PRIX64="$undef"; 
+	;;
+*)	d_PRId64="$define"; d_PRIi64="$define"; d_PRIu64="$define"; 
+	d_PRIo64="$define"; d_PRIx64="$define"; d_PRIX64="$define"; 
+	;;
+esac
+
+$rm -f try try.*
+
+: check for length of double
+echo " "
+case "$doublesize" in
+'')
+	$echo $n "Checking to see how big your double precision numbers are...$c" >&4
+	$cat >try.c <<'EOCP'
+#include <stdio.h>
+int main()
+{
+	printf("%d\n", sizeof(double));
+}
+EOCP
+	set try
+	if eval $compile_ok; then
+		doublesize=`./try`
+		$echo " $doublesize bytes." >&4
+	else
+		dflt='8'
+		echo "(I can't seem to compile the test program.  Guessing...)"
+		rp="What is the size of a double precision number (in bytes)?"
+		. ./myread
+		doublesize="$ans"
+	fi
+	;;
+esac
+$rm -f try.c try
+
+: check for long doubles
+echo " "
+echo $n "Checking to see if your system supports long doubles...$c" >&4
+echo 'long double foo() { long double x; x = 7.0; return x; }' > try.c
+if $cc $optimize $ccflags -c try.c >/dev/null 2>&1; then
+	val="$define"
+	echo " Yup, it does." >&4
+else
+	val="$undef"
+	echo " Nope, it doesn't." >&4
+fi
+$rm try.*
+set d_longdbl
+eval $setvar
+
+: check for length of long double
+case "${d_longdbl}${longdblsize}" in
+$define)
+	echo " "
+	$echo $n "Checking to see how big your long doubles are...$c" >&4
+	$cat >try.c <<'EOCP'
+#include <stdio.h>
+int main()
+{
+	printf("%d\n", sizeof(long double));
+}
+EOCP
+	set try
+	if eval $compile; then
+		longdblsize=`./try`
+		$echo " $longdblsize bytes." >&4
+	else
+		dflt='8'
+		echo " "
+		echo "(I can't seem to compile the test program.  Guessing...)" >&4
+		rp="What is the size of a long double (in bytes)?"
+		. ./myread
+		longdblsize="$ans"
+	fi
+	if $test "X$doublesize" = "X$longdblsize"; then
+		echo "(That isn't any different from an ordinary double.)"
+	fi	
+	;;
+esac
+$rm -f try.c try
+
+echo " "
+
+case "$d_longdbl" in
+$define)
+
+echo "Checking how to print long doubles..." >&4
+
+if $test X"$sPRIfldbl" = X -a X"$doublesize" = X"$longdblsize"; then
+	$cat >try.c <<'EOCP'
+#include <sys/types.h>
+#include <stdio.h>
+int main() {
+  double d = 123.456;
+  printf("%.3f\n", d);
+}
+EOCP
+	set try
+	if eval $compile; then
+		yyy=`./try$exe_ext`
+		case "$yyy" in
+		123.456)
+			sPRIfldbl='"f"'; sPRIgldbl='"g"'; sPRIeldbl='"e"';
+                	sPRIFldbl='"F"'; sPRIGldbl='"G"'; sPRIEldbl='"E"';
+			echo "We will use %f."
+			;;
+		esac
+	fi
+fi
+
+if $test X"$sPRIfldbl" = X; then
+	$cat >try.c <<'EOCP'
+#include <sys/types.h>
+#include <stdio.h>
+int main() {
+  long double d = 123.456;
+  printf("%.3Lf\n", d);
+}
+EOCP
+	set try
+	if eval $compile; then
+		yyy=`./try$exe_ext`
+		case "$yyy" in
+		123.456)
+			sPRIfldbl='"Lf"'; sPRIgldbl='"Lg"'; sPRIeldbl='"Le"';
+                	sPRIFldbl='"LF"'; sPRIGldbl='"LG"'; sPRIEldbl='"LE"';
+			echo "We will use %Lf."
+			;;
+		esac
+	fi
+fi
+
+if $test X"$sPRIfldbl" = X; then
+	$cat >try.c <<'EOCP'
+#include <sys/types.h>
+#include <stdio.h>
+int main() {
+  long double d = 123.456;
+  printf("%.3lf\n", d);
+}
+EOCP
+	set try
+	if eval $compile; then
+		yyy=`./try$exe_ext`
+		case "$yyy" in
+		123.456)
+			sPRIfldbl='"lf"'; sPRIgldbl='"lg"'; sPRIeldbl='"le"';
+                	sPRIFldbl='"lF"'; sPRIGldbl='"lG"'; sPRIEldbl='"lE"';
+			echo "We will use %lf."
+			;;
+		esac
+	fi
+fi
+
+if $test X"$sPRIfldbl" = X; then
+	$cat >try.c <<'EOCP'
+#include <sys/types.h>
+#include <stdio.h>
+int main() {
+  long double d = 123.456;
+  printf("%.3llf\n", d);
+}
+EOCP
+	set try
+	if eval $compile; then
+		yyy=`./try$exe_ext`
+		case "$yyy" in
+		123.456)
+			sPRIfldbl='"llf"'; sPRIgldbl='"llg"'; sPRIeldbl='"lle"';
+                	sPRIFldbl='"llF"'; sPRIGldbl='"llG"'; sPRIEldbl='"llE"';
+			echo "We will use %llf."
+			;;
+		esac
+	fi
+fi
+
+if $test X"$sPRIfldbl" = X; then
+	echo "Cannot figure out how to print long doubles." >&4
+fi
+
+;;
+esac # case "$d_longdbl"
+
+case "$sPRIfldbl" in
+'')	d_PRIfldbl="$undef"; d_PRIgldbl="$undef"; d_PRIeldbl="$undef"; 
+	d_PRIFldbl="$undef"; d_PRIGldbl="$undef"; d_PRIEldbl="$undef"; 
+	;;
+*)	d_PRIfldbl="$define"; d_PRIgldbl="$define"; d_PRIeldbl="$define"; 
+	d_PRIFldbl="$define"; d_PRIGldbl="$define"; d_PRIEldbl="$define"; 
+	;;
+esac
+
+$rm -f try try.*
+
 : Initialize h_fcntl
 h_fcntl=false
 
@@ -6585,6 +7103,14 @@ eval $inlibc
 
 : see if alarm exists
 set alarm d_alarm
+eval $inlibc
+
+: see if atolf exists
+set atolf d_atolf
+eval $inlibc
+
+: see if atoll exists
+set atoll d_atoll
 eval $inlibc
 
 : Look for GNU-cc style attribute checking
@@ -6748,52 +7274,6 @@ $rm -f set set.c
 : see if bzero exists
 set bzero d_bzero
 eval $inlibc
-
-: check for lengths of integral types
-echo " "
-case "$intsize" in
-'')
-	echo "Checking to see how big your integers are..." >&4
-	$cat >intsize.c <<'EOCP'
-#include <stdio.h>
-int main()
-{
-	printf("intsize=%d;\n", sizeof(int));
-	printf("longsize=%d;\n", sizeof(long));
-	printf("shortsize=%d;\n", sizeof(short));
-	exit(0);
-}
-EOCP
-	set intsize
-	if eval $compile_ok && ./intsize > /dev/null; then
-		eval `./intsize`
-		echo "Your integers are $intsize bytes long."
-		echo "Your long integers are $longsize bytes long."
-		echo "Your short integers are $shortsize bytes long."
-	else
-		$cat >&4 <<EOM
-!
-Help! I can't compile and run the intsize test program: please enlighten me!
-(This is probably a misconfiguration in your system or libraries, and
-you really ought to fix it.  Still, I'll try anyway.)
-!
-EOM
-		dflt=4
-		rp="What is the size of an integer (in bytes)?"
-		. ./myread
-		intsize="$ans"
-		dflt=$intsize
-		rp="What is the size of a long integer (in bytes)?"
-		. ./myread
-		longsize="$ans"
-		dflt=2
-		rp="What is the size of a short integer (in bytes)?"
-		. ./myread
-		shortsize="$ans"
-	fi
-	;;
-esac
-$rm -f intsize intsize.*
 
 : see if signal is declared as pointer to function returning int or void
 echo " "
@@ -8599,57 +9079,6 @@ set d_index; eval $setvar
 set inet_aton d_inetaton
 eval $inlibc
 
-: see if inttypes.h is available
-: we want a real compile instead of Inhdr because some systems
-: have an inttypes.h which includes non-existent headers
-echo " "
-$cat >try.c <<EOCP
-#include <inttypes.h>
-int main() {
-	static int32_t foo32 = 0x12345678;
-}
-EOCP
-set try
-if eval $compile; then
-	echo "<inttypes.h> found." >&4
-	val="$define"
-else
-	echo "<inttypes.h> NOT found." >&4
-	val="$undef"
-fi
-$rm -f try.c try
-set i_inttypes
-eval $setvar
-
-: check for int64_t
-case "$use64bits" in
-"$define" )
-	echo " "
-	echo $n "Checking to see if your system supports int64_t...$c" >&4
-	$cat >try.c <<EOCP
-#include <sys/types.h>
-#$i_inttypes I_INTTYPES
-#ifdef I_INTTYPES
-#include <inttypes.h>
-#endif
-int64_t foo() { int64_t x; x = 7; return x; }
-EOCP
-	if $cc $optimize $ccflags -c try.c >/dev/null 2>&1; then
-		val="$define"
-		echo " Yup, it does." >&4
-	else
-		val="$undef"
-		echo " Nope, it doesn't." >&4
-	fi
-	$rm -f try.*
-	;;
-*)	val="$undef"
-	;;
-esac
-set d_int64t
-eval $setvar
-
-
 : Look for isascii
 echo " "
 $cat >isascii.c <<'EOCP'
@@ -8722,125 +9151,6 @@ eval $inlibc
 : see if lockf exists
 set lockf d_lockf
 eval $inlibc
-
-: check for length of double
-echo " "
-case "$doublesize" in
-'')
-	$echo $n "Checking to see how big your double precision numbers are...$c" >&4
-	$cat >try.c <<'EOCP'
-#include <stdio.h>
-int main()
-{
-	printf("%d\n", sizeof(double));
-}
-EOCP
-	set try
-	if eval $compile_ok; then
-		doublesize=`./try`
-		$echo " $doublesize bytes." >&4
-	else
-		dflt='8'
-		echo "(I can't seem to compile the test program.  Guessing...)"
-		rp="What is the size of a double precision number (in bytes)?"
-		. ./myread
-		doublesize="$ans"
-	fi
-	;;
-esac
-$rm -f try.c try
-
-: check for long doubles
-echo " "
-echo $n "Checking to see if your system supports long doubles...$c" >&4
-echo 'long double foo() { long double x; x = 7.0; return x; }' > try.c
-if $cc $optimize $ccflags -c try.c >/dev/null 2>&1; then
-	val="$define"
-	echo " Yup, it does." >&4
-else
-	val="$undef"
-	echo " Nope, it doesn't." >&4
-fi
-$rm try.*
-set d_longdbl
-eval $setvar
-
-: check for length of long double
-case "${d_longdbl}${longdblsize}" in
-$define)
-	echo " "
-	$echo $n "Checking to see how big your long doubles are...$c" >&4
-	$cat >try.c <<'EOCP'
-#include <stdio.h>
-int main()
-{
-	printf("%d\n", sizeof(long double));
-}
-EOCP
-	set try
-	if eval $compile; then
-		longdblsize=`./try`
-		$echo " $longdblsize bytes." >&4
-	else
-		dflt='8'
-		echo " "
-		echo "(I can't seem to compile the test program.  Guessing...)" >&4
-		rp="What is the size of a long double (in bytes)?"
-		. ./myread
-		longdblsize="$ans"
-	fi
-	if $test "X$doublesize" = "X$longdblsize"; then
-		echo "(That isn't any different from an ordinary double.)"
-	fi	
-	;;
-esac
-$rm -f try.c try
-
-: check for long long
-echo " "
-echo $n "Checking to see if your system supports long long...$c" >&4
-echo 'long long foo() { long long x; x = 7; return x; }' > try.c
-if $cc $optimize $ccflags -c try.c >/dev/null 2>&1; then
-	val="$define"
-	echo " Yup, it does." >&4
-else
-	val="$undef"
-	echo " Nope, it doesn't." >&4
-fi
-$rm try.*
-set d_longlong
-eval $setvar
-
-: check for length of long long
-case "${d_longlong}${longlongsize}" in
-$define)
-	echo " "
-	$echo $n "Checking to see how big your long longs are...$c" >&4
-	$cat >try.c <<'EOCP'
-#include <stdio.h>
-int main()
-{
-	printf("%d\n", sizeof(long long));
-}
-EOCP
-	set try
-	if eval $compile_ok; then
-		longlongsize=`./try`
-		$echo " $longlongsize bytes." >&4
-	else
-		dflt='8'
-		echo " "
-		echo "(I can't seem to compile the test program.  Guessing...)"
-		rp="What is the size of a long long (in bytes)?"
-		. ./myread
-		longlongsize="$ans"
-	fi
-	if $test "X$longsize" = "X$longlongsize"; then
-		echo "(That isn't any different from an ordinary long.)"
-	fi	
-	;;
-esac
-$rm -f try.c try
 
 : see if lstat exists
 set lstat d_lstat
@@ -10256,6 +10566,10 @@ eval $inlibc
 
 : see if strtoul exists
 set strtoul d_strtoul
+eval $inlibc
+
+: see if strtoull exists
+set strtoull d_strtoull
 eval $inlibc
 
 : see if strxfrm exists
@@ -13137,10 +13451,24 @@ crosscompile='$crosscompile'
 cryptlib='$cryptlib'
 csh='$csh'
 d_Gconvert='$d_Gconvert'
+d_PRIEldbl='$d_PRIEldbl'
+d_PRIFldbl='$d_PRIFldbl'
+d_PRIGldbl='$d_PRIGldbl'
+d_PRIX64='$d_PRIX64'
+d_PRId64='$d_PRId64'
+d_PRIeldbl='$d_PRIeldbl'
+d_PRIfldbl='$d_PRIfldbl'
+d_PRIgldbl='$d_PRIgldbl'
+d_PRIi64='$d_PRIi64'
+d_PRIo64='$d_PRIo64'
+d_PRIu64='$d_PRIu64'
+d_PRIx64='$d_PRIx64'
 d_access='$d_access'
 d_accessx='$d_accessx'
 d_alarm='$d_alarm'
 d_archlib='$d_archlib'
+d_atolf='$d_atolf'
+d_atoll='$d_atoll'
 d_attribut='$d_attribut'
 d_bcmp='$d_bcmp'
 d_bcopy='$d_bcopy'
@@ -13396,6 +13724,7 @@ d_strerror='$d_strerror'
 d_strtod='$d_strtod'
 d_strtol='$d_strtol'
 d_strtoul='$d_strtoul'
+d_strtoull='$d_strtoull'
 d_strxfrm='$d_strxfrm'
 d_suidsafe='$d_suidsafe'
 d_symlink='$d_symlink'
@@ -13658,6 +13987,18 @@ rd_nodata='$rd_nodata'
 rm='$rm'
 rmail='$rmail'
 runnm='$runnm'
+sPRIEldbl='$sPRIEldbl'
+sPRIFldbl='$sPRIFldbl'
+sPRIGldbl='$sPRIGldbl'
+sPRIX64='$sPRIX64'
+sPRId64='$sPRId64'
+sPRIeldbl='$sPRIeldbl'
+sPRIfldbl='$sPRIfldbl'
+sPRIgldbl='$sPRIgldbl'
+sPRIi64='$sPRIi64'
+sPRIo64='$sPRIo64'
+sPRIu64='$sPRIu64'
+sPRIx64='$sPRIx64'
 sched_yield='$sched_yield'
 scriptdir='$scriptdir'
 scriptdirexp='$scriptdirexp'

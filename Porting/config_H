@@ -17,7 +17,7 @@
 /*
  * Package name      : perl5
  * Source directory  : .
- * Configuration time: Fri Jul 30 00:00:04 EET DST 1999
+ * Configuration time: Mon Aug  2 01:32:52 EET DST 1999
  * Configured by     : jhi
  * Target system     : osf1 alpha.hut.fi v4.0 878 alpha 
  */
@@ -2129,6 +2129,18 @@
 #define M_VOID			/* Xenix strikes again */
 #endif
 
+/* HAS_ATOLF:
+ *	This symbol, if defined, indicates that the atolf routine is
+ *	available to convert strings into long doubles.
+ */
+/*#define HAS_ATOLF		/ **/
+
+/* HAS_ATOLL:
+ *	This symbol, if defined, indicates that the atoll routine is
+ *	available to convert strings into long longs.
+ */
+/*#define HAS_ATOLL		/ **/
+
 /* PERL_BINCOMPAT_5005:
  *	This symbol, if defined, indicates that Perl 5.006 should be
  *	binary-compatible with Perl 5.005.  This is impossible for builds
@@ -2445,6 +2457,33 @@
 /*#define      HAS_OFF64_T    	/ **/
 /*#define   HAS_STRUCT_DIRENT64 	/ **/
 
+/* PERL_PRIfldbl:
+ *	This symbol, if defined, contains the string used by stdio to
+ *	format long doubles (format 'f') for output.
+ */
+/* PERL_PRIgldbl:
+ *	This symbol, if defined, contains the string used by stdio to
+ *	format long doubles (format 'g') for output.
+ */
+#define PERL_PRIfldbl	"f"	/**/
+#define PERL_PRIgldbl	"g"	/**/
+
+/* PERL_PRId64:
+ *	This symbol, if defined, contains the string used by stdio to
+ *	format 64-bit decimal numbers (format 'd') for output.
+ */
+/* PERL_PRIu64:
+ *	This symbol, if defined, contains the string used by stdio to
+ *	format 64-bit unsigned decimal numbers (format 'u') for output.
+ */
+/* PERL_PRIx64:
+ *	This symbol, if defined, contains the string used by stdio to
+ *	format 64-bit hexadecimal numbers (format 'x') for output.
+ */
+#define PERL_PRId64	"ld"	/**/
+#define PERL_PRIu64	"lu"	/**/
+#define PERL_PRIx64	"lx"	/**/
+
 /* SELECT_MIN_BITS:
  *	This symbol holds the minimum number of bits operated by select.
  *	That is, if you do select(n, ...), how many bits at least will be
@@ -2517,6 +2556,12 @@
  */
 #define	HAS_STDIO_STREAM_ARRAY	/**/
 #define STDIO_STREAM_ARRAY	_iob
+
+/* HAS_STRTOULL:
+ *	This symbol, if defined, indicates that the strtoull routine is
+ *	available to convert strings into unsigned long longs.
+ */
+/*#define HAS_STRTOULL		/ **/
 
 /* USE_64_BITS:
  *	This symbol, if defined, indicates that 64-bit interfaces should

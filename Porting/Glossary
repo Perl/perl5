@@ -296,6 +296,14 @@ d_archlib (archlib.U):
 	of architecture-dependent library files for $package.  If
 	$archlib is the same as $privlib, then this is set to undef.
 
+d_atolf (atolf.U):
+	This variable conditionally defines the HAS_ATOLF symbol, which
+	indicates to the C program that the atolf() routine is available.
+
+d_atoll (atoll.U):
+	This variable conditionally defines the HAS_ATOLL symbol, which
+	indicates to the C program that the atoll() routine is available.
+
 d_attribut (d_attribut.U):
 	This variable conditionally defines HASATTRIBUTE, which
 	indicates the C compiler can check for function attributes,
@@ -1008,7 +1016,7 @@ d_old_pthread_create_joinable (d_pthrattrj.U):
 d_oldpthreads (usethreads.U):
 	This variable conditionally defines the OLD_PTHREADS_API symbol,
 	and indicates that Perl should be built to use the old
-	draft POSIX threads API.  This is only potneially meaningful if
+	draft POSIX threads API.  This is only potentially meaningful if
 	usethreads is set.
 
 d_oldsock (d_socket.U):
@@ -1058,6 +1066,55 @@ d_portable (d_portable.U):
 	This variable conditionally defines the PORTABLE symbol, which
 	indicates to the C program that it should not assume that it is
 	running on the machine it was compiled on.
+
+d_PRId64 (quadfio.U):
+	This variable conditionally defines the PERL_PRId64 symbol, which
+	indiciates that stdio has a symbol to print 64-bit decimal numbers.
+
+d_PRIeldbl (longdblfio.U):
+	This variable conditionally defines the PERL_PRIfldlbl symbol, which
+	indiciates that stdio has a symbol to print long doubles.
+
+d_PRIEldbl (longdblfio.U):
+	This variable conditionally defines the PERL_PRIfldlbl symbol, which
+	indiciates that stdio has a symbol to print long doubles.
+
+d_PRIfldbl (longdblfio.U):
+	This variable conditionally defines the PERL_PRIfldlbl symbol, which
+	indiciates that stdio has a symbol to print long doubles.
+
+d_PRIFldbl (longdblfio.U):
+	This variable conditionally defines the PERL_PRIfldlbl symbol, which
+	indiciates that stdio has a symbol to print long doubles.
+
+d_PRIgldbl (longdblfio.U):
+	This variable conditionally defines the PERL_PRIfldlbl symbol, which
+	indiciates that stdio has a symbol to print long doubles.
+
+d_PRIGldbl (longdblfio.U):
+	This variable conditionally defines the PERL_PRIfldlbl symbol, which
+	indiciates that stdio has a symbol to print long doubles.
+
+d_PRIi64 (quadfio.U):
+	This variable conditionally defines the PERL_PRIi64 symbol, which
+	indiciates that stdio has a symbol to print 64-bit decimal numbers.
+
+d_PRIo64 (quadfio.U):
+	This variable conditionally defines the PERL_PRIo64 symbol, which
+	indiciates that stdio has a symbol to print 64-bit octal numbers.
+
+d_PRIu64 (quadfio.U):
+	This variable conditionally defines the PERL_PRIu64 symbol, which
+	indiciates that stdio has a symbol to print 64-bit unsigned decimal
+	numbers.
+
+d_PRIx64 (quadfio.U):
+	This variable conditionally defines the PERL_PRIx64 symbol, which
+	indiciates that stdio has a symbol to print 64-bit hexadecimal numbers.
+
+d_PRIX64 (quadfio.U):
+	This variable conditionally defines the PERL_PRIX64 symbol, which
+	indiciates that stdio has a symbol to print 64-bit hExADECimAl numbers.
 
 d_pthread_yield (d_pthread_y.U):
 	This variable conditionally defines the HAS_PTHREAD_YIELD
@@ -1437,6 +1494,10 @@ d_strtoul (d_strtoul.U):
 	This variable conditionally defines the HAS_STRTOUL symbol, which
 	indicates to the C program that the strtoul() routine is available
 	to provide conversion of strings to unsigned long.
+
+d_strtoull (strtoull.U):
+	This variable conditionally defines the HAS_STRTOULL symbol, which
+	indicates to the C program that the strtoull() routine is available.
 
 d_strxfrm (d_strxfrm.U):
 	This variable conditionally defines HAS_STRXFRM if strxfrm() is
@@ -2882,6 +2943,54 @@ split (models.U):
 	to produce a program that will run in separate I and D space, for those
 	machines that support separation of instruction and data space.  It is
 	up to the Makefile to use this.
+
+sPRId64 (quadfio.U):
+	This variable, if defined, contains the string used by stdio to
+	format 64-bit decimal numbers (format 'd') for output.
+
+sPRIeldbl (longdblfio.U):
+	This variable, if defined, contains the string used by stdio to
+	format long doubles (format 'e') for output.
+
+sPRIEldbl (longdblfio.U):
+	This variable, if defined, contains the string used by stdio to
+	format long doubles (format 'E') for output.
+
+sPRIfldbl (longdblfio.U):
+	This variable, if defined, contains the string used by stdio to
+	format long doubles (format 'f') for output.
+
+sPRIFldbl (longdblfio.U):
+	This variable, if defined, contains the string used by stdio to
+	format long doubles (format 'F') for output.
+
+sPRIgldbl (longdblfio.U):
+	This variable, if defined, contains the string used by stdio to
+	format long doubles (format 'g') for output.
+
+sPRIGldbl (longdblfio.U):
+	This variable, if defined, contains the string used by stdio to
+	format long doubles (format 'G') for output.
+
+sPRIi64 (quadfio.U):
+	This variable, if defined, contains the string used by stdio to
+	format 64-bit decimal numbers (format 'i') for output.
+
+sPRIo64 (quadfio.U):
+	This variable, if defined, contains the string used by stdio to
+	format 64-bit octal numbers (format 'o') for output.
+
+sPRIu64 (quadfio.U):
+	This variable, if defined, contains the string used by stdio to
+	format 64-bit unsigned decimal numbers (format 'u') for output.
+
+sPRIx64 (quadfio.U):
+	This variable, if defined, contains the string used by stdio to
+	format 64-bit hexadecimal numbers (format 'x') for output.
+
+sPRIX64 (quadfio.U):
+	This variable, if defined, contains the string used by stdio to
+	format 64-bit hExADECimAl numbers (format 'X') for output.
 
 src (src.U):
 	This variable holds the path to the package source. It is up to

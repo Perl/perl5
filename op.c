@@ -4799,9 +4799,15 @@ Perl_ck_fun(pTHX_ OP *o)
 		    OP *newop = newAVREF(newGVOP(OP_GV, 0,
 			gv_fetchpv(name, TRUE, SVt_PVAV) ));
 		    if (ckWARN(WARN_SYNTAX))
+#ifdef IV_IS_QUAD
+			Perl_warner(aTHX_ WARN_SYNTAX,
+			    "Array @%s missing the @ in argument %" PERL_PRId64 " of %s()",
+			    name, (IV)numargs, PL_op_desc[type]);
+#else
 			Perl_warner(aTHX_ WARN_SYNTAX,
 			    "Array @%s missing the @ in argument %ld of %s()",
 			    name, (long)numargs, PL_op_desc[type]);
+#endif
 		    op_free(kid);
 		    kid = newop;
 		    kid->op_sibling = sibl;
@@ -4819,9 +4825,15 @@ Perl_ck_fun(pTHX_ OP *o)
 		    OP *newop = newHVREF(newGVOP(OP_GV, 0,
 			gv_fetchpv(name, TRUE, SVt_PVHV) ));
 		    if (ckWARN(WARN_SYNTAX))
+#ifdef IV_IS_QUAD
+			Perl_warner(aTHX_ WARN_SYNTAX,
+			    "Hash %%%s missing the %% in argument %" PERL_PRId64 " of %s()",
+			    name, (IV)numargs, PL_op_desc[type]);
+#else
 			Perl_warner(aTHX_ WARN_SYNTAX,
 			    "Hash %%%s missing the %% in argument %ld of %s()",
 			    name, (long)numargs, PL_op_desc[type]);
+#endif
 		    op_free(kid);
 		    kid = newop;
 		    kid->op_sibling = sibl;
