@@ -18,7 +18,7 @@ sub _carp {
 
 require Exporter;
 use vars qw($VERSION @ISA @EXPORT %EXPORT_TAGS $TODO);
-$VERSION = '0.32';
+$VERSION = '0.33';
 @ISA    = qw(Exporter);
 @EXPORT = qw(ok use_ok require_ok
              is isnt like is_deeply
@@ -117,7 +117,7 @@ Before anything else, you need a testing plan.  This basically declares
 how many tests your script is going to run to protect against premature
 failure.
 
-The prefered way to do this is to declare a plan when you C<use Test::More>.
+The preferred way to do this is to declare a plan when you C<use Test::More>.
 
   use Test::More tests => $Num_Tests;
 
@@ -151,7 +151,7 @@ or for deciding between running the tests at all:
 
   use Test::More;
   if( $^O eq 'MacOS' ) {
-      plan skip_all => 'Test irrelevent on MacOS';
+      plan skip_all => 'Test irrelevant on MacOS';
   }
   else {
       plan tests => 42;
@@ -363,7 +363,7 @@ is similar to:
 (Mnemonic "This is like that".)
 
 The second argument is a regular expression.  It may be given as a
-regex reference (ie. C<qr//>) or (for better compatibility with older
+regex reference (i.e. C<qr//>) or (for better compatibility with older
 perls) as a string that looks like a regex (alternative delimiters are
 currently not supported):
 
@@ -699,7 +699,7 @@ they are "todo".  Test::Harness will interpret failures as being ok.
 Should anything succeed, it will report it as an unexpected success.
 
 The nice part about todo tests, as opposed to simply commenting out a
-block of tests, is it's like having a programatic todo list.  You know
+block of tests, is it's like having a programmatic todo list.  You know
 how much work is left to be done, you're aware of what bugs there are,
 and you'll know immediately when they're fixed.
 
@@ -709,7 +709,7 @@ When the block is empty, delete it.
 
 =back
 
-=head2 Comparision functions
+=head2 Comparison functions
 
 Not everything is a simple eq check or regex.  There are times you
 need to see if two arrays are equivalent, for instance.  For these
@@ -832,7 +832,7 @@ sub _deep_check {
 
     my $eq;
     {
-        # Quiet unintialized value warnings when comparing undefs.
+        # Quiet uninitialized value warnings when comparing undefs.
         local $^W = 0; 
 
         if( $e1 eq $e2 ) {
@@ -953,7 +953,7 @@ since ok() takes it's arguments as scalars, it will see the length of
         ok( $_[0], $_[1] );
     }
 
-The other functions act similiarly.
+The other functions act similarly.
 
 =item The eq_* family have some caveats.
 
@@ -968,17 +968,11 @@ Test::Harness upgrade.
 
 =back
 
-=head1 AUTHOR
-
-Michael G Schwern E<lt>schwern@pobox.comE<gt> with much inspiration from
-Joshua Pritikin's Test module and lots of discussion with Barrie
-Slaymaker and the perl-qa gang.
-
 
 =head1 HISTORY
 
 This is a case of convergent evolution with Joshua Pritikin's Test
-module.  I was largely unware of its existence when I'd first
+module.  I was largely unaware of its existence when I'd first
 written my own ok() routines.  This module exists because I can't
 figure out how to easily wedge test names into Test's interface (along
 with a few other problems).
@@ -1003,9 +997,26 @@ by Perl.
 
 L<Test::Unit> describes a very featureful unit testing interface.
 
-L<Pod::Tests> shows the idea of embedded testing.
+L<Test::Inline> shows the idea of embedded testing.
 
 L<SelfTest> is another approach to embedded testing.
+
+
+=head1 AUTHORS
+
+Michael G Schwern E<lt>schwern@pobox.comE<gt> with much inspiration from
+Joshua Pritikin's Test module and lots of discussion with Barrie
+Slaymaker and the perl-qa gang.
+
+
+=head1 COPYRIGHT
+
+Copyright 2001 by Michael G Schwern E<lt>schwern@pobox.comE<gt>.
+
+This program is free software; you can redistribute it and/or 
+modify it under the same terms as Perl itself.
+
+See L<http://www.perl.com/perl/misc/Artistic.html>
 
 =cut
 

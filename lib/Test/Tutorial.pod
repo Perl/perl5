@@ -5,13 +5,13 @@ Test::Tutorial - A tutorial about writing really basic tests
 =head1 DESCRIPTION
 
 
-B<AHHHHHHH!!!!  NOT TESTING!  Anything but testing!  
+I<AHHHHHHH!!!!  NOT TESTING!  Anything but testing!  
 Beat me, whip me, send me to Detroit, but don't make 
 me write tests!>
 
-B<*sob*>
+I<*sob*>
 
-B<Besides, I don't know how to write the damned things.>
+I<Besides, I don't know how to write the damned things.>
 
 
 Is this you?  Is writing tests right up there with writing
@@ -43,12 +43,12 @@ since 1 + 1 is 2, it prints:
 
 What this says is: C<1..1> "I'm going to run one test." [1] C<ok 1>
 "The first test passed".  And that's about all magic there is to
-testing.  Your basic unit of testing is the 'ok'.  For each thing you
-test, an 'ok' is printed.  Simple.  Test::Harness interprets your test
+testing.  Your basic unit of testing is the I<ok>.  For each thing you
+test, an C<ok> is printed.  Simple.  B<Test::Harness> interprets your test
 results to determine if you succeeded or failed (more on that later).
 
 Writing all these print statements rapidly gets tedious.  Fortunately,
-there's Test::Simple.  It has one function, ok().
+there's B<Test::Simple>.  It has one function, C<ok()>.
 
     #!/usr/bin/perl -w
 
@@ -56,9 +56,9 @@ there's Test::Simple.  It has one function, ok().
 
     ok( 1 + 1 == 2 );
 
-and that does the same thing as the code above.  ok() is the backbone
+and that does the same thing as the code above.  C<ok()> is the backbone
 of Perl testing, and we'll be using it instead of roll-your-own from
-here on.  If ok() gets a true value, the test passes.  False, it
+here on.  If C<ok()> gets a true value, the test passes.  False, it
 fails.
 
     #!/usr/bin/perl -w
@@ -78,12 +78,12 @@ from that comes
 C<1..2> "I'm going to run two tests."  This number is used to ensure
 your test program ran all the way through and didn't die or skip some
 tests.  C<ok 1> "The first test passed."  C<not ok 2> "The second test
-failed".  Test::Simple helpfuly prints out some extra commentary about
+failed".  Test::Simple helpfully prints out some extra commentary about
 your tests.
 
 It's not scary.  Come, hold my hand.  We're going to give an example
 of testing a module.  For our example, we'll be testing a date
-library, Date::ICal.  It's on CPAN, so download a copy and follow
+library, B<Date::ICal>.  It's on CPAN, so download a copy and follow
 along. [2]
 
 
@@ -93,7 +93,7 @@ This is the hardest part of testing, where do you start?  People often
 get overwhelmed at the apparent enormity of the task of testing a
 whole module.  Best place to start is at the beginning.  Date::ICal is
 an object-oriented module, and that means you start by making an
-object.  So we test new().
+object.  So we test C<new()>.
 
     #!/usr/bin/perl -w
 
@@ -120,7 +120,7 @@ That output isn't terribly descriptive, is it?  When you have two
 tests you can figure out which one is #2, but what if you have 102?
 
 Each test can be given a little descriptive name as the second
-argument to ok().
+argument to C<ok()>.
 
     use Test::Simple tests => 2;
 
@@ -138,7 +138,7 @@ So now you'd see...
 
 Simplest way to build up a decent testing suite is to just test what
 the manual says it does. [3] Let's pull something out of the
-Date::ICal SYNOPSIS and test that all it's bits work.
+L<Date::ICal/SYNOPSIS> and test that all it's bits work.
 
     #!/usr/bin/perl -w
 
@@ -178,15 +178,18 @@ the failure occured, but not much else.  We were supposed to get 17,
 but we didn't.  What did we get??  Dunno.  We'll have to re-run the
 test in the debugger or throw in some print statements to find out.
 
-Instead, we'll switch from Test::Simple to Test::More.  Test::More
-does everything Test::Simple does, and more!  In fact, Test::More does
+Instead, we'll switch from B<Test::Simple> to B<Test::More>.  B<Test::More>
+does everything B<Test::Simple> does, and more!  In fact, Test::More does
 things I<exactly> the way Test::Simple does.  You can literally swap
 Test::Simple out and put Test::More in its place.  That's just what
 we're going to do.
 
-Test::More provides more informative ways to say 'ok'.  ok() is nice
-and generic, you can write almost any test with it, but it can't tell
-you what went wrong.  For that, we use the is() function.
+Test::More does more than Test::Simple.  The most important difference
+at this point is it provides more informative ways to say "ok".
+Although you can write almost any test with a generic C<ok()>, it
+can't tell you what went wrong.  Instead, we'll use the C<is()>
+function, which lets us declare that something is supposed to be the
+same as something else:
 
     #!/usr/bin/perl -w
 
@@ -207,7 +210,7 @@ you what went wrong.  For that, we use the is() function.
     is( $ical->month,   10,       '  month()' );
     is( $ical->year,    1964,     '  year()'  );
 
-"Is C<$ical->sec> 47?"  "Is C<$ical->min> 12?"  With is() in place,
+"Is C<$ical-E<gt>sec> 47?"  "Is C<$ical-E<gt>min> 12?"  With C<is()> in place,
 you get some more information
 
     1..8
@@ -224,7 +227,7 @@ you get some more information
     ok 8 -   year()
     # Looks like you failed 1 tests of 8.
 
-letting us know that $ical->day returned 16, but we expected 17.  A
+letting us know that C<$ical-E<gt>day> returned 16, but we expected 17.  A
 quick check shows that the code is working fine, we made a mistake
 when writing up the tests.  Just change it to:
 
@@ -232,7 +235,7 @@ when writing up the tests.  Just change it to:
 
 and everything works.
 
-So any time you're doing a "this equals that" sort of test, use is().
+So any time you're doing a "this equals that" sort of test, use C<is()>.
 It even works on arrays.  The test is always in scalar context, so you
 can test how many elements are in a list this way. [5]
 
@@ -291,11 +294,11 @@ or we could set up a little try/expect loop.
     }
 
 So now we can test bunches of dates by just adding them to
-%ICal_Dates.  Now that it's less work to test with more dates, you'll
+C<%ICal_Dates>.  Now that it's less work to test with more dates, you'll
 be inclined to just throw more in as you think of them.
 Only problem is, every time we add to that we have to keep adjusting
-the C<use Test::More tests => ##> line.  That can rapidly get
-annoying.  Instead we use 'no_plan'.  This means we're just running
+the C<use Test::More tests =E<gt> ##> line.  That can rapidly get
+annoying.  Instead we use C<no_plan>.  This means we're just running
 some tests, don't know how many. [6]
 
     use Test::More 'no_plan';   # instead of tests => 32
@@ -326,11 +329,14 @@ if something in there fails, you'll know which one it was and that
 will make tracking down the problem easier.  So try to put a bit of
 debugging information into the test names.
 
+Describe what the tests test, to make debugging a failed test easier
+for you or for the next person who runs your test.
+
 
 =head2 Skipping tests
 
 Poking around in the existing Date::ICal tests, I found this in
-t/01sanity.t [7]
+F<t/01sanity.t> [7]
 
     #!/usr/bin/perl -w
 
@@ -386,7 +392,7 @@ going to work and skip the test.
     }
 
 A little bit of magic happens here.  When running on anything but
-MacOS, all the tests run normally.  But when on MacOS, skip() causes
+MacOS, all the tests run normally.  But when on MacOS, C<skip()> causes
 the entire contents of the SKIP block to be jumped over.  It's never
 run.  Instead, it prints special output that tells Test::Harness that
 the tests have been skipped.
@@ -403,10 +409,10 @@ the tests have been skipped.
 This means your tests won't fail on MacOS.  This means less emails
 from MacPerl users telling you about failing tests that you know will
 never work.  You've got to be careful with skip tests.  These are for
-tests which don't work and B<never will>.  It is not for skipping
+tests which don't work and I<never will>.  It is not for skipping
 genuine bugs (we'll get to that in a moment).
 
-The tests are wholely and completely skipped. [10]  This will work.
+The tests are wholly and completely skipped. [10]  This will work.
 
     SKIP: {
         skip("I don't wanna die!");
@@ -426,7 +432,7 @@ Thumbing through the Date::ICal man page, I came across this:
    Retrieves, or sets, the date on the object, using any
    valid ICal date/time string.
 
-"Retrieves or sets".  Hmmm, didn't see a test for using ical() to set
+"Retrieves or sets".  Hmmm, didn't see a test for using C<ical()> to set
 the date in the Date::ICal test suite.  So I'll write one.
 
     use Test::More tests => 1;
@@ -447,7 +453,7 @@ run that and I get
 Whoops!  Looks like it's unimplemented.  Let's assume we don't have
 the time to fix this. [11] Normally, you'd just comment out the test
 and put a note in a todo list somewhere.  Instead, we're going to
-explicitly state "this test will fail" by wraping it in a TODO block.
+explicitly state "this test will fail" by wrapping it in a C<TODO> block.
 
     use Test::More tests => 1;
 
@@ -473,22 +479,22 @@ failure as a successful test.  So you can write tests even before
 you've fixed the underlying code.
 
 If a TODO test passes, Test::Harness will report it "UNEXPECTEDLY
-SUCCEEDED".  When that happens, you simply remove the TODO block and
+SUCCEEDED".  When that happens, you simply remove the TODO block with
 C<local $TODO> and turn it into a real test.
 
 
 =head2 Testing with taint mode.
 
 Taint mode is a funny thing.  It's the globalest of all global
-features.  Once you turn it on it effects B<all> code in your program
-and B<all> modules used (and all the modules they use).  If a single
+features.  Once you turn it on it effects I<all> code in your program
+and I<all> modules used (and all the modules they use).  If a single
 piece of code isn't taint clean, the whole thing explodes.  With that
 in mind, it's very important to ensure your module works under taint
 mode.
 
 It's very simple to have your tests run under taint mode.  Just throw
-a -T into the #! line.  Test::Harness will read the switches in #! and
-use them to run your tests.
+a C<-T> into the C<#!> line.  Test::Harness will read the switches
+in C<#!> and use them to run your tests.
 
     #!/usr/bin/perl -Tw
 
@@ -496,7 +502,7 @@ use them to run your tests.
 
     ...test normally here...
 
-So when you say "make test" it will be run with taint mode and
+So when you say C<make test> it will be run with taint mode and
 warnings on.
 
 
@@ -517,7 +523,7 @@ some bugs, which is good -- we'll uncover them with our tests.
 =item 3
 
 You can actually take this one step further and test the manual
-itself.  Have a look at Pod::Tests (soon to be Test::Inline).
+itself.  Have a look at B<Test::Inline> (formerly B<Pod::Tests>).
 
 =item 4
 
@@ -562,3 +568,22 @@ Do NOT be tempted to use TODO tests as a way to avoid fixing simple
 bugs!
 
 =back
+
+=head1 AUTHORS
+
+Michael G Schwern E<lt>schwern@pobox.comE<gt> and the perl-qa dancers!
+
+=head1 COPYRIGHT
+
+Copyright 2001 by Michael G Schwern E<lt>schwern@pobox.comE<gt>.
+
+This documentation is free; you can redistribute it and/or modify it
+under the same terms as Perl itself.
+
+Irrespective of its distribution, all code examples in these files
+are hereby placed into the public domain.  You are permitted and
+encouraged to use this code in your own programs for fun
+or for profit as you see fit.  A simple comment in the code giving
+credit would be courteous but is not required.
+
+=cut
