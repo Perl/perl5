@@ -75,8 +75,8 @@ Perl_dump_sub(pTHX_ GV *gv)
     gv_fullname3(sv, gv, Nullch);
     Perl_dump_indent(aTHX_ 0, Perl_debug_log, "\nSUB %s = ", SvPVX(sv));
     if (CvXSUB(GvCV(gv)))
-	Perl_dump_indent(aTHX_ 0, Perl_debug_log, "(xsub 0x%lx %d)\n",
-	    (long)CvXSUB(GvCV(gv)),
+	Perl_dump_indent(aTHX_ 0, Perl_debug_log, "(xsub 0x%"UVxf" %d)\n",
+	    PTR2UV(CvXSUB(GvCV(gv))),
 	    (int)CvXSUBANY(GvCV(gv)).any_i32);
     else if (CvROOT(GvCV(gv)))
 	op_dump(CvROOT(GvCV(gv)));

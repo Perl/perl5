@@ -1185,7 +1185,7 @@ PP(pp_divide)
                     }
                     /* 2s complement assumption */
                     if (result <= (UV)IV_MIN)
-                        SETi( -result );
+                        SETi( -(IV)result );
                     else {
                         /* It's exact but too negative for IV. */
                         SETn( -(NV)result );

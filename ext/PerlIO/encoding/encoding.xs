@@ -237,7 +237,7 @@ PerlIOEncode_fill(pTHX_ PerlIO * f)
 	    if (SvLEN(e->dataSV) && SvPVX(e->dataSV)) {
 		Safefree(SvPVX(e->dataSV));
 	    }
-	    if (use > e->base.bufsiz) {
+	    if (use > (SSize_t)e->base.bufsiz) {
 	       use = e->base.bufsiz;
 	    }
 	    SvPVX(e->dataSV) = (char *) ptr;

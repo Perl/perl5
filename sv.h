@@ -174,7 +174,7 @@ perform the upgrade if necessary.  See C<svtype>.
 #  endif
 #endif
 
-#define SvREFCNT_dec(sv)	sv_free((SV*)sv)
+#define SvREFCNT_dec(sv)	sv_free((SV*)(sv))
 
 #define SVTYPEMASK	0xff
 #define SvTYPE(sv)	((sv)->sv_flags & SVTYPEMASK)

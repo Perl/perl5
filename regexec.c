@@ -3070,10 +3070,10 @@ S_regmatch(pTHX_ regnode *prog)
 
 		DEBUG_r(
 		    PerlIO_printf(Perl_debug_log,
-				  "%*s  %ld out of %ld..%ld  cc=%lx\n",
+				  "%*s  %ld out of %ld..%ld  cc=%"UVxf"\n",
 				  REPORT_CODE_OFF+PL_regindent*2, "",
 				  (long)n, (long)cc->min,
-				  (long)cc->max, (long)cc)
+				  (long)cc->max, (UV)cc)
 		    );
 
 		/* If degenerate scan matches "", assume scan done. */

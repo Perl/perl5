@@ -90,9 +90,9 @@ PerlIOScalar_seek(pTHX_ PerlIO *f, Off_t offset, int whence)
     s->posn = offset + SvCUR(s->var);
     break;
   }
- if (s->posn > SvCUR(s->var))
+ if ((STRLEN)s->posn > SvCUR(s->var))
   {
-   (void) SvGROW(s->var,s->posn);
+   (void) SvGROW(s->var,(STRLEN)s->posn);
   }
  return 0;
 }
@@ -141,7 +141,7 @@ PerlIOScalar_write(pTHX_ PerlIO *f, const void *vbuf, Size_t count)
      s->posn += count;
     }
    Move(vbuf,dst+offset,count,char);
-   if (s->posn > SvCUR(sv))
+   if ((STRLEN)s->posn > SvCUR(sv))
     SvCUR_set(sv,s->posn);
    SvPOK_on(s->var);
    return count;
@@ -190,7 +190,7 @@ PerlIOScalar_get_cnt(pTHX_ PerlIO *f)
  if (PerlIOBase(f)->flags & PERLIO_F_CANREAD)
   {
    PerlIOScalar *s = PerlIOSelf(f,PerlIOScalar);
-   if (SvCUR(s->var) > s->posn)
+   if (SvCUR(s->var) > (STRLEN)s->posn)
     return SvCUR(s->var) - s->posn;
    else
     return 0;

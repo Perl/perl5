@@ -73,8 +73,7 @@ bsd_realpath(path, resolved)
        dTHX;
        return Perl_rmsexpand(aTHX_ (char*)path, resolved, NULL, 0);
 #else
-	struct stat sb;
-	int n, rootd, serrno;
+	int rootd, serrno;
 	char *p, *q, wbuf[MAXPATHLEN];
 	int symlinks = 0;
 
@@ -124,9 +123,12 @@ loop:
 		p = resolved;
 
 #if defined(HAS_LSTAT) && defined(HAS_READLINK) && defined(HAS_SYMLINK)
+    {
+	struct stat sb;
 	/* Deal with the last component. */
 	if (lstat(p, &sb) == 0) {
 		if (S_ISLNK(sb.st_mode)) {
+			int n;
 			if (++symlinks > MAXSYMLINKS) {
 				errno = ELOOP;
 				goto err1;
@@ -143,6 +145,7 @@ loop:
 			p = "";
 		}
 	}
+    }
 #endif
 
 	/*
