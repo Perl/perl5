@@ -998,8 +998,12 @@ char *message;
     }
     fputs(message, stderr);
     (void)fflush(stderr);
-    if (e_fp)
+    if (e_fp) {
+#ifdef DOSISH
+	fclose(e_fp);
+#endif 
 	(void)UNLINK(e_tmpname);
+    }
     statusvalue = SHIFTSTATUS(statusvalue);
 #ifdef VMS
     my_exit((U32)vaxc$errno?vaxc$errno:errno?errno:statusvalue?statusvalue:SS$_ABORT);

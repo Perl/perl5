@@ -2,6 +2,7 @@
 
 #define BIT_BUCKET "/dev/null"  /* Will this work? */
 #define PERL_SYS_INIT(c,v)
+#define TMPPATH "plXXXXXX"
 
 /*
  * fwrite1() should be a routine with the same calling sequence as fwrite(),
