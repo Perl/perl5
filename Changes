@@ -20,7 +20,6 @@ current addresses (as of July 1998):
     Abigail             <abigail@fnx.com>
     Kenneth Albanowski  <kjahds@kjahds.com>
     Russ Allbery        <rra@stanford.edu>
-    Graham Barr         <gbarr@pobox.com>
     Spider Boardman     <spider@orb.nashua.nh.us>
     Tom Christiansen    <tchrist@perl.com>
     Hallvard B Furuseth <h.b.furuseth@usit.uio.no>
@@ -50,10 +49,11 @@ current addresses (as of July 1998):
 And the Keepers of the Patch Pumpkin:
 
     Charles Bailey      <bailey@hmivax.humgen.upenn.edu>
+    Graham Barr         <gbarr@pobox.com>
     Malcolm Beattie     <mbeattie@sable.ox.ac.uk>
     Tim Bunce           <Tim.Bunce@ig.co.uk>
     Andy Dougherty      <doughera@lafcol.lafayette.edu>
-    Gurusamy Sarathy    <gsar@engin.umich.edu>
+    Gurusamy Sarathy    <gsar@umich.edu>
     Chip Salzenberg     <chip@perl.com>
 
 And, of course, the Author of Perl:
