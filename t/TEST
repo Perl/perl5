@@ -69,8 +69,8 @@ unless (@ARGV) {
     }
     my $mani = File::Spec->catdir($updir, "MANIFEST");
     if (open(MANI, $mani)) {
-        while (<MANI>) {
-	    if (m!^((?:ext|lib)/.+/(?:t/.+\.t)|test.pl)\s!) {
+        while (<MANI>) { # similar code in t/harness
+	    if (m!^(ext/.+/([^/]+\.t|test\.pl)|lib/.+(\.t|test\.pl))\s!) {
 		push @ARGV, $1;
 		$OVER{$1} = File::Spec->catdir($updir, $1);
 	    }
