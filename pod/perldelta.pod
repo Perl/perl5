@@ -36,8 +36,8 @@ values); in particular for Data::Dumper to use the C<Sortkeys> option;
 or if some particular order is really important, use tied hashes.
 
 The hash randomisation is certain to reveal hidden assumptions about
-some particular ordering of hash elements, and outright bugs: it did
-reveal few bugs from the Perl core and core modules.
+some particular ordering of hash elements, and outright bugs: it
+revealed a few bugs in the Perl core and core modules.
 
 See L<perlsec/"Algorithmic Complexity Attacks"> for the rationale
 behind this change.
@@ -55,7 +55,7 @@ contains a very complex nesting of anonymous subs, evals and lexicals.
 =head2 UTF-8 no more default under UTF-8 locales
 
 In Perl 5.8.0 many Unicode features were introduced.   One of them
-was found the be more of nuisance than benefit: the automagic
+was found to be of more nuisance than benefit: the automagic
 (and silent) "UTF-8-ification" of filehandles, including the
 standard filehandles, if the user's locale settings indicated
 use of UTF-8.
@@ -443,7 +443,7 @@ problematic: it will wake dormant bugs.
 
 =head2 Win32 sysread, syswrite
 
-In Win32 the problem of sysread/syswritebecoming "broken" in 5.8.0 is
+In Win32 the problem of sysread/syswrite becoming "broken" in 5.8.0 is
 still open.  Background: before 5.8.0 in Win32 a filehandle that had
 been opened with sysopen() and then read/written with sysread/syswrite
 still did the CRLF <-> LF translation emblematic of Win32.
@@ -456,8 +456,8 @@ as CRLFs.
 This is still the case with 5.8.1 since the proper fix would require a
 considerable effort to implement cleanly, and secondly because one can
 argue that the old behaviour of sysread/syswrite on Win32 was simply
-anomalous (that is, wrong), since it makes Win32 to behave differently
-than any other platform.
+anomalous (that is, wrong), since it makes Win32 behave differently
+from any other platform.
 
 =head1 Reporting Bugs
 
