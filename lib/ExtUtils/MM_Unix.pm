@@ -399,7 +399,7 @@ sub cflags {
     }
 
     $self->{CCFLAGS}  = quote_paren($self->{CCFLAGS});
-    $self->{OPTIMIZE} = quote_paren($self->{CCFLAGS});
+    $self->{OPTIMIZE} = quote_paren($self->{OPTIMIZE});
 
     return $self->{CFLAGS} = qq{
 CCFLAGS = $self->{CCFLAGS}
