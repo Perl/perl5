@@ -1,10 +1,10 @@
 # Test to make sure object can be instantiated for stream protocol.
 
 BEGIN {
-    unless (eval "require Socket") {
-	print "1..0 # Skip: no Socket\n";
-	exit;
-    }
+  unless (eval "require Socket") {
+    print "1..0 \# Skip: no Socket\n";
+    exit;
+  }
 }
 
 use Test;

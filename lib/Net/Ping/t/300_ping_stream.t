@@ -8,7 +8,7 @@ BEGIN {
 	@INC = qw(../lib);
     }
     unless (eval "require Socket") {
-	print "1..0 # Skip: no Socket\n";
+	print "1..0 \# Skip: no Socket\n";
 	exit;
     }
 }
@@ -57,3 +57,8 @@ service echo
         server                  = /bin/cat
         disable                 = no
 }
+
+Or if you are using inetd, before restarting, add
+this line to your /etc/inetd.conf:
+
+echo   stream  tcp     nowait  root    internal

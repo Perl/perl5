@@ -8,7 +8,7 @@ BEGIN {
 	@INC = qw(../lib);
     }
     unless (eval "require Socket") {
-	print "1..0 # Skip: no Socket\n";
+	print "1..0 \# Skip: no Socket\n";
 	exit;
     }
 }

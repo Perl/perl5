@@ -2,10 +2,10 @@
 # Root access is required to actually perform icmp testing.
 
 BEGIN {
-    unless (eval "require Socket") {
-	print "1..0 # Skip: no Socket\n";
-	exit;
-    }
+  unless (eval "require Socket") {
+    print "1..0 \# Skip: no Socket\n";
+    exit;
+  }
 }
 
 use Test;
