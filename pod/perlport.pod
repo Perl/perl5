@@ -2095,7 +2095,7 @@ available at http://www.cpan.org/src/index.html
         UNICOS/mk
         UTS
         VOS
-        Win32/NT/2K     2)
+        WinNT/2000/XP   2)
         WinCE
         z/OS            (OS/390)
         VM/ESA
