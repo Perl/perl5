@@ -68,6 +68,8 @@ case "$workshoplibpth_done" in
                     loclibpth="$loclibpth $lib/sparcv9 $lib/v9"
                 done
             fi 
+	    # Really?
+	    ccflags="$ccflags -Dstdchar='unsigned char'"
 	    ;;
 	*)  loclibpth="$loclibpth $workshoplibs"  
 	    ;;
