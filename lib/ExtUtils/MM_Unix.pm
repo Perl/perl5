@@ -1349,8 +1349,15 @@ sub init_dirscan {	# --- File and Directory Lists (.xs .pm .pod etc)
     # (which includes PARENT_NAME). This is a subtle distinction but one
     # that's important for nested modules.
 
-    $self->{PMLIBDIRS} = ['lib', $self->{BASEEXT}]
+    if ($Is_VMS) {
+      # avoid logical name collisions by adding directory syntax
+      $self->{PMLIBDIRS} = ['./lib', './' . $self->{BASEEXT}]
 	unless $self->{PMLIBDIRS};
+    }
+    else {
+      $self->{PMLIBDIRS} = ['lib', $self->{BASEEXT}]
+       unless $self->{PMLIBDIRS};
+    }
 
     #only existing directories that aren't in $dir are allowed
 
