@@ -136,6 +136,12 @@
  * boo, hiss. */
 #undef  dNOOP
 #define dNOOP extern int Perl___notused
+/* Ditto for dXSARGS. */
+#undef  dXSARGS
+#define dXSARGS				\
+	dSP; dMARK;			\
+	I32 ax = mark - PL_stack_base + 1;	\
+	I32 items = sp - mark
 
 #endif
 

@@ -53,9 +53,12 @@ handled automatically by C<xsubpp>.
 #  define XS(name) void name(pTHXo_ CV* cv)
 #endif
 
+/* gcc -Wall: if an xsub has no arguments and PPCODE is used
+ * and none of ST, XSRETURN or XSprePUSH macros are used
+ * then `ax' (setup by dXSARGS) is unused. */
 #define dXSARGS				\
 	dSP; dMARK;			\
-	I32 ax = mark - PL_stack_base + 1;	\
+	I32 ax __attribute__((unused)) = mark - PL_stack_base + 1;	\
 	I32 items = sp - mark
 
 #define dXSTARG SV * targ = ((PL_op->op_private & OPpENTERSUB_HASTARG) \
