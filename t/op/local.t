@@ -2,7 +2,7 @@
 
 # $RCSfile: local.t,v $$Revision: 4.1 $$Date: 92/08/07 18:28:04 $
 
-print "1..47\n";
+print "1..58\n";
 
 sub foo {
     local($a, $b) = @_;
@@ -118,9 +118,9 @@ tie @a, 'TA';
 @a = ('a', 'b', 'c');
 {
     local($a[1]) = 'foo';
-    local($a[2]) = $a[1];  # XXX LHS == RHS doesn't work yet
+    local($a[2]) = $a[2];
     print +($a[1] eq 'foo') ? "" : "not ", "ok 37\n";
-    print +($a[2] eq 'foo') ? "" : "not ", "ok 38\n";
+    print +($a[2] eq 'c') ? "" : "not ", "ok 38\n";
     @a = ();
 }
 print +($a[1] eq 'b') ? "" : "not ", "ok 39\n";
@@ -142,9 +142,9 @@ tie %h, 'TH';
 
 {
     local($h{'a'}) = 'foo';
-    local($h{'b'}) = $h{'a'};  # XXX LHS == RHS doesn't work yet
+    local($h{'b'}) = $h{'b'};
     print +($h{'a'} eq 'foo') ? "" : "not ", "ok 42\n";
-    print +($h{'b'} eq 'foo') ? "" : "not ", "ok 43\n";
+    print +($h{'b'} == 2) ? "" : "not ", "ok 43\n";
     local($h{'c'});
     delete $h{'c'};
 }
@@ -158,4 +158,40 @@ print +($h{'c'} == 3) ? "" : "not ", "ok 46\n";
     shift @a;
 }
 print +($a[0].$a[1] eq "Xb") ? "" : "not ", "ok 47\n";
+
+# now try the same for %SIG
+
+$SIG{TERM} = 'foo';
+$SIG{INT} = \&foo;
+$SIG{__WARN__} = $SIG{INT};
+{
+    local($SIG{TERM}) = $SIG{TERM};
+    local($SIG{INT}) = $SIG{INT};
+    local($SIG{__WARN__}) = $SIG{__WARN__};
+    print +($SIG{TERM}		eq 'main::foo') ? "" : "not ", "ok 48\n";
+    print +($SIG{INT}		eq \&foo) ? "" : "not ", "ok 49\n";
+    print +($SIG{__WARN__}	eq \&foo) ? "" : "not ", "ok 50\n";
+    local($SIG{INT});
+    delete $SIG{__WARN__};
+}
+print +($SIG{TERM}	eq 'main::foo') ? "" : "not ", "ok 51\n";
+print +($SIG{INT}	eq \&foo) ? "" : "not ", "ok 52\n";
+print +($SIG{__WARN__}	eq \&foo) ? "" : "not ", "ok 53\n";
+
+# and for %ENV
+
+$ENV{_X_} = 'a';
+$ENV{_Y_} = 'b';
+$ENV{_Z_} = 'c';
+{
+    local($ENV{_X_}) = 'foo';
+    local($ENV{_Y_}) = $ENV{_Y_};
+    print +($ENV{_X_} eq 'foo') ? "" : "not ", "ok 54\n";
+    print +($ENV{_Y_} eq 'b') ? "" : "not ", "ok 55\n";
+    local($ENV{_Z_});
+    delete $ENV{_Z_};
+}
+print +($ENV{_X_} eq 'a') ? "" : "not ", "ok 56\n";
+print +($ENV{_Y_} eq 'b') ? "" : "not ", "ok 57\n";
+print +($ENV{_Z_} eq 'c') ? "" : "not ", "ok 58\n";
 

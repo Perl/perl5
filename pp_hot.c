@@ -250,9 +250,13 @@ PP(pp_aelemfast)
 {
     djSP;
     AV *av = GvAV((GV*)cSVOP->op_sv);
-    SV** svp = av_fetch(av, op->op_private, op->op_flags & OPf_MOD);
+    U32 lval = op->op_flags & OPf_MOD;
+    SV** svp = av_fetch(av, op->op_private, lval);
+    SV *sv = (svp ? *svp : &sv_undef);
     EXTEND(SP, 1);
-    PUSHs(svp ? *svp : &sv_undef);
+    if (!lval && SvGMAGICAL(sv))	/* see note in pp_helem() */
+	sv = sv_mortalcopy(sv);
+    PUSHs(sv);
     RETURN;
 }
 
@@ -1311,6 +1315,7 @@ PP(pp_helem)
     HV *hv = (HV*)POPs;
     U32 lval = op->op_flags & OPf_MOD;
     U32 defer = op->op_private & OPpLVAL_DEFER;
+    SV *sv;
 
     if (SvTYPE(hv) == SVt_PVHV) {
 	he = hv_fetch_ent(hv, keysv, lval && !defer, 0);
@@ -1347,7 +1352,16 @@ PP(pp_helem)
 	else if (op->op_private & OPpDEREF)
 	    vivify_ref(*svp, op->op_private & OPpDEREF);
     }
-    PUSHs(svp ? *svp : &sv_undef);
+    sv = (svp ? *svp : &sv_undef);
+    /* This makes C<local $tied{foo} = $tied{foo}> possible.
+     * Pushing the magical RHS on to the stack is useless, since
+     * that magic is soon destined to be misled by the local(),
+     * and thus the later pp_sassign() will fail to mg_get() the
+     * old value.  This should also cure problems with delayed
+     * mg_get()s.  GSAR 98-07-03 */
+    if (!lval && SvGMAGICAL(sv))
+	sv = sv_mortalcopy(sv);
+    PUSHs(sv);
     RETURN;
 }
 
@@ -2320,6 +2334,7 @@ PP(pp_aelem)
     AV* av = (AV*)POPs;
     U32 lval = op->op_flags & OPf_MOD;
     U32 defer = (op->op_private & OPpLVAL_DEFER) && (elem > AvFILL(av));
+    SV *sv;
 
     if (elem > 0)
 	elem -= curcop->cop_arybase;
@@ -2346,7 +2361,10 @@ PP(pp_aelem)
 	else if (op->op_private & OPpDEREF)
 	    vivify_ref(*svp, op->op_private & OPpDEREF);
     }
-    PUSHs(svp ? *svp : &sv_undef);
+    sv = (svp ? *svp : &sv_undef);
+    if (!lval && SvGMAGICAL(sv))	/* see note in pp_helem() */
+	sv = sv_mortalcopy(sv);
+    PUSHs(sv);
     RETURN;
 }
 
