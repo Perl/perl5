@@ -255,45 +255,48 @@ The following platforms are able to build Perl from the standard
 source code distribution available at
 F<http://www.perl.com/CPAN/src/index.html>
 
-        AIX             IRIX            SCO ODT/OSR
-        A/UX            Linux           Solaris
-        BeOS            MachTen         SunOS
-        BSD/OS      	MPE/iX          SVR4
-        DG/UX           NetBSD          Ultrix
-        Digital UNIX    NextSTEP        UNICOS
-        DOS DJGPP 1)    OpenBSD         VMS
-        DYNIX/ptx       OpenSTEP        Windows 3.1     1)
-        FreeBSD         OS/2            Windows 95      1) 3)
-        HP-UX           OS390   2)      Windows 98      1) 3)
-	Hurd		PowerMAX        Windows NT      1) 3)
-			QNX             VOS
+        AIX             Linux           SCO ODT/OSR
+        A/UX            MachTen         Solaris
+        BeOS            MPE/iX          SunOS
+        BSD/OS          NetBSD          SVR4
+        DG/UX           NextSTEP        Tru64 UNIX      3)
+        DomainOS        OpenBSD         Ultrix                  
+        DOS DJGPP 1)    OpenSTEP        UNICOS                  
+        DYNIX/ptx       OS/2            VMS                     
+        FreeBSD         OS390     2)    VOS 
+        HP-UX           PowerMAX        Windows 3.1     1)      
+        Hurd            QNX             Windows 95      1) 4)   
+        IRIX                            Windows 98      1) 4)   
+                                        Windows NT      1) 4)
 
         1) in DOS mode either the DOS or OS/2 ports can be used
-        2) formerly known as MVS	
-        3) compilers: Borland, Cygwin32, Mingw32 EGCS/GCC, VC++
-					
+        2) formerly known as MVS
+        3) formerly known as Digital UNIX and before that DEC OSF/1     
+        4) compilers: Borland, Cygwin32, Mingw32 EGCS/GCC, VC++
+                                        
 The following platforms have been known to build Perl from the source
 but for the Perl release 5.005_03 we haven't been able to verify them,
 either because the hardware/software platforms are rather rare or
 because we don't have an active champion on these platforms, or both.
 					
         3b1             FPS             Plan 9
-        AmigaOS         GENIX           RISC/os
-        ConvexOS        Greenhills      Stellar
-        CX/UX           ISC             SVR2
-        DC/OSx          MachTen 68k     TI1500
-        DDE SMES        MiNT            TitanOS
-        DomainOS        MPC             UNICOS/mk
-        DOS EMX         NEWS-OS         Unisys Dynix
-        Dynix           Opus            Unixware
-        EP/IX
-        ESIX
+        AmigaOS         GENIX           PowerUX
+        ConvexOS        Greenhills      RISC/os         
+        CX/UX           ISC             Stellar         
+        DC/OSx          MachTen 68k     SVR2            
+        DDE SMES        MiNT            TI1500          
+        DOS EMX         MPC             TitanOS         
+        Dynix           NEWS-OS         UNICOS/mk       
+        EP/IX           Opus            Unisys Dynix    
+        ESIX    			Unixware        
 
 The following platforms are planned to be supported in the standard
 source code distribution of the Perl release 5.006 but are not
 supported in the Perl release 5.005_03:
 
         BS2000
+	Netware
+	Rhapsody
         VM/ESA
 
 The following platforms have their own source code distributions and
@@ -303,6 +306,7 @@ binaries available via F<http://www.perl.com/CPAN/ports/index.html>.
 
 	AS/400			5.003
 	MacOS			5.004
+	Netware			5.003_07
 	Tandem Guardian		5.004
 
 The following platforms have only binaries available via
@@ -313,7 +317,6 @@ F<http://www.perl.com/CPAN/ports/index.html>.
 	Acorn RISCOS		5.005_02
 	AOS			5.002
 	LynxOS			5.004_02
-	Netware			5.003_07
 
 =head1 ENVIRONMENT
 

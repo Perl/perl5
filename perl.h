@@ -650,7 +650,8 @@ Free_t   Perl_mfree _((Malloc_t where));
 /* Configure already sets Direntry_t */
 #if defined(I_DIRENT)
 #   include <dirent.h>
-#   if defined(NeXT) && defined(I_SYS_DIR) /* NeXT needs dirent + sys/dir.h */
+    /* NeXT needs dirent + sys/dir.h */
+#   if  defined(I_SYS_DIR) && (defined(NeXT) || defined(__NeXT__))
 #	include <sys/dir.h>
 #   endif
 #else
@@ -1380,7 +1381,7 @@ typedef I32 (*filter_t) _((int, SV *, int));
 #      else
 #        ifdef I_MACH_CTHREADS
 #          include <mach/cthreads.h>
-#          if defined(__NeXT__) && defined(PERL_POLLUTE_MALLOC)
+#          if (defined(NeXT) || defined(__NeXT__)) && defined(PERL_POLLUTE_MALLOC)
 #            define MUTEX_INIT_CALLS_MALLOC
 #          endif
 typedef cthread_t	perl_os_thread;
@@ -1775,13 +1776,13 @@ END_EXTERN_C
 #endif
 
 #ifndef __cplusplus
-#  ifdef __NeXT__ /* or whatever catches all NeXTs */
+#  if defined(NeXT) || defined(__NeXT__) /* or whatever catches all NeXTs */
 char *crypt ();       /* Maybe more hosts will need the unprototyped version */
 #  else
 #    if !defined(WIN32) || !defined(HAVE_DES_FCRYPT)
 char *crypt _((const char*, const char*));
 #    endif /* !WIN32 && !HAVE_CRYPT_SOURCE */
-#  endif /* !__NeXT__ */
+#  endif /* !NeXT && !__NeXT__ */
 #  ifndef DONT_DECLARE_STD
 #    ifndef getenv
 char *getenv _((const char*));
@@ -1870,26 +1871,32 @@ int runops_debug _((void));
 #endif
 #endif
 
-
 /* _ (for $_) must be first in the following list (DEFSV requires it) */
 #define THREADSV_NAMES "_123456789&`'+/.,\\\";^-%=|~:\001\005!@"
 
-/* VMS doesn't use environ array and NeXT has problems with crt0.o globals */
-#if !defined(VMS) && !(defined(NeXT) && defined(__DYNAMIC__))
-#if !defined(DONT_DECLARE_STD) \
-	|| (defined(__svr4__) && defined(__GNUC__) && defined(sun)) \
-	|| defined(__sgi) || defined(__DGUX)
-extern char **	environ;	/* environment variables supplied via exec */
-#endif
-#else
-#  if defined(NeXT) && defined(__DYNAMIC__)
-
-#  include <mach-o/dyld.h>
+/* NeXT has problems with crt0.o globals */
+#if defined(__DYNAMIC__) && \
+    (defined(NeXT) || defined(__NeXT__) || defined(__APPLE__))
+#  if defined(NeXT) || defined(__NeXT)
+#    include <mach-o/dyld.h>
+#    define environ (*environ_pointer)
 EXT char *** environ_pointer;
-#  define environ (*environ_pointer)
+#  else
+#    if defined(__APPLE__)
+#      include <crt_externs.h>	/* for the env array */
+#      define environ (*_NSGetEnviron())
+#    endif
 #  endif
-#endif /* environ processing */
-
+#else
+   /* VMS and some other platforms don't use the environ array */
+#  if !defined(VMS) || \
+      !defined(DONT_DECLARE_STD) || \
+      (defined(__svr4__) && defined(__GNUC__) && defined(sun)) || \
+      defined(__sgi) || \
+      defined(__DGUX)
+extern char **	environ;	/* environment variables supplied via exec */
+#  endif
+#endif
 
 /* handy constants */
 EXTCONST char PL_warn_uninit[]

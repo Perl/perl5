@@ -173,6 +173,7 @@ elsif ($^O eq 'mpeix') {
 elsif ($^O ne 'dos') {
     safe_unlink("$installbin/$perl$ver$exe_ext");
     copy("perl$exe_ext", "$installbin/$perl$ver$exe_ext");
+    strip("$installbin/perl$ver$exe_ext") if $^O =~ /^(rhapsody)$;
     chmod(0755, "$installbin/$perl$ver$exe_ext");
 }
 else {
@@ -232,9 +233,14 @@ else {
 foreach my $file (@corefiles) {
     # HP-UX (at least) needs to maintain execute permissions
     # on dynamically-loadable libraries. So we do it for all.
-    copy_if_diff($file,"$installarchlib/CORE/$file")
-	and chmod($file =~ /\.(so|\Q$dlext\E)$/ ? 0555 : 0444,
-		   "$installarchlib/CORE/$file");
+    if (copy_if_diff($file,"$installarchlib/CORE/$file")) {
+	if ($file =~ /\.(so|\Q$dlext\E)$/) {
+	    chmod(0555, "$installarchlib/CORE/$file");
+	    strip("-S", "$installarchlib/CORE/$file") if $^O =~ /^(rhapsody)$;
+	} else {
+	    chmod(0444, "$installarchlib/CORE/$file");
+	}
+    }
 }
 
 # Install main perl executables
@@ -603,3 +609,23 @@ sub copy_if_diff {
 	1;
     }
 }
+
+sub strip
+{
+    my(@args) = @_;
+
+    my @opts;
+    while (@args && $args[0] =~ /^(-\w+)$/) {
+        push @opts, shift @args;
+    }
+
+    foreach my $file (@args) {
+        if (-f $file) {
+            print STDERR "  strip $file\n";
+            system("strip", @opts, $file);
+        } else {
+            print STDERR "# file '$file' skipped\n";
+        }
+    }
+}
+

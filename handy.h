@@ -54,7 +54,7 @@
 /* The NeXT dynamic loader headers will not build with the bool macro
    So declare them now to clear confusion.
 */
-#ifdef NeXT
+#if defined(NeXT) || defined(__NeXT__)
 # undef FALSE
 # undef TRUE
   typedef enum bool { FALSE = 0, TRUE = 1 } bool;
@@ -62,7 +62,7 @@
 # ifndef HAS_BOOL
 #  define HAS_BOOL 1
 # endif /* !HAS_BOOL */
-#endif /* NeXT */
+#endif /* NeXT || __NeXT__ */
 
 #ifndef HAS_BOOL
 # if defined(UTS) || defined(VMS)

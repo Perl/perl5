@@ -238,6 +238,10 @@ extension.
 
 GNU/Hurd is now supported.
 
+=item *
+
+Rhapsody is now supported.
+
 =back
 
 =head1 New tests
@@ -286,8 +290,22 @@ Added Dumpvalue module provides screen dumps of Perl data.
 
 =item Benchmark
 
-You can now run tests for I<x> seconds instead of guessing the right
-number of tests to run.
+You can now run tests for I<n> seconds instead of guessing the right
+number of tests to run: e.g. timethese(-5, ...) will run each of the
+codes for at least 5 CPU seconds.  Zero as the "number of repetitions"
+means "for at least 3 CPU seconds".  The output format has also
+changed.  For example: 
+
+use Benchmark;$x=3;timethese(-5,{a=>sub{$x*$x},b=>sub{$x**2}})
+
+will now output something like this:
+
+Benchmark: running a, b, each for at least 5 CPU seconds...
+         a:  5 wallclock secs ( 5.77 usr +  0.00 sys =  5.77 CPU) @ 200551.91/s (n=1156516)
+         b:  4 wallclock secs ( 5.00 usr +  0.02 sys =  5.02 CPU) @ 159605.18/s (n=800686)
+
+New features: "each for at least N CPU seconds...", "wallclock secs",
+and the "@ operations/CPU second (n=operations)".
 
 =item Fcntl
 
@@ -299,13 +317,13 @@ O_ACCMODE: the mask of O_RDONLY, O_WRONLY, and O_RDWR.
 
 =item Math::Complex
 
-The accessors methods Re, Im, arg, abs, rho, theta, methods can
-($z->Re()) now also act as mutators ($z->Re(3)).
+The accessor methods Re, Im, arg, abs, rho, and theta, can now also
+act as mutators (accessor $z->Re(), mutator $z->Re(3)).
 
 =item Math::Trig
 
 A little bit of radial trigonometry (cylindrical and spherical) added,
-for example the great circle distance.
+radial coordinate conversions and the great circle distance.
 
 =item Time::Local
 
