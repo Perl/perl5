@@ -1213,7 +1213,7 @@ form(const char* pat, ...)
     return SvPVX(sv);
 }
 
-char *
+SV *
 mess(const char *pat, va_list *args)
 {
     SV *sv = mess_alloc();
@@ -1239,7 +1239,7 @@ mess(const char *pat, va_list *args)
 	    sv_catpv(sv, ".\n");
 	}
     }
-    return SvPVX(sv);
+    return sv;
 }
 
 OP *
@@ -1252,13 +1252,21 @@ die(const char* pat, ...)
     HV *stash;
     GV *gv;
     CV *cv;
+    SV *msv;
+    STRLEN msglen;
 
     DEBUG_S(PerlIO_printf(PerlIO_stderr(),
 			  "%p: die: curstack = %p, mainstack = %p\n",
 			  thr, PL_curstack, PL_mainstack));
 
     va_start(args, pat);
-    message = pat ? mess(pat, &args) : Nullch;
+    if (pat) {
+	msv = mess(pat, &args);
+	message = SvPV(msv,msglen);
+    }
+    else {
+	message = Nullch;
+    }
     va_end(args);
 
     DEBUG_S(PerlIO_printf(PerlIO_stderr(),
@@ -1278,7 +1286,7 @@ die(const char* pat, ...)
 
 	    ENTER;
 	    if (message) {
-		msg = newSVpv(message, 0);
+		msg = newSVpvn(message, msglen);
 		SvREADONLY_on(msg);
 		SAVEFREESV(msg);
 	    }
@@ -1296,7 +1304,7 @@ die(const char* pat, ...)
 	}
     }
 
-    PL_restartop = die_where(message);
+    PL_restartop = die_where(message, msglen);
     DEBUG_S(PerlIO_printf(PerlIO_stderr(),
 	  "%p: die: restartop = %p, was_in_eval = %d, top_env = %p\n",
 	  thr, PL_restartop, was_in_eval, PL_top_env));
@@ -1314,9 +1322,12 @@ croak(const char* pat, ...)
     HV *stash;
     GV *gv;
     CV *cv;
+    SV *msv;
+    STRLEN msglen;
 
     va_start(args, pat);
-    message = mess(pat, &args);
+    msv = mess(pat, &args);
+    message = SvPV(msv,msglen);
     va_end(args);
     DEBUG_S(PerlIO_printf(PerlIO_stderr(), "croak: 0x%lx %s", (unsigned long) thr, message));
     if (PL_diehook) {
@@ -1332,7 +1343,7 @@ croak(const char* pat, ...)
 	    SV *msg;
 
 	    ENTER;
-	    msg = newSVpv(message, 0);
+	    msg = newSVpvn(message, msglen);
 	    SvREADONLY_on(msg);
 	    SAVEFREESV(msg);
 
@@ -1346,7 +1357,7 @@ croak(const char* pat, ...)
 	}
     }
     if (PL_in_eval) {
-	PL_restartop = die_where(message);
+	PL_restartop = die_where(message, msglen);
 	JMPENV_JUMP(3);
     }
     {
@@ -1354,7 +1365,7 @@ croak(const char* pat, ...)
 	/* SFIO can really mess with your errno */
 	int e = errno;
 #endif
-	PerlIO_puts(PerlIO_stderr(), message);
+	PerlIO_write(PerlIO_stderr(), message, msglen);
 	(void)PerlIO_flush(PerlIO_stderr());
 #ifdef USE_SFIO
 	errno = e;
@@ -1371,9 +1382,12 @@ warn(const char* pat,...)
     HV *stash;
     GV *gv;
     CV *cv;
+    SV *msv;
+    STRLEN msglen;
 
     va_start(args, pat);
-    message = mess(pat, &args);
+    msv = mess(pat, &args);
+    message = SvPV(msv, msglen);
     va_end(args);
 
     if (PL_warnhook) {
@@ -1390,7 +1404,7 @@ warn(const char* pat,...)
 	    SV *msg;
 
 	    ENTER;
-	    msg = newSVpv(message, 0);
+	    msg = newSVpvn(message, msglen);
 	    SvREADONLY_on(msg);
 	    SAVEFREESV(msg);
 
@@ -1404,7 +1418,7 @@ warn(const char* pat,...)
 	    return;
 	}
     }
-    PerlIO_puts(PerlIO_stderr(),message);
+    PerlIO_write(PerlIO_stderr(), message, msglen);
 #ifdef LEAKTEST
     DEBUG_L(*message == '!' 
 	    ? (xstat(message[1]=='!'
@@ -1425,9 +1439,12 @@ warner(U32  err, const char* pat,...)
     HV *stash;
     GV *gv;
     CV *cv;
+    SV *msv;
+    STRLEN msglen;
 
     va_start(args, pat);
-    message = mess(pat, &args);
+    msv = mess(pat, &args);
+    message = SvPV(msv, msglen);
     va_end(args);
 
     if (ckDEAD(err)) {
@@ -1447,7 +1464,7 @@ warner(U32  err, const char* pat,...)
                 SV *msg;
  
                 ENTER;
-                msg = newSVpv(message, 0);
+                msg = newSVpvn(message, msglen);
                 SvREADONLY_on(msg);
                 SAVEFREESV(msg);
  
@@ -1460,10 +1477,10 @@ warner(U32  err, const char* pat,...)
             }
         }
         if (PL_in_eval) {
-            PL_restartop = die_where(message);
+            PL_restartop = die_where(message, msglen);
             JMPENV_JUMP(3);
         }
-        PerlIO_puts(PerlIO_stderr(),message);
+        PerlIO_write(PerlIO_stderr(), message, msglen);
         (void)PerlIO_flush(PerlIO_stderr());
         my_failure_exit();
 
@@ -1483,7 +1500,7 @@ warner(U32  err, const char* pat,...)
                 SV *msg;
  
                 ENTER;
-                msg = newSVpv(message, 0);
+                msg = newSVpvn(message, msglen);
                 SvREADONLY_on(msg);
                 SAVEFREESV(msg);
  
@@ -1496,7 +1513,7 @@ warner(U32  err, const char* pat,...)
                 return;
             }
         }
-        PerlIO_puts(PerlIO_stderr(),message);
+        PerlIO_write(PerlIO_stderr(), message, msglen);
 #ifdef LEAKTEST
         DEBUG_L(xstat());
 #endif

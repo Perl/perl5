@@ -3192,6 +3192,7 @@ re_croak2(const char* pat1,const char* pat2,...)
     STRLEN l1 = strlen(pat1);
     STRLEN l2 = strlen(pat2);
     char buf[512];
+    SV *msv;
     char *message;
 
     if (l1 > 510)
@@ -3203,9 +3204,9 @@ re_croak2(const char* pat1,const char* pat2,...)
     buf[l1 + l2] = '\n';
     buf[l1 + l2 + 1] = '\0';
     va_start(args, pat2);
-    message = mess(buf, &args);
+    msv = mess(buf, &args);
     va_end(args);
-    l1 = strlen(message);
+    message = SvPV(msv,l1);
     if (l1 > 512)
 	l1 = 512;
     Copy(message, buf, l1 , char);

@@ -1319,7 +1319,7 @@ dounwind(I32 cxix)
 }
 
 OP *
-die_where(char *message)
+die_where(char *message, STRLEN msglen)
 {
     dSP;
     STRLEN n_a;
@@ -1332,9 +1332,8 @@ die_where(char *message)
 	if (message) {
 	    if (PL_in_eval & 4) {
 		SV **svp;
-		STRLEN klen = strlen(message);
 		
-		svp = hv_fetch(ERRHV, message, klen, TRUE);
+		svp = hv_fetch(ERRHV, message, msglen, TRUE);
 		if (svp) {
 		    if (!SvIOK(*svp)) {
 			static char prefix[] = "\t(in cleanup) ";
@@ -1343,11 +1342,11 @@ die_where(char *message)
 			(void)SvIOK_only(*svp);
 			if (!SvPOK(err))
 			    sv_setpv(err,"");
-			SvGROW(err, SvCUR(err)+sizeof(prefix)+klen);
+			SvGROW(err, SvCUR(err)+sizeof(prefix)+msglen);
 			sv_catpvn(err, prefix, sizeof(prefix)-1);
-			sv_catpvn(err, message, klen);
+			sv_catpvn(err, message, msglen);
 			if (ckWARN(WARN_UNSAFE)) {
-			    STRLEN start = SvCUR(err)-klen-sizeof(prefix)+1;
+			    STRLEN start = SvCUR(err)-msglen-sizeof(prefix)+1;
 			    warner(WARN_UNSAFE, SvPVX(err)+start);
 			}
 		    }
@@ -1355,10 +1354,10 @@ die_where(char *message)
 		}
 	    }
 	    else
-		sv_setpv(ERRSV, message);
+		sv_setpvn(ERRSV, message, msglen);
 	}
 	else
-	    message = SvPVx(ERRSV, n_a);
+	    message = SvPVx(ERRSV, msglen);
 
 	while ((cxix = dopoptoeval(cxstack_ix)) < 0 && PL_curstackinfo->si_prev) {
 	    dounwind(-1);
@@ -1373,7 +1372,8 @@ die_where(char *message)
 
 	    POPBLOCK(cx,PL_curpm);
 	    if (CxTYPE(cx) != CXt_EVAL) {
-		PerlIO_printf(PerlIO_stderr(), "panic: die %s", message);
+		PerlIO_write(PerlIO_stderr(), "panic: die ", 11);
+		PerlIO_write(PerlIO_stderr(), message, msglen);
 		my_exit(1);
 	    }
 	    POPEVAL(cx);
@@ -1392,13 +1392,13 @@ die_where(char *message)
 	}
     }
     if (!message)
-	message = SvPVx(ERRSV, n_a);
+	message = SvPVx(ERRSV, msglen);
     {
 #ifdef USE_SFIO
 	/* SFIO can really mess with your errno */
 	int e = errno;
 #endif
-	PerlIO_puts(PerlIO_stderr(), message);
+	PerlIO_write(PerlIO_stderr(), message, msglen);
 	(void)PerlIO_flush(PerlIO_stderr());
 #ifdef USE_SFIO
 	errno = e;

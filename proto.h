@@ -91,7 +91,7 @@ VIRTUAL char*	delimcpy _((char* to, char* toend, char* from, char* fromend,
 		    int delim, I32* retlen));
 VIRTUAL void	deprecate _((char* s));
 VIRTUAL OP*	die _((const char* pat,...));
-VIRTUAL OP*	die_where _((char* message));
+VIRTUAL OP*	die_where _((char* message, STRLEN msglen));
 VIRTUAL void	dounwind _((I32 cxix));
 VIRTUAL bool	do_aexec _((SV* really, SV** mark, SV** sp));
 VIRTUAL int	do_binmode _((PerlIO *fp, int iotype, int flag));
@@ -302,7 +302,7 @@ VIRTUAL void	markstack_grow _((void));
 #ifdef USE_LOCALE_COLLATE
 VIRTUAL char*	mem_collxfrm _((const char* s, STRLEN len, STRLEN* xlen));
 #endif
-VIRTUAL char*	mess _((const char* pat, va_list* args));
+VIRTUAL SV*	mess _((const char* pat, va_list* args));
 VIRTUAL int	mg_clear _((SV* sv));
 VIRTUAL int	mg_copy _((SV* sv, SV* nsv, const char* key, I32 klen));
 VIRTUAL MAGIC*	mg_find _((SV* sv, int type));
