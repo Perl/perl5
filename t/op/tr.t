@@ -22,12 +22,13 @@ print "ok 3\n";
 # In EBCDIC 'I' is \xc9 and 'J' is \0xd1, 'i' is \x89 and 'j' is \x91.
 # Yes, discontinuities.  Regardless, the \xca in the below should stay
 # untouched (and not became \x8a).
+{
+    no utf8;
+    $_ = "I\xcaJ";
 
-$_ = "I\xcaJ";
+    tr/I-J/i-j/;
 
-tr/I-J/i-j/;
-
-print "not " unless $_ eq "i\xcaj";
-print "ok 4\n";
-
+    print "not " unless $_ eq "i\xcaj";
+    print "ok 4\n";
+}
 #
