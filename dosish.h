@@ -23,7 +23,7 @@
 #    define PERL_SYS_INIT(c,v)	Perl_win32_init(c,v)
 #    define BIT_BUCKET "nul"
 #  else
-#    define PERL_SYS_INIT(c,v)	Perl_my_setenv_init(&environ)
+#    define PERL_SYS_INIT(c,v)
 #    define BIT_BUCKET "\\dev\\nul" /* "wanna be like, umm, Newlined, or somethin?" */
 #  endif
 #endif	/* DJGPP */

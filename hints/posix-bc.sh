@@ -13,6 +13,15 @@ ld='c89'
 # C-Flags:
 ccflags='-DPOSIX_BC -DUSE_PURE_BISON -D_XOPEN_SOURCE_EXTENDED'
 
+# Flags on a RISC-Host (SUNRISE):
+if [ -n "`bs2cmd SHOW-SYSTEM-INFO | egrep 'HSI-ATT.*TYPE.*SR'`" ]; then
+    echo
+    echo "Congratulations, you are running a machine with Sunrise CPUs."
+    echo "Let's hope you have the matching RISC compiler as well."
+    ccflags='-K risc_4000 -DPOSIX_BC -DUSE_PURE_BISON -D_XOPEN_SOURCE_EXTENDED'
+    ldflags='-K risc_4000'
+fi
+
 # Turning on optimization breaks perl (CORE-DUMP):
 optimize='none'
 

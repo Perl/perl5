@@ -1,6 +1,6 @@
 #define ST(off) PL_stack_base[ax + (off)]
 
-#if defined(CYGWIN32) && defined(USE_DYNAMIC_LOADING)
+#if defined(CYGWIN) && defined(USE_DYNAMIC_LOADING)
 #  define XS(name) __declspec(dllexport) void name(pTHXo_ CV* cv)
 #else
 #  define XS(name) void name(pTHXo_ CV* cv)

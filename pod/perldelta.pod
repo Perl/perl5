@@ -37,10 +37,14 @@ specified via MakeMaker:
 This new build option provides a set of macros for all API functions
 such that an implicit interpreter/thread context argument is passed to
 every API function.  As a result of this, something like C<sv_setsv(foo,bar)>
-amounts to a macro invocation that actually translates to
+amounts to a macro invocation that actually translates to something like
 C<Perl_sv_setsv(my_perl,foo,bar)>.  While this is generally expected
 to not have any significant source compatibility issues, the difference
 between a macro and a real function call will need to be considered.
+
+This means that there B<is> a source compatibility issue as a result of
+this if your extensions attempt to use pointers to any of the Perl API
+functions.
 
 Note that the above issue is not relevant to the default build of
 Perl, whose interfaces continue to match those of prior versions
@@ -49,6 +53,9 @@ Perl, whose interfaces continue to match those of prior versions
 For testing purposes, the 5.005_58 release automatically enables
 PERL_IMPLICIT_CONTEXT whenever Perl is built with -Dusethreads or
 -Dusemultiplicity.
+
+See L<perlguts/"The Perl API"> for detailed information on the
+ramifications of building Perl using this option.
 
 =item C<PERL_POLLUTE_MALLOC>
 

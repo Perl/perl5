@@ -82,7 +82,7 @@ cgi		lstein
 complex		jhi,raphael
 cpan		k
 cxux		tom.horsley
-cygwin32	win32
+cygwin		win32
 dec_osf		jhi,spider
 dgux		roderick
 doc		tchrist

@@ -1,5 +1,5 @@
 # B::Deparse.pm
-# Copyright (c) 1998,1999 Stephen McCamant. All rights reserved.
+# Copyright (c) 1998, 1999 Stephen McCamant. All rights reserved.
 # This module is free software; you can redistribute and/or modify
 # it under the same terms as Perl itself.
 
@@ -12,11 +12,11 @@ use B qw(class main_root main_start main_cv svref_2object opnumber
 	 OPf_WANT OPf_WANT_VOID OPf_WANT_SCALAR OPf_WANT_LIST
 	 OPf_KIDS OPf_REF OPf_STACKED OPf_SPECIAL
 	 OPpLVAL_INTRO OPpENTERSUB_AMPER OPpSLICE OPpCONST_BARE
-	 OPpTRANS_SQUASH OPpTRANS_DELETE OPpTRANS_COMPLEMENT
+	 OPpTRANS_SQUASH OPpTRANS_DELETE OPpTRANS_COMPLEMENT OPpTARGET_MY
 	 SVf_IOK SVf_NOK SVf_ROK SVf_POK
 	 PMf_KEEP PMf_GLOBAL PMf_CONTINUE PMf_EVAL PMf_ONCE
 	 PMf_MULTILINE PMf_SINGLELINE PMf_FOLD PMf_EXTENDED);
-$VERSION = 0.58;
+$VERSION = 0.59;
 use strict;
 
 # Changes between 0.50 and 0.51:
@@ -75,6 +75,13 @@ use strict;
 # - added -si and -sT to control indenting (also based on a patch from Hugo)
 # - added -sv to print something else instead of '???'
 # - preliminary version of utf8 tr/// handling
+# Changes after 0.58:
+# - uses of $op->ppaddr changed to new $op->name (done by Sarathy)
+# - added support for Hugo's new OP_SETSTATE (like nextstate) 
+# Changes between 0.58 and 0.59
+# - added support for Chip's OP_METHOD_NAMED
+# - added support for Ilya's OPpTARGET_MY optimization
+# - elided arrows before `()' subscripts when possible
 
 # Todo:
 # - finish tr/// changes
@@ -86,7 +93,7 @@ use strict;
 # - recognize `use utf8', `use integer', etc
 # - treat top-level block specially for incremental output
 # - interpret in high bit chars in string as utf8 \x{...} (when?)
-# - copy comments (look at real text with $^P) 
+# - copy comments (look at real text with $^P?) 
 # - avoid semis in one-statement blocks
 # - associativity of &&=, ||=, ?:
 # - ',' => '=>' (auto-unquote?)
@@ -94,6 +101,7 @@ use strict;
 # - configurable syntax highlighting: ANSI color, HTML, TeX, etc.
 # - more style options: brace style, hex vs. octal, quotes, ...
 # - print big ints as hex/octal instead of decimal (heuristic?)
+# - handle `my $x if 0'?
 # - include values of variables (e.g. set in BEGIN)
 # - coordinate with Data::Dumper (both directions? see previous)
 # - version using op_next instead of op_first/sibling?
@@ -219,8 +227,7 @@ sub next_todo {
 	return "format $name =\n"
 	    . $self->deparse_format($ent->[1]->FORM). "\n";
     } else {
-	return "sub $name " .
-	    $self->deparse_sub($ent->[1]->CV);
+	return "sub $name " . $self->deparse_sub($ent->[1]->CV);
     }
 }
 
@@ -550,6 +557,18 @@ sub maybe_local {
     }
 }
 
+sub maybe_targmy {
+    my $self = shift;
+    my($op, $cx, $func, @args) = @_;
+    if ($op->private & OPpTARGET_MY) {
+	my $var = $self->padname($op->targ);
+	my $val = $func->($self, $op, 7, @args);
+	return $self->maybe_parens("$var = $val", $cx, 7);
+    } else {
+	return $func->($self, $op, $cx, @args);
+    }
+}
+
 sub padname_sv {
     my $self = shift;
     my $targ = shift;
@@ -777,9 +796,9 @@ sub baseop {
 sub pp_stub { baseop(@_, "()") }
 sub pp_wantarray { baseop(@_, "wantarray") }
 sub pp_fork { baseop(@_, "fork") }
-sub pp_wait { baseop(@_, "wait") }
-sub pp_getppid { baseop(@_, "getppid") }
-sub pp_time { baseop(@_, "time") }
+sub pp_wait { maybe_targmy(@_, \&baseop, "wait") }
+sub pp_getppid { maybe_targmy(@_, \&baseop, "getppid") }
+sub pp_time { maybe_targmy(@_, \&baseop, "time") }
 sub pp_tms { baseop(@_, "times") }
 sub pp_ghostent { baseop(@_, "gethostent") }
 sub pp_gnetent { baseop(@_, "getnetent") }
@@ -813,15 +832,16 @@ sub pfixop {
 
 sub pp_preinc { pfixop(@_, "++", 23) }
 sub pp_predec { pfixop(@_, "--", 23) }
-sub pp_postinc { pfixop(@_, "++", 23, POSTFIX) }
-sub pp_postdec { pfixop(@_, "--", 23, POSTFIX) }
+sub pp_postinc { maybe_targmy(@_, \&pfixop, "++", 23, POSTFIX) }
+sub pp_postdec { maybe_targmy(@_, \&pfixop, "--", 23, POSTFIX) }
 sub pp_i_preinc { pfixop(@_, "++", 23) }
 sub pp_i_predec { pfixop(@_, "--", 23) }
-sub pp_i_postinc { pfixop(@_, "++", 23, POSTFIX) }
-sub pp_i_postdec { pfixop(@_, "--", 23, POSTFIX) }
-sub pp_complement { pfixop(@_, "~", 21) }
+sub pp_i_postinc { maybe_targmy(@_, \&pfixop, "++", 23, POSTFIX) }
+sub pp_i_postdec { maybe_targmy(@_, \&pfixop, "--", 23, POSTFIX) }
+sub pp_complement { maybe_targmy(@_. \&pfixop, "~", 21) }
 
-sub pp_negate {
+sub pp_negate { maybe_targmy(@_, \&real_negate) }
+sub real_negate {
     my $self = shift;
     my($op, $cx) = @_;
     if ($op->first->name =~ /^(i_)?negate$/) {
@@ -855,31 +875,31 @@ sub unop {
     }
 }
 
-sub pp_chop { unop(@_, "chop") }
-sub pp_chomp { unop(@_, "chomp") }
-sub pp_schop { unop(@_, "chop") }
-sub pp_schomp { unop(@_, "chomp") }
+sub pp_chop { maybe_targmy(@_, \&unop, "chop") }
+sub pp_chomp { maybe_targmy(@_, \&unop, "chomp") }
+sub pp_schop { maybe_targmy(@_, \&unop, "chop") }
+sub pp_schomp { maybe_targmy(@_, \&unop, "chomp") }
 sub pp_defined { unop(@_, "defined") }
 sub pp_undef { unop(@_, "undef") }
 sub pp_study { unop(@_, "study") }
 sub pp_ref { unop(@_, "ref") }
 sub pp_pos { maybe_local(@_, unop(@_, "pos")) }
 
-sub pp_sin { unop(@_, "sin") }
-sub pp_cos { unop(@_, "cos") }
-sub pp_rand { unop(@_, "rand") }
+sub pp_sin { maybe_targmy(@_, \&unop, "sin") }
+sub pp_cos { maybe_targmy(@_, \&unop, "cos") }
+sub pp_rand { maybe_targmy(@_, \&unop, "rand") }
 sub pp_srand { unop(@_, "srand") }
-sub pp_exp { unop(@_, "exp") }
-sub pp_log { unop(@_, "log") }
-sub pp_sqrt { unop(@_, "sqrt") }
-sub pp_int { unop(@_, "int") }
-sub pp_hex { unop(@_, "hex") }
-sub pp_oct { unop(@_, "oct") }
-sub pp_abs { unop(@_, "abs") }
+sub pp_exp { maybe_targmy(@_, \&unop, "exp") }
+sub pp_log { maybe_targmy(@_, \&unop, "log") }
+sub pp_sqrt { maybe_targmy(@_, \&unop, "sqrt") }
+sub pp_int { maybe_targmy(@_, \&unop, "int") }
+sub pp_hex { maybe_targmy(@_, \&unop, "hex") }
+sub pp_oct { maybe_targmy(@_, \&unop, "oct") }
+sub pp_abs { maybe_targmy(@_, \&unop, "abs") }
 
-sub pp_length { unop(@_, "length") }
-sub pp_ord { unop(@_, "ord") }
-sub pp_chr { unop(@_, "chr") }
+sub pp_length { maybe_targmy(@_, \&unop, "length") }
+sub pp_ord { maybe_targmy(@_, \&unop, "ord") }
+sub pp_chr { maybe_targmy(@_, \&unop, "chr") }
 
 sub pp_each { unop(@_, "each") }
 sub pp_values { unop(@_, "values") }
@@ -905,19 +925,19 @@ sub pp_tell { unop(@_, "tell") }
 sub pp_getsockname { unop(@_, "getsockname") }
 sub pp_getpeername { unop(@_, "getpeername") }
 
-sub pp_chdir { unop(@_, "chdir") }
-sub pp_chroot { unop(@_, "chroot") }
+sub pp_chdir { maybe_targmy(@_, \&unop, "chdir") }
+sub pp_chroot { maybe_targmy(@_, \&unop, "chroot") }
 sub pp_readlink { unop(@_, "readlink") }
-sub pp_rmdir { unop(@_, "rmdir") }
+sub pp_rmdir { maybe_targmy(@_, \&unop, "rmdir") }
 sub pp_readdir { unop(@_, "readdir") }
 sub pp_telldir { unop(@_, "telldir") }
 sub pp_rewinddir { unop(@_, "rewinddir") }
 sub pp_closedir { unop(@_, "closedir") }
-sub pp_getpgrp { unop(@_, "getpgrp") }
+sub pp_getpgrp { maybe_targmy(@_, \&unop, "getpgrp") }
 sub pp_localtime { unop(@_, "localtime") }
 sub pp_gmtime { unop(@_, "gmtime") }
 sub pp_alarm { unop(@_, "alarm") }
-sub pp_sleep { unop(@_, "sleep") }
+sub pp_sleep { maybe_targmy(@_, \&unop, "sleep") }
 
 sub pp_dofile { unop(@_, "do") }
 sub pp_entereval { unop(@_, "eval") }
@@ -1060,7 +1080,7 @@ sub pp_ucfirst { dq_unop(@_, "ucfirst") }
 sub pp_lcfirst { dq_unop(@_, "lcfirst") }
 sub pp_uc { dq_unop(@_, "uc") }
 sub pp_lc { dq_unop(@_, "lc") }
-sub pp_quotemeta { dq_unop(@_, "quotemeta") }
+sub pp_quotemeta { maybe_targmy(@_, \&dq_unop, "quotemeta") }
 
 sub loopex {
     my $self = shift;
@@ -1234,23 +1254,23 @@ sub binop {
     return $self->maybe_parens("$left $opname$eq $right", $cx, $prec);
 }
 
-sub pp_add { binop(@_, "+", 18, ASSIGN) }
-sub pp_multiply { binop(@_, "*", 19, ASSIGN) }
-sub pp_subtract { binop(@_, "-",18,  ASSIGN) }
-sub pp_divide { binop(@_, "/", 19, ASSIGN) }
-sub pp_modulo { binop(@_, "%", 19, ASSIGN) }
-sub pp_i_add { binop(@_, "+", 18, ASSIGN) }
-sub pp_i_multiply { binop(@_, "*", 19, ASSIGN) }
-sub pp_i_subtract { binop(@_, "-", 18, ASSIGN) }
-sub pp_i_divide { binop(@_, "/", 19, ASSIGN) }
-sub pp_i_modulo { binop(@_, "%", 19, ASSIGN) }
-sub pp_pow { binop(@_, "**", 22, ASSIGN) }
+sub pp_add { maybe_targmy(@_, \&binop, "+", 18, ASSIGN) }
+sub pp_multiply { maybe_targmy(@_, \&binop, "*", 19, ASSIGN) }
+sub pp_subtract { maybe_targmy(@_, \&binop, "-",18,  ASSIGN) }
+sub pp_divide { maybe_targmy(@_, \&binop, "/", 19, ASSIGN) }
+sub pp_modulo { maybe_targmy(@_, \&binop, "%", 19, ASSIGN) }
+sub pp_i_add { maybe_targmy(@_, \&binop, "+", 18, ASSIGN) }
+sub pp_i_multiply { maybe_targmy(@_, \&binop, "*", 19, ASSIGN) }
+sub pp_i_subtract { maybe_targmy(@_, \&binop, "-", 18, ASSIGN) }
+sub pp_i_divide { maybe_targmy(@_, \&binop, "/", 19, ASSIGN) }
+sub pp_i_modulo { maybe_targmy(@_, \&binop, "%", 19, ASSIGN) }
+sub pp_pow { maybe_targmy(@_, \&binop, "**", 22, ASSIGN) }
 
-sub pp_left_shift { binop(@_, "<<", 17, ASSIGN) }
-sub pp_right_shift { binop(@_, ">>", 17, ASSIGN) }
-sub pp_bit_and { binop(@_, "&", 13, ASSIGN) }
-sub pp_bit_or { binop(@_, "|", 12, ASSIGN) }
-sub pp_bit_xor { binop(@_, "^", 12, ASSIGN) }
+sub pp_left_shift { maybe_targmy(@_, \&binop, "<<", 17, ASSIGN) }
+sub pp_right_shift { maybe_targmy(@_, \&binop, ">>", 17, ASSIGN) }
+sub pp_bit_and { maybe_targmy(@_, \&binop, "&", 13, ASSIGN) }
+sub pp_bit_or { maybe_targmy(@_, \&binop, "|", 12, ASSIGN) }
+sub pp_bit_xor { maybe_targmy(@_, \&binop, "^", 12, ASSIGN) }
 
 sub pp_eq { binop(@_, "==", 14) }
 sub pp_ne { binop(@_, "!=", 14) }
@@ -1281,7 +1301,8 @@ sub pp_aassign { binop(@_, "=", 7, SWAP_CHILDREN) }
 # `.' is special because concats-of-concats are optimized to save copying
 # by making all but the first concat stacked. The effect is as if the
 # programmer had written `($a . $b) .= $c', except legal.
-sub pp_concat {
+sub pp_concat { maybe_targmy(@_, \&real_concat) }
+sub real_concat {
     my $self = shift;
     my($op, $cx) = @_;
     my $left = $op->first;
@@ -1370,6 +1391,9 @@ sub logop {
 
 sub pp_and { logop(@_, "and", 3, "&&", 11, "if") }
 sub pp_or  { logop(@_, "or",  2, "||", 10, "unless") }
+
+# xor is syntactically a logop, but it's really a binop (contrary to
+# old versions of opcode.pl). Syntax is what matters here.
 sub pp_xor { logop(@_, "xor", 2, "",   0,  "") }
 
 sub logassignop {
@@ -1407,20 +1431,20 @@ sub listop {
 }
 
 sub pp_bless { listop(@_, "bless") }
-sub pp_atan2 { listop(@_, "atan2") }
+sub pp_atan2 { maybe_targmy(@_, \&listop, "atan2") }
 sub pp_substr { maybe_local(@_, listop(@_, "substr")) }
 sub pp_vec { maybe_local(@_, listop(@_, "vec")) }
-sub pp_index { listop(@_, "index") }
-sub pp_rindex { listop(@_, "rindex") }
-sub pp_sprintf { listop(@_, "sprintf") }
+sub pp_index { maybe_targmy(@_, \&listop, "index") }
+sub pp_rindex { maybe_targmy(@_, \&listop, "rindex") }
+sub pp_sprintf { maybe_targmy(@_, \&listop, "sprintf") }
 sub pp_formline { listop(@_, "formline") } # see also deparse_format
-sub pp_crypt { listop(@_, "crypt") }
+sub pp_crypt { maybe_targmy(@_, \&listop, "crypt") }
 sub pp_unpack { listop(@_, "unpack") }
 sub pp_pack { listop(@_, "pack") }
-sub pp_join { listop(@_, "join") }
+sub pp_join { maybe_targmy(@_, \&listop, "join") }
 sub pp_splice { listop(@_, "splice") }
-sub pp_push { listop(@_, "push") }
-sub pp_unshift { listop(@_, "unshift") }
+sub pp_push { maybe_targmy(@_, \&listop, "push") }
+sub pp_unshift { maybe_targmy(@_, \&listop, "unshift") }
 sub pp_reverse { listop(@_, "reverse") }
 sub pp_warn { listop(@_, "warn") }
 sub pp_die { listop(@_, "die") }
@@ -1443,7 +1467,7 @@ sub pp_recv { listop(@_, "recv") }
 sub pp_seek { listop(@_, "seek") }
 sub pp_fcntl { listop(@_, "fcntl") }
 sub pp_ioctl { listop(@_, "ioctl") }
-sub pp_flock { listop(@_, "flock") }
+sub pp_flock { maybe_targmy(@_, \&listop, "flock") }
 sub pp_socket { listop(@_, "socket") }
 sub pp_sockpair { listop(@_, "sockpair") }
 sub pp_bind { listop(@_, "bind") }
@@ -1453,23 +1477,23 @@ sub pp_accept { listop(@_, "accept") }
 sub pp_shutdown { listop(@_, "shutdown") }
 sub pp_gsockopt { listop(@_, "getsockopt") }
 sub pp_ssockopt { listop(@_, "setsockopt") }
-sub pp_chown { listop(@_, "chown") }
-sub pp_unlink { listop(@_, "unlink") }
-sub pp_chmod { listop(@_, "chmod") }
-sub pp_utime { listop(@_, "utime") }
-sub pp_rename { listop(@_, "rename") }
-sub pp_link { listop(@_, "link") }
-sub pp_symlink { listop(@_, "symlink") }
-sub pp_mkdir { listop(@_, "mkdir") }
+sub pp_chown { maybe_targmy(@_, \&listop, "chown") }
+sub pp_unlink { maybe_targmy(@_, \&listop, "unlink") }
+sub pp_chmod { maybe_targmy(@_, \&listop, "chmod") }
+sub pp_utime { maybe_targmy(@_, \&listop, "utime") }
+sub pp_rename { maybe_targmy(@_, \&listop, "rename") }
+sub pp_link { maybe_targmy(@_, \&listop, "link") }
+sub pp_symlink { maybe_targmy(@_, \&listop, "symlink") }
+sub pp_mkdir { maybe_targmy(@_, \&listop, "mkdir") }
 sub pp_open_dir { listop(@_, "opendir") }
 sub pp_seekdir { listop(@_, "seekdir") }
-sub pp_waitpid { listop(@_, "waitpid") }
-sub pp_system { listop(@_, "system") }
-sub pp_exec { listop(@_, "exec") }
-sub pp_kill { listop(@_, "kill") }
-sub pp_setpgrp { listop(@_, "setpgrp") }
-sub pp_getpriority { listop(@_, "getpriority") }
-sub pp_setpriority { listop(@_, "setpriority") }
+sub pp_waitpid { maybe_targmy(@_, \&listop, "waitpid") }
+sub pp_system { maybe_targmy(@_, \&listop, "system") }
+sub pp_exec { maybe_targmy(@_, \&listop, "exec") }
+sub pp_kill { maybe_targmy(@_, \&listop, "kill") }
+sub pp_setpgrp { maybe_targmy(@_, \&listop, "setpgrp") }
+sub pp_getpriority { maybe_targmy(@_, \&listop, "getpriority") }
+sub pp_setpriority { maybe_targmy(@_, \&listop, "setpriority") }
 sub pp_shmget { listop(@_, "shmget") }
 sub pp_shmctl { listop(@_, "shmctl") }
 sub pp_shmread { listop(@_, "shmread") }
@@ -1547,8 +1571,7 @@ sub indirop {
 	$expr = $self->deparse($kid, 6);
 	push @exprs, $expr;
     }
-    return $self->maybe_parens_func($name,
-				    $indir . join(", ", @exprs),
+    return $self->maybe_parens_func($name, $indir . join(", ", @exprs),
 				    $cx, 5);
 }
 
@@ -1911,6 +1934,24 @@ sub pp_rv2av {
     }
  }
 
+sub is_subscriptable {
+    my $op = shift;
+    if ($op->name =~ /^[ahg]elem/) {
+	return 1;
+    } elsif ($op->name eq "entersub") {
+	my $kid = $op->first;
+	return 0 unless null $kid->sibling;
+	$kid = $kid->first;
+	$kid = $kid->sibling until null $kid->sibling;
+	return 0 if is_scope($kid);
+	$kid = $kid->first;
+	return 0 if $kid->name eq "gv";
+	return 0 if is_scalar($kid);
+	return is_subscriptable($kid);	
+    } else {
+	return 0;
+    }
+}
 
 sub elem {
     my $self = shift;
@@ -1927,8 +1968,7 @@ sub elem {
 	$array = $self->deparse($array, 24);
     } else {
 	# $x[20][3]{hi} or expr->[20]
-	my $arrow;
-	$arrow = "->" if $array->name !~ /^[ah]elem$/;
+	my $arrow = is_subscriptable($array) ? "" : "->";
 	return $self->deparse($array, 24) . $arrow .
 	    $left . $self->deparse($idx, 1) . $right;
     }
@@ -1985,10 +2025,8 @@ sub slice {
     return "\@" . $array . $left . $list . $right;
 }
 
-sub pp_aslice { maybe_local(@_, slice(@_, "[", "]", 
-				      "rv2av", "padav")) }
-sub pp_hslice { maybe_local(@_, slice(@_, "{", "}",
-				      "rv2hv", "padhv")) }
+sub pp_aslice { maybe_local(@_, slice(@_, "[", "]", "rv2av", "padav")) }
+sub pp_hslice { maybe_local(@_, slice(@_, "{", "}", "rv2hv", "padhv")) }
 
 sub pp_lslice {
     my $self = shift;
@@ -2028,7 +2066,7 @@ sub method {
 	# as the left side of -> always is, while in the former
 	# the list is in list context as method arguments always are.
 	# (Good thing there aren't method prototypes!)
-	$meth = $kid->sibling->first;
+	$meth = $kid->sibling;
 	$kid = $kid->first->sibling; # skip pushmark
 	$obj = $kid;
 	$kid = $kid->sibling;
@@ -2041,13 +2079,20 @@ sub method {
 	for (; not null $kid->sibling; $kid = $kid->sibling) {
 	    push @exprs, $self->deparse($kid, 6);
 	}
-	$meth = $kid->first;
+	$meth = $kid;
     }
     $obj = $self->deparse($obj, 24);
-    if ($meth->name eq "const") {
-	$meth = $meth->sv->PV; # needs to be bare
+    if ($meth->name eq "method_named") {
+	$meth = $meth->sv->PV;
     } else {
-	$meth = $self->deparse($meth, 1);
+	$meth = $meth->first;
+	if ($meth->name eq "const") {
+	    # As of 5.005_58, this case is probably obsoleted by the
+	    # method_named case above
+	    $meth = $meth->sv->PV; # needs to be bare
+	} else {
+	    $meth = $self->deparse($meth, 1);
+	}
     }
     my $args = join(", ", @exprs);	
     $kid = $obj . "->" . $meth;
@@ -2168,7 +2213,8 @@ sub pp_entersub {
 	$kid = $self->deparse($kid, 24);
     } else {
 	$prefix = "";
-	$kid = $self->deparse($kid, 24) . "->";
+	my $arrow = is_subscriptable($kid->first) ? "" : "->";
+	$kid = $self->deparse($kid, 24) . $arrow;
     }
     my $args;
     if (defined $proto and not $amper) {
@@ -2345,13 +2391,14 @@ sub pp_backtick {
 sub dquote {
     my $self = shift;
     my($op, $cx) = shift;
-    return $self->deparse($op->first->sibling, $cx) if $self->{'unquote'};
-    # skip ex-stringify, pushmark
-    return single_delim("qq", '"', $self->dq($op->first->sibling)); 
+    my $kid = $op->first->sibling; # skip ex-stringify, pushmark
+    return $self->deparse($kid, $cx) if $self->{'unquote'};
+    $self->maybe_targmy($kid, $cx,
+			sub {single_delim("qq", '"', $self->dq($_[1]))});
 }
 
 # OP_STRINGIFY is a listop, but it only ever has one arg
-sub pp_stringify { dquote(@_) }
+sub pp_stringify { maybe_targmy(@_, \&dquote) }
 
 # tr/// and s/// (and tr[][], tr[]//, tr###, etc)
 # note that tr(from)/to/ is OK, but not tr/from/(to)

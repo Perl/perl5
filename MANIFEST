@@ -35,7 +35,7 @@ README			The Instructions
 README.amiga		Notes about AmigaOS port
 README.apollo		Notes about Apollo DomainOS port
 README.beos		Notes about BeOS port
-README.cygwin32		Notes about Cygwin32 port
+README.cygwin		Notes about Cygwin port
 README.dos		Notes about dos/djgpp port
 README.epoc		Notes about EPOC port
 README.hpux		Notes about HP-UX port
@@ -68,14 +68,9 @@ configure.com		Configure-equivalent for VMS
 configure.gnu		Crude emulation of GNU configure
 cop.h			Control operator header
 cv.h			Code value header
-cygwin32/Makefile.SHs	Shared library generation for Cygwin32 port
-cygwin32/ld2.in		ld wrapper template for Cygwin32 port
-cygwin32/perlld.in	dll generator template for Cygwin32 port
-cygwin32/build-instructions.charles-wilson	Cygwin32 porters notes
-cygwin32/build-instructions.READFIRST		Cygwin32 porters notes
-cygwin32/build-instructions.steven-morlock2	Cygwin32 porters notes
-cygwin32/build-instructions.sebastien-barre	Cygwin32 porters notes
-cygwin32/build-instructions.steven-morlock	Cygwin32 porters notes
+cygwin/Makefile.SHs	Shared library generation for Cygwin port
+cygwin/ld2.in		ld wrapper template for Cygwin port
+cygwin/perlld.in	dll generator template for Cygwin port
 deb.c			Debugging routines
 djgpp/config.over       DOS/DJGPP port
 djgpp/configure.bat     DOS/DJGPP port
@@ -231,7 +226,7 @@ ext/DynaLoader/Makefile.PL	Dynamic Loader makefile writer
 ext/DynaLoader/README		Dynamic Loader notes and intro
 ext/DynaLoader/dl_aix.xs	AIX implementation
 ext/DynaLoader/dl_beos.xs	BeOS implementation
-ext/DynaLoader/dl_cygwin32.xs	Cygwin32 implementation
+ext/DynaLoader/dl_cygwin.xs	Cygwin implementation
 ext/DynaLoader/dl_dld.xs	GNU dld style implementation
 ext/DynaLoader/dl_dlopen.xs	BSD/SunOS4&5 dlopen() style implementation
 ext/DynaLoader/dl_hpux.xs	HP-UX implementation
@@ -419,7 +414,7 @@ hints/broken-db.msg	Warning message for systems with broken DB library
 hints/bsdos.sh		Hints for named architecture
 hints/convexos.sh	Hints for named architecture
 hints/cxux.sh		Hints for named architecture
-hints/cygwin32.sh	Hints for named architecture
+hints/cygwin.sh		Hints for named architecture
 hints/dcosx.sh		Hints for named architecture
 hints/dec_osf.sh	Hints for named architecture
 hints/dgux.sh		Hints for named architecture

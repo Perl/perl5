@@ -3,8 +3,8 @@
  DB_File.xs -- Perl 5 interface to Berkeley DB 
 
  written by Paul Marquess <Paul.Marquess@btinternet.com>
- last modified 6th June 1999
- version 1.67
+ last modified 22nd July 1999
+ version 1.68
 
  All comments/suggestions/problems are welcome
 
@@ -69,6 +69,8 @@
         1.67 -  Backed off the use of newSVpvn.
 		Fixed DBM Filter code for Perl 5.004.
 		Fixed a small memory leak in the filter code.
+        1.68 -  fixed backward compatability bug with R_IAFTER & R_IBEFORE
+		merged in the 5.005_58 changes
 
 
 
@@ -79,10 +81,10 @@
 #include "XSUB.h"
 
 #ifndef PERL_VERSION
-#include "patchlevel.h"
-#define PERL_REVISION	5
-#define PERL_VERSION	PATCHLEVEL
-#define PERL_SUBVERSION	SUBVERSION
+#    include "patchlevel.h"
+#    define PERL_REVISION	5
+#    define PERL_VERSION	PATCHLEVEL
+#    define PERL_SUBVERSION	SUBVERSION
 #endif
 
 #if PERL_REVISION == 5 && (PERL_VERSION < 4 || (PERL_VERSION == 4 && PERL_SUBVERSION <= 75 ))
@@ -94,7 +96,7 @@
 
 /* DEFSV appears first in 5.004_56 */
 #ifndef DEFSV
-#define DEFSV		GvSV(defgv)
+#    define DEFSV		GvSV(defgv)
 #endif
 
 /* Being the Berkeley DB we prefer the <sys/cdefs.h> (which will be
@@ -107,9 +109,20 @@
    be defined here. This clashes with a field name in db.h, so get rid of it.
  */
 #ifdef op
-#undef op
+#    undef op
 #endif
 #include <db.h>
+
+#ifndef pTHX
+#    define pTHX
+#    define pTHX_
+#    define aTHX
+#    define aTHX_
+#endif
+
+#ifndef newSVpvn
+#    define newSVpvn(a,b)	newSVpv(a,b)
+#endif
 
 #include <fcntl.h> 
 
@@ -123,12 +136,12 @@
 /* map version 2 features & constants onto their version 1 equivalent */
 
 #ifdef DB_Prefix_t
-#undef DB_Prefix_t
+#    undef DB_Prefix_t
 #endif
 #define DB_Prefix_t	size_t
 
 #ifdef DB_Hash_t
-#undef DB_Hash_t
+#    undef DB_Hash_t
 #endif
 #define DB_Hash_t	u_int32_t
 
@@ -148,7 +161,7 @@ typedef db_recno_t	recno_t;
 #define R_NEXT          DB_NEXT
 #define R_NOOVERWRITE   DB_NOOVERWRITE
 #define R_PREV          DB_PREV
-#define R_SETCURSOR     0
+#define R_SETCURSOR     (-1 )
 #define R_RECNOSYNC     0
 #define R_FIXEDLEN	DB_FIXEDLEN
 #define R_DUP		DB_DUP
@@ -357,21 +370,57 @@ static DBTKEY empty ;
 #ifdef DB_VERSION_MAJOR
 
 static int
+#ifdef CAN_PROTOTYPE
 db_put(DB_File db, DBTKEY key, DBT value, u_int flags)
+#else
+db_put(db, key, value, flags)
+DB_File		db ;
+DBTKEY		key ;
+DBT		value ;
+u_int		flags ;
+#endif
 {
     int status ;
 
-    if (flagSet(flags, R_CURSOR)) {
-	status = ((db->cursor)->c_del)(db->cursor, 0);
-	if (status != 0)
-	    return status ;
-
-#if DB_VERSION_MAJOR == 2 && DB_VERSION_MINOR < 5
-	flags &= ~R_CURSOR ;
+    if (flagSet(flags, R_IAFTER) || flagSet(flags, R_IBEFORE)) {
+        DBC * temp_cursor ;
+	DBT l_key, l_value;
+        
+#if DB_VERSION_MAJOR == 2 && DB_VERSION_MINOR < 6
+        if (((db->dbp)->cursor)(db->dbp, NULL, &temp_cursor) != 0)
 #else
-	flags &= ~DB_OPFLAGS_MASK ;
+        if (((db->dbp)->cursor)(db->dbp, NULL, &temp_cursor, 0) != 0)
 #endif
+	    return (-1) ;
 
+	memset(&l_key, 0, sizeof(l_key));
+	l_key.data = key.data;
+	l_key.size = key.size;
+	memset(&l_value, 0, sizeof(l_value));
+	l_value.data = value.data;
+	l_value.size = value.size;
+
+	if ( temp_cursor->c_get(temp_cursor, &l_key, &l_value, DB_SET) != 0) {
+	    (void)temp_cursor->c_close(temp_cursor);
+	    return (-1);
+	}
+
+	status = temp_cursor->c_put(temp_cursor, &key, &value, flags);
+	(void)temp_cursor->c_close(temp_cursor);
+	    
+        return (status) ;
+    }	
+    
+    
+    if (flagSet(flags, R_CURSOR)) {
+	return ((db->cursor)->c_put)(db->cursor, &key, &value, DB_CURRENT);
+    }
+
+    if (flagSet(flags, R_SETCURSOR)) {
+	if ((db->dbp)->put(db->dbp, NULL, &key, &value, 0) != 0)
+		return -1 ;
+        return ((db->cursor)->c_get)(db->cursor, &key, &value, DB_SET_RANGE);
+    
     }
 
     return ((db->dbp)->put)(db->dbp, NULL, &key, &value, flags) ;
@@ -412,9 +461,17 @@ GetVersionInfo(pTHX)
 
 
 static int
+#ifdef CAN_PROTOTYPE
 btree_compare(const DBT *key1, const DBT *key2)
+#else
+btree_compare(key1, key2)
+const DBT * key1 ;
+const DBT * key2 ;
+#endif
 {
+#ifdef dTHX
     dTHX;
+#endif    
     dSP ;
     void * data1, * data2 ;
     int retval ;
@@ -423,6 +480,7 @@ btree_compare(const DBT *key1, const DBT *key2)
     data1 = key1->data ;
     data2 = key2->data ;
 
+#ifndef newSVpvn
     /* As newSVpv will assume that the data pointer is a null terminated C 
        string if the size parameter is 0, make sure that data points to an 
        empty string if the length is 0
@@ -431,14 +489,15 @@ btree_compare(const DBT *key1, const DBT *key2)
         data1 = "" ; 
     if (key2->size == 0)
         data2 = "" ;
+#endif	
 
     ENTER ;
     SAVETMPS;
 
     PUSHMARK(SP) ;
     EXTEND(SP,2) ;
-    PUSHs(sv_2mortal(newSVpv(data1,key1->size)));
-    PUSHs(sv_2mortal(newSVpv(data2,key2->size)));
+    PUSHs(sv_2mortal(newSVpvn(data1,key1->size)));
+    PUSHs(sv_2mortal(newSVpvn(data2,key2->size)));
     PUTBACK ;
 
     count = perl_call_sv(CurrentDB->compare, G_SCALAR); 
@@ -458,9 +517,17 @@ btree_compare(const DBT *key1, const DBT *key2)
 }
 
 static DB_Prefix_t
+#ifdef CAN_PROTOTYPE
 btree_prefix(const DBT *key1, const DBT *key2)
+#else
+btree_prefix(key1, key2)
+const DBT * key1 ;
+const DBT * key2 ;
+#endif
 {
+#ifdef dTHX
     dTHX;
+#endif    
     dSP ;
     void * data1, * data2 ;
     int retval ;
@@ -469,6 +536,7 @@ btree_prefix(const DBT *key1, const DBT *key2)
     data1 = key1->data ;
     data2 = key2->data ;
 
+#ifndef newSVpvn
     /* As newSVpv will assume that the data pointer is a null terminated C 
        string if the size parameter is 0, make sure that data points to an 
        empty string if the length is 0
@@ -477,14 +545,15 @@ btree_prefix(const DBT *key1, const DBT *key2)
         data1 = "" ;
     if (key2->size == 0)
         data2 = "" ;
+#endif	
 
     ENTER ;
     SAVETMPS;
 
     PUSHMARK(SP) ;
     EXTEND(SP,2) ;
-    PUSHs(sv_2mortal(newSVpv(data1,key1->size)));
-    PUSHs(sv_2mortal(newSVpv(data2,key2->size)));
+    PUSHs(sv_2mortal(newSVpvn(data1,key1->size)));
+    PUSHs(sv_2mortal(newSVpvn(data2,key2->size)));
     PUTBACK ;
 
     count = perl_call_sv(CurrentDB->prefix, G_SCALAR); 
@@ -504,15 +573,25 @@ btree_prefix(const DBT *key1, const DBT *key2)
 }
 
 static DB_Hash_t
+#ifdef CAN_PROTOTYPE
 hash_cb(const void *data, size_t size)
+#else
+hash_cb(data, size)
+const void * data ;
+size_t size ;
+#endif
 {
+#ifdef dTHX
     dTHX;
+#endif    
     dSP ;
     int retval ;
     int count ;
 
+#ifndef newSVpvn
     if (size == 0)
         data = "" ;
+#endif	
 
      /* DGH - Next two lines added to fix corrupted stack problem */
     ENTER ;
@@ -520,7 +599,7 @@ hash_cb(const void *data, size_t size)
 
     PUSHMARK(SP) ;
 
-    XPUSHs(sv_2mortal(newSVpv((char*)data,size)));
+    XPUSHs(sv_2mortal(newSVpvn((char*)data,size)));
     PUTBACK ;
 
     count = perl_call_sv(CurrentDB->hash, G_SCALAR); 
@@ -543,7 +622,12 @@ hash_cb(const void *data, size_t size)
 #ifdef TRACE
 
 static void
+#ifdef CAN_PROTOTYPE
 PrintHash(INFO *hash)
+#else
+PrintHash(hash)
+INFO * hash ;
+#endif
 {
     printf ("HASH Info\n") ;
     printf ("  hash      = %s\n", 
@@ -557,7 +641,12 @@ PrintHash(INFO *hash)
 }
 
 static void
+#ifdef CAN_PROTOTYPE
 PrintRecno(INFO *recno)
+#else
+PrintRecno(recno)
+INFO * recno ;
+#endif
 {
     printf ("RECNO Info\n") ;
     printf ("  flags     = %d\n", recno->db_RE_flags) ;
@@ -570,7 +659,12 @@ PrintRecno(INFO *recno)
 }
 
 static void
+#ifdef CAN_PROTOTYPE
 PrintBtree(INFO *btree)
+#else
+PrintBtree(btree)
+INFO * btree ;
+#endif
 {
     printf ("BTREE Info\n") ;
     printf ("  compare    = %s\n", 
@@ -597,7 +691,12 @@ PrintBtree(INFO *btree)
 
 
 static I32
+#ifdef CAN_PROTOTYPE
 GetArrayLength(pTHX_ DB_File db)
+#else
+GetArrayLength(db)
+DB_File db ;
+#endif
 {
     DBT		key ;
     DBT		value ;
@@ -615,7 +714,13 @@ GetArrayLength(pTHX_ DB_File db)
 }
 
 static recno_t
+#ifdef CAN_PROTOTYPE
 GetRecnoKey(pTHX_ DB_File db, I32 value)
+#else
+GetRecnoKey(db, value)
+DB_File  db ;
+I32      value ;
+#endif
 {
     if (value < 0) {
 	/* Get the length of the array */
@@ -634,7 +739,16 @@ GetRecnoKey(pTHX_ DB_File db, I32 value)
 }
 
 static DB_File
+#ifdef CAN_PROTOTYPE
 ParseOpenInfo(pTHX_ int isHASH, char *name, int flags, int mode, SV *sv)
+#else
+ParseOpenInfo(isHASH, name, flags, mode, sv)
+int    isHASH ;
+char * name ;
+int    flags ;
+int    mode ;
+SV *   sv ;
+#endif
 {
     SV **	svp;
     HV *	action ;
@@ -904,7 +1018,13 @@ ParseOpenInfo(pTHX_ int isHASH, char *name, int flags, int mode, SV *sv)
 
 
 static double 
+#ifdef CAN_PROTOTYPE
 constant(char *name, int arg)
+#else
+constant(name, arg)
+char *name;
+int arg;
+#endif
 {
     errno = 0;
     switch (*name) {

@@ -75,7 +75,427 @@ indicator:
 
 
 ----------------
-Version 5.005_58        Development release working toward 5.006
+Version 5.005_59        Development release working toward 5.006
+----------------
+
+____________________________________________________________________________
+[  3849] By: gsar                                  on 1999/08/01  19:50:20
+        Log: notes on PERL_IMPLICIT_CONTEXT (from a version by Nathan Torkington
+             <gnat@frii.com>)
+     Branch: perl
+	   ! perl.h pod/perldelta.pod pod/perlguts.pod
+____________________________________________________________________________
+[  3848] By: gsar                                  on 1999/08/01  18:34:41
+        Log: fix defined(@foo) encarpments
+     Branch: perl
+	   ! ext/B/B/C.pm lib/CGI.pm lib/Dumpvalue.pm lib/dumpvar.pl
+	   ! pod/perltrap.pod
+____________________________________________________________________________
+[  3847] By: jhi                                   on 1999/08/01  17:17:07
+        Log: Undo #3790 and the patches that attempted to fix it
+             (#3837, #3838, #3845).  The #3790 caused linkage failures
+             and/or core dumps in Solaris 2.6, Digital UNIX 4.0D, and
+             IRIX 6.5.
+     Branch: cfgperl
+	   - ext/SDBM_File/hints/dec_osf.pl ext/SDBM_File/hints/solaris.pl
+	   ! MANIFEST ext/SDBM_File/Makefile.PL lib/ExtUtils/MM_Unix.pm
+	   ! lib/ExtUtils/MakeMaker.pm os2/OS2/REXX/Makefile.PL perl.h
+____________________________________________________________________________
+[  3846] By: jhi                                   on 1999/08/01  11:41:52
+        Log: Reading 64-bit decimal numbers was broken because
+             the NV was cast to an I32, not an IV.
+     Branch: cfgperl
+	   ! toke.c
+____________________________________________________________________________
+[  3845] By: jhi                                   on 1999/08/01  11:00:24
+        Log: Solaris doesn't like PERL_MALLOC_OK in SDBM_File.
+     Branch: cfgperl
+	   + ext/SDBM_File/hints/solaris.pl
+____________________________________________________________________________
+[  3844] By: jhi                                   on 1999/08/01  10:55:44
+        Log: Enable Solaris largefiles support only if -Duse64bits is used.
+             (Effectively removes #3311).
+     Branch: cfgperl
+	   ! hints/solaris_2.sh
+____________________________________________________________________________
+[  3843] By: jhi                                   on 1999/07/31  22:44:56
+        Log: Integer overflow iteration.
+     Branch: cfgperl
+	   ! t/op/oct.t toke.c util.c
+____________________________________________________________________________
+[  3842] By: jhi                                   on 1999/07/31  22:11:03
+        Log: Remove a lot of unused regnode codes.
+             Noticed by Ilya.
+     Branch: cfgperl
+	   ! regcomp.c regcomp.sym regexec.c regnodes.h
+____________________________________________________________________________
+[  3841] By: jhi                                   on 1999/07/31  21:53:54
+        Log: Make the use64bits and usethreads friendlier/braver;
+             they no more wimp out if the platform is unknown.
+             On use64bits if gcc used -DUSE_LONG_LONG is added
+             to the ccflags (this dependency on gcc caused a slightly weird
+             reordering of Configure, but things still seem to work.)
+     Branch: cfgperl
+	   ! Configure README.threads config_h.SH
+     Branch: metaconfig
+	   ! U/threads/usethreads.U
+     Branch: metaconfig/U/perl
+	   ! use64bits.U
+____________________________________________________________________________
+[  3840] By: jhi                                   on 1999/07/31  20:26:22
+        Log: Hack the "integer overflow" code some more.
+     Branch: cfgperl
+	   ! perl.h toke.c util.c
+____________________________________________________________________________
+[  3839] By: jhi                                   on 1999/07/31  20:22:00
+        Log: Test oct() at the 2^32-1 limit.
+     Branch: cfgperl
+	   ! t/op/oct.t
+____________________________________________________________________________
+[  3838] By: jhi                                   on 1999/07/31  20:08:43
+        Log: Update MANIFEST for #3837.
+     Branch: cfgperl
+	   ! MANIFEST
+____________________________________________________________________________
+[  3837] By: jhi                                   on 1999/07/31  20:02:40
+        Log: Digital UNIX 4.0D doesn't like perl malloc on sdbm
+             (a core dump with a corrput stack ensues).
+     Branch: cfgperl
+	   + ext/SDBM_File/hints/dec_osf.pl
+____________________________________________________________________________
+[  3836] By: jhi                                   on 1999/07/29  21:09:01
+        Log: Allow for Configure -Ubincompat5005 override.
+     Branch: cfgperl
+	   ! Configure config_h.SH
+     Branch: metaconfig/U/perl
+	   ! bincompat5005.U
+____________________________________________________________________________
+[  3835] By: jhi                                   on 1999/07/29  21:04:02
+        Log: Make Configure support PERL_BINCOMPAT_5005.
+     Branch: cfgperl
+	   ! Configure Porting/Glossary Porting/config.sh Porting/config_H
+	   ! config_h.SH
+     Branch: metaconfig/U/perl
+	   + bincompat5005.U
+____________________________________________________________________________
+[  3834] By: jhi                                   on 1999/07/29  19:25:35
+        Log: AIX tweak, need reported by David R. Fravor <dfavor@austin.ibm.com> 
+     Branch: cfgperl
+	   ! Makefile.SH
+____________________________________________________________________________
+[  3833] By: jhi                                   on 1999/07/29  14:07:09
+        Log: Integrate with Sarathy.  I overruled on perldelta
+             and perldiag.
+     Branch: cfgperl
+	  !> README.win32 emacs/cperl-mode.el globals.c installperl
+	  !> iperlsys.h makedef.pl perl.h pod/perldelta.pod
+	  !> pod/perldiag.pod pod/perllexwarn.pod toke.c utils/perldoc.PL
+	  !> win32/Makefile win32/bin/pl2bat.pl win32/makefile.mk
+	  !> win32/perllib.c win32/win32.c
+____________________________________________________________________________
+[  3832] By: jhi                                   on 1999/07/29  14:02:50
+        Log: Repent and make overly large integerish
+             constants non-fatal.  They are now promoted
+             to NVs, accompanied by an overflow warning that
+             is by default on.
+     Branch: cfgperl
+	   ! embed.pl global.sym pod/perldelta.pod pod/perldiag.pod pp.c
+	   ! proto.h t/op/oct.t t/pragma/warn/6default t/pragma/warn/util
+	   ! toke.c util.c
+____________________________________________________________________________
+[  3831] By: jhi                                   on 1999/07/29  11:40:04
+        Log: AIX exhibits different error on failed system().
+             Slightly modified patch via private email from
+             David R. Favor <dfavor@austin.ibm.com>
+     Branch: cfgperl
+	   ! t/op/exec.t
+____________________________________________________________________________
+[  3830] By: gsar                                  on 1999/07/29  07:46:11
+        Log: cperl-mode.el v4.19
+     Branch: perl
+	   ! emacs/cperl-mode.el
+____________________________________________________________________________
+[  3829] By: gsar                                  on 1999/07/29  07:30:35
+        Log: From: jan.dubois@ibm.net (Jan Dubois)
+             Date: Wed, 28 Jul 1999 22:01:42 +0200
+             Message-ID: <37aa5f9b.12941448@smtp1.ibm.net>
+             Subject: [PATCH 5.005_58] win32/bin/pl2bat.pl doesn't work correctly
+     Branch: perl
+	   ! win32/bin/pl2bat.pl
+____________________________________________________________________________
+[  3828] By: gsar                                  on 1999/07/29  07:19:27
+        Log: tweak previous change for multiple hits
+     Branch: perl
+	   ! utils/perldoc.PL
+____________________________________________________________________________
+[  3827] By: gsar                                  on 1999/07/29  07:10:00
+        Log: band-aid for perldoc -t broken-ness (the new Pod::Text
+             really needs a pod2text() compatibility function)
+     Branch: perl
+	   ! utils/perldoc.PL
+____________________________________________________________________________
+[  3826] By: gsar                                  on 1999/07/29  01:33:46
+        Log: minor tweaks to pods and toke.c comments
+     Branch: perl
+	   ! pod/perldelta.pod pod/perldiag.pod pod/perllexwarn.pod toke.c
+____________________________________________________________________________
+[  3825] By: gsar                                  on 1999/07/29  00:12:52
+        Log: integrate cfgperl changes into mainline
+     Branch: perl
+	  !> Configure Porting/Glossary Porting/config.sh Porting/config_H
+	  !> README.threads config_h.SH ext/IO/lib/IO/Handle.pm
+	  !> ext/IO/lib/IO/Socket.pm ext/IO/lib/IO/Socket/INET.pm
+	  !> ext/POSIX/POSIX.xs lib/ExtUtils/Install.pm perl.h
+	  !> pod/perldelta.pod pod/perldiag.pod pod/perlfunc.pod
+	  !> pod/perllexwarn.pod pod/perlre.pod pp.c pp_sys.c
+	  !> t/lib/io_unix.t t/op/oct.t t/pragma/warn/6default
+	  !> t/pragma/warn/util toke.c util.c
+____________________________________________________________________________
+[  3824] By: jhi                                   on 1999/07/28  21:15:04
+        Log: Tiny patch to go over #3820 (via private mail from Lincoln).
+     Branch: cfgperl
+	   ! ext/IO/lib/IO/Handle.pm ext/IO/lib/IO/Socket.pm
+	   ! ext/IO/lib/IO/Socket/INET.pm
+____________________________________________________________________________
+[  3823] By: jhi                                   on 1999/07/28  20:29:17
+        Log: Continue pack() doc honing.
+     Branch: cfgperl
+	   ! pod/perlfunc.pod
+____________________________________________________________________________
+[  3822] By: jhi                                   on 1999/07/28  20:17:37
+        Log: Enhance pack() doc.
+     Branch: cfgperl
+	   ! pod/perlfunc.pod
+____________________________________________________________________________
+[  3821] By: jhi                                   on 1999/07/28  18:34:50
+        Log: UNIX Domain Sockets are not implemented under QNX.
+             
+             From: Norton Allen <allen@huarp.harvard.edu>
+             To: perl5-porters@perl.org
+             Subject: [ID 19990728.010] Patch:t/lib/io_unix.t _58 QNX
+             Date: Wed, 28 Jul 1999 14:07:16 -0400 (edt)
+             Message-Id: <199907281807.OAA13167@bottesini.harvard.edu>
+     Branch: cfgperl
+	   ! t/lib/io_unix.t
+____________________________________________________________________________
+[  3820] By: jhi                                   on 1999/07/28  18:13:37
+        Log: IO::* enhancements.
+             
+             1) write() and syswrite() will now accept a single-argument
+             form of the call, for consistency with Perl's syswrite().
+             2) You can create a TCP-based IO::Socket::INET without forcing
+             a connect attempt.  This allows you to configure its options
+             (like making it non-blocking) and then call connect() manually.
+             3) Fixed a bug that prevented the IO::Socket::protocol() accessor
+             from ever returning the correct value.
+             
+             From: Lincoln Stein <lstein@formaggio.cshl.org>
+             To: Graham Barr <gbarr@pobox.com>
+             Cc: Lincoln Stein <lstein@cshl.org>, perl5-porters@perl.org
+             Subject: Re: patch for IO::*
+             Date: Wed, 28 Jul 1999 13:55:05 -0400 (EDT)
+             Message-ID: <14239.17401.330408.145295@formaggio.cshl.org>
+     Branch: cfgperl
+	   ! ext/IO/lib/IO/Handle.pm ext/IO/lib/IO/Socket.pm
+	   ! ext/IO/lib/IO/Socket/INET.pm
+____________________________________________________________________________
+[  3819] By: gsar                                  on 1999/07/28  18:08:06
+        Log: misc PERL_OBJECT tweaks; perlcore.dll is now perl56.dll
+     Branch: perl
+	   ! README.win32 globals.c installperl iperlsys.h makedef.pl
+	   ! perl.h win32/Makefile win32/makefile.mk win32/perllib.c
+	   ! win32/win32.c
+____________________________________________________________________________
+[  3818] By: jhi                                   on 1999/07/28  17:48:16
+        Log: Need to add QNX to the list for DONT_DECLARE_STD.
+             (The elimination of use of the _() macro apparently triggered
+             an incompatability with a #define of atof)
+             
+             From: Norton Allen <allen@huarp.harvard.edu>
+             To: perl5-porters@perl.org
+             Subject: [ID 19990728.008] Patch:perl.h _58 QNX
+             Date: Wed, 28 Jul 1999 13:06:23 -0400 (edt)
+             Message-Id: <199907281706.NAA07617@bottesini.harvard.edu>
+     Branch: cfgperl
+	   ! perl.h
+____________________________________________________________________________
+[  3817] By: jhi                                   on 1999/07/28  17:46:30
+        Log: Need to add some more conditions to deal with the case
+             defined(HAS_GETSPNAM) && ! defined(HAS_GETSPENT)
+             which is true for QNX4.
+             From: Norton Allen <allen@huarp.harvard.edu>
+             To: perl5-porters@perl.org
+             Subject: [ID 19990728.009] Patch:pp_sys.c _58 QNX
+             Date: Wed, 28 Jul 1999 13:08:42 -0400 (edt)
+             Message-Id: <199907281708.NAA07947@bottesini.harvard.edu>
+     Branch: cfgperl
+	   ! pp_sys.c
+____________________________________________________________________________
+[  3816] By: jhi                                   on 1999/07/28  17:43:40
+        Log: The QNX shell needs a couple more semicolons.
+             
+             From: Norton Allen <allen@huarp.harvard.edu>
+             To: perl5-porters@perl.org
+             Subject: [ID 19990728.007] Patch:Configure _58 QNX
+             Date: Wed, 28 Jul 1999 13:03:00 -0400 (edt)
+             Message-Id: <199907281703.NAA07363@bottesini.harvard.edu>
+             
+             plus silence metalint moanings on vendorprefix.
+     Branch: cfgperl
+	   ! Configure Porting/Glossary Porting/config.sh Porting/config_H
+	   ! config_h.SH
+____________________________________________________________________________
+[  3815] By: jhi                                   on 1999/07/28  17:31:11
+        Log: Silence metalint on vendorprefix.U.
+     Branch: metaconfig
+	   ! U/installdirs/vendorprefix.U
+____________________________________________________________________________
+[  3814] By: jhi                                   on 1999/07/28  17:13:29
+        Log: QNX shell needs more semicolons.
+     Branch: metaconfig/U/perl
+	   ! Extensions.U
+____________________________________________________________________________
+[  3813] By: jhi                                   on 1999/07/28  17:05:08
+        Log: Integrate with Sarathy.
+     Branch: cfgperl
+	  !> lib/ExtUtils/MM_Unix.pm
+____________________________________________________________________________
+[  3812] By: jhi                                   on 1999/07/28  16:20:17
+        Log: Fix a typo, un-shout, and reformat the installation output.
+     Branch: cfgperl
+	   ! lib/ExtUtils/Install.pm
+____________________________________________________________________________
+[  3811] By: gsar                                  on 1999/07/28  15:41:11
+        Log: fix typo that caused INSTALLPRIVLIB to have doubled 'perl5'
+     Branch: perl
+	   ! lib/ExtUtils/MM_Unix.pm
+____________________________________________________________________________
+[  3810] By: jhi                                   on 1999/07/28  13:55:57
+        Log: Talk more about subsecond things in perlfunc.
+             (Yes, redundant with perlfaq8.)
+     Branch: cfgperl
+	   ! pod/perlfunc.pod
+____________________________________________________________________________
+[  3809] By: jhi                                   on 1999/07/28  07:23:48
+        Log: Integrate with Sarathy.
+     Branch: cfgperl
+	  !> configpm hints/freebsd.sh lib/Pod/Html.pm perl.h t/op/grent.t
+	  !> t/op/pwent.t
+____________________________________________________________________________
+[  3808] By: jhi                                   on 1999/07/28  07:23:03
+        Log: Document toke.c.
+             From: Nathan Torkington <gnat@frii.com>
+             To: perl5-porters@perl.org
+             Subject: Re: toke.c patch, work in progress
+             Date: Tue, 27 Jul 1999 23:02:09 -0600 (MDT)
+             Message-ID: <14238.36561.979473.667842@localhost.frii.com>
+     Branch: cfgperl
+	   ! toke.c
+____________________________________________________________________________
+[  3807] By: jhi                                   on 1999/07/28  07:10:56
+        Log: perlre clarification.
+             
+             From: Ian Phillipps <ian@dial.pipex.com>
+             To: Perl 5 Porters <perl5-porters@perl.org>
+             Subject: [PATCH 5.00557] Add definite article to perlre.pod
+             Date: Tue, 27 Jul 1999 10:46:29 +0100
+             Message-ID: <19990727104629.A10074@homer.diplex.co.uk>
+     Branch: cfgperl
+	   ! pod/perlre.pod
+____________________________________________________________________________
+[  3806] By: gsar                                  on 1999/07/28  07:07:46
+        Log: fix the perl -V breakage
+             
+             From: Ilya Zakharevich <ilya@math.ohio-state.edu>
+             To: Jarkko Hietaniemi <jhi@iki.fi>
+             Cc: "John L. Allen" <allen@grumman.com>, perl5-porters@perl.org,
+             gsar@activestate.com
+             Subject: Re: Follow up to: _58 on AIX 431
+             Date: Tue, 27 Jul 1999 17:42:00 -0400
+             Message-ID: <19990727174200.A12775@monk.mps.ohio-state.edu>
+     Branch: perl
+	   ! configpm
+____________________________________________________________________________
+[  3805] By: gsar                                  on 1999/07/28  07:03:34
+        Log: avoid warning (from Doug MacEachern)
+     Branch: perl
+	   ! perl.h
+____________________________________________________________________________
+[  3804] By: gsar                                  on 1999/07/28  06:59:30
+        Log: Pod::Html tweak
+             
+             From: jan.dubois@ibm.net (Jan Dubois)
+             To: perl5-porters@perl.org
+             Subject: [PATCH 5.005_58] pod2html: Missing chunk for VMS filenames
+             Date: Tue, 27 Jul 1999 22:14:12 +0200
+             Message-ID: <37a50af0.46171380@smtp1.ibm.net>
+     Branch: perl
+	   ! lib/Pod/Html.pm
+____________________________________________________________________________
+[  3803] By: gsar                                  on 1999/07/28  06:56:38
+        Log: freebsd hints update
+             
+             From: Anton Berezin <tobez@plab.ku.dk>
+             To: perl5-porters@perl.org
+             Subject: [ID 19990727.034] Not OK: perl 5.00558 on i386-freebsd-thread4.0-current (UNINSTALLED)
+             Date: Tue, 27 Jul 1999 20:29:39 +0200 (CEST)
+             Message-Id: <199907271829.UAA62861@lion.plab.ku.dk>
+     Branch: perl
+	   ! hints/freebsd.sh
+____________________________________________________________________________
+[  3802] By: gsar                                  on 1999/07/28  06:51:32
+        Log: cosmetic testsuite patch
+             
+             From: Graham Barr <gbarr@ti.com>
+             To: Perl5 Porters <perl5-porters@perl.org>
+             Subject: 5.005_58 build
+             Date: Tue, 27 Jul 1999 08:09:25 -0500
+             Message-ID: <19990727080925.F4683@dal.asp.ti.com>
+     Branch: perl
+	   ! t/op/grent.t t/op/pwent.t
+____________________________________________________________________________
+[  3801] By: jhi                                   on 1999/07/27  13:49:39
+        Log: Minuscule cleanup of the integer overflow patch.
+     Branch: cfgperl
+	   ! util.c
+____________________________________________________________________________
+[  3800] By: jhi                                   on 1999/07/27  13:37:23
+        Log: Test hex('x...').
+     Branch: cfgperl
+	   ! t/op/oct.t
+____________________________________________________________________________
+[  3799] By: jhi                                   on 1999/07/27  12:45:45
+        Log: Integrate with Sarathy (5.005_58).
+     Branch: cfgperl
+	   - ext/B/byteperl.c
+	  !> Changes MANIFEST Porting/makerel configpm embed.h embed.pl
+	  !> ext/Devel/DProf/DProf.xs ext/POSIX/POSIX.pm
+	  !> ext/SDBM_File/Makefile.PL lib/AutoLoader.pm
+	  !> lib/ExtUtils/MM_Unix.pm lib/ExtUtils/MakeMaker.pm
+	  !> lib/Pod/Parser.pm lib/SelfLoader.pm os2/OS2/REXX/Makefile.PL
+	  !> perl.h pod/perldelta.pod pod/perlfaq9.pod pod/perlhist.pod
+	  !> win32/bin/pl2bat.pl win32/config_H.bc win32/config_H.gc
+	  !> win32/config_H.vc
+____________________________________________________________________________
+[  3798] By: jhi                                   on 1999/07/27  12:42:43
+        Log: Integer constants (0x, 0[0-7], 0b) now overflow fatally,
+             they used to be just optional lexical warnings.
+             Also, with warnings turned on, constants > 2**32-1
+             trigger a non-portability warning.
+     Branch: cfgperl
+	   ! pod/perldelta.pod pod/perldiag.pod pod/perllexwarn.pod pp.c
+	   ! t/op/oct.t t/pragma/warn/6default t/pragma/warn/util toke.c
+	   ! util.c
+____________________________________________________________________________
+[  3797] By: gsar                                  on 1999/07/27  10:48:27
+        Log: here lies 5.005_58
+     Branch: perl
+	   - ext/B/byteperl.c
+	   ! Changes MANIFEST Porting/makerel pod/perldelta.pod
+	   ! pod/perlfaq9.pod pod/perlhist.pod
+
+----------------
+Version 5.005_58
 ----------------
 
 ____________________________________________________________________________

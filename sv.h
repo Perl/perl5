@@ -692,7 +692,7 @@ struct xpvio {
 
 #define isGV(sv) (SvTYPE(sv) == SVt_PVGV)
 
-#if !defined(DOSISH) || defined(WIN32)
+#if !defined(DOSISH) || defined(WIN32) || defined(OS2)
 #  define SvGROW(sv,len) (SvLEN(sv) < (len) ? sv_grow(sv,len) : SvPVX(sv))
 #  define Sv_Grow sv_grow
 #else

@@ -12,7 +12,7 @@ BEGIN {
 use DB_File; 
 use Fcntl;
 
-print "1..148\n";
+print "1..155\n";
 
 sub ok
 {
@@ -37,6 +37,50 @@ sub lexical
 
     return @a - @b ;
 }
+
+{
+    package Redirect ;
+    use Symbol ;
+
+    sub new
+    {
+        my $class = shift ;
+        my $filename = shift ;
+	my $fh = gensym ;
+	open ($fh, ">$filename") || die "Cannot open $filename: $!" ;
+	my $real_stdout = select($fh) ;
+	return bless [$fh, $real_stdout ] ;
+
+    }
+    sub DESTROY
+    {
+        my $self = shift ;
+	close $self->[0] ;
+	select($self->[1]) ;
+    }
+}
+
+sub docat
+{ 
+    my $file = shift;
+    #local $/ = undef unless wantarray ;
+    open(CAT,$file) || die "Cannot open $file: $!";
+    my @result = <CAT>;
+    close(CAT);
+    wantarray ? @result : join("", @result) ;
+}   
+
+sub docat_del
+{ 
+    my $file = shift;
+    #local $/ = undef unless wantarray ;
+    open(CAT,$file) || die "Cannot open $file: $!";
+    my @result = <CAT>;
+    close(CAT);
+    unlink $file ;
+    wantarray ? @result : join("", @result) ;
+}   
+
 
 my $Dfile = "dbbtree.tmp";
 unlink $Dfile;
@@ -795,5 +839,354 @@ EOM
    unlink $Dfile;
 }
 
+
+{
+   # Examples from the POD
+
+
+  my $file = "xyzt" ;
+  {
+    my $redirect = new Redirect $file ;
+
+    # BTREE example 1
+    ###
+
+    use strict ;
+    use DB_File ;
+
+    my %h ;
+
+    sub Compare
+    {
+        my ($key1, $key2) = @_ ;
+        "\L$key1" cmp "\L$key2" ;
+    }
+
+    # specify the Perl sub that will do the comparison
+    $DB_BTREE->{'compare'} = \&Compare ;
+
+    unlink "tree" ;
+    tie %h, "DB_File", "tree", O_RDWR|O_CREAT, 0640, $DB_BTREE 
+        or die "Cannot open file 'tree': $!\n" ;
+
+    # Add a key/value pair to the file
+    $h{'Wall'} = 'Larry' ;
+    $h{'Smith'} = 'John' ;
+    $h{'mouse'} = 'mickey' ;
+    $h{'duck'}  = 'donald' ;
+
+    # Delete
+    delete $h{"duck"} ;
+
+    # Cycle through the keys printing them in order.
+    # Note it is not necessary to sort the keys as
+    # the btree will have kept them in order automatically.
+    foreach (keys %h)
+      { print "$_\n" }
+
+    untie %h ;
+
+    unlink "tree" ;
+  }  
+
+  delete $DB_BTREE->{'compare'} ;
+
+  ok(149, docat_del($file) eq <<'EOM') ;
+mouse
+Smith
+Wall
+EOM
+   
+  {
+    my $redirect = new Redirect $file ;
+
+    # BTREE example 2
+    ###
+
+    use strict ;
+    use DB_File ;
+
+    use vars qw($filename %h ) ;
+
+    $filename = "tree" ;
+    unlink $filename ;
+ 
+    # Enable duplicate records
+    $DB_BTREE->{'flags'} = R_DUP ;
+ 
+    tie %h, "DB_File", $filename, O_RDWR|O_CREAT, 0640, $DB_BTREE 
+	or die "Cannot open $filename: $!\n";
+ 
+    # Add some key/value pairs to the file
+    $h{'Wall'} = 'Larry' ;
+    $h{'Wall'} = 'Brick' ; # Note the duplicate key
+    $h{'Wall'} = 'Brick' ; # Note the duplicate key and value
+    $h{'Smith'} = 'John' ;
+    $h{'mouse'} = 'mickey' ;
+
+    # iterate through the associative array
+    # and print each key/value pair.
+    foreach (keys %h)
+      { print "$_	-> $h{$_}\n" }
+
+    untie %h ;
+
+    unlink $filename ;
+  }  
+
+  ok(150, docat_del($file) eq ($DB_File::db_version == 1 ? <<'EOM' : <<'EOM') ) ;
+Smith	-> John
+Wall	-> Brick
+Wall	-> Brick
+Wall	-> Brick
+mouse	-> mickey
+EOM
+Smith	-> John
+Wall	-> Larry
+Wall	-> Larry
+Wall	-> Larry
+mouse	-> mickey
+EOM
+
+  {
+    my $redirect = new Redirect $file ;
+
+    # BTREE example 3
+    ###
+
+    use strict ;
+    use DB_File ;
+ 
+    use vars qw($filename $x %h $status $key $value) ;
+
+    $filename = "tree" ;
+    unlink $filename ;
+ 
+    # Enable duplicate records
+    $DB_BTREE->{'flags'} = R_DUP ;
+ 
+    $x = tie %h, "DB_File", $filename, O_RDWR|O_CREAT, 0640, $DB_BTREE 
+	or die "Cannot open $filename: $!\n";
+ 
+    # Add some key/value pairs to the file
+    $h{'Wall'} = 'Larry' ;
+    $h{'Wall'} = 'Brick' ; # Note the duplicate key
+    $h{'Wall'} = 'Brick' ; # Note the duplicate key and value
+    $h{'Smith'} = 'John' ;
+    $h{'mouse'} = 'mickey' ;
+ 
+    # iterate through the btree using seq
+    # and print each key/value pair.
+    $key = $value = 0 ;
+    for ($status = $x->seq($key, $value, R_FIRST) ;
+         $status == 0 ;
+         $status = $x->seq($key, $value, R_NEXT) )
+      {  print "$key	-> $value\n" }
+ 
+ 
+    undef $x ;
+    untie %h ;
+  }
+
+  ok(151, docat_del($file) eq ($DB_File::db_version == 1 ? <<'EOM' : <<'EOM') ) ;
+Smith	-> John
+Wall	-> Brick
+Wall	-> Brick
+Wall	-> Larry
+mouse	-> mickey
+EOM
+Smith	-> John
+Wall	-> Larry
+Wall	-> Brick
+Wall	-> Brick
+mouse	-> mickey
+EOM
+
+
+  {
+    my $redirect = new Redirect $file ;
+
+    # BTREE example 4
+    ###
+
+    use strict ;
+    use DB_File ;
+ 
+    use vars qw($filename $x %h ) ;
+
+    $filename = "tree" ;
+ 
+    # Enable duplicate records
+    $DB_BTREE->{'flags'} = R_DUP ;
+ 
+    $x = tie %h, "DB_File", $filename, O_RDWR|O_CREAT, 0640, $DB_BTREE 
+	or die "Cannot open $filename: $!\n";
+ 
+    my $cnt  = $x->get_dup("Wall") ;
+    print "Wall occurred $cnt times\n" ;
+
+    my %hash = $x->get_dup("Wall", 1) ;
+    print "Larry is there\n" if $hash{'Larry'} ;
+    print "There are $hash{'Brick'} Brick Walls\n" ;
+
+    my @list = sort $x->get_dup("Wall") ;
+    print "Wall =>	[@list]\n" ;
+
+    @list = $x->get_dup("Smith") ;
+    print "Smith =>	[@list]\n" ;
+ 
+    @list = $x->get_dup("Dog") ;
+    print "Dog =>	[@list]\n" ; 
+ 
+    undef $x ;
+    untie %h ;
+  }
+
+  ok(152, docat_del($file) eq <<'EOM') ;
+Wall occurred 3 times
+Larry is there
+There are 2 Brick Walls
+Wall =>	[Brick Brick Larry]
+Smith =>	[John]
+Dog =>	[]
+EOM
+
+  {
+    my $redirect = new Redirect $file ;
+
+    # BTREE example 5
+    ###
+
+    use strict ;
+    use DB_File ;
+ 
+    use vars qw($filename $x %h $found) ;
+
+    my $filename = "tree" ;
+ 
+    # Enable duplicate records
+    $DB_BTREE->{'flags'} = R_DUP ;
+ 
+    $x = tie %h, "DB_File", $filename, O_RDWR|O_CREAT, 0640, $DB_BTREE 
+	or die "Cannot open $filename: $!\n";
+
+    $found = ( $x->find_dup("Wall", "Larry") == 0 ? "" : "not") ; 
+    print "Larry Wall is $found there\n" ;
+    
+    $found = ( $x->find_dup("Wall", "Harry") == 0 ? "" : "not") ; 
+    print "Harry Wall is $found there\n" ;
+    
+    undef $x ;
+    untie %h ;
+  }
+
+  ok(153, docat_del($file) eq <<'EOM') ;
+Larry Wall is  there
+Harry Wall is not there
+EOM
+
+  {
+    my $redirect = new Redirect $file ;
+
+    # BTREE example 6
+    ###
+
+    use strict ;
+    use DB_File ;
+ 
+    use vars qw($filename $x %h $found) ;
+
+    my $filename = "tree" ;
+ 
+    # Enable duplicate records
+    $DB_BTREE->{'flags'} = R_DUP ;
+ 
+    $x = tie %h, "DB_File", $filename, O_RDWR|O_CREAT, 0640, $DB_BTREE 
+	or die "Cannot open $filename: $!\n";
+
+    $x->del_dup("Wall", "Larry") ;
+
+    $found = ( $x->find_dup("Wall", "Larry") == 0 ? "" : "not") ; 
+    print "Larry Wall is $found there\n" ;
+    
+    undef $x ;
+    untie %h ;
+
+    unlink $filename ;
+  }
+
+  ok(154, docat_del($file) eq <<'EOM') ;
+Larry Wall is not there
+EOM
+
+  {
+    my $redirect = new Redirect $file ;
+
+    # BTREE example 7
+    ###
+
+    use strict ;
+    use DB_File ;
+    use Fcntl ;
+
+    use vars qw($filename $x %h $st $key $value) ;
+
+    sub match
+    {
+        my $key = shift ;
+        my $value = 0;
+        my $orig_key = $key ;
+        $x->seq($key, $value, R_CURSOR) ;
+        print "$orig_key\t-> $key\t-> $value\n" ;
+    }
+
+    $filename = "tree" ;
+    unlink $filename ;
+
+    $x = tie %h, "DB_File", $filename, O_RDWR|O_CREAT, 0640, $DB_BTREE
+        or die "Cannot open $filename: $!\n";
+ 
+    # Add some key/value pairs to the file
+    $h{'mouse'} = 'mickey' ;
+    $h{'Wall'} = 'Larry' ;
+    $h{'Walls'} = 'Brick' ; 
+    $h{'Smith'} = 'John' ;
+ 
+
+    $key = $value = 0 ;
+    print "IN ORDER\n" ;
+    for ($st = $x->seq($key, $value, R_FIRST) ;
+	 $st == 0 ;
+         $st = $x->seq($key, $value, R_NEXT) )
+	
+      {  print "$key	-> $value\n" }
+ 
+    print "\nPARTIAL MATCH\n" ;
+
+    match "Wa" ;
+    match "A" ;
+    match "a" ;
+
+    undef $x ;
+    untie %h ;
+
+    unlink $filename ;
+
+  }
+
+  ok(155, docat_del($file) eq <<'EOM') ;
+IN ORDER
+Smith	-> John
+Wall	-> Larry
+Walls	-> Brick
+mouse	-> mickey
+
+PARTIAL MATCH
+Wa	-> Wall	-> Larry
+A	-> Smith	-> John
+a	-> mouse	-> mickey
+EOM
+
+}
 
 exit ;

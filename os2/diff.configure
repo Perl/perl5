@@ -1,6 +1,18 @@
---- Configure	Wed Feb 25 16:52:55 1998
-+++ Configure.os2	Wed Feb 25 16:52:58 1998
-@@ -1602,7 +1602,7 @@
+--- Configure-pre	Sun Jul 25 19:18:02 1999
++++ Configure	Wed Jul 28 17:50:14 1999
+@@ -1528,6 +1528,11 @@ if test X"$trnl" = X; then
+ 	esac
+ fi
+ if test X"$trnl" = X; then
++	case "`echo foo|tr '\r' x 2>/dev/null`" in
++	foox) trnl='\r' ;;
++	esac
++fi
++if test X"$trnl" = X; then
+ 	cat <<EOM >&2
+ 
+ $me: Fatal Error: cannot figure out how to translate newlines with 'tr'.
+@@ -1844,7 +1849,7 @@ for file in $loclist; do
  	*)
  		echo "I don't know where '$file' is, and my life depends on it." >&4
  		echo "Go find a public domain implementation or fix your PATH setting!" >&4
@@ -9,16 +21,16 @@
  		;;
  	esac
  done
-@@ -3637,7 +3637,7 @@
+@@ -3688,7 +3693,7 @@ int main() {
  	exit(0);
  }
  EOM
--if $cc -o gccvers gccvers.c >/dev/null 2>&1; then
-+if $cc -o gccvers gccvers.c $ldflags  >/dev/null 2>&1; then
+-if $cc -o gccvers gccvers.c; then
++if $cc -o gccvers gccvers.c $ldflags; then
  	gccversion=`./gccvers`
  	case "$gccversion" in
  	'') echo "You are not using GNU cc." ;;
-@@ -4434,7 +4434,7 @@
+@@ -4892,7 +4897,7 @@ case "$libc" in
  	esac
  	;;
  esac

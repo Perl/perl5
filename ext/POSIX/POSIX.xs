@@ -105,7 +105,7 @@
    }
 #  define times(t) vms_times(t)
 #else
-#if defined (CYGWIN32)
+#if defined (CYGWIN)
 #    define tzname _tzname
 #    undef MB_CUR_MAX          /* XXX: bug in b20.1 */
 #endif

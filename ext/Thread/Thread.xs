@@ -180,6 +180,7 @@ threadstart(void *arg)
     Safefree(PL_reg_start_tmp);
     SvREFCNT_dec(PL_lastscream);
     SvREFCNT_dec(PL_defoutgv);
+    Safefree(PL_reg_poscache);
 
     MUTEX_LOCK(&thr->mutex);
     DEBUG_S(PerlIO_printf(PerlIO_stderr(),

@@ -355,7 +355,7 @@ sub init {
     # if we get called more than once, we want to initialize
     # ourselves from the original query (which may be gone
     # if it was read from STDIN originally.)
-    if (defined(@QUERY_PARAM) && !defined($initializer)) {
+    if (@QUERY_PARAM && !defined($initializer)) {
 	foreach (@QUERY_PARAM) {
 	    $self->param('-name'=>$_,'-value'=>$QUERY_PARAM{$_});
 	}
@@ -841,7 +841,7 @@ END_OF_FUNC
 sub keywords {
     my($self,@values) = self_or_default(@_);
     # If values is provided, then we set it.
-    $self->{'keywords'}=[@values] if defined(@values);
+    $self->{'keywords'}=[@values] if @values;
     my(@result) = defined($self->{'keywords'}) ? @{$self->{'keywords'}} : ();
     @result;
 }
@@ -1906,14 +1906,14 @@ sub _tableize {
     # rearrange into a pretty table
     $result = "<TABLE>";
     my($row,$column);
-    unshift(@$colheaders,'') if defined(@$colheaders) && defined(@$rowheaders);
-    $result .= "<TR>" if defined(@{$colheaders});
+    unshift(@$colheaders,'') if @$colheaders && @$rowheaders;
+    $result .= "<TR>" if @$colheaders;
     foreach (@{$colheaders}) {
 	$result .= "<TH>$_</TH>";
     }
     for ($row=0;$row<$rows;$row++) {
 	$result .= "<TR>";
-	$result .= "<TH>$rowheaders->[$row]</TH>" if defined(@$rowheaders);
+	$result .= "<TH>$rowheaders->[$row]</TH>" if @$rowheaders;
 	for ($column=0;$column<$columns;$column++) {
 	    $result .= "<TD>" . $elements[$column*$rows + $row] . "</TD>"
 		if defined($elements[$column*$rows + $row]);

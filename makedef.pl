@@ -1,10 +1,11 @@
 #
 # Create the export list for perl.
 #
-# Needed by WIN32 for creating perl.dll and by AIX for creating libperl.a
-# when -Dusershrplib is in effect.
+# Needed by WIN32 and OS/2 for creating perl.dll
+# and by AIX for creating libperl.a when -Dusershrplib is in effect.
 #
 # reads global.sym, pp.sym, perlvars.h, intrpvar.h, thrdvar.h, config.h
+# On OS/2 reads miniperl.map as well
 
 my $PLATFORM;
 my $CCTYPE;
@@ -13,11 +14,12 @@ while (@ARGV)
  {
   my $flag = shift;
   $define{$1} = 1 if ($flag =~ /^-D(\w+)$/);
+  $define{$1} = $2 if ($flag =~ /^-D(\w+)=(.+)$/);
   $CCTYPE   = $1 if ($flag =~ /^CCTYPE=(\w+)$/);
   $PLATFORM = $1 if ($flag =~ /^PLATFORM=(\w+)$/);
  } 
 
-my @PLATFORM = qw(aix win32);
+my @PLATFORM = qw(aix win32 os2);
 my %PLATFORM;
 @PLATFORM{@PLATFORM} = ();
 
@@ -50,6 +52,10 @@ unless ($PLATFORM eq 'win32') {
 	if (/^(?:ccflags|optimize)='(.+)'$/) {
 	    $_ = $1;
 	    $define{$1} = 1 while /-D(\w+)/g;
+	}
+	if ($PLATFORM eq 'os2') {
+	    $CONFIG_ARGS = $1 if /^(?:config_args)='(.+)'$/;
+	    $ARCHNAME = $1 if /^(?:archname)='(.+)'$/;
 	}
     }
     close(CFG);
@@ -93,6 +99,27 @@ if ($PLATFORM eq 'win32') {
 	}
 	print "EXPORTS\n";
     } 
+} elsif ($PLATFORM eq 'os2') {
+    ($v = $]) =~ s/(\d\.\d\d\d)(\d\d)$/$1_$2/;
+    $v .= '-thread' if $ARCHNAME =~ /-thread/;
+    #$sum = 0;
+    #for (split //, $v) {
+    #	$sum = ($sum * 33) + ord;
+    #	$sum &= 0xffffff;
+    #}
+    #$sum += $sum >> 5;
+    #$sum &= 0xffff;
+    #$sum = printf '%X', $sum;
+    ($dll = $define{PERL_DLL}) =~ s/\.dll$//i;
+    # print STDERR "'$dll' <= '$define{PERL_DLL}'\n";
+    print <<"---EOP---";
+LIBRARY '$dll' INITINSTANCE TERMINSTANCE
+DESCRIPTION '\@#perl5-porters\@perl.org:$v#\@ Perl interpreter, configured as $CONFIG_ARGS'
+STACKSIZE 32768
+CODE LOADONCALL
+DATA LOADONCALL NONSHARED MULTIPLE
+EXPORTS
+---EOP---
 } elsif ($PLATFORM eq 'aix') {
     print "#!\n";
 }
@@ -187,6 +214,48 @@ PL_cryptseen
 PL_opsave
 PL_statusvalue_vms
 PL_sys_intern
+)]);
+}
+
+if ($PLATFORM eq 'os2') {
+    emit_symbols([qw(
+ctermid
+get_sysinfo
+Perl_OS2_init
+OS2_Perl_data
+dlopen
+dlsym
+dlerror
+my_tmpfile
+my_tmpnam
+my_flock
+malloc_mutex
+threads_mutex
+nthreads
+nthreads_cond
+os2_cond_wait
+pthread_join
+pthread_create
+pthread_detach
+XS_Cwd_change_drive
+XS_Cwd_current_drive
+XS_Cwd_extLibpath
+XS_Cwd_extLibpath_set
+XS_Cwd_sys_abspath
+XS_Cwd_sys_chdir
+XS_Cwd_sys_cwd
+XS_Cwd_sys_is_absolute
+XS_Cwd_sys_is_relative
+XS_Cwd_sys_is_rooted
+XS_DynaLoader_mod2fname
+XS_File__Copy_syscopy
+Perl_Register_MQ
+Perl_Deregister_MQ
+Perl_Serve_Messages
+Perl_Process_Messages
+init_PMWIN_entries
+PMWIN_entries
+Perl_hab_GET
 )]);
 }
 
@@ -554,6 +623,14 @@ win32_os_id
 	try_symbol($symbol);
     }
 }
+elsif ($PLATFORM eq 'os2') {
+  open MAP, 'miniperl.map' or die 'Cannot read miniperl.map';
+  /^\s*[\da-f:]+\s+(\w+)/i and $mapped{$1}++ foreach <MAP>;
+  close MAP or die 'Cannot close miniperl.map';
+  
+  @missing = grep { !exists $mapped{$_} } keys %export;
+  delete $export{$_} foreach @missing;
+}
 
 # Now all symbols should be defined because
 # next we are going to output them.
@@ -595,6 +672,8 @@ sub output_symbol {
 #	    print "\t$symbol\n";
 #	    print "\t_$symbol = $symbol\n";
 #	}
+    } elsif ($PLATFORM eq 'os2') {
+	print qq(    "$symbol"\n);
     } elsif ($PLATFORM eq 'aix') {
 	print "$symbol\n";
     }

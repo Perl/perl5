@@ -26,18 +26,18 @@ addtopath=`pwd`
 $spitshell >>Makefile <<!GROK!THIS!
 
 # shell script feeding perlld to decent perl
-ld2: $& Makefile perlld ${src}/cygwin32/ld2.in
+ld2: $& Makefile perlld ${src}/cygwin/ld2.in
 	@echo "extracting ld2 (with variable substitutions)"
-	@$sed s,@buildpath@,$addtopath,g <${src}/cygwin32/ld2.in >ld2
+	@$sed s,@buildpath@,$addtopath,g <${src}/cygwin/ld2.in >ld2
 	@echo "installing ld2 into $installbin"
 # install is included in Cygwin distributions, and we make a note of th
-# requirement in the README.cygwin32 file. However, let's give them
+# requirement in the README.cygwin file. However, let's give them
 # a warning.
 	@if test -n "`type $1 2>&1 | sed -n -e '/'$1'$/p'`" ; then \
 		install -c -m 755 ld2 ${installbin}/ld2 ; \
 	else \
 		echo "*************************************************" ; \
-		echo "Oh, no! You didn't read the README.cygwin32" ; \
+		echo "Oh, no! You didn't read the README.cygwin" ; \
 		echo "file, which stated that \"install\" was required." ; \
 		echo "Make will probably fail in a few more steps." ; \
 		echo "When it does, copy \"ld2\" to a directory in" ; \
@@ -67,14 +67,14 @@ EXPORT_ALL = 1
 DEF_EXT = .def
 EXP_EXT = .exp
 
-perlld: $& Makefile ${src}/cygwin32/perlld.in
+perlld: $& Makefile ${src}/cygwin/perlld.in
 	@echo "extracting perlld (with variable substitutions)"
 	@$sed -e s,@CC@,\${CC}, -e s,@DLLWRAP@,\${DLLWRAP},g \\
 	-e s,@WRAPDRIVER@,\${WRAPDRIVER},g -e s,@DLLTOOL@,\${DLLTOOL},g \\
 	-e s,@AS@,\${AS},g -e s,@EXPORT_ALL@,\${EXPORT_ALL},g \\
 	-e s,@DEF_EXT@,\${DEF_EXT},g -e s,@EXP_EXT@,\${EXP_EXT},g \\
 	-e s,@LIB_EXT@,\${LIB_EXT},g \\
-	${src}/cygwin32/perlld.in >perlld
+	${src}/cygwin/perlld.in >perlld
 
 !GROK!THIS!
 

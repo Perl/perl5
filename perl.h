@@ -23,6 +23,9 @@
 #define VOIDUSED 1
 #include "config.h"
 
+/* See L<perlguts/"The Perl API"> for detailed notes on
+ * PERL_IMPLICIT_CONTEXT and PERL_IMPLICIT_SYS */
+
 /* XXXXXX testing threads via implicit pointer */
 #ifdef USE_THREADS
 #  ifndef PERL_IMPLICIT_CONTEXT
@@ -1049,6 +1052,8 @@ Free_t   Perl_mfree (Malloc_t where);
 #    undef IV_IS_QUAD
 #    undef UV_IS_QUAD
 #  endif
+#  define UV_SIZEOF LONGSIZE
+#  define IV_SIZEOF LONGSIZE
 #endif
 
 #ifdef USE_LONG_DOUBLE
@@ -1457,6 +1462,10 @@ typedef union any ANY;
 #   endif
 #endif
 
+#if defined(OS2)
+#  include "iperlsys.h"
+#endif
+
 #if defined(__OPEN_VM)
 # include "vmesa/vmesaish.h"
 #endif
@@ -1656,7 +1665,7 @@ typedef pthread_key_t	perl_key;
 #   endif
 #endif
 
-#if defined(CYGWIN32)
+#if defined(CYGWIN)
 /* USEMYBINMODE
  *   This symbol, if defined, indicates that the program should
  *   use the routine my_binmode(FILE *fp, char iotype) to insure
@@ -1665,7 +1674,7 @@ typedef pthread_key_t	perl_key;
  */
 #  define USEMYBINMODE / **/
 #  define my_binmode(fp, iotype) \
-            (PerlLIO_setmode(PerlIO_fileno(fp), O_BINARY) != -1 ? TRUE : NULL)
+            (PerlLIO_setmode(PerlIO_fileno(fp), O_BINARY) != -1 ? TRUE : FALSE)
 #endif
 
 #ifdef UNION_ANY_DEFINITION
@@ -1686,25 +1695,15 @@ union any {
 #define ARGSproto
 #endif /* USE_THREADS */
 
-#if defined(CYGWIN32)
-/* USEMYBINMODE
- *   This symbol, if defined, indicates that the program should
- *   use the routine my_binmode(FILE *fp, char iotype) to insure
- *   that a file is in "binary" mode -- that is, that no translation
- *   of bytes occurs on read or write operations.
- */
-#define USEMYBINMODE / **/
-#define my_binmode(fp, iotype) \
-        (PerlLIO_setmode(PerlIO_fileno(fp), O_BINARY) != -1 ? TRUE : FALSE)
-#endif
-
 typedef I32 (*filter_t) (pTHXo_ int, SV *, int);
 
 #define FILTER_READ(idx, sv, len)  filter_read(idx, sv, len)
 #define FILTER_DATA(idx)	   (AvARRAY(PL_rsfp_filters)[idx])
 #define FILTER_ISREADER(idx)	   (idx >= AvFILLp(PL_rsfp_filters))
 
-#include "iperlsys.h"
+#if !defined(OS2)
+#  include "iperlsys.h"
+#endif
 #include "regexp.h"
 #include "sv.h"
 #include "util.h"
@@ -1745,25 +1744,7 @@ struct _sublex_info {
 
 typedef struct magic_state MGS;	/* struct magic_state defined in mg.c */
 
-/* Length of a variant. */
-
-typedef struct {
-    I32 len_min;
-    I32 len_delta;
-    I32 pos_min;
-    I32 pos_delta;
-    SV *last_found;
-    I32 last_end;			/* min value, <0 unless valid. */
-    I32 last_start_min;
-    I32 last_start_max;
-    SV **longest;			/* Either &l_fixed, or &l_float. */
-    SV *longest_fixed;
-    I32 offset_fixed;
-    SV *longest_float;
-    I32 offset_float_min;
-    I32 offset_float_max;
-    I32 flags;
-} scan_data_t;
+struct scan_data_t;		/* Used in S_* functions in regcomp.c */
 
 typedef I32 CHECKPOINT;
 
@@ -2509,7 +2490,7 @@ struct perl_vars {
 EXT struct perl_vars PL_Vars;
 EXT struct perl_vars *PL_VarsPtr INIT(&PL_Vars);
 #else /* PERL_CORE */
-#if !defined(__GNUC__) || !(defined(WIN32) || defined(CYGWIN32))
+#if !defined(__GNUC__) || !(defined(WIN32) || defined(CYGWIN))
 EXT
 #endif /* WIN32 */
 struct perl_vars *PL_VarsPtr;

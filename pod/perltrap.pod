@@ -761,6 +761,9 @@ Hashes get defined before use
     # perl4 prints:
     # perl5 dies: hash %h defined
 
+Perl will now generate a warning when it sees defined(@a) and
+defined(%h).
+
 =item * (Globs)
 
 glob assignment from variable to variable will fail if the assigned

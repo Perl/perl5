@@ -303,7 +303,7 @@ ext.libs: $(static_ext)
 # Load up custom Makefile.SH fragment for shared loading and executables:
 case "$osname" in
 cygwin*)
-	Makefile_s="cygwin32/Makefile.SHs"
+	Makefile_s="cygwin/Makefile.SHs"
 	;;
 *)
 	Makefile_s="$osname/Makefile.SHs"
@@ -354,6 +354,16 @@ PERLEXPORT		= perl.exp
 perl.exp: $(MINIPERLEXP) makedef.pl config.sh $(SYM) $(SYMH)
 	./$(MINIPERLEXP) makedef.pl PLATFORM=aix | sort -u | sort -f > perl.exp.tmp
 	sh mv-if-diff perl.exp.tmp perl.exp
+
+!NO!SUBS!
+	;;
+os2)
+	$spitshell >>Makefile <<'!NO!SUBS!'
+MINIPERLEXP		= miniperl
+
+perl5.def: $(MINIPERLEXP) makedef.pl config.sh $(SYM) $(SYMH) miniperl.map
+	./$(MINIPERLEXP) makedef.pl PLATFORM=os2 -DPERL_DLL=$(PERL_DLL) > perl.exp.tmp
+	sh mv-if-diff perl.exp.tmp perl5.def
 
 !NO!SUBS!
 	;;

@@ -507,6 +507,7 @@ perl_destruct(pTHXx)
     Safefree(PL_reg_start_tmp);
     if (PL_reg_curpm)
 	Safefree(PL_reg_curpm);
+    Safefree(PL_reg_poscache);
     Safefree(HeKEY_hek(&PL_hv_fetch_ent_mh));
     Safefree(PL_op_mask);
     nuke_stacks();

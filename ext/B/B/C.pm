@@ -1207,7 +1207,7 @@ sub mark_package
   {    
    no strict 'refs';
    $unused_sub_packages{$package} = 1;
-   if (defined(@{$package.'::ISA'}))
+   if (@{$package.'::ISA'})
     {
      foreach my $isa (@{$package.'::ISA'}) 
       {

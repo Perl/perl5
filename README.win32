@@ -32,7 +32,7 @@ particular, you can safely ignore any information that talks about
 "Configure".
 
 You may also want to look at two other options for building
-a perl that will work on Windows NT:  the README.cygwin32 and
+a perl that will work on Windows NT:  the README.cygwin and
 README.os2 files, which each give a different set of rules to build
 a Perl that will work on Win32 platforms.  Those two methods will
 probably enable you to build a more Unix-compatible perl, but you

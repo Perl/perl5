@@ -91,7 +91,7 @@ sub stringify {
   { no strict 'refs';
     $_ = &{'overload::StrVal'}($_)
       if $self->{bareStringify} and ref $_
-	and defined %overload:: and defined &{'overload::StrVal'};
+	and %overload:: and defined &{'overload::StrVal'};
   }
 
   if ($tick eq 'auto') {
@@ -162,7 +162,7 @@ sub unwrap {
     my $val = $v;
     { no strict 'refs';
       $val = &{'overload::StrVal'}($v)
-	if defined %overload:: and defined &{'overload::StrVal'};
+	if %overload:: and defined &{'overload::StrVal'};
     }
     ($address) = $val =~ /(0x[0-9a-f]+)\)$/ ;
     if (!$self->{dumpReused} && defined $address) {
@@ -324,12 +324,12 @@ sub dumpglob {
     print( (' ' x $off) . "\$", &unctrl($key), " = " );
     $self->DumpElem($stab, 3+$off);
   }
-  if (($key !~ /^_</ or $self->{dumpDBFiles}) and defined @stab) {
+  if (($key !~ /^_</ or $self->{dumpDBFiles}) and @stab) {
     print( (' ' x $off) . "\@$key = (\n" );
     $self->unwrap(\@stab,3+$off) ;
     print( (' ' x $off) .  ")\n" );
   }
-  if ($key ne "main::" && $key ne "DB::" && defined %stab
+  if ($key ne "main::" && $key ne "DB::" && %stab
       && ($self->{dumpPackages} or $key !~ /::$/)
       && ($key !~ /^_</ or $self->{dumpDBFiles})
       && !($package eq "Dumpvalue" and $key eq "stab")) {
@@ -361,7 +361,7 @@ sub dumpsub {
 
 sub findsubs {
   my $self = shift;
-  return undef unless defined %DB::sub;
+  return undef unless %DB::sub;
   my ($addr, $name, $loc);
   while (($name, $loc) = each %DB::sub) {
     $addr = \&$name;
@@ -444,9 +444,9 @@ sub globUsage {			# glob ref, name
   local *stab = *{$_[0]};
   my $total = 0;
   $total += $self->scalarUsage($stab) if defined $stab;
-  $total += $self->arrayUsage(\@stab, $_[1]) if defined @stab;
+  $total += $self->arrayUsage(\@stab, $_[1]) if @stab;
   $total += $self->hashUsage(\%stab, $_[1]) 
-    if defined %stab and $_[1] ne "main::" and $_[1] ne "DB::";	
+    if %stab and $_[1] ne "main::" and $_[1] ne "DB::";	
   #and !($package eq "Dumpvalue" and $key eq "stab"));
   $total;
 }

@@ -1795,7 +1795,7 @@ Perl_vwarner(pTHX_ U32  err, const char* pat, va_list* args)
 }
 
 #ifndef VMS  /* VMS' my_setenv() is in VMS.c */
-#if !defined(WIN32) && !defined(CYGWIN32)
+#if !defined(WIN32) && !defined(CYGWIN)
 void
 Perl_my_setenv(pTHX_ char *nam, char *val)
 {
@@ -1860,8 +1860,8 @@ Perl_my_setenv(pTHX_ char *nam, char *val)
 #endif  /* PERL_USE_SAFE_PUTENV */
 }
 
-#else /* WIN32 || CYGWIN32 */
-#if defined(CYGWIN32)
+#else /* WIN32 || CYGWIN */
+#if defined(CYGWIN)
 /*
  * Save environ of perl.exe, currently Cygwin links in separate environ's
  * for each exe/dll.  Probably should be a member of impure_ptr.
@@ -2559,7 +2559,7 @@ Perl_my_pclose(pTHX_ PerlIO *ptr)
 }
 #endif /* !DOSISH */
 
-#if  !defined(DOSISH) || defined(OS2) || defined(WIN32) || defined(CYGWIN32)
+#if  !defined(DOSISH) || defined(OS2) || defined(WIN32)
 I32
 Perl_wait4pid(pTHX_ int pid, int *statusp, int flags)
 {
@@ -2946,6 +2946,29 @@ Perl_scan_hex(pTHX_ char *start, I32 len, I32 *retlen)
 				"Illegal hexadecimal digit '%c' ignored", *s);
 		break;
 	    }
+	}
+	if (!overflowed) {
+	    register UV xuv = ruv << 4;
+
+	    if ((xuv >> 4) != ruv) {
+		dTHR;
+		overflowed = TRUE;
+		rnv = (NV) ruv;
+		if (ckWARN_d(WARN_UNSAFE))
+		    Perl_warner(aTHX_ WARN_UNSAFE,
+				"Integer overflow in hexadecimal number");
+	    } else
+		ruv = xuv | ((hexdigit - PL_hexdigit) & 15);
+	}
+	if (overflowed) {
+	    rnv *= 16.0;
+	    /* If an NV has not enough bits in its mantissa to
+	     * represent an UV this summing of small low-order numbers
+	     * is a waste of time (because the NV cannot preserve
+	     * the low-order bits anyway): we could just remember when
+	     * did we overflow and in the end just multiply rnv by the
+	     * right amount of 16-tuples. */
+	    rnv += (NV)((hexdigit - PL_hexdigit) & 15);
 	}
 	if (!overflowed) {
 	    register UV xuv = ruv << 4;

@@ -38,6 +38,49 @@ sub ok
     return $result ;
 }
 
+{
+    package Redirect ;
+    use Symbol ;
+
+    sub new
+    {
+        my $class = shift ;
+        my $filename = shift ;
+	my $fh = gensym ;
+	open ($fh, ">$filename") || die "Cannot open $filename: $!" ;
+	my $real_stdout = select($fh) ;
+	return bless [$fh, $real_stdout ] ;
+
+    }
+    sub DESTROY
+    {
+        my $self = shift ;
+	close $self->[0] ;
+	select($self->[1]) ;
+    }
+}
+
+sub docat
+{
+    my $file = shift;
+    local $/ = undef;
+    open(CAT,$file) || die "Cannot open $file:$!";
+    my $result = <CAT>;
+    close(CAT);
+    return $result;
+}
+
+sub docat_del
+{ 
+    my $file = shift;
+    local $/ = undef;
+    open(CAT,$file) || die "Cannot open $file: $!";
+    my $result = <CAT>;
+    close(CAT);
+    unlink $file ;
+    return $result;
+}   
+
 sub bad_one
 {
     print STDERR <<EOM unless $bad_ones++ ;
@@ -56,7 +99,7 @@ sub bad_one
 EOM
 }
 
-print "1..124\n";
+print "1..126\n";
 
 my $Dfile = "recno.tmp";
 unlink $Dfile ;
@@ -208,16 +251,6 @@ undef $X ;
 untie(@h);
 
 unlink $Dfile;
-
-sub docat
-{
-    my $file = shift;
-    local $/ = undef;
-    open(CAT,$file) || die "Cannot open $file:$!";
-    my $result = <CAT>;
-    close(CAT);
-    return $result;
-}
 
 
 {
@@ -636,6 +669,171 @@ EOM
    undef $db ;
    untie @h;
    unlink $Dfile;
+}
+
+
+{
+   # Examples from the POD
+
+  my $file = "xyzt" ;
+  {
+    my $redirect = new Redirect $file ;
+
+    use strict ;
+    use DB_File ;
+
+    my $filename = "text" ;
+    unlink $filename ;
+
+    my @h ;
+    my $x = tie @h, "DB_File", $filename, O_RDWR|O_CREAT, 0640, $DB_RECNO 
+        or die "Cannot open file 'text': $!\n" ;
+
+    # Add a few key/value pairs to the file
+    $h[0] = "orange" ;
+    $h[1] = "blue" ;
+    $h[2] = "yellow" ;
+
+    $FA ? push @h, "green", "black" 
+        : $x->push("green", "black") ;
+
+    my $elements = $FA ? scalar @h : $x->length ;
+    print "The array contains $elements entries\n" ;
+
+    my $last = $FA ? pop @h : $x->pop ;
+    print "popped $last\n" ;
+
+    $FA ? unshift @h, "white" 
+        : $x->unshift("white") ;
+    my $first = $FA ? shift @h : $x->shift ;
+    print "shifted $first\n" ;
+
+    # Check for existence of a key
+    print "Element 1 Exists with value $h[1]\n" if $h[1] ;
+
+    # use a negative index
+    print "The last element is $h[-1]\n" ;
+    print "The 2nd last element is $h[-2]\n" ;
+
+    undef $x ;
+    untie @h ;
+
+    unlink $filename ;
+  }  
+
+  ok(125, docat_del($file) eq <<'EOM') ;
+The array contains 5 entries
+popped black
+shifted white
+Element 1 Exists with value blue
+The last element is green
+The 2nd last element is yellow
+EOM
+
+  my $save_output = "xyzt" ;
+  {
+    my $redirect = new Redirect $save_output ;
+
+    use strict ;
+    use vars qw(@h $H $file $i) ;
+    use DB_File ;
+    use Fcntl ;
+    
+    $file = "text" ;
+
+    unlink $file ;
+
+    $H = tie @h, "DB_File", $file, O_RDWR|O_CREAT, 0640, $DB_RECNO 
+        or die "Cannot open file $file: $!\n" ;
+    
+    # first create a text file to play with
+    $h[0] = "zero" ;
+    $h[1] = "one" ;
+    $h[2] = "two" ;
+    $h[3] = "three" ;
+    $h[4] = "four" ;
+
+    
+    # Print the records in order.
+    #
+    # The length method is needed here because evaluating a tied
+    # array in a scalar context does not return the number of
+    # elements in the array.  
+
+    print "\nORIGINAL\n" ;
+    foreach $i (0 .. $H->length - 1) {
+        print "$i: $h[$i]\n" ;
+    }
+
+    # use the push & pop methods
+    $a = $H->pop ;
+    $H->push("last") ;
+    print "\nThe last record was [$a]\n" ;
+
+    # and the shift & unshift methods
+    $a = $H->shift ;
+    $H->unshift("first") ;
+    print "The first record was [$a]\n" ;
+
+    # Use the API to add a new record after record 2.
+    $i = 2 ;
+    $H->put($i, "Newbie", R_IAFTER) ;
+
+    # and a new record before record 1.
+    $i = 1 ;
+    $H->put($i, "New One", R_IBEFORE) ;
+
+    # delete record 3
+    $H->del(3) ;
+
+    # now print the records in reverse order
+    print "\nREVERSE\n" ;
+    for ($i = $H->length - 1 ; $i >= 0 ; -- $i)
+      { print "$i: $h[$i]\n" }
+
+    # same again, but use the API functions instead
+    print "\nREVERSE again\n" ;
+    my ($s, $k, $v)  = (0, 0, 0) ;
+    for ($s = $H->seq($k, $v, R_LAST) ; 
+             $s == 0 ; 
+             $s = $H->seq($k, $v, R_PREV))
+      { print "$k: $v\n" }
+
+    undef $H ;
+    untie @h ;    
+
+    unlink $file ;
+  }  
+
+  ok(126, docat_del($save_output) eq <<'EOM') ;
+
+ORIGINAL
+0: zero
+1: one
+2: two
+3: three
+4: four
+
+The last record was [four]
+The first record was [zero]
+
+REVERSE
+5: last
+4: three
+3: Newbie
+2: one
+1: New One
+0: first
+
+REVERSE again
+5: last
+4: three
+3: Newbie
+2: one
+1: New One
+0: first
+EOM
+   
 }
 
 exit ;

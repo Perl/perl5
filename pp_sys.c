@@ -3549,7 +3549,7 @@ PP(pp_fork)
 
 PP(pp_wait)
 {
-#if !defined(DOSISH) || defined(OS2) || defined(WIN32) || defined(CYGWIN32)
+#if !defined(DOSISH) || defined(OS2) || defined(WIN32)
     djSP; dTARGET;
     Pid_t childpid;
     int argflags;
@@ -3565,7 +3565,7 @@ PP(pp_wait)
 
 PP(pp_waitpid)
 {
-#if !defined(DOSISH) || defined(OS2) || defined(WIN32) || defined(CYGWIN32)
+#if !defined(DOSISH) || defined(OS2) || defined(WIN32)
     djSP; dTARGET;
     Pid_t childpid;
     int optype;
@@ -4738,7 +4738,7 @@ PP(pp_gpwent)
 PP(pp_spwent)
 {
     djSP;
-#if defined(HAS_PASSWD) && defined(HAS_SETPWENT) && !defined(CYGWIN32)
+#if defined(HAS_PASSWD) && defined(HAS_SETPWENT) && !defined(CYGWIN)
     setpwent();
 #   ifdef HAS_SETSPENT
     setspent();

@@ -143,6 +143,7 @@ PERLVAR(Tregcomp_rx,	regexp *)	/* from regcomp.c */
 PERLVAR(Textralen,	I32)		/* from regcomp.c */
 PERLVAR(Tcolorset,	int)		/* from regcomp.c */
 PERLVARA(Tcolors,6,	char *)		/* from regcomp.c */
+PERLVAR(Treg_whilem_seen, I32)		/* number of WHILEM in this expr */
 PERLVAR(Treginput,	char *)		/* String-input pointer. */
 PERLVAR(Tregbol,	char *)		/* Beginning of input, for ^ check. */
 PERLVAR(Tregeol,	char *)		/* End of input, for $ check. */
@@ -172,6 +173,10 @@ PERLVARI(Treg_oldcurpm,	PMOP*, NULL)	/* curpm before match */
 PERLVARI(Treg_curpm,	PMOP*, NULL)	/* curpm during match */
 PERLVAR(Treg_oldsaved,	char*)		/* old saved substr during match */
 PERLVAR(Treg_oldsavedlen, STRLEN)	/* old length of saved substr during match */
+PERLVAR(Treg_maxiter,	I32)		/* max wait until caching pos */
+PERLVAR(Treg_leftiter,	I32)		/* wait until caching pos */
+PERLVARI(Treg_poscache, char *, Nullch)	/* cache of pos of WHILEM */
+PERLVAR(Treg_poscache_size, STRLEN)	/* size of pos cache of WHILEM */
 
 PERLVARI(Tregcompp,	regcomp_t, MEMBER_TO_FPTR(Perl_pregcomp))
 					/* Pointer to REx compiler */

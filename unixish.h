@@ -122,7 +122,11 @@
 #  ifdef POSIX_BC
 #    define PERL_SYS_INIT(c,v)	sigignore(SIGFPE); MALLOC_INIT
 #  else
-#    define PERL_SYS_INIT(c,v)	MALLOC_INIT
+#    ifdef CYGWIN
+#      define PERL_SYS_INIT(c,v) Perl_my_setenv_init(&environ); MALLOC_INIT
+#    else
+#      define PERL_SYS_INIT(c,v) MALLOC_INIT
+#    endif
 #  endif
 #endif
 #endif
