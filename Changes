@@ -8,6 +8,538 @@ or in the .../src/5/0/unsupported directory for sub-version
 releases.)
 
 ----------------
+Version 5.003_04
+----------------
+
+This patch was primarily to fix bugs and to clean up some of
+the changes made in 5.003_03.  The details are described below.
+A very brief summary is:
+
+o Visible Changes to Core Functionality
+
+   -Allow and document permissions for FileHandle::new and
+    IO::File::new.
+   -glob in Safe compartment used to allow shell access; now
+    it's in the same category as `` and system().
+
+o Configure and build enhancements
+   
+   -perl library name is again -lperl, not -lperl5 in some cases.
+   -Several hint files no longer set -g -DDEBUGGING by default.
+    Instead, they just turn off optimization, since that is
+    probably what was intended.
+   -Include OS/2 and Plan9 updates.
+
+o Bug fixes
+
+   -SEGV with $_[0] and circular references fixed.
+   -Ilya's debugger patch.
+   -FAKE typeglobs fixed.
+   -truncate with file name now works.
+   -lval substr() no longer coredumps with refs
+   -lval substr now clears lexicals in re-entered scopes.
+   -core dump in caller() for signal handler for __DIE__.
+
+o Specific Changes
+
+Here are the specific file-by-file changes.
+    
+# This is my patch perl5.003_04.pat to perl5.003_03
+# The full description is below.
+# Please execute the following commands before applying this patch.
+# (You can feed this patch to 'sh' to do so.)
+#  Andy Dougherty		<doughera@lafcol.lafayette.edu>
+
+# Obsolete perl4 hint file.
+rm -f hints/dnix.sh
+# Obsolete
+rm -f os2/notes
+
+# We'll create a new test, but patch won't automatically make it
+# executable.
+touch t/op/gv.t
+chmod +x t/op/gv.t
+
+exit 0
+
+
+This is patch perl5.003_04.pat to perl version 5.003_03.
+This takes you from 5.003_03 to 5.003_04.
+
+To apply this patch, run the above commands,
+cd to your perl source directory and then type
+
+	patch -p1 -N < perl5.003_04.pat
+
+The changes are described after each /^Index/ line below.  This is
+designed so you can examine each change with a command such as
+
+	csplit -k perl5.003_04.pat '/^Index:/' '{99}'
+
+Patch and enjoy,
+
+    Andy Dougherty		doughera@lafcol.lafayette.edu
+    Dept. of Physics
+    Lafayette College, Easton PA 18042
+
+
+Index: Changes
+
+    Updated for 5.003_04.
+
+Index: Configure
+
+    Change name of shared libperl library back to libperl.so.xxx,
+    so that a simple -lperl picks up either libperl.a or
+    libperl.so.xxx.
+
+    Check if $sh='' in case we've reloaded an old config.sh
+
+Index: INSTALL
+
+    Change name of shared perl library to libperl, instead of
+    libperl5.
+
+    Add notes about fragility of shared libperl and the usefulness
+    of archlib to separate different binaries.
+
+Index: MANIFEST
+
+    os2/notes removed
+
+    obsolete hints/dnix.sh removed.
+
+    New typeglob test.
+
+Index: Makefile.SH
+
+    For building shared libperl, relocate whole rule to
+    inside the if test -f $osname/Makefile.SHs case.
+
+Index: Porting/Glossary
+
+    Updated.
+
+Index: README.os2
+
+    Updated.
+
+Index: av.c
+
+    Subject: Re: SEGV with $_[0] and circular references
+
+    Subject: random cleanup
+
+    This patch removes a few obvious redundancies in the source.
+
+Index: config_H
+
+    Updated.  Note new comments to make AIX happy.
+
+Index: config_h.SH
+
+    Change /*#define../**/ into /*#define../ **/
+    to make IBM's xlc compiler shut up about nested comments.
+    The /*#define FOO /**/ is a perfectly legal un-nested comment, and
+    I wish IBM would fix it's blasted compiler instead.  In the meantime
+    we'll take mercy on the poor AIX user and get rid of the screenfulls
+    of stupid warning messages.  Thanks to Hallvard B Furuseth
+    <h.b.furuseth@usit.uio.no> for the fix.
+
+Index: dump.c
+
+    This patch changes neither behavior nor performance.  However, it does
+    reduce code size and improve maintainability by combining some common
+    code in gv_fullname() and gv_efullname().
+
+Index: ext/FileHandle/FileHandle.pm
+
+    This patch documents the behavior of FileHandle::{new,open} with
+    regard to open modes.  It also documents the exportation of Fcntl
+    constants.
+
+    This patch fixes a bug observed by Tom Christiansen: FileHandle::new
+    didn't allow for file permissions after the file mode.  Here's a patch.
+
+Index: ext/IO/lib/IO/File.pm
+
+    This patch fixes a bug observed by Tom Christiansen: IO::File::new
+    didn't allow for file permissions after the file mode.  Here's a patch.
+
+    This patch documents the behavior of IO::File::{new,open} with
+    regard to open modes.  It also documents the exportation of Fcntl
+    constants.
+
+Index: ext/Opcode/Opcode.pm
+
+    Subject: Re: glob in Safe compartment allows shell access
+
+    I've moved the glob op into the same opcode tag as backticks and system
+    and added a comment.
+
+Index: gv.c
+
+    This patch changes neither behavior nor performance.  However, it does
+    reduce code size and improve maintainability by combining some common
+    code in gv_fullname() and gv_efullname().
+
+Index: handy.h
+
+    Subject: Patch for LONG_MAX & co.
+
+    Sorry about adding yet another #ifdef forest, but hopefully this
+    should resolve the *_MAX issues permanently. It adds to the
+    previously defined PERL_LONG_MAX, PERL_LONG_MIN, and PERL_ULONG_MAX
+    symbols the complete set of
+    /PERL_U?(CHAR|SHORT|INT|LONG)_(MAX|MIN)/, and installs aliases to
+    those from /(I|U)(8|16|32|V)_(MAX|MIN)/ so that for any standard
+    Perl typedef, like I32 or UV, you can reference I32_MAX or UV_MIN,
+    and get appropriate figures. All references to LONG_(MIN|MAX) are
+    changed appropriately.
+
+    The .c changes have the side effect of making cast_uv properly use quad
+    limits if quads are in use, but longs aren't 64 bit. Hopefully this all
+    works, but I don't have any handy Crays to try it out on.
+
+    Add notes on perl's internal types, specifically Quad_t and IV.
+
+Index: hints/hpux.sh
+
+    Remove the d_bsdpgrp hint.  The defaults should be ok.
+
+Index: hints/irix_6_2.sh
+
+    Change optimize=-g to optimize=none to avoid pulling in -DDEBUGGING,
+    unless that's what the user really wants.
+
+Index: hints/mpeix.sh
+
+    Change optimize=-g to optimize=none to avoid pulling in -DDEBUGGING,
+    unless that's what the user really wants.
+
+Index: hints/os2.sh
+
+    Fixes for sh vs. bin_sh + cleanup.
+
+Index: hints/ultrix_4.sh
+
+    Don't call optimize=-g, just call optimize=none.  The -g
+    pulls in -DDEBUGGING, which might not be wanted.
+
+Index: lib/ExtUtils/MM_Unix.pm
+
+    .C$(obj_ext) removed under OS/2 - conflicts with .c$(obj_ext).
+
+Index: lib/ExtUtils/xsubpp
+
+    Fix SCOPE?  (See pod/perlxs.pod).
+    Up version number to 1.938.
+
+Index: lib/Test/Harness.pm
+
+    Add a return value to runtests - non-zero if all tests ran ok,
+    zero otherwise.
+
+Index: lib/perl5db.pl
+
+    Ilya's debugger patch.
+	Undefined subroutine &Carp::longmess called at
+	    /opt/perl5.003_03/lib/perl5db.pl line 1423.
+
+
+    Make perl5db compatible with the recent 'strict refs' enforcement
+    in %SIG.
+
+Index: malloc.c
+
+    A patch to perl5.003_02/malloc to give a sensible error abort() message
+    in ANSI C, and to give it to stderr instead of stdout.
+
+    Use config_h's STRINGIFY macro instead of pre-ANSI "p".
+
+Index: mg.c
+
+    Subject: FAKE typeglobs seriously busted (with patch)
+
+    Handling of fake typeglobs (scalars that are really globs
+    in disguise) is seriously busted since 5.002 (it wasn't
+    so in 5.001n).
+    The problem is that mg_get() on a glob calls gv_efullname()
+    which might coerce its first arg to a string.
+
+    Sub-critical patch to conceivably fix some %SIG problems. (Shared hash key
+    weren't being properly detected by some of the sig magic, but as shared
+    hash keys wouldn't normally be used in %SIG it's unlikely this is a
+    significant problem.)
+
+    This patch changes neither behavior nor performance.  However, it does
+    reduce code size and improve maintainability by combining some common
+    code in gv_fullname() and gv_efullname().
+
+Index: myconfig
+
+    Update perlio-related variables.
+
+Index: op.c
+
+    This patch changes neither behavior nor performance.  However, it does
+    reduce code size and improve maintainability by combining some common
+    code in gv_fullname() and gv_efullname().
+
+Index: opcode.h
+
+    Updated.  See opcode.pl.
+
+Index: opcode.pl
+
+    Subject: Re: truncate with file name does not work (with patch)
+
+    The prototype for truncate was changed so that perl won't die
+    with C<use strict;> when the first arg is a bareword (filehandle).
+    I think it was Tom (as in "tchrist") who brought this up.
+
+    Here's a patch that undoes the damage, makes it work with
+    C<use strict;>, and adds to the testsuite.
+
+Index: os2/Makefile.SHs
+
+    perllib vs. LIBPERL
+
+Index: os2/diff.configure
+
+    Updated.
+
+Index: os2/os2.c
+
+    SH_PATH_INI vs. BIN_SH
+
+Index: os2/os2ish.h
+
+    SH_PATH_INI added (needed to redefine SH_PATH for binary
+	    distribution).
+    SH_PATH is redefined.
+
+Index: patchlevel.h
+
+    SUBVERSION 4.
+
+Index: perl.h
+
+    Subject: Patch for LONG_MAX & co.
+
+    Sorry about adding yet another #ifdef forest, but hopefully this
+    should resolve the *_MAX issues permanently. It adds to the
+    previously defined PERL_LONG_MAX, PERL_LONG_MIN, and PERL_ULONG_MAX
+    symbols the complete set of
+    /PERL_U?(CHAR|SHORT|INT|LONG)_(MAX|MIN)/, and installs aliases to
+    those from /(I|U)(8|16|32|V)_(MAX|MIN)/ so that for any standard
+    Perl typedef, like I32 or UV, you can reference I32_MAX or UV_MIN,
+    and get appropriate figures. All references to LONG_(MIN|MAX) are
+    changed appropriately.
+
+    The .c changes have the side effect of making cast_uv properly use quad
+    limits if quads are in use, but longs aren't 64 bit. Hopefully this all
+    works, but I don't have any handy Crays to try it out on.
+
+    Add notes on perl's internal types, specifically Quad_t and IV.
+
+Index: perlio.c
+
+    Removes an incorrect prototype for setlinebuf from
+    perlio.c because it conflicts with the correct declaration in
+    MachTen's stdio.h (and possibly other stdio's as well).
+
+    Secondly, the code in perlio.c is not handling the (!PERLIO_IS_STDIO &
+    HAS_F[GS]ETPOS) case.  The patch fixes this omission (in a rather lumpen
+    manner).  I don't think this should affect platforms which try to hack a
+    different path through the #ifdef forest, but this assertion would benefit
+    from testing...
+
+    Dominic Dunlop
+
+Index: plan9/config.plan9
+
+    Updated.
+
+Index: plan9/fndvers
+
+    Updated.
+
+Index: plan9/mkfile
+
+    Updated.
+
+Index: plan9/setup.rc
+
+    Updated.
+
+Index: pod/perldiag.pod
+
+    Subject: lval substr() coredumps with refs (with patch)
+
+    substr() coredumps with a target that is a ref, when it is used in
+    an lvalue context.
+    The patch below corrects the problem by stringifying the reference
+    first (and emitting a warning when appropriate).
+
+Index: pod/perlxs.pod
+
+    document xsubpp SCOPE:
+
+Index: pp.c
+
+    Subject: lval substr() fails to clear lexicals in re-entered scopes (with patch)
+
+    substr() in lvalue context interacts in buggy fashion with SVs that
+    are !SvOK.  This manifests itself with lexicals that have a REFCNT of
+    1, since these are merely "cleared in place" by setting SvOK_off.
+
+    Subject: lval substr() coredumps with refs (with patch)
+
+    substr() coredumps with a target that is a ref, when it is used in
+    an lvalue context.
+    The patch below corrects the problem by stringifying the reference
+    first (and emitting a warning when appropriate).
+
+    Subject: Patch for LONG_MAX & co.
+
+Index: pp_ctl.c
+
+    This patch changes neither behavior nor performance.  However, it does
+    reduce code size and improve maintainability by combining some common
+    code in gv_fullname() and gv_efullname().
+
+Index: pp_hot.c
+
+    Subject: Patch for LONG_MAX & co.
+
+    This patch changes neither behavior nor performance.  However, it does
+    reduce code size and improve maintainability by combining some common
+    code in gv_fullname() and gv_efullname().
+
+Index: pp_sys.c
+
+    This patch changes neither behavior nor performance.  However, it does
+    reduce code size and improve maintainability by combining some common
+    code in gv_fullname() and gv_efullname().
+
+Index: proto.h
+
+    This patch changes neither behavior nor performance.  However, it does
+    reduce code size and improve maintainability by combining some common
+    code in gv_fullname() and gv_efullname().
+
+Index: run.c
+
+    This patch changes neither behavior nor performance.  However, it does
+    reduce code size and improve maintainability by combining some common
+    code in gv_fullname() and gv_efullname().
+
+Index: sv.c
+
+    Subject: random cleanup
+
+    This patch removes a few obvious redundancies in the source.
+
+    Subject: sv_setsv patch
+
+    This patch changes neither behavior nor performance.  However, it does
+    reduce code size and improve maintainability by combining some common
+    code in gv_fullname() and gv_efullname().
+
+    From: Chip Salzenberg <salzench@nielsenmedia.com>
+    Subject: Track SVs for destruction when -DPURIFY
+
+    When checking for memory leaks, I compiled Perl with "-DPURIFY".
+    Although that flag improves the leak checking, it also breaks
+    destruction of global objects, because SVs aren't kept in captive
+    arenas any more.
+
+    This patch rectifies the problem by providing an alternative
+    method for keeping track of SVs when Perl is compiled for Purify.
+    It has no effect on normal operation.
+
+
+    Add comment about assert(len >=0) when len is unsigned anyway.
+
+Index: t/io/fs.t
+
+    Subject: Re: truncate with file name does not work (with patch)
+
+    The prototype for truncate was changed so that perl won't die
+    with C<use strict;> when the first arg is a bareword (filehandle).
+    I think it was Tom (as in "tchrist") who brought this up.
+
+    Here's a patch that undoes the damage, makes it work with
+    C<use strict;>, and adds to the testsuite.
+
+    The "not implemented" branch is missing a "\n".
+
+Index: t/op/gv.t
+
+    Subject: FAKE typeglobs seriously busted (with patch)
+
+    Handling of fake typeglobs (scalars that are really globs
+    in disguise) is seriously busted since 5.002 (it wasn't
+    so in 5.001n).
+
+    The problem is that mg_get() on a glob calls gv_efullname()
+    which might coerce its first arg to a string.
+
+Index: t/op/substr.t
+
+
+    Subject: lval substr() fails to clear lexicals in re-entered scopes (with patch)
+
+    substr() in lvalue context interacts in buggy fashion with SVs that
+    are !SvOK.  This manifests itself with lexicals that have a REFCNT of
+    1, since these are merely "cleared in place" by setting SvOK_off.
+
+    Subject: lval substr() coredumps with refs (with patch)
+
+    substr() coredumps with a target that is a ref, when it is used in
+    an lvalue context.
+    The patch below corrects the problem by stringifying the reference
+    first (and emitting a warning when appropriate).
+
+Index: toke.c
+
+    Subject: Re: truncate with file name does not work (with patch)
+
+    The prototype for truncate was changed so that perl won't die
+    with C<use strict;> when the first arg is a bareword (filehandle).
+    I think it was Tom (as in "tchrist") who brought this up.
+
+    Here's a patch that undoes the damage, makes it work with
+    C<use strict;>, and adds to the testsuite.
+
+Index: util.c
+
+    Subject: Re: Perl 5.003 dumps core executing caller() in signal handler for
+	    __DIE__ (with patch)
+
+    sv_2pv() might call croak() (which is not prepared to handle that
+    when it calls sv_2pv(), itself).  Likewise for warn() (but under
+    slightly more esoteric circumstances--mg_get() in sv_2pv() might
+    trigger a call to warn()).
+
+
+    Subject: Patch for LONG_MAX & co.
+
+    PERL_BADLANG is examined by default before issuing a warning during
+	    internationalization.
+
+Index: utils/h2xs.PL
+
+    Make leading =head NAME item a paragraph so pod2man finds it.
+
+Index: utils/perldoc.PL
+
+    Use col -x to filter out half-line feeds (ESC-9) from
+    HP-UX nroff -man output.  (col -x isn't portable -- SunOS
+    doesn't support the -x option.)
+
+----------------
 Version 5.003_03
 ----------------
 
