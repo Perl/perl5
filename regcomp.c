@@ -3929,7 +3929,6 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state)
 	n = add_data(pRExC_state, 1, "s");
 	RExC_rx->data->data[n] = (void*)rv;
 	ARG_SET(ret, n);
-	NEXT_OFF(ret) = RExC_emit - ret;
     }
 
     return ret;
