@@ -21,12 +21,20 @@ case "$osvers" in
 	if [ -f /usr/libexec/ld.elf_so ]; then
 		d_dlopen=$define
 		d_dlerror=$define
-		ccdlflags="-Wl,-E -Wl,-R${PREFIX}/lib $ccdlflags"
+		# Include the whole libgcc.a, required for Xerces-P, which
+		# needs __eh_alloc, __pure_virtual, and others.
+		# XXX This should be obsoleted by gcc-3.0.
+		ccdlflags="-Wl,-whole-archive -lgcc -Wl,-no-whole-archive \
+			-Wl,-E -Wl,-R${PREFIX}/lib $ccdlflags"
 		cccdlflags="-DPIC -fPIC $cccdlflags"
 		lddlflags="--whole-archive -shared $lddlflags"
 	elif [ "`uname -m`" = "pmax" ]; then
 # NetBSD 1.3 and 1.3.1 on pmax shipped an `old' ld.so, which will not work.
-		d_dlopen=$undef
+		case "$osvers" in
+		1.3|1.3.1)
+			d_dlopen=$undef
+			;;
+		esac
 	elif [ -f /usr/libexec/ld.so ]; then
 		d_dlopen=$define
 		d_dlerror=$define
@@ -59,12 +67,13 @@ d_setrgid="$undef"
 d_setruid="$undef"
 
 # there's no problem with vfork.
-case "$usevfork" in
-'') usevfork=true ;;
-esac
+usevfork=true
+
+# Using perl's malloc leads to trouble on some toolchain versions.
+usemymalloc="$undef"
 
 # Pre-empt the /usr/bin/perl question of installperl.
-installusrbinperl='n'
+installusrbinperl="$undef"
 
 # This is there but in machine/ieeefp_h.
 ieeefp_h="define"
