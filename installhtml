@@ -601,6 +601,7 @@ sub runpod2html {
 	"--htmlroot=$htmlroot",
 	"--podpath=".join(":", @podpath),
 	"--podroot=$podroot", "--netscape",
+	"--header",
 	($doindex ? "--index" : "--noindex"),
 	"--" . ($recurse ? "" : "no") . "recurse",
 	($#libpods >= 0) ? "--libpods=" . join(":", @libpods) : "",

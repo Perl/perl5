@@ -323,7 +323,7 @@ INST_LIB	= $(INST_TOP)$(INST_VER)\lib
 INST_ARCHLIB	= $(INST_LIB)$(INST_ARCH)
 INST_COREDIR	= $(INST_ARCHLIB)\CORE
 INST_POD	= $(INST_LIB)\pod
-INST_HTML	= $(INST_POD)\html
+INST_HTML	= $(INST_TOP)$(INST_VER)\html
 
 #
 # Programs to compile, build .lib files and link
