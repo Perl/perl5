@@ -123,7 +123,7 @@ Options:
 PageName|ModuleName...
          is the name of a piece of documentation that you want to look at. You
          may either give a descriptive name of the page (as in the case of
-         `perlfunc') the name of a module, either like `Term::Info',
+         `perlfunc') the name of a module, either like `Term::Info' or like
          `Term/Info', or the name of a program, like `perldoc'.
 
 BuiltinFunction
