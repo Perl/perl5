@@ -232,7 +232,9 @@
 #undef fopen
 #undef vfprintf
 #undef fgetc
+#undef getc_unlocked
 #undef fputc
+#undef putc_unlocked
 #undef fputs
 #undef ungetc
 #undef fread

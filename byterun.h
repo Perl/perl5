@@ -17,7 +17,7 @@ struct bytestream {
 };
 void byterun _((struct bytestream));
 #else
-void byterun _((FILE *));
+void byterun _((PerlIO *));
 #endif /* INDIRECT_BGET_MACROS */
 
 void *bset_obj_store _((void *, I32));
