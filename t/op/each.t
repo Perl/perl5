@@ -2,7 +2,7 @@
 
 # $RCSfile: each.t,v $$Revision: 4.1 $$Date: 92/08/07 18:27:47 $
 
-print "1..7\n";
+print "1..14\n";
 
 $h{'abc'} = 'ABC';
 $h{'def'} = 'DEF';
@@ -68,3 +68,42 @@ undef %h;
 %h = (1,1);
 $size = ((split('/',scalar %h))[1]);
 if ($size == 8) {print "ok 7\n";} else {print "not ok 7\n";}
+
+# test scalar each
+%hash = 1..20;
+$total = 0;
+$total += $key while $key = each %hash;
+print "# Scalar each is bad.\nnot " unless $total == 100;
+print "ok 8\n";
+
+for (1..3) { @foo = each %hash }
+keys %hash;
+$total = 0;
+$total += $key while $key = each %hash;
+print "# Scalar keys isn't resetting the iterator.\nnot " if $total != 100;
+print "ok 9\n";
+
+for (1..3) { @foo = each %hash }
+$total = 0;
+$total += $key while $key = each %hash;
+print "# Iterator of each isn't being maintained.\nnot " if $total == 100;
+print "ok 10\n";
+
+for (1..3) { @foo = each %hash }
+values %hash;
+$total = 0;
+$total += $key while $key = each %hash;
+print "# Scalar values isn't resetting the iterator.\nnot " if $total != 100;
+print "ok 11\n";
+
+$size = (split('/', scalar %hash))[1];
+keys(%hash) = $size / 2;
+print "not " if $size != (split('/', scalar %hash))[1];
+print "ok 12\n";
+keys(%hash) = $size + 100;
+print "not " if $size == (split('/', scalar %hash))[1];
+print "ok 13\n";
+
+print "not " if keys(%hash) != 10;
+print "ok 14\n";
+
