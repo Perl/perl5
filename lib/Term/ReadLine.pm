@@ -310,7 +310,7 @@ sub ornaments {
   return $rl_term_set unless @_;
   $rl_term_set = shift;
   $rl_term_set ||= ',,,';
-  $rl_term_set = 'us,ue,md,me' if $rl_term_set == 1;
+  $rl_term_set = 'us,ue,md,me' if $rl_term_set eq '1';
   my @ts = split /,/, $rl_term_set, 4;
   eval { LoadTermCap };
   unless (defined $terminal) {

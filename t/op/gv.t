@@ -4,7 +4,7 @@
 # various typeglob tests
 #
 
-print "1..18\n";
+print "1..16\n";
 
 # type coersion on assignment
 $foo = 'foo';
@@ -71,7 +71,7 @@ $foo = 'stuff';
 @foo = qw(more stuff);
 %foo = qw(even more random stuff);
 undef *foo;
-print +($foo || @foo || %foo) ? "not ok" : "ok", " 16\n";
+print +($foo || @foo || %foo) ? "not ok" : "ok", " 14\n";
 
 # test warnings from assignment of undef to glob
 {
@@ -79,7 +79,7 @@ print +($foo || @foo || %foo) ? "not ok" : "ok", " 16\n";
     local $SIG{__WARN__} = sub { $msg = $_[0] };
     local $^W = 1;
     *foo = 'bar';
-    print $msg ? "not ok" : "ok", " 17\n";
+    print $msg ? "not ok" : "ok", " 15\n";
     *foo = undef;
-    print $msg ? "ok" : "not ok", " 18\n";
+    print $msg ? "ok" : "not ok", " 16\n";
 }

@@ -1326,7 +1326,7 @@ This is converted to a tree similar to this one:
         /   \
       $b     $c
 
-(but slightly more complicated).  This tree reflect the way Perl
+(but slightly more complicated).  This tree reflects the way Perl
 parsed your code, but has nothing to do with the execution order.
 There is an additional "thread" going through the nodes of the tree
 which shows the order of execution of the nodes.  In our simplified
@@ -1399,7 +1399,7 @@ and corresponding check routines is described in F<opcode.pl> (do not
 forget to run C<make regen_headers> if you modify this file).
 
 A check routine is called when the node is fully constructed except
-for the execution-order thread.  Since at this time there is no
+for the execution-order thread.  Since at this time there are no
 back-links to the currently constructed node, one can do most any
 operation to the top-level node, including freeing it and/or creating
 new nodes above/below it.
@@ -1442,7 +1442,7 @@ of free()ing (i.e. their type is changed to OP_NULL).
 After the compile tree for a subroutine (or for an C<eval> or a file)
 is created, an additional pass over the code is performed. This pass
 is neither top-down or bottom-up, but in the execution order (with
-additional compilications for conditionals).  These optimizations are
+additional complications for conditionals).  These optimizations are
 done in the subroutine peep().  Optimizations performed at this stage
 are subject to the same restrictions as in the pass 2.
 
@@ -1701,7 +1701,7 @@ Used to indicate scalar context.  See C<GIMME_V>, C<GIMME>, and L<perlcall>.
 
 Returns the glob with the given C<name> and a defined subroutine or
 C<NULL>.  The glob lives in the given C<stash>, or in the stashes
-accessable via @ISA and @<UNIVERSAL>.
+accessable via @ISA and @UNIVERSAL.
 
 The argument C<level> should be either 0 or -1.  If C<level==0>, as a
 side-effect creates a glob with the given C<name> in the given

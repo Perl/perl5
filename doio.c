@@ -171,8 +171,11 @@ do_open(GV *gv, register char *name, I32 len, int as_raw, int rawmode, int rawpe
 	    if (strNE(name,"-"))
 		TAINT_ENV();
 	    TAINT_PROPER("piped open");
-	    if (dowarn && name[strlen(name)-1] == '|')
-		warn("Can't do bidirectional pipe");
+	    if (name[strlen(name)-1] == '|') {
+		name[strlen(name)-1] = '\0' ;
+		if (dowarn)
+		    warn("Can't do bidirectional pipe");
+	    }
 	    fp = PerlProc_popen(name,"w");
 	    writing = 1;
 	}

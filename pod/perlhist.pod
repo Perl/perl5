@@ -6,7 +6,7 @@ perlhist - the Perl history records
 
 =for RCS
 #
-# $Id: perlhist.pod,v 1.31 1998/03/10 16:39:28 jhi Exp $
+# $Id: perlhist.pod,v 1.32 1998/04/04 12:20:50 jhi Exp $
 #
 =end RCS
 
@@ -30,8 +30,8 @@ Perl history in brief, by Larry Wall:
 
 =head1 THE KEEPERS OF THE PUMPKIN
 
-Larry Wall, Andy Dougherty, Tom Christiansen, Charles Bailey,
-Nick Ing-Simmons, Chip Salzenberg, Tim Bunce, Malcolm Beattie.
+Larry Wall, Andy Dougherty, Tom Christiansen, Charles Bailey, Nick
+Ing-Simmons, Chip Salzenberg, Tim Bunce, Malcolm Beattie.
 
 =head2 PUMPKIN?
 
@@ -272,6 +272,8 @@ the pumpking or the pumpkineer.
           5.004_60      1998-Feb-20
           5.004_61      1998-Feb-27
           5.004_62      1998-Mar-06
+          5.004_63      1998-Mar-17
+          5.004_64      1998-Apr-03
 
 =head2 SELECTED RELEASE SIZES
 
@@ -440,7 +442,7 @@ context diff output format.
           p54rc1        1997-May-12       8   1  11
           p54rc2        1997-May-14       6   0  40
 
-         5.004          1997-May-15       4   0   4
+        5.004           1997-May-15       4   0   4
 
  Tim      5.004_01      1997-Jun-13     222  14  57
           5.004_02      1997-Aug-07     112  16 119
@@ -452,8 +454,9 @@ context diff output format.
 Jarkko Hietaniemi <F<jhi@iki.fi>>.
 
 Thanks to the collective memory of the Perlfolk.  In addition to the
-Keepers of the Pumpkin also Alan Champion, Andreas König, John
+Keepers of the Pumpkin also Alan Champion, Andreas Knig, John
 Macdonald, Matthias Neeracher, Michael Peppler, Randal Schwartz, and
 Paul D. Smith sent corrections and additions.
 
 =cut
+

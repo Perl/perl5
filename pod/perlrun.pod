@@ -332,7 +332,7 @@ know when the filename has changed.  It does, however, use ARGVOUT for
 the selected filehandle.  Note that STDOUT is restored as the
 default output filehandle after the loop.
 
-You can use C<eof> without parenthesis to locate the end of each input file,
+You can use C<eof> without parentheses to locate the end of each input file,
 in case you want to append to each file, or reset line numbering (see
 example in L<perlfunc/eof>).
 

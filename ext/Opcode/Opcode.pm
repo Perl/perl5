@@ -152,7 +152,7 @@ like gv2cv, i_ncmp and ftsvtx.
 =item an operator tag name (optag)
 
 Operator tags can be used to refer to groups (or sets) of operators.
-Tag names always being with a colon. The Opcode module defines several
+Tag names always begin with a colon. The Opcode module defines several
 optags and the user can define others using the define_optag function.
 
 =item a negated opname or optag
@@ -569,7 +569,7 @@ Originally designed and implemented by Malcolm Beattie,
 mbeattie@sable.ox.ac.uk as part of Safe version 1.
 
 Split out from Safe module version 1, named opcode tags and other
-changes added by Tim Bunce E<lt>F<Tim.Bunce@ig.co.uk>E<gt>.
+changes added by Tim Bunce.
 
 =cut
 
