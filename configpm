@@ -58,12 +58,7 @@ else {
 
 open CONFIG, ">$Config_PM" or die "Can't open $Config_PM: $!\n";
 
-my $myver;
-open(CONFIG_SH, 'config.sh') || die "Can't open config.sh: $!";
-while(<CONFIG_SH>) { if (/^version='(.+)'$/) { $myver = $1; last } }
-close(CONFIG_SH);
-die "Can't find version in config.sh\n" unless defined $myver;;
-$myver =~ s/_/./g if $^O eq 'VMS';
+my $myver = sprintf "v%vd", $^V;
 
 printf CONFIG <<'ENDOFBEG', ($myver) x 3;
 # This file was created by configpm when Perl was built. Any changes
@@ -97,9 +92,9 @@ sub import {
 die "Perl lib version (%s) doesn't match executable version ($])"
     unless $^V;
 
-my $exever = sprintf("%%vd",$^V);
-$exever eq "%s"
-    or die "Perl lib version (%s) doesn't match executable version ($exever)";
+$^V eq %s
+    or die "Perl lib version (%s) doesn't match executable version (" .
+	sprintf("v%%vd",$^V) . ")";
 
 ENDOFBEG
 

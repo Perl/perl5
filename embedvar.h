@@ -286,7 +286,6 @@
 #define PL_in_load_module	(PERL_GET_INTERP->Iin_load_module)
 #define PL_in_my		(PERL_GET_INTERP->Iin_my)
 #define PL_in_my_stash		(PERL_GET_INTERP->Iin_my_stash)
-#define PL_in_require		(PERL_GET_INTERP->Iin_require)
 #define PL_incgv		(PERL_GET_INTERP->Iincgv)
 #define PL_initav		(PERL_GET_INTERP->Iinitav)
 #define PL_inplace		(PERL_GET_INTERP->Iinplace)
@@ -605,7 +604,6 @@
 #define PL_in_load_module	(vTHX->Iin_load_module)
 #define PL_in_my		(vTHX->Iin_my)
 #define PL_in_my_stash		(vTHX->Iin_my_stash)
-#define PL_in_require		(vTHX->Iin_require)
 #define PL_incgv		(vTHX->Iincgv)
 #define PL_initav		(vTHX->Iinitav)
 #define PL_inplace		(vTHX->Iinplace)
@@ -927,7 +925,6 @@
 #define PL_Iin_load_module	PL_in_load_module
 #define PL_Iin_my		PL_in_my
 #define PL_Iin_my_stash		PL_in_my_stash
-#define PL_Iin_require		PL_in_require
 #define PL_Iincgv		PL_incgv
 #define PL_Iinitav		PL_initav
 #define PL_Iinplace		PL_inplace

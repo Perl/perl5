@@ -4797,7 +4797,6 @@ Perl_yylex(pTHX)
 
 	case KEY_require:
 	    s = skipspace(s);
-	    PL_in_require = 1;
 	    if (isDIGIT(*s)) {
 		s = force_version(s, FALSE);
 	    }
@@ -4811,7 +4810,6 @@ Perl_yylex(pTHX)
 		else if (*s == '<')
 		    yyerror("<> should be quotes");
 	    }
-	    PL_in_require = 0;
 	    UNI(OP_REQUIRE);
 
 	case KEY_reset:
@@ -5174,7 +5172,6 @@ Perl_yylex(pTHX)
 	    if (PL_expect != XSTATE)
 		yyerror("\"use\" not allowed in expression");
 	    s = skipspace(s);
-	    PL_in_require = 1;
 	    if (isDIGIT(*s) || (*s == 'v' && isDIGIT(s[1]))) {
 		s = force_version(s, TRUE);
 		if (*s == ';' || (s = skipspace(s), *s == ';')) {
@@ -5190,7 +5187,6 @@ Perl_yylex(pTHX)
 		s = force_word(s,WORD,FALSE,TRUE,FALSE);
 		s = force_version(s, FALSE);
 	    }
-	    PL_in_require = 0;
 	    yylval.ival = 1;
 	    OPERATOR(USE);
 
@@ -7969,9 +7965,7 @@ Perl_scan_vstring(pTHX_ char *s, SV *sv)
 {
     char *pos = s;
     char *start = s;
-
-    if (*pos == 'v')
-        pos++;
+    if (*pos == 'v') pos++;  /* get past 'v' */
     while (pos < PL_bufend && (isDIGIT(*pos) || *pos == '_'))
 	pos++;
     if ( *pos != '.') {
@@ -7995,9 +7989,6 @@ Perl_scan_vstring(pTHX_ char *s, SV *sv)
 
 	sv_setpvn(sv, "", 0);
 
-	if (!PL_in_require && ckWARN(WARN_DEPRECATED))
-	      Perl_warner(aTHX_ packWARN(WARN_DEPRECATED),
-			  "Version objects are deprecated outside of use/require");
 	for (;;) {
 	    rev = 0;
 	    {
@@ -8016,7 +8007,6 @@ Perl_scan_vstring(pTHX_ char *s, SV *sv)
 				    "Integer overflow in decimal number");
 		}
 	    }
-
 #ifdef EBCDIC
 	    if (rev > 0x7FFFFFFF)
 		 Perl_croak(aTHX_ "In EBCDIC the v-string components cannot exceed 2147483647");

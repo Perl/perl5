@@ -92,8 +92,7 @@ more natural interpretation
 	%h = ( 'v65' => 42 );
 
 The multi-number v-strings like v65.66 and 65.66.67 still continue to
-be v-strings in Perl 5.8.  Note, however, that v-strings as a whole
-are now deprecated, see L</"Deprecation Warnings">.
+be v-strings in Perl 5.8.
 
 =head2 (Win32) The -C Switch Has Been Repurposed
 
@@ -201,17 +200,6 @@ Unicode character properties are as in Unicode 4.0.0.
 There is one new feature deprecation.  Perl 5.8.0 forgot to add
 some deprecation warnings, these warnings have now been added.
 Finally, a reminder of an impending feature removal.
-
-=head3 (New) Version strings (v-strings) are deprecated
-
-Version Strings (v-strings) have been deprecated and they will be
-removed in some future release of Perl.  Each v-string will trigger
-the warning C<v-strings are deprecated>.   The marginal benefits of
-v-strings were greatly outweighed by the potential for Surprise and
-Confusion.  If you really want to continue using v-strings but not to
-see the deprecation warnings, use:
-
-    no warnings 'deprecated';
 
 =head3 (Reminder) Pseudo-hashes are deprecated (really)
 
@@ -662,11 +650,6 @@ An illegal user-defined Unicode casemapping was specified.
 
 Something modified the values being iterated over.  This is not good.
 
-=head2 New "v-strings are deprecated"
-
-The marginal benefits of v-strings were greatly outweighed by the
-potential for Surprise and Confusion.
-
 =head1 Changed Internals
 
 These news matter to you only if you either write XS code or like to
@@ -906,17 +889,7 @@ CPANPLUS, Inline, and Module::Build will become core modules.
 
 =item *
 
-While the v-strings were deprecated now, we will think about
-new ways of supporting (again) version numbers of the "1.2.3"
-kind (as opposed to the "1.23" kind).
-
-=item *
-
 5.005 Threads Will Be Removed
-
-=item *
-
-V-strings (Version Strings) Will Be Removed
 
 =item *
 
