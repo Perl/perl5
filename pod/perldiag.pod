@@ -3684,6 +3684,14 @@ a scalar context, the comma is treated like C's comma operator, which
 throws away the left argument, which is not what you want.  See
 L<perlref> for more on this.
 
+This warning will not be issued for numerical constants equal to 0 or 1
+since they are often used in statements like
+
+    1 while sub_with_side_effects() ;
+
+String constants that would normally evaluate to 0 or 1 are warned
+about.
+
 =item Useless use of "re" pragma
 
 (W) You did C<use re;> without any arguments.   That isn't very useful.
