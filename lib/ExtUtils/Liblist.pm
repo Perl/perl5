@@ -2,7 +2,7 @@ package ExtUtils::Liblist;
 
 # Broken out of MakeMaker from version 4.11
 
-$ExtUtils::Liblist::VERSION = substr q$Revision: 1.19 $, 10;
+$ExtUtils::Liblist::VERSION = substr q$Revision: 1.20 $, 10;
 
 use Config;
 use Cwd 'cwd';
@@ -135,15 +135,18 @@ sub ext {
 
 	    # Do not add it into the list if it is already linked in
 	    # with the main perl executable.
-	    # We have to special-case the NeXT, because all the math 
-	    # is also in libsys_s
+	    # We have to special-case the NeXT, because math and ndbm 
+	    # are both in libsys_s
 	    unless ($in_perl || 
-		    ($^O eq 'next' && $thislib eq 'm') ){
+		($Config{'osname'} eq 'next' &&
+		    ($thislib eq 'm' || $thislib eq 'ndbm')) ){
 		push(@extralibs, "-l$thislib");
 	    }
 
 	    # We might be able to load this archive file dynamically
-	    if ( $Config{'dlsrc'} =~ /dl_next|dl_dld/){
+	    if ( ($Config{'dlsrc'} =~ /dl_next/ && $Config{'osvers'} lt '4_0')
+	    ||   ($Config{'dlsrc'} =~ /dl_dld/) )
+	    {
 		# We push -l$thislib instead of $fullname because
 		# it avoids hardwiring a fixed path into the .bs file.
 		# Mkbootstrap will automatically add dl_findfile() to
