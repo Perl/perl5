@@ -1239,7 +1239,7 @@ int cloning;
 	AV *av;
 	int i;
 
-	TRACEME(("arrary_call (cloning=%d), cloning"));
+	TRACEME(("arrary_call (cloning=%d)", cloning));
 
 	ENTER;
 	SAVETMPS;
