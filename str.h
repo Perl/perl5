@@ -1,4 +1,4 @@
-/* $RCSfile: str.h,v $$Revision: 4.0.1.3 $$Date: 91/11/05 18:41:47 $
+/* $RCSfile: str.h,v $$Revision: 4.0.1.4 $$Date: 92/06/08 15:41:45 $
  *
  *    Copyright (c) 1991, Larry Wall
  *
@@ -6,6 +6,10 @@
  *    License or the Artistic License, as specified in the README file.
  *
  * $Log:	str.h,v $
+ * Revision 4.0.1.4  92/06/08  15:41:45  lwall
+ * patch20: fixed confusion between a *var's real name and its effective name
+ * patch20: removed implicit int declarations on functions
+ * 
  * Revision 4.0.1.3  91/11/05  18:41:47  lwall
  * patch11: random cleanup
  * patch11: solitary subroutine references no longer trigger typo warnings
@@ -26,12 +30,15 @@ struct string {
     STRLEN	str_len;	/* allocated size */
     union {
 	double	str_nval;	/* numeric value, if any */
-	STAB	*str_stab;	/* magic stab for magic "key" string */
 	long	str_useful;	/* is this search optimization effective? */
 	ARG	*str_args;	/* list of args for interpreted string */
 	HASH	*str_hash;	/* string represents an assoc array (stab?) */
 	ARRAY	*str_array;	/* string represents an array */
 	CMD	*str_cmd;	/* command for this source line */
+	struct {
+	    STAB *stb_stab;	/* magic stab for magic "key" string */
+	    HASH *stb_stash;	/* which symbol table this stab is in */
+	} stb_u;
     } str_u;
     STRLEN	str_cur;	/* length of str_ptr as a C string */
     STR		*str_magic;	/* while free, link to next free str */
@@ -51,12 +58,15 @@ struct stab {	/* should be identical, except for str_ptr */
     STRLEN	str_len;	/* allocated size */
     union {
 	double	str_nval;	/* numeric value, if any */
-	STAB	*str_stab;	/* magic stab for magic "key" string */
 	long	str_useful;	/* is this search optimization effective? */
 	ARG	*str_args;	/* list of args for interpreted string */
 	HASH	*str_hash;	/* string represents an assoc array (stab?) */
 	ARRAY	*str_array;	/* string represents an array */
 	CMD	*str_cmd;	/* command for this source line */
+	struct {
+	    STAB *stb_stab;	/* magic stab for magic "key" string */
+	    HASH *stb_stash;	/* which symbol table this stab is in */
+	} stb_u;
     } str_u;
     STRLEN	str_cur;	/* length of str_ptr as a C string */
     STR		*str_magic;	/* while free, link to next free str */
@@ -70,6 +80,9 @@ struct stab {	/* should be identical, except for str_ptr */
     bool	str_tainted;	/* 1 if possibly under control of $< */
 #endif
 };
+
+#define str_stab stb_u.stb_stab
+#define str_stash stb_u.stb_stash
 
 /* some extra info tacked to some lvalue strings */
 
@@ -139,6 +152,17 @@ int str_cmp();
 int str_eq();
 void str_magic();
 void str_insert();
+void str_numset();
+void str_sset();
+void str_nset();
+void str_set();
+void str_chop();
+void str_cat();
+void str_scat();
+void str_ncat();
+void str_reset();
+void str_taintproper();
+void str_taintenv();
 STRLEN str_len();
 
 #define MULTI	(3)

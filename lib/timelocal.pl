@@ -1,7 +1,7 @@
 ;# timelocal.pl
 ;#
 ;# Usage:
-;#	$time = timelocal($sec,$min,$hours,$mday,$mon,$year,$junk,$junk,$isdst);
+;#	$time = timelocal($sec,$min,$hours,$mday,$mon,$year);
 ;#	$time = timegm($sec,$min,$hours,$mday,$mon,$year);
 
 ;# These routines are quite efficient and yet are always guaranteed to agree
@@ -24,6 +24,7 @@
 CONFIG: {
     package timelocal;
     
+    local($[) = 0;
     @epoch = localtime(0);
     $tzmin = $epoch[2] * 60 + $epoch[1];	# minutes east of GMT
     if ($tzmin > 0) {
@@ -40,6 +41,7 @@ CONFIG: {
 sub timegm {
     package timelocal;
 
+    local($[) = 0;
     $ym = pack(C2, @_[5,4]);
     $cheat = $cheat{$ym} || &cheat;
     $cheat + $_[0] * $SEC + $_[1] * $MIN + $_[2] * $HR + ($_[3]-1) * $DAYS;
@@ -48,10 +50,11 @@ sub timegm {
 sub timelocal {
     package timelocal;
 
-    $ym = pack(C2, @_[5,4]);
-    $cheat = $cheat{$ym} || &cheat;
-    $cheat + $_[0] * $SEC + $_[1] * $MIN + $_[2] * $HR + ($_[3]-1) * $DAYS
-	+ $tzmin * $MIN - 60 * 60 * ($_[8] != 0);
+    local($[) = 0;
+    $time = &main'timegm + $tzmin*$MIN;
+    @test = localtime($time);
+    $time -= $HR if $test[2] != $_[2];
+    $time;
 }
 
 package timelocal;
@@ -59,14 +62,15 @@ package timelocal;
 sub cheat {
     $year = $_[5];
     $month = $_[4];
+    die "Month out of range 0..11 in ctime.pl\n" if $month > 11;
     $guess = $^T;
     @g = gmtime($guess);
     while ($diff = $year - $g[5]) {
-	$guess += $diff * (364 * $DAYS);
+	$guess += $diff * (363 * $DAYS);
 	@g = gmtime($guess);
     }
     while ($diff = $month - $g[4]) {
-	$guess += $diff * (28 * $DAYS);
+	$guess += $diff * (27 * $DAYS);
 	@g = gmtime($guess);
     }
     $g[3]--;

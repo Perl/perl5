@@ -1,4 +1,4 @@
-/* $RCSfile: util.h,v $$Revision: 4.0.1.2 $$Date: 91/11/05 19:18:40 $
+/* $RCSfile: util.h,v $$Revision: 4.0.1.3 $$Date: 92/06/08 16:09:20 $
  *
  *    Copyright (c) 1991, Larry Wall
  *
@@ -6,6 +6,9 @@
  *    License or the Artistic License, as specified in the README file.
  *
  * $Log:	util.h,v $
+ * Revision 4.0.1.3  92/06/08  16:09:20  lwall
+ * patch20: bcopy() and memcpy() now tested for overlap safety
+ * 
  * Revision 4.0.1.2  91/11/05  19:18:40  lwall
  * patch11: safe malloc code now integrated into Perl's malloc when possible
  * 
@@ -30,7 +33,7 @@ char	*fbminstr();
 char	*screaminstr();
 void	fbmcompile();
 char	*savestr();
-void	setenv();
+void	my_setenv();
 int	envix();
 void	growstr();
 char	*ninstr();
@@ -38,13 +41,14 @@ char	*rninstr();
 char	*nsavestr();
 FILE	*mypopen();
 int	mypclose();
-#ifndef HAS_MEMCPY
-#ifndef HAS_BCOPY
-char	*bcopy();
+#if !defined(HAS_BCOPY) || !defined(SAFE_BCOPY)
+char	*my_bcopy();
 #endif
-#ifndef HAS_BZERO
-char	*bzero();
+#if !defined(HAS_BZERO) && !defined(HAS_MEMSET)
+char	*my_bzero();
 #endif
+#ifndef HAS_MEMCMP
+int	my_memcmp();
 #endif
 unsigned long scanoct();
 unsigned long scanhex();

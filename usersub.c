@@ -1,10 +1,13 @@
-/* $RCSfile: usersub.c,v $$Revision: 4.0.1.1 $$Date: 91/11/11 16:47:17 $
+/* $RCSfile: usersub.c,v $$Revision: 4.0.1.2 $$Date: 92/06/08 16:04:24 $
  *
  *  This file contains stubs for routines that the user may define to
  *  set up glue routines for C libraries or to decrypt encrypted scripts
  *  for execution.
  *
  * $Log:	usersub.c,v $
+ * Revision 4.0.1.2  92/06/08  16:04:24  lwall
+ * patch20: removed implicit int declarations on functions
+ * 
  * Revision 4.0.1.1  91/11/11  16:47:17  lwall
  * patch19: deleted some unused functions from usersub.c
  * 
@@ -16,6 +19,7 @@
 #include "EXTERN.h"
 #include "perl.h"
 
+int
 userinit()
 {
     return 0;
@@ -46,6 +50,7 @@ userinit()
 #define	CRYPT_MAGIC_1	0xfb
 #define	CRYPT_MAGIC_2	0xf1
 
+void
 cryptfilter( fil )
 FILE *	fil;
 {
@@ -113,6 +118,7 @@ VOID	(*func)();
     return fdopen(p[0], "r");
 }
 
+void
 cryptswitch()
 {
     int ch;

@@ -1,4 +1,4 @@
-;# $Header: termcap.pl,v 4.0 91/03/20 01:26:33 lwall Locked $
+;# $RCSfile: termcap.pl,v $$Revision: 4.0.1.1 $$Date: 92/06/08 13:49:17 $
 ;#
 ;# Usage:
 ;#	require 'ioctl.pl';
@@ -21,7 +21,7 @@ sub Tgetent {
     $TERMCAP = $ENV{'TERMCAP'};
     $TERMCAP = '/etc/termcap' unless $TERMCAP;
     if ($TERMCAP !~ m:^/:) {
-	if (index($TERMCAP,"|$TERM|") < $[) {
+	if ($TERMCAP !~ /(^|\|)$TERM[:\|]/) {
 	    $TERMCAP = '/etc/termcap';
 	}
     }
@@ -33,7 +33,7 @@ sub Tgetent {
 	    while (<TERMCAP>) {
 		next if /^#/;
 		next if /^\t/;
-		if (/\\|$TERM[:\\|]/) {
+		if (/(^|\\|)$TERM[:\\|]/) {
 		    chop;
 		    while (chop eq '\\\\') {
 			\$_ .= <TERMCAP>;

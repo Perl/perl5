@@ -1,4 +1,4 @@
-/* $RCSfile: util.c,v $$Revision: 4.0.1.4 $$Date: 91/11/11 16:48:54 $
+/* $RCSfile: util.c,v $$Revision: 4.0.1.5 $$Date: 92/06/08 16:08:37 $
  *
  *    Copyright (c) 1991, Larry Wall
  *
@@ -6,6 +6,13 @@
  *    License or the Artistic License, as specified in the README file.
  *
  * $Log:	util.c,v $
+ * Revision 4.0.1.5  92/06/08  16:08:37  lwall
+ * patch20: removed implicit int declarations on functions
+ * patch20: Perl now distinguishes overlapped copies from non-overlapped
+ * patch20: fixed confusion between a *var's real name and its effective name
+ * patch20: bcopy() and memcpy() now tested for overlap safety
+ * patch20: added Atari ST portability
+ * 
  * Revision 4.0.1.4  91/11/11  16:48:54  lwall
  * patch19: study was busted by 4.018
  * patch19: added little-endian pack/unpack options
@@ -96,16 +103,18 @@ MEM_SIZE size;
 #endif
     ptr = malloc(size?size:1);	/* malloc(0) is NASTY on our system */
 #ifdef DEBUGGING
-#  ifndef I286
+#  if !(defined(I286) || defined(atarist))
     if (debug & 128)
-	fprintf(stderr,"0x%x: (%05d) malloc %d bytes\n",ptr,an++,size);
+	fprintf(stderr,"0x%x: (%05d) malloc %ld bytes\n",ptr,an++,(long)size);
 #  else
     if (debug & 128)
-	fprintf(stderr,"0x%lx: (%05d) malloc %d bytes\n",ptr,an++,size);
+	fprintf(stderr,"0x%lx: (%05d) malloc %ld bytes\n",ptr,an++,(long)size);
 #  endif
 #endif
     if (ptr != Nullch)
 	return ptr;
+    else if (nomemok)
+	return Nullch;
     else {
 	fputs(nomem,stderr) FLUSH;
 	exit(1);
@@ -146,20 +155,22 @@ unsigned long size;
 #endif
     ptr = realloc(where,size?size:1);	/* realloc(0) is NASTY on our system */
 #ifdef DEBUGGING
-#  ifndef I286
+#  if !(defined(I286) || defined(atarist))
     if (debug & 128) {
 	fprintf(stderr,"0x%x: (%05d) rfree\n",where,an++);
-	fprintf(stderr,"0x%x: (%05d) realloc %d bytes\n",ptr,an++,size);
+	fprintf(stderr,"0x%x: (%05d) realloc %ld bytes\n",ptr,an++,(long)size);
     }
 #  else
     if (debug & 128) {
 	fprintf(stderr,"0x%lx: (%05d) rfree\n",where,an++);
-	fprintf(stderr,"0x%lx: (%05d) realloc %d bytes\n",ptr,an++,size);
+	fprintf(stderr,"0x%lx: (%05d) realloc %ld bytes\n",ptr,an++,(long)size);
     }
 #  endif
 #endif
     if (ptr != Nullch)
 	return ptr;
+    else if (nomemok)
+	return Nullch;
     else {
 	fputs(nomem,stderr) FLUSH;
 	exit(1);
@@ -177,7 +188,7 @@ safefree(where)
 char *where;
 {
 #ifdef DEBUGGING
-#  ifndef I286
+#  if !(defined(I286) || defined(atarist))
     if (debug & 128)
 	fprintf(stderr,"0x%x: (%05d) free\n",where,an++);
 #  else
@@ -233,6 +244,7 @@ char *where;
     safefree(where);
 }
 
+static void
 xstat()
 {
     register int i;
@@ -820,7 +832,7 @@ register int len;
     register char *newaddr;
 
     New(903,newaddr,len+1,char);
-    (void)bcopy(str,newaddr,len);	/* might not be null terminated */
+    Copy(str,newaddr,len,char);		/* might not be null terminated */
     newaddr[len] = '\0';		/* is now */
     return newaddr;
 }
@@ -844,6 +856,7 @@ int newlen;
 
 #ifndef I_VARARGS
 /*VARARGS1*/
+char *
 mess(pat,a1,a2,a3,a4)
 char *pat;
 long a1, a2, a3, a4;
@@ -873,7 +886,7 @@ long a1, a2, a3, a4;
 	    stab_io(last_in_stab) &&
 	    stab_io(last_in_stab)->lines ) {
 	    (void)sprintf(s,", <%s> line %ld",
-	      last_in_stab == argvstab ? "" : stab_name(last_in_stab),
+	      last_in_stab == argvstab ? "" : stab_ename(last_in_stab),
 	      (long)stab_io(last_in_stab)->lines);
 	    s += strlen(s);
 	}
@@ -888,7 +901,7 @@ long a1, a2, a3, a4;
 }
 
 /*VARARGS1*/
-fatal(pat,a1,a2,a3,a4)
+void fatal(pat,a1,a2,a3,a4)
 char *pat;
 long a1, a2, a3, a4;
 {
@@ -932,7 +945,7 @@ long a1, a2, a3, a4;
 }
 
 /*VARARGS1*/
-warn(pat,a1,a2,a3,a4)
+void warn(pat,a1,a2,a3,a4)
 char *pat;
 long a1, a2, a3, a4;
 {
@@ -1009,7 +1022,7 @@ va_list args;
 }
 
 /*VARARGS0*/
-fatal(va_alist)
+void fatal(va_alist)
 va_dcl
 {
     va_list args;
@@ -1059,7 +1072,7 @@ va_dcl
 }
 
 /*VARARGS0*/
-warn(va_alist)
+void warn(va_alist)
 va_dcl
 {
     va_list args;
@@ -1085,7 +1098,7 @@ va_dcl
 #endif
 
 void
-setenv(nam,val)
+my_setenv(nam,val)
 char *nam, *val;
 {
     register int i=envix(nam);		/* where does it go? */
@@ -1144,6 +1157,7 @@ char *nam;
 }
 
 #ifdef EUNICE
+int
 unlnk(f)	/* unlink all versions of a file */
 char *f;
 {
@@ -1154,25 +1168,32 @@ char *f;
 }
 #endif
 
-#ifndef HAS_MEMCPY
-#ifndef HAS_BCOPY
+#if !defined(HAS_BCOPY) || !defined(SAFE_BCOPY)
 char *
-bcopy(from,to,len)
+my_bcopy(from,to,len)
 register char *from;
 register char *to;
 register int len;
 {
     char *retval = to;
 
-    while (len--)
-	*to++ = *from++;
+    if (from - to >= 0) {
+	while (len--)
+	    *to++ = *from++;
+    }
+    else {
+	to += len;
+	from += len;
+	while (len--)
+	    --*to = --*from;
+    }
     return retval;
 }
 #endif
 
-#ifndef HAS_BZERO
+#if !defined(HAS_BZERO) && !defined(HAS_MEMSET)
 char *
-bzero(loc,len)
+my_bzero(loc,len)
 register char *loc;
 register int len;
 {
@@ -1183,7 +1204,23 @@ register int len;
     return retval;
 }
 #endif
-#endif
+
+#ifndef HAS_MEMCMP
+int
+my_memcmp(s1,s2,len)
+register unsigned char *s1;
+register unsigned char *s2;
+register int len;
+{
+    register int tmp;
+
+    while (len--) {
+	if (tmp = *s1++ - *s2++)
+	    return tmp;
+    }
+    return 0;
+}
+#endif /* HAS_MEMCMP */
 
 #ifdef I_VARARGS
 #ifndef HAS_VPRINTF
@@ -1372,7 +1409,7 @@ VTOH(vtohs,short)
 VTOH(vtohl,long)
 #endif
 
-#ifndef MSDOS
+#ifndef DOSISH
 FILE *
 mypopen(cmd,mode)
 char	*cmd;
@@ -1446,7 +1483,19 @@ char	*mode;
     forkprocess = pid;
     return fdopen(p[this], mode);
 }
-#endif /* !MSDOS */
+#else
+#ifdef atarist
+FILE *popen();
+FILE *
+mypopen(cmd,mode)
+char	*cmd;
+char	*mode;
+{
+    return popen(cmd, mode);
+}
+#endif
+
+#endif /* !DOSISH */
 
 #ifdef NOTDEF
 dumpfds(s)
@@ -1488,7 +1537,7 @@ int newfd;
 }
 #endif
 
-#ifndef MSDOS
+#ifndef DOSISH
 int
 mypclose(ptr)
 FILE *ptr;
@@ -1506,6 +1555,9 @@ FILE *ptr;
     pid = (int)str->str_u.str_useful;
     astore(fdpid,fileno(ptr),Nullstr);
     fclose(ptr);
+#ifdef UTS
+    if(kill(pid, 0) < 0) { return(pid); }   /* HOM 12/23/91 */
+#endif
     hstat = signal(SIGHUP, SIG_IGN);
     istat = signal(SIGINT, SIG_IGN);
     qstat = signal(SIGQUIT, SIG_IGN);
@@ -1551,7 +1603,7 @@ int flags;
 	hiterinit(pidstatus);
 	if (entry = hiternext(pidstatus)) {
 	    pid = atoi(hiterkey(entry,statusp));
-	    str = hiterval(entry);
+	    str = hiterval(pidstatus,entry);
 	    *statusp = (int)str->str_u.str_useful;
 	    sprintf(spid, "%d", pid);
 	    hdelete(pidstatus,spid,strlen(spid));
@@ -1570,7 +1622,9 @@ int flags;
 #endif
 #endif
 }
+#endif /* !DOSISH */
 
+void
 /*SUPPRESS 590*/
 pidgone(pid,status)
 int pid;
@@ -1587,23 +1641,16 @@ int status;
 #endif
     return;
 }
-#endif /* !MSDOS */
 
-#ifndef HAS_MEMCMP
-memcmp(s1,s2,len)
-register unsigned char *s1;
-register unsigned char *s2;
-register int len;
+#ifdef atarist
+int pclose();
+int
+mypclose(ptr)
+FILE *ptr;
 {
-    register int tmp;
-
-    while (len--) {
-	if (tmp = *s1++ - *s2++)
-	    return tmp;
-    }
-    return 0;
+    return pclose(ptr);
 }
-#endif /* HAS_MEMCMP */
+#endif
 
 void
 repeatcpy(to,from,len,count)

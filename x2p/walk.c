@@ -1,4 +1,4 @@
-/* $RCSfile: walk.c,v $$Revision: 4.0.1.2 $$Date: 91/11/05 19:25:09 $
+/* $RCSfile: walk.c,v $$Revision: 4.0.1.3 $$Date: 92/06/08 17:33:46 $
  *
  *    Copyright (c) 1991, Larry Wall
  *
@@ -6,6 +6,12 @@
  *    License or the Artistic License, as specified in the README file.
  *
  * $Log:	walk.c,v $
+ * Revision 4.0.1.3  92/06/08  17:33:46  lwall
+ * patch20: in a2p, simplified the filehandle model
+ * patch20: in a2p, made RS="" translate to $/ = "\n\n"
+ * patch20: in a2p, do {...} while ... was missing some reconstruction code
+ * patch20: in a2p, getline should allow variable to be array element
+ * 
  * Revision 4.0.1.2  91/11/05  19:25:09  lwall
  * patch11: in a2p, split on whitespace produced extra null field
  * 
@@ -211,11 +217,8 @@ int minprec;			/* minimum precedence without parens */
 	    str_cat(str,"\n\
 sub Pick {\n\
     local($mode,$name,$pipe) = @_;\n\
-    $fh = $opened{$name};\n\
-    if (!$fh) {\n\
-	$fh = $opened{$name} = 'fh_' . ($nextfh++ + 0);\n\
-	open($fh,$mode.$name.$pipe);\n\
-    }\n\
+    $fh = $name;\n\
+    open($name,$mode.$name.$pipe) unless $opened{$name}++;\n\
 }\n\
 ");
 	}
@@ -468,6 +471,8 @@ sub Pick {\n\
 	str_scat(str,fstr=walk(1,level,ops[node+3].ival,&numarg,prec));
 	str_free(fstr);
 	numeric |= numarg;
+	if (strEQ(str->str_ptr,"$/ = ''"))
+	    str_set(str, "$/ = \"\\n\\n\"");
 	break;
     case OADD:
 	prec = P_ADD;
@@ -570,10 +575,9 @@ sub Pick {\n\
 	if (useval)
 	    str_cat(str,"(");
 	if (len > 0) {
-	    str_cat(str,"$");
 	    str_scat(str,fstr=walk(1,level,ops[node+1].ival,&numarg,P_MIN));
 	    if (!*fstr->str_ptr) {
-		str_cat(str,"_");
+		str_cat(str,"$_");
 		len = 2;		/* a legal fiction */
 	    }
 	    str_free(fstr);
@@ -1137,8 +1141,8 @@ sub Pick {\n\
 	    str_cat(str,tokenbuf);
 	}
 	else {
-	    sprintf(tokenbuf,"$fh = delete $opened{%s} && close($fh)",
-	       tmpstr->str_ptr);
+	    sprintf(tokenbuf,"delete $opened{%s} && close(%s)",
+	       tmpstr->str_ptr, tmpstr->str_ptr);
 	    str_free(tmpstr);
 	    str_set(str,tokenbuf);
 	}
@@ -1414,6 +1418,18 @@ sub Pick {\n\
 	str_cat(str,") ");
 	str_scat(str,fstr=walk(0,level,ops[node+2].ival,&numarg,P_MIN));
 	str_free(fstr);
+	break;
+    case ODO:
+	str = str_new(0);
+	str_set(str,"do ");
+	str_scat(str,fstr=walk(1,level,ops[node+1].ival,&numarg,P_MIN));
+	str_free(fstr);
+	if (str->str_ptr[str->str_cur - 1] == '\n')
+	    --str->str_cur;;
+	str_cat(str," while (");
+	str_scat(str,fstr=walk(0,level,ops[node+2].ival,&numarg,P_MIN));
+	str_free(fstr);
+	str_cat(str,");");
 	break;
     case OFOR:
 	str = str_new(0);
