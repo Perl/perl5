@@ -1190,6 +1190,14 @@ prototypes.
           timep
           RETVAL
 
+If the prototypes are enabled, you can disable it locally for a given
+XSUB as in the following example:
+
+    void
+    rpcb_gettime_noproto()
+        PROTOTYPE: DISABLE
+    ...
+
 =head2 The ALIAS: Keyword
 
 The ALIAS: keyword allows an XSUB to have two or more unique Perl names
