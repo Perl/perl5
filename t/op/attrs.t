@@ -8,7 +8,7 @@ BEGIN {
     require './test.pl';
 }
 
-plan tests => 95;
+plan 'no_plan';
 
 $SIG{__WARN__} = sub { die @_ };
 
@@ -147,7 +147,8 @@ eval 'my $$foo : bar = 1';
 like $@, qr/Can't declare scalar dereference in my/;
 
 
-my @code = qw(assertion lvalue locked method);
+my @code = qw(lvalue locked method);
+unshift @code, 'assertion' if $] >= 5.009;
 my @other = qw(shared unique);
 my %valid;
 $valid{CODE} = {map {$_ => 1} @code};

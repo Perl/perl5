@@ -71,6 +71,7 @@ modify_SV_attributes(pTHX_ SV *sv, SV **retlist, SV **attrlist, int numattrs)
 	switch (SvTYPE(sv)) {
 	case SVt_PVCV:
 	    switch ((int)len) {
+#ifdef CVf_ASSERTION
 	    case 9:
 		if (memEQ(name, "assertion", 9)) {
 		    if (negated)
@@ -80,6 +81,7 @@ modify_SV_attributes(pTHX_ SV *sv, SV **retlist, SV **attrlist, int numattrs)
 		    continue;
 		}
 		break;
+#endif
 	    case 6:
 		switch (name[3]) {
 		case 'l':
