@@ -74,7 +74,7 @@ Force byte semantics rather than character semantics
 
 =item charnames
 
-Define character names for C<\N{named}> string literal escape.
+Define character names for C<\N{named}> string literal escapes.
 
 =item constant
 
@@ -83,6 +83,10 @@ Declare constants
 =item diagnostics
 
 Perl compiler pragma to force verbose warning diagnostics
+
+=item encoding
+
+Pragma to control the conversion of legacy data into Unicode
 
 =item fields
 
@@ -124,6 +128,10 @@ Alter regular expression behaviour
 
 Enable simple signal handling
 
+=item sort
+
+Control sort() behaviour
+
 =item strict
 
 Restrict unsafe constructs
@@ -143,6 +151,10 @@ Enable/disable UTF-8 (or UTF-EBCDIC) in source code
 =item vars
 
 Predeclare global variable names (obsolete)
+
+=item vmsish
+
+Control VMS-specific language features
 
 =item warnings
 
@@ -496,7 +508,7 @@ Portably perform operations on file names
 
 =item File::Spec::Mac
 
-File::Spec for MacOS
+File::Spec for Mac OS (Classic)
 
 =item File::Spec::OS2
 
@@ -569,10 +581,6 @@ Open a process for both reading and writing
 =item IPC::Open3
 
 Open a process for reading, writing, and error handling
-
-=item Lingua::KO::Hangul::Util
-
-Utility functions for Hangul Syllables
 
 =item Locale::Constants
 
@@ -766,6 +774,10 @@ Convert Pod data to formatted Latex
 
 Convert POD data to formatted *roff input
 
+=item Pod::ParseLink
+
+Parse an L<> formatting code in POD text
+
 =item Pod::ParseUtils
 
 Helpers for POD parsing and conversion
@@ -801,6 +813,10 @@ Convert POD data to ASCII text with format escapes
 =item Pod::Usage
 
 Print a usage message from embedded pod documentation
+
+=item Pod::t::basic
+
+Test of various basic POD features in translators.
 
 =item SDBM_File
 
@@ -862,6 +878,10 @@ Perl interface to various C<readline> packages. If
 
 Provides a simple framework for writing test scripts
 
+=item Test::Builder
+
+Backend for building test libraries
+
 =item Test::Harness
 
 Run perl standard test scripts with statistics
@@ -901,6 +921,10 @@ Expand and unexpand tabs per the unix expand(1) and unexpand(1)
 =item Text::Wrap
 
 Line wrapping to form simple paragraphs
+
+=item Thread
+
+Manipulate threads in Perl
 
 =item Tie::Array
 
@@ -949,10 +973,6 @@ Base class for ALL classes (blessed references)
 =item Unicode::Collate
 
 Use UCA (Unicode Collation Algorithm)
-
-=item Unicode::Normalize
-
-Normalized forms of Unicode text
 
 =item Unicode::UCD
 
