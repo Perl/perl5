@@ -181,7 +181,11 @@ sub Init {
 		));
 	
 	# My username
-	$me = ($Is_MSWin32 ? $ENV{'USERNAME'} : getpwuid($<));
+	$me = ( $Is_MSWin32 
+		? $ENV{'USERNAME'} 
+		: ( $^O eq 'os2' 
+		    ? $ENV{'USER'} || $ENV{'LOGNAME'} 
+		    : eval { getpwuid($<) }) );	# May be missing
 
 }
 
@@ -718,6 +722,7 @@ sub Send {
 	
 		$fh->close;  
 	
+		print "\nMessage sent.\n";
 	} else {
 		if ($Is_VMS) {
 			if ( ($address =~ /@/ and $address !~ /^\w+%"/) or
@@ -738,6 +743,18 @@ sub Send {
 			foreach (qw(/usr/lib/sendmail /usr/sbin/sendmail /usr/ucblib/sendmail))
 			{
 				$sendmail = $_, last if -e $_;
+			}
+
+			if ($^O eq 'os2' and $sendmail eq "") {
+			  my $path = $ENV{PATH};
+			  $path =~ s:\\:/: ;
+			  my @path = split /$Config{path_sep}/, $path;
+			  for (@path) {
+			    $sendmail = "$_/sendmail", last 
+			      if -e "$_/sendmail";
+			    $sendmail = "$_/sendmail.exe", last 
+			      if -e "$_/sendmail.exe";
+			  }
 			}
 			
 			paraprint <<"EOF", die "\n" if $sendmail eq "";
@@ -761,12 +778,14 @@ EOF
 			while(<REP>) { print SENDMAIL $_ }
 			close(REP);
 			
-			close(SENDMAIL);
+			if (close(SENDMAIL)) {
+			  print "\nMessage sent.\n";
+			} else {
+			  warn "\nSendmail returned status '",$?>>8,"'\n";
+			}
 		}
 	
 	}
-	
-	print "\nMessage sent.\n";
 
 	1 while unlink($filename);  # remove all versions under VMS
 
