@@ -1,7 +1,10 @@
 .rn '' }`
-''' $Header: perl_man.1,v 3.0.1.10 90/11/10 01:45:16 lwall Locked $
+''' $Header: perl_man.1,v 3.0.1.11 91/01/11 18:15:46 lwall Locked $
 ''' 
 ''' $Log:	perl.man.1,v $
+''' Revision 3.0.1.11  91/01/11  18:15:46  lwall
+''' patch42: added -0 option
+''' 
 ''' Revision 3.0.1.10  90/11/10  01:45:16  lwall
 ''' patch38: random cleanup
 ''' 
@@ -179,6 +182,22 @@ only allows one argument.  Example:
 
 .fi
 Options include:
+.TP 5
+.BI \-0 digits
+specifies the record separator ($/) as an octal number.
+If there are no digits, the null character is the separator.
+Other switches may precede or follow the digits.
+For example, if you have a version of
+.I find
+which can print filenames terminated by the null character, you can say this:
+.nf
+
+    find . \-name '*.bak' \-print0 | perl \-n0e unlink
+
+.fi
+The special value 00 will cause Perl to slurp files in paragraph mode.
+The value 0777 will cause Perl to slurp files whole since there is no
+legal character with that value.
 .TP 5
 .B \-a
 turns on autosplit mode when used with a

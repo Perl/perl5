@@ -1,6 +1,6 @@
 package DB;
 
-$header = '$Header: perldb.pl,v 3.0.1.5 90/11/10 01:40:26 lwall Locked $';
+$header = '$Header: perldb.pl,v 3.0.1.6 91/01/11 18:08:58 lwall Locked $';
 #
 # This file is automatically included if you do perl -d.
 # It's probably not useful to include this yourself.
@@ -10,6 +10,9 @@ $header = '$Header: perldb.pl,v 3.0.1.5 90/11/10 01:40:26 lwall Locked $';
 # have a breakpoint.  It also inserts a do 'perldb.pl' before the first line.
 #
 # $Log:	perldb.pl,v $
+# Revision 3.0.1.6  91/01/11  18:08:58  lwall
+# patch42: @_ couldn't be accessed from debugger
+# 
 # Revision 3.0.1.5  90/11/10  01:40:26  lwall
 # patch38: the debugger wouldn't stop correctly or do action routines
 # 
@@ -62,7 +65,7 @@ sub DB {
 	    $signal |= 1;
 	}
 	else {
-	    &eval("\$DB'signal |= do {$stop;}");
+	    $evalarg = "\$DB'signal |= do {$stop;}"; &eval;
 	    $dbline{$line} =~ s/;9($|\0)/$1/;
 	}
     }
@@ -74,9 +77,9 @@ sub DB {
 	    print OUT "$sub($filename:$i):\t",$dbline[$i];
 	}
     }
-    &eval($action) if $action;
+    $evalarg = $action, &eval if $action;
     if ($single || $signal) {
-	&eval($pre) if $pre;
+	$evalarg = $pre, &eval if $pre;
 	print OUT $#stack . " levels deep in subroutine calls!\n"
 	    if $single & 4;
 	$start = $line;
@@ -452,11 +455,11 @@ command		Execute as a perl statement in current package.
 		    };
 		};
 		next; };
-	    &eval($cmd);
+	    $evalarg = $cmd; &eval;
 	    print OUT "\n";
 	}
 	if ($post) {
-	    &eval($post);
+	    $evalarg = $post; &eval;
 	}
     }
     ($@, $!, $[, $,, $/, $\) = @saved;
@@ -467,8 +470,10 @@ sub save {
     $[ = 0; $, = ""; $/ = "\n"; $\ = "";
 }
 
+# The following takes its argument via $evalarg to preserve current @_
+
 sub eval {
-    eval "$usercontext $_[0]; &DB'save";
+    eval "$usercontext $evalarg; &DB'save";
     print OUT $@;
 }
 

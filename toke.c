@@ -1,4 +1,4 @@
-/* $Header: toke.c,v 3.0.1.11 90/11/10 02:13:44 lwall Locked $
+/* $Header: toke.c,v 3.0.1.12 91/01/11 18:31:45 lwall Locked $
  *
  *    Copyright (c) 1989, Larry Wall
  *
@@ -6,6 +6,10 @@
  *    as specified in the README file that comes with the perl 3.0 kit.
  *
  * $Log:	toke.c,v $
+ * Revision 3.0.1.12  91/01/11  18:31:45  lwall
+ * patch42: eval'ed formats without proper termination blew up
+ * patch42: whitespace now allowed after terminating . of format
+ * 
  * Revision 3.0.1.11  90/11/10  02:13:44  lwall
  * patch38: added alarm function
  * patch38: tr was busted in metacharacters on signed char machines
@@ -2341,7 +2345,7 @@ load_format()
 
     Zero(&froot, 1, FCMD);
     s = bufptr;
-    while (s < bufend || (s = str_gets(linestr,rsfp, 0)) != Nullch) {
+    while (s < bufend || (rsfp && (s = str_gets(linestr,rsfp, 0)) != Nullch)) {
 	curcmd->c_line++;
 	if (in_eval && !rsfp) {
 	    eol = index(s,'\n');
@@ -2356,9 +2360,12 @@ load_format()
 	    str_nset(tmpstr, s, eol-s);
 	    astore(stab_xarray(curcmd->c_filestab), (int)curcmd->c_line,tmpstr);
 	}
-	if (strnEQ(s,".\n",2)) {
-	    bufptr = s;
-	    return froot.f_next;
+	if (*s == '.') {
+	    for (t = s+1; *t == ' ' || *t == '\t'; t++) ;
+	    if (*t == '\n') {
+		bufptr = s;
+		return froot.f_next;
+	    }
 	}
 	if (*s == '#') {
 	    s = eol;
@@ -2456,7 +2463,8 @@ load_format()
 	}
 	if (flinebeg) {
 	  again:
-	    if (s >= bufend && (s = str_gets(linestr, rsfp, 0)) == Nullch)
+	    if (s >= bufend &&
+	      (!rsfp || (s = str_gets(linestr, rsfp, 0)) == Nullch) )
 		goto badform;
 	    curcmd->c_line++;
 	    if (in_eval && !rsfp) {

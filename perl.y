@@ -1,4 +1,4 @@
-/* $Header: perl.y,v 3.0.1.10 91/01/11 18:14:28 lwall Locked $
+/* $Header: perl.y,v 3.0.1.11 91/01/11 21:57:40 lwall Locked $
  *
  *    Copyright (c) 1989, Larry Wall
  *
@@ -6,6 +6,9 @@
  *    as specified in the README file that comes with the perl 3.0 kit.
  *
  * $Log:	perl.y,v $
+ * Revision 3.0.1.11  91/01/11  21:57:40  lwall
+ * patch42: addendum
+ * 
  * Revision 3.0.1.10  91/01/11  18:14:28  lwall
  * patch42: package didn't create symbol tables that could be reset
  * patch42: split with no arguments could wipe out next operator
@@ -672,7 +675,7 @@ term	:	'-' term %prec UMINUS
 	|	SPLIT	%prec '('
 			{   static char p[]="/\\s+/";
 			    char *oldend = bufend;
-			    int oldarg = yylval.arg;
+			    ARG *oldarg = yylval.arg;
 			    
 			    bufend=p+5;
 			    (void)scanpat(p);

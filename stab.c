@@ -1,4 +1,4 @@
-/* $Header: stab.c,v 3.0.1.10 90/11/10 02:02:05 lwall Locked $
+/* $Header: stab.c,v 3.0.1.11 91/01/11 18:23:44 lwall Locked $
  *
  *    Copyright (c) 1989, Larry Wall
  *
@@ -6,6 +6,9 @@
  *    as specified in the README file that comes with the perl 3.0 kit.
  *
  * $Log:	stab.c,v $
+ * Revision 3.0.1.11  91/01/11  18:23:44  lwall
+ * patch42: added -0 option
+ * 
  * Revision 3.0.1.10  90/11/10  02:02:05  lwall
  * patch38: random cleanup
  * 
@@ -170,7 +173,7 @@ STR *str;
 	break;
 #endif
     case '/':
-	if (record_separator != 12345) {
+	if (record_separator != 0777) {
 	    *tokenbuf = record_separator;
 	    tokenbuf[1] = '\0';
 	    str_nset(stab_val(stab),tokenbuf,rslen);
@@ -401,7 +404,7 @@ STR *str;
 		rslen = str->str_cur;
 	    }
 	    else {
-		record_separator = 12345;	/* fake a non-existent char */
+		record_separator = 0777;	/* fake a non-existent char */
 		rslen = 1;
 	    }
 	    break;

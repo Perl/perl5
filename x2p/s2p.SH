@@ -7,6 +7,7 @@ case $CONFIG in
 '')
     if test ! -f config.sh; then
 	ln ../config.sh . || \
+	ln -s ../config.sh . || \
 	ln ../../config.sh . || \
 	ln ../../../config.sh . || \
 	(echo "Can't find config.sh."; exit 1)
@@ -28,9 +29,12 @@ $spitshell >s2p <<!GROK!THIS!
 : In the following dollars and backticks do not need the extra backslash.
 $spitshell >>s2p <<'!NO!SUBS!'
 
-# $Header: s2p.SH,v 3.0.1.6 90/10/20 02:21:43 lwall Locked $
+# $Header: s2p.SH,v 3.0.1.7 91/01/11 18:36:44 lwall Locked $
 #
 # $Log:	s2p.SH,v $
+# Revision 3.0.1.7  91/01/11  18:36:44  lwall
+# patch42: x2p/s2p.SH blew up on /afs misfeature
+# 
 # Revision 3.0.1.6  90/10/20  02:21:43  lwall
 # patch37: changed some ". config.sh" to ". ./config.sh"
 # 

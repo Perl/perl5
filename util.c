@@ -1,4 +1,4 @@
-/* $Header: util.c,v 3.0.1.10 90/11/10 02:19:28 lwall Locked $
+/* $Header: util.c,v 3.0.1.11 91/01/11 18:33:10 lwall Locked $
  *
  *    Copyright (c) 1989, Larry Wall
  *
@@ -6,6 +6,10 @@
  *    as specified in the README file that comes with the perl 3.0 kit.
  *
  * $Log:	util.c,v $
+ * Revision 3.0.1.11  91/01/11  18:33:10  lwall
+ * patch42: die could exit with 0 value on some machines
+ * patch42: Configure checks typecasting behavior better
+ * 
  * Revision 3.0.1.10  90/11/10  02:19:28  lwall
  * patch38: random cleanup
  * patch38: sequence of s/^x//; s/x$//; could screw up malloc
@@ -855,7 +859,7 @@ long a1, a2, a3, a4;
     if (e_fp)
 	(void)UNLINK(e_tmpname);
     statusvalue >>= 8;
-    exit(errno?errno:(statusvalue?statusvalue:255));
+    exit((int)((errno&255)?errno:((statusvalue&255)?statusvalue:255)));
 }
 
 /*VARARGS1*/
@@ -959,7 +963,7 @@ va_dcl
     if (e_fp)
 	(void)UNLINK(e_tmpname);
     statusvalue >>= 8;
-    exit((int)(errno?errno:(statusvalue?statusvalue:255)));
+    exit((int)((errno&255)?errno:((statusvalue&255)?statusvalue:255)));
 }
 
 /*VARARGS0*/
@@ -1458,7 +1462,7 @@ double f;
 {
     long along;
 
-#ifdef mips
+#if CASTFLAGS & 2
 #   define BIGDOUBLE 2147483648.0
     if (f >= BIGDOUBLE)
 	return (unsigned long)(f-(long)(f/BIGDOUBLE)*BIGDOUBLE)|0x80000000;

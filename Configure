@@ -8,7 +8,7 @@
 # and edit it to reflect your system.  Some packages may include samples
 # of config.h for certain machines, so you might look for one of those.)
 #
-# $Header: Configure,v 3.0.1.13 91/01/11 17:01:32 lwall Locked $
+# $Header: Configure,v 3.0.1.14 91/01/11 21:56:38 lwall Locked $
 #
 # Yes, you may rip this off to use in other distribution packages.
 # (Note: this Configure script was generated automatically.  Rather than
@@ -1321,15 +1321,16 @@ main()
 	exit(result);
 }
 EOCP
-if $cc -o try $ccflags try.c >/dev/null 2>&1 && ./try; then
-    d_castneg="$define"
-    castflags=0
+$cc -o try $ccflags try.c >/dev/null 2>&1 && ./try
+castflags=$?
+case "$castflags" in
+0)  d_castneg="$define"
     echo "Yup, it does."
-else
-    d_castneg="$undef"
-    castflags=$?
+    ;;
+*)  d_castneg="$undef"
     echo "Nope, it doesn't."
-fi
+    ;;
+esac
 $rm -f try.*
 
 : see how we invoke the C preprocessor

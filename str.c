@@ -1,4 +1,4 @@
-/* $Header: str.c,v 3.0.1.11 90/11/13 15:27:14 lwall Locked $
+/* $Header: str.c,v 3.0.1.12 91/01/11 18:26:54 lwall Locked $
  *
  *    Copyright (c) 1989, Larry Wall
  *
@@ -6,6 +6,11 @@
  *    as specified in the README file that comes with the perl 3.0 kit.
  *
  * $Log:	str.c,v $
+ * Revision 3.0.1.12  91/01/11  18:26:54  lwall
+ * patch42: s/^foo/bar/ occasionally brought on core dumps
+ * patch42: undid unwarranted assumptions about memcmp() return value
+ * patch42: ('a' .. 'z') could lose its value in a loop
+ * 
  * Revision 3.0.1.11  90/11/13  15:27:14  lwall
  * patch41: fixed a couple of malloc/free problems
  * 
@@ -285,8 +290,14 @@ register STR *sstr;
 	    sstr->str_pok = 0;			/* wipe out any weird flags */
 	    sstr->str_state = 0;		/* so sstr frees uneventfully */
 	}
-	else					/* have to copy actual string */
+	else {					/* have to copy actual string */
+	    if (dstr->str_ptr) {
+		if (dstr->str_state == SS_INCR) {
+			Str_Grow(dstr,0);
+		}
+	    }
 	    str_nset(dstr,sstr->str_ptr,sstr->str_cur);
+	}
 	if (dstr->str_nok = sstr->str_nok)
 	    dstr->str_u.str_nval = sstr->str_u.str_nval;
 	else {
@@ -738,12 +749,12 @@ register STR *str2;
 
     if (str1->str_cur < str2->str_cur) {
 	if (retval = memcmp(str1->str_ptr, str2->str_ptr, str1->str_cur))
-	    return retval;
+	    return retval < 0 ? -1 : 1;
 	else
 	    return -1;
     }
     else if (retval = memcmp(str1->str_ptr, str2->str_ptr, str2->str_cur))
-	return retval;
+	return retval < 0 ? -1 : 1;
     else if (str1->str_cur == str2->str_cur)
 	return 0;
     else
@@ -804,6 +815,7 @@ int append;
 	    if (get_paragraph && oldbp)
 		obpx = oldbp - str->str_ptr;
 	    bpx = bp - str->str_ptr;	/* prepare for possible relocation */
+	    str->str_cur = bpx;
 	    STR_GROW(str, str->str_len + append + cnt + 2);
 	    bp = str->str_ptr + bpx;	/* reconstitute our pointer */
 	    if (get_paragraph && oldbp)
@@ -1373,8 +1385,10 @@ register STR *old;
     if (new->str_ptr)
 	Safefree(new->str_ptr);
     Copy(old,new,1,STR);
-    if (old->str_ptr)
+    if (old->str_ptr) {
 	new->str_ptr = nsavestr(old->str_ptr,old->str_len);
+	new->str_pok &= ~SP_TEMP;
+    }
     return new;
 }
 

@@ -1,7 +1,10 @@
 ''' Beginning of part 4
-''' $Header: perl_man.4,v 3.0.1.13 90/11/10 01:51:00 lwall Locked $
+''' $Header: perl_man.4,v 3.0.1.14 91/01/11 18:18:53 lwall Locked $
 '''
 ''' $Log:	perl.man.4,v $
+''' Revision 3.0.1.14  91/01/11  18:18:53  lwall
+''' patch42: started an addendum and errata section in the man page
+''' 
 ''' Revision 3.0.1.13  90/11/10  01:51:00  lwall
 ''' patch38: random cleanup
 ''' 
@@ -407,6 +410,7 @@ with multiple <, >, or | characters to specify, respectively, left justification
 right justification, or centering.
 As an alternate form of right justification,
 you may also use # characters (with an optional .) to specify a numeric field.
+(Use of ^ instead of @ causes the field to be blanked if undefined.)
 If any of the values supplied for these fields contains a newline, only
 the text up to the newline is printed.
 The special field @* can be used for printing multi-line values.
@@ -1556,6 +1560,18 @@ compiles the whole program before executing it.
 The arguments are available via @ARGV, not $1, $2, etc.
 .Ip * 4 2
 The environment is not automatically made available as variables.
+.SH ERRATA\0AND\0ADDENDA
+The Perl book,
+.I Programming\0Perl ,
+has the following omissions and goofs.
+.PP
+The
+.B \-0
+switch was added to Perl after the book went to press.
+.PP
+The new @###.## format was omitted accidentally.
+.PP
+It wasn't known at press time that s///ee caused multiple evaluations.
 .SH BUGS
 .PP
 .I Perl

@@ -1,4 +1,4 @@
-char rcsid[] = "$Header: perly.c,v 3.0.1.9 90/11/10 01:53:26 lwall Locked $\nPatch level: ###\n";
+char rcsid[] = "$Header: perly.c,v 3.0.1.10 91/01/11 18:22:48 lwall Locked $\nPatch level: ###\n";
 /*
  *    Copyright (c) 1989, Larry Wall
  *
@@ -6,6 +6,11 @@ char rcsid[] = "$Header: perly.c,v 3.0.1.9 90/11/10 01:53:26 lwall Locked $\nPat
  *    as specified in the README file that comes with the perl 3.0 kit.
  *
  * $Log:	perly.c,v $
+ * Revision 3.0.1.10  91/01/11  18:22:48  lwall
+ * patch42: added -0 option
+ * patch42: ANSIfied the stat mode checking
+ * patch42: executables for multiple versions may now coexist
+ * 
  * Revision 3.0.1.9  90/11/10  01:53:26  lwall
  * patch38: random cleanup
  * patch38: more msdos/os2 upgrades
@@ -82,6 +87,7 @@ static char* moreswitches();
 static char* cddir;
 extern char **environ;
 static bool minus_c;
+static char patchlevel[6];
 
 main(argc,argv,env)
 register int argc;
@@ -110,6 +116,7 @@ setuid perl scripts securely.\n");
     euid = (int)geteuid();
     gid = (int)getgid();
     egid = (int)getegid();
+    sprintf(patchlevel,"%3.3s%2.2d", rcsid+19, PATCHLEVEL);
 #ifdef MSDOS
     /*
      * There is no way we can refer to them from Perl so close them to save
@@ -147,6 +154,7 @@ setuid perl scripts securely.\n");
 	s = argv[0]+1;
       reswitch:
 	switch (*s) {
+	case '0':
 	case 'a':
 	case 'c':
 	case 'd':
@@ -287,8 +295,8 @@ setuid perl scripts securely.\n");
 #endif
 	    if (stat(tokenbuf,&statbuf) < 0)		/* not there? */
 		continue;
-	    if ((statbuf.st_mode & S_IFMT) == S_IFREG
-	     && cando(S_IREAD,TRUE,&statbuf) && cando(S_IEXEC,TRUE,&statbuf)) {
+	    if (S_ISREG(statbuf.st_mode)
+	     && cando(S_IRUSR,TRUE,&statbuf) && cando(S_IXUSR,TRUE,&statbuf)) {
 		xfound = tokenbuf;              /* bingo! */
 		break;
 	    }
@@ -303,7 +311,7 @@ setuid perl scripts securely.\n");
     }
 
     fdpid = anew(Nullstab);	/* for remembering popen pids by fd */
-    pidstatus = hnew(Nullstab);	/* for remembering status of dead pids */
+    pidstatus = hnew(COEFFSIZE);/* for remembering status of dead pids */
 
     origfilename = savestr(argv[0]);
     curcmd->c_filestab = fstab(origfilename);
@@ -360,7 +368,7 @@ setuid perl scripts securely.\n");
 #ifndef IAMSUID		/* in case script is not readable before setuid */
 	if (euid && stat(stab_val(curcmd->c_filestab)->str_ptr,&statbuf) >= 0 &&
 	  statbuf.st_mode & (S_ISUID|S_ISGID)) {
-	    (void)sprintf(buf, "%s/%s", BIN, "suidperl");
+	    (void)sprintf(buf, "%s/sperl%s", BIN, patchlevel);
 	    execv(buf, origargv);	/* try again */
 	    fatal("Can't do setuid\n");
 	}
@@ -378,12 +386,13 @@ setuid perl scripts securely.\n");
      * in perl will not fix that problem, but if you have disabled setuid
      * scripts in the kernel, this will attempt to emulate setuid and setgid
      * on scripts that have those now-otherwise-useless bits set.  The setuid
-     * root version must be called suidperl.  If regular perl discovers that
-     * it has opened a setuid script, it calls suidperl with the same argv
-     * that it had.  If suidperl finds that the script it has just opened
-     * is NOT setuid root, it sets the effective uid back to the uid.  We
-     * don't just make perl setuid root because that loses the effective
-     * uid we had before invoking perl, if it was different from the uid.
+     * root version must be called suidperl or sperlN.NNN.  If regular perl
+     * discovers that it has opened a setuid script, it calls suidperl with
+     * the same argv that it had.  If suidperl finds that the script it has
+     * just opened is NOT setuid root, it sets the effective uid back to the
+     * uid.  We don't just make perl setuid root because that loses the
+     * effective uid we had before invoking perl, if it was different from the
+     * uid.
      *
      * DOSUID must be defined in both perl and suidperl, and IAMSUID must
      * be defined in suidperl only.  suidperl must be setuid root.  The
@@ -394,7 +403,7 @@ setuid perl scripts securely.\n");
      * on these set-id scripts, but don't want to have the overhead of
      * them in normal perl, and can't use suidperl because it will lose
      * the effective uid info, so we have an additional non-setuid root
-     * version called taintperl that just does the TAINT checks.
+     * version called taintperl or tperlN.NNN that just does the TAINT checks.
      */
 
 #ifdef DOSUID
@@ -445,15 +454,15 @@ setuid perl scripts securely.\n");
 	    }
 	    if (setreuid(uid,euid) < 0 || getuid() != uid || geteuid() != euid)
 		fatal("Can't reswap uid and euid");
-	    if (!cando(S_IEXEC,FALSE,&statbuf))		/* can real uid exec? */
+	    if (!cando(S_IXUSR,FALSE,&statbuf))		/* can real uid exec? */
 		fatal("Permission denied\n");
 	}
 #endif /* SETREUID */
 #endif /* IAMSUID */
 
-	if ((statbuf.st_mode & S_IFMT) != S_IFREG)
+	if (!S_ISREG(statbuf.st_mode))
 	    fatal("Permission denied");
-	if ((statbuf.st_mode >> 6) & S_IWRITE)
+	if (statbuf.st_mode & S_IWOTH)
 	    fatal("Setuid/gid script is writable by world");
 	doswitches = FALSE;		/* -s is insecure in suid */
 	curcmd->c_line++;
@@ -463,7 +472,7 @@ setuid perl scripts securely.\n");
 	s = tokenbuf+2;
 	if (*s == ' ') s++;
 	while (!isspace(*s)) s++;
-	if (strnNE(s-4,"perl",4))	/* sanity check */
+	if (strnNE(s-4,"perl",4) && strnNE(s-9,"perl",4))  /* sanity check */
 	    fatal("Not a perl script");
 	while (*s == ' ' || *s == '\t') s++;
 	/*
@@ -487,7 +496,7 @@ FIX YOUR KERNEL, PUT A C WRAPPER AROUND THIS SCRIPT, OR USE -u AND UNDUMP!\n");
 	if (euid) {	/* oops, we're not the setuid root perl */
 	    (void)fclose(rsfp);
 #ifndef IAMSUID
-	    (void)sprintf(buf, "%s/%s", BIN, "suidperl");
+	    (void)sprintf(buf, "%s/sperl%s", BIN, patchlevel);
 	    execv(buf, origargv);	/* try again */
 #endif
 	    fatal("Can't do setuid\n");
@@ -529,7 +538,7 @@ FIX YOUR KERNEL, PUT A C WRAPPER AROUND THIS SCRIPT, OR USE -u AND UNDUMP!\n");
 	euid = (int)geteuid();
 	gid = (int)getgid();
 	egid = (int)getegid();
-	if (!cando(S_IEXEC,TRUE,&statbuf))
+	if (!cando(S_IXUSR,TRUE,&statbuf))
 	    fatal("Permission denied\n");	/* they can't do this */
     }
 #ifdef IAMSUID
@@ -542,7 +551,7 @@ FIX YOUR KERNEL, PUT A C WRAPPER AROUND THIS SCRIPT, OR USE -u AND UNDUMP!\n");
     /* script has a wrapper--can't run suidperl or we lose euid */
     else if (euid != uid || egid != gid) {
 	(void)fclose(rsfp);
-	(void)sprintf(buf, "%s/%s", BIN, "taintperl");
+	(void)sprintf(buf, "%s/tperl%s", BIN, patchlevel);
 	execv(buf, origargv);	/* try again */
 	fatal("Can't run setuid script with taint checks");
     }
@@ -563,7 +572,7 @@ FIX YOUR KERNEL, PUT A C WRAPPER AROUND THIS SCRIPT, OR USE -u AND UNDUMP!\n");
 #endif /* SETUID_SCRIPTS_ARE_SECURE_NOW */
 	/* not set-id, must be wrapped */
 	(void)fclose(rsfp);
-	(void)sprintf(buf, "%s/%s", BIN, "taintperl");
+	(void)sprintf(buf, "%s/tperl%s", BIN, patchlevel);
 	execv(buf, origargv);	/* try again */
 	fatal("Can't run setuid script with taint checks");
     }
@@ -677,9 +686,7 @@ FIX YOUR KERNEL, PUT A C WRAPPER AROUND THIS SCRIPT, OR USE -u AND UNDUMP!\n");
     if (tmpstab = stabent("]",allstabs)) {
 	str = STAB_STR(tmpstab);
 	str_set(str,rcsid);
-	strncpy(tokenbuf,rcsid+19,3);
-	sprintf(tokenbuf+3,"%2.2d",PATCHLEVEL);
-	str->str_u.str_nval = atof(tokenbuf);
+	str->str_u.str_nval = atof(patchlevel);
 	str->str_nok = 1;
     }
     str_nset(stab_val(stabent("\"", TRUE)), " ", 1);
@@ -1024,6 +1031,15 @@ char *s;
 {
   reswitch:
     switch (*s) {
+    case '0':
+	record_separator = 0;
+	if (s[1] == '0' && !isdigit(s[2]))
+	    rslen = 0;
+	while (*s >= '0' && *s <= '7') {
+	    record_separator <<= 3;
+	    record_separator += *s++ & 7;
+	}
+	return s;
     case 'a':
 	minus_a = TRUE;
 	s++;

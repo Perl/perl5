@@ -1,8 +1,11 @@
 ;# pwd.pl - keeps track of current working directory in PWD environment var
 ;#
-;# $Header: pwd.pl,v 3.0.1.1 90/08/09 04:01:24 lwall Locked $
+;# $Header: pwd.pl,v 3.0.1.2 91/01/11 18:09:24 lwall Locked $
 ;#
 ;# $Log:	pwd.pl,v $
+;# Revision 3.0.1.2  91/01/11  18:09:24  lwall
+;# patch42: some .pl files were missing their trailing 1;
+;# 
 ;# Revision 3.0.1.1  90/08/09  04:01:24  lwall
 ;# patch19: Initial revision
 ;# 
@@ -46,3 +49,4 @@ sub main'chdir {
     }
 }
 
+1;

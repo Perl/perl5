@@ -1,7 +1,10 @@
 ''' Beginning of part 2
-''' $Header: perl_man.2,v 3.0.1.10 90/11/10 01:46:29 lwall Locked $
+''' $Header: perl_man.2,v 3.0.1.11 91/01/11 18:17:08 lwall Locked $
 '''
 ''' $Log:	perl.man.2,v $
+''' Revision 3.0.1.11  91/01/11  18:17:08  lwall
+''' patch42: fixed some man page entries
+''' 
 ''' Revision 3.0.1.10  90/11/10  01:46:29  lwall
 ''' patch38: random cleanup
 ''' patch38: added alarm function
@@ -88,8 +91,8 @@ Only one timer may be counting at once.  Each call disables the previous
 timer, and an argument of 0 may be supplied to cancel the previous timer
 without starting a new one.
 The returned value is the amount of time remaining on the previous timer.
-.Ip "atan2(X,Y)" 8 2
-Returns the arctangent of X/Y in the range
+.Ip "atan2(Y,X)" 8 2
+Returns the arctangent of Y/X in the range
 .if t \-\(*p to \(*p.
 .if n \-PI to PI.
 .Ip "bind(SOCKET,NAME)" 8 2
@@ -653,6 +656,7 @@ the filehandle.
 .Ip "flock(FILEHANDLE,OPERATION)" 8 4
 Calls flock(2) on FILEHANDLE.
 See manual page for flock(2) for definition of OPERATION.
+Returns true for success, false on failure.
 Will produce a fatal error if used on a machine that doesn't implement
 flock(2).
 Here's a mailbox appender for BSD systems.
@@ -957,7 +961,7 @@ Here is yet another way to print your environment:
 	@keys = keys %ENV;
 	@values = values %ENV;
 	while ($#keys >= 0) {
-		print pop(keys), \'=\', pop(values), "\en";
+		print pop(@keys), \'=\', pop(@values), "\en";
 	}
 
 or how about sorted by key:
