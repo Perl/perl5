@@ -24,6 +24,24 @@
 
 #define FCALL *f
 
+#ifdef PERL_UTF8_CACHE_ASSERT
+/* The cache element 0 is the Unicode offset;
+ * the cache element 1 is the byte offset of the element 0;
+ * the cache element 2 is the Unicode length of the substring;
+ * the cache element 3 is the byte length of the substring;
+ * The checking of the substring side would be good
+ * but substr() has enough code paths to make my head spin;
+ * if adding more checks watch out for the following tests:
+ *   t/op/index.t t/op/length.t t/op/pat.t t/op/substr.t
+ *   lib/utf8.t lib/Unicode/Collate/t/index.t
+ * --jhi
+ */
+#define ASSERT_UTF8_CACHE(cache) \
+	STMT_START { if (cache) { assert((cache)[0] <= (cache)[1]); } } STMT_END
+#else
+#define ASSERT_UTF8_CACHE(cache) NOOP
+#endif
+
 #ifdef PERL_COPY_ON_WRITE
 #define SV_COW_NEXT_SV(sv)	INT2PTR(SV *,SvUVX(sv))
 #define SV_COW_NEXT_SV_SET(current,next)	SvUVX(current) = PTR2UV(next)
@@ -5655,8 +5673,12 @@ Perl_sv_len_utf8(pTHX_ register SV *sv)
 	U8 *s = (U8*)SvPV(sv, len);
 	MAGIC *mg = SvMAGICAL(sv) ? mg_find(sv, PERL_MAGIC_utf8) : 0;
 
-	if (mg && mg->mg_len != -1 && (mg->mg_len > 0 || len == 0))
+	if (mg && mg->mg_len != -1 && (mg->mg_len > 0 || len == 0)) {
 	    ulen = mg->mg_len;
+#ifdef PERL_UTF8_CACHE_ASSERT
+	    assert(ulen == Perl_utf8_length(aTHX_ s, s + len));
+#endif
+	}
 	else {
 	    ulen = Perl_utf8_length(aTHX_ s, s + len);
 	    if (!mg && !SvREADONLY(sv)) {
@@ -5726,8 +5748,9 @@ S_utf8_mg_pos(pTHX_ SV *sv, MAGIC **mgp, STRLEN **cachep, I32 i, I32 *offsetp, I
 	    *mgp = mg_find(sv, PERL_MAGIC_utf8);
 	if (*mgp && (*mgp)->mg_ptr) {
 	    *cachep = (STRLEN *) (*mgp)->mg_ptr;
+	    ASSERT_UTF8_CACHE(*cachep);
 	    if ((*cachep)[i] == (STRLEN)uoff)	/* An exact match. */
-		 found = TRUE;
+                 found = TRUE;          
 	    else {			/* We will skip to the right spot. */
 		 STRLEN forw  = 0;
 		 STRLEN backw = 0;
@@ -5799,7 +5822,24 @@ S_utf8_mg_pos(pTHX_ SV *sv, MAGIC **mgp, STRLEN **cachep, I32 i, I32 *offsetp, I
 		 }
 	    }
 	}
+#ifdef PERL_UTF8_CACHE_ASSERT
+	if (found) {
+	     U8 *s = start;
+	     I32 n = uoff;
+
+	     while (n-- && s < send)
+		  s += UTF8SKIP(s);
+
+	     if (i == 0) {
+		  assert(*offsetp == s - start);
+		  assert((*cachep)[0] == (STRLEN)uoff);
+		  assert((*cachep)[1] == *offsetp);
+	     }
+	     ASSERT_UTF8_CACHE(*cachep);
+	}
+#endif
     }
+
     return found;
 }
  
@@ -5871,12 +5911,14 @@ Perl_sv_pos_u2b(pTHX_ register SV *sv, I32* offsetp, I32* lenp)
 	      }
 	      *lenp = s - start;
 	 }
+	 ASSERT_UTF8_CACHE(cache);
     }
     else {
 	 *offsetp = 0;
 	 if (lenp)
 	      *lenp = 0;
     }
+
     return;
 }
 
@@ -5962,6 +6004,7 @@ Perl_sv_pos_b2u(pTHX_ register SV* sv, I32* offsetp)
 		    }
 		}
 	    }
+	    ASSERT_UTF8_CACHE(cache);
 	}
 
 	while (s < send) {
