@@ -242,11 +242,13 @@ $directories must be only the directory portion of the path on systems
 that have the concept of a volume or that have path syntax that differentiates
 files from directories.
 
-Unlike just splitting the directories on the separator, leading empty and 
-trailing directory entries can be returned, because these are significant
-on some OSs. So,
+Unlike just splitting the directories on the separator, empty
+directory names (C<''>) can be returned, because these are significant
+on some OSs (e.g. MacOS).
 
-    File::Spec->splitdir( "/a/b/c" );
+On Unix,
+
+    File::Spec->splitdir( "/a/b//c/" );
 
 Yields:
 

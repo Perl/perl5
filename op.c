@@ -4151,9 +4151,8 @@ S_cv_clone2(pTHX_ CV *proto, CV *outside)
 
     cv = PL_compcv = (CV*)NEWSV(1104,0);
     sv_upgrade((SV *)cv, SvTYPE(proto));
+    CvFLAGS(cv) = CvFLAGS(proto) & ~CVf_CLONE;
     CvCLONED_on(cv);
-    if (CvANON(proto))
-	CvANON_on(cv);
 
 #ifdef USE_THREADS
     New(666, CvMUTEXP(cv), 1, perl_mutex);

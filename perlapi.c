@@ -479,6 +479,20 @@ Perl_sv_setpvf_mg_nocontext(SV* sv, const char* pat, ...)
 #undef  Perl_fprintf_nocontext
 #endif
 
+#undef  Perl_cv_const_sv
+SV*
+Perl_cv_const_sv(pTHXo_ CV* cv)
+{
+    return ((CPerlObj*)pPerl)->Perl_cv_const_sv(cv);
+}
+
+#undef  Perl_cv_undef
+void
+Perl_cv_undef(pTHXo_ CV* cv)
+{
+    ((CPerlObj*)pPerl)->Perl_cv_undef(cv);
+}
+
 #undef  Perl_cx_dump
 void
 Perl_cx_dump(pTHXo_ PERL_CONTEXT* cs)

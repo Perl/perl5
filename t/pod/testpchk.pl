@@ -34,18 +34,12 @@ sub msgcmp( $ $ ) {
    ## filter out platform-dependent aspects of error messages
    my ($line1, $line2) = @_;
    for ($line1, $line2) {
-      if ( /^#*\s*(\S.*?)\s+(?:has \d+\s*)?pod syntax (?:error|OK)/ ) {
-          my $fname = $1;
-          s/^#*\s*//  if ($^O eq 'MacOS');
-          s/^\s*\Q$fname\E/stripname($fname)/e;
-      }
-      elsif ( /^#*\s*\*+\s*(?:ERROR|Unterminated)/ ) {
-          s/^#*\s*//  if ($^O eq 'MacOS');
-          s/of file\s+(\S.*?)\s*$/"of file ".stripname($1)/e;
-          s/at\s+(\S.*?)\s+line/"at ".stripname($1)." line"/e;
-      }
+      ## remove filenames from error messages to avoid any
+      ## filepath naming differences between OS platforms
+      s/(at line \S+ in file) .*\W(\w+\.[tT])\s*$/$1 \L$2\E/;
+      s/.*\W(\w+\.[tT]) (has \d+ pod syntax error)/\L$1\E $2/;
    }
-   return $line1 ne $line2;
+   return ($line1 ne $line2);
 }
 
 sub testpodcheck( @ ) {

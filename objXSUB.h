@@ -229,6 +229,14 @@
 #undef  fprintf_nocontext
 #define fprintf_nocontext	Perl_fprintf_nocontext
 #endif
+#undef  Perl_cv_const_sv
+#define Perl_cv_const_sv	pPerl->Perl_cv_const_sv
+#undef  cv_const_sv
+#define cv_const_sv		Perl_cv_const_sv
+#undef  Perl_cv_undef
+#define Perl_cv_undef		pPerl->Perl_cv_undef
+#undef  cv_undef
+#define cv_undef		Perl_cv_undef
 #undef  Perl_cx_dump
 #define Perl_cx_dump		pPerl->Perl_cx_dump
 #undef  cx_dump
