@@ -1250,7 +1250,7 @@ lib/Unicode/Normalize/Changes	Unicode::Normalize
 lib/Unicode/Normalize/README	Unicode::Normalize
 lib/Unicode/Normalize/t/norm.t	Unicode::Normalize
 lib/Unicode/Normalize/t/test.t	Unicode::Normalize
-lib/unicode/README		Explanation why this is there is.
+lib/Unicode/README		Explanation what happened to lib/unicode.
 lib/Unicode/UCD.pm		Unicode character database
 lib/Unicode/UCD.t		See if Unicode character database works
 lib/unicore/ArabLink.pl		Unicode character database
