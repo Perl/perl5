@@ -15,7 +15,7 @@ const int driveCount = 30;
 class VDir
 {
 public:
-    VDir();
+    VDir(int bManageDir = 1);
     ~VDir() {};
 
     void Init(VDir* pDir, VMem *pMem);
@@ -91,7 +91,7 @@ protected:
     };
 
     VMem *pMem;
-    int nDefault;
+    int nDefault, bManageDirectory;
     char *dirTableA[driveCount];
     char szLocalBufferA[MAX_PATH+1];
     WCHAR *dirTableW[driveCount];
@@ -99,9 +99,10 @@ protected:
 };
 
 
-VDir::VDir()
+VDir::VDir(int bManageDir /* = 1 */)
 {
     nDefault = 0;
+    bManageDirectory = bManageDir;
     memset(dirTableA, 0, sizeof(dirTableA));
     memset(dirTableW, 0, sizeof(dirTableW));
 }
@@ -110,6 +111,7 @@ void VDir::Init(VDir* pDir, VMem *p)
 {
     int index;
     DWORD driveBits;
+    int nSave;
     char szBuffer[MAX_PATH*driveCount];
 
     pMem = p;
@@ -120,6 +122,8 @@ void VDir::Init(VDir* pDir, VMem *p)
 	nDefault = pDir->GetDefault();
     }
     else {
+	nSave = bManageDirectory;
+	bManageDirectory = 0;
 	driveBits = GetLogicalDrives();
 	if (GetLogicalDriveStrings(sizeof(szBuffer), szBuffer)) {
 	    char* pEnv = GetEnvironmentStrings();
@@ -133,6 +137,7 @@ void VDir::Init(VDir* pDir, VMem *p)
 	    FreeEnvironmentStrings(pEnv);
 	}
 	SetDefaultA(".");
+	bManageDirectory = nSave;
     }
 }
 
@@ -163,6 +168,10 @@ int VDir::SetDirA(char const *pPath, int index)
 	    }
 	}
     }
+
+    if(bManageDirectory)
+	::SetCurrentDirectoryA(pPath);
+
     return length;
 }
 
@@ -217,6 +226,10 @@ int VDir::SetDirW(WCHAR const *pPath, int index)
 	    }
 	}
     }
+
+    if(bManageDirectory)
+	::SetCurrentDirectoryW(pPath);
+
     return length;
 }
 

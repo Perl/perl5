@@ -1890,7 +1890,7 @@ CPerlHost::CPerlHost(struct IPerlMem** ppMem, struct IPerlMem** ppMemShared,
 		 struct IPerlDir** ppDir, struct IPerlSock** ppSock,
 		 struct IPerlProc** ppProc)
 {
-    m_pvDir = new VDir();
+    m_pvDir = new VDir(0);
     m_pVMem = new VMem();
     m_pVMemShared = new VMem();
     m_pVMemParse =  new VMem();
@@ -1929,7 +1929,7 @@ CPerlHost::CPerlHost(CPerlHost& host)
     m_pVMemParse =  host.GetMemParse();
 
     /* duplicate directory info */
-    m_pvDir = new VDir();
+    m_pvDir = new VDir(0);
     m_pvDir->Init(host.GetDir(), m_pVMem);
 
     CopyMemory(&m_hostperlMem, &perlMem, sizeof(perlMem));

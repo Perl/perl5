@@ -118,6 +118,8 @@ CCTYPE		*= BORLAND
 # Get it from CPAN at http://www.perl.com/CPAN/authors/id/D/DO/DOUGL/
 # and follow the directions in the package to install.
 #
+# Not recommended if you have VC 6.x and you're not running Windows 9x.
+#
 #USE_PERLCRT	*= define
 
 #
@@ -245,6 +247,7 @@ USE_MULTI	*= undef
 USE_OBJECT	*= undef
 USE_ITHREADS	*= undef
 USE_IMP_SYS	*= undef
+USE_PERLCRT	*= undef
 
 .IF "$(USE_MULTI)$(USE_5005THREADS)$(USE_OBJECT)" != "undefundefundef"
 BUILDOPT	+= -DPERL_IMPLICIT_CONTEXT
@@ -408,7 +411,7 @@ LOCDEFS		= -DPERLDLL -DPERL_CORE
 SUBSYS		= console
 CXX_FLAG	= -TP -GX
 
-.IF "$(USE_PERLCRT)" == ""
+.IF "$(USE_PERLCRT)" != "define"
 .IF  "$(CFG)" == "Debug"
 PERLCRTLIBC	= msvcrtd.lib
 .ELSE
@@ -450,10 +453,10 @@ LINK_DBG	= -release
 .ENDIF
 
 LIBBASEFILES	= $(DELAYLOAD) $(CRYPT_LIB) \
-		oldnames.lib kernel32.lib user32.lib gdi32.lib \
-		winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib \
-		oleaut32.lib netapi32.lib uuid.lib wsock32.lib mpr.lib \
-		winmm.lib version.lib odbc32.lib odbccp32.lib
+		oldnames.lib kernel32.lib user32.lib gdi32.lib winspool.lib \
+		comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib \
+		netapi32.lib uuid.lib wsock32.lib mpr.lib winmm.lib \
+		version.lib odbc32.lib odbccp32.lib
 
 # we add LIBC here, since we may be using PerlCRT.dll
 LIBFILES	= $(LIBBASEFILES) $(LIBC)
@@ -466,6 +469,10 @@ LINK_FLAGS	= -nologo -nodefaultlib $(LINK_DBG) \
 OBJOUT_FLAG	= -Fo
 EXEOUT_FLAG	= -Fe
 LIBOUT_FLAG	= /out:
+
+.IF "$(USE_PERLCRT)" != "define"
+BUILDOPT	+= -DPERL_MSVCRT_READFIX
+.ENDIF
 
 .ENDIF
 
@@ -576,7 +583,7 @@ PERLIMPLIB	= ..\libperl$(a)
 
 CFGSH_TMPL	= config.vc
 CFGH_TMPL	= config_H.vc
-.IF "$(USE_PERLCRT)" == ""
+.IF "$(USE_PERLCRT)" != "define"
 PERL95EXE	= ..\perl95.exe
 .ENDIF
 
@@ -1097,7 +1104,7 @@ $(PERLEXE): $(PERLDLL) $(CONFIGPM) $(PERLEXE_OBJ) $(PERLEXE_RES)
 
 .IF "$(CCTYPE)" != "BORLAND"
 .IF "$(CCTYPE)" != "GCC"
-.IF "$(USE_PERLCRT)" == ""
+.IF "$(USE_PERLCRT)" != "define"
 
 perl95.c : runperl.c 
 	copy runperl.c perl95.c

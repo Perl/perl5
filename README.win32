@@ -250,10 +250,6 @@ default path.  You will need to copy the DLLs reported by the messages
 from where Borland chose to install it, into the Windows system directory
 (usually somewhere like C:\WINNT\SYSTEM32), and rerun the test.
 
-The Visual C runtime apparently has a bug that causes posix.t to fail
-test#2.  This usually happens only if you extracted the files in text
-mode.  Enable the USE_PERLCRT option in the Makefile to fix this bug.
-
 Please report any other failures as described under L<BUGS AND CAVEATS>.
 
 =head2 Installation
