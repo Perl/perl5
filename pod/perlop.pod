@@ -817,6 +817,11 @@ Some frequently seen examples:
     use POSIX qw( setlocale localeconv )
     @EXPORT = qw( foo bar baz );
 
+A common mistake is to try to separate the words with comma or to put
+comments into a multi-line qw-string.  For this reason the C<-w>
+switch produce warnings if the STRING contains the "," or the "#"
+character.
+
 =item s/PATTERN/REPLACEMENT/egimosx
 
 Searches a string for a pattern, and if found, replaces that pattern
