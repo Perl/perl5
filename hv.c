@@ -435,8 +435,8 @@ Perl_hv_store(pTHX_ HV *hv, const char *key, I32 klen, SV *val, register U32 has
 		return 0;
 #ifdef ENV_IS_CASELESS
 	    else if (mg_find((SV*)hv,'E')) {
-		SV *sv = sv_2mortal(newSVpvn(key,klen));
-		key = strupr(SvPVX(sv));
+                key = savepvn(key,klen);
+		key = strupr(key);
 		hash = 0;
 	    }
 #endif
