@@ -988,6 +988,8 @@ END_EXTERN_C
 #define PL_No			(*Perl_GNo_ptr(NULL))
 #undef  PL_Yes
 #define PL_Yes			(*Perl_GYes_ptr(NULL))
+#undef  PL_csighandlerp
+#define PL_csighandlerp		(*Perl_Gcsighandlerp_ptr(NULL))
 #undef  PL_curinterp
 #define PL_curinterp		(*Perl_Gcurinterp_ptr(NULL))
 #undef  PL_do_undump

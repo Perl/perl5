@@ -1137,7 +1137,7 @@ Perl_magic_clearsig(pTHX_ SV *sv, MAGIC *mg)
 #endif
 #ifdef FAKE_DEFAULT_SIGNAL_HANDLERS
 	    sig_defaulting[i] = 1;
-	    (void)rsignal(i, &Perl_csighandler);
+	    (void)rsignal(i, PL_csighandlerp);
 #else
 	    (void)rsignal(i, SIG_DFL);
 #endif
@@ -1176,7 +1176,7 @@ Perl_csighandler(int sig)
     dTHX;
 #endif
 #ifdef FAKE_PERSISTENT_SIGNAL_HANDLERS
-    (void) rsignal(sig, &Perl_csighandler);
+    (void) rsignal(sig, PL_csighandlerp);
     if (sig_ignoring[sig]) return;
 #endif
 #ifdef FAKE_DEFAULT_SIGNAL_HANDLERS
@@ -1206,7 +1206,7 @@ Perl_csighandler_init(void)
 #ifdef FAKE_DEFAULT_SIGNAL_HANDLERS
         dTHX;
         sig_defaulting[sig] = 1;
-        (void) rsignal(sig, &Perl_csighandler);
+        (void) rsignal(sig, PL_csighandlerp);
 #endif
 #ifdef FAKE_PERSISTENT_SIGNAL_HANDLERS
         sig_ignoring[sig] = 0;
@@ -1299,7 +1299,7 @@ Perl_magic_setsig(pTHX_ SV *sv, MAGIC *mg)
     }
     if (SvTYPE(sv) == SVt_PVGV || SvROK(sv)) {
 	if (i) {
-	    (void)rsignal(i, &Perl_csighandler);
+	    (void)rsignal(i, PL_csighandlerp);
 #ifdef HAS_SIGPROCMASK
 	    LEAVE;
 #endif
@@ -1315,7 +1315,7 @@ Perl_magic_setsig(pTHX_ SV *sv, MAGIC *mg)
 	if (i) {
 #ifdef FAKE_PERSISTENT_SIGNAL_HANDLERS
 	    sig_ignoring[i] = 1;
-	    (void)rsignal(i, &Perl_csighandler);
+	    (void)rsignal(i, PL_csighandlerp);
 #else
 	    (void)rsignal(i, SIG_IGN);
 #endif
@@ -1326,7 +1326,7 @@ Perl_magic_setsig(pTHX_ SV *sv, MAGIC *mg)
 #ifdef FAKE_DEFAULT_SIGNAL_HANDLERS
 	  {
 	    sig_defaulting[i] = 1;
-	    (void)rsignal(i, &Perl_csighandler);
+	    (void)rsignal(i, PL_csighandlerp);
 	  }
 #else
 	    (void)rsignal(i, SIG_DFL);
@@ -1341,7 +1341,7 @@ Perl_magic_setsig(pTHX_ SV *sv, MAGIC *mg)
 	if (!strchr(s,':') && !strchr(s,'\''))
 	    sv_insert(sv, 0, 0, "main::", 6);
 	if (i)
-	    (void)rsignal(i, &Perl_csighandler);
+	    (void)rsignal(i, PL_csighandlerp);
 	else
 	    *svp = SvREFCNT_inc(sv);
     }
@@ -2549,7 +2549,7 @@ Perl_sighandler(int sig)
 #else
 	/* Not clear if this will work */
 	(void)rsignal(sig, SIG_IGN);
-	(void)rsignal(sig, &Perl_csighandler);
+	(void)rsignal(sig, PL_csighandlerp);
 #endif
 #endif /* !PERL_MICRO */
 	Perl_die(aTHX_ Nullformat);
