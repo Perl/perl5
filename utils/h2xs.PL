@@ -395,7 +395,7 @@ END
 if( $opt_X || $opt_c || $opt_A ){
 	# we won't have our own AUTOLOAD(), so won't have $AUTOLOAD
 	print PM <<'END';
-use vars qw($VERSION @ISA @EXPORT);
+use vars qw($VERSION @ISA @EXPORT @EXPORT_OK);
 END
 }
 else{
@@ -403,7 +403,7 @@ else{
 	# will want Carp.
 	print PM <<'END';
 use Carp;
-use vars qw($VERSION @ISA @EXPORT $AUTOLOAD);
+use vars qw($VERSION @ISA @EXPORT @EXPORT_OK $AUTOLOAD);
 END
 }
 
