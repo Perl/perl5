@@ -82,6 +82,17 @@ maintenance versions.
 
 =head1 Core Changes
 
+=head2 Unicode and UTF-8 support
+
+Perl can optionally use UTF-8 as its internal representation for character
+strings.  The C<use utf8> pragma enables this support in the current lexical
+scope.  See L<utf8> for more information.
+
+=head2 Lexically scoped warning categories
+
+You can now control the granularity of warnings emitted by perl at a finer
+level using the C<use warning> pragma.  See L<warning> for details.
+
 =head2 Binary numbers supported
 
 Binary numbers are now supported as literals, in s?printf formats, and
@@ -264,9 +275,11 @@ consistently croak() if the date falls in an unsupported range.
 
 =head2 Pragmata
 
-Lexical warnings pragma, "use warning;", to control optional warnings.
+C<use utf8;>, to enable UTF-8 and Unicode support.
 
-Filetest pragma, to control the behaviour of filetests (C<-r> C<-w> ...).
+Lexical warnings pragma, C<use warning;>, to control optional warnings.
+
+C<use filetest;>, to control the behaviour of filetests (C<-r> C<-w> ...).
 Currently only one subpragma implemented, "use filetest 'access';",
 that enables the use of access(2) or equivalent to check the
 permissions instead of using stat(2) as usual.  This matters
