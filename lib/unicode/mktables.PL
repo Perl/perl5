@@ -2,7 +2,7 @@
 
 use bytes;
 
-$UnicodeData = "Unicode.301";
+$UnicodeData = "Unicode.txt";
 $SyllableData = "syllables.txt";
 $PropData = "PropList.txt";
 

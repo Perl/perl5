@@ -4103,6 +4103,8 @@ Perl_sys_intern_init(pTHXo)
 #if defined(PERL_IN_MG_C) || defined(PERL_DECL_PROT)
 #endif
 #if defined(PERL_IN_OP_C) || defined(PERL_DECL_PROT)
+#  if defined(DEBUG_CLOSURES)
+#  endif
 #  if defined(PL_OP_SLAB_ALLOC)
 #  endif
 #endif
@@ -4139,6 +4141,8 @@ Perl_sys_intern_init(pTHXo)
 #  endif
 #  if !defined(NV_PRESERVES_UV)
 #  endif
+#  if defined(USE_ITHREADS)
+#  endif
 #endif
 #if defined(PERL_IN_TOKE_C) || defined(PERL_DECL_PROT)
 #if 0
@@ -4152,6 +4156,8 @@ Perl_sys_intern_init(pTHXo)
 #endif
 #if defined(PERL_IN_UTIL_C) || defined(PERL_DECL_PROT)
 #  if defined(LEAKTEST)
+#  endif
+#  if defined(EBCDIC)
 #  endif
 #endif
 #if defined(PERL_OBJECT)

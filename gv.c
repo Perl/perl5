@@ -45,8 +45,14 @@ Perl_gv_IOadd(pTHX_ register GV *gv)
 {
     if (!gv || SvTYPE((SV*)gv) != SVt_PVGV)
 	Perl_croak(aTHX_ "Bad symbol for filehandle");
-    if (!GvIOp(gv))
+    if (!GvIOp(gv)) {
+#ifdef GV_SHARED_CHECK
+        if (GvSHARED(gv)) {
+            Perl_croak(aTHX_ "Bad symbol for filehandle (GV is shared)");
+        }
+#endif
 	GvIOp(gv) = newIO();
+    }
     return gv;
 }
 
@@ -1201,7 +1207,6 @@ Perl_Gv_AMupdate(pTHX_ HV *stash)
   {
     int filled = 0, have_ovl = 0;
     int i, lim = 1;
-    const char *cp;
     SV* sv = NULL;
 
     /* Work with "fallback" key, which we assume to be first in PL_AMG_names */
@@ -1273,7 +1278,7 @@ Perl_Gv_AMupdate(pTHX_ HV *stash)
     }
   }
   /* Here we have no table: */
- no_table:
+  /* no_table: */
   AMT_AMAGIC_off(&amt);
   sv_magic((SV*)stash, 0, 'c', (char*)&amt, sizeof(AMTS));
   return FALSE;

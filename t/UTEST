@@ -79,12 +79,16 @@ EOT
 	    -x $test || (print "isn't executable.\n");
 
 	    if ($type eq 'perl') {
-		open(RESULTS, "./$test |") || (print "can't run.\n"); }
+		my $run = "./$test |";
+		open(RESULTS, $run) || (print "can't run '$run': $!\n");
+	    }
 	    else { 
-        open(RESULTS, "./perl -I../lib ../utils/perlcc -o ./$test.plc ./$test "
-                 ." && ./$test.plc |")
-        or print "can't compile.\n";
-        unlink "./$test.plc";
+		my $compile =
+		    "./perl -I../lib ../utils/perlcc -o ./$test.plc ./$test "
+			." && ./$test.plc |";
+		open(RESULTS, $compile)
+		    or print "can't compile '$compile': $!.\n";
+		unlink "./$test.plc";
 	    }
 	}
 	else {
@@ -103,10 +107,14 @@ EOT
 	    }
 
 	    if ($type eq 'perl') {
-		open(RESULTS,"./perl$switch -I../lib -Mutf8 $test |") || (print "can't run.\n");
+		my $run = "./perl$switch -I../lib -Mutf8 $test |";
+		open(RESULTS, $run) or
+		    print "can't run '$run': $!.\n";
 	    }
 	    else {
-		open(RESULTS, "./perl -I../lib ../utils/perlcc -Mutf8 ./$test -run -verbose dcf -log ../compilelog |") or print "can't compile.\n";
+		my $compile = "./perl -I../lib ../utils/perlcc -Mutf8 ./$test -run -verbose dcf -log ../compilelog |";
+		open(RESULTS, $compile) or
+		    print "can't compile '$compile': $!.\n";
 	    }
 	}
 	$ok = 0;

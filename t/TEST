@@ -87,13 +87,16 @@ EOT
 	}
 
 	if ($type eq 'perl') {
-	    open(RESULTS,"./perl$switch $test |") or print "can't run.\n";
+	    my $run = "./perl$switch $test |"; 
+	    open(RESULTS,$run) or print "can't run '$run': $!.\n";
 	}
 	else {
-	    open(RESULTS, "./perl -I../lib ../utils/perlcc -o ./$test.plc ./$test "
-	    		 ." && ./$test.plc |")
-		or print "can't compile.\n";
-        unlink "./$test.plc";
+	    my $compile =
+		"./perl -I../lib ../utils/perlcc -o ./$test.plc ./$test "
+		." && ./$test.plc |";
+	    open(RESULTS, $compile)
+		or print "can't compile '$compile': $!.\n";
+	    unlink "./$test.plc";
 	}
 
 	$ok = 0;

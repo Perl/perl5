@@ -782,3 +782,5 @@ tt+$	xxxtt	y	-	-
 ^(b+?|a){1,2}c	bbbac	y	$1	a
 ^(b+?|a){1,2}c	bbbbac	y	$1	a
 \((\w\. \w+)\)	cd. (A. Tw)	y	-$1-	-A. Tw-
+((?:aaaa|bbbb)cccc)?	aaaacccc	y	-	-
+((?:aaaa|bbbb)cccc)?	bbbbcccc	y	-	-

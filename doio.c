@@ -84,7 +84,6 @@ Perl_do_openn(pTHX_ GV *gv, register char *name, I32 len, int as_raw,
     bool was_fdopen = FALSE;
     bool in_raw = 0, in_crlf = 0, out_raw = 0, out_crlf = 0;
     char *type  = NULL;
-    char *deftype = NULL;
     char mode[4];		/* stdio file mode ("r\0", "rb\0", "r+b\0" etc.) */
     SV *svs = (num_svs) ? *svp : Nullsv;
 
@@ -216,7 +215,7 @@ Perl_do_openn(pTHX_ GV *gv, register char *name, I32 len, int as_raw,
 	    len  = tend-type;
 	}
 	IoTYPE(io) = *type;
-	if (*type == IoTYPE_RDWR && (!num_svs || tend > type+1 && tend[-1] != IoTYPE_PIPE)) { /* scary */
+	if ((*type == IoTYPE_RDWR) && ((!num_svs || tend > type+1 && tend[-1] != IoTYPE_PIPE))) { /* scary */
 	    mode[1] = *type++;
 	    writing = 1;
 	}

@@ -3481,6 +3481,38 @@ C<!!!>, C<!!>, C<!>
 
 =back
 
+=head2 perlclib - Internal replacements for standard C library functions
+
+=over 4
+
+=item DESCRIPTION
+
+=over 4
+
+=item Conventions
+
+C<t>, C<p>, C<n>, C<s>
+
+=item File Operations
+
+=item File Input and Output
+
+=item File Positioning
+
+=item Memory Management and String Handling
+
+=item Character Class Tests
+
+=item F<stdlib.h> functions
+
+=item Miscellaneous functions
+
+=back
+
+=item SEE ALSO
+
+=back
+
 =head2 perlguts - Introduction to the Perl API
 
 =over 4
@@ -5487,50 +5519,6 @@ Source, Compiled Module Source, Perl Modules/Scripts
 
 =back
 
-=head2 perldos - Perl under DOS, W31, W95.
-
-=over 4
-
-=item SYNOPSIS
-
-=item DESCRIPTION
-
-=over 4
-
-=item Prerequisites
-
-DJGPP, Pthreads
-
-=item Shortcomings of Perl under DOS
-
-=item Building
-
-=item Testing
-
-=item Installation
-
-=back
-
-=item BUILDING AND INSTALLING MODULES
-
-=over 4
-
-=item Prerequisites
-
-=item Unpacking CPAN Modules
-
-=item Building Non-XS Modules
-
-=item Building XS Modules
-
-=back
-
-=item AUTHOR
-
-=item SEE ALSO
-
-=back
-
 =head2 perlepoc, README.epoc - Perl for EPOC
 
 =over 4
@@ -6177,48 +6165,6 @@ LIST, waitpid PID,FLAGS
 =item AUTHOR
 
 =item LAST UPDATE
-
-=back
-
-=head2 perlwin32 - Perl under Win32
-
-=over 4
-
-=item SYNOPSIS
-
-=item DESCRIPTION
-
-=over 4
-
-=item Setting Up
-
-Make, Command Shell, Borland C++, Microsoft Visual C++, Mingw32 with GCC
-
-=item Building
-
-=item Testing
-
-=item Installation
-
-=item Usage Hints
-
-Environment Variables, File Globbing, Using perl from the command line,
-Building Extensions, Command-line Wildcard Expansion, Win32 Specific
-Extensions, Running Perl Scripts, Miscellaneous Things
-
-=back
-
-=item BUGS AND CAVEATS
-
-=item AUTHORS
-
-Gary Ng E<lt>71564.1743@CompuServe.COME<gt>, Gurusamy Sarathy
-E<lt>gsar@activestate.comE<gt>, Nick Ing-Simmons
-E<lt>nick@ing-simmons.netE<gt>
-
-=item SEE ALSO
-
-=item HISTORY
 
 =back
 
@@ -7803,7 +7749,7 @@ B<name()>, B<value()>, B<domain()>, B<path()>, B<expires()>
 
 Searching for authors, bundles, distribution files and modules, make, test,
 install, clean	modules or distributions, get, readme, look module or
-distribution, Signals
+distribution, ls author, Signals
 
 =item CPAN::Shell
 
@@ -7900,6 +7846,8 @@ http firewall, ftp firewall, One way visibility, SOCKS, IP Masquerade
 =item BUGS
 
 =item AUTHOR
+
+=item TRANSLATIONS
 
 =item SEE ALSO
 

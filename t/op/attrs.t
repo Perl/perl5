@@ -150,11 +150,12 @@ sub X::MODIFY_CODE_ATTRIBUTES { die "$_[0]" }
 sub X::foo { 1 }
 *Y::bar = \&X::foo;
 *Y::bar = \&X::foo;	# second time for -w
-eval 'package Z; sub Y::bar : locked';
+eval 'package Z; sub Y::bar : foo';
 mytest qr/^X at /;
 BEGIN {++$ntests}
 
-my @attrs = eval 'attributes::get \&Y::bar';
+eval 'package Z; sub Y::baz : locked {}';
+my @attrs = eval 'attributes::get \&Y::baz';
 mytest '', "@attrs", "locked";
 BEGIN {++$ntests}
 

@@ -186,7 +186,7 @@ properties of bitwise xor on ASCII strings.
     $old = 'test';
     $new = 'success';
 
-    s{(\Q$old\E}
+    s{(\Q$old\E)}
      { uc $new | (uc $1 ^ $1) .
 	(uc(substr $1, -1) ^ substr $1, -1) x
 	    (length($new) - length $1)

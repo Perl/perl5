@@ -665,7 +665,7 @@ Perl_init_i18nl10n(pTHX_ int printwarn)
      *   -1 = fallback to C locale failed
      */
 
-#ifdef USE_LOCALE
+#if defined(USE_LOCALE)
 
 #ifdef USE_LOCALE_CTYPE
     char *curctype   = NULL;
@@ -808,6 +808,7 @@ Perl_init_i18nl10n(pTHX_ int printwarn)
 			  lc_all ? lc_all : "unset",
 			  lc_all ? '"' : ')');
 
+#if defined(USE_ENVIRON_ARRAY)
 	    {
 	      char **e;
 	      for (e = environ; *e; e++) {
@@ -818,6 +819,10 @@ Perl_init_i18nl10n(pTHX_ int printwarn)
 				    (int)(p - *e), *e, p + 1);
 	      }
 	    }
+#else
+	    PerlIO_printf(Perl_error_log,
+			  "\t(possibly more locale environment variables)\n");
+#endif
 
 	    PerlIO_printf(Perl_error_log,
 			  "\tLANG = %c%s%c\n",
@@ -3997,3 +4002,40 @@ Perl_report_evil_fh(pTHX_ GV *gv, IO *io, I32 op)
 			func, pars);
     }
 }
+
+#ifdef EBCDIC
+int
+Perl_ebcdic_control(pTHX_ int ch)
+{
+    	if (ch > 'a') {
+	        char *ctlp;
+ 
+ 	       if (islower(ch))
+  	              ch = toupper(ch);
+ 
+ 	       if ((ctlp = strchr(controllablechars, ch)) == 0) {
+  	              Perl_die(aTHX_ "unrecognised control character '%c'\n", ch);
+     	       }
+ 
+        	if (ctlp == controllablechars)
+         	       return('\177'); /* DEL */
+        	else
+         	       return((unsigned char)(ctlp - controllablechars - 1));
+	} else { /* Want uncontrol */
+        	if (ch == '\177' || ch == -1)
+                	return('?');
+        	else if (ch == '\157')
+                	return('\177');
+        	else if (ch == '\174')
+                	return('\000');
+        	else if (ch == '^')    /* '\137' in 1047, '\260' in 819 */
+                	return('\036');
+        	else if (ch == '\155')
+                	return('\037');
+        	else if (0 < ch && ch < (sizeof(controllablechars) - 1))
+                	return(controllablechars[ch+1]);
+        	else
+                	Perl_die(aTHX_ "invalid control request: '\\%03o'\n", ch & 0xFF);
+	}
+}
+#endif

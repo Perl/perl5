@@ -1022,7 +1022,9 @@ STATIC OP*	S_new_logop(pTHX_ I32 type, I32 flags, OP **firstp, OP **otherp);
 STATIC void	S_simplify_sort(pTHX_ OP *o);
 STATIC bool	S_is_handle_constructor(pTHX_ OP *o, I32 argnum);
 STATIC char*	S_gv_ename(pTHX_ GV *gv);
+#  if defined(DEBUG_CLOSURES)
 STATIC void	S_cv_dump(pTHX_ CV *cv);
+#  endif
 STATIC CV*	S_cv_clone2(pTHX_ CV *proto, CV *outside);
 STATIC bool	S_scalar_mod_type(pTHX_ OP *o, I32 type);
 STATIC OP *	S_my_kid(pTHX_ OP *o, OP *attrs);
@@ -1220,6 +1222,10 @@ STATIC int	S_sv_2inuv_non_preserve(pTHX_ SV *sv, I32 numtype);
 STATIC int	S_sv_2iuv_non_preserve(pTHX_ SV *sv, I32 numtype);
 #  endif
 STATIC I32	S_expect_number(pTHX_ char** pattern);
+#
+#  if defined(USE_ITHREADS)
+STATIC SV*	S_gv_share(pTHX_ SV *sv);
+#  endif
 #endif
 
 #if defined(PERL_IN_TOKE_C) || defined(PERL_DECL_PROT)
@@ -1280,6 +1286,9 @@ STATIC char*	S_stdize_locale(pTHX_ char* locs);
 STATIC SV*	S_mess_alloc(pTHX);
 #  if defined(LEAKTEST)
 STATIC void	S_xstat(pTHX_ int);
+#  endif
+#  if defined(EBCDIC)
+PERL_CALLCONV int	Perl_ebcdic_control(pTHX_ int ch);
 #  endif
 #endif
 

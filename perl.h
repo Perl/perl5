@@ -1692,6 +1692,13 @@ typedef struct ptr_tbl PTR_TBL_t;
 #  define USE_ENVIRON_ARRAY
 #endif
 
+#ifdef JPL
+    /* E.g. JPL needs to operate on a copy of the real environment.
+     * JDK 1.2 and 1.3 seem to get upset if the original environment
+     * is diddled with. */
+#   define NEED_ENVIRON_DUP_FOR_MODIFY
+#endif
+
 #ifndef PERL_SYS_INIT3
 #  define PERL_SYS_INIT3(argvp,argcp,envp) PERL_SYS_INIT(argvp,argcp)
 #endif
@@ -2192,10 +2199,32 @@ Gid_t getegid (void);
 #endif
 
 struct ufuncs {
-    I32 (*uf_val)(IV, SV*);
-    I32 (*uf_set)(IV, SV*);
+    I32 (*uf_val)(pTHX_ IV, SV*);
+    I32 (*uf_set)(pTHX_ IV, SV*);
     IV uf_index;
 };
+
+/* In pre-5.7-Perls the 'U' magic didn't get the thread context.
+ * XS code wanting to be backward compatible can do something
+ * like the following:
+ 
+#ifndef PERL_MG_UFUNC
+#define PERL_MG_UFUNC(name,ix,sv) I32 name(IV ix, SV *sv)
+#endif
+
+static PERL_MG_UFUNC(foo_get, index, val)
+{
+    sv_setsv(val, ...);
+    return TRUE;
+}
+
+-- Doug MacEachern
+
+*/
+
+#ifndef PERL_MG_UFUNC
+#define PERL_MG_UFUNC(name,ix,sv) I32 name(pTHX_ IV ix, SV *sv)
+#endif
 
 /* Fix these up for __STDC__ */
 #ifndef DONT_DECLARE_STD

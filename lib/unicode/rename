@@ -1,0 +1,18 @@
+ArabicShaping.txt               ArabShap.txt
+BidiMirroring.txt               BidiMirr.txt
+Blocks.txt                      Blocks.txt
+CaseFolding.txt                 CaseFold.txt
+CompositionExclusions.txt       CompExcl.txt
+EastAsianWidth.txt              EAWidth.txt
+Index.txt                       Index.txt
+Jamo.txt                        Jamo.txt
+LineBreak.txt                   LineBrk.txt
+NamesList.html                  NamesList.html
+NamesList.txt                   Names.txt
+PropList.txt                    PropList.txt
+ReadMe.txt                      ReadMe.txt
+SpecialCasing.txt               SpecCase.txt
+UnicodeCharacterDatabase.html   UCD.html
+UnicodeData.html                Unicode.html
+UnicodeData.txt                 Unicode.txt
+

@@ -1367,7 +1367,7 @@ Perl_mod(pTHX_ OP *o, I32 type)
             GV *gv;
 
             /* Could be a filehandle */
-            if (gv = gv_fetchpv(SvPV_nolen(sv), FALSE, SVt_PVIO)) {
+            if ((gv = gv_fetchpv(SvPV_nolen(sv), FALSE, SVt_PVIO))) {
                 OP* gvio = newUNOP(OP_RV2GV, 0, newGVOP(OP_GV, 0, gv));
                 op_free(o);
                 o = gvio;
@@ -1956,6 +1956,16 @@ S_my_kid(pTHX_ OP *o, OP *attrs)
     } else if (type == OP_RV2SV ||	/* "our" declaration */
 	       type == OP_RV2AV ||
 	       type == OP_RV2HV) { /* XXX does this let anything illegal in? */
+        if (attrs) {
+            GV *gv = cGVOPx_gv(cUNOPo->op_first);
+            PL_in_my = FALSE;
+            PL_in_my_stash = Nullhv;
+            apply_attrs(GvSTASH(gv),
+                        (type == OP_RV2SV ? GvSV(gv) :
+                         type == OP_RV2AV ? (SV*)GvAV(gv) :
+                         type == OP_RV2HV ? (SV*)GvHV(gv) : (SV*)gv),
+                        attrs);
+        }
 	o->op_private |= OPpOUR_INTRO;
 	return o;
     } else if (type != OP_PADSV &&
@@ -2390,9 +2400,6 @@ Perl_gen_constant_list(pTHX_ register OP *o)
 OP *
 Perl_convert(pTHX_ I32 type, I32 flags, OP *o)
 {
-    OP *kid;
-    OP *last = 0;
-
     if (!o || o->op_type != OP_LIST)
 	o = newLISTOP(OP_LIST, 0, o, Nullop);
     else
@@ -2685,7 +2692,6 @@ Perl_pmtrans(pTHX_ OP *o, OP *expr, OP *repl)
 	if (complement) {
 	    U8 tmpbuf[UTF8_MAXLEN+1];
 	    U8** cp;
-	    I32* cl;
 	    UV nextmin = 0;
 	    New(1109, cp, tlen, U8*);
 	    i = 0;
@@ -4180,6 +4186,7 @@ Perl_cv_undef(pTHX_ CV *cv)
     }
 }
 
+#ifdef DEBUG_CLOSURES
 STATIC void
 S_cv_dump(pTHX_ CV *cv)
 {
@@ -4226,6 +4233,7 @@ S_cv_dump(pTHX_ CV *cv)
     }
 #endif /* DEBUGGING */
 }
+#endif /* DEBUG_CLOSURES */
 
 STATIC CV *
 S_cv_clone2(pTHX_ CV *proto, CV *outside)
@@ -4548,6 +4556,12 @@ Perl_newATTRSUB(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs, OP *block)
 
     cv = (!name || GvCVGEN(gv)) ? Nullcv : GvCV(gv);
 
+#ifdef GV_SHARED_CHECK
+    if (cv && GvSHARED(gv) && SvREADONLY(cv)) {
+        Perl_croak(aTHX_ "Can't define subroutine %s (GV is shared)", name);
+    }
+#endif
+
     if (!block || !ps || *ps || attrs)
 	const_sv = Nullsv;
     else
@@ -4555,6 +4569,13 @@ Perl_newATTRSUB(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs, OP *block)
 
     if (cv) {
         bool exists = CvROOT(cv) || CvXSUB(cv);
+
+#ifdef GV_SHARED_CHECK
+        if (exists && GvSHARED(gv)) {
+            Perl_croak(aTHX_ "Can't redefine shared subroutine %s", name);
+        }
+#endif
+
         /* if the subroutine doesn't exist and wasn't pre-declared
          * with a prototype, assume it will be AUTOLOADed,
          * skipping the prototype check
@@ -5006,6 +5027,11 @@ Perl_newFORM(pTHX_ I32 floor, OP *o, OP *block)
     else
 	name = "STDOUT";
     gv = gv_fetchpv(name,TRUE, SVt_PVFM);
+#ifdef GV_SHARED_CHECK
+    if (GvSHARED(gv)) {
+        Perl_croak(aTHX_ "Bad symbol for form (GV is shared)");
+    }
+#endif
     GvMULTI_on(gv);
     if ((cv = GvFORM(gv))) {
 	if (ckWARN(WARN_REDEFINE)) {
@@ -6931,6 +6957,12 @@ static void
 const_sv_xsub(pTHXo_ CV* cv)
 {
     dXSARGS;
+    if (items != 0) {
+#if 0
+        Perl_croak(aTHX_ "usage: %s::%s()",
+                   HvNAME(GvSTASH(CvGV(cv))), GvNAME(CvGV(cv)));
+#endif
+    }
     EXTEND(sp, 1);
     ST(0) = (SV*)XSANY.any_ptr;
     XSRETURN(1);

@@ -264,7 +264,7 @@ sub autosplit_file {
 		    ($^O eq 'dos') or ($^O eq 'MSWin32') or
 	            $Is_VMS && $filename =~ m/$modpname.pm/i);
 
-    my($al_idx_file) = "$autodir/$modpname/$IndexFile";
+    my($al_idx_file) = catfile($autodir, $modpname, $IndexFile);
 
     if ($check_mod_time){
 	my($al_ts_time) = (stat("$al_idx_file"))[9] || 1;
@@ -279,8 +279,8 @@ sub autosplit_file {
     print "AutoSplitting $filename ($modnamedir)\n"
 	if $Verbose;
 
-    unless (-d "$modnamedir"){
-	mkpath("$modnamedir",0,0777);
+    unless (-d $modnamedir){
+	mkpath($modnamedir,0,0777);
     }
 
     # We must try to deal with some SVR3 systems with a limit of 14
@@ -324,7 +324,7 @@ sub autosplit_file {
 	    my($lname, $sname) = ($subname, substr($subname,0,$maxflen-3));
 	    $modpname = _modpname($this_package);
     	    my($modnamedir) = catfile($autodir, $modpname);
-	    mkpath("$modnamedir",0,0777);
+	    mkpath($modnamedir,0,0777);
 	    my($lpath) = catfile($modnamedir, "$lname.al");
 	    my($spath) = catfile($modnamedir, "$sname.al");
 	    my $path;

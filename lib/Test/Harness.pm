@@ -143,6 +143,7 @@ sub _runtests {
 	if ($wstatus) {
             $failedtests{$test} = _dubious_return(\%test, \%tot, 
                                                   $estatus, $wstatus);
+            $failedtests{$test}{name} = $test;
 	}
         elsif ($test{ok} == $test{max} && $test{next} == $test{max}+1) {
 	    if ($test{max} and $test{skipped} + $test{bonus}) {
@@ -480,7 +481,7 @@ sub _dubious_return {
 
     return { canon => $canon,  max => $test->{max} || '??',
              failed => $failed, 
-             name => $test, percent => $percent,
+             percent => $percent,
              estat => $estatus, wstat => $wstatus,
            };
 }

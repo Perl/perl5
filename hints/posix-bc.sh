@@ -92,10 +92,3 @@ esac
 #'') ldlibpthname=LIBPATH ;;
 #esac
 
-# Architecture related object files.
-# ebcdic.c contains special \cX mapping code for EBCDIC char sets.
-# Prepend your preference with Configure -Darchobs=your_preference.o.
-case "$archname" in
-'') archobjs="ebcdic.o" ;;
-*) archobjs="$archobjs ebcdic.o" ;;
-esac
