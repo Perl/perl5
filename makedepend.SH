@@ -15,9 +15,12 @@ esac
 echo "Extracting makedepend (with variable substitutions)"
 $spitshell >makedepend <<!GROK!THIS!
 $startsh
-# $Header: makedepend.SH,v 1.0 87/12/18 17:54:32 root Exp $
+# $Header: makedepend.SH,v 1.0.1.1 88/02/02 11:24:05 root Exp $
 #
 # $Log:	makedepend.SH,v $
+# Revision 1.0.1.1  88/02/02  11:24:05  root
+# patch13: removed spurious -I./h.
+# 
 # Revision 1.0  87/12/18  17:54:32  root
 # Initial revision
 # 
@@ -83,7 +86,7 @@ for file in `$cat .clist`; do
 	-e 's|\\$||' \
 	-e p \
 	-e '}'
-    $cpp -I/usr/local/include -I. -I./h $file.c | \
+    $cpp -I/usr/local/include -I. $file.c | \
     $sed \
 	-e '/^# *[0-9]/!d' \
 	-e 's/^.*"\(.*\)".*$/'$filebase'.o: \1/' \

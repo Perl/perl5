@@ -1,8 +1,8 @@
 #!./perl
 
-# $Header: op.split,v 1.0 87/12/18 13:14:20 root Exp $
+# $Header: op.split,v 1.0.1.1 88/02/02 11:26:37 root Exp $
 
-print "1..4\n";
+print "1..6\n";
 
 $FS = ':';
 
@@ -22,3 +22,10 @@ if (join(".",@ary) eq "a.b.c.\n") {print "ok 3\n";} else {print "not ok 3\n";}
 $_ = "a:b:c::::";
 @ary = split(/:/);
 if (join(".",@ary) eq "a.b.c") {print "ok 4\n";} else {print "not ok 4\n";}
+
+$_ = join(':',split(' ','    a b	c '));
+if ($_ eq 'a:b:c') {print "ok 5\n";} else {print "not ok 5\n";}
+
+$_ = join(':',split(/ */,"foo  bar bie\tdoll"));
+if ($_ eq "f:o:o:b:a:r:b:i:e:\t:d:o:l:l")
+	{print "ok 6\n";} else {print "not ok 6\n";}

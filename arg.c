@@ -1,6 +1,9 @@
-/* $Header: arg.c,v 1.0.1.6 88/02/01 17:32:26 root Exp $
+/* $Header: arg.c,v 1.0.1.7 88/02/02 11:22:19 root Exp $
  *
  * $Log:	arg.c,v $
+ * Revision 1.0.1.7  88/02/02  11:22:19  root
+ * patch13: fixed split(' ') to work right second time.  Added CRYPT dependency.
+ * 
  * Revision 1.0.1.6  88/02/01  17:32:26  root
  * patch12: made split(' ') behave like awk in ignoring leading white space.
  * 
@@ -225,7 +228,7 @@ STR ***retary;
 	m = str_get(eval(spat->spat_runtime,Null(STR***)));
 	if (!*m || (*m == ' ' && !m[1])) {
 	    m = "[ \\t\\n]+";
-	    while (isspace(*s)) s++;
+	    spat->spat_flags |= SPAT_SKIPWHITE;
 	}
 	if (spat->spat_runtime->arg_type == O_ITEM &&
 	  spat->spat_runtime[1].arg_type == A_SINGLE) {
@@ -251,6 +254,10 @@ STR ***retary;
     if (!ary)
 	myarray = ary = anew();
     ary->ary_fill = -1;
+    if (spat->spat_flags & SPAT_SKIPWHITE) {
+	while (isspace(*s))
+	    s++;
+    }
     while (*s && (m = execute(&spat->spat_compex, s, (iters == 0), 1))) {
 	if (spat->spat_compex.numsubs)
 	    s = spat->spat_compex.subbase;
@@ -1952,8 +1959,13 @@ STR ***retary;		/* where to return an array to, null if nowhere */
 	retary = Null(STR***);		/* do_stat already did retary */
 	goto donumset;
     case O_CRYPT:
+#ifdef CRYPT
 	tmps = str_get(sarg[1]);
 	str_set(str,crypt(tmps,str_get(sarg[2])));
+#else
+	fatal(
+	  "The crypt() function is unimplemented due to excessive paranoia.");
+#endif
 	break;
     case O_EXP:
 	value = exp(str_gnum(sarg[1]));

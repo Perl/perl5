@@ -1,6 +1,9 @@
-/* $Header: stab.c,v 1.0.1.1 88/01/28 10:35:17 root Exp $
+/* $Header: stab.c,v 1.0.1.2 88/02/02 11:25:53 root Exp $
  *
  * $Log:	stab.c,v $
+ * Revision 1.0.1.2  88/02/02  11:25:53  root
+ * patch13: moved extern int out of function for a poor Xenix machine.
+ * 
  * Revision 1.0.1.1  88/01/28  10:35:17  root
  * patch8: changed some stabents to support eval operator.
  * 
@@ -64,13 +67,14 @@ static char *sig_name[] = {
     ,0
     };
 
+extern int errno;
+
 STR *
 stab_str(stab)
 STAB *stab;
 {
     register int paren;
     register char *s;
-    extern int errno;
 
     switch (*stab->stab_name) {
     case '0': case '1': case '2': case '3': case '4':

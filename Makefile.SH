@@ -12,11 +12,20 @@ esac
 case "$0" in
 */*) cd `expr X$0 : 'X\(.*\)/'` ;;
 esac
+
+case "$d_symlink" in
+*define*) sln='ln -s' ;;
+*) sln='ln';;
+esac
+
 echo "Extracting Makefile (with variable substitutions)"
 cat >Makefile <<!GROK!THIS!
-# $Header: Makefile.SH,v 1.0.1.4 88/01/28 10:17:59 root Exp $
+# $Header: Makefile.SH,v 1.0.1.5 88/02/02 11:20:49 root Exp $
 #
 # $Log:	Makefile.SH,v $
+# Revision 1.0.1.5  88/02/02  11:20:49  root
+# patch13: added d_symlink dependency, changed TEST to ./perl TEST.
+# 
 # Revision 1.0.1.4  88/01/28  10:17:59  root
 # patch8: added perldb.man
 # 
@@ -44,6 +53,7 @@ SMALL = $small
 LARGE = $large $split
 mallocsrc = $mallocsrc
 mallocobj = $mallocobj
+SLN = $sln
 
 libs = $libnm -lm
 !GROK!THIS!
@@ -152,7 +162,7 @@ depend: makedepend
 
 test: perl
 	chmod 755 t/TEST t/base.* t/comp.* t/cmd.* t/io.* t/op.*
-	cd t && (rm -f perl; ln -s ../perl . || ln ../perl .) && TEST
+	cd t && (rm -f perl; $(SLN) ../perl .) && ./perl TEST
 
 clist:
 	echo $(c) | tr ' ' '\012' >.clist

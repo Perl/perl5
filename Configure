@@ -8,7 +8,7 @@
 # and edit it to reflect your system.  Some packages may include samples
 # of config.h for certain machines, so you might look for one of those.)
 #
-# $Header: Configure,v 1.0.1.5 88/01/30 09:21:20 root Exp $
+# $Header: Configure,v 1.0.1.6 88/02/02 11:20:07 root Exp $
 #
 # Yes, you may rip this off to use in other distribution packages.
 # (Note: this Configure script was generated automatically.  Rather than
@@ -70,10 +70,12 @@ cpp=''
 cppminus=''
 d_bcopy=''
 d_charsprf=''
+d_crypt=''
 d_index=''
 d_statblks=''
 d_stdstdio=''
 d_strctcpy=''
+d_symlink=''
 d_tminsys=''
 d_vfork=''
 d_voidsig=''
@@ -664,6 +666,16 @@ else
     d_charsprf="$undef"
 fi
 
+: see if crypt exists
+echo " "
+if $contains crypt libc.list >/dev/null 2>&1; then
+    echo 'crypt() found.'
+    d_crypt="$define"
+else
+    echo 'crypt() not found.'
+    d_crypt="$undef"
+fi
+
 : index or strcpy
 echo " "
 dflt=y
@@ -1233,6 +1245,16 @@ else
     cc=cc
 fi
 
+: see if symlink exists
+echo " "
+if $contains symlink libc.list >/dev/null 2>&1; then
+    echo 'symlink() found.'
+    d_symlink="$define"
+else
+    echo 'symlink() not found.'
+    d_symlink="$undef"
+fi
+
 : see if we should include -lnm
 echo " "
 if $test -r /usr/lib/libnm.a || $test -r /usr/local/lib/libnm.a ; then
@@ -1328,10 +1350,12 @@ cpp='$cpp'
 cppminus='$cppminus'
 d_bcopy='$d_bcopy'
 d_charsprf='$d_charsprf'
+d_crypt='$d_crypt'
 d_index='$d_index'
 d_statblks='$d_statblks'
 d_stdstdio='$d_stdstdio'
 d_strctcpy='$d_strctcpy'
+d_symlink='$d_symlink'
 d_tminsys='$d_tminsys'
 d_vfork='$d_vfork'
 d_voidsig='$d_voidsig'

@@ -65,6 +65,12 @@ cat <<!GROK!THIS! >config.h
  */
 #$d_charsprf	CHARSPRINTF 	/**/
 
+/* CRYPT:
+ *	This symbol, if defined, indicates that the crypt routine is available
+ *	to encrypt passwords and the like.
+ */
+#$d_crypt	CRYPT		/**/
+
 /* index:
  *	This preprocessor symbol is defined, along with rindex, if the system
  *	uses the strchr and strrchr routines instead.
@@ -94,6 +100,12 @@ cat <<!GROK!THIS! >config.h
  *	routine of some sort instead.
  */
 #$d_strctcpy	STRUCTCOPY	/**/
+
+/* SYMLINK:
+ *	This symbol, if defined, indicates that the symlink routine is available
+ *	to create symbolic links.
+ */
+#$d_symlink	SYMLINK		/**/
 
 /* TMINSYS:
  *	This symbol is defined if this system declares "struct tm" in
