@@ -1122,7 +1122,7 @@ if ($opt_x && $opt_a) {
 }
 
 my $pod = <<"END" unless $opt_P;
-## Below is stub documentation for your module. You better edit it!
+## Below is stub documentation for your module. You'd better edit it!
 #
 #=head1 NAME
 #
