@@ -347,7 +347,7 @@ all : base extras x2p archcorefiles preplibrary perlpods
 .endif
 base : miniperl perl
 	@ $(NOOP)
-extras : Fcntl IO Opcode attrs B $(POSIX) $(THREAD) SDBM_File libmods utils podxform
+extras : Fcntl IO Opcode attrs Stdio DCLSym B $(POSIX) $(THREAD) SDBM_File libmods utils podxform
 	@ $(NOOP)
 libmods : $(LIBPREREQ)
 	@ $(NOOP)
@@ -511,6 +511,44 @@ Fcntl : [.lib]Fcntl.pm [.lib.auto.Fcntl]Fcntl$(E)
 # ${@} necessary to distract different versions of MM[SK]/make
 [.ext.Fcntl]Descrip.MMS : [.ext.Fcntl]Makefile.PL $(LIBPREREQ) $(DBG)perlshr$(E)
 	$(MINIPERL) "-I[--.lib]" -e "chdir('[.ext.Fcntl]') or die $!; do 'Makefile.PL'; print ${@} if ${@};" "INST_LIB=[--.lib]" "INST_ARCHLIB=[--.lib]"
+
+Stdio : [.lib.vms]Stdio.pm [.lib.auto.vms.Stdio]Stdio$(E)
+	@ $(NOOP)
+
+[.lib.vms]Stdio.pm : [.vms.ext.stdio]Descrip.MMS
+	@ If F$Search("[.lib]auto.dir").eqs."" Then Create/Directory [.lib.auto]
+	@ Set Default [.vms.ext.Stdio]
+	$(MMS)
+	@ Set Default [---]
+
+[.lib.auto.vms.Stdio]Stdio$(E) : [.vms.ext.Stdio]Descrip.MMS
+	@ Set Default [.vms.ext.Stdio]
+	$(MMS)
+	@ Set Default [---]
+
+# Add "-I[--.lib]" t $(MINIPERL) so we use this copy of lib after C<chdir>
+# ${@} necessary to distract different versions of MM[SK]/make
+[.vms.ext.stdio]Descrip.MMS : [.vms.ext.Stdio]Makefile.PL $(LIBPREREQ) $(DBG)perlshr$(E)
+	$(MINIPERL) "-I[---.lib]" -e "chdir('[.vms.ext.Stdio]') or die $!; do 'Makefile.PL'; print ${@} if ${@};" "INST_LIB=[---.lib]" "INST_ARCHLIB=[---.lib]"
+
+DCLSym : [.lib.vms]DCLSym.pm [.lib.auto.vms.DCLSym]DCLSym$(E)
+	@ $(NOOP)
+
+[.lib.vms]DCLSym.pm : [.vms.ext.dclsym]Descrip.MMS
+	@ If F$Search("[.lib]auto.dir").eqs."" Then Create/Directory [.lib.auto]
+	@ Set Default [.vms.ext.DCLSym]
+	$(MMS)
+	@ Set Default [---]
+
+[.lib.auto.vms.DCLSym]DCLSym$(E) : [.vms.ext.DCLSym]Descrip.MMS
+	@ Set Default [.vms.ext.DCLSym]
+	$(MMS)
+	@ Set Default [---]
+
+# Add "-I[--.lib]" t $(MINIPERL) so we use this copy of lib after C<chdir>
+# ${@} necessary to distract different versions of MM[SK]/make
+[.vms.ext.DCLSym]Descrip.MMS : [.vms.ext.DCLSym]Makefile.PL $(LIBPREREQ) $(DBG)perlshr$(E)
+	$(MINIPERL) "-I[---.lib]" -e "chdir('[.vms.ext.DCLSym]') or die $!; do 'Makefile.PL'; print ${@} if ${@};" "INST_LIB=[---.lib]" "INST_ARCHLIB=[---.lib]"
 
 attrs : [.lib]attrs.pm [.lib.auto.attrs]attrs$(E)
 	@ $(NOOP)
