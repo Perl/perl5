@@ -4,7 +4,7 @@
 # the format supported by op/regexp.t.  If you want to add a test
 # that does fit that format, add it to op/re_tests, not here.
 
-print "1..215\n";
+print "1..216\n";
 
 BEGIN {
     chdir 't' if -d 't';
@@ -1024,4 +1024,13 @@ $test++;
 
 'a1b' =~ ('xyz' =~ /t/) and $` eq 'a' or print "not ";
 print "ok $test\n";
+$test++;
+
+$w = 0;
+{
+    local $SIG{__WARN__} = sub { $w = 1 };
+    local $^W = 1;
+	$w = 1 if ("1\n" x 102) =~ /^\s*\n/m;
+}
+print $w ? "not " : "", "ok $test\n";
 $test++;

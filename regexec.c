@@ -690,6 +690,7 @@ Perl_re_intuit_start(pTHX_ regexp *prog, SV *sv, char *strpos,
 	    SvREFCNT_dec(prog->check_substr);
 	    prog->check_substr = Nullsv;	/* disable */
 	    prog->float_substr = Nullsv;	/* clear */
+	    check = Nullsv;			/* abort */
 	    s = strpos;
 	    /* XXXX This is a remnant of the old implementation.  It
 	            looks wasteful, since now INTUIT can use many
@@ -752,6 +753,8 @@ Perl_re_intuit_start(pTHX_ regexp *prog, SV *sv, char *strpos,
 					       "Could not match STCLASS...\n") );
 			goto fail;
 		    }
+		    if (!check)
+			goto giveup;
 		    DEBUG_r( PerlIO_printf(Perl_debug_log,
 				"Looking for %s substr starting at offset %ld...\n",
 				 what, (long)(s + start_shift - i_strpos)) );
@@ -762,6 +765,8 @@ Perl_re_intuit_start(pTHX_ regexp *prog, SV *sv, char *strpos,
 		    goto retry_floating_check;
 		/* Recheck anchored substring, but not floating... */
 		s = check_at; 
+		if (!check)
+		    goto giveup;
 		DEBUG_r( PerlIO_printf(Perl_debug_log,
 			  "Looking for anchored substr starting at offset %ld...\n",
 			  (long)(other_last - i_strpos)) );
@@ -771,6 +776,8 @@ Perl_re_intuit_start(pTHX_ regexp *prog, SV *sv, char *strpos,
                current position only: */
 	    if (ml_anch) {
 		s = t = t + 1;
+		if (!check)
+		    goto giveup;
 		DEBUG_r( PerlIO_printf(Perl_debug_log,
 			  "Looking for /%s^%s/m starting at offset %ld...\n",
 			  PL_colors[0],PL_colors[1], (long)(t - i_strpos)) );
@@ -792,8 +799,10 @@ Perl_re_intuit_start(pTHX_ regexp *prog, SV *sv, char *strpos,
 		     PerlIO_printf(Perl_debug_log, 
 			"Does not contradict STCLASS...\n") );
     }
-    DEBUG_r(PerlIO_printf(Perl_debug_log, "%sGuessed:%s match at offset %ld\n",
-			  PL_colors[4], PL_colors[5], (long)(s - i_strpos)) );
+  giveup:
+    DEBUG_r(PerlIO_printf(Perl_debug_log, "%s%s:%s match at offset %ld\n",
+			  PL_colors[4], (check ? "Guessed" : "Giving up"),
+			  PL_colors[5], (long)(s - i_strpos)) );
     return s;
 
   fail_finish:				/* Substring not found */
