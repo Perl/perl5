@@ -751,6 +751,8 @@
 #define utf8n_to_uvuni		Perl_utf8n_to_uvuni
 #define uvchr_to_utf8		Perl_uvchr_to_utf8
 #define uvuni_to_utf8		Perl_uvuni_to_utf8
+#define pv_uni_display		Perl_pv_uni_display
+#define sv_uni_display		Perl_sv_uni_display
 #define vivify_defelem		Perl_vivify_defelem
 #define vivify_ref		Perl_vivify_ref
 #define wait4pid		Perl_wait4pid
@@ -808,8 +810,6 @@
 #define sv_usepvn_mg		Perl_sv_usepvn_mg
 #define get_vtbl		Perl_get_vtbl
 #define pv_display		Perl_pv_display
-#define pv_uni_display		Perl_pv_uni_display
-#define sv_uni_display		Perl_sv_uni_display
 #define dump_indent		Perl_dump_indent
 #define dump_vindent		Perl_dump_vindent
 #define do_gv_dump		Perl_do_gv_dump
@@ -2265,6 +2265,8 @@
 #define utf8n_to_uvuni(a,b,c,d)	Perl_utf8n_to_uvuni(aTHX_ a,b,c,d)
 #define uvchr_to_utf8(a,b)	Perl_uvchr_to_utf8(aTHX_ a,b)
 #define uvuni_to_utf8(a,b)	Perl_uvuni_to_utf8(aTHX_ a,b)
+#define pv_uni_display(a,b,c,d,e)	Perl_pv_uni_display(aTHX_ a,b,c,d,e)
+#define sv_uni_display(a,b,c,d)	Perl_sv_uni_display(aTHX_ a,b,c,d)
 #define vivify_defelem(a)	Perl_vivify_defelem(aTHX_ a)
 #define vivify_ref(a,b)		Perl_vivify_ref(aTHX_ a,b)
 #define wait4pid(a,b,c)		Perl_wait4pid(aTHX_ a,b,c)
@@ -2318,8 +2320,6 @@
 #define sv_usepvn_mg(a,b,c)	Perl_sv_usepvn_mg(aTHX_ a,b,c)
 #define get_vtbl(a)		Perl_get_vtbl(aTHX_ a)
 #define pv_display(a,b,c,d,e)	Perl_pv_display(aTHX_ a,b,c,d,e)
-#define pv_uni_display(a,b,c,d,e)	Perl_pv_uni_display(aTHX_ a,b,c,d,e)
-#define sv_uni_display(a,b,c,d)	Perl_sv_uni_display(aTHX_ a,b,c,d)
 #define dump_vindent(a,b,c,d)	Perl_dump_vindent(aTHX_ a,b,c,d)
 #define do_gv_dump(a,b,c,d)	Perl_do_gv_dump(aTHX_ a,b,c,d)
 #define do_gvgv_dump(a,b,c,d)	Perl_do_gvgv_dump(aTHX_ a,b,c,d)

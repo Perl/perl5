@@ -495,6 +495,8 @@ Perl_utf8n_to_uvchr
 Perl_utf8n_to_uvuni
 Perl_uvchr_to_utf8
 Perl_uvuni_to_utf8
+Perl_pv_uni_display
+Perl_sv_uni_display
 Perl_warn
 Perl_vwarn
 Perl_warner
@@ -530,8 +532,6 @@ Perl_sv_setpvn_mg
 Perl_sv_setsv_mg
 Perl_sv_usepvn_mg
 Perl_get_vtbl
-Perl_pv_uni_display
-Perl_sv_uni_display
 Perl_dump_indent
 Perl_dump_vindent
 Perl_do_gv_dump
