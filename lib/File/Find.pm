@@ -3,7 +3,7 @@ use 5.006;
 use strict;
 use warnings;
 use warnings::register;
-our $VERSION = '1.06';
+our $VERSION = '1.07';
 require Exporter;
 require Cwd;
 
@@ -591,7 +591,8 @@ sub _find_opt {
     local ($wanted_callback, $avoid_nlink, $bydepth, $no_chdir, $follow,
 	$follow_skip, $full_check, $untaint, $untaint_skip, $untaint_pat,
 	$pre_process, $post_process, $dangling_symlinks);
-    local($dir, $name, $fullname, $prune, $_);
+    local($dir, $name, $fullname, $prune);
+    local *_ = \my $a;
 
     my $cwd            = $wanted->{bydepth} ? Cwd::fastcwd() : Cwd::getcwd();
     my $cwd_untainted  = $cwd;

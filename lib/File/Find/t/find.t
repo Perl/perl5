@@ -15,8 +15,8 @@ BEGIN {
     $SIG{'__WARN__'} = sub { $warn_msg = $_[0]; warn "# $_[0]"; }
 }
 
-if ( $symlink_exists ) { print "1..189\n"; }
-else                   { print "1..79\n";  }
+if ( $symlink_exists ) { print "1..195\n"; }
+else                   { print "1..85\n";  }
 
 # Uncomment this to see where File::Find is chdir'ing to.  Helpful for
 # debugging its little jaunts around the filesystem.
@@ -495,6 +495,41 @@ Check( scalar(keys %Expect_Dir) == 0 );
     delete $pre{$_} for @foo;
 
     Check( scalar( keys %pre ) == 0 );
+}
+
+# see thread starting
+# http://www.xray.mpe.mpg.de/mailing-lists/perl5-porters/2004-02/msg00351.html
+{
+    print "# checking that &_ and %_ are still accessible and that\n",
+	"# tie magic on \$_ is not triggered\n";
+    
+    my $true_count;
+    my $sub = 0;
+    sub _ {
+	++$sub;
+    }
+    my $tie_called = 0;
+
+    package Foo;
+    sub STORE {
+	++$tie_called;
+    }
+    sub FETCH {return 'N'};
+    sub TIESCALAR {bless []};
+    package main;
+
+    Check( scalar( keys %_ ) == 0 );
+    my @foo = 'n';
+    tie $foo[0], "Foo";
+
+    File::Find::find( sub { $true_count++; $_{$_}++; &_; } , 'fa' ) for @foo;
+    untie $_;
+
+    Check( $tie_called == 0);
+    Check( scalar( keys %_ ) == $true_count );
+    Check( $sub == $true_count );
+    Check( scalar( @foo ) == 1);
+    Check( $foo[0] eq 'N' );
 }
 
 if ( $symlink_exists ) {
