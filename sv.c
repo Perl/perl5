@@ -3752,8 +3752,9 @@ Perl_sv_setsv_flags(pTHX_ SV *dstr, register SV *sstr, I32 flags)
  					GvENAME((GV*)dstr));
  				}
 			    }
-			    cv_ckproto(cv, (GV*)dstr,
-				       SvPOK(sref) ? SvPVX(sref) : Nullch);
+			    if (!intro)
+				cv_ckproto(cv, (GV*)dstr,
+					SvPOK(sref) ? SvPVX(sref) : Nullch);
 			}
 			GvCV(dstr) = (CV*)sref;
 			GvCVGEN(dstr) = 0; /* Switch off cacheness. */

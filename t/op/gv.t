@@ -11,7 +11,7 @@ BEGIN {
 
 use warnings;
 
-print "1..44\n";
+print "1..47\n";
 
 # type coersion on assignment
 $foo = 'foo';
@@ -191,6 +191,21 @@ print $j[0] == 1 ? "ok 43\n" : "not ok 43\n";
     my $g = *foo;
     $g = <DATA>;
     print $g;
+}
+
+{
+    my $w = '';
+    $SIG{__WARN__} = sub { $w = $_[0] };
+    sub abc1 ();
+    local *abc1 = sub { };
+    print $w eq '' ? "ok 45\n" : "not ok 45\n# $w";
+    sub abc2 ();
+    local *abc2;
+    *abc2 = sub { };
+    print $w eq '' ? "ok 46\n" : "not ok 46\n# $w";
+    sub abc3 ();
+    *abc3 = sub { };
+    print $w =~ /Prototype mismatch/ ? "ok 47\n" : "not ok 47\n# $w";
 }
 
 __END__
