@@ -4,7 +4,7 @@ BEGIN {
 	die "Encode::CN not supported on EBCDIC\n";
     }
 }
-our $VERSION = do { my @r = (q$Revision: 1.0 $ =~ /\d+/g); sprintf "%d."."%02d" x $#r, @r };
+our $VERSION = do { my @r = (q$Revision: 1.20 $ =~ /\d+/g); sprintf "%d."."%02d" x $#r, @r };
 
 use Encode;
 use Encode::CN::HZ;
@@ -42,6 +42,7 @@ Encodings supported are as follows.
   gb12345-raw			Traditional chinese counterpart to 
 				GB2312 (raw)
   iso-ir-165			GB2312 + GB6345 + GB8565 + additions
+  MacChineseSimp                GB2312 + Apple Additions
   cp936				Code Page 936, also known as GBK 
 				(Extended GuoBiao)
   hz				7-bit escaped GB2312 encoding

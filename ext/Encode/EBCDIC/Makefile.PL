@@ -4,7 +4,10 @@ use ExtUtils::MakeMaker;
 
 my $name = 'EBCDIC';
 my %tables = (
-	      ebcdic_t  => ['cp1047.ucm','cp37.ucm','posix-bc.ucm'],
+	      ebcdic_t  => 
+	      ['posix-bc.ucm',
+	       qw(cp037.ucm cp1026.ucm cp1047.ucm cp500.ucm cp875.ucm),
+	       ],
 	      );
 
 WriteMakefile(
@@ -126,9 +129,10 @@ sub postamble
 		$continuator = '';
 	    }
 	}
-        $str .= $^O eq 'VMS' # In VMS quote to preserve case
-            ? qq{\n\t\$(PERL) $enc2xs -"Q" -o \$\@ -f $table.fnm\n\n}
-            : qq{\n\t\$(PERL) $enc2xs -Q -o \$\@ -f $table.fnm\n\n};
+	my $plib   = $ENV{PERL_CORE} ? '-I$(PERL_LIB)' : '';
+	my $ucopts = ($^O eq 'VMS')  ? '-"Q" -"O"' : '-Q -O'; 
+	$str .=  
+	    qq{\n\t\$(PERL) $plib $enc2xs $ucopts -o \$\@ -f $table.fnm\n\n};
 	open (FILELIST, ">$table.fnm")
 	    || die "Could not open $table.fnm: $!";
 	foreach my $file (@{$tables{$table}})

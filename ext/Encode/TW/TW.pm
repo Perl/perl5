@@ -4,7 +4,7 @@ BEGIN {
 	die "Encode::TW not supported on EBCDIC\n";
     }
 }
-our $VERSION = do { my @r = (q$Revision: 1.0 $ =~ /\d+/g); sprintf "%d."."%02d" x $#r, @r };
+our $VERSION = do { my @r = (q$Revision: 1.20 $ =~ /\d+/g); sprintf "%d."."%02d" x $#r, @r };
 
 use Encode;
 use XSLoader;
@@ -34,8 +34,9 @@ Encodings supported are as follows.
   big5-hkscs  /\bbig5-hk(scs)?$/i
                                 Big5 plus Cantonese characters in 
                                 Hong Kong
+  MacChineseSimp		Big5 + Apple Vendor Mappings
   cp950		                Code Page 950 
-                                (Big5 + Microsoft vendor mappings)
+                                = Big5 + Microsoft vendor mappings
   --------------------------------------------------------------------
 
 To find how to use this module in detail, see L<Encode>.

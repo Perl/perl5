@@ -1,9 +1,81 @@
 # Revision history for Perl extension Encode.
 #
-# $Id: Changes,v 1.11 2002/03/31 22:12:13 dankogai Exp dankogai $
+# $Id: Changes,v 1.20 2002/04/04 19:50:52 dankogai Exp dankogai $
 #
+1.20  $Date: 2002/04/04 19:50:52 $
++ bin/unidump
+  the last minute addtion.  Just give it a try.  Docs remains to be done.  
+  Not installed by default.
+! lib/Encode/Supported.pod
+  Enhanced Greatly.
+! t/Alias.t
+! lib/Encode/Alias.pm
+! lib/Encode/utf8.pm
+! lib/Encode/10464_1.pm
+! lib/Encode/ucs2_le.pm
+  Canonical name for 'UCS-2le" is now "UTF-16LE".  UCS-2 left
+  unchanged but UTF-16BE is added as an alias.  Implicit aliases
+  move to Encode::Alias so init_alias() works more as expected.
+  Also, 'utf8' is now canonical with 'UTF-8' being an alias.  
+  Though pedantically wrong, This should make perl mongers happier.
+  t/Alias.t is enhanced to test all these.
+  Message-Id: <9C39BD58-47AF-11D6-9D82-00039301D480@dan.co.jp>
+! Byte/Makefile.PL
+  Now all .ucm are stacked in byte_t; They all share ascii part so 50%
+  of the codepoints are common.  CJKT left as is because the saving is
+  not significant.
+! Byte/Makefile.PL
+! CN/Makefile.PL
+! EBCDIC/Makefile.PL
+! Encode.xs
+! Encode/Makefile_PL.e2x
+! JP/Makefile.PL
+! KR/Makefile.PL
+! Makefile.PL
+! Symbol/Makefile.PL
+! TW/Makefile.PL
+! bin/enc2xs
+! AUTHORS
+  All occurance of _def.h replaced with .exh so djgpp works happily
+  ever after!  To credit this amazing discovery, Laszlo is now in
+  AUTHORS list
+  Message-Id: <20020403181424.GA8778@freemail.hu>
+  Message-Id: <B5BF0C6F-4732-11D6-B13D-00039301D480@dan.co.jp>
+! Makefile.PL
+! */Makefile.PL
+! Encode/Makefile_PL.skel
+  bin/enc2xs
+  No more @INC fiddling!  Uses $ENV{PERL_CORE} instead
+  Message-Id: <20020401222744.GX2000@blackrider>, et al.
+! t/encoding.t
+  Two more tests by added jhi
+  Message-Id: <200204020000.DAA25121@alpha.hut.fi>
++ t/grow.t
+! Encode.xs
+  The showstopper fixed -- Memory reallocation bug was causing
+  Encode::XS to fall into infinite  loop on certain conditions.
+  t/grow.t tests that.
+  Message-Id: <9572CAC4-463C-11D6-ABA5-00039301D480@dan.co.jp>, et al
++ bin/txt2ucm
+! */Makefile.PL
+! */*.ucm
+! */XX.pm
+! lib/Encode/Supported.pod
+  Vendor encodings rebuilt out of original map files at unicode.org.
+  Indic languages such as MacDevanagali remain unspported do to the
+  shortcoming of encengine capabilities (they need algorithmical
+  conversion and I have no knowledge on that!).  Pods fixed for added
+  encodings.
+  Oh, macJapan.ucm renamed to macJapanese.ucm.
+  macROMnn is macRomanian and macRUMnn is macRumanian.
+  txt2ucm is a crude script that is used to convert them.
+! bin/enc2xs
+  Unicode Compound Characters (used extensively on Mac) supported
+! bin/piconv
+  Typo fixes and improvements by jhi
+  Message-Id: <200204010201.FAA03564@alpha.hut.fi>, et al.
 
-1.11  $Date: 2002/03/31 22:12:13 $
+1.11  $Date: 2002/04/04 19:50:52 $
 + t/encoding.t
 + t/jperl.t
 ! MANIFEST

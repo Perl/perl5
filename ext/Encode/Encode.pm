@@ -1,6 +1,6 @@
 package Encode;
 use strict;
-our $VERSION = do { my @r = (q$Revision: 1.11 $ =~ /\d+/g); sprintf "%d."."%02d" x $#r, @r };
+our $VERSION = do { my @r = (q$Revision: 1.20 $ =~ /\d+/g); sprintf "%d."."%02d" x $#r, @r };
 our $DEBUG = 0;
 
 require DynaLoader;
@@ -42,29 +42,53 @@ use Encode::Alias;
 
 # Make a %Encoding package variable to allow a certain amount of cheating
 our %Encoding;
+our %ExtModule;
 
-our %ExtModule =
-    (
-     viscii             => 'Encode/Byte.pm',
-     'koi8-r'           => 'Encode/Byte.pm',
-     cp1047             => 'Encode/EBCDIC.pm',
-     cp37               => 'Encode/EBCDIC.pm',
-     'posix-bc'         => 'Encode/EBCDIC.pm',
-     symbol             => 'Encode/Symbol.pm',
-     dingbats           => 'Encode/Symbol.pm',
-    );
+my @codepages = qw(
+		     37  424  437  500  737  775  850  852  855 
+		    856  857  860  861  862  863  864  865  866 
+		    869  874  875  932  936  949  950 1006 1026 
+		   1047 1250 1251 1252 1253 1254 1255 1256 1257
+		   1258
+		   );
+
+my @macintosh = qw(
+		   CentralEurRoman  Croatian  Cyrillic   Greek
+		   Iceland          Roman     Rumanian   Sami
+		   Thai             Turkish   Ukrainian
+		   );
 
 for my $k (2..11,13..16){
     $ExtModule{"iso-8859-$k"} = 'Encode/Byte.pm';
 }
 
-for my $k (1250..1258){
+for my $k (@codepages){
     $ExtModule{"cp$k"} = 'Encode/Byte.pm';
 }
 
+for my $k (@macintosh)
+{
+    $ExtModule{"mac$k"} = 'Encode/Byte.pm';
+}
+
+%ExtModule =
+    (%ExtModule,
+     'koi8-r'           => 'Encode/Byte.pm',
+     'posix-bc'         => 'Encode/EBCDIC.pm',
+     cp037              => 'Encode/EBCDIC.pm',
+     cp1026             => 'Encode/EBCDIC.pm',
+     cp1047             => 'Encode/EBCDIC.pm',
+     cp500              => 'Encode/EBCDIC.pm',
+     cp875              => 'Encode/EBCDIC.pm',
+     dingbats           => 'Encode/Symbol.pm',
+     macDingbats        => 'Encode/Symbol.pm',
+     macSymbol          => 'Encode/Symbol.pm',
+     symbol             => 'Encode/Symbol.pm',
+     viscii             => 'Encode/Byte.pm',
+);
+
 unless ($ON_EBCDIC) { # CJK added to autoload unless EBCDIC env
-%ExtModule =(
-	     %ExtModule,
+%ExtModule =(%ExtModule,
 	     'euc-cn'           => 'Encode/CN.pm',
 	     gb2312		=> 'Encode/CN.pm',
 	     gb12345		=> 'Encode/CN.pm',
@@ -76,10 +100,11 @@ unless ($ON_EBCDIC) { # CJK added to autoload unless EBCDIC env
 	     'iso-2022-jp-1'	=> 'Encode/JP.pm',
 	     '7bit-jis'         => 'Encode/JP.pm',
 	     shiftjis	        => 'Encode/JP.pm',
-	     macjapan	        => 'Encode/JP.pm',
+	     macJapanese        => 'Encode/JP.pm',
 	     cp932		=> 'Encode/JP.pm',
 	     'euc-kr'       	=> 'Encode/KR.pm',
 	     ksc5601		=> 'Encode/KR.pm',
+	     macKorean          => 'Encode/KR.pm',
 	     cp949		=> 'Encode/KR.pm',
 	     big5		=> 'Encode/TW.pm',
 	     'big5-hkscs'	=> 'Encode/TW.pm',
@@ -90,13 +115,8 @@ unless ($ON_EBCDIC) { # CJK added to autoload unless EBCDIC env
 	     );
 }
 
-for my $k (qw{ CentralEurRoman  Croatian  Cyrillic   Greek
-	       Iceland          Roman     Rumanian   Sami
-	       Thai             Turkish   Ukrainian
-	     })
-{
-    $ExtModule{"mac$k"} = 'Encode/Byte.pm';
-}
+
+
 
 sub encodings
 {
@@ -197,7 +217,7 @@ sub from_to
     croak("Unknown encoding '$to'") unless defined $t;
     my $uni = $f->decode($string,$check);
     return undef if ($check && length($string));
-    $string = $t->encode($uni,$check);
+    $string =  $t->encode($uni,$check);
     return undef if ($check && length($uni));
     return defined($_[0] = $string) ? length($string) : undef ;
 }

@@ -1,7 +1,24 @@
 #
-# $Id: jperl.t,v 1.11 2002/03/31 22:12:13 dankogai Exp dankogai $
+# $Id: jperl.t,v 1.20 2002/04/04 19:50:52 dankogai Exp dankogai $
 #
 # This script is written in euc-jp
+
+BEGIN {
+    require Config; import Config;
+    if ($Config{'extensions'} !~ /\bEncode\b/) {
+      print "1..0 # Skip: Encode was not built\n";
+      exit 0;
+    }
+    unless (find PerlIO::Layer 'perlio') {
+	print "1..0 # Skip: PerlIO was not built\n";
+	exit 0;
+    }
+    if (ord("A") == 193) {
+	print "1..0 # Skip: EBCDIC\n";
+	exit 0;
+    }
+    $| = 1;
+}
 
 use strict;
 use Test::More tests => 15;

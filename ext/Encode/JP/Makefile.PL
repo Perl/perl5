@@ -5,7 +5,7 @@ use ExtUtils::MakeMaker;
 my %tables = (
 	      euc_jp_t   => ['euc-jp.ucm'],
               sjis_t     => ['shiftjis.ucm',
-			     'macJapan.ucm',
+			     'macJapanese.ucm',
 			     'cp932.ucm'],
              );
 
@@ -130,9 +130,10 @@ sub postamble
 		$continuator = '';
 	    }
 	}
-        $str .= $^O eq 'VMS' # In VMS quote to preserve case
-            ? qq{\n\t\$(PERL) $enc2xs -"Q" -o \$\@ -f $table.fnm\n\n}
-            : qq{\n\t\$(PERL) $enc2xs -Q -o \$\@ -f $table.fnm\n\n};
+	my $plib   = $ENV{PERL_CORE} ? '-I$(PERL_LIB)' : '';
+	my $ucopts = ($^O eq 'VMS')  ? '-"Q"' : '-Q'; # VMS tweaks
+	$str .=  
+	    qq{\n\t\$(PERL) $plib $enc2xs $ucopts -o \$\@ -f $table.fnm\n\n};
 	open (FILELIST, ">$table.fnm")
 	    || die "Could not open $table.fnm: $!";
 	foreach my $file (@{$tables{$table}})

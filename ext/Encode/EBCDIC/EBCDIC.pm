@@ -1,6 +1,6 @@
 package Encode::EBCDIC;
 use Encode;
-our $VERSION = do { my @r = (q$Revision: 1.0 $ =~ /\d+/g); sprintf "%d."."%02d" x $#r, @r };
+our $VERSION = do { my @r = (q$Revision: 1.20 $ =~ /\d+/g); sprintf "%d."."%02d" x $#r, @r };
 
 use XSLoader;
 XSLoader::load('Encode::EBCDIC',$VERSION);
@@ -25,8 +25,11 @@ supported are as follows.
 
   Canonical   Alias		Description
   --------------------------------------------------------------------
-  cp1047
-  cp37
+  cp37  
+  cp500  
+  cp875  
+  cp1026  
+  cp1047  
   posix-bc
 
 =head1 DESCRIPTION

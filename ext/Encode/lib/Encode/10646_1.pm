@@ -1,12 +1,12 @@
 package Encode::10646_1;
 use strict;
-our $VERSION = do { my @r = (q$Revision: 1.0 $ =~ /\d+/g); sprintf "%d."."%02d" x $#r, @r };
+our $VERSION = do { my @r = (q$Revision: 1.20 $ =~ /\d+/g); sprintf "%d."."%02d" x $#r, @r };
 
 use base 'Encode::Encoding';
 # Encoding is 16-bit network order Unicode (no surogates)
 # Used for X font encodings
 
-__PACKAGE__->Define(qw(UCS-2 iso-10646-1));
+__PACKAGE__->Define(qw(UCS-2));
 
 sub decode
 {

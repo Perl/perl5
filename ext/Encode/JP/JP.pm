@@ -5,7 +5,7 @@ BEGIN {
     }
 }
 use Encode;
-our $VERSION = do { my @r = (q$Revision: 1.0 $ =~ /\d+/g); sprintf "%d."."%02d" x $#r, @r };
+our $VERSION = do { my @r = (q$Revision: 1.20 $ =~ /\d+/g); sprintf "%d."."%02d" x $#r, @r };
 
 use XSLoader;
 XSLoader::load('Encode::JP',$VERSION);
@@ -41,14 +41,14 @@ supported are as follows.
 	      /\bsjis$/i
   7bit-jis    /\bjis$/i		7bit JIS
   iso-2022-jp			ISO-2022-JP                  [RFC1468]
-				(7bit JIS with all Halfwidth Kana 
-				 converted to Fullwidth)
+				= 7bit JIS with all Halfwidth Kana 
+				  converted to Fullwidth
   iso-2022-jp-1			ISO-2022-JP-1                [RFC2237]
-                                (ISO-2022-JP with JIS X 0212-1990
-				 support. See below)
-  MacJapanese	                (Shift JIS + Apple vendor mappings)
+                                = ISO-2022-JP with JIS X 0212-1990
+				  support.  See below
+  MacJapanese	                Shift JIS + Apple vendor mappings
   cp932                         Code Page 932	
-                                (Shift JIS + MS/IBM vendor mappings)
+                                = Shift JIS + MS/IBM vendor mappings
   --------------------------------------------------------------------
 
 =head1 DESCRIPTION

@@ -1,13 +1,13 @@
 package Encode::utf8;
 use strict;
-our $VERSION = do { my @r = (q$Revision: 1.0 $ =~ /\d+/g); sprintf "%d."."%02d" x $#r, @r };
+our $VERSION = do { my @r = (q$Revision: 1.20 $ =~ /\d+/g); sprintf "%d."."%02d" x $#r, @r };
 
 use base 'Encode::Encoding';
 # package to allow long-hand
 #   $octets = encode( utf8 => $string );
 #
 
-__PACKAGE__->Define(qw(UTF-8 utf8));
+__PACKAGE__->Define(qw(utf8));
 
 sub decode
 {

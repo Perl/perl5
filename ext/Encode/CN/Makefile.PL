@@ -3,8 +3,10 @@ use strict;
 use ExtUtils::MakeMaker;
 
 my %tables = (euc_cn_t   => ['euc-cn.ucm',
-			     'cp936.ucm',],
-	      '2312_t'   => ['gb2312.ucm'],
+			     'cp936.ucm',
+			     'macChinsimp.ucm',
+			     ],
+	      '2312_t'    => ['gb2312.ucm'],
 	      '12345_t'  => ['gb12345.ucm'],
 	      ir_165_t   => ['ir-165.ucm'],
              );
@@ -131,9 +133,10 @@ sub postamble
 		$continuator = '';
 	    }
 	}
-        $str .= $^O eq 'VMS' # In VMS quote to preserve case
-            ? qq{\n\t\$(PERL) $enc2xs -"Q" -o \$\@ -f $table.fnm\n\n}
-            : qq{\n\t\$(PERL) $enc2xs -Q -o \$\@ -f $table.fnm\n\n};
+	my $plib   = $ENV{PERL_CORE} ? '-I$(PERL_LIB)' : '';
+	my $ucopts = ($^O eq 'VMS')  ? '-"Q"' : '-Q'; # VMS tweaks
+	$str .=  
+	    qq{\n\t\$(PERL) $plib $enc2xs $ucopts -o \$\@ -f $table.fnm\n\n};
 	open (FILELIST, ">$table.fnm")
 	    || die "Could not open $table.fnm: $!";
 	foreach my $file (@{$tables{$table}})

@@ -4,13 +4,17 @@ BEGIN {
       print "1..0 # Skip: Encode was not built\n";
       exit 0;
     }
+    unless (find PerlIO::Layer 'perlio') {
+        print "1..0 # Skip: PerlIO was not built\n";
+        exit 0;
+    }
     if (ord("A") == 193) {
 	print "1..0 # encoding pragma does not support EBCDIC platforms\n";
 	exit(0);
     }
 }
 
-print "1..29\n";
+print "1..31\n";
 
 use encoding "latin1"; # ignored (overwritten by the next line)
 use encoding "greek";  # iso 8859-7 (no "latin" alias, surprise...)
@@ -187,4 +191,13 @@ print "ok 28\n";
     # Used to core dump in 5.7.3
     no warnings; # so test goes noiselessly
     print ord(undef) == 0 ? "ok 29\n" : "not ok 29\n";
+}
+
+{
+	my %h1;
+	my %h2;
+	$h1{"\xdf"}    = 41;
+	$h2{"\x{3af}"} = 42;
+	print $h1{"\x{3af}"} == 41 ? "ok 30\n" : "not ok 30\n";
+	print $h2{"\xdf"}    == 42 ? "ok 31\n" : "not ok 31\n";
 }

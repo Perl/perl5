@@ -1,6 +1,6 @@
 package Encode::Symbol;
 use Encode;
-our $VERSION = do { my @r = (q$Revision: 1.0 $ =~ /\d+/g); sprintf "%d."."%02d" x $#r, @r };
+our $VERSION = do { my @r = (q$Revision: 1.20 $ =~ /\d+/g); sprintf "%d."."%02d" x $#r, @r };
 
 use XSLoader;
 XSLoader::load('Encode::Symbol',$VERSION);
@@ -27,6 +27,8 @@ supported are as follows.
   --------------------------------------------------------------------
   symbol
   dingbats
+  AdobeZDingbat
+  AdobeSymbol
   MacDingbats
 
 =head1 DESCRIPTION
