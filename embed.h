@@ -732,7 +732,7 @@
 #define vivify_defelem		Perl_vivify_defelem
 #define vivify_ref		Perl_vivify_ref
 #define wait4pid		Perl_wait4pid
-#define report_closed_fh	Perl_report_closed_fh
+#define report_evil_fh		Perl_report_evil_fh
 #define report_uninit		Perl_report_uninit
 #define warn			Perl_warn
 #define vwarn			Perl_vwarn
@@ -2187,7 +2187,7 @@
 #define vivify_defelem(a)	Perl_vivify_defelem(aTHX_ a)
 #define vivify_ref(a,b)		Perl_vivify_ref(aTHX_ a,b)
 #define wait4pid(a,b,c)		Perl_wait4pid(aTHX_ a,b,c)
-#define report_closed_fh(a,b,c,d)	Perl_report_closed_fh(aTHX_ a,b,c,d)
+#define report_evil_fh(a,b,c)	Perl_report_evil_fh(aTHX_ a,b,c)
 #define report_uninit()		Perl_report_uninit(aTHX)
 #define vwarn(a,b)		Perl_vwarn(aTHX_ a,b)
 #define vwarner(a,b,c)		Perl_vwarner(aTHX_ a,b,c)
@@ -4286,8 +4286,8 @@
 #define vivify_ref		Perl_vivify_ref
 #define Perl_wait4pid		CPerlObj::Perl_wait4pid
 #define wait4pid		Perl_wait4pid
-#define Perl_report_closed_fh	CPerlObj::Perl_report_closed_fh
-#define report_closed_fh	Perl_report_closed_fh
+#define Perl_report_evil_fh	CPerlObj::Perl_report_evil_fh
+#define report_evil_fh		Perl_report_evil_fh
 #define Perl_report_uninit	CPerlObj::Perl_report_uninit
 #define report_uninit		Perl_report_uninit
 #define Perl_warn		CPerlObj::Perl_warn
