@@ -3452,6 +3452,18 @@ S_procselfauxv(pTHX_ SV *sv, char *arg0) {
         if (auxv.a_type == AT_SUN_EXECNAME) {
             close(fh);
             sv_setpv(sv, auxv.a_un.a_ptr);
+	    if (!strchr(SvPVX(sv), '/')) {
+		 /* If no slash at all, probably started as "./perl" 
+		  * Do not compare against "perl", though, since the
+		  * binary might be called something else. */
+		 STRLEN len;
+		 char *s = SvPV(sv, len);
+		 SvGROW(sv, len + 2);
+		 memmove(s + 2, s, len);
+		 SvPVX(sv)[0] = '.';
+		 SvPVX(sv)[1] = '/';
+		 SvCUR(sv) += 2;
+	    }
 	    return;
         }
     }
