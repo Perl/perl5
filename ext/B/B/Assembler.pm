@@ -53,6 +53,8 @@ sub B::Asmdata::PUT_U16 { pack("n", $_[0]) }
 sub B::Asmdata::PUT_U32 { pack("N", $_[0]) }
 sub B::Asmdata::PUT_I32 { pack("N", $_[0]) }
 sub B::Asmdata::PUT_objindex { pack("N", $_[0]) } # could allow names here
+sub B::Asmdata::PUT_svindex { &B::Asmdata::PUT_objindex }
+sub B::Asmdata::PUT_opindex { &B::Asmdata::PUT_objindex }
 
 sub B::Asmdata::PUT_strconst {
     my $arg = shift;
