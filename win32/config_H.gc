@@ -344,11 +344,11 @@
  */
 #define Netdb_name_t		char *
 
-/* HAS_GETNETBYADD:
+/* HAS_GETNETBYADDR:
  *	This symbol, if defined, indicates that the getnetbyaddr routine is
  *	available to lookup networks by their IP addresses.
  */
-/*#define HAS_GETNETBYADD		/**/
+/*#define HAS_GETNETBYADDR		/**/
 
 /* Netdb_net_t:
  *	This symbol holds the type used for the 1st argument
