@@ -1,4 +1,4 @@
-Unicode/Collate version 0.21
+Unicode/Collate version 0.23
 ===============================
 
 NAME
@@ -22,7 +22,7 @@ SYNOPSIS
 
 INSTALLATION
 
-Perl 5.6.1 or better
+Perl 5.6.1 or later
 
 To install this module type the following:
 
@@ -50,7 +50,7 @@ DEPENDENCIES
 
 COPYRIGHT AND LICENCE
 
-SADAHIRO Tomoyuki <bqw10602@nifty.com>
+SADAHIRO Tomoyuki <SADAHIRO@cpan.org>
 
   http://homepage1.nifty.com/nomenclator/perl/
 

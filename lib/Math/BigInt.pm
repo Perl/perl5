@@ -18,7 +18,7 @@ package Math::BigInt;
 my $class = "Math::BigInt";
 require 5.005;
 
-$VERSION = '1.62';
+$VERSION = '1.63';
 use Exporter;
 @ISA =       qw( Exporter );
 @EXPORT_OK = qw( objectify _swap bgcd blcm); 
@@ -2035,11 +2035,11 @@ sub bsqrt
   my $lastlast = $x+$two;
   while ($last != $x && $lastlast != $x)
     {
-    $lastlast = $last; $last = $x; 
-    $x += $y / $x; 
-    $x /= $two;
+    $lastlast = $last; $last = $x->copy(); 
+    $x->badd($y / $x); 
+    $x->bdiv($two);
     }
-  $x-- if $x * $x > $y;				# overshot?
+  $x->bdec() if $x * $x > $y;				# overshot?
   $x->round(@r);
   }
 

@@ -8,6 +8,25 @@ programs (e.g. I_UNISTD) are already described in config_h.SH.  [`configpm'
 generates pod documentation for Config.pm from this file--please try to keep
 the formatting regular.]
 
+Mcc (Loc.U):
+	This variable is used internally by Configure to determine the
+	full pathname (if any) of the Mcc program.  After Configure runs,
+	the value is reset to a plain "Mcc" and is not useful.
+
+PERL_REVISION (Oldsyms.U):
+	In a Perl version number such as 5.6.2, this is the 5.
+	This value is manually set in patchlevel.h
+
+PERL_SUBVERSION (Oldsyms.U):
+	In a Perl version number such as 5.6.2, this is the 2.
+	Values greater than 50 represent potentially unstable
+	development subversions.
+	This value is manually set in patchlevel.h
+
+PERL_VERSION (Oldsyms.U):
+	In a Perl version number such as 5.6.2, this is the 6.
+	This value is manually set in patchlevel.h
+
 _a (Unix.U):
 	This variable defines the extension used for ordinary library files.
 	For unix, it is '.a'.  The '.' is included.  Other possible
@@ -366,6 +385,88 @@ ctime_r_proto (d_ctime_r.U):
 	It is zero if d_ctime_r is undef, and one of the
 	REENTRANT_PROTO_T_ABC macros of reentr.h if d_ctime_r
 	is defined.
+
+d_Gconvert (d_gconvert.U):
+	This variable holds what Gconvert is defined as to convert
+	floating point numbers into strings.  By default, Configure
+	sets this macro to use the first of gconvert, gcvt, or sprintf
+	that pass sprintf-%g-like behaviour tests.  If perl is using
+	long doubles, the macro uses the first of the following
+	functions that pass Configure's tests: qgcvt, sprintf (if
+	Configure knows how to make sprintf format long doubles--see
+	sPRIgldbl), gconvert, gcvt, and sprintf (casting to double).  
+	The gconvert_preference and gconvert_ld_preference variables   
+	can be used to alter Configure's preferences, for doubles and
+	long doubles, respectively.  If present, they contain a       
+	space-separated list of one or more of the above function       
+	names in the order they should be tried.
+
+	d_Gconvert may be set to override Configure with a platform-
+	specific function.  If this function expects a double, a
+	different value may need to be set by the uselongdouble.cbu
+	call-back unit so that long doubles can be formatted without
+	loss of precision.
+
+d_PRIEUldbl (longdblfio.U):
+	This variable conditionally defines the PERL_PRIfldbl symbol, which
+	indiciates that stdio has a symbol to print long doubles.
+	The 'U' in the name is to separate this from d_PRIeldbl so that even
+	case-blind systems can see the difference.
+
+d_PRIFUldbl (longdblfio.U):
+	This variable conditionally defines the PERL_PRIfldbl symbol, which
+	indiciates that stdio has a symbol to print long doubles.
+	The 'U' in the name is to separate this from d_PRIfldbl so that even
+	case-blind systems can see the difference.
+
+d_PRIGUldbl (longdblfio.U):
+	This variable conditionally defines the PERL_PRIfldbl symbol, which
+	indiciates that stdio has a symbol to print long doubles.
+	The 'U' in the name is to separate this from d_PRIgldbl so that even
+	case-blind systems can see the difference.
+
+d_PRIXU64 (quadfio.U):
+	This variable conditionally defines the PERL_PRIXU64 symbol, which
+	indiciates that stdio has a symbol to print 64-bit hExADECimAl numbers.
+	The 'U' in the name is to separate this from d_PRIx64 so that even
+	case-blind systems can see the difference.
+
+d_PRId64 (quadfio.U):
+	This variable conditionally defines the PERL_PRId64 symbol, which
+	indiciates that stdio has a symbol to print 64-bit decimal numbers.
+
+d_PRIeldbl (longdblfio.U):
+	This variable conditionally defines the PERL_PRIfldbl symbol, which
+	indiciates that stdio has a symbol to print long doubles.
+
+d_PRIfldbl (longdblfio.U):
+	This variable conditionally defines the PERL_PRIfldbl symbol, which
+	indiciates that stdio has a symbol to print long doubles.
+
+d_PRIgldbl (longdblfio.U):
+	This variable conditionally defines the PERL_PRIfldbl symbol, which
+	indiciates that stdio has a symbol to print long doubles.
+
+d_PRIi64 (quadfio.U):
+	This variable conditionally defines the PERL_PRIi64 symbol, which
+	indiciates that stdio has a symbol to print 64-bit decimal numbers.
+
+d_PRIo64 (quadfio.U):
+	This variable conditionally defines the PERL_PRIo64 symbol, which
+	indiciates that stdio has a symbol to print 64-bit octal numbers.
+
+d_PRIu64 (quadfio.U):
+	This variable conditionally defines the PERL_PRIu64 symbol, which
+	indiciates that stdio has a symbol to print 64-bit unsigned decimal
+	numbers.
+
+d_PRIx64 (quadfio.U):
+	This variable conditionally defines the PERL_PRIx64 symbol, which
+	indiciates that stdio has a symbol to print 64-bit hexadecimal numbers.
+
+d_SCNfldbl (longdblfio.U):
+	This variable conditionally defines the PERL_PRIfldbl symbol, which
+	indiciates that stdio has a symbol to scan long doubles.
 
 d__fwalk (d__fwalk.U):
 	This variable conditionally defines HAS__FWALK if _fwalk() is
@@ -758,27 +859,6 @@ d_ftime (d_ftime.U):
 	This variable conditionally defines the HAS_FTIME symbol, which indicates
 	that the ftime() routine exists.  The ftime() routine is basically
 	a sub-second accuracy clock.
-
-d_Gconvert (d_gconvert.U):
-	This variable holds what Gconvert is defined as to convert
-	floating point numbers into strings.  By default, Configure
-	sets this macro to use the first of gconvert, gcvt, or sprintf
-	that pass sprintf-%g-like behaviour tests.  If perl is using
-	long doubles, the macro uses the first of the following
-	functions that pass Configure's tests: qgcvt, sprintf (if
-	Configure knows how to make sprintf format long doubles--see
-	sPRIgldbl), gconvert, gcvt, and sprintf (casting to double).  
-	The gconvert_preference and gconvert_ld_preference variables   
-	can be used to alter Configure's preferences, for doubles and
-	long doubles, respectively.  If present, they contain a       
-	space-separated list of one or more of the above function       
-	names in the order they should be tried.
-
-	d_Gconvert may be set to override Configure with a platform-
-	specific function.  If this function expects a double, a
-	different value may need to be set by the uselongdouble.cbu
-	call-back unit so that long doubles can be formatted without
-	loss of precision.
 
 d_getcwd (d_getcwd.U):
 	This variable conditionally defines the HAS_GETCWD symbol, which
@@ -1247,6 +1327,12 @@ d_modfl_pow32_bug (d_modfl.U):
 	and 1.150000.  The bug has been seen in certain versions of glibc,
 	release 2.2.2 is known to be okay.
 
+d_modflproto (d_modfl.U):
+	This symbol, if defined, indicates that the system provides
+	a prototype for the modfl() function.  Otherwise, it is up
+	to the program to supply one.  C99 says it should be
+	long double modfl(long double, long double *);
+
 d_mprotect (d_mprotect.U):
 	This variable conditionally defines HAS_MPROTECT if mprotect() is
 	available to modify the access protection of a memory mapped file.
@@ -1383,63 +1469,6 @@ d_portable (d_portable.U):
 	indicates to the C program that it should not assume that it is
 	running on the machine it was compiled on.
 
-d_PRId64 (quadfio.U):
-	This variable conditionally defines the PERL_PRId64 symbol, which
-	indiciates that stdio has a symbol to print 64-bit decimal numbers.
-
-d_PRIeldbl (longdblfio.U):
-	This variable conditionally defines the PERL_PRIfldbl symbol, which
-	indiciates that stdio has a symbol to print long doubles.
-
-d_PRIEUldbl (longdblfio.U):
-	This variable conditionally defines the PERL_PRIfldbl symbol, which
-	indiciates that stdio has a symbol to print long doubles.
-	The 'U' in the name is to separate this from d_PRIeldbl so that even
-	case-blind systems can see the difference.
-
-d_PRIfldbl (longdblfio.U):
-	This variable conditionally defines the PERL_PRIfldbl symbol, which
-	indiciates that stdio has a symbol to print long doubles.
-
-d_PRIFUldbl (longdblfio.U):
-	This variable conditionally defines the PERL_PRIfldbl symbol, which
-	indiciates that stdio has a symbol to print long doubles.
-	The 'U' in the name is to separate this from d_PRIfldbl so that even
-	case-blind systems can see the difference.
-
-d_PRIgldbl (longdblfio.U):
-	This variable conditionally defines the PERL_PRIfldbl symbol, which
-	indiciates that stdio has a symbol to print long doubles.
-
-d_PRIGUldbl (longdblfio.U):
-	This variable conditionally defines the PERL_PRIfldbl symbol, which
-	indiciates that stdio has a symbol to print long doubles.
-	The 'U' in the name is to separate this from d_PRIgldbl so that even
-	case-blind systems can see the difference.
-
-d_PRIi64 (quadfio.U):
-	This variable conditionally defines the PERL_PRIi64 symbol, which
-	indiciates that stdio has a symbol to print 64-bit decimal numbers.
-
-d_PRIo64 (quadfio.U):
-	This variable conditionally defines the PERL_PRIo64 symbol, which
-	indiciates that stdio has a symbol to print 64-bit octal numbers.
-
-d_PRIu64 (quadfio.U):
-	This variable conditionally defines the PERL_PRIu64 symbol, which
-	indiciates that stdio has a symbol to print 64-bit unsigned decimal
-	numbers.
-
-d_PRIx64 (quadfio.U):
-	This variable conditionally defines the PERL_PRIx64 symbol, which
-	indiciates that stdio has a symbol to print 64-bit hexadecimal numbers.
-
-d_PRIXU64 (quadfio.U):
-	This variable conditionally defines the PERL_PRIXU64 symbol, which
-	indiciates that stdio has a symbol to print 64-bit hExADECimAl numbers.
-	The 'U' in the name is to separate this from d_PRIx64 so that even
-	case-blind systems can see the difference.
-
 d_procselfexe (d_procselfexe.U):
 	Defined if $procselfexe is symlink to the absolute
 	pathname of the executing program.
@@ -1569,10 +1598,6 @@ d_scm_rights (d_socket.U):
 	This variable conditionally defines the HAS_SCM_RIGHTS symbol,
 	which indicates that the SCM_RIGHTS is available.  #ifdef is
 	not enough because it may be an enum, glibc has been known to do this.
-
-d_SCNfldbl (longdblfio.U):
-	This variable conditionally defines the PERL_PRIfldbl symbol, which
-	indiciates that stdio has a symbol to scan long doubles.
 
 d_seekdir (d_readdir.U):
 	This variable conditionally defines HAS_SEEKDIR if seekdir() is
@@ -2322,16 +2347,16 @@ extensions (Extensions.U):
 extras (Extras.U):
 	This variable holds a list of extra modules to install.
 
+fflushNULL (fflushall.U):
+	This symbol, if defined, tells that fflush(NULL) does flush
+	all pending stdio output.
+
 fflushall (fflushall.U):
 	This symbol, if defined, tells that to flush
 	all pending stdio output one must loop through all
 	the stdio file handles stored in an array and fflush them.
 	Note that if fflushNULL is defined, fflushall will not
 	even be probed for and will be left undefined.
-
-fflushNULL (fflushall.U):
-	This symbol, if defined, tells that fflush(NULL) does flush
-	all pending stdio output.
 
 find (Loc.U):
 	This variable is defined but not used by Configure.
@@ -3296,9 +3321,12 @@ make_set_make (make.U):
 	This variable contains the string to be included in Makefile.SH
 	so that MAKE is set if needed, and not if not needed.
 	Possible values are:
+
 	make_set_make='#'		# If your make program handles this for you,
+
 	make_set_make="MAKE=$make"	# if it doesn't.
-	I used a comment character so that we can distinguish a
+
+	This uses a comment character to distinguish a
 	'set' value (from a previous config.sh or Configure '-D' option)
 	from an uncomputed value.
 
@@ -3346,11 +3374,6 @@ man3ext (man3dir.U):
 	This variable contains the extension that the manual page should
 	have: one of 'n', 'l', or '3'.  The Makefile must supply the '.'.
 	See man3dir.
-
-Mcc (Loc.U):
-	This variable is used internally by Configure to determine the
-	full pathname (if any) of the Mcc program.  After Configure runs,
-	the value is reset to a plain "Mcc" and is not useful.
 
 mips_type (usrinc.U):
 	This variable holds the environment type for the mips system.
@@ -3467,6 +3490,18 @@ nroff (Loc.U):
 	full pathname (if any) of the nroff program.  After Configure runs,
 	the value is reset to a plain "nroff" and is not useful.
 
+nvEUformat (perlxvf.U):
+	This variable contains the format string used for printing
+	a Perl NV using %E-ish floating point format.
+
+nvFUformat (perlxvf.U):
+	This variable confains the format string used for printing
+	a Perl NV using %F-ish floating point format.
+
+nvGUformat (perlxvf.U):
+	This variable contains the format string used for printing
+	a Perl NV using %G-ish floating point format.
+
 nv_preserves_uv_bits (perlxv.U):
 	This variable indicates how many of bits type uvtype
 	a variable nvtype can preserve.
@@ -3475,25 +3510,13 @@ nveformat (perlxvf.U):
 	This variable contains the format string used for printing
 	a Perl NV using %e-ish floating point format.
 
-nvEUformat (perlxvf.U):
-	This variable contains the format string used for printing
-	a Perl NV using %E-ish floating point format.
-
 nvfformat (perlxvf.U):
 	This variable confains the format string used for printing
 	a Perl NV using %f-ish floating point format.
 
-nvFUformat (perlxvf.U):
-	This variable confains the format string used for printing
-	a Perl NV using %F-ish floating point format.
-
 nvgformat (perlxvf.U):
 	This variable contains the format string used for printing
 	a Perl NV using %g-ish floating point format.
-
-nvGUformat (perlxvf.U):
-	This variable contains the format string used for printing
-	a Perl NV using %G-ish floating point format.
 
 nvsize (perlxv.U):
 	This variable is the size of an NV in bytes.
@@ -3592,20 +3615,6 @@ perl_patchlevel (patchlevel.U):
 	It does not correlate with the Perl version numbers or
 	the maintenance versus development dichotomy except
 	by also being increasing.
-
-PERL_REVISION (Oldsyms.U):
-	In a Perl version number such as 5.6.2, this is the 5.
-	This value is manually set in patchlevel.h
-
-PERL_SUBVERSION (Oldsyms.U):
-	In a Perl version number such as 5.6.2, this is the 2.
-	Values greater than 50 represent potentially unstable
-	development subversions.
-	This value is manually set in patchlevel.h
-
-PERL_VERSION (Oldsyms.U):
-	In a Perl version number such as 5.6.2, this is the 6.
-	This value is manually set in patchlevel.h
 
 perladmin (perladmin.U):
 	Electronic mail address of the perl5 administrator.
@@ -3776,6 +3785,66 @@ runnm (usenm.U):
 	This variable contains 'true' or 'false' depending whether the
 	nm extraction should be performed or not, according to the value
 	of usenm and the flags on the Configure command line.
+
+sPRIEUldbl (longdblfio.U):
+	This variable, if defined, contains the string used by stdio to
+	format long doubles (format 'E') for output.
+	The 'U' in the name is to separate this from sPRIeldbl so that even
+	case-blind systems can see the difference.
+
+sPRIFUldbl (longdblfio.U):
+	This variable, if defined, contains the string used by stdio to
+	format long doubles (format 'F') for output.
+	The 'U' in the name is to separate this from sPRIfldbl so that even
+	case-blind systems can see the difference.
+
+sPRIGUldbl (longdblfio.U):
+	This variable, if defined, contains the string used by stdio to
+	format long doubles (format 'G') for output.
+	The 'U' in the name is to separate this from sPRIgldbl so that even
+	case-blind systems can see the difference.
+
+sPRIXU64 (quadfio.U):
+	This variable, if defined, contains the string used by stdio to
+	format 64-bit hExADECimAl numbers (format 'X') for output.
+	The 'U' in the name is to separate this from sPRIx64 so that even
+	case-blind systems can see the difference.
+
+sPRId64 (quadfio.U):
+	This variable, if defined, contains the string used by stdio to
+	format 64-bit decimal numbers (format 'd') for output.
+
+sPRIeldbl (longdblfio.U):
+	This variable, if defined, contains the string used by stdio to
+	format long doubles (format 'e') for output.
+
+sPRIfldbl (longdblfio.U):
+	This variable, if defined, contains the string used by stdio to
+	format long doubles (format 'f') for output.
+
+sPRIgldbl (longdblfio.U):
+	This variable, if defined, contains the string used by stdio to
+	format long doubles (format 'g') for output.
+
+sPRIi64 (quadfio.U):
+	This variable, if defined, contains the string used by stdio to
+	format 64-bit decimal numbers (format 'i') for output.
+
+sPRIo64 (quadfio.U):
+	This variable, if defined, contains the string used by stdio to
+	format 64-bit octal numbers (format 'o') for output.
+
+sPRIu64 (quadfio.U):
+	This variable, if defined, contains the string used by stdio to
+	format 64-bit unsigned decimal numbers (format 'u') for output.
+
+sPRIx64 (quadfio.U):
+	This variable, if defined, contains the string used by stdio to
+	format 64-bit hexadecimal numbers (format 'x') for output.
+
+sSCNfldbl (longdblfio.U):
+	This variable, if defined, contains the string used by stdio to
+	format long doubles (format 'f') for input.
 
 sched_yield (d_pthread_y.U):
 	This variable defines the way to yield the execution
@@ -4046,62 +4115,6 @@ spitshell (spitshell.U):
 	This variable contains the command necessary to spit out a runnable
 	shell on this system.  It is either cat or a grep '-v' for # comments.
 
-sPRId64 (quadfio.U):
-	This variable, if defined, contains the string used by stdio to
-	format 64-bit decimal numbers (format 'd') for output.
-
-sPRIeldbl (longdblfio.U):
-	This variable, if defined, contains the string used by stdio to
-	format long doubles (format 'e') for output.
-
-sPRIEUldbl (longdblfio.U):
-	This variable, if defined, contains the string used by stdio to
-	format long doubles (format 'E') for output.
-	The 'U' in the name is to separate this from sPRIeldbl so that even
-	case-blind systems can see the difference.
-
-sPRIfldbl (longdblfio.U):
-	This variable, if defined, contains the string used by stdio to
-	format long doubles (format 'f') for output.
-
-sPRIFUldbl (longdblfio.U):
-	This variable, if defined, contains the string used by stdio to
-	format long doubles (format 'F') for output.
-	The 'U' in the name is to separate this from sPRIfldbl so that even
-	case-blind systems can see the difference.
-
-sPRIgldbl (longdblfio.U):
-	This variable, if defined, contains the string used by stdio to
-	format long doubles (format 'g') for output.
-
-sPRIGUldbl (longdblfio.U):
-	This variable, if defined, contains the string used by stdio to
-	format long doubles (format 'G') for output.
-	The 'U' in the name is to separate this from sPRIgldbl so that even
-	case-blind systems can see the difference.
-
-sPRIi64 (quadfio.U):
-	This variable, if defined, contains the string used by stdio to
-	format 64-bit decimal numbers (format 'i') for output.
-
-sPRIo64 (quadfio.U):
-	This variable, if defined, contains the string used by stdio to
-	format 64-bit octal numbers (format 'o') for output.
-
-sPRIu64 (quadfio.U):
-	This variable, if defined, contains the string used by stdio to
-	format 64-bit unsigned decimal numbers (format 'u') for output.
-
-sPRIx64 (quadfio.U):
-	This variable, if defined, contains the string used by stdio to
-	format 64-bit hexadecimal numbers (format 'x') for output.
-
-sPRIXU64 (quadfio.U):
-	This variable, if defined, contains the string used by stdio to
-	format 64-bit hExADECimAl numbers (format 'X') for output.
-	The 'U' in the name is to separate this from sPRIx64 so that even
-	case-blind systems can see the difference.
-
 srand48_r_proto (d_srand48_r.U):
 	This variable encodes the prototype of srand48_r.
 	It is zero if d_srand48_r is undef, and one of the
@@ -4118,10 +4131,6 @@ src (src.U):
 	This variable holds the path to the package source. It is up to
 	the Makefile to use this variable and set VPATH accordingly to
 	find the sources remotely.
-
-sSCNfldbl (longdblfio.U):
-	This variable, if defined, contains the string used by stdio to
-	format long doubles (format 'f') for input.
 
 ssizetype (ssizetype.U):
 	This variable defines ssizetype to be something like ssize_t, 
@@ -4432,8 +4441,8 @@ usesfio (d_sfio.U):
 	d_sfio without running into a "WHOA THERE".
 
 useshrplib (libperl.U):
-	This variable is set to 'yes' if the user wishes
-	to build a shared libperl, and 'no' otherwise.
+	This variable is set to 'true' if the user wishes
+	to build a shared libperl, and 'false' otherwise.
 
 usesocks (usesocks.U):
 	This variable conditionally defines the USE_SOCKS symbol,
@@ -4460,6 +4469,10 @@ uuname (Loc.U):
 	This variable is defined but not used by Configure.
 	The value is a plain '' and is not useful.
 
+uvXUformat (perlxvf.U):
+	This variable contains the format string used for printing
+	a Perl UV as an unsigned hexadecimal integer in uppercase ABCDEF.
+
 uvoformat (perlxvf.U):
 	This variable contains the format string used for printing
 	a Perl UV as an unsigned octal integer. 
@@ -4477,10 +4490,6 @@ uvuformat (perlxvf.U):
 uvxformat (perlxvf.U):
 	This variable contains the format string used for printing
 	a Perl UV as an unsigned hexadecimal integer in lowercase abcdef.
-
-uvXUformat (perlxvf.U):
-	This variable contains the format string used for printing
-	a Perl UV as an unsigned hexadecimal integer in uppercase ABCDEF.
 
 vendorarch (vendorarch.U):
 	This variable contains the value of the PERL_VENDORARCH symbol.

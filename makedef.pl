@@ -714,6 +714,10 @@ unless ($define{'PL_OP_SLAB_ALLOC'}) {
                     )];
 }
 
+unless ($define{'THREADS_HAVE_PIDS'}) {
+    skip_symbols [qw(PL_ppid)];
+}
+
 sub readvar {
     my $file = shift;
     my $proc = shift || sub { "PL_$_[2]" };

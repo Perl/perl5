@@ -1,5 +1,44 @@
 package strict;
 
+$strict::VERSION = "1.02";
+
+my %bitmask = (
+refs => 0x00000002,
+subs => 0x00000200,
+vars => 0x00000400
+);
+
+sub bits {
+    my $bits = 0;
+    my @wrong;
+    foreach my $s (@_) {
+	push @wrong, $s unless exists $bitmask{$s};
+        $bits |= $bitmask{$s} || 0;
+    }
+    if (@wrong) {
+        my $useno = {
+         __PACKAGE__.'::import' => 'use',
+         __PACKAGE__.'::unimport' => 'no'
+        }->{ (caller(1))[3] };
+        require Carp;
+        Carp::croak("Don't know how to '$useno ".__PACKAGE__." qw(@wrong)'");
+    }
+    $bits;
+}
+
+sub import {
+    shift;
+    $^H |= bits(@_ ? @_ : qw(refs subs vars));
+}
+
+sub unimport {
+    shift;
+    $^H &= ~ bits(@_ ? @_ : qw(refs subs vars));
+}
+
+1;
+__END__
+
 =head1 NAME
 
 strict - Perl pragma to restrict unsafe constructs
@@ -87,31 +126,4 @@ appears in curly braces or on the left hand side of the "=E<gt>" symbol.
 
 See L<perlmodlib/Pragmatic Modules>.
 
-
 =cut
-
-$strict::VERSION = "1.02";
-
-my %bitmask = (
-refs => 0x00000002,
-subs => 0x00000200,
-vars => 0x00000400
-);
-
-sub bits {
-    my $bits = 0;
-    foreach my $s (@_){ $bits |= $bitmask{$s} || 0; };
-    $bits;
-}
-
-sub import {
-    shift;
-    $^H |= bits(@_ ? @_ : qw(refs subs vars));
-}
-
-sub unimport {
-    shift;
-    $^H &= ~ bits(@_ ? @_ : qw(refs subs vars));
-}
-
-1;

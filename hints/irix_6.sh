@@ -37,7 +37,7 @@
 # If that fails, or you didn't use that, then try adjusting other
 # optimization options (-LNO, -INLINE, -O3 to -O2, etcetera).
 # The compiler bug has been reported to SGI.
-# -- Allen Smith <easmith@beatrice.rutgers.edu>
+# -- Allen Smith <allens@cpan.org>
 
 case "$use64bitall" in
 $define|true|[yY]*)
@@ -90,8 +90,9 @@ case "$use64bitint" in
 esac
 
 cc=${cc:-cc}
+cat=${cat:-cat}
 
-cat > UU/cc.cbu <<'EOCCBU'
+$cat > UU/cc.cbu <<'EOCCBU'
 # This script UU/cc.cbu will get 'called-back' by Configure after it
 # has prompted the user for the C compiler to use.
 
@@ -141,7 +142,7 @@ esac'
 *"cc -64"*)
     case "`uname -s`" in
     IRIX)
-       cat >&4 <<EOM
+	$cat >&4 <<EOM
 You cannot use cc -64 or -Duse64bitall in 32-bit IRIX, sorry.
 Cannot continue, aborting.
 EOM
@@ -256,7 +257,7 @@ case "$cc" in
 
 
 
-# What is space=ON doing in here? - Allen
+# XXX What is space=ON doing in here? Could someone ask Scott Henry? - Allen
 
 	*7.*)                         # Mongoose 7.2.1+
             ccflags="$ccflags -D_BSD_TYPES -D_BSD_TIME -woff $woff"
@@ -271,7 +272,7 @@ case "$cc" in
 	     optimize='none'
 	     ;;
 	*)                            # Be safe and not optimize
-	     ccflags="$ccflags -D_BSD_TYPES -D_BSD_TIME -woff $woff -OPT:Olimit=0"
+	     ccflags="$ccflags -D_BSD_TYPES -D_BSD_TIME -woff $woff"
 	     optimize='none'
 	     ;;
 	esac
@@ -332,7 +333,7 @@ libswanted="$*"
 # I have conflicting reports about the sun, crypt, bsd, and PW
 # libraries on Irix 6.2.
 #
-# One user rerports:
+# One user reports:
 # Don't need sun crypt bsd PW under 6.2.  You *may* need to link
 # with these if you want to run perl built under 6.2 on a 5.3 machine
 # (I haven't checked)
@@ -379,7 +380,7 @@ esac
 
 i_sysmode="$undef"
 
-cat > UU/usethreads.cbu <<'EOCBU'
+$cat > UU/usethreads.cbu <<'EOCBU'
 # This script UU/usethreads.cbu will get 'called-back' by Configure 
 # after it has prompted the user for whether to use threads.
 case "$usethreads" in
@@ -448,7 +449,7 @@ EOCBU
 
 # The -n32 makes off_t to be 8 bytes, so we should have largefileness.
 
-cat > UU/use64bitint.cbu <<'EOCBU'
+$cat > UU/use64bitint.cbu <<'EOCBU'
 # This script UU/use64bitint.cbu will get 'called-back' by Configure
 # after it has prompted the user for whether to use 64 bit integers.
 
@@ -471,7 +472,7 @@ esac
 
 EOCBU
 
-cat > UU/use64bitall.cbu <<'EOCBU'
+$cat > UU/use64bitall.cbu <<'EOCBU'
 # This script UU/use64bitall.cbu will get 'called-back' by Configure
 # after it has prompted the user for whether to be maximally 64 bitty.
 
@@ -488,6 +489,123 @@ EOM
     esac
     ;;
 esac
+
+EOCBU
+
+$cat > UU/uselongdouble.cbu <<'EOCBU'
+# This script UU/uselongdouble.cbu will get 'called-back' by Configure
+# after it has prompted the user for whether to use long doubles.
+
+# This script is designed to test IRIX (and other machines, once it's put into
+# Configure) for a bug in which they fail to round correctly when using
+# sprintf/printf/etcetera on a long double with precision specified (%.0Lf or
+# whatever). Sometimes, this only happens when the number in question is
+# between 1 and -1, weirdly enough. - Allen
+
+case "$uselongdouble" in
+$define|true|[yY]*)
+
+case "$d_PRIfldbl" in
+$define|true|[yY]*)
+
+    echo " " >try.c
+    $cat >>try.c <<EOP
+#include <stdio.h>
+
+#define sPRIfldbl $sPRIfldbl
+
+#define I_STDLIB $i_stdlib
+#ifdef I_STDLIB
+#include <stdlib.h>
+#endif
+
+int main()
+{ 
+        char buf1[64];
+ 	char buf2[64];
+        buf1[63] = '\0';
+	buf2[63] = '\0';
+
+	(void)sprintf(buf1,"%.0"sPRIfldbl,(long double)0.6L);
+	(void)sprintf(buf2,"%.0f",(double)0.6);
+	if (strcmp(buf1,buf2)) {
+	    exit(1);
+	}
+	(void)sprintf(buf1,"%.0"sPRIfldbl,(long double)-0.6L);
+	(void)sprintf(buf2,"%.0f",(double)-0.6);
+	if (strcmp(buf1,buf2)) {
+	    exit(1);
+	} else {
+	    exit(0);
+	}
+}
+
+EOP
+
+    set try
+    if eval $compile && $run ./try; then
+	rm -f try try.* >/dev/null
+    else
+	rm -f try try.* core a.out >/dev/null
+	ccflags="$ccflags -DHAS_LDBL_SPRINTF_BUG"
+	cppflags="$cppflags -DHAS_LDBL_SPRINTF_BUG"
+
+        echo " " >try.c
+    $cat >>try.c <<EOP
+#include <stdio.h>
+
+#define sPRIfldbl $sPRIfldbl
+
+#define I_STDLIB $i_stdlib
+#ifdef I_STDLIB
+#include <stdlib.h>
+#endif
+
+int main()
+{ 
+        char buf1[64];
+ 	char buf2[64];
+        buf1[63] = '\0';
+	buf2[63] = '\0';
+
+	(void)sprintf(buf1,"%.0"sPRIfldbl,(long double)1.6L);
+	(void)sprintf(buf2,"%.0f",(double)1.6);
+	if (strcmp(buf1,buf2)) {
+	    exit(1);
+	}
+	(void)sprintf(buf1,"%.0"sPRIfldbl,(long double)-1.6L);
+	(void)sprintf(buf2,"%.0f",(double)-1.6);
+	if (strcmp(buf1,buf2)) {
+	    exit(1);
+	} else {
+	    exit(0);
+	}
+}
+
+EOP
+
+	set try
+	if eval $compile && $run ./try; then
+	    rm -f try try.c >/dev/null
+	    ccflags="$ccflags -DHAS_LDBL_SPRINTF_BUG_LESS1"
+	    cppflags="$cppflags -DHAS_LDBL_SPRINTF_BUG_LESS1"
+	else
+	    rm -f try try.c core try.o a.out >/dev/null
+	fi
+    fi
+;;
+*) # Can't tell!
+   ccflags="$ccflags -DHAS_LDBL_SPRINTF_BUG"
+   cppflags="$cppflags -DHAS_LDBL_SPRINTF_BUG"
+   ;;
+esac
+
+# end of case statement for how to print ldbl with 'f'
+;;
+*) ;;
+esac
+
+# end of case statement for whether to do long doubles
 
 EOCBU
 

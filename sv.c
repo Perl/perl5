@@ -2935,8 +2935,14 @@ Perl_sv_2pv_flags(pTHX_ register SV *sv, STRLEN *lp, I32 flags)
 	if (SvROK(sv)) {
 	    SV* tmpstr;
             if (SvAMAGIC(sv) && (tmpstr=AMG_CALLun(sv,string)) &&
-                (SvTYPE(tmpstr) != SVt_RV || (SvRV(tmpstr) != SvRV(sv))))
-		return SvPV(tmpstr,*lp);
+                (SvTYPE(tmpstr) != SVt_RV || (SvRV(tmpstr) != SvRV(sv)))) {
+                char *pv = SvPV(tmpstr, *lp);
+                if (SvUTF8(tmpstr))
+                    SvUTF8_on(sv);
+                else
+                    SvUTF8_off(sv);
+                return pv;
+            }
 	    sv = (SV*)SvRV(sv);
 	    if (!sv)
 		s = "NULLREF";
@@ -3193,28 +3199,16 @@ would lose the UTF-8'ness of the PV.
 void
 Perl_sv_copypv(pTHX_ SV *dsv, register SV *ssv)
 {
-    SV *tmpsv;
-
-    if ( SvTHINKFIRST(ssv) && SvROK(ssv) && SvAMAGIC(ssv) &&
-	 (tmpsv = AMG_CALLun(ssv,string))) {
-	if (SvTYPE(tmpsv) != SVt_RV || (SvRV(tmpsv) != SvRV(ssv))) {
-	    SvSetSV(dsv,tmpsv);
-	    return;
-	}
-    } else {
-        tmpsv = sv_newmortal();
-    }
-    {
-	STRLEN len;
-	char *s;
-	s = SvPV(ssv,len);
-	sv_setpvn(tmpsv,s,len);
-	if (SvUTF8(ssv))
-	    SvUTF8_on(tmpsv);
-	else
-	    SvUTF8_off(tmpsv);
-	SvSetSV(dsv,tmpsv);
-    }
+    SV *tmpsv = sv_newmortal();
+    STRLEN len;
+    char *s;
+    s = SvPV(ssv,len);
+    sv_setpvn(tmpsv,s,len);
+    if (SvUTF8(ssv))
+	SvUTF8_on(tmpsv);
+    else
+	SvUTF8_off(tmpsv);
+    SvSetSV(dsv,tmpsv);
 }
 
 /*
@@ -5086,6 +5080,27 @@ Perl_sv_replace(pTHX_ register SV *sv, register SV *nsv)
     sv_clear(sv);
     assert(!SvREFCNT(sv));
     StructCopy(nsv,sv,SV);
+#ifdef PERL_COPY_ON_WRITE
+    if (SvIsCOW_normal(nsv)) {
+	/* We need to follow the pointers around the loop to make the
+	   previous SV point to sv, rather than nsv.  */
+	SV *next;
+	SV *current = nsv;
+	while ((next = SV_COW_NEXT_SV(current)) != nsv) {
+	    assert(next);
+	    current = next;
+	    assert(SvPVX(current) == SvPVX(nsv));
+	}
+	/* Make the SV before us point to the SV after us.  */
+	if (DEBUG_C_TEST) {
+	    PerlIO_printf(Perl_debug_log, "previous is\n");
+	    sv_dump(current);
+	    PerlIO_printf(Perl_debug_log, "move it from "UVxf" to "UVxf"\n",
+			  (UV) SV_COW_NEXT_SV(current), (UV) sv);
+	}
+	SV_COW_NEXT_SV(current) = sv;
+    }
+#endif
     SvREFCNT(sv) = refcnt;
     SvFLAGS(nsv) |= SVTYPEMASK;		/* Mark as freed */
     del_SV(nsv);
@@ -7909,7 +7924,7 @@ Perl_sv_vcatpvfn(pTHX_ SV *sv, const char *pat, STRLEN patlen, va_list *args, SV
     }
 
     if (!args && svix < svmax && DO_UTF8(*svargs))
-        has_utf8 = TRUE;
+	has_utf8 = TRUE;
 
     patend = (char*)pat + patlen;
     for (p = (char*)pat; p < patend; p = q) {
@@ -7926,7 +7941,12 @@ Perl_sv_vcatpvfn(pTHX_ SV *sv, const char *pat, STRLEN patlen, va_list *args, SV
 	bool has_precis = FALSE;
 	STRLEN precis = 0;
 	bool is_utf8 = FALSE;  /* is this item utf8?   */
-	
+#ifdef HAS_LDBL_SPRINTF_BUG
+	/* This is to try to fix a bug with irix/nonstop-ux/powerux and
+	   with sfio - Allen <allens@cpan.org> */
+	bool fix_ldbl_sprintf_bug = FALSE;
+#endif
+
 	char esignbuf[4];
 	U8 utf8buf[UTF8_MAXLEN+1];
 	STRLEN esignlen = 0;
@@ -7937,7 +7957,7 @@ Perl_sv_vcatpvfn(pTHX_ SV *sv, const char *pat, STRLEN patlen, va_list *args, SV
 	 * NV_DIG: mantissa takes than many decimal digits.
 	 * Plus 32: Playing safe. */
 	char ebuf[IV_DIG * 4 + NV_DIG + 32];
-        /* large enough for "%#.#f" --chip */
+	/* large enough for "%#.#f" --chip */
 	/* what about long double NVs? --jhi */
 
 	SV *vecsv = Nullsv;
@@ -8146,7 +8166,7 @@ Perl_sv_vcatpvfn(pTHX_ SV *sv, const char *pat, STRLEN patlen, va_list *args, SV
 #endif
 	case 'l':
 #if defined(HAS_QUAD) || defined(HAS_LONG_DOUBLE)
-             if (*(q + 1) == 'l') {	/* lld, llf */
+	    if (*(q + 1) == 'l') {	/* lld, llf */
 		intsize = 'q';
 		q += 2;
 		break;
@@ -8494,10 +8514,10 @@ Perl_sv_vcatpvfn(pTHX_ SV *sv, const char *pat, STRLEN patlen, va_list *args, SV
 	    nv = (args && !vectorize) ?
 #if LONG_DOUBLESIZE > DOUBLESIZE
 		intsize == 'q' ?
-	            va_arg(*args, long double) :
-	            va_arg(*args, double)
+		    va_arg(*args, long double) :
+		    va_arg(*args, double)
 #else
-	            va_arg(*args, double)
+		    va_arg(*args, double)
 #endif
 		: SvNVx(argsv);
 
@@ -8514,8 +8534,75 @@ Perl_sv_vcatpvfn(pTHX_ SV *sv, const char *pat, STRLEN patlen, va_list *args, SV
 		    need = BIT_DIGITS(i);
 	    }
 	    need += has_precis ? precis : 6; /* known default */
+
 	    if (need < width)
 		need = width;
+
+#ifdef HAS_LDBL_SPRINTF_BUG
+	    /* This is to try to fix a bug with irix/nonstop-ux/powerux and
+	       with sfio - Allen <allens@cpan.org> */
+
+#  ifdef DBL_MAX
+#    define MY_DBL_MAX DBL_MAX
+#  else /* XXX guessing! HUGE_VAL may be defined as infinity, so not using */
+#    if DOUBLESIZE >= 8
+#      define MY_DBL_MAX 1.7976931348623157E+308L
+#    else
+#      define MY_DBL_MAX 3.40282347E+38L
+#    endif
+#  endif
+
+#  ifdef HAS_LDBL_SPRINTF_BUG_LESS1 /* only between -1L & 1L - Allen */
+#    define MY_DBL_MAX_BUG 1L
+#  else
+#    define MY_DBL_MAX_BUG MY_DBL_MAX
+#  endif
+
+#  ifdef DBL_MIN
+#    define MY_DBL_MIN DBL_MIN
+#  else  /* XXX guessing! -Allen */
+#    if DOUBLESIZE >= 8
+#      define MY_DBL_MIN 2.2250738585072014E-308L
+#    else
+#      define MY_DBL_MIN 1.17549435E-38L
+#    endif
+#  endif
+
+	    if ((intsize == 'q') && (c == 'f') &&
+		((nv < MY_DBL_MAX_BUG) && (nv > -MY_DBL_MAX_BUG)) &&
+		(need < DBL_DIG)) {
+		/* it's going to be short enough that
+		 * long double precision is not needed */
+
+		if ((nv <= 0L) && (nv >= -0L))
+		    fix_ldbl_sprintf_bug = TRUE; /* 0 is 0 - easiest */
+		else {
+		    /* would use Perl_fp_class as a double-check but not
+		     * functional on IRIX - see perl.h comments */
+
+		    if ((nv >= MY_DBL_MIN) || (nv <= -MY_DBL_MIN)) {
+			/* It's within the range that a double can represent */
+#if defined(DBL_MAX) && !defined(DBL_MIN)
+			if ((nv >= ((long double)1/DBL_MAX)) ||
+			    (nv <= (-(long double)1/DBL_MAX)))
+#endif
+			fix_ldbl_sprintf_bug = TRUE;
+		    }
+		}
+		if (fix_ldbl_sprintf_bug == TRUE) {
+		    double temp;
+
+		    intsize = 0;
+		    temp = (double)nv;
+		    nv = (NV)temp;
+		}
+	    }
+
+#  undef MY_DBL_MAX
+#  undef MY_DBL_MAX_BUG
+#  undef MY_DBL_MIN
+
+#endif /* HAS_LDBL_SPRINTF_BUG */
 
 	    need += 20; /* fudge factor */
 	    if (PL_efloatsize < need) {
@@ -9185,7 +9272,7 @@ void
 Perl_rvpv_dup(pTHX_ SV *dstr, SV *sstr, CLONE_PARAMS* param)
 {
     if (SvROK(sstr)) {
-        SvRV(dstr) = SvWEAKREF(sstr)
+	SvRV(dstr) = SvWEAKREF(sstr)
 		     ? sv_dup(SvRV(sstr), param)
 		     : sv_dup_inc(SvRV(sstr), param);
     }
@@ -9194,6 +9281,12 @@ Perl_rvpv_dup(pTHX_ SV *dstr, SV *sstr, CLONE_PARAMS* param)
 	if (SvLEN(sstr)) {
 	    /* Normal PV - clone whole allocated space */
 	    SvPVX(dstr) = SAVEPVN(SvPVX(sstr), SvLEN(sstr)-1);
+	    if (SvREADONLY(sstr) && SvFAKE(sstr)) {
+		/* Not that normal - actually sstr is copy on write.
+		   But we are a true, independant SV, so:  */
+		SvREADONLY_off(dstr);
+		SvFAKE_off(dstr);
+	    }
 	}
 	else {
 	    /* Special case - not normally malloced for some reason */
@@ -9206,7 +9299,7 @@ Perl_rvpv_dup(pTHX_ SV *dstr, SV *sstr, CLONE_PARAMS* param)
 	    else {
 		/* Some other special case - random pointer */
 		SvPVX(dstr) = SvPVX(sstr);		
-            }
+	    }
 	}
     }
     else {

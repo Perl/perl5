@@ -6,7 +6,7 @@
 
 $| = 1;
 
-print "1..924\n";
+print "1..928\n";
 
 BEGIN {
     chdir 't' if -d 't';
@@ -2911,3 +2911,22 @@ print(('goodfood' =~ $a ? '' : 'not '),
 print(($a eq '(?-xism:foo)' ? '' : 'not '),
 	"ok $test\t# reblessed qr// stringizes\n");
 ++$test;
+
+$x = "\x{3fe}";
+$a = qr/$x/;
+print(($x =~ $a ? '' : 'not '), "ok $test - utf8 interpolation in qr//\n");
+++$test;
+
+print(("a$a" =~ $x ? '' : 'not '),
+      "ok $test - stringifed qr// preserves utf8 # TODO\n");
+++$test;
+
+print(("a$x" =~ qr/a$a/ ? '' : 'not '),
+      "ok $test - interpolated qr// preserves utf8 # TODO\n");
+++$test;
+
+print(("a$x" =~ qr/a(??{$a})/ ? '' : 'not '),
+      "ok $test - postponed interpolation of qr// preserves utf8 # TODO\n");
+++$test;
+
+# last test 928

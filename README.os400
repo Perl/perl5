@@ -69,6 +69,24 @@ PASE_EXEC_QOPENSYS="N".  If you have V5R1, you'll need to get the
 latest PTFs to have this feature.  Scripts starting with
 #!/QOpenSys/perl/bin/perl should always work.
 
+=head2 Known Problems
+
+When compiling natively in PASE, there is no "oslevel" command as
+there is in AIX-- this will confuse the Configure script.  Therefore,
+before running Configure you may want to create a script (in your
+$PATH) called "oslevel" that prints out the level of AIX that your
+version of PASE supports.  Consult your documentation to find out
+what this is, or just use "4.3.3.0".
+
+When using sockets, you probably will want a signal handler for
+SIGPIPE since there seems to be some signal handling differences
+between AIX and PASE.  Especially, PASE doesn't seem to allow
+writing to a closed socket but instead throws SIGPIPE immediately.
+Because of this the subtest #18 of io_sock in IO::Socket fails.
+
+Some tests in Time::HiRes are failing because some of the system
+calls being used aren't really implemented in PASE.
+
 =head2 Perl on ILE
 
 There exists a port of Perl to the ILE environment.  This port, however,

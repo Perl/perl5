@@ -20,7 +20,7 @@
 
 # $Id: Head.U,v 3.0.1.9 1997/02/28 15:02:09 ram Exp $
 #
-# Generated on Thu Aug  1 18:53:48 CEST 2002 [metaconfig 3.0 PL70]
+# Generated on Fri Sep 13 16:29:01 METDST 2002 [metaconfig 3.0 PL70]
 # (with additional metaconfig patches by perlbug@perl.org)
 
 cat >c1$$ <<EOF
@@ -1151,6 +1151,17 @@ elif test -d c:/. ; then
 fi
 
 i_whoami=''
+ccname=''
+ccversion=''
+perllibs=''
+: set useposix=false in your hint file to disable the POSIX extension.
+useposix=true
+: set useopcode=false in your hint file to disable the Opcode extension.
+useopcode=true
+: Trailing extension.  Override this in a hint file, if needed.
+: Extra object files, if any, needed on this platform.
+archobjs=''
+archname=''
 : Possible local include directories to search.
 : Set locincpth to "" in a hint file to defeat local include searches.
 locincpth="/usr/local/include /opt/local/include /usr/gnu/include"
@@ -1159,9 +1170,6 @@ locincpth="$locincpth /opt/gnu/include /usr/GNU/include /opt/GNU/include"
 : no include file wanted by default
 inclwanted=''
 
-: Trailing extension.  Override this in a hint file, if needed.
-: Extra object files, if any, needed on this platform.
-archobjs=''
 groupstype=''
 libnames=''
 : change the next line if compiling for Xenix/286 on Xenix/386
@@ -1185,25 +1193,17 @@ plibpth=''
 libswanted=''
 : some systems want to use only the non-versioned libso:s
 ignore_versioned_solibs=''
-: full support for void wanted by default
-defvoidused=15
-
-ccname=''
-ccversion=''
-perllibs=''
-: set useposix=false in your hint file to disable the POSIX extension.
-useposix=true
-: set useopcode=false in your hint file to disable the Opcode extension.
-useopcode=true
 archname64=''
 ccflags_uselargefiles=''
 ldflags_uselargefiles=''
 libswanted_uselargefiles=''
 : set usemultiplicity on the Configure command line to enable multiplicity.
 : set usesocks on the Configure command line to enable socks.
-archname=''
 : set usethreads on the Configure command line to enable threads.
 usereentrant='undef'
+: full support for void wanted by default
+defvoidused=15
+
 : List of libraries we want.
 : If anyone needs -lnet, put it in a hint file.
 libswanted='sfio socket bind inet nsl nm ndbm gdbm dbm db malloc dl'
@@ -3853,14 +3853,17 @@ case "$ccname" in
 '') ccname="$cc" ;;
 esac
 
-# gcc 3.1 complains about adding -Idirectories that it already knows about,
+# gcc 3.* complain about adding -Idirectories that they already know about,
 # so we will take those off from locincpth.
 case "$gccversion" in
 3*)
     echo "main(){}">try.c
-    for incdir in `$cc -v -c try.c 2>&1 | \
-       sed '1,/^#include <\.\.\.>/d;/^End of search list/,$d;s/^ //'` ; do
-       locincpth=`echo $locincpth | sed s!$incdir!!`
+    for incdir in $locincpth; do
+       warn=`$cc $ccflags -I$incdir -c try.c 2>&1 | \
+	     grep '^cc1: warning: changing search order '`
+       if test "X$warn" != X; then
+	   locincpth=`echo " $locincpth " | sed "s! $incdir ! !"`
+       fi
     done
     $rm -f try try.*
 esac
@@ -5418,7 +5421,7 @@ case "$usenm" in
 	esac
 	case "$dflt" in
 	'') 
-		if $test "$osname" = aix -a "X$PASE" != "$Xdefine" -a ! -f /lib/syscalls.exp; then
+		if $test "$osname" = aix -a "X$PASE" != "Xdefine" -a ! -f /lib/syscalls.exp; then
 			echo " "
 			echo "Whoops!  This is an AIX system without /lib/syscalls.exp!" >&4
 			echo "'nm' won't be sufficient on this sytem." >&4
@@ -5768,8 +5771,8 @@ nm_extract="$com"
 case "$PASE" in
 define)
     echo " "
-    echo "Since you are compiling for PASE, extracting more symbols from libc.a...">&4
-    nm -Tv /lib/libc.a | grep '^\.[a-z]' | awk '$2 == "T" {print $1}' | sed 's/^.//' >> libc.list
+    echo "Since you are compiling for PASE, extracting more symbols from libc.a ...">&4
+    dump -Tv /lib/libc.a | awk '$7 == "/unix" {print $5 " " $8}' | grep "^SV" | awk '{print $2}' >> libc.list
     ;;
 *)  if $test -f /lib/syscalls.exp; then
 	echo " "
@@ -5848,6 +5851,25 @@ esac'
 : see if sqrtl exists
 set sqrtl d_sqrtl
 eval $inlibc
+
+hasproto='varname=$1; func=$2; shift; shift;
+while $test $# -ge 2; do
+	case "$1" in
+	$define) echo "#include <$2>";;
+	esac ;
+    shift 2;
+done > try.c;
+$cppstdin $cppflags $cppminus < try.c > tryout.c 2>/dev/null;
+if $contains "$func.*(" tryout.c >/dev/null 2>&1; then
+	echo "$func() prototype found.";
+	val="$define";
+else
+	echo "$func() prototype NOT found.";
+	val="$undef";
+fi;
+set $varname;
+eval $setvar;
+$rm -f try.c tryout.c'
 
 : check for length of double
 echo " "
@@ -6043,26 +6065,6 @@ esac
 : see if modfl exists
 set modfl d_modfl
 eval $inlibc
-
-
-hasproto='varname=$1; func=$2; shift; shift;
-while $test $# -ge 2; do
-	case "$1" in
-	$define) echo "#include <$2>";;
-	esac ;
-    shift 2;
-done > try.c;
-$cppstdin $cppflags $cppminus < try.c > tryout.c 2>/dev/null;
-if $contains "$func.*(" tryout.c >/dev/null 2>&1; then
-	echo "$func() prototype found.";
-	val="$define";
-else
-	echo "$func() prototype NOT found.";
-	val="$undef";
-fi;
-set $varname;
-eval $setvar;
-$rm -f try.c tryout.c'
 
 : see if prototype for modfl is available
 echo " "

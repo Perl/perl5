@@ -10,7 +10,7 @@ BEGIN {
 package main;
 require './test.pl';
 
-plan( tests => 25 );
+plan( tests => 30 );
 
 my($x);
 
@@ -59,3 +59,16 @@ for (qw(getc pos readline readlink undef umask <> <FOO> <$foo> -f)) {
     eval "sub { $_ // 0 }";
     is($@, '', "$_ // ... compiles");
 }
+
+# Test for some ambiguous syntaxes
+
+eval q# sub f ($) { } f $x / 2; #;
+is( $@, '' );
+eval q# sub f ($):lvalue { $y } f $x /= 2; #;
+is( $@, '' );
+eval q# sub f ($) { } f $x /2; #;
+like( $@, qr/^Search pattern not terminated/ );
+eval q# sub { print $fh / 2 } #;
+is( $@, '' );
+eval q# sub { print $fh /2 } #;
+like( $@, qr/^Search pattern not terminated/ );
