@@ -35,7 +35,7 @@ OBJVAL = $@
 	@ $$@[.vms]fndvers.com "" "" "[.vms]Makefile"
 
 # Updated by fndvers.com -- do not edit by hand
-PERL_VERSION = 5_00201#
+PERL_VERSION = 5_003  #
 
 
 ARCHDIR =  [.lib.$(ARCH).$(PERL_VERSION)]
