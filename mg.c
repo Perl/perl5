@@ -1589,6 +1589,27 @@ vivify_defelem(SV *sv)
 }
 
 int
+magic_killbackrefs(SV *sv, MAGIC *mg)
+{
+    AV *av = (AV*)mg->mg_obj;
+    SV **svp = AvARRAY(av);
+    I32 i = AvFILLp(av);
+    while (i >= 0) {
+	if (svp[i] && svp[i] != &PL_sv_undef) {
+	    if (!SvWEAKREF(svp[i]))
+		croak("panic: magic_killbackrefs");
+	    /* XXX Should we check that it hasn't changed? */
+	    SvRV(svp[i]) = 0;
+	    SvOK_off(svp[i]);
+	    SvWEAKREF_off(svp[i]);
+	    svp[i] = &PL_sv_undef;
+	}
+	i--;
+    }
+    return 0;
+}
+
+int
 magic_setmglob(SV *sv, MAGIC *mg)
 {
     mg->mg_len = -1;

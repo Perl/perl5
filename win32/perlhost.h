@@ -102,6 +102,13 @@ public:
     {
 	return win32_uname(name);
     };
+    virtual char *Getenv_len(const char *varname, unsigned long *len, int &err)
+    {
+	char *e = win32_getenv(varname);
+	if (e)
+	    *len = strlen(e);
+	return e;
+    };
 };
 
 class CPerlSock : public IPerlSock

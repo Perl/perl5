@@ -971,6 +971,11 @@ weren't.
 subscript.  But to the left of the brackets was an expression that
 didn't look like an array reference, or anything else subscriptable.
 
+=item Can't weaken a nonreference
+
+(F) You attempted to weaken something that was not a reference.  Only
+references can be weakened.
+
 =item Can't x= to read-only value
 
 (F) You tried to repeat a constant value (often the undefined value) with
@@ -1983,6 +1988,11 @@ See L<perlform>.
 (P) The savestack was requested to restore more localized values than there
 are in the savestack.
 
+=item panic: del_backref
+
+(P) Failed an internal consistency check while trying to reset a weak
+reference.
+
 =item panic: die %s
 
 (P) We popped the context stack to an eval context, and then discovered
@@ -2042,6 +2052,11 @@ invalid enum on the top of it.
 =item panic: malloc
 
 (P) Something requested a negative number of bytes of malloc.
+
+=item panic: magic_killbackrefs
+
+(P) Failed an internal consistency check while trying to reset all weak
+references to an object.
 
 =item panic: mapstart
 
@@ -2284,6 +2299,11 @@ to use parens. In any case, a hash requires key/value B<pairs>.
     %hash = [ qw/ an anon array / ];	# WRONG
     %hash = ( one => 1, two => 2, );	# right
     %hash = qw( one 1 two 2 );			# also fine
+
+=item Reference is already weak
+
+(W) You have attempted to weaken a reference that is already weak.
+Doing so has no effect.
 
 =item Reference miscount in sv_replace()
 

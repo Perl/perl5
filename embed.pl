@@ -245,6 +245,12 @@ my @staticfuncs = qw(
     refto
     seed
     docatch
+    docatch_body
+    perl_parse_body
+    perl_run_body
+    perl_call_body
+    perl_call_xbody
+    call_list_body
     dofindlabel
     doparseform
     dopoptoeval
@@ -254,7 +260,7 @@ my @staticfuncs = qw(
     dopoptosub_at
     save_lines
     doeval
-    doopen
+    doopen_pmc
     sv_ncmp
     sv_i_ncmp
     amagic_ncmp
@@ -372,10 +378,11 @@ my @staticfuncs = qw(
     dump
     do_aspawn
     debprof
-    bset_obj_store
     new_logop
     simplify_sort
     is_handle_constructor
+    sv_add_backref
+    sv_del_backref
     do_trans_CC_simple
     do_trans_CC_count
     do_trans_CC_complex

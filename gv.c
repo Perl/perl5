@@ -1075,7 +1075,7 @@ Gv_AMupdate(HV *stash)
               break;
             case SVt_PVGV:
               if (!(cv = GvCVu((GV*)sv)))
-                cv = sv_2cv(sv, &stash, &gv, TRUE);
+                cv = sv_2cv(sv, &stash, &gv, FALSE);
               break;
           }
           if (cv) filled=1;

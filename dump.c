@@ -638,6 +638,7 @@ do_magic_dump(I32 level, PerlIO *file, MAGIC *mg, I32 nest, I32 maxnest, bool du
 #endif
 	    else if (v == &PL_vtbl_amagic)     s = "amagic";
 	    else if (v == &PL_vtbl_amagicelem) s = "amagicelem";
+	    else if (v == &PL_vtbl_backref)    s = "backref";
 	    if (s)
 	        dump_indent(level, file, "    MG_VIRTUAL = &PL_vtbl_%s\n", s);
 	    else
@@ -766,7 +767,10 @@ do_sv_dump(I32 level, PerlIO *file, SV *sv, I32 nest, I32 maxnest, bool dumpops,
     if (flags & SVf_IOK)	sv_catpv(d, "IOK,");
     if (flags & SVf_NOK)	sv_catpv(d, "NOK,");
     if (flags & SVf_POK)	sv_catpv(d, "POK,");
-    if (flags & SVf_ROK)	sv_catpv(d, "ROK,");
+    if (flags & SVf_ROK)  {	
+    				sv_catpv(d, "ROK,");
+	if (SvWEAKREF(sv))	sv_catpv(d, "WEAKREF,");
+    }
     if (flags & SVf_OOK)	sv_catpv(d, "OOK,");
     if (flags & SVf_FAKE)	sv_catpv(d, "FAKE,");
     if (flags & SVf_READONLY)	sv_catpv(d, "READONLY,");

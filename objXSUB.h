@@ -502,6 +502,8 @@
 #define PL_preprocess		pPerl->PL_preprocess
 #undef  PL_profiledata
 #define PL_profiledata		pPerl->PL_profiledata
+#undef  PL_protect
+#define PL_protect		pPerl->PL_protect
 #undef  PL_reg_call_cc
 #define PL_reg_call_cc		pPerl->PL_reg_call_cc
 #undef  PL_reg_curpm
@@ -879,14 +881,14 @@
 #define boot_core_UNIVERSAL	pPerl->Perl_boot_core_UNIVERSAL
 #undef  bset_obj_store
 #define bset_obj_store		pPerl->Perl_bset_obj_store
-#undef  bset_obj_store
-#define bset_obj_store		pPerl->Perl_bset_obj_store
 #undef  byterun
 #define byterun			pPerl->Perl_byterun
 #undef  cache_re
 #define cache_re		pPerl->Perl_cache_re
 #undef  call_list
 #define call_list		pPerl->Perl_call_list
+#undef  call_list_body
+#define call_list_body		pPerl->Perl_call_list_body
 #undef  cando
 #define cando			pPerl->Perl_cando
 #undef  cast_i32
@@ -1001,6 +1003,8 @@
 #define debstack		pPerl->Perl_debstack
 #undef  debstackptrs
 #define debstackptrs		pPerl->Perl_debstackptrs
+#undef  default_protect
+#define default_protect		pPerl->Perl_default_protect
 #undef  del_he
 #define del_he			pPerl->Perl_del_he
 #undef  del_sv
@@ -1127,6 +1131,8 @@
 #define do_vop			pPerl->Perl_do_vop
 #undef  docatch
 #define docatch			pPerl->Perl_docatch
+#undef  docatch_body
+#define docatch_body		pPerl->Perl_docatch_body
 #undef  doencodes
 #define doencodes		pPerl->Perl_doencodes
 #undef  doeval
@@ -1135,16 +1141,12 @@
 #define dofile			pPerl->Perl_dofile
 #undef  dofindlabel
 #define dofindlabel		pPerl->Perl_dofindlabel
-#undef  dofindlabel
-#define dofindlabel		pPerl->Perl_dofindlabel
 #undef  doform
 #define doform			pPerl->Perl_doform
-#undef  doopen
-#define doopen			pPerl->Perl_doopen
+#undef  doopen_pmc
+#define doopen_pmc		pPerl->Perl_doopen_pmc
 #undef  doparseform
 #define doparseform		pPerl->Perl_doparseform
-#undef  dopoptoeval
-#define dopoptoeval		pPerl->Perl_dopoptoeval
 #undef  dopoptoeval
 #define dopoptoeval		pPerl->Perl_dopoptoeval
 #undef  dopoptolabel
@@ -1319,8 +1321,6 @@
 #define hv_ksplit		pPerl->Perl_hv_ksplit
 #undef  hv_magic
 #define hv_magic		pPerl->Perl_hv_magic
-#undef  hv_stashpv
-#define hv_stashpv		pPerl->Perl_hv_stashpv
 #undef  hv_store
 #define hv_store		pPerl->Perl_hv_store
 #undef  hv_store_ent
@@ -1489,6 +1489,8 @@
 #define magic_getuvar		pPerl->Perl_magic_getuvar
 #undef  magic_getvec
 #define magic_getvec		pPerl->Perl_magic_getvec
+#undef  magic_killbackrefs
+#define magic_killbackrefs	pPerl->Perl_magic_killbackrefs
 #undef  magic_len
 #define magic_len		pPerl->Perl_magic_len
 #undef  magic_methcall
@@ -1811,12 +1813,16 @@
 #define perl_atexit		pPerl->perl_atexit
 #undef  perl_call_argv
 #define perl_call_argv		pPerl->perl_call_argv
+#undef  perl_call_body
+#define perl_call_body		pPerl->perl_call_body
 #undef  perl_call_method
 #define perl_call_method	pPerl->perl_call_method
 #undef  perl_call_pv
 #define perl_call_pv		pPerl->perl_call_pv
 #undef  perl_call_sv
 #define perl_call_sv		pPerl->perl_call_sv
+#undef  perl_call_xbody
+#define perl_call_xbody		pPerl->perl_call_xbody
 #undef  perl_construct
 #define perl_construct		pPerl->perl_construct
 #undef  perl_destruct
@@ -1847,10 +1853,14 @@
 #define perl_new_numeric	pPerl->perl_new_numeric
 #undef  perl_parse
 #define perl_parse		pPerl->perl_parse
+#undef  perl_parse_body
+#define perl_parse_body		pPerl->perl_parse_body
 #undef  perl_require_pv
 #define perl_require_pv		pPerl->perl_require_pv
 #undef  perl_run
 #define perl_run		pPerl->perl_run
+#undef  perl_run_body
+#define perl_run_body		pPerl->perl_run_body
 #undef  perl_set_numeric_local
 #define perl_set_numeric_local	pPerl->perl_set_numeric_local
 #undef  perl_set_numeric_standard
@@ -2877,6 +2887,8 @@
 #define sv_2uv			pPerl->Perl_sv_2uv
 #undef  sv_add_arena
 #define sv_add_arena		pPerl->Perl_sv_add_arena
+#undef  sv_add_backref
+#define sv_add_backref		pPerl->Perl_sv_add_backref
 #undef  sv_backoff
 #define sv_backoff		pPerl->Perl_sv_backoff
 #undef  sv_bless
@@ -2915,6 +2927,8 @@
 #define sv_compile_2op		pPerl->Perl_sv_compile_2op
 #undef  sv_dec
 #define sv_dec			pPerl->Perl_sv_dec
+#undef  sv_del_backref
+#define sv_del_backref		pPerl->Perl_sv_del_backref
 #undef  sv_derived_from
 #define sv_derived_from		pPerl->Perl_sv_derived_from
 #undef  sv_dump
@@ -2979,6 +2993,8 @@
 #define sv_report_used		pPerl->Perl_sv_report_used
 #undef  sv_reset
 #define sv_reset		pPerl->Perl_sv_reset
+#undef  sv_rvweaken
+#define sv_rvweaken		pPerl->Perl_sv_rvweaken
 #undef  sv_setiv
 #define sv_setiv		pPerl->Perl_sv_setiv
 #undef  sv_setiv_mg

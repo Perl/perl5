@@ -87,6 +87,7 @@ debop
 debprofdump
 debstack
 debstackptrs
+default_protect
 delimcpy
 deprecate
 die
@@ -127,8 +128,6 @@ do_trans
 do_vecset
 do_vop
 dofile
-dofindlabel
-dopoptoeval
 dounwind
 dowantarray
 dump_all
@@ -195,7 +194,6 @@ hv_iternextsv
 hv_iterval
 hv_ksplit
 hv_magic
-hv_stashpv
 hv_store
 hv_store_ent
 hv_undef
@@ -262,6 +260,7 @@ magic_getsubstr
 magic_gettaint
 magic_getuvar
 magic_getvec
+magic_killbackrefs
 magic_len
 magic_mutexfree
 magic_nextpack
@@ -543,6 +542,7 @@ sv_reftype
 sv_replace
 sv_report_used
 sv_reset
+sv_rvweaken
 sv_setiv
 sv_setiv_mg
 sv_setnv

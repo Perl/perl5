@@ -2932,6 +2932,8 @@ new_struct_thread(struct perl_thread *t)
     Zero(thr, 1, struct perl_thread);
 #endif
 
+    PL_protect = FUNC_NAME_TO_PTR(default_protect);
+
     thr->oursv = sv;
     init_stacks(ARGS);
 
@@ -2974,6 +2976,8 @@ new_struct_thread(struct perl_thread *t)
 
     /* parent thread's data needs to be locked while we make copy */
     MUTEX_LOCK(&t->mutex);
+
+    PL_protect = t->Tprotect;
 
     PL_curcop = t->Tcurcop;       /* XXX As good a guess as any? */
     PL_defstash = t->Tdefstash;   /* XXX maybe these should */
@@ -3075,18 +3079,14 @@ get_specialsv_list(void)
  return PL_specialsv_list;
 }
 
-#ifndef HAS_GETENV_SV
-SV *
-getenv_sv(char *env_elem)
+#ifndef HAS_GETENV_LEN
+char *
+getenv_len(char *env_elem, unsigned long *len)
 {
-  char *env_trans;
-  SV *temp_sv;
-  if ((env_trans = PerlEnv_getenv(env_elem)) != Nullch) {
-    temp_sv = newSVpv(env_trans, strlen(env_trans));
-    return temp_sv;
-  } else {
-    return &PL_sv_undef;
-  }
+    char *env_trans = PerlEnv_getenv(env_elem);
+    if (env_trans)
+	*len = strlen(env_trans);
+    return env_trans;
 }
 #endif
 
@@ -3187,6 +3187,9 @@ get_vtbl(int vtbl_id)
 	break;
     case want_vtbl_amagicelem:
 	result = &PL_vtbl_amagicelem;
+	break;
+    case want_vtbl_backref:
+	result = &PL_vtbl_backref;
 	break;
     }
     return result;

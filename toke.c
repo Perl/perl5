@@ -1487,6 +1487,7 @@ filter_del(filter_t funcp)
 	return;
     /* if filter is on top of stack (usual case) just pop it off */
     if (IoDIRP(FILTER_DATA(AvFILLp(PL_rsfp_filters))) == (DIR*)funcp){
+	IoDIRP(FILTER_DATA(AvFILLp(PL_rsfp_filters))) = NULL;
 	sv_free(av_pop(PL_rsfp_filters));
 
         return;

@@ -2426,9 +2426,10 @@ set and the variable does not exist then NULL is returned.
 
 =item perl_get_cv
 
-Returns the CV of the specified Perl sub.  If C<create> is set and the Perl
-variable does not exist then it will be created.  If C<create> is not
-set and the variable does not exist then NULL is returned.
+Returns the CV of the specified Perl subroutine.  If C<create> is set and
+the Perl subroutine does not exist then it will be declared (which has
+the same effect as saying C<sub name;>).  If C<create> is not
+set and the subroutine does not exist then NULL is returned.
 
 	CV*	perl_get_cv (const char* name, I32 create)
 

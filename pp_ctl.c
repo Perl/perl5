@@ -29,6 +29,7 @@
 #define CALLOP this->*PL_op
 #else
 #define CALLOP *PL_op
+static void *docatch_body _((void *o));
 static OP *docatch _((OP *o));
 static OP *dofindlabel _((OP *o, char *label, OP **opstack, OP **oplimit));
 static void doparseform _((SV *sv));
@@ -41,7 +42,7 @@ static void save_lines _((AV *array, SV *sv));
 static I32 sortcv _((SV *a, SV *b));
 static void qsortsv _((SV **array, size_t num_elts, I32 (*fun)(SV *a, SV *b)));
 static OP *doeval _((int gimme, OP** startop));
-static PerlIO *doopen _((const char *name, const char *mode));
+static PerlIO *doopen_pmc _((const char *name, const char *mode));
 static I32 sv_ncmp _((SV *a, SV *b));
 static I32 sv_i_ncmp _((SV *a, SV *b));
 static I32 amagic_ncmp _((SV *a, SV *b));
@@ -2491,38 +2492,41 @@ save_lines(AV *array, SV *sv)
     }
 }
 
+STATIC void *
+docatch_body(va_list args)
+{
+    CALLRUNOPS();
+    return NULL;
+}
+
 STATIC OP *
 docatch(OP *o)
 {
     dTHR;
     int ret;
     OP *oldop = PL_op;
-    dJMPENV;
 
-    PL_op = o;
 #ifdef DEBUGGING
     assert(CATCH_GET == TRUE);
-    DEBUG_l(deb("Setting up local jumplevel %p, was %p\n", &cur_env, PL_top_env));
 #endif
-    JMPENV_PUSH(ret);
+    PL_op = o;
+ redo_body:
+    CALLPROTECT(&ret, FUNC_NAME_TO_PTR(docatch_body));
     switch (ret) {
-    default:				/* topmost level handles it */
-pass_the_buck:
-	JMPENV_POP;
+    case 0:
+	break;
+    case 3:
+	if (PL_restartop) {
+	    PL_op = PL_restartop;
+	    PL_restartop = 0;
+	    goto redo_body;
+	}
+	/* FALL THROUGH */
+    default:
 	PL_op = oldop;
 	JMPENV_JUMP(ret);
 	/* NOTREACHED */
-    case 3:
-	if (!PL_restartop)
-	    goto pass_the_buck;
-	PL_op = PL_restartop;
-	PL_restartop = 0;
-	/* FALL THROUGH */
-    case 0:
-        CALLRUNOPS();
-	break;
     }
-    JMPENV_POP;
     PL_op = oldop;
     return Nullop;
 }
@@ -2772,32 +2776,35 @@ doeval(int gimme, OP** startop)
     RETURNOP(PL_eval_start);
 }
 
-static PerlIO *
-doopen(const char *name, const char *mode)
+STATIC PerlIO *
+doopen_pmc(const char *name, const char *mode)
 {
     STRLEN namelen = strlen(name);
     PerlIO *fp;
 
     if (namelen > 3 && strcmp(name + namelen - 3, ".pm") == 0) {
-        SV *pmcsv = newSVpvf("%s%c", name, 'c');
+	SV *pmcsv = newSVpvf("%s%c", name, 'c');
 	char *pmc = SvPV_nolen(pmcsv);
 	Stat_t pmstat;
-        Stat_t pmcstat;
-        if (PerlLIO_stat(pmc, &pmcstat) < 0) {
+	Stat_t pmcstat;
+	if (PerlLIO_stat(pmc, &pmcstat) < 0) {
 	    fp = PerlIO_open(name, mode);
-	} else {
-	    if (PerlLIO_stat(name, &pmstat) < 0 ||
-	        pmstat.st_mtime < pmcstat.st_mtime) {
-	        fp = PerlIO_open(pmc, mode);
-	  } else {
-	        fp = PerlIO_open(name, mode);
-	  }
 	}
-        SvREFCNT_dec(pmcsv);
-    } else {
-        fp = PerlIO_open(name, mode);
+	else {
+	    if (PerlLIO_stat(name, &pmstat) < 0 ||
+	        pmstat.st_mtime < pmcstat.st_mtime)
+	    {
+		fp = PerlIO_open(pmc, mode);
+	    }
+	    else {
+		fp = PerlIO_open(name, mode);
+	    }
+	}
+	SvREFCNT_dec(pmcsv);
     }
-
+    else {
+	fp = PerlIO_open(name, mode);
+    }
     return fp;
 }
 
@@ -2851,7 +2858,7 @@ PP(pp_require)
     )
     {
 	tryname = name;
-	tryrsfp = doopen(name,PERL_SCRIPT_MODE);
+	tryrsfp = doopen_pmc(name,PERL_SCRIPT_MODE);
     }
     else {
 	AV *ar = GvAVn(PL_incgv);
@@ -2875,7 +2882,7 @@ PP(pp_require)
 #endif
 		TAINT_PROPER("require");
 		tryname = SvPVX(namesv);
-		tryrsfp = doopen(tryname, PERL_SCRIPT_MODE);
+		tryrsfp = doopen_pmc(tryname, PERL_SCRIPT_MODE);
 		if (tryrsfp) {
 		    if (tryname[0] == '.' && tryname[1] == '/')
 			tryname += 2;

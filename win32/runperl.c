@@ -28,9 +28,6 @@ xs_init(CPERLarg)
 
 CPerlObj *pPerl;
 
-#undef PERL_SYS_INIT
-#define PERL_SYS_INIT(a, c)
-
 int
 main(int argc, char **argv, char **env)
 {
@@ -47,6 +44,8 @@ main(int argc, char **argv, char **env)
     (void)win32_longpath(szModuleName);
     argv[0] = szModuleName;
 #endif
+
+    PERL_SYS_INIT(&argc,&argv);
 
     if (!host.PerlCreate())
 	exit(exitstatus);

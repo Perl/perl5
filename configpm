@@ -81,11 +81,11 @@ print CONFIG "\n",
     join("", @v_fast, sort @v_others),
     "!END!\n\n";
 
-# copy config summary format from the myconfig script
+# copy config summary format from the myconfig.SH script
 
 print CONFIG "my \$summary = <<'!END!';\n";
 
-open(MYCONFIG,"<myconfig") || die "open myconfig failed: $!";
+open(MYCONFIG,"<myconfig.SH") || die "open myconfig.SH failed: $!";
 1 while defined($_ = <MYCONFIG>) && !/^Summary of/;
 do { print CONFIG $_ } until !defined($_ = <MYCONFIG>) || /^\s*$/;
 close(MYCONFIG);

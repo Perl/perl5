@@ -79,6 +79,7 @@ PL_pending_ident
 PL_sortcxix
 PL_sublex_info
 PL_timesbuf
+Perl_do_exec3
 Perl_do_ipcctl
 Perl_do_ipcget
 Perl_do_msgrcv
@@ -302,7 +303,6 @@ sub output_symbol {
 __DATA__
 # extra globals not included above.
 perl_init_i18nl10n
-perl_init_ext
 perl_alloc
 perl_atexit
 perl_construct

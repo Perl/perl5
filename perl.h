@@ -107,9 +107,7 @@ class CPerlObj;
 #define PERL_OBJECT_THIS this
 #define _PERL_OBJECT_THIS ,this
 #define PERL_OBJECT_THIS_ this,
-#define CALLRUNOPS (this->*PL_runops)
-#define CALLREGCOMP (this->*PL_regcompp)
-#define CALLREGEXEC (this->*PL_regexecp)
+#define CALL_FPTR(fptr) (this->*fptr)
 
 #else /* !PERL_OBJECT */
 
@@ -123,11 +121,14 @@ class CPerlObj;
 #define PERL_OBJECT_THIS
 #define _PERL_OBJECT_THIS
 #define PERL_OBJECT_THIS_
-#define CALLRUNOPS (*PL_runops)
-#define CALLREGCOMP (*PL_regcompp)
-#define CALLREGEXEC (*PL_regexecp)
+#define CALL_FPTR(fptr) (*fptr)
 
 #endif /* PERL_OBJECT */
+
+#define CALLRUNOPS  CALL_FPTR(PL_runops)
+#define CALLREGCOMP CALL_FPTR(PL_regcompp)
+#define CALLREGEXEC CALL_FPTR(PL_regexecp)
+#define CALLPROTECT CALL_FPTR(PL_protect)
 
 #define VOIDUSED 1
 #include "config.h"
@@ -1902,12 +1903,13 @@ EXT char *** environ_pointer;
 #  endif
 #else
    /* VMS and some other platforms don't use the environ array */
-#  if !defined(VMS) || \
-      !defined(DONT_DECLARE_STD) || \
-      (defined(__svr4__) && defined(__GNUC__) && defined(sun)) || \
-      defined(__sgi) || \
-      defined(__DGUX)
+#  if !defined(VMS)
+#    if !defined(DONT_DECLARE_STD) || \
+        (defined(__svr4__) && defined(__GNUC__) && defined(sun)) || \
+        defined(__sgi) || \
+        defined(__DGUX)
 extern char **	environ;	/* environment variables supplied via exec */
+#    endif
 #  endif
 #endif
 
@@ -2218,7 +2220,8 @@ enum {		/* pass one of these to get_vtbl */
     want_vtbl_mutex,
 #endif
     want_vtbl_regdata,
-    want_vtbl_regdatum
+    want_vtbl_regdatum,
+    want_vtbl_backref
 };
 
 				/* Note: the lowest 8 bits are reserved for
@@ -2512,6 +2515,9 @@ EXT MGVTBL PL_vtbl_amagic =       {0,     magic_setamagic,
 EXT MGVTBL PL_vtbl_amagicelem =   {0,     magic_setamagic,
                                         0,      0,      magic_setamagic};
 
+EXT MGVTBL PL_vtbl_backref = 	  {0,	0,
+					0,	0,	magic_killbackrefs};
+
 #else /* !DOINIT */
 
 EXT MGVTBL PL_vtbl_sv;
@@ -2551,6 +2557,8 @@ EXT MGVTBL PL_vtbl_collxfrm;
 
 EXT MGVTBL PL_vtbl_amagic;
 EXT MGVTBL PL_vtbl_amagicelem;
+
+EXT MGVTBL PL_vtbl_backref;
 
 #endif /* !DOINIT */
 

@@ -53,6 +53,7 @@
 #define PL_ofslen		(PL_curinterp->Tofslen)
 #define PL_op			(PL_curinterp->Top)
 #define PL_opsave		(PL_curinterp->Topsave)
+#define PL_protect		(PL_curinterp->Tprotect)
 #define PL_reg_call_cc		(PL_curinterp->Treg_call_cc)
 #define PL_reg_curpm		(PL_curinterp->Treg_curpm)
 #define PL_reg_eval_set		(PL_curinterp->Treg_eval_set)
@@ -445,6 +446,7 @@
 #define PL_Tofslen		PL_ofslen
 #define PL_Top			PL_op
 #define PL_Topsave		PL_opsave
+#define PL_Tprotect		PL_protect
 #define PL_Treg_call_cc		PL_reg_call_cc
 #define PL_Treg_curpm		PL_reg_curpm
 #define PL_Treg_eval_set	PL_reg_eval_set
@@ -580,6 +582,7 @@
 #define PL_ofslen		(thr->Tofslen)
 #define PL_op			(thr->Top)
 #define PL_opsave		(thr->Topsave)
+#define PL_protect		(thr->Tprotect)
 #define PL_reg_call_cc		(thr->Treg_call_cc)
 #define PL_reg_curpm		(thr->Treg_curpm)
 #define PL_reg_eval_set		(thr->Treg_eval_set)

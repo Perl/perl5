@@ -1,7 +1,7 @@
 package Socket;
 
 use vars qw($VERSION @ISA @EXPORT @EXPORT_OK %EXPORT_TAGS);
-$VERSION = "1.7";
+$VERSION = "1.71";
 
 =head1 NAME
 
@@ -272,7 +272,14 @@ require DynaLoader;
 	UIO_MAXIOV
 );
 
-@EXPORT_OK = qw(CR LF CRLF $CR $LF $CRLF);
+@EXPORT_OK = qw(CR LF CRLF $CR $LF $CRLF
+
+	       IPPROTO_TCP
+	       TCP_KEEPALIVE
+	       TCP_MAXRT
+	       TCP_MAXSEG
+	       TCP_NODELAY
+	       TCP_STDURG);
 
 %EXPORT_TAGS = (
     crlf    => [qw(CR LF CRLF $CR $LF $CRLF)],

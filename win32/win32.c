@@ -1307,7 +1307,12 @@ win32_uname(struct utsname *name)
 	SYSTEM_INFO info;
 	char *arch;
 	GetSystemInfo(&info);
+
+#ifdef __BORLANDC__
+	switch (info.u.s.wProcessorArchitecture) {
+#else
 	switch (info.wProcessorArchitecture) {
+#endif
 	case PROCESSOR_ARCHITECTURE_INTEL:
 	    arch = "x86"; break;
 	case PROCESSOR_ARCHITECTURE_MIPS:
@@ -2860,8 +2865,8 @@ static
 XS(w32_GetTickCount)
 {
     dXSARGS;
-    EXTEND(SP,1);
     DWORD msec = GetTickCount();
+    EXTEND(SP,1);
     if ((IV)msec > 0)
 	XSRETURN_IV(msec);
     XSRETURN_NV(msec);

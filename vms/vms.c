@@ -207,7 +207,7 @@ int my_trnlnm(const char *lnm, char *eqv, unsigned long int idx)
  * Note: Uses Perl temp to store result so char * can be returned to
  * caller; this pointer will be invalidated at next Perl statement
  * transition.
- * We define this as a function rather than a macro in terms of my_getenv_sv()
+ * We define this as a function rather than a macro in terms of my_getenv_len()
  * so that it'll work when PL_curinterp is undefined (and we therefore can't
  * allocate SVs).
  */
@@ -256,17 +256,18 @@ my_getenv(const char *lnm, bool sys)
 /*}}}*/
 
 
-/*{{{ SV *my_getenv_sv(const char *lnm, bool sys)*/
-SV *
-my_getenv_sv(const char *lnm, bool sys)
+/*{{{ SV *my_getenv_len(const char *lnm, bool sys)*/
+char *
+my_getenv_len(const char *lnm, unsigned long *len, bool sys)
 {
     char buf[LNM$C_NAMLENGTH+1], *cp1, *cp2;
-    unsigned long int len, idx = 0;
+    unsigned long idx = 0;
 
     for (cp1 = (char *)lnm, cp2 = buf; *cp1; cp1++,cp2++) *cp2 = _toupper(*cp1);
     if (cp1 - lnm == 7 && !strncmp(buf,"DEFAULT",7)) {
       getcwd(buf,LNM$C_NAMLENGTH);
-      return newSVpv(buf,0);
+      *len = strlen(buf);
+      return buf;
     }
     else {
       if ((cp2 = strchr(lnm,';')) != NULL) {
@@ -275,18 +276,19 @@ my_getenv_sv(const char *lnm, bool sys)
         idx = strtoul(cp2+1,NULL,0);
         lnm = buf;
       }
-      if ((len = vmstrnenv(lnm,buf,idx,
+      if ((*len = vmstrnenv(lnm,buf,idx,
                            sys ? fildev : NULL,
 #ifdef SECURE_INTERNAL_GETENV
                            sys ? PERL__TRNENV_SECURE : 0
 #else
                                                        0
 #endif
-                                                         ))) return newSVpv(buf,len);
-      else return &PL_sv_undef;
+                                                         )))
+	  return buf;
+      else return Nullch;
     }
 
-}  /* end of my_getenv_sv() */
+}  /* end of my_getenv_len() */
 /*}}}*/
 
 static void create_mbx(unsigned short int *, struct dsc$descriptor_s *);
