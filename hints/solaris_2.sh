@@ -510,7 +510,14 @@ EOCBU
 # because we need to fix up things right now.
 case "$uselongdouble" in
 "$define"|true|[yY]*)
-	. ./UU/uselongdouble.cbu
+        # Need to be double smart because we can be either here or there.
+	if test -f UU/uselongdouble.cbu; then
+		. ./UU/uselongdouble.cbu
+	else
+		if test -f uselongdouble.cbu; then
+			. ./uselongdouble.cbu
+		fi
+	fi
 	;;
 esac
 
