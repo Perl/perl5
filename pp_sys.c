@@ -3078,7 +3078,7 @@ PP(pp_fttext)
 	    (void)PerlIO_close(fp);
 	    RETPUSHUNDEF;
 	}
-	do_binmode(fp, '<', TRUE);
+	do_binmode(fp, '<', O_BINARY);
 	len = PerlIO_read(fp, tbuf, sizeof(tbuf));
 	(void)PerlIO_close(fp);
 	if (len <= 0) {
