@@ -932,6 +932,7 @@ die(pat, va_alist)
         dSP;
         SWITCHSTACK(curstack, mainstack);
     }
+
 #ifdef I_STDARG
     va_start(args, pat);
 #else
@@ -939,16 +940,21 @@ die(pat, va_alist)
 #endif
     message = mess(pat, &args);
     va_end(args);
+
     if (diehook && (cv = sv_2cv(diehook, &stash, &gv, 0)) && !CvDEPTH(cv)) {
 	dSP;
+	SV *msg = sv_2mortal(newSVpv(message, 0));
 
 	PUSHMARK(sp);
 	EXTEND(sp, 1);
-	PUSHs(sv_2mortal(newSVpv(message,0)));
+	PUSHs(msg);
 	PUTBACK;
 	perl_call_sv((SV*)cv, G_DISCARD);
-	message = mess(pat, &args);	/* Static buffer could be reused. */
+
+	/* It's okay for the __DIE__ hook to modify the message. */
+	message = SvPV(msg, na);
     }
+
     restartop = die_where(message);
     if ((!restartop && was_in_eval) || oldrunlevel > 1)
 	Siglongjmp(top_env, 3);
