@@ -652,7 +652,7 @@ order.  If, for example, you lock variables $a, $b, and $c, always lock
 $a before $b, and $b before $c.  It's also best to hold on to locks for
 as short a period of time to minimize the risks of deadlock.
 
-The other syncronization primitives described below can suffer from
+The other synchronization primitives described below can suffer from
 similar problems.
 
 =head2 Queues: Passing Data Around
