@@ -1060,6 +1060,13 @@ Perl_do_vop(pTHX_ I32 optype, SV *sv, SV *left, SV *right)
     I32 lensave;
     char *lsave;
     char *rsave;
+    bool left_utf = DO_UTF8(left);
+    bool right_utf = DO_UTF8(right);
+
+    if (left_utf && !right_utf)
+	sv_utf8_upgrade(right);
+    if (!left_utf && right_utf)
+	sv_utf8_upgrade(left);
 
     if (sv != left || (optype != OP_BIT_AND && !SvOK(sv) && !SvGMAGICAL(sv)))
 	sv_setpvn(sv, "", 0);	/* avoid undef warning on |= and ^= */
@@ -1084,6 +1091,66 @@ Perl_do_vop(pTHX_ I32 optype, SV *sv, SV *left, SV *right)
     }
     SvCUR_set(sv, len);
     (void)SvPOK_only(sv);
+    if (left_utf || right_utf) {
+	UV duc, luc, ruc;
+	STRLEN lulen = leftlen;
+	STRLEN rulen = rightlen;
+	STRLEN dulen = 0;
+	I32 ulen;
+
+	switch (optype) {
+	case OP_BIT_AND:
+	    while (lulen && rulen) {
+		luc = utf8_to_uv((U8*)lc, &ulen);
+		lc += ulen;
+		lulen -= ulen;
+		ruc = utf8_to_uv((U8*)rc, &ulen);
+		rc += ulen;
+		rulen -= ulen;
+		duc = luc & ruc;
+		dc = (char*)uv_to_utf8((U8*)dc, duc);
+	    }
+	    dulen = dc - SvPVX(sv);
+	    SvCUR_set(sv, dulen);
+	    break;
+	case OP_BIT_XOR:
+	    while (lulen && rulen) {
+		luc = utf8_to_uv((U8*)lc, &ulen);
+		lc += ulen;
+		lulen -= ulen;
+		ruc = utf8_to_uv((U8*)rc, &ulen);
+		rc += ulen;
+		rulen -= ulen;
+		duc = luc ^ ruc;
+		dc = (char*)uv_to_utf8((U8*)dc, duc);
+	    }
+	    goto mop_up_utf;
+	case OP_BIT_OR:
+	    while (lulen && rulen) {
+		luc = utf8_to_uv((U8*)lc, &ulen);
+		lc += ulen;
+		lulen -= ulen;
+		ruc = utf8_to_uv((U8*)rc, &ulen);
+		rc += ulen;
+		rulen -= ulen;
+		duc = luc | ruc;
+		dc = (char*)uv_to_utf8((U8*)dc, duc);
+	    }
+	  mop_up_utf:
+	    dulen = dc - SvPVX(sv);
+	    SvCUR_set(sv, dulen);
+	    if (rulen)
+		sv_catpvn(sv, rc, rulen);
+	    else if (lulen)
+		sv_catpvn(sv, lc, lulen);
+	    else
+		*SvEND(sv) = '\0';
+	    break;
+	}
+	SvUTF8_on(sv);
+	goto finish;
+    }
+    else
 #ifdef LIBERAL
     if (len >= sizeof(long)*4 &&
 	!((long)dc % sizeof(long)) &&
@@ -1154,6 +1221,7 @@ Perl_do_vop(pTHX_ I32 optype, SV *sv, SV *left, SV *right)
 	    break;
 	}
     }
+finish:
     SvTAINT(sv);
 }
 

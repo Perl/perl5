@@ -379,7 +379,7 @@ care.
 See http://www.perl.com/CPAN/modules/by-category/15_World_Wide_Web_HTML_HTTP_CGI/ .
 
 A non-free, commercial product, ``The Velocity Engine for Perl'',
-(http://www.binevolve.com/ or http://www.binevolve.com/bine/vep) might
+(http://www.binevolve.com/ or http://www.binevolve.com/velocigen/) might
 also be worth looking at.  It will allow you to increase the performance
 of your Perl programs, up to 25 times faster than normal CGI Perl by
 running in persistent Perl mode, or 4 to 5 times faster without any
@@ -580,7 +580,7 @@ when it runs fine on the command line'', see these sources:
         http://www.boutell.com/faq/
 
     CGI FAQ
-        http://www.webthing.com/page.cgi/cgifaq
+        http://www.webthing.com/tutorials/cgifaq.html
 
     HTTP Spec
         http://www.w3.org/pub/WWW/Protocols/HTTP/

@@ -2,7 +2,7 @@
  *
  * VMS-specific routines for perl5
  *
- * Last revised: 24-Feb-2000 by Charles Bailey  bailey@newman.upenn.edu
+ * Last revised: 20-Aug-1999 by Charles Bailey  bailey@newman.upenn.edu
  * Version: 5.5.60
  */
 
@@ -1123,7 +1123,7 @@ I32 Perl_my_pclose(pTHX_ FILE *fp)
     /* If we were writing to a subprocess, insure that someone reading from
      * the mailbox gets an EOF.  It looks like a simple fclose() doesn't
      * produce an EOF record in the mailbox.  */
-    if (info->mode != 'r' && !info->done) pipe_eof(info->fp,0);
+    if (info->mode != 'r' && !info->done) pipe_eof(info->fp,1);
     PerlIO_close(info->fp);
 
     if (info->done) retsts = info->completion;
@@ -1596,13 +1596,14 @@ static char *do_fileify_dirspec(char *dir,char *buf,int ts)
           /* Yes; fake the fnb bits so we'll check type below */
           dirnam.nam$l_fnb |= NAM$M_EXP_TYPE | NAM$M_EXP_VER;
         }
-        else {
-          if (dirfab.fab$l_sts != RMS$_FNF) {
-            set_errno(EVMSERR);
-            set_vaxc_errno(dirfab.fab$l_sts);
+        else { /* No; just work with potential name */
+          if (dirfab.fab$l_sts == RMS$_FNF) dirnam = savnam;
+          else { 
+            set_errno(EVMSERR);  set_vaxc_errno(dirfab.fab$l_sts);
+            dirnam.nam$b_nop |= NAM$M_SYNCHK;  dirnam.nam$l_rlf = NULL;
+            dirfab.fab$b_dns = 0;  (void) sys$parse(&dirfab,0,0);
             return NULL;
           }
-          dirnam = savnam; /* No; just work with potential name */
         }
       }
       if (!(dirnam.nam$l_fnb & (NAM$M_EXP_DEV | NAM$M_EXP_DIR))) {
@@ -1618,6 +1619,8 @@ static char *do_fileify_dirspec(char *dir,char *buf,int ts)
         cmplen = (dirnam.nam$l_fnb & NAM$M_EXP_VER) ? 6 : 4;
         if (strncmp(dirnam.nam$l_type,".DIR;1",cmplen)) { 
           /* Something other than .DIR[;1].  Bzzt. */
+          dirnam.nam$b_nop |= NAM$M_SYNCHK;  dirnam.nam$l_rlf = NULL;
+          dirfab.fab$b_dns = 0;  (void) sys$parse(&dirfab,0,0);
           set_errno(ENOTDIR);
           set_vaxc_errno(RMS$_DIR);
           return NULL;
@@ -1630,6 +1633,8 @@ static char *do_fileify_dirspec(char *dir,char *buf,int ts)
         else if (ts) New(1311,retspec,dirnam.nam$b_esl+1,char);
         else retspec = __fileify_retbuf;
         strcpy(retspec,esa);
+        dirnam.nam$b_nop |= NAM$M_SYNCHK;  dirnam.nam$l_rlf = NULL;
+        dirfab.fab$b_dns = 0;  (void) sys$parse(&dirfab,0,0);
         return retspec;
       }
       if ((cp1 = strstr(esa,".][000000]")) != NULL) {
@@ -1638,7 +1643,11 @@ static char *do_fileify_dirspec(char *dir,char *buf,int ts)
         dirnam.nam$b_esl -= 9;
       }
       if ((cp1 = strrchr(esa,']')) == NULL) cp1 = strrchr(esa,'>');
-      if (cp1 == NULL) return NULL; /* should never happen */
+      if (cp1 == NULL) { /* should never happen */
+        dirnam.nam$b_nop |= NAM$M_SYNCHK;  dirnam.nam$l_rlf = NULL;
+        dirfab.fab$b_dns = 0;  (void) sys$parse(&dirfab,0,0);
+        return NULL;
+      }
       term = *cp1;
       *cp1 = '\0';
       retlen = strlen(esa);
@@ -1655,6 +1664,8 @@ static char *do_fileify_dirspec(char *dir,char *buf,int ts)
           /* Go back and expand rooted logical name */
           dirnam.nam$b_nop = NAM$M_SYNCHK | NAM$M_NOCONCEAL;
           if (!(sys$parse(&dirfab) & 1)) {
+            dirnam.nam$l_rlf = NULL;
+            dirfab.fab$b_dns = 0;  (void) sys$parse(&dirfab,0,0);
             set_errno(EVMSERR);
             set_vaxc_errno(dirfab.fab$l_sts);
             return NULL;
@@ -1699,6 +1710,8 @@ static char *do_fileify_dirspec(char *dir,char *buf,int ts)
           strcpy(cp2+9,cp1);
         }
       }
+      dirnam.nam$b_nop |= NAM$M_SYNCHK;  dirnam.nam$l_rlf = NULL;
+      dirfab.fab$b_dns = 0;  (void) sys$parse(&dirfab,0,0);
       /* We've set up the string up through the filename.  Add the
          type and version, and we're done. */
       strcat(retspec,".DIR;1");
@@ -1851,6 +1864,8 @@ static char *do_pathify_dirspec(char *dir,char *buf, int ts)
         savnam = dirnam;
         if (!(sys$search(&dirfab)&1)) {  /* Does the file really exist? */
           if (dirfab.fab$l_sts != RMS$_FNF) {
+            dirnam.nam$b_nop |= NAM$M_SYNCHK;  dirnam.nam$l_rlf = NULL;
+            dirfab.fab$b_dns = 0;  (void) sys$parse(&dirfab,0,0);
             set_errno(EVMSERR);
             set_vaxc_errno(dirfab.fab$l_sts);
             return NULL;
@@ -1863,6 +1878,8 @@ static char *do_pathify_dirspec(char *dir,char *buf, int ts)
         cmplen = (dirnam.nam$l_fnb & NAM$M_EXP_VER) ? 6 : 4;
         if (strncmp(dirnam.nam$l_type,".DIR;1",cmplen)) { 
           /* Something other than .DIR[;1].  Bzzt. */
+          dirnam.nam$b_nop |= NAM$M_SYNCHK;  dirnam.nam$l_rlf = NULL;
+          dirfab.fab$b_dns = 0;  (void) sys$parse(&dirfab,0,0);
           set_errno(ENOTDIR);
           set_vaxc_errno(RMS$_DIR);
           return NULL;
@@ -1882,6 +1899,8 @@ static char *do_pathify_dirspec(char *dir,char *buf, int ts)
       else if (ts) New(1314,retpath,retlen,char);
       else retpath = __pathify_retbuf;
       strcpy(retpath,esa);
+      dirnam.nam$b_nop |= NAM$M_SYNCHK;  dirnam.nam$l_rlf = NULL;
+      dirfab.fab$b_dns = 0;  (void) sys$parse(&dirfab,0,0);
       /* $PARSE may have upcased filespec, so convert output to lower
        * case if input contained any lowercase characters. */
       if (haslower) __mystrtolower(retpath);
@@ -4293,6 +4312,8 @@ int my_utime(char *file, struct utimbuf *utimes)
   }
   retsts = sys$search(&myfab,0,0);
   if (!(retsts & 1)) {
+    mynam.nam$b_nop |= NAM$M_SYNCHK;  mynam.nam$l_rlf = NULL;
+    myfab.fab$b_dns = 0;  (void) sys$parse(&myfab,0,0);
     set_vaxc_errno(retsts);
     if      (retsts == RMS$_PRV) set_errno(EACCES);
     else if (retsts == RMS$_FNF) set_errno(ENOENT);
@@ -4305,6 +4326,8 @@ int my_utime(char *file, struct utimbuf *utimes)
 
   retsts = sys$assign(&devdsc,&chan,0,0);
   if (!(retsts & 1)) {
+    mynam.nam$b_nop |= NAM$M_SYNCHK;  mynam.nam$l_rlf = NULL;
+    myfab.fab$b_dns = 0;  (void) sys$parse(&myfab,0,0);
     set_vaxc_errno(retsts);
     if      (retsts == SS$_IVDEVNAM)   set_errno(ENOTDIR);
     else if (retsts == SS$_NOPRIV)     set_errno(EACCES);
@@ -4329,6 +4352,8 @@ int my_utime(char *file, struct utimbuf *utimes)
   myfib.fib$r_acctl_overlay.fib$l_acctl = FIB$M_NORECORD;
 #endif
   retsts = sys$qiow(0,chan,IO$_MODIFY,iosb,0,0,&fibdsc,&fnmdsc,0,0,myatr,0);
+  mynam.nam$b_nop |= NAM$M_SYNCHK;  mynam.nam$l_rlf = NULL;
+  myfab.fab$b_dns = 0;  (void) sys$parse(&myfab,0,0);
   _ckvmssts(sys$dassgn(chan));
   if (retsts & 1) retsts = iosb[0];
   if (!(retsts & 1)) {

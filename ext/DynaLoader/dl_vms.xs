@@ -65,6 +65,12 @@ static AV *dl_require_symbols = Nullav;
 #include <ssdef.h>
 #include <starlet.h>
 
+#if defined(VMS_WE_ARE_CASE_SENSITIVE)
+#define DL_CASE_SENSITIVE 1<<4
+#else
+#define DL_CASE_SENSITIVE 0
+#endif
+
 typedef unsigned long int vmssts;
 
 struct libref {
@@ -142,7 +148,7 @@ my_find_image_symbol(struct dsc$descriptor_s *imgname,
 {
   unsigned long int retsts;
   VAXC$ESTABLISH(findsym_handler);
-  retsts = lib$find_image_symbol(imgname,symname,entry,defspec);
+  retsts = lib$find_image_symbol(imgname,symname,entry,defspec,DL_CASE_SENSITIVE);
   return retsts;
 }
 

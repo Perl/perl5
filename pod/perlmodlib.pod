@@ -920,11 +920,11 @@ You should try to choose one close to you:
                    ftp://ftp.sun.ac.za/CPAN/
                    ftp://ftpza.co.za/pub/mirrors/cpan/
 
+
 =item Asia
 
     China          ftp://freesoft.cei.gov.cn/pub/languages/perl/CPAN/
-    Hong Kong      ftp://ftp.hkstar.com/pub/CPAN/
-                   ftp://ftp.pacific.net.hk/pub/mirror/CPAN/
+    Hong Kong      ftp://ftp.pacific.net.hk/pub/mirror/CPAN/
     Indonesia      ftp://malone.piksi.itb.ac.id/pub/CPAN/
     Israel         ftp://bioinfo.weizmann.ac.il/pub/software/perl/CPAN/
     Japan          ftp://ftp.dti.ad.jp/pub/lang/CPAN/
@@ -933,29 +933,31 @@ You should try to choose one close to you:
                    ftp://ftp.meisei-u.ac.jp/pub/CPAN/
                    ftp://ftp.ring.gr.jp/pub/lang/perl/CPAN/
                    ftp://mirror.nucba.ac.jp/mirror/Perl/
+    Saudi-Arabia   ftp://ftp.isu.net.sa/pub/CPAN/
     Singapore      ftp://ftp.nus.edu.sg/pub/unix/perl/CPAN/
     South Korea    ftp://ftp.bora.net/pub/CPAN/
                    ftp://ftp.kornet.net/pub/CPAN/
                    ftp://ftp.nuri.net/pub/CPAN/
     Taiwan         ftp://coda.nctu.edu.tw/computer-languages/perl/CPAN/
                    ftp://ftp.ee.ncku.edu.tw/pub3/perl/CPAN/
-                   ftp://ftp.wownet.net/pub2/PERL/
                    ftp://ftp1.sinica.edu.tw/pub1/perl/CPAN/
-    Thailand       ftp://ftp.cs.riubon.ac.th/pub/mirrors/CPAN/
-                   ftp://ftp.nectec.or.th/pub/mirrors/CPAN/
+    Thailand       ftp://ftp.nectec.or.th/pub/mirrors/CPAN/
+
 
 =item Australasia
 
     Australia      ftp://cpan.topend.com.au/pub/CPAN/
-                   ftp://ftp.labyrinth.net.au/pub/perl/CPAN/
+                   ftp://ftp.labyrinth.net.au/pub/perl-CPAN/
                    ftp://ftp.sage-au.org.au/pub/compilers/perl/CPAN/
                    ftp://mirror.aarnet.edu.au/pub/perl/CPAN/
     New Zealand    ftp://ftp.auckland.ac.nz/pub/perl/CPAN/
                    ftp://sunsite.net.nz/pub/languages/perl/CPAN/
 
+
 =item Central America
 
     Costa Rica     ftp://ftp.ucr.ac.cr/pub/Unix/CPAN/
+
 
 =item Europe
 
@@ -968,14 +970,26 @@ You should try to choose one close to you:
     Denmark        ftp://sunsite.auc.dk/pub/languages/perl/CPAN/
     Estonia        ftp://ftp.ut.ee/pub/languages/perl/CPAN/
     Finland        ftp://ftp.funet.fi/pub/languages/perl/CPAN/
-    France         ftp://ftp.lip6.fr/pub/perl/CPAN/
+    France         ftp://ftp.grolier.fr/pub/perl/CPAN/
+                   ftp://ftp.lip6.fr/pub/perl/CPAN/
                    ftp://ftp.oleane.net/pub/mirrors/CPAN/
                    ftp://ftp.pasteur.fr/pub/computing/CPAN/
                    ftp://ftp.uvsq.fr/pub/perl/CPAN/
+    German         ftp://ftp.gigabell.net/pub/CPAN/
     Germany        ftp://ftp.archive.de.uu.net/pub/CPAN/
+                   ftp://ftp.freenet.de/pub/ftp.cpan.org/pub/
                    ftp://ftp.gmd.de/packages/CPAN/
                    ftp://ftp.gwdg.de/pub/languages/perl/CPAN/
-                   ftp://ftp.leo.org/pub/comp/programming/languages/script/perl/CPAN/
+                   ftp://ftp.leo.org/pub/comp/general/programming/languages/script/perl/CPAN/
+                   ftp://ftp.mpi-sb.mpg.de/pub/perl/CPAN/
+                   ftp://ftp.rz.ruhr-uni-bochum.de/pub/CPAN/
+                   ftp://ftp.uni-erlangen.de/pub/source/CPAN/
+                   ftp://ftp.uni-hamburg.de/pub/soft/lang/perl/CPAN/
+    Germany        ftp://ftp.archive.de.uu.net/pub/CPAN/
+                   ftp://ftp.freenet.de/pub/ftp.cpan.org/pub/
+                   ftp://ftp.gmd.de/packages/CPAN/
+                   ftp://ftp.gwdg.de/pub/languages/perl/CPAN/
+                   ftp://ftp.leo.org/pub/comp/general/programming/languages/script/perl/CPAN/
                    ftp://ftp.mpi-sb.mpg.de/pub/perl/CPAN/
                    ftp://ftp.rz.ruhr-uni-bochum.de/pub/CPAN/
                    ftp://ftp.uni-erlangen.de/pub/source/CPAN/
@@ -990,19 +1004,16 @@ You should try to choose one close to you:
                    ftp://ftp.unina.it/pub/Other/CPAN/
                    ftp://ftp.unipi.it/pub/mirror/perl/CPAN/
     Netherlands    ftp://ftp.cs.uu.nl/mirror/CPAN/
-                   ftp://ftp.EU.net/packages/cpan/
                    ftp://ftp.nluug.nl/pub/languages/perl/CPAN/
     Norway         ftp://ftp.uit.no/pub/languages/perl/cpan/
                    ftp://sunsite.uio.no/pub/languages/perl/CPAN/
-    Poland         ftp://ftp.man.szczecin.pl/pub/perl/CPAN/
-                   ftp://ftp.man.torun.pl/pub/doc/CPAN/
+    Poland         ftp://ftp.man.torun.pl/pub/CPAN/
                    ftp://ftp.pk.edu.pl/pub/lang/perl/CPAN/
                    ftp://sunsite.icm.edu.pl/pub/CPAN/
     Portugal       ftp://ftp.ci.uminho.pt/pub/mirrors/cpan/
                    ftp://ftp.ist.utl.pt/pub/CPAN/
                    ftp://ftp.ua.pt/pub/CPAN/
-    Romania        ftp://ftp.dntis.ro/pub/mirrors/perl-cpan/
-                   ftp://ftp.dnttm.ro/pub/CPAN/
+    Romania        ftp://ftp.dnttm.ro/pub/CPAN/
     Russia         ftp://ftp.chg.ru/pub/lang/perl/CPAN/
                    ftp://ftp.sai.msu.su/pub/lang/perl/CPAN/
     Slovakia       ftp://ftp.entry.sk/pub/languages/perl/CPAN/
@@ -1018,19 +1029,17 @@ You should try to choose one close to you:
                    ftp://ftp.plig.org/pub/CPAN/
                    ftp://sunsite.doc.ic.ac.uk/packages/CPAN/
 
+
 =item North America
 
     Alberta        ftp://sunsite.ualberta.ca/pub/Mirror/CPAN/
     California     ftp://cpan.nas.nasa.gov/pub/perl/CPAN/
                    ftp://cpan.valueclick.com/CPAN/
                    ftp://ftp.cdrom.com/pub/perl/CPAN/
-                   ftp://ftp.digital.com/pub/plan/perl/CPAN/
-    California     ftp://cpan.nas.nasa.gov/pub/perl/CPAN/
-                   ftp://cpan.valueclick.com/CPAN/
-                   ftp://ftp.cdrom.com/pub/perl/CPAN/
-                   ftp://ftp.digital.com/pub/plan/perl/CPAN/
+                   http://download.sourceforge.net/mirrors/CPAN/
     Colorado       ftp://ftp.cs.colorado.edu/pub/perl/CPAN/
     Florida        ftp://ftp.cise.ufl.edu/pub/perl/CPAN/
+    Georgia        ftp://ftp.twoguys.org/CPAN/
     Illinois       ftp://uiarchive.uiuc.edu/pub/lang/perl/CPAN/
     Indiana        ftp://csociety-ftp.ecn.purdue.edu/pub/CPAN/
                    ftp://ftp.uwsg.indiana.edu/pub/perl/CPAN/
@@ -1039,34 +1048,35 @@ You should try to choose one close to you:
     Massachusetts  ftp://ftp.ccs.neu.edu/net/mirrors/ftp.funet.fi/pub/languages/perl/CPAN/
                    ftp://ftp.iguide.com/pub/mirrors/packages/perl/CPAN/
     Mexico         ftp://ftp.msg.com.mx/pub/CPAN/
-    Minnesota      ftp://ftp.midearthbbs.com/CPAN/
     New York       ftp://ftp.deao.net/pub/CPAN/
                    ftp://ftp.rge.com/pub/languages/perl/
-                   ftp://ftp.tpj.com/pub/CPAN/
-    Nova Scotia    ftp://cpan.chebucto.ns.ca/pub/CPAN/
     North Carolina ftp://ftp.duke.edu/pub/perl/
+    Nova Scotia    ftp://cpan.chebucto.ns.ca/pub/CPAN/
     Oklahoma       ftp://ftp.ou.edu/mirrors/CPAN/
     Ontario        ftp://ftp.crc.ca/pub/packages/lang/perl/CPAN/
     Oregon         ftp://ftp.orst.edu/pub/packages/CPAN/
     Pennsylvania   ftp://ftp.epix.net/pub/languages/perl/
     Tennessee      ftp://ftp.sunsite.utk.edu/pub/CPAN/
     Texas          ftp://ftp.sedl.org/pub/mirrors/CPAN/
+                   ftp://jhcloos.com/pub/mirror/CPAN/
     Utah           ftp://mirror.xmission.com/CPAN/
     Virginia       ftp://ftp.perl.org/pub/perl/CPAN/
                    ftp://ruff.cs.jmu.edu/pub/CPAN/
     Washington     ftp://ftp-mirror.internap.com/pub/CPAN/
+                   ftp://ftp.llarian.net/pub/CPAN/
                    ftp://ftp.spu.edu/pub/CPAN/
+
 
 =item South America
 
     Brazil         ftp://cpan.if.usp.br/pub/mirror/CPAN/
                    ftp://ftp.matrix.com.br/pub/perl/
-    Chile          ftp://sunsite.dcc.uchile.cl/pub/Lang/perl/CPAN/
+    Chile          ftp://sunsite.dcc.uchile.cl/pub/Lang/PERL/
 
 =back
 
 For an up-to-date listing of CPAN sites,
-see http://www.perl.com/perl/CPAN or ftp://www.perl.com/perl/ .
+see http://www.perl.com/perl/CPAN/SITES or ftp://www.perl.com/CPAN/SITES .
 
 =head1 Modules: Creation, Use, and Abuse
 
@@ -1368,16 +1378,17 @@ location.
 
 FTP Archives for Perl Modules:
 
-Follow the instructions and links on
+Follow the instructions and links on:
 
-   http://franz.ww.tu-berlin.de/modulelist
+   http://www.perl.com/CPAN/modules/00modlist.long.html
+   http://www.perl.com/CPAN/modules/04pause.html
 
 or upload to one of these sites:
 
-   ftp://franz.ww.tu-berlin.de/incoming
-   ftp://ftp.cis.ufl.edu/incoming
+   https://pause.kbx.de/pause/
+   http://pause.perl.org/pause/
 
-and notify <F<upload@franz.ww.tu-berlin.de>>.
+and notify <modules@perl.org>.
 
 By using the WWW interface you can ask the Upload Server to mirror
 your modules from your ftp or WWW site into your own directory on

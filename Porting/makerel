@@ -36,7 +36,7 @@ my (@local_patches, @lpatch_tags, $lpatch_tags);
 @lpatch_tags   = map  {  /^\s*,"(\w+)/ } @local_patches;
 $lpatch_tags   = join "-", @lpatch_tags;
 
-$perl = "perl$vers";
+$perl = "perl-$vers";
 $reldir = "$perl";
 $reldir .= "-$lpatch_tags" if $lpatch_tags;
 

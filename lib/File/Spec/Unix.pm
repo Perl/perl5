@@ -352,35 +352,29 @@ sub abs2rel {
     }
 
     # Now, remove all leading components that are the same
-    my @pathchunks = $self->splitpath( $path );
-    my @basechunks = ($self->splitpath( $base, 1 ))[0,1];
+    my @pathchunks = $self->splitdir( $path);
+    my @basechunks = $self->splitdir( $base);
 
-    # Insure same device; case-insensitive since those filesystems
-    # which use device semantics (VMS and Win32) are case-tolerant
-    return undef unless lc($pathchunks[0]) eq lc($basechunks[0]);
-    $path = $pathchunks[0] || '';
-    @pathchunks = ( $self->splitdir( $pathchunks[1] ), $pathchunks[2] );
-    @basechunks = $self->splitdir( $basechunks[1] );
-
-    # We do case-insensitive comparisons rather than just flattening case
-    # so caller gets back same case as was sent in
-    my $lc = $self->case_tolerant;
-    while (@pathchunks && @basechunks && 
-           ($lc ? lc($pathchunks[0]) eq lc($basechunks[0])
-                : $pathchunks[0] eq $basechunks[0]        ) ) {
+    while (@pathchunks && @basechunks && $pathchunks[0] eq $basechunks[0]) {
         shift @pathchunks ;
         shift @basechunks ;
     }
 
-    # @basechunks now contains the directories the resulting relative path 
+    $path = CORE::join( '/', @pathchunks );
+    $base = CORE::join( '/', @basechunks );
+
+    # $base now contains the directories the resulting relative path 
     # must ascend out of before it can descend to $path_directory.  So, 
     # replace all names with $parentDir
-    @basechunks = ($self->updir()) x @basechunks;
+    $base =~ s|[^/]+|..|g ;
 
     # Glue the two together, using a separator if necessary, and preventing an
     # empty result.
-    $path = $self->catfile($path,@basechunks,@pathchunks);
-    $path = $self->curdir unless $path;
+    if ( $path ne '' && $base ne '' ) {
+        $path = "$base/$path" ;
+    } else {
+        $path = "$base$path" ;
+    }
 
     return $self->canonpath( $path ) ;
 }
@@ -428,9 +422,7 @@ sub rel2abs($;$;) {
         }
 
         # Glom them together
-        my($pdev,$pdir,$pfile) = $self->splitpath( $path );
-        my($bdev,$bdir,$bfile) = $self->splitpath( $base );
-        $path = $self->catpath( $bdev, $self->catdir( $bdir, $pdir ), $pfile );
+        $path = $self->catdir( $base, $path ) ;
     }
 
     return $self->canonpath( $path ) ;

@@ -173,6 +173,8 @@ sub _write_vms {
     # We don't do anything to preserve order, so we won't relax
     # the GSMATCH criteria for a dynamic extension
 
+    print OPT "case_sensitive=yes\n"
+        if $Config::Config{d_vms_case_sensitive_symbols};
     foreach $sym (@{$data->{FUNCLIST}}) {
         my $safe = $set->addsym($sym);
         if ($isvax) { print OPT "UNIVERSAL=$safe\n" }

@@ -1182,12 +1182,18 @@ $(BASEEXT).opt : Makefile.PL
 
     push @m, '	$(PERL) -e "print ""$(INST_STATIC)/Include=';
     if ($self->{OBJECT} =~ /\bBASEEXT\b/ or
-        $self->{OBJECT} =~ /\b$self->{BASEEXT}\b/i) { push @m, '$(BASEEXT)'; }
+        $self->{OBJECT} =~ /\b$self->{BASEEXT}\b/i) { 
+        push @m, ($Config{d_vms_case_sensitive_symbols}
+	           ? uc($self->{BASEEXT}) :'$(BASEEXT)');
+    }
     else {  # We don't have a "main" object file, so pull 'em all in
+       # Upcase module names if linker is being case-sensitive
+       my($upcase) = $Config{d_vms_case_sensitive_symbols};
 	my(@omods) = map { s/\.[^.]*$//;         # Trim off file type
 	                   s[\$\(\w+_EXT\)][];   # even as a macro
 	                   s/.*[:>\/\]]//;       # Trim off dir spec
-	                   $_; } split ' ', $self->eliminate_macros($self->{OBJECT});
+			   $upcase ? uc($_) : $_;
+	                 } split ' ', $self->eliminate_macros($self->{OBJECT});
 	my($tmp,@lines,$elt) = '';
 	my $tmp = shift @omods;
 	foreach $elt (@omods) {

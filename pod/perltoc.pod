@@ -3003,7 +3003,7 @@ portable
 =item CPAN Testers
 
 Mailing list: cpan-testers@perl.org, Testing results:
-C<http://www.perl.org/cpan-testers/>
+C<http://testers.perl.org/>
 
 =item PLATFORMS
 
