@@ -28,6 +28,108 @@ example from http://www.xray.mpe.mpg.de/mailing-lists/perl5-porters/
 Version v5.8.1		Maintenance release working toward v5.8.1
 --------------
 ____________________________________________________________________________
+[ 19974] By: jhi                                   on 2003/07/03  21:36:16
+        Log: Integrate:
+             [ 19971]
+             Subject: [PATCH] t/op/magic.t on FreeBSD
+             From: Slaven Rezic <slaven@rezic.de>
+             Date: Fri, 4 Jul 2003 00:35:51 +0200 (CEST)
+             Message-Id: <200307032235.h63MZpKY036791@vran.herceg.de>
+             
+             [ 19972]
+             Subject: [PATCH] installperl -n
+             From: Slaven Rezic <slaven@rezic.de>
+             Date: Fri, 4 Jul 2003 00:41:36 +0200 (CEST)
+             Message-Id: <200307032241.h63Mfaka041281@vran.herceg.de>
+             
+             [ 19973]
+             Bump Time::HiRes version to 1.50.
+     Branch: maint-5.8/perl
+	  !> ext/Time/HiRes/HiRes.pm installperl t/op/magic.t
+____________________________________________________________________________
+[ 19970] By: jhi                                   on 2003/07/03  21:28:08
+        Log: Integrate:
+             [ 19969]
+             Ask Schwern.
+     Branch: maint-5.8/perl
+	   - Porting/Modules
+	  !> AUTHORS MANIFEST
+____________________________________________________________________________
+[ 19968] By: jhi                                   on 2003/07/03  19:17:29
+        Log: Integrate:
+             [ 19957]
+             Subject: Re: randomly untainting?
+             From: Rafael Garcia-Suarez <rgarciasuarez@free.fr>
+             Date: Thu, 3 Jul 2003 14:58:18 +0200
+             Message-Id: <20030703145818.5bdd2873.rgarciasuarez@free.fr>
+             (plus extra debug printing)
+             
+             [ 19958]
+             Regen Configure, Glossary, et alia.
+             
+             [ 19959]
+             Regen perltoc.
+             
+             [ 19960]
+             perldelta tweaks.
+             
+             [ 19961]
+             Extra light testing for the UTF-8 cache
+             (that it isn't broken, not that it helps).
+             
+             [ 19962]
+             Add at least meager beginnings of assertion checks for
+             the UTF-8 length/pos cache.  It's not as full as I would
+             like since the exact behaviour of the second half of the
+             cache, used in substr(), eludes me right now.
+             
+             [ 19963]
+             Revert #19957 as requested by Rafael.
+             
+             [ 19964]
+             Subject: Re: randomly untainting?
+             From: Rafael Garcia-Suarez <rgarciasuarez@free.fr>
+             Date: Thu, 3 Jul 2003 17:35:09 +0200
+             Message-Id: <20030703173509.0c007f0f.rgarciasuarez@free.fr>
+             
+             [ 19965]
+             Subject: [PATCH] Win32: fix WM_TIMER handling
+             From: Mattia Barbon <mbarbon@dsi.unive.it>
+             Date: Thu, 3 Jul 2003 16:05:23 +0200 (ora legale Europa occidentale)
+             Message-ID: <Mahogany-0.64.2-1016-20030703-160523.00@rbnet.it>
+             
+             [ 19966]
+             Subject: Re: [PATCH] Bring Time::Local to 1.07
+             From: Dave Rolsky <autarch@urth.org>
+             Date: Thu, 3 Jul 2003 14:35:56 -0500 (CDT)
+             Message-ID: <Pine.LNX.4.56.0307031435270.29915@urth.org>
+             
+             [ 19967]
+             Add autarch and Time::Local to Modules.
+     Branch: maint-5.8/perl
+	  !> Porting/Modules ext/List/Util/t/tainted.t lib/Time/Local.pm
+	  !> sv.c t/TestInit.pm t/op/length.t win32/win32.c
+____________________________________________________________________________
+[ 19960] By: jhi                                   on 2003/07/03  13:43:42
+        Log: perldelta tweaks.
+     Branch: maint-5.8/perl
+	   ! pod/perldelta.pod
+____________________________________________________________________________
+[ 19959] By: jhi                                   on 2003/07/03  13:36:50
+        Log: Regen perltoc.
+     Branch: maint-5.8/perl
+	   ! pod/perltoc.pod
+____________________________________________________________________________
+[ 19958] By: jhi                                   on 2003/07/03  13:27:12
+        Log: Regen Configure, Glossary, et alia.
+     Branch: maint-5.8/perl
+	   ! Configure Porting/Glossary Porting/config.sh Porting/config_H
+____________________________________________________________________________
+[ 19956] By: jhi                                   on 2003/07/03  11:31:55
+        Log: Update Changes.
+     Branch: maint-5.8/perl
+	   ! Changes patchlevel.h
+____________________________________________________________________________
 [ 19955] By: jhi                                   on 2003/07/03  11:26:56
         Log: Integrate:
              [ 19952]
