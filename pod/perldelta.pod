@@ -1,6 +1,6 @@
 =head1 NAME
 
-perldelta - what's new for perl v5.6
+perldelta - what's new for perl v5.6.x
 
 =head1 DESCRIPTION
 
@@ -40,7 +40,7 @@ but wasn't tickled by base.pm in those releases.
 
 =item Memory leaks
 
-Various cases of memory leaks and attempts to access unitialized memory
+Various cases of memory leaks and attempts to access uninitialized memory
 have been cured.  See L</"Known Problems"> below for further issues.
 
 =item Numeric conversions
@@ -80,20 +80,20 @@ Pattern matches on overloaded values are now handled correctly.
 Perl 5.6.0 parsed m/\x{ab}/ incorrectly, leading to spurious warnings.
 This has been corrected.
 
-The RE engine found in Perl 5.6.0 accidentally pessimized certain kinds
+The RE engine found in Perl 5.6.0 accidentally pessimised certain kinds
 of simple pattern matches.  These are now handled better.
 
 Regular expression debug output (whether through C<use re 'debug'>
 or via C<-Dr>) now looks better.
 
-Multiline matches like C<"a\nxb\n" =~ /(?!\A)x/m> were flawed.  The
+Multi-line matches like C<"a\nxb\n" =~ /(?!\A)x/m> were flawed.  The
 bug has been fixed.
 
-Use of $& could trigger a coredump under some situations.  This
+Use of $& could trigger a core dump under some situations.  This
 is now avoided.
 
 Match variables $1 et al., weren't being unset when a pattern match
-was backtracking, and the anamoly showed up inside C</...(?{ ... }).../>
+was backtracking, and the anomaly showed up inside C</...(?{ ... }).../>
 etc.  These variables are now tracked correctly.
 
 pos() did not return the correct value within s///ge in earlier
@@ -192,10 +192,6 @@ C<$.> is no longer corrupted by the debugger.
 
 All debugger output now correctly goes to the socket if RemotePort
 is set.
-
-=item Locales
-
-Locale handling has been reworked to be more portable.
 
 =item PERL5OPT
 
@@ -416,12 +412,12 @@ improvements.
 
 =item Devel::Peek
 
-Devel::Peek has been enhanced to support dumping of memroy statistics,
+Devel::Peek has been enhanced to support dumping of memory statistics,
 when perl is built with the included malloc().
 
 =item File::Find
 
-File::Find now supports pre and postprocessing of the files in order
+File::Find now supports pre and post-processing of the files in order
 to sort() them, etc.
 
 =item Getopt::Long

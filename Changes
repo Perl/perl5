@@ -34,6 +34,23 @@ Version v5.6.1
 --------------
 
 ____________________________________________________________________________
+[  9649] By: gsar                                  on 2001/04/09  02:35:43
+        Log: tweak perldelta as suggested by Jarkko
+     Branch: maint-5.6/perl
+	   ! pod/perldelta.pod
+____________________________________________________________________________
+[  9646] By: gsar                                  on 2001/04/09  00:48:04
+        Log: add note about ithreads and Thread.pm (too many people are
+             confused by the fact that Thread.pm is built and installed
+             under non-5005threads but doesn't work)
+     Branch: maint-5.6/perl
+	   ! ext/Thread/Thread.pm ext/Thread/Thread.xs
+____________________________________________________________________________
+[  9645] By: gsar                                  on 2001/04/09  00:19:03
+        Log: update perldelta.pod for changes in 5.6.1
+     Branch: maint-5.6/perl
+	   ! Changes pod/perldelta.pod
+____________________________________________________________________________
 [  9640] By: gsar                                  on 2001/04/08  19:20:46
         Log: integrate change#9634 from mainline
              
@@ -267,7 +284,7 @@ ____________________________________________________________________________
      Branch: maint-5.6/perl
 	   ! utils/perldoc.PL x2p/find2perl.PL x2p/s2p.PL
 ____________________________________________________________________________
-[  9516] By: gsar                                  on 2001/04/02  06:12:01
+[  9516] By: gsar                                  on 2001/04/02  05:49:37
         Log: a foolish release
      Branch: maint-5.6/perl
 	   ! Changes patchlevel.h pod/perldelta.pod pod/perlhist.pod

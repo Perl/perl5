@@ -2196,9 +2196,9 @@ AnyDBM_File, AutoLoader, AutoSplit, B, B::Asmdata, B::Assembler, B::Bblock,
 B::Bytecode, B::C, B::CC, B::Concise, B::Debug, B::Deparse,
 B::Disassembler, B::Lint, B::Showlex, B::Stackobj, B::Stash, B::Terse,
 B::Xref, Benchmark, ByteLoader, CGI, CGI::Apache, CGI::Carp, CGI::Cookie,
-CGI::Fast, CGI::Pretty, CGI::Push, CGI::Switch, CPAN, CPAN::FirstTime,
-CPAN::Nox, Carp, Carp::Heavy, Class::Struct, Cwd, DB, DB_File,
-Devel::SelfStubber, DirHandle, Dumpvalue, English, Env, Exporter,
+CGI::Fast, CGI::Pretty, CGI::Push, CGI::Switch, CGI::Util, CPAN,
+CPAN::FirstTime, CPAN::Nox, Carp, Carp::Heavy, Class::Struct, Cwd, DB,
+DB_File, Devel::SelfStubber, DirHandle, Dumpvalue, English, Env, Exporter,
 Exporter::Heavy, ExtUtils::Command, ExtUtils::Embed, ExtUtils::Install,
 ExtUtils::Installed, ExtUtils::Liblist, ExtUtils::MM_Cygwin,
 ExtUtils::MM_OS2, ExtUtils::MM_Unix, ExtUtils::MM_VMS, ExtUtils::MM_Win32,
@@ -2211,17 +2211,17 @@ File::Spec::VMS, File::Spec::Win32, File::Temp, File::stat, FileCache,
 FileHandle, FindBin, GDBM_File, Getopt::Long, Getopt::Std, I18N::Collate,
 IO, IPC::Open2, IPC::Open3, Math::BigFloat, Math::BigInt, Math::Complex,
 Math::Trig, Net::Ping, Net::hostent, Net::netent, Net::protoent,
-Net::servent, O, Opcode, Pod::Checker, Pod::Find, Pod::Html,
+Net::servent, O, Opcode, POSIX, Pod::Checker, Pod::Find, Pod::Html,
 Pod::InputObjects, Pod::LaTeX, Pod::Man, Pod::ParseUtils, Pod::Parser,
 Pod::Plainer, Pod::Select, Pod::Text, Pod::Text::Color,
 Pod::Text::Overstrike, Pod::Text::Termcap, Pod::Usage, SDBM_File, Safe,
 Search::Dict, SelectSaver, SelfLoader, Shell, Socket, Symbol,
 Term::ANSIColor, Term::Cap, Term::Complete, Term::ReadLine, Test,
-Test::Harness, Text::Abbrev, Text::ParseWords, Text::Soundex, Text::Wrap,
-Thread, Thread::Queue, Thread::Semaphore, Thread::Signal, Thread::Specific,
-Tie::Array, Tie::Handle, Tie::Hash, Tie::RefHash, Tie::Scalar,
-Tie::SubstrHash, Time::Local, Time::gmtime, Time::localtime, Time::tm,
-UNIVERSAL, User::grent, User::pwent
+Test::Harness, Text::Abbrev, Text::ParseWords, Text::Soundex, Text::Tabs,
+Text::Wrap, Thread, Thread::Queue, Thread::Semaphore, Thread::Signal,
+Thread::Specific, Tie::Array, Tie::Handle, Tie::Hash, Tie::RefHash,
+Tie::Scalar, Tie::SubstrHash, Time::Local, Time::gmtime, Time::localtime,
+Time::tm, UNIVERSAL, User::grent, User::pwent, Win32
 
 =item Extension Modules
 
@@ -2229,8 +2229,23 @@ UNIVERSAL, User::grent, User::pwent
 
 =item CPAN
 
-Africa, Asia, Australasia, Central America, Europe, North America, South
-America
+=over 4
+
+=item Africa
+
+=item Asia
+
+=item Central America
+
+=item Europe
+
+=item North America
+
+=item Oceania
+
+=item South America
+
+=back
 
 =item Modules: Creation, Use, and Abuse
 
@@ -2238,24 +2253,9 @@ America
 
 =item Guidelines for Module Creation
 
-Do similar modules already exist in some form?, Try to design the new
-module to be easy to extend and reuse, Some simple style guidelines, Select
-what to export, Select a name for the module, Have you got it right?,
-README and other Additional Files, A description of the
-module/package/extension etc, A copyright notice - see below, Prerequisites
-- what else you may need to have, How to build it - possible changes to
-Makefile.PL etc, How to install it, Recent changes in this release,
-especially incompatibilities, Changes / enhancements you plan to make in
-the future, Adding a Copyright Notice, Give the module a
-version/issue/release number, How to release and distribute a module, Take
-care when changing a released module
+Adding a Copyright Notice
 
 =item Guidelines for Converting Perl 4 Library Scripts into Modules
-
-There is no requirement to convert anything, Consider the implications,
-Make the most of the opportunity, The pl2pm utility will get you started,
-Adds the standard Module prologue lines, Converts package specifiers from '
-to ::, Converts die(...) to croak(...), Several other minor changes
 
 =item Guidelines for Reusing Application Code
 
@@ -2454,6 +2454,10 @@ References, Tutorials, Task-Oriented, Special Topics
 =item Is there a ctags for Perl?
 
 =item Is there an IDE or Windows Perl Editor?
+
+CodeMagicCD, Komodo, The Object System, PerlBuilder, Perl code magic,
+visiPerl+, GNU Emacs, MicroEMACS, XEmacs, Elvis, Vile, Vim, Codewright,
+MultiEdit, SlickEdit, Bash, Ksh, Tcsh, Zsh, BBEdit and BBEdit Lite, Alpha
 
 =item Where can I get Perl macros for vi?
 
@@ -3571,14 +3575,15 @@ C<t>, C<p>, C<n>, C<s>
 =item Localizing changes
 
 C<SAVEINT(int i)>, C<SAVEIV(IV i)>, C<SAVEI32(I32 i)>, C<SAVELONG(long i)>,
-C<SAVESPTR(s)>, C<SAVEPPTR(p)>, C<SAVEFREESV(SV *sv)>, C<SAVEFREEOP(OP
-*op)>, C<SAVEFREEPV(p)>, C<SAVECLEARSV(SV *sv)>, C<SAVEDELETE(HV *hv, char
-*key, I32 length)>, C<SAVEDESTRUCTOR(DESTRUCTORFUNC_NOCONTEXT_t f, void
-*p)>, C<SAVEDESTRUCTOR_X(DESTRUCTORFUNC_t f, void *p)>, C<SAVESTACK_POS()>,
-C<SV* save_scalar(GV *gv)>, C<AV* save_ary(GV *gv)>, C<HV* save_hash(GV
-*gv)>, C<void save_item(SV *item)>, C<void save_list(SV **sarg, I32
-maxsarg)>, C<SV* save_svref(SV **sptr)>, C<void save_aptr(AV **aptr)>,
-C<void save_hptr(HV **hptr)>
+C<SAVESPTR(s)>, C<SAVEPPTR(p)>, C<SAVEFREESV(SV *sv)>, C<SAVEMORTALIZESV(SV
+*sv)>, C<SAVEFREEOP(OP *op)>, C<SAVEFREEPV(p)>, C<SAVECLEARSV(SV *sv)>,
+C<SAVEDELETE(HV *hv, char *key, I32 length)>,
+C<SAVEDESTRUCTOR(DESTRUCTORFUNC_NOCONTEXT_t f, void *p)>,
+C<SAVEDESTRUCTOR_X(DESTRUCTORFUNC_t f, void *p)>, C<SAVESTACK_POS()>, C<SV*
+save_scalar(GV *gv)>, C<AV* save_ary(GV *gv)>, C<HV* save_hash(GV *gv)>,
+C<void save_item(SV *item)>, C<void save_list(SV **sarg, I32 maxsarg)>,
+C<SV* save_svref(SV **sptr)>, C<void save_aptr(AV **aptr)>, C<void
+save_hptr(HV **hptr)>
 
 =back
 
@@ -4396,9 +4401,38 @@ I<The Road goes ever on and on, down from the door where it began.>
 
 =item DESCRIPTION
 
-=item Core Enhancements
+=item Summary of changes between 5.6.0 and 5.6.1
 
 =over 4
+
+=item Security Issues
+
+=item Core bug fixes
+
+C<UNIVERSAL::isa()>, Memory leaks, Numeric conversions, qw(a\\b), caller(),
+Bugs in regular expressions, "slurp" mode, Autovivification of symbolic
+references to special variables, Lexical warnings, Spurious warnings and
+errors, glob(), Tainting, sort(), #line directives, Subroutine prototypes,
+map(), Debugger, Locales, PERL5OPT, chop(), Unicode support, 64-bit
+support, Compiler, Lvalue subroutines, IO::Socket, File::Find, xsubpp, C<no
+Module;>, Tests
+
+=item Core features
+
+=item Configuration issues
+
+=item Documentation
+
+=item Bundled modules
+
+B::Concise, File::Temp, Pod::LaTeX, Pod::Text::Overstrike, CGI, CPAN,
+Class::Struct, DB_File, Devel::Peek, File::Find, Getopt::Long, IO::Poll,
+IPC::Open3, Math::BigFloat, Math::Complex, Net::Ping, Opcode, Pod::Parser,
+Pod::Text, SDBM_File, Sys::Syslog, Tie::RefHash, Tie::SubstrHash
+
+=item Platform-specific improvements
+
+NCR MP-RAS, NonStop-UX
 
 =item Interpreter cloning, threads, and concurrency
 
@@ -4739,16 +4773,14 @@ C<PATCHLEVEL> is now C<PERL_VERSION>
 
 =over 4
 
-=item Thread test failures
+=item Localizing a tied hash element may leak memory
 
-=item EBCDIC platforms not supported
+=item Known test failures
 
-=item In 64-bit HP-UX the lib/io_multihomed test may hang
+64-bit builds, Failure of Thread tests, NEXTSTEP 3.3 POSIX test failure,
+Tru64 (aka Digital UNIX, aka DEC OSF/1) lib/sdbm test failure with gcc
 
-=item NEXTSTEP 3.3 POSIX test failure
-
-=item Tru64 (aka Digital UNIX, aka DEC OSF/1) lib/sdbm test failure with
-gcc
+=item EBCDIC platforms not fully supported
 
 =item UNICOS/mk CC failures during Configure run
 
@@ -5526,6 +5558,20 @@ op/lexassign.t, pragma/warnings.t
 =item Building external modules
 
 =back
+
+=item AUTHOR
+
+=item DATE
+
+=back
+
+=head2 perlmacos, README.macos - Perl under Mac OS (Classic)
+
+=over 4
+
+=item SYNOPSIS
+
+=item DESCRIPTION
 
 =item AUTHOR
 
@@ -6739,7 +6785,7 @@ REFCNT, FLAGS
 
 =item B::IV METHODS
 
-IV, IVX, needs64bits, packiv
+IV, IVX, UVX, int_value, needs64bits, packiv
 
 =item B::NV METHODS
 
@@ -6751,7 +6797,7 @@ RV
 
 =item B::PV METHODS
 
-PV
+PV, PVX
 
 =item B::PVMG METHODS
 
@@ -6771,8 +6817,8 @@ USEFUL, PREVIOUS, RARE, TABLE
 
 =item B::GV METHODS
 
-is_empty, NAME, STASH, SV, IO, FORM, AV, HV, EGV, CV, CVGEN, LINE, FILE,
-FILEGV, GvREFCNT, FLAGS
+is_empty, NAME, SAFENAME, STASH, SV, IO, FORM, AV, HV, EGV, CV, CVGEN,
+LINE, FILE, FILEGV, GvREFCNT, FLAGS
 
 =item B::IO METHODS
 
@@ -12638,6 +12684,8 @@ unexpand(1)
 change)
 
 =over 4
+
+=item CAVEAT
 
 =item SYNOPSIS
 
