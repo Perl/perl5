@@ -1462,9 +1462,12 @@ PP(pp_caller)
 	    PUSHs(&PL_sv_yes);
 	}
     }
-    else if (CxTYPE(cx) == CXt_SUB &&
-	    cx->blk_sub.hasargs &&
-	    PL_curcop->cop_stash == PL_debstash)
+    else {
+	PUSHs(&PL_sv_undef);
+	PUSHs(&PL_sv_undef);
+    }
+    if (CxTYPE(cx) == CXt_SUB && cx->blk_sub.hasargs
+	&& PL_curcop->cop_stash == PL_debstash)
     {
 	AV *ary = cx->blk_sub.argarray;
 	int off = AvARRAY(ary) - AvALLOC(ary);
