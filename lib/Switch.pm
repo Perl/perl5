@@ -4,7 +4,7 @@ use strict;
 use vars qw($VERSION);
 use Carp;
 
-$VERSION = '2.09';
+$VERSION = '2.091';
 
 
 # LOAD FILTERING MODULE...
