@@ -6230,8 +6230,9 @@ Perl_sv_vcatpvfn(pTHX_ SV *sv, const char *pat, STRLEN patlen, va_list *args, SV
 	    *--eptr = c;
 #ifdef USE_LONG_DOUBLE
 	    {
-		char* p = PERL_PRIfldbl + sizeof(PERL_PRIfldbl) - 3;
-		while (p >= PERL_PRIfldbl) { *--eptr = *p--; }
+		char const my_prifldbl[] = PERL_PRIfldbl;
+		char const *p = my_prifldbl + sizeof my_prifldbl - 3;
+		while (p >= my_prifldbl) { *--eptr = *p--; }
 	    }
 #endif
 	    if (has_precis) {
