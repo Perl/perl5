@@ -34,6 +34,7 @@
 #define SAVEt_COMPPAD		33
 #define SAVEt_GENERIC_PVREF	34
 #define SAVEt_PADSV		35
+#define SAVEt_MORTALIZESV	36
 
 #ifndef SCOPE_SAVES_SIGNAL_MASK
 #define SCOPE_SAVES_SIGNAL_MASK 0
@@ -108,6 +109,7 @@ Closing bracket on a callback.  See C<ENTER> and L<perlcall>.
 #define SAVEVPTR(s)	save_vptr((void*)&(s))
 #define SAVEPADSV(s)	save_padsv(s)
 #define SAVEFREESV(s)	save_freesv((SV*)(s))
+#define SAVEMORTALIZESV(s)	save_mortalizesv((SV*)(s))
 #define SAVEFREEOP(o)	save_freeop(SOFT_CAST(OP*)(o))
 #define SAVEFREEPV(p)	save_freepv(SOFT_CAST(char*)(p))
 #define SAVECLEARSV(sv)	save_clearsv(SOFT_CAST(SV**)&(sv))

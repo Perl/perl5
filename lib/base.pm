@@ -55,7 +55,8 @@ sub import {
     foreach my $base (@_) {
 	next if $pkg->isa($base);
 	push @{"$pkg\::ISA"}, $base;
-	unless (exists ${"$base\::"}{VERSION}) {
+        my $vglob;
+	unless ($vglob = ${"$base\::"}{VERSION} and $vglob{SCALAR}) {
 	    eval "require $base";
 	    # Only ignore "Can't locate" errors from our eval require.
 	    # Other fatal errors (syntax etc) must be reported.
@@ -67,7 +68,7 @@ sub import {
 			    "which defines that package first.)");
 	    }
 	    ${"$base\::VERSION"} = "-1, set by base.pm"
-		unless exists ${"$base\::"}{VERSION};
+		unless $vglob = ${"$base\::"}{VERSION} and $vglob{SCALAR};
 	}
 
 	# A simple test like (defined %{"$base\::FIELDS"}) will

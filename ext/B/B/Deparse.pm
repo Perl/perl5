@@ -350,6 +350,10 @@ sub new {
     $self->{'cuddle'} = "\n";
     $self->{'indent_size'} = 4;
     $self->{'use_tabs'} = 0;
+    $self->{'expand'} = 0;
+    $self->{'unquote'} = 0;
+    $self->{'linenums'} = 0;
+    $self->{'parens'} = 0;
     $self->{'ex_const'} = "'???'";
     while (my $arg = shift @_) {
 	if (substr($arg, 0, 2) eq "-u") {
@@ -774,7 +778,7 @@ sub gv_name {
     my $self = shift;
     my $gv = shift;
     my $stash = $gv->STASH->NAME;
-    my $name = $gv->NAME;
+    my $name = $gv->SAFENAME;
     if ($stash eq $self->{'curstash'} or $globalnames{$name}
 	or $name =~ /^[^A-Za-z_]/)
     {
@@ -782,9 +786,8 @@ sub gv_name {
     } else {
 	$stash = $stash . "::";
     }
-    if ($name =~ /^([\cA-\cZ])(.*)$/) {
-	$name = "^" . chr(64 + ord($1)) . $2;
-	$name = "{$name}" if length($2);	# ${^WARNING_BITS} etc
+    if ($name =~ /^\^../) {
+        $name = "{$name}";       # ${^WARNING_BITS} etc
     }
     return $stash . $name;
 }
@@ -945,7 +948,6 @@ sub pp_prototype { unop(@_, "prototype") }
 sub pp_close { unop(@_, "close") }
 sub pp_fileno { unop(@_, "fileno") }
 sub pp_umask { unop(@_, "umask") }
-sub pp_binmode { unop(@_, "binmode") }
 sub pp_untie { unop(@_, "untie") }
 sub pp_tied { unop(@_, "tied") }
 sub pp_dbmclose { unop(@_, "dbmclose") }
@@ -1488,6 +1490,7 @@ sub pp_return { listop(@_, "return") }
 sub pp_open { listop(@_, "open") }
 sub pp_pipe_op { listop(@_, "pipe") }
 sub pp_tie { listop(@_, "tie") }
+sub pp_binmode { listop(@_, "binmode") }
 sub pp_dbmopen { listop(@_, "dbmopen") }
 sub pp_sselect { listop(@_, "select") }
 sub pp_select { listop(@_, "select") }
@@ -1871,21 +1874,10 @@ sub pp_null {
     }
 }
 
-# the aassign in-common check messes up SvCUR (always setting it
-# to a value >= 100), but it's probably safe to assume there
-# won't be any NULs in the names of my() variables. (with
-# stash variables, I wouldn't be so sure)
-sub padname_fix {
-    my $str = shift;
-    $str = substr($str, 0, index($str, "\0")) if index($str, "\0") != -1;
-    return $str;
-}
-
 sub padname {
     my $self = shift;
     my $targ = shift;
-    my $str = $self->padname_sv($targ)->PV;
-    return padname_fix($str);
+    return $self->padname_sv($targ)->PVX;
 }
 
 sub padany {
@@ -2386,7 +2378,7 @@ sub const {
     if (class($sv) eq "SPECIAL") {
 	return ('undef', '1', '0')[$$sv-1]; # sv_undef, sv_yes, sv_no
     } elsif ($sv->FLAGS & SVf_IOK) {
-	return $sv->IV;
+	return $sv->int_value;
     } elsif ($sv->FLAGS & SVf_NOK) {
 	return $sv->NV;
     } elsif ($sv->FLAGS & SVf_ROK) {
@@ -2429,7 +2421,13 @@ sub dq {
     if ($type eq "const") {
 	return uninterp(escape_str(unback($self->const_sv($op)->PV)));
     } elsif ($type eq "concat") {
-	return $self->dq($op->first) . $self->dq($op->last);
+	my $first = $self->dq($op->first);
+	my $last  = $self->dq($op->last);
+	# Disambiguate "${foo}bar", "${foo}{bar}", "${foo}[1]"
+        if ($last =~ /^[{\[\w]/) {
+	    $first =~ s/([%\$@])([A-Za-z_]\w*)$/${1}{$2}/;
+	}
+	return $first . $last;
     } elsif ($type eq "uc") {
 	return '\U' . $self->dq($op->first->sibling) . '\E';
     } elsif ($type eq "lc") {
@@ -2716,9 +2714,15 @@ sub re_dq {
     my $op = shift;
     my $type = $op->name;
     if ($type eq "const") {
-	return uninterp($self->const_sv($op)->PV);
+	return re_uninterp($self->const_sv($op)->PV);
     } elsif ($type eq "concat") {
-	return $self->re_dq($op->first) . $self->re_dq($op->last);
+	my $first = $self->re_dq($op->first);
+	my $last  = $self->re_dq($op->last);
+	# Disambiguate "${foo}bar", "${foo}{bar}", "${foo}[1]"
+	if ($last =~ /^[{\[\w]/) {
+	    $first =~ s/([%\$@])([A-Za-z_]\w*)$/${1}{$2}/;
+	}
+	return $first . $last;
     } elsif ($type eq "uc") {
 	return '\U' . $self->re_dq($op->first->sibling) . '\E';
     } elsif ($type eq "lc") {

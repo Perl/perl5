@@ -504,6 +504,14 @@ Perl_save_freesv(pTHX_ SV *sv)
 }
 
 void
+Perl_save_mortalizesv(pTHX_ SV *sv)
+{
+    SSCHECK(2);
+    SSPUSHPTR(sv);
+    SSPUSHINT(SAVEt_MORTALIZESV);
+}
+
+void
 Perl_save_freeop(pTHX_ OP *o)
 {
     SSCHECK(2);
@@ -802,6 +810,10 @@ Perl_leave_scope(pTHX_ I32 base)
 	case SAVEt_FREESV:
 	    ptr = SSPOPPTR;
 	    SvREFCNT_dec((SV*)ptr);
+	    break;
+	case SAVEt_MORTALIZESV:
+	    ptr = SSPOPPTR;
+	    sv_2mortal((SV*)ptr);
 	    break;
 	case SAVEt_FREEOP:
 	    ptr = SSPOPPTR;

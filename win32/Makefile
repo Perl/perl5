@@ -1038,16 +1038,18 @@ utils: $(PERLEXE) $(X2P)
 	cd ..\pod
 	copy ..\README.aix .\perlaix.pod
 	copy ..\README.amiga .\perlamiga.pod
+	copy ..\README.bs2000 .\perlbs2000.pod
 	copy ..\README.cygwin .\perlcygwin.pod
 	copy ..\README.dos .\perldos.pod
 	copy ..\README.epoc .\perlepoc.pod
 	copy ..\README.hpux .\perlhpux.pod
 	copy ..\README.machten .\perlmachten.pod
+	copy ..\README.macos .\perlmacos.pod
+	copy ..\README.mpeix .\perlmpeix.pod
 	copy ..\README.os2 .\perlos2.pod
 	copy ..\README.os390 .\perlos390.pod
-	copy ..\README.vmesa .\perlvmesa.pod
-	copy ..\README.bs2000 .\perlbs2000.pod
 	copy ..\README.solaris .\perlsolaris.pod
+	copy ..\README.vmesa .\perlvmesa.pod
 	copy ..\vms\perlvms.pod .\perlvms.pod
 	copy ..\README.vos .\perlvos.pod
 	copy ..\README.win32 .\perlwin32.pod
@@ -1097,8 +1099,14 @@ distclean: clean
 	-rmdir /s $(LIBDIR)\MIME\Base64
 	-if exist $(LIBDIR)\MIME rmdir /s /q $(LIBDIR)\MIME
 	-rmdir /s $(LIBDIR)\MIME
-	-del /f $(PODDIR)\*.html
-	-del /f $(PODDIR)\*.bat
+	cd $(PODDIR)
+	-del /f *.html
+	-del /f *.bat
+	-del /f checkpods perlamiga.pod perlcygwin.pod \
+	    perldos.pod perlhpux.pod perlmachten.pod perlmacos.pod \
+	    perlmpeix.pod perlos2.pod perlvms.pod \
+	    perlwin32.pod pod2html pod2latex pod2man pod2text pod2usage \
+	    podchecker podselect
 	cd ..\utils
 	-del /f h2ph splain perlbug pl2pm c2ph h2xs perldoc dprofpp
 	-del /f *.bat
