@@ -205,7 +205,7 @@ _cwdxs_abs_path(char *start)
       Move(cwd, cwd + namelen + 1, strlen(cwd), char);
       Copy(dp->d_name, cwd + 1, namelen, char);
 #ifdef VOID_CLOSEDIR
-      PerlDir_close(dir);
+      PerlDir_close(parent);
 #else
       if (PerlDir_close(parent) < 0) {
         warn("abs_path: closedir(\"%s\"): %s", dotdots, Strerror(errno));
