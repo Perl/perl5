@@ -1,6 +1,6 @@
 #!./perl
 
-print "1..13\n";
+print "1..14\n";
 
 $SIG{__DIE__} = sub { print ref($_[0]) ? ("ok ",$_[0]->[0]++,"\n") : @_ } ;
 
@@ -57,4 +57,7 @@ print "ok 10\n";
     print "ok 12\n";
     eval { warn $msg }; print "not " unless $err eq $msg;
     print "ok 13\n";
+    eval qq/ use strict; \$\x{3b1} /;
+    print "not " unless $@ =~ /Global symbol "\$\x{3b1}"/;
+    print "ok 14\n";
 }
