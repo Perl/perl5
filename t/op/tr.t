@@ -5,7 +5,7 @@ BEGIN {
     @INC = '../lib';
 }
 
-print "1..29\n";
+print "1..46\n";
 
 $_ = "abcdefghijklmnopqrstuvwxyz";
 
@@ -180,4 +180,96 @@ print ((eval '"123" =~ tr/12//' == 2) ? '' : 'not ', "ok 28\n");
 eval '"123" =~ tr/1/1/';
 print (($@ =~ m|^Can't modify constant item in transliteration \(tr///\)|)
        ? '' : 'not ', "ok 29\n");
+
+# v300 (0x12c) is UTF-8-encoded as 196 172 (0xc4 0xac)
+# v400 (0x190) is UTF-8-encoded as 198 144 (0xc6 0x90)
+
+# Transliterate a byte to a byte, all four ways.
+
+($a = v300.196.172.300.196.172) =~ tr/\xc4/\xc5/;
+print "not " unless $a eq v300.197.172.300.197.172;
+print "ok 30\n";
+
+($a = v300.196.172.300.196.172) =~ tr/\xc4/\x{c5}/;
+print "not " unless $a eq v300.197.172.300.197.172;
+print "ok 31\n";
+
+($a = v300.196.172.300.196.172) =~ tr/\x{c4}/\xc5/;
+print "not " unless $a eq v300.197.172.300.197.172;
+print "ok 32\n";
+
+($a = v300.196.172.300.196.172) =~ tr/\x{c4}/\x{c5}/;
+print "not " unless $a eq v300.197.172.300.197.172;
+print "ok 33\n";
+
+# Transliterate a byte to a wide character.
+
+($a = v300.196.172.300.196.172) =~ tr/\xc4/\x{12d}/;
+print "not " unless $a eq v300.301.172.300.301.172;
+print "ok 34\n";
+
+# Transliterate a wide character to a byte.
+
+($a = v300.196.172.300.196.172) =~ tr/\x{12c}/\xc3/;
+print "not " unless $a eq v195.196.172.195.196.172;
+print "ok 35\n";
+
+# Transliterate a wide character to a wide character.
+
+($a = v300.196.172.300.196.172) =~ tr/\x{12c}/\x{12d}/;
+print "not " unless $a eq v301.196.172.301.196.172;
+print "ok 36\n";
+
+# Transliterate both ways.
+
+($a = v300.196.172.300.196.172) =~ tr/\xc4\x{12c}/\x{12d}\xc3/;
+print "not " unless $a eq v195.301.172.195.301.172;
+print "ok 37\n";
+
+# Transliterate all (four) ways.
+
+($a = v300.196.172.300.196.172.400.198.144) =~
+	tr/\xac\xc4\x{12c}\x{190}/\xad\x{12d}\xc5\x{191}/;
+print "not " unless $a eq v197.301.173.197.301.173.401.198.144;
+print "ok 38\n";
+
+# Transliterate and count.
+
+print "not "
+    unless (($a = v300.196.172.300.196.172) =~ tr/\xc4/\xc5/)       == 2;
+print "ok 39\n";
+
+print "not "
+    unless (($a = v300.196.172.300.196.172) =~ tr/\x{12c}/\x{12d}/) == 2;
+print "ok 40\n";
+
+# Transliterate with complement.
+
+($a = v300.196.172.300.196.172) =~ tr/\xc4/\x{12d}/c;
+print "not " unless $a eq v301.196.301.301.196.301;
+print "ok 41\n";
+
+($a = v300.196.172.300.196.172) =~ tr/\x{12c}/\xc5/c;
+print "not " unless $a eq v300.197.197.300.197.197;
+print "ok 42\n";
+
+# Transliterate with deletion.
+
+($a = v300.196.172.300.196.172) =~ tr/\xc4//d;
+print "not " unless $a eq v300.172.300.172;
+print "ok 43\n";
+
+($a = v300.196.172.300.196.172) =~ tr/\x{12c}//d;
+print "not " unless $a eq v196.172.196.172;
+print "ok 44\n";
+
+# Transliterate with squeeze.
+
+($a = v196.196.172.300.300.196.172) =~ tr/\xc4/\xc5/s;
+print "not " unless $a eq v197.172.300.300.197.172;
+print "ok 45\n";
+
+($a = v196.172.300.300.196.172.172) =~ tr/\x{12c}/\x{12d}/s;
+print "not " unless $a eq v196.172.301.196.172.172;
+print "ok 46\n";
 
