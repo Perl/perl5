@@ -3,10 +3,10 @@ package Term::Cap;
 use Carp;
 use strict;
 
-use vars qw($VERSION);
+use vars qw($VERSION $VMS_TERMCAP);
 use vars qw($termpat $state $first $entry);
 
-$VERSION = '1.05';
+$VERSION = '1.06';
 
 # Version undef: Thu Dec 14 20:02:42 CST 1995 by sanders@bsdi.com
 # Version 1.00:  Thu Nov 30 23:34:29 EST 2000 by schwern@pobox.com
@@ -23,7 +23,9 @@ $VERSION = '1.05';
 #       Fixed warnings in test
 # Version 1.05:  Mon Dec  3 15:33:49 GMT 2001
 #       Don't try to fall back on infocmp if it's not there. From chromatic.
-#
+# Version 1.06:  Thu Dec  6 18:43:22 GMT 2001
+#       Preload the default VMS termcap from Charles Lane
+#       Don't carp at setting OSPEED unless warnings are on.
 
 # TODO:
 # support Berkeley DB termcaps
@@ -68,7 +70,17 @@ output the string to $FH if specified.
 
 =cut
 
+# Preload the default VMS termcap.
+# If a different termcap is required then the text of one can be supplied
+# in $Term::Cap::VMS_TERMCAP before Tgetent is called.
+
+if ( $^O eq 'VMS') {
+       chomp (my @entry = <DATA>);
+       $VMS_TERMCAP = join '', @entry;
+}
+
 # Returns a list of termcap files to check.
+
 sub termcap_path { ## private
     my @termcap_path;
     # $TERMCAP, if it's a filespec
@@ -89,6 +101,7 @@ sub termcap_path { ## private
 	    '/usr/share/misc/termcap',
 	);
     }
+
     # return the list of those termcaps that exist
     return grep(-f, @termcap_path);
 }
@@ -160,7 +173,9 @@ sub Tgetent { ## public -- static method
 
     # Compute PADDING factor from OSPEED (to be used by Tpad)
     if (! $self->{OSPEED}) {
-	carp "OSPEED was not set, defaulting to 9600";
+        if ( $^W ) {
+	   carp "OSPEED was not set, defaulting to 9600";
+        }
 	$self->{OSPEED} = 9600;
     }
     if ($self->{OSPEED} < 16) {
@@ -195,8 +210,7 @@ sub Tgetent { ## public -- static method
 	local $ENV{TERM} = $term;
 
         if ( $^O eq 'VMS' ) {
-          chomp(my @entry = <DATA>);
-          $entry = join '', @entry;
+          $entry = $VMS_TERMCAP;
         }
         else {
            eval
