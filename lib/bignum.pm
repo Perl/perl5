@@ -1,10 +1,11 @@
 package bignum;
 require 5.005;
 
-$VERSION = '0.11';
+$VERSION = '0.12';
 use Exporter;
-@ISA =       qw( Exporter );
-@EXPORT_OK = qw( ); 
+@EXPORT_OK 	= qw( ); 
+@EXPORT 	= qw( inf NaN ); 
+@ISA 		= qw( Exporter );
 
 use strict;
 
@@ -166,7 +167,11 @@ sub import
     print "Math::BigFloat\t\t v$Math::BigFloat::VERSION\n";
     exit;
     }
+  $self->export_to_level(1,$self,@a);		# export inf and NaN
   }
+
+sub inf () { Math::BigInt->binf(); }
+sub NaN () { Math::BigInt->bnan(); }
 
 1;
 
@@ -181,7 +186,9 @@ bignum - Transparent BigNumber support for Perl
   use bignum;
 
   $x = 2 + 4.5,"\n";			# BigFloat 6.5
-  print 2 ** 512 * 0.1;			# really is what you think it is
+  print 2 ** 512 * 0.1,"\n";		# really is what you think it is
+  print inf * inf,"\n";			# prints inf
+  print NaN * 3,"\n";			# prints NaN
 
 =head1 DESCRIPTION
 
@@ -232,6 +239,29 @@ line. This will be hopefully fixed soon ;)
 This prints out the name and version of all modules used and then exits.
 
 	perl -Mbignum=v -e ''
+
+=head2 METHODS
+
+Beside import() and AUTOLOAD() there are only a few other methods.
+
+=over 2
+
+=item inf()
+
+A shortcut to return Math::BigInt->binf(). Usefull because Perl does not always
+handle bareword C<inf> properly.
+
+=item NaN()
+
+A shortcut to return Math::BigInt->bnan(). Usefull because Perl does not always
+handle bareword C<NaN> properly.
+
+=item upgrade()
+
+Return the class that numbers are upgraded to, is in fact returning
+C<$Math::BigInt::upgrade>.
+
+=back
 
 =head2 MATH LIBRARY
 

@@ -1,10 +1,11 @@
 package bigrat;
 require 5.005;
 
-$VERSION = '0.04';
+$VERSION = '0.05';
 use Exporter;
-@ISA =       qw( Exporter );
-@EXPORT_OK = qw( ); 
+@ISA		= qw( Exporter );
+@EXPORT_OK	= qw( ); 
+@EXPORT		= qw( inf NaN ); 
 
 use strict;
 
@@ -141,7 +142,11 @@ sub import
     print "Math::BigRat\t\t v$Math::BigRat::VERSION\n";
     exit;
     }
+  $self->export_to_level(1,$self,@a);           # export inf and NaN
   }
+
+sub inf () { Math::BigInt->binf(); }
+sub NaN () { Math::BigInt->bnan(); }
 
 1;
 
@@ -149,7 +154,7 @@ __END__
 
 =head1 NAME
 
-bigrat - Transparent BigNumber/BigRational support for Perl
+bigrat - Transparent BigNumber/BigRationale support for Perl
 
 =head1 SYNOPSIS
 

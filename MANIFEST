@@ -928,9 +928,15 @@ lib/bigint.pl			An arbitrary precision integer arithmetic package
 lib/bigint.pm			bignum
 lib/bigintpl.t			See if bigint.pl works
 lib/bignum.pm			bignum
+lib/bignum/t/bn_lite.t		See if bignum works
+lib/bignum/t/br_lite.t		See if bignum works
 lib/bignum/t/bigint.t		See if bignum works
 lib/bignum/t/bignum.t		See if bignum works
 lib/bignum/t/bigrat.t		See if bignum works
+lib/bignum/t/biinfnan.t		See if bignum works
+lib/bignum/t/bninfnan.t		See if bignum works
+lib/bignum/t/brinfnan.t		See if bignum works
+lib/bignum/t/infnan.inc		See if bignum works
 lib/bignum/t/option_a.t		See if bignum works
 lib/bignum/t/option_l.t		See if bignum works
 lib/bignum/t/option_p.t		See if bignum works
