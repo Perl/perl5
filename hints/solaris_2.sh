@@ -35,17 +35,6 @@ case "$archname" in
     ;;
 esac
 
-# Solaris 2.5 has reintroduced some BSD-ish functions into libc.
-# This is no problem unless you compile perl under Solaris 2.5 but
-# try to run the binary on 2.4.  Here, we take the easy way out by
-# claiming we don't have these functions.  perl.h works around all of
-# these anyway.
-# XXX Eventually, I should fix perl.h to prefer the POSIX versions.
-d_bcmp='undef'
-d_bcopy='undef'
-d_safebcpy='undef'
-d_index='undef'
-
 ######################################################
 # General sanity testing.  See below for excerpts from the Solaris FAQ.
 
