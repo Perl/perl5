@@ -296,7 +296,10 @@ ignored, but may be read via a DATA filehandle: main::DATA for __END__,
 or PACKNAME::DATA (where PACKNAME is the current package) for __DATA__.
 The two control characters ^D and ^Z are synonyms for __END__ (or
 __DATA__ in a module).  See L<SelfLoader> for more description of
-__DATA__, and an example of its use.
+__DATA__, and an example of its use.  Note that you cannot read from the
+DATA filehandle in a BEGIN block: the BEGIN block is executed as soon as
+it is seen (during compilation), at which point the corresponding
+__DATA__ (or __END__) token has not yet been seen.
 
 A word that has no other interpretation in the grammar will
 be treated as if it were a quoted string.  These are known as
