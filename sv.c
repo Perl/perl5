@@ -4696,14 +4696,14 @@ Perl_sv_eq(pTHX_ register SV *sv1, register SV *sv2)
 	    return FALSE;
 
 	if (SvUTF8(sv1)) {
-	    char *pv = bytes_from_utf8((U8*)pv1, &cur1, &is_utf8);
+	    char *pv = (char*)bytes_from_utf8((U8*)pv1, &cur1, &is_utf8);
 	    if (is_utf8)
 		return 0;
 	    pv1tmp = (pv != pv1);
 	    pv1 = pv;
 	}
 	else {
-	    char *pv = bytes_from_utf8((U8*)pv2, &cur2, &is_utf8);
+	    char *pv = (char *)bytes_from_utf8((U8*)pv2, &cur2, &is_utf8);
 	    if (is_utf8)
 		return 0;
 	    pv2tmp = (pv != pv2);
