@@ -611,11 +611,11 @@ is sufficient to establish this file's encoding.
 
 =for comment
  If/WHEN some brave soul makes these heuristics into a generic
- text-file class (or file discipline?), we can presumably delete
+ text-file class (or PerlIO layer?), we can presumably delete
  mention of these icky details from this file, and can instead
- tell people to just use appropriate class/discipline.
+ tell people to just use appropriate class/layer.
  Auto-recognition of newline sequences would be another desirable
- feature of such a class/discipline.
+ feature of such a class/layer.
  HINT HINT HINT.
 
 =for comment

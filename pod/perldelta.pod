@@ -238,13 +238,14 @@ source code level, this shouldn't be that drastic a change.
 =item *
 
 Previous versions of perl and some readings of some sections of Camel III
-implied that C<:raw> "discipline" was the inverse of  C<:crlf>.
+implied that the C<:raw> "discipline" was the inverse of  C<:crlf>.
 Turning off "clrfness" is no longer enough to make a stream truly
-binary. So the PerlIO C<:raw> discipline is now formally defined as being
+binary. So the PerlIO C<:raw> layer (or "discipline", to use the
+Camel book's older terminology) is now formally defined as being
 equivalent to binmode(FH) - which is in turn defined as doing whatever
 is necessary to pass each byte as-is without any translation.
 In particular binmode(FH) - and hence C<:raw> - will now turn off both CRLF
-and UTF-8  translation and remove other "layers" (e.g. :encoding()) which
+and UTF-8  translation and remove other layers (e.g. :encoding()) which
 would modify byte stream.
 
 =item *
@@ -368,7 +369,7 @@ for more information about UTF-8.
 
 If your environment variables (LC_ALL, LC_CTYPE, LANG, LANGUAGE) look
 like you want to use UTF-8 (any of the the variables match C</utf-?8/i>),
-your STDIN, STDOUT, STDERR handles and the default open discipline
+your STDIN, STDOUT, STDERR handles and the default open layer
 (see L<open>) are marked as UTF-8.  (This feature, like other new
 features that combine Unicode and I/O, work only if you are using
 PerlIO, but that's is the default.)
@@ -1004,7 +1005,7 @@ See L<NEXT>.
 
 =item *
 
-C<open> is a new pragma for setting the default I/O disciplines
+C<open> is a new pragma for setting the default I/O layers
 for open().
 
 =item *

@@ -1350,7 +1350,7 @@ lib/NEXT/t/actual.t		NEXT
 lib/NEXT/t/actuns.t		NEXT
 lib/NEXT/t/next.t		NEXT
 lib/NEXT/t/unseen.t		NEXT
-lib/open.pm			Pragma to specify default I/O disciplines
+lib/open.pm			Pragma to specify default I/O layers
 lib/open.t			See if the open pragma works
 lib/open2.pl			Open a two-ended pipe (uses IPC::Open2)
 lib/open3.pl			Open a three-ended pipe (uses IPC::Open3)
