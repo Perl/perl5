@@ -11,7 +11,7 @@ use vars qw( $Term::Complete::complete $complete );
 my $restore;
 
 SKIP: {
-    skip('PERL_SKIP_TTY_TEST', 8) if $ENV{PERL_SKIP_TTY_TEST};
+    skip('PERL_SKIP_TTY_TEST', 8) if $ENV{PERL_SKIP_TTY_TEST} or !(-t STDIN);
     
     my $TTY;
     if ($^O eq 'rhapsody' && -c "/dev/ttyp0") { $TTY = "/dev/ttyp0" }
