@@ -4404,10 +4404,12 @@ Perl_op_const_sv(pTHX_ OP *o, CV *cv)
 
 	if (sv && o->op_next == o)
 	    return sv;
-	if (type == OP_NEXTSTATE || type == OP_NULL || type == OP_PUSHMARK)
-	    continue;
-	if (type == OP_DBSTATE)
-	    continue;
+	if (o->op_next != o) {
+	    if (type == OP_NEXTSTATE || type == OP_NULL || type == OP_PUSHMARK)
+		continue;
+	    if (type == OP_DBSTATE)
+		continue;
+	}
 	if (type == OP_LEAVESUB || type == OP_RETURN)
 	    break;
 	if (sv)

@@ -16,7 +16,7 @@ BEGIN {
 
 use strict;
 
-print "1..110\n";
+print "1..122\n";
 
 my $i = 1;
 
@@ -484,4 +484,13 @@ sub sreftest (\$$) {
     sreftest my $sref, $i++;
     sreftest($helem{$i}, $i++);
     sreftest $aelem[0], $i++;
+}
+
+# test prototypes when they are evaled and there is a syntax error
+for my $p ( "", qw{ () ($) ($@) ($%) ($;$) (&) (&\@) (&@) (%) (\%) (\@) } ) {
+  no warnings 'redefine';
+  my $eval = "sub evaled_subroutine $p { &void *; }";
+  eval $eval;
+  print "# eval[$eval]\nnot " unless $@ && $@ =~ /syntax error/;
+  print "ok ", $i++, "\n";
 }

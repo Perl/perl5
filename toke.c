@@ -1187,13 +1187,13 @@ S_scan_const(pTHX_ char *start)
     register char *d = SvPVX(sv);		/* destination for copies */
     bool dorange = FALSE;			/* are we in a translit range? */
     bool didrange = FALSE;		        /* did we just finish a range? */
-    bool has_utf = FALSE;			/* embedded \x{} */
+    bool has_utf8 = FALSE;			/* embedded \x{} */
     UV uv;
 
     I32 utf = (PL_lex_inwhat == OP_TRANS && PL_sublex_info.sub_op)
 	? (PL_sublex_info.sub_op->op_private & (OPpTRANS_FROM_UTF|OPpTRANS_TO_UTF))
 	: UTF;
-    I32 thisutf = (PL_lex_inwhat == OP_TRANS && PL_sublex_info.sub_op)
+    I32 this_utf8 = (PL_lex_inwhat == OP_TRANS && PL_sublex_info.sub_op)
 	? (PL_sublex_info.sub_op->op_private & (PL_lex_repl ?
 						OPpTRANS_FROM_UTF : OPpTRANS_TO_UTF))
 	: UTF;
@@ -1327,7 +1327,7 @@ S_scan_const(pTHX_ char *start)
 
 	/* (now in tr/// code again) */
 
-	if (*s & 0x80 && thisutf) {
+	if (*s & 0x80 && this_utf8) {
 	    STRLEN len;
 	    UV uv;
 
@@ -1343,7 +1343,7 @@ S_scan_const(pTHX_ char *start)
 		while (len--)
 		    *d++ = *s++;
 	    }
-	    has_utf = TRUE;
+	    has_utf8 = TRUE;
 	    continue;
 	}
 
@@ -1416,9 +1416,10 @@ S_scan_const(pTHX_ char *start)
 			yyerror("Missing right brace on \\x{}");
 			e = s;
 		    }
-		    {
+		    else {
 			STRLEN len = 1;		/* allow underscores */
 			uv = (UV)scan_hex(s + 1, e - s - 1, &len);
+			has_utf8 = TRUE;
 		    }
 		    s = e + 1;
 		}
@@ -1435,8 +1436,8 @@ S_scan_const(pTHX_ char *start)
 		 * There will always enough room in sv since such escapes will
 		 * be longer than any utf8 sequence they can end up as
 		 */
-		if (uv > 127) {
-		    if (!thisutf && !has_utf && uv > 255) {
+		if (uv > 127 || has_utf8) {
+		    if (!this_utf8 && !has_utf8 && uv > 255) {
 		        /* might need to recode whatever we have accumulated so far
 			 * if it contains any hibit chars
 			 */
@@ -1468,9 +1469,9 @@ S_scan_const(pTHX_ char *start)
                         }
                     }
 
-                    if (thisutf || uv > 255) {
+                    if (has_utf8 || uv > 255) {
 		        d = (char*)uv_to_utf8((U8*)d, uv);
-			has_utf = TRUE;
+			this_utf8 = TRUE;
                     }
 		    else {
 		        *d++ = (char)uv;
@@ -1499,7 +1500,7 @@ S_scan_const(pTHX_ char *start)
 		    res = new_constant( Nullch, 0, "charnames", 
 					res, Nullsv, "\\N{...}" );
 		    str = SvPV(res,len);
-		    if (!has_utf && SvUTF8(res)) {
+		    if (!has_utf8 && SvUTF8(res)) {
 			char *ostart = SvPVX(sv);
 			SvCUR_set(sv, d - ostart);
 			SvPOK_on(sv);
@@ -1508,7 +1509,7 @@ S_scan_const(pTHX_ char *start)
 			/* this just broke our allocation above... */
 			SvGROW(sv, send - start);
 			d = SvPVX(sv) + SvCUR(sv);
-			has_utf = TRUE;
+			has_utf8 = TRUE;
 		    }
 		    if (len > e - s + 4) {
 			char *odest = SvPVX(sv);
@@ -1587,7 +1588,7 @@ S_scan_const(pTHX_ char *start)
     *d = '\0';
     SvCUR_set(sv, d - SvPVX(sv));
     SvPOK_on(sv);
-    if (has_utf)
+    if (has_utf8)
 	SvUTF8_on(sv);
 
     /* shrink the sv if we allocated more than we used */
@@ -6553,7 +6554,7 @@ S_scan_str(pTHX_ char *start, int keep_quoted, int keep_delims)
     register char term;			/* terminating character */
     register char *to;			/* current position in the sv's data */
     I32 brackets = 1;			/* bracket nesting level */
-    bool has_utf = FALSE;		/* is there any utf8 content? */
+    bool has_utf8 = FALSE;		/* is there any utf8 content? */
 
     /* skip space before the delimiter */
     if (isSPACE(*s))
@@ -6565,7 +6566,7 @@ S_scan_str(pTHX_ char *start, int keep_quoted, int keep_delims)
     /* after skipping whitespace, the next character is the terminator */
     term = *s;
     if ((term & 0x80) && UTF)
-	has_utf = TRUE;
+	has_utf8 = TRUE;
 
     /* mark where we are */
     PL_multi_start = CopLINE(PL_curcop);
@@ -6611,8 +6612,8 @@ S_scan_str(pTHX_ char *start, int keep_quoted, int keep_delims)
 		   have found the terminator */
 		else if (*s == term)
 		    break;
-		else if (!has_utf && (*s & 0x80) && UTF)
-		    has_utf = TRUE;
+		else if (!has_utf8 && (*s & 0x80) && UTF)
+		    has_utf8 = TRUE;
 		*to = *s;
 	    }
 	}
@@ -6640,8 +6641,8 @@ S_scan_str(pTHX_ char *start, int keep_quoted, int keep_delims)
 		    break;
 		else if (*s == PL_multi_open)
 		    brackets++;
-		else if (!has_utf && (*s & 0x80) && UTF)
-		    has_utf = TRUE;
+		else if (!has_utf8 && (*s & 0x80) && UTF)
+		    has_utf8 = TRUE;
 		*to = *s;
 	    }
 	}
@@ -6701,7 +6702,7 @@ S_scan_str(pTHX_ char *start, int keep_quoted, int keep_delims)
 
     if (keep_delims)
 	sv_catpvn(sv, s, 1);
-    if (has_utf)
+    if (has_utf8)
 	SvUTF8_on(sv);
     PL_multi_end = CopLINE(PL_curcop);
     s++;
