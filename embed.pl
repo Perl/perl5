@@ -2357,7 +2357,6 @@ s	|I32	|dopoptolabel	|char *label
 s	|I32	|dopoptoloop	|I32 startingblock
 s	|I32	|dopoptosub	|I32 startingblock
 s	|I32	|dopoptosub_at	|PERL_CONTEXT* cxstk|I32 startingblock
-s	|void	|free_closures
 s	|void	|save_lines	|AV *array|SV *sv
 s	|OP*	|doeval		|int gimme|OP** startop
 s	|PerlIO *|doopen_pmc	|const char *name|const char *mode

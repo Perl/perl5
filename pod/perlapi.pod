@@ -1039,7 +1039,7 @@ Tests if some arbitrary number of bytes begins in a valid UTF-8
 character.  Note that an ASCII character is a valid UTF-8 character.
 The actual number of bytes in the UTF-8 character will be returned if
 it is valid, otherwise 0.
- 
+
 	STRLEN	is_utf8_char(U8 *p)
 
 =for hackers
@@ -3268,6 +3268,44 @@ Converts the specified character to uppercase.
 =for hackers
 Found in file handy.h
 
+=item utf8n_to_uvchr
+
+Returns the native character value of the first character in the string C<s>
+which is assumed to be in UTF8 encoding; C<retlen> will be set to the
+length, in bytes, of that character.
+
+Allows length and flags to be passed to low level routine.
+
+	UV	utf8n_to_uvchr(U8 *s, STRLEN curlen, STRLEN* retlen, U32 flags)
+
+=for hackers
+Found in file utf8.c
+
+=item utf8n_to_uvuni
+
+Bottom level UTF-8 decode routine.
+Returns the unicode code point value of the first character in the string C<s>
+which is assumed to be in UTF8 encoding and no longer than C<curlen>;
+C<retlen> will be set to the length, in bytes, of that character.
+
+If C<s> does not point to a well-formed UTF8 character, the behaviour
+is dependent on the value of C<flags>: if it contains UTF8_CHECK_ONLY,
+it is assumed that the caller will raise a warning, and this function
+will silently just set C<retlen> to C<-1> and return zero.  If the
+C<flags> does not contain UTF8_CHECK_ONLY, warnings about
+malformations will be given, C<retlen> will be set to the expected
+length of the UTF-8 character in bytes, and zero will be returned.
+
+The C<flags> can also contain various flags to allow deviations from
+the strict UTF-8 encoding (see F<utf8.h>).
+
+Most code should use utf8_to_uvchr() rather than call this directly.
+
+	UV	utf8n_to_uvuni(U8 *s, STRLEN curlen, STRLEN* retlen, U32 flags)
+
+=for hackers
+Found in file utf8.c
+
 =item utf8_distance
 
 Returns the number of UTF8 characters between the UTF-8 pointers C<a>
@@ -3321,56 +3359,69 @@ removed without notice.
 =for hackers
 Found in file utf8.c
 
-=item utf8_to_uv
+=item utf8_to_uvchr
 
-Returns the character value of the first character in the string C<s>
-which is assumed to be in UTF8 encoding and no longer than C<curlen>;
-C<retlen> will be set to the length, in bytes, of that character.
-
-If C<s> does not point to a well-formed UTF8 character, the behaviour
-is dependent on the value of C<flags>: if it contains UTF8_CHECK_ONLY,
-it is assumed that the caller will raise a warning, and this function
-will silently just set C<retlen> to C<-1> and return zero.  If the
-C<flags> does not contain UTF8_CHECK_ONLY, warnings about
-malformations will be given, C<retlen> will be set to the expected
-length of the UTF-8 character in bytes, and zero will be returned.
-
-The C<flags> can also contain various flags to allow deviations from
-the strict UTF-8 encoding (see F<utf8.h>).
-
-	UV	utf8_to_uv(U8 *s, STRLEN curlen, STRLEN* retlen, U32 flags)
-
-=for hackers
-Found in file utf8.c
-
-=item utf8_to_uv_simple
-
-Returns the character value of the first character in the string C<s>
+Returns the native character value of the first character in the string C<s>
 which is assumed to be in UTF8 encoding; C<retlen> will be set to the
 length, in bytes, of that character.
 
 If C<s> does not point to a well-formed UTF8 character, zero is
 returned and retlen is set, if possible, to -1.
 
-	UV	utf8_to_uv_simple(U8 *s, STRLEN* retlen)
+	UV	utf8_to_uvchr(U8 *s, STRLEN* retlen)
 
 =for hackers
 Found in file utf8.c
 
-=item uv_to_utf8
+=item utf8_to_uvuni
+
+Returns the Unicode code point of the first character in the string C<s>
+which is assumed to be in UTF8 encoding; C<retlen> will be set to the
+length, in bytes, of that character.
+
+This function should only be used when returned UV is considered
+an index into the Unicode semantic tables (e.g. swashes).
+
+If C<s> does not point to a well-formed UTF8 character, zero is
+returned and retlen is set, if possible, to -1.
+
+	UV	utf8_to_uvuni(U8 *s, STRLEN* retlen)
+
+=for hackers
+Found in file utf8.c
+
+=item uvchr_to_utf8
+
+Adds the UTF8 representation of the Native codepoint C<uv> to the end
+of the string C<d>; C<d> should be have at least C<UTF8_MAXLEN+1> free
+bytes available. The return value is the pointer to the byte after the
+end of the new character. In other words,
+
+    d = uvchr_to_utf8(d, uv);
+
+is the recommended wide native character-aware way of saying
+
+    *(d++) = uv;
+
+	U8*	uvchr_to_utf8(U8 *d, UV uv)
+
+=for hackers
+Found in file utf8.c
+
+=item uvuni_to_utf8
 
 Adds the UTF8 representation of the Unicode codepoint C<uv> to the end
 of the string C<d>; C<d> should be have at least C<UTF8_MAXLEN+1> free
 bytes available. The return value is the pointer to the byte after the
-end of the new character. In other words, 
+end of the new character. In other words,
 
-    d = uv_to_utf8(d, uv);
+    d = uvuni_to_utf8(d, uv);
 
 is the recommended Unicode-aware way of saying
 
     *(d++) = uv;
 
-	U8*	uv_to_utf8(U8 *d, UV uv)
+	U8*	uvuni_to_utf8(U8 *d, UV uv)
 
 =for hackers
 Found in file utf8.c

@@ -1380,41 +1380,6 @@ Perl_dounwind(pTHX_ I32 cxix)
     }
 }
 
-/*
- * Closures mentioned at top level of eval cannot be referenced
- * again, and their presence indirectly causes a memory leak.
- * (Note that the fact that compcv and friends are still set here
- * is, AFAIK, an accident.)  --Chip
- *
- * XXX need to get comppad et al from eval's cv rather than
- * relying on the incidental global values.
- */
-STATIC void
-S_free_closures(pTHX)
-{
-    SV **svp = AvARRAY(PL_comppad_name);
-    I32 ix;
-    for (ix = AvFILLp(PL_comppad_name); ix >= 0; ix--) {
-	SV *sv = svp[ix];
-	if (sv && sv != &PL_sv_undef && *SvPVX(sv) == '&') {
-	    SvREFCNT_dec(sv);
-	    svp[ix] = &PL_sv_undef;
-
-	    sv = PL_curpad[ix];
-	    if (CvCLONE(sv)) {
-		SvREFCNT_dec(CvOUTSIDE(sv));
-		CvOUTSIDE(sv) = Nullcv;
-	    }
-	    else {
-		SvREFCNT_dec(sv);
-		sv = NEWSV(0,0);
-		SvPADTMP_on(sv);
-		PL_curpad[ix] = sv;
-	    }
-	}
-    }
-}
-
 void
 Perl_qerror(pTHX_ SV *err)
 {
@@ -1951,8 +1916,6 @@ PP(pp_return)
 	POPEVAL(cx);
 	if (CxTRYBLOCK(cx))
 	    break;
-	if (AvFILLp(PL_comppad_name) >= 0)
-	    free_closures();
 	lex_end();
 	if (optype == OP_REQUIRE &&
 	    (MARK == SP || (gimme == G_SCALAR && !SvTRUE(*SP))) )
@@ -3506,9 +3469,6 @@ PP(pp_leaveeval)
 	}
     }
     PL_curpm = newpm;	/* Don't pop $1 et al till now */
-
-    if (AvFILLp(PL_comppad_name) >= 0)
-	free_closures();
 
 #ifdef DEBUGGING
     assert(CvDEPTH(PL_compcv) == 1);

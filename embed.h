@@ -982,7 +982,6 @@
 #define dopoptoloop		S_dopoptoloop
 #define dopoptosub		S_dopoptosub
 #define dopoptosub_at		S_dopoptosub_at
-#define free_closures		S_free_closures
 #define save_lines		S_save_lines
 #define doeval			S_doeval
 #define doopen_pmc		S_doopen_pmc
@@ -2465,7 +2464,6 @@
 #define dopoptoloop(a)		S_dopoptoloop(aTHX_ a)
 #define dopoptosub(a)		S_dopoptosub(aTHX_ a)
 #define dopoptosub_at(a,b)	S_dopoptosub_at(aTHX_ a,b)
-#define free_closures()		S_free_closures(aTHX)
 #define save_lines(a,b)		S_save_lines(aTHX_ a,b)
 #define doeval(a,b)		S_doeval(aTHX_ a,b)
 #define doopen_pmc(a,b)		S_doopen_pmc(aTHX_ a,b)
@@ -4806,8 +4804,6 @@
 #define dopoptosub		S_dopoptosub
 #define S_dopoptosub_at		CPerlObj::S_dopoptosub_at
 #define dopoptosub_at		S_dopoptosub_at
-#define S_free_closures		CPerlObj::S_free_closures
-#define free_closures		S_free_closures
 #define S_save_lines		CPerlObj::S_save_lines
 #define save_lines		S_save_lines
 #define S_doeval		CPerlObj::S_doeval
