@@ -1226,9 +1226,9 @@ S_scan_const(pTHX_ char *start)
 	if (PL_lex_inwhat == OP_TRANS) {
 	    /* expand a range A-Z to the full set of characters.  AIE! */
 	    if (dorange) {
-		I32 i;				/* current expanded character */
-		I32 min;			/* first character in range */
-		I32 max;			/* last character in range */
+		UV i;				/* current expanded character */
+		UV min;				/* first character in range */
+		UV max;				/* last character in range */
 
 		i = d - SvPVX(sv);		/* remember current offset */
 		SvGROW(sv, SvLEN(sv) + 256);	/* never more than 256 chars in a range */
@@ -1240,11 +1240,12 @@ S_scan_const(pTHX_ char *start)
 
                 if (min > max) {
 		    Perl_croak(aTHX_
-			       "Invalid [] range \"%c-%c\" in transliteration operator",
-			       (char)min, (char)max);
+			       "Invalid [] range \"\\x%"UVxf"-\\x%"UVxf"\" in transliteration operator",
+			       min, max);
                 }
 
-#ifndef ASCIIish
+#ifdef ALPHAS_HAVE_GAPS
+		/* BROKEN FOR EBCDIC, see regcomp.c:reglass() */ 
 		if ((isLOWER(min) && isLOWER(max)) ||
 		    (isUPPER(min) && isUPPER(max))) {
 		    if (isLOWER(min)) {
