@@ -2326,7 +2326,7 @@ I32 *retlen;
     register char *s = start;
     register UV retval = 0;
     bool overflowed = FALSE;
-    char *tmp;
+    char *tmp = s;
 
     while (len-- && *s && (tmp = strchr(hexdigit, *s))) {
 	register UV n = retval << 4;
@@ -2337,7 +2337,7 @@ I32 *retlen;
 	retval = n | (tmp - hexdigit) & 15;
 	s++;
     }
-    if (dowarn && len && ! strchr(hexdigit, *s)) {
+    if (dowarn && !tmp) {
 	warn("Illegal hex digit ignored");
     }
     *retlen = s - start;
