@@ -38,13 +38,16 @@ ok( exists $Config{d_fork},  "has d_fork");
 
 ok(!exists $Config{d_bork},  "has no d_bork");
 
-like($Config{ivsize},     qr/^(4|8)$/, "ivsize is 4 or 8 (it is $Config{ivsize})");
+like($Config{ivsize}, qr/^(4|8)$/, "ivsize is 4 or 8 (it is $Config{ivsize})");
 
 # byteorder is virtual, but it has rules.
 
-like($Config{byteorder}, qr/^(1234|4321|12345678|87654321)$/, "byteorder is 1234 or 4321 or 12345678 or 87654321 (it is $Config{byteorder})");
+like($Config{byteorder}, qr/^(1234|4321|12345678|87654321)$/,
+     "byteorder is 1234 or 4321 or 12345678 or 87654321 "
+     . "(it is $Config{byteorder})");
 
-is(length $Config{byteorder}, $Config{ivsize}, "byteorder is as long as ivsize (which is $Config{ivsize})");
+is(length $Config{byteorder}, $Config{ivsize},
+   "byteorder is as long as ivsize (which is $Config{ivsize})");
 
 # ccflags_nolargefiles is virtual, too.
 
@@ -100,7 +103,8 @@ Config::config_vars('PERL_API_REVISION.*:'); # regex, tagged
 my $out7 = $$out;
 $out->clear;
 
-Config::config_vars(':PERL_API_REVISION.*'); # regex, non-tagged multi-line answer
+# regex, non-tagged multi-line answer
+Config::config_vars(':PERL_API_REVISION.*');
 my $out8 = $$out;
 $out->clear;
 
