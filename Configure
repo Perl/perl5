@@ -1956,7 +1956,7 @@ EOM
 	$test -d /usr/apollo/bin && osname=apollo
 	$test -f /etc/saf/_sactab && osname=svr4
 	$test -d /usr/include/minix && osname=minix
-	if $test -d /MachTen; then
+	if $test -d /MachTen -o -d /MachTen_Folder; then
 		osname=machten
 		if $test -x /sbin/version; then
 			osvers=`/sbin/version | $awk '{print $2}' |
