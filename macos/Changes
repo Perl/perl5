@@ -25,6 +25,84 @@ http://dev.macperl.org/.
 This file contains only changes that affect the macperl branch.
 
 ----------------
+Version v5.8.0a2
+----------------
+
+____________________________________________________________________________
+[ 17350] By: pudge                                 on 2002/06/22  20:42:37
+        Log: Don't need this anymore
+     Branch: macperl
+	   - macos/bundled_ext/Digest/MD5/Makefile.mk
+____________________________________________________________________________
+[ 17349] By: pudge                                 on 2002/06/22  20:20:59
+        Log: Fix macos Makefiles for optimization changes
+     Branch: macperl
+	   ! macos/BuildRules.mk macos/Makefile.mk
+____________________________________________________________________________
+[ 17348] By: pudge                                 on 2002/06/22  20:20:31
+        Log: Crank down optimization for Mac OS in Digest::MD5
+     Branch: macperl
+	   + ext/Digest/MD5/hints/MacOS.pl
+____________________________________________________________________________
+[ 17347] By: pudge                                 on 2002/06/22  20:20:04
+        Log: Support hints and OPTIMIZE in MM_MacOS
+     Branch: macperl
+	   ! lib/ExtUtils/MM_MacOS.pm
+____________________________________________________________________________
+[ 17346] By: pudge                                 on 2002/06/22  17:30:59
+        Log: Misc. config/test updates in macos
+     Branch: macperl
+	   ! macos/MPVersion.r macos/MacPerlTests.cmd macos/Makefile.mk
+	   ! macos/bundled_ext/Digest/MD5/Makefile.mk macos/config.sh
+____________________________________________________________________________
+[ 17345] By: pudge                                 on 2002/06/22  17:30:12
+        Log: Mac OS Test updates
+     Branch: macperl
+	   ! ext/POSIX/t/taint.t lib/Test/Harness/t/strap-analyze.t
+	   ! lib/Test/Harness/t/test-harness.t
+____________________________________________________________________________
+[ 17344] By: pudge                                 on 2002/06/22  17:13:16
+        Log: Integrate perl
+     Branch: macperl
+	  +> ext/POSIX/t/taint.t lib/Test/Simple/t/bad_plan.t
+	  +> lib/Test/Simple/t/threads.t
+	   - lib/File/Spec/NW5.pm
+	  !> (integrate 124 files)
+____________________________________________________________________________
+[ 17215] By: pudge                                 on 2002/06/13  09:51:36
+        Log: Building XS::APItest as shared lib
+     Branch: macperl
+	   ! ext/XS/APItest/t/printf.t
+____________________________________________________________________________
+[ 17214] By: pudge                                 on 2002/06/13  09:50:25
+        Log: Update tests, makefile, config
+     Branch: macperl
+	   ! macos/MacPerlTests.cmd macos/Makefile.mk macos/config.sh
+____________________________________________________________________________
+[ 17213] By: pudge                                 on 2002/06/13  09:49:11
+        Log: Integrate perl
+     Branch: macperl
+	  +> README.freebsd README.irix ext/IO/hints/sco.pl
+	  +> ext/Thread/README.threads ext/XS/APItest/APItest.pm
+	  +> ext/XS/APItest/APItest.xs ext/XS/APItest/MANIFEST
+	  +> ext/XS/APItest/Makefile.PL ext/XS/APItest/README
+	  +> ext/XS/APItest/t/printf.t lib/Math/BigInt/t/upgradef.t
+	  +> lib/Net/Ping/Changes
+	   - README.threads lib/Net/Ping/CHANGES
+	   ! NetWare/bat/SetCodeWar.bat
+	  !> (integrate 168 files)
+____________________________________________________________________________
+[ 16983] By: pudge                                 on 2002/06/04  00:22:12
+        Log: Update Errno slightly to latest version
+     Branch: macperl
+	   ! macos/lib/Errno.pm
+____________________________________________________________________________
+[ 16978] By: pudge                                 on 2002/06/02  17:22:43
+        Log: Update Changes
+     Branch: macperl
+	   ! macos/Changes
+
+----------------
 Version v5.8.0a1
 ----------------
 
