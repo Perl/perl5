@@ -189,13 +189,10 @@ MacPerlLibMrC	= 	\
 MacPerlLib68K	=											\
 			"$(GUSI)lib:GUSI_Sfio.68K.Lib"					\
 			"$(GUSI)lib:GUSI_Core.68K.Lib"					\
-			"{{MW68KLibraries}}MSL MPWRuntime.68K.Lib"		\
 			"{{MW68KLibraries}}MSL Runtime68K.Lib"			\
 			"{{Libraries}}AEObjectSupportLib.o"				\
-			"{{Libraries}}IntEnv.o"							\
-			"{{Libraries}}ToolLibs.o"						\
 			"{{MW68KLibraries}}MacOS.Lib"					\
-			"{{MW68KLibraries}}MSL C.68K MPW(NL_4i_8d).Lib"	\
+			"{{MW68KLibraries}}MSL C.68K (NL_4i_8d).Lib"	\
 			"{{MW68KLibraries}}MSL C++.68K (4i_8d).Lib"		\
 			"{{MW68KLibraries}}MathLib68K (4i_8d).Lib"		\
 			$(SFIO)lib:sfio.68K.Lib							\
@@ -208,6 +205,9 @@ MacPerlLib68K	=											\
 			"$(DB)lib:db.Sfio.68K.Lib"						\
 			"$(XL)"XL.68K.Lib								\
 			"{{Libraries}}OSACompLib.o"						\
+			"{{Libraries}}IntEnv.o"							\
+			"{{Libraries}}ToolLibs.o"						\
+			"{{Libraries}}MacRuntime.o"						\
 			"$(IC)ICGlueFar.o"		
 
 MacPerlLibSC	=	\
