@@ -5075,7 +5075,7 @@ Perl_save_re_context(pTHX)
 
 	if (PL_curpm && (rx = PM_GETRE(PL_curpm))) {
 	    for (i = 1; i <= rx->nparens; i++) {
-		sprintf(digits, "%lu", i);
+		sprintf(digits, "%lu", (long)i);
 		if ((mgv = gv_fetchpv(digits, FALSE, SVt_PV)))
 		    save_scalar(mgv);
 	    }
