@@ -189,3 +189,40 @@ sub encode
 
 1;
 __END__
+
+=head1 NAME
+
+Encode::Tcl::Escape - Tcl Escape encodings
+
+=head1 SYNOPSIS
+
+none
+
+=head1 DESCRIPTION
+
+This module is used internally by Encode::Tcl
+and handles type E of Tcl encodings (7-bit code only).
+
+Control sequences supported by this module are
+ESCAPE SEQUENCEs to designate graphic character sets
+and the following:
+
+    name (abbr.)                   bit combination
+
+  ESCAPE (ESC)                       01/11
+  SHIFT-IN (SI)                      00/15
+  SHIFT-OUT (SO)                     00/14
+  SINGLE SHIFT TWO (SS2)             ESC 04/14
+  SINGLE SHIFT THREE (SS3)           ESC 04/15
+
+Designation of control character sets are not supported.
+
+=head1 SEE ALSO
+
+L<Encode>
+
+L<Encode::Tcl>
+
+L<http://www.itscj.ipsj.or.jp/ISO-IR/> [ISOREG]
+
+=cut
