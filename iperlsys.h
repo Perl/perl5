@@ -927,5 +927,22 @@ public:
 
 #endif	/* PERL_OBJECT */
 
+/* Mention
+
+   HAS_READV
+   HAS_RECVMSG
+   HAS_SENDMSG
+   HAS_WRITEV
+   HAS_STRUCT_MSGHDR
+   HAS_STRUCT_CMSGHDR
+   I_SYSUIO
+
+   here so that Configure picks them up.  Perl core does not
+   use them but somebody might want to extend IO:: someday.
+
+   Jarkko Hietaniemi November 1998
+
+   */
+
 #endif	/* __Inc__IPerl___ */
 

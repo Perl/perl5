@@ -26,19 +26,30 @@ print "ok 5\n";
 
 # make sure TEST is r-x
 eval { chmod 0555, 'TEST' };
-if ($@) {
-  print "#[$@]\nok 6 # skipped\n";
+$bad_chmod = $@;
+
+$oldeuid = $>;		# root can read and write anything
+eval '$> = 1';		# so switch uid (may not be implemented)
+
+print "# oldeuid = $oldeuid, euid = $>\n";
+
+if ($bad_chmod) {
+    print "#[$@]\nok 6 #skipped\n";
 }
 else {
-  print "not " if -w 'TEST';
-  print "ok 6\n";
+    print "not " if -w 'TEST';
+    print "ok 6\n";
 }
 
-# Scripts are not -x everywhere.
+# Scripts are not -x everywhere so cannot test that.
 
 print "not " unless -r 'op';
 print "ok 7\n";
 
+eval '$> = $oldeuid';	# switch uid back (may not be implemented)
+
+# this would fail for the euid 1
+# (unless we have unpacked the source code as uid 1...)
 print "not " unless -w 'op';
 print "ok 8\n";
 

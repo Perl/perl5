@@ -320,7 +320,7 @@ produce more accurate results than the bare stat() mode bits.
 
 When under the C<use filetest 'access'> the above-mentioned filetests
 will test whether the permission can (not) be granted using the
-access() family of system calls.  Also note that the -x and -X may
+access() family of system calls.  Also note that the C<-x> and C<-X> may
 under this pragma return true even if there are no execute permission
 bits set (nor any extra execute permission ACLs).  This strangeness is
 due to the underlying system calls' definitions.  Read the

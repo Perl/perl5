@@ -425,7 +425,7 @@ is the recommended Win95/NT port), or (eventually) build your own
 Win95/NT Perl using WinGCC, then you'll have to modify the Registry
 yourself.
 
-Macintosh perl scripts will have the the appropriate Creator and
+Macintosh perl scripts will have the appropriate Creator and
 Type, so that double-clicking them will invoke the perl application.
 
 I<IMPORTANT!>: Whatever you do, PLEASE don't get frustrated, and just

@@ -207,7 +207,7 @@ http://www.perl.com/CPAN/authors/David_Muir_Sharnoff/modules/Time/JulianDay.pm.g
 =head2 Does Perl have a year 2000 problem?  Is Perl Y2K compliant?
 
 Short answer: No, Perl does not have a Year 2000 problem.  Yes,
-Perl is Y2K compliant.  The programmers you're hired to use it,
+Perl is Y2K compliant.  The programmers you've hired to use it,
 however, probably are not.
 
 Long answer: Perl is just as Y2K compliant as your pencil--no more,
@@ -378,7 +378,7 @@ There are a number of ways, with varying efficiency: If you want a
 count of a certain single character (X) within a string, you can use the
 C<tr///> function like so:
 
-    $string = "ThisXlineXhasXsomeXx'sXinXit":
+    $string = "ThisXlineXhasXsomeXx'sXinXit";
     $count = ($string =~ tr/X//);
     print "There are $count X charcters in the string";
 
@@ -1326,7 +1326,7 @@ The Data::Dumper module on CPAN is nice for printing out
 data structures, and FreezeThaw for copying them.  For example:
 
     use FreezeThaw qw(freeze thaw);
-    $new = thaw freeze $old;
+    ($new) = thaw freeze $old;
 
 Where $old can be (a reference to) any kind of data structure you'd like.
 It will be deeply copied.

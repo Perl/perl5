@@ -329,6 +329,10 @@ d_closedir (d_closedir.U):
 	This variable conditionally defines HAS_CLOSEDIR if closedir() is
 	available.
 
+d_cmsghdr_s (d_socket.U):
+	This variable conditionally defines the HAS_STRUCT_CMSGHDR symbol,
+	which indicates that the the struct cmsghdr is supported.
+
 d_const (d_const.U):
 	This variable conditionally defines the HASCONST symbol, which
 	indicates to the C program that this C compiler knows about the
@@ -369,7 +373,7 @@ d_difftime (d_difftime.U):
 	This variable conditionally defines the HAS_DIFFTIME symbol, which
 	indicates to the C program that the difftime() routine is available.
 
-d_dirent64s (io64.U):
+d_dirent64_s (io64.U):
 	This symbol will be defined if the C compiler supports struct dirent64.
 
 d_dirnamlen (i_dirent.U):
@@ -493,7 +497,7 @@ d_flexfnam (d_flexfnam.U):
 	This variable conditionally defines the FLEXFILENAMES symbol, which
 	indicates that the system supports filenames longer than 14 characters.
 
-d_flock64s (io64.U):
+d_flock64_s (io64.U):
 	This symbol will be defined if the C compiler supports struct flock64.
 
 d_flock (d_flock.U):
@@ -735,6 +739,10 @@ d_ino64t (io64.U):
 d_int64t (i_inttypes.U):
 	    This symbol will be defined if the C compiler supports int64_t.
 
+d_iovec_s (i_sysuio.U):
+	This variable conditionally defines the HAS_STRUCT_IOVEC symbol,
+	which indicates that the struct iovec is supported.
+
 d_isascii (d_isascii.U):
 	This variable conditionally defines the HAS_ISASCII constant,
 	which indicates to the C program that isascii() is available.
@@ -837,6 +845,31 @@ d_msg (d_msg.U):
 	This variable conditionally defines the HAS_MSG symbol, which
 	indicates that the entire msg*(2) library is present.
 
+d_msg_ctrunc (d_socket.U):
+	This variable conditionally defines the HAS_MSG_CTRUNC symbol,
+	which indicates that the MSG_CTRUNC is available.  #ifdef is
+	not enough because it may be an enum, glibc has been known to do this.
+
+d_msg_dontroute (d_socket.U):
+	This variable conditionally defines the HAS_MSG_DONTROUTE symbol,
+	which indicates that the MSG_DONTROUTE is available.  #ifdef is
+	not enough because it may be an enum, glibc has been known to do this.
+
+d_msg_oob (d_socket.U):
+	This variable conditionally defines the HAS_MSG_OOB symbol,
+	which indicates that the MSG_OOB is available.  #ifdef is
+	not enough because it may be an enum, glibc has been known to do this.
+
+d_msg_peek (d_socket.U):
+	This variable conditionally defines the HAS_MSG_PEEK symbol,
+	which indicates that the MSG_PEEK is available.  #ifdef is
+	not enough because it may be an enum, glibc has been known to do this.
+
+d_msg_proxy (d_socket.U):
+	This variable conditionally defines the HAS_MSG_PROXY symbol,
+	which indicates that the MSG_PROXY is available.  #ifdef is
+	not enough because it may be an enum, glibc has been known to do this.
+
 d_msgctl (d_msgctl.U):
 	This variable conditionally defines the HAS_MSGCTL symbol, which
 	indicates to the C program that the msgctl() routine is available.
@@ -844,6 +877,10 @@ d_msgctl (d_msgctl.U):
 d_msgget (d_msgget.U):
 	This variable conditionally defines the HAS_MSGGET symbol, which
 	indicates to the C program that the msgget() routine is available.
+
+d_msghdr_s (d_socket.U):
+	This variable conditionally defines the HAS_STRUCT_MSGHDR symbol,
+	which indicates that the struct msghdr is supported.
 
 d_msgrcv (d_msgrcv.U):
 	This variable conditionally defines the HAS_MSGRCV symbol, which
@@ -977,6 +1014,14 @@ d_readlink (d_readlink.U):
 	indicates to the C program that the readlink() routine is available
 	to read the value of a symbolic link.
 
+d_readv (d_readv.U):
+	This variable conditionally defines the HAS_READV symbol, which
+	indicates to the C program that the readv() routine is available.
+
+d_recvmsg (d_socket.U):
+	This variable conditionally defines the HAS_RECVMSG symbol,
+	which indicates that the recvmsg is supported.
+
 d_rename (d_rename.U):
 	This variable conditionally defines the HAS_RENAME symbol, which
 	indicates to the C program that the rename() routine is available
@@ -1007,6 +1052,11 @@ d_sched_yield (d_pthread_y.U):
 	This variable conditionally defines the HAS_SCHED_YIELD
 	symbol if the sched_yield routine is available to yield
 	the execution of the current thread.
+
+d_scm_rights (d_socket.U):
+	This variable conditionally defines the HAS_SCM_RIGHTS symbol,
+	which indicates that the SCM_RIGHTS is available.  #ifdef is
+	not enough because it may be an enum, glibc has been known to do this.
 
 d_seekdir64 (io64.U):
 	This variable conditionally defines the HAS_SEEKDIR64 symbol, which
@@ -1044,6 +1094,10 @@ d_semget (d_semget.U):
 d_semop (d_semop.U):
 	This variable conditionally defines the HAS_SEMOP symbol, which
 	indicates to the C program that the semop() routine is available.
+
+d_sendmsg (d_socket.U):
+	This variable conditionally defines the HAS_SENDMSG symbol,
+	which indicates that the sendmsg is supported.
 
 d_setegid (d_setegid.U):
 	This variable conditionally defines the HAS_SETEGID symbol, which
@@ -1405,6 +1459,10 @@ d_wctomb (d_wctomb.U):
 	This variable conditionally defines the HAS_WCTOMB symbol, which
 	indicates to the C program that the wctomb() routine is available
 	to convert a wide character to a multibyte.
+
+d_writev (d_writev.U):
+	This variable conditionally defines the HAS_WRITEV symbol, which
+	indicates to the C program that the writev() routine is available.
 
 d_xenix (Guess.U):
 	This variable conditionally defines the symbol XENIX, which alerts
@@ -1795,6 +1853,10 @@ i_systimes (i_systimes.U):
 i_systypes (i_systypes.U):
 	This variable conditionally defines the I_SYS_TYPES symbol,
 	and indicates whether a C program should include <sys/types.h>.
+
+i_sysuio (i_sysuio.U):
+	This variable conditionally defines the I_SYSUIO symbol, and indicates
+	whether a C program should include <sys/uio.h>.
 
 i_sysun (i_sysun.U):
 	This variable conditionally defines I_SYS_UN, which indicates

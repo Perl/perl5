@@ -20,7 +20,7 @@
 
 # $Id: Head.U,v 3.0.1.9 1997/02/28 15:02:09 ram Exp $
 #
-# Generated on Thu Nov  5 14:26:57 EET 1998 [metaconfig 3.0 PL70]
+# Generated on Sun Nov 22 19:12:18 EET 1998 [metaconfig 3.0 PL70]
 # (with additional metaconfig patches by jhi@iki.fi)
 
 cat >/tmp/c1$$ <<EOF
@@ -419,6 +419,7 @@ d_rewinddir=''
 d_seekdir=''
 d_telldir=''
 d_readlink=''
+d_readv=''
 d_rename=''
 d_rmdir=''
 d_safebcpy=''
@@ -464,7 +465,17 @@ d_shmdt=''
 d_shmget=''
 d_sigaction=''
 d_sigsetjmp=''
+d_cmsghdr_s=''
+d_msg_ctrunc=''
+d_msg_dontroute=''
+d_msg_oob=''
+d_msg_peek=''
+d_msg_proxy=''
+d_msghdr_s=''
 d_oldsock=''
+d_recvmsg=''
+d_scm_rights=''
+d_sendmsg=''
 d_socket=''
 d_sockpair=''
 sockethdr=''
@@ -518,6 +529,7 @@ d_wait4=''
 d_waitpid=''
 d_wcstombs=''
 d_wctomb=''
+d_writev=''
 d_dbmclose64=''
 d_dbminit64=''
 d_delete64=''
@@ -598,6 +610,8 @@ i_sysselct=''
 i_sysstat=''
 i_systimes=''
 i_systypes=''
+d_iovec_s=''
+i_sysuio=''
 i_sysun=''
 i_syswait=''
 i_sgtty=''
@@ -617,8 +631,8 @@ i_vfork=''
 intsize=''
 longsize=''
 shortsize=''
-d_dirent64s=''
-d_flock64s=''
+d_dirent64_s=''
+d_flock64_s=''
 d_fstat64=''
 d_ftruncate64=''
 d_ino64t=''
@@ -6734,6 +6748,146 @@ eval $inlibc
 set chsize d_chsize
 eval $inlibc
 
+hasfield='varname=$1; struct=$2; field=$3; shift; shift; shift;
+while $test $# -ge 2; do
+	case "$1" in
+	$define) echo "#include <$2>";;
+	esac ;
+    shift 2;
+done > try.c;
+echo "int main () { struct $struct foo; foo.$field = 0; }" >> try.c;
+if eval $cc $optimize $ccflags -c try.c >/dev/null 2>&1; then
+	val="$define";
+else
+	val="$undef";
+fi;
+set $varname;
+eval $setvar;
+$rm -f try.c try.o'
+
+: see if this is a sys/uio.h system
+set sys/uio.h i_sysuio
+eval $inhdr
+
+echo "Checking to see if your system supports struct iovec..." >&4
+set d_iovec_s iovec iov_base $i_sysuio sys/uio.h
+eval $hasfield
+case "$d_iovec_s" in
+"$define")      echo "Yup, it does." >&4
+                ;;
+*)              echo "Nope, it doesn't." >&4
+                ;;
+esac
+
+socketlib=''
+sockethdr=''
+: see whether socket exists
+echo " "
+$echo $n "Hmm... $c" >&4
+if set socket val -f d_socket; eval $csym; $val; then
+	echo "Looks like you have Berkeley networking support." >&4
+	d_socket="$define"
+	if set setsockopt val -f; eval $csym; $val; then
+		d_oldsock="$undef"
+	else
+		echo "...but it uses the old BSD 4.1c interface, rather than 4.2." >&4
+		d_oldsock="$define"
+	fi
+else
+	if $contains socklib libc.list >/dev/null 2>&1; then
+		echo "Looks like you have Berkeley networking support." >&4
+		d_socket="$define"
+		: we will have to assume that it supports the 4.2 BSD interface
+		d_oldsock="$undef"
+	else
+		echo "You don't have Berkeley networking in libc$_a..." >&4
+		if test "X$d_socket" = "X$define"; then
+		   echo "...but you seem to believe that you have sockets." >&4
+		else
+			for net in net socket
+			do
+				if test -f /usr/lib/lib$net$_a; then
+					( ($nm $nm_opt /usr/lib/lib$net$_a | eval $nm_extract) ||  \
+					$ar t /usr/lib/lib$net$_a) 2>/dev/null >> libc.list
+					if $contains socket libc.list >/dev/null 2>&1; then
+						d_socket="$define"
+						socketlib="-l$net"
+						case "$net" in
+						net)
+							echo "...but the Wollongong group seems to have hacked it in." >&4
+							sockethdr="-I/usr/netinclude"
+							;;
+						esac
+						echo "Found Berkeley sockets interface in lib$net." >& 4 
+						if $contains setsockopt libc.list >/dev/null 2>&1; then
+							d_oldsock="$undef"
+						else
+							echo "...using the old BSD 4.1c interface, rather than 4.2." >&4
+							d_oldsock="$define"
+						fi
+						break
+					fi
+				fi
+			done
+			if test "X$d_socket" != "X$define"; then
+			   echo "or anywhere else I see." >&4
+			   d_socket="$undef"
+			   d_oldsock="$undef"
+			fi
+		fi
+	fi
+fi
+
+: see if socketpair exists
+set socketpair d_sockpair
+eval $inlibc
+
+
+echo "Checking the availability of certain socket constants..." >& 4
+for ENUM in MSG_CTRUNC MSG_DONTROUTE MSG_OOB MSG_PEEK MSG_PROXY SCM_RIGHTS; do
+	enum=`$echo $ENUM|./tr '[A-Z]' '[a-z]'`
+	$cat >try.c <<EOF
+#include <sys/types.h>
+#include <sys/socket.h>
+int main() {
+    int i = $ENUM;
+}
+EOF
+	val="$undef"
+	set try; if eval $compile; then
+		val="$define"
+	fi
+	set d_${enum}; eval $setvar
+	$rm -f try.c try
+done
+
+set sendmsg d_sendmsg
+eval $inlibc
+
+set recvmsg d_recvmsg
+eval $inlibc
+
+echo " "
+$echo $n "Checking to see if your system supports struct msghdr...$c" >&4
+set d_msghdr_s msghdr msg_name define sys/types.h $d_socket sys/socket.h $i_sysuio sys/uio.h
+eval $hasfield
+case "$d_msghdr_s" in
+"$define")      echo "Yup, it does." >&4
+                ;;
+*)              echo "Nope, it doesn't." >&4
+                ;;
+esac
+
+$echo $n "Checking to see if your system supports struct cmsghdr...$c" >&4
+set d_cmsghdr_s cmsghdr cmsg_len define sys/types.h $d_socket sys/socket.h $i_sysuio sys/uio.h
+eval $hasfield
+case "$d_cmsghdr_s" in
+"$define")      echo "Yup, it does." >&4
+                ;;
+*)              echo "Nope, it doesn't." >&4
+                ;;
+esac
+
 : check for const keyword
 echo " "
 echo 'Checking to see if your C compiler knows about "const"...' >&4
@@ -6953,23 +7107,6 @@ set d_dirnamlen
 eval $setvar
 $rm -f try.c
 
-hasfield='varname=$1; struct=$2; field=$3; shift; shift; shift;
-while $test $# -ge 2; do
-	case "$1" in
-	$define) echo "#include <$2>";;
-	esac ;
-    shift 2;
-done > try.c;
-echo "int main () { struct $struct foo; foo.$field = 0; }" >> try.c;
-if eval $cc $optimize $ccflags -c try.c >/dev/null 2>&1; then
-	val="$define";
-else
-	val="$undef";
-fi;
-set $varname;
-eval $setvar;
-$rm -f try.c try.o'
-
 
 if $test X"$use64bits" = X"$define"; then
 	: see if fstat64 exists
@@ -7067,14 +7204,14 @@ EOCP
 	echo " "
 	echo "Checking to see if your system supports struct flock64..." >&4
 	if $h_fcntl; then
-		set d_flock64s flock64 l_len define fcntl.h
+		set d_flock64_s flock64 l_len define fcntl.h
 		eval $hasfield
 	else
 		val="$undef"
-		set d_flock64s
+		set d_flock64_s
 		eval $setvar
 	fi
-	case "$d_flock64s" in
+	case "$d_flock64_s" in
 	"$define")	echo "Yup, it does." >&4
 			;;
 	*)		echo "Nope, it doesn't." >&4
@@ -7084,9 +7221,9 @@ EOCP
 	: check for struct dirent64
 	echo " "
 	echo "Checking to see if your system supports struct dirent64..." >&4
-	set d_dirent64s dirent64 d_off $i_dirent dirent.h
+	set d_dirent64_s dirent64 d_off $i_dirent dirent.h
 	eval $hasfield
-	case "$d_flock64s" in
+	case "$d_dirent64_s" in
 	"$define")	echo "Yup, it does." >&4
 			;;
 	*)		echo "Nope, it doesn't." >&4
@@ -7095,7 +7232,7 @@ EOCP
 
 else
 	val="$undef"
-	for xxx in d_fstat64 d_ftruncate64 d_lockf64 d_lseek64 d_lstat64 d_open64 d_opendir64 d_readdir64 d_seekdir64 d_stat64 d_telldir64 d_truncate64 d_off64t d_ino64t d_flock64s d_dirent64s
+	for xxx in d_fstat64 d_ftruncate64 d_lockf64 d_lseek64 d_lstat64 d_open64 d_opendir64 d_readdir64 d_seekdir64 d_stat64 d_telldir64 d_truncate64 d_off64t d_ino64t d_flock64_s d_dirent64_s
 	do
 		set $xxx
 		eval $setvar
@@ -7511,64 +7648,6 @@ eval $inlibc
 
 : see if this is an fcntl system
 set fcntl d_fcntl
-eval $inlibc
-
-socketlib=''
-sockethdr=''
-: see whether socket exists
-echo " "
-$echo $n "Hmm... $c" >&4
-if set socket val -f d_socket; eval $csym; $val; then
-	echo "Looks like you have Berkeley networking support." >&4
-	d_socket="$define"
-	if set setsockopt val -f; eval $csym; $val; then
-		d_oldsock="$undef"
-	else
-		echo "...but it uses the old 4.1c interface, rather than 4.2" >&4
-		d_oldsock="$define"
-	fi
-else
-	if $contains socklib libc.list >/dev/null 2>&1; then
-		echo "Looks like you have Berkeley networking support." >&4
-		d_socket="$define"
-		: we will have to assume that it supports the 4.2 BSD interface
-		d_oldsock="$undef"
-	else
-		echo "You don't have Berkeley networking in libc$_a..." >&4
-		for net in net socket
-		do
-			if test -f /usr/lib/lib$net$_a; then
-				( ($nm $nm_opt /usr/lib/lib$net$_a | eval $nm_extract) ||  \
-				$ar t /usr/lib/lib$net$_a) 2>/dev/null >> libc.list
-				if $contains socket libc.list >/dev/null 2>&1; then
-					d_socket="$define"
-					case "$net" in
-					net)
-						echo "...but the Wollongong group seems to have hacked it in." >&4
-						socketlib="-lnet"
-						sockethdr="-I/usr/netinclude"
-						;;
-					esac
-					if $contains setsockopt libc.list >/dev/null 2>&1; then
-						d_oldsock="$undef"
-					else
-						echo "...using the old 4.1c interface, rather than 4.2" >&4
-						d_oldsock="$define"
-					fi
-					break
-				fi
-			fi
-		done
-		if test "X$d_socket" != "X$define"; then
-			echo "or anywhere else I see." >&4
-			d_socket="$undef"
-			d_oldsock="$undef"
-		fi
-	fi
-fi
-
-: see if socketpair exists
-set socketpair d_sockpair
 eval $inlibc
 
 : see if sys/select.h has to be included
@@ -8728,6 +8807,10 @@ eval $inlibc
 
 : see if readlink exists
 set readlink d_readlink
+eval $inlibc
+
+: see if readv exists
+set readv d_readv
 eval $inlibc
 
 : see if rename exists
@@ -9984,6 +10067,10 @@ eval $inlibc
 set wctomb d_wctomb
 eval $inlibc
 
+: see if writev exists
+set writev d_writev
+eval $inlibc
+
 : preserve RCS keywords in files with variable substitution, grrr
 Date='$Date'
 Id='$Id'
@@ -10379,6 +10466,7 @@ $rm -f try.* .out
 
 : How can we generate normalized random numbers ?
 echo " "
+echo "Looking for a random number function..." >&4
 case "$randfunc" in
 '')
 	if set drand48 val -f; eval $csym; $val; then
@@ -10421,7 +10509,7 @@ while $test "$cont"; do
 		cont=''
 	else
 		dflt=n
-		rp="Function $ans does not exists. Use that name anyway?"
+		rp="Function $ans does not exist. Use that name anyway?"
 		. ./myread
 		dflt=rand
 		case "$ans" in
@@ -10526,7 +10614,7 @@ if eval $compile_ok; then
 		echo "Nope, no EBCDIC.  Assuming ASCII or some ISO Latin." >&4
 	fi
 else
-	echo "$me: I'm unable to compile the test program." >&4
+	echo "I'm unable to compile the test program." >&4
 	echo "I'll assume ASCII or some ISO Latin." >&4
 fi
 $rm -f tebcdic.c tebcdic
@@ -12291,6 +12379,7 @@ d_chown='$d_chown'
 d_chroot='$d_chroot'
 d_chsize='$d_chsize'
 d_closedir='$d_closedir'
+d_cmsghdr_s='$d_cmsghdr_s'
 d_const='$d_const'
 d_crypt='$d_crypt'
 d_csh='$d_csh'
@@ -12300,7 +12389,7 @@ d_dbmclose64='$d_dbmclose64'
 d_dbminit64='$d_dbminit64'
 d_delete64='$d_delete64'
 d_difftime='$d_difftime'
-d_dirent64s='$d_dirent64s'
+d_dirent64_s='$d_dirent64_s'
 d_dirnamlen='$d_dirnamlen'
 d_dlerror='$d_dlerror'
 d_dlopen='$d_dlopen'
@@ -12328,7 +12417,7 @@ d_fgetpos64='$d_fgetpos64'
 d_fgetpos='$d_fgetpos'
 d_firstkey64='$d_firstkey64'
 d_flexfnam='$d_flexfnam'
-d_flock64s='$d_flock64s'
+d_flock64_s='$d_flock64_s'
 d_flock='$d_flock'
 d_fopen64='$d_fopen64'
 d_fork='$d_fork'
@@ -12379,6 +12468,7 @@ d_index='$d_index'
 d_inetaton='$d_inetaton'
 d_ino64t='$d_ino64t'
 d_int64t='$d_int64t'
+d_iovec_s='$d_iovec_s'
 d_isascii='$d_isascii'
 d_killpg='$d_killpg'
 d_lchown='$d_lchown'
@@ -12402,8 +12492,14 @@ d_mkdir='$d_mkdir'
 d_mkfifo='$d_mkfifo'
 d_mktime='$d_mktime'
 d_msg='$d_msg'
+d_msg_ctrunc='$d_msg_ctrunc'
+d_msg_dontroute='$d_msg_dontroute'
+d_msg_oob='$d_msg_oob'
+d_msg_peek='$d_msg_peek'
+d_msg_proxy='$d_msg_proxy'
 d_msgctl='$d_msgctl'
 d_msgget='$d_msgget'
+d_msghdr_s='$d_msghdr_s'
 d_msgrcv='$d_msgrcv'
 d_msgsnd='$d_msgsnd'
 d_mymalloc='$d_mymalloc'
@@ -12434,6 +12530,8 @@ d_pwquota='$d_pwquota'
 d_readdir64='$d_readdir64'
 d_readdir='$d_readdir'
 d_readlink='$d_readlink'
+d_readv='$d_readv'
+d_recvmsg='$d_recvmsg'
 d_rename='$d_rename'
 d_rewinddir='$d_rewinddir'
 d_rmdir='$d_rmdir'
@@ -12441,6 +12539,7 @@ d_safebcpy='$d_safebcpy'
 d_safemcpy='$d_safemcpy'
 d_sanemcmp='$d_sanemcmp'
 d_sched_yield='$d_sched_yield'
+d_scm_rights='$d_scm_rights'
 d_seekdir64='$d_seekdir64'
 d_seekdir='$d_seekdir'
 d_select='$d_select'
@@ -12450,6 +12549,7 @@ d_semctl_semid_ds='$d_semctl_semid_ds'
 d_semctl_semun='$d_semctl_semun'
 d_semget='$d_semget'
 d_semop='$d_semop'
+d_sendmsg='$d_sendmsg'
 d_setegid='$d_setegid'
 d_seteuid='$d_seteuid'
 d_setgrent='$d_setgrent'
@@ -12530,6 +12630,7 @@ d_wait4='$d_wait4'
 d_waitpid='$d_waitpid'
 d_wcstombs='$d_wcstombs'
 d_wctomb='$d_wctomb'
+d_writev='$d_writev'
 d_xenix='$d_xenix'
 date='$date'
 db_hashtype='$db_hashtype'
@@ -12616,6 +12717,7 @@ i_systime='$i_systime'
 i_systimek='$i_systimek'
 i_systimes='$i_systimes'
 i_systypes='$i_systypes'
+i_sysuio='$i_sysuio'
 i_sysun='$i_sysun'
 i_syswait='$i_syswait'
 i_termio='$i_termio'
