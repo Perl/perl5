@@ -274,8 +274,8 @@ X<-S>X<-b>X<-c>X<-t>X<-u>X<-g>X<-k>X<-T>X<-B>X<-M>X<-A>X<-C>
     -O	File is owned by real uid.
 
     -e	File exists.
-    -z	File has zero size.
-    -s	File has nonzero size (returns size).
+    -z	File has zero size (is empty).
+    -s	File has nonzero size (returns size in bytes).
 
     -f	File is a plain file.
     -d	File is a directory.
