@@ -682,7 +682,8 @@ S_hv_fetch_common(pTHX_ HV *hv, SV *keysv, const char *key, STRLEN klen,
 	return entry;
     }
 #ifdef DYNAMIC_ENV_FETCH  /* %ENV lookup?  If so, try to fetch the value now */
-    if (SvRMAGICAL((SV*)hv) && mg_find((SV*)hv, PERL_MAGIC_env)) {
+    if (!(action & HV_FETCH_ISSTORE) 
+	&& SvRMAGICAL((SV*)hv) && mg_find((SV*)hv, PERL_MAGIC_env)) {
 	unsigned long len;
 	char *env = PerlEnv_ENVgetenv_len(key,&len);
 	if (env) {
