@@ -393,8 +393,6 @@ These are a hotchpotch of opcodes still waiting to be considered
 
     bless -- could be used to change ownership of objects (reblessing)
 
-    glob
-
     pushre regcmaybe regcomp subst substcont
 
     sprintf prtf -- can core dump
@@ -494,6 +492,8 @@ information about your system but not be able to change it.
     fork
 
     wait waitpid
+
+    glob -- access to Cshell via <`rm *`>
 
 =item :ownprocess
 
