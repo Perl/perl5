@@ -399,7 +399,6 @@
 #define mess			Perl_mess
 #define vmess			Perl_vmess
 #define qerror			Perl_qerror
-#define sortsv			Perl_sortsv
 #define mg_clear		Perl_mg_clear
 #define mg_copy			Perl_mg_copy
 #define mg_find			Perl_mg_find
@@ -1916,7 +1915,6 @@
 #endif
 #define vmess(a,b)		Perl_vmess(aTHX_ a,b)
 #define qerror(a)		Perl_qerror(aTHX_ a)
-#define sortsv(a,b,c)		Perl_sortsv(aTHX_ a,b,c)
 #define mg_clear(a)		Perl_mg_clear(aTHX_ a)
 #define mg_copy(a,b,c,d)	Perl_mg_copy(aTHX_ a,b,c,d)
 #define mg_find(a,b)		Perl_mg_find(aTHX_ a,b)

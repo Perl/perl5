@@ -1471,7 +1471,7 @@ p	|char*	|mem_collxfrm	|const char* s|STRLEN len|STRLEN* xlen
 Afp	|SV*	|mess		|const char* pat|...
 Ap	|SV*	|vmess		|const char* pat|va_list* args
 p	|void	|qerror		|SV* err
-Apd    |void   |sortsv         |SV ** array|size_t num_elts|SVCOMPARE_t f
+Apd     |void   |sortsv         |SV ** array|size_t num_elts|SVCOMPARE_t cmp
 Apd	|int	|mg_clear	|SV* sv
 Apd	|int	|mg_copy	|SV* sv|SV* nsv|const char* key|I32 klen
 Apd	|MAGIC*	|mg_find	|SV* sv|int type

@@ -154,6 +154,8 @@
 &if (command_status) ^= 0 &then &return
 !&compiler& <<pp_pack.c &diag& &cpu& &cflags& -o pp_pack&s&
 &if (command_status) ^= 0 &then &return
+!&compiler& <<pp_sort.c &diag& &cpu& &cflags& -o pp_sort&s&
+&if (command_status) ^= 0 &then &return
 !&compiler& <<pp_sys.c &diag& &cpu& &cflags& -o pp_sys&s&
 &if (command_status) ^= 0 &then &return
 !&compiler& <<regcomp.c &diag& &cpu& &cflags& -o regcomp&s&

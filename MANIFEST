@@ -1193,6 +1193,8 @@ lib/Shell.t			Tests for above
 lib/shellwords.pl		Perl library to split into words with shell quoting
 lib/sigtrap.pm			For trapping an abort and giving traceback
 lib/sigtrap.t			See if sigtrap works
+lib/sort.pm			For "use sort"
+lib/sort.t			See if "use sort" works
 lib/stat.pl			Perl library supporting stat function
 lib/strict.pm			For "use strict"
 lib/strict.t			See if strictures work
@@ -1963,6 +1965,7 @@ pp.sym				Push/Pop code symbols
 pp_ctl.c			Push/Pop code for control flow
 pp_hot.c			Push/Pop code for heavily used opcodes
 pp_pack.c			Push/Pop code for pack/unpack
+pp_sort.c			Push/Pop code for sort
 pp_proto.h			C++ definitions for Push/Pop code
 pp_sys.c			Push/Pop code for system interaction
 proto.h				Prototypes
