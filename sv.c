@@ -8431,6 +8431,24 @@ Perl_sv_vsetpvfn(pTHX_ SV *sv, const char *pat, STRLEN patlen, va_list *args, SV
     sv_vcatpvfn(sv, pat, patlen, args, svargs, svmax, maybe_tainted);
 }
 
+/* strnchr(): private function for use in sv_vcatpvfn()
+ *
+ * Like strchr(), but allows to use strings that are not null-terminated.
+ * The string length must be given instead and it _must_ be correct, as
+ * the function does not stop searching when a '\0' is discovered.
+ * This would also allow to explicitly search for '\0' characters.
+ */
+
+static const char *
+strnchr(const char* s, int c, size_t n)
+{
+    if (s)
+	for (; n > 0; n--, s++)
+	    if ((int)*s == c)
+		return s;
+    return NULL;
+}
+
 /* private function for use in sv_vcatpvfn via the EXPECT_NUMBER macro */
 
 STATIC I32
@@ -9329,7 +9347,11 @@ Perl_sv_vcatpvfn(pTHX_ SV *sv, const char *pat, STRLEN patlen, va_list *args, SV
 	     p = SvEND(sv);
 	     *p = '\0';
 	}
-	if (left && ckWARN(WARN_PRINTF) && strchr(eptr, '\n') && 
+	/* Don't use strchr() here, because eptr does not necessarily point */
+	/* to a null-terminated string. E.g. with the format "%-10c", eptr  */
+	/* points to c (a single char on the stack), which makes strchr()   */
+	/* run amok over the stack until it eventually hits '\n' or '\0'.   */
+	if (left && ckWARN(WARN_PRINTF) && strnchr(eptr, '\n', elen) && 
 	    (PL_op->op_type == OP_PRTF || PL_op->op_type == OP_SPRINTF)) 
 	    Perl_warner(aTHX_ packWARN(WARN_PRINTF),
 		"Newline in left-justified string for %sprintf",
