@@ -49,6 +49,7 @@ $. = 0;
 $bang = sprintf "\\%03o", ord "!"; # \41 would not be portable.
 $ffff  = chr(0xff) x 2;
 $nulnul = "\0" x 2;
+$OP = $qr ? 'qr' : 'm';
 
 $| = 1;
 print "1..$numtests\n# $iters iterations\n";
@@ -73,7 +74,7 @@ while (<TESTS>) {
     $result =~ s/B//i unless $skip;
     for $study ('', 'study \$subject') {
  	$c = $iters;
- 	eval "$study; \$match = (\$subject =~ m$pat) while \$c--; \$got = \"$repl\";";
+ 	eval "$study; \$match = (\$subject =~ $OP$pat) while \$c--; \$got = \"$repl\";";
 	chomp( $err = $@ );
 	if ($result eq 'c') {
 	    if ($err !~ m!^\Q$expect!) { print "not ok $. (compile) $input => `$err'\n"; next TEST }

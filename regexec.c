@@ -412,6 +412,7 @@ Perl_re_intuit_start(pTHX_ regexp *prog, SV *sv, char *strpos,
     I32 ml_anch;
     register char *other_last = Nullch;	/* other substr checked before this */
     char *check_at = Nullch;		/* check substr found at this pos */
+    const I32 multiline = PL_multiline | (prog->reganch & PMf_MULTILINE);
 #ifdef DEBUGGING
     const char * const i_strpos = strpos;
     SV * const dsv = PERL_DEBUG_PAD_ZERO(0);
@@ -473,7 +474,7 @@ Perl_re_intuit_start(pTHX_ regexp *prog, SV *sv, char *strpos,
     if (prog->reganch & ROPT_ANCH) {	/* Match at beg-of-str or after \n */
 	ml_anch = !( (prog->reganch & ROPT_ANCH_SINGLE)
 		     || ( (prog->reganch & ROPT_ANCH_BOL)
-			  && !PL_multiline ) );	/* Check after \n? */
+			  && !multiline ) );	/* Check after \n? */
 
 	if (!ml_anch) {
 	  if ( !(prog->reganch & (ROPT_ANCH_GPOS /* Checked by the caller */
@@ -568,11 +569,11 @@ Perl_re_intuit_start(pTHX_ regexp *prog, SV *sv, char *strpos,
     else if (prog->reganch & ROPT_CANY_SEEN)
 	s = fbm_instr((U8*)(s + start_shift),
 		      (U8*)(strend - end_shift),
-		      check, PL_multiline ? FBMrf_MULTILINE : 0);
+		      check, multiline ? FBMrf_MULTILINE : 0);
     else
 	s = fbm_instr(HOP3(s, start_shift, strend),
 		      HOP3(strend, -end_shift, strbeg),
-		      check, PL_multiline ? FBMrf_MULTILINE : 0);
+		      check, multiline ? FBMrf_MULTILINE : 0);
 
     /* Update the count-of-usability, remove useless subpatterns,
 	unshift s.  */
@@ -643,7 +644,7 @@ Perl_re_intuit_start(pTHX_ regexp *prog, SV *sv, char *strpos,
 			HOP3(HOP3(last1, prog->anchored_offset, strend)
 				+ SvCUR(must), -(SvTAIL(must)!=0), strbeg),
 			must,
-			PL_multiline ? FBMrf_MULTILINE : 0
+			multiline ? FBMrf_MULTILINE : 0
 		    );
 		DEBUG_r(PerlIO_printf(Perl_debug_log,
 			"%s anchored substr \"%s%.*s%s\"%s",
@@ -704,7 +705,7 @@ Perl_re_intuit_start(pTHX_ regexp *prog, SV *sv, char *strpos,
 		s = fbm_instr((unsigned char*)s,
 			      (unsigned char*)last + SvCUR(must)
 				  - (SvTAIL(must)!=0),
-			      must, PL_multiline ? FBMrf_MULTILINE : 0);
+			      must, multiline ? FBMrf_MULTILINE : 0);
 	    /* FIXME - DEBUG_EXECUTE_r if that is merged to maint  */
 	    DEBUG_r(PerlIO_printf(Perl_debug_log, "%s floating substr \"%s%.*s%s\"%s",
 		    (s ? "Found" : "Contradicts"),
@@ -1639,6 +1640,7 @@ Perl_regexec_flags(pTHX_ register regexp *prog, char *stringarg, register char *
     char *scream_olds;
     SV* oreplsv = GvSV(PL_replgv);
     const bool do_utf8 = DO_UTF8(sv);
+    const I32 multiline = PL_multiline | (prog->reganch & PMf_MULTILINE);
 #ifdef DEBUGGING
     SV *dsv0 = PERL_DEBUG_PAD_ZERO(0);
     SV *dsv1 = PERL_DEBUG_PAD_ZERO(1);
@@ -1756,7 +1758,7 @@ Perl_regexec_flags(pTHX_ register regexp *prog, char *stringarg, register char *
     if (prog->reganch & (ROPT_ANCH & ~ROPT_ANCH_GPOS)) {
 	if (s == startpos && regtry(prog, startpos))
 	    goto got_it;
-	else if (PL_multiline || (prog->reganch & ROPT_IMPLICIT)
+	else if (multiline || (prog->reganch & ROPT_IMPLICIT)
 		 || (prog->reganch & ROPT_ANCH_MBOL)) /* XXXX SBOL? */
 	{
 	    char *end;
@@ -1889,7 +1891,7 @@ Perl_regexec_flags(pTHX_ register regexp *prog, char *stringarg, register char *
 				    end_shift, &scream_pos, 0))
 		 : (s = fbm_instr((unsigned char*)HOP3(s, back_min, strend),
 				  (unsigned char*)strend, must,
-				  PL_multiline ? FBMrf_MULTILINE : 0))) ) {
+				  multiline ? FBMrf_MULTILINE : 0))) ) {
 	    /* we may be pointing at the wrong string */
 	    if ((flags & REXEC_SCREAM) && RX_MATCH_COPIED(prog))
 		s = strbeg + (s - SvPVX_const(sv));
@@ -1990,7 +1992,7 @@ Perl_regexec_flags(pTHX_ register regexp *prog, char *stringarg, register char *
 		if (SvTAIL(float_real)) {
 		    if (memEQ(strend - len + 1, little, len - 1))
 			last = strend - len + 1;
-		    else if (!PL_multiline)
+		    else if (!multiline)
 			last = memEQ(strend - len, little, len)
 			    ? strend - len : Nullch;
 		    else
