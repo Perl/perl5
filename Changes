@@ -29,6 +29,25 @@ Version v5.9.X		Development release working toward v5.10
 --------------
 
 ____________________________________________________________________________
+____________________________________________________________________________
+[ 21398] By: hv                                    on 2003/10/02  09:15:42
+        Log: build perlapi.pod in deterministic order even when functions differ
+             only in case; regen perlapi.pod
+     Branch: perl
+	   ! autodoc.pl pod/perlapi.pod
+____________________________________________________________________________
+[ 21397] By: ams                                   on 2003/10/02  07:48:51
+        Log: Subject: Re: 5.8.1 and srand
+             From: Brendan O'Dea <bod@debian.org>
+             Date: Thu, 2 Oct 2003 10:30:36 +1000
+             Message-Id: <20031002003036.GA9198@londo.c47.org>
+     Branch: perl
+	   ! util.c
+____________________________________________________________________________
+[ 21396] By: ams                                   on 2003/10/01  22:18:13
+        Log: Update Changes.
+     Branch: perl
+	   ! Changes patchlevel.h
 [ 21395] By: nicholas                              on 2003/10/01  21:09:11
         Log: Integrate:
              [ 21387]
