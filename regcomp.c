@@ -2912,7 +2912,7 @@ tryagain:
 				RExC_parse = p + 1;
 				vFAIL("Missing right brace on \\x{}");
 			    }
-			    else if (UTF) {
+			    else {
 				numlen = 1;	/* allow underscores */
 				ender = (UV)scan_hex(p + 1, e - p - 1, &numlen);
 				/* numlen is generous */
@@ -2922,12 +2922,6 @@ tryagain:
 				}
 				p = e + 1;
 			    }
-			    else
-			    {
-				RExC_parse = e + 1;
-				vFAIL("Can't use \\x{} without 'use utf8' declaration");
-			    }
-
 			}
 			else {
 			    numlen = 0;		/* disallow underscores */
