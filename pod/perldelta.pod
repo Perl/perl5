@@ -3585,18 +3585,6 @@ C<pP> are testing for Unicode code points, not knowing about EBCDIC.
 The compiler suite is slowly getting better but it continues to be
 highly experimental.  Use in production environments is discouraged.
 
-=head2 The Long Double Support Is Still Experimental
-
-The ability to configure Perl's numbers to use "long doubles",
-floating point numbers of hopefully better accuracy, is still
-experimental.  The implementations of long doubles are not yet
-widespread and the existing implementations are not quite mature
-or standardised, therefore trying to support them is a rare
-and moving target.  The gain of more precision may also be offset
-by slowdown in computations (more bits to move around, and the
-operations are more likely to be executed by less optimised
-libraries).
-
 =head2 Seen In Perl 5.7 But Gone Now
 
 C<Time::Piece> (previously known as C<Time::Object>) was removed
