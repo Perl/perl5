@@ -1169,6 +1169,7 @@ lib/Fatal.pm			Make errors in functions/builtins fatal
 lib/Fatal.t			See if Fatal works
 lib/fields.pm			Set up object field names for pseudo-hash-using classes
 lib/fields.t			See if base/fields works
+lib/fields-base.t		See if base/fields works
 lib/File/Basename.pm		Emulate the basename program
 lib/File/Basename.t		See if File::Basename works
 lib/FileCache.pm		Keep more files open than the system permits
