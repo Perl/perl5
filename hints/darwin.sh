@@ -52,7 +52,11 @@ archname='darwin';
 # nm works.
 usenm='true';
 
-# Optimize.
+#    Optimizing for size also mean less resident memory usage on the part
+# of Perl.  Apple asserts that this is a more important optimization than
+# saving on CPU cycles.  Given that memory speed has not increased at
+# pace with CPU speed over time (on any platform), this is probably a
+# reasonable assertion.
 if [ -z "${optimize}" ]; then
   case "$osvers" in
     [12345].*) optimize='-O3' ;;
