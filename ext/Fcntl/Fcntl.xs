@@ -115,6 +115,37 @@ int arg;
 	    goto not_there;
 #endif
 	break;
+    case 'L':
+    	if (strnEQ(name, "LOCK_", 5)) {
+	    /* We support flock() on systems which don't have it, so
+	       always supply the constants. */
+	    if (strEQ(name, "LOCK_SH"))
+#ifdef LOCK_SH
+		return LOCK_SH;
+#else
+		return 1;
+#endif
+	    if (strEQ(name, "LOCK_EX"))
+#ifdef LOCK_EX
+		return LOCK_EX;
+#else
+		return 2;
+#endif
+    	    if (strEQ(name, "LOCK_NB"))
+#ifdef LOCK_NB
+		return LOCK_NB;
+#else
+		return 4;
+#endif
+    	    if (strEQ(name, "LOCK_UN"))
+#ifdef LOCK_UN
+    	    	return LOCK_UN;
+#else
+    	    	return 8;
+#endif
+	} else
+	  goto not_there;
+    	break;
     case 'O':
 	if (strnEQ(name, "O_", 2)) {
 	    if (strEQ(name, "O_CREAT"))

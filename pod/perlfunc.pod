@@ -1040,20 +1040,17 @@ would need to use the more system-specific fcntl() for that.
 
 Here's a mailbox appender for BSD systems.
 
-    $LOCK_SH = 1;
-    $LOCK_EX = 2;
-    $LOCK_NB = 4;
-    $LOCK_UN = 8;
+    use Fcntl ':flock'; # import LOCK_* constants
 
     sub lock {
-	flock(MBOX,$LOCK_EX);
+	flock(MBOX,LOCK_EX);
 	# and, in case someone appended
 	# while we were waiting...
 	seek(MBOX, 0, 2);
     }
 
     sub unlock {
-	flock(MBOX,$LOCK_UN);
+	flock(MBOX,LOCK_UN);
     }
 
     open(MBOX, ">>/usr/spool/mail/$ENV{'USER'}")
