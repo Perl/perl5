@@ -166,8 +166,8 @@ EOT
  	open(SCRIPT,"<$test") or die "Can't run $test.\n";
  	$_ = <SCRIPT>;
  	close(SCRIPT) unless ($type eq 'deparse');
- 	if (/#!.*\bperl.*-\w*T/) {
- 	    $switch = '"-T"';
+ 	if (/#!.*\bperl.*-\w*([tT])/) {
+ 	    $switch = qq{"-$1"};
  	}
  	else {
  	    $switch = '';

@@ -834,8 +834,8 @@ sub _set_switches {
     my $s = $Switches;
     $s .= " $ENV{'HARNESS_PERL_SWITCHES'}"
       if exists $ENV{'HARNESS_PERL_SWITCHES'};
-    $s .= join " ", q[ "-T"], map {qq["-I$_"]} @INC
-      if $first =~ /^#!.*\bperl.*-\w*T/;
+    $s .= join " ", qq[ "-$1"], map {qq["-I$_"]} @INC
+      if $first =~ /^#!.*\bperl.*-\w*([tT])/;
 
     close(TEST) or print "can't close $test. $!\n";
 

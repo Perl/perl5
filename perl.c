@@ -1099,6 +1099,8 @@ S_parse_body(pTHX_ char **env, XSINIT_t xsinit)
 		goto reswitch;
 	    break;
 
+    case 't':
+        PL_taint_warn = TRUE;
 	case 'T':
 	    PL_tainting = TRUE;
 	    s++;
@@ -2373,6 +2375,11 @@ Perl_moreswitches(pTHX_ char *s)
 	PL_doswitches = TRUE;
 	s++;
 	return s;
+    case 't':
+        if (!PL_tainting)
+            Perl_croak(aTHX_ "Too late for \"-t\" option");
+        s++;
+        return s;
     case 'T':
 	if (!PL_tainting)
 	    Perl_croak(aTHX_ "Too late for \"-T\" option");
