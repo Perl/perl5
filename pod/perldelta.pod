@@ -184,6 +184,8 @@ Net::Ping
 
 podlators
 
+Pod::LaTeX
+
 Pod::Perldoc
 
 Scalar::Util - New utilities: refaddr, isvstring, looks_like_number,
