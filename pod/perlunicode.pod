@@ -9,13 +9,14 @@ perlunicode - Unicode support in Perl
 WARNING: While the implementation of Unicode support in Perl is now fairly
 complete it is still evolving to some extent.
 
-In particular the way Unicode is handled on EBCDIC platforms is still rather
-experimental. On such a platform references to UTF-8 encoding in this
-document and elsewhere should be read as meaning UTF-EBCDIC as specified
-in Unicode Technical Report 16 unless ASCII vs EBCDIC issues are specifically
-discussed. There is no C<utfebcdic> pragma or ":utfebcdic" layer, rather
-"utf8" and ":utf8" are re-used to mean platform's "natural" 8-bit encoding
-of Unicode. See L<perlebcdic> for more discussion of the issues.
+In particular the way Unicode is handled on EBCDIC platforms is still
+rather experimental. On such a platform references to UTF-8 encoding
+in this document and elsewhere should be read as meaning UTF-EBCDIC as
+specified in Unicode Technical Report 16 unless ASCII vs EBCDIC issues
+are specifically discussed. There is no C<utfebcdic> pragma or
+":utfebcdic" layer, rather "utf8" and ":utf8" are re-used to mean
+platform's "natural" 8-bit encoding of Unicode. See L<perlebcdic> for
+more discussion of the issues.
 
 The following areas are still under development.
 
@@ -23,32 +24,32 @@ The following areas are still under development.
 
 =item Input and Output Disciplines
 
-A filehandle can be marked as containing perl's internal Unicode encoding
-(UTF-8 or UTF-EBCDIC) by opening it with the ":utf8" layer.
+A filehandle can be marked as containing perl's internal Unicode
+encoding (UTF-8 or UTF-EBCDIC) by opening it with the ":utf8" layer.
 Other encodings can be converted to perl's encoding on input, or from
-perl's encoding on output by use of the ":encoding()" layer.
-There is not yet a clean way to mark the perl source itself as being
-in an particular encoding.
+perl's encoding on output by use of the ":encoding()" layer.  There is
+not yet a clean way to mark the Perl source itself as being in an
+particular encoding.
 
 =item Regular Expressions
 
 The regular expression compiler does now attempt to produce
 polymorphic opcodes.  That is the pattern should now adapt to the data
-and automatically switch to the Unicode character scheme when presented
-with Unicode data, or a traditional byte scheme when presented with
-byte data.  The implementation is still new and (particularly on
-EBCDIC platforms) may need further work.
+and automatically switch to the Unicode character scheme when
+presented with Unicode data, or a traditional byte scheme when
+presented with byte data.  The implementation is still new and
+(particularly on EBCDIC platforms) may need further work.
 
 =item C<use utf8> still needed to enable a few features
 
-The C<utf8> pragma implements the tables used for Unicode support.  These
-tables are automatically loaded on demand, so the C<utf8> pragma need not
-normally be used.
+The C<utf8> pragma implements the tables used for Unicode support.
+These tables are automatically loaded on demand, so the C<utf8> pragma
+need not normally be used.
 
-However, as a compatibility measure, this pragma must be explicitly used
-to enable recognition of UTF-8 encoded literals and identifiers in the
-source text on ASCII based machines or recognize UTF-EBCDIC encoded literals
-and identifiers on EBCDIC based machines.
+However, as a compatibility measure, this pragma must be explicitly
+used to enable recognition of UTF-8 encoded literals and identifiers
+in the source text on ASCII based machines or recognize UTF-EBCDIC
+encoded literals and identifiers on EBCDIC based machines.
 
 =back
 
@@ -58,16 +59,16 @@ Beginning with version 5.6, Perl uses logically wide characters to
 represent strings internally.  This internal representation of strings
 uses either the UTF-8 or the UTF-EBCDIC encoding.
 
-In future, Perl-level operations can be expected to work with characters
-rather than bytes, in general.
+In future, Perl-level operations can be expected to work with
+characters rather than bytes, in general.
 
-However, as strictly an interim compatibility measure, Perl v5.6 aims to
-provide a safe migration path from byte semantics to character semantics
-for programs.  For operations where Perl can unambiguously decide that the
-input data is characters, Perl now switches to character semantics.
-For operations where this determination cannot be made without additional
-information from the user, Perl decides in favor of compatibility, and
-chooses to use byte semantics.
+However, as strictly an interim compatibility measure, Perl aims to
+provide a safe migration path from byte semantics to character
+semantics for programs.  For operations where Perl can unambiguously
+decide that the input data is characters, Perl now switches to
+character semantics.  For operations where this determination cannot
+be made without additional information from the user, Perl decides in
+favor of compatibility, and chooses to use byte semantics.
 
 This behavior preserves compatibility with earlier versions of Perl,
 which allowed byte semantics in Perl operations, but only as long as
@@ -76,20 +77,21 @@ character data.  Such data may come from filehandles, from calls to
 external programs, from information provided by the system (such as %ENV),
 or from literals and constants in the source text.
 
-If the C<-C> command line switch is used, (or the ${^WIDE_SYSTEM_CALLS}
-global flag is set to C<1>), all system calls will use the
-corresponding wide character APIs.  This is currently only implemented
-on Windows since UNIXes lack API standard on this area.
+If the C<-C> command line switch is used, (or the
+${^WIDE_SYSTEM_CALLS} global flag is set to C<1>), all system calls
+will use the corresponding wide character APIs.  Note that this is
+currently only implemented on Windows since other platforms API
+standard on this area.
 
-Regardless of the above, the C<bytes> pragma can always be used to force
-byte semantics in a particular lexical scope.  See L<bytes>.
+Regardless of the above, the C<bytes> pragma can always be used to
+force byte semantics in a particular lexical scope.  See L<bytes>.
 
 The C<utf8> pragma is primarily a compatibility device that enables
-recognition of UTF-(8|EBCDIC) in literals encountered by the parser.  It may also
-be used for enabling some of the more experimental Unicode support features.
-Note that this pragma is only required until a future version of Perl
-in which character semantics will become the default.  This pragma may
-then become a no-op.  See L<utf8>.
+recognition of UTF-(8|EBCDIC) in literals encountered by the parser.
+It may also be used for enabling some of the more experimental Unicode
+support features.  Note that this pragma is only required until a
+future version of Perl in which character semantics will become the
+default.  This pragma may then become a no-op.  See L<utf8>.
 
 Unless mentioned otherwise, Perl operators will use character semantics
 when they are dealing with Unicode data, and byte semantics otherwise.
@@ -101,9 +103,9 @@ apply; otherwise, byte semantics are in effect.  To force byte semantics
 on Unicode data, the C<bytes> pragma should be used.
 
 Under character semantics, many operations that formerly operated on
-bytes change to operating on characters.  For ASCII data this makes
-no difference, because UTF-8 stores ASCII in single bytes, but for
-any character greater than C<chr(127)>, the character may be stored in
+bytes change to operating on characters.  For ASCII data this makes no
+difference, because UTF-8 stores ASCII in single bytes, but for any
+character greater than C<chr(127)>, the character B<may> be stored in
 a sequence of two or more bytes, all of which have the high bit set.
 
 For C1 controls or Latin 1 characters on an EBCDIC platform the
@@ -125,33 +127,33 @@ Character semantics have the following effects:
 Strings and patterns may contain characters that have an ordinal value
 larger than 255.
 
-Presuming you use a Unicode editor to edit your program, such characters
-will typically occur directly within the literal strings as UTF-(8|EBCDIC)
-characters, but you can also specify a particular character with an
-extension of the C<\x> notation.  UTF-X characters are specified by
-putting the hexadecimal code within curlies after the C<\x>.  For instance,
-a Unicode smiley face is C<\x{263A}>.
+Presuming you use a Unicode editor to edit your program, such
+characters will typically occur directly within the literal strings as
+UTF-8 (or UTF-EBCDIC on EBCDIC platforms) characters, but you can also
+specify a particular character with an extension of the C<\x>
+notation.  UTF-X characters are specified by putting the hexadecimal
+code within curlies after the C<\x>.  For instance, a Unicode smiley
+face is C<\x{263A}>.
 
 =item *
 
 Identifiers within the Perl script may contain Unicode alphanumeric
 characters, including ideographs.  (You are currently on your own when
-it comes to using the canonical forms of characters--Perl doesn't (yet)
-attempt to canonicalize variable names for you.)
+it comes to using the canonical forms of characters--Perl doesn't
+(yet) attempt to canonicalize variable names for you.)
 
 =item *
 
 Regular expressions match characters instead of bytes.  For instance,
 "." matches a character instead of a byte.  (However, the C<\C> pattern
-is provided to force a match a single byte ("C<char>" in C, hence
-C<\C>).)
+is provided to force a match a single byte ("C<char>" in C, hence C<\C>).)
 
 =item *
 
 Character classes in regular expressions match characters instead of
 bytes, and match against the character properties specified in the
-Unicode properties database.  So C<\w> can be used to match an ideograph,
-for instance.
+Unicode properties database.  So C<\w> can be used to match an
+ideograph, for instance.
 
 =item *
 
@@ -162,9 +164,9 @@ character with the Unicode uppercase property, while C<\p{M}> matches
 any mark character.  Single letter properties may omit the brackets,
 so that can be written C<\pM> also.  Many predefined character classes
 are available, such as C<\p{IsMirrored}> and C<\p{InTibetan}>.  The
-names of the C<In> classes are the official Unicode block names but
-with all non-alphanumeric characters removed, for example the block
-name C<"Latin-1 Supplement"> becomes C<\p{InLatin1Supplement}>.
+names of the C<In> classes are the official Unicode script and block
+names but with all non-alphanumeric characters removed, for example
+the block name C<"Latin-1 Supplement"> becomes C<\p{InLatin1Supplement}>.
 
 Here is the list as of Unicode 3.1.0 (the two-letter classes) and
 as defined by Perl (the one-letter classes) (in Unicode materials
@@ -236,9 +238,8 @@ have their directionality defined:
 
 =head2 Scripts
 
-The scripts available for C<\p{In...}> and C<\P{In...}>, for
-example \p{InCyrillic>, are as follows, for example C<\p{InLatin}>
-or C<\P{InHan}>:
+The scripts available for C<\p{In...}> and C<\P{In...}>, for example
+\p{InCyrillic>, are as follows, for example C<\p{InLatin}> or C<\P{InHan}>:
 
    Latin
    Greek
@@ -429,13 +430,13 @@ sequences have the same semantics.
 =item *
 
 Most operators that deal with positions or lengths in the string will
-automatically switch to using character positions, including C<chop()>,
-C<substr()>, C<pos()>, C<index()>, C<rindex()>, C<sprintf()>,
-C<write()>, and C<length()>.  Operators that specifically don't switch
-include C<vec()>, C<pack()>, and C<unpack()>.  Operators that really
-don't care include C<chomp()>, as well as any other operator that
-treats a string as a bucket of bits, such as C<sort()>, and the
-operators dealing with filenames.
+automatically switch to using character positions, including
+C<chop()>, C<substr()>, C<pos()>, C<index()>, C<rindex()>,
+C<sprintf()>, C<write()>, and C<length()>.  Operators that
+specifically don't switch include C<vec()>, C<pack()>, and
+C<unpack()>.  Operators that really don't care include C<chomp()>, as
+well as any other operator that treats a string as a bucket of bits,
+such as C<sort()>, and the operators dealing with filenames.
 
 =item *
 
@@ -456,12 +457,12 @@ byte-oriented C<chr()> and C<ord()> under utf8.
 
 The bit string operators C<& | ^ ~> can operate on character data.
 However, for backward compatibility reasons (bit string operations
-when the characters all are less than 256 in ordinal value) one cannot
-mix C<~> (the bit complement) and characters both less than 256 and
+when the characters all are less than 256 in ordinal value) one should
+not mix C<~> (the bit complement) and characters both less than 256 and
 equal or greater than 256.  Most importantly, the DeMorgan's laws
 (C<~($x|$y) eq ~$x&~$y>, C<~($x&$y) eq ~$x|~$y>) won't hold.
 Another way to look at this is that the complement cannot return
-B<both> the 8-bit (byte) wide bit complement, and the full character
+B<both> the 8-bit (byte) wide bit complement B<and> the full character
 wide bit complement.
 
 =item *
