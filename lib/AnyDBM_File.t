@@ -135,7 +135,7 @@ ok($h{'foo'} eq '', "empty value");
 
 my $compact = '';
 
-if ($AnyDBM_File::ISA[0] eq 'DB_File' && $DB_File::db_ver >= 2.004010) {
+if ($AnyDBM_File::ISA[0] eq 'DB_File' && ($DB_File::db_ver >= 2.004010 && $DB_File::db_ver < 3.001)) {
      ($major, $minor, $patch) = ($DB_File::db_ver =~ /^(\d+)\.(\d\d\d)(\d\d\d)/) ;
      $major =~ s/^0+// ;
      $minor =~ s/^0+// ;
@@ -147,7 +147,7 @@ if ($AnyDBM_File::ISA[0] eq 'DB_File' && $DB_File::db_ver >= 2.004010) {
      # You are using DB_File $DB_File::VERSION and Berkeley DB $compact
      #
      # Berkeley DB 2 from version 2.4.10 onwards does not allow null keys.
-     # This feature will be reenabled in a future version of Berkeley DB.
+     # This feature returned with version 3.1
      #
 }
 
