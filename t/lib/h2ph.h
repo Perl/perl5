@@ -98,4 +98,20 @@ typedef enum _days_of_week { sun, mon, tue, wed, thu, fri, sat, Sun=0, Mon,
 ??= define SOMETHING_ELSE_TRIGRAPHIC_8 "??>"          /* | ??>|  }| */
 	??=endif
 
+/* comments (that look like string) inside enums... */
+
+enum {
+   /* foo;
+     can't
+   */                        
+ };
+
+enum flimflam {
+  flim,
+   /* foo;
+     can't
+   */
+  flam                      
+ } flamflim;
+
 #endif /* _H2PH_H_ */
