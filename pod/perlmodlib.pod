@@ -98,6 +98,10 @@ Compute arithmetic in integer instead of double
 
 Request less of something from the compiler
 
+=item lib
+
+Manipulate @INC at compile time
+
 =item locale
 
 Use and avoid POSIX locales for built-in operations
@@ -195,6 +199,10 @@ Perl compiler's C backend
 =item B::CC
 
 Perl compiler's optimized C translation backend
+
+=item B::Concise
+
+Walk Perl syntax tree, printing concise info about ops
 
 =item B::Debug
 
@@ -320,10 +328,6 @@ Supply object methods for directory handles
 
 Provides screen dump of Perl data.
 
-=item Encode
-
-Character encodings
-
 =item English
 
 Use nice English (or awk) names for ugly punctuation variables
@@ -444,6 +448,10 @@ Create or remove directory trees
 
 Portably perform operations on file names
 
+=item File::Spec::Epoc
+
+Methods for Epoc file specs
+
 =item File::Spec::Functions
 
 Portably perform operations on file names
@@ -488,6 +496,10 @@ Supply object methods for filehandles
 
 Locate directory of original perl script
 
+=item GDBM_File
+
+Perl5 access to the gdbm library.
+
 =item Getopt::Long
 
 Extended processing of command line options
@@ -528,10 +540,6 @@ Complex numbers and associated mathematical functions
 
 Trigonometric functions
 
-=item NDBM_File
-
-Tied access to ndbm files
-
 =item Net::Ping
 
 Check a remote host for reachability
@@ -555,10 +563,6 @@ By-name interface to Perl's built-in getserv*() functions
 =item O
 
 Generic interface to Perl Compiler backends
-
-=item ODBM_File
-
-Tied access to odbm files
 
 =item Opcode
 
@@ -612,6 +616,10 @@ Convert POD data to formatted ASCII text
 
 Convert POD data to formatted color ASCII text
 
+=item Pod::Text::Overstrike
+
+Convert POD data to formatted overstrike text
+
 =item Pod::Text::Termcap
 
 Convert POD data to ASCII text with format escapes
@@ -647,10 +655,6 @@ Run shell commands transparently within perl
 =item Socket
 
 Load the C socket.h defines and structure manipulators 
-
-=item Storable
-
-Persistency for perl data structures
 
 =item Symbol
 
@@ -695,6 +699,26 @@ Implementation of the Soundex Algorithm as Described by Knuth
 =item Text::Wrap
 
 Line wrapping to form simple paragraphs
+
+=item Thread
+
+Manipulate threads in Perl (EXPERIMENTAL, subject to change)
+
+=item Thread::Queue
+
+Thread-safe queues
+
+=item Thread::Semaphore
+
+Thread-safe semaphores
+
+=item Thread::Signal
+
+Start a thread which runs signal handlers reliably
+
+=item Thread::Specific
+
+Thread-specific keys
 
 =item Tie::Array
 
@@ -791,90 +815,69 @@ Most importantly, CPAN includes around a thousand unbundled modules,
 some of which require a C compiler to build.  Major categories of
 modules are:
 
-=over 4
+=over
 
 =item *
-
 Language Extensions and Documentation Tools
 
 =item *
-
 Development Support
 
 =item *
-
 Operating System Interfaces
 
 =item *
-
 Networking, Device Control (modems) and InterProcess Communication
 
 =item *
-
 Data Types and Data Type Utilities
 
 =item *
-
 Database Interfaces
 
 =item *
-
 User Interfaces
 
 =item *
-
 Interfaces to / Emulations of Other Programming Languages
 
 =item *
-
 File Names, File Systems and File Locking (see also File Handles)
 
 =item *
-
 String Processing, Language Text Processing, Parsing, and Searching
 
 =item *
-
 Option, Argument, Parameter, and Configuration File Processing
 
 =item *
-
 Internationalization and Locale
 
 =item *
-
 Authentication, Security, and Encryption
 
 =item *
-
 World Wide Web, HTML, HTTP, CGI, MIME
 
 =item *
-
 Server and Daemon Utilities
 
 =item *
-
 Archiving and Compression
 
 =item *
-
 Images, Pixmap and Bitmap Manipulation, Drawing, and Graphing
 
 =item *
-
 Mail and Usenet News
 
 =item *
-
 Control Flow Utilities (callbacks and exceptions etc)
 
 =item *
-
 File Handle and Input/Output Stream Utilities
 
 =item *
-
 Miscellaneous Modules
 
 =back
@@ -882,7 +885,7 @@ Miscellaneous Modules
 Registered CPAN sites as of this writing include the following.
 You should try to choose one close to you:
 
-=over 4
+=over
 
 =item Africa
 
@@ -1238,6 +1241,12 @@ If adding a new module to a set, follow the original author's
 standards for naming modules and the interface to methods in
 those modules.
 
+If developing modules for private internal or project specific use,
+that will never be released to the public, then you should ensure
+that their names will not clash with any future public module. You
+can do this either by using the reserved Local::* category or by
+using a category name that includes an underscore like Foo_Corp::*.
+
 To be portable each component of a module name should be limited to
 11 characters. If it might be used on MS-DOS then try to ensure each is
 unique in the first 8 characters. Nested modules make this easier.
@@ -1437,28 +1446,18 @@ Don't delete the original .pl file till the new .pm one works!
 
 =over 4
 
-=item *
+=item Complete applications rarely belong in the Perl Module Library.
 
-Complete applications rarely belong in the Perl Module Library.
-
-=item *
-
-Many applications contain some Perl code that could be reused.
+=item Many applications contain some Perl code that could be reused.
 
 Help save the world! Share your code in a form that makes it easy
 to reuse.
 
-=item *
+=item Break-out the reusable code into one or more separate module files.
 
-Break-out the reusable code into one or more separate module files.
+=item Take the opportunity to reconsider and redesign the interfaces.
 
-=item *
-
-Take the opportunity to reconsider and redesign the interfaces.
-
-=item *
-
-In some cases the 'application' can then be reduced to a small
+=item In some cases the 'application' can then be reduced to a small
 
 fragment of code built on top of the reusable modules. In these cases
 the application could invoked as:

@@ -2181,36 +2181,39 @@ chcp, dataset access, OS/390 iconv, locales
 =item Pragmatic Modules
 
 attributes, attrs, autouse, base, blib, bytes, charnames, constant,
-diagnostics, fields, filetest, integer, less, locale, open, ops, overload,
-re, sigtrap, strict, subs, utf8, vars, warnings, warnings::register
+diagnostics, fields, filetest, integer, less, lib, locale, open, ops,
+overload, re, sigtrap, strict, subs, utf8, vars, warnings,
+warnings::register
 
 =item Standard Modules
 
 AnyDBM_File, AutoLoader, AutoSplit, B, B::Asmdata, B::Assembler, B::Bblock,
-B::Bytecode, B::C, B::CC, B::Debug, B::Deparse, B::Disassembler, B::Lint,
-B::Showlex, B::Stackobj, B::Stash, B::Terse, B::Xref, Benchmark,
-ByteLoader, CGI, CGI::Apache, CGI::Carp, CGI::Cookie, CGI::Fast,
-CGI::Pretty, CGI::Push, CGI::Switch, CPAN, CPAN::FirstTime, CPAN::Nox,
-Carp, Carp::Heavy, Class::Struct, Cwd, DB, DB_File, Devel::SelfStubber,
-DirHandle, Dumpvalue, Encode, English, Env, Exporter, Exporter::Heavy,
-ExtUtils::Command, ExtUtils::Embed, ExtUtils::Install, ExtUtils::Installed,
-ExtUtils::Liblist, ExtUtils::MM_Cygwin, ExtUtils::MM_OS2,
-ExtUtils::MM_Unix, ExtUtils::MM_VMS, ExtUtils::MM_Win32,
+B::Bytecode, B::C, B::CC, B::Concise, B::Debug, B::Deparse,
+B::Disassembler, B::Lint, B::Showlex, B::Stackobj, B::Stash, B::Terse,
+B::Xref, Benchmark, ByteLoader, CGI, CGI::Apache, CGI::Carp, CGI::Cookie,
+CGI::Fast, CGI::Pretty, CGI::Push, CGI::Switch, CPAN, CPAN::FirstTime,
+CPAN::Nox, Carp, Carp::Heavy, Class::Struct, Cwd, DB, DB_File,
+Devel::SelfStubber, DirHandle, Dumpvalue, English, Env, Exporter,
+Exporter::Heavy, ExtUtils::Command, ExtUtils::Embed, ExtUtils::Install,
+ExtUtils::Installed, ExtUtils::Liblist, ExtUtils::MM_Cygwin,
+ExtUtils::MM_OS2, ExtUtils::MM_Unix, ExtUtils::MM_VMS, ExtUtils::MM_Win32,
 ExtUtils::MakeMaker, ExtUtils::Manifest, ExtUtils::Mkbootstrap,
 ExtUtils::Mksymlists, ExtUtils::Packlist, ExtUtils::testlib, Fatal, Fcntl,
 File::Basename, File::CheckTree, File::Compare, File::Copy, File::DosGlob,
-File::Find, File::Path, File::Spec, File::Spec::Functions, File::Spec::Mac,
-File::Spec::OS2, File::Spec::Unix, File::Spec::VMS, File::Spec::Win32,
-File::Temp, File::stat, FileCache, FileHandle, FindBin, Getopt::Long,
-Getopt::Std, I18N::Collate, IO, IPC::Open2, IPC::Open3, Math::BigFloat,
-Math::BigInt, Math::Complex, Math::Trig, NDBM_File, Net::Ping,
-Net::hostent, Net::netent, Net::protoent, Net::servent, O, ODBM_File,
-Opcode, Pod::Checker, Pod::Find, Pod::Html, Pod::InputObjects, Pod::LaTeX,
-Pod::Man, Pod::ParseUtils, Pod::Parser, Pod::Plainer, Pod::Select,
-Pod::Text, Pod::Text::Color, Pod::Text::Termcap, Pod::Usage, SDBM_File,
-Safe, Search::Dict, SelectSaver, SelfLoader, Shell, Socket, Storable,
-Symbol, Term::ANSIColor, Term::Cap, Term::Complete, Term::ReadLine, Test,
+File::Find, File::Path, File::Spec, File::Spec::Epoc,
+File::Spec::Functions, File::Spec::Mac, File::Spec::OS2, File::Spec::Unix,
+File::Spec::VMS, File::Spec::Win32, File::Temp, File::stat, FileCache,
+FileHandle, FindBin, GDBM_File, Getopt::Long, Getopt::Std, I18N::Collate,
+IO, IPC::Open2, IPC::Open3, Math::BigFloat, Math::BigInt, Math::Complex,
+Math::Trig, Net::Ping, Net::hostent, Net::netent, Net::protoent,
+Net::servent, O, Opcode, Pod::Checker, Pod::Find, Pod::Html,
+Pod::InputObjects, Pod::LaTeX, Pod::Man, Pod::ParseUtils, Pod::Parser,
+Pod::Plainer, Pod::Select, Pod::Text, Pod::Text::Color,
+Pod::Text::Overstrike, Pod::Text::Termcap, Pod::Usage, SDBM_File, Safe,
+Search::Dict, SelectSaver, SelfLoader, Shell, Socket, Symbol,
+Term::ANSIColor, Term::Cap, Term::Complete, Term::ReadLine, Test,
 Test::Harness, Text::Abbrev, Text::ParseWords, Text::Soundex, Text::Wrap,
+Thread, Thread::Queue, Thread::Semaphore, Thread::Signal, Thread::Specific,
 Tie::Array, Tie::Handle, Tie::Hash, Tie::RefHash, Tie::Scalar,
 Tie::SubstrHash, Time::Local, Time::gmtime, Time::localtime, Time::tm,
 UNIVERSAL, User::grent, User::pwent
@@ -2221,8 +2224,20 @@ UNIVERSAL, User::grent, User::pwent
 
 =item CPAN
 
-Africa, Asia, Australasia, Central America, Europe, North America, South
-America
+Language Extensions and Documentation Tools, Development Support, Operating
+System Interfaces, Networking, Device Control (modems) and InterProcess
+Communication, Data Types and Data Type Utilities, Database Interfaces,
+User Interfaces, Interfaces to / Emulations of Other Programming Languages,
+File Names, File Systems and File Locking (see also File Handles), String
+Processing, Language Text Processing, Parsing, and Searching, Option,
+Argument, Parameter, and Configuration File Processing,
+Internationalization and Locale, Authentication, Security, and Encryption,
+World Wide Web, HTML, HTTP, CGI, MIME, Server and Daemon Utilities,
+Archiving and Compression, Images, Pixmap and Bitmap Manipulation, Drawing,
+and Graphing, Mail and Usenet News, Control Flow Utilities (callbacks and
+exceptions etc), File Handle and Input/Output Stream Utilities,
+Miscellaneous Modules, Africa, Asia, Australasia, Central America, Europe,
+North America, South America
 
 =item Modules: Creation, Use, and Abuse
 
@@ -2250,6 +2265,12 @@ Adds the standard Module prologue lines, Converts package specifiers from '
 to ::, Converts die(...) to croak(...), Several other minor changes
 
 =item Guidelines for Reusing Application Code
+
+Complete applications rarely belong in the Perl Module Library, Many
+applications contain some Perl code that could be reused, Break-out the
+reusable code into one or more separate module files, Take the opportunity
+to reconsider and redesign the interfaces, In some cases the 'application'
+can then be reduced to a small
 
 =back
 
@@ -3829,20 +3850,19 @@ mg_get, mg_length, mg_magical, mg_set, Move, New, newAV, Newc, newCONSTSUB,
 newHV, newRV_inc, newRV_noinc, NEWSV, newSViv, newSVnv, newSVpv, newSVpvf,
 newSVpvn, newSVrv, newSVsv, newSVuv, newXS, newXSproto, Newz, Nullav,
 Nullch, Nullcv, Nullhv, Nullsv, ORIGMARK, perl_alloc, perl_construct,
-perl_destruct, perl_free, perl_parse, perl_run, PL_DBsingle, PL_DBsub,
-PL_DBtrace, PL_dowarn, PL_last_in_gv, PL_modglobal, PL_na, PL_ofs_sv,
-PL_rs, PL_sv_no, PL_sv_undef, PL_sv_yes, POPi, POPl, POPn, POPp, POPs,
-PUSHi, PUSHMARK, PUSHn, PUSHp, PUSHs, PUSHu, PUTBACK, Renew, Renewc,
-require_pv, RETVAL, Safefree, savepv, savepvn, SAVETMPS, SP, SPAGAIN, ST,
-strEQ, strGE, strGT, strLE, strLT, strNE, strnEQ, strnNE, StructCopy,
-SvCUR, SvCUR_set, SvEND, SvGETMAGIC, SvGROW, SvIOK, SvIOKp, SvIOK_notUV,
-SvIOK_off, SvIOK_on, SvIOK_only, SvIOK_only_UV, SvIOK_UV, SvIV, SvIVX,
-SvLEN, SvNIOK, SvNIOKp, SvNIOK_off, SvNOK, SvNOKp, SvNOK_off, SvNOK_on,
-SvNOK_only, SvNV, SvNVX, SvOK, SvOOK, SvPOK, SvPOKp, SvPOK_off, SvPOK_on,
-SvPOK_only, SvPOK_only_UTF8, SvPV, SvPVX, SvPV_force, SvPV_nolen, SvREFCNT,
+perl_destruct, perl_free, perl_parse, perl_run, PL_modglobal, PL_na,
+PL_sv_no, PL_sv_undef, PL_sv_yes, POPi, POPl, POPn, POPp, POPs, PUSHi,
+PUSHMARK, PUSHn, PUSHp, PUSHs, PUSHu, PUTBACK, Renew, Renewc, require_pv,
+RETVAL, Safefree, savepv, savepvn, SAVETMPS, SP, SPAGAIN, ST, strEQ, strGE,
+strGT, strLE, strLT, strNE, strnEQ, strnNE, StructCopy, SvCUR, SvCUR_set,
+SvEND, SvGETMAGIC, SvGROW, SvIOK, SvIOKp, SvIOK_notUV, SvIOK_off, SvIOK_on,
+SvIOK_only, SvIOK_only_UV, SvIOK_UV, SvIV, SvIVX, SvLEN, SvNIOK, SvNIOKp,
+SvNIOK_off, SvNOK, SvNOKp, SvNOK_off, SvNOK_on, SvNOK_only, SvNV, SvNVX,
+SvOK, SvOOK, SvPOK, SvPOKp, SvPOK_off, SvPOK_on, SvPOK_only,
+SvPOK_only_UTF8, SvPV, SvPVX, SvPV_force, SvPV_nolen, SvREFCNT,
 SvREFCNT_dec, SvREFCNT_inc, SvROK, SvROK_off, SvROK_on, SvRV, SvSETMAGIC,
 SvSetSV, SvSetSV_nosteal, SvSTASH, SvTAINT, SvTAINTED, SvTAINTED_off,
-SvTAINTED_on, SvTRUE, SvTYPE, svtype, SVt_IV, SVt_NV, SVt_PV, SVt_PVAV,
+SvTAINTED_on, SvTRUE, svtype, SvTYPE, SVt_IV, SVt_NV, SVt_PV, SVt_PVAV,
 SVt_PVCV, SVt_PVHV, SVt_PVMG, SvUPGRADE, SvUTF8, SvUTF8_off, SvUTF8_on,
 SvUV, SvUVX, sv_2mortal, sv_bless, sv_catpv, sv_catpvf, sv_catpvf_mg,
 sv_catpvn, sv_catpvn_mg, sv_catpv_mg, sv_catsv, sv_catsv_mg, sv_chop,
@@ -3876,7 +3896,8 @@ Zero
 
 =item DESCRIPTION
 
-is_gv_magical
+is_gv_magical, LVRET, PL_DBsingle, PL_DBsub, PL_DBtrace, PL_dowarn,
+PL_last_in_gv, PL_ofs_sv, PL_rs
 
 =item AUTHORS
 
@@ -5439,6 +5460,30 @@ op/lexassign.t, pragma/warnings.t
 
 =back
 
+=head2 perlmpeix, README.mpeix - Perl/iX for HP e3000 MPE
+
+=head1 SYNOPSIS
+
+=over 4
+
+=item What's New
+
+=item System Requirements
+
+=item How to Obtain Perl/iX
+
+=item Distribution Contents Highlights
+
+README, public_html/feedback.cgi,  4,  6
+
+=item Getting Started with Perl/iX
+
+=item MPE/iX Implementation Considerations
+
+=item Change History
+
+=back
+
 =head2 perlos2 - Perl under OS/2, DOS, Win0.3*, Win0.95 and WinNT.
 
 =over 4
@@ -6824,6 +6869,45 @@ B<-ffreetmps-each-bblock>, B<-ffreetmps-each-loop>, B<-fomit-taint>, B<-On>
 
 =back
 
+=head2 B::Concise - Walk Perl syntax tree, printing concise info about ops
+
+=over 4
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+=item OPTIONS
+
+B<-basic>, B<-exec>, B<-tree>, B<-compact>, B<-loose>, B<-vt>, B<-ascii>,
+B<-main>, B<-base>I<n>, B<-bigendian>, B<-littleendian>, B<-concise>,
+B<-terse>, B<-linenoise>, B<-debug>, B<-env>
+
+=item FORMATTING SPECIFICATIONS
+
+B<(x(>I<exec_text>B<;>I<basic_text>B<)x)>, B<(*(>I<text>B<)*)>,
+B<(*(>I<text1>B<;>I<text2>B<)*)>, B<(?(>I<text1>B<#>I<var>I<Text2>B<)?)>,
+B<#>I<var>, B<#>I<var>I<N>, B<~>, B<#addr>, B<#arg>, B<#class>,
+B<#classym>, B<#coplabel>, B<#exname>, B<#extarg>, B<#firstaddr>,
+B<#flags>, B<#flagval>, B<#hyphenseq>, B<#label>, B<#lastaddr>, B<#name>,
+B<#NAME>, B<#next>, B<#nextaddr>, B<#noise>, B<#private>, B<#privval>,
+B<#seq>, B<#seqnum>, B<#sibaddr>, B<#svaddr>, B<#svclass>, B<#svval>,
+B<#targ>, B<#targarg>, B<#targarglife>, B<#typenum>
+
+=item ABBREVIATIONS
+
+=over 4
+
+=item OP flags abbreviations
+
+=item OP class abbreviations
+
+=back
+
+=item AUTHOR
+
+=back
+
 =head2 B::Debug - Walk Perl syntax tree, printing debug info about ops
 
 =over 4
@@ -6847,7 +6931,7 @@ B<-ffreetmps-each-bblock>, B<-ffreetmps-each-loop>, B<-fomit-taint>, B<-On>
 =item OPTIONS
 
 B<-l>, B<-p>, B<-q>, B<-u>I<PACKAGE>, B<-s>I<LETTERS>, B<C>, B<i>I<NUMBER>,
-B<T>, B<v>I<STRING>B<.>
+B<T>, B<v>I<STRING>B<.>, B<-x>I<LEVEL>
 
 =item USING B::Deparse AS A MODULE
 
@@ -7643,7 +7727,7 @@ module
 
 =back
 
-=head2 Carp::Heavy, Carp heavy machinery - no user serviceable parts inside
+=head2 Carp::Heavy - Carp guts
 
 =over 4
 
@@ -9612,6 +9696,12 @@ TopSystemUID
 =over 4
 
 =item WARNING
+
+=over 4
+
+=item Temporary files and NFS
+
+=back
 
 =item HISTORY
 
@@ -11942,6 +12032,23 @@ specification "%s", %s:%d: Unknown command paragraph "%s", Unknown escape:
 =back
 
 =head2 Pod::Text::Color - Convert POD data to formatted color ASCII text
+
+=over 4
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+=item BUGS
+
+=item SEE ALSO
+
+=item AUTHOR
+
+=back
+
+=head2 Pod::Text::Overstrike - Convert POD data to formatted overstrike
+text
 
 =over 4
 
