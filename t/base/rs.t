@@ -24,7 +24,7 @@ $bar = <TESTFILE>;
 if ($bar eq "12\n") {print "ok 2\n";} else {print "not ok 2\n";}
 
 # Try a non line terminator
-$/ = "3";
+$/ = 3;
 $bar = <TESTFILE>;
 if ($bar eq "123") {print "ok 3\n";} else {print "not ok 3\n";}
 

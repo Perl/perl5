@@ -2379,8 +2379,8 @@ enum {		/* pass one of these to get_vtbl */
 
 /* Various states of an input record separator SV (rs, nrs) */
 #define RsSNARF(sv)   (! SvOK(sv))
-#define RsSIMPLE(sv)  (SvOK(sv) && SvCUR(sv))
-#define RsPARA(sv)    (SvOK(sv) && ! SvCUR(sv))
+#define RsSIMPLE(sv)  (SvOK(sv) && (! SvPOK(sv) || SvCUR(sv)))
+#define RsPARA(sv)    (SvPOK(sv) && ! SvCUR(sv))
 #define RsRECORD(sv)  (SvROK(sv) && (SvIV(SvRV(sv)) > 0))
 
 /* Enable variables which are pointers to functions */
