@@ -1379,6 +1379,9 @@ sub process_puretext {
 # there may be pod commands embedded within the text so those must be
 # converted to html commands.
 #
+
+sub process_text1($$;$);
+
 sub process_text {
     return if $ignore;
     my( $tref ) = @_;
@@ -1880,6 +1883,8 @@ $E2c{lt} = '<';
 $E2c{gt} = '>';
 $E2c{sol} = '/';
 $E2c{verbar} = '|';
+
+sub depod1($;$);
 
 sub depod($){
     my $string;
