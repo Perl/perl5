@@ -285,19 +285,6 @@ rm -f core
 # XXX
 EOSH
 
-# Damon.Atkins@nabaus.com.au 19-Mar-1999
-# Large Files Support
-if [ -x /usr/bin/getconf ] ; then
-    ccflags="$ccflags `/usr/bin/getconf LFS_CFLAGS`"
-    [ "X${ccflags}"    = "X " ]    && ccflags=''
-    ldflags="$ldflags `/usr/bin/getconf LFS_LDFLAGS`"
-    [ "X${ldflags}" = "X " ]       && ldflags=''
-    libswanted="$libswanted `/usr/bin/getconf LFS_LIBS`"
-    [ "X${libswanted}" = "X " ]    && libswanted=''
-    lintflags="$lintflags `/usr/bin/getconf LFS_LINTFLAGS`"
-    [ "X${lintflags}"  = "X " ]    && lintflags=''
-fi
-
 # This script UU/usethreads.cbu will get 'called-back' by Configure 
 # after it has prompted the user for whether to use threads.
 cat > UU/usethreads.cbu <<'EOCBU'
@@ -360,9 +347,10 @@ EOM
 		exit 1
 		;;
 	    esac
-	    ccflags="$ccflags `getconf LFS_CFLAGS` -DUSE_LONG_LONG"
+	    ccflags="$ccflags `getconf LFS_CFLAGS`"
 	    ldflags="$ldflags `getconf LFS_LDFLAGS`"
 	    libswanted="$libswanted `getconf LFS_LIBS`"
+	    ccflags="$ccflags -DUSE_LONG_LONG"
 	    # When a 64-bit cc becomes available $archname64
 	    # may need setting so that $archname gets it attached.
 	    ;;
