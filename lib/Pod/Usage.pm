@@ -10,7 +10,7 @@
 package Pod::Usage;
 
 use vars qw($VERSION);
-$VERSION = 1.12;  ## Current version of this package
+$VERSION = 1.13;  ## Current version of this package
 require  5.005;    ## requires this Perl version or later
 
 =head1 NAME
@@ -46,7 +46,7 @@ B<pod2usage> should be given either a single argument, or a list of
 arguments corresponding to an associative array (a "hash"). When a single
 argument is given, it should correspond to exactly one of the following:
 
-=over
+=over 4
 
 =item *
 
@@ -68,7 +68,7 @@ assumed to be a hash.  If a hash is supplied (either as a reference or
 as a list) it should contain one or more elements with the following
 keys:
 
-=over
+=over 4
 
 =item C<-message>
 
@@ -129,7 +129,7 @@ Unless they are explicitly specified, the default values for the exit
 status, verbose level, and output stream to use are determined as
 follows:
 
-=over
+=over 4
 
 =item *
 
@@ -159,7 +159,7 @@ Although the above may seem a bit confusing at first, it generally does
 "the right thing" in most situations.  This determination of the default
 values to use is based upon the following typical Unix conventions:
 
-=over
+=over 4
 
 =item *
 
@@ -211,7 +211,7 @@ convenient to use as an innocent looking error message handling function:
     ## Check for too many filenames
     pod2usage("$0: Too many files given.\n")  if (@ARGV > 1);
 
-Some users however may feel that the above "economy of expression" is
+Some user's however may feel that the above "economy of expression" is
 not particularly readable nor consistent and may instead choose to do
 something more like the following:
 
