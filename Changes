@@ -103,6 +103,160 @@ Version v5.7.0		Development release working toward v5.8
 --------------
 
 ____________________________________________________________________________
+[  6888] By: jhi                                   on 2000/08/29  14:49:59
+        Log: Retract #6882, broke the safe tests.
+     Branch: perl
+	   ! ext/Opcode/Safe.pm
+____________________________________________________________________________
+[  6887] By: jhi                                   on 2000/08/29  14:47:06
+        Log: Subject: Re: [ID 20000525.003] perldoc fails when Makefile.PL is in cwd
+             From: Gisle Aas <gisle@ActiveState.com> 
+             Date: 09 Jun 2000 20:00:11 +0200
+             Message-ID: <m3n1kud9as.fsf@eik.g.aas.no>
+     Branch: perl
+	   ! utils/perldoc.PL
+____________________________________________________________________________
+[  6886] By: jhi                                   on 2000/08/29  14:42:45
+        Log: The #6881 removed one dump line.
+     Branch: perl
+	   ! t/lib/peek.t
+____________________________________________________________________________
+[  6885] By: jhi                                   on 2000/08/29  14:30:47
+        Log: Don't forget to tidy up.
+     Branch: perl
+	   ! t/lib/ftmp-security.t
+____________________________________________________________________________
+[  6884] By: jhi                                   on 2000/08/29  14:25:17
+        Log: Disabling the one test is a bit tricky.
+     Branch: perl
+	   ! t/lib/ftmp-security.t
+____________________________________________________________________________
+[  6883] By: jhi                                   on 2000/08/29  14:16:25
+        Log: Disable one of the tests for now.
+     Branch: perl
+	   ! t/lib/ftmp-security.t
+____________________________________________________________________________
+[  6882] By: jhi                                   on 2000/08/29  14:05:50
+        Log: Subject: [ID 20000829.004] Sharing leak root name into safe compartment
+             From: gisle@aas.no
+             Date: 29 Aug 2000 10:35:06 -0000
+             Message-Id: <20000829103506.21538.qmail@eik.g.aas.no>
+     Branch: perl
+	   ! ext/Opcode/Safe.pm
+____________________________________________________________________________
+[  6881] By: jhi                                   on 2000/08/29  14:03:51
+        Log: Subject: [PATCH] Glob dumping
+             From: Gisle Aas <gisle@ActiveState.com>
+             Date: 29 Aug 2000 07:59:42 -0000
+             Message-ID: <20000829075942.20923.qmail@eik.g.aas.no>
+     Branch: perl
+	   ! dump.c
+____________________________________________________________________________
+[  6880] By: jhi                                   on 2000/08/29  14:02:01
+        Log: Subject: [PATCH] Warnings in B::Deparse
+             From: <abigail@foad.org>
+             Date: Tue, 29 Aug 2000 00:00:01 -0400
+             Message-ID: <20000829040001.2999.qmail@foad.org>
+     Branch: perl
+	   ! ext/B/B/Deparse.pm
+____________________________________________________________________________
+[  6879] By: jhi                                   on 2000/08/29  13:57:26
+        Log: Missed a change in #6869.
+     Branch: perl
+	   ! mg.c
+____________________________________________________________________________
+[  6878] By: jhi                                   on 2000/08/29  13:45:04
+        Log: Subject: Net::protoent does not export 'getproto'
+             From: Yasushi Nakajima <sey@jkc.co.jp>
+             Date: Tue, 29 Aug 2000 17:28:57 +0900                 
+     Branch: perl
+	   ! lib/Net/protoent.pm
+____________________________________________________________________________
+[  6877] By: jhi                                   on 2000/08/29  13:39:19
+        Log: Patches all over for people and the files they (hopefully) care about.
+     Branch: perl
+	   ! AUTHORS Changes MAINTAIN
+____________________________________________________________________________
+[  6876] By: jhi                                   on 2000/08/29  12:53:54
+        Log: Fix for thinko in #6848.
+             
+             Subject: Compiler error in ext/Thread/Thread.c (bleadperl@6866)
+             From: Lupe Christoph <lupe@lupe-christoph.de>
+             Date: Tue, 29 Aug 2000 09:04:08 +0200
+             Message-ID: <20000829090408.V4437@alanya.lupe-christoph.de>
+     Branch: perl
+	   ! ext/Thread/Thread.xs
+____________________________________________________________________________
+[  6875] By: jhi                                   on 2000/08/29  12:50:14
+        Log: Update to Getopt::Long 2.24, from Johan Vromans.
+     Branch: perl
+	   ! lib/Getopt/Long.pm t/lib/gol-basic.t t/lib/gol-oo.t
+____________________________________________________________________________
+[  6874] By: jhi                                   on 2000/08/29  02:09:53
+        Log: Use minimal @INC in tests, most of the time just '../lib',
+             so that we simply can't pick up stuff from other Perls than
+             the one we are testing.  Pointed out by
+             
+             From: Mike Guy <mjtg@cam.ac.uk>
+             Subject: Re: [PATCH: 6757] make new Storable tests forgiving of places where not built   
+             Date: Fri, 25 Aug 2000 15:15:59 +0100
+             Message-Id: <E13SKH1-00031D-00@virgo.cus.cam.ac.uk>
+     Branch: perl
+	   ! (edit 185 files)
+____________________________________________________________________________
+[  6873] By: jhi                                   on 2000/08/29  01:07:11
+        Log: Subject: [PATCH] Re: files not cleaned even by veryclean
+             From: sthoenna@efn.org (Yitzchak Scott-Thoennes)
+             Date: Mon, 28 Aug 2000 17:45:52 -0700
+             Message-ID: <Afwq5gzkg2UB092yn@efn.org>
+     Branch: perl
+	   ! Makefile.SH hints/os2.sh
+____________________________________________________________________________
+[  6872] By: jhi                                   on 2000/08/28  23:33:39
+        Log: Subject: [PATCH bleedperl@6866] spellings
+             From: marcel@codewerk.com (Marcel Grunauer)
+             Date: Tue, 29 Aug 2000 01:19:59 +0200
+             Message-Id: <200008282319.BAA29862@gandalf.local>
+     Branch: perl
+	   ! README.os390 pod/perl5004delta.pod pod/perldebtut.pod
+	   ! pod/perlebcdic.pod pod/perlfunc.pod pod/perlguts.pod
+	   ! pod/perlipc.pod pod/perlthrtut.pod pod/perlutil.pod
+____________________________________________________________________________
+[  6871] By: jhi                                   on 2000/08/28  23:22:09
+        Log: Take out the SUIDMAIL thing, that will not be
+             a problem in 5.7.*.
+     Branch: perl
+	   ! patchlevel.h
+____________________________________________________________________________
+[  6870] By: jhi                                   on 2000/08/28  23:19:30
+        Log: -S is the silent flag, -s is the strip flag.
+             
+             Subject: [PATCH] Re: [PATCH] make no-install          
+             From: sthoenna@efn.org (Yitzchak Scott-Thoennes)
+             Date: Mon, 28 Aug 2000 15:12:55 -0700
+             Message-ID: <nPuq5gzkg2FO092yn@efn.org> 
+     Branch: perl
+	   ! Makefile.SH
+____________________________________________________________________________
+[  6869] By: jhi                                   on 2000/08/28  23:12:05
+        Log: Subject: [PATCH bleedperl@6856] warnings fixes
+             From: "Paul Marquess" <paul_marquess@yahoo.co.uk>
+             Date: Mon, 28 Aug 2000 23:55:06 +0100
+             Message-ID: <000501c01143$0230af80$2014140a@bfs.phone.com>
+     Branch: perl
+	   ! lib/warnings.pm pod/perllexwarn.pod t/pragma/warn/7fatal
+	   ! warnings.h warnings.pl
+____________________________________________________________________________
+[  6868] By: jhi                                   on 2000/08/28  21:38:22
+        Log: Potential cruft.
+     Branch: perl
+	   ! Makefile.SH
+____________________________________________________________________________
+[  6867] By: jhi                                   on 2000/08/28  21:35:36
+        Log: Update Changes.
+     Branch: perl
+	   ! Changes patchlevel.h
+____________________________________________________________________________
 [  6866] By: jhi                                   on 2000/08/28  21:33:49
         Log: Subject: hv.h Doc Patch
              From: Fisher Mark <fisherm@tce.com>
