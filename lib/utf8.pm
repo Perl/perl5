@@ -2,7 +2,7 @@ package utf8;
 
 $utf8::hint_bits = 0x00800000;
 
-our $VERSION = '1.01';
+our $VERSION = '1.02';
 
 sub import {
     $^H |= $utf8::hint_bits;
@@ -30,6 +30,15 @@ utf8 - Perl pragma to enable/disable UTF-8 (or UTF-EBCDIC) in source code
 
     use utf8;
     no utf8;
+
+    $num_octets = utf8::upgrade($string);
+    $success    = utf8::downgrade($string[, FAIL_OK]);
+
+    utf8::encode($string);
+    utf8::decode($string);
+
+    $flag = utf8::is_utf8(STRING);
+    $flag = utf8::valid(STRING);
 
 =head1 DESCRIPTION
 
@@ -78,7 +87,7 @@ you should not unless you really want to have UTF-8 source code.
 
 =over 4
 
-=item * $num_octets = utf8::upgrade($string);
+=item * $num_octets = utf8::upgrade($string)
 
 Converts (in-place) internal representation of string to Perl's
 internal I<UTF-X> form.  Returns the number of octets necessary to
@@ -89,7 +98,7 @@ derivatives).  Note that this should not be used to convert a legacy
 byte encoding to Unicode: use Encode for that.  Affected by the
 encoding pragma.
 
-=item * utf8::downgrade($string[, FAIL_OK])
+=item * $success = utf8::downgrade($string[, FAIL_OK])
 
 Converts (in-place) internal representation of string to be un-encoded
 bytes.  Returns true on success. On failure dies or, if the value of
@@ -108,7 +117,7 @@ nothing.  Same as Encode::encode_utf8(). Note that this should not be
 used to convert a legacy byte encoding to Unicode: use Encode for
 that.
 
-=item * $flag = utf8::decode($string)
+=item * utf8::decode($string)
 
 Attempts to convert I<$string> in-place from Perl's I<UTF-X> encoding
 into logical characters. Returns nothing.  Same as Encode::decode_utf8().
