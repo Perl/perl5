@@ -1326,7 +1326,12 @@ MAGIC* mg;
     case '\\':
 	if (ors)
 	    Safefree(ors);
-	ors = savepv(SvPV(sv,orslen));
+	if (SvOK(sv) || SvGMAGICAL(sv))
+	    ors = savepv(SvPV(sv,orslen));
+	else {
+	    ors = Nullch;
+	    orslen = 0;
+	}
 	break;
     case ',':
 	if (ofs)
