@@ -2480,7 +2480,7 @@ sed <<!GROK!THIS! >config.h -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un-
  *	should be used when available.  The USE_64_BITS symbol will
  *	also be turned on if necessary.
  */
-#$uselfs	USE_LARGE_FILES		/**/
+#$uselargefiles	USE_LARGE_FILES		/**/
 
 /* USE_LONG_DOUBLE:
  *	This symbol, if defined, indicates that long doubles should
