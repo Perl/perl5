@@ -30,6 +30,8 @@ while (<GR>) {
     if (@s == 4) {
 	my ($name_s,$passwd_s,$gid_s,$members_s) = @s;
 	$members_s =~ s/\s*,\s*/,/g;
+	$members_s =~ s/\s+$//;
+	$members_s =~ s/^\s+//;
 	@n = getgrgid($gid_s);
 	# 'nogroup' et al.
 	next unless @n;
