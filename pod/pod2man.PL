@@ -727,9 +727,9 @@ while (<>) {
 	# trofficate backslashes; must do it before what happens below
 	s/\\/noremap('\\e')/ge;
 
-# protect leading periods and quotes against *roff
-# mistaking them for directives
-s/^(?:[A-Z]<)?[.']/\\&$&/gm;
+	# protect leading periods and quotes against *roff
+	# mistaking them for directives
+	s/^(?:[A-Z]<)?[.']/\\&$&/gm;
 
 	# first hide the escapes in case we need to
 	# intuit something and get it wrong due to fmting
@@ -1101,6 +1101,7 @@ sub clear_noremap {
 
 sub internal_lrefs {
     local($_) = shift;
+    local $trailing_and = s/and\s+$// ? "and " : "";
 
     s{L</([^>]+)>}{$1}g;
     my(@items) = split( /(?:,?\s+(?:and\s+)?)/ );
@@ -1114,6 +1115,7 @@ sub internal_lrefs {
 
     $retstr .= " entr" . ( @items > 1  ? "ies" : "y" )
 	    .  " elsewhere in this document "; # terminal space to avoid words running together (pattern used strips terminal spaces)
+    $retstr .=  $trailing_and;
 
     return $retstr;
 
