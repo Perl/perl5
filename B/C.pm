@@ -12,7 +12,7 @@ use Exporter ();
 		init_sections set_callback save_unused_subs objsym);
 
 use B qw(minus_c sv_undef walkoptree walksymtable main_root main_start peekop
-	 class cstring cchar svref_2object compile_stats comppadlist hashi
+	 class cstring cchar svref_2object compile_stats comppadlist hash
 	 threadsv_names);
 use B::Asmdata qw(@specialsv_name);
 
@@ -120,7 +120,7 @@ sub B::OP::save {
     if ($type == OP_THREADSV) {
 	# saves looking up ppaddr but it's a bit naughty to hard code this
 	$init->add(sprintf("(void)find_threadsv(%s);",
-			   cstring($threadsv_names[$op->targ]));
+			   cstring($threadsv_names[$op->targ])));
     }
     $opsect->add(sprintf("s\\_%x, s\\_%x, %s, %u, %u, %u, 0x%x, 0x%x",
 			 ${$op->next}, ${$op->sibling}, $op->ppaddr, $op->targ,
