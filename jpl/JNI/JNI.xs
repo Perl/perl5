@@ -12,7 +12,6 @@
 #include <jni.h>
 #include <dlfcn.h>
 
-extern SV** stack_sp;
 extern JNIEnv* jplcurenv;
 extern int jpldebug;
 
