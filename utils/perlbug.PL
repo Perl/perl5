@@ -386,7 +386,7 @@ EOF
 	
 	{
 	my($dir) = ($Is_VMS ? 'sys$scratch:' :
-		    ($Is_MSWin32 and $ENV{'TEMP'} ? $ENV{'TEMP'} : '/tmp/'));
+		    ($Is_MSWin32 && $ENV{'TEMP'} ? $ENV{'TEMP'} : '/tmp/'));
 	$filename = "bugrep0$$";
 	$dir .= "\\" if $Is_MSWin32 and $dir !~ m|[\\/]$|;
 	$filename++ while -e "$dir$filename";
