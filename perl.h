@@ -4296,7 +4296,7 @@ extern void moncontrol(int);
 #ifndef PERL_BLOCKSIG_BLOCK
 #   define PERL_BLOCKSIG_BLOCK(set)	NOOP
 #endif
-#ifndef PERL_BLOCKSIG_ADD
+#ifndef PERL_BLOCKSIG_UNBLOCK
 #   define PERL_BLOCKSIG_UNBLOCK(set)	NOOP
 #endif
 
