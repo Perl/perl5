@@ -1393,7 +1393,7 @@ static int store_scalar(stcxt_t *cxt, SV *sv)
 			TRACEME(("immortal undef"));
 			PUTMARK(SX_SV_UNDEF);
 		} else {
-			TRACEME(("undef at 0x%x", sv));
+			TRACEME(("undef at 0x%"UVxf, PTR2UV(sv)));
 			PUTMARK(SX_UNDEF);
 		}
 		return 0;
@@ -1462,7 +1462,8 @@ static int store_scalar(stcxt_t *cxt, SV *sv)
 		 * Watch for number being an integer in disguise.
 		 */
 		if (nv == (NV) (iv = I_V(nv))) {
-			TRACEME(("double %"NVff" is actually integer %ld", nv, iv));
+			TRACEME(("double %"NVff" is actually integer %"IVdf,
+				 nv, iv));
 			goto integer;		/* Share code below */
 		}
 
@@ -1512,7 +1513,7 @@ static int store_scalar(stcxt_t *cxt, SV *sv)
 			WRITE(&iv, sizeof(iv));
 		}
 
-		TRACEME(("ok (integer 0x%"UVxf", value = %d)",
+		TRACEME(("ok (integer 0x%"UVxf", value = %"IVdf")",
 			 PTR2UV(sv), iv));
 
 	} else
@@ -1667,7 +1668,7 @@ static int store_hash(stcxt_t *cxt, HV *hv)
 			 */
 			
 			TRACEME(("(#%d) value 0x%"UVxf,
-				 PTR2UV(val)));
+				 i, PTR2UV(val)));
 
 			if (ret = store(cxt, val))
 				goto out;
@@ -2108,7 +2109,7 @@ static int store_hook(
 	 * If we recursed, the SX_HOOK has already been emitted.
 	 */
 
-	TRACEME(("SX_HOOK (recursed=%d) flags=0x%x class=%d len=%d len2=%d len3=%d",
+	TRACEME(("SX_HOOK (recursed=%d) flags=0x%x class=%"IVdf" len=%"IVdf" len2=%"IVdf" len3=%"IVdf,
 		recursed, flags, classnum, len, len2, count-1));
 
 	/* SX_HOOK <flags> */
@@ -2314,7 +2315,7 @@ static int store_other(stcxt_t *cxt, SV *sv)
 
 	len = strlen(buf);
 	STORE_SCALAR(buf, len);
-	TRACEME(("ok (dummy \"%s\", length = %d)", buf, len));
+	TRACEME(("ok (dummy \"%s\", length = %"IVdf")", buf, len));
 
 	return 0;
 }
@@ -2515,7 +2516,7 @@ static int magic_write(stcxt_t *cxt)
 
 	TRACEME(("ok (magic_write byteorder = 0x%lx [%d], I%d L%d P%d)",
 		 (unsigned long) BYTEORDER, (int) c,
-		 sizeof(int), sizeof(long), sizeof(char *)));
+		 (int) sizeof(int), (int) sizeof(long), (int) sizeof(char *)));
 
 	return 0;
 }
@@ -3078,7 +3079,7 @@ static SV *retrieve_hook(stcxt_t *cxt)
 	 * the object itself being already created by the runtime.
 	 */
 
-	TRACEME(("calling STORABLE_thaw on %s at 0x%"UVxf" (%d args)",
+	TRACEME(("calling STORABLE_thaw on %s at 0x%"UVxf" (%"IVdf" args)",
 		 class, PTR2UV(sv), AvFILLp(av) + 1));
 
 	rv = newRV(sv);
@@ -3364,7 +3365,7 @@ static SV *retrieve_lscalar(stcxt_t *cxt)
 	SV *sv;
 
 	RLEN(len);
-	TRACEME(("retrieve_lscalar (#%d), len = %d", cxt->tagnum, len));
+	TRACEME(("retrieve_lscalar (#%d), len = %"IVdf, cxt->tagnum, len));
 
 	/*
 	 * Allocate an empty scalar of the suitable length.
@@ -3388,7 +3389,7 @@ static SV *retrieve_lscalar(stcxt_t *cxt)
 	(void) SvPOK_only(sv);			/* Validate string pointer */
 	SvTAINT(sv);					/* External data cannot be trusted */
 
-	TRACEME(("large scalar len %d '%s'", len, SvPVX(sv)));
+	TRACEME(("large scalar len %"IVdf" '%s'", len, SvPVX(sv)));
 	TRACEME(("ok (retrieve_lscalar at 0x%"UVxf")", PTR2UV(sv)));
 
 	return sv;
@@ -3468,7 +3469,7 @@ static SV *retrieve_integer(stcxt_t *cxt)
 	sv = newSViv(iv);
 	SEEN(sv);			/* Associate this new scalar with tag "tagnum" */
 
-	TRACEME(("integer %d", iv));
+	TRACEME(("integer %"IVdf, iv));
 	TRACEME(("ok (retrieve_integer at 0x%"UVxf")", PTR2UV(sv)));
 
 	return sv;
