@@ -73,7 +73,7 @@ sub ungensym ($) {}
 
 sub qualify ($;$) {
     my ($name) = @_;
-    if (! ref($name) && $name !~ /::/) {
+    if (!ref($name) && index($name, '::') == -1 && index($name, "'") == -1) {
 	my $pkg;
 	# Global names: special character, "^x", or other. 
 	if ($name =~ /^([^a-z])|(\^[a-z])$/i || $global{$name}) {
