@@ -30,6 +30,7 @@ Configure
     _r support
     cross-compilation configuring
     mmap support
+    POSIX 1003.1 1996 Edition support
 
 Locales
     locales across packages
