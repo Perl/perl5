@@ -15,7 +15,7 @@ use threads;
 use threads::queue;
 
 $q = new threads::shared::queue;
-
+$|++;
 print "1..26\n";
 
 my $test : shared = 1;
