@@ -243,9 +243,9 @@ Okay, that's I<definitely> enough hype.
 
 =head1 AVAILABILITY
 
-Perl is available for the vast majority of operating system
-platforms. The following situation is as of February 1999 and Perl
-5.005_03.
+Perl is available for the vast majority of operating system platforms,
+including most Unix-like platforms. The following situation is as of
+February 1999 and Perl 5.005_03.
 
 The following platforms are able to build Perl from the standard
 source code distribution available at
@@ -254,15 +254,16 @@ F<http://www.perl.com/CPAN/src/index.html>
         AIX             Linux           Solaris
         BeOS            MachTen         SunOS
         BSD/OS          MPE/iX          SVR4
-        Digital UNIX    NetBSD          UNICOS
-        DOS DJGPP       OpenSTEP        VMS
-        DYNIX/ptx       OS/2            Windows 3.1     2)
-        FreeBSD         OS390   1)      Windows 95      3)
-        HP-UX           PowerUX         Windows 98      3)
-        IRIX            QNX             Windows NT      3)
-                                        VOS
-        1) formerly known as MVS
-        2) either the DOS or OS/2 ports can be used
+        DG/UX		NetBSD          UNICOS
+        Digital UNIX    OpenSTEP        VMS
+        DOS DJGPP 1)    OS/2            Windows 3.1     1)
+        DYNIX/ptx       OS390   2)      Windows 95      1),3)
+        FreeBSD         PowerUX         Windows 98      1),3)
+        HP-UX           QNX             Windows NT      1),3)
+        IRIX                            VOS
+
+        1) in DOS mode either the DOS or OS/2 ports can be used
+        2) formerly known as MVS
         3) compilers: Borland, Cygwin32, Mingw32 EGCS/GCC, VC++
 
 The following platforms have been known to build Perl from the source
@@ -277,10 +278,10 @@ or because we don't have an active champion on these platforms.
         CX/UX           Greenhills      TI1500
         DC/OSx          ISC             TitanOS
         DDE SMES        MiNT            Ultrix
-        DGUX            MPC             UNICOS/mk
-        DomainOS        NEWS-OS         Unisys Dynix
-        DOS EMX         NextSTEP        Unixware
-        Dynix           OpenBSD
+        DomainOS        MPC             UNICOS/mk
+        DOS EMX         NEWS-OS         Unisys Dynix
+        Dynix           NextSTEP        Unixware
+                        OpenBSD
                         Opus
 
 The following platforms are planned to be supported in the standard
