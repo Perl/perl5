@@ -1686,7 +1686,8 @@ DEC OSF/1).
 
 When building Perl, you must first run Configure with -Doptimize=-g
 and -Uusemymalloc flags, after that you can use the make targets
-"perl.third" and "test.third".
+"perl.third" and "test.third".  (What is required is that Perl must be
+compiled using the C<-g> flag, you may need to re-Configure.)
 
 The short story is that with "atom" you can instrument the Perl
 executable to create a new executable called F<perl.third>.  When the
@@ -1731,16 +1732,47 @@ need to do too, if you don't want to see the "global leaks":
 
 	PERL_DESTRUCT_LEVEL=2 ./perl.third t/foo/bar.t
 
+=head2 Profiling
+
+Depending on your platform there are various of profiling Perl.
+
+There are two commonly used techniques of profiling executables:
+E<statistical time-sampling> and E<basic-block counting>.
+
+The first method takes periodically samples of the CPU program
+counter, and since the program counter can be correlated with the code
+generated for functions, we get a statistical view of in which
+functions the program is spending its time.  The caveats are that very
+small/fast functions have lower probability of showing up in the
+profile, and that periodically interrupting the program (this is
+usually done rather frequently, in the scale of milliseconds) imposes
+an additional overhead that may skew the results.  The first problem
+can be alleviated by running the code for longer (in general this is a
+good idea for profiling), the second problem is usually kept in guard
+by the profiling tools themselves.
+
+The second method divides up the generated code into E<basic blocks>.
+Basic blocks are sections of code that are entered only in the
+beginning and exited only at the end.  For example, a conditional jump
+starts a basic block.  Basic block profiling usually works by
+E<instrumenting> the code by adding E<enter basic block #nnnn>
+book-keeping code to the generated code.  During the execution of the
+code the basic block counters are then updated appropriately.  The
+caveat is that the added extra code can skew the results: again, the
+profiling tools usually try to factor their own effects out of the
+results.
+
 =head2 Gprof Profiling
 
-gprof is a profiling tool available in many UNIX platforms.
-The profiling is based on statistical time-sampling; this means that
-some routines, especially those executing really fast, may be missed.
+gprof is a profiling tool available in many UNIX platforms,
+it uses F<statistical time-sampling>.
 
 You can build a profiled version of perl called "perl.gprof" by
-invoking the make target "perl.gprof".  Running the profiled version
-of Perl will create an output file called F<gmon.out> is created which
-contains the profiling data collected during the execution.
+invoking the make target "perl.gprof"  (What is required is that Perl
+must be compiled using the C<-pg> flag, you may need to re-Configure).
+Running the profiled version of Perl will create an output file called
+F<gmon.out> is created which contains the profiling data collected
+during the execution.
 
 The gprof tool can then display the collected data in various ways.
 Usually gprof understands the following options:
@@ -1777,21 +1809,59 @@ Display routines that have zero usage.
 For more detailed explanation of the available commands and output
 formats, see your own local documentation of gprof.
 
+=head2 GCC gcov Profiling
+
+Starting from GCC 3.0 E<basic block profiling> is officially available
+for the GNU CC.
+
+You can build a profiled version of perl called F<perl.gcov> by
+invoking the make target "perl.gcov" (what is required that Perl must
+be compiled using gcc with the flags C<-fprofile-arcs
+-ftest-coverage>, you may need to re-Configure).
+
+Running the profiled version of Perl will cause profile output to be
+generated.  For each source file an accompanying ".da" file will be
+created.
+
+To display the results you use the "gcov" utility (which should
+be installed if you have gcc 3.0 or newer installed).  F<gcov> is
+run on source code files, like this
+
+    gcov sv.c
+
+which will cause F<sv.c.gcov> to be created.  The F<.gcov> files
+contain the source code annotated with relative frequencies of
+execution indicated by "#" markers.
+
+Useful options of F<gcov> include C<-b> which will summarise the
+basic block, branch, and function call coverage, and C<-c> which
+instead of relative frequencies will use the actual counts.  For
+more information on the use of F<gcov> and basic block profiling
+with gcc, see the latest GNU CC manual, as of GCC 3.0 see
+
+    http://gcc.gnu.org/onlinedocs/gcc-3.0/gcc.html
+
+and its section titled "8. gcov: a Test Coverage Program"
+
+    http://gcc.gnu.org/onlinedocs/gcc-3.0/gcc_8.html#SEC132
+
 =head2 Pixie Profiling
 
-Pixie is a profiling tool available on IRIX and Tru64
-(aka Digital UNIX aka DEC OSF/1) platforms.  Pixie does its profiling
-using "basic-block counting".  A basic block is a program region that
-is entered only at the beginning and exited only at the end.
+Pixie is a profiling tool available on IRIX and Tru64 (aka Digital
+UNIX aka DEC OSF/1) platforms.  Pixie does its profiling using
+E<basic-block counting>.
 
 You can build a profiled version of perl called F<perl.pixie> by
-invoking the make target "perl.pixie" (in Tru64 a file called
-F<perl.Addrs> will also be silently created, this file contains the
-addresses of the basic blocks).  Running the profiled version of Perl
-will create a new file called "perl.Counts" which contains the counts
-for the basic block for that particular program execution.
+invoking the make target "perl.pixie" (what is required is that Perl
+must be compiled using the C<-g> flag, you may need to re-Configure).
 
-To display the results you must use the "prof" utility.  The exact
+In Tru64 a file called F<perl.Addrs> will also be silently created,
+this file contains the addresses of the basic blocks.  Running the
+profiled version of Perl will create a new file called "perl.Counts"
+which contains the counts for the basic block for that particular
+program execution.
+
+To display the results you use the F<prof> utility.  The exact
 incantation depends on your operating system, "prof perl.Counts" in
 IRIX, and "prof -pixie -all -L. perl" in Tru64.
 
