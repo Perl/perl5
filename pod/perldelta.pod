@@ -71,7 +71,8 @@ The C<my EXPR : ATTRS> syntax now applies variable attributes at
 run-time.  (Subroutine and C<our> variables still get attributes applied
 at compile-time.)  See L<attributes> for additional details.  In particular,
 however, this allows variable attributes to be useful for C<tie> interfaces,
-which was a deficiency of earlier releaes.
+which was a deficiency of earlier releases.  Note that the new semantics
+doesn't work with the Attribute::Handlers module (as of version 0.76).
 
 =head2 Socket Extension Dynamic in VMS
 
@@ -2530,7 +2531,7 @@ pP are testing for Unicode code points, not knowing about EBCDIC.
 The compiler suite is slowly getting better but it continues to be
 highly experimental.  Use in production environments is discouraged.
 
-=head2 The Long Double Support is Still Experimental
+=head2 The Long Double Support Is Still Experimental
 
 The ability to configure Perl's numbers to use "long doubles",
 floating point numbers of hopefully better accuracy, is still
@@ -2541,6 +2542,29 @@ and moving target.  The gain of more precision may also be offset
 by slowdown in computations (more bits to move around, and the
 operations are more likely to be executed by less optimised
 libraries).
+
+=head2 Seen In Perl 5.7 But Gone Now
+
+Some modules were seen in the Perl 5.7 development releases
+but are not present in 5.8.0.
+
+=over 4
+
+=item *
+
+C<Attribute::Handlers> was removed because the implementation of C<my>
+variable attributes changed so much that the Attribute::Handlers will
+require a major rewrite.  (This means that you can't use
+Attribute::Handler 0.76 with Perl 5.8.0.)
+
+=item *
+
+C<Time::Piece> (previously known as C<Time::Object>) was removed
+because it was felt that it didn't have enough value in it to be a
+core module.  It is still a useful module, though, and is available
+from the CPAN.
+
+=back
 
 =head1 Reporting Bugs
 
