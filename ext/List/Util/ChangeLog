@@ -1,3 +1,23 @@
+Change 645 on 2001/09/07 by <gbarr@pobox.com> (Graham Barr)
+
+	Some platforms require the main executable to export symbols
+	needed by modules. In 5.7.2 and prior releases of perl
+	Perl_cxinc was not exported so we need to duplicate its
+	functionality
+
+Change 644 on 2001/09/07 by <gbarr@pobox.com> (Graham Barr)
+
+	Generate a typemap for NV for all perl version up to and
+	including 5.006
+
+Change 643 on 2001/09/07 by <gbarr@pobox.com> (Graham Barr)
+
+	Document problems known with specific versions of perl
+
+Change 642 on 2001/09/05 by <gbarr@pobox.com> (Graham Barr)
+
+	Release 1.05
+
 Change 641 on 2001/09/05 by <gbarr@pobox.com> (Graham Barr)
 
 	Fix shuffle() to compile with threaded perl

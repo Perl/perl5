@@ -16,6 +16,27 @@
 
 #ifndef aTHX
 #  define aTHX
+#  define pTHX
+#endif
+
+/* Some platforms have strict exports. And before 5.7.3 cxinc (or Perl_cxinc)
+   was not exported. Therefore platforms like win32, VMS etc have problems
+   so we redefine it here -- GMB
+*/
+#if PERL_VERSION < 7
+/* Not in 5.6.1. */
+#  define SvUOK(sv)           SvIOK_UV(sv)
+#  ifdef cxinc
+#    undef cxinc
+#  endif
+#  define cxinc() my_cxinc(aTHX)
+static I32
+my_cxinc(pTHX)
+{
+    cxstack_max = cxstack_max * 3 / 2;
+    Renew(cxstack, cxstack_max + 1, struct context);      /* XXX should fix CXINC macro */
+    return cxstack_ix + 1;
+}
 #endif
 
 #if PERL_VERSION < 6
