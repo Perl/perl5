@@ -109,17 +109,17 @@ sub timing_info {
 	    $hr, $min, $sec, $user, $sys);
 }
 
-#my %symtable;
-#sub savesym {
-#    my ($obj, $value) = @_;
-##    warn(sprintf("savesym: sym_%x => %s\n", $$obj, $value)); # debug
-#    $symtable{sprintf("sym_%x", $$obj)} = $value;
-#}
+my %symtable;
+sub savesym {
+    my ($obj, $value) = @_;
+#    warn(sprintf("savesym: sym_%x => %s\n", $$obj, $value)); # debug
+    $symtable{sprintf("sym_%x", $$obj)} = $value;
+}
 
-#sub objsym {
-#    my $obj = shift;
-#    return $symtable{sprintf("sym_%x", $$obj)};
-#}
+sub objsym {
+    my $obj = shift;
+    return $symtable{sprintf("sym_%x", $$obj)};
+}
 
 sub walkoptree_exec {
     my ($op, $method, $level) = @_;
