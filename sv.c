@@ -7205,7 +7205,11 @@ Perl_sv_bless(pTHX_ SV *sv, HV *stash)
     else
 	SvAMAGIC_off(sv);
 
-    SvSETMAGIC(tmpRef);
+    if(SvSMAGICAL(tmpRef))
+        if(mg_find(tmpRef, PERL_MAGIC_ext) || mg_find(tmpRef, PERL_MAGIC_uvar))
+            mg_set(tmpRef);
+
+
  
     return sv;
 }
