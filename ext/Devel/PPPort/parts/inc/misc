@@ -1,12 +1,12 @@
 ################################################################################
 ##
-##  $Revision: 17 $
+##  $Revision: 20 $
 ##  $Author: mhx $
-##  $Date: 2004/09/08 21:10:12 +0200 $
+##  $Date: 2005/02/02 19:17:33 +0100 $
 ##
 ################################################################################
 ##
-##  Version 3.x, Copyright (C) 2004, Marcus Holland-Moritz.
+##  Version 3.x, Copyright (C) 2004-2005, Marcus Holland-Moritz.
 ##  Version 2.x, Copyright (C) 2001, Paul Marquess.
 ##  Version 1.x, Copyright (C) 1999, Kenneth Albanowski.
 ##
@@ -211,6 +211,26 @@ __UNDEFINED__  UNDERBAR        DEFSV
 __UNDEFINED__  dAX             I32 ax = MARK - PL_stack_base + 1
 __UNDEFINED__  dITEMS          I32 items = SP - MARK
 
+__UNDEFINED__  dXSTARG         SV * targ = sv_newmortal()
+
+=xsmisc
+
+XS(XS_Devel__PPPort_dXSTARG);  /* prototype */
+XS(XS_Devel__PPPort_dXSTARG)
+{
+  dXSARGS;
+  dXSTARG;
+  IV iv;
+  SP -= items;
+  iv = SvIV(ST(0)) + 1;
+  PUSHi(iv);
+  XSRETURN(1);
+}
+
+=xsboot
+
+newXS("Devel::PPPort::dXSTARG", XS_Devel__PPPort_dXSTARG, file);
+
 =xsubs
 
 int
@@ -330,7 +350,7 @@ UNDERBAR()
 	OUTPUT:
 		RETVAL
 
-=tests plan => 31
+=tests plan => 32
 
 use vars qw($my_sv @my_av %my_hv);
 
@@ -382,4 +402,6 @@ sub my_cv { 1 };
 ok(&Devel::PPPort::get_cv('my_cv', 0));
 ok(!&Devel::PPPort::get_cv('not_my_cv', 0));
 ok(&Devel::PPPort::get_cv('not_my_cv', 1));
+
+ok(Devel::PPPort::dXSTARG(42), 43);
 

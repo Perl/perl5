@@ -4,13 +4,13 @@
 #
 ################################################################################
 #
-#  $Revision: 7 $
+#  $Revision: 8 $
 #  $Author: mhx $
-#  $Date: 2004/08/13 12:49:19 +0200 $
+#  $Date: 2005/01/31 08:10:55 +0100 $
 #
 ################################################################################
 #
-#  Version 3.x, Copyright (C) 2004, Marcus Holland-Moritz.
+#  Version 3.x, Copyright (C) 2004-2005, Marcus Holland-Moritz.
 #  Version 2.x, Copyright (C) 2001, Paul Marquess.
 #  Version 1.x, Copyright (C) 1999, Kenneth Albanowski.
 #
@@ -85,13 +85,13 @@ __DATA__
 *
 ********************************************************************************
 *
-*  $Revision: 7 $
+*  $Revision: 8 $
 *  $Author: mhx $
-*  $Date: 2004/08/13 12:49:19 +0200 $
+*  $Date: 2005/01/31 08:10:55 +0100 $
 *
 ********************************************************************************
 *
-*  Version 3.x, Copyright (C) 2004, Marcus Holland-Moritz.
+*  Version 3.x, Copyright (C) 2004-2005, Marcus Holland-Moritz.
 *  Version 2.x, Copyright (C) 2001, Paul Marquess.
 *  Version 1.x, Copyright (C) 1999, Kenneth Albanowski.
 *

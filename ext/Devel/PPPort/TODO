@@ -1,7 +1,7 @@
 TODO:
 
 * improve apicheck (things like utf8_mg_pos_init() are
-  not currently checks)
+  not currently checked)
 
 * more documentation, more tests
 

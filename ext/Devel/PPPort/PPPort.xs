@@ -8,13 +8,13 @@
 *
 ********************************************************************************
 *
-*  $Revision: 7 $
+*  $Revision: 8 $
 *  $Author: mhx $
-*  $Date: 2004/08/13 12:49:19 +0200 $
+*  $Date: 2005/01/31 08:10:55 +0100 $
 *
 ********************************************************************************
 *
-*  Version 3.x, Copyright (C) 2004, Marcus Holland-Moritz.
+*  Version 3.x, Copyright (C) 2004-2005, Marcus Holland-Moritz.
 *  Version 2.x, Copyright (C) 2001, Paul Marquess.
 *  Version 1.x, Copyright (C) 1999, Kenneth Albanowski.
 *
@@ -67,6 +67,22 @@
 #include "ppport.h"
 
 /* ========== BEGIN XSMISC ================================================== */
+
+/* ---- from parts/inc/exception ---- */
+/* defined in module3.c */
+int exception(int throw_e);
+
+/* ---- from parts/inc/misc ---- */
+XS(XS_Devel__PPPort_dXSTARG);  /* prototype */
+XS(XS_Devel__PPPort_dXSTARG)
+{
+  dXSARGS;
+  dXSTARG;
+  SP -= items;
+  IV iv = SvIV(ST(0)) + 1;
+  PUSHi(iv);
+  XSRETURN(1);
+}
 
 /* ---- from parts/inc/MY_CXT ---- */
 #define MY_CXT_KEY "Devel::PPPort::_guts" XS_VERSION
@@ -134,6 +150,9 @@ static void test_sv_vsetpvf(pTHX_ SV *sv, const char *pat, ...)
 MODULE = Devel::PPPort		PACKAGE = Devel::PPPort
 
 BOOT:
+	/* ---- from parts/inc/misc ---- */
+	newXS("Devel::PPPort::dXSTARG", XS_Devel__PPPort_dXSTARG, file);
+	
 	/* ---- from parts/inc/MY_CXT ---- */
 	{
 	  MY_CXT_INIT;
@@ -278,6 +297,16 @@ CopFILE()
 		RETVAL = CopFILE(PL_curcop);
 	OUTPUT:
 		RETVAL
+
+##----------------------------------------------------------------------
+##  XSUBs from parts/inc/exception
+##----------------------------------------------------------------------
+
+int
+exception(throw_e)
+  int throw_e
+  OUTPUT:
+    RETVAL
 
 ##----------------------------------------------------------------------
 ##  XSUBs from parts/inc/grok
@@ -879,7 +908,7 @@ SvPV_nolen(sv)
 		const char *str;
 	CODE:
 		str = SvPV_nolen(sv);
-		RETVAL = strEQ(str, "mhx") ? 3 : 0;
+		RETVAL = strEQ(str, "mhx") ? 42 : 0;
 	OUTPUT:
 		RETVAL
 
