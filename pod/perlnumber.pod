@@ -26,7 +26,7 @@ p-adic arithmetic, and so on.  See L<overload> for details.
 
 =head1 Storing numbers
 
-Perl can internally represents numbers in 3 different ways: as native
+Perl can internally represent numbers in 3 different ways: as native
 integers, as native floating point numbers, and as decimal strings.
 Decimal strings may have an exponential notation part, as in C<"12.34e-56">.
 I<Native> here means "a format supported by the C compiler which was used
@@ -54,7 +54,7 @@ The upshot of all this is that Perl cannot store a number like
 12345678901234567 as a floating point number on such architectures without
 loss of information.
 
-Similarly, decimal strings may represent only those numbers which have a
+Similarly, decimal strings can represent only those numbers which have a
 finite decimal expansion.  Being strings, and thus of arbitrary length, there
 is no practical limit for the exponent or number of decimal digits for these
 numbers.  (But realize that what we are discussing the rules for just the

@@ -5,8 +5,8 @@
  * This program is free software; you can redistribute it and/or
  * modify it under the same terms as Perl itself.
  *
- * For systems that do not have the poll() system call (for example Linux)
- * try to emulate it as closely as possible using select()
+ * For systems that do not have the poll() system call (for example Linux
+ * kernels < v2.1.23) try to emulate it as closely as possible using select()
  *
  */
 
