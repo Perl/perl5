@@ -294,7 +294,6 @@ done
 cat > UU/usethreads.cbu <<'EOCBU'
 case "$usethreads" in
 $define|true|[yY]*)
-esac
 	ccflags="-Zmt $ccflags"
         cppflags="-Zmt $cppflags"  # Do we really need to set this?
         aout_ccflags="-DUSE_THREADS $aout_ccflags"
@@ -302,6 +301,7 @@ esac
         aout_lddlflags="-Zmt $aout_lddlflags"
         aout_ldflags="-Zmt $aout_ldflags"
 	;;
+esac
 EOCBU
 
 # Now go back

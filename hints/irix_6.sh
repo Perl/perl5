@@ -216,7 +216,6 @@ EOCBU
 cat > UU/use64bits.cbu <<'EOCBU'
 case "$use64bits" in
 $define|true|[yY]*)
-esac
 	    case "`uname -r`" in
 	    [1-5]*|6.[01])
 		cat >&4 <<EOM
