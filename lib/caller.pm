@@ -33,7 +33,7 @@ setting in the calling context.
 
 =cut
 
-my %bits = (
+my %bitmask = (
     # only HINT_UTF8 supported for now
     encoding => 0x8
 );
@@ -48,9 +48,7 @@ sub import {
     shift;
     my @cxt = caller(3);
     if (@cxt and $cxt[7]) {	# was our parent require-d?
-	#warn "hints was $^H\n";
-	$^H |= bits(@_) | $cxt[8];
-	#warn "hints now $^H\n";
+	$^H |= bits(@_) & $cxt[8];
     }
 }
 
