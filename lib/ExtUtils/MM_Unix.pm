@@ -2040,7 +2040,8 @@ usually solves this kind of problem.
 
     # Build up a set of file names (not command names).
     foreach $element (@perls) {
-        $element .= "$Config{exe_ext}";
+        $element .= $Config{exe_ext}
+          unless $element =~ m/$Config{exe_ext}$/i;
     }
 
     $self->{PERL} ||=
