@@ -572,6 +572,7 @@ S_mulexp10(NV value, I32 exponent)
 	negative = 1;
 	exponent = -exponent;
     }
+
     /* Avoid %SYSTEM-F-FLTOVF_F sans VAXC$ESTABLISH.
      * In VAX VMS we by default use the D_FLOAT double format,
      * and that format does not have *easy* capabilities [1] for
@@ -591,6 +592,20 @@ S_mulexp10(NV value, I32 exponent)
         return NV_MAX;
 #  endif
 #endif
+
+    /* In UNICOS and in certain Cray models (such as T90) there is no
+     * IEEE fp, and no way at all from C to catch fp overflows gracefully.
+     * There is something you can do if you are willing to use some
+     * inline assembler: the instruction is called DFI-- but that will
+     * disable *all* floating point interrupts, a little bit too large
+     * a hammer.  Therefore we need to catch potential overflows before
+     * it's too late. */
+#if defined(_UNICOS) && defined(NV_MAX_10_EXP)
+    if (!negative &&
+	(log10(value) + exponent) >= NV_MAX_10_EXP)
+        return NV_MAX;
+#endif
+
     for (bit = 1; exponent; bit <<= 1) {
 	if (exponent & bit) {
 	    exponent ^= bit;
