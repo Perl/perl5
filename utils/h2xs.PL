@@ -799,7 +799,6 @@ package $module;
 
 use $compat_version;
 use strict;
-use Errno; # For $!{EINVAL}
 END
 } 
 else {
@@ -809,7 +808,6 @@ package $module;
 use 5.006;
 use strict;
 use warnings;
-use Errno; # For $!{EINVAL}
 END
 }
 
