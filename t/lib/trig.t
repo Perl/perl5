@@ -29,7 +29,7 @@ sub near ($$;$) {
     abs($_[0] - $_[1]) < (defined $_[2] ? $_[2] : $eps);
 }
 
-print "1..23\n";
+print "1..24\n";
 
 $x = 0.9;
 print 'not ' unless (near(tan($x), sin($x) / cos($x)));
