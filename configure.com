@@ -6065,8 +6065,6 @@ $ CALL Bad_environment "LIB"
 $ CALL Bad_environment "T"
 $ CALL Bad_environment "FOO"
 $ CALL Bad_environment "EXT"
-$ CALL Bad_environment "SOME_LOGICAL_NAME_NOT_LIKELY"
-$ CALL Bad_environment "DOWN_LOGICAL_NAME_NOT_LIKELY"
 $ CALL Bad_environment "TEST" "SYMBOL"
 $ IF f$search("config.msg") .eqs. "" THEN echo "OK."
 $!
