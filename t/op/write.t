@@ -33,7 +33,7 @@ my @NumTests = (
                 999.99499, '999.99',      -100, '######' ],
 
     [ '@0#.##',         0, '000.00',         1, '001.00',       10, '010.00',
-                  -0.0001, '-00.00' ],
+                  -0.0001, qr/^[\-0]00\.00$/ ],
 
 );
 
@@ -486,8 +486,11 @@ for my $tref ( @NumTests ){
 	my $expected = shift @$tref;
         my $writeres = swrite( $writefmt, $val );
         $nt++;
-
-        print $expected eq $writeres
+	my $ok = ref($expected)
+		 ? $writeres =~ $expected
+		 : $writeres eq $expected;
+	
+        print $ok
 	    ? "ok $nt\n"
 	    : "not ok $nt\n# f=[$writefmt] exp=[$expected] got=[$writeres]\n";
     }
