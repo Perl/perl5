@@ -309,6 +309,9 @@ my $packlist = ExtUtils::Packlist->new("$installarchlib/.packlist");
 # First we install the version-numbered executables.
 
 if ($Is_VMS) {
+    safe_unlink("$installbin/perl_setup.com");
+    copy("perl_setup.com", "$installbin/perl_setup.com");
+    chmod(0755, "$installbin/perl_setup.com");
     safe_unlink("$installbin/$dbg$perl$exe_ext");
     copy("$dbg$perl$exe_ext", "$installbin/$dbg$perl$exe_ext");
     chmod(0755, "$installbin/$dbg$perl$exe_ext");
@@ -316,9 +319,12 @@ if ($Is_VMS) {
     copy("$dbg${perl}shr$exe_ext", "$installbin/$dbg${perl}shr$exe_ext");
     chmod(0755, "$installbin/$dbg${perl}shr$exe_ext");
     if ($ndbg) {
-       safe_unlink("$installbin/$ndbg$perl$exe_ext");
-       copy("$ndbg$perl$exe_ext", "$installbin/$ndbg$perl$exe_ext");
-       chmod(0755, "$installbin/$ndbg$perl$exe_ext");
+        safe_unlink("$installbin/$ndbg$perl$exe_ext");
+        copy("$ndbg$perl$exe_ext", "$installbin/$ndbg$perl$exe_ext");
+        chmod(0755, "$installbin/$ndbg$perl$exe_ext");
+	safe_unlink("$installbin/${dbg}a2p$exe_ext");
+	copy("x2p/${dbg}a2p$exe_ext", "$installbin/${dbg}a2p$exe_ext");
+	chmod(0755, "$installbin/${dbg}a2p$exe_ext");
     }
 }
 elsif ($^O eq 'mpeix') {
@@ -497,7 +503,7 @@ if ($Config{installusrbinperl} && $Config{installusrbinperl} eq 'define' &&
 }
 
 # Make links to ordinary names if installbin directory isn't current directory.
-if (!$Is_NetWare) {
+if (!$Is_NetWare && $dbg eq '') {
     if (! samepath($installbin, 'x2p')) {
 	my $base = 'a2p';
 	$base .= $ver if $versiononly;
