@@ -148,9 +148,12 @@ starts with a plus or minus, a string starting with the opposite sign
 is returned.  One effect of these rules is that C<-bareword> is equivalent
 to C<"-bareword">.
 
-Unary "~" performs bitwise negation, i.e., 1's complement.  For example,
-C<0666 &~ 027> is 0640.  (See also L<Integer Arithmetic> and L<Bitwise
-String Operators>.)
+Unary "~" performs bitwise negation, i.e., 1's complement.  For
+example, C<0666 & ~027> is 0640.  (See also L<Integer Arithmetic> and
+L<Bitwise String Operators>.)  Note that the width of the result is
+platform-dependent: ~0 is 32 bits wide on a 32-bit platform, but 64
+bits wide on a 64-bit platform, so if you are expecting a certain bit
+width, remember use the & operator to mask off the excess bits.
 
 Unary "+" has no effect whatsoever, even on strings.  It is useful
 syntactically for separating a function name from a parenthesized expression
