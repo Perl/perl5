@@ -14,20 +14,20 @@ case "$cc" in
 	ld=ld
 	ccflags="$ccflags -D_BSD_TYPES -D_BSD_TIME -woff 1009,1110,1184 -OPT:fprop_limit=1500"
 	optimize='none'  # Miniperl core dumps with -O
-	pp_sys_cflags='ccflags="$ccflags -DHAS_TELLDIR_PROTOTYPE"'
-	lddlflags="-n32 -shared"
 	ldflags=' -L/usr/local/lib -L/usr/lib32 -L/lib32'
+	cccdlflags=' '
+	lddlflags="-n32 -shared"
 	libc='/usr/lib32/libc.so'
 	plibpth='/usr/lib32 /lib32 /usr/ccs/lib'
-
 	nm_opt='-p'
 	nm_so_opt='-p'
-	cccdlflags=' '
 	;;
 *)
 	ccflags="$ccflags -D_BSD_TYPES -D_BSD_TIME -Olimit 3000"
 	;;
 esac
+
+pp_sys_cflags='ccflags="$ccflags -DHAS_TELLDIR_PROTOTYPE"'
 
 # We don't want these libraries.  Anyone know why?
 set `echo X "$libswanted "|sed -e 's/ socket / /' -e 's/ nsl / /' -e 's/ dl / /'`
