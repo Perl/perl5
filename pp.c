@@ -2699,10 +2699,10 @@ PP(pp_substr)
     char *tmps;
     I32 arybase = PL_curcop->cop_arybase;
     SV *repl_sv = NULL;
-    SV *repl_sv_copy = NULL;
     char *repl = 0;
     STRLEN repl_len;
     int num_args = PL_op->op_private & 7;
+    bool repl_need_utf8_upgrade = FALSE;
     bool repl_is_utf8 = FALSE;
 
     SvTAINTED_off(TARG);			/* decontaminate */
@@ -2723,12 +2723,8 @@ PP(pp_substr)
 	    if (!DO_UTF8(sv))
 		sv_utf8_upgrade(sv);
 	}
-	else if (DO_UTF8(sv)) {
-	    repl_sv_copy = newSVsv(repl_sv);
-	    sv_utf8_upgrade(repl_sv_copy);
-	    repl = SvPV(repl_sv_copy, repl_len);
-	    repl_is_utf8 = DO_UTF8(repl_sv_copy) && SvCUR(sv);
-	}
+	else if (DO_UTF8(sv))
+	    repl_need_utf8_upgrade = TRUE;
     }
     tmps = SvPV(sv, curlen);
     if (DO_UTF8(sv)) {
@@ -2791,6 +2787,14 @@ PP(pp_substr)
 	if (utf8_curlen)
 	    SvUTF8_on(TARG);
 	if (repl) {
+	    SV* repl_sv_copy = NULL;
+
+	    if (repl_need_utf8_upgrade) {
+		repl_sv_copy = newSVsv(repl_sv);
+		sv_utf8_upgrade(repl_sv_copy);
+		repl = SvPV(repl_sv_copy, repl_len);
+		repl_is_utf8 = DO_UTF8(repl_sv_copy) && SvCUR(sv);
+	    }
 	    sv_insert(sv, pos, rem, repl, repl_len);
 	    if (repl_is_utf8)
 		SvUTF8_on(sv);
