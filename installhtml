@@ -515,7 +515,7 @@ sub installdir {
 	|| die "$0: error opening directory $podroot/$dir: $!\n";
 
     # find the directories to recurse on
-    @dirlist = map { "$dir/$_" }
+    @dirlist = map { if ($^O eq 'VMS') {/^(.*)\.dir$/i; "$dir/$1";} else {"$dir/$_";}}
 	grep(-d "$podroot/$dir/$_" && !/^\.{1,2}/, readdir(DIR)) if $recurse;
     rewinddir(DIR);
 
