@@ -7,10 +7,18 @@ BEGIN {
 
     my $GR = "/etc/group";
 
-    if (($^O eq 'next' and not open(GR, "nidump group .|"))
-	or (defined $Config{'i_grp'} and $Config{'i_grp'} ne 'define')
-	or not -f $GR or not open(GR, $GR)
-	) {
+    $where = $GR;
+
+    if (-x "/usr/bin/nidump") {
+	if (open(GR, "nidump group . |")) {
+	    $where = "NetInfo";
+	} else {
+	    print "1..0\n";
+	    exit 0;
+	}
+    } elsif ((defined $Config{'i_grp'} and $Config{'i_grp'} ne 'define')
+	     or not -f $GR or not open(GR, $GR)
+	    ) {
 	print "1..0\n";
 	exit 0;
     }
@@ -19,19 +27,27 @@ BEGIN {
 print "1..1\n";
 
 # Go through at most this many groups.
-my $max = 25; #
+my $max = 25;
 
-my $n = 0;
-my $not;
+my $n   = 0;
 my $tst = 1;
+my %suspect;
+my %seen;
 
-$not = 0;
 while (<GR>) {
-    last if $n == $max;
     chomp;
-    @s = split /:/;
+    my @s = split /:/;
+    my ($name_s,$passwd_s,$gid_s,$members_s) = @s;
+    if (@s) {
+	push @{ $seen{$name_s} }, $.;
+    } else {
+	warn "# Your $where line $. is empty.\n";
+	next;
+    }
+    next if $n == $max;
+    # In principle we could whine if @s != 4 but do we know enough
+    # of group file formats everywhere?
     if (@s == 4) {
-	my ($name_s,$passwd_s,$gid_s,$members_s) = @s;
 	$members_s =~ s/\s*,\s*/,/g;
 	$members_s =~ s/\s+$//;
 	$members_s =~ s/^\s+//;
@@ -46,10 +62,10 @@ while (<GR>) {
 	    next if $name_s ne $name;
 	}
 	$members =~ s/\s+/,/g;
-	$not = 1, last
+	$suspect{$name_s}++
 	    if $name    ne $name_s    or
 # Shadow passwords confuse this.
-# Not that group passwords are used much but still.
+# Not that group passwords are used much but better not assume anything.
 #              $passwd  ne $passwd_s  or
                $gid     ne $gid_s     or
                $members ne $members_s;
@@ -57,7 +73,19 @@ while (<GR>) {
     $n++;
 }
 
-print "not " if $not;
+# Drop the multiply defined groups.
+
+foreach (sort keys %seen) {
+    my $times = @{ $seen{$_} };
+    if ($times > 1) {
+	# Multiply defined groups are rarely intentional.
+	local $" = ", ";
+	warn "# Group '$_' defined multiple times in $where, lines: @{$seen{$_}}.\n";
+	delete $suspect{$_};
+    }
+}
+
+print "not " if keys %suspect;
 print "ok ", $tst++, "\n";
 
 close(GR);

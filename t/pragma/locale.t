@@ -2,7 +2,7 @@
 
 BEGIN {
     chdir 't' if -d 't';
-    @INC = '../lib';
+    unshift @INC, '../lib';
     require Config; import Config;
     if (!$Config{d_setlocale} || $Config{ccflags} =~ /\bD?NO_LOCALE\b/) {
 	print "1..0\n";
@@ -12,6 +12,8 @@ BEGIN {
 
 use strict;
 
+my $debug = 1;
+
 my $have_setlocale = 0;
 eval {
     require POSIX;
@@ -19,19 +21,21 @@ eval {
     $have_setlocale++;
 };
 
+use vars qw(&LC_ALL);
+
 # Visual C's CRT goes silly on strings of the form "en_US.ISO8859-1"
 # and mingw32 uses said silly CRT
 $have_setlocale = 0 if $^O eq 'MSWin32' && $Config{cc} =~ /^(cl|gcc)/i;
 
-# 103 (the last test) may fail but that is okay.
+# 103 (the last test) may fail but that is sort-of okay.
 # (It indicates something broken in the environment, not Perl)
-# Therefore .. only until 102, not 103.
-print "1..", ($have_setlocale ? 102 : 98), "\n";
+
+print "1..", ($have_setlocale ? 103 : 98), "\n";
 
 use vars qw($a
 	    $English $German $French $Spanish
 	    @C @English @German @French @Spanish
-	    $Locale @Locale %iLocale %UPPER %lower @Neoalpha);
+	    $Locale @Locale %UPPER %lower %bothcase @Neoalpha);
 
 $a = 'abc %';
 
@@ -219,269 +223,363 @@ check_taint_not  98, $a;
 
 # I think we've seen quite enough of taint.
 # Let us do some *real* locale work now,
-#  unless setlocale() is missing (i.e. minitest).
+# unless setlocale() is missing (i.e. minitest).
 
 exit unless $have_setlocale;
 
-sub getalnum {
+# Find locales.
+
+my $locales = <<EOF;
+Arabic:ar:dz eg sa:6 arabic8
+Bulgarian:bg:bg:5
+Chinese:zh:cn tw:cn.EUC eucCN eucTW euc.CN euc.TW tw.EUC
+Croation:hr:hr:2
+Czech:cs:cz:2
+Danish:dk:da:1
+Danish:dk:da:1
+Dutch:nl:nl:1
+English American British:en:au ca gb ie nz us uk:1 cp850
+Estonian:et:ee:1
+Finnish:fi:fi:1
+French:fr:be ca ch fr:1
+German:de:de at ch:1
+Greek:el:gr:7 g8
+Hebrew:iw:il:8 hebrew8
+Hungarian:hu:hu:2
+Icelandic:is:is:1
+Italian:it:it:1
+Japanese:ja:jp:euc eucJP jp.EUC sjis
+Korean:ko:kr:
+Latin:la:va:1
+Latvian:lv:lv:1
+Lithuanian:lt:lt:1
+Polish:pl:pl:2
+Portuguese:po:po br:1
+Rumanian:ro:ro:2
+Russian:ru:ru su:5 koi8 koi8r koi8u cp1251
+Slovak:sk:sk:2
+Slovene:sl:si:2
+Spanish:es:ar bo cl co cr ec es gt mx ni pa pe py sv uy ve:1
+Swedish:sv:se:1
+Thai:th:th:tis620
+Turkish:tr:tr:9 turkish8
+EOF
+
+my @Locale;
+my $Locale;
+my @Alnum_;
+
+sub getalnum_ {
     sort grep /\w/, map { chr } 0..255
 }
 
-sub locatelocale ($$@) {
-    my ($lcall, $alnum, @try) = @_;
+sub trylocale {
+    my $locale = shift;
+    if (setlocale(LC_ALL, $locale)) {
+	push @Locale, $locale;
+    }
+}
 
-    undef $$lcall;
+sub decode_encodings {
+    my @enc;
 
-    for (@try) {
-	local $^W = 0; # suppress "Subroutine LC_ALL redefined"
-	if (setlocale(&LC_ALL, $_)) {
-	    $$lcall = $_;
-	    @$alnum = &getalnum;
-	    last;
+    foreach (split(/ /, shift)) {
+	if (/^(\d+)$/) {
+	    push @enc, "ISO8859-$1";
+	    push @enc, "iso8859$1";	# HP
+	    if ($1 eq '1') {
+		 push @enc, "roman8";	# HP
+	    }
+	} else {
+	    push @enc, $_;
 	}
     }
 
-    @$alnum = () unless (defined $$lcall);
+    return @enc;
 }
 
-# Find some default locale
-
-locatelocale(\$Locale, \@Locale, qw(C POSIX));
-
-# Find some English locale
-
-locatelocale(\$English, \@English,
-	     qw(en_US.ISO8859-1 en_GB.ISO8859-1
-		en en_US en_UK en_IE en_CA en_AU en_NZ
-		english english.iso88591
-		american american.iso88591
-		british british.iso88591
-		));
-
-# Find some German locale
-
-locatelocale(\$German, \@German,
-	     qw(de_DE.ISO8859-1 de_AT.ISO8859-1 de_CH.ISO8859-1
-		de de_DE de_AT de_CH
-		german german.iso88591));
-
-# Find some French locale
-
-locatelocale(\$French, \@French,
-	     qw(fr_FR.ISO8859-1 fr_BE.ISO8859-1 fr_CA.ISO8859-1 fr_CH.ISO8859-1
-		fr fr_FR fr_BE fr_CA fr_CH
-		french french.iso88591));
-
-# Find some Spanish locale
-
-locatelocale(\$Spanish, \@Spanish,
-	     qw(es_AR.ISO8859-1 es_BO.ISO8859-1 es_CL.ISO8859-1
-		es_CO.ISO8859-1 es_CR.ISO8859-1 es_EC.ISO8859-1
-		es_ES.ISO8859-1 es_GT.ISO8859-1 es_MX.ISO8859-1
-		es_NI.ISO8859-1 es_PA.ISO8859-1 es_PE.ISO8859-1
-		es_PY.ISO8859-1 es_SV.ISO8859-1 es_UY.ISO8859-1 es_VE.ISO8859-1
-		es es_AR es_BO es_CL
-		es_CO es_CR es_EC
-		es_ES es_GT es_MX
-		es_NI es_PA es_PE
-		es_PY es_SV es_UY es_VE
-		spanish spanish.iso88591));
-
-# Select the largest of the alpha(num)bets.
-
-($Locale, @Locale) = ($English, @English)
-    if (@English > @Locale);
-($Locale, @Locale) = ($German, @German)
-    if (@German  > @Locale);
-($Locale, @Locale) = ($French, @French)
-    if (@French  > @Locale);
-($Locale, @Locale) = ($Spanish, @Spanish)
-    if (@Spanish > @Locale);
-
-{
-    local $^W = 0;
-    setlocale(&LC_ALL, $Locale);
+trylocale("C");
+trylocale("POSIX");
+foreach (0..15) {
+    trylocale("ISO8859-$_");
+    trylocale("iso_8859_$_");
+    trylocale("iso8859$_");
 }
 
-# Sort it now that LC_ALL has been set.
+foreach my $locale (split(/\n/, $locales)) {
+    my ($locale_name, $language_codes, $country_codes, $encodings) =
+	split(/:/, $locale);
+    my @enc = decode_encodings($encodings);
+    foreach my $loc (split(/ /, $locale_name)) {
+	trylocale($loc);
+	foreach my $enc (@enc) {
+	    trylocale("$loc.$enc");
+	}
+	$loc = lc $loc;
+	foreach my $enc (@enc) {
+	    trylocale("$loc.$enc");
+	}
+    }
+    foreach my $lang (split(/ /, $language_codes)) {
+	trylocale($lang);
+	foreach my $country (split(/ /, $country_codes)) {
+	    my $lc = "${lang}_${country}";
+	    trylocale($lc);
+	    foreach my $enc (@enc) {
+		trylocale("$lc.$enc");
+	    }
+	    my $lC = "${lang}_\U${country}";
+	    trylocale($lC);
+	    foreach my $enc (@enc) {
+		trylocale("$lC.$enc");
+	    }
+	}
+    }
+}
 
 @Locale = sort @Locale;
 
-print "# Locale = $Locale\n";
-print "# Alnum_ = @Locale\n";
-
-{
-    my $i = 0;
-
-    for (@Locale) {
-	$iLocale{$_} = $i++;
-    }
+sub debug {
+    print @_ if $debug;
 }
 
-# Sieve the uppercase and the lowercase.
+sub debugf {
+    printf @_ if $debug;
+}
 
-for (@Locale) {
-    if (/[^\d_]/) { # skip digits and the _
-	if (lc eq $_) {
-	    $UPPER{$_} = uc;
-	} else {
-	    $lower{$_} = lc;
+debug "# Locales = @Locale\n";
+
+my %Problem;
+
+foreach $Locale (@Locale) {
+    debug "# Locale = $Locale\n";
+    @Alnum_ = getalnum_();
+    debug "# \\w = @Alnum_\n";
+
+    unless (setlocale(LC_ALL, $Locale)) {
+	foreach (99..103) {
+	    $Problem{$_}{$Locale} = -1;
+	}
+	next;
+    }
+
+    # Sieve the uppercase and the lowercase.
+    
+    %UPPER = %lower = %bothcase = ();
+    for (@Alnum_) {
+	if (/[^\d_]/) { # skip digits and the _
+	    if (uc($_) eq $_) {
+		$UPPER{$_} = $_;
+	    }
+	    if (lc($_) eq $_) {
+		$lower{$_} = $_;
+	    }
 	}
     }
-}
-
-# Find the alphabets that are not alphabets in the default locale.
-
-{
-    no locale;
-    
-    for (keys %UPPER, keys %lower) {
-	push(@Neoalpha, $_) if (/\W/);
+    foreach (keys %UPPER) {
+	$bothcase{$_}++ if exists $lower{$_};
     }
-}
+    foreach (keys %lower) {
+	$bothcase{$_}++ if exists $UPPER{$_};
+    }
+    foreach (keys %bothcase) {
+	delete $UPPER{$_};
+	delete $lower{$_};
+    }
 
-@Neoalpha = sort @Neoalpha;
+    debug "# UPPER    = ", join(" ", sort keys %UPPER   ), "\n";
+    debug "# lower    = ", join(" ", sort keys %lower   ), "\n";
+    debug "# bothcase = ", join(" ", sort keys %bothcase), "\n";
 
-# Test \w.
-
-{
-    my $word = join('', @Neoalpha);
-
-    $word =~ /^(\w*)$/;
-
-    print 'not ' if ($1 ne $word);
-}
-print "ok 99\n";
-
-# Find places where the collation order differs from the default locale.
-
-print "# testing 100\n";
-{
-    my (@k, $i, $j, @d);
+    # Find the alphabets that are not alphabets in the default locale.
 
     {
 	no locale;
-
-	@k = sort (keys %UPPER, keys %lower); 
-    }
-
-    for ($i = 0; $i < @k; $i++) {
-	for ($j = $i + 1; $j < @k; $j++) {
-	    if ($iLocale{$k[$j]} < $iLocale{$k[$i]}) {
-		push(@d, [$k[$j], $k[$i]]);
-	    }
+    
+	@Neoalpha = ();
+	for (keys %UPPER, keys %lower) {
+	    push(@Neoalpha, $_) if (/\W/);
 	}
     }
 
-    # Cross-check those places.
+    @Neoalpha = sort @Neoalpha;
 
-    for (@d) {
-	($i, $j) = @$_;
-	if ($i gt $j) {
-	    print "# failed 100 at:\n";
-	    print "# i = $i, j = $j, i ",
-	          $i le $j ? 'le' : 'gt', " j\n";
-	    print 'not ';
-	    last;
-	}
+    debug "# Neoalpha = @Neoalpha\n";
+
+    if (@Neoalpha == 0) {
+	# If we have no Neoalphas the remaining tests are no-ops.
+	debug "# no Neoalpha, skipping tests 99..103 for locale '$Locale'\n";
+	next;
     }
-}
-print "ok 100\n";
 
-# Cross-check whole character set.
-
-print "# testing 101\n";
-for (map { chr } 0..255) {
-    if (/\w/ and /\W/) { print 'not '; last }
-    if (/\d/ and /\D/) { print 'not '; last }
-    if (/\s/ and /\S/) { print 'not '; last }
-    if (/\w/ and /\D/ and not /_/ and
-	not (exists $UPPER{$_} or exists $lower{$_})) {
-	print "# failed 101 at:\n";
-	print "# ", ord($_), " '$_'\n";
-	print 'not ';
-	last;
-    }
-}
-print "ok 101\n";
-
-# Test for read-onlys.
-
-print "# testing 102\n";
-{
-    no locale;
-    $a = "qwerty";
+    # Test \w.
+    
+    debug "# testing 99 with locale '$Locale'\n";
     {
-	use locale;
-	print "not " if $a cmp "qwerty";
+	my $word = join('', @Neoalpha);
+
+	$word =~ /^(\w+)$/;
+
+	if ($1 ne $word) {
+	    $Problem{99}{$Locale} = 1;
+	    debug "# failed 99 ($1 vs $word)\n";
+	}
     }
-}
-print "ok 102\n";
 
-# This test must be the last one because its failure is not fatal.
-# The @Locale should be internally consistent.
-# Thanks to Hallvard Furuseth <h.b.furuseth@usit.uio.no>
-# for inventing a way to test for ordering consistency
-# without requiring any particular order.
-# <jhi@iki.fi>
+    # Test #100 removed but to preserve historical test number
+    # consistency we do not renumber the remaining tests.
 
-print "# testing 103\n";
-{
-    my ($from, $to, $lesser, $greater, @test, %test, $test, $yes, $no, $sign);
+    # Cross-check whole character set.
 
-    for (0..9) {
-	# Select a slice.
-	$from = int(($_*@Locale)/10);
-	$to = $from + int(@Locale/10);
-        $to = $#Locale if ($to > $#Locale);
-	$lesser  = join('', @Locale[$from..$to]);
-	# Select a slice one character on.
-	$from++; $to++;
-        $to = $#Locale if ($to > $#Locale);
-	$greater = join('', @Locale[$from..$to]);
-	($yes, $no, $sign) = ($lesser lt $greater
-				? ("    ", "not ", 1)
-				: ("not ", "    ", -1));
-	# all these tests should FAIL (return 0).
-	@test = 
-	    (
-	     $no.'    ($lesser  lt $greater)',  # 0
-	     $no.'    ($lesser  le $greater)',  # 1
-	     'not      ($lesser  ne $greater)', # 2
-	     '         ($lesser  eq $greater)', # 3
-	     $yes.'    ($lesser  ge $greater)', # 4
-	     $yes.'    ($lesser  gt $greater)', # 5
-	     $yes.'    ($greater lt $lesser )', # 6
-	     $yes.'    ($greater le $lesser )', # 7
-	     'not      ($greater ne $lesser )', # 8
-	     '         ($greater eq $lesser )', # 9
-	     $no.'     ($greater ge $lesser )', # 10
-	     $no.'     ($greater gt $lesser )', # 11
-	     'not (($lesser cmp $greater) == -$sign)' # 12
-	     );
-	@test{@test} = 0 x @test;
-	$test = 0;
-	for my $ti (@test) { $test{$ti} = eval $ti ; $test ||= $test{$ti} }
-	if ($test) {
-	    print "# failed 103 at:\n";
-	    print "# lesser  = '$lesser'\n";
-	    print "# greater = '$greater'\n";
-	    print "# lesser cmp greater = ", $lesser cmp $greater, "\n";
-	    print "# greater cmp lesser = ", $greater cmp $lesser, "\n";
-	    print "# (greater) from = $from, to = $to\n";
-	    for my $ti (@test) {
-		printf("# %-40s %-4s", $ti,
-		       $test{$ti} ? 'FAIL' : 'ok');
-		if ($ti =~ /\(\.*(\$.+ +cmp +\$[^\)]+)\.*\)/) {
-		    printf("(%s == %4d)", $1, eval $1);
-	        }
-		print "\n";
-	    }
-
-	    warn "The locale definition on your system may have errors.\n";
+    debug "# testing 101 with locale '$Locale'\n";
+    for (map { chr } 0..255) {
+	if ((/\w/ and /\W/) or (/\d/ and /\D/) or (/\s/ and /\S/)) {
+	    $Problem{101}{$Locale} = 1;
+	    debug "# failed 101\n";
 	    last;
 	}
     }
+
+    # Test for read-only scalars' locale vs non-locale comparisons.
+
+    debug "# testing 102 with locale '$Locale'\n";
+    {
+	no locale;
+	$a = "qwerty";
+	{
+	    use locale;
+	    if ($a cmp "qwerty") {
+		$Problem{102}{$Locale} = 1;
+		debug "# failed 102\n";
+	    }
+	}
+    }
+
+    # This test must be the last one because its failure is not fatal.
+    # The @Alnum_ should be internally consistent.
+    # Thanks to Hallvard Furuseth <h.b.furuseth@usit.uio.no>
+    # for inventing a way to test for ordering consistency
+    # without requiring any particular order.
+    # <jhi@iki.fi>
+    
+    debug "# testing 103 with locale '$Locale'\n";
+    {
+	my ($from, $to, $lesser, $greater,
+	    @test, %test, $test, $yes, $no, $sign);
+
+	for (0..9) {
+	    # Select a slice.
+	    $from = int(($_*@Alnum_)/10);
+	    $to = $from + int(@Alnum_/10);
+	    $to = $#Alnum_ if ($to > $#Alnum_);
+	    $lesser  = join('', @Alnum_[$from..$to]);
+	    # Select a slice one character on.
+	    $from++; $to++;
+	    $to = $#Alnum_ if ($to > $#Alnum_);
+	    $greater = join('', @Alnum_[$from..$to]);
+	    ($yes, $no, $sign) = ($lesser lt $greater
+				  ? ("    ", "not ", 1)
+				  : ("not ", "    ", -1));
+	    # all these tests should FAIL (return 0).
+	    # Exact lt or gt cannot be tested because
+	    # in some locales, say, eacute and E may test equal.
+	    @test = 
+		(
+		 $no.'    ($lesser  le $greater)',  # 1
+		 'not      ($lesser  ne $greater)', # 2
+		 '         ($lesser  eq $greater)', # 3
+		 $yes.'    ($lesser  ge $greater)', # 4
+		 $yes.'    ($lesser  ge $greater)', # 5
+		 $yes.'    ($greater le $lesser )', # 7
+		 'not      ($greater ne $lesser )', # 8
+		 '         ($greater eq $lesser )', # 9
+		 $no.'     ($greater ge $lesser )', # 10
+		 'not (($lesser cmp $greater) == -$sign)' # 12
+		 );
+	    @test{@test} = 0 x @test;
+	    $test = 0;
+	    for my $ti (@test) { $test{$ti} = eval $ti ; $test ||= $test{$ti} }
+	    if ($test) {
+		$Problem{103}{$Locale} = 1;
+		debug "# failed 103 at:\n";
+		debug "# lesser  = '$lesser'\n";
+		debug "# greater = '$greater'\n";
+		debug "# lesser cmp greater = ", $lesser cmp $greater, "\n";
+		debug "# greater cmp lesser = ", $greater cmp $lesser, "\n";
+		debug "# (greater) from = $from, to = $to\n";
+		for my $ti (@test) {
+		    debugf("# %-40s %-4s", $ti,
+			   $test{$ti} ? 'FAIL' : 'ok');
+		    if ($ti =~ /\(\.*(\$.+ +cmp +\$[^\)]+)\.*\)/) {
+			debugf("(%s == %4d)", $1, eval $1);
+		    }
+		    debug "\n#";
+		}
+
+		last;
+	    }
+	}
+    }
+}
+
+no locale;
+
+foreach (99..103) {
+    if ($Problem{$_}) {
+	if ($_ == 103) {
+	    print "# The failure of test 103 is not necessarily fatal.\n";
+	    print "# It usually indicates a problem in the enviroment,\n";
+	    print "# not in Perl itself.\n";
+	}
+	print "not ";
+    }
+    print "ok $_\n";
+}
+
+my $didwarn = 0;
+
+foreach (99..103) {
+    if ($Problem{$_}) {
+	my @f = sort keys %{ $Problem{$_} };
+	my $f = join(" ", @f);
+	$f =~ s/(.{50,60}) /$1\n#\t/g;
+	warn
+	    "# The locale ", (@f == 1 ? "definition" : "definitions"), "\n#\n",
+	    "#\t", $f, "\n#\n",
+	    "# on your system may have errors because the locale test $_\n",
+            "# failed in ", (@f == 1 ? "that locale" : "those locales"),
+            ".\n";
+	warn <<EOW;
+#
+# If your users are not using these locales you are safe for the moment,
+# but please report this failure first to perlbug\@perl.com using the
+# perlbug script (as described in the INSTALL file) so that the exact
+# details of the failures can be sorted out first and then your operating
+# system supplier can be alerted about these anomalies.
+#
+EOW
+	$didwarn = 1;
+    }
+}
+
+if ($didwarn) {
+    my @s;
+    
+    foreach my $l (@Locale) {
+	my $p = 0;
+	foreach my $t (99..103) {
+	    $p++ if $Problem{$t}{$l};
+	}
+	push @s, $l if $p == 0;
+    }
+    
+    my $s = join(" ", @s);
+    $s =~ s/(.{50,60}) /$1\n#\t/g;
+
+    warn
+	"# The following locales\n#\n",
+        "#\t", $s, "\n#\n",
+	"# tested okay.\n#\n",
 }
 
 # eof

@@ -7,10 +7,17 @@ BEGIN {
 
     my $PW = "/etc/passwd";
 
-    if (($^O eq 'next' and not open(PW, "nidump passwd .|"))
-        or (defined $Config{'i_pwd'} and $Config{'i_pwd'} ne 'define')
-	or not -f $PW or not open(PW, $PW)
-	) {
+    $where = $PW;
+
+    if (-x "/usr/bin/nidump") {
+	if (open(PW, "nidump passwd . |")) {
+	    $where = "NetInfo";
+	} else {
+	    print "1..0\n";
+	    exit 0;
+	}
+    } elsif ((defined $Config{'i_pwd'} and $Config{'i_pwd'} ne 'define')
+	     or not -f $PW or not open(PW, $PW)) {
 	print "1..0\n";
 	exit 0;
     }
@@ -22,16 +29,24 @@ print "1..1\n";
 my $max = 25; #
 
 my $n = 0;
-my $not;
 my $tst = 1;
+my %suspect;
+my %seen;
 
-$not = 0;
 while (<PW>) {
-    last if $n == $max;
     chomp;
-    @s = split /:/;
+    my @s = split /:/;
+    my ($name_s, $passwd_s, $uid_s, $gid_s, $gcos_s, $home_s, $shell_s) = @s;
+    if (@s) {
+	push @{ $seen{$name_s} }, $.;
+    } else {
+	warn "# Your $where line $. is empty.\n";
+	next;
+    }
+    next if $n == $max;
+    # In principle we could whine if @s != 7 but do we know enough
+    # of passwd file formats everywhere?
     if (@s == 7) {
-	my ($name_s, $passwd_s, $uid_s, $gid_s, $gcos_s, $home_s, $shell_s) = @s;
 	@n = getpwuid($uid_s);
 	# 'nobody' et al.
 	next unless @n;
@@ -42,7 +57,7 @@ while (<PW>) {
 	    ($name,$passwd,$uid,$gid,$quota,$comment,$gcos,$home,$shell) = @n;
 	    next if $name_s ne $name;
 	}
-	$not = 1, last
+	$suspect{$name_s}++
 	    if $name    ne $name_s    or
 # Shadow passwords confuse this.
 # Think about non-crypt(3) encryptions, too, before you do anything rash.
@@ -56,7 +71,19 @@ while (<PW>) {
     $n++;
 }
 
-print "not " if $not;
+# Drop the multiply defined users.
+
+foreach (sort keys %seen) {
+    my $times = @{ $seen{$_} };
+    if ($times > 1) {
+	# Multiply defined users are rarely intentional.
+	local $" = ", ";
+	warn "# User '$_' defined multiple times in $where, lines: @{$seen{$_}}.\n";
+	delete $suspect{$_};
+    }
+}
+
+print "not " if keys %suspect;
 print "ok ", $tst++, "\n";
 
 close(PW);

@@ -5207,7 +5207,7 @@ EOM
 To build perl, you must add the current working directory to your
 $xxx environment variable before running make.  You can do
 this with
-   $xxx=\`pwd\`; export $xxx
+   $xxx=\`pwd\`:\$$xxx; export $xxx
 for Bourne-style shells, or
    setenv $xxx \`pwd\`
 for Csh-style shells.  You *MUST* do this before running make.
