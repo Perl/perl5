@@ -2858,10 +2858,18 @@ sed <<!GROK!THIS! >config.h -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un-
 /* USE_64_BITS:
  *	This symbol, if defined, indicates that 64-bit integers should
  *	be used when available.  If not defined, the native integers
- *	will be used (be they 32 or 64 bits).
+ *	will be employed (be they 32 or 64 bits).  The minimal possible
+ *	64-bitness is used, just enough to get 64-bit integers into Perl.
+ *	This may mean using for example "long longs", while your memory
+ *	may still be limited to 2 gigabytes.
+ *	To go all the way, use Configure -Dusefull64bits.
  */
 #ifndef USE_64_BITS
 #$use64bits	USE_64_BITS		/**/
+#endif
+
+#ifndef USE_FULL_64_BITS
+#$usefull64bits	USE_FULL_64_BITS		/**/
 #endif
 
 /* USE_LARGE_FILES:
@@ -2998,6 +3006,14 @@ sed <<!GROK!THIS! >config.h -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un-
  */
 #define PERL_XS_APIVERSION "$xs_apiversion"
 #define PERL_PM_APIVERSION "$pm_apiversion"
+
+/* HAS_LSEEK_PROTO:
+ *	This symbol, if defined, indicates that the system provides
+ *	a prototype for the lseek() function.  Otherwise, it is up
+ *	to the program to supply one.  A good guess is
+ *		extern off_t lseek(int, off_t, int);
+ */
+#$d_lseekproto	HAS_LSEEK_PROTO	/**/
 
 #endif
 !GROK!THIS!
