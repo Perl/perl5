@@ -218,6 +218,8 @@ SHELL = $sh
 # how to tr(anslate) newlines
 TRNL = '$trnl'
 
+OPTIMIZE = $optimize
+
 !GROK!THIS!
 # not used by Makefile but by installperl;
 # mentioned here so that metaconfig picks these up
