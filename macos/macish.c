@@ -799,6 +799,7 @@ Boolean MacPerl_QueueAsyncTask(MacPerl_AsyncTask * task)
 
 void MacPerl_DoAsyncTasks()
 {
+	dTHX;
 	QElemPtr			elem;
 	MacPerl_AsyncTask * task;
 	
@@ -806,8 +807,12 @@ void MacPerl_DoAsyncTasks()
 	while (elem = sMacPerlAsyncQueue.qHead) {
 		Dequeue(elem, &sMacPerlAsyncQueue);
 		task = (MacPerl_AsyncTask *) elem;	/* Remove from queue */
-		task->fProc(task);						/* Call procedure */
-		task->fPending = false;					/* Allow it to be queued again */
+		task->fProc(task);					/* Call procedure */
+		task->fPending = false;				/* Allow it to be queued again */
+	}
+
+	if (PL_sig_pending) {
+		despatch_signals();
 	}
 }
 
@@ -821,6 +826,7 @@ void MacPerl_ClearAsyncTasks()
 		Dequeue(elem, &sMacPerlAsyncQueue);
 	}
 }
+
 
 /*
  * Asynchronous tasks come in handy to exit gracefully from the middle of a script

@@ -207,7 +207,7 @@ void MacPerl_Exit(int status);
 
 MP_EXT Boolean			gMacPerl_HasAsyncTasks;
 void MacPerl_DoAsyncTasks();
-#define PERL_ASYNC_CHECK() while (gMacPerl_HasAsyncTasks) MacPerl_DoAsyncTasks()
+#define PERL_ASYNC_CHECK() while (gMacPerl_HasAsyncTasks || PL_sig_pending) MacPerl_DoAsyncTasks()
 typedef struct MacPerl_AsyncTask {
 	void	*	qLink;		/* Don't set */
 	short    qType;		/* Queue type. Ignore */
