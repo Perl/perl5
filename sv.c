@@ -5168,6 +5168,7 @@ Perl_sv_reftype(pTHX_ SV *sv, int ob)
 	case SVt_PVCV:		return "CODE";
 	case SVt_PVGV:		return "GLOB";
 	case SVt_PVFM:		return "FORMAT";
+	case SVt_PVIO:		return "IO";
 	default:		return "UNKNOWN";
 	}
     }
