@@ -342,8 +342,8 @@ $inhibit_exit = $option{PrintRet} = 1;
 
 # These guys may be defined in $ENV{PERL5DB} :
 $rl		= 1	unless defined $rl;
-$warnLevel	= 0	unless defined $warnLevel;
-$dieLevel	= 0	unless defined $dieLevel;
+$warnLevel	= 1	unless defined $warnLevel;
+$dieLevel	= 1	unless defined $dieLevel;
 $signalLevel	= 1	unless defined $signalLevel;
 $pre		= []	unless defined $pre;
 $post		= []	unless defined $post;
@@ -2682,7 +2682,8 @@ sub dbdie {
   if ($dieLevel < 2) {
     die @_ if $^S;		# in eval propagate
   }
-  eval { require Carp } if defined $^S;	# If error/warning during compilation,
+  # No need to check $^S, eval is much more robust nowadays
+  eval { require Carp }; #if defined $^S;# If error/warning during compilation,
                                 	# require may be broken.
 
   die(@_, "\nCannot print stack trace, load with -MCarp option to see stack")
@@ -2692,7 +2693,13 @@ sub dbdie {
   # inside DB::DB, but not in Carp).
   my ($mysingle,$mytrace) = ($single,$trace);
   $single = 0; $trace = 0;
-  my $mess = Carp::longmess(@_);
+  my $mess = "@_";
+  { 
+    package Carp;		# Do not include us in the list
+    eval {
+      $mess = Carp::longmess(@_);
+    };
+  }
   ($single,$trace) = ($mysingle,$mytrace);
   die $mess;
 }
