@@ -1172,6 +1172,7 @@ fail_discipline:
 #ifndef PERLIO_LAYERS
 		Perl_croak(aTHX_ "IO layers (like '%.*s') unavailable", end-s, s);
 #else
+		len -= end-s;
 		s = end;
 #endif
 	    }
