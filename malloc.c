@@ -1520,25 +1520,25 @@ Perl_mfree(void *mp)
 		if (!bad_free_warn)
 		    return;
 #ifdef RCHECK
-#ifdef PERL_CORE
 		{
 		    dTHX;
+#ifdef PERL_CORE
 		    if (!PERL_IS_ALIVE || !PL_curcop || ckWARN_d(WARN_MALLOC))
-			Perl_warner(WARN_MALLOC, "%s free() ignored",
+			Perl_warner(aTHX_ WARN_MALLOC, "%s free() ignored",
 				    ovp->ov_rmagic == RMAGIC - 1 ?
 				    "Duplicate" : "Bad");
-		}
 #else
-		warn("%s free() ignored",
-		    ovp->ov_rmagic == RMAGIC - 1 ? "Duplicate" : "Bad");
+		    warn("%s free() ignored",
+			ovp->ov_rmagic == RMAGIC - 1 ? "Duplicate" : "Bad");
 #endif		
 #else
 #ifdef PERL_CORE
-		if (!PERL_IS_ALIVE || !PL_curcop || ckWARN_d(WARN_MALLOC))
-		  Perl_warner(WARN_MALLOC, "%s", "Bad free() ignored");
+		    if (!PERL_IS_ALIVE || !PL_curcop || ckWARN_d(WARN_MALLOC))
+			Perl_warner(aTHX_ WARN_MALLOC, "%s", "Bad free() ignored");
 #else
-		warn("%s", "Bad free() ignored");
+		    warn("%s", "Bad free() ignored");
 #endif
+		}
 #endif
 		return;				/* sanity */
 	    }
@@ -1617,27 +1617,28 @@ Perl_realloc(void *mp, size_t nbytes)
 		if (!bad_free_warn)
 		    return Nullch;
 #ifdef RCHECK
-#ifdef PERL_CORE
 		{
 		    dTHX;
+#ifdef PERL_CORE
 		    if (!PERL_IS_ALIVE || !PL_curcop || ckWARN_d(WARN_MALLOC))
-			Perl_warner(WARN_MALLOC, "%srealloc() %signored",
+			Perl_warner(aTHX_ WARN_MALLOC, "%srealloc() %signored",
 				    (ovp->ov_rmagic == RMAGIC - 1 ? "" : "Bad "),
 				    ovp->ov_rmagic == RMAGIC - 1
 				    ? "of freed memory " : "");
-		}
 #else
-		warn("%srealloc() %signored",
-		    (ovp->ov_rmagic == RMAGIC - 1 ? "" : "Bad "),
-		     ovp->ov_rmagic == RMAGIC - 1 ? "of freed memory " : "");
+		    warn("%srealloc() %signored",
+			(ovp->ov_rmagic == RMAGIC - 1 ? "" : "Bad "),
+			 ovp->ov_rmagic == RMAGIC - 1 ? "of freed memory " : "");
 #endif
 #else
 #ifdef PERL_CORE
-		if (!PERL_IS_ALIVE || !PL_curcop || ckWARN_d(WARN_MALLOC))
-		  Perl_warner(WARN_MALLOC, "%s", "Bad realloc() ignored");
+		    if (!PERL_IS_ALIVE || !PL_curcop || ckWARN_d(WARN_MALLOC))
+			Perl_warner(aTHX_ WARN_MALLOC, "%s",
+				    "Bad realloc() ignored");
 #else
-		warn("%s", "Bad realloc() ignored");
+		    warn("%s", "Bad realloc() ignored");
 #endif
+		}
 #endif
 		return Nullch;			/* sanity */
 	    }
