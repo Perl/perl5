@@ -1469,9 +1469,6 @@
 #define next_symbol		S_next_symbol
 #endif
 #ifdef PERL_CORE
-#define doencodes		S_doencodes
-#endif
-#ifdef PERL_CORE
 #define is_an_int		S_is_an_int
 #endif
 #ifdef PERL_CORE
@@ -4067,9 +4064,6 @@
 #endif
 #ifdef PERL_CORE
 #define next_symbol(a)		S_next_symbol(aTHX_ a)
-#endif
-#ifdef PERL_CORE
-#define doencodes(a,b,c)	S_doencodes(aTHX_ a,b,c)
 #endif
 #ifdef PERL_CORE
 #define is_an_int(a,b)		S_is_an_int(aTHX_ a,b)

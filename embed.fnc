@@ -1064,7 +1064,6 @@ s	|I32	|measure_struct	|tempsym_t* symptr
 s	|char *	|group_end	|char *pat|char *patend|char ender
 s	|char *	|get_num	|char *ppat|I32 *
 s	|bool	|next_symbol	|tempsym_t* symptr
-s	|void	|doencodes	|SV* sv|char* s|I32 len
 s	|SV*	|is_an_int	|char *s|STRLEN l
 s	|int	|div128		|SV *pnum|bool *done
 #endif

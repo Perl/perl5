@@ -571,25 +571,24 @@ that make the distinction.
 Most operators that deal with positions or lengths in a string will
 automatically switch to using character positions, including
 C<chop()>, C<chomp()>, C<substr()>, C<pos()>, C<index()>, C<rindex()>,
-C<sprintf()>, C<write()>, and C<length()>.  Operators that
-specifically do not switch include C<vec()>, C<pack()>, and
-C<unpack()>.  Operators that really don't care include
-operators that treats strings as a bucket of bits such as C<sort()>,
-and operators dealing with filenames.
+C<sprintf()>, C<write()>, and C<length()>.  An operator that
+specifically does not switch is C<vec()>.  Operators that really don't 
+care include operators that treat strings as a bucket of bits such as 
+C<sort()>, and operators dealing with filenames.
 
 =item *
 
-The C<pack()>/C<unpack()> letters C<c> and C<C> do I<not> change,
-since they are often used for byte-oriented formats.  Again, think
-C<char> in the C language.
+The C<pack()>/C<unpack()> letter C<C> does I<not> change, since it is often 
+used for byte-oriented formats.  Again, think C<char> in the C language.
 
 There is a new C<U> specifier that converts between Unicode characters
-and code points.
+and code points. There is also a C<W> specifier that is the equivalent of
+C<chr>/C<ord> and properly handles character values even if they are above 255.
 
 =item *
 
 The C<chr()> and C<ord()> functions work on characters, similar to
-C<pack("U")> and C<unpack("U")>, I<not> C<pack("C")> and
+C<pack("W")> and C<unpack("W")>, I<not> C<pack("C")> and
 C<unpack("C")>.  C<pack("C")> and C<unpack("C")> are methods for
 emulating byte-oriented C<chr()> and C<ord()> on Unicode strings.
 While these methods reveal the internal encoding of Unicode strings,

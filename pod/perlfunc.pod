@@ -2054,7 +2054,7 @@ addresses returned by the corresponding system library call.  In the
 Internet domain, each address is four bytes long and you can unpack it
 by saying something like:
 
-    ($a,$b,$c,$d) = unpack('C4',$addr[0]);
+    ($a,$b,$c,$d) = unpack('W4',$addr[0]);
 
 The Socket library makes this slightly easier:
 
@@ -3296,7 +3296,8 @@ Takes a LIST of values and converts it into a string using the rules
 given by the TEMPLATE.  The resulting string is the concatenation of
 the converted values.  Typically, each converted value looks
 like its machine-level representation.  For example, on 32-bit machines
-a converted integer may be represented by a sequence of 4 bytes.
+an integer may be represented by a sequence of 4 bytes which will be 
+converted to a sequence of 4 characters.
 
 The TEMPLATE is a sequence of characters that give the order and type
 of values, as follows:
@@ -3311,7 +3312,9 @@ of values, as follows:
     H	A hex string (high nybble first).
 
     c	A signed char (8-bit) value.
-    C	An unsigned char value.  Only does bytes.  See U for Unicode.
+    C	An unsigned C char (octet) even under Unicode. Should normally not
+        be used. See U and W instead.
+    W   An unsigned char value (can be greater than 255).
 
     s	A signed short (16-bit) value.
     S	An unsigned short value.
@@ -3414,71 +3417,72 @@ byte (so the packed result will be one longer than the byte C<length>
 of the item).
 
 The repeat count for C<u> is interpreted as the maximal number of bytes
-to encode per line of output, with 0 and 1 replaced by 45.
+to encode per line of output, with 0, 1 and 2 replaced by 45. The repeat 
+count should not be more than 65.
 
 =item *
 
 The C<a>, C<A>, and C<Z> types gobble just one value, but pack it as a
 string of length count, padding with nulls or spaces as necessary.  When
 unpacking, C<A> strips trailing spaces and nulls, C<Z> strips everything
-after the first null, and C<a> returns data verbatim.  When packing,
-C<a>, and C<Z> are equivalent.
+after the first null, and C<a> returns data verbatim.
 
 If the value-to-pack is too long, it is truncated.  If too long and an
 explicit count is provided, C<Z> packs only C<$count-1> bytes, followed
-by a null byte.  Thus C<Z> always packs a trailing null byte under
-all circumstances.
+by a null byte.  Thus C<Z> always packs a trailing null (except when the
+count is 0).
 
 =item *
 
 Likewise, the C<b> and C<B> fields pack a string that many bits long.
-Each byte of the input field of pack() generates 1 bit of the result.
+Each character of the input field of pack() generates 1 bit of the result.
 Each result bit is based on the least-significant bit of the corresponding
-input byte, i.e., on C<ord($byte)%2>.  In particular, bytes C<"0"> and
-C<"1"> generate bits 0 and 1, as do bytes C<"\0"> and C<"\1">.
+input character, i.e., on C<ord($char)%2>.  In particular, characters C<"0">
+and C<"1"> generate bits 0 and 1, as do characters C<"\0"> and C<"\1">.
 
 Starting from the beginning of the input string of pack(), each 8-tuple
-of bytes is converted to 1 byte of output.  With format C<b>
-the first byte of the 8-tuple determines the least-significant bit of a
-byte, and with format C<B> it determines the most-significant bit of
-a byte.
+of characters is converted to 1 character of output.  With format C<b>
+the first character of the 8-tuple determines the least-significant bit of a
+character, and with format C<B> it determines the most-significant bit of
+a character.
 
 If the length of the input string is not exactly divisible by 8, the
-remainder is packed as if the input string were padded by null bytes
+remainder is packed as if the input string were padded by null characters
 at the end.  Similarly, during unpack()ing the "extra" bits are ignored.
 
-If the input string of pack() is longer than needed, extra bytes are ignored.
-A C<*> for the repeat count of pack() means to use all the bytes of
-the input field.  On unpack()ing the bits are converted to a string
-of C<"0">s and C<"1">s.
+If the input string of pack() is longer than needed, extra characters are 
+ignored. A C<*> for the repeat count of pack() means to use all the 
+characters of the input field.  On unpack()ing the bits are converted to a 
+string of C<"0">s and C<"1">s.
 
 =item *
 
 The C<h> and C<H> fields pack a string that many nybbles (4-bit groups,
 representable as hexadecimal digits, 0-9a-f) long.
 
-Each byte of the input field of pack() generates 4 bits of the result.
-For non-alphabetical bytes the result is based on the 4 least-significant
-bits of the input byte, i.e., on C<ord($byte)%16>.  In particular,
-bytes C<"0"> and C<"1"> generate nybbles 0 and 1, as do bytes
-C<"\0"> and C<"\1">.  For bytes C<"a".."f"> and C<"A".."F"> the result
+Each character of the input field of pack() generates 4 bits of the result.
+For non-alphabetical characters the result is based on the 4 least-significant
+bits of the input character, i.e., on C<ord($char)%16>.  In particular,
+characters C<"0"> and C<"1"> generate nybbles 0 and 1, as do bytes
+C<"\0"> and C<"\1">.  For characters C<"a".."f"> and C<"A".."F"> the result
 is compatible with the usual hexadecimal digits, so that C<"a"> and
-C<"A"> both generate the nybble C<0xa==10>.  The result for bytes
+C<"A"> both generate the nybble C<0xa==10>.  The result for characters
 C<"g".."z"> and C<"G".."Z"> is not well-defined.
 
 Starting from the beginning of the input string of pack(), each pair
-of bytes is converted to 1 byte of output.  With format C<h> the
-first byte of the pair determines the least-significant nybble of the
-output byte, and with format C<H> it determines the most-significant
+of characters is converted to 1 character of output.  With format C<h> the
+first character of the pair determines the least-significant nybble of the
+output character, and with format C<H> it determines the most-significant
 nybble.
 
 If the length of the input string is not even, it behaves as if padded
-by a null byte at the end.  Similarly, during unpack()ing the "extra"
+by a null character at the end.  Similarly, during unpack()ing the "extra"
 nybbles are ignored.
 
-If the input string of pack() is longer than needed, extra bytes are ignored.
-A C<*> for the repeat count of pack() means to use all the bytes of
-the input field.  On unpack()ing the bits are converted to a string
+If the input string of pack() is longer than needed, extra characters are
+ignored.
+A C<*> for the repeat count of pack() means to use all the characters of
+the input field.  On unpack()ing the nybbles are converted to a string
 of hexadecimal digits.
 
 =item *
@@ -3512,7 +3516,7 @@ I<length-item>, but if you put in the '*' it will be ignored. For all other
 codes, C<unpack> applies the length value to the next item, which must not
 have a repeat count.
 
-    unpack 'C/a', "\04Gurusamy";        gives 'Guru'
+    unpack 'W/a', "\04Gurusamy";        gives 'Guru'
     unpack 'a3/A* A*', '007 Bond  J ';  gives (' Bond','J')
     pack 'n/a* w/a*','hello,','world';  gives "\000\006hello,\005world"
 
@@ -3581,7 +3585,7 @@ Some systems may have even weirder byte orders such as
 You can see your system's preference with
 
  	print join(" ", map { sprintf "%#02x", $_ }
-                            unpack("C*",pack("L",0x12345678))), "\n";
+                            unpack("W*",pack("L",0x12345678))), "\n";
 
 The byteorder on the platform where Perl was built is also available
 via L<Config>:
@@ -3649,21 +3653,21 @@ will not in general equal $foo).
 
 =item *
 
-If the pattern begins with a C<U>, the resulting string will be
-treated as UTF-8-encoded Unicode. You can force UTF-8 encoding on in a
-string with an initial C<U0>, and the bytes that follow will be
-interpreted as Unicode characters. If you don't want this to happen,
-you can begin your pattern with C<C0> (or anything else) to force Perl
-not to UTF-8 encode your string, and then follow this with a C<U*>
-somewhere in your pattern.
+Pack and unpack can operate in two modes, character mode (C<C0> mode) where
+the packed string is processed per character and UTF-8 mode (C<U0> mode)
+where the packed string is processed in its UTF-8-encoded Unicode form on
+a byte by byte basis. Character mode is the default unless the format string 
+starts with an C<U>. You can switch mode at any moment with an explicit 
+C<C0> or C<U0> in the format. A mode is in effect until the next mode switch 
+or until the end of the ()-group in which it was entered.
 
 =item *
 
 You must yourself do any alignment or padding by inserting for example
 enough C<'x'>es while packing.  There is no way to pack() and unpack()
-could know where the bytes are going to or coming from.  Therefore
+could know where the characters are going to or coming from.  Therefore
 C<pack> (and C<unpack>) handle their output and input as flat
-sequences of bytes.
+sequences of characters.
 
 =item *
 
@@ -3681,9 +3685,9 @@ is the string "\0a\0\0bc".
 
 C<x> and C<X> accept C<!> modifier.  In this case they act as
 alignment commands: they jump forward/back to the closest position
-aligned at a multiple of C<count> bytes.  For example, to pack() or
+aligned at a multiple of C<count> characters. For example, to pack() or
 unpack() C's C<struct {char c; double d; char cc[2]}> one may need to
-use the template C<C x![d] d C[2]>; this assumes that doubles must be
+use the template C<W x![d] d W[2]>; this assumes that doubles must be
 aligned on the double's size.
 
 For alignment commands C<count> of 0 is equivalent to C<count> of 1;
@@ -3713,20 +3717,27 @@ to pack() than actually given, extra arguments are ignored.
 
 Examples:
 
-    $foo = pack("CCCC",65,66,67,68);
+    $foo = pack("WWWW",65,66,67,68);
     # foo eq "ABCD"
-    $foo = pack("C4",65,66,67,68);
+    $foo = pack("W4",65,66,67,68);
     # same thing
+    $foo = pack("W4",0x24b6,0x24b7,0x24b8,0x24b9);
+    # same thing with Unicode circled letters.
     $foo = pack("U4",0x24b6,0x24b7,0x24b8,0x24b9);
-    # same thing with Unicode circled letters
+    # same thing with Unicode circled letters. You don't get the UTF-8
+    # bytes because the U at the start of the format caused a switch to
+    # U0-mode, so the UTF-8 bytes get joined into characters
+    $foo = pack("C0U4",0x24b6,0x24b7,0x24b8,0x24b9);
+    # foo eq "\xe2\x92\xb6\xe2\x92\xb7\xe2\x92\xb8\xe2\x92\xb9"
+    # This is the UTF-8 encoding of the string in the previous example
 
     $foo = pack("ccxxcc",65,66,67,68);
     # foo eq "AB\0\0CD"
 
-    # note: the above examples featuring "C" and "c" are true
+    # note: the above examples featuring "W" and "c" are true
     # only on ASCII and ASCII-derived systems such as ISO Latin 1
     # and UTF-8.  In EBCDIC the first example would be
-    # $foo = pack("CCCC",193,194,195,196);
+    # $foo = pack("WWWW",193,194,195,196);
 
     $foo = pack("s2",1,2);
     # "\1\0\2\0" on little-endian
@@ -6242,7 +6253,7 @@ If EXPR is omitted, unpacks the C<$_> string.
 
 The string is broken into chunks described by the TEMPLATE.  Each chunk
 is converted separately to a value.  Typically, either the string is a result
-of C<pack>, or the bytes of the string represent a C structure of some
+of C<pack>, or the characters of the string represent a C structure of some
 kind.
 
 The TEMPLATE has the same format as in the C<pack> function.
@@ -6255,7 +6266,7 @@ Here's a subroutine that does substring:
 
 and then there's
 
-    sub ordinal { unpack("c",$_[0]); } # same as ord()
+    sub ordinal { unpack("W",$_[0]); } # same as ord()
 
 In addition to fields allowed in pack(), you may prefix a field with
 a %<number> to indicate that
@@ -6269,7 +6280,7 @@ computes the same number as the System V sum program:
 
     $checksum = do {
 	local $/;  # slurp!
-	unpack("%32C*",<>) % 65535;
+	unpack("%32W*",<>) % 65535;
     };
 
 The following efficiently counts the number of set bits in a bit vector:

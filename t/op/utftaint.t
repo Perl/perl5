@@ -31,7 +31,7 @@ use constant UTF8 => "\x{1234}";
 
 sub is_utf8 {
     my $s = shift;
-    return 0xB6 != ord pack('a*', chr(0xB6).$s);
+    return 0xB6 != unpack('C', chr(0xB6).$s);
 }
 
 for my $ary ([ascii => 'perl'], [latin1 => "\xB6"], [utf8 => "\x{100}"]) {
@@ -82,7 +82,7 @@ for my $ary ([ascii => 'perl'], [latin1 => "\xB6"], [utf8 => "\x{100}"]) {
     my $encode = $ary->[0];
 
     my $utf8 = pack('U*') . $ary->[1];
-    my $byte = pack('C0a*', $utf8);
+    my $byte = unpack('U0a*', $utf8);
 
     my $taint = $arg; substr($taint, 0) = $utf8;
     utf8::encode($taint);
@@ -120,7 +120,7 @@ for my $ary ([ascii => 'perl'], [latin1 => "\xB6"]) {
     my $encode = $ary->[0];
 
     my $up   = pack('U*') . $ary->[1];
-    my $down = pack('C0a*', $ary->[1]);
+    my $down = pack("a*", $ary->[1]);
 
     my $taint = $arg; substr($taint, 0) = $up;
     utf8::upgrade($taint);

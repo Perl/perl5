@@ -1148,7 +1148,7 @@ references can be weakened.
 with an assignment operator, which implies modifying the value itself.
 Perhaps you need to copy the value to a temporary, and repeat that.
 
-=item Character in "C" format wrapped in pack
+=item Character in 'C' format wrapped in pack
 
 (W pack) You said
 
@@ -1163,7 +1163,19 @@ and so on) and not for Unicode characters, so Perl behaved as if you meant
 If you actually want to pack Unicode codepoints, use the C<"U"> format
 instead.
 
-=item Character in "c" format wrapped in pack
+=item Character in 'W' format wrapped in pack
+
+(W pack) You said
+
+    pack("U0W", $x)
+
+where $x is either less than 0 or more than 255. However, C<U0>-mode expects
+all values to fall in the interval [0, 255], so Perl behaved as if you
+meant:
+
+    pack("U0W", $x & 255)
+
+=item Character in 'c' format wrapped in pack
 
 (W pack) You said
 
@@ -1177,6 +1189,42 @@ and so on) and not for Unicode characters, so Perl behaved as if you meant
 
 If you actually want to pack Unicode codepoints, use the C<"U"> format
 instead.
+
+=item Character in '%c' format wrapped in unpack
+
+(W unpack) You tried something like
+
+   unpack("H", "\x{2a1}")
+
+where the format expects to process a byte (a character with a value 
+below 256), but a higher value was provided instead. Perl uses the value
+modulus 256 instead, as if you had provided:
+
+   unpack("H", "\x{a1}")
+
+=item Character(s) in '%c' format wrapped in pack
+
+(W pack) You tried something like
+
+   pack("u", "\x{1f3}b")
+
+where the format expects to process a sequence of bytes (character with a 
+value below 256), but some of the characters had a higher value. Perl 
+uses the character values modulus 256 instead, as if you had provided:
+
+   pack("u", "\x{f3}b")
+
+=item Character(s) in '%c' format wrapped in unpack
+
+(W unpack) You tried something like
+
+   unpack("s", "\x{1f3}b")
+
+where the format expects to process a sequence of bytes (character with a 
+value below 256), but some of the characters had a higher value. Perl 
+uses the character values modulus 256 instead, as if you had provided:
+
+   unpack("s", "\x{f3}b")
 
 =item close() on unopened filehandle %s
 
@@ -1559,6 +1607,13 @@ you which section of the Perl source code is distressed.
 
 (F) Your machine apparently doesn't implement fcntl().  What is this, a
 PDP-11 or something?
+
+=item Field too wide in 'u' format in pack
+
+(W pack) Each line in an uuencoded string start with a length indicator
+which can't encode values above 63. So there is no point in asking for
+a line length bigger than that. Perl will behave as if you specified
+C<u63> as format.
 
 =item Filehandle %s opened only for input
 
@@ -2112,6 +2167,21 @@ possibility is careless use of utf8::upgrade().
 
 Perl thought it was reading UTF-16 encoded character data but while
 doing it Perl met a malformed Unicode surrogate.
+
+=item Malformed UTF-8 string in pack
+
+(F) You tried to pack something that didn't comply with UTF-8 encoding
+rules and perl was unable to guess how to make more progress.
+
+=item Malformed UTF-8 string in unpack
+
+(F) You tried to unpack something that didn't comply with UTF-8 encoding
+rules and perl was unable to guess how to make more progress.
+
+=item Malformed UTF-8 string in '%c' format in unpack
+
+(F) You tried to unpack something that didn't comply with UTF-8 encoding
+rules and perl was unable to guess how to make more progress.
 
 =item %s matches null string many times in regex; marked by <-- HERE in m/%s/
 
@@ -2715,6 +2785,12 @@ otherwise.
 
 (F) You had a template that specified an absolute position outside
 the string being unpacked.  See L<perlfunc/pack>.
+
+=item '@' outside of string with malformed UTF-8 in unpack
+
+(F) You had a template that specified an absolute position outside
+the string being unpacked. The string being unpacked was also invalid
+UTF-8. See L<perlfunc/pack>.
 
 =item %s package attribute may clash with future reserved word: %s
 

@@ -4,13 +4,16 @@
 use strict;
 use Encode;
 
-my @lines = grep {!/^#/} <DATA>;
+my @lines = grep {
+    s/#.*//;
+    /\S/;
+} <DATA>;
 
 sub addline {
-  my ($arrays, $chrmap, $letter, $arrayname, $spare, $nocsum, $size,
+  my ($arrays, $chrmap, $letter, $arrayname, $unpredictable, $nocsum, $size,
       $condition) = @_;
   my $line = "/* $letter */ $size";
-  $line .= " | PACK_SIZE_SPARE" if $spare;
+  $line .= " | PACK_SIZE_UNPREDICTABLE" if $unpredictable;
   $line .= " | PACK_SIZE_CANNOT_CSUM" if $nocsum;
   $line .= ",";
   # And then the hack
@@ -24,7 +27,7 @@ sub output_tables {
 
   my $chrmap = shift;
   foreach (@_) {
-    my ($letter, $shriek, $spare, $nocsum, $size, $condition)
+    my ($letter, $shriek, $unpredictable, $nocsum, $size, $condition)
       = /^([A-Za-z])(!?)\t(\S*)\t(\S*)\t([^\t\n]+)(?:\t+(.*))?$/;
     die "Can't parse '$_'" unless $size;
 
@@ -36,7 +39,7 @@ sub output_tables {
     }
 
     addline (\%arrays, $chrmap, $letter, $shriek ? 'shrieking' : 'normal',
-	     $spare, $nocsum, $size, $condition);
+	     $unpredictable, $nocsum, $size, $condition);
   }
 
   my %earliest;
@@ -100,11 +103,12 @@ output_tables (\%ebcdicmap, @lines);
 print "#endif\n";
 
 __DATA__
-#Symbol	spare	nocsum	size
+#Symbol	unpredictable
+#		nocsum	size
 c			char
-C			unsigned char
-W			unsigned char
-U			char
+C	*		unsigned char
+W	*		unsigned char
+U	*		char
 s!			short
 s			=SIZE16
 S!			unsigned short
@@ -128,7 +132,7 @@ V!			=SIZE32	PERL_PACK_CAN_SHRIEKSIGN
 N!			=SIZE32	PERL_PACK_CAN_SHRIEKSIGN
 L			=SIZE32
 p		*	char *
-w		*	char
+w	*	*	char
 q			Quad_t	HAS_QUAD
 Q			Uquad_t	HAS_QUAD
 f			float
