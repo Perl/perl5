@@ -1,20 +1,19 @@
+/*
+ * Copyright (c) 1997-8 Graham Barr <gbarr@pobox.com>. All rights reserved.
+ * This program is free software; you can redistribute it and/or
+ * modify it under the same terms as Perl itself.
+ */
+
 #include "EXTERN.h"
 #define PERLIO_NOT_STDIO 1
 #include "perl.h"
 #include "XSUB.h"
-
+#include "poll.h"
 #ifdef I_UNISTD
 #  include <unistd.h>
 #endif
-#ifdef I_FCNTL
-#if defined(__GNUC__) && defined(__cplusplus) && defined(WIN32)
-#define _NO_OLDNAMES
-#endif 
+#if defined(I_FCNTL) || defined(HAS_FCNTL)
 #  include <fcntl.h>
-#if defined(__GNUC__) && defined(__cplusplus) && defined(WIN32)
-#undef _NO_OLDNAMES
-#endif 
-
 #endif
 
 #ifdef PerlIO
@@ -28,62 +27,167 @@ typedef FILE * InputStream;
 typedef FILE * OutputStream;
 #endif
 
+#include "patchlevel.h"
+
+#if (PATCHLEVEL < 3) || ((PATCHLEVEL == 3) && (SUBVERSION < 22))
+     /* before 5.003_22 */
+#    define MY_start_subparse(fmt,flags) start_subparse()
+#else
+#  if (PATCHLEVEL == 3) && (SUBVERSION == 22)
+     /* 5.003_22 */
+#    define MY_start_subparse(fmt,flags) start_subparse(flags)
+#  else
+     /* 5.003_23  onwards */
+#    define MY_start_subparse(fmt,flags) start_subparse(fmt,flags)
+#  endif
+#endif
+
+#ifndef gv_stashpvn
+#define gv_stashpvn(str,len,flags) gv_stashpv(str,flags)
+#endif
+
 static int
-not_here(char *s)
+not_here(s)
+char *s;
 {
     croak("%s not implemented on this architecture", s);
     return -1;
 }
 
-static bool
-constant(char *name, IV *pval)
+#ifndef newCONSTSUB
+/*
+ * Define an XSUB that returns a constant scalar. The resulting structure is
+ * identical to that created by the parser when it parses code like :
+ *
+ *    sub xyz () { 123 }
+ *
+ * This allows the constants from the XSUB to be inlined.
+ *
+ * !!! THIS SHOULD BE ADDED INTO THE CORE CODE !!!!
+ *
+ */
+ 
+static void
+newCONSTSUB(stash,name,sv)
+    HV *stash;
+    char *name;
+    SV *sv;
 {
-    switch (*name) {
-    case '_':
-	if (strEQ(name, "_IOFBF"))
-#ifdef _IOFBF
-	    { *pval = _IOFBF; return TRUE; }
-#else
-	    return FALSE;
+#ifdef dTHR
+    dTHR;
 #endif
-	if (strEQ(name, "_IOLBF"))
-#ifdef _IOLBF
-	    { *pval = _IOLBF; return TRUE; }
-#else
-	    return FALSE;
-#endif
-	if (strEQ(name, "_IONBF"))
-#ifdef _IONBF
-	    { *pval = _IONBF; return TRUE; }
-#else
-	    return FALSE;
-#endif
-	break;
-    case 'S':
-	if (strEQ(name, "SEEK_SET"))
-#ifdef SEEK_SET
-	    { *pval = SEEK_SET; return TRUE; }
-#else
-	    return FALSE;
-#endif
-	if (strEQ(name, "SEEK_CUR"))
-#ifdef SEEK_CUR
-	    { *pval = SEEK_CUR; return TRUE; }
-#else
-	    return FALSE;
-#endif
-	if (strEQ(name, "SEEK_END"))
-#ifdef SEEK_END
-	    { *pval = SEEK_END; return TRUE; }
-#else
-	    return FALSE;
-#endif
-	break;
-    }
+    U32 oldhints = hints;
+    HV *old_cop_stash = curcop->cop_stash;
+    HV *old_curstash = curstash;
+    line_t oldline = curcop->cop_line;
+    curcop->cop_line = copline;
 
-    return FALSE;
+    hints &= ~HINT_BLOCK_SCOPE;
+    if(stash)
+	curstash = curcop->cop_stash = stash;
+
+    newSUB(
+	MY_start_subparse(FALSE, 0),
+	newSVOP(OP_CONST, 0, newSVpv(name,0)),
+	newSVOP(OP_CONST, 0, &sv_no),	/* SvPV(&sv_no) == "" -- GMB */
+	newSTATEOP(0, Nullch, newSVOP(OP_CONST, 0, sv))
+    );
+
+    hints = oldhints;
+    curcop->cop_stash = old_cop_stash;
+    curstash = old_curstash;
+    curcop->cop_line = oldline;
 }
+#endif
 
+#ifndef PerlIO
+#define PerlIO_fileno(f) fileno(f)
+#endif
+
+static int
+io_blocking(f,block)
+InputStream f;
+int block;
+{
+    int RETVAL;
+    if(!f) {
+	errno = EBADF;
+	return -1;
+    }
+#if defined(HAS_FCNTL)
+    RETVAL = fcntl(PerlIO_fileno(f), F_GETFL, 0);
+    if (RETVAL >= 0) {
+	int mode = RETVAL;
+#ifdef O_NONBLOCK
+	/* POSIX style */ 
+#if defined(O_NDELAY) && O_NDELAY != O_NONBLOCK
+	/* Ooops has O_NDELAY too - make sure we don't 
+	 * get SysV behaviour by mistake
+	 */
+	RETVAL = RETVAL & O_NONBLOCK ? 0 : 1;
+
+	if ((mode & O_NDELAY) || ((block == 0) && !(mode & O_NONBLOCK))) {
+	    int ret;
+	    mode = (mode & ~O_NDELAY) | O_NONBLOCK;
+	    ret = fcntl(PerlIO_fileno(f),F_SETFL,mode);
+	    if(ret < 0)
+		RETVAL = ret;
+	}
+	else if ((mode & O_NDELAY) || ((block > 0) && (mode & O_NONBLOCK))) {
+	    int ret;
+	    mode &= ~(O_NONBLOCK | O_NDELAY);
+	    ret = fcntl(PerlIO_fileno(f),F_SETFL,mode);
+	    if(ret < 0)
+		RETVAL = ret;
+	}
+#else
+	/* Standard POSIX */ 
+	RETVAL = RETVAL & O_NONBLOCK ? 0 : 1;
+
+	if ((block == 0) && !(mode & O_NONBLOCK)) {
+	    int ret;
+	    mode |= O_NONBLOCK;
+	    ret = fcntl(PerlIO_fileno(f),F_SETFL,mode);
+	    if(ret < 0)
+		RETVAL = ret;
+	 }
+	else if ((block > 0) && (mode & O_NONBLOCK)) {
+	    int ret;
+	    mode &= ~O_NONBLOCK;
+	    ret = fcntl(PerlIO_fileno(f),F_SETFL,mode);
+	    if(ret < 0)
+		RETVAL = ret;
+	 }
+#endif 
+#else
+	/* Not POSIX - better have O_NDELAY or we can't cope.
+	 * for BSD-ish machines this is an acceptable alternative
+	 * for SysV we can't tell "would block" from EOF but that is 
+	 * the way SysV is...
+	 */
+	RETVAL = RETVAL & O_NDELAY ? 0 : 1;
+
+	if ((block == 0) && !(mode & O_NDELAY)) {
+	    int ret;
+	    mode |= O_NDELAY;
+	    ret = fcntl(PerlIO_fileno(f),F_SETFL,mode);
+	    if(ret < 0)
+		RETVAL = ret;
+	 }
+	else if ((block > 0) && (mode & O_NDELAY)) {
+	    int ret;
+	    mode &= ~O_NDELAY;
+	    ret = fcntl(PerlIO_fileno(f),F_SETFL,mode);
+	    if(ret < 0)
+		RETVAL = ret;
+	 }
+#endif
+    }
+    return RETVAL;
+#else
+ return -1;
+#endif
+}
 
 MODULE = IO	PACKAGE = IO::Seekable	PREFIX = f
 
@@ -101,7 +205,7 @@ fgetpos(handle)
 	    ST(0) = sv_2mortal(newSVpv((char*)&pos, sizeof(Fpos_t)));
 	}
 	else {
-	    ST(0) = &PL_sv_undef;
+	    ST(0) = &sv_undef;
 	    errno = EINVAL;
 	}
 
@@ -110,12 +214,11 @@ fsetpos(handle, pos)
 	InputStream	handle
 	SV *		pos
     CODE:
-	char *p;
-	if (handle && (p = SvPVx(pos, PL_na)) && PL_na == sizeof(Fpos_t))
+	if (handle)
 #ifdef PerlIO
-	    RETVAL = PerlIO_setpos(handle, (Fpos_t*)p);
+	    RETVAL = PerlIO_setpos(handle, (Fpos_t*)SvPVX(pos));
 #else
-	    RETVAL = fsetpos(handle, (Fpos_t*)p);
+	    RETVAL = fsetpos(handle, (Fpos_t*)SvPVX(pos));
 #endif
 	else {
 	    RETVAL = -1;
@@ -143,24 +246,63 @@ new_tmpfile(packname = "IO::File")
 	if (do_open(gv, "+>&", 3, FALSE, 0, 0, fp)) {
 	    ST(0) = sv_2mortal(newRV((SV*)gv));
 	    sv_bless(ST(0), gv_stashpv(packname, TRUE));
-	    SvREFCNT_dec(gv);	/* undo increment in newRV() */
+	    SvREFCNT_dec(gv);   /* undo increment in newRV() */
 	}
 	else {
-	    ST(0) = &PL_sv_undef;
+	    ST(0) = &sv_undef;
 	    SvREFCNT_dec(gv);
 	}
 
+MODULE = IO	PACKAGE = IO::Poll
+
+void   
+_poll(timeout,...)
+	int timeout;
+PPCODE:
+{
+#ifdef HAS_POLL
+    int nfd = (items - 1) / 2;
+    SV *tmpsv = NEWSV(999,nfd * sizeof(struct pollfd));
+    struct pollfd *fds = (struct pollfd *)SvPVX(tmpsv);
+    int i,j,ret;
+    for(i=1, j=0  ; j < nfd ; j++) {
+	fds[j].fd = SvIV(ST(i));
+	i++;
+	fds[j].events = SvIV(ST(i));
+	i++;
+	fds[j].revents = 0;
+    }
+    if((ret = poll(fds,nfd,timeout)) >= 0) {
+	for(i=1, j=0 ; j < nfd ; j++) {
+	    sv_setiv(ST(i), fds[j].fd); i++;
+	    sv_setiv(ST(i), fds[j].revents); i++;
+	}
+    }
+    SvREFCNT_dec(tmpsv);
+    XSRETURN_IV(ret);
+#else
+	not_here("IO::Poll::poll");
+#endif
+}
+
+MODULE = IO	PACKAGE = IO::Handle	PREFIX = io_
+
+void
+io_blocking(handle,blk=-1)
+	InputStream	handle
+	int		blk
+PROTOTYPE: $;$
+CODE:
+{
+    int ret = io_blocking(handle, items == 1 ? -1 : blk ? 1 : 0);
+    if(ret >= 0)
+	XSRETURN_IV(ret);
+    else
+	XSRETURN_UNDEF;
+}
+
 MODULE = IO	PACKAGE = IO::Handle	PREFIX = f
 
-SV *
-constant(name)
-	char *		name
-    CODE:
-	IV i;
-	if (constant(name, &i))
-	    ST(0) = sv_2mortal(newSViv(i));
-	else
-	    ST(0) = &PL_sv_undef;
 
 int
 ungetc(handle, c)
@@ -290,3 +432,91 @@ setvbuf(handle, buf, type, size)
 	RETVAL
 
 
+SysRet
+fsync(handle)
+	OutputStream handle
+    CODE:
+#ifdef HAS_FSYNC
+	if(handle)
+	    RETVAL = fsync(PerlIO_fileno(handle));
+	else {
+	    RETVAL = -1;
+	    errno = EINVAL;
+	}
+#else
+	RETVAL = (SysRet) not_here("IO::Handle::sync");
+#endif
+    OUTPUT:
+	RETVAL
+
+
+BOOT:
+{
+    HV *stash;
+    /*
+     * constant subs for IO::Poll
+     */
+    stash = gv_stashpvn("IO::Poll", 8, TRUE);
+#ifdef	POLLIN
+	newCONSTSUB(stash,"POLLIN",newSViv(POLLIN));
+#endif
+#ifdef	POLLPRI
+        newCONSTSUB(stash,"POLLPRI", newSViv(POLLPRI));
+#endif
+#ifdef	POLLOUT
+        newCONSTSUB(stash,"POLLOUT", newSViv(POLLOUT));
+#endif
+#ifdef	POLLRDNORM
+        newCONSTSUB(stash,"POLLRDNORM", newSViv(POLLRDNORM));
+#endif
+#ifdef	POLLWRNORM
+        newCONSTSUB(stash,"POLLWRNORM", newSViv(POLLWRNORM));
+#endif
+#ifdef	POLLRDBAND
+        newCONSTSUB(stash,"POLLRDBAND", newSViv(POLLRDBAND));
+#endif
+#ifdef	POLLWRBAND
+        newCONSTSUB(stash,"POLLWRBAND", newSViv(POLLWRBAND));
+#endif
+#ifdef	POLLNORM
+        newCONSTSUB(stash,"POLLNORM", newSViv(POLLNORM));
+#endif
+#ifdef	POLLERR
+        newCONSTSUB(stash,"POLLERR", newSViv(POLLERR));
+#endif
+#ifdef	POLLHUP
+        newCONSTSUB(stash,"POLLHUP", newSViv(POLLHUP));
+#endif
+#ifdef	POLLNVAL
+        newCONSTSUB(stash,"POLLNVAL", newSViv(POLLNVAL));
+#endif
+    /*
+     * constant subs for IO::Handle
+     */
+    stash = gv_stashpvn("IO::Handle", 10, TRUE);
+#ifdef _IOFBF
+        newCONSTSUB(stash,"_IOFBF", newSViv(_IOFBF));
+#endif
+#ifdef _IOLBF
+        newCONSTSUB(stash,"_IOLBF", newSViv(_IOLBF));
+#endif
+#ifdef _IONBF
+        newCONSTSUB(stash,"_IONBF", newSViv(_IONBF));
+#endif
+#ifdef SEEK_SET
+        newCONSTSUB(stash,"SEEK_SET", newSViv(SEEK_SET));
+#endif
+#ifdef SEEK_CUR
+        newCONSTSUB(stash,"SEEK_CUR", newSViv(SEEK_CUR));
+#endif
+#ifdef SEEK_END
+        newCONSTSUB(stash,"SEEK_END", newSViv(SEEK_END));
+#endif
+    /*
+     * constant subs for IO
+     */
+    stash = gv_stashpvn("IO", 2, TRUE);
+#ifdef EINPROGRESS
+        newCONSTSUB(stash,"EINPROGRESS", newSViv(EINPROGRESS));
+#endif
+}
