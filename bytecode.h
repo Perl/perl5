@@ -30,23 +30,23 @@ typedef IV IV64;
 	if (arg)			\
 	    bs.freadpv(arg, bs.data);	\
 	else {				\
-	    PL_pv.xpv_pv = 0;		\
-	    PL_pv.xpv_len = 0;		\
-	    PL_pv.xpv_cur = 0;		\
+	    PL_bytecode_pv.xpv_pv = 0;		\
+	    PL_bytecode_pv.xpv_len = 0;		\
+	    PL_bytecode_pv.xpv_cur = 0;		\
 	}				\
     } STMT_END
 #else
 #define BGET_PV(arg)	STMT_START {		\
 	BGET_U32(arg);				\
 	if (arg) {				\
-	    New(666, PL_pv.xpv_pv, arg, char);	\
-	    PerlIO_read(fp, PL_pv.xpv_pv, arg);	\
-	    PL_pv.xpv_len = arg;			\
-	    PL_pv.xpv_cur = arg - 1;		\
+	    New(666, PL_bytecode_pv.xpv_pv, arg, char);	\
+	    PerlIO_read(fp, PL_bytecode_pv.xpv_pv, arg);	\
+	    PL_bytecode_pv.xpv_len = arg;			\
+	    PL_bytecode_pv.xpv_cur = arg - 1;		\
 	} else {				\
-	    PL_pv.xpv_pv = 0;			\
-	    PL_pv.xpv_len = 0;			\
-	    PL_pv.xpv_cur = 0;			\
+	    PL_bytecode_pv.xpv_pv = 0;			\
+	    PL_bytecode_pv.xpv_len = 0;			\
+	    PL_bytecode_pv.xpv_cur = 0;			\
 	}					\
     } STMT_END
 #endif /* INDIRECT_BGET_MACROS */
@@ -70,7 +70,7 @@ typedef IV IV64;
 	    arg = (I32)lo;				\
 	}						\
 	else {						\
-	    PL_iv_overflows++;				\
+	    PL_bytecode_iv_overflows++;				\
 	    arg = 0;					\
 	}						\
     } STMT_END
@@ -85,7 +85,7 @@ typedef IV IV64;
 	arg = (char *) ary;		\
     } while (0)
 
-#define BGET_pvcontents(arg)	arg = PL_pv.xpv_pv
+#define BGET_pvcontents(arg)	arg = PL_bytecode_pv.xpv_pv
 #define BGET_strconst(arg) STMT_START {	\
 	for (arg = PL_tokenbuf; (*arg = BGET_FGETC()); arg++) /* nothing */; \
 	arg = PL_tokenbuf;			\
@@ -100,7 +100,7 @@ typedef IV IV64;
 #define BGET_objindex(arg, type) STMT_START {	\
 	U32 ix;					\
 	BGET_U32(ix);				\
-	arg = (type)PL_obj_list[ix];		\
+	arg = (type)PL_bytecode_obj_list[ix];		\
     } STMT_END
 #define BGET_svindex(arg) BGET_objindex(arg, svindex)
 #define BGET_opindex(arg) BGET_objindex(arg, opindex)
@@ -117,22 +117,22 @@ typedef IV IV64;
 #define BSET_gv_fetchpv(sv, arg)	sv = (SV*)gv_fetchpv(arg, TRUE, SVt_PV)
 #define BSET_gv_stashpv(sv, arg)	sv = (SV*)gv_stashpv(arg, TRUE)
 #define BSET_sv_magic(sv, arg)		sv_magic(sv, Nullsv, arg, 0, 0)
-#define BSET_mg_pv(mg, arg)	mg->mg_ptr = arg; mg->mg_len = PL_pv.xpv_cur
+#define BSET_mg_pv(mg, arg)	mg->mg_ptr = arg; mg->mg_len = PL_bytecode_pv.xpv_cur
 #define BSET_sv_upgrade(sv, arg)	(void)SvUPGRADE(sv, arg)
 #define BSET_xpv(sv)	do {	\
-	SvPV_set(sv, PL_pv.xpv_pv);	\
-	SvCUR_set(sv, PL_pv.xpv_cur);	\
-	SvLEN_set(sv, PL_pv.xpv_len);	\
+	SvPV_set(sv, PL_bytecode_pv.xpv_pv);	\
+	SvCUR_set(sv, PL_bytecode_pv.xpv_cur);	\
+	SvLEN_set(sv, PL_bytecode_pv.xpv_len);	\
     } while (0)
 #define BSET_av_extend(sv, arg)	av_extend((AV*)sv, arg)
 
 #define BSET_av_push(sv, arg)	av_push((AV*)sv, arg)
 #define BSET_hv_store(sv, arg)	\
-	hv_store((HV*)sv, PL_pv.xpv_pv, PL_pv.xpv_cur, arg, 0)
+	hv_store((HV*)sv, PL_bytecode_pv.xpv_pv, PL_bytecode_pv.xpv_cur, arg, 0)
 #define BSET_pv_free(pv)	Safefree(pv.xpv_pv)
 #define BSET_pregcomp(o, arg) \
 	((PMOP*)o)->op_pmregexp = arg ? \
-		CALLREGCOMP(arg, arg + PL_pv.xpv_cur, ((PMOP*)o)) : 0
+		CALLREGCOMP(arg, arg + PL_bytecode_pv.xpv_cur, ((PMOP*)o)) : 0
 #define BSET_newsv(sv, arg)	sv = NEWSV(666,0); SvUPGRADE(sv, arg)
 #define BSET_newop(o, arg)	o = (OP*)safemalloc(optype_size[arg])
 #define BSET_newopn(o, arg) STMT_START {	\
@@ -157,5 +157,5 @@ typedef IV IV64;
 #define BSET_curpad(pad, arg) pad = AvARRAY(arg)
 
 #define BSET_OBJ_STORE(obj, ix)		\
-	(I32)ix > PL_obj_list_fill ?	\
-	bset_obj_store(obj, (I32)ix) : (PL_obj_list[ix] = obj)
+	(I32)ix > PL_bytecode_obj_list_fill ?	\
+	bset_obj_store(obj, (I32)ix) : (PL_bytecode_obj_list[ix] = obj)
