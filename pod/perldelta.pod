@@ -25,13 +25,13 @@ are safe.
 
 The exploit attempt reporting feature has been completely removed from
 the Perl 5.7.0 release, so that particular vulnerability isn't there
-anymore.  However, further security vulnerabilities are, unfortunately,
-always possible.  The suidperl code is being reviewed and if deemed too
-risky to continue to support it may be completely removed from future
-releases.  In any case, suidperl should only be used by security
-experts who know exactly what they are doing and why they are using
-suidperl instead of some other solution such as sudo (see
-http://www.courtesan.com/sudo/).
+anymore.  However, further security vulnerabilities are,
+unfortunately, always possible.  The suidperl code is being reviewed
+and if deemed too risky to continue to be supported, it may be
+completely removed from future releases.  In any case, suidperl should
+only be used by security experts who know exactly what they are doing
+and why they are using suidperl instead of some other solution such as
+sudo (see http://www.courtesan.com/sudo/).
 
 =head1 Incompatible Changes
 
@@ -265,7 +265,7 @@ perlnewmod tells about writing and submitting a new module.
 =item *
 
 perlposix-bc explains using Perl on the POSIX-BC platform
-(a mainframe platform).
+(an EBCDIC mainframe platform).
 
 =item *
 
@@ -285,7 +285,13 @@ distribution.
 
 =head1 Performance Enhancements
 
+=over 4
+
+=item *
+
 map() that changes the size of the list should now work faster.
+
+=back
 
 =head1 Installation and Configuration Improvements
 
@@ -413,7 +419,7 @@ C<q(a\\b)> now parses correctly as C<'a\\b'>.
 =item *
 
 Printing quads (64-bit integers) with printf/sprintf now works
-without q L ll prefixes (assuming you are on a quad-capable platform).
+without the q L ll prefixes (assuming you are on a quad-capable platform).
 
 =item *
 
@@ -682,7 +688,7 @@ marked.
 
 The various "opened only for", "on closed", "never opened" warnings
 drop the C<main::> prefix for filehandles in the C<main> package,
-for example C<STDIN> instead of <main::STDIN>.
+for example C<STDIN> instead of <main::STDIN>. 
 
 The "Unrecognized escape" warning has been extended to include C<\8>,
 C<\9>, and C<\_>.  There is no need to escape any of the C<\w> characters.
