@@ -259,6 +259,13 @@ print p::func()->groovy(), "\n"
 EXPECT
 really groovy
 ########
+@list = ([ 'one', 1 ], [ 'two', 2 ]);
+sub func { $num = shift; (grep $_->[1] == $num, @list)[0] }
+print scalar(map &func($_), 1 .. 3), " ",
+      scalar(map scalar &func($_), 1 .. 3), "\n";
+EXPECT
+2 3
+########
 ($k, $s)  = qw(x 0);
 @{$h{$k}} = qw(1 2 4);
 for (@{$h{$k}}) { $s += $_; delete $h{$k} if ($_ == 2) }
