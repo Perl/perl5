@@ -1000,7 +1000,7 @@ Perl_to_utf8_upper(pTHX_ U8 *p)
     if (!PL_utf8_toupper)
 	PL_utf8_toupper = swash_init("utf8", "ToUpper", &PL_sv_undef, 4, 0);
     uv = swash_fetch(PL_utf8_toupper, p);
-    return uv ? uv : utf8_to_uv(p,STRLEN_MAX,0,0);
+    return uv ? uv : utf8_to_uv(p,UTF8_MAXLEN,0,0);
 }
 
 UV
@@ -1011,7 +1011,7 @@ Perl_to_utf8_title(pTHX_ U8 *p)
     if (!PL_utf8_totitle)
 	PL_utf8_totitle = swash_init("utf8", "ToTitle", &PL_sv_undef, 4, 0);
     uv = swash_fetch(PL_utf8_totitle, p);
-    return uv ? uv : utf8_to_uv(p,STRLEN_MAX,0,0);
+    return uv ? uv : utf8_to_uv(p,UTF8_MAXLEN,0,0);
 }
 
 UV
@@ -1022,7 +1022,7 @@ Perl_to_utf8_lower(pTHX_ U8 *p)
     if (!PL_utf8_tolower)
 	PL_utf8_tolower = swash_init("utf8", "ToLower", &PL_sv_undef, 4, 0);
     uv = swash_fetch(PL_utf8_tolower, p);
-    return uv ? uv : utf8_to_uv(p,STRLEN_MAX,0,0);
+    return uv ? uv : utf8_to_uv(p,UTF8_MAXLEN,0,0);
 }
 
 /* a "swash" is a swatch hash */
@@ -1112,7 +1112,7 @@ Perl_swash_fetch(pTHX_ SV *sv, U8 *ptr)
 	    PUSHMARK(SP);
 	    EXTEND(SP,3);
 	    PUSHs((SV*)sv);
-	    PUSHs(sv_2mortal(newSViv(utf8_to_uv(ptr, STRLEN_MAX, 0, 0) & ~(needents - 1))));
+	    PUSHs(sv_2mortal(newSViv(utf8_to_uv(ptr, UTF8_MAXLEN, 0, 0) & ~(needents - 1))));
 	    PUSHs(sv_2mortal(newSViv(needents)));
 	    PUTBACK;
 	    if (call_method("SWASHGET", G_SCALAR))
