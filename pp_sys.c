@@ -860,7 +860,7 @@ PP(pp_untie)
     if (SvTYPE(sv) == SVt_PVGV && !(sv = (SV *)GvIOp(sv)))
 	RETPUSHYES;
 
-    if ((mg = SvTIED_mg(sv, how))) {
+    if ((mg = SvTIED_mg(sv, how)) && mg->mg_obj) {
 	SV *obj = SvRV(mg->mg_obj);
 	GV *gv;
 	CV *cv = NULL;

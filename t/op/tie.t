@@ -360,3 +360,10 @@ $s=~ s/\(0x\w+\)//g;
 print $s, "\n";
 EXPECT
 SCALAR SCALAR SCALAR SCALAR
+########
+# [perl #23287] segfault in untie
+sub TIESCALAR { bless $_[1], $_[0] }
+my $var;
+tie $var, 'main', \$var;
+untie $var;
+EXPECT
