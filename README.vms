@@ -31,7 +31,7 @@ could use modules implementing useful VMS system services, so if you'd like
 to lend a hand we'd love to have you. Join the Perl Porting Team Now!
 
 The current sources and build procedures have been tested on a VAX using
-VaxC and Dec C, and on an AXP using Dec C. If you run into problems with
+Dec C, and on an AXP using Dec C. If you run into problems with
 other compilers, please let us know.
 
 There are issues with varions versions of Dec C, so if you're not running a
@@ -41,13 +41,38 @@ document.
 * Other required software
 
 In addition to VMS, you'll need:
-        1) A C compiler. Dec C for AXP, or Dec C, or gcc for the VAX.
+        1) A C compiler. Dec C or gcc for AXP or the VAX.
         2) A make tool. Dec's MMS (v2.6 or later), or MadGoat's free MMS
            analog MMK (available from ftp.madgoat.com/madgoat) both work
            just fine. Gnu Make might work, but it's been so long since
            anyone's tested it that we're not sure. MMK's free, though, so
            go ahead and use that.
 
+You may also want to have on hand:
+        1) UNZIP.EXE for VMS available from a number of web/ftp sites.
+    http://www.cdrom.com/pub/infozip/UnZip.html
+    http://www.openvms.digital.com/cd/INFO-ZIP/
+    ftp://ftp.digital.com/pub/VMS/
+    ftp://ftp.openvms.digital.com/
+    ftp://ftp.madgoat.com/madgoat/
+    ftp://ftp.wku.edu/vms/
+        2) GUNZIP/GZIP.EXE for VMS available from a number of web/ftp sites.
+    http://www.fsf.org/order/ftp.html
+    ftp://ftp.uu.net/archive/systems/gnu/diffutils*.tar.gz
+    ftp://gatekeeper.dec.com/pub/GNU/diffutils*.tar.gz
+    ftp://ftp.gnu.org/pub/gnu/diffutils*.tar.gz 
+    http://www.openvms.digital.com/cd/GZIP/
+    ftp://ftp.digital.com/pub/VMS/
+        3) VMS TAR also available from a number of web/ftp sites.
+    ftp://ftp.lp.se/vms/
+    http://www.openvms.digital.com/cd/VMSTAR/
+    ftp://ftp.digital.com/pub/VMS/
+Please note that UNZIP and GUNZIP are not the same thing (they work with
+different formats).  Most of the useful files from CPAN (the Comprehensive
+Perl Archive Network) are in .tar.gz format (this includes copies of the
+source code for perl as well as modules and scripts that you may wish to
+add later) hence you probably want to have GUNZIP.EXE and VMSTAR.EXE on
+your VMS machine.
 
 If you want to include socket support, you'll need a TCP stack and either
 Dec C, or socket libraries. See the Socket Support topic for more details.
@@ -81,8 +106,9 @@ As a handy shortcut, the command:
 
 @CONFIGURE "-des"
 
-(note the quotes and case) will choose reasonable defaults. (It takes Dec C
-over Gnu C, Dec C sockets over SOCKETSHR sockets, and either over no sockets)
+(note the quotation marks and case) will choose reasonable defaults. (It 
+takes Dec C over Gnu C, Dec C sockets over SOCKETSHR sockets, and either 
+over no sockets)
 
 * Testing Perl
 
@@ -109,7 +135,7 @@ the time taken will be displayed.
 
 If any tests fail, it means something's wrong with Perl. If the test suite
 hangs (some tests can take upwards of two or three minutes, or more if
-you're on an especially slow machine, depending on you machine speed, so
+you're on an especially slow machine, depending on your machine speed, so
 don't be hasty), then the test *after* the last one displayed failed. Don't
 install Perl unless you're confident that you're OK. Regardless of how
 confident you are, make a bug report to the VMSPerl mailing list.
@@ -133,6 +159,9 @@ MCR []MINIPERL "-V"
 
 Note that "-V" really is a capital V in double quotes. This will dump out a
 couple of screens worth of config info, and can help us diagnose the problem.
+If (and only if) that did not work then try enclosing the output of:
+
+@[.vms]myconfig
 
 * Cleaning up and starting fresh
 
@@ -170,28 +199,37 @@ MMK install
 If for some reason it complains about target INSTALL being up to date,
 throw a /FORCE switch on the MMS or MMK command.
 
+The script [.VMS]PERL_SETUP.COM that is written by CONFIGURE.COM 
+will take care of most of the following:
+
 3) Either define the symbol PERL somewhere, such as
 SYS$MANAGER:SYLOGIN.COM, to be "PERL :== $PERL_ROOT:[000000]PERL.EXE", or
 install Perl into DCLTABLES.EXE (Check out the section "Installing Perl
 into DCLTABLES" for more info), or put the image in a directory that's in
 your DCL$PATH (if you're using VMS 6.2 or higher).
 
-4) Optionally define the command PERLDOC as 
-PERLDOC :== "$PERL_ROOT:[000000]PERL PERL_ROOT:[LIB.POD]PERLDOC.COM -T"
-Note that if you wish to use most as a pager please see
-ftp://space.mit.edu/pub/davis/ for both most and slang.
+4) Either define the logical name PERLSHR somewhere 
+(such as in PERL_SETUP.COM) like so:
+DEFINE/NOLOG PERLSHR PERL_ROOT:[000000]PERLSHR.EXE
+or copy perl_root:[000000]perlshr.exe sys$share:.
 
-5) Optionally define the command PERLBUG (the Perl bug report generator) as
+5) Optionally define the command PERLDOC as 
+PERLDOC :== "$PERL_ROOT:[000000]PERL PERL_ROOT:[LIB.POD]PERLDOC.COM -t"
+Note that if you wish to use most as a pager please see
+ftp://space.mit.edu/pub/davis/ for both most and slang (or perhaps
+ftp://ftp.wku.edu/vms/narnia/most.zip ).
+
+6) Optionally define the command PERLBUG (the Perl bug report generator) as
 PERLBUG :== "$PERL_ROOT:[000000]PERL PERL_ROOT:[LIB]PERLBUG.COM"
 
-6) Optionally define the command POD2MAN (Converts POD files to nroff
+7) Optionally define the command POD2MAN (Converts POD files to nroff
 source suitable for converting to man pages. Also quiets complaints during
 module builds) as
 
 DEFINE/NOLOG POD2MAN PERL_ROOT:[LIB.POD]POD2MAN.COM
 POD2MAN :== "$PERL_ROOT:[000000]PERL POD2MAN"
 
-7) Optionally define the command POD2TEXT (Converts POD files to text,
+8) Optionally define the command POD2TEXT (Converts POD files to text,
 which is required for perldoc -f to work properly) as
 
 DEFINE/NOLOG POD2TEXT PERL_ROOT:[LIB.POD]POD2TEXT.COM
@@ -233,20 +271,44 @@ unnecessary.
 
 The one exception is the various *DIR install locations. Changing those
 requires changes in genconfig.pl as well. Be really careful if you need to
-change these,a s they can cause some fairly subtle problems.
+change these, as they can cause some fairly subtle problems.
+
+* INSTALLing images
+
+On systems that are using perl quite a bit, and particularly those with 
+minimal RAM, you can boost the performance of perl by INSTALLing it as
+a known image.  PERLSHR.EXE is typically larger than 1500 blocks
+and that is a reasonably large amount of IO to load each time perl is 
+invoked. 
+
+   INSTALL ADD PERLSHR/SHARE
+
+should be enough for PERLSHR.EXE (/share implies /header and /open), 
+while /HEADER should do for PERL.EXE (perl.exe is not a shared image).
+
+If your code 'use's modules, check to see if there's an executable for
+them, too. In the base perl build, POSIX, IO, Fcntl, Opcode, SDBM_File,
+DCLsym, and Stdio all have shared images that can be installed /SHARE.
+
+How much of a win depends on your memory situation, but if you're firing
+off perl with any regularity (like more than once every 20 seconds or so)
+it's probably a win.
+
+While there is code in perl to remove privileges as it runs you are advised
+to NOT INSTALL PERL.EXE with PRIVs!
 
 * Extra things in the Perl distribution
 
 In addition to the standard stuff that gets installed, there are two
 optional extensions, DCLSYM and STDIO, that are handy. Instructions for
 these two modules are in [.VMS.EXT.DCLSYM] and [.VMS.EXT.STDIO],
-respectively.
+respectively.  They are built automatically for versions of perl >= 5.005.
 
 * Socket Support
 
 Perl includes a number of functions for IP sockets, which are available if
-you choose to compile Perl with socket support. (See the section Compiling
-Perl for more info on selecting a socket stack) Since IP networking is an
+you choose to compile Perl with socket support (see the section Compiling
+Perl for more info on selecting a socket stack).  Since IP networking is an
 optional addition to VMS, there are several different IP stacks
 available. How well integrated they are into the system depends on the
 stack, your version of VMS, and the version of your C compiler.
@@ -272,7 +334,7 @@ If you come across what you think might be a bug in Perl, please report
 it. There's a script in PERL_ROOT:[UTILS], perlbug, that walks you through
 the process of creating a bug report. This script includes details of your
 installation, and is very handy. Completed bug reports should go to
-PERLBUG@PERL.COM.
+perlbug@perl.com.
 
 * Gotchas to watch out for
 
@@ -286,7 +348,8 @@ start to hit the RMS 8 level point. It's best to do a
 $DEFINE/TRANS=(CONC,TERM) PERLSRC disk:[dir.dir.dir.perldir.]"  (note the
 trailing period) and $SET DEFAULT PERLSRC:[000000] before building. Perl
 modules can be just as bad (or worse), so watch out for them, too. The
-configuration script will warn if it thinks you're too deep.
+configuration script will warn if it thinks you're too deep (at least on 
+versions of VMS prior to 7.2).
 
 Finally, the third thing that bites people is leftover pieces from a failed
 build. If things go wrong, make sure you do a "(MMK|MMS|make) realclean"
@@ -323,12 +386,10 @@ message with just the words SUBSCRIBE VMSPERL in the body of the message.
 The VMSPERL mailing list address is VMSPERL@NEWMAN.UPENN.EDU. Any mail
 sent there gets echoed to all subscribers of the list.
 
-The Perl5-Porters list is for anyone involved in porting Perl to a
-platform. This includes you, if you want to participate. It's a high-volume
-list (60-100 messages a day during active development times), so be sure
-you want to be there. The subscription address is
-Perl5-Porters-request@perl.org. Send a message with just the word SUBSCRIBE
-in the body. The posting address is Perl5-Porters@perl.org.
+To unsubscribe from VMSPERL send the message UNSUBSCRIBE VMSPERL to
+VMSPERL-REQUEST@NEWMAN.UPENN.EDU.  Be sure to do so from the subscribed 
+account that you are cancelling.
+
 
 * Acknowledgements
 
@@ -348,16 +409,16 @@ missed someone.  That said, special thanks are due to the following:
      for the getredirection() code
   Rich Salz <rsalz@bbn.com>
      for readdir() and related routines
-  Peter Prymmer <pvhp@lns62.lns.cornell.edu)
+  Peter Prymmer <pvhp@forte.com> or <pvhp@lns62.lns.cornell.edu>
      for extensive testing, as well as development work on
      configuration and documentation for VMS Perl,
-  Dan Sugalski <sugalsd@stargate.lbcc.cc.or.us>
+  Dan Sugalski <sugalskd@ous.edu>
      for extensive contributions to recent version support,
      development of VMS-specific extensions, and dissemination
      of information about VMS Perl,
   the Stanford Synchrotron Radiation Laboratory and the
      Laboratory of Nuclear Studies at Cornell University for
-     the the opportunity to test and develop for the AXP,
+     the opportunity to test and develop for the AXP,
 and to the entire VMSperl group for useful advice and suggestions.  In
 addition the perl5-porters deserve credit for their creativity and
 willingness to work with the VMS newcomers.  Finally, the greatest debt of
