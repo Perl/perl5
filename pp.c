@@ -773,7 +773,7 @@ PP(pp_undef)
 	hv_undef((HV*)sv);
 	break;
     case SVt_PVCV:
-	if (cv_const_sv((CV*)sv))
+	if (dowarn && cv_const_sv((CV*)sv))
 	    warn("Constant subroutine %s undefined",
 		 CvANON((CV*)sv) ? "(anonymous)" : GvENAME(CvGV((CV*)sv)));
 	/* FALL THROUGH */
