@@ -99,6 +99,7 @@ struct tms {
 
 unsigned int sleep(unsigned int);
 char *win32PerlLibPath(void);
+char *win32SiteLibPath(void);
 int mytimes(struct tms *timebuf);
 unsigned int myalarm(unsigned int sec);
 int do_aspawn(void* really, void** mark, void** arglast);

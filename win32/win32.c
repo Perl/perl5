@@ -86,6 +86,15 @@ win32PerlLibPath(void)
     return (szPerlLibRoot);
 }
 
+char *
+win32SiteLibPath(void)
+{
+    static char szPerlSiteLib[MAXPATH+1];
+    strcpy(szPerlSiteLib, win32PerlLibPath());
+    strcat(szPerlSiteLib, "\\site");
+    return (szPerlSiteLib);
+}
+
 BOOL
 HasRedirection(char *ptr)
 {
