@@ -1738,7 +1738,7 @@ traditional Unicode classes:
     IsPrint          /^([LMNPS]|Co|Zs)/
     IsPunct          /^P/
     IsSpace          /^Z/ || ($code =~ /^(0009|000A|000B|000C|000D)$/
-    IsSpacePerl      /^Z/ || ($code =~ /^(0009|000A|000C|000D)$/
+    IsSpacePerl      /^Z/ || ($code =~ /^(0009|000A|000C|000D|0085|2028|2029)$/
     IsUpper          /^L[ut]/
     IsWord           /^[LMN]/ || $code eq "005F"
     IsXDigit         $code =~ /^00(3[0-9]|[46][1-6])$/
