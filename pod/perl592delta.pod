@@ -10,6 +10,34 @@ differences between 5.8.0 and 5.9.1.
 
 =head1 Incompatible Changes
 
+=head2 Packing and UTF-8 strings
+
+The semantics of pack() and unpack() regarding UTF-8-encoded data has been
+clarified. B<The character mode is now the default.> Notably, code that
+uses C<pack("a*", $string)> to see through the encoding of string will now
+simply return $string.
+
+To be consistent with pack(), the C<C0> in unpack() templates indicates
+that the data is to be processed in character mode, i.e. character by
+character; at the contrary, C<U0> in unpack() indicates UTF-8 mode, where
+the packed string is processed in its UTF-8-encoded Unicode form on a byte
+by byte basis. This is reversed with regard to perl 5.8.X.
+
+Moreover, C<C0> and C<U0> can also be used in pack() templates to specify
+respectively character and byte modes.
+
+C<C0> and C<U0> in the middle of a pack format now switch to the specified
+encoding mode, honoring parens grouping. Previously, parens were ignored.
+
+Also, there is a new pack() character format, C<W>, which is intended to
+replace the old C<C>. C<C> is kept for unsigned chars coded on eight bits.
+C<W> represents unsigned character values, which can be greater than 255.
+It is therefore more robust when dealing with potentially UTF-8-encoded
+data (as C<C> will wrap values outside the range 0..255).
+
+In practice, that means that pack formats are now encoding-neutral, except
+C<C>.
+
 =head1 Core Enhancements
 
 =head1 Modules and Pragmata
