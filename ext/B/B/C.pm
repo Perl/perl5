@@ -269,10 +269,11 @@ sub B::SVOP::save {
     my $sym = objsym($op);
     return $sym if defined $sym;
     my $svsym = $op->sv->save;
-    $svopsect->add(sprintf("s\\_%x, s\\_%x, %s,$handle_VC_problem %u, %u, %u, 0x%x, 0x%x, %s",
+    $svopsect->add(sprintf("s\\_%x, s\\_%x, %s,$handle_VC_problem %u, %u, %u, 0x%x, 0x%x, Nullsv",
 			   ${$op->next}, ${$op->sibling}, $op->ppaddr,
 			   $op->targ, $op->type, $op_seq, $op->flags,
-			   $op->private, "(SV*)$svsym"));
+			   $op->private));
+    $init->add(sprintf("svop_list[%d].op_sv = %s;", $svopsect->index, "(SV*)$svsym"));
     savesym($op, sprintf("(OP*)&svop_list[%d]", $svopsect->index));
 }
 
@@ -682,7 +683,7 @@ sub B::CV::save {
 		     $cvstashname, $cvname); # debug
     }              
     $pv = '' unless defined $pv; # Avoid use of undef warnings
-    $symsect->add(sprintf("xpvcvix%d\t%s, %u, 0, %d, %s, 0, Nullhv, Nullhv, %s, s\\_%x, $xsub, $xsubany, Nullgv, Nullgv, %d, s\\_%x, (CV*)s\\_%x, 0x%x",
+    $symsect->add(sprintf("xpvcvix%d\t%s, %u, 0, %d, %s, 0, Nullhv, Nullhv, %s, s\\_%x, $xsub, $xsubany, Nullgv, \"\", %d, s\\_%x, (CV*)s\\_%x, 0x%x",
 			  $xpvcv_ix, cstring($pv), length($pv), $cv->IVX,
 			  $cv->NVX, $startfield, ${$cv->ROOT}, $cv->DEPTH,
                         $$padlist, ${$cv->OUTSIDE}, $cv->CvFLAGS));
@@ -1045,10 +1046,10 @@ sub output_boilerplate {
 #undef Perl_pp_mapstart
 #define Perl_pp_mapstart Perl_pp_grepstart
 #define XS_DynaLoader_boot_DynaLoader boot_DynaLoader
-EXTERN_C void boot_DynaLoader (CV* cv);
+EXTERN_C void boot_DynaLoader (pTHX_ CV* cv);
 
-static void xs_init (void);
-static void dl_init (void);
+static void xs_init (pTHX);
+static void dl_init (pTHX);
 static PerlInterpreter *my_perl;
 EOT
 }
@@ -1056,28 +1057,20 @@ EOT
 sub output_main {
     print <<'EOT';
 int
-#ifndef CAN_PROTOTYPE
-main(argc, argv, env)
-int argc;
-char **argv;
-char **env;
-#else  /* def(CAN_PROTOTYPE) */
 main(int argc, char **argv, char **env)
-#endif  /* def(CAN_PROTOTYPE) */
 {
     int exitstatus;
     int i;
     char **fakeargv;
 
-    PERL_SYS_INIT(&argc,&argv);
+    PERL_SYS_INIT3(&argc,&argv,&env);
  
-    perl_init_i18nl10n(1);
-
     if (!PL_do_undump) {
 	my_perl = perl_alloc();
 	if (!my_perl)
 	    exit(1);
 	perl_construct( my_perl );
+	PL_perl_destruct_level = 0;
     }
 
 #ifdef CSH
@@ -1113,19 +1106,21 @@ main(int argc, char **argv, char **env)
     exitstatus = perl_init();
     if (exitstatus)
 	exit( exitstatus );
-    dl_init();
+    dl_init(aTHX);
 
     exitstatus = perl_run( my_perl );
 
     perl_destruct( my_perl );
     perl_free( my_perl );
 
+    PERL_SYS_TERM();
+
     exit( exitstatus );
 }
 
 /* yanked from perl.c */
 static void
-xs_init()
+xs_init(pTHX)
 {
     char *file = __FILE__;
     dTARG;
@@ -1142,7 +1137,7 @@ EOT
     print "\tPUSHMARK(sp);\n";
     print qq/\tXPUSHp("DynaLoader",strlen("DynaLoader"));\n/;
     print qq/\tPUTBACK;\n/;
-    print "\tboot_DynaLoader(NULL);\n";
+    print "\tboot_DynaLoader(aTHX_ NULL);\n";
     print qq/\tSPAGAIN;\n/;
     print "#endif\n";
     foreach my $stashname (keys %xsub){
@@ -1152,7 +1147,7 @@ EOT
 	   print "\tPUSHMARK(sp);\n";
 	   print qq/\tXPUSHp("$stashname",strlen("$stashname"));\n/;
 	   print qq/\tPUTBACK;\n/;
-	   print "\tboot_$stashxsub(NULL);\n";
+	   print "\tboot_$stashxsub(aTHX_ NULL);\n";
 	   print qq/\tSPAGAIN;\n/;
 	}   
     }
@@ -1161,7 +1156,7 @@ EOT
     
 print <<'EOT';
 static void
-dl_init()
+dl_init(pTHX)
 {
     char *file = __FILE__;
     dTARG;
@@ -1181,7 +1176,7 @@ EOT
 	   warn "bootstrapping $stashname added to xs_init\n";
 	   print qq/\tperl_call_method("bootstrap",G_DISCARD);\n/;
            print "\n#else\n";
-	   print "\tboot_$stashxsub(NULL);\n";
+	   print "\tboot_$stashxsub(aTHX_ NULL);\n";
            print "#endif\n";
 	   print qq/\tSPAGAIN;\n/;
 	}   
