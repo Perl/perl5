@@ -7,9 +7,12 @@
  * blame Henry for some of the lack of readability.
  */
 
-/* $Header: regcomp.c,v 3.0.1.5 90/08/13 22:23:29 lwall Locked $
+/* $Header: regcomp.c,v 3.0.1.6 90/10/16 10:17:33 lwall Locked $
  *
  * $Log:	regcomp.c,v $
+ * Revision 3.0.1.6  90/10/16  10:17:33  lwall
+ * patch29: patterns with multiple short literal strings sometimes failed
+ * 
  * Revision 3.0.1.5  90/08/13  22:23:29  lwall
  * patch28: /x{m}/ didn't work right
  * 
@@ -138,7 +141,8 @@ int fold;
 {
 	register regexp *r;
 	register char *scan;
-	register STR *longest;
+	register STR *longish;
+	STR *longest;
 	register int len;
 	register char *first;
 	int flags;
@@ -241,6 +245,7 @@ int fold;
 		 * it happens that curback has been invalidated, since the
 		 * earlier string may buy us something the later one won't.]
 		 */
+		longish = str_make("",0);
 		longest = str_make("",0);
 		len = 0;
 		curback = 0;
@@ -260,7 +265,7 @@ int fold;
 			    while (OP(regnext(scan)) >= CLOSE)
 				scan = regnext(scan);
 			    if (curback - back == len) {
-				str_ncat(longest, OPERAND(first)+1,
+				str_ncat(longish, OPERAND(first)+1,
 				    *OPERAND(first));
 				len += *OPERAND(first);
 				curback += *OPERAND(first);
@@ -268,7 +273,7 @@ int fold;
 			    }
 			    else if (*OPERAND(first) >= len + (curback >= 0)) {
 				len = *OPERAND(first);
-				str_nset(longest, OPERAND(first)+1,len);
+				str_nset(longish, OPERAND(first)+1,len);
 				back = curback;
 				curback += len;
 				first = regnext(scan);
@@ -276,18 +281,27 @@ int fold;
 			    else
 				curback += *OPERAND(first);
 			}
-			else if (index(varies,OP(scan)))
-				curback = -30000;
+			else if (index(varies,OP(scan))) {
+			    curback = -30000;
+			    len = 0;
+			    if (longish->str_cur > longest->str_cur)
+				str_sset(longest,longish);
+			    str_nset(longish,"",0);
+			}
 			else if (index(simple,OP(scan)))
-				curback++;
+			    curback++;
 			scan = regnext(scan);
 		}
-		if (len) {
+		if (longish->str_cur > longest->str_cur)
+		    str_sset(longest,longish);
+		str_free(longish);
+		if (longest->str_cur) {
 			r->regmust = longest;
 			if (back < 0)
 				back = -1;
 			r->regback = back;
-			if (len > !(sawstudy||fold||OP(first)==EOL))
+			if (longest->str_cur
+			  > !(sawstudy || fold || OP(first) == EOL) )
 				fbmcompile(r->regmust,fold);
 			r->regmust->str_u.str_useful = 100;
 			if (OP(first) == EOL) /* is match anchored to EOL? */
@@ -1123,6 +1137,8 @@ regexp *r;
 #endif
 		op = OP(s);
 		fprintf(stderr,"%2d%s", s-r->program, regprop(s));	/* Where, what. */
+		if (op == CURLY)
+		    s += 4;
 		next = regnext(s);
 		if (next == NULL)		/* Next ptr. */
 			fprintf(stderr,"(0)");

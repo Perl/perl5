@@ -1,4 +1,4 @@
-/* $Header: stab.c,v 3.0.1.8 90/08/13 22:30:17 lwall Locked $
+/* $Header: stab.c,v 3.0.1.9 90/10/16 10:32:05 lwall Locked $
  *
  *    Copyright (c) 1989, Larry Wall
  *
@@ -6,6 +6,13 @@
  *    as specified in the README file that comes with the perl 3.0 kit.
  *
  * $Log:	stab.c,v $
+ * Revision 3.0.1.9  90/10/16  10:32:05  lwall
+ * patch29: added -M, -A and -C
+ * patch29: taintperl now checks for world writable PATH components
+ * patch29: *foo now prints as *package'foo
+ * patch29: scripts now run at almost full speed under the debugger
+ * patch29: package behavior is now more consistent
+ * 
  * Revision 3.0.1.8  90/08/13  22:30:17  lwall
  * patch28: the NSIG hack didn't work right on Xenix
  * 
@@ -77,6 +84,9 @@ STR *str;
 	return stab_val(stab);
 
     switch (*stab->str_magic->str_ptr) {
+    case '\024':		/* ^T */
+	str_numset(stab_val(stab),(double)basetime);
+	break;
     case '1': case '2': case '3': case '4':
     case '5': case '6': case '7': case '8': case '9': case '&':
 	if (curspat) {
@@ -220,7 +230,7 @@ STR *str;
 	    struct ufuncs *uf = (struct ufuncs *)str->str_ptr;
 
 	    if (uf && uf->uf_val)
-		uf->uf_val(uf->uf_index, stab_val(stab));
+		(*uf->uf_val)(uf->uf_index, stab_val(stab));
 	}
 	break;
     }
@@ -240,7 +250,22 @@ STR *str;
     case 'E':
 	setenv(mstr->str_ptr,str_get(str));
 				/* And you'll never guess what the dog had */
-	break;			/*   in its mouth... */
+				/*   in its mouth... */
+#ifdef TAINT
+	if (strEQ(mstr->str_ptr,"PATH")) {
+	    char *strend = str->str_ptr + str->str_cur;
+
+	    s = str->str_ptr;
+	    while (s < strend) {
+		s = cpytill(tokenbuf,s,strend,':',&i);
+		s++;
+		if (*tokenbuf != '/'
+		  || (stat(tokenbuf,&statbuf) && (statbuf.st_mode & 2)) )
+		    str->str_tainted = 2;
+	    }
+	}
+#endif
+	break;
     case 'S':
 	s = str_get(str);
 	i = whichsig(mstr->str_ptr);	/* ...no, a brick */
@@ -252,14 +277,30 @@ STR *str;
 #endif
 	else if (strEQ(s,"DEFAULT") || !*s)
 	    (void)signal(i,SIG_DFL);
-	else
+	else {
 	    (void)signal(i,sighandler);
+	    if (!index(s,'\'')) {
+		sprintf(tokenbuf, "main'%s",s);
+		str_set(str,tokenbuf);
+	    }
+	}
 	break;
 #ifdef SOME_DBM
     case 'D':
 	hdbmstore(stab_hash(stab),mstr->str_ptr,mstr->str_cur,str);
 	break;
 #endif
+    case 'L':
+	{
+	    CMD *cmd;
+
+	    i = str_true(str);
+	    str = afetch(stab_xarray(stab),atoi(mstr->str_ptr));
+	    cmd = str->str_magic->str_u.str_cmd;
+	    cmd->c_flags &= ~CF_OPTIMIZE;
+	    cmd->c_flags |= i? CFT_D1 : CFT_D0;
+	}
+	break;
     case '#':
 	afill(stab_array(stab), (int)str_gnum(str) - arybase);
 	break;
@@ -310,6 +351,9 @@ STR *str;
 
     case 0:
 	switch (*stab->str_magic->str_ptr) {
+	case '\024':	/* ^T */
+	    basetime = (long)str_gnum(str);
+	    break;
 	case '.':
 	    if (localizing)
 		savesptr((STR**)&last_in_stab);
@@ -473,7 +517,7 @@ STR *str;
 		struct ufuncs *uf = (struct ufuncs *)str->str_magic->str_ptr;
 
 		if (uf && uf->uf_set)
-		    uf->uf_set(uf->uf_index, str);
+		    (*uf->uf_set)(uf->uf_index, str);
 	    }
 	    break;
 	}
@@ -507,14 +551,16 @@ int sig;
     STAB *stab;
     ARRAY *savearray;
     STR *str;
-    char *oldfile = filename;
+    CMD *oldcurcmd = curcmd;
     int oldsave = savestack->ary_fill;
     ARRAY *oldstack = stack;
+    CSV *oldcurcsv = curcsv;
     SUBR *sub;
 
 #ifdef OS2		/* or anybody else who requires SIG_ACK */
     signal(sig, SIG_ACK);
 #endif
+    curcsv = Nullcsv;
     stab = stabent(
 	str_get(hfetch(stab_hash(sigstab),sig_name[sig],strlen(sig_name[sig]),
 	  TRUE)), TRUE);
@@ -546,7 +592,6 @@ int sig;
 	    warn("Deep recursion on subroutine \"%s\"",stab_name(stab));
 	savelist(sub->tosave->ary_array,sub->tosave->ary_fill);
     }
-    filename = sub->filename;
 
     (void)cmd_exec(sub->cmd,G_SCALAR,1);		/* so do it already */
 
@@ -555,9 +600,10 @@ int sig;
     afree(stab_xarray(defstab));  /* put back old $_[] */
     stab_xarray(defstab) = savearray;
     stack = oldstack;
-    filename = oldfile;
     if (savestack->ary_fill > oldsave)
 	restorelist(oldsave);
+    curcmd = oldcurcmd;
+    curcsv = oldcurcsv;
 }
 
 STAB *
@@ -575,6 +621,21 @@ register STAB *stab;
 {
     if (!stab_xhash(stab))
 	stab_xhash(stab) = hnew(COEFFSIZE);
+    return stab;
+}
+
+STAB *
+fstab(name)
+char *name;
+{
+    char tmpbuf[1200];
+    STAB *stab;
+
+    sprintf(tmpbuf,"'_<%s", name);
+    stab = stabent(tmpbuf, TRUE);
+    str_set(stab_val(stab), name);
+    if (perldb)
+	(void)hadd(aadd(stab));
     return stab;
 }
 
@@ -625,8 +686,10 @@ int add;
     }
     else if (!isalpha(*name) || global)
 	stash = defstash;
-    else
+    else if (curcmd == &compiling)
 	stash = curstash;
+    else
+	stash = curcmd->c_stash;
     if (sawquote) {
 	char tmpbuf[256];
 	char *s, *d;
@@ -645,12 +708,14 @@ int add;
 	stab = stabent(tmpbuf,TRUE);
 	if (!(stash = stab_xhash(stab)))
 	    stash = stab_xhash(stab) = hnew(0);
+	if (!stash->tbl_name)
+	    stash->tbl_name = savestr(name);
 	name = sawquote+1;
 	*sawquote = '\'';
     }
     len = namend - name;
     stab = (STAB*)hfetch(stash,name,len,add);
-    if (!stab)
+    if (stab == (STAB*)&str_undef)
 	return Nullstab;
     if (stab->str_pok) {
 	stab->str_pok |= SP_MULTI;
@@ -667,8 +732,18 @@ int add;
 	stab_val(stab) = Str_new(72,0);
 	stab_line(stab) = curcmd->c_line;
 	str_magic(stab,stab,'*',name,len);
+	stab_stash(stab) = stash;
 	return stab;
     }
+}
+
+stab_fullname(str,stab)
+STR *str;
+STAB *stab;
+{
+    str_set(str,stab_stash(stab)->tbl_name);
+    str_ncat(str,"'", 1);
+    str_scat(str,stab->str_magic);
 }
 
 STIO *
@@ -719,7 +794,7 @@ register STAB *stab;
     SUBR *sub;
 
     afree(stab_xarray(stab));
-    (void)hfree(stab_xhash(stab));
+    (void)hfree(stab_xhash(stab), FALSE);
     str_free(stab_val(stab));
     if (stio = stab_io(stab)) {
 	do_close(stab,FALSE);

@@ -28,9 +28,12 @@ $spitshell >s2p <<!GROK!THIS!
 : In the following dollars and backticks do not need the extra backslash.
 $spitshell >>s2p <<'!NO!SUBS!'
 
-# $Header: s2p.SH,v 3.0.1.4 90/08/09 05:50:43 lwall Locked $
+# $Header: s2p.SH,v 3.0.1.5 90/10/16 11:32:40 lwall Locked $
 #
 # $Log:	s2p.SH,v $
+# Revision 3.0.1.5  90/10/16  11:32:40  lwall
+# patch29: s2p modernized
+# 
 # Revision 3.0.1.4  90/08/09  05:50:43  lwall
 # patch19: s2p didn't translate \n right
 # 
@@ -59,14 +62,13 @@ $spitshell >>s2p <<'!NO!SUBS!'
 $indent = 4;
 $shiftwidth = 4;
 $l = '{'; $r = '}';
-$tempvar = '1';
 
-while ($ARGV[0] =~ '^-') {
+while ($ARGV[0] =~ /^-/) {
     $_ = shift;
   last if /^--/;
     if (/^-D/) {
 	$debug++;
-	open(body,'>-');
+	open(BODY,'>-');
 	next;
     }
     if (/^-n/) {
@@ -81,25 +83,27 @@ while ($ARGV[0] =~ '^-') {
 }
 
 unless ($debug) {
-    open(body,">/tmp/sperl$$") || do Die("Can't open temp file");
+    open(BODY,">/tmp/sperl$$") ||
+      &Die("Can't open temp file: $!\n");
 }
 
 if (!$assumen && !$assumep) {
-    print body
-'while ($ARGV[0] =~ /^-/) {
+    print BODY <<'EOT';
+while ($ARGV[0] =~ /^-/) {
     $_ = shift;
   last if /^--/;
     if (/^-n/) {
 	$nflag++;
 	next;
     }
-    die "I don\'t recognize this switch: $_\\n";
+    die "I don't recognize this switch: $_\\n";
 }
 
-';
+EOT
 }
 
-print body '
+print BODY <<'EOT';
+
 #ifdef PRINTIT
 #ifdef ASSUMEP
 $printit++;
@@ -107,21 +111,27 @@ $printit++;
 $printit++ unless $nflag;
 #endif
 #endif
-line: while (<>) {
-';
+LINE: while (<>) {
+EOT
 
-line: while (<>) {
+LINE: while (<>) {
+
+    # Wipe out surrounding whitespace.
+
     s/[ \t]*(.*)\n$/$1/;
+
+    # Perhaps it's a label/comment.
+
     if (/^:/) {
 	s/^:[ \t]*//;
-	$label = do make_label($_);
+	$label = &make_label($_);
 	if ($. == 1) {
 	    $toplabel = $label;
 	}
 	$_ = "$label:";
 	if ($lastlinewaslabel++) {
 	    $indent += 4;
-	    print body "\t" x ($indent / 8), ' ' x ($indent % 8), ";\n";
+	    print BODY &tab, ";\n";
 	    $indent -= 4;
 	}
 	if ($indent >= 2) {
@@ -132,6 +142,9 @@ line: while (<>) {
     } else {
 	$lastlinewaslabel = '';
     }
+
+    # Look for one or two address clauses
+
     $addr1 = '';
     $addr2 = '';
     if (s/^([0-9]+)//) {
@@ -141,7 +154,7 @@ line: while (<>) {
 	$addr1 = 'eof()';
     }
     elsif (s|^/||) {
-	$addr1 = do fetchpat('/');
+	$addr1 = &fetchpat('/');
     }
     if (s/^,//) {
 	if (s/^([0-9]+)//) {
@@ -149,14 +162,18 @@ line: while (<>) {
 	} elsif (s/^\$//) {
 	    $addr2 = "eof()";
 	} elsif (s|^/||) {
-	    $addr2 = do fetchpat('/');
+	    $addr2 = &fetchpat('/');
 	} else {
-	    do Die("Invalid second address at line $.\n");
+	    &Die("Invalid second address at line $.\n");
 	}
 	$addr1 .= " .. $addr2";
     }
-					# a { to keep vi happy
+
+    # Now we check for metacommands {, }, and ! and worry
+    # about indentation.
+
     s/^[ \t]+//;
+    # a { to keep vi happy
     if ($_ eq '}') {
 	$indent -= 4;
 	next;
@@ -180,8 +197,10 @@ line: while (<>) {
 	} else {
 	    $space = '';
 	}
-	$_ = do transmogrify();
+	$_ = &transmogrify();
     }
+
+    # See if we can optimize to modifier form.
 
     if ($addr1) {
 	if ($_ !~ /[\n{}]/ && $rmaybe && !$change &&
@@ -189,46 +208,48 @@ line: while (<>) {
 	    s/;$/ $if $addr1;/;
 	    $_ = substr($_,$shiftwidth,1000);
 	} else {
-	    $command = $_;
-	    $_ = "$if ($addr1) $l\n$change$command$rmaybe";
+	    $_ = "$if ($addr1) $l\n$change$_$rmaybe";
 	}
 	$change = '';
-	next line;
+	next LINE;
     }
 } continue {
     @lines = split(/\n/,$_);
-    while ($#lines >= 0) {
-	$_ = shift(lines);
+    for (@lines) {
 	unless (s/^ *<<--//) {
-	    print body "\t" x ($indent / 8), ' ' x ($indent % 8);
+	    print BODY &tab;
 	}
-	print body $_, "\n";
+	print BODY $_, "\n";
     }
     $indent += $indmod;
     $indmod = 0;
     if ($redo) {
 	$_ = $redo;
 	$redo = '';
-	redo line;
+	redo LINE;
     }
 }
 if ($lastlinewaslabel++) {
     $indent += 4;
-    print body "\t" x ($indent / 8), ' ' x ($indent % 8), ";\n";
+    print BODY &tab, ";\n";
     $indent -= 4;
 }
 
-print body "}\n";
+print BODY "}\n";
 if ($appendseen || $tseen || !$assumen) {
     $printit++ if $dseen || (!$assumen && !$assumep);
-    print body '
+    print BODY <<'EOT';
+
 continue {
 #ifdef PRINTIT
 #ifdef DSEEN
 #ifdef ASSUMEP
     print if $printit++;
 #else
-    if ($printit) { print;} else { $printit++ unless $nflag; }
+    if ($printit)
+	{ print; }
+    else
+	{ $printit++ unless $nflag; }
 #endif
 #else
     print if $printit;
@@ -237,40 +258,43 @@ continue {
     print;
 #endif
 #ifdef TSEEN
-    $tflag = \'\';
+    $tflag = '';
 #endif
 #ifdef APPENDSEEN
-    if ($atext) { print $atext; $atext = \'\'; }
+    if ($atext) { print $atext; $atext = ''; }
 #endif
 }
-';
+EOT
 }
 
-close body;
+close BODY;
 
 unless ($debug) {
-    open(head,">/tmp/sperl2$$.c") || do Die("Can't open temp file 2");
-    print head "#define PRINTIT\n" if ($printit);
-    print head "#define APPENDSEEN\n" if ($appendseen);
-    print head "#define TSEEN\n" if ($tseen);
-    print head "#define DSEEN\n" if ($dseen);
-    print head "#define ASSUMEN\n" if ($assumen);
-    print head "#define ASSUMEP\n" if ($assumep);
-    if ($opens) {print head "$opens\n";}
-    open(body,"/tmp/sperl$$") || do Die("Can't reopen temp file");
-    while (<body>) {
-	print head $_;
+    open(HEAD,">/tmp/sperl2$$.c")
+      || &Die("Can't open temp file 2: $!\n");
+    print HEAD "#define PRINTIT\n" if ($printit);
+    print HEAD "#define APPENDSEEN\n" if ($appendseen);
+    print HEAD "#define TSEEN\n" if ($tseen);
+    print HEAD "#define DSEEN\n" if ($dseen);
+    print HEAD "#define ASSUMEN\n" if ($assumen);
+    print HEAD "#define ASSUMEP\n" if ($assumep);
+    if ($opens) {print HEAD "$opens\n";}
+    open(BODY,"/tmp/sperl$$")
+      || &Die("Can't reopen temp file: $!\n");
+    while (<BODY>) {
+	print HEAD $_;
     }
-    close head;
+    close HEAD;
 
-    print "#!$bin/perl
-eval \"exec $bin/perl -S \$0 \$*\"
+    print <<"EOT";
+#!$bin/perl
+eval 'exec $bin/perl -S \$0 \$*'
 	if \$running_under_some_shell;
 
-";
-    open(body,"cc -E /tmp/sperl2$$.c |") ||
-	do Die("Can't reopen temp file");
-    while (<body>) {
+EOT
+    open(BODY,"cc -E /tmp/sperl2$$.c |") ||
+	&Die("Can't reopen temp file: $!\n");
+    while (<BODY>) {
 	/^# [0-9]/ && next;
 	/^[ \t]*$/ && next;
 	s/^<><>//;
@@ -278,39 +302,44 @@ eval \"exec $bin/perl -S \$0 \$*\"
     }
 }
 
-unlink "/tmp/sperl$$", "/tmp/sperl2$$", "/tmp/sperl2$$.c";
+&Cleanup;
+exit;
 
+sub Cleanup {
+    chdir "/tmp";
+    unlink "sperl$$", "sperl2$$", "sperl2$$.c";
+}
 sub Die {
-    unlink "/tmp/sperl$$", "/tmp/sperl2$$", "/tmp/sperl2$$.c";
+    &Cleanup;
     die $_[0];
 }
+sub tab {
+    "\t" x ($indent / 8) . ' ' x ($indent % 8);
+}
 sub make_filehandle {
-    $fname = $_ = $_[0];
+    local($_) = $_[0];
+    local($fname) = $_;
     s/[^a-zA-Z]/_/g;
     s/^_*//;
-    if (/^([a-z])([a-z]*)$/) {
-	$first = $1;
-	$rest = $2;
-	$first =~ y/a-z/A-Z/;
-	$_ = $first . $rest;
-    }
+    substr($_,0,1) =~ y/a-z/A-Z/ if /^[a-z]/;
     if (!$seen{$_}) {
-	$opens .= "open($_,'>$fname') || die \"Can't create $fname\";\n";
+	$opens .= <<"EOT";
+open($_,'>$fname') || die "Can't create $fname";
+EOT
     }
     $seen{$_} = $_;
 }
 
 sub make_label {
-    $label = $_[0];
+    local($label) = @_;
     $label =~ s/[^a-zA-Z0-9]/_/g;
     if ($label =~ /^[0-9_]/) { $label = 'L' . $label; }
     $label = substr($label,0,8);
-    if ($label =~ /^([a-z])([a-z]*)$/) {	# could be reserved word
-	$first = $1;
-	$rest = $2;
-	$first =~ y/a-z/A-Z/;			# so capitalize it
-	$label = $first . $rest;
-    }
+
+    # Could be a reserved word, so capitalize it.
+    substr($label,0,1) =~ y/a-z/A-Z/
+      if $label =~ /^[a-z]/;
+
     $label;
 }
 
@@ -318,22 +347,26 @@ sub transmogrify {
     {	# case
 	if (/^d/) {
 	    $dseen++;
-	    $_ = '
+	    chop($_ = <<'EOT');
 <<--#ifdef PRINTIT
-$printit = \'\';
+$printit = '';
 <<--#endif
-next line;';
+next LINE;
+EOT
 	    next;
 	}
 
 	if (/^n/) {
-	    $_ =
-'<<--#ifdef PRINTIT
+	    chop($_ = <<'EOT');
+<<--#ifdef PRINTIT
 <<--#ifdef DSEEN
 <<--#ifdef ASSUMEP
 print if $printit++;
 <<--#else
-if ($printit) { print;} else { $printit++ unless $nflag; }
+if ($printit)
+    { print; }
+else
+    { $printit++ unless $nflag; }
 <<--#endif
 <<--#else
 print if $printit;
@@ -342,18 +375,19 @@ print if $printit;
 print;
 <<--#endif
 <<--#ifdef APPENDSEEN
-if ($atext) {print $atext; $atext = \'\';}
+if ($atext) {print $atext; $atext = '';}
 <<--#endif
 $_ = <>;
 <<--#ifdef TSEEN
-$tflag = \'\';
-<<--#endif';
+$tflag = '';
+<<--#endif
+EOT
 	    next;
 	}
 
 	if (/^a/) {
 	    $appendseen++;
-	    $command = $space .  '$atext .=' . "\n<<--'";
+	    $command = $space . '$atext .=' . "\n<<--'";
 	    $lastline = 0;
 	    while (<>) {
 		s/^[ \t]*//;
@@ -372,7 +406,8 @@ $tflag = \'\';
 	if (/^[ic]/) {
 	    if (/^c/) { $change = 1; }
 	    $addr1 = '$iter = (' . $addr1 . ')';
-	    $command = $space .  'if ($iter == 1) { print' . "\n<<--'";
+	    $command = $space . 'if ($iter == 1) { print'
+	      . "\n<<--'";
 	    $lastline = 0;
 	    while (<>) {
 		s/^[ \t]*//;
@@ -388,11 +423,12 @@ $tflag = \'\';
 	    if ($change) {
 		$dseen++;
 		$change = "$_\n";
-		$_ = "
+		chop($_ = <<"EOT");
 <<--#ifdef PRINTIT
 $space\$printit = '';
 <<--#endif
-${space}next line;";
+${space}next LINE;
+EOT
 	    }
 	    last;
 	}
@@ -406,7 +442,7 @@ ${space}next line;";
 		$c = substr($_,$i,1);
 		if ($c eq $delim) {
 		    if ($inbracket) {
-			$_ = substr($_,0,$i) . '\\' . substr($_,$i,10000);
+			substr($_, $i, 0) = '\\';
 			$i++;
 			$len++;
 		    }
@@ -430,12 +466,14 @@ ${space}next line;";
 		    elsif (substr($_,$i,1) =~ /^[n]$/) {
 			;
 		    }
-		    elsif (!$repl && substr($_,$i,1) =~ /^[(){}\w]$/) {
+		    elsif (!$repl &&
+		      substr($_,$i,1) =~ /^[(){}\w]$/) {
 			$i--;
 			$len--;
-			$_ = substr($_,0,$i) . substr($_,$i+1,10000);
+			substr($_, $i, 1) = '';
 		    }
-		    elsif (!$repl && substr($_,$i,1) =~ /^[<>]$/) {
+		    elsif (!$repl &&
+		      substr($_,$i,1) =~ /^[<>]$/) {
 			substr($_,$i,1) = 'b';
 		    }
 		}
@@ -448,14 +486,15 @@ ${space}next line;";
 		    $inbracket = 0;
 		}
 		elsif (!$repl && index("()+",$c) >= 0) {
-		    $_ = substr($_,0,$i) . '\\' . substr($_,$i,10000);
+		    substr($_, $i, 0) = '\\';
 		    $i++;
 		    $len++;
 		}
 	    }
-	    do Die("Malformed substitution at line $.\n") unless $end;
+	    &Die("Malformed substitution at line $.\n")
+	      unless $end;
 	    $pat = substr($_, 0, $repl + 1);
-	    $repl = substr($_, $repl + 1, $end - $repl - 1);
+	    $repl = substr($_, $repl+1, $end-$repl-1);
 	    $end = substr($_, $end + 1, 1000);
 	    $dol = '$';
 	    $repl =~ s/\$/\\$/;
@@ -464,22 +503,30 @@ ${space}next line;";
 	    $subst = "$pat$repl$delim";
 	    $cmd = '';
 	    while ($end) {
-		if ($end =~ s/^g//) { $subst .= 'g'; next; }
-		if ($end =~ s/^p//) { $cmd .= ' && (print)'; next; }
+		if ($end =~ s/^g//) {
+		    $subst .= 'g';
+		    next;
+		}
+		if ($end =~ s/^p//) {
+		    $cmd .= ' && (print)';
+		    next;
+		}
 		if ($end =~ s/^w[ \t]*//) {
-		    $fh = do make_filehandle($end);
+		    $fh = &make_filehandle($end);
 		    $cmd .= " && (print $fh \$_)";
 		    $end = '';
 		    next;
 		}
-		do Die("Unrecognized substitution command ($end) at line $.\n");
+		&Die("Unrecognized substitution command".
+		  "($end) at line $.\n");
 	    }
-	    $_ =
-"<<--#ifdef TSEEN
+	    chop ($_ = <<"EOT");
+<<--#ifdef TSEEN
 $subst && \$tflag++$cmd;
 <<--#else
 $subst$cmd;
-<<--#endif";
+<<--#endif
+EOT
 	    next;
 	}
 
@@ -490,7 +537,7 @@ $subst$cmd;
 
 	if (/^w/) {
 	    s/^w[ \t]*//;
-	    $fh = do make_filehandle($_);
+	    $fh = &make_filehandle($_);
 	    $_ = "print $fh \$_;";
 	    next;
 	}
@@ -509,19 +556,21 @@ $subst$cmd;
 	}
 
 	if (/^D/) {
-	    $_ =
-'s/^.*\n//;
-redo line if $_;
-next line;';
+	    chop($_ = <<'EOT');
+s/^.*\n//;
+redo LINE if $_;
+next LINE;
+EOT
 	    next;
 	}
 
 	if (/^N/) {
-	    $_ = '
+	    chop($_ = <<'EOT');
 $_ .= <>;
 <<--#ifdef TSEEN
-$tflag = \'\';
-<<--#endif';
+$tflag = '';
+<<--#endif
+EOT
 	    next;
 	}
 
@@ -551,15 +600,15 @@ $tflag = \'\';
 	}
 
 	if (/^b$/) {
-	    $_ = 'next line;';
+	    $_ = 'next LINE;';
 	    next;
 	}
 
 	if (/^b/) {
 	    s/^b[ \t]*//;
-	    $lab = do make_label($_);
+	    $lab = &make_label($_);
 	    if ($lab eq $toplabel) {
-		$_ = 'redo line;';
+		$_ = 'redo LINE;';
 	    } else {
 		$_ = "goto $lab;";
 	    }
@@ -567,18 +616,19 @@ $tflag = \'\';
 	}
 
 	if (/^t$/) {
-	    $_ = 'next line if $tflag;';
+	    $_ = 'next LINE if $tflag;';
 	    $tseen++;
 	    next;
 	}
 
 	if (/^t/) {
 	    s/^t[ \t]*//;
-	    $lab = do make_label($_);
+	    $lab = &make_label($_);
+	    $_ = q/if ($tflag) {$tflag = ''; /;
 	    if ($lab eq $toplabel) {
-		$_ = 'if ($tflag) {$tflag = \'\'; redo line;}';
+		$_ .= 'redo LINE;}';
 	    } else {
-		$_ = "if (\$tflag) {\$tflag = ''; goto $lab;}";
+		$_ .= "goto $lab;}";
 	    }
 	    $tseen++;
 	    next;
@@ -590,10 +640,11 @@ $tflag = \'\';
 	}
 
 	if (/^q/) {
-	    $_ =
-'close(ARGV);
+	    chop($_ = <<'EOT');
+close(ARGV);
 @ARGV = ();
-next line;';
+next LINE;
+EOT
 	    next;
 	}
     } continue {
@@ -612,7 +663,9 @@ sub fetchpat {
     local($inbracket);
     local($prefix,$delim,$ch);
 
-    delim: while (s:^([^\]+(|)[\\/]*)([]+(|)[\\/])::) {
+    # Process pattern one potential delimiter at a time.
+
+    DELIM: while (s#^([^\]+(|)[\\/]*)([]+(|)[\\/])##) {
 	$prefix = $1;
 	$delim = $2;
 	if ($delim eq '\\') {
@@ -636,7 +689,7 @@ sub fetchpat {
 	$addr .= $prefix;
 	$addr .= $delim;
 	if ($delim eq $outer && !$inbracket) {
-	    last delim;
+	    last DELIM;
 	}
     }
     $addr;

@@ -1,210 +1,237 @@
-/*
- * Pipe support for OS/2.
- *
- * WARNING:  I am guilty of chumminess with the runtime library because
- *           I had no choice.  Details to follow.
- *
+/* added real/protect mode branch at runtime and real mode version
+ * names changed for perl
+ * Kai Uwe Rommel
  */
 
-#include "EXTERN.h"
-#include "perl.h"
-#define INCL_DOSPROCESS
-#define INCL_DOSQUEUES
-#define INCL_DOSMISC
-#define INCL_DOSMEMMGR
+/*
+Several people in the past have asked about having Unix-like pipe
+calls in OS/2.  The following source file, adapted from 4.3 BSD Unix,
+uses a #define to give you a pipe(2) call, and contains function
+definitions for popen(3) and pclose(3).  Anyone with problems should
+send mail to me; they seem to work fine.
+
+Mark Towfigh
+Racal Interlan, Inc.
+----------------------------------cut-here------------------------------------
+*/
+
+/*
+ * The following code segment is derived from BSD 4.3 Unix.  See
+ * copyright below.  Any bugs, questions, improvements, or problems
+ * should be sent to Mark Towfigh (towfiq@interlan.interlan.com).
+ *
+ * Racal InterLan Inc.
+ */
+
+/*
+ * Copyright (c) 1980 Regents of the University of California.
+ * All rights reserved.  The Berkeley software License Agreement
+ * specifies the terms and conditions for redistribution.
+ */
+
+#include <stdio.h>
+#include <stdlib.h>
+#include <io.h>
+#include <string.h>
+#include <process.h>
+#include <errno.h>
+
+#define INCL_NOPM
+#define	INCL_DOS
 #include <os2.h>
 
-extern char **environ;
+static FILE *dos_popen(const char *cmd, const char *flags);
+static int dos_pclose(FILE *pipe);
 
-/* This mysterious array _osfile is used internally by the runtime
- * library to remember assorted things about open file handles.
- * The problem is that we are creating file handles via DosMakePipe,
- * rather than via the runtime library.  This means that we have
- * to fake the runtime library into thinking that the handles we've
- * created are honest file handles.  So just before doing the fdopen,
- * we poke in a magic value that fools the library functions into
- * thinking that the handle is already open in text mode.
- *
- * This might not work for your compiler, so beware.
+/*
+ * emulate Unix pipe(2) call
  */
-extern char _osfile[];
 
-/* The maximum number of simultaneously open pipes.  We create an
- * array of this size to record information about each open pipe.
- */
-#define MAXPIPES 5
+#define	tst(a,b)	(*mode == 'r'? (b) : (a))
+#define READH           0
+#define WRITEH          1
 
-/* Information to remember about each open pipe.
- * The (FILE *) that popen returns is stored because that's the only
- * way we can keep track of the pipes.
- */
-typedef struct pipeinfo {
-	FILE *pfId;		/* Which FILE we're talking about */
-	HFILE hfMe;		/* handle I should close at pclose */
-	PID pidChild;		/* Child's PID */
-	CHAR fReading;		/* A read or write pipe? */
-} PIPEINFO, *PPIPEINFO;		/* pi and ppi */
+static  int       popen_pid[20];
 
-static PIPEINFO PipeInfo[MAXPIPES];
-
-FILE *mypopen(const char *command, const char *t)
+FILE *mypopen(char *cmd, char *mode)
 {
-	typedef char *PSZZ;
-	PSZZ pszzPipeArgs = 0;
-	PSZZ pszzEnviron = 0;
-	PSZ *ppsz;
-	PSZ psz;
-	FILE *f;
-	HFILE hfMe, hfYou;
-	HFILE hf, hfSave;
-	RESULTCODES rc;
-	USHORT us;
-	PPIPEINFO ppi;
-	UINT i;
+	int p[2];
+        register myside, hisside, save_stream;
+        char *shell = getenv("COMPSPEC");
 
-	/* Validate pipe type */
-	if (*t != 'w' && *t != 'r') fatal("Unknown pipe type");
+        if ( shell == NULL )
+          shell = "C:\\OS2\\CMD.EXE";
 
-	/* Room for another pipe? */
-	for (ppi = &PipeInfo[0]; ppi < &PipeInfo[MAXPIPES]; ppi++)
-		if (ppi->pfId == 0) goto foundone;
-	return NULL;
+        if ( _osmode == DOS_MODE )
+          return dos_popen(cmd, mode);
 
-foundone:
+	if (DosMakePipe((PHFILE) &p[0], (PHFILE) &p[1], 4096) < 0)
+                return NULL;
 
-	/* Make the pipe */
-	if (DosMakePipe(&hfMe, &hfYou, 0)) return NULL;
+        myside = tst(p[WRITEH], p[READH]);
+        hisside = tst(p[READH], p[WRITEH]);
 
-	/* Build the environment.  First compute its length, then copy
-	 * the environment strings into it.
-	 */
-	i = 0;
-	for (ppsz = environ; *ppsz; ppsz++) i += 1 + strlen(*ppsz);
-	New(1204, pszzEnviron, 1+i, CHAR);
-
-	psz = pszzEnviron;
-	for (ppsz = environ; *ppsz; ppsz++) {
-		strcpy(psz, *ppsz);
-		psz += 1 + strlen(*ppsz);
+	/* set up file descriptors for remote function */
+	save_stream = dup(tst(0, 1));		/* don't lose stdin/out! */
+        if (dup2(hisside, tst(0, 1)) < 0)
+        {
+		perror("dup2");
+		return NULL;
 	}
-	*psz = 0;
+        close(hisside);
 
-	/* Build the command string to execute.
-	 * 6 = length(0 "/c " 0 0)
+	/*
+	 * make sure that we can close our side of the pipe, by
+	 * preventing it from being inherited!
 	 */
-	if (DosScanEnv("COMSPEC", &psz)) psz = "C:\\OS2\\cmd.exe";
-#if 0
-	New(1203, pszzPipeArgs, strlen(psz) + strlen(command) + 6, CHAR);
-#else
-#define pszzPipeArgs buf
-#endif
-	sprintf(pszzPipeArgs, "%s%c/c %s%c", psz, 0, command, 0);
 
-	/* Now some stuff that depends on what kind of pipe we're doing.
-	 * We pull a sneaky trick; namely, that stdin = 0 = false,
-	 * and stdout = 1 = true.  The end result is that if the
-	 * pipe is a read pipe, then hf = 1; if it's a write pipe, then
-	 * hf = 0 and Me and You are reversed.
-	 */
-	if (!(hf = (*t == 'r'))) {
-		/* The meaning of Me and You is reversed for write pipes. */
-		hfSave = hfYou; hfYou = hfMe; hfMe = hfSave;
+	/* set no-inheritance flag */
+	DosSetFHandState(myside, OPEN_FLAGS_NOINHERIT);
+
+	/* execute the command:  it will inherit our other file descriptors */
+        popen_pid[myside] = spawnlp(P_NOWAIT, shell, shell, "/C", cmd, NULL);
+
+	/* now restore our previous file descriptors */
+        if (dup2(save_stream, tst(0, 1)) < 0)   /* retrieve stdin/out */
+        {
+		perror("dup2");
+		return NULL;
 	}
+        close(save_stream);
 
-	ppi->fReading = hf;
+	return fdopen(myside, mode);		/* return a FILE pointer */
+}
 
-	/* Trick number 1:  Fooling the runtime library into thinking
- 	 * that the file handle is legit.
-	 *
-	 * Trick number 2:  Don't let my handle go over to the child!
-	 * Since the child never closes it (why should it?), I'd better
-	 * make sure he never sees it in the first place.  Otherwise,
-	 * we are in deadlock city.
-	 */
-	_osfile[hfMe] = 0x81;		/* Danger, Will Robinson! */
-	if (!(ppi->pfId = fdopen(hfMe, t))) goto no_fdopen;
-	DosSetFHandState(hfMe, OPEN_FLAGS_NOINHERIT);
+int mypclose(FILE *ptr)
+{
+	register f;
+        int status;
 
-	/* Save the original handle because we're going to diddle it */
-	hfSave = 0xFFFF;
-	if (DosDupHandle(hf, &hfSave)) goto no_dup_init;
+        if ( _osmode == DOS_MODE )
+          return dos_pclose(ptr);
 
-	/* Force the child's handle onto the stdio handle */
-	if (DosDupHandle(hfYou, &hf)) goto no_force_dup;
-	DosClose(hfYou);
+	f = fileno(ptr);
+        fclose(ptr);
 
-	/* Now run the guy servicing the pipe */
-	us = DosExecPgm(NULL, 0, EXEC_ASYNCRESULT, pszzPipeArgs, pszzEnviron,
-			&rc, pszzPipeArgs);
+	/* wait for process to terminate */
+	cwait(&status, popen_pid[f], WAIT_GRANDCHILD);
 
-	/* Restore stdio handle, even if exec failed. */
-	DosDupHandle(hfSave, &hf); close(hfSave);
-
-	/* See if the exec succeeded. */
-	if (us) goto no_exec_pgm;
-
-	/* Remember the child's PID */
-	ppi->pidChild = rc.codeTerminate;
-
-	Safefree(pszzEnviron);
-
-	/* Phew. */
-	return ppi->pfId;
-
-	/* Here is where we clean up after an error. */
-no_exec_pgm: ;
-no_force_dup: close(hfSave);
-no_dup_init: fclose(f);
-no_fdopen:
-	DosClose(hfMe); DosClose(hfYou);
-	ppi->pfId = 0;
-	Safefree(pszzEnviron);
-	return NULL;
+	return status;
 }
 
 
-/* mypclose:  Closes the pipe associated with the file handle.
- * After waiting for the child process to terminate, its return
- * code is returned.  If the stream was not associated with a pipe,
- * we return -1.
- */
-int
-mypclose(FILE *f)
+int pipe(int *filedes)
 {
-	PPIPEINFO ppi;
-	RESULTCODES rc;
-	USHORT us;
+  int res;
 
-	/* Find the pipe this (FILE *) refers to */
-	for (ppi = &PipeInfo[0]; ppi < &PipeInfo[MAXPIPES]; ppi++)
-		if (ppi->pfId == f) goto foundit;
-	return -1;
-foundit:
-	if (ppi->fReading && !DosRead(fileno(f), &rc, 1, &us) && us > 0) {
-		DosKillProcess(DKP_PROCESSTREE, ppi->pidChild);
-	}
-	fclose(f);
-	DosCwait(DCWA_PROCESS, DCWW_WAIT, &rc, &ppi->pidChild, ppi->pidChild);
-	ppi->pfId = 0;
-	return rc.codeResult;
+  if ( res = DosMakePipe((PHFILE) &filedes[0], (PHFILE) &filedes[1], 4096) )
+    return res;
+
+  DosSetFHandState(filedes[0], OPEN_FLAGS_NOINHERIT);
+  DosSetFHandState(filedes[1], OPEN_FLAGS_NOINHERIT);
+  return 0;
 }
 
-/* pipe:  The only tricky thing is letting the runtime library know about
- * our two new file descriptors.
- */
-int pipe(int filedes[2])
-{
-	HFILE hfRead, hfWrite;
-	USHORT usResult;
 
-	usResult = DosMakePipe(&hfRead, &hfWrite, 0);
-	if (usResult) {
-		/* Error 4 == ERROR_TOO_MANY_OPEN_FILES */
-		errno = (usResult == 4) ? ENFILE : ENOMEM;
-		return -1;
-	}
-	_osfile[hfRead] = _osfile[hfWrite] = 0x81;/* Danger, Will Robinson! */
-	filedes[0] = hfRead;
-	filedes[1] = hfWrite;
-	return 0;
+/* this is the MS-DOS version */
+
+typedef enum { unopened = 0, reading, writing } pipemode;
+
+static struct
+{
+    char *name;
+    char *command;
+    pipemode pmode;
+}
+pipes[_NFILE];
+
+static FILE *dos_popen(const char *command, const char *mode)
+{
+    FILE *current;
+    char name[128];
+    int cur;
+    pipemode curmode;
+
+    /*
+    ** decide on mode.
+    */
+    if(strchr(mode, 'r') != NULL)
+        curmode = reading;
+    else if(strchr(mode, 'w') != NULL)
+        curmode = writing;
+    else
+        return NULL;
+
+    /*
+    ** get a name to use.
+    */
+    strcpy(name, "piXXXXXX");
+    Mktemp(name);
+
+    /*
+    ** If we're reading, just call system to get a file filled with
+    ** output.
+    */
+    if(curmode == reading)
+    {
+        char cmd[256];
+        sprintf(cmd,"%s > %s", command, name);
+        system(cmd);
+
+        if((current = fopen(name, mode)) == NULL)
+            return NULL;
+    }
+    else
+    {
+        if((current = fopen(name, mode)) == NULL)
+            return NULL;
+    }
+
+    cur = fileno(current);
+    pipes[cur].name = strdup(name);
+    pipes[cur].command = strdup(command);
+    pipes[cur].pmode = curmode;
+
+    return current;
+}
+
+static int dos_pclose(FILE * current)
+{
+    int cur = fileno(current), rval;
+    char command[256];
+
+    /*
+    ** check for an open file.
+    */
+    if(pipes[cur].pmode == unopened)
+        return -1;
+
+    if(pipes[cur].pmode == reading)
+    {
+        /*
+        ** input pipes are just files we're done with.
+        */
+        rval = fclose(current);
+        unlink(pipes[cur].name);
+    }
+    else
+    {
+        /*
+        ** output pipes are temporary files we have
+        ** to cram down the throats of programs.
+        */
+        fclose(current);
+        sprintf(command,"%s < %s", pipes[cur].command, pipes[cur].name);
+        rval = system(command);
+        unlink(pipes[cur].name);
+    }
+
+    /*
+    ** clean up current pipe.
+    */
+    free(pipes[cur].name);
+    free(pipes[cur].command);
+    pipes[cur].pmode = unopened;
+
+    return rval;
 }

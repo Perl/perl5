@@ -7,9 +7,14 @@
  * blame Henry for some of the lack of readability.
  */
 
-/* $Header: regexec.c,v 3.0.1.4 90/08/09 05:12:03 lwall Locked $
+/* $Header: regexec.c,v 3.0.1.5 90/10/16 10:25:36 lwall Locked $
  *
  * $Log:	regexec.c,v $
+ * Revision 3.0.1.5  90/10/16  10:25:36  lwall
+ * patch29: /^pat/ occasionally matched in middle of string when $* = 0
+ * patch29: /.{n,m}$/ could match with fewer than n characters remaining
+ * patch29: /\d{9}/ could match more than 9 characters
+ * 
  * Revision 3.0.1.4  90/08/09  05:12:03  lwall
  * patch19: sped up /x+y/ patterns greatly by not retrying on every x
  * patch19: inhibited backoff on patterns anchored to the end like /\s+$/
@@ -139,8 +144,11 @@ int safebase;	/* no need to remember string in subbase */
 
 	if (string == strbeg)	/* is ^ valid at stringarg? */
 	    regprev = '\n';
-	else
+	else {
 	    regprev = stringarg[-1];
+	    if (!multiline && regprev == '\n')
+		regprev = '\0';		/* force ^ to NOT match */
+	}
 	regprecomp = prog->precomp;
 	/* Check validity of program. */
 	if (UCHARAT(prog->program) != MAGIC) {
@@ -771,7 +779,7 @@ char *prog;
 				nextchar = -1000;
 			reginput = locinput;
 			n = regrepeat(scan, n);
-			if (!multiline && OP(next) == EOL)
+			if (!multiline && OP(next) == EOL && ln < n)
 			    ln = n;			/* why back off? */
 			while (n >= ln) {
 				/* If it could work, try it. */
@@ -845,7 +853,7 @@ int max;
 		}
 		break;
 	case ALNUM:
-		while (isALNUM(*scan))
+		while (scan < loceol && isALNUM(*scan))
 			scan++;
 		break;
 	case NALNUM:
@@ -861,7 +869,7 @@ int max;
 			scan++;
 		break;
 	case DIGIT:
-		while (isDIGIT(*scan))
+		while (scan < loceol && isDIGIT(*scan))
 			scan++;
 		break;
 	case NDIGIT:
