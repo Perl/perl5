@@ -175,6 +175,8 @@ NDBM_File
 ODBM_File
 Pod::Checker
 Pod::Find
+Pod::LaTeX
+Pod::ParseUtils
 Pod::Text
 Pod::Usage
 SDBM_File
