@@ -1251,6 +1251,7 @@ sv.c			Scalar value code
 sv.h			Scalar value header
 t/README		Instructions for regression tests
 t/TEST			The regression tester
+t/TestInit.pm		Preamble library for core tests
 t/UTEST			Run regression tests with -Mutf8
 t/base/cond.t		See if conditionals work
 t/base/if.t		See if if works
