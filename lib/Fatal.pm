@@ -5,7 +5,7 @@ use Carp;
 use strict;
 our($AUTOLOAD, $Debug, $VERSION);
 
-$VERSION = 1.03;
+$VERSION = 1.04;
 
 $Debug = 0 unless defined $Debug;
 
