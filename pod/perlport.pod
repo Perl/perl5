@@ -1441,7 +1441,7 @@ Only good for changing "owner" and "other" read-write access. (S<RISC OS>)
 Access permissions are mapped onto VOS access-control list changes. (VOS)
 
 The actual permissions set depend on the value of the C<CYGWIN>
-environment variable. (Cygwin)
+in the SYSTEM environment settings.  (Cygwin)
 
 =item chown LIST
 
