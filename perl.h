@@ -1418,12 +1418,7 @@ typedef struct ptr_tbl PTR_TBL_t;
 
 #include "handy.h"
 
-#ifndef NO_LARGE_FILES
-#   define USE_LARGE_FILES	/* If available. */
-#endif
-
 #if defined(USE_LARGE_FILES) && !defined(NO_64_BIT_RAWIO)
-#   define USE_64_BIT_RAWIO	/* explicit */
 #   if LSEEKSIZE == 8 && !defined(USE_64_BIT_RAWIO)
 #       define USE_64_BIT_RAWIO	/* implicit */
 #   endif
@@ -1441,7 +1436,6 @@ typedef struct ptr_tbl PTR_TBL_t;
 #endif
 
 #if defined(USE_LARGE_FILES) && !defined(NO_64_BIT_STDIO)
-#   define USE_64_BIT_STDIO	/* explicit */
 #   if FSEEKSIZE == 8 && !defined(USE_64_BIT_STDIO)
 #       define USE_64_BIT_STDIO /* implicit */
 #   endif
