@@ -2,7 +2,7 @@
 
 # $RCSfile: pat.t,v $$Revision: 4.1 $$Date: 92/08/07 18:28:12 $
 
-print "1..62\n";
+print "1..97\n";
 
 $x = "abc\ndef\n";
 
@@ -217,3 +217,114 @@ print "ok 61\n";
 /\Gc/g;
 print "not " if defined pos $_;
 print "ok 62\n";
+
+$out = 1;
+'abc' =~ m'a(?{ $out = 2 })b';
+print "not " if $out != 2;
+print "ok 63\n";
+
+$out = 1;
+'abc' =~ m'a(?{ $out = 3 })c';
+print "not " if $out != 1;
+print "ok 64\n";
+
+$_ = 'foobar1 bar2 foobar3 barfoobar5 foobar6';
+@out = /(?<!foo)bar./g;
+print "not " if "@out" ne 'bar2 barf';
+print "ok 65\n";
+
+# Long Monsters
+$test = 66;
+for $l (125, 140, 250, 270, 300000, 30) { # Ordered to free memory
+  $a = 'a' x $l;
+  print "# length=$l\nnot " unless "ba$a=" =~ /a$a=/;
+  print "ok $test\n";
+  $test++;
+  
+  print "not " if "b$a=" =~ /a$a=/;
+  print "ok $test\n";
+  $test++;
+}
+
+# 20000 nodes, each taking 3 words per string, and 1 per branch
+$long_constant_len = join '|', 12120 .. 32645;
+$long_var_len = join '|', 8120 .. 28645;
+%ans = ( 'ax13876y25677lbc' => 1,
+	 'ax13876y25677mcb' => 0, # not b.
+	 'ax13876y35677nbc' => 0, # Num too big
+	 'ax13876y25677y21378obc' => 1,
+	 'ax13876y25677y21378zbc' => 0,	# Not followed by [k-o]
+	 'ax13876y25677y21378y21378kbc' => 1,
+	 'ax13876y25677y21378y21378kcb' => 0, # Not b.
+	 'ax13876y25677y21378y21378y21378kbc' => 0, # 5 runs
+       );
+
+for ( keys %ans ) {
+  print "# const-len `$_' not =>  $ans{$_}\nnot " 
+    if $ans{$_} xor /a(?=([yx]($long_constant_len)){2,4}[k-o]).*b./o;
+  print "ok $test\n";
+  $test++;
+  print "# var-len   `$_' not =>  $ans{$_}\nnot " 
+    if $ans{$_} xor /a(?=([yx]($long_var_len)){2,4}[k-o]).*b./o;
+  print "ok $test\n";
+  $test++;
+}
+
+$_ = " a (bla()) and x(y b((l)u((e))) and b(l(e)e)e";
+$expect = "(bla()) ((l)u((e))) (l(e)e)";
+
+sub matchit { 
+  m'
+     (
+       \( 
+       (?{ $c = 1 })		# Initialize
+       (?:
+	 (?(?{ $c == 0 })       # PREVIOUS iteration was OK, stop the loop
+	   (?!
+	   )			# Fail: will unwind one iteration back
+	 )	    
+	 (?:
+	   [^()]+		# Match a big chunk
+	   (?=
+	     [()]
+	   )			# Do not try to match subchunks
+	 |
+	   \( 
+	   (?{ ++$c })
+	 |
+	   \) 
+	   (?{ --$c })
+	 )
+       )+			# This may not match with different subblocks
+     )
+     (?(?{ $c != 0 })
+       (?!
+       )			# Fail
+     )				# Otherwise the chunk 1 may succeed with $c>0
+   'xg;
+}
+
+push @ans, $res while $res = matchit;
+
+print "# ans='@ans'\n# expect='$expect'\nnot " if "@ans" ne "1 1 1";
+print "ok $test\n";
+$test++;
+
+@ans = matchit;
+
+print "# ans='@ans'\n# expect='$expect'\nnot " if "@ans" ne $expect;
+print "ok $test\n";
+$test++;
+
+@ans = ('a/b' =~ m%(.*/)?(.*)%);	# Stack may be bad
+print "not " if "@ans" ne 'a/ b';
+print "ok $test\n";
+$test++;
+
+$code = '$blah = 45';
+$blah = 12;
+/(?{$code})/;			
+print "not " if $blah != 45;
+print "ok $test\n";
+$test++;
+

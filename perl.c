@@ -418,36 +418,6 @@ perl_destruct(register PerlInterpreter *sv_interp)
 
     /* defgv, aka *_ should be taken care of elsewhere */
 
-#if 0  /* just about all regexp stuff, seems to be ok */
-
-    /* shortcuts to regexp stuff */
-    leftgv = Nullgv;
-    ampergv = Nullgv;
-
-    SAVEFREEOP(curpm);
-    SAVEFREEOP(oldlastpm); /* for saving regexp context during debugger */
-
-    regprecomp = NULL;	/* uncompiled string. */
-    regparse = NULL;	/* Input-scan pointer. */
-    regxend = NULL;	/* End of input for compile */
-    regnpar = 0;	/* () count. */
-    regcode = NULL;	/* Code-emit pointer; &regdummy = don't. */
-    regsize = 0;	/* Code size. */
-    regnaughty = 0;	/* How bad is this pattern? */
-    regsawback = 0;	/* Did we see \1, ...? */
-
-    reginput = NULL;		/* String-input pointer. */
-    regbol = NULL;		/* Beginning of input, for ^ check. */
-    regeol = NULL;		/* End of input, for $ check. */
-    regstartp = (char **)NULL;	/* Pointer to startp array. */
-    regendp = (char **)NULL;	/* Ditto for endp. */
-    reglastparen = 0;		/* Similarly for lastparen. */
-    regtill = NULL;		/* How far we are required to go. */
-    regflags = 0;		/* are we folding, multilining? */
-    regprev = (char)NULL;	/* char before regbol, \n if none */
-
-#endif /* if 0 */
-
     /* clean up after study() */
     SvREFCNT_dec(lastscream);
     lastscream = Nullsv;

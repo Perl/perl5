@@ -177,16 +177,14 @@ struct pmop {
     OP *	op_pmreplstart;
     PMOP *	op_pmnext;		/* list of all scanpats */
     REGEXP *	op_pmregexp;		/* compiled expression */
-    SV *	op_pmshort;		/* for a fast bypass of execute() */
     U16		op_pmflags;
     U16		op_pmpermflags;
-    char	op_pmslen;
 };
 
 #define PMf_USED	0x0001		/* pm has been used once already */
 #define PMf_ONCE	0x0002		/* use pattern only once per reset */
-#define PMf_SCANFIRST	0x0004		/* initial constant not anchored */
-#define PMf_ALL		0x0008		/* initial constant is whole pat */
+#define PMf_REVERSED	0x0004		/* Should be matched right->left */
+/*#define PMf_ALL		0x0008*/		/* initial constant is whole pat */
 #define PMf_SKIPWHITE	0x0010		/* skip leading whitespace for split */
 #define PMf_FOLD	0x0020		/* case insensitivity */
 #define PMf_CONST	0x0040		/* subst replacement is constant */

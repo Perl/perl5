@@ -359,18 +359,17 @@ dump_pm(PMOP *pm)
 	dump("PMf_REPL = ");
 	dump_op(pm->op_pmreplroot);
     }
-    if (pm->op_pmshort) {
-	dump("PMf_SHORT = %s\n",SvPEEK(pm->op_pmshort));
-    }
-    if (pm->op_pmflags) {
+    if (pm->op_pmflags || (pm->op_pmregexp && pm->op_pmregexp->check_substr)) {
 	SV *tmpsv = newSVpv("", 0);
 	if (pm->op_pmflags & PMf_USED)
 	    sv_catpv(tmpsv, ",USED");
 	if (pm->op_pmflags & PMf_ONCE)
 	    sv_catpv(tmpsv, ",ONCE");
-	if (pm->op_pmflags & PMf_SCANFIRST)
+	if (pm->op_pmregexp && pm->op_pmregexp->check_substr
+	    && !(pm->op_pmregexp->reganch & ROPT_NOSCAN))
 	    sv_catpv(tmpsv, ",SCANFIRST");
-	if (pm->op_pmflags & PMf_ALL)
+	if (pm->op_pmregexp && pm->op_pmregexp->check_substr
+	    && pm->op_pmregexp->reganch & ROPT_CHECK_ALL)
 	    sv_catpv(tmpsv, ",ALL");
 	if (pm->op_pmflags & PMf_SKIPWHITE)
 	    sv_catpv(tmpsv, ",SKIPWHITE");

@@ -1748,29 +1748,6 @@ EXT U32		hints;		/* various compilation flags */
 #define HINT_STRICT_VARS	0x00000400
 #define HINT_LOCALE		0x00000800
 
-/**************************************************************************/
-/* This regexp stuff is global since it always happens within 1 expr eval */
-/**************************************************************************/
-
-EXT char *	regprecomp;	/* uncompiled string. */
-EXT char *	regparse;	/* Input-scan pointer. */
-EXT char *	regxend;	/* End of input for compile */
-EXT I32		regnpar;	/* () count. */
-EXT char *	regcode;	/* Code-emit pointer; &regdummy = don't. */
-EXT I32		regsize;	/* Code size. */
-EXT I32		regnaughty;	/* How bad is this pattern? */
-EXT I32		regsawback;	/* Did we see \1, ...? */
-
-EXT char *	reginput;	/* String-input pointer. */
-EXT char *	regbol;		/* Beginning of input, for ^ check. */
-EXT char *	regeol;		/* End of input, for $ check. */
-EXT char **	regstartp;	/* Pointer to startp array. */
-EXT char **	regendp;	/* Ditto for endp. */
-EXT U32 *	reglastparen;	/* Similarly for lastparen. */
-EXT char *	regtill;	/* How far we are required to go. */
-EXT U16		regflags;	/* are we folding, multilining? */
-EXT char	regprev;	/* char before regbol, \n if none */
-
 EXT bool	do_undump;	/* -u or dump seen? */
 EXT VOL U32	debug;
 
@@ -2072,6 +2049,8 @@ EXT MGVTBL vtbl_mutex =	{0,	0,	0,	0,	magic_mutexfree};
 EXT MGVTBL vtbl_defelem = {magic_getdefelem,magic_setdefelem,
 					0,	0,	magic_freedefelem};
 
+EXT MGVTBL vtbl_regexp = {0,0,0,0, magic_freeregexp};
+
 #ifdef USE_LOCALE_COLLATE
 EXT MGVTBL vtbl_collxfrm = {0,
 				magic_setcollxfrm,
@@ -2114,6 +2093,7 @@ EXT MGVTBL vtbl_mutex;
 #endif /* USE_THREADS */
 
 EXT MGVTBL vtbl_defelem;
+EXT MGVTBL vtbl_regexp;
 
 #ifdef USE_LOCALE_COLLATE
 EXT MGVTBL vtbl_collxfrm;

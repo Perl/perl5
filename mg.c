@@ -418,7 +418,7 @@ magic_get(SV *sv, MAGIC *mg)
 		    }
 		    sv_setpvn(sv,s,i);
 		    if (tainting)
-			tainted = was_tainted || rx->exec_tainted;
+			tainted = was_tainted || RX_MATCH_TAINTED(rx);
 		    break;
 		}
 	    }
@@ -1302,6 +1302,14 @@ magic_setuvar(SV *sv, MAGIC *mg)
 
     if (uf && uf->uf_set)
 	(*uf->uf_set)(uf->uf_index, sv);
+    return 0;
+}
+
+int
+magic_freeregexp(SV *sv, MAGIC *mg)
+{
+    regexp *re = (regexp *)mg->mg_obj;
+    ReREFCNT_dec(re);
     return 0;
 }
 

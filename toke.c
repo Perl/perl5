@@ -784,7 +784,7 @@ scan_const(char *start)
 	else if (*s == '$') {
 	    if (!lex_inpat)	/* not a regexp, so $ must be var */
 		break;
-	    if (s + 1 < send && !strchr(")| \n\t", s[1]))
+	    if (s + 1 < send && !strchr("()| \n\t", s[1]))
 		break;		/* in regexp, $ might be tail anchor */
 	}
 	if (*s == '\\' && s+1 < send) {
@@ -2389,7 +2389,11 @@ yylex(void)
     case '/':			/* may either be division or pattern */
     case '?':			/* may either be conditional or pattern */
 	if (expect != XOPERATOR) {
-	    check_uni();
+	    /* Disable warning on "study /blah/" */
+	    if (oldoldbufptr == last_uni 
+		&& (*last_uni != 's' || s - last_uni < 5 
+		    || memNE(last_uni, "study", 5) || isALNUM(last_uni[5])))
+		check_uni();
 	    s = scan_pat(s);
 	    TERM(sublex_start());
 	}
@@ -4674,46 +4678,6 @@ scan_subst(char *start)
     lex_op = (OP*)pm;
     yylval.ival = OP_SUBST;
     return s;
-}
-
-void
-hoistmust(register PMOP *pm)
-{
-    dTHR;
-    if (!pm->op_pmshort && pm->op_pmregexp->regstart &&
-	(!pm->op_pmregexp->regmust || pm->op_pmregexp->reganch & ROPT_ANCH)
-       ) {
-	if (!(pm->op_pmregexp->reganch & ROPT_ANCH))
-	    pm->op_pmflags |= PMf_SCANFIRST;
-	pm->op_pmshort = SvREFCNT_inc(pm->op_pmregexp->regstart);
-	pm->op_pmslen = SvCUR(pm->op_pmshort);
-    }
-    else if (pm->op_pmregexp->regmust) {/* is there a better short-circuit? */
-	if (pm->op_pmshort &&
-	  sv_eq(pm->op_pmshort,pm->op_pmregexp->regmust))
-	{
-	    if (pm->op_pmflags & PMf_SCANFIRST) {
-		SvREFCNT_dec(pm->op_pmshort);
-		pm->op_pmshort = Nullsv;
-	    }
-	    else {
-		SvREFCNT_dec(pm->op_pmregexp->regmust);
-		pm->op_pmregexp->regmust = Nullsv;
-		return;
-	    }
-	}
-	/* promote the better string */
-	if ((!pm->op_pmshort &&
-	     !(pm->op_pmregexp->reganch & ROPT_ANCH_GPOS)) ||
-	    ((pm->op_pmflags & PMf_SCANFIRST) &&
-	     (SvCUR(pm->op_pmshort) < SvCUR(pm->op_pmregexp->regmust)))) {
-	    SvREFCNT_dec(pm->op_pmshort);		/* ok if null */
-	    pm->op_pmshort = pm->op_pmregexp->regmust;
-	    pm->op_pmslen = SvCUR(pm->op_pmshort);
-	    pm->op_pmregexp->regmust = Nullsv;
-	    pm->op_pmflags |= PMf_SCANFIRST;
-	}
-    }
 }
 
 static char *

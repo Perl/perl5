@@ -163,7 +163,6 @@ void	gv_init _((GV* gv, HV* stash, char* name, STRLEN len, int multi));
 HV*	gv_stashpv _((char* name, I32 create));
 HV*	gv_stashpvn _((char* name, U32 namelen, I32 create));
 HV*	gv_stashsv _((SV* sv, I32 create));
-void	hoistmust _((PMOP* pm));
 void	hv_clear _((HV* tb));
 void	hv_delayfree_ent _((HV* hv, HE* entry));
 SV*	hv_delete _((HV* tb, char* key, U32 klen, I32 flags));
@@ -208,6 +207,7 @@ int	magic_clearpack	_((SV* sv, MAGIC* mg));
 int	magic_clearsig	_((SV* sv, MAGIC* mg));
 int	magic_existspack _((SV* sv, MAGIC* mg));
 int	magic_freedefelem _((SV* sv, MAGIC* mg));
+int	magic_freeregexp _((SV* sv, MAGIC* mg));
 int	magic_get	_((SV* sv, MAGIC* mg));
 int	magic_getarylen	_((SV* sv, MAGIC* mg));
 int	magic_getdefelem _((SV* sv, MAGIC* mg));
@@ -397,10 +397,11 @@ regexp*	pregcomp _((char* exp, char* xend, PMOP* pm));
 OP*	ref _((OP* o, I32 type));
 OP*	refkids _((OP* o, I32 type));
 void	regdump _((regexp* r));
-I32	pregexec _((regexp* prog, char* stringarg, char* strend, char* strbeg, I32 minend, SV* screamer, I32 safebase));
-void	pregfree _((struct regexp* r));
-char*	regnext _((char* p));
-void	regprop _((SV* sv, char* o));
+I32	pregexec _((regexp* prog, char* stringarg, char* strend, char* strbeg, I32 minend, SV* screamer, U32 nosave));
+I32	regexec_flags _((regexp* prog, char* stringarg, char* strend, char* strbeg, I32 minend, SV* screamer, void* data, U32 flags));
+  void	pregfree _((struct regexp* r));
+regnode*regnext _((regnode* p));
+void	regprop _((SV* sv, regnode* o));
 void	repeatcpy _((char* to, char* from, I32 len, I32 count));
 char*	rninstr _((char* big, char* bigend, char* little, char* lend));
 Sighandler_t rsignal _((int, Sighandler_t));
@@ -451,7 +452,7 @@ UV	scan_hex _((char* start, I32 len, I32* retlen));
 char*	scan_num _((char* s));
 UV	scan_oct _((char* start, I32 len, I32* retlen));
 OP*	scope _((OP* o));
-char*	screaminstr _((SV* bigsv, SV* littlesv));
+char*	screaminstr _((SV* bigsv, SV* littlesv, I32 start_shift, I32 end_shift, I32 *state, I32 last));
 #ifndef VMS
 I32	setenv_getix _((char* nam));
 #endif
@@ -491,6 +492,7 @@ I32	sv_cmp_locale _((SV* sv1, SV* sv2));
 #ifdef USE_LOCALE_COLLATE
 char*	sv_collxfrm _((SV* sv, STRLEN* nxp));
 #endif
+OP*	sv_compile_2op _((SV* sv, OP** startp, char* code, AV** avp));
 void	sv_dec _((SV* sv));
 void	sv_dump _((SV* sv));
 bool	sv_derived_from _((SV* sv, char* name));
