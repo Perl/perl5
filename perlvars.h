@@ -37,4 +37,6 @@ PERLVAR(Gmalloc_mutex,	perl_mutex)	/* Mutex for malloc */
 
 #if defined(USE_ITHREADS)
 PERLVAR(Gop_mutex,	perl_mutex)	/* Mutex for op refcounting */
+PERLVAR(Gsharedsv_space, PerlInterpreter*) /* The shared sv space */
+PERLVAR(Gsharedsv_space_mutex, perl_mutex) /* Mutex protecting the shared sv space */
 #endif

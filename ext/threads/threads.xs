@@ -19,8 +19,6 @@ void thread_run(ithread* thread) {
 	SV* thread_tid_ptr;
 	SV* thread_ptr;
 	dTHXa(thread->interp);
-
-
 	PERL_SET_CONTEXT(thread->interp);
 
 #ifdef WIN32
@@ -29,15 +27,16 @@ void thread_run(ithread* thread) {
 	thread->thr = pthread_self();
 #endif
 
+	SHAREDSvLOCK(threads);
 	SHAREDSvEDIT(threads);
-	thread_tid_ptr = Perl_newSViv(sharedsv_space, (IV) thread->thr);
-	thread_ptr = Perl_newSViv(sharedsv_space, (IV) thread);	
+	thread_tid_ptr = Perl_newSViv(PL_sharedsv_space, (IV) thread->thr);
+	thread_ptr = Perl_newSViv(PL_sharedsv_space, (IV) thread);	
 	hv_store_ent((HV*)SHAREDSvGET(threads), thread_tid_ptr, thread_ptr,0);
    	SvREFCNT_dec(thread_tid_ptr);
 	SHAREDSvRELEASE(threads);
-
-
+	SHAREDSvUNLOCK(threads);
 	PL_perl_destruct_level = 2;
+
 	{
 
 		AV* params;
@@ -55,7 +54,7 @@ void thread_run(ithread* thread) {
 			}	
 		}
 		PUTBACK;
-		call_sv(thread->init_function, G_DISCARD);
+	 	call_sv(thread->init_function, G_DISCARD);
 		FREETMPS;
 		LEAVE;
 
@@ -106,10 +105,7 @@ SV* thread_create(char* class, SV* init_function, SV* params) {
 		here we put the values of params and function to call onto namespace, this is so perl will properly 		clone them when we call perl_clone.
 	*/
 	
-	/*if(SvTYPE(SvRV(init_function)) == SVt_PVCV) {
-		CvCLONED_on(SvRV(init_function));
-	}
-	*/
+
 
 	temp_store = Perl_get_sv(current_perl, "threads::paramtempstore", TRUE | GV_ADDMULTI);
 	Perl_sv_setsv(current_perl, temp_store,params);
@@ -118,7 +114,8 @@ SV* thread_create(char* class, SV* init_function, SV* params) {
 
 	temp_store = Perl_get_sv(current_perl, "threads::calltempstore", TRUE | GV_ADDMULTI);
 	Perl_sv_setsv(current_perl,temp_store, init_function);
-
+	init_function = NULL;
+	temp_store = NULL;
 	
 
 #ifdef WIN32
@@ -126,19 +123,12 @@ SV* thread_create(char* class, SV* init_function, SV* params) {
 #else
 	thread->interp = perl_clone(current_perl,0);
 #endif
-	
-	PL_perl_destruct_level = 2;
-
-#if 0
-	sv_dump(SvRV(Perl_get_sv(current_perl, "threads::calltempstore",FALSE)));	
-	sv_dump(SvRV(Perl_get_sv(thread->interp, "threads::calltempstore",FALSE)));	
-#endif
 
 	thread->init_function = newSVsv(Perl_get_sv(thread->interp, "threads::calltempstore",FALSE));
 	thread->params = newSVsv(Perl_get_sv(thread->interp, "threads::paramtempstore",FALSE));
 
-	init_function = NULL;
-	temp_store = NULL;
+
+
 
 
 	/*
@@ -164,7 +154,7 @@ SV* thread_create(char* class, SV* init_function, SV* params) {
 	/* lets init the thread */
 
 
-
+//	thread->mutex = (perl_mutex) malloc(sizeof(perl_mutex));
 
 
 	MUTEX_INIT(&thread->mutex);
@@ -183,7 +173,7 @@ SV* thread_create(char* class, SV* init_function, SV* params) {
 	MUTEX_UNLOCK(&create_mutex);	
 
 
-	if(!SvRV(obj_ref)) printf("FUCK\n");
+
   return obj_ref;
 }
 
@@ -209,29 +199,28 @@ SV* thread_self (char* class) {
 	SV*		thread_tid_ptr;
 	SV*		thread_ptr;
 	HE*		thread_entry;
-	IV	pointer;
 	PerlInterpreter *old_context = PERL_GET_CONTEXT;
 
 
 	
+	SHAREDSvLOCK(threads);
 	SHAREDSvEDIT(threads);
 #ifdef WIN32
-	thread_tid_ptr = Perl_newSViv(sharedsv_space, (IV) GetCurrentThreadId());
+	thread_tid_ptr = Perl_newSViv(PL_sharedsv_space, (IV) GetCurrentThreadId());
 #else
-	thread_tid_ptr = Perl_newSViv(sharedsv_space, (IV) pthread_self());
+	thread_tid_ptr = Perl_newSViv(PL_sharedsv_space, (IV) pthread_self());
 #endif
-	thread_entry = Perl_hv_fetch_ent(sharedsv_space,(HV*) SHAREDSvGET(threads), thread_tid_ptr, 0,0);
+	thread_entry = Perl_hv_fetch_ent(PL_sharedsv_space,(HV*) SHAREDSvGET(threads), thread_tid_ptr, 0,0);
 	thread_ptr = HeVAL(thread_entry);
 	SvREFCNT_dec(thread_tid_ptr);	
-	pointer = SvIV(thread_ptr);
 	SHAREDSvRELEASE(threads);
-
+	SHAREDSvUNLOCK(threads);
 	
 
 
 	obj_ref = newSViv(0);
 	obj = newSVrv(obj_ref, class);
-   	sv_setiv(obj, pointer);
+   	sv_setsv(obj, thread_ptr);
    	SvREADONLY_on(obj);
 	return obj_ref;
 }
@@ -299,13 +288,13 @@ BOOT:
 	PL_perl_destruct_level = 2;
 	threads = Perl_sharedsv_new(aTHX);
 	SHAREDSvEDIT(threads);
-	SHAREDSvGET(threads) = (SV *)newHV();
+	((HV*) SHAREDSvGET(threads)) = newHV();
 	SHAREDSvRELEASE(threads);
 	{
 	    
 	
 	    SV* temp = get_sv("threads::sharedsv_space", TRUE | GV_ADDMULTI);
-	    SV* temp2 = newSViv((IV)sharedsv_space );
+	    SV* temp2 = newSViv((IV)PL_sharedsv_space );
 	    sv_setsv( temp , temp2 );
 	}
 	{
@@ -319,13 +308,12 @@ BOOT:
 #else
 		thread->thr = pthread_self();
 #endif
+		thread_tid_ptr = Perl_newSViv(PL_sharedsv_space, (IV) thread->thr);
+		thread_ptr = Perl_newSViv(PL_sharedsv_space, (IV) thread);	
 		SHAREDSvEDIT(threads);
-		thread_tid_ptr = Perl_newSViv(sharedsv_space, (IV) thread->thr);
-		thread_ptr = Perl_newSViv(sharedsv_space, (IV) thread);	
 		hv_store_ent((HV*) SHAREDSvGET(threads), thread_tid_ptr, thread_ptr,0);
-	   	SvREFCNT_dec(thread_tid_ptr);
 		SHAREDSvRELEASE(threads);
-
+	   	SvREFCNT_dec(thread_tid_ptr);
 	}
 	MUTEX_INIT(&create_mutex);
 

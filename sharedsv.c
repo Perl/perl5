@@ -22,8 +22,7 @@
 
 #ifdef USE_ITHREADS
 
-PerlInterpreter* sharedsv_space;
-perl_mutex sharedsv_space_mutex;
+
 
 /*
   Shared SV
@@ -45,8 +44,8 @@ currently only stores a pointer to the first interpreter.
 void
 Perl_sharedsv_init(pTHX)
 {
-    sharedsv_space = PERL_GET_CONTEXT;
-    MUTEX_INIT(&sharedsv_space_mutex);
+    PL_sharedsv_space = PERL_GET_CONTEXT;
+    MUTEX_INIT(&PL_sharedsv_space_mutex);
 }
 
 /*
