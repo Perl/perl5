@@ -294,10 +294,10 @@ use the form LE<lt>show this text|fooE<gt> instead.
 
 =item *
 
-The script F<pod/checkpods.PL> in the Perl source distribution
-provides skeletal checking for lines that look empty but aren't
-B<only>, but is there as a placeholder until someone writes
-Pod::Checker.  The best way to check your pod is to pass it through
+The F<L<podchecker|podchecker>> command is provided to check pod syntax
+for errors and warnings. For example, it checks for completely
+blank lines in pod segments and for unknown escape sequences.
+It is still advised to pass it through
 one or more translators and proofread the result, or print out the
 result and proofread that.  Some of the problems found may be bugs in
 the translators, which you may or may not wish to work around.
@@ -306,7 +306,8 @@ the translators, which you may or may not wish to work around.
 
 =head1 SEE ALSO
 
-L<pod2man> and L<perlsyn/"PODs: Embedded Documentation">
+L<pod2man>, L<perlsyn/"PODs: Embedded Documentation">,
+L<podchecker>
 
 =head1 AUTHOR
 
