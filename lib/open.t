@@ -13,7 +13,7 @@ sub import {
 }
 
 # can't use require_ok() here, with a name like 'open'
-ok( require 'open.pm', 'required okay!' );
+ok( require 'open.pm', 'require' );
 
 # this should fail
 eval { import() };
@@ -24,7 +24,7 @@ is( $^H & $open::hint_bits, 0, '$^H is okay before open import runs' );
 
 # prevent it from loading I18N::Langinfo, so we can test encoding failures
 local @INC;
-$ENV{LC_ALL} = '';
+undef @ENV{qw(LC_ALL LANG LANGUAGE)};
 eval { import( 'IN', 'locale' ) };
 like( $@, qr/Cannot figure out an encoding/, 'no encoding found' );
 
@@ -40,16 +40,16 @@ like( $warn, qr/Unknown discipline layer/, 'warned about unknown discipline' );
 # now load a real-looking locale
 $ENV{LC_ALL} = ' .utf8';
 import( 'IN', 'locale' );
-is( ${^OPEN}, ':utf8\0', 'set locale layer okay!' );
+is( ${^OPEN}, ':utf8\0', 'set locale layer' );
 
 # and see if it sets the magic variables appropriately
 import( 'IN', ':crlf' );
 ok( $^H & $open::hint_bits, '$^H is set after open import runs' );
-is( $^H{'open_IN'}, 'crlf', 'set crlf layer okay!' );
+is( $^H{'open_IN'}, 'crlf', 'set crlf layer' );
 
 # it should reset them appropriately, too
 import( 'IN', ':raw' );
-is( $^H{'open_IN'}, 'raw', 'set raw layer okay!' );
+is( $^H{'open_IN'}, 'raw', 'set raw layer' );
 
 # it dies if you don't set IN, OUT, or INOUT
 eval { import( 'sideways', ':raw' ) };
