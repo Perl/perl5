@@ -455,9 +455,9 @@ binary and text files.  If FILEHANDLE is an expression, the value is
 taken as the name of the filehandle.  Returns true on success,
 C<undef> on failure.
 
-If DISCIPLINE is ommited the filehandle is made suitable for
-passing binary data. This includes turning off CRLF translation
-and marking it as bytes.
+If DISCIPLINE is omitted the filehandle is made suitable for passing
+binary data. This includes turning off possible CRLF translation and
+marking it as bytes (as opposed to Unicode characters).
 
 On some systems (in general, DOS and Windows-based systems) binmode()
 is necessary when you're not working with a text file.  For the sake
@@ -476,7 +476,7 @@ To mark FILEHANDLE as UTF-8, use C<:utf8>.
 
 The C<:bytes>, C<:crlf>, and C<:utf8>, and any other directives of the
 form C<:...>, are called I/O I<disciplines>. The normal implementation
-of disciplines in perl5.8 and later is in terms of I<layers>. See
+of disciplines in Perl 5.8 and later is in terms of I<layers>. See
 L<PerlIO>. (There is typically a one-to-one correspondence between
 layers and disiplines.) The C<open> pragma can be used to establish
 default I/O disciplines.  See L<open>.
