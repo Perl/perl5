@@ -1,8 +1,10 @@
-#!./perl
+#!./perl -w
 
 BEGIN {
     chdir 't' if -d 't';
     @INC = '../lib';
+    no warnings; # Need global -w flag for later tests, but don't want this
+    # to warn here:
     push @INC, "::lib:$MacPerl::Architecture:" if $^O eq 'MacOS';
     unless (find PerlIO::Layer 'perlio') {
 	print "1..0 # Skip: not perlio\n";
@@ -10,11 +12,12 @@ BEGIN {
     }
 }
 
-print "1..11\n";
+print "1..13\n";
 
 my $grk = "grk$$";
 my $utf = "utf$$";
-my $fail1 = "fail$$";
+my $fail1 = "fa$$";
+my $fail2 = "fb$$";
 my $russki = "koi8r$$";
 
 if (open(GRK, ">$grk")) {
@@ -68,7 +71,7 @@ if (open(GRK, "<$grk")) {
     close GRK;
 }
 
-$SIG{__WARN__} = sub {$warn = $_[0]};
+$SIG{__WARN__} = sub {$warn .= $_[0]};
 
 if (open(FAIL, ">:encoding(NoneSuch)", $fail1)) {
     print "not ok 9 # Open should fail\n";
@@ -90,7 +93,7 @@ if (open(RUSSKI, ">$russki")) {
     binmode(RUSSKI, ":raw");
     my $buf1;
     read(RUSSKI, $buf1, 1);
-    eof(RUSSKI);
+    # eof(RUSSKI);
     binmode(RUSSKI, ":encoding(koi8-r)");
     my $buf2;
     read(RUSSKI, $buf2, 1);
@@ -109,6 +112,25 @@ if (open(RUSSKI, ">$russki")) {
     print "not ok 11 # open failed: $!\n";
 }
 
+undef $warn;
+
+# Check there is no Use of uninitialized value in concatenation (.) warning
+# due to the way @latin2iso_num was used to make aliases.
+if (open(FAIL, ">:encoding(latin42)", $fail2)) {
+    print "not ok 12 # Open should fail\n";
+} else {
+    print "ok 12\n";
+}
+if (!defined $warn) {
+    print "not ok 13 # warning is undef\n";
+} elsif ($warn =~ /^Cannot find encoding "latin42" at.*line \d+\.$/) {
+    print "ok 13\n";
+} else {
+    print "not ok 13 # warning is: \n";
+    $warn =~ s/^/# /mg;
+    print "$warn";
+}
+
 END {
-    unlink($grk, $utf, $fail1, $russki);
+    unlink($grk, $utf, $fail1, $fail2, $russki);
 }

@@ -740,7 +740,7 @@ sneaky data mutilation behind your back.
 
 Depending on the vicissitudes of your runtime system, even these calls
 may need C<binmode> or C<O_BINARY> first.  Systems known to be free of
-such difficulties include Unix, the Mac OS, Plan9, and Inferno.
+such difficulties include Unix, the Mac OS, Plan 9, and Inferno.
 
 =head2 File Locking
 
@@ -837,6 +837,42 @@ how to increment a number in a file safely:
         or die "can't truncate numfile: $!";
     close(FH)
         or die "can't close numfile: $!";
+
+=head2 IO Layers
+
+In Perl 5.8.0 a new I/O framework called "PerlIO" was introduced.
+This is a new "plumbing" for all the I/O happening in Perl; for the
+most part everything will work just as it did, but PerlIO brought in
+also some new features, like the capability of think of I/O as "layers".
+One I/O layer may in addition to just moving the data also do
+transformations on the data.  Such transformations may include
+compression and decompression, encryption and decryption, and transforming
+between various character encodings.
+
+Full discussion about the features of PerlIO is out of scope for this
+tutorial, but here is how to recognize the layers being used:
+
+=over 4
+
+=item *
+
+The three-(or more)-argument form of C<open()> is being used and the
+second argument contains something else in addition to the usual
+C<< '<' >>, C<< '>' >>, C<< '>>' >>, C<< '|' >> and their variants,
+for example:
+
+    open(my $fh, "<:utf8", $fn);
+
+=item *
+
+The two-argument form of C<binmode<open()> is being used, for example
+
+    binmode($fh, ":encoding(utf16)");
+
+=back
+
+For more detailed discussion about PerlIO see L<perlio>;
+for more detailed discussion about Unicode and I/O see L<perluniintro>.
 
 =head1 SEE ALSO 
 

@@ -473,7 +473,19 @@ Perl_init_i18nl10n(pTHX_ int printwarn)
 
 #endif /* USE_LOCALE */
 
+#ifdef USE_PERLIO
     {
+      /* Set PL_wantutf8 to TRUE if using PerlIO _and_
+	 any of the following are true:
+	 - nl_langinfo(CODESET) contains /^utf-?8/i
+	 - $ENV{LANGUAGE} contains /^utf-?8/i (only if using glibc)
+	 - $ENV{LC_CALL} contains /^utf-?8/i
+	 - $ENV{LC_CTYPE} contains /^utf-?8/i
+	 - $ENV{LANG} contains /^utf-?8/i
+	 If PL_wantutf8 is true, perl.c:S_parse_body()
+	 will turn on the PerlIO :utf8 discipline on STDIN, STDOUT,
+	 STDERR, _and_ the default open discipline.
+      */
 	 bool wantutf8 = FALSE;
 	 char *codeset = NULL;
 #if defined(HAS_NL_LANGINFO) && defined(CODESET)
@@ -508,6 +520,7 @@ Perl_init_i18nl10n(pTHX_ int printwarn)
 	 if (wantutf8)
 	      PL_wantutf8 = TRUE;
     }
+#endif
 
 #ifdef USE_LOCALE_CTYPE
     if (curctype != NULL)

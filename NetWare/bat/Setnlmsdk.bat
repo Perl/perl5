@@ -24,5 +24,5 @@ goto exit
  @echo "Usage: setnlmsdk <path to NetWare sdk>"
  @echo "Usage: setnlmsdk /now" - To display current setting
  @echo Ex. setnlmsdk e:\sdkcd14\nwsdk
-:exit
 
+:exit

@@ -980,9 +980,8 @@ sub scan_headings {
         ($tag, $which_head, $otitle) = ($1,$2,$3);
 
         my $title = depod( $otitle );
-        my $name = htmlify( $title );
+        my $name = anchorify( $title );
         $$sections{$name} = 1;
-        $name =~ s/\s/_/g; # htmlify keeps spaces but we don't want them here..
         $title = process_text( \$otitle );
 
 	    while ($which_head != $listdepth) {
@@ -1903,7 +1902,7 @@ sub coderef($$){
             if( exists $pages{$page} and $pages{$page} =~ /([^:.]*)\.[^:]*:/){
 		$page = $1 . '.html';
 	    }
-	    my $link = "$htmlroot/$page#item_$fid";
+	    my $link = "$htmlroot/$page#item_" . anchorify($fid);
 
 	    # Here, we take advantage of the knowledge that $htmlfileurl
 	    # ne '' implies $htmlroot eq ''.
@@ -1914,7 +1913,7 @@ sub coderef($$){
 		$url = $link ;
 	    }
 	} else {
-	    $url = "#item_" . $fid;
+	    $url = "#item_" . anchorify($fid);
 	}
 
 	confess "url has space: $url" if $url =~ /"[^"]*\s[^"]*"/;

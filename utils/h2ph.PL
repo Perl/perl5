@@ -108,12 +108,14 @@ while (defined (my $file = next_file())) {
     }
 
     print OUT "require '_h2ph_pre.ph';\n\n";
-    while (defined (local $_ = next_line())) {
+
+    while (defined (local $_ = next_line($file))) {
 	if (s/^\s*\#\s*//) {
 	    if (s/^define\s+(\w+)//) {
 		$name = $1;
 		$new = '';
 		s/\s+$//;
+		s/\(\w+\s*\(\*\)\s*\(\w*\)\)\s*(-?\d+)/$1/; # (int (*)(foo_t))0
 		if (s/^\(([\w,\s]*)\)//) {
 		    $args = $1;
     	    	    my $proto = '() ';
@@ -240,7 +242,7 @@ while (defined (my $file = next_file())) {
 	    }
 	} elsif(/^\s*(typedef\s*)?enum\s*(\s+[a-zA-Z_]\w*\s*)?/) {
 	    until(/\{[^}]*\}.*;/ || /;/) {
-		last unless defined ($next = next_line());
+		last unless defined ($next = next_line($file));
 		chomp $next;
 		# drop "#define FOO FOO" in enums
 		$next =~ s/^\s*#\s*define\s+(\w+)\s+\1\s*$//;
@@ -298,8 +300,21 @@ sub expr {
 	s/^\&\&// && do { $new .= " &&"; next;}; # handle && operator
 	s/^\&([\(a-z\)]+)/$1/i;	# hack for things that take the address of
 	s/^(\s+)//		&& do {$new .= ' '; next;};
-	s/^(0X[0-9A-F]+)[UL]*//i	&& do {$new .= lc($1); next;};
-	s/^(-?\d+\.\d+E[-+]\d+)F?//i	&& do {$new .= $1; next;};
+	s/^0X([0-9A-F]+)[UL]*//i 
+	    && do {my $hex = $1;
+		   $hex =~ s/^0+//;
+		   if (length $hex > 8 && !$Config{use64bitint}) {
+		       # Croak if nv_preserves_uv_bits < 64 ?
+		       $new .=         hex(substr($hex, -8)) +
+			       2**32 * hex(substr($hex,  0, -8));
+		       # The above will produce "errorneus" code
+		       # if the hex constant was e.g. inside UINT64_C
+		       # macro, but then again, h2ph is an approximation.
+		   } else {
+		       $new .= lc("0x$hex");
+		   }
+		   next;};
+	s/^(-?\d+\.\d+E[-+]?\d+)[FL]?//i	&& do {$new .= $1; next;};
 	s/^(\d+)\s*[LU]*//i	&& do {$new .= $1; next;};
 	s/^("(\\"|[^"])*")//	&& do {$new .= $1; next;};
 	s/^'((\\"|[^"])*)'//	&& do {
@@ -404,6 +419,7 @@ sub expr {
 
 sub next_line
 {
+    my $file = shift;
     my ($in, $out);
     my $pre_sub_tri_graphs = 1;
 
@@ -426,6 +442,20 @@ sub next_line
                 $in =~ s/\?\?</{/g;                         # | ??<|  {|
                 $in =~ s/\?\?>/}/g;                         # | ??>|  }|
             }
+	    if ($in =~ /^\#ifdef __LANGUAGE_PASCAL__/) {
+                # Tru64 disassembler.h evilness: mixed C and Pascal.
+		while (<IN>) {
+		    last if /^\#endif/; 
+		}
+		next READ;
+	    }
+	    if ($in =~ /^extern inline / && # Inlined assembler.
+		$^O eq 'linux' && $file =~ m!(?:^|/)asm/[^/]+\.h$!) {
+ 		while (<IN>) {
+		    last if /^}/; 
+		}
+		next READ;
+	    }
             if ($in =~ s/\\$//) {                           # \-newline
                 $out    .= ' ';
                 next READ;
@@ -450,8 +480,12 @@ sub next_line
                 $out    .= $1;
             } elsif ($in =~ s/^([^\'\"\\\/]+)//) {
                 $out    .= $1;
+            } elsif ($^O eq 'linux' &&
+                     $file =~ m!(?:^|/)linux/byteorder/pdp_endian\.h$! &&
+                     $in   =~ s!\'T KNOW!!) {
+                $out    =~ s!I DON$!I_DO_NOT_KNOW!;
             } else {
-                die "Cannot parse:\n$in\n";
+		die "Cannot parse:\n$in\n";
             }
         }
 
@@ -669,6 +703,10 @@ format.
 It is most easily run while in /usr/include:
 
 	cd /usr/include; h2ph * sys/*
+
+or
+
+	cd /usr/include; h2ph * sys/* arpa/* netinet/*
 
 or
 

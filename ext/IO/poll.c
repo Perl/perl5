@@ -12,6 +12,8 @@
 
 #include "EXTERN.h"
 #include "perl.h"
+#include "XSUB.h"
+
 #include "poll.h"
 #ifdef I_SYS_TIME
 # include <sys/time.h>

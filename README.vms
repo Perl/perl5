@@ -24,16 +24,19 @@ mmk may be used in place of mms in the last three steps.
 The build and install procedures have changed significantly from the 5.004
 releases!  Make sure you read the "Configuring the Perl Build", "Building 
 Perl", and "Installing Perl" sections of this document before you build or 
-install.
+install.  Also please note other changes in the current release by having
+a look at L<perldelta/VMS>.
 
 Also note that, as of Perl version 5.005 and later, an ANSI C compliant 
 compiler is required to build Perl.  VAX C is *not* ANSI compliant, as it 
 died a natural death some time before the standard was set.  Therefore 
 VAX C will not compile Perl 5.005 or later.  We are sorry about that.
 
-If you are stuck without DEC C (the VAX C license should be good for DEC C,
-but the media charges might prohibit an upgrade), consider getting Gnu C
-instead.
+If you are stuck without Compaq (formerly DEC) C consider trying Gnu C
+instead, though there have been no recent reports of builds using Gnu C. 
+There is minimal support for Compaq C++ but this support is not complete;
+if you get it working please write to the vmsperl list (for info see
+L</"Mailing Lists">).
 
 
 =head2 Introduction to Perl on VMS
@@ -446,7 +449,8 @@ while /HEADER should do for PERL.EXE (perl.exe is not a shared image).
 
 If your code 'use's modules, check to see if there is a shareable image for
 them, too.  In the base perl build, POSIX, IO, Fcntl, Opcode, SDBM_File,
-DCLsym, and Stdio all have shared images that can be installed /SHARE.
+DCLsym, and Stdio, and other extensions all have shared images that can be
+installed /SHARE.
 
 How much of a win depends on your memory situation, but if you are firing
 off perl with any regularity (like more than once every 20 seconds or so)
@@ -559,6 +563,39 @@ of source code modification to work again.
     http://slacvx.slac.stanford.edu/HELP/GCC
     http://www.progis.de/
     http://www.lp.se/products/gnu.html
+
+=head2 Floating Point Considerations
+
+Prior to 5.8.0, Perl simply accepted the default floating point options of the
+C compiler, namely representing doubles with D_FLOAT on VAX and G_FLOAT on
+Alpha.  Single precision floating point values are represented in F_FLOAT
+format when either D_FLOAT or G_FLOAT is in use for doubles.  Beginning with
+5.8.0, Alpha builds now use IEEE floating point formats by default, which in
+VMS parlance are S_FLOAT for singles and T_FLOAT for doubles.  IEEE is not
+available on VAX, so F_FLOAT and D_FLOAT remain the defaults for singles and
+doubles respectively.  The available non-default options are G_FLOAT on VAX
+and D_FLOAT or G_FLOAT on Alpha.
+
+The use of IEEE on Alpha introduces NaN, infinity, and denormalization
+capabilities not available with D_FLOAT and G_FLOAT.  When using one of those
+non-IEEE formats, silent underflow and overflow are emulated in the conversion
+of strings to numbers, but it is preferable to get the real thing by using
+IEEE where possible.
+
+Regardless of what floating point format you consider preferable, be aware
+that the choice may have an impact on compatibility with external libraries,
+such as database interfaces, and with existing data, such as data created with
+the C<pack> function and written to disk, or data stored via the Storable
+extension.  For example, a C<pack("d", $foo)")> will create a D_FLOAT,
+G_FLOAT, or T_FLOAT depending on what your Perl was configured with.  When
+written to disk, the value can only be retrieved later by a Perl configured
+with the same floating point option that was in effect when it was created.
+
+To obtain a non-IEEE build on Alpha, simply answer no to the "Use IEEE math?"
+question during the configuration.  To obtain an option different from the C
+compiler default on either VAX or Alpha, put in the option that you want in
+answer to the "Any additional cc flags?" question.  For example, to obtain a
+G_FLOAT build on VAX, put in C</FLOAT=G_FLOAT>.
 
 =head2 Multinet issues with Perl on VMS
 

@@ -7,8 +7,8 @@ my $count;
   
 BEGIN
   {
-  if ($^O eq 'os390') { print "1..0\n"; exit(0) }
   $| = 1;
+  if ($^O eq 'os390') { print "1..0\n"; exit(0) } # test takes too long there
   unshift @INC, '../lib'; # for running manually
   my $location = $0; $location =~ s/mbi_rand.t//;
   unshift @INC, $location; # to locate the testing files
@@ -41,12 +41,10 @@ for (my $i = 0; $i < $count; $i++)
   # together digits, we would end up with "1272398823211223" etc.
   while (length($As) < $la) { $As .= int(rand(100)) x int(rand(16)); }
   while (length($Bs) < $lb) { $Bs .= int(rand(100)) x int(rand(16)); }
-  # Strip leading zeros, but don't let As and Bs end up empty.
-  $As =~ s/^0+//; $Bs =~ s/^0+//;
-  $As = '0' if $As eq '';
-  $Bs = '0' if $Bs eq '';
-  $A = $c->new($As); $B = $c->new($Bs);
+  $As =~ s/^0+//; $Bs =~ s/^0+//; 
+  $As = $As || '0'; $Bs = $Bs || '0';
   # print "# As $As\n# Bs $Bs\n";
+  $A = $c->new($As); $B = $c->new($Bs);
   # print "# A $A\n# B $B\n";
   if ($A->is_zero() || $B->is_zero())
     {
@@ -63,5 +61,4 @@ for (my $i = 0; $i < $count; $i++)
   print "# ". join(' ',Math::BigInt::Calc->_base_len()),"\n"
    unless ok ($ADB*$A+$two*$AMB-$AMB,$Bs);
   }
-
 

@@ -458,6 +458,8 @@ DISCIPLINE can be either of C<:raw> for binary mode or C<:crlf> for
 "text" mode.  If the DISCIPLINE is omitted, it defaults to C<:raw>.
 Returns true on success, C<undef> on failure.  To mark FILEHANDLE as
 UTF-8, use C<:utf8>, and to mark it as bytes, use C<:bytes>.
+For backward compatibility binmode(FILEHANDLE) also implicitly
+marks the handle as bytes.
 
 The C<:raw> are C<:clrf>, and any other directives of the form
 C<:...>, are called I/O I<disciplines>.  The C<open> pragma can be
@@ -1089,7 +1091,7 @@ This is useful for propagating exceptions:
 If LIST is empty and C<$@> contains an object reference that has a
 C<PROPAGATE> method, that method will be called with additional file
 and line number parameters.  The return value replaces the value in
-C<$@>.  ie. as if C<<$@ = eval { $@->PROPAGATE(__FILE__, __LINE__) };>> 
+C<$@>.  ie. as if C<<$@ = eval { $@->PROPAGATE(__FILE__, __LINE__) };>>
 were called.
 
 If C<$@> is empty then the string C<"Died"> is used.
@@ -1280,7 +1282,7 @@ formed from the files listed on the command line and accessed via the
 C<< <> >> operator.  Since C<< <> >> isn't explicitly opened,
 as a normal filehandle is, an C<eof()> before C<< <> >> has been
 used will cause C<@ARGV> to be examined to determine if input is
-available.   Similarly, an C<eof()> after C<< <> >> has returned 
+available.   Similarly, an C<eof()> after C<< <> >> has returned
 end-of-file will assume you are processing another C<@ARGV> list,
 and if you haven't set C<@ARGV>, will read input from C<STDIN>;
 see L<perlop/"I/O Operators">.
@@ -2469,12 +2471,13 @@ and the month of the year, may not necessarily be three characters wide.
 
 =item lock THING
 
-This function places an advisory lock on a variable, subroutine,
-or referenced object contained in I<THING> until the lock goes out
-of scope.  This is a built-in function only if your version of Perl
-was built with threading enabled, and if you've said C<use Thread>.
-Otherwise a user-defined function by this name will be called.
-See L<Thread>.
+This function places an advisory lock on a shared variable, or referenced 
+object contained in I<THING> until the lock goes out of scope.
+
+lock() is a "weak keyword" : this means that if you've defined a function
+by this name (before any calls to it), that function will be called
+instead. (However, if you've said C<use threads>, lock() is always a
+keyword.) See L<threads>.
 
 =item log EXPR
 
@@ -2623,12 +2626,22 @@ and C<IPC::SysV::Msg> documentation.
 
 =item my EXPR
 
+=item my TYPE EXPR
+
 =item my EXPR : ATTRIBUTES
+
+=item my TYPE EXPR : ATTRIBUTES
 
 A C<my> declares the listed variables to be local (lexically) to the
 enclosing block, file, or C<eval>.  If
-more than one value is listed, the list must be placed in parentheses.  See
-L<perlsub/"Private Variables via my()"> for details.
+more than one value is listed, the list must be placed in parentheses.
+
+The use of TYPE and ATTRIBUTES is considered experimental and subject
+to change.  TYPE is currently bound to the use of C<fields> pragma,
+and attributes are handled using the C<attributes> pragma, or starting
+from Perl 5.8.0 also via the C<Attribute::Handlers> module.  See
+L<perlsub/"Private Variables via my()"> for details, and L<fields>,
+L<attributes>, and L<Attribute::Handlers>.
 
 =item next LABEL
 
@@ -2715,7 +2728,7 @@ strict 'refs'> should I<not> be in effect.)
 If EXPR is omitted, the scalar variable of the same name as the
 FILEHANDLE contains the filename.  (Note that lexical variables--those
 declared with C<my>--will not work for this purpose; so if you're
-using C<my>, specify EXPR in your call to open.) 
+using C<my>, specify EXPR in your call to open.)
 
 If three or more arguments are specified then the mode of opening and
 the file name are separate. If MODE is C<< '<' >> or nothing, the file
@@ -2786,7 +2799,7 @@ If you're running Perl on a system that distinguishes between text
 files and binary files, then you should check out L</binmode> for tips
 for dealing with this.  The key distinction between systems that need
 C<binmode> and those that don't is their text file formats.  Systems
-like Unix, MacOS, and Plan9, which delimit lines with a single
+like Unix, Mac OS, and Plan 9, which delimit lines with a single
 character, and which encode that character in C as C<"\n">, do not
 need C<binmode>.  The rest need it.
 
@@ -2952,7 +2965,9 @@ The following triples are more or less equivalent:
     open(FOO, '-|', "cat", '-n', $file);
 
 The last example in each block shows the pipe as "list form", which is
-not yet supported on all platforms.
+not yet supported on all platforms.  A good rule of thumb is that if
+your platform has true C<fork()> (in other words, if your platform is
+UNIX) you can use the list form.
 
 See L<perlipc/"Safe Pipe Opens"> for more examples of this.
 
@@ -3053,7 +3068,11 @@ See L<perlunicode> and L<encoding> for more about Unicode.
 
 =item our EXPR
 
+=item our EXPR TYPE
+
 =item our EXPR : ATTRIBUTES
+
+=item our TYPE EXPR : ATTRIBUTES
 
 An C<our> declares the listed variables to be valid globals within
 the enclosing block, file, or C<eval>.  That is, it has the same
@@ -3094,21 +3113,28 @@ package, Perl will emit warnings if you have asked for them.
     our $bar;		# emits warning
 
 An C<our> declaration may also have a list of attributes associated
-with it.  B<WARNING>: This is an experimental feature that may be
-changed or removed in future releases of Perl.  It should not be
-relied upon.
+with it.
 
-The only currently recognized attribute is C<unique> which indicates
-that a single copy of the global is to be used by all interpreters
-should the program happen to be running in a multi-interpreter
-environment. (The default behaviour would be for each interpreter to
-have its own copy of the global.)  In such an environment, this
-attribute also has the effect of making the global readonly.
-Examples:
+The use of TYPE and ATTRIBUTES is considered experimental and subject
+to change.  TYPE is currently bound to the use of C<fields> pragma,
+and attributes are handled using the C<attributes> pragma, or starting
+from Perl 5.8.0 also via the C<Attribute::Handlers> module.  See
+L<perlsub/"Private Variables via my()"> for details, and L<fields>,
+L<attributes>, and L<Attribute::Handlers>.
+
+The only currently recognized C<our()> attribute is C<unique> which
+indicates that a single copy of the global is to be used by all
+interpreters should the program happen to be running in a
+multi-interpreter environment. (The default behaviour would be for
+each interpreter to have its own copy of the global.)  Examples:
 
     our @EXPORT : unique = qw(foo);
     our %EXPORT_TAGS : unique = (bar => [qw(aa bb cc)]);
     our $VERSION : unique = "1.00";
+
+Note that this attribute also has the effect of making the global
+readonly when the first new interpreter is cloned (for example,
+when the first new thread is created).
 
 Multi-interpreter environments can come to being either through the
 fork() emulation on Windows platforms, or by embedding perl in a
@@ -4476,16 +4502,18 @@ sockets but not socketpair.
 
 =item sort LIST
 
-Sorts the LIST and returns the sorted list value.  If SUBNAME or BLOCK
-is omitted, C<sort>s in standard string comparison order.  If SUBNAME is
-specified, it gives the name of a subroutine that returns an integer
-less than, equal to, or greater than C<0>, depending on how the elements
-of the list are to be ordered.  (The C<< <=> >> and C<cmp>
-operators are extremely useful in such routines.)  SUBNAME may be a
-scalar variable name (unsubscripted), in which case the value provides
-the name of (or a reference to) the actual subroutine to use.  In place
-of a SUBNAME, you can provide a BLOCK as an anonymous, in-line sort
-subroutine.
+In list context, this sorts the LIST and returns the sorted list value.
+In scalar context, the behaviour of C<sort()> is undefined.
+
+If SUBNAME or BLOCK is omitted, C<sort>s in standard string comparison
+order.  If SUBNAME is specified, it gives the name of a subroutine
+that returns an integer less than, equal to, or greater than C<0>,
+depending on how the elements of the list are to be ordered.  (The C<<
+<=> >> and C<cmp> operators are extremely useful in such routines.)
+SUBNAME may be a scalar variable name (unsubscripted), in which case
+the value provides the name of (or a reference to) the actual
+subroutine to use.  In place of a SUBNAME, you can provide a BLOCK as
+an anonymous, in-line sort subroutine.
 
 If the subroutine's prototype is C<($$)>, the elements to be compared
 are passed by reference in C<@_>, as for a normal subroutine.  This is
@@ -4965,7 +4993,7 @@ Most programs won't even call srand() at all, except those that
 need a cryptographically-strong starting point rather than the
 generally acceptable default, which is based on time of day,
 process ID, and memory allocation, or the F</dev/urandom> device,
-if available. 
+if available.
 
 You can call srand($seed) with the same $seed to reproduce the
 I<same> sequence from rand(), but this is usually reserved for
@@ -5612,7 +5640,7 @@ package.
 =item time
 
 Returns the number of non-leap seconds since whatever time the system
-considers to be the epoch (that's 00:00:00, January 1, 1904 for MacOS,
+considers to be the epoch (that's 00:00:00, January 1, 1904 for Mac OS,
 and 00:00:00 UTC, January 1, 1970 for most other systems).
 Suitable for feeding to C<gmtime> and C<localtime>.
 

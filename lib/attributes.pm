@@ -191,10 +191,7 @@ as a scalar variable, as described in L<perlsub>.
 
 =back
 
-There are no built-in attributes for anything other than subroutines.
-
-=for hackers
-What about C<unique>?
+For global variables there is C<unique> attribute: see L<perlfunc/our>.
 
 =head2 Available Subroutines
 

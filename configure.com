@@ -2970,24 +2970,12 @@ $!
 $ IF use64bitint .OR. use64bitint .EQS. "define"
 $ THEN
 $   d_PRId64 = "define"
-$   d_PRIEUldbl = "define"
-$   d_PRIFUldbl = "define"
-$   d_PRIGUldbl = "define"
-$   d_PRIeldbl = "define"
-$   d_PRIfldbl = "define"
-$   d_PRIgldbl = "define"
 $   d_PRIu64 = "define"
 $   d_PRIo64 = "define"
 $   d_PRIx64 = "define"
 $   d_PRIXU64 = "define"
 $   sPRId64 = """Ld"""
-$   sPRIEUldbl = """LE"""
-$   sPRIFUldbl = """LF"""
-$   sPRIGUldbl = """LG"""
 $   sPRIXU64 = """LX"""
-$   sPRIeldbl = """Le"""
-$   sPRIfldbl = """Lf"""
-$   sPRIgldbl = """Lg"""
 $   sPRIi64 = """Li"""
 $   sPRIo64 = """Lo"""
 $   sPRIu64 = """Lu"""
@@ -3002,24 +2990,12 @@ $   d_isnanl = "define"
 $   d_modfl = "define"
 $ ELSE
 $   d_PRId64 = "undef"
-$   d_PRIEUldbl = "define"
-$   d_PRIFUldbl = "define"
-$   d_PRIGUldbl = "define"
 $   d_PRIXU64 = "undef"
-$   d_PRIeldbl = "define"
-$   d_PRIfldbl = "undef"
-$   d_PRIgldbl = "undef"
 $   d_PRIu64 = "undef"
 $   d_PRIo64 = "undef"
 $   d_PRIx64 = "undef"
 $   sPRId64 = ""
-$   sPRIEUldbl = """E"""
-$   sPRIFUldbl = """F"""
-$   sPRIGUldbl = """G"""
 $   sPRIXU64 = """lX"""
-$   sPRIeldbl = """e"""
-$   sPRIfldbl = """f"""
-$   sPRIgldbl = """g"""
 $   sPRIi64 = ""
 $   sPRIo64 = ""
 $   sPRIu64 = ""
@@ -3033,8 +3009,6 @@ $   d_isnan = "undef"
 $   d_isnanl = "undef"
 $   d_modfl = "undef"
 $ ENDIF
-$ d_SCNfldbl = d_PRIfldbl
-$ sSCNfldbl = sPRIfldbl ! expect consistency
 $!
 $! Now some that we build up
 $!
@@ -3267,6 +3241,37 @@ $   longdblsize = tmp
 $   d_longdbl = "define"
 $   echo "Your long doubles are ''longdblsize' bytes long."
 $ ENDIF
+$!
+$ IF d_longdbl .OR. d_longdbl .EQS. "define"
+$ THEN
+$   d_PRIEUldbl = "define"
+$   d_PRIFUldbl = "define"
+$   d_PRIGUldbl = "define"
+$   d_PRIeldbl = "define"
+$   d_PRIfldbl = "define"
+$   d_PRIgldbl = "define"
+$   sPRIEUldbl = """LE"""
+$   sPRIFUldbl = """LF"""
+$   sPRIGUldbl = """LG"""
+$   sPRIeldbl = """Le"""
+$   sPRIfldbl = """Lf"""
+$   sPRIgldbl = """Lg"""
+$ ELSE
+$   d_PRIEUldbl = "undef"
+$   d_PRIFUldbl = "undef"
+$   d_PRIGUldbl = "undef"
+$   d_PRIeldbl = "undef"
+$   d_PRIfldbl = "undef"
+$   d_PRIgldbl = "undef"
+$   sPRIEUldbl = ""
+$   sPRIFUldbl = ""
+$   sPRIGUldbl = ""
+$   sPRIeldbl = ""
+$   sPRIfldbl = ""
+$   sPRIgldbl = ""
+$ ENDIF
+$ d_SCNfldbl = d_PRIfldbl
+$ sSCNfldbl = sPRIfldbl ! expect consistency
 $!
 $!: check for long long
 $ OS

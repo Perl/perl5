@@ -29,24 +29,34 @@ Additionally, there is the UV, which is simply an unsigned IV.
 
 Perl also uses two special typedefs, I32 and I16, which will always be at
 least 32-bits and 16-bits long, respectively. (Again, there are U32 and U16,
-as well.)
+as well.)  They will usually be exactly 32 and 16 bits long, but on Crays
+they will both be 64 bits.
 
 =head2 Working with SVs
 
-An SV can be created and loaded with one command.  There are four types of
-values that can be loaded: an integer value (IV), a double (NV),
-a string (PV), and another scalar (SV).
+An SV can be created and loaded with one command.  There are five types of
+values that can be loaded: an integer value (IV), an unsigned integer
+value (UV), a double (NV), a string (PV), and another scalar (SV).
 
-The six routines are:
+The seven routines are:
 
     SV*  newSViv(IV);
+    SV*  newSVuv(UV);
     SV*  newSVnv(double);
     SV*  newSVpv(const char*, int);
     SV*  newSVpvn(const char*, int);
     SV*  newSVpvf(const char*, ...);
     SV*  newSVsv(SV*);
 
-To change the value of an *already-existing* SV, there are seven routines:
+If you require more complex initialisation you can create an empty SV with
+newSV(len).  If C<len> is 0 an empty SV of type NULL is returned, else an
+SV of type PV is returned with len + 1 (for the NUL) bytes of storage
+allocated, accessible via SvPVX.  In both cases the SV has value undef.
+
+    SV*  newSV(0);   /* no storage allocated  */
+    SV*  newSV(10);  /* 10 (+1) bytes of uninitialised storage allocated  */
+
+To change the value of an *already-existing* SV, there are eight routines:
 
     void  sv_setiv(SV*, IV);
     void  sv_setuv(SV*, UV);

@@ -52,6 +52,7 @@ Summary of my $package (revision $baserev $version_patchlevel_string) configurat
     libs=$libs
     perllibs=$perllibs
     libc=$libc, so=$so, useshrplib=$useshrplib, libperl=$libperl
+    gnulibc_version='$gnulibc_version'
   Dynamic Linking:
     dlsrc=$dlsrc, dlext=$dlext, d_dlsymun=$d_dlsymun, ccdlflags='$ccdlflags'
     cccdlflags='$cccdlflags', lddlflags='$lddlflags'

@@ -814,13 +814,27 @@ sub installlib {
 sub copy_if_diff {
     my($from,$to)=@_;
     return 1 if (($^O eq 'VMS') && (-d $from));
-    -f $from || warn "$0: $from not found";
+    my $perlpodbadsymlink;
+    if ($from =~ m!^pod/perl[\w-]+\.pod$! &&
+	-l $from &&
+	! -e $from) {
+	# Some Linux implementations have problems traversing over
+	# multiple symlinks (when going over NFS?) and fail to read
+	# the symlink target.  Combine this with the fact that some
+	# of the pod files (the perl$OS.pod) are symlinks (to ../README.$OS),
+	# and you end up with those pods not getting installed.
+	$perlpodbadsymlink = 1;
+    }
+    -f $from || $perlpodbadsymlink || warn "$0: $from not found";
     $packlist->{$to} = { type => 'file' };
     if (compare($from, $to) || $nonono) {
 	safe_unlink($to);   # In case we don't have write permissions.
         if ($nonono) {
             $from = $depth . "/" . $from if $depth;
         }
+	if ($perlpodbadsymlink && $from =~ m!^pod/perl(.+)\.pod$!) {
+	    $from = "README.$1";
+	}
 	copy($from, $to);
 	# Restore timestamps if it's a .a library or for OS/2.
 	if (!$nonono && ($Is_OS2 || $to =~ /\.a$/)) {

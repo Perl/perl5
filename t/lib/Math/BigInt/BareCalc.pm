@@ -14,10 +14,11 @@ $VERSION = '0.02';
 
 # uses Calc, but only features the strictly necc. methods.
 
-use Math::BigInt::Calc '0.18';
+use Math::BigInt::Calc '0.29';
 
 BEGIN
   {
+  no strict 'refs';
   foreach (qw/	base_len new zero one two copy str num add sub mul div inc dec
 		acmp len digit zeros
 		is_zero is_one is_odd is_even is_one check
@@ -25,7 +26,6 @@ BEGIN
 		/)
     {
     my $name  = "Math::BigInt::Calc::_$_";
-    no strict 'refs';
     *{"Math::BigInt::BareCalc::_$_"} = \&$name;
     }
   }

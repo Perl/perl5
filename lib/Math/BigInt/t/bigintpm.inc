@@ -217,6 +217,7 @@ $try .= '$a = $x->bpow($x);';
 $ans1 = eval $try;
 print "# Tried: '$try'\n" if !ok ($ans1, $class->new(10) ** 10);
 
+###############################################################################
 # test whether op destroys args or not (should better not)
 
 $x = $class->new(3);
@@ -249,6 +250,36 @@ ok ($x, -5);
 $x = $class->new(-5); $y = abs($x);
 ok ($x, -5);
 
+$x = $class->new(8);
+$y = $class->new(-1);
+$z = $class->new(5033);
+my $u = $x->copy()->bmodpow($y,$z);
+ok ($u,4404);
+ok ($y,-1);
+ok ($z,5033);
+
+$x = $class->new(-5); $y = -$x; ok ($x,-5); ok ($y,5);
+$x = $class->new(-5); $y = $x->copy()->bneg(); ok ($x,-5); ok ($y,5);
+
+$x = $class->new(-5); $y = $class->new(3); $x->bmul($y); ok ($x,-15); ok ($y,3);
+$x = $class->new(-5); $y = $class->new(3); $x->badd($y); ok ($x,-2); ok ($y,3);
+$x = $class->new(-5); $y = $class->new(3); $x->bsub($y); ok ($x,-8); ok ($y,3);
+$x = $class->new(-15); $y = $class->new(3); $x->bdiv($y); ok ($x,-5); ok ($y,3);
+$x = $class->new(-5); $y = $class->new(3); $x->bmod($y); ok ($x,1); ok ($y,3);
+
+$x = $class->new(5); $y = $class->new(3); $x->bmul($y); ok ($x,15); ok ($y,3);
+$x = $class->new(5); $y = $class->new(3); $x->badd($y); ok ($x,8); ok ($y,3);
+$x = $class->new(5); $y = $class->new(3); $x->bsub($y); ok ($x,2); ok ($y,3);
+$x = $class->new(15); $y = $class->new(3); $x->bdiv($y); ok ($x,5); ok ($y,3);
+$x = $class->new(5); $y = $class->new(3); $x->bmod($y); ok ($x,2); ok ($y,3);
+
+$x = $class->new(5); $y = $class->new(-3); $x->bmul($y); ok ($x,-15); ok($y,-3);
+$x = $class->new(5); $y = $class->new(-3); $x->badd($y); ok ($x,2); ok($y,-3);
+$x = $class->new(5); $y = $class->new(-3); $x->bsub($y); ok ($x,8); ok($y,-3);
+$x = $class->new(15); $y = $class->new(-3); $x->bdiv($y); ok ($x,-5); ok($y,-3);
+$x = $class->new(5); $y = $class->new(-3); $x->bmod($y); ok ($x,-1); ok($y,-3);
+
+###############################################################################
 # check whether overloading cmp works
 $try = "\$x = $class->new(0);";
 $try .= "\$y = 10;";
@@ -504,6 +535,11 @@ $x = $class->new('-322056000'); ($x,$y) = $x->bdiv('-12882240');
 ok ($y,'0'); is_valid($y);	# $y not '-0'
 
 ###############################################################################
+# bug in $x->bmod($y) if $x < 0 and $y > 0
+
+$x = $class->new('-629'); ok ($x->bmod(5033),4404);
+
+###############################################################################
 # bone/binf etc as plain calls (Lite failed them)
 
 ok ($class->bzero(),0);
@@ -578,6 +614,7 @@ __DATA__
 &%=
 100:3:1
 8:9:8
+-629:5033:4404
 &/=
 100:3:33
 -8:2:-4
@@ -788,6 +825,21 @@ E23:NaN
 1e2e3:NaN
 1e2r:NaN
 1e2.0:NaN
+# bug with two '.' in number beeing valid
+1.2.2:NaN
+1.2.3e1:NaN
+-1.2.3:NaN
+-1.2.3e-4:NaN
+1.2e3.4:NaN
+1.2e-3.4:NaN
+1.2.3.4:NaN
+1.2.t:NaN
+1..2:NaN
+1..2e1:NaN
+1..2e1..1:NaN
+12e1..1:NaN
+..2:NaN
+.-2:NaN
 # leading zeros
 012:12
 0123:123
@@ -1320,42 +1372,46 @@ inf:0:inf
 14:3:4
 # bug in Calc with '99999' vs $BASE-1
 10000000000000000000000000000000000000000000000000000000000000000000000000000000000:10000000375084540248994272022843165711074:999999962491547381984643365663244474111576
-#&bmodinv
-## format: number:modulus:result
-## bmodinv Data errors
-#abc:abc:NaN
-#abc:5:NaN
-#5:abc:NaN
-## bmodinv Expected Results from normal use
-#1:5:1
-#3:5:2
-#-2:5:2
-#324958749843759385732954874325984357439658735983745:2348249874968739:1741662881064902
+&bmodinv
+# format: number:modulus:result
+# bmodinv Data errors
+abc:abc:NaN
+abc:5:NaN
+5:abc:NaN
+# bmodinv Expected Results from normal use
+1:5:1
+3:5:2
+-2:5:2
+8:5033:4404
+324958749843759385732954874325984357439658735983745:2348249874968739:1741662881064902
 ## bmodinv Error cases / useless use of function
-#3:-5:NaN
-#inf:5:NaN
-#&bmodpow
-## format: number:exponent:modulus:result
-## bmodpow Data errors
-#abc:abc:abc:NaN
-#5:abc:abc:NaN
-#abc:5:abc:NaN
-#abc:abc:5:NaN
-#5:5:abc:NaN
-#5:abc:5:NaN
-#abc:5:5:NaN
-## bmodpow Expected results
-#0:0:2:1
-#1:0:2:1
-#0:0:1:0
-#8:7:5032:3840
-#8:-1:5033:4404
-#98436739867439843769485798542749827593285729587325:43698764986460981048259837659386739857456983759328457:6943857329857295827698367:3104744730915914415259518
-## bmodpow Error cases
-#8:8:-5:NaN
-#8:-1:16:NaN
-#inf:5:13:NaN
-#5:inf:13:NaN
+3:-5:NaN
+inf:5:NaN
+5:inf:NaN
+-inf:5:NaN
+5:-inf:NaN
+&bmodpow
+# format: number:exponent:modulus:result
+# bmodpow Data errors
+abc:abc:abc:NaN
+5:abc:abc:NaN
+abc:5:abc:NaN
+abc:abc:5:NaN
+5:5:abc:NaN
+5:abc:5:NaN
+abc:5:5:NaN
+# bmodpow Expected results
+0:0:2:1
+1:0:2:1
+0:0:1:0
+8:7:5032:3840
+8:-1:5033:4404
+98436739867439843769485798542749827593285729587325:43698764986460981048259837659386739857456983759328457:6943857329857295827698367:3104744730915914415259518
+# bmodpow Error cases
+8:8:-5:NaN
+8:-1:16:NaN
+inf:5:13:NaN
+5:inf:13:NaN
 &bmod
 # inf handling, see table in doc
 0:inf:0
@@ -1457,6 +1513,8 @@ abc:1:abc:NaN
 12345678912345:113:53
 1234567891234567:113:56
 123456789123456789:113:39
+# bug in bmod() not modifying the variable in place
+-629:5033:4404
 &bgcd
 abc:abc:NaN
 abc:+0:NaN
@@ -1901,6 +1959,7 @@ NaNas_hex:NaN
 -0:0b0
 1:0b1
 0b1010111101010101010110110110110110101:0b1010111101010101010110110110110110101
+0x123456789123456789:0b100100011010001010110011110001001000100100011010001010110011110001001
 +inf:inf
 -inf:-inf
 NaNas_bin:NaN

@@ -11,7 +11,7 @@ $DirName = "t";
 
 # These scripts have problems (either abend or hang) as of now (11 May 2001).
 # So, they are commented out in the corresponding auto scripts, io.pl and lib.pl
-@ScriptsNotUsed = ("t/io/openpid.t", "t/lib/filehandle.t", "t/lib/memoize/t/expire_module_t.t", "t/lib/NEXT/t/next.t", "t/lib/Math/BigInt/t/require.t", "t/ext/B/t/debug.t","t/lib/IPC/Open3.t", "t/ext/B/t/showlex.t", "t/op/subst_wamp.t", "t/uni/upper.t", "t/lib/Net/t/ftp.t");
+@ScriptsNotUsed = ("t/io/openpid.t", "t/lib/filehandle.t", "t/lib/memoize/t/expire_module_t.t", "t/lib/NEXT/t/next.t", "t/lib/Math/BigInt/t/require.t", "t/ext/B/t/debug.t","t/lib/IPC/Open3.t", "t/ext/B/t/showlex.t", "t/op/subst_wamp.t", "t/uni/upper.t", "t/lib/Net/t/ftp.t", "t/op/sort.t, ", "t/ext/POSIX/t/posix.t");
 
 opendir(DIR, $DirName);
 @Dirs = readdir(DIR);

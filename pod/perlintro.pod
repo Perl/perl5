@@ -55,7 +55,7 @@ Alternatively, put this as the first line of your script:
 to be executable first, so C<chmod 755 script.pl> (under Unix).
 
 For more information, including instructions for other platforms such as
-Windows and MacOS, read L<perlrun>.
+Windows and Mac OS, read L<perlrun>.
 
 =head2 Basic syntax overview
 

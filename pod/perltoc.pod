@@ -1796,7 +1796,7 @@ Proto, LocalPort, Listen, Reuse
 
 =back
 
-=head2 perlfork - Perl's fork() emulation (EXPERIMENTAL, subject to change)
+=head2 perlfork - Perl's fork() emulation
 
 =over 4
 
@@ -1892,6 +1892,8 @@ string
 =over 4
 
 =item Basic Thread Support
+
+=item A Note about the Examples
 
 =item Creating Threads
 
@@ -2643,13 +2645,14 @@ B::Deparse, B::Disassembler, B::Lint, B::Showlex, B::Stackobj, B::Stash,
 B::Terse, B::Xref, Benchmark, ByteLoader, CGI, CGI::Apache, CGI::Carp,
 CGI::Cookie, CGI::Fast, CGI::Pretty, CGI::Push, CGI::Switch, CGI::Util,
 CPAN, CPAN::FirstTime, CPAN::Nox, Carp, Carp::Heavy, Class::ISA,
-Class::Struct, Cwd, DB, DB_File, Devel::SelfStubber, Digest, DirHandle,
-Dumpvalue, Encode, English, Env, Exporter, Exporter::Heavy,
-ExtUtils::Command, ExtUtils::Command::MM, ExtUtils::Constant,
-ExtUtils::Embed, ExtUtils::Install, ExtUtils::Installed, ExtUtils::Liblist,
-ExtUtils::MM, ExtUtils::MM_Any, ExtUtils::MM_BeOS, ExtUtils::MM_Cygwin,
-ExtUtils::MM_DOS, ExtUtils::MM_MacOS, ExtUtils::MM_NW5, ExtUtils::MM_OS2,
-ExtUtils::MM_UWIN, ExtUtils::MM_Unix, ExtUtils::MM_VMS, ExtUtils::MM_Win32,
+Class::Struct, Config, Cwd, DB, DB_File, Devel::SelfStubber, Digest,
+DirHandle, Dumpvalue, Encode, English, Env, Errno, Exporter,
+Exporter::Heavy, ExtUtils::Command, ExtUtils::Command::MM,
+ExtUtils::Constant, ExtUtils::Embed, ExtUtils::Install,
+ExtUtils::Installed, ExtUtils::Liblist, ExtUtils::MM, ExtUtils::MM_Any,
+ExtUtils::MM_BeOS, ExtUtils::MM_Cygwin, ExtUtils::MM_DOS,
+ExtUtils::MM_MacOS, ExtUtils::MM_NW5, ExtUtils::MM_OS2, ExtUtils::MM_UWIN,
+ExtUtils::MM_Unix, ExtUtils::MM_VMS, ExtUtils::MM_Win32,
 ExtUtils::MM_Win95, ExtUtils::MY, ExtUtils::MakeMaker, ExtUtils::Manifest,
 ExtUtils::Mkbootstrap, ExtUtils::Mksymlists, ExtUtils::Packlist,
 ExtUtils::testlib, Fatal, Fcntl, File::Basename, File::CheckTree,
@@ -2671,10 +2674,10 @@ Net::netent, Net::protoent, Net::servent, O, ODBM_File, Opcode, POSIX,
 PerlIO, Pod::Checker, Pod::Find, Pod::Functions, Pod::Html,
 Pod::InputObjects, Pod::LaTeX, Pod::Man, Pod::ParseLink, Pod::ParseUtils,
 Pod::Parser, Pod::Plainer, Pod::Select, Pod::Text, Pod::Text::Color,
-Pod::Text::Overstrike, Pod::Text::Termcap, Pod::Usage, Pod::t::basic,
-SDBM_File, Safe, Search::Dict, SelectSaver, SelfLoader, Shell, Socket,
-Storable, Switch, Symbol, Term::ANSIColor, Term::Cap, Term::Complete,
-Term::ReadLine, Test, Test::Builder, Test::Harness, Test::Harness::Assert,
+Pod::Text::Overstrike, Pod::Text::Termcap, Pod::Usage, SDBM_File, Safe,
+Search::Dict, SelectSaver, SelfLoader, Shell, Socket, Storable, Switch,
+Symbol, Term::ANSIColor, Term::Cap, Term::Complete, Term::ReadLine, Test,
+Test::Builder, Test::Harness, Test::Harness::Assert,
 Test::Harness::Iterator, Test::Harness::Straps, Test::More, Test::Simple,
 Test::Tutorial, Text::Abbrev, Text::Balanced, Text::ParseWords,
 Text::Soundex, Text::Tabs, Text::Wrap, Thread, Thread::Queue,
@@ -3357,8 +3360,8 @@ protected files?  Isn't this a bug in Perl?
 
 =back
 
-=head2 perlfaq6 - Regular Expressions ($Revision: 1.11 $, $Date: 2002/05/23
-15:47:37 $)
+=head2 perlfaq6 - Regular Expressions ($Revision: 1.12 $, $Date: 2002/06/01
+22:31:09 $)
 
 =over 4
 
@@ -5095,7 +5098,7 @@ NFS, rsync'ing the patches
 
 =item Why rsync the source tree
 
-It's easier to rsync the source tree, It's more recent, It's more reliable
+It's easier to rsync the source tree, It's more reliable
 
 =item Why rsync the patches
 
@@ -5278,6 +5281,8 @@ I<The Road goes ever on and on, down from the door where it began.>
 
 =item Understanding of Numbers
 
+=item Arrays now always interpolate into double-quoted strings [561]
+
 =item Miscellaneous Changes
 
 =back
@@ -5320,7 +5325,7 @@ I<The Road goes ever on and on, down from the door where it began.>
 
 =item Changed Internals
 
-=item Security Vulnerability Closed
+=item Security Vulnerability Closed [561]
 
 =item New Tests
 
@@ -5340,7 +5345,11 @@ I<The Road goes ever on and on, down from the door where it began.>
 
 =item ext/threads/t/libc
 
+=item FreeBSD built with ithreads coredumps reading large directories
+
 =item FreeBSD Failing locale Test 117 For ISO8859-15 Locales
+
+=item IRIX fails ext/List/Util/t/shuffle.t
 
 =item Modifying $_ Inside for(..)
 
@@ -5362,17 +5371,21 @@ I<The Road goes ever on and on, down from the door where it began.>
 
 =item Solaris 2.5
 
-=item Stratus VOS
+=item SUPER-UX (NEC SX)
 
 =item Term::ReadKey not working on Win32
 
 =item Failure of Thread (5.005-style) tests
+
+=item Timing problems
 
 =item UNICOS
 
 =item UNICOS/mk
 
 =item UTS
+
+=item VOS (Stratus)
 
 =item VMS
 
@@ -7301,6 +7314,26 @@ DJGPP, Pthreads
 
 =back
 
+=head2 perlfreebsd, README.freebsd - Perl version 5 on FreeBSD systems
+
+=over 4
+
+=item DESCRIPTION
+
+=over 4
+
+=item FreeBSD core dumps from readdir_r with ithreads
+
+=item $^X doesn't always contain a full path in FreeBSD
+
+=item Perl will no more be part of "base FreeBSD"
+
+=back
+
+=item AUTHOR
+
+=back
+
 =head2 perlhpux, README.hpux - Perl version 5 on Hewlett-Packard Unix
 (HP-UX) systems
 
@@ -7369,6 +7402,32 @@ DJGPP, Pthreads
 =over 4
 
 =item Known Problems with Perl on Hurd 
+
+=back
+
+=item AUTHOR
+
+=back
+
+=head2 perlirix, README.irix - Perl version 5 on Irix systems
+
+=over 4
+
+=item DESCRIPTION
+
+=over 4
+
+=item Building 32-bit Perl in Irix
+
+=item Building 64-bit Perl in Irix
+
+=item About Compiler Versions of Irix
+
+=item Linker Problems in Irix
+
+=item Malloc in Irix
+
+=item Building with threads
 
 =back
 
@@ -7489,6 +7548,8 @@ SetNWBld.bat, Buildtype.bat
 =back
 
 =item Install
+
+=item Build new extensions
 
 =item Acknowledgements
 
@@ -8179,8 +8240,11 @@ SDK 64-bit Compiler, Mingw32 with GCC
 
 Environment Variables, File Globbing, Using perl from the command line,
 Building Extensions, Command-line Wildcard Expansion, Win32 Specific
-Extensions, Notes on 64-bit Windows, Running Perl Scripts, Miscellaneous
-Things
+Extensions, Notes on 64-bit Windows
+
+=item Running Perl Scripts
+
+Miscellaneous Things
 
 =back
 
@@ -10592,7 +10656,8 @@ C<getprotobynumber_r_proto>, C<getprotoent_r_proto>, C<getpwent_r_proto>,
 C<getpwnam_r_proto>, C<getpwuid_r_proto>, C<getservbyname_r_proto>,
 C<getservbyport_r_proto>, C<getservent_r_proto>, C<getspnam_r_proto>,
 C<gidformat>, C<gidsign>, C<gidsize>, C<gidtype>, C<glibpth>, C<gmake>,
-C<gmtime_r_proto>, C<grep>, C<groupcat>, C<groupstype>, C<gzip>
+C<gmtime_r_proto>, C<gnulibc_version>, C<grep>, C<groupcat>, C<groupstype>,
+C<gzip>
 
 =item h
 
@@ -15453,15 +15518,15 @@ the same terms as Perl itself.
 
 =item as_number()
 
-=item bfac()/blog()
+=item bfac()
+
+=item blog()
 
 =item bround()/round()/bfround()
 
 =back
 
 =item BUGS
-
-perl -Mbigrat -le 'print 1 + 2/3'
 
 =item LICENSE
 
@@ -15945,9 +16010,10 @@ MSGNUM ] ), delete ( MSGNUM ), reset (), quit ()
 
 =item Functions
 
-Net::Ping->new([$proto [, $def_timeout [, $bytes]]]);, $p->hires( { 0 | 1 }
-);, $p->bind($local_addr);, $p->ping($host [, $timeout]);,
-$p->open($host);, $p->close();, pingecho($host [, $timeout]);
+Net::Ping->new([$proto [, $def_timeout [, $bytes]]]);, $p->source_verify( {
+0 | 1 } );, $p->hires( { 0 | 1 } );, $p->bind($local_addr);, $p->ping($host
+[, $timeout]);, $p->open($host);, $p->close();, pingecho($host [,
+$timeout]);
 
 =back
 
@@ -16575,7 +16641,7 @@ after =back
 
 =item Warnings
 
-multiple occurence of link target I<name>, line containing nothing but
+multiple occurrence of link target I<name>, line containing nothing but
 whitespace in paragraph, file does not start with =head, previous =item has
 no contents, preceding non-item paragraph(s), =item type mismatch (I<one>
 vs. I<two>), I<N> unescaped C<E<lt>E<gt>> in paragraph, Unknown entity, No
@@ -18847,7 +18913,7 @@ unexpand(1)
 
 =back
 
-=head2 Thread - manipulate threads in Perl
+=head2 Thread - manipulate threads in Perl (for old code only)
 
 =over 4
 
@@ -18873,9 +18939,11 @@ join, eval, detach, equal, tid, flags, done
 
 =back
 
-=head2 Thread::Queue - thread-safe queues
+=head2 Thread::Queue - thread-safe queues (for old code only)
 
 =over 4
+
+=item CAVEAT
 
 =item SYNOPSIS
 
@@ -18889,9 +18957,11 @@ new, enqueue LIST, dequeue, dequeue_nb, pending
 
 =back
 
-=head2 Thread::Semaphore - thread-safe semaphores
+=head2 Thread::Semaphore - thread-safe semaphores (for old code only)
 
 =over 4
+
+=item CAVEAT
 
 =item SYNOPSIS
 
@@ -19460,7 +19530,7 @@ Win32::ExpandEnvironmentStrings(STRING), Win32::FormatMessage(ERRORCODE),
 Win32::FsType(), Win32::FreeLibrary(HANDLE), Win32::GetArchName(),
 Win32::GetChipName(), Win32::GetCwd(), Win32::GetFullPathName(FILENAME),
 Win32::GetLastError(), Win32::GetLongPathName(PATHNAME),
-Win32::GetNextAvailDrive(), Win32::GetOSVersion(),
+Win32::GetNextAvailDrive(), Win32::GetOSVersion(), Win32::GetOSName(),
 Win32::GetShortPathName(PATHNAME), Win32::GetProcAddress(INSTANCE,
 PROCNAME), Win32::GetTickCount(), Win32::InitiateSystemShutdown,
 Win32::IsWinNT(), Win32::IsWin95(), Win32::LoadLibrary(LIBNAME),
@@ -19473,6 +19543,33 @@ Win32::Sleep(TIME), Win32::Spawn(COMMAND, ARGS, PID),
 Win32::UnregisterServer(LIBRARYNAME)
 
 =back
+
+=back
+
+=head2 XS::APItest - Test the perl C API
+
+=over 4
+
+=item SYNOPSIS
+
+=item ABSTRACT
+
+=item DESCRIPTION
+
+=over 4
+
+=item EXPORT
+
+B<print_double>, B<print_long_double>, B<have_long_double>, B<print_nv>,
+B<print_iv>, B<print_uv>, B<print_int>, B<print_long>, B<print_float>
+
+=back
+
+=item SEE ALSO
+
+=item AUTHORS
+
+=item COPYRIGHT AND LICENSE
 
 =back
 

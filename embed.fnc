@@ -1242,7 +1242,7 @@ s      |int    |sv_2iuv_non_preserve   |SV *sv|I32 numtype
 s	|I32	|expect_number	|char** pattern
 #
 #  if defined(USE_ITHREADS)
-s	|SV*	|gv_share	|SV *sv
+s	|SV*	|gv_share	|SV *sv|CLONE_PARAMS *param
 #  endif
 #endif
 

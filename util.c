@@ -752,7 +752,7 @@ Perl_fbm_instr(pTHX_ unsigned char *big, register unsigned char *bigend, SV *lit
 
 /* start_shift, end_shift are positive quantities which give offsets
    of ends of some substring of bigstr.
-   If `last' we want the last occurence.
+   If `last' we want the last occurrence.
    old_posp is the way of communication between consequent calls if
    the next call needs to find the .
    The initial *old_posp should be -1.

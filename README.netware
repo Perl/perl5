@@ -33,7 +33,7 @@ The build process is dependent on the location of the NetWare SDK.
 Once the Tools & SDK are installed, the build environment has to
 be setup.  The following batch files setup the environment.
 
-=item *
+=over 4
 
 =item SetNWBld.bat
 
@@ -41,8 +41,6 @@ The Execution of this file takes 2 parameters as input. The first
 being the NetWare SDK path, second being the path for CodeWarrior
 Compiler & tools. Execution of this file sets these paths and also
 sets the build type to Release by default.
-
-=back
 
 =item Buildtype.bat
 
@@ -57,6 +55,8 @@ Example:
   2. Typing "buildtype d off" or "buildtype d" at the command prompt causes
      the buildtype to be set to Debug type with D1 flag set. 
   2. Typing "buildtype r" at the command prompt sets it to Release Build type.
+
+=back
 
 =head2 Make
 
@@ -110,7 +110,6 @@ Example: At the command prompt Type "nmake nwinstall".
           This will cause the binaries to be installed on the local machine.
           (Typically under the c:\perl folder)
 
-         
 =head1 Build new extensions
 
 To build extensions other than standard extensions, NetWare Perl has
@@ -140,7 +139,11 @@ Run the following command at the command prompt:
 
 Example:
 
-    perl -Ic:/perl/5.7.2/lib/NetWare-x86-multi-thread -Ic:\perl\5.7.2\lib MakeFile.pl
+    perl -Ic:/perl/5.6.1/lib/NetWare-x86-multi-thread -Ic:\perl\5.6.1\lib MakeFile.pl
+
+or
+
+    perl -Ic:/perl/5.8.0/lib/NetWare-x86-multi-thread -Ic:\perl\5.8.0\lib MakeFile.pl
 
 =item *
 
@@ -159,12 +162,15 @@ typing I<nmake install>, will copy the files onto the NetWare server.
 
 Example: You can execute the following on the command prompt.
 
-          perl -Ic:/perl/5.7.2/lib/NetWare-x86-multi-thread -Ic:\perl\5.7.2\lib MakeFile.pl
+          perl -Ic:/perl/5.6.1/lib/NetWare-x86-multi-thread -Ic:\perl\5.6.1\lib MakeFile.pl
           INSTALLSITELIB=i:\perl\lib
 
-=back
+or
 
-= item * 
+          perl -Ic:/perl/5.8.0/lib/NetWare-x86-multi-thread -Ic:\perl\5.8.0\lib MakeFile.pl
+          INSTALLSITELIB=i:\perl\lib
+
+=item * 
 
 Note: Some modules downloaded from CPAN may require NetWare related
 API in order to build on NetWare.Other modules may however build

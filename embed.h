@@ -2671,7 +2671,7 @@
 #  endif
 #define expect_number(a)	S_expect_number(aTHX_ a)
 #  if defined(USE_ITHREADS)
-#define gv_share(a)		S_gv_share(aTHX_ a)
+#define gv_share(a,b)		S_gv_share(aTHX_ a,b)
 #  endif
 #endif
 #if defined(PERL_IN_TOKE_C) || defined(PERL_DECL_PROT)

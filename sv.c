@@ -7738,7 +7738,14 @@ Perl_sv_vcatpvfn(pTHX_ SV *sv, const char *pat, STRLEN patlen, va_list *args, SV
 	unsigned base = 0;
 	IV iv = 0;
 	UV uv = 0;
+	/* we need a long double target in case HAS_LONG_DOUBLE but
+	   not USE_LONG_DOUBLE
+	*/
+#if defined(HAS_LONG_DOUBLE) && LONG_DOUBLESIZE > DOUBLESIZE
+	long double nv;
+#else
 	NV nv;
+#endif
 	STRLEN have;
 	STRLEN need;
 	STRLEN gap;
@@ -7914,18 +7921,18 @@ Perl_sv_vcatpvfn(pTHX_ SV *sv, const char *pat, STRLEN patlen, va_list *args, SV
 	    q++;
 	    break;
 #endif
-#if defined(HAS_QUAD) || (defined(HAS_LONG_DOUBLE) && defined(USE_LONG_DOUBLE))
+#if defined(HAS_QUAD) || defined(HAS_LONG_DOUBLE)
 	case 'L':			/* Ld */
 	    /* FALL THROUGH */
-#endif
 #ifdef HAS_QUAD
 	case 'q':			/* qd */
+#endif
 	    intsize = 'q';
 	    q++;
 	    break;
 #endif
 	case 'l':
-#if defined(HAS_QUAD) || (defined(HAS_LONG_DOUBLE) && defined(USE_LONG_DOUBLE))
+#if defined(HAS_QUAD) || defined(HAS_LONG_DOUBLE)
              if (*(q + 1) == 'l') {	/* lld, llf */
 		intsize = 'q';
 		q += 2;
@@ -8242,11 +8249,49 @@ Perl_sv_vcatpvfn(pTHX_ SV *sv, const char *pat, STRLEN patlen, va_list *args, SV
 	    /* This is evil, but floating point is even more evil */
 
 	    vectorize = FALSE;
-	    nv = args ? va_arg(*args, NV) : SvNVx(argsv);
+	    /* for SV-style calling, we can only get NV
+	       for C-style calling, we assume %f is double;
+	       for simplicity we allow any of %Lf, %llf, %qf for long double
+	    */
+	    switch (intsize) {
+	    case 'V':
+#if defined(USE_LONG_DOUBLE)
+		intsize = 'q';
+#endif
+		break;
+	    default:
+#if defined(USE_LONG_DOUBLE)
+		intsize = args ? 0 : 'q';
+#endif
+		break;
+	    case 'q':
+#if defined(HAS_LONG_DOUBLE)
+		break;
+#else
+		/* FALL THROUGH */
+#endif
+	    case 'h':
+		/* FALL THROUGH */
+	    case 'l':
+		goto unknown;
+	    }
+
+	    /* now we need (long double) if intsize == 'q', else (double) */
+	    nv = args ?
+#if LONG_DOUBLESIZE > DOUBLESIZE
+		intsize == 'q' ?
+	            va_arg(*args, long double) :
+	            va_arg(*args, double)
+#else
+	            va_arg(*args, double)
+#endif
+		: SvNVx(argsv);
 
 	    need = 0;
 	    if (c != 'e' && c != 'E') {
 		i = PERL_INT_MIN;
+		/* FIXME: if HAS_LONG_DOUBLE but not USE_LONG_DOUBLE this
+		   will cast our (long double) to (double) */
 		(void)Perl_frexp(nv, &i);
 		if (i == PERL_INT_MIN)
 		    Perl_die(aTHX_ "panic: frexp");
@@ -8268,8 +8313,9 @@ Perl_sv_vcatpvfn(pTHX_ SV *sv, const char *pat, STRLEN patlen, va_list *args, SV
 	    eptr = ebuf + sizeof ebuf;
 	    *--eptr = '\0';
 	    *--eptr = c;
-#if defined(USE_LONG_DOUBLE) && defined(PERL_PRIfldbl)
-	    {
+	    /* FIXME: what to do if HAS_LONG_DOUBLE but not PERL_PRIfldbl? */
+#if defined(HAS_LONG_DOUBLE) && defined(PERL_PRIfldbl)
+	    if (intsize == 'q') {
 		/* Copy the one or more characters in a long double
 		 * format before the 'base' ([efgEFG]) character to
 		 * the format string. */
@@ -8300,8 +8346,14 @@ Perl_sv_vcatpvfn(pTHX_ SV *sv, const char *pat, STRLEN patlen, va_list *args, SV
 	    /* No taint.  Otherwise we are in the strange situation
 	     * where printf() taints but print($float) doesn't.
 	     * --jhi */
+#if defined(HAS_LONG_DOUBLE)
+	    if (intsize == 'q')
+		(void)sprintf(PL_efloatbuf, eptr, nv);
+	    else
+		(void)sprintf(PL_efloatbuf, eptr, (double)nv);
+#else
 	    (void)sprintf(PL_efloatbuf, eptr, nv);
-
+#endif
 	    eptr = PL_efloatbuf;
 	    elen = strlen(PL_efloatbuf);
 	    break;
@@ -8757,7 +8809,6 @@ Perl_ptr_table_store(pTHX_ PTR_TBL_t *tbl, void *oldv, void *newv)
     for (tblent = *otblent; tblent; i=0, tblent = tblent->next) {
 	if (tblent->oldval == oldv) {
 	    tblent->newval = newv;
-	    tbl->tbl_items++;
 	    return;
 	}
     }
@@ -8859,10 +8910,10 @@ char *PL_watch_pvx;
 /* attempt to make everything in the typeglob readonly */
 
 STATIC SV *
-S_gv_share(pTHX_ SV *sstr)
+S_gv_share(pTHX_ SV *sstr, CLONE_PARAMS *param)
 {
     GV *gv = (GV*)sstr;
-    SV *sv = &PL_sv_no; /* just need SvREADONLY-ness */
+    SV *sv = &param->proto_perl->Isv_no; /* just need SvREADONLY-ness */
 
     if (GvIO(gv) || GvFORM(gv)) {
         GvUNIQUE_off(gv); /* GvIOs cannot be shared. nor can GvFORMs */
@@ -8872,7 +8923,7 @@ S_gv_share(pTHX_ SV *sstr)
     }
     else {
         /* CvPADLISTs cannot be shared */
-        if (!CvXSUB(GvCV(gv))) {
+        if (!SvREADONLY(GvCV(gv)) && !CvXSUB(GvCV(gv))) {
             GvUNIQUE_off(gv);
         }
     }
@@ -9053,9 +9104,10 @@ Perl_sv_dup(pTHX_ SV *sstr, CLONE_PARAMS* param)
     case SVt_PVGV:
 	if (GvUNIQUE((GV*)sstr)) {
             SV *share;
-            if ((share = gv_share(sstr))) {
+            if ((share = gv_share(sstr, param))) {
                 del_SV(dstr);
                 dstr = share;
+                ptr_table_store(PL_ptr_table, sstr, dstr);
 #if 0
                 PerlIO_printf(Perl_debug_log, "sv_dup: sharing %s::%s\n",
                               HvNAME(GvSTASH(share)), GvNAME(share));
@@ -9758,6 +9810,7 @@ perl_clone_using(PerlInterpreter *proto_perl, UV flags,
 #    endif	/* DEBUGGING */
 #endif		/* PERL_IMPLICIT_SYS */
     param->flags = flags;
+    param->proto_perl = proto_perl;
 
     /* arena roots */
     PL_xiv_arenaroot	= NULL;

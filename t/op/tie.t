@@ -240,3 +240,30 @@ tie FH, 'main';
 EXPECT
 Can't modify constant item in tie at - line 3, near "'main';"
 Execution of - aborted due to compilation errors.
+########
+
+# localizing tied hash slices
+$ENV{FooA} = 1;
+$ENV{FooB} = 2;
+print exists $ENV{FooA} ? 1 : 0, "\n";
+print exists $ENV{FooB} ? 2 : 0, "\n";
+print exists $ENV{FooC} ? 3 : 0, "\n";
+{
+    local @ENV{qw(FooA FooC)};
+    print exists $ENV{FooA} ? 4 : 0, "\n";
+    print exists $ENV{FooB} ? 5 : 0, "\n";
+    print exists $ENV{FooC} ? 6 : 0, "\n";
+}
+print exists $ENV{FooA} ? 7 : 0, "\n";
+print exists $ENV{FooB} ? 8 : 0, "\n";
+print exists $ENV{FooC} ? 9 : 0, "\n"; # this should not exist
+EXPECT
+1
+2
+0
+4
+5
+6
+7
+8
+0

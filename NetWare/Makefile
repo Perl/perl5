@@ -33,7 +33,6 @@ REL_DIR	= Release
 DEB_DIR = Debug
 
 
-!ifndef MAKE_TYPE
 !ifndef NLMSDKBASE
 !message "Run bat\SetNWBld.bat to set the NetWare SDK before continuing.\n"
 !error
@@ -115,17 +114,17 @@ BLDMESG	    = Debug version,
 BS_CFLAGS	= -opt off -inline off -sym on -sym codeview4 -sym internal -DDEBUGGING -DDKFBPON
 BLDMESG		= $(BLDMESG) Using /d2 option
 !ifdef NLM_NAME8
-LDFLAGS		= $(LDFLAGS) -sym on -sym codeview4 -sym internal -osym $(NLM_NAME8).sym
+LDFLAGS		= $(LDFLAGS) -sym on -sym codeview4 -sym internal -osym $(MAKE_TYPE)\$(NLM_NAME8).sym
 !else												# !ifdef NLM_NAME8
-LDFLAGS		= $(LDFLAGS) -sym on -sym codeview4 -sym internal -osym $(NLM_NAME).sym
+LDFLAGS		= $(LDFLAGS) -sym on -sym codeview4 -sym internal -osym $(MAKE_TYPE)\$(NLM_NAME).sym
 !endif												# !ifdef NLM_NAME8
 !else												# !ifdef USE_D2
 BS_CFLAGS	= -opt off -inline off -sym on -sym codeview4 -sym internal -DDEBUGGING -DDKFBPON
 BLDMESG		= $(BLDMESG) Using /d1 option
 !ifdef NLM_NAME8
-LDFLAGS		= $(LDFLAGS) -sym on -sym codeview4 -sym internal -osym $(NLM_NAME8).sym
+LDFLAGS		= $(LDFLAGS) -sym on -sym codeview4 -sym internal -osym $(MAKE_TYPE)\$(NLM_NAME8).sym
 !else												# !ifdef NLM_NAME8
-LDFLAGS		= $(LDFLAGS) -sym on -sym codeview4 -sym internal -osym $(NLM_NAME).sym
+LDFLAGS		= $(LDFLAGS) -sym on -sym codeview4 -sym internal -osym $(MAKE_TYPE)\$(NLM_NAME).sym
 !endif												# !ifdef NLM_NAME8
 !endif												# !ifdef USE_D2
 !else												# !if "$(MAKE_TYPE)"=="Debug"
@@ -329,6 +328,7 @@ CWD_NLM			= $(EXTDIR)\Cwd\Cwd.NLM
 STORABLE_NLM		= $(EXTDIR)\Storable\Storable.NLM
 LISTUTIL_NLM		= $(EXTDIR)\List\Util.NLM
 MIMEBASE64_NLM		= $(EXTDIR)\MIME\Base64\Base64.NLM
+XSAPITEST_NLM		= $(EXTDIR)\XS\APItest\APItest.NLM
 XSTYPEMAP_NLM		= $(EXTDIR)\XS\Typemap\Typemap.NLM
 UNICODENORMALIZE_NLM 	= $(EXTDIR)\Unicode\Normalize\Normalize.NLM
 
@@ -353,6 +353,7 @@ EXTENSION_NLM	= 		\
 		$(STORABLE_NLM)		\
 		$(LISTUTIL_NLM)		\
 		$(MIMEBASE64_NLM)	\
+		$(XSAPITEST_NLM)	\
 		$(XSTYPEMAP_NLM)	\
 		$(UNICODENORMALIZE_NLM)  \
 		$(FILTER_NLM)	
@@ -816,7 +817,7 @@ X2P_OBJ		= $(X2P_SRC:.c=.obj)
 
 DYNAMIC_EXT	= Socket IO Fcntl Opcode SDBM_File POSIX attrs Thread B re \
 		Data/Dumper Devel/Peek ByteLoader Devel/DProf File/Glob \
-		Storable/Storable List/Util MIME/Base64/Base64 \
+		Storable/Storable List/Util MIME/Base64/Base64 XS/APItest/APItest \
 		XS/Typemap/Typemap Unicode/Normalize/Normalize Sys/Hostname
 
 STATIC_EXT	= DynaLoader
@@ -844,6 +845,7 @@ CWD			= $(EXTDIR)\Cwd\Cwd
 STORABLE		= $(EXTDIR)\Storable\Storable
 LISTUTIL		= $(EXTDIR)\List\Util
 MIMEBASE64		= $(EXTDIR)\MIME\Base64\Base64
+XSAPITEST		= $(EXTDIR)\XS\APItest\APItest
 XSTYPEMAP		= $(EXTDIR)\XS\Typemap\Typemap
 UNICODENORMALIZE	= $(EXTDIR)\Unicode\Normalize\Normalize
 
@@ -870,6 +872,7 @@ EXTENSION_C	= 		\
 		$(STORABLE).c	\
 		$(LISTUTIL).c	\
 		$(MIMEBASE64).c	\
+		$(XSAPITEST).c	\
 		$(XSTYPEMAP).c	\
 		$(UNICODENORMALIZE).c	\
 
@@ -927,7 +930,7 @@ $(MINIMOD) : $(MINIPERL) ..\minimod.pl
 	@echo $(MPKMESSAGE)...$(BLDMESG)...$@
 	$(C_COMPILER) $(COMPLER_FLAGS) $(NLM_INCLUDES) -I..\x2p $(ADD_LOCDEFS) $(ERROR_FLAG) $*.c -o $@
     @echo Built $(@)
-	
+
 ..\x2p\hash$(o) : ..\x2p\hash.c
 	@echo $(MPKMESSAGE)...$(BLDMESG)...$@
 	$(C_COMPILER) $(COMPLER_FLAGS) $(NLM_INCLUDES) -I..\x2p $(ADD_LOCDEFS) $(ERROR_FLAG) $*.c -o $@
@@ -1071,14 +1074,6 @@ $(NLM_NAME): MESSAGE HEADERS $(BLDDIR)\nul $(NLM_OBJ) $(NEWTARE_OBJ_DEP) $(NEWTA
 	copy splittree.pl .. 
 	$(MINIPERL) -I..\lib ..\splittree.pl "../LIB" $(AUTODIR)
 	@echo ========Linked $@ ==========
-
-!if "$(MAKE_TYPE)"=="Debug"
-!ifdef NLM_NAME8
-	.\bat\cvpack $(BLDDIR)\$(NLM_NAME8).sym
-!else
-	.\bat\cvpack $(BLDDIR)\$(NLM_NAME).sym
-!endif
-!endif
 
 	@echo======= Finished building $(BUILT).
 
@@ -1302,6 +1297,12 @@ $(MIMEBASE64_NLM):
 	$(MAKE)
 	cd ..\..\..\netware
 
+$(XSAPITEST_NLM):
+	cd $(EXTDIR)\XS\$(*B)
+	..\..\..\miniperl -I..\..\lib Makefile.PL PERL_CORE=1 INSTALLDIRS=perl
+	$(MAKE)
+	cd ..\..\..\netware
+
 $(XSTYPEMAP_NLM):
 	cd $(EXTDIR)\XS\$(*B)
 	..\..\..\miniperl -I..\..\lib Makefile.PL PERL_CORE=1 INSTALLDIRS=perl
@@ -1396,11 +1397,11 @@ nwclean:
 	@if exist .\config.h del /f /q .\config.h
 	@if exist .\config.nw5 del /f /q .\config.nw5
 	@if exist .\perl.imp del /f /q .\perl.imp
-	-del /f /q *.obj *.lib *.def *.sym *.map *.xdc *.err
+	-del /f /q *.obj *.lib *.def *.sym *.map *.xdc *.err *.nlm
 	cd testnlm\echo
-	-del /f /q *.obj *.map *.link *.options *.nlm *.sym *.xdc *.err
+	-del /f /q *.obj *.map *.link *.options *.nlm *.sym *.xdc *.err *.lib *.def *.pdb *.bs
 	cd ..\type
-	-del /f /q *.obj *.map *.link *.options *.nlm *.sym *.xdc *.err
+	-del /f /q *.obj *.map *.link *.options *.nlm *.sym *.xdc *.err *.lib *.def *.pdb *.bs
 	cd ..\..\
 
 utils: $(BLDDIR)\$(NLM_NAME8).$(NLM_EXT) $(X2P)
@@ -1457,14 +1458,14 @@ distclean: clean nwclean
 	-del /f /q $(CONFIGPM)
 	-del /f /q bin\*.bat
 	cd $(EXTDIR)
-    -del /s /f /q *.lib *.def *.map *.pdb *.bs Makefile *$(o) pm_to_blib *.xdc *.err
+    -del /s /q /f *.lib *.def *.map *.pdb *.bs Makefile *$(o) pm_to_blib *.xdc *.err *.obj *.sym
 	cd ..\netware
 !if "$(NW_EXTNS)"=="yes"
 	cd cgi2perl
-	-del /f /q *.obj *.bs Makefile *$(o) *.c pm_to_blib *.xdc *.err *.sym *.map
+	-del /f /q *.obj *.bs Makefile *$(o) *.c pm_to_blib *.xdc *.err *.sym *.map *.def *.lib *.pdb
 	cd ..
 	cd $(EXTDIR)\Perl2UCS
-	-del /f /q *.obj *.bs Makefile *$(o) *.c pm_to_blib *.xdc *.err *.sym *.map *.c
+	-del /f /q *.obj *.bs Makefile *$(o) *.c pm_to_blib *.xdc *.err *.sym *.map *.def *.lib *.pdb
 	cd ..\..\netware
 	cd $(EXTDIR)\UCSExt
 	-del /f /q *.obj *.bs Makefile *$(o) *.c pm_to_blib *.xdc *.err *.sym *.map *.c

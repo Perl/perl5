@@ -123,9 +123,8 @@ Options:
 PageName|ModuleName...
          is the name of a piece of documentation that you want to look at. You
          may either give a descriptive name of the page (as in the case of
-         `perlfunc') the name of a module, either like `Term::Info',
-         `Term/Info', the partial name of a module, like `info', or
-         `makemaker', or the name of a program, like `perldoc'.
+         `perlfunc') the name of a module, either like `Term::Info' or like
+         `Term/Info', or the name of a program, like `perldoc'.
 
 BuiltinFunction
          is the name of a perl function.  Will extract documentation from
@@ -760,10 +759,7 @@ run.
 
 The item you want to look up.  Nested modules (such as C<File::Basename>)
 are specified either as C<File::Basename> or C<File/Basename>.  You may also
-give a descriptive name of a page, such as C<perlfunc>. You may also give a
-partial or wrong-case name, such as "basename" for "File::Basename", but
-this will be slower, if there is more then one page with the same partial
-name, you will only get the first one.
+give a descriptive name of a page, such as C<perlfunc>.
 
 =back
 

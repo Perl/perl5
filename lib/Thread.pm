@@ -19,7 +19,7 @@ our(@ISA, @EXPORT, @EXPORT_OK);
 
 BEGIN {
     if ($ithreads) {
-	@EXPORT = qw(cond_wait cond_broadcast cond_signal unlock)
+	@EXPORT = qw(cond_wait cond_broadcast cond_signal)
     } elsif ($othreads) {
 	@EXPORT_OK = qw(cond_signal cond_broadcast cond_wait);
     }
@@ -28,7 +28,7 @@ BEGIN {
 
 =head1 NAME
 
-Thread - manipulate threads in Perl
+Thread - manipulate threads in Perl (for old code only)
 
 =head1 CAVEAT
 
@@ -65,7 +65,7 @@ be thought differently.  With the ithreads you must explicitly share()
 variables between the threads.
 
 For new code the use of the C<Thread> module is discouraged and
-the direct use use of the C<threads> and C<threads::shared> modules
+the direct use of the C<threads> and C<threads::shared> modules
 is encouraged instead.
 
 Finally, note that there are many known serious problems with the
@@ -107,8 +107,6 @@ use ithreads instead.
 
     my @list = Thread->list;	# not available with ithreads
 
-    unlock(...);	# not available with the 5.005 threads
-
     use Thread 'async';
 
 =head1 DESCRIPTION
@@ -132,8 +130,7 @@ thread.
 
 =item lock VARIABLE
 
-C<lock> places a lock on a variable until the lock goes out of scope
-(with ithreads you can also explicitly unlock()).
+C<lock> places a lock on a variable until the lock goes out of scope.
 
 If the variable is locked by another thread, the C<lock> call will
 block until it's available.  C<lock> is recursive, so multiple calls
@@ -323,7 +320,7 @@ BEGIN {
 	    *{"Thread::$m"} = \&{"threads::$m"};
 	}
 	require 'threads/shared.pm';
-	for my $m (qw(cond_signal cond_broadcast cond_wait unlock)) {
+	for my $m (qw(cond_signal cond_broadcast cond_wait)) {
 	    no strict 'refs';
 	    *{"Thread::$m"} = \&{"threads::shared::${m}_enabled"};
 	}
@@ -331,7 +328,6 @@ BEGIN {
 	unimplement(qw(done flags));
     } elsif ($othreads) {
 	XSLoader::load 'Thread';
-	unimplement(qw(unlock));
     } else {
 	require Carp;
 	Carp::croak("This Perl has neither ithreads nor 5005threads");

@@ -8,7 +8,7 @@ require Exporter;
 use vars qw/@ISA $VERSION/;
 @ISA = qw(Exporter);
 
-$VERSION = '0.28';
+$VERSION = '0.30';
 
 # Package to store unsigned big integers in decimal and do math with them
 
@@ -74,6 +74,7 @@ sub _base_len
 
     undef &_mul;
     undef &_div;
+
     if ($caught & 1 != 0)
       {
       # must USE_MUL
@@ -108,6 +109,7 @@ BEGIN
   $e = 5 if $^O =~ /^uts/;	# UTS get's some special treatment
   $e = 5 if $^O =~ /^unicos/;	# unicos is also problematic (6 seems to work
 				# there, but we play safe)
+  $e = 5 if $] < 5.006;		# cap, for older Perls
   $e = 7 if $e > 7;		# cap, for VMS, OS/390 and other 64 bit systems
 				# 8 fails inside random testsuite, so take 7
 
@@ -143,6 +145,10 @@ BEGIN
   # to make _and etc simpler (and faster for smaller, slower for large numbers)
   my $max = 16;
   while (2 ** $max < $BASE) { $max++; }
+  {
+    no integer;
+    $max = 16 if $] < 5.006;	# older Perls might not take >16 too well
+  }
   my ($x,$y,$z);
   do {
     $AND_BITS++;
@@ -267,7 +273,7 @@ sub _one
 
 sub _two
   {
-  # create a two (for _pow)
+  # create a two (used internally for shifting)
   [ 2 ];
   }
 
@@ -413,7 +419,7 @@ sub _sub
   #print "case 1 (swap)\n";
   for $i (@$sx)
     {
-    # we can't do an early out if $x is than $y, since we
+    # we can't do an early out if $x is < than $y, since we
     # need to copy the high chunks from $y. Found by Bob Mathews.
     #last unless defined $sy->[$j] || $car;
     $sy->[$j] += $BASE
@@ -1228,15 +1234,16 @@ sub _pow
   my ($c,$cx,$cy) = @_;
 
   my $pow2 = _one();
-  my $two = _two();
-  my $y1 = _copy($c,$cy);
-  while (!_is_one($c,$y1))
+
+  my $y_bin = ${_as_bin($c,$cy)}; $y_bin =~ s/^0b//;
+  my $len = length($y_bin);
+  while (--$len > 0)
     {
-    _mul($c,$pow2,$cx) if _is_odd($c,$y1);
-    _div($c,$y1,$two);
+    _mul($c,$pow2,$cx) if substr($y_bin,$len,1) eq '1';		# is odd?
     _mul($c,$cx,$cx);
     }
-  _mul($c,$cx,$pow2) unless _is_one($c,$pow2);
+
+  _mul($c,$cx,$pow2);
   $cx;
   }
 
@@ -1482,12 +1489,19 @@ sub _as_hex
   my $x1 = _copy($c,$x);
 
   my $es = '';
-  my $xr;
-  my $x10000 = [ 0x10000 ];
+  my ($xr, $h, $x10000);
+  if ($] >= 5.006)
+    {
+    $x10000 = [ 0x10000 ]; $h = 'h4';
+    }
+  else
+    {
+    $x10000 = [ 0x1000 ]; $h = 'h3';
+    }
   while (! _is_zero($c,$x1))
     {
     ($x1, $xr) = _div($c,$x1,$x10000);
-    $es .= unpack('h4',pack('v',$xr->[0]));
+    $es .= unpack($h,pack('v',$xr->[0]));
     }
   $es = reverse $es;
   $es =~ s/^[0]+//;   # strip leading zeros
@@ -1503,12 +1517,19 @@ sub _as_bin
   my $x1 = _copy($c,$x);
 
   my $es = '';
-  my $xr;
-  my $x10000 = [ 0x10000 ];
+  my ($xr, $b, $x10000);
+  if ($] >= 5.006)
+    {
+    $x10000 = [ 0x10000 ]; $b = 'b16';
+    }
+  else
+    {
+    $x10000 = [ 0x1000 ]; $b = 'b12';
+    }
   while (! _is_zero($c,$x1))
     {
     ($x1, $xr) = _div($c,$x1,$x10000);
-    $es .= unpack('b16',pack('v',$xr->[0]));
+    $es .= unpack($b,pack('v',$xr->[0]));
     }
   $es = reverse $es;
   $es =~ s/^[0]+//;   # strip leading zeros
@@ -1576,14 +1597,78 @@ sub _from_bin
   $x;
   }
 
-sub _modinv
+##############################################################################
+# special modulus functions
+
+# not ready yet, since it would need to deal with unsigned numbers
+sub _modinv1
   {
   # inverse modulus
+  my ($c,$num,$mod) = @_;
+
+  my $u = _zero(); my $u1 = _one();
+  my $a = _copy($c,$mod); my $b = _copy($c,$num);
+
+  # Euclid's Algorithm for bgcd(), only that we calc bgcd() ($a) and the
+  # result ($u) at the same time
+  while (!_is_zero($c,$b))
+    {
+#    print ${_str($c,$a)}, " ", ${_str($c,$b)}, " ", ${_str($c,$u)}, " ",
+#     ${_str($c,$u1)}, "\n";
+    ($a, my $q, $b) = ($b, _div($c,$a,$b));
+#    print ${_str($c,$a)}, " ", ${_str($c,$q)}, " ", ${_str($c,$b)}, "\n";
+    # original: ($u,$u1) = ($u1, $u - $u1 * $q);
+    my $t = _copy($c,$u);
+    $u = _copy($c,$u1);
+    _mul($c,$u1,$q);
+    $u1 = _sub($t,$u1);
+#    print ${_str($c,$a)}, " ", ${_str($c,$b)}, " ", ${_str($c,$u)}, " ",
+#     ${_str($c,$u1)}, "\n";
+    }
+
+  # if the gcd is not 1, then return NaN
+  return undef unless _is_one($c,$a);
+
+  $num = _mod($c,$u,$mod);
+#  print ${_str($c,$num)},"\n";
+  $num;
   }
 
 sub _modpow
   {
   # modulus of power ($x ** $y) % $z
+  my ($c,$num,$exp,$mod) = @_;
+
+  # in the trivial case,
+  if (_is_one($c,$mod))
+    {
+    splice @$num,0,1; $num->[0] = 0;
+    return $num;
+    }
+  if ((scalar @$num == 1) && (($num->[0] == 0) || ($num->[0] == 1)))
+    {
+    $num->[0] = 1;
+    return $num;
+    }
+
+#  $num = _mod($c,$num,$mod);	# this does not make it faster
+
+  my $acc = _copy($c,$num); my $t = _one();
+
+  my $expbin = ${_as_bin($c,$exp)}; $expbin =~ s/^0b//;
+  my $len = length($expbin);
+  while (--$len >= 0)
+    {
+    if ( substr($expbin,$len,1) eq '1')			# is_odd
+      {
+      _mul($c,$t,$acc);
+      $t = _mod($c,$t,$mod);
+      }
+    _mul($c,$acc,$acc);
+    $acc = _mod($c,$acc,$mod);
+    }
+  @$num = @$t;
+  $num;
   }
 
 ##############################################################################

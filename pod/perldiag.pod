@@ -817,6 +817,11 @@ the file, say, by doing C<make install>.
 functioning as a class, but that package doesn't define that particular
 method, nor does any of its base classes.  See L<perlobj>.
 
+=item Can't locate PerlIO%s
+
+(F) You tried to use in open() a PerlIO layer that does not exist,
+e.g. open(FH, ">:nosuchlayer", "somefile").
+
 =item (perhaps you forgot to load "%s"?)
 
 (F) This is an educated guess made in conjunction with the message
@@ -1430,7 +1435,7 @@ goto, or a loop control statement.
 
 =item Exiting format via %s
 
-(W exiting) You are exiting an eval by unconventional means, such as a
+(W exiting) You are exiting a format by unconventional means, such as a
 goto, or a loop control statement.
 
 =item Exiting pseudo-block via %s
@@ -2801,23 +2806,23 @@ L<perllocale> section B<LOCALE PROBLEMS>.
 
 =item perlio: argument list not closed for layer "%s"
 
-(S) When pushing a layer with arguments onto the Perl I/O system you forgot
-the ) that closes the argument list.  (Layers take care of transforming
+(W layer) When pushing a layer with arguments onto the Perl I/O system you
+forgot the ) that closes the argument list.  (Layers take care of transforming
 data between external and internal representations.)  Perl stopped parsing
 the layer list at this point and did not attempt to push this layer.
 If your program didn't explicitly request the failing operation, it may be
 the result of the value of the environment variable PERLIO.
 
-=item perlio: invalid separator character %s in attribute list
+=item perlio: invalid separator character %s in layer specification list %s
 
-(S) When pushing layers onto the Perl I/O system, something other than a
+(W layer) When pushing layers onto the Perl I/O system, something other than a
 colon or whitespace was seen between the elements of a layer list.
 If the previous attribute had a parenthesised parameter list, perhaps that
 list was terminated too soon.
 
 =item perlio: unknown layer "%s"
 
-(S) An attempt was made to push an unknown layer onto the Perl I/O
+(W layer) An attempt was made to push an unknown layer onto the Perl I/O
 system.  (Layers take care of transforming data between external and
 internal representations.)  Note that some layers, such as C<mmap>,
 are not supported in all environments.  If your program didn't
@@ -3580,6 +3585,10 @@ need to rebuild Perl with a CRTL that does, or redefine
 F<PERL_ENV_TABLES> (see L<perlvms>) so that the environ array isn't the
 target of the change to
 %ENV which produced the warning.
+
+=item thread failed to start: %s
+
+(F) The entry point function of threads->create() failed for some reason.
 
 =item times not implemented
 

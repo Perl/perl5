@@ -329,11 +329,11 @@ lintflags = -hbvxac
 .c.s:
 	$(CCCMDSRC) -S $*.c
 
-.PHONY: all compile translators utilities
-
 all: $(FIRSTMAKEFILE) miniperl$(EXE_EXT) extra.pods $(private) $(public) $(dynamic_ext) $(nonxs_ext) extras.make
 	@echo " ";
 	@echo "	Everything is up to date. Type '$(MAKE) test' to run test suite."
+
+.PHONY: all compile translators utilities
 
 compile: all
 	echo "testing compilation" > testcompile;
@@ -378,9 +378,19 @@ perlmain.c: miniperlmain.c config.sh $(FIRSTMAKEFILE)
 	sh writemain $(DYNALOADER) $(static_ext) > writemain.tmp
 	sh mv-if-diff writemain.tmp perlmain.c
 
+!NO!SUBS!
+case "$osname" in
+cygwin)
+	;; # Let cygwin/Makefile.SHs do its work.
+*)
+	$spitshell >>Makefile <<'!NO!SUBS!'
 perlmain$(OBJ_EXT): perlmain.c
 	$(CCCMD) $(PLDLFLAGS) $*.c
 
+!NO!SUBS!
+	;;
+esac
+$spitshell >>Makefile <<'!NO!SUBS!'
 # The file ext.libs is a list of libraries that must be linked in
 # for static extensions, e.g. -lm -lgdbm, etc.  The individual
 # static extension Makefile's add to it.
@@ -666,7 +676,7 @@ preplibrary: miniperl$(EXE_EXT) lib/Config.pm lib/lib.pm $(PREPLIBRARY_LIBPERL)
 # Take care to avoid modifying lib/Config.pm without reason
 # (If trying to create a new port and having problems with the configpm script,
 # try 'make minitest' and/or commenting out the tests at the end of configpm.)
-lib/Config.pm: config.sh miniperl$(EXE_EXT) configpm
+lib/Config.pm: config.sh miniperl$(EXE_EXT) configpm Porting/Glossary
 	$(LDLIBPTH) ./miniperl -Ilib configpm configpm.tmp
 	sh mv-if-diff configpm.tmp $@
 
@@ -887,6 +897,7 @@ veryclean:	_verycleaner _mopup _clobber
 # Do not 'make _mopup' directly.
 _mopup:
 	rm -f *$(OBJ_EXT) *$(LIB_EXT) all perlmain.c
+	-rmdir .depending
 	-@test -f extra.pods && rm -f `cat extra.pods`
 	-@test -f vms/README_vms.pod && rm -f vms/README_vms.pod
 	-rm -f perl.exp ext.libs extra.pods opmini.o
@@ -896,8 +907,8 @@ _mopup:
 	-rm -f perl.pixie lib*.so.perl.pixie lib*.so.Addrs
 	-rm -f perl.Addrs perl.Counts t/perl.Addrs t/perl.Counts *perl.xok
 	-rm -f perlld cygwin.c ld2 libperl*.def libperl*.dll cygperl*.dll *.exe.stackdump
-	rm -f perl$(EXE_EXT) suidperl$(EXE_EXT) miniperl$(EXE_EXT) $(LIBPERL) libperl.* microperl
-	rm -f opcode.h-old opnames.h-old pp.sym-old pp_proto.h-old
+	-rm -f perl$(EXE_EXT) suidperl$(EXE_EXT) miniperl$(EXE_EXT) $(LIBPERL) libperl.* microperl
+	-rm -f opcode.h-old opnames.h-old pp.sym-old pp_proto.h-old
 
 # Do not 'make _tidy' directly.
 _tidy:

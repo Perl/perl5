@@ -1,13 +1,13 @@
 package Net::Ping;
 
-# $Id: Ping.pm,v 1.34 2002/05/06 17:37:54 rob Exp $
+# $Id: Ping.pm,v 1.1 2002/06/04 00:41:52 rob Exp $
 
 require 5.002;
 require Exporter;
 
 use strict;
 use vars qw(@ISA @EXPORT $VERSION
-            $def_timeout $def_proto $max_datasize $pingstring $hires);
+            $def_timeout $def_proto $max_datasize $pingstring $hires $udp_source_verify);
 use FileHandle;
 use Socket qw( SOCK_DGRAM SOCK_STREAM SOCK_RAW PF_INET
                inet_aton inet_ntoa sockaddr_in );
@@ -16,7 +16,7 @@ use POSIX qw(ECONNREFUSED);
 
 @ISA = qw(Exporter);
 @EXPORT = qw(pingecho);
-$VERSION = "2.18";
+$VERSION = "2.19";
 
 # Constants
 
@@ -25,6 +25,7 @@ $def_proto = "tcp";         # Default protocol to use for pinging
 $max_datasize = 1024;       # Maximum data bytes in a packet
 # The data we exchange with the server for the stream protocol
 $pingstring = "pingschwingping!\n";
+$udp_source_verify = 1;     # Default is to verify source endpoint
 
 if ($^O =~ /Win32/i) {
   # Hack to avoid this Win32 spewage:
@@ -162,6 +163,17 @@ sub bind
   return 1;
 }
 
+
+# Description: Allow UDP source endpoint comparision to be
+#              skipped for those remote interfaces that do
+#              not response from the same endpoint.
+
+sub source_verify
+{
+  my $self = shift;
+  $udp_source_verify = 1 unless defined
+    ($udp_source_verify = ((defined $self) && (ref $self)) ? shift() : $self);
+}
 
 # Description: allows the module to use milliseconds as returned by
 # the Time::HiRes module
@@ -638,9 +650,10 @@ sub ping_udp
       $from_saddr = recv($self->{"fh"}, $from_msg, 1500, UDP_FLAGS)
         or last; # For example an unreachable host will make recv() fail.
       ($from_port, $from_ip) = sockaddr_in($from_saddr);
-      if (($from_ip eq $ip) &&        # Does the packet check out?
-          ($from_port == $self->{"port_num"}) &&
-          ($from_msg eq $msg))
+      if (!$udp_source_verify ||
+          (($from_ip eq $ip) &&        # Does the packet check out?
+           ($from_port == $self->{"port_num"}) &&
+           ($from_msg eq $msg)))
       {
         $ret = 1;       # It's a winner
         $done = 1;
@@ -672,7 +685,7 @@ __END__
 
 Net::Ping - check a remote host for reachability
 
-$Id: Ping.pm,v 1.34 2002/05/06 17:37:54 rob Exp $
+$Id: Ping.pm,v 1.1 2002/06/04 00:41:52 rob Exp $
 
 =head1 SYNOPSIS
 
@@ -778,10 +791,21 @@ default) number of data bytes is 1 if the protocol is "udp" and 0
 otherwise.  The maximum number of data bytes that can be specified is
 1024.
 
+=item $p->source_verify( { 0 | 1 } );
+
+Allows source endpoint verification to be enabled or disabled.
+This is useful for those remote destinations with multiples
+interfaces where the response may not originate from the same
+endpoint that the original destination endpoint was sent to.
+
+This is enabled by default.
+
 =item $p->hires( { 0 | 1 } );
 
 Causes this module to use Time::HiRes module, allowing milliseconds
 to be returned by subsequent calls to ping().
+
+This is disabled by default.
 
 =item $p->bind($local_addr);
 

@@ -351,14 +351,14 @@ typedef struct stcxt {
 
 #else /* !MULTIPLICITY && !PERL_OBJECT && !PERL_CAPI */
 
-static stcxt_t Context;
-static stcxt_t *Context_ptr = &Context;
+static stcxt_t *Context_ptr = NULL;
 #define dSTCXT			stcxt_t *cxt = Context_ptr
+#define SET_STCXT(x)		Context_ptr = x
 #define INIT_STCXT						\
 	dSTCXT;								\
-	NEW_STORABLE_CXT_OBJ(cxt)
+	NEW_STORABLE_CXT_OBJ(cxt);			\
+	SET_STCXT(cxt)
 
-#define SET_STCXT(x)		Context_ptr = x
 
 #endif /* MULTIPLICITY || PERL_OBJECT || PERL_CAPI */
 
@@ -2645,7 +2645,7 @@ static int store_hook(
 	 * If they returned more than one item, we need to serialize some
 	 * extra references if not already done.
 	 *
-	 * Loop over the array, starting at postion #1, and for each item,
+	 * Loop over the array, starting at position #1, and for each item,
 	 * ensure it is a reference, serialize it if not already done, and
 	 * replace the entry with the tag ID of the corresponding serialized
 	 * object.
@@ -3677,6 +3677,10 @@ static SV *retrieve_hook(stcxt_t *cxt, char *cname)
 	 * We don't need to remember the addresses returned by retrieval, because
 	 * all the references will be obtained through indirection via the object
 	 * tags in the object-ID list.
+	 *
+	 * We need to decrement the reference count for these objects
+	 * because, if the user doesn't save a reference to them in the hook,
+	 * they must be freed when this context is cleaned.
 	 */
 
 	while (flags & SHF_NEED_RECURSE) {
@@ -3684,6 +3688,7 @@ static SV *retrieve_hook(stcxt_t *cxt, char *cname)
 		rv = retrieve(cxt, 0);
 		if (!rv)
 			return (SV *) 0;
+		SvREFCNT_dec(rv);
 		TRACEME(("retrieve_hook back with rv=0x%"UVxf,
 			 PTR2UV(rv)));
 		GETMARK(flags);

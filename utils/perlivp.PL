@@ -14,9 +14,9 @@ use Cwd;
 
 # This forces PL files to create target in same directory as PL file.
 # This is so that make depend always knows where to find PL derivatives.
-$origdir = cwd;
+my $origdir = cwd;
 chdir dirname($0);
-$file = basename($0, '.PL');
+my $file = basename($0, '.PL');
 $file .= '.com' if $^O eq 'VMS';
 
 # Create output file.
@@ -37,7 +37,7 @@ $Config{'startperl'}
 
 print OUT <<'!NO!SUBS!';
 
-# perlivp V 0.01
+# perlivp V 0.02
 
 
 sub usage {
@@ -56,7 +56,7 @@ Usage:
     exit;
 }
 
-use vars (%opt); # allow testing with older versions (do not use our)
+use vars qw(%opt); # allow testing with older versions (do not use our)
 
 @opt{ qw/? H h P p V v/ } = qw(0 0 0 0 0 0 0);
 
@@ -88,8 +88,15 @@ if (defined($Config{'perlpath'})) { $perlpath = $Config{'perlpath'}; }
 # Of course some platforms are distinct...
 if ($^O eq 'VMS') { $perlpath = $^X; }
 
+# The useithreads Config variable plays a role in whether or not
+# threads and threads/shared work when C<use>d.  They apparently always
+# get installed on systems that can run Configure.
+my $useithreads = '';
+if (defined($Config{'useithreads'})) { $useithreads = $Config{'useithreads'}; }
+
 print OUT <<"!GROK!THIS!";
 my \$perlpath = '$perlpath';
+my \$useithreads = '$useithreads';
 !GROK!THIS!
 
 print OUT <<'!NO!SUBS!';
@@ -199,6 +206,10 @@ if (defined($Config{'extensions'})) {
     my @extensions = split(/\s+/,$Config{'extensions'});
     foreach (@extensions) {
         next if ($_ eq '');
+        if ( $useithreads !~ /define/i ) {
+            next if ($_ eq 'threads');
+            next if ($_ eq 'threads/shared');
+        }
         next if ($_ eq 'Devel/DProf'); 
            # VMS$ perl  -e "eval ""require \""Devel/DProf.pm\"";"" print $@"
            # \NT> perl  -e "eval \"require 'Devel/DProf.pm'\"; print $@"
@@ -306,9 +317,17 @@ my @ph_files = qw(stdio.ph);
 while (($var, $val) = each %Config) {
     if ($var =~ m/i_(.+)/ && $val eq 'define') {
         $h_file = $1;
+	# Some header and symbol names don't match for hysterical raisins.
+	$h_file = 'arpa/inet'    if $h_file eq 'arpainet';
+	$h_file = 'netinet/in'   if $h_file eq 'niin';
+	$h_file = 'netinet/tcp'  if $h_file eq 'netinettcp';
+	$h_file = 'sys/resource' if $h_file eq 'sysresrc';
+	$h_file = 'sys/select'   if $h_file eq 'sysselct';
+	$h_file = 'sys/security' if $h_file eq 'syssecrt';
+        $h_file = 'rpcsvc/dbm'   if $h_file eq 'rpcsvcdbm';
         # This ought to distinguish syslog from sys/syslog.
         # (NB syslog.ph is heavily used for the DBI pre-requisites).
-        $h_file =~ s{^sys(.+)}{sys/$1} unless $h_file eq 'syslog';
+        $h_file =~ s{^sys(\w.+)}{sys/$1} unless $h_file eq 'syslog';
         push(@ph_files, "$h_file.ph");
     }
 }

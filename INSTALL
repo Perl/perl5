@@ -719,6 +719,9 @@ unmaintained.
 
 By default, Configure selects ithreads if -Dusethreads is specified.
 
+(You need to use also the PerlIO layer, explained later, if you decide
+to use ithreads, to guarantee the good interworking of threads and I/O.)
+
 However, you can select the old 5005threads behavior
 
 	sh Configure -Dusethreads -Duse5005threads
@@ -1370,7 +1373,7 @@ libgdbm under HP-UX 11.
 
 =item Porting information
 
-Specific information for the OS/2, Plan9, VMS and Win32 ports is in the
+Specific information for the OS/2, Plan 9, VMS and Win32 ports is in the
 corresponding README files and subdirectories.  Additional information,
 including a glossary of all those config.sh variables, is in the Porting
 subdirectory.  Especially Porting/Glossary should come in handy.

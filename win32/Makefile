@@ -667,6 +667,7 @@ TIMEHIRES		= $(EXTDIR)\Time\HiRes\HiRes
 CWD			= $(EXTDIR)\Cwd\Cwd
 LISTUTIL  		= $(EXTDIR)\List\Util\Util
 PERLIOVIA		= $(EXTDIR)\PerlIO\Via\Via
+XSAPITEST		= $(EXTDIR)\XS\APItest\APItest
 XSTYPEMAP		= $(EXTDIR)\XS\Typemap\Typemap
 UNICODENORMALIZE	= $(EXTDIR)\Unicode\Normalize\Normalize
 
@@ -696,6 +697,7 @@ TIMEHIRES_DLL		= $(AUTODIR)\Time\HiRes\HiRes.dll
 CWD_DLL			= $(AUTODIR)\Cwd\Cwd.dll
 LISTUTIL_DLL		= $(AUTODIR)\List\Util\Util.dll
 PERLIOVIA_DLL		= $(AUTODIR)\PerlIO\Via\Via.dll
+XSAPITEST_DLL		= $(AUTODIR)\XS\APItest\APItest.dll
 XSTYPEMAP_DLL		= $(AUTODIR)\XS\Typemap\Typemap.dll
 UNICODENORMALIZE_DLL	= $(AUTODIR)\Unicode\Normalize\Normalize.dll
 
@@ -726,6 +728,7 @@ EXTENSION_C	= 		\
 		$(CWD).c	\
 		$(LISTUTIL).c	\
 		$(PERLIOVIA).c	\
+		$(XSAPITEST).c	\
 		$(XSTYPEMAP).c	\
 		$(UNICODENORMALIZE).c
 
@@ -756,6 +759,7 @@ EXTENSION_DLL	= 		\
 		$(CWD_DLL)	\
 		$(LISTUTIL_DLL)	\
 		$(PERLIOVIA_DLL)	\
+		$(XSAPITEST_DLL)	\
 		$(XSTYPEMAP_DLL)	\
 		$(UNICODENORMALIZE_DLL)
 
@@ -968,8 +972,10 @@ utils: $(PERLEXE) $(X2P)
 	copy ..\README.dgux     .\perldgux.pod
 	copy ..\README.dos      .\perldos.pod
 	copy ..\README.epoc     .\perlepoc.pod
+	copy ..\README.freebsd     .\perlfreebsd.pod
 	copy ..\README.hurd     .\perlhurd.pod
 	copy ..\README.hpux     .\perlhpux.pod
+	copy ..\README.irix     .\perlirix.pod
 	copy ..\README.machten  .\perlmachten.pod
 	copy ..\README.macos    .\perlmacos.pod
 	copy ..\README.mint     .\perlmint.pod
@@ -1018,6 +1024,7 @@ distclean: clean
 	-del /f $(LIBDIR)\List\Util.pm
 	-del /f $(LIBDIR)\Scalar\Util.pm
 	-del /f $(LIBDIR)\Time\HiRes.pm
+	-del /f $(LIBDIR)\XS\APItest.pm
 	-del /f $(LIBDIR)\XS\Typemap.pm
 	-del /f $(LIBDIR)\Unicode\Normalize.pm
 	-if exist $(LIBDIR)\IO rmdir /s /q $(LIBDIR)\IO
@@ -1041,8 +1048,8 @@ distclean: clean
 	-del /f *.html *.bat checkpods \
 	    perlaix.pod perlamiga.pod perlapollo.pod perlbeos.pod \
 	    perlbs2000.pod perlce.pod perlcygwin.pod perldgux.pod \
-	    perldos.pod perlepoc.pod perlhurd.pod \
-	    perlhpux.pod perlmachten.pod \
+	    perldos.pod perlepoc.pod perlfreebsd.pod perlhurd.pod \
+	    perlhpux.pod perlirix.pod perlmachten.pod \
 	    perlmacos.pod perlmint.pod perlmpeix.pod perlnetware.pod \
 	    perlos2.pod perlos390.pod perlplan9.pod perlqnx.pod \
 	    perlsolaris.pod perltru64.pod perluts.pod \

@@ -12,7 +12,7 @@ package Math::BigFloat;
 #   _p: precision
 #   _f: flags, used to signal MBI not to touch our private parts
 
-$VERSION = '1.32';
+$VERSION = '1.34';
 require 5.005;
 use Exporter;
 use File::Spec;
@@ -1715,7 +1715,6 @@ sub import
       push @a, $_[$i];
       }
     }
-#  print "mbf @a\n";
 
   # let use Math::BigInt lib => 'GMP'; use Math::BigFloat; still work
   my $mbilib = eval { Math::BigInt->config()->{lib} };
@@ -1728,19 +1727,17 @@ sub import
     {
     # MBI not loaded, or with ne "Math::BigInt"
     $lib .= ",$mbilib" if defined $mbilib;
-  
-#  my @parts = split /::/, $MBI;		# Math::BigInt => Math BigInt
-#  my $file = pop @parts; $file .= '.pm';	# BigInt => BigInt.pm
-#  $file = File::Spec->catfile (@parts, $file);
-
+    $lib =~ s/^,//;				# don't leave empty 
     if ($] < 5.006)
       {
       # Perl < 5.6.0 dies with "out of memory!" when eval() and ':constant' is
       # used in the same script, or eval inside import().
       my @parts = split /::/, $MBI;		# Math::BigInt => Math BigInt
       my $file = pop @parts; $file .= '.pm';	# BigInt => BigInt.pm
+      require File::Spec;
       $file = File::Spec->catfile (@parts, $file);
-      eval { require $file; $MBI->import( lib => '$lib', 'objectify' ); }
+      eval { require "$file"; };
+      $MBI->import( lib => $lib, 'objectify' );
       }
     else
       {

@@ -71,3 +71,24 @@ Revision history for Perl extension Attribute::Handlers
 
 	- Added $VERSION numbrs to demo modules (seems bizarre to me, but
 	  they're core too now).
+
+
+0.77	Sat Jun  8 22:58:56 CEST 2002
+
+	- Since Attribute::Handlers now is core, I will refer to changes
+	with their patch number, please read  Porting/repository.pod from
+	your a perl tarball for more information.
+
+	- Brought up to date with perl 5.8RC1 version 
+	will be 5.8 if no more changes come in
+
+	- [#13686] This changes the behaviour of lexical attributes.
+	Prior to this lexical attributes were done at a compile time, 
+	and they would loose their attribute on the next run over them.
+	Now perl 5.8 calls the attribute handler runtime whenever it hits my.
+
+	- [#14448] Fixes cases with too high refcounts on lexical attributes
+
+	- [#15945] Do not warn about too late CHECK and INIT block if
+	A::H is pulled in using a require.
+

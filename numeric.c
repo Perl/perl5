@@ -743,10 +743,10 @@ S_mulexp10(NV value, I32 exponent)
      *
      * [1] Trying to establish a condition handler to trap floating point
      *     exceptions is not a good idea. */
-#if defined(VMS) && !defined(__IEEE_FP) && defined(NV_MAX_10_EXP)
-    if (!negative &&
-        (log10(value) + exponent) >= (NV_MAX_10_EXP))
-        return NV_MAX;
+    /* UNICOS fp is similarly non-IEEE. */
+#if ((defined(VMS) && !defined(__IEEE_FP)) || defined(_UNICOS)) && defined(NV_MAX_10_EXP)
+    if ((log10(value) + exponent) >= (NV_MAX_10_EXP))
+        return negative ? 0.0 : NV_MAX;
 #endif
 
     /* In UNICOS and in certain Cray models (such as T90) there is no
@@ -766,8 +766,11 @@ S_mulexp10(NV value, I32 exponent)
 	if (exponent & bit) {
 	    exponent ^= bit;
 	    result *= power;
+	    /* Floating point exceptions are supposed to be turned off,
+	     *  but if we're obviously done, don't risk another iteration.  
+	     */
+	     if (exponent == 0) break;
 	}
-	/* Floating point exceptions are supposed to be turned off. */
 	power *= power;
     }
     return negative ? value / result : value * result;

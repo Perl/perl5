@@ -186,6 +186,7 @@ sub cat_file
     my($file) = @_;
     local $/;  # slurp
     open(FILE, $file) or die "Can't open $file: $!";
+    binmode(FILE);
     my $tmp = <FILE>;
     close(FILE);
     $tmp;

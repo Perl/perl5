@@ -1117,8 +1117,10 @@ utils: $(PERLEXE) $(X2P)
 	copy ..\README.dgux	..\pod\perldgux.pod
 	copy ..\README.dos	..\pod\perldos.pod
 	copy ..\README.epoc	..\pod\perlepoc.pod
+	copy ..\README.freebsd	..\pod\perlfreebsd.pod
 	copy ..\README.hpux	..\pod\perlhpux.pod
 	copy ..\README.hurd	..\pod\perlhurd.pod
+	copy ..\README.irix	..\pod\perlirix.pod
 	copy ..\README.machten	..\pod\perlmachten.pod
 	copy ..\README.macos	..\pod\perlmacos.pod
 	copy ..\README.mint	..\pod\perlmint.pod
@@ -1175,8 +1177,8 @@ distclean: clean
 	-cd $(PODDIR) && del /f *.html *.bat checkpods \
 	    perlaix.pod perlamiga.pod perlapollo.pod \
 	    perlbeos.pod perlbs2000.pod perlce.pod perlcygwin.pod perldgux.pod \
-	    perldos.pod perlepoc.pod perlhpux.pod perlhurd.pod \
-	    perlmachten.pod perlmint.pod \
+	    perldos.pod perlepoc.pod perlfreebsd.pod perlhpux.pod perlhurd.pod \
+	    perlirix.pod perlmachten.pod perlmint.pod \
 	    perlmacos.pod perlmpeix.pod perlnetware.pod \
 	    perlos2.pod perlos390.pod \
 	    perlplan9.pod perlqnx.pod \

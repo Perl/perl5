@@ -392,11 +392,14 @@ Several special variables also refer back to portions of the previous
 match.  C<$+> returns whatever the last bracket match matched.
 C<$&> returns the entire matched string.  (At one point C<$0> did
 also, but now it returns the name of the program.)  C<$`> returns
-everything before the matched string.  And C<$'> returns everything
-after the matched string.
+everything before the matched string.  C<$'> returns everything
+after the matched string. And C<$^N> contains whatever was matched by
+the most-recently closed group (submatch). C<$^N> can be used in
+extended patterns (see below), for example to assign a submatch to a
+variable. 
 
 The numbered variables ($1, $2, $3, etc.) and the related punctuation
-set (C<$+>, C<$&>, C<$`>, and C<$'>) are all dynamically scoped
+set (C<$+>, C<$&>, C<$`>, C<$'>, and C<$^N>) are all dynamically scoped
 until the end of the enclosing block or until the next successful
 match, whichever comes first.  (See L<perlsyn/"Compound Statements">.)
 
@@ -562,6 +565,14 @@ highly experimental, and may be changed or deleted without notice.
 This zero-width assertion evaluate any embedded Perl code.  It
 always succeeds, and its C<code> is not interpolated.  Currently,
 the rules to determine where the C<code> ends are somewhat convoluted.
+
+This feature can be used together with the special variable C<$^N> to
+capture the results of submatches in variables without having to keep
+track of the number of nested parentheses. For example:
+
+  $_ = "The brown fox jumps over the lazy dog";
+  /the (\S+)(?{ $color = $^N }) (\S+)(?{ $animal = $^N })/i;
+  print "color = $color, animal = $animal\n";
 
 The C<code> is properly scoped in the following sense: If the assertion
 is backtracked (compare L<"Backtracking">), all changes introduced after

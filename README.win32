@@ -192,7 +192,8 @@ Make sure you are in the "win32" subdirectory under the perl toplevel.
 This directory contains a "Makefile" that will work with
 versions of nmake that come with Visual C++ or the Platform SDK, and
 a dmake "makefile.mk" that will work for all supported compilers.  The
-defaults in the dmake makefile are setup to build using the GCC compiler.
+defaults in the dmake makefile are setup to build using Microsoft Visual
+C++ 6.0 or newer.
 
 =item *
 
@@ -603,7 +604,7 @@ Embedding Perl inside a 64-bit application.
 
 =back
 
-=item Running Perl Scripts
+=head2 Running Perl Scripts
 
 Perl scripts on UNIX use the "#!" (a.k.a "shebang") line to
 indicate to the OS that it should execute the file using perl.

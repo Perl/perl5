@@ -347,6 +347,10 @@ Report the search path for a class's ISA tree
 
 Declare struct-like datatypes as Perl classes
 
+=item Config
+
+Access Perl configuration information
+
 =item Cwd
 
 Get pathname of current working directory
@@ -386,6 +390,10 @@ Use nice English (or awk) names for ugly punctuation variables
 =item Env
 
 Perl module that imports environment variables as scalars or arrays
+
+=item Errno
+
+System errno constants
 
 =item Exporter
 
@@ -879,10 +887,6 @@ Convert POD data to ASCII text with format escapes
 
 Print a usage message from embedded pod documentation
 
-=item Pod::t::basic
-
-Test of various basic POD features in translators.
-
 =item SDBM_File
 
 Tied access to sdbm files
@@ -1001,15 +1005,15 @@ Line wrapping to form simple paragraphs
 
 =item Thread
 
-Manipulate threads in Perl
+Manipulate threads in Perl (for old code only)
 
 =item Thread::Queue
 
-Thread-safe queues
+Thread-safe queues (for old code only)
 
 =item Thread::Semaphore
 
-Thread-safe semaphores
+Thread-safe semaphores (for old code only)
 
 =item Tie::Array
 

@@ -54,7 +54,6 @@ sub share_disabled { return @_}
 
 $threads::shared::threads_shared = 1;
 
-sub _thrcnt { 42 }
 
 sub threads::shared::tie::SPLICE
 {
@@ -201,11 +200,6 @@ Documentation borrowed from Thread.pm
 
 =head1 SEE ALSO
 
-L<perl> L<threads>
+L<threads>, L<perlthrtut>
 
 =cut
-
-
-
-
-
