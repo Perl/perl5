@@ -2431,6 +2431,12 @@ package-specific handler.  That name might have a meaning to Perl itself
 some day, even though it doesn't yet.  Perhaps you should use a
 mixed-case attribute name, instead.  See L<attributes>.
 
+=item Package '%s' not found (did you use the incorrect case?)
+
+(W misc) You included a package file via C<use>, but the package name
+did not match the file name. It's possible that you mispelled the
+package name.
+
 =item page overflow
 
 (W io) A single call to write() produced more lines than can fit on a
