@@ -1016,8 +1016,9 @@ PP(pp_flip)
 #define RANGE_IS_NUMERIC(left,right) ( \
 	SvNIOKp(left)  || (SvOK(left)  && !SvPOKp(left))  || \
 	SvNIOKp(right) || (SvOK(right) && !SvPOKp(right)) || \
-	(((!SvOK(left) && SvOK(right)) || (looks_like_number(left) && \
-	  SvPOKp(left) && *SvPVX(left) != '0')) && looks_like_number(right)))
+	(((!SvOK(left) && SvOK(right)) || ((!SvOK(left) || \
+          looks_like_number(left)) && SvPOKp(left) && *SvPVX(left) != '0')) \
+         && (!SvOK(right) || looks_like_number(right))))
 
 PP(pp_flop)
 {

@@ -1910,7 +1910,7 @@ Perl_looks_like_number(pTHX_ SV *sv)
     else if (SvPOKp(sv))
 	sbegin = SvPV(sv, len);
     else
-	return 1; /* Historic.  Wrong?  */
+	return SvFLAGS(sv) & (SVf_NOK|SVp_NOK|SVf_IOK|SVp_IOK);
     return grok_number(sbegin, len, NULL);
 }
 
