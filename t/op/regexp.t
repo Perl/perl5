@@ -19,7 +19,11 @@
 # Column 4 contains a string, usually C<$&>.
 #
 # Column 5 contains the expected result of double-quote
-# interpolating that string after the match.
+# interpolating that string after the match, or start of error message.
+#
+# Columns 1, 2 and 5 are \n-interpolated.
+
+$iters = shift || 1;		# Poor man performance suite, 10000 is OK.
 
 open(TESTS,'op/re_tests') || open(TESTS,'t/op/re_tests')
     || die "Can't open re_tests";
@@ -30,24 +34,33 @@ seek(TESTS,0,0);
 $. = 0;
 
 $| = 1;
-print "1..$numtests\n";
+print "1..$numtests\n# $iters iterations\n";
 TEST:
 while (<TESTS>) {
     ($pat, $subject, $result, $repl, $expect) = split(/[\t\n]/,$_);
     $input = join(':',$pat,$subject,$result,$repl,$expect);
     $pat = "'$pat'" unless $pat =~ /^[:']/;
+    $pat =~ s/\\n/\n/g;
+    $subject =~ s/\\n/\n/g;
+    $expect =~ s/\\n/\n/g;
+    $expect = $repl = '-' if $skip_amp and $input =~ /\$[&\`\']/;
     for $study ("", "study \$subject") {
-	eval "$study; \$match = (\$subject =~ m$pat); \$got = \"$repl\";";
+ 	$c = $iters;
+ 	eval "$study; \$match = (\$subject =~ m$pat) while \$c--; \$got = \"$repl\";";
+	chomp( $err = $@ );
 	if ($result eq 'c') {
-	    if ($@ !~ m!^\Q$expect!) { print "not ok $.\n"; next TEST }
+	    if ($err !~ m!^\Q$expect!) { print "not ok $. (compile) $input => `$err'\n"; next TEST }
 	    last;  # no need to study a syntax error
 	}
+	elsif ($@) {
+	    print "not ok $. $input => error `$err'\n"; next TEST;
+	}
 	elsif ($result eq 'n') {
-	    if ($match) { print "not ok $. $input => $got\n"; next TEST }
+	    if ($match) { print "not ok $. ($study) $input => false positive\n"; next TEST }
 	}
 	else {
 	    if (!$match || $got ne $expect) {
-		print "not ok $. $input => $got\n";
+ 		print "not ok $. ($study) $input => `$got', match=$match\n";
 		next TEST;
 	    }
 	}

@@ -418,36 +418,6 @@ perl_destruct(register PerlInterpreter *sv_interp)
 
     /* defgv, aka *_ should be taken care of elsewhere */
 
-#if 0  /* just about all regexp stuff, seems to be ok */
-
-    /* shortcuts to regexp stuff */
-    leftgv = Nullgv;
-    ampergv = Nullgv;
-
-    SAVEFREEOP(curpm);
-    SAVEFREEOP(oldlastpm); /* for saving regexp context during debugger */
-
-    regprecomp = NULL;	/* uncompiled string. */
-    regparse = NULL;	/* Input-scan pointer. */
-    regxend = NULL;	/* End of input for compile */
-    regnpar = 0;	/* () count. */
-    regcode = NULL;	/* Code-emit pointer; &regdummy = don't. */
-    regsize = 0;	/* Code size. */
-    regnaughty = 0;	/* How bad is this pattern? */
-    regsawback = 0;	/* Did we see \1, ...? */
-
-    reginput = NULL;		/* String-input pointer. */
-    regbol = NULL;		/* Beginning of input, for ^ check. */
-    regeol = NULL;		/* End of input, for $ check. */
-    regstartp = (char **)NULL;	/* Pointer to startp array. */
-    regendp = (char **)NULL;	/* Ditto for endp. */
-    reglastparen = 0;		/* Similarly for lastparen. */
-    regtill = NULL;		/* How far we are required to go. */
-    regflags = 0;		/* are we folding, multilining? */
-    regprev = (char)NULL;	/* char before regbol, \n if none */
-
-#endif /* if 0 */
-
     /* clean up after study() */
     SvREFCNT_dec(lastscream);
     lastscream = Nullsv;
@@ -967,7 +937,7 @@ print \"  \\@INC:\\n    @INC\\n\";");
     SvREFCNT_dec(rs);
     rs = SvREFCNT_inc(nrs);
 #ifdef USE_THREADS
-    sv_setsv(*av_fetch(thr->magicals, find_thread_magical("/"), FALSE), rs); 
+    sv_setsv(*av_fetch(thr->threadsv, find_threadsv("/"), FALSE), rs); 
 #else
     sv_setsv(GvSV(gv_fetchpv("/", TRUE, SVt_PV)), rs);
 #endif /* USE_THREADS */
@@ -1082,10 +1052,10 @@ perl_get_sv(char *name, I32 create)
     GV *gv;
 #ifdef USE_THREADS
     if (name[1] == '\0' && !isALPHA(name[0])) {
-	PADOFFSET tmp = find_thread_magical(name);
+	PADOFFSET tmp = find_threadsv(name);
     	if (tmp != NOT_IN_PAD) {
 	    dTHR;
-	    return *av_fetch(thr->magicals, tmp, FALSE);
+	    return *av_fetch(thr->threadsv, tmp, FALSE);
 	}
     }
 #endif /* USE_THREADS */
@@ -2528,7 +2498,7 @@ init_predump_symbols(void)
     GV *othergv;
 
 #ifdef USE_THREADS
-    sv_setpvn(*av_fetch(thr->magicals,find_thread_magical("\""),FALSE)," ", 1);
+    sv_setpvn(*av_fetch(thr->threadsv,find_threadsv("\""),FALSE)," ", 1);
 #else
     sv_setpvn(GvSV(gv_fetchpv("\"", TRUE, SVt_PV)), " ", 1);
 #endif /* USE_THREADS */
@@ -2816,7 +2786,7 @@ init_main_thread()
     Newz(53, thr, 1, struct thread);
     curcop = &compiling;
     thr->cvcache = newHV();
-    thr->magicals = newAV();
+    thr->threadsv = newAV();
     thr->specific = newAV();
     thr->errhv = newHV();
     thr->flags = THRf_R_JOINABLE;

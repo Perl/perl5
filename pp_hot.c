@@ -754,13 +754,15 @@ PP(pp_match)
     I32 minmatch = 0;
     I32 oldsave = savestack_ix;
     I32 update_minmatch = 1;
+    SV *screamer;
 
     if (op->op_flags & OPf_STACKED)
 	TARG = POPs;
     else {
-	TARG = GvSV(defgv);
+	TARG = DEFSV;
 	EXTEND(SP,1);
     }
+    PUTBACK;				/* EVAL blocks need stack_sp. */
     s = SvPV(TARG, len);
     strend = s + len;
     if (!s)
@@ -768,6 +770,7 @@ PP(pp_match)
     TAINT_NOT;
 
     if (pm->op_pmflags & PMf_USED) {
+      failure:
 	if (gimme == G_ARRAY)
 	    RETURN;
 	RETPUSHNO;
@@ -777,6 +780,12 @@ PP(pp_match)
 	pm = curpm;
 	rx = pm->op_pmregexp;
     }
+    if (rx->minlen > len) goto failure;
+
+    screamer = ( (SvSCREAM(TARG) && rx->check_substr
+		  && SvTYPE(rx->check_substr) == SVt_PVBM
+		  && SvVALID(rx->check_substr)) 
+		? TARG : Nullsv);
     truebase = t = s;
     if (global = pm->op_pmflags & PMf_GLOBAL) {
 	rx->startp[0] = 0;
@@ -793,6 +802,7 @@ PP(pp_match)
 	gimme = G_SCALAR;			/* accidental array context? */
     safebase = (((gimme == G_ARRAY) || global || !rx->nparens)
 		&& !sawampersand);
+    safebase = safebase ? 0  : REXEC_COPY_STR ;
     if (pm->op_pmflags & (PMf_MULTILINE|PMf_SINGLELINE)) {
 	SAVEINT(multiline);
 	multiline = pm->op_pmflags & PMf_MULTILINE;
@@ -806,43 +816,52 @@ play_it_again:
 	if (update_minmatch++)
 	    minmatch = (s == rx->startp[0]);
     }
-    if (pm->op_pmshort) {
-	if (pm->op_pmflags & PMf_SCANFIRST) {
-	    if (SvSCREAM(TARG)) {
-		if (screamfirst[BmRARE(pm->op_pmshort)] < 0)
+    if (rx->check_substr) {
+	if (!(rx->reganch & ROPT_NOSCAN)) { /* Floating checkstring. */
+	    if ( screamer ) {
+		I32 p = -1;
+		
+		if (screamfirst[BmRARE(rx->check_substr)] < 0)
 		    goto nope;
-		else if (!(s = screaminstr(TARG, pm->op_pmshort)))
+		else if (!(s = screaminstr(TARG, rx->check_substr, 
+					   rx->check_offset_min, 0, &p, 0)))
 		    goto nope;
-		else if (pm->op_pmflags & PMf_ALL)
+		else if ((rx->reganch & ROPT_CHECK_ALL)
+			 && !sawampersand && !SvTAIL(rx->check_substr))
 		    goto yup;
 	    }
-	    else if (!(s = fbm_instr((unsigned char*)s,
-	      (unsigned char*)strend, pm->op_pmshort)))
+	    else if (!(s = fbm_instr((unsigned char*)s + rx->check_offset_min,
+				     (unsigned char*)strend, 
+				     rx->check_substr)))
 		goto nope;
-	    else if (pm->op_pmflags & PMf_ALL)
+	    else if ((rx->reganch & ROPT_CHECK_ALL) && !sawampersand)
 		goto yup;
-	    if (s && rx->regback >= 0) {
-		++BmUSEFUL(pm->op_pmshort);
-		s -= rx->regback;
-		if (s < t)
-		    s = t;
+	    if (s && rx->check_offset_max < t - s) {
+		++BmUSEFUL(rx->check_substr);
+		s -= rx->check_offset_max;
 	    }
 	    else
 		s = t;
 	}
-	else if (!multiline) {
-	    if (*SvPVX(pm->op_pmshort) != *s
-		|| (pm->op_pmslen > 1
-		    && memNE(SvPVX(pm->op_pmshort), s, pm->op_pmslen)))
+	/* Now checkstring is fixed, i.e. at fixed offset from the
+	   beginning of match, and the match is anchored at s. */
+	else if (!multiline) {	/* Anchored near beginning of string. */
+	    I32 slen;
+	    if (*SvPVX(rx->check_substr) != s[rx->check_offset_min]
+		|| ((slen = SvCUR(rx->check_substr)) > 1
+		    && memNE(SvPVX(rx->check_substr), 
+			     s + rx->check_offset_min, slen)))
 		goto nope;
 	}
-	if (!rx->naughty && --BmUSEFUL(pm->op_pmshort) < 0) {
-	    SvREFCNT_dec(pm->op_pmshort);
-	    pm->op_pmshort = Nullsv;	/* opt is being useless */
+	if (!rx->naughty && --BmUSEFUL(rx->check_substr) < 0
+	    && rx->check_substr == rx->float_substr) {
+	    SvREFCNT_dec(rx->check_substr);
+	    rx->check_substr = Nullsv;	/* opt is being useless */
+	    rx->float_substr = Nullsv;
 	}
     }
-    if (pregexec(rx, s, strend, truebase, minmatch,
-		 SvSCREAM(TARG) ? TARG : Nullsv, safebase))
+    if (regexec_flags(rx, s, strend, truebase, minmatch,
+		      screamer, NULL, safebase))
     {
 	curpm = pm;
 	if (pm->op_pmflags & PMf_ONCE)
@@ -854,7 +873,7 @@ play_it_again:
     /*NOTREACHED*/
 
   gotcha:
-    TAINT_IF(rx->exec_tainted);
+    TAINT_IF(RX_MATCH_TAINTED(rx));
     if (gimme == G_ARRAY) {
 	I32 iters, i, len;
 
@@ -863,6 +882,7 @@ play_it_again:
 	    i = 1;
 	else
 	    i = 0;
+	SPAGAIN;			/* EVAL blocks could move the stack. */
 	EXTEND(SP, iters + i);
 	EXTEND_MORTAL(iters + i);
 	for (i = !i; i <= iters; i++) {
@@ -878,6 +898,7 @@ play_it_again:
 	    strend = rx->subend;
 	    if (rx->startp[0] && rx->startp[0] == rx->endp[0])
 		++rx->endp[0];
+	    PUTBACK;			/* EVAL blocks may use stack */
 	    goto play_it_again;
 	}
 	LEAVE_SCOPE(oldsave);
@@ -904,9 +925,9 @@ play_it_again:
 	RETPUSHYES;
     }
 
-yup:
-    TAINT_IF(rx->exec_tainted);
-    ++BmUSEFUL(pm->op_pmshort);
+yup:					/* Confirmed by check_substr */
+    TAINT_IF(RX_MATCH_TAINTED(rx));
+    ++BmUSEFUL(rx->check_substr);
     curpm = pm;
     if (pm->op_pmflags & PMf_ONCE)
 	pm->op_pmflags |= PMf_USED;
@@ -916,7 +937,7 @@ yup:
 	rx->subbeg = truebase;
 	rx->subend = strend;
 	rx->startp[0] = s;
-	rx->endp[0] = s + SvCUR(pm->op_pmshort);
+	rx->endp[0] = s + SvCUR(rx->check_substr);
 	goto gotcha;
     }
     if (sawampersand) {
@@ -926,14 +947,14 @@ yup:
 	rx->subbeg = tmps;
 	rx->subend = tmps + (strend-t);
 	tmps = rx->startp[0] = tmps + (s - t);
-	rx->endp[0] = tmps + SvCUR(pm->op_pmshort);
+	rx->endp[0] = tmps + SvCUR(rx->check_substr);
     }
     LEAVE_SCOPE(oldsave);
     RETPUSHYES;
 
 nope:
-    if (pm->op_pmshort)
-	++BmUSEFUL(pm->op_pmshort);
+    if (rx->check_substr)
+	++BmUSEFUL(rx->check_substr);
 
 ret_no:
     if (global && !(pm->op_pmflags & PMf_CONTINUE)) {
@@ -1403,13 +1424,15 @@ PP(pp_subst)
     STRLEN len;
     int force_on_match = 0;
     I32 oldsave = savestack_ix;
+    I32 update_minmatch = 1;
+    SV *screamer;
 
     /* known replacement string? */
     dstr = (pm->op_pmflags & PMf_CONST) ? POPs : Nullsv;
     if (op->op_flags & OPf_STACKED)
 	TARG = POPs;
     else {
-	TARG = GvSV(defgv);
+	TARG = DEFSV;
 	EXTEND(SP,1);
     }
     if (SvREADONLY(TARG)
@@ -1432,41 +1455,52 @@ PP(pp_subst)
 	pm = curpm;
 	rx = pm->op_pmregexp;
     }
-    safebase = (!rx->nparens && !sawampersand);
+    screamer = ( (SvSCREAM(TARG) && rx->check_substr
+		  && SvTYPE(rx->check_substr) == SVt_PVBM
+		  && SvVALID(rx->check_substr)) 
+		? TARG : Nullsv);
+    safebase = (!rx->nparens && !sawampersand) ? 0 : REXEC_COPY_STR;
     if (pm->op_pmflags & (PMf_MULTILINE|PMf_SINGLELINE)) {
 	SAVEINT(multiline);
 	multiline = pm->op_pmflags & PMf_MULTILINE;
     }
     orig = m = s;
-    if (pm->op_pmshort) {
-	if (pm->op_pmflags & PMf_SCANFIRST) {
-	    if (SvSCREAM(TARG)) {
-		if (screamfirst[BmRARE(pm->op_pmshort)] < 0)
+    if (rx->check_substr) {
+	if (!(rx->reganch & ROPT_NOSCAN)) { /* It floats. */
+	    if (screamer) {
+		I32 p = -1;
+		
+		if (screamfirst[BmRARE(rx->check_substr)] < 0)
 		    goto nope;
-		else if (!(s = screaminstr(TARG, pm->op_pmshort)))
+		else if (!(s = screaminstr(TARG, rx->check_substr, rx->check_offset_min, 0, &p, 0)))
 		    goto nope;
 	    }
-	    else if (!(s = fbm_instr((unsigned char*)s, (unsigned char*)strend,
-	      pm->op_pmshort)))
+	    else if (!(s = fbm_instr((unsigned char*)s + rx->check_offset_min, 
+				     (unsigned char*)strend,
+				     rx->check_substr)))
 		goto nope;
-	    if (s && rx->regback >= 0) {
-		++BmUSEFUL(pm->op_pmshort);
-		s -= rx->regback;
-		if (s < m)
-		    s = m;
+	    if (s && rx->check_offset_max < s - m) {
+		++BmUSEFUL(rx->check_substr);
+		s -= rx->check_offset_max;
 	    }
 	    else
 		s = m;
 	}
-	else if (!multiline) {
-	    if (*SvPVX(pm->op_pmshort) != *s
-		|| (pm->op_pmslen > 1
-		    && memNE(SvPVX(pm->op_pmshort), s, pm->op_pmslen)))
+	/* Now checkstring is fixed, i.e. at fixed offset from the
+	   beginning of match, and the match is anchored at s. */
+	else if (!multiline) { /* Anchored at beginning of string. */
+	    I32 slen;
+	    if (*SvPVX(rx->check_substr) != s[rx->check_offset_min]
+		|| ((slen = SvCUR(rx->check_substr)) > 1
+		    && memNE(SvPVX(rx->check_substr), 
+			     s + rx->check_offset_min, slen)))
 		goto nope;
 	}
-	if (!rx->naughty && --BmUSEFUL(pm->op_pmshort) < 0) {
-	    SvREFCNT_dec(pm->op_pmshort);
-	    pm->op_pmshort = Nullsv;	/* opt is being useless */
+	if (!rx->naughty && --BmUSEFUL(rx->check_substr) < 0
+	    && rx->check_substr == rx->float_substr) {
+	    SvREFCNT_dec(rx->check_substr);
+	    rx->check_substr = Nullsv;	/* opt is being useless */
+	    rx->float_substr = Nullsv;
 	}
     }
 
@@ -1477,9 +1511,9 @@ PP(pp_subst)
     c = dstr ? SvPV(dstr, clen) : Nullch;
 
     /* can do inplace substitution? */
-    if (c && clen <= rx->minlen && safebase) {
-	if (! pregexec(rx, s, strend, orig, 0,
-		       SvSCREAM(TARG) ? TARG : Nullsv, safebase)) {
+    if (c && clen <= rx->minlen && (once || !(safebase & REXEC_COPY_STR))
+	&& !(rx->reganch & ROPT_LOOKBEHIND_SEEN)) {
+	if (!regexec_flags(rx, s, strend, orig, 0, screamer, NULL, safebase)) {
 	    PUSHs(&sv_no);
 	    LEAVE_SCOPE(oldsave);
 	    RETURN;
@@ -1493,9 +1527,14 @@ PP(pp_subst)
 	curpm = pm;
 	SvSCREAM_off(TARG);	/* disable possible screamer */
 	if (once) {
-	    rxtainted = rx->exec_tainted;
-	    m = rx->startp[0];
-	    d = rx->endp[0];
+	    rxtainted = RX_MATCH_TAINTED(rx);
+	    if (rx->subbase) {
+		m = orig + (rx->startp[0] - rx->subbase);
+		d = orig + (rx->endp[0] - rx->subbase);
+	    } else {
+		m = rx->startp[0];
+		d = rx->endp[0];
+	    }
 	    s = orig;
 	    if (m - s > strend - d) {  /* faster to shorten from end */
 		if (clen) {
@@ -1537,7 +1576,7 @@ PP(pp_subst)
 	    do {
 		if (iters++ > maxiters)
 		    DIE("Substitution loop");
-		rxtainted |= rx->exec_tainted;
+		rxtainted |= RX_MATCH_TAINTED(rx);
 		m = rx->startp[0];
 		/*SUPPRESS 560*/
 		if (i = m - s) {
@@ -1550,8 +1589,8 @@ PP(pp_subst)
 		    d += clen;
 		}
 		s = rx->endp[0];
-	    } while (pregexec(rx, s, strend, orig, s == m,
-			      Nullsv, TRUE)); /* don't match same null twice */
+	    } while (regexec_flags(rx, s, strend, orig, s == m,
+			      Nullsv, NULL, 0)); /* don't match same null twice */
 	    if (s != d) {
 		i = strend - s;
 		SvCUR_set(TARG, d - SvPVX(TARG) + i);
@@ -1567,14 +1606,13 @@ PP(pp_subst)
 	RETURN;
     }
 
-    if (pregexec(rx, s, strend, orig, 0,
-		 SvSCREAM(TARG) ? TARG : Nullsv, safebase)) {
+    if (regexec_flags(rx, s, strend, orig, 0, screamer, NULL, safebase)) {
 	if (force_on_match) {
 	    force_on_match = 0;
 	    s = SvPV_force(TARG, len);
 	    goto force_it;
 	}
-	rxtainted = rx->exec_tainted;
+	rxtainted = RX_MATCH_TAINTED(rx);
 	dstr = NEWSV(25, sv_len(TARG));
 	sv_setpvn(dstr, m, s-m);
 	curpm = pm;
@@ -1586,7 +1624,7 @@ PP(pp_subst)
 	do {
 	    if (iters++ > maxiters)
 		DIE("Substitution loop");
-	    rxtainted |= rx->exec_tainted;
+	    rxtainted |= RX_MATCH_TAINTED(rx);
 	    if (rx->subbase && rx->subbase != orig) {
 		m = s;
 		s = orig;
@@ -1601,7 +1639,7 @@ PP(pp_subst)
 		sv_catpvn(dstr, c, clen);
 	    if (once)
 		break;
-	} while (pregexec(rx, s, strend, orig, s == m, Nullsv, safebase));
+	} while (regexec_flags(rx, s, strend, orig, s == m, Nullsv, NULL, safebase));
 	sv_catpvn(dstr, s, strend - s);
 
 	TAINT_IF(rxtainted);
@@ -1624,7 +1662,7 @@ PP(pp_subst)
     goto ret_no;
 
 nope:
-    ++BmUSEFUL(pm->op_pmshort);
+    ++BmUSEFUL(rx->check_substr);
 
 ret_no:
     PUSHs(&sv_no);
@@ -1667,7 +1705,7 @@ PP(pp_grepwhile)
 
 	src = stack_base[*markstack_ptr];
 	SvTEMP_off(src);
-	GvSV(defgv) = src;
+	DEFSV = src;
 
 	RETURNOP(cLOGOP->op_other);
     }

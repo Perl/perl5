@@ -514,12 +514,21 @@ PP(pp_gelem)
 PP(pp_study)
 {
     djSP; dPOPss;
+    register UNOP *unop = cUNOP;
     register unsigned char *s;
     register I32 pos;
     register I32 ch;
     register I32 *sfirst;
     register I32 *snext;
     STRLEN len;
+
+    if(unop->op_first && unop->op_first->op_type == OP_PUSHRE) {
+	PMOP *pm = (PMOP *)unop->op_first;
+	SV *rv = sv_newmortal();
+	sv = newSVrv(rv, "Regexp");
+	sv_magic(sv,(SV*)ReREFCNT_inc(pm->op_pmregexp),'r',0,0);
+	RETURNX(PUSHs(rv));
+    }
 
     if (sv == lastscream) {
 	if (SvSCREAM(sv))
@@ -581,7 +590,7 @@ PP(pp_trans)
     if (op->op_flags & OPf_STACKED)
 	sv = POPs;
     else {
-	sv = GvSV(defgv);
+	sv = DEFSV;
 	EXTEND(SP,1);
     }
     TARG = sv_newmortal();
@@ -2705,7 +2714,7 @@ PP(pp_reverse)
 	if (SP - MARK > 1)
 	    do_join(TARG, &sv_no, MARK, SP);
 	else
-	    sv_setsv(TARG, (SP > MARK) ? *SP : GvSV(defgv));
+	    sv_setsv(TARG, (SP > MARK) ? *SP : DEFSV);
 	up = SvPV_force(TARG, len);
 	if (len > 1) {
 	    down = SvPVX(TARG) + len - 1;
@@ -4126,10 +4135,12 @@ PP(pp_split)
 	    s = m;
 	}
     }
-    else if (pm->op_pmshort && !rx->nparens) {
-	i = SvCUR(pm->op_pmshort);
-	if (i == 1) {
-	    i = *SvPVX(pm->op_pmshort);
+    else if (rx->check_substr && !rx->nparens 
+	     && (rx->reganch & ROPT_CHECK_ALL)
+	     && !(rx->reganch & ROPT_ANCH)) {
+	i = SvCUR(rx->check_substr);
+	if (i == 1 && !SvTAIL(rx->check_substr)) {
+	    i = *SvPVX(rx->check_substr);
 	    while (--limit) {
 		/*SUPPRESS 530*/
 		for (m = s; m < strend && *m != i; m++) ;
@@ -4147,7 +4158,7 @@ PP(pp_split)
 #ifndef lint
 	    while (s < strend && --limit &&
 	      (m=fbm_instr((unsigned char*)s, (unsigned char*)strend,
-		    pm->op_pmshort)) )
+		    rx->check_substr)) )
 #endif
 	    {
 		dstr = NEWSV(31, m-s);
@@ -4162,9 +4173,9 @@ PP(pp_split)
     else {
 	maxiters += (strend - s) * rx->nparens;
 	while (s < strend && --limit &&
-	       pregexec(rx, s, strend, orig, 1, Nullsv, TRUE))
+	       regexec_flags(rx, s, strend, orig, 1, Nullsv, NULL, 0))
 	{
-	    TAINT_IF(rx->exec_tainted);
+	    TAINT_IF(RX_MATCH_TAINTED(rx));
 	    if (rx->subbase
 	      && rx->subbase != orig) {
 		m = s;
@@ -4299,14 +4310,11 @@ PP(pp_threadsv)
 {
     djSP;
 #ifdef USE_THREADS
-    SV **svp = av_fetch(thr->magicals, op->op_targ, FALSE);
-    if (!svp)
-	croak("panic: pp_threadsv");
     EXTEND(sp, 1);
     if (op->op_private & OPpLVAL_INTRO)
-	PUSHs(save_svref(svp));
+	PUSHs(*save_threadsv(op->op_targ));
     else
-	PUSHs(*svp);
+	PUSHs(*av_fetch(thr->threadsv, op->op_targ, FALSE));
 #else
     DIE("tried to access per-thread data in non-threaded perl");
 #endif /* USE_THREADS */

@@ -63,6 +63,7 @@ exp_amg
 expect
 expectterm
 fallback_amg
+find_threadsv
 fold
 fold_locale
 freq
@@ -163,7 +164,6 @@ pad_reset_pending
 padix
 padix_floor
 patleave
-per_thread_magicals
 pidstatus
 pow_amg
 pow_ass_amg
@@ -173,30 +173,11 @@ psig_name
 psig_ptr
 rcsid
 reall_srchlen
-regarglen
-regbol
-regcode
-regdummy
-regendp
-regeol
-regflags
-reginput
+regdump
+regexec_flags
 regkind
-reglastparen
-regmyendp
-regmyp_size
-regmystartp
-regnarrate
-regnaughty
-regnpar
-regparse
-regprecomp
-regprev
-regsawback
-regsize
-regstartp
-regtill
-regxend
+regnext
+regprop
 repeat_amg
 repeat_ass_amg
 retstack
@@ -242,6 +223,7 @@ sv_no
 sv_undef
 sv_yes
 thisexpr
+threadsv_names
 thr_key
 timesbuf
 tokenbuf
@@ -322,6 +304,7 @@ avhv_iterinit
 avhv_iternext
 avhv_iternextsv
 avhv_iterval
+avhv_keys
 avhv_store
 avhv_store_ent
 av_clear
@@ -428,7 +411,6 @@ do_tell
 do_trans
 do_vecset
 do_vop
-doeval
 dofindlabel
 dopoptoeval
 dounwind
@@ -525,6 +507,7 @@ magic_clearpack
 magic_clearsig
 magic_existspack
 magic_freedefelem
+magic_freeregexp
 magic_get
 magic_getarylen
 magic_getdefelem
@@ -1020,6 +1003,7 @@ q
 ref
 refkids
 regdump
+regexec_flags
 regnext
 regprop
 repeatcpy
@@ -1064,6 +1048,7 @@ save_pptr
 save_scalar
 save_sptr
 save_svref
+save_threadsv
 savepv
 savepvn
 savestack_grow
@@ -1119,6 +1104,7 @@ sv_clean_objs
 sv_clear
 sv_cmp
 sv_cmp_locale
+sv_compile_2op
 sv_collxfrm
 sv_dec
 sv_derived_from

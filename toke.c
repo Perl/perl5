@@ -784,7 +784,7 @@ scan_const(char *start)
 	else if (*s == '$') {
 	    if (!lex_inpat)	/* not a regexp, so $ must be var */
 		break;
-	    if (s + 1 < send && !strchr(")| \n\t", s[1]))
+	    if (s + 1 < send && !strchr("()| \n\t", s[1]))
 		break;		/* in regexp, $ might be tail anchor */
 	}
 	if (*s == '\\' && s+1 < send) {
@@ -1109,9 +1109,8 @@ filter_del(filter_t funcp)
     if (!rsfp_filters || AvFILL(rsfp_filters)<0)
 	return;
     /* if filter is on top of stack (usual case) just pop it off */
-    if (IoDIRP(FILTER_DATA(0)) == (void*)funcp){
-	/* sv_free(av_pop(rsfp_filters)); */
-	sv_free(av_shift(rsfp_filters));
+    if (IoDIRP(FILTER_DATA(AvFILL(rsfp_filters))) == (void*)funcp){
+	sv_free(av_pop(rsfp_filters));
 
         return;
     }
@@ -1227,10 +1226,10 @@ yylex(void)
 
 	if (!strchr(tokenbuf,':')) {
 #ifdef USE_THREADS
-	    /* Check for single character per-thread magicals */
+	    /* Check for single character per-thread SVs */
 	    if (tokenbuf[0] == '$' && tokenbuf[2] == '\0'
-		&& !isALPHA(tokenbuf[1]) /* Rule out obvious non-magicals */
-		&& (tmp = find_thread_magical(&tokenbuf[1])) != NOT_IN_PAD)
+		&& !isALPHA(tokenbuf[1]) /* Rule out obvious non-threadsvs */
+		&& (tmp = find_threadsv(&tokenbuf[1])) != NOT_IN_PAD)
 	    {
 		yylval.opval = newOP(OP_THREADSV, 0);
 		yylval.opval->op_targ = tmp;
@@ -1374,7 +1373,7 @@ yylex(void)
 	    force_next(',');
 #ifdef USE_THREADS
 	    nextval[nexttoke].opval = newOP(OP_THREADSV, 0);
-	    nextval[nexttoke].opval->op_targ = find_thread_magical("\"");
+	    nextval[nexttoke].opval->op_targ = find_threadsv("\"");
 	    force_next(PRIVATEREF);
 #else
 	    force_ident("\"", '$');
@@ -2389,7 +2388,11 @@ yylex(void)
     case '/':			/* may either be division or pattern */
     case '?':			/* may either be conditional or pattern */
 	if (expect != XOPERATOR) {
-	    check_uni();
+	    /* Disable warning on "study /blah/" */
+	    if (oldoldbufptr == last_uni 
+		&& (*last_uni != 's' || s - last_uni < 5 
+		    || memNE(last_uni, "study", 5) || isALNUM(last_uni[5])))
+		check_uni();
 	    s = scan_pat(s);
 	    TERM(sublex_start());
 	}
@@ -4674,46 +4677,6 @@ scan_subst(char *start)
     lex_op = (OP*)pm;
     yylval.ival = OP_SUBST;
     return s;
-}
-
-void
-hoistmust(register PMOP *pm)
-{
-    dTHR;
-    if (!pm->op_pmshort && pm->op_pmregexp->regstart &&
-	(!pm->op_pmregexp->regmust || pm->op_pmregexp->reganch & ROPT_ANCH)
-       ) {
-	if (!(pm->op_pmregexp->reganch & ROPT_ANCH))
-	    pm->op_pmflags |= PMf_SCANFIRST;
-	pm->op_pmshort = SvREFCNT_inc(pm->op_pmregexp->regstart);
-	pm->op_pmslen = SvCUR(pm->op_pmshort);
-    }
-    else if (pm->op_pmregexp->regmust) {/* is there a better short-circuit? */
-	if (pm->op_pmshort &&
-	  sv_eq(pm->op_pmshort,pm->op_pmregexp->regmust))
-	{
-	    if (pm->op_pmflags & PMf_SCANFIRST) {
-		SvREFCNT_dec(pm->op_pmshort);
-		pm->op_pmshort = Nullsv;
-	    }
-	    else {
-		SvREFCNT_dec(pm->op_pmregexp->regmust);
-		pm->op_pmregexp->regmust = Nullsv;
-		return;
-	    }
-	}
-	/* promote the better string */
-	if ((!pm->op_pmshort &&
-	     !(pm->op_pmregexp->reganch & ROPT_ANCH_GPOS)) ||
-	    ((pm->op_pmflags & PMf_SCANFIRST) &&
-	     (SvCUR(pm->op_pmshort) < SvCUR(pm->op_pmregexp->regmust)))) {
-	    SvREFCNT_dec(pm->op_pmshort);		/* ok if null */
-	    pm->op_pmshort = pm->op_pmregexp->regmust;
-	    pm->op_pmslen = SvCUR(pm->op_pmshort);
-	    pm->op_pmregexp->regmust = Nullsv;
-	    pm->op_pmflags |= PMf_SCANFIRST;
-	}
-    }
 }
 
 static char *
