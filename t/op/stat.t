@@ -1,8 +1,6 @@
 #!./perl
 
 # $RCSfile: stat.t,v $$Revision: 4.1 $$Date: 92/08/07 18:28:28 $
-# 950521 DFD    This version hacked to make test 39 succeed on MachTen
-#               though the O.S. wrongly thinks /dev/null is a terminal
 
 BEGIN {
     chdir 't' if -d 't';
@@ -141,7 +139,7 @@ if ($^O eq 'amigaos' or $Is_MSWin32) {print "ok 35\n"; goto tty_test;}
 $cnt = $uid = 0;
 
 die "Can't run op/stat.t test 35 without pwd working" unless $cwd;
-($bin) = grep {-d} qw(/bin /usr/bin)
+($bin) = grep {-d} ($^O eq 'machten' ? qw(/usr/bin /bin) : qw(/bin /usr/bin))
     or print ("not ok 35\n"), goto tty_test;
 opendir BIN, $bin or die "Can't opendir $bin: $!";
 while (defined($_ = readdir BIN)) {
@@ -174,7 +172,7 @@ else {
 }
 if (! -t tty) {print "ok 38\n";} else {print "not ok 38\n";}
 open(null,"/dev/null");
-if (! -t null || -e '/xenix' || -e '/MachTen' || $Is_MSWin32)
+if (! -t null || -e '/xenix' || $^O eq 'machten' || $Is_MSWin32)
 	{print "ok 39\n";} else {print "not ok 39\n";}
 close(null);
 if (-t) {print "ok 40\n";} else {print "not ok 40\n";}

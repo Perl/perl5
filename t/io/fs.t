@@ -117,7 +117,7 @@ else {
   truncate "Iofs.tmp", 0;
   if (-z "Iofs.tmp") {print "ok 24\n"} else {print "not ok 24\n"}
   `echo helloworld > Iofs.tmp`;
-  open(FH, ">Iofs.tmp") or die "Can't create Iofs.tmp";
+  open(FH, ">>Iofs.tmp") or die "Can't create Iofs.tmp";
   truncate FH, 5;
   if (-s "Iofs.tmp" == 5) {print "ok 25\n"} else {print "not ok 25\n"}
   truncate FH, 0;
