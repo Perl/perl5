@@ -1102,6 +1102,37 @@ that the C unary operator C<*> is considered to be a part of the C type name.
      TYPEMAP
      Netconfig *<tab>T_PTROBJ
 
+Here's a more complicated example: suppose that you wanted C<struct
+netconfig> to be blessed into the class C<Net::Config>.  One way to do
+this is to use underscores (_) to separate package names, as follows:
+
+        typedef struct netconfig * Net_Config;
+
+And then provide a typemap entry C<T_PTROBJ_SPECIAL> that maps underscores to
+double-colons (::), and declare C<Net_Config> to be of that type:
+
+
+        TYPEMAP
+        Net_Config      T_PTROBJ_SPECIAL
+
+        INPUT
+        T_PTROBJ_SPECIAL
+                if (sv_derived_from($arg, \"${(my $ntt=$ntype)=~s/_/::/g;\$ntt}\")) {
+                        IV tmp = SvIV((SV*)SvRV($arg));
+                $var = ($type) tmp;
+                }
+                else
+                        croak(\"$var is not of type ${(my $ntt=$ntype)=~s/_/::/g;\$ntt}\")
+
+        OUTPUT
+        T_PTROBJ_SPECIAL
+                sv_setref_pv($arg, \"${(my $ntt=$ntype)=~s/_/::/g;\$ntt}\",
+                (void*)$var);
+
+The INPUT and OUTPUT sections substitute underscores for double-colons
+on the fly, giving the desired effect.  This example demonstrates some
+of the power and versatility of the typemap facility.
+
 =head1 EXAMPLES
 
 File C<RPC.xs>: Interface to some ONC+ RPC bind library functions.
