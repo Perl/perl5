@@ -25,6 +25,7 @@ use File::Compare;
 use File::Copy ();
 use File::Path ();
 use ExtUtils::Packlist;
+use Config;
 use subs qw(unlink link chmod);
 use vars qw($packlist);
 
@@ -74,7 +75,7 @@ my %archpms = (
     Config => 1, 
 );
 
-if ($osname eq 'dos') {
+if ($^O eq 'dos') {
     push(@scripts,'djgpp/fixpmain');
     $archpms{config} = $archpms{filehand} = 1;
 }
@@ -199,7 +200,7 @@ if ($Is_VMS) {
     copy("perlshr$exe_ext", "$installbin/${perl}shr$exe_ext");
     chmod(0755, "$installbin/${perl}shr$exe_ext");
 }
-elsif ($osname eq 'mpeix') {
+elsif ($^O eq 'mpeix') {
     # MPE lacks hard links and requires that executables with special
     # capabilities reside in the MPE namespace.
     safe_unlink("$installbin/perl$ver$exe_ext", $Config{perlpath});
@@ -262,8 +263,8 @@ else {
     @corefiles = <*.h libperl*.*>;
 
     # AIX needs perl.exp installed as well.
-    push(@corefiles,'perl.exp') if $osname eq 'aix';
-    if ($osname eq 'mpeix') {
+    push(@corefiles,'perl.exp') if $^O eq 'aix';
+    if ($^O eq 'mpeix') {
         # MPE needs mpeixish.h installed as well.
         mkpath("$installarchlib/CORE/mpeix", 1, 0777);
         push(@corefiles,'mpeix/mpeixish.h');

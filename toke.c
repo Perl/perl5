@@ -6681,7 +6681,6 @@ Perl_scan_num(pTHX_ char *start)
     register char *s = start;		/* current position in buffer */
     register char *d;			/* destination in temp buffer */
     register char *e;			/* end of temp buffer */
-    UV tryuv;				/* used to see if it can be an UV */
     NV value;				/* number read, as a double */
     SV *sv = Nullsv;			/* place to put the converted number */
     bool floatit;			/* boolean: int or float? */
@@ -6960,15 +6959,17 @@ Perl_scan_num(pTHX_ char *start)
 	   Note: if floatit is true, then we don't need to do the
 	   conversion at all.
 	*/
-	tryuv = U_V(value);
-	if (!floatit && (NV)tryuv == value) {
-	    if (tryuv <= IV_MAX)
-		sv_setiv(sv, (IV)tryuv);
+	{
+	    UV tryuv = U_V(value);
+	    if (!floatit && (NV)tryuv == value) {
+		if (tryuv <= IV_MAX)
+		    sv_setiv(sv, (IV)tryuv);
+		else
+		    sv_setuv(sv, tryuv);
+	    }
 	    else
-		sv_setuv(sv, tryuv);
+		sv_setnv(sv, value);
 	}
-	else
-	    sv_setnv(sv, value);
 #else
 	/*
 	   strtol/strtoll sets errno to ERANGE if the number is too big
@@ -7021,7 +7022,7 @@ Perl_scan_num(pTHX_ char *start)
 			      sv, Nullsv, NULL);
 	break;
 
-    /* if it starts with a v, it could be a version number */
+    /* if it starts with a v, it could be a v-string */
     case 'v':
 vstring:
 	{
