@@ -68,6 +68,7 @@ no warnings 'unsafe' ;
 /[[.foo.]]/;
 /[[=bar=]]/;
 /[:zog:]/;
+BEGIN { $ENV{PERL_DESTRUCT_LEVEL} = 0 unless $ENV{PERL_DESTRUCT_LEVEL} > 3 }
 /[[:zog:]]/;
 EXPECT
 Character class syntax [: :] belongs inside character classes at - line 4.
@@ -78,7 +79,7 @@ Character class syntax [= =] is reserved for future extensions at - line 6.
 Character class syntax [. .] is reserved for future extensions at - line 8.
 Character class syntax [= =] is reserved for future extensions at - line 9.
 Character class syntax [: :] belongs inside character classes at - line 10.
-Character class [:zog:] unknown at - line 19.
+Character class [:zog:] unknown at - line 20.
 ########
 # regcomp.c [S_regclass]
 $_ = "";
