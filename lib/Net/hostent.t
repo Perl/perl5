@@ -44,12 +44,14 @@ is( inet_ntoa($i->addr), "127.0.0.1",   'addr from gethostbyaddr' );
 # return the name of the machine instead of "localhost" when resolving
 # 127.0.0.1 or even "localhost"
 
-# VMS returns "LOCALHOST" under tcp/ip services V4.1 ECO 2, possibly others
-# OS/390 returns localhost.YADDA.YADDA
+# - VMS returns "LOCALHOST" under tcp/ip services V4.1 ECO 2, possibly others
+# - OS/390 returns localhost.YADDA.YADDA
 
 SKIP: {
     skip "Windows will return the machine name instead of 'localhost'", 2
       if $^O eq 'MSWin32' or $^O eq 'NetWare' or $^O eq 'cygwin';
+
+    print "# name = ",$h->name, ", aliases = ", join (",", @{$h->aliases}), "\n";
 
     my $in_alias;
     unless ($h->name =~ /^localhost(?:\..+)?$/i) {
@@ -59,12 +61,11 @@ SKIP: {
                 last;
             }
         }
+	ok( $in_alias );
+    } else {
+	ok( 1 );
     }
     
-    unless( ok( $in_alias ) ) {
-        print "# ",$h->name, " ", join (",", @{$h->aliases}), "\n";
-    }
-
     if ($in_alias) {
         # If we found it in the aliases before, expect to find it there again.
         foreach (@{$h->aliases}) {
