@@ -30,8 +30,8 @@ void *cvarg;
     dTHR;
 #endif /* DEBUGGING */
 
-    DEBUG_L((PerlIO_printf(PerlIO_stderr(), "0x%lx unsetting CvOWNER of 0x%lx:%s\n",
-		     (unsigned long)thr, (unsigned long)cv, SvPEEK((SV*)cv))));
+    DEBUG_L((PerlIO_printf(PerlIO_stderr(), "%p unsetting CvOWNER of %p:%s\n",
+			   thr, cv, SvPEEK((SV*)cv))));
     MUTEX_LOCK(CvMUTEXP(cv));
     DEBUG_L(if (CvDEPTH(cv) != 0)
 		PerlIO_printf(PerlIO_stderr(), "depth %ld != 0\n",
@@ -1920,19 +1920,12 @@ PP(pp_entersub)
 	    while (MgOWNER(mg))
 		COND_WAIT(MgOWNERCONDP(mg), MgMUTEXP(mg));
 	    MgOWNER(mg) = thr;
-	    DEBUG_L(PerlIO_printf(PerlIO_stderr(),
-				  "0x%lx: pp_entersub lock 0x%lx\n",
-				  (unsigned long)thr, (unsigned long)sv);)
+	    DEBUG_L(PerlIO_printf(PerlIO_stderr(), "%p: pp_entersub lock %p\n",
+				  thr, sv);)
 	    MUTEX_UNLOCK(MgMUTEXP(mg));
 	    save_destructor(unlock_condpair, sv);
 	}
 	MUTEX_LOCK(CvMUTEXP(cv));
-	assert(CvOWNER(cv) == 0);
-	CvOWNER(cv) = thr;	/* Assert ownership */
-	SvREFCNT_inc(cv);
-	MUTEX_UNLOCK(CvMUTEXP(cv));
-	if (CvDEPTH(cv) == 0)
-	    SAVEDESTRUCTOR(unset_cvowner, (void*) cv);
     }
     /*
      * Now we have permission to enter the sub, we must distinguish
@@ -1970,9 +1963,8 @@ PP(pp_entersub)
 	    MUTEX_UNLOCK(CvMUTEXP(cv));
 	    cv = *(CV**)svp;
 	    DEBUG_L(PerlIO_printf(PerlIO_stderr(),
-			    "entersub: 0x%lx already has clone 0x%lx:%s\n",
-			    (unsigned long) thr, (unsigned long) cv,
-			    SvPEEK((SV*)cv)));
+				  "entersub: %p already has clone %p:%s\n",
+				  thr, cv, SvPEEK((SV*)cv)));
 	    CvOWNER(cv) = thr;
 	    SvREFCNT_inc(cv);
 	    if (CvDEPTH(cv) == 0)
@@ -1985,9 +1977,8 @@ PP(pp_entersub)
 		SvREFCNT_inc(cv);
 		MUTEX_UNLOCK(CvMUTEXP(cv));
 		DEBUG_L(PerlIO_printf(PerlIO_stderr(),
-			    "entersub: 0x%lx grabbing 0x%lx:%s in stash %s\n",
-			    (unsigned long) thr, (unsigned long) cv,
-		    	    SvPEEK((SV*)cv), CvSTASH(cv) ?
+			    "entersub: %p grabbing %p:%s in stash %s\n",
+			    thr, cv, SvPEEK((SV*)cv), CvSTASH(cv) ?
 	    			HvNAME(CvSTASH(cv)) : "(none)"));
 	    } else {
 		/* Make a new clone. */
@@ -1995,9 +1986,8 @@ PP(pp_entersub)
 		SvREFCNT_inc(cv); /* don't let it vanish from under us */
 		MUTEX_UNLOCK(CvMUTEXP(cv));
 		DEBUG_L((PerlIO_printf(PerlIO_stderr(),
-				       "entersub: 0x%lx cloning 0x%lx:%s\n",
-				       (unsigned long) thr, (unsigned long) cv,
-				       SvPEEK((SV*)cv))));
+				       "entersub: %p cloning %p:%s\n",
+				       thr, cv, SvPEEK((SV*)cv))));
 		/*
 	    	 * We're creating a new clone so there's no race
 		 * between the original MUTEX_UNLOCK and the
