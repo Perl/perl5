@@ -94,36 +94,6 @@ more natural interpretation
 The multi-number v-strings like v65.66 and 65.66.67 still continue to
 be v-strings in Perl 5.8.
 
-=head2 strict only allows refs, subs, vars
-
-Earlier versions of the strict pragma did not check the parameters
-implicitly passed to its "import" (use) and "unimport" (no) routine.
-This caused the false idiom such as:
-
-        use strict qw(@ISA);
-        @ISA = qw(Foo);
-
-This however (probably) raised the false expectation that (also) the
-strict refs, vars and subs were being enforced.  They are B<not> enforced
-when using this false idiom.
-
-Starting from Perl 5.8.1, the above B<will> cause an error to be
-raised.  This may cause programs which used to execute seemingly
-correctly without warnings and errors to fail when run under 5.8.1.
-This happens because
-
-        use strict qw(@ISA);
-
-will now fail with the error:
-
-        Unknown 'strict' tag(s) '@ISA'
-
-The remedy to this problem is to replace this code with the correct idiom:
-
-        use strict;
-        use vars qw(@ISA);
-        @ISA = qw(Foo);
-
 =head2 (Win32) The -C Switch Has Been Repurposed
 
 The -C switch has changed in an incompatible way.  The old semantics
@@ -526,14 +496,53 @@ your code a bit, such Perl scripts do exist, for example as results
 from generated code.  Now linenumbers can go all the way to
 4294967296, or 2**32.
 
-=head2 Module-specific fixes
+=head2 Module and pragma specific fixes
 
-Encode: if a filehandle has been marked as to have an encoding,
-unmappable characters are detected already during input, not later
-(when the corrupted data is being used).
+=over 4
 
-PerlIO::scalar; reading from non-string scalars (like the special
-variables, see L<perlvar>) now works.
+=item Encode
+
+If a filehandle has been marked as to have an encoding, unmappable
+characters are detected already during input, not later (when the
+corrupted data is being used).
+
+=item PerlIO::scalar
+
+Reading from non-string scalars (like the special variables, see
+L<perlvar>) now works.
+
+=item strict
+
+Earlier versions of the strict pragma did not check the parameters
+implicitly passed to its "import" (use) and "unimport" (no) routine.
+This caused the false idiom such as:
+
+        use strict qw(@ISA);
+        @ISA = qw(Foo);
+
+This however (probably) raised the false expectation that the strict
+refs, vars and subs were being enforced (and that @ISA was somehow
+"declared").  But the strict refs, vars, and subs are B<not> enforced
+when using this false idiom.
+
+Starting from Perl 5.8.1, the above B<will> cause an error to be
+raised.  This may cause programs which used to execute seemingly
+correctly without warnings and errors to fail when run under 5.8.1.
+This happens because
+
+        use strict qw(@ISA);
+
+will now fail with the error:
+
+        Unknown 'strict' tag(s) '@ISA'
+
+The remedy to this problem is to replace this code with the correct idiom:
+
+        use strict;
+        use vars qw(@ISA);
+        @ISA = qw(Foo);
+
+=back
 
 =head2 Platform-specific fixes
 
