@@ -20,7 +20,7 @@ getcwd - get pathname of current working directory
     chdir "/tmp";
     print $ENV{'PWD'};
 
-    use Cwd 'abs_path';
+    use Cwd 'abs_path';	    # aka realpath()
     print abs_path($ENV{'PWD'});
 
     use Cwd 'fast_abs_path';
@@ -32,8 +32,11 @@ The getcwd() function re-implements the getcwd(3) (or getwd(3)) functions
 in Perl.
 
 The abs_path() function takes a single argument and returns the
-absolute pathname for that argument. It uses the same algorithm as
-getcwd(). (actually getcwd() is abs_path("."))
+absolute pathname for that argument.  It uses the same algorithm
+as getcwd().  (Actually, getcwd() is abs_path("."))  Symbolic links
+and relative-path components ("." and "..") are resolved to return
+the canonical pathname, just like realpath(3).  Also callable as
+realpath().
 
 The fastcwd() function looks the same as getcwd(), but runs faster.
 It's also more dangerous because it might conceivably chdir() you out
@@ -67,12 +70,12 @@ kept up to date if all packages which use chdir import it from Cwd.
 
 use Carp;
 
-$VERSION = '2.01';
+$VERSION = '2.02';
 
 require Exporter;
 @ISA = qw(Exporter);
 @EXPORT = qw(cwd getcwd fastcwd fastgetcwd);
-@EXPORT_OK = qw(chdir abs_path fast_abs_path);
+@EXPORT_OK = qw(chdir abs_path fast_abs_path realpath fast_realpath);
 
 
 # The 'natural and safe form' for UNIX (pwd may be setuid root)
@@ -257,6 +260,10 @@ sub abs_path
     $cwd;
 }
 
+# added function alias for those of us more
+# used to the libc function.  --tchrist 27-Jan-00
+*realpath = \&abs_path;
+
 sub fast_abs_path {
     my $cwd = getcwd();
     my $path = shift || '.';
@@ -265,6 +272,10 @@ sub fast_abs_path {
     CORE::chdir($cwd)  || croak "Cannot chdir back to $cwd:$!";
     $realpath;
 }
+
+# added function alias to follow principle of least surprise
+# based on previous aliasing.  --tchrist 27-Jan-00
+*fast_realpath = \&fast_abs_path;
 
 
 # --- PORTING SECTION ---
