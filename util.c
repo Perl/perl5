@@ -2663,7 +2663,9 @@ Perl_my_pclose(pTHX_ PerlIO *ptr)
     LOCK_FDPID_MUTEX;
     svp = av_fetch(PL_fdpid,PerlIO_fileno(ptr),TRUE);
     UNLOCK_FDPID_MUTEX;
-    pid = SvIVX(*svp);
+    pid = SvIV(*svp);
+    if (!pid)
+        return 0;
     SvREFCNT_dec(*svp);
     *svp = &PL_sv_undef;
 #ifdef OS2
