@@ -2851,7 +2851,7 @@ PP(pp_ftrread)
 #if defined(HAS_ACCESS) && defined(R_OK)
     STRLEN n_a;
     if ((PL_op->op_private & OPpFT_ACCESS) && SvPOK(TOPs)) {
-	result = access(TOPpx, R_OK);
+	result = access(POPpx, R_OK);
 	if (result == 0)
 	    RETPUSHYES;
 	if (result < 0)
@@ -2878,7 +2878,7 @@ PP(pp_ftrwrite)
 #if defined(HAS_ACCESS) && defined(W_OK)
     STRLEN n_a;
     if ((PL_op->op_private & OPpFT_ACCESS) && SvPOK(TOPs)) {
-	result = access(TOPpx, W_OK);
+	result = access(POPpx, W_OK);
 	if (result == 0)
 	    RETPUSHYES;
 	if (result < 0)
@@ -2905,7 +2905,7 @@ PP(pp_ftrexec)
 #if defined(HAS_ACCESS) && defined(X_OK)
     STRLEN n_a;
     if ((PL_op->op_private & OPpFT_ACCESS) && SvPOK(TOPs)) {
-	result = access(TOPpx, X_OK);
+	result = access(POPpx, X_OK);
 	if (result == 0)
 	    RETPUSHYES;
 	if (result < 0)
@@ -2932,7 +2932,7 @@ PP(pp_fteread)
 #ifdef PERL_EFF_ACCESS_R_OK
     STRLEN n_a;
     if ((PL_op->op_private & OPpFT_ACCESS) && SvPOK(TOPs)) {
-	result = PERL_EFF_ACCESS_R_OK(TOPpx);
+	result = PERL_EFF_ACCESS_R_OK(POPpx);
 	if (result == 0)
 	    RETPUSHYES;
 	if (result < 0)
@@ -2959,7 +2959,7 @@ PP(pp_ftewrite)
 #ifdef PERL_EFF_ACCESS_W_OK
     STRLEN n_a;
     if ((PL_op->op_private & OPpFT_ACCESS) && SvPOK(TOPs)) {
-	result = PERL_EFF_ACCESS_W_OK(TOPpx);
+	result = PERL_EFF_ACCESS_W_OK(POPpx);
 	if (result == 0)
 	    RETPUSHYES;
 	if (result < 0)
@@ -2986,7 +2986,7 @@ PP(pp_fteexec)
 #ifdef PERL_EFF_ACCESS_X_OK
     STRLEN n_a;
     if ((PL_op->op_private & OPpFT_ACCESS) && SvPOK(TOPs)) {
-	result = PERL_EFF_ACCESS_X_OK(TOPpx);
+	result = PERL_EFF_ACCESS_X_OK(POPpx);
 	if (result == 0)
 	    RETPUSHYES;
 	if (result < 0)
