@@ -7,7 +7,7 @@
  *
  */
 
-/* This structure much match XPVCV in B/C.pm and the beginning of XPVFM
+/* This structure must match XPVCV in B/C.pm and the beginning of XPVFM
  * in sv.h  */
 
 struct xpvcv {
