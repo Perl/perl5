@@ -415,7 +415,7 @@ sub installlib {
     }
 
     if (-f $_) {
-	if (/\.al$/ || /\.ix$/) {
+	if (/\.(?:al|ix)$/ && !($dir =~ m[^auto/(.*)$] && $archpms{$1})) {
 	    $installlib = $installprivlib;
 	    #We're installing *.al and *.ix files into $installprivlib,
 	    #but we have to delete old *.al and *.ix files from the 5.000
