@@ -2440,7 +2440,8 @@ PP(pp_accept)
 #endif
 
 #ifdef EPOC
-    len = sizeof saddr;  /* EPOC somehow truncates info */
+    len = sizeof saddr;          /* EPOC somehow truncates info */
+    setbuf( IoIFP(nstio), NULL); /* EPOC gets confused about sockets */
 #endif
 
     PUSHp((char *)&saddr, len);

@@ -1,8 +1,9 @@
 #
 # Create the export list for perl.
 #
-# Needed by WIN32 and OS/2 for creating perl.dll
-# and by AIX for creating libperl.a when -Dusershrplib is in effect.
+# Needed by WIN32 and OS/2 for creating perl.dll,
+# and by AIX for creating libperl.a when -Dusershrplib is in effect,
+# and by MacOS Classic.
 #
 # reads global.sym, pp.sym, perlvars.h, intrpvar.h, thrdvar.h, config.h
 # On OS/2 reads miniperl.map as well
@@ -464,7 +465,9 @@ unless ($define{'USE_ITHREADS'}) {
 		    Perl_re_dup
 		    Perl_sv_dup
 		    Perl_sys_intern_dup
+		    Perl_ptr_table_clear
 		    Perl_ptr_table_fetch
+		    Perl_ptr_table_free
 		    Perl_ptr_table_new
 		    Perl_ptr_table_clear
 		    Perl_ptr_table_free
@@ -581,6 +584,36 @@ if ($define{'USE_PERLIO'}) {
 			 PerlIO_vprintf
 			 PerlIO_write
 			 )];
+    }
+    else {
+	# Skip the PerlIO New Generation symbols.
+	skip_symbols [qw(
+			 PerlIOBase_clearerr
+			 PerlIOBase_close
+			 PerlIOBase_eof
+			 PerlIOBase_error
+			 PerlIOBase_fileno
+			 PerlIOBuf_bufsiz
+			 PerlIOBuf_fdopen
+			 PerlIOBuf_fill
+			 PerlIOBuf_flush
+			 PerlIOBuf_get_cnt
+			 PerlIOBuf_get_ptr
+			 PerlIOBuf_open
+			 PerlIOBuf_pushed
+			 PerlIOBuf_read
+			 PerlIOBuf_reopen
+			 PerlIOBuf_seek
+			 PerlIOBuf_set_ptrcnt
+			 PerlIOBuf_setlinebuf
+			 PerlIOBuf_tell
+			 PerlIOBuf_unread
+			 PerlIOBuf_write
+			 PerlIO_define_layer
+			 PerlIO_pending
+			 PerlIO_push
+			 PerlIO_unread
+			)];
     }
 }
 

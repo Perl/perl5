@@ -14,10 +14,20 @@ $VERSION = 1.31;
 BEGIN {
     unless ($^O eq 'unicosmk') {
         my $e = $!;
-	# We do want an arithmetic overflow.
-        eval '$Inf = CORE::exp(CORE::exp(30))';
+	# We do want an arithmetic overflow, Inf INF inf Infinity:.
+        undef $Inf unless eval <<'EOE' and $Inf =~ /^inf(?:inity)?$/i;
+	  local $SIG{FPE} = sub {die};
+	  my $t = CORE::exp 30;
+	  $Inf = CORE::exp $t;
+EOE
+	if (!defined $Inf) {		# Try a different method
+	  undef $Inf unless eval <<'EOE' and $Inf =~ /^inf(?:inity)?$/i;
+	    local $SIG{FPE} = sub {die};
+	    my $t = 1;
+	    $Inf = $t + "1e99999999999999999999999999999999";
+EOE
+	}
         $! = $e; # Clear ERANGE.
-        undef $Inf unless $Inf =~ /^inf(?:inity)?$/i; # Inf INF inf Infinity
     }
     $Inf = "Inf" if !defined $Inf || !($Inf > 0); # Desperation.
 }

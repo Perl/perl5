@@ -126,40 +126,42 @@ int yyactlevel = -1;
  * Also see LOP and lop() below.
  */
 
+/* Note that REPORT() and REPORT2() will be expressions that supply
+ * their own trailing comma, not suitable for statements as such. */
 #ifdef DEBUGGING /* Serve -DT. */
-#   define REPORT(x,retval) tokereport(x,s,(int)retval)
-#   define REPORT2(x,retval) tokereport(x,s, yylval.ival)
+#   define REPORT(x,retval) tokereport(x,s,(int)retval),
+#   define REPORT2(x,retval) tokereport(x,s, yylval.ival),
 #else
-#   define REPORT(x,retval) 1
-#   define REPORT2(x,retval) 1
+#   define REPORT(x,retval)
+#   define REPORT2(x,retval)
 #endif
 
-#define TOKEN(retval) return (REPORT2("token",retval), PL_bufptr = s,(int)retval)
-#define OPERATOR(retval) return (REPORT2("operator",retval), PL_expect = XTERM, PL_bufptr = s,(int)retval)
-#define AOPERATOR(retval) return ao((REPORT2("aop",retval), PL_expect = XTERM, PL_bufptr = s,(int)retval))
-#define PREBLOCK(retval) return (REPORT2("preblock",retval), PL_expect = XBLOCK,PL_bufptr = s,(int)retval)
-#define PRETERMBLOCK(retval) return (REPORT2("pretermblock",retval), PL_expect = XTERMBLOCK,PL_bufptr = s,(int)retval)
-#define PREREF(retval) return (REPORT2("preref",retval), PL_expect = XREF,PL_bufptr = s,(int)retval)
-#define TERM(retval) return (CLINE, REPORT2("term",retval), PL_expect = XOPERATOR, PL_bufptr = s,(int)retval)
-#define LOOPX(f) return(yylval.ival=f, REPORT("loopx",f), PL_expect = XTERM,PL_bufptr = s,(int)LOOPEX)
-#define FTST(f) return(yylval.ival=f, REPORT("ftst",f), PL_expect = XTERM,PL_bufptr = s,(int)UNIOP)
-#define FUN0(f) return(yylval.ival = f, REPORT("fun0",f), PL_expect = XOPERATOR,PL_bufptr = s,(int)FUNC0)
-#define FUN1(f) return(yylval.ival = f, REPORT("fun1",f), PL_expect = XOPERATOR,PL_bufptr = s,(int)FUNC1)
-#define BOop(f) return ao((yylval.ival=f, REPORT("bitorop",f), PL_expect = XTERM,PL_bufptr = s,(int)BITOROP))
-#define BAop(f) return ao((yylval.ival=f, REPORT("bitandop",f), PL_expect = XTERM,PL_bufptr = s,(int)BITANDOP))
-#define SHop(f) return ao((yylval.ival=f, REPORT("shiftop",f), PL_expect = XTERM,PL_bufptr = s,(int)SHIFTOP))
-#define PWop(f) return ao((yylval.ival=f, REPORT("powop",f), PL_expect = XTERM,PL_bufptr = s,(int)POWOP))
-#define PMop(f) return(yylval.ival=f, REPORT("matchop",f), PL_expect = XTERM,PL_bufptr = s,(int)MATCHOP)
-#define Aop(f) return ao((yylval.ival=f, REPORT("add",f), PL_expect = XTERM,PL_bufptr = s,(int)ADDOP))
-#define Mop(f) return ao((yylval.ival=f, REPORT("mul",f), PL_expect = XTERM,PL_bufptr = s,(int)MULOP))
-#define Eop(f) return(yylval.ival=f, REPORT("eq",f), PL_expect = XTERM,PL_bufptr = s,(int)EQOP)
-#define Rop(f) return(yylval.ival=f, REPORT("rel",f), PL_expect = XTERM,PL_bufptr = s,(int)RELOP)
+#define TOKEN(retval) return (REPORT2("token",retval) PL_bufptr = s,(int)retval)
+#define OPERATOR(retval) return (REPORT2("operator",retval) PL_expect = XTERM, PL_bufptr = s,(int)retval)
+#define AOPERATOR(retval) return ao((REPORT2("aop",retval) PL_expect = XTERM, PL_bufptr = s,(int)retval))
+#define PREBLOCK(retval) return (REPORT2("preblock",retval) PL_expect = XBLOCK,PL_bufptr = s,(int)retval)
+#define PRETERMBLOCK(retval) return (REPORT2("pretermblock",retval) PL_expect = XTERMBLOCK,PL_bufptr = s,(int)retval)
+#define PREREF(retval) return (REPORT2("preref",retval) PL_expect = XREF,PL_bufptr = s,(int)retval)
+#define TERM(retval) return (CLINE, REPORT2("term",retval) PL_expect = XOPERATOR, PL_bufptr = s,(int)retval)
+#define LOOPX(f) return(yylval.ival=f, REPORT("loopx",f) PL_expect = XTERM,PL_bufptr = s,(int)LOOPEX)
+#define FTST(f) return(yylval.ival=f, REPORT("ftst",f) PL_expect = XTERM,PL_bufptr = s,(int)UNIOP)
+#define FUN0(f) return(yylval.ival = f, REPORT("fun0",f) PL_expect = XOPERATOR,PL_bufptr = s,(int)FUNC0)
+#define FUN1(f) return(yylval.ival = f, REPORT("fun1",f) PL_expect = XOPERATOR,PL_bufptr = s,(int)FUNC1)
+#define BOop(f) return ao((yylval.ival=f, REPORT("bitorop",f) PL_expect = XTERM,PL_bufptr = s,(int)BITOROP))
+#define BAop(f) return ao((yylval.ival=f, REPORT("bitandop",f) PL_expect = XTERM,PL_bufptr = s,(int)BITANDOP))
+#define SHop(f) return ao((yylval.ival=f, REPORT("shiftop",f) PL_expect = XTERM,PL_bufptr = s,(int)SHIFTOP))
+#define PWop(f) return ao((yylval.ival=f, REPORT("powop",f) PL_expect = XTERM,PL_bufptr = s,(int)POWOP))
+#define PMop(f) return(yylval.ival=f, REPORT("matchop",f) PL_expect = XTERM,PL_bufptr = s,(int)MATCHOP)
+#define Aop(f) return ao((yylval.ival=f, REPORT("add",f) PL_expect = XTERM,PL_bufptr = s,(int)ADDOP))
+#define Mop(f) return ao((yylval.ival=f, REPORT("mul",f) PL_expect = XTERM,PL_bufptr = s,(int)MULOP))
+#define Eop(f) return(yylval.ival=f, REPORT("eq",f) PL_expect = XTERM,PL_bufptr = s,(int)EQOP)
+#define Rop(f) return(yylval.ival=f, REPORT("rel",f) PL_expect = XTERM,PL_bufptr = s,(int)RELOP)
 
 /* This bit of chicanery makes a unary function followed by
  * a parenthesis into a function with one argument, highest precedence.
  */
 #define UNI(f) return(yylval.ival = f, \
-	REPORT("uni",f), \
+	REPORT("uni",f) \
 	PL_expect = XTERM, \
 	PL_bufptr = s, \
 	PL_last_uni = PL_oldbufptr, \
@@ -167,7 +169,7 @@ int yyactlevel = -1;
 	(*s == '(' || (s = skipspace(s), *s == '(') ? (int)FUNC1 : (int)UNIOP) )
 
 #define UNIBRACK(f) return(yylval.ival = f, \
-        REPORT("uni",f), \
+        REPORT("uni",f) \
 	PL_bufptr = s, \
 	PL_last_uni = PL_oldbufptr, \
 	(*s == '(' || (s = skipspace(s), *s == '(') ? (int)FUNC1 : (int)UNIOP) )
@@ -709,7 +711,7 @@ S_lop(pTHX_ I32 f, int x, char *s)
 {
     yylval.ival = f;
     CLINE;
-    REPORT("lop", f);
+    REPORT("lop", f)
     PL_expect = x;
     PL_bufptr = s;
     PL_last_lop = PL_oldbufptr;
@@ -1238,6 +1240,17 @@ S_scan_const(pTHX_ char *start)
 		I32 min;			/* first character in range */
 		I32 max;			/* last character in range */
 
+		if (utf) {
+		    char *c = (char*)utf8_hop((U8*)d, -1);
+		    char *e = d++;
+		    while (e-- > c)
+			*(e + 1) = *e;
+		    *c = (char)0xff;
+		    /* mark the range as done, and continue */
+		    dorange = FALSE;
+		    didrange = TRUE;
+		    continue;
+		}
 		i = d - SvPVX(sv);		/* remember current offset */
 		SvGROW(sv, SvLEN(sv) + 256);	/* never more than 256 chars in a range */
 		d = SvPVX(sv) + i;		/* refresh d after realloc */
@@ -1464,7 +1477,7 @@ S_scan_const(pTHX_ char *start)
 			    char *src, *dst;
 			  
 			    d = SvGROW(sv,
-				       SvCUR(sv) + hicount + 1) +
+				       SvLEN(sv) + hicount + 1) +
 				         (d - old_pvx);
 
 			    src = d - 1;
@@ -1537,7 +1550,7 @@ S_scan_const(pTHX_ char *start)
 		    if (len > e - s + 4) {
 			char *odest = SvPVX(sv);
 
-			SvGROW(sv, (SvCUR(sv) + len - (e - s + 4)));
+			SvGROW(sv, (SvLEN(sv) + len - (e - s + 4)));
 			d = SvPVX(sv) + (d - odest);
 		    }
 		    Copy(str, d, len, char);
@@ -6301,9 +6314,6 @@ S_scan_trans(pTHX_ char *start)
 	Perl_croak(aTHX_ "Transliteration replacement not terminated");
     }
 
-    New(803,tbl,256,short);
-    o = newPVOP(OP_TRANS, 0, (char*)tbl);
-
     complement = del = squash = 0;
     while (strchr("cds", *s)) {
 	if (*s == 'c')
@@ -6314,6 +6324,9 @@ S_scan_trans(pTHX_ char *start)
 	    squash = OPpTRANS_SQUASH;
 	s++;
     }
+
+    New(803, tbl, complement&&!del?258:256, short);
+    o = newPVOP(OP_TRANS, 0, (char*)tbl);
     o->op_private = del|squash|complement|
       (DO_UTF8(PL_lex_stuff)? OPpTRANS_FROM_UTF : 0)|
       (DO_UTF8(PL_lex_repl) ? OPpTRANS_TO_UTF   : 0);

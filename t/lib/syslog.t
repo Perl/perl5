@@ -22,6 +22,15 @@ BEGIN {
     }
 }
 
+BEGIN {
+  eval {require Sys::Syslog} or do {
+    if ($@ =~ /Your vendor has not/) {
+      print "1..0 # Skipped: missing macros\n";
+      exit 0;
+    }
+  }
+}
+
 use Sys::Syslog qw(:DEFAULT setlogsock);
 
 # Test this to 1 if your syslog accepts udp connections.

@@ -8,27 +8,6 @@ use Test;
 BEGIN { 
   plan tests => 4; 
   use File::Spec;
-  if ($^O eq 'VMS') {
-     # This magick is needed to make the VMS I/O system to believe
-     # that there's life after eight directory levels (this makes
-     # it believe there's life until sixteen levels).  The filesystem
-     # has no limitation as such.
-     $DEFAULT_DIR = $ENV{'DEFAULT'};
-     my $here = $DEFAULT_DIR;
-     my ($dev,$dir) = File::Spec->splitpath($here);
-     $dev =~ s/:$//;
-     $dev = $ENV{$dev} if exists($ENV{$dev});
-     $dev .= ':' if $dev !~ /:/;
-     $here = File::Spec->canonpath($dev.$dir);
-     $here =~ s/\]$/.]/;
-     system "define/nolog/job/trans=conceal temp_perl_base $here";
-     chdir('temp_perl_base:[000000]');
-  }
-}
-
-END {
-    chdir($DEFAULT_DIR) if $^O eq 'VMS';
-    system "deassign/job temp_perl_base";
 }
 
 use Pod::Find qw(pod_find pod_where);

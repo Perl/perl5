@@ -17,7 +17,7 @@
 /*
  * Package name      : perl5
  * Source directory  : .
- * Configuration time: Sun Jan 21 21:13:39 EET 2001
+ * Configuration time: Sat Mar  3 02:46:53 EET 2001
  * Configured by     : jhi
  * Target system     : osf1 alpha.hut.fi v4.0 878 alpha 
  */
@@ -2565,7 +2565,7 @@
  *	This symbol, if defined, indicates that Perl is to be installed
  * 	also as /usr/bin/perl.
  */
-#define INSTALL_USR_BIN_PERL	/**/
+/*#define INSTALL_USR_BIN_PERL	/ **/
 
 /* PERL_PRIfldbl:
  *	This symbol, if defined, contains the string used by stdio to
@@ -3021,7 +3021,7 @@
  *	script to make sure (one hopes) that it runs with perl and not
  *	some shell.
  */
-#define STARTPERL "#!/opt/perl/bin/perl"		/**/
+#define STARTPERL "#!/opt/perl/bin/perl5.7.0"		/**/
 
 /* STDCHAR:
  *	This symbol is defined to be the type of char used in stdio.h.
@@ -3127,7 +3127,7 @@
  *	used in a fully backward compatible manner.
  */
 #ifndef USE_PERLIO
-/*#define	USE_PERLIO		/ **/
+#define	USE_PERLIO		/**/
 #endif
 
 /* USE_SOCKS:

@@ -1162,12 +1162,10 @@ tcp1(char *name, int arg)
 	((void (*)(int)) fcn) (arg);
 }
 
-#ifndef HAS_GETHOSTENT		/* Older versions of EMX did not have it... */
-void *	gethostent()	{ return tcp0("GETHOSTENT");  }
-void *	getnetent()	{ return tcp0("GETNETENT");   }
-void *	getprotoent()	{ return tcp0("GETPROTOENT"); }
-void *	getservent()	{ return tcp0("GETSERVENT");  }
-#endif
+struct hostent *	gethostent()	{ return tcp0("GETHOSTENT");  }
+struct netent *		getnetent()	{ return tcp0("GETNETENT");   }
+struct protoent *	getprotoent()	{ return tcp0("GETPROTOENT"); }
+struct servent *	getservent()	{ return tcp0("GETSERVENT");  }
 
 void	sethostent(x)	{ tcp1("SETHOSTENT",  x); }
 void	setnetent(x)	{ tcp1("SETNETENT",   x); }
