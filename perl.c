@@ -2291,7 +2291,7 @@ S_fd_on_nosuid_fs(pTHX_ int fd)
 #               if defined(HAS_FSTAT) && \
 		   defined(HAS_USTAT) && \
 		   defined(HAS_GETMNT) && \
-		   defined(HAS_STRUCT_FS_DATA) &&
+		   defined(HAS_STRUCT_FS_DATA) && \
 		   defined(NOSTAT_ONE)
     struct stat fdst;
     if (fstat(fd, &fdst) == 0) {
