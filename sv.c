@@ -10400,11 +10400,11 @@ Perl_ptr_table_store(pTHX_ PTR_TBL_t *tbl, void *oldv, void *newv)
      * hash values e.g. if they grow faster in the most significant
      * bits */
     UV hash = PTR2UV(oldv);
-    bool i = 1;
+    bool empty = 1;
 
     assert(tbl);
     otblent = &tbl->tbl_ary[hash & tbl->tbl_max];
-    for (tblent = *otblent; tblent; i=0, tblent = tblent->next) {
+    for (tblent = *otblent; tblent; empty=0, tblent = tblent->next) {
 	if (tblent->oldval == oldv) {
 	    tblent->newval = newv;
 	    return;
@@ -10416,7 +10416,7 @@ Perl_ptr_table_store(pTHX_ PTR_TBL_t *tbl, void *oldv, void *newv)
     tblent->next = *otblent;
     *otblent = tblent;
     tbl->tbl_items++;
-    if (i && tbl->tbl_items > tbl->tbl_max)
+    if (!empty && tbl->tbl_items > tbl->tbl_max)
 	ptr_table_split(tbl);
 }
 
