@@ -15,11 +15,6 @@
 #define Win32_Winsock
 #endif
 #include <windows.h>
-#ifndef __MINGW32__	/* GCC/Mingw32-2.95.2 forgot the WINAPI on CommandLineToArgvW() */
-#  include <shellapi.h>
-#else
-   LPWSTR* WINAPI CommandLineToArgvW(LPCWSTR lpCommandLine, int * pNumArgs);
-#endif
 #include <winnt.h>
 #include <io.h>
 
@@ -46,6 +41,7 @@
 #endif
 #include <string.h>
 #include <stdarg.h>
+#include <stdlib.h> /* get a real declaration of sys_nerr */
 #include <float.h>
 #include <time.h>
 #if defined(_MSC_VER) || defined(__MINGW32__)
@@ -1613,7 +1609,11 @@ win32_uname(struct utsname *name)
 	GetSystemInfo(&info);
 
 #if defined(__BORLANDC__) || defined(__MINGW32__)
-	switch (info.u.s.wProcessorArchitecture) {
+#ifndef _STRUCT_NAME
+#  define _STRUCT_NAME(s) s
+#  define _UNION_NAME(u) u
+#endif
+	switch (info._UNION_NAME(u.)_STRUCT_NAME(s.)wProcessorArchitecture) {
 #else
 	switch (info.wProcessorArchitecture) {
 #endif
@@ -2057,9 +2057,6 @@ win32_feof(FILE *fp)
 DllExport char *
 win32_strerror(int e) 
 {
-#ifndef __BORLANDC__		/* Borland intolerance */
-    extern int sys_nerr;
-#endif
     DWORD source = 0;
 
     if (e < 0 || e > sys_nerr) {
@@ -2489,8 +2486,8 @@ Nt4CreateHardLinkW(
     StreamId.dwStreamAttributes = 0;
     StreamId.dwStreamNameSize = 0;
 #if defined(__BORLANDC__) || defined(__MINGW32__)
-    StreamId.Size.u.HighPart = 0;
-    StreamId.Size.u.LowPart = dwLen;
+    StreamId.Size._UNION_NAME(u.)HighPart = 0;
+    StreamId.Size._UNION_NAME(u.)LowPart = dwLen;
 #else
     StreamId.Size.HighPart = 0;
     StreamId.Size.LowPart = dwLen;
@@ -4084,13 +4081,21 @@ win32_free_argvw(pTHXo_ void *ptr)
     }
 }
 
+typedef LPWSTR* (WINAPI CLTARGVW)(LPCWSTR lpCommandLine, int * pNumArgs);
+/* load shell32.dll on demand (reduces number of DLLs loaded on startup by 1/3)
+	-- BKS 5-28-2000 */
 void
 win32_argv2utf8(int argc, char** argv)
 {
     dTHXo;
     char* psz;
     int length, wargc;
-    LPWSTR* lpwStr = CommandLineToArgvW(GetCommandLineW(), &wargc);
+    HANDLE hDll = LoadLibraryA("shell32.dll");
+    CLTARGVW *pCommandLineToArgvW = NULL;
+    LPWSTR* lpwStr = NULL;
+    if (hDll && (pCommandLineToArgvW = (CLTARGVW*)GetProcAddress(hDll, "CommandLineToArgvW"))) {
+	lpwStr = (*pCommandLineToArgvW)(GetCommandLineW(), &wargc);
+    }
     if (lpwStr && argc) {
 	while (argc--) {
 	    length = WideCharToMultiByte(CP_UTF8, 0, lpwStr[--wargc], -1, NULL, 0, NULL, NULL);
@@ -4100,6 +4105,7 @@ win32_argv2utf8(int argc, char** argv)
 	}
 	call_atexit(win32_free_argvw, argv);
     }
+    if (hDll)
+	FreeLibrary(hDll);
     GlobalFree((HGLOBAL)lpwStr);
 }
-

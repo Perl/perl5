@@ -27,7 +27,9 @@
 #include <sys/socket.h>
 #include <fcntl.h>
 #include <sys/stat.h>
+#ifndef __MINGW32__
 #include <assert.h>
+#endif
 #include <io.h>
 
 /* thanks to Beverly Brown	(beverly@datacube.com) */
@@ -39,7 +41,7 @@
 #	define TO_SOCKET(x)	(x)
 #endif	/* USE_SOCKETS_AS_HANDLES */
 
-#ifdef USE_THREADS
+#if defined(USE_THREADS) || defined(USE_ITHREADS)
 #define StartSockets() \
     STMT_START {					\
 	if (!wsock_started)				\
@@ -56,17 +58,11 @@
     } STMT_END
 #endif
 
-#define EndSockets() \
-    STMT_START {					\
-	if (wsock_started)				\
-	    WSACleanup();				\
-    } STMT_END
-
 #define SOCKET_TEST(x, y) \
     STMT_START {					\
 	StartSockets();					\
 	if((x) == (y))					\
-	    errno = WSAGetLastError();			\
+	    errno = CALL(WSAGetLastError)();			\
     } STMT_END
 
 #define SOCKET_TEST_ERROR(x) SOCKET_TEST(x, SOCKET_ERROR)
@@ -77,6 +73,87 @@ static struct servent* win32_savecopyservent(struct servent*d,
 
 static int wsock_started = 0;
 
+#ifdef PERL_WIN32_SOCK_DLOAD /* we load the socket libraries when needed -- BKS 5-29-2000 */
+#define CALL(x) (*p ## x)
+typedef SOCKET (PASCAL *Paccept)(SOCKET,struct sockaddr*,int*);
+typedef int (PASCAL *Pbind)(SOCKET,const struct sockaddr*,int);
+typedef int (PASCAL *Pclosesocket)(SOCKET);
+typedef int (PASCAL *Pconnect)(SOCKET,const struct sockaddr*,int);
+typedef int (PASCAL *Pioctlsocket)(SOCKET,long,u_long *);
+typedef int (PASCAL *Pgetpeername)(SOCKET,struct sockaddr*,int*);
+typedef int (PASCAL *Pgetsockname)(SOCKET,struct sockaddr*,int*);
+typedef int (PASCAL *Pgetsockopt)(SOCKET,int,int,char*,int*);
+typedef unsigned long (PASCAL *Pinet_addr)(const char*);
+typedef char * (PASCAL *Pinet_ntoa)(struct in_addr);
+typedef int (PASCAL *Plisten)(SOCKET,int);
+typedef int (PASCAL *Precv)(SOCKET,char*,int,int);
+typedef int (PASCAL *Precvfrom)(SOCKET,char*,int,int,struct sockaddr*,int*);
+typedef int (PASCAL *Psend)(SOCKET,const char*,int,int);
+typedef int (PASCAL *Psendto)(SOCKET,const char*,int,int,const struct sockaddr*,int);
+typedef int (PASCAL *Psetsockopt)(SOCKET,int,int,const char*,int);
+typedef int (PASCAL *Pshutdown)(SOCKET,int);
+typedef SOCKET (PASCAL *Psocket)(int,int,int);
+typedef struct hostent* (PASCAL *Pgethostbyaddr)(const char*,int,int);
+typedef struct hostent* (PASCAL *Pgethostbyname)(const char*);
+typedef struct servent* (PASCAL *Pgetservbyport)(int,const char*);
+typedef struct servent* (PASCAL *Pgetservbyname)(const char*,const char*);
+typedef struct protoent* (PASCAL *Pgetprotobynumber)(int);
+typedef struct protoent* (PASCAL *Pgetprotobyname)(const char*);
+typedef int (PASCAL *PWSACleanup)(void);
+typedef int (PASCAL *PWSAStartup)(unsigned short, WSADATA*);
+typedef void (PASCAL *PWSASetLastError)(int);
+typedef int (PASCAL *PWSAGetLastError)(void);
+typedef int (PASCAL *P__WSAFDIsSet)(SOCKET,fd_set*);
+typedef int (PASCAL *Pselect)(int nfds,fd_set*,fd_set*,fd_set*,const struct timeval*);
+typedef int (PASCAL *Pgethostname)(char*,int);
+typedef u_long (PASCAL *Phtonl)(u_long), (PASCAL *Pntohl)(u_long);
+typedef u_short (PASCAL *Phtons)(u_short), (PASCAL *Pntohs)(u_short);
+static Paccept 		paccept;
+static Pbind 		pbind;
+static Pclosesocket 	pclosesocket;
+static Pconnect 	pconnect;
+static Pioctlsocket	pioctlsocket;
+static Pgetpeername	pgetpeername;
+static Pgetsockname	pgetsockname;
+static Pgetsockopt	pgetsockopt;
+static Pinet_addr	pinet_addr;
+static Pinet_ntoa	pinet_ntoa;
+static Plisten		plisten;
+static Precv		precv;
+static Precvfrom	precvfrom;
+static Psend		psend;
+static Psendto		psendto;
+static Psetsockopt	psetsockopt;
+static Pshutdown	pshutdown;
+static Psocket		psocket;
+static Pgethostbyaddr	pgethostbyaddr;
+static Pgethostbyname	pgethostbyname;
+static Pgetservbyport	pgetservbyport;
+static Pgetservbyname	pgetservbyname;
+static Pgetprotobynumber pgetprotobynumber;
+static Pgetprotobyname	pgetprotobyname;
+static PWSAStartup	pWSAStartup;
+static PWSACleanup	pWSACleanup;
+static PWSASetLastError	pWSASetLastError;
+static PWSAGetLastError	pWSAGetLastError;
+static P__WSAFDIsSet	p__WSAFDIsSet;
+static Pselect		pselect;
+static Pgethostname	pgethostname;
+#if BYTEORDER != 0x1234
+static Phtons		phtons;
+static Pntohs		pntohs;
+static Phtonl		phtonl;
+static Pntohl		pntohl;
+#endif
+void end_sockets(pTHXo_ void *ptr)
+{
+    CALL(WSACleanup)();
+    wsock_started = 0;
+    FreeLibrary(ptr);
+}
+#else
+#define CALL(x) x
+#endif /* PERL_WIN32_SOCK_DLOAD */
 void
 start_sockets(void) 
 {
@@ -84,18 +161,67 @@ start_sockets(void)
     unsigned short version;
     WSADATA retdata;
     int ret;
+#ifdef PERL_WIN32_SOCK_DLOAD
+    HANDLE hDll = LoadLibraryA("wsock32.dll");
 
     /*
      * initalize the winsock interface and insure that it is
      * cleaned up at exit.
+     * Also, only load the DLL when needed -- BKS, 4-2-2000
      */
+    if (!(hDll &&
+	(paccept = (Paccept)GetProcAddress(hDll, "accept")) &&
+	(pbind = (Pbind)GetProcAddress(hDll, "bind")) &&
+	(pclosesocket = (Pclosesocket)GetProcAddress(hDll, "closesocket")) &&
+	(pconnect = (Pconnect)GetProcAddress(hDll, "connect")) &&
+	(pioctlsocket = (Pioctlsocket)GetProcAddress(hDll, "ioctlsocket")) &&
+	(pgetpeername = (Pgetpeername)GetProcAddress(hDll, "getpeername")) &&
+	(pgetsockname = (Pgetsockname)GetProcAddress(hDll, "getsockname")) &&
+	(pgetsockopt = (Pgetsockopt)GetProcAddress(hDll, "getsockopt")) &&
+	(pinet_addr = (Pinet_addr)GetProcAddress(hDll, "inet_addr")) &&
+	(pinet_ntoa = (Pinet_ntoa)GetProcAddress(hDll, "inet_ntoa")) &&
+	(plisten = (Plisten)GetProcAddress(hDll, "listen")) &&
+	(precv = (Precv)GetProcAddress(hDll, "recv")) &&
+	(precvfrom = (Precvfrom)GetProcAddress(hDll, "recvfrom")) &&
+	(psend = (Psend)GetProcAddress(hDll, "send")) &&
+	(psendto = (Psendto)GetProcAddress(hDll, "sendto")) &&
+	(psetsockopt = (Psetsockopt)GetProcAddress(hDll, "setsockopt")) &&
+	(pshutdown = (Pshutdown)GetProcAddress(hDll, "shutdown")) &&
+	(psocket = (Psocket)GetProcAddress(hDll, "socket")) &&
+	(pgethostbyaddr = (Pgethostbyaddr)GetProcAddress(hDll, "gethostbyaddr")) &&
+	(pgethostbyname = (Pgethostbyname)GetProcAddress(hDll, "gethostbyname")) &&
+	(pgetservbyport = (Pgetservbyport)GetProcAddress(hDll, "getservbyport")) &&
+	(pgetservbyname = (Pgetservbyname)GetProcAddress(hDll, "getservbyname")) &&
+	(pgetprotobynumber = (Pgetprotobynumber)GetProcAddress(hDll, "getprotobynumber")) &&
+	(pgetprotobyname = (Pgetprotobyname)GetProcAddress(hDll, "getprotobyname")) &&
+	(pWSAStartup = (PWSAStartup)GetProcAddress(hDll, "WSAStartup")) &&
+	(pWSACleanup = (PWSACleanup)GetProcAddress(hDll, "WSACleanup")) &&
+	(pWSASetLastError = (PWSASetLastError)GetProcAddress(hDll, "WSASetLastError")) &&
+	(pWSAGetLastError = (PWSAGetLastError)GetProcAddress(hDll, "WSAGetLastError")) &&
+	(p__WSAFDIsSet = (P__WSAFDIsSet)GetProcAddress(hDll, "__WSAFDIsSet")) &&
+	(pselect = (Pselect)GetProcAddress(hDll, "select")) &&
+	(pgethostname = (Pgethostname)GetProcAddress(hDll, "gethostname")) &&
+#if BYTEORDER != 0x1234
+	(phtonl = (Phtonl)GetProcAddress(hDll, "htonl")) &&
+	(pntohl = (Pntohl)GetProcAddress(hDll, "ntohl")) &&
+	(phtons = (Pntohs)GetProcAddress(hDll, "htons")) &&
+	(pntohs = (Pntohs)GetProcAddress(hDll, "ntohs")
+#else
+	1
+#endif
+    )) {
+	Perl_croak(aTHX_ "Unable to load winsock library!\n");
+    }
+#endif /* PERL_WIN32_SOCK_DLOAD */
     version = 0x101;
-    if(ret = WSAStartup(version, &retdata))
-	Perl_croak_nocontext("Unable to locate winsock library!\n");
+    if(ret = CALL(WSAStartup)(version, &retdata))
+	Perl_croak(aTHX_ "Unable to initialize winsock library!\n");
     if(retdata.wVersion != version)
-	Perl_croak_nocontext("Could not find version 1.1 of winsock dll\n");
+	Perl_croak(aTHX_ "Could not find version 1.1 of winsock dll\n");
 
-    /* atexit((void (*)(void)) EndSockets); */
+#ifdef PERL_WIN32_SOCK_DLOAD
+    call_atexit(end_sockets, hDll);
+#endif
     wsock_started = 1;
 }
 
@@ -111,7 +237,7 @@ set_socktype(void)
 	/*
 	 * Enable the use of sockets as filehandles
 	 */
-	setsockopt(INVALID_SOCKET, SOL_SOCKET, SO_OPENTYPE,
+	CALL(setsockopt)(INVALID_SOCKET, SOL_SOCKET, SO_OPENTYPE,
 		    (char *)&iSockOpt, sizeof(iSockOpt));
 #ifdef USE_THREADS
 	w32_init_socktype = 1;
@@ -134,8 +260,8 @@ my_fdopen(int fd, char *mode)
     if (!wsock_started)
 	return(fdopen(fd, mode));
 
-    retval = getsockopt((SOCKET)fd, SOL_SOCKET, SO_TYPE, sockbuf, &optlen);
-    if(retval == SOCKET_ERROR && WSAGetLastError() == WSAENOTSOCK) {
+    retval = CALL(getsockopt)((SOCKET)fd, SOL_SOCKET, SO_TYPE, sockbuf, &optlen);
+    if(retval == SOCKET_ERROR && CALL(WSAGetLastError)() == WSAENOTSOCK) {
 	return(fdopen(fd, mode));
     }
 
@@ -158,33 +284,61 @@ my_fdopen(int fd, char *mode)
 }
 #endif	/* USE_SOCKETS_AS_HANDLES */
 
+/* ntoh* and hton* are implemented here so that ByteLoader doesn't need to load WinSock;
+   these functions are simply copied from util.c */
 
 u_long
-win32_htonl(u_long hostlong)
+win32_htonl(u_long l)
 {
+#if BYTEORDER == 0x1234
+    union { u_long r; char c[4]; } u;
+    u.c[0] = (l >> 24) & 255;
+    u.c[1] = (l >> 16) & 255;
+    u.c[2] = (l >> 8) & 255;
+    u.c[3] = l & 255;
+    return u.r;
+#else
     StartSockets();
-    return htonl(hostlong);
+    return CALL(htonl)(l);
+#endif
 }
 
 u_short
-win32_htons(u_short hostshort)
+win32_htons(u_short s)
 {
+#if BYTEORDER == 0x1234
+    return (((s >> 8) & 255) | ((s & 255) << 8));
+#else
     StartSockets();
-    return htons(hostshort);
+    return CALL(htons)(s);
+#endif
 }
 
 u_long
-win32_ntohl(u_long netlong)
+win32_ntohl(u_long l)
 {
+#if BYTEORDER == 0x1234
+    union { u_long r; char c[4]; } u;
+    u.c[0] = (l >> 24) & 255;
+    u.c[1] = (l >> 16) & 255;
+    u.c[2] = (l >> 8) & 255;
+    u.c[3] = l & 255;
+    return u.r;
+#else
     StartSockets();
-    return ntohl(netlong);
+    return CALL(ntohl)(l);
+#endif
 }
 
 u_short
-win32_ntohs(u_short netshort)
+win32_ntohs(u_short s)
 {
+#if BYTEORDER == 0x1234
+    return (((s >> 8) & 255) | ((s & 255) << 8));
+#else
     StartSockets();
-    return ntohs(netshort);
+    return CALL(ntohs)(s);
+#endif
 }
 
 
@@ -194,7 +348,7 @@ win32_accept(SOCKET s, struct sockaddr *addr, int *addrlen)
 {
     SOCKET r;
 
-    SOCKET_TEST((r = accept(TO_SOCKET(s), addr, addrlen)), INVALID_SOCKET);
+    SOCKET_TEST((r = CALL(accept)(TO_SOCKET(s), addr, addrlen)), INVALID_SOCKET);
     return OPEN_SOCKET(r);
 }
 
@@ -203,7 +357,7 @@ win32_bind(SOCKET s, const struct sockaddr *addr, int addrlen)
 {
     int r;
 
-    SOCKET_TEST_ERROR(r = bind(TO_SOCKET(s), addr, addrlen));
+    SOCKET_TEST_ERROR(r = CALL(bind)(TO_SOCKET(s), addr, addrlen));
     return r;
 }
 
@@ -212,7 +366,7 @@ win32_connect(SOCKET s, const struct sockaddr *addr, int addrlen)
 {
     int r;
 
-    SOCKET_TEST_ERROR(r = connect(TO_SOCKET(s), addr, addrlen));
+    SOCKET_TEST_ERROR(r = CALL(connect)(TO_SOCKET(s), addr, addrlen));
     return r;
 }
 
@@ -222,7 +376,7 @@ win32_getpeername(SOCKET s, struct sockaddr *addr, int *addrlen)
 {
     int r;
 
-    SOCKET_TEST_ERROR(r = getpeername(TO_SOCKET(s), addr, addrlen));
+    SOCKET_TEST_ERROR(r = CALL(getpeername)(TO_SOCKET(s), addr, addrlen));
     return r;
 }
 
@@ -231,7 +385,7 @@ win32_getsockname(SOCKET s, struct sockaddr *addr, int *addrlen)
 {
     int r;
 
-    SOCKET_TEST_ERROR(r = getsockname(TO_SOCKET(s), addr, addrlen));
+    SOCKET_TEST_ERROR(r = CALL(getsockname)(TO_SOCKET(s), addr, addrlen));
     return r;
 }
 
@@ -240,7 +394,7 @@ win32_getsockopt(SOCKET s, int level, int optname, char *optval, int *optlen)
 {
     int r;
 
-    SOCKET_TEST_ERROR(r = getsockopt(TO_SOCKET(s), level, optname, optval, optlen));
+    SOCKET_TEST_ERROR(r = CALL(getsockopt)(TO_SOCKET(s), level, optname, optval, optlen));
     return r;
 }
 
@@ -249,7 +403,7 @@ win32_ioctlsocket(SOCKET s, long cmd, u_long *argp)
 {
     int r;
 
-    SOCKET_TEST_ERROR(r = ioctlsocket(TO_SOCKET(s), cmd, argp));
+    SOCKET_TEST_ERROR(r = CALL(ioctlsocket)(TO_SOCKET(s), cmd, argp));
     return r;
 }
 
@@ -258,7 +412,7 @@ win32_listen(SOCKET s, int backlog)
 {
     int r;
 
-    SOCKET_TEST_ERROR(r = listen(TO_SOCKET(s), backlog));
+    SOCKET_TEST_ERROR(r = CALL(listen)(TO_SOCKET(s), backlog));
     return r;
 }
 
@@ -267,7 +421,7 @@ win32_recv(SOCKET s, char *buf, int len, int flags)
 {
     int r;
 
-    SOCKET_TEST_ERROR(r = recv(TO_SOCKET(s), buf, len, flags));
+    SOCKET_TEST_ERROR(r = CALL(recv)(TO_SOCKET(s), buf, len, flags));
     return r;
 }
 
@@ -277,7 +431,7 @@ win32_recvfrom(SOCKET s, char *buf, int len, int flags, struct sockaddr *from, i
     int r;
     int frombufsize = *fromlen;
 
-    SOCKET_TEST_ERROR(r = recvfrom(TO_SOCKET(s), buf, len, flags, from, fromlen));
+    SOCKET_TEST_ERROR(r = CALL(recvfrom)(TO_SOCKET(s), buf, len, flags, from, fromlen));
     /* Winsock's recvfrom() only returns a valid 'from' when the socket
      * is connectionless.  Perl expects a valid 'from' for all types
      * of sockets, so go the extra mile.
@@ -336,19 +490,19 @@ win32_select(int nfds, Perl_fd_set* rd, Perl_fd_set* wr, Perl_fd_set* ex, const 
 	    FD_SET(fd, &nex);
     }
 
-    SOCKET_TEST_ERROR(r = select(nfds, prd, pwr, pex, timeout));
+    SOCKET_TEST_ERROR(r = CALL(select)(nfds, prd, pwr, pex, timeout));
 
     for (i = 0; i < nfds; i++) {
 	fd = TO_SOCKET(i);
-	if (PERL_FD_ISSET(i,rd) && !FD_ISSET(fd, &nrd))
+	if (PERL_FD_ISSET(i,rd) && !CALL(__WSAFDIsSet)(fd, &nrd))
 	    PERL_FD_CLR(i,rd);
-	if (PERL_FD_ISSET(i,wr) && !FD_ISSET(fd, &nwr))
+	if (PERL_FD_ISSET(i,wr) && !CALL(__WSAFDIsSet)(fd, &nwr))
 	    PERL_FD_CLR(i,wr);
-	if (PERL_FD_ISSET(i,ex) && !FD_ISSET(fd, &nex))
+	if (PERL_FD_ISSET(i,ex) && !CALL(__WSAFDIsSet)(fd, &nex))
 	    PERL_FD_CLR(i,ex);
     }
 #else
-    SOCKET_TEST_ERROR(r = select(nfds, rd, wr, ex, timeout));
+    SOCKET_TEST_ERROR(r = CALL(select)(nfds, rd, wr, ex, timeout));
 #endif
     return r;
 }
@@ -358,7 +512,7 @@ win32_send(SOCKET s, const char *buf, int len, int flags)
 {
     int r;
 
-    SOCKET_TEST_ERROR(r = send(TO_SOCKET(s), buf, len, flags));
+    SOCKET_TEST_ERROR(r = CALL(send)(TO_SOCKET(s), buf, len, flags));
     return r;
 }
 
@@ -368,7 +522,7 @@ win32_sendto(SOCKET s, const char *buf, int len, int flags,
 {
     int r;
 
-    SOCKET_TEST_ERROR(r = sendto(TO_SOCKET(s), buf, len, flags, to, tolen));
+    SOCKET_TEST_ERROR(r = CALL(sendto)(TO_SOCKET(s), buf, len, flags, to, tolen));
     return r;
 }
 
@@ -377,7 +531,7 @@ win32_setsockopt(SOCKET s, int level, int optname, const char *optval, int optle
 {
     int r;
 
-    SOCKET_TEST_ERROR(r = setsockopt(TO_SOCKET(s), level, optname, optval, optlen));
+    SOCKET_TEST_ERROR(r = CALL(setsockopt)(TO_SOCKET(s), level, optname, optval, optlen));
     return r;
 }
     
@@ -386,7 +540,7 @@ win32_shutdown(SOCKET s, int how)
 {
     int r;
 
-    SOCKET_TEST_ERROR(r = shutdown(TO_SOCKET(s), how));
+    SOCKET_TEST_ERROR(r = CALL(shutdown)(TO_SOCKET(s), how));
     return r;
 }
 
@@ -395,7 +549,7 @@ win32_closesocket(SOCKET s)
 {
     int r;
 
-    SOCKET_TEST_ERROR(r = closesocket(TO_SOCKET(s)));
+    SOCKET_TEST_ERROR(r = CALL(closesocket)(TO_SOCKET(s)));
     return r;
 }
 
@@ -405,11 +559,11 @@ win32_socket(int af, int type, int protocol)
     SOCKET s;
 
 #ifndef USE_SOCKETS_AS_HANDLES
-    SOCKET_TEST(s = socket(af, type, protocol), INVALID_SOCKET);
+    SOCKET_TEST(s = CALL(socket)(af, type, protocol), INVALID_SOCKET);
 #else
     StartSockets();
-    if((s = socket(af, type, protocol)) == INVALID_SOCKET)
-	errno = WSAGetLastError();
+    if((s = CALL(socket)(af, type, protocol)) == INVALID_SOCKET)
+	errno = CALL(WSAGetLastError)();
     else
 	s = OPEN_SOCKET(s);
 #endif	/* USE_SOCKETS_AS_HANDLES */
@@ -427,8 +581,8 @@ my_fclose (FILE *pf)
     osf = TO_SOCKET(fileno(pf));/* Get it now before it's gone! */
     retval = fclose(pf);	/* Must fclose() before closesocket() */
     if (osf != -1
-	&& closesocket(osf) == SOCKET_ERROR
-	&& WSAGetLastError() != WSAENOTSOCK)
+	&& CALL(closesocket)(osf) == SOCKET_ERROR
+	&& CALL(WSAGetLastError)() != WSAENOTSOCK)
     {
 	return EOF;
     }
@@ -440,7 +594,7 @@ win32_gethostbyaddr(const char *addr, int len, int type)
 {
     struct hostent *r;
 
-    SOCKET_TEST(r = gethostbyaddr(addr, len, type), NULL);
+    SOCKET_TEST(r = CALL(gethostbyaddr)(addr, len, type), NULL);
     return r;
 }
 
@@ -449,7 +603,7 @@ win32_gethostbyname(const char *name)
 {
     struct hostent *r;
 
-    SOCKET_TEST(r = gethostbyname(name), NULL);
+    SOCKET_TEST(r = CALL(gethostbyname)(name), NULL);
     return r;
 }
 
@@ -458,7 +612,7 @@ win32_gethostname(char *name, int len)
 {
     int r;
 
-    SOCKET_TEST_ERROR(r = gethostname(name, len));
+    SOCKET_TEST_ERROR(r = CALL(gethostname)(name, len));
     return r;
 }
 
@@ -467,7 +621,7 @@ win32_getprotobyname(const char *name)
 {
     struct protoent *r;
 
-    SOCKET_TEST(r = getprotobyname(name), NULL);
+    SOCKET_TEST(r = CALL(getprotobyname)(name), NULL);
     return r;
 }
 
@@ -476,7 +630,7 @@ win32_getprotobynumber(int num)
 {
     struct protoent *r;
 
-    SOCKET_TEST(r = getprotobynumber(num), NULL);
+    SOCKET_TEST(r = CALL(getprotobynumber)(num), NULL);
     return r;
 }
 
@@ -486,7 +640,7 @@ win32_getservbyname(const char *name, const char *proto)
     dTHXo;    
     struct servent *r;
 
-    SOCKET_TEST(r = getservbyname(name, proto), NULL);
+    SOCKET_TEST(r = CALL(getservbyname)(name, proto), NULL);
     if (r) {
 	r = win32_savecopyservent(&w32_servent, r, proto);
     }
@@ -499,7 +653,7 @@ win32_getservbyport(int port, const char *proto)
     dTHXo; 
     struct servent *r;
 
-    SOCKET_TEST(r = getservbyport(port, proto), NULL);
+    SOCKET_TEST(r = CALL(getservbyport)(port, proto), NULL);
     if (r) {
 	r = win32_savecopyservent(&w32_servent, r, proto);
     }
@@ -518,13 +672,13 @@ win32_ioctl(int i, unsigned int u, char *data)
 	/* NOTREACHED */
     }
 
-    retval = ioctlsocket(TO_SOCKET(i), (long)u, &argp);
+    retval = CALL(ioctlsocket)(TO_SOCKET(i), (long)u, &argp);
     if (retval == SOCKET_ERROR) {
-	if (WSAGetLastError() == WSAENOTSOCK) {
+	if (CALL(WSAGetLastError)() == WSAENOTSOCK) {
 	    Perl_croak_nocontext("ioctl implemented only on sockets");
 	    /* NOTREACHED */
 	}
-	errno = WSAGetLastError();
+	errno = CALL(WSAGetLastError)();
     }
     return retval;
 }
@@ -533,14 +687,14 @@ char FAR *
 win32_inet_ntoa(struct in_addr in)
 {
     StartSockets();
-    return inet_ntoa(in);
+    return CALL(inet_ntoa)(in);
 }
 
 unsigned long
 win32_inet_addr(const char FAR *cp)
 {
     StartSockets();
-    return inet_addr(cp);
+    return CALL(inet_addr)(cp);
 }
 
 /*

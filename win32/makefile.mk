@@ -1005,14 +1005,15 @@ $(PERLDLL): perldll.def $(PERLDLL_OBJ) $(PERLDLL_RES)
 		perldll.def\n)
 	$(IMPLIB) $*.lib $@
 .ELIF "$(CCTYPE)" == "GCC"
-	$(LINK32) -mdll -o $@ -Wl,--base-file -Wl,perl.base $(BLINK_FLAGS) \
+	$(LINK32) -mdll -o $@ -Wl,--base-file,perl.base \
+	    -Wl,--image-base,0x28000000 $(BLINK_FLAGS) \
 	    $(mktmp $(LKPRE) $(PERLDLL_OBJ:s,\,\\) $(LIBFILES) $(LKPOST))
 	dlltool --output-lib $(PERLIMPLIB) \
 		--dllname $(PERLDLL:b).dll \
 		--def perldll.def \
 		--base-file perl.base \
 		--output-exp perl.exp
-	$(LINK32) -mdll -o $@ $(BLINK_FLAGS) \
+	$(LINK32) -mdll -o $@ -Wl,--image-base,0x28000000 $(BLINK_FLAGS) \
 	    $(mktmp $(LKPRE) $(PERLDLL_OBJ:s,\,\\) $(LIBFILES) \
 		perl.exp $(LKPOST))
 .ELSE
@@ -1067,7 +1068,7 @@ $(PERLEXE): $(PERLDLL) $(CONFIGPM) $(PERLEXE_OBJ) $(PERLEXE_RES)
 	    $(@:s,\,\\),\n \
 	    $(PERLIMPLIB) $(LIBFILES)\n)
 .ELIF "$(CCTYPE)" == "GCC"
-	$(LINK32) -mconsole -o $@ $(BLINK_FLAGS)  \
+	$(LINK32) -mconsole -o $@ -Wl,--stack,0x800000 $(BLINK_FLAGS)  \
 	    $(PERLEXE_OBJ) $(PERLIMPLIB) $(LIBFILES)
 .ELSE
 	$(LINK32) -subsystem:console -out:$@ -stack:0x1000000 $(BLINK_FLAGS) \

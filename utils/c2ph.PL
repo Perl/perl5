@@ -1393,8 +1393,11 @@ chmod 0755, $file or die "Can't reset permissions for $file: $!\n";
 unlink 'pstruct';
 print "Linking c2ph to pstruct.\n";
 if (defined $Config{d_link}) {
-  link 'c2ph', 'pstruct';
+   eval { link 'c2ph', 'pstruct'; };
+   goto NOLINK if ($@ && $@ =~ /function is unimplemented/);	# Win32 has $Config{d_link},
+								# but Win9X doesn't have it
 } else {
+NOLINK:
   unshift @INC, '../lib';
   require File::Copy;
   File::Copy::syscopy('c2ph', 'pstruct');
