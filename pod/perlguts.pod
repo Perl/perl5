@@ -77,7 +77,7 @@ important.  Note that this function requires you to specify the length of
 the format.
 
 STRLEN is an integer type (Size_t, usually defined as size_t in
-config.h) guaranteed to be large enough to represent the size of 
+config.h) guaranteed to be large enough to represent the size of
 any string that perl can handle.
 
 The C<sv_set*()> functions are not generic enough to operate on values
@@ -224,7 +224,7 @@ actually removing the characters, C<sv_chop> sets the flag C<OOK>
 (offset OK) to signal to other functions that the offset hack is in
 effect, and it puts the number of bytes chopped off into the IV field
 of the SV. It then moves the PV pointer (called C<SvPVX>) forward that
-many bytes, and adjusts C<SvCUR> and C<SvLEN>. 
+many bytes, and adjusts C<SvCUR> and C<SvLEN>.
 
 Hence, at this point, the start of the buffer that we allocated lives
 at C<SvPVX(sv) - SvIV(sv)> in memory and the PV pointer is pointing
@@ -571,7 +571,7 @@ is the function implementing the C<UNIVERSAL::isa> functionality.
 
 	bool sv_derived_from(SV* sv, const char* name);
 
-To check if you've got an object derived from a specific class you have 
+To check if you've got an object derived from a specific class you have
 to write:
 
 	if (sv_isobject(sv) && sv_derived_from(sv, class)) { ... }
@@ -650,9 +650,11 @@ See L<perlcall> and L<perlxs> for more details on these macros.
 However, if you mortalize a variable twice, the reference count will
 later be decremented twice.
 
-You should be careful about creating mortal variables.  Strange things
-can happen if you make the same value mortal within multiple contexts,
-or if you make a variable mortal multiple times.
+"Mortal" SVs are mainly used for SVs that are placed on perl's stack.
+For example an SV which is created just to pass a number to a called sub
+is made mortal to have it cleaned up automatically when stack is popped.
+Similarly results returned by XSUBs (which go in the stack) are often
+made mortal.
 
 To create a mortal variable, use the functions:
 
@@ -660,9 +662,28 @@ To create a mortal variable, use the functions:
     SV*  sv_2mortal(SV*)
     SV*  sv_mortalcopy(SV*)
 
-The first call creates a mortal SV, the second converts an existing
+The first call creates a mortal SV (with no value), the second converts an existing
 SV to a mortal SV (and thus defers a call to C<SvREFCNT_dec>), and the
 third creates a mortal copy of an existing SV.
+Because C<sv_newmortal> gives the new SV no value,it must normally be given one
+via C<sv_setpv>, C<sv_setiv> etc. :
+
+    SV *tmp = sv_newmortal();
+    sv_setiv(tmp, an_integer);
+
+As that is multiple C statements it is quite common so see this idiom instead:
+
+    SV *tmp = sv_2mortal(newSViv(an_integer));
+
+
+You should be careful about creating mortal variables.  Strange things
+can happen if you make the same value mortal within multiple contexts,
+or if you make a variable mortal multiple times. Thinking of "Mortalization"
+as deferred C<SvREFCNT_dec> should help to minimize such problems.
+For example if you are passing an SV which you I<know> has high enough REFCNT
+to survive its use on the stack you need not do any mortalization.
+If you are not sure then doing an C<SvREFCNT_inc> and C<sv_2mortal>, or
+making a C<sv_mortalcopy> is safer.
 
 The mortal routines are not just for SVs -- AVs and HVs can be
 made mortal by passing their address (type-casted to C<SV*>) to the
@@ -1198,7 +1219,7 @@ at the end of I<pseudo-block>.
 
 The following API list contains functions, thus one needs to
 provide pointers to the modifiable data explicitly (either C pointers,
-or Perlish C<GV *>s).  Where the above macros take C<int>, a similar 
+or Perlish C<GV *>s).  Where the above macros take C<int>, a similar
 function takes C<int *>.
 
 =over 4
@@ -1267,13 +1288,12 @@ extended using the macro:
 where C<SP> is the macro that represents the local copy of the stack pointer,
 and C<num> is the number of elements the stack should be extended by.
 
-Now that there is room on the stack, values can be pushed on it using the
-macros to push IVs, doubles, strings, and SV pointers respectively:
+Now that there is room on the stack, values can be pushed on it using C<PUSHs>
+macro. The values pushed will often need to be "mortal" (See L</Reference Counts and Mortality).
 
-    PUSHi(IV)
-    PUSHn(double)
-    PUSHp(char*, I32)
-    PUSHs(SV*)
+    PUSHs(sv_2mortal(newSViv(an_integer)))
+    PUSHs(sv_2mortal(newSVpv("Some String",0)))
+    PUSHs(sv_2mortal(newSVnv(3.141592)))
 
 And now the Perl program calling C<tzname>, the two values will be assigned
 as in:
@@ -1281,16 +1301,16 @@ as in:
     ($standard_abbrev, $summer_abbrev) = POSIX::tzname;
 
 An alternate (and possibly simpler) method to pushing values on the stack is
-to use the macros:
+to use the macro:
 
-    XPUSHi(IV)
-    XPUSHn(double)
-    XPUSHp(char*, I32)
     XPUSHs(SV*)
 
-These macros automatically adjust the stack for you, if needed.  Thus, you
+This macro automatically adjust the stack for you, if needed.  Thus, you
 do not need to call C<EXTEND> to extend the stack.
-However, see L</Putting a C value on Perl stack>
+
+Despite their suggestions in earlier versions of this document the macros
+C<PUSHi>, C<PUSHn> and C<PUSHp> are I<not> suited to XSUBs which return
+multiple results, see L</Putting a C value on Perl stack>.
 
 For more information, consult L<perlxs> and L<perlxstut>.
 
@@ -1435,7 +1455,7 @@ which bypasses C<TARG>.
 
 On a related note, if you do use C<(X)PUSH[npi]>, then you're going to
 need a C<dTARG> in your variable declarations so that the C<*PUSH*>
-macros can make use of the local variable C<TARG>. 
+macros can make use of the local variable C<TARG>.
 
 =head2 Scratchpads
 
@@ -1647,7 +1667,7 @@ functions which produce formatted output of internal data structures.
 The most commonly used of these functions is C<Perl_sv_dump>; it's used
 for dumping SVs, AVs, HVs, and CVs. The C<Devel::Peek> module calls
 C<sv_dump> to produce debugging output from Perl-space, so users of that
-module should already be familiar with its format. 
+module should already be familiar with its format.
 
 C<Perl_op_dump> can be used to dump an C<OP> structure or any of its
 derivatives, and produces output similiar to C<perl -Dx>; in fact,
@@ -1704,13 +1724,13 @@ the Perl source (as it does in so many other situations) makes heavy
 use of macros and subroutine naming conventions.
 
 First problem: deciding which functions will be public API functions and
-which will be private.  All functions whose names begin C<S_> are private 
+which will be private.  All functions whose names begin C<S_> are private
 (think "S" for "secret" or "static").  All other functions begin with
 "Perl_", but just because a function begins with "Perl_" does not mean it is
-part of the API. (See L</Internal Functions>.) The easiest way to be B<sure> a 
-function is part of the API is to find its entry in L<perlapi>.  
-If it exists in L<perlapi>, it's part of the API.  If it doesn't, and you 
-think it should be (i.e., you need it for your extension), send mail via 
+part of the API. (See L</Internal Functions>.) The easiest way to be B<sure> a
+function is part of the API is to find its entry in L<perlapi>.
+If it exists in L<perlapi>, it's part of the API.  If it doesn't, and you
+think it should be (i.e., you need it for your extension), send mail via
 L<perlbug> explaining why you think it should be.
 
 Second problem: there must be a syntax so that the same subroutine
@@ -2020,7 +2040,7 @@ The argument list should end with C<...>, like this:
 
 =item M
 
-This function is part of the experimental development API, and may change 
+This function is part of the experimental development API, and may change
 or disappear without notice.
 
 =item o
