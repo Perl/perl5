@@ -17,6 +17,11 @@ elsif ($^O eq 'VMS') {
   map { $files{lc($_)}++ } <[.op]*>;
   map { s/;.*$//; delete $files{lc($_)}; } split /[\n]/, `directory/noheading/notrailing/versions=1 [.op]`,
 }
+elsif ($^O eq 'MacOS') {
+  @oops = @ops = <:op:*>;
+  map { $files{$_}++ } <:op:*>;
+  map { delete $files{$_} } split /[\s\n]/, `echo :op:\xc5`;
+}
 else {
   map { $files{$_}++ } <op/*>;
   map { delete $files{$_} } split /[\s\n]/, `echo op/*`;
@@ -27,16 +32,23 @@ if (keys %files) {
 
 print $/ eq "\n" ? "ok 2\n" : "not ok 2\n";
 
-while (<jskdfjskdfj* op/* jskdjfjkosvk*>) {
-    $not = "not " unless $_ eq shift @ops;
-    $not = "not at all " if $/ eq "\0";
+if ($^O eq 'MacOS') {
+    while (<jskdfjskdfj* :op:* jskdjfjkosvk*>) {
+	$not = "not " unless $_ eq shift @ops;
+	$not = "not at all " if $/ eq "\0";
+    }
+} else {
+    while (<jskdfjskdfj* op/* jskdjfjkosvk*>) {
+	$not = "not " unless $_ eq shift @ops;
+	$not = "not at all " if $/ eq "\0";
+    }
 }
 print "${not}ok 3\n";
 
 print $/ eq "\n" ? "ok 4\n" : "not ok 4\n";
 
 # test the "glob" operator
-$_ = "op/*";
+$_ = $^O eq 'MacOS' ? ":op:*" : "op/*";
 @glops = glob $_;
 print "@glops" eq "@oops" ? "ok 5\n" : "not ok 5\n";
 
