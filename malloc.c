@@ -3,9 +3,9 @@
  */
 
 #ifndef lint
-#ifdef DEBUGGING
-#define RCHECK
-#endif
+#  if defined(DEBUGGING) && !defined(NO_RCHECK)
+#    define RCHECK
+#  endif
 /*
  * malloc.c (Caltech) 2/21/82
  * Chris Kingsley, kingsley@cit-20.
