@@ -28,6 +28,121 @@ example from http://www.xray.mpe.mpg.de/mailing-lists/perl5-porters/
 Version v5.8.1		Maintenance release working toward v5.8.1
 --------------
 ____________________________________________________________________________
+[ 20581] By: jhi                                   on 2003/08/09  08:45:18
+        Log: Update on the cygwin situation.  (I'm wishfully thinking
+             that the sigaction.t failure was fixed by (blead) #20565.)
+     Branch: maint-5.8/perl
+	   ! pod/perldelta.pod
+____________________________________________________________________________
+[ 20580] By: jhi                                   on 2003/08/09  08:32:25
+        Log: Integrate:
+             [ 20570]
+             Two more tests for #20566/#20568.
+             
+             [ 20571]
+             Subject: [PATCH] Re: [PATCH] Re: Storing &PL_sv_undef as a hash key with perl-5.8.x
+             From: Nicholas Clark <nick@ccl4.org>
+             Date: Fri, 8 Aug 2003 23:30:00 +0100
+             Message-ID: <20030808233000.B20130@plum.flirble.org>
+             
+             [ 20572]
+             Subject: [PATCH] kill 'INT' doesn't work on Windows
+             From: Jan Dubois <jand@ActiveState.com>
+             Date: Fri, 08 Aug 2003 17:49:03 -0700
+             Message-ID: <ite8jvgjgcfm8e9dhl6f4dtstrbmn1vmpk@4ax.com>
+             
+             [ 20573]
+             Subject: Re: [PATCH] perlfaq8.pod and MakeMaker's PREFIX=
+             From: Michael G Schwern <schwern@pobox.com>
+             Date: Fri, 8 Aug 2003 13:59:50 -0700
+             Message-ID: <20030808205950.GJ1587@windhund.schwern.org>
+             
+             [ 20574]
+             Subject: [ PATCH] Re: strange destruction problem on VMS
+             From: Dave Mitchell <davem@fdgroup.com>
+             Date: Fri, 8 Aug 2003 22:28:48 +0100
+             Message-ID: <20030808212848.GA2628@fdgroup.com>
+             
+             [ 20577]
+             The libcygipc doesn't really work with the Perl SysV IPC tests
+             so no much point in adding it yet.
+             
+             [ 20579]
+             Some updates for the memory use debugging section:
+             -DL is obsolete, mention Devel::Size, and Purify and valgrind.
+     Branch: maint-5.8/perl
+	  !> ext/Storable/Storable.xs hints/cygwin.sh pod/perldebguts.pod
+	  !> pod/perlfaq8.pod sv.c t/op/pat.t win32/win32.c
+____________________________________________________________________________
+[ 20576] By: jhi                                   on 2003/08/09  07:25:52
+        Log: Retract #20525 since it was due to broken INT32_MIN in
+             Cygwin 1.5's stdint.h.
+     Branch: maint-5.8/perl
+	   ! pad.c
+____________________________________________________________________________
+[ 20569] By: jhi                                   on 2003/08/08  21:07:09
+        Log: Integrate:
+             [ 20568]
+             Subject: [PATCH] Re: UNICODE regexp bug
+             From: Nick Ing-Simmons <nick@ing-simmons.net>
+             Date: Fri, 08 Aug 2003 23:05:49 +0100
+             Message-Id: <20030808220549.5109.4@llama.ni-s.u-net.com>
+             
+             Better patch (than #20566) from NI-S, one more test
+             (introduce another variable rather than reuse the tmp, though)
+     Branch: maint-5.8/perl
+	  !> regexec.c t/op/pat.t
+____________________________________________________________________________
+[ 20567] By: jhi                                   on 2003/08/08  19:51:22
+        Log: Integrate:
+             [ 20563]
+             Subject: [PATCH] maintperl & bleadperl for Cygwin: include libgdbm_compat & libcygipc in searchlist
+             From: "Gerrit P. Haase" <gp@familiehaase.de>
+             Date: Fri, 8 Aug 2003 13:44:51 +0200
+             Message-ID: <1621817486657.20030808134451@familiehaase.de>
+             
+             [ 20564]
+             Subject: [PATCH] Re: main@20537: WinXP build failed op/time.t test 2
+             From: Steve Hay <steve.hay@uk.radan.com>
+             Date: Fri, 08 Aug 2003 12:42:28 +0100
+             Message-ID: <3F338CA4.3010503@uk.radan.com>
+             
+             [ 20565]
+             Move the csighandler to be a data variable so that
+             things like DLL trampolines can't mess up the code
+             variables the Perl_csighandler (seen in Cygwin:
+             Perl_csighandler in POSIX extension was different
+             than in main executable).
+             
+             [ 20566]
+             Subject: UNICODE regexp bug
+             From: Nick Ing-Simmons <nick@ing-simmons.net>
+             Date: Fri, 08 Aug 2003 20:36:56 +0100
+             Message-Id: <20030808193656.5109.1@llama.ni-s.u-net.com>
+     Branch: maint-5.8/perl
+	  !> embedvar.h ext/NDBM_File/hints/cygwin.pl
+	  !> ext/ODBM_File/hints/cygwin.pl ext/POSIX/POSIX.xs
+	  !> hints/cygwin.sh mg.c perlapi.h perlvars.h regexec.c t/op/pat.t
+	  !> t/op/time.t
+____________________________________________________________________________
+[ 20562] By: jhi                                   on 2003/08/08  11:55:24
+        Log: Retract #20479 (was part of #20493) from maint.
+     Branch: maint-5.8/perl
+	   ! scope.c t/op/local.t
+____________________________________________________________________________
+[ 20561] By: jhi                                   on 2003/08/08  11:45:58
+        Log: Integrate:
+             [ 20560]
+             Retract PASTHRU* changes as recommended by Schwern.
+     Branch: maint-5.8/perl
+	  !> lib/ExtUtils/MM_Unix.pm lib/ExtUtils/MM_Win32.pm
+	  !> lib/ExtUtils/t/MM_Win32.t
+____________________________________________________________________________
+[ 20558] By: jhi                                   on 2003/08/07  18:21:11
+        Log: Update Changes.
+     Branch: maint-5.8/perl
+	   ! Changes patchlevel.h
+____________________________________________________________________________
 [ 20557] By: jhi                                   on 2003/08/07  18:15:57
         Log: Integrate:
              [ 20556]
@@ -61,12 +176,6 @@ ____________________________________________________________________________
              From: hv@crypt.org
              Date: Thu, 07 Aug 2003 02:44:23 +0100
              Message-Id: <200308070144.h771iN906446@zen.crypt.org>
-             
-             [ 20540]
-             Subject: Re: maint @ 20537
-             From: Philip Newton <Philip.Newton@gmx.net>
-             Date: Thu, 07 Aug 2003 09:05:17 +0200
-             Message-ID: <s0l3jvo4mju2uu4f6pkq18istk02hme6j9@4ax.com>
              
              [ 20541]
              Subject: Re: maint @ 20537
