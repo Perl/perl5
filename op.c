@@ -195,8 +195,8 @@ pad_findlex(char *name, PADOFFSET newoff, U32 seq, CV* startcv, I32 cx_ix)
 
 		depth = CvDEPTH(cv);
 		if (!depth) {
-		    if (newoff)
-			return 0; /* don't clone inactive stack frame */
+		    if (newoff && (CvANON(cv) || CvGV(cv)))
+			return 0; /* don't clone inactive sub's stack frame */
 		    depth = 1;
 		}
 		oldpad = (AV*)*av_fetch(curlist, depth, FALSE);
@@ -2795,13 +2795,22 @@ CV* cv;
     I32 ix;
 
     PerlIO_printf(Perl_debug_log, "\tCV=0x%p (%s), OUTSIDE=0x%p (%s)\n",
-		  cv, CvANON(cv) ? "ANON" : GvNAME(CvGV(cv)),
-		  outside, CvANON(outside) ? "ANON" : GvNAME(CvGV(outside)));
+		  cv,
+		  (CvANON(cv) ? "ANON"
+		   : (cv == main_cv) ? "MAIN"
+		   : CvGV(cv) ? GvNAME(CvGV(cv)) : "?mystery?"),
+		  outside,
+		  (!outside ? "null"
+		   : CvANON(outside) ? "ANON"
+		   : (outside == main_cv) ? "MAIN"
+		   : CvGV(outside) ? GvNAME(CvGV(outside)) : "?mystery?"));
 
     for (ix = 1; ix <= AvFILL(pad); ix++) {
 	if (SvPOK(pname[ix]))
-	    PerlIO_printf(Perl_debug_log, "\t%4d. 0x%p (\"%s\")\n",
-			  ix, ppad[ix], SvPVX(pname[ix]))
+	    PerlIO_printf(Perl_debug_log, "\t%4d. 0x%p (\"%s\" %ld-%ld)\n",
+			  ix, ppad[ix], SvPVX(pname[ix]),
+			  (long)I_32(SvNVX(pname[ix])),
+			  (long)SvIVX(pname[ix]));
     }
 }
 #endif /* DEBUG_CLOSURES */
@@ -2907,9 +2916,11 @@ CV* outside;
     }
 
 #ifdef DEBUG_CLOSURES
-    PerlIO_printf(Perl_debug_log, "Cloned from:\n");
+    PerlIO_printf(Perl_debug_log, "Cloned inside:\n");
+    cv_dump(outside);
+    PerlIO_printf(Perl_debug_log, "  from:\n");
     cv_dump(proto);
-    PerlIO_printf(Perl_debug_log, "  to:\n");
+    PerlIO_printf(Perl_debug_log, "   to:\n");
     cv_dump(cv);
 #endif
 
