@@ -25,7 +25,7 @@ struct 'User::pwent' => [
     gid	    => '$',
     quota   => '$',
     comment => '$',
-    gcos    => '$',
+    gecos   => '$',
     dir	    => '$',
     shell   => '$',
 ];
