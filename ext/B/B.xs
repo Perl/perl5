@@ -81,7 +81,7 @@ static char *opclassnames[] = {
 
 static int walkoptree_debug = 0;	/* Flag for walkoptree debug hook */
 
-static SV *specialsv_list[4];
+static SV *specialsv_list[6];
 
 static opclass
 cc_opclass(pTHX_ OP *o)
@@ -386,11 +386,15 @@ BOOT:
     specialsv_list[1] = &PL_sv_undef;
     specialsv_list[2] = &PL_sv_yes;
     specialsv_list[3] = &PL_sv_no;
+    specialsv_list[4] = pWARN_ALL;
+    specialsv_list[5] = pWARN_NONE;
 #include "defsubs.h"
 }
 
 #define B_main_cv()	PL_main_cv
 #define B_init_av()	PL_initav
+#define B_begin_av()	PL_beginav_save
+#define B_end_av()	PL_endav
 #define B_main_root()	PL_main_root
 #define B_main_start()	PL_main_start
 #define B_amagic_generation()	PL_amagic_generation
@@ -402,6 +406,10 @@ BOOT:
 B::AV
 B_init_av()
 
+B::AV
+B_begin_av()
+B::AV
+B_end_av()
 B::CV
 B_main_cv()
 
@@ -515,6 +523,10 @@ minus_c()
     CODE:
 	PL_minus_c = TRUE;
 
+void
+save_BEGINs()
+    CODE:
+	PL_minus_c |= 0x10;
 SV *
 cstring(sv)
 	SV *	sv
@@ -693,8 +705,8 @@ PMOP_precomp(o)
 	if (rx)
 	    sv_setpvn(ST(0), rx->precomp, rx->prelen);
 
-#define SVOP_sv(o)	cSVOPo->op_sv
-#define SVOP_gv(o)	((GV*)cSVOPo->op_sv)
+#define SVOP_sv(o)	cSVOPo_sv
+#define SVOP_gv(o)	cGVOPo_gv
 
 MODULE = B	PACKAGE = B::SVOP		PREFIX = SVOP_
 

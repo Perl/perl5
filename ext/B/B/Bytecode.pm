@@ -7,12 +7,14 @@
 #
 package B::Bytecode;
 use strict;
-use Carp;
 use IO::File;
 
-use B qw(minus_c main_cv main_root main_start comppadlist
+use B qw(main_cv main_root main_start comppadlist
 	 class peekop walkoptree svref_2object cstring walksymtable
-	 SVf_POK SVp_POK SVf_IOK SVp_IOK
+	 init_av begin_av end_av
+	 SVf_POK SVp_POK SVf_IOK SVp_IOK SVf_NOK SVp_NOK
+	 SVf_READONLY GVf_IMPORTED_AV GVf_IMPORTED_CV GVf_IMPORTED_HV
+	 GVf_IMPORTED_SV
 	);
 use B::Asmdata qw(@optype @specialsv_name);
 use B::Assembler qw(assemble_fh);
@@ -31,9 +33,16 @@ sub POK () { SVf_POK|SVp_POK }
 # XXX Shouldn't be hardwired
 sub IOK () { SVf_IOK|SVp_IOK }
 
+# Following is SVf_NOK|SVp_NOK
+# XXX Shouldn't be hardwired
+sub NOK () { SVf_NOK|SVp_NOK }
+# nonexistant flags (see B::GV::bytecode for usage)
+sub GVf_IMPORTED_IO () { 0; }
+sub GVf_IMPORTED_FORM () { 0; }
 my ($verbose, $module_only, $no_assemble, $debug_bc, $debug_cv);
 my $assembler_pid;
 
+my @packages;	# list of packages to compile
 # Optimisation options. On the command line, use hyphens instead of
 # underscores for compatibility with gcc-style options. We use
 # underscores here because they are OK in (strict) barewords.
@@ -100,6 +109,11 @@ sub pvstring {
     }
 }
 
+sub nv {
+    # print full precision
+    my $str = sprintf "%.40f", $_[0];
+    return $str;
+}
 sub saved { $saved{${$_[0]}} }
 sub mark_saved { $saved{${$_[0]}} = 1 }
 sub unmark_saved { $saved{${$_[0]}} = 0 }
@@ -166,7 +180,8 @@ sub B::OP::newix {
     my ($op, $ix) = @_;
     my $class = class($op);
     my $typenum = $optype_enum{$class};
-    croak "OP::newix: can't understand class $class" unless defined($typenum);
+    require('Carp.pm'), Carp::croak("OP::newix: can't understand class $class")
+	 unless defined($typenum);
     print "newop $typenum\t# $class\n";
     stop($ix);
 }
@@ -180,7 +195,7 @@ sub B::OP::bytecode {
     my $op = shift;
     my $next = $op->next;
     my $nextix;
-    my $sibix = $op->sibling->objix;
+    my $sibix = $op->sibling->objix unless $strip_syntree;
     my $ix = $op->objix;
     my $type = $op->type;
 
@@ -203,7 +218,7 @@ sub B::OP::bytecode {
 
 sub B::UNOP::bytecode {
     my $op = shift;
-    my $firstix = $op->first->objix;
+    my $firstix = $op->first->objix unless $strip_syntree;
     $op->B::OP::bytecode;
     if (($op->type || !$compress_nullops) && !$strip_syntree) {
 	print "op_first $firstix\n";
@@ -251,7 +266,7 @@ sub B::PVOP::bytecode {
 
 sub B::BINOP::bytecode {
     my $op = shift;
-    my $lastix = $op->last->objix;
+    my $lastix = $op->last->objix unless $strip_syntree;
     $op->B::UNOP::bytecode;
     if (($op->type || !$compress_nullops) && !$strip_syntree) {
 	print "op_last $lastix\n";
@@ -260,7 +275,7 @@ sub B::BINOP::bytecode {
 
 sub B::LISTOP::bytecode {
     my $op = shift;
-    my $children = $op->children;
+    my $children = $op->children unless $strip_syntree;
     $op->B::BINOP::bytecode;
     if (($op->type || !$compress_nullops) && !$strip_syntree) {
 	print "op_children $children\n";
@@ -278,14 +293,16 @@ sub B::LOOP::bytecode {
 
 sub B::COP::bytecode {
     my $op = shift;
-    my $stashpv = $op->stashpv;
     my $file = $op->file;
     my $line = $op->line;
-    my $warnings = $op->warnings;
-    my $warningsix = $warnings->objix;
-    if ($debug_bc) {
+    if ($debug_bc) { # do this early to aid debugging
 	printf "# line %s:%d\n", $file, $line;
     }
+    my $stashpv = $op->stashpv;
+    my $warnings = $op->warnings;
+    my $warningsix;
+    $warningsix = $warnings->objix;
+    $warnings->bytecode;
     $op->B::OP::bytecode;
     printf <<"EOT", pvstring($op->label), pvstring($stashpv), $op->cop_seq, pvstring($file), $op->arybase;
 newpv %s
@@ -359,14 +376,14 @@ sub B::IV::bytecode {
     return if saved($sv);
     my $iv = $sv->IVX;
     $sv->B::SV::bytecode;
-    printf "%s $iv\n", $sv->needs64bits ? "xiv64" : "xiv32";
+    printf "%s $iv\n", $sv->needs64bits ? "xiv64" : "xiv32" if $sv->FLAGS & IOK; # could be PVNV
 }
 
 sub B::NV::bytecode {
     my $sv = shift;
     return if saved($sv);
     $sv->B::SV::bytecode;
-    printf "xnv %s\n", $sv->NVX;
+    printf "xnv %s\n", nv($sv->NVX);
 }
 
 sub B::RV::bytecode {
@@ -404,7 +421,7 @@ sub B::PVNV::bytecode {
     } else {
 	my $pv = $sv->PV;
 	$sv->B::IV::bytecode;
-	printf "xnv %s\n", $sv->NVX;
+	printf "xnv %s\n", nv($sv->NVX);
 	if ($flag == 1) {
 	    $pv .= "\0" . $sv->TABLE;
 	    printf "newpv %s\npv_cur %d\nxpv\n", pvstring($pv),length($pv)-257;
@@ -461,6 +478,7 @@ sub B::BM::bytecode {
 sub B::GV::bytecode {
     my $gv = shift;
     return if saved($gv);
+    return unless grep { $_ eq $gv->STASH->NAME; } @packages;
     my $ix = $gv->objix;
     mark_saved($gv);
     ldsv($ix);
@@ -488,6 +506,10 @@ EOT
 	if ($gvname !~ /^([^A-Za-z]|STDIN|STDOUT|STDERR|ARGV|SIG|ENV)$/) {
 	    my $i;
 	    my @subfield_names = qw(SV AV HV CV FORM IO);
+	    @subfield_names = grep {;
+					no strict 'refs';
+					!($gv->GvFLAGS & ${\"GVf_IMPORTED_$_"}->());
+				} @subfield_names;
 	    my @subfields = map($gv->$_(), @subfield_names);
 	    my @ixes = map($_->objix, @subfields);
 	    # Reset sv register for $gv
@@ -510,6 +532,7 @@ sub B::HV::bytecode {
     mark_saved($hv);
     my $name = $hv->NAME;
     my $ix = $hv->objix;
+    printf "sv_refcnt %d\nsv_flags 0x%x\n", $hv->REFCNT, $hv->FLAGS;
     if (!$name) {
 	# It's an ordinary HV. Stashes have NAME set and need no further
 	# saving beyond the gv_stashpv that $hv->objix already ensures.
@@ -526,7 +549,6 @@ sub B::HV::bytecode {
 	    printf("newpv %s\nhv_store %d\n",
 		   pvstring($contents[$i]), $ixes[$i / 2]);
 	}
-	printf "sv_refcnt %d\nsv_flags 0x%x\n", $hv->REFCNT, $hv->FLAGS;
     }
 }
 
@@ -551,6 +573,7 @@ sub B::AV::bytecode {
     # create an AV with NEWSV and SvUPGRADE rather than doing newAV
     # which is what sets AvMAX and AvFILL.
     ldsv($ix);
+    printf "sv_flags 0x%x\n", $av->FLAGS & ~SVf_READONLY; # SvREADONLY_off($av) in case PADCONST
     printf "xav_flags 0x%x\nxav_max -1\nxav_fill -1\n", $av->AvFLAGS;
     if ($fill > -1) {
 	my $elix;
@@ -562,11 +585,13 @@ sub B::AV::bytecode {
 	    print "av_extend $max\n";
 	}
     }
+    printf "sv_flags 0x%x\n", $av->FLAGS; # restore flags from above
 }
 
 sub B::CV::bytecode {
     my $cv = shift;
     return if saved($cv);
+    return if ${$cv->GV} && ($cv->GV->GvFLAGS & GVf_IMPORTED_CV);
     my $ix = $cv->objix;
     $cv->B::PVMG::bytecode;
     my $i;
@@ -628,8 +653,7 @@ sub B::SPECIAL::bytecode {
 }
 
 sub bytecompile_object {
-    my $sv;
-    foreach $sv (@_) {
+    for my $sv (@_) {
 	svref_2object($sv)->bytecode;
     }
 }
@@ -646,30 +670,64 @@ sub B::GV::bytecodecv {
     }
 }
 
+sub save_call_queues {
+    if (ref(begin_av()) eq "B::AV") {	# this is just to save 'use Foo;' calls
+	for my $cv (begin_av->ARRAY) {
+	    my $name = $cv->STASH->NAME;
+	    next unless grep { $_ eq $name } @packages;
+	    my $op = $cv->START;
+	    $op = $op->next while ($$op && ref $op ne "B::UNOP");
+	    if ($$op && $op->name eq 'require') { # should be first UNOP
+		$cv->bytecode;
+		printf "push_begin %d\n", $cv->objix;
+	    }
+	}
+    }
+    if (ref(init_av()) eq "B::AV") {
+	for my $cv (init_av->ARRAY) {
+	    next unless grep { $_ eq $cv->STASH->NAME } @packages;
+	    $cv->bytecode;
+	    printf "push_init %d\n", $cv->objix;
+	}
+    }
+    if (ref(end_av()) eq "B::AV") {
+	for my $cv (end_av->ARRAY) {
+	    next unless grep { $_ eq $cv->STASH->NAME } @packages;
+	    $cv->bytecode;
+	    printf "push_end %d\n", $cv->objix;
+	}
+    }
+}
+
+sub symwalk {
+     no strict 'refs';
+     my $ok = 1 if grep { (my $name = $_[0]) =~ s/::$//; $_ eq $name;} @packages;
+    if (grep { /^$_[0]/; } @packages) {
+	walksymtable(\%{"$_[0]"}, "bytecodecv", \&symwalk, $_[0]);
+    }
+    warn "considering $_[0] ... " . ($ok ? "accepted\n" : "rejected\n")
+	if $debug_bc;
+    $ok;
+}
+
 sub bytecompile_main {
     my $curpad = (comppadlist->ARRAY)[1];
     my $curpadix = $curpad->objix;
     $curpad->bytecode;
-    walkoptree(main_root, "bytecode");
+    walkoptree(main_root, "bytecode") unless ref(main_root) eq "B::NULL";
     warn "done main program, now walking symbol table\n" if $debug_bc;
-    my ($pack, %exclude);
-    foreach $pack (qw(B O AutoLoader DynaLoader XSLoader Config DB VMS strict vars
-		      FileHandle Exporter Carp UNIVERSAL IO Fcntl Symbol warnings
-		      attributes File::Spec SelectSaver blib Cwd))
-    {
-	$exclude{$pack."::"} = 1;
+    if (@packages) {
+	no strict qw(refs);
+	our %packages;
+	walksymtable(\%{"main::"}, "bytecodecv", \&symwalk);
+    } else {
+	die "No packages requested for compilation!\n";
     }
-    no strict qw(vars refs);
-    walksymtable(\%{"main::"}, "bytecodecv", sub {
-	warn "considering $_[0]\n" if $debug_bc;
-	return !defined($exclude{$_[0]});
-    });
-    if (!$module_only) {
-	printf "main_root %d\n", main_root->objix;
-	printf "main_start %d\n", main_start->objix;
-	printf "curpad $curpadix\n";
-	# XXX Do min_intro_pending and max_intro_pending matter?
-    }
+    save_call_queues;
+    printf "main_root %d\n", main_root->objix;
+    printf "main_start %d\n", main_start->objix;
+    printf "curpad $curpadix\n";
+    # XXX Do min_intro_pending and max_intro_pending matter?
 }
 
 sub prepare_assemble {
@@ -727,7 +785,7 @@ sub compile {
 	    }
 	} elsif ($opt eq "v") {
 	    $verbose = 1;
-	} elsif ($opt eq "m") {
+	} elsif ($opt eq "m") { # XXX: NOP
 	    $module_only = 1;
 	} elsif ($opt eq "S") {
 	    $no_assemble = 1;
@@ -757,9 +815,16 @@ sub compile {
 		$compress_nullops = 1;
 		$omit_seq = 1;
 	    }
+	} elsif ($opt eq "P") {
+	    $arg ||= shift @options;
+	    push @packages, $arg;
 	}
     }
-    if (@options) {
+    if (! @packages) {
+	warn "No package specified for compilation, assuming main::\n";
+	@packages = qw(main);
+    }
+    if (@options) { # XXX: unsupported and untested!
 	return sub {
 	    my $objname;
 	    my $newfh; 
@@ -887,33 +952,33 @@ Prints each CV taken from the final symbol tree walk.
 Output (bytecode) assembler source rather than piping it
 through the assembler and outputting bytecode.
 
-=item B<-m>
-
-Compile as a module rather than a standalone program. Currently this
-just means that the bytecodes for initialising C<main_start>,
-C<main_root> and C<curpad> are omitted.
-
+=item B<-Ppackage>
+  
+Stores package in the output.
+  
 =back
 
 =head1 EXAMPLES
 
-    perl -MO=Bytecode,-O6,-o,foo.plc foo.pl
+    perl -MO=Bytecode,-O6,-ofoo.plc,-Pmain foo.pl
 
-    perl -MO=Bytecode,-S foo.pl > foo.S
+    perl -MO=Bytecode,-S,-Pmain foo.pl > foo.S
     assemble foo.S > foo.plc
 
 Note that C<assemble> lives in the C<B> subdirectory of your perl
 library directory. The utility called perlcc may also be used to 
 help make use of this compiler.
 
-    perl -MO=Bytecode,-m,-oFoo.pmc Foo.pm
+    perl -MO=Bytecode,-PFoo,-oFoo.pmc Foo.pm
 
 =head1 BUGS
 
-Plenty. Current status: experimental.
+Output is still huge and there are still occasional crashes during
+either compilation or ByteLoading. Current status: experimental.
 
-=head1 AUTHOR
+=head1 AUTHORS
 
 Malcolm Beattie, C<mbeattie@sable.ox.ac.uk>
+Benjamin Stuhl, C<sho_pi@hotmail.com>
 
 =cut

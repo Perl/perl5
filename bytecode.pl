@@ -13,7 +13,7 @@ my @optype= qw(OP UNOP BINOP LOGOP LISTOP PMOP SVOP PADOP PVOP LOOP COP);
 
 # Nullsv *must* come first in the following so that the condition
 # ($$sv == 0) can continue to be used to test (sv == Nullsv).
-my @specialsv = qw(Nullsv &PL_sv_undef &PL_sv_yes &PL_sv_no);
+my @specialsv = qw(Nullsv &PL_sv_undef &PL_sv_yes &PL_sv_no pWARN_ALL pWARN_NONE);
 
 my (%alias_from, $from, $tos);
 while (($from, $tos) = each %alias_to) {
@@ -82,7 +82,7 @@ print BYTERUN_C $c_header, <<'EOT';
 #include "bytecode.h"
 
 
-static int optype_size[] = {
+static const int optype_size[] = {
 EOT
 my $i = 0;
 for ($i = 0; $i < @optype - 1; $i++) {
@@ -92,12 +92,8 @@ printf BYTERUN_C "    sizeof(%s)\n", $optype[$i], $i;
 print BYTERUN_C <<'EOT';
 };
 
-static SV *specialsv_list[4];
-
 static int bytecode_iv_overflows = 0;
-static SV *bytecode_sv;
-static XPV bytecode_pv;
-static void **bytecode_obj_list;
+static void **bytecode_obj_list = Null(void**);
 static I32 bytecode_obj_list_fill = -1;
 
 void *
@@ -105,9 +101,9 @@ bset_obj_store(pTHXo_ void *obj, I32 ix)
 {
     if (ix > bytecode_obj_list_fill) {
 	if (bytecode_obj_list_fill == -1)
-	    New(666, bytecode_obj_list, ix + 1, void*);
+	    New(666, bytecode_obj_list, ix + 32, void*);
 	else
-	    Renew(bytecode_obj_list, ix + 1, void*);
+	    Renew(bytecode_obj_list, ix + 32, void*);
 	bytecode_obj_list_fill = ix;
     }
     bytecode_obj_list[ix] = obj;
@@ -115,11 +111,20 @@ bset_obj_store(pTHXo_ void *obj, I32 ix)
 }
 
 void
-byterun(pTHXo_ struct bytestream bs)
+byterun(pTHXo)
 {
     dTHR;
     int insn;
+    SV *bytecode_sv;
+    XPV bytecode_pv;
+    SV *specialsv_list[6];
+    ENTER;
+    SAVEVPTR(bytecode_obj_list);
+    SAVEI32(bytecode_obj_list_fill);
+    bytecode_obj_list = Null(void**);
+    bytecode_obj_list_fill = -1;
 
+    BYTECODE_HEADER_CHECK;	/* croak if incorrect platform */
 EOT
 
 for (my $i = 0; $i < @specialsv; $i++) {
@@ -198,7 +203,7 @@ EOT
 #
 open(BYTERUN_H, ">ext/ByteLoader/byterun.h") or die "ext/ByteLoader/byterun.h: $!";
 print BYTERUN_H $c_header, <<'EOT';
-struct bytestream {
+struct bytestream { /* XXX: not currently used - too slow */
     void *data;
     int (*pfgetc)(void *);
     int (*pfread)(char *, size_t, size_t, void *);
@@ -234,15 +239,7 @@ for ($i = 0; $i < @optype - 1; $i++) {
 printf BYTERUN_H "    OPt_%s\t\t/* %d */\n};\n\n", $optype[$i], $i;
 
 print BYTERUN_H <<'EOT';
-extern void byterun(pTHXo_ struct bytestream bs);
-
-#define INIT_SPECIALSV_LIST STMT_START { \
-EOT
-for ($i = 0; $i < @specialsv; $i++) {
-    print BYTERUN_H "\tPL_specialsv_list[$i] = $specialsv[$i]; \\\n";
-}
-print BYTERUN_H <<'EOT';
-    } STMT_END
+extern void byterun(pTHXo);
 EOT
 
 #
@@ -409,3 +406,6 @@ cop_warnings	cCOP->cop_warnings			svindex
 main_start	PL_main_start				opindex
 main_root	PL_main_root				opindex
 curpad		PL_curpad				svindex		x
+push_begin	PL_beginav				svindex		x
+push_init	PL_initav				svindex		x
+push_end	PL_endav				svindex		x

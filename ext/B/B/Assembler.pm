@@ -8,10 +8,11 @@ package B::Assembler;
 use Exporter;
 use B qw(ppname);
 use B::Asmdata qw(%insn_data @insn_name);
+use Config qw(%Config);
 
 @ISA = qw(Exporter);
 @EXPORT_OK = qw(assemble_fh assemble_insn strip_comments
-		parse_statement uncstring);
+		parse_statement uncstring gen_header);
 
 use strict;
 my %opnumber;
@@ -49,11 +50,12 @@ sub B::Asmdata::PUT_U8 {
     return $c;
 }
 
-sub B::Asmdata::PUT_U16 { pack("n", $_[0]) }
-sub B::Asmdata::PUT_U32 { pack("N", $_[0]) }
-sub B::Asmdata::PUT_I32 { pack("N", $_[0]) }
-sub B::Asmdata::PUT_NV  { sprintf("%lf\0", $_[0]) }
-sub B::Asmdata::PUT_objindex { pack("N", $_[0]) } # could allow names here
+sub B::Asmdata::PUT_U16 { pack("S", $_[0]) }
+sub B::Asmdata::PUT_U32 { pack("L", $_[0]) }
+sub B::Asmdata::PUT_I32 { pack("L", $_[0]) }
+sub B::Asmdata::PUT_NV  { sprintf("%s\0", $_[0]) } # "%lf" looses precision and pack('d',...)
+						   # may not even be portable between compilers
+sub B::Asmdata::PUT_objindex { pack("L", $_[0]) } # could allow names here
 sub B::Asmdata::PUT_svindex { &B::Asmdata::PUT_objindex }
 sub B::Asmdata::PUT_opindex { &B::Asmdata::PUT_objindex }
 
@@ -79,7 +81,7 @@ sub B::Asmdata::PUT_PV {
     my $arg = shift;
     $arg = uncstring($arg);
     error "bad string argument: $arg" unless defined($arg);
-    return pack("N", length($arg)) . $arg;
+    return pack("L", length($arg)) . $arg;
 }
 sub B::Asmdata::PUT_comment_t {
     my $arg = shift;
@@ -90,7 +92,7 @@ sub B::Asmdata::PUT_comment_t {
     }
     return $arg . "\n";
 }
-sub B::Asmdata::PUT_double { sprintf("%s\0", $_[0]) }
+sub B::Asmdata::PUT_double { sprintf("%s\0", $_[0]) } # see PUT_NV above
 sub B::Asmdata::PUT_none {
     my $arg = shift;
     error "extraneous argument: $arg" if defined $arg;
@@ -103,12 +105,12 @@ sub B::Asmdata::PUT_op_tr_array {
 	error "wrong number of arguments to op_tr_array";
 	@ary = (0) x 256;
     }
-    return pack("n256", @ary);
+    return pack("S256", @ary);
 }
 # XXX Check this works
 sub B::Asmdata::PUT_IV64 {
     my $arg = shift;
-    return pack("NN", $arg >> 32, $arg & 0xffffffff);
+    return pack("LL", $arg >> 32, $arg & 0xffffffff);
 }
 
 my %unesc = (n => "\n", r => "\r", t => "\t", a => "\a",
@@ -138,6 +140,16 @@ sub strip_comments {
     return $stmt;
 }
 
+sub gen_header { # create the ByteCode header
+    my $header = B::Asmdata::PUT_U32(0x43424c50);	# 'PLBC'
+    $header .= B::Asmdata::PUT_strconst($Config{archname});
+    $header .= B::Asmdata::PUT_U32($Config{ivsize});
+    $header .= B::Asmdata::PUT_U32($Config{nvsize});
+    $header .= B::Asmdata::PUT_U32($Config{ptrsize});
+    $header .= B::Asmdata::PUT_strconst($Config{byteorder});	# PV not U32 because
+								# of varying size
+    $header;
+}
 sub parse_statement {
     my $stmt = shift;
     my ($insn, $arg) = $stmt =~ m{
@@ -186,6 +198,7 @@ sub assemble_fh {
     my ($line, $insn, $arg);
     $linenum = 0;
     $errors = 0;
+    &$out(gen_header());
     while ($line = <$fh>) {
 	$linenum++;
 	chomp $line;
