@@ -9,7 +9,7 @@ use Math::BigInt;
 
 $test = 0;
 $| = 1;
-print "1..247\n";
+print "1..276\n";
 while (<DATA>) {
        chop;
        if (s/^&//) {
