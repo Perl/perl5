@@ -2273,6 +2273,14 @@ respectively.
 
 =item *
 
+perl5db.pl has been modified to present a more consistent commands
+interface, via (CommandSet=580).  perl5db.t was also added to test the
+changes, and as a placeholder for further tests.
+
+See L<perldebug>
+
+=item *
+
 If an attempt to use a (non-blessed) reference as an array index
 is made, a warning is given.
 

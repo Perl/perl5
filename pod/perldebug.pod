@@ -52,22 +52,26 @@ The debugger understands the following commands:
 
 =over 12
 
+=item h
+
+Prints out a summary help message
+
 =item h [command]
 
-Prints out a help message.
+Prints out a help message for the given debugger command.
 
-If you supply another debugger command as an argument to the C<h> command,
-it prints out the description for just that command.  The special
-argument of C<h h> produces a more compact help listing, designed to fit
-together on one screen.
+=item h h
 
-If the output of the C<h> command (or any command, for that matter) scrolls
+The special argument of C<h h> produces the entire help page, which is quite long.
+
+If the output of the C<h h> command (or any command, for that matter) scrolls
 past your screen, precede the command with a leading pipe symbol so
 that it's run through your pager, as in
 
-    DB> |h
+    DB> |h h
 
-You may change the pager which is used via C<O pager=...> command.
+You may change the pager which is used via C<o pager=...> command.
+
 
 =item p expr
 
@@ -166,9 +170,9 @@ be a variable that contains a code reference.
 
 List previous window of lines.
 
-=item w [line]
+=item v [line]
 
-List window (a few lines) around the current line.
+View a few lines of code around the current line.
 
 =item .
 
@@ -197,9 +201,9 @@ The search is case-insensitive by default.
 Search backwards for pattern; final ? is optional.
 The search is case-insensitive by default.
 
-=item L
+=item L [abw]
 
-List all breakpoints and actions.
+List (default all) actions, breakpoints and watch expressions
 
 =item S [[!]regex]
 
@@ -214,10 +218,13 @@ Toggle trace mode (see also the C<AutoTrace> option).
 Trace through execution of C<expr>.
 See L<perldebguts/"Frame Listing Output Examples"> for examples.
 
+=item b
+
+Sets breakpoint on current line
+
 =item b [line] [condition]
 
-Set a breakpoint before the given line.  If I<line> is omitted, set a
-breakpoint on the line about to be executed.  If a condition
+Set a breakpoint before the given line.  If a condition
 is specified, it's evaluated each time the statement is reached: a
 breakpoint is taken only if the condition is true.  Breakpoints may
 only be set on lines that begin an executable statement.  Conditions
@@ -247,12 +254,11 @@ which should be a full pathname found amongst the %INC values.
 Sets a breakpoint before the first statement executed after the specified
 subroutine is compiled.
 
-=item d [line]
+=item B line
 
-Delete a breakpoint from the specified I<line>.  If I<line> is omitted, deletes
-the breakpoint from the line about to be executed.
+Delete a breakpoint from the specified I<line>.  
 
-=item D
+=item B *
 
 Delete all installed breakpoints.
 
@@ -273,45 +279,50 @@ For example, this will print out $foo every time line
 
     a 53 print "DB FOUND $foo\n"
 
-=item a [line]
+=item A line
 
-Delete an action from the specified line.  If I<line> is omitted, delete
-the action on the line that is about to be executed.
+Delete an action from the specified line.  
 
-=item A
+=item A *
 
 Delete all installed actions.
 
-=item W expr
+=item w expr
 
 Add a global watch-expression.  We hope you know what one of these
-is, because they're supposed to be obvious.  B<WARNING>: It is far
-too easy to destroy your watch expressions by accidentally omitting
-the I<expr>.
+is, because they're supposed to be obvious.  
 
-=item W
+=item W expr
+
+Delete watch-expression
+
+=item W *
 
 Delete all watch-expressions.
 
-=item O booloption ...
+=item o
+
+Display all options
+
+=item o booloption ...
 
 Set each listed Boolean option to the value C<1>.
 
-=item O anyoption? ...
+=item o anyoption? ...
 
 Print out the value of one or more options.
 
-=item O option=value ...
+=item o option=value ...
 
 Set the value of one or more options.  If the value has internal
-whitespace, it should be quoted.  For example, you could set C<O
+whitespace, it should be quoted.  For example, you could set C<o
 pager="less -MQeicsNfr"> to call B<less> with those specific options.
 You may use either single or double quotes, but if you do, you must
 escape any embedded instances of same sort of quote you began with,
 as well as any escaping any escapes that immediately precede that
 quote but which are not meant to escape the quote itself.  In other
 words, you follow single-quoting rules irrespective of the quote;
-eg: C<O option='this isn\'t bad'> or C<O option="She said, \"Isn't
+eg: C<o option='this isn\'t bad'> or C<o option="She said, \"Isn't
 it?\"">.
 
 For historical reasons, the C<=value> is optional, but defaults to
@@ -385,12 +396,12 @@ Redo number'th previous command.
 =item ! pattern
 
 Redo last command that started with pattern.
-See C<O recallCommand>, too.
+See C<o recallCommand>, too.
 
 =item !! cmd
 
 Run cmd in a subprocess (reads from DB::IN, writes to DB::OUT) See
-C<O shellBang>, also.  Note that the user's current shell (well,
+C<o shellBang>, also.  Note that the user's current shell (well,
 their C<$ENV{SHELL}> variable) will be used, which can interfere
 with proper interpretation of exit status or signal and coredump
 information.
@@ -453,6 +464,11 @@ List which methods may be called on the result of the evaluated
 expression.  The expression may evaluated to a reference to a 
 blessed object, or to a package name.
 
+=item M
+
+Displays all loaded modules and their versions
+
+
 =item man [manpage]
 
 Despite its name, this calls your system's default documentation
@@ -478,7 +494,7 @@ working example of something along the lines of:
 
 =head2 Configurable Options
 
-The debugger has numerous options settable using the C<O> command,
+The debugger has numerous options settable using the C<o> command,
 either interactively or from the environment or an rc file.
 (./.perldb or ~/.perldb under Unix.)
 
@@ -838,7 +854,7 @@ compile subname> for the same purpose.
 
 The debugger probably contains enough configuration hooks that you
 won't ever have to modify it yourself.  You may change the behaviour
-of debugger from within the debugger using its C<O> command, from
+of debugger from within the debugger using its C<o> command, from
 the command line via the C<PERLDB_OPTS> environment variable, and
 from customization files.
 
