@@ -188,7 +188,6 @@ $? = 0;
 
 # check that child is reaped if the piped program can't be executed
 {
-  local $SIG{CHLD} = 'DEFAULT';
   open NIL, '/no_such_process |';
   close NIL;
 
