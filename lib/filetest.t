@@ -5,7 +5,7 @@ BEGIN {
 	@INC = '../lib';
 }
 
-use Test::More tests => 15;
+use Test::More tests => 13;
 
 # these two should be kept in sync with the pragma itself
 # if hint bits are changed there, other things *will* break
@@ -55,7 +55,7 @@ SKIP: {
     # This works for systems with /usr/bin/chflags (i.e. BSD4.4 systems).
     my $chflags = "/usr/bin/chflags";
     my $tstfile = "filetest.tst";
-    skip("No $chflags available", 2) if !-x $chflags;
+    skip("No $chflags available", 4) if !-x $chflags;
 
  SKIP: {
 	eval {
@@ -66,7 +66,7 @@ SKIP: {
 	    system($chflags, "uchg", $tstfile);
 	    die "Can't exec $chflags uchg" if $? != 0;
 	};
-	skip("Errors in test using chflags: $@", 2) if $@;
+	skip("Errors in test using chflags: $@", 4) if $@;
 
 	{
 	    use filetest 'access';
