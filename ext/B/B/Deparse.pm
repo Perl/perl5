@@ -939,7 +939,10 @@ sub lineseq {
 	if (is_state $ops[$i]) {
 	    $expr = $self->deparse($ops[$i], 0);
 	    $i++;
-	    last if $i > $#ops;
+	    if ($i > $#ops) {
+		push @exprs, $expr;
+		last;
+	    }
 	}
 	if (!is_state $ops[$i] and $ops[$i+1] and !null($ops[$i+1]) and
 	    $ops[$i+1]->name eq "leaveloop" and $self->{'expand'} < 3)
@@ -949,9 +952,9 @@ sub lineseq {
 	    next;
 	}
 	$expr .= $self->deparse($ops[$i], 0);
+	$expr =~ s/;\n?\z//;
 	push @exprs, $expr if length $expr;
     }
-    for(@exprs[0..@exprs-1]) { s/;\n\z// }
     return join(";\n", @exprs);
 }
 
@@ -1121,9 +1124,9 @@ sub pp_nextstate {
     my($op, $cx) = @_;
     $self->{'curcop'} = $op;
     my @text;
-    @text = $op->label . ": " if $op->label;
 #push @text, "# ", $op->cop_seq, "\n";
     push @text, $self->cop_subs($op);
+    push @text, $op->label . ": " if $op->label;
     my $stash = $op->stashpv;
     if ($stash ne $self->{'curstash'}) {
 	push @text, "package $stash;\n";
@@ -1196,7 +1199,16 @@ sub baseop {
     return $name;
 }
 
-sub pp_stub { baseop(@_, "()") }
+sub pp_stub {
+    my $self = shift;
+    my($op, $cx, $name) = @_;
+    if ($cx) {
+	return "()";
+    }
+    else {
+	return "();";
+    }
+}
 sub pp_wantarray { baseop(@_, "wantarray") }
 sub pp_fork { baseop(@_, "fork") }
 sub pp_wait { maybe_targmy(@_, \&baseop, "wait") }
@@ -1863,6 +1875,9 @@ sub listop {
     else {
 	$first = $self->deparse($kid, 6);
     }
+    if ($name eq "chmod" && $first =~ /^\d+$/) {
+	$first = sprintf("0%o", $first);
+    }
     $first = "+$first" if not $parens and substr($first, 0, 1) eq "(";
     push @exprs, $first;
     $kid = $kid->sibling;
@@ -2156,7 +2171,7 @@ sub loop_common {
     my $out_seq = $self->{'curcop'}->cop_seq;;
     if ($kid->name eq "lineseq") { # bare or infinite loop 
 	if (is_state $kid->last) { # infinite
-	    $head = "for (;;) "; # shorter than while (1)
+	    $head = "while (1) "; # Can't use for(;;) if there's a continue
 	    $cond = "";
 	} else {
 	    $bare = 1;
@@ -2706,6 +2721,10 @@ sub pp_entersub {
     # Doesn't matter how many prototypes there are, if
     # they haven't happened yet!
     my $declared = exists $self->{'subs_declared'}{$kid};
+    if (!$declared && defined($proto)) {
+	# Avoid "too early to check prototype" warning
+	($amper, $proto) = ('&');
+    }
 
     my $args;
     if ($declared and defined $proto and not $amper) {
