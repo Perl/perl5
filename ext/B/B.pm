@@ -9,13 +9,12 @@ package B;
 use XSLoader ();
 require Exporter;
 @ISA = qw(Exporter);
-@EXPORT_OK =
-    qw(minus_c ppname save_BEGINs
-       class peekop cast_I32 cstring cchar hash threadsv_names
-       main_root main_start main_cv svref_2object opnumber amagic_generation
-       walkoptree_slow walkoptree_exec walksymtable
-       parents comppadlist sv_undef compile_stats timing_info
-       begin_av init_av end_av);
+@EXPORT_OK = qw(minus_c ppname save_BEGINs
+		class peekop cast_I32 cstring cchar hash threadsv_names
+		main_root main_start main_cv svref_2object opnumber amagic_generation
+		walkoptree_slow walkoptree walkoptree_exec walksymtable
+		parents comppadlist sv_undef compile_stats timing_info
+		begin_av init_av end_av);
 sub OPf_KIDS ();
 use strict;
 @B::SV::ISA = 'B::OBJECT';
@@ -81,7 +80,7 @@ sub peekop {
     return sprintf("%s (0x%x) %s", class($op), $$op, $op->name);
 }
 
-sub walkoptree_slow {
+sub walkoptree {
     my($op, $method, $level) = @_;
     $op_count++; # just for statistics
     $level ||= 0;
@@ -91,11 +90,13 @@ sub walkoptree_slow {
 	my $kid;
 	unshift(@parents, $op);
 	for ($kid = $op->first; $$kid; $kid = $kid->sibling) {
-	    walkoptree_slow($kid, $method, $level + 1);
+	    walkoptree($kid, $method, $level + 1);
 	}
 	shift @parents;
     }
 }
+
+*walkoptree_slow = \&walkoptree; # Who is using this?
 
 sub compile_stats {
     return "Total number of OPs processed: $op_count\n";
