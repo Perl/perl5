@@ -389,8 +389,6 @@ static stcxt_t *Context_ptr = &Context;
 
 #endif /* MULTIPLICITY || PERL_OBJECT || PERL_CAPI */
 
-XS(XS_Storable_END); /* free perinterp_sv and kbuf */
-
 /*
  * KNOWN BUG:
  *   Croaking implies a memory leak, since we don't use setjmp/longjmp
@@ -5428,16 +5426,3 @@ is_storing()
 int
 is_retrieving()
 
-void
-END()
-PPCODE:
-{   
-	dSTCXT;
-#if defined(MULTIPLICITY) || defined(PERL_OBJECT) || defined(PERL_CAPI)
-	Safefree(INT2PTR(stcxt_t*, perinterp_sv));
-	perinterp_sv = 0;
-#endif
-	Safefree(kbuf);
-	kbuf = 0;
-	ksiz = 0;
-}
