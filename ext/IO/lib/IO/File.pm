@@ -103,12 +103,20 @@ passed on to the C<binmode> call.
 
 =back
 
+=head1 NOTE
+
+Some operating systems may perform  C<IO::File::new()> or C<IO::File::open()>
+on a directory without errors.  This behavior is not portable and not
+suggested for use.  Using C<opendir()> and C<readdir()> or C<IO::Dir> are
+suggested instead.
+
 =head1 SEE ALSO
 
 L<perlfunc>, 
 L<perlop/"I/O Operators">,
-L<IO::Handle>
-L<IO::Seekable>
+L<IO::Handle>,
+L<IO::Seekable>,
+L<IO::Dir>
 
 =head1 HISTORY
 
