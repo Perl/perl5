@@ -6,7 +6,7 @@ use base 'Encode::Encoding';
 # Encoding is 16-bit network order Unicode (no surogates)
 # Used for X font encodings
 
-__PACKAGE__->Define(qw(UCS-2BE UCS-2));
+__PACKAGE__->Define(qw(UCS-2));
 
 sub decode
 {
@@ -18,7 +18,7 @@ sub decode
 	$uni .= chr($code);
     }
     $_[1] = $str if $chk;
-    utf8::upgrade($uni);
+  utf8::upgrade($uni);
     return $uni;
 }
 
@@ -30,7 +30,7 @@ sub encode
     {
 	my $ch = substr($uni,0,1,'');
 	my $x  = ord($ch);
-	unless ($x <= 0xffff)
+	unless ($x < 32768)
 	{
 	    last if ($chk);
 	    $x = 0;
