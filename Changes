@@ -28,6 +28,134 @@ example from http://www.xray.mpe.mpg.de/mailing-lists/perl5-porters/
 Version v5.8.1		Maintenance release working toward v5.8.1
 --------------
 ____________________________________________________________________________
+[ 21049] By: jhi                                   on 2003/09/05  13:56:44
+        Log: Integrate:
+             [ 21036]
+             Subject: Re: [PATCH] Data::Dumper 2.121
+             From: Ilya Martynov <ilya@martynov.org>
+             Date: Fri, 05 Sep 2003 00:33:46 +0400
+             Message-ID: <87ad9kuwd1.fsf@abra.ru>
+             
+             [ 21039]
+             Another seemingly fixed (un)tie bug,
+             [perl ##22297] cannot untie scalar from within tied FETCH
+             
+             [ 21040]
+             [perl #3763] code example error in "perlopentut"
+             
+             [ 21041]
+             Subject: [PATCH] Remove dublicated entry in AUTHORS
+             From: Ilya Martynov <ilya@martynov.org>
+             Date: Fri, 05 Sep 2003 00:49:57 +0400
+             Message-ID: <8765k8uvm2.fsf@abra.ru>
+             
+             [ 21042]
+             Acknowledge some known tie bugs.
+             
+             [ 21043]
+             Changed conflicting diff options
+             
+             [ 21044]
+             FreeBSD hints updates from Anton Berezin.
+             
+             [ 21045]
+             More suidperl path disclosure plugging:
+             the #9813 didn't do enough.  See either of
+             http://rt.perl.org/rt2/Ticket/Display.html?id=6511
+             http://bugs.debian.org/cgi-bin/bugreport.cgi?bug=203426
+             
+             [ 21046]
+             Subject: versions threads modules
+             From: Elizabeth Mattijsen <liz@dijkmat.nl>
+             Date: Fri, 5 Sep 2003 12:22:52 +0200
+             Message-Id: <p05111b03bb7e1423e6ff@[192.168.56.4]>
+             
+             [ 21047]
+             Subject: [PATCH] threads/shared.pm: saves 4K per thread
+             Date: Fri, 5 Sep 2003 14:46:00 +0200
+             Message-Id: <p05111b05bb7e177db044@[192.168.56.4]>
+             From: Elizabeth Mattijsen <liz@dijkmat.nl>
+             
+             [ 21048]
+             One more known tie problem.
+     Branch: maint-5.8/perl
+	  !> AUTHORS ext/Data/Dumper/Changes ext/Data/Dumper/Dumper.pm
+	  !> ext/Data/Dumper/Dumper.xs ext/Data/Dumper/t/dumper.t
+	  !> ext/Data/Dumper/t/overload.t ext/Data/Dumper/t/pair.t
+	  !> ext/threads/shared/shared.pm hints/freebsd.sh patchlevel.h
+	  !> perl.c pod/perldiag.pod pod/perlopentut.pod pod/perltie.pod
+	  !> t/op/tie.t
+____________________________________________________________________________
+[ 21035] By: jhi                                   on 2003/09/04  19:02:26
+        Log: Integrate:
+             [ 21027]
+             AUTHORS updates.
+             
+             [ 21028]
+             A SuSE patchlet for perlcc -c to avoid
+             "Modification of a read-only value attempted at ... C.pm"
+             
+             [ 21029]
+             Tiny perlcc tweaks.
+             
+             [ 21030]
+             Subject: Re: "vendor" patch pickup
+             From: "Marcus Holland-Moritz" <mhx-perl@gmx.net>
+             Date: Thu, 4 Sep 2003 19:47:55 +0200
+             Message-ID: <009b01c3730c$ac45e750$0c2f1fac@R2D2>
+             
+             (Gentoo: take Marcus' version of the __THROW patch and
+             even further #ifdef-protect it with __GLIBC__.)
+             
+             [ 21031]
+             Subject: [PATCH] perlreftut: change distribution conditions
+             From: "Brendan O'Dea" <bod@debian.org>
+             Date: Thu, 4 Sep 2003 02:28:49 +1000
+             Message-ID: <20030903162849.GA9675@londo.c47.org>
+             
+             [ 21033]
+             I think once is enough.
+     Branch: maint-5.8/perl
+	  !> AUTHORS configure.gnu ext/B/B/C.pm perl.h pod/perlreftut.pod
+	  !> utils/perlcc.PL
+____________________________________________________________________________
+[ 21034] By: jhi                                   on 2003/09/04  18:57:14
+        Log: Regen the Asmdata for maint (only the VERSION changes, which is okay)
+     Branch: maint-5.8/perl
+	   ! ext/B/B/Asmdata.pm
+____________________________________________________________________________
+[ 21026] By: jhi                                   on 2003/09/03  20:29:34
+        Log: Integrate:
+             [ 21022]
+             Subject: [PATCH Porting/valgrindpp.pl] fix: output from different pids
+             From: "Marcus Holland-Moritz" <mhx-perl@gmx.net>
+             Date: Wed, 3 Sep 2003 19:20:20 +0200
+             Message-ID: <005901c3723f$a7914f10$0c2f1fac@R2D2>
+             
+             [ 21025]
+             Upgrade to Math::BigInt pre-rel 1.66 as of
+             http://www.xray.mpe.mpg.de/mailing-lists/perl5-porters/2003-09/msg00242.html
+             (the tar.gz link doesn't have 'v1.66', it has '1.66')
+             so that the smoke builds can start chewing it.
+     Branch: maint-5.8/perl
+	  !> Porting/valgrindpp.pl lib/Math/BigInt.pm
+	  !> lib/Math/BigInt/Calc.pm lib/Math/BigInt/t/bare_mbf.t
+	  !> lib/Math/BigInt/t/bare_mbi.t lib/Math/BigInt/t/bigfltpm.inc
+	  !> lib/Math/BigInt/t/bigfltpm.t lib/Math/BigInt/t/bigintpm.inc
+	  !> lib/Math/BigInt/t/bigintpm.t lib/Math/BigInt/t/mbi_rand.t
+	  !> lib/Math/BigInt/t/sub_mbf.t lib/Math/BigInt/t/sub_mbi.t
+	  !> lib/Math/BigInt/t/with_sub.t
+____________________________________________________________________________
+[ 21023] By: jhi                                   on 2003/09/03  17:01:01
+        Log: perldelta polishing.
+     Branch: maint-5.8/perl
+	   ! pod/perldelta.pod
+____________________________________________________________________________
+[ 21021] By: jhi                                   on 2003/09/03  16:10:31
+        Log: Update Changes.
+     Branch: maint-5.8/perl
+	   ! Changes patchlevel.h
+____________________________________________________________________________
 [ 21020] By: jhi                                   on 2003/09/03  16:07:02
         Log: Integrate:
              [ 21016]
