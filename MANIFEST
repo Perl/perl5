@@ -1579,6 +1579,7 @@ t/lib/mimeb64u.t		see whether MIME::Base64 works
 t/lib/mimeqp.t		see whether MIME::QuotedPrint works
 t/lib/ndbm.t		See if NDBM_File works
 t/lib/net-hostent.t	See if Net::hostent works
+t/lib/net-nent.t	See if Net::netent works
 t/lib/next.t		See if NEXT works
 t/lib/odbm.t		See if ODBM_File works
 t/lib/opcode.t		See if Opcode works

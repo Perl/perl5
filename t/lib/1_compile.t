@@ -193,6 +193,7 @@ Math::Trig
 NDBM_File
 NEXT
 Net::hostent
+Net::netent
 ODBM_File
 Opcode
 PerlIO
