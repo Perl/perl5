@@ -17,7 +17,7 @@
 /*
  * Package name      : perl5
  * Source directory  : .
- * Configuration time: Mon Jun  9 21:59:20 EET DST 2003
+ * Configuration time: Thu Jul  3 17:37:04 EEST 2003
  * Configured by     : jhi
  * Target system     : osf1 kosh.hut.fi v5.1 2650 alpha 
  */
@@ -2646,7 +2646,7 @@
  *	This symbol, if defined, indicates that the nanosleep
  *	system call is available to sleep with 1E-9 sec accuracy.
  */
-#define HAS_NANOSLEEP		/**/
+/*#define HAS_NANOSLEEP		/ **/
 
 /* HAS_NL_LANGINFO:
  *	This symbol, if defined, indicates that the nl_langinfo routine is
