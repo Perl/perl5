@@ -45,7 +45,7 @@ if (@ARGV) {
     my $mani  = File::Spec->catdir(File::Spec->updir, "MANIFEST");
     if (open(MANI, $mani)) {
         while (<MANI>) {
-	    if (m!^((?:ext|lib)/.+/t/[^/]+\.t)\s!) {
+	    if (m!^((?:ext|lib)/.+/(?:t/.+\.t)|test.pl)\s!) {
 		push @tests, File::Spec->catdir($updir, $1);
 	    }
 	}
