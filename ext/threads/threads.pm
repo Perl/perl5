@@ -50,7 +50,7 @@ our @EXPORT_OK = ( @{ $EXPORT_TAGS{'all'} } );
 our @EXPORT = qw(
 async	
 );
-our $VERSION = '1.02';
+our $VERSION = '1.03';
 
 
 # || 0 to ensure compatibility with previous versions
