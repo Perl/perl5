@@ -27,6 +27,8 @@ re - Perl pragma to alter regular expression behaviour
     /^(.*)$/s;			   # output debugging info 
 				   # during compile and run time
 
+(We use $^X in these examples because it's tainted by default.)
+
 =head1 DESCRIPTION
 
 When C<use re 'taint'> is in effect, and a tainted string is the target

@@ -17,7 +17,10 @@ $relroot = "..";	# XXX make an option
 die "Must be in root of the perl source tree.\n"
 	unless -f "./MANIFEST" and -f "patchlevel.h";
 
-$patchlevel_h = `grep '#define ' patchlevel.h`;
+open PATCHLEVEL,"<patchlevel.h" or die;
+my @patchlevel_h = <PATCHLEVEL>;
+close PATCHLEVEL;
+my $patchlevel_h = join "", grep { /^#define/ } @patchlevel_h;
 print $patchlevel_h;
 $patchlevel = $1 if $patchlevel_h =~ /PATCHLEVEL\s+(\d+)/;
 $subversion = $1 if $patchlevel_h =~ /SUBVERSION\s+(\d+)/;
@@ -31,12 +34,18 @@ if ($subversion) {
     $vms_vers.= "  ";
 }
 
+# fetch list of local patches
+my (@local_patches, @lpatch_tags, $lpatch_tags);
+@local_patches = grep { /^static.*local_patches/../^};/ } @patchlevel_h;
+@local_patches = grep { !/^\s*,?NULL/  } @local_patches;
+@lpatch_tags   = map  {  /^\s*,"(\w+)/ } @local_patches;
+$lpatch_tags   = join "-", @lpatch_tags;
+
 $perl = "perl$vers";
 $reldir = "$perl";
-$reldir .= "-$ARGV[0]" if $ARGV[0];
+$reldir .= "-$lpatch_tags" if $lpatch_tags;
 
 print "\nMaking a release for $perl in $relroot/$reldir\n\n";
-
 
 print "Cross-checking the MANIFEST...\n";
 ($missfile, $missentry) = fullcheck();
@@ -101,7 +110,7 @@ chdir $relroot or die $!;
 
 print "Creating and compressing the tar file...\n";
 my $src = (-e $perl) ? $perl : 'perl'; # 'perl' in maint branch
-$cmd = "tar cf - $reldir | gzip --best > $perl.tar.gz";
+$cmd = "tar cf - $reldir | gzip --best > $reldir.tar.gz";
 system($cmd) == 0 or die "$cmd failed";
 print "\n";
 
