@@ -336,16 +336,26 @@ by the current locale if C<use locale> is in effect.  See L<perllocale>.
 
 =head2 Bitwise And
 
-Binary "&" returns its operators ANDed together bit by bit.
+Binary "&" returns its operands ANDed together bit by bit.
 (See also L<Integer Arithmetic> and L<Bitwise String Operators>.)
+
+Note that "&" has lower priority than relational operators, so for example
+the brackets are essential in a test like
+
+	print "Even\n" if ($x & 1) == 0;
 
 =head2 Bitwise Or and Exclusive Or
 
-Binary "|" returns its operators ORed together bit by bit.
+Binary "|" returns its operands ORed together bit by bit.
 (See also L<Integer Arithmetic> and L<Bitwise String Operators>.)
 
-Binary "^" returns its operators XORed together bit by bit.
+Binary "^" returns its operands XORed together bit by bit.
 (See also L<Integer Arithmetic> and L<Bitwise String Operators>.)
+
+Note that "|" and "^" have lower priority than relational operators, so
+for example the brackets are essential in a test like
+
+	print "false\n" if (8 | 2) != 10;
 
 =head2 C-style Logical And
 
