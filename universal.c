@@ -913,6 +913,6 @@ XS(XS_Internals_hash_seed)
     /* Using dXSARGS would also have dITEM and dSP,
      * which define 2 unused local variables.  */
     dMARK; dAX;
-    XSRETURN_UV(PL_hash_seed);
+    XSRETURN_UV(PERL_HASH_SEED);
 }
 
