@@ -32,6 +32,7 @@ deb.c			Debugging routines
 djgpp/config.over	DOS/DJGPP port
 djgpp/configure.bat	DOS/DJGPP port
 djgpp/djgpp.c		DOS/DJGPP port
+djgpp/djgpp.h		DOS/DJGPP port
 djgpp/djgppsed.sh	DOS/DJGPP port
 djgpp/fixpmain		DOS/DJGPP port
 doio.c			I/O operations
