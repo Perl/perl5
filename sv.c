@@ -24,6 +24,11 @@
 
 #define FCALL *f
 
+#ifdef __Lynx__
+/* Missing proto on LynxOS */
+  char *gconvert(double, int, int,  char *);
+#endif
+
 #ifdef PERL_UTF8_CACHE_ASSERT
 /* The cache element 0 is the Unicode offset;
  * the cache element 1 is the byte offset of the element 0;
