@@ -249,7 +249,13 @@ sub next_todo {
 		return $use_dec;
 	    }
 	}
-        return "sub $name " . $self->deparse_sub($cv);
+	my $l = '';
+	if ($self->{'linenums'}) {
+	    my $line = $gv->LINE;
+	    my $file = $gv->FILE;
+	    $l = "\n\f#line $line \"$file\"\n";
+	}
+        return "${l}sub $name " . $self->deparse_sub($cv);
     }
 }
 
@@ -358,10 +364,24 @@ sub stash_subs {
 	next if $key eq 'main::';	# avoid infinite recursion
 	my $class = class($val);
 	if ($class eq "PV") {
-	    # Just a prototype
+	    # Just a prototype. As an ugly but fairly effective way
+	    # to find out if it belongs here is to see if the AUTOLOAD
+	    # (if any) for the stash was defined in one of our files.
+	    my $A = $stash{"AUTOLOAD"};
+	    if (defined ($A) && class($A) eq "GV" && defined($A->CV)
+		&& class($A->CV) eq "CV") {
+		my $AF = $A->FILE;
+		next unless $AF eq $0 || exists $self->{'files'}{$AF};
+	    }
 	    push @{$self->{'protos_todo'}}, [$pack . $key, $val->PV];
 	} elsif ($class eq "IV") {
-	    # Just a name
+	    # Just a name. As above.
+	    my $A = $stash{"AUTOLOAD"};
+	    if (defined ($A) && class($A) eq "GV" && defined($A->CV)
+		&& class($A->CV) eq "CV") {
+		my $AF = $A->FILE;
+		next unless $AF eq $0 || exists $self->{'files'}{$AF};
+	    }
 	    push @{$self->{'protos_todo'}}, [$pack . $key, undef];	    
 	} elsif ($class eq "GV") {
 	    if (class(my $cv = $val->CV) ne "SPECIAL") {
@@ -773,9 +793,16 @@ sub maybe_parens_unop {
     my $self = shift;
     my($name, $kid, $cx) = @_;
     if ($cx > 16 or $self->{'parens'}) {
-	return "$name(" . $self->deparse($kid, 1) . ")";
+	$kid =  $self->deparse($kid, 1);
+ 	if ($name eq "umask" && $kid =~ /^\d+$/) {
+	    $kid = sprintf("%#o", $kid);
+	}
+	return "$name($kid)";
     } else {
 	$kid = $self->deparse($kid, 16);
+ 	if ($name eq "umask" && $kid =~ /^\d+$/) {
+	    $kid = sprintf("%#o", $kid);
+	}
 	if (substr($kid, 0, 1) eq "\cS") {
 	    # use kid's parens
 	    return $name . substr($kid, 1);
@@ -1184,8 +1211,25 @@ sub declare_warnings {
 
 sub declare_hints {
     my ($from, $to) = @_;
-    my $bits = $to;
-    return sprintf "BEGIN {\$^H &= ~0xFF; \$^H |= %x}\n", $bits;
+    my $use = $to   & ~$from;
+    my $no  = $from & ~$to;
+    my $decls = "";
+    for my $pragma (hint_pragmas($use)) {
+	$decls .= "use $pragma;\n";
+    }
+    for my $pragma (hint_pragmas($no)) {
+        $decls .= "no $pragma;\n";
+    }
+    return $decls;
+}
+
+sub hint_pragmas {
+    my ($bits) = @_;
+    my @pragmas;
+    push @pragmas, "integer" if $bits & 0x1;
+    push @pragmas, "strict 'refs'" if $bits & 0x2;
+    push @pragmas, "bytes" if $bits & 0x8;
+    return @pragmas;
 }
 
 sub pp_dbstate { pp_nextstate(@_) }
@@ -1876,7 +1920,7 @@ sub listop {
 	$first = $self->deparse($kid, 6);
     }
     if ($name eq "chmod" && $first =~ /^\d+$/) {
-	$first = sprintf("0%o", $first);
+	$first = sprintf("%#o", $first);
     }
     $first = "+$first" if not $parens and substr($first, 0, 1) eq "(";
     push @exprs, $first;
@@ -2253,6 +2297,7 @@ sub loop_common {
 	$cont = "\cK";
 	$body = $self->deparse($body, 0);
     }
+    $body =~ s/;?$/;/;
     $body .= "\n";
     # If we have say C<{my $x=2; sub x{$x}}>, the sub must go inside
     # the loop. So we insert any subs which are due here.
