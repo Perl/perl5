@@ -1,5 +1,5 @@
 package encoding;
-our $VERSION = do { my @r = (q$Revision: 1.36 $ =~ /\d+/g); sprintf "%d."."%02d" x $#r, @r };
+our $VERSION = do { my @r = (q$Revision: 1.37 $ =~ /\d+/g); sprintf "%d."."%02d" x $#r, @r };
 
 use Encode;
 use strict;
@@ -144,7 +144,7 @@ the code in UTF-8:
   s/\bCamel\b/$Rakuda/;
 
 The B<encoding> pragma also modifies the filehandle disciplines of
-STDIN, STDOUT, and STDERR to the specified encoding.  Therefore,
+STDIN and STDOUT to the specified encoding.  Therefore,
 
   use encoding "euc-jp";
   my $message = "Camel is the symbol of perl.\n";
@@ -236,6 +236,53 @@ After all, the best thing about this pragma is that you don't have to
 resort to \x{....} just to spell your name in a native encoding.
 So feel free to put your strings in your encoding in quotes and
 regexes.
+
+=head2 tr/// with ranges remain unaffected
+
+The B<encoding> pragma works by decoding string literals in
+C<q//,qq//,qr//,qw///, qx//> and so forth.  As of perl 5.8.0, this
+does not apply to C<tr///>.  Therefore,
+
+  use encoding 'euc-jp';
+  #....
+  $kana =~ tr/\xA4\xA1-\xA4\xF3/\xA5\xA1-\xA5\xF3/;
+  #           -------- -------- -------- --------
+
+Does not work as
+
+  $kana =~ tr/\x{3041}-\x{3093}/\x{30a1}-\x{30f3}/;
+
+=over
+
+=item Legend of characters above
+
+  utf8     euc-jp   charnames::viacode()
+  -----------------------------------------
+  \x{3041} \xA4\xA1 HIRAGANA LETTER SMALL A
+  \x{3093} \xA4\xF3 HIRAGANA LETTER N
+  \x{30a1} \xA5\xA1 KATAKANA LETTER SMALL A
+  \x{30f3} \xA5\xF3 KATAKANA LETTER N
+
+=back
+
+=head3 workaround to tr///;
+
+You can, however, achieve the same as simply as follows;
+
+  use encoding 'euc-jp';
+  # ....
+  eval qq{ \$kana =~ tr/\xA4\xA1-\xA4\xF3/\xA5\xA1-\xA5\xF3/ };
+
+Note the C<tr//> expression is surronded by C<qq{}>.  The idea behind
+is the same as classic idiom that makes C<tr///> 'interpolate'.
+
+   tr/$from/$to/;            # wrong!
+   eval qq{ tr/$from/$to/ }; # workaround.
+
+Nevertheless, in case of B<encoding> pragma even C<q//> is affected so
+C<tr///> not being decoded was obviously against the will of Perl5
+Porters.  In future version of perl, this counter-intuitive behaviour
+of C<tr///> will be fixed so C<eval qq{}> trick will be unneccesary.
 
 =head1 Non-ASCII Identifiers and Filter option
 

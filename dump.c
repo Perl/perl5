@@ -768,7 +768,7 @@ static struct { char type; char *name; } magic_names[] = {
 	{ PERL_MAGIC_taint,          "taint(t)" },
 	{ PERL_MAGIC_uvar_elem,      "uvar_elem(v)" },
 	{ PERL_MAGIC_vec,            "vec(v)" },
-	{ PERL_MAGIC_vstring,        "v-string(V)" },
+	{ PERL_MAGIC_vstring,        "vstring(V)" },
 	{ PERL_MAGIC_substr,         "substr(x)" },
 	{ PERL_MAGIC_defelem,        "defelem(y)" },
 	{ PERL_MAGIC_ext,            "ext(~)" },
@@ -842,13 +842,15 @@ Perl_do_magic_dump(pTHX_ I32 level, PerlIO *file, MAGIC *mg, I32 nest, I32 maxne
 
         if (mg->mg_flags) {
             Perl_dump_indent(aTHX_ level, file, "    MG_FLAGS = 0x%02X\n", mg->mg_flags);
-	    if (mg->mg_flags & MGf_TAINTEDDIR)
+	    if (mg->mg_type == PERL_MAGIC_envelem &&
+		mg->mg_flags & MGf_TAINTEDDIR)
 	        Perl_dump_indent(aTHX_ level, file, "      TAINTEDDIR\n");
 	    if (mg->mg_flags & MGf_REFCOUNTED)
 	        Perl_dump_indent(aTHX_ level, file, "      REFCOUNTED\n");
             if (mg->mg_flags & MGf_GSKIP)
 	        Perl_dump_indent(aTHX_ level, file, "      GSKIP\n");
-	    if (mg->mg_flags & MGf_MINMATCH)
+	    if (mg->mg_type == PERL_MAGIC_regex_global &&
+		mg->mg_flags & MGf_MINMATCH)
 	        Perl_dump_indent(aTHX_ level, file, "      MINMATCH\n");
         }
 	if (mg->mg_obj) {
@@ -1286,34 +1288,12 @@ Perl_do_sv_dump(pTHX_ I32 level, PerlIO *file, SV *sv, I32 nest, I32 maxnest, bo
  	do_gvgv_dump(level, file, "  GVGV::GV", CvGV(sv));
 	Perl_dump_indent(aTHX_ level, file, "  FILE = \"%s\"\n", CvFILE(sv));
 	Perl_dump_indent(aTHX_ level, file, "  DEPTH = %"IVdf"\n", (IV)CvDEPTH(sv));
-#ifdef USE_5005THREADS
-	Perl_dump_indent(aTHX_ level, file, "  MUTEXP = 0x%"UVxf"\n", PTR2UV(CvMUTEXP(sv)));
-	Perl_dump_indent(aTHX_ level, file, "  OWNER = 0x%"UVxf"\n",  PTR2UV(CvOWNER(sv)));
-#endif /* USE_5005THREADS */
 	Perl_dump_indent(aTHX_ level, file, "  FLAGS = 0x%"UVxf"\n", (UV)CvFLAGS(sv));
 	if (type == SVt_PVFM)
 	    Perl_dump_indent(aTHX_ level, file, "  LINES = %"IVdf"\n", (IV)FmLINES(sv));
 	Perl_dump_indent(aTHX_ level, file, "  PADLIST = 0x%"UVxf"\n", PTR2UV(CvPADLIST(sv)));
-	if (nest < maxnest && CvPADLIST(sv)) {
-	    AV* padlist = CvPADLIST(sv);
-	    AV* pad_name = (AV*)*av_fetch(padlist, 0, FALSE);
-	    AV* pad = (AV*)*av_fetch(padlist, 1, FALSE);
-	    SV** pname = AvARRAY(pad_name);
-	    SV** ppad = AvARRAY(pad);
-	    I32 ix;
-
-	    for (ix = 1; ix <= AvFILL(pad_name); ix++) {
-		if (SvPOK(pname[ix]))
-		    Perl_dump_indent(aTHX_ level,
-				/* %5d below is enough whitespace. */
-				file,
-				"%5d. 0x%"UVxf" (%s\"%s\" %"IVdf"-%"IVdf")\n",
-				(int)ix, PTR2UV(ppad[ix]),
-				SvFAKE(pname[ix]) ? "FAKE " : "",
-				SvPVX(pname[ix]),
-				(IV)SvNVX(pname[ix]),
-				(IV)SvIVX(pname[ix]));
-	    }
+	if (nest < maxnest) {
+	    do_dump_pad(level+1, file, CvPADLIST(sv), 0);
 	}
 	{
 	    CV *outside = CvOUTSIDE(sv);

@@ -871,7 +871,7 @@ is to be expected. (For information only--not to be used).
 =for hackers
 Found in file hv.h
 
-=item Nullch 
+=item Nullch
 
 Null character pointer.
 =for hackers
@@ -1881,6 +1881,23 @@ Used by C<xsubpp> to hook up XSUBs as Perl subs.
 
 =for hackers
 Found in file op.c
+
+
+=back
+
+=head1 Pad Data Structures
+
+=over 8
+
+=item pad_sv
+
+Get the value at offset po in the current pad.
+Use macro PAD_SV instead of calling this function directly.
+
+	SV*	pad_sv(PADOFFSET po)
+
+=for hackers
+Found in file pad.c
 
 
 =back
@@ -4562,32 +4579,42 @@ Returns a pointer to the upgraded SV.
 =for hackers
 Found in file util.c
 
+=item vcmp
+
+Version object aware cmp.  Both operands must already have been 
+converted into version objects.
+
+	int	vcmp(SV *lvs, SV *rvs)
+
+=for hackers
+Found in file util.c
+
 =item vnumify
 
-Accepts a version (or vstring) object and returns the
-normalized floating point representation.  Call like:
+Accepts a version object and returns the normalized floating
+point representation.  Call like:
 
-    sv = vnumify(sv,SvRV(rv));
+    sv = vnumify(rv);
 
-NOTE: no checking is done to see if the object is of the
-correct type (for speed).
+NOTE: you can pass either the object directly or the SV
+contained within the RV.
 
-	SV*	vnumify(SV *sv, SV *vs)
+	SV*	vnumify(SV *vs)
 
 =for hackers
 Found in file util.c
 
 =item vstringify
 
-Accepts a version (or vstring) object and returns the
-normalized representation.  Call like:
+Accepts a version object and returns the normalized string
+representation.  Call like:
 
-    sv = vstringify(sv,SvRV(rv));
+    sv = vstringify(rv);
 
-NOTE: no checking is done to see if the object is of the
-correct type (for speed).
+NOTE: you can pass either the object directly or the SV
+contained within the RV.
 
-	SV*	vstringify(SV *sv, SV *vs)
+	SV*	vstringify(SV *vs)
 
 =for hackers
 Found in file util.c

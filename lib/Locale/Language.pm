@@ -107,6 +107,7 @@ sub all_language_names
     my $code;
     my $language;
 
+    local $_;
 
     while (<DATA>)
     {
@@ -231,7 +232,7 @@ mt:Maltese
 my:Burmese
 
 na:Nauru
-nb:Norwegian Bokmål
+nb:Norwegian Bokmal
 nd:Ndebele, North
 ne:Nepali
 ng:Ndonga
@@ -300,7 +301,7 @@ ur:Urdu
 uz:Uzbek
 
 vi:Vietnamese
-vo:Volapük
+vo:Volapuk
 
 wo:Wolof
 

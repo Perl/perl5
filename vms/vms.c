@@ -154,24 +154,11 @@ Perl_vmstrnenv(const char *lnm, char *eqv, unsigned long int idx,
     $DESCRIPTOR(crtlenv,"CRTL_ENV");  $DESCRIPTOR(clisym,"CLISYM");
 #if defined(PERL_IMPLICIT_CONTEXT)
     pTHX = NULL;
-#  if defined(USE_5005THREADS)
-    /* We jump through these hoops because we can be called at */
-    /* platform-specific initialization time, which is before anything is */
-    /* set up--we can't even do a plain dTHX since that relies on the */
-    /* interpreter structure to be initialized */
-    if (PL_curinterp) {
-      aTHX = PL_threadnum? THR : (struct perl_thread*)SvPVX(PL_thrsv);
-    } else {
-      aTHX = NULL;
-    }
-# else
     if (PL_curinterp) {
       aTHX = PERL_GET_INTERP;
     } else {
       aTHX = NULL;
     }
-
-#  endif
 #endif
 
     if (!lnm || !eqv || idx > PERL_LNM_MAX_ALLOWED_INDEX) {
@@ -231,18 +218,9 @@ Perl_vmstrnenv(const char *lnm, char *eqv, unsigned long int idx,
 	      /* fully initialized, in which case either thr or PL_curcop */
 	      /* might be bogus. We have to check, since ckWARN needs them */
 	      /* both to be valid if running threaded */
-#if defined(USE_5005THREADS)
-	      if (thr && PL_curcop) {
-#endif
 		if (ckWARN(WARN_MISC)) {
 		  Perl_warner(aTHX_ packWARN(WARN_MISC),"Value of CLI symbol \"%s\" too long",lnm);
 		}
-#if defined(USE_5005THREADS)
-	      } else {
-		  Perl_warner(aTHX_ packWARN(WARN_MISC),"Value of CLI symbol \"%s\" too long",lnm);
-	      }
-#endif
-	      
             }
             strncpy(eqv,eqvdsc.dsc$a_pointer,eqvlen);
           }
@@ -447,7 +425,7 @@ prime_env_iter(void)
 #if defined(PERL_IMPLICIT_CONTEXT)
   pTHX;
 #endif
-#if defined(USE_5005THREADS) || defined(USE_ITHREADS)
+#if defined(USE_ITHREADS)
   static perl_mutex primenv_mutex;
   MUTEX_INIT(&primenv_mutex);
 #endif
@@ -457,19 +435,11 @@ prime_env_iter(void)
     /* platform-specific initialization time, which is before anything is */
     /* set up--we can't even do a plain dTHX since that relies on the */
     /* interpreter structure to be initialized */
-#if defined(USE_5005THREADS)
-    if (PL_curinterp) {
-      aTHX = PL_threadnum? THR : (struct perl_thread*)SvPVX(PL_thrsv);
-    } else {
-      aTHX = NULL;
-    }
-#else
     if (PL_curinterp) {
       aTHX = PERL_GET_INTERP;
     } else {
       aTHX = NULL;
     }
-#endif
 #endif
 
   if (primed || !PL_envgv) return;
@@ -4521,12 +4491,6 @@ vms_image_init(int *argcp, char ***argvp)
   if (tabidx) { tabvec[tabidx] = NULL; env_tables = tabvec; }
 
   getredirection(argcp,argvp);
-#if defined(USE_5005THREADS) && ( defined(__DECC) || defined(__DECCXX) )
-  {
-# include <reentrancy.h>
-  (void) decc$set_reentrancy(C$C_MULTITHREAD);
-  }
-#endif
   return;
 }
 /*}}}*/

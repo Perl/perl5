@@ -19,8 +19,6 @@
 
 #include "reentr.h"
 
-/* variations on pp_null */
-
 /* XXX I can't imagine anyone who doesn't have this actually _needs_
    it, since pid_t is an integral type.
    --AD  2/20/1998
@@ -28,6 +26,8 @@
 #ifdef NEED_GETPID_PROTO
 extern Pid_t getpid (void);
 #endif
+
+/* variations on pp_null */
 
 PP(pp_stub)
 {
@@ -47,8 +47,9 @@ PP(pp_scalar)
 PP(pp_padav)
 {
     dSP; dTARGET;
+    I32 gimme;
     if (PL_op->op_private & OPpLVAL_INTRO)
-	SAVECLEARSV(PL_curpad[PL_op->op_targ]);
+	SAVECLEARSV(PAD_SVl(PL_op->op_targ));
     EXTEND(SP, 1);
     if (PL_op->op_flags & OPf_REF) {
 	PUSHs(TARG);
@@ -59,7 +60,8 @@ PP(pp_padav)
 	PUSHs(TARG);
 	RETURN;
     }
-    if (GIMME == G_ARRAY) {
+    gimme = GIMME_V;
+    if (gimme == G_ARRAY) {
 	I32 maxarg = AvFILL((AV*)TARG) + 1;
 	EXTEND(SP, maxarg);
 	if (SvMAGICAL(TARG)) {
@@ -74,7 +76,7 @@ PP(pp_padav)
 	}
 	SP += maxarg;
     }
-    else {
+    else if (gimme == G_SCALAR) {
 	SV* sv = sv_newmortal();
 	I32 maxarg = AvFILL((AV*)TARG) + 1;
 	sv_setiv(sv, maxarg);
@@ -90,7 +92,7 @@ PP(pp_padhv)
 
     XPUSHs(TARG);
     if (PL_op->op_private & OPpLVAL_INTRO)
-	SAVECLEARSV(PL_curpad[PL_op->op_targ]);
+	SAVECLEARSV(PAD_SVl(PL_op->op_targ));
     if (PL_op->op_flags & OPf_REF)
 	RETURN;
     else if (LVRET) {
@@ -159,7 +161,7 @@ PP(pp_rv2gv)
 		    GV *gv;
 		    if (cUNOP->op_targ) {
 			STRLEN len;
-			SV *namesv = PL_curpad[cUNOP->op_targ];
+			SV *namesv = PAD_SV(cUNOP->op_targ);
 			name = SvPV(namesv, len);
 			gv = (GV*)NEWSV(0,0);
 			gv_init(gv, CopSTASH(PL_curcop), name, len, 0);
@@ -420,7 +422,7 @@ PP(pp_prototype)
 PP(pp_anoncode)
 {
     dSP;
-    CV* cv = (CV*)PL_curpad[PL_op->op_targ];
+    CV* cv = (CV*)PAD_SV(PL_op->op_targ);
     if (CvCLONE(cv))
 	cv = (CV*)sv_2mortal((SV*)cv_clone(cv));
     EXTEND(SP,1);
@@ -4372,17 +4374,13 @@ PP(pp_split)
 
     if (pm->op_pmreplroot) {
 #ifdef USE_ITHREADS
-	ary = GvAVn((GV*)PL_curpad[INT2PTR(PADOFFSET, pm->op_pmreplroot)]);
+	ary = GvAVn((GV*)PAD_SVl(INT2PTR(PADOFFSET, pm->op_pmreplroot)));
 #else
 	ary = GvAVn((GV*)pm->op_pmreplroot);
 #endif
     }
     else if (gimme != G_ARRAY)
-#ifdef USE_5005THREADS
-	ary = (AV*)PL_curpad[0];
-#else
 	ary = GvAVn(PL_defgv);
-#endif /* USE_5005THREADS */
     else
 	ary = Nullav;
     if (ary && (gimme != G_ARRAY || (pm->op_pmflags & PMf_ONCE))) {
@@ -4642,25 +4640,6 @@ PP(pp_split)
     RETPUSHUNDEF;
 }
 
-#ifdef USE_5005THREADS
-void
-Perl_unlock_condpair(pTHX_ void *svv)
-{
-    MAGIC *mg = mg_find((SV*)svv, PERL_MAGIC_mutex);
-
-    if (!mg)
-	Perl_croak(aTHX_ "panic: unlock_condpair unlocking non-mutex");
-    MUTEX_LOCK(MgMUTEXP(mg));
-    if (MgOWNER(mg) != thr)
-	Perl_croak(aTHX_ "panic: unlock_condpair unlocking mutex that we don't own");
-    MgOWNER(mg) = 0;
-    COND_SIGNAL(MgOWNERCONDP(mg));
-    DEBUG_S(PerlIO_printf(Perl_debug_log, "0x%"UVxf": unlock 0x%"UVxf"\n",
-			  PTR2UV(thr), PTR2UV(svv)));
-    MUTEX_UNLOCK(MgMUTEXP(mg));
-}
-#endif /* USE_5005THREADS */
-
 PP(pp_lock)
 {
     dSP;
@@ -4677,15 +4656,5 @@ PP(pp_lock)
 
 PP(pp_threadsv)
 {
-#ifdef USE_5005THREADS
-    dSP;
-    EXTEND(SP, 1);
-    if (PL_op->op_private & OPpLVAL_INTRO)
-	PUSHs(*save_threadsv(PL_op->op_targ));
-    else
-	PUSHs(THREADSV(PL_op->op_targ));
-    RETURN;
-#else
     DIE(aTHX_ "tried to access per-thread data in non-threaded perl");
-#endif /* USE_5005THREADS */
 }

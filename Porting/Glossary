@@ -4342,11 +4342,6 @@ uquadtype (quadtype.U):
 	unsigned int, unsigned long long, uint64_t, or whatever type is
 	used for 64-bit integers.
 
-use5005threads (usethreads.U):
-	This variable conditionally defines the USE_5005THREADS symbol,
-	and indicates that Perl should be built to use the 5.005-based
-	threading implementation.
-
 use64bitall (use64bits.U):
 	This variable conditionally defines the USE_64_BIT_ALL symbol,
 	and indicates that 64-bit integer types should be used

@@ -106,9 +106,6 @@ Ap	|UV	|cast_uv	|NV f
 #if !defined(HAS_TRUNCATE) && !defined(HAS_CHSIZE) && defined(F_FREESP)
 Ap	|I32	|my_chsize	|int fd|Off_t length
 #endif
-#if defined(USE_5005THREADS)
-Ap	|MAGIC*	|condpair_magic	|SV *sv
-#endif
 p	|OP*	|convert	|I32 optype|I32 flags|OP* o
 Afprd	|void	|croak		|const char* pat|...
 Apr	|void	|vcroak		|const char* pat|va_list* args
@@ -130,7 +127,7 @@ Afnp	|int	|fprintf_nocontext|PerlIO* stream|const char* fmt|...
 Afnp	|int	|printf_nocontext|const char* fmt|...
 #endif
 p	|void	|cv_ckproto	|CV* cv|GV* gv|char* p
-p	|CV*	|cv_clone	|CV* proto
+pd	|CV*	|cv_clone	|CV* proto
 Apd	|SV*	|cv_const_sv	|CV* cv
 p	|SV*	|op_const_sv	|OP* o|CV* cv
 Ap	|void	|cv_undef	|CV* cv
@@ -222,9 +219,6 @@ Apd	|char*	|fbm_instr	|unsigned char* big|unsigned char* bigend \
 				|SV* littlesv|U32 flags
 p	|char*	|find_script	|char *scriptname|bool dosearch \
 				|char **search_ext|I32 flags
-#if defined(USE_5005THREADS)
-p	|PADOFFSET|find_threadsv|const char *name
-#endif
 p	|OP*	|force_list	|OP* arg
 p	|OP*	|fold_constants	|OP* arg
 Afpd	|char*	|form		|const char* pat|...
@@ -294,7 +288,7 @@ p	|void	|init_argv_symbols|int|char **
 p	|void	|init_debugger
 Ap	|void	|init_stacks
 Ap	|void	|init_tm	|struct tm *ptm
-p	|U32	|intro_my
+pd	|U32	|intro_my
 Ap	|char*	|instr		|const char* big|const char* little
 p	|bool	|io_close	|IO* io|bool not_implicit
 p	|OP*	|invert		|OP* cmd
@@ -392,9 +386,6 @@ p	|int	|magic_gettaint	|SV* sv|MAGIC* mg
 p	|int	|magic_getuvar	|SV* sv|MAGIC* mg
 p	|int	|magic_getvec	|SV* sv|MAGIC* mg
 p	|U32	|magic_len	|SV* sv|MAGIC* mg
-#if defined(USE_5005THREADS)
-p	|int	|magic_mutexfree|SV* sv|MAGIC* mg
-#endif
 p	|int	|magic_nextpack	|SV* sv|MAGIC* mg|SV* key
 p	|U32	|magic_regdata_cnt|SV* sv|MAGIC* mg
 p	|int	|magic_regdatum_get|SV* sv|MAGIC* mg
@@ -538,29 +529,27 @@ Apd	|char*	|scan_vstring	|char *vstr|SV *sv
 Apd	|char*	|scan_version	|char *vstr|SV *sv
 Apd	|SV*	|new_version	|SV *ver
 Apd	|SV*	|upg_version	|SV *ver
-Apd	|SV*	|vnumify	|SV *sv|SV *vs
-Apd	|SV*	|vstringify	|SV *sv|SV *vs
+Apd	|SV*	|vnumify	|SV *vs
+Apd	|SV*	|vstringify	|SV *vs
+Apd	|int	|vcmp		|SV *lvs|SV *rvs
 p	|PerlIO*|nextargv	|GV* gv
 Ap	|char*	|ninstr		|const char* big|const char* bigend \
 				|const char* little|const char* lend
 p	|OP*	|oopsCV		|OP* o
 Ap	|void	|op_free	|OP* arg
 p	|void	|package	|OP* o
-p	|PADOFFSET|pad_alloc	|I32 optype|U32 tmptype
-p	|PADOFFSET|pad_allocmy	|char* name
-p	|PADOFFSET|pad_findmy	|char* name
+pd	|PADOFFSET|pad_alloc	|I32 optype|U32 tmptype
+p	|PADOFFSET|allocmy	|char* name
+pd	|PADOFFSET|pad_findmy	|char* name
 p	|OP*	|oopsAV		|OP* o
 p	|OP*	|oopsHV		|OP* o
-p	|void	|pad_leavemy	|I32 fill
-Ap	|SV*	|pad_sv		|PADOFFSET po
-p	|void	|pad_free	|PADOFFSET po
-p	|void	|pad_reset
-p	|void	|pad_swipe	|PADOFFSET po
+pd	|void	|pad_leavemy
+Apd	|SV*	|pad_sv		|PADOFFSET po
+pd	|void	|pad_free	|PADOFFSET po
+pd	|void	|pad_reset
+pd	|void	|pad_swipe	|PADOFFSET po|bool refadjust
 p	|void	|peep		|OP* o
 dopM	|PerlIO*|start_glob	|SV* pattern|IO *io
-#if defined(USE_5005THREADS)
-Ap	|struct perl_thread*	|new_struct_thread|struct perl_thread *t
-#endif
 #if defined(USE_REENTRANT_API)
 Ap	|void	|reentrant_size
 Ap	|void	|reentrant_init
@@ -805,9 +794,6 @@ Apd	|UV	|to_utf8_fold	|U8 *p|U8* ustrp|STRLEN *lenp
 #if defined(UNLINK_ALL_VERSIONS)
 Ap	|I32	|unlnk		|char* f
 #endif
-#if defined(USE_5005THREADS)
-Ap	|void	|unlock_condpair|void* svv
-#endif
 Apd	|I32	|unpack_str	|char *pat|char *patend|char *s|char *strbeg|char *strend|char **new_s|I32 ocnt|U32 flags
 Ap	|void	|unsharepvn	|const char* sv|I32 len|U32 hash
 p	|void	|unshare_hek	|HEK* hek
@@ -857,20 +843,11 @@ Anp	|Malloc_t|safesysmalloc	|MEM_SIZE nbytes
 Anp	|Malloc_t|safesyscalloc	|MEM_SIZE elements|MEM_SIZE size
 Anp	|Malloc_t|safesysrealloc|Malloc_t where|MEM_SIZE nbytes
 Anp	|Free_t	|safesysfree	|Malloc_t where
-#if defined(LEAKTEST)
-Anp	|Malloc_t|safexmalloc	|I32 x|MEM_SIZE size
-Anp	|Malloc_t|safexcalloc	|I32 x|MEM_SIZE elements|MEM_SIZE size
-Anp	|Malloc_t|safexrealloc	|Malloc_t where|MEM_SIZE size
-Anp	|void	|safexfree	|Malloc_t where
-#endif
 #if defined(PERL_GLOBAL_STRUCT)
 Ap	|struct perl_vars *|GetVars
 #endif
 Ap	|int	|runops_standard
 Ap	|int	|runops_debug
-#if defined(USE_5005THREADS)
-Ap	|SV*	|sv_lock	|SV *sv
-#endif
 Afpd	|void	|sv_catpvf_mg	|SV *sv|const char* pat|...
 Ap	|void	|sv_vcatpvf_mg	|SV* sv|const char* pat|va_list* args
 Apd	|void	|sv_catpv_mg	|SV *sv|const char *ptr
@@ -1016,18 +993,11 @@ s	|OP*	|no_fh_allowed	|OP *o
 s	|OP*	|scalarboolean	|OP *o
 s	|OP*	|too_few_arguments|OP *o|char* name
 s	|OP*	|too_many_arguments|OP *o|char* name
-s	|PADOFFSET|pad_addlex	|SV* name
-s	|PADOFFSET|pad_findlex	|char* name|PADOFFSET newoff|U32 seq \
-				|CV* startcv|I32 cx_ix|I32 saweval|U32 flags
 s	|OP*	|newDEFSVOP
 s	|OP*	|new_logop	|I32 type|I32 flags|OP **firstp|OP **otherp
 s	|void	|simplify_sort	|OP *o
 s	|bool	|is_handle_constructor	|OP *o|I32 argnum
 s	|char*	|gv_ename	|GV *gv
-#  if defined(DEBUG_CLOSURES)
-s	|void	|cv_dump	|CV *cv
-#  endif
-s	|CV*	|cv_clone2	|CV *proto|CV *outside
 s	|bool	|scalar_mod_type|OP *o|I32 type
 s	|OP *	|my_kid		|OP *o|OP *attrs|OP **imopsp
 s	|OP *	|dup_attrlist	|OP *o
@@ -1068,9 +1038,6 @@ s	|void*	|vrun_body	|va_list args
 s	|void*	|vcall_body	|va_list args
 s	|void*	|vcall_list_body|va_list args
 #endif
-#  if defined(USE_5005THREADS)
-s	|struct perl_thread *	|init_main_thread
-#  endif
 #endif
 
 #if defined(PERL_IN_PP_C) || defined(PERL_DECL_PROT)
@@ -1314,9 +1281,6 @@ s	|char*	|stdize_locale	|char* locs
 #if defined(PERL_IN_UTIL_C) || defined(PERL_DECL_PROT)
 s	|COP*	|closest_cop	|COP *cop|OP *o
 s	|SV*	|mess_alloc
-#  if defined(LEAKTEST)
-s	|void	|xstat		|int
-#  endif
 #endif
 
 START_EXTERN_C
@@ -1363,6 +1327,34 @@ p	|void	|deb_stack_all
 s	|void	|deb_stack_n	|SV** stack_base|I32 stack_min \
 				|I32 stack_max|I32 mark_min|I32 mark_max
 #endif
+
+pd	|PADLIST*|pad_new	|padnew_flags flags
+pd	|void	|pad_undef	|CV* cv|CV* outercv
+pd	|PADOFFSET|pad_add_name	|char *name\
+				|HV* typestash|HV* ourstash \
+				|bool clone
+pd	|PADOFFSET|pad_add_anon	|SV* sv|OPCODE op_type
+pd	|void	|pad_check_dup	|char* name|bool is_our|HV* ourstash
+#ifdef DEBUGGING
+pd	|void	|pad_setsv	|PADOFFSET po|SV* sv
+#endif
+pd	|void	|pad_block_start|int full
+pd	|void	|pad_tidy	|padtidy_type type
+pd 	|void	|do_dump_pad	|I32 level|PerlIO *file \
+				|PADLIST *padlist|int full
+pd	|void	|pad_fixup_inner_anons|PADLIST *padlist|CV *old_cv|CV *new_cv
+
+pd	|void	|pad_push	|PADLIST *padlist|int depth|int has_args
+
+#if defined(PERL_IN_PAD_C) || defined(PERL_DECL_PROT)
+sd	|PADOFFSET|pad_findlex	|char* name|PADOFFSET newoff|U32 seq \
+				|CV* startcv|I32 cx_ix|I32 saweval|U32 flags
+#  if defined(DEBUGGING)
+sd	|void	|cv_dump	|CV *cv|char *title
+#  endif
+s	|CV*	|cv_clone2	|CV *proto|CV *outside
+#endif
+
 
 
 END_EXTERN_C

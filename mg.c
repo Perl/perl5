@@ -872,11 +872,6 @@ Perl_magic_get(pTHX_ SV *sv, MAGIC *mg)
     case '0':
 	break;
 #endif
-#ifdef USE_5005THREADS
-    case '@':
-	sv_setsv(sv, thr->errsv);
-	break;
-#endif /* USE_5005THREADS */
     }
     return 0;
 }
@@ -2062,8 +2057,15 @@ Perl_magic_set(pTHX_ SV *sv, MAGIC *mg)
 	    STATUS_POSIX_SET(SvIOK(sv) ? SvIVX(sv) : sv_2iv(sv));
 	break;
     case '!':
+        {
+#ifdef VMS
+#   define PERL_VMS_BANG vaxc$errno
+#else
+#   define PERL_VMS_BANG 0
+#endif
 	SETERRNO(SvIOK(sv) ? SvIVX(sv) : SvOK(sv) ? sv_2iv(sv) : 0,
-		 (SvIV(sv) == EVMSERR) ? 4 : vaxc$errno);
+		 (SvIV(sv) == EVMSERR) ? 4 : PERL_VMS_BANG);
+	}
 	break;
     case '<':
 	PL_uid = SvIOK(sv) ? SvIVX(sv) : sv_2iv(sv);
@@ -2281,29 +2283,9 @@ Perl_magic_set(pTHX_ SV *sv, MAGIC *mg)
 	}
 	break;
 #endif
-#ifdef USE_5005THREADS
-    case '@':
-	sv_setsv(thr->errsv, sv);
-	break;
-#endif /* USE_5005THREADS */
     }
     return 0;
 }
-
-#ifdef USE_5005THREADS
-int
-Perl_magic_mutexfree(pTHX_ SV *sv, MAGIC *mg)
-{
-    DEBUG_S(PerlIO_printf(Perl_debug_log,
-			  "0x%"UVxf": magic_mutexfree 0x%"UVxf"\n",
-			  PTR2UV(thr), PTR2UV(sv)));
-    if (MgOWNER(mg))
-	Perl_croak(aTHX_ "panic: magic_mutexfree");
-    MUTEX_DESTROY(MgMUTEXP(mg));
-    COND_DESTROY(MgCONDP(mg));
-    return 0;
-}
-#endif /* USE_5005THREADS */
 
 I32
 Perl_whichsig(pTHX_ char *sig)

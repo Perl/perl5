@@ -412,8 +412,6 @@ END_EXTERN_C
 #define PL_nthreads		(*Perl_Inthreads_ptr(aTHX))
 #undef  PL_nthreads_cond
 #define PL_nthreads_cond	(*Perl_Inthreads_cond_ptr(aTHX))
-#undef  PL_nullstash
-#define PL_nullstash		(*Perl_Inullstash_ptr(aTHX))
 #undef  PL_numeric_compat1
 #define PL_numeric_compat1	(*Perl_Inumeric_compat1_ptr(aTHX))
 #undef  PL_numeric_local

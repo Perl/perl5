@@ -601,9 +601,11 @@ than one Unicode character.
 Things to do with locales (Lithuanian, Turkish, Azeri) do B<not> work
 since Perl does not understand the concept of Unicode locales.
 
+See the Unicode Technical Report #21, Case Mappings, for more details.
+
 =back
 
-See the Unicode Technical Report #21, Case Mappings, for more details.
+=over 4
 
 =item *
 
@@ -730,13 +732,13 @@ Level 1 - Basic Unicode Support
              or user-defined character properties [b] to emulate subtraction
         [ 7] include Letters in word characters
         [ 8] note that Perl does Full case-folding in matching, not Simple:
-             for example U+1F88 is equivalent with U+1F000 U+03B9,
+             for example U+1F88 is equivalent with U+1F00 U+03B9,
              not with 1F80.  This difference matters for certain Greek
              capital letters with certain modifiers: the Full case-folding
              decomposes the letter, while the Simple case-folding would map
              it to a single character.
         [ 9] see UTR#13 Unicode Newline Guidelines
-        [10] should do ^ and $ also on \x{85}, \x{2028} and \x{2029})
+        [10] should do ^ and $ also on \x{85}, \x{2028} and \x{2029}
              (should also affect <>, $., and script line numbers)
              (the \x{85}, \x{2028} and \x{2029} do match \s)
 
@@ -1244,6 +1246,114 @@ benchmark shows:
 Even though the algorithm based on C<substr()> is faster than
 C<split()> for byte-encoded data, it pales in comparison to the speed
 of C<split()> when used with UTF-8 data.
+
+=head2 Porting code from perl-5.6.X
+
+Perl 5.8 has a different Unicode model from 5.6. In 5.6 the programmer
+was required to use the C<utf8> pragma to declare that a given scope
+expected to deal with Unicode data and had to make sure that only
+Unicode data were reaching that scope. If you have code that is
+working with 5.6, you will need some of the following adjustments to
+your code. The examples are written such that the code will continue
+to work under 5.6, so you should be safe to try them out.
+
+=over 4
+
+=item *
+
+A filehandle that should read or write UTF-8
+
+  if ($] > 5.007) {
+    binmode $fh, ":utf8";
+  }
+
+=item *
+
+A scalar that is going to be passed to some extension
+
+Be it Compress::Zlib, Apache::Request or any extension that has no
+mention of Unicode in the manpage, you need to make sure that the
+UTF-8 flag is stripped off. Note that at the time of this writing
+(October 2002) the mentioned modules are not UTF-8-aware. Please
+check the documentation to verify if this is still true.
+
+  if ($] > 5.007) {
+    require Encode;
+    $val = Encode::encode_utf8($val); # make octets
+  }
+
+=item *
+
+A scalar we got back from an extension
+
+If you believe the scalar comes back as UTF-8, you will most likely
+want the UTF-8 flag restored:
+
+  if ($] > 5.007) {
+    require Encode;
+    $val = Encode::decode_utf8($val);
+  }
+
+=item *
+
+Same thing, if you are really sure it is UTF-8
+
+  if ($] > 5.007) {
+    require Encode;
+    Encode::_utf8_on($val);
+  }
+
+=item *
+
+A wrapper for fetchrow_array and fetchrow_hashref
+
+When the database contains only UTF-8, a wrapper function or method is
+a convenient way to replace all your fetchrow_array and
+fetchrow_hashref calls. A wrapper function will also make it easier to
+adapt to future enhancements in your database driver. Note that at the
+time of this writing (October 2002), the DBI has no standardized way
+to deal with UTF-8 data. Please check the documentation to verify if
+that is still true.
+
+  sub fetchrow {
+    my($self, $sth, $what) = @_; # $what is one of fetchrow_{array,hashref}
+    if ($] < 5.007) {
+      return $sth->$what;
+    } else {
+      require Encode;
+      if (wantarray) {
+        my @arr = $sth->$what;
+        for (@arr) {
+          defined && /[^\000-\177]/ && Encode::_utf8_on($_);
+        }
+        return @arr;
+      } else {
+        my $ret = $sth->$what;
+        if (ref $ret) {
+          for my $k (keys %$ret) {
+            defined && /[^\000-\177]/ && Encode::_utf8_on($_) for $ret->{$k};
+          }
+          return $ret;
+        } else {
+          defined && /[^\000-\177]/ && Encode::_utf8_on($_) for $ret;
+          return $ret;
+        }
+      }
+    }
+  }
+
+
+=item *
+
+A large scalar that you know can only contain ASCII
+
+Scalars that contain only ASCII and are marked as UTF-8 are sometimes
+a drag to your program. If you recognize such a situation, just remove
+the UTF-8 flag:
+
+  utf8::downgrade($val) if $] > 5.007;
+
+=back
 
 =head1 SEE ALSO
 

@@ -35,7 +35,7 @@
 #	define TO_SOCKET(x)	(x)
 #endif	/* USE_SOCKETS_AS_HANDLES */
 
-#if defined(USE_5005THREADS) || defined(USE_ITHREADS)
+#if defined(USE_ITHREADS)
 #define StartSockets() \
     STMT_START {					\
 	if (!wsock_started)				\
@@ -100,7 +100,7 @@ void
 set_socktype(void)
 {
 #ifdef USE_SOCKETS_AS_HANDLES
-#if defined(USE_5005THREADS) || defined(USE_ITHREADS)
+#if defined(USE_ITHREADS)
     dTHX;
     if (!w32_init_socktype) {
 #endif
@@ -110,7 +110,7 @@ set_socktype(void)
 	 */
 	setsockopt(INVALID_SOCKET, SOL_SOCKET, SO_OPENTYPE,
 		    (char *)&iSockOpt, sizeof(iSockOpt));
-#if defined(USE_5005THREADS) || defined(USE_ITHREADS)
+#if defined(USE_ITHREADS)
 	w32_init_socktype = 1;
     }
 #endif

@@ -16,12 +16,8 @@ sub bits {
         $bits |= $bitmask{$s} || 0;
     }
     if (@wrong) {
-        my $useno = {
-         __PACKAGE__.'::import' => 'use',
-         __PACKAGE__.'::unimport' => 'no'
-        }->{ (caller(1))[3] };
         require Carp;
-        Carp::croak("Don't know how to '$useno ".__PACKAGE__." qw(@wrong)'");
+        Carp::croak("Unknown 'strict' tag(s) '@wrong'");
     }
     $bits;
 }

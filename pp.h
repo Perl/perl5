@@ -7,14 +7,6 @@
  *
  */
 
-#ifdef USE_5005THREADS
-#define ARGS thr
-#define dARGS struct perl_thread *thr;
-#else
-#define ARGS
-#define dARGS
-#endif /* USE_5005THREADS */
-
 #define PP(s) OP * Perl_##s(pTHX)
 
 /*

@@ -215,7 +215,10 @@ cc*|xlc*) # cc should've been set by line 116 or so if empty.
 	if test ! -x /usr/bin/$cc -a -x /usr/vac/bin/$cc; then
 		case ":$PATH:" in
 		*:/usr/vac/bin:*) ;;
-		*) cat <<EOF
+		*) if test ! -x /QOpenSys/usr/bin/$cc; then
+			# The /QOpenSys/usr/bin/$cc saves us if we are
+			# building natively in OS/400 PASE.
+			cat >&4 <<EOF
 
 ***
 *** You either implicitly or explicitly specified an IBM C compiler,
@@ -224,7 +227,8 @@ cc*|xlc*) # cc should've been set by line 116 or so if empty.
 *** in your PATH.  I suggest adding that and retrying Configure.
 ***
 EOF
-		   exit 1
+			exit 1
+		   fi 
 		   ;;
 		esac
 	fi
@@ -556,6 +560,15 @@ EOF
 	shift
 	libswanted="$*"
 	installusrbinperl="$undef"
+
+	# V5R1 doesn't have this (V5R2 does), without knowing
+	# which one we have it's safer to be pessimistic.
+	# Cwd will work fine even without fchdir(), but if
+	# V5R1 tries to use code compiled assuming fchdir(),
+	# lots of grief will issue forth from Cwd.
+	case "$d_fchdir" in
+	'') d_fchdir="$undef" ;;
+	esac
 	;;
 esac
 

@@ -36,17 +36,6 @@
 #   include "config.h"
 #endif
 
-#if defined(USE_ITHREADS) && defined(USE_5005THREADS)
-#  include "error: USE_ITHREADS and USE_5005THREADS are incompatible"
-#endif
-
-/* XXX This next guard can disappear if the sources are revised
-   to use USE_5005THREADS throughout. -- A.D  1/6/2000
-*/
-#if defined(USE_ITHREADS) && defined(USE_5005THREADS)
-#  include "error: USE_ITHREADS and USE_5005THREADS are incompatible"
-#endif
-
 /* See L<perlguts/"The Perl API"> for detailed notes on
  * PERL_IMPLICIT_CONTEXT and PERL_IMPLICIT_SYS */
 
@@ -66,12 +55,6 @@
 #ifdef USE_ITHREADS
 #  if !defined(MULTIPLICITY)
 #    define MULTIPLICITY
-#  endif
-#endif
-
-#ifdef USE_5005THREADS
-#  ifndef PERL_IMPLICIT_CONTEXT
-#    define PERL_IMPLICIT_CONTEXT
 #  endif
 #endif
 
@@ -96,20 +79,12 @@
 /* <--- here ends the logic shared by perl.h and makedef.pl */
 
 #ifdef PERL_IMPLICIT_CONTEXT
-#  ifdef USE_5005THREADS
-struct perl_thread;
-#    define pTHX	register struct perl_thread *thr PERL_UNUSED_DECL
-#    define aTHX	thr
-#    define dTHR	dNOOP /* only backward compatibility */
-#    define dTHXa(a)	pTHX = (struct perl_thread*)a
-#  else
-#    ifndef MULTIPLICITY
-#      define MULTIPLICITY
-#    endif
-#    define pTHX	register PerlInterpreter *my_perl PERL_UNUSED_DECL
-#    define aTHX	my_perl
-#    define dTHXa(a)	pTHX = (PerlInterpreter*)a
+#  ifndef MULTIPLICITY
+#    define MULTIPLICITY
 #  endif
+#  define pTHX	register PerlInterpreter *my_perl PERL_UNUSED_DECL
+#  define aTHX	my_perl
+#  define dTHXa(a)	pTHX = (PerlInterpreter*)a
 #  define dTHX		pTHX = PERL_GET_THX
 #  define pTHX_		pTHX,
 #  define aTHX_		aTHX,
@@ -228,12 +203,12 @@ register struct op *Perl_op asm(stringify(OP_IN_REGISTER));
  * Trying to select a version that gives no warnings...
  */
 #if !(defined(STMT_START) && defined(STMT_END))
-# if defined(__GNUC__) && !defined(__STRICT_ANSI__) && !defined(__cplusplus)
+# if defined(__GNUC__) && !defined(__STRICT_ANSI__) && !defined(PERL_GCC_PEDANTIC) && !defined(__cplusplus)
 #   define STMT_START	(void)(	/* gcc supports ``({ STATEMENTS; })'' */
 #   define STMT_END	)
 # else
    /* Now which other defined()s do we need here ??? */
-#  if (VOIDFLAGS) && (defined(sun) || defined(__sun__))
+#  if (VOIDFLAGS) && (defined(sun) || defined(__sun__)) && !defined(__GNUC__)
 #   define STMT_START	if (1)
 #   define STMT_END	else (void)0
 #  else
@@ -361,8 +336,7 @@ register struct op *Perl_op asm(stringify(OP_IN_REGISTER));
 /* HP-UX 10.X CMA (Common Multithreaded Architecure) insists that
    pthread.h must be included before all other header files.
 */
-#if (defined(USE_5005THREADS) || defined(USE_ITHREADS)) \
-    && defined(PTHREAD_H_FIRST) && defined(I_PTHREAD)
+#if defined(USE_ITHREADS) && defined(PTHREAD_H_FIRST) && defined(I_PTHREAD)
 #  include <pthread.h>
 #endif
 
@@ -684,18 +658,7 @@ typedef struct perl_mstats perl_mstats_t;
 #       define INCLUDE_PROTOTYPES /* for <socks.h> */
 #       define PERL_SOCKS_NEED_PROTOTYPES
 #   endif
-#   ifdef USE_5005THREADS
-#       define PERL_USE_THREADS /* store our value */
-#       undef USE_5005THREADS
-#   endif
 #   include <socks.h>
-#   ifdef USE_5005THREADS
-#       undef USE_5005THREADS /* socks.h does this on its own */
-#   endif
-#   ifdef PERL_USE_THREADS
-#       define USE_5005THREADS /* restore our value */
-#       undef PERL_USE_THREADS
-#   endif
 #   ifdef PERL_SOCKS_NEED_PROTOTYPES /* keep cpp space clean */
 #       undef INCLUDE_PROTOTYPES
 #       undef PERL_SOCKS_NEED_PROTOTYPES
@@ -730,19 +693,37 @@ int sockatmark(int);
 	    set_errno(errcode);		\
 	    set_vaxc_errno(vmserrcode);	\
 	} STMT_END
+#   define LIB_INVARG 		LIB$_INVARG
+#   define RMS_DIR    		RMS$_DIR
+#   define RMS_FAC    		RMS$_FAC
+#   define RMS_FEX    		RMS$_FEX
+#   define RMS_FNF    		RMS$_FNF
+#   define RMS_IFI    		RMS$_IFI
+#   define RMS_ISI    		RMS$_ISI
+#   define RMS_PRV    		RMS$_PRV
+#   define SS_ACCVIO      	SS$_ACCVIO
+#   define SS_DEVOFFLINE	SS$_DEVOFFLINE
+#   define SS_IVCHAN  		SS$_IVCHAN
+#   define SS_NORMAL  		SS$_NORMAL
 #else
 #   define SETERRNO(errcode,vmserrcode) (errno = (errcode))
+#   define LIB_INVARG 		0
+#   define RMS_DIR    		0
+#   define RMS_FAC    		0
+#   define RMS_FEX    		0
+#   define RMS_FNF    		0
+#   define RMS_IFI    		0
+#   define RMS_ISI    		0
+#   define RMS_PRV    		0
+#   define SS_ACCVIO      	0
+#   define SS_DEVOFFLINE	0
+#   define SS_IVCHAN  		0
+#   define SS_NORMAL  		0
 #endif
 
-#ifdef USE_5005THREADS
-#  define ERRSV (thr->errsv)
-#  define DEFSV THREADSV(0)
-#  define SAVE_DEFSV save_threadsv(0)
-#else
-#  define ERRSV GvSV(PL_errgv)
-#  define DEFSV GvSV(PL_defgv)
-#  define SAVE_DEFSV SAVESPTR(GvSV(PL_defgv))
-#endif /* USE_5005THREADS */
+#define ERRSV GvSV(PL_errgv)
+#define DEFSV GvSV(PL_defgv)
+#define SAVE_DEFSV SAVESPTR(GvSV(PL_defgv))
 
 #define ERRHV GvHV(PL_errgv)	/* XXX unused, here for compatibility */
 
@@ -1948,37 +1929,34 @@ typedef struct clone_params CLONE_PARAMS;
 #  ifdef PATH_MAX
 #    ifdef _POSIX_PATH_MAX
 #       if PATH_MAX > _POSIX_PATH_MAX
-/* MAXPATHLEN is supposed to include the final null character,
- * as opposed to PATH_MAX and _POSIX_PATH_MAX. */
-#         define MAXPATHLEN (PATH_MAX+1)
+/* POSIX 1990 (and pre) was ambiguous about whether PATH_MAX
+ * included the null byte or not.  Later amendments of POSIX,
+ * XPG4, the Austin Group, and the Single UNIX Specification
+ * all explicitly include the null byte in the PATH_MAX.
+ * Ditto for _POSIX_PATH_MAX. */
+#         define MAXPATHLEN PATH_MAX
 #       else
-#         define MAXPATHLEN (_POSIX_PATH_MAX+1)
+#         define MAXPATHLEN _POSIX_PATH_MAX
 #       endif
 #    else
 #      define MAXPATHLEN (PATH_MAX+1)
 #    endif
 #  else
 #    ifdef _POSIX_PATH_MAX
-#       define MAXPATHLEN (_POSIX_PATH_MAX+1)
+#       define MAXPATHLEN _POSIX_PATH_MAX
 #    else
 #       define MAXPATHLEN 1024	/* Err on the large side. */
 #    endif
 #  endif
 #endif
 
-/*
- * USE_5005THREADS needs to be after unixish.h as <pthread.h> includes
+/* USE_5005THREADS needs to be after unixish.h as <pthread.h> includes
  * <sys/signal.h> which defines NSIG - which will stop inclusion of <signal.h>
  * this results in many functions being undeclared which bothers C++
  * May make sense to have threads after "*ish.h" anyway
  */
 
-#if defined(USE_5005THREADS) || defined(USE_ITHREADS)
-#  if defined(USE_5005THREADS)
-   /* pending resolution of licensing issues, we avoid the erstwhile
-    * atomic.h everywhere */
-#  define EMULATE_ATOMIC_REFCOUNTS
-#  endif
+#if defined(USE_ITHREADS)
 #  ifdef NETWARE
 #   include <nw5thread.h>
 #  else
@@ -2013,7 +1991,7 @@ typedef pthread_key_t	perl_key;
 #    endif /* WIN32 */
 #  endif /* FAKE_THREADS */
 #endif	/* NETWARE */
-#endif /* USE_5005THREADS || USE_ITHREADS */
+#endif /* USE_ITHREADS */
 
 #if defined(WIN32)
 #  include "win32.h"
@@ -2117,12 +2095,8 @@ typedef pthread_key_t	perl_key;
 #endif
 
 #if defined(PERL_IMPLICIT_CONTEXT) && !defined(PERL_GET_THX)
-#  ifdef USE_5005THREADS
-#    define PERL_GET_THX		((struct perl_thread *)PERL_GET_CONTEXT)
-#  else
 #  ifdef MULTIPLICITY
 #    define PERL_GET_THX		((PerlInterpreter *)PERL_GET_CONTEXT)
-#  endif
 #  endif
 #  define PERL_SET_THX(t)		PERL_SET_CONTEXT(t)
 #endif
@@ -2204,12 +2178,6 @@ union any {
 };
 #endif
 
-#ifdef USE_5005THREADS
-#define ARGSproto struct perl_thread *thr
-#else
-#define ARGSproto
-#endif /* USE_5005THREADS */
-
 typedef I32 (*filter_t) (pTHX_ int, SV *, int);
 
 #define FILTER_READ(idx, sv, len)  filter_read(idx, sv, len)
@@ -2240,6 +2208,7 @@ typedef        struct crypt_data {     /* straight from /usr/include/crypt.h */
 #include "util.h"
 #include "form.h"
 #include "gv.h"
+#include "pad.h"
 #include "cv.h"
 #include "opnames.h"
 #include "op.h"
@@ -2452,7 +2421,6 @@ Gid_t getegid (void);
 #define DEBUG_r_FLAG		0x00000200 /*    512 */
 #define DEBUG_x_FLAG		0x00000400 /*   1024 */
 #define DEBUG_u_FLAG		0x00000800 /*   2048 */
-#define DEBUG_L_FLAG		0x00001000 /*   4096 */
 #define DEBUG_H_FLAG		0x00002000 /*   8192 */
 #define DEBUG_X_FLAG		0x00004000 /*  16384 */
 #define DEBUG_D_FLAG		0x00008000 /*  32768 */
@@ -2462,7 +2430,7 @@ Gid_t getegid (void);
 #define DEBUG_J_FLAG		0x00080000 /* 524288 */
 #define DEBUG_v_FLAG		0x00100000 /*1048576 */
 #define DEBUG_C_FLAG		0x00200000 /*2097152 */
-#define DEBUG_MASK		0x003FFFFF /* mask of all the standard flags */
+#define DEBUG_MASK		0x003FEFFF /* mask of all the standard flags */
 
 #define DEBUG_DB_RECURSE_FLAG	0x40000000
 #define DEBUG_TOP_FLAG		0x80000000 /* XXX what's this for ??? Signal
@@ -2480,7 +2448,6 @@ Gid_t getegid (void);
 #  define DEBUG_r_TEST_ (PL_debug & DEBUG_r_FLAG)
 #  define DEBUG_x_TEST_ (PL_debug & DEBUG_x_FLAG)
 #  define DEBUG_u_TEST_ (PL_debug & DEBUG_u_FLAG)
-#  define DEBUG_L_TEST_ (PL_debug & DEBUG_L_FLAG)
 #  define DEBUG_H_TEST_ (PL_debug & DEBUG_H_FLAG)
 #  define DEBUG_X_TEST_ (PL_debug & DEBUG_X_FLAG)
 #  define DEBUG_D_TEST_ (PL_debug & DEBUG_D_FLAG)
@@ -2490,6 +2457,7 @@ Gid_t getegid (void);
 #  define DEBUG_J_TEST_ (PL_debug & DEBUG_J_FLAG)
 #  define DEBUG_v_TEST_ (PL_debug & DEBUG_v_FLAG)
 #  define DEBUG_C_TEST_ (PL_debug & DEBUG_C_FLAG)
+#  define DEBUG_Xv_TEST_ (DEBUG_X_TEST_ && DEBUG_v_TEST_)
 
 #ifdef DEBUGGING
 
@@ -2508,9 +2476,9 @@ Gid_t getegid (void);
 #  define DEBUG_r_TEST DEBUG_r_TEST_
 #  define DEBUG_x_TEST DEBUG_x_TEST_
 #  define DEBUG_u_TEST DEBUG_u_TEST_
-#  define DEBUG_L_TEST DEBUG_L_TEST_
 #  define DEBUG_H_TEST DEBUG_H_TEST_
 #  define DEBUG_X_TEST DEBUG_X_TEST_
+#  define DEBUG_Xv_TEST DEBUG_Xv_TEST_
 #  define DEBUG_D_TEST DEBUG_D_TEST_
 #  define DEBUG_S_TEST DEBUG_S_TEST_
 #  define DEBUG_T_TEST DEBUG_T_TEST_
@@ -2545,16 +2513,12 @@ Gid_t getegid (void);
 #  define DEBUG_r(a) DEBUG__(DEBUG_r_TEST, a)
 #  define DEBUG_x(a) DEBUG__(DEBUG_x_TEST, a)
 #  define DEBUG_u(a) DEBUG__(DEBUG_u_TEST, a)
-#  define DEBUG_L(a) DEBUG__(DEBUG_L_TEST, a)
 #  define DEBUG_H(a) DEBUG__(DEBUG_H_TEST, a)
 #  define DEBUG_X(a) DEBUG__(DEBUG_X_TEST, a)
+#  define DEBUG_Xv(a) DEBUG__(DEBUG_Xv_TEST, a)
 #  define DEBUG_D(a) DEBUG__(DEBUG_D_TEST, a)
 
-#  ifdef USE_5005THREADS
-#    define DEBUG_S(a) DEBUG__(DEBUG_S_TEST, a)
-#  else
-#    define DEBUG_S(a)
-#  endif
+#  define DEBUG_S(a)
 
 #  define DEBUG_T(a) DEBUG__(DEBUG_T_TEST, a)
 #  define DEBUG_R(a) DEBUG__(DEBUG_R_TEST, a)
@@ -2575,9 +2539,9 @@ Gid_t getegid (void);
 #  define DEBUG_r_TEST (0)
 #  define DEBUG_x_TEST (0)
 #  define DEBUG_u_TEST (0)
-#  define DEBUG_L_TEST (0)
 #  define DEBUG_H_TEST (0)
 #  define DEBUG_X_TEST (0)
+#  define DEBUG_Xv_TEST (0)
 #  define DEBUG_D_TEST (0)
 #  define DEBUG_S_TEST (0)
 #  define DEBUG_T_TEST (0)
@@ -2600,9 +2564,9 @@ Gid_t getegid (void);
 #  define DEBUG_r(a)
 #  define DEBUG_x(a)
 #  define DEBUG_u(a)
-#  define DEBUG_L(a)
 #  define DEBUG_H(a)
 #  define DEBUG_X(a)
+#  define DEBUG_Xv(a)
 #  define DEBUG_D(a)
 #  define DEBUG_S(a)
 #  define DEBUG_T(a)
@@ -2871,10 +2835,8 @@ typedef Sighandler_t Sigsave_t;
 # ifndef register
 #  define register
 # endif
-# define PAD_SV(po) pad_sv(po)
 # define RUNOPS_DEFAULT Perl_runops_debug
 #else
-# define PAD_SV(po) PL_curpad[po]
 # define RUNOPS_DEFAULT Perl_runops_standard
 #endif
 
@@ -3240,9 +3202,6 @@ enum {		/* pass one of these to get_vtbl */
     want_vtbl_collxfrm,
     want_vtbl_amagic,
     want_vtbl_amagicelem,
-#ifdef USE_5005THREADS
-    want_vtbl_mutex,
-#endif
     want_vtbl_regdata,
     want_vtbl_regdatum,
     want_vtbl_backref
@@ -3356,9 +3315,7 @@ struct perl_vars *PL_VarsPtr;
 */
 
 struct interpreter {
-#  ifndef USE_5005THREADS
-#    include "thrdvar.h"
-#  endif
+#  include "thrdvar.h"
 #  include "intrpvar.h"
 /*
  * The following is a buffer where new variables must
@@ -3373,21 +3330,7 @@ struct interpreter {
 };
 #endif /* MULTIPLICITY */
 
-#ifdef USE_5005THREADS
-/* If we have threads define a struct with all the variables
- * that have to be per-thread
- */
-
-
-struct perl_thread {
-#include "thrdvar.h"
-};
-
-typedef struct perl_thread *Thread;
-
-#else
 typedef void *Thread;
-#endif
 
 /* Done with PERLVAR macros for now ... */
 #undef PERLVAR
@@ -3440,9 +3383,7 @@ typedef void *Thread;
 #if !defined(MULTIPLICITY)
 START_EXTERN_C
 #  include "intrpvar.h"
-#  ifndef USE_5005THREADS
-#    include "thrdvar.h"
-#  endif
+#  include "thrdvar.h"
 END_EXTERN_C
 #endif
 
@@ -3532,10 +3473,6 @@ EXT MGVTBL PL_vtbl_fm =	{0,	MEMBER_TO_FPTR(Perl_magic_setfm),
 EXT MGVTBL PL_vtbl_uvar =	{MEMBER_TO_FPTR(Perl_magic_getuvar),
 				MEMBER_TO_FPTR(Perl_magic_setuvar),
 					0,	0,	0};
-#ifdef USE_5005THREADS
-EXT MGVTBL PL_vtbl_mutex =	{0,	0,	0,	0,	
-					MEMBER_TO_FPTR(Perl_magic_mutexfree)};
-#endif /* USE_5005THREADS */
 EXT MGVTBL PL_vtbl_defelem = {MEMBER_TO_FPTR(Perl_magic_getdefelem),
     					MEMBER_TO_FPTR(Perl_magic_setdefelem),
 					0,	0,	0};
@@ -3586,10 +3523,6 @@ EXT MGVTBL PL_vtbl_bm;
 EXT MGVTBL PL_vtbl_fm;
 EXT MGVTBL PL_vtbl_uvar;
 EXT MGVTBL PL_vtbl_ovrld;
-
-#ifdef USE_5005THREADS
-EXT MGVTBL PL_vtbl_mutex;
-#endif /* USE_5005THREADS */
 
 EXT MGVTBL PL_vtbl_defelem;
 EXT MGVTBL PL_vtbl_regexp;
@@ -3888,7 +3821,7 @@ typedef struct am_table_short AMTS;
  * Remap printf
  */
 #undef printf
-#ifdef __GNUC__
+#if defined(__GNUC__) && !defined(__STRICT_ANSI__) && !defined(PERL_GCC_PEDANTIC)
 #define printf(fmt,args...) PerlIO_stdoutf(fmt,##args)
 #else
 #define printf PerlIO_stdoutf
@@ -4257,8 +4190,9 @@ extern void moncontrol(int);
    NVff
    NVgf
 
-   HAS_USLEEP
    HAS_UALARM
+   HAS_USLEEP
+   HAS_NANOSLEEP
 
    HAS_SETITIMER
    HAS_GETITIMER

@@ -267,6 +267,7 @@ sub _code2codeset
     my ($alpha2, $alpha3, $numeric);
     my ($country, @countries);
 
+    local $_;
 
     while (<DATA>)
     {

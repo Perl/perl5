@@ -105,7 +105,7 @@ Perl_av_extend(pTHX_ AV *av, I32 key)
 		IV itmp;
 #endif
 
-#if defined(MYMALLOC) && !defined(LEAKTEST)
+#ifdef MYMALLOC
 		newmax = malloced_size((void*)AvALLOC(av))/sizeof(SV*) - 1;
 
 		if (key <= newmax) 
@@ -134,7 +134,7 @@ Perl_av_extend(pTHX_ AV *av, I32 key)
 		    Safefree(AvALLOC(av));
 		AvALLOC(av) = ary;
 #endif
-#if defined(MYMALLOC) && !defined(LEAKTEST)
+#ifdef MYMALLOC
 	      resized:
 #endif
 		ary = AvALLOC(av) + AvMAX(av) + 1;

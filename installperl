@@ -396,17 +396,6 @@ foreach my $file (@corefiles) {
     }
 }
 
-# Switch in the 5.005-threads versions of he threadsafe queue and semaphore
-# modules if so needed.
-if ($Config{use5005threads}) {
-    for my $m (qw(Queue Semaphore)) {
-	my $t = "$installprivlib/Thread/$m.pm";
-	unlink $t;
-	copy("ext/Thread/$m.pmx", $t);
-	chmod(0444, $t);
-    }
-}
-
 # Install main perl executables
 # Make links to ordinary names if installbin directory isn't current directory.
 

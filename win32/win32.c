@@ -4750,11 +4750,7 @@ win32_signal_context(void)
     }
     return my_perl;
 #else
-#ifdef USE_5005THREADS
-    return aTHX;
-#else
     return PL_curinterp;
-#endif
 #endif
 }
 
@@ -4767,10 +4763,6 @@ win32_ctrlhandler(DWORD dwCtrlType)
 
     if (!my_perl)
 	return FALSE;
-#else
-#ifdef USE_5005THREADS
-    dTHX;
-#endif
 #endif
 
     switch(dwCtrlType) {

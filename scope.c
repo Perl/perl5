@@ -469,16 +469,8 @@ Perl_save_padsv(pTHX_ PADOFFSET off)
 SV **
 Perl_save_threadsv(pTHX_ PADOFFSET i)
 {
-#ifdef USE_5005THREADS
-    SV **svp = &THREADSV(i);	/* XXX Change to save by offset */
-    DEBUG_S(PerlIO_printf(Perl_debug_log, "save_threadsv %"UVuf": %p %p:%s\n",
-			  (UV)i, svp, *svp, SvPEEK(*svp)));
-    save_svref(svp);
-    return svp;
-#else
     Perl_croak(aTHX_ "panic: save_threadsv called in non-threaded perl");
     return 0;
-#endif /* USE_5005THREADS */
 }
 
 void
@@ -868,6 +860,15 @@ Perl_leave_scope(pTHX_ I32 base)
 	case SAVEt_CLEARSV:
 	    ptr = (void*)&PL_curpad[SSPOPLONG];
 	    sv = *(SV**)ptr;
+
+	    DEBUG_Xv(PerlIO_printf(Perl_debug_log,
+		"Pad [0x%"UVxf"] clearsv: %ld sv=0x%"UVxf"<%"IVdf"> %s\n",
+		PTR2UV(PL_curpad), (long)((SV **)ptr-PL_curpad),
+		PTR2UV(sv),
+		(IV)SvREFCNT(sv),
+		(SvREFCNT(sv) <= 1 && !SvOBJECT(sv)) ? "clear" : "abandon"
+	    ));
+
 	    /* Can clear pad variable in place? */
 	    if (SvREFCNT(sv) <= 1 && !SvOBJECT(sv)) {
 		/*
@@ -1000,7 +1001,7 @@ Perl_leave_scope(pTHX_ I32 base)
 		PADOFFSET off = (PADOFFSET)SSPOPLONG;
 		ptr = SSPOPPTR;
 		if (ptr)
-		    ((SV**)ptr)[off] = (SV*)SSPOPPTR;
+		    ((PAD)ptr)[off] = (SV*)SSPOPPTR;
 	    }
 	    break;
 	default:

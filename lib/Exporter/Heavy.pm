@@ -27,6 +27,17 @@ No user-serviceable parts inside.
 #  because Carp requires Exporter, and something has to give.
 #
 
+sub _rebuild_cache {
+    my ($pkg, $exports, $cache) = @_;
+    s/^&// foreach @$exports;
+    @{$cache}{@$exports} = (1) x @$exports;
+    my $ok = \@{"${pkg}::EXPORT_OK"};
+    if (@$ok) {
+	s/^&// foreach @$ok;
+	@{$cache}{@$ok} = (1) x @$ok;
+    }
+}
+
 sub heavy_export {
 
     # First make import warnings look like they're coming from the "use".
@@ -49,19 +60,14 @@ sub heavy_export {
     };
 
     my($pkg, $callpkg, @imports) = @_;
-    my($type, $sym, $oops);
+    my($type, $sym, $cache_is_current, $oops);
     my($exports, $export_cache) = (\@{"${pkg}::EXPORT"},
                                    $Exporter::Cache{$pkg} ||= {});
 
     if (@imports) {
 	if (!%$export_cache) {
-	    s/^&// foreach @$exports;
-	    @{$export_cache}{@$exports} = (1) x @$exports;
-	    my $ok = \@{"${pkg}::EXPORT_OK"};
-	    if (@$ok) {
-		s/^&// foreach @$ok;
-		@{$export_cache}{@$ok} = (1) x @$ok;
-	    }
+	    _rebuild_cache ($pkg, $exports, $export_cache);
+	    $cache_is_current = 1;
 	}
 
 	if ($imports[0] =~ m#^[/!:]#){
@@ -127,10 +133,21 @@ sub heavy_export {
 			last;
 		    }
 		} elsif ($sym !~ s/^&// || !$export_cache->{$sym}) {
-		    # accumulate the non-exports
-		    push @carp,
-		        qq["$sym" is not exported by the $pkg module\n];
-		    $oops++;
+		    # Last chance - see if they've updated EXPORT_OK since we
+		    # cached it.
+
+		    unless ($cache_is_current) {
+			%$export_cache = ();
+			_rebuild_cache ($pkg, $exports, $export_cache);
+			$cache_is_current = 1;
+		    }
+
+		    if (!$export_cache->{$sym}) {
+			# accumulate the non-exports
+			push @carp,
+			  qq["$sym" is not exported by the $pkg module\n];
+			$oops++;
+		    }
 		}
 	    }
 	}

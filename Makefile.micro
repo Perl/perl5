@@ -9,7 +9,7 @@ all:	microperl
 
 O = uav$(_O) udeb$(_O) udoio$(_O) udoop$(_O) udump$(_O) \
 	uglobals$(_O) ugv$(_O) uhv$(_O) \
-	umg$(_O) uperlmain$(_O) uop$(_O) ureentr$(_O) \
+	umg$(_O) uperlmain$(_O) uop$(_O) upad$(_O) ureentr$(_O) \
 	uperl$(_O) uperlio$(_O) uperly$(_O) upp$(_O) \
 	upp_ctl$(_O) upp_hot$(_O) upp_sys$(_O) upp_pack$(_O) upp_sort$(_O) \
 	uregcomp$(_O) uregexec$(_O) urun$(_O) \
@@ -21,10 +21,10 @@ microperl:	$(O)
 	$(LD) -o $@ $(O) $(LIBS)
 
 H = av.h uconfig.h cop.h cv.h embed.h embedvar.h form.h gv.h handy.h \
-	hv.h intrpvar.h iperlsys.h mg.h op.h opcode.h opnames.h patchlevel.h \
-	perl.h perlsdio.h perlvars.h perly.h pp.h pp_proto.h proto.h reentr.h \
-	regexp.h scope.h sv.h thrdvar.h thread.h unixish.h utf8.h util.h \
-	warnings.h
+	hv.h intrpvar.h iperlsys.h mg.h op.h opcode.h opnames.h pad.h \
+	patchlevel.h perl.h perlsdio.h perlvars.h perly.h pp.h \
+	pp_proto.h proto.h reentr.h regexp.h scope.h sv.h thrdvar.h \
+	thread.h unixish.h utf8.h util.h warnings.h
 
 HE = $(H) EXTERN.h
 
@@ -81,6 +81,9 @@ uperlmain$(_O):	$(HE) miniperlmain.c
 
 uop$(_O):	$(HE) op.c keywords.h
 	$(CC) -c -o $@ $(CFLAGS) op.c
+
+upad$(_O):	$(HE) pad.c
+	$(CC) -c -o $@ $(CFLAGS) pad.c
 
 ureentr$(_O):	$(HE) reentr.c
 	$(CC) -c -o $@ $(CFLAGS) reentr.c

@@ -14,7 +14,7 @@ require Exporter;
 @ISA = qw(Exporter);
 @EXPORT = qw(struct);
 
-$VERSION = '0.61';
+$VERSION = '0.63';
 
 ## Tested on 5.002 and 5.003 without class membership tests:
 my $CHECK_CLASS_MEMBERSHIP = ($] >= 5.003_95);
@@ -463,13 +463,13 @@ type C<Timeval>.
     use Class::Struct;
 
     struct( Rusage => {
-        ru_utime => 'Timeval',  # seconds
-        ru_stime => 'Timeval',  # microseconds
+        ru_utime => 'Timeval',  # user time used
+        ru_stime => 'Timeval',  # system time used
     });
 
     struct( Timeval => [
-        tv_secs  => '$',
-        tv_usecs => '$',
+        tv_secs  => '$',        # seconds
+        tv_usecs => '$',        # microseconds
     ]);
 
         # create an object:
@@ -500,10 +500,10 @@ accessor accordingly.
         my $self = shift;
         if ( @_ ) {
             die 'count must be nonnegative' if $_[0] < 0;
-            $self->{'count'} = shift;
+            $self->{'MyObj::count'} = shift;
             warn "Too many args to count" if @_;
         }
-        return $self->{'count'};
+        return $self->{'MyObj::count'};
     }
 
     package main;

@@ -74,12 +74,12 @@ sub SPLICE {
 
 sub EXISTS {
     my $pkg = ref $_[0];
-    croak "$pkg dosn't define an EXISTS method";
+    croak "$pkg doesn't define an EXISTS method";
 }
 
 sub DELETE {
     my $pkg = ref $_[0];
-    croak "$pkg dosn't define a DELETE method";
+    croak "$pkg doesn't define a DELETE method";
 }
 
 package Tie::StdArray;

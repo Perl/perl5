@@ -56,17 +56,7 @@ static I32 read_e_script(pTHX_ int idx, SV *buf_sv, int maxlen);
 #endif
 #endif
 
-#if defined(USE_5005THREADS)
-#  define INIT_TLS_AND_INTERP \
-    STMT_START {				\
-	if (!PL_curinterp) {			\
-	    PERL_SET_INTERP(my_perl);		\
-	    INIT_THREADS;			\
-	    ALLOC_THREAD_KEY;			\
-	}					\
-    } STMT_END
-#else
-#  if defined(USE_ITHREADS)
+#if defined(USE_ITHREADS)
 #  define INIT_TLS_AND_INTERP \
     STMT_START {				\
 	if (!PL_curinterp) {			\
@@ -80,7 +70,7 @@ static I32 read_e_script(pTHX_ int idx, SV *buf_sv, int maxlen);
 	    PERL_SET_THX(my_perl);		\
 	}					\
     } STMT_END
-#  else
+#else
 #  define INIT_TLS_AND_INTERP \
     STMT_START {				\
 	if (!PL_curinterp) {			\
@@ -89,7 +79,6 @@ static I32 read_e_script(pTHX_ int idx, SV *buf_sv, int maxlen);
 	PERL_SET_THX(my_perl);			\
     } STMT_END
 #  endif
-#endif
 
 #ifdef PERL_IMPLICIT_SYS
 PerlInterpreter *
@@ -156,12 +145,6 @@ Initializes a new Perl interpreter.  See L<perlembed>.
 void
 perl_construct(pTHXx)
 {
-#ifdef USE_5005THREADS
-#ifndef FAKE_THREADS
-    struct perl_thread *thr = NULL;
-#endif /* FAKE_THREADS */
-#endif /* USE_5005THREADS */
-
 #ifdef MULTIPLICITY
     init_interp();
     PL_perl_destruct_level = 1;
@@ -172,27 +155,6 @@ perl_construct(pTHXx)
 
    /* Init the real globals (and main thread)? */
     if (!PL_linestr) {
-#ifdef USE_5005THREADS
-	MUTEX_INIT(&PL_sv_mutex);
-	/*
-	 * Safe to use basic SV functions from now on (though
-	 * not things like mortals or tainting yet).
-	 */
-	MUTEX_INIT(&PL_eval_mutex);
-	COND_INIT(&PL_eval_cond);
-	MUTEX_INIT(&PL_threads_mutex);
-	COND_INIT(&PL_nthreads_cond);
-#  ifdef EMULATE_ATOMIC_REFCOUNTS
-	MUTEX_INIT(&PL_svref_mutex);
-#  endif /* EMULATE_ATOMIC_REFCOUNTS */
-	
-	MUTEX_INIT(&PL_cred_mutex);
-	MUTEX_INIT(&PL_sv_lock_mutex);
-	MUTEX_INIT(&PL_fdpid_mutex);
-
-	thr = init_main_thread();
-#endif /* USE_5005THREADS */
-
 #ifdef PERL_FLEXIBLE_EXCEPTIONS
 	PL_protect = MEMBER_TO_FPTR(Perl_default_protect); /* for exceptions */
 #endif
@@ -292,9 +254,6 @@ perl_construct(pTHXx)
        It is properly deallocated in perl_destruct() */
     PL_strtab = newHV();
 
-#ifdef USE_5005THREADS
-    MUTEX_INIT(&PL_strtab_mutex);
-#endif
     HvSHAREKEYS_off(PL_strtab);			/* mandatory */
     hv_ksplit(PL_strtab, 512);
 
@@ -347,83 +306,11 @@ perl_destruct(pTHXx)
     volatile int destruct_level;  /* 0=none, 1=full, 2=full with checks */
     HV *hv;
 #ifdef USE_5005THREADS
-    Thread t;
     dTHX;
 #endif /* USE_5005THREADS */
 
     /* wait for all pseudo-forked children to finish */
     PERL_WAIT_FOR_CHILDREN;
-
-#ifdef USE_5005THREADS
-#ifndef FAKE_THREADS
-    /* Pass 1 on any remaining threads: detach joinables, join zombies */
-  retry_cleanup:
-    MUTEX_LOCK(&PL_threads_mutex);
-    DEBUG_S(PerlIO_printf(Perl_debug_log,
-			  "perl_destruct: waiting for %d threads...\n",
-			  PL_nthreads - 1));
-    for (t = thr->next; t != thr; t = t->next) {
-	MUTEX_LOCK(&t->mutex);
-	switch (ThrSTATE(t)) {
-	    AV *av;
-	case THRf_ZOMBIE:
-	    DEBUG_S(PerlIO_printf(Perl_debug_log,
-				  "perl_destruct: joining zombie %p\n", t));
-	    ThrSETSTATE(t, THRf_DEAD);
-	    MUTEX_UNLOCK(&t->mutex);
-	    PL_nthreads--;
-	    /*
-	     * The SvREFCNT_dec below may take a long time (e.g. av
-	     * may contain an object scalar whose destructor gets
-	     * called) so we have to unlock threads_mutex and start
-	     * all over again.
-	     */
-	    MUTEX_UNLOCK(&PL_threads_mutex);
-	    JOIN(t, &av);
-	    SvREFCNT_dec((SV*)av);
-	    DEBUG_S(PerlIO_printf(Perl_debug_log,
-				  "perl_destruct: joined zombie %p OK\n", t));
-	    goto retry_cleanup;
-	case THRf_R_JOINABLE:
-	    DEBUG_S(PerlIO_printf(Perl_debug_log,
-				  "perl_destruct: detaching thread %p\n", t));
-	    ThrSETSTATE(t, THRf_R_DETACHED);
-	    /*
-	     * We unlock threads_mutex and t->mutex in the opposite order
-	     * from which we locked them just so that DETACH won't
-	     * deadlock if it panics. It's only a breach of good style
-	     * not a bug since they are unlocks not locks.
-	     */
-	    MUTEX_UNLOCK(&PL_threads_mutex);
-	    DETACH(t);
-	    MUTEX_UNLOCK(&t->mutex);
-	    goto retry_cleanup;
-	default:
-	    DEBUG_S(PerlIO_printf(Perl_debug_log,
-				  "perl_destruct: ignoring %p (state %u)\n",
-				  t, ThrSTATE(t)));
-	    MUTEX_UNLOCK(&t->mutex);
-	    /* fall through and out */
-	}
-    }
-    /* We leave the above "Pass 1" loop with threads_mutex still locked */
-
-    /* Pass 2 on remaining threads: wait for the thread count to drop to one */
-    while (PL_nthreads > 1)
-    {
-	DEBUG_S(PerlIO_printf(Perl_debug_log,
-			      "perl_destruct: final wait for %d threads\n",
-			      PL_nthreads - 1));
-	COND_WAIT(&PL_nthreads_cond, &PL_threads_mutex);
-    }
-    /* At this point, we're the last thread */
-    MUTEX_UNLOCK(&PL_threads_mutex);
-    DEBUG_S(PerlIO_printf(Perl_debug_log, "perl_destruct: armageddon has arrived\n"));
-    MUTEX_DESTROY(&PL_threads_mutex);
-    COND_DESTROY(&PL_nthreads_cond);
-    PL_nthreads--;
-#endif /* !defined(FAKE_THREADS) */
-#endif /* USE_5005THREADS */
 
     destruct_level = PL_perl_destruct_level;
 #ifdef DEBUGGING
@@ -462,8 +349,7 @@ perl_destruct(pTHXx)
 
     /* Destroy the main CV and syntax tree */
     if (PL_main_root) {
-        /* If running under -d may not have PL_comppad. */
-        PL_curpad = PL_comppad ? AvARRAY(PL_comppad) : NULL;
+	PAD_UPDATE_CURPAD;
 	op_free(PL_main_root);
 	PL_main_root = Nullop;
     }
@@ -894,23 +780,6 @@ perl_destruct(pTHXx)
     PL_hints = 0;		/* Reset hints. Should hints be per-interpreter ? */
 
     DEBUG_P(debprofdump());
-#ifdef USE_5005THREADS
-    MUTEX_DESTROY(&PL_strtab_mutex);
-    MUTEX_DESTROY(&PL_sv_mutex);
-    MUTEX_DESTROY(&PL_eval_mutex);
-    MUTEX_DESTROY(&PL_cred_mutex);
-    MUTEX_DESTROY(&PL_fdpid_mutex);
-    COND_DESTROY(&PL_eval_cond);
-#ifdef EMULATE_ATOMIC_REFCOUNTS
-    MUTEX_DESTROY(&PL_svref_mutex);
-#endif /* EMULATE_ATOMIC_REFCOUNTS */
-
-    /* As the penultimate thing, free the non-arena SV for thrsv */
-    Safefree(SvPVX(PL_thrsv));
-    Safefree(SvANY(PL_thrsv));
-    Safefree(PL_thrsv);
-    PL_thrsv = Nullsv;
-#endif /* USE_5005THREADS */
 
 #ifdef USE_REENTRANT_API
     Perl_reentrant_free(aTHX);
@@ -1040,7 +909,7 @@ setuid perl scripts securely.\n");
     }
 
     if (PL_main_root) {
-	PL_curpad = AvARRAY(PL_comppad);
+	PAD_UPDATE_CURPAD;
 	op_free(PL_main_root);
 	PL_main_root = Nullop;
     }
@@ -1108,7 +977,6 @@ S_parse_body(pTHX_ char **env, XSINIT_t xsinit)
     int fdscript = -1;
     VOL bool dosearch = FALSE;
     char *validarg = "";
-    AV* comppadlist;
     register SV *sv;
     register char *s;
     char *cddir = Nullch;
@@ -1341,6 +1209,7 @@ print \"  \\@INC:\\n    @INC\\n\";");
 	}
     }
   switch_end:
+    sv_setsv(get_sv("/", TRUE), PL_rs);
 
     if (
 #ifndef SECURE_INTERNAL_GETENV
@@ -1450,27 +1319,12 @@ print \"  \\@INC:\\n    @INC\\n\";");
     sv_upgrade((SV *)PL_compcv, SVt_PVCV);
     CvUNIQUE_on(PL_compcv);
 
-    PL_comppad = newAV();
-    av_push(PL_comppad, Nullsv);
-    PL_curpad = AvARRAY(PL_comppad);
-    PL_comppad_name = newAV();
-    PL_comppad_name_fill = 0;
-    PL_min_intro_pending = 0;
-    PL_padix = 0;
+    CvPADLIST(PL_compcv) = pad_new(0);
 #ifdef USE_5005THREADS
-    av_store(PL_comppad_name, 0, newSVpvn("@_", 2));
-    PL_curpad[0] = (SV*)newAV();
-    SvPADMY_on(PL_curpad[0]);	/* XXX Needed? */
     CvOWNER(PL_compcv) = 0;
     New(666, CvMUTEXP(PL_compcv), 1, perl_mutex);
     MUTEX_INIT(CvMUTEXP(PL_compcv));
 #endif /* USE_5005THREADS */
-
-    comppadlist = newAV();
-    AvREAL_off(comppadlist);
-    av_store(comppadlist, 0, (SV*)PL_comppad_name);
-    av_store(comppadlist, 1, (SV*)PL_comppad);
-    CvPADLIST(PL_compcv) = comppadlist;
 
     boot_core_PerlIO();
     boot_core_UNIVERSAL();
@@ -1526,7 +1380,7 @@ print \"  \\@INC:\\n    @INC\\n\";");
 
     /* now parse the script */
 
-    SETERRNO(0,SS$_NORMAL);
+    SETERRNO(0,SS_NORMAL);
     PL_error_count = 0;
 #ifdef MACOS_TRADITIONAL
     if (gMacPerl_SyntaxError = (yyparse() || PL_error_count)) {
@@ -1554,12 +1408,6 @@ print \"  \\@INC:\\n    @INC\\n\";");
 	SvREFCNT_dec(PL_e_script);
 	PL_e_script = Nullsv;
     }
-
-/*
-   Not sure that this is still the right place to do this now that we
-   no longer use PL_nrs. HVDS 2001/09/09
-*/
-    sv_setsv(get_sv("/", TRUE), PL_rs);
 
     if (PL_do_undump)
 	my_unexec();
@@ -2360,7 +2208,7 @@ Perl_moreswitches(pTHX_ char *s)
 	forbid_setid("-D");
 	if (isALPHA(s[1])) {
 	    /* if adding extra options, remember to update DEBUG_MASK */
-	    static char debopts[] = "psltocPmfrxuLHXDSTRJvC";
+	    static char debopts[] = "psltocPmfrxu HXDSTRJvC";
 	    char *d;
 
 	    for (s++; *s && (d = strchr(debopts,*s)); s++)
@@ -2777,7 +2625,6 @@ S_init_main_stash(pTHX)
     CopSTASH_set(&PL_compiling, PL_defstash);
     PL_debstash = GvHV(gv_fetchpv("DB::", GV_ADDMULTI, SVt_PVHV));
     PL_globalstash = GvHV(gv_fetchpv("CORE::GLOBAL::", GV_ADDMULTI, SVt_PVHV));
-    PL_nullstash = GvHV(gv_fetchpv("<none>::", GV_ADDMULTI, SVt_PVHV));
     /* We must init $/ before switches are processed. */
     sv_setpvn(get_sv("/", TRUE), "\n", 1);
 }

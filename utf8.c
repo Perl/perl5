@@ -1542,6 +1542,7 @@ Perl_swash_init(pTHX_ char* pkg, char* name, SV *listsv, I32 minbits, I32 none)
     if (PL_curcop == &PL_compiling) {
 	/* XXX ought to be handled by lex_start */
 	SAVEI32(PL_in_my);
+	PL_in_my = 0;
 	sv_setpv(tokenbufsv, PL_tokenbuf);
     }
     errsv_save = newSVsv(ERRSV);

@@ -164,6 +164,7 @@ sub canonpath {
       $path =~ s/([\[<])(-+)/$1 . "\cx" x length($2)/e; # encode leading '-'s
       $path =~ s/([\[<\.])([^\[<\.\cx]+)\.-\.?/$1/g;    # bar.-.foo       ==> foo
       $path =~ s/([\[<])(\cx+)/$1 . '-' x length($2)/e; # then decode
+      $path =~ s/^[\[<\]>]{2}//;                        # []foo           ==> foo
       return $path;
     }
 }
@@ -211,7 +212,7 @@ VMS-syntax file specification.
 
 sub catfile {
     my ($self,@files) = @_;
-    my $file = pop @files;
+    my $file = $self->canonpath(pop @files);
     @files = grep($_,@files);
     my $rslt;
     if (@files) {

@@ -1,4 +1,4 @@
-#!./perl
+#!./perl -T
 
 BEGIN {
     chdir 't' if -d 't';
@@ -12,7 +12,7 @@ BEGIN {
 
 use Devel::Peek;
 
-print "1..19\n";
+print "1..21\n";
 
 our $DEBUG = 0;
 open(SAVERR, ">&STDERR") or die "Can't dup STDERR: $!";
@@ -31,7 +31,7 @@ sub do_test {
 	    print $pattern, "\n" if $DEBUG;
 	    my $dump = <IN>;
 	    print $dump, "\n"    if $DEBUG;
-	    print "[$dump] vs [$pattern]\nnot " unless $dump =~ /$pattern/ms;
+	    print "[$dump] vs [$pattern]\nnot " unless $dump =~ /\A$pattern\Z/ms;
 	    print "ok $_[0]\n";
 	    close(IN);
             return $1;
@@ -222,6 +222,7 @@ do_test(13,
     OWNER = $ADDR
 )?    FLAGS = 0x4
     PADLIST = $ADDR
+    PADNAME = $ADDR\\($ADDR\\) PAD = $ADDR\\($ADDR\\)
     OUTSIDE = $ADDR \\(MAIN\\)');
 
 do_test(14,
@@ -247,9 +248,10 @@ do_test(14,
     OWNER = $ADDR
 )?    FLAGS = 0x0
     PADLIST = $ADDR
-      \\d+\\. $ADDR \\("\\$pattern" \\d+-\\d+\\)
-     \\d+\\. $ADDR \\(FAKE "\\$DEBUG" 0-\\d+\\)
-     \\d+\\. $ADDR \\("\\$dump" \\d+-\\d+\\)
+    PADNAME = $ADDR\\($ADDR\\) PAD = $ADDR\\($ADDR\\)
+       \\d+\\. $ADDR<\\d+>      \\(\\d+,\\d+\\) "\\$pattern"
+      \\d+\\. $ADDR<\\d+> FAKE \\(\\d+,\\d+\\) "\\$DEBUG"
+      \\d+\\. $ADDR<\\d+>      \\(\\d+,\\d+\\) "\\$dump"
     OUTSIDE = $ADDR \\(MAIN\\)');
 
 do_test(15,
@@ -391,6 +393,49 @@ do_test(19,
       CUR = 2
       LEN = \\d+');
 }
+
+my $x="";
+$x=~/.??/g;
+do_test(20,
+        $x,
+'SV = PVMG\\($ADDR\\) at $ADDR
+  REFCNT = 1
+  FLAGS = \\(PADBUSY,PADMY,SMG,POK,pPOK\\)
+  IV = 0
+  NV = 0
+  PV = $ADDR ""\\\0
+  CUR = 0
+  LEN = 1
+  MAGIC = $ADDR
+    MG_VIRTUAL = &PL_vtbl_mglob
+    MG_TYPE = PERL_MAGIC_regex_global\\(g\\)
+    MG_FLAGS = 0x01
+      MINMATCH');
+
+#
+# TAINTEDDIR is not set on: OS2, AMIGAOS, WIN32, MSDOS
+# environment variables may be invisibly case-forced, hence the (?i:PATH)
+#
+do_test(21,
+        $ENV{PATH}=@ARGV,  # scalar(@ARGV) is a handy known tainted value
+'SV = PVMG\\($ADDR\\) at $ADDR
+  REFCNT = 1
+  FLAGS = \\(GMG,SMG,RMG,pIOK,pPOK\\)
+  IV = 0
+  NV = 0
+  PV = $ADDR "0"\\\0
+  CUR = 1
+  LEN = \d+
+  MAGIC = $ADDR
+    MG_VIRTUAL = &PL_vtbl_envelem
+    MG_TYPE = PERL_MAGIC_envelem\\(e\\)
+(?:    MG_FLAGS = 0x01
+      TAINTEDDIR
+)?    MG_LEN = 4
+    MG_PTR = $ADDR "(?i:PATH)"
+  MAGIC = $ADDR
+    MG_VIRTUAL = &PL_vtbl_taint
+    MG_TYPE = PERL_MAGIC_taint\\(t\\)');
 
 END {
   1 while unlink("peek$$");

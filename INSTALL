@@ -712,6 +712,14 @@ If you decide to use ithreads, the 'threads' module allows their use,
 and the 'Thread' module offers an interface to both 5005threads and
 ithreads (whichever has been configured).
 
+When building threaded for certain library calls like the getgr*() and
+the getpw*() there is a dynamically sized result buffer: the buffer
+starts small but Perl will keep growing the buffer until the result fits.
+To get a fixed upper limit you will have to recompile Perl with
+PERL_REENTRANT_MAXSIZE defined to be the number of bytes you want.
+One way to do this is to run Configure with
+C<-Accflags=-DPERL_REENTRANT_MAXSIZE=65536>
+
 =head2 Large file support.
 
 Since Perl 5.6.0, Perl has supported large files (files larger than

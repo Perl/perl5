@@ -125,34 +125,10 @@ perform the upgrade if necessary.  See C<svtype>.
 #define SvFLAGS(sv)	(sv)->sv_flags
 #define SvREFCNT(sv)	(sv)->sv_refcnt
 
-#ifdef USE_5005THREADS
+#define ATOMIC_INC(count) (++count)
+#define ATOMIC_DEC_AND_TEST(res, count) (res = (--count == 0))
 
-#  if defined(VMS)
-#    define ATOMIC_INC(count) __ATOMIC_INCREMENT_LONG(&count)
-#    define ATOMIC_DEC_AND_TEST(res,count) res=(1==__ATOMIC_DECREMENT_LONG(&count))
- #  else
-#    ifdef EMULATE_ATOMIC_REFCOUNTS
- #      define ATOMIC_INC(count) STMT_START {	\
-	  MUTEX_LOCK(&PL_svref_mutex);		\
-	  ++count;				\
-	  MUTEX_UNLOCK(&PL_svref_mutex);		\
-       } STMT_END
-#      define ATOMIC_DEC_AND_TEST(res,count) STMT_START {	\
-	  MUTEX_LOCK(&PL_svref_mutex);			\
-	  res = (--count == 0);				\
-	  MUTEX_UNLOCK(&PL_svref_mutex);			\
-       } STMT_END
-#    else
-#      define ATOMIC_INC(count) atomic_inc(&count)
-#      define ATOMIC_DEC_AND_TEST(res,count) (res = atomic_dec_and_test(&count))
-#    endif /* EMULATE_ATOMIC_REFCOUNTS */
-#  endif /* VMS */
-#else
-#  define ATOMIC_INC(count) (++count)
-#  define ATOMIC_DEC_AND_TEST(res, count) (res = (--count == 0))
-#endif /* USE_5005THREADS */
-
-#ifdef __GNUC__
+#if defined(__GNUC__) && !defined(__STRICT_ANSI__) && !defined(PERL_GCC_PEDANTIC)
 #  define SvREFCNT_inc(sv)		\
     ({					\
 	SV *nsv = (SV*)(sv);		\
@@ -161,17 +137,8 @@ perform the upgrade if necessary.  See C<svtype>.
 	nsv;				\
     })
 #else
-#  ifdef USE_5005THREADS
-#    if defined(VMS) && defined(__ALPHA)
-#      define SvREFCNT_inc(sv) \
-          (PL_Sv=(SV*)(sv), (PL_Sv && __ATOMIC_INCREMENT_LONG(&(SvREFCNT(PL_Sv)))), (SV *)PL_Sv)
-#    else
-#      define SvREFCNT_inc(sv) sv_newref((SV*)sv)
-#    endif
-#  else
-#    define SvREFCNT_inc(sv)	\
+#  define SvREFCNT_inc(sv)	\
 	((PL_Sv=(SV*)(sv)), (PL_Sv && ATOMIC_INC(SvREFCNT(PL_Sv))), (SV*)PL_Sv)
-#  endif
 #endif
 
 #define SvREFCNT_dec(sv)	sv_free((SV*)(sv))
@@ -350,10 +317,6 @@ struct xpvfm {
     long	xcv_depth;	/* >= 2 indicates recursive call */
     AV *	xcv_padlist;
     CV *	xcv_outside;
-#ifdef USE_5005THREADS
-    perl_mutex *xcv_mutexp;	/* protects xcv_owner */
-    struct perl_thread *xcv_owner;	/* current owner thread */
-#endif /* USE_5005THREADS */
     cv_flags_t	xcv_flags;
 
     IV		xfm_lines;
@@ -1000,7 +963,7 @@ otherwise.
 #define SvPVutf8x_force(sv, lp) sv_pvutf8n_force(sv, &lp)
 #define SvPVbytex_force(sv, lp) sv_pvbyten_force(sv, &lp)
 
-#ifdef __GNUC__
+#if defined(__GNUC__) && !defined(__STRICT_ANSI__) && !defined(PERL_GCC_PEDANTIC)
 
 #  define SvIVx(sv) ({SV *nsv = (SV*)(sv); SvIV(nsv); })
 #  define SvUVx(sv) ({SV *nsv = (SV*)(sv); SvUV(nsv); })
@@ -1028,28 +991,16 @@ otherwise.
 
 #else /* __GNUC__ */
 
-#  ifdef USE_5005THREADS
-#    define SvIVx(sv) sv_iv(sv)
-#    define SvUVx(sv) sv_uv(sv)
-#    define SvNVx(sv) sv_nv(sv)
-#    define SvPVx(sv, lp) sv_pvn(sv, &lp)
-#    define SvPVutf8x(sv, lp) sv_pvutf8n(sv, &lp)
-#    define SvPVbytex(sv, lp) sv_pvbyten(sv, &lp)
-#    define SvTRUE(sv) SvTRUEx(sv)
-#    define SvTRUEx(sv) sv_true(sv)
-
-#  else /* USE_5005THREADS */
-
 /* These inlined macros use globals, which will require a thread
  * declaration in user code, so we avoid them under threads */
 
-#    define SvIVx(sv) ((PL_Sv = (sv)), SvIV(PL_Sv))
-#    define SvUVx(sv) ((PL_Sv = (sv)), SvUV(PL_Sv))
-#    define SvNVx(sv) ((PL_Sv = (sv)), SvNV(PL_Sv))
-#    define SvPVx(sv, lp) ((PL_Sv = (sv)), SvPV(PL_Sv, lp))
-#    define SvPVutf8x(sv, lp) ((PL_Sv = (sv)), SvPVutf8(PL_Sv, lp))
-#    define SvPVbytex(sv, lp) ((PL_Sv = (sv)), SvPVbyte(PL_Sv, lp))
-#    define SvTRUE(sv) (						\
+#  define SvIVx(sv) ((PL_Sv = (sv)), SvIV(PL_Sv))
+#  define SvUVx(sv) ((PL_Sv = (sv)), SvUV(PL_Sv))
+#  define SvNVx(sv) ((PL_Sv = (sv)), SvNV(PL_Sv))
+#  define SvPVx(sv, lp) ((PL_Sv = (sv)), SvPV(PL_Sv, lp))
+#  define SvPVutf8x(sv, lp) ((PL_Sv = (sv)), SvPVutf8(PL_Sv, lp))
+#  define SvPVbytex(sv, lp) ((PL_Sv = (sv)), SvPVbyte(PL_Sv, lp))
+#  define SvTRUE(sv) (						\
     !sv								\
     ? 0								\
     :    SvPOK(sv)						\
@@ -1064,8 +1015,7 @@ otherwise.
 	    :   SvNOK(sv)					\
 		? SvNVX(sv) != 0.0				\
 		: sv_2bool(sv) )
-#    define SvTRUEx(sv) ((PL_Sv = (sv)), SvTRUE(PL_Sv))
-#  endif /* USE_5005THREADS */
+#  define SvTRUEx(sv) ((PL_Sv = (sv)), SvTRUE(PL_Sv))
 #endif /* __GNU__ */
 
 #define SvIsCOW(sv)		((SvFLAGS(sv) & (SVf_FAKE | SVf_READONLY)) == \

@@ -3401,6 +3401,10 @@ failures are expected:
 
 NDBM_File fails and ODBM_File just coredumps.
 
+If you intend to run only on FAT (or if using AnyDBM_File on FAT),
+run Configure with the -Ui_ndbm and -Ui_dbm options to prevent
+NDBM_File and ODBM_File being built.
+
 =head2 DJGPP Failures
 
  t/op/stat............................FAILED at test 29

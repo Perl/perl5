@@ -1273,7 +1273,7 @@ S_scan_const(pTHX_ char *start)
 
                 if (min > max) {
 		    Perl_croak(aTHX_
-			       "Invalid [] range \"%c-%c\" in transliteration operator",
+			       "Invalid range \"%c-%c\" in transliteration operator",
 			       (char)min, (char)max);
                 }
 
@@ -1963,7 +1963,7 @@ S_incl_perldb(pTHX)
 
 	if (pdb)
 	    return pdb;
-	SETERRNO(0,SS$_NORMAL);
+	SETERRNO(0,SS_NORMAL);
 	return "BEGIN { require 'perl5db.pl' }";
     }
     return "";
@@ -2322,13 +2322,7 @@ Perl_yylex(pTHX)
 	if (PL_lex_dojoin) {
 	    PL_nextval[PL_nexttoke].ival = 0;
 	    force_next(',');
-#ifdef USE_5005THREADS
-	    PL_nextval[PL_nexttoke].opval = newOP(OP_THREADSV, 0);
-	    PL_nextval[PL_nexttoke].opval->op_targ = find_threadsv("\"");
-	    force_next(PRIVATEREF);
-#else
 	    force_ident("\"", '$');
-#endif /* USE_5005THREADS */
 	    PL_nextval[PL_nexttoke].ival = 0;
 	    force_next('$');
 	    PL_nextval[PL_nexttoke].ival = 0;
@@ -3802,6 +3796,7 @@ Perl_yylex(pTHX)
     case 'z': case 'Z':
 
       keylookup: {
+	I32 orig_keyword = 0;
 	gv = Nullgv;
 	gvp = 0;
 
@@ -3866,6 +3861,7 @@ Perl_yylex(pTHX)
 		}
 	    }
 	    if (ogv) {
+		orig_keyword = tmp;
 		tmp = 0;		/* overridden by import or by GLOBAL */
 	    }
 	    else if (gv && !gvp
@@ -4041,7 +4037,9 @@ Perl_yylex(pTHX)
 
 		/* If followed by a bareword, see if it looks like indir obj. */
 
-		if ((isIDFIRST_lazy_if(s,UTF) || *s == '$') && (tmp = intuit_method(s,gv)))
+		if (!orig_keyword
+			&& (isIDFIRST_lazy_if(s,UTF) || *s == '$')
+			&& (tmp = intuit_method(s,gv)))
 		    return tmp;
 
 		/* Not a method, so call it a subroutine (if defined) */
@@ -5257,14 +5255,14 @@ S_pending_ident(pTHX)
                 yyerror(Perl_form(aTHX_ "No package name allowed for "
                                   "variable %s in \"our\"",
                                   PL_tokenbuf));
-            tmp = pad_allocmy(PL_tokenbuf);
+            tmp = allocmy(PL_tokenbuf);
         }
         else {
             if (strchr(PL_tokenbuf,':'))
                 yyerror(Perl_form(aTHX_ PL_no_myglob,PL_tokenbuf));
 
             yylval.opval = newOP(OP_PADANY, 0);
-            yylval.opval->op_targ = pad_allocmy(PL_tokenbuf);
+            yylval.opval->op_targ = allocmy(PL_tokenbuf);
             return PRIVATEREF;
         }
     }
@@ -5282,23 +5280,11 @@ S_pending_ident(pTHX)
     */
 
     if (!strchr(PL_tokenbuf,':')) {
-#ifdef USE_5005THREADS
-        /* Check for single character per-thread SVs */
-        if (PL_tokenbuf[0] == '$' && PL_tokenbuf[2] == '\0'
-            && !isALPHA(PL_tokenbuf[1]) /* Rule out obvious non-threadsvs */
-            && (tmp = find_threadsv(&PL_tokenbuf[1])) != NOT_IN_PAD)
-        {
-            yylval.opval = newOP(OP_THREADSV, 0);
-            yylval.opval->op_targ = tmp;
-            return PRIVATEREF;
-        }
-#endif /* USE_5005THREADS */
         if ((tmp = pad_findmy(PL_tokenbuf)) != NOT_IN_PAD) {
-            SV *namesv = AvARRAY(PL_comppad_name)[tmp];
             /* might be an "our" variable" */
-            if (SvFLAGS(namesv) & SVpad_OUR) {
+            if (PAD_COMPNAME_FLAGS(tmp) & SVpad_OUR) {
                 /* build ops for a bareword */
-                SV *sym = newSVpv(HvNAME(GvSTASH(namesv)),0);
+                SV *sym = newSVpv(HvNAME(PAD_COMPNAME_OURSTASH(tmp)), 0);
                 sv_catpvn(sym, "::", 2);
                 sv_catpv(sym, PL_tokenbuf+1);
                 yylval.opval = (OP*)newSVOP(OP_CONST, 0, sym);
@@ -6777,9 +6763,9 @@ S_scan_inputsymbol(pTHX_ char *start)
 	       add symbol table ops
 	    */
 	    if ((tmp = pad_findmy(d)) != NOT_IN_PAD) {
-		SV *namesv = AvARRAY(PL_comppad_name)[tmp];
-		if (SvFLAGS(namesv) & SVpad_OUR) {
-		    SV *sym = sv_2mortal(newSVpv(HvNAME(GvSTASH(namesv)),0));
+		if (PAD_COMPNAME_FLAGS(tmp) & SVpad_OUR) {
+		    SV *sym = sv_2mortal(
+			    newSVpv(HvNAME(PAD_COMPNAME_OURSTASH(tmp)),0));
 		    sv_catpvn(sym, "::", 2);
 		    sv_catpv(sym, d+1);
 		    d = SvPVX(sym);
@@ -7557,52 +7543,21 @@ Perl_start_subparse(pTHX_ I32 is_format, U32 flags)
 {
     I32 oldsavestack_ix = PL_savestack_ix;
     CV* outsidecv = PL_compcv;
-    AV* comppadlist;
 
     if (PL_compcv) {
 	assert(SvTYPE(PL_compcv) == SVt_PVCV);
     }
     SAVEI32(PL_subline);
     save_item(PL_subname);
-    SAVEI32(PL_padix);
-    SAVECOMPPAD();
-    SAVESPTR(PL_comppad_name);
     SAVESPTR(PL_compcv);
-    SAVEI32(PL_comppad_name_fill);
-    SAVEI32(PL_min_intro_pending);
-    SAVEI32(PL_max_intro_pending);
-    SAVEI32(PL_pad_reset_pending);
 
     PL_compcv = (CV*)NEWSV(1104,0);
     sv_upgrade((SV *)PL_compcv, is_format ? SVt_PVFM : SVt_PVCV);
     CvFLAGS(PL_compcv) |= flags;
 
-    PL_comppad = newAV();
-    av_push(PL_comppad, Nullsv);
-    PL_curpad = AvARRAY(PL_comppad);
-    PL_comppad_name = newAV();
-    PL_comppad_name_fill = 0;
-    PL_min_intro_pending = 0;
-    PL_padix = 0;
     PL_subline = CopLINE(PL_curcop);
-#ifdef USE_5005THREADS
-    av_store(PL_comppad_name, 0, newSVpvn("@_", 2));
-    PL_curpad[0] = (SV*)newAV();
-    SvPADMY_on(PL_curpad[0]);	/* XXX Needed? */
-#endif /* USE_5005THREADS */
-
-    comppadlist = newAV();
-    AvREAL_off(comppadlist);
-    av_store(comppadlist, 0, (SV*)PL_comppad_name);
-    av_store(comppadlist, 1, (SV*)PL_comppad);
-
-    CvPADLIST(PL_compcv) = comppadlist;
+    CvPADLIST(PL_compcv) = pad_new(padnew_SAVE|padnew_SAVESUB);
     CvOUTSIDE(PL_compcv) = (CV*)SvREFCNT_inc(outsidecv);
-#ifdef USE_5005THREADS
-    CvOWNER(PL_compcv) = 0;
-    New(666, CvMUTEXP(PL_compcv), 1, perl_mutex);
-    MUTEX_INIT(CvMUTEXP(PL_compcv));
-#endif /* USE_5005THREADS */
 
     return oldsavestack_ix;
 }

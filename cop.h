@@ -107,14 +107,12 @@ struct block_sub {
     CV *	cv;
     GV *	gv;
     GV *	dfoutgv;
-#ifndef USE_5005THREADS
     AV *	savearray;
-#endif /* USE_5005THREADS */
     AV *	argarray;
     long	olddepth;
     U8		hasargs;
     U8		lval;		/* XXX merge lval and hasargs? */
-    SV **	oldcurpad;
+    PAD		oldcurpad;
 };
 
 #define PUSHSUB(cx)							\
@@ -131,15 +129,11 @@ struct block_sub {
 	cx->blk_sub.dfoutgv = PL_defoutgv;				\
 	(void)SvREFCNT_inc(cx->blk_sub.dfoutgv)
 
-#ifdef USE_5005THREADS
-#  define POP_SAVEARRAY() NOOP
-#else
-#  define POP_SAVEARRAY()						\
+#define POP_SAVEARRAY()						\
     STMT_START {							\
 	SvREFCNT_dec(GvAV(PL_defgv));					\
 	GvAV(PL_defgv) = cx->blk_sub.savearray;				\
     } STMT_END
-#endif /* USE_5005THREADS */
 
 /* junk in @_ spells trouble when cloning CVs and in pp_caller(), so don't
  * leave any (a fast av_clear(ary), basically) */
@@ -161,7 +155,7 @@ struct block_sub {
 		cx->blk_sub.argarray = newAV();				\
 		av_extend(cx->blk_sub.argarray, fill);			\
 		AvFLAGS(cx->blk_sub.argarray) = AVf_REIFY;		\
-		cx->blk_sub.oldcurpad[0] = (SV*)cx->blk_sub.argarray;	\
+		CX_CURPAD_SV(cx->blk_sub, 0) = (SV*)cx->blk_sub.argarray;	\
 	    }								\
 	    else {							\
 		CLEAR_ARGARRAY(cx->blk_sub.argarray);			\
@@ -220,7 +214,7 @@ struct block_loop {
     OP *	last_op;
 #ifdef USE_ITHREADS
     void *	iterdata;
-    SV **	oldcurpad;
+    PAD		oldcurpad;
 #else
     SV **	itervar;
 #endif
@@ -235,11 +229,12 @@ struct block_loop {
 #  define CxITERVAR(c)							\
 	((c)->blk_loop.iterdata						\
 	 ? (CxPADLOOP(cx) 						\
-	    ? &((c)->blk_loop.oldcurpad)[INT2PTR(PADOFFSET, (c)->blk_loop.iterdata)] \
+	    ? &CX_CURPAD_SV( (c)->blk_loop, 				\
+		    INT2PTR(PADOFFSET, (c)->blk_loop.iterdata))		\
 	    : &GvSV((GV*)(c)->blk_loop.iterdata))			\
 	 : (SV**)NULL)
 #  define CX_ITERDATA_SET(cx,idata)					\
-	cx->blk_loop.oldcurpad = PL_curpad;				\
+	CX_CURPAD_SAVE(cx->blk_loop);					\
 	if ((cx->blk_loop.iterdata = (idata)))				\
 	    cx->blk_loop.itersave = SvREFCNT_inc(*CxITERVAR(cx));	\
 	else								\

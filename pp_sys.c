@@ -1206,8 +1206,6 @@ S_doform(pTHX_ CV *cv, GV *gv, OP *retop)
 {
     register PERL_CONTEXT *cx;
     I32 gimme = GIMME_V;
-    AV* padlist = CvPADLIST(cv);
-    SV** svp = AvARRAY(padlist);
 
     ENTER;
     SAVETMPS;
@@ -1215,8 +1213,7 @@ S_doform(pTHX_ CV *cv, GV *gv, OP *retop)
     push_return(retop);
     PUSHBLOCK(cx, CXt_FORMAT, PL_stack_sp);
     PUSHFORMAT(cx);
-    SAVEVPTR(PL_curpad);
-    PL_curpad = AvARRAY((AV*)svp[1]);
+    PAD_SET_CUR(CvPADLIST(cv), 1);
 
     setdefout(gv);	    /* locally select filehandle so $% et al work */
     return CvSTART(cv);
@@ -1447,7 +1444,7 @@ PP(pp_prtf)
     if (!(io = GvIO(gv))) {
 	if (ckWARN2(WARN_UNOPENED,WARN_CLOSED))
 	    report_evil_fh(gv, io, PL_op->op_type);
-	SETERRNO(EBADF,RMS$_IFI);
+	SETERRNO(EBADF,RMS_IFI);
 	goto just_say_no;
     }
     else if (!(fp = IoOFP(io))) {
@@ -1469,7 +1466,7 @@ PP(pp_prtf)
 	    else if (ckWARN(WARN_CLOSED))
 		report_evil_fh(gv, io, PL_op->op_type);
 	}
-	SETERRNO(EBADF,IoIFP(io)?RMS$_FAC:RMS$_IFI);
+	SETERRNO(EBADF,IoIFP(io)?RMS_FAC:RMS_IFI);
 	goto just_say_no;
     }
     else {
@@ -2121,7 +2118,7 @@ PP(pp_truncate)
 	if (result)
 	    RETPUSHYES;
 	if (!errno)
-	    SETERRNO(EBADF,RMS$_IFI);
+	    SETERRNO(EBADF,RMS_IFI);
 	RETPUSHUNDEF;
     }
 #else
@@ -2148,7 +2145,7 @@ PP(pp_ioctl)
     if (!io || !argsv || !IoIFP(io)) {
 	if (ckWARN2(WARN_UNOPENED,WARN_CLOSED))
 	    report_evil_fh(gv, io, PL_op->op_type);
-	SETERRNO(EBADF,RMS$_IFI);	/* well, sort of... */
+	SETERRNO(EBADF,RMS_IFI);	/* well, sort of... */
 	RETPUSHUNDEF;
     }
 
@@ -2236,7 +2233,7 @@ PP(pp_flock)
 	if (ckWARN2(WARN_UNOPENED,WARN_CLOSED))
 	    report_evil_fh(gv, io, PL_op->op_type);
 	value = 0;
-	SETERRNO(EBADF,RMS$_IFI);
+	SETERRNO(EBADF,RMS_IFI);
     }
     PUSHi(value);
     RETURN;
@@ -2266,7 +2263,7 @@ PP(pp_socket)
 	    report_evil_fh(gv, io, PL_op->op_type);
 	if (IoIFP(io))
 	    do_close(gv, FALSE);
-	SETERRNO(EBADF,LIB$_INVARG);
+	SETERRNO(EBADF,LIB_INVARG);
 	RETPUSHUNDEF;
     }
 
@@ -2417,7 +2414,7 @@ PP(pp_bind)
 nuts:
     if (ckWARN(WARN_CLOSED))
 	report_evil_fh(gv, io, PL_op->op_type);
-    SETERRNO(EBADF,SS$_IVCHAN);
+    SETERRNO(EBADF,SS_IVCHAN);
     RETPUSHUNDEF;
 #else
     DIE(aTHX_ PL_no_sock_func, "bind");
@@ -2447,7 +2444,7 @@ PP(pp_connect)
 nuts:
     if (ckWARN(WARN_CLOSED))
 	report_evil_fh(gv, io, PL_op->op_type);
-    SETERRNO(EBADF,SS$_IVCHAN);
+    SETERRNO(EBADF,SS_IVCHAN);
     RETPUSHUNDEF;
 #else
     DIE(aTHX_ PL_no_sock_func, "connect");
@@ -2473,7 +2470,7 @@ PP(pp_listen)
 nuts:
     if (ckWARN(WARN_CLOSED))
 	report_evil_fh(gv, io, PL_op->op_type);
-    SETERRNO(EBADF,SS$_IVCHAN);
+    SETERRNO(EBADF,SS_IVCHAN);
     RETPUSHUNDEF;
 #else
     DIE(aTHX_ PL_no_sock_func, "listen");
@@ -2540,7 +2537,7 @@ PP(pp_accept)
 nuts:
     if (ckWARN(WARN_CLOSED))
 	report_evil_fh(ggv, ggv ? GvIO(ggv) : 0, PL_op->op_type);
-    SETERRNO(EBADF,SS$_IVCHAN);
+    SETERRNO(EBADF,SS_IVCHAN);
 
 badexit:
     RETPUSHUNDEF;
@@ -2567,7 +2564,7 @@ PP(pp_shutdown)
 nuts:
     if (ckWARN(WARN_CLOSED))
 	report_evil_fh(gv, io, PL_op->op_type);
-    SETERRNO(EBADF,SS$_IVCHAN);
+    SETERRNO(EBADF,SS_IVCHAN);
     RETPUSHUNDEF;
 #else
     DIE(aTHX_ PL_no_sock_func, "shutdown");
@@ -2646,7 +2643,7 @@ PP(pp_ssockopt)
 nuts:
     if (ckWARN(WARN_CLOSED))
 	report_evil_fh(gv, io, optype);
-    SETERRNO(EBADF,SS$_IVCHAN);
+    SETERRNO(EBADF,SS_IVCHAN);
 nuts2:
     RETPUSHUNDEF;
 
@@ -2719,7 +2716,7 @@ PP(pp_getpeername)
 nuts:
     if (ckWARN(WARN_CLOSED))
 	report_evil_fh(gv, io, optype);
-    SETERRNO(EBADF,SS$_IVCHAN);
+    SETERRNO(EBADF,SS_IVCHAN);
 nuts2:
     RETPUSHUNDEF;
 
@@ -3325,7 +3322,7 @@ PP(pp_fttext)
 		gv = cGVOP_gv;
 		report_evil_fh(gv, GvIO(gv), PL_op->op_type);
 	    }
-	    SETERRNO(EBADF,RMS$_IFI);
+	    SETERRNO(EBADF,RMS_IFI);
 	    RETPUSHUNDEF;
 	}
     }
@@ -3654,21 +3651,21 @@ S_dooneliner(pTHX_ char *cmd, char *filename)
 #define EACCES EPERM
 #endif
 	    if (instr(s, "cannot make"))
-		SETERRNO(EEXIST,RMS$_FEX);
+		SETERRNO(EEXIST,RMS_FEX);
 	    else if (instr(s, "existing file"))
-		SETERRNO(EEXIST,RMS$_FEX);
+		SETERRNO(EEXIST,RMS_FEX);
 	    else if (instr(s, "ile exists"))
-		SETERRNO(EEXIST,RMS$_FEX);
+		SETERRNO(EEXIST,RMS_FEX);
 	    else if (instr(s, "non-exist"))
-		SETERRNO(ENOENT,RMS$_FNF);
+		SETERRNO(ENOENT,RMS_FNF);
 	    else if (instr(s, "does not exist"))
-		SETERRNO(ENOENT,RMS$_FNF);
+		SETERRNO(ENOENT,RMS_FNF);
 	    else if (instr(s, "not empty"))
-		SETERRNO(EBUSY,SS$_DEVOFFLINE);
+		SETERRNO(EBUSY,SS_DEVOFFLINE);
 	    else if (instr(s, "cannot access"))
-		SETERRNO(EACCES,RMS$_PRV);
+		SETERRNO(EACCES,RMS_PRV);
 	    else
-		SETERRNO(EPERM,RMS$_PRV);
+		SETERRNO(EPERM,RMS_PRV);
 	    return 0;
 	}
 	else {	/* some mkdirs return no failure indication */
@@ -3678,7 +3675,7 @@ S_dooneliner(pTHX_ char *cmd, char *filename)
 	    if (anum)
 		SETERRNO(0,0);
 	    else
-		SETERRNO(EACCES,RMS$_PRV);	/* a guess */
+		SETERRNO(EACCES,RMS_PRV);	/* a guess */
 	}
 	return anum;
     }
@@ -3772,7 +3769,7 @@ PP(pp_open_dir)
     RETPUSHYES;
 nope:
     if (!errno)
-	SETERRNO(EBADF,RMS$_DIR);
+	SETERRNO(EBADF,RMS_DIR);
     RETPUSHUNDEF;
 #else
     DIE(aTHX_ PL_no_dir_func, "opendir");
@@ -3827,7 +3824,7 @@ PP(pp_readdir)
 
 nope:
     if (!errno)
-	SETERRNO(EBADF,RMS$_ISI);
+	SETERRNO(EBADF,RMS_ISI);
     if (GIMME == G_ARRAY)
 	RETURN;
     else
@@ -3858,7 +3855,7 @@ PP(pp_telldir)
     RETURN;
 nope:
     if (!errno)
-	SETERRNO(EBADF,RMS$_ISI);
+	SETERRNO(EBADF,RMS_ISI);
     RETPUSHUNDEF;
 #else
     DIE(aTHX_ PL_no_dir_func, "telldir");
@@ -3881,7 +3878,7 @@ PP(pp_seekdir)
     RETPUSHYES;
 nope:
     if (!errno)
-	SETERRNO(EBADF,RMS$_ISI);
+	SETERRNO(EBADF,RMS_ISI);
     RETPUSHUNDEF;
 #else
     DIE(aTHX_ PL_no_dir_func, "seekdir");
@@ -3902,7 +3899,7 @@ PP(pp_rewinddir)
     RETPUSHYES;
 nope:
     if (!errno)
-	SETERRNO(EBADF,RMS$_ISI);
+	SETERRNO(EBADF,RMS_ISI);
     RETPUSHUNDEF;
 #else
     DIE(aTHX_ PL_no_dir_func, "rewinddir");
@@ -3932,7 +3929,7 @@ PP(pp_closedir)
     RETPUSHYES;
 nope:
     if (!errno)
-	SETERRNO(EBADF,RMS$_IFI);
+	SETERRNO(EBADF,RMS_IFI);
     RETPUSHUNDEF;
 #else
     DIE(aTHX_ PL_no_dir_func, "closedir");

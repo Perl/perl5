@@ -2573,8 +2573,6 @@ $ IF .NOT. Has_socketshr .AND. .NOT. Has_Dec_C_Sockets
 $ THEN
 $   dflt = dflt - "Socket"            ! optional on VMS
 $ ENDIF
-$ IF .NOT. use_ithreads THEN dflt = dflt - "threads/shared"
-$ IF .NOT. use_ithreads THEN dflt = dflt - "threads"
 $ IF .NOT. use_threads  THEN dflt = dflt - "Thread"
 $ dflt = F$EDIT(dflt,"TRIM,COMPRESS")
 $!
@@ -5491,6 +5489,7 @@ $ WC "d_unlink_all_versions='undef'"
 $ WC "d_unordered='undef'"
 $ WC "d_usleep='" + d_usleep + "'"
 $ WC "d_usleepproto='" + d_usleep + "'"
+$ WC "d_nanosleep='undef'"
 $ WC "d_ustat='undef'"
 $ WC "d_vendorarch='undef'"
 $ WC "d_vendorlib='undef'"

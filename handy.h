@@ -516,18 +516,6 @@ typedef U16 line_t;
 
 
 /*
-   XXX LEAKTEST doesn't really work in perl5.  There are direct calls to
-   safemalloc() in the source, so LEAKTEST won't pick them up.
-   (The main "offenders" are extensions.)
-   Further, if you try LEAKTEST, you'll also end up calling
-   Safefree, which might call safexfree() on some things that weren't
-   malloced with safexmalloc.  The correct "fix" to this, if anyone
-   is interested, is to ensure that all calls go through the New and
-   Renew macros.
-	--Andy Dougherty		August 1996
-*/
-
-/*
 =head1 SV Manipulation Functions
 
 =for apidoc Am|SV*|NEWSV|int id|STRLEN len
@@ -589,8 +577,6 @@ hopefully catches attempts to access uninitialized memory.
 
 #define NEWSV(x,len)	newSV(len)
 
-#ifndef LEAKTEST
-
 #define New(x,v,n,t)	(v = (t*)safemalloc((MEM_SIZE)((n)*sizeof(t))))
 #define Newc(x,v,n,t,c)	(v = (c*)safemalloc((MEM_SIZE)((n)*sizeof(t))))
 #define Newz(x,v,n,t)	(v = (t*)safemalloc((MEM_SIZE)((n)*sizeof(t)))), \
@@ -600,28 +586,6 @@ hopefully catches attempts to access uninitialized memory.
 #define Renewc(v,n,t,c) \
 	  (v = (c*)saferealloc((Malloc_t)(v),(MEM_SIZE)((n)*sizeof(t))))
 #define Safefree(d)	safefree((Malloc_t)(d))
-
-#else /* LEAKTEST */
-
-#define New(x,v,n,t)	(v = (t*)safexmalloc((x),(MEM_SIZE)((n)*sizeof(t))))
-#define Newc(x,v,n,t,c)	(v = (c*)safexmalloc((x),(MEM_SIZE)((n)*sizeof(t))))
-#define Newz(x,v,n,t)	(v = (t*)safexmalloc((x),(MEM_SIZE)((n)*sizeof(t)))), \
-			 memzero((char*)(v), (n)*sizeof(t))
-#define Renew(v,n,t) \
-	  (v = (t*)safexrealloc((Malloc_t)(v),(MEM_SIZE)((n)*sizeof(t))))
-#define Renewc(v,n,t,c) \
-	  (v = (c*)safexrealloc((Malloc_t)(v),(MEM_SIZE)((n)*sizeof(t))))
-#define Safefree(d)	safexfree((Malloc_t)(d))
-
-#define MAXXCOUNT 1400
-#define MAXY_SIZE 80
-#define MAXYCOUNT 16			/* (MAXY_SIZE/4 + 1) */
-extern long xcount[MAXXCOUNT];
-extern long lastxcount[MAXXCOUNT];
-extern long xycount[MAXXCOUNT][MAXYCOUNT];
-extern long lastxycount[MAXXCOUNT][MAXYCOUNT];
-
-#endif /* LEAKTEST */
 
 #define Move(s,d,n,t)	(void)memmove((char*)(d),(char*)(s), (n) * sizeof(t))
 #define Copy(s,d,n,t)	(void)memcpy((char*)(d),(char*)(s), (n) * sizeof(t))

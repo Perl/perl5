@@ -1,9 +1,20 @@
 # Revision history for Perl extension Encode.
 #
-# $Id: Changes,v 1.76 2002/08/25 15:09:51 dankogai Exp dankogai $
+# $Id: Changes,v 1.77 2002/10/06 03:27:02 dankogai Exp dankogai $
 #
 
-$Revision: 1.76 $ $Date: 2002/08/25 15:09:51 $
+$Revision: 1.77 $ $Date: 2002/10/06 03:27:02 $
+! t/jperl.t
+  * Modified to accomodate up and comming patch by Inaba-san that
+    will fix tr/// needing eval qq{}
+    Message-Id: <9F78A19C-D6C3-11D6-BAC6-0003939A104C@dan.co.jp>
+! encoding.pm 
+  * pod fixes/enhancements to reflect the changes above
+! lib/Encode/Alias.pm
+  "Encode::TW is correct, Encode::Alias not." - /Autrijus/
+  Message-Id: <20021001015648.GB18710@not.autrijus.org>
+
+1.76 2002/08/25 15:09:51
 ! t/big5-eten.utf
   To reflect ucm change by Autrijus.  t/big5-eten.enc was regenerated
   but naturally identical to previous version -- dankogai
@@ -706,7 +717,7 @@ $Revision: 1.76 $ $Date: 2002/08/25 15:09:51 $
   Typo fixes and improvements by jhi
   Message-Id: <200204010201.FAA03564@alpha.hut.fi>, et al.
 
-1.11  $Date: 2002/08/25 15:09:51 $
+1.11  $Date: 2002/10/06 03:27:02 $
 + t/encoding.t
 + t/jperl.t
 ! MANIFEST

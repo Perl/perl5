@@ -1391,7 +1391,7 @@ Returns C<undef> on failure.
 =item tcflush
 
 This is similar to the C function C<tcflush()> for flushing
-the I/O buffers of its argumeny stream.
+the I/O buffers of its argument stream.
 
 Returns C<undef> on failure.
 

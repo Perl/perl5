@@ -20,7 +20,7 @@
 
 # $Id: Head.U,v 3.0.1.9 1997/02/28 15:02:09 ram Exp $
 #
-# Generated on Fri Sep 13 16:29:01 METDST 2002 [metaconfig 3.0 PL70]
+# Generated on Wed Oct  2 11:55:39 METDST 2002 [metaconfig 3.0 PL70]
 # (with additional metaconfig patches by perlbug@perl.org)
 
 cat >c1$$ <<EOF
@@ -548,6 +548,7 @@ d_msgrcv=''
 d_msgsnd=''
 d_msync=''
 d_munmap=''
+d_nanosleep=''
 d_nice=''
 d_nl_langinfo=''
 d_off64_t=''
@@ -755,6 +756,7 @@ fflushNULL=''
 fflushall=''
 fpossize=''
 fpostype=''
+gccansipedantic=''
 gccosandvers=''
 gccversion=''
 gidformat=''
@@ -764,6 +766,12 @@ gidtype=''
 groupstype=''
 h_fcntl=''
 h_sysfile=''
+html1dir=''
+html1direxp=''
+installhtml1dir=''
+html3dir=''
+html3direxp=''
+installhtml3dir=''
 i_arpainet=''
 i_crypt=''
 db_hashtype=''
@@ -1046,12 +1054,27 @@ sitearchexp=''
 installsitebin=''
 sitebin=''
 sitebinexp=''
+installsitehtml1=''
+sitehtml1=''
+sitehtml1exp=''
+installsitehtml3=''
+sitehtml3=''
+sitehtml3exp=''
 installsitelib=''
 sitelib=''
 sitelib_stem=''
 sitelibexp=''
+installsiteman1=''
+siteman1=''
+siteman1exp=''
+installsiteman3=''
+siteman3=''
+siteman3exp=''
 siteprefix=''
 siteprefixexp=''
+installsitescript=''
+sitescript=''
+sitescriptexp=''
 sizesize=''
 sizetype=''
 so=''
@@ -1104,14 +1127,30 @@ d_vendorbin=''
 installvendorbin=''
 vendorbin=''
 vendorbinexp=''
+installvendorhtml1=''
+vendorhtml1=''
+vendorhtml1exp=''
+installvendorhtml3=''
+vendorhtml3=''
+vendorhtml3exp=''
 d_vendorlib=''
 installvendorlib=''
 vendorlib=''
 vendorlib_stem=''
 vendorlibexp=''
+installvendorman1=''
+vendorman1=''
+vendorman1exp=''
+installvendorman3=''
+vendorman3=''
+vendorman3exp=''
 usevendorprefix=''
 vendorprefix=''
 vendorprefixexp=''
+d_vendorscript=''
+installvendorscript=''
+vendorscript=''
+vendorscriptexp=''
 versiononly=''
 defvoidused=''
 voidflags=''
@@ -1193,6 +1232,9 @@ plibpth=''
 libswanted=''
 : some systems want to use only the non-versioned libso:s
 ignore_versioned_solibs=''
+siteman1=''
+siteman3=''
+sitescript=''
 archname64=''
 ccflags_uselargefiles=''
 ldflags_uselargefiles=''
@@ -2153,9 +2195,10 @@ for dir in \$*; do
 	elif test -f \$dir/\$thing.exe; then
 		if test -n "$DJGPP"; then
 			echo \$dir/\$thing.exe
-		else
+		elif test "$eunicefix" != ":"; then
 			: on Eunice apparently
 			echo \$dir/\$thing
+			exit 0
 		fi
 		exit 0
 	fi
@@ -6402,9 +6445,9 @@ else
 $cat <<EOM
 
 In some special cases, particularly when building $package for distribution,
-it is convenient to distinguish between the directory in which files should 
-be installed from the directory ($prefix) in which they 
-will eventually reside.  For most users, these two directories are the same.
+it is convenient to distinguish the directory in which files should be
+installed from the directory ($prefix) in which they will
+eventually reside.  For most users, these two directories are the same.
 
 EOM
 	case "$installprefix" in
@@ -7308,6 +7351,62 @@ set extras
 eval $setvar
 echo " "
 
+: determine where html pages for programs go
+set html1dir html1dir none
+eval $prefixit
+$cat <<EOM
+
+If you wish to install html files for programs in $spackage, indicate 
+the appropriate directory here.  To skip installing html files,
+answer "none".
+EOM
+case "$html1dir" in
+''|none|$undef|' ') dflt=none ;;
+*) dflt=$html1dir ;;
+esac
+fn=dn+~
+rp="Directory for the main $spackage html pages?"
+. ./getfile
+html1dir="$ans"
+html1direxp="$ansexp"
+: Use ' ' for none so value is preserved next time through Configure
+$test X"$html1dir" = "X" && html1dir=' '
+: Change installation prefix, if necessary.
+if $test X"$prefix" != X"$installprefix"; then
+	installhtml1dir=`echo $html1direxp | sed "s#^$prefix#$installprefix#"`
+else
+	installhtml1dir="$html1direxp"
+fi
+
+: determine where html pages for libraries and modules go
+set html3dir html3dir none
+eval $prefixit
+$cat <<EOM
+
+If you wish to install html files for modules associated with $spackage,
+indicate the appropriate directory here.  To skip installing html files,
+answer "none".
+EOM
+: There is no obvious default.  If they have specified html1dir, then
+: try to key off that, possibly changing .../html1 into .../html3.
+case "$html3dir" in
+'') html3dir=`echo "$html1dir" | $sed 's/1$/3$/'` ;;
+*) dflt=$html3dir ;;
+esac
+fn=dn+~
+rp="Directory for the $spackage module html pages?"
+. ./getfile
+html3dir="$ans"
+html3direxp="$ansexp"
+: Use ' ' for none so value is preserved next time through Configure
+$test X"$html3dir" = "X" && html3dir=' '
+: Change installation prefix, if necessary.
+if $test X"$prefix" != X"$installprefix"; then
+	installhtml3dir=`echo $html3direxp | sed "s#^$prefix#$installprefix#"`
+else
+	installhtml3dir="$html3direxp"
+fi
+
 : Find perl5.005 or later.
 echo "Looking for a previously installed perl5.005 or later... "
 case "$perl5" in
@@ -7432,13 +7531,33 @@ echo " "
 if $test -d /usr/bin -a "X$installbin" != X/usr/bin; then
 	$cat <<EOM
 Many scripts expect perl to be installed as /usr/bin/perl.
-I can install the perl you are about to compile also as /usr/bin/perl
-(in addition to $installbin/perl).
+
+If you want to, I can install the perl you are about to compile
+as /usr/bin/perl (in addition to $bin/perl).
 EOM
-	case "$installusrbinperl" in
-	"$undef"|[nN]*)	dflt='n';;
-	*)		dflt='y';;
-	esac
+	if test -f /usr/bin/perl; then
+	    $cat <<EOM
+
+However, please note that because you already have a /usr/bin/perl,
+overwriting that with a new Perl would very probably cause problems.
+Therefore I'm assuming you don't want to do that (unless you insist).
+
+EOM
+	    case "$installusrbinperl" in
+	    "$define"|[yY]*)	dflt='y';;
+	    *)			dflt='n';;
+	    esac
+	else
+	    $cat <<EOM
+
+Since you don't have a /usr/bin/perl I'm assuming creating one is okay.
+
+EOM
+	    case "$installusrbinperl" in
+	    "$undef"|[nN]*)	dflt='n';;
+	    *)			dflt='y';;
+	    esac
+	fi
 	rp="Do you want to install perl as /usr/bin/perl?"
 	. ./myread
 	case "$ans" in
@@ -8586,6 +8705,116 @@ else
 	installsitebin="$sitebinexp"
 fi
 
+: determine where add-on html pages go
+: There is no standard location, so try to copy the previously-selected 
+: directory structure for the core html pages.
+case "$sitehtml1" in
+'')	dflt=`echo "$html1dir" | $sed "s#^$prefix#$siteprefix#"` ;;
+*)	dflt=$sitehtml1 ;;
+esac
+case "$dflt" in
+''|' ') dflt=none ;;
+esac
+fn=dn+~
+rp='Pathname where the site-specific html pages should be installed?'
+. ./getfile
+sitehtml1="$ans"
+sitehtml1exp="$ansexp"
+: Use ' ' for none so value is preserved next time through Configure
+$test X"$sitehtml1" = "X" && sitehtml1=' '
+: Change installation prefix, if necessary.
+if $test X"$prefix" != X"$installprefix"; then
+	installsitehtml1=`echo "$sitehtml1exp" | $sed "s#^$prefix#$installprefix#"`
+else
+	installsitehtml1="$sitehtml1exp"
+fi
+
+: determine where add-on library html pages go
+: There is no standard location, so try to copy the previously-selected
+: directory structure for the core html pages.
+case "$sitehtml3" in
+'')	dflt=`echo "$html3dir" | $sed "s#^$prefix#$siteprefix#"` ;;
+*)	dflt=$sitehtml3 ;;
+esac
+case "$dflt" in
+''|' ') dflt=none ;;
+esac
+fn=dn+~
+rp='Pathname where the site-specific library html pages should be installed?'
+. ./getfile
+sitehtml3="$ans"
+sitehtml3exp="$ansexp"
+: Use ' ' for none so value is preserved next time through Configure
+$test X"$sitehtml3" = "X" && sitehtml3=' '
+: Change installation prefix, if necessary.
+if $test X"$prefix" != X"$installprefix"; then
+	installsitehtml3=`echo "$sitehtml3exp" | $sed "s#^$prefix#$installprefix#"`
+else
+	installsitehtml3="$sitehtml3exp"
+fi
+
+: determine where add-on manual pages go
+case "$siteman1" in
+'')	dflt=`echo "$man1dir" | $sed "s#^$prefix#$siteprefix#"` ;;
+*)	dflt=$siteman1 ;;
+esac
+case "$dflt" in
+''|' ') dflt=none ;;
+esac
+fn=dn+~
+rp='Pathname where the site-specific manual pages should be installed?'
+. ./getfile
+siteman1="$ans"
+siteman1exp="$ansexp"
+: Use ' ' for none so value is preserved next time through Configure
+$test X"$siteman1" = "X" && siteman1=' '
+: Change installation prefix, if necessary.
+if $test X"$prefix" != X"$installprefix"; then
+	installsiteman1=`echo "$siteman1exp" | $sed "s#^$prefix#$installprefix#"`
+else
+	installsiteman1="$siteman1exp"
+fi
+
+: determine where add-on library man pages go
+case "$siteman3" in
+'')	dflt=`echo "$man3dir" | $sed "s#^$prefix#$siteprefix#"` ;;
+*)	dflt=$siteman3 ;;
+esac
+case "$dflt" in
+''|' ') dflt=none ;;
+esac
+fn=dn+~
+rp='Pathname where the site-specific library manual pages should be installed?'
+. ./getfile
+siteman3="$ans"
+siteman3exp="$ansexp"
+: Use ' ' for none so value is preserved next time through Configure
+$test X"$siteman3" = "X" && siteman3=' '
+: Change installation prefix, if necessary.
+if $test X"$prefix" != X"$installprefix"; then
+	installsiteman3=`echo "$siteman3exp" | $sed "s#^$prefix#$installprefix#"`
+else
+	installsiteman3="$siteman3exp"
+fi
+
+: determine where add-on public executable scripts go
+case "$sitescript" in
+'')	dflt=$siteprefix/script
+	$test -d $dflt || dflt=$sitebin ;;
+*)  dflt="$sitescript" ;;
+esac
+fn=d~+
+rp='Pathname where add-on public executable scripts should be installed?'
+. ./getfile
+sitescript="$ans"
+sitescriptexp="$ansexp"
+: Change installation prefix, if necessary.
+if $test X"$prefix" != X"$installprefix"; then
+	installsitescript=`echo $sitescriptexp | sed "s#^$prefix#$installprefix#"`
+else
+	installsitescript="$sitescriptexp"
+fi
+
 : define an is-a-typedef? function
 typedef='type=$1; var=$2; def=$3; shift; shift; shift; inclist=$@;
 case "$inclist" in
@@ -8843,6 +9072,156 @@ if $test X"$prefix" != X"$installprefix"; then
 	installvendorbin=`echo $vendorbinexp | $sed "s#^$prefix#$installprefix#"`
 else
 	installvendorbin="$vendorbinexp"
+fi
+
+case "$vendorprefix" in
+'')	vendorhtml1=''
+	vendorhtml1exp=''
+	;;
+*)	: determine where vendor-supplied html pages go.
+	: There is no standard location, so try to copy the previously-selected
+	: directory structure for the core html pages.
+	: XXX Better default suggestions would be welcome.
+	case "$vendorhtml1" in
+	'')	dflt=`echo "$html1dir" | $sed "s#^$prefix#$vendorprefix#"` ;;
+	*)	dflt=$vendorhtml1 ;;
+	esac
+	case "$dflt" in
+	''|' ') dflt=none ;;
+	esac
+	fn=dn+~
+	rp='Pathname for the vendor-supplied html pages?'
+	. ./getfile
+	vendorhtml1="$ans"
+	vendorhtml1exp="$ansexp"
+	;;
+esac
+: Use ' ' for none so value is preserved next time through Configure
+$test X"$vendorhtml1" = "X" && vendorhtml1=' '
+: Change installation prefix, if necessary.
+if $test X"$prefix" != X"$installprefix"; then
+	installvendorhtml1=`echo $vendorhtml1exp | $sed "s#^$prefix#$installprefix#"`
+else
+	installvendorhtml1="$vendorhtml1exp"
+fi
+
+case "$vendorprefix" in
+'')	vendorhtml3=''
+	vendorhtml3exp=''
+	;;
+*)	: determine where vendor-supplied module html pages go.
+	: There is no standard location, so try to copy the previously-selected
+	: directory structure for the core html pages.
+	: XXX Better default suggestions would be welcome.
+	case "$vendorhtml3" in
+	'')	dflt=`echo "$html3dir" | $sed "s#^$prefix#$vendorprefix#"` ;;
+	*)	dflt=$vendorhtml3 ;;
+	esac
+	case "$dflt" in
+	''|' ') dflt=none ;;
+	esac
+	fn=dn+~
+	rp='Pathname for the vendor-supplied html pages?'
+	. ./getfile
+	vendorhtml3="$ans"
+	vendorhtml3exp="$ansexp"
+	;;
+esac
+: Use ' ' for none so value is preserved next time through Configure
+$test X"$vendorhtml3" = "X" && vendorhtml3=' '
+: Change installation prefix, if necessary.
+if $test X"$prefix" != X"$installprefix"; then
+	installvendorhtml3=`echo $vendorhtml3exp | $sed "s#^$prefix#$installprefix#"`
+else
+	installvendorhtml3="$vendorhtml3exp"
+fi
+
+case "$vendorprefix" in
+'')	vendorman1=''
+	vendorman1exp=''
+	;;
+*)	: determine where vendor-supplied manual pages go.
+	case "$vendorman1" in
+	'') dflt=`echo "$man1dir" | $sed "s#^$prefix#$vendorprefix#"` ;;
+	*)	dflt=$vendorman1 ;;
+	esac
+	case "$dflt" in
+	''|' ') dflt=none ;;
+	esac
+	fn=nd~+
+	rp='Pathname for the vendor-supplied manual section 1 pages?'
+	. ./getfile
+	vendorman1="$ans"
+	vendorman1exp="$ansexp"
+	;;
+esac
+: Use ' ' for none so value is preserved next time through Configure
+$test X"$vendorman1" = "X" && vendorman1=' '
+: Change installation prefix, if necessary.
+if $test X"$prefix" != X"$installprefix"; then
+	installvendorman1=`echo "$vendorman1exp" | $sed "s#^$prefix#$installprefix#"`
+else
+	installvendorman1="$vendorman1exp"
+fi
+
+case "$vendorprefix" in
+'')	vendorman3=''
+	vendorman3exp=''
+	;;
+*)	: determine where vendor-supplied module manual pages go.
+	case "$vendorman3" in
+	'') dflt=`echo "$man3dir" | $sed "s#^$prefix#$vendorprefix#"` ;;
+	*)	dflt=$vendorman3 ;;
+	esac
+	case "$dflt" in
+	''|' ') dflt=none ;;
+	esac
+	fn=nd~+
+	rp='Pathname for the vendor-supplied manual section 3 pages?'
+	. ./getfile
+	vendorman3="$ans"
+	vendorman3exp="$ansexp"
+	;;
+esac
+: Use ' ' for none so value is preserved next time through Configure
+$test X"$vendorman3" = "X" && vendorman3=' '
+: Change installation prefix, if necessary.
+if $test X"$prefix" != X"$installprefix"; then
+	installvendorman3=`echo "$vendorman3exp" | $sed "s#^$prefix#$installprefix#"`
+else
+	installvendorman3="$vendorman3exp"
+fi
+
+case "$vendorprefix" in
+'')	d_vendorscript="$undef"
+	vendorscript=''
+	vendorscriptexp=''
+	;;
+*)	d_vendorscript="$define"
+	: determine where vendor-supplied scripts go.
+	case "$vendorscript" in
+	'')	dflt=$vendorprefix/script
+		$test -d $dflt || dflt=$vendorbin ;;
+	*)  dflt="$vendorscript" ;;
+	esac
+	$cat <<EOM
+
+The installation process will create a directory for 
+vendor-supplied scripts.
+
+EOM
+	fn=d~+
+	rp='Pathname for the vendor-supplied scripts directory?'
+	. ./getfile
+	vendorscript="$ans"
+	vendorscriptexp="$ansexp"
+	;;
+esac
+: Change installation prefix, if necessary.
+if $test X"$prefix" != X"$installprefix"; then
+	installvendorscript=`echo $vendorscriptexp | $sed "s#^$prefix#$installprefix#"`
+else
+	installvendorscript="$vendorscriptexp"
 fi
 
 : see if qgcvt exists
@@ -13361,6 +13740,10 @@ eval $inlibc
 
 : see if munmap exists
 set munmap d_munmap
+eval $inlibc
+
+: see if nanosleep exists
+set nanosleep d_nanosleep
 eval $inlibc
 
 : see if nice exists
@@ -19963,6 +20346,7 @@ d_msgsnd='$d_msgsnd'
 d_msync='$d_msync'
 d_munmap='$d_munmap'
 d_mymalloc='$d_mymalloc'
+d_nanosleep='$d_nanosleep'
 d_nice='$d_nice'
 d_nl_langinfo='$d_nl_langinfo'
 d_nv_preserves_uv='$d_nv_preserves_uv'
@@ -20128,6 +20512,7 @@ d_ustat='$d_ustat'
 d_vendorarch='$d_vendorarch'
 d_vendorbin='$d_vendorbin'
 d_vendorlib='$d_vendorlib'
+d_vendorscript='$d_vendorscript'
 d_vfork='$d_vfork'
 d_void_closedir='$d_void_closedir'
 d_voidsig='$d_voidsig'
@@ -20182,6 +20567,7 @@ from='$from'
 full_ar='$full_ar'
 full_csh='$full_csh'
 full_sed='$full_sed'
+gccansipedantic='$gccansipedantic'
 gccosandvers='$gccosandvers'
 gccversion='$gccversion'
 getgrent_r_proto='$getgrent_r_proto'
@@ -20220,6 +20606,10 @@ h_fcntl='$h_fcntl'
 h_sysfile='$h_sysfile'
 hint='$hint'
 hostcat='$hostcat'
+html1dir='$html1dir'
+html1direxp='$html1direxp'
+html3dir='$html3dir'
+html3direxp='$html3direxp'
 i16size='$i16size'
 i16type='$i16type'
 i32size='$i32size'
@@ -20317,6 +20707,8 @@ incpath='$incpath'
 inews='$inews'
 installarchlib='$installarchlib'
 installbin='$installbin'
+installhtml1dir='$installhtml1dir'
+installhtml3dir='$installhtml3dir'
 installman1dir='$installman1dir'
 installman3dir='$installman3dir'
 installprefix='$installprefix'
@@ -20325,12 +20717,22 @@ installprivlib='$installprivlib'
 installscript='$installscript'
 installsitearch='$installsitearch'
 installsitebin='$installsitebin'
+installsitehtml1='$installsitehtml1'
+installsitehtml3='$installsitehtml3'
 installsitelib='$installsitelib'
+installsiteman1='$installsiteman1'
+installsiteman3='$installsiteman3'
+installsitescript='$installsitescript'
 installstyle='$installstyle'
 installusrbinperl='$installusrbinperl'
 installvendorarch='$installvendorarch'
 installvendorbin='$installvendorbin'
+installvendorhtml1='$installvendorhtml1'
+installvendorhtml3='$installvendorhtml3'
 installvendorlib='$installvendorlib'
+installvendorman1='$installvendorman1'
+installvendorman3='$installvendorman3'
+installvendorscript='$installvendorscript'
 intsize='$intsize'
 issymlink='$issymlink'
 ivdformat='$ivdformat'
@@ -20509,11 +20911,21 @@ sitearch='$sitearch'
 sitearchexp='$sitearchexp'
 sitebin='$sitebin'
 sitebinexp='$sitebinexp'
+sitehtml1='$sitehtml1'
+sitehtml1exp='$sitehtml1exp'
+sitehtml3='$sitehtml3'
+sitehtml3exp='$sitehtml3exp'
 sitelib='$sitelib'
 sitelib_stem='$sitelib_stem'
 sitelibexp='$sitelibexp'
+siteman1='$siteman1'
+siteman1exp='$siteman1exp'
+siteman3='$siteman3'
+siteman3exp='$siteman3exp'
 siteprefix='$siteprefix'
 siteprefixexp='$siteprefixexp'
+sitescript='$sitescript'
+sitescriptexp='$sitescriptexp'
 sizesize='$sizesize'
 sizetype='$sizetype'
 sleep='$sleep'
@@ -20608,11 +21020,21 @@ vendorarch='$vendorarch'
 vendorarchexp='$vendorarchexp'
 vendorbin='$vendorbin'
 vendorbinexp='$vendorbinexp'
+vendorhtml1='$vendorhtml1'
+vendorhtml1exp='$vendorhtml1exp'
+vendorhtml3='$vendorhtml3'
+vendorhtml3exp='$vendorhtml3exp'
 vendorlib='$vendorlib'
 vendorlib_stem='$vendorlib_stem'
 vendorlibexp='$vendorlibexp'
+vendorman1='$vendorman1'
+vendorman1exp='$vendorman1exp'
+vendorman3='$vendorman3'
+vendorman3exp='$vendorman3exp'
 vendorprefix='$vendorprefix'
 vendorprefixexp='$vendorprefixexp'
+vendorscript='$vendorscript'
+vendorscriptexp='$vendorscriptexp'
 version='$version'
 version_patchlevel_string='$version_patchlevel_string'
 versiononly='$versiononly'

@@ -15,22 +15,20 @@
 /* (Doing namespace management portably in C is really gross.) */
 
 /*
-   The following combinations of MULTIPLICITY, USE_5005THREADS
-   and PERL_IMPLICIT_CONTEXT are supported:
+   The following combinations of MULTIPLICITY and PERL_IMPLICIT_CONTEXT
+   are supported:
      1) none
      2) MULTIPLICITY	# supported for compatibility
      3) MULTIPLICITY && PERL_IMPLICIT_CONTEXT
-     4) USE_5005THREADS && PERL_IMPLICIT_CONTEXT
-     5) MULTIPLICITY && USE_5005THREADS && PERL_IMPLICIT_CONTEXT
 
    All other combinations of these flags are errors.
 
-   #3, #4, #5, and #6 are supported directly, while #2 is a special
+   only #3 is supported directly, while #2 is a special
    case of #3 (supported by redefining vTHX appropriately).
 */
 
 #if defined(MULTIPLICITY)
-/* cases 2, 3 and 5 above */
+/* cases 2 and 3 above */
 
 #  if defined(PERL_IMPLICIT_CONTEXT)
 #    define vTHX	aTHX
@@ -174,311 +172,6 @@
 #define PL_watchaddr		(vTHX->Twatchaddr)
 #define PL_watchok		(vTHX->Twatchok)
 
-#  if defined(USE_5005THREADS)
-/* case 5 above */
-
-#define PL_Argv			(PERL_GET_INTERP->IArgv)
-#define PL_Cmd			(PERL_GET_INTERP->ICmd)
-#define PL_DBcv			(PERL_GET_INTERP->IDBcv)
-#define PL_DBgv			(PERL_GET_INTERP->IDBgv)
-#define PL_DBline		(PERL_GET_INTERP->IDBline)
-#define PL_DBsignal		(PERL_GET_INTERP->IDBsignal)
-#define PL_DBsingle		(PERL_GET_INTERP->IDBsingle)
-#define PL_DBsub		(PERL_GET_INTERP->IDBsub)
-#define PL_DBtrace		(PERL_GET_INTERP->IDBtrace)
-#define PL_Dir			(PERL_GET_INTERP->IDir)
-#define PL_Env			(PERL_GET_INTERP->IEnv)
-#define PL_LIO			(PERL_GET_INTERP->ILIO)
-#define PL_Mem			(PERL_GET_INTERP->IMem)
-#define PL_MemParse		(PERL_GET_INTERP->IMemParse)
-#define PL_MemShared		(PERL_GET_INTERP->IMemShared)
-#define PL_OpPtr		(PERL_GET_INTERP->IOpPtr)
-#define PL_OpSlab		(PERL_GET_INTERP->IOpSlab)
-#define PL_OpSpace		(PERL_GET_INTERP->IOpSpace)
-#define PL_Proc			(PERL_GET_INTERP->IProc)
-#define PL_Sock			(PERL_GET_INTERP->ISock)
-#define PL_StdIO		(PERL_GET_INTERP->IStdIO)
-#define PL_amagic_generation	(PERL_GET_INTERP->Iamagic_generation)
-#define PL_an			(PERL_GET_INTERP->Ian)
-#define PL_argvgv		(PERL_GET_INTERP->Iargvgv)
-#define PL_argvout_stack	(PERL_GET_INTERP->Iargvout_stack)
-#define PL_argvoutgv		(PERL_GET_INTERP->Iargvoutgv)
-#define PL_basetime		(PERL_GET_INTERP->Ibasetime)
-#define PL_beginav		(PERL_GET_INTERP->Ibeginav)
-#define PL_beginav_save		(PERL_GET_INTERP->Ibeginav_save)
-#define PL_bitcount		(PERL_GET_INTERP->Ibitcount)
-#define PL_bufend		(PERL_GET_INTERP->Ibufend)
-#define PL_bufptr		(PERL_GET_INTERP->Ibufptr)
-#define PL_checkav		(PERL_GET_INTERP->Icheckav)
-#define PL_checkav_save		(PERL_GET_INTERP->Icheckav_save)
-#define PL_clocktick		(PERL_GET_INTERP->Iclocktick)
-#define PL_collation_ix		(PERL_GET_INTERP->Icollation_ix)
-#define PL_collation_name	(PERL_GET_INTERP->Icollation_name)
-#define PL_collation_standard	(PERL_GET_INTERP->Icollation_standard)
-#define PL_collxfrm_base	(PERL_GET_INTERP->Icollxfrm_base)
-#define PL_collxfrm_mult	(PERL_GET_INTERP->Icollxfrm_mult)
-#define PL_compcv		(PERL_GET_INTERP->Icompcv)
-#define PL_compiling		(PERL_GET_INTERP->Icompiling)
-#define PL_comppad		(PERL_GET_INTERP->Icomppad)
-#define PL_comppad_name		(PERL_GET_INTERP->Icomppad_name)
-#define PL_comppad_name_fill	(PERL_GET_INTERP->Icomppad_name_fill)
-#define PL_comppad_name_floor	(PERL_GET_INTERP->Icomppad_name_floor)
-#define PL_cop_seqmax		(PERL_GET_INTERP->Icop_seqmax)
-#define PL_copline		(PERL_GET_INTERP->Icopline)
-#define PL_cred_mutex		(PERL_GET_INTERP->Icred_mutex)
-#define PL_cryptseen		(PERL_GET_INTERP->Icryptseen)
-#define PL_cshlen		(PERL_GET_INTERP->Icshlen)
-#define PL_cshname		(PERL_GET_INTERP->Icshname)
-#define PL_curcopdb		(PERL_GET_INTERP->Icurcopdb)
-#define PL_curstname		(PERL_GET_INTERP->Icurstname)
-#define PL_curthr		(PERL_GET_INTERP->Icurthr)
-#define PL_custom_op_descs	(PERL_GET_INTERP->Icustom_op_descs)
-#define PL_custom_op_names	(PERL_GET_INTERP->Icustom_op_names)
-#define PL_dbargs		(PERL_GET_INTERP->Idbargs)
-#define PL_debstash		(PERL_GET_INTERP->Idebstash)
-#define PL_debug		(PERL_GET_INTERP->Idebug)
-#define PL_debug_pad		(PERL_GET_INTERP->Idebug_pad)
-#define PL_def_layerlist	(PERL_GET_INTERP->Idef_layerlist)
-#define PL_defgv		(PERL_GET_INTERP->Idefgv)
-#define PL_diehook		(PERL_GET_INTERP->Idiehook)
-#define PL_doextract		(PERL_GET_INTERP->Idoextract)
-#define PL_doswitches		(PERL_GET_INTERP->Idoswitches)
-#define PL_dowarn		(PERL_GET_INTERP->Idowarn)
-#define PL_e_script		(PERL_GET_INTERP->Ie_script)
-#define PL_egid			(PERL_GET_INTERP->Iegid)
-#define PL_encoding		(PERL_GET_INTERP->Iencoding)
-#define PL_endav		(PERL_GET_INTERP->Iendav)
-#define PL_envgv		(PERL_GET_INTERP->Ienvgv)
-#define PL_errgv		(PERL_GET_INTERP->Ierrgv)
-#define PL_error_count		(PERL_GET_INTERP->Ierror_count)
-#define PL_euid			(PERL_GET_INTERP->Ieuid)
-#define PL_eval_cond		(PERL_GET_INTERP->Ieval_cond)
-#define PL_eval_mutex		(PERL_GET_INTERP->Ieval_mutex)
-#define PL_eval_owner		(PERL_GET_INTERP->Ieval_owner)
-#define PL_eval_root		(PERL_GET_INTERP->Ieval_root)
-#define PL_eval_start		(PERL_GET_INTERP->Ieval_start)
-#define PL_evalseq		(PERL_GET_INTERP->Ievalseq)
-#define PL_exit_flags		(PERL_GET_INTERP->Iexit_flags)
-#define PL_exitlist		(PERL_GET_INTERP->Iexitlist)
-#define PL_exitlistlen		(PERL_GET_INTERP->Iexitlistlen)
-#define PL_expect		(PERL_GET_INTERP->Iexpect)
-#define PL_fdpid		(PERL_GET_INTERP->Ifdpid)
-#define PL_fdpid_mutex		(PERL_GET_INTERP->Ifdpid_mutex)
-#define PL_filemode		(PERL_GET_INTERP->Ifilemode)
-#define PL_forkprocess		(PERL_GET_INTERP->Iforkprocess)
-#define PL_formfeed		(PERL_GET_INTERP->Iformfeed)
-#define PL_generation		(PERL_GET_INTERP->Igeneration)
-#define PL_gensym		(PERL_GET_INTERP->Igensym)
-#define PL_gid			(PERL_GET_INTERP->Igid)
-#define PL_glob_index		(PERL_GET_INTERP->Iglob_index)
-#define PL_globalstash		(PERL_GET_INTERP->Iglobalstash)
-#define PL_he_arenaroot		(PERL_GET_INTERP->Ihe_arenaroot)
-#define PL_he_root		(PERL_GET_INTERP->Ihe_root)
-#define PL_hintgv		(PERL_GET_INTERP->Ihintgv)
-#define PL_hints		(PERL_GET_INTERP->Ihints)
-#define PL_in_clean_all		(PERL_GET_INTERP->Iin_clean_all)
-#define PL_in_clean_objs	(PERL_GET_INTERP->Iin_clean_objs)
-#define PL_in_my		(PERL_GET_INTERP->Iin_my)
-#define PL_in_my_stash		(PERL_GET_INTERP->Iin_my_stash)
-#define PL_incgv		(PERL_GET_INTERP->Iincgv)
-#define PL_initav		(PERL_GET_INTERP->Iinitav)
-#define PL_inplace		(PERL_GET_INTERP->Iinplace)
-#define PL_known_layers		(PERL_GET_INTERP->Iknown_layers)
-#define PL_last_lop		(PERL_GET_INTERP->Ilast_lop)
-#define PL_last_lop_op		(PERL_GET_INTERP->Ilast_lop_op)
-#define PL_last_swash_hv	(PERL_GET_INTERP->Ilast_swash_hv)
-#define PL_last_swash_key	(PERL_GET_INTERP->Ilast_swash_key)
-#define PL_last_swash_klen	(PERL_GET_INTERP->Ilast_swash_klen)
-#define PL_last_swash_slen	(PERL_GET_INTERP->Ilast_swash_slen)
-#define PL_last_swash_tmps	(PERL_GET_INTERP->Ilast_swash_tmps)
-#define PL_last_uni		(PERL_GET_INTERP->Ilast_uni)
-#define PL_lastfd		(PERL_GET_INTERP->Ilastfd)
-#define PL_laststatval		(PERL_GET_INTERP->Ilaststatval)
-#define PL_laststype		(PERL_GET_INTERP->Ilaststype)
-#define PL_lex_brackets		(PERL_GET_INTERP->Ilex_brackets)
-#define PL_lex_brackstack	(PERL_GET_INTERP->Ilex_brackstack)
-#define PL_lex_casemods		(PERL_GET_INTERP->Ilex_casemods)
-#define PL_lex_casestack	(PERL_GET_INTERP->Ilex_casestack)
-#define PL_lex_defer		(PERL_GET_INTERP->Ilex_defer)
-#define PL_lex_dojoin		(PERL_GET_INTERP->Ilex_dojoin)
-#define PL_lex_expect		(PERL_GET_INTERP->Ilex_expect)
-#define PL_lex_formbrack	(PERL_GET_INTERP->Ilex_formbrack)
-#define PL_lex_inpat		(PERL_GET_INTERP->Ilex_inpat)
-#define PL_lex_inwhat		(PERL_GET_INTERP->Ilex_inwhat)
-#define PL_lex_op		(PERL_GET_INTERP->Ilex_op)
-#define PL_lex_repl		(PERL_GET_INTERP->Ilex_repl)
-#define PL_lex_starts		(PERL_GET_INTERP->Ilex_starts)
-#define PL_lex_state		(PERL_GET_INTERP->Ilex_state)
-#define PL_lex_stuff		(PERL_GET_INTERP->Ilex_stuff)
-#define PL_lineary		(PERL_GET_INTERP->Ilineary)
-#define PL_linestart		(PERL_GET_INTERP->Ilinestart)
-#define PL_linestr		(PERL_GET_INTERP->Ilinestr)
-#define PL_localpatches		(PERL_GET_INTERP->Ilocalpatches)
-#define PL_main_cv		(PERL_GET_INTERP->Imain_cv)
-#define PL_main_root		(PERL_GET_INTERP->Imain_root)
-#define PL_main_start		(PERL_GET_INTERP->Imain_start)
-#define PL_max_intro_pending	(PERL_GET_INTERP->Imax_intro_pending)
-#define PL_maxo			(PERL_GET_INTERP->Imaxo)
-#define PL_maxsysfd		(PERL_GET_INTERP->Imaxsysfd)
-#define PL_mess_sv		(PERL_GET_INTERP->Imess_sv)
-#define PL_min_intro_pending	(PERL_GET_INTERP->Imin_intro_pending)
-#define PL_minus_F		(PERL_GET_INTERP->Iminus_F)
-#define PL_minus_a		(PERL_GET_INTERP->Iminus_a)
-#define PL_minus_c		(PERL_GET_INTERP->Iminus_c)
-#define PL_minus_l		(PERL_GET_INTERP->Iminus_l)
-#define PL_minus_n		(PERL_GET_INTERP->Iminus_n)
-#define PL_minus_p		(PERL_GET_INTERP->Iminus_p)
-#define PL_modglobal		(PERL_GET_INTERP->Imodglobal)
-#define PL_multi_close		(PERL_GET_INTERP->Imulti_close)
-#define PL_multi_end		(PERL_GET_INTERP->Imulti_end)
-#define PL_multi_open		(PERL_GET_INTERP->Imulti_open)
-#define PL_multi_start		(PERL_GET_INTERP->Imulti_start)
-#define PL_multiline		(PERL_GET_INTERP->Imultiline)
-#define PL_nexttoke		(PERL_GET_INTERP->Inexttoke)
-#define PL_nexttype		(PERL_GET_INTERP->Inexttype)
-#define PL_nextval		(PERL_GET_INTERP->Inextval)
-#define PL_nice_chunk		(PERL_GET_INTERP->Inice_chunk)
-#define PL_nice_chunk_size	(PERL_GET_INTERP->Inice_chunk_size)
-#define PL_nomemok		(PERL_GET_INTERP->Inomemok)
-#define PL_nthreads		(PERL_GET_INTERP->Inthreads)
-#define PL_nthreads_cond	(PERL_GET_INTERP->Inthreads_cond)
-#define PL_nullstash		(PERL_GET_INTERP->Inullstash)
-#define PL_numeric_compat1	(PERL_GET_INTERP->Inumeric_compat1)
-#define PL_numeric_local	(PERL_GET_INTERP->Inumeric_local)
-#define PL_numeric_name		(PERL_GET_INTERP->Inumeric_name)
-#define PL_numeric_radix_sv	(PERL_GET_INTERP->Inumeric_radix_sv)
-#define PL_numeric_standard	(PERL_GET_INTERP->Inumeric_standard)
-#define PL_ofmt			(PERL_GET_INTERP->Iofmt)
-#define PL_oldbufptr		(PERL_GET_INTERP->Ioldbufptr)
-#define PL_oldname		(PERL_GET_INTERP->Ioldname)
-#define PL_oldoldbufptr		(PERL_GET_INTERP->Ioldoldbufptr)
-#define PL_op_mask		(PERL_GET_INTERP->Iop_mask)
-#define PL_op_seqmax		(PERL_GET_INTERP->Iop_seqmax)
-#define PL_origalen		(PERL_GET_INTERP->Iorigalen)
-#define PL_origargc		(PERL_GET_INTERP->Iorigargc)
-#define PL_origargv		(PERL_GET_INTERP->Iorigargv)
-#define PL_origenviron		(PERL_GET_INTERP->Iorigenviron)
-#define PL_origfilename		(PERL_GET_INTERP->Iorigfilename)
-#define PL_ors_sv		(PERL_GET_INTERP->Iors_sv)
-#define PL_osname		(PERL_GET_INTERP->Iosname)
-#define PL_pad_reset_pending	(PERL_GET_INTERP->Ipad_reset_pending)
-#define PL_padix		(PERL_GET_INTERP->Ipadix)
-#define PL_padix_floor		(PERL_GET_INTERP->Ipadix_floor)
-#define PL_patchlevel		(PERL_GET_INTERP->Ipatchlevel)
-#define PL_pending_ident	(PERL_GET_INTERP->Ipending_ident)
-#define PL_perl_destruct_level	(PERL_GET_INTERP->Iperl_destruct_level)
-#define PL_perldb		(PERL_GET_INTERP->Iperldb)
-#define PL_perlio		(PERL_GET_INTERP->Iperlio)
-#define PL_pidstatus		(PERL_GET_INTERP->Ipidstatus)
-#define PL_preambleav		(PERL_GET_INTERP->Ipreambleav)
-#define PL_preambled		(PERL_GET_INTERP->Ipreambled)
-#define PL_preprocess		(PERL_GET_INTERP->Ipreprocess)
-#define PL_profiledata		(PERL_GET_INTERP->Iprofiledata)
-#define PL_psig_name		(PERL_GET_INTERP->Ipsig_name)
-#define PL_psig_pend		(PERL_GET_INTERP->Ipsig_pend)
-#define PL_psig_ptr		(PERL_GET_INTERP->Ipsig_ptr)
-#define PL_ptr_table		(PERL_GET_INTERP->Iptr_table)
-#define PL_reentrant_buffer	(PERL_GET_INTERP->Ireentrant_buffer)
-#define PL_regex_pad		(PERL_GET_INTERP->Iregex_pad)
-#define PL_regex_padav		(PERL_GET_INTERP->Iregex_padav)
-#define PL_replgv		(PERL_GET_INTERP->Ireplgv)
-#define PL_rsfp			(PERL_GET_INTERP->Irsfp)
-#define PL_rsfp_filters		(PERL_GET_INTERP->Irsfp_filters)
-#define PL_runops		(PERL_GET_INTERP->Irunops)
-#define PL_savebegin		(PERL_GET_INTERP->Isavebegin)
-#define PL_sawampersand		(PERL_GET_INTERP->Isawampersand)
-#define PL_sh_path		(PERL_GET_INTERP->Ish_path)
-#define PL_sig_pending		(PERL_GET_INTERP->Isig_pending)
-#define PL_sighandlerp		(PERL_GET_INTERP->Isighandlerp)
-#define PL_sort_RealCmp		(PERL_GET_INTERP->Isort_RealCmp)
-#define PL_splitstr		(PERL_GET_INTERP->Isplitstr)
-#define PL_srand_called		(PERL_GET_INTERP->Isrand_called)
-#define PL_statusvalue		(PERL_GET_INTERP->Istatusvalue)
-#define PL_statusvalue_vms	(PERL_GET_INTERP->Istatusvalue_vms)
-#define PL_stderrgv		(PERL_GET_INTERP->Istderrgv)
-#define PL_stdingv		(PERL_GET_INTERP->Istdingv)
-#define PL_strtab		(PERL_GET_INTERP->Istrtab)
-#define PL_strtab_mutex		(PERL_GET_INTERP->Istrtab_mutex)
-#define PL_sub_generation	(PERL_GET_INTERP->Isub_generation)
-#define PL_sublex_info		(PERL_GET_INTERP->Isublex_info)
-#define PL_subline		(PERL_GET_INTERP->Isubline)
-#define PL_subname		(PERL_GET_INTERP->Isubname)
-#define PL_sv_arenaroot		(PERL_GET_INTERP->Isv_arenaroot)
-#define PL_sv_count		(PERL_GET_INTERP->Isv_count)
-#define PL_sv_lock_mutex	(PERL_GET_INTERP->Isv_lock_mutex)
-#define PL_sv_mutex		(PERL_GET_INTERP->Isv_mutex)
-#define PL_sv_no		(PERL_GET_INTERP->Isv_no)
-#define PL_sv_objcount		(PERL_GET_INTERP->Isv_objcount)
-#define PL_sv_root		(PERL_GET_INTERP->Isv_root)
-#define PL_sv_undef		(PERL_GET_INTERP->Isv_undef)
-#define PL_sv_yes		(PERL_GET_INTERP->Isv_yes)
-#define PL_svref_mutex		(PERL_GET_INTERP->Isvref_mutex)
-#define PL_sys_intern		(PERL_GET_INTERP->Isys_intern)
-#define PL_taint_warn		(PERL_GET_INTERP->Itaint_warn)
-#define PL_tainting		(PERL_GET_INTERP->Itainting)
-#define PL_threadnum		(PERL_GET_INTERP->Ithreadnum)
-#define PL_threads_mutex	(PERL_GET_INTERP->Ithreads_mutex)
-#define PL_threadsv_names	(PERL_GET_INTERP->Ithreadsv_names)
-#define PL_thrsv		(PERL_GET_INTERP->Ithrsv)
-#define PL_tokenbuf		(PERL_GET_INTERP->Itokenbuf)
-#define PL_uid			(PERL_GET_INTERP->Iuid)
-#define PL_unsafe		(PERL_GET_INTERP->Iunsafe)
-#define PL_utf8_alnum		(PERL_GET_INTERP->Iutf8_alnum)
-#define PL_utf8_alnumc		(PERL_GET_INTERP->Iutf8_alnumc)
-#define PL_utf8_alpha		(PERL_GET_INTERP->Iutf8_alpha)
-#define PL_utf8_ascii		(PERL_GET_INTERP->Iutf8_ascii)
-#define PL_utf8_cntrl		(PERL_GET_INTERP->Iutf8_cntrl)
-#define PL_utf8_digit		(PERL_GET_INTERP->Iutf8_digit)
-#define PL_utf8_graph		(PERL_GET_INTERP->Iutf8_graph)
-#define PL_utf8_idcont		(PERL_GET_INTERP->Iutf8_idcont)
-#define PL_utf8_idstart		(PERL_GET_INTERP->Iutf8_idstart)
-#define PL_utf8_lower		(PERL_GET_INTERP->Iutf8_lower)
-#define PL_utf8_mark		(PERL_GET_INTERP->Iutf8_mark)
-#define PL_utf8_print		(PERL_GET_INTERP->Iutf8_print)
-#define PL_utf8_punct		(PERL_GET_INTERP->Iutf8_punct)
-#define PL_utf8_space		(PERL_GET_INTERP->Iutf8_space)
-#define PL_utf8_tofold		(PERL_GET_INTERP->Iutf8_tofold)
-#define PL_utf8_tolower		(PERL_GET_INTERP->Iutf8_tolower)
-#define PL_utf8_totitle		(PERL_GET_INTERP->Iutf8_totitle)
-#define PL_utf8_toupper		(PERL_GET_INTERP->Iutf8_toupper)
-#define PL_utf8_upper		(PERL_GET_INTERP->Iutf8_upper)
-#define PL_utf8_xdigit		(PERL_GET_INTERP->Iutf8_xdigit)
-#define PL_uudmap		(PERL_GET_INTERP->Iuudmap)
-#define PL_wantutf8		(PERL_GET_INTERP->Iwantutf8)
-#define PL_warnhook		(PERL_GET_INTERP->Iwarnhook)
-#define PL_widesyscalls		(PERL_GET_INTERP->Iwidesyscalls)
-#define PL_xiv_arenaroot	(PERL_GET_INTERP->Ixiv_arenaroot)
-#define PL_xiv_root		(PERL_GET_INTERP->Ixiv_root)
-#define PL_xnv_arenaroot	(PERL_GET_INTERP->Ixnv_arenaroot)
-#define PL_xnv_root		(PERL_GET_INTERP->Ixnv_root)
-#define PL_xpv_arenaroot	(PERL_GET_INTERP->Ixpv_arenaroot)
-#define PL_xpv_root		(PERL_GET_INTERP->Ixpv_root)
-#define PL_xpvav_arenaroot	(PERL_GET_INTERP->Ixpvav_arenaroot)
-#define PL_xpvav_root		(PERL_GET_INTERP->Ixpvav_root)
-#define PL_xpvbm_arenaroot	(PERL_GET_INTERP->Ixpvbm_arenaroot)
-#define PL_xpvbm_root		(PERL_GET_INTERP->Ixpvbm_root)
-#define PL_xpvcv_arenaroot	(PERL_GET_INTERP->Ixpvcv_arenaroot)
-#define PL_xpvcv_root		(PERL_GET_INTERP->Ixpvcv_root)
-#define PL_xpvhv_arenaroot	(PERL_GET_INTERP->Ixpvhv_arenaroot)
-#define PL_xpvhv_root		(PERL_GET_INTERP->Ixpvhv_root)
-#define PL_xpviv_arenaroot	(PERL_GET_INTERP->Ixpviv_arenaroot)
-#define PL_xpviv_root		(PERL_GET_INTERP->Ixpviv_root)
-#define PL_xpvlv_arenaroot	(PERL_GET_INTERP->Ixpvlv_arenaroot)
-#define PL_xpvlv_root		(PERL_GET_INTERP->Ixpvlv_root)
-#define PL_xpvmg_arenaroot	(PERL_GET_INTERP->Ixpvmg_arenaroot)
-#define PL_xpvmg_root		(PERL_GET_INTERP->Ixpvmg_root)
-#define PL_xpvnv_arenaroot	(PERL_GET_INTERP->Ixpvnv_arenaroot)
-#define PL_xpvnv_root		(PERL_GET_INTERP->Ixpvnv_root)
-#define PL_xrv_arenaroot	(PERL_GET_INTERP->Ixrv_arenaroot)
-#define PL_xrv_root		(PERL_GET_INTERP->Ixrv_root)
-#define PL_yychar		(PERL_GET_INTERP->Iyychar)
-#define PL_yydebug		(PERL_GET_INTERP->Iyydebug)
-#define PL_yyerrflag		(PERL_GET_INTERP->Iyyerrflag)
-#define PL_yylval		(PERL_GET_INTERP->Iyylval)
-#define PL_yynerrs		(PERL_GET_INTERP->Iyynerrs)
-#define PL_yyval		(PERL_GET_INTERP->Iyyval)
-
-#  else		/* !USE_5005THREADS */
 /* cases 2 and 3 above */
 
 #define PL_Argv			(vTHX->IArgv)
@@ -529,13 +222,11 @@
 #define PL_comppad_name_floor	(vTHX->Icomppad_name_floor)
 #define PL_cop_seqmax		(vTHX->Icop_seqmax)
 #define PL_copline		(vTHX->Icopline)
-#define PL_cred_mutex		(vTHX->Icred_mutex)
 #define PL_cryptseen		(vTHX->Icryptseen)
 #define PL_cshlen		(vTHX->Icshlen)
 #define PL_cshname		(vTHX->Icshname)
 #define PL_curcopdb		(vTHX->Icurcopdb)
 #define PL_curstname		(vTHX->Icurstname)
-#define PL_curthr		(vTHX->Icurthr)
 #define PL_custom_op_descs	(vTHX->Icustom_op_descs)
 #define PL_custom_op_names	(vTHX->Icustom_op_names)
 #define PL_dbargs		(vTHX->Idbargs)
@@ -556,9 +247,6 @@
 #define PL_errgv		(vTHX->Ierrgv)
 #define PL_error_count		(vTHX->Ierror_count)
 #define PL_euid			(vTHX->Ieuid)
-#define PL_eval_cond		(vTHX->Ieval_cond)
-#define PL_eval_mutex		(vTHX->Ieval_mutex)
-#define PL_eval_owner		(vTHX->Ieval_owner)
 #define PL_eval_root		(vTHX->Ieval_root)
 #define PL_eval_start		(vTHX->Ieval_start)
 #define PL_evalseq		(vTHX->Ievalseq)
@@ -567,7 +255,6 @@
 #define PL_exitlistlen		(vTHX->Iexitlistlen)
 #define PL_expect		(vTHX->Iexpect)
 #define PL_fdpid		(vTHX->Ifdpid)
-#define PL_fdpid_mutex		(vTHX->Ifdpid_mutex)
 #define PL_filemode		(vTHX->Ifilemode)
 #define PL_forkprocess		(vTHX->Iforkprocess)
 #define PL_formfeed		(vTHX->Iformfeed)
@@ -644,9 +331,6 @@
 #define PL_nice_chunk		(vTHX->Inice_chunk)
 #define PL_nice_chunk_size	(vTHX->Inice_chunk_size)
 #define PL_nomemok		(vTHX->Inomemok)
-#define PL_nthreads		(vTHX->Inthreads)
-#define PL_nthreads_cond	(vTHX->Inthreads_cond)
-#define PL_nullstash		(vTHX->Inullstash)
 #define PL_numeric_compat1	(vTHX->Inumeric_compat1)
 #define PL_numeric_local	(vTHX->Inumeric_local)
 #define PL_numeric_name		(vTHX->Inumeric_name)
@@ -702,28 +386,20 @@
 #define PL_stderrgv		(vTHX->Istderrgv)
 #define PL_stdingv		(vTHX->Istdingv)
 #define PL_strtab		(vTHX->Istrtab)
-#define PL_strtab_mutex		(vTHX->Istrtab_mutex)
 #define PL_sub_generation	(vTHX->Isub_generation)
 #define PL_sublex_info		(vTHX->Isublex_info)
 #define PL_subline		(vTHX->Isubline)
 #define PL_subname		(vTHX->Isubname)
 #define PL_sv_arenaroot		(vTHX->Isv_arenaroot)
 #define PL_sv_count		(vTHX->Isv_count)
-#define PL_sv_lock_mutex	(vTHX->Isv_lock_mutex)
-#define PL_sv_mutex		(vTHX->Isv_mutex)
 #define PL_sv_no		(vTHX->Isv_no)
 #define PL_sv_objcount		(vTHX->Isv_objcount)
 #define PL_sv_root		(vTHX->Isv_root)
 #define PL_sv_undef		(vTHX->Isv_undef)
 #define PL_sv_yes		(vTHX->Isv_yes)
-#define PL_svref_mutex		(vTHX->Isvref_mutex)
 #define PL_sys_intern		(vTHX->Isys_intern)
 #define PL_taint_warn		(vTHX->Itaint_warn)
 #define PL_tainting		(vTHX->Itainting)
-#define PL_threadnum		(vTHX->Ithreadnum)
-#define PL_threads_mutex	(vTHX->Ithreads_mutex)
-#define PL_threadsv_names	(vTHX->Ithreadsv_names)
-#define PL_thrsv		(vTHX->Ithrsv)
 #define PL_tokenbuf		(vTHX->Itokenbuf)
 #define PL_uid			(vTHX->Iuid)
 #define PL_unsafe		(vTHX->Iunsafe)
@@ -782,11 +458,9 @@
 #define PL_yynerrs		(vTHX->Iyynerrs)
 #define PL_yyval		(vTHX->Iyyval)
 
-#  endif	/* USE_5005THREADS */
-
 #else	/* !MULTIPLICITY */
 
-/* cases 1 and 4 above */
+/* case 1 above */
 
 #define PL_IArgv		PL_Argv
 #define PL_ICmd			PL_Cmd
@@ -836,13 +510,11 @@
 #define PL_Icomppad_name_floor	PL_comppad_name_floor
 #define PL_Icop_seqmax		PL_cop_seqmax
 #define PL_Icopline		PL_copline
-#define PL_Icred_mutex		PL_cred_mutex
 #define PL_Icryptseen		PL_cryptseen
 #define PL_Icshlen		PL_cshlen
 #define PL_Icshname		PL_cshname
 #define PL_Icurcopdb		PL_curcopdb
 #define PL_Icurstname		PL_curstname
-#define PL_Icurthr		PL_curthr
 #define PL_Icustom_op_descs	PL_custom_op_descs
 #define PL_Icustom_op_names	PL_custom_op_names
 #define PL_Idbargs		PL_dbargs
@@ -863,9 +535,6 @@
 #define PL_Ierrgv		PL_errgv
 #define PL_Ierror_count		PL_error_count
 #define PL_Ieuid		PL_euid
-#define PL_Ieval_cond		PL_eval_cond
-#define PL_Ieval_mutex		PL_eval_mutex
-#define PL_Ieval_owner		PL_eval_owner
 #define PL_Ieval_root		PL_eval_root
 #define PL_Ieval_start		PL_eval_start
 #define PL_Ievalseq		PL_evalseq
@@ -874,7 +543,6 @@
 #define PL_Iexitlistlen		PL_exitlistlen
 #define PL_Iexpect		PL_expect
 #define PL_Ifdpid		PL_fdpid
-#define PL_Ifdpid_mutex		PL_fdpid_mutex
 #define PL_Ifilemode		PL_filemode
 #define PL_Iforkprocess		PL_forkprocess
 #define PL_Iformfeed		PL_formfeed
@@ -951,9 +619,6 @@
 #define PL_Inice_chunk		PL_nice_chunk
 #define PL_Inice_chunk_size	PL_nice_chunk_size
 #define PL_Inomemok		PL_nomemok
-#define PL_Inthreads		PL_nthreads
-#define PL_Inthreads_cond	PL_nthreads_cond
-#define PL_Inullstash		PL_nullstash
 #define PL_Inumeric_compat1	PL_numeric_compat1
 #define PL_Inumeric_local	PL_numeric_local
 #define PL_Inumeric_name	PL_numeric_name
@@ -1009,28 +674,20 @@
 #define PL_Istderrgv		PL_stderrgv
 #define PL_Istdingv		PL_stdingv
 #define PL_Istrtab		PL_strtab
-#define PL_Istrtab_mutex	PL_strtab_mutex
 #define PL_Isub_generation	PL_sub_generation
 #define PL_Isublex_info		PL_sublex_info
 #define PL_Isubline		PL_subline
 #define PL_Isubname		PL_subname
 #define PL_Isv_arenaroot	PL_sv_arenaroot
 #define PL_Isv_count		PL_sv_count
-#define PL_Isv_lock_mutex	PL_sv_lock_mutex
-#define PL_Isv_mutex		PL_sv_mutex
 #define PL_Isv_no		PL_sv_no
 #define PL_Isv_objcount		PL_sv_objcount
 #define PL_Isv_root		PL_sv_root
 #define PL_Isv_undef		PL_sv_undef
 #define PL_Isv_yes		PL_sv_yes
-#define PL_Isvref_mutex		PL_svref_mutex
 #define PL_Isys_intern		PL_sys_intern
 #define PL_Itaint_warn		PL_taint_warn
 #define PL_Itainting		PL_tainting
-#define PL_Ithreadnum		PL_threadnum
-#define PL_Ithreads_mutex	PL_threads_mutex
-#define PL_Ithreadsv_names	PL_threadsv_names
-#define PL_Ithrsv		PL_thrsv
 #define PL_Itokenbuf		PL_tokenbuf
 #define PL_Iuid			PL_uid
 #define PL_Iunsafe		PL_unsafe
@@ -1088,148 +745,6 @@
 #define PL_Iyylval		PL_yylval
 #define PL_Iyynerrs		PL_yynerrs
 #define PL_Iyyval		PL_yyval
-
-#  if defined(USE_5005THREADS)
-/* case 4 above */
-
-#define PL_Sv			(aTHX->TSv)
-#define PL_Xpv			(aTHX->TXpv)
-#define PL_av_fetch_sv		(aTHX->Tav_fetch_sv)
-#define PL_bodytarget		(aTHX->Tbodytarget)
-#define PL_bostr		(aTHX->Tbostr)
-#define PL_chopset		(aTHX->Tchopset)
-#define PL_colors		(aTHX->Tcolors)
-#define PL_colorset		(aTHX->Tcolorset)
-#define PL_curcop		(aTHX->Tcurcop)
-#define PL_curpad		(aTHX->Tcurpad)
-#define PL_curpm		(aTHX->Tcurpm)
-#define PL_curstack		(aTHX->Tcurstack)
-#define PL_curstackinfo		(aTHX->Tcurstackinfo)
-#define PL_curstash		(aTHX->Tcurstash)
-#define PL_defoutgv		(aTHX->Tdefoutgv)
-#define PL_defstash		(aTHX->Tdefstash)
-#define PL_delaymagic		(aTHX->Tdelaymagic)
-#define PL_dirty		(aTHX->Tdirty)
-#define PL_dumpindent		(aTHX->Tdumpindent)
-#define PL_efloatbuf		(aTHX->Tefloatbuf)
-#define PL_efloatsize		(aTHX->Tefloatsize)
-#define PL_errors		(aTHX->Terrors)
-#define PL_extralen		(aTHX->Textralen)
-#define PL_firstgv		(aTHX->Tfirstgv)
-#define PL_formtarget		(aTHX->Tformtarget)
-#define PL_hv_fetch_ent_mh	(aTHX->Thv_fetch_ent_mh)
-#define PL_hv_fetch_sv		(aTHX->Thv_fetch_sv)
-#define PL_in_eval		(aTHX->Tin_eval)
-#define PL_last_in_gv		(aTHX->Tlast_in_gv)
-#define PL_lastgotoprobe	(aTHX->Tlastgotoprobe)
-#define PL_lastscream		(aTHX->Tlastscream)
-#define PL_localizing		(aTHX->Tlocalizing)
-#define PL_mainstack		(aTHX->Tmainstack)
-#define PL_markstack		(aTHX->Tmarkstack)
-#define PL_markstack_max	(aTHX->Tmarkstack_max)
-#define PL_markstack_ptr	(aTHX->Tmarkstack_ptr)
-#define PL_maxscream		(aTHX->Tmaxscream)
-#define PL_modcount		(aTHX->Tmodcount)
-#define PL_na			(aTHX->Tna)
-#define PL_nrs			(aTHX->Tnrs)
-#define PL_ofs_sv		(aTHX->Tofs_sv)
-#define PL_op			(aTHX->Top)
-#define PL_opsave		(aTHX->Topsave)
-#define PL_peepp		(aTHX->Tpeepp)
-#define PL_protect		(aTHX->Tprotect)
-#define PL_reg_call_cc		(aTHX->Treg_call_cc)
-#define PL_reg_curpm		(aTHX->Treg_curpm)
-#define PL_reg_eval_set		(aTHX->Treg_eval_set)
-#define PL_reg_flags		(aTHX->Treg_flags)
-#define PL_reg_ganch		(aTHX->Treg_ganch)
-#define PL_reg_leftiter		(aTHX->Treg_leftiter)
-#define PL_reg_magic		(aTHX->Treg_magic)
-#define PL_reg_match_utf8	(aTHX->Treg_match_utf8)
-#define PL_reg_maxiter		(aTHX->Treg_maxiter)
-#define PL_reg_oldcurpm		(aTHX->Treg_oldcurpm)
-#define PL_reg_oldpos		(aTHX->Treg_oldpos)
-#define PL_reg_oldsaved		(aTHX->Treg_oldsaved)
-#define PL_reg_oldsavedlen	(aTHX->Treg_oldsavedlen)
-#define PL_reg_poscache		(aTHX->Treg_poscache)
-#define PL_reg_poscache_size	(aTHX->Treg_poscache_size)
-#define PL_reg_re		(aTHX->Treg_re)
-#define PL_reg_start_tmp	(aTHX->Treg_start_tmp)
-#define PL_reg_start_tmpl	(aTHX->Treg_start_tmpl)
-#define PL_reg_starttry		(aTHX->Treg_starttry)
-#define PL_reg_sv		(aTHX->Treg_sv)
-#define PL_reg_whilem_seen	(aTHX->Treg_whilem_seen)
-#define PL_regbol		(aTHX->Tregbol)
-#define PL_regcc		(aTHX->Tregcc)
-#define PL_regcode		(aTHX->Tregcode)
-#define PL_regcomp_parse	(aTHX->Tregcomp_parse)
-#define PL_regcomp_rx		(aTHX->Tregcomp_rx)
-#define PL_regcompat1		(aTHX->Tregcompat1)
-#define PL_regcompp		(aTHX->Tregcompp)
-#define PL_regdata		(aTHX->Tregdata)
-#define PL_regdummy		(aTHX->Tregdummy)
-#define PL_regendp		(aTHX->Tregendp)
-#define PL_regeol		(aTHX->Tregeol)
-#define PL_regexecp		(aTHX->Tregexecp)
-#define PL_regflags		(aTHX->Tregflags)
-#define PL_regfree		(aTHX->Tregfree)
-#define PL_regindent		(aTHX->Tregindent)
-#define PL_reginput		(aTHX->Treginput)
-#define PL_regint_start		(aTHX->Tregint_start)
-#define PL_regint_string	(aTHX->Tregint_string)
-#define PL_reginterp_cnt	(aTHX->Treginterp_cnt)
-#define PL_reglastcloseparen	(aTHX->Treglastcloseparen)
-#define PL_reglastparen		(aTHX->Treglastparen)
-#define PL_regnarrate		(aTHX->Tregnarrate)
-#define PL_regnaughty		(aTHX->Tregnaughty)
-#define PL_regnpar		(aTHX->Tregnpar)
-#define PL_regprecomp		(aTHX->Tregprecomp)
-#define PL_regprogram		(aTHX->Tregprogram)
-#define PL_regsawback		(aTHX->Tregsawback)
-#define PL_regseen		(aTHX->Tregseen)
-#define PL_regsize		(aTHX->Tregsize)
-#define PL_regstartp		(aTHX->Tregstartp)
-#define PL_regtill		(aTHX->Tregtill)
-#define PL_regxend		(aTHX->Tregxend)
-#define PL_restartop		(aTHX->Trestartop)
-#define PL_retstack		(aTHX->Tretstack)
-#define PL_retstack_ix		(aTHX->Tretstack_ix)
-#define PL_retstack_max		(aTHX->Tretstack_max)
-#define PL_rs			(aTHX->Trs)
-#define PL_savestack		(aTHX->Tsavestack)
-#define PL_savestack_ix		(aTHX->Tsavestack_ix)
-#define PL_savestack_max	(aTHX->Tsavestack_max)
-#define PL_scopestack		(aTHX->Tscopestack)
-#define PL_scopestack_ix	(aTHX->Tscopestack_ix)
-#define PL_scopestack_max	(aTHX->Tscopestack_max)
-#define PL_screamfirst		(aTHX->Tscreamfirst)
-#define PL_screamnext		(aTHX->Tscreamnext)
-#define PL_secondgv		(aTHX->Tsecondgv)
-#define PL_seen_evals		(aTHX->Tseen_evals)
-#define PL_seen_zerolen		(aTHX->Tseen_zerolen)
-#define PL_sortcop		(aTHX->Tsortcop)
-#define PL_sortcxix		(aTHX->Tsortcxix)
-#define PL_sortstash		(aTHX->Tsortstash)
-#define PL_stack_base		(aTHX->Tstack_base)
-#define PL_stack_max		(aTHX->Tstack_max)
-#define PL_stack_sp		(aTHX->Tstack_sp)
-#define PL_start_env		(aTHX->Tstart_env)
-#define PL_statbuf		(aTHX->Tstatbuf)
-#define PL_statcache		(aTHX->Tstatcache)
-#define PL_statgv		(aTHX->Tstatgv)
-#define PL_statname		(aTHX->Tstatname)
-#define PL_tainted		(aTHX->Ttainted)
-#define PL_timesbuf		(aTHX->Ttimesbuf)
-#define PL_tmps_floor		(aTHX->Ttmps_floor)
-#define PL_tmps_ix		(aTHX->Ttmps_ix)
-#define PL_tmps_max		(aTHX->Ttmps_max)
-#define PL_tmps_stack		(aTHX->Ttmps_stack)
-#define PL_top_env		(aTHX->Ttop_env)
-#define PL_toptarget		(aTHX->Ttoptarget)
-#define PL_watchaddr		(aTHX->Twatchaddr)
-#define PL_watchok		(aTHX->Twatchok)
-
-#  else	/* !USE_5005THREADS */
-/* case 1 above */
 
 #define PL_TSv			PL_Sv
 #define PL_TXpv			PL_Xpv
@@ -1367,7 +882,6 @@
 #define PL_Twatchaddr		PL_watchaddr
 #define PL_Twatchok		PL_watchok
 
-#  endif	/* USE_5005THREADS */
 #endif	/* MULTIPLICITY */
 
 #if defined(PERL_GLOBAL_STRUCT)

@@ -633,6 +633,12 @@
  */
 /*#define HAS_USLEEP		/**/
 
+/* HAS_NANOSLEEP:
+ *	This symbol, if defined, indicates that the nanosleep system
+ *	call is available to let the process sleep with 1E-9 accuracy.
+ */
+/*#define HAS_NANOSLEEP		/**/
+
 /* HASVOLATILE:
  *	This symbol, if defined, indicates that this C compiler knows about
  *	the volatile declaration.
@@ -3179,10 +3185,6 @@
  *	This symbol, if defined, indicates that Perl should be built to
  *	use the interpreter-based threading implementation.
  */
-/* USE_5005THREADS:
- *	This symbol, if defined, indicates that Perl should be built to
- *	use the 5.005-based threading implementation.
- */
 /* OLD_PTHREADS_API:
  *	This symbol, if defined, indicates that Perl should
  *	be built to use the old draft POSIX threads API.
@@ -3192,11 +3194,7 @@
  *	try to use the various _r versions of library functions.
  *	This is extremely experimental.
  */
-/*#define	USE_5005THREADS		/**/
 #define	USE_ITHREADS		/**/
-#if defined(USE_5005THREADS) && !defined(USE_ITHREADS)
-#define		USE_5005THREADS		/* until src is revised*/
-#endif
 /*#define	OLD_PTHREADS_API		/**/
 /*#define	USE_REENTRANT_API	/**/
 

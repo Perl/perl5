@@ -100,17 +100,17 @@ for (@prgs){
 }
 
 eval qq(use strict 'garbage');
-print +($@ =~ /^Don't know how to 'use strict qw\(garbage\)/)
+print +($@ =~ /^Unknown 'strict' tag\(s\) 'garbage'/)
 	? "ok ".++$i."\n" : "not ok ".++$i."\t# $@";
 
 eval qq(no strict 'garbage');
-print +($@ =~ /^Don't know how to 'no strict qw\(garbage\)/)
+print +($@ =~ /^Unknown 'strict' tag\(s\) 'garbage'/)
 	? "ok ".++$i."\n" : "not ok ".++$i."\t# $@";
 
 eval qq(use strict qw(foo bar));
-print +($@ =~ /^Don't know how to 'use strict qw\(foo bar\)/)
+print +($@ =~ /^Unknown 'strict' tag\(s\) 'foo bar'/)
 	? "ok ".++$i."\n" : "not ok ".++$i."\t# $@";
 
 eval qq(no strict qw(foo bar));
-print +($@ =~ /^Don't know how to 'no strict qw\(foo bar\)/)
+print +($@ =~ /^Unknown 'strict' tag\(s\) 'foo bar'/)
 	? "ok ".++$i."\n" : "not ok ".++$i."\t# $@";

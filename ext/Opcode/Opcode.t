@@ -87,7 +87,7 @@ print verify_opset($s1) && !verify_opset(42) ? "ok $t\n":"not ok $t\n"; $t++;
 
 opmask_add(opset(qw(fileno)));	# add to global op_mask
 print eval 'fileno STDOUT' ? "not ok $t\n" : "ok $t\n";	$t++; # fail
-print $@ =~ /fileno trapped/ ? "ok $t\n" : "not ok $t\n# $@\n"; $t++;
+print $@ =~ /'fileno' trapped/ ? "ok $t\n" : "not ok $t\n# $@\n"; $t++;
 
 # --- check use of bit vector ops on opsets
 

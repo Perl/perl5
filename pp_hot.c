@@ -21,10 +21,6 @@
 
 /* Hot code. */
 
-#ifdef USE_5005THREADS
-static void unset_cvowner(pTHX_ void *cvarg);
-#endif /* USE_5005THREADS */
-
 PP(pp_const)
 {
     dSP;
@@ -197,10 +193,10 @@ PP(pp_padsv)
     XPUSHs(TARG);
     if (PL_op->op_flags & OPf_MOD) {
 	if (PL_op->op_private & OPpLVAL_INTRO)
-	    SAVECLEARSV(PL_curpad[PL_op->op_targ]);
+	    SAVECLEARSV(PAD_SVl(PL_op->op_targ));
         else if (PL_op->op_private & OPpDEREF) {
 	    PUTBACK;
-	    vivify_ref(PL_curpad[PL_op->op_targ], PL_op->op_private & OPpDEREF);
+	    vivify_ref(PAD_SVl(PL_op->op_targ), PL_op->op_private & OPpDEREF);
 	    SPAGAIN;
 	}
     }
@@ -607,7 +603,7 @@ PP(pp_print)
             goto had_magic;
 	if (ckWARN2(WARN_UNOPENED,WARN_CLOSED))
 	    report_evil_fh(gv, io, PL_op->op_type);
-	SETERRNO(EBADF,RMS$_IFI);
+	SETERRNO(EBADF,RMS_IFI);
 	goto just_say_no;
     }
     else if (!(fp = IoOFP(io))) {
@@ -617,7 +613,7 @@ PP(pp_print)
 	    else if (ckWARN2(WARN_UNOPENED,WARN_CLOSED))
 		report_evil_fh(gv, io, PL_op->op_type);
 	}
-	SETERRNO(EBADF,IoIFP(io)?RMS$_FAC:RMS$_IFI);
+	SETERRNO(EBADF,IoIFP(io)?RMS_FAC:RMS_IFI);
 	goto just_say_no;
     }
     else {
@@ -780,7 +776,7 @@ PP(pp_rv2av)
 	}
 	SP += maxarg;
     }
-    else {
+    else if (GIMME_V == G_SCALAR) {
 	dTARGET;
 	I32 maxarg = AvFILL(av) + 1;
 	SETi(maxarg);
@@ -1484,10 +1480,14 @@ Perl_do_readline(pTHX)
 	tmplen = SvLEN(sv);	/* remember if already alloced */
 	if (!tmplen)
 	    Sv_Grow(sv, 80);	/* try short-buffering it */
-	if (type == OP_RCATLINE)
+	offset = 0;
+	if (type == OP_RCATLINE && SvOK(sv)) {
+	    if (!SvPOK(sv)) {
+		STRLEN n_a;
+		(void)SvPV_force(sv, n_a);
+	    }
 	    offset = SvCUR(sv);
-	else
-	    offset = 0;
+	}
     }
     else {
 	sv = sv_2mortal(NEWSV(57, 80));
@@ -1768,13 +1768,11 @@ PP(pp_iter)
 	    STRLEN maxlen;
 	    char *max = SvPV((SV*)av, maxlen);
 	    if (!SvNIOK(cur) && SvCUR(cur) <= maxlen) {
-#ifndef USE_5005THREADS			  /* don't risk potential race */
 		if (SvREFCNT(*itersvp) == 1 && !SvMAGICAL(*itersvp)) {
 		    /* safe to reuse old SV */
 		    sv_setsv(*itersvp, cur);
 		}
 		else
-#endif
 		{
 		    /* we need a fresh SV every time so that loop body sees a
 		     * completely new SV for closures/references to work as
@@ -1794,13 +1792,12 @@ PP(pp_iter)
 	if (cx->blk_loop.iterix > cx->blk_loop.itermax)
 	    RETPUSHNO;
 
-#ifndef USE_5005THREADS			  /* don't risk potential race */
+	/* don't risk potential race */
 	if (SvREFCNT(*itersvp) == 1 && !SvMAGICAL(*itersvp)) {
 	    /* safe to reuse old SV */
 	    sv_setiv(*itersvp, cx->blk_loop.iterix++);
 	}
 	else
-#endif
 	{
 	    /* we need a fresh SV every time so that loop body sees a
 	     * completely new SV for closures/references to work as they
@@ -2553,140 +2550,6 @@ try_autoload:
 	    DIE(aTHX_ "No DBsub routine");
     }
 
-#ifdef USE_5005THREADS
-    /*
-     * First we need to check if the sub or method requires locking.
-     * If so, we gain a lock on the CV, the first argument or the
-     * stash (for static methods), as appropriate. This has to be
-     * inline because for FAKE_THREADS, COND_WAIT inlines code to
-     * reschedule by returning a new op.
-     */
-    MUTEX_LOCK(CvMUTEXP(cv));
-    if (CvFLAGS(cv) & CVf_LOCKED) {
-	MAGIC *mg;	
-	if (CvFLAGS(cv) & CVf_METHOD) {
-	    if (SP > PL_stack_base + TOPMARK)
-		sv = *(PL_stack_base + TOPMARK + 1);
-	    else {
-		AV *av = (AV*)PL_curpad[0];
-		if (hasargs || !av || AvFILLp(av) < 0
-		    || !(sv = AvARRAY(av)[0]))
-		{
-		    MUTEX_UNLOCK(CvMUTEXP(cv));
-		    DIE(aTHX_ "no argument for locked method call");
-		}
-	    }
-	    if (SvROK(sv))
-		sv = SvRV(sv);
-	    else {		
-		STRLEN len;
-		char *stashname = SvPV(sv, len);
-		sv = (SV*)gv_stashpvn(stashname, len, TRUE);
-	    }
-	}
-	else {
-	    sv = (SV*)cv;
-	}
-	MUTEX_UNLOCK(CvMUTEXP(cv));
-	mg = condpair_magic(sv);
-	MUTEX_LOCK(MgMUTEXP(mg));
-	if (MgOWNER(mg) == thr)
-	    MUTEX_UNLOCK(MgMUTEXP(mg));
-	else {
-	    while (MgOWNER(mg))
-		COND_WAIT(MgOWNERCONDP(mg), MgMUTEXP(mg));
-	    MgOWNER(mg) = thr;
-	    DEBUG_S(PerlIO_printf(Perl_debug_log, "%p: pp_entersub lock %p\n",
-				  thr, sv));
-	    MUTEX_UNLOCK(MgMUTEXP(mg));
-	    SAVEDESTRUCTOR_X(Perl_unlock_condpair, sv);
-	}
-	MUTEX_LOCK(CvMUTEXP(cv));
-    }
-    /*
-     * Now we have permission to enter the sub, we must distinguish
-     * four cases. (0) It's an XSUB (in which case we don't care
-     * about ownership); (1) it's ours already (and we're recursing);
-     * (2) it's free (but we may already be using a cached clone);
-     * (3) another thread owns it. Case (1) is easy: we just use it.
-     * Case (2) means we look for a clone--if we have one, use it
-     * otherwise grab ownership of cv. Case (3) means we look for a
-     * clone (for non-XSUBs) and have to create one if we don't
-     * already have one.
-     * Why look for a clone in case (2) when we could just grab
-     * ownership of cv straight away? Well, we could be recursing,
-     * i.e. we originally tried to enter cv while another thread
-     * owned it (hence we used a clone) but it has been freed up
-     * and we're now recursing into it. It may or may not be "better"
-     * to use the clone but at least CvDEPTH can be trusted.
-     */
-    if (CvOWNER(cv) == thr || CvXSUB(cv))
-	MUTEX_UNLOCK(CvMUTEXP(cv));
-    else {
-	/* Case (2) or (3) */
-	SV **svp;
-	
-	/*
-	 * XXX Might it be better to release CvMUTEXP(cv) while we
-     	 * do the hv_fetch? We might find someone has pinched it
-     	 * when we look again, in which case we would be in case
-     	 * (3) instead of (2) so we'd have to clone. Would the fact
-     	 * that we released the mutex more quickly make up for this?
-     	 */
-	if ((svp = hv_fetch(thr->cvcache, (char *)cv, sizeof(cv), FALSE)))
-	{
-	    /* We already have a clone to use */
-	    MUTEX_UNLOCK(CvMUTEXP(cv));
-	    cv = *(CV**)svp;
-	    DEBUG_S(PerlIO_printf(Perl_debug_log,
-				  "entersub: %p already has clone %p:%s\n",
-				  thr, cv, SvPEEK((SV*)cv)));
-	    CvOWNER(cv) = thr;
-	    SvREFCNT_inc(cv);
-	    if (CvDEPTH(cv) == 0)
-		SAVEDESTRUCTOR_X(unset_cvowner, (void*) cv);
-	}
-	else {
-	    /* (2) => grab ownership of cv. (3) => make clone */
-	    if (!CvOWNER(cv)) {
-		CvOWNER(cv) = thr;
-		SvREFCNT_inc(cv);
-		MUTEX_UNLOCK(CvMUTEXP(cv));
-		DEBUG_S(PerlIO_printf(Perl_debug_log,
-			    "entersub: %p grabbing %p:%s in stash %s\n",
-			    thr, cv, SvPEEK((SV*)cv), CvSTASH(cv) ?
-	    			HvNAME(CvSTASH(cv)) : "(none)"));
-	    }
-	    else {
-		/* Make a new clone. */
-		CV *clonecv;
-		SvREFCNT_inc(cv); /* don't let it vanish from under us */
-		MUTEX_UNLOCK(CvMUTEXP(cv));
-		DEBUG_S((PerlIO_printf(Perl_debug_log,
-				       "entersub: %p cloning %p:%s\n",
-				       thr, cv, SvPEEK((SV*)cv))));
-		/*
-	    	 * We're creating a new clone so there's no race
-		 * between the original MUTEX_UNLOCK and the
-		 * SvREFCNT_inc since no one will be trying to undef
-		 * it out from underneath us. At least, I don't think
-		 * there's a race...
-		 */
-	     	clonecv = cv_clone(cv);
-    		SvREFCNT_dec(cv); /* finished with this */
-		hv_store(thr->cvcache, (char*)cv, sizeof(cv), (SV*)clonecv,0);
-		CvOWNER(clonecv) = thr;
-		cv = clonecv;
-		SvREFCNT_inc(cv);
-	    }
-	    DEBUG_S(if (CvDEPTH(cv) != 0)
-			PerlIO_printf(Perl_debug_log, "depth %ld != 0\n",
-                                     CvDEPTH(cv)));
-	    SAVEDESTRUCTOR_X(unset_cvowner, (void*) cv);
-	}
-    }
-#endif /* USE_5005THREADS */
-
     if (CvXSUB(cv)) {
 #ifdef PERL_XSUB_OLDSTYLE
 	if (CvOLDSTYLE(cv)) {
@@ -2718,11 +2581,7 @@ try_autoload:
 		 * back. This would allow popping @_ in XSUB, e.g.. XXXX */
 		AV* av;
 		I32 items;
-#ifdef USE_5005THREADS
-		av = (AV*)PL_curpad[0];
-#else
 		av = GvAV(PL_defgv);
-#endif /* USE_5005THREADS */		
 		items = AvFILLp(av) + 1;   /* @_ is not tieable */
 
 		if (items) {
@@ -2758,7 +2617,6 @@ try_autoload:
 	dMARK;
 	register I32 items = SP - MARK;
 	AV* padlist = CvPADLIST(cv);
-	SV** svp = AvARRAY(padlist);
 	push_return(PL_op->op_next);
 	PUSHBLOCK(cx, CXt_SUB, MARK);
 	PUSHSUB(cx);
@@ -2770,69 +2628,12 @@ try_autoload:
 	 */
 	if (CvDEPTH(cv) < 2)
 	    (void)SvREFCNT_inc(cv);
-	else {	/* save temporaries on recursion? */
+	else {
 	    PERL_STACK_OVERFLOW_CHECK();
-	    if (CvDEPTH(cv) > AvFILLp(padlist)) {
-		AV *av;
-		AV *newpad = newAV();
-		SV **oldpad = AvARRAY(svp[CvDEPTH(cv)-1]);
-		I32 ix = AvFILLp((AV*)svp[1]);
-		I32 names_fill = AvFILLp((AV*)svp[0]);
-		svp = AvARRAY(svp[0]);
-		for ( ;ix > 0; ix--) {
-		    if (names_fill >= ix && svp[ix] != &PL_sv_undef) {
-			char *name = SvPVX(svp[ix]);
-			if ((SvFLAGS(svp[ix]) & SVf_FAKE) /* outer lexical? */
-			    || *name == '&')		  /* anonymous code? */
-			{
-			    av_store(newpad, ix, SvREFCNT_inc(oldpad[ix]));
-			}
-			else {				/* our own lexical */
-			    if (*name == '@')
-				av_store(newpad, ix, sv = (SV*)newAV());
-			    else if (*name == '%')
-				av_store(newpad, ix, sv = (SV*)newHV());
-			    else
-				av_store(newpad, ix, sv = NEWSV(0,0));
-			    SvPADMY_on(sv);
-			}
-		    }
-		    else if (IS_PADGV(oldpad[ix]) || IS_PADCONST(oldpad[ix])) {
-			av_store(newpad, ix, sv = SvREFCNT_inc(oldpad[ix]));
-		    }
-		    else {
-			av_store(newpad, ix, sv = NEWSV(0,0));
-			SvPADTMP_on(sv);
-		    }
-		}
-		av = newAV();		/* will be @_ */
-		av_extend(av, 0);
-		av_store(newpad, 0, (SV*)av);
-		AvFLAGS(av) = AVf_REIFY;
-		av_store(padlist, CvDEPTH(cv), (SV*)newpad);
-		AvFILLp(padlist) = CvDEPTH(cv);
-		svp = AvARRAY(padlist);
-	    }
+	    pad_push(padlist, CvDEPTH(cv), 1);
 	}
-#ifdef USE_5005THREADS
-	if (!hasargs) {
-	    AV* av = (AV*)PL_curpad[0];
-
-	    items = AvFILLp(av) + 1;
-	    if (items) {
-		/* Mark is at the end of the stack. */
-		EXTEND(SP, items);
-		Copy(AvARRAY(av), SP + 1, items, SV*);
-		SP += items;
-		PUTBACK ;		
-	    }
-	}
-#endif /* USE_5005THREADS */		
-	SAVEVPTR(PL_curpad);
-    	PL_curpad = AvARRAY((AV*)svp[CvDEPTH(cv)]);
-#ifndef USE_5005THREADS
+	PAD_SET_CUR(padlist, CvDEPTH(cv));
 	if (hasargs)
-#endif /* USE_5005THREADS */
 	{
 	    AV* av;
 	    SV** ary;
@@ -2841,7 +2642,7 @@ try_autoload:
 	    DEBUG_S(PerlIO_printf(Perl_debug_log,
 	    			  "%p entersub preparing @_\n", thr));
 #endif
-	    av = (AV*)PL_curpad[0];
+	    av = (AV*)PAD_SVl(0);
 	    if (AvREAL(av)) {
 		/* @_ is normally not REAL--this should only ever
 		 * happen when DB::sub() calls things that modify @_ */
@@ -2849,11 +2650,9 @@ try_autoload:
 		AvREAL_off(av);
 		AvREIFY_on(av);
 	    }
-#ifndef USE_5005THREADS
 	    cx->blk_sub.savearray = GvAV(PL_defgv);
 	    GvAV(PL_defgv) = (AV*)SvREFCNT_inc(av);
-#endif /* USE_5005THREADS */
-	    cx->blk_sub.oldcurpad = PL_curpad;
+	    CX_CURPAD_SAVE(cx->blk_sub);
 	    cx->blk_sub.argarray = av;
 	    ++MARK;
 
@@ -3134,22 +2933,3 @@ S_method_common(pTHX_ SV* meth, U32* hashp)
     }
     return isGV(gv) ? (SV*)GvCV(gv) : (SV*)gv;
 }
-
-#ifdef USE_5005THREADS
-static void
-unset_cvowner(pTHX_ void *cvarg)
-{
-    register CV* cv = (CV *) cvarg;
-
-    DEBUG_S((PerlIO_printf(Perl_debug_log, "%p unsetting CvOWNER of %p:%s\n",
-			   thr, cv, SvPEEK((SV*)cv))));
-    MUTEX_LOCK(CvMUTEXP(cv));
-    DEBUG_S(if (CvDEPTH(cv) != 0)
-		PerlIO_printf(Perl_debug_log, "depth %ld != 0\n",
-                             CvDEPTH(cv)));
-    assert(thr == CvOWNER(cv));
-    CvOWNER(cv) = 0;
-    MUTEX_UNLOCK(CvMUTEXP(cv));
-    SvREFCNT_dec(cv);
-}
-#endif /* USE_5005THREADS */

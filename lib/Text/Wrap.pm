@@ -34,6 +34,7 @@ sub wrap
 	my $t = expand(join("", (map { /\s+\z/ ? ( $_ ) : ($_, ' ') } @t), $tail));
 	my $lead = $ip;
 	my $ll = $columns - length(expand($ip)) - 1;
+	$ll = 0 if $ll < 0;
 	my $nll = $columns - length(expand($xp)) - 1;
 	my $nl = "";
 	my $remainder = "";
@@ -144,7 +145,7 @@ B<Example 3>
 C<Text::Wrap::wrap()> is a very simple paragraph formatter.  It formats a
 single paragraph at a time by breaking lines at word boundries.
 Indentation is controlled for the first line (C<$initial_tab>) and
-all subsquent lines (C<$subsequent_tab>) independently.  Please note: 
+all subsequent lines (C<$subsequent_tab>) independently.  Please note: 
 C<$initial_tab> and C<$subsequent_tab> are the literal strings that will
 be used: it is unlikley you would want to pass in a number.
 

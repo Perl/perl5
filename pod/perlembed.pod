@@ -386,6 +386,8 @@ been wrapped here):
  #include <EXTERN.h>
  #include <perl.h>
 
+ static PerlInterpreter *my_perl;
+
  /** my_eval_sv(code, error_check)
  ** kinda like eval_sv(), 
  ** but we pop the return value off the stack 
@@ -481,17 +483,18 @@ been wrapped here):
 
  main (int argc, char **argv, char **env)
  {
-     PerlInterpreter *my_perl = perl_alloc();
      char *embedding[] = { "", "-e", "0" };
      AV *match_list;
      I32 num_matches, i;
-     SV *text = NEWSV(1099,0);
+     SV *text;
      STRLEN n_a;
 
+     my_perl = perl_alloc();
      perl_construct(my_perl);
      perl_parse(my_perl, NULL, 3, embedding, NULL);
      PL_exit_flags |= PERL_EXIT_DESTRUCT_END;
 
+     text = NEWSV(1099,0);
      sv_setpv(text, "When he is at a convenience store and the bill comes to some amount like 76 cents, Maynard is aware that there is something he *should* do, something that will enable him to get back a quarter, but he has no idea *what*.  He fumbles through his red squeezey changepurse and gives the boy three extra pennies with his dollar, hoping that he might luck into the correct amount.  The boy gives him back two of his own pennies and then the big shiny quarter that is his prize. -RICHH");
 
      if (match(text, "m/quarter/")) /** Does text contain 'quarter'? **/
@@ -747,7 +750,7 @@ with L<perlfunc/my> whenever possible.
  #define DO_CLEAN 0
  #endif
 
- static PerlInterpreter *perl = NULL;
+ static PerlInterpreter *my_perl = NULL;
 
  int
  main(int argc, char **argv, char **env)
@@ -758,16 +761,16 @@ with L<perlfunc/my> whenever possible.
      int exitstatus = 0;
      STRLEN n_a;
 
-     if((perl = perl_alloc()) == NULL) {
+     if((my_perl = perl_alloc()) == NULL) {
         fprintf(stderr, "no memory!");
         exit(1);
      }
-     perl_construct(perl);
+     perl_construct(my_perl);
 
-     exitstatus = perl_parse(perl, NULL, 2, embedding, NULL);
+     exitstatus = perl_parse(my_perl, NULL, 2, embedding, NULL);
      PL_exit_flags |= PERL_EXIT_DESTRUCT_END;
      if(!exitstatus) {
-        exitstatus = perl_run(perl);
+        exitstatus = perl_run(my_perl);
 
         while(printf("Enter file name: ") && gets(filename)) {
 
@@ -783,8 +786,8 @@ with L<perlfunc/my> whenever possible.
      }
 
      PL_perl_destruct_level = 0;
-     perl_destruct(perl);
-     perl_free(perl);
+     perl_destruct(my_perl);
+     perl_free(my_perl);
      exit(exitstatus);
  }
 

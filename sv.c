@@ -25,6 +25,7 @@
 
 #ifdef PERL_COPY_ON_WRITE
 #define SV_COW_NEXT_SV(sv)	INT2PTR(SV *,SvUVX(sv))
+#define SV_COW_NEXT_SV_SET(current,next)	SvUVX(current) = PTR2UV(next)
 /* This is a pessamistic view. Scalar must be purely a read-write PV to copy-
    on-write.  */
 #define CAN_COW_MASK	(SVs_OBJECT|SVs_GMG|SVs_SMG|SVs_RMG|SVf_IOK|SVf_NOK| \
@@ -1126,13 +1127,8 @@ S_more_xpvbm(pTHX)
     xpvbm->xpv_pv = 0;
 }
 
-#ifdef LEAKTEST
-#  define my_safemalloc(s)	(void*)safexmalloc(717,s)
-#  define my_safefree(p)	safexfree((char*)p)
-#else
-#  define my_safemalloc(s)	(void*)safemalloc(s)
-#  define my_safefree(p)	safefree((char*)p)
-#endif
+#define my_safemalloc(s)	(void*)safemalloc(s)
+#define my_safefree(p)	safefree((char*)p)
 
 #ifdef PURIFY
 
@@ -1578,7 +1574,7 @@ Perl_sv_grow(pTHX_ register SV *sv, register STRLEN newlen)
 
     if (newlen > SvLEN(sv)) {		/* need more room? */
 	if (SvLEN(sv) && s) {
-#if defined(MYMALLOC) && !defined(LEAKTEST)
+#ifdef MYMALLOC
 	    STRLEN l = malloced_size((void*)SvPVX(sv));
 	    if (newlen <= l) {
 		SvLEN_set(sv, l);
@@ -2894,7 +2890,7 @@ Perl_sv_2pv_flags(pTHX_ register SV *sv, STRLEN *lp, I32 flags)
 {
     register char *s;
     int olderrno;
-    SV *tsv;
+    SV *tsv, *origsv;
     char tbuf[64];	/* Must fit sprintf/Gconvert of longest IV/NV */
     char *tmpbuf = tbuf;
 
@@ -2943,6 +2939,7 @@ Perl_sv_2pv_flags(pTHX_ register SV *sv, STRLEN *lp, I32 flags)
                     SvUTF8_off(sv);
                 return pv;
             }
+	    origsv = sv;
 	    sv = (SV*)SvRV(sv);
 	    if (!sv)
 		s = "NULLREF";
@@ -3009,6 +3006,7 @@ Perl_sv_2pv_flags(pTHX_ register SV *sv, STRLEN *lp, I32 flags)
                                            need a newline */
                                         mg->mg_len++; /* save space for it */
                                         need_newline = 1; /* note to add it */
+					break;
                                     }
                                 }
                             }
@@ -3024,6 +3022,11 @@ Perl_sv_2pv_flags(pTHX_ register SV *sv, STRLEN *lp, I32 flags)
 			    mg->mg_ptr[mg->mg_len] = 0;
 			}
 			PL_reginterp_cnt += re->program[0].next_off;
+
+			if (re->reganch & ROPT_UTF8)
+			    SvUTF8_on(origsv);
+			else
+			    SvUTF8_off(origsv);
 			*lp = mg->mg_len;
 			return mg->mg_ptr;
 		    }
@@ -3049,15 +3052,8 @@ Perl_sv_2pv_flags(pTHX_ register SV *sv, STRLEN *lp, I32 flags)
 		default:	s = "UNKNOWN";			break;
 		}
 		tsv = NEWSV(0,0);
-		if (SvOBJECT(sv)) {
-                    HV *svs = SvSTASH(sv);
-		    Perl_sv_setpvf(
-                        aTHX_ tsv, "%s=%s",
-                        /* [20011101.072] This bandaid for C<package;>
-                           should eventually be removed. AMS 20011103 */
-                        (svs ? HvNAME(svs) : "<none>"), s
-                    );
-                }
+		if (SvOBJECT(sv))
+		    Perl_sv_setpvf(aTHX_ tsv, "%s=%s", HvNAME(SvSTASH(sv)), s);
 		else
 		    sv_setpv(tsv, s);
 		Perl_sv_catpvf(aTHX_ tsv, "(0x%"UVxf")", PTR2UV(sv));
@@ -3199,16 +3195,14 @@ would lose the UTF-8'ness of the PV.
 void
 Perl_sv_copypv(pTHX_ SV *dsv, register SV *ssv)
 {
-    SV *tmpsv = sv_newmortal();
     STRLEN len;
     char *s;
     s = SvPV(ssv,len);
-    sv_setpvn(tmpsv,s,len);
+    sv_setpvn(dsv,s,len);
     if (SvUTF8(ssv))
-	SvUTF8_on(tmpsv);
+	SvUTF8_on(dsv);
     else
-	SvUTF8_off(tmpsv);
-    SvSetSV(dsv,tmpsv);
+	SvUTF8_off(dsv);
 }
 
 /*
@@ -3562,6 +3556,12 @@ Perl_sv_setsv_flags(pTHX_ SV *dstr, register SV *sstr, I32 flags)
     dtype = SvTYPE(dstr);
 
     SvAMAGIC_off(dstr);
+    if ( SvVOK(dstr) ) 
+    {
+	/* need to nuke the magic */
+	mg_free(dstr);
+	SvRMAGICAL_off(dstr);
+    }
 
     /* There's a lot of redundancy below but we're going for speed here */
 
@@ -3942,7 +3942,7 @@ Perl_sv_setsv_flags(pTHX_ SV *dstr, register SV *sstr, I32 flags)
                     SvFAKE_on(sstr);
                     /* Make the source SV into a loop of 1.
                        (about to become 2) */
-                    SV_COW_NEXT_SV(sstr) = sstr;
+                    SV_COW_NEXT_SV_SET(sstr, sstr);
                 }
             }
 #endif
@@ -3965,8 +3965,8 @@ Perl_sv_setsv_flags(pTHX_ SV *dstr, register SV *sstr, I32 flags)
                 if (len) {
                     /* SvIsCOW_normal */
                     /* splice us in between source and next-after-source.  */
-                    SV_COW_NEXT_SV(dstr) = SV_COW_NEXT_SV(sstr);
-                    SV_COW_NEXT_SV(sstr) = dstr;
+                    SV_COW_NEXT_SV_SET(dstr, SV_COW_NEXT_SV(sstr));
+                    SV_COW_NEXT_SV_SET(sstr, dstr);
                     SvPV_set(dstr, SvPVX(sstr));
                 } else {
                     /* SvIsCOW_shared_hash */
@@ -4017,9 +4017,9 @@ Perl_sv_setsv_flags(pTHX_ SV *dstr, register SV *sstr, I32 flags)
 	    SvIVX(dstr) = SvIVX(sstr);
 	}
 	if (SvVOK(sstr)) {
-	    MAGIC *mg = SvMAGIC(sstr); 
-	    sv_magicext(dstr, NULL, PERL_MAGIC_vstring, NULL,
-			mg->mg_ptr, mg->mg_len);
+	    MAGIC *smg = mg_find(sstr,PERL_MAGIC_vstring); 
+	    sv_magic(dstr, NULL, PERL_MAGIC_vstring,
+			smg->mg_ptr, smg->mg_len);
 	    SvRMAGICAL_on(dstr);
 	} 
     }
@@ -4255,7 +4255,7 @@ S_sv_release_COW(pTHX_ register SV *sv, char *pvx, STRLEN cur, STRLEN len,
                 assert (SvPVX(current) == pvx);
             }
             /* Make the SV before us point to the SV after us.  */
-            SV_COW_NEXT_SV(current) = after;
+            SV_COW_NEXT_SV_SET(current, after);
         }
     } else {
         unsharepvn(pvx, SvUTF8(sv) ? -(I32)cur : cur, hash);
@@ -4757,11 +4757,6 @@ Perl_sv_magic(pTHX_ register SV *sv, SV *obj, int how, const char *name, I32 nam
     case PERL_MAGIC_dbline:
 	vtable = &PL_vtbl_dbline;
 	break;
-#ifdef USE_5005THREADS
-    case PERL_MAGIC_mutex:
-	vtable = &PL_vtbl_mutex;
-	break;
-#endif /* USE_5005THREADS */
 #ifdef USE_LOCALE_COLLATE
     case PERL_MAGIC_collxfrm:
         vtable = &PL_vtbl_collxfrm;
@@ -4791,6 +4786,9 @@ Perl_sv_magic(pTHX_ register SV *sv, SV *obj, int how, const char *name, I32 nam
 	break;
     case PERL_MAGIC_vec:
 	vtable = &PL_vtbl_vec;
+	break;
+    case PERL_MAGIC_vstring:
+	vtable = 0;
 	break;
     case PERL_MAGIC_substr:
 	vtable = &PL_vtbl_substr;
@@ -5095,10 +5093,11 @@ Perl_sv_replace(pTHX_ register SV *sv, register SV *nsv)
 	if (DEBUG_C_TEST) {
 	    PerlIO_printf(Perl_debug_log, "previous is\n");
 	    sv_dump(current);
-	    PerlIO_printf(Perl_debug_log, "move it from "UVxf" to "UVxf"\n",
+	    PerlIO_printf(Perl_debug_log,
+                          "move it from 0x%"UVxf" to 0x%"UVxf"\n",
 			  (UV) SV_COW_NEXT_SV(current), (UV) sv);
 	}
-	SV_COW_NEXT_SV(current) = sv;
+	SV_COW_NEXT_SV_SET(current, sv);
     }
 #endif
     SvREFCNT(sv) = refcnt;
@@ -7238,10 +7237,7 @@ char *
 Perl_sv_reftype(pTHX_ SV *sv, int ob)
 {
     if (ob && SvOBJECT(sv)) {
-        HV *svs = SvSTASH(sv);
-        /* [20011101.072] This bandaid for C<package;> should eventually
-           be removed. AMS 20011103 */
-        return (svs ? HvNAME(svs) : "<none>");
+	return HvNAME(SvSTASH(sv));
     }
     else {
 	switch (SvTYPE(sv)) {
@@ -8805,10 +8801,6 @@ ptr_table_* functions.
 
 #if defined(USE_ITHREADS)
 
-#if defined(USE_5005THREADS)
-#  include "error: USE_5005THREADS and USE_ITHREADS are incompatible"
-#endif
-
 #ifndef GpREFCNT_inc
 #  define GpREFCNT_inc(gp)	((gp) ? (++(gp)->gp_refcnt, (gp)) : (GP*)NULL)
 #endif
@@ -9573,15 +9565,7 @@ Perl_sv_dup(pTHX_ SV *sstr, CLONE_PARAMS* param)
 	} else {
 	  CvDEPTH(dstr) = 0;
 	}
-	if (CvPADLIST(sstr) && !AvREAL(CvPADLIST(sstr))) {
-	    /* XXX padlists are real, but pretend to be not */
-	    AvREAL_on(CvPADLIST(sstr));
-	    CvPADLIST(dstr)	= av_dup_inc(CvPADLIST(sstr), param);
-	    AvREAL_off(CvPADLIST(sstr));
-	    AvREAL_off(CvPADLIST(dstr));
-	}
-	else
-	    CvPADLIST(dstr)	= av_dup_inc(CvPADLIST(sstr), param);
+	PAD_DUP(CvPADLIST(dstr), CvPADLIST(sstr), param);
 	if (!CvANON(sstr) || CvCLONED(sstr))
 	    CvOUTSIDE(dstr)	= cv_dup_inc(CvOUTSIDE(sstr), param);
 	else
@@ -10319,7 +10303,6 @@ perl_clone_using(PerlInterpreter *proto_perl, UV flags,
     /* symbol tables */
     PL_defstash		= hv_dup_inc(proto_perl->Tdefstash, param);
     PL_curstash		= hv_dup(proto_perl->Tcurstash, param);
-    PL_nullstash       = hv_dup(proto_perl->Inullstash, param);
     PL_debstash		= hv_dup(proto_perl->Idebstash, param);
     PL_globalstash	= hv_dup(proto_perl->Iglobalstash, param);
     PL_curstname	= sv_dup_inc(proto_perl->Icurstname, param);
@@ -10391,12 +10374,8 @@ perl_clone_using(PerlInterpreter *proto_perl, UV flags,
     PL_rsfp_filters	= av_dup_inc(proto_perl->Irsfp_filters, param);
 
     PL_compcv			= cv_dup(proto_perl->Icompcv, param);
-    PL_comppad			= av_dup(proto_perl->Icomppad, param);
-    PL_comppad_name		= av_dup(proto_perl->Icomppad_name, param);
-    PL_comppad_name_fill	= proto_perl->Icomppad_name_fill;
-    PL_comppad_name_floor	= proto_perl->Icomppad_name_floor;
-    PL_curpad			= (SV**)ptr_table_fetch(PL_ptr_table,
-							proto_perl->Tcurpad);
+
+    PAD_CLONE_VARS(proto_perl, param);
 
 #ifdef HAVE_INTERP_INTERN
     sys_intern_dup(&proto_perl->Isys_intern, &PL_sys_intern);
@@ -10415,7 +10394,6 @@ perl_clone_using(PerlInterpreter *proto_perl, UV flags,
     PL_egid		= proto_perl->Iegid;
     PL_nomemok		= proto_perl->Inomemok;
     PL_an		= proto_perl->Ian;
-    PL_cop_seqmax	= proto_perl->Icop_seqmax;
     PL_op_seqmax	= proto_perl->Iop_seqmax;
     PL_evalseq		= proto_perl->Ievalseq;
     PL_origenviron	= proto_perl->Iorigenviron;	/* XXX not quite right */
@@ -10493,12 +10471,6 @@ perl_clone_using(PerlInterpreter *proto_perl, UV flags,
     PL_error_count	= proto_perl->Ierror_count;
     PL_subline		= proto_perl->Isubline;
     PL_subname		= sv_dup_inc(proto_perl->Isubname, param);
-
-    PL_min_intro_pending	= proto_perl->Imin_intro_pending;
-    PL_max_intro_pending	= proto_perl->Imax_intro_pending;
-    PL_padix			= proto_perl->Ipadix;
-    PL_padix_floor		= proto_perl->Ipadix_floor;
-    PL_pad_reset_pending	= proto_perl->Ipad_reset_pending;
 
     /* XXX See comment on SvANY(proto_perl->Ilinestr) above */
     if (SvANY(proto_perl->Ilinestr)) {

@@ -4973,8 +4973,8 @@ effect as the C<-> flag: left-justification.
 
 You can specify a precision (for numeric conversions) or a maximum
 width (for string conversions) by specifying a C<.> followed by a number.
-For floating point formats, this specifies the number of decimal places
-to show (the default being 6), eg:
+For floating point formats, with the exception of 'g' and 'G', this specifies
+the number of decimal places to show (the default being 6), eg:
 
   # these examples are subject to system-specific variation
   printf '<%f>', 1;    # prints "<1.000000>"
@@ -4982,6 +4982,18 @@ to show (the default being 6), eg:
   printf '<%.0f>', 1;  # prints "<1>"
   printf '<%e>', 10;   # prints "<1.000000e+01>"
   printf '<%.1e>', 10; # prints "<1.0e+01>"
+
+For 'g' and 'G', this specifies the maximum number of digits to show,
+including prior to the decimal point as well as after it, eg:
+
+  # these examples are subject to system-specific variation
+  printf '<%g>', 1;        # prints "<1>"
+  printf '<%.10g>', 1;     # prints "<1>"
+  printf '<%g>', 100;      # prints "<100>"
+  printf '<%.1g>', 100;    # prints "<1e+02>"
+  printf '<%.2g>', 100.01; # prints "<1e+02>"
+  printf '<%.5g>', 100.01; # prints "<100.01>"
+  printf '<%.4g>', 100.01; # prints "<100>"
 
 For integer conversions, specifying a precision implies that the
 output of the number itself should be zero-padded to this width:
@@ -5010,23 +5022,49 @@ eg C<.*2$>:
 =item size
 
 For numeric conversions, you can specify the size to interpret the
-number as using C<l>, C<h>, C<V>, C<q>, C<L> or C<ll>. For integer
-conversions, numbers are usually assumed to be whatever the default
-integer size is on your platform (usually 32 or 64 bits), but you
-can override this to use instead one of the standard C types, as
-supported by the compiler used to build Perl:
+number as using C<l>, C<h>, C<V>, C<q>, C<L>, or C<ll>. For integer
+conversions (C<d u o x X b i D U O>), numbers are usually assumed to be
+whatever the default integer size is on your platform (usually 32 or 64
+bits), but you can override this to use instead one of the standard C types,
+as supported by the compiler used to build Perl:
 
    l           interpret integer as C type "long" or "unsigned long"
    h           interpret integer as C type "short" or "unsigned short"
-   q, L or ll  interpret integer as C type "long long" or "unsigned long long"
-               (if your platform supports such a type, else it is an error)
+   q, L or ll  interpret integer as C type "long long", "unsigned long long".
+               or "quads" (typically 64-bit integers)
 
-For floating point conversions, numbers are usually assumed to be
-the default floating point size on your platform (double or long double),
-but you can force 'long double' with C<q>, C<L> or C<ll> if your
-platform supports them.
+The last will produce errors if Perl does not understand "quads" in your
+installation. (This requires that either the platform natively supports quads
+or Perl was specifically compiled to support quads.) You can find out
+whether your Perl supports quads via L<Config>:
 
-The size specifier 'V' has no effect for Perl code, but it supported
+	use Config;
+	($Config{use64bitint} eq 'define' || $Config{longsize} >= 8) &&
+		print "quads\n";
+
+For floating point conversions (C<e f g E F G>), numbers are usually assumed
+to be the default floating point size on your platform (double or long double),
+but you can force 'long double' with C<q>, C<L>, or C<ll> if your
+platform supports them. You can find out whether your Perl supports long
+doubles via L<Config>:
+
+	use Config;
+	$Config{d_longdbl} eq 'define' && print "long doubles\n";
+
+You can find out whether Perl considers 'long double' to be the default
+floating point size to use on your platform via L<Config>:
+
+        use Config;
+        ($Config{uselongdouble} eq 'define') &&
+                print "long doubles by default\n";
+
+It can also be the case that long doubles and doubles are the same thing:
+
+        use Config;
+        ($Config{doublesize} == $Config{longdblsize}) &&
+                print "doubles are long doubles\n";
+
+The size specifier C<V> has no effect for Perl code, but it is supported
 for compatibility with XS code; it means 'use the standard size for
 a Perl integer (or floating-point number)', which is already the
 default for Perl code.
@@ -5067,44 +5105,6 @@ index, the C<$> may need to be escaped:
 If C<use locale> is in effect, the character used for the decimal
 point in formatted real numbers is affected by the LC_NUMERIC locale.
 See L<perllocale>.
-
-If Perl understands "quads" (64-bit integers) (this requires
-either that the platform natively support quads or that Perl
-be specifically compiled to support quads), the characters
-
-	d u o x X b i D U O
-
-print quads, and they may optionally be preceded by
-
-	ll L q
-
-For example
-
-	%lld %16LX %qo
-
-You can find out whether your Perl supports quads via L<Config>:
-
-	use Config;
-	($Config{use64bitint} eq 'define' || $Config{longsize} == 8) &&
-		print "quads\n";
-
-If Perl understands "long doubles" (this requires that the platform
-support long doubles), the flags
-
-	e f g E F G
-
-may optionally be preceded by
-
-	ll L
-
-For example
-
-	%llf %Lg
-
-You can find out whether your Perl supports long doubles via L<Config>:
-
-	use Config;
-	$Config{d_longdbl} eq 'define' && print "long doubles\n";
 
 =item sqrt EXPR
 
@@ -5257,7 +5257,7 @@ You can import symbolic mode constants (C<S_IF*>) and functions
     $group_read    = ($mode & S_IRGRP) >> 3;
     $other_execute =  $mode & S_IXOTH;
 
-    printf "Permissions are %04o\n", S_ISMODE($mode), "\n";
+    printf "Permissions are %04o\n", S_IMODE($mode), "\n";
 
     $is_setuid     =  $mode & S_ISUID;
     $is_setgid     =  S_ISDIR($mode);
@@ -5285,7 +5285,7 @@ The commonly available S_IF* constants are
 
 and the S_IF* functions are
 
-    S_IFMODE($mode)	the part of $mode containing the permission bits
+    S_IMODE($mode)	the part of $mode containing the permission bits
 			and the setuid/setgid/sticky bits
 
     S_IFMT($mode)	the part of $mode containing the file type
