@@ -927,10 +927,12 @@ DllExport char *
 win32_getenv(const char *name)
 {
     static char *curitem = Nullch;	/* XXX threadead */
-    static DWORD curlen = 512;		/* XXX threadead */
+    static DWORD curlen = 0;		/* XXX threadead */
     DWORD needlen;
-    if (!curitem)
+    if (!curitem) {
+	curlen = 512;
 	New(1305,curitem,curlen,char);
+    }
 
     needlen = GetEnvironmentVariable(name,curitem,curlen);
     if (needlen != 0) {
@@ -950,6 +952,7 @@ win32_getenv(const char *name)
 	    if (curitem) {
 		Safefree(curitem);
 		curitem = Nullch;
+		curlen = 0;
 	    }
 	    curitem = GetRegStr(name, &curitem, &curlen);
 	}

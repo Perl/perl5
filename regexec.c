@@ -208,6 +208,7 @@ regcppop(void)
 STATIC char *
 regcp_set_to(I32 ss)
 {
+    dTHR;
     I32 tmp = PL_savestack_ix;
 
     PL_savestack_ix = ss;
@@ -250,6 +251,7 @@ pregexec(register regexp *prog, char *stringarg, register char *strend,
 STATIC void
 cache_re(regexp *prog)
 {
+    dTHR;
     PL_regprecomp = prog->precomp;		/* Needed for FAIL. */
 #ifdef DEBUGGING
     PL_regprogram = prog->program;

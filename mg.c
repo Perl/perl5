@@ -47,6 +47,7 @@ struct magic_state {
 STATIC void
 save_magic(I32 mgs_ix, SV *sv)
 {
+    dTHR;
     MGS* mgs;
     assert(SvMAGICAL(sv));
 
@@ -65,6 +66,7 @@ save_magic(I32 mgs_ix, SV *sv)
 STATIC void
 restore_magic(void *p)
 {
+    dTHR;
     MGS* mgs = SSPTR((I32)p, MGS*);
     SV* sv = mgs->mgs_sv;
 
@@ -120,6 +122,7 @@ mg_magical(SV *sv)
 int
 mg_get(SV *sv)
 {
+    dTHR;
     I32 mgs_ix;
     MAGIC* mg;
     MAGIC** mgp;
@@ -154,6 +157,7 @@ mg_get(SV *sv)
 int
 mg_set(SV *sv)
 {
+    dTHR;
     I32 mgs_ix;
     MAGIC* mg;
     MAGIC* nextmg;

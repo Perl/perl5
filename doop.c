@@ -594,6 +594,7 @@ do_trans_UU_complex(SV *sv)
 I32
 do_trans(SV *sv)
 {
+    dTHR;
     STRLEN len;
 
     if (SvREADONLY(sv) && !(PL_op->op_private & OPpTRANS_IDENTICAL))
