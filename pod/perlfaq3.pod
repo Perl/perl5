@@ -873,7 +873,7 @@ when it runs fine on the command line'', see the troubleshooting
 guides and references in L<perlfaq9> or in the CGI MetaFAQ:
 
 	http://www.perl.org/CGI_MetaFAQ.html
-	
+
 =head2 Where can I learn about object-oriented Perl programming?
 
 A good place to start is L<perltoot>, and you can use L<perlobj>,

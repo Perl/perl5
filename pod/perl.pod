@@ -53,7 +53,7 @@ For ease of access, the Perl manual has been split up into several sections.
       perlfaq7		Perl Language Issues
       perlfaq8		System Interaction
       perlfaq9		Networking
-  
+
 =head2 Reference Manual
 
     perlsyn		Perl syntax
