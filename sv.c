@@ -7205,6 +7205,8 @@ Perl_sv_bless(pTHX_ SV *sv, HV *stash)
     else
 	SvAMAGIC_off(sv);
 
+    SvSETMAGIC(tmpRef);
+ 
     return sv;
 }
 
