@@ -3,15 +3,15 @@ Check FATAL functionality
 __END__
 
 # Check compile time warning
-use warnings FATAL => 'deprecated' ;
+use warnings FATAL => 'syntax' ;
 {
     no warnings ;
-    1 if $a EQ $b ;
+    $a =+ 1 ;
 }
-1 if $a EQ $b ; 
+$a =+ 1 ;
 print STDERR "The End.\n" ;
 EXPECT
-Use of EQ is deprecated at - line 8.
+Reversed += operator at - line 8.
 ########
 
 # Check compile time warning
@@ -75,28 +75,28 @@ Use of uninitialized value in scalar chop at - line 6.
 ########
 
 --FILE-- abc
-1 if $a EQ $b ;
+$a =+ 1 ;
 1;
 --FILE-- 
-use warnings FATAL => 'deprecated' ;
+use warnings FATAL => 'syntax' ;
 require "./abc";
 EXPECT
 
 ########
 
 --FILE-- abc
-use warnings FATAL => 'deprecated' ;
+use warnings FATAL => 'syntax' ;
 1;
 --FILE-- 
 require "./abc";
-1 if $a EQ $b ;
+$a =+ 1 ;
 EXPECT
 
 ########
 
 --FILE-- abc
-use warnings 'deprecated' ;
-1 if $a EQ $b ;
+use warnings 'syntax' ;
+$a =+ 1 ;
 1;
 --FILE-- 
 use warnings FATAL => 'uninitialized' ;
@@ -104,13 +104,13 @@ require "./abc";
 my $a ; chop $a ;
 print STDERR "The End.\n" ;
 EXPECT
-Use of EQ is deprecated at ./abc line 2.
+Reversed += operator at ./abc line 2.
 Use of uninitialized value in scalar chop at - line 3.
 ########
 
 --FILE-- abc.pm
-use warnings 'deprecated' ;
-1 if $a EQ $b ;
+use warnings 'syntax' ;
+$a =+ 1 ;
 1;
 --FILE-- 
 use warnings FATAL => 'uninitialized' ;
@@ -118,7 +118,7 @@ use abc;
 my $a ; chop $a ;
 print STDERR "The End.\n" ;
 EXPECT
-Use of EQ is deprecated at abc.pm line 2.
+Reversed += operator at abc.pm line 2.
 Use of uninitialized value in scalar chop at - line 3.
 ########
 
@@ -162,44 +162,44 @@ Use of uninitialized value in scalar chop at - line 8.
 # Check scope of pragma with eval
 no warnings ;
 eval {
-    use warnings FATAL => 'deprecated' ;
-    1 if $a EQ $b ;
+    use warnings FATAL => 'syntax' ;
+    $a =+ 1 ;
 }; print STDERR "-- $@" ;
-1 if $a EQ $b ;
+$a =+ 1 ;
 print STDERR "The End.\n" ;
 EXPECT
-Use of EQ is deprecated at - line 6.
+Reversed += operator at - line 6.
 ########
 
 # Check scope of pragma with eval
-use warnings FATAL => 'deprecated' ;
+use warnings FATAL => 'syntax' ;
 eval {
-    1 if $a EQ $b ;
+    $a =+ 1 ;
 }; print STDERR "-- $@" ;
-1 if $a EQ $b ;
+$a =+ 1 ;
 print STDERR "The End.\n" ;
 EXPECT
-Use of EQ is deprecated at - line 5.
+Reversed += operator at - line 5.
 ########
 
 # Check scope of pragma with eval
-use warnings FATAL => 'deprecated' ;
+use warnings FATAL => 'syntax' ;
 eval {
     no warnings ;
-    1 if $a EQ $b ;
+    $a =+ 1 ;
 }; print STDERR $@ ;
-1 if $a EQ $b ;
+$a =+ 1 ;
 print STDERR "The End.\n" ;
 EXPECT
-Use of EQ is deprecated at - line 8.
+Reversed += operator at - line 8.
 ########
 
 # Check scope of pragma with eval
 no warnings ;
 eval {
-    use warnings FATAL => 'deprecated' ;
+    use warnings FATAL => 'syntax' ;
 }; print STDERR $@ ;
-1 if $a EQ $b ;
+$a =+ 1 ;
 print STDERR "The End.\n" ;
 EXPECT
 The End.
@@ -245,34 +245,34 @@ Use of uninitialized value in scalar chop at - line 8.
 # Check scope of pragma with eval
 no warnings ;
 eval q[ 
-    use warnings FATAL => 'deprecated' ;
-    1 if $a EQ $b ;
+    use warnings FATAL => 'syntax' ;
+    $a =+ 1 ;
 ]; print STDERR "-- $@";
-1 if $a EQ $b ;
+$a =+ 1 ;
 print STDERR "The End.\n" ;
 EXPECT
--- Use of EQ is deprecated at (eval 1) line 3.
+-- Reversed += operator at (eval 1) line 3.
 The End.
 ########
 
 # Check scope of pragma with eval
-use warnings FATAL => 'deprecated' ;
+use warnings FATAL => 'syntax' ;
 eval '
-    1 if $a EQ $b ;
+    $a =+ 1 ;
 '; print STDERR "-- $@";
 print STDERR "The End.\n" ;
 EXPECT
--- Use of EQ is deprecated at (eval 1) line 2.
+-- Reversed += operator at (eval 1) line 2.
 The End.
 ########
 
 # Check scope of pragma with eval
-use warnings FATAL => 'deprecated' ;
+use warnings FATAL => 'syntax' ;
 eval '
     no warnings ;
-    1 if $a EQ $b ;
+    $a =+ 1 ;
 '; print STDERR "-- $@";
-1 if $a EQ $b ;
+$a =+ 1 ;
 print STDERR "The End.\n" ;
 EXPECT
-Use of EQ is deprecated at - line 8.
+Reversed += operator at - line 8.

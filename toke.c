@@ -5146,7 +5146,6 @@ Perl_keyword(pTHX_ register char *d, I32 len)
 	}
 	break;
     case 'E':
-	if (strEQ(d,"EQ")) { deprecate(d);	return -KEY_eq;}
 	if (strEQ(d,"END"))			return KEY_END;
 	break;
     case 'e':
@@ -5210,12 +5209,6 @@ Perl_keyword(pTHX_ register char *d, I32 len)
 	case 8:
 	    if (strEQ(d,"formline"))		return -KEY_formline;
 	    break;
-	}
-	break;
-    case 'G':
-	if (len == 2) {
-	    if (strEQ(d,"GT")) { deprecate(d);	return -KEY_gt;}
-	    if (strEQ(d,"GE")) { deprecate(d);	return -KEY_ge;}
 	}
 	break;
     case 'g':
@@ -5317,12 +5310,6 @@ Perl_keyword(pTHX_ register char *d, I32 len)
 	    if (strEQ(d,"kill"))		return -KEY_kill;
 	}
 	break;
-    case 'L':
-	if (len == 2) {
-	    if (strEQ(d,"LT")) { deprecate(d);	return -KEY_lt;}
-	    if (strEQ(d,"LE")) { deprecate(d);	return -KEY_le;}
-	}
-	break;
     case 'l':
 	switch (len) {
 	case 2:
@@ -5373,9 +5360,6 @@ Perl_keyword(pTHX_ register char *d, I32 len)
 	    if (strEQ(d,"msgsnd"))		return -KEY_msgsnd;
 	    break;
 	}
-	break;
-    case 'N':
-	if (strEQ(d,"NE")) { deprecate(d);	return -KEY_ne;}
 	break;
     case 'n':
 	if (strEQ(d,"next"))			return KEY_next;

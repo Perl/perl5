@@ -5,7 +5,7 @@ __END__
 # nolint: check compile time $^W is zapped
 BEGIN { $^W = 1 ;}
 $a = $b = 1 ;
-$a = 1 if $a EQ $b ;
+$a =+ 1 ;
 close STDIN ; print STDIN "abc" ;
 EXPECT
 ########
@@ -27,7 +27,7 @@ EXPECT
 # nolint: check "no warnings" is zapped
 use warnings ;
 $a = $b = 1 ;
-$a = 1 if $a EQ $b ;
+$a =+ 1 ;
 close STDIN ; print STDIN "abc" ;
 EXPECT
 ########
@@ -49,9 +49,9 @@ EXPECT
 ########
 -X
 --FILE-- abc.pm
-use warnings 'deprecated' ;
-my ($a, $b) = (0,0);
-1 if $a EQ $b ;
+use warnings 'syntax' ;
+my $a = 0;
+$a =+ 1 ;
 1;
 --FILE-- 
 use warnings 'uninitialized' ;
@@ -61,9 +61,9 @@ EXPECT
 ########
 -X
 --FILE-- abc
-use warnings 'deprecated' ;
-my ($a, $b) = (0,0);
-1 if $a EQ $b ;
+use warnings 'syntax' ;
+my $a = 0;
+$a =+ 1 ;
 1;
 --FILE-- 
 use warnings 'uninitialized' ;
@@ -75,7 +75,7 @@ EXPECT
 --FILE-- abc.pm
 BEGIN {$^W = 1}
 my ($a, $b) = (0,0);
-1 if $a EQ $b ;
+$a =+ 1 ;
 1;
 --FILE-- 
 $^W = 1 ;
@@ -87,7 +87,7 @@ EXPECT
 --FILE-- abc
 BEGIN {$^W = 1}
 my ($a, $b) = (0,0);
-1 if $a EQ $b ;
+$a =+ 1 ;
 1;
 --FILE-- 
 $^W = 1 ;
