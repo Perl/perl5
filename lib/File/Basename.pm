@@ -61,8 +61,8 @@ B<name> is removed and prepended to B<suffix>.  By proper use of
 C<@suffixlist>, you can remove file types or versions for examination.
 
 You are guaranteed that if you concatenate B<path>, B<name>, and
-B<suffix> together in that order, the result will be identical to the
-input file specification.
+B<suffix> together in that order, the result will denote the same
+file as the input file specification.
 
 =back
 
@@ -70,13 +70,13 @@ input file specification.
 
 Using UNIX file syntax:
 
-    ($base,$path,$type) = fileparse('/virgil/aeneid/draft.book7', 
+    ($base,$path,$type) = fileparse('/virgil/aeneid/draft.book7',
 				    '\.book\d+');
 
 would yield
 
     $base eq 'draft'
-    $path eq '/virgil/aeneid',
+    $path eq '/virgil/aeneid/',
     $tail eq '.book7'
 
 Similarly, using VMS syntax:
@@ -101,7 +101,9 @@ compatibility with the UNIX shell command basename(1).
 The dirname() routine returns the directory portion of the input file
 specification.  When using VMS or MacOS syntax, this is identical to the
 second element of the list produced by calling fileparse() with the same
-input file specification.  When using UNIX or MSDOS syntax, the return
+input file specification.  (Under VMS, if there is no directory information
+in the input file specification, then the current default device and
+directory are returned.)  When using UNIX or MSDOS syntax, the return
 value conforms to the behavior of the UNIX shell command dirname(1).  This
 is usually the same as the behavior of fileparse(), but differs in some
 cases.  For example, for the input file specification F<lib/>, fileparse()
@@ -114,6 +116,10 @@ require 5.002;
 require Exporter;
 @ISA = qw(Exporter);
 @EXPORT = qw(fileparse fileparse_set_fstype basename dirname);
+#use strict;
+#use vars qw($VERSION $Fileparse_fstype);
+$VERSION = "2.3";
+
 
 #   fileparse_set_fstype() - specify OS-based rules used in future
 #                            calls to routines in this package
@@ -129,62 +135,25 @@ sub fileparse_set_fstype {
 
 #   fileparse() - parse file specification
 #
-#   calling sequence:
-#     ($filename,$prefix,$tail) = &basename_pat($filespec,@excludelist);
-#     where  $filespec    is the file specification to be parsed, and
-#            @excludelist is a list of patterns which should be removed
-#                         from the end of $filename.
-#            $filename    is the part of $filespec after $prefix (i.e. the
-#                         name of the file).  The elements of @excludelist
-#                         are compared to $filename, and if an  
-#            $prefix     is the path portion $filespec, up to and including
-#                        the end of the last directory name
-#            $tail        any characters removed from $filename because they
-#                         matched an element of @excludelist.
-#
-#   fileparse() first removes the directory specification from $filespec,
-#   according to the syntax of the OS (code is provided below to handle
-#   VMS, Unix, MSDOS and MacOS; you can pick the one you want using
-#   fileparse_set_fstype(), or you can accept the default, which is
-#   based on the information in the builtin variable $^O).  It then compares
-#   each element of @excludelist to $filename, and if that element is a
-#   suffix of $filename, it is removed from $filename and prepended to
-#   $tail.  By specifying the elements of @excludelist in the right order,
-#   you can 'nibble back' $filename to extract the portion of interest
-#   to you.
-#
-#   For example, on a system running Unix,
-#   ($base,$path,$type) = fileparse('/virgil/aeneid/draft.book7',
-#                                       '\.book\d+');
-#   would yield $base == 'draft',
-#               $path == '/virgil/aeneid/'  (note trailing slash)
-#               $tail == '.book7'.
-#   Similarly, on a system running VMS,
-#   ($name,$dir,$type) = fileparse('Doc_Root:[Help]Rhetoric.Rnh','\..*');
-#   would yield $name == 'Rhetoric';
-#               $dir == 'Doc_Root:[Help]', and
-#               $type == '.Rnh'.
-#
-#   Version 2.2  13-Oct-1994  Charles Bailey  bailey@genetics.upenn.edu 
+#   Version 2.3   4-Jul-1996  Charles Bailey  bailey@genetics.upenn.edu
 
 
 sub fileparse {
   my($fullname,@suffices) = @_;
   my($fstype) = $Fileparse_fstype;
-  my($dirpath,$tail,$suffix);
+  my($dirpath,$tail,$suffix,$basename);
 
   if ($fstype =~ /^VMS/i) {
     if ($fullname =~ m#/#) { $fstype = '' }  # We're doing Unix emulation
     else {
       ($dirpath,$basename) = ($fullname =~ /(.*[:>\]])?(.*)/);
-      $dirpath = $ENV{'DEFAULT'} unless $dirpath;
     }
   }
   if ($fstype =~ /^MSDOS/i) {
-    ($dirpath,$basename) = ($fullname =~ /(.*\\)?(.*)/);
-    $dirpath = '.\\' unless $dirpath;
+    ($dirpath,$basename) = ($fullname =~ /(.*[:\\])?(.*)/);
+    $dirpath .= '.\\' unless $dirpath =~ /\\$/;
   }
-  elsif ($fstype =~ /^MAC/i) {
+  elsif ($fstype =~ /^MacOS/i) {
     ($dirpath,$basename) = ($fullname =~ /(.*:)?(.*)/);
   }
   elsif ($fstype !~ /^VMS/i) {  # default to Unix
@@ -195,9 +164,9 @@ sub fileparse {
   if (@suffices) {
     $tail = '';
     foreach $suffix (@suffices) {
-      if ($basename =~ /($suffix)$/) {
-        $tail = $1 . $tail;
-        $basename = $`;
+      if ($basename =~ /([\x00-\xff]*?)($suffix)$/) {
+        $tail = $2 . $tail;
+        $basename = $1;
       }
     }
   }
@@ -213,7 +182,7 @@ sub basename {
   my($name) = shift;
   (fileparse($name, map("\Q$_\E",@_)))[0];
 }
-  
+
 
 #    dirname() - returns device and directory portion of file specification
 #        Behavior matches that of Unix dirname(1) exactly for Unix and MSDOS
@@ -228,20 +197,21 @@ sub dirname {
 
     if ($fstype =~ /VMS/i) { 
         if ($_[0] =~ m#/#) { $fstype = '' }
-        else { return $dirname }
+        else { return $dirname || $ENV{DEFAULT} }
     }
     if ($fstype =~ /MacOS/i) { return $dirname }
     elsif ($fstype =~ /MSDOS/i) { 
         if ( $dirname =~ /:\\$/) { return $dirname }
         chop $dirname;
-        $dirname =~ s:[^\\]+$:: unless $basename;
-        $dirname = '.' unless $dirname;
+        $dirname =~ s:[^\\]+$:: unless length($basename);
+        $dirname = '.' unless length($dirname);
     }
     else { 
-        if ( $dirname eq '/') { return $dirname }
+        if ( $dirname =~ m:^/+$:) { return '/'; }
         chop $dirname;
-        $dirname =~ s:[^/]+$:: unless $basename;
-        $dirname = '.' unless $dirname;
+        $dirname =~ s:[^/]+$:: unless length($basename);
+        $dirname =~ s:/+$:: ;
+        $dirname = '.' unless length($dirname);
     }
 
     $dirname;
