@@ -29,6 +29,24 @@ Version v5.8.3		Maintenance release working toward v5.8.3
 --------------
 ____________________________________________________________________________
 ____________________________________________________________________________
+[ 22151] By: nicholas                              on 2004/01/14  17:54:36
+        Log: Integrate:
+             [ 22149]
+             Subject:  Doc patches for File::Find
+             From:  Andy Lester <andy@petdance.com>
+             Date:  Mon, 12 Jan 2004 00:10:50 -0600
+             Message-Id:  <20040112061050.GB7308@petdance.com>
+             
+             [ 22150]
+             Bump version number as file has changed since 5.8.2
+     Branch: maint-5.8/perl
+	  !> lib/File/Find.pm
+____________________________________________________________________________
+[ 22148] By: nicholas                              on 2004/01/14  16:53:02
+        Log: Update Changes
+     Branch: maint-5.8/perl
+	   ! Changes
+____________________________________________________________________________
 [ 22147] By: nicholas                              on 2004/01/14  16:51:39
         Log: Update sample config to 5.8.3
      Branch: maint-5.8/perl
