@@ -45,6 +45,7 @@ typedef NVTYPE NV;
 #       endif
 #   else
 #       define	IVdf	"ld"
+#       define	UVuf	"lu"
 #   endif
 #endif
 
