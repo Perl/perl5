@@ -454,6 +454,7 @@ conveniently stored to disk and retrieved at a later time.
 It can be used in the regular procedural way by calling C<store> with
 a reference to the object to be stored, along with the file name where
 the image should be written.
+
 The routine returns C<undef> for I/O problems or other internal error,
 a true value otherwise. Serious errors are propagated as a C<die> exception.
 
@@ -562,8 +563,8 @@ settings.
 This release of Storable can be used on a newer version of Perl to
 serialize data which is not supported by earlier Perls.  By default
 Storable will attempt to do the right thing, by C<croak()>ing if it
-encounters data that it cannot deserialize.  However, the defaults can be
-changed as follows
+encounters data that it cannot deserialize.  However, the defaults
+can be changed as follows
 
 =over 4
 
@@ -921,16 +922,10 @@ a binary incompatibility for the Storable image starting at version
 Murray Nesbitt made Storable thread-safe.  Marc Lehmann added overloading
 and reference to tied items support.
 
-=head1 TRANSLATIONS
-
-There is a Japanese translation of this man page available at
-http://member.nifty.ne.jp/hippo2000/perltips/storable.htm ,
-courtesy of Kawai, Takanori <kawai@nippon-rad.co.jp>.
-
 =head1 AUTHOR
 
 Storable was written by Raphael Manfredi F<E<lt>Raphael_Manfredi@pobox.comE<gt>>
-Maitainance is now done by the perl5-porters F<E<lt>perl5-porters@perl.orgE<gt>>
+Maintenance is now done by the perl5-porters F<E<lt>perl5-porters@perl.orgE<gt>>
 
 Please e-mail us with problems, bug fixes, comments and complaints,
 although if you have complements you should send them to Raphael.
