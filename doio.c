@@ -556,8 +556,8 @@ Perl_do_openn(pTHX_ GV *gv, register char *name, I32 len, int as_raw,
 	    Pid_t pid;
 	    SV *sv;
 	    if (PerlLIO_dup2(fd, savefd) < 0) {
-	       (void)PerlIO_close(fp);
-	       goto say_false;
+		(void)PerlIO_close(fp);
+		goto say_false;
 	    }
 #ifdef VMS
 	    if (savefd != PerlIO_fileno(PerlIO_stdin())) {
