@@ -1540,6 +1540,8 @@ Perl_sv_grow(pTHX_ register SV *sv, register STRLEN newlen)
 {
     register char *s;
 
+
+
 #ifdef HAS_64K_LIMIT
     if (newlen >= 0x10000) {
 	PerlIO_printf(Perl_debug_log,
@@ -1565,6 +1567,7 @@ Perl_sv_grow(pTHX_ register SV *sv, register STRLEN newlen)
     }
     else
 	s = SvPVX(sv);
+
     if (newlen > SvLEN(sv)) {		/* need more room? */
 	if (SvLEN(sv) && s) {
 #if defined(MYMALLOC) && !defined(LEAKTEST)
@@ -1585,7 +1588,7 @@ Perl_sv_grow(pTHX_ register SV *sv, register STRLEN newlen)
 	    }
 	    New(703, s, newlen, char);
 	    if (SvPVX(sv) && SvCUR(sv)) {
-	        Move(SvPVX(sv), s, SvCUR(sv), char);
+	        Move(SvPVX(sv), s, (newlen < SvCUR(sv)) ? newlen : SvCUR(sv), char);
 	    }
 	}
 	SvPV_set(sv, s);
@@ -3152,10 +3155,10 @@ Perl_sv_2pv_flags(pTHX_ register SV *sv, STRLEN *lp, I32 flags)
 
 Copies a stringified representation of the source SV into the
 destination SV.  Automatically performs any necessary mg_get and
-coercion of numeric values into strings.  Guaranteed to preserve 
+coercion of numeric values into strings.  Guaranteed to preserve
 UTF-8 flag even from overloaded objects.  Similar in nature to
-sv_2pv[_flags] but operates directly on an SV instead of just the 
-string.  Mostly uses sv_2pv_flags to do its work, except when that 
+sv_2pv[_flags] but operates directly on an SV instead of just the
+string.  Mostly uses sv_2pv_flags to do its work, except when that
 would lose the UTF-8'ness of the PV.
 
 =cut
@@ -3917,7 +3920,6 @@ Perl_sv_setsv_flags(pTHX_ SV *dstr, register SV *sstr, I32 flags)
 	}
 	else {				/* have to copy actual string */
 	    STRLEN len = SvCUR(sstr);
-
 	    SvGROW(dstr, len + 1);	/* inlined from sv_setpvn */
 	    Move(SvPVX(sstr),SvPVX(dstr),len,char);
 	    SvCUR_set(dstr, len);
