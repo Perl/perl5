@@ -258,7 +258,7 @@ my @a; $a[2] = 1; for (@a) { $_ = 2 } print "@a\n"
 EXPECT
 2 2 2
 ########
-# used to attach defelem magic too all immortal values,
+# used to attach defelem magic to all immortal values,
 # which made restore of local $_ fail.
 foo(2>1);
 sub foo { bar() for @_;  }
