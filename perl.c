@@ -1127,10 +1127,6 @@ S_parse_body(pTHX_ char **env, XSINIT_t xsinit)
       reswitch:
 	switch (*s) {
 	case 'C':
-#ifdef	WIN32
-	    win32_argv2utf8(argc-1, argv+1);
-	    /* FALL THROUGH */
-#endif
 #ifndef PERL_STRICT_CR
 	case '\r':
 #endif

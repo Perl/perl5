@@ -1641,10 +1641,10 @@ nothing in the core.
 	if (mark == sp)
 	    break;
 	s = SvPVx(*++mark, n_a);
-	if (isUPPER(*s)) {
+	if (isALPHA(*s)) {
 	    if (*s == 'S' && s[1] == 'I' && s[2] == 'G')
 		s += 3;
-	    if (!(val = whichsig(s)))
+	    if ((val = whichsig(s)) < 0)
 		Perl_croak(aTHX_ "Unrecognized signal name \"%s\"",s);
 	}
 	else

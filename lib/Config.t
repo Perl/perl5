@@ -122,5 +122,5 @@ ok( exists $Config{d_fork}, "still d_fork");
 # Signal-related variables
 # (this is actually a regression test for Configure.)
 
-ok((split / /, $Config{sig_num}) == $Config{sig_size}, "sig_size");
-like($Config{sig_num}, qr/^[ \d]+\z/, "sig_num has only positive numbers");
+is($Config{sig_num_init}  =~ tr/,/,/, $Config{sig_size}, "sig_num_init size");
+is($Config{sig_name_init} =~ tr/,/,/, $Config{sig_size}, "sig_name_init size");

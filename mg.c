@@ -1066,7 +1066,7 @@ Perl_magic_getsig(pTHX_ SV *sv, MAGIC *mg)
     STRLEN n_a;
     /* Are we fetching a signal entry? */
     i = whichsig(MgPV(mg,n_a));
-    if (i) {
+    if (i > 0) {
     	if(PL_psig_ptr[i])
     	    sv_setsv(sv,PL_psig_ptr[i]);
     	else {
@@ -1117,7 +1117,7 @@ Perl_magic_clearsig(pTHX_ SV *sv, MAGIC *mg)
 	I32 i;
 	/* Are we clearing a signal entry? */
 	i = whichsig(s);
-	if (i) {
+	if (i > 0) {
 #ifdef HAS_SIGPROCMASK
 	    sigset_t set, save;
 	    SV* save_sv;
@@ -1264,7 +1264,7 @@ Perl_magic_setsig(pTHX_ SV *sv, MAGIC *mg)
     }
     else {
 	i = whichsig(s);	/* ...no, a brick */
-	if (!i) {
+	if (i < 0) {
 	    if (ckWARN(WARN_SIGNAL))
 		Perl_warner(aTHX_ packWARN(WARN_SIGNAL), "No such signal: SIG%s", s);
 	    return 0;
@@ -2464,7 +2464,7 @@ Perl_whichsig(pTHX_ char *sig)
 {
     register char **sigv;
 
-    for (sigv = PL_sig_name+1; *sigv; sigv++)
+    for (sigv = PL_sig_name; *sigv; sigv++)
 	if (strEQ(sig,*sigv))
 	    return PL_sig_num[sigv - PL_sig_name];
 #ifdef SIGCLD
