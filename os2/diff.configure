@@ -175,15 +175,6 @@
  		dflt=`./try`
  		case "$dflt" in
  		[1-4][1-4][1-4][1-4]|12345678|87654321)
-@@ -8550,7 +8572,7 @@
- 	printf("%d\n",i);
- }
- EOCP
--	if $cc try.c -o try >/dev/null 2>&1 ; then
-+	if $cc $ldflags try.c -o try >/dev/null 2>&1 ; then
- 		dflt=`try`
- 	else
- 		dflt='?'
 @@ -8660,7 +8682,7 @@
  	'') $echo $n ".$c"
  		if $cc $ccflags \
