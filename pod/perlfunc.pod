@@ -3587,7 +3587,7 @@ and C<'87654321'> are big-endian.
 
 If you want portable packed integers you can either use the formats
 C<n>, C<N>, C<v>, and C<V>, or you can use the C<E<gt>> and C<E<lt>>
-modifiers.  These modifiers are only available as of perl 5.8.5.
+modifiers.  These modifiers are only available as of perl 5.9.2.
 See also L<perlport>.
 
 =item *
