@@ -457,7 +457,7 @@ emergency_sbrk(size)
     if (size >= BIG_SIZE) {
 	/* Give the possibility to recover: */
 	MUTEX_UNLOCK(&malloc_mutex);
-	croak("Out of memory during request for %i bytes", size);
+	croak("Out of memory during \"large\" request for %i bytes", size);
     }
 
     if (!emergency_buffer) {		
