@@ -1,30 +1,21 @@
 #!/usr/local/bin/perl -w
 
-BEGIN {
-	chdir 't' if -d 't';
-	if ($ENV{PERL_CORE}) {
-		@INC = '../lib';
-	} else {
-		# Due to a bug in older versions of MakeMaker & Test::Harness,
-	        # we must ensure the blib's are in @INC, else we might use
-	        # the core CGI.pm
-		unshift @INC, qw( ../blib/lib ../blib/arch ../lib );
-	}
-}
 # Test ability to retrieve HTTP request info
 ######################### We start with some black magic to print on failure.
+use lib '../blib/lib','../blib/arch';
 
-BEGIN {$| = 1; print "1..24\n"; }
 END {print "not ok 1\n" unless $loaded;}
 use CGI (':standard','-no_debug','*h3','start_table');
 $loaded = 1;
 print "ok 1\n";
 
 BEGIN {
-    if ($] >= 5.006) {
-	require utf8;	# we contain Latin-1 in subtest #22,
-	utf8->unimport;	# possible "use utf8" must be undone
-    }
+   $| = 1; print "1..27\n";
+  if( $] > 5.006 ) {
+    # no utf8
+    require utf8; # we contain Latin-1
+    utf8->unimport;
+  }
 }
 
 ######################### End of black magic.
@@ -105,3 +96,9 @@ test(22,h1(escapeHTML("this is <not> \x8bright\x9b")) eq '<h1>this is &lt;not&gt
 test(23,i(p('hello there')) eq '<i><p>hello there</p></i>');
 my $q = new CGI;
 test(24,$q->h1('hi') eq '<h1>hi</h1>');
+
+$q->autoEscape(1);
+test(25,$q->p({title=>"hello world&egrave;"},'hello &aacute;') eq '<p title="hello world&amp;egrave;">hello &aacute;</p>');
+$q->autoEscape(0);
+test(26,$q->p({title=>"hello world&egrave;"},'hello &aacute;') eq '<p title="hello world&egrave;">hello &aacute;</p>');
+test(27,p({title=>"hello world&egrave;"},'hello &aacute;') eq '<p title="hello world&amp;egrave;">hello &aacute;</p>');

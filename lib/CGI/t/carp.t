@@ -1,18 +1,12 @@
 # -*- Mode: cperl; coding: utf-8; cperl-indent-level: 2 -*-
 #!/usr/local/bin/perl -w
 
-BEGIN {
-	chdir 't' if -d 't';
-	if ($ENV{PERL_CORE}) {
-		@INC = '../lib';
-	} else {
-		# Due to a bug in older versions of MakeMaker & Test::Harness, we must
-		# ensure the blib's are in @INC, else we might use the core CGI.pm
-		unshift @INC, qw( ../blib/lib ../blib/arch lib );
-	}
-}
-
 use strict;
+use lib qw(t/lib);
+
+# Due to a bug in older versions of MakeMaker & Test::Harness, we must
+# ensure the blib's are in @INC, else we might use the core CGI.pm
+use lib qw(blib/lib blib/arch);
 
 use Test::More tests => 47;
 use IO::Handle;
@@ -199,7 +193,7 @@ untie *STDOUT;
 open(STDOUT, ">&REAL_STDOUT");
 my $fname = $0;
 $fname =~ tr/<>-/\253\273\255/; # _warn does this so we have to also
-is( $fake_out, "<!-- warning: There is a problem at $fname line 106. -->\n",
+is( $fake_out, "<!-- warning: There is a problem at $fname line 100. -->\n",
                         'warningsToBrowser() on' );
 
 is($CGI::Carp::EMIT_WARNINGS, 1, "Warnings turned off");
