@@ -1,8 +1,8 @@
 # DB_File.pm -- Perl 5 interface to Berkeley DB 
 #
 # written by Paul Marquess (pmarquess@bfsec.bt.co.uk)
-# last modified 8th Oct 1997
-# version 1.16
+# last modified 20th Nov 1997
+# version 1.56
 #
 #     Copyright (c) 1995, 1996, 1997 Paul Marquess. All rights reserved.
 #     This program is free software; you can redistribute it and/or
@@ -141,11 +141,11 @@ sub TIEHASH
 package DB_File ;
 
 use strict;
-use vars qw($VERSION @ISA @EXPORT $AUTOLOAD $DB_BTREE $DB_HASH $DB_RECNO) ;
+use vars qw($VERSION @ISA @EXPORT $AUTOLOAD $DB_BTREE $DB_HASH $DB_RECNO $db_version) ;
 use Carp;
 
 
-$VERSION = "1.15" ;
+$VERSION = "1.56" ;
 
 #typedef enum { DB_BTREE, DB_HASH, DB_RECNO } DBTYPE;
 $DB_BTREE = new DB_File::BTREEINFO ;
@@ -212,12 +212,24 @@ sub AUTOLOAD {
 
 
 eval {
-   # Make all Fcntl O_XXX constants available for importing
-   require Fcntl;
-   my @O = grep /^O_/, @Fcntl::EXPORT;
-   Fcntl->import(@O);  # first we import what we want to export
-   push(@EXPORT, @O);
+    # Make all Fcntl O_XXX constants available for importing
+    require Fcntl;
+    my @O = grep /^O_/, @Fcntl::EXPORT;
+    Fcntl->import(@O);  # first we import what we want to export
+    push(@EXPORT, @O);
 };
+
+## import borrowed from IO::File
+##   exports Fcntl constants if available.
+#sub import {
+#    my $pkg = shift;
+#    my $callpkg = caller;
+#    Exporter::export $pkg, $callpkg, @_;
+#    eval {
+#        require Fcntl;
+#        Exporter::export 'Fcntl', $callpkg, '/^O_/';
+#    };
+#}
 
 bootstrap DB_File $VERSION;
 
@@ -232,6 +244,14 @@ sub tie_hash_or_array
     $arg[4] = tied %{ $arg[4] } 
 	if @arg >= 5 && ref $arg[4] && $arg[4] =~ /=HASH/ && tied %{ $arg[4] } ;
 
+    # make recno in Berkeley DB version 2 work like recno in version 1.
+    if ($db_version > 1 and defined $arg[4] and $arg[4] =~ /RECNO/ and 
+	$arg[1] and ! -e $arg[1]) {
+	open(FH, ">$arg[1]") or return undef ;
+	close FH ;
+	chmod $arg[3] ? $arg[3] : 0666 , $arg[1] ;
+    }
+
     DoTie_($tieHASH, @arg) ;
 }
 
@@ -243,6 +263,22 @@ sub TIEHASH
 sub TIEARRAY
 {
     tie_hash_or_array(@_) ;
+}
+
+sub CLEAR {
+    my $self = shift;
+    my $key = "" ;
+    my $value = "" ;
+    my $status = $self->seq($key, $value, R_FIRST());
+    my @keys;
+ 
+    while ($status == 0) {
+        push @keys, $key;
+        $status = $self->seq($key, $value, R_NEXT());
+    }
+    foreach $key (reverse @keys) {
+        my $s = $self->del($key); 
+    }
 }
 
 sub get_dup
@@ -288,7 +324,7 @@ __END__
 
 =head1 NAME
 
-DB_File - Perl5 access to Berkeley DB
+DB_File - Perl5 access to Berkeley DB version 1.x
 
 =head1 SYNOPSIS
 
@@ -323,14 +359,11 @@ DB_File - Perl5 access to Berkeley DB
 =head1 DESCRIPTION
 
 B<DB_File> is a module which allows Perl programs to make use of the
-facilities provided by Berkeley DB.  If you intend to use this
-module you should really have a copy of the Berkeley DB manual pages at
-hand. The interface defined here mirrors the Berkeley DB interface
-closely.
-
-Please note that this module will only work with version 1.x of
-Berkeley DB. Once Berkeley DB version 2 is released, B<DB_File> will be
-upgraded to work with it.
+facilities provided by Berkeley DB version 1.x (if you have a newer
+version of DB, see L<Using DB_File with Berkeley DB version 2>). It is
+assumed that you have a copy of the Berkeley DB manual pages at hand
+when reading this documentation. The interface defined here mirrors the
+Berkeley DB interface closely.
 
 Berkeley DB is a C library which provides a consistent interface to a
 number of database formats.  B<DB_File> provides an interface to all
@@ -370,6 +403,33 @@ and DB_BTREE.  In this case the key will consist of a record (line)
 number.
 
 =back
+
+=head2 Using DB_File with Berkeley DB version 2
+
+Although B<DB_File> is intended to be used with Berkeley DB version 1,
+it can also be used with version 2. In this case the interface is
+limited to the functionality provided by Berkeley DB 1.x. Anywhere the
+version 2 interface differs, B<DB_File> arranges for it to work like
+version 1. This feature allows B<DB_File> scripts that were built with
+version 1 to be migrated to version 2 without any changes.
+
+If you want to make use of the new features available in Berkeley DB
+2.x, use the Perl module B<BerkeleyDB> instead.
+
+At the time of writing this document the B<BerkeleyDB> module is still
+alpha quality (the version number is < 1.0), and so unsuitable for use
+in any serious development work. Once its version number is >= 1.0, it
+is considered stable enough for real work.
+
+B<Note:> The database file format has changed in Berkeley DB version 2.
+If you cannot recreate your databases, you must dump any existing
+databases with the C<db_dump185> utility that comes with Berkeley DB.
+Once you have upgraded DB_File to use Berkeley DB version 2, your
+databases can be recreated using C<db_load>. Refer to the Berkeley DB
+documentation for further details.
+
+Please read L<COPYRIGHT> before using version 2.x of Berkeley DB with
+DB_File.
 
 =head2 Interface to Berkeley DB
 
@@ -1537,156 +1597,13 @@ of having a C<use strict> in all your scripts.
 
 =head1 HISTORY
 
-=over
-
-=item 0.1
-
-First Release.
-
-=item 0.2
-
-When B<DB_File> is opening a database file it no longer terminates the
-process if I<dbopen> returned an error. This allows file protection
-errors to be caught at run time. Thanks to Judith Grass
-E<lt>grass@cybercash.comE<gt> for spotting the bug.
-
-=item 0.3
-
-Added prototype support for multiple btree compare callbacks.
-
-=item 1.0
-
-B<DB_File> has been in use for over a year. To reflect that, the
-version number has been incremented to 1.0.
-
-Added complete support for multiple concurrent callbacks.
-
-Using the I<push> method on an empty list didn't work properly. This
-has been fixed.
-
-=item 1.01
-
-Fixed a core dump problem with SunOS.
-
-The return value from TIEHASH wasn't set to NULL when dbopen returned
-an error.
-
-=item 1.02
-
-Merged OS/2 specific code into DB_File.xs
-
-Removed some redundant code in DB_File.xs.
-
-Documentation update.
-
-Allow negative subscripts with RECNO interface.
-
-Changed the default flags from O_RDWR to O_CREAT|O_RDWR.
-
-The example code which showed how to lock a database needed a call to
-C<sync> added. Without it the resultant database file was empty.
-
-Added get_dup method.
-
-=item 1.03
-
-Documentation update.
-
-B<DB_File> now imports the constants (O_RDWR, O_CREAT etc.) from Fcntl
-automatically.
-
-The standard hash function C<exists> is now supported.
-
-Modified the behavior of get_dup. When it returns an associative
-array, the value is the count of the number of matching BTREE values.
-
-=item 1.04
-
-Minor documentation changes.
-
-Fixed a bug in hash_cb. Patches supplied by Dave Hammen,
-E<lt>hammen@gothamcity.jsc.nasa.govE<gt>.
-
-Fixed a bug with the constructors for DB_File::HASHINFO,
-DB_File::BTREEINFO and DB_File::RECNOINFO. Also tidied up the
-constructors to make them C<-w> clean.
-
-Reworked part of the test harness to be more locale friendly.
-
-=item 1.05
-
-Made all scripts in the documentation C<strict> and C<-w> clean.
-
-Added logic to F<DB_File.xs> to allow the module to be built after Perl
-is installed.
-
-=item 1.06
-
-Minor namespace cleanup: Localized C<PrintBtree>.
-
-=item 1.07
-
-Fixed bug with RECNO, where bval wasn't defaulting to "\n".
-
-=item 1.08
-
-Documented operation of bval.
-
-=item 1.09
-
-Minor bug fix in DB_File::HASHINFO, DB_File::RECNOINFO and
-DB_File::BTREEINFO.
-
-Changed default mode to 0666.
-
-=item 1.10
-
-Fixed fd method so that it still returns -1 for in-memory files when db
-1.86 is used.
-
-=item 1.11
-
-Documented the untie gotcha.
-
-=item 1.12
-
-Documented the incompatibility with version 2 of Berkeley DB.
-
-=item 1.13
-
-Minor changes to DB_FIle.xs and DB_File.pm
-
-=item 1.14
-
-Made it illegal to tie an associative array to a RECNO database and an
-ordinary array to a HASH or BTREE database.
-
-=item 1.15
-
-Patch from Gisle Aas <gisle@aas.no> to suppress "use of undefined
-value" warning with db_get and db_seq.
-
-Patch from Gisle Aas <gisle@aas.no> to make DB_File export only the O_*
-constants from Fcntl.
-
-Removed the DESTROY method from the DB_File::HASHINFO module.
-
-Previously DB_File hard-wired the class name of any object that it
-created to "DB_File". This makes sub-classing difficult. Now DB_File
-creats objects in the namespace of the package it has been inherited
-into.
-
-=item 1.16
-
-Minor changes to DB_File.xs to support multithreaded perl.
-
-=back
+Moved to the Changes file.
 
 =head1 BUGS
 
 Some older versions of Berkeley DB had problems with fixed length
-records using the RECNO file format. The newest version at the time of
-writing was 1.85 - this seems to have fixed the problems with RECNO.
+records using the RECNO file format. This problem has been fixed since
+version 1.85 of Berkeley DB.
 
 I am sure there are bugs in the code. If you do find any, or can
 suggest any enhancements, I would welcome your comments.
@@ -1694,38 +1611,60 @@ suggest any enhancements, I would welcome your comments.
 =head1 AVAILABILITY
 
 B<DB_File> comes with the standard Perl source distribution. Look in
-the directory F<ext/DB_File>.
+the directory F<ext/DB_File>. Given the amount of time between releases
+of Perl the version that ships with Perl is quite likely to be out of
+date, so the most recent version can always be found on CPAN (see
+L<perlmod/CPAN> for details), in the directory
+F<modules/by-module/DB_File>.
 
-This version of B<DB_File> will only work with version 1.x of Berkeley
-DB. It is I<not> yet compatible with version 2.
+This version of B<DB_File> will work with either version 1.x or 2.x of
+Berkeley DB, but is limited to the functionality provided by version 1.
 
-Version 1 of Berkeley DB is available at your nearest CPAN archive (see
-L<perlmod/"CPAN"> for a list) in F<src/misc/db.1.85.tar.gz>, or via the
-host F<ftp.cs.berkeley.edu> in F</ucb/4bsd/db.tar.gz>.  Alternatively,
-check out the Berkeley DB home page at F<http://www.bostic.com/db>. It
-is I<not> under the GPL.
+The official web site for Berkeley DB is
+F<http://www.sleepycat.com/db>. The ftp equivalent is
+F<ftp.sleepycat.com:/pub>. Both versions 1 and 2 of Berkeley DB are
+available there.
 
-If you are running IRIX, then get Berkeley DB from
+Alternatively, Berkeley DB version 1 is available at your nearest CPAN
+archive in F<src/misc/db.1.85.tar.gz>.
+
+If you are running IRIX, then get Berkeley DB version 1 from
 F<http://reality.sgi.com/ariel>. It has the patches necessary to
 compile properly on IRIX 5.3.
 
-As of January 1997, version 1.86 of Berkeley DB is available from the
-Berkeley DB home page. Although this release does fix a number of bugs
-that were present in 1.85 you should be aware of the following
-information (taken from the Berkeley DB home page) before you consider
-using it:
+=head1 COPYRIGHT
 
-    DB version 1.86 includes a new implementation of the hash access
-    method that fixes a variety of hashing problems found in DB version
-    1.85. We are making it available as an interim solution until DB
-    2.0 is available.
+Copyright (c) 1997 Paul Marquess. All rights reserved. This program is
+free software; you can redistribute it and/or modify it under the same
+terms as Perl itself.
 
-    PLEASE NOTE: the underlying file format for the hash access method
-    changed between version 1.85 and version 1.86, so you will have to
-    dump and reload all of your databases to convert from version 1.85
-    to version 1.86. If you do not absolutely require the fixes from
-    version 1.86, we strongly urge you to wait until DB 2.0 is released
-    before upgrading from 1.85.  
+Although B<DB_File> is covered by the Perl license, the library it
+makes use of, namely Berkeley DB, is not. Berkeley DB has its own
+copyright and its own license. Please take the time to read it.
+
+The license for Berkeley DB version 2, and how it relates to DB_File
+does need some extra clarification. Here are are few words taken from
+the Berkeley DB FAQ regarding the version 2 license:
+
+    The major difference is that the license for DB 2.0, when
+    downloaded from the net, requires that the software that
+    uses DB 2.0 be freely redistributable.
+
+That means that if you want to use DB_File, and you have changed either
+the source for Berkeley DB or Perl, then the changes must be freely
+available.
+
+In the case of Perl, the term source refers to the complete source
+code for Perl (e.g. sv.c, toke.c, perl.h) and any external modules that
+you are using (e.g. DB_File, Tk).
+
+Note that any Perl scripts that you write are your property - this
+includes scripts that make use of DB_File. Neither the Perl license or
+the Berkeley DB license place any restriction on what you have to do
+with them.
+
+If you are in any doubt about the license situation, contact either the
+Berkeley DB authors or the author of DB_File. See L<"AUTHOR"> for details.
 
 
 =head1 SEE ALSO
