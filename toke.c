@@ -1414,6 +1414,8 @@ S_scan_const(pTHX_ char *start)
 			if (hicount) {
 			    char *old_pvx = SvPVX(sv);
 			    char *src, *dst;
+			    U8 tmpbuf[UTF8_MAXLEN+1];
+			    U8 *tmpend;
 			    d = SvGROW(sv, SvCUR(sv) + hicount + 1) + (d - old_pvx);
 
 			    src = d - 1;
@@ -1422,9 +1424,10 @@ S_scan_const(pTHX_ char *start)
 
 			    while (src < dst) {
 			        if (UTF8_IS_CONTINUED(*src)) {
-				    dst--;
-				    uv_to_utf8((U8*)dst, (U8)*src--);
-				    dst--;
+				    tmpend = uv_to_utf8(tmpbuf, (U8)*src--);
+				    dst -= tmpend - tmpbuf;
+				    Copy((char *)tmpbuf, dst+1,
+					 tmpend - tmpbuf, char);
 			        }
 			        else {
 				    *dst-- = *src--;
