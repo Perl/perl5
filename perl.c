@@ -3358,12 +3358,15 @@ S_init_postdump_symbols(pTHX_ register int argc, register char **argv, register 
 	    for (env_base = env; *env; env++) 
 		dup_env_count++;
 	    if ((dup_env_base = (char **)
-		 safemalloc( sizeof(char *) * (dup_env_count+1) ))) {
+		 safesysmalloc( sizeof(char *) * (dup_env_count+1) ))) {
 		char **dup_env;
 		for (env = env_base, dup_env = dup_env_base;
 		     *env;
-		     env++, dup_env++)
-		    *dup_env = savepv(*env);
+		     env++, dup_env++) {
+		    /* With environ one needs to use safesysmalloc(). */
+		    *dup_env = safesysmalloc(strlen(*env) + 1);
+		    (void)strcpy(*dup_env, *env);
+		}
 		*dup_env = Nullch;
 		env = dup_env_base;
 	    } /* else what? */
@@ -3384,12 +3387,14 @@ S_init_postdump_symbols(pTHX_ register int argc, register char **argv, register 
 	    (void)PerlEnv_putenv(savepv(*env));
 #endif
 	}
+#ifdef NEED_ENVIRON_DUP_FOR_MODIFY
 	if (dup_env_base) {
 	    char **dup_env;
 	    for (dup_env = dup_env_base; *dup_env; dup_env++)
-		Safefree(*dup_env);
-	    Safefree(dup_env_base);
+		safesysfree(*dup_env);
+	    safesysfree(dup_env_base);
 	}
+#endif /* NEED_ENVIRON_DUP_FOR_MODIFU */
 #endif /* USE_ENVIRON_ARRAY */
 #ifdef DYNAMIC_ENV_FETCH
 	HvNAME(hv) = savepv(ENV_HV_NAME);
