@@ -174,7 +174,7 @@ Perl_do_openn(pTHX_ GV *gv, register char *name, I32 len, int as_raw,
 	     IoTYPE(io) = IoTYPE_RDWR;
 	     break;
 	}
-	writing = (result > 0);
+	writing = (result != O_RDONLY);
 
 	if (result == O_RDONLY) {
 	    mode[ix++] = 'r';
