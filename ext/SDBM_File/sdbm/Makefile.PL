@@ -1,13 +1,12 @@
 use ExtUtils::MakeMaker;
 WriteMakefile(
-    'NAME'	=> 'SDBM_File',
-    'LINKTYPE'  => 'static',
-    'DEFINE'	=> '-DSDBM -DDUFF',
-    'SKIP'	=> [qw(static static_lib dynamic dynamic_lib)],
-    'clean'
-	=> {'FILES' => 'dbu libsdbm.a dbd dba dbe x-dbu *.dir *.pag'},
-    'H' => [qw(tune.h sdbm.h pair.h $(PERL_INC)/config.h)],
-    'C' => [qw(sdbm.c pair.c hash.c)]
+    NAME      => 'SDBM_File/sdbm', # doesn't matter what the name is here
+    LINKTYPE  => 'static',
+    DEFINE    => '-DSDBM -DDUFF',
+    SKIP      => [qw(static static_lib dynamic dynamic_lib)],
+    clean     => {'FILES' => 'dbu libsdbm.a dbd dba dbe x-dbu *.dir *.pag'},
+    H         => [qw(tune.h sdbm.h pair.h $(PERL_INC)/config.h)],
+    C         => [qw(sdbm.c pair.c hash.c)]
 );
 
 
