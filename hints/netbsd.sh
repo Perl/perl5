@@ -51,10 +51,12 @@ case "$osvers" in
 0.9*|1.[012]*|1.3|1.3.1)
 	d_setregid="$undef"
 	d_setreuid="$undef"
-	d_setrgid="$undef"
-	d_setruid="$undef"
 	;;
 esac
+
+# These are obsolete in any netbsd.
+d_setrgid="$undef"
+d_setruid="$undef"
 
 # there's no problem with vfork.
 case "$usevfork" in
