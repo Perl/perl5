@@ -73,12 +73,12 @@ gcc)	if [ "X$gccversion" = "X" ]; then
 	    # Done too late in Configure if hinted
 	    gccversion=`$cc --version | sed 's/.*(GCC) *//'`
 	fi
-	set $gcc_version
-	if test "$1" -lt 2 -o \( "$1" -eq 2 -a \( "$2" -lt 95 -o \( "$2" -eq 95 -a "$3" -lt 2 \) \) \); then
+	set $gccversion
+	if test "$1" -lt 2 -o \( "$1" -eq 2 -a \( "$2" -lt 95 -o \( "$2" -eq 95 -a "$3" -lt 3 \) \) \); then
 	    cat >&4 <<EOF
 
-*** Your cc seems to be gcc and its version ($gcc_version) seems to be
-*** less than 2.95.2.  This is not a good idea since old versions of gcc
+*** Your cc seems to be gcc and its version ($gccversion) seems to be
+*** less than 2.95.3.  This is not a good idea since old versions of gcc
 *** are known to produce buggy code when compiling Perl (and no doubt for
 *** other programs, too).
 ***
