@@ -5,9 +5,9 @@
 # from the Unicode database files (lib/unicore/*.txt).
 #
 
-my $LastUnicodeCodepoint = 0x10FFFF; # As of Unicode 3.1.1.
-
 use strict;
+
+my $LastUnicodeCodepoint = 0x10FFFF; # As of Unicode 3.1.1.
 
 mkdir("In", 0755);
 mkdir("Is", 0755);
@@ -123,9 +123,9 @@ if (open(my $Unicode, "Unicode.txt")) {
     my @Mirrored;
     my %To;
     while (<$Unicode>) {
-	next if /^\#/ || /^\s*$/;
-	next unless /^[0-9a-f]+\s*;/i;
+	next unless /^[0-9A-Fa-f]+;/;
 	s/\s+$//;
+
 	my ($code, $name, $cat, $comb, $bidi, $deco,
 	    $decimal, $digit, $number,
 	    $mirrored, $unicode10, $comment,
@@ -259,10 +259,7 @@ if (open(my $LineBrk, "LineBrk.txt")) {
     my %Lbrk;
 
     while (<$LineBrk>) {
-	next if /^\#/ || /^\s*$/;
-	s/\s+$//;
-	s/\s*\#.*//;
-	next unless /^([0-9a-f]+)(?:\.\.([0-9a-f]+))?\s*;\s*(.+)$/i;
+        next unless /^([0-9A-Fa-f]+)(?:\.\.([0-9A-Fa-f]+))?\s*;\s*(\w+)/;
 
 	my ($first, $last, $lbrk) = ($1, $2, $3);
 
@@ -291,9 +288,9 @@ if (open(my $ArabShap, "ArabShap.txt")) {
     my @ArabLinkGroup;
 
     while (<$ArabShap>) {
-	next if /^\#/ || /^\s*$/;
-	next unless /^[0-9a-f]+\s*;/i;
+	next unless /^[0-9A-Fa-f]+;/;
 	s/\s+$//;
+
 	my ($code, $name, $link, $linkgroup) = split(/\s*;\s*/);
 
 	append(\@ArabLink,      $code, $link);
@@ -314,11 +311,9 @@ if (open(my $Jamo, "Jamo.txt")) {
     my @Short;
 
     while (<$Jamo>) {
-	next if /^\#/ || /^\s*$/;
-	next unless /^[0-9a-f]+\s*;/i;
-	s/\s*\#.*//;
-	s/\s+$//;
-	my ($code, $short) = split(/\s*;\s*/);
+	next unless /^([0-9A-Fa-f]+)\s*;\s*(\w*)/;
+
+	my ($code, $short) = ($1, $2);
 
 	append(\@Short, $code, $short);
     }
@@ -336,10 +331,7 @@ my @Scripts;
 
 if (open(my $Scripts, "Scripts.txt")) {
     while (<$Scripts>) {
-	next if /^\#/ || /^\s*$/;
-	s/\s*\#.*//;
-	s/\s+$//;
-	next unless /^([0-9a-f]+)(?:\.\.([0-9a-f]+))?\s*;\s*(.+)$/i;
+	next unless /^([0-9A-Fa-f]+)(?:\.\.([0-9A-Fa-f]+))?\s*;\s*(.+?)\s*\#/;
 
 	# Wait until all the scripts have been read since
 	# they are not listed in numeric order.
@@ -387,11 +379,8 @@ my %Blocks;
 
 if (open(my $Blocks, "Blocks.txt")) {
     while (<$Blocks>) {
-	next if /^\#/ || /^\s*$/;
-	s/\s*\#.*//;
-	s/\s+$//;
-	next unless /^([0-9a-f]+)\.\.([0-9a-f]+)\s*;\s*(.+)$/i;
-
+	next unless /^([0-9A-Fa-f]+)\.\.([0-9A-Fa-f]+)\s*;\s*(.+?)\s*$/;
+	
 	my ($first, $last, $name) = ($1, $2, $3);
 
 	# If there's a naming conflict (the script names are
@@ -430,10 +419,7 @@ my @Props;
 
 if (open(my $Props, "PropList.txt")) {
     while (<$Props>) {
-	next if /^\#/ || /^\s*$/;
-	s/\s*\#.*//;
-	s/\s+$//;
-	next unless /^([0-9a-f]+)(?:\.\.([0-9a-f]+))?\s*;\s*(\w+)/i;
+	next unless /^([0-9A-Fa-f]+)(?:\.\.([0-9A-Fa-f]+))?\s*;\s*(.+?)\s*\#/;
 
 	# Wait until all the extended properties have been read since
 	# they are not listed in numeric order.
@@ -681,6 +667,49 @@ my %Is = (
 #
 
 mapping(\%Is, "Is");
+
+#
+# Read in the special cases.
+#
+
+my %Case;
+
+if (open(my $SpecCase, "SpecCase.txt")) {
+    while (<$SpecCase>) {
+	next unless /^[0-9A-Fa-f]+;/;
+	s/\#.*//;
+	s/\s+$//;
+
+	my ($code, $lower, $title, $upper, $condition) = split(/\s*;\s*/);
+
+	if ($condition) { # not implemented yet
+	    print "# SKIPPING $_\n";
+	    next;
+	}
+
+	# Wait until all the special cases have been read since
+	# they are not listed in numeric order.
+	my $ix = hex($code);
+	push @{$Case{Lower}}, [ $ix, $code, $lower ];
+	push @{$Case{Title}}, [ $ix, $code, $title ];
+	push @{$Case{Upper}}, [ $ix, $code, $upper ];
+    }
+} else {
+    die "$0: SpecCase.txt: $!\n";
+}
+
+# Now write out the special cases properties in their code point order.
+# The To/Spec{Lower,Title,Upper}.pl are unused for now since the swash
+# routines do not do returning multiple characters.
+
+for my $case (qw(Lower Title Upper)) {
+    my @case;
+    for my $prop (sort { $a->[0] <=> $b->[0] } @{$Case{$case}}) {
+        my ($ix, $code, $to) = @$prop;
+        append(\@case, $code, $to);
+    }
+    flush(\@case, "To/Spec$case.pl");
+}
 
 # That's all, folks!
 
