@@ -285,13 +285,14 @@ str_gets(register STR *str, register FILE *fp)
     ptr = FILE_ptr(fp);
     for (;;) {
 	while (--cnt >= 0) {
-	    if ((*bp++ = *ptr++) == newline)
+	    if ((*bp++ = *ptr++) == newline) {
 		if (bp <= str->str_ptr || bp[-2] != '\\')
 		    goto thats_all_folks;
 		else {
 		    line++;
 		    bp -= 2;
 		}
+	    }
 	}
 	
 	FILE_cnt(fp) = cnt;		/* deregisterize cnt and ptr */
@@ -353,7 +354,7 @@ str_inc(register STR *str)
     }
     for (d = str->str_ptr; *d && *d != '.'; d++) ;
     d--;
-    if (!isdigit(*str->str_ptr) || !isdigit(*d) ) {
+    if (!isDIGIT(*str->str_ptr) || !isDIGIT(*d) ) {
         str_numset(str,atof(str->str_ptr) + 1.0);  /* punt */
 	return;
     }
@@ -389,7 +390,7 @@ str_dec(register STR *str)
     }
     for (d = str->str_ptr; *d && *d != '.'; d++) ;
     d--;
-    if (!isdigit(*str->str_ptr) || !isdigit(*d) || (*d == '0' && d == str->str_ptr)) {
+    if (!isDIGIT(*str->str_ptr) || !isDIGIT(*d) || (*d == '0' && d == str->str_ptr)) {
         str_numset(str,atof(str->str_ptr) - 1.0);  /* punt */
 	return;
     }

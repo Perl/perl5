@@ -69,12 +69,12 @@ walk(int useval, int level, register int node, int *numericptr, int minprec)
     case OPROG:
 	arymax = 0;
 	if (namelist) {
-	    while (isalpha(*namelist)) {
+	    while (isALPHA(*namelist)) {
 		for (d = tokenbuf,s=namelist;
-		  isalpha(*s) || isdigit(*s) || *s == '_';
+		  isALPHA(*s) || isDIGIT(*s) || *s == '_';
 		  *d++ = *s++) ;
 		*d = '\0';
-		while (*s && !isalpha(*s)) s++;
+		while (*s && !isALPHA(*s)) s++;
 		namelist = s;
 		nameary[++arymax] = savestr(tokenbuf);
 	    }
@@ -241,7 +241,7 @@ sub Pick {\n\
 	tmpstr=walk(0,level,ops[node+1].ival,&numarg,P_MIN);
 	/* translate \nnn to [\nnn] */
 	for (s = tmpstr->str_ptr, d = tokenbuf; *s; s++, d++) {
-	    if (*s == '\\' && isdigit(s[1]) && isdigit(s[2]) && isdigit(s[3])){
+	    if (*s == '\\' && isDIGIT(s[1]) && isDIGIT(s[2]) && isDIGIT(s[3])){
 		*d++ = '[';
 		*d++ = *s++;
 		*d++ = *s++;
@@ -589,9 +589,9 @@ sub Pick {\n\
 		s = savestr(tokenbuf);
 		for (t = tokenbuf; *t; t++) {
 		    *t &= 127;
-		    if (islower(*t))
-			*t = toupper(*t);
-		    if (!isalpha(*t) && !isdigit(*t))
+		    if (isLOWER(*t))
+			*t = toUPPER(*t);
+		    if (!isALPHA(*t) && !isDIGIT(*t))
 			*t = '_';
 		}
 		if (!strchr(tokenbuf,'_'))
@@ -1120,9 +1120,9 @@ sub Pick {\n\
 	    s = savestr(tokenbuf);
 	    for (t = tokenbuf; *t; t++) {
 		*t &= 127;
-		if (islower(*t))
-		    *t = toupper(*t);
-		if (!isalpha(*t) && !isdigit(*t))
+		if (isLOWER(*t))
+		    *t = toUPPER(*t);
+		if (!isALPHA(*t) && !isDIGIT(*t))
 		    *t = '_';
 	    }
 	    if (!strchr(tokenbuf,'_'))
@@ -1157,9 +1157,9 @@ sub Pick {\n\
 		s = savestr(tokenbuf);
 		for (t = tokenbuf; *t; t++) {
 		    *t &= 127;
-		    if (islower(*t))
-			*t = toupper(*t);
-		    if (!isalpha(*t) && !isdigit(*t))
+		    if (isLOWER(*t))
+			*t = toUPPER(*t);
+		    if (!isALPHA(*t) && !isDIGIT(*t))
 			*t = '_';
 		}
 		if (!strchr(tokenbuf,'_'))
@@ -1430,7 +1430,7 @@ sub Pick {\n\
 	i = numarg;
 	if (i) {
 	    t = s = tmpstr->str_ptr;
-	    while (isalpha(*t) || isdigit(*t) || *t == '$' || *t == '_')
+	    while (isALPHA(*t) || isDIGIT(*t) || *t == '$' || *t == '_')
 		t++;
 	    i = t - s;
 	    if (i < 2)

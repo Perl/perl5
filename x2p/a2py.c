@@ -281,7 +281,7 @@ yylex(void)
 	s++;
 	XTERM('}');
     case '}':
-	for (d = s + 1; isspace(*d); d++) ;
+	for (d = s + 1; isSPACE(*d); d++) ;
 	if (!*d)
 	    s = d - 1;
 	*s = 127;
@@ -383,7 +383,7 @@ yylex(void)
 
 #define SNARFWORD \
 	d = tokenbuf; \
-	while (isalpha(*s) || isdigit(*s) || *s == '_') \
+	while (isALPHA(*s) || isDIGIT(*s) || *s == '_') \
 	    *d++ = *s++; \
 	*d = '\0'; \
 	d = tokenbuf; \
@@ -402,8 +402,8 @@ yylex(void)
 	    ID("0");
 	}
 	do_split = TRUE;
-	if (isdigit(*s)) {
-	    for (d = s; isdigit(*s); s++) ;
+	if (isDIGIT(*s)) {
+	    for (d = s; isDIGIT(*s); s++) ;
 	    yylval = string(d,s-d);
 	    tmp = atoi(d);
 	    if (tmp > maxfld)
@@ -473,15 +473,15 @@ yylex(void)
 	    XTERM(FUN1);
 	}
 	if (strEQ(d,"chdir"))
-	    *d = toupper(*d);
+	    *d = toUPPER(*d);
 	else if (strEQ(d,"crypt"))
-	    *d = toupper(*d);
+	    *d = toUPPER(*d);
 	else if (strEQ(d,"chop"))
-	    *d = toupper(*d);
+	    *d = toUPPER(*d);
 	else if (strEQ(d,"chmod"))
-	    *d = toupper(*d);
+	    *d = toUPPER(*d);
 	else if (strEQ(d,"chown"))
-	    *d = toupper(*d);
+	    *d = toUPPER(*d);
 	ID(d);
     case 'd': case 'D':
 	SNARFWORD;
@@ -490,7 +490,7 @@ yylex(void)
 	if (strEQ(d,"delete"))
 	    XTERM(DELETE);
 	if (strEQ(d,"die"))
-	    *d = toupper(*d);
+	    *d = toUPPER(*d);
 	ID(d);
     case 'e': case 'E':
 	SNARFWORD;
@@ -507,26 +507,26 @@ yylex(void)
 	    XTERM(FUN1);
 	}
 	if (strEQ(d,"elsif"))
-	    *d = toupper(*d);
+	    *d = toUPPER(*d);
 	else if (strEQ(d,"eq"))
-	    *d = toupper(*d);
+	    *d = toUPPER(*d);
 	else if (strEQ(d,"eval"))
-	    *d = toupper(*d);
+	    *d = toUPPER(*d);
 	else if (strEQ(d,"eof"))
-	    *d = toupper(*d);
+	    *d = toUPPER(*d);
 	else if (strEQ(d,"each"))
-	    *d = toupper(*d);
+	    *d = toUPPER(*d);
 	else if (strEQ(d,"exec"))
-	    *d = toupper(*d);
+	    *d = toUPPER(*d);
 	ID(d);
     case 'f': case 'F':
 	SNARFWORD;
 	if (strEQ(d,"FS")) {
 	    saw_FS++;
 	    if (saw_FS == 1 && in_begin) {
-		for (d = s; *d && isspace(*d); d++) ;
+		for (d = s; *d && isSPACE(*d); d++) ;
 		if (*d == '=') {
-		    for (d++; *d && isspace(*d); d++) ;
+		    for (d++; *d && isSPACE(*d); d++) ;
 		    if (*d == '"' && d[2] == '"')
 			const_FS = d[1];
 		}
@@ -540,13 +540,13 @@ yylex(void)
 	if (strEQ(d,"FILENAME"))
 	    d = "ARGV";
 	if (strEQ(d,"foreach"))
-	    *d = toupper(*d);
+	    *d = toUPPER(*d);
 	else if (strEQ(d,"format"))
-	    *d = toupper(*d);
+	    *d = toUPPER(*d);
 	else if (strEQ(d,"fork"))
-	    *d = toupper(*d);
+	    *d = toUPPER(*d);
 	else if (strEQ(d,"fh"))
-	    *d = toupper(*d);
+	    *d = toUPPER(*d);
 	ID(d);
     case 'g': case 'G':
 	SNARFWORD;
@@ -555,18 +555,18 @@ yylex(void)
 	if (strEQ(d,"gsub"))
 	    XTERM(GSUB);
 	if (strEQ(d,"ge"))
-	    *d = toupper(*d);
+	    *d = toUPPER(*d);
 	else if (strEQ(d,"gt"))
-	    *d = toupper(*d);
+	    *d = toUPPER(*d);
 	else if (strEQ(d,"goto"))
-	    *d = toupper(*d);
+	    *d = toUPPER(*d);
 	else if (strEQ(d,"gmtime"))
-	    *d = toupper(*d);
+	    *d = toUPPER(*d);
 	ID(d);
     case 'h': case 'H':
 	SNARFWORD;
 	if (strEQ(d,"hex"))
-	    *d = toupper(*d);
+	    *d = toUPPER(*d);
 	ID(d);
     case 'i': case 'I':
 	SNARFWORD;
@@ -586,14 +586,14 @@ yylex(void)
     case 'j': case 'J':
 	SNARFWORD;
 	if (strEQ(d,"join"))
-	    *d = toupper(*d);
+	    *d = toUPPER(*d);
 	ID(d);
     case 'k': case 'K':
 	SNARFWORD;
 	if (strEQ(d,"keys"))
-	    *d = toupper(*d);
+	    *d = toUPPER(*d);
 	else if (strEQ(d,"kill"))
-	    *d = toupper(*d);
+	    *d = toUPPER(*d);
 	ID(d);
     case 'l': case 'L':
 	SNARFWORD;
@@ -606,17 +606,17 @@ yylex(void)
 	    XTERM(FUN1);
 	}
 	if (strEQ(d,"last"))
-	    *d = toupper(*d);
+	    *d = toUPPER(*d);
 	else if (strEQ(d,"local"))
-	    *d = toupper(*d);
+	    *d = toUPPER(*d);
 	else if (strEQ(d,"lt"))
-	    *d = toupper(*d);
+	    *d = toUPPER(*d);
 	else if (strEQ(d,"le"))
-	    *d = toupper(*d);
+	    *d = toUPPER(*d);
 	else if (strEQ(d,"locatime"))
-	    *d = toupper(*d);
+	    *d = toUPPER(*d);
 	else if (strEQ(d,"link"))
-	    *d = toupper(*d);
+	    *d = toUPPER(*d);
 	ID(d);
     case 'm': case 'M':
 	SNARFWORD;
@@ -625,7 +625,7 @@ yylex(void)
 	    XTERM(MATCH);
 	}
 	if (strEQ(d,"m"))
-	    *d = toupper(*d);
+	    *d = toUPPER(*d);
 	ID(d);
     case 'n': case 'N':
 	SNARFWORD;
@@ -636,7 +636,7 @@ yylex(void)
 	    XTERM(NEXT);
 	}
 	if (strEQ(d,"ne"))
-	    *d = toupper(*d);
+	    *d = toUPPER(*d);
 	ID(d);
     case 'o': case 'O':
 	SNARFWORD;
@@ -652,11 +652,11 @@ yylex(void)
 	    d = "#";
 	}
 	if (strEQ(d,"open"))
-	    *d = toupper(*d);
+	    *d = toUPPER(*d);
 	else if (strEQ(d,"ord"))
-	    *d = toupper(*d);
+	    *d = toUPPER(*d);
 	else if (strEQ(d,"oct"))
-	    *d = toupper(*d);
+	    *d = toUPPER(*d);
 	ID(d);
     case 'p': case 'P':
 	SNARFWORD;
@@ -667,9 +667,9 @@ yylex(void)
 	    XTERM(PRINTF);
 	}
 	if (strEQ(d,"push"))
-	    *d = toupper(*d);
+	    *d = toUPPER(*d);
 	else if (strEQ(d,"pop"))
-	    *d = toupper(*d);
+	    *d = toUPPER(*d);
 	ID(d);
     case 'q': case 'Q':
 	SNARFWORD;
@@ -687,11 +687,11 @@ yylex(void)
 	if (strEQ(d,"return"))
 	    XTERM(RET);
 	if (strEQ(d,"reset"))
-	    *d = toupper(*d);
+	    *d = toUPPER(*d);
 	else if (strEQ(d,"redo"))
-	    *d = toupper(*d);
+	    *d = toUPPER(*d);
 	else if (strEQ(d,"rename"))
-	    *d = toupper(*d);
+	    *d = toUPPER(*d);
 	ID(d);
     case 's': case 'S':
 	SNARFWORD;
@@ -734,73 +734,73 @@ yylex(void)
 	    XTERM(FUN1);
 	}
 	if (strEQ(d,"s"))
-	    *d = toupper(*d);
+	    *d = toUPPER(*d);
 	else if (strEQ(d,"shift"))
-	    *d = toupper(*d);
+	    *d = toUPPER(*d);
 	else if (strEQ(d,"select"))
-	    *d = toupper(*d);
+	    *d = toUPPER(*d);
 	else if (strEQ(d,"seek"))
-	    *d = toupper(*d);
+	    *d = toUPPER(*d);
 	else if (strEQ(d,"stat"))
-	    *d = toupper(*d);
+	    *d = toUPPER(*d);
 	else if (strEQ(d,"study"))
-	    *d = toupper(*d);
+	    *d = toUPPER(*d);
 	else if (strEQ(d,"sleep"))
-	    *d = toupper(*d);
+	    *d = toUPPER(*d);
 	else if (strEQ(d,"symlink"))
-	    *d = toupper(*d);
+	    *d = toUPPER(*d);
 	else if (strEQ(d,"sort"))
-	    *d = toupper(*d);
+	    *d = toUPPER(*d);
 	ID(d);
     case 't': case 'T':
 	SNARFWORD;
 	if (strEQ(d,"tr"))
-	    *d = toupper(*d);
+	    *d = toUPPER(*d);
 	else if (strEQ(d,"tell"))
-	    *d = toupper(*d);
+	    *d = toUPPER(*d);
 	else if (strEQ(d,"time"))
-	    *d = toupper(*d);
+	    *d = toUPPER(*d);
 	else if (strEQ(d,"times"))
-	    *d = toupper(*d);
+	    *d = toUPPER(*d);
 	ID(d);
     case 'u': case 'U':
 	SNARFWORD;
 	if (strEQ(d,"until"))
-	    *d = toupper(*d);
+	    *d = toUPPER(*d);
 	else if (strEQ(d,"unless"))
-	    *d = toupper(*d);
+	    *d = toUPPER(*d);
 	else if (strEQ(d,"umask"))
-	    *d = toupper(*d);
+	    *d = toUPPER(*d);
 	else if (strEQ(d,"unshift"))
-	    *d = toupper(*d);
+	    *d = toUPPER(*d);
 	else if (strEQ(d,"unlink"))
-	    *d = toupper(*d);
+	    *d = toUPPER(*d);
 	else if (strEQ(d,"utime"))
-	    *d = toupper(*d);
+	    *d = toUPPER(*d);
 	ID(d);
     case 'v': case 'V':
 	SNARFWORD;
 	if (strEQ(d,"values"))
-	    *d = toupper(*d);
+	    *d = toUPPER(*d);
 	ID(d);
     case 'w': case 'W':
 	SNARFWORD;
 	if (strEQ(d,"while"))
 	    XTERM(WHILE);
 	if (strEQ(d,"write"))
-	    *d = toupper(*d);
+	    *d = toUPPER(*d);
 	else if (strEQ(d,"wait"))
-	    *d = toupper(*d);
+	    *d = toUPPER(*d);
 	ID(d);
     case 'x': case 'X':
 	SNARFWORD;
 	if (strEQ(d,"x"))
-	    *d = toupper(*d);
+	    *d = toUPPER(*d);
 	ID(d);
     case 'y': case 'Y':
 	SNARFWORD;
 	if (strEQ(d,"y"))
-	    *d = toupper(*d);
+	    *d = toUPPER(*d);
 	ID(d);
     case 'z': case 'Z':
 	SNARFWORD;
@@ -869,13 +869,13 @@ scannum(register char *s)
     case '1': case '2': case '3': case '4': case '5':
     case '6': case '7': case '8': case '9': case '0' : case '.':
 	d = tokenbuf;
-	while (isdigit(*s)) {
+	while (isDIGIT(*s)) {
 	    *d++ = *s++;
 	}
 	if (*s == '.') {
-	    if (isdigit(s[1])) {
+	    if (isDIGIT(s[1])) {
 		*d++ = *s++;
-		while (isdigit(*s)) {
+		while (isDIGIT(*s)) {
 		    *d++ = *s++;
 		}
 	    }
@@ -886,7 +886,7 @@ scannum(register char *s)
 	    *d++ = *s++;
 	    if (*s == '+' || *s == '-')
 		*d++ = *s++;
-	    while (isdigit(*s))
+	    while (isDIGIT(*s))
 		*d++ = *s++;
 	}
 	*d = '\0';
@@ -1059,9 +1059,9 @@ fixup(STR *str)
 	    s++;
 	}
 	else if (*s == '\n') {
-	    for (t = s+1; isspace(*t & 127); t++) ;
+	    for (t = s+1; isSPACE(*t & 127); t++) ;
 	    t--;
-	    while (isspace(*t & 127) && *t != '\n') t--;
+	    while (isSPACE(*t & 127) && *t != '\n') t--;
 	    if (*t == '\n' && t-s > 1) {
 		if (s[-1] == '{')
 		    s--;
@@ -1094,7 +1094,7 @@ putlines(STR *str)
 	if (pos > 78) {		/* split a long line? */
 	    *d-- = '\0';
 	    newpos = 0;
-	    for (t = tokenbuf; isspace(*t & 127); t++) {
+	    for (t = tokenbuf; isSPACE(*t & 127); t++) {
 		if (*t == '\t')
 		    newpos += 8;
 		else
