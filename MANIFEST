@@ -274,6 +274,7 @@ hints/newsos4.sh	Hints for named architecture
 hints/next_3.sh		Hints for named architecture
 hints/next_3_0.sh	Hints for named architecture
 hints/next_4.sh		Hints for named architecture
+hints/openbsd.sh	Hints for named architecture
 hints/opus.sh		Hints for named architecture
 hints/os2.sh		Hints for named architecture
 hints/os390.sh		Hints for named architecture
@@ -735,6 +736,7 @@ t/op/oct.t		See if oct and hex work
 t/op/ord.t		See if ord works
 t/op/pack.t		See if pack and unpack work
 t/op/pat.t		See if esoteric patterns work
+t/op/pos.t		See if pos works
 t/op/push.t		See if push and pop work
 t/op/quotemeta.t	See if quotemeta works
 t/op/rand.t		See if rand works
