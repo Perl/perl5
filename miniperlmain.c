@@ -25,6 +25,10 @@ char **env;
 {
     int exitstatus;
 
+#ifdef USE_THREADS
+    MUTEX_INIT(&malloc_mutex); 
+#endif
+
     PERL_SYS_INIT(&argc,&argv);
 
     perl_init_i18nl10n(1);
