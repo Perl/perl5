@@ -102,7 +102,7 @@ sub B::GV::terse {
 	$stash = $stash . "::";
     }
     print indent($level);
-    printf "%s (0x%lx) *%s%s\n", class($gv), $$gv, $stash, $gv->NAME;
+    printf "%s (0x%lx) *%s%s\n", class($gv), $$gv, $stash, $gv->SAFENAME;
 }
 
 sub B::IV::terse {

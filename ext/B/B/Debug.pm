@@ -218,14 +218,14 @@ EOT
 sub B::GV::debug {
     my ($gv) = @_;
     if ($done_gv{$$gv}++) {
-	printf "GV %s::%s\n", $gv->STASH->NAME, $gv->NAME;
+	printf "GV %s::%s\n", $gv->STASH->NAME, $gv->SAFENAME;
 	return;
     }
     my ($sv) = $gv->SV;
     my ($av) = $gv->AV;
     my ($cv) = $gv->CV;
     $gv->B::SV::debug;
-    printf <<'EOT', $gv->NAME, $gv->STASH->NAME, $gv->STASH, $$sv, $gv->GvREFCNT, $gv->FORM, $$av, ${$gv->HV}, ${$gv->EGV}, $$cv, $gv->CVGEN, $gv->LINE, $gv->FILE, $gv->GvFLAGS;
+    printf <<'EOT', $gv->SAFENAME, $gv->STASH->NAME, $gv->STASH, $$sv, $gv->GvREFCNT, $gv->FORM, $$av, ${$gv->HV}, ${$gv->EGV}, $$cv, $gv->CVGEN, $gv->LINE, $gv->FILE, $gv->GvFLAGS;
 	NAME		%s
 	STASH		%s (0x%x)
 	SV		0x%x

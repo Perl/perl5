@@ -60,6 +60,12 @@ use strict;
     package B::OBJECT;
 }
 
+sub B::GV::SAFENAME {
+  my $name = (shift())->NAME;
+  $name =~ s/^([\cA-\cZ])/"^".chr(64 + ord($1))/e;
+  return $name;
+}
+
 my $debug;
 my $op_count = 0;
 my @parents = ();
@@ -448,6 +454,21 @@ are always stored with a null terminator, and the length field
 This method returns TRUE if the GP field of the GV is NULL.
 
 =item NAME
+
+=item SAFENAME
+
+This method returns the name of the glob, but if the first
+character of the name is a control character, then it converts
+it to ^X first, so that *^G would return "^G" rather than "\cG".
+
+It's useful if you want to print out the name of a variable.
+If you restrict yourself to globs which exist at compile-time
+then the result ought to be unambiguous, because code like
+C<${"^G"} = 1> is compiled as two ops - a constant string and
+a dereference (rv2gv) - so that the glob is created at runtime.
+
+If you're working with globs at runtime, and need to disambiguate
+*^G from *{"^G"}, then you should use the raw NAME method.
 
 =item STASH
 
