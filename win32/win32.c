@@ -896,30 +896,40 @@ DllExport int
 win32_stat(const char *path, struct stat *buffer)
 {
     char	t[MAX_PATH+1]; 
-    const char	*p = path;
     int		l = strlen(path);
     int		res;
 
     if (l > 1) {
 	switch(path[l - 1]) {
+	/* FindFirstFile() and stat() are buggy with a trailing
+	 * backslash, so change it to a forward slash :-( */
 	case '\\':
-	case '/':
-	    if (path[l - 2] != ':') {
-		strncpy(t, path, l - 1);
-		t[l - 1] = 0;
-		p = t;
-	    };
+	    strncpy(t, path, l-1);
+	    t[l - 1] = '/';
+	    t[l] = '\0';
+	    path = t;
+	    break;
+	/* FindFirstFile() is buggy with "x:", so add a slash :-( */
+	case ':':
+	    if (l == 2 && isALPHA(path[0])) {
+		t[0] = path[0]; t[1] = ':'; t[2] = '/'; t[3] = '\0';
+		l = 3;
+		path = t;
+	    }
+	    break;
 	}
     }
-    res = stat(p,buffer);
+    res = stat(path,buffer);
     if (res < 0) {
 	/* CRT is buggy on sharenames, so make sure it really isn't.
 	 * XXX using GetFileAttributesEx() will enable us to set
 	 * buffer->st_*time (but note that's not available on the
 	 * Windows of 1995) */
-	DWORD r = GetFileAttributes(p);
+	DWORD r = GetFileAttributes(path);
 	if (r != 0xffffffff && (r & FILE_ATTRIBUTE_DIRECTORY)) {
-	    buffer->st_mode |= S_IFDIR | S_IREAD;
+	    /* buffer may still contain old garbage since stat() failed */
+	    Zero(buffer, 1, struct stat);
+	    buffer->st_mode = S_IFDIR | S_IREAD;
 	    errno = 0;
 	    if (!(r & FILE_ATTRIBUTE_READONLY))
 		buffer->st_mode |= S_IWRITE | S_IEXEC;
@@ -927,8 +937,8 @@ win32_stat(const char *path, struct stat *buffer)
 	}
     }
     else {
-	if (l == 3 && path[l-2] == ':'
-	    && (path[l-1] == '\\' || path[l-1] == '/'))
+	if (l == 3 && isALPHA(path[0]) && path[1] == ':'
+	    && (path[2] == '\\' || path[2] == '/'))
 	{
 	    /* The drive can be inaccessible, some _stat()s are buggy */
 	    if (!GetVolumeInformation(path,NULL,0,NULL,NULL,NULL,NULL,0)) {
