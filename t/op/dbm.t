@@ -1,8 +1,9 @@
 #!./perl
 
-# $Header: dbm.t,v 4.0 91/03/20 01:51:52 lwall Locked $
+# $RCSfile: dbm.t,v $$Revision: 4.0.1.1 $$Date: 92/06/08 15:43:02 $
 
-if (!-r '/usr/include/dbm.h' && !-r '/usr/include/ndbm.h') {
+if (!-r '/usr/include/dbm.h' && !-r '/usr/include/ndbm.h'
+    && !-r '/usr/include/rpcsvc/dbm.h') {
     print "1..0\n";
     exit;
 }

@@ -1,6 +1,9 @@
-/* $RCSfile: curses.mus,v $$Revision: 4.0.1.1 $$Date: 91/11/05 19:06:19 $
+/* $RCSfile: curses.mus,v $$Revision: 4.0.1.2 $$Date: 92/06/08 16:06:12 $
  *
  * $Log:	curses.mus,v $
+ * Revision 4.0.1.2  92/06/08  16:06:12  lwall
+ * patch20: function key support added to curses.mus
+ * 
  * Revision 4.0.1.1  91/11/05  19:06:19  lwall
  * patch11: usub/curses.mus now supports SysV curses
  * 
@@ -518,7 +521,10 @@ END
 		st[0] = &str_undef;
 	    else {
 		retch = retval;
-		str_nset(st[0], &retch, 1);
+		if (retval > 0377)
+			str_numset(st[0], (double) retval);
+		else
+			str_nset(st[0], &retch, 1);
 	    }
 	}
 	return sp;
@@ -536,7 +542,10 @@ END
 		st[0] = &str_undef;
 	    else {
 		retch = retval;
-		str_nset(st[0], &retch, 1);
+		if (retval > 0377)
+			str_numset(st[0], (double) retval);
+		else
+			str_nset(st[0], &retch, 1);
 	    }
 	}
 	return sp;
