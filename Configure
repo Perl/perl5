@@ -20,7 +20,7 @@
 
 # $Id: Head.U,v 3.0.1.9 1997/02/28 15:02:09 ram Exp $
 #
-# Generated on Fri Mar 29 18:09:14 EET 2002 [metaconfig 3.0 PL70]
+# Generated on Thu Apr  4 20:10:51 EET DST 2002 [metaconfig 3.0 PL70]
 # (with additional metaconfig patches by perlbug@perl.org)
 
 cat >c1$$ <<EOF
@@ -3421,7 +3421,13 @@ esac'
 
 case "$usethreads" in
 $define|true|[yY]*)     dflt='y';;
-*) dflt='n';;
+*)     # Catch case where user specified ithreads or 5005threads but
+       # forgot -Dusethreads (A.D. 4/2002)
+       case "$useithreads$use5005threads" in
+       *$define*)      dflt='y' ;;
+       *)      dflt='n';;
+       esac
+       ;;
 esac
 cat <<EOM
 
