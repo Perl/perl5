@@ -23,17 +23,17 @@ my $EXPECT;
 
 if (ord "A" == 193) { # EBCDIC
     $EXPECT = <<EOT;
-a1ee2b18d1e05bdde3a93009e7f9dfda  Changes
-5a591a47e8c40fe4b78c744111511c45  README
-c9c83e6dbad5f41722338e67d4428077  MD5.pm
-4850753428db9422e8e5f97b401d5a13  MD5.xs
-276da0aa4e9a08b7fe09430c9c5690aa  rfc1321.txt
+b362148b17a451f0d81e0ebb2487756e Changes
+5a591a47e8c40fe4b78c744111511c45 README
+3157e2d2e27dacddea7c54efddc32520 MD5.pm
+4850753428db9422e8e5f97b401d5a13 MD5.xs
+276da0aa4e9a08b7fe09430c9c5690aa rfc1321.txt
 EOT
 } else {
     $EXPECT = <<EOT;
-3866f3543ef41421c6aed3f198e2e9f5  Changes
+0106b67df0dbf9f4d65e9fc04907745b  Changes
 3519f3d02c7c91158f732f0f00064657  README
-01cd8fd24bd46ce1db53074d2af6001a  MD5.pm
+88c35ca46c7e8069fb5ae00c091c98d6  MD5.pm
 1be293491bba726810f8e87671ee0328  MD5.xs
 754b9db19f79dbc4992f7166eb0f37ce  rfc1321.txt
 EOT
@@ -74,9 +74,9 @@ for (split /^/, $EXPECT) {
 	next;
      }
      if ($ENV{EBCDIC_MD5SUM}) {
-         use Encode 'from_to';
+         require Encode;
 	 my $data = cat_file($file);	
-	 from_to($data, 'latin1', 'cp1047');
+	 Encode::from_to($data, 'latin1', 'cp1047');
 	 print md5_hex($data), " $base\n";
 	 next;
      }

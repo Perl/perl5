@@ -1,3 +1,16 @@
+2002-05-05   Gisle Aas <gisle@ActiveState.com>
+
+   Release 2.20
+
+   More synchronization with tweaks Jarkko have done to the
+   bleadperl test suite. This time various EBCDIC hacks.
+
+   Outside PERL_CORE the md5-aaa.t test loaded the wrong version of
+   the module (and would fail if no previous Digest::MD5 was installed).
+   Patch by Mike Stok <mike@stok.co.uk>
+
+
+
 2002-05-01   Gisle Aas <gisle@ActiveState.com>
 
    Release 2.19
