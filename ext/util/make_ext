@@ -34,9 +34,9 @@ if test "X$extspec" = X; then
 fi
 
 # The Perl Makefile.SH will expand all extensions to
-#	lib/auto/X/X.a  (or lib/auto/X/Y/Y.a is nested)
+#	lib/auto/X/X.a  (or lib/auto/X/Y/Y.a if nested)
 # A user wishing to run make_ext might use
-#	X (or X/Y or X::Y is nested)
+#	X (or X/Y or X::Y if nested)
 
 # canonise into X/Y form (pname)
 case "$extspec" in
@@ -50,7 +50,6 @@ esac
 
 mname=`echo "$pname"   | sed -e 's!/!::!g'`
 depth=`echo "$pname"   | sed -e 's![^/][^/]*!..!g'`
-make=${altmake-make}
 makefile=Makefile
 makeargs=''
 makeopts=''
