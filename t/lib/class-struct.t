@@ -5,7 +5,7 @@ BEGIN {
 	@INC = '../lib';
 }
 
-print "1..2\n";
+print "1..8\n";
 
 package aClass;
 
@@ -15,7 +15,8 @@ sub meth { 42 }
 
 package MyObj;
 
-use Class::Struct 'struct';
+use Class::Struct;
+use Class::Struct 'struct'; # test out both forms
 
 use Class::Struct SomeClass => { SomeElem => '$' };
 
@@ -62,8 +63,4 @@ $obk->SomeElem(123);
 
 print "not " unless $obk->SomeElem() == 123;
 print "ok 8\n";
-
-
-
-
 

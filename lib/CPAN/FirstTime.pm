@@ -17,7 +17,7 @@ use FileHandle ();
 use File::Basename ();
 use File::Path ();
 use vars qw($VERSION);
-$VERSION = substr q$Revision: 1.50 $, 10;
+$VERSION = substr q$Revision: 1.51 $, 10;
 
 =head1 NAME
 
@@ -421,8 +421,26 @@ sub conf_sites {
   }
   my $loopcount = 0;
   local $^T = time;
+  my $overwrite_local = 0;
+  if ($mby && -f $mby && -M _ <= 60 && -s _ > 0) {
+      my $mtime = localtime((stat _)[9]);
+      my $prompt = qq{Found $mby as of $mtime
+
+  I\'d use that as a database of CPAN sites. If that is OK for you,
+  please answer 'y', but if you want me to get a new database now,
+  please answer 'n' to the following question.
+
+  Shall I use the local database in $mby?};
+      my $ans = prompt($prompt,"y");
+      $overwrite_local = 1 unless $ans =~ /^y/i;
+  }
   while ($mby) {
-    if ( ! -f $mby ){
+    if ($overwrite_local) {
+      print qq{Trying to overwrite $mby
+};
+      $mby = CPAN::FTP->localize($m,$mby,3);
+      $overwrite_local = 0;
+    } elsif ( ! -f $mby ){
       print qq{You have no $mby
   I\'m trying to fetch one
 };
