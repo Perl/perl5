@@ -4127,7 +4127,7 @@ S_socketpair_udp (int fd[2]) {
 int
 Perl_my_socketpair (int family, int type, int protocol, int fd[2]) {
     /* Stevens says that family must be AF_LOCAL, protocol 0.
-       I'm going to enforce that, then ignore it, and use TCP.  */
+       I'm going to enforce that, then ignore it, and use TCP (or UDP).  */
     int listener = -1;
     int connector = -1;
     int acceptor = -1;
@@ -4143,8 +4143,10 @@ Perl_my_socketpair (int family, int type, int protocol, int fd[2]) {
         errno = EAFNOSUPPORT;
         return -1;
     }
-    if (!fd)
-        return EINVAL;
+    if (!fd) {
+        errno = EINVAL;
+        return -1;
+    }
 
     if (type == SOCK_DGRAM)
         return S_socketpair_udp (fd);
