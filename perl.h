@@ -1381,7 +1381,7 @@ EXT char Error[1];
 # define HAS_VTOHS
 # define HAS_HTOVL
 # define HAS_HTOVS
-# if BYTEORDER == 0x4321
+# if BYTEORDER == 0x4321 || BYTEORDER == 0x87654321
 #  define vtohl(x)	((((x)&0xFF)<<24)	\
 			+(((x)>>24)&0xFF)	\
 			+(((x)&0x0000FF00)<<8)	\

@@ -2,7 +2,7 @@
 
 # $RCSfile: pack.t,v $$Revision: 4.1 $$Date: 92/08/07 18:28:11 $
 
-print "1..60\n";
+print "1..124\n";
 
 $format = "c2 x5 C C x s d i l a6";
 # Need the expression in here to force ary[5] to be numeric.  This avoids
@@ -142,7 +142,7 @@ print "ok ", $test++, "\n";
 print "not " unless length(pack("V", 0)) == 4;
 print "ok ", $test++, "\n";
 
-# 41..56: test unpack-pack lengths
+# 41..56: test unpack-pack lengths (no gargabe bytes at the end)
 
 my @templates = qw(c C i I s S l L n N v V f d);
 
@@ -203,3 +203,91 @@ print "ok ", $test++, "\n";
 # binary values of the uuencoded version would not be portable between
 # character sets.  Uuencoding is meant for encoding binary data, not
 # text data.
+
+#  61..120: pack <-> unpack bijectionism
+
+#  61.. 65: c
+foreach my $c (-128, -1, 0, 1, 127) {
+    print "not " unless unpack("c", pack("c", $c)) == $c;
+    print "ok ", $test++, "\n";
+}
+
+#  66.. 70: C
+foreach my $C (0, 1, 127, 128, 255) {
+    print "not " unless unpack("C", pack("C", $C)) == $C;
+    print "ok ", $test++, "\n";
+}
+
+#  71.. 75: s
+foreach my $s (-32768, -1, 0, 1, 32767) {
+    print "not " unless unpack("s", pack("s", $s)) == $s;
+    print "ok ", $test++, "\n";
+}
+
+#  76.. 80: S
+foreach my $S (0, 1, 32767, 32768, 65535) {
+    print "not " unless unpack("S", pack("S", $S)) == $S;
+    print "ok ", $test++, "\n";
+}
+
+#  81.. 85: i
+foreach my $i (-2147483648, -1, 0, 1, 2147483647) {
+    print "not " unless unpack("i", pack("i", $i)) == $i;
+    print "ok ", $test++, "\n";
+}
+
+#  86..90: I
+foreach my $I (0, 1, 2147483647, 2147483648, 4294967295) {
+    print "not " unless unpack("I", pack("I", $I)) == $I;
+    print "ok ", $test++, "\n";
+}
+
+#  91.. 95: l
+foreach my $l (-2147483648, -1, 0, 1, 2147483647) {
+    print "not " unless unpack("l", pack("l", $l)) == $l;
+    print "ok ", $test++, "\n";
+}
+
+#  96..100: L
+foreach my $L (0, 1, 2147483647, 2147483648, 4294967295) {
+    print "not " unless unpack("L", pack("L", $L)) == $L;
+    print "ok ", $test++, "\n";
+}
+
+# 101..105: n
+foreach my $n (0, 1, 32767, 32768, 65535) {
+    print "not " unless unpack("n", pack("n", $n)) == $n;
+    print "ok ", $test++, "\n";
+}
+
+# 106..110: v
+foreach my $v (0, 1, 32767, 32768, 65535) {
+    print "not " unless unpack("v", pack("v", $v)) == $v;
+    print "ok ", $test++, "\n";
+}
+
+# 111..115: N
+foreach my $N (0, 1, 2147483647, 2147483648, 4294967295) {
+    print "not " unless unpack("N", pack("N", $N)) == $N;
+    print "ok ", $test++, "\n";
+}
+
+# 116..120: V
+foreach my $V (0, 1, 2147483647, 2147483648, 4294967295) {
+    print "not " unless unpack("V", pack("V", $V)) == $V;
+    print "ok ", $test++, "\n";
+}
+
+# 120..124: pack nvNV byteorders
+
+print "not " unless pack("n", 0xdead) eq "\xde\xad";
+print "ok ", $test++, "\n";
+
+print "not " unless pack("v", 0xdead) eq "\xad\xde";
+print "ok ", $test++, "\n";
+
+print "not " unless pack("N", 0xdeadbeef) eq "\xde\xad\xbe\xef";
+print "ok ", $test++, "\n";
+
+print "not " unless pack("V", 0xdeadbeef) eq "\xef\xbe\xad\xde";
+print "ok ", $test++, "\n";

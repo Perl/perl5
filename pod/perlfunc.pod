@@ -2511,30 +2511,101 @@ follows:
     X	Back up a byte.
     @	Null fill to absolute position.
 
+The following rules apply:
+
+=over 8
+
+=item *
+
 Each letter may optionally be followed by a number giving a repeat
-count.  With all types except C<"a">, C<"A">, C<"b">, C<"B">, C<"h">, C<"H">, and C<"P"> the
-pack function will gobble up that many values from the LIST.  A C<*> for the
-repeat count means to use however many items are left.  The C<"a"> and C<"A">
-types gobble just one value, but pack it as a string of length count,
-padding with nulls or spaces as necessary.  (When unpacking, C<"A"> strips
-trailing spaces and nulls, but C<"a"> does not.)  Likewise, the C<"b"> and C<"B">
-fields pack a string that many bits long.  The C<"h"> and C<"H"> fields pack a
-string that many nybbles long.  The C<"p"> type packs a pointer to a null-
-terminated string.  You are responsible for ensuring the string is not a
-temporary value (which can potentially get deallocated before you get
-around to using the packed result).  The C<"P"> packs a pointer to a structure
-of the size indicated by the length. A NULL pointer is created if the 
-corresponding value for C<"p"> or C<"P"> is C<undef>.
-Real numbers (floats and doubles) are
-in the native machine format only; due to the multiplicity of floating
-formats around, and the lack of a standard "network" representation, no
-facility for interchange has been made.  This means that packed floating
-point data written on one machine may not be readable on another - even if
-both use IEEE floating point arithmetic (as the endian-ness of the memory
-representation is not part of the IEEE spec).  Note that Perl uses doubles
-internally for all numeric calculation, and converting from double into
-float and thence back to double again will lose precision (i.e.,
-C<unpack("f", pack("f", $foo)>) will not in general equal C<$foo>).
+count.  With all types except C<"a">, C<"A">, C<"b">, C<"B">, C<"h">,
+C<"H">, and C<"P"> the pack function will gobble up that many values from
+the LIST.  A C<*> for the repeat count means to use however many items are
+left.
+
+=item *
+
+The C<"a"> and C<"A"> types gobble just one value, but pack it as a
+string of length count, padding with nulls or spaces as necessary.
+When unpacking, C<"A"> strips trailing spaces and nulls, and C<"a">
+returns data verbatim.
+
+=item *
+
+Likewise, the C<"b"> and C<"B"> fields pack a string that many bits long.
+
+=item *
+
+The C<"h"> and C<"H"> fields pack a string that many nybbles long.
+
+=item *
+
+The C<"p"> type packs a pointer to a null-terminated string.  You are
+responsible for ensuring the string is not a temporary value (which can
+potentially get deallocated before you get around to using the packed result).
+The C<"P"> type packs a pointer to a structure of the size indicated by the
+length. A NULL pointer is created if the corresponding value for C<"p"> or
+C<"P"> is C<undef>.
+
+=item *
+
+The integer formats C<"s">, C<"S">, C<"i">, C<"I">, C<"l">, and C<"L">
+are inherently non-portable between processors and operating systems
+because they obey the native byteorder and endianness.  For example a
+4-byte integer 0x87654321 (2271560481 decimal) be ordered natively
+(arranged in and handled by the CPU registers) into bytes as
+ 
+ 	0x12 0x34 0x56 0x78	# little-endian
+ 	0x78 0x56 0x34 0x12	# big-endian
+ 
+Basically, the Intel, Alpha, and VAX CPUs and little-endian, while
+everybody else, for example Motorola m68k/88k, PPC, Sparc, HP PA,
+Power, and Cray are big-endian.  MIPS can be either: Digital used it
+in little-endian mode, SGI uses it in big-endian mode.
+
+The names `big-endian' and `little-endian' are joking references to
+the classic "Gulliver's Travels" (via the paper "On Holy Wars and a
+Plea for Peace" by Danny Cohen, USC/ISI IEN 137, April 1, 1980) and
+the egg-eating habits of the lilliputs.
+ 
+Some systems may even have weird byte orders such as
+ 
+ 	0x56 0x78 0x12 0x34
+ 	0x34 0x12 0x78 0x56
+ 
+You can see your system's preference with
+
+ 	print join(" ", map { sprintf "%#02x", $_ }
+                            unpack("C*",pack("L",0x12345678))), "\n";
+
+The byteorder on the platform where Perl was built is also available
+via L<Config>:
+
+	use Config;
+	print $Config{byteorder}, "\n";
+
+Byteorders C<'1234'> and C<'12345678'> are little-endian, C<'4321'>
+and C<'87654321'> are big-endian.
+
+If you want portable packed integers use the formats C<"n">, C<"N">,
+C<"v">, and C<"V">, their byte endianness and size is known.
+
+=item *
+
+Real numbers (floats and doubles) are in the native machine format only;
+due to the multiplicity of floating formats around, and the lack of a
+standard "network" representation, no facility for interchange has been
+made.  This means that packed floating point data written on one machine
+may not be readable on another - even if both use IEEE floating point
+arithmetic (as the endian-ness of the memory representation is not part
+of the IEEE spec).
+
+Note that Perl uses doubles internally for all numeric calculation, and
+converting from double into float and thence back to double again will
+lose precision (i.e., C<unpack("f", pack("f", $foo)>) will not in general
+equal C<$foo>).
+
+=back
 
 Examples:
 
