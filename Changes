@@ -32,6 +32,151 @@ Version v5.7.0		Development release working toward v5.8
 --------------
 
 ____________________________________________________________________________
+[  7612] By: jhi                                   on 2000/11/08  18:35:25
+        Log: Subject: is this the appropriate patch to fix: [ID 20001106.006] find2perl generated scripts issue new lstat()    on filehandle _ warning
+             From: David Dyck <dcd@tc.fluke.com>
+             Date: Wed, 8 Nov 2000 10:05:44 -0800 (PST)
+             Message-ID: <Pine.LNX.4.30.0011080957440.2572-100000@dd.tc.fluke.com>
+     Branch: perl
+	   ! pp_sys.c
+____________________________________________________________________________
+[  7611] By: jhi                                   on 2000/11/08  18:30:26
+        Log: Subject: [PATCH bleadperl] Re: Patch 7533 prevents malloc.c from compiling on MachTen
+             From: Dominic Dunlop <domo@computer.org>
+             Date: Tue, 7 Nov 2000 12:05:25 +0100
+             Message-Id: <p04320403b62d8e0870cf@[192.168.1.4]>
+     Branch: perl
+	   ! malloc.c
+____________________________________________________________________________
+[  7610] By: jhi                                   on 2000/11/08  18:25:14
+        Log: Do not test UTF-8 locales since that the tests would require
+             polymorphic regexen.
+     Branch: perl
+	   ! t/pragma/locale.t
+____________________________________________________________________________
+[  7609] By: jhi                                   on 2000/11/08  17:12:51
+        Log: Locale buglets.
+             
+             Subject: RE: Locales support (setlocale) fixes
+             From: "Konovalov, Vadim" <vkonovalov@lucent.com>
+             Date: Wed, 8 Nov 2000 20:01:39 +0300
+             Message-ID: <402099F49BEED211999700805FC7359F825283@ru0028exch01.spb.lucent.com>
+     Branch: perl
+	   ! t/pragma/locale.t util.c
+____________________________________________________________________________
+[  7608] By: jhi                                   on 2000/11/08  17:00:16
+        Log: Deleting $ENV{PATH} in VMS is not recommendable.
+     Branch: perl
+	   ! t/pragma/locale.t
+____________________________________________________________________________
+[  7607] By: jhi                                   on 2000/11/08  16:58:26
+        Log: Subject: PATCH std stdio for (Free)BSD
+             From: Nicholas Clark <nick@ccl4.org>
+             Date: Wed, 8 Nov 2000 15:36:29 +0000
+             Message-ID: <20001108153629.D98736@plum.flirble.org>
+     Branch: metaconfig
+	   ! U/compline/d_stdstdio.U
+     Branch: perl
+	   ! Configure config_h.SH
+____________________________________________________________________________
+[  7606] By: jhi                                   on 2000/11/08  16:43:31
+        Log: Forgot to bump the line numbers in #7601.
+     Branch: perl
+	   ! t/pragma/warn/pp_sys
+____________________________________________________________________________
+[  7605] By: jhi                                   on 2000/11/08  16:39:12
+        Log: More careful detection of how well NVs and UVs mix.
+             
+             Subject: [PATCH] Re: NV preserving UV (wasRe: [ID 20001007.002] Not OK: perl v5.7.0 +DEVEL7158 on armv4l-linux-64int 2.2.17-rmk1 (UNINSTALLED))
+             From: Nicholas Clark <nick@ccl4.org>
+             Date: Wed, 8 Nov 2000 15:14:12 +0000
+             Message-ID: <20001108151412.B98736@plum.flirble.org>
+             
+             Added some SIGFPE paranoia.
+     Branch: metaconfig/U/perl
+	   ! perlxv.U
+     Branch: perl
+	   ! Configure config_h.SH
+____________________________________________________________________________
+[  7604] By: jhi                                   on 2000/11/08  14:39:10
+        Log: Subject: [patch perl@7595] VMS configure.com tweak
+             From: "Craig A. Berry" <craigberry@mac.com>
+             Date: Wed, 8 Nov 2000 00:24:12 -0600
+             Message-Id: <p04330103b62e879ceeff@[192.168.56.177]>
+     Branch: perl
+	   ! configure.com
+____________________________________________________________________________
+[  7603] By: jhi                                   on 2000/11/08  14:27:11
+        Log: Subject: [PATCH @7595] int/ptr casts in perlio.c
+             From: Robin Barker <rmb1@cise.npl.co.uk>
+             Date: Wed, 8 Nov 2000 11:11:39 GMT
+             Message-Id: <200011081111.LAA07377@tempest.npl.co.uk>
+     Branch: perl
+	   ! perlio.c
+____________________________________________________________________________
+[  7602] By: jhi                                   on 2000/11/08  14:25:03
+        Log: Fix for the tie-refhash string table leaks.
+             
+             From: Nick Ing-Simmons <nik@tiuk.ti.com> 
+             Date: Wed, 8 Nov 2000 13:03:04 GMT
+             Message-Id: <200011081303.NAA07042@mikado.tiuk.ti.com>
+     Branch: perl
+	   ! t/lib/tie-refhash.t
+____________________________________________________________________________
+[  7601] By: jhi                                   on 2000/11/08  14:21:08
+        Log: Try to avoid flockless and emulationless places.
+     Branch: perl
+	   ! t/pragma/warn/pp_sys
+____________________________________________________________________________
+[  7600] By: jhi                                   on 2000/11/08  02:28:54
+        Log: Overrideable keys, each, pop, push, shift, splice, unshift.
+             
+             Subject: [PATCH] prototyped functions that should be overrideable
+             From: "Casey R. Tweten" <crt@kiski.net>
+             Date: Fri, 3 Nov 2000 11:09:12 -0500 (EST)
+             Message-ID: <Pine.OSF.4.21.0011031100470.17471-100000@home.kiski.net>
+     Branch: perl
+	   ! toke.c
+____________________________________________________________________________
+[  7599] By: jhi                                   on 2000/11/08  01:12:05
+        Log: Make perlbug not insist on dumping to a file when stdout isn't a tty.
+             
+             Subject: [PATCH] perlbug.PL
+             From: "Kurt D. Starsinic" <kstar@chapin.edu>
+             Date: Mon, 6 Nov 2000 21:39:01 -0500
+             Message-ID: <20001106213901.B20955@O2.chapin.edu>
+     Branch: perl
+	   ! utils/perlbug.PL
+____________________________________________________________________________
+[  7598] By: jhi                                   on 2000/11/07  23:42:00
+        Log: Bad thinko in #7581 (I used the test program with the expanded
+             values as-is).
+     Branch: metaconfig
+	   ! U/compline/d_stdstdio.U
+     Branch: perl
+	   ! Configure
+____________________________________________________________________________
+[  7597] By: jhi                                   on 2000/11/07  21:43:29
+        Log: Subject: [PATCH perl@7573] cygwin port
+             From: "Fifer, Eric" <EFifer@sanwaint.com>
+             Date: Tue, 7 Nov 2000 18:08:51 -0000 
+             Message-ID: <779F20BCCE5AD31186A50008C75D99791717BB@silldn_mail1.sanwaint.com>
+             
+             Synchronize with Cygwin 1.1.5.
+     Branch: perl
+	   ! AUTHORS README.cygwin cygwin/cygwin.c hints/cygwin.sh mg.c
+	   ! pod/perlport.pod unixish.h util.c
+____________________________________________________________________________
+[  7596] By: jhi                                   on 2000/11/07  21:39:25
+        Log: perlhack updates from H.Merijn Brand.
+     Branch: perl
+	   ! pod/perlhack.pod
+____________________________________________________________________________
+[  7595] By: jhi                                   on 2000/11/07  20:21:41
+        Log: Update Changes.
+     Branch: perl
+	   ! Changes patchlevel.h
+____________________________________________________________________________
 [  7594] By: jhi                                   on 2000/11/07  19:18:58
         Log: Be more robust in Dynaloader.pm.
      Branch: perl
