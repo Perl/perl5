@@ -78,7 +78,11 @@ sub loadEncoding
      $type = substr($line,0,1);
      last unless $type eq '#';
     }
-   my $class = ref($obj).('::'.(($type eq 'H') ? 'HanZi' : ($type eq 'E') ? 'Escape' : 'Table'));
+   my $class = ref($obj).('::'.(
+	($type eq 'X') ? 'Extended' :
+	($type eq 'H') ? 'HanZi' :
+	($type eq 'E') ? 'Escape' : 'Table'
+	));
    # carp "Loading $file";
    bless $obj,$class;
    return $obj if $obj->read($fh,$obj->name,$type);
@@ -270,25 +274,25 @@ sub decode
  my $std = $seq->[0];
  my $cur = $std;
  my @sta = ($std, undef, undef, undef); # G0 .. G3 state
- my($g1,$g2,$g3) = (0,0,0);
+ my $s   = 0; # state of SO-SI.   0 (G0) or 1 (G1);
+ my $ss  = 0; # state of SS2,SS3. 0 (G0), 2 (G2) or 3 (G3);
  my $uni;
  while (length($str)){
    my $uch = substr($str,0,1,'');
    if($uch eq "\e"){
     if($str =~ s/^($esc)//)
      {
-      my $esc = "\e$1";
-      $sta[ $grp->{$esc} ] = $esc if $tbl->{$esc};
+      my $e = "\e$1";
+      $sta[ $grp->{$e} ] = $e if $tbl->{$e};
      }
     # appearance of "\eN\eO" or "\eO\eN" isn't supposed.
-    # but coincidental ON of G2 and G3 is explicitly avoided.
     elsif($str =~ s/^N//)
      {
-      $g2 = 1; $g3 = 0;
+      $ss = 2;
      }
     elsif($str =~ s/^O//)
      {
-      $g3 = 1; $g2 = 0;
+      $ss = 3;
      }
     else
      {
@@ -298,17 +302,17 @@ sub decode
     next;
    }
    if($uch eq "\x0e"){
-    $g1 = 1; next;
+    $s = 1; next;
    }
    if($uch eq "\x0f"){
-    $g1 = 0; next;
+    $s = 0; next;
    }
 
-   $cur = $g3 ? $sta[3] : $g2 ? $sta[2] : $g1 ? $sta[1] : $sta[0];
+   $cur = $ss ? $sta[$ss] : $sta[$s];
 
    if(ref($tbl->{$cur}) eq 'Encode::XS'){
      $uni .= $tbl->{$cur}->decode($uch);
-     $g2 = $g3 = 0;
+     $ss = 0;
      next;
    }
    my $ch    = ord($uch);
@@ -330,7 +334,7 @@ sub decode
      $x = '';
     }
    $uni .= $x;
-   $g2 = $g3 = 0;
+   $ss = 0;
   }
  $_[1] = $str if $chk;
  return $uni;
@@ -346,15 +350,14 @@ sub encode
  my $fin = $obj->{'final'};
  my $std = $seq->[0];
  my $str = $ini;
- my @sta = ($std,undef,undef,undef);
- my @pre = ($std,undef,undef,undef);
+ my @sta = ($std,undef,undef,undef); # G0 .. G3 state
  my $cur = $std;
- my $pG = 0;
- my $cG = 0;
+ my $pG = 0; # previous G: 0 or 1.
+ my $cG = 0; # current G: 0,1,2,3. 
 
- if($ini)
+ if($ini && defined $grp->{$ini})
   {
-    $sta[ $grp->{$ini} ] = $pre[ $grp->{$ini} ] = $ini;
+    $sta[ $grp->{$ini} ] = $ini;
   }
 
  while (length($uni)){
@@ -377,18 +380,137 @@ sub encode
     $x = pack(&$rep($x),$x);
    }
   $cG   = $grp->{$cur};
-  $str .= $pre[ $cG ] = $cur if $cur ne $pre[ $cG ];
+  $str .= $sta[$cG] = $cur unless $cG < 2 && $cur eq $sta[$cG];
 
   $str .= $cG == 0 && $pG == 1 ? "\cO" :
           $cG == 1 && $pG == 0 ? "\cN" :
           $cG == 2 ? "\eN" :
-          $cG == 3 ? "\eO" :        "";
+          $cG == 3 ? "\eO" : "";
   $str .= $x;
   $pG = $cG if $cG < 2;
  }
- $str .= $std  unless $cur eq $std;
  $str .= "\cO" if $pG == 1; # back to G0
+ $str .= $std  unless $std eq $sta[0]; # GO to ASCII
  $str .= $fin; # necessary?
+ $_[1] = $uni if $chk;
+ return $str;
+}
+
+
+package Encode::Tcl::Extended;
+use base 'Encode::Encoding';
+
+use Carp;
+
+sub read
+{
+ my ($obj,$fh,$name) = @_;
+ my(%tbl, $enc, %ssc, @key);
+ while (<$fh>)
+  {
+   my ($key,$val) = /^(\S+)\s+(.*)$/;
+   $val =~ s/\{(.*?)\}/$1/;
+   $val =~ s/\\x([0-9a-f]{2})/chr(hex($1))/ge;
+
+   if($enc = Encode->getEncoding($key)){
+     push @key, $val;
+     $tbl{$val} = ref($enc) eq 'Encode::Tcl'
+	? $enc->loadEncoding : $enc;
+     $ssc{$val} = substr($val,1) if $val =~ /^>/;
+   }else{
+     $obj->{$key} = $val;
+   }
+  }
+ $obj->{'SSC'} = \%ssc; # single shift char
+ $obj->{'Tbl'} = \%tbl; # encoding tables
+ $obj->{'Key'} = \@key; # keys of table hash
+ return $obj;
+}
+
+sub decode
+{
+ my ($obj,$str,$chk) = @_;
+ my $tbl = $obj->{'Tbl'};
+ my $ssc = $obj->{'SSC'};
+ my $cur = ''; # current state
+ my $uni;
+ while (length($str)){
+   my $uch = substr($str,0,1,'');
+   my $ch  = ord($uch);
+   if(!$cur && $ch > 0x7F)
+    {
+     $cur = '>';
+     $cur .= $uch, next if $ssc->{$cur.$uch};
+    }
+   $ch ^= 0x80 if $cur;
+
+   if(ref($tbl->{$cur}) eq 'Encode::XS'){
+     $uni .= $tbl->{$cur}->decode(chr($ch));
+     $cur = '';
+     next;
+   }
+   my $rep   = $tbl->{$cur}->{'Rep'};
+   my $touni = $tbl->{$cur}->{'ToUni'};
+   my $x;
+   if (&$rep($ch) eq 'C')
+    {
+     $x = $touni->[0][$ch];
+    }
+   else
+    {
+     $x = $touni->[$ch][0x80 ^ ord(substr($str,0,1,''))];
+    }
+   unless (defined $x)
+    {
+     last if $chk;
+     # What do we do here ?
+     $x = '';
+    }
+   $uni .= $x;
+   $cur = '';
+  }
+ $_[1] = $str if $chk;
+ return $uni;
+}
+
+sub encode
+{
+ my ($obj,$uni,$chk) = @_;
+ my $tbl = $obj->{'Tbl'};
+ my $ssc = $obj->{'SSC'};
+ my $key = $obj->{'Key'};
+ my $str;
+ my $cur;
+
+ while (length($uni)){
+  my $ch = substr($uni,0,1,'');
+  my $x;
+  foreach my $k (@$key){
+   $x = ref($tbl->{$k}) eq 'Encode::XS'
+    ? $k =~ /^>/
+      ? $tbl->{$k}->encode(chr(0x80 ^ ord $ch),1)
+      : $tbl->{$k}->encode($ch,1)
+    : $tbl->{$k}->{FmUni}->{$ch};
+   $cur = $k, last if defined $x;
+  }
+  if(ref($tbl->{$cur}) ne 'Encode::XS')
+   {
+    my $def = $tbl->{$cur}->{'Def'};
+    my $rep = $tbl->{$cur}->{'Rep'};
+    unless (defined $x){
+     last if ($chk);
+     $x = $def;
+    }
+    my $r = &$rep($x);
+    $x = pack($r,
+      $cur =~ /^>/
+        ? $r eq 'C' ? 0x80 ^ $x : 0x8080 ^ $x
+        : $x);
+   }
+
+  $str .= $ssc->{$cur} if defined $ssc->{$cur};
+  $str .= $x;
+ }
  $_[1] = $uni if $chk;
  return $str;
 }

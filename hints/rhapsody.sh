@@ -43,8 +43,8 @@ libc='/System/Library/Frameworks/System.framework/System';
 # Optimize.
 optimize='-O3';
 
-# We have a prototype for telldir.
-ccflags="${ccflags} -pipe -fno-common -DHAS_TELLDIR_PROTOTYPE";
+# XXX Unclear why we require -pipe and -fno-common here.
+ccflags="${ccflags} -pipe -fno-common"
 
 # cpp-precomp is problematic.
 cppflags='-traditional-cpp';

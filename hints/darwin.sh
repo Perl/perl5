@@ -41,10 +41,12 @@ usenm='true';
 #libc='/usr/lib/libSystem.dylib';
 
 # Optimize.
-optimize='-O3';
+if [ "x$optimize" = 'x' ]; then
+    optimize='-O3'
+fi
 
-# We have a prototype for telldir.
-ccflags="${ccflags} -pipe -fno-common -DHAS_TELLDIR_PROTOTYPE";
+# XXX Unclear why we require -pipe and -fno-common here.
+ccflags="${ccflags} -pipe -fno-common"
 
 # At least on Darwin 1.3.x:
 #

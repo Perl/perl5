@@ -3874,6 +3874,10 @@ PP(pp_fork)
     Pid_t childpid;
     GV *tmpgv;
 
+#   if defined(USE_ITHREADS) && !defined(HAS_PTHREAD_ATFORK)
+	Perl_croak(aTHX_ "No pthread_atfork() -- fork() too unsafe");
+#   endif
+
     EXTEND(SP, 1);
     PERL_FLUSHALL_FOR_CHILD;
     childpid = fork();

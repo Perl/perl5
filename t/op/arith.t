@@ -1,6 +1,6 @@
 #!./perl -w
 
-print "1..109\n";
+print "1..113\n";
 
 sub try ($$) {
    print +($_[1] ? "ok" : "not ok"), " $_[0]\n";
@@ -204,3 +204,10 @@ tryeq 106, 46339 * 46341, 0x7ffea80f;
 tryeq 107, 46339 * -46341, -0x7ffea80f;
 tryeq 108, -46339 * 46341, -0x7ffea80f;
 tryeq 109, -46339 * -46341, 0x7ffea80f;
+
+# leading space should be ignored
+
+tryeq 110, 1 + " 1", 2;
+tryeq 111, 3 + " -1", 2;
+tryeq 112, 1.2, " 1.2";
+tryeq 113, -1.2, " -1.2";

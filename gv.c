@@ -938,6 +938,17 @@ Perl_gv_fetchpv(pTHX_ const char *nambeg, I32 add, I32 sv_type)
     case '7':
     case '8':
     case '9':
+	/* ensures variable is only digits */
+	/* ${"1foo"} fails this test (and is thus writeable) */
+	/* added by japhy, but borrowed from is_gv_magical */
+
+	if (len > 1) {
+	    const char *end = name + len;
+	    while (--end > name) {
+		if (!isDIGIT(*end)) return gv;
+	    }
+	}
+
       ro_magicalize:
 	SvREADONLY_on(GvSV(gv));
       magicalize:

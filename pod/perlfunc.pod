@@ -3490,9 +3490,10 @@ you will have to use a block returning its value instead:
 
 Equivalent to C<print FILEHANDLE sprintf(FORMAT, LIST)>, except that C<$\>
 (the output record separator) is not appended.  The first argument
-of the list will be interpreted as the C<printf> format.  If C<use locale> is
-in effect, the character used for the decimal point in formatted real numbers
-is affected by the LC_NUMERIC locale.  See L<perllocale>.
+of the list will be interpreted as the C<printf> format. See C<sprintf>
+for an explanation of the format argument. If C<use locale> is in effect,
+the character used for the decimal point in formatted real numbers is
+affected by the LC_NUMERIC locale.  See L<perllocale>.
 
 Don't fall into the trap of using a C<printf> when a simple
 C<print> would do.  The C<print> is more efficient and less

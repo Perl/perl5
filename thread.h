@@ -310,13 +310,8 @@ void Perl_atfork_unlock(void);
 #    define PTHREAD_ATFORK(prepare,parent,child)		\
 	pthread_atfork(prepare,parent,child)
 #  else
-#    ifdef HAS_FORK
-#      define PTHREAD_ATFORK(prepare,parent,child)		\
-	 Perl_croak(aTHX_ "No pthread_atfork() -- fork() too unsafe");
-#    else
-#      define PTHREAD_ATFORK(prepare,parent,child)		\
-	 NOOP
-#    endif
+#    define PTHREAD_ATFORK(prepare,parent,child)		\
+	NOOP
 #  endif
 #endif
 
@@ -473,8 +468,4 @@ typedef struct condpair {
 
 #ifndef INIT_THREADS
 #  define INIT_THREADS NOOP
-#endif
-
-#ifndef PTHREAD_ATFORK
-#  define PTHREAD_ATFORK(prepare,parent,child)	NOOP
 #endif

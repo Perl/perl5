@@ -629,6 +629,10 @@ Perl_my_atof2(pTHX_ const char* orig, NV* value)
     I32 ipart = 0;	/* index into part[] */
     I32 offcount;	/* number of digits in least significant part */
 
+    /* leading whitespace */
+    while (isSPACE(*s))
+	++s;
+
     /* sign */
     switch (*s) {
 	case '-':
