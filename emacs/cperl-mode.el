@@ -7083,7 +7083,6 @@ Currently it is tuned to C and Perl syntax."
 	      found-bad found)))
     (not not-found)))
 
-
 ;;; Getting help
 (defvar cperl-have-help-regexp 
   ;;(concat "\\("

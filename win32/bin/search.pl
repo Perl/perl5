@@ -621,7 +621,7 @@ sub read_rc
     local($line_num, $ln, $tag) = 0;
     local($use_default, @default) = 0;
 
-    { package magic; $ = 0; } ## turn off warnings for when we run EXPR's
+    { package magic; $^W= 0; } ## turn off warnings for when we run EXPR's
 
     unless (open(RC, "$file")) {
 	$use_default=1;
