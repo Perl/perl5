@@ -933,7 +933,6 @@ void restore_expect _((void *e));
 void restore_lex_expect _((void *e));
 void yydestruct _((void *ptr));
 VIRTUAL int fprintf _((PerlIO *pf, const char *pat, ...));
-VIRTUAL SV**	get_specialsv_list _((void));
 
 #ifdef WIN32
 VIRTUAL int&	ErrorNo _((void));
@@ -941,12 +940,6 @@ VIRTUAL int&	ErrorNo _((void));
 #else	/* !PERL_OBJECT */
 END_EXTERN_C
 #endif	/* PERL_OBJECT */
-
-#ifdef INDIRECT_BGET_MACROS
-VIRTUAL void byterun _((struct bytestream bs));
-#else
-VIRTUAL void byterun _((PerlIO *fp));
-#endif /* INDIRECT_BGET_MACROS */
 
 VIRTUAL void	sv_catpvf_mg _((SV *sv, const char* pat, ...));
 VIRTUAL void	sv_catpv_mg _((SV *sv, const char *ptr));

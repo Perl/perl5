@@ -5008,6 +5008,30 @@ ck_lfun(OP *o)
 }
 
 OP *
+ck_defined(OP *o)		/* 19990527 MJD */
+{
+    if (ckWARN(WARN_DEPRECATED)) {
+      switch (cUNOPo->op_first->op_type) {
+      case OP_RV2AV:
+      case OP_PADAV:
+      case OP_AASSIGN:		/* Is this a good idea? */
+	warner(WARN_DEPRECATED, "defined(@array) is deprecated (and not really meaningful)");
+	warner(WARN_DEPRECATED, "(Maybe you should just omit the defined()?)\n");
+	break;
+      case OP_RV2HV:
+      case OP_PADHV:
+	warner(WARN_DEPRECATED, "defined(%hash) is deprecated (and not really meaningful)");
+	warner(WARN_DEPRECATED, "(Maybe you should just omit the defined()?)\n");
+	break;
+      default:
+	/* no warning */
+	break;
+      }
+    }
+    return ck_rfun(o);
+}
+
+OP *
 ck_rfun(OP *o)
 {
     OPCODE type = o->op_type;

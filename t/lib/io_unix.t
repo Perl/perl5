@@ -21,6 +21,13 @@ BEGIN {
 	elsif ($Config{'extensions'} !~ /\bIO\b/) {
 	    $reason = 'IO extension unavailable';
 	}
+	elsif ($^O eq 'os2') {
+	    use IO::Socket;
+
+	    eval {IO::Socket::pack_sockaddr_un('/tmp/foo') || 1}
+	      or $@ !~ /not implemented/ or
+		$reason = 'compiled without TCP/IP stack v4';
+	}
 	undef $reason if $^O eq 'VMS' and $Config{d_socket};
 	if ($reason) {
 	    print "1..0 # Skip: $reason\n";
@@ -32,12 +39,12 @@ BEGIN {
 $PATH = "/tmp/sock-$$";
 
 # Test if we can create the file within the tmp directory
-if (-e $PATH or not open(TEST, ">$PATH")) {
-    print "1..0\n";
+if (-e $PATH or not open(TEST, ">$PATH") and $^O ne 'os2') {
+    print "1..0 # Skip: cannot open '$PATH' for write\n";
     exit 0;
 }
 close(TEST);
-unlink($PATH) or die "Can't unlink $PATH: $!";
+unlink($PATH) or $^O eq 'os2' or die "Can't unlink $PATH: $!";
 
 # Start testing
 $| = 1;
@@ -60,7 +67,7 @@ if($pid = fork()) {
     $sock->close;
 
     waitpid($pid,0);
-    unlink($PATH) || warn "Can't unlink $PATH: $!";
+    unlink($PATH) || $^O eq 'os2' || warn "Can't unlink $PATH: $!";
 
     print "ok 5\n";
 

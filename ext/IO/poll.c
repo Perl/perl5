@@ -26,6 +26,12 @@
 #include <sys/stat.h>
 #include <errno.h>
 
+#ifdef HAS_SELECT
+#ifdef I_SYS_SELECT
+#include <sys/select.h>
+#endif
+#endif
+
 #ifdef EMULATE_POLL_WITH_SELECT
 
 # define POLL_CAN_READ	(POLLIN | POLLRDNORM )

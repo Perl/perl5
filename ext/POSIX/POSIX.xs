@@ -138,8 +138,12 @@
 #else
 
 #  ifndef HAS_MKFIFO
-#    ifndef mkfifo
-#      define mkfifo(path, mode) (mknod((path), (mode) | S_IFIFO, 0))
+#    ifdef OS2
+#      define mkfifo(a,b) not_here("mkfifo")
+#    else	/* !( defined OS2 ) */ 
+#      ifndef mkfifo
+#        define mkfifo(path, mode) (mknod((path), (mode) | S_IFIFO, 0))
+#      endif
 #    endif
 #  endif /* !HAS_MKFIFO */
 

@@ -42,7 +42,6 @@
 #define block_start		Perl_block_start
 #define boot_core_UNIVERSAL	Perl_boot_core_UNIVERSAL
 #define bset_obj_store		Perl_bset_obj_store
-#define byterun			Perl_byterun
 #define call_list		Perl_call_list
 #define cando			Perl_cando
 #define cast_i32		Perl_cast_i32
@@ -163,7 +162,6 @@
 #define get_op_descs		Perl_get_op_descs
 #define get_op_names		Perl_get_op_names
 #define get_opargs		Perl_get_opargs
-#define get_specialsv_list	Perl_get_specialsv_list
 #define get_vtbl		Perl_get_vtbl
 #define gp_free			Perl_gp_free
 #define gp_ref			Perl_gp_ref
@@ -1010,7 +1008,6 @@
 #define block_start		CPerlObj::Perl_block_start
 #define boot_core_UNIVERSAL	CPerlObj::Perl_boot_core_UNIVERSAL
 #define bset_obj_store		CPerlObj::Perl_bset_obj_store
-#define byterun			CPerlObj::Perl_byterun
 #define cache_re		CPerlObj::Perl_cache_re
 #define call_list		CPerlObj::Perl_call_list
 #define call_list_body		CPerlObj::Perl_call_list_body
@@ -1187,7 +1184,6 @@
 #define get_op_descs		CPerlObj::Perl_get_op_descs
 #define get_op_names		CPerlObj::Perl_get_op_names
 #define get_opargs		CPerlObj::Perl_get_opargs
-#define get_specialsv_list	CPerlObj::Perl_get_specialsv_list
 #define get_vtbl		CPerlObj::Perl_get_vtbl
 #define gp_free			CPerlObj::Perl_gp_free
 #define gp_ref			CPerlObj::Perl_gp_ref

@@ -9,7 +9,7 @@ package B;
 require DynaLoader;
 require Exporter;
 @ISA = qw(Exporter DynaLoader);
-@EXPORT_OK = qw(byteload_fh byteload_string minus_c ppname
+@EXPORT_OK = qw(minus_c ppname
 		class peekop cast_I32 cstring cchar hash threadsv_names
 		main_root main_start main_cv svref_2object opnumber amagic_generation
 		walkoptree walkoptree_slow walkoptree_exec walksymtable
@@ -819,11 +819,6 @@ preceding the first "::". This is used to turn "B::UNOP" into
 
 In a perl compiled for threads, this returns a list of the special
 per-thread threadsv variables.
-
-=item byteload_fh(FILEHANDLE)
-
-Load the contents of FILEHANDLE as bytecode. See documentation for
-the B<Bytecode> module in F<B::Backend> for how to generate bytecode.
 
 =back
 

@@ -307,7 +307,7 @@ chop		chop			ck_spair	mts%	L
 schop		scalar chop		ck_null		stu%	S?
 chomp		safe chop		ck_spair	mts%	L
 schomp		scalar safe chop	ck_null		stu%	S?
-defined		defined operator	ck_rfun		isu%	S?
+defined		defined operator	ck_defined	isu%	S?
 undef		undef operator		ck_lfun		s%	S?
 study		study			ck_fun		su%	S?
 pos		match position		ck_lfun		stu%	S?

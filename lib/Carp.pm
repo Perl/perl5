@@ -215,7 +215,7 @@ sub shortmess {	# Short-circuit &longmess if called via multiple packages
 
     # merge all the caller's @ISA packages into %isa.
     @isa{@{"${prevpack}::ISA"}} = ()
-	if(defined @{"${prevpack}::ISA"});
+	if(@{"${prevpack}::ISA"});
 
     # now we crawl up the calling stack and look at all the packages in
     # there.  For each package, we look to see if it has an @ISA and then
@@ -223,7 +223,7 @@ sub shortmess {	# Short-circuit &longmess if called via multiple packages
     # our caller is a derived class of that package and its calls can also
     # be ignored
     while (($pack,$file,$line) = caller($i++)) {
-	if(defined @{$pack . "::ISA"}) {
+	if(@{$pack . "::ISA"}) {
 	    my @i = @{$pack . "::ISA"};
 	    my %i;
 	    @i{@i} = ();
@@ -247,7 +247,7 @@ sub shortmess {	# Short-circuit &longmess if called via multiple packages
 	if ($extra-- > 0) {
 	    %isa = ($pack,1);
 	    @isa{@{$pack . "::ISA"}} = ()
-		if(defined @{$pack . "::ISA"});
+		if(@{$pack . "::ISA"});
 	}
 	else {
 	    # OK!  We've got a candidate package.  Time to construct the

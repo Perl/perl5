@@ -65,6 +65,11 @@ EOM
     quit();
 }
 
+unless (eval { getgrgid(0); 1 }) {
+    print "1..0 # Skip: getgrgid() not implemented\n";
+    exit 0;
+}
+
 # Remember that group names can contain whitespace, '-', et cetera.
 # That is: do not \w, do not \S.
 if ($groups =~ /groups=(.+)( [ug]id=|$)/) {

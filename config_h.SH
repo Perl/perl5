@@ -2094,6 +2094,12 @@ sed <<!GROK!THIS! >config.h -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un-
  */
 #$d_dlsymun 	DLSYM_NEEDS_UNDERSCORE 	/**/
 
+/* HAS_ENDSPENT:
+ *	This symbol, if defined, indicates that the endspent system call is
+ *	available to finalize the scan of SysV shadow password entries.
+ */
+#$d_endspent HAS_ENDSPENT		/**/
+
 /* HAS_FSEEKO:
  *	This symbol, if defined, indicates that the fseeko routine is
  *	available to fseek beyond 32 bits (useful for ILP32 hosts).
@@ -2111,6 +2117,18 @@ sed <<!GROK!THIS! >config.h -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un-
  *	available to iterate through mounted file systems.
  */
 #$d_getmntent HAS_GETMNTENT		/**/
+
+/* HAS_GETSPENT:
+ *	This symbol, if defined, indicates that the getspent system call is
+ *	available to retrieve SysV shadow password entries sequentially.
+ */
+#$d_getspent HAS_GETSPENT		/**/
+
+/* HAS_GETSPNAM:
+ *	This symbol, if defined, indicates that the getspnam system call is
+ *	available to retrieve SysV shadow password entries by name.
+ */
+#$d_getspnam HAS_GETSPNAM		/**/
 
 /* HAS_HASMNTOPT:
  *	This symbol, if defined, indicates that the hasmntopt routine is
@@ -2136,6 +2154,12 @@ sed <<!GROK!THIS! >config.h -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un-
  *	and there I_SYSUIO.
  */
 #$d_readv HAS_READV		/**/
+
+/* HAS_SETSPENT:
+ *	This symbol, if defined, indicates that the setspent system call is
+ *	available to initialize the scan of SysV shadow password entries.
+ */
+#$d_setspent HAS_SETSPENT		/**/
 
 /* USE_SFIO:
  *	This symbol, if defined, indicates that sfio should
@@ -2275,6 +2299,12 @@ sed <<!GROK!THIS! >config.h -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un-
  *	should be included.
  */
 #$i_poll	I_POLL		/**/
+
+/* I_SHADOW:
+ *	This symbol, if defined, indicates that <shadow.h> exists and
+ *	should be included.
+ */
+#$i_shadow	I_SHADOW		/**/
 
 /* I_SYS_MMAN:
  *	This symbol, if defined, indicates that <sys/mman.h> exists and

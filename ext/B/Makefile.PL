@@ -18,7 +18,7 @@ WriteMakefile(
     VERSION	=> "a5",
     MAN3PODS => {},
     clean	=> {
-	FILES		=> "perl$e byteperl$e *$o B.c defsubs.h *~"
+	FILES		=> "perl$e *$o B.c defsubs.h *~"
     }
 );   
 
@@ -33,22 +33,3 @@ sub postamble {
 B$(OBJ_EXT) : defsubs.h 
 '
 }
-
-# Leave out doing byteperl for now. Probably should be built in the
-# core directory or somewhere else rather than here
-#sub top_targets {
-#    my $self = shift;
-#    my $targets = $self->MM::top_targets();
-#    $targets =~ s/^(all ::.*)$/$1 byteperl$e/m;
-#    return <<"EOT" . $targets;
-
-#
-# byteperl is *not* a standard perl+XSUB executable. It's a special
-# program for running standalone bytecode executables. It isn't an XSUB
-# at the moment because a standlone Perl program needs to set up curpad
-# which is overwritten on exit from an XSUB.
-#
-#byteperl$e : byteperl$o B$o \$(PERL_SRC)/byterun$o
-#	\$(CC) ${exeout_flag}byteperl$e byteperl$o B$o byterun$o \$(LDFLAGS) \$(PERL_ARCHLIB)/CORE/$Config{libperl} \$(LIBS)
-#EOT
-#}

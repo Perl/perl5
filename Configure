@@ -20,7 +20,7 @@
 
 # $Id: Head.U,v 3.0.1.9 1997/02/28 15:02:09 ram Exp $
 #
-# Generated on Sat May 22 00:54:37 EET DST 1999 [metaconfig 3.0 PL70]
+# Generated on Sun May 30 15:51:19 EET DST 1999 [metaconfig 3.0 PL70]
 # (with additional metaconfig patches by perlbug@perl.com)
 
 cat >/tmp/c1$$ <<EOF
@@ -338,6 +338,7 @@ d_endnent=''
 d_endpent=''
 d_endpwent=''
 d_endsent=''
+d_endspent=''
 d_fchmod=''
 d_fchown=''
 d_fcntl=''
@@ -383,6 +384,8 @@ d_getprotoprotos=''
 d_getpwent=''
 d_getsent=''
 d_getservprotos=''
+d_getspent=''
+d_getspnam=''
 d_getsbyname=''
 d_getsbyport=''
 d_gnulibc=''
@@ -474,6 +477,7 @@ d_setrgid=''
 d_setruid=''
 d_setsent=''
 d_setsid=''
+d_setspent=''
 d_setvbuf=''
 d_sfio=''
 usesfio=''
@@ -623,6 +627,7 @@ d_pwpasswd=''
 d_pwquota=''
 i_pwd=''
 i_sfio=''
+i_shadow=''
 i_stddef=''
 i_stdlib=''
 i_string=''
@@ -950,7 +955,7 @@ useopcode=true
 : If anyone needs -lnet, put it in a hint file.
 libswanted='sfio socket inet nsl nm ndbm gdbm dbm db malloc dl'
 libswanted="$libswanted dld ld sun m rt c cposix posix"
-libswanted="$libswanted ndir dir crypt"
+libswanted="$libswanted ndir dir crypt sec"
 libswanted="$libswanted ucb bsd BSD PW x"
 : We probably want to search /usr/shlib before most other libraries.
 : This is only used by the lib/ExtUtils/MakeMaker.pm routine extliblist.
@@ -2103,7 +2108,7 @@ EOM
 				osvers=$tmp
 			elif $test -f /etc/kconfig; then
 				osname=isc
-				if test "$lns" = "ln -s"; then
+				if test "$lns" = "$ln -s"; then
 					osvers=4
 				elif $contains _SYSV3 /usr/include/stdio.h > /dev/null 2>&1 ; then
 					osvers=3
@@ -7566,6 +7571,10 @@ eval $inlibc
 set endservent d_endsent
 eval $inlibc
 
+: see if endspent exists
+set endspent d_endspent
+eval $inlibc
+
 : Locate the flags for 'open()'
 echo " "
 $cat >open3.c <<'EOCP'
@@ -8266,6 +8275,14 @@ eval $inlibc
 echo " "
 set d_getservprotos getservent $i_netdb netdb.h
 eval $hasproto
+
+: see if getspent exists
+set getspent d_getspent
+eval $inlibc
+
+: see if getspnam exists
+set getspnam d_getspnam
+eval $inlibc
 
 : see if gettimeofday or ftime exists
 set gettimeofday d_gettimeod
@@ -9619,6 +9636,10 @@ eval $inlibc
 set setsid d_setsid
 eval $inlibc
 
+: see if setspent exists
+set setspent d_setspent
+eval $inlibc
+
 : see if setvbuf exists
 set setvbuf d_setvbuf
 eval $inlibc
@@ -9836,7 +9857,7 @@ eval $hasfield
 
 : see if _ptr and _cnt from stdio act std
 echo " "
-if $contains '_IO_fpos_t' `./findhdr stdio.h` >/dev/null 2>&1 ; then
+if $contains '_IO_fpos_t' `./findhdr stdio.h` `./findhdr libio.h` >/dev/null 2>&1 ; then
 	echo "(Looks like you have stdio.h from Linux.)"
 	case "$stdio_ptr" in
 	'') stdio_ptr='((fp)->_IO_read_ptr)'
@@ -10962,18 +10983,17 @@ $rm -f tebcdic.c tebcdic
 set ebcdic
 eval $setvar
 
-# SunOS has a <unistd.h> which we generally avoid, but need for this test.
-# For everyone else, we'll trust i_unistd.
-t_unistd=$i_unistd
-case "$osname" in
-sunos) $test -f /usr/include/unistd.h && t_unistd=$define ;;
-esac
 $cat >&4 <<EOM
 Checking how to flush all pending stdio output...
 EOM
-$cat >try.c <<EOCP
+# I only know how to find the first 32 possibly open files on SunOS.
+# See also hints/sunos_4_1.sh and util.c  --AD
+case "$osname" in
+sunos) $echo '#define PERL_FFLUSH_ALL_FOPEN_MAX 32' > try.c ;;
+esac
+$cat >>try.c <<EOCP
 #include <stdio.h>
-#$t_unistd I_UNISTD
+#$i_unistd I_UNISTD
 #ifdef I_UNISTD
 # include <unistd.h>
 #endif
@@ -10997,26 +11017,33 @@ int main() {
 #ifdef TRY_FFLUSH_ALL
   {
     long open_max = -1;
-# if defined(HAS_SYSCONF) && defined(_SC_OPEN_MAX)
-    open_max = sysconf(_SC_OPEN_MAX);
+# ifdef PERL_FFLUSH_ALL_FOPEN_MAX
+    open_max = PERL_FFLUSH_ALL_FOPEN_MAX;
 # else
-#  ifdef FOPEN_MAX
-#   open_max = FOPEN_MAX;
+#  if defined(HAS_SYSCONF) && defined(_SC_OPEN_MAX)
+    open_max = sysconf(_SC_OPEN_MAX);
 #  else
-#   ifdef OPEN_MAX
-#   open_max = OPEN_MAX;
+#   ifdef FOPEN_MAX
+    open_max = FOPEN_MAX;
 #   else
-#    ifdef _NFILE
-#   open_max = _NFILE;
+#    ifdef OPEN_MAX
+    open_max = OPEN_MAX;
+#    else
+#     ifdef _NFILE
+    open_max = _NFILE;
+#     endif
 #    endif
 #   endif
 #  endif
-# endif
+# endif 
 # ifdef HAS_STDIO_STREAM_ARRAY
     if (open_max > 0) {
       long i;
       for (i = 0; i < open_max; i++)
-         fflush(&$stdio_stream_array[i]);
+	    if (STDIO_STREAM_ARRAY[i]._file >= 0 &&
+		STDIO_STREAM_ARRAY[i]._file < open_max &&
+		STDIO_STREAM_ARRAY[i]._flag)
+		fflush(&STDIO_STREAM_ARRAY[i]);
     }	
   }
 # endif
@@ -11028,8 +11055,8 @@ EOCP
 if $test "X$fflushNULL" = X -o "X$fflushall" = X; then
     output=''
     set try -DTRY_FPUTC
-    $rm -f try.out
     if eval $compile; then
+	    $rm -f try.out
  	    ./try$exe_ext 2>/dev/null
 	    if $test ! -s try.out -a "X$?" = X42; then
 		output=-DTRY_FPUTC
@@ -11040,6 +11067,7 @@ if $test "X$fflushNULL" = X -o "X$fflushall" = X; then
 	    set try -DTRY_FPRINTF
 	    $rm -f try.out
 	    if eval $compile; then
+		    $rm -f try.out
  		    ./try$exe_ext 2>/dev/null
 		    if $test ! -s try.out -a "X$?" = X42; then
 			output=-DTRY_FPRINTF
@@ -11051,8 +11079,8 @@ fi
 : check for fflush NULL behaviour
 case "$fflushNULL" in
 '') 	set try -DTRY_FFLUSH_NULL $output
-	$rm -f try.out
 	if eval $compile; then
+	        $rm -f try.out
 	    	./try$exe_ext 2>/dev/null
 		code="$?"
 		if $test -s try.out -a "X$code" = X42; then
@@ -11098,11 +11126,11 @@ case "$fflushNULL" in
 	: check for fflush all behaviour
 	case "$fflushall" in
 	'') 	set try -DTRY_FFLUSH_ALL $output
-		$rm -f try.out
 		if eval $compile; then
-	        $cat >&4 <<EOM
+		        $cat >&4 <<EOM
 (Now testing the other method--but note that also this may fail.)
 EOM
+			$rm -f try.out
 		    	./try$exe_ext 2>/dev/null
 			if $test -s try.out -a "X$?" = X42; then
 				fflushall="`$cat try.out`"
@@ -11625,6 +11653,10 @@ EOM
 #$i_sysselct I_SYS_SELECT
 #ifdef I_SYS_SELECT
 #include <sys/select.h>
+#endif
+#$d_socket HAS_SOCKET
+#ifdef HAS_SOCKET
+#   include <sys/socket.h> /* Might include <sys/bsdtypes.h> */
 #endif
 #include <stdio.h>
 $selecttype b;
@@ -12381,6 +12413,10 @@ set i_termio; eval $setvar
 val=$val2; set i_sgtty; eval $setvar
 val=$val3; set i_termios; eval $setvar
 
+: see if this is a shadow.h system
+set shadow.h i_shadow
+eval $inhdr
+
 : see if stdarg is available
 echo " "
 if $test `./findhdr stdarg.h`; then
@@ -12973,6 +13009,7 @@ d_endnent='$d_endnent'
 d_endpent='$d_endpent'
 d_endpwent='$d_endpwent'
 d_endsent='$d_endsent'
+d_endspent='$d_endspent'
 d_eofnblk='$d_eofnblk'
 d_eunice='$d_eunice'
 d_fchmod='$d_fchmod'
@@ -13032,6 +13069,8 @@ d_getsbyname='$d_getsbyname'
 d_getsbyport='$d_getsbyport'
 d_getsent='$d_getsent'
 d_getservprotos='$d_getservprotos'
+d_getspent='$d_getspent'
+d_getspnam='$d_getspnam'
 d_gettimeod='$d_gettimeod'
 d_gnulibc='$d_gnulibc'
 d_grpasswd='$d_grpasswd'
@@ -13153,6 +13192,7 @@ d_setrgid='$d_setrgid'
 d_setruid='$d_setruid'
 d_setsent='$d_setsent'
 d_setsid='$d_setsid'
+d_setspent='$d_setspent'
 d_setvbuf='$d_setvbuf'
 d_sfio='$d_sfio'
 d_shm='$d_shm'
@@ -13289,6 +13329,7 @@ i_pwd='$i_pwd'
 i_rpcsvcdbm='$i_rpcsvcdbm'
 i_sfio='$i_sfio'
 i_sgtty='$i_sgtty'
+i_shadow='$i_shadow'
 i_stdarg='$i_stdarg'
 i_stddef='$i_stddef'
 i_stdlib='$i_stdlib'

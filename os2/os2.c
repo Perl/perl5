@@ -412,6 +412,7 @@ result(int flag, int pid)
 #define EXECF_EXEC 1
 #define EXECF_TRUEEXEC 2
 #define EXECF_SPAWN_NOWAIT 3
+#define EXECF_SPAWN_BYFLAG 4
 
 /* const char* const ptypes[] = { "FS", "DOS", "VIO", "PM", "DETACH" }; */
 
@@ -587,7 +588,7 @@ U32 addflag;
 	    rc = spawnvp(trueflag | P_OVERLAY,tmps,PL_Argv);
 	else if (execf == EXECF_SPAWN_NOWAIT)
 	    rc = spawnvp(flag,tmps,PL_Argv);
-        else				/* EXECF_SPAWN */
+        else				/* EXECF_SPAWN, EXECF_SPAWN_BYFLAG */
 	    rc = result(trueflag, 
 			spawnvp(flag,tmps,PL_Argv));
 #endif 
@@ -813,49 +814,9 @@ U32 addflag;
     return rc;
 }
 
-/* Array spawn.  */
-int
-do_aspawn(really,mark,sp)
-SV *really;
-register SV **mark;
-register SV **sp;
-{
-    dTHR;
-    register char **a;
-    char *tmps = NULL;
-    int rc;
-    int flag = P_WAIT, trueflag, err, secondtry = 0;
-    STRLEN n_a;
-
-    if (sp > mark) {
-	New(1301,PL_Argv, sp - mark + 3, char*);
-	a = PL_Argv;
-
-	if (mark < sp && SvNIOKp(*(mark+1)) && !SvPOKp(*(mark+1))) {
-		++mark;
-		flag = SvIVx(*mark);
-	}
-
-	while (++mark <= sp) {
-	    if (*mark)
-		*a++ = SvPVx(*mark, n_a);
-	    else
-		*a++ = "";
-	}
-	*a = Nullch;
-
-	rc = do_spawn_ve(really, flag, EXECF_SPAWN, NULL, 0);
-    } else
-    	rc = -1;
-    do_execfree();
-    return rc;
-}
-
 /* Try converting 1-arg form to (usually shell-less) multi-arg form. */
 int
-do_spawn2(cmd, execf)
-char *cmd;
-int execf;
+do_spawn3(char *cmd, int execf, int flag)
 {
     register char **a;
     register char *s;
@@ -936,6 +897,8 @@ int execf;
                 rc = spawnl(P_OVERLAY,shell,shell,copt,cmd,(char*)0);
 	    else if (execf == EXECF_SPAWN_NOWAIT)
                 rc = spawnl(P_NOWAIT,shell,shell,copt,cmd,(char*)0);
+	    else if (execf == EXECF_SPAWN_BYFLAG)
+                rc = spawnl(flag,shell,shell,copt,cmd,(char*)0);
 	    else {
 		/* In the ak code internal P_NOWAIT is P_WAIT ??? */
 		rc = result(P_WAIT,
@@ -968,7 +931,7 @@ int execf;
     }
     *a = Nullch;
     if (PL_Argv[0])
-	rc = do_spawn_ve(NULL, 0, execf, cmd, mergestderr);
+	rc = do_spawn_ve(NULL, flag, execf, cmd, mergestderr);
     else
     	rc = -1;
     if (news)
@@ -977,25 +940,67 @@ int execf;
     return rc;
 }
 
+/* Array spawn.  */
+int
+do_aspawn(really,mark,sp)
+SV *really;
+register SV **mark;
+register SV **sp;
+{
+    dTHR;
+    register char **a;
+    int rc;
+    int flag = P_WAIT, flag_set = 0;
+    STRLEN n_a;
+
+    if (sp > mark) {
+	New(1301,PL_Argv, sp - mark + 3, char*);
+	a = PL_Argv;
+
+	if (mark < sp && SvNIOKp(*(mark+1)) && !SvPOKp(*(mark+1))) {
+		++mark;
+		flag = SvIVx(*mark);
+		flag_set = 1;
+
+	}
+
+	while (++mark <= sp) {
+	    if (*mark)
+		*a++ = SvPVx(*mark, n_a);
+	    else
+		*a++ = "";
+	}
+	*a = Nullch;
+
+	if (flag_set && (a == PL_Argv + 1)) { /* One arg? */
+	    rc = do_spawn3(a[-1], EXECF_SPAWN_BYFLAG, flag);
+	} else
+	    rc = do_spawn_ve(really, flag, EXECF_SPAWN, NULL, 0);
+    } else
+    	rc = -1;
+    do_execfree();
+    return rc;
+}
+
 int
 do_spawn(cmd)
 char *cmd;
 {
-    return do_spawn2(cmd, EXECF_SPAWN);
+    return do_spawn3(cmd, EXECF_SPAWN, 0);
 }
 
 int
 do_spawn_nowait(cmd)
 char *cmd;
 {
-    return do_spawn2(cmd, EXECF_SPAWN_NOWAIT);
+    return do_spawn3(cmd, EXECF_SPAWN_NOWAIT,0);
 }
 
 bool
 do_exec(cmd)
 char *cmd;
 {
-    do_spawn2(cmd, EXECF_EXEC);
+    do_spawn3(cmd, EXECF_EXEC, 0);
     return FALSE;
 }
 
@@ -1003,7 +1008,7 @@ bool
 os2exec(cmd)
 char *cmd;
 {
-    return do_spawn2(cmd, EXECF_TRUEEXEC);
+    return do_spawn3(cmd, EXECF_TRUEEXEC, 0);
 }
 
 PerlIO *

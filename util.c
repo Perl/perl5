@@ -2087,6 +2087,7 @@ my_popen(char *cmd, char *mode)
 	    PerlLIO_dup2(p[THIS], *mode == 'r');
 	    PerlLIO_close(p[THIS]);
 	}
+#ifndef OS2
 	if (doexec) {
 #if !defined(HAS_FCNTL) || !defined(F_SETFD)
 	    int fd;
@@ -2101,6 +2102,7 @@ my_popen(char *cmd, char *mode)
 	    do_exec3(cmd,pp[1],did_pipes);	/* may or may not use the shell */
 	    PerlProc__exit(1);
 	}
+#endif	/* defined OS2 */
 	/*SUPPRESS 560*/
 	if (tmpgv = gv_fetchpv("$",TRUE, SVt_PV))
 	    sv_setiv(GvSV(tmpgv), (IV)getpid());
@@ -3197,12 +3199,6 @@ get_opargs(void)
  return PL_opargs;
 }
 
-SV **
-get_specialsv_list(void)
-{
- return PL_specialsv_list;
-}
-
 #ifndef HAS_GETENV_LEN
 char *
 getenv_len(char *env_elem, unsigned long *len)
@@ -3323,29 +3319,36 @@ I32
 my_fflush_all(void)
 {
 #ifdef FFLUSH_NULL
-    return fflush(NULL);
+    return PerlIO_flush(NULL);
 #else
     long open_max = -1;
 # if defined(FFLUSH_ALL) && defined(HAS_STDIO_STREAM_ARRAY)
+#  ifdef PERL_FFLUSH_ALL_FOPEN_MAX
+    open_max = PERL_FFLUSH_ALL_FOPEN_MAX;
+#  else
 #  if defined(HAS_SYSCONF) && defined(_SC_OPEN_MAX)
     open_max = sysconf(_SC_OPEN_MAX);
 #  else
 #   ifdef FOPEN_MAX
-#   open_max = FOPEN_MAX;
+    open_max = FOPEN_MAX;
 #   else
 #    ifdef OPEN_MAX
-#   open_max = OPEN_MAX;
+    open_max = OPEN_MAX;
 #    else
 #     ifdef _NFILE
-#   open_max = _NFILE;
+    open_max = _NFILE;
 #     endif
 #    endif
 #   endif
 #  endif
+#  endif
     if (open_max > 0) {
       long i;
       for (i = 0; i < open_max; i++)
-         fflush(&STDIO_STREAM_ARRAY[i]);
+	    if (STDIO_STREAM_ARRAY[i]._file >= 0 &&
+		STDIO_STREAM_ARRAY[i]._file < open_max &&
+		STDIO_STREAM_ARRAY[i]._flag)
+		PerlIO_flush(&STDIO_STREAM_ARRAY[i]);
       return 0;
     }
 # endif

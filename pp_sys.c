@@ -17,8 +17,10 @@
 #include "EXTERN.h"
 #include "perl.h"
 
-#ifdef HAS_GETSPENT
-/* Shadow password support for solaris - pdo@cs.umd.edu*/
+#ifdef I_SHADOW
+/* Shadow password support for solaris - pdo@cs.umd.edu
+ * Not just Solaris: at least HP-UX, IRIX, Linux.
+ * the API is from SysV. --jhi */
 #include <shadow.h>
 #endif
 
@@ -4564,11 +4566,13 @@ PP(pp_gpwent)
     else
 	pwent = (struct passwd *)getpwent();
 
-#ifdef HAS_GETSPENT
+#ifdef HAS_GETSPNAM
    if (which == OP_GPWNAM)
       spwent = getspnam(pwent->pw_name);
+#  ifdef HAS_GETSPUID /* AFAIK there isn't any anywhere. --jhi */ 
    else if (which == OP_GPWUID)
       spwent = getspnam(pwent->pw_name);
+#  endif
    else
       spwent = (struct spwd *)getspent();
 #endif
@@ -4591,14 +4595,14 @@ PP(pp_gpwent)
 
 	PUSHs(sv = sv_mortalcopy(&PL_sv_no));
 #ifdef PWPASSWD
-#ifdef HAS_GETSPENT
+#   ifdef HAS_GETSPENT
       if (spwent)
               sv_setpv(sv, spwent->sp_pwdp);
       else
               sv_setpv(sv, pwent->pw_passwd);
-#else
+#   else
 	sv_setpv(sv, pwent->pw_passwd);
-#endif
+#   endif
 #endif
 
 	PUSHs(sv = sv_mortalcopy(&PL_sv_no));
@@ -4662,9 +4666,9 @@ PP(pp_spwent)
     djSP;
 #if defined(HAS_PASSWD) && defined(HAS_SETPWENT) && !defined(CYGWIN32)
     setpwent();
-#ifdef HAS_GETSPENT
+#   ifdef HAS_SETSPENT
     setspent();
-#endif
+#   endif
     RETPUSHYES;
 #else
     DIE(PL_no_func, "setpwent");
@@ -4676,9 +4680,9 @@ PP(pp_epwent)
     djSP;
 #if defined(HAS_PASSWD) && defined(HAS_ENDPWENT)
     endpwent();
-#ifdef HAS_GETSPENT
+#   ifdef HAS_ENDSPENT
     endspent();
-#endif
+#   endif
     RETPUSHYES;
 #else
     DIE(PL_no_func, "endpwent");

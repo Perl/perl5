@@ -30,7 +30,15 @@ d_tzname='undef'
 i_unistd='undef'
 # See util.c for another:  We need _SC_OPEN_MAX, which is in
 # <unistd.h>.
-util_cflags='ccflags="$ccflags -DI_UNISTD"'
+
+# fflush(NULL) will core dump on SunOS 4.1.3.  In util.c we'll
+# try explicitly fflushing all open files.  Unfortunately,
+# on my SunOS 4.1.3 system, sysconf(_SC_OPEN_MAX) returns
+# 64, but only 32 of those file pointers can be accessed 
+# directly by _iob[i].  The remainder are off in dynamically
+# allocated memory somewhere and I don't know to automatically
+# fflush() them.  -- Andy Dougherty  Wed May 26 15:25:22 EDT 1999
+util_cflags='ccflags="$ccflags -DPERL_FFLUSH_ALL_FOPEN_MAX=32"'
 
 cat << 'EOM' >&4
 

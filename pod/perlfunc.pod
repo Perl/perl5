@@ -912,23 +912,13 @@ should use C<defined> only when you're questioning the integrity of what
 you're trying to do.  At other times, a simple comparison to C<0> or C<""> is
 what you want.
 
-Currently, using C<defined> on an entire array or hash reports whether
-memory for that aggregate has ever been allocated.  So an array you set
-to the empty list appears undefined initially, and one that once was full
-and that you then set to the empty list still appears defined.  You
-should instead use a simple test for size:
+Use of C<defined> on aggregates (hashes and arrays) is deprecated.  It
+used to report whether memory for that aggregate has ever been
+allocated.  This behavior may disappear in future versions of Perl.
+You should instead use a simple test for size:
 
     if (@an_array) { print "has array elements\n" }
     if (%a_hash)   { print "has hash members\n"   }
-
-Using C<undef> on these, however, does clear their memory and then report
-them as not defined anymore, but you shouldn't do that unless you don't
-plan to use them again, because it saves time when you load them up
-again to have memory already ready to be filled.  The normal way to 
-free up space used by an aggregate is to assign the empty list.
-
-This counterintuitive behavior of C<defined> on aggregates may be
-changed, fixed, or broken in a future release of Perl.
 
 See also L</undef>, L</exists>, L</ref>.
 

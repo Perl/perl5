@@ -4,7 +4,7 @@ require DynaLoader;
 
 @ISA = qw(DynaLoader);
 
-$VERSION = 0.01;
+$VERSION = 0.03;
 
 bootstrap ByteLoader $VERSION;
 
@@ -19,10 +19,10 @@ ByteLoader - load byte compiled perl code
 
 =head1 SYNOPSIS
 
-  use ByteLoader 0.01;
+  use ByteLoader 0.03;
   <byte code>
 
-  use ByteLoader 0.01;
+  use ByteLoader 0.03;
   <byte code>
 
 =head1 DESCRIPTION

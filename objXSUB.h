@@ -62,16 +62,6 @@
 #define PL_bufend		pPerl->PL_bufend
 #undef  PL_bufptr
 #define PL_bufptr		pPerl->PL_bufptr
-#undef  PL_bytecode_iv_overflows
-#define PL_bytecode_iv_overflows	pPerl->PL_bytecode_iv_overflows
-#undef  PL_bytecode_obj_list
-#define PL_bytecode_obj_list	pPerl->PL_bytecode_obj_list
-#undef  PL_bytecode_obj_list_fill
-#define PL_bytecode_obj_list_fill	pPerl->PL_bytecode_obj_list_fill
-#undef  PL_bytecode_pv
-#define PL_bytecode_pv		pPerl->PL_bytecode_pv
-#undef  PL_bytecode_sv
-#define PL_bytecode_sv		pPerl->PL_bytecode_sv
 #undef  PL_cddir
 #define PL_cddir		pPerl->PL_cddir
 #undef  PL_chopset
@@ -648,8 +638,6 @@
 #define PL_sortcxix		pPerl->PL_sortcxix
 #undef  PL_sortstash
 #define PL_sortstash		pPerl->PL_sortstash
-#undef  PL_specialsv_list
-#define PL_specialsv_list	pPerl->PL_specialsv_list
 #undef  PL_splitstr
 #define PL_splitstr		pPerl->PL_splitstr
 #undef  PL_srand_called
@@ -883,8 +871,6 @@
 #define boot_core_UNIVERSAL	pPerl->Perl_boot_core_UNIVERSAL
 #undef  bset_obj_store
 #define bset_obj_store		pPerl->Perl_bset_obj_store
-#undef  byterun
-#define byterun			pPerl->Perl_byterun
 #undef  cache_re
 #define cache_re		pPerl->Perl_cache_re
 #undef  call_list
@@ -1237,8 +1223,6 @@
 #define get_op_names		pPerl->Perl_get_op_names
 #undef  get_opargs
 #define get_opargs		pPerl->Perl_get_opargs
-#undef  get_specialsv_list
-#define get_specialsv_list	pPerl->Perl_get_specialsv_list
 #undef  get_vtbl
 #define get_vtbl		pPerl->Perl_get_vtbl
 #undef  gp_free

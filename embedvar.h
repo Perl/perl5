@@ -154,11 +154,6 @@
 #define PL_argvoutgv		(PL_curinterp->Iargvoutgv)
 #define PL_basetime		(PL_curinterp->Ibasetime)
 #define PL_beginav		(PL_curinterp->Ibeginav)
-#define PL_bytecode_iv_overflows	(PL_curinterp->Ibytecode_iv_overflows)
-#define PL_bytecode_obj_list	(PL_curinterp->Ibytecode_obj_list)
-#define PL_bytecode_obj_list_fill	(PL_curinterp->Ibytecode_obj_list_fill)
-#define PL_bytecode_pv		(PL_curinterp->Ibytecode_pv)
-#define PL_bytecode_sv		(PL_curinterp->Ibytecode_sv)
 #define PL_cddir		(PL_curinterp->Icddir)
 #define PL_compcv		(PL_curinterp->Icompcv)
 #define PL_compiling		(PL_curinterp->Icompiling)
@@ -287,11 +282,6 @@
 #define PL_Iargvoutgv		PL_argvoutgv
 #define PL_Ibasetime		PL_basetime
 #define PL_Ibeginav		PL_beginav
-#define PL_Ibytecode_iv_overflows	PL_bytecode_iv_overflows
-#define PL_Ibytecode_obj_list	PL_bytecode_obj_list
-#define PL_Ibytecode_obj_list_fill	PL_bytecode_obj_list_fill
-#define PL_Ibytecode_pv		PL_bytecode_pv
-#define PL_Ibytecode_sv		PL_bytecode_sv
 #define PL_Icddir		PL_cddir
 #define PL_Icompcv		PL_compcv
 #define PL_Icompiling		PL_compiling
@@ -768,7 +758,6 @@
 #define PL_runops		(PL_Vars.Grunops)
 #define PL_sh_path		(PL_Vars.Gsh_path)
 #define PL_sighandlerp		(PL_Vars.Gsighandlerp)
-#define PL_specialsv_list	(PL_Vars.Gspecialsv_list)
 #define PL_srand_called		(PL_Vars.Gsrand_called)
 #define PL_subline		(PL_Vars.Gsubline)
 #define PL_subname		(PL_Vars.Gsubname)
@@ -907,7 +896,6 @@
 #define PL_Grunops		PL_runops
 #define PL_Gsh_path		PL_sh_path
 #define PL_Gsighandlerp		PL_sighandlerp
-#define PL_Gspecialsv_list	PL_specialsv_list
 #define PL_Gsrand_called	PL_srand_called
 #define PL_Gsubline		PL_subline
 #define PL_Gsubname		PL_subname

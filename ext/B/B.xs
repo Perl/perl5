@@ -83,6 +83,8 @@ static char *opclassnames[] = {
 
 static int walkoptree_debug = 0;	/* Flag for walkoptree debug hook */
 
+static SV *specialsv_list[4];
+
 static opclass
 cc_opclass(OP *o)
 {
@@ -197,8 +199,8 @@ make_sv_object(SV *arg, SV *sv)
     char *type = 0;
     IV iv;
     
-    for (iv = 0; iv < sizeof(PL_specialsv_list)/sizeof(SV*); iv++) {
-	if (sv == PL_specialsv_list[iv]) {
+    for (iv = 0; iv < sizeof(specialsv_list)/sizeof(SV*); iv++) {
+	if (sv == specialsv_list[iv]) {
 	    type = "B::SPECIAL";
 	    break;
 	}
@@ -311,74 +313,6 @@ cchar(SV *sv)
     return sstr;
 }
 
-#ifdef INDIRECT_BGET_MACROS
-void freadpv(U32 len, void *data)
-{
-    New(666, pv.xpv_pv, len, char);
-    fread(pv.xpv_pv, 1, len, (FILE*)data);
-    pv.xpv_len = len;
-    pv.xpv_cur = len - 1;
-}
-
-void byteload_fh(InputStream fp)
-{
-    struct bytestream bs;
-    bs.data = fp;
-    bs.fgetc = (int(*) _((void*)))fgetc;
-    bs.fread = (int(*) _((char*,size_t,size_t,void*)))fread;
-    bs.freadpv = freadpv;
-    byterun(bs);
-}
-
-static int fgetc_fromstring(void *data)
-{
-    char **strp = (char **)data;
-    return *(*strp)++;
-}
-
-static int fread_fromstring(char *argp, size_t elemsize, size_t nelem,
-			    void *data)
-{
-    char **strp = (char **)data;
-    size_t len = elemsize * nelem;
-    
-    memcpy(argp, *strp, len);
-    *strp += len;
-    return (int)len;
-}
-
-static void freadpv_fromstring(U32 len, void *data)
-{
-    char **strp = (char **)data;
-    
-    New(666, pv.xpv_pv, len, char);
-    memcpy(pv.xpv_pv, *strp, len);
-    pv.xpv_len = len;
-    pv.xpv_cur = len - 1;
-    *strp += len;
-}    
-
-void byteload_string(char *str)
-{
-    struct bytestream bs;
-    bs.data = &str;
-    bs.fgetc = fgetc_fromstring;
-    bs.fread = fread_fromstring;
-    bs.freadpv = freadpv_fromstring;
-    byterun(bs);
-}
-#else
-void byteload_fh(InputStream fp)
-{
-    byterun(fp);
-}
-
-void byteload_string(char *str)
-{
-    croak("Must compile with -DINDIRECT_BGET_MACROS for byteload_string");
-}    
-#endif /* INDIRECT_BGET_MACROS */
-
 void
 walkoptree(SV *opsv, char *method)
 {
@@ -446,7 +380,10 @@ BOOT:
 {
     HV *stash = gv_stashpvn("B", 1, TRUE);
     AV *export_ok = perl_get_av("B::EXPORT_OK",TRUE);
-    INIT_SPECIALSV_LIST;
+    specialsv_list[0] = Nullsv;
+    specialsv_list[1] = &PL_sv_undef;
+    specialsv_list[2] = &PL_sv_yes;
+    specialsv_list[3] = &PL_sv_no;
 #include "defsubs.h"
 }
 
