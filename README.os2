@@ -290,6 +290,9 @@ There are also endless possibilities to use I<executable extensions> of
 *nixish shell (like F<sh.exe> supplied in the binary distribution),
 you need to follow the syntax specified in L<perlrun/"Switches">.
 
+Note that B<-S> switch enables a search with additional extensions 
+F<.cmd>, F<.btm>, F<.bat>, F<.pl> as well.
+
 =head2 Starting OS/2 (and DOS) programs under Perl
 
 This is what system() (see L<perlfunc/system>), C<``> (see

@@ -1625,6 +1625,10 @@ SV *sv;
 #  define SEARCH_EXTS ".bat", ".cmd", NULL
 #  define MAX_EXT_LEN 4
 #endif
+#ifdef OS2
+#  define SEARCH_EXTS ".cmd", ".btm", ".bat", ".pl", NULL
+#  define MAX_EXT_LEN 4
+#endif
 #ifdef VMS
 #  define SEARCH_EXTS ".pl", ".com", NULL
 #  define MAX_EXT_LEN 4
