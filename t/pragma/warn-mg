@@ -1,0 +1,21 @@
+  mg.c	AOK
+
+  No such signal: SIG%s
+    $SIG{FRED} = sub {}
+
+  SIG%s handler \"%s\" not defined.
+    $SIG{"INT"} = "ok3"; kill "INT",$$;
+
+
+__END__
+# mg.c
+use warning 'signal' ;
+$SIG{FRED} = sub {};
+EXPECT
+No such signal: SIGFRED at - line 3.
+########
+# mg.c
+use warning 'signal' ;
+$SIG{"INT"} = "fred"; kill "INT",$$;
+EXPECT
+SIGINT handler "fred" not defined.

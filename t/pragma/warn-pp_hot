@@ -1,0 +1,107 @@
+  pp_hot.c	AOK
+
+  Filehandle %s never opened
+    $f = $a = "abc" ; print $f $a
+
+  Filehandle %s opened only for input
+    print STDIN "abc" ;
+
+
+  print on closed filehandle %s
+    close STDIN ; print STDIN "abc" ;
+
+  uninitialized
+	my $a = undef ; my @b = @$a
+
+  uninitialized	
+	my $a = undef ; my %b = %$a
+
+  Odd number of elements in hash list
+	%X = (1,2,3) ;
+
+  Reference found where even-sized list expected 
+	$X = [ 1 ..3 ];
+
+  Read on closed filehandle <%s>
+    close STDIN ; $a = <STDIN>;
+
+  Deep recursion on subroutine \"%s\"
+     sub fred { fred() if $a++ < 200} fred()
+
+  Deep recursion on anonymous subroutine 
+     $a = sub { &$a if $a++ < 200} &$a
+
+__END__
+# pp_hot.c
+use warning 'unopened' ;
+$f = $a = "abc" ; 
+print $f $a
+EXPECT
+Filehandle main::abc never opened at - line 4.
+########
+# pp_hot.c
+use warning 'io' ;
+print STDIN "anc";
+EXPECT
+Filehandle main::STDIN opened only for input at - line 3.
+########
+# pp_hot.c
+use warning 'closed' ;
+close STDIN ;
+print STDIN "anc";
+EXPECT
+print on closed filehandle main::STDIN at - line 4.
+########
+# pp_hot.c
+use warning 'uninitialized' ;
+my $a = undef ;
+my @b = @$a
+EXPECT
+Use of uninitialized value at - line 4.
+########
+# pp_hot.c
+use warning 'uninitialized' ;
+my $a = undef ;
+my %b = %$a
+EXPECT
+Use of uninitialized value at - line 4.
+########
+# pp_hot.c
+use warning 'unsafe' ;
+my %X ; %X = (1,2,3) ;
+EXPECT
+Odd number of elements in hash assignment at - line 3.
+########
+# pp_hot.c
+use warning 'unsafe' ;
+my %X ; %X = [1 .. 3] ;
+EXPECT
+Reference found where even-sized list expected at - line 3.
+########
+# pp_hot.c
+use warning 'closed' ;
+close STDIN ; $a = <STDIN> ;
+EXPECT
+Read on closed filehandle <STDIN> at - line 3.
+########
+# pp_hot.c
+use warning 'recursion' ;
+sub fred 
+{ 
+    fred() if $a++ < 200
+} 
+
+fred()
+EXPECT
+Deep recursion on subroutine "main::fred" at - line 5.
+########
+# pp_hot.c
+use warning 'recursion' ;
+$b = sub 
+{ 
+    &$b if $a++ < 200
+}  ;
+
+&$b ;
+EXPECT
+Deep recursion on anonymous subroutine at - line 5.

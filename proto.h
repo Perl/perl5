@@ -662,6 +662,7 @@ VIRTUAL void	vivify_defelem _((SV* sv));
 VIRTUAL void	vivify_ref _((SV* sv, U32 to_what));
 VIRTUAL I32	wait4pid _((int pid, int* statusp, int flags));
 VIRTUAL void	warn _((const char* pat,...));
+VIRTUAL void	warner _((U32 err, const char* pat,...));
 VIRTUAL void	watch _((char** addr));
 VIRTUAL I32	whichsig _((char* sig));
 VIRTUAL int	yyerror _((char* s));

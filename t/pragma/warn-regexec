@@ -1,0 +1,23 @@
+  regexec.c	
+
+  count exceeded %d
+
+        $_ = 'a' x (2**15+1); /^()(a\1)*$/ ;
+  count exceeded %d
+
+        $_ = 'a' x (2**15+1); /^()(a\1)*?$/ ;
+
+__END__
+# regexec.c
+use warning 'unsafe' ;
+$_ = 'a' x (2**15+1); 
+/^()(a\1)*$/ ;
+EXPECT
+count exceeded 32766 at - line 4.
+########
+# regexec.c
+use warning 'unsafe' ;
+$_ = 'a' x (2**15+1);
+/^()(a\1)*?$/ ;
+EXPECT
+Complex regular subexpression recursion limit (32766) exceeded at - line 4.

@@ -357,8 +357,8 @@ PP(pp_formline)
 		sv = *++MARK;
 	    else {
 		sv = &PL_sv_no;
-		if (PL_dowarn)
-		    warn("Not enough format arguments");
+		if (ckWARN(WARN_SYNTAX))
+		    warner(WARN_SYNTAX, "Not enough format arguments");
 	    }
 	    break;
 
@@ -979,20 +979,24 @@ dopoptolabel(char *label)
 	cx = &cxstack[i];
 	switch (cx->cx_type) {
 	case CXt_SUBST:
-	    if (PL_dowarn)
-		warn("Exiting substitution via %s", op_name[PL_op->op_type]);
+	    if (ckWARN(WARN_UNSAFE))
+		warner(WARN_UNSAFE, "Exiting substitution via %s", 
+			op_name[PL_op->op_type]);
 	    break;
 	case CXt_SUB:
-	    if (PL_dowarn)
-		warn("Exiting subroutine via %s", op_name[PL_op->op_type]);
+	    if (ckWARN(WARN_UNSAFE))
+		warner(WARN_UNSAFE, "Exiting subroutine via %s", 
+			op_name[PL_op->op_type]);
 	    break;
 	case CXt_EVAL:
-	    if (PL_dowarn)
-		warn("Exiting eval via %s", op_name[PL_op->op_type]);
+	    if (ckWARN(WARN_UNSAFE))
+		warner(WARN_UNSAFE, "Exiting eval via %s", 
+			op_name[PL_op->op_type]);
 	    break;
 	case CXt_NULL:
-	    if (PL_dowarn)
-		warn("Exiting pseudo-block via %s", op_name[PL_op->op_type]);
+	    if (ckWARN(WARN_UNSAFE))
+		warner(WARN_UNSAFE, "Exiting pseudo-block via %s", 
+			op_name[PL_op->op_type]);
 	    return -1;
 	case CXt_LOOP:
 	    if (!cx->blk_loop.label ||
@@ -1095,20 +1099,24 @@ dopoptoloop(I32 startingblock)
 	cx = &cxstack[i];
 	switch (cx->cx_type) {
 	case CXt_SUBST:
-	    if (PL_dowarn)
-		warn("Exiting substitution via %s", op_name[PL_op->op_type]);
+	    if (ckWARN(WARN_UNSAFE))
+		warner(WARN_UNSAFE, "Exiting substitution via %s", 
+			op_name[PL_op->op_type]);
 	    break;
 	case CXt_SUB:
-	    if (PL_dowarn)
-		warn("Exiting subroutine via %s", op_name[PL_op->op_type]);
+	    if (ckWARN(WARN_UNSAFE))
+		warner(WARN_UNSAFE, "Exiting subroutine via %s", 
+			op_name[PL_op->op_type]);
 	    break;
 	case CXt_EVAL:
-	    if (PL_dowarn)
-		warn("Exiting eval via %s", op_name[PL_op->op_type]);
+	    if (ckWARN(WARN_UNSAFE))
+		warner(WARN_UNSAFE, "Exiting eval via %s", 
+			op_name[PL_op->op_type]);
 	    break;
 	case CXt_NULL:
-	    if (PL_dowarn)
-		warn("Exiting pseudo-block via %s", op_name[PL_op->op_type]);
+	    if (ckWARN(WARN_UNSAFE))
+		warner(WARN_UNSAFE, "Exiting pseudo-block via %s", 
+			op_name[PL_op->op_type]);
 	    return -1;
 	case CXt_LOOP:
 	    DEBUG_l( deb("(Found loop #%ld)\n", (long)i));
@@ -1966,7 +1974,7 @@ PP(pp_goto)
 		if (CvDEPTH(cv) < 2)
 		    (void)SvREFCNT_inc(cv);
 		else {	/* save temporaries on recursion? */
-		    if (CvDEPTH(cv) == 100 && PL_dowarn)
+		    if (CvDEPTH(cv) == 100 && ckWARN(WARN_RECURSION))
 			sub_crush_depth(cv);
 		    if (CvDEPTH(cv) > AvFILLp(padlist)) {
 			AV *newpad = newAV();
@@ -2684,6 +2692,9 @@ PP(pp_require)
     SAVEFREEPV(name);
     SAVEHINTS();
     PL_hints = 0;
+    SAVEPPTR(PL_compiling.cop_warnings);
+    PL_compiling.cop_warnings = ((PL_dowarn & G_WARN_ALL_ON) ? WARN_ALL 
+							     : WARN_NONE);
  
     /* switch to eval mode */
 
@@ -2744,6 +2755,12 @@ PP(pp_entereval)
     SAVEDELETE(PL_defstash, safestr, strlen(safestr));
     SAVEHINTS();
     PL_hints = PL_op->op_targ;
+    SAVEPPTR(compiling.cop_warnings);
+    if (PL_compiling.cop_warnings != WARN_ALL 
+	&& PL_compiling.cop_warnings != WARN_NONE){
+        PL_compiling.cop_warnings = newSVsv(PL_compiling.cop_warnings) ;
+        SAVEFREESV(PL_compiling.cop_warnings) ;
+    }
 
     push_return(PL_op->op_next);
     PUSHBLOCK(cx, CXt_EVAL, SP);

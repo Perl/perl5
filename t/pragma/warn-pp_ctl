@@ -1,0 +1,145 @@
+  pp_ctl.c	AOK
+ 
+     Not enough format arguments	
+ 	format STDOUT =
+ 	@<<< @<<<
+ 	$a
+ 	.
+ 	write;
+     
+
+    Exiting substitution via %s
+	$_ = "abc" ;
+	while ($i ++ == 0)
+	{
+    	    s/ab/last/e ;
+	}
+
+    Exiting subroutine via %s		
+	sub fred { last }
+	{ fred() }
+
+    Exiting eval via %s	
+	{ eval "last" }
+
+    Exiting pseudo-block via %s 
+	@a = (1,2) ; @b = sort { last } @a ;
+
+    Exiting substitution via %s
+	$_ = "abc" ;
+	last fred:
+	while ($i ++ == 0)
+	{
+    	    s/ab/last fred/e ;
+	}
+
+
+    Exiting subroutine via %s
+	sub fred { last joe }
+	joe: { fred() }
+
+    Exiting eval via %s
+	fred: { eval "last fred" }
+
+    Exiting pseudo-block via %s 
+	@a = (1,2) ; fred: @b = sort { last fred } @a ;
+
+
+    Deep recursion on subroutine \"%s\"
+	sub fred
+	{
+    	goto &fred() if $a++ < 200
+	}
+	 
+	goto &fred()
+
+
+__END__
+# pp_ctl.c
+use warning 'syntax' ;
+format STDOUT =
+@<<< @<<<
+1
+.
+write;
+EXPECT
+Not enough format arguments at - line 5.
+1
+########
+# pp_ctl.c
+use warning 'unsafe' ;
+$_ = "abc" ;
+ 
+while ($i ++ == 0)
+{
+    s/ab/last/e ;
+}
+EXPECT
+Exiting substitution via last at - line 7.
+########
+# pp_ctl.c
+use warning 'unsafe' ;
+sub fred { last }
+{ fred() }
+EXPECT
+Exiting subroutine via last at - line 3.
+########
+# pp_ctl.c
+use warning 'unsafe' ;
+{ eval "last" } 
+print STDERR $@ ;
+EXPECT
+Exiting eval via last at (eval 1) line 1.
+########
+# pp_ctl.c
+use warning 'unsafe' ;
+@a = (1,2) ;
+@b = sort { last } @a ;
+EXPECT
+Exiting pseudo-block via last at - line 4.
+Can't "last" outside a block at - line 4.
+########
+# pp_ctl.c
+use warning 'unsafe' ;
+$_ = "abc" ;
+fred: 
+while ($i ++ == 0)
+{
+    s/ab/last fred/e ;
+}
+EXPECT
+Exiting substitution via last at - line 7.
+########
+# pp_ctl.c
+use warning 'unsafe' ;
+sub fred { last joe }
+joe: { fred() }
+EXPECT
+Exiting subroutine via last at - line 3.
+########
+# pp_ctl.c
+use warning 'unsafe' ;
+joe: { eval "last joe" }
+print STDERR $@ ;
+EXPECT
+Exiting eval via last at (eval 1) line 2.
+########
+# pp_ctl.c
+use warning 'unsafe' ;
+@a = (1,2) ;
+fred: @b = sort { last fred } @a ;
+EXPECT
+Exiting pseudo-block via last at - line 4.
+Label not found for "last fred" at - line 4.
+########
+# pp_ctl.c
+use warning 'recursion' ;
+BEGIN { warn "PREFIX\n" ;}
+sub fred
+{
+    goto &fred() if $a++ < 200
+}
+ 
+goto &fred()
+EXPECT
+Deep recursion on subroutine "main::fred" at - line 6.

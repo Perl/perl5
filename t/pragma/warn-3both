@@ -1,0 +1,66 @@
+Check interaction of $^W and lexical
+
+__END__
+
+# Check interaction of $^W and use warning
+sub fred { 
+    use warning ;
+    my $b ; 
+    chop $b ;
+}
+{ local $^W = 0 ;
+  fred() ;
+}
+
+EXPECT
+Use of uninitialized value at - line 6.
+########
+
+# Check interaction of $^W and use warning
+sub fred { 
+    no warning ;
+    my $b ; 
+    chop $b ;
+}
+{ local $^W = 1 ;
+  fred() ;
+}
+
+EXPECT
+Use of uninitialized value at - line 6.
+########
+
+# Check interaction of $^W and use warning
+use warning ;
+$^W = 1 ;
+my $b ; 
+chop $b ;
+EXPECT
+Use of uninitialized value at - line 6.
+########
+
+# Check interaction of $^W and use warning
+$^W = 1 ;
+use warning ;
+my $b ; 
+chop $b ;
+EXPECT
+Use of uninitialized value at - line 6.
+########
+
+# Check interaction of $^W and use warning
+$^W = 1 ;
+no warning ;
+my $b ; 
+chop $b ;
+EXPECT
+Use of uninitialized value at - line 6.
+########
+
+# Check interaction of $^W and use warning
+no warning ;
+$^W = 1 ;
+my $b ; 
+chop $b ;
+EXPECT
+Use of uninitialized value at - line 6.

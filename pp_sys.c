@@ -612,7 +612,7 @@ PP(pp_untie)
 
     sv = POPs;
 
-    if (PL_dowarn) {
+    if (ckWARN(WARN_UNTIE)) {
         MAGIC * mg ;
         if (SvMAGICAL(sv)) {
             if (SvTYPE(sv) == SVt_PVHV || SvTYPE(sv) == SVt_PVAV)
@@ -621,8 +621,9 @@ PP(pp_untie)
                 mg = mg_find(sv, 'q') ;
     
             if (mg && SvREFCNT(SvRV(mg->mg_obj)) > 1)  
-		warn("untie attempted while %lu inner references still exist",
-			(unsigned long)SvREFCNT(SvRV(mg->mg_obj)) - 1 ) ;
+		warner(WARN_UNTIE,
+		    "untie attempted while %lu inner references still exist",
+		    (unsigned long)SvREFCNT(SvRV(mg->mg_obj)) - 1 ) ;
         }
     }
  
@@ -1083,18 +1084,18 @@ PP(pp_leavewrite)
 
     fp = IoOFP(io);
     if (!fp) {
-	if (PL_dowarn) {
+	if (ckWARN2(WARN_CLOSED,WARN_IO)) {
 	    if (IoIFP(io))
-		warn("Filehandle only opened for input");
-	    else
-		warn("Write on closed filehandle");
+		warner(WARN_IO, "Filehandle only opened for input");
+	    else if (ckWARN(WARN_CLOSED))
+		warner(WARN_CLOSED, "Write on closed filehandle");
 	}
 	PUSHs(&PL_sv_no);
     }
     else {
 	if ((IoLINES_LEFT(io) -= FmLINES(PL_formtarget)) < 0) {
-	    if (PL_dowarn)
-		warn("page overflow");
+	    if (ckWARN(WARN_IO))
+		warner(WARN_IO, "page overflow");
 	}
 	if (!PerlIO_write(ofp, SvPVX(PL_formtarget), SvCUR(PL_formtarget)) ||
 		PerlIO_error(fp))
@@ -1149,20 +1150,22 @@ PP(pp_prtf)
 
     sv = NEWSV(0,0);
     if (!(io = GvIO(gv))) {
-	if (PL_dowarn) {
+	if (ckWARN(WARN_UNOPENED)) {
 	    gv_fullname3(sv, gv, Nullch);
-	    warn("Filehandle %s never opened", SvPV(sv,PL_na));
+	    warner(WARN_UNOPENED, "Filehandle %s never opened", SvPV(sv,PL_na));
 	}
 	SETERRNO(EBADF,RMS$_IFI);
 	goto just_say_no;
     }
     else if (!(fp = IoOFP(io))) {
-	if (PL_dowarn)  {
+	if (ckWARN2(WARN_CLOSED,WARN_IO))  {
 	    gv_fullname3(sv, gv, Nullch);
 	    if (IoIFP(io))
-		warn("Filehandle %s opened only for input", SvPV(sv,PL_na));
-	    else
-		warn("printf on closed filehandle %s", SvPV(sv,PL_na));
+		warner(WARN_IO, "Filehandle %s opened only for input",
+			SvPV(sv,PL_na));
+	    else if (ckWARN(WARN_CLOSED))
+		warner(WARN_CLOSED, "printf on closed filehandle %s",
+			SvPV(sv,PL_na));
 	}
 	SETERRNO(EBADF,IoIFP(io)?RMS$_FAC:RMS$_IFI);
 	goto just_say_no;
@@ -1396,11 +1399,11 @@ PP(pp_send)
     io = GvIO(gv);
     if (!io || !IoIFP(io)) {
 	length = -1;
-	if (PL_dowarn) {
+	if (ckWARN(WARN_CLOSED)) {
 	    if (PL_op->op_type == OP_SYSWRITE)
-		warn("Syswrite on closed filehandle");
+		warner(WARN_CLOSED, "Syswrite on closed filehandle");
 	    else
-		warn("Send on closed socket");
+		warner(WARN_CLOSED, "Send on closed socket");
 	}
     }
     else if (PL_op->op_type == OP_SYSWRITE) {
@@ -1813,8 +1816,8 @@ PP(pp_bind)
 	RETPUSHUNDEF;
 
 nuts:
-    if (PL_dowarn)
-	warn("bind() on closed fd");
+    if (ckWARN(WARN_CLOSED))
+	warner(WARN_CLOSED, "bind() on closed fd");
     SETERRNO(EBADF,SS$_IVCHAN);
     RETPUSHUNDEF;
 #else
@@ -1843,8 +1846,8 @@ PP(pp_connect)
 	RETPUSHUNDEF;
 
 nuts:
-    if (PL_dowarn)
-	warn("connect() on closed fd");
+    if (ckWARN(WARN_CLOSED))
+	warner(WARN_CLOSED, "connect() on closed fd");
     SETERRNO(EBADF,SS$_IVCHAN);
     RETPUSHUNDEF;
 #else
@@ -1869,8 +1872,8 @@ PP(pp_listen)
 	RETPUSHUNDEF;
 
 nuts:
-    if (PL_dowarn)
-	warn("listen() on closed fd");
+    if (ckWARN(WARN_CLOSED))
+	warner(WARN_CLOSED, "listen() on closed fd");
     SETERRNO(EBADF,SS$_IVCHAN);
     RETPUSHUNDEF;
 #else
@@ -1923,8 +1926,8 @@ PP(pp_accept)
     RETURN;
 
 nuts:
-    if (PL_dowarn)
-	warn("accept() on closed fd");
+    if (ckWARN(WARN_CLOSED))
+	warner(WARN_CLOSED, "accept() on closed fd");
     SETERRNO(EBADF,SS$_IVCHAN);
 
 badexit:
@@ -1950,8 +1953,8 @@ PP(pp_shutdown)
     RETURN;
 
 nuts:
-    if (PL_dowarn)
-	warn("shutdown() on closed fd");
+    if (ckWARN(WARN_CLOSED))
+	warner(WARN_CLOSED, "shutdown() on closed fd");
     SETERRNO(EBADF,SS$_IVCHAN);
     RETPUSHUNDEF;
 #else
@@ -2028,8 +2031,8 @@ PP(pp_ssockopt)
     RETURN;
 
 nuts:
-    if (PL_dowarn)
-	warn("[gs]etsockopt() on closed fd");
+    if (ckWARN(WARN_CLOSED))
+	warner(WARN_CLOSED, "[gs]etsockopt() on closed fd");
     SETERRNO(EBADF,SS$_IVCHAN);
 nuts2:
     RETPUSHUNDEF;
@@ -2101,8 +2104,8 @@ PP(pp_getpeername)
     RETURN;
 
 nuts:
-    if (PL_dowarn)
-	warn("get{sock, peer}name() on closed fd");
+    if (ckWARN(WARN_CLOSED))
+	warner(WARN_CLOSED, "get{sock, peer}name() on closed fd");
     SETERRNO(EBADF,SS$_IVCHAN);
 nuts2:
     RETPUSHUNDEF;
@@ -2159,8 +2162,8 @@ PP(pp_stat)
 #endif
 	    PL_laststatval = PerlLIO_stat(SvPV(PL_statname, PL_na), &PL_statcache);
 	if (PL_laststatval < 0) {
-	    if (PL_dowarn && strchr(SvPV(PL_statname, PL_na), '\n'))
-		warn(warn_nl, "stat");
+	    if (ckWARN(WARN_NEWLINE) && strchr(SvPV(PL_statname, PL_na), '\n'))
+		warner(WARN_NEWLINE, warn_nl, "stat");
 	    max = 0;
 	}
     }
@@ -2564,8 +2567,8 @@ PP(pp_fttext)
 		len = 512;
 	}
 	else {
-	    if (PL_dowarn)
-		warn("Test on unopened file <%s>",
+	    if (ckWARN(WARN_UNOPENED))
+		warner(WARN_UNOPENED, "Test on unopened file <%s>",
 		  GvENAME(cGVOP->op_gv));
 	    SETERRNO(EBADF,RMS$_IFI);
 	    RETPUSHUNDEF;
@@ -2583,8 +2586,8 @@ PP(pp_fttext)
 	i = PerlLIO_open(SvPV(sv, PL_na), 0);
 #endif
 	if (i < 0) {
-	    if (PL_dowarn && strchr(SvPV(sv, PL_na), '\n'))
-		warn(warn_nl, "open");
+	    if (ckWARN(WARN_NEWLINE) && strchr(SvPV(sv, PL_na), '\n'))
+		warner(WARN_NEWLINE, warn_nl, "open");
 	    RETPUSHUNDEF;
 	}
 	PL_laststatval = PerlLIO_fstat(i, &PL_statcache);

@@ -234,8 +234,8 @@ PP(pp_rv2gv)
 		if (PL_op->op_flags & OPf_REF ||
 		    PL_op->op_private & HINT_STRICT_REFS)
 		    DIE(no_usym, "a symbol");
-		if (PL_dowarn)
-		    warn(warn_uninit);
+		if (ckWARN(WARN_UNINITIALIZED))
+		    warner(WARN_UNINITIALIZED, warn_uninit);
 		RETSETUNDEF;
 	    }
 	    sym = SvPV(sv, PL_na);
@@ -278,8 +278,8 @@ PP(pp_rv2sv)
 		if (PL_op->op_flags & OPf_REF ||
 		    PL_op->op_private & HINT_STRICT_REFS)
 		    DIE(no_usym, "a SCALAR");
-		if (PL_dowarn)
-		    warn(warn_uninit);
+		if (ckWARN(WARN_UNINITIALIZED))
+		    warner(WARN_UNINITIALIZED, warn_uninit);
 		RETSETUNDEF;
 	    }
 	    sym = SvPV(sv, PL_na);
@@ -520,8 +520,9 @@ PP(pp_bless)
 	SV *ssv = POPs;
 	STRLEN len;
 	char *ptr = SvPV(ssv,len);
-	if (PL_dowarn && len == 0)
-	    warn("Explicit blessing to '' (assuming package main)");
+	if (ckWARN(WARN_UNSAFE) && len == 0)
+	    warner(WARN_UNSAFE, 
+		   "Explicit blessing to '' (assuming package main)");
 	stash = gv_stashpvn(ptr, len, TRUE);
     }
 
@@ -770,8 +771,8 @@ PP(pp_undef)
 	hv_undef((HV*)sv);
 	break;
     case SVt_PVCV:
-	if (PL_dowarn && cv_const_sv((CV*)sv))
-	    warn("Constant subroutine %s undefined",
+	if (ckWARN(WARN_UNSAFE) && cv_const_sv((CV*)sv))
+	    warner(WARN_UNSAFE, "Constant subroutine %s undefined",
 		 CvANON((CV*)sv) ? "(anonymous)" : GvENAME(CvGV((CV*)sv)));
 	/* FALL THROUGH */
     case SVt_PVFM:
@@ -1876,8 +1877,8 @@ PP(pp_substr)
 	rem -= pos;
     }
     if (fail < 0) {
-	if (PL_dowarn || lvalue || repl)
-	    warn("substr outside of string");
+	if (ckWARN(WARN_SUBSTR) || lvalue || repl)
+	    warner(WARN_SUBSTR, "substr outside of string");
 	RETPUSHUNDEF;
     }
     else {
@@ -1889,8 +1890,9 @@ PP(pp_substr)
 	    if (!SvGMAGICAL(sv)) {
 		if (SvROK(sv)) {
 		    SvPV_force(sv,PL_na);
-		    if (PL_dowarn)
-			warn("Attempt to use reference as lvalue in substr");
+		    if (ckWARN(WARN_SUBSTR))
+			warner(WARN_SUBSTR,
+				"Attempt to use reference as lvalue in substr");
 		}
 		if (SvOK(sv))		/* is it defined ? */
 		    (void)SvPOK_only(sv);
@@ -2712,8 +2714,8 @@ PP(pp_anonhash)
 	SV *val = NEWSV(46, 0);
 	if (MARK < SP)
 	    sv_setsv(val, *++MARK);
-	else if (PL_dowarn)
-	    warn("Odd number of elements in hash assignment");
+	else if (ckWARN(WARN_UNSAFE))
+	    warner(WARN_UNSAFE, "Odd number of elements in hash assignment");
 	(void)hv_store_ent(hv,key,val,0);
     }
     SP = ORIGMARK;
@@ -3195,8 +3197,8 @@ PP(pp_unpack)
 	default:
 	    croak("Invalid type in unpack: '%c'", (int)datumtype);
 	case ',': /* grandfather in commas but with a warning */
-	    if (commas++ == 0 && PL_dowarn)
-		warn("Invalid type in unpack: '%c'", (int)datumtype);
+	    if (commas++ == 0 && ckWARN(WARN_UNSAFE))
+		warner(WARN_UNSAFE, "Invalid type in unpack: '%c'", (int)datumtype);
 	    break;
 	case '%':
 	    if (len == 1 && pat[-1] != '1')
@@ -4026,8 +4028,8 @@ PP(pp_pack)
 	default:
 	    croak("Invalid type in pack: '%c'", (int)datumtype);
 	case ',': /* grandfather in commas but with a warning */
-	    if (commas++ == 0 && PL_dowarn)
-		warn("Invalid type in pack: '%c'", (int)datumtype);
+	    if (commas++ == 0 && ckWARN(WARN_UNSAFE))
+		warner(WARN_UNSAFE, "Invalid type in pack: '%c'", (int)datumtype);
 	    break;
 	case '%':
 	    DIE("%% may only be used in unpack");
@@ -4408,8 +4410,9 @@ PP(pp_pack)
 		     * of pack() (and all copies of the result) are
 		     * gone.
 		     */
-		    if (PL_dowarn && (SvTEMP(fromstr) || SvPADTMP(fromstr)))
-			warn("Attempt to pack pointer to temporary value");
+		    if (ckWARN(WARN_UNSAFE) && (SvTEMP(fromstr) || SvPADTMP(fromstr)))
+			warner(WARN_UNSAFE,
+				"Attempt to pack pointer to temporary value");
 		    if (SvPOK(fromstr) || SvNIOK(fromstr))
 			aptr = SvPV(fromstr,PL_na);
 		    else

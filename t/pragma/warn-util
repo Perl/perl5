@@ -1,0 +1,21 @@
+  util.c AOK
+ 
+     Illegal octal digit ignored 
+	my $a = oct "029" ;
+
+     Illegal hex digit ignored 
+	my $a = hex "0xv9" ;
+
+
+__END__
+# util.c
+use warning 'octal' ;
+my $a = oct "029" ;
+EXPECT
+Illegal octal digit ignored at - line 3.
+########
+# util.c
+use warning 'unsafe' ;
+*a =  hex "0xv9" ;
+EXPECT
+Illegal hex digit ignored at - line 3.

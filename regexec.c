@@ -1668,10 +1668,10 @@ regmatch(regnode *prog)
 		    PL_regcc = cc;
 
 		    if (n >= cc->max) {	/* Maximum greed exceeded? */
-			if (PL_dowarn && n >= REG_INFTY 
+			if (ckWARN(WARN_UNSAFE) && n >= REG_INFTY 
 			    && !(PL_reg_flags & RF_warned)) {
 			    PL_reg_flags |= RF_warned;
-			    warn("%s limit (%d) exceeded",
+			    warner(WARN_UNSAFE, "%s limit (%d) exceeded",
 				 "Complex regular subexpression recursion",
 				 REG_INFTY - 1);
 			}
@@ -1725,9 +1725,10 @@ regmatch(regnode *prog)
 				      REPORT_CODE_OFF+PL_regindent*2, "")
 			);
 		}
-		if (PL_dowarn && n >= REG_INFTY && !(PL_reg_flags & RF_warned)) {
+		if (ckWARN(WARN_UNSAFE) && n >= REG_INFTY 
+			&& !(PL_reg_flags & RF_warned)) {
 		    PL_reg_flags |= RF_warned;
-		    warn("%s limit (%d) exceeded",
+		    warner(WARN_UNSAFE, "%s limit (%d) exceeded",
 			 "Complex regular subexpression recursion",
 			 REG_INFTY - 1);
 		}

@@ -334,23 +334,25 @@ PP(pp_print)
 	RETURN;
     }
     if (!(io = GvIO(gv))) {
-	if (PL_dowarn) {
+	if (ckWARN(WARN_UNOPENED)) {
 	    SV* sv = sv_newmortal();
             gv_fullname3(sv, gv, Nullch);
-            warn("Filehandle %s never opened", SvPV(sv,PL_na));
+            warner(WARN_UNOPENED, "Filehandle %s never opened", SvPV(sv,PL_na));
         }
 
 	SETERRNO(EBADF,RMS$_IFI);
 	goto just_say_no;
     }
     else if (!(fp = IoOFP(io))) {
-	if (PL_dowarn)  {
+	if (ckWARN2(WARN_CLOSED, WARN_IO))  {
 	    SV* sv = sv_newmortal();
             gv_fullname3(sv, gv, Nullch);
 	    if (IoIFP(io))
-		warn("Filehandle %s opened only for input", SvPV(sv,PL_na));
-	    else
-		warn("print on closed filehandle %s", SvPV(sv,PL_na));
+		warner(WARN_IO, "Filehandle %s opened only for input", 
+				SvPV(sv,PL_na));
+	    else if (ckWARN(WARN_CLOSED))
+		warner(WARN_CLOSED, "print on closed filehandle %s", 
+				SvPV(sv,PL_na));
 	}
 	SETERRNO(EBADF,IoIFP(io)?RMS$_FAC:RMS$_IFI);
 	goto just_say_no;
@@ -437,8 +439,8 @@ PP(pp_rv2av)
 		    if (PL_op->op_flags & OPf_REF ||
 		      PL_op->op_private & HINT_STRICT_REFS)
 			DIE(no_usym, "an ARRAY");
-		    if (PL_dowarn)
-			warn(warn_uninit);
+		    if (ckWARN(WARN_UNINITIALIZED))
+			warner(WARN_UNINITIALIZED, warn_uninit);
 		    if (GIMME == G_ARRAY)
 			RETURN;
 		    RETPUSHUNDEF;
@@ -521,8 +523,8 @@ PP(pp_rv2hv)
 		    if (PL_op->op_flags & OPf_REF ||
 		      PL_op->op_private & HINT_STRICT_REFS)
 			DIE(no_usym, "a HASH");
-		    if (PL_dowarn)
-			warn(warn_uninit);
+		    if (ckWARN(WARN_UNINITIALIZED))
+			warner(WARN_UNINITIALIZED, warn_uninit);
 		    if (GIMME == G_ARRAY) {
 			SP--;
 			RETURN;
@@ -660,14 +662,14 @@ PP(pp_aassign)
 		if (relem == lastrelem) {
 		    if (*relem) {
 			HE *didstore;
-			if (PL_dowarn) {
+			if (ckWARN(WARN_UNSAFE)) {
 			    if (relem == firstrelem &&
 				SvROK(*relem) &&
 				( SvTYPE(SvRV(*relem)) == SVt_PVAV ||
 				  SvTYPE(SvRV(*relem)) == SVt_PVHV ) )
-				warn("Reference found where even-sized list expected");
+				warner(WARN_UNSAFE, "Reference found where even-sized list expected");
 			    else
-				warn("Odd number of elements in hash assignment");
+				warner(WARN_UNSAFE, "Odd number of elements in hash assignment");
 			}
 			tmpstr = NEWSV(29,0);
 			didstore = hv_store_ent(hash,*relem,tmpstr,0);
@@ -1218,8 +1220,9 @@ do_readline(void)
 	    SP--;
     }
     if (!fp) {
-	if (PL_dowarn && io && !(IoFLAGS(io) & IOf_START))
-	    warn("Read on closed filehandle <%s>", GvENAME(PL_last_in_gv));
+	if (ckWARN(WARN_CLOSED) && io && !(IoFLAGS(io) & IOf_START))
+	    warner(WARN_CLOSED,
+		   "Read on closed filehandle <%s>", GvENAME(PL_last_in_gv));
 	if (gimme == G_SCALAR) {
 	    (void)SvOK_off(TARG);
 	    PUSHTARG;
@@ -2268,7 +2271,7 @@ PP(pp_entersub)
 	if (CvDEPTH(cv) < 2)
 	    (void)SvREFCNT_inc(cv);
 	else {	/* save temporaries on recursion? */
-	    if (CvDEPTH(cv) == 100 && PL_dowarn 
+	    if (CvDEPTH(cv) == 100 && ckWARN(WARN_RECURSION)
 		  && !(PERLDB_SUB && cv == GvCV(PL_DBsub)))
 		sub_crush_depth(cv);
 	    if (CvDEPTH(cv) > AvFILLp(padlist)) {
@@ -2382,11 +2385,12 @@ void
 sub_crush_depth(CV *cv)
 {
     if (CvANON(cv))
-	warn("Deep recursion on anonymous subroutine");
+	warner(WARN_RECURSION, "Deep recursion on anonymous subroutine");
     else {
 	SV* tmpstr = sv_newmortal();
 	gv_efullname3(tmpstr, CvGV(cv), Nullch);
-	warn("Deep recursion on subroutine \"%s\"", SvPVX(tmpstr));
+	warner(WARN_RECURSION, "Deep recursion on subroutine \"%s\"", 
+		SvPVX(tmpstr));
     }
 }
 

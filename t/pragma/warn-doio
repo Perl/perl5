@@ -1,0 +1,94 @@
+  doio.c	AOK
+
+  Can't do bidirectional pipe
+    open(F, "| true |");
+
+  warn(warn_nl, "open");
+    open(F, "true\ncd")
+
+  Close on unopened file <%s>
+    $a = "fred";close($a)
+
+  tell() on unopened file
+    $a = "fred";$a = tell($a)
+
+  seek() on unopened file
+    $a = "fred";$a = seek($a,1,1)
+
+  sysseek() on unopened file
+    $a = "fred";$a = seek($a,1,1)
+
+  warn(warn_uninit);
+    print $a ;
+
+  Stat on unopened file <%s> 
+    close STDIN ; -x STDIN ;
+
+  warn(warn_nl, "stat");
+    stat "ab\ncd"
+
+  warn(warn_nl, "lstat");
+    lstat "ab\ncd"
+
+  Can't exec \"%s\": %s 
+
+  Can't exec \"%s\": %s 
+
+
+__END__
+# doio.c
+use warning 'io' ;
+open(F, "|true|")
+EXPECT
+Can't do bidirectional pipe at - line 3.
+########
+# doio.c
+use warning 'io' ;
+open(F, "<true\ncd")
+EXPECT
+Unsuccessful open on filename containing newline at - line 3.
+########
+# doio.c
+use warning 'io' ;
+close STDIN ;
+tell(STDIN);
+$a = seek(STDIN,1,1);
+$a = sysseek(STDIN,1,1);
+-x STDIN ;
+EXPECT
+tell() on unopened file at - line 4.
+seek() on unopened file at - line 5.
+sysseek() on unopened file at - line 6.
+Stat on unopened file <STDIN> at - line 7.
+########
+# doio.c
+use warning 'uninitialized' ;
+print $a ;
+EXPECT
+Use of uninitialized value at - line 3.
+########
+# doio.c
+use warning 'io' ;
+
+EXPECT
+
+########
+# doio.c
+use warning 'io' ;
+stat "ab\ncd";
+lstat "ab\ncd";
+EXPECT
+Unsuccessful stat on filename containing newline at - line 3.
+Unsuccessful stat on filename containing newline at - line 4.
+########
+# doio.c
+use warning 'io' ;
+exec "lskdjfalksdjfdjfkls" ;
+EXPECT
+Can't exec "lskdjfalksdjfdjfkls": No such file or directory at - line 3.
+########
+# doio.c
+use warning 'io' ;
+exec "lskdjfalksdjfdjfkls", "abc" ;
+EXPECT
+Can't exec "lskdjfalksdjfdjfkls": No such file or directory at - line 3.

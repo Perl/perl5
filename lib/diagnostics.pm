@@ -274,7 +274,7 @@ if (eof(POD_DIAG)) {
 
 $transmo = <<EOFUNC;
 sub transmo {
-    local \$^W = 0;  # recursive warnings we do NOT need!
+    #local \$^W = 0;  # recursive warnings we do NOT need!
     study;
 EOFUNC
 
@@ -371,7 +371,7 @@ if ($standalone) {
 
 sub import {
     shift;
-    $old_w = $^W;
+    #$old_w = $^W;
     $^W = 1; # yup, clobbered the global variable; tough, if you
 	     # want diags, you want diags.
     return if $SIG{__WARN__} eq \&warn_trap;
@@ -407,7 +407,7 @@ sub enable { &import }
 
 sub disable {
     shift;
-    $^W = $old_w;
+    #$^W = $old_w;
     return unless $SIG{__WARN__} eq \&warn_trap;
     $SIG{__WARN__} = $oldwarn;
     $SIG{__DIE__} = $olddie;

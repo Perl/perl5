@@ -74,7 +74,152 @@ indicator:
 
 
 ----------------
-Version 5.005_50        Development release working toward 5.006
+Version 5.005_51        Development release working toward 5.006
+----------------
+
+____________________________________________________________________________
+[  1772] By: gsar                                  on 1998/08/08  23:06:00
+        Log: bump patchlevel to 5.005_51
+     Branch: perl
+	   ! patchlevel.h win32/Makefile win32/config_H.bc
+           ! win32/config_H.gc win32/config_H.vc win32/makefile.mk
+____________________________________________________________________________
+[  1771] By: gsar                                  on 1998/08/08  23:01:57
+        Log: fix bogus warning on "\x{123}"
+             From: pmarquess@claudius.bfsec.bt.co.uk (Paul Marquess)
+             Date: Mon, 27 Jul 1998 06:16:15 +0100 (BST)
+             Message-Id: <9807270534.AA11102@claudius.bfsec.bt.co.uk>
+             Subject: [5.005_50 PATCH] Some unicode problems
+     Branch: perl
+           ! regcomp.c toke.c
+____________________________________________________________________________
+[  1770] By: gsar                                  on 1998/08/08  22:56:55
+        Log: hide dup symbol for static build of ext/re
+             From: Dominic Dunlop <domo@ppp72.vo.lu>
+             Date: Wed, 29 Jul 1998 11:09:56 +0100 (WET DST)
+             Message-Id: <199807291009.LAA08935@ppp72.vo.lu>
+             Subject: Not OK: perl 5.00550 on powerpc-machten 4.1 [BOGUS PATCH]
+     Branch: perl
+           ! regcomp.c
+____________________________________________________________________________
+[  1769] By: gsar                                  on 1998/08/08  22:45:06
+        Log: fix double free on -Mutf8 -e '$b=uc("")'
+             From: larry@wall.org (Larry Wall)
+             Date: Fri, 7 Aug 1998 14:42:43 -0700
+             Message-Id: <199808072142.OAA14920@wall.org>
+             Subject: [PATCH 5.005_50]: uc("") and lc("") under utf8 fails
+     Branch: perl
+           ! pp.c
+____________________________________________________________________________
+[  1768] By: gsar                                  on 1998/08/08  22:42:29
+        Log: substr() assumes utf8 without say-so
+             From: larry@wall.org (Larry Wall)
+             Date: Fri, 7 Aug 1998 12:25:12 -0700
+             Message-Id: <199808071925.MAA13436@wall.org>
+             Subject: [PATCH 5.005_50] substr bug?
+     Branch: perl
+           ! pp.c
+____________________________________________________________________________
+[  1767] By: gsar                                  on 1998/08/08  22:38:25
+        Log: fix intolerance of SWASHes for blank lines
+             From: Gisle Aas <aas@sn.no>
+             Date: 06 Aug 1998 23:28:57 +0200
+             Message-ID: <m3emutkdeu.fsf@furu.g.aas.no>
+             Subject: Re: Re[2]: another joyride begins
+     Branch: perl
+           ! lib/utf8_heavy.pl
+____________________________________________________________________________
+[  1766] By: gsar                                  on 1998/08/08  22:33:10
+        Log: utf8 doc tweak
+             From: Gisle Aas <aas@sn.no>
+             Date: 05 Aug 1998 00:41:04 +0200
+             Message-ID: <m3yat4wetb.fsf@furu.g.aas.no>
+             Subject: Matching clumps
+     Branch: perl
+           ! lib/utf8.pm
+____________________________________________________________________________
+[  1765] By: gsar                                  on 1998/08/08  22:31:37
+        Log: kill bogus warning from -we 'use utf8; $_="\x{FF}"'
+             From: Gisle Aas <aas@sn.no>
+             Date: 04 Aug 1998 22:56:11 +0200
+             Message-ID: <m3yat4sbys.fsf@furu.g.aas.no>
+             Subject: Re: another joyride begins
+     Branch: perl
+           ! lib/utf8_heavy.pl
+____________________________________________________________________________
+[  1764] By: gsar                                  on 1998/08/08  22:28:43
+        Log: From: larry@wall.org (Larry Wall)
+             Date: Tue, 4 Aug 1998 17:04:51 -0700
+             Message-Id: <199808050004.RAA22592@wall.org>
+             Subject: [PATCH 5.005_50] \pX not implemented!
+     Branch: perl
+           ! regcomp.c
+____________________________________________________________________________
+[  1763] By: gsar                                  on 1998/08/08  22:27:15
+        Log: From: Stephen McCamant <alias@mcs.com>
+             Date: Sun,  2 Aug 1998 16:33:18 -0500 (CDT)
+             Message-ID: <13764.55116.921952.837027@alias-2.pr.mcs.net>
+             Subject: [PATCH] Eliminate superfluous RV2p[AH]Vs in oops[AH]V()
+     Branch: perl
+           ! op.c
+____________________________________________________________________________
+[  1762] By: gsar                                  on 1998/08/08  22:26:09
+        Log: From: Jarkko Hietaniemi <jhi@iki.fi>
+             Date: Sun, 2 Aug 1998 22:05:28 +0300 (EET DST)
+             Message-Id: <199808021905.WAA10592@alpha.hut.fi>
+             Subject: [PATCH] 5.005_02-TRIAL1 or 5.004_05-MAINT_TRIAL_5: t/op/{pw,gr}ent.t
+     Branch: perl
+           + t/op/grent.t t/op/pwent.t
+           ! MANIFEST
+____________________________________________________________________________
+[  1761] By: gsar                                  on 1998/08/08  22:21:52
+        Log: From: Ilya Zakharevich <ilya@math.ohio-state.edu>
+             Date: Thu, 30 Jul 1998 19:23:56 -0400 (EDT)
+             Message-Id: <199807302323.TAA21175@monk.mps.ohio-state.edu>
+             Subject: [5.005_50 PATCH] misprint in RE engine
+     Branch: perl
+           ! regexec.c t/op/re_tests
+____________________________________________________________________________
+[  1760] By: gsar                                  on 1998/08/08  22:18:54
+        Log: integrate maint-5.005 changes into mainline
+     Branch: perl
+          +> Porting/fixCORE README.os390 ebcdic.c win32/des_fcrypt.patch
+          !> (integrate 138 files)
+____________________________________________________________________________
+[  1672] By: gsar                                  on 1998/07/27  18:35:28
+        Log: create new Changes
+     Branch: perl
+           + Changes
+           ! Changes5.005 MANIFEST
+____________________________________________________________________________
+[  1671] By: gsar                                  on 1998/07/27  18:30:57
+        Log: rename Changes --> Changes5.005
+     Branch: perl
+          +> Changes5.005
+           - Changes
+____________________________________________________________________________
+[  1670] By: gsar                                  on 1998/07/27  18:10:14
+        Log: integrate 5.005_01 changes from maint
+     Branch: perl
+           ! Changes
+	  !> README.win32 pod/perldelta.pod proto.h toke.c win32/GenCAPI.pl
+          !> win32/win32.c
+____________________________________________________________________________
+[  1667] By: nick                                  on 1998/07/26  14:31:01
+        Log: Add dTHR so that it compiles miniperl in threaded mode
+     Branch: perl
+           ! doop.c mg.c regcomp.c regexec.c
+____________________________________________________________________________
+[  1666] By: nick                                  on 1998/07/26  13:01:10
+        Log: Resolve ansiperl against mainline (@1648?)
+             Unclear that change number has "taken".
+     Branch: ansiperl
+          +> (branch 169 files)
+           - ObjXSub.h XSLock.h compat3.sym fixvars pod/perld4.pod
+          !> (integrate 131 files)
+
+----------------
+Version 5.005_50
 ----------------
 
 ____________________________________________________________________________

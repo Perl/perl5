@@ -53,8 +53,9 @@ isa_lookup(HV *stash, char *name, int len, int level)
 		SV* sv = *svp++;
 		HV* basestash = gv_stashsv(sv, FALSE);
 		if (!basestash) {
-		    if (PL_dowarn)
-			warn("Can't locate package %s for @%s::ISA",
+		    if (ckWARN(WARN_MISC))
+			warner(WARN_SYNTAX,
+		             "Can't locate package %s for @%s::ISA",
 			    SvPVX(sv), HvNAME(stash));
 		    continue;
 		}

@@ -15,6 +15,7 @@ struct cop {
     U32		cop_seq;	/* parse sequence number */
     I32		cop_arybase;	/* array base this line was compiled with */
     line_t      cop_line;       /* line # of this command */
+    SV *	cop_warnings;	/* lexical warnings bitmask */
 };
 
 #define Nullcop Null(COP*)

@@ -16,8 +16,16 @@ my $i = 0 ;
 END {  if ($tmpfile) { 1 while unlink $tmpfile} }
 
 my @prgs = () ;
+my @w_files = () ;
 
-foreach (sort glob("pragma/warn-*")) {
+if (@ARGV)
+  { print "ARGV = [@ARGV]\n" ; @w_files = map { s#^#./pragma/warn-#; $_ } @ARGV }
+else
+  { @w_files = sort glob("pragma/warn-*") }
+
+foreach (@w_files) {
+
+    next if /\.orig$/ ;
 
     next if /(~|\.orig)$/;
 

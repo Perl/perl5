@@ -33,6 +33,7 @@ README.amiga		Notes about AmigaOS port
 README.beos		Notes about BeOS port
 README.cygwin32		Notes about Cygwin32 port
 README.dos		Notes about dos/djgpp port
+README.lexwarn		Notes about lexical warnings
 README.mpeix		Notes about MPE/iX port
 README.os2		Notes about OS/2 port
 README.os390		Notes about OS/390 (nee MVS) port
@@ -754,6 +755,7 @@ lib/utf8.pm					Pragma to control Unicode support
 lib/utf8_heavy.pl				Support routines for utf8 pragma
 lib/validate.pl		Perl library supporting wholesale file mode validation
 lib/vars.pm		Declare pseudo-imported global variables
+lib/warning.pm		For "use warning"
 makeaperl.SH		perl script that produces a new perl binary
 makedepend.SH		Precursor to makedepend
 makedir.SH		Precursor to makedir
@@ -1129,6 +1131,24 @@ t/pragma/strict-vars	Tests of "use strict 'vars'" for strict.t
 t/pragma/strict.t	See if strictures work
 t/pragma/subs.t		See if subroutine pseudo-importation works
 t/pragma/warn-1global	Tests of global warnings for warning.t
+t/pragma/warn-2use	Tests for "use warning" for warning.t
+t/pragma/warn-doio	Tests for doio.c for warning.t
+t/pragma/warn-gv	Tests for gv.c for warning.t
+t/pragma/warn-mg	Tests for mg.c for warning.t
+t/pragma/warn-op	Tests for op.c for warning.t
+t/pragma/warn-perl	Tests for perl.c for warning.t
+t/pragma/warn-perly	Tests for perly.y for warning.t
+t/pragma/warn-pp	Tests for pp.c for warning.t
+t/pragma/warn-pp_ctl	Tests for pp_ctl.c for warning.t
+t/pragma/warn-pp_hot	Tests for pp_hot.c for warning.t
+t/pragma/warn-pp_sys	Tests for pp_sys.c for warning.t
+t/pragma/warn-regcomp	Tests for regcomp.c for warning.t
+t/pragma/warn-regexec	Tests for regexec.c for warning.t
+t/pragma/warn-sv	Tests for sv.c for warning.t
+t/pragma/warn-taint	Tests for taint.c for warning.t
+t/pragma/warn-toke	Tests for toke.c for warning.t
+t/pragma/warn-universal	Tests for universal.c for warning.t
+t/pragma/warn-util	Tests for util.c for warning.t
 t/pragma/warning.t	See if warning controls work
 taint.c			Tainting code
 thrdvar.h		Per-thread variables
@@ -1184,6 +1204,8 @@ vms/vms.c		VMS-specific C code for Perl core
 vms/vms_yfix.pl		convert Unix perly.[ch] to VMS perly_[ch].vms
 vms/vmsish.h		VMS-specific C header for Perl core
 vms/writemain.pl	Generate perlmain.c from miniperlmain.c+extensions
+warning.h		The warning numbers
+warning.pl		Program to write warning.h and lib/warning.pm
 win32/GenCAPI.pl	Win32 port for C API with PERL_OBJECT
 win32/Makefile		Win32 makefile for NMAKE (Visual C++ build)
 win32/TEST		Win32 port

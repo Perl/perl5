@@ -1,0 +1,53 @@
+  regcomp.c	AOK
+
+  %.*s matches null string many times   
+
+	$a = "ABC123" ; $a =~ /(?=a)*/'
+
+  Strange *+?{} on zero-length expression
+
+	/(?=a)?/
+
+  Character class syntax [: :] is reserved for future extensions
+	/[a[:xyz:]b]/
+
+  Character class syntax [. .] is reserved for future extensions
+  Character class syntax [= =] is reserved for future extensions
+
+__END__
+# regcomp.c
+use warning 'unsafe' ;
+my $a = "ABC123" ; 
+$a =~ /(?=a)*/ ;
+EXPECT
+(?=a)* matches null string many times at - line 4.
+########
+# regcomp.c
+use warning 'unsafe' ;
+$_ = "" ;
+/(?=a)?/;
+EXPECT
+Strange *+?{} on zero-length expression at - line 4.
+########
+# regcomp.c
+use warning 'unsafe' ;
+$_ = "" ;
+/[a[:xyz:]b]/;
+/[a[.xyz.]b]/;
+/[a[=xyz=]b]/;
+EXPECT
+Character class syntax [: :] is reserved for future extensions at - line 4.
+Character class syntax [. .] is reserved for future extensions at - line 5.
+Character class syntax [= =] is reserved for future extensions at - line 6.
+########
+# regcomp.c
+use warning 'unsafe' ; 
+# use utf8 ; # Note this line should be uncommented when utf8 gets fixed.
+$_ = "" ;
+/[a[:xyz:]b]/;
+/[a[.xyz.]b]/;
+/[a[=xyz=]b]/;
+EXPECT
+Character class syntax [: :] is reserved for future extensions at - line 5.
+Character class syntax [. .] is reserved for future extensions at - line 6.
+Character class syntax [= =] is reserved for future extensions at - line 7.

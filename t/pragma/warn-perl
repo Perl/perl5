@@ -1,0 +1,12 @@
+  perl.c	AOK
+
+  gv_check(defstash)
+	Name \"%s::%s\" used only once: possible typo 
+
+
+__END__
+# perl.c
+use warning 'once' ;
+$x = 3 ;
+EXPECT
+Name "main::x" used only once: possible typo at - line 3.

@@ -490,10 +490,10 @@ study_chunk(regnode **scanp, I32 *deltap, regnode *last, scan_data_t *data, U32 
 					? (flags & ~SCF_DO_SUBSTR) : flags);
 		if (!scan) 		/* It was not CURLYX, but CURLY. */
 		    scan = next;
-		if (PL_dowarn && (minnext + deltanext == 0) 
+		if (ckWARN(WARN_UNSAFE) && (minnext + deltanext == 0) 
 		    && !(data->flags & (SF_HAS_PAR|SF_IN_PAR))
 		    && maxcount <= 10000) /* Complement check for big count */
-		    warn("Strange *+?{} on zero-length expression");
+		    warner(WARN_UNSAFE, "Strange *+?{} on zero-length expression");
 		min += minnext * mincount;
 		is_inf |= (maxcount == REG_INFTY && (minnext + deltanext) > 0
 			   || deltanext == I32_MAX);
@@ -1558,8 +1558,8 @@ regpiece(I32 *flagp)
 	goto do_curly;
     }
   nest_check:
-    if (PL_dowarn && !SIZE_ONLY && !(flags&HASWIDTH) && max > 10000) {
-	warn("%.*s matches null string many times",
+    if (ckWARN(WARN_UNSAFE) && !SIZE_ONLY && !(flags&HASWIDTH) && max > 10000) {
+	warner(WARN_UNSAFE, "%.*s matches null string many times",
 	    PL_regcomp_parse - origparse, origparse);
     }
 
@@ -2115,8 +2115,9 @@ regclass(void)
 		     * (POSIX Extended Character Classes, that is)
 		     * The text between e.g. [: and :] would start
 		     * at posixccs + 1 and stop at regcomp_parse - 2. */
-		    if (PL_dowarn && !SIZE_ONLY)
-			warn("Character class syntax [%c %c] is reserved for future extensions", posixccc, posixccc);
+		    if (ckWARN(WARN_UNSAFE) && !SIZE_ONLY)
+			warner(WARN_UNSAFE,
+			    "Character class syntax [%c %c] is reserved for future extensions", posixccc, posixccc);
 		    PL_regcomp_parse++; /* skip over the ending ] */
 		}
 	    }
@@ -2317,8 +2318,9 @@ regclassutf8(void)
 		     * (POSIX Extended Character Classes, that is)
 		     * The text between e.g. [: and :] would start
 		     * at posixccs + 1 and stop at regcomp_parse - 2. */
-		    if (PL_dowarn && !SIZE_ONLY)
-			warn("Character class syntax [%c %c] is reserved for future extensions", posixccc, posixccc);
+		    if (ckWARN(WARN_UNSAFE) && !SIZE_ONLY)
+			warner(WARN_UNSAFE,
+			    "Character class syntax [%c %c] is reserved for future extensions", posixccc, posixccc);
 		    PL_regcomp_parse++; /* skip over the ending ] */
 		}
 	    }

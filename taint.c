@@ -25,8 +25,8 @@ taint_proper(const char *f, char *s)
 	    ug = " while running with -T switch";
 	if (!PL_unsafe)
 	    croak(f, s, ug);
-	else if (PL_dowarn)
-	    warn(f, s, ug);
+	else if (ckWARN(WARN_TAINT))
+	    warner(WARN_TAINT, f, s, ug);
     }
 }
 

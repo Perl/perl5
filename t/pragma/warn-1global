@@ -1,5 +1,6 @@
 Check existing $^W functionality
 
+
 __END__
 
 # warnable code, warnings disabled
@@ -110,22 +111,24 @@ Use of uninitialized value at - line 3.
 ########
 
 $^W = 1;
-eval "my $b ; chop $b ;" ;
+eval 'my $b ; chop $b ;' ;
+print $@ ;
 EXPECT
-Use of uninitialized value at - line 3.
-Use of uninitialized value at - line 3.
+Use of uninitialized value at (eval 1) line 1.
 ########
 
-eval "$^W = 1;" ;
+eval '$^W = 1;' ;
+print $@ ;
 my $b ; chop $b ;
 EXPECT
-
+Use of uninitialized value at - line 4.
 ########
 
 eval {$^W = 1;} ;
+print $@ ;
 my $b ; chop $b ;
 EXPECT
-Use of uninitialized value at - line 3.
+Use of uninitialized value at - line 4.
 ########
 
 {
@@ -147,5 +150,37 @@ Use of uninitialized value at - line 5.
 ########
 -w
 -e undef
+EXPECT
+Use of uninitialized value at - line 2.
+########
+
+$^W = 1 + 2 ;
+EXPECT
+
+########
+
+$^W = $a ;
+EXPECT
+
+########
+
+sub fred {}
+$^W = fred() ;
+EXPECT
+
+########
+
+sub fred { my $b ; chop $b ;}
+{ local $^W = 0 ;
+  fred() ;
+}
+EXPECT
+
+########
+
+sub fred { my $b ; chop $b ;}
+{ local $^W = 1 ;
+  fred() ;
+}
 EXPECT
 Use of uninitialized value at - line 2.

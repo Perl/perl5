@@ -1106,6 +1106,7 @@ utilize
 uv_to_utf8
 wait4pid
 warn
+warner
 watch
 whichsig
 yydestruct

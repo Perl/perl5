@@ -212,8 +212,8 @@ missingterm(char *s)
 void
 deprecate(char *s)
 {
-    if (PL_dowarn)
-	warn("Use of %s is deprecated", s);
+    if (ckWARN(WARN_DEPRECATED))
+	warner(WARN_DEPRECATED, "Use of %s is deprecated", s);
 }
 
 STATIC void
@@ -981,7 +981,7 @@ scan_const(char *start)
 
 	/* (now in tr/// code again) */
 
-	if (*s & 0x80 && PL_dowarn && thisutf) {
+	if (*s & 0x80 && ckWARN(WARN_UTF8) && thisutf) {
 	    (void)utf8_to_uv(s, &len);	/* could cvt latin-1 to utf8 here... */
 	    if (len) {
 		while (len--)
@@ -1005,8 +1005,8 @@ scan_const(char *start)
 	    if (PL_lex_inwhat == OP_SUBST && !PL_lex_inpat &&
 		isDIGIT(*s) && *s != '0' && !isDIGIT(s[1]))
 	    {
-		if (PL_dowarn)
-		    warn("\\%c better written as $%c", *s, *s);
+		if (ckWARN(WARN_SYNTAX))
+		    warner(WARN_SYNTAX, "\\%c better written as $%c", *s, *s);
 		*--s = '$';
 		break;
 	    }
@@ -1047,8 +1047,8 @@ scan_const(char *start)
 
 		    if (!e)
 			yyerror("Missing right brace on \\x{}");
-		    if (PL_dowarn && !utf)
-			warn("Use of \\x{} without utf8 declaration");
+		    if (ckWARN(WARN_UTF8) && !utf)
+			warner(WARN_UTF8,"Use of \\x{} without utf8 declaration");
 		    /* note: utf always shorter than hex */
 		    d = uv_to_utf8(d, scan_hex(s + 1, e - s - 1, &len));
 		    s = e + 1;
@@ -1062,8 +1062,8 @@ scan_const(char *start)
 			d = uv_to_utf8(d, uv);		/* doing a CU or UC */
 		    }
 		    else {
-			if (PL_dowarn && uv >= 127 && UTF)
-			    warn(
+			if (ckWARN(WARN_UTF8) && uv >= 127 && UTF)
+			    warner(WARN_UTF8,
 				"\\x%.*s will produce malformed UTF-8 character; use \\x{%.*s} for that",
 				len,s,len,s);
 			*d++ = (char)uv;
@@ -2469,9 +2469,9 @@ yylex(void)
 	    AOPERATOR(ANDAND);
 	s--;
 	if (PL_expect == XOPERATOR) {
-	    if (PL_dowarn && isALPHA(*s) && PL_bufptr == PL_linestart) {
+	    if (ckWARN(WARN_SEMICOLON) && isALPHA(*s) && PL_bufptr == PL_linestart) {
 		PL_curcop->cop_line--;
-		warn(warn_nosemi);
+		warner(WARN_SEMICOLON, warn_nosemi);
 		PL_curcop->cop_line++;
 	    }
 	    BAop(OP_BIT_AND);
@@ -2503,8 +2503,8 @@ yylex(void)
 	    OPERATOR(',');
 	if (tmp == '~')
 	    PMop(OP_MATCH);
-	if (PL_dowarn && tmp && isSPACE(*s) && strchr("+-*/%.^&|<",tmp))
-	    warn("Reversed %c= operator",(int)tmp);
+	if (ckWARN(WARN_SYNTAX) && tmp && isSPACE(*s) && strchr("+-*/%.^&|<",tmp))
+	    warner(WARN_SYNTAX, "Reversed %c= operator",(int)tmp);
 	s--;
 	if (PL_expect == XSTATE && isALPHA(tmp) &&
 		(s == PL_linestart+1 || s[-2] == '\n') )
@@ -2634,7 +2634,7 @@ yylex(void)
 	    char *t;
 	    if (*s == '[') {
 		PL_tokenbuf[0] = '@';
-		if (PL_dowarn) {
+		if (ckWARN(WARN_SYNTAX)) {
 		    for(t = s + 1;
 			isSPACE(*t) || isALNUM(*t) || *t == '$';
 			t++) ;
@@ -2642,14 +2642,15 @@ yylex(void)
 			PL_bufptr = skipspace(PL_bufptr);
 			while (t < PL_bufend && *t != ']')
 			    t++;
-			warn("Multidimensional syntax %.*s not supported",
-			     (t - PL_bufptr) + 1, PL_bufptr);
+			warner(WARN_SYNTAX,
+				"Multidimensional syntax %.*s not supported",
+			     	(t - PL_bufptr) + 1, PL_bufptr);
 		    }
 		}
 	    }
 	    else if (*s == '{') {
 		PL_tokenbuf[0] = '%';
-		if (PL_dowarn && strEQ(PL_tokenbuf+1, "SIG") &&
+		if (ckWARN(WARN_SYNTAX) && strEQ(PL_tokenbuf+1, "SIG") &&
 		    (t = strchr(s, '}')) && (t = strchr(t, '=')))
 		{
 		    char tmpbuf[sizeof PL_tokenbuf];
@@ -2658,7 +2659,8 @@ yylex(void)
 		    if (isIDFIRST(*t)) {
 			t = scan_word(t, tmpbuf, sizeof tmpbuf, TRUE, &len);
 			if (*t != '(' && perl_get_cv(tmpbuf, FALSE))
-			    warn("You need to quote \"%s\"", tmpbuf);
+			    warner(WARN_SYNTAX,
+				"You need to quote \"%s\"", tmpbuf);
 		    }
 		}
 	    }
@@ -2728,7 +2730,7 @@ yylex(void)
 		PL_tokenbuf[0] = '%';
 
 	    /* Warn about @ where they meant $. */
-	    if (PL_dowarn) {
+	    if (ckWARN(WARN_SYNTAX)) {
 		if (*s == '[' || *s == '{') {
 		    char *t = s + 1;
 		    while (*t && (isALNUM(*t) || strchr(" \t$#+-'\"", *t)))
@@ -2736,7 +2738,8 @@ yylex(void)
 		    if (*t == '}' || *t == ']') {
 			t++;
 			PL_bufptr = skipspace(PL_bufptr);
-			warn("Scalar value %.*s better written as $%.*s",
+			warner(WARN_SYNTAX,
+			    "Scalar value %.*s better written as $%.*s",
 			    t-PL_bufptr, PL_bufptr, t-PL_bufptr-1, PL_bufptr+1);
 		    }
 		}
@@ -2842,8 +2845,9 @@ yylex(void)
 
     case '\\':
 	s++;
-	if (PL_dowarn && PL_lex_inwhat && isDIGIT(*s))
-	    warn("Can't use \\%c to mean $%c in expression", *s, *s);
+	if (ckWARN(WARN_SYNTAX) && PL_lex_inwhat && isDIGIT(*s))
+	    warner(WARN_SYNTAX,"Can't use \\%c to mean $%c in expression",
+			*s, *s);
 	if (PL_expect == XOPERATOR)
 	    no_op("Backslash",s);
 	OPERATOR(REFGEN);
@@ -2958,8 +2962,9 @@ yylex(void)
 		tmp = -tmp;
 		gv = Nullgv;
 		gvp = 0;
-		if (PL_dowarn && hgv)
-		    warn("Ambiguous call resolved as CORE::%s(), %s",
+		if (ckWARN(WARN_AMBIGUOUS) && hgv)
+		    warner(WARN_AMBIGUOUS,
+		    	"Ambiguous call resolved as CORE::%s(), %s",
 			 GvENAME(hgv), "qualify as such or use &");
 	    }
 	}
@@ -2987,7 +2992,7 @@ yylex(void)
 		if (PL_expect == XOPERATOR) {
 		    if (PL_bufptr == PL_linestart) {
 			PL_curcop->cop_line--;
-			warn(warn_nosemi);
+			warner(WARN_SEMICOLON, warn_nosemi);
 			PL_curcop->cop_line++;
 		    }
 		    else
@@ -3001,8 +3006,9 @@ yylex(void)
 		if (len > 2 &&
 		    PL_tokenbuf[len - 2] == ':' && PL_tokenbuf[len - 1] == ':')
 		{
-		    if (PL_dowarn && ! gv_fetchpv(PL_tokenbuf, FALSE, SVt_PVHV))
-			warn("Bareword \"%s\" refers to nonexistent package",
+		    if (ckWARN(WARN_UNSAFE) && ! gv_fetchpv(PL_tokenbuf, FALSE, SVt_PVHV))
+			warner(WARN_UNSAFE, 
+		  	    "Bareword \"%s\" refers to nonexistent package",
 			     PL_tokenbuf);
 		    len -= 2;
 		    PL_tokenbuf[len] = '\0';
@@ -3160,11 +3166,11 @@ yylex(void)
 		/* Call it a bare word */
 
 	    bareword:
-		if (PL_dowarn) {
+		if (ckWARN(WARN_RESERVED)) {
 		    if (lastchar != '-') {
 			for (d = PL_tokenbuf; *d && isLOWER(*d); d++) ;
 			if (!*d)
-			    warn(warn_reserved, PL_tokenbuf);
+			    warner(WARN_RESERVED, warn_reserved, PL_tokenbuf);
 		    }
 		}
 
@@ -3305,7 +3311,7 @@ yylex(void)
 	    LOP(OP_CRYPT,XTERM);
 
 	case KEY_chmod:
-	    if (PL_dowarn) {
+	    if (ckWARN(WARN_OCTAL)) {
 		for (d = s; d < PL_bufend && (isSPACE(*d) || *d == '('); d++) ;
 		if (*d != '0' && isDIGIT(*d))
 		    yywarn("chmod: mode argument is missing initial 0");
@@ -3725,15 +3731,17 @@ yylex(void)
 	    s = scan_str(s);
 	    if (!s)
 		missingterm((char*)0);
-	    if (PL_dowarn && SvLEN(PL_lex_stuff)) {
+	    if (ckWARN(WARN_SYNTAX) && SvLEN(PL_lex_stuff)) {
 		d = SvPV_force(PL_lex_stuff, len);
 		for (; len; --len, ++d) {
 		    if (*d == ',') {
-			warn("Possible attempt to separate words with commas");
+			warner(WARN_SYNTAX,
+			    "Possible attempt to separate words with commas");
 			break;
 		    }
 		    if (*d == '#') {
-			warn("Possible attempt to put comments in qw() list");
+			warner(WARN_SYNTAX,
+			    "Possible attempt to put comments in qw() list");
 			break;
 		    }
 		}
@@ -4108,7 +4116,7 @@ yylex(void)
 	    LOP(OP_UTIME,XTERM);
 
 	case KEY_umask:
-	    if (PL_dowarn) {
+	    if (ckWARN(WARN_OCTAL)) {
 		for (d = s; d < PL_bufend && (isSPACE(*d) || *d == '('); d++) ;
 		if (*d != '0' && isDIGIT(*d))
 		    yywarn("umask: argument is missing initial 0");
@@ -4815,7 +4823,7 @@ checkcomma(register char *s, char *name, char *what)
 {
     char *w;
 
-    if (PL_dowarn && *s == ' ' && s[1] == '(') {	/* XXX gotta be a better way */
+    if (ckWARN(WARN_SYNTAX) && *s == ' ' && s[1] == '(') {	/* XXX gotta be a better way */
 	int level = 1;
 	for (w = s+2; *w && level; w++) {
 	    if (*w == '(')
@@ -4826,7 +4834,7 @@ checkcomma(register char *s, char *name, char *what)
 	if (*w)
 	    for (; *w && isSPACE(*w); w++) ;
 	if (!*w || !strchr(";|})]oaiuw!=", *w))	/* an advisory hack only... */
-	    warn("%s (...) interpreted as function",name);
+	    warner(WARN_SYNTAX, "%s (...) interpreted as function",name);
     }
     while (s < PL_bufend && isSPACE(*s))
 	s++;
@@ -5066,9 +5074,10 @@ scan_ident(register char *s, register char *send, char *dest, STRLEN destlen, I3
 	    *d = '\0';
 	    while (s < send && (*s == ' ' || *s == '\t')) s++;
 	    if ((*s == '[' || (*s == '{' && strNE(dest, "sub")))) {
-		if (PL_dowarn && keyword(dest, d - dest)) {
+		if (ckWARN(WARN_AMBIGUOUS) && keyword(dest, d - dest)) {
 		    char *brack = *s == '[' ? "[...]" : "{...}";
-		    warn("Ambiguous use of %c{%s%s} resolved to %c%s%s",
+		    warner(WARN_AMBIGUOUS,
+			"Ambiguous use of %c{%s%s} resolved to %c%s%s",
 			funny, dest, brack, funny, dest, brack);
 		}
 		PL_lex_fakebrack = PL_lex_brackets+1;
@@ -5083,9 +5092,10 @@ scan_ident(register char *s, register char *send, char *dest, STRLEN destlen, I3
 		PL_lex_state = LEX_INTERPEND;
 	    if (funny == '#')
 		funny = '@';
-	    if (PL_dowarn && PL_lex_state == LEX_NORMAL &&
+	    if (ckWARN(WARN_AMBIGUOUS) && PL_lex_state == LEX_NORMAL &&
 	      (keyword(dest, d - dest) || perl_get_cv(dest, FALSE)))
-		warn("Ambiguous use of %c{%s} resolved to %c%s",
+		warner(WARN_AMBIGUOUS,
+		    "Ambiguous use of %c{%s} resolved to %c%s",
 		    funny, dest, funny, dest);
 	}
 	else {
@@ -5931,8 +5941,8 @@ scan_num(char *start)
 	       if -w is on
 	    */
 	    if (*s == '_') {
-		if (PL_dowarn && lastub && s - lastub != 3)
-		    warn("Misplaced _ in number");
+		if (ckWARN(WARN_SYNTAX) && lastub && s - lastub != 3)
+		    warner(WARN_SYNTAX, "Misplaced _ in number");
 		lastub = ++s;
 	    }
 	    else {
@@ -5945,8 +5955,8 @@ scan_num(char *start)
 	}
 
 	/* final misplaced underbar check */
-	if (PL_dowarn && lastub && s - lastub != 3)
-	    warn("Misplaced _ in number");
+	if (ckWARN(WARN_SYNTAX) && lastub && s - lastub != 3)
+	    warner(WARN_SYNTAX, "Misplaced _ in number");
 
 	/* read a decimal portion if there is one.  avoid
 	   3..5 being interpreted as the number 3. followed

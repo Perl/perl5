@@ -1,0 +1,208 @@
+  pp_sys.c 	AOK
+
+  untie attempted while %d inner references still exist
+    sub TIESCALAR { bless [] } ; tie $a, 'main'; untie $a ;
+
+  Filehandle only opened for input
+    format STDIN =
+    .
+    write STDIN;
+
+  Write on closed filehandle
+    format STDIN =
+    .
+    close STDIN;
+    write STDIN ;
+
+  page overflow	
+
+  Filehandle %s never opened
+    $a = "abc"; printf $a "fred"
+
+  Filehandle %s opened only for input
+    $a = "abc"; 
+    printf $a "fred"
+
+  printf on closed filehandle %s
+    close STDIN ;
+    printf STDIN "fred"
+
+  Syswrite on closed filehandle
+    close STDIN; 
+    syswrite STDIN, "fred", 1;
+
+  Send on closed socket
+    close STDIN; 
+    send STDIN, "fred", 1
+
+  bind() on closed fd
+    close STDIN; 
+    bind STDIN, "fred" ;
+
+
+  connect() on closed fd
+    close STDIN; 
+    connect STDIN, "fred" ;
+
+  listen() on closed fd
+    close STDIN; 
+    listen STDIN, 2;
+
+  accept() on closed fd
+    close STDIN; 
+    accept STDIN, "fred" ;
+
+  shutdown() on closed fd
+    close STDIN; 
+    shutdown STDIN, 0;
+
+  [gs]etsockopt() on closed fd
+    close STDIN; 
+    setsockopt STDIN, 1,2,3;
+    getsockopt STDIN, 1,2;
+
+  get{sock, peer}name() on closed fd
+    close STDIN; 
+    getsockname STDIN;
+    getpeername STDIN;
+
+  warn(warn_nl, "stat");
+
+  Test on unopened file <%s>
+	close STDIN ; -T STDIN ;
+
+  warn(warn_nl, "open");
+    -T "abc\ndef" ;
+
+  
+
+__END__
+# pp_sys.c
+use warning 'untie' ;
+sub TIESCALAR { bless [] } ; 
+$b = tie $a, 'main'; 
+untie $a ;
+EXPECT
+untie attempted while 1 inner references still exist at - line 5.
+########
+# pp_sys.c
+use warning 'io' ;
+format STDIN =
+.
+write STDIN;
+EXPECT
+Filehandle only opened for input at - line 5.
+########
+# pp_sys.c
+use warning 'closed' ;
+format STDIN =
+.
+close STDIN;
+write STDIN;
+EXPECT
+Write on closed filehandle at - line 6.
+########
+# pp_sys.c
+use warning 'io' ;
+format STDOUT_TOP =
+abc
+.
+format STDOUT =
+def
+ghi
+.
+$= = 1 ;
+$- =1 ;
+open STDOUT, ">/dev/null" ;
+write ;
+EXPECT
+page overflow at - line 13.
+########
+# pp_sys.c
+use warning 'unopened' ;
+$a = "abc"; 
+printf $a "fred"
+EXPECT
+Filehandle main::abc never opened at - line 4.
+########
+# pp_sys.c
+use warning 'closed' ;
+close STDIN ;
+printf STDIN "fred"
+EXPECT
+printf on closed filehandle main::STDIN at - line 4.
+########
+# pp_sys.c
+use warning 'io' ;
+printf STDIN "fred"
+EXPECT
+Filehandle main::STDIN opened only for input at - line 3.
+########
+# pp_sys.c
+use warning 'closed' ;
+close STDIN; 
+syswrite STDIN, "fred", 1;
+EXPECT
+Syswrite on closed filehandle at - line 4.
+########
+# pp_sys.c
+use warning 'io' ;
+use Config; 
+BEGIN { 
+  if ( $^O ne 'VMS' and ! $Config{d_socket}) {
+    print <<EOM ;
+SKIPPED
+# send not present
+# bind not present
+# connect not present
+# accept not present
+# shutdown not present
+# setsockopt not present
+# getsockopt not present
+# getsockname not present
+# getpeername not present
+EOM
+    exit ;
+  } 
+}
+close STDIN; 
+send STDIN, "fred", 1;
+bind STDIN, "fred" ;
+connect STDIN, "fred" ;
+listen STDIN, 2;
+accept STDIN, "fred" ;
+shutdown STDIN, 0;
+setsockopt STDIN, 1,2,3;
+getsockopt STDIN, 1,2;
+getsockname STDIN;
+getpeername STDIN;
+EXPECT
+Send on closed socket at - line 22.
+bind() on closed fd at - line 23.
+connect() on closed fd at - line 24.
+listen() on closed fd at - line 25.
+accept() on closed fd at - line 26.
+shutdown() on closed fd at - line 27.
+[gs]etsockopt() on closed fd at - line 28.
+[gs]etsockopt() on closed fd at - line 29.
+get{sock, peer}name() on closed fd at - line 30.
+get{sock, peer}name() on closed fd at - line 31.
+########
+# pp_sys.c
+use warning 'newline' ;
+stat "abc\ndef";
+EXPECT
+Unsuccessful stat on filename containing newline at - line 3.
+########
+# pp_sys.c
+use warning 'unopened' ;
+close STDIN ; 
+-T STDIN ;
+EXPECT
+Test on unopened file <STDIN> at - line 4.
+########
+# pp_sys.c
+use warning 'newline' ;
+-T "abc\ndef" ;
+EXPECT
+Unsuccessful open on filename containing newline at - line 3.

@@ -1257,6 +1257,7 @@ union any {
 #include "hv.h"
 #include "mg.h"
 #include "scope.h"
+#include "warning.h"
 #include "bytecode.h"
 #include "byterun.h"
 #include "utf8.h"

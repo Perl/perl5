@@ -1289,10 +1289,10 @@ not_a_number(SV *sv)
     *d = '\0';
 
     if (PL_op)
-	warn("Argument \"%s\" isn't numeric in %s", tmpbuf,
+	warner(WARN_NUMERIC, "Argument \"%s\" isn't numeric in %s", tmpbuf,
 		op_name[PL_op->op_type]);
     else
-	warn("Argument \"%s\" isn't numeric", tmpbuf);
+	warner(WARN_NUMERIC, "Argument \"%s\" isn't numeric", tmpbuf);
 }
 
 IV
@@ -1313,10 +1313,10 @@ sv_2iv(register SV *sv)
 	if (SvPOKp(sv) && SvLEN(sv))
 	    return asIV(sv);
 	if (!SvROK(sv)) {
-	    if (PL_dowarn && !(SvFLAGS(sv) & SVs_PADTMP)) {
+	    if (ckWARN(WARN_UNINITIALIZED) && !(SvFLAGS(sv) & SVs_PADTMP)) {
 		dTHR;
 		if (!PL_localizing)
-		    warn(warn_uninit);
+		    warner(WARN_UNINITIALIZED, warn_uninit);
 	    }
 	    return 0;
 	}
@@ -1339,8 +1339,8 @@ sv_2iv(register SV *sv)
 	    }
 	    if (SvPOKp(sv) && SvLEN(sv))
 		return asIV(sv);
-	    if (PL_dowarn)
-		warn(warn_uninit);
+	    if (ckWARN(WARN_UNINITIALIZED))
+		warner(WARN_UNINITIALIZED, warn_uninit);
 	    return 0;
 	}
     }
@@ -1368,8 +1368,8 @@ sv_2iv(register SV *sv)
     }
     else  {
 	dTHR;
-	if (PL_dowarn && !PL_localizing && !(SvFLAGS(sv) & SVs_PADTMP))
-	    warn(warn_uninit);
+	if (ckWARN(WARN_UNINITIALIZED) && !PL_localizing && !(SvFLAGS(sv) & SVs_PADTMP))
+	    warner(WARN_UNINITIALIZED, warn_uninit);
 	return 0;
     }
     DEBUG_c(PerlIO_printf(Perl_debug_log, "0x%lx 2iv(%ld)\n",
@@ -1391,10 +1391,10 @@ sv_2uv(register SV *sv)
 	if (SvPOKp(sv) && SvLEN(sv))
 	    return asUV(sv);
 	if (!SvROK(sv)) {
-	    if (PL_dowarn && !(SvFLAGS(sv) & SVs_PADTMP)) {
+	    if (ckWARN(WARN_UNINITIALIZED) && !(SvFLAGS(sv) & SVs_PADTMP)) {
 		dTHR;
 		if (!PL_localizing)
-		    warn(warn_uninit);
+		    warner(WARN_UNINITIALIZED, warn_uninit);
 	    }
 	    return 0;
 	}
@@ -1414,8 +1414,8 @@ sv_2uv(register SV *sv)
 	    }
 	    if (SvPOKp(sv) && SvLEN(sv))
 		return asUV(sv);
-	    if (PL_dowarn)
-		warn(warn_uninit);
+	    if (ckWARN(WARN_UNINITIALIZED))
+		warner(WARN_UNINITIALIZED, warn_uninit);
 	    return 0;
 	}
     }
@@ -1439,10 +1439,10 @@ sv_2uv(register SV *sv)
 	SvUVX(sv) = asUV(sv);
     }
     else  {
-	if (PL_dowarn && !(SvFLAGS(sv) & SVs_PADTMP)) {
+	if (ckWARN(WARN_UNINITIALIZED) && !(SvFLAGS(sv) & SVs_PADTMP)) {
 	    dTHR;
 	    if (!PL_localizing)
-		warn(warn_uninit);
+		warner(WARN_UNINITIALIZED, warn_uninit);
 	}
 	return 0;
     }
@@ -1461,7 +1461,7 @@ sv_2nv(register SV *sv)
 	if (SvNOKp(sv))
 	    return SvNVX(sv);
 	if (SvPOKp(sv) && SvLEN(sv)) {
-	    if (PL_dowarn && !SvIOKp(sv) && !looks_like_number(sv))
+	    if (ckWARN(WARN_NUMERIC) && !SvIOKp(sv) && !looks_like_number(sv))
 		not_a_number(sv);
 	    SET_NUMERIC_STANDARD();
 	    return atof(SvPVX(sv));
@@ -1469,10 +1469,10 @@ sv_2nv(register SV *sv)
 	if (SvIOKp(sv))
 	    return (double)SvIVX(sv);
         if (!SvROK(sv)) {
-	    if (PL_dowarn && !(SvFLAGS(sv) & SVs_PADTMP)) {
+	    if (ckWARN(WARN_UNINITIALIZED) && !(SvFLAGS(sv) & SVs_PADTMP)) {
 		dTHR;
 		if (!PL_localizing)
-		    warn(warn_uninit);
+		    warner(WARN_UNINITIALIZED, warn_uninit);
 	    }
             return 0;
         }
@@ -1488,15 +1488,15 @@ sv_2nv(register SV *sv)
 	}
 	if (SvREADONLY(sv)) {
 	    if (SvPOKp(sv) && SvLEN(sv)) {
-		if (PL_dowarn && !SvIOKp(sv) && !looks_like_number(sv))
+		if (ckWARN(WARN_NUMERIC) && !SvIOKp(sv) && !looks_like_number(sv))
 		    not_a_number(sv);
 		SET_NUMERIC_STANDARD();
 		return atof(SvPVX(sv));
 	    }
 	    if (SvIOKp(sv))
 		return (double)SvIVX(sv);
-	    if (PL_dowarn)
-		warn(warn_uninit);
+	    if (ckWARN(WARN_UNINITIALIZED))
+		warner(WARN_UNINITIALIZED, warn_uninit);
 	    return 0.0;
 	}
     }
@@ -1517,15 +1517,15 @@ sv_2nv(register SV *sv)
 	SvNVX(sv) = (double)SvIVX(sv);
     }
     else if (SvPOKp(sv) && SvLEN(sv)) {
-	if (PL_dowarn && !SvIOKp(sv) && !looks_like_number(sv))
+	if (ckWARN(WARN_NUMERIC) && !SvIOKp(sv) && !looks_like_number(sv))
 	    not_a_number(sv);
 	SET_NUMERIC_STANDARD();
 	SvNVX(sv) = atof(SvPVX(sv));
     }
     else  {
 	dTHR;
-	if (PL_dowarn && !PL_localizing && !(SvFLAGS(sv) & SVs_PADTMP))
-	    warn(warn_uninit);
+	if (ckWARN(WARN_UNINITIALIZED) && !PL_localizing && !(SvFLAGS(sv) & SVs_PADTMP))
+	    warner(WARN_UNINITIALIZED, warn_uninit);
 	return 0.0;
     }
     SvNOK_on(sv);
@@ -1543,7 +1543,7 @@ asIV(SV *sv)
 
     if (numtype == 1)
 	return atol(SvPVX(sv));
-    if (!numtype && PL_dowarn)
+    if (!numtype && ckWARN(WARN_NUMERIC))
 	not_a_number(sv);
     SET_NUMERIC_STANDARD();
     d = atof(SvPVX(sv));
@@ -1562,7 +1562,7 @@ asUV(SV *sv)
     if (numtype == 1)
 	return strtoul(SvPVX(sv), Null(char**), 10);
 #endif
-    if (!numtype && PL_dowarn)
+    if (!numtype && ckWARN(WARN_NUMERIC))
 	not_a_number(sv);
     SET_NUMERIC_STANDARD();
     return U_V(atof(SvPVX(sv)));
@@ -1677,10 +1677,10 @@ sv_2pv(register SV *sv, STRLEN *lp)
 	    goto tokensave;
 	}
         if (!SvROK(sv)) {
-	    if (PL_dowarn && !(SvFLAGS(sv) & SVs_PADTMP)) {
+	    if (ckWARN(WARN_UNINITIALIZED) && !(SvFLAGS(sv) & SVs_PADTMP)) {
 		dTHR;
 		if (!PL_localizing)
-		    warn(warn_uninit);
+		    warner(WARN_UNINITIALIZED, warn_uninit);
 	    }
             *lp = 0;
             return "";
@@ -1785,8 +1785,8 @@ sv_2pv(register SV *sv, STRLEN *lp)
 		tsv = Nullsv;
 		goto tokensave;
 	    }
-	    if (PL_dowarn)
-		warn(warn_uninit);
+	    if (ckWARN(WARN_UNINITIALIZED))
+		warner(WARN_UNINITIALIZED, warn_uninit);
 	    *lp = 0;
 	    return "";
 	}
@@ -1833,8 +1833,8 @@ sv_2pv(register SV *sv, STRLEN *lp)
     }
     else {
 	dTHR;
-	if (PL_dowarn && !PL_localizing && !(SvFLAGS(sv) & SVs_PADTMP))
-	    warn(warn_uninit);
+	if (ckWARN(WARN_UNINITIALIZED) && !PL_localizing && !(SvFLAGS(sv) & SVs_PADTMP))
+	    warner(WARN_UNINITIALIZED, warn_uninit);
 	*lp = 0;
 	return "";
     }
@@ -2162,12 +2162,12 @@ sv_setsv(SV *dstr, register SV *sstr)
 				    croak(
 				    "Can't redefine active sort subroutine %s",
 					  GvENAME((GV*)dstr));
-				if (PL_dowarn || (const_changed && const_sv)) {
+				if (ckWARN(WARN_REDEFINE) || (const_changed && const_sv)) {
 				    if (!(CvGV(cv) && GvSTASH(CvGV(cv))
 					  && HvNAME(GvSTASH(CvGV(cv)))
 					  && strEQ(HvNAME(GvSTASH(CvGV(cv))),
 						   "autouse")))
-					warn(const_sv ? 
+					warner(WARN_REDEFINE, const_sv ? 
 					     "Constant subroutine %s redefined"
 					     : "Subroutine %s redefined", 
 					     GvENAME((GV*)dstr));
@@ -2296,8 +2296,8 @@ sv_setsv(SV *dstr, register SV *sstr)
     }
     else {
 	if (dtype == SVt_PVGV) {
-	    if (PL_dowarn)
-		warn("Undefined value assigned to typeglob");
+	    if (ckWARN(WARN_UNSAFE))
+		warner(WARN_UNSAFE, "Undefined value assigned to typeglob");
 	}
 	else
 	    (void)SvOK_off(dstr);
@@ -4915,7 +4915,7 @@ sv_vcatpvfn(SV *sv, const char *pat, STRLEN patlen, va_list *args, SV **svargs, 
 
 	default:
       unknown:
-	    if (!args && PL_dowarn &&
+	    if (!args && ckWARN(WARN_PRINTF) &&
 		  (PL_op->op_type == OP_PRTF || PL_op->op_type == OP_SPRINTF)) {
 		SV *msg = sv_newmortal();
 		sv_setpvf(msg, "Invalid conversion in %s: ",
@@ -4925,7 +4925,7 @@ sv_vcatpvfn(SV *sv, const char *pat, STRLEN patlen, va_list *args, SV **svargs, 
 			      c & 0xFF);
 		else
 		    sv_catpv(msg, "end of string");
-		warn("%_", msg); /* yes, this is reentrant */
+		warner(WARN_PRINTF, "%_", msg); /* yes, this is reentrant */
 	    }
 
 	    /* output mangled stuff ... */

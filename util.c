@@ -1407,6 +1407,93 @@ warn(const char* pat,...)
     (void)PerlIO_flush(PerlIO_stderr());
 }
 
+void
+warner(U32  err, const char* pat,...)
+{
+    va_list args;
+    char *message;
+    HV *stash;
+    GV *gv;
+    CV *cv;
+
+    va_start(args, pat);
+    message = mess(pat, &args);
+    va_end(args);
+
+    if (ckDEAD(err)) {
+#ifdef USE_THREADS
+        DEBUG_L(PerlIO_printf(PerlIO_stderr(), "croak: 0x%lx %s", (unsigned long) thr, message));
+#endif /* USE_THREADS */
+        if (PL_diehook) {
+            /* sv_2cv might call croak() */
+            SV *olddiehook = PL_diehook;
+            ENTER;
+            SAVESPTR(PL_diehook);
+            PL_diehook = Nullsv;
+            cv = sv_2cv(olddiehook, &stash, &gv, 0);
+            LEAVE;
+            if (cv && !CvDEPTH(cv) && (CvROOT(cv) || CvXSUB(cv))) {
+                dSP;
+                SV *msg;
+ 
+                ENTER;
+                msg = newSVpv(message, 0);
+                SvREADONLY_on(msg);
+                SAVEFREESV(msg);
+ 
+                PUSHMARK(sp);
+                XPUSHs(msg);
+                PUTBACK;
+                perl_call_sv((SV*)cv, G_DISCARD);
+ 
+                LEAVE;
+            }
+        }
+        if (PL_in_eval) {
+            PL_restartop = die_where(message);
+            JMPENV_JUMP(3);
+        }
+        PerlIO_puts(PerlIO_stderr(),message);
+        (void)PerlIO_flush(PerlIO_stderr());
+        my_failure_exit();
+
+    }
+    else {
+        if (PL_warnhook) {
+            /* sv_2cv might call warn() */
+            dTHR;
+            SV *oldwarnhook = PL_warnhook;
+            ENTER;
+            SAVESPTR(PL_warnhook);
+            PL_warnhook = Nullsv;
+            cv = sv_2cv(oldwarnhook, &stash, &gv, 0);
+                LEAVE;
+            if (cv && !CvDEPTH(cv) && (CvROOT(cv) || CvXSUB(cv))) {
+                dSP;
+                SV *msg;
+ 
+                ENTER;
+                msg = newSVpv(message, 0);
+                SvREADONLY_on(msg);
+                SAVEFREESV(msg);
+ 
+                PUSHMARK(sp);
+                XPUSHs(msg);
+                PUTBACK;
+                perl_call_sv((SV*)cv, G_DISCARD);
+ 
+                LEAVE;
+                return;
+            }
+        }
+        PerlIO_puts(PerlIO_stderr(),message);
+#ifdef LEAKTEST
+        DEBUG_L(xstat());
+#endif
+        (void)PerlIO_flush(PerlIO_stderr());
+    }
+}
+
 #ifndef VMS  /* VMS' my_setenv() is in VMS.c */
 #ifndef WIN32
 void
@@ -2341,8 +2428,8 @@ scan_oct(char *start, I32 len, I32 *retlen)
 	retval = n | (*s++ - '0');
 	len--;
     }
-    if (PL_dowarn && len && (*s == '8' || *s == '9'))
-	warn("Illegal octal digit ignored");
+    if (len && (*s == '8' || *s == '9') && ckWARN(WARN_OCTAL))
+	warner(WARN_OCTAL, "Illegal octal digit ignored");
     *retlen = s - start;
     return retval;
 }
@@ -2363,8 +2450,8 @@ scan_hex(char *start, I32 len, I32 *retlen)
 		continue;
 	    else {
 		--s;
-		if (PL_dowarn)
-		    warn("Illegal hex digit ignored");
+		if (ckWARN(WARN_UNSAFE))
+		    warner(WARN_UNSAFE,"Illegal hex digit ignored");
 		break;
 	    }
 	}

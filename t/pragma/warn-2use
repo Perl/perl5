@@ -1,0 +1,291 @@
+Check lexical warning functionality
+
+TODO
+  check that the warning hierarchy works.
+
+__END__
+
+# check illegal category is caught
+use warning 'blah' ;
+EXPECT
+unknown warning category 'blah' at - line 3
+BEGIN failed--compilation aborted at - line 3.
+########
+
+# Check compile time scope of pragma
+use warning 'deprecated' ;
+{
+    no warning ;
+    1 if $a EQ $b ;
+}
+1 if $a EQ $b ;
+EXPECT
+Use of EQ is deprecated at - line 8.
+########
+
+# Check compile time scope of pragma
+no warning;
+{
+    use warning 'deprecated' ;
+    1 if $a EQ $b ;
+}
+1 if $a EQ $b ;
+EXPECT
+Use of EQ is deprecated at - line 6.
+########
+
+# Check runtime scope of pragma
+use warning 'uninitialized' ;
+{
+    no warning ;
+    my $b ; chop $b ;
+}
+my $b ; chop $b ;
+EXPECT
+Use of uninitialized value at - line 8.
+########
+
+# Check runtime scope of pragma
+no warning ;
+{
+    use warning 'uninitialized' ;
+    my $b ; chop $b ;
+}
+my $b ; chop $b ;
+EXPECT
+Use of uninitialized value at - line 6.
+########
+
+# Check runtime scope of pragma
+no warning ;
+{
+    use warning 'uninitialized' ;
+    $a = sub { my $b ; chop $b ; }
+}
+&$a ;
+EXPECT
+Use of uninitialized value at - line 6.
+########
+
+use warning 'deprecated' ;
+1 if $a EQ $b ;
+EXPECT
+Use of EQ is deprecated at - line 3.
+########
+
+--FILE-- abc
+1 if $a EQ $b ;
+1;
+--FILE-- 
+use warning 'deprecated' ;
+require "./abc";
+EXPECT
+
+########
+
+--FILE-- abc
+use warning 'deprecated' ;
+1;
+--FILE-- 
+require "./abc";
+1 if $a EQ $b ;
+EXPECT
+
+########
+
+--FILE-- abc
+use warning 'deprecated' ;
+1 if $a EQ $b ;
+1;
+--FILE-- 
+use warning 'uninitialized' ;
+require "./abc";
+my $a ; chop $a ;
+EXPECT
+Use of EQ is deprecated at ./abc line 2.
+Use of uninitialized value at - line 3.
+########
+
+--FILE-- abc.pm
+use warning 'deprecated' ;
+1 if $a EQ $b ;
+1;
+--FILE-- 
+use warning 'uninitialized' ;
+use abc;
+my $a ; chop $a ;
+EXPECT
+Use of EQ is deprecated at abc.pm line 2.
+Use of uninitialized value at - line 3.
+########
+
+# Check scope of pragma with eval
+no warning ;
+eval {
+    my $b ; chop $b ;
+}; print STDERR $@ ;
+my $b ; chop $b ;
+EXPECT
+
+########
+
+# Check scope of pragma with eval
+no warning ;
+eval {
+    use warning 'uninitialized' ;
+    my $b ; chop $b ;
+}; print STDERR $@ ;
+my $b ; chop $b ;
+EXPECT
+Use of uninitialized value at - line 6.
+########
+
+# Check scope of pragma with eval
+use warning 'uninitialized' ;
+eval {
+    my $b ; chop $b ;
+}; print STDERR $@ ;
+my $b ; chop $b ;
+EXPECT
+Use of uninitialized value at - line 5.
+Use of uninitialized value at - line 7.
+########
+
+# Check scope of pragma with eval
+use warning 'uninitialized' ;
+eval {
+    no warning ;
+    my $b ; chop $b ;
+}; print STDERR $@ ;
+my $b ; chop $b ;
+EXPECT
+Use of uninitialized value at - line 8.
+########
+
+# Check scope of pragma with eval
+no warning ;
+eval {
+    1 if $a EQ $b ;
+}; print STDERR $@ ;
+1 if $a EQ $b ;
+EXPECT
+
+########
+
+# Check scope of pragma with eval
+no warning ;
+eval {
+    use warning 'deprecated' ;
+    1 if $a EQ $b ;
+}; print STDERR $@ ;
+1 if $a EQ $b ;
+EXPECT
+Use of EQ is deprecated at - line 6.
+########
+
+# Check scope of pragma with eval
+use warning 'deprecated' ;
+eval {
+    1 if $a EQ $b ;
+}; print STDERR $@ ;
+1 if $a EQ $b ;
+EXPECT
+Use of EQ is deprecated at - line 5.
+Use of EQ is deprecated at - line 7.
+########
+
+# Check scope of pragma with eval
+use warning 'deprecated' ;
+eval {
+    no warning ;
+    1 if $a EQ $b ;
+}; print STDERR $@ ;
+1 if $a EQ $b ;
+EXPECT
+Use of EQ is deprecated at - line 8.
+########
+
+# Check scope of pragma with eval
+no warning ;
+eval '
+    my $b ; chop $b ;
+'; print STDERR $@ ;
+my $b ; chop $b ;
+EXPECT
+
+########
+
+# Check scope of pragma with eval
+no warning ;
+eval q[ 
+    use warning 'uninitialized' ;
+    my $b ; chop $b ;
+]; print STDERR $@;
+my $b ; chop $b ;
+EXPECT
+Use of uninitialized value at (eval 1) line 3.
+########
+
+# Check scope of pragma with eval
+use warning 'uninitialized' ;
+eval '
+    my $b ; chop $b ;
+'; print STDERR $@ ;
+my $b ; chop $b ;
+EXPECT
+Use of uninitialized value at (eval 1) line 2.
+Use of uninitialized value at - line 7.
+########
+
+# Check scope of pragma with eval
+use warning 'uninitialized' ;
+eval '
+    no warning ;
+    my $b ; chop $b ;
+'; print STDERR $@ ;
+my $b ; chop $b ;
+EXPECT
+Use of uninitialized value at - line 8.
+########
+
+# Check scope of pragma with eval
+no warning ;
+eval '
+    1 if $a EQ $b ;
+'; print STDERR $@ ;
+1 if $a EQ $b ;
+EXPECT
+
+########
+
+# Check scope of pragma with eval
+no warning ;
+eval q[ 
+    use warning 'deprecated' ;
+    1 if $a EQ $b ;
+]; print STDERR $@;
+1 if $a EQ $b ;
+EXPECT
+Use of EQ is deprecated at (eval 1) line 3.
+########
+
+# Check scope of pragma with eval
+use warning 'deprecated' ;
+eval '
+    1 if $a EQ $b ;
+'; print STDERR $@;
+1 if $a EQ $b ;
+EXPECT
+Use of EQ is deprecated at - line 7.
+Use of EQ is deprecated at (eval 1) line 2.
+########
+
+# Check scope of pragma with eval
+use warning 'deprecated' ;
+eval '
+    no warning ;
+    1 if $a EQ $b ;
+'; print STDERR $@;
+1 if $a EQ $b ;
+EXPECT
+Use of EQ is deprecated at - line 8.

@@ -1,0 +1,11 @@
+  universal.c
+
+  Can't locate package %s for @%s::ISA
+
+
+__END__
+# universal.c
+use warning 'misc' ;
+
+EXPECT
+

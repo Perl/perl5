@@ -188,8 +188,8 @@ do_open(GV *gv, register char *name, I32 len, int as_raw, int rawmode, int rawpe
 	    TAINT_PROPER("piped open");
 	    if (name[strlen(name)-1] == '|') {
 		name[strlen(name)-1] = '\0' ;
-		if (PL_dowarn)
-		    warn("Can't do bidirectional pipe");
+		if (ckWARN(WARN_PIPE))
+		    warner(WARN_PIPE, "Can't do bidirectional pipe");
 	    }
 	    fp = PerlProc_popen(name,"w");
 	    writing = 1;
@@ -298,8 +298,8 @@ do_open(GV *gv, register char *name, I32 len, int as_raw, int rawmode, int rawpe
 	}
     }
     if (!fp) {
-	if (PL_dowarn && IoTYPE(io) == '<' && strchr(name, '\n'))
-	    warn(warn_nl, "open");
+	if (ckWARN(WARN_NEWLINE) && IoTYPE(io) == '<' && strchr(name, '\n'))
+	    warner(WARN_NEWLINE, warn_nl, "open");
 	goto say_false;
     }
     if (IoTYPE(io) &&
@@ -616,8 +616,9 @@ do_close(GV *gv, bool not_implicit)
     io = GvIO(gv);
     if (!io) {		/* never opened */
 	if (not_implicit) {
-	    if (PL_dowarn)
-		warn("Close on unopened file <%s>",GvENAME(gv));
+	    if (ckWARN(WARN_UNOPENED))
+		warner(WARN_UNOPENED, 
+		       "Close on unopened file <%s>",GvENAME(gv));
 	    SETERRNO(EBADF,SS$_IVCHAN);
 	}
 	return FALSE;
@@ -714,8 +715,8 @@ do_tell(GV *gv)
 #endif
 	return PerlIO_tell(fp);
     }
-    if (PL_dowarn)
-	warn("tell() on unopened file");
+    if (ckWARN(WARN_UNOPENED))
+	warner(WARN_UNOPENED, "tell() on unopened file");
     SETERRNO(EBADF,RMS$_IFI);
     return -1L;
 }
@@ -733,8 +734,8 @@ do_seek(GV *gv, long int pos, int whence)
 #endif
 	return PerlIO_seek(fp, pos, whence) >= 0;
     }
-    if (PL_dowarn)
-	warn("seek() on unopened file");
+    if (ckWARN(WARN_UNOPENED))
+	warner(WARN_UNOPENED, "seek() on unopened file");
     SETERRNO(EBADF,RMS$_IFI);
     return FALSE;
 }
@@ -747,8 +748,8 @@ do_sysseek(GV *gv, long int pos, int whence)
 
     if (gv && (io = GvIO(gv)) && (fp = IoIFP(io)))
 	return PerlLIO_lseek(PerlIO_fileno(fp), pos, whence);
-    if (PL_dowarn)
-	warn("sysseek() on unopened file");
+    if (ckWARN(WARN_UNOPENED))
+	warner(WARN_UNOPENED, "sysseek() on unopened file");
     SETERRNO(EBADF,RMS$_IFI);
     return -1L;
 }
@@ -868,8 +869,8 @@ do_print(register SV *sv, PerlIO *fp)
     }
     switch (SvTYPE(sv)) {
     case SVt_NULL:
-	if (PL_dowarn)
-	    warn(warn_uninit);
+	if (ckWARN(WARN_UNINITIALIZED))
+	    warner(WARN_UNINITIALIZED, warn_uninit);
 	return TRUE;
     case SVt_IV:
 	if (SvIOK(sv)) {
@@ -909,8 +910,8 @@ my_stat(ARGSproto)
 	else {
 	    if (tmpgv == PL_defgv)
 		return PL_laststatval;
-	    if (PL_dowarn)
-		warn("Stat on unopened file <%s>",
+	    if (ckWARN(WARN_UNOPENED))
+		warner(WARN_UNOPENED, "Stat on unopened file <%s>",
 		  GvENAME(tmpgv));
 	    PL_statgv = Nullgv;
 	    sv_setpv(PL_statname,"");
@@ -935,8 +936,8 @@ my_stat(ARGSproto)
 	sv_setpv(PL_statname, s);
 	PL_laststype = OP_STAT;
 	PL_laststatval = PerlLIO_stat(s, &PL_statcache);
-	if (PL_laststatval < 0 && PL_dowarn && strchr(s, '\n'))
-	    warn(warn_nl, "stat");
+	if (PL_laststatval < 0 && ckWARN(WARN_NEWLINE) && strchr(s, '\n'))
+	    warner(WARN_NEWLINE, warn_nl, "stat");
 	return PL_laststatval;
     }
 }
@@ -966,8 +967,8 @@ my_lstat(ARGSproto)
 #else
     PL_laststatval = PerlLIO_stat(SvPV(sv, PL_na),&PL_statcache);
 #endif
-    if (PL_laststatval < 0 && PL_dowarn && strchr(SvPV(sv, PL_na), '\n'))
-	warn(warn_nl, "lstat");
+    if (PL_laststatval < 0 && ckWARN(WARN_NEWLINE) && strchr(SvPV(sv, PL_na), '\n'))
+	warner(WARN_NEWLINE, warn_nl, "lstat");
     return PL_laststatval;
 }
 
@@ -994,8 +995,9 @@ do_aexec(SV *really, register SV **mark, register SV **sp)
 	    PerlProc_execvp(tmps,PL_Argv);
 	else
 	    PerlProc_execvp(PL_Argv[0],PL_Argv);
-	if (PL_dowarn)
-	    warn("Can't exec \"%s\": %s", PL_Argv[0], Strerror(errno));
+	if (ckWARN(WARN_EXEC))
+	    warner(WARN_EXEC, "Can't exec \"%s\": %s", 
+		PL_Argv[0], Strerror(errno));
     }
     do_execfree();
     return FALSE;
@@ -1097,8 +1099,9 @@ do_exec(char *cmd)
 	    do_execfree();
 	    goto doshell;
 	}
-	if (PL_dowarn)
-	    warn("Can't exec \"%s\": %s", PL_Argv[0], Strerror(errno));
+	if (ckWARN(WARN_EXEC))
+	    warner(WARN_EXEC, "Can't exec \"%s\": %s", 
+		PL_Argv[0], Strerror(errno));
     }
     do_execfree();
     return FALSE;

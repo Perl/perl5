@@ -1,0 +1,25 @@
+  taint.c TODO
+
+  Insecure %s%s while running setuid
+  Insecure %s%s while running setgid
+  Insecure %s%s while running with -T switch
+
+
+  Insecure directory in %s%s while running setuid
+  Insecure directory in %s%s while running setgid
+  Insecure directory in %s%s while running with -T switch
+
+
+
+__END__
+# taint.c
+use warning 'misc' ;
+
+EXPECT
+
+########
+# taint.c
+use warning 'misc' ;
+
+EXPECT
+

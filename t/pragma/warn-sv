@@ -1,0 +1,203 @@
+  sv.c	AOK
+
+  warn(warn_uninit);
+
+  warn(warn_uninit);
+
+  warn(warn_uninit);
+
+  warn(warn_uninit);
+
+  not_a_number(sv);
+
+  not_a_number(sv);
+
+  warn(warn_uninit);
+
+  not_a_number(sv);
+
+  warn(warn_uninit);
+
+  not_a_number(sv);
+
+  not_a_number(sv);
+
+  warn(warn_uninit);
+
+  warn(warn_uninit);
+
+  Subroutine %s redefined	
+
+  Invalid conversion in %s:
+
+  Undefined value assigned to typeglob
+
+
+__END__
+# sv.c
+use integer ;
+use warning 'uninitialized' ;
+$x = 1 + $a[0] ; # a
+EXPECT
+Use of uninitialized value at - line 4.
+########
+# sv.c (sv_2iv)
+package fred ;
+sub TIESCALAR { my $x ; bless \$x}
+sub FETCH { return undef }
+sub STORE { return 1 }
+package main ;
+tie $A, 'fred' ;
+use integer ;
+use warning 'uninitialized' ;
+$A *= 2 ;
+EXPECT
+Use of uninitialized value at - line 10.
+########
+# sv.c
+use integer ;
+use warning 'uninitialized' ;
+my $x *= 2 ; #b 
+EXPECT
+Use of uninitialized value at - line 4.
+########
+# sv.c (sv_2uv)
+package fred ;
+sub TIESCALAR { my $x ; bless \$x}
+sub FETCH { return undef }
+sub STORE { return 1 }
+package main ;
+tie $A, 'fred' ;
+use warning 'uninitialized' ;
+$B = 0 ;
+$B |= $A ;
+EXPECT
+Use of uninitialized value at - line 10.
+########
+# sv.c
+use warning 'uninitialized' ;
+my $Y = 1 ; 
+my $x = 1 | $a[$Y]
+EXPECT
+Use of uninitialized value at - line 4.
+########
+# sv.c
+use warning 'uninitialized' ;
+my $x *= 1 ; # d
+EXPECT
+Use of uninitialized value at - line 3.
+########
+# sv.c
+use warning 'uninitialized' ;
+$x = 1 + $a[0] ; # e
+EXPECT
+Use of uninitialized value at - line 3.
+########
+# sv.c (sv_2nv)
+package fred ;
+sub TIESCALAR { my $x ; bless \$x}
+sub FETCH { return undef }
+sub STORE { return 1 }
+package main ;
+tie $A, 'fred' ;
+use warning 'uninitialized' ;
+$A *= 2 ;
+EXPECT
+Use of uninitialized value at - line 9.
+########
+# sv.c
+use warning 'uninitialized' ;
+$x = $y + 1 ; # f
+EXPECT
+Use of uninitialized value at - line 3.
+########
+# sv.c
+use warning 'uninitialized' ;
+$x = chop undef ; # g
+EXPECT
+Use of uninitialized value at - line 3.
+########
+# sv.c
+use warning 'uninitialized' ;
+$x = chop $y ; # h
+EXPECT
+Use of uninitialized value at - line 3.
+########
+# sv.c (sv_2pv)
+package fred ;
+sub TIESCALAR { my $x ; bless \$x}
+sub FETCH { return undef }
+sub STORE { return 1 }
+package main ;
+tie $A, 'fred' ;
+use warning 'uninitialized' ;
+$B = "" ;
+$B .= $A ;
+EXPECT
+Use of uninitialized value at - line 10.
+########
+# sv.c 
+use warning 'numeric' ;
+sub TIESCALAR{bless[]} ; 
+sub FETCH {"def"} ; 
+tie $a,"main" ; 
+my $b = 1 + $a
+EXPECT
+Argument "def" isn't numeric in add at - line 6.
+########
+# sv.c
+use warning 'numeric' ;
+my $x = 1 + "def" ;
+EXPECT
+Argument "def" isn't numeric in add at - line 3.
+########
+# sv.c
+use warning 'numeric' ;
+my $a = "def" ;
+my $x = 1 + $a ;
+EXPECT
+Argument "def" isn't numeric in add at - line 4.
+########
+# sv.c
+use warning 'numeric' ; use integer ;
+my $a = "def" ;
+my $x = 1 + $a ;
+EXPECT
+Argument "def" isn't numeric in i_add at - line 4.
+########
+# sv.c
+use warning 'numeric' ;
+my $x = 1 & "def" ;
+EXPECT
+Argument "def" isn't numeric in bit_and at - line 3.
+########
+# sv.c
+use warning 'redefine' ;
+sub fred {}  
+sub joe {} 
+*fred = \&joe ;
+EXPECT
+Subroutine fred redefined at - line 5.
+########
+# sv.c
+use warning 'printf' ;
+open F, ">/dev/null" ;
+printf F "%q\n" ;
+my $a = sprintf "%q" ;
+printf F "%" ;
+$a = sprintf "%" ;
+printf F "%\x02" ;
+$a = sprintf "%\x02" ;
+EXPECT
+Invalid conversion in sprintf: "%q" at - line 5.
+Invalid conversion in sprintf: end of string at - line 7.
+Invalid conversion in sprintf: "%\002" at - line 9.
+Invalid conversion in printf: "%q" at - line 4.
+Invalid conversion in printf: end of string at - line 6.
+Invalid conversion in printf: "%\002" at - line 8.
+########
+# sv.c
+use warning 'unsafe' ;
+*a = undef ;
+EXPECT
+Undefined value assigned to typeglob at - line 3.

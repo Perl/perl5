@@ -126,7 +126,7 @@ pad_allocmy(char *name)
 	}
 	croak("Can't use global %s in \"my\"",name);
     }
-    if (PL_dowarn && AvFILLp(PL_comppad_name) >= 0) {
+    if (ckWARN(WARN_UNSAFE) && AvFILLp(PL_comppad_name) >= 0) {
 	SV **svp = AvARRAY(PL_comppad_name);
 	for (off = AvFILLp(PL_comppad_name); off > PL_comppad_name_floor; off--) {
 	    if ((sv = svp[off])
@@ -134,7 +134,9 @@ pad_allocmy(char *name)
 		&& SvIVX(sv) == 999999999       /* var is in open scope */
 		&& strEQ(name, SvPVX(sv)))
 	    {
-		warn("\"my\" variable %s masks earlier declaration in same scope", name);
+		warner(WARN_UNSAFE,
+			"\"my\" variable %s masks earlier declaration in same scope", 
+			name);
 		break;
 	    }
 	}
@@ -231,8 +233,8 @@ pad_findlex(char *name, PADOFFSET newoff, U32 seq, CV* startcv, I32 cx_ix)
 				if (CvANON(bcv))
 				    CvCLONE_on(bcv);
 				else {
-				    if (PL_dowarn && !CvUNIQUE(cv))
-					warn(
+				    if (ckWARN(WARN_CLOSURE) && !CvUNIQUE(cv))
+					warner(WARN_CLOSURE,
 					  "Variable \"%s\" may be unavailable",
 					     name);
 				    break;
@@ -241,8 +243,9 @@ pad_findlex(char *name, PADOFFSET newoff, U32 seq, CV* startcv, I32 cx_ix)
 			}
 		    }
 		    else if (!CvUNIQUE(PL_compcv)) {
-			if (PL_dowarn && !SvFAKE(sv) && !CvUNIQUE(cv))
-			    warn("Variable \"%s\" will not stay shared", name);
+			if (ckWARN(WARN_CLOSURE) && !SvFAKE(sv) && !CvUNIQUE(cv))
+			    warner(WARN_CLOSURE,
+				"Variable \"%s\" will not stay shared", name);
 		    }
 		}
 		av_store(PL_comppad, newoff, SvREFCNT_inc(oldsv));
@@ -604,6 +607,8 @@ op_free(OP *o)
     case OP_DBSTATE:
 	Safefree(cCOPo->cop_label);
 	SvREFCNT_dec(cCOPo->cop_filegv);
+	if (cCOPo->cop_warnings != WARN_NONE && cCOPo->cop_warnings != WARN_ALL)
+	    SvREFCNT_dec(cCOPo->cop_warnings);
 	break;
     case OP_CONST:
 	SvREFCNT_dec(cSVOPo->op_sv);
@@ -689,14 +694,14 @@ scalarkids(OP *o)
 STATIC OP *
 scalarboolean(OP *o)
 {
-    if (PL_dowarn &&
+    if (ckWARN(WARN_SYNTAX) &&
 	o->op_type == OP_SASSIGN && cBINOPo->op_first->op_type == OP_CONST) {
 	dTHR;
 	line_t oldline = PL_curcop->cop_line;
 
 	if (PL_copline != NOLINE)
 	    PL_curcop->cop_line = PL_copline;
-	warn("Found = in conditional, should be ==");
+	warner(WARN_SYNTAX, "Found = in conditional, should be ==");
 	PL_curcop->cop_line = oldline;
     }
     return scalar(o);
@@ -884,7 +889,7 @@ scalarvoid(OP *o)
 
     case OP_CONST:
 	sv = cSVOPo->op_sv;
-	if (PL_dowarn) {
+	if (ckWARN(WARN_VOID)) {
 	    useless = "a constant";
 	    if (SvNIOK(sv) && (SvNV(sv) == 0.0 || SvNV(sv) == 1.0))
 		useless = 0;
@@ -951,8 +956,8 @@ scalarvoid(OP *o)
 	}
 	break;
     }
-    if (useless && PL_dowarn)
-	warn("Useless use of %s in void context", useless);
+    if (useless && ckWARN(WARN_VOID))
+	warner(WARN_VOID, "Useless use of %s in void context", useless);
     return o;
 }
 
@@ -1462,18 +1467,20 @@ bind_match(I32 type, OP *left, OP *right)
 {
     OP *o;
 
-    if (PL_dowarn &&
-	(left->op_type == OP_RV2AV ||
-	 left->op_type == OP_RV2HV ||
-	 left->op_type == OP_PADAV ||
-	 left->op_type == OP_PADHV)) {
-	char *desc = op_desc[(right->op_type == OP_SUBST ||
-			      right->op_type == OP_TRANS)
-			     ? right->op_type : OP_MATCH];
-	char *sample = ((left->op_type == OP_RV2AV ||
-			 left->op_type == OP_PADAV)
-			? "@array" : "%hash");
-	warn("Applying %s to %s will act on scalar(%s)", desc, sample, sample);
+    if (ckWARN(WARN_UNSAFE) &&
+      (left->op_type == OP_RV2AV ||
+       left->op_type == OP_RV2HV ||
+       left->op_type == OP_PADAV ||
+       left->op_type == OP_PADHV)) {
+      char *desc = op_desc[(right->op_type == OP_SUBST ||
+                            right->op_type == OP_TRANS)
+                           ? right->op_type : OP_MATCH];
+      char *sample = ((left->op_type == OP_RV2AV ||
+                       left->op_type == OP_PADAV)
+                      ? "@array" : "%hash");
+      warner(WARN_UNSAFE,
+             "Applying %s to %s will act on scalar(%s)", 
+             desc, sample, sample);
     }
 
     if (right->op_type == OP_MATCH ||
@@ -1562,6 +1569,14 @@ block_start(int full)
     PL_pad_reset_pending = FALSE;
     SAVEHINTS();
     PL_hints &= ~HINT_BLOCK_SCOPE;
+    SAVEPPTR(compiling.cop_warnings); 
+    if (PL_compiling.cop_warnings != WARN_ALL && 
+       PL_compiling.cop_warnings != WARN_NONE) {
+        PL_compiling.cop_warnings = newSVsv(PL_compiling.cop_warnings) ;
+        SAVEFREESV(PL_compiling.cop_warnings) ;
+    }
+
+
     return retval;
 }
 
@@ -1633,11 +1648,12 @@ localize(OP *o, I32 lex)
     if (o->op_flags & OPf_PARENS)
 	list(o);
     else {
-	if (PL_dowarn && PL_bufptr > PL_oldbufptr && PL_bufptr[-1] == ',') {
+	if (ckWARN(WARN_PARENTHESIS) && PL_bufptr > PL_oldbufptr && PL_bufptr[-1] == ',') {
 	    char *s;
 	    for (s = PL_bufptr; *s && (isALNUM(*s) || strchr("@$%, ",*s)); s++) ;
 	    if (*s == ';' || *s == '=')
-		warn("Parens missing around \"%s\" list", lex ? "my" : "local");
+		warner(WARN_PARENTHESIS, "Parens missing around \"%s\" list",
+				lex ? "my" : "local");
 	}
     }
     PL_in_my = FALSE;
@@ -2820,6 +2836,12 @@ newSTATEOP(I32 flags, char *label, OP *o)
     }
     cop->cop_seq = seq;
     cop->cop_arybase = PL_curcop->cop_arybase;
+    if (PL_curcop->cop_warnings == WARN_NONE 
+	|| PL_curcop->cop_warnings == WARN_ALL)
+        cop->cop_warnings = PL_curcop->cop_warnings ;
+    else 
+        cop->cop_warnings = newSVsv(PL_curcop->cop_warnings) ;
+
 
     if (PL_copline == NOLINE)
         cop->cop_line = PL_curcop->cop_line;
@@ -2900,8 +2922,9 @@ new_logop(I32 type, I32 flags, OP** firstp, OP** otherp)
 	}
     }
     if (first->op_type == OP_CONST) {
-	if (PL_dowarn && (first->op_private & OPpCONST_BARE))
-	    warn("Probable precedence problem on %s", op_desc[type]);
+	if (ckWARN(WARN_PRECEDENCE) && (first->op_private & OPpCONST_BARE))
+	    warner(WARN_PRECEDENCE, "Probable precedence problem on %s", 
+			op_desc[type]);
 	if ((type == OP_AND) == (SvTRUE(((SVOP*)first)->op_sv))) {
 	    op_free(first);
 	    *firstp = Nullop;
@@ -2919,7 +2942,7 @@ new_logop(I32 type, I32 flags, OP** firstp, OP** otherp)
 	else
 	    scalar(other);
     }
-    else if (PL_dowarn && (first->op_flags & OPf_KIDS)) {
+    else if (ckWARN(WARN_UNSAFE) && (first->op_flags & OPf_KIDS)) {
 	OP *k1 = ((UNOP*)first)->op_first;
 	OP *k2 = k1->op_sibling;
 	OPCODE warnop = 0;
@@ -2942,7 +2965,8 @@ new_logop(I32 type, I32 flags, OP** firstp, OP** otherp)
 	if (warnop) {
 	    line_t oldline = PL_curcop->cop_line;
 	    PL_curcop->cop_line = PL_copline;
-	    warn("Value of %s%s can be \"0\"; test with defined()",
+	    warner(WARN_UNSAFE,
+		 "Value of %s%s can be \"0\"; test with defined()",
 		 op_desc[warnop],
 		 ((warnop == OP_READLINE || warnop == OP_GLOB)
 		  ? " construct" : "() operator"));
@@ -3691,14 +3715,16 @@ newSUB(I32 floor, OP *o, OP *proto, OP *block)
 		croak("Can't redefine active sort subroutine %s", name);
 	    if(const_sv = cv_const_sv(cv))
 		const_changed = sv_cmp(const_sv, op_const_sv(block, Nullcv));
-	    if ((const_sv && const_changed) || PL_dowarn && !(CvGV(cv) && GvSTASH(CvGV(cv))
+	    if ((const_sv && const_changed) || ckWARN(WARN_REDEFINE) 
+					&& !(CvGV(cv) && GvSTASH(CvGV(cv))
 					&& HvNAME(GvSTASH(CvGV(cv)))
 					&& strEQ(HvNAME(GvSTASH(CvGV(cv))),
 						 "autouse"))) {
 		line_t oldline = PL_curcop->cop_line;
 		PL_curcop->cop_line = PL_copline;
-		warn(const_sv ? "Constant subroutine %s redefined"
-		     : "Subroutine %s redefined", name);
+		warner(WARN_REDEFINE,
+			const_sv ? "Constant subroutine %s redefined"
+		                 : "Subroutine %s redefined", name);
 		PL_curcop->cop_line = oldline;
 	    }
 	    SvREFCNT_dec(cv);
@@ -3919,12 +3945,12 @@ newXS(char *name, void (*subaddr) (CV * _CPERLproto), char *filename)
 	}
 	else if (CvROOT(cv) || CvXSUB(cv) || GvASSUMECV(gv)) {
 	    /* already defined (or promised) */
-	    if (PL_dowarn && !(CvGV(cv) && GvSTASH(CvGV(cv))
+	    if (ckWARN(WARN_REDEFINE) && !(CvGV(cv) && GvSTASH(CvGV(cv))
 			    && HvNAME(GvSTASH(CvGV(cv)))
 			    && strEQ(HvNAME(GvSTASH(CvGV(cv))), "autouse"))) {
 		line_t oldline = PL_curcop->cop_line;
 		PL_curcop->cop_line = PL_copline;
-		warn("Subroutine %s redefined",name);
+		warner(WARN_REDEFINE, "Subroutine %s redefined",name);
 		PL_curcop->cop_line = oldline;
 	    }
 	    SvREFCNT_dec(cv);
@@ -3999,11 +4025,11 @@ newFORM(I32 floor, OP *o, OP *block)
     gv = gv_fetchpv(name,TRUE, SVt_PVFM);
     GvMULTI_on(gv);
     if (cv = GvFORM(gv)) {
-	if (PL_dowarn) {
+	if (ckWARN(WARN_REDEFINE)) {
 	    line_t oldline = PL_curcop->cop_line;
 
 	    PL_curcop->cop_line = PL_copline;
-	    warn("Format %s redefined",name);
+	    warner(WARN_REDEFINE, "Format %s redefined",name);
 	    PL_curcop->cop_line = oldline;
 	}
 	SvREFCNT_dec(cv);
@@ -4471,8 +4497,9 @@ ck_fun(OP *o)
 		    char *name = SvPVx(((SVOP*)kid)->op_sv, PL_na);
 		    OP *newop = newAVREF(newGVOP(OP_GV, 0,
 			gv_fetchpv(name, TRUE, SVt_PVAV) ));
-		    if (PL_dowarn)
-			warn("Array @%s missing the @ in argument %ld of %s()",
+		    if (ckWARN(WARN_SYNTAX))
+			warner(WARN_SYNTAX,
+			    "Array @%s missing the @ in argument %ld of %s()",
 			    name, (long)numargs, op_desc[type]);
 		    op_free(kid);
 		    kid = newop;
@@ -4489,8 +4516,9 @@ ck_fun(OP *o)
 		    char *name = SvPVx(((SVOP*)kid)->op_sv, PL_na);
 		    OP *newop = newHVREF(newGVOP(OP_GV, 0,
 			gv_fetchpv(name, TRUE, SVt_PVHV) ));
-		    if (PL_dowarn)
-			warn("Hash %%%s missing the %% in argument %ld of %s()",
+		    if (ckWARN(WARN_SYNTAX))
+			warner(WARN_SYNTAX,
+			    "Hash %%%s missing the %% in argument %ld of %s()",
 			    name, (long)numargs, op_desc[type]);
 		    op_free(kid);
 		    kid = newop;
@@ -5223,7 +5251,8 @@ peep(register OP *o)
 
 	case OP_EXEC:
 	    o->op_seq = PL_op_seqmax++;
-	    if (PL_dowarn && o->op_next && o->op_next->op_type == OP_NEXTSTATE) {
+	    if (ckWARN(WARN_SYNTAX) && o->op_next 
+		&& o->op_next->op_type == OP_NEXTSTATE) {
 		if (o->op_next->op_sibling &&
 			o->op_next->op_sibling->op_type != OP_EXIT &&
 			o->op_next->op_sibling->op_type != OP_WARN &&
@@ -5231,8 +5260,8 @@ peep(register OP *o)
 		    line_t oldline = PL_curcop->cop_line;
 
 		    PL_curcop->cop_line = ((COP*)o->op_next)->cop_line;
-		    warn("Statement unlikely to be reached");
-		    warn("(Maybe you meant system() when you said exec()?)\n");
+		    warner(WARN_SYNTAX, "Statement unlikely to be reached");
+		    warner(WARN_SYNTAX, "(Maybe you meant system() when you said exec()?)\n");
 		    PL_curcop->cop_line = oldline;
 		}
 	    }

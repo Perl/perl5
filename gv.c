@@ -221,8 +221,8 @@ gv_fetchmeth(HV *stash, char *name, STRLEN len, I32 level)
 	    SV* sv = *svp++;
 	    HV* basestash = gv_stashsv(sv, FALSE);
 	    if (!basestash) {
-		if (PL_dowarn)
-		    warn("Can't locate package %s for @%s::ISA",
+		if (ckWARN(WARN_MISC))
+		    warner(WARN_MISC, "Can't locate package %s for @%s::ISA",
 			SvPVX(sv), HvNAME(stash));
 		continue;
 	    }
@@ -356,8 +356,9 @@ gv_autoload4(HV *stash, char *name, STRLEN len, I32 method)
     /*
      * Inheriting AUTOLOAD for non-methods works ... for now.
      */
-    if (PL_dowarn && !method && (GvCVGEN(gv) || GvSTASH(gv) != stash))
-	warn(
+    if (ckWARN(WARN_DEPRECATED) && !method && 
+	(GvCVGEN(gv) || GvSTASH(gv) != stash))
+	warner(WARN_DEPRECATED,
 	  "Use of inherited AUTOLOAD for non-method %s::%.*s() is deprecated",
 	     HvNAME(stash), (int)len, name);
 
@@ -728,8 +729,8 @@ gv_fetchpv(char *nambeg, I32 add, I32 sv_type)
 	goto magicalize;
     case '#':
     case '*':
-	if (PL_dowarn && len == 1 && sv_type == SVt_PV)
-	    warn("Use of $%s is deprecated", name);
+	if (ckWARN(WARN_DEPRECATED) && len == 1 && sv_type == SVt_PV)
+	    warner(WARN_DEPRECATED, "Use of $%s is deprecated", name);
 	/* FALL THROUGH */
     case '[':
     case '^':
@@ -747,6 +748,7 @@ gv_fetchpv(char *nambeg, I32 add, I32 sv_type)
     case '/':
     case '|':
     case '\001':
+    case '\002':
     case '\004':
     case '\005':
     case '\006':
@@ -885,7 +887,8 @@ gv_check(HV *stash)
 		PL_curcop->cop_filegv = filegv;
 		if (filegv && GvMULTI(filegv))	/* Filename began with slash */
 		    continue;
-		warn("Name \"%s::%s\" used only once: possible typo",
+		warner(WARN_ONCE,
+			"Name \"%s::%s\" used only once: possible typo",
 			HvNAME(stash), GvNAME(gv));
 	    }
 	}

@@ -403,7 +403,7 @@ perl_destruct(register PerlInterpreter *sv_interp)
     PL_minus_a      = FALSE;
     PL_minus_F      = FALSE;
     PL_doswitches   = FALSE;
-    PL_dowarn       = FALSE;
+    PL_dowarn       = G_WARN_OFF;
     PL_doextract    = FALSE;
     PL_sawampersand = FALSE;	/* must save all match strings */
     PL_sawstudy     = FALSE;	/* do fbm_instr on all strings */
@@ -680,6 +680,7 @@ setuid perl scripts securely.\n");
 
     time(&PL_basetime);
     oldscope = PL_scopestack_ix;
+    PL_dowarn = G_WARN_OFF;
 
     JMPENV_PUSH(ret);
     switch (ret) {
@@ -737,6 +738,8 @@ setuid perl scripts securely.\n");
 	case 'u':
 	case 'U':
 	case 'v':
+	case 'W':
+	case 'X':
 	case 'w':
 	    if (s = moreswitches(s))
 		goto reswitch;
@@ -990,7 +993,7 @@ print \"  \\@INC:\\n    @INC\\n\";");
     if (PL_do_undump)
 	my_unexec();
 
-    if (PL_dowarn)
+    if (ckWARN(WARN_ONCE))
 	gv_check(PL_defstash);
 
     LEAVE;
@@ -1748,7 +1751,18 @@ this system using `man perl' or `perldoc perl'.  If you have access to the\n\
 Internet, point your browser at http://www.perl.com/, the Perl Home Page.\n\n");
 	PerlProc_exit(0);
     case 'w':
-	PL_dowarn = TRUE;
+	if (! (PL_dowarn & G_WARN_ALL_MASK))
+	    PL_dowarn |= G_WARN_ON; 
+	s++;
+	return s;
+    case 'W':
+	PL_dowarn = G_WARN_ALL_ON|G_WARN_ON; 
+	compiling.cop_warnings = WARN_ALL ;
+	s++;
+	return s;
+    case 'X':
+	PL_dowarn = G_WARN_ALL_OFF; 
+	compiling.cop_warnings = WARN_NONE ;
 	s++;
 	return s;
     case '*':
