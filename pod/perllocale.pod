@@ -814,9 +814,14 @@ set, it overrides all the rest of the locale environment variables.
 B<NOTE>: C<LANGUAGE> is a GNU extension, it affects you only if you
 are using the GNU libc.  This is the case if you are using e.g. Linux.
 If you are using "commercial" UNIXes you are most probably I<not>
-using libc and you can ignore C<LANGUAGE>.  But in the case you are
-using it: it is an even more powerful "override-all" than C<LC_ALL>
-and moreover, it's a "path" (":"-separated list) of locales.
+using GNU libc and you can ignore C<LANGUAGE>.
+
+However, in the case you are using C<LANGUAGE>: it affects the
+language of informational, warning, and error messages output by
+commands (in other words, it's like C<LC_MESSAGES>) but it has higher
+priority than L<LC_ALL>.  Moreover, it's not a single value but
+instead a "path" (":"-separated list) of I<languages> (not locales).
+See the GNU C<gettext> library documentation for more information.
 
 =item LC_CTYPE
 
