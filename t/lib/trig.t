@@ -184,7 +184,7 @@ use Math::Trig ':radial';
     print "ok 24\n";
 
     print 'not '
-	unless (near(great_circle_direction(0, 0, pi, pi), -pi/2));
+	unless (near(great_circle_direction(0, 0, pi, pi), -pi()/2));
     print "ok 25\n";
 
     # London to Tokyo.
