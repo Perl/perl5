@@ -99,7 +99,7 @@ esac
 case "$osvers" in
 0.*|1.0*) ;;
 
-3.*|4.0*)
+3.*|4.*|5.*)
         objformat=`/usr/bin/objformat`
         if [ x$objformat = xelf ]; then
             libpth="/usr/lib /usr/local/lib"
@@ -122,8 +122,8 @@ case "$osvers" in
 esac
 
 case "$osvers" in
-4.0*)
-	if /usr/bin/file /usr/lib/libc.so.3 | /usr/bin/grep -vq "not stripped" ; then
+4.*|5.*)
+	if /usr/bin/file -L /usr/lib/libc.so | /usr/bin/grep -vq "not stripped" ; then
 	    usenm=false
 	fi
 esac
@@ -173,7 +173,7 @@ case "$usethreads" in
 $define|true|[yY]*)
         lc_r=`/sbin/ldconfig -r|grep ':-lc_r'|awk '{print $NF}'|tail -1`
         case "$osvers" in  
-	2.2.8*|3.*|4.*)
+	2.2.8*|3.*|4.*|5.*)
 	      if [ ! -r "$lc_r" ]; then
 	      cat <<EOM >&4
 POSIX threads should be supported by FreeBSD $osvers --
