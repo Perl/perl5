@@ -2008,6 +2008,9 @@ Note that C<sv_setref_pv> copies the pointer while this copies the string.
 =item sv_setsv
 
 Copies the contents of the source SV C<ssv> into the destination SV C<dsv>.
+(B<NOTE:> If C<ssv> has the C<SVs_TEMP> bit set, C<sv_setsv> may simply steal
+the string from C<ssv> and give it to C<dsv>, leaving C<ssv> empty.
+Caveat caller.)
 
 	void	sv_setsv _((SV* dsv, SV* ssv));
 
