@@ -125,6 +125,28 @@ The undocumented special variable C<%@> that used to accumulate
 has been removed, because it could potentially result in memory
 leaks.
 
+=item Parenthesized not() behaves like a list operator
+
+The C<not> operator now falls under the "if it looks like a function,
+it behaves like a function" rule.
+
+As a result, the parenthesized form can be used with C<grep> and C<map>.
+The following construct used to be a syntax error before, but it works
+as expected now:
+
+    grep not($_), @things;
+
+On the other hand, using C<not> with a literal list slice may not
+work.  The following previously allowed construct:
+
+    print not (1,2,3)[0];
+
+needs to written with additional parentheses now:
+
+    print not((1,2,3)[0]);
+
+The behavior remains unaffected when C<not> is not followed by parentheses.
+
 =back
 
 =head2 C Source Incompatibilities
