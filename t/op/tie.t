@@ -1,12 +1,13 @@
 #!./perl
 
 # Add new tests to the end with format:
-# "########\n# test description\nTest code\nEXPECT\nWarn or die msgs (if any)\n"
+# ########
 #
-# This test script does NOT test the output of the test code.  It ONLY
-# checks warnings or croaks.  Todo tests should have TODO as the start
-# of the description.  Note also that warnings are not enabled:  if you
-# need to test a perl warning, enable its class in your test.
+# # test description
+# Test code
+# EXPECT
+# Warn or die msgs (if any) at - line 1234
+#
 
 chdir 't' if -d 't';
 @INC = '../lib';
@@ -14,37 +15,22 @@ $ENV{PERL5LIB} = "../lib";
 
 $|=1;
 
-# catch warnings into fatal errors
-$SIG{__WARN__} = sub { die "WARNING: @_" } ;
-$SIG{__DIE__}  = sub { die @_ };
-
 undef $/;
 @prgs = split /^########\n/m, <DATA>;
-print "1..", scalar @prgs, "\n";
 
+require './test.pl';
+plan(tests => scalar @prgs);
 for (@prgs){
     ++$i;
     my($prog,$expected) = split(/\nEXPECT\n/, $_, 2);
     print("not ok $i # bad test format\n"), next
         unless defined $expected;
-    my ($testname) = $prog =~ /^\n?(# .*)\n/;
+    my ($testname) = $prog =~ /^# (.*)\n/m;
     $testname ||= '';
-    eval "$prog" ;
-    $status = $?;
-    $results = $@ ;
     $results =~ s/\n+$//;
     $expected =~ s/\n+$//;
-    if ( $status || ($expected eq '') != ($results eq '') ||
-         $results !~ /^(WARNING: )?$expected/){
-	print STDERR "STATUS: $status\n";
-	print STDERR "PROG: $prog\n";
-	print STDERR "EXPECTED:\n$expected\n";
-	print STDERR "GOT:\n$results\n";
-	print "not ok $i $testname\n";
-    }
-    else {
-        print "ok $i $testname\n";
-    }
+
+    fresh_perl_is($prog, $expected, {}, $testname);
 }
 
 __END__
@@ -117,7 +103,7 @@ use Tie::Hash ;
 $a = tie %h, Tie::StdHash;
 untie %h;
 EXPECT
-untie attempted while 1 inner references still exist
+untie attempted while 1 inner references still exist at - line 6.
 ########
 
 # strict behaviour, with 1 extra references via tied generating an error
@@ -127,7 +113,7 @@ tie %h, Tie::StdHash;
 $a = tied %h;
 untie %h;
 EXPECT
-untie attempted while 1 inner references still exist
+untie attempted while 1 inner references still exist at - line 7.
 ########
 
 # strict behaviour, with 1 extra references which are destroyed
@@ -156,7 +142,7 @@ $a = tie %h, Tie::StdHash;
 $b = tied %h ;
 untie %h;
 EXPECT
-untie attempted while 2 inner references still exist
+untie attempted while 2 inner references still exist at - line 7.
 ########
 
 # strict behaviour, check scope of strictness.
@@ -173,6 +159,7 @@ $C = $B = tied %H ;
 untie %H;
 EXPECT
 ########
+
 # Forbidden aggregate self-ties
 sub Self::TIEHASH { bless $_[1], $_[0] }
 {
@@ -180,8 +167,9 @@ sub Self::TIEHASH { bless $_[1], $_[0] }
     tie %c, 'Self', \%c;
 }
 EXPECT
-Self-ties of arrays and hashes are not supported 
+Self-ties of arrays and hashes are not supported at - line 6.
 ########
+
 # Allowed scalar self-ties
 my $destroyed = 0;
 sub Self::TIESCALAR { bless $_[1], $_[0] }
@@ -193,6 +181,7 @@ sub Self::DESTROY   { $destroyed = 1; }
 die "self-tied scalar not DESTROYd" unless $destroyed == 1;
 EXPECT
 ########
+
 # Allowed glob self-ties
 my $destroyed = 0;
 sub Self2::TIEHANDLE { bless $_[1], $_[0] }
@@ -205,6 +194,7 @@ sub Self2::DESTROY   { $destroyed = 1; }
 die "self-tied glob not DESTROYd" unless $destroyed == 1;
 EXPECT
 ########
+
 # Allowed IO self-ties
 my $destroyed = 0;
 sub Self3::TIEHANDLE { bless $_[1], $_[0] }
@@ -217,6 +207,7 @@ sub Self3::DESTROY   { $destroyed = 1; }
 die "self-tied IO not DESTROYd" unless $destroyed == 1;
 EXPECT
 ########
+
 # Interaction of tie and vec
 
 my ($a, $b);
@@ -229,6 +220,7 @@ vec($b,1,1)=0;
 die unless $a eq $b;
 EXPECT
 ########
+
 # correct unlocalisation of tied hashes (patch #16431)
 use Tie::Hash ;
 tie %tied, Tie::StdHash;
@@ -236,4 +228,10 @@ tie %tied, Tie::StdHash;
 { local $tied{'foo'} } warn "tied hash bad unlocalize" if exists $tied{'foo'};
 { local $ENV{'foo'}  } warn "%ENV bad unlocalize" if exists $ENV{'foo'};
 EXPECT
+########
 
+# An attempt at lvalueable barewords broke this
+tie FH, 'main';
+EXPECT
+Can't modify constant item in tie at - line 3, near "'main';"
+Execution of - aborted due to compilation errors.
