@@ -9,6 +9,7 @@ if ($perl =~ m#^\.\.#)
   $perl = "$here\\$perl";
  }
 my $make = shift;
+$make .= " ".shift while $ARGV[0]=~/^-/;
 my $dep  = shift;
 my $dmod = -M $dep;
 my $dir  = shift;
