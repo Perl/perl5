@@ -32,9 +32,9 @@ use ExtUtils::MakeMaker qw( &neatvalue );
 
 $ENV{EMXSHELL} = 'sh'; # to run `commands`
 
-my $BORLAND  = 1 if $Config{'cc'} =~ /^bcc/i;
-my $GCC      = 1 if $Config{'cc'} =~ /^gcc/i;
-my $DMAKE    = 1 if $Config{'make'} =~ /^dmake/i;
+my $BORLAND  = $Config{'cc'} =~ /^bcc/i;
+my $GCC      = $Config{'cc'} =~ /^gcc/i;
+my $DMAKE    = $Config{'make'} =~ /^dmake/i;
 
 
 =item os_flavor

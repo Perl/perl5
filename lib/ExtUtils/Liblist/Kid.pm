@@ -227,9 +227,9 @@ sub _win32_ext {
     return ("", "", "", "", ($give_libs ? [] : ())) unless $potential_libs;
 
     my $cc		= $Config{cc};
-    my $VC		= 1 if $cc =~ /^cl/i;
-    my $BC		= 1 if $cc =~ /^bcc/i;
-    my $GC		= 1 if $cc =~ /^gcc/i;
+    my $VC		= $cc =~ /^cl/i;
+    my $BC		= $cc =~ /^bcc/i;
+    my $GC		= $cc =~ /^gcc/i;
     my $so		= $Config{'so'};
     my $libs		= $Config{'perllibs'};
     my $libpth		= $Config{'libpth'};

@@ -1155,7 +1155,8 @@ sub parse_from_file {
     my $self = shift;
     my %opts = (ref $_[0] eq 'HASH') ? %{ shift() } : ();
     my ($infile, $outfile) = @_;
-    my ($in_fh,  $out_fh) = (gensym, gensym)  if ($] < 5.6);
+    my ($in_fh,  $out_fh);
+    ($in_fh,  $out_fh) = (gensym, gensym)  if ($] < 5.6);
     my ($close_input, $close_output) = (0, 0);
     local *myData = $self;
     local $_;

@@ -1086,7 +1086,8 @@ sub lineseq {
     my $limit_seq;
     if (defined $root) {
 	$limit_seq = $out_seq;
-	my $nseq = $self->find_scope_st($root->sibling) if ${$root->sibling};
+	my $nseq;
+	$nseq = $self->find_scope_st($root->sibling) if ${$root->sibling};
 	$limit_seq = $nseq if !defined($limit_seq)
 			   or defined($nseq) && $nseq < $limit_seq;
     }
