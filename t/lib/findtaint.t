@@ -35,11 +35,12 @@ $ENV{'PATH'} = join($sep,@path);
 
 cleanup();
 
-find({wanted => sub { print "ok 1\n" if $_ eq 'filefind.t'; }, untaint => 1,
-      untaint_pattern => qr|^(.+)$|}, File::Spec->curdir);
+find({wanted => sub { print "ok 1\n" if $_ eq 'filefind.t'; },
+      untaint => 1, untaint_pattern => qr|^(.+)$|}, File::Spec->curdir);
 
-finddepth({wanted => sub { print "ok 2\n" if $_ eq 'filefind.t'; }, 
-           untaint => 1, untaint_pattern => qr|^(.+)$|}, File::Spec->curdir);
+finddepth({wanted => sub { print "ok 2\n" if $_ eq 'filefind.t'; },
+           untaint => 1, untaint_pattern => qr|^(.+)$|},
+           File::Spec->curdir);
 
 my $case = 2;
 my $FastFileTests_OK = 0;
@@ -117,19 +118,22 @@ sub simple_wanted {
 }
 
 
-# Use dir_path() to specify a directory path that's expected for $File::Find::dir 
-# (%Expect_Dir). Also use it in file operations like chdir, rmdir etc.
+# Use dir_path() to specify a directory path that's expected for
+# $File::Find::dir (%Expect_Dir). Also use it in file operations like
+# chdir, rmdir etc.
 #
-# dir_path() concatenates directory names to form a _relative_ directory path,
-# independant from the platform it's run on, although there are limitations. 
-# Don't try to create an absolute path, because that may fail on operating 
-# systems that have the concept of volume names (e.g. Mac OS). Be careful when
-# you want to create an updir path like ../fa (Unix) or ::fa: (Mac OS). Plain 
-# directory names will work best. As a special case, you can pass it a "." as 
-# first argument, to create a directory path like "./fa/dir" on operating 
-# systems other than Mac OS (actually, Mac OS will ignore the ".", if it's the 
-# first argument). If there's no second argument, this function will return the
-# empty string on Mac OS and the string "./" otherwise. 
+# dir_path() concatenates directory names to form a _relative_
+# directory path, independant from the platform it's run on, although
+# there are limitations.  Don't try to create an absolute path,
+# because that may fail on operating systems that have the concept of
+# volume names (e.g. Mac OS). Be careful when you want to create an
+# updir path like ../fa (Unix) or ::fa: (Mac OS). Plain directory
+# names will work best. As a special case, you can pass it a "." as
+# first argument, to create a directory path like "./fa/dir" on
+# operating systems other than Mac OS (actually, Mac OS will ignore
+# the ".", if it's the first argument). If there's no second argument,
+# this function will return the empty string on Mac OS and the string
+# "./" otherwise.
 
 sub dir_path {
     my $first_item = shift @_;
@@ -160,10 +164,9 @@ sub dir_path {
 }
 
 
-# Use topdir() to specify a directory path that you want to pass to find/finddepth
-#
-# Basically, topdir() does the same as dir_path() (see above), except that there's 
-# no trailing ":" on Mac OS.
+# Use topdir() to specify a directory path that you want to pass to
+#find/finddepth Basically, topdir() does the same as dir_path() (see
+#above), except that there's no trailing ":" on Mac OS.
 
 sub topdir {
     my $path = dir_path(@_);
@@ -174,15 +177,16 @@ sub topdir {
 
 # Use file_path() to specify a file path that's expected for $_ (%Expect_File).
 # Also suitable for file operations like unlink etc.
-#
-# file_path() concatenates directory names (if any) and a filename to form a 
-# _relative_ file path (the last argument is assumed to be a file). It's 
-# independant from the platform it's run on, although there are limitations 
-# (see the warnings for dir_path() above). As a special case, you can pass it a 
-# "." as first argument, to create a file path like "./fa/file" on operating 
-# systems other than Mac OS (actually, Mac OS will ignore the ".", if it's the 
-# first argument). If there's no second argument, this function will return the
-# empty string on Mac OS and the string "./" otherwise. 
+
+# file_path() concatenates directory names (if any) and a filename to
+# form a _relative_ file path (the last argument is assumed to be a
+# file). It's independant from the platform it's run on, although
+# there are limitations (see the warnings for dir_path() above). As a
+# special case, you can pass it a "." as first argument, to create a
+# file path like "./fa/file" on operating systems other than Mac OS
+# (actually, Mac OS will ignore the ".", if it's the first
+# argument). If there's no second argument, this function will return
+# the empty string on Mac OS and the string "./" otherwise.
 
 sub file_path {
     my $first_item = shift @_;
@@ -213,13 +217,15 @@ sub file_path {
 }
 
 
-# Use file_path_name() to specify a file path that's expected for $File::Find::Name
-# (%Expect_Name). Note: When the no_chdir => 1 option is in effect, $_ is the same  
-# as $File::Find::Name. In that case, also use this function to specify a file path 
-# that's expected for $_.
+# Use file_path_name() to specify a file path that's expected for
+# $File::Find::Name (%Expect_Name). Note: When the no_chdir => 1
+# option is in effect, $_ is the same as $File::Find::Name. In that
+# case, also use this function to specify a file path that's expected
+# for $_.
 #
-# Basically, file_path_name() does the same as file_path() (see above), except that 
-# there's always a leading ":" on Mac OS, even for plain file/directory names.  
+# Basically, file_path_name() does the same as file_path() (see
+# above), except that there's always a leading ":" on Mac OS, even for
+# plain file/directory names.
 
 sub file_path_name {
     my $path = file_path(@_);
@@ -254,19 +260,26 @@ touch( file_path('fa', 'fab', 'fab_ord') );
 MkDir( dir_path('fa', 'fab', 'faba'), 0770  );
 touch( file_path('fa', 'fab', 'faba', 'faba_ord') );
 
-
 print "# check untainting (no follow)\n";
 
 # untainting here should work correctly
-%Expect_File = (File::Spec->curdir => 1, file_path('fsl') => 1, file_path('fa_ord') => 1, 
-                file_path('fab') => 1, file_path('fab_ord') => 1, file_path('faba') => 1, 
+
+%Expect_File = (File::Spec->curdir => 1, file_path('fsl') =>
+                1,file_path('fa_ord') => 1, file_path('fab') => 1,
+                file_path('fab_ord') => 1, file_path('faba') => 1,
                 file_path('faa') => 1, file_path('faa_ord') => 1);
 delete $Expect_File{ file_path('fsl') } unless $symlink_exists;
 %Expect_Name = ();
-%Expect_Dir = ( dir_path('fa') => 1, dir_path('faa') => 1, dir_path('fab') => 1, dir_path('faba') => 1, 
+
+%Expect_Dir = ( dir_path('fa') => 1, dir_path('faa') => 1,
+                dir_path('fab') => 1, dir_path('faba') => 1,
                 dir_path('fb') => 1, dir_path('fba') => 1);
+
 delete @Expect_Dir{ dir_path('fb'), dir_path('fba') } unless $symlink_exists;
-File::Find::find( {wanted => \&wanted_File_Dir_prune, untaint => 1, untaint_pattern => qr|^(.+)$|}, topdir('fa') ); 
+
+File::Find::find( {wanted => \&wanted_File_Dir_prune, untaint => 1,
+		   untaint_pattern => qr|^(.+)$|}, topdir('fa') );
+
 Check( scalar(keys %Expect_File) == 0 );
 
 
@@ -282,8 +295,11 @@ chdir($cwd_untainted);
 
 # untaint pattern doesn't match, should die 
 undef $@;
+
 eval {File::Find::find( {wanted => \&simple_wanted, untaint => 1,
-                         untaint_pattern => qr|^(NO_MATCH)$|}, topdir('fa') );}; 
+                         untaint_pattern => qr|^(NO_MATCH)$|},
+                         topdir('fa') );};
+
 Check( $@ =~ m|is still tainted| );
 chdir($cwd_untainted);
 
@@ -291,52 +307,80 @@ chdir($cwd_untainted);
 # untaint pattern doesn't match, should die when we chdir to cwd   
 print "# check untaint_skip (no follow)\n";
 undef $@;
-eval {File::Find::find( {wanted => \&simple_wanted, untaint => 1, untaint_skip => 1, 
-                         untaint_pattern => qr|^(NO_MATCH)$|}, topdir('fa') );};
+
+eval {File::Find::find( {wanted => \&simple_wanted, untaint => 1,
+                         untaint_skip => 1, untaint_pattern =>
+                         qr|^(NO_MATCH)$|}, topdir('fa') );};
+
 Check( $@ =~ m|insecure cwd| );
 chdir($cwd_untainted);
 
 
 if ( $symlink_exists ) {
-    print "\n# --- symbolic link tests --- \n\n";
+    print "# --- symbolic link tests --- \n";
     $FastFileTests_OK= 1;
 
     print "# check untainting (follow)\n";
 
     # untainting here should work correctly
     # no_chdir is in effect, hence we use file_path_name to specify the expected paths for %Expect_File
-    %Expect_File = (file_path_name('fa') => 1, file_path_name('fa', 'fa_ord') => 1, 
-                    file_path_name('fa', 'fsl') => 1, file_path_name('fa', 'fsl', 'fb_ord') => 1, 
-                    file_path_name('fa', 'fsl', 'fba') => 1, file_path_name('fa', 'fsl', 'fba', 'fba_ord') => 1, 
-                    file_path_name('fa', 'fab') => 1, file_path_name('fa', 'fab', 'fab_ord') => 1, 
-                    file_path_name('fa', 'fab', 'faba') => 1, file_path_name('fa', 'fab', 'faba', 'faba_ord') => 1, 
-                    file_path_name('fa', 'faa') => 1, file_path_name('fa', 'faa', 'faa_ord') => 1);
+
+    %Expect_File = (file_path_name('fa') => 1,
+		    file_path_name('fa','fa_ord') => 1,
+		    file_path_name('fa', 'fsl') => 1,
+                    file_path_name('fa', 'fsl', 'fb_ord') => 1,
+                    file_path_name('fa', 'fsl', 'fba') => 1,
+                    file_path_name('fa', 'fsl', 'fba', 'fba_ord') => 1,
+                    file_path_name('fa', 'fab') => 1,
+                    file_path_name('fa', 'fab', 'fab_ord') => 1,
+                    file_path_name('fa', 'fab', 'faba') => 1,
+                    file_path_name('fa', 'fab', 'faba', 'faba_ord') => 1,
+                    file_path_name('fa', 'faa') => 1,
+                    file_path_name('fa', 'faa', 'faa_ord') => 1);
+
     %Expect_Name = ();
-    %Expect_Dir = (dir_path('fa') => 1, dir_path('fa', 'faa') => 1, dir_path('fa', 'fab') => 1, 
-                   dir_path('fa', 'fab', 'faba') => 1, dir_path('fb') => 1, dir_path('fb', 'fba') => 1); 
-    File::Find::find( {wanted => \&wanted_File_Dir, follow_fast => 1, no_chdir => 1, untaint => 1, 
-                       untaint_pattern => qr|^(.+)$| }, topdir('fa') );
+
+    %Expect_Dir = (dir_path('fa') => 1,
+		   dir_path('fa', 'faa') => 1,
+                   dir_path('fa', 'fab') => 1,
+		   dir_path('fa', 'fab', 'faba') => 1,
+		   dir_path('fb') => 1,
+		   dir_path('fb', 'fba') => 1);
+
+    File::Find::find( {wanted => \&wanted_File_Dir, follow_fast => 1,
+                       no_chdir => 1, untaint => 1, untaint_pattern =>
+                       qr|^(.+)$| }, topdir('fa') );
+
     Check( scalar(keys %Expect_File) == 0 );
  
     
     # don't untaint at all, should die
     undef $@;
-    eval {File::Find::find( {wanted => \&simple_wanted, follow => 1}, topdir('fa') );};
+
+    eval {File::Find::find( {wanted => \&simple_wanted, follow => 1},
+			    topdir('fa') );};
+
     Check( $@ =~ m|Insecure dependency| );
     chdir($cwd_untainted);
 
     # untaint pattern doesn't match, should die
     undef $@;
-    eval {File::Find::find( {wanted => \&simple_wanted, follow => 1, untaint => 1,
-                             untaint_pattern => qr|^(NO_MATCH)$|}, topdir('fa') );};
+
+    eval {File::Find::find( {wanted => \&simple_wanted, follow => 1,
+                             untaint => 1, untaint_pattern =>
+                             qr|^(NO_MATCH)$|}, topdir('fa') );};
+
     Check( $@ =~ m|is still tainted| );
     chdir($cwd_untainted);
 
     # untaint pattern doesn't match, should die when we chdir to cwd
     print "# check untaint_skip (follow)\n";
     undef $@;
-    eval {File::Find::find( {wanted => \&simple_wanted, untaint => 1, untaint_skip => 1, 
-                             untaint_pattern => qr|^(NO_MATCH)$|}, topdir('fa') );};
+
+    eval {File::Find::find( {wanted => \&simple_wanted, untaint => 1,
+                             untaint_skip => 1, untaint_pattern =>
+                             qr|^(NO_MATCH)$|}, topdir('fa') );};
+
     Check( $@ =~ m|insecure cwd| );
     chdir($cwd_untainted);
 
