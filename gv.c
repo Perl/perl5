@@ -95,18 +95,10 @@ int multi;
 {
     dTHR;
     register GP *gp;
-    bool doproto = SvTYPE(gv) > SVt_NULL;
-    char *proto = (doproto && SvPOK(gv)) ? SvPVX(gv) : NULL;
 
     sv_upgrade((SV*)gv, SVt_PVGV);
-    if (SvLEN(gv)) {
-	if (proto) {
-	    SvPVX(gv) = NULL;
-	    SvLEN(gv) = 0;
-	    SvPOK_off(gv);
-	} else
-	    Safefree(SvPVX(gv));
-    }
+    if (SvLEN(gv))
+	Safefree(SvPVX(gv));
     Newz(602, gp, 1, GP);
     GvGP(gv) = gp_ref(gp);
     GvSV(gv) = NEWSV(72,0);
@@ -119,27 +111,6 @@ int multi;
     GvNAMELEN(gv) = len;
     if (multi)
 	GvMULTI_on(gv);
-    if (doproto) {			/* Replicate part of newSUB here. */
-	ENTER;
-	start_subparse(0,0);		/* Create CV in compcv. */
-	GvCV(gv) = compcv;
-	LEAVE;
-
-	GvCVGEN(gv) = 0;
-	sub_generation++;
-	CvGV(GvCV(gv)) = (GV*)SvREFCNT_inc(gv);
-	CvFILEGV(GvCV(gv)) = curcop->cop_filegv;
-	CvSTASH(GvCV(gv)) = curstash;
-#ifdef USE_THREADS
-	CvOWNER(GvCV(gv)) = 0;
-	New(666, CvMUTEXP(GvCV(gv)), 1, perl_mutex);
-	MUTEX_INIT(CvMUTEXP(GvCV(gv)));
-#endif /* USE_THREADS */
-	if (proto) {
-	    sv_setpv((SV*)GvCV(gv), proto);
-	    Safefree(proto);
-	}
-    }
 }
 
 static void
@@ -491,7 +462,7 @@ I32 sv_type;
 		gv = gvp ? *gvp : Nullgv;
 		if (gv && gv != (GV*)&sv_undef) {
 		    if (SvTYPE(gv) != SVt_PVGV)
-			gv_init(gv, stash, tmpbuf, len, (add & 2));
+			gv_init(gv, stash, tmpbuf, len, (add & GV_ADDMULTI));
 		    else
 			GvMULTI_on(gv);
 		}
@@ -594,7 +565,7 @@ I32 sv_type;
     if (!stash) {
 	if (!add)
 	    return Nullgv;
-	if (add & ~2) {
+	if (add & ~GV_ADDMULTI) {
 	    char sv_type_char = ((sv_type == SVt_PV) ? '$'
 				 : (sv_type == SVt_PVAV) ? '@'
 				 : (sv_type == SVt_PVHV) ? '%'
@@ -626,8 +597,6 @@ I32 sv_type;
 	    GvMULTI_on(gv);
 	    gv_init_sv(gv, sv_type);
 	}
-	return gv;
-    } else if (add & GV_NOINIT) {
 	return gv;
     }
 
@@ -926,7 +895,7 @@ HV* stash;
 	    }
 	    else if (isALPHA(*HeKEY(entry))) {
 		gv = (GV*)HeVAL(entry);
-		if (SvTYPE(gv) != SVt_PVGV || GvMULTI(gv))
+		if (GvMULTI(gv))
 		    continue;
 		curcop->cop_line = GvLINE(gv);
 		filegv = GvFILEGV(gv);
