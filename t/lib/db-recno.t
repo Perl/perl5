@@ -12,7 +12,7 @@ BEGIN {
 use DB_File; 
 use Fcntl;
 use strict ;
-use vars qw($dbh $Dfile) ;
+use vars qw($dbh $Dfile $bad_ones) ;
 
 sub ok
 {
@@ -27,8 +27,8 @@ sub ok
 
 sub bad_one
 {
-    print <<EOM unless $bad_ones++ ;
-# 
+    print STDERR <<EOM unless $bad_ones++ ;
+#
 # Some older versions of Berkeley DB will fail tests 51, 53 and 55.
 #
 # You can safely ignore the errors if you're never going to use the
