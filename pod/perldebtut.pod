@@ -21,10 +21,10 @@ straightforward when it comes to debugging perl programs, without using the
 debugger at all.  To demonstrate, here's a simple script with a problem:
 
 	#!/usr/bin/perl
-	
+
 	$var1 = 'Hello World'; # always wanted to do that :-)
 	$var2 = "$varl\n";
-	
+
 	print $var2; 
 	exit;
 
@@ -45,7 +45,7 @@ first line of the script.
 
 Now when you run it, perl complains about the 3 undeclared variables and we
 get four error messages because one variable is referenced twice:
- 
+
  Global symbol "$var1" requires explicit package name at ./t1 line 4.
  Global symbol "$var2" requires explicit package name at ./t1 line 5.
  Global symbol "$varl" requires explicit package name at ./t1 line 5.
@@ -57,11 +57,11 @@ script looks like this:
 
 	#!/usr/bin/perl
 	use strict;
-	
+
 	my $var1 = 'Hello World';
 	my $varl = '';
 	my $var2 = "$varl\n";
-	
+
 	print $var2; 
 	exit;
 
@@ -97,7 +97,7 @@ dynamic variable, just before using it?
 
 Looks OK, after it's been through the syntax check (perl -c scriptname), we
 run it and all we get is a blank line again!  Hmmmm.
- 
+
 One common debugging approach here, would be to liberally sprinkle a few print
 statements, to add a check just before we print out our data, and another just
 after:
@@ -107,10 +107,10 @@ after:
 	print "done: '$data{$key}'\n";
 
 And try again:
-	
+
 	> perl data
 	All OK     
-	
+
 	done: ''
 
 After much staring at the same piece of code and not seeing the wood for the
@@ -137,7 +137,7 @@ just the letter 'B<q>', not the words 'quit' or 'exit':
 
 	DB<1> q
 	>
-	
+
 That's it, you're back on home turf again.
 
 
@@ -174,7 +174,7 @@ break/watch/actions
  V [Pk [Vars]] List Variables in Package.  Vars can be ~pattern or !pattern.
  X [Vars]      Same as "V current_package [Vars]".
  For more help, type h cmd_letter, or run man perldebug for all docs.       
-	
+
 More confusing options than you can shake a big stick at!  It's not as bad as
 it looks and it's very useful to know more about all of it, and fun too!
 
@@ -196,7 +196,7 @@ the 'name':
 
 	DM<3>X ~err
 	FileHandle(stderr) => fileno(2)    
-	
+
 Remember we're in our tiny program with a problem, we should have a look at
 where we are, and what our data looks like. First of all let's have a window
 on our present position (the first line of code in this case), via the letter
@@ -216,7 +216,7 @@ on our present position (the first line of code in this case), via the letter
 
 At line number 4 is a helpful pointer, that tells you where you are now.  To
 see more code, type 'w' again:
-	
+
 	DB<4> w
 	8               'welcome' => q(Hello World),
 	9               'zip' => q(welcome),
@@ -231,19 +231,19 @@ And if you wanted to list line 5 again, type 'l 5', (note the space):
 
 	DB<4> l 5
 	5:      my %data = (
-	
+
 In this case, there's not much to see, but of course normally there's pages of
 stuff to wade through, and 'l' can be very useful.  To reset your view to the
 line we're about to execute, type a lone period '.':
 
 	DB<5> .
 	main::(./data_a:4):     my $key = 'welcome';  
-	
+
 The line shown is the one that is about to be executed B<next>, it hasn't
 happened yet.  So while we can print a variable with the letter 'B<p>', at
 this point all we'd get is an empty (undefined) value back.  What we need to
 do is to step through the next executable statement with an 'B<s>':
-	
+
 	DB<6> s
 	main::(./data_a:5):     my %data = (
 	main::(./data_a:6):             'this' => qw(that),
@@ -264,21 +264,21 @@ line or sub routine:
 	DB<8> c 13
 	All OK
 	main::(./data_a:13):    print "$data{$key}\n";
-	
+
 We've gone past our check (where 'All OK' was printed) and have stopped just
 before the meat of our task.  We could try to print out a couple of variables
 to see what is happening:
 
 	DB<9> p $data{$key}
-	
+
 Not much in there, lets have a look at our hash:
-	
+
 	DB<10> p %data
 	Hello Worldziptomandwelcomejerrywelcomethisthat 
 
 	DB<11> p keys %data
 	Hello Worldtomwelcomejerrythis  
-	
+
 Well, this isn't very easy to read, and using the helpful manual (B<h h>), the
 'B<x>' command looks promising:
 
@@ -349,7 +349,7 @@ Now build an on-the-fly object over a couple of lines (note the backslash):
 	cont: 	{'col' => 'black', 'things' => [qw(this that etc)]}}, 'MY_class')
 
 And let's have a look at it:
- 
+
   	DB<2> x $obj
 	0  MY_class=HASH(0x828ad98)
    		'attr' => HASH(0x828ad68)
@@ -365,7 +365,7 @@ Useful, huh?  You can eval nearly anything in there, and experiment with bits
 of code or regexes until the cows come home:
 
 	DB<3> @data = qw(this that the other atheism leather theory scythe)
-	
+
 	DB<4> p 'saw -> '.($cnt += map { print "\t:\t$_\n" } grep(/the/, sort @data))
 	atheism
 	leather
@@ -384,7 +384,7 @@ If you want to see the command History, type an 'B<H>':
 	1: $obj = bless({'unique_id'=>'123', 'attr'=>
 	{'col' => 'black', 'things' => [qw(this that etc)]}}, 'MY_class')
 	DB<5>
-	
+
 And if you want to repeat any previous command, use the exclamation: 'B<!>':
 
 	DB<5> !4
@@ -446,22 +446,22 @@ expected output.  This is what it does:
 
 	> temp -c0.72
 	33.30 f
-	
+
 	> temp -f33.3
 	162.94 c
-	
+
 Not very consistent!  We'll set a breakpoint in the code manually and run it
 under the debugger to see what's going on.  A breakpoint is a flag, to which
 the debugger will run without interruption, when it reaches the breakpoint, it
 will stop execution and offer a prompt for further interaction.  In normal
 use, these debugger commands are completely ignored, and they are safe - if a
 little messy, to leave in production code.
-	
+
 	my ($in, $out) = ($num, $num);
 	$DB::single=2; # insert at line 9!
 	if ($deg eq 'c') 
 		...
-	
+
 	> perl -d temp -f33.3
 	Default die handler restored.
 
@@ -478,7 +478,7 @@ We'll simply continue down to our pre-set breakpoint with a 'B<c>':
 	main::(temp:10):                if ($deg eq 'c') {   
 
 Followed by a window command to see where we are:
-	
+
 	DB<1> w
 	7:              my ($deg, $num) = ($1, $2);
 	8:              my ($in, $out) = ($num, $num);
@@ -499,9 +499,9 @@ And a print to show what values we're currently using:
 We can put another break point on any line beginning with a colon, we'll use
 line 17 as that's just as we come out of the subroutine, and we'd like to
 pause there later on:
-	
+
 	DB<2> b 17
-	
+
 There's no feedback from this, but you can see what breakpoints are set by
 using the list 'L' command:
 
@@ -550,13 +550,13 @@ possibilities with our sum:
 
 	DB<6> p (5 * $f - 32 / 9)
 	162.944444444444
-	
+
 	DB<7> p 5 * $f - (32 / 9) 
 	162.944444444444
-	
+
 	DB<8> p (5 * $f) - 32 / 9
 	162.944444444444
-	
+
 	DB<9> p 5 * ($f - 32) / 9
 	0.722222222222221
 
@@ -564,10 +564,10 @@ possibilities with our sum:
 return out of the sub with an 'r':
 
 	DB<10> $c = 5 * ($f - 32) / 9
-	
+
 	DB<11> r
 	scalar context return from main::f2c: 0.722222222222221
-	
+
 Looks good, let's just continue off the end of the script:
 
 	DB<12> c
@@ -585,11 +585,11 @@ actual program and we're finished.
 Actions, watch variables, stack traces etc.: on the TODO list.
 
 	a 
-	
+
 	W 
-	
+
 	t 
-	
+
 	T
 
 
@@ -597,7 +597,7 @@ Actions, watch variables, stack traces etc.: on the TODO list.
 
 Ever wanted to know what a regex looked like?  You'll need perl compiled with
 the DEBUGGING flag for this one:
-	
+
 	> perl -Dr -e '/^pe(a)*rl$/i'
 	Compiling REx `^pe(a)*rl$'
 	size 17 first at 2
@@ -674,7 +674,7 @@ In particular have a hunt around for the following:
 B<ptkdb> perlTK based wrapper for the built-in debugger
 
 B<ddd> data display debugger
-	
+
 B<PerlDevKit> and B<PerlBuilder> are NT specific
 
 NB. (more info on these and others would be appreciated).

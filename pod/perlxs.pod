@@ -809,9 +809,9 @@ mixed with ANSI-style declarations, as in
 (here the optional C<IN> keyword is omitted).
 
 The C<IN_OUT> parameters are identical with parameters introduced with
-L<The & Unary Operator> and put into the C<OUTPUT:> section (see L<The
-OUTPUT: Keyword>).  The C<IN_OUTLIST> parameters are very similar, the
-only difference being that the value C function writes through the
+L<The & Unary Operator> and put into the C<OUTPUT:> section (see
+L<The OUTPUT: Keyword>).  The C<IN_OUTLIST> parameters are very similar,
+the only difference being that the value C function writes through the
 pointer would not modify the Perl parameter, but is put in the output
 list.
 

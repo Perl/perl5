@@ -78,6 +78,16 @@ A patch is included in the above fixed version.)
 Fetch and install dmake somewhere on your path (follow the instructions
 in the README.NOW file).
 
+There exists a minor coexistence problem with dmake and Borland C++
+compilers. Namely, if a distribution have C files named with a mixed
+case letters, they will be compiled into appropriate .obj-files named
+with all lowercase letters, and every time when dmake will be invoked
+to bring files up to date, it will try to recompile such files again.
+For example, Tk distribution have a lot of such files, resulting in
+multiple recompiling everytime dmake is invoked. To avoid this, you
+may use the script "sncfnmcs.pl" after successful build.  It is
+available in the win32 subdirectory.
+
 =item Command Shell
 
 Use the default "cmd" shell that comes with NT.  Some versions of the

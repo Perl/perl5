@@ -381,7 +381,7 @@ with a single parameter--see L<The setlocale function>.)
 localeconv() takes no arguments, and returns B<a reference to> a hash.
 The keys of this hash are variable names for formatting, such as
 C<decimal_point> and C<thousands_sep>.  The values are the
-corresponding, er, values.  See L<POSIX (3)/localeconv> for a longer
+corresponding, er, values.  See L<POSIX/localeconv> for a longer
 example listing the categories an implementation might be expected to
 provide; some provide more and others fewer.  You don't need an
 explicit C<use locale>, because localeconv() always observes the
@@ -964,12 +964,12 @@ operating system upgrade.
 
 =head1 SEE ALSO
 
-L<POSIX (3)/isalnum>, L<POSIX (3)/isalpha>, L<POSIX (3)/isdigit>, 
-L<POSIX (3)/isgraph>, L<POSIX (3)/islower>, L<POSIX (3)/isprint>, 
-L<POSIX (3)/ispunct>, L<POSIX (3)/isspace>, L<POSIX (3)/isupper>, 
-L<POSIX (3)/isxdigit>, L<POSIX (3)/localeconv>, L<POSIX (3)/setlocale>, 
-L<POSIX (3)/strcoll>, L<POSIX (3)/strftime>, L<POSIX (3)/strtod>, 
-L<POSIX (3)/strxfrm>.
+L<POSIX/isalnum>, L<POSIX/isalpha>, L<POSIX/isdigit>, 
+L<POSIX/isgraph>, L<POSIX/islower>, L<POSIX/isprint>, 
+L<POSIX/ispunct>, L<POSIX/isspace>, L<POSIX/isupper>, 
+L<POSIX/isxdigit>, L<POSIX/localeconv>, L<POSIX/setlocale>, 
+L<POSIX/strcoll>, L<POSIX/strftime>, L<POSIX/strtod>, 
+L<POSIX/strxfrm>.
 
 =head1 HISTORY
 

@@ -61,8 +61,8 @@ as a pattern match, a substitution, or a transliteration.
 Variables beginning with underscore used to be forced into package
 main, but we decided it was more useful for package writers to be able
 to use leading underscore to indicate private variables and method names.
-$_ is still global though.  See also L<perlvar/"Technical Note on the
-Syntax of Variable Names">.
+$_ is still global though.  See also
+L<perlvar/"Technical Note on the Syntax of Variable Names">.
 
 C<eval>ed strings are compiled in the package in which the eval() was
 compiled.  (Assignments to C<$SIG{}>, however, assume the signal

@@ -609,6 +609,8 @@ Various pragmata to control behavior of regular expressions.
 You can now run tests for I<x> seconds instead of guessing the right
 number of tests to run.
 
+Keeps better time.
+
 =item Carp
 
 Carp has a new function cluck(). cluck() warns, like carp(), but also adds
@@ -665,10 +667,6 @@ See <perlmodinstall> and L<CPAN>.
 =item Cwd
 
 Cwd::cwd is faster on most platforms.
-
-=item Benchmark
-
-Keeps better time.
 
 =back
 
