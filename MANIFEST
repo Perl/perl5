@@ -606,23 +606,23 @@ ext/Thread/Thread/Semaphore.pm	Thread semaphore objects
 ext/Thread/Thread/Signal.pm	Start a thread to run signal handlers
 ext/Thread/Thread/Specific.pm	Thread specific data access
 ext/Thread/create.t		Test thread creation
-ext/Thread/die.t		Test thread die()
-ext/Thread/die2.t		Test thread die() differently
-ext/Thread/io.t			Test threads doing simple I/O
-ext/Thread/join.t		Test thread joining
-ext/Thread/join2.t		Test thread joining differently
-ext/Thread/list.t		Test getting list of all threads
-ext/Thread/lock.t		Test lock primitive
-ext/Thread/queue.t		Test Thread::Queue module
-ext/Thread/specific.t		Test thread-specific user data
-ext/Thread/sync.t		Test thread synchronisation
-ext/Thread/sync2.t		Test thread synchronisation
+ext/Thread/die.tx		Test thread die()
+ext/Thread/die2.tx		Test thread die() differently
+ext/Thread/io.tx			Test threads doing simple I/O
+ext/Thread/join.tx		Test thread joining
+ext/Thread/join2.tx		Test thread joining differently
+ext/Thread/list.tx		Test getting list of all threads
+ext/Thread/lock.tx		Test lock primitive
+ext/Thread/queue.tx		Test Thread::Queue module
+ext/Thread/specific.tx		Test thread-specific user data
+ext/Thread/sync.tx		Test thread synchronisation
+ext/Thread/sync2.tx		Test thread synchronisation
 ext/Thread/thr5005.t		Test 5.005-style threading (skipped if no use5005threads)
 ext/Thread/typemap		Thread extension interface types
-ext/Thread/unsync.t		Test thread implicit synchronisation
-ext/Thread/unsync2.t		Test thread implicit synchronisation
-ext/Thread/unsync3.t		Test thread implicit synchronisation
-ext/Thread/unsync4.t		Test thread implicit synchronisation
+ext/Thread/unsync.tx		Test thread implicit synchronisation
+ext/Thread/unsync2.tx		Test thread implicit synchronisation
+ext/Thread/unsync3.tx		Test thread implicit synchronisation
+ext/Thread/unsync4.tx		Test thread implicit synchronisation
 ext/Time/HiRes/Changes		Time::HiRes extension
 ext/Time/HiRes/HiRes.pm		Time::HiRes extension
 ext/Time/HiRes/HiRes.t		Test for Time::HiRes
