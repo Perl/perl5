@@ -138,8 +138,6 @@ PERLVAR(Isortcop,	OP *)		/* user defined sort routine */
 PERLVAR(Isortstash,	HV *)		/* which is in some package or other */
 PERLVAR(Ifirstgv,	GV *)		/* $a */
 PERLVAR(Isecondgv,	GV *)		/* $b */
-PERLVAR(Isortstack,	AV *)		/* temp stack during pp_sort() */
-PERLVAR(Isignalstack,	AV *)		/* temp stack during sighandler() */
 PERLVAR(Imystrk,	SV *)		/* temp key string for do_each() */
 PERLVAR(Idumplvl,	I32)		/* indentation level on syntax tree dump */
 PERLVAR(Ioldlastpm,	PMOP *)		/* for saving regexp context during debugger */
@@ -153,6 +151,15 @@ PERLVAR(Imess_sv,	SV *)
 PERLVAR(Iors,		char *)		/* $\ */
 PERLVAR(Iorslen,	STRLEN)		
 PERLVAR(Iofmt,		char *)		/* $# */
+
+/* interpreter atexit processing */
+PERLVARI(Iexitlist,	PerlExitListEntry *, NULL)	/* list of exit functions */
+PERLVARI(Iexitlistlen,	I32, 0)				/* length of same */
+PERLVAR(Imodglobal,	HV *)				/* per-interp module data */
+
+#ifdef HAVE_INTERP_INTERN
+PERLVAR(Isys_intern,	struct interp_intern)		/* platform internals */
+#endif
 
 #ifdef USE_THREADS
 PERLVAR(Ithrsv,		SV *)		/* holds struct perl_thread for main thread */

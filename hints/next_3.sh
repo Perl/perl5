@@ -72,7 +72,7 @@ cccdlflags=' '
 # If you want to build for specific architectures, change the line
 # below to something like
 #
-#	archs=(m68k i386)
+#	archs='m68k i386'
 #
 archs=`/bin/lipo -info /usr/lib/libm.a | sed -n 's/^[^:]*:[^:]*: //p'`
 

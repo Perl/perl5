@@ -1313,7 +1313,7 @@ regmatch(regnode *prog)
 		    *reglastparen = paren;
 	    }
 #endif 
-	    scan = NEXTOPER(scan) + 4/sizeof(regnode);
+	    scan = NEXTOPER(scan) + NODE_STEP_REGNODE;
 	    if (paren)
 		scan += NEXT_OFF(scan); /* Skip former OPEN. */
 	    reginput = locinput;
@@ -1427,13 +1427,13 @@ regmatch(regnode *prog)
 		*reglastparen = paren;
 	    ln = ARG1(scan);  /* min to match */
 	    n  = ARG2(scan);  /* max to match */
-            scan = regnext(NEXTOPER(scan) + 4/sizeof(regnode));
+            scan = regnext(NEXTOPER(scan) + NODE_STEP_REGNODE);
 	    goto repeat;
 	case CURLY:
 	    paren = 0;
 	    ln = ARG1(scan);  /* min to match */
 	    n  = ARG2(scan);  /* max to match */
-	    scan = NEXTOPER(scan) + 4/sizeof(regnode);
+	    scan = NEXTOPER(scan) + NODE_STEP_REGNODE;
 	    goto repeat;
 	case STAR:
 	    ln = 0;

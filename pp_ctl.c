@@ -535,7 +535,7 @@ PP(pp_grepstart)
     djSP;
     SV *src;
 
-    if (stack_base + *markstack_ptr == sp) {
+    if (stack_base + *markstack_ptr == SP) {
 	(void)POPMARK;
 	if (GIMME_V == G_SCALAR)
 	    XPUSHs(&sv_no);
@@ -574,7 +574,7 @@ PP(pp_mapstart)
 PP(pp_mapwhile)
 {
     djSP;
-    I32 diff = (sp - stack_base) - *markstack_ptr;
+    I32 diff = (SP - stack_base) - *markstack_ptr;
     I32 count;
     I32 shift;
     SV** src;
@@ -584,11 +584,11 @@ PP(pp_mapwhile)
     if (diff) {
 	if (diff > markstack_ptr[-1] - markstack_ptr[-2]) {
 	    shift = diff - (markstack_ptr[-1] - markstack_ptr[-2]);
-	    count = (sp - stack_base) - markstack_ptr[-1] + 2;
+	    count = (SP - stack_base) - markstack_ptr[-1] + 2;
 	    
-	    EXTEND(sp,shift);
-	    src = sp;
-	    dst = (sp += shift);
+	    EXTEND(SP,shift);
+	    src = SP;
+	    dst = (SP += shift);
 	    markstack_ptr[-1] += shift;
 	    *markstack_ptr += shift;
 	    while (--count)
@@ -705,7 +705,6 @@ PP(pp_sort)
     max = --up - myorigmark;
     if (sortcop) {
 	if (max > 1) {
-	    AV *oldstack;
 	    PERL_CONTEXT *cx;
 	    SV** newsp;
 	    bool oldcatch = CATCH_GET;
@@ -713,14 +712,8 @@ PP(pp_sort)
 	    SAVETMPS;
 	    SAVEOP();
 
-	    oldstack = curstack;
-	    if (!sortstack) {
-		sortstack = newAV();
-		AvREAL_off(sortstack);
-		av_extend(sortstack, 32);
-	    }
 	    CATCH_SET(TRUE);
-	    SWITCHSTACK(curstack, sortstack);
+	    PUSHSTACK(SI_SORT);
 	    if (sortstash != stash) {
 		firstgv = gv_fetchpv("a", TRUE, SVt_PV);
 		secondgv = gv_fetchpv("b", TRUE, SVt_PV);
@@ -744,7 +737,7 @@ PP(pp_sort)
 	    qsortsv(myorigmark+1, max, sortcv);
 
 	    POPBLOCK(cx,curpm);
-	    SWITCHSTACK(sortstack, oldstack);
+	    POPSTACK();
 	    CATCH_SET(oldcatch);
 	}
 	LEAVE;
@@ -791,7 +784,7 @@ PP(pp_flip)
 	    }
 	    else {
 		sv_setiv(targ, 0);
-		sp--;
+		SP--;
 		RETURNOP(((CONDOP*)cUNOP->op_first)->op_false);
 	    }
 	}
@@ -1036,7 +1029,7 @@ dounwind(I32 cxix)
 OP *
 die_where(char *message)
 {
-    dTHR;
+    dSP;
     if (in_eval) {
 	I32 cxix;
 	register PERL_CONTEXT *cx;
@@ -1066,7 +1059,11 @@ die_where(char *message)
 	else
 	    sv_setpv(ERRSV, message);
 	
-	cxix = dopoptoeval(cxstack_ix);
+	while ((cxix = dopoptoeval(cxstack_ix)) < 0 && curstackinfo->si_prev) {
+	    dounwind(-1);
+	    POPSTACK();
+	}
+
 	if (cxix >= 0) {
 	    I32 optype;
 
@@ -1285,7 +1282,7 @@ PP(pp_dbstate)
 
     if (op->op_private || SvIV(DBsingle) || SvIV(DBsignal) || SvIV(DBtrace))
     {
-	SV **sp;
+	djSP;
 	register CV *cv;
 	register PERL_CONTEXT *cx;
 	I32 gimme = G_ARRAY;
@@ -1307,10 +1304,10 @@ PP(pp_dbstate)
 	SAVESTACK_POS();
 	debug = 0;
 	hasargs = 0;
-	sp = stack_sp;
+	SPAGAIN;
 
 	push_return(op->op_next);
-	PUSHBLOCK(cx, CXt_SUB, sp);
+	PUSHBLOCK(cx, CXt_SUB, SP);
 	PUSHSUB(cx);
 	CvDEPTH(cv)++;
 	(void)SvREFCNT_inc(cv);
@@ -1360,7 +1357,7 @@ PP(pp_enteriter)
 	cx->blk_loop.iterary = (AV*)SvREFCNT_inc(POPs);
     else {
 	cx->blk_loop.iterary = curstack;
-	AvFILLp(curstack) = sp - stack_base;
+	AvFILLp(curstack) = SP - stack_base;
 	cx->blk_loop.iterix = MARK - stack_base;
     }
 
@@ -1436,7 +1433,7 @@ PP(pp_return)
     PMOP *newpm;
     I32 optype = 0;
 
-    if (curstack == sortstack) {
+    if (curstackinfo->si_type == SI_SORT) {
 	if (cxstack_ix == sortcxix || dopoptosub(cxstack_ix) <= sortcxix) {
 	    if (cxstack_ix > sortcxix)
 		dounwind(sortcxix);
@@ -1722,8 +1719,11 @@ PP(pp_goto)
 	    if (cxix < cxstack_ix)
 		dounwind(cxix);
 	    TOPBLOCK(cx);
+	    if (cx->cx_type == CXt_EVAL && cx->blk_eval.old_op_type == OP_ENTEREVAL) 
+		DIE("Can't goto subroutine from an eval-string");
 	    mark = stack_sp;
-	    if (cx->blk_sub.hasargs) {   /* put @_ back onto stack */
+	    if (cx->cx_type == CXt_SUB &&
+		cx->blk_sub.hasargs) {   /* put @_ back onto stack */
 		AV* av = cx->blk_sub.argarray;
 		
 		items = AvFILLp(av) + 1;
@@ -1738,7 +1738,8 @@ PP(pp_goto)
 		AvREAL_off(av);
 		av_clear(av);
 	    }
-	    if (!(CvDEPTH(cx->blk_sub.cv) = cx->blk_sub.olddepth))
+	    if (cx->cx_type == CXt_SUB &&
+		!(CvDEPTH(cx->blk_sub.cv) = cx->blk_sub.olddepth))
 		SvREFCNT_dec(cx->blk_sub.cv);
 	    oldsave = scopestack[scopestack_ix - 1];
 	    LEAVE_SCOPE(oldsave);
@@ -1748,15 +1749,15 @@ PP(pp_goto)
 	    if (CvXSUB(cv)) {
 		if (CvOLDSTYLE(cv)) {
 		    I32 (*fp3)_((int,int,int));
-		    while (sp > mark) {
-			sp[1] = sp[0];
-			sp--;
+		    while (SP > mark) {
+			SP[1] = SP[0];
+			SP--;
 		    }
 		    fp3 = (I32(*)_((int,int,int)))CvXSUB(cv);
 		    items = (*fp3)(CvXSUBANY(cv).any_i32,
 		                   mark - stack_base + 1,
 				   items);
-		    sp = stack_base + items;
+		    SP = stack_base + items;
 		}
 		else {
 		    stack_sp--;		/* There is no cv arg. */
@@ -1768,6 +1769,12 @@ PP(pp_goto)
 	    else {
 		AV* padlist = CvPADLIST(cv);
 		SV** svp = AvARRAY(padlist);
+		if (cx->cx_type == CXt_EVAL) {
+		    in_eval = cx->blk_eval.old_in_eval;
+		    eval_root = cx->blk_eval.old_eval_root;
+		    cx->cx_type = CXt_SUB;
+		    cx->blk_sub.hasargs = 0;
+		}
 		cx->blk_sub.cv = cv;
 		cx->blk_sub.olddepth = CvDEPTH(cv);
 		CvDEPTH(cv)++;
@@ -1824,9 +1831,9 @@ PP(pp_goto)
 		    items = AvFILLp(av) + 1;
 		    if (items) {
 			/* Mark is at the end of the stack. */
-			EXTEND(sp, items);
-			Copy(AvARRAY(av), sp + 1, items, SV*);
-			sp += items;
+			EXTEND(SP, items);
+			Copy(AvARRAY(av), SP + 1, items, SV*);
+			SP += items;
 			PUTBACK ;		    
 		    }
 		}
@@ -1981,7 +1988,7 @@ PP(pp_goto)
 	do_undump = FALSE;
     }
 
-    if (curstack == signalstack) {
+    if (top_env->je_prev) {
         restartop = retop;
         JMPENV_JUMP(3);
     }
@@ -2145,7 +2152,11 @@ sv_compile_2op(SV *sv, OP** startop, char *code, AV** avp)
     safestr = savepv(tmpbuf);
     SAVEDELETE(defstash, safestr, strlen(safestr));
     SAVEI32(hints);
+#ifdef OP_IN_REGISTER
+    opsave = op;
+#else
     SAVEPPTR(op);
+#endif
     hints = 0;
 
     op = &dummy;
@@ -2162,6 +2173,9 @@ sv_compile_2op(SV *sv, OP** startop, char *code, AV** avp)
     lex_end();
     *avp = (AV*)SvREFCNT_inc(comppad);
     LEAVE;
+#ifdef OP_IN_REGISTER
+    op = opsave;
+#endif
     return rop;
 }
 
@@ -2320,7 +2334,7 @@ doeval(int gimme, OP** startop)
 	CV *cv = perl_get_cv("DB::postponed", FALSE);
 	if (cv) {
 	    dSP;
-	    PUSHMARK(sp);
+	    PUSHMARK(SP);
 	    XPUSHs((SV*)compiling.cop_filegv);
 	    PUTBACK;
 	    perl_call_sv((SV*)cv, G_DISCARD);
@@ -2633,7 +2647,7 @@ PP(pp_leaveeval)
     lex_end();
 
     if (optype == OP_REQUIRE &&
-	!(gimme == G_SCALAR ? SvTRUE(*sp) : sp > newsp))
+	!(gimme == G_SCALAR ? SvTRUE(*SP) : SP > newsp))
     {
 	/* Unassume the success we assumed earlier. */
 	char *name = cx->blk_eval.old_name;
@@ -3549,9 +3563,10 @@ qsortsv(
             if (j != i) {
                /* Looks like we really need to move some things
                */
+	       int k;
 	       temp = array[i];
-	       for (--i; i >= j; --i)
-		  array[i + 1] = array[i];
+	       for (k = i - 1; k >= j; --k)
+		  array[k + 1] = array[k];
                array[j] = temp;
             }
          }

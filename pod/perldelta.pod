@@ -1208,7 +1208,7 @@ or a hash slice, such as
 
 =item Applying %s to %s will act on scalar(%s)
 
-(W) The pattern match (//), substitution (s///), and translation (tr///)
+(W) The pattern match (//), substitution (s///), and transliteration (tr///)
 operators work on scalar values.  If you apply one of them to an array
 or a hash, it will convert the array or hash to a scalar value -- the
 length of an array, or the population info of a hash -- and then work on
@@ -1227,6 +1227,12 @@ that can no longer be found in the table.
 (W) You supplied a reference as the first argument to substr() used
 as an lvalue, which is pretty strange.  Perhaps you forgot to
 dereference it first.  See L<perlfunc/substr>.
+
+=item Bareword "%s" refers to nonexistent package
+
+(W) You used a qualified bareword of the form C<Foo::>, but
+the compiler saw no other uses of that namespace before that point.
+Perhaps you need to predeclare a package?
 
 =item Can't redefine active sort subroutine %s
 

@@ -370,7 +370,7 @@ been wrapped here):
      dSP;
      SV* retval;
  
-     PUSHMARK(sp);
+     PUSHMARK(SP);
      perl_eval_sv(sv, G_SCALAR);
  
      SPAGAIN;
@@ -563,7 +563,7 @@ deep breath...
       dSP;                            /* initialize stack pointer      */
       ENTER;                          /* everything created after here */
       SAVETMPS;                       /* ...is a temporary variable.   */
-      PUSHMARK(sp);                   /* remember the stack pointer    */
+      PUSHMARK(SP);                   /* remember the stack pointer    */
       XPUSHs(sv_2mortal(newSViv(a))); /* push the base onto the stack  */
       XPUSHs(sv_2mortal(newSViv(b))); /* push the exponent onto stack  */
       PUTBACK;                      /* make local stack pointer global */

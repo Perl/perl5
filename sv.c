@@ -59,6 +59,8 @@ static void sv_mortalgrow _((void));
 static void sv_unglob _((SV* sv));
 static void sv_check_thinkfirst _((SV *sv));
 
+#define SV_CHECK_THINKFIRST(sv) if (SvTHINKFIRST(sv)) sv_check_thinkfirst(sv)
+
 #ifndef PURIFY
 static void *my_safemalloc(MEM_SIZE size);
 #endif
@@ -333,8 +335,19 @@ do_clean_objs(SV *sv)
 static void
 do_clean_named_objs(SV *sv)
 {
-    if (SvTYPE(sv) == SVt_PVGV && GvSV(sv))
-	do_clean_objs(GvSV(sv));
+    if (SvTYPE(sv) == SVt_PVGV) {
+	if ( SvOBJECT(GvSV(sv)) ||
+	     GvAV(sv) && SvOBJECT(GvAV(sv)) ||
+	     GvHV(sv) && SvOBJECT(GvHV(sv)) ||
+	     GvIO(sv) && SvOBJECT(GvIO(sv)) ||
+	     GvCV(sv) && SvOBJECT(GvCV(sv)) )
+	{
+	    DEBUG_D((PerlIO_printf(Perl_debug_log, "Cleaning named glob object:\n "), sv_dump(sv));)
+	    SvREFCNT_dec(sv);
+	}
+	else if (GvSV(sv))
+	    do_clean_objs(GvSV(sv));
+    }
 }
 #endif
 
@@ -387,6 +400,10 @@ sv_free_arenas(void)
 	    Safefree((void *)sva);
     }
 
+    if (nice_chunk)
+	Safefree(nice_chunk);
+    nice_chunk = Nullch;
+    nice_chunk_size = 0;
     sv_arenaroot = 0;
     sv_root = 0;
 }
@@ -1106,7 +1123,7 @@ sv_grow(SV* sv, unsigned long newlen)
 void
 sv_setiv(register SV *sv, IV i)
 {
-    sv_check_thinkfirst(sv);
+    SV_CHECK_THINKFIRST(sv);
     switch (SvTYPE(sv)) {
     case SVt_NULL:
 	sv_upgrade(sv, SVt_IV);
@@ -1167,7 +1184,7 @@ sv_setuv_mg(register SV *sv, UV u)
 void
 sv_setnv(register SV *sv, double num)
 {
-    sv_check_thinkfirst(sv);
+    SV_CHECK_THINKFIRST(sv);
     switch (SvTYPE(sv)) {
     case SVt_NULL:
     case SVt_IV:
@@ -1869,7 +1886,7 @@ sv_setsv(SV *dstr, register SV *sstr)
 
     if (sstr == dstr)
 	return;
-    sv_check_thinkfirst(dstr);
+    SV_CHECK_THINKFIRST(dstr);
     if (!sstr)
 	sstr = &sv_undef;
     stype = SvTYPE(sstr);
@@ -1937,7 +1954,6 @@ sv_setsv(SV *dstr, register SV *sstr)
 	if (dtype < SVt_PVNV)
 	    sv_upgrade(dstr, SVt_PVNV);
 	break;
-
     case SVt_PVAV:
     case SVt_PVHV:
     case SVt_PVCV:
@@ -1963,7 +1979,7 @@ sv_setsv(SV *dstr, register SV *sstr)
 		SvFAKE_on(dstr);	/* can coerce to non-glob */
 	    }
 	    /* ahem, death to those who redefine active sort subs */
-	    else if (curstack == sortstack
+	    else if (curstackinfo->si_type == SI_SORT
 		     && GvCV(dstr) && sortcop == CvSTART(GvCV(dstr)))
 		croak("Can't redefine active sort subroutine %s",
 		      GvNAME(dstr));
@@ -1988,8 +2004,10 @@ sv_setsv(SV *dstr, register SV *sstr)
 		    goto glob_assign;
 	    }
 	}
-	if (dtype < stype)
-	    sv_upgrade(dstr, stype);
+	if (stype == SVt_PVLV)
+	    SvUPGRADE(dstr, SVt_PVNV);
+	else
+	    SvUPGRADE(dstr, stype);
     }
 
     sflags = SvFLAGS(sstr);
@@ -2052,7 +2070,7 @@ sv_setsv(SV *dstr, register SV *sstr)
 			    {
 				/* ahem, death to those who redefine
 				 * active sort subs */
-				if (curstack == sortstack &&
+				if (curstackinfo->si_type == SI_SORT &&
 				      sortcop == CvSTART(cv))
 				    croak(
 				    "Can't redefine active sort subroutine %s",
@@ -2060,9 +2078,14 @@ sv_setsv(SV *dstr, register SV *sstr)
 				if (cv_const_sv(cv))
 				    warn("Constant subroutine %s redefined",
 					 GvENAME((GV*)dstr));
-				else if (dowarn)
-				    warn("Subroutine %s redefined",
-					 GvENAME((GV*)dstr));
+				else if (dowarn) {
+				    if (!(CvGV(cv) && GvSTASH(CvGV(cv))
+					  && HvNAME(GvSTASH(CvGV(cv)))
+					  && strEQ(HvNAME(GvSTASH(CvGV(cv))),
+						   "autouse")))
+					warn("Subroutine %s redefined",
+					     GvENAME((GV*)dstr));
+				}
 			    }
 			    cv_ckproto(cv, (GV*)dstr,
 				       SvPOK(sref) ? SvPVX(sref) : Nullch);
@@ -2204,7 +2227,7 @@ sv_setpvn(register SV *sv, register const char *ptr, register STRLEN len)
     register char *dptr;
     assert(len >= 0);  /* STRLEN is probably unsigned, so this may
 			  elicit a warning, but it won't hurt. */
-    sv_check_thinkfirst(sv);
+    SV_CHECK_THINKFIRST(sv);
     if (!ptr) {
 	(void)SvOK_off(sv);
 	return;
@@ -2237,7 +2260,7 @@ sv_setpv(register SV *sv, register const char *ptr)
 {
     register STRLEN len;
 
-    sv_check_thinkfirst(sv);
+    SV_CHECK_THINKFIRST(sv);
     if (!ptr) {
 	(void)SvOK_off(sv);
 	return;
@@ -2267,7 +2290,7 @@ sv_setpv_mg(register SV *sv, register const char *ptr)
 void
 sv_usepvn(register SV *sv, register char *ptr, register STRLEN len)
 {
-    sv_check_thinkfirst(sv);
+    SV_CHECK_THINKFIRST(sv);
     (void)SvUPGRADE(sv, SVt_PV);
     if (!ptr) {
 	(void)SvOK_off(sv);
@@ -2287,22 +2310,20 @@ sv_usepvn(register SV *sv, register char *ptr, register STRLEN len)
 void
 sv_usepvn_mg(register SV *sv, register char *ptr, register STRLEN len)
 {
-    sv_usepvn_mg(sv,ptr,len);
+    sv_usepvn(sv,ptr,len);
     SvSETMAGIC(sv);
 }
 
 static void
 sv_check_thinkfirst(register SV *sv)
 {
-    if (SvTHINKFIRST(sv)) {
-	if (SvREADONLY(sv)) {
-	    dTHR;
-	    if (curcop != &compiling)
-		croak(no_modify);
-	}
-	if (SvROK(sv))
-	    sv_unref(sv);
+    if (SvREADONLY(sv)) {
+	dTHR;
+	if (curcop != &compiling)
+	    croak(no_modify);
     }
+    if (SvROK(sv))
+	sv_unref(sv);
 }
     
 void
@@ -2314,7 +2335,7 @@ sv_chop(register SV *sv, register char *ptr)	/* like set but assuming ptr is in 
 
     if (!ptr || !SvPOKp(sv))
 	return;
-    sv_check_thinkfirst(sv);
+    SV_CHECK_THINKFIRST(sv);
     if (SvTYPE(sv) < SVt_PVIV)
 	sv_upgrade(sv,SVt_PVIV);
 
@@ -2395,7 +2416,7 @@ sv_catpv(register SV *sv, register char *ptr)
 void
 sv_catpv_mg(register SV *sv, register char *ptr)
 {
-    sv_catpv_mg(sv,ptr);
+    sv_catpv(sv,ptr);
     SvSETMAGIC(sv);
 }
 
@@ -2687,7 +2708,7 @@ void
 sv_replace(register SV *sv, register SV *nsv)
 {
     U32 refcnt = SvREFCNT(sv);
-    sv_check_thinkfirst(sv);
+    SV_CHECK_THINKFIRST(sv);
     if (SvREFCNT(nsv) != 1)
 	warn("Reference miscount in sv_replace()");
     if (SvMAGICAL(sv)) {
@@ -2712,6 +2733,7 @@ sv_replace(register SV *sv, register SV *nsv)
 void
 sv_clear(register SV *sv)
 {
+    HV* stash;
     assert(sv);
     assert(SvREFCNT(sv) == 0);
 
@@ -2720,7 +2742,6 @@ sv_clear(register SV *sv)
 	if (defstash) {		/* Still have a symbol table? */
 	    djSP;
 	    GV* destructor;
-	    HV* stash;
 	    SV ref;
 
 	    Zero(&ref, 1, SV);
@@ -2734,6 +2755,7 @@ sv_clear(register SV *sv)
 		destructor = gv_fetchmethod(SvSTASH(sv), "DESTROY");
 		if (destructor) {
 		    ENTER;
+		    PUSHSTACK(SI_DESTROY);
 		    SvRV(&ref) = SvREFCNT_inc(sv);
 		    EXTEND(SP, 2);
 		    PUSHMARK(SP);
@@ -2742,6 +2764,7 @@ sv_clear(register SV *sv)
 		    perl_call_sv((SV*)GvCV(destructor),
 				 G_DISCARD|G_EVAL|G_KEEPERR);
 		    SvREFCNT(sv)--;
+		    POPSTACK();
 		    LEAVE;
 		}
 	    } while (SvOBJECT(sv) && SvSTASH(sv) != stash);
@@ -2764,6 +2787,7 @@ sv_clear(register SV *sv)
     }
     if (SvTYPE(sv) >= SVt_PVMG && SvMAGIC(sv))
 	mg_free(sv);
+    stash = NULL;
     switch (SvTYPE(sv)) {
     case SVt_PVIO:
 	if (IoIFP(sv) != PerlIO_stdin() &&
@@ -2789,7 +2813,11 @@ sv_clear(register SV *sv)
     case SVt_PVGV:
 	gp_free((GV*)sv);
 	Safefree(GvNAME(sv));
-	SvREFCNT_dec(GvSTASH(sv));
+	/* cannot decrease stash refcount yet, as we might recursively delete
+	   ourselves when the refcnt drops to zero. Delay SvREFCNT_dec
+	   of stash until current sv is completely gone.
+	   -- JohnPC, 27 Mar 1998 */
+	stash = GvSTASH(sv);
 	/* FALL THROUGH */
     case SVt_PVLV:
     case SVt_PVMG:
@@ -2851,7 +2879,13 @@ sv_clear(register SV *sv)
 	break;
     case SVt_PVGV:
 	del_XPVGV(SvANY(sv));
-	break;
+	/* code duplication for increased performance. */
+	SvFLAGS(sv) &= SVf_BREAK;
+	SvFLAGS(sv) |= SVTYPEMASK;
+	/* decrease refcount of the stash that owns this GV, if any */
+	if (stash)
+	    SvREFCNT_dec(stash);
+	return; /* not break, SvFLAGS reset already happened */
     case SVt_PVBM:
 	del_XPVBM(SvANY(sv));
 	break;
@@ -2870,13 +2904,15 @@ SV *
 sv_newref(SV *sv)
 {
     if (sv)
-	SvREFCNT(sv)++;
+	ATOMIC_INC(SvREFCNT(sv));
     return sv;
 }
 
 void
 sv_free(SV *sv)
 {
+    int refcount_is_zero;
+
     if (!sv)
 	return;
     if (SvREADONLY(sv)) {
@@ -2891,7 +2927,8 @@ sv_free(SV *sv)
 	warn("Attempt to free unreferenced scalar");
 	return;
     }
-    if (--SvREFCNT(sv) > 0)
+    ATOMIC_DEC_AND_TEST(refcount_is_zero, SvREFCNT(sv));
+    if (!refcount_is_zero)
 	return;
 #ifdef DEBUGGING
     if (SvTEMP(sv)) {
@@ -3084,7 +3121,7 @@ sv_gets(register SV *sv, register PerlIO *fp, I32 append)
     register I32 cnt;
     I32 i;
 
-    sv_check_thinkfirst(sv);
+    SV_CHECK_THINKFIRST(sv);
     (void)SvUPGRADE(sv, SVt_PV);
     SvSCREAM_off(sv);
 
@@ -3990,7 +4027,7 @@ newSVrv(SV *rv, char *classname)
     SvREFCNT(sv) = 0;
     SvFLAGS(sv) = 0;
 
-    sv_check_thinkfirst(rv);
+    SV_CHECK_THINKFIRST(rv);
 #ifdef OVERLOAD
     SvAMAGIC_off(rv);
 #endif /* OVERLOAD */
@@ -4082,6 +4119,10 @@ sv_unglob(SV *sv)
     SvFAKE_off(sv);
     if (GvGP(sv))
 	gp_free((GV*)sv);
+    if (GvSTASH(sv)) {
+	SvREFCNT_dec(GvSTASH(sv));
+	GvSTASH(sv) = Nullhv;
+    }
     sv_unmagic(sv, '*');
     Safefree(GvNAME(sv));
     GvMULTI_off(sv);
@@ -4569,6 +4610,8 @@ sv_vcatpvfn(SV *sv, const char *pat, STRLEN patlen, va_list *args, SV **svargs, 
 	    switch (base) {
 		unsigned dig;
 	    case 16:
+		if (!uv)
+		    alt = FALSE;
 		p = (c == 'X') ? "0123456789ABCDEF" : "0123456789abcdef";
 		do {
 		    dig = uv & 15;
@@ -4595,8 +4638,12 @@ sv_vcatpvfn(SV *sv, const char *pat, STRLEN patlen, va_list *args, SV **svargs, 
 		break;
 	    }
 	    elen = (ebuf + sizeof ebuf) - eptr;
-	    if (has_precis && precis > elen)
-		zeros = precis - elen;
+	    if (has_precis) {
+		if (precis > elen)
+		    zeros = precis - elen;
+		else if (precis == 0 && elen == 1 && *eptr == '0')
+		    elen = 0;
+	    }
 	    break;
 
 	    /* FLOATING POINT */
@@ -4990,7 +5037,8 @@ sv_dump(SV *sv)
     case SVt_PVGV:
 	PerlIO_printf(Perl_debug_log, "  NAME = \"%s\"\n", GvNAME(sv));
 	PerlIO_printf(Perl_debug_log, "  NAMELEN = %ld\n", (long)GvNAMELEN(sv));
-	PerlIO_printf(Perl_debug_log, "  STASH = \"%s\"\n", HvNAME(GvSTASH(sv)));
+	PerlIO_printf(Perl_debug_log, "  STASH = \"%s\"\n",
+	    SvTYPE(GvSTASH(sv)) == SVt_PVHV ? HvNAME(GvSTASH(sv)) : "(deleted)");
 	PerlIO_printf(Perl_debug_log, "  GP = 0x%lx\n", (long)GvGP(sv));
 	PerlIO_printf(Perl_debug_log, "    SV = 0x%lx\n", (long)GvSV(sv));
 	PerlIO_printf(Perl_debug_log, "    REFCNT = %ld\n", (long)GvREFCNT(sv));

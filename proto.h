@@ -137,7 +137,7 @@ void	dump_op _((OP* arg));
 void	dump_pm _((PMOP* pm));
 void	dump_packsubs _((HV* stash));
 void	dump_sub _((GV* gv));
-void	fbm_compile _((SV* sv));
+void	fbm_compile _((SV* sv, U32 flags));
 char*	fbm_instr _((unsigned char* big, unsigned char* bigend, SV* littlesv));
 #ifdef USE_THREADS
 PADOFFSET	find_threadsv _((char *name));
@@ -302,6 +302,7 @@ OP*	newANONHASH _((OP* o));
 OP*	newANONSUB _((I32 floor, OP* proto, OP* block));
 OP*	newASSIGNOP _((I32 flags, OP* left, I32 optype, OP* right));
 OP*	newCONDOP _((I32 flags, OP* expr, OP* trueop, OP* falseop));
+void	newCONSTSUB _((HV* stash, char* name, SV* sv));
 void	newFORM _((I32 floor, OP* o, OP* block));
 OP*	newFOROP _((I32 flags, char* label, line_t forline, OP* scalar, OP* expr, OP*block, OP*cont));
 OP*	newLOGOP _((I32 optype, I32 flags, OP* left, OP* right));
@@ -352,6 +353,7 @@ OP*	newWHILEOP _((I32 flags, I32 debuggable, LOOP* loop,
 #ifdef USE_THREADS
 struct perl_thread *	new_struct_thread _((struct perl_thread *t));
 #endif
+PERL_SI *	new_stackinfo _((I32 stitems, I32 cxitems));
 PerlIO*	nextargv _((GV* gv));
 char*	ninstr _((char* big, char* bigend, char* little, char* lend));
 OP*	oopsCV _((OP* o));
@@ -369,6 +371,7 @@ void	pad_reset _((void));
 void	pad_swipe _((PADOFFSET po));
 void	peep _((OP* o));
 PerlInterpreter*	perl_alloc _((void));
+void    perl_atexit _((void(*fn)(void *), void*));
 I32	perl_call_argv _((char* subname, I32 flags, char** argv));
 I32	perl_call_method _((char* methname, I32 flags));
 I32	perl_call_pv _((char* subname, I32 flags));
@@ -426,6 +429,7 @@ I32	same_dirent _((char* a, char* b));
 char*	savepv _((char* sv));
 char*	savepvn _((char* sv, I32 len));
 void	savestack_grow _((void));
+void	save_aelem _((AV* av, I32 idx, SV **sptr));
 void	save_aptr _((AV** aptr));
 AV*	save_ary _((GV* gv));
 void	save_clearsv _((SV** svp));
@@ -438,6 +442,7 @@ void	save_freeop _((OP* o));
 void	save_freepv _((char* pv));
 void	save_gp _((GV* gv, I32 empty));
 HV*	save_hash _((GV* gv));
+void	save_helem _((HV* hv, SV *key, SV **sptr));
 void	save_hptr _((HV** hptr));
 void	save_I16 _((I16* intp));
 void	save_I32 _((I32* intp));

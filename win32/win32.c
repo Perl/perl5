@@ -16,6 +16,18 @@
 #endif
 #include <windows.h>
 
+#ifndef __MINGW32__
+#include <lmcons.h>
+#include <lmerr.h>
+/* ugliness to work around a buggy struct definition in lmwksta.h */
+#undef LPTSTR
+#define LPTSTR LPWSTR
+#include <lmwksta.h>
+#undef LPTSTR
+#define LPTSTR LPSTR
+#include <lmapibuf.h>
+#endif /* __MINGW32__ */
+
 /* #include "config.h" */
 
 #define PERLIO_NOT_STDIO 0 
@@ -36,7 +48,7 @@
 #include <stdarg.h>
 #include <float.h>
 #include <time.h>
-#ifdef _MSC_VER
+#if defined(_MSC_VER) || defined(__MINGW32__)
 #include <sys/utime.h>
 #else
 #include <utime.h>
@@ -61,34 +73,29 @@ static BOOL		has_redirection(char *ptr);
 static long		filetime_to_clock(PFILETIME ft);
 static BOOL		filetime_from_time(PFILETIME ft, time_t t);
 
-char *	w32_perlshell_tokens = Nullch;
-char **	w32_perlshell_vec;
-long	w32_perlshell_items = -1;
-DWORD	w32_platform = (DWORD)-1;
-char	w32_perllib_root[MAX_PATH+1];
 HANDLE	w32_perldll_handle = INVALID_HANDLE_VALUE;
-#ifndef __BORLANDC__
-long	w32_num_children = 0;
-HANDLE	w32_child_pids[MAXIMUM_WAIT_OBJECTS];
-#endif
+static DWORD	w32_platform = (DWORD)-1;
 
 #ifdef USE_THREADS
 #  ifdef USE_DECLSPEC_THREAD
 __declspec(thread) char	strerror_buffer[512];
 __declspec(thread) char	getlogin_buffer[128];
+__declspec(thread) char	w32_perllib_root[MAX_PATH+1];
 #    ifdef HAVE_DES_FCRYPT
 __declspec(thread) char	crypt_buffer[30];
 #    endif
 #  else
 #    define strerror_buffer	(thr->i.Wstrerror_buffer)
 #    define getlogin_buffer	(thr->i.Wgetlogin_buffer)
+#    define w32_perllib_root	(thr->i.Ww32_perllib_root)
 #    define crypt_buffer	(thr->i.Wcrypt_buffer)
 #  endif
 #else
-char	strerror_buffer[512];
-char	getlogin_buffer[128];
+static char	strerror_buffer[512];
+static char	getlogin_buffer[128];
+static char	w32_perllib_root[MAX_PATH+1];
 #  ifdef HAVE_DES_FCRYPT
-char	crypt_buffer[30];
+static char	crypt_buffer[30];
 #  endif
 #endif
 
@@ -105,8 +112,10 @@ IsWinNT(void) {
 char *
 win32_perllib_path(char *sfx,...)
 {
+    dTHR;
     va_list ap;
     char *end;
+
     va_start(ap,sfx);
     GetModuleFileName((w32_perldll_handle == INVALID_HANDLE_VALUE) 
 		      ? GetModuleHandle(NULL)
@@ -138,12 +147,12 @@ has_redirection(char *ptr)
      * Scan string looking for redirection (< or >) or pipe
      * characters (|) that are not in a quoted string
      */
-    while(*ptr) {
+    while (*ptr) {
 	switch(*ptr) {
 	case '\'':
 	case '\"':
-	    if(inquote) {
-		if(quote == *ptr) {
+	    if (inquote) {
+		if (quote == *ptr) {
 		    inquote = 0;
 		    quote = '\0';
 		}
@@ -156,7 +165,7 @@ has_redirection(char *ptr)
 	case '>':
 	case '<':
 	case '|':
-	    if(!inquote)
+	    if (!inquote)
 		return TRUE;
 	default:
 	    break;
@@ -188,10 +197,8 @@ my_popen(char *cmd, char *mode)
 #define fixcmd(x)
 #endif
     fixcmd(cmd);
-#ifdef __BORLANDC__ /* workaround a Borland stdio bug */
     win32_fflush(stdout);
     win32_fflush(stderr);
-#endif
     return win32_popen(cmd, mode);
 }
 
@@ -309,7 +316,7 @@ do_aspawn(void *vreally, void **vmark, void **vsp)
 	flag = SvIVx(*mark);
     }
 
-    while(++mark <= sp) {
+    while (++mark <= sp) {
 	if (*mark && (str = SvPV(*mark, na)))
 	    argv[index++] = str;
 	else
@@ -335,15 +342,18 @@ do_aspawn(void *vreally, void **vmark, void **vsp)
 			       (const char* const*)argv);
     }
 
-    if (status < 0) {
-	if (dowarn)
-	    warn("Can't spawn \"%s\": %s", argv[0], strerror(errno));
-	status = 255 * 256;
+    if (flag != P_NOWAIT) {
+	if (status < 0) {
+	    if (dowarn)
+		warn("Can't spawn \"%s\": %s", argv[0], strerror(errno));
+	    status = 255 * 256;
+	}
+	else
+	    status *= 256;
+	statusvalue = status;
     }
-    else if (flag != P_NOWAIT)
-	status *= 256;
     Safefree(argv);
-    return (statusvalue = status);
+    return (status);
 }
 
 static int
@@ -358,7 +368,7 @@ do_spawn2(char *cmd, int exectype)
 
     /* Save an extra exec if possible. See if there are shell
      * metacharacters in it */
-    if(!has_redirection(cmd)) {
+    if (!has_redirection(cmd)) {
 	New(1301,argv, strlen(cmd) / 2 + 2, char*);
 	New(1302,cmd2, strlen(cmd) + 1, char);
 	strcpy(cmd2, cmd);
@@ -368,9 +378,9 @@ do_spawn2(char *cmd, int exectype)
 		s++;
 	    if (*s)
 		*(a++) = s;
-	    while(*s && !isspace(*s))
+	    while (*s && !isspace(*s))
 		s++;
-	    if(*s)
+	    if (*s)
 		*s++ = '\0';
 	}
 	*a = Nullch;
@@ -419,16 +429,19 @@ do_spawn2(char *cmd, int exectype)
 	cmd = argv[0];
 	Safefree(argv);
     }
-    if (status < 0) {
-	if (dowarn)
-	    warn("Can't %s \"%s\": %s",
-		 (exectype == EXECF_EXEC ? "exec" : "spawn"),
-		 cmd, strerror(errno));
-	status = 255 * 256;
+    if (exectype != EXECF_SPAWN_NOWAIT) {
+	if (status < 0) {
+	    if (dowarn)
+		warn("Can't %s \"%s\": %s",
+		     (exectype == EXECF_EXEC ? "exec" : "spawn"),
+		     cmd, strerror(errno));
+	    status = 255 * 256;
+	}
+	else
+	    status *= 256;
+	statusvalue = status;
     }
-    else if (exectype != EXECF_SPAWN_NOWAIT)
-	status *= 256;
-    return (statusvalue = status);
+    return (status);
 }
 
 int
@@ -450,9 +463,6 @@ do_exec(char *cmd)
     return FALSE;
 }
 
-
-#define PATHLEN 1024
-
 /* The idea here is to read all the directory names into a string table
  * (separated by nulls) and when one of the other dir functions is called
  * return the pointer to the current file name.
@@ -460,19 +470,17 @@ do_exec(char *cmd)
 DIR *
 opendir(char *filename)
 {
-    DIR            *p;
-    long            len;
-    long            idx;
-    char            scannamespc[PATHLEN];
-    char       *scanname = scannamespc;
-    struct stat     sbuf;
-    WIN32_FIND_DATA FindData;
-    HANDLE          fh;
-/*  char            root[_MAX_PATH];*/
-/*  char            volname[_MAX_PATH];*/
-/*  DWORD           serial, maxname, flags;*/
-/*  BOOL            downcase;*/
-/*  char           *dummy;*/
+    DIR			*p;
+    long		len;
+    long		idx;
+    char		scanname[MAX_PATH+3];
+    struct stat		sbuf;
+    WIN32_FIND_DATA	FindData;
+    HANDLE		fh;
+
+    len = strlen(filename);
+    if (len > MAX_PATH)
+	return NULL;
 
     /* check to see if filename is a directory */
     if (win32_stat(filename, &sbuf) < 0 || (sbuf.st_mode & S_IFDIR) == 0) {
@@ -482,35 +490,21 @@ opendir(char *filename)
 	    return NULL;
     }
 
-    /* get the file system characteristics */
-/*  if(GetFullPathName(filename, MAX_PATH, root, &dummy)) {
- *	if(dummy = strchr(root, '\\'))
- *	    *++dummy = '\0';
- *	if(GetVolumeInformation(root, volname, MAX_PATH, &serial,
- *				&maxname, &flags, 0, 0)) {
- *	    downcase = !(flags & FS_CASE_IS_PRESERVED);
- *	}
- *  }
- *  else {
- *	downcase = TRUE;
- *  }
- */
     /* Get us a DIR structure */
     Newz(1303, p, 1, DIR);
-    if(p == NULL)
+    if (p == NULL)
 	return NULL;
 
     /* Create the search pattern */
     strcpy(scanname, filename);
-
-    if(index("/\\", *(scanname + strlen(scanname) - 1)) == NULL)
-	strcat(scanname, "/*");
-    else
-	strcat(scanname, "*");
+    if (scanname[len-1] != '/' && scanname[len-1] != '\\')
+	scanname[len++] = '/';
+    scanname[len++] = '*';
+    scanname[len] = '\0';
 
     /* do the FindFirstFile call */
     fh = FindFirstFile(scanname, &FindData);
-    if(fh == INVALID_HANDLE_VALUE) {
+    if (fh == INVALID_HANDLE_VALUE) {
 	return NULL;
     }
 
@@ -519,13 +513,9 @@ opendir(char *filename)
      */
     idx = strlen(FindData.cFileName)+1;
     New(1304, p->start, idx, char);
-    if(p->start == NULL) {
+    if (p->start == NULL)
 	croak("opendir: malloc failed!\n");
-    }
     strcpy(p->start, FindData.cFileName);
-/*  if(downcase)
- *	strlwr(p->start);
- */
     p->nfiles++;
 
     /* loop finding all the files that match the wildcard
@@ -539,20 +529,16 @@ opendir(char *filename)
 	 * new name and it's null terminator
 	 */
 	Renew(p->start, idx+len+1, char);
-	if(p->start == NULL) {
+	if (p->start == NULL)
 	    croak("opendir: malloc failed!\n");
-	}
 	strcpy(&p->start[idx], FindData.cFileName);
-/*	if (downcase) 
- *	    strlwr(&p->start[idx]);
- */
-		p->nfiles++;
-		idx += len+1;
-	}
-	FindClose(fh);
-	p->size = idx;
-	p->curr = p->start;
-	return p;
+	p->nfiles++;
+	idx += len+1;
+    }
+    FindClose(fh);
+    p->size = idx;
+    p->curr = p->start;
+    return p;
 }
 
 
@@ -681,9 +667,13 @@ getlogin(void)
     return (char*)NULL;
 }
 
-/*
- * pretended kill
- */
+int
+chown(const char *path, uid_t owner, gid_t group)
+{
+    /* XXX noop */
+    return 0;
+}
+
 int
 kill(int pid, int sig)
 {
@@ -875,7 +865,7 @@ win32_utime(const char *filename, struct utimbuf *times)
 DllExport int
 win32_wait(int *status)
 {
-#ifdef __BORLANDC__
+#ifdef USE_RTL_WAIT
     return wait(status);
 #else
     /* XXX this wait emulation only knows about processes
@@ -1036,14 +1026,14 @@ my_open_osfhandle(long osfhandle, int flags)
     /* copy relevant flags from second parameter */
     fileflags = FDEV;
 
-    if(flags & O_APPEND)
+    if (flags & O_APPEND)
 	fileflags |= FAPPEND;
 
-    if(flags & O_TEXT)
+    if (flags & O_TEXT)
 	fileflags |= FTEXT;
 
     /* attempt to allocate a C Runtime file handle */
-    if((fh = _alloc_osfhnd()) == -1) {
+    if ((fh = _alloc_osfhnd()) == -1) {
 	errno = EMFILE;		/* too many open files */
 	_doserrno = 0L;		/* not an OS error */
 	return -1;		/* return error to caller */
@@ -1178,12 +1168,12 @@ win32_strerror(int e)
 #endif
     DWORD source = 0;
 
-    if(e < 0 || e > sys_nerr) {
+    if (e < 0 || e > sys_nerr) {
         dTHR;
-	if(e < 0)
+	if (e < 0)
 	    e = GetLastError();
 
-	if(FormatMessage(FORMAT_MESSAGE_FROM_SYSTEM, &source, e, 0,
+	if (FormatMessage(FORMAT_MESSAGE_FROM_SYSTEM, &source, e, 0,
 			 strerror_buffer, sizeof(strerror_buffer), NULL) == 0) 
 	    strcpy(strerror_buffer, "Unknown Error");
 
@@ -1193,7 +1183,7 @@ win32_strerror(int e)
 }
 
 DllExport void
-win32_str_os_error(SV *sv, unsigned long dwErr)
+win32_str_os_error(void *sv, DWORD dwErr)
 {
     DWORD dwLen;
     char *sMsg;
@@ -1214,7 +1204,7 @@ win32_str_os_error(SV *sv, unsigned long dwErr)
 			"Unknown error #0x%lX (lookup 0x%lX)",
 			dwErr, GetLastError());
     }
-    sv_setpvn(sv, sMsg, dwLen);
+    sv_setpvn((SV*)sv, sMsg, dwLen);
     LocalFree(sMsg);
 }
 
@@ -1393,16 +1383,145 @@ win32_pipe(int *pfd, unsigned int size, int mode)
     return _pipe(pfd, size, mode);
 }
 
+/*
+ * a popen() clone that respects PERL5SHELL
+ */
+
 DllExport FILE*
 win32_popen(const char *command, const char *mode)
 {
+#ifdef USE_RTL_POPEN
     return _popen(command, mode);
+#else
+    int p[2];
+    int parent, child;
+    int stdfd, oldfd;
+    int ourmode;
+    int childpid;
+
+    /* establish which ends read and write */
+    if (strchr(mode,'w')) {
+        stdfd = 0;		/* stdin */
+        parent = 1;
+        child = 0;
+    }
+    else if (strchr(mode,'r')) {
+        stdfd = 1;		/* stdout */
+        parent = 0;
+        child = 1;
+    }
+    else
+        return NULL;
+
+    /* set the correct mode */
+    if (strchr(mode,'b'))
+        ourmode = O_BINARY;
+    else if (strchr(mode,'t'))
+        ourmode = O_TEXT;
+    else
+        ourmode = _fmode & (O_TEXT | O_BINARY);
+
+    /* the child doesn't inherit handles */
+    ourmode |= O_NOINHERIT;
+
+    if (win32_pipe( p, 512, ourmode) == -1)
+        return NULL;
+
+    /* save current stdfd */
+    if ((oldfd = win32_dup(stdfd)) == -1)
+        goto cleanup;
+
+    /* make stdfd go to child end of pipe (implicitly closes stdfd) */
+    /* stdfd will be inherited by the child */
+    if (win32_dup2(p[child], stdfd) == -1)
+        goto cleanup;
+
+    /* close the child end in parent */
+    win32_close(p[child]);
+
+    /* start the child */
+    if ((childpid = do_spawn_nowait((char*)command)) == -1)
+        goto cleanup;
+
+    /* revert stdfd to whatever it was before */
+    if (win32_dup2(oldfd, stdfd) == -1)
+        goto cleanup;
+
+    /* close saved handle */
+    win32_close(oldfd);
+
+    sv_setiv(*av_fetch(w32_fdpid, p[parent], TRUE), childpid);
+
+    /* we have an fd, return a file stream */
+    return (win32_fdopen(p[parent], (char *)mode));
+
+cleanup:
+    /* we don't need to check for errors here */
+    win32_close(p[0]);
+    win32_close(p[1]);
+    if (oldfd != -1) {
+        win32_dup2(oldfd, stdfd);
+        win32_close(oldfd);
+    }
+    return (NULL);
+
+#endif /* USE_RTL_POPEN */
 }
+
+/*
+ * pclose() clone
+ */
 
 DllExport int
 win32_pclose(FILE *pf)
 {
+#ifdef USE_RTL_POPEN
     return _pclose(pf);
+#else
+
+#ifndef USE_RTL_WAIT
+    int child;
+#endif
+
+    int childpid, status;
+    SV *sv;
+
+    sv = *av_fetch(w32_fdpid, win32_fileno(pf), TRUE);
+    if (SvIOK(sv))
+	childpid = SvIVX(sv);
+    else
+	childpid = 0;
+
+    if (!childpid) {
+	errno = EBADF;
+        return -1;
+    }
+
+    win32_fclose(pf);
+    SvIVX(sv) = 0;
+
+#ifndef USE_RTL_WAIT
+    for (child = 0 ; child < w32_num_children ; ++child) {
+	if (w32_child_pids[child] == (HANDLE)childpid) {
+	    Copy(&w32_child_pids[child+1], &w32_child_pids[child],
+		 (w32_num_children-child-1), HANDLE);
+	    w32_num_children--;
+	    break;
+	}
+    }
+#endif
+
+    /* wait for the child */
+    if (cwait(&status, childpid, WAIT_CHILD) == -1)
+        return (-1);
+    /* cwait() returns differently on Borland */
+#ifdef __BORLANDC__
+    return (((status >> 8) & 0xff) | ((status << 8) & 0xff00));
+#else
+    return (status);
+#endif
+
+#endif /* USE_RTL_POPEN */
 }
 
 DllExport int
@@ -1497,8 +1616,13 @@ win32_spawnvp(int mode, const char *cmdname, const char *const *argv)
 {
     int status;
 
+#ifndef USE_RTL_WAIT
+    if (mode == P_NOWAIT && w32_num_children >= MAXIMUM_WAIT_OBJECTS)
+	return -1;
+#endif
+
     status = spawnvp(mode, cmdname, (char * const *) argv);
-#ifndef __BORLANDC__
+#ifndef USE_RTL_WAIT
     /* XXX For the P_NOWAIT case, Borland RTL returns pinfo.dwProcessId
      * while VC RTL returns pinfo.hProcess. For purposes of the custom
      * implementation of win32_wait(), we assume the latter.
@@ -1724,7 +1848,7 @@ XS(w32_GetCwd)
      */
     if (SvCUR(sv))
 	SvPOK_on(sv);
-    EXTEND(sp,1);
+    EXTEND(SP,1);
     ST(0) = sv;
     XSRETURN(1);
 }
@@ -1797,6 +1921,8 @@ static
 XS(w32_DomainName)
 {
     dXSARGS;
+#ifndef HAS_NETWKSTAGETINFO
+    /* mingw32 (and Win95) don't have NetWksta*(), so do it the old way */
     char name[256];
     DWORD size = sizeof(name);
     if (GetUserName(name,&size)) {
@@ -1810,6 +1936,26 @@ XS(w32_DomainName)
 	    XSRETURN_PV(dname);		/* all that for this */
 	}
     }
+#else
+    /* this way is more reliable, in case user has a local account.
+     * XXX need dynamic binding of netapi32.dll symbols or this will fail on
+     * Win95. Probably makes more sense to move it into libwin32. */
+    char dname[256];
+    DWORD dnamelen = sizeof(dname);
+    PWKSTA_INFO_100 pwi;
+    if (NERR_Success == NetWkstaGetInfo(NULL, 100, (LPBYTE*)&pwi)) {
+	if (pwi->wki100_langroup && *(pwi->wki100_langroup)) {
+	    WideCharToMultiByte(CP_ACP, NULL, pwi->wki100_langroup,
+				-1, (LPSTR)dname, dnamelen, NULL, NULL);
+	}
+	else {
+	    WideCharToMultiByte(CP_ACP, NULL, pwi->wki100_computername,
+				-1, (LPSTR)dname, dnamelen, NULL, NULL);
+	}
+	NetApiBufferFree(pwi);
+	XSRETURN_PV(dname);
+    }
+#endif
     XSRETURN_UNDEF;
 }
 
@@ -1893,7 +2039,7 @@ XS(w32_Spawn)
     STARTUPINFO stStartInfo;
     BOOL bSuccess = FALSE;
 
-    if(items != 3)
+    if (items != 3)
 	croak("usage: Win32::Spawn($cmdName, $args, $PID)");
 
     cmd = SvPV(ST(0),na);
@@ -1904,7 +2050,7 @@ XS(w32_Spawn)
     stStartInfo.dwFlags = STARTF_USESHOWWINDOW;	    /* Enable wShowWindow control */
     stStartInfo.wShowWindow = SW_SHOWMINNOACTIVE;   /* Start min (normal) */
 
-    if(CreateProcess(
+    if (CreateProcess(
 		cmd,			/* Image path */
 		args,	 		/* Arguments for command line */
 		NULL,			/* Default process security */
@@ -1937,7 +2083,7 @@ XS(w32_GetShortPathName)
     SV *shortpath;
     DWORD len;
 
-    if(items != 1)
+    if (items != 1)
 	croak("usage: Win32::GetShortPathName($longPathName)");
 
     shortpath = sv_mortalcopy(ST(0));
@@ -1972,6 +2118,13 @@ Perl_init_os_extras()
 {
     char *file = __FILE__;
     dXSUB_SYS;
+
+    w32_perlshell_tokens = Nullch;
+    w32_perlshell_items = -1;
+    w32_fdpid = newAV();		/* XXX needs to be in Perl_win32_init()? */
+#ifndef USE_RTL_WAIT
+    w32_num_children = 0;
+#endif
 
     /* these names are Activeware compatible */
     newXS("Win32::GetCwd", w32_GetCwd, file);
@@ -2015,7 +2168,7 @@ Perl_win32_init(int *argcp, char ***argvp)
 #if !defined(_ALPHA_) && !defined(__GNUC__)
     _control87(MCW_EM, MCW_EM);
 #endif
-    MALLOC_INIT; 
+    MALLOC_INIT;
 }
 
 #ifdef USE_BINMODE_SCRIPTS

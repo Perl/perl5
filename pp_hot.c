@@ -65,7 +65,7 @@ PP(pp_nextstate)
 PP(pp_gvsv)
 {
     djSP;
-    EXTEND(sp,1);
+    EXTEND(SP,1);
     if (op->op_private & OPpLVAL_INTRO)
 	PUSHs(save_scalar(cGVOP->op_gv));
     else
@@ -644,8 +644,15 @@ PP(pp_aassign)
 		    }
 		    TAINT_NOT;
 		}
-		if (relem == lastrelem && dowarn)
-		    warn("Odd number of elements in hash list");
+		if (relem == lastrelem && dowarn) {
+		    if (relem == firstrelem &&
+			SvROK(*relem) &&
+			( SvTYPE(SvRV(*relem)) == SVt_PVAV ||
+			  SvTYPE(SvRV(*relem)) == SVt_PVHV ) )
+			warn("Reference found where even-sized list expected");
+		    else
+			warn("Odd number of elements in hash assignment");
+		}
 	    }
 	    break;
 	default:
@@ -1077,7 +1084,10 @@ do_readline(void)
 		       }
 		    }
 		    if ((tmpfp = PerlIO_open(tmpfnam,"w+","fop=dlt")) != NULL) {
-		        ok = ((wilddsc.dsc$a_pointer = tovmsspec(SvPVX(tmpglob),vmsspec)) != NULL);
+		        Stat_t st;
+		        if (!PerlLIO_stat(SvPVX(tmpglob),&st) && S_ISDIR(st.st_mode))
+		          ok = ((wilddsc.dsc$a_pointer = tovmspath(SvPVX(tmpglob),vmsspec)) != NULL);
+		        else ok = ((wilddsc.dsc$a_pointer = tovmsspec(SvPVX(tmpglob),vmsspec)) != NULL);
 		        if (ok) wilddsc.dsc$w_length = (unsigned short int) strlen(wilddsc.dsc$a_pointer);
 		        while (ok && ((sts = lib$find_file(&wilddsc,&rsdsc,&cxt,
 		                                    &dfltdsc,NULL,NULL,NULL))&1)) {
@@ -1224,7 +1234,7 @@ do_readline(void)
 		if (!isALPHA(*tmps) && !isDIGIT(*tmps) &&
 		    strchr("$&*(){}[]'\";\\|?<>~`", *tmps))
 			break;
-	    if (*tmps && Stat(SvPVX(sv), &statbuf) < 0) {
+	    if (*tmps && PerlLIO_stat(SvPVX(sv), &statbuf) < 0) {
 		(void)POPs;		/* Unmatched wildcard?  Chuck it... */
 		continue;
 	    }
@@ -1265,7 +1275,7 @@ PP(pp_enter)
     ENTER;
 
     SAVETMPS;
-    PUSHBLOCK(cx, CXt_BLOCK, sp);
+    PUSHBLOCK(cx, CXt_BLOCK, SP);
 
     RETURN;
 }
@@ -1310,7 +1320,7 @@ PP(pp_helem)
 	    if (HvNAME(hv) && isGV(*svp))
 		save_gp((GV*)*svp, !(op->op_flags & OPf_SPECIAL));
 	    else
-		save_svref(svp);
+		save_helem(hv, keysv, svp);
 	}
 	else if (op->op_private & OPpDEREF)
 	    vivify_ref(*svp, op->op_private & OPpDEREF);
@@ -1382,7 +1392,7 @@ PP(pp_iter)
     SV* sv;
     AV* av;
 
-    EXTEND(sp, 1);
+    EXTEND(SP, 1);
     cx = &cxstack[cxstack_ix];
     if (cx->cx_type != CXt_LOOP)
 	DIE("panic: pp_iter");
@@ -1714,7 +1724,7 @@ PP(pp_grepwhile)
     LEAVE;					/* exit inner scope */
 
     /* All done yet? */
-    if (stack_base + *markstack_ptr > sp) {
+    if (stack_base + *markstack_ptr > SP) {
 	I32 items;
 	I32 gimme = GIMME_V;
 
@@ -2032,17 +2042,15 @@ PP(pp_entersub)
     }
 #endif /* USE_THREADS */
 
-    gimme = GIMME;
-
     if (CvXSUB(cv)) {
 	if (CvOLDSTYLE(cv)) {
 	    I32 (*fp3)_((int,int,int));
 	    dMARK;
 	    register I32 items = SP - MARK;
 					/* We dont worry to copy from @_. */
-	    while (sp > mark) {
-		sp[1] = sp[0];
-		sp--;
+	    while (SP > mark) {
+		SP[1] = SP[0];
+		SP--;
 	    }
 	    stack_sp = mark + 1;
 	    fp3 = (I32(*)_((int,int,int)))CvXSUB(cv);
@@ -2071,9 +2079,9 @@ PP(pp_entersub)
 
 		if (items) {
 		    /* Mark is at the end of the stack. */
-		    EXTEND(sp, items);
-		    Copy(AvARRAY(av), sp + 1, items, SV*);
-		    sp += items;
+		    EXTEND(SP, items);
+		    Copy(AvARRAY(av), SP + 1, items, SV*);
+		    SP += items;
 		    PUTBACK ;		    
 		}
 	    }
@@ -2159,9 +2167,9 @@ PP(pp_entersub)
 	    items = AvFILLp(av) + 1;
 	    if (items) {
 		/* Mark is at the end of the stack. */
-		EXTEND(sp, items);
-		Copy(AvARRAY(av), sp + 1, items, SV*);
-		sp += items;
+		EXTEND(SP, items);
+		Copy(AvARRAY(av), SP + 1, items, SV*);
+		SP += items;
 		PUTBACK ;		    
 	    }
 	}
@@ -2263,7 +2271,7 @@ PP(pp_aelem)
 	    RETURN;
 	}
 	if (op->op_private & OPpLVAL_INTRO)
-	    save_svref(svp);
+	    save_aelem(av, elem, svp);
 	else if (op->op_private & OPpDEREF)
 	    vivify_ref(*svp, op->op_private & OPpDEREF);
     }

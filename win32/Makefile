@@ -14,7 +14,7 @@ INST_TOP=$(INST_DRV)\perl5004.5x
 
 #
 # uncomment to enable threads-capabilities
-#USE_THREADS=-DUSE_THREADS
+#USE_THREADS=define
 
 #
 # uncomment next line if you are using Visual C++ 2.x
@@ -33,6 +33,13 @@ INST_TOP=$(INST_DRV)\perl5004.5x
 # if you didn't set CRYPT_SRC and if you have des_fcrypt() available in a
 # library, uncomment this, and make sure the library exists (see README.win32)
 #CRYPT_LIB=des_fcrypt.lib
+
+#
+# set this if you wish to use perl's malloc
+# WARNING: Turning this on/off WILL break binary compatibility with extensions
+# you may have compiled with/without it.  Be prepared to recompile all extensions
+# if you change the default.
+PERL_MALLOC	= define
 
 #
 # set the install locations of the compiler include/libraries
@@ -55,19 +62,26 @@ D_CRYPT=define
 CRYPT_FLAG=-DHAVE_DES_FCRYPT
 !ENDIF
 
-BUILDOPT	= $(USE_THREADS)
-#BUILDOPT	= $(USE_THREADS) -DMULTIPLICITY 
-#BUILDOPT	= $(USE_THREADS) -DPERL_GLOBAL_STRUCT -DMULTIPLICITY
+!IF "$(PERL_MALLOC)" == ""
+PERL_MALLOC	= undef
+!ENDIF
+
+#BUILDOPT	= -DMULTIPLICITY 
+#BUILDOPT	= -DPERL_GLOBAL_STRUCT -DMULTIPLICITY
 # -DUSE_PERLIO -D__STDC__=1 -DUSE_SFIO -DI_SFIO -I\sfio97\include
+
+!IF "$(USE_THREADS)" == ""
+USE_THREADS = undef
+!ENDIF
 
 !IF "$(PROCESSOR_ARCHITECTURE)" == ""
 PROCESSOR_ARCHITECTURE	= x86
 !ENDIF
 
-!IF "$(USE_THREADS)" == ""
-ARCHNAME	= MSWin32-$(PROCESSOR_ARCHITECTURE)
-!ELSE
+!IF "$(USE_THREADS)" == "define"
 ARCHNAME	= MSWin32-$(PROCESSOR_ARCHITECTURE)-thread
+!ELSE
+ARCHNAME	= MSWin32-$(PROCESSOR_ARCHITECTURE)
 !ENDIF
 
 ARCHDIR		= ..\lib\$(ARCHNAME)
@@ -87,7 +101,7 @@ LIB32=$(LINK32) -lib
 RUNTIME  = -MD
 !ENDIF
 INCLUDES = -I.\include -I. -I..
-#PCHFLAGS = -Fp"$(INTDIR)/modules.pch" -YX 
+#PCHFLAGS = -Fpc:\temp\modules.pch -YX 
 DEFINES  = -DWIN32 -D_CONSOLE $(BUILDOPT) $(CRYPT_FLAG)
 LOCDEFS  = -DPERLDLL -DPERL_CORE
 SUBSYS   = console
@@ -109,9 +123,9 @@ OPTIMIZE = -Od $(RUNTIME)d -Z7 -D_DEBUG -DDEBUGGING
 LINK_DBG = -debug -pdb:none
 !ELSE
 !  IF "$(CCTYPE)" == "MSVC20"
-OPTIMIZE = -Od $(RUNTIME) -DNDEBUG
+OPTIMIZE = -O1 $(RUNTIME) -DNDEBUG
 !  ELSE
-OPTIMIZE = -Od $(RUNTIME) -DNDEBUG
+OPTIMIZE = -O1 $(RUNTIME) -DNDEBUG
 !  ENDIF
 LINK_DBG = -release
 !ENDIF
@@ -172,7 +186,6 @@ X2P=..\x2p\a2p.exe
 PL2BAT=bin\pl2bat.pl
 GLOBBAT = bin\perlglob.bat
 
-MAKE=nmake -nologo
 CFGSH_TMPL = config.vc
 CFGH_TMPL = config_H.vc
 PERL95EXE=..\perl95.exe
@@ -185,12 +198,18 @@ NULL=
 CRYPT_OBJ=$(CRYPT_SRC:.c=.obj)
 !ENDIF
 
+!IF "$(PERL_MALLOC)" == "define"
+MALLOC_SRC	= ..\malloc.c
+MALLOC_OBJ	= ..\malloc$(o)
+!ENDIF
+
 #
 # filenames given to xsubpp must have forward slashes (since it puts
 # full pathnames in #line strings)
 XSUBPP=..\$(MINIPERL) -I..\..\lib ..\$(EXTUTILSDIR)\xsubpp -C++ -prototypes
 
 CORE_C=	..\av.c		\
+	..\byterun.c	\
 	..\deb.c	\
 	..\doio.c	\
 	..\doop.c	\
@@ -216,10 +235,11 @@ CORE_C=	..\av.c		\
 	..\toke.c	\
 	..\universal.c	\
 	..\util.c	\
-	..\malloc.c	\
+	$(MALLOC_SRC)	\
 	$(CRYPT_SRC)
 
 CORE_OBJ= ..\av$(o)	\
+	..\byterun$(o)	\
 	..\deb$(o)	\
 	..\doio$(o)	\
 	..\doop$(o)	\
@@ -245,7 +265,7 @@ CORE_OBJ= ..\av$(o)	\
 	..\toke$(o)	\
 	..\universal$(o)\
 	..\util$(o)	\
-	..\malloc$(o)	\
+	$(MALLOC_OBJ)	\
 	$(CRYPT_OBJ)
 
 WIN32_C = perllib.c \
@@ -271,6 +291,8 @@ X2P_OBJ = ..\x2p\a2p$(o)	\
 	..\x2p\walk$(o)
 
 CORE_H = ..\av.h	\
+	..\byterun.h	\
+	..\bytecode.h	\
 	..\cop.h	\
 	..\cv.h		\
 	..\dosish.h	\
@@ -307,7 +329,7 @@ CORE_H = ..\av.h	\
 	.\include\sys\socket.h	\
 	.\win32.h
 
-DYNAMIC_EXT=Socket IO Fcntl Opcode SDBM_File attrs Thread
+DYNAMIC_EXT=Socket IO Fcntl Opcode SDBM_File POSIX attrs Thread B
 STATIC_EXT=DynaLoader
 
 DYNALOADER=$(EXTDIR)\DynaLoader\DynaLoader
@@ -316,16 +338,20 @@ FCNTL=$(EXTDIR)\Fcntl\Fcntl
 OPCODE=$(EXTDIR)\Opcode\Opcode
 SDBM_FILE=$(EXTDIR)\SDBM_File\SDBM_File
 IO=$(EXTDIR)\IO\IO
+POSIX=$(EXTDIR)\POSIX\POSIX
 ATTRS=$(EXTDIR)\attrs\attrs
 THREAD=$(EXTDIR)\Thread\Thread
+B=$(EXTDIR)\B\B
 
 SOCKET_DLL=..\lib\auto\Socket\Socket.dll
 FCNTL_DLL=..\lib\auto\Fcntl\Fcntl.dll
 OPCODE_DLL=..\lib\auto\Opcode\Opcode.dll
 SDBM_FILE_DLL=..\lib\auto\SDBM_File\SDBM_File.dll
 IO_DLL=..\lib\auto\IO\IO.dll
+POSIX_DLL=..\lib\auto\POSIX\POSIX.dll
 ATTRS_DLL=..\lib\auto\attrs\attrs.dll
 THREAD_DLL=..\lib\auto\Thread\Thread.dll
+B_DLL=..\lib\auto\B\B.dll
 
 STATICLINKMODULES=DynaLoader
 DYNALOADMODULES=	\
@@ -334,13 +360,34 @@ DYNALOADMODULES=	\
 	$(OPCODE_DLL)	\
 	$(SDBM_FILE_DLL)\
 	$(IO_DLL)	\
+	$(POSIX_DLL)	\
 	$(ATTRS_DLL)	\
-	$(THREAD_DLL)
+	$(THREAD_DLL)	\
+	$(B_DLL)
 
 POD2HTML=$(PODDIR)\pod2html
 POD2MAN=$(PODDIR)\pod2man
 POD2LATEX=$(PODDIR)\pod2latex
 POD2TEXT=$(PODDIR)\pod2text
+
+CFG_VARS=   "INST_DRV=$(INST_DRV)"		\
+	    "INST_TOP=$(INST_TOP)"		\
+	    "archname=$(ARCHNAME)"		\
+	    "cc=$(CC)"				\
+	    "ccflags=$(OPTIMIZE) $(DEFINES)"	\
+	    "cf_email=$(EMAIL)"			\
+	    "d_crypt=$(D_CRYPT)"		\
+	    "d_mymalloc=$(PERL_MALLOC)"		\
+	    "libs=$(LIBFILES)"			\
+	    "incpath=$(CCINCDIR)"		\
+	    "libpth=$(CCLIBDIR)"		\
+	    "libc=$(LIBC)"			\
+	    "make=nmake"			\
+	    "static_ext=$(STATIC_EXT)"		\
+	    "dynamic_ext=$(DYNAMIC_EXT)"	\
+	    "usethreads=$(USE_THREADS)"		\
+	    "LINK_FLAGS=$(LINK_FLAGS)"		\
+	    "optimize=$(OPTIMIZE)"
 
 #
 # Top targets
@@ -369,23 +416,7 @@ config.w32 : $(CFGSH_TMPL)
 	copy $(CFGH_TMPL) config.h
 
 ..\config.sh : config.w32 $(MINIPERL) config_sh.PL
-	$(MINIPERL) -I..\lib config_sh.PL	\
-	    "INST_DRV=$(INST_DRV)"		\
-	    "INST_TOP=$(INST_TOP)"		\
-	    "archname=$(ARCHNAME)"		\
-	    "cc=$(CC)"				\
-	    "ccflags=$(OPTIMIZE) $(DEFINES)"	\
-	    "cf_email=$(EMAIL)"			\
-	    "d_crypt=$(D_CRYPT)"		\
-	    "libs=$(LIBFILES)"			\
-	    "incpath=$(CCINCDIR)"		\
-	    "libpth=$(CCLIBDIR)"		\
-	    "libc=$(LIBC)"			\
-	    "static_ext=$(STATIC_EXT)"		\
-	    "dynamic_ext=$(DYNAMIC_EXT)"	\
-	    "LINK_FLAGS=$(LINK_FLAGS)"		\
-	    "optimize=$(OPTIMIZE)"		\
-	    config.w32				> ..\config.sh
+	$(MINIPERL) -I..\lib config_sh.PL $(CFG_VARS) config.w32 > ..\config.sh
 
 $(CONFIGPM) : $(MINIPERL) ..\config.sh config_h.PL ..\minimod.pl
 	cd .. && miniperl configpm
@@ -393,8 +424,7 @@ $(CONFIGPM) : $(MINIPERL) ..\config.sh config_h.PL ..\minimod.pl
 	$(XCOPY) ..\*.h $(COREDIR)\*.*
 	$(XCOPY) *.h $(COREDIR)\*.*
 	$(RCOPY) include $(COREDIR)\*.*
-	$(MINIPERL) -I..\lib config_h.PL || $(MAKE) CCTYPE=$(CCTYPE) \
-	    RUNTIME=$(RUNTIME) CFG=$(CFG) $(CONFIGPM)
+	$(MINIPERL) -I..\lib config_h.PL || $(MAKE) $(MAKEFLAGS) $(CONFIGPM)
 
 $(MINIPERL) : ..\miniperlmain$(o) $(CORE_OBJ) $(WIN32_OBJ)
 	$(LINK32) -subsystem:console -out:$@ @<<
@@ -470,7 +500,7 @@ $(DYNALOADER).c: $(MINIPERL) $(EXTDIR)\DynaLoader\dl_win32.xs $(CONFIGPM)
 $(EXTDIR)\DynaLoader\dl_win32.xs: dl_win32.xs
 	copy dl_win32.xs $(EXTDIR)\DynaLoader\dl_win32.xs
 
-$(ATTRS_DLL): $(PERLEXE) $(ATTRS).xs
+$(B_DLL): $(PERLEXE) $(B).xs
 	cd $(EXTDIR)\$(*B)
 	..\..\miniperl -I..\..\lib Makefile.PL INSTALLDIRS=perl
 	$(MAKE)
@@ -482,6 +512,17 @@ $(THREAD_DLL): $(PERLEXE) $(THREAD).xs
 	$(MAKE)
 	cd ..\..\win32
 
+$(ATTRS_DLL): $(PERLEXE) $(ATTRS).xs
+	cd $(EXTDIR)\$(*B)
+	..\..\miniperl -I..\..\lib Makefile.PL INSTALLDIRS=perl
+	$(MAKE)
+	cd ..\..\win32
+
+$(POSIX_DLL): $(PERLEXE) $(POSIX).xs
+	cd $(EXTDIR)\$(*B)
+	..\..\miniperl -I..\..\lib Makefile.PL INSTALLDIRS=perl
+	$(MAKE)
+	cd ..\..\win32
 
 $(IO_DLL): $(PERLEXE) $(CONFIGPM) $(IO).xs
 	cd $(EXTDIR)\$(*B)
@@ -521,7 +562,7 @@ doc: $(PERLEXE)
 	cd ..\win32
 	copy ..\README.win32 ..\pod\perlwin32.pod
 	$(PERLEXE) -I..\lib ..\installhtml --podroot=.. --htmldir=./html \
-	    --podpath=pod:lib:ext:utils --htmlroot="//$(INST_HTML::=|)" \
+	    --podpath=pod:lib:ext:utils --htmlroot="file://$(INST_HTML::=|)" \
 	    --libpod=perlfunc:perlguts:perlvar:perlrun:perlop --recurse
 
 utils: $(PERLEXE)
@@ -539,9 +580,9 @@ distclean: clean
 		$(PERLIMPLIB) ..\miniperl.lib $(MINIMOD)
 	-del /f *.def *.map
 	-del /f $(SOCKET_DLL) $(IO_DLL) $(SDBM_FILE_DLL) $(FCNTL_DLL) \
-		$(OPCODE_DLL) $(ATTRS_DLL) $(THREAD_DLL)
+		$(OPCODE_DLL) $(POSIX_DLL) $(ATTRS_DLL) $(THREAD_DLL) $(B_DLL)
 	-del /f $(SOCKET).c $(IO).c $(SDBM_FILE).c $(FCNTL).c $(OPCODE).c \
-		$(DYNALOADER).c $(ATTRS).c $(THREAD).c
+		$(DYNALOADER).c $(POSIX).c $(ATTRS).c $(THREAD).c $(B).c
 	-del /f $(PODDIR)\*.html
 	-del /f $(PODDIR)\*.bat
 	-del /f ..\config.sh ..\splittree.pl perlmain.c dlutils.c \
@@ -553,12 +594,18 @@ distclean: clean
 	-del /s *.lib *.def *.map *.bs Makefile *$(o) pm_to_blib
 	cd ..\win32
 
-install : all doc utils
+install : all installbare installutils installhtml
+
+installbare :
 	$(PERLEXE) ..\installperl
 	$(XCOPY) $(PERL95EXE) $(INST_BIN)\*.*
+
+installutils : utils
 	$(XCOPY) $(GLOBEXE) $(INST_BIN)\*.*
 	$(XCOPY) bin\*.bat $(INST_BIN)\*.*
 	$(XCOPY) ..\pod\*.bat $(INST_BIN)\*.*
+
+installhtml : doc
 	$(RCOPY) html\*.* $(INST_HTML)\*.*
 
 inst_lib : $(CONFIGPM)

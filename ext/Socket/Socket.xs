@@ -323,8 +323,14 @@ constant(char *name, int arg)
     case 'L':
 	break;
     case 'M':
+	if (strEQ(name, "MSG_CTRUNC"))
+#if defined(MSG_CTRUNC) || defined(HAS_GNULIBC) /* XXX it's an enum */
+	    return MSG_CTRUNC;
+#else
+	    goto not_there;
+#endif
 	if (strEQ(name, "MSG_DONTROUTE"))
-#ifdef MSG_DONTROUTE
+#if defined(MSG_DONTROUTE) || defined(HAS_GNULIBC) /* XXX it's an enum */
 	    return MSG_DONTROUTE;
 #else
 	    goto not_there;
@@ -336,14 +342,20 @@ constant(char *name, int arg)
 	    goto not_there;
 #endif
 	if (strEQ(name, "MSG_OOB"))
-#ifdef MSG_OOB
+#if defined(MSG_OOB) || defined(HAS_GNULIBC) /* XXX it's an enum */
 	    return MSG_OOB;
 #else
 	    goto not_there;
 #endif
 	if (strEQ(name, "MSG_PEEK"))
-#ifdef MSG_PEEK
+#if defined(MSG_PEEK) || defined(HAS_GNULIBC) /* XXX it's an enum */
 	    return MSG_PEEK;
+#else
+	    goto not_there;
+#endif
+	if (strEQ(name, "MSG_PROXY"))
+#if defined(MSG_PROXY) || defined(HAS_GNULIBC) /* XXX it's an enum */
+	    return MSG_PROXY;
 #else
 	    goto not_there;
 #endif
@@ -742,9 +754,10 @@ pack_sockaddr_un(pathname)
 	{
 #ifdef I_SYS_UN
 	struct sockaddr_un sun_ad; /* fear using sun */
+	STRLEN len;
 	Zero( &sun_ad, sizeof sun_ad, char );
 	sun_ad.sun_family = AF_UNIX;
-	Copy( pathname, sun_ad.sun_path, sizeof sun_ad.sun_path, char );
+	strncpy(sun_ad.sun_path, pathname, sizeof sun_ad.sun_path);
 	ST(0) = sv_2mortal(newSVpv((char *)&sun_ad, sizeof sun_ad));
 #else
 	ST(0) = (SV *) not_here("pack_sockaddr_un");
@@ -758,9 +771,10 @@ unpack_sockaddr_un(sun_sv)
 	CODE:
 	{
 #ifdef I_SYS_UN
-	STRLEN sockaddrlen;
 	struct sockaddr_un addr;
-	char *	sun_ad = SvPV(sun_sv,sockaddrlen);
+	STRLEN sockaddrlen;
+	char * sun_ad = SvPV(sun_sv,sockaddrlen);
+	char * e;
 
 	if (sockaddrlen != sizeof(addr)) {
 	    croak("Bad arg length for %s, length is %d, should be %d",
@@ -775,8 +789,11 @@ unpack_sockaddr_un(sun_sv)
 			"Socket::unpack_sockaddr_un",
 			addr.sun_family,
 			AF_UNIX);
-	} 
-	ST(0) = sv_2mortal(newSVpv(addr.sun_path, strlen(addr.sun_path)));
+	}
+	e = addr.sun_path;
+	while (*e && e < addr.sun_path + sizeof addr.sun_path)
+	    ++e;
+	ST(0) = sv_2mortal(newSVpvn(addr.sun_path, e - addr.sun_path));
 #else
 	ST(0) = (SV *) not_here("unpack_sockaddr_un");
 #endif
@@ -823,7 +840,7 @@ unpack_sockaddr_in(sin_sv)
 	port = ntohs(addr.sin_port);
 	ip_address = addr.sin_addr;
 
-	EXTEND(sp, 2);
+	EXTEND(SP, 2);
 	PUSHs(sv_2mortal(newSViv((IV) port)));
 	PUSHs(sv_2mortal(newSVpv((char *)&ip_address,sizeof ip_address)));
 	}

@@ -194,7 +194,7 @@ the return value of your socket() call?  See L<perlfunc/accept>.
 
 =item Applying %s to %s will act on scalar(%s)
 
-(W) The pattern match (//), substitution (s///), and translation (tr///)
+(W) The pattern match (//), substitution (s///), and transliteration (tr///)
 operators work on scalar values.  If you apply one of them to an array
 or a hash, it will convert the array or hash to a scalar value -- the
 length of an array, or the population info of a hash -- and then work on
@@ -360,6 +360,12 @@ Perl yourself.
 (F) With "strict subs" in use, a bareword is only allowed as a
 subroutine identifier, in curly braces or to the left of the "=>" symbol.
 Perhaps you need to predeclare a subroutine?
+
+=item Bareword "%s" refers to nonexistent package
+
+(W) You used a qualified bareword of the form C<Foo::>, but
+the compiler saw no other uses of that namespace before that point.
+Perhaps you need to predeclare a package?
 
 =item BEGIN failed--compilation aborted
 
@@ -638,6 +644,11 @@ call for another.  It can't manufacture one out of whole cloth.  In general
 you should be calling it out of only an AUTOLOAD routine anyway.  See
 L<perlfunc/goto>.
 
+=item Can't goto subroutine from an eval-string
+
+(F) The "goto subroutine" call can't be used to jump out of an eval "string".
+(You can use it to jump out of an eval {BLOCK}, but you probably don't want to.)
+
 =item Can't localize through a reference
 
 (F) You said something like C<local $$ref>, which Perl can't currently
@@ -681,11 +692,6 @@ to exist.
 =item Can't make list assignment to \%ENV on this system
 
 (F) List assignment to %ENV is not supported on some systems, notably VMS.
-
-=item Can't mktemp()
-
-(F) The mktemp() routine failed for some reason while trying to process
-a B<-e> switch.  Maybe your /tmp partition is full, or clobbered.
 
 =item Can't modify %s in %s
 
@@ -883,15 +889,22 @@ a B<-e> switch.  Maybe your /tmp partition is full, or clobbered.
 an assignment operator, which implies modifying the value itself.
 Perhaps you need to copy the value to a temporary, and repeat that.
 
+=item Cannot create temporary file "%s"
+
+(F) A temporary file could not created for some reason while trying to
+process a B<-e> switch.  Maybe your temporary file partition is full,
+or over-protected, or clobbered.
+
 =item Cannot find an opnumber for "%s"
 
 (F) A string of a form C<CORE::word> was given to prototype(), but
 there is no builtin with the name C<word>.
 
-=item Cannot open temporary file
+=item Cannot generate temporary filename
 
-(F) The create routine failed for some reason while trying to process
-a B<-e> switch.  Maybe your /tmp partition is full, or clobbered.
+(F) While trying to process a B<-e> switch, a filename for a temporary
+file could not be generated.  Maybe your temporary file partition is
+full, or over-protected, or clobbered.
 
 =item Cannot resolve method `%s' overloading `%s' in package `%s'
 
@@ -1698,10 +1711,10 @@ about 250 characters.  You've exceeded that length.  Future versions of
 Perl are likely to eliminate this arbitrary limitation.  In the meantime,
 try using scientific notation (e.g. "1e6" instead of "1_000_000").
 
-=item Odd number of elements in hash list
+=item Odd number of elements in hash assignment
 
-(S) You specified an odd number of elements to a hash list, which is odd,
-because hash lists come in key/value pairs.
+(S) You specified an odd number of elements to initialize a hash, which
+is odd, because hashes come in key/value pairs.
 
 =item Offset outside string
 
@@ -2049,6 +2062,18 @@ which is why it's currently left out of your copy.
 
 (F) More than 100 levels of inheritance were used.  Probably indicates
 an unintended loop in your inheritance hierarchy.
+
+=item Reference found where even-sized list expected
+
+(W) You gave a single reference where Perl was expecting a list with
+an even number of elements (for assignment to a hash). This
+usually means that you used the anon hash constructor when you meant 
+to use parens. In any case, a hash requires key/value B<pairs>.
+
+    %hash = { one => 1, two => 2, };	# WRONG
+    %hash = [ qw/ an anon array / ];	# WRONG
+    %hash = ( one => 1, two => 2, );	# right
+    %hash = qw( one 1 two 2 );			# also fine
 
 =item Reference miscount in sv_replace()
 
@@ -2458,13 +2483,13 @@ Perl yourself.
 (F) The regular expression ends with an unbackslashed backslash.  Backslash
 it.   See L<perlre>.
 
-=item Translation pattern not terminated
+=item Transliteration pattern not terminated
 
 (F) The lexer couldn't find the interior delimiter of a tr/// or tr[][]
 or y/// or y[][] construct.  Missing the leading C<$> from variables
 C<$tr> or C<$y> may cause this error.
 
-=item Translation replacement not terminated
+=item Transliteration replacement not terminated
 
 (F) The lexer couldn't find the final delimiter of a tr/// or tr[][]
 construct.
@@ -2801,6 +2826,27 @@ variables.
 (A) You've accidentally run your script through B<csh> instead
 of Perl.  Check the #! line, or manually feed your script into
 Perl yourself.
+
+=item perl: warning: Setting locale failed.
+
+(S) The whole warning message will look something like:
+
+	perl: warning: Setting locale failed.
+	perl: warning: Please check that your locale settings:
+	        LC_ALL = "En_US",
+	        LANG = (unset)
+	    are supported and installed on your system.
+	perl: warning: Falling back to the standard locale ("C").
+
+Exactly what were the failed locale settings varies.  In the above the
+settings were that the LC_ALL was "En_US" and the LANG had no value.
+This error means that Perl detected that you and/or your system
+administrator have set up the so-called variable system but Perl could
+not use those settings.  This was not dead serious, fortunately: there
+is a "default locale" called "C" that Perl can and will use, the
+script will be run.  Before you really fix the problem, however, you
+will get the same error message each time you run Perl.  How to really
+fix the problem can be found in L<perllocale> section B<LOCALE PROBLEMS>.
 
 =item Warning: something's wrong
 

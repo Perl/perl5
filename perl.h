@@ -46,7 +46,11 @@
 #  ifdef __GNUC__
 #    define stringify_immed(s) #s
 #    define stringify(s) stringify_immed(s)
+#ifdef EMBED
+register struct op *Perl_op asm(stringify(OP_IN_REGISTER));
+#else
 register struct op *op asm(stringify(OP_IN_REGISTER));
+#endif
 #  endif
 #endif
 
@@ -113,8 +117,7 @@ register struct op *op asm(stringify(OP_IN_REGISTER));
 # define STANDARD_C 1
 #endif
 
-#if defined(__cplusplus) || defined(WIN32) || defined(__sgi) || defined(OS2) \
-	|| defined(__DGUX)
+#if defined(__cplusplus) || defined(WIN32) || defined(__sgi) || defined(OS2) || defined(__DGUX)
 # define DONT_DECLARE_STD 1
 #endif
 
@@ -784,7 +787,11 @@ Free_t   Perl_free _((Malloc_t where));
 #  ifdef MAXUSHORT
 #    define PERL_USHORT_MAX ((unsigned short)MAXUSHORT)
 #  else
-#    define PERL_USHORT_MAX       ((unsigned short)~(unsigned)0)
+#    ifdef USHRT_MAX
+#      define PERL_USHORT_MAX ((unsigned short)USHRT_MAX)
+#    else
+#      define PERL_USHORT_MAX       ((unsigned short)~(unsigned)0)
+#    endif
 #  endif
 #endif
 
@@ -794,7 +801,11 @@ Free_t   Perl_free _((Malloc_t where));
 #  ifdef MAXSHORT    /* Often used in <values.h> */
 #    define PERL_SHORT_MAX ((short)MAXSHORT)
 #  else
-#    define PERL_SHORT_MAX      ((short) (PERL_USHORT_MAX >> 1))
+#    ifdef SHRT_MAX
+#      define PERL_SHORT_MAX ((short)SHRT_MAX)
+#    else
+#      define PERL_SHORT_MAX      ((short) (PERL_USHORT_MAX >> 1))
+#    endif
 #  endif
 #endif
 
@@ -804,7 +815,11 @@ Free_t   Perl_free _((Malloc_t where));
 #  ifdef MINSHORT
 #    define PERL_SHORT_MIN ((short)MINSHORT)
 #  else
-#    define PERL_SHORT_MIN        (-PERL_SHORT_MAX - ((3 & -1) == 3))
+#    ifdef SHRT_MIN
+#      define PERL_SHORT_MIN ((short)SHRT_MIN)
+#    else
+#      define PERL_SHORT_MIN        (-PERL_SHORT_MAX - ((3 & -1) == 3))
+#    endif
 #  endif
 #endif
 
@@ -1100,6 +1115,8 @@ union any {
 #include "hv.h"
 #include "mg.h"
 #include "scope.h"
+#include "bytecode.h"
+#include "byterun.h"
 
 /* work around some libPW problems */
 #ifdef DOINIT
@@ -1628,6 +1645,12 @@ typedef enum {
 #define PERLVARI(var,type,init) type var;
 #define PERLVARIC(var,type,init) type var;
 
+/* Interpreter exitlist entry */
+typedef struct exitlistentry {
+    void (*fn) _((void*));
+    void *ptr;
+} PerlExitListEntry;
+
 #ifdef PERL_GLOBAL_STRUCT
 struct perl_vars {
 #include "perlvars.h"
@@ -2024,7 +2047,7 @@ enum {
 
 #endif /* !USE_LOCALE_NUMERIC */
 
-#if !defined(PERLIO_IS_STDIO) && defined(HAS_ATTRIBUTE)
+#if !defined(PERLIO_IS_STDIO) && defined(HASATTRIBUTE)
 /* 
  * Now we have __attribute__ out of the way 
  * Remap printf 
@@ -2045,6 +2068,9 @@ enum {
 	if (!nice_chunk) {				\
 	    nice_chunk = (char*)(chunk);		\
 	    nice_chunk_size = (chunk_size);		\
+	}						\
+	else {						\
+	    Safefree(chunk);				\
 	}						\
 	UNLOCK_SV_MUTEX;				\
     } while (0)

@@ -117,8 +117,8 @@ threadstart(void *arg)
     PUTBACK;
     perl_call_sv(sv, G_ARRAY|G_EVAL);
     SPAGAIN;
-    retval = sp - (stack_base + oldmark);
-    sp = stack_base + oldmark + 1;
+    retval = SP - (stack_base + oldmark);
+    SP = stack_base + oldmark + 1;
     if (SvCUR(thr->errsv)) {
 	MUTEX_LOCK(&thr->mutex);
 	thr->flags |= THRf_DID_DIE;
@@ -126,17 +126,17 @@ threadstart(void *arg)
 	av_store(av, 0, &sv_no);
 	av_store(av, 1, newSVsv(thr->errsv));
 	DEBUG_L(PerlIO_printf(PerlIO_stderr(), "%p died: %s\n",
-			      SvPV(thr->errsv, na)));
+			      thr, SvPV(thr->errsv, na)));
     } else {
 	DEBUG_L(STMT_START {
 	    for (i = 1; i <= retval; i++) {
 		PerlIO_printf(PerlIO_stderr(), "%p return[%d] = %s\n",
-				thr, i, SvPEEK(sp[i - 1]));
+				thr, i, SvPEEK(SP[i - 1]));
 	    }
 	} STMT_END);
 	av_store(av, 0, &sv_yes);
-	for (i = 1; i <= retval; i++, sp++)
-	    sv_setsv(*av_fetch(av, i, TRUE), SvREFCNT_inc(*sp));
+	for (i = 1; i <= retval; i++, SP++)
+	    sv_setsv(*av_fetch(av, i, TRUE), SvREFCNT_inc(*SP));
     }
 
   finishoff:
@@ -219,7 +219,7 @@ newthread (SV *startsv, AV *initargs, char *classname)
 			  "%p: newthread (%p), tid is %u, preparing stack\n",
 			  savethread, thr, thr->tid));
     /* The following pushes the arg list and startsv onto the *new* stack */
-    PUSHMARK(sp);
+    PUSHMARK(SP);
     /* Could easily speed up the following greatly */
     for (i = 0; i <= AvFILL(initargs); i++)
 	XPUSHs(SvREFCNT_inc(*av_fetch(initargs, i, FALSE)));
@@ -280,8 +280,15 @@ static Signal_t handle_thread_signal _((int sig));
 static Signal_t
 handle_thread_signal(int sig)
 {
-    char c = (char) sig;
-    write(sig_pipe[0], &c, 1);
+    unsigned char c = (unsigned char) sig;
+    /*
+     * We're not really allowed to call fprintf in a signal handler
+     * so don't be surprised if this isn't robust while debugging
+     * with -DL.
+     */
+    DEBUG_L(PerlIO_printf(PerlIO_stderr(),
+	    "handle_thread_signal: got signal %d\n", sig););
+    write(sig_pipe[1], &c, 1);
 }
 
 MODULE = Thread		PACKAGE = Thread
@@ -543,7 +550,7 @@ list(classname)
 	/* Truncate any unneeded slots in av */
 	av_fill(av, n - 1);
 	/* Finally, push all the new objects onto the stack and drop av */
-	EXTEND(sp, n);
+	EXTEND(SP, n);
 	for (svp = AvARRAY(av); n > 0; n--, svp++)
 	    PUSHs(*svp);
 	(void)sv_2mortal((SV*)av);
@@ -555,7 +562,7 @@ MODULE = Thread		PACKAGE = Thread::Signal
 void
 kill_sighandler_thread()
     PPCODE:
-	write(sig_pipe[0], "\0", 1);
+	write(sig_pipe[1], "\0", 1);
 	PUSHs(&sv_yes);
 
 void
@@ -566,22 +573,22 @@ init_thread_signals()
 	    XSRETURN_UNDEF;
 	PUSHs(&sv_yes);
 
-SV *
+void
 await_signal()
     PREINIT:
-	char c;
+	unsigned char c;
 	SSize_t ret;
     CODE:
 	do {
-	    ret = read(sig_pipe[1], &c, 1);
+	    ret = read(sig_pipe[0], &c, 1);
 	} while (ret == -1 && errno == EINTR);
 	if (ret == -1)
 	    croak("panic: await_signal");
-	if (ret == 0)
-	    XSRETURN_UNDEF;
-	RETVAL = c ? psig_ptr[c] : &sv_no;
-    OUTPUT:
-	RETVAL
+	ST(0) = sv_newmortal();
+	if (ret)
+	    sv_setsv(ST(0), c ? psig_ptr[c] : &sv_no);
+	DEBUG_L(PerlIO_printf(PerlIO_stderr(),
+			      "await_signal returning %s\n", SvPEEK(ST(0))););
 
 MODULE = Thread		PACKAGE = Thread::Specific
 

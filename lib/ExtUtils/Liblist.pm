@@ -261,9 +261,38 @@ sub _win32_ext {
 
 sub _vms_ext {
   my($self, $potential_libs,$verbose) = @_;
-  return ('', '', '', '') unless $potential_libs;
+  my(@crtls,$crtlstr);
+  my($dbgqual) = $self->{OPTIMIZE} || $Config{'optimize'} ||
+                 $self->{CCFLAS}   || $Config{'ccflags'};
+  @crtls = ( ($dbgqual =~ m-/Debug-i ? $Config{'dbgprefix'} : '')
+              . 'PerlShr/Share' );
+  push(@crtls, grep { not /\(/ } split /\s+/, $Config{'libs'});
+  push(@crtls, grep { not /\(/ } split /\s+/, $Config{'libc'});
+  # In general, we pass through the basic libraries from %Config unchanged.
+  # The one exception is that if we're building in the Perl source tree, and
+  # a library spec could be resolved via a logical name, we go to some trouble
+  # to insure that the copy in the local tree is used, rather than one to
+  # which a system-wide logical may point.
+  if ($self->{PERL_SRC}) {
+    my($lib,$locspec,$type);
+    foreach $lib (@crtls) { 
+      if (($locspec,$type) = $lib =~ m-^([\w$\-]+)(/\w+)?- and $locspec =~ /perl/i) {
+        if    (lc $type eq '/share')   { $locspec .= $Config{'exe_ext'}; }
+        elsif (lc $type eq '/library') { $locspec .= $Config{'lib_ext'}; }
+        else                           { $locspec .= $Config{'obj_ext'}; }
+        $locspec = $self->catfile($self->{PERL_SRC},$locspec);
+        $lib = "$locspec$type" if -e $locspec;
+      }
+    }
+  }
+  $crtlstr = @crtls ? join(' ',@crtls) : '';
 
-  my(@dirs,@libs,$dir,$lib,%sh,%olb,%obj);
+  unless ($potential_libs) {
+    warn "Result:\n\tEXTRALIBS: \n\tLDLOADLIBS: $crtlstr\n" if $verbose;
+    return ('', '', $crtlstr, '');
+  }
+
+  my(@dirs,@libs,$dir,$lib,%sh,%olb,%obj,$ldlib);
   my $cwd = cwd();
   my($so,$lib_ext,$obj_ext) = @Config{'so','lib_ext','obj_ext'};
   # List of common Unix library names and there VMS equivalents
@@ -388,8 +417,10 @@ sub _vms_ext {
   push(@libs, map { "$_/Library" } sort keys %olb);
   push(@libs, map { "$_/Share"   } sort keys %sh);
   $lib = join(' ',@libs);
-  warn "Result: $lib\n" if $verbose;
-  wantarray ? ($lib, '', $lib, '') : $lib;
+
+  $ldlib = $crtlstr ? "$lib $crtlstr" : $lib;
+  warn "Result:\n\tEXTRALIBS: $lib\n\tLDLOADLIBS: $ldlib\n" if $verbose;
+  wantarray ? ($lib, '', $ldlib, '') : $lib;
 }
 
 1;
@@ -499,8 +530,10 @@ these directives, rather than elements used on the linker command line.
 
 =item *
 
-LDLOADLIBS and EXTRALIBS are always identical under VMS, and BSLOADLIBS
-and LD_RIN_PATH are always empty.
+LDLOADLIBS contains both the libraries found based on C<$potential_libs> and
+the CRTLs, if any, specified in Config.pm.  EXTRALIBS contains just those
+libraries found based on C<$potential_libs>.  BSLOADLIBS and LD_RUN_PATH
+are always empty.
 
 =back
 

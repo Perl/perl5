@@ -271,7 +271,10 @@ struct regnode_2 {
 
 #endif 
 
-#define REG_INFTY I16_MAX
+/* I16_MAX is no good for REG_INFTY because sizeof(short) > 2
+ * is perfectly fine.  In Cray C90 sizeof(short) == 4,
+ * in Cray T90 sizeof(short) == 8. */
+#define REG_INFTY ((1<<15)-1)
 
 #ifdef REGALIGN
 #  define ARG_VALUE(arg) (arg)
@@ -445,7 +448,5 @@ const static char reg_off_by_arg[] = {
 #define REG_SEEN_GPOS		4
 
 #ifdef DEBUGGING
-extern char *colors[4];
+EXT char *colors[4];  /* not dEXT since we do EXTERN/INTERN.h shuffle */
 #endif 
-
-void	re_croak2 _((const char* pat1,const char* pat2,...)) __attribute__((noreturn));

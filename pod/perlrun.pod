@@ -72,7 +72,7 @@ The sequences "-*" and "- " are specifically ignored so that you could,
 if you were so inclined, say
 
     #!/bin/sh -- # -*- perl -*- -p
-    eval 'exec /usr/bin/perl $0 -S ${1+"$@"}'
+    eval 'exec /usr/bin/perl -S $0 ${1+"$@"}'
         if $running_under_some_shell;
 
 to let Perl see the B<-p> switch.
@@ -618,7 +618,8 @@ look in COMSPEC to find a shell fit for interactive use).
 
 =item PERL_DEBUG_MSTATS
 
-Relevant only if your perl executable was built with B<-DDEBUGGING_MSTATS>,
+Relevant only if perl is compiled with the malloc included with the perl
+distribution (that is, if C<perl -V:d_mymalloc> is 'define'),
 if set, this causes memory statistics to be dumped after execution.  If set
 to an integer greater than one, also causes memory statistics to be dumped
 after compilation.

@@ -3,8 +3,12 @@
 
 #ifdef PERL_OBJECT
 #else
-#define PerlDir_mkdir(name, mode) mkdir((name), (mode))
-#define PerlDir_chdir(name) chdir((name))
+#define PerlDir_mkdir(name, mode) Mkdir((name), (mode))
+#ifdef VMS
+#  define PerlDir_chdir(name) chdir(((name) && *(name)) ? (name) : "SYS$LOGIN")
+#else 
+#  define PerlDir_chdir(name) chdir((name))
+#endif
 #define PerlDir_rmdir(name) rmdir((name))
 #define PerlDir_close(dir) closedir((dir))
 #define PerlDir_open(name) opendir((name))

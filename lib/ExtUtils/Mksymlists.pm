@@ -176,13 +176,6 @@ sub _write_vms {
     }
     close OPT;
 
-    # Options file specifying RTLs to which this extension must be linked.
-    # Eventually, the list of libraries will be supplied by a working
-    # extliblist routine.
-    open OPT,'>rtls.opt';
-    print OPT "PerlShr/Share\n";
-    foreach $rtl (split(/\s+/,$Config::Config{'libs'})) { print OPT "$rtl\n"; }
-    close OPT;
 }
 
 1;

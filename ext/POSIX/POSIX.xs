@@ -1,3 +1,6 @@
+#ifdef WIN32
+#define _POSIX_
+#endif
 #include "EXTERN.h"
 #define PERLIO_NOT_STDIO 1
 #include "perl.h"
@@ -40,7 +43,9 @@
 #include <sys/stat.h>
 #include <sys/types.h>
 #include <time.h>
+#ifdef I_UNISTD
 #include <unistd.h>	/* see hints/sunos_4_1.sh */
+#endif
 #include <fcntl.h>
 
 #if defined(__VMS) && !defined(__POSIX_SOURCE)
@@ -91,6 +96,28 @@
    }
 #  define times(t) vms_times(t)
 #else
+#if defined (WIN32)
+#  undef mkfifo  /* #defined in perl.h */
+#  define mkfifo(a,b) not_here("mkfifo")
+#  define ttyname(a) not_here("ttyname")
+#  define sigset_t long
+#  define pid_t long
+#  ifdef __BORLANDC__
+#    define tzname _tzname
+#  endif
+#  ifdef _MSC_VER
+#    define mode_t short
+#  endif
+#  define sigaction(a,b,c)	not_here("sigaction")
+#  define sigpending(a)		not_here("sigpending")
+#  define sigprocmask(a,b,c)	not_here("sigprocmask")
+#  define sigsuspend(a)		not_here("sigsuspend")
+#  define sigemptyset(a)	not_here("sigemptyset")
+#  define sigaddset(a,b)	not_here("sigaddset")
+#  define sigdelset(a,b)	not_here("sigdelset")
+#  define sigfillset(a)		not_here("sigfillset")
+#  define sigismember(a,b)	not_here("sigismember")
+#else
 #  include <grp.h>
 #  include <sys/times.h>
 #  ifdef HAS_UNAME
@@ -100,7 +127,8 @@
 #  ifdef I_UTIME
 #    include <utime.h>
 #  endif
-#endif
+#endif /* WIN32 */
+#endif /* __VMS */
 
 typedef int SysRet;
 typedef long SysRetLong;
@@ -227,10 +255,12 @@ unsigned long strtoul _((const char *, char **, int));
 #define localeconv() not_here("localeconv")
 #endif
 
+#ifndef WIN32
 #ifdef HAS_TZNAME
 extern char *tzname[];
 #else
 char *tzname[] = { "" , "" };
+#endif
 #endif
 
 /* XXX struct tm on some systems (SunOS4/BSD) contains extra (non POSIX)
@@ -247,6 +277,12 @@ char *tzname[] = { "" , "" };
  * support is added and NETaa14816 is considered in full.
  * It does not address tzname aspects of NETaa14816.
  */
+#ifdef HAS_GNULIBC
+# ifndef STRUCT_TM_HASZONE
+#    define STRUCT_TM_HAS_ZONE
+# endif
+#endif
+
 #ifdef STRUCT_TM_HASZONE
 static void
 init_tm(ptm)		/* see mktime, strftime and asctime	*/
@@ -262,7 +298,13 @@ init_tm(ptm)		/* see mktime, strftime and asctime	*/
 #endif
 
 
-#ifndef HAS_LONG_DOUBLE /* XXX What to do about long doubles? */
+#ifdef HAS_LONG_DOUBLE
+#  if LONG_DOUBLESIZE > DOUBLESIZE
+#    undef HAS_LONG_DOUBLE  /* XXX until we figure out how to use them */
+#  endif
+#endif
+
+#ifndef HAS_LONG_DOUBLE 
 #ifdef LDBL_MAX
 #undef LDBL_MAX
 #endif
@@ -281,7 +323,12 @@ not_here(char *s)
     return -1;
 }
 
-static double
+static
+#ifdef HAS_LONG_DOUBLE
+long double
+#else
+double
+#endif
 constant(char *name, int arg)
 {
     errno = 0;
@@ -2543,6 +2590,7 @@ new(packname = "POSIX::Termios", ...)
 	    RETVAL = (struct termios*)safemalloc(sizeof(struct termios));
 #else
 	    not_here("termios");
+        RETVAL = 0;
 #endif
 	}
     OUTPUT:
@@ -2592,7 +2640,8 @@ getiflag(termios_ref)
 #ifdef I_TERMIOS /* References a termios structure member so ifdef it out. */
 	RETVAL = termios_ref->c_iflag;
 #else
-	    not_here("getiflag");
+     not_here("getiflag");
+     RETVAL = 0;
 #endif
     OUTPUT:
 	RETVAL
@@ -2604,7 +2653,8 @@ getoflag(termios_ref)
 #ifdef I_TERMIOS /* References a termios structure member so ifdef it out. */
 	RETVAL = termios_ref->c_oflag;
 #else
-	    not_here("getoflag");
+     not_here("getoflag");
+     RETVAL = 0;
 #endif
     OUTPUT:
 	RETVAL
@@ -2616,7 +2666,8 @@ getcflag(termios_ref)
 #ifdef I_TERMIOS /* References a termios structure member so ifdef it out. */
 	RETVAL = termios_ref->c_cflag;
 #else
-	    not_here("getcflag");
+     not_here("getcflag");
+     RETVAL = 0;
 #endif
     OUTPUT:
 	RETVAL
@@ -2628,7 +2679,8 @@ getlflag(termios_ref)
 #ifdef I_TERMIOS /* References a termios structure member so ifdef it out. */
 	RETVAL = termios_ref->c_lflag;
 #else
-	    not_here("getlflag");
+     not_here("getlflag");
+     RETVAL = 0;
 #endif
     OUTPUT:
 	RETVAL
@@ -2643,7 +2695,8 @@ getcc(termios_ref, ccix)
 	    croak("Bad getcc subscript");
 	RETVAL = termios_ref->c_cc[ccix];
 #else
-	    not_here("getcc");
+     not_here("getcc");
+     RETVAL = 0;
 #endif
     OUTPUT:
 	RETVAL
@@ -3079,7 +3132,9 @@ sigaction(sig, action, oldaction = 0)
 	POSIX::SigAction	action
 	POSIX::SigAction	oldaction
     CODE:
-
+#ifdef WIN32
+	RETVAL = not_here("sigaction");
+#else
 # This code is really grody because we're trying to make the signal
 # interface look beautiful, which is hard.
 
@@ -3158,6 +3213,7 @@ sigaction(sig, action, oldaction = 0)
 		sv_setiv(*svp, oact.sa_flags);
 	    }
 	}
+#endif
     OUTPUT:
 	RETVAL
 
@@ -3207,7 +3263,7 @@ pipe()
     PPCODE:
 	int fds[2];
 	if (pipe(fds) != -1) {
-	    EXTEND(sp,2);
+	    EXTEND(SP,2);
 	    PUSHs(sv_2mortal(newSViv(fds[0])));
 	    PUSHs(sv_2mortal(newSViv(fds[1])));
 	}
@@ -3251,7 +3307,7 @@ uname()
 #ifdef HAS_UNAME
 	struct utsname buf;
 	if (uname(&buf) >= 0) {
-	    EXTEND(sp, 5);
+	    EXTEND(SP, 5);
 	    PUSHs(sv_2mortal(newSVpv(buf.sysname, 0)));
 	    PUSHs(sv_2mortal(newSVpv(buf.nodename, 0)));
 	    PUSHs(sv_2mortal(newSVpv(buf.release, 0)));
@@ -3319,7 +3375,7 @@ strtod(str)
 	num = strtod(str, &unparsed);
 	PUSHs(sv_2mortal(newSVnv(num)));
 	if (GIMME == G_ARRAY) {
-	    EXTEND(sp, 1);
+	    EXTEND(SP, 1);
 	    if (unparsed)
 		PUSHs(sv_2mortal(newSViv(strlen(unparsed))));
 	    else
@@ -3340,7 +3396,7 @@ strtol(str, base = 0)
 	else
 	    PUSHs(sv_2mortal(newSVnv((double)num)));
 	if (GIMME == G_ARRAY) {
-	    EXTEND(sp, 1);
+	    EXTEND(SP, 1);
 	    if (unparsed)
 		PUSHs(sv_2mortal(newSViv(strlen(unparsed))));
 	    else
@@ -3361,7 +3417,7 @@ strtoul(str, base = 0)
 	else
 	    PUSHs(sv_2mortal(newSVnv((double)num)));
 	if (GIMME == G_ARRAY) {
-	    EXTEND(sp, 1);
+	    EXTEND(SP, 1);
 	    if (unparsed)
 		PUSHs(sv_2mortal(newSViv(strlen(unparsed))));
 	    else
@@ -3462,7 +3518,7 @@ times()
 	struct tms tms;
 	clock_t realtime;
 	realtime = times( &tms );
-	EXTEND(sp,5);
+	EXTEND(SP,5);
 	PUSHs( sv_2mortal( newSViv( (IV) realtime ) ) );
 	PUSHs( sv_2mortal( newSViv( (IV) tms.tms_utime ) ) );
 	PUSHs( sv_2mortal( newSViv( (IV) tms.tms_stime ) ) );
@@ -3540,7 +3596,7 @@ tzset()
 void
 tzname()
     PPCODE:
-	EXTEND(sp,2);
+	EXTEND(SP,2);
 	PUSHs(sv_2mortal(newSVpv(tzname[0],strlen(tzname[0]))));
 	PUSHs(sv_2mortal(newSVpv(tzname[1],strlen(tzname[1]))));
 

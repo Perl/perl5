@@ -68,7 +68,9 @@
 #define bool__amg		Perl_bool__amg
 #define boot_core_UNIVERSAL	Perl_boot_core_UNIVERSAL
 #define bor_amg			Perl_bor_amg
+#define bset_obj_store		Perl_bset_obj_store
 #define bxor_amg		Perl_bxor_amg
+#define byterun			Perl_byterun
 #define call_list		Perl_call_list
 #define cando			Perl_cando
 #define cast_ulong		Perl_cast_ulong
@@ -365,6 +367,7 @@
 #define newAVREF		Perl_newAVREF
 #define newBINOP		Perl_newBINOP
 #define newCONDOP		Perl_newCONDOP
+#define newCONSTSUB		Perl_newCONSTSUB
 #define newCVREF		Perl_newCVREF
 #define newFORM			Perl_newFORM
 #define newFOROP		Perl_newFOROP
@@ -403,6 +406,7 @@
 #define newWHILEOP		Perl_newWHILEOP
 #define newXS			Perl_newXS
 #define newXSUB			Perl_newXSUB
+#define new_stackinfo		Perl_new_stackinfo
 #define new_struct_thread	Perl_new_struct_thread
 #define nextargv		Perl_nextargv
 #define ninstr			Perl_ninstr
@@ -844,6 +848,7 @@
 #define same_dirent		Perl_same_dirent
 #define save_I16		Perl_save_I16
 #define save_I32		Perl_save_I32
+#define save_aelem		Perl_save_aelem
 #define save_aptr		Perl_save_aptr
 #define save_ary		Perl_save_ary
 #define save_clearsv		Perl_save_clearsv
@@ -854,6 +859,7 @@
 #define save_freesv		Perl_save_freesv
 #define save_gp			Perl_save_gp
 #define save_hash		Perl_save_hash
+#define save_helem		Perl_save_helem
 #define save_hptr		Perl_save_hptr
 #define save_int		Perl_save_int
 #define save_item		Perl_save_item
@@ -909,6 +915,7 @@
 #define sle_amg			Perl_sle_amg
 #define slt_amg			Perl_slt_amg
 #define sne_amg			Perl_sne_amg
+#define specialsv_list		Perl_specialsv_list
 #define sqrt_amg		Perl_sqrt_amg
 #define stack_grow		Perl_stack_grow
 #define start_subparse		Perl_start_subparse

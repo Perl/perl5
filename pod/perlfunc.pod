@@ -863,7 +863,9 @@ is just like
 except that it's more efficient, more concise, keeps track of the
 current filename for error messages, and searches all the B<-I>
 libraries if the file isn't in the current directory (see also the @INC
-array in L<perlvar/Predefined Names>).  It's the same, however, in that it does
+array in L<perlvar/Predefined Names>).  It is also different in how
+code evaluated with C<do FILENAME> doesn't see lexicals in the enclosing
+scope like C<eval STRING> does.  It's the same, however, in that it does
 reparse the file every time you call it, so you probably don't want to
 do this inside a loop.
 
@@ -3720,7 +3722,7 @@ seconds, for this process and the children of this process.
 
 =item tr///
 
-The translation operator.  Same as y///. See L<perlop>.
+The transliteration operator.  Same as y///. See L<perlop>.
 
 =item truncate FILEHANDLE,LENGTH
 
@@ -4062,6 +4064,6 @@ Note that write is I<NOT> the opposite of read.  Unfortunately.
 
 =item y///
 
-The translation operator.  Same as tr///.  See L<perlop>.
+The transliteration operator.  Same as tr///.  See L<perlop>.
 
 =back

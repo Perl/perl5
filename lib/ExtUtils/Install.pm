@@ -30,6 +30,7 @@ sub install {
 
     use Cwd qw(cwd);
     use ExtUtils::MakeMaker; # to implement a MY class
+    use ExtUtils::Packlist;
     use File::Basename qw(dirname);
     use File::Copy qw(copy);
     use File::Find qw(find);
@@ -37,10 +38,11 @@ sub install {
     use File::Compare qw(compare);
 
     my(%hash) = %$hash;
-    my(%pack, %write, $dir, $warn_permissions);
+    my(%pack, $dir, $warn_permissions);
+    my($packlist) = ExtUtils::Packlist->new();
     # -w doesn't work reliably on FAT dirs
     $warn_permissions++ if $^O eq 'MSWin32';
-    local(*DIR, *P);
+    local(*DIR);
     for (qw/read write/) {
 	$pack{$_}=$hash{$_};
 	delete $hash{$_};
@@ -63,15 +65,7 @@ sub install {
 	}
 	closedir DIR;
     }
-    if (-f $pack{"read"}) {
-	open P, $pack{"read"} or Carp::croak("Couldn't read $pack{'read'}");
-	# Remember what you found
-	while (<P>) {
-	    chomp;
-	    $write{$_}++;
-	}
-	close P;
-    }
+    $packlist->read($pack{"read"}) if (-f $pack{"read"});
     my $cwd = cwd();
     my $umask = umask 0 unless $Is_VMS;
 
@@ -134,7 +128,7 @@ sub install {
 	    } else {
 		inc_uninstall($_,$File::Find::dir,$verbose,0); # nonono set to 0
 	    }
-	    $write{$targetfile}++;
+	    $packlist->{$targetfile}++;
 
 	}, ".");
 	chdir($cwd) or Carp::croak("Couldn't chdir to $cwd: $!");
@@ -144,11 +138,7 @@ sub install {
 	$dir = dirname($pack{'write'});
 	mkpath($dir,0,0755);
 	print "Writing $pack{'write'}\n";
-	open P, ">$pack{'write'}" or Carp::croak("Couldn't write $pack{'write'}: $!");
-	for (sort keys %write) {
-	    print P "$_\n";
-	}
-	close P;
+	$packlist->write($pack{'write'});
     }
 }
 
@@ -190,14 +180,13 @@ sub install_default {
 }
 
 sub uninstall {
+    use ExtUtils::Packlist;
     my($fil,$verbose,$nonono) = @_;
     die "no packlist file found: $fil" unless -f $fil;
     # my $my_req = $self->catfile(qw(auto ExtUtils Install forceunlink.al));
     # require $my_req; # Hairy, but for the first
-    local *P;
-    open P, $fil or Carp::croak("uninstall: Could not read packlist " .
-				"file $fil: $!");
-    while (<P>) {
+    my ($packlist) = ExtUtils::Packlist->new($fil);
+    foreach (sort(keys(%$packlist))) {
 	chomp;
 	print "unlink $_\n" if $verbose;
 	forceunlink($_) unless $nonono;

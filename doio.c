@@ -34,7 +34,7 @@
 #endif
 
 #ifdef I_UTIME
-#  ifdef _MSC_VER
+#  if defined(_MSC_VER) || defined(__MINGW32__)
 #    include <sys/utime.h>
 #  else
 #    include <utime.h>
@@ -92,6 +92,7 @@ do_open(GV *gv, register char *name, I32 len, int as_raw, int rawmode, int rawpe
     PerlIO *fp;
     int fd;
     int result;
+    bool was_fdopen = FALSE;
 
     forkprocess = 1;		/* assume true if no fork */
 
@@ -221,6 +222,8 @@ do_open(GV *gv, register char *name, I32 len, int as_raw, int rawmode, int rawpe
 		    }
 		    if (dodup)
 			fd = PerlLIO_dup(fd);
+		    else
+			was_fdopen = TRUE;
 		    if (!(fp = PerlIO_fdopen(fd,mode))) {
 			if (dodup)
 			    PerlLIO_close(fd);
@@ -330,7 +333,8 @@ do_open(GV *gv, register char *name, I32 len, int as_raw, int rawmode, int rawpe
 	    sv = *av_fetch(fdpid,fd,TRUE);
 	    (void)SvUPGRADE(sv, SVt_IV);
 	    SvIVX(sv) = pid;
-	    PerlIO_close(fp);
+	    if (!was_fdopen)
+		PerlIO_close(fp);
 
 	}
 	fp = saveifp;
@@ -564,13 +568,7 @@ badexit:
 
 /* explicit renamed to avoid C++ conflict    -- kja */
 bool
-#ifndef CAN_PROTOTYPE
-do_close(gv,not_implicit)
-GV *gv;
-bool not_implicit;
-#else
 do_close(GV *gv, bool not_implicit)
-#endif /* CAN_PROTOTYPE */
 {
     bool retval;
     IO *io;
@@ -818,7 +816,7 @@ my_stat(ARGSproto)
     GV* tmpgv;
 
     if (op->op_flags & OPf_REF) {
-	EXTEND(sp,1);
+	EXTEND(SP,1);
 	tmpgv = cGVOP->op_gv;
       do_fstat:
 	io = GvIO(tmpgv);
@@ -841,6 +839,7 @@ my_stat(ARGSproto)
     }
     else {
 	SV* sv = POPs;
+	char *s;
 	PUTBACK;
 	if (SvTYPE(sv) == SVt_PVGV) {
 	    tmpgv = (GV*)sv;
@@ -851,11 +850,12 @@ my_stat(ARGSproto)
 	    goto do_fstat;
 	}
 
+	s = SvPV(sv, na);
 	statgv = Nullgv;
-	sv_setpv(statname,SvPV(sv, na));
+	sv_setpv(statname, s);
 	laststype = OP_STAT;
-	laststatval = PerlLIO_stat(SvPV(sv, na),&statcache);
-	if (laststatval < 0 && dowarn && strchr(SvPV(sv, na), '\n'))
+	laststatval = PerlLIO_stat(s, &statcache);
+	if (laststatval < 0 && dowarn && strchr(s, '\n'))
 	    warn(warn_nl, "stat");
 	return laststatval;
     }
@@ -867,7 +867,7 @@ my_lstat(ARGSproto)
     djSP;
     SV *sv;
     if (op->op_flags & OPf_REF) {
-	EXTEND(sp,1);
+	EXTEND(SP,1);
 	if (cGVOP->op_gv == defgv) {
 	    if (laststype != OP_LSTAT)
 		croak("The stat preceding -l _ wasn't an lstat");

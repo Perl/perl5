@@ -69,7 +69,11 @@ typedef unsigned UBW;
  * If they're not right on your machine, then pack() and unpack()
  * wouldn't work right anyway; you'll need to apply the Cray hack.
  * (I'd like to check them with #if, but you can't use sizeof() in
- * the preprocessor.)
+ * the preprocessor.)  --???
+ */
+/*
+    The appropriate SHORTSIZE, INTSIZE, LONGSIZE, and LONGLONGSIZE
+    defines are now in config.h.  --Andy Dougherty  April 1998
  */
 #define SIZE16 2
 #define SIZE32 4
@@ -105,12 +109,16 @@ static bool srand_called = FALSE;
 
 /* variations on pp_null */
 
-#ifdef DONT_DECLARE_STD
 #ifdef I_UNISTD
 #include <unistd.h>
 #endif
-#else
-extern pid_t getpid (void);
+
+/* XXX I can't imagine anyone who doesn't have this actually _needs_
+   it, since pid_t is an integral type.
+   --AD  2/20/1998
+*/
+#ifdef NEED_GETPID_PROTO
+extern Pid_t getpid (void);
 #endif
 
 PP(pp_stub)
@@ -1772,6 +1780,7 @@ PP(pp_substr)
 	len = POPi;
     pos = POPi;
     sv = POPs;
+    PUTBACK;
     tmps = SvPV(sv, curlen);
     if (pos >= arybase) {
 	pos -= arybase;
@@ -1838,6 +1847,7 @@ PP(pp_substr)
 	    LvTARGLEN(TARG) = rem;
 	}
     }
+    SPAGAIN;
     PUSHs(TARG);		/* avoid SvSETMAGIC here */
     RETURN;
 }
@@ -2212,7 +2222,7 @@ PP(pp_aslice)
     if (SvTYPE(av) == SVt_PVAV) {
 	if (lval && op->op_private & OPpLVAL_INTRO) {
 	    I32 max = -1;
-	    for (svp = mark + 1; svp <= sp; svp++) {
+	    for (svp = MARK + 1; svp <= SP; svp++) {
 		elem = SvIVx(*svp);
 		if (elem > max)
 		    max = elem;
@@ -2230,7 +2240,7 @@ PP(pp_aslice)
 		if (!svp || *svp == &sv_undef)
 		    DIE(no_aelem, elem);
 		if (op->op_private & OPpLVAL_INTRO)
-		    save_svref(svp);
+		    save_aelem(av, elem, svp);
 	    }
 	    *MARK = svp ? *svp : &sv_undef;
 	}
@@ -2372,7 +2382,7 @@ PP(pp_hslice)
 		if (!he || HeVAL(he) == &sv_undef)
 		    DIE(no_helem, SvPV(keysv, na));
 		if (op->op_private & OPpLVAL_INTRO)
-		    save_svref(&HeVAL(he));
+		    save_helem(hv, keysv, &HeVAL(he));
 	    }
 	    *MARK = he ? HeVAL(he) : &sv_undef;
 	}
@@ -2479,7 +2489,7 @@ PP(pp_anonhash)
 	if (MARK < SP)
 	    sv_setsv(val, *++MARK);
 	else if (dowarn)
-	    warn("Odd number of elements in hash list");
+	    warn("Odd number of elements in hash assignment");
 	(void)hv_store_ent(hv,key,val,0);
     }
     SP = ORIGMARK;
@@ -2758,9 +2768,8 @@ PP(pp_unshift)
     MAGIC *mg;
 
     if (SvRMAGICAL(ary) && (mg = mg_find((SV*)ary,'P'))) {
-
-
 	*MARK-- = mg->mg_obj;
+	PUSHMARK(MARK);
 	PUTBACK;
 	ENTER;
 	perl_call_method("UNSHIFT",G_SCALAR|G_DISCARD);
@@ -2831,11 +2840,11 @@ mul128(SV *sv, U8 m)
   U32             i = 0;
 
   if (!strnEQ(s, "0000", 4)) {  /* need to grow sv */
-    SV             *New = newSVpv("0000000000", 10);
+    SV             *tmpNew = newSVpv("0000000000", 10);
 
-    sv_catsv(New, sv);
+    sv_catsv(tmpNew, sv);
     SvREFCNT_dec(sv);		/* free old sv */
-    sv = New;
+    sv = tmpNew;
     s = SvPV(sv, len);
   }
   t = s + len - 1;
@@ -2855,7 +2864,7 @@ PP(pp_unpack)
 {
     djSP;
     dPOPPOPssrl;
-    SV **oldsp = sp;
+    SV **oldsp = SP;
     I32 gimme = GIMME_V;
     SV *sv;
     STRLEN llen;
@@ -3539,7 +3548,7 @@ PP(pp_unpack)
 	    checksum = 0;
 	}
     }
-    if (sp == oldsp && gimme == G_SCALAR)
+    if (SP == oldsp && gimme == G_SCALAR)
 	PUSHs(&sv_undef);
     RETURN;
 }
@@ -4433,7 +4442,7 @@ PP(pp_threadsv)
 {
     djSP;
 #ifdef USE_THREADS
-    EXTEND(sp, 1);
+    EXTEND(SP, 1);
     if (op->op_private & OPpLVAL_INTRO)
 	PUSHs(*save_threadsv(op->op_targ));
     else

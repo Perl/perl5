@@ -145,7 +145,7 @@ is returned.  One effect of these rules is that C<-bareword> is equivalent
 to C<"-bareword">.
 
 Unary "~" performs bitwise negation, i.e., 1's complement.
-(See also L<Integer Arithmetic>.)
+(See also L<Integer Arithmetic> and L<Bitwise String Operators>.)
 
 Unary "+" has no effect whatsoever, even on strings.  It is useful
 syntactically for separating a function name from a parenthesized expression
@@ -162,11 +162,11 @@ thing from interpretation.
 Binary "=~" binds a scalar expression to a pattern match.  Certain operations
 search or modify the string $_ by default.  This operator makes that kind
 of operation work on some other string.  The right argument is a search
-pattern, substitution, or translation.  The left argument is what is
-supposed to be searched, substituted, or translated instead of the default
+pattern, substitution, or transliteration.  The left argument is what is
+supposed to be searched, substituted, or transliterated instead of the default
 $_.  The return value indicates the success of the operation.  (If the
 right argument is an expression rather than a search pattern,
-substitution, or translation, it is interpreted as a search pattern at run
+substitution, or transliteration, it is interpreted as a search pattern at run
 time.  This can be is less efficient than an explicit search, because the
 pattern must be compiled every time the expression is evaluated.
 
@@ -300,15 +300,15 @@ by the current locale if C<use locale> is in effect.  See L<perllocale>.
 =head2 Bitwise And
 
 Binary "&" returns its operators ANDed together bit by bit.
-(See also L<Integer Arithmetic>.)
+(See also L<Integer Arithmetic> and L<Bitwise String Operators>.)
 
 =head2 Bitwise Or and Exclusive Or
 
 Binary "|" returns its operators ORed together bit by bit.
-(See also L<Integer Arithmetic>.)
+(See also L<Integer Arithmetic> and L<Bitwise String Operators>.)
 
 Binary "^" returns its operators XORed together bit by bit.
-(See also L<Integer Arithmetic>.)
+(See also L<Integer Arithmetic> and L<Bitwise String Operators>.)
 
 =head2 C-style Logical And
 
@@ -558,14 +558,14 @@ any pair of delimiters you choose.  Non-bracketing delimiters use
 the same character fore and aft, but the 4 sorts of brackets
 (round, angle, square, curly) will all nest.
 
-    Customary  Generic     Meaning    Interpolates
-	''	 q{}	   Literal	   no
-	""	qq{}	   Literal	   yes
-	``	qx{}	   Command	   yes
-		qw{}	  Word list	   no
-	//	 m{}	Pattern match	   yes
-		 s{}{}	 Substitution	   yes
-		tr{}{}	 Translation	   no
+    Customary  Generic        Meaning	     Interpolates
+	''	 q{}	      Literal		  no
+	""	qq{}	      Literal		  yes
+	``	qx{}	      Command		  yes
+		qw{}	     Word list		  no
+	//	 m{}	   Pattern match	  yes
+		 s{}{}	    Substitution	  yes
+		tr{}{}	  Transliteration	  no (but see below)
 
 Note that there can be whitespace between the operator and the quoting
 characters, except when C<#> is being used as the quoting character.
@@ -576,8 +576,9 @@ next line. This allows you to write:
     s {foo}  # Replace foo
       {bar}  # with bar.
 
-For constructs that do interpolation, variables beginning with "C<$>" or "C<@>"
-are interpolated, as are the following sequences:
+For constructs that do interpolation, variables beginning with "C<$>"
+or "C<@>" are interpolated, as are the following sequences. Within
+a transliteration, the first ten of these sequences may be used.
 
     \t		tab             (HT, TAB)
     \n		newline         (LF, NL)
@@ -589,6 +590,7 @@ are interpolated, as are the following sequences:
     \033	octal char
     \x1b	hex char
     \c[		control char
+
     \l		lowercase next char
     \u		uppercase next char
     \L		lowercase till \E
@@ -954,16 +956,18 @@ to occur.  Here are two common cases:
 
 =item y/SEARCHLIST/REPLACEMENTLIST/cds
 
-Translates all occurrences of the characters found in the search list
+Transliterates all occurrences of the characters found in the search list
 with the corresponding character in the replacement list.  It returns
 the number of characters replaced or deleted.  If no string is
-specified via the =~ or !~ operator, the $_ string is translated.  (The
+specified via the =~ or !~ operator, the $_ string is transliterated.  (The
 string specified with =~ must be a scalar variable, an array element, a
 hash element, or an assignment to one of those, i.e., an lvalue.)
+A character range may be specified with a hyphen, so C<tr/A-J/0-9/> 
+does the same replacement as C<tr/ACEGIBDFHJ/0246813579/>.
 For B<sed> devotees, C<y> is provided as a synonym for C<tr>.  If the
 SEARCHLIST is delimited by bracketing quotes, the REPLACEMENTLIST has
 its own pair of quotes, which may or may not be bracketing quotes,
-e.g., C<tr[A-Z][a-z]> or C<tr(+-*/)/ABCD/>.
+e.g., C<tr[A-Z][a-z]> or C<tr(+\-*/)/ABCD/>.
 
 Options:
 
@@ -977,7 +981,7 @@ by SEARCHLIST not found in REPLACEMENTLIST are deleted.  (Note
 that this is slightly more flexible than the behavior of some B<tr>
 programs, which delete anything they find in the SEARCHLIST, period.)
 If the C</s> modifier is specified, sequences of characters that were
-translated to the same character are squashed down to a single instance of the
+transliterated to the same character are squashed down to a single instance of the
 character.
 
 If the C</d> modifier is used, the REPLACEMENTLIST is always interpreted
@@ -1006,13 +1010,13 @@ Examples:
     tr [\200-\377]
        [\000-\177];		# delete 8th bit
 
-If multiple translations are given for a character, only the first one is used:
+If multiple transliterations are given for a character, only the first one is used:
 
     tr/AAA/XYZ/
 
-will translate any A to X.
+will transliterate any A to X.
 
-Note that because the translation table is built at compile time, neither
+Note that because the transliteration table is built at compile time, neither
 the SEARCHLIST nor the REPLACEMENTLIST are subjected to double quote
 interpolation.  That means that if you want to use variables, you must use
 an eval():
@@ -1213,6 +1217,34 @@ the compiler will precompute the number that
 expression represents so that the interpreter
 won't have to.
 
+=head2 Bitwise String Operators
+
+Bitstrings of any size may be manipulated by the bitwise operators
+(C<~ | & ^>).
+
+If the operands to a binary bitwise op are strings of different sizes,
+B<or> and B<xor> ops will act as if the shorter operand had additional
+zero bits on the right, while the B<and> op will act as if the longer
+operand were truncated to the length of the shorter.
+
+    # ASCII-based examples 
+    print "j p \n" ^ " a h";        	# prints "JAPH\n"
+    print "JA" | "  ph\n";          	# prints "japh\n"
+    print "japh\nJunk" & '_____';   	# prints "JAPH\n";
+    print 'p N$' ^ " E<H\n";		# prints "Perl\n";
+
+If you are intending to manipulate bitstrings, you should be certain that
+you're supplying bitstrings: If an operand is a number, that will imply
+a B<numeric> bitwise operation. You may explicitly show which type of
+operation you intend by using C<""> or C<0+>, as in the examples below.
+
+    $foo =  150  |  105 ;	# yields 255  (0x96 | 0x69 is 0xFF)
+    $foo = '150' |  105 ;	# yields 255
+    $foo =  150  | '105';	# yields 255
+    $foo = '150' | '105';	# yields string '155' (under ASCII)
+
+    $baz = 0+$foo & 0+$bar;	# both ops explicitly numeric
+    $biz = "$foo" ^ "$bar";	# both ops explicitly stringy
 
 =head2 Integer Arithmetic
 
@@ -1230,7 +1262,8 @@ countermand this by saying
 which lasts until the end of that BLOCK.
 
 The bitwise operators ("&", "|", "^", "~", "<<", and ">>") always
-produce integral results.  However, C<use integer> still has meaning
+produce integral results.  (But see also L<Bitwise String Operators>.)
+However, C<use integer> still has meaning
 for them.  By default, their results are interpreted as unsigned
 integers.  However, if C<use integer> is in effect, their results are
 interpreted as signed integers.  For example, C<~0> usually evaluates

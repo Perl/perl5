@@ -22,21 +22,22 @@
 
 #define Sv			(curinterp->TSv)
 #define Xpv			(curinterp->TXpv)
+#define av_fetch_sv		(curinterp->Tav_fetch_sv)
 #define bodytarget		(curinterp->Tbodytarget)
 #define chopset			(curinterp->Tchopset)
 #define curcop			(curinterp->Tcurcop)
 #define curpad			(curinterp->Tcurpad)
 #define curpm			(curinterp->Tcurpm)
 #define curstack		(curinterp->Tcurstack)
+#define curstackinfo		(curinterp->Tcurstackinfo)
 #define curstash		(curinterp->Tcurstash)
-#define cxstack			(curinterp->Tcxstack)
-#define cxstack_ix		(curinterp->Tcxstack_ix)
-#define cxstack_max		(curinterp->Tcxstack_max)
 #define defoutgv		(curinterp->Tdefoutgv)
 #define defstash		(curinterp->Tdefstash)
 #define delaymagic		(curinterp->Tdelaymagic)
 #define dirty			(curinterp->Tdirty)
 #define formtarget		(curinterp->Tformtarget)
+#define hv_fetch_ent_mh		(curinterp->Thv_fetch_ent_mh)
+#define hv_fetch_sv		(curinterp->Thv_fetch_sv)
 #define in_eval			(curinterp->Tin_eval)
 #define last_in_gv		(curinterp->Tlast_in_gv)
 #define localizing		(curinterp->Tlocalizing)
@@ -114,6 +115,8 @@
 #define errgv			(curinterp->Ierrgv)
 #define eval_root		(curinterp->Ieval_root)
 #define eval_start		(curinterp->Ieval_start)
+#define exitlist		(curinterp->Iexitlist)
+#define exitlistlen		(curinterp->Iexitlistlen)
 #define fdpid			(curinterp->Ifdpid)
 #define filemode		(curinterp->Ifilemode)
 #define firstgv			(curinterp->Ifirstgv)
@@ -124,6 +127,7 @@
 #define incgv			(curinterp->Iincgv)
 #define initav			(curinterp->Iinitav)
 #define inplace			(curinterp->Iinplace)
+#define sys_intern		(curinterp->Isys_intern)
 #define lastfd			(curinterp->Ilastfd)
 #define lastscream		(curinterp->Ilastscream)
 #define lastsize		(curinterp->Ilastsize)
@@ -145,6 +149,7 @@
 #define minus_l			(curinterp->Iminus_l)
 #define minus_n			(curinterp->Iminus_n)
 #define minus_p			(curinterp->Iminus_p)
+#define modglobal		(curinterp->Imodglobal)
 #define multiline		(curinterp->Imultiline)
 #define mystrk			(curinterp->Imystrk)
 #define ofmt			(curinterp->Iofmt)
@@ -171,9 +176,7 @@
 #define screamnext		(curinterp->Iscreamnext)
 #define secondgv		(curinterp->Isecondgv)
 #define siggv			(curinterp->Isiggv)
-#define signalstack		(curinterp->Isignalstack)
 #define sortcop			(curinterp->Isortcop)
-#define sortstack		(curinterp->Isortstack)
 #define sortstash		(curinterp->Isortstash)
 #define splitstr		(curinterp->Isplitstr)
 #define statcache		(curinterp->Istatcache)
@@ -232,6 +235,8 @@
 #define Ierrgv			errgv
 #define Ieval_root		eval_root
 #define Ieval_start		eval_start
+#define Iexitlist		exitlist
+#define Iexitlistlen		exitlistlen
 #define Ifdpid			fdpid
 #define Ifilemode		filemode
 #define Ifirstgv		firstgv
@@ -242,6 +247,7 @@
 #define Iincgv			incgv
 #define Iinitav			initav
 #define Iinplace		inplace
+#define Isys_intern		sys_intern
 #define Ilastfd			lastfd
 #define Ilastscream		lastscream
 #define Ilastsize		lastsize
@@ -263,6 +269,7 @@
 #define Iminus_l		minus_l
 #define Iminus_n		minus_n
 #define Iminus_p		minus_p
+#define Imodglobal		modglobal
 #define Imultiline		multiline
 #define Imystrk			mystrk
 #define Iofmt			ofmt
@@ -289,9 +296,7 @@
 #define Iscreamnext		screamnext
 #define Isecondgv		secondgv
 #define Isiggv			siggv
-#define Isignalstack		signalstack
 #define Isortcop		sortcop
-#define Isortstack		sortstack
 #define Isortstash		sortstash
 #define Isplitstr		splitstr
 #define Istatcache		statcache
@@ -316,21 +321,22 @@
 
 #define TSv			Sv
 #define TXpv			Xpv
+#define Tav_fetch_sv		av_fetch_sv
 #define Tbodytarget		bodytarget
 #define Tchopset		chopset
 #define Tcurcop			curcop
 #define Tcurpad			curpad
 #define Tcurpm			curpm
 #define Tcurstack		curstack
+#define Tcurstackinfo		curstackinfo
 #define Tcurstash		curstash
-#define Tcxstack		cxstack
-#define Tcxstack_ix		cxstack_ix
-#define Tcxstack_max		cxstack_max
 #define Tdefoutgv		defoutgv
 #define Tdefstash		defstash
 #define Tdelaymagic		delaymagic
 #define Tdirty			dirty
 #define Tformtarget		formtarget
+#define Thv_fetch_ent_mh	hv_fetch_ent_mh
+#define Thv_fetch_sv		hv_fetch_sv
 #define Tin_eval		in_eval
 #define Tlast_in_gv		last_in_gv
 #define Tlocalizing		localizing
@@ -410,6 +416,8 @@
 #define errgv			Perl_errgv
 #define eval_root		Perl_eval_root
 #define eval_start		Perl_eval_start
+#define exitlist		Perl_exitlist
+#define exitlistlen		Perl_exitlistlen
 #define fdpid			Perl_fdpid
 #define filemode		Perl_filemode
 #define firstgv			Perl_firstgv
@@ -420,6 +428,7 @@
 #define incgv			Perl_incgv
 #define initav			Perl_initav
 #define inplace			Perl_inplace
+#define sys_intern		Perl_sys_intern
 #define lastfd			Perl_lastfd
 #define lastscream		Perl_lastscream
 #define lastsize		Perl_lastsize
@@ -441,6 +450,7 @@
 #define minus_l			Perl_minus_l
 #define minus_n			Perl_minus_n
 #define minus_p			Perl_minus_p
+#define modglobal		Perl_modglobal
 #define multiline		Perl_multiline
 #define mystrk			Perl_mystrk
 #define ofmt			Perl_ofmt
@@ -467,9 +477,7 @@
 #define screamnext		Perl_screamnext
 #define secondgv		Perl_secondgv
 #define siggv			Perl_siggv
-#define signalstack		Perl_signalstack
 #define sortcop			Perl_sortcop
-#define sortstack		Perl_sortstack
 #define sortstash		Perl_sortstash
 #define splitstr		Perl_splitstr
 #define statcache		Perl_statcache
@@ -494,21 +502,22 @@
 
 #define Sv			Perl_Sv
 #define Xpv			Perl_Xpv
+#define av_fetch_sv		Perl_av_fetch_sv
 #define bodytarget		Perl_bodytarget
 #define chopset			Perl_chopset
 #define curcop			Perl_curcop
 #define curpad			Perl_curpad
 #define curpm			Perl_curpm
 #define curstack		Perl_curstack
+#define curstackinfo		Perl_curstackinfo
 #define curstash		Perl_curstash
-#define cxstack			Perl_cxstack
-#define cxstack_ix		Perl_cxstack_ix
-#define cxstack_max		Perl_cxstack_max
 #define defoutgv		Perl_defoutgv
 #define defstash		Perl_defstash
 #define delaymagic		Perl_delaymagic
 #define dirty			Perl_dirty
 #define formtarget		Perl_formtarget
+#define hv_fetch_ent_mh		Perl_hv_fetch_ent_mh
+#define hv_fetch_sv		Perl_hv_fetch_sv
 #define in_eval			Perl_in_eval
 #define last_in_gv		Perl_last_in_gv
 #define localizing		Perl_localizing
@@ -556,21 +565,22 @@
 
 #define Sv			(thr->TSv)
 #define Xpv			(thr->TXpv)
+#define av_fetch_sv		(thr->Tav_fetch_sv)
 #define bodytarget		(thr->Tbodytarget)
 #define chopset			(thr->Tchopset)
 #define curcop			(thr->Tcurcop)
 #define curpad			(thr->Tcurpad)
 #define curpm			(thr->Tcurpm)
 #define curstack		(thr->Tcurstack)
+#define curstackinfo		(thr->Tcurstackinfo)
 #define curstash		(thr->Tcurstash)
-#define cxstack			(thr->Tcxstack)
-#define cxstack_ix		(thr->Tcxstack_ix)
-#define cxstack_max		(thr->Tcxstack_max)
 #define defoutgv		(thr->Tdefoutgv)
 #define defstash		(thr->Tdefstash)
 #define delaymagic		(thr->Tdelaymagic)
 #define dirty			(thr->Tdirty)
 #define formtarget		(thr->Tformtarget)
+#define hv_fetch_ent_mh		(thr->Thv_fetch_ent_mh)
+#define hv_fetch_sv		(thr->Thv_fetch_sv)
 #define in_eval			(thr->Tin_eval)
 #define last_in_gv		(thr->Tlast_in_gv)
 #define localizing		(thr->Tlocalizing)
@@ -716,6 +726,7 @@
 #define sv_no			(Perl_Vars.Gsv_no)
 #define sv_undef		(Perl_Vars.Gsv_undef)
 #define sv_yes			(Perl_Vars.Gsv_yes)
+#define svref_mutex		(Perl_Vars.Gsvref_mutex)
 #define thisexpr		(Perl_Vars.Gthisexpr)
 #define thr_key			(Perl_Vars.Gthr_key)
 #define threads_mutex		(Perl_Vars.Gthreads_mutex)
@@ -834,6 +845,7 @@
 #define Gsv_no			sv_no
 #define Gsv_undef		sv_undef
 #define Gsv_yes			sv_yes
+#define Gsvref_mutex		svref_mutex
 #define Gthisexpr		thisexpr
 #define Gthr_key		thr_key
 #define Gthreads_mutex		threads_mutex
@@ -952,6 +964,7 @@
 #define sv_no			Perl_sv_no
 #define sv_undef		Perl_sv_undef
 #define sv_yes			Perl_sv_yes
+#define svref_mutex		Perl_svref_mutex
 #define thisexpr		Perl_thisexpr
 #define thr_key			Perl_thr_key
 #define threads_mutex		Perl_threads_mutex

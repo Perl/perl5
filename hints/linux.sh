@@ -30,7 +30,8 @@ esac
 ccflags="-Dbool=char -DHAS_BOOL $ccflags"
 
 # BSD compatability library no longer needed
-set `echo X "$libswanted "| sed -e 's/ bsd / /'`
+# 'kaffe' has a /usr/lib/libnet.so which is not at all relevent for perl.
+set `echo X "$libswanted "| sed -e 's/ bsd / /' -e 's/ net / /'`
 shift
 libswanted="$*"
 
@@ -169,8 +170,8 @@ fi
 if [  ! "`csh -c 'echo $version' 2>/dev/null`"  ] 
 then
     echo 'Real csh found (might break); looking for tcsh ...'
-    # Use ../UU/loc to find tcsh.  (We run in the hints/ directory.)
-    if xxx=`../UU/loc tcsh blurfl $pth`; $test -f "$xxx"; then
+    # Use ./UU/loc to find tcsh.  (We no longer run in the hints/ directory)
+    if xxx=`./UU/loc tcsh blurfl $pth`; $test -f "$xxx"; then
 	echo "Found tcsh.  I'll use it for globbing."
 	# We can't change Configure's setting of $csh, due to the way
 	# Configure handles $d_portable and commands found in $loclist.
@@ -194,9 +195,13 @@ fi
 # it should be:
 # ccdlflags='-Wl,-E'
 
-if [ "X$usethreads" != "X" ]; then
-    ccflags="-D_REENTRANT -DUSE_THREADS $ccflags"
-    cppflags="-D_REENTRANT -DUSE_THREADS $cppflags"
+# XXX EXPERIMENTAL  A.D.  2/27/1998
+# XXX This script UU/usethreads.cbu will get 'called-back' by Configure 
+# XXX after it has prompted the user for whether to use threads.
+cat > UU/usethreads.cbu <<'EOSH'
+case "$usethreads" in
+$define|true|[yY]*)
+    ccflags="-D_REENTRANT $ccflags"
     # -lpthread needs to come before -lc but after other libraries such
     # as -lgdbm and such like. We assume here that -lc is present in
     # libswanted. If that fails to be true in future, then this can be
@@ -204,4 +209,7 @@ if [ "X$usethreads" != "X" ]; then
     set `echo X "$libswanted "| sed -e 's/ c / pthread c /'`
     shift
     libswanted="$*"
-fi
+    ;;
+esac
+EOSH
+# XXX EXPERIMENTAL  --end of call-back

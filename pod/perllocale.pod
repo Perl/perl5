@@ -189,6 +189,9 @@ If the second argument does not correspond to a valid locale, the locale
 for the category is not changed, and the function returns I<undef>.
 
 For further information about the categories, consult L<setlocale(3)>.
+
+=head2 Finding locales
+
 For the locales available in your system, also consult L<setlocale(3)>
 and see whether it leads you to the list of the available locales
 (search for the I<SEE ALSO> section).  If that fails, try the following
@@ -213,10 +216,17 @@ and see whether they list something resembling these
         english.iso88591    german.iso88591     russian.iso88595
 
 Sadly, even though the calling interface for setlocale() has been
-standardized, the names of the locales and the directories where
-the configuration is, have not.  The basic form of the name is
-I<language_country/territory>B<.>I<codeset>, but the
-latter parts are not always present.
+standardized, the names of the locales and the directories where the
+configuration is, have not.  The basic form of the name is
+I<language_country/territory>B<.>I<codeset>, but the latter parts
+after the I<language> are not always present.  The I<language> and the
+I<country> are usually from the standards B<ISO 3166> and B<ISO 639>,
+respectively, the two-letter abbreviations for the countries and the
+languages of the world.  The I<codeset> part often mentions some B<ISO
+8859> character set, the Latin codesets.  For example the C<ISO
+8859-1> is the so-called "Western codeset" that can be used to encode
+most of the Western European languages.  Again, sadly, as you can see,
+there are several ways to write even the name of that one standard.
 
 Two special locales are worth particular mention: "C" and "POSIX".
 Currently these are effectively the same locale: the difference is
@@ -229,6 +239,117 @@ is (American) English and its character codeset ASCII.
 B<NOTE>: Not all systems have the "POSIX" locale (not all systems are
 POSIX-conformant), so use "C" when you need explicitly to specify this
 default locale.
+
+=head2 LOCALE PROBLEMS
+
+You may meet the following warning message at Perl startup:
+
+	perl: warning: Setting locale failed.
+	perl: warning: Please check that your locale settings:
+	        LC_ALL = "En_US",
+	        LANG = (unset)
+	    are supported and installed on your system.
+	perl: warning: Falling back to the standard locale ("C").
+
+This means that your locale settings were that LC_ALL equals "En_US"
+and LANG exists but has no value.  Perl tried to believe you but it
+could not.  Instead Perl gave up and fell back to the "C" locale, the
+default locale that is supposed to work no matter what.  This usually
+means either or both of the two problems: either your locale settings
+were wrong, they talk of locales your system has never heard of, or
+that the locale installation in your system has problems, for example
+some system files are broken or missing.  For the problems there are
+quick and temporary fixes and more thorough and lasting fixes.
+
+=head2 Temporarily fixing locale problems
+
+The two quickest fixes are either to make Perl be silent about any
+locale inconsistencies or to run Perl under the default locale "C".
+
+Perl's moaning about locale problems can be silenced by setting the
+environment variable PERL_BADLANG to a non-zero value, for example
+"1".  This method really just sweeps the problem under the carpet: you
+tell Perl to shut up even when Perl sees that something is wrong.  Do
+not be surprised if later something locale-dependent works funny.
+
+Perl can be run under the "C" locale by setting the environment
+variable LC_ALL to "C".  This method is perhaps a bit more civilised
+than the PERL_BADLANG one but please note that setting the LC_ALL (or
+the other locale variables) may affect also other programs, not just
+Perl.  Especially external programs run from within Perl will see
+these changes.  If you make the new settings permanent (read on), all
+the programs you run will see the changes.  See L<ENVIRONMENT> for for
+the full list of all the environment variables and L<USING LOCALES>
+for their effects in Perl.  The effects in other programs are quite
+easily deducible: for example the variable LC_COLLATE may well affect
+your "sort" program (or whatever the program that arranges `records'
+alphabetically in your system is called).
+
+You can first try out changing these variables temporarily and if the
+new settings seem to help then put the settings into the startup files
+of your environment.  Please consult your local documentation for the
+exact details but very shortly for UNIXish systems: in Bourneish
+shells (sh, ksh, bash, zsh) for example
+
+	LC_ALL=en_US.ISO8859-1
+	export LC_ALL
+
+We assume here that we saw with the above discussed commands the
+locale "en_US.ISO8859-1" and decided to try that instead of the above
+faulty locale "En_US" -- and in Cshish shells (csh, tcsh)
+
+	setenv LC_ALL en_US.ISO8859-1
+	
+If you do not know what shell you have, please consult your local
+helpdesk or the equivalent.
+
+=head2 Permanently fixing locale problems
+
+Then the slower but better fixes: the misconfiguration of your own
+environment variables you may be able to fix yourself; the
+mis(sing)configuration of the whole system's locales usually requires
+the help of your friendly system administrator.
+
+First, see earlier in this document about L<Finding locales>.  That
+tells how you can find which locales really are supported and more
+importantly, installed, in your system.  In our example error message
+the environment variables affecting the locale are listed in the order
+of decreasing importance and unset variables do not matter, therefore
+in the above error message the LC_ALL being "En_US" must have been the
+bad choice.  Always try fixing first the locale settings listed first.
+
+Second, if you see with the listed commands something B<exactly> (for
+example prefix matches do not count and case usually matters) like
+"En_US" (without the quotes), then you should be okay because you are
+using a locale name that should be installed and available in your
+system.  In this case skip forward to L<Fixing the system locale
+configuration>.
+
+=head2 Permantently fixing your locale configuration
+
+This is the case when for example you see
+
+	perl: warning: Please check that your locale settings:
+	        LC_ALL = "En_US",
+	        LANG = (unset)
+	    are supported and installed on your system.
+
+but then cannot see that "En_US" listed by the above-mentioned
+commands.  You may see things like "en_US.ISO8859-1" but that is not
+the same thing.  In this case you might try running under a locale
+that you could list and somehow matches with what you tried.  The
+rules for matching locale names are a bit vague because
+standardisation is weak in this area.  See again the L<Finding
+locales> about the general rules.
+
+=head2 Permanently fixing the system locale configuration
+
+Please contact your system administrator and tell her the exact error
+message you get and ask her to read this same documentation you are
+now reading.  She should be able to check whether there is something
+wrong with the locale configuration of the system.  The L<Finding
+locales> section is unfortunately a bit vague about the exact commands
+and places because these things are not that standardised.
 
 =head2 The localeconv function
 
@@ -370,7 +491,7 @@ regular expressions.)  Thanks to C<LC_CTYPE>, depending on your locale
 setting, characters like 'E<aelig>', 'E<eth>', 'E<szlig>', and
 'E<oslash>' may be understood as C<\w> characters.
 
-The C<LC_CTYPE> locale also provides the map used in translating
+The C<LC_CTYPE> locale also provides the map used in transliterating
 characters between lower and uppercase.  This affects the case-mapping
 functions - lc(), lcfirst, uc() and ucfirst(); case-mapping
 interpolation with C<\l>, C<\L>, C<\u> or <\U> in double-quoted strings
@@ -797,4 +918,4 @@ L<POSIX (3)/strxfrm>
 Jarkko Hietaniemi's original F<perli18n.pod> heavily hacked by Dominic
 Dunlop, assisted by the perl5-porters.
 
-Last update: Wed Jan 22 11:04:58 EST 1997
+Last update: Mon Nov 17 22:48:48 EET 1997

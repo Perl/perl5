@@ -250,7 +250,7 @@ sufficient example:
 
 =item *
 
-Line up your translations when it makes sense:
+Line up your transliterations when it makes sense:
 
     tr [abc]
        [xyz];

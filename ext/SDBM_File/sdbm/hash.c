@@ -8,6 +8,7 @@
  */
 
 #include "config.h"
+#include "EXTERN.h"
 #include "sdbm.h"
 /*
  * polynomial conversion ignoring overflows

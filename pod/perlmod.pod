@@ -45,7 +45,7 @@ forced to be in package C<main>, even when used for other purposes than
 their builtin one.  Note also that, if you have a package called C<m>,
 C<s>, or C<y>, then you can't use the qualified form of an identifier
 because it will be interpreted instead as a pattern match, a substitution,
-or a translation.
+or a transliteration.
 
 (Variables beginning with underscore used to be forced into package
 main, but we decided it was more useful for package writers to be able

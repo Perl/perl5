@@ -144,3 +144,8 @@ my $a ; chop $a ;
 my $c ; chop $c ;
 EXPECT
 Use of uninitialized value at - line 5.
+########
+-w
+-e undef
+EXPECT
+Use of uninitialized value at - line 2.

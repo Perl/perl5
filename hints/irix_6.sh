@@ -23,6 +23,8 @@
 # Threaded by Jarkko Hietaniemi <jhi@iki.fi> on 11/18/97
 #    - POSIX threads knowledge by IRIX version
 
+# gcc-enabled by Kurt Starsinic <kstar@isinet.com> on 3/24/1998
+
 # Use   sh Configure -Dcc='cc -n32' to try compiling with -n32.
 #     or -Dcc='cc -n32 -mips3' (or -mips4) to force (non)portability
 # Don't bother with -n32 unless you have the 7.1 or later compilers.
@@ -76,6 +78,11 @@ case "$cc" in
 	nm_opt='-p'
 	nm_so_opt='-p'
 	;;
+*gcc*)
+	ccflags="$ccflags -D_BSD_TYPES -D_BSD_TIME -D_POSIX_C_SOURCE"
+	optimize="-O3"
+	usenm='undef'
+	;;
 *)
 	# this is needed to force the old-32 paths
 	#  since the system default can be changed.
@@ -83,9 +90,6 @@ case "$cc" in
 	optimize='-O'	  
 	;;
 esac
-
-# This should be a Configure thing, but not for now...
-pp_sys_cflags='ccflags="$ccflags -DHAS_TELLDIR_PROTOTYPE"'
 
 # We don't want these libraries.  Anyone know why?
 set `echo X "$libswanted "|sed -e 's/ socket / /' -e 's/ nsl / /' -e 's/ dl / /'`
@@ -116,7 +120,11 @@ set `echo X "$libswanted "|sed -e 's/ sun / /' -e 's/ crypt / /' -e 's/ bsd / /'
 shift
 libswanted="$*"
 
-if [ "X$usethreads" != "X" ]; then
+# Perl 5.004_57 introduced new qsort code into pp_ctl.c that
+# makes IRIX 6.2 cc to emit bad code.
+pp_ctl_cflags='optimize=-O'
+
+if [ "X$usethreads" = "X$define" ]; then
     if test ! -f /usr/include/pthread.h -o ! -f /usr/lib/libpthread.so; then
 	uname_r=`uname -r`
 	case "`uname -r`" in
@@ -154,10 +162,8 @@ EOF
 	    exit 1
 	    ;;
 	esac
-	unset uname-r
+	unset uname_r
     fi
-    ccflags="-DUSE_THREADS $ccflags"
-    cppflags="-DUSE_THREADS $cppflags"
     # -lpthread needs to come before -lc but after other libraries such
     # as -lgdbm and such like. We assume here that -lc is present in
     # libswanted. If that fails to be true in future, then this can be
@@ -166,4 +172,5 @@ EOF
     ld="cc"
     shift
     libswanted="$*"
+    usemymalloc='n'
 fi

@@ -87,7 +87,7 @@ delete $h{'goner3'};
 
 if ($#keys == 29 && $#values == 29) {print "ok 5\n";} else {print "not ok 5\n";}
 
-while (($key,$value) = each(h)) {
+while (($key,$value) = each(%h)) {
     if ($key eq $keys[$i] && $value eq $values[$i] && $key eq lc($value)) {
 	$key =~ y/a-z/A-Z/;
 	$i++ if $key eq $value;
@@ -96,7 +96,7 @@ while (($key,$value) = each(h)) {
 
 if ($i == 30) {print "ok 6\n";} else {print "not ok 6\n";}
 
-@keys = ('blurfl', keys(h), 'dyick');
+@keys = ('blurfl', keys(%h), 'dyick');
 if ($#keys == 31) {print "ok 7\n";} else {print "not ok 7\n";}
 
 $h{'foo'} = '';

@@ -33,9 +33,6 @@ libswanted="$*"
 glibpth="$glibpth /usr/X11/lib"
 ldflags="$ldflags -L/usr/X11/lib"
 
-# Avoid telldir prototype conflict in pp_sys.c
-pp_sys_cflags='ccflags="$ccflags -DHAS_TELLDIR_PROTOTYPE"'
-
 case "$optimize" in
 '')     optimize='-O2' ;;
 esac
@@ -69,7 +66,7 @@ case "$osvers" in
 	'')	cc='gcc2' ;;
 	esac
 	;;
-2.0*|2.1*|3.0*)
+2.0*|2.1*|3.0*|3.1*)
 	so='o'
 
 	# default to GCC 2.X w/shared libraries
@@ -88,22 +85,4 @@ case "$osvers" in
 	libswanted="Xpm Xaw Xmu Xt SM ICE Xext X11 $libswanted"
 	libswanted="rpc curses termcap $libswanted"
 	;;
-3.1*)
-	# ELF dynamic link libraries starting in 3.1
-        useshrplib='true'
-	so='so'
-	dlext='so'
-
-	case "$cc" in
-	'')	cc='cc'			# cc is gcc2 in 3.1
-		cccdlflags="-fPIC"
-		ccdlflags=" " ;;
-	esac
-
-	case "$ld" in
-	'')	ld='ld'
-		lddlflags="-shared -x $lddlflags" ;;
-	esac
-	;;
 esac
-

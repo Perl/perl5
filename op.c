@@ -41,6 +41,7 @@ static void null _((OP* o));
 static PADOFFSET pad_findlex _((char* name, PADOFFSET newoff, U32 seq,
 	CV* startcv, I32 cx_ix));
 static OP *newDEFSVOP _((void));
+static OP *new_logop _((I32 type, I32 flags, OP **firstp, OP **otherp));
 
 static char*
 gv_ename(GV *gv)
@@ -85,9 +86,18 @@ assertref(OP *o)
     int type = o->op_type;
     if (type != OP_AELEM && type != OP_HELEM) {
 	yyerror(form("Can't use subscript on %s", op_desc[type]));
-	if (type == OP_ENTERSUB || type == OP_RV2HV || type == OP_PADHV)
-	    warn("(Did you mean $ or @ instead of %c?)\n",
-		 type == OP_ENTERSUB ? '&' : '%');
+	if (type == OP_ENTERSUB || type == OP_RV2HV || type == OP_PADHV) {
+	    dTHR;
+	    SV *msg = sv_2mortal(
+			newSVpvf("(Did you mean $ or @ instead of %c?)\n",
+				 type == OP_ENTERSUB ? '&' : '%'));
+	    if (in_eval & 2)
+		warn("%_", msg);
+	    else if (in_eval)
+		sv_catsv(GvSV(errgv), msg);
+	    else
+		PerlIO_write(PerlIO_stderr(), SvPVX(msg), SvCUR(msg));
+	}
     }
 }
 
@@ -148,16 +158,7 @@ pad_allocmy(char *name)
 }
 
 static PADOFFSET
-#ifndef CAN_PROTOTYPE
-pad_findlex(name, newoff, seq, startcv, cx_ix)
-char *name;
-PADOFFSET newoff;
-U32 seq;
-CV* startcv;
-I32 cx_ix;
-#else
 pad_findlex(char *name, PADOFFSET newoff, U32 seq, CV* startcv, I32 cx_ix)
-#endif
 {
     dTHR;
     CV *cv;
@@ -401,12 +402,7 @@ pad_alloc(I32 optype, U32 tmptype)
 }
 
 SV *
-#ifndef CAN_PROTOTYPE
-pad_sv(po)
-PADOFFSET po;
-#else
 pad_sv(PADOFFSET po)
-#endif /* CAN_PROTOTYPE */
 {
     dTHR;
 #ifdef USE_THREADS
@@ -422,12 +418,7 @@ pad_sv(PADOFFSET po)
 }
 
 void
-#ifndef CAN_PROTOTYPE
-pad_free(po)
-PADOFFSET po;
-#else
 pad_free(PADOFFSET po)
-#endif /* CAN_PROTOTYPE */
 {
     dTHR;
     if (!curpad)
@@ -450,12 +441,7 @@ pad_free(PADOFFSET po)
 }
 
 void
-#ifndef CAN_PROTOTYPE
-pad_swipe(po)
-PADOFFSET po;
-#else
 pad_swipe(PADOFFSET po)
-#endif /* CAN_PROTOTYPE */
 {
     dTHR;
     if (AvARRAY(comppad) != curpad)
@@ -1414,8 +1400,9 @@ my(OP *o)
     if (type == OP_LIST) {
 	for (kid = cLISTOPo->op_first; kid; kid = kid->op_sibling)
 	    my(kid);
-    }
-    else if (type != OP_PADSV &&
+    } else if (type == OP_UNDEF) {
+	return o;
+    } else if (type != OP_PADSV &&
 	     type != OP_PADAV &&
 	     type != OP_PADHV &&
 	     type != OP_PUSHMARK)
@@ -1586,7 +1573,7 @@ newPROG(OP *o)
 	    CV *cv = perl_get_cv("DB::postponed", FALSE);
 	    if (cv) {
 		dSP;
-		PUSHMARK(sp);
+		PUSHMARK(SP);
 		XPUSHs((SV*)compiling.cop_filegv);
 		PUTBACK;
 		perl_call_sv((SV*)cv, G_DISCARD);
@@ -2622,9 +2609,17 @@ intro_my(void)
 OP *
 newLOGOP(I32 type, I32 flags, OP *first, OP *other)
 {
+    return new_logop(type, flags, &first, &other);
+}
+
+static OP *
+new_logop(I32 type, I32 flags, OP** firstp, OP** otherp)
+{
     dTHR;
     LOGOP *logop;
     OP *o;
+    OP *first = *firstp;
+    OP *other = *otherp;
 
     if (type == OP_XOR)		/* Not short circuit, but here by precedence. */
 	return newBINOP(type, flags, scalar(first), scalar(other));
@@ -2638,7 +2633,7 @@ newLOGOP(I32 type, I32 flags, OP *first, OP *other)
 	    else
 		type = OP_AND;
 	    o = first;
-	    first = cUNOPo->op_first;
+	    first = *firstp = cUNOPo->op_first;
 	    if (o->op_next)
 		first->op_next = o->op_next;
 	    cUNOPo->op_first = Nullop;
@@ -2650,10 +2645,12 @@ newLOGOP(I32 type, I32 flags, OP *first, OP *other)
 	    warn("Probable precedence problem on %s", op_desc[type]);
 	if ((type == OP_AND) == (SvTRUE(((SVOP*)first)->op_sv))) {
 	    op_free(first);
+	    *firstp = Nullop;
 	    return other;
 	}
 	else {
 	    op_free(other);
+	    *otherp = Nullop;
 	    return first;
 	}
     }
@@ -2838,9 +2835,10 @@ newLOOPOP(I32 flags, I32 debuggable, OP *expr, OP *block)
     }
 
     listop = append_elem(OP_LINESEQ, block, newOP(OP_UNSTACK, 0));
-    o = newLOGOP(OP_AND, 0, expr, listop);
+    o = new_logop(OP_AND, 0, &expr, &listop);
 
-    ((LISTOP*)listop)->op_last->op_next = LINKLIST(o);
+    if (listop)
+	((LISTOP*)listop)->op_last->op_next = LINKLIST(o);
 
     if (once && o != listop)
 	o->op_next = ((LOGOP*)cUNOPo->op_first)->op_other;
@@ -2888,14 +2886,17 @@ newWHILEOP(I32 flags, I32 debuggable, LOOP *loop, I32 whileline, OP *expr, OP *b
     redo = LINKLIST(listop);
 
     if (expr) {
-	o = newLOGOP(OP_AND, 0, expr, scalar(listop));
+	copline = whileline;
+	scalar(listop);
+	o = new_logop(OP_AND, 0, &expr, &listop);
 	if (o == expr && o->op_type == OP_CONST && !SvTRUE(cSVOPo->op_sv)) {
 	    op_free(expr);		/* oops, it's a while (0) */
 	    op_free((OP*)loop);
-	    return Nullop;		/* (listop already freed by newLOGOP) */
+	    return Nullop;		/* listop already freed by new_logop */
 	}
-	((LISTOP*)listop)->op_last->op_next = condop =
-	    (o == listop ? redo : LINKLIST(o));
+	if (listop)
+	    ((LISTOP*)listop)->op_last->op_next = condop =
+		(o == listop ? redo : LINKLIST(o));
 	if (!next)
 	    next = condop;
     }
@@ -2926,18 +2927,7 @@ newWHILEOP(I32 flags, I32 debuggable, LOOP *loop, I32 whileline, OP *expr, OP *b
 }
 
 OP *
-#ifndef CAN_PROTOTYPE
-newFOROP(flags,label,forline,sv,expr,block,cont)
-I32 flags;
-char *label;
-line_t forline;
-OP* sv;
-OP* expr;
-OP*block;
-OP*cont;
-#else
 newFOROP(I32 flags,char *label,line_t forline,OP *sv,OP *expr,OP *block,OP *cont)
-#endif /* CAN_PROTOTYPE */
 {
     LOOP *loop;
     OP *wop;
@@ -3340,10 +3330,13 @@ newSUB(I32 floor, OP *o, OP *proto, OP *block)
 		goto done;
 	    }
 	    /* ahem, death to those who redefine active sort subs */
-	    if (curstack == sortstack && sortcop == CvSTART(cv))
+	    if (curstackinfo->si_type == SI_SORT && sortcop == CvSTART(cv))
 		croak("Can't redefine active sort subroutine %s", name);
 	    const_sv = cv_const_sv(cv);
-	    if (const_sv || dowarn) {
+	    if (const_sv || dowarn && !(CvGV(cv) && GvSTASH(CvGV(cv))
+					&& HvNAME(GvSTASH(CvGV(cv)))
+					&& strEQ(HvNAME(GvSTASH(CvGV(cv))),
+						 "autouse"))) {
 		line_t oldline = curcop->cop_line;
 		curcop->cop_line = copline;
 		warn(const_sv ? "Constant subroutine %s redefined"
@@ -3473,7 +3466,7 @@ newSUB(I32 floor, OP *o, OP *proto, OP *block)
 	    if (HvFILL(hv) > 0 && hv_exists(hv, SvPVX(tmpstr), SvCUR(tmpstr))
 		  && (cv = GvCV(db_postponed))) {
 		dSP;
-		PUSHMARK(sp);
+		PUSHMARK(SP);
 		XPUSHs(tmpstr);
 		PUTBACK;
 		perl_call_sv((SV*)cv, G_DISCARD);
@@ -3523,6 +3516,33 @@ newSUB(I32 floor, OP *o, OP *proto, OP *block)
     return cv;
 }
 
+void
+newCONSTSUB(HV *stash, char *name, SV *sv)
+{
+    dTHR;
+    U32 oldhints = hints;
+    HV *old_cop_stash = curcop->cop_stash;
+    HV *old_curstash = curstash;
+    line_t oldline = curcop->cop_line;
+    curcop->cop_line = copline;
+
+    hints &= ~HINT_BLOCK_SCOPE;
+    if(stash)
+	curstash = curcop->cop_stash = stash;
+
+    newSUB(
+	start_subparse(FALSE, 0),
+	newSVOP(OP_CONST, 0, newSVpv(name,0)),
+	newSVOP(OP_CONST, 0, &sv_no),	/* SvPV(&sv_no) == "" -- GMB */
+	newSTATEOP(0, Nullch, newSVOP(OP_CONST, 0, sv))
+    );
+
+    hints = oldhints;
+    curcop->cop_stash = old_cop_stash;
+    curstash = old_curstash;
+    curcop->cop_line = oldline;
+}
+
 CV *
 newXS(char *name, void (*subaddr) (CV *), char *filename)
 {
@@ -3538,7 +3558,9 @@ newXS(char *name, void (*subaddr) (CV *), char *filename)
 	}
 	else if (CvROOT(cv) || CvXSUB(cv) || GvASSUMECV(gv)) {
 	    /* already defined (or promised) */
-	    if (dowarn) {
+	    if (dowarn && !(CvGV(cv) && GvSTASH(CvGV(cv))
+			    && HvNAME(GvSTASH(CvGV(cv)))
+			    && strEQ(HvNAME(GvSTASH(CvGV(cv))), "autouse"))) {
 		line_t oldline = curcop->cop_line;
 		curcop->cop_line = copline;
 		warn("Subroutine %s redefined",name);
@@ -3976,17 +3998,16 @@ ck_rvconst(register OP *o)
 	  "Can't use bareword (\"%s\") as %s ref while \"strict refs\" in use",
 		      name, badthing);
 	}
-	kid->op_type = OP_GV;
+	/*
+	 * This is a little tricky.  We only want to add the symbol if we
+	 * didn't add it in the lexer.  Otherwise we get duplicate strict
+	 * warnings.  But if we didn't add it in the lexer, we must at
+	 * least pretend like we wanted to add it even if it existed before,
+	 * or we get possible typo warnings.  OPpCONST_ENTERED says
+	 * whether the lexer already added THIS instance of this symbol.
+	 */
 	iscv = (o->op_type == OP_RV2CV) * 2;
-	for (gv = 0; !gv; iscv++) {
-	    /*
-	     * This is a little tricky.  We only want to add the symbol if we
-	     * didn't add it in the lexer.  Otherwise we get duplicate strict
-	     * warnings.  But if we didn't add it in the lexer, we must at
-	     * least pretend like we wanted to add it even if it existed before,
-	     * or we get possible typo warnings.  OPpCONST_ENTERED says
-	     * whether the lexer already added THIS instance of this symbol.
-	     */
+	do {
 	    gv = gv_fetchpv(name,
 		iscv | !(kid->op_private & OPpCONST_ENTERED),
 		iscv
@@ -3998,9 +4019,12 @@ ck_rvconst(register OP *o)
 			    : o->op_type == OP_RV2HV
 				? SVt_PVHV
 				: SVt_PVGV);
+	} while (!gv && !(kid->op_private & OPpCONST_ENTERED) && !iscv++);
+	if (gv) {
+	    kid->op_type = OP_GV;
+	    SvREFCNT_dec(kid->op_sv);
+	    kid->op_sv = SvREFCNT_inc(gv);
 	}
-	SvREFCNT_dec(kid->op_sv);
-	kid->op_sv = SvREFCNT_inc(gv);
     }
     return o;
 }
@@ -4265,7 +4289,7 @@ ck_index(OP *o)
     if (o->op_flags & OPf_KIDS) {
 	OP *kid = cLISTOPo->op_first->op_sibling;	/* get past pushmark */
 	if (kid && kid->op_type == OP_CONST)
-	    fbm_compile(((SVOP*)kid)->op_sv);
+	    fbm_compile(((SVOP*)kid)->op_sv, 0);
     }
     return ck_fun(o);
 }
@@ -4752,7 +4776,7 @@ peep(register OP *o)
 	    goto nothin;
 	case OP_NULL:
 	    if (o->op_targ == OP_NEXTSTATE || o->op_targ == OP_DBSTATE)
-		curcop = ((COP*)op);
+		curcop = ((COP*)o);
 	    goto nothin;
 	case OP_SCALAR:
 	case OP_LINESEQ:
@@ -4825,6 +4849,8 @@ peep(register OP *o)
 	case OP_AND:
 	case OP_OR:
 	    o->op_seq = op_seqmax++;
+	    while (cLOGOP->op_other->op_type == OP_NULL)
+		cLOGOP->op_other = cLOGOP->op_other->op_next;
 	    peep(cLOGOP->op_other);
 	    break;
 

@@ -131,6 +131,7 @@ static void regset _((char *, I32));
 static void regtail _((regnode *, regnode *));
 static char* regwhite _((char *, char *));
 static char* nextchar _((void));
+static void re_croak2 _((const char* pat1,const char* pat2,...)) __attribute__((noreturn));
 
 static U32 regseen;
 static I32 seen_zerolen;
@@ -139,7 +140,6 @@ static I32 extralen;
 
 #ifdef DEBUGGING
 static int colorset;
-char *colors[4];
 #endif 
 
 /* Length of a variant. */
@@ -170,8 +170,13 @@ static scan_data_t zero_scan_data = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
 #define SF_FIX_BEFORE_EOL	(SF_FIX_BEFORE_SEOL|SF_FIX_BEFORE_MEOL)
 #define SF_FL_BEFORE_EOL	(SF_FL_BEFORE_SEOL|SF_FL_BEFORE_MEOL)
 
-#define SF_FIX_SHIFT_EOL	(+2)
-#define SF_FL_SHIFT_EOL		(+4)
+#ifdef NO_UNARY_PLUS
+#  define SF_FIX_SHIFT_EOL	(0+2)
+#  define SF_FL_SHIFT_EOL		(0+4)
+#else
+#  define SF_FIX_SHIFT_EOL	(+2)
+#  define SF_FL_SHIFT_EOL		(+4)
+#endif
 
 #define SF_FIX_BEFORE_SEOL	(SF_BEFORE_SEOL << SF_FIX_SHIFT_EOL)
 #define SF_FIX_BEFORE_MEOL	(SF_BEFORE_MEOL << SF_FIX_SHIFT_EOL)
@@ -182,6 +187,7 @@ static scan_data_t zero_scan_data = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
 #define SF_HAS_PAR		0x80
 #define SF_IN_PAR		0x100
 #define SF_HAS_EVAL		0x200
+#define SCF_DO_SUBSTR		0x400
 
 static void
 scan_commit(scan_data_t *data)
@@ -214,8 +220,6 @@ scan_commit(scan_data_t *data)
     data->last_end = -1;
     data->flags &= ~SF_BEFORE_EOL;
 }
-
-#define SCF_DO_SUBSTR 1
 
 /* Stops at toplevel WHILEM as well as at `last'. At end *scanp is set
    to the position after last scanned or to NULL. */
@@ -340,7 +344,7 @@ study_chunk(regnode **scanp, I32 *deltap, regnode *last, scan_data_t *data, U32 
 		    scan = next;
 		    if (data_fake.flags & (SF_HAS_PAR|SF_IN_PAR))
 			pars++;
-		    if (data_fake.flags & SF_HAS_EVAL)
+		    if (data && (data_fake.flags & SF_HAS_EVAL))
 			data->flags |= SF_HAS_EVAL;
 		    if (code == SUSPEND) 
 			break;
@@ -586,7 +590,7 @@ study_chunk(regnode **scanp, I32 *deltap, regnode *last, scan_data_t *data, U32 
 			data->longest = &(data->longest_float);
 		    }
 		}
-		if (fl & SF_HAS_EVAL)
+		if (data && (fl & SF_HAS_EVAL))
 		    data->flags |= SF_HAS_EVAL;
 	      optimize_curly_tail:
 #ifdef REGALIGN
@@ -635,7 +639,7 @@ study_chunk(regnode **scanp, I32 *deltap, regnode *last, scan_data_t *data, U32 
 	    }
 	    if (data && data_fake.flags & (SF_HAS_PAR|SF_IN_PAR))
 		pars++;
-	    if (data_fake.flags & SF_HAS_EVAL)
+	    if (data && (data_fake.flags & SF_HAS_EVAL))
 		data->flags |= SF_HAS_EVAL;
 	} else if (OP(scan) == OPEN) {
 	    pars++;
@@ -812,6 +816,11 @@ pregcomp(char *exp, char *xend, PMOP *pm)
     r->regstclass = NULL;
     r->naughty = regnaughty >= 10;	/* Probably an expensive pattern. */
     scan = r->program + 1;		/* First BRANCH. */
+
+    /* XXXX To minimize changes to RE engine we always allocate
+       3-units-long substrs field. */
+    Newz(1004, r->substrs, 1, struct reg_substr_data);
+
     if (OP(scan) != BRANCH) {	/* Only one top-level choice. */
 	scan_data_t data;
 	I32 fake;
@@ -906,7 +915,7 @@ pregcomp(char *exp, char *xend, PMOP *pm)
 	    r->float_substr = data.longest_float;
 	    r->float_min_offset = data.offset_float_min;
 	    r->float_max_offset = data.offset_float_max;
-	    fbm_compile(r->float_substr);
+	    fbm_compile(r->float_substr, 0);
 	    BmUSEFUL(r->float_substr) = 100;
 	    if (data.flags & SF_FL_BEFORE_EOL /* Cannot have SEOL and MULTI */
 		&& (!(data.flags & SF_FL_BEFORE_MEOL)
@@ -926,7 +935,7 @@ pregcomp(char *exp, char *xend, PMOP *pm)
 		    || (regflags & PMf_MULTILINE)))) {
 	    r->anchored_substr = data.longest_fixed;
 	    r->anchored_offset = data.offset_fixed;
-	    fbm_compile(r->anchored_substr);
+	    fbm_compile(r->anchored_substr, 0);
 	    BmUSEFUL(r->anchored_substr) = 100;
 	    if (data.flags & SF_FIX_BEFORE_EOL /* Cannot have SEOL and MULTI */
 		&& (!(data.flags & SF_FIX_BEFORE_MEOL)
@@ -2046,12 +2055,7 @@ nextchar(void)
 - reg_node - emit a node
 */
 static regnode *			/* Location. */
-#ifdef CAN_PROTOTYPE
 reg_node(U8 op)
-#else
-reg_node(op)
-U8 op;
-#endif
 {
     register regnode *ret;
     register regnode *ptr;
@@ -2079,13 +2083,7 @@ U8 op;
 - reganode - emit a node with an argument
 */
 static regnode *			/* Location. */
-#ifdef CAN_PROTOTYPE
 reganode(U8 op, U32 arg)
-#else
-reganode(op, arg)
-U8 op;
-U32 arg;
-#endif
 {
     register regnode *ret;
     register regnode *ptr;
@@ -2112,15 +2110,8 @@ U32 arg;
 /*
 - regc - emit (if appropriate) a byte of code
 */
-#ifdef CAN_PROTOTYPE
 static void
 regc(U8 b, char* s)
-#else
-static void
-regc(b, s)
-U8 b;
-char *s;
-#endif
 {
     if (!SIZE_ONLY)
 	*s = b;
@@ -2131,15 +2122,8 @@ char *s;
 *
 * Means relocating the operand.
 */
-#ifdef CAN_PROTOTYPE
 static void
 reginsert(U8 op, regnode *opnd)
-#else
-static void
-reginsert(op, opnd)
-U8 op;
-regnode *opnd;
-#endif
 {
     register regnode *src;
     register regnode *dst;
@@ -2590,10 +2574,13 @@ pregfree(struct regexp *r)
 	Safefree(r->precomp);
     if (r->subbase)
 	Safefree(r->subbase);
-    if (r->anchored_substr)
-	SvREFCNT_dec(r->anchored_substr);
-    if (r->float_substr)
-	SvREFCNT_dec(r->float_substr);
+    if (r->substrs) {
+	if (r->anchored_substr)
+	    SvREFCNT_dec(r->anchored_substr);
+	if (r->float_substr)
+	    SvREFCNT_dec(r->float_substr);
+	Safefree(r->substrs);
+    }
     if (r->data) {
 	int n = r->data->count;
 	while (--n >= 0) {
@@ -2647,11 +2634,11 @@ regnext(register regnode *p)
 }
 
 #ifdef I_STDARG
-void	
+static void	
 re_croak2(const char* pat1,const char* pat2,...)
 #else
 /*VARARGS0*/
-void	
+static void	
 re_croak2(const char* pat1,const char* pat2, va_alist)
     const char* pat1;
     const char* pat2;
