@@ -7,7 +7,11 @@ BEGIN {
 
     my $GR = "/etc/group";
 
-    if ($Config{'i_grp'} ne 'define' or not -f $GR or not open(GR, $GR)) {
+    if ($Config{'i_grp'} ne 'define' or not -f $GR or not open(GR, $GR)
+	# NeXTstep /etc/group is used only at boot time,
+	# after that it's up to NetInfo and NIS/YP.
+	or $^O eq 'next'
+	) {
 	print "1..0\n";
 	exit 0;
     }
