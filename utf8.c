@@ -1857,7 +1857,7 @@ Perl_ibcmp_utf8(pTHX_ const char *s1, char **pe1, register UV l1, bool u1, const
 	       if (u1)
 		    to_utf8_fold(p1, foldbuf1, &foldlen1);
 	       else {
-		    natbuf[0] = NATIVE_TO_UNI(*p1);
+		    natbuf[0] = *p1;
 		    to_utf8_fold(natbuf, foldbuf1, &foldlen1);
 	       }
 	       q1 = foldbuf1;
@@ -1867,7 +1867,7 @@ Perl_ibcmp_utf8(pTHX_ const char *s1, char **pe1, register UV l1, bool u1, const
 	       if (u2)
 		    to_utf8_fold(p2, foldbuf2, &foldlen2);
 	       else {
-		    natbuf[0] = NATIVE_TO_UNI(*p2);
+		    natbuf[0] = *p2;
 		    to_utf8_fold(natbuf, foldbuf2, &foldlen2);
 	       }
 	       q2 = foldbuf2;
