@@ -345,13 +345,14 @@ PP(pp_backtick)
 		;
 	}
 	else if (gimme == G_SCALAR) {
-	    SV *oldrs = PL_rs;
+	    ENTER;
+	    SAVESPTR(PL_rs);
 	    PL_rs = &PL_sv_undef;
 	    sv_setpv(TARG, "");	/* note that this preserves previous buffer */
 	    while (sv_gets(TARG, fp, SvCUR(TARG)) != Nullch)
 		/*SUPPRESS 530*/
 		;
-	    PL_rs = oldrs;
+	    LEAVE;
 	    XPUSHs(TARG);
 	    SvTAINTED_on(TARG);
 	}
