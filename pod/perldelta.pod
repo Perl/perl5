@@ -3208,7 +3208,7 @@ on FAT filesystems.  Installation (or build) on NTFS works fine.
 
 =head2 DJGPP does not build
 
-Unfortunately DJGPP build broke somewhere after 5.7.1.
+Unfortunately DJGPP build broke somewhere after 5.7.3.
 
 =head2 ext/threads/t/libc
 
