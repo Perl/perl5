@@ -458,23 +458,42 @@ sequence number in a range has the string "E0" appended to it, which
 doesn't affect its numeric value, but gives you something to search
 for if you want to exclude the endpoint.  You can exclude the
 beginning point by waiting for the sequence number to be greater
-than 1.  If either operand of scalar ".." is a constant expression,
-that operand is implicitly compared to the C<$.> variable, the
-current line number.  Examples:
+than 1.
+
+If either operand of scalar ".." is a constant expression,
+that operand is considered true if it is equal (C<==>) to the current
+input line number (the C<$.> variable).
+
+To be pedantic, the comparison is actually C<int(EXPR) == int(EXPR)>,
+but that is only an issue if you use a floating point expression; when
+implicitly using C<$.> as described in the previous paragraph, the
+comparison is C<int(EXPR) == int($.)> which is only an issue when C<$.>
+is set to a floating point value and you are not reading from a file.
+Furthermore, C<"span" .. "spat"> or C<2.18 .. 3.14> will not do what
+you want in scalar context because each of the operands are evaluated
+using their integer representation.
+
+Examples:
 
 As a scalar operator:
 
-    if (101 .. 200) { print; }	# print 2nd hundred lines
-    next line if (1 .. /^$/);	# skip header lines
+    if (101 .. 200) { print; } # print 2nd hundred lines, short for
+                               #   if ($. == 101 .. $. == 200) ...
+    next line if (1 .. /^$/);  # skip header lines, short for
+                               #   ... if ($. == 1 .. /^$/);
     s/^/> / if (/^$/ .. eof());	# quote body
 
     # parse mail messages
     while (<>) {
         $in_header =   1  .. /^$/;
-        $in_body   = /^$/ .. eof();
-	# do something based on those
+        $in_body   = /^$/ .. eof;
+        if ($in_header) {
+            # ...
+        } else { # in body
+            # ...
+        }
     } continue {
-	close ARGV if eof; 		# reset $. each file
+        close ARGV if eof;             # reset $. each file
     }
 
 As a list operator:
@@ -501,6 +520,11 @@ to get dates with leading zeros.  If the final value specified is not
 in the sequence that the magical increment would produce, the sequence
 goes until the next value would be longer than the final value
 specified.
+
+Because each operand is evaluated in integer form, C<2.18 .. 3.14> will
+return two elements in list context.
+
+    @list = (2.18 .. 3.14); # same as @list = (2 .. 3);
 
 =head2 Conditional Operator
 
