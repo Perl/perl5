@@ -139,7 +139,6 @@ Perl_my_memcmp
 Perl_my_memset
 Perl_cshlen
 Perl_cshname
-boot_DynaLoader
 !END!OF!SKIP!
 
 # All symbols have a Perl_ prefix because that's what embed.h
@@ -212,6 +211,7 @@ perl_call_sv
 perl_require_pv
 perl_eval_pv
 perl_eval_sv
+boot_DynaLoader
 win32_errno
 win32_environ
 win32_stdin
