@@ -2322,7 +2322,7 @@ doeval(int gimme, OP** startop)
     SAVEI32(PL_max_intro_pending);
 
     caller = PL_compcv;
-    for (i = cxstack_ix - 1; i >= 0; i--) {
+    for (i = cxstack_ix; i >= 0; i--) {
 	PERL_CONTEXT *cx = &cxstack[i];
 	if (cx->cx_type == CXt_EVAL)
 	    break;
