@@ -302,12 +302,12 @@ $v
 
 {
     # Bug #24774 format without trailing \n failed assertion
+    # but this must not compile because we'd get a ';' into the format
+
     my @v = ('k');
     eval "format OUT14 = \n@\n\@v";
-    open(OUT14, '>Op_write.tmp') || die "Can't create Op_write.tmp";
-    write(OUT14);
-    close OUT14 or die "Could not close: $!";
-    print "ok 14\n";
+    print $@ ? "ok 14\n" : "not ok 14\n";
+
 }
 
 #######################################
@@ -348,10 +348,10 @@ $= = 10;
     write;
     $test++;
     print $- == 9
-	? "ok $test\n" : "not ok $test # TODO \$- = $- instead of 9\n";
+	? "ok $test # TODO\n" : "not ok $test # TODO \$- = $- instead of 9\n";
     $test++;
     print $^ ne "Comment_TOP"
-	? "ok $test\n" : "not ok $test # TODO \$^ = $^ instead of 'STDOUT_TOP'\n";
+	? "ok $test\n" : "not ok $test\n# \$^ = $^ instead of 'STDOUT_TOP'\n";
     $test++;
     }
 

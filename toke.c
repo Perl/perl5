@@ -2429,8 +2429,12 @@ Perl_yylex(pTHX)
 	if (!PL_rsfp) {
 	    PL_last_uni = 0;
 	    PL_last_lop = 0;
-	    if (PL_lex_brackets)
-		yyerror("Missing right curly or square bracket");
+	    if (PL_lex_brackets) {
+ 	        if (PL_lex_formbrack)
+		    yyerror("Format not terminated");
+                else
+		    yyerror("Missing right curly or square bracket");
+	    }
             DEBUG_T( { PerlIO_printf(Perl_debug_log,
                         "### Tokener got EOF\n");
             } );
@@ -7588,6 +7592,7 @@ S_scan_formline(pTHX_ register char *s)
     register char *t;
     SV *stuff = newSVpvn("",0);
     bool needargs = FALSE;
+    bool eofmt = FALSE;
 
     while (!needargs) {
 	if (*s == '.' || *s == /*{*/'}') {
@@ -7597,8 +7602,10 @@ S_scan_formline(pTHX_ register char *s)
 #else
 	    for (t = s+1;SPACE_OR_TAB(*t) || *t == '\r'; t++) ;
 #endif
-	    if (*t == '\n' || t == PL_bufend)
+	    if (*t == '\n' || t == PL_bufend) {
+	        eofmt = TRUE;
 		break;
+            }
 	}
 	if (PL_in_eval && !PL_rsfp) {
 	    eol = strchr(s,'\n');
@@ -7638,7 +7645,6 @@ S_scan_formline(pTHX_ register char *s)
 	    PL_last_lop = PL_last_uni = Nullch;
 	    if (!s) {
 		s = PL_bufptr;
-		yyerror("Format not terminated");
 		break;
 	    }
 	}
@@ -7667,7 +7673,8 @@ S_scan_formline(pTHX_ register char *s)
     }
     else {
 	SvREFCNT_dec(stuff);
-	PL_lex_formbrack = 0;
+	if (eofmt)
+	    PL_lex_formbrack = 0;
 	PL_bufptr = s;
     }
     return s;
