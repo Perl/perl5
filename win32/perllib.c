@@ -143,6 +143,13 @@ perl_alloc(void)
     return my_perl;
 }
 
+EXTERN_C void
+win32_delete_internal_host(void *h)
+{
+    CPerlHost *host = (CPerlHost*)h;
+    delete host;
+}
+
 #ifdef PERL_OBJECT
 
 EXTERN_C void
@@ -157,10 +164,7 @@ perl_construct(PerlInterpreter* my_perl)
     {
 	win32_fprintf(stderr, "%s\n",
 		      "Error: Unable to construct data structures");
-	CPerlHost* pHost = (CPerlHost*)w32_internal_host;
-	Perl_free();
-	delete pHost;
-	PERL_SET_THX(NULL);
+	perl_free(my_perl);
     }
 }
 
@@ -185,21 +189,19 @@ EXTERN_C void
 perl_free(PerlInterpreter* my_perl)
 {
     CPerlObj* pPerl = (CPerlObj*)my_perl;
+    void *host = w32_internal_host;
 #ifdef DEBUGGING
-    CPerlHost* pHost = (CPerlHost*)w32_internal_host;
     Perl_free();
-    delete pHost;
 #else
     try
     {
-	CPerlHost* pHost = (CPerlHost*)w32_internal_host;
 	Perl_free();
-	delete pHost;
     }
     catch(...)
     {
     }
 #endif
+    win32_delete_internal_host(host);
     PERL_SET_THX(NULL);
 }
 
@@ -207,10 +209,10 @@ EXTERN_C int
 perl_run(PerlInterpreter* my_perl)
 {
     CPerlObj* pPerl = (CPerlObj*)my_perl;
-#ifdef DEBUGGING
-    return Perl_run();
-#else
     int retVal;
+#ifdef DEBUGGING
+    retVal = Perl_run();
+#else
     try
     {
 	retVal = Perl_run();
@@ -220,8 +222,8 @@ perl_run(PerlInterpreter* my_perl)
 	win32_fprintf(stderr, "Error: Runtime exception\n");
 	retVal = -1;
     }
-    return retVal;
 #endif
+    return retVal;
 }
 
 EXTERN_C int

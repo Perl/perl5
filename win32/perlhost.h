@@ -1719,6 +1719,13 @@ restart:
 	PL_main_root = Nullop;
     }
 
+    /* close the std handles to avoid fd leaks */
+    {
+	do_close(gv_fetchpv("STDIN", TRUE, SVt_PVIO), FALSE);
+	do_close(gv_fetchpv("STDOUT", TRUE, SVt_PVIO), FALSE);
+	do_close(gv_fetchpv("STDERR", TRUE, SVt_PVIO), FALSE);
+    }
+
     /* destroy everything (waits for any pseudo-forked children) */
     perl_destruct(my_perl);
     perl_free(my_perl);

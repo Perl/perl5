@@ -606,6 +606,13 @@ Perl_do_binmode(pTHXo_ PerlIO *fp, int iotype, int flag)
 {
     return ((CPerlObj*)pPerl)->Perl_do_binmode(fp, iotype, flag);
 }
+
+#undef  Perl_do_close
+bool
+Perl_do_close(pTHXo_ GV* gv, bool not_implicit)
+{
+    return ((CPerlObj*)pPerl)->Perl_do_close(gv, not_implicit);
+}
 #if !defined(WIN32)
 #endif
 #if defined(HAS_MSG) || defined(HAS_SEM) || defined(HAS_SHM)

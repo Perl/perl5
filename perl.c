@@ -764,7 +764,13 @@ perl_free(pTHXx)
 #if defined(PERL_OBJECT)
     PerlMem_free(this);
 #else
+#  if defined(PERL_IMPLICIT_SYS) && defined(WIN32)
+    void *host = w32_internal_host;
     PerlMem_free(aTHXx);
+    win32_delete_internal_host(host);
+#  else
+    PerlMem_free(aTHXx);
+#  endif
 #endif
 }
 
