@@ -30,7 +30,8 @@ esac
 ccflags="-Dbool=char -DHAS_BOOL $ccflags"
 
 # BSD compatability library no longer needed
-set `echo X "$libswanted "| sed -e 's/ bsd / /'`
+# 'kaffe' has a /usr/lib/libnet.so which is not at all relevent for perl.
+set `echo X "$libswanted "| sed -e 's/ bsd / /' -e 's/ net / /'`
 shift
 libswanted="$*"
 
@@ -194,7 +195,12 @@ fi
 # it should be:
 # ccdlflags='-Wl,-E'
 
-if [ "X$usethreads" != "X" ]; then
+# XXX EXPERIMENTAL  A.D.  2/27/1998
+# XXX This script UU/usethreads.cbu will get 'called-back' by Configure 
+# XXX after it has prompted the user for whether to use threads.
+cat > UU/usethreads.cbu <<'EOSH'
+case "$usethreads" in
+$define|true|[yY]*)
     ccflags="-D_REENTRANT $ccflags"
     # -lpthread needs to come before -lc but after other libraries such
     # as -lgdbm and such like. We assume here that -lc is present in
@@ -203,4 +209,7 @@ if [ "X$usethreads" != "X" ]; then
     set `echo X "$libswanted "| sed -e 's/ c / pthread c /'`
     shift
     libswanted="$*"
-fi
+    ;;
+esac
+EOSH
+# XXX EXPERIMENTAL  --end of call-back

@@ -116,6 +116,10 @@ END
 fi
 rm -f make.vers
 
+# XXX EXPERIMENTAL  A.D.  2/27/1998
+# XXX This script UU/cc.cbu will get 'called-back' by Configure after it
+# XXX has prompted the user for the C compiler to use.
+cat > UU/cc.cbu <<'EOSH'
 # If the C compiler is gcc:
 #   - check the fixed-includes
 #   - check as(1) and ld(1), they should not be GNU
@@ -222,6 +226,9 @@ fi
 
 # as --version or ld --version might dump core.
 rm -f core
+
+# XXX
+EOSH
 
 if [ "X$usethreads" != "X" ]; then
     ccflags="-D_REENTRANT $ccflags"

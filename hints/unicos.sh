@@ -4,4 +4,7 @@ esac
 optimize="-O1"
 d_setregid='undef'
 d_setreuid='undef'
+case "$usemymalloc" in
+'') usemymalloc='n' ;;
+esac
 

@@ -24,7 +24,7 @@ Summary of my $package ($baserev patchlevel $PATCHLEVEL subversion $SUBVERSION) 
     osname=$osname, osvers=$osvers, archname=$archname
     uname='$myuname'
     hint=$hint, useposix=$useposix, d_sigaction=$d_sigaction
-    bincompat3=$bincompat3 useperlio=$useperlio d_sfio=$d_sfio
+    usethreads=$usethreads useperlio=$useperlio d_sfio=$d_sfio
   Compiler:
     cc='$cc', optimize='$optimize', gccversion=$gccversion
     cppflags='$cppflags'
