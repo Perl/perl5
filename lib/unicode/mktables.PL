@@ -9,74 +9,6 @@ mkdir "Is", 0777;
 mkdir "To", 0777;
 mkdir "Eq", 0777;
 
-open(UNICODEDATA, $UnicodeData) || die "$0: $UnicodeData: $!\n";
-
-while (<UNICODEDATA>) {
-    ($code, $name) = split /;/;
-    
-    $code{$name} = $code;
-    $name{$code} = $name;
-
-    next unless $name =~ /^(.+? LETTER .+?) WITH .+( \w+ FORM)?$/;
-
-    push @base, [ $code, $1 ];
-    push @base, [ $code, $1.$2 ] if $2 ne '';
-
-    # Before this "diacritics stripping" phase (and for Arabic, also
-    # "form stripping" phase) all ligatures could be decomposed into
-    # their constituent letters.
-    #
-    # For example the ligature
-    # ARABIC LIGATURE YEH WITH HAMZA ABOVE WITH ALEF ISOLATED FORM
-    # would go first through ligature decomposition producing the two letters
-    # ARABIC LETTER YEH WITH HAMZA ABOVE ISOLATED FORM
-    # ARABIC LETTER ALEF WITH HAMZA ABOVE ISOLATED FORM
-    # and those with diacritics stripping
-    # ARABIC LETTER YEH ISOLATED FORM
-    # ARABIC LETTER ALEF ISOLATED FORM
-    # and those with the Arabic form stripping
-    # ARABIC LETTER YEH
-    # ARABIC LETTER ALEF ISOLATED FORM
-    # ARABIC LETTER YEH
-    # ARABIC LETTER ALEF ISOLATED FORM
-    #
-    # Similarly for ligatures from other scripts.
-    # Effectively this would mean that ligatures turn into categories
-    # (Unicodese for character classes).
-}
-
-foreach my $b (@base) {
-    ($code, $base) = @$b;
-    next unless exists $code{$base};
-    push @{$unicode{$code{$base}}}, $code;
-#   print "$code: $name{$code} -> $base\n",
-}
-
-@unicode = sort keys %unicode;
-
-print "Eq/Unicode\n";
-if (open(EQ_UNICODE, ">Eq/Unicode")) {
-    foreach my $c (@unicode) {
-	print EQ_UNICODE "$c @{$unicode{$c}}\n";
-    }
-    close EQ_UNICODE;
-} else {
-    die "$0: failed to open Eq/Unicode for writing: $!\n";
-}
-
-print "Eq/Latin1\n";
-if (open(EQ_LATIN1, ">Eq/Latin1")) {
-    foreach my $c (@unicode) {
-	last if hex($c) > 255;
-	my @c = grep { hex($_) <= 255 } @{$unicode{$c}};
-	next unless @c;
-	print EQ_LATIN1 "$c @c\n";
-    }
-    close EQ_LATIN1;
-} else {
-    die "$0: failed to open Eq/Latin1 for writing: $!\n";
-}
-
 @todo = (
 # typical
 
@@ -372,4 +304,71 @@ END
 
 # Create the equivalence mappings.
 
+open(UNICODEDATA, $UnicodeData) || die "$0: $UnicodeData: $!\n";
+
+while (<UNICODEDATA>) {
+    ($code, $name) = split /;/;
+    
+    $code{$name} = $code;
+    $name{$code} = $name;
+
+    next unless $name =~ /^(.+? LETTER .+?) WITH .+( \w+ FORM)?$/;
+
+    push @base, [ $code, $1 ];
+    push @base, [ $code, $1.$2 ] if $2 ne '';
+
+    # Before this "diacritics stripping" phase (and for Arabic, also
+    # "form stripping" phase) all ligatures could be decomposed into
+    # their constituent letters.
+    #
+    # For example the ligature
+    # ARABIC LIGATURE YEH WITH HAMZA ABOVE WITH ALEF ISOLATED FORM
+    # would go first through ligature decomposition producing the two letters
+    # ARABIC LETTER YEH WITH HAMZA ABOVE ISOLATED FORM
+    # ARABIC LETTER ALEF WITH HAMZA ABOVE ISOLATED FORM
+    # and those with diacritics stripping
+    # ARABIC LETTER YEH ISOLATED FORM
+    # ARABIC LETTER ALEF ISOLATED FORM
+    # and those with the Arabic form stripping
+    # ARABIC LETTER YEH
+    # ARABIC LETTER ALEF ISOLATED FORM
+    # ARABIC LETTER YEH
+    # ARABIC LETTER ALEF ISOLATED FORM
+    #
+    # Similarly for ligatures from other scripts.
+    # Effectively this would mean that ligatures turn into categories
+    # (Unicodese for character classes).
+}
+
+foreach my $b (@base) {
+    ($code, $base) = @$b;
+    next unless exists $code{$base};
+    push @{$unicode{$code{$base}}}, $code;
+#   print "$code: $name{$code} -> $base\n",
+}
+
+@unicode = sort keys %unicode;
+
+print "Eq/Unicode\n";
+if (open(EQ_UNICODE, ">Eq/Unicode")) {
+    foreach my $c (@unicode) {
+	print EQ_UNICODE "$c @{$unicode{$c}}\n";
+    }
+    close EQ_UNICODE;
+} else {
+    die "$0: failed to open Eq/Unicode for writing: $!\n";
+}
+
+print "Eq/Latin1\n";
+if (open(EQ_LATIN1, ">Eq/Latin1")) {
+    foreach my $c (@unicode) {
+	last if hex($c) > 255;
+	my @c = grep { hex($_) <= 255 } @{$unicode{$c}};
+	next unless @c;
+	print EQ_LATIN1 "$c @c\n";
+    }
+    close EQ_LATIN1;
+} else {
+    die "$0: failed to open Eq/Latin1 for writing: $!\n";
+}
   
