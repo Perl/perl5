@@ -60,6 +60,16 @@ my $perl = defined($ENV{PERLNAME}) ? $ENV{PERLNAME} : 'perl';
 my $perl_verbase = defined($ENV{PERLNAME_VERBASE})
 		    ? $ENV{PERLNAME_VERBASE}
 		    : $perl;
+my $dbg = '';
+my $ndbg = '';
+if ( $Is_VMS ) {
+    if ( defined $Config{usevmsdebug} ) {
+        if ( $Config{usevmsdebug} eq 'define' ) {
+            $dbg = 'dbg';
+            $ndbg = 'ndbg';
+        }
+    }
+}
 
 $otherperls = 1;
 my $destdir = '';
@@ -225,7 +235,15 @@ if (!$nonono && $d_dosuid && $>) { die "You must run as root to install suidperl
 	unless $installbin =~ m#^/afs/# || $nonono;
 
 if (!$Is_NetWare) {
+if (!$Is_VMS) {
 -x 'perl' . $exe_ext	|| die "perl isn't executable!\n";
+}
+else {
+-x $ndbg . 'perl' . $exe_ext	|| die "${ndbg}perl$exe_ext isn't executable!\n";
+    if ($dbg) {
+        -x $dbg . 'perl' . $exe_ext	|| die "${dbg}perl$exe_ext isn't executable!\n";
+    }
+}
 -x 'suidperl' . $exe_ext|| die "suidperl isn't executable!\n" if $d_dosuid;
 
 -f 't/rantests'		|| $Is_W32
@@ -291,12 +309,17 @@ my $packlist = ExtUtils::Packlist->new("$installarchlib/.packlist");
 # First we install the version-numbered executables.
 
 if ($Is_VMS) {
-    safe_unlink("$installbin/$perl$exe_ext");
-    copy("perl$exe_ext", "$installbin/$perl$exe_ext");
-    chmod(0755, "$installbin/$perl$exe_ext");
-    safe_unlink("$installbin/${perl}shr$exe_ext");
-    copy("perlshr$exe_ext", "$installbin/${perl}shr$exe_ext");
-    chmod(0755, "$installbin/${perl}shr$exe_ext");
+    safe_unlink("$installbin/$dbg$perl$exe_ext");
+    copy("$dbg$perl$exe_ext", "$installbin/$dbg$perl$exe_ext");
+    chmod(0755, "$installbin/$dbg$perl$exe_ext");
+    safe_unlink("$installbin/$dbg${perl}shr$exe_ext");
+    copy("$dbg${perl}shr$exe_ext", "$installbin/$dbg${perl}shr$exe_ext");
+    chmod(0755, "$installbin/$dbg${perl}shr$exe_ext");
+    if ($ndbg) {
+       safe_unlink("$installbin/$ndbg$perl$exe_ext");
+       copy("$ndbg$perl$exe_ext", "$installbin/$ndbg$perl$exe_ext");
+       chmod(0755, "$installbin/$ndbg$perl$exe_ext");
+    }
 }
 elsif ($^O eq 'mpeix') {
     # MPE lacks hard links and requires that executables with special
