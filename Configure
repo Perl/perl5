@@ -20,7 +20,7 @@
 
 # $Id: Head.U,v 3.0.1.9 1997/02/28 15:02:09 ram Exp $
 #
-# Generated on Thu Feb 24 02:58:10 EET 2000 [metaconfig 3.0 PL70]
+# Generated on Thu Feb 24 03:09:49 EET 2000 [metaconfig 3.0 PL70]
 # (with additional metaconfig patches by perlbug@perl.com)
 
 cat >/tmp/c1$$ <<EOF
@@ -9309,7 +9309,6 @@ $cat >try.c <<EOCP
 #endif
 int main() { int64_t x = 7; }
 EOCP
-	echo " " >&4
 set try
 if eval $compile; then
 	val="$define"
@@ -9317,6 +9316,7 @@ if eval $compile; then
 	echo "You have int64_t."
 else
 	val="$undef"
+	echo " " >&4
 	echo "You do not have int64_t."
 fi
 $rm -f try try.*
