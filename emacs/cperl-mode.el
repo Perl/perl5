@@ -27,7 +27,7 @@
 ;;; Corrections made by Ilya Zakharevich ilya@math.mps.ohio-state.edu
 ;;; XEmacs changes by Peter Arius arius@informatik.uni-erlangen.de
 
-;; $Id: cperl-mode.el,v 1.19 1996/01/31 01:14:31 ilya Exp ilya $
+;; $Id: cperl-mode.el,v 1.20 1996/02/09 03:40:01 ilya Exp ilya $
 
 ;;; To use this mode put the following into your .emacs file:
 
@@ -67,9 +67,9 @@
 
 ;;; to your .emacs file.
 
-;;;; This mode supports font-lock, imenu and compile-mode. In the
+;;;; This mode supports font-lock, imenu and mode-compile. In the
 ;;;; hairy version font-lock is on, but you should activate imenu
-;;;; yourself (note that compile-mode is not standard yet). Well, you
+;;;; yourself (note that mode-compile is not standard yet). Well, you
 ;;;; can use imenu from keyboard anyway (M-x imenu), but it is better
 ;;;; to bind it like that:
 
@@ -236,6 +236,15 @@
 ;;;  Fontifies the package name after import/no/bootstrap.
 ;;;  Added new entry to menu with meta-info about the mode.
 
+;;;; After 1.19:
+;;;  Prefontification works much better with 19.29. Should be checked
+;;;   with 19.30 as well.
+;;;  Some misprints in docs corrected.
+;;;  Now $a{-text} and -text => "blah" are fontified as strings too.
+;;;  Now the pod search is much stricter, so it can help you to find
+;;;    pod sections which are broken because of whitespace before =blah
+;;;    - just observe the fontification.
+
 (defvar cperl-extra-newline-before-brace nil
   "*Non-nil means that if, elsif, while, until, else, for, foreach
 and do constructs look like:
@@ -340,7 +349,7 @@ You can always make lookup from menu or using \\[cperl-find-pods-heres].")
 
 (defvar cperl-tips 'please-ignore-this-line
   "Get newest version of this package from
-  ftp://ftp.math.ohio-state.edu/pub/users/ilya/lisp
+  ftp://ftp.math.ohio-state.edu/pub/users/ilya/emacs
 and/or
   ftp://ftp.math.ohio-state.edu/pub/users/ilya/perl
 
@@ -350,7 +359,7 @@ Note that for 19.30 you should use choose-color.el *instead* of
 font-lock-extra.el (and you will not get smart highlighting in C :-().
 
 Note that to enable Compile choices in the menu you need to install
-compile-mode.el.
+mode-compile.el.
 
 Get perl5-info from 
   http://www.metronet.com:70/9/perlinfo/perl5/manual/perl5-info.tar.gz
@@ -467,6 +476,13 @@ To speed up coloring the following compromises exist:
       (interactive "r")
       (comment-region beg end -1)))
 
+(defvar cperl-do-not-fontify
+  (if (string< emacs-version "19.30")
+      'fontified
+    'lazy-lock)
+  "Text property which inhibits refontification.")
+
+
 ;;; Probably it is too late to set these guys already, but it can help later:
 
 (setq auto-mode-alist
@@ -1778,36 +1794,37 @@ the sections using `cperl-pod-head-face', `cperl-pod-face',
 	    (remove-text-properties min max '(syntax-type t))
 	    ;; Need to remove face as well...
 	    (goto-char min)
-	    (while (re-search-forward "^=" max t)
-	      (if (looking-at "cut\\>")
+	    (while (re-search-forward "\\(\\`\n?\\|\n\n\\)=" max t)
+	      (if (looking-at "\n*cut\\>")
 		  (progn
 		    (message "=cut is not preceeded by a pod section")
 		    (setq err (point)))
 		(beginning-of-line)
 		(setq b (point) bb b)
-		(re-search-forward "^=cut\\>" max 'toend)
-		(beginning-of-line 2)
+		(or (re-search-forward "\n\n=cut\\>" max 'toend)
+		    (message "Cannot find the end of a pod section"))
+		(beginning-of-line 4)
 		(setq e (point))
 		(put-text-property b e 'in-pod t)
 		(goto-char b)
 		(while (re-search-forward "\n\n[ \t]" e t)
 		  (beginning-of-line)
 		  (put-text-property b (point) 'syntax-type 'pod)
-		  (put-text-property b (point) 'fontified t) ; Old lazy-lock
-		  (put-text-property b (point) 'lazy-lock t) ; New lazy-lock
+		  (put-text-property (max (point-min) (1- b))
+				     (point) cperl-do-not-fontify t)
 		  (if cperl-pod-here-fontify (put-text-property b (point) 'face face))
 		  (re-search-forward "\n\n[^ \t\f]" e 'toend)
 		  (beginning-of-line)
 		  (setq b (point)))
 		(put-text-property (point) e 'syntax-type 'pod)
-		(put-text-property (point) e 'fontified t)
-		(put-text-property (point) e 'lazy-lock t)
+		(put-text-property (max (point-min) (1- (point)))
+				   e cperl-do-not-fontify t)
 		(if cperl-pod-here-fontify 
 		    (progn (put-text-property (point) e 'face face)
 			   (goto-char bb)
 			   (while (re-search-forward
 				   ;; One paragraph
-				   "^=[a-zA-Z0-9]+\\>[ \t]*\\(\\(\n?[^\n]\\)+\\)$"
+				   "\n\n=[a-zA-Z0-9]+\\>[ \t]*\\(\\(\n?[^\n]\\)+\\)$"
 				   e 'toend)
 			     (put-text-property 
 			      (match-beginning 1) (match-end 1)
@@ -1830,16 +1847,12 @@ the sections using `cperl-pod-head-face', `cperl-pod-face',
 			 (progn
 			   (put-text-property (match-beginning 0) (match-end 0) 
 					      'face font-lock-reference-face)
-			   (put-text-property (match-beginning 0) 
-					      (1+ (match-end 0))
-					      'lazy-lock t)
-			   (put-text-property (match-beginning 0) 
-					      (1+ (match-end 0))
-					      'fontified t)
+			   (put-text-property (max (point-min) (1- b))
+					      (min (point-mox)
+						   (1+ (match-end 0)))
+					      cperl-do-not-fontify t)
 			   (put-text-property b (match-beginning 0) 
-					      'face here-face)
-			   (put-text-property b (match-beginning 0) 
-					      'lazy-lock t)))
+					      'face here-face)))
 		     (put-text-property b (match-beginning 0) 
 					'syntax-type 'here-doc)))))
 	  (if err (goto-char err)
@@ -2330,18 +2343,18 @@ indentation and initial hashes. Behaves usually outside of comment."
 	    '("\\<\\(package\\|require\\|use\\|import\\|no\\|bootstrap\\)[ \t]+\\([a-zA-z_][a-zA-z_0-9:]*\\)[ \t;]" ; require A if B;
 	      2 font-lock-function-name-face)
 	    (cond ((featurep 'font-lock-extra)
-		   '("\\([]}\\\\%@>*&]\\|\\$[a-zA-Z0-9_:]*\\)[ \t]*{[ \t]*\\([a-zA-Z0-9_:]+\\)[ \t]*}" 
+		   '("\\([]}\\\\%@>*&]\\|\\$[a-zA-Z0-9_:]*\\)[ \t]*{[ \t]*\\(-?[a-zA-Z0-9_:]+\\)[ \t]*}" 
 		     (2 font-lock-string-face t)
 		     (0 '(restart 2 t)))) ; To highlight $a{bc}{ef}
 		  (font-lock-anchored
-		   '("\\([]}\\\\%@>*&]\\|\\$[a-zA-Z0-9_:]*\\)[ \t]*{[ \t]*\\([a-zA-Z0-9_:]+\\)[ \t]*}"
+		   '("\\([]}\\\\%@>*&]\\|\\$[a-zA-Z0-9_:]*\\)[ \t]*{[ \t]*\\(-?[a-zA-Z0-9_:]+\\)[ \t]*}"
 		     (2 font-lock-string-face t)
-		     ("\\=[ \t]*{[ \t]*\\([a-zA-Z0-9_:]+\\)[ \t]*}"
+		     ("\\=[ \t]*{[ \t]*\\(-?[a-zA-Z0-9_:]+\\)[ \t]*}"
 		      nil nil
 		      (1 font-lock-string-face t))))
-		  (t '("\\([]}\\\\%@>*&]\\|\\$[a-zA-Z0-9_:]*\\)[ \t]*{[ \t]*\\([a-zA-Z0-9_:]+\\)[ \t]*}"
+		  (t '("\\([]}\\\\%@>*&]\\|\\$[a-zA-Z0-9_:]*\\)[ \t]*{[ \t]*\\(-?[a-zA-Z0-9_:]+\\)[ \t]*}"
 		       2 font-lock-string-face t)))
-	    '("[ \t{,(]\\([a-zA-Z0-9_:]+\\)[ \t]*=>" 1
+	    '("[ \t{,(]\\(-?[a-zA-Z0-9_:]+\\)[ \t]*=>" 1
 	      font-lock-string-face t)
 	    '("^[ \t]*\\([a-zA-Z0-9_]+[ \t]*:\\)[ \t]*\\($\\|{\\|\\<\\(until\\|while\\|for\\(each\\)?\\|do\\)\\>\\)" 1 
 	      font-lock-reference-face) ; labels
