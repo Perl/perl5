@@ -174,3 +174,8 @@ EOF
     ;;
 esac
 
+# NetBSD/sparc 1.5.3/1.6.1 dumps core in the semid_ds test of Configure.
+case `uname -m` in
+sparc) d_semctl_semid_ds=undef ;;
+esac
+
