@@ -72,6 +72,7 @@ Perl_gv_fetchfile(pTHX_ const char *name)
 	tmpbuf = smallbuf;
     else
 	New(603, tmpbuf, tmplen + 1, char);
+    /* This is where the debugger's %{"::_<$filename"} hash is created */
     tmpbuf[0] = '_';
     tmpbuf[1] = '<';
     strcpy(tmpbuf + 2, name);

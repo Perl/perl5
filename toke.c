@@ -634,6 +634,8 @@ S_skipspace(pTHX_ register char *s)
 
 	    sv_upgrade(sv, SVt_PVMG);
 	    sv_setpvn(sv,PL_bufptr,PL_bufend-PL_bufptr);
+            (void)SvIOK_on(sv);
+            SvIVX(sv) = 0;
 	    av_store(CopFILEAV(PL_curcop),(I32)CopLINE(PL_curcop),sv);
 	}
     }
@@ -2469,6 +2471,8 @@ Perl_yylex(pTHX)
 
 		sv_upgrade(sv, SVt_PVMG);
 		sv_setsv(sv,PL_linestr);
+                (void)SvIOK_on(sv);
+                SvIVX(sv) = 0;
 		av_store(CopFILEAV(PL_curcop),(I32)CopLINE(PL_curcop),sv);
 	    }
 	    goto retry;
@@ -2552,6 +2556,8 @@ Perl_yylex(pTHX)
 
 	    sv_upgrade(sv, SVt_PVMG);
 	    sv_setsv(sv,PL_linestr);
+            (void)SvIOK_on(sv);
+            SvIVX(sv) = 0;
 	    av_store(CopFILEAV(PL_curcop),(I32)CopLINE(PL_curcop),sv);
 	}
 	PL_bufend = SvPVX(PL_linestr) + SvCUR(PL_linestr);
@@ -6533,6 +6539,8 @@ S_scan_heredoc(pTHX_ register char *s)
 
 	    sv_upgrade(sv, SVt_PVMG);
 	    sv_setsv(sv,PL_linestr);
+            (void)SvIOK_on(sv);
+            SvIVX(sv) = 0;
 	    av_store(CopFILEAV(PL_curcop), (I32)CopLINE(PL_curcop),sv);
 	}
 	if (*s == term && memEQ(s,PL_tokenbuf,len)) {
@@ -6883,6 +6891,8 @@ S_scan_str(pTHX_ char *start, int keep_quoted, int keep_delims)
 
 	    sv_upgrade(sv, SVt_PVMG);
 	    sv_setsv(sv,PL_linestr);
+            (void)SvIOK_on(sv);
+            SvIVX(sv) = 0;
 	    av_store(CopFILEAV(PL_curcop), (I32)CopLINE(PL_curcop), sv);
 	}
 

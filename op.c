@@ -3695,10 +3695,10 @@ Perl_newSTATEOP(pTHX_ I32 flags, char *label, OP *o)
 
     if (PERLDB_LINE && PL_curstash != PL_debstash) {
 	SV **svp = av_fetch(CopFILEAV(PL_curcop), (I32)CopLINE(cop), FALSE);
-	if (svp && *svp != &PL_sv_undef && !SvIOK(*svp)) {
-	    (void)SvIOK_on(*svp);
+        if (svp && *svp != &PL_sv_undef ) { 
+           (void)SvIOK_on(*svp);
 	    SvIVX(*svp) = PTR2IV(cop);
-	}
+	} 
     }
 
     return prepend_elem(OP_LINESEQ, (OP*)cop, o);
