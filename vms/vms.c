@@ -273,6 +273,8 @@ Perl_my_getenv(pTHX_ const char *lnm, bool sys)
         idx = strtoul(cp2+1,NULL,0);
         lnm = uplnm;
       }
+      /* Impose security constraints only if tainting */
+      if (sys) sys = PL_curinterp ? PL_tainting : will_taint;
       if (vmstrnenv(lnm,eqv,idx,
                     sys ? fildev : NULL,
 #ifdef SECURE_INTERNAL_GETENV
@@ -319,6 +321,8 @@ my_getenv_len(const char *lnm, unsigned long *len, bool sys)
         idx = strtoul(cp2+1,NULL,0);
         lnm = buf;
       }
+      /* Impose security constraints only if tainting */
+      if (sys) sys = PL_curinterp ? PL_tainting : will_taint;
       if ((*len = vmstrnenv(lnm,buf,idx,
                            sys ? fildev : NULL,
 #ifdef SECURE_INTERNAL_GETENV
