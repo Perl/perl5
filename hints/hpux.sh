@@ -291,8 +291,9 @@ else
 	    if test -x /usr/bin/ar; then
 	    	cat <<END >&2
 
-NOTE: You are using HP cc(1) but GNU ar(1).  This might lead into trouble
-later on, I'm switching to HP ar to play safe.
+*** You are using HP cc(1) but GNU ar(1).  This might lead into trouble
+*** later on, I'm switching to HP ar to play safe.
+
 END
 		ar=/usr/bin/ar
 	    fi
