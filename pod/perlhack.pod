@@ -350,7 +350,7 @@ from Andreas König to have better control over the patching process.
 
 =back
 
-=head3 Why rsync the source tree
+=head2 Why rsync the source tree
 
 =over 4
 
@@ -378,7 +378,7 @@ more ... (see Sarathy's remark).
 
 =back
 
-=head3 Why rsync the patches
+=head2 Why rsync the patches
 
 =over 4
 
@@ -469,20 +469,23 @@ for reference.
 
 =head2 Submitting patches
 
-Always submit patches to I<perl5-porters@perl.org>.  This lets other
-porters review your patch, which catches a surprising number of errors
-in patches.  Either use the diff program (available in source code
-form from I<ftp://ftp.gnu.org/pub/gnu/>), or use Johan Vromans'
-I<makepatch> (available from I<CPAN/authors/id/JV/>).  Unified diffs
-are preferred, but context diffs are accepted.  Do not send RCS-style
-diffs or diffs without context lines.  More information is given in
-the I<Porting/patching.pod> file in the Perl source distribution.
-Please patch against the latest B<development> version (e.g., if
-you're fixing a bug in the 5.005 track, patch against the latest
-5.005_5x version).  Only patches that survive the heat of the
-development branch get applied to maintenance versions.
+Always submit patches to I<perl5-porters@perl.org>.  If you're
+patching a core module and there's an author listed, send the author a
+copy (see L<Patching a core module>).  This lets other porters review
+your patch, which catches a surprising number of errors in patches.
+Either use the diff program (available in source code form from
+I<ftp://ftp.gnu.org/pub/gnu/>), or use Johan Vromans' I<makepatch>
+(available from I<CPAN/authors/id/JV/>).  Unified diffs are preferred,
+but context diffs are accepted.  Do not send RCS-style diffs or diffs
+without context lines.  More information is given in the
+I<Porting/patching.pod> file in the Perl source distribution.  Please
+patch against the latest B<development> version (e.g., if you're
+fixing a bug in the 5.005 track, patch against the latest 5.005_5x
+version).  Only patches that survive the heat of the development
+branch get applied to maintenance versions.
 
-Your patch should update the documentation and test suite.
+Your patch should update the documentation and test suite.  See
+L<Writing a test>.
 
 To report a bug in Perl, use the program I<perlbug> which comes with
 Perl (if you can't get Perl to work, send mail to the address
@@ -569,6 +572,13 @@ correspond to files or directories in the source kit. Among the areas are:
 Modules shipped as part of the Perl core live in the F<lib/> and F<ext/>
 subdirectories: F<lib/> is for the pure-Perl modules, and F<ext/>
 contains the core XS modules.
+
+=item Tests
+
+There are tests for nearly all the modules, built-ins and major bits
+of functionality.  Test files all have a .t suffix.  Module tests live
+in the F<lib/> and F<ext/> directories next to the module being
+tested.  Others live in F<t/>.  See L<Writing a test>
 
 =item Documentation
 
@@ -1534,6 +1544,98 @@ We end up with a patch looking a little like this:
 
 And finally, we submit it, with our rationale, to perl5-porters. Job
 done!
+
+=head2 Patching a core module
+
+This works just like patching anything else, with an extra
+consideration.  Many core modules also live on CPAN.  If this is so,
+patch the CPAN version instead of the core and send the patch off to
+the module maintainer (with a copy to p5p).  This will help the module
+maintainer keep the CPAN version in sync with the core version without
+constantly scanning p5p.
+
+
+=head2 Writing a test
+
+Every module and built-in function has an associated test file (or
+should...).  If you add or change functionality, you have to write a
+test.  If you fix a bug, you have to write a test so that bug never
+comes back.  If you alter the docs, it would be nice to test what the
+new documentation says.
+
+In short, if you submit a patch you probably also have to patch the
+tests.
+
+For modules, the test file is right next to the module itself.
+F<lib/strict.t> tests F<lib/strict.pm>.  This is a recent innovation,
+so there are some snags (and it would be wonderful for you to brush
+them out), but it basically works that way.  Everything else lives in
+F<t/>.
+
+=over 3
+
+=item F<t/base/>
+
+Testing of the absolute basic functionality of Perl.  Things like
+C<if>, basic file reads and writes, simple regexes, etc.  These are
+run first in the test suite and if any of them fail, something is
+I<really> broken.
+
+=item F<t/cmd/>
+
+These test the basic control structures, C<if/else>, C<while>,
+subroutines, etc... 
+
+=item F<t/comp/>
+
+Tests basic issues of how Perl parses and compiles itself.
+
+=item F<t/io/>
+
+Tests for built-in IO functions, including command line arguments.
+
+=item F<t/lib/>
+
+The old home for the module tests, you shouldn't put anything new in
+here.  There are still some bits and pieces hanging around in here
+that need to be moved.  Perhaps you could move them?  Thanks!
+
+=item F<t/op/>
+
+Tests for perl's built in functions that don't fit into any of the
+other directories.
+
+=item F<t/pod/>
+
+Tests for POD directives.  There are still some tests for the Pod
+modules hanging around in here that need to be moved out into F<lib/>.
+
+=item F<t/run/>
+
+Testing features of how perl actually runs, including exit codes and
+handling of PERL* environment variables.
+
+=back
+
+The core uses the same testing style as the rest of Perl, a simple
+"ok/not ok" run through Test::Harness, but there are a few special
+considerations.
+
+For most libraries and extensions, you'll want to use the Test::More
+library rather than rolling your own test functions.  If a module test
+doesn't use Test::More, consider rewriting it so it does.  For the
+rest its best to use a simple C<print "ok $test_num\n"> style to avoid
+broken core functionality from causing the whole test to collapse.
+
+When you say "make test" Perl uses the F<t/TEST> program to run the
+test suite.  All tests are run from the F<t/> directory, B<not> the
+directory which contains the test.  This causes some problems with the
+tests in F<lib/>, so here's some opportunity for some patching.
+
+You must be triply conscious of cross-platform concerns.  This usually
+boils down to using File::Spec and avoiding things like C<fork()> and
+C<system()> unless absolutely necessary.
+
 
 =head1 EXTERNAL TOOLS FOR DEBUGGING PERL
 
