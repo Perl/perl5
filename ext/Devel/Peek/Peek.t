@@ -12,7 +12,7 @@ BEGIN {
 
 use Devel::Peek;
 
-print "1..18\n";
+print "1..19\n";
 
 our $DEBUG = 0;
 open(SAVERR, ">&STDERR") or die "Can't dup STDERR: $!";
@@ -322,9 +322,35 @@ do_test(18,
 'SV = PV\\($ADDR\\) at $ADDR
   REFCNT = 1
   FLAGS = \\(PADBUSY,PADTMP,POK,READONLY,pPOK,UTF8\\)
-  PV = $ADDR "\\\304\\\200\\\0\\\310\\\200"\\\0 "\\\x\{100\}\\\x\{0\}\\\x\{200\}"
+  PV = $ADDR "\\\304\\\200\\\0\\\310\\\200"\\\0 \[UTF8 "\\\x\{100\}\\\x\{0\}\\\x\{200\}"\]
   CUR = 5
   LEN = 6');
+
+do_test(19,
+	{chr(256)=>chr(512)},
+'SV = RV\\($ADDR\\) at $ADDR
+  REFCNT = 1
+  FLAGS = \\(ROK\\)
+  RV = $ADDR
+  SV = PVHV\\($ADDR\\) at $ADDR
+    REFCNT = 2
+    FLAGS = \\(SHAREKEYS\\)
+    IV = 1
+    NV = 0
+    ARRAY = $ADDR  \\(0:7, 1:1\\)
+    hash quality = 100.0%
+    KEYS = 1
+    FILL = 1
+    MAX = 7
+    RITER = -1
+    EITER = $ADDR
+    Elt "\\\304\\\200" \[UTF8 "\\\x\{100\}"\] HASH = $ADDR
+    SV = PV\\($ADDR\\) at $ADDR
+      REFCNT = 1
+      FLAGS = \\(POK,pPOK,UTF8\\)
+      PV = $ADDR "\\\310\\\200"\\\0 \[UTF8 "\\\x\{200\}"\]
+      CUR = 2
+      LEN = 3');
 
 END {
   1 while unlink("peek$$");

@@ -1129,7 +1129,7 @@ Perl_do_sv_dump(pTHX_ I32 level, PerlIO *file, SV *sv, I32 nest, I32 maxnest, bo
 		PerlIO_printf(file, "( %s . ) ", pv_display(d, SvPVX(sv)-SvIVX(sv), SvIVX(sv), 0, pvlim));
 	    PerlIO_printf(file, "%s", pv_display(d, SvPVX(sv), SvCUR(sv), SvLEN(sv), pvlim));
 	    if (SvUTF8(sv)) /* the 8?  \x{....} */
-	        PerlIO_printf(file, " %s", sv_uni_display(d, sv, 8 * sv_len_utf8(sv)));
+	        PerlIO_printf(file, " [UTF8 %s]", sv_uni_display(d, sv, 8 * sv_len_utf8(sv)));
 	    PerlIO_printf(file, "\n");
 	    Perl_dump_indent(aTHX_ level, file, "  CUR = %"IVdf"\n", (IV)SvCUR(sv));
 	    Perl_dump_indent(aTHX_ level, file, "  LEN = %"IVdf"\n", (IV)SvLEN(sv));
@@ -1251,14 +1251,18 @@ Perl_do_sv_dump(pTHX_ I32 level, PerlIO *file, SV *sv, I32 nest, I32 maxnest, bo
 
 	    hv_iterinit(hv);
 	    while ((he = hv_iternext(hv)) && count--) {
-		SV *elt;
-		char *key;
-		I32 len;
+		SV *elt, *keysv;
+		char *keypv;
+		STRLEN len;
 		U32 hash = HeHASH(he);
 
-		key = hv_iterkey(he, &len);
+		keysv = hv_iterkeysv(he);
+		keypv = SvPV(keysv, len);
 		elt = hv_iterval(hv, he);
-		Perl_dump_indent(aTHX_ level+1, file, "Elt %s HASH = 0x%"UVxf"\n", pv_display(d, key, len, 0, pvlim), (UV)hash);
+		Perl_dump_indent(aTHX_ level+1, file, "Elt %s ", pv_display(d, keypv, len, 0, pvlim));
+		if (SvUTF8(keysv))
+		    PerlIO_printf(file, "[UTF8 %s] ", sv_uni_display(d, keysv, 8 * sv_len_utf8(keysv)));
+		PerlIO_printf(file, "HASH = 0x%"UVxf"\n", (UV)hash);
 		do_sv_dump(level+1, file, elt, nest+1, maxnest, dumpops, pvlim);
 	    }
 	    hv_iterinit(hv);		/* Return to status quo */
