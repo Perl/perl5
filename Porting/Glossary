@@ -4,11 +4,6 @@ programs (e.g. I_UNISTD) are already described in config_h.SH.  [`configpm'
 generates pod documentation for Config.pm from this file--please try to keep
 the formatting regular.]
 
-Mcc (Loc.U):
-	This variable is be used internally by Configure to determine the
-	full pathname (if any) of the Mcc program.  After Configure runs,
-	the value is reset to a plain "Mcc" and is not useful.
-
 _a (Unix.U):
 	This variable defines the extension used for ordinary libraries.
 	For unix, it is '.a'.  The '.' is included.  Other possible
@@ -256,15 +251,6 @@ csh (Loc.U):
 	This variable is be used internally by Configure to determine the
 	full pathname (if any) of the csh program.  After Configure runs,
 	the value is reset to a plain "csh" and is not useful.
-
-d_Gconvert (d_gconvert.U):
-	This variable holds what Gconvert is defined as to convert
-	floating point numbers into strings. It could be 'gconvert'
-	or a more complex macro emulating gconvert with gcvt() or sprintf.
-	Possible values are:
-		d_Gconvert='gconvert((x),(n),(t),(b))'
-		d_Gconvert='gcvt((x),(n),(b))'
-		d_Gconvert='sprintf((b),"%.*g",(n),(x))'
 
 d_access (d_access.U):
 	This variable conditionally defines HAS_ACCESS if the access() system
@@ -580,6 +566,15 @@ d_ftime (d_ftime.U):
 d_ftruncate64 (io64.U):
 	This variable conditionally defines the HAS_FTRUNCATE64 symbol, which
 	indicates to the C program that the ftruncate64() routine is available.
+
+d_Gconvert (d_gconvert.U):
+	This variable holds what Gconvert is defined as to convert
+	floating point numbers into strings. It could be 'gconvert'
+	or a more complex macro emulating gconvert with gcvt() or sprintf.
+	Possible values are:
+		d_Gconvert='gconvert((x),(n),(t),(b))'
+		d_Gconvert='gcvt((x),(n),(b))'
+		d_Gconvert='sprintf((b),"%.*g",(n),(x))'
 
 d_getgrent (d_getgrent.U):
 	This variable conditionally defines the HAS_GETGRENT symbol, which
@@ -911,6 +906,10 @@ d_nice (d_nice.U):
 d_off64t (io64.U):
 	This symbol will be defined if the C compiler supports off64_t.
 
+d_old_pthread_create_joinable (d_pthrattrj.U):
+	This variable conditionally defines pthread_create_joinable.
+	undef if pthread.h defines PTHREAD_CREATE_JOINABLE.
+
 d_oldpthreads (usethreads.U):
 	This variable conditionally defines the OLD_PTHREADS_API symbol,
 	and indicates that Perl should be built to use the old
@@ -964,10 +963,6 @@ d_portable (d_portable.U):
 	This variable conditionally defines the PORTABLE symbol, which
 	indicates to the C program that it should not assume that it is
 	running on the machine it was compiled on.
-
-d_pthread_create_joinable (d_pthrattrj.U):
-	This variable conditionally defines pthread_create_joinable.
-	undef if pthread.h defines PTHREAD_CREATE_JOINABLE.
 
 d_pthread_yield (d_pthread_y.U):
 	This variable conditionally defines the HAS_PTHREAD_YIELD
@@ -2176,6 +2171,11 @@ man3ext (man3dir.U):
 	have: one of 'n', 'l', or '3'.  The Makefile must supply the '.'.
 	See man3dir.
 
+Mcc (Loc.U):
+	This variable is be used internally by Configure to determine the
+	full pathname (if any) of the Mcc program.  After Configure runs,
+	the value is reset to a plain "Mcc" and is not useful.
+
 medium (models.U):
 	This variable contains a flag which will tell the C compiler and loader
 	to produce a program running with a medium memory model.  If the
@@ -2292,6 +2292,12 @@ o_nonblock (nblock_io.U):
 obj_ext (Unix.U):
 	This is an old synonym for _o.
 
+old_pthread_create_joinable (d_pthrattrj.U):
+	This variable defines the constant to use for creating joinable
+	(aka undetached) pthreads.  Unused if pthread.h defines
+	PTHREAD_CREATE_JOINABLE.  If used, possible values are
+	PTHREAD_CREATE_UNDETACHED and __UNDETACHED.
+
 optimize (ccflags.U):
 	This variable contains any optimizer/debugger flag that should be used.
 	It is up to the Makefile to use it.
@@ -2402,12 +2408,6 @@ privlibexp (privlib.U):
 prototype (prototype.U):
 	This variable holds the eventual value of CAN_PROTOTYPE, which
 	indicates the C compiler can handle funciton prototypes.
-
-pthread_create_joinable (d_pthrattrj.U):
-	This variable defines the constant to use for creating joinable
-	(aka undetached) pthreads.  Unused if pthread.h defines
-	PTHREAD_CREATE_JOINABLE.  If used, possible values are
-	PTHREAD_CREATE_UNDETACHED and __UNDETACHED.
 
 ptrsize (ptrsize.U):
 	This variable contains the value of the PTRSIZE symbol, which

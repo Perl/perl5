@@ -261,10 +261,7 @@ sed <<!GROK!THIS! >config.h -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un-
  */
 #$d_gethname HAS_GETHOSTNAME	/**/
 #$d_uname HAS_UNAME		/**/
-#$d_phostname HAS_PHOSTNAME
-#ifdef PHOSTNAME
 #$d_phostname PHOSTNAME "$aphostname"	/* How to get the host name */
-#endif
 
 /* HAS_GETLOGIN:
  *	This symbol, if defined, indicates that the getlogin routine is
@@ -2395,17 +2392,15 @@ sed <<!GROK!THIS! >config.h -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un-
  */
 #define ARCHNAME "$archname"		/**/
 
-/* PTHREAD_CREATE_JOINABLE:
+/* OLD_PTHREAD_CREATE_JOINABLE:
  *	This symbol, if defined, indicates how to create pthread
- *	in joinable (aka undetached) state.  Not defined here if
- *	pthread.h already has defined PTHREAD_CREATE_JOINABLE.
+ *	in joinable (aka undetached) state.  NOTE: not defined
+ *	if pthread.h already has defined PTHREAD_CREATE_JOINABLE
+ *	(the new version of the constant).
  *	If defined, possible values are PTHREAD_CREATE_UNDETACHED
  *	and __UNDETACHED.
  */
-#$d_pthread_create_joinable HAS_PTHREAD_CREATE_JOINABLE
-#ifdef HAS_PTHREAD_CREATE_JOINABLE
-#$d_pthread_create_joinable PTHREAD_CREATE_JOINABLE $pthread_create_joinable /**/
-#endif
+#$d_old_pthread_create_joinable OLD_PTHREAD_CREATE_JOINABLE $old_pthread_create_joinable /**/
 
 /* HAS_PTHREAD_YIELD:
  *	This symbol, if defined, indicates that the pthread_yield 
