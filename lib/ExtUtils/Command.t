@@ -93,7 +93,7 @@ BEGIN {
 	@ARGV = ( 0600, 'ecmdfile' );
 	ExtUtils::Command::chmod();
 
-	is( (stat('ecmdfile'))[2] & 07777, 0600, 'removed non-owner permissions' );
+	is( ((stat('ecmdfile'))[2] & 07777) & 0700, 0600, 'change a file to read-only' );
 
 	# mkpath
 	@ARGV = ( File::Spec->join( 'ecmddir', 'temp2' ) );
