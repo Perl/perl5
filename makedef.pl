@@ -1153,6 +1153,7 @@ perl_destruct
 perl_free
 perl_parse
 perl_run
+Perl_cxinc
 PerlIO_define_layer
 PerlIOBuf_set_ptrcnt
 PerlIOBuf_get_cnt
