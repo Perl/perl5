@@ -7741,7 +7741,7 @@ Perl_sv_vcatpvfn(pTHX_ SV *sv, const char *pat, STRLEN patlen, va_list *args, SV
 	/* we need a long double target in case HAS_LONG_DOUBLE but
 	   not USE_LONG_DOUBLE
 	*/
-#if defined(HAS_LONG_DOUBLE)
+#if defined(HAS_LONG_DOUBLE) && LONG_DOUBLESIZE > DOUBLESIZE
 	long double nv;
 #else
 	NV nv;
@@ -8277,10 +8277,14 @@ Perl_sv_vcatpvfn(pTHX_ SV *sv, const char *pat, STRLEN patlen, va_list *args, SV
 	    }
 
 	    /* now we need (long double) if intsize == 'q', else (double) */
-	    nv = args
-		? intsize == 'q'
-		    ? va_arg(*args, long double)
-		    : va_arg(*args, double)
+	    nv = args ?
+#if LONG_DOUBLESIZE > DOUBLESIZE
+		intsize == 'q' ?
+	            va_arg(*args, long double) :
+	            va_arg(*args, double)
+#else
+	            va_arg(*args, double)
+#endif
 		: SvNVx(argsv);
 
 	    need = 0;
