@@ -27,7 +27,7 @@ sub _exception{
 	   UTF-32 UTF-32BE UTF-32LE);
     $utfs{$name} or return 0;            # UTFs or no
     require Config; Config->import(); our %Config;
-    return $Config{perl_patchlevel} == 0 # maintperl then no
+    return $Config{perl_patchlevel} ? 0 : 1 # maintperl then no
 }
 
 sub import {
