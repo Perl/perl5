@@ -1588,7 +1588,6 @@ localize(OP *o, I32 lex)
     if (o->op_flags & OPf_PARENS)
 	list(o);
     else {
-	scalar(o);
 	if (dowarn && bufptr > oldbufptr && bufptr[-1] == ',') {
 	    char *s;
 	    for (s = bufptr; *s && (isALNUM(*s) || strchr("@$%, ",*s)); s++) ;
@@ -2980,10 +2979,14 @@ newLOOPEX(I32 type, OP *label)
     dTHR;
     OP *o;
     if (type != OP_GOTO || label->op_type == OP_CONST) {
-	o = newPVOP(type, 0, savepv(
-		label->op_type == OP_CONST
-		    ? SvPVx(((SVOP*)label)->op_sv, na)
-		    : "" ));
+	/* "last()" means "last" */
+	if (label->op_type == OP_STUB && (label->op_flags & OPf_PARENS))
+	    o = newOP(type, OPf_SPECIAL);
+	else {
+	    o = newPVOP(type, 0, savepv(label->op_type == OP_CONST
+					? SvPVx(((SVOP*)label)->op_sv, na)
+					: ""));
+	}
 	op_free(label);
     }
     else {

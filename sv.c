@@ -1644,7 +1644,7 @@ sv_2pv(register SV *sv, STRLEN *lp)
 		case SVt_PVHV:	s = "HASH";			break;
 		case SVt_PVCV:	s = "CODE";			break;
 		case SVt_PVGV:	s = "GLOB";			break;
-		case SVt_PVFM:	s = "FORMATLINE";		break;
+		case SVt_PVFM:	s = "FORMLINE";			break;
 		case SVt_PVIO:	s = "IO";			break;
 		default:	s = "UNKNOWN";			break;
 		}
