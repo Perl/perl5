@@ -1747,44 +1747,59 @@ win32_crypt(const char *txt, const char *salt)
 #endif
 }
 
-#ifdef USE_FIXED_OSFHANDLE
+/* C doesn't like repeat struct definitions */
 
-EXTERN_C int __cdecl _alloc_osfhnd(void);
-EXTERN_C int __cdecl _set_osfhnd(int fh, long value);
-EXTERN_C void __cdecl _lock_fhandle(int);
-EXTERN_C void __cdecl _unlock_fhandle(int);
-EXTERN_C void __cdecl _unlock(int);
+#if defined(USE_FIXED_OSFHANDLE) || defined(PERL_MSVCRT_READFIX)
 
-#if	(_MSC_VER >= 1000)
-typedef struct	{
+#ifndef _CRTIMP
+#define _CRTIMP __declspec(dllimport)
+#endif
+
+/*
+ * Control structure for lowio file handles
+ */
+typedef struct {
     long osfhnd;    /* underlying OS file HANDLE */
     char osfile;    /* attributes of file (e.g., open in text mode?) */
     char pipech;    /* one char buffer for handles opened on pipes */
-#if defined (_MT) && !defined (DLL_FOR_WIN32S)
     int lockinitflag;
     CRITICAL_SECTION lock;
-#endif  /* defined (_MT) && !defined (DLL_FOR_WIN32S) */
-}	ioinfo;
+} ioinfo;
 
-EXTERN_C ioinfo * __pioinfo[];
 
-#define IOINFO_L2E			5
-#define IOINFO_ARRAY_ELTS	(1 << IOINFO_L2E)
-#define _pioinfo(i)	(__pioinfo[i >> IOINFO_L2E] + (i & (IOINFO_ARRAY_ELTS - 1)))
-#define _osfile(i)	(_pioinfo(i)->osfile)
+/*
+ * Array of arrays of control structures for lowio files.
+ */
+EXTERN_C _CRTIMP ioinfo* __pioinfo[];
 
-#else	/* (_MSC_VER >= 1000) */
-extern char _osfile[];
-#endif	/* (_MSC_VER >= 1000) */
+/*
+ * Definition of IOINFO_L2E, the log base 2 of the number of elements in each
+ * array of ioinfo structs.
+ */
+#define IOINFO_L2E	    5
+
+/*
+ * Definition of IOINFO_ARRAY_ELTS, the number of elements in ioinfo array
+ */
+#define IOINFO_ARRAY_ELTS   (1 << IOINFO_L2E)
+
+/*
+ * Access macros for getting at an ioinfo struct and its fields from a
+ * file handle
+ */
+#define _pioinfo(i) (__pioinfo[(i) >> IOINFO_L2E] + ((i) & (IOINFO_ARRAY_ELTS - 1)))
+#define _osfhnd(i)  (_pioinfo(i)->osfhnd)
+#define _osfile(i)  (_pioinfo(i)->osfile)
+#define _pipech(i)  (_pioinfo(i)->pipech)
+
+#endif
+
+#ifdef USE_FIXED_OSFHANDLE
 
 #define FOPEN			0x01	/* file handle open */
 #define FAPPEND			0x20	/* file handle opened O_APPEND */
 #define FDEV			0x40	/* file handle refers to device */
 #define FTEXT			0x80	/* file handle is in text mode */
-
-#define _STREAM_LOCKS   26		/* Table of stream locks */
-#define _LAST_STREAM_LOCK  (_STREAM_LOCKS+_NSTREAM_-1)	/* Last stream lock */
-#define _FH_LOCKS          (_LAST_STREAM_LOCK+1)	/* Table of fh locks */
 
 /***
 *int my_open_osfhandle(long osfhandle, int flags) - open C Runtime file handle
@@ -1792,8 +1807,10 @@ extern char _osfile[];
 *Purpose:
 *       This function allocates a free C Runtime file handle and associates
 *       it with the Win32 HANDLE specified by the first parameter. This is a
-*		temperary fix for WIN95's brain damage GetFileType() error on socket
-*		we just bypass that call for socket
+*	temperary fix for WIN95's brain damage GetFileType() error on socket
+*	we just bypass that call for socket
+*
+*	This works with MSVC++ 4.0+ or GCC/Mingw32
 *
 *Entry:
 *       long osfhandle - Win32 HANDLE to associate with C Runtime file handle.
@@ -1806,6 +1823,30 @@ extern char _osfile[];
 *Exceptions:
 *
 *******************************************************************************/
+
+/*
+ * we fake up some parts of the CRT that aren't exported by MSVCRT.dll
+ * this lets sockets work on Win9X with GCC and should fix the problems
+ * with perl95.exe
+ *	-- BKS, 1-23-2000
+*/
+
+/* since we are not doing a dup2(), this works fine */
+
+#define _set_osfhnd(fh, osfh) (void)(_osfhnd(fh) = osfh)
+
+/* create an ioinfo entry, kill its handle, and steal the entry */
+
+static int _alloc_osfhnd()
+{
+    HANDLE hF = CreateFile("NUL", 0, 0, NULL, OPEN_ALWAYS, 0, NULL);
+    int fh = _open_osfhandle(hF, 0);
+    CloseHandle(hF);
+    if (fh == -1)
+        return fh;
+    EnterCriticalSection(&(_pioinfo(fh)->lock));
+    return fh;
+}
 
 static int
 my_open_osfhandle(long osfhandle, int flags)
@@ -1834,18 +1875,12 @@ my_open_osfhandle(long osfhandle, int flags)
 
     fileflags |= FOPEN;		/* mark as open */
 
-#if (_MSC_VER >= 1000)
     _osfile(fh) = fileflags;	/* set osfile entry */
-    _unlock_fhandle(fh);
-#else
-    _osfile[fh] = fileflags;	/* set osfile entry */
-    _unlock(fh+_FH_LOCKS);		/* unlock handle */
-#endif
+    LeaveCritiicalSection(&_pioinfo(fh)->lock);
 
     return fh;			/* return handle */
 }
 
-#define _open_osfhandle my_open_osfhandle
 #endif	/* USE_FIXED_OSFHANDLE */
 
 /* simulate flock by locking a range on the file */
@@ -2636,43 +2671,6 @@ win32_dup2(int fd1,int fd2)
 #define FTEXT		0x80	/* file handle is in text mode */
 #define MAX_DESCRIPTOR_COUNT	(64*32) /* this is the maximun that MSVCRT can handle */
 
-/*
- * Control structure for lowio file handles
- */
-typedef struct {
-    long osfhnd;    /* underlying OS file HANDLE */
-    char osfile;    /* attributes of file (e.g., open in text mode?) */
-    char pipech;    /* one char buffer for handles opened on pipes */
-    int lockinitflag;
-    CRITICAL_SECTION lock;
-} ioinfo;
-
-
-/*
- * Array of arrays of control structures for lowio files.
- */
-EXTERN_C _CRTIMP ioinfo* __pioinfo[];
-
-/*
- * Definition of IOINFO_L2E, the log base 2 of the number of elements in each
- * array of ioinfo structs.
- */
-#define IOINFO_L2E	    5
-
-/*
- * Definition of IOINFO_ARRAY_ELTS, the number of elements in ioinfo array
- */
-#define IOINFO_ARRAY_ELTS   (1 << IOINFO_L2E)
-
-/*
- * Access macros for getting at an ioinfo struct and its fields from a
- * file handle
- */
-#define _pioinfo(i) (__pioinfo[(i) >> IOINFO_L2E] + ((i) & (IOINFO_ARRAY_ELTS - 1)))
-#define _osfhnd(i)  (_pioinfo(i)->osfhnd)
-#define _osfile(i)  (_pioinfo(i)->osfile)
-#define _pipech(i)  (_pioinfo(i)->pipech)
-
 int __cdecl _fixed_read(int fh, void *buf, unsigned cnt)
 {
     int bytes_read;                 /* number of bytes read */
@@ -3405,6 +3403,10 @@ win32_free(void *block)
 int
 win32_open_osfhandle(long handle, int flags)
 {
+#ifdef USE_FIXED_OSFHANDLE
+    if (IsWin95())
+	return my_open_osfhandle(handle, flags);
+#endif
     return _open_osfhandle(handle, flags);
 }
 

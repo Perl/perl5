@@ -215,21 +215,6 @@ The build process may produce "harmless" compiler warnings (more or
 less copiously, depending on how picky your compiler gets).  The
 maintainers are aware of these warnings, thankyouverymuch. :)
 
-When building using Visual C++, a perl95.exe will also get built.  This
-executable is only needed on Windows95, and should be used instead of
-perl.exe, and then only if you want sockets to work properly on Windows95.
-This is necessitated by a bug in the Microsoft C Runtime that cannot be
-worked around in the "normal" perl.exe.  perl95.exe gets built with its
-own private copy of the C Runtime that is not accessible to extensions
-(which see the DLL version of the CRT).  Be aware, therefore, that this
-perl95.exe will have esoteric problems with extensions like perl/Tk that
-themselves use the C Runtime heavily, or want to free() pointers
-malloc()-ed by perl.
-
-You can avoid the perl95.exe problems completely if you either enable
-USE_PERLCRT with Visual C++, or use Borland C++ for building perl.  In
-those cases, perl95.exe is not needed and will not be built.
-
 =back
 
 =head2 Testing

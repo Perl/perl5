@@ -130,9 +130,11 @@ struct utsname {
  * facilities for accessing the same.  See note in util.c/my_setenv(). */
 /*#define USE_WIN32_RTL_ENV */
 
-/* Define USE_FIXED_OSFHANDLE to fix VC's _open_osfhandle() on W95.
- * Can only enable it if not using the DLL CRT (it doesn't expose internals) */
-#if defined(_MSC_VER) && !defined(_DLL) && defined(_M_IX86)
+/* Define USE_FIXED_OSFHANDLE to fix MSVCRT's _open_osfhandle() on W95.
+   It now uses some black magic to work seamlessly with the DLL CRT and
+   works with MSVC++ 4.0+ or GCC/Mingw32
+	-- BKS 1-24-2000 */
+#if (defined(_M_IX86) && _MSC_VER >= 1000) || defined(__MINGW32__)
 #define USE_FIXED_OSFHANDLE
 #endif
 
