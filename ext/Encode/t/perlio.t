@@ -13,7 +13,8 @@ BEGIN {
 	exit 0;
     }
     require Encode;
-    unless ($INC{"PerlIO/encoding.pm"} 
+    eval { require PerlIO::encoding };
+    unless ($INC{"PerlIO/encoding.pm"}
 	    and PerlIO::encoding->VERSION >= 0.02
 	   ){
 	print "1..0 # Skip:: PerlIO::encoding 0.02 or better required\n";
@@ -95,7 +96,7 @@ for my $e (qw/euc-jp shiftjis 7bit-jis iso-2022-jp iso-2022-jp-1/){
 	}
 	close $fh;
 	ok($utext eq $dtext, "<:encoding($e); line-by-line");
-    }    
+    }
     $DEBUG or unlink ($sfile, $pfile);
 }
 

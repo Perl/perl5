@@ -7,8 +7,8 @@ require Encode;
 for my $name ('7bit-jis', 'iso-2022-jp', 'iso-2022-jp-1'){
     my $h2z     = ($name eq '7bit-jis')    ? 0 : 1;
     my $jis0212 = ($name eq 'iso-2022-jp') ? 0 : 1;
-    
-    $Encode::Encoding{$name} =  
+
+    $Encode::Encoding{$name} =
         bless {
                Name      =>   $name,
                h2z       =>   $h2z,
@@ -17,7 +17,10 @@ for my $name ('7bit-jis', 'iso-2022-jp', 'iso-2022-jp-1'){
 }
 
 sub name { shift->{'Name'} }
-sub new_sequence { $_[0] };
+
+sub new_sequence { $_[0] }
+
+sub needs_lines { 1 }
 
 use Encode::CJKConstants qw(:all);
 
@@ -87,7 +90,7 @@ sub euc_jis{
 	((?:$RE{EUC_C})+|(?:$RE{EUC_KANA})+|(?:$RE{EUC_0212})+)
 	}{
 	    my $chunk = $1;
-	    my $esc = 
+	    my $esc =
 		( $chunk =~ tr/\x8E//d ) ? $ESC{KANA} :
 		    ( $chunk =~ tr/\x8F//d ) ? $ESC{JIS_0212} :
 			$ESC{JIS_0208};
