@@ -390,7 +390,7 @@ sub INPUT_handler {
 	  if ($name_printed) {
 	    print ";\n";
 	  } else {
-	    print "\t$var_name_after;\n";
+	    print "\t$var_name;\n";
 	  }
 	} elsif ($var_init =~ /\S/) {
 	    &output_init($var_type, $var_num, $var_name, $var_init, $name_printed);
