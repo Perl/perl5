@@ -131,7 +131,7 @@ but Perl does not.  It relies on you to read the documentation of each
 class.  If you try to call an undefined method on an object, Perl won't
 complain, but the program will trigger an exception while it's running.
 Likewise, if you call a method expecting a prime number as its argument
-with an even one instead, you can't expect the compiler to catch this.
+with a non-prime one instead, you can't expect the compiler to catch this.
 (Well, you can expect it all you like, but it's not going to happen.)
 
 Let's suppose you have a well-educated user of your Person class,
@@ -311,8 +311,8 @@ be made through methods.
 
 Perl doesn't impose restrictions on who gets to use which methods.
 The public-versus-private distinction is by convention, not syntax.
-(Well, unless you use the Alias module described below in L</"Data Members
-as Variables">.)  Occasionally you'll see method names beginning or ending
+(Well, unless you use the Alias module described below in 
+L</"Data Members as Variables">.)  Occasionally you'll see method names beginning or ending
 with an underscore or two.  This marking is a convention indicating
 that the methods are private to that class alone and sometimes to its
 closest acquaintances, its immediate subclasses.  But this distinction
@@ -437,7 +437,7 @@ to inheritance.
 
 Got that?  Maybe not.  Ok, let's say that some other class "borrowed"
 (well, inherited) the DESTROY method as it was defined above.  When those
-objects are destructed, the original $Census variable will be altered,
+objects are destroyed, the original $Census variable will be altered,
 not the one in the new class's package namespace.  Perhaps this is what
 you want, but probably it isn't.
 
@@ -538,9 +538,9 @@ and DESTROY methods as follows:
         -- ${ $self->{"_CENSUS"} };
     }
 
-What happens if a derived class (which we'll all C<Employee>) inherits
-methods from this person one?  Then C<Employee-&gt;debug()> when called
-as a class method manipulates $Person::Debugging not $Employee::Debugging.
+What happens if a derived class (which we'll call Employee) inherits
+methods from this Person base class?  Then C<Employee-E<gt>debug()>, when called
+as a class method, manipulates $Person::Debugging not $Employee::Debugging.
 
 =head2 Class Destructors
 
@@ -1118,7 +1118,7 @@ it happens when you say
 
     use Some_Module 3.0;
 
-If you wanted to add versioning to your Person class explained
+If you wanted to add version checking to your Person class explained
 above, just add this to Person.pm:
 
     use vars qw($VERSION);
@@ -1189,13 +1189,13 @@ instead of a hash reference to represent the object.
 
     1;  # so the require or use succeeds
 
-You might guess that the array access will be a lot faster than the
-hash access, but they're actually comparable.  The array is a little
+You might guess that the array access would be a lot faster than the
+hash access, but they're actually comparable.  The array is a I<little>
 bit faster, but not more than ten or fifteen percent, even when you
 replace the variables above like $AGE with literal numbers, like 1.
 A bigger difference between the two approaches can be found in memory use.
 A hash representation takes up more memory than an array representation
-because you have to allocation memory for the keys as well as the values.
+because you have to allocate memory for the keys as well as for the values.
 However, it really isn't that bad, especially since as of version 5.004,
 memory is only allocated once for a given hash key, no matter how many
 hashes have that key.  It's expected that sometime in the future, even
@@ -1271,7 +1271,7 @@ Although this is the same function each time, it contains a different
 version of $self.
 
 When a method like C<$him-E<gt>name("Jason")> is called, its implicit
-zeroth argument is the invoking object just as it is with all method
+zeroth argument is the invoking object--just as it is with all method
 calls.  But in this case, it's our code reference (something like a
 function pointer in C++, but with deep binding of lexical variables).
 There's not a lot to be done with a code reference beyond calling it, so
@@ -1474,10 +1474,14 @@ found in the modules directory on CPAN.
 
 One of the older ones is Class::Template.  In fact, its syntax and
 interface were sketched out long before perl5 even solidified into a
-real thing.  What it does is provide you a way to "declare"
-a class as having objects whose fields are of a specific type.
-The function that does this is called, not surprisingly
-enough, struct().
+real thing.  What it does is provide you a way to "declare" a class
+as having objects whose fields are of a specific type.  The function
+that does this is called, not surprisingly enough, struct().  Because
+structures or records are not base types in Perl, each time you want to
+create a class to provide a record-like data object, you yourself have
+to define a new() method, plus separate data-access methods for each of
+that record's fields.  You'll quickly become bored with this process.
+The Class::Template::struct() function alleviates this tedium.
 
 Here's a simple example of using it:
 
@@ -1720,7 +1724,7 @@ as a class or object method is by usage only.  You could accidentally
 call a class method (one expecting a string argument) on an
 object (one expecting a reference), or vice versa.
 
->From the C++ perspective, all methods in Perl are virtual.
+Z<>From the C++ perspective, all methods in Perl are virtual.
 This, by the way, is why they are never checked for function
 prototypes in the argument list as regular built-in and user-defined
 functions can be.
