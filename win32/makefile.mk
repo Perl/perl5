@@ -186,6 +186,16 @@ CCLIBDIR	*= $(CCHOME)\lib
 #
 
 #
+# Adding -DPERL_HASH_SEED_EXPLICIT will disable randomization of Perl's
+# internal hash function unless the PERL_HASH_SEED environment variable is set.
+# Alternatively, adding -DNO_HASH_SEED will completely disable the
+# randomization feature. 
+# The latter is required to maintain binary compatibility with Perl 5.8.0.
+#
+#BUILDOPT	+= -DPERL_HASH_SEED_EXPLICIT
+#BUILDOPT	+= -DNO_HASH_SEED
+
+#
 # This should normally be disabled.  Adding -DPERL_POLLUTE enables support
 # for old symbols by default, at the expense of extreme pollution.  You most
 # probably just want to build modules that won't compile with
