@@ -2262,6 +2262,7 @@ XS(w32_GetNextAvailDrive)
     dXSARGS;
     char ix = 'C';
     char root[] = "_:\\";
+    EXTEND(SP,1);
     while (ix <= 'Z') {
 	root[0] = ix++;
 	if (GetDriveType(root) == 1) {
@@ -2276,6 +2277,7 @@ static
 XS(w32_GetLastError)
 {
     dXSARGS;
+    EXTEND(SP,1);
     XSRETURN_IV(GetLastError());
 }
 
@@ -2285,6 +2287,7 @@ XS(w32_LoginName)
     dXSARGS;
     char *name = getlogin_buffer;
     DWORD size = sizeof(getlogin_buffer);
+    EXTEND(SP,1);
     if (GetUserName(name,&size)) {
 	/* size includes NULL */
 	ST(0) = sv_2mortal(newSVpv(name,size-1));
@@ -2299,6 +2302,7 @@ XS(w32_NodeName)
     dXSARGS;
     char name[MAX_COMPUTERNAME_LENGTH+1];
     DWORD size = sizeof(name);
+    EXTEND(SP,1);
     if (GetComputerName(name,&size)) {
 	/* size does NOT include NULL :-( */
 	ST(0) = sv_2mortal(newSVpv(name,size));
@@ -2312,6 +2316,7 @@ static
 XS(w32_DomainName)
 {
     dXSARGS;
+    EXTEND(SP,1);
 #ifndef HAS_NETWKSTAGETINFO
     /* mingw32 (and Win95) don't have NetWksta*(), so do it the old way */
     char name[256];
@@ -2356,6 +2361,7 @@ XS(w32_FsType)
     dXSARGS;
     char fsname[256];
     DWORD flags, filecomplen;
+    EXTEND(SP,1);
     if (GetVolumeInformation(NULL, NULL, 0, NULL, &filecomplen,
 			 &flags, fsname, sizeof(fsname))) {
 	if (GIMME == G_ARRAY) {
@@ -2393,6 +2399,7 @@ static
 XS(w32_IsWinNT)
 {
     dXSARGS;
+    EXTEND(SP,1);
     XSRETURN_IV(IsWinNT());
 }
 
@@ -2400,6 +2407,7 @@ static
 XS(w32_IsWin95)
 {
     dXSARGS;
+    EXTEND(SP,1);
     XSRETURN_IV(IsWin95());
 }
 
@@ -2465,6 +2473,7 @@ static
 XS(w32_GetTickCount)
 {
     dXSARGS;
+    EXTEND(SP,1);
     XSRETURN_IV(GetTickCount());
 }
 
