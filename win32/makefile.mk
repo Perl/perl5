@@ -469,7 +469,8 @@ LIBC	= msvcrt.lib
 LIBC	= PerlCRT.lib
 .ENDIF
 
-PERLEXE_RES	=
+PERLEXE_ICO	= perlexe.ico
+PERLEXE_RES	= perlexe.res
 PERLDLL_RES	=
 
 .IF  "$(CFG)" == "Debug"
@@ -1041,6 +1042,11 @@ $(PERLDLL): perldll.def $(PERLDLL_OBJ) $(PERLDLL_RES)
 	        $(PERLDLL_RES) $(PERLDLL_OBJ:s,\,\\))
 .ENDIF
 	$(XCOPY) $(PERLIMPLIB) $(COREDIR)
+
+$(PERLEXE_ICO): $(MINIPERL) makeico.pl
+	$(MINIPERL) makeico.pl > $@
+
+$(PERLEXE_RES): perlexe.rc $(PERLEXE_ICO)
 
 $(MINIMOD) : $(MINIPERL) ..\minimod.pl
 	cd .. && miniperl minimod.pl > lib\ExtUtils\Miniperl.pm

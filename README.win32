@@ -758,6 +758,11 @@ Please send detailed descriptions of any problems and solutions that
 you may find to <F<perlbug@perl.com>>, along with the output produced
 by C<perl -V>.
 
+=head1 ACKNOWLEDGEMENTS
+
+The use of a camel with the topic of Perl is a trademark
+of O'Reilly and Associates, Inc. Used with permission.
+
 =head1 AUTHORS
 
 =over 4
