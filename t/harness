@@ -15,23 +15,38 @@ use Test::Harness;
 $Test::Harness::switches = "";    # Too much noise otherwise
 $Test::Harness::verbose = shift if @ARGV && $ARGV[0] eq '-v';
 
+#fudge DATA for now.
+%datahandle = qw(
+		lib/bigint.t		1
+		lib/bigintpm.t		1
+		lib/bigfloat.t	 	1
+		lib/bigfloatpm.t	1
+		op/gv.t			1
+		lib/complex.t		1
+		lib/ph.t		1
+		lib/soundex.t		1
+		op/misc.t		1
+		op/runlevel.t		1
+		op/tie.t		1
+		op/lex_assign.t		1
+		pragma/subs.t   	1
+		);
+
+foreach (keys %datahandle) {
+     unlink "$_.t";
+}
+
 @tests = @ARGV;
 @tests = <base/*.t comp/*.t cmd/*.t io/*.t op/*.t pragma/*.t lib/*.t> unless @tests;
 
 Test::Harness::runtests @tests;
 exit(0) unless -e "../testcompile";
 
-#fudge DATA for now.
 %infinite =  qw (
-        op/bop.t        1
-        lib/hostname.t  1
-        );
-
-%datahandle = qw(
-        lib/bigint.t        1
-        lib/bigintpm.t      1
-        lib/bigfloat.t      1
-        lib/bigfloatpm.t    1
+        op/bop.t	1
+        lib/hostname.t	1
+	op/lex_assign.t	1
+	lib/ph.t	1  
         );
 
 my $dhwrapper = <<'EOT';
@@ -42,7 +57,7 @@ EOT
 @tests = grep (!$infinite{$_}, @tests);
 @tests = map {
          my $new = $_;
-         if ($datahandle{$_}) {
+	 if ($datahandle{$_} && !( -f $new.t) ) {
              $new .= '.t';
              local(*F, *T);
              open(F,"<$_") or die "Can't open $_: $!";

@@ -86,6 +86,7 @@ case "$osvers" in
 	libswanted="rpc curses termcap $libswanted"
 	;;
 4.0*)
+	POSIX_cflags='ccflags="$ccflags -DSTRUCT_TM_HASZONE"' 
 	# ELF dynamic link libraries starting in 4.0 (???)
         useshrplib='true'
 	so='so'

@@ -142,7 +142,7 @@ Perl_pad_allocmy(pTHX_ char *name)
 	(PL_hints & HINT_UTF8 && (name[1] & 0xc0) == 0xc0) ||
 	name[1] == '_' && (int)strlen(name) > 2))
     {
-	if (!isPRINT(name[1])) {
+	if (!isPRINT(name[1]) || strchr("\t\n\r\f", name[1])) {
 	    /* 1999-02-27 mjd@plover.com */
 	    char *p;
 	    p = strchr(name, '\0');
@@ -686,10 +686,7 @@ Perl_op_free(pTHX_ OP *o)
 	break;
     case OP_NEXTSTATE:
     case OP_DBSTATE:
-	Safefree(cCOPo->cop_label);
-	SvREFCNT_dec(cCOPo->cop_filegv);
-	if (cCOPo->cop_warnings != WARN_NONE && cCOPo->cop_warnings != WARN_ALL)
-	    SvREFCNT_dec(cCOPo->cop_warnings);
+	cop_free((COP*)o);
 	break;
     case OP_CONST:
 	SvREFCNT_dec(cSVOPo->op_sv);
@@ -727,6 +724,15 @@ Perl_op_free(pTHX_ OP *o)
 #else
     Safefree(o);
 #endif
+}
+
+STATIC void
+S_cop_free(pTHX_ COP* cop)
+{
+    Safefree(cop->cop_label);
+    SvREFCNT_dec(cop->cop_filegv);
+    if (cop->cop_warnings != WARN_NONE && cop->cop_warnings != WARN_ALL)
+	SvREFCNT_dec(cop->cop_warnings);
 }
 
 STATIC void
@@ -1678,7 +1684,7 @@ Perl_scope(pTHX_ OP *o)
 		o->op_ppaddr = PL_ppaddr[OP_SCOPE];
 		kid = ((LISTOP*)o)->op_first;
 		if (kid->op_type == OP_NEXTSTATE || kid->op_type == OP_DBSTATE){
-		    SvREFCNT_dec(((COP*)kid)->cop_filegv);
+		    cop_free((COP*)kid);
 		    null(kid);
 		}
 	    }

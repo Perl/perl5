@@ -22,7 +22,7 @@ require IO::Socket::UNIX;
 
 @ISA = qw(IO::Handle);
 
-$VERSION = "1.251";
+$VERSION = "1.252";
 
 sub import {
     my $pkg = shift;
@@ -81,7 +81,7 @@ sub socket {
 }
 
 sub socketpair {
-    @_ == 4 || croak 'usage: IO::Socket->pair(DOMAIN, TYPE, PROTOCOL)';
+    @_ == 4 || croak 'usage: IO::Socket->socketpair(DOMAIN, TYPE, PROTOCOL)';
     my($class,$domain,$type,$protocol) = @_;
     my $sock1 = $class->new();
     my $sock2 = $class->new();
@@ -357,10 +357,19 @@ new object will be created in the same class as the listen socket, unless
 C<PKG> is specified. This object can be used to communicate with the client
 that was trying to connect. In a scalar context the new socket is returned,
 or undef upon failure. In an array context a two-element array is returned
-containing the new socket and the peer address, the list will
+containing the new socket and the peer address; the list will
 be empty upon failure.
 
-Additional methods that are provided are
+=item socketpair(DOMAIN, TYPE, PROTOCOL)
+
+Call C<socketpair> and return a list of two sockets created, or an
+empty list on failure.
+
+=back
+
+Additional methods that are provided are:
+
+=over 4
 
 =item timeout([VAL])
 

@@ -749,6 +749,7 @@
 #if defined(PERL_IN_OP_C) || defined(PERL_DECL_PROT)
 #define list_assignment		S_list_assignment
 #define bad_type		S_bad_type
+#define cop_free		S_cop_free
 #define modkids			S_modkids
 #define no_bareword_allowed	S_no_bareword_allowed
 #define no_fh_allowed		S_no_fh_allowed
@@ -2077,6 +2078,7 @@
 #if defined(PERL_IN_OP_C) || defined(PERL_DECL_PROT)
 #define list_assignment(a)	S_list_assignment(aTHX_ a)
 #define bad_type(a,b,c,d)	S_bad_type(aTHX_ a,b,c,d)
+#define cop_free(a)		S_cop_free(aTHX_ a)
 #define modkids(a,b)		S_modkids(aTHX_ a,b)
 #define no_bareword_allowed(a)	S_no_bareword_allowed(aTHX_ a)
 #define no_fh_allowed(a)	S_no_fh_allowed(aTHX_ a)
@@ -4103,6 +4105,8 @@
 #define list_assignment		S_list_assignment
 #define S_bad_type		CPerlObj::S_bad_type
 #define bad_type		S_bad_type
+#define S_cop_free		CPerlObj::S_cop_free
+#define cop_free		S_cop_free
 #define S_modkids		CPerlObj::S_modkids
 #define modkids			S_modkids
 #define S_no_bareword_allowed	CPerlObj::S_no_bareword_allowed

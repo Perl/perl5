@@ -3,12 +3,12 @@
   untie attempted while %d inner references still exist
     sub TIESCALAR { bless [] } ; tie $a, 'main'; untie $a ;
 
-  Filehandle only opened for input
+  Filehandle %s opened only for input
     format STDIN =
     .
     write STDIN;
 
-  Write on closed filehandle
+  Write on closed filehandle %s
     format STDIN =
     .
     close STDIN;
@@ -91,7 +91,7 @@ format STDIN =
 .
 write STDIN;
 EXPECT
-Filehandle only opened for input at - line 5.
+Filehandle main::STDIN opened only for input at - line 5.
 ########
 # pp_sys.c
 use warning 'closed' ;
@@ -100,7 +100,7 @@ format STDIN =
 close STDIN;
 write STDIN;
 EXPECT
-Write on closed filehandle at - line 6.
+Write on closed filehandle main::STDIN at - line 6.
 ########
 # pp_sys.c
 use warning 'io' ;

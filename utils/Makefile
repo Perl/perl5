@@ -37,6 +37,7 @@ clean:
 
 realclean:
 	rm -rf $(plextract) pstruct $(plextractexe)
+	rm -f ../t/_h2ph_pre.ph
 
 clobber:	realclean
 

@@ -706,6 +706,15 @@ Perl_do_eof(pTHX_ GV *gv)
 
     if (!io)
 	return TRUE;
+    else if (ckWARN(WARN_IO)
+	     && (IoTYPE(io) == '>' || IoIFP(io) == PerlIO_stdout()
+		 || IoIFP(io) == PerlIO_stderr()))
+    {
+	SV* sv = sv_newmortal();
+	gv_efullname3(sv, gv, Nullch);
+	Perl_warner(aTHX_ WARN_IO, "Filehandle %s opened only for output",
+		    SvPV_nolen(sv));
+    }
 
     while (IoIFP(io)) {
 
@@ -1125,6 +1134,20 @@ Perl_do_exec3(pTHX_ char *cmd, int fd, int do_report)
 	    if (*s == '\n' && !s[1]) {
 		*s = '\0';
 		break;
+	    }
+	    /* handle the 2>&1 construct at the end */
+	    if (*s == '>' && s[1] == '&' && s[2] == '1'
+		&& s > cmd + 1 && s[-1] == '2' && isSPACE(s[-2])
+		&& (!s[3] || isSPACE(s[3])))
+	    {
+		char *t = s + 3;
+
+		while (*t && isSPACE(*t))
+		    ++t;
+		if (!*t && (dup2(1,2) != -1)) {
+		    s[-2] = '\0';
+		    break;
+		}
 	    }
 	  doshell:
 	    PerlProc_execl(PL_sh_path, "sh", "-c", cmd, (char*)0);

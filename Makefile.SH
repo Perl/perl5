@@ -205,10 +205,10 @@ private = preplibrary lib/ExtUtils/Miniperl.pm lib/Config.pm
 # Files to be built with variable substitution before miniperl
 # is available.
 sh = Makefile.SH cflags.SH config_h.SH makeaperl.SH makedepend.SH \
-	makedir.SH perl_exp.SH writemain.SH
+	makedir.SH myconfig.SH perl_exp.SH writemain.SH
 
 shextract = Makefile cflags config.h makeaperl makedepend \
-	makedir perl.exp writemain
+	makedir myconfig perl.exp writemain
 
 # Files to be built with variable substitution after miniperl is
 # available.  Dependencies handled manually below (for now).
@@ -571,6 +571,7 @@ _cleaner:
 	rm -f h2ph.man pstruct
 	rm -rf .config
 	rm -f testcompile compilelog
+	-rmdir lib/B lib/Data lib/IO/Socket lib/IO
 
 # The following lint has practically everything turned on.  Unfortunately,
 # you have to wade through a lot of mumbo jumbo that can't be suppressed.
