@@ -2077,7 +2077,7 @@ newBINOP(I32 type, I32 flags, OP *first, OP *last)
     if (binop->op_next)
 	return (OP*)binop;
 
-    binop->op_last = last = binop->op_first->op_sibling;
+    binop->op_last = binop->op_first->op_sibling;
 
     return fold_constants((OP *)binop);
 }
