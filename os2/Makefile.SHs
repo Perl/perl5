@@ -1,4 +1,4 @@
-# This file is read by Makefile.SH to produce rules for $(perllib) (and
+# This file is read by Makefile.SH to produce rules for $(LIBPERL) (and
 # some additional rules as well).
 
 # Rerun `sh Makefile.SH; make depend' after making any change.
@@ -12,14 +12,14 @@ AOUT_CCCMD	= \$(CC) $aout_ccflags $optimize
 AOUT_AR		= $aout_ar
 AOUT_OBJ_EXT	= $aout_obj_ext
 AOUT_LIB_EXT	= $aout_lib_ext
-aout_perllib	= libperl$aout_lib_ext
+AOUT_LIBPERL	= libperl$aout_lib_ext
 AOUT_CLDFLAGS	= $aout_ldflags
 
 !GROK!THIS!
 
 $spitshell >>Makefile <<'!NO!SUBS!'
-$(perllib): perl.imp perl.dll perl5.def
-	emximp -o $(perllib) perl.imp
+$(LIBPERL): perl.imp perl.dll perl5.def
+	emximp -o $(LIBPERL) perl.imp
 
 perl.imp: perl5.def
 	emximp -o perl.imp perl5.def
@@ -103,9 +103,9 @@ AOUT_DYNALOADER = $(addsuffix $(AOUT_LIB_EXT),$(basename $(DYNALOADER)))
 aout_static_ext = $(addsuffix $(AOUT_LIB_EXT),$(basename $(dynamic_ext)))
 aout_static_lib = $(addsuffix $(LIB_EXT),$(basename $(dynamic_ext)))
 
-$(aout_perllib) : $(aout_obj) perl$(AOUT_OBJ_EXT)
-	rm -f $(perllib)
-	$(AOUT_AR) rcu $(aout_perllib) perl$(AOUT_OBJ_EXT) $(aout_obj)
+$(AOUT_LIBPERL) : $(aout_obj) perl$(AOUT_OBJ_EXT)
+	rm -f $(AOUT_LIBPERL)
+	$(AOUT_AR) rcu $(AOUT_LIBPERL) perl$(AOUT_OBJ_EXT) $(aout_obj)
 
 .c$(AOUT_OBJ_EXT):
 	$(AOUT_CCCMD) $(PLDLFLAGS) -c $*.c
@@ -114,16 +114,16 @@ aout_perlmain.c: miniperlmain.c config.sh makefile $(static_ext_autoinit)
 	sh writemain $(DYNALOADER) $(aout_static_lib) > tmp
 	sh mv-if-diff tmp aout_perlmain.c
 
-miniperl_: $& miniperlmain$(AOUT_OBJ_EXT) $(aout_perllib) ext.libs
-	$(CC) $(LARGE) $(AOUT_CLDFLAGS) $(CCDLFLAGS) -o miniperl_ miniperlmain$(AOUT_OBJ_EXT) $(aout_perllib) `cat ext.libs` $(libs)
+miniperl_: $& miniperlmain$(AOUT_OBJ_EXT) $(AOUT_LIBPERL) ext.libs
+	$(CC) $(LARGE) $(AOUT_CLDFLAGS) $(CCDLFLAGS) -o miniperl_ miniperlmain$(AOUT_OBJ_EXT) $(AOUT_LIBPERL) `cat ext.libs` $(libs)
 
-perl_: $& aout_perlmain$(AOUT_OBJ_EXT) $(aout_perllib) $(AOUT_DYNALOADER) $(aout_static_ext) ext.libs
-	$(CC) $(LARGE) $(AOUT_CLDFLAGS) $(CCDLFLAGS) -o perl_ aout_perlmain$(AOUT_OBJ_EXT) $(AOUT_DYNALOADER) $(aout_static_ext) $(aout_perllib) `cat ext.libs` $(libs)
+perl_: $& aout_perlmain$(AOUT_OBJ_EXT) $(AOUT_LIBPERL) $(AOUT_DYNALOADER) $(aout_static_ext) ext.libs
+	$(CC) $(LARGE) $(AOUT_CLDFLAGS) $(CCDLFLAGS) -o perl_ aout_perlmain$(AOUT_OBJ_EXT) $(AOUT_DYNALOADER) $(aout_static_ext) $(AOUT_LIBPERL) `cat ext.libs` $(libs)
 
 perl : perl__
 
-perl__: $& perlmain$(OBJ_EXT) $(perllib) $(DYNALOADER) $(static_ext) ext.libs
-	$(CC) $(LARGE) $(CLDFLAGS) $(CCDLFLAGS) -o perl__ perlmain$(OBJ_EXT) $(DYNALOADER) $(static_ext) $(perllib) `cat ext.libs` $(libs) -Zlinker /PM:PM
+perl__: $& perlmain$(OBJ_EXT) $(LIBPERL) $(DYNALOADER) $(static_ext) ext.libs
+	$(CC) $(LARGE) $(CLDFLAGS) $(CCDLFLAGS) -o perl__ perlmain$(OBJ_EXT) $(DYNALOADER) $(static_ext) $(LIBPERL) `cat ext.libs` $(libs) -Zlinker /PM:PM
 
 aout_clean:
 	-rm *perl_.* *.o *.a lib/auto/*/*.a ext/*/Makefile.aout
