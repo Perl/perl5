@@ -41,6 +41,21 @@ if [ "$uw_isuw" = "Release = 4.2MP" -a \
    d_csh='undef'
 fi
 
+# DDE SMES Supermax Enterprise Server
+case "`uname -svm`" in
+"UNIX_SV SMES mips")
+	if test "$cc" = '/bin/cc' -o "$gccversion" = ""
+	then
+		# for cc we need -K PIC (not -K pic)
+ 		cccdlflags="$cccdlflags -K PIC"
+	fi
+	# the *grent functions are in libgen.
+	libswanted="$libswanted gen"
+	# csh is broken (also) in SMES
+	d_csh='undef'
+	;;
+esac
+
 cat <<'EOM' >&4
 
 If you wish to use dynamic linking, you must use 
