@@ -100,8 +100,11 @@ print "1..2\n";
 
 $pwgid = $( + 0;
 ($pwgnam) = getgrgid($pwgid);
-@basegroup{$pwgid,$pwgnam} = (1,1);
-
+if ($^O eq 'cygwin') { # basegroup on Cygwin has id = 0.
+    @basegroup{$pwgid,$pwgnam} = (0,0);
+} else {
+    @basegroup{$pwgid,$pwgnam} = (1,1);
+}
 $seen{$pwgid}++;
 
 for (split(' ', $()) {
