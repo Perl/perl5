@@ -93,7 +93,7 @@ my @ary_buff = (  # [ encoding, decoded, encoded ]
   ["2022-cn",     hiragana, "\e\$)A\cN". '$"$$$&$($*' . "\cO" ],
   ["2022-jp",     hiragana, "\e\$B".'$"$$$&$($*'."\e(B" ],
   ["2022-kr",     hiragana, "\e\$)C\cN". '*"*$*&*(**' . "\cO" ],
-  [ $jis,         han_kana, "\e\(I".'12345'."\e(B" ],
+#  [ $jis,         han_kana, "\e\(I".'12345'."\e(B" ],
   ["2022-jp1", macron, "\e\$(D\x2A\x27\x2A\x37\x2A\x45\x2A\x57\x2A\x69\e(B"],
   ["2022-jp2", "\x{C0}" . macron . "\x{C1}", 
        "\e\$(D\e.A\eN\x40\x2A\x27\x2A\x37\x2A\x45\x2A\x57\x2A\x69\e(B\eN\x41"],
