@@ -926,6 +926,22 @@ that absolutely must start with that character.  The value passed
 as part of C<@_> will be a reference to the actual argument given
 in the subroutine call, obtained by applying C<\> to that argument.
 
+You can also backslash several argument types simultaneously by using
+the C<\[]> notation:
+
+    sub myref (\[$@%&*])
+
+will allow calling myref() as
+
+    myref $var
+    myref @array
+    myref %hash
+    myref &sub
+    myref *glob
+
+and the first argument of myref() will be a reference to
+a scalar, an array, a hash, a code, or a glob.
+
 Unbackslashed prototype characters have special meanings.  Any
 unbackslashed C<@> or C<%> eats all remaining arguments, and forces
 list context.  An argument represented by C<$> forces scalar context.  An

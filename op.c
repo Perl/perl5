@@ -6545,6 +6545,8 @@ Perl_ck_subr(pTHX_ OP *o)
     GV *namegv = 0;
     int optional = 0;
     I32 arg = 0;
+    I32 contextclass = 0;
+    char *e;
     STRLEN n_a;
 
     o->op_private |= OPpENTERSUB_HASTARG;
@@ -6641,36 +6643,67 @@ Perl_ck_subr(pTHX_ OP *o)
 		}
 		scalar(o2);
 		break;
+	    case '[': case ']':
+		 goto oops;
+		 break;
 	    case '\\':
 		proto++;
 		arg++;
+	    again:
 		switch (*proto++) {
+		case '[':
+		     if (contextclass++ == 0) {
+			  e = strchr(proto, ']');
+			  if (!e || e == proto)
+			       goto oops;
+		     }
+		     else
+			  goto oops;
+		     goto again;
+		     break;
+		case ']':
+		     if (contextclass)
+			  contextclass = 0;
+		     else
+			  goto oops;
+		     break;
 		case '*':
-		    if (o2->op_type != OP_RV2GV)
-			bad_type(arg, "symbol", gv_ename(namegv), o2);
-		    goto wrapref;
+		     if (o2->op_type == OP_RV2GV)
+			  goto wrapref;
+		     if (!contextclass)
+			  bad_type(arg, "symbol", gv_ename(namegv), o2);
+		     break;
 		case '&':
-		    if (o2->op_type != OP_ENTERSUB)
-			bad_type(arg, "subroutine entry", gv_ename(namegv), o2);
-		    goto wrapref;
+		     if (o2->op_type == OP_ENTERSUB)
+			  goto wrapref;
+		     if (!contextclass)
+			  bad_type(arg, "subroutine entry", gv_ename(namegv), o2);
+		     break;
 		case '$':
-		    if (o2->op_type != OP_RV2SV
-			&& o2->op_type != OP_PADSV
-			&& o2->op_type != OP_HELEM
-			&& o2->op_type != OP_AELEM
-			&& o2->op_type != OP_THREADSV)
-		    {
+		    if (o2->op_type == OP_RV2SV ||
+			o2->op_type == OP_PADSV ||
+			o2->op_type == OP_HELEM ||
+			o2->op_type == OP_AELEM ||
+			o2->op_type == OP_THREADSV)
+			 goto wrapref;
+		    if (!contextclass)
 			bad_type(arg, "scalar", gv_ename(namegv), o2);
-		    }
-		    goto wrapref;
+		     break;
 		case '@':
-		    if (o2->op_type != OP_RV2AV && o2->op_type != OP_PADAV)
+		    if (o2->op_type == OP_RV2AV ||
+			o2->op_type == OP_PADAV)
+			 goto wrapref;
+		    if (!contextclass)
 			bad_type(arg, "array", gv_ename(namegv), o2);
-		    goto wrapref;
+		    break;
 		case '%':
-		    if (o2->op_type != OP_RV2HV && o2->op_type != OP_PADHV)
-			bad_type(arg, "hash", gv_ename(namegv), o2);
-		  wrapref:
+		    if (o2->op_type == OP_RV2HV ||
+			o2->op_type == OP_PADHV)
+			 goto wrapref;
+		    if (!contextclass)
+			 bad_type(arg, "hash", gv_ename(namegv), o2);
+		    break;
+		wrapref:
 		    {
 			OP* kid = o2;
 			OP* sib = kid->op_sibling;
@@ -6679,9 +6712,15 @@ Perl_ck_subr(pTHX_ OP *o)
 			o2->op_sibling = sib;
 			prev->op_sibling = o2;
 		    }
+		    if (contextclass) {
+			 proto = e + 1;
+			 contextclass = 0;
+		    }
 		    break;
 		default: goto oops;
 		}
+		if (contextclass)
+		     goto again;
 		break;
 	    case ' ':
 		proto++;
@@ -6689,7 +6728,7 @@ Perl_ck_subr(pTHX_ OP *o)
 	    default:
 	      oops:
 		Perl_croak(aTHX_ "Malformed prototype for %s: %s",
-			gv_ename(namegv), SvPV((SV*)cv, n_a));
+			   gv_ename(namegv), SvPV((SV*)cv, n_a));
 	    }
 	}
 	else
