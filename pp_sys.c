@@ -1340,7 +1340,7 @@ PP(pp_leavewrite)
 		topgv = gv_fetchsv(topname, FALSE, SVt_PVFM);
 		if ((topgv && GvFORM(topgv)) ||
 		  !gv_fetchpv("top",FALSE,SVt_PVFM))
-		    IoTOP_NAME(io) = savepv(SvPVX(topname));
+		    IoTOP_NAME(io) = savesvpv(topname);
 		else
 		    IoTOP_NAME(io) = savepv("top");
 	    }

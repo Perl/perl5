@@ -2118,7 +2118,7 @@ Perl_magic_set(pTHX_ SV *sv, MAGIC *mg)
 	if (PL_inplace)
 	    Safefree(PL_inplace);
 	if (SvOK(sv))
-	    PL_inplace = savepv(SvPV(sv,len));
+	    PL_inplace = savesvpv(sv);
 	else
 	    PL_inplace = Nullch;
 	break;
@@ -2130,7 +2130,7 @@ Perl_magic_set(pTHX_ SV *sv, MAGIC *mg)
 	    }
 	    if (SvOK(sv)) {
 		TAINT_PROPER("assigning to $^O");
-		PL_osname = savepv(SvPV(sv,len));
+		PL_osname = savesvpv(sv);
 	    }
 	}
 	else if (strEQ(mg->mg_ptr, "\017PEN")) {
@@ -2206,12 +2206,12 @@ Perl_magic_set(pTHX_ SV *sv, MAGIC *mg)
 	break;
     case '^':
 	Safefree(IoTOP_NAME(GvIOp(PL_defoutgv)));
-	IoTOP_NAME(GvIOp(PL_defoutgv)) = s = savepv(SvPV(sv,len));
+	IoTOP_NAME(GvIOp(PL_defoutgv)) = s = savesvpv(sv);
 	IoTOP_GV(GvIOp(PL_defoutgv)) = gv_fetchsv(sv,TRUE, SVt_PVIO);
 	break;
     case '~':
 	Safefree(IoFMT_NAME(GvIOp(PL_defoutgv)));
-	IoFMT_NAME(GvIOp(PL_defoutgv)) = s = savepv(SvPV(sv,len));
+	IoFMT_NAME(GvIOp(PL_defoutgv)) = s = savesvpv(sv);
 	IoFMT_GV(GvIOp(PL_defoutgv)) = gv_fetchsv(sv,TRUE, SVt_PVIO);
 	break;
     case '=':
@@ -2269,7 +2269,7 @@ Perl_magic_set(pTHX_ SV *sv, MAGIC *mg)
     case '#':
 	if (PL_ofmt)
 	    Safefree(PL_ofmt);
-	PL_ofmt = savepv(SvPV(sv,len));
+	PL_ofmt = savesvpv(sv);
 	break;
     case '[':
 	PL_compiling.cop_arybase = SvIOK(sv) ? SvIVX(sv) : sv_2iv(sv);

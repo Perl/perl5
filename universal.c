@@ -602,7 +602,7 @@ XS(XS_version_qv)
 	    }
 	    else
 	    {
-		version = savepv(SvPV_nolen(ver));
+		version = savesvpv(ver);
 	    }
 	    (void)scan_version(version,vs,TRUE);
 	    Safefree(version);

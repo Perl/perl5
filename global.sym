@@ -675,3 +675,4 @@ Perl_hv_clear_placeholders
 Perl_hv_scalar
 Perl_gv_fetchpvn_flags
 Perl_gv_fetchsv
+Perl_savesvpv

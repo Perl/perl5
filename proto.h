@@ -1429,4 +1429,6 @@ PERL_CALLCONV GV*	Perl_gv_fetchpvn_flags(pTHX_ const char* name, STRLEN len, I32
 PERL_CALLCONV GV*	Perl_gv_fetchsv(pTHX_ SV *name, I32 flags, I32 sv_type);
 PERL_CALLCONV bool	Perl_is_gv_magical_sv(pTHX_ SV *name, U32 flags);
 
+PERL_CALLCONV char*	Perl_savesvpv(pTHX_ SV* sv);
+
 END_EXTERN_C

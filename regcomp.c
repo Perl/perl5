@@ -4863,7 +4863,7 @@ Perl_regprop(pTHX_ SV *sv, regnode *o)
 		}
 
 		{
-		    char *s = savepv(SvPVX(lv));
+		    char *s = savesvpv(lv);
 		    char *origs = s;
 		
 		    while(*s && *s != '\n') s++;
