@@ -302,24 +302,7 @@ Yields:
 =cut
 
 sub splitdir {
-    my ($self,$directories) = @_ ;
-    #
-    # split() likes to forget about trailing null fields, so here we
-    # check to be sure that there will not be any before handling the
-    # simple case.
-    #
-    if ( $directories !~ m|/\Z(?!\n)| ) {
-        return split( m|/|, $directories );
-    }
-    else {
-        #
-        # since there was a trailing separator, add a file name to the end, 
-        # then do the split, then replace it with ''.
-        #
-        my( @directories )= split( m|/|, "${directories}dummy" ) ;
-        $directories[ $#directories ]= '' ;
-        return @directories ;
-    }
+    return split m|/|, $_[1], -1;  # Preserve trailing fields
 }
 
 

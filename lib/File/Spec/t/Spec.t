@@ -1,12 +1,7 @@
-#!./perl
+#!/usr/bin/perl -w
 
-BEGIN {
-    chdir 't' if -d 't';
-    @INC = '../lib';
-    if ($^O eq 'MacOS') {
-	push @INC, "::lib:$MacPerl::Architecture";
-    }
-}
+use Test;
+
 # Grab all of the plain routines from File::Spec
 use File::Spec @File::Spec::EXPORT_OK ;
 
@@ -35,10 +30,12 @@ require File::Spec::VMS ;
 
 require File::Spec::OS2 ;
 require File::Spec::Mac ;
+require File::Spec::Epoc ;
+require File::Spec::Cygwin ;
 
 # $root is only needed by Mac OS tests; these particular
 # tests are skipped on other OSs
-my $root;
+my $root = '';
 if ($^O eq 'MacOS') {
 	$root = File::Spec::Mac->rootdir();
 }
@@ -49,6 +46,8 @@ if ($^O eq 'MacOS') {
 
 @tests = (
 # [ Function          ,            Expected          ,         Platform ]
+
+[ "Unix->case_tolerant()",         '0'  ],
 
 [ "Unix->catfile('a','b','c')",         'a/b/c'  ],
 [ "Unix->catfile('a','b','./c')",       'a/b/c'  ],
@@ -117,6 +116,8 @@ if ($^O eq 'MacOS') {
 [ "Unix->rel2abs('../t4','/t1/t2/t3')",          '/t1/t2/t3/../t4' ],
 [ "Unix->rel2abs('/t1','/t1/t2/t3')",            '/t1'             ],
 
+[ "Win32->case_tolerant()",         '1'  ],
+
 [ "Win32->splitpath('file')",                            ',,file'                            ],
 [ "Win32->splitpath('\\d1/d2\\d3/')",                    ',\\d1/d2\\d3/,'                    ],
 [ "Win32->splitpath('d1/d2\\d3/')",                      ',d1/d2\\d3/,'                      ],
@@ -171,6 +172,10 @@ if ($^O eq 'MacOS') {
 [ "Win32->catdir('')",                      '\\'                 ],
 [ "Win32->catdir('/')",                     '\\'                 ],
 [ "Win32->catdir('//d1','d2')",             '\\\\d1\\d2'         ],
+[ "Win32->catdir('\\d1\\','d2')",           '\\d1\\d2'         ],
+[ "Win32->catdir('\\d1','d2')",             '\\d1\\d2'         ],
+[ "Win32->catdir('\\d1','\\d2')",           '\\d1\\d2'         ],
+[ "Win32->catdir('\\d1','\\d2\\')",         '\\d1\\d2'         ],
 [ "Win32->catdir('','/d1','d2')",           '\\\\d1\\d2'         ],
 [ "Win32->catdir('','','/d1','d2')",        '\\\\\\d1\\d2'       ],
 [ "Win32->catdir('','//d1','d2')",          '\\\\\\d1\\d2'       ],
@@ -208,34 +213,41 @@ if ($^O eq 'MacOS') {
 [ "Win32->canonpath('//a/b/c/.../d')",  '\\\\a\\b\\d'         ],
 [ "Win32->canonpath('/a/b/c/../../d')", '\\a\\d'              ],
 [ "Win32->canonpath('/a/b/c/.../d')",   '\\a\\d'              ],
+[ "Win32->canonpath('\\../temp\\')",    '\\temp'              ],
 
-## Hmmm, we should test missing and relative base paths some day...
-## would need to cd to a known place, get the cwd() and use it I
-## think.
-[  "Win32->abs2rel('/t1/t2/t3','/t1/t2/t3')",    ''                       ],
-[  "Win32->abs2rel('/t1/t2/t4','/t1/t2/t3')",    '..\\t4'                 ],
-[  "Win32->abs2rel('/t1/t2','/t1/t2/t3')",       '..'                     ],
-[  "Win32->abs2rel('/t1/t2/t3/t4','/t1/t2/t3')", 't4'                     ],
-[  "Win32->abs2rel('/t4/t5/t6','/t1/t2/t3')",    '..\\..\\..\\t4\\t5\\t6' ],
-#[ "Win32->abs2rel('../t4','/t1/t2/t3')",        '\\t1\\t2\\t3\\..\\t4'   ],
-[  "Win32->abs2rel('/','/t1/t2/t3')",            '..\\..\\..'             ],
-[  "Win32->abs2rel('///','/t1/t2/t3')",          '..\\..\\..'             ],
-[  "Win32->abs2rel('/.','/t1/t2/t3')",           '..\\..\\..\\.'          ],
-[  "Win32->abs2rel('/./','/t1/t2/t3')",          '..\\..\\..'             ],
-[  "Win32->abs2rel('\\\\a/t1/t2/t4','/t2/t3')",  '..\\t4'                 ],
-[  "Win32->abs2rel('//a/t1/t2/t4','/t2/t3')",    '..\\t4'                 ],
-[  "Win32->abs2rel('A:/t1/t2/t3','B:/t1/t2/t3')",''                       ],
-[  "Win32->abs2rel('A:/t1/t2/t3/t4','B:/t1/t2/t3')",'t4'                  ],
+# FakeWin32 subclass (see below) just sets CWD to C:\one\two
 
-[ "Win32->rel2abs('temp','C:/')",                       'C:\\temp'                        ],
-[ "Win32->rel2abs('temp','C:/a')",                      'C:\\a\\temp'                     ],
-[ "Win32->rel2abs('temp','C:/a/')",                     'C:\\a\\temp'                     ],
-[ "Win32->rel2abs('../','C:/')",                        'C:\\'                            ],
-[ "Win32->rel2abs('../','C:/a')",                       'C:\\'                            ],
-[ "Win32->rel2abs('temp','//prague_main/work/')",       '\\\\prague_main\\work\\temp'     ],
-[ "Win32->rel2abs('../temp','//prague_main/work/')",    '\\\\prague_main\\work\\temp'     ],
-[ "Win32->rel2abs('temp','//prague_main/work')",        '\\\\prague_main\\work\\temp'     ],
-[ "Win32->rel2abs('../','//prague_main/work')",         '\\\\prague_main\\work'           ],
+[ "FakeWin32->abs2rel('/t1/t2/t3','/t1/t2/t3')",     ''                       ],
+[ "FakeWin32->abs2rel('/t1/t2/t4','/t1/t2/t3')",     '..\\t4'                 ],
+[ "FakeWin32->abs2rel('/t1/t2','/t1/t2/t3')",        '..'                     ],
+[ "FakeWin32->abs2rel('/t1/t2/t3/t4','/t1/t2/t3')",  't4'                     ],
+[ "FakeWin32->abs2rel('/t4/t5/t6','/t1/t2/t3')",     '..\\..\\..\\t4\\t5\\t6' ],
+[ "FakeWin32->abs2rel('../t4','/t1/t2/t3')",         '..\\..\\..\\one\\t4'    ],
+[ "FakeWin32->abs2rel('/','/t1/t2/t3')",             '..\\..\\..'             ],
+[ "FakeWin32->abs2rel('///','/t1/t2/t3')",           '..\\..\\..'             ],
+[ "FakeWin32->abs2rel('/.','/t1/t2/t3')",            '..\\..\\..'             ],
+[ "FakeWin32->abs2rel('/./','/t1/t2/t3')",           '..\\..\\..'             ],
+[ "FakeWin32->abs2rel('\\\\a/t1/t2/t4','/t2/t3')",   '\\\\a\\t1\\t2\\t4'      ],
+[ "FakeWin32->abs2rel('//a/t1/t2/t4','/t2/t3')",     '\\\\a\\t1\\t2\\t4'      ],
+[ "FakeWin32->abs2rel('A:/t1/t2/t3','A:/t1/t2/t3')",     ''                   ],
+[ "FakeWin32->abs2rel('A:/t1/t2/t3/t4','A:/t1/t2/t3')",  't4'                 ],
+[ "FakeWin32->abs2rel('A:/t1/t2/t3','A:/t1/t2/t3/t4')",  '..'                 ],
+[ "FakeWin32->abs2rel('A:/t1/t2/t3','B:/t1/t2/t3')",     'A:\\t1\\t2\\t3'     ],
+[ "FakeWin32->abs2rel('A:/t1/t2/t3/t4','B:/t1/t2/t3')",  'A:\\t1\\t2\\t3\\t4' ],
+[ "FakeWin32->abs2rel('E:/foo/bar/baz')",            'E:\\foo\\bar\\baz'      ],
+[ "FakeWin32->abs2rel('C:/one/two/three')",          'three'                  ],
+
+[ "FakeWin32->rel2abs('temp','C:/')",                       'C:\\temp'                        ],
+[ "FakeWin32->rel2abs('temp','C:/a')",                      'C:\\a\\temp'                     ],
+[ "FakeWin32->rel2abs('temp','C:/a/')",                     'C:\\a\\temp'                     ],
+[ "FakeWin32->rel2abs('../','C:/')",                        'C:\\'                            ],
+[ "FakeWin32->rel2abs('../','C:/a')",                       'C:\\'                            ],
+[ "FakeWin32->rel2abs('temp','//prague_main/work/')",       '\\\\prague_main\\work\\temp'     ],
+[ "FakeWin32->rel2abs('../temp','//prague_main/work/')",    '\\\\prague_main\\work\\temp'     ],
+[ "FakeWin32->rel2abs('temp','//prague_main/work')",        '\\\\prague_main\\work\\temp'     ],
+[ "FakeWin32->rel2abs('../','//prague_main/work')",         '\\\\prague_main\\work'           ],
+
+[ "VMS->case_tolerant()",         '1'  ],
 
 [ "VMS->catfile('a','b','c')",         '[.a.b]c'  ],
 [ "VMS->catfile('a','b','[]c')",       '[.a.b]c'  ],
@@ -310,6 +322,8 @@ if ($^O eq 'MacOS') {
 [ "VMS->rel2abs('[-.t4]','[t1.t2.t3]')",         '[t1.t2.t4]'       ],
 [ "VMS->rel2abs('[t1]','[t1.t2.t3]')",           '[t1]'             ],
 
+[ "OS2->case_tolerant()",         '1'  ],
+
 [ "OS2->catdir('A:/d1','B:/d2','d3','')", 'A:/d1/B:/d2/d3' ],
 
 [ "OS2->catfile('a','b','c')",            'a/b/c'          ],
@@ -318,6 +332,7 @@ if ($^O eq 'MacOS') {
 [ "OS2->catfile('c')",                    'c' ],
 [ "OS2->catfile('./c')",                  'c' ],
 
+[ "Mac->case_tolerant()",         '1'  ],
 
 [ "Mac->catpath('','','')",              ''                ],
 [ "Mac->catpath('',':','')",             ':'               ],
@@ -504,12 +519,29 @@ if ($^O eq 'MacOS') {
 [ "Mac->rel2abs('hd:','hd:d1:d2:')",           'hd:'              ], # path already absolute
 [ "Mac->rel2abs('hd:d3:file','hd:d1:d2:')",    'hd:d3:file'       ],
 [ "Mac->rel2abs('hd:d3:','hd:d1:file')",       'hd:d3:'           ],
+
+[ "Epoc->case_tolerant()",         '1'  ],
+
+[ "Epoc->canonpath('')",                                      ''          ],
+[ "Epoc->canonpath('///../../..//./././a//b/.././c/././')",   '/a/b/../c' ],
+[ "Epoc->canonpath('/./')",                                   '/'         ],
+[ "Epoc->canonpath('/a/./')",                                 '/a'        ],
+
+# XXX Todo, copied from Unix, but fail. Should they? 2003-07-07 Tels
+#[ "Epoc->canonpath('/a/.')",                                  '/a'        ],
+#[ "Epoc->canonpath('/.')",                                    '/'         ],
+
+[ "Cygwin->case_tolerant()",         '0'  ],
+
 ) ;
 
+plan tests => scalar @tests;
 
-print "1..", scalar( @tests ), "\n" ;
+{
+    @File::Spec::FakeWin32::ISA = qw(File::Spec::Win32);
+    sub File::Spec::FakeWin32::cwd { 'C:\\one\\two' }
+}
 
-my $current_test= 1 ;
 
 # Test out the class methods
 for ( @tests ) {
@@ -527,36 +559,23 @@ sub tryfunc {
     my $platform = shift ;
 
     if ($platform && $^O ne $platform) {
-	print "ok $current_test # skipped: $function\n" ;
-	++$current_test ;
+	skip("skip $function", 1);
 	return;
     }
 
     $function =~ s#\\#\\\\#g ;
-
-    my $got ;
-    if ( $function =~ /^[^\$].*->/ ) {
-	$got = eval( "join( ',', File::Spec::$function )" ) ;
-    }
-    else {
-	$got = eval( "join( ',', $function )" ) ;
-    }
+    $function =~ s/^([^\$].*->)/File::Spec::$1/;
+    my $got = join ',', eval $function;
 
     if ( $@ ) {
-        if ( substr( $@, 0, length $skip_exception ) eq $skip_exception ) {
-	    chomp $@ ;
-	    print "ok $current_test # skip $function: $@\n" ;
-	}
-	else {
-	    chomp $@ ;
-	    print "not ok $current_test # $function: $@\n" ;
-	}
+      if ( $@ =~ /^\Q$skip_exception/ ) {
+	skip "skip $function: $skip_exception", 1;
+      }
+      else {
+	ok $@, '', $function;
+      }
+      return;
     }
-    elsif ( !defined( $got ) || $got ne $expected ) {
-	print "not ok $current_test # $function: got '$got', expected '$expected'\n" ;
-    }
-    else {
-	print "ok $current_test # $function\n" ;
-    }
-    ++$current_test ;
+
+    ok $got, $expected, $function;
 }

@@ -8,10 +8,14 @@ $VERSION = '1.4';
 
 @ISA = qw(File::Spec::Unix);
 
+use Cwd;
 my $macfiles;
 if ($^O eq 'MacOS') {
 	$macfiles = eval { require Mac::Files };
 }
+
+sub case_tolerant { 1 }
+
 
 =head1 NAME
 

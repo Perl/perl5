@@ -120,39 +120,40 @@ sub canonpath {
     $path =~ s|(\\\.)+\\|\\|g;                     # xx\.\.\xx -> xx\xx
     $path =~ s|^(\.\\)+||s unless $path eq ".\\";  # .\xx      -> xx
     $path =~ s|\\\Z(?!\n)||
-             unless $path =~ m#^([A-Z]:)?\\\Z(?!\n)#s;   # xx\       -> xx
-	# xx1/xx2/xx3/../../xx -> xx1/xx
-	$path =~ s|\\\.\.\.\\|\\\.\.\\\.\.\\|g; # \...\ is 2 levels up
-	$path =~ s|^\.\.\.\\|\.\.\\\.\.\\|g;    # ...\ is 2 levels up
-	return $path if $path =~ m|^\.\.|;      # skip relative paths
-	return $path unless $path =~ /\.\./;    # too few .'s to cleanup
-	return $path if $path =~ /\.\.\.\./;    # too many .'s to cleanup
-	return $path if $orig_path =~ m|^\Q/../\E|
-			        and $orig_path =~ m|\/$|;  # don't do /../dirs/ 
-			        						   # when called from rel2abs()
-			        						   # for ../dirs/
-	my ($vol,$dirs,$file) = $self->splitpath($path);
-	my @dirs = $self->splitdir($dirs);
-	my (@base_dirs, @path_dirs);
-	my $dest = \@base_dirs;
-	for my $dir (@dirs){
-		$dest = \@path_dirs if $dir eq $self->updir;
-		push @$dest, $dir;
+	unless $path =~ m{^([A-Z]:)?\\\Z(?!\n)}s;  # xx\       -> xx
+    # xx1/xx2/xx3/../../xx -> xx1/xx
+    $path =~ s|\\\.\.\.\\|\\\.\.\\\.\.\\|g; # \...\ is 2 levels up
+    $path =~ s|^\.\.\.\\|\.\.\\\.\.\\|g;    # ...\ is 2 levels up
+    return $path if $path =~ m|^\.\.|;      # skip relative paths
+    return $path unless $path =~ /\.\./;    # too few .'s to cleanup
+    return $path if $path =~ /\.\.\.\./;    # too many .'s to cleanup
+    return $path if $orig_path =~ m|^\Q/../\E|
+	and $orig_path =~ m|\/$|;  # don't do /../dirs/ when called
+                                   # from rel2abs() for ../dirs/
+    1 while $path =~ s{^\\\.\.}{};                 # \..\xx -> \xx
+
+    my ($vol,$dirs,$file) = $self->splitpath($path);
+    my @dirs = $self->splitdir($dirs);
+    my (@base_dirs, @path_dirs);
+    my $dest = \@base_dirs;
+    for my $dir (@dirs){
+	$dest = \@path_dirs if $dir eq $self->updir;
+	push @$dest, $dir;
+    }
+    # for each .. in @path_dirs pop one item from 
+    # @base_dirs
+    while (my $dir = shift @path_dirs){ 
+	unless ($dir eq $self->updir){
+	    unshift @path_dirs, $dir;
+	    last;
 	}
-	# for each .. in @path_dirs pop one item from 
-	# @base_dirs
-	while (my $dir = shift @path_dirs){ 
-		unless ($dir eq $self->updir){
-			unshift @path_dirs, $dir;
-			last;
-		}
-		pop @base_dirs;
-	}
-	$path = $self->catpath( 
-		$vol, 
-		$self->catdir(@base_dirs, @path_dirs), 
-		$file
-    );
+	pop @base_dirs;
+    }
+    $path = $self->catpath( 
+			   $vol, 
+			   $self->catdir(@base_dirs, @path_dirs), 
+			   $file
+			  );
     return $path;
 }
 
@@ -287,31 +288,20 @@ sub catpath {
 
 sub abs2rel {
     my($self,$path,$base) = @_;
+    $base = $self->cwd() unless defined $base and length $base;
 
-    # Clean up $path
-    if ( ! $self->file_name_is_absolute( $path ) ) {
-        $path = $self->rel2abs( $path ) ;
+    for ($path, $base) {
+      $_ = $self->canonpath($self->rel2abs($_));
     }
-    else {
-        $path = $self->canonpath( $path ) ;
-    }
+    my ($path_volume, $path_directories) = $self->splitpath($path, 1) ;
+    my ($base_volume, $base_directories) = $self->splitpath($base, 1);
 
-    # Figure out the effective $base and clean it up.
-    if ( !defined( $base ) || $base eq '' ) {
-        $base = cwd() ;
-    }
-    elsif ( ! $self->file_name_is_absolute( $base ) ) {
-        $base = $self->rel2abs( $base ) ;
-    }
-    else {
-        $base = $self->canonpath( $base ) ;
+    if ($path_volume and not $base_volume) {
+        ($base_volume) = $self->splitpath($self->cwd);
     }
 
-    # Split up paths
-    my ( undef, $path_directories, $path_file ) =
-        $self->splitpath( $path, 1 ) ;
-
-    my $base_directories = ($self->splitpath( $base, 1 ))[1] ;
+    # Can't relativize across volumes
+    return $path unless $path_volume eq $base_volume;
 
     # Now, remove all leading components that are the same
     my @pathchunks = $self->splitdir( $path_directories );
@@ -325,30 +315,9 @@ sub abs2rel {
         shift @basechunks ;
     }
 
-    # No need to catdir, we know these are well formed.
-    $path_directories = CORE::join( '\\', @pathchunks );
-    $base_directories = CORE::join( '\\', @basechunks );
+    my $result_dirs = $self->catdir( ($self->updir) x @basechunks, @pathchunks );
 
-    # $base_directories now contains the directories the resulting relative
-    # path must ascend out of before it can descend to $path_directory.  So, 
-    # replace all names with $parentDir
-
-    #FA Need to replace between backslashes...
-    $base_directories =~ s|[^\\]+|..|g ;
-
-    # Glue the two together, using a separator if necessary, and preventing an
-    # empty result.
-
-    #FA Must check that new directories are not empty.
-    if ( $path_directories ne '' && $base_directories ne '' ) {
-        $path_directories = "$base_directories\\$path_directories" ;
-    } else {
-        $path_directories = "$base_directories$path_directories" ;
-    }
-
-    return $self->canonpath( 
-        $self->catpath( "", $path_directories, $path_file ) 
-    ) ;
+    return $self->canonpath( $self->catpath('', $result_dirs, '') );
 }
 
 
@@ -358,7 +327,7 @@ sub rel2abs {
     if ( ! $self->file_name_is_absolute( $path ) ) {
 
         if ( !defined( $base ) || $base eq '' ) {
-            $base = cwd() ;
+            $base = $self->cwd() ;
         }
         elsif ( ! $self->file_name_is_absolute( $base ) ) {
             $base = $self->rel2abs( $base ) ;

@@ -24,19 +24,27 @@ there. This package overrides the implementation of these methods, not
 the semantics.
 
 This package is still work in progress ;-)
+
+=head1 AUTHORS
+
 o.flebbe@gmx.de
 
-
-=over 4
+=cut
 
 sub case_tolerant {
     return 1;
 }
 
+=pod
+
+=over 4
+
 =item canonpath()
 
 No physical check on the filesystem, but a logical cleanup of a
 path. On UNIX eliminated successive slashes and successive "/.".
+
+=back
 
 =cut
 
@@ -50,8 +58,6 @@ sub canonpath {
     $path =~  s|/\Z(?!\n)|| unless $path eq "/";          # xx/       -> xx
     return $path;
 }
-
-=back
 
 =head1 SEE ALSO
 
