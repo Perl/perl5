@@ -24,7 +24,7 @@ use File::Spec;
 
 sub install_rooted_file {
     if (defined $INSTALL_ROOT) {
-	MY->catfile($INSTALL_ROOT, $_[0]);
+	File::Spec->catfile($INSTALL_ROOT, $_[0]);
     } else {
 	$_[0];
     }
@@ -32,7 +32,7 @@ sub install_rooted_file {
 
 sub install_rooted_dir {
     if (defined $INSTALL_ROOT) {
-	MY->catdir($INSTALL_ROOT, $_[0]);
+	File::Spec->catdir($INSTALL_ROOT, $_[0]);
     } else {
 	$_[0];
     }
@@ -52,13 +52,13 @@ sub install {
     $nonono  ||= 0;
 
     use Cwd qw(cwd);
-    use ExtUtils::MakeMaker; # to implement a MY class
     use ExtUtils::Packlist;
     use File::Basename qw(dirname);
     use File::Copy qw(copy);
     use File::Find qw(find);
     use File::Path qw(mkpath);
     use File::Compare qw(compare);
+    use File::Spec;
 
     my(%hash) = %$hash;
     my(%pack, $dir, $warn_permissions);
@@ -119,8 +119,8 @@ sub install {
                          $atime,$mtime,$ctime,$blksize,$blocks) = stat;
 	    return unless -f _;
 	    return if $_ eq ".exists";
-	    my $targetdir  = MY->catdir($targetroot, $File::Find::dir);
-	    my $targetfile = MY->catfile($targetdir, $_);
+	    my $targetdir  = File::Spec->catdir($targetroot, $File::Find::dir);
+	    my $targetfile = File::Spec->catfile($targetdir, $_);
 
 	    my $diff = 0;
 	    if ( -f $targetfile && -s _ == $size) {
@@ -231,7 +231,7 @@ sub inc_uninstall {
 						  sitelibexp)}) {
 	next if $dir eq ".";
 	next if $seen_dir{$dir}++;
-	my($targetfile) = MY->catfile($dir,$libdir,$file);
+	my($targetfile) = File::Spec->catfile($dir,$libdir,$file);
 	next unless -f $targetfile;
 
 	# The reason why we compare file's contents is, that we cannot
