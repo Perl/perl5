@@ -1050,10 +1050,6 @@ sub mkindex {
     my ($entry) = @_;
     my @entries = split m:\s*/\s*:, $entry;
     push @Indices, ".IX Xref " . join ' ', map {qq("$_")} @entries;
-    for $entry (@entries) {
-	print qq("$entry" );
-    }
-    print "\n";
     return '';
 }
 
