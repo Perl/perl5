@@ -1226,10 +1226,10 @@ yylex(void)
 
 	if (!strchr(tokenbuf,':')) {
 #ifdef USE_THREADS
-	    /* Check for single character per-thread magicals */
+	    /* Check for single character per-thread SVs */
 	    if (tokenbuf[0] == '$' && tokenbuf[2] == '\0'
-		&& !isALPHA(tokenbuf[1]) /* Rule out obvious non-magicals */
-		&& (tmp = find_thread_magical(&tokenbuf[1])) != NOT_IN_PAD)
+		&& !isALPHA(tokenbuf[1]) /* Rule out obvious non-threadsvs */
+		&& (tmp = find_threadsv(&tokenbuf[1])) != NOT_IN_PAD)
 	    {
 		yylval.opval = newOP(OP_THREADSV, 0);
 		yylval.opval->op_targ = tmp;
@@ -1373,7 +1373,7 @@ yylex(void)
 	    force_next(',');
 #ifdef USE_THREADS
 	    nextval[nexttoke].opval = newOP(OP_THREADSV, 0);
-	    nextval[nexttoke].opval->op_targ = find_thread_magical("\"");
+	    nextval[nexttoke].opval->op_targ = find_threadsv("\"");
 	    force_next(PRIVATEREF);
 #else
 	    force_ident("\"", '$');

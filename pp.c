@@ -590,7 +590,7 @@ PP(pp_trans)
     if (op->op_flags & OPf_STACKED)
 	sv = POPs;
     else {
-	sv = GvSV(defgv);
+	sv = DEFSV;
 	EXTEND(SP,1);
     }
     TARG = sv_newmortal();
@@ -2714,7 +2714,7 @@ PP(pp_reverse)
 	if (SP - MARK > 1)
 	    do_join(TARG, &sv_no, MARK, SP);
 	else
-	    sv_setsv(TARG, (SP > MARK) ? *SP : GvSV(defgv));
+	    sv_setsv(TARG, (SP > MARK) ? *SP : DEFSV);
 	up = SvPV_force(TARG, len);
 	if (len > 1) {
 	    down = SvPVX(TARG) + len - 1;
@@ -4310,14 +4310,11 @@ PP(pp_threadsv)
 {
     djSP;
 #ifdef USE_THREADS
-    SV **svp = av_fetch(thr->magicals, op->op_targ, FALSE);
-    if (!svp)
-	croak("panic: pp_threadsv");
     EXTEND(sp, 1);
     if (op->op_private & OPpLVAL_INTRO)
-	PUSHs(save_svref(svp));
+	PUSHs(*save_threadsv(op->op_targ));
     else
-	PUSHs(*svp);
+	PUSHs(*av_fetch(thr->threadsv, op->op_targ, FALSE));
 #else
     DIE("tried to access per-thread data in non-threaded perl");
 #endif /* USE_THREADS */

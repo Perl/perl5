@@ -63,6 +63,7 @@ exp_amg
 expect
 expectterm
 fallback_amg
+find_threadsv
 fold
 fold_locale
 freq
@@ -163,7 +164,6 @@ pad_reset_pending
 padix
 padix_floor
 patleave
-per_thread_magicals
 pidstatus
 pow_amg
 pow_ass_amg
@@ -223,6 +223,7 @@ sv_no
 sv_undef
 sv_yes
 thisexpr
+threadsv_names
 thr_key
 timesbuf
 tokenbuf
@@ -1047,6 +1048,7 @@ save_pptr
 save_scalar
 save_sptr
 save_svref
+save_threadsv
 savepv
 savepvn
 savestack_grow

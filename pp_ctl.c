@@ -546,14 +546,17 @@ PP(pp_grepstart)
     ENTER;					/* enter outer scope */
 
     SAVETMPS;
-    SAVESPTR(GvSV(defgv));
-
+#if 0
+    SAVE_DEFSV;
+#else
+    save_sptr(av_fetch(thr->threadsv, find_threadsv("_"), FALSE));
+#endif
     ENTER;					/* enter inner scope */
     SAVESPTR(curpm);
 
     src = stack_base[*markstack_ptr];
     SvTEMP_off(src);
-    GvSV(defgv) = src;
+    DEFSV = src;
 
     PUTBACK;
     if (op->op_type == OP_MAPSTART)
@@ -623,7 +626,7 @@ PP(pp_mapwhile)
 
 	src = stack_base[markstack_ptr[-1]];
 	SvTEMP_off(src);
-	GvSV(defgv) = src;
+	DEFSV = src;
 
 	RETURNOP(cLOGOP->op_other);
     }
@@ -1334,12 +1337,19 @@ PP(pp_enteriter)
     ENTER;
     SAVETMPS;
 
-    if (op->op_targ)
-	svp = &curpad[op->op_targ];		/* "my" variable */
+#ifdef USE_THREADS
+    if (op->op_flags & OPf_SPECIAL)
+	svp = save_threadsv(op->op_targ);	/* per-thread variable */
     else
+#endif /* USE_THREADS */
+    if (op->op_targ) {
+	svp = &curpad[op->op_targ];		/* "my" variable */
+	SAVESPTR(*svp);
+    }
+    else {
 	svp = &GvSV((GV*)POPs);			/* symbol table variable */
-
-    SAVESPTR(*svp);
+	SAVESPTR(*svp);
+    }
 
     ENTER;
 

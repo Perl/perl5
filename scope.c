@@ -330,6 +330,22 @@ save_sptr(SV **sptr)
     SSPUSHINT(SAVEt_SPTR);
 }
 
+SV **
+save_threadsv(PADOFFSET i)
+{
+#ifdef USE_THREADS
+    dTHR;
+    SV **svp = av_fetch(thr->threadsv, i, FALSE);
+    DEBUG_L(PerlIO_printf(PerlIO_stderr(), "save_threadsv %u: %p %p:%s\n",
+			  i, svp, *svp, SvPEEK(*svp)));
+    save_svref(svp);
+    return svp;
+#else
+    croak("panic: save_threadsv called in non-threaded perl");
+    return 0;
+#endif /* USE_THREADS */
+}
+
 void
 save_nogv(GV *gv)
 {
@@ -475,6 +491,9 @@ leave_scope(I32 base)
 	    ptr = SSPOPPTR;
 	restore_sv:
 	    sv = *(SV**)ptr;
+	    DEBUG_L(PerlIO_printf(PerlIO_stderr(),
+				  "restore svref: %p %p:%s -> %p:%s\n",
+			  	  ptr, sv, SvPEEK(sv), value, SvPEEK(value)));
 	    if (SvTYPE(sv) >= SVt_PVMG && SvMAGIC(sv) &&
 		SvTYPE(sv) != SVt_PVGV)
 	    {
