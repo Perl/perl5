@@ -2350,7 +2350,6 @@ S_regmatch(pTHX_ regnode *prog)
 	    {
 		char *l = locinput;
 		char *e = s + ln;
-		U8 tmpbuf[UTF8_MAXLEN_FOLD+1];
 
 		if (do_utf8 != (UTF!=0)) {
 		     /* The target and the pattern have differing utf8ness. */
@@ -2403,8 +2402,6 @@ S_regmatch(pTHX_ regnode *prog)
 
 		if (do_utf8 && UTF) {
 		     /* Both the target and the pattern are utf8. */
-		     STRLEN ulen;
-		     
 		     while (s < e) {
 			  if (l >= PL_regeol)
 			       sayNO;
