@@ -14,8 +14,8 @@ print "1..58\n";
 $Is_MSWin32 = $^O eq 'MSWin32';
 $Is_NetWare = $^O eq 'NetWare';
 $Is_Dos = $^O eq 'dos';
-$Is_Dosish = $Is_Dos || $^O eq 'os2' || $Is_MSWin32 || $Is_NetWare;
 $Is_Cygwin = $^O eq 'cygwin';
+$Is_Dosish = $Is_Dos || $^O eq 'os2' || $Is_MSWin32 || $Is_NetWare || $Is_Cygwin;
 chop($cwd = (($Is_MSWin32 || $Is_NetWare) ? `cd` : `pwd`));
 
 $DEV = `ls -l /dev` unless $Is_Dosish or $Is_Cygwin;
@@ -101,7 +101,7 @@ $olduid = $>;		# can't test -r if uid == 0
 $Is_MSWin32 ? `cmd /c echo hi > Op.stat.tmp` : `echo hi >Op.stat.tmp`;
 chmod 0,'Op.stat.tmp';
 eval '$> = 1;';		# so switch uid (may not be implemented)
-if (!$> || $Is_Dos || ! -r 'Op.stat.tmp') {print "ok 9\n";} else {print "not ok 9\n";}
+if (!$> || $Is_Dos || $Is_Cygwin || ! -r 'Op.stat.tmp') {print "ok 9\n";} else {print "not ok 9\n";}
 if (!$> || ! -w 'Op.stat.tmp') {print "ok 10\n";} else {print "not ok 10\n";}
 eval '$> = $olduid;';		# switch uid back (may not be implemented)
 print "# olduid=$olduid, newuid=$>\n" unless ($> == $olduid);

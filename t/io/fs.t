@@ -10,7 +10,7 @@ BEGIN {
 use Config;
 
 $Is_Dosish = ($^O eq 'MSWin32' or $^O eq 'NetWare' or $^O eq 'dos' or
-	      $^O eq 'os2' or $^O eq 'mint');
+	      $^O eq 'os2' or $^O eq 'mint' or $^O eq 'cygwin');
 
 if (defined &Win32::IsWinNT && Win32::IsWinNT()) {
     $Is_Dosish = '' if Win32::FsType() eq 'NTFS';
@@ -111,7 +111,7 @@ if ($foo == 1) {print "ok 16\n";} else {print "not ok 16 $foo\n";}
     $blksize,$blocks) = stat('b');
 if (($^O eq 'MSWin32') || ($^O eq 'NetWare')) { print "ok 17 # skipped: bogus (stat)[1]\n"; }
 elsif ($ino) {print "ok 17\n";} else {print "not ok 17\n";}
-if ($wd =~ m#$Config{'afsroot'}/# || $^O eq 'amigaos' || $^O eq 'dos' || $^O eq 'MSWin32' || $^O eq 'NetWare')
+if ($wd =~ m#$Config{'afsroot'}/# || $^O eq 'amigaos' || $^O eq 'dos' || $^O eq 'MSWin32' || $^O eq 'NetWare' || $^O eq 'cygwin')
     {print "ok 18 # skipped: granularity of the filetime\n";}
 elsif ($atime == 500000000 && $mtime == 500000000 + $delta)
     {print "ok 18\n";}
