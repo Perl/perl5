@@ -26,12 +26,18 @@ Would be nice to have
 	    32+ constants in Perl code? (non-portable!)
 	    32+ arguments/return values to/from system calls? (seek et al)
 	    32+ bit ops (&|^~, currently explicitly disabled)
+	Generalise Errno way of extracting cpp symbols and use that in
+	    Errno and Fcntl (ExtUtils::CppSymbol?)
 	The _r-problem: for all the {set,get,end}*() system database
 	     calls (and a couple more: readdir, *rand*, crypt, *time,
 	     tmpnam) there are in many systems the _r versions
 	     to be used in re-entrant (=multithreaded) code.
-	Generalise Errno way of extracting cpp symbols and use that in
-	    Errno and Fcntl (ExtUtils::CppSymbol?)
+	     Icky things: the _r API is not standardized and
+	     the _r-forms require per-thread data to store their state.
+	memory profiler: turn malloc.c:Perl_dump_mstats() into
+	    an extension (Devel::MProf?) that would return the malloc
+	    stats in a nice Perl datastructure (also a simple interface
+	    to return just the grand total) would be good.
 
 Possible pragmas
 	debugger
