@@ -32,6 +32,392 @@ Version v5.7.1		Development release working toward v5.8
 --------------
 
 ____________________________________________________________________________
+[  8268] By: jhi                                   on 2000/12/30  17:18:40
+        Log: Add a test for Unicode split //.  The #8267 was the cure.
+     Branch: perl
+	   ! t/op/split.t
+____________________________________________________________________________
+[  8267] By: jhi                                   on 2000/12/30  17:14:19
+        Log: Subject: more UTF8 test suites and an UTF8 patch
+             From: Inaba Hiroto <inaba@st.rim.or.jp>
+             Date: Sat, 30 Dec 2000 14:27:10 +0900
+             Message-ID: <3A4D722D.243AFD88@st.rim.or.jp> 
+             
+             Just the patch part for now, and the pragma renamed
+             as unicode::distinct.
+     Branch: perl
+	   + lib/unicode/distinct.pm
+	   ! MANIFEST doop.c embed.h embed.pl mg.c op.c op.h perl.h
+	   ! pod/perlapi.pod pp.c pp_ctl.c pp_hot.c proto.h regcomp.c
+	   ! regcomp.h regexec.c sv.c toke.c utf8.c
+____________________________________________________________________________
+[  8266] By: nick                                  on 2000/12/30  16:40:49
+        Log: Integrate mainline
+     Branch: perlio
+	  +> lib/Pod/Text/Overstrike.pm
+	  !> MANIFEST doio.c hints/dec_osf.sh hv.c lib/Pod/Man.pm
+	  !> lib/Pod/Text/Color.pm lib/Pod/Text/Termcap.pm op.c
+	  !> pod/pod2text.PL sv.c t/lib/syslfs.t t/op/join.t t/op/lfs.t
+	  !> t/pragma/constant.t t/pragma/sub_lval.t t/pragma/utf8.t util.c
+	  !> vms/vms.c vms/vmsish.h vms/vmspipe.com
+____________________________________________________________________________
+[  8265] By: jhi                                   on 2000/12/30  07:28:55
+        Log: The sv_catsv() fix, take two.
+     Branch: perl
+	   ! sv.c t/op/join.t
+____________________________________________________________________________
+[  8264] By: jhi                                   on 2000/12/30  06:19:18
+        Log: Undo all the join-related changes since #8248: relevant
+             portions of 8248, 8249, 8250, 8251, 8260, 8263 must go.
+             The new sv_catsv() doesn't fly so it must go back to
+             the drawing board.
+     Branch: perl
+	   ! sv.c t/op/join.t t/pragma/utf8.t
+____________________________________________________________________________
+[  8263] By: jhi                                   on 2000/12/30  01:08:32
+        Log: (Retracted by #8264)  Tweak sv_catsv() some more.
+     Branch: perl
+	   ! sv.c
+____________________________________________________________________________
+[  8262] By: jhi                                   on 2000/12/30  00:45:14
+        Log: Retract #8261.
+     Branch: perl
+	   ! hv.c util.c
+____________________________________________________________________________
+[  8261] By: jhi                                   on 2000/12/30  00:38:32
+        Log: (Retracted by #8261). (Unsuccessful memory access tweaks.)
+     Branch: perl
+	   ! hv.c util.c
+____________________________________________________________________________
+[  8260] By: jhi                                   on 2000/12/29  22:51:33
+        Log: (Retracted by #8264)  More fixing for #8251.
+     Branch: perl
+	   ! sv.c
+____________________________________________________________________________
+[  8259] By: jhi                                   on 2000/12/29  18:27:30
+        Log: Subject: podlators 1.06 released
+             From: Russ Allbery <rra@stanford.edu>
+             Date: 25 Dec 2000 05:09:30 -0800
+             Message-ID: <ylwvcosl4l.fsf@windlord.stanford.edu>
+     Branch: perl
+	   + lib/Pod/Text/Overstrike.pm
+	   ! MANIFEST lib/Pod/Man.pm lib/Pod/Text/Color.pm
+	   ! lib/Pod/Text/Termcap.pm pod/pod2text.PL
+____________________________________________________________________________
+[  8258] By: jhi                                   on 2000/12/29  18:20:45
+        Log: Make the large file tests more robust/talkative as suggested by
+             
+             Subject: Re: [ID 20001229.001] Not OK: perl v5.7.0 +DEVEL8221 on i686-linux 2.4.0-test13pre4-ac2 -2 (UNINSTALLED)
+             From: andreas.koenig@anima.de (Andreas J. Koenig)
+             Date: 29 Dec 2000 14:23:01 +0100
+             Message-ID: <m3snn7uzt6.fsf@ak-71.mind.de>
+     Branch: perl
+	   ! t/lib/syslfs.t t/op/lfs.t
+____________________________________________________________________________
+[  8257] By: jhi                                   on 2000/12/29  17:48:04
+        Log: Further VMS piping fixes from Charles Lane:
+             
+             In summary, error messages produced when a subprocess terminated
+             abnormally were being sent not just to the parent process, but to
+             grandparents, because of default values for error output that were
+             not completely overridden when the subprocess was started.
+             
+             This patch fixes this behavior by defining user-mode (i.e., temporary
+             for the duration of the program) logical names for SYS$OUTPUT and
+             SYS$ERROR when they are (re)opened inside Perl.  And a bunch of other
+             changes to make it so that the user-mode logicals are the ones that
+             control where Perl's error messages go if it terminates abnormally.
+             
+             I also added some gratuitous fixes to the indentation of braces in
+             the piping code.  It just looked ugly, before.
+     Branch: perl
+	   ! doio.c vms/vms.c vms/vmsish.h vms/vmspipe.com
+____________________________________________________________________________
+[  8256] By: jhi                                   on 2000/12/29  17:45:12
+        Log: Subject: [PATCH] Idea: Declare multiple constants at once (fwd)
+             From: "Casey R. Tweten" <crt@kiski.net>
+             Date: Fri, 29 Dec 2000 12:03:00 -0500 (EST)
+             Message-ID: <Pine.OSF.4.21.0012291201150.17186-100000@home.kiski.net>
+             
+             Tests for for #8240.
+     Branch: perl
+	   ! t/pragma/constant.t
+____________________________________________________________________________
+[  8255] By: jhi                                   on 2000/12/29  17:43:07
+        Log: Subject: Re: [PATCH] Interesting syntax idea
+             From: Simon Cozens <simon@cozens.net>
+             Date: Fri, 29 Dec 2000 14:34:04 +0000
+             Message-ID: <20001229143404.A7762@deep-dark-truthful-mirror.perlhacker.org>
+             
+             Tests for #8254.
+     Branch: perl
+	   ! t/pragma/sub_lval.t
+____________________________________________________________________________
+[  8254] By: jhi                                   on 2000/12/29  17:42:11
+        Log: Subject: [PATCH] Interesting syntax idea
+             From: Simon Cozens <simon@cozens.net>
+             Date: Wed, 27 Dec 2000 05:08:57 +0000
+             Message-ID: <20001227050857.A11296@deep-dark-truthful-mirror.perlhacker.org>
+             
+             Make opens + bareword assigns do typeglob assigns.
+     Branch: perl
+	   ! op.c
+____________________________________________________________________________
+[  8253] By: jhi                                   on 2000/12/29  17:36:45
+        Log: Output the (apparent) version of gcc, as suggested by
+             
+             Subject: [ID 20001226.001] dec_osf.sh mis-parses gcc version 2.95.2 as less than 2.95, causing installation-failure
+             From: jhbrown@ai.mit.edu (Jeremy H. Brown)
+             Date: 26 Dec 2000 04:29:17 -0500
+             Message-Id: <uv6puify1hu.fsf@suspiria.ai.mit.edu>
+             
+             (The patch as such didn't any more apply as the misparsing had
+             already been addressed in #6474.)  Also change the wording about
+             gcc 2.95.2, for Jeremy it didn't break sdbm, for me it did.
+     Branch: perl
+	   ! hints/dec_osf.sh
+____________________________________________________________________________
+[  8252] By: nick                                  on 2000/12/29  12:14:31
+        Log: Integrate mainline
+     Branch: perlio
+	  !> (integrate 27 files)
+____________________________________________________________________________
+[  8251] By: jhi                                   on 2000/12/29  08:45:46
+        Log: (Retracted by #8264)
+             
+             (Fixed by #8260.)
+             
+             sv_catsv() needs one more byte space than seems reasonable.
+             (for join() and PERL_DESTRUCT_LEVEL=2, built with debugging).
+             Curiouser and curiouser.
+     Branch: perl
+	   ! sv.c
+____________________________________________________________________________
+[  8250] By: jhi                                   on 2000/12/29  07:57:52
+        Log: More split // UTF-8 tests.
+     Branch: perl
+	   ! t/pragma/utf8.t
+____________________________________________________________________________
+[  8249] By: jhi                                   on 2000/12/29  07:54:51
+        Log: (Retracted by #8264)  More join() testing which was good because
+             it revealed a bug in #8248 (the UTF8_EIGHT_BIT_LO() was wrong).
+     Branch: perl
+	   ! pp.c t/op/join.t utf8.c utf8.h
+____________________________________________________________________________
+[  8248] By: jhi                                   on 2000/12/29  07:08:32
+        Log: (Retracted by #8264)  Externally: join() was still quite UTF-8-unaware.
+             Internally: sv_catsv() wasn't quite okay on UTF-8, it assumed
+             that the only cases to care about are byte+byte and byte+character.
+             
+             TODO: See how well pp_concat() could be implemented in terms
+             of sv_catsv().
+     Branch: perl
+	   ! doop.c sv.c t/op/join.t utf8.h
+____________________________________________________________________________
+[  8247] By: jhi                                   on 2000/12/29  06:35:23
+        Log: Signedness nit.
+     Branch: perl
+	   ! pp_hot.c
+____________________________________________________________________________
+[  8246] By: jhi                                   on 2000/12/29  01:23:31
+        Log: Subject: Re: [ID 20001226.002] Not OK: perl v5.7.0 +DEVEL8221 on i86pc-solaris 2.8 (UNINSTALLED)
+             From: Lupe Christoph <lupe@lupe-christoph.de>
+             Date: Thu, 28 Dec 2000 23:00:00 +0100
+             Message-ID: <20001228230000.F2574@alanya.lupe-christoph.de>
+             
+             Suggest rsync --delete --dry-run.
+     Branch: perl
+	   ! pod/perlhack.pod
+____________________________________________________________________________
+[  8245] By: jhi                                   on 2000/12/28  23:57:05
+        Log: The maxiters upper limit sanity check (guarding against
+             non-progress) assumed bytes instead of characters in s///
+             and split().
+     Branch: perl
+	   ! pp.c pp_hot.c
+____________________________________________________________________________
+[  8244] By: jhi                                   on 2000/12/28  23:34:08
+        Log: Make some panic messages a bit more logical.
+     Branch: perl
+	   ! doop.c pod/perldiag.pod pp.c pp_hot.c
+____________________________________________________________________________
+[  8243] By: jhi                                   on 2000/12/28  22:59:16
+        Log: Subject: [PATCH] lvalue AUTOLOAD. No, really.
+             From: Simon Cozens <simon@cozens.net>
+             Date: Wed, 27 Dec 2000 02:30:03 +0000
+             Message-ID: <20001227023003.A7677@deep-dark-truthful-mirror.perlhacker.org>
+     Branch: perl
+	   ! pp.c t/pragma/sub_lval.t
+____________________________________________________________________________
+[  8242] By: jhi                                   on 2000/12/28  22:56:53
+        Log: Subject: [PATCH blead] Fix B::Terse indentation
+             From: Daniel Chetlin <daniel@chetlin.com>
+             Date: Wed, 27 Dec 2000 06:43:30 -0800
+             Message-ID: <20001227064329.B9573@darkstar>
+     Branch: perl
+	   ! ext/B/B.pm ext/B/B/Terse.pm t/lib/b.t
+____________________________________________________________________________
+[  8241] By: jhi                                   on 2000/12/28  22:48:59
+        Log: The latter patch from the
+             
+             Subject: [PATCH: perl@8211] directory depth typo in one win32 Makefile
+             From: Peter Prymmer <pvhp@forte.com> 
+             Date: Fri, 22 Dec 2000 14:52:12 -0800 (PST)
+             Message-ID: <Pine.OSF.4.10.10012221433140.195493-100000@aspara.forte.com>
+             
+             (the former patch from the above should have been
+             taken care of by Nick I-S)
+     Branch: perl
+	   ! win32/Makefile
+____________________________________________________________________________
+[  8240] By: jhi                                   on 2000/12/28  22:45:22
+        Log: Subject: Re: [PATCH] Idea: Declare multiple constants at once
+             From: "Casey R. Tweten" <crt@kiski.net>
+             Date: Fri, 22 Dec 2000 10:35:53 -0500 (EST)
+             Message-ID: <Pine.OSF.4.21.0012221032030.28992-100000@home.kiski.net>
+     Branch: perl
+	   ! lib/constant.pm
+____________________________________________________________________________
+[  8239] By: jhi                                   on 2000/12/28  22:37:45
+        Log: Subject: [PATCH] Re: [ID 19991001.003] sort(sub(arg)) misparsed as sort sub args
+             From: Simon Cozens <simon@cozens.net>
+             Date: Wed, 27 Dec 2000 14:12:44 +0000
+             Message-ID: <20001227141244.A13344@deep-dark-truthful-mirror.perlhacker.org>
+     Branch: perl
+	   ! t/op/method.t t/op/sort.t toke.c
+____________________________________________________________________________
+[  8238] By: jhi                                   on 2000/12/28  22:30:32
+        Log: Subject: [PATCH perl@8229] Call.pm
+             From: "Paul Marquess" <Paul.Marquess@btinternet.com>
+             Date: Mon, 25 Dec 2000 10:47:15 -0000
+             Message-ID: <000201c06e60$0b967760$a20a140a@bfs.phone.com>
+     Branch: perl
+	   ! ext/Filter/Util/Call/Call.pm
+____________________________________________________________________________
+[  8237] By: jhi                                   on 2000/12/28  22:19:21
+        Log: Subject: [PATCH blead] Fix problem with `&' prototype
+             From: Daniel Chetlin <daniel@chetlin.com>
+             Date: Wed, 27 Dec 2000 15:55:32 -0800
+             Message-ID: <20001227155532.D9573@darkstar>
+     Branch: perl
+	   ! op.c t/comp/proto.t
+____________________________________________________________________________
+[  8236] By: jhi                                   on 2000/12/28  22:09:25
+        Log: Subject: Re: [PATCH blead] Fix segfault in gv_handler/mg_find
+             From: Daniel Chetlin <daniel@chetlin.com>
+             Date: Sun, 24 Dec 2000 04:09:49 -0800
+             Message-ID: <20001224040949.B3090@darkstar>
+     Branch: perl
+	   ! gv.c mg.c t/op/attrs.t
+____________________________________________________________________________
+[  8235] By: jhi                                   on 2000/12/28  22:07:11
+        Log: Subject: [PATCH] Win32::Spawn() didn't inherit cwd and env correctly
+             From: Jan Dubois <jand@ActiveState.com>
+             Date: Tue, 26 Dec 2000 20:57:31 -0800
+             Message-ID: <reti4ts0php3anruv0qcjru3tl850g3sfd@4ax.com>
+     Branch: perl
+	   ! win32/win32.c
+____________________________________________________________________________
+[  8234] By: jhi                                   on 2000/12/28  21:52:42
+        Log: Subject: Re: [PATCH] Warn on use of reference as array elem
+             From: Simon Cozens <simon@cozens.net>
+             Date: Thu, 28 Dec 2000 20:33:13 +0000
+             Message-ID: <20001228203313.A2607@deep-dark-truthful-mirror.perlhacker.org>
+     Branch: perl
+	   ! pod/perldiag.pod pp_hot.c t/pragma/warn/pp_hot
+____________________________________________________________________________
+[  8233] By: jhi                                   on 2000/12/28  19:40:49
+        Log: Integrate perlio.
+     Branch: perl
+	  !> ext/Encode/Makefile.PL ext/Encode/compile
+____________________________________________________________________________
+[  8232] By: nick                                  on 2000/12/23  16:06:00
+        Log: Encode's Makefile.PL fix not good for dmake $(MAKEFILE) is set to -f Makefile
+             and fails to make '-f'. (Also handle case where xxxx.c files have not been deleted.)
+     Branch: perlio
+	   ! ext/Encode/Makefile.PL
+____________________________________________________________________________
+[  8231] By: nick                                  on 2000/12/23  14:30:34
+        Log: "Compiled" encode build cleanup
+             - Makefile uses catfile $(MAKEFILE) etc. for platform issues.
+             - .c files do not export sub-tables
+     Branch: perlio
+	   ! ext/Encode/Makefile.PL ext/Encode/compile
+____________________________________________________________________________
+[  8230] By: nick                                  on 2000/12/23  12:50:37
+        Log: Integrate mainline
+     Branch: perlio
+	  !> INSTALL lib/CGI.pm lib/CPAN.pm lib/Pod/Select.pm
+	  !> lib/Text/ParseWords.pm lib/Win32.pod pod/perl.pod
+	  !> pod/perl5004delta.pod pod/perl5005delta.pod
+	  !> pod/perl56delta.pod pod/perldelta.pod pod/perldiag.pod
+	  !> pod/perlembed.pod pod/perlfaq4.pod pod/perllocale.pod
+	  !> pod/perlmodlib.pod pod/perlrequick.pod pod/perlretut.pod
+	  !> pod/perlsub.pod
+____________________________________________________________________________
+[  8229] By: jhi                                   on 2000/12/22  15:32:12
+        Log: Integrate perlio.
+     Branch: perl
+	  +> win32/distclean.bat
+	  !> MANIFEST t/io/utf8.t
+____________________________________________________________________________
+[  8228] By: jhi                                   on 2000/12/22  15:29:40
+        Log: Subject: [PATCH 5.6.1-TRIAL1 and @8223]; was Re: Perlbug 20000322.006 status +update
+             From: Robin Barker <rmb1@cise.npl.co.uk>
+             Date: Fri, 22 Dec 2000 12:17:38 GMT
+             Message-Id: <200012221217.MAA21332@tempest.npl.co.uk>
+     Branch: perl
+	   ! lib/CGI.pm lib/CPAN.pm lib/Pod/Select.pm
+	   ! lib/Text/ParseWords.pm lib/Win32.pod pod/perl.pod
+	   ! pod/perl5004delta.pod pod/perl5005delta.pod
+	   ! pod/perl56delta.pod pod/perldelta.pod pod/perldiag.pod
+	   ! pod/perlembed.pod pod/perlfaq4.pod pod/perllocale.pod
+	   ! pod/perlmodlib.pod pod/perlrequick.pod pod/perlretut.pod
+	   ! pod/perlsub.pod
+____________________________________________________________________________
+[  8227] By: jhi                                   on 2000/12/22  15:24:28
+        Log: Subject: Re: A Configure option like 'otherlibdirs' but for *pre*pending?
+             From: "John L. Allen" <allen@grumman.com>
+             Date: Thu, 21 Dec 2000 14:39:58 -0500 (EST)
+             Message-ID: <Pine.SOL.3.91.1001221133227.23511A-100000@gateway.grumman.com>
+             
+             Document APPLLIB_EXP.
+     Branch: perl
+	   ! INSTALL
+____________________________________________________________________________
+[  8226] By: nick                                  on 2000/12/21  22:11:50
+        Log: Handy script for when one forgets to "dmake clean" 
+     Branch: perlio
+	   + win32/distclean.bat
+	   ! MANIFEST
+____________________________________________________________________________
+[  8225] By: nick                                  on 2000/12/21  21:54:04
+        Log: CRLF platform issue with io/utf8 fix.
+     Branch: perlio
+	   ! t/io/utf8.t
+____________________________________________________________________________
+[  8224] By: nick                                  on 2000/12/21  21:02:20
+        Log: Integrate mainline
+     Branch: perlio
+	  !> Changes Configure Makefile.SH Porting/Glossary
+	  !> Porting/config.sh Porting/config_H configure.com
+	  !> epoc/config.sh ext/Thread/Thread.xs patchlevel.h
+	  !> pod/perlfaq3.pod pod/perlfunc.pod pod/perltoc.pod pp_sys.c
+	  !> sv.c t/io/fs.t t/op/misc.t t/op/utf8decode.t t/pragma/utf8.t
+	  !> win32/config.bc win32/config.gc win32/config.vc
+____________________________________________________________________________
+[  8223] By: jhi                                   on 2000/12/21  17:09:16
+        Log: Update Changes.
+     Branch: perl
+	   ! Changes patchlevel.h
+____________________________________________________________________________
+[  8222] By: jhi                                   on 2000/12/21  16:24:01
+        Log: Metaconfig unit changes for #8221.
+     Branch: metaconfig/U/perl
+	  +> issymlink.U
+	   - testsyml.U
+	   ! Mksymlinks.U
+____________________________________________________________________________
 [  8221] By: jhi                                   on 2000/12/21  16:23:48
         Log: Rename testsyml to issymlink.
      Branch: perl
