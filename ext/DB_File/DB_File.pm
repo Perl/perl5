@@ -1,8 +1,8 @@
 # DB_File.pm -- Perl 5 interface to Berkeley DB 
 #
 # written by Paul Marquess (Paul.Marquess@btinternet.com)
-# last modified 6th Jan 2002
-# version 1.802
+# last modified 1st March 2002
+# version 1.803
 #
 #     Copyright (c) 1995-2002 Paul Marquess. All rights reserved.
 #     This program is free software; you can redistribute it and/or
@@ -150,7 +150,7 @@ our ($db_version, $use_XSLoader);
 use Carp;
 
 
-$VERSION = "1.802" ;
+$VERSION = "1.803" ;
 
 #typedef enum { DB_BTREE, DB_HASH, DB_RECNO } DBTYPE;
 $DB_BTREE = new DB_File::BTREEINFO ;
@@ -978,7 +978,7 @@ code:
     use strict ;
     use DB_File ;
 
-    our ($filename, %h) ;
+    my ($filename, %h) ;
 
     $filename = "tree" ;
     unlink $filename ;
@@ -1033,7 +1033,7 @@ Here is the script above rewritten using the C<seq> API method.
     use strict ;
     use DB_File ;
 
-    our ($filename, $x, %h, $status, $key, $value) ;
+    my ($filename, $x, %h, $status, $key, $value) ;
 
     $filename = "tree" ;
     unlink $filename ;
@@ -1105,7 +1105,7 @@ this:
     use strict ;
     use DB_File ;
 
-    our ($filename, $x, %h) ;
+    my ($filename, $x, %h) ;
 
     $filename = "tree" ;
 
@@ -1155,7 +1155,7 @@ Assuming the database from the previous example:
     use strict ;
     use DB_File ;
 
-    our ($filename, $x, %h, $found) ;
+    my ($filename, $x, %h, $found) ;
 
     $filename = "tree" ;
 
@@ -1194,7 +1194,7 @@ Again assuming the existence of the C<tree> database
     use strict ;
     use DB_File ;
 
-    our ($filename, $x, %h, $found) ;
+    my ($filename, $x, %h, $found) ;
 
     $filename = "tree" ;
 
@@ -1240,7 +1240,7 @@ and print the first matching key/value pair given a partial key.
     use DB_File ;
     use Fcntl ;
 
-    our ($filename, $x, %h, $st, $key, $value) ;
+    my ($filename, $x, %h, $st, $key, $value) ;
 
     sub match
     {
@@ -1439,7 +1439,7 @@ L<THE API INTERFACE>).
 
     use warnings ;
     use strict ;
-    our (@h, $H, $file, $i) ;
+    my (@h, $H, $file, $i) ;
     use DB_File ;
     use Fcntl ;
 
@@ -2004,7 +2004,7 @@ F<authors/id/TOMC/scripts/nshist.gz>).
     use DB_File ;
     use Fcntl ;
 
-    our ($dotdir, $HISTORY, %hist_db, $href, $binary_time, $date) ;
+    my ($dotdir, $HISTORY, %hist_db, $href, $binary_time, $date) ;
     $dotdir = $ENV{HOME} || $ENV{LOGNAME};
 
     $HISTORY = "$dotdir/.netscape/history.db";

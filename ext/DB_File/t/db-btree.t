@@ -958,7 +958,7 @@ EOM
     use strict ;
     use DB_File ;
 
-    our ($filename, %h);
+    my ($filename, %h);
 
     $filename = "tree" ;
     unlink $filename ;
@@ -1010,7 +1010,7 @@ EOM
     use strict ;
     use DB_File ;
  
-    our ($filename, $x, %h, $status, $key, $value);
+    my ($filename, $x, %h, $status, $key, $value);
 
     $filename = "tree" ;
     unlink $filename ;
@@ -1066,7 +1066,7 @@ EOM
     use strict ;
     use DB_File ;
  
-    our ($filename, $x, %h);
+    my ($filename, $x, %h);
 
     $filename = "tree" ;
  
@@ -1115,7 +1115,7 @@ EOM
     use strict ;
     use DB_File ;
  
-    our ($filename, $x, %h, $found);
+    my ($filename, $x, %h, $found);
 
     $filename = "tree" ;
  
@@ -1150,7 +1150,7 @@ EOM
     use strict ;
     use DB_File ;
  
-    our ($filename, $x, %h, $found);
+    my ($filename, $x, %h, $found);
 
     $filename = "tree" ;
  
@@ -1186,7 +1186,7 @@ EOM
     use DB_File ;
     use Fcntl ;
 
-    our ($filename, $x, %h, $st, $key, $value);
+    my ($filename, $x, %h, $st, $key, $value);
 
     sub match
     {

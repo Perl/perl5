@@ -395,10 +395,18 @@
 
    * Added "clean" attribute to Makefile.PL
  
-1.802 6th January 2001
+1.802 6th January 2002
 
    * The message about some test failing in db-recno.t had the wrong test
      numbers. Fixed.
 
    * merged core patch 13942.
+
+1.803 1st March 2002
+
+   * Fixed a problem with db-btree.t where it complained about an "our"
+     variable redeclaation.
+
+   * FETCH, STORE & DELETE don't map the flags parameter into the
+     equivalent Berkeley DB function anymore.
 
