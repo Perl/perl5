@@ -42,7 +42,7 @@ sub B::LOGOP::debug {
 sub B::LISTOP::debug {
     my ($op) = @_;
     $op->B::BINOP::debug();
-    printf "\top_last\t\t0x%x\n", ${$op->last};
+    printf "\top_children\t%d\n", $op->children;
 }
 
 sub B::PMOP::debug {
