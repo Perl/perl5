@@ -339,9 +339,9 @@ I32 safebase;	/* no need to remember string in subbase */
 	    if (minlen)
 		dontbother++,strend--;
 	    tmp = (s != startpos) ? UCHARAT(s - 1) : regprev;
-	    tmp = (OP(c) == BOUND ? isALNUM(tmp) : isALNUM_LC(tmp));
+	    tmp = ((OP(c) == BOUND ? isALNUM(tmp) : isALNUM_LC(tmp)) != 0);
 	    while (s < strend) {
-		if (tmp != (OP(c) == BOUND ? isALNUM(*s) : isALNUM_LC(*s))) {
+		if (tmp == !(OP(c) == BOUND ? isALNUM(*s) : isALNUM_LC(*s))) {
 		    tmp = !tmp;
 		    if (regtry(prog, s))
 			goto got_it;
@@ -358,9 +358,9 @@ I32 safebase;	/* no need to remember string in subbase */
 	    if (minlen)
 		dontbother++,strend--;
 	    tmp = (s != startpos) ? UCHARAT(s - 1) : regprev;
-	    tmp = (OP(c) == NBOUND ? isALNUM(tmp) : isALNUM_LC(tmp));
+	    tmp = ((OP(c) == NBOUND ? isALNUM(tmp) : isALNUM_LC(tmp)) != 0);
 	    while (s < strend) {
-		if (tmp != (OP(c) == NBOUND ? isALNUM(*s) : isALNUM_LC(*s)))
+		if (tmp == !(OP(c) == NBOUND ? isALNUM(*s) : isALNUM_LC(*s)))
 		    tmp = !tmp;
 		else if (regtry(prog, s))
 		    goto got_it;
@@ -705,7 +705,7 @@ char *prog;
 	    s = OPERAND(scan);
 	    ln = *s++;
 	    /* Inline the first character, for speed. */
-	    if (*s != nextchar)
+	    if (UCHARAT(s) != nextchar)
 		sayNO;
 	    if (regeol - locinput < ln)
 		sayNO;
@@ -781,7 +781,7 @@ char *prog;
 		ln = isALNUM_LC(ln);
 		n = isALNUM_LC(nextchar);
 	    }
-	    if ((ln == n) == (OP(scan) == BOUND || OP(scan) == BOUNDL))
+	    if (((!ln) == (!n)) == (OP(scan) == BOUND || OP(scan) == BOUNDL))
 		sayNO;
 	    break;
 	case SPACEL:
@@ -828,7 +828,7 @@ char *prog;
 	    if (s == regendp[n])
 		break;
 	    /* Inline the first character, for speed. */
-	    if (*s != nextchar)
+	    if (UCHARAT(s) != nextchar)
 		sayNO;
 	    ln = regendp[n] - s;
 	    if (locinput + ln > regeol)
