@@ -31,7 +31,7 @@ OP*	bind_match _((I32 type, OP* left, OP* pat));
 OP*	block_end _((I32 floor, OP* seq));
 int	block_start _((int full));
 void	boot_core_UNIVERSAL _((void));
-void	calllist _((AV* list));
+void	calllist _((I32 oldscope, AV* list));
 I32	cando _((I32 bit, I32 effective, struct stat* statbufp));
 #ifndef CASTNEGFLOAT
 U32	cast_ulong _((double f));

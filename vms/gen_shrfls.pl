@@ -268,7 +268,7 @@ elsif ($isgcc) {
   # if DOINIT is #defined.  Bleah.  It's cheaper to just add
   # it by hand than to add /Define=DOINIT to the preprocessing
   # run and wade through all the extra junk.
-  $vars{'Error'}++;
+  $vars{"${embed}Error"}++;
 }
 
 # Eventually, we'll check against existing copies here, so we can add new

@@ -50,7 +50,7 @@ __END__
 
 =head1 NAME
 
-File::stat.pm - by-name interface to Perl's built-in stat() functions
+File::stat - by-name interface to Perl's built-in stat() functions
 
 =head1 SYNOPSIS
 

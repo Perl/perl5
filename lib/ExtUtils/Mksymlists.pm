@@ -164,6 +164,8 @@ C<Mksymlists>, which is exported by default from C<ExtUtils::Mksymlists>.
 It takes one argument, a list of key-value pairs, in which the following
 keys are recognized:
 
+=over
+
 =item NAME
 
 This gives the name of the extension (I<e.g.> Tk::Canvas) for which
@@ -216,6 +218,8 @@ extension, which may be different from the name of the
 extension itself (for instance, some linkers add an '_' to the
 name of the extension).  If it is not specified, it is derived
 from the NAME attribute.  It is presently used only by OS2.
+
+=back
 
 When calling C<Mksymlists>, one should always specify the NAME
 attribute.  In most cases, this is all that's necessary.  In

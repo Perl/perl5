@@ -11,7 +11,7 @@ __END__
 
 =head1 NAME
 
-Time::tm.pm - internal object used by Time::gmtime and Time::localtime
+Time::tm - internal object used by Time::gmtime and Time::localtime
 
 =head1 SYNOPSIS
 

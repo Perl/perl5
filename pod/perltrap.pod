@@ -1137,26 +1137,6 @@ general subroutine traps.  Includes some OS-Specific traps.
 
 =over 5
 
-=item * Subroutine calls provide lvalue context to arguments
-
-Beginning with version 5.002, all subroutine arguments are consistently
-given a "value may be modified" context, since all subroutines are able
-to modify their arguments by explicitly referring to C<$_[0]> etc.
-This means that any array and hash elements provided as arguments
-will B<always be created> if they did not exist at the time
-the subroutine is called.  (perl5 versions before 5.002 used to provide
-lvalue context for the second and subsequent arguments, and perl4 did
-not provide lvalue context to subroutine arguments at all--even though
-arguments were supposedly modifiable in perl4).
-
-    sub test { $_[0] = 1; $_[1] = 2; $_[2] = 3; }
-    &test($foo{'bar'}, $bar{'foo'}, $foo[5]);
-    print join(':', %foo), '|', join(':',%bar), '|', join(':',@foo);
-    
-    # perl4          prints: ||
-    # perl5 <  5.002 prints: |foo:2|:::::3
-    # perl5 >= 5.002 prints: bar:1|foo:2|:::::3
-
 =item * (Signals)
 
 Barewords that used to look like strings to Perl will now look like subroutine

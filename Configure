@@ -3557,7 +3557,7 @@ $rm -f testcpp.c testcpp.out
 
 : determine optimize, if desired, or use for debug flag also
 case "$optimize" in
-' ') dflt='none';;
+' '|$undef) dflt='none';;
 '') dflt='-O';;
 *) dflt="$optimize";;
 esac
@@ -3899,7 +3899,7 @@ case "$nm_opt" in
 		nm_opt='-p'	# Solaris (and SunOS?)
 	elif $test -f /dgux; then
 		nm_opt='-p'	# DG-UX
-	elif $test -x /lib64/rld; then
+	elif $test -f /lib64/rld; then
 		nm_opt='-p'	# 64-bit Irix
 	else
 		nm_opt=''
@@ -4555,7 +4555,7 @@ $undef)
 	;;
 *)	case "$useshrplib" in
 	'')	case "$osname" in
-		svr4|dgux|dynixptx|esix|powerux)
+		svr4*|dgux|dynixptx|esix|powerux)
 			dflt='yes'
 			also='Building a shared libperl is required for dynamic loading to work on your system.'
 			;;

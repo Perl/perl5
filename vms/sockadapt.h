@@ -140,9 +140,6 @@ void endnetent();
 #include <in.h>
 #include <inet.h>
 #include <netdb.h>
-/* However, we don't have these two in the system headers. */
-void setnetent(int);
-void endnetent();
 
 /* SocketShr doesn't support these routines, but the DECC RTL contains
  * stubs with these names, designed to be used with the UCX socket
@@ -154,6 +151,10 @@ void endnetent();
 #define setnetent    no_setnetent
 #define endnetent    no_endnetent
 #endif
+
+/* We don't have these two in the system headers. */
+void setnetent(int);
+void endnetent();
 
 #include <socketshr.h>
 /* socketshr.h from SocketShr 0.9D doesn't alias fileno; its comments say

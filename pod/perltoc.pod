@@ -50,11 +50,13 @@ expression enhancements, Innumerable Unbundled Modules, Compilability
 
 =item Compilation Option: Binary Compatibility With 5.003
 
-=item New Opcode Module and Revised Safe Module
+=item Subroutine Parameters Are Not Autovivified
 
 =item Fixed Parsing of $$<digit>, &$<digit>, etc.
 
 =item Changes to Tainting Checks
+
+=item New Opcode Module and Revised Safe Module
 
 =item Internal Change: FileHandle Class Based on IO::* Classes
 
@@ -78,11 +80,12 @@ isa(CLASS), can(METHOD), VERSION( [NEED] )
 
 =item TIEHANDLE Now Supported
 
-TIEHANDLE classname, LIST, PRINT this, LIST, READLINE this, DESTROY this
+TIEHANDLE classname, LIST, PRINT this, LIST, READ this LIST, READLINE this,
+GETC this, DESTROY this
 
 =item Malloc Enhancements
 
--DEMERGENCY_SBRK, -DPACK_MALLOC, -DTWO_POT_OPTIMIZE
+-DDEBUGGING_MSTATS, -DEMERGENCY_SBRK, -DPACK_MALLOC, -DTWO_POT_OPTIMIZE
 
 =item Miscellaneous Efficiency Enhancements
 
@@ -962,7 +965,8 @@ this, NEXTKEY this, lastkey, DESTROY this
 
 =item Tying FileHandles
 
-TIEHANDLE classname, LIST, PRINT this, LIST, READLINE this, DESTROY this
+TIEHANDLE classname, LIST, PRINT this, LIST, READ this LIST, READLINE this,
+GETC this, DESTROY this
 
 =item The C<untie> Gotcha
 
@@ -1172,8 +1176,7 @@ Regular Expression
 
 =item Subroutine, Signal, Sorting Traps
 
-Subroutine calls provide lvalue context to arguments, (Signals), (Sort
-Subroutine), warn() won't let you specify a filehandle
+(Signals), (Sort Subroutine), warn() won't let you specify a filehandle
 
 =item OS Traps
 
@@ -1480,7 +1483,7 @@ B<PerlIO_get_base(f)>, B<PerlIO_get_bufsiz(f)>
 
 =item Scratchpads
 
-=item Scratchpads and recursions
+=item Scratchpads and recursion
 
 =back
 
@@ -3624,6 +3627,6 @@ don't all have manual pages yet:
 
 =head1 AUTHOR
 
-Larry Wall E<lt>F<larry@wall.org>E<gt>, with the help of oodles
+Larry Wall <F<larry@wall.org>>, with the help of oodles
 of other folks.
 

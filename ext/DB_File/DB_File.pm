@@ -1144,7 +1144,7 @@ destroyed.
     undef $db ;
     untie %hash ;
 
-See L<The untie gotcha> for more details.
+See L<The untie Gotcha> for more details.
 
 All the functions defined in L<dbopen> are available except for
 close() and dbopen() itself. The B<DB_File> method interface to the

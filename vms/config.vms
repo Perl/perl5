@@ -76,7 +76,7 @@
  * when Perl is built.  Please do not change it by hand; make
  * any changes to FndVers.Com instead.
  */
-#define ARCHLIB_EXP "/perl_root/lib/VMS_VAX/5_00392"  /**/
+#define ARCHLIB_EXP "/perl_root/lib/VMS_VAX/5_00393"  /**/
 #define ARCHLIB ARCHLIB_EXP	/*config-skip*/
 
 /* ARCHNAME:
@@ -979,7 +979,12 @@
  *	This symbol holds the path of the bin directory where the package will
  *	be installed. Program must be prepared to deal with ~name substitution.
  */
+/* BIN_EXP:
+ *	This symbol is the filename expanded version of the BIN symbol, for
+ *	programs that do not want to deal with that at run-time.
+ */
 #define BIN "/perl_root/000000"	/**/
+#define BIN_EXP "/perl_root/000000"	/**/
 
 /* HAS_ALARM:
  *	This symbol, if defined, indicates that the alarm routine is
@@ -1465,14 +1470,6 @@
  */
 #define SITEARCH_EXP "/perl_root/lib/site_perl/VMS_VAX"  /**/
 #define SITEARCH SITEARCH_EXP  /*config-skip*/
-
-/* SCRIPTDIR:
- *	This symbol holds the name of the directory in which the user wants
- *	to put publicly executable scripts for the package in question.  It
- *	is often a directory that is mounted across diverse architectures.
- *	Programs must be prepared to deal with ~name expansion.
- */
-#define SCRIPTDIR "/perl_root/script"	/**/
 
 /* Size_t:
  *	This symbol holds the type used to declare length parameters

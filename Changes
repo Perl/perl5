@@ -9,6 +9,170 @@ releases.)
 
 
 ----------------
+Version 5.003_93
+----------------
+
+Me, last time:
+     "This release will be the public beta of 5.004,
+        or my name isn't Larson T. Pettifogger."
+Me, now:
+     "Gone like *that*, a fortune in letterhead."
+
+ CORE LANGUAGE CHANGES
+
+  Title:  "Don't autovivify array and hash elements in sub parameters"
+   From:  Gurusamy Sarathy <gsar@engin.umich.edu>
+ Msg-ID:  <199703061912.OAA20606@aatma.engin.umich.edu>
+   Date:  Thu, 06 Mar 1997 14:12:09 -0500
+  Files:  op.c pod/perldelta.pod pod/perlsub.pod pod/perltrap.pod
+
+  Title:  "Support READ and GETC for tied handles"
+   From:  Doug MacEachern <dougm@opengroup.org>
+ Msg-ID:  <199703090019.TAA32591@postman.osf.org>
+   Date:  Sat, 08 Mar 1997 19:19:38 -0500
+  Files:  pod/perldelta.pod pod/perltie.pod pp_sys.c t/op/misc.t
+
+  Title:  "Warn on C<@x =~ /a/> and C<%x =~ s/a/b/>"
+   From:  Chip Salzenberg
+  Files:  op.c pod/perldiag.pod
+
+  Title:  "Warn on %{+undef} and @{+undef}"
+   From:  Chip Salzenberg
+  Files:  pp.c pp_hot.c
+
+ CORE PORTABILITY
+
+  Title:  "VMS update"
+   From:  Charles Bailey <bailey@HMIVAX.HUMGEN.UPENN.EDU>
+ Msg-ID:  <01IG8KN5R28M00661G@hmivax.humgen.upenn.edu>
+   Date:  Fri, 07 Mar 1997 22:49:46 -0500 (EST)
+  Files:  lib/ExtUtils/MM_VMS.pm vms/descrip.mms vms/gen_shrfls.pl
+          vms/sockadapt.h
+
+  Title:  "AmigaOS hint patch"
+   From:  "Norbert Pueschel" <pueschel@imsdd.meb.uni-bonn.de>
+ Msg-ID:  <77724767@Armageddon.meb.uni-bonn.de>
+   Date:  Sat, 08 Mar 1997 12:50:15 +0100
+  Files:  hints/amigaos.sh
+
+ OTHER CORE CHANGES
+
+  Title:  "Make conversion of @_ to real array work right after C<shift>"
+   From:  Chip Salzenberg
+  Files:  av.c
+
+  Title:  "Fix imbalanced ENTER/LEAVE from C<BEGIN{die}>"
+   From:  Chip Salzenberg
+  Files:  op.c perl.c proto.h
+
+  Title:  "perl -P path patch"
+   From:  Andy Dougherty <doughera@fractal.phys.lafayette.edu>
+ Msg-ID:  <Pine.SOL.3.95q.970308120242.23766D-100000@fractal.lafayette.
+   Date:  Sat, 08 Mar 1997 12:45:08 -0500 (EST)
+  Files:  config_H config_h.SH perl.c plan9/config.plan9 t/comp/cpp.t
+          vms/config.vms win32/config.H
+
+ BUILD PROCESS
+
+  Title:  "Fix for Unisys UNIX and libperl.so"
+   From:  aburlison@cix.compulink.co.uk (Alan Burlison)
+ Msg-ID:  <memo.147328@cix.compulink.co.uk>
+   Date:  Thu, 6 Mar 97 16:28 GMT0
+  Files:  Configure
+
+  Title:  "Allow './Configure -Uoptimize'"
+   From:  Andy Dougherty <doughera@fractal.phys.lafayette.edu>
+ Msg-ID:  <Pine.SOL.3.95q.970306110532.11070A-100000@fractal.lafayette.
+   Date:  Thu, 06 Mar 1997 11:15:47 -0500 (EST)
+  Files:  Configure
+
+  Title:  "Use 'test -f', not 'test -x'"
+   From:  Spider Boardman <spider@web.zk3.dec.com>
+ Msg-ID:  <199703080053.TAA13943@web.zk3.dec.com>
+   Date:  Fri, 7 Mar 1997 19:53:00 -0500
+  Files:  Configure
+
+  Title:  "Don't count on 'trap 0' inside () in shell script"
+   From:  aburlison@cix.compulink.co.uk (Alan Burlison)
+ Msg-ID:  <memo.147326@cix.compulink.co.uk>
+   Date:  Thu, 6 Mar 97 16:28 GMT0
+  Files:  perl_exp.SH
+
+ LIBRARY AND EXTENSIONS
+
+  Title:  "Carp with multiple arguments"
+   From:  "M.J.T. Guy" <mjtg@cus.cam.ac.uk>
+ Msg-ID:  <E0w3STZ-0007RW-00@taurus.cus.cam.ac.uk>
+   Date:  Sat, 8 Mar 1997 20:12:17 +0000
+  Files:  lib/Carp.pm
+
+  Title:  "@EXPORT_FAIL fix for Exporter.pm"
+   From:  Roderick Schertler <roderick@argon.org>
+ Msg-ID:  <24884.857841724@eeyore.ibcinc.com>
+   Date:  Sat, 08 Mar 1997 12:22:04 -0500
+  Files:  lib/Exporter.pm
+
+  Title:  "Open[23] autoflush docs"
+   From:  Roderick Schertler <roderick@argon.org>
+ Msg-ID:  <7939.857693947@eeyore.ibcinc.com>
+   Date:  Thu, 06 Mar 1997 19:19:07 -0500
+  Files:  lib/IPC/Open2.pm lib/IPC/Open3.pm
+
+ TESTS
+
+  Title:  "Fix counts in output of TEST"
+   From:  Hugo van der Sanden <hv@iii.co.uk>
+ Msg-ID:  <331F1507.4BE8@iii.co.uk>
+   Date:  Thu, 06 Mar 1997 19:03:35 +0000
+  Files:  t/TEST
+
+  Title:  "Ignore backup files in strict.t and warning.t"
+   From:  Chip Salzenberg
+  Files:  t/pragma/strict.t t/pragma/warning.t
+
+ UTILITIES
+
+  Title:  "Quote pathname before using as pattern"
+   From:  Chip Salzenberg
+  Files:  pod/pod2html.PL
+
+ DOCUMENTATION
+
+  Title:  "Consolidated INSTALL updates since _92"
+   From:  Andy Dougherty <doughera@fractal.phys.lafayette.edu>
+ Msg-ID:  <Pine.SOL.3.95q.970308131806.23766F-100000@fractal.lafayette.
+   Date:  Sat, 08 Mar 1997 13:21:22 -0500 (EST)
+
+  Title:  "Fix more E-Mail addresses in pods"
+   From:  Chip Salzenberg
+  Files:  lib/ExtUtils/MakeMaker.pm lib/ExtUtils/Manifest.pm
+          lib/diagnostics.pm pod/buildtoc
+
+  Title:  "Warn about '.' terminating E-Mail"
+   From:  Chip Salzenberg
+  Files:  pod/perlform.pod
+
+  Title:  "OS/2 doc update"
+   From:  Ilya Zakharevich <ilya@math.ohio-state.edu>
+ Msg-ID:  <199703080537.AAA25157@monk.mps.ohio-state.edu>
+   Date:  Sat, 8 Mar 1997 00:37:30 -0500 (EST)
+  Files:  README.os2
+
+  Title:  "PODs corrections"
+   From:  Ilya Zakharevich <ilya@math.ohio-state.edu>
+ Msg-ID:  <199703080253.VAA24975@monk.mps.ohio-state.edu>
+   Date:  Fri, 7 Mar 1997 21:53:04 -0500 (EST)
+  Files:  ext/DB_File/DB_File.pm ext/Socket/Socket.pm
+          lib/Class/Template.pm lib/ExtUtils/Embed.pm
+          lib/ExtUtils/MM_VMS.pm lib/ExtUtils/Mksymlists.pm
+          lib/File/Basename.pm lib/File/stat.pm lib/Time/gmtime.pm
+          lib/Time/localtime.pm lib/Time/tm.pm lib/User/grent.pm
+          lib/User/pwent.pm pod/perlcall.pod pod/perldebug.pod
+          pod/perlfunc.pod pod/perlguts.pod pod/perllocale.pod
+          pod/perlop.pod pod/perlsub.pod
+
+
+----------------
 Version 5.003_92
 ----------------
 
@@ -446,7 +610,7 @@ At last, a mil[le]stone:  The first beta of Perl 5.004.
           t/lib/gdbm.t t/lib/ndbm.t t/lib/odbm.t t/lib/sdbm.t
           t/op/magic.t t/op/stat.t
 
-    #20:  "Hints for DC/OSx"
+  Title:  "Hints for DC/OSx"
    From:  Stephen Zander <srz@loopback>
  Msg-ID:  <199702242124.NAA03796@wsuse5.mckesson.com>
    Date:  Mon, 24 Feb 1997 13:24:54 -0800

@@ -65,7 +65,7 @@ OBJVAL = $(MMS$TARGET_NAME)$(O)
 .endif
 
 # Updated by fndvers.com -- do not edit by hand
-PERL_VERSION = 5_00392#
+PERL_VERSION = 5_00393#
 
 
 ARCHDIR =  [.lib.$(ARCH).$(PERL_VERSION)]
@@ -85,10 +85,11 @@ PIPES_BROKEN = 1
 	@ @[.vms]fndvers.com "" "" "[.vms]descrip.mms"
 	@ If F$TrnLnm("Sys").eqs."" Then Define/NoLog SYS GNU_CC_Include:[VMS]
 CC = gcc
+PIPES_BROKEN = 1
 # -fno-builtin avoids bug in gcc up to version 2.6.2 which can destroy
 # data when memcpy() is called on large (>64 kB) blocks of memory
 # (fixed in gcc 2.6.3)
-XTRACCFLAGS = /Obj=$(MMS$TARGET_NAME)$(O)/NoCase_Hack/Optimize=2/CC1="""""-fno-builtin"""""
+XTRACCFLAGS = /Obj=$(MMS$TARGET_NAME)$(O)/NoCase_Hack/Optimize=2
 DBGSPECFLAGS =
 XTRADEF = ,GNUC_ATTRIBUTE_CHECK
 XTRAOBJS =
@@ -373,7 +374,7 @@ $(ARCHDIR)config.pm : [.lib]config.pm
 	$(XSUBPP) $(MMS$SOURCE) >$(MMS$TARGET)
 
 [.ext.dynaloader]dl_vms$(O) : [.ext.dynaloader]dl_vms.c
-	$(CC) $(CFLAGS) /Object=$(MMS$TARGET) $(MMS$SOURCE)
+	$(CC) $(CFLAGS) /Include=([],[.ext.dynaloader])/Object=$(MMS$TARGET) $(MMS$SOURCE)
 
 [.lib]DynaLoader.pm : [.ext.dynaloader]dynaloader.pm
 	Copy/Log/NoConfirm [.ext.dynaloader]dynaloader.pm [.lib]DynaLoader.pm
@@ -550,11 +551,27 @@ IO : [.lib]IO.pm [.lib.IO]File.pm [.lib.IO]Handle.pm [.lib.IO]Pipe.pm [.lib.IO]S
 	Link $(LINKFLAGS) /Exe=$(MMS$TARGET) $(MMS$SOURCE_LIST) $(CRTLOPTS)
 
 # Accomodate buggy cpp in some version of DECC, which chokes on illegal
-# filespec "y.tab.c"
+# filespec "y.tab.c", and broken gcc cpp, which doesn't start #include ""
+# search in same dir as source file
 [.x2p]a2p$(O) : [.x2p]a2p.c $(MINIPERL_EXE)
 	$(MINIPERL) -pe "s/^#line\s+(\d+)\s+\Q""y.tab.c""/#line $1 ""y_tab.c""/;" $(MMS$SOURCE) >$(MMS$TARGET_NAME)_vms.c
-	$(CC) $(CFLAGS) /Object=$(MMS$TARGET) $(MMS$TARGET_NAME)_vms.c
+	$(CC) $(CFLAGS) /Object=$(MMS$TARGET)/Include=([.x2p],[]) $(MMS$TARGET_NAME)_vms.c
 	Delete/Log/NoConfirm $(MMS$TARGET_NAME)_vms.c;
+
+# gcc cpp broken -- doesn't look in directory of source file for #include ""
+.ifdef GNUC
+[.x2p]hash$(O) : [.x2p]hash.c
+	$(CC) $(CFLAGS) /Include=[.x2p] $(MMS$SOURCE)
+
+[.x2p]str$(O) : [.x2p]str.c
+	$(CC) $(CFLAGS) /Include=[.x2p] $(MMS$SOURCE)
+
+[.x2p]util$(O) : [.x2p]util.c
+	$(CC) $(CFLAGS) /Include=[.x2p] $(MMS$SOURCE)
+
+[.x2p]walk$(O) : [.x2p]walk.c
+	$(CC) $(CFLAGS) /Include=[.x2p] $(MMS$SOURCE)
+.endif
 
 [.lib.pod]pod2html.com : [.pod]pod2html.PL $(ARCHDIR)Config.pm
 	@ If F$Search("[.lib]pod.dir").eqs."" Then Create/Directory [.lib.pod]
@@ -1611,7 +1628,9 @@ globals$(O) : util.h
 [.x2p]str$(O) : [.x2p]str.h
 [.x2p]str$(O) : handy.h
 [.x2p]str$(O) : [.x2p]util.h
+.ifdef __MMK__
 [.x2p]util$(O) : [.x2p]util.c
+.endif
 [.x2p]util$(O) : [.x2p]EXTERN.h
 [.x2p]util$(O) : [.x2p]a2p.h
 [.x2p]util$(O) : [.x2p]hash.h

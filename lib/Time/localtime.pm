@@ -36,7 +36,7 @@ __END__
 
 =head1 NAME
 
-Time::localtime.pm - by-name interface to Perl's built-in localtime() function
+Time::localtime - by-name interface to Perl's built-in localtime() function
 
 =head1 SYNOPSIS
 

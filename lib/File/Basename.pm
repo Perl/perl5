@@ -95,6 +95,8 @@ would yield
     $dir  eq 'Doc_Root:[Help]'
     $type eq '.Rnh'
 
+=over
+
 =item C<basename>
 
 The basename() routine returns the first element of the list produced
@@ -115,6 +117,8 @@ is usually the same as the behavior of fileparse(), but differs in some
 cases.  For example, for the input file specification F<lib/>, fileparse()
 considers the directory name to be F<lib/>, while dirname() considers the
 directory name to be F<.>).
+
+=back
 
 =cut
 

@@ -27,12 +27,17 @@ might have symbol conflicts if you embed Perl in another application,
 just as in the 5.003 release.  By default, binary compatibility
 is preserved at the expense of symbol table pollution.
 
-=head2 New Opcode Module and Revised Safe Module
+=head2 Subroutine Parameters Are Not Autovivified
 
-A new Opcode module supports the creation, manipulation and
-application of opcode masks.  The revised Safe module has a new API
-and is implemented using the new Opcode module.  Please read the new
-Opcode and Safe documentation.
+In Perl versions 5.002 and 5.003, array and hash elements used as
+subroutine parameters were "autovivified"; that is, they were brought
+into existence if they did not already exist.  For example, calling
+C<func($h{foo})> would create C<$h{foo}> if it did not already exist,
+causing C<exists $h{foo}> to become true and C<keys %h> to return
+C<('foo')>.
+
+Perl 5.004 returns to the pre-5.002 behavior of I<not> autovivifying
+array and hash elements used as subroutine parameters.
 
 =head2 Fixed Parsing of $$<digit>, &$<digit>, etc.
 
@@ -51,6 +56,13 @@ C<-T> invocation option.) Although it's unlikely, this may cause a
 previously-working script to now fail -- which should be construed
 as a blessing, since that indicates a potentially-serious security
 hole was just plugged.
+
+=head2 New Opcode Module and Revised Safe Module
+
+A new Opcode module supports the creation, manipulation and
+application of opcode masks.  The revised Safe module has a new API
+and is implemented using the new Opcode module.  Please read the new
+Opcode and Safe documentation.
 
 =head2 Internal Change: FileHandle Class Based on IO::* Classes
 
@@ -222,7 +234,7 @@ would yield the same sequence of random numbers on most or all machines.
 Now, when perl sees that you're calling C<rand> and haven't yet called
 C<srand>, it calls C<srand> with the default seed. You should still call
 C<srand> manually if your code might ever be run on a pre-5.004 system,
-of course, or if you want a seed other than the default. 
+of course, or if you want a seed other than the default.
 
 =item $_ as Default
 
@@ -241,8 +253,8 @@ zero-width assertion.  See L<perlop> and L<perlre>.
 
 =item nested C<sub{}> closures work now
 
-Prior to the 5.004 release, nested anonymous functions 
-didn't work right.  They do now.
+Prior to the 5.004 release, nested anonymous functions didn't work
+right.  They do now.
 
 =item formats work right on changing lexicals
 
@@ -258,7 +270,7 @@ before, and is fine now:
 	$i
     .
 	write;
-    } 
+    }
 
 =back
 
@@ -324,9 +336,9 @@ This is the constructor for the class.  That means it is expected to
 return an object of some sort. The reference can be used to
 hold some internal information.
 
-    sub TIEHANDLE { 
-	print "<shout>\n"; 
-	my $i; 
+    sub TIEHANDLE {
+	print "<shout>\n";
+	my $i;
 	return bless \$i, shift;
     }
 
@@ -336,10 +348,21 @@ This method will be triggered every time the tied handle is printed to.
 Beyond its self reference it also expects the list that was passed to
 the print function.
 
-    sub PRINT { 
-	$r = shift; 
-	$$r++; 
+    sub PRINT {
+	$r = shift;
+	$$r++;
 	return print join( $, => map {uc} @_), $\;
+    }
+
+=item READ this LIST
+
+This method will be called when the handle is read from via the C<read>
+or C<sysread> functions.
+
+    sub READ {
+	$r = shift;
+	my($buf,$len,$offset) = @_;
+	print "READ called, \$buf=$buf, \$len=$len, \$offset=$offset";
     }
 
 =item READLINE this
@@ -347,10 +370,16 @@ the print function.
 This method will be called when the handle is read from. The method
 should return undef when there is no more data.
 
-    sub READLINE { 
-	$r = shift; 
-	return "PRINT called $$r times\n"; 
+    sub READLINE {
+	$r = shift;
+	return "PRINT called $$r times\n"
     }
+
+=item GETC this
+
+This method will be called when the C<getc> function is called.
+
+    sub GETC { print "Don't GETC, Get Perl"; return "a"; }
 
 =item DESTROY this
 
@@ -358,7 +387,7 @@ As with the other types of ties, this method will be called when the
 tied handle is about to be destroyed. This is useful for debugging and
 possibly for cleaning up.
 
-    sub DESTROY { 
+    sub DESTROY {
 	print "</shout>\n";
     }
 
@@ -366,8 +395,15 @@ possibly for cleaning up.
 
 =head2 Malloc Enhancements
 
-If perl's malloc() is used, you can print memory statistics at runtime
-by running Perl thusly:
+Four new compilation flags are recognized by malloc.c.  (They have no
+effect if perl is compiled with system malloc().)
+
+=over
+
+=item -DDEBUGGING_MSTATS
+
+If perl is compiled with C<DEBUGGING_MSTATS> defined, you can print
+memory statistics at runtime by running Perl thusly:
 
   env PERL_DEBUG_MSTATS=2 perl your_script_here
 
@@ -375,11 +411,6 @@ The value of 2 means to print statistics after compilation and on
 exit; with a value of 1, the statistics ares printed only on exit.
 (If you want the statistics at an arbitrary time, you'll need to
 install the optional module Devel::Peek.)
-
-In addition, three new compilation flags are recognized by malloc.c.
-(They have no effect if perl is compiled with system malloc().)
-
-=over
 
 =item -DEMERGENCY_SBRK
 
@@ -498,7 +529,7 @@ New constants in the existing Fcntl modules are now supported,
 provided that your operating system happens to support them:
 
     F_GETOWN F_SETOWN
-    O_ASYNC O_DEFER O_DSYNC O_FSYNC O_SYNC 
+    O_ASYNC O_DEFER O_DSYNC O_FSYNC O_SYNC
     O_EXLOCK O_SHLOCK
 
 These constants are intended for use with the Perl operators sysopen()
@@ -747,7 +778,7 @@ Although not new, this has been massively updated.
 
 Several new conditions will trigger warnings that were
 silent before.  Some only affect certain platforms.
-The following new warnings and errors outline these.  
+The following new warnings and errors outline these.
 These messages are classified as follows (listed in
 increasing order of desperation):
 
@@ -906,7 +937,7 @@ used.)
 
 You probably wrote something like this:
 
-    @list = qw( 
+    @list = qw(
         a # a comment
         b # another comment
     );
@@ -914,7 +945,7 @@ You probably wrote something like this:
 when you should have written this:
 
     @list = qw(
-        a 
+        a
         b
     );
 
@@ -933,7 +964,7 @@ aren't needed to separate the items. (You may have used different
 delimiters than the parentheses shown here; braces are also frequently
 used.)
 
-You probably wrote something like this: 
+You probably wrote something like this:
 
     qw! a, b, c !;
 
@@ -1077,4 +1108,4 @@ Constructed by Tom Christiansen, grabbing material with permission
 from innumerable contributors, with kibitzing by more than a few Perl
 porters.
 
-Last update: Tue Jan 14 14:03:02 EST 1997
+Last update: Sat Mar  8 19:51:26 EST 1997

@@ -1517,7 +1517,7 @@ Note that, because $_ is a reference into the list value, it can be used
 to modify the elements of the array.  While this is useful and
 supported, it can cause bizarre results if the LIST is not a named
 array.  Similarly, grep returns aliases into the original list,
-much like the way that L<foreach>'s index variable aliases the list
+much like the way that L<Foreach Loops>'s index variable aliases the list
 elements.  That is, modifying an element of a list returned by grep
 actually modifies the element in the original list.
 

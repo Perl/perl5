@@ -1264,6 +1264,20 @@ OP *right;
 {
     OP *op;
 
+    if (dowarn &&
+	(left->op_type == OP_RV2AV ||
+	 left->op_type == OP_RV2HV ||
+	 left->op_type == OP_PADAV ||
+	 left->op_type == OP_PADHV)) {
+	char *desc = op_desc[(right->op_type == OP_SUBST ||
+			      right->op_type == OP_TRANS)
+			     ? right->op_type : OP_MATCH];
+	char *sample = ((left->op_type == OP_RV2AV ||
+			 left->op_type == OP_PADAV)
+			? "@array" : "%hash");
+	warn("Applying %s to %s will act on scalar(%s)", desc, sample, sample);
+    }
+
     if (right->op_type == OP_MATCH ||
 	right->op_type == OP_SUBST ||
 	right->op_type == OP_TRANS) {
@@ -3192,6 +3206,7 @@ OP *block;
 	else
 	    s = name;
 	if (strEQ(s, "BEGIN") && !error_count) {
+	    I32 oldscope = scopestack_ix;
 	    ENTER;
 	    SAVESPTR(compiling.cop_filegv);
 	    SAVEI16(compiling.cop_line);
@@ -3204,7 +3219,7 @@ OP *block;
 	    DEBUG_x( dump_sub(gv) );
 	    av_push(beginav, (SV *)cv);
 	    GvCV(gv) = 0;
-	    calllist(beginav);
+	    calllist(oldscope, beginav);
 
 	    curcop = &compiling;
 	    LEAVE;
@@ -4399,7 +4414,6 @@ OP *op;
 	}
 	else
 	    list(o);
-	mod(o, OP_ENTERSUB);
 	prev = o;
 	o = o->op_sibling;
     }

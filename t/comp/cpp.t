@@ -9,7 +9,7 @@ BEGIN {
 
 use Config;
 if ( ($Config{'cppstdin'} =~ /\bcppstdin\b/) and
-     ( ! -x $Config{'scriptdir'} . "/cppstdin") ) {
+     ( ! -x $Config{'binexp'} . "/cppstdin") ) {
     print "1..0\n";
     exit; 		# Cannot test till after install, alas.
 }

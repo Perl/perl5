@@ -465,8 +465,6 @@ corresponds to F</dev/ttyc>, say, by issuing a command like
 
 See L<"Debugger Internals"> below for more details.
 
-=over 12
-
 =item E<lt> [ command ]
 
 Set an action (Perl command) to happen before every debugger prompt.

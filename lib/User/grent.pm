@@ -37,7 +37,7 @@ __END__
 
 =head1 NAME
 
-User::grent.pm - by-name interface to Perl's built-in getgr*() functions
+User::grent - by-name interface to Perl's built-in getgr*() functions
 
 =head1 SYNOPSIS
 

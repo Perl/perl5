@@ -413,7 +413,7 @@ Here's the constructor:
 It's probably worth mentioning that if you're going to filetest the
 return values out of a readdir, you'd better prepend the directory
 in question.  Otherwise, because we didn't chdir() there, it would
-have been testing the wrong file.  
+have been testing the wrong file.
 
 =item FETCH this, key
 
@@ -610,8 +610,9 @@ use the each() function to iterate over such.  Example:
 
 This is partially implemented now.
 
-A class implementing a tied filehandle should define the following methods:
-TIEHANDLE, PRINT and/or READLINE, and possibly DESTROY.
+A class implementing a tied filehandle should define the following
+methods: TIEHANDLE, at least one of PRINT, READLINE, GETC, or READ,
+and possibly DESTROY.
 
 It is especially useful when perl is embedded in some other program,
 where output to STDOUT and STDERR may have to be redirected in some
@@ -639,12 +640,29 @@ the print function.
 
     sub PRINT { $r = shift; $$r++; print join($,,map(uc($_),@_)),$\ }
 
+=item READ this LIST
+
+This method will be called when the handle is read from via the C<read>
+or C<sysread> functions.
+
+    sub READ {
+	$r = shift;
+	my($buf,$len,$offset) = @_;
+	print "READ called, \$buf=$buf, \$len=$len, \$offset=$offset";
+    }
+
 =item READLINE this
 
-This method will be called when the handle is read from. The method
-should return undef when there is no more data.
+This method will be called when the handle is read from via <HANDLE>.
+The method should return undef when there is no more data.
 
     sub READLINE { $r = shift; "PRINT called $$r times\n"; }
+
+=item GETC this
+
+This method will be called when the C<getc> function is called.
+
+    sub GETC { print "Don't GETC, Get Perl"; return "a"; }
 
 =item DESTROY this
 

@@ -63,7 +63,7 @@ C<define>.
 
 If you want a Perl application to process and present your data
 according to a particular locale, the application code should include
-the S<C<use locale>> pragma (see L<The use locale Pragma>) where
+the S<C<use locale>> pragma (see L<The use locale pragma>) where
 appropriate, and B<at least one> of the following must be true:
 
 =over 4
@@ -345,7 +345,7 @@ call strxfrm() for both their operands, then do a byte-by-byte
 comparison of the transformed strings.  By calling strxfrm() explicitly,
 and using a non locale-affected comparison, the example attempts to save
 a couple of transformations.  In fact, it doesn't save anything: Perl
-magic (see L<perlguts/Magic>) creates the transformed version of a
+magic (see L<perlguts/Magic Variables>) creates the transformed version of a
 string the first time it's needed in a comparison, then keeps it around
 in case it's needed again.  An example rewritten the easy way with
 C<cmp> runs just about as fast.  It also copes with null characters
@@ -703,7 +703,7 @@ L<The setlocale function>) was always in force, even if the program
 environment suggested otherwise.  By default, Perl still behaves this
 way so as to maintain backward compatibility.  If you want a Perl
 application to pay attention to locale information, you B<must> use
-the S<C<use locale>> pragma (see L<The S<C<use locale>> Pragma>) to
+the S<C<use locale>> pragma (see L<The use locale Pragma>) to
 instruct it to do so.
 
 Versions of Perl from 5.002 to 5.003 did use the C<LC_CTYPE>

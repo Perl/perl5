@@ -829,6 +829,7 @@ PP(pp_getc)
 {
     dSP; dTARGET;
     GV *gv;
+    MAGIC *mg;
 
     if (MAXARG <= 0)
 	gv = stdingv;
@@ -836,6 +837,19 @@ PP(pp_getc)
 	gv = (GV*)POPs;
     if (!gv)
 	gv = argvgv;
+
+    if (SvMAGICAL(gv) && (mg = mg_find((SV*)gv, 'q'))) {
+	PUSHMARK(SP);
+	XPUSHs(mg->mg_obj);
+	PUTBACK;
+	ENTER;
+	perl_call_method("GETC", GIMME);
+	LEAVE;
+	SPAGAIN;
+	if (GIMME == G_SCALAR)
+	    SvSetSV_nosteal(TARG, TOPs);
+	RETURN;
+    }
     if (!gv || do_eof(gv)) /* make sure we have fp with something */
 	RETPUSHUNDEF;
     TAINT;
@@ -1126,8 +1140,24 @@ PP(pp_sysread)
     Sock_size_t bufsize;
     SV *bufsv;
     STRLEN blen;
+    MAGIC *mg;
 
     gv = (GV*)*++MARK;
+    if (SvMAGICAL(gv) && (mg = mg_find((SV*)gv, 'q'))) {
+	SV *sv;
+	
+	PUSHMARK(MARK-1);
+	*MARK = mg->mg_obj;
+	ENTER;
+	perl_call_method("READ", G_SCALAR);
+	LEAVE;
+	SPAGAIN;
+	sv = POPs;
+	SP = ORIGMARK;
+	PUSHs(sv);
+	RETURN;
+    }
+
     if (!gv)
 	goto say_undef;
     bufsv = *++MARK;

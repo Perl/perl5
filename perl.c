@@ -449,6 +449,7 @@ char **env;
     char *scriptname = NULL;
     VOL bool dosearch = FALSE;
     char *validarg = "";
+    I32 oldscope;
     AV* comppadlist;
 
 #ifdef SETUID_SCRIPTS_ARE_SECURE_NOW
@@ -496,6 +497,7 @@ setuid perl scripts securely.\n");
     main_cv = Nullcv;
 
     time(&basetime);
+    oldscope = scopestack_ix;
     mustcatch = FALSE;
 
     switch (Sigsetjmp(top_env,1)) {
@@ -504,9 +506,11 @@ setuid perl scripts securely.\n");
 	/* FALL THROUGH */
     case 2:
 	/* my_exit() was called */
+	while (scopestack_ix > oldscope)
+	    LEAVE;
 	curstash = defstash;
 	if (endav)
-	    calllist(endav);
+	    calllist(oldscope, endav);
 	return STATUS_NATIVE_EXPORT;
     case 3:
 	mustcatch = FALSE;
@@ -783,17 +787,24 @@ int
 perl_run(sv_interp)
 PerlInterpreter *sv_interp;
 {
+    I32 oldscope;
+
     if (!(curinterp = sv_interp))
 	return 255;
+
+    oldscope = scopestack_ix;
+
     switch (Sigsetjmp(top_env,1)) {
     case 1:
 	cxstack_ix = -1;		/* start context stack again */
 	break;
     case 2:
 	/* my_exit() was called */
+	while (scopestack_ix > oldscope)
+	    LEAVE;
 	curstash = defstash;
 	if (endav)
-	    calllist(endav);
+	    calllist(oldscope, endav);
 	FREETMPS;
 #ifdef DEBUGGING_MSTATS
 	if (getenv("PERL_DEBUG_MSTATS"))
@@ -1476,7 +1487,7 @@ my_unexec()
     extern int etext;
 
     sprintf (buf, "%s.perldump", origfilename);
-    sprintf (tokenbuf, "%s/perl", BIN);
+    sprintf (tokenbuf, "%s/perl", BIN_EXP);
 
     status = unexec(buf, tokenbuf, &etext, sbrk(0), 0);
     if (status)
@@ -1650,7 +1661,7 @@ SV *sv;
 	char *cpp = CPPSTDIN;
 
 	if (strEQ(cpp,"cppstdin"))
-	    sprintf(tokenbuf, "%s/%s", SCRIPTDIR, cpp);
+	    sprintf(tokenbuf, "%s/%s", BIN_EXP, cpp);
 	else
 	    sprintf(tokenbuf, "%s", cpp);
 	sv_catpv(sv,"-I");
@@ -1733,7 +1744,7 @@ sed %s -e \"/^[^#]/b\" \
 #ifndef IAMSUID		/* in case script is not readable before setuid */
 	if (euid && Stat(SvPVX(GvSV(curcop->cop_filegv)),&statbuf) >= 0 &&
 	  statbuf.st_mode & (S_ISUID|S_ISGID)) {
-	    (void)sprintf(buf, "%s/sperl%s", BIN, patchlevel);
+	    (void)sprintf(buf, "%s/sperl%s", BIN_EXP, patchlevel);
 	    execv(buf, origargv);	/* try again */
 	    croak("Can't do setuid\n");
 	}
@@ -1881,7 +1892,7 @@ FIX YOUR KERNEL, PUT A C WRAPPER AROUND THIS SCRIPT, OR USE -u AND UNDUMP!\n");
 	if (euid) {	/* oops, we're not the setuid root perl */
 	    (void)PerlIO_close(rsfp);
 #ifndef IAMSUID
-	    (void)sprintf(buf, "%s/sperl%s", BIN, patchlevel);
+	    (void)sprintf(buf, "%s/sperl%s", BIN_EXP, patchlevel);
 	    execv(buf, origargv);	/* try again */
 #endif
 	    croak("Can't do setuid\n");
@@ -1966,7 +1977,7 @@ FIX YOUR KERNEL, PUT A C WRAPPER AROUND THIS SCRIPT, OR USE -u AND UNDUMP!\n");
     fcntl(PerlIO_fileno(rsfp),F_SETFD,0);	/* ensure no close-on-exec */
 #endif
 
-    (void)sprintf(tokenbuf, "%s/perl%s", BIN, patchlevel);
+    (void)sprintf(tokenbuf, "%s/perl%s", BIN_EXP, patchlevel);
     execv(tokenbuf, origargv);	/* try again */
     croak("Can't do setuid\n");
 #endif /* IAMSUID */
@@ -2426,7 +2437,8 @@ int addsubdirs;
 }
 
 void
-calllist(list)
+calllist(oldscope, list)
+I32 oldscope;
 AV* list;
 {
     Sigjmp_buf oldtop;
@@ -2454,6 +2466,8 @@ AV* list;
 			sv_catpv(atsv, "BEGIN failed--compilation aborted");
 		    else
 			sv_catpv(atsv, "END failed--cleanup aborted");
+		    while (scopestack_ix > oldscope)
+			LEAVE;
 		    croak("%s", SvPVX(atsv));
 		}
 	    }
@@ -2463,9 +2477,11 @@ AV* list;
 	    /* FALL THROUGH */
 	case 2:
 	    /* my_exit() was called */
+	    while (scopestack_ix > oldscope)
+		LEAVE;
 	    curstash = defstash;
 	    if (endav)
-		calllist(endav);
+		calllist(oldscope, endav);
 	    FREETMPS;
 	    Copy(oldtop, top_env, 1, Sigjmp_buf);
 	    curcop = &compiling;

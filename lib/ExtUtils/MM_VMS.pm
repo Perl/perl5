@@ -36,6 +36,8 @@ the semantics.
 
 =head2 Methods always loaded
 
+=over
+
 =item eliminate_macros
 
 Expands MM[KS]/Make macros in a text string, using the contents of
@@ -312,6 +314,7 @@ sub ext {
   ExtUtils::Liblist::ext(@_);
 }
 
+=back
 
 =head2 SelfLoaded methods
 
@@ -320,6 +323,8 @@ Those methods which override default MM_Unix methods are marked
 For overridden methods, documentation is limited to an explanation
 of why this method overrides the MM_Unix method; see the ExtUtils::MM_Unix
 documentation for more details.
+
+=over
 
 =item guess_name (override)
 
@@ -1111,11 +1116,16 @@ default MM_Unix method.
 sub dist {
     my($self, %attribs) = @_;
     $attribs{VERSION}      ||= $self->{VERSION_SYM};
+    $attribs{NAME}         ||= $self->{DISTNAME};
     $attribs{ZIPFLAGS}     ||= '-Vu';
     $attribs{COMPRESS}     ||= 'gzip';
     $attribs{SUFFIX}       ||= '-gz';
     $attribs{SHAR}         ||= 'vms_share';
     $attribs{DIST_DEFAULT} ||= 'zipdist';
+
+    # Sanitize these for use in $(DISTVNAME) filespec
+    $attribs{VERSION} =~ s/[^\w\$]/_/g;
+    $attribs{NAME} =~ s/[^\w\$]/_/g;
 
     return ExtUtils::MM_Unix::dist($self,%attribs);
 }
@@ -1745,28 +1755,28 @@ sub dist_core {
     my($self) = @_;
 q[
 dist : $(DIST_DEFAULT)
-	$(NOECHO) $(PERL) -le "print 'Warning: $m older than $vf' if -e ($vf = '$(VERSION_FROM)') && -M $vf < -M ($m = '$(MAKEFILE)'"
+	$(NOECHO) $(PERL) -le "print 'Warning: $m older than $vf' if -e ($vf = '$(VERSION_FROM)') && -M $vf < -M ($m = '$(MAKEFILE)')"
 
 zipdist : $(DISTVNAME).zip
 	$(NOECHO) $(NOOP)
 
 $(DISTVNAME).zip : distdir
 	$(PREOP)
-	$(ZIP) "$(ZIPFLAGS)" $(MMS$TARGET) $(SRC)
+	$(ZIP) "$(ZIPFLAGS)" $(MMS$TARGET) [.$(DISTVNAME)...]*.*;
 	$(RM_RF) $(DISTVNAME)
 	$(POSTOP)
 
 $(DISTVNAME).tar$(SUFFIX) : distdir
 	$(PREOP)
 	$(TO_UNIX)
-	$(TAR) "$(TARFLAGS)" $(DISTVNAME).tar $(SRC)
+	$(TAR) "$(TARFLAGS)" $(DISTVNAME).tar [.$(DISTVNAME)]
 	$(RM_RF) $(DISTVNAME)
 	$(COMPRESS) $(DISTVNAME).tar
 	$(POSTOP)
 
 shdist : distdir
 	$(PREOP)
-	$(SHARE) $(SRC) $(DISTVNAME).share
+	$(SHAR) [.$(DISTVNAME...]*.*; $(DISTVNAME).share
 	$(RM_RF) $(DISTVNAME)
 	$(POSTOP)
 ];
@@ -2352,6 +2362,10 @@ sub nicetext {
 }
 
 1;
+
+=back
+
+=cut
 
 __END__
 
