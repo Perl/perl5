@@ -55,9 +55,7 @@ sleep 6;
 print "ok 12\n";
 $t->join;
 
-sub islocked
-{
- use attrs 'locked';
+sub islocked : locked {
  my $val = shift;
  my $ret;
  print $val;
@@ -74,8 +72,7 @@ $t->join->join;
 {
     package Loch::Ness;
     sub new { bless [], shift }
-    sub monster {
-	use attrs qw(locked method);
+    sub monster : locked, method {
 	my($s, $m) = @_;
 	print "ok $m\n";
     }

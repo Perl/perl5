@@ -8,7 +8,7 @@ $VERSION = "1.0";
 
 =head1 NAME
 
-attrs - set/get attributes of a subroutine
+attrs - set/get attributes of a subroutine (deprecated)
 
 =head1 SYNOPSIS
 
@@ -21,11 +21,17 @@ attrs - set/get attributes of a subroutine
 
 =head1 DESCRIPTION
 
-This module lets you set and get attributes for subroutines.
+NOTE: Use of this pragma is deprecated.  Use the syntax
+
+    sub foo : locked, method { }
+
+to declare attributes instead.  See also L<attributes>.
+
+This pragma lets you set and get attributes for subroutines.
 Setting attributes takes place at compile time; trying to set
 invalid attribute names causes a compile-time error. Calling
-C<attr::get> on a subroutine reference or name returns its list
-of attribute names. Notice that C<attr::get> is not exported.
+C<attrs::get> on a subroutine reference or name returns its list
+of attribute names. Notice that C<attrs::get> is not exported.
 Valid attributes are as follows.
 
 =over
@@ -45,11 +51,6 @@ perl ensures that a lock is taken on the subroutine itself before
 execution. The semantics of the lock are exactly those of one
 explicitly taken with the C<lock> operator immediately after the
 subroutine is entered.
-
-=item lvalue
-
-Setting this attribute enables the subroutine to be used in
-lvalue context.  See L<perlsub/"Lvalue subroutines">.
 
 =back
 
