@@ -3126,6 +3126,14 @@ Perl_newASSIGNOP(pTHX_ I32 flags, OP *left, I32 optype, OP *right)
 	    op_free(right);
 	    return Nullop;
 	}
+	/* optimise C<my @x = ()> to C<my @x>, and likewise for hashes */
+	if ((left->op_type == OP_PADAV || left->op_type == OP_PADHV)
+		&& right->op_type == OP_STUB
+		&& (left->op_private & OPpLVAL_INTRO))
+	{
+	    op_free(right);
+	    return left;
+	}
 	curop = list(force_list(left));
 	o = newBINOP(OP_AASSIGN, flags, list(force_list(right)), curop);
 	o->op_private = (U8)(0 | (flags >> 8));
@@ -5591,6 +5599,19 @@ Perl_ck_sassign(pTHX_ OP *o)
 	    op_free(kkid);
 	    kid->op_private |= OPpTARGET_MY;	/* Used for context settings */
 	    return kid;
+	}
+    }
+    /* optimise C<my $x = undef> to C<my $x> */
+    if (kid->op_type == OP_UNDEF) {
+	OP *kkid = kid->op_sibling;
+	if (kkid && kkid->op_type == OP_PADSV
+		&& (kkid->op_private & OPpLVAL_INTRO))
+	{
+	    cLISTOPo->op_first = NULL;
+	    kid->op_sibling = NULL;
+	    op_free(o);
+	    op_free(kid);
+	    return kkid;
 	}
     }
     return o;
