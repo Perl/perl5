@@ -455,6 +455,7 @@ Perl_do_op_dump(pTHX_ I32 level, PerlIO *file, OP *o)
 	}
 	else if (o->op_type == OP_ENTERSUB ||
 		 o->op_type == OP_RV2SV ||
+		 o->op_type == OP_GVSV ||
 		 o->op_type == OP_RV2AV ||
 		 o->op_type == OP_RV2HV ||
 		 o->op_type == OP_RV2GV ||

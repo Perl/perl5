@@ -929,6 +929,7 @@ Perl_magic_clear_all_env(pTHX_ SV *sv, MAGIC *mg)
     }
     FreeEnvironmentStrings(envv);
 #	else
+#ifdef USE_ENVIRON_ARRAY
 #	    ifndef PERL_USE_SAFE_PUTENV
     I32 i;
 
@@ -941,6 +942,7 @@ Perl_magic_clear_all_env(pTHX_ SV *sv, MAGIC *mg)
 
     environ[0] = Nullch;
 
+#endif /* USE_ENVIRON_ARRAY */
 #	endif /* WIN32 */
 #   endif /* PERL_IMPLICIT_SYS */
 #endif /* VMS */

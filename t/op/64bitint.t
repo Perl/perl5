@@ -16,7 +16,7 @@ BEGIN {
 # 32+ bit integers don't cause noise
 no warnings qw(overflow portable);
 
-print "1..57\n";
+print "1..58\n";
 
 my $q = 12345678901;
 my $r = 23456789012;
@@ -319,5 +319,11 @@ if ($num eq $string) {
 } else {
   print "not ok 57 # \"$num\" ne \"$string\"\n";
 }
+
+$q = "18446744073709551616e0";
+$q += 0;
+print "# \"18446744073709551616e0\" += 0 gives $q\nnot " if "$q" eq "18446744073709551615";
+print "ok 58\n";
+
 
 # eof
