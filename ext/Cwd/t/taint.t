@@ -7,15 +7,18 @@ BEGIN {
 }
 
 use Cwd;
-use Test::More tests => 2;
-
-# The normal kill() trick is not portable.
-sub is_tainted { 
-    return ! eval { eval("#" . substr(join("", @_), 0, 0)); 1 };
-}
+use Test::More tests => 6;
+use Scalar::Util qw/tainted/;
 
 my $cwd;
 eval { $cwd = getcwd; };
-is( $@, '',                 'getcwd() does not explode under taint mode' );
-ok( is_tainted($cwd),       "its return value is tainted" );
+is( $@, '',		'getcwd() does not explode under taint mode' );
+ok( tainted($cwd),	"its return value is tainted" );
 
+eval { $cwd = cwd; };
+is( $@, '',		'cwd() does not explode under taint mode' );
+ok( tainted($cwd),	"its return value is tainted" );
+
+eval { $cwd = fastcwd; };
+is( $@, '',		'fastcwd() does not explode under taint mode' );
+ok( tainted($cwd),	"its return value is tainted" );

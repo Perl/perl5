@@ -2035,21 +2035,11 @@ third for more information.  The most extensive Third Degree
 documentation is available in the Compaq "Tru64 UNIX Programmer's
 Guide", chapter "Debugging Programs with Third Degree".
 
-The "test.third" leaves a lot of files named F<perl.3log.*> in the t/
+The "test.third" leaves a lot of files named F<foo_bar.3log> in the t/
 subdirectory.  There is a problem with these files: Third Degree is so
 effective that it finds problems also in the system libraries.
-Therefore there are certain types of errors that you should ignore in
-your debugging.  Errors with stack traces matching
-
-    __actual_atof|__catgets|_doprnt|__exc_|__exec|_findio|__localtime|setlocale|__sia_|__strxfrm
-
-(all in libc.so) are known to be non-serious.  You can also
-ignore the combinations
-
-    Perl_gv_fetchfile() calling strcpy()
-    S_doopen_pmc() calling strcmp()
-
-causing "rih" (reading invalid heap) errors.
+Therefore you should used the Porting/thirdclean script to cleanup
+the F<*.3log> files.
 
 There are also leaks that for given certain definition of a leak,
 aren't.  See L</PERL_DESTRUCT_LEVEL> for more information.

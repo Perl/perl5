@@ -354,26 +354,18 @@ libswanted_uselargefiles="`getconf XBS5_ILP32_OFFBIG_LIBS 2>/dev/null|sed -e 's@
 	esac
 	case "$gccversion" in
 	'') ;;
-	*)
-	cat >&4 <<EOM
-
-*** Warning: gcc in AIX might not work with the largefile support of Perl
-*** (default since 5.6.0), this combination hasn't been tested.
-*** I will try, though.
-
-EOM
-	# Remove xlc-spefific -qflags.
-        ccflags="`echo $ccflags | sed -e 's@ -q[^ ]*@ @g' -e 's@^-q[^ ]* @@g'`"
-        ldflags="`echo $ldflags | sed -e 's@ -q[^ ]*@ @g' -e 's@^-q[^ ]* @@g'`"
-        # Move xld-spefific -bflags.
-        ccflags="`echo $ccflags | sed -e 's@ -b@ -Wl,-b@g'`"
-        ldflags="`echo ' '$ldflags | sed -e 's@ -b@ -Wl,-b@g'`"
-        lddlflags="`echo ' '$lddlflags | sed -e 's@ -b@ -Wl,-b@g'`"
-        ld='gcc'
-        echo >&4 "(using ccflags   $ccflags)"
-        echo >&4 "(using ldflags   $ldflags)"
-        echo >&4 "(using lddlflags $lddlflags)"
-        ;; 
+	*) # Remove xlc-spefific -qflags.
+	   ccflags="`echo $ccflags | sed -e 's@ -q[^ ]*@ @g' -e 's@^-q[^ ]* @@g'`"
+	   ldflags="`echo $ldflags | sed -e 's@ -q[^ ]*@ @g' -e 's@^-q[^ ]* @@g'`"
+	   # Move xld-spefific -bflags.
+	   ccflags="`echo $ccflags | sed -e 's@ -b@ -Wl,-b@g'`"
+	   ldflags="`echo ' '$ldflags | sed -e 's@ -b@ -Wl,-b@g'`"
+	   lddlflags="`echo ' '$lddlflags | sed -e 's@ -b@ -Wl,-b@g'`"
+	   ld='gcc'
+	   echo >&4 "(using ccflags   $ccflags)"
+	   echo >&4 "(using ldflags   $ldflags)"
+	   echo >&4 "(using lddlflags $lddlflags)"
+	   ;; 
         esac
         ;;
 esac

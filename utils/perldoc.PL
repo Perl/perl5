@@ -691,6 +691,9 @@ the perl library modules.
 Your system may also have man pages installed for those modules, in
 which case you can probably just use the man(1) command.
 
+If you are looking for a table of contents to the Perl library modules
+documentation, see the L<perltoc> page.
+
 =head1 OPTIONS
 
 =over 5
