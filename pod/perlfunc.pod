@@ -2216,6 +2216,9 @@ or how about sorted by key:
 	print $key, '=', $ENV{$key}, "\n";
     }
 
+The returned values are copies of the original keys in the hash, so
+modifying them will not affect the original hash.  Compare L</values>.
+
 To sort a hash by value, you'll need to use a C<sort> function.
 Here's a descending numeric sort of a hash by its values:
 
@@ -5417,12 +5420,11 @@ subject to change in future versions of perl, but it is guaranteed to
 be the same order as either the C<keys> or C<each> function would
 produce on the same (unmodified) hash.
 
-Note that you cannot modify the values of a hash this way, because the
-returned list is just a copy.  You need to use a hash slice for that, 
-since it's lvaluable in a way that values() is not.
+Note that the values are not copied, which means modifying them will
+modify the contents of the hash:
 
-    for (values %hash) 	    { s/foo/bar/g }   # FAILS!
-    for (@hash{keys %hash}) { s/foo/bar/g }   # ok
+    for (values %hash) 	    { s/foo/bar/g }   # modifies %hash values
+    for (@hash{keys %hash}) { s/foo/bar/g }   # same
 
 As a side effect, calling values() resets the HASH's internal iterator.
 See also C<keys>, C<each>, and C<sort>.
