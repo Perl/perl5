@@ -5,9 +5,9 @@ BEGIN {
     @INC = qw(. ../lib);
 }
 
-print "1..70\n";
-
 require 'test.pl';
+
+plan (72);
 
 # Test glob operations.
 
@@ -171,15 +171,16 @@ package OBJ;
 $main'object = bless {FOO => foo, BAR => bar};
 
 package main;
+curr_test(36);
 
 # Test arrow-style method invocation.
 
-print $object->doit("BAR") eq bar ? "ok 36\n" : "not ok 36\n";
+is ($object->doit("BAR"), bar);
 
 # Test indirect-object-style method invocation.
 
 $foo = doit $object "FOO";
-print $foo eq foo ? "ok 37\n" : "not ok 37\n";
+main::is ($foo, foo);
 
 sub BASEOBJ'doit {
     local $ref = shift;
@@ -191,10 +192,10 @@ package UNIVERSAL;
 @ISA = 'LASTCHANCE';
 
 package LASTCHANCE;
-sub foo { print $_[1] }
+sub foo { main::is ($_[1], 'works') }
 
 package WHATEVER;
-foo WHATEVER "ok 38\n";
+foo WHATEVER "works";
 
 #
 # test the \(@foo) construct
@@ -203,26 +204,26 @@ package main;
 @foo = \(1..3);
 @bar = \(@foo);
 @baz = \(1,@foo,@bar);
-print @bar == 3 ? "ok 39\n" : "not ok 39\n";
-print grep(ref($_), @bar) == 3 ? "ok 40\n" : "not ok 40\n";
-print @baz == 3 ? "ok 41\n" : "not ok 41\n";
+is (scalar (@bar), 3);
+is (scalar grep(ref($_), @bar), 3);
+is (scalar (@baz), 3);
 
 my(@fuu) = \(1..2,3);
 my(@baa) = \(@fuu);
 my(@bzz) = \(1,@fuu,@baa);
-print @baa == 3 ? "ok 42\n" : "not ok 42\n";
-print grep(ref($_), @baa) == 3 ? "ok 43\n" : "not ok 43\n";
-print @bzz == 3 ? "ok 44\n" : "not ok 44\n";
+is (scalar (@baa), 3);
+is (scalar grep(ref($_), @baa), 3);
+is (scalar (@bzz), 3);
 
 # also, it can't be an lvalue
 eval '\\($x, $y) = (1, 2);';
-print $@ =~ /Can\'t modify.*ref.*in.*assignment/ ? "ok 45\n" : "not ok 45\n";
+like ($@, qr/Can\'t modify.*ref.*in.*assignment/);
 
 # test for proper destruction of lexical objects
-
-sub larry::DESTROY { print "# larry\nok 46\n"; }
-sub curly::DESTROY { print "# curly\nok 47\n"; }
-sub moe::DESTROY   { print "# moe\nok 48\n"; }
+my $test = curr_test();
+sub larry::DESTROY { print "# larry\nok $test\n"; }
+sub curly::DESTROY { print "# curly\nok ", $test + 1, "\n"; }
+sub moe::DESTROY   { print "# moe\nok ", $test + 2, "\n"; }
 
 {
     my ($joe, @curly, %larry);
@@ -233,44 +234,48 @@ sub moe::DESTROY   { print "# moe\nok 48\n"; }
 }
 
 print "# left block\n";
+curr_test($test + 3);
 
 # another glob test
 
-$foo = "not ok 49";
-{ local(*bar) = "foo" }
-$bar = "ok 49";
-local(*bar) = *bar;
-print "$bar\n";
 
-$var = "ok 50";
+$foo = "garbage";
+{ local(*bar) = "foo" }
+$bar = "glob 3";
+local(*bar) = *bar;
+is ($bar, "glob 3");
+
+$var = "glob 4";
 $_   = \$var;
-print $$_,"\n";
+is ($$_, 'glob 4');
+
 
 # test if reblessing during destruction results in more destruction
-
+$test = curr_test();
 {
     package A;
     sub new { bless {}, shift }
-    DESTROY { print "# destroying 'A'\nok 52\n" }
+    DESTROY { print "# destroying 'A'\nok ", $test + 1, "\n" }
     package _B;
     sub new { bless {}, shift }
-    DESTROY { print "# destroying '_B'\nok 51\n"; bless shift, 'A' }
+    DESTROY { print "# destroying '_B'\nok $test\n"; bless shift, 'A' }
     package main;
     my $b = _B->new;
 }
+curr_test($test + 2);
 
 # test if $_[0] is properly protected in DESTROY()
 
 {
+    my $test = curr_test();
     my $i = 0;
     local $SIG{'__DIE__'} = sub {
 	my $m = shift;
 	if ($i++ > 4) {
-	    print "# infinite recursion, bailing\nnot ok 53\n";
+	    print "# infinite recursion, bailing\nnot ok $test\n";
 	    exit 1;
         }
-	print "# $m";
-	if ($m =~ /^Modification of a read-only/) { print "ok 53\n" }
+	like ($m, qr/^Modification of a read-only/);
     };
     package C;
     sub new { bless {}, shift }
@@ -283,40 +288,38 @@ print $$_,"\n";
 }
 
 # test if refgen behaves with autoviv magic
-
 {
     my @a;
-    $a[1] = "ok 54\n";
-    print ${\$_} for @a;
+    $a[1] = "good";
+    my $got;
+    for (@a) {
+	$got .= ${\$_};
+	$got .= ';';
+    }
+    is ($got, ";good;");
 }
 
 # This test is the reason for postponed destruction in sv_unref
 $a = [1,2,3];
 $a = $a->[1];
-print "not " unless $a == 2;
-print "ok 55\n";
+is ($a, 2);
 
 # This test used to coredump. The BEGIN block is important as it causes the
 # op that created the constant reference to be freed. Hence the only
 # reference to the constant string "pass" is in $a. The hack that made
 # sure $a = $a->[1] would work didn't work with references to constants.
 
-my $test = 56;
 
 foreach my $lexical ('', 'my $a; ') {
   my $expect = "pass\n";
   my $result = runperl (switches => ['-wl'], stderr => 1,
     prog => $lexical . 'BEGIN {$a = \q{pass}}; $a = $$a; print $a');
 
-  if ($? == 0 and $result eq $expect) {
-    print "ok $test\n";
-  } else {
-    print "not ok $test # \$? = $?\n";
-    print "# expected ", _qq ($expect), ", got ", _qq ($result), "\n";
-  }
-  $test++;
+  is ($?, 0);
+  is ($result, $expect);
 }
 
+my $test = curr_test();
 sub x::DESTROY {print "ok ", $test + shift->[0], "\n"}
 { my $a1 = bless [3],"x";
   my $a2 = bless [2],"x";
@@ -325,64 +328,48 @@ sub x::DESTROY {print "ok ", $test + shift->[0], "\n"}
     567;
   }
 }
-$test+=4;
+curr_test($test+4);
 
-my $result = runperl (switches=>['-l'],
-                      prog=> 'print 1; print qq-*$\*-;print 1;');
-my $expect = "1\n*\n*\n1\n";
-if ($result eq $expect) {
-  print "ok $test\n";
-} else {
-  print "not ok $test\n";
-  foreach ($expect, $result) {
-    s/\n/\\n/gs;
-  }
-  print "# expected \"$expect\", got \"$result\"\n";
-}
+is (runperl (switches=>['-l'],
+	     prog=> 'print 1; print qq-*$\*-;print 1;'),
+    "1\n*\n*\n1\n");
 
 # bug #21347
 
 runperl(prog => 'sub UNIVERSAL::AUTOLOAD { qr// } a->p' );
-if ($? != 0) { print "not " };
-print "ok ",++$test," - UNIVERSAL::AUTOLOAD called when freeing qr//\n";
+is ($?, 0, 'UNIVERSAL::AUTOLOAD called when freeing qr//');
 
 runperl(prog => 'sub UNIVERSAL::DESTROY { warn } bless \$a, A', stderr => 1);
-if ($? != 0) { print "not " };
-print "ok ",++$test," - warn called inside UNIVERSAL::DESTROY\n";
+is ($?, 0, 'warn called inside UNIVERSAL::DESTROY');
 
 
 # bug #22719
 
 runperl(prog => 'sub f { my $x = shift; *z = $x; } f({}); f();');
-if ($? != 0) { print "not " };
-print "ok ",++$test," - coredump on typeglob = (SvRV && !SvROK)\n";
+is ($?, 0, 'coredump on typeglob = (SvRV && !SvROK)');
 
 # bug #27268: freeing self-referential typeglobs could trigger
 # "Attempt to free unreferenced scalar" warnings
 
-$result = runperl(
+is (runperl(
     prog => 'use Symbol;my $x=bless \gensym,"t"; print;*$$x=$x',
     stderr => 1
-);
-print "not " if length $result;
-print "ok ",++$test," - freeing self-referential typeglob\n";
-print "# got: $result\n" if length $result;
+), '', 'freeing self-referential typeglob');
 
 # using a regex in the destructor for STDOUT segfaulted because the
 # REGEX pad had already been freed (ithreads build only). The
 # object is required to trigger the early freeing of GV refs to to STDOUT
 
-$result = runperl(
+like (runperl(
     prog => '$x=bless[]; sub IO::Handle::DESTROY{$_="bad";s/bad/ok/;print}',
     stderr => 1
-);
-print "not " unless $result =~ /^(ok)+$/;
-print "ok ",++$test," - STDOUT destructor\n";
-print "# got: $result\n" unless $result =~ /^(ok)+$/;
+      ), qr/^(ok)+$/, 'STDOUT destructor');
 
+# Bit of a hack to make test.pl happy. There are 3 more tests after it leaves.
+$test = curr_test();
+curr_test($test + 3);
 # test global destruction
 
-++$test;
 my $test1 = $test + 1;
 my $test2 = $test + 2;
 
