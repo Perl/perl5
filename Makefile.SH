@@ -1,3 +1,4 @@
+#! /bin/sh
 case $CONFIG in
 '')
 	if test -f config.sh; then TOP=.;
@@ -209,18 +210,6 @@ utilities:	miniperl lib/Config.pm FORCE
 FORCE:
 	@sh -c true
 
-# The $& notation tells Sequent machines that it can do a parallel make,
-# and is harmless otherwise.
-# The miniperl -w -MExporter line is a basic cheap test to catch errors
-# before make goes on to run preplibrary and then MakeMaker on extensions.
-# This is very handy because later errors are often caused by miniperl
-# build problems but that's not obvious to the novice.
-# The Module used here must not depend on Config or any extensions.
-
-miniperl: $& miniperlmain$(OBJ_EXT) $(LIBPERL)
-	$(CC) $(LARGE) $(CLDFLAGS) -o miniperl miniperlmain$(OBJ_EXT) $(LIBPERL) $(libs)
-	@./miniperl -w -Ilib -MExporter -e 0 || $(MAKE) minitest
-
 miniperlmain$(OBJ_EXT): miniperlmain.c
 	$(CCCMD) $(PLDLFLAGS) $*.c
 
@@ -237,18 +226,10 @@ perlmain$(OBJ_EXT): perlmain.c
 ext.libs: $(static_ext)
 	-@test -f ext.libs || touch ext.libs
 
-perl: $& perlmain$(OBJ_EXT) $(LIBPERL) $(DYNALOADER) $(static_ext) ext.libs
-	$(SHRPENV) $(CC) $(LARGE) $(CLDFLAGS) $(CCDLFLAGS) -o perl perlmain$(OBJ_EXT) $(DYNALOADER) $(static_ext) $(LIBPERL) `cat ext.libs` $(libs)
-
-pureperl: $& perlmain$(OBJ_EXT) $(LIBPERL) $(DYNALOADER) $(static_ext) ext.libs
-	purify $(CC) $(LARGE) $(CLDFLAGS) $(CCDLFLAGS) -o pureperl perlmain$(OBJ_EXT) $(DYNALOADER) $(static_ext) $(LIBPERL) `cat ext.libs` $(libs)
-
-quantperl: $& perlmain$(OBJ_EXT) $(LIBPERL) $(DYNALOADER) $(static_ext) ext.libs
-	quantify $(CC) $(LARGE) $(CLDFLAGS) $(CCDLFLAGS) -o quantperl perlmain$(OBJ_EXT) $(DYNALOADER) $(static_ext) $(LIBPERL) `cat ext.libs` $(libs)
-
 !NO!SUBS!
+
 # How to build libperl.  This is still rather convoluted.
-# Load up custom Makefile.SH fragments?
+# Load up custom Makefile.SH fragment for shared loading and executables:
 if test -r $osname/Makefile.SHs ; then
 	. $osname/Makefile.SHs
 	$spitshell >>Makefile <<!GROK!THIS!
@@ -273,9 +254,30 @@ $(LIBPERL): $& perl$(OBJ_EXT) $(obj)
 !NO!SUBS!
 		;;
 	esac
-fi
-		
-$spitshell >>Makefile <<'!NO!SUBS!'
+	$spitshell >>Makefile <<'!NO!SUBS!'
+
+# How to build executables.
+
+# The $& notation tells Sequent machines that it can do a parallel make,
+# and is harmless otherwise.
+# The miniperl -w -MExporter line is a basic cheap test to catch errors
+# before make goes on to run preplibrary and then MakeMaker on extensions.
+# This is very handy because later errors are often caused by miniperl
+# build problems but that's not obvious to the novice.
+# The Module used here must not depend on Config or any extensions.
+
+miniperl: $& miniperlmain$(OBJ_EXT) $(LIBPERL)
+	$(CC) $(LARGE) $(CLDFLAGS) -o miniperl miniperlmain$(OBJ_EXT) $(LIBPERL) $(libs)
+	@./miniperl -w -Ilib -MExporter -e 0 || $(MAKE) minitest
+
+perl: $& perlmain$(OBJ_EXT) $(LIBPERL) $(DYNALOADER) $(static_ext) ext.libs
+	$(SHRPENV) $(CC) $(LARGE) $(CLDFLAGS) $(CCDLFLAGS) -o perl perlmain$(OBJ_EXT) $(DYNALOADER) $(static_ext) $(LIBPERL) `cat ext.libs` $(libs)
+
+pureperl: $& perlmain$(OBJ_EXT) $(LIBPERL) $(DYNALOADER) $(static_ext) ext.libs
+	purify $(CC) $(LARGE) $(CLDFLAGS) $(CCDLFLAGS) -o pureperl perlmain$(OBJ_EXT) $(DYNALOADER) $(static_ext) $(LIBPERL) `cat ext.libs` $(libs)
+
+quantperl: $& perlmain$(OBJ_EXT) $(LIBPERL) $(DYNALOADER) $(static_ext) ext.libs
+	quantify $(CC) $(LARGE) $(CLDFLAGS) $(CCDLFLAGS) -o quantperl perlmain$(OBJ_EXT) $(DYNALOADER) $(static_ext) $(LIBPERL) `cat ext.libs` $(libs)
 
 # This version, if specified in Configure, does ONLY those scripts which need
 # set-id emulation.  Suidperl must be setuid root.  It contains the "taint"
@@ -284,6 +286,12 @@ $spitshell >>Makefile <<'!NO!SUBS!'
 
 suidperl: $& sperl$(OBJ_EXT) perlmain$(OBJ_EXT) $(LIBPERL) $(DYNALOADER) $(static_ext) ext.libs
 	$(CC) $(LARGE) $(CLDFLAGS) $(CCDLFLAGS) -o suidperl perlmain$(OBJ_EXT) sperl$(OBJ_EXT) $(LIBPERL) $(DYNALOADER) $(static_ext) `cat ext.libs` $(libs)
+
+!NO!SUBS!
+
+fi
+
+$spitshell >>Makefile <<'!NO!SUBS!'
 
 sperl$(OBJ_EXT): perl.c perly.h patchlevel.h $(h)
 	$(RMS) sperl.c
@@ -430,7 +438,7 @@ MAKEDEPEND = makedepend
 $(FIRSTMAKEFILE):	Makefile $(MAKEDEPEND)
 	$(MAKE) depend MAKEDEPEND=
 
-config.h: config.sh
+config.h: config_h.SH config.sh
 	$(SHELL) config_h.SH
 
 perl.exp: perl_exp.SH config.sh
@@ -451,7 +459,7 @@ check test: miniperl perl preplibrary $(dynamic_ext)
 
 # Can't depend on lib/Config.pm because that might be where miniperl
 # is crashing.
-minitest: miniperl 
+minitest: miniperl
 	@echo "You may see some irrelevant test failures if you have been unable"
 	@echo "to build lib/Config.pm."
 	- cd t && (rm -f perl$(EXE_EXT); $(LNS) ../miniperl$(EXE_EXT) perl$(EXE_EXT)) \
@@ -469,14 +477,11 @@ shlist: $(sh)
 pllist: $(pl)
 	echo $(pl) | tr ' ' '\012' >.pllist
 
-Makefile: Makefile.SH ./config.sh 
+Makefile: Makefile.SH ./config.sh
 	$(SHELL) Makefile.SH
 
-distcheck : FORCE
+distcheck: FORCE
 	perl '-MExtUtils::Manifest=&fullcheck' -e 'fullcheck()'
-
-manifest  : 
-	perl '-MExtUtils::Manifest=&mkmanifest' -e 'mkmanifest()'
 
 # AUTOMATICALLY GENERATED MAKE DEPENDENCIES--PUT NOTHING BELOW THIS LINE
 # If this runs make out of memory, delete /usr/include lines.
