@@ -20,7 +20,7 @@
 
 # $Id: Head.U,v 3.0.1.9 1997/02/28 15:02:09 ram Exp $
 #
-# Generated on Mon Dec 24 20:13:53 EET 2001 [metaconfig 3.0 PL70]
+# Generated on Wed Dec 26 20:19:46 EET 2001 [metaconfig 3.0 PL70]
 # (with additional metaconfig patches by perlbug@perl.org)
 
 cat >c1$$ <<EOF
@@ -2810,7 +2810,7 @@ EOM
 	$test -d /usr/apollo/bin && osname=apollo
 	$test -f /etc/saf/_sactab && osname=svr4
 	$test -d /usr/include/minix && osname=minix
-	$test -d /system && osname=vos
+	$test -f /system/gnu_library/bin/ar.pm && osname=vos
 	if $test -d /MachTen -o -d /MachTen_Folder; then
 		osname=machten
 		if $test -x /sbin/version; then
