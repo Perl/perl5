@@ -290,6 +290,10 @@ It is, after all, just a guess.  You should alway be explicit when it
 comes to encodings.  But there are some, especially Japanese,
 environment that guess-coding is a must.  Use this module with care. 
 
+=head1 TO DO
+
+Encode::Guess does not work on EBCDIC platforms.
+
 =head1 SEE ALSO
 
 L<Encode>, L<Encode::Encoding>

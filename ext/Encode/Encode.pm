@@ -601,6 +601,8 @@ constants via C<use Encode qw(:fallback_all)>.
 In the future, you will be able to use a code reference to a callback
 function for the value of I<CHECK> but its API is still undecided.
 
+The fallback scheme does not work on EBCDIC platforms.
+
 =head1 Defining Encodings
 
 To define a new encoding, use:
