@@ -970,7 +970,7 @@ sub pp_refgen {
                 # The @a in \(@a) isn't in ref context, but only when the
                 # parens are there.
                 return "\\(" . $self->deparse($kid->sibling, 1) . ")";
-            } elsif ($kid->sibling->ppaddr eq 'pp_entersub') {
+            } elsif ($sib_ppaddr eq 'pp_entersub') {
                 my $text = $self->deparse($kid->sibling, 1);
                 # Always show parens for \(&func()), but only with -p otherwise
                 $text = "($text)" if $self->{'parens'}
