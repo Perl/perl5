@@ -108,6 +108,13 @@ processed a second time.
 C<follow_skip==2> causes File::Find to ignore any duplicate files and
 directories but to proceed normally otherwise.
 
+=item C<dangling_symlinks>
+
+If true and a code reference, will be called with the symbolic link
+name and the directory it lives in as arguments.  Otherwise, if true
+and warnings are on, warning "symbolic_link_name is a dangling
+symbolic link\n" will be issued.  If false, the dangling symbolic link
+will be silently ignored.
 
 =item C<no_chdir>
 
@@ -293,7 +300,7 @@ require File::Spec;
 our %SLnkSeen;
 our ($wanted_callback, $avoid_nlink, $bydepth, $no_chdir, $follow,
     $follow_skip, $full_check, $untaint, $untaint_skip, $untaint_pat,
-    $pre_process, $post_process);
+    $pre_process, $post_process, $dangling_symlinks);
 
 sub contract_name {
     my ($cdir,$fn) = @_;
@@ -462,23 +469,24 @@ sub _find_opt {
     local %SLnkSeen;
     local ($wanted_callback, $avoid_nlink, $bydepth, $no_chdir, $follow,
 	$follow_skip, $full_check, $untaint, $untaint_skip, $untaint_pat,
-	$pre_process, $post_process);
+	$pre_process, $post_process, $dangling_symlinks);
     local($dir, $name, $fullname, $prune);
 
-    my $cwd           = $wanted->{bydepth} ? Cwd::fastcwd() : Cwd::cwd();
-    my $cwd_untainted = $cwd;
-    my $check_t_cwd   = 1;
-    $wanted_callback  = $wanted->{wanted};
-    $bydepth          = $wanted->{bydepth};
-    $pre_process      = $wanted->{preprocess};
-    $post_process     = $wanted->{postprocess};
-    $no_chdir         = $wanted->{no_chdir};
-    $full_check       = $wanted->{follow};
-    $follow           = $full_check || $wanted->{follow_fast};
-    $follow_skip      = $wanted->{follow_skip};
-    $untaint          = $wanted->{untaint};
-    $untaint_pat      = $wanted->{untaint_pattern};
-    $untaint_skip     = $wanted->{untaint_skip};
+    my $cwd            = $wanted->{bydepth} ? Cwd::fastcwd() : Cwd::cwd();
+    my $cwd_untainted  = $cwd;
+    my $check_t_cwd    = 1;
+    $wanted_callback   = $wanted->{wanted};
+    $bydepth           = $wanted->{bydepth};
+    $pre_process       = $wanted->{preprocess};
+    $post_process      = $wanted->{postprocess};
+    $no_chdir          = $wanted->{no_chdir};
+    $full_check        = $wanted->{follow};
+    $follow            = $full_check || $wanted->{follow_fast};
+    $follow_skip       = $wanted->{follow_skip};
+    $untaint           = $wanted->{untaint};
+    $untaint_pat       = $wanted->{untaint_pattern};
+    $untaint_skip      = $wanted->{untaint_skip};
+    $dangling_symlinks = $wanted->{dangling_symlinks};
 
     # for compatability reasons (find.pl, find2perl)
     local our ($topdir, $topdev, $topino, $topmode, $topnlink);
@@ -534,7 +542,13 @@ sub _find_opt {
 	    }
 	    $abs_dir= Follow_SymLink($abs_dir);
 	    unless (defined $abs_dir) {
-		warn "$top_item is a dangling symbolic link\n" if $^W;
+		if ($dangling_symlinks) {
+		    if (ref $dangling_symlinks eq 'CODE') {
+			$dangling_symlinks->($top_item, $cwd);
+		    } else {
+			warn "$top_item is a dangling symbolic link\n" if $^W;
+		    }
+		}
 		next Proc_Top_Item;
 	    }
 

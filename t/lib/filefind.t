@@ -479,7 +479,7 @@ if ( $symlink_exists ) {
         %Expect_Name = ();
         %Expect_Dir = ();
         undef $warn_msg;
-        File::Find::find( {wanted => \&wanted_File, follow => 1}, topdir('dangling_dir_sl'), topdir('fa') );
+        File::Find::find( {wanted => \&wanted_File, follow => 1, dangling_symlinks => sub { $warn_msg = "$_[0] is a dangling symbolic link" }}, topdir('dangling_dir_sl'), topdir('fa') );
         Check( scalar(keys %Expect_File) == 0 );
         Check( $warn_msg =~ m|dangling_dir_sl is a dangling symbolic link| );  
         unlink file_path('fa', 'dangling_file_sl'), file_path('dangling_dir_sl');
