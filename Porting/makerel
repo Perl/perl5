@@ -78,23 +78,29 @@ print "\n";
 chdir "$relroot/$reldir" or die $!;
 
 print "Setting file permissions...\n";
-system("find . -type f -print     | xargs chmod 0444");
+system("find . -type f -print     | xargs chmod a-w");
 system("find . -type d -print     | xargs chmod 0755");
-system("find t -name '*.t' -print | xargs chmod +x");
+
+# the right files should already have the execute bit set
+# in the repository, but this is just insurance
+system("find t -name '*.t' -print | xargs chmod a+x");
 my @exe = qw(
     Configure
+    configure.gnu
     configpm
-    embed.pl
     installperl
+    installhtml
     installman
+    embed.pl
     keywords.pl
     opcode.pl
+    warnings.pl
     perly.fixer
     t/TEST
     t/*/*.t
     *.SH
     vms/ext/Stdio/test.pl
-    vms/ext/filespec.t
+    vms/ext/*.t
     x2p/*.SH
     Porting/patchls
     Porting/makerel
