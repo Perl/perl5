@@ -45,7 +45,6 @@ static XPVIV *more_xiv _((void));
 static XPVNV *more_xnv _((void));
 static XPV *more_xpv _((void));
 static XRV *more_xrv _((void));
-static SV *new_sv _((void));
 static XPVIV *new_xiv _((void));
 static XPVNV *new_xnv _((void));
 static XPV *new_xpv _((void));
@@ -55,13 +54,95 @@ static void del_xnv _((XPVNV* p));
 static void del_xpv _((XPV* p));
 static void del_xrv _((XRV* p));
 static void sv_mortalgrow _((void));
-
 static void sv_unglob _((SV* sv));
+
+typedef void (*SVFUNC) _((SV*));
 
 #ifdef PURIFY
 
-#define new_SV() sv = (SV*)safemalloc(sizeof(SV))
-#define del_SV(p) free((char*)p)
+#define new_SV(p)			\
+    do {				\
+	(p) = (SV*)safemalloc(sizeof(SV)); \
+	reg_add(p);			\
+    } while (0)
+
+#define del_SV(p)			\
+    do {				\
+	reg_remove(p);			\
+        free((char*)(p));		\
+    } while (0)
+
+static SV **registry;
+static I32 regsize;
+
+#define REGHASH(sv,size)  ((((U32)(sv)) >> 2) % (size))
+
+#define REG_REPLACE(sv,a,b) \
+    do {				\
+	void* p = sv->sv_any;		\
+	I32 h = REGHASH(sv, regsize);	\
+	I32 i = h;			\
+	while (registry[i] != (a)) {	\
+	    if (++i >= regsize)		\
+		i = 0;			\
+	    if (i == h)			\
+		die("SV registry bug");	\
+	}				\
+	registry[i] = (b);		\
+    } while (0)
+
+#define REG_ADD(sv)	REG_REPLACE(sv,Nullsv,sv)
+#define REG_REMOVE(sv)	REG_REPLACE(sv,sv,Nullsv)
+
+static void
+reg_add(sv)
+SV* sv;
+{
+    if (sv_count >= (regsize >> 1))
+    {
+	SV **oldreg = registry;
+	I32 oldsize = regsize;
+
+	regsize = regsize ? ((regsize << 2) + 1) : 2037;
+	registry = (SV**)safemalloc(regsize * sizeof(SV*));
+	memzero(registry, regsize * sizeof(SV*));
+
+	if (oldreg) {
+	    I32 i;
+
+	    for (i = 0; i < oldsize; ++i) {
+		SV* oldsv = oldreg[i];
+		if (oldsv)
+		    REG_ADD(oldsv);
+	    }
+	    Safefree(oldreg);
+	}
+    }
+
+    REG_ADD(sv);
+    ++sv_count;
+}
+
+static void
+reg_remove(sv)
+SV* sv;
+{
+    REG_REMOVE(sv);
+    --sv_count;
+}
+
+static void
+visit(f)
+SVFUNC f;
+{
+    I32 i;
+
+    for (i = 0; i < regsize; ++i) {
+	SV* sv = registry[i];
+	if (sv)
+	    (*f)(sv);
+    }
+}
 
 void
 sv_add_arena(ptr, size, flags)
@@ -73,40 +154,40 @@ U32 flags;
 	free(ptr);
 }
 
-#else
+#else /* ! PURIFY */
 
-#define new_SV()			\
-    if (sv_root) {			\
-	sv = sv_root;			\
-	sv_root = (SV*)SvANY(sv);	\
+/*
+ * "A time to plant, and a time to uproot what was planted..."
+ */
+
+#define plant_SV(p)			\
+    do {				\
+	SvANY(p) = (void *)sv_root;	\
+	SvFLAGS(p) = SVTYPEMASK;	\
+	sv_root = (p);			\
+	--sv_count;			\
+    } while (0)
+
+#define uproot_SV(p)		\
+    do {				\
+	(p) = sv_root;			\
+	sv_root = (SV*)SvANY(p);	\
 	++sv_count;			\
-    }					\
-    else				\
-	sv = more_sv();
+    } while (0)
 
-static SV*
-new_sv()
-{
-    SV* sv;
-    if (sv_root) {
-	sv = sv_root;
-	sv_root = (SV*)SvANY(sv);
-	++sv_count;
-	return sv;
-    }
-    return more_sv();
-}
+#define new_SV(p)			\
+    if (sv_root)			\
+	uproot_SV(p);			\
+    else				\
+	(p) = more_sv()
 
 #ifdef DEBUGGING
+
 #define del_SV(p)			\
     if (debug & 32768)			\
 	del_sv(p);			\
-    else {				\
-	SvANY(p) = (void *)sv_root;	\
-	SvFLAGS(p) = SVTYPEMASK;	\
-	sv_root = p;			\
-	--sv_count;			\
-    }
+    else				\
+	plant_SV(p)
 
 static void
 del_sv(p)
@@ -128,17 +209,14 @@ SV* p;
 	    return;
 	}
     }
-    SvANY(p) = (void *) sv_root;
-    sv_root = p;
-    --sv_count;
+    plant_SV(p);
 }
-#else
-#define del_SV(p)			\
-    SvANY(p) = (void *)sv_root;		\
-    sv_root = p;			\
-    --sv_count;
 
-#endif
+#else /* ! DEBUGGING */
+
+#define del_SV(p)   plant_SV(p)
+
+#endif /* DEBUGGING */
 
 void
 sv_add_arena(ptr, size, flags)
@@ -173,6 +251,8 @@ U32 flags;
 static SV*
 more_sv()
 {
+    register SV* sv;
+
     if (nice_chunk) {
 	sv_add_arena(nice_chunk, nice_chunk_size, 0);
 	nice_chunk = Nullch;
@@ -182,74 +262,87 @@ more_sv()
 	New(704,chunk,1008,char);   /* Safefree() in sv_free_arenas()     */
 	sv_add_arena(chunk, 1008, 0);
     }
-    return new_sv();
+    uproot_SV(sv);
+    return sv;
 }
-#endif
 
-void
-sv_report_used()
+static void
+visit(f)
+SVFUNC f;
 {
     SV* sva;
     SV* sv;
     register SV* svend;
 
-    for (sva = sv_arenaroot; sva; sva = (SV *) SvANY(sva)) {
-	sv = sva + 1;
+    for (sva = sv_arenaroot; sva; sva = (SV*)SvANY(sva)) {
 	svend = &sva[SvREFCNT(sva)];
-	while (sv < svend) {
-	    if (SvTYPE(sv) != SVTYPEMASK) {
-		PerlIO_printf(PerlIO_stderr(), "****\n");
-		sv_dump(sv);
-	    }
-	    ++sv;
+	for (sv = sva + 1; sv < svend; ++sv) {
+	    if (SvTYPE(sv) != SVTYPEMASK)
+		(*f)(sv);
 	}
     }
 }
 
+#endif /* PURIFY */
+
+static void
+do_report_used(sv)
+SV* sv;
+{
+    if (SvTYPE(sv) != SVTYPEMASK) {
+	PerlIO_printf(PerlIO_stderr(), "****\n");
+	sv_dump(sv);
+    }
+}
+
+void
+sv_report_used()
+{
+    visit(do_report_used);
+}
+
+static void
+do_clean_objs(sv)
+SV* sv;
+{
+    SV* rv;
+
+    if (SvROK(sv) && SvOBJECT(rv = SvRV(sv))) {
+	DEBUG_D((PerlIO_printf(PerlIO_stderr(), "Cleaning object ref:\n "), sv_dump(sv));)
+	SvROK_off(sv);
+	SvRV(sv) = 0;
+	SvREFCNT_dec(rv);
+    }
+
+    /* XXX Might want to check arrays, etc. */
+}
+
+#ifndef DISABLE_DESTRUCTOR_KLUDGE
+static void
+do_clean_named_objs(sv)
+SV* sv;
+{
+    if (SvTYPE(sv) == SVt_PVGV && GvSV(sv))
+	do_clean_objs(GvSV(sv));
+}
+#endif
+
 void
 sv_clean_objs()
 {
-    SV* sva;
-    register SV* sv;
-    register SV* svend;
-    SV* rv;
-
 #ifndef DISABLE_DESTRUCTOR_KLUDGE
-    register GV* gv;
-    for (sva = sv_arenaroot; sva; sva = (SV *) SvANY(sva)) {
-	gv = (GV*)sva + 1;
-	svend = &sva[SvREFCNT(sva)];
-	while ((SV*)gv < svend) {
-	    if (SvTYPE(gv) == SVt_PVGV && (sv = GvSV(gv)) &&
-		SvROK(sv) && SvOBJECT(rv = SvRV(sv)))
-	    {
-		DEBUG_D((PerlIO_printf(PerlIO_stderr(), "Cleaning object ref:\n "),
-			 sv_dump(sv));)
-		SvROK_off(sv);
-		SvRV(sv) = 0;
-		SvREFCNT_dec(rv);
-	    }
-	    ++gv;
-	}
-    }
-    if (!sv_objcount)
-	return;
+    visit(do_clean_named_objs);
 #endif
-    for (sva = sv_arenaroot; sva; sva = (SV *) SvANY(sva)) {
-	sv = sva + 1;
-	svend = &sva[SvREFCNT(sva)];
-	while (sv < svend) {
-	    if (SvROK(sv) && SvOBJECT(rv = SvRV(sv))) {
-		DEBUG_D((PerlIO_printf(PerlIO_stderr(), "Cleaning object ref:\n "),
-			 sv_dump(sv));)
-		SvROK_off(sv);
-		SvRV(sv) = 0;
-		SvREFCNT_dec(rv);
-	    }
-	    /* XXX Might want to check arrays, etc. */
-	    ++sv;
-	}
-    }
+    visit(do_clean_objs);
+}
+
+static void
+do_clean_all(sv)
+SV* sv;
+{
+    DEBUG_D((PerlIO_printf(PerlIO_stderr(), "Cleaning loops:\n "), sv_dump(sv));)
+    SvFLAGS(sv) |= SVf_BREAK;
+    SvREFCNT_dec(sv);
 }
 
 static int in_clean_all = 0;
@@ -257,23 +350,8 @@ static int in_clean_all = 0;
 void
 sv_clean_all()
 {
-    SV* sva;
-    register SV* sv;
-    register SV* svend;
-
     in_clean_all = 1;
-    for (sva = sv_arenaroot; sva; sva = (SV*) SvANY(sva)) {
-	sv = sva + 1;
-	svend = &sva[SvREFCNT(sva)];
-	while (sv < svend) {
-	    if (SvTYPE(sv) != SVTYPEMASK) {
-		DEBUG_D((PerlIO_printf(Perl_debug_log, "Cleaning loops:\n "), sv_dump(sv));)
-		SvFLAGS(sv) |= SVf_BREAK;
-		SvREFCNT_dec(sv);
-	    }
-	    ++sv;
-	}
-    }
+    visit(do_clean_all);
     in_clean_all = 0;
 }
 
@@ -583,7 +661,6 @@ U32 mt;
 	stash	= 0;
 	break;
     case SVt_PV:
-	nv = 0.0;
 	pv	= SvPVX(sv);
 	cur	= SvCUR(sv);
 	len	= SvLEN(sv);
@@ -598,7 +675,6 @@ U32 mt;
 	    mt = SVt_PVNV;
 	break;
     case SVt_PVIV:
-	nv = 0.0;
 	pv	= SvPVX(sv);
 	cur	= SvCUR(sv);
 	len	= SvLEN(sv);
@@ -609,7 +685,6 @@ U32 mt;
 	del_XPVIV(SvANY(sv));
 	break;
     case SVt_PVNV:
-	nv = SvNVX(sv);
 	pv	= SvPVX(sv);
 	cur	= SvCUR(sv);
 	len	= SvLEN(sv);
@@ -1580,7 +1655,7 @@ register SV *sstr;
 	break;
 
     case SVt_PVLV:
-	sv_upgrade(dstr, SVt_PVNV);
+	sv_upgrade(dstr, SVt_PVLV);
 	break;
 
     case SVt_PVAV:
@@ -1809,7 +1884,8 @@ register SV *sv;
 register char *ptr;
 register STRLEN len;
 {
-    assert(len >= 0);
+    assert(len >= 0);  /* STRLEN is probably unsigned, so this may
+			  elicit a warning, but it won't hurt. */
     if (SvTHINKFIRST(sv)) {
 	if (SvREADONLY(sv) && curcop != &compiling)
 	    croak(no_modify);
@@ -1990,7 +2066,7 @@ STRLEN len;
 {
     register SV *sv;
     
-    new_SV();
+    new_SV(sv);
     SvANY(sv) = 0;
     SvREFCNT(sv) = 1;
     SvFLAGS(sv) = 0;
@@ -2893,7 +2969,7 @@ SV *oldstr;
 {
     register SV *sv;
 
-    new_SV();
+    new_SV(sv);
     SvANY(sv) = 0;
     SvREFCNT(sv) = 1;
     SvFLAGS(sv) = 0;
@@ -2910,7 +2986,7 @@ sv_newmortal()
 {
     register SV *sv;
 
-    new_SV();
+    new_SV(sv);
     SvANY(sv) = 0;
     SvREFCNT(sv) = 1;
     SvFLAGS(sv) = SVs_TEMP;
@@ -2944,7 +3020,7 @@ STRLEN len;
 {
     register SV *sv;
 
-    new_SV();
+    new_SV(sv);
     SvANY(sv) = 0;
     SvREFCNT(sv) = 1;
     SvFLAGS(sv) = 0;
@@ -2960,7 +3036,7 @@ double n;
 {
     register SV *sv;
 
-    new_SV();
+    new_SV(sv);
     SvANY(sv) = 0;
     SvREFCNT(sv) = 1;
     SvFLAGS(sv) = 0;
@@ -2974,7 +3050,7 @@ IV i;
 {
     register SV *sv;
 
-    new_SV();
+    new_SV(sv);
     SvANY(sv) = 0;
     SvREFCNT(sv) = 1;
     SvFLAGS(sv) = 0;
@@ -2988,7 +3064,7 @@ SV *ref;
 {
     register SV *sv;
 
-    new_SV();
+    new_SV(sv);
     SvANY(sv) = 0;
     SvREFCNT(sv) = 1;
     SvFLAGS(sv) = 0;
@@ -3013,7 +3089,7 @@ register SV *old;
 	warn("semi-panic: attempt to dup freed string");
 	return Nullsv;
     }
-    new_SV();
+    new_SV(sv);
     SvANY(sv) = 0;
     SvREFCNT(sv) = 1;
     SvFLAGS(sv) = 0;
@@ -3145,7 +3221,7 @@ I32 lref;
 	    SV *tmpsv;
 	    ENTER;
 	    tmpsv = NEWSV(704,0);
-	    gv_efullname(tmpsv, gv);
+	    gv_efullname(tmpsv, gv, Nullch);
 	    newSUB(start_subparse(),
 		   newSVOP(OP_CONST, 0, tmpsv),
 		   Nullop,
@@ -3340,7 +3416,7 @@ char *classname;
 {
     SV *sv;
 
-    new_SV();
+    new_SV(sv);
     SvANY(sv) = 0;
     SvREFCNT(sv) = 0;
     SvFLAGS(sv) = 0;
