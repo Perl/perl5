@@ -1793,7 +1793,8 @@
 
 /* HAS_GNULIBC:
  *	This symbol, if defined, indicates to the C program that 
- *	the GNU C library is being used.
+ *	the GNU C library is being used.  A better check is to use
+ *	the __GLIBC__ and __GLIBC_MINOR__ symbols supplied with glibc.
  */
 /*#define HAS_GNULIBC  	/**/
 #if defined(HAS_GNULIBC) && !defined(_GNU_SOURCE)
