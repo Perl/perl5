@@ -1012,10 +1012,10 @@ in quoted-printable encoding, as defined in RFC 2045 - I<MIME
 
     use MIME::QuotedPrint;
 
-    $encoded = encode_qp("Smiley in Unicode: \x{263a}");
+    $encoded = encode_qp("some eight-bit data \xDE\xAD\xBE\xEF");
     $decoded = decode_qp($encoded);
 
-    print $encoded, "\n"; # "Smiley in Unicode: =263A"
+    print $encoded, "\n"; # "some eight-bit data =DE=AD=BE=EF\n"
 
 See also L<PerlIO::via::QuotedPrint>.
 
