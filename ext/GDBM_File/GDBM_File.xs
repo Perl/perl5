@@ -304,7 +304,8 @@ gdbm_setopt (db, optflag, optval, optlen)
 #define setFilter(type)					\
 	{						\
 	    if (db->type)				\
-	        RETVAL = newSVsv(db->type) ; 		\
+	        RETVAL = sv_mortalcopy(db->type) ; 	\
+	    ST(0) = RETVAL ;				\
 	    if (db->type && (code == &PL_sv_undef)) {	\
                 SvREFCNT_dec(db->type) ;		\
 	        db->type = NULL ;			\
@@ -326,8 +327,6 @@ filter_fetch_key(db, code)
 	SV *		RETVAL = &PL_sv_undef ;
 	CODE:
 	    setFilter(filter_fetch_key) ;
-	OUTPUT:
-	    RETVAL
 
 SV *
 filter_store_key(db, code)
@@ -336,8 +335,6 @@ filter_store_key(db, code)
 	SV *		RETVAL =  &PL_sv_undef ;
 	CODE:
 	    setFilter(filter_store_key) ;
-	OUTPUT:
-	    RETVAL
 
 SV *
 filter_fetch_value(db, code)
@@ -346,8 +343,6 @@ filter_fetch_value(db, code)
 	SV *		RETVAL =  &PL_sv_undef ;
 	CODE:
 	    setFilter(filter_fetch_value) ;
-	OUTPUT:
-	    RETVAL
 
 SV *
 filter_store_value(db, code)
@@ -356,6 +351,4 @@ filter_store_value(db, code)
 	SV *		RETVAL =  &PL_sv_undef ;
 	CODE:
 	    setFilter(filter_store_value) ;
-	OUTPUT:
-	    RETVAL
 

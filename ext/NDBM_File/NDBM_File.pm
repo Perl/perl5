@@ -12,7 +12,7 @@ require DynaLoader;
 
 @ISA = qw(Tie::Hash DynaLoader);
 
-$VERSION = "1.02";
+$VERSION = "1.03";
 
 bootstrap NDBM_File $VERSION;
 

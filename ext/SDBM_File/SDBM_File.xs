@@ -23,16 +23,13 @@ typedef datum datum_value ;
 	    if (db->filtering)					\
 	        croak("recursion detected in %s", name) ;	\
 	    db->filtering = TRUE ;				\
-	    /* SAVE_DEFSV ;*/   /* save $_ */			\
 	    save_defsv = newSVsv(DEFSV) ;			\
 	    sv_setsv(DEFSV, arg) ;				\
 	    PUSHMARK(sp) ;					\
 	    (void) perl_call_sv(db->type, G_DISCARD|G_NOARGS); 	\
-	    /* SPAGAIN ; */						\
 	    sv_setsv(arg, DEFSV) ;				\
 	    sv_setsv(DEFSV, save_defsv) ;				\
 	    SvREFCNT_dec(save_defsv) ;				\
-	    /* PUTBACK ; */						\
 	    db->filtering = FALSE ;				\
 	    /*printf("end of filtering %s\n", name) ;*/		\
 	}
@@ -143,7 +140,8 @@ sdbm_clearerr(db)
 #define setFilter(type)					\
 	{						\
 	    if (db->type)				\
-	        RETVAL = newSVsv(db->type) ; 		\
+	        RETVAL = sv_mortalcopy(db->type) ;	\
+	    ST(0) = RETVAL ;				\
 	    if (db->type && (code == &PL_sv_undef)) {	\
                 SvREFCNT_dec(db->type) ;		\
 	        db->type = NULL ;			\
@@ -165,8 +163,6 @@ filter_fetch_key(db, code)
 	SV *		RETVAL = &PL_sv_undef ;
 	CODE:
 	    setFilter(filter_fetch_key) ;
-	OUTPUT:
-	    RETVAL
 
 SV *
 filter_store_key(db, code)
@@ -175,8 +171,6 @@ filter_store_key(db, code)
 	SV *		RETVAL =  &PL_sv_undef ;
 	CODE:
 	    setFilter(filter_store_key) ;
-	OUTPUT:
-	    RETVAL
 
 SV *
 filter_fetch_value(db, code)
@@ -185,8 +179,6 @@ filter_fetch_value(db, code)
 	SV *		RETVAL =  &PL_sv_undef ;
 	CODE:
 	    setFilter(filter_fetch_value) ;
-	OUTPUT:
-	    RETVAL
 
 SV *
 filter_store_value(db, code)
@@ -195,6 +187,4 @@ filter_store_value(db, code)
 	SV *		RETVAL =  &PL_sv_undef ;
 	CODE:
 	    setFilter(filter_store_value) ;
-	OUTPUT:
-	    RETVAL
 
