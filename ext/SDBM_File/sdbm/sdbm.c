@@ -182,6 +182,18 @@ sdbm_fetch(register DBM *db, datum key)
 }
 
 int
+sdbm_exists(register DBM *db, datum key)
+{
+	if (db == NULL || bad(key))
+		return errno = EINVAL, -1;
+
+	if (getpage(db, exhash(key)))
+		return exipair(db->pagbuf, key);
+
+	return ioerr(db), -1;
+}
+
+int
 sdbm_delete(register DBM *db, datum key)
 {
 	if (db == NULL || bad(key))

@@ -15,7 +15,7 @@ require SDBM_File;
 #If Fcntl is not available, try 0x202 or 0x102 for O_RDWR|O_CREAT
 use Fcntl;
 
-print "1..18\n";
+print "1..20\n";
 
 unlink <Op_dbmx.*>;
 
@@ -122,13 +122,6 @@ print join(':',200..400) eq join(':',@foo) ? "ok 10\n" : "not ok 10\n";
 print ($h{'foo'} eq '' ? "ok 11\n" : "not ok 11\n");
 print ($h{''} eq 'bar' ? "ok 12\n" : "not ok 12\n");
 
-untie %h;
-if ($^O eq 'VMS') {
-  unlink 'Op_dbmx.sdbm_dir', $Dfile;
-} else {
-  unlink 'Op_dbmx.dir', $Dfile;
-}
-
 
 sub ok
 {
@@ -209,4 +202,14 @@ EOM
     untie(%h);
     unlink "SubDB.pm", <dbhash_tmp.*> ;
 
+}
+
+ok(19, !exists $h{'goner1'});
+ok(20, exists $h{'foo'});
+
+untie %h;
+if ($^O eq 'VMS') {
+  unlink 'Op_dbmx.sdbm_dir', $Dfile;
+} else {
+  unlink 'Op_dbmx.dir', $Dfile;
 }
