@@ -13,10 +13,6 @@
 #define WIN32_LEAN_AND_MEAN
 #ifdef __GNUC__
 #define Win32_Winsock
-#  ifdef __cplusplus
-#undef __attribute__		/* seems broken in 2.8.0 */
-#define __attribute__(p)
-#  endif
 #endif
 #include <windows.h>
 #include "EXTERN.h"

@@ -74,7 +74,7 @@ VIRTUAL char **	get_op_names _((void));
 VIRTUAL char *	get_no_modify _((void));
 VIRTUAL U32 *	get_opargs _((void));
 VIRTUAL I32	cxinc _((void));
-VIRTUAL void	deb _((const char* pat,...)) __attribute__((format(printf,1,2)));
+VIRTUAL void	deb _((const char* pat,...)) /*__attribute__((format(printf,1,2)))*/;
 VIRTUAL void	deb_growlevel _((void));
 VIRTUAL void	debprofdump _((void));
 VIRTUAL I32	debop _((OP* o));

@@ -13,10 +13,6 @@
 #include <tchar.h>
 #ifdef __GNUC__
 #define Win32_Winsock
-#  ifdef __cplusplus
-#undef __attribute__		/* seems broken in 2.8.0 */
-#define __attribute__(p)
-#  endif
 #endif
 #include <windows.h>
 
@@ -2194,7 +2190,7 @@ XS(w32_DomainName)
 	char dname[256];
 	DWORD dnamelen = sizeof(dname);
 	SID_NAME_USE snu;
-	if (LookupAccountName(NULL, name, &sid, &sidlen,
+	if (LookupAccountName(NULL, name, (PSID)&sid, &sidlen,
 			      dname, &dnamelen, &snu)) {
 	    XSRETURN_PV(dname);		/* all that for this */
 	}

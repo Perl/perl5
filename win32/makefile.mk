@@ -227,8 +227,8 @@ SUBSYS		= console
 CXX_FLAG	= -xc++
 
 LIBC		= -lcrtdll
-LIBFILES	= $(CRYPT_LIB) -ladvapi32 -luser32 -lnetapi32 -lwsock32 -lmingw32 \
-		-lgcc -lmoldname $(LIBC) -lkernel32
+LIBFILES	= $(CRYPT_LIB) -ladvapi32 -luser32 -lnetapi32 -lwsock32 \
+		-lmingw32 -lgcc -lmoldname $(LIBC) -lkernel32
 
 .IF  "$(CFG)" == "Debug"
 OPTIMIZE	= -g -O2 $(RUNTIME) -DDEBUGGING
@@ -410,7 +410,11 @@ CFGH_TMPL	= config_H.bc
 
 CFGSH_TMPL	= config.gc
 CFGH_TMPL	= config_H.gc
-PERLIMPLIB	*= ..\libperl$(a)
+.IF "$(OBJECT)" == "-DPERL_OBJECT"
+PERLIMPLIB	= ..\libperlcore$(a)
+.ELSE
+PERLIMPLIB	= ..\libperl$(a)
+.ENDIF
 
 .ELSE
 

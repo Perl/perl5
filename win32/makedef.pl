@@ -76,8 +76,20 @@ sub emit_symbols
 }
 
 skip_symbols [qw(
-Perl_statusvalue_vms
-Perl_archpat_auto
+PL_statusvalue_vms
+PL_archpat_auto
+PL_cryptseen
+PL_DBcv
+PL_generation
+PL_in_clean_all
+PL_in_clean_objs
+PL_lastgotoprobe
+PL_linestart
+PL_modcount
+PL_pending_ident
+PL_sortcxix
+PL_sublex_info
+PL_timesbuf
 Perl_block_type
 Perl_additem
 Perl_cast_ulong
@@ -85,9 +97,7 @@ Perl_check_uni
 Perl_checkcomma
 Perl_chsize
 Perl_ck_aelem
-Perl_cryptseen
 Perl_cx_dump
-Perl_DBcv
 Perl_do_ipcctl
 Perl_do_ipcget
 Perl_do_msgrcv
@@ -112,16 +122,10 @@ Perl_fetch_io
 Perl_force_ident
 Perl_force_next
 Perl_force_word
-Perl_generation
 Perl_hv_stashpv
-Perl_in_clean_all
-Perl_in_clean_objs
 Perl_intuit_more
 Perl_init_thread_intern
 Perl_know_next
-Perl_lastgotoprobe
-Perl_linestart
-Perl_modcount
 Perl_modkids
 Perl_mstats
 Perl_my_bzero
@@ -134,7 +138,6 @@ Perl_no_fh_allowed
 Perl_no_op
 Perl_nointrp
 Perl_nomem
-Perl_pending_ident
 Perl_pp_cswitch
 Perl_pp_entersubr
 Perl_pp_evalonce
@@ -142,7 +145,6 @@ Perl_pp_interp
 Perl_pp_map
 Perl_pp_nswitch
 Perl_q
-Perl_rcsid
 Perl_reall_srchlen
 Perl_same_dirent
 Perl_saw_return
@@ -160,13 +162,10 @@ Perl_scan_word
 Perl_setenv_getix
 Perl_skipspace
 Perl_sort_mutex
-Perl_sortcxix
 Perl_sublex_done
-Perl_sublex_info
 Perl_sublex_start
 Perl_sv_ref
 Perl_sv_setptrobj
-Perl_timesbuf
 Perl_too_few_arguments
 Perl_too_many_arguments
 Perl_unlnk
@@ -181,16 +180,15 @@ mystack_mark
 perl_init_ext
 perl_requirepv
 stack
-statusvalue_vms
 Perl_safexcalloc
 Perl_safexmalloc
 Perl_safexfree
 Perl_safexrealloc
 Perl_my_memcmp
 Perl_my_memset
-Perl_cshlen
-Perl_cshname
-Perl_opsave
+PL_cshlen
+PL_cshname
+PL_opsave
 )];
 
 
@@ -216,28 +214,28 @@ else
 unless ($define{'USE_THREADS'})
  {
   skip_symbols [qw(
+PL_thr_key
+PL_sv_mutex
+PL_svref_mutex
+PL_malloc_mutex
+PL_eval_mutex
+PL_eval_cond
+PL_eval_owner
+PL_threads_mutex
+PL_nthreads
+PL_nthreads_cond
+PL_threadnum
+PL_threadsv_names
+PL_thrsv
+Perl_vtbl_mutex
 Perl_getTHR
 Perl_setTHR
 Perl_condpair_magic
-Perl_thr_key
-Perl_sv_mutex
-Perl_svref_mutex
-Perl_malloc_mutex
-Perl_eval_mutex
-Perl_eval_cond
-Perl_eval_owner
-Perl_threads_mutex
 Perl_new_struct_thread
-Perl_nthreads
-Perl_nthreads_cond
 Perl_per_thread_magicals
 Perl_thread_create
-Perl_threadnum
 Perl_find_threadsv
-Perl_threadsv_names
-Perl_thrsv
 Perl_unlock_condpair
-Perl_vtbl_mutex
 Perl_magic_mutexfree
 Perl_sv_iv
 Perl_sv_nv
@@ -249,7 +247,7 @@ Perl_sv_pvn
 
 unless ($define{'FAKE_THREADS'})
  {
-  skip_symbols [qw(Perl_curthr)];
+  skip_symbols [qw(PL_curthr)];
  }
 
 sub readvar
@@ -261,7 +259,7 @@ sub readvar
   {
    # All symbols have a Perl_ prefix because that's what embed.h
    # sticks in front of them.
-   push(@syms,"Perl_".$1) if (/\bPERLVARI?C?\([IGT](\w+)/);
+   push(@syms,"PL_".$1) if (/\bPERLVARI?C?\([IGT](\w+)/);
   } 
  close(VARS); 
  return \@syms;
@@ -284,7 +282,7 @@ if ($define{'PERL_GLOBAL_STRUCT'})
   my $global = readvar("../perlvars.h");
   skip_symbols $global;
   emit_symbols [qw(Perl_GetVars)];
-  emit_symbols [qw(Perl_Vars Perl_VarsPtr)] unless $CCTYPE eq 'GCC';
+  emit_symbols [qw(PL_Vars PL_VarsPtr)] unless $CCTYPE eq 'GCC';
  } 
 
 unless ($define{'DEBUGGING'})

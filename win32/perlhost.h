@@ -652,23 +652,19 @@ public:
     };
     virtual char* GetBase(PerlIO* pf, int &err)
     {
-	FILE *f = (FILE*)pf;
-	return FILE_base(f);
+	return (PerlIO_has_base(pf) ? PerlIO_get_base(pf) : Nullch);
     };
     virtual int GetBufsiz(PerlIO* pf, int &err)
     {
-	FILE *f = (FILE*)pf;
-	return FILE_bufsiz(f);
+	return PerlIO_get_bufsiz(pf);
     };
     virtual int GetCnt(PerlIO* pf, int &err)
     {
-	FILE *f = (FILE*)pf;
-	return FILE_cnt(f);
+	return PerlIO_get_cnt(pf);
     };
     virtual char* GetPtr(PerlIO* pf, int &err)
     {
-	FILE *f = (FILE*)pf;
-	return FILE_ptr(f);
+	return PerlIO_get_ptr(pf);
     };
     virtual char* Gets(PerlIO* pf, char* s, int n, int& err)
     {
@@ -738,14 +734,15 @@ public:
     };
     virtual void SetCnt(PerlIO* pf, int n, int &err)
     {
-	FILE *f = (FILE*)pf;
-	FILE_cnt(f) = n;
+	if (PerlIO_canset_cnt(pf)) {
+	    PerlIO_set_cnt(pf,n);
+	}
     };
     virtual void SetPtrCnt(PerlIO* pf, char * ptr, int n, int& err)
     {
-	FILE *f = (FILE*)pf;
-	FILE_ptr(f) = ptr;
-	FILE_cnt(f) = n;
+	if (PerlIO_canset_cnt(pf)) {
+	    PerlIO_set_ptrcnt(pf,ptr,n);
+	}
     };
     virtual void Setlinebuf(PerlIO* pf, int &err)
     {

@@ -204,7 +204,7 @@ opmask_addlocal(SV *opset, char *op_mask_buf) /* Localise PL_op_mask then opmask
 {
     char *orig_op_mask = PL_op_mask;
     SAVEPPTR(PL_op_mask);
-#if !(defined(PERL_OBJECT) && defined(__BORLANDC__))
+#if !defined(PERL_OBJECT)
     /* XXX casting to an ordinary function ptr from a member function ptr
      * is disallowed by Borland
      */

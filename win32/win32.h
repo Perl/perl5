@@ -20,17 +20,15 @@
 
 #ifdef __GNUC__
 typedef long long __int64;
-#define Win32_Winsock
-#  ifdef __cplusplus
-#undef __attribute__		/* seems broken in 2.8.0 */
-#define __attribute__(p)
-#  endif
+#  define Win32_Winsock
 /* GCC does not do __declspec() - render it a nop 
  * and turn on options to avoid importing data 
  */
-#define __declspec(x)
-#define PERL_GLOBAL_STRUCT
-#define MULTIPLICITY
+#  define __declspec(x)
+#  ifndef PERL_OBJECT
+#    define PERL_GLOBAL_STRUCT
+#    define MULTIPLICITY
+#  endif
 #endif
 
 /* Define DllExport akin to perl's EXT, 
@@ -215,6 +213,10 @@ typedef long		gid_t;
 #define _environ	environ
 #define flushall	_flushall
 #define fcloseall	_fcloseall
+
+#ifdef PERL_OBJECT
+#define FUNC_NAME_TO_PTR(name)	&(name)
+#endif
 
 #ifndef _O_NOINHERIT
 #  define _O_NOINHERIT	0x0080
