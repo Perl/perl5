@@ -379,7 +379,9 @@ Make C<perldoc> tell users what they need to add to their .login or
 =head2 Install ALL Documentation
 
 Make the standard documentation kit include the VMS, OS/2, Win32,
-Threads, etc information.
+Threads, etc information.  installperl and pod/Makefile should know
+enough to copy README.foo to perlfoo.pod before building everything,
+when appropriate.
 
 =head2 Outstanding issues to be documented
 
