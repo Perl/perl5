@@ -3,44 +3,36 @@
 #ifdef WIN32
 #  include <win32thread.h>
 #else
-
-#ifndef DJGPP
-/* POSIXish threads */
-#ifdef OLD_PTHREADS_API
-#  define pthread_mutexattr_init(a) pthread_mutexattr_create(a)
-#  define pthread_mutexattr_settype(a,t) pthread_mutexattr_setkind_np(a,t)
-#  define pthread_key_create(k,d) pthread_keycreate(k,(pthread_destructor_t)(d))
-#  define YIELD pthread_yield()
-#  define DETACH(t)				\
+#  if defined(OLD_PTHREADS_API) && !defined(DJGPP)
+     /* POSIXish threads */
+#    define pthread_mutexattr_init(a) pthread_mutexattr_create(a)
+#    define pthread_mutexattr_settype(a,t) pthread_mutexattr_setkind_np(a,t)
+#    define pthread_key_create(k,d) pthread_keycreate(k,(pthread_destructor_t)(d))
+#    define DETACH(t)				\
     STMT_START {				\
 	if (pthread_detach(&(t)->self)) {	\
 	    MUTEX_UNLOCK(&(t)->mutex);		\
 	    croak("panic: DETACH");		\
 	}					\
     } STMT_END
-#else
-#  define pthread_mutexattr_default NULL
-#  define pthread_condattr_default NULL
-#endif /* OLD_PTHREADS_API */
-#endif
+#  else
+#    define pthread_mutexattr_default NULL
+#    define pthread_condattr_default NULL
+#  endif /* OLD_PTHREADS_API */
 #endif
 
-#ifdef PTHREADS_CREATED_JOINABLE
+#ifndef YIELD
+#  define YIELD SCHED_YIELD
+#endif
+
+#ifdef PTHREAD_CREATE_JOINABLE
 #  define ATTR_JOINABLE PTHREAD_CREATE_JOINABLE
 #else
 #  ifdef PTHREAD_CREATE_UNDETACHED
 #    define ATTR_JOINABLE PTHREAD_CREATE_UNDETACHED
 #  else
-#    define ATTR_JOINABLE PTHREAD_CREATE_JOINABLE
-#  endif
-#endif
-
-#ifndef YIELD
-#  ifdef HAS_SCHED_YIELD
-#    define YIELD sched_yield()
-#  else
-#    ifdef HAS_PTHREAD_YIELD
-#      define YIELD pthread_yield()
+#    ifdef __UNDETACHED
+#      define ATTR_JOINABLE __UNDETACHED
 #    endif
 #  endif
 #endif

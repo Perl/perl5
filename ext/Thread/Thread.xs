@@ -230,7 +230,10 @@ newthread (SV *startsv, AV *initargs, char *classname)
     static int attr_inited = 0;
     sigset_t fullmask, oldmask;
 #endif
-    
+#ifdef PTHREAD_SETDETACHSTATE_ARG2_POINTER
+    static int attr_joinable = ATTR_JOINABLE;
+#endif    
+
     savethread = thr;
     thr = new_struct_thread(thr);
     SPAGAIN;
@@ -264,14 +267,24 @@ newthread (SV *startsv, AV *initargs, char *classname)
 #ifdef OLD_PTHREADS_API
 #ifdef VMS
 /* This is available with the old pthreads API, but only with */
-/* DecThreads (VMS and Digital Unix) */
+/* DecThreads (VMS and Digital Unix (which has and uses the new one)) */
 	if (err == 0)
 	    err = pthread_attr_setdetach_np(&attr, ATTR_JOINABLE);
 #endif
-#else
+#else /* !defined(VMS) */
+#ifdef ATTR_JOINABLE
 	if (err == 0)
 	    err = pthread_attr_setdetachstate(&attr, ATTR_JOINABLE);
-#endif
+#else /* !defined(ATTR_JOINABLE) */
+#ifdef __UNDETACHED
+	if (err == 0)
+	    err = pthread_attr_setdetachstate(&attr, &__undetached);
+#else /* !defined(__UNDETACHED) */
+	croak("panic: can't pthread_attr_setdetachstate");
+#endif /* __UNDETACHED */
+#endif /* ATTR_JOINABLE */
+#endif /* VMS */
+#endif /* OLD_PTHREADS_API */
     }
     if (err == 0)
 #ifdef OLD_PTHREADS_API
