@@ -380,8 +380,15 @@ OPTIMIZE	= -Od -MD -Zi -DDEBUGGING
 !  ENDIF
 LINK_DBG	= -debug
 !ELSE
-OPTIMIZE	= -MD -DNDEBUG
-LINK_DBG	= -release
+OPTIMIZE	= -MD -Zi -DNDEBUG
+# we enable debug symbols in release builds also
+LINK_DBG	= -debug -opt:ref,icf
+# you may want to enable this if you want COFF symbols in the executables
+# in addition to the PDB symbols.  The default Dr. Watson that ships with
+# Windows can use the the former but not latter.  The free WinDbg can be
+# installed to get better stack traces from just the PDB symbols, so we
+# avoid the bloat of COFF symbols by default.
+#LINK_DBG	= $(LINK_DBG) -debugtype:both
 !  IF "$(WIN64)" == "define"
 # enable Whole Program Optimizations (WPO) and Link Time Code Generation (LTCG)
 OPTIMIZE	= $(OPTIMIZE) -Ox -GL
@@ -1138,7 +1145,7 @@ distclean: realclean
 	-del /f ..\config.sh ..\splittree.pl perlmain.c dlutils.c config.h.new
 	-del /f $(CONFIGPM)
 	-del /f bin\*.bat
-	-del /f $(PERLEXE_ICO)
+	-del /f $(PERLEXE_ICO) perl.base
 	-cd .. && del /s *.lib *.map *.pdb *.ilk *.bs *$(o) .exists pm_to_blib
 	-cd $(EXTDIR) && del /s *.def Makefile Makefile.old
 	-if exist $(AUTODIR) rmdir /s /q $(AUTODIR)
@@ -1152,6 +1159,8 @@ installbare : utils
 	$(PERLEXE) ..\installperl
 	if exist $(WPERLEXE) $(XCOPY) $(WPERLEXE) $(INST_BIN)\*.*
 	$(XCOPY) $(GLOBEXE) $(INST_BIN)\*.*
+	if exist ..\perl*.pdb $(XCOPY) ..\perl*.pdb $(INST_BIN)\*.*
+	if exist ..\x2p\a2p.pdb $(XCOPY) ..\x2p\a2p.pdb $(INST_BIN)\*.*
 	$(XCOPY) bin\*.bat $(INST_SCRIPT)\*.*
 
 installhtml : doc
