@@ -1,6 +1,9 @@
-/* $Header: arg.c,v 1.0 87/12/18 13:04:33 root Exp $
+/* $Header: arg.c,v 1.0.1.1 88/01/21 21:27:10 root Exp $
  *
  * $Log:	arg.c,v $
+ * Revision 1.0.1.1  88/01/21  21:27:10  root
+ * Now defines signal return values correctly using VOIDSIG.
+ * 
  * Revision 1.0  87/12/18  13:04:33  root
  * Initial revision
  * 
@@ -1173,8 +1176,13 @@ init_eval()
     opargs[O_REPEAT] =		A(1,1,0);
 }
 
+#ifdef VOIDSIG
+static void (*ihand)();
+static void (*qhand)();
+#else
 static int (*ihand)();
 static int (*qhand)();
+#endif
 
 STR *
 eval(arg,retary)

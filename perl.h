@@ -1,13 +1,15 @@
-/* $Header: perl.h,v 1.0 87/12/18 13:05:38 root Exp $
+/* $Header: perl.h,v 1.0.1.1 88/01/21 21:29:23 root Exp $
  *
  * $Log:	perl.h,v $
+ * Revision 1.0.1.1  88/01/21  21:29:23  root
+ * No longer defines STDSTDIO--gets it from config.h now.
+ * 
  * Revision 1.0  87/12/18  13:05:38  root
  * Initial revision
  * 
  */
 
 #define DEBUGGING
-#define STDSTDIO	/* eventually should be in config.h */
 
 #define VOIDUSED 1
 #include "config.h"

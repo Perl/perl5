@@ -8,7 +8,7 @@
 # and edit it to reflect your system.  Some packages may include samples
 # of config.h for certain machines, so you might look for one of those.)
 #
-# $Header: Configure,v 1.0 87/12/18 15:05:56 root Exp $
+# $Header: Configure,v 1.0.1.1 88/01/21 21:21:47 root Exp $
 #
 # Yes, you may rip this off to use in other distribution packages.
 # (Note: this Configure script was generated automatically.  Rather than
@@ -67,10 +67,13 @@ bin=''
 cc=''
 contains=''
 cpp=''
+cppminus=''
 d_charsprf=''
 d_index=''
+d_stdstdio=''
 d_strctcpy=''
 d_vfork=''
+d_voidsig=''
 libc=''
 libnm=''
 mansrc=''
@@ -90,6 +93,7 @@ spitshell=''
 shsharp=''
 sharpbang=''
 startsh=''
+stdchar=''
 voidflags=''
 defvoidused=''
 CONFIG=''
@@ -110,7 +114,7 @@ rmlist='kit[1-9]isdone kit[1-9][0-9]isdone'
 trap 'echo " "; rm -f $rmlist; exit 1' 1 2 3
 attrlist="mc68000 sun gcos unix ibm gimpel interdata tss os mert pyr"
 attrlist="$attrlist vax pdp11 i8086 z8000 u3b2 u3b5 u3b20 u3b200"
-attrlist="$attrlist ns32000 ns16000 iAPX286"
+attrlist="$attrlist ns32000 ns16000 iAPX286 mc300 mc500 mc700 sparc"
 pth="/usr/ucb /bin /usr/bin /usr/local /usr/local/bin /usr/lbin /etc /usr/lib"
 defvoidused=7
 
@@ -200,8 +204,8 @@ cat <<EOH
 
 Much effort has been expended to ensure that this shell script will run
 on any Unix system.  If despite that it blows up on you, your best bet is
-to edit Configure and run it again. Also, let me (lwall@sdcrdcf.UUCP) know
-how I blew it.  If you can't run Configure for some reason, you'll have
+to edit Configure and run it again. Also, let me (lwall@jpl-devvax.jpl.nasa.gov)
+know how I blew it.  If you can't run Configure for some reason, you'll have
 to generate a config.sh file by hand.
 
 This installation script affects things in two ways: 1) it may do direct
@@ -546,6 +550,94 @@ else
 fi
 rm -f try today
 
+: see how we invoke the C preprocessor
+echo " "
+echo "Now, how can we feed standard input to your C preprocessor..."
+cat <<'EOT' >testcpp.c
+#define ABC abc
+#define XYZ xyz
+ABC.XYZ
+EOT
+echo 'Maybe "/lib/cpp" will work...'
+/lib/cpp <testcpp.c >testcpp.out 2>&1
+if $contains 'abc.xyz' testcpp.out >/dev/null 2>&1 ; then
+    echo "Yup, it does."
+    cpp='/lib/cpp'
+    cppminus='';
+else
+    echo 'Nope, maybe "/lib/cpp -" will work...'
+    /lib/cpp - <testcpp.c >testcpp.out 2>&1
+    if $contains 'abc.xyz' testcpp.out >/dev/null 2>&1 ; then
+	echo "Yup, it does."
+	cpp='/lib/cpp'
+	cppminus='-';
+    else
+	echo 'No such luck...maybe "cc -E" will work...'
+	cc -E <testcpp.c >testcpp.out 2>&1
+	if $contains 'abc.xyz' testcpp.out >/dev/null 2>&1 ; then
+	    echo "It works!"
+	    cpp='cc -E'
+	    cppminus='';
+	else
+	    echo 'Nixed again...maybe "cc -E -" will work...'
+	    cc -E - <testcpp.c >testcpp.out 2>&1
+	    if $contains 'abc.xyz' testcpp.out >/dev/null 2>&1 ; then
+		echo "Hooray, it works!  I was beginning to wonder."
+		cpp='cc -E'
+		cppminus='-';
+	    else
+		echo 'Nope...maybe "cc -P" will work...'
+		cc -P <testcpp.c >testcpp.out 2>&1
+		if $contains 'abc.xyz' testcpp.out >/dev/null 2>&1 ; then
+		    echo "Yup, that does."
+		    cpp='cc -P'
+		    cppminus='';
+		else
+		    echo 'Nope...maybe "cc -P -" will work...'
+		    cc -P - <testcpp.c >testcpp.out 2>&1
+		    if $contains 'abc.xyz' testcpp.out >/dev/null 2>&1 ; then
+			echo "Yup, that does."
+			cpp='cc -P'
+			cppminus='-';
+		    else
+			echo 'Hmm...perhaps you already told me...'
+			case "$cpp" in
+			'') ;;
+			*) $cpp $cppminus <testcpp.c >testcpp.out 2>&1;;
+			esac
+			if $contains 'abc.xyz' testcpp.out >/dev/null 2>&1 ; then
+			    echo "Hooray, you did!  I was beginning to wonder."
+			else
+			    echo 'Uh-uh.  Time to get fancy...'
+			    echo 'Trying (cat >/tmp/$$.c; cc -E /tmp/$$.c; rm /tmp/$$.c)'
+			    cpp='(cat >/tmp/$$.c; cc -E /tmp/$$.c; rm /tmp/$$.c)'
+			    cppminus='';
+			    $cpp <testcpp.c >testcpp.out 2>&1
+			    if $contains 'abc.xyz' testcpp.out >/dev/null 2>&1 ; then
+				echo "Eureka!."
+			    else
+				dflt=blurfl
+				$echo $n "No dice.  I can't find a C preprocessor.  Name one: $c"
+				rp='Name a C preprocessor:'
+				. myread
+				cpp="$ans"
+				$cpp <testcpp.c >testcpp.out 2>&1
+				if $contains 'abc.xyz' testcpp.out >/dev/null 2>&1 ; then
+				    echo "OK, that will do."
+				else
+				    echo "Sorry, I can't get that to work.  Go find one."
+				    exit 1
+				fi
+			    fi
+			fi
+		    fi
+		fi
+	    fi
+	fi
+    fi
+fi
+rm -f testcpp.c testcpp.out
+
 : see if sprintf is declared as int or pointer to char
 echo " "
 if $contains 'char.*sprintf' /usr/include/stdio.h >/dev/null 2>&1 ; then
@@ -579,6 +671,21 @@ else
     esac
 fi
 
+: see if stdio is really std
+echo " "
+if $contains 'char.*_ptr;' /usr/include/stdio.h >/dev/null 2>&1 ; then
+    if $contains '_cnt;' /usr/include/stdio.h >/dev/null 2>&1 ; then
+	echo "Your stdio is pretty std."
+	d_stdstdio="$define"
+    else
+	echo "Your stdio isn't very std."
+	d_stdstdio="$undef"
+    fi
+else
+    echo "Your stdio isn't very std."
+    d_stdstdio="$undef"
+fi
+
 : check for structure copying
 echo " "
 echo "Checking to see if your C compiler can copy structs..."
@@ -609,6 +716,16 @@ if $contains vfork libc.list >/dev/null 2>&1 ; then
 else
     echo "No vfork() found--will use fork() instead."
     d_vfork="$define"
+fi
+
+: see if signal is declared as pointer to function returning int or void
+echo " "
+if $contains 'void.*signal' /usr/include/signal.h >/dev/null 2>&1 ; then
+    echo "You have void (*signal())() instead of int."
+    d_voidsig="$define"
+else
+    echo "You have int (*signal())() instead of void."
+    d_voidsig="$undef"
 fi
 
 : check for void type
@@ -680,6 +797,16 @@ $echo $n "$rp $c"
 . myread
 voidflags="$ans"
 $rm -f try.* .out
+
+: see what type of char stdio uses.
+echo " "
+if $contains 'unsigned.*char.*_ptr;' /usr/include/stdio.h >/dev/null 2>&1 ; then
+    echo "Your stdio uses unsigned chars."
+    stdchar="unsigned char"
+else
+    echo "Your stdio uses signed chars."
+    stdchar="char"
+fi
 
 : preserve RCS keywords in files with variable substitution, grrr
 Log='$Log'
@@ -793,61 +920,9 @@ case "$mansrc" in
     ;;
 esac
 
-: see how we invoke the C preprocessor
-echo " "
-echo "Checking to see how your C preprocessor is invoked..."
-cat <<'EOT' >testcpp.c
-#define ABC abc
-#define XYZ xyz
-ABC.XYZ
-EOT
-echo 'Maybe "cc -E" will work...'
-cc -E testcpp.c >testcpp.out 2>&1
-if $contains 'abc.xyz' testcpp.out >/dev/null 2>&1 ; then
-    echo "Yup, it does."
-    cpp='cc -E'
-else
-    echo 'Nope...maybe "cc -P" will work...'
-    cc -P testcpp.c >testcpp.out 2>&1
-    if $contains 'abc.xyz' testcpp.out >/dev/null 2>&1 ; then
-	echo "Yup, that does."
-	cpp='cc -P'
-    else
-	echo 'Nixed again...maybe "/lib/cpp" will work...'
-	/lib/cpp testcpp.c >testcpp.out 2>&1
-	if $contains 'abc.xyz' testcpp.out >/dev/null 2>&1 ; then
-	    echo "Hooray, it works!  I was beginning to wonder."
-	    cpp='/lib/cpp'
-	else
-	    echo 'Hmm...maybe you already told me...'
-	    case "$cpp" in
-	    '') ;;
-	    *) $cpp testcpp.c >testcpp.out 2>&1;;
-	    esac
-	    if $contains 'abc.xyz' testcpp.out >/dev/null 2>&1 ; then
-		echo "Hooray, you did!  I was beginning to wonder."
-	    else
-		dflt=blurfl
-		$echo $n "Nope. I can't find a C preprocessor.  Name one: $c"
-		rp='Name a C preprocessor:'
-		. myread
-		cpp="$ans"
-		$cpp testcpp.c >testcpp.out 2>&1
-		if $contains 'abc.xyz' testcpp.out >/dev/null 2>&1 ; then
-		    echo "OK, that will do."
-		else
-		    echo "Sorry, I can't get that to work.  Go find one."
-		    exit 1
-		fi
-	    fi
-	fi
-    fi
-fi
-rm -f testcpp.c testcpp.out
-
 : get C preprocessor symbols handy
 echo " "
-echo $attrlist | $tr '[ ]' '[\012]' >Cppsym.know
+echo $attrlist | $tr '[ - ]' '[\012-\012]' >Cppsym.know
 $cat <<EOSS >Cppsym
 $startsh
 case "\$1" in
@@ -874,13 +949,13 @@ esac
 case \$# in
 0) exit 1;;
 esac
-echo \$* | $tr '[ ]' '[\012]' | $sed -e 's/\(.*\)/\\
+echo \$* | $tr '[ - ]' '[\012-\012]' | $sed -e 's/\(.*\)/\\
 #ifdef \1\\
 exit 0; _ _ _ _\1\\	 \1\\
 #endif\\
 /' >/tmp/Cppsym\$\$
 echo exit 1 >>/tmp/Cppsym\$\$
-$cpp /tmp/Cppsym\$\$ >/tmp/Cppsym2\$\$
+$cpp $cppminus </tmp/Cppsym\$\$ >/tmp/Cppsym2\$\$
 case "\$list" in
 true) awk '\$6 != "" {print substr(\$6,2,100)}' </tmp/Cppsym2\$\$ ;;
 *)
@@ -1123,7 +1198,7 @@ if $test -r /usr/lib/libnm.a || $test -r /usr/local/lib/libnm.a ; then
     echo "New math library found."
     libnm='-lnm'
 else
-    ans=`loc libtermlib.a x $libpth`
+    ans=`loc libnm.a x $libpth`
     case "$ans" in
     x)
 	echo "No nm library found--the normal math library will have to do."
@@ -1184,10 +1259,13 @@ bin='$bin'
 cc='$cc'
 contains='$contains'
 cpp='$cpp'
+cppminus='$cppminus'
 d_charsprf='$d_charsprf'
 d_index='$d_index'
+d_stdstdio='$d_stdstdio'
 d_strctcpy='$d_strctcpy'
 d_vfork='$d_vfork'
+d_voidsig='$d_voidsig'
 libc='$libc'
 libnm='$libnm'
 mansrc='$mansrc'
@@ -1207,6 +1285,7 @@ spitshell='$spitshell'
 shsharp='$shsharp'
 sharpbang='$sharpbang'
 startsh='$startsh'
+stdchar='$stdchar'
 voidflags='$voidflags'
 defvoidused='$defvoidused'
 CONFIG=true
@@ -1228,7 +1307,14 @@ esac
 
 echo " "
 echo "Doing variable substitutions on .SH files..."
-set `$grep '\.SH' <MANIFEST | awk '{print $1}'`
+set x `$grep '\.SH' <MANIFEST | awk '{print $1}'`
+shift
+case $# in
+0) set x *.SH; shift;;
+esac
+if test ! -f $1; then
+    shift
+fi
 for file in $*; do
     case "$file" in
     */*)

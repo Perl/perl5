@@ -1,6 +1,9 @@
-char rcsid[] = "$Header: perly.c,v 1.0 87/12/18 15:53:31 root Exp $";
+char rcsid[] = "$Header: perly.c,v 1.0.1.1 88/01/21 21:25:57 root Exp $";
 /*
  * $Log:	perly.c,v $
+ * Revision 1.0.1.1  88/01/21  21:25:57  root
+ * Now uses CPP and CPPMINUS symbols from config.h.
+ * 
  * Revision 1.0  87/12/18  15:53:31  root
  * Initial revision
  * 
@@ -118,8 +121,8 @@ register char **env;
  -e '/^#[ 	]*else/b' \
  -e '/^#[ 	]*endif/b' \
  -e 's/^#.*//' \
- %s | /lib/cpp -C %s-",
-	  argv[0], str_get(str));
+ %s | %s -C %s%s",
+	  argv[0], CPP, str_get(str), CPPMINUS);
 	rsfp = popen(buf,"r");
     }
     else if (!*argv[0])

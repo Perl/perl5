@@ -37,6 +37,20 @@ cat <<!GROK!THIS! >config.h
 #$d_eunice	EUNICE		/**/
 #$d_eunice	VMS		/**/
 
+/* CPP:
+ *	This symbol contains the first part of the string which will invoke
+ *	the C preprocessor on the standard input and produce to standard
+ *	output.	 Typical value of "cc -E" or "/lib/cpp".
+ */
+/* CPPMINUS:
+ *	This symbol contains the second part of the string which will invoke
+ *	the C preprocessor on the standard input and produce to standard
+ *	output.  This symbol will have the value "-" if CPP needs a minus
+ *	to specify standard input, otherwise the value is "".
+ */
+#define CPP "$cpp"
+#define CPPMINUS "$cppminus"
+
 /* CHARSPRINTF:
  *	This symbol is defined if this system declares "char *sprintf()" in
  *	stdio.h.  The trend seems to be to declare it as "int sprintf()".  It
@@ -56,6 +70,12 @@ cat <<!GROK!THIS! >config.h
 #$d_index	index strchr	/* cultural */
 #$d_index	rindex strrchr	/*  differences? */
 
+/* STDSTDIO:
+ *	This symbol is defined if this system has a FILE structure declaring
+ *	_ptr and _cnt in stdio.h.
+ */
+#$d_stdstdio	STDSTDIO 	/**/
+
 /* STRUCTCOPY:
  *	This symbol, if defined, indicates that this C compiler knows how
  *	to copy structures.  If undefined, you'll need to use a block copy
@@ -68,6 +88,20 @@ cat <<!GROK!THIS! >config.h
  *	vfork() routine isn't supported here.
  */
 #$d_vfork	vfork fork	/**/
+
+/* VOIDSIG:
+ *	This symbol is defined if this system declares "void (*signal())()" in
+ *	signal.h.  The old way was to declare it as "int (*signal())()".  It
+ *	is up to the package author to declare things correctly based on the
+ *	symbol.
+ */
+#$d_voidsig	VOIDSIG 	/**/
+
+/* STDCHAR:
+ *	This symbol is defined to be the type of char used in stdio.h.
+ *	It has the values "unsigned char" or "char".
+ */
+#define STDCHAR $stdchar	/**/
 
 /* VOIDFLAGS:
  *	This symbol indicates how much support of the void type is given by this

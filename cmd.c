@@ -1,6 +1,9 @@
-/* $Header: cmd.c,v 1.0 87/12/18 13:04:51 root Exp $
+/* $Header: cmd.c,v 1.0.1.1 88/01/21 21:24:16 root Exp $
  *
  * $Log:	cmd.c,v $
+ * Revision 1.0.1.1  88/01/21  21:24:16  root
+ * The redo cmd got a segmentation fault because trace context stack overflowed.
+ * 
  * Revision 1.0  87/12/18  13:04:51  root
  * Initial revision
  * 
@@ -383,6 +386,9 @@ until_loop:
 	case O_NEXT:
 	    goto next_iter;
 	case O_REDO:
+#ifdef DEBUGGING
+	    dlevel = olddlevel;
+#endif
 	    goto doit;
 	}
 	oldspat = curspat;

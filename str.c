@@ -1,6 +1,9 @@
-/* $Header: str.c,v 1.0 87/12/18 13:06:22 root Exp $
+/* $Header: str.c,v 1.0.1.1 88/01/21 21:28:39 root Exp $
  *
  * $Log:	str.c,v $
+ * Revision 1.0.1.1  88/01/21  21:28:39  root
+ * Suppressed warning messages on signed vs unsigned chars in str_gets().
+ * 
  * Revision 1.0  87/12/18  13:06:22  root
  * Initial revision
  * 
@@ -318,8 +321,8 @@ register FILE *fp;
 
     register char *bp;		/* we're going to steal some values */
     register int cnt;		/*  from the stdio struct and put EVERYTHING */
-    register char *ptr;		/*   in the innermost loop into registers */
-    register char newline = record_separator;	/* (assuming >= 6 registers) */
+    register STDCHAR *ptr;	/*   in the innermost loop into registers */
+    register char newline = record_separator;/* (assuming >= 6 registers) */
     int i;
     int bpx;
     int obpx;
