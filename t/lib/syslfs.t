@@ -119,17 +119,17 @@ print "ok 7\n";
 fail unless $big eq "big";
 print "ok 8\n";
 
-bye();
-
 if ($fail) {
     print STDERR <<EOM;
 #
-# If the lfs (large file support) tests fail, it means that
+# If the lfs (large file support) tests fail, it may mean that
 # the *file system* you are running the tests on doesn't support
 # large files (files larger than two gigabytes).  Perl may still
 # be able to support such files, once you have such a file system.
 #
 EOM
 }
+
+bye();
 
 # eof
