@@ -187,7 +187,7 @@ sub expr {
     while ($_ ne '') {
 	s/^(\s+)//		&& do {$new .= ' '; next;};
 	s/^(0x[0-9a-fA-F]+)//	&& do {$new .= $1; next;};
-	s/^(\d+)//		&& do {$new .= $1; next;};
+	s/^(\d+)[LlUu]*//	&& do {$new .= $1; next;};
 	s/^("(\\"|[^"])*")//	&& do {$new .= $1; next;};
 	s/^'((\\"|[^"])*)'//	&& do {
 	    if ($curargs{$1}) {
@@ -198,7 +198,7 @@ sub expr {
 	    }
 	    next;
 	};
-	s/^sizeof\s*\(([^)]+\))\)/{$1}/ && do {
+	s/^sizeof\s*\(([^)]+)\)/{$1}/ && do {
 	    $new .= '$sizeof';
 	    next;
 	};
@@ -233,7 +233,7 @@ sub expr {
 		    s/^[\s*]*\)//;
 		}
 		else {
-		    $new .= $id;
+		    $new .= q(').$id.q(');
 		}
 	    }
 	    else {
