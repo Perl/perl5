@@ -5,6 +5,7 @@ typedef struct {
     SV*              sv;    /* The actual data */
     perl_mutex       mutex; /* Our mutex */
     perl_cond        cond;  /* Our condition variable */
+    perl_cond        user_cond;  /* For user level conditions */
     IV               locks; /* Number of locks held */
     PerlInterpreter* owner; /* who owns the lock */
 } shared_sv;
