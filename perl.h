@@ -1173,7 +1173,7 @@ typedef NVTYPE NV;
 #endif
 
 #if !defined(Perl_atof) && defined(USE_LONG_DOUBLE) && defined(HAS_LONG_DOUBLE)
-#   if !defined(Perl_atof) && defined(HAS_STRTOLD)
+#   if !defined(Perl_atof) && defined(HAS_STRTOLD) 
 #       define Perl_atof(s) strtold(s, (char**)NULL)
 #   endif
 #   if !defined(Perl_atof) && defined(HAS_ATOLF)
@@ -3075,7 +3075,7 @@ typedef struct am_table_short AMTS;
 
 #endif /* !USE_LOCALE_NUMERIC */
 
-#if !defined(Atol) && defined(IV_IS_QUAD) && QUADKIND == QUAD_IS_LONG_LONG
+#if !defined(Atol) && defined(USE_64_BIT_INT) && defined(IV_IS_QUAD) && QUADKIND == QUAD_IS_LONG_LONG
 #    ifdef __hpux
 #        define strtoll __strtoll	/* secret handshake */
 #    endif
@@ -3091,7 +3091,7 @@ typedef struct am_table_short AMTS;
 #   define Atol atol /* we assume atol being available anywhere */
 #endif
 
-#if !defined(Strtoul) && defined(UV_IS_QUAD) && QUADKIND == QUAD_IS_LONG_LONG
+#if !defined(Strtoul) && defined(USE_64_BIT_INT) && defined(UV_IS_QUAD) && QUADKIND == QUAD_IS_LONG_LONG
 #    ifdef __hpux
 #        define strtoull __strtoull	/* secret handshake */
 #    endif
@@ -3105,6 +3105,9 @@ typedef struct am_table_short AMTS;
 #endif
 #if !defined(Strtoul)
 #   define Strtoul strtoul /* we assume strtoul being available anywhere */
+#endif
+#ifndef Atoul 
+#   define Atoul Strtoul
 #endif
 
 #if !defined(PERLIO_IS_STDIO) && defined(HASATTRIBUTE)

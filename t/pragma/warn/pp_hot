@@ -62,12 +62,11 @@ print <STDERR>;
 open(FOO, ">&STDOUT") and print <FOO>;
 print getc(STDERR);
 print getc(FOO);
-#####################################################################
-# The next test is known to fail on some systems (Linux+glibc, *BSD #
-# NeXT among others.  glibc and FreeBSD have been fixed, but it     #
-# appears other platforms have little hope.  We skip it for now (on #
-# the grounds that it is "just" a warning).                         #
-#####################################################################
+####################################################################
+# The next test is known to fail on some systems (Linux+old glibc, #
+# old *BSDs, and NeXT, among others.                               #
+# We skip it for now (on the grounds that it is "just" a warning). #
+####################################################################
 #read(FOO,$_,1);
 no warnings 'io' ;
 print STDIN "anc";

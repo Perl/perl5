@@ -6978,22 +6978,14 @@ Perl_scan_num(pTHX_ char *start)
 	 */
 
 	if (!floatit) {
-	    char *tp;
     	    IV iv;
     	    UV uv;
 	    errno = 0;
-#ifdef USE_64_BIT_INT
 	    if (*PL_tokenbuf == '-')
-		iv = strtoll(PL_tokenbuf,&tp,10);
+		iv = Atol(PL_tokenbuf);
 	    else
-		uv = strtoull(PL_tokenbuf,&tp,10);
-#else
-	    if (*PL_tokenbuf == '-')
-		iv = strtol(PL_tokenbuf,&tp,10);
-	    else
-		uv = strtoul(PL_tokenbuf,&tp,10);
-#endif
-	    if (*tp || errno)
+		uv = Atoul(PL_tokenbuf);
+	    if (errno)
 	    	floatit = TRUE; /* probably just too large */
 	    else if (*PL_tokenbuf == '-')
 	    	sv_setiv(sv, iv);
@@ -7003,13 +6995,8 @@ Perl_scan_num(pTHX_ char *start)
 	if (floatit) {
 	    char *tp;
 	    errno = 0;
-/* For some reason VMS doesn't have strrold at the moment. Dunno why */
-#if defined(USE_LONG_DOUBLE) && (defined(HAS_STRTOLD) || !defined(VMS))
-	    value = strtold(PL_tokenbuf,&tp);
-#else
-	    value = strtod(PL_tokenbuf,&tp);
-#endif
-	    if (*tp || errno)
+	    value = Atof(PL_tokenbuf);
+	    if (errno)
 		Perl_die(aTHX_ "unparseable float");
 	    else
 	    	sv_setnv(sv, value);
