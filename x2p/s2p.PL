@@ -29,7 +29,7 @@ print OUT <<"!GROK!THIS!";
 $Config{'startperl'}
     eval 'exec perl -S \$0 "\$@"'
 	if 0;
-\$startperl = $Config{startperl};
+\$startperl = "$Config{startperl}";
 !GROK!THIS!
 
 # In the following, perl variables are not expanded during extraction.
