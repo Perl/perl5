@@ -43,8 +43,10 @@
 # "ext.libs" file which is *probably* messing up the order.  Often,
 # you can replace ext.libs with an empty file to fix the problem.
 #
-# If you get a message about "too much defining", you might have to
-# add the following to your ccflags: '-Wp,-H256000'
+# If you get a message about "too much defining", as may happen
+# in HPUX < 10, you might have to append a single entry to your
+# ccflags: '-Wp,-H256000'
+# NOTE: This is a single entry (-W takes the argument 'p,-H256000').
 #--------------------------------------------------------------------
 
 # Turn on the _HPUX_SOURCE flag to get many of the HP add-ons
