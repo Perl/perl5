@@ -352,12 +352,7 @@ static DBTKEY empty ;
 #ifdef DB_VERSION_MAJOR
 
 static int
-db_put(db, key, value, flags)
-DB_File		db ;
-DBTKEY		key ;
-DBT		value ;
-u_int		flags ;
-
+db_put(DB_File db, DBTKEY key, DBT value, u_int flags)
 {
     int status ;
 
@@ -381,7 +376,7 @@ u_int		flags ;
 #endif /* DB_VERSION_MAJOR */
 
 static void
-GetVersionInfo()
+GetVersionInfo(pTHX)
 {
     SV * ver_sv = perl_get_sv("DB_File::db_version", TRUE) ;
 #ifdef DB_VERSION_MAJOR
@@ -412,10 +407,9 @@ GetVersionInfo()
 
 
 static int
-btree_compare(key1, key2)
-const DBT * key1 ;
-const DBT * key2 ;
+btree_compare(const DBT *key1, const DBT *key2)
 {
+    dTHX;
     dSP ;
     void * data1, * data2 ;
     int retval ;
@@ -459,10 +453,9 @@ const DBT * key2 ;
 }
 
 static DB_Prefix_t
-btree_prefix(key1, key2)
-const DBT * key1 ;
-const DBT * key2 ;
+btree_prefix(const DBT *key1, const DBT *key2)
 {
+    dTHX;
     dSP ;
     void * data1, * data2 ;
     int retval ;
@@ -506,10 +499,9 @@ const DBT * key2 ;
 }
 
 static DB_Hash_t
-hash_cb(data, size)
-const void * data ;
-size_t size ;
+hash_cb(const void *data, size_t size)
 {
+    dTHX;
     dSP ;
     int retval ;
     int count ;
@@ -546,8 +538,7 @@ size_t size ;
 #ifdef TRACE
 
 static void
-PrintHash(hash)
-INFO * hash ;
+PrintHash(INFO *hash)
 {
     printf ("HASH Info\n") ;
     printf ("  hash      = %s\n", 
@@ -561,8 +552,7 @@ INFO * hash ;
 }
 
 static void
-PrintRecno(recno)
-INFO * recno ;
+PrintRecno(INFO *recno)
 {
     printf ("RECNO Info\n") ;
     printf ("  flags     = %d\n", recno->db_RE_flags) ;
@@ -575,8 +565,7 @@ INFO * recno ;
 }
 
 static void
-PrintBtree(btree)
-INFO * btree ;
+PrintBtree(INFO *btree)
 {
     printf ("BTREE Info\n") ;
     printf ("  compare    = %s\n", 
@@ -603,8 +592,7 @@ INFO * btree ;
 
 
 static I32
-GetArrayLength(db)
-DB_File db ;
+GetArrayLength(pTHX_ DB_File db)
 {
     DBT		key ;
     DBT		value ;
@@ -622,13 +610,11 @@ DB_File db ;
 }
 
 static recno_t
-GetRecnoKey(db, value)
-DB_File  db ;
-I32      value ;
+GetRecnoKey(pTHX_ DB_File db, I32 value)
 {
     if (value < 0) {
 	/* Get the length of the array */
-	I32 length = GetArrayLength(db) ;
+	I32 length = GetArrayLength(aTHX_ db) ;
 
 	/* check for attempt to write before start of array */
 	if (length + value + 1 <= 0)
@@ -643,12 +629,7 @@ I32      value ;
 }
 
 static DB_File
-ParseOpenInfo(isHASH, name, flags, mode, sv)
-int    isHASH ;
-char * name ;
-int    flags ;
-int    mode ;
-SV *   sv ;
+ParseOpenInfo(pTHX_ int isHASH, char *name, int flags, int mode, SV *sv)
 {
     SV **	svp;
     HV *	action ;
@@ -917,18 +898,8 @@ SV *   sv ;
 }
 
 
-static int
-not_here(s)
-char *s;
-{
-    croak("DB_File::%s not implemented on this architecture", s);
-    return -1;
-}
-
 static double 
-constant(name, arg)
-char *name;
-int arg;
+constant(char *name, int arg)
 {
     errno = 0;
     switch (*name) {
@@ -1161,7 +1132,7 @@ MODULE = DB_File	PACKAGE = DB_File	PREFIX = db_
 
 BOOT:
   {
-    GetVersionInfo() ;
+    GetVersionInfo(aTHX) ;
  
     empty.data = &zero ;
     empty.size =  sizeof(recno_t) ;
@@ -1192,7 +1163,7 @@ db_DoTie_(isHASH, dbtype, name=undef, flags=O_CREAT|O_RDWR, mode=0666, type=DB_H
             if (items == 6)
 	        sv = ST(5) ;
 
-	    RETVAL = ParseOpenInfo(isHASH, name, flags, mode, sv) ;
+	    RETVAL = ParseOpenInfo(aTHX_ isHASH, name, flags, mode, sv) ;
 	    if (RETVAL->dbp == NULL)
 	        RETVAL = NULL ;
 	}
@@ -1465,7 +1436,7 @@ length(db)
 	ALIAS:		FETCHSIZE = 1
 	CODE:
 	    CurrentDB = db ;
-	    RETVAL = GetArrayLength(db) ;
+	    RETVAL = GetArrayLength(aTHX_ db) ;
 	OUTPUT:
 	    RETVAL
 
