@@ -549,7 +549,7 @@ cchar(sv)
 void
 threadsv_names()
     PPCODE:
-#ifdef USE_THREADS
+#ifdef USE_5005THREADS
 	int i;
 	STRLEN len = strlen(PL_threadsv_names);
 

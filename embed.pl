@@ -554,13 +554,13 @@ print EM <<'END';
 /* (Doing namespace management portably in C is really gross.) */
 
 /*
-   The following combinations of MULTIPLICITY, USE_THREADS, PERL_OBJECT
+   The following combinations of MULTIPLICITY, USE_5005THREADS, PERL_OBJECT
    and PERL_IMPLICIT_CONTEXT are supported:
      1) none
      2) MULTIPLICITY	# supported for compatibility
      3) MULTIPLICITY && PERL_IMPLICIT_CONTEXT
-     4) USE_THREADS && PERL_IMPLICIT_CONTEXT
-     5) MULTIPLICITY && USE_THREADS && PERL_IMPLICIT_CONTEXT
+     4) USE_5005THREADS && PERL_IMPLICIT_CONTEXT
+     5) MULTIPLICITY && USE_5005THREADS && PERL_IMPLICIT_CONTEXT
      6) PERL_OBJECT && PERL_IMPLICIT_CONTEXT
 
    All other combinations of these flags are errors.
@@ -590,7 +590,7 @@ print EM <<'END';
 #    include "error: PERL_OBJECT + MULTIPLICITY don't go together"
 #  endif
 
-#  if defined(USE_THREADS)
+#  if defined(USE_5005THREADS)
 /* case 5 above */
 
 END
@@ -601,7 +601,7 @@ for $sym (sort keys %intrp) {
 
 print EM <<'END';
 
-#  else		/* !USE_THREADS */
+#  else		/* !USE_5005THREADS */
 /* cases 2 and 3 above */
 
 END
@@ -612,7 +612,7 @@ for $sym (sort keys %intrp) {
 
 print EM <<'END';
 
-#  endif	/* USE_THREADS */
+#  endif	/* USE_5005THREADS */
 
 #else	/* !MULTIPLICITY */
 
@@ -644,7 +644,7 @@ for $sym (sort keys %intrp) {
 
 print EM <<'END';
 
-#    if defined(USE_THREADS)
+#    if defined(USE_5005THREADS)
 /* case 4 above */
 
 END
@@ -655,7 +655,7 @@ for $sym (sort keys %thread) {
 
 print EM <<'END';
 
-#    else	/* !USE_THREADS */
+#    else	/* !USE_5005THREADS */
 /* case 1 above */
 
 END
@@ -666,7 +666,7 @@ for $sym (sort keys %thread) {
 
 print EM <<'END';
 
-#    endif	/* USE_THREADS */
+#    endif	/* USE_5005THREADS */
 #  endif	/* PERL_OBJECT */
 #endif	/* MULTIPLICITY */
 
@@ -1433,7 +1433,7 @@ Ap	|UV	|cast_uv	|NV f
 #if !defined(HAS_TRUNCATE) && !defined(HAS_CHSIZE) && defined(F_FREESP)
 Ap	|I32	|my_chsize	|int fd|Off_t length
 #endif
-#if defined(USE_THREADS)
+#if defined(USE_5005THREADS)
 Ap	|MAGIC*	|condpair_magic	|SV *sv
 #endif
 p	|OP*	|convert	|I32 optype|I32 flags|OP* o
@@ -1543,7 +1543,7 @@ Apd	|char*	|fbm_instr	|unsigned char* big|unsigned char* bigend \
 				|SV* littlesv|U32 flags
 p	|char*	|find_script	|char *scriptname|bool dosearch \
 				|char **search_ext|I32 flags
-#if defined(USE_THREADS)
+#if defined(USE_5005THREADS)
 p	|PADOFFSET|find_threadsv|const char *name
 #endif
 p	|OP*	|force_list	|OP* arg
@@ -1701,7 +1701,7 @@ p	|int	|magic_gettaint	|SV* sv|MAGIC* mg
 p	|int	|magic_getuvar	|SV* sv|MAGIC* mg
 p	|int	|magic_getvec	|SV* sv|MAGIC* mg
 p	|U32	|magic_len	|SV* sv|MAGIC* mg
-#if defined(USE_THREADS)
+#if defined(USE_5005THREADS)
 p	|int	|magic_mutexfree|SV* sv|MAGIC* mg
 #endif
 p	|int	|magic_nextpack	|SV* sv|MAGIC* mg|SV* key
@@ -1870,7 +1870,7 @@ Aox	|int	|Perl_run
 Aox	|int	|Perl_parse	|XSINIT_t xsinit \
 				|int argc|char** argv|char** env
 #endif
-#if defined(USE_THREADS)
+#if defined(USE_5005THREADS)
 Ap	|struct perl_thread*	|new_struct_thread|struct perl_thread *t
 #endif
 Ap	|void	|call_atexit	|ATEXIT_t fn|void *ptr
@@ -2103,7 +2103,7 @@ Ap	|UV	|to_utf8_title	|U8 *p
 #if defined(UNLINK_ALL_VERSIONS)
 Ap	|I32	|unlnk		|char* f
 #endif
-#if defined(USE_THREADS)
+#if defined(USE_5005THREADS)
 Ap	|void	|unlock_condpair|void* svv
 #endif
 Ap	|void	|unsharepvn	|const char* sv|I32 len|U32 hash
@@ -2160,7 +2160,7 @@ Ap	|struct perl_vars *|GetVars
 #endif
 Ap	|int	|runops_standard
 Ap	|int	|runops_debug
-#if defined(USE_THREADS)
+#if defined(USE_5005THREADS)
 Ap	|SV*	|sv_lock	|SV *sv
 #endif
 Afpd	|void	|sv_catpvf_mg	|SV *sv|const char* pat|...
@@ -2363,7 +2363,7 @@ s	|void*	|vrun_body	|va_list args
 s	|void*	|vcall_body	|va_list args
 s	|void*	|vcall_list_body|va_list args
 #endif
-#  if defined(USE_THREADS)
+#  if defined(USE_5005THREADS)
 s	|struct perl_thread *	|init_main_thread
 #  endif
 #endif

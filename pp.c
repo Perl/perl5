@@ -4147,11 +4147,11 @@ PP(pp_split)
 #endif
     }
     else if (gimme != G_ARRAY)
-#ifdef USE_THREADS
+#ifdef USE_5005THREADS
 	ary = (AV*)PL_curpad[0];
 #else
 	ary = GvAVn(PL_defgv);
-#endif /* USE_THREADS */
+#endif /* USE_5005THREADS */
     else
 	ary = Nullav;
     if (ary && (gimme != G_ARRAY || (pm->op_pmflags & PMf_ONCE))) {
@@ -4407,7 +4407,7 @@ PP(pp_split)
     RETPUSHUNDEF;
 }
 
-#ifdef USE_THREADS
+#ifdef USE_5005THREADS
 void
 Perl_unlock_condpair(pTHX_ void *svv)
 {
@@ -4424,16 +4424,16 @@ Perl_unlock_condpair(pTHX_ void *svv)
 			  PTR2UV(thr), PTR2UV(svv)));
     MUTEX_UNLOCK(MgMUTEXP(mg));
 }
-#endif /* USE_THREADS */
+#endif /* USE_5005THREADS */
 
 PP(pp_lock)
 {
     dSP;
     dTOPss;
     SV *retsv = sv;
-#ifdef USE_THREADS
+#ifdef USE_5005THREADS
     sv_lock(sv);
-#endif /* USE_THREADS */
+#endif /* USE_5005THREADS */
 #ifdef USE_ITHREADS
     shared_sv *ssv = Perl_sharedsv_find(aTHX_ sv);
     if(ssv)
@@ -4449,7 +4449,7 @@ PP(pp_lock)
 
 PP(pp_threadsv)
 {
-#ifdef USE_THREADS
+#ifdef USE_5005THREADS
     dSP;
     EXTEND(SP, 1);
     if (PL_op->op_private & OPpLVAL_INTRO)
@@ -4459,5 +4459,5 @@ PP(pp_threadsv)
     RETURN;
 #else
     DIE(aTHX_ "tried to access per-thread data in non-threaded perl");
-#endif /* USE_THREADS */
+#endif /* USE_5005THREADS */
 }

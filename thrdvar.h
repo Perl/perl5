@@ -5,16 +5,16 @@
 /* Don't forget to re-run embed.pl to propagate changes! */
 
 /* The 'T' prefix is only needed for vars that need appropriate #defines
- * generated when built with or without USE_THREADS.  It is also used
+ * generated when built with or without USE_5005THREADS.  It is also used
  * to generate the appropriate export list for win32.
  *
- * When building without USE_THREADS, these variables will be truly global.
- * When building without USE_THREADS but with MULTIPLICITY, these variables
+ * When building without USE_5005THREADS, these variables will be truly global.
+ * When building without USE_5005THREADS but with MULTIPLICITY, these variables
  * will be global per-interpreter. */
 
 /* Important ones in the first cache line (if alignment is done right) */
 
-#ifdef USE_THREADS
+#ifdef USE_5005THREADS
 PERLVAR(interp,		PerlInterpreter*)	/* thread owner */
 #endif
 
@@ -233,7 +233,7 @@ PERLVAR(Twatchok,	char *)
 /* Note that the variables below are all explicitly referenced in the code
  * as thr->whatever and therefore don't need the 'T' prefix. */
 
-#ifdef USE_THREADS
+#ifdef USE_5005THREADS
 
 PERLVAR(oursv,		SV *)
 PERLVAR(cvcache,	HV *)
@@ -257,7 +257,7 @@ PERLVAR(i,		struct thread_intern)
 PERLVAR(trailing_nul,	char)		/* For the sake of thrsv and oursv */
 PERLVAR(thr_done,	bool)		/* True when the thread has finished */
 
-#endif /* USE_THREADS */
+#endif /* USE_5005THREADS */
 
 PERLVAR(Treg_sv_utf8,	bool)		/* was what we matched against utf8 */
 

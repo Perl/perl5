@@ -47,7 +47,7 @@ static I32 read_e_script(pTHXo_ int idx, SV *buf_sv, int maxlen);
 #define perl_free	Perl_free
 #endif
 
-#if defined(USE_THREADS)
+#if defined(USE_5005THREADS)
 #  define INIT_TLS_AND_INTERP \
     STMT_START {				\
 	if (!PL_curinterp) {			\
@@ -148,11 +148,11 @@ Initializes a new Perl interpreter.  See L<perlembed>.
 void
 perl_construct(pTHXx)
 {
-#ifdef USE_THREADS
+#ifdef USE_5005THREADS
 #ifndef FAKE_THREADS
     struct perl_thread *thr = NULL;
 #endif /* FAKE_THREADS */
-#endif /* USE_THREADS */
+#endif /* USE_5005THREADS */
 
 #ifdef MULTIPLICITY
     init_interp();
@@ -164,7 +164,7 @@ perl_construct(pTHXx)
 
    /* Init the real globals (and main thread)? */
     if (!PL_linestr) {
-#ifdef USE_THREADS
+#ifdef USE_5005THREADS
 	MUTEX_INIT(&PL_sv_mutex);
 	/*
 	 * Safe to use basic SV functions from now on (though
@@ -183,7 +183,7 @@ perl_construct(pTHXx)
 	MUTEX_INIT(&PL_fdpid_mutex);
 
 	thr = init_main_thread();
-#endif /* USE_THREADS */
+#endif /* USE_5005THREADS */
 
 #ifdef PERL_FLEXIBLE_EXCEPTIONS
 	PL_protect = MEMBER_TO_FPTR(Perl_default_protect); /* for exceptions */
@@ -308,15 +308,15 @@ perl_destruct(pTHXx)
 {
     int destruct_level;  /* 0=none, 1=full, 2=full with checks */
     HV *hv;
-#ifdef USE_THREADS
+#ifdef USE_5005THREADS
     Thread t;
     dTHX;
-#endif /* USE_THREADS */
+#endif /* USE_5005THREADS */
 
     /* wait for all pseudo-forked children to finish */
     PERL_WAIT_FOR_CHILDREN;
 
-#ifdef USE_THREADS
+#ifdef USE_5005THREADS
 #ifndef FAKE_THREADS
     /* Pass 1 on any remaining threads: detach joinables, join zombies */
   retry_cleanup:
@@ -385,7 +385,7 @@ perl_destruct(pTHXx)
     COND_DESTROY(&PL_nthreads_cond);
     PL_nthreads--;
 #endif /* !defined(FAKE_THREADS) */
-#endif /* USE_THREADS */
+#endif /* USE_5005THREADS */
 
     destruct_level = PL_perl_destruct_level;
 #ifdef DEBUGGING
@@ -810,7 +810,7 @@ perl_destruct(pTHXx)
     PL_hints = 0;		/* Reset hints. Should hints be per-interpreter ? */
 
     DEBUG_P(debprofdump());
-#ifdef USE_THREADS
+#ifdef USE_5005THREADS
     MUTEX_DESTROY(&PL_strtab_mutex);
     MUTEX_DESTROY(&PL_sv_mutex);
     MUTEX_DESTROY(&PL_eval_mutex);
@@ -826,7 +826,7 @@ perl_destruct(pTHXx)
     Safefree(SvANY(PL_thrsv));
     Safefree(PL_thrsv);
     PL_thrsv = Nullsv;
-#endif /* USE_THREADS */
+#endif /* USE_5005THREADS */
 
 #ifdef USE_REENTRANT_API
     Safefree(PL_reentrant_buffer->tmbuff);
@@ -925,7 +925,7 @@ perl_parse(pTHXx_ XSINIT_t xsinit, int argc, char **argv, char **env)
     I32 oldscope;
     int ret;
     dJMPENV;
-#ifdef USE_THREADS
+#ifdef USE_5005THREADS
     dTHX;
 #endif
 
@@ -1171,8 +1171,8 @@ S_parse_body(pTHX_ char **env, XSINIT_t xsinit)
 #  ifdef MULTIPLICITY
 		sv_catpv(PL_Sv," MULTIPLICITY");
 #  endif
-#  ifdef USE_THREADS
-		sv_catpv(PL_Sv," USE_THREADS");
+#  ifdef USE_5005THREADS
+		sv_catpv(PL_Sv," USE_5005THREADS");
 #  endif
 #  ifdef USE_ITHREADS
 		sv_catpv(PL_Sv," USE_ITHREADS");
@@ -1373,14 +1373,14 @@ print \"  \\@INC:\\n    @INC\\n\";");
     PL_comppad_name_fill = 0;
     PL_min_intro_pending = 0;
     PL_padix = 0;
-#ifdef USE_THREADS
+#ifdef USE_5005THREADS
     av_store(PL_comppad_name, 0, newSVpvn("@_", 2));
     PL_curpad[0] = (SV*)newAV();
     SvPADMY_on(PL_curpad[0]);	/* XXX Needed? */
     CvOWNER(PL_compcv) = 0;
     New(666, CvMUTEXP(PL_compcv), 1, perl_mutex);
     MUTEX_INIT(CvMUTEXP(PL_compcv));
-#endif /* USE_THREADS */
+#endif /* USE_5005THREADS */
 
     comppadlist = newAV();
     AvREAL_off(comppadlist);
@@ -1490,7 +1490,7 @@ perl_run(pTHXx)
     I32 oldscope;
     int ret = 0;
     dJMPENV;
-#ifdef USE_THREADS
+#ifdef USE_5005THREADS
     dTHX;
 #endif
 
@@ -1610,13 +1610,13 @@ SV*
 Perl_get_sv(pTHX_ const char *name, I32 create)
 {
     GV *gv;
-#ifdef USE_THREADS
+#ifdef USE_5005THREADS
     if (name[1] == '\0' && !isALPHA(name[0])) {
 	PADOFFSET tmp = find_threadsv(name);
     	if (tmp != NOT_IN_PAD)
 	    return THREADSV(tmp);
     }
-#endif /* USE_THREADS */
+#endif /* USE_5005THREADS */
     gv = gv_fetchpv(name, create, SVt_PV);
     if (gv)
 	return GvSV(gv);
@@ -2596,19 +2596,19 @@ S_init_interp(pTHX)
 #    define PERLVAR(var,type)
 #    define PERLVARA(var,n,type)
 #    if defined(PERL_IMPLICIT_CONTEXT)
-#      if defined(USE_THREADS)
+#      if defined(USE_5005THREADS)
 #        define PERLVARI(var,type,init)		PERL_GET_INTERP->var = init;
 #        define PERLVARIC(var,type,init)	PERL_GET_INTERP->var = init;
-#      else /* !USE_THREADS */
+#      else /* !USE_5005THREADS */
 #        define PERLVARI(var,type,init)		aTHX->var = init;
 #        define PERLVARIC(var,type,init)	aTHX->var = init;
-#      endif /* USE_THREADS */
+#      endif /* USE_5005THREADS */
 #    else
 #      define PERLVARI(var,type,init)	PERL_GET_INTERP->var = init;
 #      define PERLVARIC(var,type,init)	PERL_GET_INTERP->var = init;
 #    endif
 #    include "intrpvar.h"
-#    ifndef USE_THREADS
+#    ifndef USE_5005THREADS
 #      include "thrdvar.h"
 #    endif
 #    undef PERLVAR
@@ -2621,7 +2621,7 @@ S_init_interp(pTHX)
 #    define PERLVARI(var,type,init)	PL_##var = init;
 #    define PERLVARIC(var,type,init)	PL_##var = init;
 #    include "intrpvar.h"
-#    ifndef USE_THREADS
+#    ifndef USE_5005THREADS
 #      include "thrdvar.h"
 #    endif
 #    undef PERLVAR
@@ -2642,7 +2642,7 @@ S_init_main_stash(pTHX)
        about not iterating on it, and not adding tie magic to it.
        It is properly deallocated in perl_destruct() */
     PL_strtab = newHV();
-#ifdef USE_THREADS
+#ifdef USE_5005THREADS
     MUTEX_INIT(&PL_strtab_mutex);
 #endif
     HvSHAREKEYS_off(PL_strtab);			/* mandatory */
@@ -3787,7 +3787,7 @@ S_incpush(pTHX_ char *p, int addsubdirs, int addoldvers)
     }
 }
 
-#ifdef USE_THREADS
+#ifdef USE_5005THREADS
 STATIC struct perl_thread *
 S_init_main_thread(pTHX)
 {
@@ -3865,7 +3865,7 @@ S_init_main_thread(pTHX)
 
     return thr;
 }
-#endif /* USE_THREADS */
+#endif /* USE_5005THREADS */
 
 void
 Perl_call_list(pTHX_ I32 oldscope, AV *paramList)

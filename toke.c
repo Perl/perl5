@@ -2285,13 +2285,13 @@ Perl_yylex(pTHX)
 	if (PL_lex_dojoin) {
 	    PL_nextval[PL_nexttoke].ival = 0;
 	    force_next(',');
-#ifdef USE_THREADS
+#ifdef USE_5005THREADS
 	    PL_nextval[PL_nexttoke].opval = newOP(OP_THREADSV, 0);
 	    PL_nextval[PL_nexttoke].opval->op_targ = find_threadsv("\"");
 	    force_next(PRIVATEREF);
 #else
 	    force_ident("\"", '$');
-#endif /* USE_THREADS */
+#endif /* USE_5005THREADS */
 	    PL_nextval[PL_nexttoke].ival = 0;
 	    force_next('$');
 	    PL_nextval[PL_nexttoke].ival = 0;
@@ -5164,7 +5164,7 @@ S_pending_ident(pTHX)
     */
 
     if (!strchr(PL_tokenbuf,':')) {
-#ifdef USE_THREADS
+#ifdef USE_5005THREADS
         /* Check for single character per-thread SVs */
         if (PL_tokenbuf[0] == '$' && PL_tokenbuf[2] == '\0'
             && !isALPHA(PL_tokenbuf[1]) /* Rule out obvious non-threadsvs */
@@ -5174,7 +5174,7 @@ S_pending_ident(pTHX)
             yylval.opval->op_targ = tmp;
             return PRIVATEREF;
         }
-#endif /* USE_THREADS */
+#endif /* USE_5005THREADS */
         if ((tmp = pad_findmy(PL_tokenbuf)) != NOT_IN_PAD) {
             SV *namesv = AvARRAY(PL_comppad_name)[tmp];
             /* might be an "our" variable" */
@@ -7455,11 +7455,11 @@ Perl_start_subparse(pTHX_ I32 is_format, U32 flags)
     PL_min_intro_pending = 0;
     PL_padix = 0;
     PL_subline = CopLINE(PL_curcop);
-#ifdef USE_THREADS
+#ifdef USE_5005THREADS
     av_store(PL_comppad_name, 0, newSVpvn("@_", 2));
     PL_curpad[0] = (SV*)newAV();
     SvPADMY_on(PL_curpad[0]);	/* XXX Needed? */
-#endif /* USE_THREADS */
+#endif /* USE_5005THREADS */
 
     comppadlist = newAV();
     AvREAL_off(comppadlist);
@@ -7468,11 +7468,11 @@ Perl_start_subparse(pTHX_ I32 is_format, U32 flags)
 
     CvPADLIST(PL_compcv) = comppadlist;
     CvOUTSIDE(PL_compcv) = (CV*)SvREFCNT_inc(outsidecv);
-#ifdef USE_THREADS
+#ifdef USE_5005THREADS
     CvOWNER(PL_compcv) = 0;
     New(666, CvMUTEXP(PL_compcv), 1, perl_mutex);
     MUTEX_INIT(CvMUTEXP(PL_compcv));
-#endif /* USE_THREADS */
+#endif /* USE_5005THREADS */
 
     return oldsavestack_ix;
 }

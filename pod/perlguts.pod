@@ -1733,9 +1733,9 @@ the C++ object will contain all the context, the state of that
 interpreter.
 
 Three macros control the major Perl build flavors: MULTIPLICITY,
-USE_THREADS and PERL_OBJECT.  The MULTIPLICITY build has a C structure
+USE_5005THREADS and PERL_OBJECT.  The MULTIPLICITY build has a C structure
 that packages all the interpreter state, there is a similar thread-specific
-data structure under USE_THREADS, and the (now deprecated) PERL_OBJECT
+data structure under USE_5005THREADS, and the (now deprecated) PERL_OBJECT
 build has a C++ class to maintain interpreter state.  In all three cases,
 PERL_IMPLICIT_CONTEXT is also normally defined, and enables the
 support for passing in a "hidden" first argument that represents all three
@@ -1819,7 +1819,7 @@ Under PERL_OBJECT in the core, that will translate to either:
                                        # see objXSUB.h
 
 Under PERL_OBJECT in extensions (aka PERL_CAPI), or under
-MULTIPLICITY/USE_THREADS with PERL_IMPLICIT_CONTEXT in both core
+MULTIPLICITY/USE_5005THREADS with PERL_IMPLICIT_CONTEXT in both core
 and extensions, it will become:
 
     Perl_sv_setsv(aTHX_ foo, bar);     # the canonical Perl "API"
@@ -1984,7 +1984,7 @@ that the interpreter knows about itself and pass it around, so too are
 there plans to allow the interpreter to bundle up everything it knows
 about the environment it's running on.  This is enabled with the
 PERL_IMPLICIT_SYS macro.  Currently it only works with PERL_OBJECT
-and USE_THREADS on Windows (see inside iperlsys.h).
+and USE_5005THREADS on Windows (see inside iperlsys.h).
 
 This allows the ability to provide an extra pointer (called the "host"
 environment) for all the system calls.  This makes it possible for

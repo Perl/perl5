@@ -23,7 +23,7 @@ static int sig_pipe[2];
 static void
 remove_thread(pTHX_ Thread t)
 {
-#ifdef USE_THREADS
+#ifdef USE_5005THREADS
     DEBUG_S(WITH_THR(PerlIO_printf(Perl_debug_log,
 				   "%p: remove_thread %p\n", thr, t)));
     MUTEX_LOCK(&PL_threads_mutex);
@@ -40,7 +40,7 @@ remove_thread(pTHX_ Thread t)
 static THREAD_RET_TYPE
 threadstart(void *arg)
 {
-#ifdef USE_THREADS
+#ifdef USE_5005THREADS
 #ifdef FAKE_THREADS
     Thread savethread = thr;
     LOGOP myop;
@@ -228,7 +228,7 @@ threadstart(void *arg)
 static SV *
 newthread (pTHX_ SV *startsv, AV *initargs, char *classname)
 {
-#ifdef USE_THREADS
+#ifdef USE_5005THREADS
     dSP;
     Thread savethread;
     int i;
@@ -370,7 +370,7 @@ join(t)
 	AV *	av = NO_INIT
 	int	i = NO_INIT
     PPCODE:
-#ifdef USE_THREADS
+#ifdef USE_5005THREADS
 	if (t == thr)
 	    croak("Attempt to join self");
 	DEBUG_S(PerlIO_printf(Perl_debug_log, "%p: joining %p (state %u)\n",
@@ -415,7 +415,7 @@ void
 detach(t)
 	Thread	t
     CODE:
-#ifdef USE_THREADS
+#ifdef USE_5005THREADS
 	DEBUG_S(PerlIO_printf(Perl_debug_log, "%p: detaching %p (state %u)\n",
 			      thr, t, ThrSTATE(t)));
     	MUTEX_LOCK(&t->mutex);
@@ -451,7 +451,7 @@ void
 flags(t)
 	Thread	t
     PPCODE:
-#ifdef USE_THREADS
+#ifdef USE_5005THREADS
 	PUSHs(sv_2mortal(newSViv(t->flags)));
 #endif
 
@@ -459,7 +459,7 @@ void
 done(t)
 	Thread	t
     PPCODE:
-#ifdef USE_THREADS
+#ifdef USE_5005THREADS
 	PUSHs(t->thr_done ? &PL_sv_yes : &PL_sv_no);
 #endif
 
@@ -469,7 +469,7 @@ self(classname)
     PREINIT:
 	SV *sv;
     PPCODE:        
-#ifdef USE_THREADS
+#ifdef USE_5005THREADS
 	sv = newSViv(thr->tid);
 	sv_magic(sv, thr->oursv, '~', 0, 0);
 	SvMAGIC(sv)->mg_private = Thread_MAGIC_SIGNATURE;
@@ -481,7 +481,7 @@ U32
 tid(t)
 	Thread	t
     CODE:
-#ifdef USE_THREADS
+#ifdef USE_5005THREADS
     	MUTEX_LOCK(&t->mutex);
 	RETVAL = t->tid;
     	MUTEX_UNLOCK(&t->mutex);
@@ -501,7 +501,7 @@ void
 yield()
     CODE:
 {
-#ifdef USE_THREADS
+#ifdef USE_5005THREADS
 	YIELD;
 #endif
 }
@@ -511,7 +511,7 @@ cond_wait(sv)
 	SV *	sv
 	MAGIC *	mg = NO_INIT
 CODE:                       
-#ifdef USE_THREADS
+#ifdef USE_5005THREADS
 	if (SvROK(sv))
 	    sv = SvRV(sv);
 
@@ -536,7 +536,7 @@ cond_signal(sv)
 	SV *	sv
 	MAGIC *	mg = NO_INIT
 CODE:
-#ifdef USE_THREADS
+#ifdef USE_5005THREADS
 	if (SvROK(sv))
 	    sv = SvRV(sv);
 
@@ -556,7 +556,7 @@ cond_broadcast(sv)
 	SV *	sv
 	MAGIC *	mg = NO_INIT
 CODE: 
-#ifdef USE_THREADS
+#ifdef USE_5005THREADS
 	if (SvROK(sv))
 	    sv = SvRV(sv);
 
@@ -581,7 +581,7 @@ list(classname)
 	SV **	svp;
 	int	n = 0;
     PPCODE:
-#ifdef USE_THREADS
+#ifdef USE_5005THREADS
 	av = newAV();
 	/*
 	 * Iterate until we have enough dynamic storage for all threads.
@@ -673,7 +673,7 @@ void
 data(classname = "Thread::Specific")
 	char *	classname
     PPCODE:
-#ifdef USE_THREADS
+#ifdef USE_5005THREADS
 	if (AvFILL(thr->specific) == -1) {
 	    GV *gv = gv_fetchpv("Thread::Specific::FIELDS", TRUE, SVt_PVHV);
 	    av_store(thr->specific, 0, newRV((SV*)GvHV(gv)));

@@ -1253,10 +1253,10 @@ Perl_do_sv_dump(pTHX_ I32 level, PerlIO *file, SV *sv, I32 nest, I32 maxnest, bo
  	do_gvgv_dump(level, file, "  GVGV::GV", CvGV(sv));
 	Perl_dump_indent(aTHX_ level, file, "  FILE = \"%s\"\n", CvFILE(sv));
 	Perl_dump_indent(aTHX_ level, file, "  DEPTH = %"IVdf"\n", (IV)CvDEPTH(sv));
-#ifdef USE_THREADS
+#ifdef USE_5005THREADS
 	Perl_dump_indent(aTHX_ level, file, "  MUTEXP = 0x%"UVxf"\n", PTR2UV(CvMUTEXP(sv)));
 	Perl_dump_indent(aTHX_ level, file, "  OWNER = 0x%"UVxf"\n",  PTR2UV(CvOWNER(sv)));
-#endif /* USE_THREADS */
+#endif /* USE_5005THREADS */
 	Perl_dump_indent(aTHX_ level, file, "  FLAGS = 0x%"UVxf"\n", (UV)CvFLAGS(sv));
 	if (type == SVt_PVFM)
 	    Perl_dump_indent(aTHX_ level, file, "  LINES = %"IVdf"\n", (IV)FmLINES(sv));

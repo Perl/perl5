@@ -99,7 +99,7 @@
 # undef I_SYS_UN
 #endif 
 
-#ifdef USE_THREADS
+#ifdef USE_5005THREADS
 
 #define do_spawn(a)      os2_do_spawn(aTHX_ (a))
 #define do_aspawn(a,b,c) os2_do_aspawn(aTHX_ (a),(b),(c))
@@ -202,12 +202,12 @@ int pthread_create(pthread_t *tid, const pthread_attr_t *attr,
 
 #define THREADS_ELSEWHERE
 
-#else /* USE_THREADS */
+#else /* USE_5005THREADS */
 
 #define do_spawn(a)      os2_do_spawn(a)
 #define do_aspawn(a,b,c) os2_do_aspawn((a),(b),(c))
 
-#endif /* USE_THREADS */
+#endif /* USE_5005THREADS */
  
 void Perl_OS2_init(char **);
 void Perl_OS2_init3(char **envp, void **excH, int flags);

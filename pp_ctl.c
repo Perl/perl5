@@ -90,7 +90,7 @@ PP(pp_regcomp)
     tmpstr = POPs;
 
     /* prevent recompiling under /o and ithreads. */
-#if defined(USE_ITHREADS) || defined(USE_THREADS)
+#if defined(USE_ITHREADS) || defined(USE_5005THREADS)
     if (pm->op_pmflags & PMf_KEEP && PM_GETRE(pm))
 	 RETURN;
 #endif
@@ -155,7 +155,7 @@ PP(pp_regcomp)
     /* XXX runtime compiled output needs to move to the pad */
     if (pm->op_pmflags & PMf_KEEP) {
 	pm->op_private &= ~OPpRUNTIME;	/* no point compiling again */
-#if !defined(USE_ITHREADS) && !defined(USE_THREADS)
+#if !defined(USE_ITHREADS) && !defined(USE_5005THREADS)
 	/* XXX can't change the optree at runtime either */
 	cLOGOP->op_first->op_next = PL_op->op_next;
 #endif
@@ -780,7 +780,7 @@ PP(pp_grepstart)
     ENTER;					/* enter outer scope */
 
     SAVETMPS;
-    /* SAVE_DEFSV does *not* suffice here for USE_THREADS */
+    /* SAVE_DEFSV does *not* suffice here for USE_5005THREADS */
     SAVESPTR(DEFSV);
     ENTER;					/* enter inner scope */
     SAVEVPTR(PL_curpm);
@@ -994,7 +994,7 @@ PP(pp_sort)
 		    PL_secondgv = gv_fetchpv("b", TRUE, SVt_PV);
 		    PL_sortstash = stash;
 		}
-#ifdef USE_THREADS
+#ifdef USE_5005THREADS
 		sv_lock((SV *)PL_firstgv);
 		sv_lock((SV *)PL_secondgv);
 #endif
@@ -1016,10 +1016,10 @@ PP(pp_sort)
 		/* This is mostly copied from pp_entersub */
 		AV *av = (AV*)PL_curpad[0];
 
-#ifndef USE_THREADS
+#ifndef USE_5005THREADS
 		cx->blk_sub.savearray = GvAV(PL_defgv);
 		GvAV(PL_defgv) = (AV*)SvREFCNT_inc(av);
-#endif /* USE_THREADS */
+#endif /* USE_5005THREADS */
 		cx->blk_sub.oldcurpad = PL_curpad;
 		cx->blk_sub.argarray = av;
 	    }
@@ -1770,14 +1770,14 @@ PP(pp_enteriter)
     ENTER;
     SAVETMPS;
 
-#ifdef USE_THREADS
+#ifdef USE_5005THREADS
     if (PL_op->op_flags & OPf_SPECIAL) {
 	svp = &THREADSV(PL_op->op_targ);	/* per-thread variable */
 	SAVEGENERICSV(*svp);
 	*svp = NEWSV(0,0);
     }
     else
-#endif /* USE_THREADS */
+#endif /* USE_5005THREADS */
     if (PL_op->op_targ) {
 #ifndef USE_ITHREADS
 	svp = &PL_curpad[PL_op->op_targ];		/* "my" variable */
@@ -2252,10 +2252,10 @@ PP(pp_goto)
 		EXTEND(PL_stack_sp, items); /* @_ could have been extended. */
 		Copy(AvARRAY(av), PL_stack_sp, items, SV*);
 		PL_stack_sp += items;
-#ifndef USE_THREADS
+#ifndef USE_5005THREADS
 		SvREFCNT_dec(GvAV(PL_defgv));
 		GvAV(PL_defgv) = cx->blk_sub.savearray;
-#endif /* USE_THREADS */
+#endif /* USE_5005THREADS */
 		/* abandon @_ if it got reified */
 		if (AvREAL(av)) {
 		    (void)sv_2mortal((SV*)av);	/* delay until return */
@@ -2267,7 +2267,7 @@ PP(pp_goto)
 	    }
 	    else if (CvXSUB(cv)) {	/* put GvAV(defgv) back onto stack */
 		AV* av;
-#ifdef USE_THREADS
+#ifdef USE_5005THREADS
 		av = (AV*)PL_curpad[0];
 #else
 		av = GvAV(PL_defgv);
@@ -2379,7 +2379,7 @@ PP(pp_goto)
 			svp = AvARRAY(padlist);
 		    }
 		}
-#ifdef USE_THREADS
+#ifdef USE_5005THREADS
 		if (!cx->blk_sub.hasargs) {
 		    AV* av = (AV*)PL_curpad[0];
 		
@@ -2392,20 +2392,20 @@ PP(pp_goto)
 			PUTBACK ;		
 		    }
 		}
-#endif /* USE_THREADS */		
+#endif /* USE_5005THREADS */		
 		SAVEVPTR(PL_curpad);
 		PL_curpad = AvARRAY((AV*)svp[CvDEPTH(cv)]);
-#ifndef USE_THREADS
+#ifndef USE_5005THREADS
 		if (cx->blk_sub.hasargs)
-#endif /* USE_THREADS */
+#endif /* USE_5005THREADS */
 		{
 		    AV* av = (AV*)PL_curpad[0];
 		    SV** ary;
 
-#ifndef USE_THREADS
+#ifndef USE_5005THREADS
 		    cx->blk_sub.savearray = GvAV(PL_defgv);
 		    GvAV(PL_defgv) = (AV*)SvREFCNT_inc(av);
-#endif /* USE_THREADS */
+#endif /* USE_5005THREADS */
 		    cx->blk_sub.oldcurpad = PL_curpad;
 		    cx->blk_sub.argarray = av;
 		    ++mark;
@@ -2805,7 +2805,7 @@ Perl_sv_compile_2op(pTHX_ SV *sv, OP** startop, char *code, AV** avp)
     return rop;
 }
 
-/* With USE_THREADS, eval_owner must be held on entry to doeval */
+/* With USE_5005THREADS, eval_owner must be held on entry to doeval */
 STATIC OP *
 S_doeval(pTHX_ int gimme, OP** startop)
 {
@@ -2849,11 +2849,11 @@ S_doeval(pTHX_ int gimme, OP** startop)
     assert(CxTYPE(&cxstack[cxstack_ix]) == CXt_EVAL);
     cxstack[cxstack_ix].blk_eval.cv = PL_compcv;
 
-#ifdef USE_THREADS
+#ifdef USE_5005THREADS
     CvOWNER(PL_compcv) = 0;
     New(666, CvMUTEXP(PL_compcv), 1, perl_mutex);
     MUTEX_INIT(CvMUTEXP(PL_compcv));
-#endif /* USE_THREADS */
+#endif /* USE_5005THREADS */
 
     PL_comppad = newAV();
     av_push(PL_comppad, Nullsv);
@@ -2862,11 +2862,11 @@ S_doeval(pTHX_ int gimme, OP** startop)
     PL_comppad_name_fill = 0;
     PL_min_intro_pending = 0;
     PL_padix = 0;
-#ifdef USE_THREADS
+#ifdef USE_5005THREADS
     av_store(PL_comppad_name, 0, newSVpvn("@_", 2));
     PL_curpad[0] = (SV*)newAV();
     SvPADMY_on(PL_curpad[0]);	/* XXX Needed? */
-#endif /* USE_THREADS */
+#endif /* USE_5005THREADS */
 
     comppadlist = newAV();
     AvREAL_off(comppadlist);
@@ -2940,12 +2940,12 @@ S_doeval(pTHX_ int gimme, OP** startop)
 	}
 	SvREFCNT_dec(PL_rs);
 	PL_rs = SvREFCNT_inc(PL_nrs);
-#ifdef USE_THREADS
+#ifdef USE_5005THREADS
 	MUTEX_LOCK(&PL_eval_mutex);
 	PL_eval_owner = 0;
 	COND_SIGNAL(&PL_eval_cond);
 	MUTEX_UNLOCK(&PL_eval_mutex);
-#endif /* USE_THREADS */
+#endif /* USE_5005THREADS */
 	RETPUSHUNDEF;
     }
     SvREFCNT_dec(PL_rs);
@@ -2984,12 +2984,12 @@ S_doeval(pTHX_ int gimme, OP** startop)
     SP = PL_stack_base + POPMARK;		/* pop original mark */
     PL_op = saveop;			/* The caller may need it. */
     PL_lex_state = LEX_NOTPARSING;	/* $^S needs this. */
-#ifdef USE_THREADS
+#ifdef USE_5005THREADS
     MUTEX_LOCK(&PL_eval_mutex);
     PL_eval_owner = 0;
     COND_SIGNAL(&PL_eval_cond);
     MUTEX_UNLOCK(&PL_eval_mutex);
-#endif /* USE_THREADS */
+#endif /* USE_5005THREADS */
 
     RETURNOP(PL_eval_start);
 }
@@ -3368,14 +3368,14 @@ trylocal: {
     CopLINE_set(&PL_compiling, 0);
 
     PUTBACK;
-#ifdef USE_THREADS
+#ifdef USE_5005THREADS
     MUTEX_LOCK(&PL_eval_mutex);
     if (PL_eval_owner && PL_eval_owner != thr)
 	while (PL_eval_owner)
 	    COND_WAIT(&PL_eval_cond, &PL_eval_mutex);
     PL_eval_owner = thr;
     MUTEX_UNLOCK(&PL_eval_mutex);
-#endif /* USE_THREADS */
+#endif /* USE_5005THREADS */
     return DOCATCH(doeval(gimme, NULL));
 }
 
@@ -3452,14 +3452,14 @@ PP(pp_entereval)
     if (PERLDB_LINE && PL_curstash != PL_debstash)
 	save_lines(CopFILEAV(&PL_compiling), PL_linestr);
     PUTBACK;
-#ifdef USE_THREADS
+#ifdef USE_5005THREADS
     MUTEX_LOCK(&PL_eval_mutex);
     if (PL_eval_owner && PL_eval_owner != thr)
 	while (PL_eval_owner)
 	    COND_WAIT(&PL_eval_cond, &PL_eval_mutex);
     PL_eval_owner = thr;
     MUTEX_UNLOCK(&PL_eval_mutex);
-#endif /* USE_THREADS */
+#endif /* USE_5005THREADS */
     ret = doeval(gimme, NULL);
     if (PERLDB_INTER && was != PL_sub_generation /* Some subs defined here. */
 	&& ret != PL_op->op_next) {	/* Successive compilation. */
@@ -4203,7 +4203,7 @@ sortcv_stacked(pTHXo_ SV *a, SV *b)
     I32 result;
     AV *av;
 
-#ifdef USE_THREADS
+#ifdef USE_5005THREADS
     av = (AV*)PL_curpad[0];
 #else
     av = GvAV(PL_defgv);

@@ -6,13 +6,13 @@
 /* (Doing namespace management portably in C is really gross.) */
 
 /*
-   The following combinations of MULTIPLICITY, USE_THREADS, PERL_OBJECT
+   The following combinations of MULTIPLICITY, USE_5005THREADS, PERL_OBJECT
    and PERL_IMPLICIT_CONTEXT are supported:
      1) none
      2) MULTIPLICITY	# supported for compatibility
      3) MULTIPLICITY && PERL_IMPLICIT_CONTEXT
-     4) USE_THREADS && PERL_IMPLICIT_CONTEXT
-     5) MULTIPLICITY && USE_THREADS && PERL_IMPLICIT_CONTEXT
+     4) USE_5005THREADS && PERL_IMPLICIT_CONTEXT
+     5) MULTIPLICITY && USE_5005THREADS && PERL_IMPLICIT_CONTEXT
      6) PERL_OBJECT && PERL_IMPLICIT_CONTEXT
 
    All other combinations of these flags are errors.
@@ -170,7 +170,7 @@
 #    include "error: PERL_OBJECT + MULTIPLICITY don't go together"
 #  endif
 
-#  if defined(USE_THREADS)
+#  if defined(USE_5005THREADS)
 /* case 5 above */
 
 #define PL_Argv			(PERL_GET_INTERP->IArgv)
@@ -456,7 +456,7 @@
 #define PL_yynerrs		(PERL_GET_INTERP->Iyynerrs)
 #define PL_yyval		(PERL_GET_INTERP->Iyyval)
 
-#  else		/* !USE_THREADS */
+#  else		/* !USE_5005THREADS */
 /* cases 2 and 3 above */
 
 #define PL_Argv			(vTHX->IArgv)
@@ -742,7 +742,7 @@
 #define PL_yynerrs		(vTHX->Iyynerrs)
 #define PL_yyval		(vTHX->Iyyval)
 
-#  endif	/* USE_THREADS */
+#  endif	/* USE_5005THREADS */
 
 #else	/* !MULTIPLICITY */
 
@@ -1454,7 +1454,7 @@
 #define PL_Iyynerrs		PL_yynerrs
 #define PL_Iyyval		PL_yyval
 
-#    if defined(USE_THREADS)
+#    if defined(USE_5005THREADS)
 /* case 4 above */
 
 #define PL_Sv			(aTHX->TSv)
@@ -1593,7 +1593,7 @@
 #define PL_watchaddr		(aTHX->Twatchaddr)
 #define PL_watchok		(aTHX->Twatchok)
 
-#    else	/* !USE_THREADS */
+#    else	/* !USE_5005THREADS */
 /* case 1 above */
 
 #define PL_TSv			PL_Sv
@@ -1732,7 +1732,7 @@
 #define PL_Twatchaddr		PL_watchaddr
 #define PL_Twatchok		PL_watchok
 
-#    endif	/* USE_THREADS */
+#    endif	/* USE_5005THREADS */
 #  endif	/* PERL_OBJECT */
 #endif	/* MULTIPLICITY */
 

@@ -157,7 +157,7 @@
 #undef  my_chsize
 #define my_chsize		Perl_my_chsize
 #endif
-#if defined(USE_THREADS)
+#if defined(USE_5005THREADS)
 #undef  Perl_condpair_magic
 #define Perl_condpair_magic	pPerl->Perl_condpair_magic
 #undef  condpair_magic
@@ -383,7 +383,7 @@
 #define Perl_fbm_instr		pPerl->Perl_fbm_instr
 #undef  fbm_instr
 #define fbm_instr		Perl_fbm_instr
-#if defined(USE_THREADS)
+#if defined(USE_5005THREADS)
 #endif
 #undef  Perl_form
 #define Perl_form		pPerl->Perl_form
@@ -819,7 +819,7 @@
 #define Perl_grok_numeric_radix	pPerl->Perl_grok_numeric_radix
 #undef  grok_numeric_radix
 #define grok_numeric_radix	Perl_grok_numeric_radix
-#if defined(USE_THREADS)
+#if defined(USE_5005THREADS)
 #endif
 #if defined(USE_LOCALE_COLLATE)
 #endif
@@ -1209,7 +1209,7 @@
 #undef  Perl_parse
 #define Perl_parse		pPerl->Perl_parse
 #endif
-#if defined(USE_THREADS)
+#if defined(USE_5005THREADS)
 #undef  Perl_new_struct_thread
 #define Perl_new_struct_thread	pPerl->Perl_new_struct_thread
 #undef  new_struct_thread
@@ -1915,7 +1915,7 @@
 #undef  unlnk
 #define unlnk			Perl_unlnk
 #endif
-#if defined(USE_THREADS)
+#if defined(USE_5005THREADS)
 #undef  Perl_unlock_condpair
 #define Perl_unlock_condpair	pPerl->Perl_unlock_condpair
 #undef  unlock_condpair
@@ -2061,7 +2061,7 @@
 #define Perl_runops_debug	pPerl->Perl_runops_debug
 #undef  runops_debug
 #define runops_debug		Perl_runops_debug
-#if defined(USE_THREADS)
+#if defined(USE_5005THREADS)
 #undef  Perl_sv_lock
 #define Perl_sv_lock		pPerl->Perl_sv_lock
 #undef  sv_lock
@@ -2363,7 +2363,7 @@
 #  endif
 #if defined(PERL_FLEXIBLE_EXCEPTIONS)
 #endif
-#  if defined(USE_THREADS)
+#  if defined(USE_5005THREADS)
 #  endif
 #endif
 #if defined(PERL_IN_PP_C) || defined(PERL_DECL_PROT)

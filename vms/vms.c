@@ -224,13 +224,13 @@ Perl_vmstrnenv(const char *lnm, char *eqv, unsigned long int idx,
 	      /* fully initialized, in which case either thr or PL_curcop */
 	      /* might be bogus. We have to check, since ckWARN needs them */
 	      /* both to be valid if running threaded */
-#if defined(USE_THREADS)
+#if defined(USE_5005THREADS)
 	      if (thr && PL_curcop) {
 #endif
 		if (ckWARN(WARN_MISC)) {
 		  Perl_warner(aTHX_ WARN_MISC,"Value of CLI symbol \"%s\" too long",lnm);
 		}
-#if defined(USE_THREADS)
+#if defined(USE_5005THREADS)
 	      } else {
 		  Perl_warner(aTHX_ WARN_MISC,"Value of CLI symbol \"%s\" too long",lnm);
 	      }
@@ -439,7 +439,7 @@ prime_env_iter(void)
 #if defined(PERL_IMPLICIT_CONTEXT)
   pTHX;
 #endif
-#if defined(USE_THREADS) || defined(USE_ITHREADS)
+#if defined(USE_5005THREADS) || defined(USE_ITHREADS)
   static perl_mutex primenv_mutex;
   MUTEX_INIT(&primenv_mutex);
 #endif
@@ -4084,7 +4084,7 @@ vms_image_init(int *argcp, char ***argvp)
   if (tabidx) { tabvec[tabidx] = NULL; env_tables = tabvec; }
 
   getredirection(argcp,argvp);
-#if defined(USE_THREADS) && ( defined(__DECC) || defined(__DECCXX) )
+#if defined(USE_5005THREADS) && ( defined(__DECC) || defined(__DECCXX) )
   {
 # include <reentrancy.h>
   (void) decc$set_reentrancy(C$C_MULTITHREAD);

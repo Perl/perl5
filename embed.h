@@ -111,7 +111,7 @@
 #if !defined(HAS_TRUNCATE) && !defined(HAS_CHSIZE) && defined(F_FREESP)
 #define my_chsize		Perl_my_chsize
 #endif
-#if defined(USE_THREADS)
+#if defined(USE_5005THREADS)
 #define condpair_magic		Perl_condpair_magic
 #endif
 #define convert			Perl_convert
@@ -213,7 +213,7 @@
 #define fbm_compile		Perl_fbm_compile
 #define fbm_instr		Perl_fbm_instr
 #define find_script		Perl_find_script
-#if defined(USE_THREADS)
+#if defined(USE_5005THREADS)
 #define find_threadsv		Perl_find_threadsv
 #endif
 #define force_list		Perl_force_list
@@ -366,7 +366,7 @@
 #define magic_getuvar		Perl_magic_getuvar
 #define magic_getvec		Perl_magic_getvec
 #define magic_len		Perl_magic_len
-#if defined(USE_THREADS)
+#if defined(USE_5005THREADS)
 #define magic_mutexfree		Perl_magic_mutexfree
 #endif
 #define magic_nextpack		Perl_magic_nextpack
@@ -524,7 +524,7 @@
 #define peep			Perl_peep
 #if defined(PERL_OBJECT)
 #endif
-#if defined(USE_THREADS)
+#if defined(USE_5005THREADS)
 #define new_struct_thread	Perl_new_struct_thread
 #endif
 #define call_atexit		Perl_call_atexit
@@ -736,7 +736,7 @@
 #if defined(UNLINK_ALL_VERSIONS)
 #define unlnk			Perl_unlnk
 #endif
-#if defined(USE_THREADS)
+#if defined(USE_5005THREADS)
 #define unlock_condpair		Perl_unlock_condpair
 #endif
 #define unsharepvn		Perl_unsharepvn
@@ -793,7 +793,7 @@
 #endif
 #define runops_standard		Perl_runops_standard
 #define runops_debug		Perl_runops_debug
-#if defined(USE_THREADS)
+#if defined(USE_5005THREADS)
 #define sv_lock			Perl_sv_lock
 #endif
 #define sv_catpvf_mg		Perl_sv_catpvf_mg
@@ -964,7 +964,7 @@
 #define vcall_body		S_vcall_body
 #define vcall_list_body		S_vcall_list_body
 #endif
-#  if defined(USE_THREADS)
+#  if defined(USE_5005THREADS)
 #define init_main_thread	S_init_main_thread
 #  endif
 #endif
@@ -1656,7 +1656,7 @@
 #if !defined(HAS_TRUNCATE) && !defined(HAS_CHSIZE) && defined(F_FREESP)
 #define my_chsize(a,b)		Perl_my_chsize(aTHX_ a,b)
 #endif
-#if defined(USE_THREADS)
+#if defined(USE_5005THREADS)
 #define condpair_magic(a)	Perl_condpair_magic(aTHX_ a)
 #endif
 #define convert(a,b,c)		Perl_convert(aTHX_ a,b,c)
@@ -1740,7 +1740,7 @@
 #define fbm_compile(a,b)	Perl_fbm_compile(aTHX_ a,b)
 #define fbm_instr(a,b,c,d)	Perl_fbm_instr(aTHX_ a,b,c,d)
 #define find_script(a,b,c,d)	Perl_find_script(aTHX_ a,b,c,d)
-#if defined(USE_THREADS)
+#if defined(USE_5005THREADS)
 #define find_threadsv(a)	Perl_find_threadsv(aTHX_ a)
 #endif
 #define force_list(a)		Perl_force_list(aTHX_ a)
@@ -1891,7 +1891,7 @@
 #define magic_getuvar(a,b)	Perl_magic_getuvar(aTHX_ a,b)
 #define magic_getvec(a,b)	Perl_magic_getvec(aTHX_ a,b)
 #define magic_len(a,b)		Perl_magic_len(aTHX_ a,b)
-#if defined(USE_THREADS)
+#if defined(USE_5005THREADS)
 #define magic_mutexfree(a,b)	Perl_magic_mutexfree(aTHX_ a,b)
 #endif
 #define magic_nextpack(a,b,c)	Perl_magic_nextpack(aTHX_ a,b,c)
@@ -2047,7 +2047,7 @@
 #define peep(a)			Perl_peep(aTHX_ a)
 #if defined(PERL_OBJECT)
 #endif
-#if defined(USE_THREADS)
+#if defined(USE_5005THREADS)
 #define new_struct_thread(a)	Perl_new_struct_thread(aTHX_ a)
 #endif
 #define call_atexit(a,b)	Perl_call_atexit(aTHX_ a,b)
@@ -2257,7 +2257,7 @@
 #if defined(UNLINK_ALL_VERSIONS)
 #define unlnk(a)		Perl_unlnk(aTHX_ a)
 #endif
-#if defined(USE_THREADS)
+#if defined(USE_5005THREADS)
 #define unlock_condpair(a)	Perl_unlock_condpair(aTHX_ a)
 #endif
 #define unsharepvn(a,b,c)	Perl_unsharepvn(aTHX_ a,b,c)
@@ -2312,7 +2312,7 @@
 #endif
 #define runops_standard()	Perl_runops_standard(aTHX)
 #define runops_debug()		Perl_runops_debug(aTHX)
-#if defined(USE_THREADS)
+#if defined(USE_5005THREADS)
 #define sv_lock(a)		Perl_sv_lock(aTHX_ a)
 #endif
 #define sv_vcatpvf_mg(a,b,c)	Perl_sv_vcatpvf_mg(aTHX_ a,b,c)
@@ -2479,7 +2479,7 @@
 #define vcall_body(a)		S_vcall_body(aTHX_ a)
 #define vcall_list_body(a)	S_vcall_list_body(aTHX_ a)
 #endif
-#  if defined(USE_THREADS)
+#  if defined(USE_5005THREADS)
 #define init_main_thread()	S_init_main_thread(aTHX)
 #  endif
 #endif
@@ -3218,7 +3218,7 @@
 #define Perl_my_chsize		CPerlObj::Perl_my_chsize
 #define my_chsize		Perl_my_chsize
 #endif
-#if defined(USE_THREADS)
+#if defined(USE_5005THREADS)
 #define Perl_condpair_magic	CPerlObj::Perl_condpair_magic
 #define condpair_magic		Perl_condpair_magic
 #endif
@@ -3412,7 +3412,7 @@
 #define fbm_instr		Perl_fbm_instr
 #define Perl_find_script	CPerlObj::Perl_find_script
 #define find_script		Perl_find_script
-#if defined(USE_THREADS)
+#if defined(USE_5005THREADS)
 #define Perl_find_threadsv	CPerlObj::Perl_find_threadsv
 #define find_threadsv		Perl_find_threadsv
 #endif
@@ -3714,7 +3714,7 @@
 #define magic_getvec		Perl_magic_getvec
 #define Perl_magic_len		CPerlObj::Perl_magic_len
 #define magic_len		Perl_magic_len
-#if defined(USE_THREADS)
+#if defined(USE_5005THREADS)
 #define Perl_magic_mutexfree	CPerlObj::Perl_magic_mutexfree
 #define magic_mutexfree		Perl_magic_mutexfree
 #endif
@@ -4017,7 +4017,7 @@
 #define Perl_run		CPerlObj::Perl_run
 #define Perl_parse		CPerlObj::Perl_parse
 #endif
-#if defined(USE_THREADS)
+#if defined(USE_5005THREADS)
 #define Perl_new_struct_thread	CPerlObj::Perl_new_struct_thread
 #define new_struct_thread	Perl_new_struct_thread
 #endif
@@ -4441,7 +4441,7 @@
 #define Perl_unlnk		CPerlObj::Perl_unlnk
 #define unlnk			Perl_unlnk
 #endif
-#if defined(USE_THREADS)
+#if defined(USE_5005THREADS)
 #define Perl_unlock_condpair	CPerlObj::Perl_unlock_condpair
 #define unlock_condpair		Perl_unlock_condpair
 #endif
@@ -4545,7 +4545,7 @@
 #define runops_standard		Perl_runops_standard
 #define Perl_runops_debug	CPerlObj::Perl_runops_debug
 #define runops_debug		Perl_runops_debug
-#if defined(USE_THREADS)
+#if defined(USE_5005THREADS)
 #define Perl_sv_lock		CPerlObj::Perl_sv_lock
 #define sv_lock			Perl_sv_lock
 #endif
@@ -4855,7 +4855,7 @@
 #define S_vcall_list_body	CPerlObj::S_vcall_list_body
 #define vcall_list_body		S_vcall_list_body
 #endif
-#  if defined(USE_THREADS)
+#  if defined(USE_5005THREADS)
 #define S_init_main_thread	CPerlObj::S_init_main_thread
 #define init_main_thread	S_init_main_thread
 #  endif

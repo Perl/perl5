@@ -27,7 +27,7 @@
 
 typedef long perl_key;
 
-#if (defined (USE_ITHREADS) || defined (USE_THREADS)) && defined(MPK_ON)
+#if (defined (USE_ITHREADS) || defined (USE_5005THREADS)) && defined(MPK_ON)
 #ifdef __cplusplus
 extern "C"
 {

@@ -384,11 +384,11 @@ struct thread_intern {
 #    endif
 };
 
-#ifdef USE_THREADS
+#ifdef USE_5005THREADS
 #  ifndef USE_DECLSPEC_THREAD
 #    define HAVE_THREAD_INTERN
 #  endif /* !USE_DECLSPEC_THREAD */
-#endif /* USE_THREADS */
+#endif /* USE_5005THREADS */
 
 #define HAVE_INTERP_INTERN
 typedef struct {
@@ -408,7 +408,7 @@ struct interp_intern {
     child_tab *	pseudo_children;
 #endif
     void *	internal_host;
-#ifndef USE_THREADS
+#ifndef USE_5005THREADS
     struct thread_intern	thr_intern;
 #endif
 };
@@ -428,7 +428,7 @@ struct interp_intern {
 #define w32_pseudo_child_pids		(w32_pseudo_children->pids)
 #define w32_pseudo_child_handles	(w32_pseudo_children->handles)
 #define w32_internal_host		(PL_sys_intern.internal_host)
-#ifdef USE_THREADS
+#ifdef USE_5005THREADS
 #  define w32_strerror_buffer	(thr->i.Wstrerror_buffer)
 #  define w32_getlogin_buffer	(thr->i.Wgetlogin_buffer)
 #  define w32_crypt_buffer	(thr->i.Wcrypt_buffer)
@@ -440,7 +440,7 @@ struct interp_intern {
 #  define w32_crypt_buffer	(PL_sys_intern.thr_intern.Wcrypt_buffer)
 #  define w32_servent		(PL_sys_intern.thr_intern.Wservent)
 #  define w32_init_socktype	(PL_sys_intern.thr_intern.Winit_socktype)
-#endif /* USE_THREADS */
+#endif /* USE_5005THREADS */
 
 /* UNICODE<>ANSI translation helpers */
 /* Use CP_ACP when mode is ANSI */

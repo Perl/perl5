@@ -825,11 +825,11 @@ Perl_magic_get(pTHX_ SV *sv, MAGIC *mg)
     case '0':
 	break;
 #endif
-#ifdef USE_THREADS
+#ifdef USE_5005THREADS
     case '@':
 	sv_setsv(sv, thr->errsv);
 	break;
-#endif /* USE_THREADS */
+#endif /* USE_5005THREADS */
     }
     return 0;
 }
@@ -2175,16 +2175,16 @@ Perl_magic_set(pTHX_ SV *sv, MAGIC *mg)
 	}
 	break;
 #endif
-#ifdef USE_THREADS
+#ifdef USE_5005THREADS
     case '@':
 	sv_setsv(thr->errsv, sv);
 	break;
-#endif /* USE_THREADS */
+#endif /* USE_5005THREADS */
     }
     return 0;
 }
 
-#ifdef USE_THREADS
+#ifdef USE_5005THREADS
 int
 Perl_magic_mutexfree(pTHX_ SV *sv, MAGIC *mg)
 {
@@ -2197,7 +2197,7 @@ Perl_magic_mutexfree(pTHX_ SV *sv, MAGIC *mg)
     COND_DESTROY(MgCONDP(mg));
     return 0;
 }
-#endif /* USE_THREADS */
+#endif /* USE_5005THREADS */
 
 I32
 Perl_whichsig(pTHX_ char *sig)

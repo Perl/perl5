@@ -78,7 +78,7 @@ PERLVAR(Iargvout_stack,	AV *)
 
 /* shortcuts to regexp stuff */
 /* this one needs to be moved to thrdvar.h and accessed via
- * find_threadsv() when USE_THREADS */
+ * find_threadsv() when USE_5005THREADS */
 PERLVAR(Ireplgv,	GV *)
 
 /* shortcuts to misc objects */
@@ -220,11 +220,11 @@ PERLVAR(Ilinestart,	char *)		/* beg. of most recently read line */
 PERLVAR(Ipending_ident,	char)		/* pending identifier lookup */
 PERLVAR(Isublex_info,	SUBLEXINFO)	/* from toke.c */
 
-#ifdef USE_THREADS
+#ifdef USE_5005THREADS
 PERLVAR(Ithrsv,		SV *)		/* struct perl_thread for main thread */
 PERLVARI(Ithreadnum,	U32,	0)	/* incremented each thread creation */
 PERLVAR(Istrtab_mutex,	perl_mutex)	/* Mutex for string table access */
-#endif /* USE_THREADS */
+#endif /* USE_5005THREADS */
 
 PERLVAR(Iuid,		Uid_t)		/* current real user id */
 PERLVAR(Ieuid,		Uid_t)		/* current effective user id */
@@ -404,7 +404,7 @@ PERLVAR(Isrand_called,	bool)
 PERLVARA(Iuudmap,256,	char)
 PERLVAR(Ibitcount,	char *)
 
-#ifdef USE_THREADS
+#ifdef USE_5005THREADS
 PERLVAR(Isv_mutex,	perl_mutex)	/* Mutex for allocating SVs in sv.c */
 PERLVAR(Ieval_mutex,	perl_mutex)	/* Mutex for doeval */
 PERLVAR(Ieval_cond,	perl_cond)	/* Condition variable for doeval */
@@ -422,7 +422,7 @@ PERLVAR(Icurthr,	struct perl_thread *)
 
 PERLVAR(Icred_mutex,	perl_mutex)	/* altered credentials in effect */
 
-#endif /* USE_THREADS */
+#endif /* USE_5005THREADS */
 
 PERLVAR(Ipsig_ptr, SV**)
 PERLVAR(Ipsig_name, SV**)
@@ -444,7 +444,7 @@ PERLVAR(Iptr_table,	PTR_TBL_t*)
 #endif
 PERLVARI(Ibeginav_save, AV*, Nullav)	/* save BEGIN{}s when compiling */
 
-#ifdef USE_THREADS
+#ifdef USE_5005THREADS
 PERLVAR(Ifdpid_mutex,	perl_mutex)	/* mutex for fdpid array */
 PERLVAR(Isv_lock_mutex,	perl_mutex)	/* mutex for SvLOCK macro */
 #endif

@@ -401,7 +401,7 @@ Perl_pad_findmy(pTHX_ char *name)
     PERL_CONTEXT *cx;
     CV *outside;
 
-#ifdef USE_THREADS
+#ifdef USE_5005THREADS
     /*
      * Special case to get lexical (and hence per-thread) @_.
      * XXX I need to find out how to tell at parse-time whether use
@@ -412,7 +412,7 @@ Perl_pad_findmy(pTHX_ char *name)
      */
     if (strEQ(name, "@_"))
 	return 0;		/* success. (NOT_IN_PAD indicates failure) */
-#endif /* USE_THREADS */
+#endif /* USE_5005THREADS */
 
     /* The one we're looking for is probably just before comppad_name_fill. */
     for (off = AvFILLp(PL_comppad_name); off > 0; off--) {
@@ -508,7 +508,7 @@ Perl_pad_alloc(pTHX_ I32 optype, U32 tmptype)
     }
     SvFLAGS(sv) |= tmptype;
     PL_curpad = AvARRAY(PL_comppad);
-#ifdef USE_THREADS
+#ifdef USE_5005THREADS
     DEBUG_X(PerlIO_printf(Perl_debug_log,
 			  "0x%"UVxf" Pad 0x%"UVxf" alloc %ld for %s\n",
 			  PTR2UV(thr), PTR2UV(PL_curpad),
@@ -518,14 +518,14 @@ Perl_pad_alloc(pTHX_ I32 optype, U32 tmptype)
 			  "Pad 0x%"UVxf" alloc %ld for %s\n",
 			  PTR2UV(PL_curpad),
 			  (long) retval, PL_op_name[optype]));
-#endif /* USE_THREADS */
+#endif /* USE_5005THREADS */
     return (PADOFFSET)retval;
 }
 
 SV *
 Perl_pad_sv(pTHX_ PADOFFSET po)
 {
-#ifdef USE_THREADS
+#ifdef USE_5005THREADS
     DEBUG_X(PerlIO_printf(Perl_debug_log,
 			  "0x%"UVxf" Pad 0x%"UVxf" sv %"IVdf"\n",
 			  PTR2UV(thr), PTR2UV(PL_curpad), (IV)po));
@@ -534,7 +534,7 @@ Perl_pad_sv(pTHX_ PADOFFSET po)
 	Perl_croak(aTHX_ "panic: pad_sv po");
     DEBUG_X(PerlIO_printf(Perl_debug_log, "Pad 0x%"UVxf" sv %"IVdf"\n",
 			  PTR2UV(PL_curpad), (IV)po));
-#endif /* USE_THREADS */
+#endif /* USE_5005THREADS */
     return PL_curpad[po];		/* eventually we'll turn this into a macro */
 }
 
@@ -547,14 +547,14 @@ Perl_pad_free(pTHX_ PADOFFSET po)
 	Perl_croak(aTHX_ "panic: pad_free curpad");
     if (!po)
 	Perl_croak(aTHX_ "panic: pad_free po");
-#ifdef USE_THREADS
+#ifdef USE_5005THREADS
     DEBUG_X(PerlIO_printf(Perl_debug_log,
 			  "0x%"UVxf" Pad 0x%"UVxf" free %"IVdf"\n",
 			  PTR2UV(thr), PTR2UV(PL_curpad), (IV)po));
 #else
     DEBUG_X(PerlIO_printf(Perl_debug_log, "Pad 0x%"UVxf" free %"IVdf"\n",
 			  PTR2UV(PL_curpad), (IV)po));
-#endif /* USE_THREADS */
+#endif /* USE_5005THREADS */
     if (PL_curpad[po] && PL_curpad[po] != &PL_sv_undef) {
 	SvPADTMP_off(PL_curpad[po]);
 #ifdef USE_ITHREADS
@@ -572,14 +572,14 @@ Perl_pad_swipe(pTHX_ PADOFFSET po)
 	Perl_croak(aTHX_ "panic: pad_swipe curpad");
     if (!po)
 	Perl_croak(aTHX_ "panic: pad_swipe po");
-#ifdef USE_THREADS
+#ifdef USE_5005THREADS
     DEBUG_X(PerlIO_printf(Perl_debug_log,
 			  "0x%"UVxf" Pad 0x%"UVxf" swipe %"IVdf"\n",
 			  PTR2UV(thr), PTR2UV(PL_curpad), (IV)po));
 #else
     DEBUG_X(PerlIO_printf(Perl_debug_log, "Pad 0x%"UVxf" swipe %"IVdf"\n",
 			  PTR2UV(PL_curpad), (IV)po));
-#endif /* USE_THREADS */
+#endif /* USE_5005THREADS */
     SvPADTMP_off(PL_curpad[po]);
     PL_curpad[po] = NEWSV(1107,0);
     SvPADTMP_on(PL_curpad[po]);
@@ -601,14 +601,14 @@ Perl_pad_reset(pTHX)
 
     if (AvARRAY(PL_comppad) != PL_curpad)
 	Perl_croak(aTHX_ "panic: pad_reset curpad");
-#ifdef USE_THREADS
+#ifdef USE_5005THREADS
     DEBUG_X(PerlIO_printf(Perl_debug_log,
 			  "0x%"UVxf" Pad 0x%"UVxf" reset\n",
 			  PTR2UV(thr), PTR2UV(PL_curpad)));
 #else
     DEBUG_X(PerlIO_printf(Perl_debug_log, "Pad 0x%"UVxf" reset\n",
 			  PTR2UV(PL_curpad)));
-#endif /* USE_THREADS */
+#endif /* USE_5005THREADS */
     if (!PL_tainting) {	/* Can't mix tainted and non-tainted temporaries. */
 	for (po = AvMAX(PL_comppad); po > PL_padix_floor; po--) {
 	    if (PL_curpad[po] && !SvIMMORTAL(PL_curpad[po]))
@@ -620,7 +620,7 @@ Perl_pad_reset(pTHX)
     PL_pad_reset_pending = FALSE;
 }
 
-#ifdef USE_THREADS
+#ifdef USE_5005THREADS
 /* find_threadsv is not reentrant */
 PADOFFSET
 Perl_find_threadsv(pTHX_ const char *name)
@@ -685,7 +685,7 @@ Perl_find_threadsv(pTHX_ const char *name)
     }
     return key;
 }
-#endif /* USE_THREADS */
+#endif /* USE_5005THREADS */
 
 /* Destructor */
 
@@ -751,17 +751,17 @@ Perl_op_clear(pTHX_ OP *o)
     switch (o->op_type) {
     case OP_NULL:	/* Was holding old type, if any. */
     case OP_ENTEREVAL:	/* Was holding hints. */
-#ifdef USE_THREADS
+#ifdef USE_5005THREADS
     case OP_THREADSV:	/* Was holding index into thr->threadsv AV. */
 #endif
 	o->op_targ = 0;
 	break;
-#ifdef USE_THREADS
+#ifdef USE_5005THREADS
     case OP_ENTERITER:
 	if (!(o->op_flags & OPf_SPECIAL))
 	    break;
 	/* FALL THROUGH */
-#endif /* USE_THREADS */
+#endif /* USE_5005THREADS */
     default:
 	if (!(o->op_flags & OPf_REF)
 	    || (PL_check[o->op_type] != MEMBER_TO_FPTR(Perl_ck_ftst)))
@@ -1601,11 +1601,11 @@ Perl_mod(pTHX_ OP *o, I32 type)
 		SvPV(*av_fetch(PL_comppad_name, o->op_targ, 4), n_a));
 	break;
 
-#ifdef USE_THREADS
+#ifdef USE_5005THREADS
     case OP_THREADSV:
 	PL_modcount++;	/* XXX ??? */
 	break;
-#endif /* USE_THREADS */
+#endif /* USE_5005THREADS */
 
     case OP_PUSHMARK:
 	break;
@@ -2168,13 +2168,13 @@ Perl_block_end(pTHX_ I32 floor, OP *seq)
 STATIC OP *
 S_newDEFSVOP(pTHX)
 {
-#ifdef USE_THREADS
+#ifdef USE_5005THREADS
     OP *o = newOP(OP_THREADSV, 0);
     o->op_targ = find_threadsv("_");
     return o;
 #else
     return newSVREF(newGVOP(OP_GV, 0, PL_defgv));
-#endif /* USE_THREADS */
+#endif /* USE_5005THREADS */
 }
 
 void
@@ -2252,12 +2252,12 @@ Perl_jmaybe(pTHX_ OP *o)
 {
     if (o->op_type == OP_LIST) {
 	OP *o2;
-#ifdef USE_THREADS
+#ifdef USE_5005THREADS
 	o2 = newOP(OP_THREADSV, 0);
 	o2->op_targ = find_threadsv(";");
 #else
 	o2 = newSVREF(newGVOP(OP_GV, 0, gv_fetchpv(";", TRUE, SVt_PV))),
-#endif /* USE_THREADS */
+#endif /* USE_5005THREADS */
 	o = convert(OP_JOIN, 0, prepend_elem(OP_LIST, o2, o));
     }
     return o;
@@ -3059,21 +3059,21 @@ Perl_pmruntime(pTHX_ OP *o, OP *expr, OP *repl)
 	    if (CopLINE(PL_curcop) < PL_multi_end)
 		CopLINE_set(PL_curcop, PL_multi_end);
 	}
-#ifdef USE_THREADS
+#ifdef USE_5005THREADS
 	else if (repl->op_type == OP_THREADSV
 		 && strchr("&`'123456789+",
 			   PL_threadsv_names[repl->op_targ]))
 	{
 	    curop = 0;
 	}
-#endif /* USE_THREADS */
+#endif /* USE_5005THREADS */
 	else if (repl->op_type == OP_CONST)
 	    curop = repl;
 	else {
 	    OP *lastop = 0;
 	    for (curop = LINKLIST(repl); curop!=repl; curop = LINKLIST(curop)) {
 		if (PL_opargs[curop->op_type] & OA_DANGEROUS) {
-#ifdef USE_THREADS
+#ifdef USE_5005THREADS
 		    if (curop->op_type == OP_THREADSV) {
 			repl_has_vars = 1;
 			if (strchr("&`'123456789+", curop->op_private))
@@ -3086,7 +3086,7 @@ Perl_pmruntime(pTHX_ OP *o, OP *expr, OP *repl)
 			if (strchr("&`'123456789+", *GvENAME(gv)))
 			    break;
 		    }
-#endif /* USE_THREADS */
+#endif /* USE_5005THREADS */
 		    else if (curop->op_type == OP_RV2CV)
 			break;
 		    else if (curop->op_type == OP_RV2SV ||
@@ -4113,7 +4113,7 @@ Perl_newFOROP(pTHX_ I32 flags,char *label,line_t forline,OP *sv,OP *expr,OP *blo
 	    Perl_croak(aTHX_ "Can't use %s for loop variable", PL_op_desc[sv->op_type]);
     }
     else {
-#ifdef USE_THREADS
+#ifdef USE_5005THREADS
 	padoff = find_threadsv("_");
 	iterflags |= OPf_SPECIAL;
 #else
@@ -4205,13 +4205,13 @@ Perl_newLOOPEX(pTHX_ I32 type, OP *label)
 void
 Perl_cv_undef(pTHX_ CV *cv)
 {
-#ifdef USE_THREADS
+#ifdef USE_5005THREADS
     if (CvMUTEXP(cv)) {
 	MUTEX_DESTROY(CvMUTEXP(cv));
 	Safefree(CvMUTEXP(cv));
 	CvMUTEXP(cv) = 0;
     }
-#endif /* USE_THREADS */
+#endif /* USE_5005THREADS */
 
 #ifdef USE_ITHREADS
     if (CvFILE(cv) && !CvXSUB(cv)) {
@@ -4222,13 +4222,13 @@ Perl_cv_undef(pTHX_ CV *cv)
 #endif
 
     if (!CvXSUB(cv) && CvROOT(cv)) {
-#ifdef USE_THREADS
+#ifdef USE_5005THREADS
 	if (CvDEPTH(cv) || (CvOWNER(cv) && CvOWNER(cv) != thr))
 	    Perl_croak(aTHX_ "Can't undef active subroutine");
 #else
 	if (CvDEPTH(cv))
 	    Perl_croak(aTHX_ "Can't undef active subroutine");
-#endif /* USE_THREADS */
+#endif /* USE_5005THREADS */
 	ENTER;
 
 	SAVEVPTR(PL_curpad);
@@ -4361,11 +4361,11 @@ S_cv_clone2(pTHX_ CV *proto, CV *outside)
     CvFLAGS(cv) = CvFLAGS(proto) & ~CVf_CLONE;
     CvCLONED_on(cv);
 
-#ifdef USE_THREADS
+#ifdef USE_5005THREADS
     New(666, CvMUTEXP(cv), 1, perl_mutex);
     MUTEX_INIT(CvMUTEXP(cv));
     CvOWNER(cv)		= 0;
-#endif /* USE_THREADS */
+#endif /* USE_5005THREADS */
 #ifdef USE_ITHREADS
     CvFILE(cv)		= CvXSUB(proto) ? CvFILE(proto)
 					: savepv(CvFILE(proto));
@@ -4809,13 +4809,13 @@ Perl_newATTRSUB(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs, OP *block)
     CvGV(cv) = gv;
     CvFILE_set_from_cop(cv, PL_curcop);
     CvSTASH(cv) = PL_curstash;
-#ifdef USE_THREADS
+#ifdef USE_5005THREADS
     CvOWNER(cv) = 0;
     if (!CvMUTEXP(cv)) {
 	New(666, CvMUTEXP(cv), 1, perl_mutex);
 	MUTEX_INIT(CvMUTEXP(cv));
     }
-#endif /* USE_THREADS */
+#endif /* USE_5005THREADS */
 
     if (ps)
 	sv_setpv((SV*)cv, ps);
@@ -5094,11 +5094,11 @@ Perl_newXS(pTHX_ char *name, XSUBADDR_t subaddr, char *filename)
 	}
     }
     CvGV(cv) = gv;
-#ifdef USE_THREADS
+#ifdef USE_5005THREADS
     New(666, CvMUTEXP(cv), 1, perl_mutex);
     MUTEX_INIT(CvMUTEXP(cv));
     CvOWNER(cv) = 0;
-#endif /* USE_THREADS */
+#endif /* USE_5005THREADS */
     (void)gv_fetchfile(filename);
     CvFILE(cv) = filename;	/* NOTE: not copied, as it is expected to be
 				   an external constant string */
@@ -6312,7 +6312,7 @@ Perl_ck_shift(pTHX_ OP *o)
 	OP *argop;
 	
 	op_free(o);
-#ifdef USE_THREADS
+#ifdef USE_5005THREADS
 	if (!CvUNIQUE(PL_compcv)) {
 	    argop = newOP(OP_PADAV, OPf_REF);
 	    argop->op_targ = 0;		/* PL_curpad[0] is @_ */
@@ -6326,7 +6326,7 @@ Perl_ck_shift(pTHX_ OP *o)
 	argop = newUNOP(OP_RV2AV, 0,
 	    scalar(newGVOP(OP_GV, 0, !CvUNIQUE(PL_compcv) ?
 			   PL_defgv : gv_fetchpv("ARGV", TRUE, SVt_PVAV))));
-#endif /* USE_THREADS */
+#endif /* USE_5005THREADS */
 	return newUNOP(type, 0, scalar(argop));
     }
     return scalar(modkids(ck_fun(o), type));

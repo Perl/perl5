@@ -50,7 +50,7 @@ Perl_vdefault_protect(pTHX_ volatile JMPENV *pcur_env, int *excpt,
 SV**
 Perl_stack_grow(pTHX_ SV **sp, SV **p, int n)
 {
-#if defined(DEBUGGING) && !defined(USE_THREADS)
+#if defined(DEBUGGING) && !defined(USE_5005THREADS)
     static int growing = 0;
     if (growing++)
       abort();
@@ -61,7 +61,7 @@ Perl_stack_grow(pTHX_ SV **sp, SV **p, int n)
 #else
     av_extend(PL_curstack, (p - PL_stack_base) + (n) + 1);
 #endif
-#if defined(DEBUGGING) && !defined(USE_THREADS)
+#if defined(DEBUGGING) && !defined(USE_5005THREADS)
     growing--;
 #endif
     return PL_stack_sp;
@@ -458,7 +458,7 @@ Perl_save_padsv(pTHX_ PADOFFSET off)
 SV **
 Perl_save_threadsv(pTHX_ PADOFFSET i)
 {
-#ifdef USE_THREADS
+#ifdef USE_5005THREADS
     SV **svp = &THREADSV(i);	/* XXX Change to save by offset */
     DEBUG_S(PerlIO_printf(Perl_debug_log, "save_threadsv %"UVuf": %p %p:%s\n",
 			  (UV)i, svp, *svp, SvPEEK(*svp)));
@@ -467,7 +467,7 @@ Perl_save_threadsv(pTHX_ PADOFFSET i)
 #else
     Perl_croak(aTHX_ "panic: save_threadsv called in non-threaded perl");
     return 0;
-#endif /* USE_THREADS */
+#endif /* USE_5005THREADS */
 }
 
 void

@@ -48,7 +48,7 @@ main(int argc, char **argv, char **env)
 
     PERL_SYS_INIT3(&argc,&argv,&env);
 
-#if defined(USE_THREADS) || defined(USE_ITHREADS)
+#if defined(USE_5005THREADS) || defined(USE_ITHREADS)
     /* XXX Ideally, this should really be happening in perl_alloc() or
      * perl_construct() to keep libperl.a transparently fork()-safe.
      * It is currently done here only because Apache/mod_perl have

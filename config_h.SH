@@ -3368,7 +3368,7 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
 #$use5005threads	USE_5005THREADS		/**/
 #$useithreads	USE_ITHREADS		/**/
 #if defined(USE_5005THREADS) && !defined(USE_ITHREADS)
-#define		USE_THREADS		/* until src is revised*/
+#define		USE_5005THREADS		/* until src is revised*/
 #endif
 #$d_oldpthreads	OLD_PTHREADS_API		/**/
 #$usereentrant	USE_REENTRANT_API	/**/

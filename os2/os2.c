@@ -29,7 +29,7 @@
 #include "EXTERN.h"
 #include "perl.h"
 
-#ifdef USE_THREADS
+#ifdef USE_5005THREADS
 
 typedef void (*emx_startroutine)(void *);
 typedef void* (*pthreads_startroutine)(void *);
@@ -1391,7 +1391,7 @@ mod2fname(pTHX_ SV *sv)
 	}
 	avlen --;
     }
-#ifdef USE_THREADS
+#ifdef USE_5005THREADS
     sum++;				/* Avoid conflict of DLLs in memory. */
 #endif 
    /* We always load modules as *specific* DLLs, and with the full name.

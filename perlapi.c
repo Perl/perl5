@@ -296,7 +296,7 @@ Perl_my_chsize(pTHXo_ int fd, Off_t length)
     return ((CPerlObj*)pPerl)->Perl_my_chsize(fd, length);
 }
 #endif
-#if defined(USE_THREADS)
+#if defined(USE_5005THREADS)
 
 #undef  Perl_condpair_magic
 MAGIC*
@@ -750,7 +750,7 @@ Perl_fbm_instr(pTHXo_ unsigned char* big, unsigned char* bigend, SV* littlesv, U
 {
     return ((CPerlObj*)pPerl)->Perl_fbm_instr(big, bigend, littlesv, flags);
 }
-#if defined(USE_THREADS)
+#if defined(USE_5005THREADS)
 #endif
 
 #undef  Perl_form
@@ -1519,7 +1519,7 @@ Perl_grok_numeric_radix(pTHXo_ const char **sp, const char *send)
 {
     return ((CPerlObj*)pPerl)->Perl_grok_numeric_radix(sp, send);
 }
-#if defined(USE_THREADS)
+#if defined(USE_5005THREADS)
 #endif
 #if defined(USE_LOCALE_COLLATE)
 #endif
@@ -2223,7 +2223,7 @@ Perl_parse(pTHXo_ XSINIT_t xsinit, int argc, char** argv, char** env)
     return ((CPerlObj*)pPerl)->Perl_parse(xsinit, argc, argv, env);
 }
 #endif
-#if defined(USE_THREADS)
+#if defined(USE_5005THREADS)
 
 #undef  Perl_new_struct_thread
 struct perl_thread*
@@ -3457,7 +3457,7 @@ Perl_unlnk(pTHXo_ char* f)
     return ((CPerlObj*)pPerl)->Perl_unlnk(f);
 }
 #endif
-#if defined(USE_THREADS)
+#if defined(USE_5005THREADS)
 
 #undef  Perl_unlock_condpair
 void
@@ -3719,7 +3719,7 @@ Perl_runops_debug(pTHXo)
 {
     return ((CPerlObj*)pPerl)->Perl_runops_debug();
 }
-#if defined(USE_THREADS)
+#if defined(USE_5005THREADS)
 
 #undef  Perl_sv_lock
 SV*
@@ -4237,7 +4237,7 @@ Perl_sys_intern_init(pTHXo)
 #  endif
 #if defined(PERL_FLEXIBLE_EXCEPTIONS)
 #endif
-#  if defined(USE_THREADS)
+#  if defined(USE_5005THREADS)
 #  endif
 #endif
 #if defined(PERL_IN_PP_C) || defined(PERL_DECL_PROT)
