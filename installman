@@ -86,6 +86,9 @@ runpod2man('pod', $opts{man1dir}, $opts{man1ext}, 'pod2man', 'pod2html',
 # but then it would have to pay attention to $opts{man1dir} and $opts{man1ext}.
 runpod2man('utils', $opts{man1dir}, $opts{man1ext}, 'pstruct'); 
 
+# Similar concern as with pstruct/c2ph above: psed is s2p by other name.
+runpod2man('x2p', $opts{man1dir}, $opts{man1ext}, 'psed'); 
+
 runpod2man('lib/ExtUtils', $opts{man1dir}, $opts{man1ext}, 'xsubpp');
 
 sub runpod2man {
