@@ -177,13 +177,13 @@ sub ldopts {
     foreach $mod (@mods) {
 	@ns = split(/::|\/|\\/, $mod);
 	$sub = $ns[-1];
-	$root = $MM->catdir(@ns);
+	$root = File::Spec->catdir(@ns);
 	
 	print STDERR "searching for '$sub${lib_ext}'\n" if $Verbose;
 	foreach (@path) {
-	    next unless -e ($archive = $MM->catdir($_,"auto",$root,"$sub$lib_ext"));
+	    next unless -e ($archive = File::Spec->catdir($_,"auto",$root,"$sub$lib_ext"));
 	    push @archives, $archive;
-	    if(-e ($extra = $MM->catdir($_,"auto",$root,"extralibs.ld"))) {
+	    if(-e ($extra = File::Spec->catdir($_,"auto",$root,"extralibs.ld"))) {
 		local(*FH); 
 		if(open(FH, $extra)) {
 		    my($libs) = <FH>; chomp $libs;
