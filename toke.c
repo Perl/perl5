@@ -6897,7 +6897,6 @@ int
 Perl_yywarn(pTHX_ char *s)
 {
     dTHR;
-    --PL_error_count;
     PL_in_eval |= EVAL_WARNONLY;
     yyerror(s);
     PL_in_eval &= ~EVAL_WARNONLY;
@@ -6977,11 +6976,9 @@ PRId64 ")\n",
     }
     if (PL_in_eval & EVAL_WARNONLY)
 	Perl_warn(aTHX_ "%_", msg);
-    else if (PL_in_eval)
-	sv_catsv(ERRSV, msg);
     else
-	PerlIO_write(PerlIO_stderr(), SvPVX(msg), SvCUR(msg));
-    if (++PL_error_count >= 10)
+	qerror(msg);
+    if (PL_error_count >= 10)
 	Perl_croak(aTHX_ "%_ has too many errors.\n", GvSV(PL_curcop->cop_filegv));
     PL_in_my = 0;
     PL_in_my_stash = Nullhv;

@@ -96,9 +96,9 @@ S_bad_type(pTHX_ I32 n, char *t, char *name, OP *kid)
 STATIC void
 S_no_bareword_allowed(pTHX_ OP *o)
 {
-    Perl_warn(aTHX_ "Bareword \"%s\" not allowed while \"strict subs\" in use",
-	  SvPV_nolen(cSVOPo->op_sv));
-    ++PL_error_count;
+    qerror(Perl_mess(aTHX_
+		     "Bareword \"%s\" not allowed while \"strict subs\" in use",
+		     SvPV_nolen(cSVOPo->op_sv)));
 }
 
 /* "register" allocation */

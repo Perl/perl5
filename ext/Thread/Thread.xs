@@ -181,6 +181,7 @@ threadstart(void *arg)
     SvREFCNT_dec(PL_rs);
     SvREFCNT_dec(PL_nrs);
     SvREFCNT_dec(PL_statname);
+    SvREFCNT_dec(PL_errors);
     Safefree(PL_screamfirst);
     Safefree(PL_screamnext);
     Safefree(PL_reg_start_tmp);

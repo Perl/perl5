@@ -56,6 +56,7 @@ VIRTUAL void	Perl_croak_nocontext(const char* pat, ...) __attribute__((noreturn)
 VIRTUAL OP*	Perl_die_nocontext(const char* pat, ...);
 VIRTUAL void	Perl_deb_nocontext(const char* pat, ...);
 VIRTUAL char*	Perl_form_nocontext(const char* pat, ...);
+VIRTUAL SV*	Perl_mess_nocontext(const char* pat, ...);
 VIRTUAL void	Perl_warn_nocontext(const char* pat, ...);
 VIRTUAL void	Perl_warner_nocontext(U32 err, const char* pat, ...);
 VIRTUAL SV*	Perl_newSVpvf_nocontext(const char* pat, ...);
@@ -322,7 +323,9 @@ VIRTUAL void	Perl_markstack_grow(pTHX);
 #if defined(USE_LOCALE_COLLATE)
 VIRTUAL char*	Perl_mem_collxfrm(pTHX_ const char* s, STRLEN len, STRLEN* xlen);
 #endif
-VIRTUAL SV*	Perl_mess(pTHX_ const char* pat, va_list* args);
+VIRTUAL SV*	Perl_mess(pTHX_ const char* pat, ...);
+VIRTUAL SV*	Perl_vmess(pTHX_ const char* pat, va_list* args);
+VIRTUAL void	Perl_qerror(pTHX_ SV* err);
 VIRTUAL int	Perl_mg_clear(pTHX_ SV* sv);
 VIRTUAL int	Perl_mg_copy(pTHX_ SV* sv, SV* nsv, const char* key, I32 klen);
 VIRTUAL MAGIC*	Perl_mg_find(pTHX_ SV* sv, int type);

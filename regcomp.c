@@ -3395,7 +3395,7 @@ S_re_croak2(pTHX_ const char* pat1,const char* pat2,...)
 #else
     va_start(args);
 #endif
-    msv = mess(buf, &args);
+    msv = vmess(buf, &args);
     va_end(args);
     message = SvPV(msv,l1);
     if (l1 > 512)

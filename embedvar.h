@@ -51,6 +51,7 @@
 #define PL_dumpindent		(vTHX->Tdumpindent)
 #define PL_efloatbuf		(vTHX->Tefloatbuf)
 #define PL_efloatsize		(vTHX->Tefloatsize)
+#define PL_errors		(vTHX->Terrors)
 #define PL_extralen		(vTHX->Textralen)
 #define PL_firstgv		(vTHX->Tfirstgv)
 #define PL_formtarget		(vTHX->Tformtarget)
@@ -1000,6 +1001,7 @@
 #define PL_dumpindent		(aTHX->Tdumpindent)
 #define PL_efloatbuf		(aTHX->Tefloatbuf)
 #define PL_efloatsize		(aTHX->Tefloatsize)
+#define PL_errors		(aTHX->Terrors)
 #define PL_extralen		(aTHX->Textralen)
 #define PL_firstgv		(aTHX->Tfirstgv)
 #define PL_formtarget		(aTHX->Tformtarget)
@@ -1136,6 +1138,7 @@
 #define PL_Tdumpindent		PL_dumpindent
 #define PL_Tefloatbuf		PL_efloatbuf
 #define PL_Tefloatsize		PL_efloatsize
+#define PL_Terrors		PL_errors
 #define PL_Textralen		PL_extralen
 #define PL_Tfirstgv		PL_firstgv
 #define PL_Tformtarget		PL_formtarget

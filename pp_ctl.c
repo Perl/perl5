@@ -1247,6 +1247,18 @@ S_free_closures(pTHX)
     }
 }
 
+void
+Perl_qerror(pTHX_ SV *err)
+{
+    if (PL_in_eval)
+	sv_catsv(ERRSV, err);
+    else if (PL_errors)
+	sv_catsv(PL_errors, err);
+    else
+	Perl_warn(aTHX_ "%_", err);
+    ++PL_error_count;
+}
+
 OP *
 Perl_die_where(pTHX_ char *message, STRLEN msglen)
 {
@@ -1288,7 +1300,9 @@ Perl_die_where(pTHX_ char *message, STRLEN msglen)
 	else
 	    message = SvPVx(ERRSV, msglen);
 
-	while ((cxix = dopoptoeval(cxstack_ix)) < 0 && PL_curstackinfo->si_prev) {
+	while ((cxix = dopoptoeval(cxstack_ix)) < 0
+	       && PL_curstackinfo->si_prev)
+	{
 	    dounwind(-1);
 	    POPSTACK;
 	}
@@ -1315,7 +1329,8 @@ Perl_die_where(pTHX_ char *message, STRLEN msglen)
 
 	    if (optype == OP_REQUIRE) {
 		char* msg = SvPVx(ERRSV, n_a);
-		DIE(aTHX_ "%s", *msg ? msg : "Compilation failed in require");
+		DIE(aTHX_ "%sCompilation failed in require",
+		    *msg ? msg : "Unknown error\n");
 	    }
 	    return pop_return();
 	}
@@ -2625,13 +2640,16 @@ S_doeval(pTHX_ int gimme, OP** startop)
 	LEAVE;
 	if (optype == OP_REQUIRE) {
 	    char* msg = SvPVx(ERRSV, n_a);
-	    DIE(aTHX_ "%s", *msg ? msg : "Compilation failed in require");
-	} else if (startop) {
+	    DIE(aTHX_ "%sCompilation failed in require",
+		*msg ? msg : "Unknown error\n");
+	}
+	else if (startop) {
 	    char* msg = SvPVx(ERRSV, n_a);
 
 	    POPBLOCK(cx,PL_curpm);
 	    POPEVAL(cx);
-	    Perl_croak(aTHX_ "%sCompilation failed in regexp", (*msg ? msg : "Unknown error\n"));
+	    Perl_croak(aTHX_ "%sCompilation failed in regexp",
+		       (*msg ? msg : "Unknown error\n"));
 	}
 	SvREFCNT_dec(PL_rs);
 	PL_rs = SvREFCNT_inc(PL_nrs);

@@ -314,7 +314,7 @@ Perl_convert(pTHXo_ I32 optype, I32 flags, OP* o)
 
 #undef  Perl_croak
 void
-Perl_croak(pTHXo_ const char* pat)
+Perl_croak(pTHXo_ const char* pat, ...)
 {
     va_list args;
     va_start(args, pat);
@@ -332,7 +332,7 @@ Perl_vcroak(pTHXo_ const char* pat, va_list* args)
 
 #undef  Perl_croak_nocontext
 void
-Perl_croak_nocontext(const char* pat)
+Perl_croak_nocontext(const char* pat, ...)
 {
     dTHXo;
     va_list args;
@@ -343,7 +343,7 @@ Perl_croak_nocontext(const char* pat)
 
 #undef  Perl_die_nocontext
 OP*
-Perl_die_nocontext(const char* pat)
+Perl_die_nocontext(const char* pat, ...)
 {
     dTHXo;
     OP* retval;
@@ -357,7 +357,7 @@ Perl_die_nocontext(const char* pat)
 
 #undef  Perl_deb_nocontext
 void
-Perl_deb_nocontext(const char* pat)
+Perl_deb_nocontext(const char* pat, ...)
 {
     dTHXo;
     va_list args;
@@ -368,7 +368,7 @@ Perl_deb_nocontext(const char* pat)
 
 #undef  Perl_form_nocontext
 char*
-Perl_form_nocontext(const char* pat)
+Perl_form_nocontext(const char* pat, ...)
 {
     dTHXo;
     char* retval;
@@ -380,9 +380,23 @@ Perl_form_nocontext(const char* pat)
 
 }
 
+#undef  Perl_mess_nocontext
+SV*
+Perl_mess_nocontext(const char* pat, ...)
+{
+    dTHXo;
+    SV* retval;
+    va_list args;
+    va_start(args, pat);
+    retval = ((CPerlObj*)pPerl)->Perl_vmess(pat, &args);
+    va_end(args);
+    return retval;
+
+}
+
 #undef  Perl_warn_nocontext
 void
-Perl_warn_nocontext(const char* pat)
+Perl_warn_nocontext(const char* pat, ...)
 {
     dTHXo;
     va_list args;
@@ -393,7 +407,7 @@ Perl_warn_nocontext(const char* pat)
 
 #undef  Perl_warner_nocontext
 void
-Perl_warner_nocontext(U32 err, const char* pat)
+Perl_warner_nocontext(U32 err, const char* pat, ...)
 {
     dTHXo;
     va_list args;
@@ -404,7 +418,7 @@ Perl_warner_nocontext(U32 err, const char* pat)
 
 #undef  Perl_newSVpvf_nocontext
 SV*
-Perl_newSVpvf_nocontext(const char* pat)
+Perl_newSVpvf_nocontext(const char* pat, ...)
 {
     dTHXo;
     SV* retval;
@@ -418,7 +432,7 @@ Perl_newSVpvf_nocontext(const char* pat)
 
 #undef  Perl_sv_catpvf_nocontext
 void
-Perl_sv_catpvf_nocontext(SV* sv, const char* pat)
+Perl_sv_catpvf_nocontext(SV* sv, const char* pat, ...)
 {
     dTHXo;
     va_list args;
@@ -429,7 +443,7 @@ Perl_sv_catpvf_nocontext(SV* sv, const char* pat)
 
 #undef  Perl_sv_setpvf_nocontext
 void
-Perl_sv_setpvf_nocontext(SV* sv, const char* pat)
+Perl_sv_setpvf_nocontext(SV* sv, const char* pat, ...)
 {
     dTHXo;
     va_list args;
@@ -440,7 +454,7 @@ Perl_sv_setpvf_nocontext(SV* sv, const char* pat)
 
 #undef  Perl_sv_catpvf_mg_nocontext
 void
-Perl_sv_catpvf_mg_nocontext(SV* sv, const char* pat)
+Perl_sv_catpvf_mg_nocontext(SV* sv, const char* pat, ...)
 {
     dTHXo;
     va_list args;
@@ -451,7 +465,7 @@ Perl_sv_catpvf_mg_nocontext(SV* sv, const char* pat)
 
 #undef  Perl_sv_setpvf_mg_nocontext
 void
-Perl_sv_setpvf_mg_nocontext(SV* sv, const char* pat)
+Perl_sv_setpvf_mg_nocontext(SV* sv, const char* pat, ...)
 {
     dTHXo;
     va_list args;
@@ -570,7 +584,7 @@ Perl_cxinc(pTHXo)
 
 #undef  Perl_deb
 void
-Perl_deb(pTHXo_ const char* pat)
+Perl_deb(pTHXo_ const char* pat, ...)
 {
     va_list args;
     va_start(args, pat);
@@ -636,7 +650,7 @@ Perl_deprecate(pTHXo_ char* s)
 
 #undef  Perl_die
 OP*
-Perl_die(pTHXo_ const char* pat)
+Perl_die(pTHXo_ const char* pat, ...)
 {
     OP* retval;
     va_list args;
@@ -1014,7 +1028,7 @@ Perl_fold_constants(pTHXo_ OP* arg)
 
 #undef  Perl_form
 char*
-Perl_form(pTHXo_ const char* pat)
+Perl_form(pTHXo_ const char* pat, ...)
 {
     char* retval;
     va_list args;
@@ -2172,9 +2186,29 @@ Perl_mem_collxfrm(pTHXo_ const char* s, STRLEN len, STRLEN* xlen)
 
 #undef  Perl_mess
 SV*
-Perl_mess(pTHXo_ const char* pat, va_list* args)
+Perl_mess(pTHXo_ const char* pat, ...)
 {
-    return ((CPerlObj*)pPerl)->Perl_mess(pat, args);
+    SV* retval;
+    va_list args;
+    va_start(args, pat);
+    retval = ((CPerlObj*)pPerl)->Perl_vmess(pat, &args);
+    va_end(args);
+    return retval;
+
+}
+
+#undef  Perl_vmess
+SV*
+Perl_vmess(pTHXo_ const char* pat, va_list* args)
+{
+    return ((CPerlObj*)pPerl)->Perl_vmess(pat, args);
+}
+
+#undef  Perl_qerror
+void
+Perl_qerror(pTHXo_ SV* err)
+{
+    ((CPerlObj*)pPerl)->Perl_qerror(err);
 }
 
 #undef  Perl_mg_clear
@@ -2688,7 +2722,7 @@ Perl_newSVpvn(pTHXo_ const char* s, STRLEN len)
 
 #undef  Perl_newSVpvf
 SV*
-Perl_newSVpvf(pTHXo_ const char* pat)
+Perl_newSVpvf(pTHXo_ const char* pat, ...)
 {
     SV* retval;
     va_list args;
@@ -3713,7 +3747,7 @@ Perl_sv_bless(pTHXo_ SV* sv, HV* stash)
 
 #undef  Perl_sv_catpvf
 void
-Perl_sv_catpvf(pTHXo_ SV* sv, const char* pat)
+Perl_sv_catpvf(pTHXo_ SV* sv, const char* pat, ...)
 {
     va_list args;
     va_start(args, pat);
@@ -3991,7 +4025,7 @@ Perl_sv_reset(pTHXo_ char* s, HV* stash)
 
 #undef  Perl_sv_setpvf
 void
-Perl_sv_setpvf(pTHXo_ SV* sv, const char* pat)
+Perl_sv_setpvf(pTHXo_ SV* sv, const char* pat, ...)
 {
     va_list args;
     va_start(args, pat);
@@ -4299,7 +4333,7 @@ Perl_wait4pid(pTHXo_ Pid_t pid, int* statusp, int flags)
 
 #undef  Perl_warn
 void
-Perl_warn(pTHXo_ const char* pat)
+Perl_warn(pTHXo_ const char* pat, ...)
 {
     va_list args;
     va_start(args, pat);
@@ -4316,7 +4350,7 @@ Perl_vwarn(pTHXo_ const char* pat, va_list* args)
 
 #undef  Perl_warner
 void
-Perl_warner(pTHXo_ U32 err, const char* pat)
+Perl_warner(pTHXo_ U32 err, const char* pat, ...)
 {
     va_list args;
     va_start(args, pat);
@@ -4515,7 +4549,7 @@ Perl_runops_debug(pTHXo)
 
 #undef  Perl_sv_catpvf_mg
 void
-Perl_sv_catpvf_mg(pTHXo_ SV *sv, const char* pat)
+Perl_sv_catpvf_mg(pTHXo_ SV *sv, const char* pat, ...)
 {
     va_list args;
     va_start(args, pat);
@@ -4553,7 +4587,7 @@ Perl_sv_catsv_mg(pTHXo_ SV *dstr, SV *sstr)
 
 #undef  Perl_sv_setpvf_mg
 void
-Perl_sv_setpvf_mg(pTHXo_ SV *sv, const char* pat)
+Perl_sv_setpvf_mg(pTHXo_ SV *sv, const char* pat, ...)
 {
     va_list args;
     va_start(args, pat);
@@ -4640,7 +4674,7 @@ Perl_pv_display(pTHXo_ SV *sv, char *pv, STRLEN cur, STRLEN len, STRLEN pvlim)
 
 #undef  Perl_dump_indent
 void
-Perl_dump_indent(pTHXo_ I32 level, PerlIO *file, const char* pat)
+Perl_dump_indent(pTHXo_ I32 level, PerlIO *file, const char* pat, ...)
 {
     va_list args;
     va_start(args, pat);
@@ -4713,7 +4747,7 @@ Perl_magic_dump(pTHXo_ MAGIC *mg)
 
 #undef  Perl_default_protect
 void*
-Perl_default_protect(pTHXo_ int *excpt, protect_body_t body)
+Perl_default_protect(pTHXo_ int *excpt, protect_body_t body, ...)
 {
     void* retval;
     va_list args;

@@ -580,6 +580,8 @@
 #define PL_efloatbuf		(*Perl_Tefloatbuf_ptr(aTHXo))
 #undef  PL_efloatsize
 #define PL_efloatsize		(*Perl_Tefloatsize_ptr(aTHXo))
+#undef  PL_errors
+#define PL_errors		(*Perl_Terrors_ptr(aTHXo))
 #undef  PL_extralen
 #define PL_extralen		(*Perl_Textralen_ptr(aTHXo))
 #undef  PL_firstgv
@@ -1004,6 +1006,10 @@
 #define Perl_form_nocontext	pPerl->Perl_form_nocontext
 #undef  form_nocontext
 #define form_nocontext		Perl_form_nocontext
+#undef  Perl_mess_nocontext
+#define Perl_mess_nocontext	pPerl->Perl_mess_nocontext
+#undef  mess_nocontext
+#define mess_nocontext		Perl_mess_nocontext
 #undef  Perl_warn_nocontext
 #define Perl_warn_nocontext	pPerl->Perl_warn_nocontext
 #undef  warn_nocontext
@@ -2015,6 +2021,14 @@
 #define Perl_mess		pPerl->Perl_mess
 #undef  mess
 #define mess			Perl_mess
+#undef  Perl_vmess
+#define Perl_vmess		pPerl->Perl_vmess
+#undef  vmess
+#define vmess			Perl_vmess
+#undef  Perl_qerror
+#define Perl_qerror		pPerl->Perl_qerror
+#undef  qerror
+#define qerror			Perl_qerror
 #undef  Perl_mg_clear
 #define Perl_mg_clear		pPerl->Perl_mg_clear
 #undef  mg_clear

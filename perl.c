@@ -443,6 +443,10 @@ perl_destruct(pTHXx)
     PL_defstash = 0;
     SvREFCNT_dec(hv);
 
+    /* clear queued errors */
+    SvREFCNT_dec(PL_errors);
+    PL_errors = Nullsv;
+
     FREETMPS;
     if (destruct_level >= 2 && ckWARN_d(WARN_INTERNAL)) {
 	if (PL_scopestack_ix != 0)

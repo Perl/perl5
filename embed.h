@@ -97,6 +97,7 @@
 #define die_nocontext		Perl_die_nocontext
 #define deb_nocontext		Perl_deb_nocontext
 #define form_nocontext		Perl_form_nocontext
+#define mess_nocontext		Perl_mess_nocontext
 #define warn_nocontext		Perl_warn_nocontext
 #define warner_nocontext	Perl_warner_nocontext
 #define newSVpvf_nocontext	Perl_newSVpvf_nocontext
@@ -364,6 +365,8 @@
 #define mem_collxfrm		Perl_mem_collxfrm
 #endif
 #define mess			Perl_mess
+#define vmess			Perl_vmess
+#define qerror			Perl_qerror
 #define mg_clear		Perl_mg_clear
 #define mg_copy			Perl_mg_copy
 #define mg_find			Perl_mg_find
@@ -1698,7 +1701,8 @@
 #if defined(USE_LOCALE_COLLATE)
 #define mem_collxfrm(a,b,c)	Perl_mem_collxfrm(aTHX_ a,b,c)
 #endif
-#define mess(a,b)		Perl_mess(aTHX_ a,b)
+#define vmess(a,b)		Perl_vmess(aTHX_ a,b)
+#define qerror(a)		Perl_qerror(aTHX_ a)
 #define mg_clear(a)		Perl_mg_clear(aTHX_ a)
 #define mg_copy(a,b,c,d)	Perl_mg_copy(aTHX_ a,b,c,d)
 #define mg_find(a,b)		Perl_mg_find(aTHX_ a,b)
@@ -2818,6 +2822,8 @@
 #define deb_nocontext		Perl_deb_nocontext
 #define Perl_form_nocontext	CPerlObj::Perl_form_nocontext
 #define form_nocontext		Perl_form_nocontext
+#define Perl_mess_nocontext	CPerlObj::Perl_mess_nocontext
+#define mess_nocontext		Perl_mess_nocontext
 #define Perl_warn_nocontext	CPerlObj::Perl_warn_nocontext
 #define warn_nocontext		Perl_warn_nocontext
 #define Perl_warner_nocontext	CPerlObj::Perl_warner_nocontext
@@ -3333,6 +3339,10 @@
 #endif
 #define Perl_mess		CPerlObj::Perl_mess
 #define mess			Perl_mess
+#define Perl_vmess		CPerlObj::Perl_vmess
+#define vmess			Perl_vmess
+#define Perl_qerror		CPerlObj::Perl_qerror
+#define qerror			Perl_qerror
 #define Perl_mg_clear		CPerlObj::Perl_mg_clear
 #define mg_clear		Perl_mg_clear
 #define Perl_mg_copy		CPerlObj::Perl_mg_copy
@@ -5365,6 +5375,7 @@
 #  define deb				Perl_deb_nocontext
 #  define die				Perl_die_nocontext
 #  define form				Perl_form_nocontext
+#  define mess				Perl_mess_nocontext
 #  define newSVpvf			Perl_newSVpvf_nocontext
 #  define sv_catpvf			Perl_sv_catpvf_nocontext
 #  define sv_setpvf			Perl_sv_setpvf_nocontext
@@ -5382,6 +5393,7 @@
 #  define Perl_die_nocontext		Perl_die
 #  define Perl_deb_nocontext		Perl_deb
 #  define Perl_form_nocontext		Perl_form
+#  define Perl_mess_nocontext		Perl_mess
 #  define Perl_newSVpvf_nocontext	Perl_newSVpvf
 #  define Perl_sv_catpvf_nocontext	Perl_sv_catpvf
 #  define Perl_sv_setpvf_nocontext	Perl_sv_setpvf
