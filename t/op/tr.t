@@ -130,7 +130,7 @@ print "ok 17\n";
 # 18: test brokenness with tr/a-z-9//;
 $_ = "abcdefghijklmnopqrstuvwxyz";
 eval "tr/a-z-9/ /";
-print (($@ =~ /^Ambiguous range in transliteration operator/) 
+print (($@ =~ /^Ambiguous range in transliteration operator/ || $^V lt v5.7.0) 
        ? '' : 'not ', "ok 18\n");
 
 # 19-21: Make sure leading and trailing hyphens still work
@@ -161,7 +161,7 @@ print (($_ eq '...d.f...j.l...p') ? '' : 'not ', "ok 24\n");
 # 25: Test reversed range check
 # 20000705 MJD
 eval "tr/m-d/ /";
-print (($@ =~ /^Invalid \[\] range "m-d" in transliteration operator/) 
+print (($@ =~ /^Invalid \[\] range "m-d" in transliteration operator/ || $^V lt v5.7.0) 
        ? '' : 'not ', "ok 25\n");
 
 # 26: test cannot update if read-only
