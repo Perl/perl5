@@ -1890,9 +1890,9 @@ First public release with perl5.005.
 
 =head1 Supported Platforms
 
-As of early 2001 (the Perl release 5.6.1), the following platforms are
-able to build Perl from the standard source code distribution
-available at http://www.perl.com/CPAN/src/index.html
+As of early 2001 (the Perl releases 5.6.1 and 5.7.1), the following
+platforms are able to build Perl from the standard source code
+distribution available at http://www.perl.com/CPAN/src/index.html
 
 	AIX
 	AmigaOS
@@ -1928,9 +1928,9 @@ available at http://www.perl.com/CPAN/src/index.html
            list macperl-porters@macperl.org for more information.
         3) compilers: Borland, Cygwin, Mingw32 EGCS/GCC, VC++
 
-The following platforms worked for the previous release (5.6.0),
-but we did not manage to test these in time for the 5.6.1 release.
-There is a very good chance that these will work fine with 5.6.1.
+The following platforms worked for the previous releases (5.6.0 and 5.7.0),
+but we did not manage to test these in time for the 5.7.1 release.
+There is a very good chance that these will work fine with the 5.7.1.
 
 	DomainOS
 	Hurd
@@ -1949,12 +1949,11 @@ There is a very good chance that these will work fine with 5.6.1.
 	Windows Me
 
 The following platform worked for the 5.005_03 major release but not
-5.6.0.  Standardization on UTF-8 as the internal string representation
-in 5.6.0 and 5.6.1 has introduced incompatibilities in this EBCDIC
-platform.  While Perl 5.6.1 will build on this platform some
+for 5.6.0.  Standardization on UTF-8 as the internal string
+representation in 5.6.0 and 5.6.1 introduced incompatibilities in this
+EBCDIC platform.  While Perl 5.7.1 will build on this platform some
 regression tests may fail and the C<use utf8;> pragma typically
-introduces text handling errors.  UTF-8 support for this platform may
-be enabled in a future release:
+introduces text handling errors.
 
 	OS/390	1)
 
