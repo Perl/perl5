@@ -360,17 +360,19 @@ Function parameters are normally initialized with their
 values from the argument stack.  The typemaps contain the
 code segments which are used to transfer the Perl values to
 the C parameters.  The programmer, however, is allowed to
-override the typemaps and supply alternate initialization
-code.
+override the typemaps and supply alternate (or additional)
+initialization code.
 
 The following code demonstrates how to supply initialization code for
-function parameters.  The initialization code is eval'd by the compiler
-before it is added to the output so anything which should be interpreted
-literally, such as double quotes, must be protected with backslashes.
+function parameters.  The initialization code is eval'd within double
+quotes by the compiler before it is added to the output so anything
+which should be interpreted literally [mainly C<$>, C<@>, or C<\\>]
+must be protected with backslashes.  The variables C<$var>, C<$arg>,
+and C<$type> can be used as in typemaps.
 
      bool_t
      rpcb_gettime(host,timep)
-          char *host = (char *)SvPV(ST(0),na);
+          char *host = (char *)SvPV($arg,na);
           time_t &timep = 0;
           OUTPUT:
           timep
@@ -750,7 +752,7 @@ prototypes.
 
 =head2 The ALIAS: Keyword
 
-The ALIAS: keyword allows an XSUB to have two more unique Perl names
+The ALIAS: keyword allows an XSUB to have two or more unique Perl names
 and to know which of those names was used when it was invoked.  The Perl
 names may be fully-qualified with package names.  Each alias is given an
 index.  The compiler will setup a variable called C<ix> which contain the
