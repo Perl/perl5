@@ -163,6 +163,7 @@ sub pod_find
         # on VMS canonpath will vmsify:[the.path], but File::Find::find
         # wants /unixy/paths
         $try = File::Spec->canonpath($try) if ($^O ne 'VMS');
+        $try = VMS::Filespec::unixify($try) if ($^O eq 'VMS');
         my $name;
         if(-f $try) {
             if($name = _check_and_extract_name($try, $opts{-verbose})) {
