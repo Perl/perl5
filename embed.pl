@@ -1505,18 +1505,6 @@ p	|I32	|do_trans	|SV* sv
 p	|UV	|do_vecget	|SV* sv|I32 offset|I32 size
 p	|void	|do_vecset	|SV* sv
 p	|void	|do_vop		|I32 optype|SV* sv|SV* left|SV* right
-#if defined(SOCKS_64BIT_BUG)
-p	|Off_t	|do_s64_tell	|PerlIO* fp
-p	|SSize_t|do_s64_fread	|void *buf|SSize_t count|PerlIO* fp
-p	|int	|do_s64_getc	|PerlIO* fp
-p	|int	|do_s64_seek	|PerlIO* fp|Off_t pos|int whence
-p	|int	|do_s64_ungetc	|int ch|PerlIO* fp
-p	|void	|do_s64_delete_buffer|PerlIO* fp
-Ajnop	|void	|do_s64_init_buffer
-s	|S64_IOB *	|s64_get_buffer		|PerlIO *f
-s	|S64_IOB *	|s64_create_buffer	|PerlIO *f
-s	|int		|s64_malloc		|S64_IOB *ptr
-#endif
 p	|OP*	|dofile		|OP* term
 Ap	|I32	|dowantarray
 Ap	|void	|dump_all

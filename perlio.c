@@ -1368,8 +1368,12 @@ PerlIOStdio_tell(PerlIO *f)
 IV
 PerlIOStdio_close(PerlIO *f)
 {
+ int optval, optlen = sizeof(int);
  FILE *stdio = PerlIOSelf(f,PerlIOStdio)->stdio;
- return fclose(stdio);
+ return(
+   (getsockopt(PerlIO_fileno(f), SOL_SOCKET, SO_TYPE, (char *)&optval, &optlen) < 0) ? 
+       fclose(stdio) :
+       close(PerlIO_fileno(f)));
 }
 
 IV
