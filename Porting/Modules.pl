@@ -46,8 +46,8 @@
 	'Attribute::Handlers' =>
 		{
 		'MAINTAINER'	=> 'arthur',
-		'FILES'		=>
-			q[lib/Attribute/Handlers.pm lib/Attribute/Handlers],
+		'FILES'		=> q[lib/Attribute/Handlers.pm
+				     lib/Attribute/Handlers],
 		'CPAN'		=> 1,
 		},
 
@@ -160,14 +160,16 @@
 	'Filter::Simple' =>
 		{
 		'MAINTAINER'	=> 'damian',
-		'FILES'		=> q[lib/Filter/Simple.pm lib/Filter/Simple],
+		'FILES'		=> q[lib/Filter/Simple.pm lib/Filter/Simple
+				     t/lib/Filter/Simple],
 		'CPAN'		=> 1,
 		},
 
 	'Filter::Util::Call' =>
 		{
 		'MAINTAINER'	=> 'pmarquess',
-		'FILES'		=> q[ext/Filter/Util/Call],
+		'FILES'		=> q[ext/Filter/Util/Call
+				     t/lib/filter-util.pl],
 		'CPAN'		=> 1,
 		},
 
@@ -195,7 +197,7 @@
 	'IO' =>
 		{
 		'MAINTAINER'	=> 'p5p', # Not gbarr.
-		'FILES'		=> q[ext/Data/Dumper],
+		'FILES'		=> q[ext/IO],
 		'CPAN'		=> 0,
 		},
 
@@ -238,7 +240,8 @@
 	'Math::BigInt' =>
 		{
 		'MAINTAINER'	=> 'tels',
-		'FILES'		=> q[lib/Math/BigInt.pm lib/Math/BigInt],
+		'FILES'		=> q[lib/Math/BigInt.pm lib/Math/BigInt
+				     t/lib/Math],
 		'CPAN'		=> 1,
 		},
 
@@ -363,7 +366,8 @@
 	'Test::Harness' =>
 		{
 		'MAINTAINER'	=> 'petdance',
-		'FILES'		=> q[lib/Test/Harness.pm lib/Test/Harness],
+		'FILES'		=> q[lib/Test/Harness.pm lib/Test/Harness
+				     t/lib/sample-tests],
 		'CPAN'		=> 1,
 		},
 
@@ -377,7 +381,8 @@
 	'Test::Simple' =>
 		{
 		'MAINTAINER'	=> 'schwern',
-		'FILES'		=> q[lib/Test/Simple.pm lib/Test/Simple],
+		'FILES'		=> q[lib/Test/Simple.pm lib/Test/Simple
+				     t/lib/Test/Simple],
 		'CPAN'		=> 1,
 		},
 
@@ -388,11 +393,10 @@
 		'CPAN'		=> 1,
 		},
 
-
 	'threads' =>
 		{
 		'MAINTAINER' => 'arthur',
-		'FILES'  => q[ext/threads],
+		'FILES'	 => q[ext/threads],
 		'CPAN'		=> 1,
 		},
 
@@ -420,8 +424,8 @@
 	'Unicode::Collate' =>
 		{
 		'MAINTAINER'	=> 'sadahiro',
-		'FILES'		=>
-			q[lib/Unicode/Collate.pm lib/Unicode/Collate],
+		'FILES'		=> q[lib/Unicode/Collate.pm
+				     lib/Unicode/Collate],
 		'CPAN'		=> 1,
 		},
 
@@ -435,9 +439,8 @@
 	'warnings' =>
 		{
 		'MAINTAINER'	=> 'pmarquess',
-		'FILES'		=>
-		    q[warnings.pl lib/warnings.{pm,t}
-		      lib/warnings t/lib/warnings],
+		'FILES'		=> q[warnings.pl lib/warnings.{pm,t}
+				     lib/warnings t/lib/warnings],
 		'CPAN'		=> 1,
 		},
 
