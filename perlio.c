@@ -2314,7 +2314,7 @@ int
 PerlIO_getpos(PerlIO *f, Fpos_t *pos)
 {
  *pos = PerlIO_tell(f);
- return 0;
+ return *pos != -1;
 }
 #else
 #ifndef PERLIO_IS_STDIO
