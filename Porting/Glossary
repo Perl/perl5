@@ -1315,10 +1315,6 @@ d_nv_preserves_uv (perlxv.U):
 	This variable indicates whether a variable of type nvtype
 	can preserve all the bits a variable of type uvtype.
 
-nv_preserves_uv_bits (perlxv.U):
-	This variable indicates how many of bits type uvtype
-	a variable nvtype can preserve.
-
 d_off64_t (d_off64_t.U):
 	This symbol will be defined if the C compiler supports off64_t.
 
@@ -3366,6 +3362,10 @@ nroff (Loc.U):
 	This variable is used internally by Configure to determine the
 	full pathname (if any) of the nroff program.  After Configure runs,
 	the value is reset to a plain "nroff" and is not useful.
+
+nv_preserves_uv_bits (perlxv.U):
+	This variable indicates how many of bits type uvtype
+	a variable nvtype can preserve.
 
 nveformat (perlxvf.U):
 	This variable contains the format string used for printing
