@@ -504,9 +504,9 @@ PERLVAR(Iunicode, U32)	/* Unicode features: $ENV{PERL_UNICODE} or -C */
 
 PERLVAR(Isignals, U32)	/* Using which pre-5.8 signals */
 
-PERLVAR(IDBassertion,   SV *)
-
 PERLVAR(Istashcache,	HV *)		/* Cache to speed up S_method_common */
+
+PERLVAR(IDBassertion,   SV *)
 
 /* Don't forget to add your variable also to perl_clone()! */
 
