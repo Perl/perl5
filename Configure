@@ -1806,7 +1806,8 @@ EOH
 	dflt='n'
 	. ./myread
 	case "$ans" in
-	[yY]) echo >&4 "Okay, continuing." ;;
+	[yY]) echo >&4 "Okay, continuing."
+	      usedevel="$define" ;;
 	*) echo >&4 "Okay, bye."
 	   exit 1
 	   ;;
@@ -1814,6 +1815,16 @@ EOH
 	;;
     esac
     ;;
+esac
+case "$usedevel" in
+$define|true|[yY]*)
+	case "$versiononly" in
+	'') versiononly="$define" ;;
+	esac
+	case "$installusrbinperl" in
+	'') installusrbinperl="$undef" ;;
+	esac
+	;;
 esac
 
 : general instructions
