@@ -67,6 +67,14 @@ PP(pp_regcmaybe)
     return NORMAL;
 }
 
+PP(pp_regcreset)
+{
+    /* XXXX Should store the old value to allow for tie/overload - and
+       restore in regcomp, where marked with XXXX. */
+    reginterp_cnt = 0;
+    return NORMAL;
+}
+
 PP(pp_regcomp)
 {
     djSP;
@@ -99,9 +107,13 @@ PP(pp_regcomp)
 		ReREFCNT_dec(pm->op_pmregexp);
 		pm->op_pmregexp = Null(REGEXP*);	/* crucial if regcomp aborts */
 	    }
+	    if (op->op_flags & OPf_SPECIAL)
+		reginterp_cnt = I32_MAX; /* Mark as safe.  */
 
 	    pm->op_pmflags = pm->op_pmpermflags;	/* reset case sensitivity */
 	    pm->op_pmregexp = CALLREGCOMP(t, t + len, pm);
+	    reginterp_cnt = 0;		/* XXXX Be extra paranoid - needed
+					   inside tie/overload accessors.  */
 	}
     }
 

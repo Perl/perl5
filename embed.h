@@ -703,6 +703,7 @@
 #define pp_refgen		Perl_pp_refgen
 #define pp_regcmaybe		Perl_pp_regcmaybe
 #define pp_regcomp		Perl_pp_regcomp
+#define pp_regcreset		Perl_pp_regcreset
 #define pp_rename		Perl_pp_rename
 #define pp_repeat		Perl_pp_repeat
 #define pp_require		Perl_pp_require

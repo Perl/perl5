@@ -142,6 +142,7 @@ regeol
 regflags
 regindent
 reginput
+reginterp_cnt
 reglastparen
 regnarrate
 regnaughty
@@ -170,6 +171,7 @@ screamfirst
 screamnext
 secondgv
 seen_zerolen
+seen_evals
 siggv
 sortcop
 sortcxix

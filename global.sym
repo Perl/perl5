@@ -769,6 +769,7 @@ pp_redo
 pp_ref
 pp_refgen
 pp_regcmaybe
+pp_regcreset
 pp_regcomp
 pp_rename
 pp_repeat

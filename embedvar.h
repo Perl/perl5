@@ -206,6 +206,7 @@
 #define regflags		(curinterp->Iregflags)
 #define regindent		(curinterp->Iregindent)
 #define reginput		(curinterp->Ireginput)
+#define reginterp_cnt		(curinterp->Ireginterp_cnt)
 #define reglastparen		(curinterp->Ireglastparen)
 #define regnarrate		(curinterp->Iregnarrate)
 #define regnaughty		(curinterp->Iregnaughty)
@@ -229,6 +230,7 @@
 #define screamfirst		(curinterp->Iscreamfirst)
 #define screamnext		(curinterp->Iscreamnext)
 #define secondgv		(curinterp->Isecondgv)
+#define seen_evals		(curinterp->Iseen_evals)
 #define seen_zerolen		(curinterp->Iseen_zerolen)
 #define siggv			(curinterp->Isiggv)
 #define sortcop			(curinterp->Isortcop)
@@ -384,6 +386,7 @@
 #define Iregflags		regflags
 #define Iregindent		regindent
 #define Ireginput		reginput
+#define Ireginterp_cnt		reginterp_cnt
 #define Ireglastparen		reglastparen
 #define Iregnarrate		regnarrate
 #define Iregnaughty		regnaughty
@@ -407,6 +410,7 @@
 #define Iscreamfirst		screamfirst
 #define Iscreamnext		screamnext
 #define Isecondgv		secondgv
+#define Iseen_evals		seen_evals
 #define Iseen_zerolen		seen_zerolen
 #define Isiggv			siggv
 #define Isortcop		sortcop
@@ -624,6 +628,7 @@
 #define regflags		Perl_regflags
 #define regindent		Perl_regindent
 #define reginput		Perl_reginput
+#define reginterp_cnt		Perl_reginterp_cnt
 #define reglastparen		Perl_reglastparen
 #define regnarrate		Perl_regnarrate
 #define regnaughty		Perl_regnaughty
@@ -647,6 +652,7 @@
 #define screamfirst		Perl_screamfirst
 #define screamnext		Perl_screamnext
 #define secondgv		Perl_secondgv
+#define seen_evals		Perl_seen_evals
 #define seen_zerolen		Perl_seen_zerolen
 #define siggv			Perl_siggv
 #define sortcop			Perl_sortcop

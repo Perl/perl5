@@ -60,6 +60,8 @@
 #define pp_rcatline	CPerlObj::Perl_pp_rcatline
 #undef  pp_regcmaybe	
 #define pp_regcmaybe	CPerlObj::Perl_pp_regcmaybe
+#undef  pp_regcreset	
+#define pp_regcreset	CPerlObj::Perl_pp_regcreset
 #undef  pp_regcomp	
 #define pp_regcomp	CPerlObj::Perl_pp_regcomp
 #undef  pp_match	

@@ -398,7 +398,7 @@ These are a hotchpotch of opcodes still waiting to be considered
 
     bless -- could be used to change ownership of objects (reblessing)
 
-    pushre regcmaybe regcomp subst substcont
+    pushre regcmaybe regcreset regcomp subst substcont
 
     sprintf prtf -- can core dump
 

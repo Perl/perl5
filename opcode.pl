@@ -209,6 +209,7 @@ END
 
 close OC or die "Error closing opcode.h: $!";
 
+unlink "pp_proto.h";
 open PP, '>pp_proto.h' or die "Error creating pp_proto.h: $!";
 for (@ops) {
     next if /^i_(pre|post)(inc|dec)$/;
@@ -273,6 +274,7 @@ rcatline	append I/O operator	ck_null		t%
 # Bindable operators.
 
 regcmaybe	regexp comp once	ck_fun		s1	S
+regcreset	regexp reset interpolation flag	ck_fun		s1	S
 regcomp		regexp compilation	ck_null		s|	S
 match		pattern match		ck_match	d/
 subst		substitution		ck_null		dis/	S

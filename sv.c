@@ -1706,9 +1706,9 @@ sv_2pv(register SV *sv, STRLEN *lp)
 			  == (SVs_OBJECT|SVs_RMG))
 			 && strEQ(s=HvNAME(SvSTASH(sv)), "Regexp")
 			 && (mg = mg_find(sv, 'r'))) {
-			if (!mg->mg_ptr) {
-			    regexp *re = (regexp *)mg->mg_obj;
+			regexp *re = (regexp *)mg->mg_obj;
 
+			if (!mg->mg_ptr) {
 			    mg->mg_len = re->prelen + 4;
 			    New(616, mg->mg_ptr, mg->mg_len + 1, char);
 			    Copy("(?:", mg->mg_ptr, 3, char);
@@ -1716,6 +1716,7 @@ sv_2pv(register SV *sv, STRLEN *lp)
 			    mg->mg_ptr[mg->mg_len - 1] = ')';
 			    mg->mg_ptr[mg->mg_len] = 0;
 			}
+			reginterp_cnt += re->program[0].next_off;
 			*lp = mg->mg_len;
 			return mg->mg_ptr;
 		    }

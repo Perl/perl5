@@ -478,6 +478,8 @@
 #define regindent		pPerl->Perl_regindent
 #undef  reginput
 #define reginput		pPerl->Perl_reginput
+#undef  reginterp_cnt
+#define reginterp_cnt		pPerl->Perl_reginterp_cnt
 #undef  reglastparen
 #define reglastparen		pPerl->Perl_reglastparen
 #undef  regnarrate
@@ -552,6 +554,8 @@
 #define secondgv		pPerl->Perl_secondgv
 #undef  seen_zerolen
 #define seen_zerolen		pPerl->Perl_seen_zerolen
+#undef  seen_evals
+#define seen_evals		pPerl->Perl_seen_evals
 #undef  sh_path
 #define sh_path			pPerl->Perl_sh_path
 #undef  siggv

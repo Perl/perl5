@@ -2146,19 +2146,23 @@ pmruntime(OP *o, OP *expr, OP *repl)
 	op_free(expr);
     }
     else {
-	if (pm->op_pmflags & PMf_KEEP)
-	    expr = newUNOP(OP_REGCMAYBE,0,expr);
+	if (pm->op_pmflags & PMf_KEEP || !(hints & HINT_RE_EVAL))
+	    expr = newUNOP((!(hints & HINT_RE_EVAL) 
+			    ? OP_REGCRESET
+			    : OP_REGCMAYBE),0,expr);
 
 	Newz(1101, rcop, 1, LOGOP);
 	rcop->op_type = OP_REGCOMP;
 	rcop->op_ppaddr = ppaddr[OP_REGCOMP];
 	rcop->op_first = scalar(expr);
-	rcop->op_flags |= OPf_KIDS;
+	rcop->op_flags |= ((hints & HINT_RE_EVAL) 
+			   ? (OPf_SPECIAL | OPf_KIDS)
+			   : OPf_KIDS);
 	rcop->op_private = 1;
 	rcop->op_other = o;
 
 	/* establish postfix order */
-	if (pm->op_pmflags & PMf_KEEP) {
+	if (pm->op_pmflags & PMf_KEEP || !(hints & HINT_RE_EVAL)) {
 	    LINKLIST(expr);
 	    rcop->op_next = expr;
 	    ((UNOP*)expr)->op_first->op_next = (OP*)rcop;

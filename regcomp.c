@@ -720,6 +720,7 @@ pregcomp(char *exp, char *xend, PMOP *pm)
 
     regseen = 0;
     seen_zerolen = *exp == '^' ? -1 : 0;
+    seen_evals = 0;
     extralen = 0;
 
     /* First pass: determine size, legality. */
@@ -787,6 +788,8 @@ pregcomp(char *exp, char *xend, PMOP *pm)
     regnaughty = 0;
     regnpar = 1;
     regcode = r->program;
+    /* Store the count of eval-groups for security checks: */
+    regcode->next_off = ((seen_evals > U16_MAX) ? U16_MAX : seen_evals);
     regc((U8)MAGIC, (char*) regcode++);
     r->data = 0;
     if (reg(0, &flags) == NULL)
@@ -1059,13 +1062,10 @@ reg(I32 paren, I32 *flagp)
 		    regcomp_rx->data->data[n+2] = (void*)sop;
 		    SvREFCNT_dec(sv);
 		} else {		/* First pass */
-		    if (curcop == &compiling) {
-			if (!(hints & HINT_RE_EVAL))
-			    FAIL("Eval-group not allowed, use re 'eval'");
-		    }
-		    else {
-			FAIL("Eval-group not allowed at run time");
-		    }
+		    if (reginterp_cnt < ++seen_evals && curcop != &compiling)
+			/* No compiled RE interpolated, has runtime
+			   components ===> unsafe.  */
+			FAIL("Eval-group not allowed at runtime, use re 'eval'");
 		    if (tainted)
 			FAIL("Eval-group in insecure regular expression");
 		}

@@ -213,6 +213,7 @@ PERLVAR(Iregflags,	U16)		/* are we folding, multilining? */
 
 PERLVAR(Iregseen,	U32)		/* from regcomp.c */
 PERLVAR(Iseen_zerolen,	I32)		/* from regcomp.c */
+PERLVAR(Iseen_evals,	I32)		/* from regcomp.c */
 PERLVAR(Iregcomp_rx,	regexp *)	/* from regcomp.c */
 PERLVAR(Iextralen,	I32)		/* from regcomp.c */
 PERLVAR(Icolorset,	int)		/* from regcomp.c */
@@ -245,6 +246,8 @@ PERLVARI(Iregcompp,	regcomp_t, FUNC_NAME_TO_PTR(pregcomp))
 					/* Pointer to RE compiler */
 PERLVARI(Iregexecp,	regexec_t, FUNC_NAME_TO_PTR(regexec_flags))
 					/* Pointer to RE executer */
+PERLVARI(Ireginterp_cnt,	int,	    0)	/* Whether `Regexp'
+						   was interpolated. */
 
 PERLVARI(Iin_clean_objs,bool,    FALSE)	/* from sv.c */
 PERLVARI(Iin_clean_all,	bool,    FALSE)	/* from sv.c */
