@@ -56,7 +56,17 @@ So to check whether signal 17 and SIGALRM were the same, do just this:
 
 You may also choose to assign the strings C<'IGNORE'> or C<'DEFAULT'> as
 the handler, in which case Perl will try to discard the signal or do the
-default thing.  Some signals can be neither trapped nor ignored, such as
+default thing.
+
+On most UNIX platforms, the C<CHLD> (sometimes also known as C<CLD>) signal
+has special behavior with respect to a value of C<'IGNORE'>.
+Setting C<$SIG{CHLD}> to C<'IGNORE'> on such a platform has the effect of
+not creating zombie processes when the parent process fails to C<wait()>
+on its child processes (i.e. child processes are automatically reaped).
+Calling C<wait()> with C<$SIG{CHLD}> set to C<'IGNORE'> usually returns
+C<-1> on such platforms.
+
+Some signals can be neither trapped nor ignored, such as
 the KILL and STOP (but not the TSTP) signals.  One strategy for
 temporarily ignoring signals is to use a local() statement, which will be
 automatically restored once your block is exited.  (Remember that local()

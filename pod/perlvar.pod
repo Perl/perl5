@@ -835,6 +835,10 @@ signals.  Example:
     $SIG{'INT'} = 'DEFAULT';	# restore default action
     $SIG{'QUIT'} = 'IGNORE';	# ignore SIGQUIT
 
+Using a value of C<'IGNORE'> usually has the effect of ignoring the
+signal, except for the C<CHLD> signal.  See L<perlipc> for more about
+this special case.
+
 The %SIG array contains values for only the signals actually set within
 the Perl script.  Here are some other examples:
 

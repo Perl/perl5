@@ -4432,7 +4432,8 @@ If you know the exact length in bits, it can be used in place of the C<*>.
 
 Waits for a child process to terminate and returns the pid of the
 deceased process, or C<-1> if there are no child processes.  The status is
-returned in C<$?>.
+returned in C<$?>.  Note that a return value of C<-1> could mean that
+child processes are being automatically reaped, as described in L<perlipc>.
 
 =item waitpid PID,FLAGS
 
@@ -4451,7 +4452,8 @@ FLAGS of C<0> is implemented everywhere.  (Perl emulates the system call
 by remembering the status values of processes that have exited but have
 not been harvested by the Perl script yet.)
 
-See L<perlipc> for other examples.
+Note that a return value of C<-1> could mean that child processes are being
+automatically reaped.  See L<perlipc> for details, and for other examples.
 
 =item wantarray
 
