@@ -58,7 +58,7 @@ my \@inc_version_list = $Config_inc_version_list;
 print OUT <<'!NO!SUBS!';
 
 our @ORIG_INC = @INC;	# take a handy copy of 'original' value
-our $VERSION = '0.5564';
+our $VERSION = '0.5565';
 my $Is_MacOS = $^O eq 'MacOS';
 my $Mac_FS;
 if ($Is_MacOS) {

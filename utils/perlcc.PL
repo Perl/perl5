@@ -42,6 +42,7 @@ print OUT <<'!NO!SUBS!';
 # Version 2.01, Tom Christiansen, Thu Mar 30 08:25:14 MST 2000
 # Version 2.02, Simon Cozens, Sun Apr 16 01:53:36 JST 2000
 # Version 2.03, Edward Peschko, Mon Feb 26 12:04:17 PST 2001
+# Version 2.04, Enache Adrian,Fri, 18 Jul 2003 23:15:37 +0300
 
 use strict;
 use warnings;
@@ -52,7 +53,7 @@ use Config;
 use Fcntl qw(:DEFAULT :flock);
 use File::Temp qw(tempfile);
 use Cwd;
-our $VERSION = 2.03;
+our $VERSION = 2.04;
 $| = 1;
 
 $SIG{INT} = sub { exit(); }; # exit gracefully and clean up after ourselves.

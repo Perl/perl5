@@ -492,7 +492,7 @@ See L<perlxs> and L<perlxstut> for additional details.
 use strict;
 
 
-my( $H2XS_VERSION ) = ' $Revision: 1.22 $ ' =~ /\$Revision:\s+([^\s]+)/;
+my( $H2XS_VERSION ) = ' $Revision: 1.23 $ ' =~ /\$Revision:\s+([^\s]+)/;
 my $TEMPLATE_VERSION = '0.01';
 my @ARGS = @ARGV;
 my $compat_version = $];
