@@ -878,7 +878,7 @@ sub pp_sassign {
 	    }
 	    runtime("SvSETMAGIC(TOPs);");
 	} else {
-	    my $dst = pop @stack;
+	    my $dst = $stack[-1];
 	    my $type = $dst->{type};
 	    runtime("sv = POPs;");
 	    runtime("MAYBE_TAINT_SASSIGN_SRC(sv);");
