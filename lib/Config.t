@@ -62,8 +62,10 @@ ok(exists $Config{ccflags_nolargefiles}, "has ccflags_nolargefiles");
     }
 }
 
-like(Config::myconfig(),       qr/osname=\Q$Config{osname}\E/,   "myconfig");
-like(Config::config_sh(),      qr/osname='\Q$Config{osname}\E'/, "config_sh");
+like(Config::myconfig(), qr/osname=\Q$Config{osname}\E/,   "myconfig");
+like(Config::config_sh(), qr/osname='\Q$Config{osname}\E'/, "config_sh");
+like(Config::config_sh(), qr/byteorder='[1-8]+'/,
+     "config_sh has a valid byteorder");
 foreach my $line (Config::config_re('c.*')) {
   like($line,                  qr/^c.*?=.*$/,                   'config_re' );
 }
@@ -156,3 +158,12 @@ ok( exists $Config{d_fork}, "still d_fork");
 
 is($Config{sig_num_init}  =~ tr/,/,/, $Config{sig_size}, "sig_num_init size");
 is($Config{sig_name_init} =~ tr/,/,/, $Config{sig_size}, "sig_name_init size");
+
+# Test the troublesome virtual stuff
+foreach my $pain (qw(byteorder)) {
+  # No config var is named with anything that is a regexp metachar"
+  my @result = Config::config_re($pain);
+  is (scalar @result, 1, "single result for config_re('$pain')");
+  like ($result[0], qr/^$pain=(['"])$Config{$pain}\1$/, # grr '
+				"which is the expected result for $pain");
+}
