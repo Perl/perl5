@@ -10,12 +10,12 @@ binary distribution will most certainly have additional problems.
 * Known Problems
 
 The Perl testsuite may still report some errors on the Hurd.  The
-`lib/anydbm.t' and `op/stat.t' will most certainly fail.  The first
-fails because Berkeley DB 2 does not allow empty keys and the test
-tries to use them anyway.  This is not really a Hurd bug.  The same
-test fails on Linux with version 2.1 of the GNU C Library.  The second
-is a bug is a bug in the Hurd's filesystem, that we have not been able
-to fix yet.  I don't think it is crucial.
+`lib/anydbm.t' and `op/stat.t' tests will most certainly fail.  The
+first fails because Berkeley DB 2 does not allow empty keys and the
+test tries to use them anyway.  This is not really a Hurd bug.  The
+same test fails on Linux with version 2.1 of the GNU C Library.  The
+second failure is caused by a bug in the Hurd's filesystem servers,
+that we have not been able to fix yet.  I don't think it is crucial.
 
 The socket tests may fail if the network is not configured.  You have
 to make `/hurd/pfinet' the translator for `/servers/socket/2', giving
