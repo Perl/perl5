@@ -1026,22 +1026,6 @@ sed <<!GROK!THIS! >config.h -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un-
  */
 #define STDCHAR $stdchar	/**/
 
-/* INTSIZE:
- *	This symbol contains the value of sizeof(int) so that the C
- *	preprocessor can make decisions based on it.
- */
-/* LONGSIZE:
- *	This symbol contains the value of sizeof(long) so that the C
- *	preprocessor can make decisions based on it.
- */
-/* SHORTSIZE:
- *	This symbol contains the value of sizeof(short) so that the C
- *	preprocessor can make decisions based on it.
- */
-#define INTSIZE $intsize		/**/
-#define LONGSIZE $longsize		/**/
-#define SHORTSIZE $shortsize		/**/
-
 /* HAS_ACCESSX:
  *	This symbol, if defined, indicates that the accessx routine is
  *	available to do extended access checks.
@@ -1071,6 +1055,22 @@ sed <<!GROK!THIS! >config.h -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un-
  *	build process is a cross-compilation.
  */
 #$crosscompile CROSSCOMPILE		/**/
+
+/* INTSIZE:
+ *	This symbol contains the value of sizeof(int) so that the C
+ *	preprocessor can make decisions based on it.
+ */
+/* LONGSIZE:
+ *	This symbol contains the value of sizeof(long) so that the C
+ *	preprocessor can make decisions based on it.
+ */
+/* SHORTSIZE:
+ *	This symbol contains the value of sizeof(short) so that the C
+ *	preprocessor can make decisions based on it.
+ */
+#define INTSIZE $intsize		/**/
+#define LONGSIZE $longsize		/**/
+#define SHORTSIZE $shortsize		/**/
 
 /* MULTIARCH:
  *	This symbol, if defined, signifies that the build

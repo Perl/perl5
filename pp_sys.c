@@ -869,8 +869,8 @@ PP(pp_sselect)
     /* If SELECT_MIN_BITS is greater than one we most probably will want
      * to align the sizes with SELECT_MIN_BITS/8 because for example
      * in many little-endian (Intel, Alpha) systems (Linux, OS/2, Digital
-     * UNIX, Solaris, NeXT) the smallest quantum select() operates on
-     * (sets bit) is 32 bits.  */
+     * UNIX, Solaris, NeXT, Rhapsody) the smallest quantum select() operates
+     * on (sets/tests/clears bits) is 32 bits.  */
     growsize = maxlen + (SELECT_MIN_BITS/8 - (maxlen % (SELECT_MIN_BITS/8)));
 #  else
     growsize = sizeof(fd_set);

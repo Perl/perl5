@@ -43,6 +43,9 @@ true)
 		# NeXT uses a different name.
 		ldlibpth="DYLD_LIBRARY_PATH=`pwd`:$DYLD_LIBRARY_PATH"
 		;;
+	rhapsody*)
+		ldlibpth="DYLD_LIBRARY_PATH=`pwd`/Perl:$DYLD_LIBRARY_PATH"
+		;;
 	os2*)	# OS/2 doesn't need anything special for LD_LIBRARY_PATH.
 		ldlibpth=''
 		;;
