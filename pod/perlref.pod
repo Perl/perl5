@@ -568,7 +568,7 @@ pseudo-hash.  The first is to use exists().  This checks to see if the
 given field has been used yet.  It acts this way to match the behavior
 of a regular hash.  For instance:
 
-	$phash = [{foo =>, bar => 2, pants => 3}, 'FOO'];
+	$phash = [{foo =>1, bar => 2, pants => 3}, 'FOO'];
 	$phash->{pants} = undef;
 
 	exists $phash->{foo};    # true, 'foo' was set in the declaration
