@@ -66,9 +66,7 @@ USE_IMP_SYS = define
 
 #
 # uncomment to enable the experimental PerlIO I/O subsystem.
-# This is currently incompatible with USE_MULTI, USE_ITHREADS,
-# and USE_IMP_SYS
-#USE_PERLIO	= define
+USE_PERLIO	= define
 
 #
 # WARNING! This option is deprecated and will eventually go away (enable
@@ -245,6 +243,10 @@ USE_ITHREADS	= undef
 
 !IF "$(USE_IMP_SYS)" == ""
 USE_IMP_SYS	= undef
+!ENDIF
+
+!IF "$(USE_PERLIO)" == ""
+USE_PERLIO	= undef
 !ENDIF
 
 !IF "$(USE_PERLCRT)" == ""
@@ -729,6 +731,7 @@ CFG_VARS	=					\
 		"useithreads=$(USE_ITHREADS)"		\
 		"usethreads=$(USE_5005THREADS)"		\
 		"usemultiplicity=$(USE_MULTI)"		\
+		"useperlio=$(USE_PERLIO)"		\
 		"LINK_FLAGS=$(LINK_FLAGS:"=\")"		\
 		"optimize=$(OPTIMIZE:"=\")"
 
