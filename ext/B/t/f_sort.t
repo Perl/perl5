@@ -9,12 +9,19 @@ use OptreeCheck;
 plan tests => 20;
 
 
-=for gentest
+=head1 Test Notes
 
 # chunk: #!perl
 #examples poached from perldoc -f sort
 
-=cut
+NOTE: name is no longer a required arg for checkOptree, as label is
+synthesized out of others.  HOWEVER, if the test-code has newlines in
+it, the label must be overridden by an explicit name.
+
+This is because t/TEST is quite particular about the test output it
+processes, and multi-line labels violate its 1-line-per-test
+expectations.
+
 =for gentest
 
 # chunk: # sort lexically
@@ -333,7 +340,7 @@ print sort @george, 'to', @harry;
 
 =cut
 
-checkOptree(note   => q{},
+checkOptree(name   => q{sort USERSUB LIST },
 	    bcopts => q{-exec},
 	    todo   => 'sort why BARE flag happens',	
 	    code   => q{sub backwards { $b cmp $a }
@@ -463,7 +470,7 @@ sort { $b->[1] <=> $a->[1]
 
 =cut
 
-checkOptree(note   => q{},
+checkOptree(name   => q{Compound sort/map Expression },
 	    bcopts => q{-exec},
 	    code   => q{ @new = map { $_->[0] }
 			 sort { $b->[1] <=> $a->[1] || $a->[2] cmp $b->[2] }
@@ -554,7 +561,7 @@ package main;
 
 =cut
 
-checkOptree(note   => q{},
+checkOptree(name   => q{sort other::sub LIST },
 	    bcopts => q{-exec},
 	    code   => q{package other; sub backwards ($$) { $_[1] cmp $_[0]; }
 			package main; @new = sort other::backwards @old; },

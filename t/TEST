@@ -447,7 +447,8 @@ EOT
 	}
 	else {
 	    $next += 1;
-	    print "${te}FAILED at test $next\n";
+	    print "${te}FAILED at test $next";
+	    print ($next > $max) ? "\tpossibly due to extra output\n" : "\n";
 	    $bad = $bad + 1;
 	    $_ = $test;
 	    if (/^base/) {
