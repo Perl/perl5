@@ -2796,6 +2796,7 @@ t/op/sort.t			See if sort works
 t/op/splice.t			See if splice works
 t/op/split.t			See if split works
 t/op/sprintf.t			See if sprintf works
+t/op/sprintf2.t			See if sprintf works
 t/op/srand.t			See if srand works
 t/op/stash.t			See if %:: stashes work
 t/op/stat.t			See if stat works
