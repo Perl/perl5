@@ -2350,10 +2350,6 @@ sed <<!GROK!THIS! >config.h -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un-
  *	The standard distribution will put nothing in this directory.
  *	Individual sites may place their own extensions and modules in
  *	this directory.
- *	This differs from LOCALARCH in that SITEARCH is often
- *	a shared network directory while LOCALARCH is
- *	at a local disk, because of policy/administrative issues
- *	like for example caching (performance), licensing, or security.
  */
 /* SITEARCH_EXP:
  *	This symbol contains the ~name expanded version of SITEARCH, to be used
@@ -2370,10 +2366,6 @@ sed <<!GROK!THIS! >config.h -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un-
  *	The standard distribution will put nothing in this directory.
  *	Individual sites may place their own extensions and modules in
  *	this directory.
- *	This differs from LOCALLIB in that SITELIB is often
- *	a shared network directory while LOCALLIB is
- *	at a local disk, because of policy/administrative issues
- *	like for example caching (performance), licensing, or security.
  */
 /* SITELIB_EXP:
  *	This symbol contains the ~name expanded version of SITELIB, to be used
