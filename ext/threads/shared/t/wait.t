@@ -29,6 +29,48 @@ sub ok {
     print "${not}ok " . ($Base + $offset) . " - $text\n";
 }
 
+sub forko (&$$); # To prevent deadlock from underlying pthread_* bugs (as in
+                 # stock RH9 glibc/NPTL) or from our own errors, we run tests
+                 # in separately forked and alarmed processes.
+
+*forko = ($^O =~ /^dos|os2|mswin32|netware$/i)  # Not on DOSish platforms
+? sub (&$$) { my $code = shift; goto &$code; }
+: sub (&$$) {
+  my ($code, $expected, $patience) = @_;
+  my ($test_num, $pid);
+  local *CHLD;
+
+  my $bump = $expected;
+
+  $patience ||= 60;
+
+  unless (defined($pid = open(CHLD, "-|"))) {
+    die "fork: $!\n";
+  }
+  if (! $pid) {   # Child -- run the test
+    $patience ||= 60;
+    alarm $patience;
+    &$code;
+    exit;
+  }
+
+  while (<CHLD>) {
+    $expected--, $test_num=$1 if /^(?:not )?ok (\d+)/;
+    #print "#forko: ($expected, $1) $_";
+    print;
+  }
+
+  close(CHLD);
+
+  while ($expected--) {
+    $test_num++;
+    print "not ok $test_num - child status $?\n";
+  }
+
+  $Base += $bump;
+
+};
+
 # - TEST basics
 
 ok(1, defined &cond_wait, "cond_wait() present");
@@ -69,11 +111,13 @@ SYNC_SHARED: {
   }
 
   # - TEST cond_wait
-  foreach (@wait_how) {
-    $test = "cond_wait [$_]";
-    threads->create(\&cw)->join;
-    $Base += 6;
-  }
+  forko( sub {
+    foreach (@wait_how) {
+      $test = "cond_wait [$_]";
+      threads->create(\&cw)->join;
+      $Base += 6;
+    }
+  }, 6*@wait_how, 90);
 
   sub cw {
     my $thr;
@@ -98,11 +142,13 @@ SYNC_SHARED: {
 
   # - TEST cond_timedwait success
 
-  foreach (@wait_how) {
-    $test = "cond_timedwait [$_]";
-    threads->create(\&ctw, 5)->join;
-    $Base += 6;
-  }
+  forko( sub {
+    foreach (@wait_how) {
+      $test = "cond_timedwait [$_]";
+      threads->create(\&ctw, 5)->join;
+      $Base += 6;
+    }
+  }, 6*@wait_how, 90);
 
   sub ctw($) {
     my $to = shift;
@@ -129,17 +175,21 @@ SYNC_SHARED: {
 
   # - TEST cond_timedwait timeout
 
-  foreach (@wait_how) {
-    $test = "cond_timedwait pause, timeout [$_]";
-    threads->create(\&ctw_fail, 3)->join;
-    $Base += 2;
-  }
+  forko( sub {
+    foreach (@wait_how) {
+      $test = "cond_timedwait pause, timeout [$_]";
+      threads->create(\&ctw_fail, 3)->join;
+      $Base += 2;
+    }
+  }, 2*@wait_how, 90);
 
-  foreach (@wait_how) {
-    $test = "cond_timedwait instant timeout [$_]";
-    threads->create(\&ctw_fail, -60)->join;
-    $Base += 2;
-  }
+  forko( sub {
+    foreach (@wait_how) {
+      $test = "cond_timedwait instant timeout [$_]";
+      threads->create(\&ctw_fail, -60)->join;
+      $Base += 2;
+    }
+  }, 2*@wait_how, 90);
 
   # cond_timedwait timeout (relative timeout)
   sub ctw_fail {
@@ -189,11 +239,13 @@ SYNCH_REFS: {
   }
 
   # - TEST cond_wait
-  foreach (@wait_how) {
-    $test = "cond_wait [$_]";
-    threads->create(\&cw2)->join;
-    $Base += 6;
-  }
+  forko( sub {
+    foreach (@wait_how) {
+      $test = "cond_wait [$_]";
+      threads->create(\&cw2)->join;
+      $Base += 6;
+    }
+  }, 6*@wait_how, 90);
 
   sub cw2 {
     my $thr;
@@ -218,11 +270,13 @@ SYNCH_REFS: {
 
   # - TEST cond_timedwait success
 
-  foreach (@wait_how) {
-    $test = "cond_timedwait [$_]";
-    threads->create(\&ctw2, 5)->join;
-    $Base += 6;
-  }
+  forko( sub {
+    foreach (@wait_how) {
+      $test = "cond_timedwait [$_]";
+      threads->create(\&ctw2, 5)->join;
+      $Base += 6;
+    }
+  }, 6*@wait_how, 90);
 
   sub ctw2($) {
     my $to = shift;
@@ -249,17 +303,21 @@ SYNCH_REFS: {
 
   # - TEST cond_timedwait timeout
 
-  foreach (@wait_how) {
-    $test = "cond_timedwait pause, timeout [$_]";
-    threads->create(\&ctw_fail2, 3)->join;
-    $Base += 2;
-  }
+  forko( sub {
+    foreach (@wait_how) {
+      $test = "cond_timedwait pause, timeout [$_]";
+      threads->create(\&ctw_fail2, 3)->join;
+      $Base += 2;
+    }
+  }, 2*@wait_how, 90);
 
-  foreach (@wait_how) {
-    $test = "cond_timedwait instant timeout [$_]";
-    threads->create(\&ctw_fail2, -60)->join;
-    $Base += 2;
-  }
+  forko( sub {
+    foreach (@wait_how) {
+      $test = "cond_timedwait instant timeout [$_]";
+      threads->create(\&ctw_fail2, -60)->join;
+      $Base += 2;
+    }
+  }, 2*@wait_how, 90);
 
   sub ctw_fail2 {
     my $to = shift;
