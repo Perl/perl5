@@ -475,6 +475,7 @@ Perl_to_utf8_case
 Perl_to_utf8_lower
 Perl_to_utf8_upper
 Perl_to_utf8_title
+Perl_to_utf8_fold
 Perl_unlnk
 Perl_unlock_condpair
 Perl_unsharepvn

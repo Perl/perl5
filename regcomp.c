@@ -3155,6 +3155,21 @@ tryagain:
 	break;
     }
 
+    if (PL_encoding && PL_regkind[(U8)OP(ret)] == EXACT && !RExC_utf8) {
+	 STRLEN oldlen = STR_LEN(ret);
+	 SV *sv        = sv_2mortal(newSVpvn(STRING(ret), oldlen));
+	 char *s       = Perl_sv_recode_to_utf8(aTHX_ sv, PL_encoding);
+	 STRLEN newlen = SvCUR(sv);
+	 if (!SIZE_ONLY) {
+	      DEBUG_r(PerlIO_printf(Perl_debug_log, "recode %*s to %*s\n",
+				    oldlen, STRING(ret), newlen, s));
+	      Copy(s, STRING(ret), newlen, char);
+	      STR_LEN(ret) += newlen - oldlen;
+	      RExC_emit += STR_SZ(newlen) - STR_SZ(oldlen);
+	 } else
+	      RExC_size += STR_SZ(newlen) - STR_SZ(oldlen);
+    }
+
     return(ret);
 }
 
@@ -4415,7 +4430,7 @@ Perl_regprop(pTHX_ SV *sv, regnode *o)
 
     if (k == EXACT) {
         SV *dsv = sv_2mortal(newSVpvn("", 0));
-	bool do_utf8 = PL_reg_match_utf8;
+	bool do_utf8 = DO_UTF8(sv);
 	char *s    = do_utf8 ?
 	  pv_uni_display(dsv, (U8*)STRING(o), STR_LEN(o), 60, 0) :
 	  STRING(o);

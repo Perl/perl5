@@ -595,7 +595,7 @@ DB_File - Perl5 access to Berkeley DB version 1.x
 
 B<DB_File> is a module which allows Perl programs to make use of the
 facilities provided by Berkeley DB version 1.x (if you have a newer
-version of DB, see L<Using DB_File with Berkeley DB version 2 or greater).
+version of DB, see L<Using DB_File with Berkeley DB version 2 or greater>).
 It is assumed that you have a copy of the Berkeley DB manual pages at
 hand when reading this documentation. The interface defined here
 mirrors the Berkeley DB interface closely.

@@ -802,6 +802,7 @@ PERL_CALLCONV UV	Perl_to_utf8_case(pTHX_ U8 *p, U8* ustrp, STRLEN *lenp, SV **sw
 PERL_CALLCONV UV	Perl_to_utf8_lower(pTHX_ U8 *p, U8* ustrp, STRLEN *lenp);
 PERL_CALLCONV UV	Perl_to_utf8_upper(pTHX_ U8 *p, U8* ustrp, STRLEN *lenp);
 PERL_CALLCONV UV	Perl_to_utf8_title(pTHX_ U8 *p, U8* ustrp, STRLEN *lenp);
+PERL_CALLCONV UV	Perl_to_utf8_fold(pTHX_ U8 *p, U8* ustrp, STRLEN *lenp);
 #if defined(UNLINK_ALL_VERSIONS)
 PERL_CALLCONV I32	Perl_unlnk(pTHX_ char* f);
 #endif

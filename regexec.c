@@ -408,7 +408,8 @@ Perl_re_intuit_start(pTHX_ regexp *prog, SV *sv, char *strpos,
 	PL_reg_flags |= RF_utf8;
 
     if (prog->minlen > CHR_DIST((U8*)strend, (U8*)strpos)) {
-	DEBUG_r(PerlIO_printf(Perl_debug_log, "String too short...\n"));
+	DEBUG_r(PerlIO_printf(Perl_debug_log,
+			      "String too short... [re_intuit_start]\n"));
 	goto fail;
     }
     strbeg = (sv && SvPOK(sv)) ? strend - SvCUR(sv) : strpos;
@@ -1474,11 +1475,10 @@ Perl_regexec_flags(pTHX_ register regexp *prog, char *stringarg, register char *
     }
 
     minlen = prog->minlen;
-    if (do_utf8 && !(prog->reganch & ROPT_CANY_SEEN)) {
-        if (utf8_distance((U8*)strend, (U8*)startpos) < minlen) goto phooey;
-    }
-    else {
-        if (strend - startpos < minlen) goto phooey;
+    if (strend - startpos < minlen) {
+        DEBUG_r(PerlIO_printf(Perl_debug_log,
+			      "String too short [regexec_flags]...\n"));
+	goto phooey;
     }
 
     /* Check validity of program. */
@@ -1537,13 +1537,15 @@ Perl_regexec_flags(pTHX_ register regexp *prog, char *stringarg, register char *
 	d.scream_olds = &scream_olds;
 	d.scream_pos = &scream_pos;
 	s = re_intuit_start(prog, sv, s, strend, flags, &d);
-	if (!s)
+	if (!s) {
+	    DEBUG_r(PerlIO_printf(Perl_debug_log, "Not present...\n"));
 	    goto phooey;	/* not present */
+	}
     }
 
     DEBUG_r({
-	 char *s   = UTF ? sv_uni_display(dsv, sv, 60, 0) : startpos;
-	 int   len = UTF ? strlen(s) : strend - startpos;
+	 char *s   = do_utf8 ? sv_uni_display(dsv, sv, 60, 0) : startpos;
+	 int   len = do_utf8 ? strlen(s) : strend - startpos;
 	 if (!PL_colorset)
 	     reginitcolors();
 	 PerlIO_printf(Perl_debug_log,
@@ -2070,13 +2072,13 @@ S_regmatch(pTHX_ regnode *prog)
 		? (5 + taill) - l : locinput - PL_bostr;
 	    int pref0_len;
 
-	    while (UTF8_IS_CONTINUATION(*(U8*)(locinput - pref_len)))
+	    while (do_utf8 && UTF8_IS_CONTINUATION(*(U8*)(locinput - pref_len)))
 		pref_len++;
 	    pref0_len = pref_len  - (locinput - PL_reg_starttry);
 	    if (l + pref_len < (5 + taill) && l < PL_regeol - locinput)
 		l = ( PL_regeol - locinput > (5 + taill) - pref_len
 		      ? (5 + taill) - pref_len : PL_regeol - locinput);
-	    while (UTF8_IS_CONTINUATION(*(U8*)(locinput + l)))
+	    while (do_utf8 && UTF8_IS_CONTINUATION(*(U8*)(locinput + l)))
 		l--;
 	    if (pref0_len < 0)
 		pref0_len = 0;
@@ -2085,21 +2087,21 @@ S_regmatch(pTHX_ regnode *prog)
 	    regprop(prop, scan);
 	    {
 	      char *s0 =
-		UTF ?
+		do_utf8 ?
 		pv_uni_display(dsv0, (U8*)(locinput - pref_len),
 			       pref0_len, 60, 0) :
 		locinput - pref_len;
-	      int len0 = UTF ? strlen(s0) : pref0_len;
-	      char *s1 = UTF ?
+	      int len0 = do_utf8 ? strlen(s0) : pref0_len;
+	      char *s1 = do_utf8 ?
 		pv_uni_display(dsv1, (U8*)(locinput - pref_len + pref0_len),
 			       pref_len - pref0_len, 60, 0) :
 		locinput - pref_len + pref0_len;
-	      int len1 = UTF ? strlen(s1) : pref_len - pref0_len;
-	      char *s2 = UTF ?
+	      int len1 = do_utf8 ? strlen(s1) : pref_len - pref0_len;
+	      char *s2 = do_utf8 ?
 		pv_uni_display(dsv2, (U8*)locinput,
 			       PL_regeol - locinput, 60, 0) :
 		locinput;
-	      int len2 = UTF ? strlen(s2) : l;
+	      int len2 = do_utf8 ? strlen(s2) : l;
 	      PerlIO_printf(Perl_debug_log,
 			    "%4"IVdf" <%s%.*s%s%s%.*s%s%s%s%.*s%s>%*s|%3"IVdf":%*s%s\n",
 			    (IV)(locinput - PL_bostr),
@@ -2205,14 +2207,26 @@ S_regmatch(pTHX_ regnode *prog)
 		char *l = locinput;
 		char *e = s + ln;
 		STRLEN len;
+
 		if (do_utf8)
 		    while (s < e) {
+			UV uv;
+
 			if (l >= PL_regeol)
 			    sayNO;
-			if (*((U8*)s) != utf8_to_uvchr((U8*)l, &len))
-			    sayNO;
-			s++;
-			l += len;
+			uv = NATIVE_TO_UNI(*(U8*)s);
+			if (UTF8_IS_START(uv)) {
+			     len = UTF8SKIP(s);
+			     if (memNE(s, l, len))
+				  sayNO;
+			     l += len;
+			     s += len;
+			} else {
+			     if (uv != utf8_to_uvchr((U8*)l, &len))
+				  sayNO;
+			     l += len;
+			     s ++;
+			}
 		    }
 		else
 		    while (s < e) {
@@ -2221,7 +2235,7 @@ S_regmatch(pTHX_ regnode *prog)
 			if (*((U8*)l) != utf8_to_uvchr((U8*)s, &len))
 			    sayNO;
 			s += len;
-			l++;
+			l ++;
 		    }
 		locinput = l;
 		nextchr = UCHARAT(locinput);

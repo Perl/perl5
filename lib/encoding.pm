@@ -57,14 +57,33 @@ encoding pragma you can change this default.
 The pragma is a per script, not a per block lexical.  Only the last
 C<use encoding> matters, and it affects B<the whole script>.
 
+Notice that only literals (string or regular expression) having only
+legacy code points are affected: if you mix data like this
+
+	\xDF\x{100}
+
+the data is assumed to be in (Latin 1 and) Unicode, not in your native
+encoding.  In other words, this will match in "greek":
+
+	"\xDF" =~ /\x{3af}/
+
+but this will not
+
+	"\xDF\x{100}" =~ /\x{3af}\x{100}/
+
+since the C<\xDF> on the left will B<not> be upgraded to C<\x{3af}>
+because of the C<\x{100}> on the left.  You should not be mixing your
+legacy data and Unicode in the same string.
+
 If no encoding is specified, the environment variable L<PERL_ENCODING>
 is consulted.  If that fails, "latin1" (ISO 8859-1) is assumed.  If no
 encoding can be found, C<Unknown encoding '...'> error will be thrown.
 
 =head1 KNOWN PROBLEMS
 
-Literals in regular expressions are not affected by this pragma.
-They very probably should.
+For native multibyte encodings (either fixed or variable length)
+the current implementation of the regular expressions may introduce
+recoding errors for longer regular expression literals than 127 bytes.
 
 =head1 SEE ALSO
 
