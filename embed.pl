@@ -316,7 +316,10 @@ print EM do_not_edit ("embed.h"), <<'END';
 
 /* (Doing namespace management portably in C is really gross.) */
 
-/* NO_EMBED is no longer supported. i.e. EMBED is always active. */
+/* NO_EMBED is no longer supported. i.e. EMBED is always active--
+ * but you can define PERL_HIDE_SHORT_NAMES to achieve the same. */
+
+#ifndef PERL_HIDE_SHORT_NAMES
 
 /* Hide global symbols */
 
@@ -428,6 +431,8 @@ print EM <<'END';
 
 #endif	/* PERL_IMPLICIT_CONTEXT */
 
+#endif	/* #ifndef PERL_HIDE_SHORT_NAMES */
+
 END
 
 print EM <<'END';
@@ -472,7 +477,7 @@ print EM <<'END';
    an extra argument but grab the context pointer using the macro
    dTHX.
  */
-#if defined(PERL_IMPLICIT_CONTEXT)
+#if defined(PERL_IMPLICIT_CONTEXT) && !defined(PERL_HIDE_SHORT_NAMES)
 #  define croak				Perl_croak_nocontext
 #  define deb				Perl_deb_nocontext
 #  define die				Perl_die_nocontext
