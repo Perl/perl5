@@ -429,6 +429,8 @@ modulo the caveats given in L<perlipc/"Signals">.
     	# didn't
     }
 
+For more information see L<perlipc>.
+
 =item atan2 Y,X
 
 Returns the arctangent of Y/X in the range -PI to PI.
