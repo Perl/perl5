@@ -923,7 +923,10 @@ element to return happens to be C<undef>.
 
 You may also use C<defined(&func)> to check whether subroutine C<&func>
 has ever been defined.  The return value is unaffected by any forward
-declarations of C<&foo>.
+declarations of C<&foo>.  Note that a subroutine which is not defined
+may still be callable: its package may have an C<AUTOLOAD> method that
+makes it spring into existence the first time that it is called -- see
+L<perlsub>.
 
 Use of C<defined> on aggregates (hashes and arrays) is deprecated.  It
 used to report whether memory for that aggregate has ever been
@@ -1479,7 +1482,10 @@ it exists, but the reverse doesn't necessarily hold true.
 Given an expression that specifies the name of a subroutine,
 returns true if the specified subroutine has ever been declared, even
 if it is undefined.  Mentioning a subroutine name for exists or defined
-does not count as declaring it.
+does not count as declaring it.  Note that a subroutine which does not
+exist may still be callable: its package may have an C<AUTOLOAD>
+method that makes it spring into existence the first time that it is
+called -- see L<perlsub>.
 
     print "Exists\n" 	if exists &subroutine;
     print "Defined\n" 	if defined &subroutine;
