@@ -8,7 +8,7 @@
 /* #include "8859.h" */
 /* #include "EBCDIC.h" */
 /* #include "Symbols.h" */
-#include "defcodes.h"
+#include "def_t.h"
 
 #define UNIMPLEMENTED(x,y) y x (SV *sv, char *encoding) {dTHX;   \
                          Perl_croak(aTHX_ "panic_unimplemented"); \
@@ -785,5 +785,5 @@ BOOT:
 /* #include "8859_def.h" */
 /* #include "EBCDIC_def.h" */
 /* #include "Symbols_def.h" */
-#include "defcodes_def.h"
+#include "def_t_def.h"
 }

@@ -592,7 +592,11 @@ sub outstring
         {
          next unless (my $i = index($o,$s)) >= 0;
          $sym = $strings{$o};
-         $sym .= sprintf("+0x%02x",$i) if ($i);
+         # gcc things that 0x0e+0x10 (anything with e+) starts to look like
+         # a hexadecimal floating point constant. Silly gcc. Only p
+         # introduces a floating point constant. Put the space in to stop it
+         # getting confused.
+         $sym .= sprintf(" +0x%02x",$i) if ($i);
          $subsave += length($s);
          return $strings{$s} = $sym;
        }

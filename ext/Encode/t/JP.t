@@ -1,4 +1,5 @@
 BEGIN {
+    if (! -d 'blib' and -d 't'){ chdir 't' };
     chdir 't' if -d 't' and $ENV{PWD} !~ m,/Encode[^/]*$,o;
     unshift @INC, '../lib';
     require Config; import Config;

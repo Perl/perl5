@@ -1,5 +1,5 @@
 BEGIN {
-    chdir 't' if -d 't';
+    if (! -d 'blib' and -d 't'){ chdir 't' };
     unshift @INC,  '../lib';
     require Config; import Config;
     if ($Config{'extensions'} !~ /\bEncode\b/) {

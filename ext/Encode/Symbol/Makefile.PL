@@ -4,7 +4,7 @@ use ExtUtils::MakeMaker;
 
 my $name = 'Symbol';
 my %tables = (
-	      symbol => ['symbol.ucm','dingbats.ucm'],
+	      symbol_t => ['symbol.ucm','dingbats.ucm'],
 	      );
 
 WriteMakefile(

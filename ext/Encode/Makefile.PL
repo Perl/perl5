@@ -4,9 +4,9 @@ use ExtUtils::MakeMaker;
 
 my %tables = 
     (
-     defcodes => ['ascii.ucm',
-		 '8859-1.ucm',
-		 ]
+     def_t => ['ascii.ucm',
+	       '8859-1.ucm',
+	       ]
      );
 
 WriteMakefile(

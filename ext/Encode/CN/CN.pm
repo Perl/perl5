@@ -1,5 +1,10 @@
 package Encode::CN;
-our $VERSION = do { my @r = (q$Revision: 0.96 $ =~ /\d+/g); sprintf "%d."."%02d" x $#r, @r };
+BEGIN {
+    if (ord("A") == 193) {
+	die "Encode::CN not supported on EBCDIC\n";
+    }
+}
+our $VERSION = do { my @r = (q$Revision: 0.97 $ =~ /\d+/g); sprintf "%d."."%02d" x $#r, @r };
 
 use Encode;
 use Encode::CN::HZ;
