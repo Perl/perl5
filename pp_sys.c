@@ -1134,7 +1134,7 @@ PP(pp_getc)
 {
     dSP; dTARGET;
     GV *gv;
-    IO *io;
+    IO *io = NULL;
     MAGIC *mg;
 
     if (MAXARG == 0)
@@ -1157,8 +1157,11 @@ PP(pp_getc)
 	    SvSetMagicSV_nosteal(TARG, TOPs);
 	RETURN;
     }
-    if (!gv || do_eof(gv)) /* make sure we have fp with something */
+    if (!gv || do_eof(gv)) { /* make sure we have fp with something */
+	if (ckWARN2(WARN_UNOPENED,WARN_CLOSED) && IoTYPE(io) != IoTYPE_WRONLY)
+	    report_evil_fh(gv, io, PL_op->op_type);
 	RETPUSHUNDEF;
+    }
     TAINT;
     sv_setpv(TARG, " ");
     *SvPVX(TARG) = PerlIO_getc(IoIFP(GvIOp(gv))); /* should never be EOF */
