@@ -1,6 +1,6 @@
 #!../../miniperl
 
-$UnicodeData = "UnicodeData-Latest.txt";
+$UnicodeData = "Unicode.300";
 
 # Note: we try to keep filenames unique within first 8 chars.  Using
 # subdirectories for the following helps.
@@ -249,7 +249,7 @@ sub proplist {
 	$split = '($code, $name, $link, $linkgroup) = split(/; */);';
     }
     elsif ($table =~ /^Jamo/) {
-	open(UD, "Jamo-2.txt") or warn "Can't open $table: $!";
+	open(UD, "Jamo.txt") or warn "Can't open $table: $!";
 
 	$split = '($code, $short, $name) = split(/; */); $code =~ s/^U\+//;';
     }
@@ -416,7 +416,7 @@ EOH
     print OUT "END\n";
     close OUT;
 } else {
-    die "$0: failed to open Eq/Unicode for writing: $!\n";
+    die "$0: failed to open Eq/Unicode.pl for writing: $!\n";
 }
 
 print "EqLatin1\n";
@@ -436,7 +436,7 @@ EOH
     print OUT "END\n";
     close OUT;
 } else {
-    die "$0: failed to open Eq/Latin1 for writing: $!\n";
+    die "$0: failed to open Eq/Latin1.pl for writing: $!\n";
 }
 
 # eof
