@@ -2320,55 +2320,55 @@ int arg;
     case '_':
 	if (strnEQ(name, "_PC_", 4)) {
 	    if (strEQ(name, "_PC_CHOWN_RESTRICTED"))
-#ifdef _PC_CHOWN_RESTRICTED
+#if defined(_PC_CHOWN_RESTRICTED) || HINT_SC_EXIST
 		return _PC_CHOWN_RESTRICTED;
 #else
 		goto not_there;
 #endif
 	    if (strEQ(name, "_PC_LINK_MAX"))
-#ifdef _PC_LINK_MAX
+#if defined(_PC_LINK_MAX) || HINT_SC_EXIST
 		return _PC_LINK_MAX;
 #else
 		goto not_there;
 #endif
 	    if (strEQ(name, "_PC_MAX_CANON"))
-#ifdef _PC_MAX_CANON
+#if defined(_PC_MAX_CANON) || HINT_SC_EXIST
 		return _PC_MAX_CANON;
 #else
 		goto not_there;
 #endif
 	    if (strEQ(name, "_PC_MAX_INPUT"))
-#ifdef _PC_MAX_INPUT
+#if defined(_PC_MAX_INPUT) || HINT_SC_EXIST
 		return _PC_MAX_INPUT;
 #else
 		goto not_there;
 #endif
 	    if (strEQ(name, "_PC_NAME_MAX"))
-#ifdef _PC_NAME_MAX
+#if defined(_PC_NAME_MAX) || HINT_SC_EXIST
 		return _PC_NAME_MAX;
 #else
 		goto not_there;
 #endif
 	    if (strEQ(name, "_PC_NO_TRUNC"))
-#ifdef _PC_NO_TRUNC
+#if defined(_PC_NO_TRUNC) || HINT_SC_EXIST
 		return _PC_NO_TRUNC;
 #else
 		goto not_there;
 #endif
 	    if (strEQ(name, "_PC_PATH_MAX"))
-#ifdef _PC_PATH_MAX
+#if defined(_PC_PATH_MAX) || HINT_SC_EXIST
 		return _PC_PATH_MAX;
 #else
 		goto not_there;
 #endif
 	    if (strEQ(name, "_PC_PIPE_BUF"))
-#ifdef _PC_PIPE_BUF
+#if defined(_PC_PIPE_BUF) || HINT_SC_EXIST
 		return _PC_PIPE_BUF;
 #else
 		goto not_there;
 #endif
 	    if (strEQ(name, "_PC_VDISABLE"))
-#ifdef _PC_VDISABLE
+#if defined(_PC_VDISABLE) || HINT_SC_EXIST
 		return _PC_VDISABLE;
 #else
 		goto not_there;
@@ -2494,61 +2494,61 @@ int arg;
 	}
 	if (strnEQ(name, "_SC_", 4)) {
 	    if (strEQ(name, "_SC_ARG_MAX"))
-#ifdef _SC_ARG_MAX
+#if defined(_SC_ARG_MAX) || HINT_SC_EXIST
 		return _SC_ARG_MAX;
 #else
 		goto not_there;
 #endif
 	    if (strEQ(name, "_SC_CHILD_MAX"))
-#ifdef _SC_CHILD_MAX
+#if defined(_SC_CHILD_MAX) || HINT_SC_EXIST
 		return _SC_CHILD_MAX;
 #else
 		goto not_there;
 #endif
 	    if (strEQ(name, "_SC_CLK_TCK"))
-#ifdef _SC_CLK_TCK
+#if defined(_SC_CLK_TCK) || HINT_SC_EXIST
 		return _SC_CLK_TCK;
 #else
 		goto not_there;
 #endif
 	    if (strEQ(name, "_SC_JOB_CONTROL"))
-#ifdef _SC_JOB_CONTROL
+#if defined(_SC_JOB_CONTROL) || HINT_SC_EXIST
 		return _SC_JOB_CONTROL;
 #else
 		goto not_there;
 #endif
 	    if (strEQ(name, "_SC_NGROUPS_MAX"))
-#ifdef _SC_NGROUPS_MAX
+#if defined(_SC_NGROUPS_MAX) || HINT_SC_EXIST
 		return _SC_NGROUPS_MAX;
 #else
 		goto not_there;
 #endif
 	    if (strEQ(name, "_SC_OPEN_MAX"))
-#ifdef _SC_OPEN_MAX
+#if defined(_SC_OPEN_MAX) || HINT_SC_EXIST
 		return _SC_OPEN_MAX;
 #else
 		goto not_there;
 #endif
 	    if (strEQ(name, "_SC_SAVED_IDS"))
-#ifdef _SC_SAVED_IDS
+#if defined(_SC_SAVED_IDS) || HINT_SC_EXIST
 		return _SC_SAVED_IDS;
 #else
 		goto not_there;
 #endif
 	    if (strEQ(name, "_SC_STREAM_MAX"))
-#ifdef _SC_STREAM_MAX
+#if defined(_SC_STREAM_MAX) || HINT_SC_EXIST
 		return _SC_STREAM_MAX;
 #else
 		goto not_there;
 #endif
 	    if (strEQ(name, "_SC_TZNAME_MAX"))
-#ifdef _SC_TZNAME_MAX
+#if defined(_SC_TZNAME_MAX) || HINT_SC_EXIST
 		return _SC_TZNAME_MAX;
 #else
 		goto not_there;
 #endif
 	    if (strEQ(name, "_SC_VERSION"))
-#ifdef _SC_VERSION
+#if defined(_SC_VERSION) || HINT_SC_EXIST
 		return _SC_VERSION;
 #else
 		goto not_there;
