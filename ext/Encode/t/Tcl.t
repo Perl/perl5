@@ -6,6 +6,10 @@ BEGIN {
       print "1..0 # Skip: Encode was not built\n";
       exit 0;
     }
+    if (ord("A") == 193) {
+	print "1..0 # Skip: EBCDIC\n";
+	exit 0;
+    }
 }
 use Test;
 use Encode qw(encode decode);
