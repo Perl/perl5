@@ -1152,7 +1152,12 @@ S_parse_body(pTHX_ char **env, XSINIT_t xsinit)
 #endif
 		sv_catpv(PL_Sv, "; \
 $\"=\"\\n    \"; \
-@env = map { \"$_=\\\"$ENV{$_}\\\"\" } sort grep {/^PERL/} keys %ENV; \
+@env = map { \"$_=\\\"$ENV{$_}\\\"\" } sort grep {/^PERL/} keys %ENV; ");
+#ifdef __CYGWIN__
+		sv_catpv(PL_Sv,"\
+push @env, \"CYGWIN=\\\"$ENV{CYGWIN}\\\"\";");
+#endif
+		sv_catpv(PL_Sv, "\
 print \"  \\%ENV:\\n    @env\\n\" if @env; \
 print \"  \\@INC:\\n    @INC\\n\";");
 	    }
