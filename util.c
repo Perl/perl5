@@ -2355,7 +2355,7 @@ I32 *retlen;
 void
 schedule(void)
 {
-    thr = thr->next_run;
+    thr = thr->i.next_run;
 }
 
 void
@@ -2376,11 +2376,11 @@ perl_cond *cp;
 	return;
     t = cond->thread;
     /* Insert t in the runnable queue just ahead of us */
-    t->next_run = thr->next_run;
-    thr->next_run->prev_run = t;
-    t->prev_run = thr;
-    thr->next_run = t;
-    thr->wait_queue = 0;
+    t->i.next_run = thr->i.next_run;
+    thr->i.next_run->i.prev_run = t;
+    t->i.prev_run = thr;
+    thr->i.next_run = t;
+    thr->i.wait_queue = 0;
     /* Remove from the wait queue */
     *cp = cond->next;
     Safefree(cond);
@@ -2396,11 +2396,11 @@ perl_cond *cp;
     for (cond = *cp; cond; cond = cond_next) {
 	t = cond->thread;
 	/* Insert t in the runnable queue just ahead of us */
-	t->next_run = thr->next_run;
-	thr->next_run->prev_run = t;
-	t->prev_run = thr;
-	thr->next_run = t;
-	thr->wait_queue = 0;
+	t->i.next_run = thr->i.next_run;
+	thr->i.next_run->i.prev_run = t;
+	t->i.prev_run = thr;
+	thr->i.next_run = t;
+	thr->i.wait_queue = 0;
 	/* Remove from the wait queue */
 	cond_next = cond->next;
 	Safefree(cond);
@@ -2414,17 +2414,17 @@ perl_cond *cp;
 {
     perl_cond cond;
 
-    if (thr->next_run == thr)
+    if (thr->i.next_run == thr)
 	croak("panic: perl_cond_wait called by last runnable thread");
     
     New(666, cond, 1, struct perl_wait_queue);
     cond->thread = thr;
     cond->next = *cp;
     *cp = cond;
-    thr->wait_queue = cond;
+    thr->i.wait_queue = cond;
     /* Remove ourselves from runnable queue */
-    thr->next_run->prev_run = thr->prev_run;
-    thr->prev_run->next_run = thr->next_run;
+    thr->i.next_run->i.prev_run = thr->i.prev_run;
+    thr->i.prev_run->i.next_run = thr->i.next_run;
 }
 #endif /* FAKE_THREADS */
 
@@ -2473,9 +2473,7 @@ SV *sv;
 	    mg->mg_len = sizeof(cp);
 	    MUTEX_UNLOCK(&sv_mutex);
 	    DEBUG_L(WITH_THR(PerlIO_printf(PerlIO_stderr(),
-					   "0x%lx: condpair_magic 0x%lx\n",
-					   (unsigned long)thr,
-					   (unsigned long)sv));)
+					   "%p: condpair_magic %p\n", thr, sv));)
 	}
     }
     return mg;

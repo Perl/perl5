@@ -155,15 +155,49 @@ COND_BROADCAST work by putting back all the threads on the
 condition variables list into the run queue. Note that a mutex
 must *not* be held while returning from a PP function.
 
-Perl locks are a condpair_t structure (a triple of a mutex, a
-condtion variable and an owner thread field) attached by 'm'
-magic to any SV. pp_lock locks such an object by waiting on the
-condition variable until the owner field is zero and then setting
-the owner field to its own thread pointer. The lock is recursive
-so if the owner field already matches the current thread then
-pp_lock returns straight away. If the owner field has to be filled
-in then unlock_condpair is queued as an end-of-block destructor and
-that function zeroes out the owner field, releasing the lock.
+Perl locks and condition variables are both implemented as a
+condpair_t structure, containing a mutex, an "owner" condition
+variable, an owner thread field and another condition variable).
+The structure is attached by 'm' magic to any SV. pp_lock locks
+such an object by waiting on the ownercond condition variable until
+the owner field is zero and then setting the owner field to its own
+thread pointer. The lock is semantically recursive so if the owner
+field already matches the current thread then pp_lock returns
+straight away. If the owner field has to be filled in then
+unlock_condpair is queued as an end-of-block destructor and
+that function zeroes out the owner field and signals the ownercond
+condition variable, thus waking up any other thread that wants to
+lock it. When used as a condition variable, the condpair is locked
+(involving the above wait-for-ownership and setting the owner field)
+and the spare condition variable field is used for waiting on.
+
+
+Thread states
+
+
+              $t->join
+R_JOINABLE ---------------------> R_JOINED >----\
+    |      \  pthread_join(t)         |  ^      |
+    |       \                         |  | join | pthread_join
+    |        \                        |  |      |
+    |         \                       |  \------/
+    |          \                      |
+    |           \                     |
+    |  $t->detach\ pthread_detach     |
+    |            _\|                  |
+ends|             R_DETACHED     ends | unlink
+    |                       \         |
+    |                   ends \ unlink |
+    |                         \       |
+    |                          \      |
+    |                           \     |
+    |                            \    |
+    |                             \   |
+    V    join          detach     _\| V
+ZOMBIE ----------------------------> DEAD
+       pthread_join   pthread_detach
+       and unlink     and unlink
+
 
 
 Malcolm Beattie

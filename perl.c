@@ -136,12 +136,9 @@ register PerlInterpreter *sv_interp;
 	MUTEX_INIT(&thr->mutex);
 	thr->next = thr;
 	thr->prev = thr;
-#ifdef FAKE_THREADS
-	self = thr;
-	thr->next_run = thr->prev_run = thr;
-	thr->wait_queue = 0;
-	thr->private = 0;
 	thr->tid = 0;
+#ifdef HAVE_THREAD_INTERN
+	init_thread_intern(thr);
 #else
 	self = pthread_self();
 	if (pthread_key_create(&thr_key, 0))
@@ -244,13 +241,15 @@ register PerlInterpreter *sv_interp;
     /* Join with any remaining non-detached threads */
     MUTEX_LOCK(&threads_mutex);
     DEBUG_L(PerlIO_printf(PerlIO_stderr(),
-			  "perl_destruct: waiting for %d threads\n",
+			  "perl_destruct: waiting for %d threads...\n",
 			  nthreads - 1));
     for (t = thr->next; t != thr; t = t->next) {
 	MUTEX_LOCK(&t->mutex);
 	switch (ThrSTATE(t)) {
 	    AV *av;
-	case R_ZOMBIE:
+	case THRf_ZOMBIE:
+	    DEBUG_L(PerlIO_printf(PerlIO_stderr(),
+				  "perl_destruct: joining zombie %p\n", t));
 	    ThrSETSTATE(t, THRf_DEAD);
 	    MUTEX_UNLOCK(&t->mutex);
 	    nthreads--;
@@ -258,15 +257,37 @@ register PerlInterpreter *sv_interp;
 	    if (pthread_join(t->Tself, (void**)&av))
 		croak("panic: pthread_join failed during global destruction");
 	    SvREFCNT_dec((SV*)av);
+	    DEBUG_L(PerlIO_printf(PerlIO_stderr(),
+				  "perl_destruct: joined zombie %p OK\n", t));
 	    break;
-	case XXXX:
+	case THRf_R_JOINABLE:
+	    DEBUG_L(PerlIO_printf(PerlIO_stderr(),
+				  "perl_destruct: detaching thread %p\n", t));
+	    ThrSETSTATE(t, THRf_R_DETACHED);
+	    /* 
+	     * We unlock threads_mutex and t->mutex in the opposite order
+	     * from which we locked them just so that DETACH won't
+	     * deadlock if it panics. It's only a breach of good style
+	     * not a bug since they are unlocks not locks.
+	     */
+	    MUTEX_UNLOCK(&threads_mutex);
+	    DETACH(t);
+	    MUTEX_UNLOCK(&t->mutex);
+	    break;
+	default:
+	    DEBUG_L(PerlIO_printf(PerlIO_stderr(),
+				  "perl_destruct: ignoring %p (state %u)\n",
+				  t, ThrSTATE(t)));
+	    MUTEX_UNLOCK(&t->mutex);
+	    MUTEX_UNLOCK(&threads_mutex);
+	    /* fall through and out */
 	}
     }
     /* Now wait for the thread count nthreads to drop to one */
     while (nthreads > 1)
     {
 	DEBUG_L(PerlIO_printf(PerlIO_stderr(),
-			      "perl_destruct: waiting for %d threads\n",
+			      "perl_destruct: final wait for %d threads\n",
 			      nthreads - 1));
 	COND_WAIT(&nthreads_cond, &threads_mutex);
     }
