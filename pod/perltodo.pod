@@ -134,9 +134,13 @@ http://archive.develooper.com/perl5-porters@perl.org/msg79618.html
 
 =head2 Better support for nonpreemptive threading systems like PTH
 
-Perhaps do yield() before blocking calls, exchange calls to non blocking
-calls specific for those libraries (for example GNUpth has a pth_sleep
-which is a non pth aware version of sleep).
+To better support nonpreemptive threading systems perhaps some of the
+blocking functions internally in perl should do a yield() before a 
+blocking call.
+
+In some cases, like GNUpth, which has replacement functions that
+are non blocking (pth_select instead of select), maybe per should
+be using them instead when built for threading.
 
 =head2 Typed lexicals for compiler
 
