@@ -47,7 +47,7 @@ esac
 case "$cc" in
 *"cc -n32"*)
 
-	libscheck='case "`file $xxx`" in
+	libscheck='case "`/usr/bin/file $xxx`" in
 *N32*) ;;
 *) xxx=/no/n32$xxx ;;
 esac'
