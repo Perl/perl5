@@ -963,6 +963,13 @@ utils: $(PERLEXE) $(X2P)
 	cd ..\utils
 	$(MAKE) PERL=$(MINIPERL)
 	cd ..\pod
+	copy ..\README.amiga .\perlamiga.pod
+	copy ..\README.cygwin .\perlcygwin.pod
+	copy ..\README.dos .\perldos.pod
+	copy ..\README.hpux .\perlhpux.pod
+	copy ..\README.machten .\perlmachten.pod
+	copy ..\README.os2 .\perlos2.pod
+	copy ..\vms\perlvms.pod .\perlvms.pod
 	copy ..\README.win32 .\perlwin32.pod
 	$(MAKE) -f ..\win32\pod.mak converters
 	cd ..\win32

@@ -85,6 +85,7 @@ sections:
     perlcygwin		Perl notes for Cygwin
     perldos		Perl notes for DOS
     perlhpux		Perl notes for HP-UX
+    perlmachten		Perl notes for Power MachTen
     perlos2		Perl notes for OS/2
     perlos390		Perl notes for OS/390
     perlvms		Perl notes for VMS
