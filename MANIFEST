@@ -1113,9 +1113,10 @@ lib/unicode/JamoShort.pl			Unicode character database
 lib/unicode/LineBrk.txt				Unicode character database
 lib/unicode/Makefile				Unicode character database
 lib/unicode/Name.pl				Unicode character database
-lib/unicode/Names.txt				Unicode character database
 lib/unicode/NamesList.html			Unicode character database
+lib/unicode/NamesList.txt			Unicode character database
 lib/unicode/Number.pl				Unicode character database
+lib/unicode/PropList.html			Unicode character database
 lib/unicode/PropList.txt			Unicode character database
 lib/unicode/README.perl				Unicode character database
 lib/unicode/ReadMe.txt				Unicode character database info
