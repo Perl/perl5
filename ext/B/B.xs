@@ -1013,7 +1013,7 @@ SvSTASH(sv)
 #define MgFLAGS(mg) mg->mg_flags
 #define MgOBJ(mg) mg->mg_obj
 #define MgLENGTH(mg) mg->mg_len
-#define MgREGEX(mg) ((IV)(mg->mg_obj))
+#define MgREGEX(mg) PTR2IV(mg->mg_obj)
 
 MODULE = B	PACKAGE = B::MAGIC	PREFIX = Mg	
 
