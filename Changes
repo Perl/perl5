@@ -105,6 +105,28 @@ Version v5.7.0		Development release working toward v5.8
 --------------
 
 ____________________________________________________________________________
+[  7129] By: jhi                                   on 2000/10/03  02:24:02
+        Log: Misplaced else.
+     Branch: metaconfig/U/perl
+	   ! d_strtoll.U
+     Branch: perl
+	   ! Configure config_h.SH
+____________________________________________________________________________
+[  7128] By: jhi                                   on 2000/10/03  02:08:29
+        Log: Subject: [ID 20000915.007] Not OK: perl v5.7.0 +DEVEL7092 on os2-64int-ld 2.30 '(UNINSTALLED)'
+             From: sthoenna@efn.org
+             Date: Fri, 15 Sep 2000 07:19:57 -0700 (PDT)
+             Message-Id: <200009151419.e8FEJvE19796@garcia.efn.org>
+     Branch: metaconfig/U/perl
+	   ! d_strtoll.U
+     Branch: perl
+	   ! Configure config_h.SH hints/os2.sh os2/os2ish.h
+____________________________________________________________________________
+[  7127] By: jhi                                   on 2000/10/03  01:13:14
+        Log: Update Changes.
+     Branch: perl
+	   ! Changes patchlevel.h
+____________________________________________________________________________
 [  7126] By: jhi                                   on 2000/10/03  00:57:08
         Log: Introduce NO_ENVIRON_ARRAY (and USE_ENVIRON_ARRAY) defines
              as suggested by Olaf Flebbe and Nick Clark.
