@@ -81,15 +81,17 @@ path. On UNIX eliminated successive slashes and successive "/.".
 
 sub canonpath {
     my($self,$path) = @_;
+    
+    # Handle POSIX-style node names beginning with double slash
     my $node = '';
-    if ( $^O eq 'qnx' && $path =~ s|^(//\d+)/|/|s ) {
+    if ( $^O =~ m/^qnx|nto$/ && $path =~ s:^(//[^/]+)(/|\z):/:s ) {
       $node = $1;
     }
     $path =~ s|(?<=[^/])/+|/|g ;                   # xx////xx  -> xx/xx
     $path =~ s|(/\.)+/|/|g ;                       # xx/././xx -> xx/xx
     $path =~ s|^(\./)+||s unless $path eq "./";    # ./xx      -> xx
     $path =~ s|(?<=[^/])/\z|| ;                    # xx/       -> xx
-    "$node$path";
+    return "$node$path";
 }
 
 =item catdir
