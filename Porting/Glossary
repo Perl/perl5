@@ -1008,7 +1008,7 @@ d_old_pthread_create_joinable (d_pthrattrj.U):
 d_oldpthreads (usethreads.U):
 	This variable conditionally defines the OLD_PTHREADS_API symbol,
 	and indicates that Perl should be built to use the old
-	draft POSIX threads API.  This is only potneially meaningful if
+	draft POSIX threads API.  This is only potentially meaningful if
 	usethreads is set.
 
 d_oldsock (d_socket.U):
