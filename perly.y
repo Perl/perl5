@@ -16,7 +16,9 @@
 #include "EXTERN.h"
 #define PERL_IN_PERLY_C
 #include "perl.h"
-
+#ifdef EBCDIC
+#undef YYDEBUG
+#endif
 #define dep() deprecate("\"do\" to call subroutines")
 
 /* stuff included here to make perly_c.diff apply better */

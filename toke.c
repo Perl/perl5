@@ -1457,7 +1457,7 @@ S_scan_const(pTHX_ char *start)
 		/* We need to map to chars to ASCII before doing the tests
 		   to cover EBCDIC
 		*/
-		if (!UTF8_IS_INVARIANT(uv)) {
+		if (!UNI_IS_INVARIANT(NATIVE_TO_UNI(uv))) {
 		    if (!has_utf8 && uv > 255) {
 		        /* Might need to recode whatever we have
 			 * accumulated so far if it contains any
@@ -1469,7 +1469,7 @@ S_scan_const(pTHX_ char *start)
 			int hicount = 0;
 			U8 *c;
 			for (c = (U8 *) SvPVX(sv); c < (U8 *)d; c++) {
-			    if (!UTF8_IS_INVARIANT(*c)) {
+			    if (!NATIVE_IS_INVARIANT(*c)) {
 			        hicount++;
 			    }
 			}
@@ -1481,7 +1481,7 @@ S_scan_const(pTHX_ char *start)
 			    dst = src+hicount;
 			    d  += hicount;
 			    while (src >= (U8 *)SvPVX(sv)) {
-			        if (!UTF8_IS_INVARIANT(*src)) {
+			        if (!NATIVE_IS_INVARIANT(*src)) {
 				    U8 ch = NATIVE_TO_ASCII(*src);
 				    *dst-- = UTF8_EIGHT_BIT_LO(ch);
 				    *dst-- = UTF8_EIGHT_BIT_HI(ch);
@@ -1510,7 +1510,7 @@ S_scan_const(pTHX_ char *start)
 		    }
 		}
 		else {
-		    *d++ = NATIVE_TO_NEED(has_utf8,uv);
+		    *d++ = (char) uv;
 		}
 		continue;
 
@@ -1603,7 +1603,6 @@ S_scan_const(pTHX_ char *start)
 	} /* end if (backslash) */
 
     default_action:
-       /* The 'has_utf8' here is very dubious */
        if (!UTF8_IS_INVARIANT((U8)(*s)) && (this_utf8 || has_utf8)) {
            STRLEN len = (STRLEN) -1;
            UV uv;
@@ -7230,7 +7229,7 @@ vstring:
 	    while (isDIGIT(*pos) || *pos == '_')
 		pos++;
 	    if (!isALPHA(*pos)) {
-		UV rev, revmax = 0;
+		UV rev;
 		U8 tmpbuf[UTF8_MAXLEN+1];
 		U8 *tmpend;
 		s++;				/* get past 'v' */
@@ -7260,9 +7259,9 @@ vstring:
 		    }
 		    /* Append native character for the rev point */
 		    tmpend = uvchr_to_utf8(tmpbuf, rev);
-		    if (rev > revmax)
-			revmax = rev;
 		    sv_catpvn(sv, (const char*)tmpbuf, tmpend - tmpbuf);
+		    if (!UNI_IS_INVARIANT(NATIVE_TO_UNI(rev)))
+			SvUTF8_on(sv);
 		    if (*pos == '.' && isDIGIT(pos[1]))
 			s = ++pos;
 		    else {
@@ -7272,14 +7271,8 @@ vstring:
 		    while (isDIGIT(*pos) || *pos == '_')
 			pos++;
 		}
-
 		SvPOK_on(sv);
 		SvREADONLY_on(sv);
-		/* if (revmax > 127) { */
-		    SvUTF8_on(sv); /*
-		    if (revmax < 256)
-		      sv_utf8_downgrade(sv, TRUE);
-		} */
 	    }
 	}
 	break;

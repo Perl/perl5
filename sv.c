@@ -2984,7 +2984,8 @@ Perl_sv_utf8_upgrade(pTHX_ register SV *sv)
     e = (U8 *) SvEND(sv);
     t = s;
     while (t < e) {
-	if ((hibit = !UTF8_IS_INVARIANT(*t++)))
+	U8 ch = *t++;
+	if ((hibit = !NATIVE_IS_INVARIANT(ch)))
 	    break;
     }
     if (hibit) {
@@ -2997,12 +2998,6 @@ Perl_sv_utf8_upgrade(pTHX_ register SV *sv)
 	    Safefree(s); /* No longer using what was there before. */
 	SvLEN(sv) = len; /* No longer know the real size. */
     }
-#ifdef EBCDIC
-    else {
-	for (t = s; t < e; t++)
-	    *t = NATIVE_TO_ASCII(*t);
-    }
-#endif
     /* Mark as UTF-8 even if no hibit - saves scanning loop */
     SvUTF8_on(sv);
     return SvCUR(sv);
@@ -3118,7 +3113,8 @@ Perl_sv_utf8_decode(pTHX_ register SV *sv)
 	    return FALSE;
         e = (U8 *) SvEND(sv);
         while (c < e) {
-            if (!UTF8_IS_INVARIANT(*c++)) {
+	    U8 ch = *c++;
+            if (!UTF8_IS_INVARIANT(ch)) {
 		SvUTF8_on(sv);
 		break;
 	    }
@@ -7133,7 +7129,7 @@ Perl_sv_vcatpvfn(pTHX_ SV *sv, const char *pat, STRLEN patlen, va_list *args, SV
 
 	case 'c':
 	    uv = args ? va_arg(*args, int) : SvIVx(argsv);
-	    if ((uv > 255 || (!UTF8_IS_INVARIANT(uv) && SvUTF8(sv))) && !IN_BYTE) {
+	    if ((uv > 255 || (!UNI_IS_INVARIANT(uv) || SvUTF8(sv))) && !IN_BYTE) {
 		eptr = (char*)utf8buf;
 		elen = uvchr_to_utf8((U8*)eptr, uv) - utf8buf;
 		is_utf = TRUE;

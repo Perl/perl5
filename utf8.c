@@ -46,8 +46,8 @@ is the recommended Unicode-aware way of saying
 U8 *
 Perl_uvuni_to_utf8(pTHX_ U8 *d, UV uv)
 {
-    if (UTF8_IS_INVARIANT(uv)) {
-	*d++ = uv;
+    if (UNI_IS_INVARIANT(uv)) {
+	*d++ = UTF_TO_NATIVE(uv);
 	return d;
     }
 #if defined(EBCDIC) || 1 /* always for testing */
@@ -151,9 +151,7 @@ is the recommended wide native character-aware way of saying
 U8 *
 Perl_uvchr_to_utf8(pTHX_ U8 *d, UV uv)
 {
-    if (uv < 0x100)
-	uv = NATIVE_TO_ASCII(uv);
-    return Perl_uvuni_to_utf8(aTHX_ d, uv);
+    return Perl_uvuni_to_utf8(aTHX_ d, NATIVE_TO_UNI(uv));
 }
 
 
@@ -293,7 +291,7 @@ Perl_utf8n_to_uvuni(pTHX_ U8* s, STRLEN curlen, STRLEN* retlen, U32 flags)
     if (UTF8_IS_INVARIANT(uv)) {
 	if (retlen)
 	    *retlen = 1;
-	return (UV) (*s);
+	return (UV) (NATIVE_TO_UTF(*s));
     }
 
     if (UTF8_IS_CONTINUATION(uv) &&
@@ -478,9 +476,7 @@ UV
 Perl_utf8n_to_uvchr(pTHX_ U8* s, STRLEN curlen, STRLEN* retlen, U32 flags)
 {
     UV uv = Perl_utf8n_to_uvuni(aTHX_ s, curlen, retlen, flags);
-    if (uv < 0x100)
-        return (UV) ASCII_TO_NATIVE(uv);
-    return uv;
+    return UNI_TO_NATIVE(uv);
 }
 
 /*
@@ -550,7 +546,7 @@ Perl_utf8_length(pTHX_ U8* s, U8* e)
 	U8 t = UTF8SKIP(s);
 
 	if (e - s < t)
-	    Perl_croak(aTHX_ "panic: utf8_length: unaligned end");
+	    Perl_croak(aTHX_ "panic: utf8_length: s=%p (%02X) e=%p l=%d - unaligned end",s,*s,e,t);
 	s += t;
 	len++;
     }
@@ -713,19 +709,16 @@ Perl_bytes_from_utf8(pTHX_ U8* s, STRLEN *len, bool *is_utf8)
 
     *is_utf8 = 0;		
 
-#ifndef EBCDIC
-    /* Can use as-is if no high chars */
-    if (!count)
-	return start;
-#endif
-
     Newz(801, d, (*len) - count + 1, U8);
     s = start; start = d;
     while (s < send) {
 	U8 c = *s++;
-	if (!UTF8_IS_INVARIANT(c))
-	    c = UTF8_ACCUMULATE(c, *s++);
-	*d++ = ASCII_TO_NATIVE(c);
+	if (!UTF8_IS_INVARIANT(c)) {
+	    /* Then it is two-byte encoded */
+	    c = UTF8_ACCUMULATE(NATIVE_TO_UTF(c), *s++);
+	    c = ASCII_TO_NATIVE(c);
+	}
+	*d++ = c;
     }
     *d = '\0';
     *len = d - start;
@@ -755,8 +748,8 @@ Perl_bytes_to_utf8(pTHX_ U8* s, STRLEN *len)
 
     while (s < send) {
         UV uv = NATIVE_TO_ASCII(*s++);
-        if (UTF8_IS_INVARIANT(uv))
-            *d++ = uv;
+        if (UNI_IS_INVARIANT(uv))
+            *d++ = UTF_TO_NATIVE(uv);
         else {
             *d++ = UTF8_EIGHT_BIT_HI(uv);
             *d++ = UTF8_EIGHT_BIT_LO(uv);

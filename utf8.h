@@ -64,7 +64,9 @@ END_EXTERN_C
 
  */
 
-#define UTF8_IS_INVARIANT(c) 		(((UV)c) <  0x80)
+#define UNI_IS_INVARIANT(c)		(((UV)c) <  0x80)
+#define UTF8_IS_INVARIANT(c)		UNI_IS_INVARIANT(NATIVE_TO_UTF(c))
+#define NATIVE_IS_INVARIANT(c)		UNI_IS_INVARIANT(NATIVE_TO_ASCII(c))
 #define UTF8_IS_START(c)		(((U8)c) >= 0xc0 && (((U8)c) <= 0xfd))
 #define UTF8_IS_CONTINUATION(c)		(((U8)c) >= 0x80 && (((U8)c) <= 0xbf))
 #define UTF8_IS_CONTINUED(c) 		(((U8)c) &  0x80)

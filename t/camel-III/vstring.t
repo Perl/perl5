@@ -5,14 +5,12 @@ BEGIN {
 }
 use Test;
 plan test => 5;
-# Error messages may have wide chars, say that is okay - if we can.
-eval { binmode STDOUT,":utf8" };
 
 # Chapter 2 pp67/68
 my $vs = v1.20.300.4000;
 ok($vs,"\x{1}\x{14}\x{12c}\x{fa0}","v-string ne \\x{}");
 ok($vs,chr(1).chr(20).chr(300).chr(4000),"v-string ne chr()");
-ok('foo',v102.111.111,"v-string ne ''");
+ok('foo',((chr(193) eq 'A') ? v134.150.150 : v102.111.111),"v-string ne ''");
 
 # Chapter 15, pp403
 

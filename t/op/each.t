@@ -2,11 +2,11 @@
 
 BEGIN {
     chdir 't' if -d 't';
-    @INC = '.'; 
+    @INC = '.';
     push @INC, '../lib';
-}    
+}
 
-print "1..26\n";
+print "1..27\n";
 
 $h{'abc'} = 'ABC';
 $h{'def'} = 'DEF';
@@ -163,15 +163,20 @@ print "ok 23\n";
 print "#$u{$_}\n" for keys %u; # Used to core dump before change #8056.
 print "ok 24\n";
 
+use bytes ();
+
 $d = pack("U*", 0xe3, 0x81, 0x82);
+$ol = bytes::length($d);
+print "not " unless $ol > 3;
+print "ok 25\n";
 %u = ($d => "downgrade");
 for (keys %u) {
     use bytes;
     print "not " if length ne 3 or $_ ne "\xe3\x81\x82";
-    print "ok 25\n";
+    print "ok 26\n";
 }
 {
     use bytes;
-    print "not " if length($d) ne 6;
-    print "ok 26\n";
+    print "not " if length($d) != $ol;
+    print "ok 27\n";
 }
