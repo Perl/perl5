@@ -19,7 +19,7 @@ BEGIN {
 
 use strict;
 
-print "1..122\n";
+print "1..123\n";
 
 my $i = 1;
 
@@ -498,3 +498,7 @@ for my $p ( "", qw{ () ($) ($@) ($%) ($;$) (&) (&\@) (&@) (%) (\%) (\@) } ) {
   print "# eval[$eval]\nnot " unless $@ && $@ =~ /syntax error/;
   print "ok ", $i++, "\n";
 }
+
+# Not $$;$;$
+print "not " unless prototype "CORE::substr" eq '$$;$$';
+print "ok ", $i++, "\n";
