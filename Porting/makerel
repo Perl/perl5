@@ -80,7 +80,8 @@ chdir "$relroot/$reldir" or die $!;
 print "Setting file permissions...\n";
 system("find . -type f -print     | xargs chmod 0444");
 system("find . -type d -print     | xargs chmod 0755");
-system("find t -name '*.t' -print | xargs chmod +x");
+system("find t ext lib -name '*.t'     -print | xargs chmod +x");
+system("find t ext lib -name 'test.pl' -print | xargs chmod +x");
 my @exe = qw(
     Configure
     configpm
@@ -91,13 +92,14 @@ my @exe = qw(
     opcode.pl
     perly.fixer
     t/TEST
-    t/*/*.t
     *.SH
     vms/ext/Stdio/test.pl
     vms/ext/filespec.t
     x2p/*.SH
     Porting/patchls
     Porting/makerel
+    mpeix/nm
+    mpeix/relink
 );
 system("chmod +x @exe");
 
