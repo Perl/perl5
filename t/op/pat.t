@@ -4,7 +4,7 @@
 # the format supported by op/regexp.t.  If you want to add a test
 # that does fit that format, add it to op/re_tests, not here.
 
-print "1..195\n";
+print "1..207\n";
 
 BEGIN {
     chdir 't' if -d 't';
@@ -905,3 +905,51 @@ $text = "abc dbf";
 print "ok $test\n";
 $test++;
 
+@a = map chr,0..255;
+print "not " if grep(/\S/,@a) != grep(/[^\s]/,@a);
+print "ok $test\n";
+$test++;
+
+print "not " if grep(/\S/,@a) != grep(/[\S]/,@a);
+print "ok $test\n";
+$test++;
+
+print "not " if grep(/\s/,@a) != grep(/[^\S]/,@a);
+print "ok $test\n";
+$test++;
+
+print "not " if grep(/\s/,@a) != grep(/[\s]/,@a);
+print "ok $test\n";
+$test++;
+
+print "not " if grep(/\D/,@a) != grep(/[^\d]/,@a);
+print "ok $test\n";
+$test++;
+
+print "not " if grep(/\D/,@a) != grep(/[\D]/,@a);
+print "ok $test\n";
+$test++;
+
+print "not " if grep(/\d/,@a) != grep(/[^\D]/,@a);
+print "ok $test\n";
+$test++;
+
+print "not " if grep(/\d/,@a) != grep(/[\d]/,@a);
+print "ok $test\n";
+$test++;
+
+print "not " if grep(/\W/,@a) != grep(/[^\w]/,@a);
+print "ok $test\n";
+$test++;
+
+print "not " if grep(/\W/,@a) != grep(/[\W]/,@a);
+print "ok $test\n";
+$test++;
+
+print "not " if grep(/\w/,@a) != grep(/[^\W]/,@a);
+print "ok $test\n";
+$test++;
+
+print "not " if grep(/\w/,@a) != grep(/[\w]/,@a);
+print "ok $test\n";
+$test++;

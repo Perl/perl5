@@ -2084,7 +2084,7 @@ S_regmatch(pTHX_ regnode *prog)
 	    PL_reg_flags |= RF_tainted;
 	    /* FALL THROUGH */
 	case SPACE:
-	    if (!nextchr && locinput >= PL_regeol)
+	    if (!nextchr)
 		sayNO;
 	    if (!(OP(scan) == SPACE
 		  ? isSPACE(nextchr) : isSPACE_LC(nextchr)))
@@ -2095,11 +2095,11 @@ S_regmatch(pTHX_ regnode *prog)
 	    PL_reg_flags |= RF_tainted;
 	    /* FALL THROUGH */
 	case SPACEUTF8:
-	    if (!nextchr && locinput >= PL_regeol)
+	    if (!nextchr)
 		sayNO;
 	    if (nextchr & 0x80) {
 		if (!(OP(scan) == SPACEUTF8
-		      ? swash_fetch(PL_utf8_space,(U8*)locinput)
+		      ? swash_fetch(PL_utf8_space, (U8*)locinput)
 		      : isSPACE_LC_utf8((U8*)locinput)))
 		{
 		    sayNO;
@@ -2117,9 +2117,9 @@ S_regmatch(pTHX_ regnode *prog)
 	    PL_reg_flags |= RF_tainted;
 	    /* FALL THROUGH */
 	case NSPACE:
-	    if (!nextchr)
+	    if (!nextchr && locinput >= PL_regeol)
 		sayNO;
-	    if (OP(scan) == SPACE
+	    if (OP(scan) == NSPACE
 		? isSPACE(nextchr) : isSPACE_LC(nextchr))
 		sayNO;
 	    nextchr = UCHARAT(++locinput);
@@ -2128,11 +2128,11 @@ S_regmatch(pTHX_ regnode *prog)
 	    PL_reg_flags |= RF_tainted;
 	    /* FALL THROUGH */
 	case NSPACEUTF8:
-	    if (!nextchr)
+	    if (!nextchr && locinput >= PL_regeol)
 		sayNO;
 	    if (nextchr & 0x80) {
 		if (OP(scan) == NSPACEUTF8
-		    ? swash_fetch(PL_utf8_space,(U8*)locinput)
+		    ? swash_fetch(PL_utf8_space, (U8*)locinput)
 		    : isSPACE_LC_utf8((U8*)locinput))
 		{
 		    sayNO;
@@ -2150,7 +2150,7 @@ S_regmatch(pTHX_ regnode *prog)
 	    PL_reg_flags |= RF_tainted;
 	    /* FALL THROUGH */
 	case DIGIT:
-	    if (!nextchr && locinput >= PL_regeol)
+	    if (!nextchr)
 		sayNO;
 	    if (!(OP(scan) == DIGIT
 		  ? isDIGIT(nextchr) : isDIGIT_LC(nextchr)))
@@ -2164,9 +2164,9 @@ S_regmatch(pTHX_ regnode *prog)
 	    if (!nextchr)
 		sayNO;
 	    if (nextchr & 0x80) {
-		if (OP(scan) == NDIGITUTF8
-		    ? swash_fetch(PL_utf8_digit,(U8*)locinput)
-		    : isDIGIT_LC_utf8((U8*)locinput))
+		if (!(OP(scan) == DIGITUTF8
+		      ? swash_fetch(PL_utf8_digit, (U8*)locinput)
+		      : isDIGIT_LC_utf8((U8*)locinput)))
 		{
 		    sayNO;
 		}
@@ -2174,7 +2174,8 @@ S_regmatch(pTHX_ regnode *prog)
 		nextchr = UCHARAT(locinput);
 		break;
 	    }
-	    if (!isDIGIT(nextchr))
+	    if (!(OP(scan) == DIGITUTF8
+		  ? isDIGIT(nextchr) : isDIGIT_LC(nextchr)))
 		sayNO;
 	    nextchr = UCHARAT(++locinput);
 	    break;
@@ -2182,9 +2183,9 @@ S_regmatch(pTHX_ regnode *prog)
 	    PL_reg_flags |= RF_tainted;
 	    /* FALL THROUGH */
 	case NDIGIT:
-	    if (!nextchr)
+	    if (!nextchr && locinput >= PL_regeol)
 		sayNO;
-	    if (OP(scan) == DIGIT
+	    if (OP(scan) == NDIGIT
 		? isDIGIT(nextchr) : isDIGIT_LC(nextchr))
 		sayNO;
 	    nextchr = UCHARAT(++locinput);
@@ -2196,13 +2197,18 @@ S_regmatch(pTHX_ regnode *prog)
 	    if (!nextchr && locinput >= PL_regeol)
 		sayNO;
 	    if (nextchr & 0x80) {
-		if (swash_fetch(PL_utf8_digit,(U8*)locinput))
+		if (OP(scan) == NDIGITUTF8
+		    ? swash_fetch(PL_utf8_digit, (U8*)locinput)
+		    : isDIGIT_LC_utf8((U8*)locinput))
+		{
 		    sayNO;
+		}
 		locinput += PL_utf8skip[nextchr];
 		nextchr = UCHARAT(locinput);
 		break;
 	    }
-	    if (isDIGIT(nextchr))
+	    if (OP(scan) == NDIGITUTF8
+		? isDIGIT(nextchr) : isDIGIT_LC(nextchr))
 		sayNO;
 	    nextchr = UCHARAT(++locinput);
 	    break;
