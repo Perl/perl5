@@ -5229,11 +5229,13 @@ Note the LIST is prepended whole, not one element at a time, so the
 prepended elements stay in the same order.  Use C<reverse> to do the
 reverse.
 
+=item use Module VERSION LIST
+
+=item use Module VERSION
+
 =item use Module LIST
 
 =item use Module
-
-=item use Module VERSION LIST
 
 =item use VERSION
 
@@ -5279,8 +5281,11 @@ If the VERSION argument is present between Module and LIST, then the
 C<use> will call the VERSION method in class Module with the given
 version as an argument.  The default VERSION method, inherited from
 the Universal class, croaks if the given version is larger than the
-value of the variable C<$Module::VERSION>.  (Note that there is not a
-comma after VERSION!)
+value of the variable C<$Module::VERSION>. 
+
+Again, there is a distinction between omitting LIST (C<import> called
+with no arguments) and an explicit empty LIST C<()> (C<import> not
+called).  Note that there is no comma after VERSION!
 
 Because this is a wide-open interface, pragmas (compiler directives)
 are also implemented this way.  Currently implemented pragmas are:
