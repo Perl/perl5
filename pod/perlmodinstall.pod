@@ -75,7 +75,7 @@ A. DECOMPRESS
 
 Decompress the file with C<gzip -d yourmodule.tar.gz>
 
-You can get gzip from ftp://prep.ai.mit.edu/pub/gnu.
+You can get gzip from ftp://prep.ai.mit.edu/pub/gnu/
 
 Or, you can combine this step with the next to save disk space:
 
@@ -143,7 +143,7 @@ in .xs, .c, .h, .y, .cc, .cxx, or .C)?  If it doesn't, go to INSTALL.
 If it does, life is now officially tough for you, because you have to
 compile the module yourself -- no easy feat on Windows.  You'll need
 the C<nmake> utility, available at
-ftp://ftp.microsoft.com/Softlib/MSLFILES/nmake15.exe.
+ftp://ftp.microsoft.com/Softlib/MSLFILES/nmake15.exe
 
    D. INSTALL
 
@@ -192,9 +192,9 @@ must be compiled, and you cannot install it "out of the box."
 
 If a module does not work on MacPerl but should, or needs to be
 compiled, see if the module exists already as a port on the
-MacPerl Module Porters site (http://pudge.net/mmp/).
+MacPerl Module Porters site ( http://pudge.net/mmp/ ).
 For more information on doing XS with MacPerl yourself, see
-Arved Sandstrom's XS tutorial (http://macperl.com/depts/Tutorials/),
+Arved Sandstrom's XS tutorial ( http://macperl.com/depts/Tutorials/ ),
 and then consider uploading your binary to the CPAN and
 registering it on the MMP site.
 
@@ -363,7 +363,7 @@ Unpack the result with
 
 The BUILD and INSTALL steps are identical to those for Unix.  Some
 modules generate Makefiles that work better with GNU make, which is
-available from http://www.mks.com/s390/gnu/index.htm.
+available from http://www.mks.com/s390/gnu/
 
 =back
 

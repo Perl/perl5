@@ -349,7 +349,7 @@ and L<perlunicode> for details.
 =item *
 
 The Unicode Character Database coming with Perl has been upgraded
-to Unicode 3.1.1.  For more information, see http://www.unicode.org/.
+to Unicode 3.1.1.  For more information, see http://www.unicode.org/ .
 
 =item *
 
@@ -2556,7 +2556,7 @@ unfortunately, always possible.  The suidperl functionality is most
 probably going to be removed in Perl 5.10.  In any case, suidperl
 should only be used by security experts who know exactly what they are
 doing and why they are using suidperl instead of some other solution
-such as sudo (see http://www.courtesan.com/sudo/).
+such as sudo ( see http://www.courtesan.com/sudo/ ).
 
 =head1 New Tests
 

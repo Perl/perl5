@@ -23,7 +23,7 @@ a /bin/mail that is vulnerable to buffer overflow attacks.
 Note that suidperl is neither built nor installed by default in
 any recent version of perl.  Use of suidperl is highly discouraged.
 If you think you need it, try alternatives such as sudo first.
-See http://www.courtesan.com/sudo/.
+See http://www.courtesan.com/sudo/ .
 
 =head2 Core bug fixes
 

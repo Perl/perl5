@@ -278,7 +278,7 @@ Set up a local rsync server which makes the rsynced source tree
 available to the LAN and sync the other machines against this
 directory.
 
-From http://rsync.samba.org/README.html:
+From http://rsync.samba.org/README.html :
 
    "Rsync uses rsh or ssh for communication. It does not need to be
     setuid and requires no special privileges for installation.  It
@@ -591,7 +591,7 @@ source, and we'll do that later on.
 You might also want to look at Gisle Aas's illustrated perlguts -
 there's no guarantee that this will be absolutely up-to-date with the
 latest documentation in the Perl core, but the fundamentals will be
-right. (http://gisle.aas.no/perl/illguts/)
+right. ( http://gisle.aas.no/perl/illguts/ )
 
 =item L<perlxstut> and L<perlxs>
 

@@ -16,9 +16,9 @@ a program ("CGI script") and a web server (HTTPD). It is not specific
 to Perl, and has its own FAQs and tutorials, and usenet group, 
 comp.infosystems.www.authoring.cgi 
 
-The original CGI specification is at: http://hoohoo.ncsa.uiuc.edu/cgi/ 
+The original CGI specification is at: http://hoohoo.ncsa.uiuc.edu/cgi/
 
-Current best-practice RFC draft at: http://CGI-Spec.Golux.Com/ 
+Current best-practice RFC draft at: http://CGI-Spec.Golux.Com/
 
 Other relevant documentation listed in: http://www.perl.org/CGI_MetaFAQ.html
 
@@ -382,7 +382,7 @@ mail addresses with a simple regex, such as
 C</^[\w.-]+\@(?:[\w-]+\.)+\w+$/>.  It's a very bad idea.  However,
 this also throws out many valid ones, and says nothing about
 potential deliverability, so it is not suggested.  Instead, see
-http://www.cpan.org/authors/Tom_Christiansen/scripts/ckaddr.gz,
+http://www.cpan.org/authors/Tom_Christiansen/scripts/ckaddr.gz ,
 which actually checks against the full RFC spec (except for nested
 comments), looks for addresses you may not wish to accept mail to
 (say, Bill Clinton or your postmaster), and then makes sure that the

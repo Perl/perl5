@@ -31,7 +31,7 @@ and if deemed too risky to continue to be supported, it may be
 completely removed from future releases.  In any case, suidperl should
 only be used by security experts who know exactly what they are doing
 and why they are using suidperl instead of some other solution such as
-sudo (see http://www.courtesan.com/sudo/).
+sudo ( see http://www.courtesan.com/sudo/ ).
 
 =head1 Incompatible Changes
 

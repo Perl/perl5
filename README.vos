@@ -20,7 +20,7 @@ from ftp://ftp.stratus.com/pub/vos/posix/alpha/alpha.html.  If you are
 running VOS Release 14.3.0 or later, download Perl from
 ftp://ftp.stratus.com/pub/vos/posix/ga/ga.html.  Instructions for
 unbundling the Perl distribution file are at
-ftp://ftp.stratus.com/pub/vos/utility/utility.html.
+ftp://ftp.stratus.com/pub/vos/utility/utility.html
 
 If you are running VOS Release 14.4.1 or later, you can obtain a
 pre-compiled, supported copy of perl by purchasing Release 2.0.1
@@ -169,7 +169,7 @@ binary file-transfer mode.  Or use the Uniform Resource
 Locator (URL)
 ftp://ftp.stratus.com/pub/vos/posix/alpha/posix.save.evf.gz from
 your web browser.  Instructions for unbundling this file
-are at ftp://ftp.stratus.com/pub/vos/utility/utility.html.
+are at ftp://ftp.stratus.com/pub/vos/utility/utility.html
 This is not a standard Stratus product.
 
 In VOS Release 14.3.0, the generally-available version of

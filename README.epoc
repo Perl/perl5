@@ -23,7 +23,7 @@ http://www.windhager.de/~mattes/epocemx/
 perl and epocemx runs on Epoc Release 5 machines: Psion 5mx, 5mx Pro,
 Psion Revo, Psion Netbook and on the Ericson M128. It may run on Epoc
 Release 3 Hardware (Series 5 classic), too. For more information about
-this hardware please refer to http://www.psion.com.
+this hardware please refer to http://www.psion.com/
 
 Vendors which like to have support for their devices are free to send
 me a sample. 
@@ -31,7 +31,7 @@ me a sample.
 =head1 INSTALLING PERL ON EPOC
 
 You can download a ready-to-install version from
-http://www.science-computing.de/o.flebbe/perl. 
+http://www.science-computing.de/o.flebbe/perl/
 
 You will need at least ~6MB free space in order to install and run
 perl.

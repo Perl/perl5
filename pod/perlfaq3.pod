@@ -156,7 +156,7 @@ http://www.cpan.org/authors/id/TOMC/scripts/toms.exrc.gz
 
 The a2ps http://www-inf.enst.fr/%7Edemaille/a2ps/black+white.ps.gz does
 lots of things related to generating nicely printed output of
-documents, as does enscript at http://people.ssh.fi/mtr/genscript/.
+documents, as does enscript at http://people.ssh.fi/mtr/genscript/
 
 =head2 Is there a ctags for Perl?
 
@@ -187,7 +187,7 @@ multi-language IDE has Perl support, including a regular expression
 debugger and remote debugging
 (http://www.ActiveState.com/Products/Komodo/index.html).  (Visual
 Perl, a Visual Studio.NET plug-in is currently (early 2001) in beta
-(http://www.ActiveState.com/Products/VisualPerl/index.html)).
+( http://www.ActiveState.com/Products/VisualPerl/index.html )).
 
 =item The Object System
 
@@ -244,8 +244,8 @@ specifically for programming, such as Textpad
 
 If you are using MacOS, the same concerns apply.  MacPerl
 (for Classic environments) comes with a simple editor.
-Popular external editors are BBEdit (http://www.bbedit.com)
-or Alpha (http://alpha.olm.net/). MacOS X users can use Unix
+Popular external editors are BBEdit ( http://www.bbedit.com/ )
+or Alpha ( http://alpha.olm.net/ ). MacOS X users can use Unix
 editors as well.
 
 =over 4
@@ -285,7 +285,7 @@ win32: http://www.cs.vu.nl/%7Etmgil/vi.html
 =back
 
 For vi lovers in general, Windows or elsewhere:
-http://www.thomer.com/thomer/vi/vi.html.
+http://www.thomer.com/thomer/vi/vi.html
 
 nvi (http://www.bostic.com/vi/, available from CPAN in src/misc/) is
 yet another vi clone, unfortunately not available for Windows, but in
@@ -327,12 +327,12 @@ powerful shell environment for Win32.  Your options include
 
 =item Bash
 
-from the Cygwin package (http://sources.redhat.com/cygwin/)
+from the Cygwin package ( http://sources.redhat.com/cygwin/ )
 
 =item Ksh
 
 from the MKS Toolkit (http://www.mks.com/), or the Bourne shell of
-the U/WIN environment (http://www.research.att.com/sw/tools/uwin/)
+the U/WIN environment ( http://www.research.att.com/sw/tools/uwin/ )
 
 =item Tcsh
 
@@ -365,18 +365,18 @@ no 32k limit).
 =item BBEdit and BBEdit Lite
 
 are text editors for Mac OS that have a Perl sensitivity mode
-(http://web.barebones.com/).
+( http://web.barebones.com/ ).
 
 =item Alpha
 
 is an editor, written and extensible in Tcl, that nonetheless has
 built in support for several popular markup and programming languages
-including Perl and HTML (http://alpha.olm.net/).
+including Perl and HTML ( http://alpha.olm.net/ ).
 
 =back
 
 Pepper and Pe are programming language sensitive text editors for Mac
-OS X and BeOS respectively (http://www.hekkelman.com/).
+OS X and BeOS respectively ( http://www.hekkelman.com/ ).
 
 =head2 Where can I get Perl macros for vi?
 
@@ -384,7 +384,7 @@ For a complete version of Tom Christiansen's vi configuration file,
 see http://www.cpan.org/authors/Tom_Christiansen/scripts/toms.exrc.gz ,
 the standard benchmark file for vi emulators.  The file runs best with nvi,
 the current version of vi out of Berkeley, which incidentally can be built
-with an embedded Perl interpreter--see http://www.cpan.org/src/misc.
+with an embedded Perl interpreter--see http://www.cpan.org/src/misc/
 
 =head2 Where can I get perl-mode for emacs?
 
@@ -405,7 +405,7 @@ shouldn't be an issue.
 
 The Curses module from CPAN provides a dynamically loadable object
 module interface to a curses library.  A small demo can be found at the
-directory http://www.cpan.org/authors/Tom_Christiansen/scripts/rep;
+directory http://www.cpan.org/authors/Tom_Christiansen/scripts/rep ;
 this program repeats a command and updates the screen as needed, rendering
 B<rep ps axu> similar to B<top>.
 

@@ -186,7 +186,7 @@ following groups:
 There is also a Usenet gateway to Perl mailing lists sponsored by perl.org at 
 nntp://nntp.perl.org, or a web interface to the same lists at
 http://nntp.perl.org/group/.  Other groups are listed at 
-http://lists.perl.org.
+http://lists.perl.org/
 
 =head2 Where should I post source code?
 
@@ -394,7 +394,7 @@ http://www.stonehenge.com/merlyn/LinuxMag/ .
 
 To get the best performance, pick a site from
 the list below and use it to grab the complete list of mirror sites
-which is at /CPAN/MIRRORED.BY or at http://mirror.cpan.org/.
+which is at /CPAN/MIRRORED.BY or at http://mirror.cpan.org/
 From there you can find the quickest site for you.  Remember, the
 following list is I<not> the complete list of CPAN mirrors
 (the complete list contains 165 sites as of January 2001):
@@ -420,7 +420,7 @@ Most of the major modules (Tk, CGI, libwww-perl) have their own
 mailing lists.  Consult the documentation that came with the module for
 subscription information.
 
-	http://lists.cpan.org/	
+	http://lists.cpan.org/
 
 =head2 Archives of comp.lang.perl.misc
 

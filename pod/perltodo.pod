@@ -829,7 +829,7 @@ Use C<Inline::CPR>.
 
 =head2 man for perl
 
-See the Perl Power Tools. (http://language.perl.com/ppt/)
+See the Perl Power Tools. ( http://language.perl.com/ppt/ )
 
 =head2 my $Package::variable
 
