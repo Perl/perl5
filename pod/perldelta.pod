@@ -26,14 +26,25 @@ ordering has already changed several times during the lifetime of
 Perl 5.  Also, the ordering of hash keys has always been, and
 continues to be, affected by the insertion order.
 
-The added randomness may affect applications, especially when the
-output of an application has included hash data.  For example, if you
-have used the Data::Dumper module to dump data into different files,
-and then compared the files to see whether the data has changed, now
-you will have false positives since the order in which hashes are
-dumped will vary.  In general the cure is to sort the keys (or the
-values); in particular for Data::Dumper to use the C<Sortkeys> option;
-or if some particular order is really important, use tied hashes.
+The added randomness may affect applications.
+
+One possible scenario is when output of an application has included
+hash data.  For example, if you have used the Data::Dumper module to
+dump data into different files, and then compared the files to see
+whether the data has changed, now you will have false positives since
+the order in which hashes are dumped will vary.  In general the cure
+is to sort the keys (or the values); in particular for Data::Dumper to
+use the C<Sortkeys> option; or if some particular order is really
+important, use tied hashes.
+
+More subtle problem is reliance on the order of "global destruction".
+This is what happens at the end of execution: Perl destroys all data
+structures, including those representing the application data.
+If your destructors (DESTROY subroutines) have assumed any particular
+ordering to the global destruction, there might be problems ahead.
+For example, in a destructor for one class you cannot assume that
+objects or methods of any other class are still available.
+They might already have been destroyed.
 
 The hash randomisation is certain to reveal hidden assumptions about
 some particular ordering of hash elements, and outright bugs: it
