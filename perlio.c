@@ -3492,8 +3492,8 @@ PerlIOCrlf_get_cnt(pTHX_ PerlIO *f)
 	PerlIO_get_base(f);
     if (PerlIOBase(f)->flags & PERLIO_F_RDBUF) {
 	PerlIOCrlf *c = PerlIOSelf(f, PerlIOCrlf);
-	if ((PerlIOBase(f)->flags & PERLIO_F_CRLF) && !c->nl) {
-	    STDCHAR *nl = b->ptr;
+	if ((PerlIOBase(f)->flags & PERLIO_F_CRLF) && (!c->nl || *c->nl == 0xd)) {
+	    STDCHAR *nl = (c->nl) ? c->nl : b->ptr;
 	  scan:
 	    while (nl < b->end && *nl != 0xd)
 		nl++;
@@ -3575,6 +3575,7 @@ PerlIOCrlf_set_ptrcnt(pTHX_ PerlIO *f, STDCHAR * ptr, SSize_t cnt)
 	ptr -= cnt;
     }
     else {
+#if 1
 	/*
 	 * Test code - delete when it works ...
 	 */
@@ -3585,7 +3586,6 @@ PerlIOCrlf_set_ptrcnt(pTHX_ PerlIO *f, STDCHAR * ptr, SSize_t cnt)
         }
 	chk -= cnt;
 
-#ifdef USE_ATTRIBUTES_FOR_PERLIO
 	if (ptr != chk ) {
 	    Perl_croak(aTHX_ "ptr wrong %p != %p fl=%08" UVxf
 		       " nl=%p e=%p for %d", ptr, chk, flags, c->nl,
