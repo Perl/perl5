@@ -338,11 +338,13 @@ PerlIO_init(pTHX)
 }
 
 PerlIO *
-PerlIO_importFILE(FILE *stdio, int fl)
+PerlIO_importFILE(FILE *stdio, const char *mode)
 {
     int fd = fileno(stdio);
-    PerlIO *r = PerlIO_fdopen(fd, "r+");
-    return r;
+    if (!mode || !*mode) {
+	mmode = "r+";
+    }
+    return PerlIO_fdopen(fd, mode);
 }
 
 FILE *
@@ -2199,7 +2201,7 @@ PerlIOUnix_pushed(pTHX_ PerlIO *f, const char *mode, SV *arg)
     IV code = PerlIOBase_pushed(aTHX_ f, mode, arg);
     PerlIOUnix *s = PerlIOSelf(f, PerlIOUnix);
     if (*PerlIONext(f)) {
-	/* We never call down so any pending stuff now */
+	/* We never call down so do any pending stuff now */
 	PerlIO_flush(PerlIONext(f));
 	s->fd = PerlIO_fileno(PerlIONext(f));
 	/*
@@ -2445,7 +2447,7 @@ PerlIOStdio_pushed(pTHX_ PerlIO *f, const char *mode, SV *arg)
 			   PerlIOStdio_mode(mode, tmode));
 	if (stdio) {
 	    s->stdio = stdio;
-	    /* We never call down so any pending stuff now */
+	    /* We never call down so do any pending stuff now */
 	    PerlIO_flush(PerlIONext(f));
 	}
 	else
@@ -2456,36 +2458,35 @@ PerlIOStdio_pushed(pTHX_ PerlIO *f, const char *mode, SV *arg)
 
 
 PerlIO *
-PerlIO_importFILE(FILE *stdio, int fl)
+PerlIO_importFILE(FILE *stdio, const char *mode)
 {
     dTHX;
     PerlIO *f = NULL;
     if (stdio) {
-	/* We need to probe to see how we can open the stream
-	   so start with read/write and then try write and read
-	   we dup() so that we can fclose without loosing the fd.
-
-	   Note that the errno value set by a failing fdopen
-	   varies between stdio implementations.
-	 */
-	int fd = PerlLIO_dup(fileno(stdio));
-	char *mode = "r+";
-	FILE *f2 = fdopen(fd, mode);
 	PerlIOStdio *s;
-	if (!f2) {
-	    mode = "w";
-	    f2 = fdopen(fd, mode);
+	if (!mode || !*mode) {
+	    /* We need to probe to see how we can open the stream
+	       so start with read/write and then try write and read
+	       we dup() so that we can fclose without loosing the fd.
+
+	       Note that the errno value set by a failing fdopen
+	       varies between stdio implementations.
+	     */
+	    int fd = PerlLIO_dup(fileno(stdio));
+	    FILE *f2 = fdopen(fd, (mode = "r+"));
+	    if (!f2) {
+		f2 = fdopen(fd, (mode = "w"));
+	    }
+	    if (!f2) {
+		f2 = fdopen(fd, (mode = "r"));
+	    }
+	    if (!f2) {
+		/* Don't seem to be able to open */
+		PerlLIO_close(fd);
+		return f;
+	    }
+	    fclose(f2);
 	}
-	if (!f2) {
-	    mode = "r";
-	    f2 = fdopen(fd, mode);
-	}
-	if (!f2) {
-	    /* Don't seem to be able to open */
-	    PerlLIO_close(fd);
-	    return f;
-	}
-	fclose(f2);
 	s = PerlIOSelf(PerlIO_push
 			   (aTHX_(f = PerlIO_allocate(aTHX)), &PerlIO_stdio,
 			    mode, Nullsv), PerlIOStdio);
@@ -2964,13 +2965,16 @@ PerlIO_funcs PerlIO_stdio = {
 };
 
 FILE *
-PerlIO_exportFILE(PerlIO *f, int fl)
+PerlIO_exportFILE(PerlIO *f, const char *mode)
 {
     dTHX;
     FILE *stdio;
     char buf[8];
     PerlIO_flush(f);
-    stdio = fdopen(PerlIO_fileno(f), PerlIO_modestr(f,buf));
+    if (!mode || !*mode) {
+	mode = PerlIO_modestr(f,buf);
+    }
+    stdio = fdopen(PerlIO_fileno(f), mode);
     if (stdio) {
 	PerlIOStdio *s =
 	    PerlIOSelf(PerlIO_push(aTHX_ f, &PerlIO_stdio, buf, Nullsv),
@@ -2991,7 +2995,8 @@ PerlIO_findFILE(PerlIO *f)
 	}
 	l = *PerlIONext(&l);
     }
-    return PerlIO_exportFILE(f, 0);
+    /* Uses fallback "mode" via PerlIO_modestr() in PerlIO_exportFILE */
+    return PerlIO_exportFILE(f, Nullch);
 }
 
 void
@@ -3022,13 +3027,14 @@ PerlIOBuf_pushed(pTHX_ PerlIO *f, const char *mode, SV *arg)
 {
     PerlIOBuf *b = PerlIOSelf(f, PerlIOBuf);
     int fd = PerlIO_fileno(f);
-    Off_t posn;
     if (fd >= 0 && PerlLIO_isatty(fd)) {
 	PerlIOBase(f)->flags |= PERLIO_F_LINEBUF | PERLIO_F_TTY;
     }
-    posn = PerlIO_tell(PerlIONext(f));
-    if (posn != (Off_t) - 1) {
-	b->posn = posn;
+    if (*PerlIONext(f)) {
+	Off_t posn = PerlIO_tell(PerlIONext(f));
+	if (posn != (Off_t) - 1) {
+	    b->posn = posn;
+	}
     }
     return PerlIOBase_pushed(aTHX_ f, mode, arg);
 }
@@ -3126,14 +3132,19 @@ PerlIOBuf_flush(pTHX_ PerlIO *f)
 	 */
 	b->posn += (b->ptr - buf);
 	if (b->ptr < b->end) {
-	    /*
-	     * We did not consume all of it
+	    /* We did not consume all of it - try and seek downstream to
+	       our logical position
 	     */
-	    if (PerlIO_seek(n, b->posn, SEEK_SET) == 0) {
+	    if (PerlIOValid(n) && PerlIO_seek(n, b->posn, SEEK_SET) == 0) {
 		/* Reload n as some layers may pop themselves on seek */
 		b->posn = PerlIO_tell(n = PerlIONext(f));
 	    }
 	    else {
+		/* Seek failed (e.g. pipe or tty). Do NOT clear buffer or pre-read
+		   data is lost for good - so return saying "ok" having undone
+		   the position adjust
+		 */
+		b->posn -= (b->ptr - buf);
 		return code;
 	    }
 	}
@@ -3141,7 +3152,6 @@ PerlIOBuf_flush(pTHX_ PerlIO *f)
     b->ptr = b->end = b->buf;
     PerlIOBase(f)->flags &= ~(PERLIO_F_RDBUF | PERLIO_F_WRBUF);
     /* We check for Valid because of dubious decision to make PerlIO_flush(NULL) flush all */
-    /* FIXME: Doing downstream flush may be sub-optimal see PerlIOBuf_fill() below */
     if (PerlIOValid(n) && PerlIO_flush(n) != 0)
 	code = -1;
     return code;
@@ -3154,10 +3164,8 @@ PerlIOBuf_fill(pTHX_ PerlIO *f)
     PerlIO *n = PerlIONext(f);
     SSize_t avail;
     /*
-     * FIXME: doing the down-stream flush maybe sub-optimal if it causes
-     * pre-read data in stdio buffer to be discarded.
-     * However, skipping the flush also skips _our_ hosekeeping
-     * and breaks tell tests. So we do the flush.
+     * Down-stream flush is defined not to loose read data so is harmless.
+     * we would not normally be fill'ing if there was data left in anycase.
      */
     if (PerlIO_flush(f) != 0)
 	return -1;
@@ -3168,6 +3176,12 @@ PerlIOBuf_fill(pTHX_ PerlIO *f)
 	PerlIO_get_base(f);     /* allocate via vtable */
 
     b->ptr = b->end = b->buf;
+
+    if (!PerlIOValid(n)) {
+	PerlIOBase(f)->flags |= PERLIO_F_EOF;
+	return -1;
+    }
+
     if (PerlIO_fast_gets(n)) {
 	/*
 	 * Layer below is also buffered. We do _NOT_ want to call its

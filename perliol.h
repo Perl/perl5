@@ -64,7 +64,7 @@ struct _PerlIO_funcs {
 struct _PerlIO {
     PerlIOl *next;		/* Lower layer */
     PerlIO_funcs *tab;		/* Functions for this layer */
-    IV flags;			/* Various flags for state */
+    U32 flags;			/* Various flags for state */
 };
 
 /*--------------------------------------------------------------------------------------*/

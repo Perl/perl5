@@ -241,10 +241,10 @@ extern int PerlIO_ungetc(PerlIO *, int);
 extern PerlIO *PerlIO_fdopen(int, const char *);
 #endif
 #ifndef PerlIO_importFILE
-extern PerlIO *PerlIO_importFILE(FILE *, int);
+extern PerlIO *PerlIO_importFILE(FILE *, const char *);
 #endif
 #ifndef PerlIO_exportFILE
-extern FILE *PerlIO_exportFILE(PerlIO *, int);
+extern FILE *PerlIO_exportFILE(PerlIO *, const char *);
 #endif
 #ifndef PerlIO_findFILE
 extern FILE *PerlIO_findFILE(PerlIO *);
