@@ -466,6 +466,10 @@ sub next_line
                 $out    .= $1;
             } elsif ($in =~ s/^([^\'\"\\\/]+)//) {
                 $out    .= $1;
+            } elsif ($^O eq 'linux' &&
+                     $file =~ m!(?:^|/)linux/byteorder/pdp_endian\.h$! &&
+                     $in   =~ s!\'T KNOW!!) {
+                $out    =~ s!I DON$!I_DO_NOT_KNOW!;
             } else {
 		die "Cannot parse:\n$in\n";
             }
