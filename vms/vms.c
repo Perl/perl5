@@ -3953,7 +3953,7 @@ vms_image_init(int *argcp, char ***argvp)
   if (tabidx) { tabvec[tabidx] = NULL; env_tables = tabvec; }
 
   getredirection(argcp,argvp);
-#if defined(USE_THREADS) && defined(__DECC)
+#if defined(USE_THREADS) && ( defined(__DECC) || defined(__DECCXX) )
   {
 # include <reentrancy.h>
   (void) decc$set_reentrancy(C$C_MULTITHREAD);
@@ -5769,7 +5769,7 @@ int my_utime(char *file, struct utimbuf *utimes)
   fnmdsc.dsc$w_length = mynam.nam$b_name + mynam.nam$b_type + mynam.nam$b_ver;
 
   memset((void *) &myfib, 0, sizeof myfib);
-#ifdef __DECC
+#if defined(__DECC) || defined(__DECCXX)
   for (i=0;i<3;i++) myfib.fib$w_fid[i] = mynam.nam$w_fid[i];
   for (i=0;i<3;i++) myfib.fib$w_did[i] = mynam.nam$w_did[i];
   /* This prevents the revision time of the file being reset to the current

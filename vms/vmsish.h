@@ -22,6 +22,9 @@
 #ifdef __DECC
 #  pragma message disable (ADDRCONSTEXT,NEEDCONSTEXT)
 #endif
+#ifdef __DECCXX 
+#  pragma message disable (ADDRCONSTEXT,NEEDCONSTEXT)
+#endif
 
 /* DEC's C compilers and gcc use incompatible definitions of _to(upp|low)er() */
 #ifdef _toupper
@@ -34,7 +37,7 @@
 #define _tolower(c) (((c) < 'A' || (c) > 'Z') ? (c) : (c) | 040)
 /* DECC 1.3 has a funny definition of abs; it's fixed in DECC 4.0, so this
  * can go away once DECC 1.3 isn't in use any more. */
-#if defined(__ALPHA) && defined(__DECC)
+#if defined(__ALPHA) && (defined(__DECC) || defined(__DECCXX))
 #undef abs
 #define abs(__x)        __ABS(__x)
 #undef labs
@@ -52,6 +55,9 @@
 #include <unixlib.h>
 #include <file.h>  /* it's not <sys/file.h>, so don't use I_SYS_FILE */
 #if defined(__DECC) && defined(__DECC_VER) && __DECC_VER > 20000000
+#  include <unistd.h> /* DECC has this; VAXC and gcc don't */
+#endif
+#ifdef __DECCXX 
 #  include <unistd.h> /* DECC has this; VAXC and gcc don't */
 #endif
 
@@ -473,7 +479,7 @@ struct utimbuf {
 #define ENVgetenv_len(v,l) my_getenv_len(v,l,FALSE)
 
 
-/* Thin jacket around cuserid() tomatch Unix' calling sequence */
+/* Thin jacket around cuserid() to match Unix' calling sequence */
 #define getlogin my_getlogin
 
 /* Ditto for sys$hash_passwrod() . . . */
@@ -539,7 +545,7 @@ struct passwd {
  * to map the unsigned int we want and the unsigned short[3] the CRTL
  * returns into the same member, since gcc has different ideas than DECC
  * and VAXC about sizing union types.
- * N.B 2. The routine cando() in vms.c assumes that &stat.st_ino is the
+ * N.B. 2. The routine cando() in vms.c assumes that &stat.st_ino is the
  * address of a FID.
  */
 /* First, grab the system types, so we don't clobber them later */
