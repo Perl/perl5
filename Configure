@@ -20,7 +20,7 @@
 
 # $Id: Head.U,v 3.0.1.9 1997/02/28 15:02:09 ram Exp $
 #
-# Generated on Wed Jan 26 12:23:57 EET 2000 [metaconfig 3.0 PL70]
+# Generated on Thu Jan 27 12:37:26 EET 2000 [metaconfig 3.0 PL70]
 # (with additional metaconfig patches by perlbug@perl.com)
 
 cat >/tmp/c1$$ <<EOF
@@ -908,7 +908,7 @@ fi
 
 i_whoami=''
 : list of known cpp symbols, sorted alphabetically
-al="386BSD 3b1 a29k ABI64 aegis AES_SOURCE AIX AIX32 AIX370"
+al="a29k ABI64 aegis AES_SOURCE AIX AIX32 AIX370"
 al="$al AIX41 AIX42 AIX43 AIX_SOURCE aixpc ALL_SOURCE"
 al="$al alliant alpha am29000 AM29000 amiga AMIGAOS AMIX"
 al="$al ansi ANSI_C_SOURCE apollo ardent atarist att386 att3b BeOS"
@@ -13706,7 +13706,6 @@ $sed 's/\(.*\)/__\1__/' < Cppsym.know > Cppsym.c
 $cat Cppsym.know Cppsym.a Cppsym.b Cppsym.c | sort | uniq > Cppsym.d
 mv Cppsym.d Cppsym.know
 rm Cppsym.?
-al=`cat Cppsym.know`
 $cat <<EOSS >Cppsym
 $startsh
 case "\$1" in
@@ -13752,7 +13751,18 @@ exit \$status
 EOSS
 chmod +x Cppsym
 $eunicefix Cppsym
-./Cppsym -l $al | $sort | $grep -v '^$' >Cppsym.true
+$rm -f Cppsym.true
+startsym=1
+stopsym=500
+symbols=`wc -l < Cppsym.know`
+while test $startsym -le $symbols
+do
+    $sed -n "$startsym,$stopsym p" Cppsym.know > Cppsym.batch
+    ./Cppsym -l `cat Cppsym.batch` | $sort | $grep -v '^$' >>Cppsym.true
+    startsym=`expr $startsym + 500`
+    stopsym=`expr $stopsym + 500`
+done
+$rm -f Cppsym.batch
 
 : now check the C compiler for additional symbols
 postprocess_cc_v=''
