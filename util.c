@@ -822,7 +822,7 @@ Perl_savesharedpv(pTHX_ const char *pv)
 /*
 =for apidoc savesvpv
 
-A version of C<savepv()>/C<savepvn() which gets the string to duplicate from
+A version of C<savepv()>/C<savepvn()> which gets the string to duplicate from
 the passed in SV using C<SvPV()>
 
 =cut
