@@ -15,7 +15,9 @@ nearly all of Perl, while I<Learning Perl> is a tutorial that covers
 the most frequently used subset of the language.  You might also check
 out the very handy, inexpensive, and compact I<Perl 5 Desktop
 Reference>, especially when the thought of lugging the 676-page Camel
-around doesn't make much sense.
+around doesn't make much sense.  I<Mastering Regular Expressions>, by
+Jeffrey Friedl, is a reference work that covers the art and implementation 
+of regular expressions in various languages including Perl.
 
     Programming Perl, Second Edition (the Camel Book):
 	ISBN 1-56592-149-6	(English)
@@ -27,5 +29,7 @@ around doesn't make much sense.
 	ISBN 3-930673-08-8      (German)
 
     Perl 5 Desktop Reference (the reference card):
-
 	ISBN 1-56592-187-9	(brief English)
+
+    Mastering Regular Expressions (the Hip Owl Book):
+	ISBN 1-56592-257-3      (English)
