@@ -1289,7 +1289,7 @@ EXT OP * (CPERLscope(*PL_check)[]) (pTHX_ OP *op) = {
 	MEMBER_TO_FPTR(Perl_ck_fun),	/* close */
 	MEMBER_TO_FPTR(Perl_ck_fun),	/* pipe_op */
 	MEMBER_TO_FPTR(Perl_ck_fun),	/* fileno */
-	MEMBER_TO_FPTR(Perl_ck_fun),	/* umask */
+	MEMBER_TO_FPTR(Perl_ck_octmode),	/* umask */
 	MEMBER_TO_FPTR(Perl_ck_fun),	/* binmode */
 	MEMBER_TO_FPTR(Perl_ck_fun),	/* tie */
 	MEMBER_TO_FPTR(Perl_ck_fun),	/* untie */
@@ -1361,13 +1361,13 @@ EXT OP * (CPERLscope(*PL_check)[]) (pTHX_ OP *op) = {
 	MEMBER_TO_FPTR(Perl_ck_fun),	/* chown */
 	MEMBER_TO_FPTR(Perl_ck_fun),	/* chroot */
 	MEMBER_TO_FPTR(Perl_ck_fun),	/* unlink */
-	MEMBER_TO_FPTR(Perl_ck_fun),	/* chmod */
+	MEMBER_TO_FPTR(Perl_ck_octmode),	/* chmod */
 	MEMBER_TO_FPTR(Perl_ck_fun),	/* utime */
 	MEMBER_TO_FPTR(Perl_ck_fun),	/* rename */
 	MEMBER_TO_FPTR(Perl_ck_fun),	/* link */
 	MEMBER_TO_FPTR(Perl_ck_fun),	/* symlink */
 	MEMBER_TO_FPTR(Perl_ck_fun),	/* readlink */
-	MEMBER_TO_FPTR(Perl_ck_fun),	/* mkdir */
+	MEMBER_TO_FPTR(Perl_ck_octmode),	/* mkdir */
 	MEMBER_TO_FPTR(Perl_ck_fun),	/* rmdir */
 	MEMBER_TO_FPTR(Perl_ck_fun),	/* open_dir */
 	MEMBER_TO_FPTR(Perl_ck_fun),	/* readdir */

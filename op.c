@@ -6117,6 +6117,39 @@ Perl_ck_null(pTHX_ OP *o)
 }
 
 OP *
+Perl_ck_octmode(pTHX_ OP *o)
+{
+    OP *p;
+
+    if ((ckWARN(WARN_OCTMODE)
+	/* Add WARN_MKDIR instead of getting rid of WARN_{CHMOD,UMASK}.
+	   Backwards compatibility and consistency are terrible things.
+	   AMS 20010705 */
+	|| (o->op_type == OP_CHMOD && ckWARN(WARN_CHMOD))
+	|| (o->op_type == OP_UMASK && ckWARN(WARN_UMASK))
+	|| (o->op_type == OP_MKDIR && ckWARN(WARN_MKDIR)))
+	&& o->op_flags & OPf_KIDS)
+    {
+	if (o->op_type == OP_MKDIR)
+	    p = cLISTOPo->op_last;		/* mkdir $foo, 0777 */
+	else if (o->op_type == OP_CHMOD)
+	    p = cLISTOPo->op_first->op_sibling;	/* chmod 0777, $foo */
+	else
+	    p = cUNOPo->op_first;		/* umask 0222 */
+
+	if (p->op_type == OP_CONST && !(p->op_private & OPpCONST_OCTAL)) {
+	    int mode = SvIV(cSVOPx_sv(p));
+
+	    Perl_warner(aTHX_ WARN_OCTMODE,
+			"Non-octal literal mode (%d) specified", mode);
+	    Perl_warner(aTHX_ WARN_OCTMODE,
+			"\t(Did you mean 0%d instead?)\n", mode);
+	}
+    }
+    return ck_fun(o);
+}
+
+OP *
 Perl_ck_open(pTHX_ OP *o)
 {
     HV *table = GvHV(PL_hintgv);

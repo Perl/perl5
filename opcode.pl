@@ -674,7 +674,7 @@ close		close			ck_fun		is%	F?
 pipe_op		pipe			ck_fun		is@	F F
 
 fileno		fileno			ck_fun		ist%	F
-umask		umask			ck_fun		ist%	S?
+umask		umask			ck_octmode	ist%	S?
 binmode		binmode			ck_fun		s@	F S?
 
 tie		tie			ck_fun		idms@	R S L
@@ -767,13 +767,13 @@ chdir		chdir			ck_fun		isT%	S?
 chown		chown			ck_fun		imsT@	L
 chroot		chroot			ck_fun		isTu%	S?
 unlink		unlink			ck_fun		imsTu@	L
-chmod		chmod			ck_fun		imsT@	L
+chmod		chmod			ck_octmode	imsT@	L
 utime		utime			ck_fun		imsT@	L
 rename		rename			ck_fun		isT@	S S
 link		link			ck_fun		isT@	S S
 symlink		symlink			ck_fun		isT@	S S
 readlink	readlink		ck_fun		stu%	S?
-mkdir		mkdir			ck_fun		isT@	S S?
+mkdir		mkdir			ck_octmode	isT@	S S?
 rmdir		rmdir			ck_fun		isTu%	S?
 
 # Directory calls.
