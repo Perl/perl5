@@ -1,11 +1,11 @@
 # -*- Mode: cperl; coding: utf-8; cperl-indent-level: 4 -*-
 package CPAN;
-$VERSION = '1.75_02';
-# $Id: CPAN.pm,v 1.409 2003/07/28 22:07:23 k Exp $
+$VERSION = '1.76';
+# $Id: CPAN.pm,v 1.405 2003/07/04 08:06:11 k Exp $
 
 # only used during development:
 $Revision = "";
-# $Revision = "[".substr(q$Revision: 1.409 $, 10)."]";
+# $Revision = "[".substr(q$Revision: 1.405 $, 10)."]";
 
 use Carp ();
 use Config ();
@@ -773,22 +773,6 @@ sub has_inst {
 
 });
 	sleep 2;
-    } elsif ($mod eq "Module::Signature"){
-	unless ($Have_warned->{"Module::Signature"}++) {
-	    # No point in complaining unless the user can
-	    # reasonably install and use it.
-	    if (eval { require Crypt::OpenPGP; 1 } ||
-		defined $CPAN::Config->{'gpg'}) {
-		$CPAN::Frontend->myprint(qq{
-  CPAN: Module::Signature security checks disabled because Module::Signature
-  not installed.  Please consider installing the Module::Signature module.
-  You also need to be able to connect over the Internet to the public
-  keyservers like pgp.mit.edu (port 11371).
-
-})
-		    sleep 2;
-	    }
-	}
     } else {
 	delete $INC{$file}; # if it inc'd LWP but failed during, say, URI
     }
@@ -3675,18 +3659,6 @@ sub dir_listing {
     my $lc_want =
 	File::Spec->catfile($CPAN::Config->{keep_source_where},
 			    "authors", "id", @$chksumfile);
-
-    my $fh;
-
-    # Purge and refetch old (pre-PGP) CHECKSUMS; they are a security
-    # hazard.  (Without GPG installed they are not that much better,
-    # though.)
-    $fh = FileHandle->new;
-    if (open($fh, $lc_want)) {
-	my $line = <$fh>; close $fh;
-	unlink($lc_want) unless $line =~ /PGP/;
-    }
-
     local($") = "/";
     # connect "force" argument with "index_expire".
     my $force = 0;
@@ -3709,7 +3681,7 @@ sub dir_listing {
     }
 
     # adapted from CPAN::Distribution::MD5_check_file ;
-    $fh = FileHandle->new;
+    my $fh = FileHandle->new;
     my($cksum);
     if (open $fh, $lc_file){
 	local($/);
@@ -3989,43 +3961,8 @@ sub get {
     }
 
     $self->{'build_dir'} = $packagedir;
-    $self->safe_chdir($builddir);
+    $self->safe_chdir(File::Spec->updir);
     File::Path::rmtree("tmp");
-
-    $self->safe_chdir($packagedir);
-    if ($CPAN::META->has_inst("Module::Signature")) {
-        if (-f "SIGNATURE") {
-            $self->debug("Module::Signature is installed, verifying") if $CPAN::DEBUG;
-            my $rv = Module::Signature::verify();
-            if ($rv != Module::Signature::SIGNATURE_OK() and
-                $rv != Module::Signature::SIGNATURE_MISSING()) {
-                $CPAN::Frontend->myprint(
-                                         qq{\nSignature invalid for }.
-                                         qq{distribution file. }.
-                                         qq{Please investigate.\n\n}.
-                                         $self->as_string,
-                                         $CPAN::META->instance(
-                                                               'CPAN::Author',
-                                                               $self->cpan_userid,
-                                                              )->as_string
-                                        );
-
-                my $wrap = qq{I\'d recommend removing $self->{localfile}. Its signature
-is invalid. Maybe you have configured your 'urllist' with
-a bad URL. Please check this array with 'o conf urllist', and
-retry.};
-                $CPAN::Frontend->mydie(Text::Wrap::wrap("","",$wrap));
-            }
-        } else {
-            $CPAN::Frontend->myprint(qq{Package came without SIGNATURE\n\n});
-        }
-    } else {
-	$self->debug("Module::Signature is NOT installed") if $CPAN::DEBUG;
-    }
-    $self->safe_chdir($builddir);
-    return if $CPAN::Signal;
-
-
 
     my($mpl) = File::Spec->catfile($packagedir,"Makefile.PL");
     my($mpl_exists) = -f $mpl;
@@ -4294,44 +4231,10 @@ sub verifyMD5 {
     $self->MD5_check_file($lc_file);
 }
 
-sub SIG_check_file {
-    my($self,$chk_file) = @_;
-    my $rv = eval { Module::Signature::_verify($chk_file) };
-
-    if ($rv == Module::Signature::SIGNATURE_OK()) {
-	$CPAN::Frontend->myprint("Signature for $chk_file ok\n");
-	return $self->{SIG_STATUS} = "OK";
-    } else {
-	$CPAN::Frontend->myprint(qq{\nSignature invalid for }.
-				 qq{distribution file. }.
-				 qq{Please investigate.\n\n}.
-				 $self->as_string,
-				$CPAN::META->instance(
-							'CPAN::Author',
-							$self->cpan_userid
-							)->as_string);
-
-	my $wrap = qq{I\'d recommend removing $chk_file. Its signature
-is invalid. Maybe you have configured your 'urllist' with
-a bad URL. Please check this array with 'o conf urllist', and
-retry.};
-
-	$CPAN::Frontend->mydie(Text::Wrap::wrap("","",$wrap));
-    }
-}
-
 #-> sub CPAN::Distribution::MD5_check_file ;
 sub MD5_check_file {
     my($self,$chk_file) = @_;
     my($cksum,$file,$basename);
-
-    if ($CPAN::META->has_inst("Module::Signature") and Module::Signature->VERSION >= 0.26) {
-	$self->debug("Module::Signature is installed, verifying");
-	$self->SIG_check_file($chk_file);
-    } else {
-	$self->debug("Module::Signature is NOT installed");
-    }
-
     $file = $self->{localfile};
     $basename = File::Basename::basename($file);
     my $fh = FileHandle->new;
@@ -7074,21 +6977,6 @@ like
     o conf ncftp "/usr/bin/ncftp -f /home/scott/ncftplogin.cfg"
 
 Your mileage may vary...
-
-=head1 Cryptographically signed modules
-
-Since release 1.72 CPAN.pm has been able to verify cryptographically
-signed module distributions using Module::Signature.  The CPAN modules
-can be signed by their authors, thus giving more security.  The simple
-unsigned MD5 checksums that were used before by CPAN protect mainly
-against accidental file corruption.
-
-You will need to have Module::Signature installed, which in turn
-requires that you have at least one of Crypt::OpenPGP module or the
-command-line F<gpg> tool installed.
-
-You will also need to be able to connect over the Internet to the public
-keyservers, like pgp.mit.edu, and their port 11731 (the HKP protocol).
 
 =head1 FAQ
 
