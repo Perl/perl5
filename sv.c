@@ -5729,6 +5729,8 @@ Perl_sv_vcatpvfn(pTHX_ SV *sv, const char *pat, STRLEN patlen, va_list *args, SV
     for (p = (char*)pat; p < patend; p = q) {
 	bool alt = FALSE;
 	bool left = FALSE;
+	bool vectorize = FALSE;
+	bool utf = FALSE;
 	char fill = ' ';
 	char plus = 0;
 	char intsize = 0;
@@ -5750,6 +5752,10 @@ Perl_sv_vcatpvfn(pTHX_ SV *sv, const char *pat, STRLEN patlen, va_list *args, SV
 	char ebuf[IV_DIG * 4 + NV_DIG + 32];
         /* large enough for "%#.#f" --chip */
 	/* what about long double NVs? --jhi */
+
+	SV *vecsv;
+	char *vecstr = Nullch;
+	STRLEN veclen = 0;
 	char c;
 	int i;
 	unsigned base;
@@ -5759,6 +5765,8 @@ Perl_sv_vcatpvfn(pTHX_ SV *sv, const char *pat, STRLEN patlen, va_list *args, SV
 	STRLEN have;
 	STRLEN need;
 	STRLEN gap;
+	char *dotstr = ".";
+	STRLEN dotstrlen = 1;
 
 	for (q = p; q < patend && *q != '%'; ++q) ;
 	if (q > p) {
@@ -5789,6 +5797,30 @@ Perl_sv_vcatpvfn(pTHX_ SV *sv, const char *pat, STRLEN patlen, va_list *args, SV
 	    case '#':
 		alt = TRUE;
 		q++;
+		continue;
+
+	    case '*':			/* printf("%*vX",":",$ipv6addr) */
+		if (q[1] != 'v')
+		    break;
+		q++;
+		if (args)
+		    vecsv = va_arg(*args, SV*);
+		else if (svix < svmax)
+		    vecsv = svargs[svix++];
+		dotstr = SvPVx(vecsv,dotstrlen);
+		if (DO_UTF8(vecsv))
+		    is_utf = TRUE;
+		/* FALL THROUGH */
+
+	    case 'v':
+		vectorize = TRUE;
+		q++;
+		if (args)
+		    vecsv = va_arg(*args, SV*);
+		else if (svix < svmax)
+		    vecsv = svargs[svix++];
+		vecstr = SvPVx(vecsv,veclen);
+		utf = DO_UTF8(vecsv);
 		continue;
 
 	    default:
@@ -5926,63 +5958,6 @@ Perl_sv_vcatpvfn(pTHX_ SV *sv, const char *pat, STRLEN patlen, va_list *args, SV
 	    }
 	    goto string;
 
-	case 'v':
-	    if (args)
-		argsv = va_arg(*args, SV*);
-	    else if (svix < svmax)
-		argsv = svargs[svix++];
-	    {
-		STRLEN len;
-		U8 *str = (U8*)SvPVx(argsv,len);
-		I32 vlen = len*3+1;
-		SV *vsv = NEWSV(73,vlen);
-		I32 ulen;
-		I32 vfree = vlen;
-		U8 *vptr = (U8*)SvPVX(vsv);
-		STRLEN vcur = 0;
-		bool utf = DO_UTF8(argsv);
-
-		if (utf)
-		    is_utf = TRUE;
-		while (len) {
-		    UV uv;
-
-		    if (utf)
-			uv = utf8_to_uv(str, &ulen);
-		    else {
-			uv = *str;
-			ulen = 1;
-		    }
-		    str += ulen;
-		    len -= ulen;
-		    eptr = ebuf + sizeof ebuf;
-		    do {
-			*--eptr = '0' + uv % 10;
-		    } while (uv /= 10);
-		    elen = (ebuf + sizeof ebuf) - eptr;
-		    while (elen >= vfree-1) {
-			STRLEN off = vptr - (U8*)SvPVX(vsv);
-			vfree += vlen;
-			vlen *= 2;
-			SvGROW(vsv, vlen);
-			vptr = (U8*)SvPVX(vsv) + off;
-		    }
-		    memcpy(vptr, eptr, elen);
-		    vptr += elen;
-		    *vptr++ = '.';
-		    vfree -= elen + 1;
-		    vcur += elen + 1;
-		}
-		if (vcur) {
-		    vcur--;
-		    vptr[-1] = '\0';
-		}
-		SvCUR_set(vsv,vcur);
-		eptr = SvPVX(vsv);
-		elen = vcur;
-	    }
-	    goto string;
-
 	case '_':
 	    /*
 	     * The "%_" hack might have to be changed someday,
@@ -5997,6 +5972,7 @@ Perl_sv_vcatpvfn(pTHX_ SV *sv, const char *pat, STRLEN patlen, va_list *args, SV
 		is_utf = TRUE;
 
 	string:
+	    vectorize = FALSE;
 	    if (has_precis && elen > precis)
 		elen = precis;
 	    break;
@@ -6020,7 +5996,22 @@ Perl_sv_vcatpvfn(pTHX_ SV *sv, const char *pat, STRLEN patlen, va_list *args, SV
 	    /* FALL THROUGH */
 	case 'd':
 	case 'i':
-	    if (args) {
+	    if (vectorize) {
+		I32 ulen;
+		if (!veclen) {
+		    vectorize = FALSE;
+		    break;
+		}
+		if (utf)
+		    iv = (IV)utf8_to_uv(vecstr, &ulen);
+		else {
+		    iv = (U8)*vecstr;
+		    ulen = 1;
+		}
+		vecstr += ulen;
+		veclen -= ulen;
+	    }
+	    else if (args) {
 		switch (intsize) {
 		case 'h':	iv = (short)va_arg(*args, int); break;
 		default:	iv = va_arg(*args, int); break;
@@ -6086,7 +6077,23 @@ Perl_sv_vcatpvfn(pTHX_ SV *sv, const char *pat, STRLEN patlen, va_list *args, SV
 	    base = 16;
 
 	uns_integer:
-	    if (args) {
+	    if (vectorize) {
+		I32 ulen;
+	vector:
+		if (!veclen) {
+		    vectorize = FALSE;
+		    break;
+		}
+		if (utf)
+		    uv = utf8_to_uv(vecstr, &ulen);
+		else {
+		    uv = (U8)*vecstr;
+		    ulen = 1;
+		}
+		vecstr += ulen;
+		veclen -= ulen;
+	    }
+	    else if (args) {
 		switch (intsize) {
 		case 'h':  uv = (unsigned short)va_arg(*args, unsigned); break;
 		default:   uv = va_arg(*args, unsigned); break;
@@ -6186,6 +6193,7 @@ Perl_sv_vcatpvfn(pTHX_ SV *sv, const char *pat, STRLEN patlen, va_list *args, SV
 
 	    /* This is evil, but floating point is even more evil */
 
+	    vectorize = FALSE;
 	    if (args)
 		nv = va_arg(*args, NV);
 	    else
@@ -6253,6 +6261,7 @@ Perl_sv_vcatpvfn(pTHX_ SV *sv, const char *pat, STRLEN patlen, va_list *args, SV
 	    /* SPECIAL */
 
 	case 'n':
+	    vectorize = FALSE;
 	    i = SvCUR(sv) - origlen;
 	    if (args) {
 		switch (intsize) {
@@ -6273,6 +6282,7 @@ Perl_sv_vcatpvfn(pTHX_ SV *sv, const char *pat, STRLEN patlen, va_list *args, SV
 
 	default:
       unknown:
+	    vectorize = FALSE;
 	    if (!args && ckWARN(WARN_PRINTF) &&
 		  (PL_op->op_type == OP_PRTF || PL_op->op_type == OP_SPRINTF)) {
 		SV *msg = sv_newmortal();
@@ -6311,7 +6321,7 @@ Perl_sv_vcatpvfn(pTHX_ SV *sv, const char *pat, STRLEN patlen, va_list *args, SV
 	need = (have > width ? have : width);
 	gap = need - have;
 
-	SvGROW(sv, SvCUR(sv) + need + 1);
+	SvGROW(sv, SvCUR(sv) + need + dotstrlen + 1);
 	p = SvEND(sv);
 	if (esignlen && fill == '0') {
 	    for (i = 0; i < esignlen; i++)
@@ -6337,10 +6347,22 @@ Perl_sv_vcatpvfn(pTHX_ SV *sv, const char *pat, STRLEN patlen, va_list *args, SV
 	    memset(p, ' ', gap);
 	    p += gap;
 	}
+	if (vectorize) {
+	    if (veclen) {
+		memcpy(p, dotstr, dotstrlen);
+		p += dotstrlen;
+	    }
+	    else
+		vectorize = FALSE;		/* done iterating over vecstr */
+	}
 	if (is_utf)
 	    SvUTF8_on(sv);
 	*p = '\0';
 	SvCUR(sv) = p - SvPVX(sv);
+	if (vectorize) {
+	    esignlen = 0;
+	    goto vector;
+	}
     }
 }
 
