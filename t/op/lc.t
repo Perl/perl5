@@ -51,32 +51,32 @@ ok(lc($b)         eq "hello\.\* world",      'lc');
 # \x{100} is LATIN CAPITAL LETTER A WITH MACRON; its bijective lowercase is
 # \x{101}, LATIN SMALL LETTER A WITH MACRON.
 
-$a = "\x{100}\x{101}\x{41}\x{61}";
-$b = "\x{101}\x{100}\x{61}\x{41}";
+$a = "\x{100}\x{101}Aa";
+$b = "\x{101}\x{100}aA";
 
-ok("\Q$a\E."      eq "\x{100}\x{101}\x{41}\x{61}.", '\Q\E \x{100}\x{101}\x{41}\x{61}');
-ok("\u$a"         eq "\x{100}\x{101}\x{41}\x{61}",  '\u');
-ok("\l$a"         eq "\x{101}\x{101}\x{41}\x{61}",  '\l');
-ok("\U$a"         eq "\x{100}\x{100}\x{41}\x{41}",  '\U');
-ok("\L$a"         eq "\x{101}\x{101}\x{61}\x{61}",  '\L');
+ok("\Q$a\E."      eq "\x{100}\x{101}Aa.", '\Q\E \x{100}\x{101}Aa');
+ok("\u$a"         eq "\x{100}\x{101}Aa",  '\u');
+ok("\l$a"         eq "\x{101}\x{101}Aa",  '\l');
+ok("\U$a"         eq "\x{100}\x{100}AA",  '\U');
+ok("\L$a"         eq "\x{101}\x{101}aa",  '\L');
 
-ok(quotemeta($a)  eq "\x{100}\x{101}\x{41}\x{61}",  'quotemeta');
-ok(ucfirst($a)    eq "\x{100}\x{101}\x{41}\x{61}",  'ucfirst');
-ok(lcfirst($a)    eq "\x{101}\x{101}\x{41}\x{61}",  'lcfirst');
-ok(uc($a)         eq "\x{100}\x{100}\x{41}\x{41}",  'uc');
-ok(lc($a)         eq "\x{101}\x{101}\x{61}\x{61}",  'lc');
+ok(quotemeta($a)  eq "\x{100}\x{101}Aa",  'quotemeta');
+ok(ucfirst($a)    eq "\x{100}\x{101}Aa",  'ucfirst');
+ok(lcfirst($a)    eq "\x{101}\x{101}Aa",  'lcfirst');
+ok(uc($a)         eq "\x{100}\x{100}AA",  'uc');
+ok(lc($a)         eq "\x{101}\x{101}aa",  'lc');
 
-ok("\Q$b\E."      eq "\x{101}\x{100}\x{61}\x{41}.", '\Q\E \x{101}\x{100}\x{61}\x{41}');
-ok("\u$b"         eq "\x{100}\x{100}\x{61}\x{41}",  '\u');
-ok("\l$b"         eq "\x{101}\x{100}\x{61}\x{41}",  '\l');
-ok("\U$b"         eq "\x{100}\x{100}\x{41}\x{41}",  '\U');
-ok("\L$b"         eq "\x{101}\x{101}\x{61}\x{61}",  '\L');
+ok("\Q$b\E."      eq "\x{101}\x{100}aA.", '\Q\E \x{101}\x{100}aA');
+ok("\u$b"         eq "\x{100}\x{100}aA",  '\u');
+ok("\l$b"         eq "\x{101}\x{100}aA",  '\l');
+ok("\U$b"         eq "\x{100}\x{100}AA",  '\U');
+ok("\L$b"         eq "\x{101}\x{101}aa",  '\L');
 
-ok(quotemeta($b)  eq "\x{101}\x{100}\x{61}\x{41}",  'quotemeta');
-ok(ucfirst($b)    eq "\x{100}\x{100}\x{61}\x{41}",  'ucfirst');
-ok(lcfirst($b)    eq "\x{101}\x{100}\x{61}\x{41}",  'lcfirst');
-ok(uc($b)         eq "\x{100}\x{100}\x{41}\x{41}",  'uc');
-ok(lc($b)         eq "\x{101}\x{101}\x{61}\x{61}",  'lc');
+ok(quotemeta($b)  eq "\x{101}\x{100}aA",  'quotemeta');
+ok(ucfirst($b)    eq "\x{100}\x{100}aA",  'ucfirst');
+ok(lcfirst($b)    eq "\x{101}\x{100}aA",  'lcfirst');
+ok(uc($b)         eq "\x{100}\x{100}AA",  'uc');
+ok(lc($b)         eq "\x{101}\x{101}aa",  'lc');
 
 # \x{DF} is LATIN SMALL LETTER SHARP S, its uppercase is SS or \x{53}\x{53};
 # \x{149} is LATIN SMALL LETTER N PRECEDED BY APOSTROPHE, its uppercase is
