@@ -238,15 +238,19 @@ while (defined (my $file = next_file())) {
 	    } elsif(/^ident\s+(.*)/) {
 		print OUT $t, "# $1\n";
 	    }
- 	} elsif(/^\s*(typedef\s*)?enum\s*(\s+[a-zA-Z_]\w*\s*)?\{/) {
-	    until(/\}.*?;/) {
-		chomp($next = <IN>);
+	} elsif(/^\s*(typedef\s*)?enum\s*(\s+[a-zA-Z_]\w*\s*)?/) {
+	    until(/\{[^}]*\}.*;/ || /;/) {
+		last unless defined ($next = <IN>);
+		chomp $next;
+		# drop "#define FOO FOO" in enums
+		$next =~ s/^\s*#\s*define\s+(\w+)\s+\1\s*$//;
 		$_ .= $next;
 		print OUT "# $next\n" if $opt_D;
 	    }
+	    s/#\s*if.*?#\s*endif//g; # drop #ifdefs
 	    s@/\*.*?\*/@@g;
 	    s/\s+/ /g;
-	    /^\s?(typedef\s?)?enum\s?([a-zA-Z_]\w*)?\s?\{(.*)\}\s?([a-zA-Z_]\w*)?\s?;/;
+	    next unless /^\s?(typedef\s?)?enum\s?([a-zA-Z_]\w*)?\s?\{(.*)\}\s?([a-zA-Z_]\w*)?\s?;/;
 	    (my $enum_subs = $3) =~ s/\s//g;
 	    my @enum_subs = split(/,/, $enum_subs);
 	    my $enum_val = -1;
