@@ -637,7 +637,6 @@
 #define sv_2iv			Perl_sv_2iv
 #define sv_2mortal		Perl_sv_2mortal
 #define sv_2nv			Perl_sv_2nv
-#define sv_2pv			Perl_sv_2pv
 #define sv_2pvutf8		Perl_sv_2pvutf8
 #define sv_2pvbyte		Perl_sv_2pvbyte
 #define sv_pvn_nomg		Perl_sv_pvn_nomg
@@ -655,8 +654,6 @@
 #define sv_catpvf		Perl_sv_catpvf
 #define sv_vcatpvf		Perl_sv_vcatpvf
 #define sv_catpv		Perl_sv_catpv
-#define sv_catpvn		Perl_sv_catpvn
-#define sv_catsv		Perl_sv_catsv
 #define sv_chop			Perl_sv_chop
 #define sv_clean_all		Perl_sv_clean_all
 #define sv_clean_objs		Perl_sv_clean_objs
@@ -689,7 +686,6 @@
 #define sv_peek			Perl_sv_peek
 #define sv_pos_u2b		Perl_sv_pos_u2b
 #define sv_pos_b2u		Perl_sv_pos_b2u
-#define sv_pvn_force		Perl_sv_pvn_force
 #define sv_pvutf8n_force	Perl_sv_pvutf8n_force
 #define sv_pvbyten_force	Perl_sv_pvbyten_force
 #define sv_reftype		Perl_sv_reftype
@@ -709,7 +705,6 @@
 #define sv_setref_pvn		Perl_sv_setref_pvn
 #define sv_setpv		Perl_sv_setpv
 #define sv_setpvn		Perl_sv_setpvn
-#define sv_setsv		Perl_sv_setsv
 #define sv_taint		Perl_sv_taint
 #define sv_tainted		Perl_sv_tainted
 #define sv_unmagic		Perl_sv_unmagic
@@ -830,7 +825,6 @@
 #define sv_pv			Perl_sv_pv
 #define sv_pvutf8		Perl_sv_pvutf8
 #define sv_pvbyte		Perl_sv_pvbyte
-#define sv_utf8_upgrade		Perl_sv_utf8_upgrade
 #define sv_utf8_downgrade	Perl_sv_utf8_downgrade
 #define sv_utf8_encode		Perl_sv_utf8_encode
 #define sv_utf8_decode		Perl_sv_utf8_decode
@@ -1203,6 +1197,7 @@
 #define ck_concat		Perl_ck_concat
 #define ck_defined		Perl_ck_defined
 #define ck_delete		Perl_ck_delete
+#define ck_die			Perl_ck_die
 #define ck_eof			Perl_ck_eof
 #define ck_eval			Perl_ck_eval
 #define ck_exec			Perl_ck_exec
@@ -2154,7 +2149,6 @@
 #define sv_2iv(a)		Perl_sv_2iv(aTHX_ a)
 #define sv_2mortal(a)		Perl_sv_2mortal(aTHX_ a)
 #define sv_2nv(a)		Perl_sv_2nv(aTHX_ a)
-#define sv_2pv(a,b)		Perl_sv_2pv(aTHX_ a,b)
 #define sv_2pvutf8(a,b)		Perl_sv_2pvutf8(aTHX_ a,b)
 #define sv_2pvbyte(a,b)		Perl_sv_2pvbyte(aTHX_ a,b)
 #define sv_pvn_nomg(a,b)	Perl_sv_pvn_nomg(aTHX_ a,b)
@@ -2171,8 +2165,6 @@
 #define sv_bless(a,b)		Perl_sv_bless(aTHX_ a,b)
 #define sv_vcatpvf(a,b,c)	Perl_sv_vcatpvf(aTHX_ a,b,c)
 #define sv_catpv(a,b)		Perl_sv_catpv(aTHX_ a,b)
-#define sv_catpvn(a,b,c)	Perl_sv_catpvn(aTHX_ a,b,c)
-#define sv_catsv(a,b)		Perl_sv_catsv(aTHX_ a,b)
 #define sv_chop(a,b)		Perl_sv_chop(aTHX_ a,b)
 #define sv_clean_all()		Perl_sv_clean_all(aTHX)
 #define sv_clean_objs()		Perl_sv_clean_objs(aTHX)
@@ -2205,7 +2197,6 @@
 #define sv_peek(a)		Perl_sv_peek(aTHX_ a)
 #define sv_pos_u2b(a,b,c)	Perl_sv_pos_u2b(aTHX_ a,b,c)
 #define sv_pos_b2u(a,b)		Perl_sv_pos_b2u(aTHX_ a,b)
-#define sv_pvn_force(a,b)	Perl_sv_pvn_force(aTHX_ a,b)
 #define sv_pvutf8n_force(a,b)	Perl_sv_pvutf8n_force(aTHX_ a,b)
 #define sv_pvbyten_force(a,b)	Perl_sv_pvbyten_force(aTHX_ a,b)
 #define sv_reftype(a,b)		Perl_sv_reftype(aTHX_ a,b)
@@ -2224,7 +2215,6 @@
 #define sv_setref_pvn(a,b,c,d)	Perl_sv_setref_pvn(aTHX_ a,b,c,d)
 #define sv_setpv(a,b)		Perl_sv_setpv(aTHX_ a,b)
 #define sv_setpvn(a,b,c)	Perl_sv_setpvn(aTHX_ a,b,c)
-#define sv_setsv(a,b)		Perl_sv_setsv(aTHX_ a,b)
 #define sv_taint(a)		Perl_sv_taint(aTHX_ a)
 #define sv_tainted(a)		Perl_sv_tainted(aTHX_ a)
 #define sv_unmagic(a,b)		Perl_sv_unmagic(aTHX_ a,b)
@@ -2339,7 +2329,6 @@
 #define sv_pv(a)		Perl_sv_pv(aTHX_ a)
 #define sv_pvutf8(a)		Perl_sv_pvutf8(aTHX_ a)
 #define sv_pvbyte(a)		Perl_sv_pvbyte(aTHX_ a)
-#define sv_utf8_upgrade(a)	Perl_sv_utf8_upgrade(aTHX_ a)
 #define sv_utf8_downgrade(a,b)	Perl_sv_utf8_downgrade(aTHX_ a,b)
 #define sv_utf8_encode(a)	Perl_sv_utf8_encode(aTHX_ a)
 #define sv_utf8_decode(a)	Perl_sv_utf8_decode(aTHX_ a)
@@ -2711,6 +2700,7 @@
 #define ck_concat(a)		Perl_ck_concat(aTHX_ a)
 #define ck_defined(a)		Perl_ck_defined(aTHX_ a)
 #define ck_delete(a)		Perl_ck_delete(aTHX_ a)
+#define ck_die(a)		Perl_ck_die(aTHX_ a)
 #define ck_eof(a)		Perl_ck_eof(aTHX_ a)
 #define ck_eval(a)		Perl_ck_eval(aTHX_ a)
 #define ck_exec(a)		Perl_ck_exec(aTHX_ a)

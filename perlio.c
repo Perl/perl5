@@ -128,6 +128,24 @@ PerlIO_binmode(pTHX_ PerlIO *fp, int iotype, int mode, const char *names)
 #endif
 }
 
+PerlIO *
+PerlIO_fdupopen(pTHX_ PerlIO *f, CLONE_PARAMS *param)
+{
+    if (f) {
+	int fd = PerlLIO_dup(PerlIO_fileno(f));
+	if (fd >= 0) {
+	    /* the r+ is a hack */
+	    return PerlIO_fdopen(fd, "r+");
+	}
+	return NULL;
+    }
+    else {
+	SETERRNO(EBADF, SS$_IVCHAN);
+    }
+    return NULL;
+}
+
+
 /*
  * De-mux PerlIO_openn() into fdopen, freopen and fopen type entries
  */

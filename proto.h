@@ -701,7 +701,7 @@ PERL_CALLCONV IO*	Perl_sv_2io(pTHX_ SV* sv);
 PERL_CALLCONV IV	Perl_sv_2iv(pTHX_ SV* sv);
 PERL_CALLCONV SV*	Perl_sv_2mortal(pTHX_ SV* sv);
 PERL_CALLCONV NV	Perl_sv_2nv(pTHX_ SV* sv);
-PERL_CALLCONV char*	Perl_sv_2pv(pTHX_ SV* sv, STRLEN* lp);
+/* PERL_CALLCONV char*	sv_2pv(pTHX_ SV* sv, STRLEN* lp); */
 PERL_CALLCONV char*	Perl_sv_2pvutf8(pTHX_ SV* sv, STRLEN* lp);
 PERL_CALLCONV char*	Perl_sv_2pvbyte(pTHX_ SV* sv, STRLEN* lp);
 PERL_CALLCONV char*	Perl_sv_pvn_nomg(pTHX_ SV* sv, STRLEN* lp);
@@ -723,8 +723,8 @@ PERL_CALLCONV void	Perl_sv_catpvf(pTHX_ SV* sv, const char* pat, ...)
 ;
 PERL_CALLCONV void	Perl_sv_vcatpvf(pTHX_ SV* sv, const char* pat, va_list* args);
 PERL_CALLCONV void	Perl_sv_catpv(pTHX_ SV* sv, const char* ptr);
-PERL_CALLCONV void	Perl_sv_catpvn(pTHX_ SV* sv, const char* ptr, STRLEN len);
-PERL_CALLCONV void	Perl_sv_catsv(pTHX_ SV* dsv, SV* ssv);
+/* PERL_CALLCONV void	sv_catpvn(pTHX_ SV* sv, const char* ptr, STRLEN len); */
+/* PERL_CALLCONV void	sv_catsv(pTHX_ SV* dsv, SV* ssv); */
 PERL_CALLCONV void	Perl_sv_chop(pTHX_ SV* sv, char* ptr);
 PERL_CALLCONV I32	Perl_sv_clean_all(pTHX);
 PERL_CALLCONV void	Perl_sv_clean_objs(pTHX);
@@ -757,7 +757,7 @@ PERL_CALLCONV SV*	Perl_sv_newref(pTHX_ SV* sv);
 PERL_CALLCONV char*	Perl_sv_peek(pTHX_ SV* sv);
 PERL_CALLCONV void	Perl_sv_pos_u2b(pTHX_ SV* sv, I32* offsetp, I32* lenp);
 PERL_CALLCONV void	Perl_sv_pos_b2u(pTHX_ SV* sv, I32* offsetp);
-PERL_CALLCONV char*	Perl_sv_pvn_force(pTHX_ SV* sv, STRLEN* lp);
+/* PERL_CALLCONV char*	sv_pvn_force(pTHX_ SV* sv, STRLEN* lp); */
 PERL_CALLCONV char*	Perl_sv_pvutf8n_force(pTHX_ SV* sv, STRLEN* lp);
 PERL_CALLCONV char*	Perl_sv_pvbyten_force(pTHX_ SV* sv, STRLEN* lp);
 PERL_CALLCONV char*	Perl_sv_reftype(pTHX_ SV* sv, int ob);
@@ -781,7 +781,7 @@ PERL_CALLCONV SV*	Perl_sv_setref_pv(pTHX_ SV* rv, const char* classname, void* p
 PERL_CALLCONV SV*	Perl_sv_setref_pvn(pTHX_ SV* rv, const char* classname, char* pv, STRLEN n);
 PERL_CALLCONV void	Perl_sv_setpv(pTHX_ SV* sv, const char* ptr);
 PERL_CALLCONV void	Perl_sv_setpvn(pTHX_ SV* sv, const char* ptr, STRLEN len);
-PERL_CALLCONV void	Perl_sv_setsv(pTHX_ SV* dsv, SV* ssv);
+/* PERL_CALLCONV void	sv_setsv(pTHX_ SV* dsv, SV* ssv); */
 PERL_CALLCONV void	Perl_sv_taint(pTHX_ SV* sv);
 PERL_CALLCONV bool	Perl_sv_tainted(pTHX_ SV* sv);
 PERL_CALLCONV int	Perl_sv_unmagic(pTHX_ SV* sv, int type);
@@ -922,7 +922,7 @@ PERL_CALLCONV char*	Perl_sv_2pvbyte_nolen(pTHX_ SV* sv);
 PERL_CALLCONV char*	Perl_sv_pv(pTHX_ SV *sv);
 PERL_CALLCONV char*	Perl_sv_pvutf8(pTHX_ SV *sv);
 PERL_CALLCONV char*	Perl_sv_pvbyte(pTHX_ SV *sv);
-PERL_CALLCONV STRLEN	Perl_sv_utf8_upgrade(pTHX_ SV *sv);
+/* PERL_CALLCONV STRLEN	sv_utf8_upgrade(pTHX_ SV *sv); */
 PERL_CALLCONV bool	Perl_sv_utf8_downgrade(pTHX_ SV *sv, bool fail_ok);
 PERL_CALLCONV void	Perl_sv_utf8_encode(pTHX_ SV *sv);
 PERL_CALLCONV bool	Perl_sv_utf8_decode(pTHX_ SV *sv);
