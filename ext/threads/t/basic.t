@@ -7,6 +7,8 @@
 # And even when that will be fixed, this is a basic
 # test and should not rely on shared variables
 # 
+# This will test the basic API, it will not use any coderefs
+# as they are more advanced
 #
 #########################
 
@@ -33,9 +35,9 @@ print "ok 1\n";
 
 #########################
 
-# Insert your test code below, the Test module is use()ed here so read
-# its man page ( perldoc Test ) for help writing this test script.
-#my $bar;
+
+
+
 sub ok {	
     my ($id, $ok, $name) = @_;
     
@@ -49,74 +51,71 @@ sub ok {
 
 
 
+sub test1 {
+	ok(2,'bar' eq $_[0],"Test that argument passing works");
+}
+threads->create('test1','bar')->join();
 
-#test passing of simple argument
-my $thread = threads->create(sub { ok(2, 'bar' eq $_[0]),"" },"bar");
-$thread->join();
+sub test2 {
+	ok(3,'bar' eq $_[0]->[0]->{foo},"Test that passing arguments as references work");
+}
 
-
-#test passing of complex argument
-
-$thread = threads->create(sub { ok(3, 'bar' eq $_[0]->[0]->{foo})},[{foo => 'bar'}]);
-
-$thread->join();
+threads->create('test2',[{foo => 'bar'}])->join();
 
 
 #test execuion of normal sub
-sub bar { ok(4,shift() == 1,"") }
-threads->create(\&bar,1)->join();
+sub test3 { ok(4,shift() == 1,"Test a normal sub") }
+threads->create('test3',1)->join();
 
 
 #check Config
-ok(5, 1 == $Config::threads,"");
+ok(5, 1 == $Config::threads,"Check that Config::threads is true");
 
 #test trying to detach thread
 
-my $thread1 = threads->create(sub {ok(6,1,"")});
+sub test4 { ok(6,1,"Detach test") }
+
+my $thread1 = threads->create('test4');
 
 $thread1->detach();
-sleep 1;
-ok(7,1,"");
-#create nested threads
-unless($^O eq 'MSWin32') {
-	my $thread3 = threads->create(sub { threads->create(sub {})})->join();
-}
+sleep 2;
+ok(7,1,"Detach test");
 
 
-unless($^O eq 'MSWin32') {
-    my @threads;
-    my $i;
-    for(1..25) {
-	push @threads,
-            threads->create(
-			    sub {
-				for(1..100000) { my $i  }
-				threads->create(
-						sub {sleep 2})
-				    ->join()
-				}
-			   );
-    }
-    foreach my $thread (@threads) {
-	$thread->join();
-    }
+
+sub test5 {
+	threads->create('test6')->join();
+	ok(9,1,"Nested thread test");
 }
-ok(8,1,"");
-threads->create(sub { 
-    my $self = threads->self();
-    ok(9,$self->tid() == 57,"");
-})->join();
-threads->create(sub { 
-    my $self = threads->self();
-    ok(10,$self->tid() == 58,"");
-})->join();
+
+sub test6 {
+	ok(8,1,"Nested thread test");
+}
+
+threads->create('test5')->join();
+
+sub test7 {
+	my $self = threads->self();
+	ok(9, $self->tid == 7, "Wanted 7, got ".$self->tid);
+	ok(10, threads->tid() == 7, "Wanted 7, got ".threads->tid());
+}
+
+threads->create('test7')->join;
+
+sub test8 {
+	my $self = threads->self();
+	ok(11, $self->tid == 8, "Wanted 8, got ".$self->tid);
+	ok(12, threads->tid() == 8, "Wanted 8, got ".threads->tid());
+}
+
+threads->create('test8')->join;
+
 
 #check support for threads->self() in main thread
-ok(11, 0 == threads->self->tid(),"");
-ok(12, 0 == threads->tid(),"Check so that tid for threads work for current tid");
+ok(13, 0 == threads->self->tid(),"Check so that tid for threads work for main thread");
+ok(14, 0 == threads->tid(),"Check so that tid for threads work for main thread");
 
-
-
+1;
 
 
 
