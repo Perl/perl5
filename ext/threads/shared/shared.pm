@@ -74,6 +74,11 @@ win32). It is used together with the threads module.
 
 C<share>, C<lock>, C<cond_wait>, C<cond_signal>, C<cond_broadcast>
 
+Note that if this module is imported when C<threads> has not yet been
+loaded, then these functions all become no-ops. This makes it possible to
+write modules that will work in both threaded and non-threaded
+environments.
+
 =head1 FUNCTIONS
 
 =over 4
