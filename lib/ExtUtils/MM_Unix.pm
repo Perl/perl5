@@ -464,6 +464,13 @@ EOT
     }
 
     my(@otherfiles) = values %{$self->{XS}}; # .c files from *.xs files
+    if ( $^O eq 'qnx' ) {
+      my @errfiles = @{$self->{C}};
+      for ( @errfiles ) {
+	s/.c$/.err/;
+      }
+      push( @otherfiles, @errfiles, 'perlmain.err' );
+    }
     push(@otherfiles, $attribs{FILES}) if $attribs{FILES};
     push(@otherfiles, qw[./blib $(MAKE_APERL_FILE) $(INST_ARCHAUTODIR)/extralibs.all
 			 perlmain.c tmon.out mon.out core core.*perl.*.?
