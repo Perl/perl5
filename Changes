@@ -78,6 +78,12 @@ Version 5.005_04-tobe        Fourth maintenance release of 5.005
 ----------------
 
 ____________________________________________________________________________
+[ 22178] By: acme                                  on 2004/01/19  20:30:12
+        Log: Integrated the FreeBSD hints file from 5.6.2,
+             thanks to Nicholas Clark
+     Branch: maint-5.005/perl
+          !> hints/freebsd.sh
+____________________________________________________________________________
 [ 22157] By: acme                                  on 2004/01/15  17:04:55
         Log: Integrate stat.t from blead (suggested by Abe Timmerman),
              slightly modified
