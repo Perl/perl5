@@ -2,7 +2,7 @@
 
 # $RCSfile: s.t,v $$Revision: 4.1 $$Date: 92/08/07 18:28:22 $
 
-print "1..62\n";
+print "1..63\n";
 
 $x = 'foo';
 $_ = "x";
@@ -239,3 +239,7 @@ print $x eq "cd" ? "ok 61\n" : "not ok 61\n";
 eval 's{foo} # this is a comment, not a delimiter
        {bar};';
 print @? ? "not ok 62\n" : "ok 62\n";
+
+# XXX TODO: Most tests above don't test return values of the ops. They should.
+$_ = "ab";
+print (s/a/b/ == 1 ? "ok 63\n" : "not ok 63\n");
