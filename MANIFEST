@@ -168,6 +168,7 @@ ext/Devel/PPPort/t/test.t	See if Devel::PPPort works
 ext/Devel/PPPort/TODO		Devel::PPPort Todo
 ext/Digest/MD5/Changes		Digest::MD5 extension changes
 ext/Digest/MD5/hints/irix_6.pl	Hints for named architecture
+ext/Digest/MD5/hints/MacOS.pl	Hints for named architecture
 ext/Digest/MD5/Makefile.PL	Digest::MD5 extension makefile writer
 ext/Digest/MD5/MD5.pm		Digest::MD5 extension
 ext/Digest/MD5/MD5.xs		Digest::MD5 extension
@@ -717,8 +718,8 @@ ext/Unicode/Normalize/t/test.t	Unicode::Normalize
 ext/util/make_ext		Used by Makefile to execute extension Makefiles
 ext/XS/APItest/APItest.pm	XS::APItest extension
 ext/XS/APItest/APItest.xs	XS::APItest extension
-ext/XS/APItest/MANIFEST		XS::APItest extension
 ext/XS/APItest/Makefile.PL	XS::APItest extension
+ext/XS/APItest/MANIFEST		XS::APItest extension
 ext/XS/APItest/README		XS::APItest extension
 ext/XS/APItest/t/printf.t	XS::APItest extension
 ext/XS/Typemap/Makefile.PL	XS::Typemap extension
@@ -1388,8 +1389,8 @@ lib/Pod/t/man.t			podlators test
 lib/Pod/t/parselink.t		podlators test
 lib/Pod/t/pod2html-lib.pl	pod2html testing library
 lib/Pod/t/Select.t		See if Pod::Select works
-lib/Pod/t/text.t		podlators test
 lib/Pod/t/text-errors.t		podlators test
+lib/Pod/t/text.t		podlators test
 lib/Pod/t/Usage.t		See if Pod::Usage works
 lib/Pod/t/utils.t		Test for Pod::ParseUtils
 lib/Pod/Text.pm			Pod-Parser - convert POD data to formatted ASCII text
