@@ -3684,56 +3684,22 @@ typedef	void SV;
 typedef int  (*SVCOMPARE_t) (pTHXo_ SV*, SV*);
 #endif	/* TESTHARNESS */
 
+typedef char * aptr;		/* pointer for arithmetic on sizes */
+typedef SV * gptr;		/* pointers in our lists */
+
 /* 
  * The original author of the mergesort implementation included here
- * is Peter M. McIlroy <pmcilroy@lucent.com>,  and the integrator of
- * it to the Perl source code is John Lindermann <jpl@research.att.com>.
+ * is Peter M. McIlroy <pmcilroy@lucent.com> (see: Optimistic Merge Sort
+ * (SODA '92)), and the integrator of it to the Perl source code is
+ * John Linderman <jpl@research.att.com>.
  *
  * Both Peter and John agree with the inclusion of their code in here
  * and with their code being distributed under the same terms as Perl.
  *
- * Peter is the original copyright holder, UCB was just granted the
- * right to redistribute the code and has no rights to the original code.
- * Inclusion of the BSD copyright is just simple courtesy and no
- * indication of intellectual property.  Keith Bostic <bostic@bostic.com>
- * agrees with this interpretation.
- *
- * --jhi */
-
-typedef char * aptr;		/* pointer for arithmetic on sizes */
-typedef SV * gptr;		/* pointers in our lists */
-
-/* Copyright notice from Peter's original sort,
-** which has been modified heavily.  Good ideas are Peter's
-** bugs are jpl's
-*/
-
-/* The below advertising clause is ineffective as of July 22, 1999:
- *
- *  ftp://ftp.cs.berkeley.edu/pub/4bsd/README.Impt.License.Change
+ * This code originally developed in conjunction with the BSD Computer
+ * Software Research Group and the University of California at Berkeley.
  *
  */
-
-/* Much of this code is original source code from BSD4.4, and is 
- * copyright (c) 1991 The Regents of the University of California.
- *
- * 1. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in the
- *    documentation and/or other materials provided with the distribution.
- * 2. All advertising materials mentioning features or use of this software
- *    must display the following acknowledgement:
- *	This product includes software developed by the University of
- *	California, Berkeley and its contributors.
- * 3. Neither the name of the University nor the names of its contributors
- *    may be used to endorse or promote products derived from this software
- *    without specific prior written permission.
- *
-*/
-
-/* 
- * AUTHOR: Peter McIlroy
- * 1991-1992,  See: Optimistic Merge Sort (SODA '92)
-*/
 
 /* Binary merge internal sort, with a few special mods
 ** for the special perl environment it now finds itself in.
