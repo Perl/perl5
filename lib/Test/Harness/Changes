@@ -1,5 +1,9 @@
 Revision history for Perl extension Test::Harness
 
+1.26  Mon Nov 12 15:44:01 EST 2001
+    * An excuse to upload a new version to CPAN to get Test::Harness
+      back on the index.
+
 1.25  Tue Aug  7 08:51:09 EDT 2001
     * Fixed a bug with tests failing if they're all skipped
       reported by Stas Bekman.
