@@ -37,6 +37,8 @@ sub install {
 
     my(%hash) = %$hash;
     my(%pack, %write, $dir, $warn_permissions);
+    # -w doesn't work reliably on FAT dirs
+    $warn_permissions++ if $^O eq 'MSWin32';
     local(*DIR, *P);
     for (qw/read write/) {
 	$pack{$_}=$hash{$_};

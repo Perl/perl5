@@ -34,8 +34,10 @@
 static DWORD IdOS(void);
 
 extern WIN32_IOSUBSYSTEM	win32stdio;
-__declspec(thread) PWIN32_IOSUBSYSTEM	pIOSubSystem = &win32stdio;
-/*__declspec(thread) PWIN32_IOSUBSYSTEM	pIOSubSystem = NULL;*/
+#ifndef __BORLANDC__	/* pointers cannot be declared TLS! */
+__declspec(thread)
+#endif
+PWIN32_IOSUBSYSTEM pIOSubSystem = &win32stdio;
 
 BOOL  ProbeEnv = FALSE;
 DWORD Win32System = (DWORD)-1;
@@ -152,6 +154,10 @@ my_popen(char *cmd, char *mode)
  * GSAR 97/03/13
  */
     fixcmd(cmd);
+#ifdef __BORLANDC__ /* workaround a Borland stdio bug */
+    win32_fflush(stdout);
+    win32_fflush(stderr);
+#endif
     return win32_popen(cmd, mode);
 #else
 /*
@@ -187,11 +193,11 @@ my_popen(char *cmd, char *mode)
 	goto error1;
 
     if ( *(mode + 1) == _T('t') )
-	tm = _O_TEXT;
+	tm = O_TEXT;
     else if ( *(mode + 1) == _T('b') )
-	tm = _O_BINARY;
+	tm = O_BINARY;
     else
-	tm = (*mode == 'w' ? _O_BINARY : _O_TEXT);
+	tm = (*mode == 'w' ? O_BINARY : O_TEXT);
 
 
     fixcmd(cmd);
@@ -317,18 +323,19 @@ IdOS(void)
 static char *
 GetShell(void)
 {
-    static char* szWin95ShellEntry = "Win95Shell";
-    static char* szWin95DefaultShell = "Cmd32.exe";
-    static char* szWinNTDefaultShell = "cmd.exe";
-   
     if (!ProbeEnv) {
+	char* defaultshell = (IsWinNT() ? "cmd.exe" : "command.com");
+	/* we don't use COMSPEC here for two reasons:
+	 *  1. the same reason perl on UNIX doesn't use SHELL--rampant and
+	 *     uncontrolled unportability of the ensuing scripts.
+	 *  2. PERL5SHELL could be set to a shell that may not be fit for
+	 *     interactive use (which is what most programs look in COMSPEC
+	 *     for).
+	 */
+	char *usershell = getenv("PERL5SHELL");  
+
 	ProbeEnv = TRUE;
-	if (IsWin95()) {
-	    strcpy(szShellPath, szWin95DefaultShell);
-	}
-	else {
-	    strcpy(szShellPath, szWinNTDefaultShell);
-	}
+	strcpy(szShellPath, usershell ? usershell : defaultshell);
     }
     return szShellPath;
 }
@@ -364,8 +371,7 @@ do_aspawn(void* really, void** mark, void** arglast)
     }
     argv[index++] = 0;
    
-    status = win32_spawnvpe(P_WAIT, cmd, (const char* const*)argv,
-			    (const char* const*)environ);
+    status = win32_spawnvp(P_WAIT, cmd, (const char* const*)argv);
 
     Safefree(argv);
 
@@ -408,10 +414,7 @@ do_spawn(char *cmd)
 	}
 	*a = Nullch;
 	if(argv[0]) {
-	    status = win32_spawnvpe(P_WAIT,
-				    argv[0],
-				    (const char* const*)argv,
-				    (const char* const*)environ);
+	    status = win32_spawnvp(P_WAIT, argv[0], (const char* const*)argv);
 	    if(status != -1 || errno == 0)
 		needToTry = FALSE;
 	}
@@ -419,11 +422,10 @@ do_spawn(char *cmd)
 	Safefree(cmd2);
     }
     if(needToTry) {
-	status = win32_spawnle(P_WAIT,
-			       shell,
-			       shell,
-			       "/x",
-			       "/c", cmd, (char*)0, environ);
+	char *argv[5];
+	argv[0] = shell; argv[1] = "/x"; argv[2] = "/c";
+	argv[3] = cmd; argv[4] = Nullch;
+	status = win32_spawnvp(P_WAIT, argv[0], (const char* const*)argv);
     }
     if (status < 0) {
 	if (dowarn)
@@ -459,7 +461,7 @@ opendir(char *filename)
 /*  char           *dummy;*/
 
     /* check to see if filename is a directory */
-    if(stat(filename, &sbuf) < 0 || sbuf.st_mode & _S_IFDIR == 0) {
+    if(stat(filename, &sbuf) < 0 || sbuf.st_mode & S_IFDIR == 0) {
 	return NULL;
     }
 
@@ -674,12 +676,14 @@ kill(int pid, int sig)
  * File system stuff
  */
 
+#if 0
 int
 ioctl(int i, unsigned int u, char *data)
 {
     CROAK("ioctl not implemented!\n");
     return -1;
 }
+#endif
 
 unsigned int
 sleep(unsigned int t)
@@ -805,7 +809,9 @@ __declspec(thread) char	strerror_buffer[512];
 DllExport char *
 win32_strerror(int e) 
 {
+#ifndef __BORLANDC__		/* Borland intolerance */
     extern int sys_nerr;
+#endif
     DWORD source = 0;
 
     if(e < 0 || e > sys_nerr) {
@@ -1060,13 +1066,13 @@ win32_dup2(int fd1,int fd2)
 }
 
 DllExport int
-win32_read(int fd, char *buf, unsigned int cnt)
+win32_read(int fd, void *buf, unsigned int cnt)
 {
     return pIOSubSystem->pfnread(fd, buf, cnt);
 }
 
 DllExport int
-win32_write(int fd, const char *buf, unsigned int cnt)
+win32_write(int fd, const void *buf, unsigned int cnt)
 {
     return pIOSubSystem->pfnwrite(fd, buf, cnt);
 }
@@ -1090,23 +1096,9 @@ win32_chdir(const char *dir)
 }
 
 DllExport int
-win32_spawnvpe(int mode, const char *cmdname,
-	       const char *const *argv, const char *const *envp)
+win32_spawnvp(int mode, const char *cmdname, const char *const *argv)
 {
-    return pIOSubSystem->pfnspawnvpe(mode, cmdname, argv, envp);
-}
-
-DllExport int
-win32_spawnle(int mode, const char *cmdname, const char *arglist,...)
-{
-    const char*	const*	envp;
-    const char*	const*	argp;
-
-    argp = &arglist;
-    while (*argp++) ;
-    envp = (const char* const*)*argp;
-
-    return pIOSubSystem->pfnspawnvpe(mode, cmdname, &arglist, envp);
+    return pIOSubSystem->pfnspawnvp(mode, cmdname, argv);
 }
 
 int

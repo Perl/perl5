@@ -19,10 +19,11 @@ sub ok {
     }
 }
 
-$Is_MSWin32 = ($^O eq 'MSWin32');
+$Is_MSWin32 = $^O eq 'MSWin32';
+$Is_VMS     = $^O eq 'VMS';
 $PERL = ($Is_MSWin32 ? '.\perl' : './perl');
 
-print "1..28\n";
+print "1..30\n";
 
 eval '$ENV{"foo"} = "hi there";';	# check that ENV is inited inside eval
 if ($Is_MSWin32) { ok 1, `cmd /x /c set foo` eq "foo=hi there\n"; }
@@ -109,7 +110,7 @@ if ($Is_MSWin32) {
     for (19 .. 25) { ok $_, 1 }
 }
 else {
-    if ($^O eq 'qnx' || $^O eq 'amigaos') {
+    if ($^O eq 'qnx') {
 	chomp($wd = `pwd`);
     }
     else {
@@ -142,3 +143,22 @@ EOF
 ok 26, $] >= 5.00319, $];
 ok 27, $^O;
 ok 28, $^T > 850000000, $^T;
+
+if ($Is_VMS) {
+	ok 29, 1;
+	ok 30, 1;
+}
+else {
+	$PATH = $ENV{PATH};
+	$ENV{foo} = "bar";
+	%ENV = ();
+	$ENV{PATH} = $PATH;
+	ok 29, ($Is_MSWin32 ? (`cmd /x /c set foo 2>NUL` eq "")
+				: (`echo \$foo` eq "\n") );
+
+	$ENV{NoNeSuCh} = "foo";
+	$0 = "bar";
+	ok 30, ($Is_MSWin32 ? (`cmd /x /c set NoNeSuCh` eq "NoNeSuCh=foo\n")
+						: (`echo \$NoNeSuCh` eq "foo\n") );
+}
+

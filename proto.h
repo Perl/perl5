@@ -198,6 +198,7 @@ OP*	listkids _((OP* o));
 OP*	localize _((OP* arg, I32 lexical));
 I32	looks_like_number _((SV* sv));
 int	magic_clearenv	_((SV* sv, MAGIC* mg));
+int	magic_clear_all_env _((SV* sv, MAGIC* mg));
 int	magic_clearpack	_((SV* sv, MAGIC* mg));
 int	magic_clearsig	_((SV* sv, MAGIC* mg));
 int	magic_existspack _((SV* sv, MAGIC* mg));

@@ -27,7 +27,7 @@ AUTOLOAD {
       }
     }
     my $save = $@;
-    eval {require $name};
+    eval {local $SIG{__DIE__};require $name};
     if ($@) {
 	if (substr($AUTOLOAD,-9) eq '::DESTROY') {
 	    *$AUTOLOAD = sub {};
@@ -38,7 +38,7 @@ AUTOLOAD {
 	    # There is a slight risk that we could pick up the wrong file here
 	    # but autosplit should have warned about that when splitting.
 	    if ($name =~ s/(\w{12,})\.al$/substr($1,0,11).".al"/e){
-		eval {require $name};
+		eval {local $SIG{__DIE__};require $name};
 	    }
 	    if ($@){
 		$@ =~ s/ at .*\n//;

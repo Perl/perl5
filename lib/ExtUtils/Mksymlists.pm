@@ -97,6 +97,7 @@ while (($name, $exp)= each %{$data->{IMPORTS}}) {
 sub _write_win32 {
     my($data) = @_;
 
+    require Config;
     if (not $data->{DLBASE}) {
         ($data->{DLBASE} = $data->{NAME}) =~ s/.*:://;
         $data->{DLBASE} = substr($data->{DLBASE},0,7) . '_';
@@ -109,6 +110,10 @@ sub _write_win32 {
     print DEF "CODE LOADONCALL\n";
     print DEF "DATA LOADONCALL NONSHARED MULTIPLE\n";
     print DEF "EXPORTS\n  ";
+    if ($Config::Config{'cc'} =~ /^bcc/i) {
+	for (@{$data->{DL_VARS}}) { $_ = "$_ = _$_" }
+	for (@{$data->{FUNCLIST}}) { $_ = "$_ = _$_" }
+    }
     print DEF join("\n  ",@{$data->{DL_VARS}}, "\n") if @{$data->{DL_VARS}};
     print DEF join("\n  ",@{$data->{FUNCLIST}}, "\n") if @{$data->{FUNCLIST}};
     if (%{$data->{IMPORTS}}) {

@@ -448,7 +448,7 @@ successfully changed.  See also L</oct>, if all you have is a string.
 
 =item chomp
 
-This is a slightly safer version of chop (see below).  It removes any
+This is a slightly safer version of L</chop>.  It removes any
 line ending that corresponds to the current value of C<$/> (also known as
 $INPUT_RECORD_SEPARATOR in the C<English> module).  It returns the total
 number of characters removed from all its arguments.  It's often used to
@@ -1731,7 +1731,7 @@ it succeeded, FALSE otherwise.  See example in L<perlipc/"Sockets: Client/Server
 A local modifies the listed variables to be local to the enclosing block,
 subroutine, C<eval{}>, or C<do>.  If more than one value is listed, the
 list must be placed in parentheses.  See L<perlsub/"Temporary Values via
-local()"> for details.
+local()"> for details, including issues with tied arrays and hashes.
 
 But you really probably want to be using my() instead, because local() isn't
 what most people think of as "local").  See L<perlsub/"Private Variables
@@ -2335,10 +2335,10 @@ If EXPR is omitted, uses $_.
 
 =item rand
 
-Returns a random fractional number between 0 and the value of EXPR.
-(EXPR should be positive.)  If EXPR is omitted, returns a value between
-0 and 1.  Automatically calls srand() unless srand() has already been
-called.  See also srand().
+Returns a random fractional number greater than or equal to 0 and less
+than the value of EXPR.  (EXPR should be positive.)  If EXPR is
+omitted, the value 1 is used.  Automatically calls srand() unless
+srand() has already been called.  See also srand().
 
 (Note: If your rand function consistently returns numbers that are too
 large or too small, then your version of Perl was probably compiled

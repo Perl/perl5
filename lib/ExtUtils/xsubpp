@@ -127,6 +127,7 @@ else
 
 @ARGV == 1 or die $usage;
 ($dir, $filename) = $ARGV[0] =~ m#(.*)/(.*)#
+	or ($dir, $filename) = $ARGV[0] =~ m#(.*)\\(.*)#
 	or ($dir, $filename) = $ARGV[0] =~ m#(.*[>\]])(.*)#
 	or ($dir, $filename) = ('.', $ARGV[0]);
 chdir($dir);

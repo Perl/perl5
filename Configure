@@ -1704,7 +1704,6 @@ EOM
 			esac;;
 		[23]100) osname=mips ;;
 		next*) osname=next ;;
-		news*) osname=news ;;
 		i386*)
 			if $test -f /etc/kconfig; then
 				osname=isc
@@ -1771,6 +1770,12 @@ EOM
 			;;
 		netbsd*) osname=netbsd 
 			osvers="$3"
+			;;
+		news-os) osvers="$3"
+			case "$3" in
+			4*) osname=newsos4 ;;
+			*) osname=newsos ;;
+			esac
 			;;
 		bsd386) osname=bsd386
 			osvers=`$uname -r`
@@ -1872,10 +1877,10 @@ EOM
 			;;
 		esac
 	else
-		if test -f /vmunix -a -f news_os.sh; then
+		if test -f /vmunix -a -f newsos4.sh; then
 			(what /vmunix | ../UU/tr '[A-Z]' '[a-z]') > ../UU/kernel.what 2>&1
 			if $contains news-os ../UU/kernel.what >/dev/null 2>&1; then
-				osname=news_os
+				osname=newsos4
 			fi
 			$rm -f ../UU/kernel.what
 		elif test -d c:/.; then
@@ -4574,30 +4579,30 @@ $undef)
 *)	case "$useshrplib" in
 	'')	case "$osname" in
 		svr4*|dgux|dynixptx|esix|powerux)
-			dflt='yes'
+			dflt=y
 			also='Building a shared libperl is required for dynamic loading to work on your system.'
 			;;
 		next*)
 			case "$osvers" in
-			4*)	dflt='yes'
+			4*)	dflt=y
 				also='Building a shared libperl is needed for MAB support.'
 				;;
-			*)	dflt='no'
+			*)	dflt=n
 				;;
 			esac
 			;;
 		sunos)
-			dflt='no'
+			dflt=n
 			also='Building a shared libperl will definitely not work on SunOS 4.'
 			;;
-		*)	dflt='no'
+		*)	dflt=n
 			;;
 		esac
 		;;
 	$define|true|[Yy]*)
-		dflt='yes'
+		dflt=y
 		;;
-	*)	dflt='no'
+	*)	dflt=n
 		;;
 	esac
 	$cat << EOM
@@ -5350,7 +5355,7 @@ EOH
 		case "$ans" in
 		none)	startperl=": # use perl";;
 		*)	startperl="#!$ans"
-			if $test 33 -lt `echo "$ans" | wc -c`; then
+			if $test 30 -lt `echo "$ans" | wc -c`; then
 				$cat >&4 <<EOM
 
 WARNING:  Some systems limit the #! command to 32 characters.
@@ -9097,7 +9102,7 @@ EOP
 $cat >signal_cmd <<EOS
 $startsh
 $test -s signal.lst && exit 0
-if $cc $ccflags signal.c -o signal $ldflags >/dev/null 2>&1; then
+if $cc $ccflags $ldflags signal.c -o signal >/dev/null 2>&1; then
 	./signal | $sort -n +1 | $uniq | $awk -f signal.awk >signal.lst
 else
 	echo "(I can't seem be able to compile the test program -- Guessing)"
@@ -9109,7 +9114,7 @@ else
 	0) set HUP INT QUIT ILL TRAP ABRT EMT FPE KILL BUS SEGV SYS PIPE ALRM TERM;;
 	esac
 	echo \$@ | $tr ' ' '\012' | \
-		$awk '{ printf $1; printf " %d\n", ++s; }' >signal.lst
+		$awk '{ printf \$1; printf " %d\n", ++s; }' >signal.lst
 fi
 $rm -f signal.c signal signal.o
 EOS

@@ -104,7 +104,8 @@ sub runtests {
 	}
 	$fh->close; # must close to reap child resource values
 	my $wstatus = $?;
-	my $estatus = ($^O eq 'VMS'
+	my $estatus;
+	$estatus = ($^O eq 'VMS'
 		       ? eval 'use vmsish "status"; $estatus = $?'
 		       : $wstatus >> 8);
 	if ($wstatus) {

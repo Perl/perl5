@@ -126,7 +126,7 @@ sub autosplit{
 sub autosplit_lib_modules{
     my(@modules) = @_; # list of Module names
 
-    foreach(@modules){
+    while(defined($_ = shift @modules)){
 	s#::#/#g;	# incase specified as ABC::XYZ
 	s|\\|/|g;		# bug in ksh OS/2
 	s#^lib/##; # incase specified as lib/*.pm
@@ -147,6 +147,7 @@ sub autosplit_lib_modules{
 sub autosplit_file{
     my($filename, $autodir, $keep, $check_for_autoloader, $check_mod_time) = @_;
     my(@names);
+    local($_);
 
     # where to write output files
     $autodir = "lib/auto" unless $autodir;

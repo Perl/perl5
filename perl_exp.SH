@@ -5,9 +5,9 @@
 # Create the export list for perl.
 # Needed by AIX to do dynamic linking.
 #
-# This simple program relys on 'global.sym' being up to date
-# with all of the global symbols that a dynamicly link library
-# might want to access.
+# This simple program relys on 'global.sym' and other *.sym files
+# being up to date with all of the global symbols that a dynamic
+# link library might want to access.
 #
 # Most symbols have a Perl_ prefix because that's what embed.h sticks
 # in front of them.  Variations depend on binary compatibility with
@@ -56,6 +56,15 @@ y*)
 	sed -n '/^[A-Za-z]/ s/^/Perl_/p' global.sym interp.sym >> perl.exp
 	;;
 esac
+
+# 
+# If we use the PerlIO abstraction layer, add its symbols
+#
+
+if [ $useperlio = "define" ]
+then
+	grep '^[A-Za-z]' perlio.sym >> perl.exp
+fi
 
 #
 # Extra globals not included above (including a few that might

@@ -16,6 +16,8 @@ c2ph:		c2ph.PL
 
 h2ph:		h2ph.PL
 
+h2xs:		h2xs.PL
+
 perlbug:	perlbug.PL
 
 perldoc:	perldoc.PL

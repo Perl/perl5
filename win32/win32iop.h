@@ -9,8 +9,8 @@
 /*
  * function prototypes for our own win32io layer
  */
-EXT int * 	win32_errno();
-EXT char *** 	win32_environ();
+EXT int * 	win32_errno(void);
+EXT char *** 	win32_environ(void);
 EXT FILE*	win32_stdin(void);
 EXT FILE*	win32_stdout(void);
 EXT FILE*	win32_stderr(void);
@@ -57,9 +57,8 @@ EXT int		win32_close(int fd);
 EXT int		win32_eof(int fd);
 EXT int		win32_read(int fd, void *buf, unsigned int cnt);
 EXT int		win32_write(int fd, const void *buf, unsigned int cnt);
-EXT int		win32_spawnvpe(int mode, const char *cmdname,
-			       const char *const *argv, const char *const *envp);
-EXT int		win32_spawnle(int mode, const char *cmdname, const char *,...);
+EXT int		win32_spawnvp(int mode, const char *cmdname,
+			      const char *const *argv);
 EXT int		win32_mkdir(const char *dir, int mode);
 EXT int		win32_rmdir(const char *dir);
 EXT int		win32_chdir(const char *dir);
@@ -94,6 +93,12 @@ void *	SetIOSubSystem(void	*piosubsystem);
 #undef stdout
 #undef ferror
 #undef feof
+
+#ifdef __BORLANDC__
+#undef ungetc
+#undef getc
+#undef fileno
+#endif
 
 #define stderr				win32_stderr()
 #define stdout				win32_stdout()
@@ -144,8 +149,7 @@ void *	SetIOSubSystem(void	*piosubsystem);
 #define write(fd,b,s)		win32_write(fd,b,s)
 #define _open_osfhandle		stolen_open_osfhandle
 #define _get_osfhandle		stolen_get_osfhandle
-#define spawnvpe		win32_spawnvpe
-#define spawnle			win32_spawnle
+#define spawnvp			win32_spawnvp
 #define mkdir			win32_mkdir
 #define rmdir			win32_rmdir
 #define chdir			win32_chdir

@@ -418,7 +418,7 @@ END
 
 # require autoloader if XS is disabled.
 # if XS is enabled, require autoloader unless autoloading is disabled.
-if( $opt_X || (! $opt_A) ){
+if( $opt_X && (! $opt_A) ){
 	print PM <<"END";
 require AutoLoader;
 END
@@ -882,7 +882,7 @@ if ($^O eq 'VMS') {
     $_ = 'Makefile.PL' if $_ eq 'makefile.pl';
   }
 }
-print MANI join("\n",@files);
+print MANI join("\n",@files), "\n";
 close MANI;
 !NO!SUBS!
 

@@ -75,6 +75,12 @@ int arg;
 #else
 	        goto not_there;
 #endif
+	    if (strEQ(name, "F_POSIX"))
+#ifdef F_POSIX
+	        return F_POSIX;
+#else
+	        goto not_there;
+#endif
 	    if (strEQ(name, "F_SETFL"))
 #ifdef F_SETFL
 	        return F_SETFL;
@@ -119,12 +125,60 @@ int arg;
 #endif
 	    errno = EINVAL;
 	    return 0;
-	} else
-	  if (strEQ(name, "FD_CLOEXEC"))
+	}
+        if (strEQ(name, "FAPPEND"))
+#ifdef FAPPEND
+            return FAPPEND;
+#else
+            goto not_there;
+#endif
+        if (strEQ(name, "FASYNC"))
+#ifdef FASYNC
+            return FASYNC;
+#else
+            goto not_there;
+#endif
+        if (strEQ(name, "FCREAT"))
+#ifdef FCREAT
+            return FCREAT;
+#else
+            goto not_there;
+#endif
+	if (strEQ(name, "FD_CLOEXEC"))
 #ifdef FD_CLOEXEC
 	    return FD_CLOEXEC;
 #else
 	    goto not_there;
+#endif
+        if (strEQ(name, "FEXCL"))
+#ifdef FEXCL
+            return FEXCL;
+#else
+            goto not_there;
+#endif
+        if (strEQ(name, "FNDELAY"))
+#ifdef FNDELAY
+            return FNDELAY;
+#else
+            goto not_there;
+#endif
+        if (strEQ(name, "FNONBLOCK"))
+#ifdef FNONBLOCK
+            return FNONBLOCK;
+#else
+            goto not_there;
+#endif
+        if (strEQ(name, "FSYNC"))
+#ifdef FSYNC
+            return FSYNC;
+#else
+            goto not_there;
+#endif
+        if (strEQ(name, "FTRUNC"))
+#ifdef FTRUNC
+            return FTRUNC;
+#else
+            goto not_there;
 #endif
 	break;
     case 'L':

@@ -892,6 +892,7 @@ register SV *sv;
     STRLEN prevlen;
     int unref = 0;
 
+    sv_setpvn(t, "", 0);
   retry:
     if (!sv) {
 	sv_catpv(t, "VOID");

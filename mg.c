@@ -594,7 +594,7 @@ MAGIC* mg;
     }
 #endif
 
-#if !defined(OS2) && !defined(AMIGAOS) && !defined(_WIN32)
+#if !defined(OS2) && !defined(AMIGAOS) && !defined(WIN32)
 			    /* And you'll never guess what the dog had */
 			    /*   in its mouth... */
     if (tainting) {
@@ -642,7 +642,7 @@ MAGIC* mg;
 	    }
 	}
     }
-#endif /* neither OS2 nor AMIGAOS nor _WIN32 */
+#endif /* neither OS2 nor AMIGAOS nor WIN32 */
 
     return 0;
 }
@@ -653,6 +653,45 @@ SV* sv;
 MAGIC* mg;
 {
     my_setenv(MgPV(mg,na),Nullch);
+    return 0;
+}
+
+int
+magic_clear_all_env(sv,mg)
+SV* sv;
+MAGIC* mg;
+{
+#if defined(VMS)
+    die("Can't make list assignment to %%ENV on this system");
+#else
+#ifdef WIN32
+    char *envv = GetEnvironmentStrings();
+    char *cur = envv;
+    STRLEN len;
+    while (*cur) {
+	char *end = strchr(cur,'=');
+	if (end && end != cur) {
+	    *end = '\0';
+	    my_setenv(cur,Nullch);
+	    *end = '=';
+	    cur += strlen(end+1)+1;
+	}
+	else if ((len = strlen(cur)))
+	    cur += len+1;
+    }
+    FreeEnvironmentStrings(envv);
+#else
+    I32 i;
+
+    if (environ == origenviron)
+	New(901, environ, 1, char*);
+    else
+	for (i = 0; environ[i]; i++)
+	    Safefree(environ[i]);
+    environ[0] = Nullch;
+
+#endif
+#endif
     return 0;
 }
 
@@ -1213,7 +1252,7 @@ SV* sv;
 		croak(no_aelem, (I32)LvTARGOFF(sv));
 	}
     }
-    SvREFCNT_inc(value);
+    (void)SvREFCNT_inc(value);
     SvREFCNT_dec(LvTARG(sv));
     LvTARG(sv) = value;
     LvTARGLEN(sv) = 0;
@@ -1591,7 +1630,7 @@ MAGIC* mg;
 	    }
 	    /* can grab env area too? */
 	    if (origenviron && origenviron[0] == s + 1) {
-		my_setenv("NoNeSuCh", Nullch);
+		my_setenv("NoNe  SuCh", Nullch);
 					    /* force copy of environment */
 		for (i = 0; origenviron[i]; i++)
 		    if (origenviron[i] == s + 1)

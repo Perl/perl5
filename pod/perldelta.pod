@@ -19,6 +19,13 @@ cannot be built there, for lack of a reasonable command interpreter.
 Most importantly, many bugs were fixed, including several security
 problems.  See the F<Changes> file in the distribution for details.
 
+=head2 List assignment to %ENV works
+
+C<%ENV = ()> and C<%ENV = @list> now work as expected (except on VMS
+where it generates a fatal error).
+
+=head2 "Can't locate Foo.pm in @INC" error now lists @INC
+
 =head2 Compilation option: Binary compatibility with 5.003
 
 There is a new Configure question that asks if you want to maintain
@@ -83,6 +90,13 @@ The simple rule is:  Inheritance will not work when autoloading
 non-methods.  The simple fix for old code is:  In any module that used to
 depend on inheriting C<AUTOLOAD> for non-methods from a base class named
 C<BaseClass>, execute C<*AUTOLOAD = \&BaseClass::AUTOLOAD> during startup.
+
+=head2 Previously deprecated %OVERLOAD is no longer usable
+
+Using %OVERLOAD to define overloading was deprecated in 5.003.
+Overloading is now defined using the overload pragma. %OVERLOAD is
+still used internally but should not be used by Perl scripts. See
+L<overload> for more details.
 
 =head2 Subroutine arguments created only when they're modified
 

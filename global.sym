@@ -512,6 +512,7 @@ listkids
 localize
 looks_like_number
 magic_clearenv
+magic_clear_all_env
 magic_clearpack
 magic_clearsig
 magic_existspack

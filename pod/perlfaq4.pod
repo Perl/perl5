@@ -371,7 +371,7 @@ suggests (assuming your string is contained in $text):
 
 If you want to represent quotation marks inside a
 quotation-mark-delimited field, escape them with backslashes (eg,
-C<"like \"this\"").  Unescaping them is a task addressed earlier in
+C<"like \"this\"">.  Unescaping them is a task addressed earlier in
 this section.
 
 Alternatively, the Text::ParseWords module (part of the standard perl

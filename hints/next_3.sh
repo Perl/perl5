@@ -74,7 +74,7 @@ cccdlflags=' '
 #
 #	archs=(m68k i386)
 #
-archs=`/bin/lipo -info /usr/lib/libm.a | sed 's/^[^:]*:[^:]*: //'`
+archs=`/bin/lipo -info /usr/lib/libm.a | sed -n 's/^[^:]*:[^:]*: //p'`
 
 #
 # leave the following part alone

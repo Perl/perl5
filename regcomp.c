@@ -907,7 +907,9 @@ tryagain:
 		    goto defchar;
 		else {
 		    regsawback = 1;
-		    ret = reganode(REF, num);
+		    ret = reganode((regflags & PMf_FOLD)
+				   ? ((regflags & PMf_LOCALE) ? REFFL : REFF)
+				   : REF, num);
 		    *flagp |= HASWIDTH;
 		    while (isDIGIT(*regparse))
 			regparse++;
@@ -1670,6 +1672,12 @@ char *o;
 	break;
     case REF:
 	sv_catpvf(sv, "REF%d", ARG1(o));
+	break;
+    case REFF:
+	sv_catpvf(sv, "REFF%d", ARG1(o));
+	break;
+    case REFFL:
+	sv_catpvf(sv, "REFFL%d", ARG1(o));
 	break;
     case OPEN:
 	sv_catpvf(sv, "OPEN%d", ARG1(o));

@@ -1440,6 +1440,7 @@ Trying with $funkyftp to get
 	    $want_compressed = $aslocal =~ s/\.gz//;
 	    my($source_switch) = "";
 	    $source_switch = "-source" if $funkyftp =~ /\blynx$/;
+	    $source_switch = "-c" if $funkyftp =~ /\bncftp$/;
 	    my($system) = "$funkyftp $source_switch '$url' > $aslocal";
 	    my($wstatus);
 	    if (($wstatus = system($system)) == 0) {

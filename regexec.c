@@ -827,7 +827,11 @@ char *prog;
 		sayNO;
 	    nextchar = UCHARAT(++locinput);
 	    break;
+	case REFFL:
+	    regtainted = TRUE;
+	    /* FALL THROUGH */
 	case REF:
+	case REFF:
 	    n = ARG1(scan);  /* which paren pair */
 	    s = regstartp[n];
 	    if (!s)
@@ -837,12 +841,19 @@ char *prog;
 	    if (s == regendp[n])
 		break;
 	    /* Inline the first character, for speed. */
-	    if (UCHARAT(s) != nextchar)
+	    if (UCHARAT(s) != nextchar &&
+		(OP(scan) == REF ||
+		 (UCHARAT(s) != ((OP(scan) == REFF
+				 ? fold : fold_locale)[nextchar]))))
 		sayNO;
 	    ln = regendp[n] - s;
 	    if (locinput + ln > regeol)
 		sayNO;
-	    if (ln > 1 && memNE(s, locinput, ln))
+	    if (ln > 1 && (OP(scan) == REF
+			   ? memNE(s, locinput, ln)
+			   : (OP(scan) == REFF
+			      ? ibcmp(s, locinput, ln)
+			      : ibcmp_locale(s, locinput, ln))))
 		sayNO;
 	    locinput += ln;
 	    nextchar = UCHARAT(locinput);

@@ -2485,6 +2485,10 @@ register char **env;
 	    sv = newSVpv(s--,0);
 	    (void)hv_store(hv, *env, s - *env, sv, 0);
 	    *s = '=';
+#if defined(__BORLANDC__) && defined(USE_WIN32_RTL_ENV)
+	    /* Sins of the RTL. See note in my_setenv(). */
+	    (void)putenv(savepv(*env));
+#endif
 	}
 #endif
 #ifdef DYNAMIC_ENV_FETCH

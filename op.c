@@ -1036,6 +1036,7 @@ I32 type;
 
     switch (o->op_type) {
     case OP_UNDEF:
+	modcount++;
 	return o;
     case OP_CONST:
 	if (!(o->op_private & (OPpCONST_ARYBASE)))
@@ -2066,6 +2067,7 @@ OP *repl;
     if (o->op_type == OP_TRANS)
 	return pmtrans(o, expr, repl);
 
+    hints |= HINT_BLOCK_SCOPE;
     pm = (PMOP*)o;
 
     if (expr->op_type == OP_CONST) {

@@ -145,7 +145,8 @@ sub scan_var {
   my($const) = $line =~ /^EXTCONST/;
 
   print "\tchecking for global variable\n" if $debug > 1;
-  $line =~ s/INIT\(.*\)//;
+  $line =~ s/\s*EXT/EXT/;
+  $line =~ s/INIT\s*\(.*\)//;
   $line =~ s/\[.*//;
   $line =~ s/=.*//;
   $line =~ s/\W*;?\s*$//;
@@ -156,7 +157,7 @@ sub scan_var {
    else        { $vars{$1}++;  }
   }
   if ($isvaxc) {
-    my($type) = $line =~ /^EXT\w*\s+(\w+)/;
+    my($type) = $line =~ /^\s*EXT\w*\s+(\w+)/;
     print "\tchecking for use of enum (type is \"$type\")\n" if $debug > 2;
     if ($type eq 'expectation') {
       $used_expectation_enum++;
@@ -194,18 +195,18 @@ LINE: while (<CPP>) {
   while (/^#.*vmsish\.h/i .. /^#.*perl\.h/i) {
     while (/__VMS_PROTOTYPES__/i .. /__VMS_SEPYTOTORP__/i) {
       print "vms_proto>> $_" if $debug > 2;
-      if (/^EXT/) { &scan_var($_);  }
+      if (/^\s*EXT/) { &scan_var($_);  }
       else        { &scan_func($_); }
       last LINE unless $_ = <CPP>;
     }
     print "vmsish.h>> $_" if $debug > 2;
-    if (/^EXT/) { &scan_var($_); }
+    if (/^\s*EXT/) { &scan_var($_); }
     last LINE unless $_ = <CPP>;
   }    
   while (/^#.*opcode\.h/i .. /^#.*perl\.h/i) {
     print "opcode.h>> $_" if $debug > 2;
     if (/^OP \*\s/) { &scan_func($_); }
-    if (/^EXT/) { &scan_var($_); }
+    if (/^\s*EXT/) { &scan_var($_); }
     if (/^\s+OP_/) { &scan_enum($_); }
     last LINE unless $_ = <CPP>;
   }
@@ -216,12 +217,12 @@ LINE: while (<CPP>) {
   }
   while (/^#.*proto\.h/i .. /^#.*perl\.h/i) {
     print "proto.h>> $_" if $debug > 2;
-    if (/^EXT/) { &scan_var($_);  }
+    if (/\s*^EXT/) { &scan_var($_);  }
     else        { &scan_func($_); }
     last LINE unless $_ = <CPP>;
   }
   print $_ if $debug > 3 && ($debug > 5 || length($_));
-  if (/^EXT/) { &scan_var($_); }
+  if (/^\s*EXT/) { &scan_var($_); }
 }
 close CPP;
 

@@ -2,7 +2,7 @@
 
 # $RCSfile: s.t,v $$Revision: 4.1 $$Date: 92/08/07 18:28:22 $
 
-print "1..60\n";
+print "1..61\n";
 
 $x = 'foo';
 $_ = "x";
@@ -229,3 +229,8 @@ print exp_vars('$(DIR)',0)             eq '$(UNDEFINEDNAME)/xxx'
 print exp_vars('foo $(DIR)/yyy bar',0) eq 'foo $(UNDEFINEDNAME)/xxx/yyy bar'
 	? "ok 60\n" : "not ok 60\n";
 
+# a match nested in the RHS of a substitution:
+
+$_ = "abcd";
+s/../$x = $&, m#.#/eg;
+print $x eq "cd" ? "ok 61\n" : "not ok 61\n";

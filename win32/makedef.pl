@@ -14,6 +14,8 @@
 # that does not present in the WIN32 port but there is no easy
 # way to find them so I just put a exeception list here
 
+my $CCTYPE = shift || "MSVC";
+
 $skip_sym=<<'!END!OF!SKIP!';
 Perl_SvIV
 Perl_SvNV
@@ -119,18 +121,13 @@ Perl_yyname
 Perl_yyrule
 allgvs
 curblock
-curcop
-curcopdb
 curcsv
-envgv
 lastretstr
 mystack_mark
 perl_init_ext
 perl_requirepv
-siggv
 stack
 statusvalue_vms
-tainting
 Perl_safexcalloc
 Perl_safexmalloc
 Perl_safexfree
@@ -158,8 +155,8 @@ while (<GLOBAL>) {
 	next if (/_amg[ \t]*$/);
 	$symbol = "Perl_$_";
     	next if ($skip_sym =~ m/$symbol/m);
-	print "\t$symbol";
-	};
+	emit_symbol($symbol);
+}
 close(GLOBAL);
 
 # also add symbols from interp.sym
@@ -175,8 +172,8 @@ while (<INTERP>) {
 	$symbol = $_;
     	next if ($skip_sym =~ m/$symbol/m);
 	#print "\t$symbol";
-	print "\tPerl_$symbol";
-	};
+	emit_symbol("Perl_" . $symbol);
+}
 
 #close(INTERP);
 
@@ -186,8 +183,22 @@ while (<DATA>) {
 	next if (/^#/);
 	$symbol = $_;
     	next if ($skip_sym =~ m/^$symbol/m);
-	print "\t$symbol";
-	};
+	emit_symbol($symbol);
+}
+
+sub emit_symbol {
+	my $symbol = shift;
+	chomp $symbol;
+	if ($CCTYPE eq "BORLAND") {
+		# workaround Borland quirk by exporting both the straight
+		# name and a name with leading underscore
+		#print "\t$symbol = _$symbol\n";
+		print "\t_$symbol\n";
+	}
+	else {
+		print "\t$symbol\n";
+	}
+}
 
 1;
 __DATA__
@@ -259,8 +270,7 @@ win32_close
 win32_eof
 win32_read
 win32_write
-win32_spawnvpe
-win32_spawnle
+win32_spawnvp
 win32_mkdir
 win32_rmdir
 win32_chdir

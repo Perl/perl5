@@ -20,7 +20,6 @@ current addresses (as of March 1997):
     Kenneth Albanowski  <kjahds@kjahds.com>
     Graham Barr         <gbarr@ti.com>
     Spider Boardman     <spider@orb.nashua.nh.us>
-    Tim Bunce           <Tim.Bunce@ig.co.uk>
     Tom Christiansen    <tchrist@perl.com>
     Hallvard B Furuseth <h.b.furuseth@usit.uio.no>
     M. J. T. Guy        <mjtg@cus.cam.ac.uk>
@@ -30,12 +29,14 @@ current addresses (as of March 1997):
     Andreas Koenig      <a.koenig@mind.de>
     Doug MacEachern     <dougm@opengroup.org>
     Paul Marquess       <pmarquess@bfsec.bt.co.uk>
+    Hans Mulder         <hansm@euronet.nl>
     Jeff Okamoto        <okamoto@hpcc123.corp.hp.com>
     Ulrich Pfeifer      <pfeifer@charly.informatik.uni-dortmund.de>
     Tom Phoenix         <rootbeer@teleport.com>
     Norbert Pueschel    <pueschel@imsdd.meb.uni-bonn.de>
     Dean Roehrich       <roehrich@cray.com>
     Roderick Schertler  <roderick@argon.org>
+    Larry W. Virden     <lvirden@cas.org>
     Ilya Zakharevich    <ilya@math.ohio-state.edu>
 
 And the Keepers of the Patch Pumpkin:
@@ -43,6 +44,414 @@ And the Keepers of the Patch Pumpkin:
     Charles Bailey      <bailey@hmivax.humgen.upenn.edu>
     Andy Dougherty      <doughera@lafcol.lafayette.edu>
     Chip Salzenberg     <chip@perl.com>
+    Tim Bunce           <Tim.Bunce@ig.co.uk>
+
+
+----------------
+Version 5.004_01        Maintenance release 1 for 5.004
+----------------
+
+"Practice random kindness and senseless acts of beauty"
+  -- Anne Herbert
+
+  HEADLINES FOR THIS MAINTENANCE RELEASE
+
+          (..., undef, ...) = split(...) bug fixed. 
+          Win32 support greatly improved, now very strong. 
+          Memory leak using Tied hashes and arrays fixed. 
+          Documentation updates. 
+          Many other bug fixes and enhancements. 
+
+  CORE LANGUAGE
+
+  Title:  "[PATCH] first true value returned by scalar C<...> is wrong"
+   From:  hansm@euronet.nl
+  Files:  pp_ctl.c t/op/flip.t
+
+  Title:  "Regex Bug in 5.003_26 thru 003_99a"
+   From:  Andreas Karrer <karrer@ife.ee.ethz.ch>, Chip Salzenberg
+          <chip@atlantic.net>
+ Msg-ID:  <199705152303.BAA08890@kuru.ee.ethz.ch>,
+          <199705161915.PAA18721@rio.atlantic.net>
+  Files:  regcomp.h regcomp.c regexec.c
+
+  Title:  "[PATCH] -w interacts badly with -Dt"
+   From:  Spider Boardman <spider@Orb.Nashua.NH.US>
+  Files:  sv.c
+
+  Title:  "No DESTROY on untie. Tie memory leak fixed."
+   From:  Gurusamy Sarathy <gsar@engin.umich.edu>, Jay Rogers <jay@rgrs.com>,
+          pmarquess@bfsec.bt.co.uk (Paul Marquess)
+ Msg-ID:  <199705170235.WAA00267@fluffy.rgrs.com>,
+          <199705172156.RAA20561@aatma.engin.umich.edu>,
+          <9705171506.AA04491@claudius.bfsec.bt.co.uk>
+  Files:  pp_hot.c
+
+  Title:  "magic_clear_all_env proto should match svt_clear"
+   From:  Nick Ing-Simmons <nik@tiuk.ti.com>
+  Files:  proto.h mg.c
+
+  Title:  "[PATCH] ENV leaks on win32 (was Re: Comments on ENV patch sought)",
+          "[PATCH] for NETaa13787: %ENV=(); doesn't clear the environment"
+   From:  hansm@euronet.nl, pvhp@forte.com (Peter Prymmer)
+ Msg-ID:  <199705292240.AAA01135@mail.euronet.nl>
+  Files:  embed.h perl.h proto.h global.sym mg.c t/op/magic.t
+
+  Title:  "Patch to show @INC when require dies"
+   From:  avera@hal.com (Jim Avera)
+ Msg-ID:  <9705230121.AA27872@membrane.hal.com>
+  Files:  pp_ctl.c
+
+  Title:  "[PATCH] bug with m// nested inside s///e"
+   From:  hansm@euro.net
+  Files:  op.c t/op/subst.t
+
+  DOCUMENTATION
+
+  Title:  "[PATCH] perlembed Win32 update"
+   From:  Doug MacEachern <dougm@opengroup.org>
+  Files:  pod/perlembed.pod
+
+  Title:  "perldiag.pod patch - "(W) substr outside string" is "(S)evere" if
+          used as lvalue."
+   From:  John Hughes <john@AtlanTech.COM>
+  Files:  pod/perldiag.pod
+
+  Title:  "local(%ENV) looses magic - document behaviour"
+   From:  Gurusamy Sarathy <gsar@engin.umich.edu>
+  Files:  pod/perlsub.pod
+
+  Title:  "[PATCH] perlguts caveats", "perlguts additions"
+   From:  Gurusamy Sarathy <gsar@engin.umich.edu>, ilya@math.ohio-state.edu
+          (Ilya Zakharevich)
+ Msg-ID:  <199705180052.UAA22066@aatma.engin.umich.edu>,
+          <199705180202.WAA22826@aatma.engin.umich.edu>,
+          <199705301341.JAA05204@aatma.engin.umich.edu>,
+          <1997May17.235722.2033087@hmivax.humgen.upenn.edu>
+  Files:  pod/perlguts.pod
+
+  Title:  "pod2man produces broken pages", "weird condition in perldelta breaks
+          nroff"
+   From:  Davin Milun <milun@cs.Buffalo.EDU>, Hans Mulder <hansm@icgned.nl>
+ Msg-ID:  <199705310447.AAA15721@obelix.cs.Buffalo.EDU>,
+          <1997May25.192350.2055977@hmivax.humgen.upenn.edu>
+  Files:  pod/pod2man.PL
+
+  Title:  "Perl 5 pod2man fix", "perlguts man page corrupted"
+   From:  chen@adi.com (Franklin Chen), gnat@frii.com, lvirden@cas.org, tom
+          (Tom Dinger on Feste), tom@edc.com (Tom Dinger on Feste)
+ Msg-ID:  <199705210013.UAA09599@menhaden.adi.com>,
+          <199706011305.JAA18271@cas.org>,
+          <199706012116.PAA14102@elara.frii.com>,
+          <9504250959.AA23419@feste.edc.com>,
+          <9504251700.AA23823@feste.edc.com>
+  Files:  pod/pod2man.PL
+
+  Title:  "[PATCH] reference form chomp to chop in perlfunc"
+   From:  hansm@euronet.nl
+  Files:  pod/perlfunc.pod
+
+  Title:  "pod2man gags if "=pod" is before "=head1 NAME""
+   From:  whyde@pezz.sps.mot.com (Warren Hyde)
+ Msg-ID:  <9705212115.AA21730@pezz.sps.mot.com>
+  Files:  pod/pod2man.PL
+
+  Title:  "perlfunc.pod unclear about return value range of rand"
+   From:  "Tuomas J. Lukka" <tjl@lukka.student.harvard.edu>
+ Msg-ID:  <m0wSMiC-000C9xC@lukka.student.harvard.edu>
+  Files:  pod/perlfunc.pod
+
+  Title:  "Error in perllol manpage", "Error in perllol manpage (fwd)"
+   From:  Chris Wick <cwick@lmc.com>
+  Files:  pod/perllol.pod
+
+  Title:  "5.004 removed deprecated %OVERLOAD support silently"
+   From:  jon@sems.com (Jonathan Biggar)
+ Msg-ID:  <199705232319.QAA28388@clamp.netlabs.com>
+  Files:  pod/perldelta.pod
+
+  Title:  "[PATCH] Documentation bugs"
+   From:  Stephen Potter <spp@psa.pencom.com>
+  Files:  pod/perldata.pod pod/perldiag.pod pod/perlfaq8.pod pod/perlfaq9.pod
+          pod/perlop.pod pod/perlsub.pod pod/perltoot.pod
+
+  Title:  "5.004 POD stuff", "make html - any takers?", "make html --> unusable
+          xref links", "pod/*.html -- all hyperlinks are invalid"
+   From:  "Darren/Torin/Who Ever..." <torin@daft.com>, "Paul D. Smith"
+          <psmith@BayNetworks.COM>, Gurusamy Sarathy
+          <gsar@engin.umich.edu>, Jarkko Hietaniemi <jhi@iki.fi>,
+          Michael R Cook <mcook@cognex.com>, avera@hal.com (Jim
+          Avera), lvirden@cas.org
+ Msg-ID:  <199705162008.XAA06906@alpha.hut.fi>,
+          <199705171830.OAA15652@erawan.cognex.com>,
+          <199706081749.NAA04552@aatma.engin.umich.edu>,
+          <1997May16.191039.2033079@hmivax.humgen.upenn.edu>,
+          <87hgg2y1h4.fsf@perv.daft.com>,
+          <9705161931.AA01075@membrane.hal.com>,
+          <9705191839.AA28702@lemming.engeast>
+  Files:  INSTALL pod/perldiag.pod installhtml
+
+  Title:  "checkpods- forget blank line status when starting a new file"
+   From:  Larry Parmelee <parmelee@CS.Cornell.EDU>
+  Files:  pod/checkpods.PL
+
+  Title:  "installhtml: Fix 'no title' & 'unexpected ...' warnings. Double speed."
+   From:  Tim Bunce
+  Files:  installhtml lib/Pod/Html.pm pod/splitpod
+
+  LIBRARY AND EXTENSIONS
+
+  Title:  "sdbm can fail if a config.h exists in system directories"
+   From:  Tim Bunce
+  Files:  ext/SDBM_File/sdbm/Makefile.PL
+
+  Title:  "LWP and SIG __DIE__ traps not playing well together!"
+   From:  Gisle Aas <aas@bergen.sn.no>
+  Files:  lib/AutoLoader.pm
+
+  Title:  "Memory Consumption of autosplit_lib_modules/sv_gets (workaround)"
+   From:  Matthias Neeracher <neeri@iis.ee.ethz.ch>
+  Files:  lib/AutoSplit.pm
+
+  Title:  "Comments of this Sys::Syslog patch", "Unusual Sys::Syslog behaviour
+          with FQDN ? [Even in 5.004 - a bug?]"
+   From:  Jarkko Hietaniemi <jhi@iki.fi>, Russ Allbery <rra@stanford.edu>,
+          alansz@mellers1.psych.berkeley.edu (Alan Schwartz)
+ Msg-ID:  <199705231621.TAA16790@alpha.hut.fi>, <5m4fjr$rhs@agate.berkeley.edu>
+  Files:  lib/Sys/Syslog.pm
+
+  Title:  "Patch to CPAN.pm (perl5.004) for ncftp"
+   From:  "Richard L. Maus, Jr." <rmaus@monmouth.com>
+ Msg-ID:  <337FBAC8.167EB0E7@monmouth.com>
+  Files:  lib/CPAN.pm
+
+  Title:  "[PATCH] Harness.pm bug w/perl5.004 & VMS"
+   From:  Dan Sugalski <sugalsd@lbcc.cc.or.us>
+ Msg-ID:  <3.0.1.32.19970530102300.008a2730@stargate.lbcc.cc.or.us>
+  Files:  lib/Test/Harness.pm
+
+  Title:  "more Fcntl constants [PATCH]"
+   From:  Jarkko Hietaniemi <jhi@iki.fi>
+  Files:  ext/Fcntl/Fcntl.pm ext/Fcntl/Fcntl.xs
+
+  Title:  "5.004 breaks ftp.pl due to missing (although obsolete) chat2.pl"
+   From:  Tim Bunce
+  Files:  lib/chat2.pl
+
+  BUILD PROCESS
+
+  Title:  "make test && ... doesn't work"
+   From:  Tim Bunce
+  Files:  Makefile.SH
+
+  Title:  "[PATCH] INSTALL-1.18"
+   From:  Andy Dougherty <doughera@fractal.phys.lafayette.edu>
+ Msg-ID:  <Pine.SOL.3.95q.970529142739.662D-100000@fractal.lafayette.edu>
+  Files:  INSTALL
+
+  Title:  "improved gnuwin32 Configure support"
+   From:  Chris Faylor <cgf@bbc.com>
+ Msg-ID:  <199706070318.XAA09214@hardy.bbc.com>
+  Files:  Configure
+
+  Title:  "installhtml problems finding splitpod"
+   From:  lvirden@cas.org
+  Files:  installhtml INSTALL
+
+  Title:  "perl 5.004 (and 01) man pages not generated and installed"
+   From:  lvirden@cas.org (Larry W. Virden)
+  Files:  installman
+
+  Title:  "oddity in Configure"
+   From:  Mike Stok <mike@stok.co.uk>
+  Files:  Configure
+
+  Title:  "perl5.004 on AIX: Patches", "perl5.004 on FreeBSD and AIX"
+   From:  Peter van Heusden <pvh@junior.uwc.ac.za>
+ Msg-ID:  <Pine.A32.3.93.970519142625.22442B-100000@junior.uwc.ac.za>,
+          <Pine.A32.3.93.970519163700.25188A-100000@junior.uwc.ac.za>
+  Files:  Makefile.SH perl_exp.SH ext/DynaLoader/dl_aix.xs perlio.sym
+
+  Title:  "Compiling perl5.004 on NEWS-OS 4.x"
+   From:  Makoto MATSUSHITA (=?ISO-2022-JP?B?GyRCJF4kRCQ3JD8kXiQzJEgbKEI=?=)
+          <matusita@ics.es.osaka-u.ac.jp>
+ Msg-ID:  <19970521132814F.matusita@ics.es.osaka-u.ac.jp>
+  Files:  Configure hints/newsos4.sh
+
+  PORTABILITY
+
+  Title:  "win32: additional default libraries"
+   From:  Gurusamy Sarathy <gsar@engin.umich.edu>
+ Msg-ID:  <199705291332.JAA21560@aatma.engin.umich.edu>
+  Files:  lib/ExtUtils/MM_Win32.pm
+
+  Title:  "[PATCH] win32 minor fixes"
+   From:  Gurusamy Sarathy <gsar@engin.umich.edu>
+  Files:  lib/ExtUtils/MM_Unix.pm lib/ExtUtils/MM_Win32.pm win32/config.bc
+
+  Title:  "[PATCH] clean up perlocal.pod output on VMS"
+   From:  pvhp@forte.com (Peter Prymmer)
+  Files:  lib/ExtUtils/MM_VMS.pm
+
+  Title:  "[PATCH] Re: Term::ReadKey on Win32: set console"
+   From:  Gurusamy Sarathy <gsar@engin.umich.edu>
+  Files:  lib/Term/ReadLine.pm
+
+  Title:  "[PATCH] Pod::Text nit for Win32"
+   From:  Gurusamy Sarathy <gsar@engin.umich.edu>
+  Files:  lib/Pod/Text.pm
+
+  Title:  "pathname bug in xsubpp on win32"
+   From:  jon@sems.com (Jonathan Biggar)
+ Msg-ID:  <199705230126.SAA23401@clamp.netlabs.com>
+  Files:  lib/ExtUtils/xsubpp
+
+  Title:  "MakeMaker stumbles on Win32 UNC paths"
+   From:  Warren Jones <wjones@TC.FLUKE.COM>
+  Files:  lib/ExtUtils/MM_Win32.pm
+
+  Title:  "build problem on SGI R10000 PowerChallenge (IRIX 6.2) lseek proto"
+   From:  Jarkko Hietaniemi <jhi@iki.fi>
+  Files:  doio.c
+
+  Title:  "Perl 5.004 + Linux 2.0.30 & semctl()"
+   From:  Andy Dougherty <doughera@fractal.phys.lafayette.edu>, Jordan
+          Mendelson <jordy@snappy.wserv.com>
+  Files:  doio.c
+
+  Title:  "lib/io_udp.t fails on VMS"
+   From:  Jonathan.Hudson@jrhudson.demon.co.uk
+ Msg-ID:  <XFMail.970522181042.Jonathan.Hudson@jrhudson.demon.co.uk>
+  Files:  pp_sys.c
+
+  Title:  "Compilation of mg.c from perl5.004m1t2 fails on OpenVMS/AXP"
+   From:  Henrik Tougaard <ht.000@foa.dk>
+  Files:  mg.c t/op/taint.t
+
+  Title:  "[PATCH] (NEXT|OPEN)STEP hints"
+   From:  Gerd Knops <gerti@BITart.com>
+  Files:  hints/next_3.sh hints/next_4.sh
+
+  Title:  "win32: user defined shell"
+   From:  Gurusamy Sarathy <gsar@engin.umich.edu>
+ Msg-ID:  <199705291339.JAA21682@aatma.engin.umich.edu>
+  Files:  pod/perlrun.pod win32/win32.c
+
+  Title:  "misc perl5.004 doc fixes, especially vms"
+   From:  lvirden@cas.org (Larry W. Virden)
+ Msg-ID:  <199705160419.AAA16317@cas.org>
+  Files:  pod/perlfaq4.pod vms/perlvms.pod lib/Pod/Html.pm pod/roffitall
+          vms/ext/DCLsym/DCLsym.pm vms/ext/Stdio/Stdio.pm
+
+  Title:  "[PATCH] gen_shrfls.pl too picky for Dec C 5.6 preprocessor output"
+   From:  Dan Sugalski <sugalsd@lbcc.cc.or.us>
+  Files:  vms/gen_shrfls.pl
+
+  Title:  "[PATCH] win32: Configure cf_email"
+   From:  Gurusamy Sarathy <gsar@engin.umich.edu>
+ Msg-ID:  <199705301335.JAA05079@aatma.engin.umich.edu>
+  Files:  win32/Makefile win32/config.bc win32/config.vc win32/config_sh.PL
+          win32/makefile.mk
+
+  Title:  "[PATCH] README.win32 nits"
+   From:  Gurusamy Sarathy <gsar@engin.umich.edu>
+  Files:  README.win32
+
+  Title:  "Document cause and remedy for op/taint.t failure"
+   From:  Gurusamy Sarathy <gsar@engin.umich.edu>
+  Files:  README.win32
+
+  Title:  "SVR4 hints for DDE SMES Supermax Enterprise Server"
+   From:  Jarkko Hietaniemi <jhi@iki.fi>
+  Files:  hints/svr4.sh
+
+  Title:  "porting.help"
+   From:  Tim Bunce
+  Files:  Porting/pumpkin.pod Porting/preprel
+
+  Title:  "Major 5.004 Win32 update (Borland win32 support, and other patches)",
+          "($a,undef,$b) = qw(a b c) and ties delaying DESTROY fixes"
+   From:  Gurusamy Sarathy <gsar@engin.umich.edu>
+  Files:  MANIFEST pod/perlguts.pod win32/include/sys/socket.h EXTERN.h
+          opcode.h perl.h regcomp.h ext/Fcntl/Fcntl.pm
+          ext/SDBM_File/Makefile.PL lib/ExtUtils/Install.pm
+          lib/ExtUtils/MM_Unix.pm lib/ExtUtils/MM_Win32.pm
+          lib/ExtUtils/MakeMaker.pm lib/ExtUtils/Mksymlists.pm
+          lib/File/DosGlob.pm t/op/mkdir.t t/op/stat.t win32/win32.h
+          win32/win32io.h win32/win32iop.h README.win32 doio.c gv.c
+          mg.c op.c perlio.c pp.c pp_ctl.c pp_hot.c pp_sys.c util.c
+          win32/Makefile win32/config.bc win32/config.vc
+          win32/config_H.bc win32/config_H.vc win32/makedef.pl
+          win32/makefile.mk win32/makeperldef.pl win32/perlglob.c
+          win32/perllib.c win32/win32.c win32/win32io.c
+          win32/win32sck.c
+
+  Title:  "[PATCH] Re: Maintenance release (remove PERL_DUMMY_SIZE)"
+   From:  Gurusamy Sarathy <gsar@engin.umich.edu>
+  Files:  opcode.h perl.h regcomp.h win32/win32.h gv.c
+
+  Title:  "[PATCH] ENV leaks on win32 (was Re: Comments on ENV patch sought)"
+   From:  Gurusamy Sarathy <gsar@engin.umich.edu>
+  Files:  win32/win32.h win32/win32io.h win32/win32iop.h global.sym mg.c perl.c
+          t/op/magic.t util.c win32/makedef.pl win32/win32.c
+          win32/win32io.c
+
+  Title:  "[PATCH] win32: ExtUtils::Liblist support"
+   From:  Gurusamy Sarathy <gsar@engin.umich.edu>
+  Files:  lib/ExtUtils/Liblist.pm win32/Makefile win32/config.bc
+          win32/makefile.mk
+
+  Title:  "[PATCH] Re: borland C++Perl embedding failures re __declspec()"
+   From:  Gurusamy Sarathy <gsar@engin.umich.edu>
+  Files:  win32/win32.c
+
+  Title:  "No need to use `pwd` in t/op/magic.t test for amigaos"
+   From:  Norbert Pueschel <pueschel@imsdd.meb.uni-bonn.de>
+  Files:  t/op/magic.t
+
+  TESTS
+
+  Title:  "Tests depend on locale"
+   From:  "Jan D." <jan.djarv@mbox200.swipnet.se>, Jarkko Hietaniemi
+          <jhi@iki.fi>
+ Msg-ID:  <199705191127.NAA08148@ostrich.gaia.swipnet.se>,
+          <199705191230.PAA21070@alpha.hut.fi>
+  Files:  t/lib/safe2.t t/op/mkdir.t
+
+  Title:  "op/groups test fails on Linux (groups in /bin)"
+   From:  "Jan D." <jan.djarv@mbox200.swipnet.se>
+ Msg-ID:  <199705191120.NAA08130@ostrich.gaia.swipnet.se>
+  Files:  t/op/groups.t
+
+  Title:  "More simple regexp tests and test docs"
+   From:  Hans Mulder <hansm@euronet.nl>
+  Files:  t/op/re_tests t/op/regexp.t
+
+  Title:  "[PATCH] Re: Using undef to ignore values returned from split"
+   From:  Hugo van der Sanden <hv@crypt.compulink.co.uk>
+  Files:  t/op/split.t
+
+  UTILITIES
+
+  Title:  "bad test of -A flag in h2xs"
+   From:  "Jeffrey S. Haemer" <jsh@woodcock.boulder.qms.com>
+  Files:  utils/h2xs.PL
+
+  Title:  "[PATCH] h2xs missing from utils/Makefile"
+   From:  hansm@euronet.nl
+  Files:  utils/Makefile
+
+  Title:  "PATCH: bug in perlbug w.r.t. environment variables", "bug in perlbug
+          w.r.t. environment variables"
+   From:  "Jan D." <jan.djarv@mbox200.swipnet.se>, Jarkko Hietaniemi
+          <jhi@iki.fi>
+ Msg-ID:  <199705191841.UAA00969@ostrich.gaia.swipnet.se>,
+          <199705191857.VAA09154@alpha.hut.fi>
+  Files:  utils/perlbug.PL
+
+  Title:  "[PATCH] final newline missing in MANIFEST generated by h2xs"
+   From:  hansm@euronet.nl
+  Files:  utils/h2xs.PL
 
 
 -------------

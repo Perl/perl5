@@ -22,7 +22,7 @@
 #ifdef USE_SOCKETS_AS_HANDLES
 /* thanks to Beverly Brown	(beverly@datacube.com) */
 
-#define OPEN_SOCKET(x)	_open_osfhandle(x,_O_RDWR|_O_BINARY)
+#define OPEN_SOCKET(x)	_open_osfhandle(x,O_RDWR|O_BINARY)
 #define TO_SOCKET(x)	_get_osfhandle(x)
 
 #else

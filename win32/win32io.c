@@ -65,7 +65,7 @@ dummy_globalmode(int mode)
     return o;
 }
 
-#ifdef _DLL
+#if defined(_DLL) || defined(__BORLANDC__)
 /* It may or may not be fixed (ok on NT), but DLL runtime
    does not export the functions used in the workround
 */
@@ -147,10 +147,10 @@ my_open_osfhandle(long osfhandle, int flags)
     /* copy relevant flags from second parameter */
     fileflags = FDEV;
 
-    if(flags & _O_APPEND)
+    if(flags & O_APPEND)
 	fileflags |= FAPPEND;
 
-    if(flags & _O_TEXT)
+    if(flags & O_TEXT)
 	fileflags |= FTEXT;
 
     /* attempt to allocate a C Runtime file handle */
@@ -190,6 +190,9 @@ my_get_osfhandle( int filehandle )
     return _get_osfhandle(filehandle);
 }
 
+#ifdef __BORLANDC__
+#define _chdir chdir
+#endif
 
 /* simulate flock by locking a range on the file */
 
@@ -289,7 +292,7 @@ WIN32_IOSUBSYSTEM	win32stdio = {
     dummy_globalmode,	/* (*pfunc_globalmode)(int mode) */
     my_open_osfhandle,
     my_get_osfhandle,
-    spawnvpe,
+    spawnvp,
     _mkdir,
     _rmdir,
     _chdir,
