@@ -1527,6 +1527,17 @@ Not implemented. (S<Mac OS>, Win32, Plan9)
 
 Not implemented. (Plan9, Win32)
 
+=item exit EXPR
+
+=item exit
+
+Emulates UNIX exit() (which considers C<exit 1> to indicate an error) by
+mapping the C<1> to SS$_ABORT (C<44>).  This behavior may be overridden
+with the pragma C<use vmsish 'exit'>.  As with the CRTL's exit()
+function, C<exit 0> is also mapped to an exit status of SS$_NORMAL
+(C<1>); this mapping cannot be overridden.  Any other argument to exit()
+is used directly as Perl's exit status. (VMS)
+
 =item getsockopt SOCKET,LEVEL,OPTNAME
 
 Not implemented. (S<Mac OS>, Plan9)
@@ -1736,6 +1747,11 @@ first token in its argument string.  Handles basic redirection
 
 Does not automatically flush output handles on some platforms.
 (SunOS, Solaris, HP-UX)
+
+The return value is POSIX-like (shifted up by 8 bits), which only allows
+room for a made-up value derived from the severity bits of the native
+32-bit condition code (unless overridden by C<use vmsish 'status'>). 
+For more details see L<perlvms/$?>. (VMS)
 
 =item times
 

@@ -572,7 +572,7 @@ change the exit status of your program.  For example:
 
 Under VMS, the pragma C<use vmsish 'status'> makes C<$?> reflect the
 actual VMS exit status, instead of the default emulation of POSIX
-status.
+status; see L<perlvms/$?> for details.
 
 Also see L<Error Indicators>.
 
