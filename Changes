@@ -75,7 +75,278 @@ indicator:
 
 
 ----------------
-Version 5.005_63        Development release working toward 5.6
+Version v5.5.640        Development release working toward 5.6
+----------------
+
+____________________________________________________________________________
+[  4722] By: gsar                                  on 1999/12/28  03:14:48
+        Log: avoid "used once" warning
+     Branch: perl
+	   ! lib/diagnostics.pm
+____________________________________________________________________________
+[  4721] By: gsar                                  on 1999/12/28  03:10:32
+        Log: ebcdic tweaks for tests from Peter Prymmer
+     Branch: perl
+	   ! t/pragma/warn/doop t/pragma/warn/pp t/pragma/warn/regcomp
+	   ! t/pragma/warn/sv t/pragma/warn/toke t/pragma/warn/utf8
+____________________________________________________________________________
+[  4720] By: gsar                                  on 1999/12/28  03:08:39
+        Log: pod nits from Simon Cozens <simon@brecon.co.uk> and others
+     Branch: perl
+	   ! README.os2 lib/ExtUtils/Embed.pm lib/ExtUtils/Install.pm
+	   ! lib/ExtUtils/Liblist.pm lib/ExtUtils/MakeMaker.pm
+	   ! lib/ExtUtils/Mkbootstrap.pm pod/perlop.pod
+____________________________________________________________________________
+[  4719] By: gsar                                  on 1999/12/28  03:01:04
+        Log: perlport v1.45 from Chris Nandor
+     Branch: perl
+	   ! pod/perlport.pod
+____________________________________________________________________________
+[  4718] By: gsar                                  on 1999/12/28  02:59:16
+        Log: newer version of constant.pm from Tom Phoenix; added Tom's notes to
+             perldelta; added STOP, DESTROY and AUTOLOAD to specials list
+     Branch: perl
+	   ! lib/constant.pm pod/perldelta.pod pod/perlvar.pod
+	   ! t/pragma/constant.t
+____________________________________________________________________________
+[  4717] By: gsar                                  on 1999/12/28  02:47:04
+        Log: cygwin update from Eric Fifer <EFifer@sanwaint.com>
+     Branch: perl
+	   - ext/DynaLoader/dl_cygwin.xs
+	   ! MAINTAIN MANIFEST ext/POSIX/POSIX.xs ext/SDBM_File/sdbm/pair.c
+	   ! hints/cygwin.sh installperl mg.c pod/perlfaq3.pod t/op/stat.t
+	   ! util.c
+____________________________________________________________________________
+[  4716] By: gsar                                  on 1999/12/28  02:40:51
+        Log: tweak to show up db-linked-with-libpthread-but-not-perl problem
+             (from Andy Dougherty)
+     Branch: perl
+	   ! Configure
+____________________________________________________________________________
+[  4715] By: gsar                                  on 1999/12/28  02:38:44
+        Log: better variant of change#4644 (from Andy Dougherty)
+     Branch: perl
+	   ! Configure
+____________________________________________________________________________
+[  4714] By: gsar                                  on 1999/12/28  02:36:40
+        Log: be defensive about setting {host,group,pass}cat (from Andy Dougherty)
+     Branch: perl
+	   ! Configure
+____________________________________________________________________________
+[  4713] By: gsar                                  on 1999/12/28  02:35:15
+        Log: $sitelib should be $prefix/lib/perl5/site_perl, as documented in
+             INSTALL (from Andy Dougherty)
+     Branch: perl
+	   ! Configure
+____________________________________________________________________________
+[  4712] By: gsar                                  on 1999/12/28  02:30:55
+        Log: avoid creating new files during make install
+     Branch: perl
+	   ! Makefile.SH
+____________________________________________________________________________
+[  4711] By: gsar                                  on 1999/12/28  02:24:44
+        Log: pod edits from Paul Marquess and Mark-Jason Dominus
+     Branch: perl
+	   ! AUTHORS Changes ext/DynaLoader/dl_aix.xs
+	   ! ext/DynaLoader/dl_dlopen.xs lib/Net/Ping.pm pod/perlcall.pod
+	   ! pod/perldelta.pod
+____________________________________________________________________________
+[  4710] By: gsar                                  on 1999/12/28  02:05:23
+        Log: miniperl build fixes for os2 (from Yitzchak Scott-Thoennes
+             <sthoenna@efn.org>); add explicit target for opmini.o
+     Branch: perl
+	   ! Makefile.SH cygwin/Makefile.SHs os2/Makefile.SHs
+____________________________________________________________________________
+[  4709] By: gsar                                  on 1999/12/28  01:20:39
+        Log: partly fix perldiag regressions identified by Tom Christiansen
+     Branch: perl
+	   ! doio.c lib/diagnostics.pm pod/perldiag.pod pp_hot.c pp_sys.c
+	   ! t/pragma/warn/4lint t/pragma/warn/doio t/pragma/warn/pp_hot
+	   ! t/pragma/warn/pp_sys
+____________________________________________________________________________
+[  4708] By: gsar                                  on 1999/12/27  23:33:24
+        Log: update perldiag for change#4707
+     Branch: perl
+	   ! perl.c pod/perldiag.pod
+____________________________________________________________________________
+[  4707] By: gsar                                  on 1999/12/27  23:23:39
+        Log: allow spaces in -I switch argument
+     Branch: perl
+	   ! perl.c
+____________________________________________________________________________
+[  4706] By: gsar                                  on 1999/12/26  23:44:53
+        Log: fix typos
+     Branch: utfperl
+	   ! sv.h toke.c
+____________________________________________________________________________
+[  4705] By: gsar                                  on 1999/12/24  04:02:35
+        Log: support for v5.5.640 style version numbers
+     Branch: utfperl
+	   ! configpm embedvar.h gv.c intrpvar.h objXSUB.h patchlevel.h
+	   ! perl.c perl.h pp_ctl.c sv.c sv.h t/comp/require.t toke.c
+____________________________________________________________________________
+[  4704] By: gsar                                  on 1999/12/23  08:54:27
+        Log: bring in basic threads stuff under USE_ITHREADS
+     Branch: perl
+	   ! makedef.pl op.c perl.c perl.h perlvars.h pp_sys.c thread.h
+	   ! util.c
+____________________________________________________________________________
+[  4703] By: gsar                                  on 1999/12/23  00:10:06
+        Log: integrate mainline contents into utfperl
+     Branch: utfperl
+	  !> (integrate 33 files)
+____________________________________________________________________________
+[  4702] By: gsar                                  on 1999/12/20  17:18:23
+        Log: virtual directory handling broken on paths with trailing slash
+     Branch: perl
+	   ! win32/Makefile win32/makefile.mk win32/vdir.h
+____________________________________________________________________________
+[  4701] By: gsar                                  on 1999/12/20  17:09:55
+        Log: revert optimization in change#4700 (it appears OPpRUNTIME flag
+             isn't set for all m/$foo/o)
+     Branch: perl
+	   ! pp_ctl.c
+____________________________________________________________________________
+[  4700] By: gsar                                  on 1999/12/20  16:28:51
+        Log: avoid pp_regcomp() changing optree at run time under USE_*THREADS (or
+             we have a race on our hands)
+     Branch: perl
+	   ! pp_ctl.c
+____________________________________________________________________________
+[  4699] By: gsar                                  on 1999/12/20  16:19:00
+        Log: pod tweaks
+     Branch: perl
+	   ! pod/perldelta.pod pod/perlfilter.pod pod/perlopentut.pod
+____________________________________________________________________________
+[  4698] By: gsar                                  on 1999/12/20  07:55:07
+        Log: uv_to_utf8() could lose 37th bit on HAS_QUAD platforms
+     Branch: perl
+	   ! utf8.c
+____________________________________________________________________________
+[  4697] By: gsar                                  on 1999/12/18  01:35:50
+        Log: fix from Larry for parsing C<{ 0x1 => 'foo'}> as an
+             anon hash rather than a block; test case for the same
+     Branch: perl
+	   ! t/comp/term.t toke.c
+____________________________________________________________________________
+[  4696] By: gsar                                  on 1999/12/17  19:55:03
+        Log: leak in change#4694 spotted by Larry
+     Branch: perl
+	   ! hv.c
+____________________________________________________________________________
+[  4695] By: gsar                                  on 1999/12/17  18:14:11
+        Log: test case for change#4694
+     Branch: perl
+	   ! t/op/delete.t
+____________________________________________________________________________
+[  4694] By: gsar                                  on 1999/12/17  18:09:08
+        Log: delete() should return the value as is, not a copy thereof
+     Branch: perl
+	   ! hv.c pod/perldelta.pod
+____________________________________________________________________________
+[  4693] By: gsar                                  on 1999/12/17  17:45:58
+        Log: fix for C<"\nx\taa\n" =~ /^\S\s+aa$/m> (from Ilya Zakharevich)
+     Branch: perl
+	   ! regexec.c t/op/re_tests
+____________________________________________________________________________
+[  4692] By: gsar                                  on 1999/12/17  17:41:10
+        Log: credits tweak
+     Branch: perl
+	   ! lib/File/Spec.pm
+____________________________________________________________________________
+[  4691] By: gsar                                  on 1999/12/17  07:12:53
+        Log: DynaLoader doesn't build properly when $(DLSRC) changes
+             (fix suggested by Hans Mulder)
+     Branch: perl
+	   ! ext/DynaLoader/Makefile.PL
+____________________________________________________________________________
+[  4690] By: gsar                                  on 1999/12/17  06:26:34
+        Log: add missing new ops
+     Branch: perl
+	   ! ext/B/ramblings/runtime.porting
+____________________________________________________________________________
+[  4689] By: gsar                                  on 1999/12/17  06:16:49
+        Log: test harness tweak from Hans Mulder
+     Branch: perl
+	   ! t/TEST
+____________________________________________________________________________
+[  4688] By: gsar                                  on 1999/12/17  06:14:23
+        Log: miniperl build fixes for NeXTstep and cygwin (from Hans Mulder
+             and Lucian CIONCA <Lucian.Cionca@algoritma.ro>)
+     Branch: perl
+	   ! Makefile.SH cygwin/Makefile.SHs
+____________________________________________________________________________
+[  4687] By: gsar                                  on 1999/12/17  06:06:46
+        Log: applied suggested patch with whitespace adjustments
+             From: Helmut Jarausch <jarausch@numa1.igpm.rwth-aachen.de>
+             Date: Thu, 16 Dec 1999 08:57:55 +0100
+             Message-id: <38589B82.C4668E10@numa1.igpm.rwth-aachen.de>
+             Subject: Re: [ID 19991215.001] patch 5.005_63: Find::Fill cannot handle /
+     Branch: perl
+	   ! lib/File/Find.pm
+____________________________________________________________________________
+[  4686] By: gsar                                  on 1999/12/17  05:48:53
+        Log: avoid warnings due to symbols unintroduced by XSLoader (spotted
+             by Hans Mulder)
+     Branch: perl
+	   ! ext/DynaLoader/dl_dld.xs ext/DynaLoader/dl_hpux.xs
+	   ! ext/DynaLoader/dl_mpeix.xs ext/DynaLoader/dl_next.xs
+	   ! ext/DynaLoader/dl_rhapsody.xs
+____________________________________________________________________________
+[  4685] By: gsar                                  on 1999/12/17  05:37:51
+        Log: fix bug when one of the operands is +0E+0 (from Ronald J Kimball
+             <rjk@linguist.dartmouth.edu>)
+     Branch: perl
+	   ! lib/Math/BigFloat.pm t/lib/bigfltpm.t
+____________________________________________________________________________
+[  4684] By: gsar                                  on 1999/12/16  09:32:48
+        Log: spell out how to get 4-digit year (from Micheal G Schwern
+             <schwern@pobox.com>)
+     Branch: perl
+	   ! pod/perlfunc.pod
+____________________________________________________________________________
+[  4683] By: gsar                                  on 1999/12/16  09:26:53
+        Log: type mismatch for %c format argument (spotted by Robin Barker
+             <rmb1@cise.npl.co.uk>)
+     Branch: perl
+	   ! regcomp.c
+____________________________________________________________________________
+[  4682] By: gsar                                  on 1999/12/16  08:33:28
+        Log: mingw32 doesn't have anonymous union (from Benjamin Stuhl
+             <sho_pi@hotmail.com>)
+     Branch: perl
+	   ! win32/win32.c
+____________________________________________________________________________
+[  4681] By: gsar                                  on 1999/12/16  08:31:15
+        Log: missing backslash (spotted by Johan Vromans)
+     Branch: perl
+	   ! perl.c
+____________________________________________________________________________
+[  4680] By: gsar                                  on 1999/12/16  08:26:00
+        Log: avoid coredump on diagnostics when STDERR is closed
+     Branch: perl
+	   ! perl.h
+____________________________________________________________________________
+[  4679] By: gsar                                  on 1999/12/12  18:09:41
+        Log: integrate mainline changes
+     Branch: utfperl
+	  +> (branch 39 files)
+	   - lib/unicode/Jamo-2.txt lib/unicode/Unicode.html
+	   - lib/unicode/UnicodeData-Latest.txt
+	  !> (integrate 447 files)
+____________________________________________________________________________
+[  4678] By: gsar                                  on 1999/12/10  01:39:13
+        Log: interpreter structure should be nulled under -DMULTIPLICITY
+     Branch: perl
+	   ! perl.c
+____________________________________________________________________________
+[  4677] By: gsar                                  on 1999/12/09  11:10:27
+        Log: update Changes
+     Branch: perl
+	   ! Changes
+
+----------------
+Version 5.005_63
 ----------------
 
 ____________________________________________________________________________
