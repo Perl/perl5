@@ -60,7 +60,7 @@ my @files = qw(foo bar baz quux);
 }
 
 {# Test 5: that close is overridden properly
-     cacheout local $_ = "Foo::Bar";
+     cacheout local $_ = "Foo'Bar";
      print $_ "Hello World\n";
      close($_);
      open($_, "+>$_");
