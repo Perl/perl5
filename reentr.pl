@@ -480,13 +480,13 @@ EOF
 EOF
 	    } elsif ($1 eq 'random') {
 	    push @struct, <<EOF;
-#   if RANDOM_R_PROTO == REENTRANT_PROTO_iS
+#   if RANDOM_R_PROTO == REENTRANT_PROTO_I_iS
 	int	_${func}_retval;
 #   endif
-#   if RANDOM_R_PROTO == REENTRANT_PROTO_lS
+#   if RANDOM_R_PROTO == REENTRANT_PROTO_I_lS
 	long	_${func}_retval;
 #   endif
-#   if RANDOM_R_PROTO == REENTRANT_PROTO_tS
+#   if RANDOM_R_PROTO == REENTRANT_PROTO_I_St
 	int32_t	_${func}_retval;
 #   endif
 EOF
@@ -679,7 +679,6 @@ EOF
 		$w = ", $w" if length $v;
 	    }
 	    my $call = "${func}_r($v$w)";
-	    $call = "((PL_reentrant_retint = $call))" if $r eq 'I' && $func ne 'random';
 	    push @wrap, <<EOF;
 #   if !defined($func) && ${FUNC}_R_PROTO == REENTRANT_PROTO_$p
 EOF
@@ -692,7 +691,7 @@ EOF
 		    my $rv = $v ? ", $v" : "";
 		    if ($r eq 'I') {
 			push @wrap, <<EOF;
-#       define $func($v) ($call$test ? $true : (((PL_reentrant_retint > 0 && PL_reentrant_retint == ERANGE) || (errno == ERANGE)) ? Perl_reentrant_retry("$func"$rv) : 0))
+#       define $func($v) ((PL_reentrant_retint = $call)$test ? $true : (((PL_reentrant_retint == ERANGE) || (errno == ERANGE)) ? Perl_reentrant_retry("$func"$rv) : 0))
 EOF
 		    } else {
 			push @wrap, <<EOF;
