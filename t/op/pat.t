@@ -2,7 +2,7 @@
 
 # $RCSfile: pat.t,v $$Revision: 4.1 $$Date: 92/08/07 18:28:12 $
 
-print "1..107\n";
+print "1..108\n";
 
 $x = "abc\ndef\n";
 
@@ -370,6 +370,11 @@ $test++;
 $x = $^R = 67;
 'foot' =~ /foo(?{ $^R + 12 })((?{ $x = 12; $^R + 17 })[xy])?/;
 print "not " unless $^R eq '79' and $x eq '12';
+print "ok $test\n";
+$test++;
+
+# This should be changed to qr/\b\v$/ ASAP
+print "not " unless study(/\b\v$/) eq '\bv$';
 print "ok $test\n";
 $test++;
 
