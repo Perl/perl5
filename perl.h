@@ -714,6 +714,10 @@ typedef struct perl_mstats perl_mstats_t;
 
 #include <errno.h>
 
+#if defined(WIN32) && (defined(PERL_OBJECT) || defined(PERL_IMPLICIT_SYS) || defined(PERL_CAPI))
+#  define WIN32SCK_IS_STDSCK		/* don't pull in custom wsock layer */
+#endif
+
 #if defined(HAS_SOCKET) && !defined(VMS) /* VMS handles sockets via vmsish.h */
 # include <sys/socket.h>
 # if defined(USE_SOCKS) && defined(I_SOCKS)
@@ -3440,6 +3444,10 @@ typedef struct am_table_short AMTS;
 
 #ifdef I_LIBUTIL
 #   include <libutil.h>		/* setproctitle() in some FreeBSDs */
+#endif
+
+#ifndef EXEC_ARGV_CAST
+#define EXEC_ARGV_CAST(x) x
 #endif
 
 /* and finally... */

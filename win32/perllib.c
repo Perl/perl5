@@ -1,8 +1,7 @@
 /*
  * "The Road goes ever on and on, down from the door where it began."
  */
-
-
+#define PERLIO_NOT_STDIO 0
 #include "EXTERN.h"
 #include "perl.h"
 

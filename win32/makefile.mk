@@ -50,21 +50,21 @@ INST_ARCH	*= \$(ARCHNAME)
 # uncomment to enable multiple interpreters.  This is need for fork()
 # emulation.
 #
-#USE_MULTI	*= define
+USE_MULTI	*= define
 
 #
 # Beginnings of interpreter cloning/threads; still very incomplete.
 # This should be enabled to get the fork() emulation.  This needs
 # USE_MULTI as well.
 #
-#USE_ITHREADS	*= define
+USE_ITHREADS	*= define
 
 #
 # uncomment to enable the implicit "host" layer for all system calls
 # made by perl.  This needs USE_MULTI above.  This is also needed to
 # get fork().
 #
-#USE_IMP_SYS	*= define
+USE_IMP_SYS	*= define
 
 #
 # WARNING! This option is deprecated and will eventually go away (enable
@@ -364,6 +364,7 @@ LIB32		= ar rc
 IMPLIB		= dlltool
 RSC		= rc
 
+i = .i
 o = .o
 a = .a
 
@@ -498,10 +499,13 @@ LKPOST		= )
 # Rules
 #
 
-.SUFFIXES : .c $(o) .dll $(a) .exe .rc .res
+.SUFFIXES : .c .i $(o) .dll $(a) .exe .rc .res
 
 .c$(o):
 	$(CC) -c $(null,$(<:d) $(NULL) -I$(<:d)) $(CFLAGS_O) $(OBJOUT_FLAG)$@ $<
+
+.c.i:
+	$(CC) -c $(null,$(<:d) $(NULL) -I$(<:d)) $(CFLAGS_O) -E $< >$@ 
 
 .y.c:
 	$(NOOP)

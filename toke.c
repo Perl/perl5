@@ -2718,7 +2718,7 @@ Perl_yylex(pTHX)
 		    else
 			newargv = PL_origargv;
 		    newargv[0] = ipath;
-		    PerlProc_execv(ipath, newargv);
+		    PerlProc_execv(ipath, EXEC_ARGV_CAST(newargv));
 		    Perl_croak(aTHX_ "Can't exec %s", ipath);
 		}
 #endif

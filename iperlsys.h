@@ -82,20 +82,18 @@ typedef char*		(*LPGets)(struct IPerlStdIO*, FILE*, char*, int);
 typedef int		(*LPPutc)(struct IPerlStdIO*, FILE*, int);
 typedef int		(*LPPuts)(struct IPerlStdIO*, FILE*, const char*);
 typedef int		(*LPFlush)(struct IPerlStdIO*, FILE*);
-typedef int		(*LPUngetc)(struct IPerlStdIO*, FILE*,int);
+typedef int		(*LPUngetc)(struct IPerlStdIO*, int,FILE*);
 typedef int		(*LPFileno)(struct IPerlStdIO*, FILE*);
 typedef FILE*		(*LPFdopen)(struct IPerlStdIO*, int, const char*);
 typedef FILE*		(*LPReopen)(struct IPerlStdIO*, const char*,
 			    const char*, FILE*);
-typedef SSize_t		(*LPRead)(struct IPerlStdIO*, FILE*, void*, Size_t);
-typedef SSize_t		(*LPWrite)(struct IPerlStdIO*, FILE*, const void*,
-			    Size_t);
+typedef SSize_t		(*LPRead)(struct IPerlStdIO*, void*, Size_t, Size_t, FILE *);
+typedef SSize_t		(*LPWrite)(struct IPerlStdIO*, const void*, Size_t, Size_t, FILE *);
 typedef void		(*LPSetBuf)(struct IPerlStdIO*, FILE*, char*);
 typedef int		(*LPSetVBuf)(struct IPerlStdIO*, FILE*, char*, int,
 			    Size_t);
 typedef void		(*LPSetCnt)(struct IPerlStdIO*, FILE*, int);
-typedef void		(*LPSetPtrCnt)(struct IPerlStdIO*, FILE*, char*,
-			    int);
+typedef void		(*LPSetPtr)(struct IPerlStdIO*, FILE*, char*);
 typedef void		(*LPSetlinebuf)(struct IPerlStdIO*, FILE*);
 typedef int		(*LPPrintf)(struct IPerlStdIO*, FILE*, const char*,
 			    ...);
@@ -140,7 +138,7 @@ struct IPerlStdIO
     LPSetBuf		pSetBuf;
     LPSetVBuf		pSetVBuf;
     LPSetCnt		pSetCnt;
-    LPSetPtrCnt		pSetPtrCnt;
+    LPSetPtr		pSetPtr;
     LPSetlinebuf	pSetlinebuf;
     LPPrintf		pPrintf;
     LPVprintf		pVprintf;
@@ -230,8 +228,8 @@ struct IPerlStdIOInfo
 	(*PL_StdIO->pFlush)(PL_StdIO, (f))
 #define PerlSIO_fgets(s, n, fp)						\
 	(*PL_StdIO->pGets)(PL_StdIO, (fp), s, n)
-#define PerlSIO_ungetc(f,c)						\
-	(*PL_StdIO->pUngetc)(PL_StdIO, (f),(c))
+#define PerlSIO_ungetc(c,f)						\
+	(*PL_StdIO->pUngetc)(PL_StdIO, (c),(f))
 #define PerlSIO_fileno(f)						\
 	(*PL_StdIO->pFileno)(PL_StdIO, (f))
 #define PerlSIO_fdopen(f, s)						\
@@ -239,17 +237,17 @@ struct IPerlStdIOInfo
 #define PerlSIO_freopen(p, m, f)					\
 	(*PL_StdIO->pReopen)(PL_StdIO, (p), (m), (f))
 #define PerlSIO_fread(buf,sz,count,f)					\
-	(SSize_t)(*PL_StdIO->pRead)(PL_StdIO, (sz), (buf), (count), (f))
-#define PerlSIO_write(buf,sz,count,f)					\
-	(*PL_StdIO->pWrite)(PL_StdIO, (sz), (buf), (count), (f))
+	(*PL_StdIO->pRead)(PL_StdIO, (buf), (sz), (count), (f))
+#define PerlSIO_fwrite(buf,sz,count,f)					\
+	(*PL_StdIO->pWrite)(PL_StdIO, (buf), (sz), (count), (f))
 #define PerlSIO_setbuf(f,b)						\
 	(*PL_StdIO->pSetBuf)(PL_StdIO, (f), (b))
 #define PerlSIO_setvbuf(f,b,t,s)					\
 	(*PL_StdIO->pSetVBuf)(PL_StdIO, (f),(b),(t),(s))
 #define PerlSIO_set_cnt(f,c)						\
 	(*PL_StdIO->pSetCnt)(PL_StdIO, (f), (c))
-#define PerlSIO_set_ptrcnt(f,p,c)					\
-	(*PL_StdIO->pSetPtrCnt)(PL_StdIO, (f), (p), (c))
+#define PerlSIO_set_ptr(f,p)						\
+	(*PL_StdIO->pSetPtr)(PL_StdIO, (f), (p))
 #define PerlSIO_setlinebuf(f)						\
 	(*PL_StdIO->pSetlinebuf)(PL_StdIO, (f))
 #define PerlSIO_printf		Perl_fprintf_nocontext
@@ -305,7 +303,7 @@ struct IPerlStdIOInfo
 #define PerlSIO_fputs(f,s)		fputs(s,f)
 #define PerlSIO_fflush(f)		Fflush(f)
 #define PerlSIO_fgets(s, n, fp)		fgets(s,n,fp)
-#define PerlSIO_ungetc(f,c)		ungetc(f,c)
+#define PerlSIO_ungetc(c,f)		ungetc(c,f)
 #define PerlSIO_fileno(f)		fileno(f)
 #define PerlSIO_fdopen(f, s)		fdopen(f,s)
 #define PerlSIO_freopen(p, m, f)	freopen(p,m,f)
@@ -333,8 +331,6 @@ struct IPerlStdIOInfo
 #define PerlSIO_fsetpos(f,p)		fsetpos(f,p)
 #define PerlSIO_rewind(f)		rewind(f)
 #define PerlSIO_tmpfile()		tmpfile()
-#undef 	init_os_extras
-#define init_os_extras()		
 #define PerlSIO_fdupopen(f)		(f)
 
 #endif	/* PERL_IMPLICIT_SYS */

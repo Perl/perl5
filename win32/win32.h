@@ -544,11 +544,17 @@ EXTERN_C _CRTIMP ioinfo* __pioinfo[];
 #endif
 #endif
 
+#define PERLIO_NOT_STDIO 0
+
+#include "perlio.h"
+
 /*
  * This provides a layer of functions and macros to ensure extensions will
  * get to use the same RTL functions as the core.
  */
 #include "win32iop.h"
+
+#define EXEC_ARGV_CAST(x) ((const char *const *) x)
 
 #endif /* _INC_WIN32_PERL5 */
 
