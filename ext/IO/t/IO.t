@@ -118,4 +118,5 @@ SKIP:
 END
 {
 	1 while unlink $fakemod;
+	rmdir $fakedir;
 }
