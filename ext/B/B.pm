@@ -843,12 +843,24 @@ DEBUG argument is non-zero, it sets the debugging flag to that. See
 the description of C<walkoptree> above for what the debugging flag
 does.
 
-=item walksymtable(SYMREF, METHOD, RECURSE)
+=item walksymtable(SYMREF, METHOD, RECURSE, PREFIX)
 
 Walk the symbol table starting at SYMREF and call METHOD on each
-symbol visited. When the walk reached package symbols "Foo::" it
-invokes RECURSE and only recurses into the package if that sub
-returns true.
+symbol (a B::GV object) visited.  When the walk reaches package
+symbols (such as "Foo::") it invokes RECURSE, passing in the symbol
+name, and only recurses into the package if that sub returns true.
+
+PREFIX is the name of the SYMREF you're walking.
+
+For example...
+
+  # Walk CGI's symbol table calling print_subs on each symbol.
+  # Only recurse into CGI::Util::
+  walksymtable(\%CGI::, 'print_subs', sub { $_[0] eq 'CGI::Util::' },
+               'CGI::');
+
+print_subs() is a B::GV method you have declared.
+
 
 =item svref_2object(SV)
 
