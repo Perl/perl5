@@ -28,13 +28,16 @@ current addresses (as of March 1997):
     Andreas Koenig      <a.koenig@mind.de>
     Doug MacEachern     <dougm@opengroup.org>
     Paul Marquess       <pmarquess@bfsec.bt.co.uk>
+    Stephen McCamant	<alias@mcs.com>
     Hans Mulder         <hansm@euronet.nl>
     Jeff Okamoto        <okamoto@hpcc123.corp.hp.com>
     Ulrich Pfeifer      <pfeifer@charly.informatik.uni-dortmund.de>
     Tom Phoenix         <rootbeer@teleport.com>
     Norbert Pueschel    <pueschel@imsdd.meb.uni-bonn.de>
     Dean Roehrich       <roehrich@cray.com>
+    Hugo van der Sanden	<hv@crypt0.demon.co.uk>
     Roderick Schertler  <roderick@argon.org>
+    Dan Sugalski	<sugalskd@osshe.edu>
     Larry W. Virden     <lvirden@cas.org>
     Ilya Zakharevich    <ilya@math.ohio-state.edu>
 
@@ -68,6 +71,15 @@ indicator:
 Version 5.004_75        5.005 Public Beta, Issue 1
 ----------------
 
+____________________________________________________________________________
+[  1518] By: gsar                                  on 1998/07/15  10:01:41
+        Log: add stub docs for ext/B, other minor tweaks
+     Branch: perl
+	   ! Changes Porting/config_H config_h.SH ext/B/B.pm
+	   ! ext/B/B/Asmdata.pm ext/B/B/Assembler.pm ext/B/B/Bblock.pm
+	   ! ext/B/B/Bytecode.pm ext/B/B/C.pm ext/B/B/CC.pm
+	   ! ext/B/B/Debug.pm ext/B/B/Disassembler.pm ext/B/B/Showlex.pm
+           ! ext/B/B/Stackobj.pm ext/B/B/Terse.pm ext/B/O.pm sv.c
 ____________________________________________________________________________
 [  1517] By: gsar                                  on 1998/07/15  08:27:15
         Log: up patchlevel to 75 (Beta, Issue 1), add podpatch
