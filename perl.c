@@ -494,6 +494,7 @@ perl_destruct(pTHXx)
 	 * Non-referenced objects are on their own.
 	 */
 	sv_clean_objs();
+	PL_sv_objcount = 0;
     }
 
     /* unhook hooks which will soon be, or use, destroyed data */
@@ -619,6 +620,8 @@ perl_destruct(pTHXx)
 	PL_e_script = Nullsv;
     }
 
+    PL_perldb = 0;
+
     /* magical thingies */
 
     SvREFCNT_dec(PL_ofs_sv);	/* $, */
@@ -678,6 +681,14 @@ perl_destruct(pTHXx)
     PL_stderrgv = Nullgv;
     PL_last_in_gv = Nullgv;
     PL_replgv = Nullgv;
+    PL_DBgv = Nullgv;
+    PL_DBline = Nullgv;
+    PL_DBsub = Nullgv;
+    PL_DBsingle = Nullsv;
+    PL_DBtrace = Nullsv;
+    PL_DBsignal = Nullsv;
+    PL_DBcv = Nullcv;
+    PL_dbargs = Nullav;
     PL_debstash = Nullhv;
 
     /* reset so print() ends up where we expect */
@@ -712,6 +723,7 @@ perl_destruct(pTHXx)
     Safefree(PL_numeric_name);
     PL_numeric_name = Nullch;
     SvREFCNT_dec(PL_numeric_radix_sv);
+    PL_numeric_radix_sv = Nullsv;
 #endif
 
     /* clear utf8 character classes */
@@ -850,6 +862,7 @@ perl_destruct(pTHXx)
 #ifdef USE_ITHREADS
     /* free the pointer table used for cloning */
     ptr_table_free(PL_ptr_table);
+    PL_ptr_table = (PTR_TBL_t*)NULL;
 #endif
 
     /* free special SVs */
@@ -893,6 +906,7 @@ perl_destruct(pTHXx)
 	}
     }
 #endif
+    PL_sv_count = 0;
 
 
 #if defined(PERLIO_LAYERS)
@@ -911,18 +925,31 @@ perl_destruct(pTHXx)
     SvREADONLY_off(&PL_sv_placeholder);
 
     Safefree(PL_origfilename);
+    PL_origfilename = Nullch;
     Safefree(PL_reg_start_tmp);
+    PL_reg_start_tmp = (char**)NULL;
+    PL_reg_start_tmpl = 0;
     if (PL_reg_curpm)
 	Safefree(PL_reg_curpm);
     Safefree(PL_reg_poscache);
     free_tied_hv_pool();
     Safefree(PL_op_mask);
     Safefree(PL_psig_ptr);
+    PL_psig_ptr = (SV**)NULL;
     Safefree(PL_psig_name);
+    PL_psig_name = (SV**)NULL;
     Safefree(PL_bitcount);
+    PL_bitcount = Nullch;
     Safefree(PL_psig_pend);
+    PL_psig_pend = (int*)NULL;
+    PL_formfeed = Nullsv;
+    Safefree(PL_ofmt);
+    PL_ofmt = Nullch;
     nuke_stacks();
+    PL_tainting = FALSE;
+    PL_taint_warn = FALSE;
     PL_hints = 0;		/* Reset hints. Should hints be per-interpreter ? */
+    PL_debug = 0;
 
     DEBUG_P(debprofdump());
 #ifdef USE_5005THREADS

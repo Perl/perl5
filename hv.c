@@ -104,6 +104,7 @@ Perl_free_tied_hv_pool(pTHX)
 	he = HeNEXT(he);
 	del_HE(ohe);
     }
+    PL_hv_fetch_ent_mh = Nullhe;
 }
 
 #if defined(USE_ITHREADS)

@@ -492,78 +492,91 @@ Perl_sv_free_arenas(pTHX)
 	Safefree(arena);
     }
     PL_xiv_arenaroot = 0;
+    PL_xiv_root = 0;
 
     for (arena = PL_xnv_arenaroot; arena; arena = arenanext) {
 	arenanext = (XPV*)arena->xpv_pv;
 	Safefree(arena);
     }
     PL_xnv_arenaroot = 0;
+    PL_xnv_root = 0;
 
     for (arena = PL_xrv_arenaroot; arena; arena = arenanext) {
 	arenanext = (XPV*)arena->xpv_pv;
 	Safefree(arena);
     }
     PL_xrv_arenaroot = 0;
+    PL_xrv_root = 0;
 
     for (arena = PL_xpv_arenaroot; arena; arena = arenanext) {
 	arenanext = (XPV*)arena->xpv_pv;
 	Safefree(arena);
     }
     PL_xpv_arenaroot = 0;
+    PL_xpv_root = 0;
 
     for (arena = (XPV*)PL_xpviv_arenaroot; arena; arena = arenanext) {
 	arenanext = (XPV*)arena->xpv_pv;
 	Safefree(arena);
     }
     PL_xpviv_arenaroot = 0;
+    PL_xpviv_root = 0;
 
     for (arena = (XPV*)PL_xpvnv_arenaroot; arena; arena = arenanext) {
 	arenanext = (XPV*)arena->xpv_pv;
 	Safefree(arena);
     }
     PL_xpvnv_arenaroot = 0;
+    PL_xpvnv_root = 0;
 
     for (arena = (XPV*)PL_xpvcv_arenaroot; arena; arena = arenanext) {
 	arenanext = (XPV*)arena->xpv_pv;
 	Safefree(arena);
     }
     PL_xpvcv_arenaroot = 0;
+    PL_xpvcv_root = 0;
 
     for (arena = (XPV*)PL_xpvav_arenaroot; arena; arena = arenanext) {
 	arenanext = (XPV*)arena->xpv_pv;
 	Safefree(arena);
     }
     PL_xpvav_arenaroot = 0;
+    PL_xpvav_root = 0;
 
     for (arena = (XPV*)PL_xpvhv_arenaroot; arena; arena = arenanext) {
 	arenanext = (XPV*)arena->xpv_pv;
 	Safefree(arena);
     }
     PL_xpvhv_arenaroot = 0;
+    PL_xpvhv_root = 0;
 
     for (arena = (XPV*)PL_xpvmg_arenaroot; arena; arena = arenanext) {
 	arenanext = (XPV*)arena->xpv_pv;
 	Safefree(arena);
     }
     PL_xpvmg_arenaroot = 0;
+    PL_xpvmg_root = 0;
 
     for (arena = (XPV*)PL_xpvlv_arenaroot; arena; arena = arenanext) {
 	arenanext = (XPV*)arena->xpv_pv;
 	Safefree(arena);
     }
     PL_xpvlv_arenaroot = 0;
+    PL_xpvlv_root = 0;
 
     for (arena = (XPV*)PL_xpvbm_arenaroot; arena; arena = arenanext) {
 	arenanext = (XPV*)arena->xpv_pv;
 	Safefree(arena);
     }
     PL_xpvbm_arenaroot = 0;
+    PL_xpvbm_root = 0;
 
     for (arena = (XPV*)PL_he_arenaroot; arena; arena = arenanext) {
 	arenanext = (XPV*)arena->xpv_pv;
 	Safefree(arena);
     }
     PL_he_arenaroot = 0;
+    PL_he_root = 0;
 
     if (PL_nice_chunk)
 	Safefree(PL_nice_chunk);

@@ -169,7 +169,7 @@ PERLVAR(Ilastfd,	int)		/* what to preserve mode on */
 PERLVAR(Ioldname,	char *)		/* what to preserve mode on */
 PERLVAR(IArgv,		char **)	/* stuff to free from do_aexec, vfork safe */
 PERLVAR(ICmd,		char *)		/* stuff to free from do_aexec, vfork safe */
-PERLVAR(Igensym,	I32)		/* next symbol for getsym() to define */
+PERLVARI(Igensym,	I32,	0)	/* next symbol for getsym() to define */
 PERLVAR(Ipreambled,	bool)
 PERLVAR(Ipreambleav,	AV *)
 PERLVARI(Ilaststatval,	int,	-1)
@@ -239,10 +239,10 @@ PERLVAR(Ieuid,		Uid_t)		/* current effective user id */
 PERLVAR(Igid,		Gid_t)		/* current real group id */
 PERLVAR(Iegid,		Gid_t)		/* current effective group id */
 PERLVAR(Inomemok,	bool)		/* let malloc context handle nomem */
-PERLVAR(Ian,		U32)		/* malloc sequence number */
-PERLVAR(Icop_seqmax,	U32)		/* statement sequence number */
-PERLVAR(Iop_seqmax,	U16)		/* op sequence number */
-PERLVAR(Ievalseq,	U32)		/* eval sequence number */
+PERLVARI(Ian,		U32,	0)	/* malloc sequence number */
+PERLVARI(Icop_seqmax,	U32,	0)	/* statement sequence number */
+PERLVARI(Iop_seqmax,	U16,	0)	/* op sequence number */
+PERLVARI(Ievalseq,	U32,	0)	/* eval sequence number */
 PERLVAR(Iorigenviron,	char **)
 PERLVAR(Iorigalen,	U32)
 PERLVAR(Ipidstatus,	HV *)		/* pid-to-status mappings for waitpid */
@@ -296,7 +296,7 @@ PERLVAR(Isv_yes,	SV)
 
 #ifdef CSH
 PERLVARI(Icshname,	char *,	CSH)
-PERLVAR(Icshlen,	I32)
+PERLVARI(Icshlen,	I32,	0)
 #endif
 
 PERLVAR(Ilex_state,	U32)		/* next token is determined */
@@ -348,17 +348,17 @@ PERLVAR(Ilast_lop_op,	OPCODE)		/* last list operator */
 PERLVAR(Iin_my,		I32)		/* we're compiling a "my" (or "our") declaration */
 PERLVAR(Iin_my_stash,	HV *)		/* declared class of this "my" declaration */
 #ifdef FCRYPT
-PERLVAR(Icryptseen,	bool)		/* has fast crypt() been initialized? */
+PERLVARI(Icryptseen,	bool,	FALSE)	/* has fast crypt() been initialized? */
 #endif
 
 PERLVAR(Ihints,		U32)		/* pragma-tic compile-time flags */
 
 PERLVAR(Idebug,		VOL U32)	/* flags given to -D switch */
 
-PERLVAR(Iamagic_generation,	long)
+PERLVARI(Iamagic_generation,	long,	0)
 
 #ifdef USE_LOCALE_COLLATE
-PERLVAR(Icollation_ix,	U32)		/* Collation generation index */
+PERLVARI(Icollation_ix,	U32,	0)	/* Collation generation index */
 PERLVAR(Icollation_name,char *)		/* Name of current collation */
 PERLVARI(Icollation_standard, bool,	TRUE)
 					/* Assume simple collation */
@@ -411,7 +411,7 @@ PERLVAR(Iyychar,	int)
 PERLVAR(Iyyval,		YYSTYPE)
 PERLVAR(Iyylval,	YYSTYPE)
 
-PERLVAR(Iglob_index,	int)
+PERLVARI(Iglob_index,	int,	0)
 PERLVAR(Isrand_called,	bool)
 PERLVARA(Iuudmap,256,	char)
 PERLVAR(Ibitcount,	char *)
@@ -497,7 +497,7 @@ PERLVAR(Ireentrant_buffer, REENTR*)	/* here we store the _r buffers */
 
 #endif
 
-PERLVAR(Isavebegin,     bool)	/* save BEGINs for compiler	*/
+PERLVARI(Isavebegin,     bool,	FALSE)	/* save BEGINs for compiler	*/
 
 PERLVAR(Icustom_op_names, HV*)  /* Names of user defined ops */
 PERLVAR(Icustom_op_descs, HV*)  /* Descriptions of user defined ops */

@@ -221,6 +221,15 @@ the previous current pad.
 =for hackers
 Found in file pad.h
 
+=item PAD_SET_CUR_NOSAVE	
+
+like PAD_SET_CUR, but without the save
+
+	void	PAD_SET_CUR_NOSAVE	(PADLIST padlist, I32 n)
+
+=for hackers
+Found in file pad.h
+
 =item PAD_SV	
 
 Get the value at offset C<po> in the current pad
