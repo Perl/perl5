@@ -1077,7 +1077,7 @@ $exp_doc$meth_doc$revhist
 #
 #=head1 COPYRIGHT AND LICENSE
 #
-#Copyright YEAR(S) by YOUR NAME(s)
+#Copyright ${\(1900 + (localtime) [5])} by $author
 #
 #This library is free software; you can redistribute it and/or modify
 #it under the same terms as Perl itself. 
