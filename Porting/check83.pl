@@ -3,16 +3,17 @@
 # Check whether there are naming conflicts when names are truncated to
 # the DOSish case-ignoring 8.3 format, plus other portability no-nos.
 
-# The "8.3 rule" is "if reducing the directory entry names within one
-# directory to lowercase and 8.3-truncated causes conflicts, that's
-# a bad thing".  So the rule is NOT "no filename shall be longer
-# than eight and a suffix if present not longer than three".
+# The "8.3 rule" is loose: "if reducing the directory entry names
+# within one directory to lowercase and 8.3-truncated causes
+# conflicts, that's a bad thing".  So the rule is NOT the strict
+# "no filename shall be longer than eight and a suffix if present
+# not longer than three".
 
-# TODO: this doesn't actually check for *directory entries*, what
-# this does is to check for *MANIFES entries*, which are only files,
-# not directories.  In other words, a conflict between a directory
-# "abcdefghx" and a file "abcdefghy" wouldn't be noticed-- or even
-# for a directory "abcdefgh" and a file "abcdefghy".
+# TODO: this doesn't actually check for *directory entries*, what this
+# does is to check for *MANIFEST entries*, which are only files, not
+# directories.  In other words, a 8.3 conflict between a directory
+# "abcdefghx" and a file "abcdefghy" wouldn't be noticed-- or even for
+# a directory "abcdefgh" and a file "abcdefghy".
 
 sub eight_dot_three {
     my ($dir, $base, $ext) = ($_[0] =~ m!^(?:(.+)/)?([^/.]+)(?:\.([^/.]+))?$!);
@@ -26,7 +27,7 @@ sub eight_dot_three {
 	warn "$file: filename contains non-portable characters\n";
     }
     if (length $file > 30) {
-	warn "$file: filename longer than 30 characters\n";
+	warn "$file: filename longer than 30 characters\n"; # make up a limit
     }
     if (defined $dir) {
 	return ($dir, defined $ext ? "$dir/$base.$ext" : "$dir/$base");
