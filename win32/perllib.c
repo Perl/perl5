@@ -334,6 +334,9 @@ RunPerl(int argc, char **argv, char **env)
     return (exitstatus);
 }
 
+EXTERN_C void
+set_w32_module_name(void);
+
 BOOL APIENTRY
 DllMain(HANDLE hModule,		/* DLL module handle */
 	DWORD fdwReason,	/* reason called */
@@ -353,6 +356,7 @@ DllMain(HANDLE hModule,		/* DLL module handle */
 #endif
 	DisableThreadLibraryCalls((HMODULE)hModule);
 	w32_perldll_handle = hModule;
+	set_w32_module_name();
 	break;
 
 	/* The DLL is detaching from a process due to
