@@ -38,7 +38,7 @@ sub handles {
     (IO::Pipe::End->new(), IO::Pipe::End->new());
 }
 
-my $do_spawn = $^O eq 'os2';
+my $do_spawn = $^O eq 'os2' || $^O eq 'MSWin32';
 
 sub _doit {
     my $me = shift;
@@ -56,8 +56,11 @@ sub _doit {
         if ($do_spawn) {
           require Fcntl;
           $save = IO::Handle->new_from_fd($io, $mode);
+	  my $handle = shift;
           # Close in child:
-          fcntl(shift, Fcntl::F_SETFD(), 1) or croak "fcntl: $!";
+	  unless ($^O eq 'MSWin32') {
+            fcntl($handle, Fcntl::F_SETFD(), 1) or croak "fcntl: $!";
+	  }
           $fh = $rw ? ${*$me}[0] : ${*$me}[1];
         } else {
           shift;
