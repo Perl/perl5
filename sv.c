@@ -73,21 +73,24 @@ typedef void (*SVFUNC) _((SV*));
 
 #ifdef PURIFY
 
-#define new_SV(p)			\
-    do {				\
-	LOCK_SV_MUTEX;			\
-	(p) = (SV*)safemalloc(sizeof(SV)); \
-	reg_add(p);			\
-	UNLOCK_SV_MUTEX;		\
-    } while (0)
+#define new_SV(p) \
+    STMT_START {					\
+	LOCK_SV_MUTEX;					\
+	(p) = (SV*)safemalloc(sizeof(SV));		\
+	reg_add(p);					\
+	UNLOCK_SV_MUTEX;				\
+	SvANY(p) = 0;					\
+	SvREFCNT(p) = 1;				\
+	SvFLAGS(p) = 0;					\
+    } STMT_END
 
-#define del_SV(p)			\
-    do {				\
-	LOCK_SV_MUTEX;			\
-	reg_remove(p);			\
-        Safefree((char*)(p));		\
-	UNLOCK_SV_MUTEX;		\
-    } while (0)
+#define del_SV(p) \
+    STMT_START {					\
+	LOCK_SV_MUTEX;					\
+	reg_remove(p);					\
+        Safefree((char*)(p));				\
+	UNLOCK_SV_MUTEX;				\
+    } STMT_END
 
 static SV **registry;
 static I32 registry_size;
@@ -95,18 +98,18 @@ static I32 registry_size;
 #define REGHASH(sv,size)  ((((U32)(sv)) >> 2) % (size))
 
 #define REG_REPLACE(sv,a,b) \
-    do {				\
-	void* p = sv->sv_any;		\
-	I32 h = REGHASH(sv, registry_size);	\
-	I32 i = h;			\
-	while (registry[i] != (a)) {	\
-	    if (++i >= registry_size)	\
-		i = 0;			\
-	    if (i == h)			\
-		die("SV registry bug");	\
-	}				\
-	registry[i] = (b);		\
-    } while (0)
+    STMT_START {					\
+	void* p = sv->sv_any;				\
+	I32 h = REGHASH(sv, registry_size);		\
+	I32 i = h;					\
+	while (registry[i] != (a)) {			\
+	    if (++i >= registry_size)			\
+		i = 0;					\
+	    if (i == h)					\
+		die("SV registry bug");			\
+	}						\
+	registry[i] = (b);				\
+    } STMT_END
 
 #define REG_ADD(sv)	REG_REPLACE(sv,Nullsv,sv)
 #define REG_REMOVE(sv)	REG_REPLACE(sv,sv,Nullsv)
@@ -176,41 +179,46 @@ U32 flags;
  * "A time to plant, and a time to uproot what was planted..."
  */
 
-#define plant_SV(p)			\
-    do {				\
-	SvANY(p) = (void *)PL_sv_root;	\
-	SvFLAGS(p) = SVTYPEMASK;	\
-	PL_sv_root = (p);			\
-	--PL_sv_count;			\
-    } while (0)
+#define plant_SV(p) \
+    STMT_START {					\
+	SvANY(p) = (void *)PL_sv_root;			\
+	SvFLAGS(p) = SVTYPEMASK;			\
+	PL_sv_root = (p);				\
+	--PL_sv_count;					\
+    } STMT_END
 
 /* sv_mutex must be held while calling uproot_SV() */
-#define uproot_SV(p)			\
-    do {				\
-	(p) = PL_sv_root;			\
-	PL_sv_root = (SV*)SvANY(p);	\
-	++PL_sv_count;			\
-    } while (0)
+#define uproot_SV(p) \
+    STMT_START {					\
+	(p) = PL_sv_root;				\
+	PL_sv_root = (SV*)SvANY(p);			\
+	++PL_sv_count;					\
+    } STMT_END
 
-#define new_SV(p)	do {	\
-	LOCK_SV_MUTEX;		\
-	if (PL_sv_root)		\
-	    uproot_SV(p);	\
-	else			\
-	    (p) = more_sv();	\
-	UNLOCK_SV_MUTEX;	\
-    } while (0)
+#define new_SV(p) \
+    STMT_START {					\
+	LOCK_SV_MUTEX;					\
+	if (PL_sv_root)					\
+	    uproot_SV(p);				\
+	else						\
+	    (p) = more_sv();				\
+	UNLOCK_SV_MUTEX;				\
+	SvANY(p) = 0;					\
+	SvREFCNT(p) = 1;				\
+	SvFLAGS(p) = 0;					\
+    } STMT_END
 
 #ifdef DEBUGGING
 
-#define del_SV(p)	do {	\
-	LOCK_SV_MUTEX;		\
-	if (PL_debug & 32768)	\
-	    del_sv(p);		\
-	else			\
-	    plant_SV(p);	\
-	UNLOCK_SV_MUTEX;	\
-    } while (0)
+#define del_SV(p) \
+    STMT_START {					\
+	LOCK_SV_MUTEX;					\
+	if (PL_debug & 32768)				\
+	    del_sv(p);					\
+	else						\
+	    plant_SV(p);				\
+	UNLOCK_SV_MUTEX;				\
+    } STMT_END
 
 STATIC void
 del_sv(SV *p)
@@ -2351,9 +2359,6 @@ newSV(STRLEN len)
     register SV *sv;
     
     new_SV(sv);
-    SvANY(sv) = 0;
-    SvREFCNT(sv) = 1;
-    SvFLAGS(sv) = 0;
     if (len) {
 	sv_upgrade(sv, SVt_PV);
 	SvGROW(sv, len + 1);
@@ -3557,9 +3562,6 @@ sv_mortalcopy(SV *oldstr)
     register SV *sv;
 
     new_SV(sv);
-    SvANY(sv) = 0;
-    SvREFCNT(sv) = 1;
-    SvFLAGS(sv) = 0;
     sv_setsv(sv,oldstr);
     EXTEND_MORTAL(1);
     PL_tmps_stack[++PL_tmps_ix] = sv;
@@ -3574,8 +3576,6 @@ sv_newmortal(void)
     register SV *sv;
 
     new_SV(sv);
-    SvANY(sv) = 0;
-    SvREFCNT(sv) = 1;
     SvFLAGS(sv) = SVs_TEMP;
     EXTEND_MORTAL(1);
     PL_tmps_stack[++PL_tmps_ix] = sv;
@@ -3604,9 +3604,6 @@ newSVpv(const char *s, STRLEN len)
     register SV *sv;
 
     new_SV(sv);
-    SvANY(sv) = 0;
-    SvREFCNT(sv) = 1;
-    SvFLAGS(sv) = 0;
     if (!len)
 	len = strlen(s);
     sv_setpvn(sv,s,len);
@@ -3619,9 +3616,6 @@ newSVpvn(const char *s, STRLEN len)
     register SV *sv;
 
     new_SV(sv);
-    SvANY(sv) = 0;
-    SvREFCNT(sv) = 1;
-    SvFLAGS(sv) = 0;
     sv_setpvn(sv,s,len);
     return sv;
 }
@@ -3633,9 +3627,6 @@ newSVpvf(const char* pat, ...)
     va_list args;
 
     new_SV(sv);
-    SvANY(sv) = 0;
-    SvREFCNT(sv) = 1;
-    SvFLAGS(sv) = 0;
     va_start(args, pat);
     sv_vsetpvfn(sv, pat, strlen(pat), &args, Null(SV**), 0, Null(bool*));
     va_end(args);
@@ -3649,9 +3640,6 @@ newSVnv(double n)
     register SV *sv;
 
     new_SV(sv);
-    SvANY(sv) = 0;
-    SvREFCNT(sv) = 1;
-    SvFLAGS(sv) = 0;
     sv_setnv(sv,n);
     return sv;
 }
@@ -3662,9 +3650,6 @@ newSViv(IV i)
     register SV *sv;
 
     new_SV(sv);
-    SvANY(sv) = 0;
-    SvREFCNT(sv) = 1;
-    SvFLAGS(sv) = 0;
     sv_setiv(sv,i);
     return sv;
 }
@@ -3676,9 +3661,6 @@ newRV_noinc(SV *tmpRef)
     register SV *sv;
 
     new_SV(sv);
-    SvANY(sv) = 0;
-    SvREFCNT(sv) = 1;
-    SvFLAGS(sv) = 0;
     sv_upgrade(sv, SVt_RV);
     SvTEMP_off(tmpRef);
     SvRV(sv) = tmpRef;
@@ -3706,9 +3688,6 @@ newSVsv(register SV *old)
 	return Nullsv;
     }
     new_SV(sv);
-    SvANY(sv) = 0;
-    SvREFCNT(sv) = 1;
-    SvFLAGS(sv) = 0;
     if (SvTEMP(old)) {
 	SvTEMP_off(old);
 	sv_setsv(sv,old);
@@ -4077,9 +4056,6 @@ newSVrv(SV *rv, const char *classname)
     SV *sv;
 
     new_SV(sv);
-    SvANY(sv) = 0;
-    SvREFCNT(sv) = 0;
-    SvFLAGS(sv) = 0;
 
     SV_CHECK_THINKFIRST(rv);
     SvAMAGIC_off(rv);
@@ -4088,7 +4064,7 @@ newSVrv(SV *rv, const char *classname)
       sv_upgrade(rv, SVt_RV);
 
     (void)SvOK_off(rv);
-    SvRV(rv) = SvREFCNT_inc(sv);
+    SvRV(rv) = sv;
     SvROK_on(rv);
 
     if (classname) {
