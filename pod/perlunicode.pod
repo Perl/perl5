@@ -32,13 +32,9 @@ byte scheme when presented with byte data.
 
 =item C<use utf8> still needed to enable UTF-8/UTF-EBCDIC in scripts
 
-The C<utf8> pragma implements the tables used for Unicode support.
-However, these tables are automatically loaded on demand, so the
-C<utf8> pragma should not normally be used.
-
 As a compatibility measure, this pragma must be explicitly used to
 enable recognition of UTF-8 in the Perl scripts themselves on ASCII
-based machines or recognize UTF-EBCDIC on EBCDIC based machines.
+based machines, or to recognize UTF-EBCDIC on EBCDIC based machines.
 B<NOTE: this should be the only place where an explicit C<use utf8>
 is needed>.
 
@@ -50,8 +46,7 @@ of the data in your script; see L<encoding>.
 =head2 Byte and Character semantics
 
 Beginning with version 5.6, Perl uses logically wide characters to
-represent strings internally.  This internal representation of strings
-uses either the UTF-8 or the UTF-EBCDIC encoding.
+represent strings internally.
 
 In future, Perl-level operations can be expected to work with
 characters rather than bytes, in general.
@@ -91,29 +86,23 @@ when they are dealing with Unicode data, and byte semantics otherwise.
 Thus, character semantics for these operations apply transparently; if
 the input data came from a Unicode source (for example, by adding a
 character encoding discipline to the filehandle whence it came, or a
-literal UTF-8 string constant in the program), character semantics
+literal Unicode string constant in the program), character semantics
 apply; otherwise, byte semantics are in effect.  To force byte semantics
 on Unicode data, the C<bytes> pragma should be used.
 
 Notice that if you concatenate strings with byte semantics and strings
 with Unicode character data, the bytes will by default be upgraded
 I<as if they were ISO 8859-1 (Latin-1)> (or if in EBCDIC, after a
-translation to ISO 8859-1).  To change this, use the C<encoding>
+translation to ISO 8859-1). This is done without regard to the
+system's native 8-bit encoding, so to change this for systems with
+non-Latin-1 (or non-EBCDIC) native encodings, use the C<encoding>
 pragma, see L<encoding>.
 
-Under character semantics, many operations that formerly operated on
-bytes change to operating on characters.  For ASCII data this makes no
-difference, because UTF-8 stores ASCII in single bytes, but for any
-character greater than C<chr(127)>, the character B<may> be stored in
-a sequence of two or more bytes, all of which have the high bit set.
-
-For C1 controls or Latin 1 characters on an EBCDIC platform the
-character may be stored in a UTF-EBCDIC multi byte sequence.  But by
-and large, the user need not worry about this, because Perl hides it
-from the user.  A character in Perl is logically just a number ranging
-from 0 to 2**32 or so.  Larger characters encode to longer sequences
-of bytes internally, but again, this is just an internal detail which
-is hidden at the Perl level.
+Under character semantics, many operations that formerly operated on bytes
+change to operating on characters. A character in Perl is logically just a
+number ranging from 0 to 2**31 or so. Larger characters may encode to longer
+sequences of bytes internally, but this is just an internal detail
+which is hidden at the Perl level. See L<perluniintro> for more on this.
 
 =head2 Effects of character semantics
 
@@ -126,17 +115,27 @@ Character semantics have the following effects:
 Strings and patterns may contain characters that have an ordinal value
 larger than 255.
 
-Presuming you use a Unicode editor to edit your program, such
-characters will typically occur directly within the literal strings as
-UTF-8 (or UTF-EBCDIC on EBCDIC platforms) characters, but you can also
-specify a particular character with an extension of the C<\x>
-notation.  UTF-X characters are specified by putting the hexadecimal
-code within curlies after the C<\x>.  For instance, a Unicode smiley
-face is C<\x{263A}>.
+If you use a Unicode editor to edit your program, Unicode characters may
+occur directly within the literal strings in one of the various Unicode
+encodings (UTF-8, UTF-EBCDIC, UCS-2, etc.), but are recognized as such (and
+converted to Perl's internal representation) only if the appropriate
+L<encoding> is specified.
+
+You can also get Unicode characters into a string by using the C<\x{...}>
+notation, putting the Unicode code for the desired character, in
+hexadecimal, into the curlies. For instance, a smiley face is C<\x{263A}>.
+This works only for characters with a code 0x100 and above.
+
+Additionally, if you
+   use charnames ':full';
+you can use the C<\N{...}> notation, putting the official Unicode character
+name within the curlies. For example, C<\N{WHITE SMILING FACE}>.
+This works for all characters that have names.
 
 =item *
 
-Identifiers within the Perl script may contain Unicode alphanumeric
+If an appropriate L<encoding> is specified,
+identifiers within the Perl script may contain Unicode alphanumeric
 characters, including ideographs.  (You are currently on your own when
 it comes to using the canonical forms of characters--Perl doesn't
 (yet) attempt to canonicalize variable names for you.)
@@ -159,8 +158,8 @@ ideograph, for instance.
 Named Unicode properties and block ranges may be used as character
 classes via the new C<\p{}> (matches property) and C<\P{}> (doesn't
 match property) constructs.  For instance, C<\p{Lu}> matches any
-character with the Unicode uppercase property, while C<\p{M}> matches
-any mark character.  Single letter properties may omit the brackets,
+character with the Unicode "Lu" (Letter, uppercase) property, while C<\p{M}> matches
+any character with a "M" (mark -- accents and such) property.  Single letter properties may omit the brackets,
 so that can be written C<\pM> also.  Many predefined character classes
 are available, such as C<\p{IsMirrored}> and C<\p{InTibetan}>.
 
@@ -232,6 +231,8 @@ C<\p{In_Greek}>, C<\P{Pd}> is equal to C<\P{Pd}>.
     Co          Private_Use
     Cn          Unassigned
 
+The single-letter properties match all characters in any of the
+two-letter sub-properties starting with the same letter.
 There's also C<L&> which is an alias for C<Ll>, C<Lu>, and C<Lt>.
 
 The following reserved ranges have C<In> tests:
@@ -529,8 +530,7 @@ such as C<sort()>, and the operators dealing with filenames.
 The C<pack()>/C<unpack()> letters "C<c>" and "C<C>" do I<not> change,
 since they're often used for byte-oriented formats.  (Again, think
 "C<char>" in the C language.)  However, there is a new "C<U>" specifier
-that will convert between UTF-8 characters and integers.  (It works
-outside of the utf8 pragma too.)
+that will convert between Unicode characters and integers.
 
 =item *
 
@@ -538,8 +538,8 @@ The C<chr()> and C<ord()> functions work on characters.  This is like
 C<pack("U")> and C<unpack("U")>, not like C<pack("C")> and
 C<unpack("C")>.  In fact, the latter are how you now emulate
 byte-oriented C<chr()> and C<ord()> for Unicode strings.
-(Note that this reveals the internal UTF-8 encoding of strings and
-you are not supposed to do that unless you know what you are doing.)
+(Note that this reveals the internal encoding of Unicode strings,
+which is not something one normally needs to care about at all.)
 
 =item *
 
@@ -606,10 +606,10 @@ in the near future, however.
 Whether an arbitrary piece of data will be treated as "characters" or
 "bytes" by internal operations cannot be divined at the current time.
 
-Use of locales with utf8 may lead to odd results.  Currently there is
+Use of locales with Unicode data may lead to odd results.  Currently there is
 some attempt to apply 8-bit locale info to characters in the range
 0..255, but this is demonstrably incorrect for locales that use
-characters above that range (when mapped into Unicode).  It will also
+characters above that range when mapped into Unicode.  It will also
 tend to run slower.  Avoidance of locales is strongly encouraged.
 
 =head1 UNICODE REGULAR EXPRESSION SUPPORT LEVEL
@@ -630,7 +630,7 @@ Level 1 - Basic Unicode Support
         2.2 Categories                          - done          [3][4]
         2.3 Subtraction                         - MISSING       [5][6]
         2.4 Simple Word Boundaries              - done          [7]
-        2.5 Simple Loose Matches                - done          [8]
+        2.5 Simple Loose Matches                - MISSING       [8]
         2.6 End of Line                         - MISSING       [9][10]
 
         [ 1] \x{...}
@@ -640,7 +640,8 @@ Level 1 - Basic Unicode Support
         [ 5] have negation
         [ 6] can use look-ahead to emulate subtraction (*)
         [ 7] include Letters in word characters
-        [ 8] see UTR#21 Case Mappings: Perl implements 1:1 mappings
+        [ 8] see UTR#21 Case Mappings: Perl implements most mappings,
+             but not yet special cases like the SIGMA example.
         [ 9] see UTR#13 Unicode Newline Guidelines
         [10] should do ^ and $ also on \x{85}, \x{2028} and \x{2029})
              (should also affect <>, $., and script line numbers)
@@ -660,9 +661,6 @@ But in this particular example, you probably really want
     \p{Greek}
 
 which will match assigned characters known to be part of the Greek script.
-
-In other words: the matched character must not be a non-assigned
-character, but it must be in the block of modern Greek characters.
 
 =item *
 
@@ -704,10 +702,9 @@ numbers.  To use these numbers various encodings are needed.
 
 =item UTF-8
 
-UTF-8 is the encoding used internally by Perl.  UTF-8 is a variable
-length (1 to 6 bytes, current character allocations require 4 bytes), 
-byteorder independent encoding.  For ASCII, UTF-8 is transparent
-(and we really do mean 7-bit ASCII, not any 8-bit encoding).
+UTF-8 is a variable-length (1 to 6 bytes, current character allocations
+require 4 bytes), byteorder independent encoding. For ASCII, UTF-8 is
+transparent (and we really do mean 7-bit ASCII, not another 8-bit encoding).
 
 The following table is from Unicode 3.1.
 
@@ -761,10 +758,9 @@ and the decoding is
 
 	$uni = 0x10000 + ($hi - 0xD8000) * 0x400 + ($lo - 0xDC00);
 
-If you try to generate surrogates (for example by using chr()), you
-will get an error because firstly a surrogate on its own is meaningless,
-and secondly because Perl encodes its Unicode characters in UTF-8
-(not 16-bit numbers), which makes the encoded character doubly illegal.
+If you try to generate surrogates (for example by using chr()), you will
+get a warning if warnings are turned on (C<-w> or C<use warnings;>) because
+those code points are not valid for a Unicode character.
 
 Because of the 16-bitness, UTF-16 is byteorder dependent.  UTF-16
 itself can be used for in-memory computations, but if storage or
