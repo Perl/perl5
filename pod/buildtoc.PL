@@ -123,6 +123,7 @@ if (-d "pod") {
     perlpodspec
     perlstyle
     perltrap
+    perlcheat
 
     perlrun
     perldiag
