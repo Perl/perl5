@@ -77,6 +77,7 @@ ext/B/B/Showlex.pm	Compiler Showlex backend
 ext/B/B/Stackobj.pm	Compiler stack objects support functions
 ext/B/B/Stash.pm	Compiler module to identify stashes
 ext/B/B/Terse.pm	Compiler Terse backend
+ext/B/B/Terse.t		See if B::Terse works
 ext/B/B/Xref.pm		Compiler Xref backend
 ext/B/Debug.t		See if B::Debug works
 ext/B/defsubs_h.PL	Generator for constant subroutines
