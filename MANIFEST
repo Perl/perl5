@@ -1090,6 +1090,12 @@ lib/termcap.pl			Perl library supporting termcap usage
 lib/Test.pm			A simple framework for writing test scripts
 lib/Test/Harness.pm		A test harness
 lib/Test/Harness.t		See if Test::Harness works
+lib/Test/More.pm                More utilities for writing tests
+lib/Test/More/t/More.t          Test::More test, basic operation
+lib/Test/More/t/fail-like.t     Test::More test, like() and qr// bug
+lib/Test/More/t/fail.t          Test::More test, failing tests
+lib/Test/More/t/plan_is_noplan.t        Test::More test, noplan
+lib/Test/More/t/skipall.t       Test::More test, skipping all tests
 lib/Test/Simple.pm              Basic utility for writing tests
 lib/Test/Simple/t/exit.t        Test::Simple test, exit codes
 lib/Test/Simple/t/extra.t       Test::Simple test
@@ -1852,6 +1858,7 @@ t/lib/st-dump.pl		See if Storable works
 t/lib/strict/refs		Tests of "use strict 'refs'" for strict.t
 t/lib/strict/subs		Tests of "use strict 'subs'" for strict.t
 t/lib/strict/vars		Tests of "use strict 'vars'" for strict.t
+t/lib/Test/More/Catch.pm        Utility module for testing Test::More
 t/lib/Test/Simple/Catch.pm      Utility module for testing Test::Simple
 t/lib/Test/Simple/sample_tests/death.plx                for exit.t
 t/lib/Test/Simple/sample_tests/death_in_eval.plx        for exit.t
