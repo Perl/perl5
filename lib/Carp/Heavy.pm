@@ -3,7 +3,7 @@ package Carp;
 
 =head1 NAME
 
-Carp heavy machinery - no user serviceable parts inside
+Carp::Heavy - heavy machinery, no user serviceable parts inside
 
 =cut
 
