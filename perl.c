@@ -2429,7 +2429,7 @@ init_postdump_symbols(register int argc, register char **argv, register char **e
 	    if (!(s = strchr(*env,'=')))
 		continue;
 	    *s++ = '\0';
-#if defined(WIN32) || defined(MSDOS)
+#if defined(MSDOS)
 	    (void)strupr(*env);
 #endif
 	    sv = newSVpv(s--,0);
