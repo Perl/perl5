@@ -706,9 +706,6 @@ perl_destruct(pTHXx)
     if (PL_sv_count != 0 && ckWARN_d(WARN_INTERNAL))
 	Perl_warner(aTHX_ WARN_INTERNAL,"Scalars leaked: %ld\n", (long)PL_sv_count);
 
-    sv_free_arenas();
-
-    /* No SVs have survived, need to clean out */
     Safefree(PL_origfilename);
     Safefree(PL_reg_start_tmp);
     if (PL_reg_curpm)
@@ -738,6 +735,8 @@ perl_destruct(pTHXx)
     Safefree(PL_thrsv);
     PL_thrsv = Nullsv;
 #endif /* USE_THREADS */
+
+    sv_free_arenas();
 
     /* As the absolutely last thing, free the non-arena SV for mess() */
 
