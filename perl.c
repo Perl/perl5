@@ -2200,6 +2200,10 @@ Perl_eval_sv(pTHX_ SV *sv, I32 flags)
     CALLPROTECT(aTHX_ pcur_env, &ret, MEMBER_TO_FPTR(S_vcall_body),
 		(OP*)&myop, TRUE);
 #else
+    /* fail now; otherwise we could fail after the JMPENV_PUSH but
+     * before a PUSHEVAL, which corrupts the stack after a croak */
+    TAINT_PROPER("eval_sv()");
+
     JMPENV_PUSH(ret);
 #endif
     switch (ret) {

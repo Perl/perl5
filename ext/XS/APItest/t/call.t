@@ -19,9 +19,14 @@ BEGIN {
 use warnings;
 use strict;
 
-use Test::More tests => 239;
+# Test::MJore doesn't have fresh_perl_is() yet
+# use Test::More tests => 240;
 
-BEGIN { use_ok('XS::APItest') };
+BEGIN {
+    require './test.pl';
+    plan(240);
+    use_ok('XS::APItest')
+};
 
 #########################
 
@@ -132,9 +137,12 @@ for my $test (
     ok(eq_array( [ eval { call_pv('d', $flags, @$args) }, $@ ],
 	[ "its_dead_jim\n" ]), "$description eval { call_pv('d') }");
 
+    #use Data::Dumper; print Dumper([ eval { eval_sv('d', $flags), $@ }, $@ ]);
+#    print Dumper([ ($flags & (G_ARRAY|G_DISCARD)) ? (0) : (undef, 1),
+#		"its_dead_jim\n", undef ]);
     ok(eq_array( [ eval { eval_sv('d', $flags), $@ }, $@ ],
 	[ ($flags & (G_ARRAY|G_DISCARD)) ? (0) : (undef, 1),
-		"its_dead_jim\n", undef ]),
+		"its_dead_jim\n", '' ]),
 	"$description eval { eval_sv('d') }");
 
     ok(eq_array( [ eval { call_method('d', $flags, $obj, @$args) }, $@ ],
@@ -148,3 +156,22 @@ is(eval_pv('d()', 0), undef, "eval_pv('d()', 0)");
 is($@, "its_dead_jim\n", "eval_pv('d()', 0) - \$@");
 is(eval { eval_pv('d()', 1) } , undef, "eval { eval_pv('d()', 1) }");
 is($@, "its_dead_jim\n", "eval { eval_pv('d()', 1) } - \$@");
+
+# DAPM 9-Aug-04. A taint test in eval_sv() could die after setting up
+# a new jump level but before pushing an eval context, leading to
+# stack corruption
+
+fresh_perl_is(<<'EOF', "x=2", { switches => ['-T'] }, 'eval_sv() taint');
+use XS::APItest;
+
+my $x = 0;
+sub f {
+    eval { my @a = ($^X . "x" , eval_sv(q(die "inner\n"), 0)) ; };
+    $x++;
+    $a <=> $b;
+}
+
+eval { my @a = sort f 2, 1;  $x++};
+print "x=$x\n";
+EOF
+
