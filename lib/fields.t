@@ -93,8 +93,10 @@ my %expect = (
     'Foo::Bar::Baz' => 'b1:1,b2:2,b3:3,foo:4,bar:5,baz:6',
 );
 
-plan tests => keys(%expect) + 17;
+plan tests => keys(%expect) + 21;
+
 my $testno = 0;
+
 while (my($class, $exp) = each %expect) {
    no strict 'refs';
    my $fstr = fstr(\%{$class."::FIELDS"});
@@ -212,4 +214,26 @@ package Test::Version3;
 
 use base qw(Has::Version_0);
 ::is( $Has::Version_0::VERSION, 0, '$VERSION==0 preserved' );
+
+package Test::FooBar;
+
+use fields qw(a b c);
+
+sub new {
+    my $self = fields::new(shift);
+    %$self = @_ if @_;
+    $self;
+}
+
+package main;
+
+{
+    my $x = Test::FooBar->new( a => 1, b => 2);
+
+    is(ref $x, 'Test::FooBar', 'x is a Test::FooBar');
+    ok(exists $x->{a}, 'x has a');
+    ok(exists $x->{b}, 'x has b');
+    is(scalar keys %$x, 2, 'x has two fields');
+}
+
 
