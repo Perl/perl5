@@ -22,6 +22,12 @@
 # include <unistd.h>
 #endif
 
+#ifdef HAS_SYSCALL   
+#ifdef __cplusplus              
+extern "C" int syscall(unsigned long,...);
+#endif
+#endif
+
 #ifdef I_SYS_WAIT
 # include <sys/wait.h>
 #endif
@@ -169,7 +175,7 @@ static char zero_but_true[ZBTLEN + 1] = "0 but true";
 
 PP(pp_backtick)
 {
-    dSP; dTARGET;
+    djSP; dTARGET;
     PerlIO *fp;
     char *tmps = POPp;
     I32 gimme = GIMME_V;
@@ -266,7 +272,7 @@ PP(pp_rcatline)
 
 PP(pp_warn)
 {
-    dSP; dMARK;
+    djSP; dMARK;
     char *tmps;
     if (SP - MARK != 1) {
 	dTARGET;
@@ -291,7 +297,7 @@ PP(pp_warn)
 
 PP(pp_die)
 {
-    dSP; dMARK;
+    djSP; dMARK;
     char *tmps;
     if (SP - MARK != 1) {
 	dTARGET;
@@ -317,7 +323,7 @@ PP(pp_die)
 
 PP(pp_open)
 {
-    dSP; dTARGET;
+    djSP; dTARGET;
     GV *gv;
     SV *sv;
     char *tmps;
@@ -346,7 +352,7 @@ PP(pp_open)
 
 PP(pp_close)
 {
-    dSP;
+    djSP;
     GV *gv;
 
     if (MAXARG == 0)
@@ -360,7 +366,7 @@ PP(pp_close)
 
 PP(pp_pipe_op)
 {
-    dSP;
+    djSP;
 #ifdef HAS_PIPE
     GV *rgv;
     GV *wgv;
@@ -412,7 +418,7 @@ badexit:
 
 PP(pp_fileno)
 {
-    dSP; dTARGET;
+    djSP; dTARGET;
     GV *gv;
     IO *io;
     PerlIO *fp;
@@ -427,7 +433,7 @@ PP(pp_fileno)
 
 PP(pp_umask)
 {
-    dSP; dTARGET;
+    djSP; dTARGET;
     int anum;
 
 #ifdef HAS_UMASK
@@ -447,7 +453,7 @@ PP(pp_umask)
 
 PP(pp_binmode)
 {
-    dSP;
+    djSP;
     GV *gv;
     IO *io;
     PerlIO *fp;
@@ -497,9 +503,10 @@ PP(pp_binmode)
 
 }
 
+
 PP(pp_tie)
 {
-    dSP;
+    djSP;
     SV *varsv;
     HV* stash;
     GV *gv;
@@ -572,7 +579,7 @@ PP(pp_tie)
 
 PP(pp_untie)
 {
-    dSP;
+    djSP;
     SV * sv ;
 
     sv = POPs;
@@ -600,7 +607,7 @@ PP(pp_untie)
 
 PP(pp_tied)
 {
-    dSP;
+    djSP;
     SV * sv ;
     MAGIC * mg ;
 
@@ -622,7 +629,7 @@ PP(pp_tied)
 
 PP(pp_dbmopen)
 {
-    dSP;
+    djSP;
     HV *hv;
     dPOPPOPssrl;
     HV* stash;
@@ -728,7 +735,7 @@ PP(pp_dbmclose)
 
 PP(pp_sselect)
 {
-    dSP; dTARGET;
+    djSP; dTARGET;
 #ifdef HAS_SELECT
     register I32 i;
     register I32 j;
@@ -861,8 +868,7 @@ PP(pp_sselect)
 }
 
 void
-setdefout(gv)
-GV *gv;
+setdefout(GV *gv)
 {
     dTHR;
     if (gv)
@@ -874,11 +880,11 @@ GV *gv;
 
 PP(pp_select)
 {
-    dSP; dTARGET;
+    djSP; dTARGET;
     GV *newdefout, *egv;
     HV *hv;
 
-    newdefout = (op->op_private > 0) ? ((GV *) POPs) : NULL;
+    newdefout = (op->op_private > 0) ? ((GV *) POPs) : (GV *) NULL;
 
     egv = GvEGV(defoutgv);
     if (!egv)
@@ -908,7 +914,7 @@ PP(pp_select)
 
 PP(pp_getc)
 {
-    dSP; dTARGET;
+    djSP; dTARGET;
     GV *gv;
     MAGIC *mg;
 
@@ -947,10 +953,7 @@ PP(pp_read)
 }
 
 static OP *
-doform(cv,gv,retop)
-CV *cv;
-GV *gv;
-OP *retop;
+doform(CV *cv, GV *gv, OP *retop)
 {
     dTHR;
     register CONTEXT *cx;
@@ -973,7 +976,7 @@ OP *retop;
 
 PP(pp_enterwrite)
 {
-    dSP;
+    djSP;
     register GV *gv;
     register IO *io;
     GV *fgv;
@@ -1014,7 +1017,7 @@ PP(pp_enterwrite)
 
 PP(pp_leavewrite)
 {
-    dSP;
+    djSP;
     GV *gv = cxstack[cxstack_ix].blk_sub.gv;
     register IO *io = GvIOp(gv);
     PerlIO *ofp = IoOFP(io);
@@ -1128,7 +1131,7 @@ PP(pp_leavewrite)
 
 PP(pp_prtf)
 {
-    dSP; dMARK; dORIGMARK;
+    djSP; dMARK; dORIGMARK;
     GV *gv;
     IO *io;
     PerlIO *fp;
@@ -1209,7 +1212,7 @@ PP(pp_prtf)
 
 PP(pp_sysopen)
 {
-    dSP;
+    djSP;
     GV *gv;
     SV *sv;
     char *tmps;
@@ -1237,7 +1240,7 @@ PP(pp_sysopen)
 
 PP(pp_sysread)
 {
-    dSP; dMARK; dORIGMARK; dTARGET;
+    djSP; dMARK; dORIGMARK; dTARGET;
     int offset;
     GV *gv;
     IO *io;
@@ -1366,7 +1369,7 @@ PP(pp_syswrite)
 
 PP(pp_send)
 {
-    dSP; dMARK; dORIGMARK; dTARGET;
+    djSP; dMARK; dORIGMARK; dTARGET;
     GV *gv;
     IO *io;
     int offset;
@@ -1442,7 +1445,7 @@ PP(pp_recv)
 
 PP(pp_eof)
 {
-    dSP;
+    djSP;
     GV *gv;
 
     if (MAXARG <= 0)
@@ -1455,7 +1458,7 @@ PP(pp_eof)
 
 PP(pp_tell)
 {
-    dSP; dTARGET;
+    djSP; dTARGET;
     GV *gv;
 
     if (MAXARG <= 0)
@@ -1473,7 +1476,7 @@ PP(pp_seek)
 
 PP(pp_sysseek)
 {
-    dSP;
+    djSP;
     GV *gv;
     int whence = POPi;
     long offset = POPl;
@@ -1492,7 +1495,7 @@ PP(pp_sysseek)
 
 PP(pp_truncate)
 {
-    dSP;
+    djSP;
     Off_t len = (Off_t)POPn;
     int result = 1;
     GV *tmpgv;
@@ -1560,7 +1563,7 @@ PP(pp_fcntl)
 
 PP(pp_ioctl)
 {
-    dSP; dTARGET;
+    djSP; dTARGET;
     SV *argsv = POPs;
     unsigned int func = U_I(POPn);
     int optype = op->op_type;
@@ -1631,7 +1634,7 @@ PP(pp_ioctl)
 
 PP(pp_flock)
 {
-    dSP; dTARGET;
+    djSP; dTARGET;
     I32 value;
     int argtype;
     GV *gv;
@@ -1664,7 +1667,7 @@ PP(pp_flock)
 
 PP(pp_socket)
 {
-    dSP;
+    djSP;
 #ifdef HAS_SOCKET
     GV *gv;
     register IO *io;
@@ -1706,7 +1709,7 @@ PP(pp_socket)
 
 PP(pp_sockpair)
 {
-    dSP;
+    djSP;
 #ifdef HAS_SOCKETPAIR
     GV *gv1;
     GV *gv2;
@@ -1756,7 +1759,7 @@ PP(pp_sockpair)
 
 PP(pp_bind)
 {
-    dSP;
+    djSP;
 #ifdef HAS_SOCKET
     SV *addrsv = POPs;
     char *addr;
@@ -1786,7 +1789,7 @@ nuts:
 
 PP(pp_connect)
 {
-    dSP;
+    djSP;
 #ifdef HAS_SOCKET
     SV *addrsv = POPs;
     char *addr;
@@ -1816,7 +1819,7 @@ nuts:
 
 PP(pp_listen)
 {
-    dSP;
+    djSP;
 #ifdef HAS_SOCKET
     int backlog = POPi;
     GV *gv = (GV*)POPs;
@@ -1842,7 +1845,7 @@ nuts:
 
 PP(pp_accept)
 {
-    dSP; dTARGET;
+    djSP; dTARGET;
 #ifdef HAS_SOCKET
     GV *ngv;
     GV *ggv;
@@ -1899,7 +1902,7 @@ badexit:
 
 PP(pp_shutdown)
 {
-    dSP; dTARGET;
+    djSP; dTARGET;
 #ifdef HAS_SOCKET
     int how = POPi;
     GV *gv = (GV*)POPs;
@@ -1932,7 +1935,7 @@ PP(pp_gsockopt)
 
 PP(pp_ssockopt)
 {
-    dSP;
+    djSP;
 #ifdef HAS_SOCKET
     int optype = op->op_type;
     SV *sv;
@@ -2012,7 +2015,7 @@ PP(pp_getsockname)
 
 PP(pp_getpeername)
 {
-    dSP;
+    djSP;
 #ifdef HAS_SOCKET
     int optype = op->op_type;
     SV *sv;
@@ -2083,7 +2086,7 @@ PP(pp_lstat)
 
 PP(pp_stat)
 {
-    dSP;
+    djSP;
     GV *tmpgv;
     I32 gimme;
     I32 max = 13;
@@ -2171,7 +2174,7 @@ PP(pp_stat)
 PP(pp_ftrread)
 {
     I32 result = my_stat(ARGS);
-    dSP;
+    djSP;
     if (result < 0)
 	RETPUSHUNDEF;
     if (cando(S_IRUSR, 0, &statcache))
@@ -2182,7 +2185,7 @@ PP(pp_ftrread)
 PP(pp_ftrwrite)
 {
     I32 result = my_stat(ARGS);
-    dSP;
+    djSP;
     if (result < 0)
 	RETPUSHUNDEF;
     if (cando(S_IWUSR, 0, &statcache))
@@ -2193,7 +2196,7 @@ PP(pp_ftrwrite)
 PP(pp_ftrexec)
 {
     I32 result = my_stat(ARGS);
-    dSP;
+    djSP;
     if (result < 0)
 	RETPUSHUNDEF;
     if (cando(S_IXUSR, 0, &statcache))
@@ -2204,7 +2207,7 @@ PP(pp_ftrexec)
 PP(pp_fteread)
 {
     I32 result = my_stat(ARGS);
-    dSP;
+    djSP;
     if (result < 0)
 	RETPUSHUNDEF;
     if (cando(S_IRUSR, 1, &statcache))
@@ -2215,7 +2218,7 @@ PP(pp_fteread)
 PP(pp_ftewrite)
 {
     I32 result = my_stat(ARGS);
-    dSP;
+    djSP;
     if (result < 0)
 	RETPUSHUNDEF;
     if (cando(S_IWUSR, 1, &statcache))
@@ -2226,7 +2229,7 @@ PP(pp_ftewrite)
 PP(pp_fteexec)
 {
     I32 result = my_stat(ARGS);
-    dSP;
+    djSP;
     if (result < 0)
 	RETPUSHUNDEF;
     if (cando(S_IXUSR, 1, &statcache))
@@ -2237,7 +2240,7 @@ PP(pp_fteexec)
 PP(pp_ftis)
 {
     I32 result = my_stat(ARGS);
-    dSP;
+    djSP;
     if (result < 0)
 	RETPUSHUNDEF;
     RETPUSHYES;
@@ -2251,7 +2254,7 @@ PP(pp_fteowned)
 PP(pp_ftrowned)
 {
     I32 result = my_stat(ARGS);
-    dSP;
+    djSP;
     if (result < 0)
 	RETPUSHUNDEF;
     if (statcache.st_uid == (op->op_type == OP_FTEOWNED ? euid : uid) )
@@ -2262,7 +2265,7 @@ PP(pp_ftrowned)
 PP(pp_ftzero)
 {
     I32 result = my_stat(ARGS);
-    dSP;
+    djSP;
     if (result < 0)
 	RETPUSHUNDEF;
     if (!statcache.st_size)
@@ -2273,7 +2276,7 @@ PP(pp_ftzero)
 PP(pp_ftsize)
 {
     I32 result = my_stat(ARGS);
-    dSP; dTARGET;
+    djSP; dTARGET;
     if (result < 0)
 	RETPUSHUNDEF;
     PUSHi(statcache.st_size);
@@ -2283,7 +2286,7 @@ PP(pp_ftsize)
 PP(pp_ftmtime)
 {
     I32 result = my_stat(ARGS);
-    dSP; dTARGET;
+    djSP; dTARGET;
     if (result < 0)
 	RETPUSHUNDEF;
     PUSHn( ((I32)basetime - (I32)statcache.st_mtime) / 86400.0 );
@@ -2293,7 +2296,7 @@ PP(pp_ftmtime)
 PP(pp_ftatime)
 {
     I32 result = my_stat(ARGS);
-    dSP; dTARGET;
+    djSP; dTARGET;
     if (result < 0)
 	RETPUSHUNDEF;
     PUSHn( ((I32)basetime - (I32)statcache.st_atime) / 86400.0 );
@@ -2303,7 +2306,7 @@ PP(pp_ftatime)
 PP(pp_ftctime)
 {
     I32 result = my_stat(ARGS);
-    dSP; dTARGET;
+    djSP; dTARGET;
     if (result < 0)
 	RETPUSHUNDEF;
     PUSHn( ((I32)basetime - (I32)statcache.st_ctime) / 86400.0 );
@@ -2313,7 +2316,7 @@ PP(pp_ftctime)
 PP(pp_ftsock)
 {
     I32 result = my_stat(ARGS);
-    dSP;
+    djSP;
     if (result < 0)
 	RETPUSHUNDEF;
     if (S_ISSOCK(statcache.st_mode))
@@ -2324,7 +2327,7 @@ PP(pp_ftsock)
 PP(pp_ftchr)
 {
     I32 result = my_stat(ARGS);
-    dSP;
+    djSP;
     if (result < 0)
 	RETPUSHUNDEF;
     if (S_ISCHR(statcache.st_mode))
@@ -2335,7 +2338,7 @@ PP(pp_ftchr)
 PP(pp_ftblk)
 {
     I32 result = my_stat(ARGS);
-    dSP;
+    djSP;
     if (result < 0)
 	RETPUSHUNDEF;
     if (S_ISBLK(statcache.st_mode))
@@ -2346,7 +2349,7 @@ PP(pp_ftblk)
 PP(pp_ftfile)
 {
     I32 result = my_stat(ARGS);
-    dSP;
+    djSP;
     if (result < 0)
 	RETPUSHUNDEF;
     if (S_ISREG(statcache.st_mode))
@@ -2357,7 +2360,7 @@ PP(pp_ftfile)
 PP(pp_ftdir)
 {
     I32 result = my_stat(ARGS);
-    dSP;
+    djSP;
     if (result < 0)
 	RETPUSHUNDEF;
     if (S_ISDIR(statcache.st_mode))
@@ -2368,7 +2371,7 @@ PP(pp_ftdir)
 PP(pp_ftpipe)
 {
     I32 result = my_stat(ARGS);
-    dSP;
+    djSP;
     if (result < 0)
 	RETPUSHUNDEF;
     if (S_ISFIFO(statcache.st_mode))
@@ -2379,7 +2382,7 @@ PP(pp_ftpipe)
 PP(pp_ftlink)
 {
     I32 result = my_lstat(ARGS);
-    dSP;
+    djSP;
     if (result < 0)
 	RETPUSHUNDEF;
     if (S_ISLNK(statcache.st_mode))
@@ -2389,7 +2392,7 @@ PP(pp_ftlink)
 
 PP(pp_ftsuid)
 {
-    dSP;
+    djSP;
 #ifdef S_ISUID
     I32 result = my_stat(ARGS);
     SPAGAIN;
@@ -2403,7 +2406,7 @@ PP(pp_ftsuid)
 
 PP(pp_ftsgid)
 {
-    dSP;
+    djSP;
 #ifdef S_ISGID
     I32 result = my_stat(ARGS);
     SPAGAIN;
@@ -2417,7 +2420,7 @@ PP(pp_ftsgid)
 
 PP(pp_ftsvtx)
 {
-    dSP;
+    djSP;
 #ifdef S_ISVTX
     I32 result = my_stat(ARGS);
     SPAGAIN;
@@ -2431,7 +2434,7 @@ PP(pp_ftsvtx)
 
 PP(pp_fttty)
 {
-    dSP;
+    djSP;
     int fd;
     GV *gv;
     char *tmps = Nullch;
@@ -2466,7 +2469,7 @@ PP(pp_fttty)
 
 PP(pp_fttext)
 {
-    dSP;
+    djSP;
     I32 i;
     I32 len;
     I32 odd = 0;
@@ -2593,7 +2596,7 @@ PP(pp_ftbinary)
 
 PP(pp_chdir)
 {
-    dSP; dTARGET;
+    djSP; dTARGET;
     char *tmps;
     SV **svp;
 
@@ -2623,7 +2626,7 @@ PP(pp_chdir)
 
 PP(pp_chown)
 {
-    dSP; dMARK; dTARGET;
+    djSP; dMARK; dTARGET;
     I32 value;
 #ifdef HAS_CHOWN
     value = (I32)apply(op->op_type, MARK, SP);
@@ -2637,7 +2640,7 @@ PP(pp_chown)
 
 PP(pp_chroot)
 {
-    dSP; dTARGET;
+    djSP; dTARGET;
     char *tmps;
 #ifdef HAS_CHROOT
     tmps = POPp;
@@ -2651,7 +2654,7 @@ PP(pp_chroot)
 
 PP(pp_unlink)
 {
-    dSP; dMARK; dTARGET;
+    djSP; dMARK; dTARGET;
     I32 value;
     value = (I32)apply(op->op_type, MARK, SP);
     SP = MARK;
@@ -2661,7 +2664,7 @@ PP(pp_unlink)
 
 PP(pp_chmod)
 {
-    dSP; dMARK; dTARGET;
+    djSP; dMARK; dTARGET;
     I32 value;
     value = (I32)apply(op->op_type, MARK, SP);
     SP = MARK;
@@ -2671,7 +2674,7 @@ PP(pp_chmod)
 
 PP(pp_utime)
 {
-    dSP; dMARK; dTARGET;
+    djSP; dMARK; dTARGET;
     I32 value;
     value = (I32)apply(op->op_type, MARK, SP);
     SP = MARK;
@@ -2681,7 +2684,7 @@ PP(pp_utime)
 
 PP(pp_rename)
 {
-    dSP; dTARGET;
+    djSP; dTARGET;
     int anum;
 
     char *tmps2 = POPp;
@@ -2707,7 +2710,7 @@ PP(pp_rename)
 
 PP(pp_link)
 {
-    dSP; dTARGET;
+    djSP; dTARGET;
 #ifdef HAS_LINK
     char *tmps2 = POPp;
     char *tmps = SvPV(TOPs, na);
@@ -2721,7 +2724,7 @@ PP(pp_link)
 
 PP(pp_symlink)
 {
-    dSP; dTARGET;
+    djSP; dTARGET;
 #ifdef HAS_SYMLINK
     char *tmps2 = POPp;
     char *tmps = SvPV(TOPs, na);
@@ -2735,7 +2738,7 @@ PP(pp_symlink)
 
 PP(pp_readlink)
 {
-    dSP; dTARGET;
+    djSP; dTARGET;
 #ifdef HAS_SYMLINK
     char *tmps;
     char buf[MAXPATHLEN];
@@ -2848,7 +2851,7 @@ char *filename;
 
 PP(pp_mkdir)
 {
-    dSP; dTARGET;
+    djSP; dTARGET;
     int mode = POPi;
 #ifndef HAS_MKDIR
     int oldumask;
@@ -2869,7 +2872,7 @@ PP(pp_mkdir)
 
 PP(pp_rmdir)
 {
-    dSP; dTARGET;
+    djSP; dTARGET;
     char *tmps;
 
     tmps = POPp;
@@ -2886,7 +2889,7 @@ PP(pp_rmdir)
 
 PP(pp_open_dir)
 {
-    dSP;
+    djSP;
 #if defined(Direntry_t) && defined(HAS_READDIR)
     char *dirname = POPp;
     GV *gv = (GV*)POPs;
@@ -2912,7 +2915,7 @@ nope:
 
 PP(pp_readdir)
 {
-    dSP;
+    djSP;
 #if defined(Direntry_t) && defined(HAS_READDIR)
 #ifndef I_DIRENT
     Direntry_t *readdir _((DIR *));
@@ -2968,9 +2971,9 @@ nope:
 
 PP(pp_telldir)
 {
-    dSP; dTARGET;
+    djSP; dTARGET;
 #if defined(HAS_TELLDIR) || defined(telldir)
-#if !defined(telldir) && !defined(HAS_TELLDIR_PROTOTYPE)
+#if !defined(telldir) && !defined(HAS_TELLDIR_PROTOTYPE) && !defined(DONT_DECLARE_STD)
     long telldir _((DIR *));
 #endif
     GV *gv = (GV*)POPs;
@@ -2992,7 +2995,7 @@ nope:
 
 PP(pp_seekdir)
 {
-    dSP;
+    djSP;
 #if defined(HAS_SEEKDIR) || defined(seekdir)
     long along = POPl;
     GV *gv = (GV*)POPs;
@@ -3015,7 +3018,7 @@ nope:
 
 PP(pp_rewinddir)
 {
-    dSP;
+    djSP;
 #if defined(HAS_REWINDDIR) || defined(rewinddir)
     GV *gv = (GV*)POPs;
     register IO *io = GvIOn(gv);
@@ -3036,7 +3039,7 @@ nope:
 
 PP(pp_closedir)
 {
-    dSP;
+    djSP;
 #if defined(Direntry_t) && defined(HAS_READDIR)
     GV *gv = (GV*)POPs;
     register IO *io = GvIOn(gv);
@@ -3069,7 +3072,7 @@ nope:
 PP(pp_fork)
 {
 #ifdef HAS_FORK
-    dSP; dTARGET;
+    djSP; dTARGET;
     int childpid;
     GV *tmpgv;
 
@@ -3093,7 +3096,7 @@ PP(pp_fork)
 PP(pp_wait)
 {
 #if !defined(DOSISH) || defined(OS2)
-    dSP; dTARGET;
+    djSP; dTARGET;
     int childpid;
     int argflags;
 
@@ -3109,7 +3112,7 @@ PP(pp_wait)
 PP(pp_waitpid)
 {
 #if !defined(DOSISH) || defined(OS2)
-    dSP; dTARGET;
+    djSP; dTARGET;
     int childpid;
     int optype;
     int argflags;
@@ -3127,7 +3130,7 @@ PP(pp_waitpid)
 
 PP(pp_system)
 {
-    dSP; dMARK; dORIGMARK; dTARGET;
+    djSP; dMARK; dORIGMARK; dTARGET;
     I32 value;
     int childpid;
     int result;
@@ -3178,10 +3181,10 @@ PP(pp_system)
 #else /* ! FORK or VMS or OS/2 */
     if (op->op_flags & OPf_STACKED) {
 	SV *really = *++MARK;
-	value = (I32)do_aspawn(really, MARK, SP);
+	value = (I32)do_aspawn(really, (void **)MARK, (void **)SP);
     }
     else if (SP - MARK != 1)
-	value = (I32)do_aspawn(Nullsv, MARK, SP);
+	value = (I32)do_aspawn(Nullsv, (void **)MARK, (void **)SP);
     else {
 	value = (I32)do_spawn(SvPVx(sv_mortalcopy(*SP), na));
     }
@@ -3195,7 +3198,7 @@ PP(pp_system)
 
 PP(pp_exec)
 {
-    dSP; dMARK; dORIGMARK; dTARGET;
+    djSP; dMARK; dORIGMARK; dTARGET;
     I32 value;
 
     if (op->op_flags & OPf_STACKED) {
@@ -3227,7 +3230,7 @@ PP(pp_exec)
 
 PP(pp_kill)
 {
-    dSP; dMARK; dTARGET;
+    djSP; dMARK; dTARGET;
     I32 value;
 #ifdef HAS_KILL
     value = (I32)apply(op->op_type, MARK, SP);
@@ -3242,7 +3245,7 @@ PP(pp_kill)
 PP(pp_getppid)
 {
 #ifdef HAS_GETPPID
-    dSP; dTARGET;
+    djSP; dTARGET;
     XPUSHi( getppid() );
     RETURN;
 #else
@@ -3253,7 +3256,7 @@ PP(pp_getppid)
 PP(pp_getpgrp)
 {
 #ifdef HAS_GETPGRP
-    dSP; dTARGET;
+    djSP; dTARGET;
     int pid;
     I32 value;
 
@@ -3278,7 +3281,7 @@ PP(pp_getpgrp)
 PP(pp_setpgrp)
 {
 #ifdef HAS_SETPGRP
-    dSP; dTARGET;
+    djSP; dTARGET;
     int pgrp;
     int pid;
     if (MAXARG < 2) {
@@ -3306,7 +3309,7 @@ PP(pp_setpgrp)
 
 PP(pp_getpriority)
 {
-    dSP; dTARGET;
+    djSP; dTARGET;
     int which;
     int who;
 #ifdef HAS_GETPRIORITY
@@ -3321,7 +3324,7 @@ PP(pp_getpriority)
 
 PP(pp_setpriority)
 {
-    dSP; dTARGET;
+    djSP; dTARGET;
     int which;
     int who;
     int niceval;
@@ -3341,7 +3344,7 @@ PP(pp_setpriority)
 
 PP(pp_time)
 {
-    dSP; dTARGET;
+    djSP; dTARGET;
 #ifdef BIG_TIME
     XPUSHn( time(Null(Time_t*)) );
 #else
@@ -3368,7 +3371,7 @@ PP(pp_time)
 
 PP(pp_tms)
 {
-    dSP;
+    djSP;
 
 #ifndef HAS_TIMES
     DIE("times not implemented");
@@ -3400,7 +3403,7 @@ PP(pp_localtime)
 
 PP(pp_gmtime)
 {
-    dSP;
+    djSP;
     Time_t when;
     struct tm *tmbuf;
     static char *dayname[] = {"Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"};
@@ -3454,7 +3457,7 @@ PP(pp_gmtime)
 
 PP(pp_alarm)
 {
-    dSP; dTARGET;
+    djSP; dTARGET;
     int anum;
 #ifdef HAS_ALARM
     anum = POPi;
@@ -3471,7 +3474,7 @@ PP(pp_alarm)
 
 PP(pp_sleep)
 {
-    dSP; dTARGET;
+    djSP; dTARGET;
     I32 duration;
     Time_t lasttime;
     Time_t when;
@@ -3508,7 +3511,7 @@ PP(pp_shmread)
 PP(pp_shmwrite)
 {
 #if defined(HAS_MSG) || defined(HAS_SEM) || defined(HAS_SHM)
-    dSP; dMARK; dTARGET;
+    djSP; dMARK; dTARGET;
     I32 value = (I32)(do_shmio(op->op_type, MARK, SP) >= 0);
     SP = MARK;
     PUSHi(value);
@@ -3533,7 +3536,7 @@ PP(pp_msgctl)
 PP(pp_msgsnd)
 {
 #if defined(HAS_MSG) || defined(HAS_SEM) || defined(HAS_SHM)
-    dSP; dMARK; dTARGET;
+    djSP; dMARK; dTARGET;
     I32 value = (I32)(do_msgsnd(MARK, SP) >= 0);
     SP = MARK;
     PUSHi(value);
@@ -3546,7 +3549,7 @@ PP(pp_msgsnd)
 PP(pp_msgrcv)
 {
 #if defined(HAS_MSG) || defined(HAS_SEM) || defined(HAS_SHM)
-    dSP; dMARK; dTARGET;
+    djSP; dMARK; dTARGET;
     I32 value = (I32)(do_msgrcv(MARK, SP) >= 0);
     SP = MARK;
     PUSHi(value);
@@ -3561,7 +3564,7 @@ PP(pp_msgrcv)
 PP(pp_semget)
 {
 #if defined(HAS_MSG) || defined(HAS_SEM) || defined(HAS_SHM)
-    dSP; dMARK; dTARGET;
+    djSP; dMARK; dTARGET;
     int anum = do_ipcget(op->op_type, MARK, SP);
     SP = MARK;
     if (anum == -1)
@@ -3576,7 +3579,7 @@ PP(pp_semget)
 PP(pp_semctl)
 {
 #if defined(HAS_MSG) || defined(HAS_SEM) || defined(HAS_SHM)
-    dSP; dMARK; dTARGET;
+    djSP; dMARK; dTARGET;
     int anum = do_ipcctl(op->op_type, MARK, SP);
     SP = MARK;
     if (anum == -1)
@@ -3596,7 +3599,7 @@ PP(pp_semctl)
 PP(pp_semop)
 {
 #if defined(HAS_MSG) || defined(HAS_SEM) || defined(HAS_SHM)
-    dSP; dMARK; dTARGET;
+    djSP; dMARK; dTARGET;
     I32 value = (I32)(do_semop(MARK, SP) >= 0);
     SP = MARK;
     PUSHi(value);
@@ -3628,15 +3631,15 @@ PP(pp_ghbyaddr)
 
 PP(pp_ghostent)
 {
-    dSP;
+    djSP;
 #ifdef HAS_SOCKET
     I32 which = op->op_type;
     register char **elem;
     register SV *sv;
-    struct hostent *gethostbyname();
-    struct hostent *gethostbyaddr();
-#ifdef HAS_GETHOSTENT
-    struct hostent *gethostent();
+#if defined(HAS_GETHOSTENT) && !defined(DONT_DECLARE_STD)
+    struct hostent *gethostbyname(const char *);
+    struct hostent *gethostbyaddr(const char *, int, int);
+    struct hostent *gethostent(void);
 #endif
     struct hostent *hent;
     unsigned long len;
@@ -3729,14 +3732,16 @@ PP(pp_gnbyaddr)
 
 PP(pp_gnetent)
 {
-    dSP;
+    djSP;
 #ifdef HAS_SOCKET
     I32 which = op->op_type;
     register char **elem;
     register SV *sv;
-    struct netent *getnetbyname();
-    struct netent *getnetbyaddr();
-    struct netent *getnetent();
+#ifndef DONT_DECLARE_STD
+    struct netent *getnetbyname(const char *);
+    struct netent *getnetbyaddr(long int, int);
+    struct netent *getnetent(void);
+#endif
     struct netent *nent;
 
     if (which == OP_GNBYNAME)
@@ -3802,14 +3807,16 @@ PP(pp_gpbynumber)
 
 PP(pp_gprotoent)
 {
-    dSP;
+    djSP;
 #ifdef HAS_SOCKET
     I32 which = op->op_type;
     register char **elem;
-    register SV *sv;
-    struct protoent *getprotobyname();
-    struct protoent *getprotobynumber();
-    struct protoent *getprotoent();
+    register SV *sv;  
+#ifndef DONT_DECLARE_STD
+    struct protoent *getprotobyname(const char *);
+    struct protoent *getprotobynumber(int);
+    struct protoent *getprotoent(void);
+#endif
     struct protoent *pent;
 
     if (which == OP_GPBYNAME)
@@ -3870,14 +3877,16 @@ PP(pp_gsbyport)
 
 PP(pp_gservent)
 {
-    dSP;
+    djSP;
 #ifdef HAS_SOCKET
     I32 which = op->op_type;
     register char **elem;
     register SV *sv;
-    struct servent *getservbyname();
+#ifndef DONT_DECLARE_STD
+    struct servent *getservbyname(const char *, const char *);
     struct servent *getservbynumber();
-    struct servent *getservent();
+    struct servent *getservent(void);
+#endif
     struct servent *sent;
 
     if (which == OP_GSBYNAME) {
@@ -3945,7 +3954,7 @@ PP(pp_gservent)
 
 PP(pp_shostent)
 {
-    dSP;
+    djSP;
 #ifdef HAS_SOCKET
     sethostent(TOPi);
     RETSETYES;
@@ -3956,7 +3965,7 @@ PP(pp_shostent)
 
 PP(pp_snetent)
 {
-    dSP;
+    djSP;
 #ifdef HAS_SOCKET
     setnetent(TOPi);
     RETSETYES;
@@ -3967,7 +3976,7 @@ PP(pp_snetent)
 
 PP(pp_sprotoent)
 {
-    dSP;
+    djSP;
 #ifdef HAS_SOCKET
     setprotoent(TOPi);
     RETSETYES;
@@ -3978,7 +3987,7 @@ PP(pp_sprotoent)
 
 PP(pp_sservent)
 {
-    dSP;
+    djSP;
 #ifdef HAS_SOCKET
     setservent(TOPi);
     RETSETYES;
@@ -3989,7 +3998,7 @@ PP(pp_sservent)
 
 PP(pp_ehostent)
 {
-    dSP;
+    djSP;
 #ifdef HAS_SOCKET
     endhostent();
     EXTEND(sp,1);
@@ -4001,7 +4010,7 @@ PP(pp_ehostent)
 
 PP(pp_enetent)
 {
-    dSP;
+    djSP;
 #ifdef HAS_SOCKET
     endnetent();
     EXTEND(sp,1);
@@ -4013,7 +4022,7 @@ PP(pp_enetent)
 
 PP(pp_eprotoent)
 {
-    dSP;
+    djSP;
 #ifdef HAS_SOCKET
     endprotoent();
     EXTEND(sp,1);
@@ -4025,7 +4034,7 @@ PP(pp_eprotoent)
 
 PP(pp_eservent)
 {
-    dSP;
+    djSP;
 #ifdef HAS_SOCKET
     endservent();
     EXTEND(sp,1);
@@ -4055,7 +4064,7 @@ PP(pp_gpwuid)
 
 PP(pp_gpwent)
 {
-    dSP;
+    djSP;
 #ifdef HAS_PASSWD
     I32 which = op->op_type;
     register SV *sv;
@@ -4131,7 +4140,7 @@ PP(pp_gpwent)
 
 PP(pp_spwent)
 {
-    dSP;
+    djSP;
 #if defined(HAS_PASSWD) && !defined(CYGWIN32)
     setpwent();
     RETPUSHYES;
@@ -4142,7 +4151,7 @@ PP(pp_spwent)
 
 PP(pp_epwent)
 {
-    dSP;
+    djSP;
 #ifdef HAS_PASSWD
     endpwent();
     RETPUSHYES;
@@ -4171,7 +4180,7 @@ PP(pp_ggrgid)
 
 PP(pp_ggrent)
 {
-    dSP;
+    djSP;
 #ifdef HAS_GROUP
     I32 which = op->op_type;
     register char **elem;
@@ -4220,7 +4229,7 @@ PP(pp_ggrent)
 
 PP(pp_sgrent)
 {
-    dSP;
+    djSP;
 #ifdef HAS_GROUP
     setgrent();
     RETPUSHYES;
@@ -4231,7 +4240,7 @@ PP(pp_sgrent)
 
 PP(pp_egrent)
 {
-    dSP;
+    djSP;
 #ifdef HAS_GROUP
     endgrent();
     RETPUSHYES;
@@ -4242,7 +4251,7 @@ PP(pp_egrent)
 
 PP(pp_getlogin)
 {
-    dSP; dTARGET;
+    djSP; dTARGET;
 #ifdef HAS_GETLOGIN
     char *tmps;
     EXTEND(SP, 1);
@@ -4259,8 +4268,8 @@ PP(pp_getlogin)
 
 PP(pp_syscall)
 {
-#ifdef HAS_SYSCALL
-    dSP; dMARK; dORIGMARK; dTARGET;
+#ifdef HAS_SYSCALL   
+    djSP; dMARK; dORIGMARK; dTARGET;
     register I32 items = SP - MARK;
     unsigned long a[20];
     register I32 i = 0;
@@ -4361,9 +4370,7 @@ PP(pp_syscall)
 */
 
 static int
-fcntl_emulate_flock(fd, operation)
-int fd;
-int operation;
+fcntl_emulate_flock(int fd, int operation)
 {
     struct flock flock;
  
@@ -4475,3 +4482,4 @@ int operation;
 }
 
 #endif /* LOCKF_EMULATE_FLOCK */
+

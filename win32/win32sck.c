@@ -702,7 +702,14 @@ win32_setservent(int stayopen)
 
 #define WIN32IO_IS_STDIO
 #include <io.h>
+
+#ifdef __cplusplus
+extern "C" {
+#endif
 #include "win32iop.h"
+#ifdef __cplusplus
+}
+#endif
 
 static struct servent*
 win32_savecopyservent(struct servent*d, struct servent*s, const char *proto)

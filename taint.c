@@ -8,9 +8,7 @@
 #include "perl.h"
 
 void
-taint_proper(f, s)
-const char *f;
-char *s;
+taint_proper(const char *f, char *s)
 {
     dTHR;	/* just for taint */
     char *ug;
@@ -33,7 +31,7 @@ char *s;
 }
 
 void
-taint_env()
+taint_env(void)
 {
     SV** svp;
     MAGIC* mg;

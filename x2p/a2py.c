@@ -18,13 +18,13 @@ char *myname;
 
 int checkers = 0;
 
-int oper0();
-int oper1();
-int oper2();
-int oper3();
-int oper4();
-int oper5();
-STR *walk();
+int oper0(int type);
+int oper1(int type, int arg1);
+int oper2(int type, int arg1, int arg2);
+int oper3(int type, int arg1, int arg2, int arg3);
+int oper4(int type, int arg1, int arg2, int arg3, int arg4);
+int oper5(int type, int arg1, int arg2, int arg3, int arg4, int arg5);
+STR *walk(int useval, int level, register int node, int *numericptr, int minprec);
 
 #ifdef OS2
 static void
@@ -44,10 +44,7 @@ usage()
 #endif
 
 int
-main(argc,argv,env)
-register int argc;
-register char **argv;
-register char **env;
+main(register int argc, register char **argv, register char **env)
 {
     register STR *str;
     int i;
@@ -200,7 +197,7 @@ register char **env;
 int idtype;
 
 int
-yylex()
+yylex(void)
 {
     register char *s = bufptr;
     register char *d;
@@ -794,8 +791,7 @@ yylex()
 }
 
 char *
-scanpat(s)
-register char *s;
+scanpat(register char *s)
 {
     register char *d;
 
@@ -840,16 +836,14 @@ register char *s;
 }
 
 void
-yyerror(s)
-char *s;
+yyerror(char *s)
 {
     fprintf(stderr,"%s in file %s at line %d\n",
       s,filename,line);
 }
 
 char *
-scannum(s)
-register char *s;
+scannum(register char *s)
 {
     register char *d;
 
@@ -885,16 +879,14 @@ register char *s;
 }
 
 int
-string(ptr,len)
-char *ptr;
-int len;
+string(char *ptr, int len)
 {
     int retval = mop;
 
     ops[mop++].ival = OSTRING + (1<<8);
     if (!len)
 	len = strlen(ptr);
-    ops[mop].cval = safemalloc(len+1);
+    ops[mop].cval = (char *) safemalloc(len+1);
     strncpy(ops[mop].cval,ptr,len);
     ops[mop++].cval[len] = '\0';
     if (mop >= OPSMAX)
@@ -903,8 +895,7 @@ int len;
 }
 
 int
-oper0(type)
-int type;
+oper0(int type)
 {
     int retval = mop;
 
@@ -917,9 +908,7 @@ int type;
 }
 
 int
-oper1(type,arg1)
-int type;
-int arg1;
+oper1(int type, int arg1)
 {
     int retval = mop;
 
@@ -933,10 +922,7 @@ int arg1;
 }
 
 int
-oper2(type,arg1,arg2)
-int type;
-int arg1;
-int arg2;
+oper2(int type, int arg1, int arg2)
 {
     int retval = mop;
 
@@ -951,11 +937,7 @@ int arg2;
 }
 
 int
-oper3(type,arg1,arg2,arg3)
-int type;
-int arg1;
-int arg2;
-int arg3;
+oper3(int type, int arg1, int arg2, int arg3)
 {
     int retval = mop;
 
@@ -971,12 +953,7 @@ int arg3;
 }
 
 int
-oper4(type,arg1,arg2,arg3,arg4)
-int type;
-int arg1;
-int arg2;
-int arg3;
-int arg4;
+oper4(int type, int arg1, int arg2, int arg3, int arg4)
 {
     int retval = mop;
 
@@ -993,13 +970,7 @@ int arg4;
 }
 
 int
-oper5(type,arg1,arg2,arg3,arg4,arg5)
-int type;
-int arg1;
-int arg2;
-int arg3;
-int arg4;
-int arg5;
+oper5(int type, int arg1, int arg2, int arg3, int arg4, int arg5)
 {
     int retval = mop;
 
@@ -1019,8 +990,7 @@ int arg5;
 int depth = 0;
 
 void
-dump(branch)
-int branch;
+dump(int branch)
 {
     register int type;
     register int len;
@@ -1047,9 +1017,7 @@ int branch;
 }
 
 int
-bl(arg,maybe)
-int arg;
-int maybe;
+bl(int arg, int maybe)
 {
     if (!arg)
 	return 0;
@@ -1062,8 +1030,7 @@ int maybe;
 }
 
 void
-fixup(str)
-STR *str;
+fixup(STR *str)
 {
     register char *s;
     register char *t;
@@ -1088,8 +1055,7 @@ STR *str;
 }
 
 void
-putlines(str)
-STR *str;
+putlines(STR *str)
 {
     register char *d, *s, *t, *e;
     register int pos, newpos;
@@ -1165,7 +1131,7 @@ STR *str;
 }
 
 void
-putone()
+putone(void)
 {
     register char *t;
 
@@ -1188,8 +1154,7 @@ putone()
 }
 
 int
-numary(arg)
-int arg;
+numary(int arg)
 {
     STR *key;
     int dummy;
@@ -1203,8 +1168,7 @@ int arg;
 }
 
 int
-rememberargs(arg)
-int arg;
+rememberargs(int arg)
 {
     int type;
     STR *str;
@@ -1226,8 +1190,7 @@ int arg;
 }
 
 int
-aryrefarg(arg)
-int arg;
+aryrefarg(int arg)
 {
     int type = ops[arg].ival & 255;
     STR *str;
@@ -1241,10 +1204,7 @@ int arg;
 }
 
 int
-fixfargs(name,arg,prevargs)
-int name;
-int arg;
-int prevargs;
+fixfargs(int name, int arg, int prevargs)
 {
     int type;
     STR *str;
@@ -1280,10 +1240,7 @@ int prevargs;
 }
 
 int
-fixrargs(name,arg,prevargs)
-char *name;
-int arg;
-int prevargs;
+fixrargs(char *name, int arg, int prevargs)
 {
     int type;
     STR *str;
@@ -1297,7 +1254,7 @@ int prevargs;
 	numargs = fixrargs(name,ops[arg+3].ival,numargs);
     }
     else {
-	char *tmpbuf = safemalloc(strlen(name) + (sizeof(prevargs) * 3) + 5);
+	char *tmpbuf = (char *) safemalloc(strlen(name) + (sizeof(prevargs) * 3) + 5);
 	sprintf(tmpbuf,"%s:%d",name,prevargs);
 	str = hfetch(curarghash,tmpbuf);
 	safefree(tmpbuf);

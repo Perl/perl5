@@ -237,8 +237,14 @@ static	union overhead *nextf[NBUCKETS];
 #ifdef USE_PERL_SBRK
 #define sbrk(a) Perl_sbrk(a)
 char *  Perl_sbrk _((int size));
+#else 
+#ifdef DONT_DECLARE_STD
+#ifdef I_UNISTD
+#include <unistd.h>
+#endif
 #else
-extern	char *sbrk();
+extern	char *sbrk(int);
+#endif
 #endif
 
 #ifdef DEBUGGING_MSTATS
@@ -255,8 +261,7 @@ static  u_int start_slack;
 #ifdef DEBUGGING
 #define	ASSERT(p)   if (!(p)) botch(STRINGIFY(p));  else
 static void
-botch(s)
-	char *s;
+botch(char *s)
 {
 	PerlIO_printf(PerlIO_stderr(), "assertion botched: %s\n", s);
 	abort();
@@ -266,8 +271,7 @@ botch(s)
 #endif
 
 Malloc_t
-malloc(nbytes)
-	register MEM_SIZE nbytes;
+malloc(register size_t nbytes)
 {
   	register union overhead *p;
   	register int bucket = 0;
@@ -368,8 +372,7 @@ malloc(nbytes)
  * Allocate more memory to the indicated bucket.
  */
 static void
-morecore(bucket)
-	register int bucket;
+morecore(register int bucket)
 {
   	register union overhead *ovp;
   	register int rnu;       /* 2^rnu bytes will be requested */
@@ -481,8 +484,7 @@ morecore(bucket)
 }
 
 Free_t
-free(mp)
-	Malloc_t mp;
+free(void *mp)
 {   
   	register MEM_SIZE size;
 	register union overhead *ovp;
@@ -546,9 +548,7 @@ free(mp)
 int reall_srchlen = 4;	/* 4 should be plenty, -1 =>'s whole list */
 
 Malloc_t
-realloc(mp, nbytes)
-	Malloc_t mp; 
-	MEM_SIZE nbytes;
+realloc(void *mp, size_t nbytes)
 {   
   	register MEM_SIZE onb;
 	union overhead *ovp;
@@ -672,9 +672,7 @@ realloc(mp, nbytes)
  * Return bucket number, or -1 if not found.
  */
 static int
-findbucket(freep, srchlen)
-	union overhead *freep;
-	int srchlen;
+findbucket(union overhead *freep, int srchlen)
 {
 	register union overhead *p;
 	register int i, j;
@@ -691,9 +689,7 @@ findbucket(freep, srchlen)
 }
 
 Malloc_t
-calloc(elements, size)
-	register MEM_SIZE elements;
-	register MEM_SIZE size;
+calloc(register size_t elements, register size_t size)
 {
     long sz = elements * size;
     Malloc_t p = malloc(sz);
@@ -713,8 +709,7 @@ calloc(elements, size)
  * frees for each size category.
  */
 void
-dump_mstats(s)
-	char *s;
+dump_mstats(char *s)
 {
   	register int i, j;
   	register union overhead *p;
@@ -746,8 +741,7 @@ dump_mstats(s)
 }
 #else
 void
-dump_mstats(s)
-    char *s;
+dump_mstats(char *s)
 {
 }
 #endif

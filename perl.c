@@ -97,7 +97,7 @@ catch_sigsegv(int signo, struct sigcontext_struct sc)
 #endif
 
 PerlInterpreter *
-perl_alloc()
+perl_alloc(void)
 {
     PerlInterpreter *sv_interp;
 
@@ -107,8 +107,7 @@ perl_alloc()
 }
 
 void
-perl_construct( sv_interp )
-register PerlInterpreter *sv_interp;
+perl_construct(register PerlInterpreter *sv_interp)
 {
 #ifdef USE_THREADS
     int i;
@@ -129,8 +128,12 @@ register PerlInterpreter *sv_interp;
 #ifdef USE_THREADS
 
     	INIT_THREADS;
+#ifdef ALLOC_THREAD_KEY
+        ALLOC_THREAD_KEY;
+#else
 	if (pthread_key_create(&thr_key, 0))
 	    croak("panic: pthread_key_create");
+#endif
 	MUTEX_INIT(&malloc_mutex);
 	MUTEX_INIT(&sv_mutex);
 	/*
@@ -222,8 +225,7 @@ register PerlInterpreter *sv_interp;
 }
 
 void
-perl_destruct(sv_interp)
-register PerlInterpreter *sv_interp;
+perl_destruct(register PerlInterpreter *sv_interp)
 {
     dTHR;
     int destruct_level;  /* 0=none, 1=full, 2=full with checks */
@@ -470,7 +472,8 @@ register PerlInterpreter *sv_interp;
     envgv = Nullgv;
     siggv = Nullgv;
     incgv = Nullgv;
-    errgv = Nullgv;
+    errhv = Nullhv;
+    errsv = Nullsv;
     argvgv = Nullgv;
     argvoutgv = Nullgv;
     stdingv = Nullgv;
@@ -581,8 +584,7 @@ register PerlInterpreter *sv_interp;
 }
 
 void
-perl_free(sv_interp)
-PerlInterpreter *sv_interp;
+perl_free(PerlInterpreter *sv_interp)
 {
     if (!(curinterp = sv_interp))
 	return;
@@ -590,12 +592,7 @@ PerlInterpreter *sv_interp;
 }
 
 int
-perl_parse(sv_interp, xsinit, argc, argv, env)
-PerlInterpreter *sv_interp;
-void (*xsinit)_((void));
-int argc;
-char **argv;
-char **env;
+perl_parse(PerlInterpreter *sv_interp, void (*xsinit) (void), int argc, char **argv, char **env)
 {
     dTHR;
     register SV *sv;
@@ -996,8 +993,7 @@ print \"  \\@INC:\\n    @INC\\n\";");
 }
 
 int
-perl_run(sv_interp)
-PerlInterpreter *sv_interp;
+perl_run(PerlInterpreter *sv_interp)
 {
     dTHR;
     I32 oldscope;
@@ -1082,9 +1078,7 @@ PerlInterpreter *sv_interp;
 }
 
 SV*
-perl_get_sv(name, create)
-char* name;
-I32 create;
+perl_get_sv(char *name, I32 create)
 {
     GV *gv;
 #ifdef USE_THREADS
@@ -1103,9 +1097,7 @@ I32 create;
 }
 
 AV*
-perl_get_av(name, create)
-char* name;
-I32 create;
+perl_get_av(char *name, I32 create)
 {
     GV* gv = gv_fetchpv(name, create, SVt_PVAV);
     if (create)
@@ -1116,9 +1108,7 @@ I32 create;
 }
 
 HV*
-perl_get_hv(name, create)
-char* name;
-I32 create;
+perl_get_hv(char *name, I32 create)
 {
     GV* gv = gv_fetchpv(name, create, SVt_PVHV);
     if (create)
@@ -1129,9 +1119,7 @@ I32 create;
 }
 
 CV*
-perl_get_cv(name, create)
-char* name;
-I32 create;
+perl_get_cv(char *name, I32 create)
 {
     GV* gv = gv_fetchpv(name, create, SVt_PVCV);
     if (create && !GvCVu(gv))
@@ -1147,12 +1135,11 @@ I32 create;
 /* Be sure to refetch the stack pointer after calling these routines. */
 
 I32
-perl_call_argv(subname, flags, argv)
-char *subname;
-I32 flags;		/* See G_* flags in cop.h */
-register char **argv;	/* null terminated arg list */
+perl_call_argv(char *subname, I32 flags, register char **argv)
+              
+          		/* See G_* flags in cop.h */
+                     	/* null terminated arg list */
 {
-    dTHR;
     dSP;
 
     PUSHMARK(sp);
@@ -1167,19 +1154,18 @@ register char **argv;	/* null terminated arg list */
 }
 
 I32
-perl_call_pv(subname, flags)
-char *subname;		/* name of the subroutine */
-I32 flags;		/* See G_* flags in cop.h */
+perl_call_pv(char *subname, I32 flags)
+              		/* name of the subroutine */
+          		/* See G_* flags in cop.h */
 {
     return perl_call_sv((SV*)perl_get_cv(subname, TRUE), flags);
 }
 
 I32
-perl_call_method(methname, flags)
-char *methname;		/* name of the subroutine */
-I32 flags;		/* See G_* flags in cop.h */
+perl_call_method(char *methname, I32 flags)
+               		/* name of the subroutine */
+          		/* See G_* flags in cop.h */
 {
-    dTHR;
     dSP;
     OP myop;
     if (!op)
@@ -1192,9 +1178,9 @@ I32 flags;		/* See G_* flags in cop.h */
 
 /* May be called with any of a CV, a GV, or an SV containing the name. */
 I32
-perl_call_sv(sv, flags)
-SV* sv;
-I32 flags;		/* See G_* flags in cop.h */
+perl_call_sv(SV *sv, I32 flags)
+       
+          		/* See G_* flags in cop.h */
 {
     dTHR;
     LOGOP myop;		/* fake syntax tree node */
@@ -1336,9 +1322,9 @@ I32 flags;		/* See G_* flags in cop.h */
 /* Eval a string. The G_EVAL flag is always assumed. */
 
 I32
-perl_eval_sv(sv, flags)
-SV* sv;
-I32 flags;		/* See G_* flags in cop.h */
+perl_eval_sv(SV *sv, I32 flags)
+       
+          		/* See G_* flags in cop.h */
 {
     dTHR;
     UNOP myop;		/* fake syntax tree node */
@@ -1425,11 +1411,8 @@ I32 flags;		/* See G_* flags in cop.h */
 }
 
 SV*
-perl_eval_pv(p, croak_on_error)
-char* p;
-I32 croak_on_error;
+perl_eval_pv(char *p, I32 croak_on_error)
 {
-    dTHR;
     dSP;
     SV* sv = newSVpv(p, 0);
 
@@ -1450,8 +1433,7 @@ I32 croak_on_error;
 /* Require a module. */
 
 void
-perl_require_pv(pv)
-char* pv;
+perl_require_pv(char *pv)
 {
     SV* sv = sv_newmortal();
     sv_setpv(sv, "require '");
@@ -1461,10 +1443,7 @@ char* pv;
 }
 
 void
-magicname(sym,name,namlen)
-char *sym;
-char *name;
-I32 namlen;
+magicname(char *sym, char *name, I32 namlen)
 {
     register GV *gv;
 
@@ -1473,8 +1452,8 @@ I32 namlen;
 }
 
 static void
-usage(name)		/* XXX move this out into a module ? */
-char *name;
+usage(char *name)		/* XXX move this out into a module ? */
+           
 {
     /* This message really ought to be max 23 lines.
      * Removed -h because the user already knows that opton. Others? */
@@ -1516,8 +1495,7 @@ NULL
 /* This routine handles any switches that can be given during run */
 
 char *
-moreswitches(s)
-char *s;
+moreswitches(char *s)
 {
     I32 numlen;
     U32 rschar;
@@ -1761,7 +1739,7 @@ GNU General Public License, which may be found in the Perl 5.0 source kit.\n\n")
 /* unexec() can be found in the Gnu emacs distribution */
 
 void
-my_unexec()
+my_unexec(void)
 {
 #ifdef UNEXEC
     SV*    prog;
@@ -1790,7 +1768,7 @@ my_unexec()
 }
 
 static void
-init_main_stash()
+init_main_stash(void)
 {
     dTHR;
     GV *gv;
@@ -1813,8 +1791,8 @@ init_main_stash()
     incgv = gv_HVadd(gv_AVadd(gv_fetchpv("INC",TRUE, SVt_PVAV)));
     GvMULTI_on(incgv);
     defgv = gv_fetchpv("_",TRUE, SVt_PVAV);
-    errgv = gv_HVadd(gv_fetchpv("@", TRUE, SVt_PV));
-    GvMULTI_on(errgv);
+    errsv = newSVpv("", 0);
+    errhv = newHV();
     (void)form("%240s","");	/* Preallocate temp - for immediate signals. */
     sv_grow(ERRSV, 240);	/* Preallocate - for immediate signals. */
     sv_setpvn(ERRSV, "", 0);
@@ -2149,9 +2127,7 @@ sed %s -e \"/^[^#]/b\" \
 }
 
 static void
-validate_suid(validarg, scriptname)
-char *validarg;
-char *scriptname;
+validate_suid(char *validarg, char *scriptname)
 {
     int which;
 
@@ -2391,7 +2367,7 @@ FIX YOUR KERNEL, PUT A C WRAPPER AROUND THIS SCRIPT, OR USE -u AND UNDUMP!\n");
 }
 
 static void
-find_beginning()
+find_beginning(void)
 {
     register char *s, *s2;
 
@@ -2420,7 +2396,7 @@ find_beginning()
 }
 
 static void
-init_ids()
+init_ids(void)
 {
     uid = (int)getuid();
     euid = (int)geteuid();
@@ -2434,8 +2410,7 @@ init_ids()
 }
 
 static void
-forbid_setid(s)
-char *s;
+forbid_setid(char *s)
 {
     if (euid != uid)
         croak("No %s allowed while running setuid", s);
@@ -2444,7 +2419,7 @@ char *s;
 }
 
 static void
-init_debugger()
+init_debugger(void)
 {
     dTHR;
     curstash = debstash;
@@ -2463,8 +2438,7 @@ init_debugger()
 }
 
 void
-init_stacks(ARGS)
-dARGS
+init_stacks(ARGSproto)
 {
     curstack = newAV();
     mainstack = curstack;		/* remember in case we switch stacks */
@@ -2523,7 +2497,7 @@ dARGS
 }
 
 static void
-nuke_stacks()
+nuke_stacks(void)
 {
     dTHR;
     Safefree(cxstack);
@@ -2537,7 +2511,7 @@ nuke_stacks()
 static PerlIO *tmpfp;  /* moved outside init_lexer() because of UNICOS bug */
 
 static void
-init_lexer()
+init_lexer(void)
 {
     tmpfp = rsfp;
     rsfp = Nullfp;
@@ -2547,7 +2521,7 @@ init_lexer()
 }
 
 static void
-init_predump_symbols()
+init_predump_symbols(void)
 {
     dTHR;
     GV *tmpgv;
@@ -2588,10 +2562,7 @@ init_predump_symbols()
 }
 
 static void
-init_postdump_symbols(argc,argv,env)
-register int argc;
-register char **argv;
-register char **env;
+init_postdump_symbols(register int argc, register char **argv, register char **env)
 {
     dTHR;
     char *s;
@@ -2679,7 +2650,7 @@ register char **env;
 }
 
 static void
-init_perllib()
+init_perllib(void)
 {
     char *s;
     if (!tainting) {
@@ -2746,9 +2717,7 @@ init_perllib()
 #endif 
 
 static void
-incpush(p, addsubdirs)
-char *p;
-int addsubdirs;
+incpush(char *p, int addsubdirs)
 {
     SV *subdir = Nullsv;
     static char *archpat_auto;
@@ -2897,9 +2866,7 @@ init_main_thread()
 #endif /* USE_THREADS */
 
 void
-call_list(oldscope, list)
-I32 oldscope;
-AV* list;
+call_list(I32 oldscope, AV *list)
 {
     dTHR;
     line_t oldline = curcop->cop_line;
@@ -2918,18 +2885,18 @@ AV* list;
 		SV* atsv = ERRSV;
 		PUSHMARK(stack_sp);
 		perl_call_sv((SV*)cv, G_EVAL|G_DISCARD);
-		(void)SvPV(atsv, len);
+		(void)SvPV(errsv, len);
 		if (len) {
 		    JMPENV_POP;
 		    curcop = &compiling;
 		    curcop->cop_line = oldline;
 		    if (list == beginav)
-			sv_catpv(atsv, "BEGIN failed--compilation aborted");
+			sv_catpv(errsv, "BEGIN failed--compilation aborted");
 		    else
-			sv_catpv(atsv, "END failed--cleanup aborted");
+			sv_catpv(errsv, "END failed--cleanup aborted");
 		    while (scopestack_ix > oldscope)
 			LEAVE;
-		    croak("%s", SvPVX(atsv));
+		    croak("%s", SvPVX(errsv));
 		}
 	    }
 	    break;
@@ -2971,8 +2938,7 @@ AV* list;
 }
 
 void
-my_exit(status)
-U32 status;
+my_exit(U32 status)
 {
     dTHR;
 
@@ -2995,7 +2961,7 @@ U32 status;
 }
 
 void
-my_failure_exit()
+my_failure_exit(void)
 {
 #ifdef VMS
     if (vaxc$errno & 1) {
@@ -3018,7 +2984,7 @@ my_failure_exit()
 }
 
 static void
-my_exit_jump()
+my_exit_jump(void)
 {
     dTHR;
     register CONTEXT *cx;
@@ -3044,3 +3010,5 @@ my_exit_jump()
 
     JMPENV_JUMP(2);
 }
+
+

@@ -132,10 +132,7 @@ static char* nextchar _((void));
  * of the structure of the compiled regexp.  [I'll say.]
  */
 regexp *
-pregcomp(exp,xend,pm)
-char* exp;
-char* xend;
-PMOP* pm;
+pregcomp(char *exp, char *xend, PMOP *pm)
 {
     register regexp *r;
     register char *scan;
@@ -436,9 +433,9 @@ PMOP* pm;
  * follows makes it hard to avoid.
  */
 static char *
-reg(paren, flagp)
-I32 paren;			/* Parenthesized? */
-I32 *flagp;
+reg(I32 paren, I32 *flagp)
+          			/* Parenthesized? */
+           
 {
     register char *ret;
     register char *br;
@@ -567,8 +564,7 @@ I32 *flagp;
  * Implements the concatenation operator.
  */
 static char *
-regbranch(flagp)
-I32 *flagp;
+regbranch(I32 *flagp)
 {
     register char *ret;
     register char *chain;
@@ -614,8 +610,7 @@ I32 *flagp;
  * endmarker role is not redundant.
  */
 static char *
-regpiece(flagp)
-I32 *flagp;
+regpiece(I32 *flagp)
 {
     register char *ret;
     register char op;
@@ -762,8 +757,7 @@ I32 *flagp;
  * [Yes, it is worth fixing, some scripts can run twice the speed.]
  */
 static char *
-regatom(flagp)
-I32 *flagp;
+regatom(I32 *flagp)
 {
     register char *ret = 0;
     I32 flags;
@@ -1075,9 +1069,7 @@ tryagain:
 }
 
 static char *
-regwhite(p, e)
-char *p;
-char *e;
+regwhite(char *p, char *e)
 {
     while (p < e) {
 	if (isSPACE(*p))
@@ -1094,9 +1086,7 @@ char *e;
 }
 
 static void
-regset(opnd, c)
-char *opnd;
-register I32 c;
+regset(char *opnd, register I32 c)
 {
     if (opnd == &regdummy)
 	return;
@@ -1105,10 +1095,10 @@ register I32 c;
 }
 
 static char *
-regclass()
+regclass(void)
 {
     register char *opnd;
-    register I32 class;
+    register I32 Class;
     register I32 lastclass = 1234;
     register I32 range = 0;
     register char *ret;
@@ -1117,7 +1107,7 @@ regclass()
 
     ret = regnode(ANYOF);
     opnd = regcode;
-    for (class = 0; class < 33; class++)
+    for (Class = 0; Class < 33; Class++)
 	regc(0);
     if (*regparse == '^') {	/* Complement of range. */
 	regnaughty++;
@@ -1135,19 +1125,19 @@ regclass()
 	goto skipcond;		/* allow 1st char to be ] or - */
     while (regparse < regxend && *regparse != ']') {
        skipcond:
-	class = UCHARAT(regparse++);
-	if (class == '\\') {
-	    class = UCHARAT(regparse++);
-	    switch (class) {
+	Class = UCHARAT(regparse++);
+	if (Class == '\\') {
+	    Class = UCHARAT(regparse++);
+	    switch (Class) {
 	    case 'w':
 		if (regflags & PMf_LOCALE) {
 		    if (opnd != &regdummy)
 			*opnd |= ANYOF_ALNUML;
 		}
 		else {
-		    for (class = 0; class < 256; class++)
-			if (isALNUM(class))
-			    regset(opnd, class);
+		    for (Class = 0; Class < 256; Class++)
+			if (isALNUM(Class))
+			    regset(opnd, Class);
 		}
 		lastclass = 1234;
 		continue;
@@ -1157,9 +1147,9 @@ regclass()
 			*opnd |= ANYOF_NALNUML;
 		}
 		else {
-		    for (class = 0; class < 256; class++)
-			if (!isALNUM(class))
-			    regset(opnd, class);
+		    for (Class = 0; Class < 256; Class++)
+			if (!isALNUM(Class))
+			    regset(opnd, Class);
 		}
 		lastclass = 1234;
 		continue;
@@ -1169,9 +1159,9 @@ regclass()
 			*opnd |= ANYOF_SPACEL;
 		}
 		else {
-		    for (class = 0; class < 256; class++)
-			if (isSPACE(class))
-			    regset(opnd, class);
+		    for (Class = 0; Class < 256; Class++)
+			if (isSPACE(Class))
+			    regset(opnd, Class);
 		}
 		lastclass = 1234;
 		continue;
@@ -1181,67 +1171,67 @@ regclass()
 			*opnd |= ANYOF_NSPACEL;
 		}
 		else {
-		    for (class = 0; class < 256; class++)
-			if (!isSPACE(class))
-			    regset(opnd, class);
+		    for (Class = 0; Class < 256; Class++)
+			if (!isSPACE(Class))
+			    regset(opnd, Class);
 		}
 		lastclass = 1234;
 		continue;
 	    case 'd':
-		for (class = '0'; class <= '9'; class++)
-		    regset(opnd, class);
+		for (Class = '0'; Class <= '9'; Class++)
+		    regset(opnd, Class);
 		lastclass = 1234;
 		continue;
 	    case 'D':
-		for (class = 0; class < '0'; class++)
-		    regset(opnd, class);
-		for (class = '9' + 1; class < 256; class++)
-		    regset(opnd, class);
+		for (Class = 0; Class < '0'; Class++)
+		    regset(opnd, Class);
+		for (Class = '9' + 1; Class < 256; Class++)
+		    regset(opnd, Class);
 		lastclass = 1234;
 		continue;
 	    case 'n':
-		class = '\n';
+		Class = '\n';
 		break;
 	    case 'r':
-		class = '\r';
+		Class = '\r';
 		break;
 	    case 't':
-		class = '\t';
+		Class = '\t';
 		break;
 	    case 'f':
-		class = '\f';
+		Class = '\f';
 		break;
 	    case 'b':
-		class = '\b';
+		Class = '\b';
 		break;
 	    case 'e':
-		class = '\033';
+		Class = '\033';
 		break;
 	    case 'a':
-		class = '\007';
+		Class = '\007';
 		break;
 	    case 'x':
-		class = scan_hex(regparse, 2, &numlen);
+		Class = scan_hex(regparse, 2, &numlen);
 		regparse += numlen;
 		break;
 	    case 'c':
-		class = UCHARAT(regparse++);
-		class = toCTRL(class);
+		Class = UCHARAT(regparse++);
+		Class = toCTRL(Class);
 		break;
 	    case '0': case '1': case '2': case '3': case '4':
 	    case '5': case '6': case '7': case '8': case '9':
-		class = scan_oct(--regparse, 3, &numlen);
+		Class = scan_oct(--regparse, 3, &numlen);
 		regparse += numlen;
 		break;
 	    }
 	}
 	if (range) {
-	    if (lastclass > class)
+	    if (lastclass > Class)
 		FAIL("invalid [] range in regexp");
 	    range = 0;
 	}
 	else {
-	    lastclass = class;
+	    lastclass = Class;
 	    if (*regparse == '-' && regparse+1 < regxend &&
 	      regparse[1] != ']') {
 		regparse++;
@@ -1249,9 +1239,9 @@ regclass()
 		continue;	/* do it next time */
 	    }
 	}
-	for ( ; lastclass <= class; lastclass++)
+	for ( ; lastclass <= Class; lastclass++)
 	    regset(opnd, lastclass);
-	lastclass = class;
+	lastclass = Class;
     }
     if (*regparse != ']')
 	FAIL("unmatched [] in regexp");
@@ -1260,7 +1250,7 @@ regclass()
 }
 
 static char*
-nextchar()
+nextchar(void)
 {
     char* retval = regparse++;
 
@@ -1447,9 +1437,7 @@ char *opnd;
 - regtail - set the next-pointer at the end of a node chain
 */
 static void
-regtail(p, val)
-char *p;
-char *val;
+regtail(char *p, char *val)
 {
     register char *scan;
     register char *temp;
@@ -1488,9 +1476,7 @@ char *val;
 - regoptail - regtail on operand of first argument; nop if operandless
 */
 static void
-regoptail(p, val)
-char *p;
-char *val;
+regoptail(char *p, char *val)
 {
     /* "Operandless" and "op != BRANCH" are synonymous in practice. */
     if (p == NULL || p == &regdummy || regkind[(U8)OP(p)] != BRANCH)
@@ -1502,8 +1488,7 @@ char *val;
  - regcurly - a little FSA that accepts {\d+,?\d*}
  */
 STATIC I32
-regcurly(s)
-register char *s;
+regcurly(register char *s)
 {
     if (*s++ != '{')
 	return FALSE;
@@ -1526,8 +1511,7 @@ register char *s;
  - regdump - dump a regexp onto Perl_debug_log in vaguely comprehensible form
  */
 void
-regdump(r)
-regexp *r;
+regdump(regexp *r)
 {
     register char *s;
     register char op = EXACT;	/* Arbitrary non-END op. */
@@ -1599,9 +1583,7 @@ regexp *r;
 - regprop - printable representation of opcode
 */
 void
-regprop(sv, o)
-SV *sv;
-char *o;
+regprop(SV *sv, char *o)
 {
     register char *p = 0;
 
@@ -1752,8 +1734,7 @@ char *o;
 #endif /* DEBUGGING */
 
 void
-pregfree(r)
-struct regexp *r;
+pregfree(struct regexp *r)
 {
     if (!r)
 	return;

@@ -42,7 +42,7 @@ static I32 sortcxix;
 
 PP(pp_wantarray)
 {
-    dSP;
+    djSP;
     I32 cxix;
     EXTEND(SP, 1);
 
@@ -66,7 +66,7 @@ PP(pp_regcmaybe)
 }
 
 PP(pp_regcomp) {
-    dSP;
+    djSP;
     register PMOP *pm = (PMOP*)cLOGOP->op_other;
     register char *t;
     SV *tmpstr;
@@ -103,7 +103,7 @@ PP(pp_regcomp) {
 
 PP(pp_substcont)
 {
-    dSP;
+    djSP;
     register PMOP *pm = (PMOP*) cLOGOP->op_other;
     register CONTEXT *cx = &cxstack[cxstack_ix];
     register SV *dstr = cx->sb_dstr;
@@ -164,9 +164,7 @@ PP(pp_substcont)
 }
 
 void
-rxres_save(rsp, rx)
-void **rsp;
-REGEXP *rx;
+rxres_save(void **rsp, REGEXP *rx)
 {
     UV *p = (UV*)*rsp;
     U32 i;
@@ -194,9 +192,7 @@ REGEXP *rx;
 }
 
 void
-rxres_restore(rsp, rx)
-void **rsp;
-REGEXP *rx;
+rxres_restore(void **rsp, REGEXP *rx)
 {
     UV *p = (UV*)*rsp;
     U32 i;
@@ -216,8 +212,7 @@ REGEXP *rx;
 }
 
 void
-rxres_free(rsp)
-void **rsp;
+rxres_free(void **rsp)
 {
     UV *p = (UV*)*rsp;
 
@@ -230,7 +225,7 @@ void **rsp;
 
 PP(pp_formline)
 {
-    dSP; dMARK; dORIGMARK;
+    djSP; dMARK; dORIGMARK;
     register SV *form = *++MARK;
     register U16 *fpc;
     register char *t;
@@ -523,7 +518,7 @@ PP(pp_formline)
 
 PP(pp_grepstart)
 {
-    dSP;
+    djSP;
     SV *src;
 
     if (stack_base + *markstack_ptr == sp) {
@@ -560,7 +555,7 @@ PP(pp_mapstart)
 
 PP(pp_mapwhile)
 {
-    dSP;
+    djSP;
     I32 diff = (sp - stack_base) - *markstack_ptr;
     I32 count;
     I32 shift;
@@ -624,7 +619,7 @@ PP(pp_mapwhile)
 
 PP(pp_sort)
 {
-    dSP; dMARK; dORIGMARK;
+    djSP; dMARK; dORIGMARK;
     register SV **up;
     SV **myorigmark = ORIGMARK;
     register I32 max;
@@ -758,7 +753,7 @@ PP(pp_range)
 
 PP(pp_flip)
 {
-    dSP;
+    djSP;
 
     if (GIMME == G_ARRAY) {
 	RETURNOP(((CONDOP*)cUNOP->op_first)->op_false);
@@ -790,7 +785,7 @@ PP(pp_flip)
 
 PP(pp_flop)
 {
-    dSP;
+    djSP;
 
     if (GIMME == G_ARRAY) {
 	dPOPPOPssrl;
@@ -847,8 +842,7 @@ PP(pp_flop)
 /* Control. */
 
 static I32
-dopoptolabel(label)
-char *label;
+dopoptolabel(char *label)
 {
     dTHR;
     register I32 i;
@@ -888,14 +882,14 @@ char *label;
 }
 
 I32
-dowantarray()
+dowantarray(void)
 {
     I32 gimme = block_gimme();
     return (gimme == G_VOID) ? G_SCALAR : gimme;
 }
 
 I32
-block_gimme()
+block_gimme(void)
 {
     dTHR;
     I32 cxix;
@@ -905,20 +899,19 @@ block_gimme()
 	return G_VOID;
 
     switch (cxstack[cxix].blk_gimme) {
-    case G_VOID:
-	return G_VOID;
     case G_SCALAR:
 	return G_SCALAR;
     case G_ARRAY:
 	return G_ARRAY;
     default:
 	croak("panic: bad gimme: %d\n", cxstack[cxix].blk_gimme);
+    case G_VOID:
+	return G_VOID;
     }
 }
 
 static I32
-dopoptosub(startingblock)
-I32 startingblock;
+dopoptosub(I32 startingblock)
 {
     dTHR;
     I32 i;
@@ -938,8 +931,7 @@ I32 startingblock;
 }
 
 static I32
-dopoptoeval(startingblock)
-I32 startingblock;
+dopoptoeval(I32 startingblock)
 {
     dTHR;
     I32 i;
@@ -958,8 +950,7 @@ I32 startingblock;
 }
 
 static I32
-dopoptoloop(startingblock)
-I32 startingblock;
+dopoptoloop(I32 startingblock)
 {
     dTHR;
     I32 i;
@@ -992,8 +983,7 @@ I32 startingblock;
 }
 
 void
-dounwind(cxix)
-I32 cxix;
+dounwind(I32 cxix)
 {
     dTHR;
     register CONTEXT *cx;
@@ -1026,8 +1016,7 @@ I32 cxix;
 }
 
 OP *
-die_where(message)
-char *message;
+die_where(char *message)
 {
     dTHR;
     if (in_eval) {
@@ -1092,7 +1081,7 @@ char *message;
 
 PP(pp_xor)
 {
-    dSP; dPOPTOPssrl;
+    djSP; dPOPTOPssrl;
     if (SvTRUE(left) != SvTRUE(right))
 	RETSETYES;
     else
@@ -1101,7 +1090,7 @@ PP(pp_xor)
 
 PP(pp_andassign)
 {
-    dSP;
+    djSP;
     if (!SvTRUE(TOPs))
 	RETURN;
     else
@@ -1110,7 +1099,7 @@ PP(pp_andassign)
 
 PP(pp_orassign)
 {
-    dSP;
+    djSP;
     if (SvTRUE(TOPs))
 	RETURN;
     else
@@ -1119,7 +1108,7 @@ PP(pp_orassign)
 	
 PP(pp_caller)
 {
-    dSP;
+    djSP;
     register I32 cxix = dopoptosub(cxstack_ix);
     register CONTEXT *cx;
     I32 dbcxix;
@@ -1215,9 +1204,7 @@ PP(pp_caller)
 }
 
 static int
-sortcv(a, b)
-const void *a;
-const void *b;
+sortcv(const void *a, const void *b)
 {
     dTHR;
     SV * const *str1 = (SV * const *)a;
@@ -1243,24 +1230,20 @@ const void *b;
 }
 
 static int
-sortcmp(a, b)
-const void *a;
-const void *b;
+sortcmp(const void *a, const void *b)
 {
     return sv_cmp(*(SV * const *)a, *(SV * const *)b);
 }
 
 static int
-sortcmp_locale(a, b)
-const void *a;
-const void *b;
+sortcmp_locale(const void *a, const void *b)
 {
     return sv_cmp_locale(*(SV * const *)a, *(SV * const *)b);
 }
 
 PP(pp_reset)
 {
-    dSP;
+    djSP;
     char *tmps;
 
     if (MAXARG < 1)
@@ -1330,7 +1313,7 @@ PP(pp_scope)
 
 PP(pp_enteriter)
 {
-    dSP; dMARK;
+    djSP; dMARK;
     register CONTEXT *cx;
     I32 gimme = GIMME_V;
     SV **svp;
@@ -1362,7 +1345,7 @@ PP(pp_enteriter)
 
 PP(pp_enterloop)
 {
-    dSP;
+    djSP;
     register CONTEXT *cx;
     I32 gimme = GIMME_V;
 
@@ -1378,7 +1361,7 @@ PP(pp_enterloop)
 
 PP(pp_leaveloop)
 {
-    dSP;
+    djSP;
     register CONTEXT *cx;
     struct block_loop cxloop;
     I32 gimme;
@@ -1419,7 +1402,7 @@ PP(pp_leaveloop)
 
 PP(pp_return)
 {
-    dSP; dMARK;
+    djSP; dMARK;
     I32 cxix;
     register CONTEXT *cx;
     struct block_sub cxsub;
@@ -1495,7 +1478,7 @@ PP(pp_return)
 
 PP(pp_last)
 {
-    dSP;
+    djSP;
     I32 cxix;
     register CONTEXT *cx;
     struct block_loop cxloop;
@@ -1628,11 +1611,7 @@ PP(pp_redo)
 static OP* lastgotoprobe;
 
 static OP *
-dofindlabel(o,label,opstack,oplimit)
-OP *o;
-char *label;
-OP **opstack;
-OP **oplimit;
+dofindlabel(OP *o, char *label, OP **opstack, OP **oplimit)
 {
     OP *kid;
     OP **ops = opstack;
@@ -1681,7 +1660,7 @@ PP(pp_dump)
 
 PP(pp_goto)
 {
-    dSP;
+    djSP;
     OP *retop = 0;
     I32 ix;
     register CONTEXT *cx;
@@ -1988,7 +1967,7 @@ PP(pp_goto)
 
 PP(pp_exit)
 {
-    dSP;
+    djSP;
     I32 anum;
 
     if (MAXARG < 1)
@@ -2008,7 +1987,7 @@ PP(pp_exit)
 #ifdef NOTYET
 PP(pp_nswitch)
 {
-    dSP;
+    djSP;
     double value = SvNVx(GvSV(cCOP->cop_gv));
     register I32 match = I_32(value);
 
@@ -2027,7 +2006,7 @@ PP(pp_nswitch)
 
 PP(pp_cswitch)
 {
-    dSP;
+    djSP;
     register I32 match;
 
     if (multiline)
@@ -2048,9 +2027,7 @@ PP(pp_cswitch)
 /* Eval. */
 
 static void
-save_lines(array, sv)
-AV *array;
-SV *sv;
+save_lines(AV *array, SV *sv)
 {
     register char *s = SvPVX(sv);
     register char *send = SvPVX(sv) + SvCUR(sv);
@@ -2074,8 +2051,7 @@ SV *sv;
 }
 
 static OP *
-docatch(o)
-OP *o;
+docatch(OP *o)
 {
     dTHR;
     int ret;
@@ -2116,10 +2092,8 @@ OP *o;
 
 /* With USE_THREADS, eval_owner must be held on entry to doeval */
 static OP *
-doeval(gimme)
-int gimme;
+doeval(int gimme)
 {
-    dTHR;
     dSP;
     OP *saveop = op;
     HV *newstash;
@@ -2271,7 +2245,7 @@ int gimme;
 
 PP(pp_require)
 {
-    dSP;
+    djSP;
     register CONTEXT *cx;
     SV *sv;
     char *name;
@@ -2421,7 +2395,7 @@ PP(pp_dofile)
 
 PP(pp_entereval)
 {
-    dSP;
+    djSP;
     register CONTEXT *cx;
     dPOPss;
     I32 gimme = GIMME_V, was = sub_generation;
@@ -2481,7 +2455,7 @@ PP(pp_entereval)
 
 PP(pp_leaveeval)
 {
-    dSP;
+    djSP;
     register SV **mark;
     SV **newsp;
     PMOP *newpm;
@@ -2577,7 +2551,7 @@ PP(pp_leaveeval)
 
 PP(pp_entertry)
 {
-    dSP;
+    djSP;
     register CONTEXT *cx;
     I32 gimme = GIMME_V;
 
@@ -2597,7 +2571,7 @@ PP(pp_entertry)
 
 PP(pp_leavetry)
 {
-    dSP;
+    djSP;
     register SV **mark;
     SV **newsp;
     PMOP *newpm;
@@ -2643,8 +2617,7 @@ PP(pp_leavetry)
 }
 
 static void
-doparseform(sv)
-SV *sv;
+doparseform(SV *sv)
 {
     STRLEN len;
     register char *s = SvPV_force(sv, len);
@@ -2820,3 +2793,4 @@ SV *sv;
     sv_magic(sv, Nullsv, 'f', Nullch, 0);
     SvCOMPILED_on(sv);
 }
+

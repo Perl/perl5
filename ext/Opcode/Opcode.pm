@@ -438,7 +438,7 @@ These ops are related to multi-threading.
 A handy tag name for a I<reasonable> default set of ops.  (The current ops
 allowed are unstable while development continues. It will change.)
 
-    :base_core :base_mem :base_loop :base_io :base_orig
+    :base_core :base_mem :base_loop :base_io :base_orig :base_thread
 
 If safety matters to you (and why else would you be using the Opcode module?)
 then you should not rely on the definition of this, or indeed any other, optag!

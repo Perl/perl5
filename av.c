@@ -16,8 +16,7 @@
 #include "perl.h"
 
 void
-av_reify(av)
-AV* av;
+av_reify(AV *av)
 {
     I32 key;
     SV* sv;
@@ -42,9 +41,7 @@ AV* av;
 }
 
 void
-av_extend(av,key)
-AV *av;
-I32 key;
+av_extend(AV *av, I32 key)
 {
     dTHR;			/* only necessary if we have to extend stack */
     if (key > AvMAX(av)) {
@@ -123,10 +120,7 @@ I32 key;
 }
 
 SV**
-av_fetch(av,key,lval)
-register AV *av;
-I32 key;
-I32 lval;
+av_fetch(register AV *av, I32 key, I32 lval)
 {
     SV *sv;
 
@@ -175,10 +169,7 @@ I32 lval;
 }
 
 SV**
-av_store(av,key,val)
-register AV *av;
-I32 key;
-SV *val;
+av_store(register AV *av, I32 key, SV *val)
 {
     SV** ary;
 
@@ -232,7 +223,7 @@ SV *val;
 }
 
 AV *
-newAV()
+newAV(void)
 {
     register AV *av;
 
@@ -246,9 +237,7 @@ newAV()
 }
 
 AV *
-av_make(size,strp)
-register I32 size;
-register SV **strp;
+av_make(register I32 size, register SV **strp)
 {
     register AV *av;
     register I32 i;
@@ -274,9 +263,7 @@ register SV **strp;
 }
 
 AV *
-av_fake(size,strp)
-register I32 size;
-register SV **strp;
+av_fake(register I32 size, register SV **strp)
 {
     register AV *av;
     register SV** ary;
@@ -299,8 +286,7 @@ register SV **strp;
 }
 
 void
-av_clear(av)
-register AV *av;
+av_clear(register AV *av)
 {
     register I32 key;
     SV** ary;
@@ -333,8 +319,7 @@ register AV *av;
 }
 
 void
-av_undef(av)
-register AV *av;
+av_undef(register AV *av)
 {
     register I32 key;
 
@@ -357,9 +342,7 @@ register AV *av;
 }
 
 void
-av_push(av,val)
-register AV *av;
-SV *val;
+av_push(register AV *av, SV *val)
 {
     if (!av)
 	return;
@@ -367,8 +350,7 @@ SV *val;
 }
 
 SV *
-av_pop(av)
-register AV *av;
+av_pop(register AV *av)
 {
     SV *retval;
 
@@ -384,9 +366,7 @@ register AV *av;
 }
 
 void
-av_unshift(av,num)
-register AV *av;
-register I32 num;
+av_unshift(register AV *av, register I32 num)
 {
     register I32 i;
     register SV **sstr,**dstr;
@@ -427,8 +407,7 @@ register I32 num;
 }
 
 SV *
-av_shift(av)
-register AV *av;
+av_shift(register AV *av)
 {
     SV *retval;
 
@@ -448,16 +427,13 @@ register AV *av;
 }
 
 I32
-av_len(av)
-register AV *av;
+av_len(register AV *av)
 {
     return AvFILL(av);
 }
 
 void
-av_fill(av, fill)
-register AV *av;
-I32 fill;
+av_fill(register AV *av, I32 fill)
 {
     if (!av)
 	croak("panic: null array");
@@ -487,11 +463,7 @@ I32 fill;
 }
 
 SV**
-avhv_fetch(av, key, klen, lval)
-AV *av;
-char *key;
-U32 klen;
-I32 lval;
+avhv_fetch(AV *av, char *key, U32 klen, I32 lval)
 {
     SV **keys, **indsvp;
     I32 ind;
@@ -515,11 +487,7 @@ I32 lval;
 }
 
 SV**
-avhv_fetch_ent(av, keysv, lval, hash)
-AV *av;
-SV *keysv;
-I32 lval;
-U32 hash;
+avhv_fetch_ent(AV *av, SV *keysv, I32 lval, U32 hash)
 {
     SV **keys, **indsvp;
     HE *he;
@@ -544,12 +512,7 @@ U32 hash;
 }
 
 SV**
-avhv_store(av, key, klen, val, hash)
-AV *av;
-char *key;
-U32 klen;
-SV *val;
-U32 hash;
+avhv_store(AV *av, char *key, U32 klen, SV *val, U32 hash)
 {
     SV **keys, **indsvp;
     I32 ind;
@@ -570,11 +533,7 @@ U32 hash;
 }
 
 SV**
-avhv_store_ent(av, keysv, val, hash)
-AV *av;
-SV *keysv;
-SV *val;
-U32 hash;
+avhv_store_ent(AV *av, SV *keysv, SV *val, U32 hash)
 {
     SV **keys;
     HE *he;
@@ -596,10 +555,7 @@ U32 hash;
 }
 
 bool
-avhv_exists_ent(av, keysv, hash)
-AV *av;
-SV *keysv;
-U32 hash;
+avhv_exists_ent(AV *av, SV *keysv, U32 hash)
 {
     SV **keys;
     
@@ -610,10 +566,7 @@ U32 hash;
 }
 
 bool
-avhv_exists(av, key, klen)
-AV *av;
-char *key;
-U32 klen;
+avhv_exists(AV *av, char *key, U32 klen)
 {
     SV **keys;
     
@@ -625,11 +578,7 @@ U32 klen;
 
 /* avhv_delete leaks. Caller can re-index and compress if so desired. */
 SV *
-avhv_delete(av, key, klen, flags)
-AV *av;
-char *key;
-U32 klen;
-I32 flags;
+avhv_delete(AV *av, char *key, U32 klen, I32 flags)
 {
     SV **keys;
     SV *sv;
@@ -660,11 +609,7 @@ I32 flags;
 
 /* avhv_delete_ent leaks. Caller can re-index and compress if so desired. */
 SV *
-avhv_delete_ent(av, keysv, flags, hash)
-AV *av;
-SV *keysv;
-I32 flags;
-U32 hash;
+avhv_delete_ent(AV *av, SV *keysv, I32 flags, U32 hash)
 {
     SV **keys;
     SV *sv;
@@ -694,8 +639,7 @@ U32 hash;
 }
 
 I32
-avhv_iterinit(av)
-AV *av;
+avhv_iterinit(AV *av)
 {
     SV **keys;
     
@@ -706,8 +650,7 @@ AV *av;
 }
 
 HE *
-avhv_iternext(av)
-AV *av;
+avhv_iternext(AV *av)
 {
     SV **keys;
     
@@ -718,9 +661,7 @@ AV *av;
 }
 
 SV *
-avhv_iterval(av, entry)
-AV *av;
-register HE *entry;
+avhv_iterval(AV *av, register HE *entry)
 {
     SV **keys;
     SV *sv;
@@ -737,10 +678,7 @@ register HE *entry;
 }
 
 SV *
-avhv_iternextsv(av, key, retlen)
-AV *av;
-char **key;
-I32 *retlen;
+avhv_iternextsv(AV *av, char **key, I32 *retlen)
 {
     SV **keys;
     HE *he;

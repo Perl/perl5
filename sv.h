@@ -494,20 +494,19 @@ struct xpvio {
 
 #ifdef CRIPPLED_CC
 
-IV SvIV _((SV* sv));
-UV SvUV _((SV* sv));
-double SvNV _((SV* sv));
 #define SvPV_force(sv, lp) sv_pvn_force(sv, &lp)
 #define SvPV(sv, lp) sv_pvn(sv, &lp)
-char *sv_pvn _((SV *, STRLEN *));
-I32 SvTRUE _((SV *));
-
-#define SvIVx(sv) SvIV(sv)
-#define SvUVx(sv) SvUV(sv)
-#define SvNVx(sv) SvNV(sv)
+#define SvIVx(sv) sv_iv(sv)
+#define SvUVx(sv) sv_uv(sv)
+#define SvNVx(sv) sv_nv(sv)
 #define SvPVx(sv, lp) sv_pvn(sv, &lp)
 #define SvPVx_force(sv, lp) sv_pvn_force(sv, &lp)
-#define SvTRUEx(sv) SvTRUE(sv)
+#define SvTRUEx(sv) sv_true(sv)
+
+#define SvIV(sv) SvIVx(sv)
+#define SvNV(sv) SvNVx(sv)
+#define SvUV(sv) SvIVx(sv)
+#define SvTRUE(sv) SvTRUEx(sv)
 
 #else /* !CRIPPLED_CC */
 
@@ -565,11 +564,12 @@ I32 SvTRUE _((SV *));
 
 #define newRV_inc(sv)	newRV(sv)
 #ifdef __GNUC__
+#  undef newRV_noinc
 #  define newRV_noinc(sv) ({SV *nsv=newRV((sv)); --SvREFCNT(SvRV(nsv)); nsv;})
 #else
 #  if defined(CRIPPLED_CC) || defined(USE_THREADS)
-SV *newRV_noinc _((SV *));
 #  else
+#    undef newRV_noinc
 #    define newRV_noinc(sv)	((Sv = newRV(sv)), --SvREFCNT(SvRV(Sv)), Sv)
 #  endif
 #endif /* __GNUC__ */

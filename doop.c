@@ -19,9 +19,7 @@
 #endif
 
 I32
-do_trans(sv,arg)
-SV *sv;
-OP *arg;
+do_trans(SV *sv, OP *arg)
 {
     dTHR;
     register short *tbl;
@@ -82,11 +80,7 @@ OP *arg;
 }
 
 void
-do_join(sv,del,mark,sp)
-register SV *sv;
-SV *del;
-register SV **mark;
-register SV **sp;
+do_join(register SV *sv, SV *del, register SV **mark, register SV **sp)
 {
     SV **oldmark = mark;
     register I32 items = sp - mark;
@@ -142,10 +136,7 @@ register SV **sp;
 }
 
 void
-do_sprintf(sv,len,sarg)
-SV *sv;
-I32 len;
-SV **sarg;
+do_sprintf(SV *sv, I32 len, SV **sarg)
 {
     STRLEN patlen;
     char *pat = SvPV(*sarg, patlen);
@@ -158,8 +149,7 @@ SV **sarg;
 }
 
 void
-do_vecset(sv)
-SV *sv;
+do_vecset(SV *sv)
 {
     SV *targ = LvTARG(sv);
     register I32 offset;
@@ -210,9 +200,7 @@ SV *sv;
 }
 
 void
-do_chop(astr,sv)
-register SV *astr;
-register SV *sv;
+do_chop(register SV *astr, register SV *sv)
 {
     STRLEN len;
     char *s;
@@ -254,8 +242,7 @@ register SV *sv;
 } 
 
 I32
-do_chomp(sv)
-register SV *sv;
+do_chomp(register SV *sv)
 {
     dTHR;
     register I32 count;
@@ -329,11 +316,7 @@ register SV *sv;
 } 
 
 void
-do_vop(optype,sv,left,right)
-I32 optype;
-SV *sv;
-SV *left;
-SV *right;
+do_vop(I32 optype, SV *sv, SV *left, SV *right)
 {
     dTHR;	/* just for taint */
 #ifdef LIBERAL
@@ -447,10 +430,9 @@ SV *right;
 }
 
 OP *
-do_kv(ARGS)
-dARGS
+do_kv(ARGSproto)
 {
-    dSP;
+    djSP;
     HV *hv = (HV*)POPs;
     register HE *entry;
     SV *tmpstr;
@@ -532,3 +514,4 @@ dARGS
     }
     return NORMAL;
 }
+

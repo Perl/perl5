@@ -1,6 +1,15 @@
 #ifndef WIN32IOP_H
 #define WIN32IOP_H
 
+/*
+ * defines for flock emulation
+ */
+#define LOCK_SH 1
+#define LOCK_EX 2
+#define LOCK_NB 4
+#define LOCK_UN 8
+
+#include <win32io.h>	/* pull in the io sub system structure */
 
 /*
  * Make this as close to original stdio as possible.
@@ -9,6 +18,8 @@
 /*
  * function prototypes for our own win32io layer
  */
+START_EXTERN_C
+
 EXT int * 	win32_errno(void);
 EXT char *** 	win32_environ(void);
 EXT FILE*	win32_stdin(void);
@@ -81,24 +92,19 @@ EXT void*	win32_calloc(size_t numitems, size_t size);
 EXT void*	win32_realloc(void *block, size_t size);
 EXT void	win32_free(void *block);
 
+
+
 /*
  * these two are win32 specific but still io related
  */
 int		stolen_open_osfhandle(long handle, int flags);
 long		stolen_get_osfhandle(int fd);
 
-/*
- * defines for flock emulation
- */
-#define LOCK_SH 1
-#define LOCK_EX 2
-#define LOCK_NB 4
-#define LOCK_UN 8
-
-#include <win32io.h>	/* pull in the io sub system structure */
 
 EXT PWIN32_IOSUBSYSTEM	SetIOSubSystem(void	*piosubsystem);
 EXT PWIN32_IOSUBSYSTEM	GetIOSubSystem(void);
+
+END_EXTERN_C
 
 /*
  * the following six(6) is #define in stdio.h

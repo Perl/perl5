@@ -1,6 +1,8 @@
 # Global symbols that need to be hidden in embedded applications.
 
 # Variables
+nthreads_cond
+threads_mutex
 
 AMG_names
 Error
@@ -301,10 +303,10 @@ yyval
 # Functions
 
 Gv_AMupdate
-SvTRUE
-SvIV
-SvUV
-SvNV
+sv_true
+sv_iv
+sv_uv
+sv_nv
 amagic_call
 append_elem
 append_list
@@ -618,6 +620,7 @@ newPROG
 newPVOP
 newRANGE
 newRV
+newRV_noinc
 newSLICEOP
 newSTATEOP
 newSUB

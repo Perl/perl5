@@ -22,8 +22,7 @@
 EXT char rcsid[];
 
 GV *
-gv_AVadd(gv)
-register GV *gv;
+gv_AVadd(register GV *gv)
 {
     if (!gv || SvTYPE((SV*)gv) != SVt_PVGV)
 	croak("Bad symbol for array");
@@ -33,8 +32,7 @@ register GV *gv;
 }
 
 GV *
-gv_HVadd(gv)
-register GV *gv;
+gv_HVadd(register GV *gv)
 {
     if (!gv || SvTYPE((SV*)gv) != SVt_PVGV)
 	croak("Bad symbol for hash");
@@ -44,8 +42,7 @@ register GV *gv;
 }
 
 GV *
-gv_IOadd(gv)
-register GV *gv;
+gv_IOadd(register GV *gv)
 {
     if (!gv || SvTYPE((SV*)gv) != SVt_PVGV)
 	croak("Bad symbol for filehandle");
@@ -55,8 +52,7 @@ register GV *gv;
 }
 
 GV *
-gv_fetchfile(name)
-char *name;
+gv_fetchfile(char *name)
 {
     dTHR;
     char smallbuf[256];
@@ -86,12 +82,7 @@ char *name;
 }
 
 void
-gv_init(gv, stash, name, len, multi)
-GV *gv;
-HV *stash;
-char *name;
-STRLEN len;
-int multi;
+gv_init(GV *gv, HV *stash, char *name, STRLEN len, int multi)
 {
     dTHR;
     register GP *gp;
@@ -114,9 +105,7 @@ int multi;
 }
 
 static void
-gv_init_sv(gv, sv_type)
-GV* gv;
-I32 sv_type;
+gv_init_sv(GV *gv, I32 sv_type)
 {
     switch (sv_type) {
     case SVt_PVIO:
@@ -132,11 +121,7 @@ I32 sv_type;
 }
 
 GV *
-gv_fetchmeth(stash, name, len, level)
-HV* stash;
-char* name;
-STRLEN len;
-I32 level;
+gv_fetchmeth(HV *stash, char *name, STRLEN len, I32 level)
 {
     AV* av;
     GV* topgv;
@@ -248,18 +233,13 @@ I32 level;
 }
 
 GV *
-gv_fetchmethod(stash, name)
-HV* stash;
-char* name;
+gv_fetchmethod(HV *stash, char *name)
 {
     return gv_fetchmethod_autoload(stash, name, TRUE);
 }
 
 GV *
-gv_fetchmethod_autoload(stash, name, autoload)
-HV* stash;
-char* name;
-I32 autoload;
+gv_fetchmethod_autoload(HV *stash, char *name, I32 autoload)
 {
     dTHR;
     register char *nend;
@@ -320,11 +300,7 @@ I32 autoload;
 }
 
 GV*
-gv_autoload4(stash, name, len, method)
-HV* stash;
-char* name;
-STRLEN len;
-I32 method;
+gv_autoload4(HV *stash, char *name, STRLEN len, I32 method)
 {
     static char autoload[] = "AUTOLOAD";
     static STRLEN autolen = 8;
@@ -367,18 +343,13 @@ I32 method;
 }
 
 HV*
-gv_stashpv(name,create)
-char *name;
-I32 create;
+gv_stashpv(char *name, I32 create)
 {
     return gv_stashpvn(name, strlen(name), create);
 }
 
 HV*
-gv_stashpvn(name,namelen,create)
-char *name;
-U32 namelen;
-I32 create;
+gv_stashpvn(char *name, U32 namelen, I32 create)
 {
     char smallbuf[256];
     char *tmpbuf;
@@ -407,9 +378,7 @@ I32 create;
 }
 
 HV*
-gv_stashsv(sv,create)
-SV *sv;
-I32 create;
+gv_stashsv(SV *sv, I32 create)
 {
     register char *ptr;
     STRLEN len;
@@ -419,10 +388,7 @@ I32 create;
 
 
 GV *
-gv_fetchpv(nambeg,add,sv_type)
-char *nambeg;
-I32 add;
-I32 sv_type;
+gv_fetchpv(char *nambeg, I32 add, I32 sv_type)
 {
     dTHR;
     register char *name = nambeg;
@@ -777,10 +743,7 @@ I32 sv_type;
 }
 
 void
-gv_fullname3(sv, gv, prefix)
-SV *sv;
-GV *gv;
-char *prefix;
+gv_fullname3(SV *sv, GV *gv, char *prefix)
 {
     HV *hv = GvSTASH(gv);
     if (!hv) {
@@ -794,10 +757,7 @@ char *prefix;
 }
 
 void
-gv_efullname3(sv, gv, prefix)
-SV *sv;
-GV *gv;
-char *prefix;
+gv_efullname3(SV *sv, GV *gv, char *prefix)
 {
     GV *egv = GvEGV(gv);
     if (!egv)
@@ -807,24 +767,20 @@ char *prefix;
 
 /* XXX compatibility with versions <= 5.003. */
 void
-gv_fullname(sv,gv)
-SV *sv;
-GV *gv;
+gv_fullname(SV *sv, GV *gv)
 {
     gv_fullname3(sv, gv, sv == (SV*)gv ? "*" : "");
 }
 
 /* XXX compatibility with versions <= 5.003. */
 void
-gv_efullname(sv,gv)
-SV *sv;
-GV *gv;
+gv_efullname(SV *sv, GV *gv)
 {
     gv_efullname3(sv, gv, sv == (SV*)gv ? "*" : "");
 }
 
 IO *
-newIO()
+newIO(void)
 {
     dTHR;
     IO *io;
@@ -842,8 +798,7 @@ newIO()
 }
 
 void
-gv_check(stash)
-HV* stash;
+gv_check(HV *stash)
 {
     dTHR;
     register HE *entry;
@@ -879,8 +834,7 @@ HV* stash;
 }
 
 GV *
-newGVgen(pack)
-char *pack;
+newGVgen(char *pack)
 {
     return gv_fetchpv(form("%s::_GEN_%ld", pack, (long)gensym++),
 		      TRUE, SVt_PVGV);
@@ -889,8 +843,7 @@ char *pack;
 /* hopefully this is only called on local symbol table entries */
 
 GP*
-gp_ref(gp)
-GP* gp;
+gp_ref(GP *gp)
 {
     gp->gp_refcnt++;
     if (gp->gp_cv) {
@@ -909,8 +862,7 @@ GP* gp;
 }
 
 void
-gp_free(gv)
-GV* gv;
+gp_free(GV *gv)
 {
     GP* gp;
     CV* cv;
@@ -970,8 +922,7 @@ register GV *gv;
 /* Updates and caches the CV's */
 
 bool
-Gv_AMupdate(stash)
-HV* stash;
+Gv_AMupdate(HV *stash)
 {
   dTHR;  
   GV** gvp;
@@ -979,7 +930,7 @@ HV* stash;
   GV* gv;
   CV* cv;
   MAGIC* mg=mg_find((SV*)stash,'c');
-  AMT *amtp=mg ? (AMT*)mg->mg_ptr: NULL;
+  AMT *amtp = (mg) ? (AMT*)mg->mg_ptr: (AMT *) NULL;
   AMT amt;
 
   if (mg && amtp->was_ok_am == amagic_generation
@@ -1131,11 +1082,7 @@ HV* stash;
  * advised to call SPAGAIN macro in your code after call */
 
 SV*
-amagic_call(left,right,method,flags)
-SV* left;
-SV* right;
-int method;
-int flags; 
+amagic_call(SV *left, SV *right, int method, int flags)
 {
   dTHR;
   MAGIC *mg; 
@@ -1149,7 +1096,7 @@ int flags;
       && (mg = mg_find((SV*)(stash=SvSTASH(SvRV(left))),'c'))
       && (ocvp = cvp = (AMT_AMAGIC((AMT*)mg->mg_ptr) 
 			? (oamtp = amtp = (AMT*)mg->mg_ptr)->table
-			: NULL))
+			: (CV **) NULL))
       && ((cv = cvp[off=method+assignshift]) 
 	  || (assign && amtp->fallback > AMGfallNEVER && /* fallback to
 						          * usual method */
@@ -1242,7 +1189,7 @@ int flags;
 	       && (mg = mg_find((SV*)(stash=SvSTASH(SvRV(right))),'c'))
 	       && (cvp = (AMT_AMAGIC((AMT*)mg->mg_ptr) 
 			  ? (amtp = (AMT*)mg->mg_ptr)->table
-			  : NULL))
+			  : (CV **) NULL))
 	       && (cv = cvp[off=method])) { /* Method for right
 					     * argument found */
       lr=1;
@@ -1337,7 +1284,6 @@ int flags;
 	|| inc_dec_ass) RvDEEPCP(left);
   }
   {
-    dTHR;
     dSP;
     BINOP myop;
     SV* res;
@@ -1415,3 +1361,4 @@ int flags;
   }
 }
 #endif /* OVERLOAD */
+

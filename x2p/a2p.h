@@ -63,10 +63,10 @@
 #   include <strings.h>
 #endif
 
-#ifndef HAS_BCOPY
+#if !defined(HAS_BCOPY) || defined(__cplusplus)
 #   define bcopy(s1,s2,l) memcpy(s2,s1,l)
 #endif
-#ifndef HAS_BZERO
+#if !defined(HAS_BZERO) || defined(__cplusplus)
 #   define bzero(s,l) memset(s,0,l)
 #endif
 

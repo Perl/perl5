@@ -7,7 +7,7 @@ static char yysccsid[] = "@(#)yaccpar 1.8 (Berkeley) 01/20/91";
 #include "perl.h"
 
 static void
-dep()
+dep(void)
 {
     deprecate("\"do\" to call subroutines");
 }
@@ -1303,8 +1303,7 @@ struct ysv {
 };
 
 void
-yydestruct(ptr)
-void* ptr;
+yydestruct(void *ptr)
 {
     struct ysv* ysave = (struct ysv*)ptr;
     if (ysave->yyss) Safefree(ysave->yyss);
@@ -1319,7 +1318,7 @@ void* ptr;
 }
 
 int
-yyparse()
+yyparse(void)
 {
     register int yym, yyn, yystate;
     register short *yyssp;
@@ -1330,7 +1329,9 @@ yyparse()
     int retval = 0;
 #if YYDEBUG
     register char *yys;
+#ifndef __cplusplus
     extern char *getenv();
+#endif
 #endif
 
     struct ysv *ysave = (struct ysv*)safemalloc(sizeof(struct ysv));

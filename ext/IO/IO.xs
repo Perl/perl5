@@ -22,17 +22,14 @@ typedef FILE * OutputStream;
 #endif
 
 static int
-not_here(s)
-char *s;
+not_here(char *s)
 {
     croak("%s not implemented on this architecture", s);
     return -1;
 }
 
 static bool
-constant(name, pval)
-char *name;
-IV *pval;
+constant(char *name, IV *pval)
 {
     switch (*name) {
     case '_':

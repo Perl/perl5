@@ -1400,7 +1400,7 @@
  *	This symbol is defined to be the type of char used in stdio.h.
  *	It has the values "unsigned char" or "char".
  */
-#define STDCHAR unsigned char	/**/
+#define STDCHAR char	/**/
 
 /* Uid_t:
  *	This symbol holds the type used to declare user ids in the kernel.

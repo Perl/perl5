@@ -1061,6 +1061,8 @@ EXT char *op_desc[] = {
 };
 #endif
 
+START_EXTERN_C
+
 OP *	ck_anoncode	_((OP* o));
 OP *	ck_bitop	_((OP* o));
 OP *	ck_concat	_((OP* o));
@@ -1441,10 +1443,12 @@ OP *	pp_syscall	_((ARGSproto));
 OP *	pp_lock		_((ARGSproto));
 OP *	pp_threadsv	_((ARGSproto));
 
+END_EXTERN_C
+
 #ifndef DOINIT
-EXT OP * (*ppaddr[])();
+EXT OP * (*ppaddr[])(ARGSproto);
 #else
-EXT OP * (*ppaddr[])() = {
+EXT OP * (*ppaddr[])(ARGSproto) = {
 	pp_null,
 	pp_stub,
 	pp_scalar,

@@ -10,7 +10,10 @@
 # Set these to wherever you want "nmake install" to put your
 # newly built perl.
 INST_DRV=c:
-INST_TOP=$(INST_DRV)\perl
+INST_TOP=$(INST_DRV)\perl\perl5004.5X
+BUILDOPT=-DUSE_THREADS 
+
+# -DUSE_PERLIO -D__STDC__=1 -DUSE_SFIO -DI_SFIO -I\sfio97\include
 
 #
 # uncomment one if you are using Visual C++ 2.x or Borland
@@ -25,14 +28,14 @@ CCTYPE=BORLAND
 #
 # set the install locations of the compiler include/libraries
 #CCHOME = f:\msdev\vc
-CCHOME = D:\bc5
+CCHOME = C:\bc5
 CCINCDIR = $(CCHOME)\include
 CCLIBDIR = $(CCHOME)\lib
 
 #
 # set this to point to cmd.exe (only needed if you use some
 # alternate shell that doesn't grok cmd.exe style commands)
-SHELL = g:\winnt\system32\cmd.exe
+#SHELL = g:\winnt\system32\cmd.exe
 
 #
 # set this to your email address (perl will guess a value from
@@ -60,7 +63,8 @@ IMPLIB = implib
 RUNTIME  = -D_RTLDLL
 INCLUDES = -I.\include -I. -I.. -I$(CCINCDIR)
 #PCHFLAGS = -H -H$(INTDIR)\bcmoduls.pch 
-DEFINES  = -DWIN32 -DPERLDLL
+DEFINES  = -DWIN32 $(BUILDOPT) 
+LOCDEFS  = -DPERLDLL
 SUBSYS   = console
 LIBC = cw32mti.lib
 LIBFILES = import32.lib $(LIBC) odbc32.lib odbccp32.lib
@@ -71,11 +75,11 @@ WINIOMAYBE =
 OPTIMIZE = -v $(RUNTIME)
 LINK_DBG = -v
 .ELSE
-OPTIMIZE = -O $(RUNTIME)
+OPTIMIZE = -5 -O2 $(RUNTIME)
 LINK_DBG = 
 .ENDIF
 
-CFLAGS   = -w -tWM -tWD $(INCLUDES) $(DEFINES) $(PCHFLAGS) $(OPTIMIZE)
+CFLAGS   = -w -tWM -tWD $(INCLUDES) $(DEFINES) $(LOCDEFS) $(PCHFLAGS) $(OPTIMIZE)
 LINK_FLAGS  = $(LINK_DBG) -L$(CCLIBDIR)
 OBJOUT_FLAG = -o
 
@@ -92,7 +96,8 @@ RUNTIME  = -MD
 .ENDIF
 INCLUDES = -I.\include -I. -I..
 #PCHFLAGS = -Fp$(INTDIR)\vcmoduls.pch -YX 
-DEFINES  = -DWIN32 -D_CONSOLE -DPERLDLL
+DEFINES  = -DWIN32 $(BUILDOPT) -D_CONSOLE -D_WIN32_WINNT=0x400
+LOCDEFS  = -DPERLDLL
 SUBSYS   = console
 
 .IF "$(RUNTIME)" == "-MD"
@@ -125,7 +130,7 @@ LIBFILES = oldnames.lib kernel32.lib user32.lib gdi32.lib \
 	oleaut32.lib netapi32.lib uuid.lib wsock32.lib mpr.lib winmm.lib \
 	version.lib odbc32.lib odbccp32.lib
 
-CFLAGS   = -nologo -W3 $(INCLUDES) $(DEFINES) $(PCHFLAGS) $(OPTIMIZE)
+CFLAGS   = -nologo -W3 $(INCLUDES) $(DEFINES) $(LOCDEFS) $(PCHFLAGS) $(OPTIMIZE)
 LINK_FLAGS  = -nologo $(LIBFILES) $(LINK_DBG) -machine:I386
 OBJOUT_FLAG = -Fo
 
@@ -261,11 +266,13 @@ CORE_OBJ= ..\av.obj	\
 WIN32_C = perllib.c \
 	win32.c \
 	win32io.c \
-	win32sck.c
+	win32sck.c \
+	win32thread.c 
 
 WIN32_OBJ = win32.obj \
 	win32io.obj \
-	win32sck.obj
+	win32sck.obj \
+	win32thread.obj
 
 PERL95_OBJ = perl95.obj \
 	win32mt.obj \
@@ -297,6 +304,7 @@ CORE_H = ..\av.h	\
 	..\regexp.h	\
 	..\scope.h	\
 	..\sv.h		\
+	..\thread.h	\
 	..\unixish.h	\
 	..\util.h	\
 	..\XSUB.h	\
@@ -308,7 +316,7 @@ CORE_H = ..\av.h	\
 	.\win32.h
 
 
-EXTENSIONS=DynaLoader Socket IO Fcntl Opcode SDBM_File attrs
+EXTENSIONS=DynaLoader Socket IO Fcntl Opcode SDBM_File attrs Thread
 
 DYNALOADER=$(EXTDIR)\DynaLoader\DynaLoader
 SOCKET=$(EXTDIR)\Socket\Socket
@@ -317,6 +325,7 @@ OPCODE=$(EXTDIR)\Opcode\Opcode
 SDBM_FILE=$(EXTDIR)\SDBM_File\SDBM_File
 IO=$(EXTDIR)\IO\IO
 ATTRS=$(EXTDIR)\attrs\attrs
+THREAD=$(EXTDIR)\Thread\Thread
 
 SOCKET_DLL=..\lib\auto\Socket\Socket.dll
 FCNTL_DLL=..\lib\auto\Fcntl\Fcntl.dll
@@ -324,6 +333,7 @@ OPCODE_DLL=..\lib\auto\Opcode\Opcode.dll
 SDBM_FILE_DLL=..\lib\auto\SDBM_File\SDBM_File.dll
 IO_DLL=..\lib\auto\IO\IO.dll
 ATTRS_DLL=..\lib\auto\attrs\attrs.dll
+THREAD_DLL=..\lib\auto\Thread\Thread.dll
 
 STATICLINKMODULES=DynaLoader
 DYNALOADMODULES=	\
@@ -332,7 +342,8 @@ DYNALOADMODULES=	\
 	$(OPCODE_DLL)	\
 	$(SDBM_FILE_DLL)\
 	$(IO_DLL)	\
-	$(ATTRS_DLL)
+	$(ATTRS_DLL)	\
+	$(THREAD_DLL)
 
 POD2HTML=$(PODDIR)\pod2html
 POD2MAN=$(PODDIR)\pod2man
@@ -368,15 +379,16 @@ perlglob.obj  : perlglob.c
 config.w32 : $(CFGSH_TMPL)
 	copy $(CFGSH_TMPL) config.w32
 
-.\config.h : $(CFGSH_TMPL)
+.\config.h : $(CFGH_TMPL)
 	-del /f config.h
 	copy $(CFGH_TMPL) config.h
 
 ..\config.sh : config.w32 $(MINIPERL) config_sh.PL
 	$(MINIPERL) -I..\lib config_sh.PL "INST_DRV=$(INST_DRV)" \
-	    "INST_TOP=$(INST_TOP)" "cc=$(CC)" "ccflags=$(RUNTIME) -DWIN32" \
+	    "INST_TOP=$(INST_TOP)" "cc=$(CC)" "ccflags=$(OPTIMIZE) $(DEFINES)" \
 	    "cf_email=$(EMAIL)" "libs=$(LIBFILES:f)" "incpath=$(CCINCDIR)" \
 	    "libpth=$(strip $(CCLIBDIR) $(LIBFILES:d))" "libc=$(LIBC)" \
+            "LINK_FLAGS=$(LINK_FLAGS)" \
 	    config.w32 > ..\config.sh
 
 $(CONFIGPM) : $(MINIPERL) ..\config.sh config_h.PL ..\minimod.pl
@@ -403,8 +415,8 @@ $(WIN32_OBJ) : $(CORE_H)
 $(CORE_OBJ)  : $(CORE_H)
 $(DLL_OBJ)   : $(CORE_H) 
 
-perldll.def : $(MINIPERL) $(CONFIGPM)
-	$(MINIPERL) -w makedef.pl $(CCTYPE) > perldll.def
+perldll.def : $(MINIPERL) $(CONFIGPM) ..\global.sym makedef.pl
+	$(MINIPERL) -w makedef.pl $(DEFINES) $(CCTYPE) > perldll.def
 
 $(PERLDLL): perldll.def $(CORE_OBJ) $(WIN32_OBJ) $(DLL_OBJ)
 .IF "$(CCTYPE)" == "BORLAND"
@@ -449,8 +461,8 @@ $(PERLEXE): $(PERLDLL) $(CONFIGPM) perlmain.obj
 .ENDIF
 	copy splittree.pl .. 
 	$(MINIPERL) -I..\lib ..\splittree.pl "../LIB" "../LIB/auto"
-	attrib -r ..\t\*.*
-	copy test ..\t
+#	attrib -r ..\t\*.*
+#	copy test ..\t
 
 .IF "$(CCTYPE)" != "BORLAND"
 
@@ -486,12 +498,17 @@ $(DYNALOADER).c: $(MINIPERL) $(EXTDIR)\DynaLoader\dl_win32.xs $(CONFIGPM)
 $(EXTDIR)\DynaLoader\dl_win32.xs: dl_win32.xs
 	copy dl_win32.xs $(EXTDIR)\DynaLoader\dl_win32.xs
 
+$(THREAD_DLL): $(PERLEXE) $(THREAD).xs
+	cd $(EXTDIR)\$(*B) && \
+	..\..\miniperl -I..\..\lib Makefile.PL INSTALLDIRS=perl
+	cd $(EXTDIR)\$(*B) && $(MAKE)
+
 $(ATTRS_DLL): $(PERLEXE) $(ATTRS).xs
 	cd $(EXTDIR)\$(*B) && \
 	..\..\miniperl -I..\..\lib Makefile.PL INSTALLDIRS=perl
 	cd $(EXTDIR)\$(*B) && $(MAKE)
 
-$(IO_DLL): $(PERLEXE) $(CONFIGPM) $(IO).xs
+$(IO_DLL): $(PERLEXE) $(IO).xs
 	cd $(EXTDIR)\$(*B) && \
 	..\..\miniperl -I..\..\lib Makefile.PL INSTALLDIRS=perl
 	cd $(EXTDIR)\$(*B) && $(MAKE)
@@ -538,9 +555,9 @@ distclean: clean
 		$(PERLIMPLIB) ..\miniperl.lib $(MINIMOD)
 	-del /f *.def *.map
 	-del /f $(SOCKET_DLL) $(IO_DLL) $(SDBM_FILE_DLL) $(FCNTL_DLL) \
-		$(OPCODE_DLL) $(ATTRS_DLL)
+		$(OPCODE_DLL) $(ATTRS_DLL) $(THREAD_DLL)
 	-del /f $(SOCKET).c $(IO).c $(SDBM_FILE).c $(FCNTL).c $(OPCODE).c \
-		$(DYNALOADER).c $(ATTRS).c
+		$(DYNALOADER).c $(ATTRS).c $(THREAD).c
 	-del /f $(PODDIR)\*.html
 	-del /f $(PODDIR)\*.bat
 	-del /f ..\config.sh ..\splittree.pl perlmain.c dlutils.c config.h.new

@@ -39,9 +39,7 @@ typedef struct magic_state MGS;
 static void restore_magic _((void *p));
 
 static void
-save_magic(mgs, sv)
-MGS* mgs;
-SV* sv;
+save_magic(MGS *mgs, SV *sv)
 {
     assert(SvMAGICAL(sv));
 
@@ -55,8 +53,7 @@ SV* sv;
 }
 
 static void
-restore_magic(p)
-void* p;
+restore_magic(void *p)
 {
     MGS* mgs = (MGS*)p;
     SV* sv = mgs->mgs_sv;
@@ -74,8 +71,7 @@ void* p;
 
 
 void
-mg_magical(sv)
-SV* sv;
+mg_magical(SV *sv)
 {
     MAGIC* mg;
     for (mg = SvMAGIC(sv); mg; mg = mg->mg_moremagic) {
@@ -92,8 +88,7 @@ SV* sv;
 }
 
 int
-mg_get(sv)
-SV* sv;
+mg_get(SV *sv)
 {
     MGS mgs;
     MAGIC* mg;
@@ -127,8 +122,7 @@ SV* sv;
 }
 
 int
-mg_set(sv)
-SV* sv;
+mg_set(SV *sv)
 {
     MGS mgs;
     MAGIC* mg;
@@ -153,8 +147,7 @@ SV* sv;
 }
 
 U32
-mg_len(sv)
-SV* sv;
+mg_len(SV *sv)
 {
     MAGIC* mg;
     char *junk;
@@ -179,8 +172,7 @@ SV* sv;
 }
 
 int
-mg_clear(sv)
-SV* sv;
+mg_clear(SV *sv)
 {
     MGS mgs;
     MAGIC* mg;
@@ -201,9 +193,7 @@ SV* sv;
 }
 
 MAGIC*
-mg_find(sv, type)
-SV* sv;
-int type;
+mg_find(SV *sv, int type)
 {
     MAGIC* mg;
     for (mg = SvMAGIC(sv); mg; mg = mg->mg_moremagic) {
@@ -214,11 +204,7 @@ int type;
 }
 
 int
-mg_copy(sv, nsv, key, klen)
-SV* sv;
-SV* nsv;
-char *key;
-I32 klen;
+mg_copy(SV *sv, SV *nsv, char *key, I32 klen)
 {
     int count = 0;
     MAGIC* mg;
@@ -232,8 +218,7 @@ I32 klen;
 }
 
 int
-mg_free(sv)
-SV* sv;
+mg_free(SV *sv)
 {
     MAGIC* mg;
     MAGIC* moremagic;
@@ -260,9 +245,7 @@ SV* sv;
 #endif
 
 U32
-magic_len(sv, mg)
-SV *sv;
-MAGIC *mg;
+magic_len(SV *sv, MAGIC *mg)
 {
     dTHR;
     register I32 paren;
@@ -326,9 +309,7 @@ MAGIC *mg;
 }
 
 int
-magic_get(sv, mg)
-SV *sv;
-MAGIC *mg;
+magic_get(SV *sv, MAGIC *mg)
 {
     dTHR;
     register I32 paren;
@@ -588,9 +569,7 @@ MAGIC *mg;
 }
 
 int
-magic_getuvar(sv, mg)
-SV *sv;
-MAGIC *mg;
+magic_getuvar(SV *sv, MAGIC *mg)
 {
     struct ufuncs *uf = (struct ufuncs *)mg->mg_ptr;
 
@@ -600,9 +579,7 @@ MAGIC *mg;
 }
 
 int
-magic_setenv(sv,mg)
-SV* sv;
-MAGIC* mg;
+magic_setenv(SV *sv, MAGIC *mg)
 {
     register char *s;
     char *ptr;
@@ -678,18 +655,14 @@ MAGIC* mg;
 }
 
 int
-magic_clearenv(sv,mg)
-SV* sv;
-MAGIC* mg;
+magic_clearenv(SV *sv, MAGIC *mg)
 {
     my_setenv(MgPV(mg,na),Nullch);
     return 0;
 }
 
 int
-magic_set_all_env(sv,mg)
-SV* sv;
-MAGIC* mg;
+magic_set_all_env(SV *sv, MAGIC *mg)
 {
 #if defined(VMS)
     die("Can't make list assignment to %%ENV on this system");
@@ -710,9 +683,7 @@ MAGIC* mg;
 }
 
 int
-magic_clear_all_env(sv,mg)
-SV* sv;
-MAGIC* mg;
+magic_clear_all_env(SV *sv, MAGIC *mg)
 {
 #if defined(VMS)
     die("Can't make list assignment to %%ENV on this system");
@@ -749,9 +720,7 @@ MAGIC* mg;
 }
 
 int
-magic_getsig(sv,mg)
-SV* sv;
-MAGIC* mg;
+magic_getsig(SV *sv, MAGIC *mg)
 {
     I32 i;
     /* Are we fetching a signal entry? */
@@ -774,9 +743,7 @@ MAGIC* mg;
     return 0;
 }
 int
-magic_clearsig(sv,mg)
-SV* sv;
-MAGIC* mg;
+magic_clearsig(SV *sv, MAGIC *mg)
 {
     I32 i;
     /* Are we clearing a signal entry? */
@@ -795,9 +762,7 @@ MAGIC* mg;
 }
 
 int
-magic_setsig(sv,mg)
-SV* sv;
-MAGIC* mg;
+magic_setsig(SV *sv, MAGIC *mg)
 {
     dTHR;
     register char *s;
@@ -871,9 +836,7 @@ MAGIC* mg;
 }
 
 int
-magic_setisa(sv,mg)
-SV* sv;
-MAGIC* mg;
+magic_setisa(SV *sv, MAGIC *mg)
 {
     sub_generation++;
     return 0;
@@ -882,9 +845,7 @@ MAGIC* mg;
 #ifdef OVERLOAD
 
 int
-magic_setamagic(sv,mg)
-SV* sv;
-MAGIC* mg;
+magic_setamagic(SV *sv, MAGIC *mg)
 {
     /* HV_badAMAGIC_on(Sv_STASH(sv)); */
     amagic_generation++;
@@ -894,9 +855,7 @@ MAGIC* mg;
 #endif /* OVERLOAD */
 
 int
-magic_setnkeys(sv,mg)
-SV* sv;
-MAGIC* mg;
+magic_setnkeys(SV *sv, MAGIC *mg)
 {
     if (LvTARG(sv)) {
 	hv_ksplit((HV*)LvTARG(sv), SvIV(sv));
@@ -906,12 +865,8 @@ MAGIC* mg;
 }
 
 static int
-magic_methpack(sv,mg,meth)
-SV* sv;
-MAGIC* mg;
-char *meth;
+magic_methpack(SV *sv, MAGIC *mg, char *meth)
 {
-    dTHR;
     dSP;
 
     ENTER;
@@ -938,9 +893,7 @@ char *meth;
 }
 
 int
-magic_getpack(sv,mg)
-SV* sv;
-MAGIC* mg;
+magic_getpack(SV *sv, MAGIC *mg)
 {
     magic_methpack(sv,mg,"FETCH");
     if (mg->mg_ptr)
@@ -949,11 +902,8 @@ MAGIC* mg;
 }
 
 int
-magic_setpack(sv,mg)
-SV* sv;
-MAGIC* mg;
+magic_setpack(SV *sv, MAGIC *mg)
 {
-    dTHR;
     dSP;
 
     PUSHMARK(sp);
@@ -976,18 +926,13 @@ MAGIC* mg;
 }
 
 int
-magic_clearpack(sv,mg)
-SV* sv;
-MAGIC* mg;
+magic_clearpack(SV *sv, MAGIC *mg)
 {
     return magic_methpack(sv,mg,"DELETE");
 }
 
-int magic_wipepack(sv,mg)
-SV* sv;
-MAGIC* mg;
+int magic_wipepack(SV *sv, MAGIC *mg)
 {
-    dTHR;
     dSP;
 
     PUSHMARK(sp);
@@ -1000,12 +945,8 @@ MAGIC* mg;
 }
 
 int
-magic_nextpack(sv,mg,key)
-SV* sv;
-MAGIC* mg;
-SV* key;
+magic_nextpack(SV *sv, MAGIC *mg, SV *key)
 {
-    dTHR;
     dSP;
     char *meth = SvOK(key) ? "NEXTKEY" : "FIRSTKEY";
 
@@ -1027,17 +968,13 @@ SV* key;
 }
 
 int
-magic_existspack(sv,mg)
-SV* sv;
-MAGIC* mg;
+magic_existspack(SV *sv, MAGIC *mg)
 {
     return magic_methpack(sv,mg,"EXISTS");
 } 
 
 int
-magic_setdbline(sv,mg)
-SV* sv;
-MAGIC* mg;
+magic_setdbline(SV *sv, MAGIC *mg)
 {
     dTHR;
     OP *o;
@@ -1057,9 +994,7 @@ MAGIC* mg;
 }
 
 int
-magic_getarylen(sv,mg)
-SV* sv;
-MAGIC* mg;
+magic_getarylen(SV *sv, MAGIC *mg)
 {
     dTHR;
     sv_setiv(sv, AvFILL((AV*)mg->mg_obj) + curcop->cop_arybase);
@@ -1067,9 +1002,7 @@ MAGIC* mg;
 }
 
 int
-magic_setarylen(sv,mg)
-SV* sv;
-MAGIC* mg;
+magic_setarylen(SV *sv, MAGIC *mg)
 {
     dTHR;
     av_fill((AV*)mg->mg_obj, SvIV(sv) - curcop->cop_arybase);
@@ -1077,9 +1010,7 @@ MAGIC* mg;
 }
 
 int
-magic_getpos(sv,mg)
-SV* sv;
-MAGIC* mg;
+magic_getpos(SV *sv, MAGIC *mg)
 {
     SV* lsv = LvTARG(sv);
     
@@ -1096,9 +1027,7 @@ MAGIC* mg;
 }
 
 int
-magic_setpos(sv,mg)
-SV* sv;
-MAGIC* mg;
+magic_setpos(SV *sv, MAGIC *mg)
 {
     SV* lsv = LvTARG(sv);
     SSize_t pos;
@@ -1135,9 +1064,7 @@ MAGIC* mg;
 }
 
 int
-magic_getglob(sv,mg)
-SV* sv;
-MAGIC* mg;
+magic_getglob(SV *sv, MAGIC *mg)
 {
     if (SvFAKE(sv)) {			/* FAKE globs can get coerced */
 	SvFAKE_off(sv);
@@ -1150,9 +1077,7 @@ MAGIC* mg;
 }
 
 int
-magic_setglob(sv,mg)
-SV* sv;
-MAGIC* mg;
+magic_setglob(SV *sv, MAGIC *mg)
 {
     register char *s;
     GV* gv;
@@ -1172,9 +1097,7 @@ MAGIC* mg;
 }
 
 int
-magic_setsubstr(sv,mg)
-SV* sv;
-MAGIC* mg;
+magic_setsubstr(SV *sv, MAGIC *mg)
 {
     STRLEN len;
     char *tmps = SvPV(sv,len);
@@ -1183,9 +1106,7 @@ MAGIC* mg;
 }
 
 int
-magic_gettaint(sv,mg)
-SV* sv;
-MAGIC* mg;
+magic_gettaint(SV *sv, MAGIC *mg)
 {
     dTHR;
     TAINT_IF((mg->mg_len & 1) ||
@@ -1194,9 +1115,7 @@ MAGIC* mg;
 }
 
 int
-magic_settaint(sv,mg)
-SV* sv;
-MAGIC* mg;
+magic_settaint(SV *sv, MAGIC *mg)
 {
     dTHR;
     if (localizing) {
@@ -1213,18 +1132,14 @@ MAGIC* mg;
 }
 
 int
-magic_setvec(sv,mg)
-SV* sv;
-MAGIC* mg;
+magic_setvec(SV *sv, MAGIC *mg)
 {
     do_vecset(sv);	/* XXX slurp this routine */
     return 0;
 }
 
 int
-magic_getdefelem(sv,mg)
-SV* sv;
-MAGIC* mg;
+magic_getdefelem(SV *sv, MAGIC *mg)
 {
     SV *targ = Nullsv;
     if (LvTARGLEN(sv)) {
@@ -1257,9 +1172,7 @@ MAGIC* mg;
 }
 
 int
-magic_setdefelem(sv,mg)
-SV* sv;
-MAGIC* mg;
+magic_setdefelem(SV *sv, MAGIC *mg)
 {
     if (LvTARGLEN(sv))
 	vivify_defelem(sv);
@@ -1271,17 +1184,14 @@ MAGIC* mg;
 }
 
 int
-magic_freedefelem(sv,mg)
-SV* sv;
-MAGIC* mg;
+magic_freedefelem(SV *sv, MAGIC *mg)
 {
     SvREFCNT_dec(LvTARG(sv));
     return 0;
 }
 
 void
-vivify_defelem(sv)
-SV* sv;
+vivify_defelem(SV *sv)
 {
     dTHR;			/* just for SvREFCNT_inc and SvREFCNT_dec*/
     MAGIC* mg;
@@ -1315,9 +1225,7 @@ SV* sv;
 }
 
 int
-magic_setmglob(sv,mg)
-SV* sv;
-MAGIC* mg;
+magic_setmglob(SV *sv, MAGIC *mg)
 {
     mg->mg_len = -1;
     SvSCREAM_off(sv);
@@ -1325,9 +1233,7 @@ MAGIC* mg;
 }
 
 int
-magic_setbm(sv,mg)
-SV* sv;
-MAGIC* mg;
+magic_setbm(SV *sv, MAGIC *mg)
 {
     sv_unmagic(sv, 'B');
     SvVALID_off(sv);
@@ -1335,9 +1241,7 @@ MAGIC* mg;
 }
 
 int
-magic_setfm(sv,mg)
-SV* sv;
-MAGIC* mg;
+magic_setfm(SV *sv, MAGIC *mg)
 {
     sv_unmagic(sv, 'f');
     SvCOMPILED_off(sv);
@@ -1345,9 +1249,7 @@ MAGIC* mg;
 }
 
 int
-magic_setuvar(sv,mg)
-SV* sv;
-MAGIC* mg;
+magic_setuvar(SV *sv, MAGIC *mg)
 {
     struct ufuncs *uf = (struct ufuncs *)mg->mg_ptr;
 
@@ -1358,9 +1260,7 @@ MAGIC* mg;
 
 #ifdef USE_LOCALE_COLLATE
 int
-magic_setcollxfrm(sv,mg)
-SV* sv;
-MAGIC* mg;
+magic_setcollxfrm(SV *sv, MAGIC *mg)
 {
     /*
      * René Descartes said "I think not."
@@ -1376,9 +1276,7 @@ MAGIC* mg;
 #endif /* USE_LOCALE_COLLATE */
 
 int
-magic_set(sv,mg)
-SV* sv;
-MAGIC* mg;
+magic_set(SV *sv, MAGIC *mg)
 {
     dTHR;
     register char *s;
@@ -1728,9 +1626,7 @@ MAGIC* mg;
 
 #ifdef USE_THREADS
 int
-magic_mutexfree(sv, mg)
-SV *sv;
-MAGIC *mg;
+magic_mutexfree(SV *sv, MAGIC *mg)
 {
     dTHR;
     DEBUG_L(PerlIO_printf(PerlIO_stderr(), "0x%lx: magic_mutexfree 0x%lx\n",
@@ -1745,8 +1641,7 @@ MAGIC *mg;
 #endif /* USE_THREADS */
 
 I32
-whichsig(sig)
-char *sig;
+whichsig(char *sig)
 {
     register char **sigv;
 
@@ -1767,8 +1662,7 @@ char *sig;
 static SV* sig_sv;
 
 static void
-unwind_handler_stack(p)
-    void *p;
+unwind_handler_stack(void *p)
 {
     dTHR;
     U32 flags = *(U32*)p;
@@ -1781,10 +1675,8 @@ unwind_handler_stack(p)
 }
 
 Signal_t
-sighandler(sig)
-int sig;
+sighandler(int sig)
 {
-    dTHR;
     dSP;
     GV *gv;
     HV *st;
@@ -1885,3 +1777,5 @@ int sig;
     Xpv = tXpv;
     return;
 }
+
+

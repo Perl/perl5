@@ -14,15 +14,18 @@
 # that does not present in the WIN32 port but there is no easy
 # way to find them so I just put a exception list here
 
+while (@ARGV && $ARGV[0] =~ /^-/)
+ {
+  my $flag = shift;
+  $define{$1} = 1 if ($flag =~ /^-D(\w+)$/);
+ } 
+
+warn join(' ',keys %define)."\n";
+
 my $CCTYPE = shift || "MSVC";
 
 $skip_sym=<<'!END!OF!SKIP!';
-Perl_SvIV
-Perl_SvNV
-Perl_SvTRUE
-Perl_SvUV
 Perl_block_type
-Perl_sv_pvn
 Perl_additem
 Perl_cast_ulong
 Perl_check_uni
@@ -63,6 +66,7 @@ Perl_force_next
 Perl_force_word
 Perl_hv_stashpv
 Perl_intuit_more
+Perl_init_thread_intern
 Perl_know_next
 Perl_modkids
 Perl_mstats
@@ -83,6 +87,7 @@ Perl_pp_interp
 Perl_pp_map
 Perl_pp_nswitch
 Perl_q
+Perl_rcsid
 Perl_reall_srchlen
 Perl_regdump
 Perl_regfold
@@ -108,7 +113,6 @@ Perl_setenv_getix
 Perl_skipspace
 Perl_sublex_done
 Perl_sublex_start
-Perl_sv_peek
 Perl_sv_ref
 Perl_sv_setptrobj
 Perl_timesbuf
@@ -136,12 +140,50 @@ Perl_my_memcmp
 Perl_my_memset
 Perl_cshlen
 Perl_cshname
-Perl_condpair_magic
-Perl_magic_mutexfree
 Perl_opsave
+!END!OF!SKIP!
+
+unless ($define{'USE_THREADS'})
+ {
+  $skip_sym .= <<'!END!OF!SKIP!';
+Perl_condpair_magic
+Perl_thr_key
+Perl_sv_mutex
+Perl_malloc_mutex
+Perl_eval_mutex
+Perl_eval_cond
+Perl_eval_owner
+Perl_threads_mutex
+Perl_nthreads_cond
 Perl_unlock_condpair
 Perl_vtbl_mutex
+Perl_magic_mutexfree
+Perl_sv_iv
+Perl_sv_nv
+Perl_sv_true
+Perl_sv_uv
+Perl_sv_pvn
+Perl_newRV_noinc
 !END!OF!SKIP!
+ }
+
+if ($define{'USE_THISPTR'} || $define{'USE_THREADS'})
+ {
+  open(THREAD,"<../thread.sym") || die "Cannot open thread.sym:$!";
+  while (<THREAD>)
+   {
+    next if (!/^[A-Za-z]/);
+    next if (/_amg[ \t]*$/);
+    $skip_sym .= "Perl_".$_;
+   } 
+  close(THREAD); 
+  $skip_sym .= "Perl_op\n";
+ } 
+
+unless ($define{'USE_THREADS'})
+ {
+  $skip_sym .= "Perl_thread_create\n";
+ }
 
 # All symbols have a Perl_ prefix because that's what embed.h
 # sticks in front of them.
@@ -188,6 +230,8 @@ while (<DATA>) {
 	next if (/^#/);
 	$symbol = $_;
     	next if ($skip_sym =~ m/^$symbol/m);
+        $symbol = "Perl_".$symbol if ($define{'USE_THISPTR'} 
+                                      && $symbol =~ /^perl/);
 	emit_symbol($symbol);
 }
 
@@ -233,6 +277,7 @@ perl_require_pv
 perl_eval_pv
 perl_eval_sv
 boot_DynaLoader
+Perl_thread_create
 win32_errno
 win32_environ
 win32_stdin

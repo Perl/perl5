@@ -361,7 +361,7 @@ GetShell(void)
 }
 
 int
-do_aspawn(void* really, void** mark, void** arglast)
+do_aspawn(void* really, void ** mark, void ** arglast)
 {
     char **argv;
     char *strPtr;
@@ -524,7 +524,7 @@ opendir(char *filename)
 /*  char           *dummy;*/
 
     /* check to see if filename is a directory */
-    if (win32_stat(filename, &sbuf) < 0 || sbuf.st_mode & S_IFDIR == 0) {
+    if (win32_stat(filename, &sbuf) < 0 || (sbuf.st_mode & S_IFDIR) == 0) {
 	return NULL;
     }
 
@@ -833,26 +833,78 @@ win32_getenv(const char *name)
 
 #endif
 
+static long
+FileTimeToClock(PFILETIME ft)
+{
+ __int64 qw = ft->dwHighDateTime;
+ qw <<= 32;
+ qw |= ft->dwLowDateTime;
+ qw /= 10000;  /* File time ticks at 0.1uS, clock at 1mS */
+ return (long) qw;
+}
+
 #undef times
 int
 mytimes(struct tms *timebuf)
 {
-    clock_t	t = clock();
-    timebuf->tms_utime = t;
-    timebuf->tms_stime = 0;
-    timebuf->tms_cutime = 0;
-    timebuf->tms_cstime = 0;
-
+    FILETIME user;
+    FILETIME kernel;
+    FILETIME dummy;
+    if (GetProcessTimes(GetCurrentProcess(), &dummy, &dummy, 
+                        &kernel,&user)) {
+	timebuf->tms_utime = FileTimeToClock(&user);
+	timebuf->tms_stime = FileTimeToClock(&kernel);
+	timebuf->tms_cutime = 0;
+	timebuf->tms_cstime = 0;
+        
+    } else { 
+        /* That failed - e.g. Win95 fallback to clock() */
+        clock_t t = clock();
+	timebuf->tms_utime = t;
+	timebuf->tms_stime = 0;
+	timebuf->tms_cutime = 0;
+	timebuf->tms_cstime = 0;
+    }
     return 0;
+}
+
+static UINT timerid = 0;
+
+
+static VOID CALLBACK TimerProc(HWND win, UINT msg, UINT id, DWORD time)
+{
+ KillTimer(NULL,timerid);
+ timerid=0;  
+ sighandler(14);
 }
 
 #undef alarm
 unsigned int
 myalarm(unsigned int sec)
 {
-    /* we warn the usuage of alarm function */
-    if (sec != 0)
-	WARN("dummy function alarm called, program might not function as expected\n");
+    /* 
+     * the 'obvious' implentation is SetTimer() with a callback
+     * which does whatever receiving SIGALRM would do 
+     * we cannot use SIGALRM even via raise() as it is not 
+     * one of the supported codes in <signal.h>
+     *
+     * Snag is unless something is looking at the message queue
+     * nothing happens :-(
+     */ 
+    if (sec)
+     {
+      timerid = SetTimer(NULL,timerid,sec*1000,(TIMERPROC)TimerProc);
+      if (!timerid)
+       croak("Cannot set timer");
+     } 
+    else
+     {
+      if (timerid)
+       {
+        KillTimer(NULL,timerid);
+        timerid=0;  
+       }
+     }
     return 0;
 }
 
@@ -987,7 +1039,7 @@ win32_fopen(const char *filename, const char *mode)
 DllExport FILE *
 win32_fdopen( int handle, const char *mode)
 {
-    return pIOSubSystem->pfnfdopen(handle, mode);
+    return pIOSubSystem->pfnfdopen(handle, (char *) mode);
 }
 
 DllExport FILE *
@@ -1205,13 +1257,13 @@ win32_chdir(const char *dir)
 DllExport int
 win32_spawnvp(int mode, const char *cmdname, const char *const *argv)
 {
-    return pIOSubSystem->pfnspawnvp(mode, cmdname, argv);
+    return pIOSubSystem->pfnspawnvp(mode, cmdname, (char * const *) argv);
 }
 
 DllExport int
 win32_execvp(const char *cmdname, const char *const *argv)
 {
-    return pIOSubSystem->pfnexecvp(cmdname, argv);
+    return pIOSubSystem->pfnexecvp(cmdname, (char *const *)argv);
 }
 
 DllExport void
@@ -1637,3 +1689,7 @@ Perl_win32_init(int *argcp, char ***argvp)
     _control87(MCW_EM, MCW_EM);
 #endif
 }
+
+
+
+

@@ -39,7 +39,7 @@ extern int errno;
 
 extern Malloc_t malloc proto((MEM_SIZE));
 extern Free_t free proto((Malloc_t));
-extern Off_t lseek();
+extern Off_t lseek(int, off_t, int);
 #endif
 
 /*
@@ -75,10 +75,7 @@ static long masks[] = {
 datum nullitem = {NULL, 0};
 
 DBM *
-sdbm_open(file, flags, mode)
-register char *file;
-register int flags;
-register int mode;
+sdbm_open(register char *file, register int flags, register int mode)
 {
 	register DBM *db;
 	register char *dirname;
@@ -92,7 +89,7 @@ register int mode;
  */
 	n = strlen(file) * 2 + strlen(DIRFEXT) + strlen(PAGFEXT) + 2;
 
-	if ((dirname = malloc((unsigned) n)) == NULL)
+	if ((dirname = (char *) malloc((unsigned) n)) == NULL)
 		return errno = ENOMEM, (DBM *) NULL;
 /*
  * build the file names
@@ -107,11 +104,7 @@ register int mode;
 }
 
 DBM *
-sdbm_prep(dirname, pagname, flags, mode)
-char *dirname;
-char *pagname;
-int flags;
-int mode;
+sdbm_prep(char *dirname, char *pagname, int flags, int mode)
 {
 	register DBM *db;
 	struct stat dstat;
@@ -170,8 +163,7 @@ int mode;
 }
 
 void
-sdbm_close(db)
-register DBM *db;
+sdbm_close(register DBM *db)
 {
 	if (db == NULL)
 		errno = EINVAL;
@@ -183,9 +175,7 @@ register DBM *db;
 }
 
 datum
-sdbm_fetch(db, key)
-register DBM *db;
-datum key;
+sdbm_fetch(register DBM *db, datum key)
 {
 	if (db == NULL || bad(key))
 		return errno = EINVAL, nullitem;
@@ -197,9 +187,7 @@ datum key;
 }
 
 int
-sdbm_delete(db, key)
-register DBM *db;
-datum key;
+sdbm_delete(register DBM *db, datum key)
 {
 	if (db == NULL || bad(key))
 		return errno = EINVAL, -1;
@@ -223,11 +211,7 @@ datum key;
 }
 
 int
-sdbm_store(db, key, val, flags)
-register DBM *db;
-datum key;
-datum val;
-int flags;
+sdbm_store(register DBM *db, datum key, datum val, int flags)
 {
 	int need;
 	register long hash;
@@ -285,22 +269,19 @@ int flags;
  * giving up.
  */
 static int
-makroom(db, hash, need)
-register DBM *db;
-long hash;
-int need;
+makroom(register DBM *db, long int hash, int need)
 {
 	long newp;
 	char twin[PBLKSIZ];
 	char *pag = db->pagbuf;
-	char *new = twin;
+	char *New = twin;
 	register int smax = SPLTMAX;
 
 	do {
 /*
  * split the current page
  */
-		(void) splpage(pag, new, db->hmask + 1);
+		(void) splpage(pag, New, db->hmask + 1);
 /*
  * address of the new page
  */
@@ -319,10 +300,10 @@ int need;
 			    || write(db->pagf, db->pagbuf, PBLKSIZ) < 0)
 				return 0;
 			db->pagbno = newp;
-			(void) memcpy(pag, new, PBLKSIZ);
+			(void) memcpy(pag, New, PBLKSIZ);
 		}
 		else if (lseek(db->pagf, OFF_PAG(newp), SEEK_SET) < 0
-			 || write(db->pagf, new, PBLKSIZ) < 0)
+			 || write(db->pagf, New, PBLKSIZ) < 0)
 			return 0;
 
 		if (!setdbit(db, db->curbit))
@@ -363,8 +344,7 @@ int need;
  * deletions aren't taken into account. (ndbm bug)
  */
 datum
-sdbm_firstkey(db)
-register DBM *db;
+sdbm_firstkey(register DBM *db)
 {
 	if (db == NULL)
 		return errno = EINVAL, nullitem;
@@ -382,8 +362,7 @@ register DBM *db;
 }
 
 datum
-sdbm_nextkey(db)
-register DBM *db;
+sdbm_nextkey(register DBM *db)
 {
 	if (db == NULL)
 		return errno = EINVAL, nullitem;
@@ -394,9 +373,7 @@ register DBM *db;
  * all important binary trie traversal
  */
 static int
-getpage(db, hash)
-register DBM *db;
-register long hash;
+getpage(register DBM *db, register long int hash)
 {
 	register int hbit;
 	register long dbit;
@@ -435,9 +412,7 @@ register long hash;
 }
 
 static int
-getdbit(db, dbit)
-register DBM *db;
-register long dbit;
+getdbit(register DBM *db, register long int dbit)
 {
 	register long c;
 	register long dirb;
@@ -458,9 +433,7 @@ register long dbit;
 }
 
 static int
-setdbit(db, dbit)
-register DBM *db;
-register long dbit;
+setdbit(register DBM *db, register long int dbit)
 {
 	register long c;
 	register long dirb;
@@ -494,8 +467,7 @@ register long dbit;
  * the page, try the next page in sequence
  */
 static datum
-getnext(db)
-register DBM *db;
+getnext(register DBM *db)
 {
 	datum key;
 

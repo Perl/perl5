@@ -7,24 +7,39 @@
 
 $| = 1;
 
-if ($#ARGV >= 0 && $ARGV[0] eq '-v') {
+if ($ARGV[0] eq '-v') {
     $verbose = 1;
     shift;
 }
 
 chdir 't' if -f 't/TEST';
 
-die "You need to run \"make test\" first to set things up.\n"
+die "You need to run \"make test\" first to set things up.\n" 
   unless -e 'perl' or -e 'perl.exe';
 
 $ENV{EMXSHELL} = 'sh';        # For OS/2
 
-if ($#ARGV == -1) {
-    @ARGV = split(/[ \n]/,
-      `echo base/*.t comp/*.t cmd/*.t io/*.t; echo op/*.t pragma/*.t lib/*.t`);
+if ($ARGV[0] eq '') {
+    push( @ARGV, `dir/s/b base` );
+    push( @ARGV, `dir/s/b comp` );
+    push( @ARGV, `dir/s/b cmd` );
+    push( @ARGV, `dir/s/b io` );
+    push( @ARGV, `dir/s/b op` );
+    push( @ARGV, `dir/s/b pragma` );
+    push( @ARGV, `dir/s/b lib` );
+
+    grep( chomp, @ARGV );
+    @ARGV = grep( /\.t$/, @ARGV );
+    grep( s/.*t\\//, @ARGV );
+#    @ARGV = split(/[ \n]/,
+#      `echo base/*.t comp/*.t cmd/*.t io/*.t; echo op/*.t pragma/*.t lib/*.t`);
+} else {
+
+@ARGV = map(glob($_),@ARGV);
+
 }
 
-if ($^O eq 'os2' || $^O eq 'qnx') {
+if ($^O eq 'os2' || $^O eq 'MSWin32' || $^O eq 'qnx' || 1) {
     $sharpbang = 0;
 }
 else {
@@ -41,8 +56,6 @@ else {
 $bad = 0;
 $good = 0;
 $total = @ARGV;
-$files  = 0;
-$totmax = 0;
 while ($test = shift) {
     if ($test =~ /^$/) {
 	next;
@@ -51,12 +64,11 @@ while ($test = shift) {
     chop($te);
     print "$te" . '.' x (18 - length($te));
     if ($sharpbang) {
-	-x $test || (print "isn't executable.\n");
-	open(RESULTS,"./$test |") || (print "can't run.\n");
+	open(results,"./$test |") || (print "can't run.\n");
     } else {
-	open(SCRIPT,"$test") || die "Can't run $test.\n";
-	$_ = <SCRIPT>;
-	close(SCRIPT);
+	open(script,"$test") || die "Can't run $test.\n";
+	$_ = <script>;
+	close(script);
 	if (/#!..perl(.*)/) {
 	    $switch = $1;
 	    if ($^O eq 'VMS') {
@@ -66,11 +78,12 @@ while ($test = shift) {
 	} else {
 	    $switch = '';
 	}
-	open(RESULTS,"./perl$switch $test |") || (print "can't run.\n");
+	open(results,"perl$switch $test |") || (print "can't run.\n");
     }
     $ok = 0;
     $next = 0;
-    while (<RESULTS>) {
+    while (<results>) {
+	if (/^$/) { next;};
 	if ($verbose) {
 	    print $_;
 	}
@@ -102,7 +115,7 @@ while ($test = shift) {
 	}
     } else {
 	$next += 1;
-	print "FAILED at test $next\n";
+	print "FAILED on test $next\n";
 	$bad = $bad + 1;
 	$_ = $test;
 	if (/^base/) {
@@ -114,7 +127,6 @@ while ($test = shift) {
 if ($bad == 0) {
     if ($ok) {
 	print "All tests successful.\n";
-	# XXX add mention of 'perlbug -ok' ?
     } else {
 	die "FAILED--no tests were run for some reason.\n";
     }
@@ -130,15 +142,8 @@ if ($bad == 0) {
    ### of them individually and examine any diagnostic messages they
    ### produce.  See the INSTALL document's section on "make test".
 SHRDLU
-       warn <<'SHRDLU' if $good / $total > 0.8;
-   ###
-   ### Since most tests were successful, you have a good chance to
-   ### get information with better granularity by running
-   ###     ./perl harness
-   ### in directory ./t.
-SHRDLU
 }
 ($user,$sys,$cuser,$csys) = times;
 print sprintf("u=%g  s=%g  cu=%g  cs=%g  scripts=%d  tests=%d\n",
     $user,$sys,$cuser,$csys,$files,$totmax);
-exit ($bad != 0);
+exit $bad != 0;
