@@ -4508,6 +4508,8 @@ sv_vcatpvfn(sv, pat, patlen, args, svargs, svmax, used_locale)
 	    switch (base) {
 		unsigned dig;
 	    case 16:
+		if (!uv)
+		    alt = FALSE;
 		p = (c == 'X') ? "0123456789ABCDEF" : "0123456789abcdef";
 		do {
 		    dig = uv & 15;
@@ -4534,8 +4536,12 @@ sv_vcatpvfn(sv, pat, patlen, args, svargs, svmax, used_locale)
 		break;
 	    }
 	    elen = (ebuf + sizeof ebuf) - eptr;
-	    if (has_precis && precis > elen)
-		zeros = precis - elen;
+	    if (has_precis) {
+		if (precis > elen)
+		    zeros = precis - elen;
+		else if (precis == 0 && elen == 1 && *eptr == '0')
+		    elen = 0;
+	    }
 	    break;
 
 	    /* FLOATING POINT */
