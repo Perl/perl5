@@ -31,6 +31,163 @@ or any other branch.
 Version v5.7.2		Development release working toward v5.8
 --------------
 ____________________________________________________________________________
+[ 12400] By: jhi                                   on 2001/10/11  11:33:20
+        Log: HP-UX update from H.Merijn Brand.
+     Branch: perl
+	   ! README.hpux
+____________________________________________________________________________
+[ 12399] By: jhi                                   on 2001/10/11  00:53:56
+        Log: Subject: [PATCH] fix link rot in README.vms
+             From: "Craig A. Berry" <craigberry@mac.com>
+             Date: Wed, 10 Oct 2001 17:17:00 -0500
+             Message-Id: <5.1.0.14.0.20011010171057.01bd77c8@exchi01>
+     Branch: perl
+	   ! README.vms
+____________________________________________________________________________
+[ 12398] By: jhi                                   on 2001/10/11  00:49:42
+        Log: Subject: [PATCH lib/Term/Complete.t] (was Re: lib/Term/Complete.t won't complete in background)
+             From: "chromatic" <chromatic@rmci.net>
+             Date: Wed, 10 Oct 2001 15:50:30 -0600
+             Message-ID: <20011010215627.13283.qmail@onion.perl.org> 
+     Branch: perl
+	   ! lib/Term/Complete.t
+____________________________________________________________________________
+[ 12397] By: jhi                                   on 2001/10/11  00:48:54
+        Log: Subject: [PATCH MANIFEST lib/ExtUtils/Packlist.t] Add Tests for ExtUtils::Packlist
+             From: "chromatic" <chromatic@rmci.net>
+             Date: Wed, 10 Oct 2001 15:45:42 -0600
+             Message-ID: <20011010215140.8913.qmail@onion.perl.org>
+     Branch: perl
+	   + lib/ExtUtils/Packlist.t
+	   ! MANIFEST
+____________________________________________________________________________
+[ 12396] By: jhi                                   on 2001/10/10  20:20:22
+        Log: VMS needs quotes around the -I option to keep it from
+             being downcased, from Charles Lane.
+     Branch: perl
+	   ! t/run/kill_perl.t
+____________________________________________________________________________
+[ 12395] By: ams                                   on 2001/10/10  16:22:32
+        Log: Subject: [PATCH lib/FindBin.pm]
+             From: Stas Bekman <stas@stason.org>
+             Date: Tue, 09 Oct 2001 23:57:10 +0800
+             Message-Id: <3BC31E56.60805@stason.org>
+     Branch: perl
+	   ! lib/FindBin.pm
+____________________________________________________________________________
+[ 12394] By: ams                                   on 2001/10/10  16:09:53
+        Log: Subject: Re: /usr/include/sys/e ?? (perl@12340)
+             From: Abhijit Menon-Sen <ams@wiw.org>
+             Date: Wed, 10 Oct 2001 21:59:33 +0530
+             Message-Id: <20011010215933.B2444@lustre.dyn.wiw.org>
+     Branch: perl
+	   ! ext/Data/Dumper/Dumper.xs
+____________________________________________________________________________
+[ 12393] By: jhi                                   on 2001/10/10  15:53:39
+        Log: VMS: reorder the elimination of 000000 in the canonpath logic,
+             from Charles Lane.
+     Branch: perl
+	   ! lib/File/Spec/VMS.pm
+____________________________________________________________________________
+[ 12392] By: ams                                   on 2001/10/10  14:49:43
+        Log: Subject: [PATCH] two s/// bugfixes
+             From: Rafael Garcia-Suarez <rgarciasuarez@free.fr>
+             Date: Wed, 10 Oct 2001 17:23:44 +0200
+             Message-Id: <20011010172344.C22440@rafael>
+     Branch: perl
+	   ! pp_ctl.c regexec.c t/op/subst.t
+____________________________________________________________________________
+[ 12391] By: jhi                                   on 2001/10/10  12:22:02
+        Log: Fix/improve handling of the [000000] special "root"
+             directory, by putting cwd in canonical form when doing
+             abs2rel, and prepending a 000000 to directory "chunks"
+             if missing from base or path.  Also adjust test to
+             reflect the (improved) output from abs2rel.
+             From Charles Lane.
+     Branch: perl
+	   ! lib/File/Spec.t lib/File/Spec/VMS.pm
+____________________________________________________________________________
+[ 12390] By: jhi                                   on 2001/10/10  11:48:14
+        Log: In VMS the copy-to-untaint %ENV in the initialization also loses
+             all of the extra VMSish attributes (such as "treat this logical
+             as a device name") that are necessary to make programs run.
+             A tainted %ENV does not hinder VMS.  From Charles Lane.
+     Branch: perl
+	   ! lib/File/Find/t/taint.t
+____________________________________________________________________________
+[ 12389] By: jhi                                   on 2001/10/10  11:40:29
+        Log: VMS-specific fixes to the ExtUtils::Manifest tests.
+             
+             o  VMS is case-insensitive, RTL downcases filenames read
+             by perl... so need to re-upcase filenames like MANIFEST
+             and MANIFEST.SKIP
+             
+             o  Need to convert VMS-style to Unix-style filenames when comparing
+             names in MANIFEST to names in filesystem.
+             
+             o  Need to remove mantest/MANIFEST before rmdir'ing mantest,
+             since VMS won't let you (easily) delete non-empty directories.
+             
+             From Charles Lane.
+     Branch: perl
+	   ! lib/ExtUtils/Manifest.pm lib/ExtUtils/Manifest.t
+____________________________________________________________________________
+[ 12388] By: jhi                                   on 2001/10/10  11:28:44
+        Log: Unix and VMS agree on "*" as a "match any number of any chars"
+             wildcards, but differ ("?"  vs.  "%") for their "match any single
+             char" wildcard.  This patch changes "?"  chars to "%" before doing a
+             VMS glob...at no loss of functionality, since "?"  isn't a valid
+             filename char on VMS.  From Charles Lane.
+     Branch: perl
+	   ! doio.c
+____________________________________________________________________________
+[ 12387] By: jhi                                   on 2001/10/10  11:20:13
+        Log: (accidentally empty submit; new life as #12390)
+     Branch: perl
+	   ! lib/File/Find/t/taint.t
+____________________________________________________________________________
+[ 12386] By: jhi                                   on 2001/10/10  11:12:40
+        Log: Even more VMS tweakage from Charles Lane:
+             
+             Tweak #1:  splitdir only works on directory part of filespec,
+             split off volume first
+             Tweak #2:  VMS pre-7.0's $ENV{'HOME'} is not settable
+             (it's a horrible kludge in the run-time library,
+             improved in later versions). Check the
+             $Config{'d_setenv'} flag before attempting to set it.
+     Branch: perl
+	   ! t/op/chdir.t
+____________________________________________________________________________
+[ 12385] By: jhi                                   on 2001/10/09  20:34:36
+        Log: VMS tweakage from Charles Lane.
+             
+             . command.com doubles an output line when prompting for extensions
+             . Term::Cap has no business trying to run obscure Un*x utilities on VMS
+             . perl5db doesn't clean up after itself
+     Branch: perl
+	   ! configure.com lib/Term/Cap.pm lib/perl5db.pl
+____________________________________________________________________________
+[ 12384] By: sky                                   on 2001/10/09  19:16:11
+        Log: Subject: [PATCH again again], Re: [PATCH again] Re: [PATCH mg.c gv.c and others] ${^TAINT}
+             From: Rafael Garcia-Suarez <rgarciasuarez@free.fr>
+             Date: Tue, 9 Oct 2001 22:10:26 +0200
+             Message-ID: <20011009221026.A8579@rafael>
+     Branch: perl
+	   ! pod/perldata.pod
+____________________________________________________________________________
+[ 12383] By: jhi                                   on 2001/10/09  14:33:15
+        Log: Subject: [PATCH t/op/subst.t] new tests, new TODO test
+             From: rgarciasuarez@free.fr (Rafael Garcia-Suarez)
+             Date: 9 Oct 2001 15:15:06 -0000
+             Message-Id: <slrn9s653h.h2p.rgarciasuarez@rafael.kazibao.net>
+     Branch: perl
+	   ! t/op/subst.t
+____________________________________________________________________________
+[ 12382] By: jhi                                   on 2001/10/09  14:03:30
+        Log: Update Changes.
+     Branch: perl
+	   ! Changes patchlevel.h
+____________________________________________________________________________
 [ 12381] By: jhi                                   on 2001/10/09  13:52:50
         Log: Seems that a glob(undef) triggers an ACCVIO in Perl_flex_stat
              Seems that a glob(undef) triggers an ACCVIO in Perl_flex_stat,
