@@ -2,6 +2,8 @@
  *
  */
 
+#define EMBEDMYMALLOC
+
 #if defined(PERL_CORE) && !defined(DEBUGGING_MSTATS)
 #  define DEBUGGING_MSTATS
 #endif 

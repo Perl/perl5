@@ -2598,32 +2598,8 @@ $undef$define) . ./whoa; eval "$var=\$tu";;
 *) eval "$var=$val";;
 esac'
 
-$cat <<EOM
-
-Perl 5.004 can be compiled for binary compatibility with 5.003.
-If you decide to do so, you will be able to continue using any
-extensions that were compiled for Perl 5.003.  However, binary
-compatibility forces Perl to expose some of its internal symbols
-in the same way that 5.003 did.  So you may have symbol conflicts
-if you embed a binary-compatible Perl in other programs.
-
-EOM
-case "$d_bincompat3" in
-"$undef") dflt=n ;;
-*) dflt=y ;;
-esac
-rp='Binary compatibility with Perl 5.003?'
-. ./myread
-case "$ans" in
-y*) val="$define" ;;
-*)  val="$undef" ;;
-esac
-set d_bincompat3
-eval $setvar
-case "$d_bincompat3" in
-"$define") bincompat3=y ;;
-*) bincompat3=n ;;
-esac
+: bincompat3 is no more even possible starting with 5.005
+d_bincompat3=$undef
 
 : make some quick guesses about what we are up against
 echo " "

@@ -188,6 +188,8 @@ rsfp_filters
 rshift_amg
 rshift_ass_amg
 runops
+runops_debug
+runops_standard
 savestack
 savestack_ix
 savestack_max
