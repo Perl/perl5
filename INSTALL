@@ -766,12 +766,22 @@ or you can answer 'n' at the appropriate interactive Configure prompt.
 
 =item -DPERL_POLLUTE_MALLOC
 
-Perl's malloc family of functions are called Perl_malloc(),
-Perl_realloc(), Perl_calloc() and Perl_mfree().  The names do not clash
-with the system versions of these functions.
+NOTE: This flag is enabled automatically on some platforms if you
+asked for binary compatibility with version 5.005, or if you just
+run Configure to accept all the defaults on those platforms.  You
+can refuse the automatic binary compatibility flags wholesale by
+running:
 
-If you add -DPERL_POLLUTE_MALLOC to your ccflags variable in
-config.sh, then Perl's malloc family of functions will have the same
+	sh Configure -Ubincompat5005
+
+or by answering 'n' at the appropriate prompt.
+
+Perl's malloc family of functions are called Perl_malloc(),
+Perl_realloc(), Perl_calloc() and Perl_mfree().  When this flag is
+not enabled, the names do not clash with the system versions of
+these functions.
+
+If enabled, Perl's malloc family of functions will have the same
 names as the system versions.  This may be sometimes required when you
 have libraries that like to free() data that may have been allocated
 by Perl_malloc() and vice versa.

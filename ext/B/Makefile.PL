@@ -16,7 +16,8 @@ if ($^O eq 'MSWin32') {
 WriteMakefile(
     NAME	=> "B",
     VERSION	=> "a5",
-    MAN3PODS => {},
+    PL_FILES	=> { 'defsubs_h.PL' => 'defsubs.h' },
+    MAN3PODS	=> {},
     clean	=> {
 	FILES		=> "perl$e *$o B.c defsubs.h *~"
     }

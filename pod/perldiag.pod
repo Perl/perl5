@@ -3336,6 +3336,12 @@ variables.
 of Perl.  Check the #! line, or manually feed your script into
 Perl yourself.
 
+=item Version number must be a constant number
+
+(P) The attempt to translate a C<use Module n.n LIST> statement into
+its equivalent C<BEGIN> block found an internal inconsistency with
+the version number.
+
 =item perl: warning: Setting locale failed.
 
 (S) The whole warning message will look something like:
