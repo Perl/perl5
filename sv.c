@@ -4417,9 +4417,12 @@ Perl_sv_chop(pTHX_ register SV *sv, register char *ptr)
 	    *SvEND(sv) = '\0';
 	}
 	SvIVX(sv) = 0;
-	SvFLAGS(sv) |= SVf_OOK;
+	/* Same SvOOK_on but SvOOK_on does a SvIOK_off
+	   and we do that anyway inside the SvNIOK_off
+	*/
+	SvFLAGS(sv) |= SVf_OOK; 
     }
-    SvFLAGS(sv) &= ~(SVf_IOK|SVf_NOK|SVp_IOK|SVp_NOK|SVf_IVisUV);
+    SvNIOK_off(sv);
     delta = ptr - SvPVX(sv);
     SvLEN(sv) -= delta;
     SvCUR(sv) -= delta;
