@@ -558,7 +558,7 @@ Perl_pad_findmy(pTHX_ char *name)
 	    && !SvFAKE(namesv)
 	    && (SvFLAGS(namesv) & SVpad_OUR)
 	    && strEQ(SvPVX(namesv), name)
-	    && U_32(SvNVX(namesv)) == PAD_MAX /* min */
+	    && (U32)I_32(SvNVX(namesv)) == PAD_MAX /* min */
 	)
 	    return offset;
     }
@@ -631,8 +631,8 @@ S_pad_findlex(pTHX_ char *name, CV* cv, U32 seq, int warn,
 	    {
 		if (SvFAKE(namesv))
 		    fake_offset = offset; /* in case we don't find a real one */
-		else if (  seq >  U_32(SvNVX(namesv))	/* min */
-			&& seq <= (U32)SvIVX(namesv))	/* max */
+		else if (  seq >  (U32)I_32(SvNVX(namesv))	/* min */
+			&& seq <= (U32)SvIVX(namesv))		/* max */
 		    break;
 	    }
 	}
@@ -656,7 +656,7 @@ S_pad_findlex(pTHX_ char *name, CV* cv, U32 seq, int warn,
 
 		DEBUG_Xv(PerlIO_printf(Perl_debug_log,
 		    "Pad findlex cv=0x%"UVxf" matched: offset=%ld (%ld,%ld)\n",
-		    PTR2UV(cv), (long)offset, (long)U_32(SvNVX(*out_name_sv)),
+		    PTR2UV(cv), (long)offset, (long)I_32(SvNVX(*out_name_sv)),
 		    (long)SvIVX(*out_name_sv)));
 	    }
 	    else { /* fake match */
@@ -925,7 +925,7 @@ Perl_intro_my(pTHX)
 	    DEBUG_Xv(PerlIO_printf(Perl_debug_log,
 		"Pad intromy: %ld \"%s\", (%ld,%ld)\n",
 		(long)i, SvPVX(sv),
-		(long)U_32(SvNVX(sv)), (long)SvIVX(sv))
+		(long)I_32(SvNVX(sv)), (long)SvIVX(sv))
 	    );
 	}
     }
@@ -973,7 +973,7 @@ Perl_pad_leavemy(pTHX)
 	    DEBUG_Xv(PerlIO_printf(Perl_debug_log,
 		"Pad leavemy: %ld \"%s\", (%ld,%ld)\n",
 		(long)off, SvPVX(sv),
-		(long)U_32(SvNVX(sv)), (long)SvIVX(sv))
+		(long)I_32(SvNVX(sv)), (long)SvIVX(sv))
 	    );
 	}
     }
@@ -1258,7 +1258,7 @@ Perl_do_dump_pad(pTHX_ I32 level, PerlIO *file, PADLIST *padlist, int full)
 		    (int) ix,
 		    PTR2UV(ppad[ix]),
 		    (unsigned long) (ppad[ix] ? SvREFCNT(ppad[ix]) : 0),
-		    (long)U_32(SvNVX(namesv)),
+		    (long)I_32(SvNVX(namesv)),
 		    (long)SvIVX(namesv),
 		    SvPVX(namesv)
 		);
