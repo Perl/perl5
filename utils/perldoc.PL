@@ -105,9 +105,12 @@ use Text::ParseWords;
 
 unshift(@ARGV,shellwords($ENV{"PERLDOC"}));
 
-getopts("mhtluvFf:") || usage;
+getopts("mhtluvFf:X") || usage;
 
 usage if $opt_h || $opt_h; # avoid -w warning
+
+$podidx = "$Config{'archlib'}/pod.idx";
+$podidx = "" if $opt_X || !-f "pod.idx" && !-r _ && -M _ > 7;
 
 if ($opt_t + $opt_u + $opt_m + $opt_l > 1) {
     usage("only one of -t, -u, -m or -l")
@@ -251,6 +254,18 @@ sub searchfor {
 
 
 foreach (@pages) {
+        if ($podidx && open(PODIDX, $podidx)) {
+	    my $searchfor = $_;
+	    local($_);
+	    $searchfor =~ s,::,/,g;
+	    print STDERR "Searching for '$searchfor' in $podidx\n" if $opt_v;
+	    while (<PODIDX>) {
+		chomp;
+		push(@found, $_) if m,/$searchfor(?:\.(?:pod|pm))?$,i;
+	    }
+	    close(PODIDX);
+	    next;
+        }
 	print STDERR "Searching for $_\n" if $opt_v;
 	# We must look both in @INC for library modules and in PATH
 	# for executables, like h2xs or perldoc itself.
