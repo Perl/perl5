@@ -1154,6 +1154,9 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
  */
 /* ASCTIME_R_PROTO:
  *	This symbol encodes the prototype of asctime_r.
+ *	It is zero if d_asctime_r is undef, and one of the
+ *	REENTRANT_PROTO_T_ABC macros of reentr.h if d_asctime_r
+ *	is defined.
  */
 #$d_asctime_r HAS_ASCTIME_R	   /**/
 #define ASCTIME_R_PROTO $asctime_r_proto	   /**/
@@ -1215,6 +1218,9 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
  */
 /* CRYPT_R_PROTO:
  *	This symbol encodes the prototype of crypt_r.
+ *	It is zero if d_crypt_r is undef, and one of the
+ *	REENTRANT_PROTO_T_ABC macros of reentr.h if d_crypt_r
+ *	is defined.
  */
 #$d_crypt_r HAS_CRYPT_R	   /**/
 #define CRYPT_R_PROTO $crypt_r_proto	   /**/
@@ -1236,6 +1242,9 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
  */
 /* CTIME_R_PROTO:
  *	This symbol encodes the prototype of ctime_r.
+ *	It is zero if d_ctime_r is undef, and one of the
+ *	REENTRANT_PROTO_T_ABC macros of reentr.h if d_ctime_r
+ *	is defined.
  */
 #$d_ctime_r HAS_CTIME_R	   /**/
 #define CTIME_R_PROTO $ctime_r_proto	   /**/
@@ -1254,6 +1263,9 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
  */
 /* DRAND48_R_PROTO:
  *	This symbol encodes the prototype of drand48_r.
+ *	It is zero if d_drand48_r is undef, and one of the
+ *	REENTRANT_PROTO_T_ABC macros of reentr.h if d_drand48_r
+ *	is defined.
  */
 #$d_drand48_r HAS_DRAND48_R	   /**/
 #define DRAND48_R_PROTO $drand48_r_proto	   /**/
@@ -1278,6 +1290,9 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
  */
 /* ENDGRENT_R_PROTO:
  *	This symbol encodes the prototype of endgrent_r.
+ *	It is zero if d_endgrent_r is undef, and one of the
+ *	REENTRANT_PROTO_T_ABC macros of reentr.h if d_endgrent_r
+ *	is defined.
  */
 #$d_endgrent_r HAS_ENDGRENT_R	   /**/
 #define ENDGRENT_R_PROTO $endgrent_r_proto	   /**/
@@ -1312,6 +1327,9 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
  */
 /* ENDPWENT_R_PROTO:
  *	This symbol encodes the prototype of endpwent_r.
+ *	It is zero if d_endpwent_r is undef, and one of the
+ *	REENTRANT_PROTO_T_ABC macros of reentr.h if d_endpwent_r
+ *	is defined.
  */
 #$d_endpwent_r HAS_ENDPWENT_R	   /**/
 #define ENDPWENT_R_PROTO $endpwent_r_proto	   /**/
@@ -1500,6 +1518,9 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
  */
 /* GETGRENT_R_PROTO:
  *	This symbol encodes the prototype of getgrent_r.
+ *	It is zero if d_getgrent_r is undef, and one of the
+ *	REENTRANT_PROTO_T_ABC macros of reentr.h if d_getgrent_r
+ *	is defined.
  */
 #$d_getgrent_r HAS_GETGRENT_R	   /**/
 #define GETGRENT_R_PROTO $getgrent_r_proto	   /**/
@@ -1510,6 +1531,9 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
  */
 /* GETGRGID_R_PROTO:
  *	This symbol encodes the prototype of getgrgid_r.
+ *	It is zero if d_getgrgid_r is undef, and one of the
+ *	REENTRANT_PROTO_T_ABC macros of reentr.h if d_getgrgid_r
+ *	is defined.
  */
 #$d_getgrgid_r HAS_GETGRGID_R	   /**/
 #define GETGRGID_R_PROTO $getgrgid_r_proto	   /**/
@@ -1520,6 +1544,9 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
  */
 /* GETGRNAM_R_PROTO:
  *	This symbol encodes the prototype of getgrnam_r.
+ *	It is zero if d_getgrnam_r is undef, and one of the
+ *	REENTRANT_PROTO_T_ABC macros of reentr.h if d_getgrnam_r
+ *	is defined.
  */
 #$d_getgrnam_r HAS_GETGRNAM_R	   /**/
 #define GETGRNAM_R_PROTO $getgrnam_r_proto	   /**/
@@ -1591,6 +1618,9 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
  */
 /* GETLOGIN_R_PROTO:
  *	This symbol encodes the prototype of getlogin_r.
+ *	It is zero if d_getlogin_r is undef, and one of the
+ *	REENTRANT_PROTO_T_ABC macros of reentr.h if d_getlogin_r
+ *	is defined.
  */
 #$d_getlogin_r HAS_GETLOGIN_R	   /**/
 #define GETLOGIN_R_PROTO $getlogin_r_proto	   /**/
@@ -1695,6 +1725,9 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
  */
 /* GETPWENT_R_PROTO:
  *	This symbol encodes the prototype of getpwent_r.
+ *	It is zero if d_getpwent_r is undef, and one of the
+ *	REENTRANT_PROTO_T_ABC macros of reentr.h if d_getpwent_r
+ *	is defined.
  */
 #$d_getpwent_r HAS_GETPWENT_R	   /**/
 #define GETPWENT_R_PROTO $getpwent_r_proto	   /**/
@@ -1705,6 +1738,9 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
  */
 /* GETPWNAM_R_PROTO:
  *	This symbol encodes the prototype of getpwnam_r.
+ *	It is zero if d_getpwnam_r is undef, and one of the
+ *	REENTRANT_PROTO_T_ABC macros of reentr.h if d_getpwnam_r
+ *	is defined.
  */
 #$d_getpwnam_r HAS_GETPWNAM_R	   /**/
 #define GETPWNAM_R_PROTO $getpwnam_r_proto	   /**/
@@ -1715,6 +1751,9 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
  */
 /* GETPWUID_R_PROTO:
  *	This symbol encodes the prototype of getpwuid_r.
+ *	It is zero if d_getpwuid_r is undef, and one of the
+ *	REENTRANT_PROTO_T_ABC macros of reentr.h if d_getpwuid_r
+ *	is defined.
  */
 #$d_getpwuid_r HAS_GETPWUID_R	   /**/
 #define GETPWUID_R_PROTO $getpwuid_r_proto	   /**/
@@ -1745,6 +1784,9 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
  */
 /* GETSPNAM_R_PROTO:
  *	This symbol encodes the prototype of getspnam_r.
+ *	It is zero if d_getspnam_r is undef, and one of the
+ *	REENTRANT_PROTO_T_ABC macros of reentr.h if d_getspnam_r
+ *	is defined.
  */
 #$d_getspnam_r HAS_GETSPNAM_R	   /**/
 #define GETSPNAM_R_PROTO $getspnam_r_proto	   /**/
@@ -1766,6 +1808,9 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
  */
 /* GMTIME_R_PROTO:
  *	This symbol encodes the prototype of gmtime_r.
+ *	It is zero if d_gmtime_r is undef, and one of the
+ *	REENTRANT_PROTO_T_ABC macros of reentr.h if d_gmtime_r
+ *	is defined.
  */
 #$d_gmtime_r HAS_GMTIME_R	   /**/
 #define GMTIME_R_PROTO $gmtime_r_proto	   /**/
@@ -1867,6 +1912,9 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
  */
 /* LOCALTIME_R_PROTO:
  *	This symbol encodes the prototype of localtime_r.
+ *	It is zero if d_localtime_r is undef, and one of the
+ *	REENTRANT_PROTO_T_ABC macros of reentr.h if d_localtime_r
+ *	is defined.
  */
 #$d_localtime_r HAS_LOCALTIME_R	   /**/
 #define LOCALTIME_R_PROTO $localtime_r_proto	   /**/
@@ -2029,6 +2077,9 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
  */
 /* RANDOM_R_PROTO:
  *	This symbol encodes the prototype of random_r.
+ *	It is zero if d_random_r is undef, and one of the
+ *	REENTRANT_PROTO_T_ABC macros of reentr.h if d_random_r
+ *	is defined.
  */
 #$d_random_r HAS_RANDOM_R	   /**/
 #define RANDOM_R_PROTO $random_r_proto	   /**/
@@ -2039,6 +2090,9 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
  */
 /* READDIR_R_PROTO:
  *	This symbol encodes the prototype of readdir_r.
+ *	It is zero if d_readdir_r is undef, and one of the
+ *	REENTRANT_PROTO_T_ABC macros of reentr.h if d_readdir_r
+ *	is defined.
  */
 #$d_readdir_r HAS_READDIR_R	   /**/
 #define READDIR_R_PROTO $readdir_r_proto	   /**/
@@ -2112,6 +2166,9 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
  */
 /* SETGRENT_R_PROTO:
  *	This symbol encodes the prototype of setgrent_r.
+ *	It is zero if d_setgrent_r is undef, and one of the
+ *	REENTRANT_PROTO_T_ABC macros of reentr.h if d_setgrent_r
+ *	is defined.
  */
 #$d_setgrent_r HAS_SETGRENT_R	   /**/
 #define SETGRENT_R_PROTO $setgrent_r_proto	   /**/
@@ -2177,6 +2234,9 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
  */
 /* SETPWENT_R_PROTO:
  *	This symbol encodes the prototype of setpwent_r.
+ *	It is zero if d_setpwent_r is undef, and one of the
+ *	REENTRANT_PROTO_T_ABC macros of reentr.h if d_setpwent_r
+ *	is defined.
  */
 #$d_setpwent_r HAS_SETPWENT_R	   /**/
 #define SETPWENT_R_PROTO $setpwent_r_proto	   /**/
@@ -2308,6 +2368,9 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
  */
 /* SRAND48_R_PROTO:
  *	This symbol encodes the prototype of srand48_r.
+ *	It is zero if d_srand48_r is undef, and one of the
+ *	REENTRANT_PROTO_T_ABC macros of reentr.h if d_srand48_r
+ *	is defined.
  */
 #$d_srand48_r HAS_SRAND48_R	   /**/
 #define SRAND48_R_PROTO $srand48_r_proto	   /**/
@@ -2318,6 +2381,9 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
  */
 /* SRANDOM_R_PROTO:
  *	This symbol encodes the prototype of srandom_r.
+ *	It is zero if d_srandom_r is undef, and one of the
+ *	REENTRANT_PROTO_T_ABC macros of reentr.h if d_srandom_r
+ *	is defined.
  */
 #$d_srandom_r HAS_SRANDOM_R	   /**/
 #define SRANDOM_R_PROTO $srandom_r_proto	   /**/
@@ -2448,6 +2514,9 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
  */
 /* STRERROR_R_PROTO:
  *	This symbol encodes the prototype of strerror_r.
+ *	It is zero if d_strerror_r is undef, and one of the
+ *	REENTRANT_PROTO_T_ABC macros of reentr.h if d_strerror_r
+ *	is defined.
  */
 #$d_strerror_r HAS_STRERROR_R	   /**/
 #define STRERROR_R_PROTO $strerror_r_proto	   /**/
@@ -2520,6 +2589,9 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
  */
 /* TMPNAM_R_PROTO:
  *	This symbol encodes the prototype of tmpnam_r.
+ *	It is zero if d_tmpnam_r is undef, and one of the
+ *	REENTRANT_PROTO_T_ABC macros of reentr.h if d_tmpnam_r
+ *	is defined.
  */
 #$d_tmpnam_r HAS_TMPNAM_R	   /**/
 #define TMPNAM_R_PROTO $tmpnam_r_proto	   /**/
@@ -3870,6 +3942,9 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
  */
 /* CTERMID_R_PROTO:
  *	This symbol encodes the prototype of ctermid_r.
+ *	It is zero if d_ctermid_r is undef, and one of the
+ *	REENTRANT_PROTO_T_ABC macros of reentr.h if d_ctermid_r
+ *	is defined.
  */
 #$d_ctermid_r HAS_CTERMID_R	   /**/
 #define CTERMID_R_PROTO $ctermid_r_proto	   /**/
@@ -3880,6 +3955,9 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
  */
 /* ENDHOSTENT_R_PROTO:
  *	This symbol encodes the prototype of endhostent_r.
+ *	It is zero if d_endhostent_r is undef, and one of the
+ *	REENTRANT_PROTO_T_ABC macros of reentr.h if d_endhostent_r
+ *	is defined.
  */
 #$d_endhostent_r HAS_ENDHOSTENT_R	   /**/
 #define ENDHOSTENT_R_PROTO $endhostent_r_proto	   /**/
@@ -3890,6 +3968,9 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
  */
 /* ENDNETENT_R_PROTO:
  *	This symbol encodes the prototype of endnetent_r.
+ *	It is zero if d_endnetent_r is undef, and one of the
+ *	REENTRANT_PROTO_T_ABC macros of reentr.h if d_endnetent_r
+ *	is defined.
  */
 #$d_endnetent_r HAS_ENDNETENT_R	   /**/
 #define ENDNETENT_R_PROTO $endnetent_r_proto	   /**/
@@ -3900,6 +3981,9 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
  */
 /* ENDPROTOENT_R_PROTO:
  *	This symbol encodes the prototype of endprotoent_r.
+ *	It is zero if d_endprotoent_r is undef, and one of the
+ *	REENTRANT_PROTO_T_ABC macros of reentr.h if d_endprotoent_r
+ *	is defined.
  */
 #$d_endprotoent_r HAS_ENDPROTOENT_R	   /**/
 #define ENDPROTOENT_R_PROTO $endprotoent_r_proto	   /**/
@@ -3910,6 +3994,9 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
  */
 /* ENDSERVENT_R_PROTO:
  *	This symbol encodes the prototype of endservent_r.
+ *	It is zero if d_endservent_r is undef, and one of the
+ *	REENTRANT_PROTO_T_ABC macros of reentr.h if d_endservent_r
+ *	is defined.
  */
 #$d_endservent_r HAS_ENDSERVENT_R	   /**/
 #define ENDSERVENT_R_PROTO $endservent_r_proto	   /**/
@@ -3920,6 +4007,9 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
  */
 /* GETHOSTBYADDR_R_PROTO:
  *	This symbol encodes the prototype of gethostbyaddr_r.
+ *	It is zero if d_gethostbyaddr_r is undef, and one of the
+ *	REENTRANT_PROTO_T_ABC macros of reentr.h if d_gethostbyaddr_r
+ *	is defined.
  */
 #$d_gethostbyaddr_r HAS_GETHOSTBYADDR_R	   /**/
 #define GETHOSTBYADDR_R_PROTO $gethostbyaddr_r_proto	   /**/
@@ -3930,6 +4020,9 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
  */
 /* GETHOSTBYNAME_R_PROTO:
  *	This symbol encodes the prototype of gethostbyname_r.
+ *	It is zero if d_gethostbyname_r is undef, and one of the
+ *	REENTRANT_PROTO_T_ABC macros of reentr.h if d_gethostbyname_r
+ *	is defined.
  */
 #$d_gethostbyname_r HAS_GETHOSTBYNAME_R	   /**/
 #define GETHOSTBYNAME_R_PROTO $gethostbyname_r_proto	   /**/
@@ -3940,6 +4033,9 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
  */
 /* GETHOSTENT_R_PROTO:
  *	This symbol encodes the prototype of gethostent_r.
+ *	It is zero if d_gethostent_r is undef, and one of the
+ *	REENTRANT_PROTO_T_ABC macros of reentr.h if d_gethostent_r
+ *	is defined.
  */
 #$d_gethostent_r HAS_GETHOSTENT_R	   /**/
 #define GETHOSTENT_R_PROTO $gethostent_r_proto	   /**/
@@ -3950,6 +4046,9 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
  */
 /* GETNETBYADDR_R_PROTO:
  *	This symbol encodes the prototype of getnetbyaddr_r.
+ *	It is zero if d_getnetbyaddr_r is undef, and one of the
+ *	REENTRANT_PROTO_T_ABC macros of reentr.h if d_getnetbyaddr_r
+ *	is defined.
  */
 #$d_getnetbyaddr_r HAS_GETNETBYADDR_R	   /**/
 #define GETNETBYADDR_R_PROTO $getnetbyaddr_r_proto	   /**/
@@ -3960,6 +4059,9 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
  */
 /* GETNETBYNAME_R_PROTO:
  *	This symbol encodes the prototype of getnetbyname_r.
+ *	It is zero if d_getnetbyname_r is undef, and one of the
+ *	REENTRANT_PROTO_T_ABC macros of reentr.h if d_getnetbyname_r
+ *	is defined.
  */
 #$d_getnetbyname_r HAS_GETNETBYNAME_R	   /**/
 #define GETNETBYNAME_R_PROTO $getnetbyname_r_proto	   /**/
@@ -3970,6 +4072,9 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
  */
 /* GETNETENT_R_PROTO:
  *	This symbol encodes the prototype of getnetent_r.
+ *	It is zero if d_getnetent_r is undef, and one of the
+ *	REENTRANT_PROTO_T_ABC macros of reentr.h if d_getnetent_r
+ *	is defined.
  */
 #$d_getnetent_r HAS_GETNETENT_R	   /**/
 #define GETNETENT_R_PROTO $getnetent_r_proto	   /**/
@@ -3980,6 +4085,9 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
  */
 /* GETPROTOBYNAME_R_PROTO:
  *	This symbol encodes the prototype of getprotobyname_r.
+ *	It is zero if d_getprotobyname_r is undef, and one of the
+ *	REENTRANT_PROTO_T_ABC macros of reentr.h if d_getprotobyname_r
+ *	is defined.
  */
 #$d_getprotobyname_r HAS_GETPROTOBYNAME_R	   /**/
 #define GETPROTOBYNAME_R_PROTO $getprotobyname_r_proto	   /**/
@@ -3990,6 +4098,9 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
  */
 /* GETPROTOBYNUMBER_R_PROTO:
  *	This symbol encodes the prototype of getprotobynumber_r.
+ *	It is zero if d_getprotobynumber_r is undef, and one of the
+ *	REENTRANT_PROTO_T_ABC macros of reentr.h if d_getprotobynumber_r
+ *	is defined.
  */
 #$d_getprotobynumber_r HAS_GETPROTOBYNUMBER_R	   /**/
 #define GETPROTOBYNUMBER_R_PROTO $getprotobynumber_r_proto	   /**/
@@ -4000,6 +4111,9 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
  */
 /* GETPROTOENT_R_PROTO:
  *	This symbol encodes the prototype of getprotoent_r.
+ *	It is zero if d_getprotoent_r is undef, and one of the
+ *	REENTRANT_PROTO_T_ABC macros of reentr.h if d_getprotoent_r
+ *	is defined.
  */
 #$d_getprotoent_r HAS_GETPROTOENT_R	   /**/
 #define GETPROTOENT_R_PROTO $getprotoent_r_proto	   /**/
@@ -4010,6 +4124,9 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
  */
 /* GETSERVBYNAME_R_PROTO:
  *	This symbol encodes the prototype of getservbyname_r.
+ *	It is zero if d_getservbyname_r is undef, and one of the
+ *	REENTRANT_PROTO_T_ABC macros of reentr.h if d_getservbyname_r
+ *	is defined.
  */
 #$d_getservbyname_r HAS_GETSERVBYNAME_R	   /**/
 #define GETSERVBYNAME_R_PROTO $getservbyname_r_proto	   /**/
@@ -4020,6 +4137,9 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
  */
 /* GETSERVBYPORT_R_PROTO:
  *	This symbol encodes the prototype of getservbyport_r.
+ *	It is zero if d_getservbyport_r is undef, and one of the
+ *	REENTRANT_PROTO_T_ABC macros of reentr.h if d_getservbyport_r
+ *	is defined.
  */
 #$d_getservbyport_r HAS_GETSERVBYPORT_R	   /**/
 #define GETSERVBYPORT_R_PROTO $getservbyport_r_proto	   /**/
@@ -4030,6 +4150,9 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
  */
 /* GETSERVENT_R_PROTO:
  *	This symbol encodes the prototype of getservent_r.
+ *	It is zero if d_getservent_r is undef, and one of the
+ *	REENTRANT_PROTO_T_ABC macros of reentr.h if d_getservent_r
+ *	is defined.
  */
 #$d_getservent_r HAS_GETSERVENT_R	   /**/
 #define GETSERVENT_R_PROTO $getservent_r_proto	   /**/
@@ -4046,6 +4169,9 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
  */
 /* READDIR64_R_PROTO:
  *	This symbol encodes the prototype of readdir64_r.
+ *	It is zero if d_readdir64_r is undef, and one of the
+ *	REENTRANT_PROTO_T_ABC macros of reentr.h if d_readdir64_r
+ *	is defined.
  */
 #$d_readdir64_r HAS_READDIR64_R	   /**/
 #define READDIR64_R_PROTO $readdir64_r_proto	   /**/
@@ -4056,6 +4182,9 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
  */
 /* SETHOSTENT_R_PROTO:
  *	This symbol encodes the prototype of sethostent_r.
+ *	It is zero if d_sethostent_r is undef, and one of the
+ *	REENTRANT_PROTO_T_ABC macros of reentr.h if d_sethostent_r
+ *	is defined.
  */
 #$d_sethostent_r HAS_SETHOSTENT_R	   /**/
 #define SETHOSTENT_R_PROTO $sethostent_r_proto	   /**/
@@ -4066,6 +4195,9 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
  */
 /* SETLOCALE_R_PROTO:
  *	This symbol encodes the prototype of setlocale_r.
+ *	It is zero if d_setlocale_r is undef, and one of the
+ *	REENTRANT_PROTO_T_ABC macros of reentr.h if d_setlocale_r
+ *	is defined.
  */
 #$d_setlocale_r HAS_SETLOCALE_R	   /**/
 #define SETLOCALE_R_PROTO $setlocale_r_proto	   /**/
@@ -4076,6 +4208,9 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
  */
 /* SETNETENT_R_PROTO:
  *	This symbol encodes the prototype of setnetent_r.
+ *	It is zero if d_setnetent_r is undef, and one of the
+ *	REENTRANT_PROTO_T_ABC macros of reentr.h if d_setnetent_r
+ *	is defined.
  */
 #$d_setnetent_r HAS_SETNETENT_R	   /**/
 #define SETNETENT_R_PROTO $setnetent_r_proto	   /**/
@@ -4086,6 +4221,9 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
  */
 /* SETPROTOENT_R_PROTO:
  *	This symbol encodes the prototype of setprotoent_r.
+ *	It is zero if d_setprotoent_r is undef, and one of the
+ *	REENTRANT_PROTO_T_ABC macros of reentr.h if d_setprotoent_r
+ *	is defined.
  */
 #$d_setprotoent_r HAS_SETPROTOENT_R	   /**/
 #define SETPROTOENT_R_PROTO $setprotoent_r_proto	   /**/
@@ -4096,6 +4234,9 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
  */
 /* SETSERVENT_R_PROTO:
  *	This symbol encodes the prototype of setservent_r.
+ *	It is zero if d_setservent_r is undef, and one of the
+ *	REENTRANT_PROTO_T_ABC macros of reentr.h if d_setservent_r
+ *	is defined.
  */
 #$d_setservent_r HAS_SETSERVENT_R	   /**/
 #define SETSERVENT_R_PROTO $setservent_r_proto	   /**/
@@ -4106,6 +4247,9 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
  */
 /* TTYNAME_R_PROTO:
  *	This symbol encodes the prototype of ttyname_r.
+ *	It is zero if d_ttyname_r is undef, and one of the
+ *	REENTRANT_PROTO_T_ABC macros of reentr.h if d_ttyname_r
+ *	is defined.
  */
 #$d_ttyname_r HAS_TTYNAME_R	   /**/
 #define TTYNAME_R_PROTO $ttyname_r_proto	   /**/
