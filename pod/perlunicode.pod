@@ -880,7 +880,7 @@ not think that LATIN SMALL LETTER ETH is a letter (unless you happen
 to speak Icelandic), but Unicode does.
 
 As discussed elsewhere, Perl tries to stand one leg (two legs, as
-camels are quadrupeds?) in two worlds: the old world of byte and the new
+camels are quadrupeds?) in two worlds: the old world of bytes and the new
 world of characters, upgrading from bytes to characters when necessary.
 If your legacy code is not explicitly using Unicode, no automatic
 switchover to characters should happen, and characters shouldn't get
