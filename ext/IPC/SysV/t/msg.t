@@ -1,12 +1,22 @@
 BEGIN {
-    eval { require Config; import Config };
-    if ($@) {
-	print "1..0 # Skip: no Config\n";
-	exit(0);
+    chdir 't' if -d 't';
+
+    @INC = '../lib';
+
+    require Config; import Config;
+
+    my $reason;
+
+    if ($Config{'extensions'} !~ /\bIPC\/SysV\b/) {
+      $reason = 'IPC::SysV was not built';
+    } elsif ($Config{'d_sem'} ne 'define') {
+      $reason = '$Config{d_sem} undefined';
+    } elsif ($Config{'d_msg'} ne 'define') {
+      $reason = '$Config{d_msg} undefined';
     }
-    if ($Config{extensions} !~ m!\bIPC/SysV\b!) {
-	print "1..0 # Skip: no SysV IPC\n";
-	exit(0);
+    if ($reason) {
+	print "1..0 # Skip: $reason\n";
+	exit 0;
     }
 }
 

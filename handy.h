@@ -116,6 +116,14 @@ Null SV pointer.
 
 #ifdef I_INTTYPES /* e.g. Linux has int64_t without <inttypes.h> */
 #   include <inttypes.h>
+#   ifdef INT32_MIN_BROKEN
+#       undef  INT32_MIN
+#       define INT32_MIN (-2147483647-1)
+#   endif
+#   ifdef INT64_MIN_BROKEN
+#       undef  INT64_MIN
+#       define INT64_MIN (-9223372036854775807LL-1)
+#   endif
 #endif
 
 typedef I8TYPE I8;
