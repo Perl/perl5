@@ -11227,8 +11227,8 @@ bool
 Perl_sv_cat_decode(pTHX_ SV *dsv, SV *encoding,
 		   SV *ssv, int *offset, char *tstr, int tlen)
 {
+    bool ret = FALSE;
     if (SvPOK(ssv) && SvPOK(dsv) && SvROK(encoding) && offset) {
-        bool ret = FALSE;
 	SV *offsv;
 	dSP;
 	ENTER;
@@ -11249,8 +11249,9 @@ Perl_sv_cat_decode(pTHX_ SV *dsv, SV *encoding,
 	PUTBACK;
 	FREETMPS;
 	LEAVE;
-	return ret;
     }
-    Perl_croak(aTHX_ "Invalid argument to sv_cat_decode.");
+    else
+        Perl_croak(aTHX_ "Invalid argument to sv_cat_decode");
+    return ret;
 }
 

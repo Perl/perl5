@@ -20,6 +20,26 @@ sub file_name_is_absolute {
     return $self->SUPER::file_name_is_absolute($file);
 }
 
+my $tmpdir;
+sub tmpdir {
+    return $tmpdir if defined $tmpdir;
+    my @dirlist = ($ENV{TMPDIR}, "/tmp", 'C:/temp');
+    {
+	no strict 'refs';
+	if (${"\cTAINT"}) { # Check for taint mode on perl >= 5.8.0
+            require Scalar::Util;
+	    shift @dirlist if Scalar::Util::tainted($ENV{TMPDIR});
+	}
+    }
+    foreach (@dirlist) {
+	next unless defined && -d && -w _;
+	$tmpdir = $_;
+	last;
+    }
+    $tmpdir = File::Spec->curdir unless defined $tmpdir;
+    return $tmpdir;
+}
+
 1;
 __END__
 

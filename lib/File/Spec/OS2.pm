@@ -46,7 +46,7 @@ sub tmpdir {
 	$tmpdir = $_;
 	last;
     }
-    $tmpdir = '' unless defined $tmpdir;
+    $tmpdir = File::Spec->curdir unless defined $tmpdir;
     $tmpdir =~ s:\\:/:g;
     $tmpdir = $self->canonpath($tmpdir);
     return $tmpdir;
