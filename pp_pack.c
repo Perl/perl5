@@ -149,7 +149,7 @@ S_group_end(pTHX_ register char *pat, register char *patend, char ender)
 }
 
 /* Returns the sizeof() struct described by pat */
-I32
+STATIC I32
 S_measure_struct(pTHX_ char *pat, register char *patend)
 {
     I32 datumtype;
