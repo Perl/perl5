@@ -25,6 +25,13 @@ require "dumpvar.pl";
 sub unctrl    { print dumpvar::unctrl($_[0]), "\n" }
 sub uniescape { print dumpvar::uniescape($_[0]), "\n" }
 sub stringify { print dumpvar::stringify($_[0]), "\n" }
+sub dumpvalue { 
+        local $\ = '';
+        local $, = '';
+        local $" = ' ';
+        my @params = @_;
+        &main::dumpValue(\@params, -1);
+}
 
 package Foo;
 
@@ -187,3 +194,90 @@ EXPECT
 3  4
 4  5
 ########
+dumpvalue("a");
+EXPECT
+0  'a'
+########
+dumpvalue("\cA");
+EXPECT
+0  "\cA"
+########
+dumpvalue("\x{100}");
+EXPECT
+0  '\x{0100}'
+########
+dumpvalue(undef);
+EXPECT
+0  undef
+########
+dumpvalue("foo");
+EXPECT
+0  'foo'
+########
+dumpvalue(\undef);
+EXPECT
+/0  SCALAR\(0x[0-9a-f]+\)\n   -> undef\n/i
+########
+dumpvalue(\\undef);
+EXPECT
+/0  REF\(0x[0-9a-f]+\)\n   -> SCALAR\(0x[0-9a-f]+\)\n         -> undef\n/i
+########
+dumpvalue([]);
+EXPECT
+/0  ARRAY\(0x[0-9a-f]+\)\n     empty array/i
+########
+dumpvalue({});
+EXPECT
+/0  HASH\(0x[0-9a-f]+\)\n\s+empty hash/i
+########
+dumpvalue(sub{});
+EXPECT
+/0  CODE\(0x[0-9a-f]+\)\n   -> &CODE\(0x[0-9a-f]+\) in /i
+########
+dumpvalue(\*a);
+EXPECT
+/0  GLOB\(0x[0-9a-f]+\)\n   -> \*main::a\n/i
+########
+dumpvalue($foo);
+EXPECT
+/0  Foo=ARRAY\(0x[0-9a-f]+\)\n   0  1\n   1  2\n   2  3\n   3  4\n   4  5\n/i
+########
+dumpvalue($bar);
+EXPECT
+/0  Bar=ARRAY\(0x[0-9a-f]+\)\n   0  1\n   1  2\n   2  3\n   3  4\n   4  5\n/i
+########
+dumpvalue("1\n2\n3")
+EXPECT
+/0  '1\n2\n3'\n/i
+########
+dumpvalue([1..4]);
+EXPECT
+/0  ARRAY\(0x[0-9a-f]+\)\n   0  1\n   1  2\n   2  3\n   3  4\n/i
+########
+dumpvalue({1..4});
+EXPECT
+/0  HASH\(0x[0-9a-f]+\)\n   1 => 2\n   3 => 4\n/i
+########
+dumpvalue({1=>2,3=>4});
+EXPECT
+/0  HASH\(0x[0-9a-f]+\)\n   1 => 2\n   3 => 4\n/i
+########
+dumpvalue({a=>1,b=>2});
+EXPECT
+/0  HASH\(0x[0-9a-f]+\)\n   'a' => 1\n   'b' => 2\n/i
+########
+dumpvalue([{a=>[1,2,3],b=>{c=>1,d=>2}},{e=>{f=>1,g=>2},h=>[qw(i j k)]}]);
+EXPECT
+/0  ARRAY\(0x[0-9a-f]+\)\n   0  HASH\(0x[0-9a-f]+\)\n      'a' => ARRAY\(0x[0-9a-f]+\)\n         0  1\n         1  2\n         2  3\n      'b' => HASH\(0x[0-9a-f]+\)\n         'c' => 1\n         'd' => 2\n   1  HASH\(0x[0-9a-f]+\)\n      'e' => HASH\(0x[0-9a-f]+\)\n         'f' => 1\n         'g' => 2\n      'h' => ARRAY\(0x[0-9a-f]+\)\n         0  'i'\n         1  'j'\n         2  'k'/i
+########
+dumpvalue({reverse map {$_=>1} sort qw(the quick brown fox)})
+EXPECT
+/0  HASH\(0x[0-9a-f]+\)\n   1 => 'brown'\n/i
+########
+my @x=qw(a b c); dumpvalue(\@x);
+EXPECT
+/0  ARRAY\(0x[0-9a-f]+\)\n   0  'a'\n   1  'b'\n   2  'c'\n/i
+########
+my %x=(a=>1, b=>2); dumpvalue(\%x);
+EXPECT
+/0  HASH\(0x[0-9a-f]+\)\n   'a' => 1\n   'b' => 2\n/i
