@@ -105,6 +105,9 @@ Get the value from slot C<po> in the base (DEPTH=1) pad of a padlist
 Set the current pad to be pad C<n> in the padlist, saving
 the previous current pad.
 
+=for apidoc m|void|PAD_SET_CUR_NOSAVE	|PADLIST padlist|I32 n
+like PAD_SET_CUR, but without the save
+
 =for apidoc m|void|PAD_SAVE_SETNULLPAD
 Save the current pad then set it to null.
 
@@ -133,13 +136,17 @@ Restore the old pad saved into the local variable opad by PAD_SAVE_LOCAL()
 	    ? AvARRAY((AV*)(AvARRAY(padlist)[1]))[po] : Nullsv;
     
 
-#define PAD_SET_CUR(padlist,n) \
-	SAVECOMPPAD();						\
+#define PAD_SET_CUR_NOSAVE(padlist,n) \
 	PL_comppad = (PAD*) (AvARRAY(padlist)[n]);		\
 	PL_curpad = AvARRAY(PL_comppad);			\
 	DEBUG_Xv(PerlIO_printf(Perl_debug_log,			\
 	      "Pad 0x%"UVxf"[0x%"UVxf"] set_cur    depth=%d\n",	\
 	      PTR2UV(PL_comppad), PTR2UV(PL_curpad), (int)(n)));
+
+
+#define PAD_SET_CUR(padlist,n) \
+	SAVECOMPPAD();						\
+	PAD_SET_CUR_NOSAVE(padlist,n);
 
 
 #define PAD_SAVE_SETNULLPAD()	SAVECOMPPAD(); \

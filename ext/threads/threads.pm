@@ -31,8 +31,6 @@ use overload
     '==' => \&equal,
     'fallback' => 1;
 
-#use threads::Shared;
-
 BEGIN {
     warn "Warning, threads::shared has already been loaded. ".
        "To enable shared variables for these modules 'use threads' ".
@@ -55,15 +53,12 @@ async
 our $VERSION = '1.00';
 
 
-sub equal {
-    return 1 if($_[0]->tid() == $_[1]->tid());
-    return 0;
-}
+# || 0 to ensure compatibility with previous versions
+sub equal { ($_[0]->tid == $_[1]->tid) || 0 }
 
-sub async (&;@) {
-    my $cref = shift;
-    return threads->new($cref,@_);
-}
+# use "goto" trick to avoid pad problems from 5.8.1 (fixed in 5.8.2)
+# should also be faster
+sub async (&;@) { unshift @_,'threads'; goto &new }
 
 sub object {
     return undef unless @_ > 1;
