@@ -682,8 +682,15 @@ win32_opendir(char *filename)
 
     /* Create the search pattern */
     strcpy(scanname, filename);
-    if (scanname[len-1] != '/' && scanname[len-1] != '\\')
+
+    /* bare drive name means look in cwd for drive */
+    if (len == 2 && isALPHA(scanname[0]) && scanname[1] == ':') {
+	scanname[len++] = '.';
 	scanname[len++] = '/';
+    }
+    else if (scanname[len-1] != '/' && scanname[len-1] != '\\') {
+	scanname[len++] = '/';
+    }
     scanname[len++] = '*';
     scanname[len] = '\0';
 
@@ -929,10 +936,10 @@ win32_stat(const char *path, struct stat *buffer)
 	    t[l] = '\0';
 	    path = t;
 	    break;
-	/* FindFirstFile() is buggy with "x:", so add a slash :-( */
+	/* FindFirstFile() is buggy with "x:", so add a dot :-( */
 	case ':':
 	    if (l == 2 && isALPHA(path[0])) {
-		t[0] = path[0]; t[1] = ':'; t[2] = '/'; t[3] = '\0';
+		t[0] = path[0]; t[1] = ':'; t[2] = '.'; t[3] = '\0';
 		l = 3;
 		path = t;
 	    }
