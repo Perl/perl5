@@ -5830,7 +5830,7 @@ Perl_sv_vcatpvfn(pTHX_ SV *sv, const char *pat, STRLEN patlen, va_list *args, SV
 		uv = va_arg(*args, int);
 	    else
 		uv = (svix < svmax) ? SvIVx(svargs[svix++]) : 0;
-	    if (uv >= 128 && PL_bigchar && !IN_BYTE) {
+	    if ((uv > 255 || (uv > 127 && SvUTF8(sv))) && !IN_BYTE) {
 		eptr = (char*)utf8buf;
 		elen = uv_to_utf8((U8*)eptr, uv) - utf8buf;
 		is_utf = TRUE;

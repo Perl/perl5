@@ -38,9 +38,7 @@ the effect of C<use byte> within the current lexical scope.
 
 Perl normally assumes character semantics in the presence of
 character data (i.e. data that has come from a source that has
-been marked as being of a particular character encoding) or when
-the global $^U flag is enabled.  [XXX: implement -C command line
-switch and mention that instead of $^U?]
+been marked as being of a particular character encoding).
 
 To understand the implications and differences between character
 semantics and byte semantics, see L<perlunicode>.
