@@ -8335,6 +8335,7 @@ Perl_sv_vcatpvfn(pTHX_ SV *sv, const char *pat, STRLEN patlen, va_list *args, SV
 	}
     }
 
+#ifndef USE_LONG_DOUBLE
     /* special-case "%.<number>[gf]" */
     if ( patlen <= 5 && pat[0] == '%' && pat[1] == '.'
 	 && (pat[patlen-1] == 'g' || pat[patlen-1] == 'f') ) {
@@ -8355,7 +8356,7 @@ Perl_sv_vcatpvfn(pTHX_ SV *sv, const char *pat, STRLEN patlen, va_list *args, SV
 		return;
 	    if (*pp == 'g') {
 		if (digits < sizeof(ebuf) - NV_DIG - 10) { /* 0, point, slack */
-		    Gconvert((double)nv, digits, 0, ebuf);
+		    Gconvert(nv, (int)digits, 0, ebuf);
 		    sv_catpv(sv, ebuf);
 		    if (*ebuf)	/* May return an empty string for digits==0 */
 			return;
@@ -8370,6 +8371,7 @@ Perl_sv_vcatpvfn(pTHX_ SV *sv, const char *pat, STRLEN patlen, va_list *args, SV
 	    }
 	}
     }
+#endif /* !USE_LONG_DOUBLE */
 
     if (!args && svix < svmax && DO_UTF8(*svargs))
 	has_utf8 = TRUE;
@@ -9064,7 +9066,7 @@ Perl_sv_vcatpvfn(pTHX_ SV *sv, const char *pat, STRLEN patlen, va_list *args, SV
 	    if ( !(width || left || plus || alt) && fill != '0'
 		 && has_precis && intsize != 'q' ) {	/* Shortcuts */
 		if ( c == 'g') {
-		    Gconvert((double)nv, precis, 0, PL_efloatbuf);
+		    Gconvert((NV)nv, (int)precis, 0, PL_efloatbuf);
 		    if (*PL_efloatbuf)	/* May return an empty string for digits==0 */
 			goto float_converted;
 		} else if ( c == 'f' && !precis) {
