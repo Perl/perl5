@@ -861,7 +861,20 @@ C<mg_ptr> field points to a C<ufuncs> structure:
 
 When the SV is read from or written to, the C<uf_val> or C<uf_set>
 function will be called with C<uf_index> as the first arg and a
-pointer to the SV as the second.
+pointer to the SV as the second.  A simple example of how to add 'U'
+magic is shown below.  Note that the ufuncs structure is copied by
+sv_magic, so you can safely allocate it on the stack.
+
+    void
+    Umagic(sv)
+        SV *sv;
+    PREINIT:
+        struct ufuncs uf;
+    CODE:
+        uf.uf_val   = &my_get_fn;
+        uf.uf_set   = &my_set_fn;
+        uf.uf_index = 0;
+        sv_magic(sv, 0, 'U', (char*)&uf, sizeof(uf));
 
 Note that because multiple extensions may be using '~' or 'U' magic,
 it is important for extensions to take extra care to avoid conflict.
@@ -906,6 +919,33 @@ of these caveats are actually considered bugs in the API, to be fixed
 in later releases, and are bracketed with [MAYCHANGE] below. If
 you find yourself actually applying such information in this section, be
 aware that the behavior may change in the future, umm, without warning.
+
+The perl tie function associates a variable with an object that implements
+the various GET, SET etc methods.  To perform the equivalent of the perl
+tie function from an XSUB, you must mimic this behaviour.  The code below
+carries out the necessary steps - firstly it creates a new hash, and then
+creates a second hash which it blesses into the class which will implement
+the tie methods. Lastly it ties the two hashes together, and returns a
+reference to the new tied hash.  Note that the code below does NOT call the
+TIEHASH method in the MyTie class -
+see L<Calling Perl Routines from within C Programs> for details on how
+to do this.
+
+    SV*
+    mytie()
+    PREINIT:
+        HV *hash;
+        HV *stash;
+        SV *tie;
+    CODE:
+        hash = newHV();
+        tie = newRV_noinc((SV*)newHV());
+        stash = gv_stashpv("MyTie", TRUE);
+        sv_bless(tie, stash);
+        hv_magic(hash, tie, 'P');
+        RETVAL = newRV_noinc(hash);
+    OUTPUT:
+        RETVAL
 
 The C<av_store> function, when given a tied array argument, merely
 copies the magic of the array onto the value to be "stored", using
