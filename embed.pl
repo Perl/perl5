@@ -1853,7 +1853,9 @@ Apd	|UV	|utf8_to_uvuni	|U8 *s|STRLEN* retlen
 Adp	|UV	|utf8n_to_uvchr	|U8 *s|STRLEN curlen|STRLEN* retlen|U32 flags
 Adp	|UV	|utf8n_to_uvuni	|U8 *s|STRLEN curlen|STRLEN* retlen|U32 flags
 Apd	|U8*	|uvchr_to_utf8	|U8 *d|UV uv
-Apd	|U8*	|uvuni_to_utf8	|U8 *d|UV uv
+Ap	|U8*	|uvuni_to_utf8	|U8 *d|UV uv
+Ap	|U8*	|uvchr_to_utf8_flags	|U8 *d|UV uv|UV flags
+Apd	|U8*	|uvuni_to_utf8_flags	|U8 *d|UV uv|UV flags
 Apd	|char*	|pv_uni_display	|SV *dsv|U8 *spv|STRLEN len \
 				|STRLEN pvlim|UV flags
 Apd	|char*	|sv_uni_display	|SV *dsv|SV *ssv|STRLEN pvlim|UV flags

@@ -135,7 +135,7 @@ ok ($i == 5);
 # Check for Unicode hash keys.
 %u = ("\x{12}", "f", "\x{123}", "fo", "\x{1234}",  "foo");
 $u{"\x{12345}"}  = "bar";
-@u{"\x{123456}"} = "zap";
+@u{"\x{10FFFD}"} = "zap";
 
 my %u2;
 foreach (keys %u) {

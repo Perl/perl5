@@ -166,6 +166,17 @@ END_EXTERN_C
 #define UNICODE_BYTER_ORDER_MARK	0xfffe
 #define UNICODE_ILLEGAL			0xffff
 
+/* Though our UTF-8 encoding can go beyond this,
+ * let's be conservative. */
+#define PERL_UNICODE_MAX	0x10FFFF
+
+#define UNICODE_ALLOW_SURROGATE 0x0001	/* Allow UTF-16 surrogates (EVIL) */
+#define UNICODE_ALLOW_FDD0	0x0002	/* Allow the U+FDD0...U+FDEF */
+#define UNICODE_ALLOW_FFFE	0x0004	/* Allow 0xFFFE, 0x1FFFE, ... */
+#define UNICODE_ALLOW_FFFF	0x0008	/* Allow 0xFFFE, 0x1FFFE, ... */
+#define UNICODE_ALLOW_SUPER	0x0010	/* Allow past 10xFFFF */
+#define UNICODE_ALLOW_ANY	0xFFFF
+
 #define UNICODE_IS_SURROGATE(c)		((c) >= UNICODE_SURROGATE_FIRST && \
 					 (c) <= UNICODE_SURROGATE_LAST)
 #define UNICODE_IS_REPLACEMENT(c)	((c) == UNICODE_REPLACEMENT)

@@ -561,9 +561,11 @@ sub compile {
 
 	# Print __DATA__ section, if necessary
 	no strict 'refs';
-	if (defined *{$self->{'curstash'}."::DATA"}{IO}) {
+	my $laststash = defined $self->{'curcop'}
+	    ? $self->{'curcop'}->stash->NAME : $self->{'curstash'};
+	if (defined *{$laststash."::DATA"}{IO}) {
 	    print "__DATA__\n";
-	    print readline(*{$self->{'curstash'}."::DATA"});
+	    print readline(*{$laststash."::DATA"});
 	}
     }
 }
@@ -3158,10 +3160,11 @@ sub balanced_delim {
 sub single_delim {
     my($q, $default, $str) = @_;
     return "$default$str$default" if $default and index($str, $default) == -1;
-    my($succeed, $delim);
-    ($succeed, $str) = balanced_delim($str);
-    return "$q$str" if $succeed;
-    for $delim ('/', '"', '#') {
+    if ($q ne 'qr') {
+	(my $succeed, $str) = balanced_delim($str);
+	return "$q$str" if $succeed;
+    }
+    for my $delim ('/', '"', '#') {
 	return "$q$delim" . $str . $delim if index($str, $delim) == -1;
     }
     if ($default) {

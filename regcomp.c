@@ -1690,17 +1690,15 @@ Perl_pregcomp(pTHX_ char *exp, char *xend, PMOP *pm)
     if (exp == NULL)
 	FAIL("NULL regexp argument");
 
-    /* XXXX This looks very suspicious... */
-    if (pm->op_pmdynflags & PMdf_CMP_UTF8)
-        RExC_utf8 = 1;
-    else
-        RExC_utf8 = 0;
+    RExC_utf8 = pm->op_pmdynflags & PMdf_CMP_UTF8;
 
     RExC_precomp = exp;
-    DEBUG_r(if (!PL_colorset) reginitcolors());
-    DEBUG_r(PerlIO_printf(Perl_debug_log, "%sCompiling REx%s `%s%*s%s'\n",
-		      PL_colors[4],PL_colors[5],PL_colors[0],
-		      (int)(xend - exp), RExC_precomp, PL_colors[1]));
+    DEBUG_r({
+	 if (!PL_colorset) reginitcolors();
+	 PerlIO_printf(Perl_debug_log, "%sCompiling REx%s `%s%*s%s'\n",
+		       PL_colors[4],PL_colors[5],PL_colors[0],
+		       (int)(xend - exp), RExC_precomp, PL_colors[1]);
+    });
     RExC_flags16 = pm->op_pmflags;
     RExC_sawback = 0;
 
@@ -3967,10 +3965,10 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state)
 		}
 		else
 #endif
-		    for (i = prevvalue; i <= ceilvalue; i++)
-			ANYOF_BITMAP_SET(ret, i);
+		      for (i = prevvalue; i <= ceilvalue; i++)
+			  ANYOF_BITMAP_SET(ret, i);
 	  }
-	  if (value > 255) {
+	  if (value > 255 || UTF) {
 		ANYOF_FLAGS(ret) |= ANYOF_UNICODE;
 		if (prevvalue < value)
 		    Perl_sv_catpvf(aTHX_ listsv, "%04"UVxf"\t%04"UVxf"\n",

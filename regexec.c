@@ -972,7 +972,8 @@ S_find_byclass(pTHX_ regexp * prog, regnode *c, char *s, char *strend, char *sta
 			if ( utf8_to_uvchr((U8*)s, &len) == c1
 			     && (ln == 1 ||
 				 ibcmp_utf8(s, do_utf8,  strend - s,
-					    m, UTF, ln)) )
+					    m, UTF, ln))
+			     && (norun || regtry(prog, s)) )
 			    goto got_it;
 			s += len;
 		    }
@@ -982,7 +983,8 @@ S_find_byclass(pTHX_ regexp * prog, regnode *c, char *s, char *strend, char *sta
 			if ( (c == c1 || c == c2)
 			     && (ln == 1 ||
 				 ibcmp_utf8(s, do_utf8, strend - s,
-					    m, UTF, ln)) )
+					    m, UTF, ln))
+			     && (norun || regtry(prog, s)) )
 			    goto got_it;
 			s += len;
 		    }
@@ -4110,9 +4112,12 @@ S_reginclass(pTHX_ register regnode *n, register U8* p, register bool do_utf8)
 		    match = TRUE;
 		else if (flags & ANYOF_FOLD) {
 		    STRLEN ulen;
-		    U8 tmpbuf[UTF8_MAXLEN_UCLC+1];
+		    U8 tmpbuf[UTF8_MAXLEN_FOLD+1];
 
-		    toLOWER_utf8(p, tmpbuf, &ulen);
+		    to_utf8_fold(p, tmpbuf, &ulen);
+		    if (swash_fetch(sw, tmpbuf, do_utf8))
+			match = TRUE;
+		    to_utf8_upper(p, tmpbuf, &ulen);
 		    if (swash_fetch(sw, tmpbuf, do_utf8))
 			match = TRUE;
 		}

@@ -6,7 +6,7 @@
 
 $| = 1;
 
-print "1..757\n";
+print "1..770\n";
 
 BEGIN {
     chdir 't' if -d 't';
@@ -1618,9 +1618,9 @@ EOT
 {
     # from Robin Houston
 
-    my $x = "\x{12345678}";
+    my $x = "\x{10FFFD}";
     $x =~ s/(.)/$1/g;
-    print "not " unless ord($x) == 0x12345678 && length($x) == 1;
+    print "not " unless ord($x) == 0x10FFFD && length($x) == 1;
     print "ok 587\n";
 }
 
@@ -2290,4 +2290,54 @@ print "# some Unicode properties\n";
 
     print "not " unless "A\x{100}" =~ /A/i;
     print "ok 757\n";
+}
+
+{
+    use charnames ':full';
+
+    print "# LATIN LETTER A WITH GRAVE\n";
+    my $lower = "\N{LATIN SMALL LETTER A WITH GRAVE}";
+    my $UPPER = "\N{LATIN CAPITAL LETTER A WITH GRAVE}";
+
+    print $lower =~ m/$UPPER/i   ? "ok 758\n" : "not ok 758\n";
+    print $UPPER =~ m/$lower/i   ? "ok 759\n" : "not ok 759\n";
+    print $lower =~ m/[$UPPER]/i ? "ok 760\n" : "not ok 760\n";
+    print $UPPER =~ m/[$lower]/i ? "ok 761\n" : "not ok 761\n";
+
+    print "# GREEK LETTER ALPHA WITH VRACHY\n";
+
+    $lower = "\N{GREEK CAPITAL LETTER ALPHA WITH VRACHY}";
+    $UPPER = "\N{GREEK SMALL LETTER ALPHA WITH VRACHY}";
+
+    print $lower =~ m/$UPPER/i   ? "ok 762\n" : "not ok 762\n";
+    print $UPPER =~ m/$lower/i   ? "ok 763\n" : "not ok 763\n";
+    print $lower =~ m/[$UPPER]/i ? "ok 764\n" : "not ok 764\n";
+    print $UPPER =~ m/[$lower]/i ? "ok 765\n" : "not ok 765\n";
+
+    print "# LATIN LETTER Y WITH DIAERESIS\n";
+
+    $lower = "\N{LATIN CAPITAL LETTER Y WITH DIAERESIS}";
+    $UPPER = "\N{LATIN SMALL LETTER Y WITH DIAERESIS}";
+
+    print $lower =~ m/$UPPER/i   ? "ok 766\n" : "not ok 766\n";
+    print $UPPER =~ m/$lower/i   ? "ok 767\n" : "not ok 767\n";
+    print $lower =~ m/[$UPPER]/i ? "ok 768\n" : "not ok 768\n";
+    print $UPPER =~ m/[$lower]/i ? "ok 769\n" : "not ok 769\n";
+}
+
+{
+    use warnings;
+    use charnames ':full';
+    
+    print "# GREEK CAPITAL LETTER SIGMA vs COMBINING GREEK PERISPOMENI\n";
+
+    my $SIGMA = "\N{GREEK CAPITAL LETTER SIGMA}";
+
+    my $hSIGMA = sprintf "%04x", ord $SIGMA;
+    
+    my $char = "\N{COMBINING GREEK PERISPOMENI}";
+    my $code = sprintf "%04x", ord($char);
+
+    # Before #13843 this was failing.
+    print "_:$char:_" =~ m/_:$SIGMA:_/i ? "not ok 770\n" : "ok 770\n";
 }

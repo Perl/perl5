@@ -893,19 +893,18 @@ Perl_hv_delete_ent(pTHX_ HV *hv, SV *keysv, I32 flags, U32 hash)
 	{
 	    if (SvREADONLY(hv))
 		return Nullsv; /* if still SvREADONLY, leave it deleted. */
-	    else {
-		// okay, really delete the placeholder.
-		*oentry = HeNEXT(entry);
-		if (i && !*oentry)
-		    xhv->xhv_fill--; /* HvFILL(hv)-- */
-		if (entry == xhv->xhv_eiter /* HvEITER(hv) */)
-		    HvLAZYDEL_on(hv);
-		else
-		    hv_free_ent(hv, entry);
-		xhv->xhv_keys--; /* HvKEYS(hv)-- */
-		xhv->xhv_placeholders--;
-		return Nullsv;
-	    }
+
+           /* okay, really delete the placeholder. */
+           *oentry = HeNEXT(entry);
+           if (i && !*oentry)
+               xhv->xhv_fill--; /* HvFILL(hv)-- */
+           if (entry == xhv->xhv_eiter /* HvEITER(hv) */)
+               HvLAZYDEL_on(hv);
+           else
+               hv_free_ent(hv, entry);
+           xhv->xhv_keys--; /* HvKEYS(hv)-- */
+           xhv->xhv_placeholders--;
+           return Nullsv;
 	}
 	else if (SvREADONLY(hv) && HeVAL(entry) && SvREADONLY(HeVAL(entry))) {
 	    Perl_hv_notallowed(aTHX_ is_utf8, key, klen, keysave);

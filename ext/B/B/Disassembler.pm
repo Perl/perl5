@@ -56,7 +56,7 @@ sub GET_I32 {
     my $fh = shift;
     my $str = $fh->readn(4);
     croak "reached EOF while reading I32" unless length($str) == 4;
-    return cast_I32(unpack("L", $str));
+    return unpack("l", $str);
 }
 
 sub GET_objindex { 

@@ -850,7 +850,7 @@ or C<sysread> functions.
 
     sub READ {
 	my $self = shift;
-	my $$bufref = \$_[0];
+	my $bufref = \$_[0];
 	my(undef,$len,$offset) = @_;
 	print "READ called, \$buf=$bufref, \$len=$len, \$offset=$offset";
 	# add to $$bufref, set $len to number of characters read

@@ -1658,6 +1658,10 @@ are the semantics that lockf(3) implements.  Most if not all systems
 implement lockf(3) in terms of fcntl(2) locking, though, so the
 differing semantics shouldn't bite too many people.
 
+Note that the fcntl(2) emulation of flock(3) requires that FILEHANDLE
+be open with read intent to use LOCK_SH and requires that it be open
+with write intent to use LOCK_EX.
+
 Note also that some versions of C<flock> cannot lock things over the
 network; you would need to use the more system-specific C<fcntl> for
 that.  If you like you can force Perl to ignore your system's flock(2)

@@ -197,7 +197,7 @@ sub putdis(@){
 #
 sub gen_type($$$){
     my( $href, $descref, $text ) = @_;
-    for my $odt ( keys( %opsByType ) ){
+    for my $odt ( sort( keys( %opsByType ) ) ){
         my $opcode = $opsByType{$odt}->[0];
 	my $sel = $odt;
 	$sel =~ s/^GET_//;

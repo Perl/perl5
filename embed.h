@@ -755,6 +755,8 @@
 #define utf8n_to_uvuni		Perl_utf8n_to_uvuni
 #define uvchr_to_utf8		Perl_uvchr_to_utf8
 #define uvuni_to_utf8		Perl_uvuni_to_utf8
+#define uvchr_to_utf8_flags	Perl_uvchr_to_utf8_flags
+#define uvuni_to_utf8_flags	Perl_uvuni_to_utf8_flags
 #define pv_uni_display		Perl_pv_uni_display
 #define sv_uni_display		Perl_sv_uni_display
 #define vivify_defelem		Perl_vivify_defelem
@@ -2274,6 +2276,8 @@
 #define utf8n_to_uvuni(a,b,c,d)	Perl_utf8n_to_uvuni(aTHX_ a,b,c,d)
 #define uvchr_to_utf8(a,b)	Perl_uvchr_to_utf8(aTHX_ a,b)
 #define uvuni_to_utf8(a,b)	Perl_uvuni_to_utf8(aTHX_ a,b)
+#define uvchr_to_utf8_flags(a,b,c)	Perl_uvchr_to_utf8_flags(aTHX_ a,b,c)
+#define uvuni_to_utf8_flags(a,b,c)	Perl_uvuni_to_utf8_flags(aTHX_ a,b,c)
 #define pv_uni_display(a,b,c,d,e)	Perl_pv_uni_display(aTHX_ a,b,c,d,e)
 #define sv_uni_display(a,b,c,d)	Perl_sv_uni_display(aTHX_ a,b,c,d)
 #define vivify_defelem(a)	Perl_vivify_defelem(aTHX_ a)

@@ -499,6 +499,7 @@ ext/POSIX/typemap		POSIX extension interface types
 ext/re/hints/mpeix.pl		Hints for re for named architecture
 ext/re/Makefile.PL		re extension makefile writer
 ext/re/re.pm			re extension Perl module
+ext/re/re.t				see if re pragma works
 ext/re/re.xs			re extension external subroutines
 ext/Safe/safe1.t		See if Safe works
 ext/Safe/safe2.t		See if Safe works
@@ -948,6 +949,7 @@ lib/ExtUtils/t/Installed.t	See if ExtUtils::Installed works
 lib/ExtUtils/t/Manifest.t	See if ExtUtils::Manifest works
 lib/ExtUtils/t/Mkbootstrap.t	See if ExtUtils::Mkbootstrap works
 lib/ExtUtils/t/MM_Cygwin.t	See if ExtUtils::MM_Cygwin works
+lib/ExtUtils/t/MM_OS2.t		See if ExtUtils::MM_OS2 works
 lib/ExtUtils/t/MM_Unix.t	See if ExtUtils::MM_UNIX works
 lib/ExtUtils/t/MM_VMS.t		See if ExtUtils::MM_VMS works
 lib/ExtUtils/t/Packlist.t	See if Packlist works

@@ -72,7 +72,7 @@ sub B::Asmdata::PUT_U32 {
 }
 sub B::Asmdata::PUT_I32 {
     my $arg = limcheck( $_[0], -0x80000000, 0x7fffffff, 'I32' );
-    pack("L", $arg);
+    pack("l", $arg);
 }
 sub B::Asmdata::PUT_NV  { sprintf("%s\0", $_[0]) } # "%lf" looses precision and pack('d',...)
 						   # may not even be portable between compilers

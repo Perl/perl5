@@ -27,14 +27,22 @@
 /* Unicode support */
 
 /*
-=for apidoc A|U8 *|uvuni_to_utf8|U8 *d|UV uv
+=for apidoc A|U8 *|uvuni_to_utf8_flags|U8 *d|UV uv|UV flags
 
 Adds the UTF8 representation of the Unicode codepoint C<uv> to the end
 of the string C<d>; C<d> should be have at least C<UTF8_MAXLEN+1> free
 bytes available. The return value is the pointer to the byte after the
 end of the new character. In other words,
 
+    d = uvuni_to_utf8_flags(d, uv, flags);
+
+or, in most cases,
+
     d = uvuni_to_utf8(d, uv);
+
+(which is equivalent to)
+
+    d = uvuni_to_utf8_flags(d, uv, 0);
 
 is the recommended Unicode-aware way of saying
 
@@ -44,13 +52,26 @@ is the recommended Unicode-aware way of saying
 */
 
 U8 *
-Perl_uvuni_to_utf8(pTHX_ U8 *d, UV uv)
+Perl_uvuni_to_utf8_flags(pTHX_ U8 *d, UV uv, UV flags)
 {
     if (ckWARN_d(WARN_UTF8)) {
-	 if (UNICODE_IS_SURROGATE(uv))
+	 if (UNICODE_IS_SURROGATE(uv) &&
+	     !(flags & UNICODE_ALLOW_SURROGATE))
 	      Perl_warner(aTHX_ WARN_UTF8, "UTF-16 surrogate 0x%04"UVxf, uv);
-	 else if ((uv >= 0xFDD0 && uv <= 0xFDEF) ||
-		  (uv == 0xFFFE || uv == 0xFFFF))
+	 else if (
+		  ((uv >= 0xFDD0 && uv <= 0xFDEF &&
+		    !(flags & UNICODE_ALLOW_FDD0))
+		   ||
+		   ((uv & 0xFFFF) == 0xFFFE &&
+		    !(flags & UNICODE_ALLOW_FFFE))
+		   ||
+		   ((uv & 0xFFFF) == 0xFFFF &&
+		    !(flags & UNICODE_ALLOW_FFFF))) &&
+		  /* UNICODE_ALLOW_SUPER includes
+		   * FFFEs and FFFFs beyond 0x10FFFF. */
+		  ((uv <= PERL_UNICODE_MAX) ||
+		   !(flags & UNICODE_ALLOW_SUPER))
+		  )
 	      Perl_warner(aTHX_ WARN_UTF8,
 			 "Unicode character 0x%04"UVxf" is illegal", uv);
     }
@@ -138,7 +159,12 @@ Perl_uvuni_to_utf8(pTHX_ U8 *d, UV uv)
 #endif
 #endif /* Loop style */
 }
-
+ 
+U8 *
+Perl_uvuni_to_utf8(pTHX_ U8 *d, UV uv)
+{
+    return Perl_uvuni_to_utf8_flags(aTHX_ d, uv, 0);
+}
 
 
 /*
@@ -1041,6 +1067,36 @@ Perl_is_uni_xdigit_lc(pTHX_ UV c)
     return is_uni_xdigit(c);	/* XXX no locale support yet */
 }
 
+U32
+Perl_to_uni_upper_lc(pTHX_ U32 c)
+{
+    /* XXX returns only the first character -- do not use XXX */
+    /* XXX no locale support yet */
+    STRLEN len;
+    U8 tmpbuf[UTF8_MAXLEN_UCLC+1];
+    return (U32)to_uni_upper(c, tmpbuf, &len);
+}
+
+U32
+Perl_to_uni_title_lc(pTHX_ U32 c)
+{
+    /* XXX returns only the first character XXX -- do not use XXX */
+    /* XXX no locale support yet */
+    STRLEN len;
+    U8 tmpbuf[UTF8_MAXLEN_UCLC+1];
+    return (U32)to_uni_title(c, tmpbuf, &len);
+}
+
+U32
+Perl_to_uni_lower_lc(pTHX_ U32 c)
+{
+    /* XXX returns only the first character -- do not use XXX */
+    /* XXX no locale support yet */
+    STRLEN len;
+    U8 tmpbuf[UTF8_MAXLEN_UCLC+1];
+    return (U32)to_uni_lower(c, tmpbuf, &len);
+}
+
 bool
 Perl_is_utf8_alnum(pTHX_ U8 *p)
 {
@@ -1514,9 +1570,14 @@ is the recommended wide native character-aware way of saying
 U8 *
 Perl_uvchr_to_utf8(pTHX_ U8 *d, UV uv)
 {
-    return Perl_uvuni_to_utf8(aTHX_ d, NATIVE_TO_UNI(uv));
+    return Perl_uvuni_to_utf8_flags(aTHX_ d, NATIVE_TO_UNI(uv), 0);
 }
 
+U8 *
+Perl_uvchr_to_utf8_flags(pTHX_ U8 *d, UV uv, UV flags)
+{
+    return Perl_uvuni_to_utf8_flags(aTHX_ d, NATIVE_TO_UNI(uv), flags);
+}
 
 /*
 =for apidoc A|UV|utf8n_to_uvchr|U8 *s|STRLEN curlen|STRLEN *retlen|U32 flags

@@ -31,6 +31,140 @@ or any other branch.
 Version v5.7.2		Development release working toward v5.8
 --------------
 ____________________________________________________________________________
+[ 13832] By: jhi                                   on 2001/12/21  14:46:24
+        Log: Also the search for cat needs to be _exe-aware.
+     Branch: perl
+	   ! Configure
+____________________________________________________________________________
+[ 13831] By: jhi                                   on 2001/12/21  13:43:53
+        Log: Subject: [PATCH] ext/B/B/Xref.pm adding "our" recognition
+             From: Wolfgang Laun <Wolfgang.Laun@alcatel.at>
+             Date: Fri, 21 Dec 2001 14:02:01 +0100
+             Message-ID: <3C2332C9.7CFED5F2@alcatel.at>
+     Branch: perl
+	   ! ext/B/B/Xref.pm
+____________________________________________________________________________
+[ 13830] By: jhi                                   on 2001/12/21  13:42:31
+        Log: packing I32 with L is not nice, need l; from Wolfgang Laun.
+     Branch: perl
+	   ! ext/B/B/Assembler.pm ext/B/B/Disassembler.pm
+	   ! ext/B/t/assembler.t
+____________________________________________________________________________
+[ 13829] By: jhi                                   on 2001/12/21  13:39:06
+        Log: Subject: [ PATCH ] Smoke 13820 /pro/3gl/CPAN/perl-current
+             From: "H.Merijn Brand" <h.m.brand@hccnet.nl>
+             Date: Fri, 21 Dec 2001 11:15:38 +0100
+             Message-Id: <20011221104035.4B4F.H.M.BRAND@hccnet.nl>
+     Branch: perl
+	   ! hv.c
+____________________________________________________________________________
+[ 13828] By: jhi                                   on 2001/12/21  01:59:10
+        Log: A plan is good.
+     Branch: perl
+	   ! ext/re/re.t
+____________________________________________________________________________
+[ 13827] By: jhi                                   on 2001/12/21  01:57:48
+        Log: Subject: [REPATCH MANIFEST, ext/re/re.t] Tests for re pragma
+             From: chromatic <chromatic@rmci.net>
+             Date: Thu, 20 Dec 2001 16:16:48 -0700
+             Message-ID: <20011220231726.23878.qmail@onion.perl.org>
+     Branch: perl
+	   + ext/re/re.t
+	   ! MANIFEST
+____________________________________________________________________________
+[ 13826] By: jhi                                   on 2001/12/21  01:34:37
+        Log: Synchronize the skippage message.
+     Branch: perl
+	   ! lib/ExtUtils/t/MM_OS2.t
+____________________________________________________________________________
+[ 13825] By: jhi                                   on 2001/12/21  01:32:42
+        Log: Subject: [PATCH MANIFEST, lib/ExtUtils/t/MM_OS2.t] Tests for ExtUtils::MM_OS2
+             From: chromatic <chromatic@rmci.net>
+             Date: Thu, 20 Dec 2001 16:09:10 -0700
+             Message-ID: <20011220230948.18010.qmail@onion.perl.org>
+     Branch: perl
+	   + lib/ExtUtils/t/MM_OS2.t
+	   ! MANIFEST
+____________________________________________________________________________
+[ 13824] By: jhi                                   on 2001/12/21  01:14:12
+        Log: Subject: perlfunc.pod patch re flock via fcntl
+             From: "Tye McQueen" <tye@metronet.com>
+             Date: Thu, 20 Dec 2001 14:52:19 -0600 (CST) 
+             Message-Id: <200112202052.fBKKqKH16263@metronet.com>
+     Branch: perl
+	   ! pod/perlfunc.pod
+____________________________________________________________________________
+[ 13823] By: jhi                                   on 2001/12/21  00:54:49
+        Log: Make using U+FDD0..U+FDEF (noncharacters since Unicode 3.1),
+             U+...FFFE, U+...FFFF, and characters beyond U+10FFFF
+             (the Unicode maximum code point) warnable offenses.
+     Branch: perl
+	   ! embed.h embed.pl global.sym op.c pod/perlapi.pod pp.c proto.h
+	   ! t/op/each.t t/op/pat.t t/op/qq.t utf8.c utf8.h
+____________________________________________________________________________
+[ 13822] By: jhi                                   on 2001/12/20  20:59:55
+        Log: Sterner admonishment on -t.
+     Branch: perl
+	   ! pod/perlrun.pod
+____________________________________________________________________________
+[ 13821] By: jhi                                   on 2001/12/20  20:53:42
+        Log: Subject: [PATCH B::Dpparse] minor qr// fix
+             From: Rafael Garcia-Suarez <rgarciasuarez@free.fr>
+             Date: Thu, 20 Dec 2001 22:53:34 +0100
+             Message-ID: <20011220225334.A735@rafael>
+     Branch: perl
+	   ! ext/B/B/Deparse.pm
+____________________________________________________________________________
+[ 13820] By: jhi                                   on 2001/12/20  15:18:25
+        Log: Subject: [PATCH} typo fix in Carp/Heavy.pm
+             From: Robert Spier <rspier@pobox.com>
+             Date: Thu, 20 Dec 2001 08:10:00 -0800
+             Message-ID: <15394.3416.693353.107334@rls.cx>
+     Branch: perl
+	   ! lib/Carp/Heavy.pm
+____________________________________________________________________________
+[ 13819] By: jhi                                   on 2001/12/20  14:56:30
+        Log: Integrate perlio (pTHX_ fixes for :win32 layer)
+     Branch: perl
+	  !> win32/win32io.c
+____________________________________________________________________________
+[ 13818] By: jhi                                   on 2001/12/20  14:53:05
+        Log: Subject: Re: [PATCH pod/perliol.pod] resend
+             From: Stas Bekman <stas@stason.org>
+             Date: Thu, 20 Dec 2001 17:15:09 +0800 (SGT)
+             Message-ID: <Pine.LNX.4.40.0112201714210.23498-100000@hope.stason.org>
+     Branch: perl
+	   ! pod/perliol.pod
+____________________________________________________________________________
+[ 13817] By: jhi                                   on 2001/12/20  14:51:24
+        Log: Fix up the APIs noone hopefully uses.
+     Branch: perl
+	   ! utf8.c
+____________________________________________________________________________
+[ 13816] By: jhi                                   on 2001/12/20  14:18:56
+        Log: Subject: [PATCH] Carp.pm caller_info returns wrong info for eval
+             Date: Wed, 19 Dec 2001 14:13:38 -0800
+             From: Robert Spier <rspier@pobox.com>
+             Message-ID: <15393.4370.605214.548582@rls.cx>
+     Branch: perl
+	   ! lib/Carp.t lib/Carp/Heavy.pm
+____________________________________________________________________________
+[ 13813] By: jhi                                   on 2001/12/19  21:29:49
+        Log: Some bincompat clawbacks.
+     Branch: perl
+	   ! embed.h embed.pl embedvar.h perlapi.h proto.h thrdvar.h utf8.c
+	   ! wince/perldll.def
+____________________________________________________________________________
+[ 13812] By: jhi                                   on 2001/12/19  17:56:53
+        Log: gcc pacifying (RH 7.1/ia64).
+     Branch: perl
+	   ! pp.c
+____________________________________________________________________________
+[ 13811] By: jhi                                   on 2001/12/19  16:55:09
+        Log: Update Changes.
+     Branch: perl
+	   ! Changes patchlevel.h
+____________________________________________________________________________
 [ 13810] By: jhi                                   on 2001/12/19  16:50:12
         Log: Subject: Re: [BUG] bleadperl regexp (was ok in 5.6.0)
              From: Wolfgang Laun <Wolfgang.Laun@alcatel.at>

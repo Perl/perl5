@@ -2,6 +2,36 @@ package DB;
 
 # Debugger for Perl 5.00x; perl5db.pl patch level:
 
+# It is crucial that there is no lexicals in scope of `eval ""' down below
+sub eval {
+    # 'my' would make it visible from user code
+    #    but so does local! --tchrist  [... into @DB::res, not @res. IZ]
+    local @res;
+    {
+	local $otrace = $trace;
+	local $osingle = $single;
+	local $od = $^D;
+	{ ($evalarg) = $evalarg =~ /(.*)/s; }
+	@res = eval "$usercontext $evalarg;\n"; # '\n' for nice recursive debug
+	$trace = $otrace;
+	$single = $osingle;
+	$^D = $od;
+    }
+    my $at = $@;
+    local $saved[0];		# Preserve the old value of $@
+    eval { &DB::save };
+    if ($at) {
+	print $OUT $at;
+    } elsif ($onetimeDump) {
+	dumpit($OUT, \@res) if $onetimeDump eq 'dump';
+	methods($res[0])    if $onetimeDump eq 'methods';
+    }
+    @res;
+}
+
+# After this point it is safe to introduce lexicals
+# However, one should not overdo it: leave as much control from outside as possible
+
 $VERSION = 1.15;
 $header = "perl5db.pl version $VERSION";
 
@@ -543,21 +573,19 @@ if ($notty) {
     $IN = $OUT;
   } else {
     create_IN_OUT(4) if $CreateTTY & 4;
-    if (defined $console) {
+    if ($console) {
       my ($i, $o) = split /,/, $console;
       $o = $i unless defined $o;
       open(IN,"+<$i") || open(IN,"<$i") || open(IN,"<&STDIN");
       open(OUT,"+>$o") || open(OUT,">$o") || open(OUT,">&STDERR")
         || open(OUT,">&STDOUT");	# so we don't dongle stdout
-    } else {
+    } elsif (not defined $console) {
       open(IN,"<&STDIN");
       open(OUT,">&STDERR") || open(OUT,">&STDOUT"); # so we don't dongle stdout
       $console = 'STDIN/OUT';
     }
     # so open("|more") can read from STDOUT and so we don't dingle stdin
-    $IN = \*IN;
-
-    $OUT = \*OUT;
+    $IN = \*IN, $OUT = \*OUT if $console or not defined $console;
   }
   my $previous = select($OUT);
   $| = 1;			# for DB::OUT
@@ -1739,32 +1767,6 @@ sub print_lineinfo {
 
 # The following takes its argument via $evalarg to preserve current @_
 
-sub eval {
-    # 'my' would make it visible from user code
-    #    but so does local! --tchrist  [... into @DB::res, not @res. IZ]
-    local @res;
-    {
-	local $otrace = $trace;
-	local $osingle = $single;
-	local $od = $^D;
-	{ ($evalarg) = $evalarg =~ /(.*)/s; }
-	@res = eval "$usercontext $evalarg;\n"; # '\n' for nice recursive debug
-	$trace = $otrace;
-	$single = $osingle;
-	$^D = $od;
-    }
-    my $at = $@;
-    local $saved[0];		# Preserve the old value of $@
-    eval { &DB::save };
-    if ($at) {
-	print $OUT $at;
-    } elsif ($onetimeDump) {
-	dumpit($OUT, \@res) if $onetimeDump eq 'dump';
-	methods($res[0])    if $onetimeDump eq 'methods';
-    }
-    @res;
-}
-
 sub postponed_sub {
   my $subname = shift;
   if ($postponed{$subname} =~ s/^break\s([+-]?\d+)\s+if\s//) {
@@ -2030,24 +2032,26 @@ sub xterm_get_fork_TTY {
   return $tty;
 }
 
-# This one resets $IN, $OUT itself
+# This example function resets $IN, $OUT itself
 sub os2_get_fork_TTY {
-  $^F = 40;		# XXXX Fixme!
+  local $^F = 40;			# XXXX Fixme!
   my ($in1, $out1, $in2, $out2);
   # Having -d in PERL5OPT would lead to a disaster...
   local $ENV{PERL5OPT} = $ENV{PERL5OPT}    if $ENV{PERL5OPT};
   $ENV{PERL5OPT} =~ s/(?:^|(?<=\s))-d\b//  if $ENV{PERL5OPT};
   $ENV{PERL5OPT} =~ s/(?:^|(?<=\s))-d\B/-/ if $ENV{PERL5OPT};
-  print $OUT "Making PERL5OPT->`$ENV{PERL5OPT}'.\n" if $ENV{PERL5OPT};
+  print $OUT "Making kid PERL5OPT->`$ENV{PERL5OPT}'.\n" if $ENV{PERL5OPT};
   (my $name = $0) =~ s,^.*[/\\],,s;
-  if ( pipe $in1, $out1 and pipe $in2, $out2 and
+  my @args;
+  if ( pipe $in1, $out1 and pipe $in2, $out2
        # system P_SESSION will fail if there is another process
        # in the same session with a "dependent" asynchronous child session.
-       (($kpid = CORE::system 4, $^X, '-we', <<'ES', fileno $in1, fileno $out2, "Daughter Perl debugger $pids $name") >= 0 or warn "system P_SESSION: $!, $^E" and 0) # P_SESSION
-use Term::ReadKey;
+       and @args = ($rl, fileno $in1, fileno $out2,
+		    "Daughter Perl debugger $pids $name") and
+       (($kpid = CORE::system 4, $^X, '-we', <<'ES', @args) >= 0 # P_SESSION
 use OS2::Process;
 
-my $in = shift;		# Read from here and pass through
+my ($rl, $in) = (shift, shift);		# Read from $in and pass through
 set_title pop;
 system P_NOWAIT, $^X, '-we', <<EOS or die "Cannot start a grandkid";
   open IN, '<&=$in' or die "open <&=$in: \$!";
@@ -2057,11 +2061,13 @@ EOS
 my $out = shift;
 open OUT, ">&=$out" or die "Cannot open &=$out for writing: $!";
 select OUT;    $| = 1;
-ReadMode 4;		# Nodelay on kbd.  Pipe is automatically nodelay...
-print while sysread STDIN, $_, 1<<16;
+require Term::ReadKey if $rl;
+Term::ReadKey::ReadMode(4) if $rl; # Nodelay on kbd.  Pipe is automatically nodelay...
+print while sysread STDIN, $_, 1<<($rl ? 16 : 0);
 ES
+	 or warn "system P_SESSION: $!, $^E" and 0)
 	and close $in1 and close $out2 ) {
-      $pidprompt = '';		# Shown anyway in titlebar
+      $pidprompt = '';			# Shown anyway in titlebar
       reset_IN_OUT($in2, $out1);
       $tty = '*reset*';
       return '';			# Indicate that reset_IN_OUT is called
@@ -2096,6 +2102,8 @@ EOP
 EOP
     } elsif ($in ne '') {
       TTY($in);
+    } else {
+      $console = '';		# Indicate no need to open-from-the-console 
     }
     undef $fork_TTY;
 }

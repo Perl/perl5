@@ -832,6 +832,8 @@ PERL_CALLCONV UV	Perl_utf8n_to_uvchr(pTHX_ U8 *s, STRLEN curlen, STRLEN* retlen,
 PERL_CALLCONV UV	Perl_utf8n_to_uvuni(pTHX_ U8 *s, STRLEN curlen, STRLEN* retlen, U32 flags);
 PERL_CALLCONV U8*	Perl_uvchr_to_utf8(pTHX_ U8 *d, UV uv);
 PERL_CALLCONV U8*	Perl_uvuni_to_utf8(pTHX_ U8 *d, UV uv);
+PERL_CALLCONV U8*	Perl_uvchr_to_utf8_flags(pTHX_ U8 *d, UV uv, UV flags);
+PERL_CALLCONV U8*	Perl_uvuni_to_utf8_flags(pTHX_ U8 *d, UV uv, UV flags);
 PERL_CALLCONV char*	Perl_pv_uni_display(pTHX_ SV *dsv, U8 *spv, STRLEN len, STRLEN pvlim, UV flags);
 PERL_CALLCONV char*	Perl_sv_uni_display(pTHX_ SV *dsv, SV *ssv, STRLEN pvlim, UV flags);
 PERL_CALLCONV void	Perl_vivify_defelem(pTHX_ SV* sv);
