@@ -503,9 +503,9 @@ The following functions are currently unavailable: C<fork()>,
 C<dump()>, C<chown()>, C<link()>, C<symlink()>, C<chroot()>,
 C<setpgrp()> and related security functions, C<setpriority()>,
 C<getpriority()>, C<syscall()>, C<fcntl()>, C<getpw*()>,
-C<getlogin()>, C<wait*()>, C<msg*()>, C<shm*()>, C<sem*()>,
-C<ioctl()>, C<alarm()>, C<socketpair()>, C<*netent()>, C<*protoent()>,
-C<*servent()>, C<*hostent()>, C<getnetby*()>.
+C<wait*()>, C<msg*()>, C<shm*()>, C<sem*()>, C<ioctl()>, C<alarm()>,
+C<socketpair()>, C<*netent()>, C<*protoent()>, C<*servent()>,
+C<*hostent()>, C<getnetby*()>.
 This list is possibly incomplete.
 
 =item *

@@ -58,15 +58,18 @@ HANDLE PerlDllHandle = INVALID_HANDLE_VALUE;
 #ifdef USE_THREADS
 #  ifdef USE_DECLSPEC_THREAD
 __declspec(thread) char	strerror_buffer[512];
+__declspec(thread) char	getlogin_buffer[128];
 #    ifdef HAVE_DES_FCRYPT
 __declspec(thread) char	crypt_buffer[30];
 #    endif
 #  else
 #    define strerror_buffer	(thr->i.Wstrerror_buffer)
+#    define getlogin_buffer	(thr->i.Wgetlogin_buffer)
 #    define crypt_buffer	(thr->i.Wcrypt_buffer)
 #  endif
 #else
 char	strerror_buffer[512];
+char	getlogin_buffer[128];
 #  ifdef HAVE_DES_FCRYPT
 char	crypt_buffer[30];
 #  endif
@@ -571,6 +574,17 @@ int
 setgid(gid_t agid)
 {
     return (agid == ROOT_GID ? 0 : -1);
+}
+
+char *
+getlogin(void)
+{
+    dTHR;
+    char *buf = getlogin_buffer;
+    DWORD size = sizeof(getlogin_buffer);
+    if (GetUserName(buf,&size))
+	return buf;
+    return (char*)NULL;
 }
 
 /*
@@ -1524,8 +1538,8 @@ static
 XS(w32_LoginName)
 {
     dXSARGS;
-    char name[256];
-    DWORD size = sizeof(name);
+    char *name = getlogin_buffer;
+    DWORD size = sizeof(getlogin_buffer);
     if (GetUserName(name,&size)) {
 	/* size includes NULL */
 	ST(0) = sv_2mortal(newSVpv(name,size-1));
