@@ -99,12 +99,12 @@ are different, there is only one "count" and order has
 
 =item B<PerlIO_close(f)>
 
-=item B<PerlIO_puts(s,f)>, B<PerlIO_putc(c,f)>
+=item B<PerlIO_puts(f,s)>, B<PerlIO_putc(f,c)>
 
 These correspond to fputs() and fputc().
 Note that arguments have been revised to have "file" first.
 
-=item B<PerlIO_ungetc(c,f)>
+=item B<PerlIO_ungetc(f,c)>
 
 This corresponds to ungetc().
 Note that arguments have been revised to have "file" first.
