@@ -1,10 +1,12 @@
 # hints/openbsd.sh
 #
 # hints file for OpenBSD; Todd Miller <millert@openbsd.org>
+# Edited to allow Configure command-line overrides by
+#  Andy Dougherty <doughera@lafcol.lafayette.edu>
 #
 
 # OpenBSD has a better malloc than perl...
-usemymalloc='n'
+test "$usemymalloc" || usemymalloc='n'
 
 # Currently, vfork(2) is not a real win over fork(2) but this will
 # change in a future release.
@@ -46,6 +48,7 @@ pp_sys_cflags='ccflags="$ccflags -DHAS_TELLDIR_PROTOTYPE"'
 d_suidsafe='define'
 
 # cc is gcc so we can do better than -O
-optimize='-O2'
+# Allow a command-line override, such as -Doptimize=-g
+test "$optimize" || optimize='-O2'
 
 # end
