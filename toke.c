@@ -1602,13 +1602,16 @@ S_scan_const(pTHX_ char *start)
 	    /* \c is a control character */
 	    case 'c':
 		s++;
-		{
+		if (s < send) {
 		    U8 c = *s++;
 #ifdef EBCDIC
 		    if (isLOWER(c))
 			c = toUPPER(c);
 #endif
 		    *d++ = NATIVE_TO_NEED(has_utf8,toCTRL(c));
+		}
+		else {
+		    yyerror("Missing control char name in \\c");
 		}
 		continue;
 

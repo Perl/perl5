@@ -10016,12 +10016,7 @@ perl_clone_using(PerlInterpreter *proto_perl, UV flags,
 
     /* pseudo environmental stuff */
     PL_origargc		= proto_perl->Iorigargc;
-    i = PL_origargc;
-    New(0, PL_origargv, i+1, char*);
-    PL_origargv[i] = '\0';
-    while (i-- > 0) {
-	PL_origargv[i]	= SAVEPV(proto_perl->Iorigargv[i]);
-    }
+    PL_origargv		= proto_perl->Iorigargv;
 
     param->stashes      = newAV();  /* Setup array of objects to call clone on */
 

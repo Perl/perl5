@@ -1396,6 +1396,20 @@ lib/Pod/Man.pm			Convert POD data to *roff
 lib/Pod/ParseLink.pm		Perl an L<> formatting code in POD text
 lib/Pod/Parser.pm		Pod-Parser - define base class for parsing POD
 lib/Pod/ParseUtils.pm		Pod-Parser - pod utility functions
+lib/Pod/Perldoc.pm		guts of the 'perldoc' utility
+lib/Pod/Perldoc/BaseTo.pm	utility module for perldoc
+lib/Pod/Perldoc/GetOptsOO.pm	options parsing for perldoc
+lib/Pod/Perldoc/ToChecker.pm	let perldoc check POD for errors
+lib/Pod/Perldoc/ToMan.pm	render POD as man pages
+lib/Pod/Perldoc/ToNroff.pm	convert POD to nroff
+lib/Pod/Perldoc/ToPod.pm	convert POD to POD
+lib/Pod/Perldoc/ToRtf.pm	convert POD to RTF
+lib/Pod/Perldoc/ToText.pm	convert POD to plain text
+lib/Pod/Perldoc/ToTk.pm		convert POD via Tk::Pod
+lib/Pod/Perldoc/ToXml.pm	convert POD to XML
+lib/Pod/Perldoc/t/checkerbasic.t	test Pod::Perldoc::ToChecker
+lib/Pod/Perldoc/t/perldocbasic.t	test Pod::Perldoc basic operation
+lib/Pod/Perldoc/t/textbasic.t	test Pod::Perldoc::ToText
 lib/Pod/Plainer.pm		Pod migration utility module
 lib/Pod/PlainText.pm		Convert POD data to formatted ASCII text
 lib/Pod/Select.pm		Pod-Parser - select portions of POD docs
@@ -2176,6 +2190,7 @@ pod/perldebtut.pod		Perl debugging tutorial
 pod/perldebug.pod		Debugger info
 pod/perldelta.pod		Changes since last version
 pod/perldiag.pod		Diagnostic info
+pod/perldoc.pod			docs for utils/perldoc
 pod/perldsc.pod			Data Structures Cookbook
 pod/perlebcdic.pod		Considerations for running Perl on EBCDIC platforms
 pod/perlembed.pod		Embedding info
