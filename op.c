@@ -1243,6 +1243,7 @@ Perl_scalarvoid(pTHX_ OP *o)
 
     case OP_OR:
     case OP_AND:
+    case OP_DOR:
     case OP_COND_EXPR:
 	for (kid = cUNOPo->op_first->op_sibling; kid; kid = kid->op_sibling)
 	    scalarvoid(kid);
@@ -1626,6 +1627,7 @@ Perl_mod(pTHX_ OP *o, I32 type)
     case OP_SASSIGN:
     case OP_ANDASSIGN:
     case OP_ORASSIGN:
+    case OP_DORASSIGN:
     case OP_AELEMFAST:
 	PL_modcount++;
 	break;
@@ -3617,7 +3619,7 @@ Perl_newASSIGNOP(pTHX_ I32 flags, OP *left, I32 optype, OP *right)
     OP *o;
 
     if (optype) {
-	if (optype == OP_ANDASSIGN || optype == OP_ORASSIGN) {
+	if (optype == OP_ANDASSIGN || optype == OP_ORASSIGN || optype == OP_DORASSIGN) {
 	    return newLOGOP(optype, 0,
 		mod(scalar(left), optype),
 		newUNOP(OP_SASSIGN, 0, scalar(right)));
@@ -3940,7 +3942,7 @@ S_new_logop(pTHX_ I32 type, I32 flags, OP** firstp, OP** otherp)
     if (!other)
 	return first;
 
-    if (type == OP_ANDASSIGN || type == OP_ORASSIGN)
+    if (type == OP_ANDASSIGN || type == OP_ORASSIGN || type == OP_DORASSIGN)
 	other->op_private |= OPpASSIGN_BACKWARDS;  /* other is an OP_SASSIGN */
 
     NewOp(1101, logop, 1, LOGOP);
@@ -7145,8 +7147,10 @@ Perl_peep(pTHX_ register OP *o)
 	case OP_GREPWHILE:
 	case OP_AND:
 	case OP_OR:
+	case OP_DOR:
 	case OP_ANDASSIGN:
 	case OP_ORASSIGN:
+	case OP_DORASSIGN:
 	case OP_COND_EXPR:
 	case OP_RANGE:
 	    o->op_seq = PL_op_seqmax++;

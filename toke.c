@@ -207,8 +207,8 @@ S_tokereport(pTHX_ char *thing, char* s, I32 rv)
 /*
  * S_ao
  *
- * This subroutine detects &&= and ||= and turns an ANDAND or OROR
- * into an OP_ANDASSIGN or OP_ORASSIGN
+ * This subroutine detects &&=, ||=, and //= and turns an ANDAND, OROR or DORDOR
+ * into an OP_ANDASSIGN, OP_ORASSIGN, or OP_DORASSIGN
  */
 
 STATIC int
@@ -220,6 +220,8 @@ S_ao(pTHX_ int toketype)
 	    yylval.ival = OP_ANDASSIGN;
 	else if (toketype == OROR)
 	    yylval.ival = OP_ORASSIGN;
+	else if (toketype == DORDOR)
+	    yylval.ival = OP_DORASSIGN;
 	toketype = ASSIGNOP;
     }
     return toketype;
@@ -2979,6 +2981,7 @@ Perl_yylex(pTHX)
 		    switch (tmp) {
 		    case KEY_or:
 		    case KEY_and:
+		    case KEY_err:
 		    case KEY_for:
 		    case KEY_unless:
 		    case KEY_if:
@@ -3542,8 +3545,16 @@ Perl_yylex(pTHX)
 		PL_expect = XTERM;		/* e.g. print $fh 3 */
 	    else if (*s == '.' && isDIGIT(s[1]))
 		PL_expect = XTERM;		/* e.g. print $fh .3 */
-	    else if (strchr("/?-+", *s) && !isSPACE(s[1]) && s[1] != '=')
-		PL_expect = XTERM;		/* e.g. print $fh -1 */
+	    else if (strchr("?-+", *s) && !isSPACE(s[1]) && s[1] != '=')
+ 		PL_expect = XTERM;		/* e.g. print $fh -1 */
+	    else if (*s == '/') {
+		if(s[1] == '/') {
+		    PL_expect=XOPERATOR;
+		}
+		else {
+		    PL_expect=XTERM;
+		}
+	    }
 	    else if (*s == '<' && s[1] == '<' && !isSPACE(s[2]) && s[2] != '=')
 		PL_expect = XTERM;		/* print $fh <<"EOF" */
 	}
@@ -3585,22 +3596,36 @@ Perl_yylex(pTHX)
 	PL_pending_ident = '@';
 	TERM('@');
 
-    case '/':			/* may either be division or pattern */
-    case '?':			/* may either be conditional or pattern */
-	if (PL_expect != XOPERATOR) {
-	    /* Disable warning on "study /blah/" */
-	    if (PL_oldoldbufptr == PL_last_uni
-		&& (*PL_last_uni != 's' || s - PL_last_uni < 5
-		    || memNE(PL_last_uni, "study", 5)
-		    || isALNUM_lazy_if(PL_last_uni+5,UTF)))
-		check_uni();
-	    s = scan_pat(s,OP_MATCH);
-	    TERM(sublex_start());
-	}
-	tmp = *s++;
-	if (tmp == '/')
-	    Mop(OP_DIVIDE);
-	OPERATOR(tmp);
+     case '/':			/* may be division, defined-or, or pattern */
+     case '?':			/* may either be conditional or pattern */
+	 if(PL_expect == XOPERATOR) {
+	     tmp = *s++;
+	     if(tmp == '?') {
+    	          OPERATOR('?');
+	     }
+             else {
+	         tmp = *s++;
+	         if(tmp == '/') {
+	             /* A // operator. */
+	            AOPERATOR(DORDOR);
+	         }
+	         else {
+	             s--;
+	             Mop(OP_DIVIDE);
+	         }
+	     }
+	 }
+	 else {
+	     /* Disable warning on "study /blah/" */
+	     if (PL_oldoldbufptr == PL_last_uni
+	      && (*PL_last_uni != 's' || s - PL_last_uni < 5
+	          || memNE(PL_last_uni, "study", 5)
+	          || isALNUM_lazy_if(PL_last_uni+5,UTF)
+	      ))
+	         check_uni();
+	     s = scan_pat(s,OP_MATCH);
+	     TERM(sublex_start());
+	 }
 
     case '.':
 	if (PL_lex_formbrack && PL_lex_brackets == PL_lex_formbrack
@@ -4315,6 +4340,9 @@ Perl_yylex(pTHX)
 
 	case KEY_eof:
 	    UNI(OP_EOF);
+
+	case KEY_err:
+	    OPERATOR(DOROP);
 
 	case KEY_exp:
 	    UNI(OP_EXP);
@@ -5438,6 +5466,7 @@ Perl_keyword(pTHX_ register char *d, I32 len)
 	    break;
 	case 3:
 	    if (strEQ(d,"eof"))			return -KEY_eof;
+	    if (strEQ(d,"err"))			return -KEY_err;
 	    if (strEQ(d,"exp"))			return -KEY_exp;
 	    break;
 	case 4:

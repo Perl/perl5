@@ -93,6 +93,7 @@ endpwent
 endservent
 eof
 eq
+err
 eval
 exec
 exists

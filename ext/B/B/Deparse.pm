@@ -1951,6 +1951,7 @@ sub logop {
 
 sub pp_and { logop(@_, "and", 3, "&&", 11, "if") }
 sub pp_or  { logop(@_, "or",  2, "||", 10, "unless") }
+sub pp_dor { logop(@_, "err", 2, "//", 10, "") }
 
 # xor is syntactically a logop, but it's really a binop (contrary to
 # old versions of opcode.pl). Syntax is what matters here.
@@ -1967,7 +1968,8 @@ sub logassignop {
 }
 
 sub pp_andassign { logassignop(@_, "&&=") }
-sub pp_orassign { logassignop(@_, "||=") }
+sub pp_orassign  { logassignop(@_, "||=") }
+sub pp_dorassign { logassignop(@_, "//=") }
 
 sub listop {
     my $self = shift;
