@@ -34,29 +34,37 @@ for ($i = 1; @tests; $i++) {
     $x = sprintf(">$template<",
                  defined @$evalData ? @$evalData : $evalData);
     substr($x, -1, 0) = $w if $w;
-    # $y may have 3 exponent digits, not 2
-    my $r;
-    if (($y = $x) =~ s/([Ee][-+])0(\d)/$1$2/g) {
-	$y =~ s/^>\s+/>/;
-	$y =~ s/\s+<$/</;
-	$r = $result;
-	$r =~ s/^\s+//;
-	$r =~ s/\s+$//;
+    # $x may have 3 exponent digits, not 2
+    my $y = $x;
+    if ($y =~ s/([Ee][-+])0(\d)/$1$2/) {
+        # if result is left-adjusted, append extra space
+        if ($template =~ /%\+?\-/ and $result =~ / $/) {
+	    $y =~ s/<$/ </;
+	}
+        # if result is zero-filled, add extra zero
+	elsif ($template =~ /%\+?0/ and $result =~ /^0/) {
+	    $y =~ s/^>0/>00/;
+	}
+        # if result is right-adjusted, prepend extra space
+	elsif ($result =~ /^ /) {
+	    $y =~ s/^>/> /;
+	}
     }
 
     if ($x eq ">$result<") {
         print "ok $i\n";
     }
-    elsif ($r and $y eq ">$r<")	# Some C libraries always give
+    elsif ($y eq ">$result<")	# Some C libraries always give
     {				# three-digit exponent
 	print("ok $i >$result< $x # three-digit exponent accepted\n");
     }
     else {
-	print("not ok $i >$template< >$data< >$result< $x",
+	$y = ($x eq $y ? "" : " => $y");
+	print("not ok $i >$template< >$data< >$result< $x$y",
 	    $comment ? " # $comment\n" : "\n");
     }
 }
-    
+
 # In each of the the following lines, there are three required fields:
 # printf template, data to be formatted (as a Perl expression), and
 # expected result of formatting.  An optional fourth field can contain
