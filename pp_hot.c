@@ -155,6 +155,10 @@ PP(pp_concat)
     left_utf8  = DO_UTF8(left);
     right_utf8 = DO_UTF8(right);
 
+    if (!left_utf8 && !right_utf8 && SvUTF8(TARG)) {
+	SvUTF8_off(TARG);
+    }
+
     if (left_utf8 != right_utf8 && !IN_BYTE) {
         if (TARG == right && !right_utf8) {
             sv_utf8_upgrade(TARG); /* Now straight binary copy */
@@ -289,7 +293,7 @@ PP(pp_eq)
 	if (SvIOK(TOPm1s)) {
 	    bool auvok = SvUOK(TOPm1s);
 	    bool buvok = SvUOK(TOPs);
-	    
+	
 	    if (!auvok && !buvok) { /* ## IV == IV ## */
 		IV aiv = SvIVX(TOPm1s);
 		IV biv = SvIVX(TOPs);
@@ -416,7 +420,7 @@ PP(pp_add)
 	if (SvIOK(TOPm1s)) {
 	    bool auvok = SvUOK(TOPm1s);
 	    bool buvok = SvUOK(TOPs);
-	    
+	
 	    if (!auvok && !buvok) { /* ## IV + IV ## */
 		IV aiv = SvIVX(TOPm1s);
 		IV biv = SvIVX(TOPs);
@@ -459,7 +463,7 @@ PP(pp_add)
 		    aiv = SvIVX(TOPs);
 		    buv = SvUVX(TOPm1s);
 		}
-	    
+	
 		if (aiv >= 0) {
 		    UV result = (UV)aiv + buv;
 		    if (result >= buv) {
@@ -1627,7 +1631,7 @@ PP(pp_helem)
 		    STRLEN keylen;
 		    char *key = SvPV(keysv, keylen);
 		    save_delete(hv, key, keylen);
-		} else 
+		} else
 		    save_helem(hv, keysv, svp);
             }
 	}
@@ -1857,7 +1861,7 @@ PP(pp_subst)
     if (PL_tainted)
 	rxtainted |= 2;
     TAINT_NOT;
-    
+
   force_it:
     if (!pm || !s)
 	DIE(aTHX_ "panic: pp_subst");

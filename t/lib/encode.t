@@ -16,7 +16,7 @@ my @character_set = ('0'..'9', 'A'..'Z', 'a'..'z');
 my @source = qw(ascii iso8859-1 cp1250);
 my @destiny = qw(cp1047 cp37 posix-bc);
 my @ebcdic_sets = qw(cp1047 cp37 posix-bc);
-plan test => 13+$n*@encodings + 2*@source*@destiny*@character_set + 2*@ebcdic_sets*256;
+plan test => 21+$n*@encodings + 2*@source*@destiny*@character_set + 2*@ebcdic_sets*256;
 my $str = join('',map(chr($_),0x20..0x7E));
 my $cpy = $str;
 ok(length($str),from_to($cpy,'iso8859-1','Unicode'),"Length Wrong");
@@ -47,7 +47,7 @@ foreach my $enc (qw(symbol dingbats ascii),@encodings)
 
 # On ASCII based machines see if we can map several codepoints from
 # three distinct ASCII sets to three distinct EBCDIC coded character sets.
-# On EBCDIC machines see if we can map from three EBCDIC sets to three 
+# On EBCDIC machines see if we can map from three EBCDIC sets to three
 # distinct ASCII sets.
 
 my @expectation = (240..249, 193..201,209..217,226..233, 129..137,145..153,162..169);
@@ -89,5 +89,14 @@ foreach my $enc_eb (@ebcdic_sets)
     ok($rc,2,"return code for $ord $enc_eb -> $enc_as -> $enc_eb was not obtained");
     ok($ord,ord($str),"$enc_as mangled translating $ord to $enc_eb and back");
    }
+ }
+
+for $i (256,128,129,256)
+ {
+  my $c = chr($i);
+  my $s = "$c\n".sprintf("%02X",$i);
+  ok(Encode::valid_utf8($s),1,"concat of $i botched");
+  Encode::utf8_upgrade($s);
+  ok(Encode::valid_utf8($s),1,"concat of $i botched");
  }
 
