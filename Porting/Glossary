@@ -545,6 +545,10 @@ d_fcntl (d_fcntl.U):
 	This variable conditionally defines the HAS_FCNTL symbol, and indicates
 	whether the fcntl() function exists
 
+d_fcntl_can_lock (d_fcntl_can_lock.U):
+	This variable conditionally defines the FCNTL_CAN_LOCK symbol
+	and indicates whether file locking with fcntl() works.
+
 d_fd_macros (d_fd_set.U):
 	This variable contains the eventual value of the HAS_FD_MACROS symbol,
 	which indicates if your C compiler knows about the macros which

@@ -1,4 +1,3 @@
-
 use Config;
 
 sub to_string {
@@ -12,7 +11,7 @@ unlink "DynaLoader.pm" if -f "DynaLoader.pm";
 open OUT, ">DynaLoader.pm" or die $!;
 print OUT <<'EOT';
 
-# Generated from DynaLoader.pm.PL (resolved %Config::Config values)
+# Generated from DynaLoader.pm.PL
 
 package DynaLoader;
 
@@ -28,7 +27,9 @@ package DynaLoader;
 #
 # Tim.Bunce@ig.co.uk, August 1994
 
-$VERSION = "1.04";	# avoid typo warning
+use vars qw($VERSION *AUTOLOAD);
+
+$VERSION = 1.04;	# avoid typo warning
 
 require AutoLoader;
 *AUTOLOAD = \&AutoLoader::AUTOLOAD;
@@ -39,7 +40,6 @@ require AutoLoader;
 # if Carp hasn't been loaded in earlier compile time. :-( 
 # We'll let those bugs get found on the development track.
 require Carp if $] < 5.00450; 
-
 
 # enable debug/trace messages from DynaLoader perl code
 $dl_debug = $ENV{PERL_DL_DEBUG} || 0 unless defined $dl_debug;
@@ -61,6 +61,14 @@ sub dl_load_flags { 0x00 }
 #         = @Config::Config{'dlext', 'dlsrc'};
 EOT
 
+
+if (!$ENV{PERL_BUILD_EXPAND_CONFIG_VARS}) {
+    print OUT <<EOT;
+use Config;
+
+EOT
+}
+
 print OUT "  (\$dl_dlext, \$dlsrc) = (",
           to_string($Config::Config{'dlext'}), ",",
           to_string($Config::Config{'dlsrc'}), ")\n;" ;
@@ -71,66 +79,107 @@ print OUT <<'EOT';
 # (VMS support by Charles Bailey <bailey@HMIVAX.HUMGEN.UPENN.EDU>)
 # See dl_expandspec() for more details. Should be harmless but
 # inefficient to define on systems that don't need it.
-$do_expand = $Is_VMS = $^O eq 'VMS';
+$Is_VMS    = $^O eq 'VMS';
+$do_expand = $Is_VMS;
 $Is_MacOS  = $^O eq 'MacOS';
 
 @dl_require_symbols = ();       # names of symbols we need
 @dl_resolve_using   = ();       # names of files to link with
 @dl_library_path    = ();       # path to look for files
-#@dl_librefs         = ();       # things we have loaded
-#@dl_modules         = ();       # Modules we have loaded
+@dl_librefs         = ();       # things we have loaded
+@dl_modules         = ();       # Modules we have loaded
 
 # This is a fix to support DLD's unfortunate desire to relink -lc
 @dl_resolve_using = dl_findfile('-lc') if $dlsrc eq "dl_dld.xs";
 
-# Initialise @dl_library_path with the 'standard' library path
-# for this platform as determined by Configure
-
-# push(@dl_library_path, split(' ', $Config::Config{'libpth'});
 EOT
 
-print OUT "push(\@dl_library_path, split(' ', ",
-          to_string($Config::Config{'libpth'}), "));\n";
+my $cfg_dl_library_path = <<'EOT';
+push(@dl_library_path, split(' ', $Config::Config{libpth}));
+EOT
 
-print OUT <<'EOT';
+sub dquoted_comma_list {
+    join(", ", map {qq("$_")} @_);
+}
 
-# Add to @dl_library_path any extra directories we can gather
-# from environment variables.
-if ($Is_MacOS) {
-    push(@dl_library_path, split(/,/, $ENV{LD_LIBRARY_PATH}))
-   	if exists $ENV{LD_LIBRARY_PATH};
-} else {
-#     push(@dl_library_path, split(/:/, $ENV{$Config::Config{ldlibpthname}}))
-#     	if exists      $Config::Config{ldlibpthname}        &&
-#                        $Config::Config{ldlibpthname}  ne '' &&
-#                 exists $ENV{$Config::Config{ldlibpthname}}       ;;
-#     push(@dl_library_path, split(/:/, $ENV{$Config::Config{ldlibpthname}}))
-#     	if exists      $Config::Config{ldlibpthname}        &&
-#                        $Config::Config{ldlibpthname}  ne '' &&
-#                 exists $ENV{$Config::Config{ldlibpthname}}       ;;
+if ($ENV{PERL_BUILD_EXPAND_CONFIG_VARS}) {
+    eval $cfg_dl_library_path;
+    if (!$ENV{PERL_BUILD_EXPAND_ENV_VARS}) {
+        my $dl_library_path = dquoted_comma_list(@dl_library_path);
+        print OUT <<EOT;
+# This list has been expanded in Perl build time.
+# (%Config expanded, %ENV not)
+
+\@dl_library_path = ($dl_library_path);
+
+EOT
+    }
+}
+else {
+    print OUT <<EOT;
+# Initialise \@dl_library_path with the 'standard' library path
+# for this platform as determined by Configure.
+
+$cfg_dl_library_path
+
+EOT
+}
+
+my $ldlibpthname;
+my $pthsep;
+
+if ($ENV{PERL_BUILD_EXPAND_CONFIG_VARS}) {
+    $ldlibpthname = qq('$Config::Config{ldlibpthname}');
+    $pthsep       = qq('$Config::Config{path_sep}');
+}
+else {
+    $ldlibpthname = q($Config::Config{ldlibpthname});
+    $pthsep       = q($Config::Config{path_sep});
+    print OUT <<EOT;
+my \$ldlibpthname = $ldlibpthname;
+my \$pthsep       = $pthsep;
+
+EOT
+}
+
+
+my $env_dl_library_path = <<EOT;
+if (exists \$ENV{$ldlibpthname} && \$ENV{$ldlibpthname} ne '') {
+    push(\@dl_library_path, split(/\$pthsep/, \$ENV{$ldlibpthname}));
+}
+
 # E.g. HP-UX supports both its native SHLIB_PATH *and* LD_LIBRARY_PATH.
-# push(@dl_library_path, split(/:/, $ENV{LD_LIBRARY_PATH}))
-#     if exists $ENV{LD_LIBRARY_PATH};
+
+if ($ldlibpthname ne 'LD_LIBRARY_PATH' && exists \$ENV{LD_LIBRARY_PATH}) {
+    push(\@dl_library_path, split(/\$pthsep/, \$ENV{LD_LIBRARY_PATH}));
+}
 EOT
 
-# Make a list of paths to print.
-# HP-UX supports both its native SHLIB_PATH *and* LD_LIBRARY_PATH,
-# but for other OSes no point pushing 'LD_LIBRARY_PATH' twice.
-my @ldlibpthname = 'LD_LIBRARY_PATH';
-if (exists $Config::Config{ldlibpthname}
-    and length $Config::Config{ldlibpthname}
-    and $Config::Config{ldlibpthname} ne 'LD_LIBRARY_PATH') {
-    unshift @ldlibpthname, $Config::Config{ldlibpthname};
+if ($ENV{PERL_BUILD_EXPAND_CONFIG_VARS} && $ENV{PERL_BUILD_EXPAND_ENV_VARS}) {
+    eval $env_dl_library_path;
+}
+else {
+    print OUT <<EOT;
+# Add to \@dl_library_path any extra directories we can gather from environment
+# during runtime.
+
+$env_dl_library_path
+
+EOT
 }
 
-foreach (@ldlibpthname) {
-    print OUT "    push(\@dl_library_path, split(/:/, \$ENV{", to_string($_),
-		  "}))\n\tif exists \$ENV{", to_string($_), "};\n";
+if ($ENV{PERL_BUILD_EXPAND_CONFIG_VARS} && $ENV{PERL_BUILD_EXPAND_ENV_VARS}) {
+    my $dl_library_path = dquoted_comma_list(@dl_library_path);
+    print OUT <<EOT;
+# This list has been expanded in Perl build time.
+# (%Config expanded, %ENV expanded)
+
+\@dl_library_path = ($dl_library_path);
+
+EOT
 }
 
 print OUT <<'EOT';
-}
-
 # No prizes for guessing why we don't say 'bootstrap DynaLoader;' here.
 # NOTE: All dl_*.xs (including dl_none.xs) define a dl_error() XSUB
 boot_DynaLoader('DynaLoader') if defined(&boot_DynaLoader) &&

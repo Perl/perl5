@@ -20,7 +20,7 @@
 
 # $Id: Head.U,v 3.0.1.9 1997/02/28 15:02:09 ram Exp $
 #
-# Generated on Fri Oct 27 18:57:46 EET DST 2000 [metaconfig 3.0 PL70]
+# Generated on Sat Nov  4 01:58:40 EET 2000 [metaconfig 3.0 PL70]
 # (with additional metaconfig patches by perlbug@perl.org)
 
 cat >/tmp/c1$$ <<EOF
@@ -348,6 +348,7 @@ d_endsent=''
 d_fchmod=''
 d_fchown=''
 d_fcntl=''
+d_fcntl_can_lock=''
 d_fd_macros=''
 d_fd_set=''
 d_fds_bits=''
@@ -2428,7 +2429,7 @@ EOM
 			esac
 			;;
 		next*) osname=next ;;
-		NonStop-UX) osname=nonstopux ;;
+		nonstop-ux) osname=nonstopux ;;
 		POSIX-BC | posix-bc ) osname=posix-bc
 			osvers="$3"
 			;;
@@ -7268,6 +7269,25 @@ rp='Perl administrator e-mail address'
 . ./myread
 perladmin="$ans"
 
+: determine whether to only install version-specific parts.
+echo " "
+$cat <<EOM
+Do you want to install only the version-specific parts of the perl
+distribution?  Usually you do *not* want to do this.
+EOM
+case "$versiononly" in
+"$define"|[Yy]*|true) dflt='y' ;;
+*) dflt='n';
+esac
+rp="Do you want to install only the version-specific parts of perl?"
+. ./myread
+case "$ans" in
+[yY]*)	val="$define";;
+*)	val="$undef" ;;
+esac
+set versiononly
+eval $setvar
+
 : figure out how to guarantee perl startup
 case "$startperl" in
 '')
@@ -7282,7 +7302,10 @@ want to share those scripts and perl is not in a standard place
 a shell by starting the script with a single ':' character.
 
 EOH
-		dflt="$binexp/perl"
+		case "$versiononly" in
+		"$define")      dflt="$binexp/perl$version";;  
+		*)              dflt="$binexp/perl";;
+		esac
 		rp='What shall I put after the #! to start up perl ("none" to not use #!)?'
 		. ./myread
 		case "$ans" in
@@ -7446,25 +7469,6 @@ if $test X"$prefix" != X"$installprefix"; then
 else
 	installvendorbin="$vendorbinexp"
 fi
-
-: determine whether to only install version-specific parts.
-echo " "
-$cat <<EOM
-Do you want to install only the version-specific parts of the perl
-distribution?  Usually you do *not* want to do this.
-EOM
-case "$versiononly" in
-"$define"|[Yy]*|true) dflt='y' ;;
-*) dflt='n';
-esac
-rp="Do you want to install only the version-specific parts of perl?"
-. ./myread
-case "$ans" in
-[yY]*)	val="$define";;
-*)	val="$undef" ;;
-esac
-set versiononly
-eval $setvar
 
 : see if qgcvt exists
 set qgcvt d_qgcvt
@@ -8844,6 +8848,54 @@ eval $inlibc
 : see if this is an fcntl system
 set fcntl d_fcntl
 eval $inlibc
+
+echo " "
+: See if fcntl-based locking works.
+$cat >try.c <<'EOCP'
+#include <stdlib.h>
+#include <unistd.h>
+#include <fcntl.h>
+int main() {
+#if defined(F_SETLK) && defined(F_SETLKW)
+     struct flock flock;
+     int retval, fd;
+     fd = open("try.c", O_RDONLY);
+     flock.l_type = F_RDLCK;
+     flock.l_whence = SEEK_SET;
+     flock.l_start = flock.l_len = 0;
+     retval = fcntl(fd, F_SETLK, &flock);
+     close(fd);
+     (retval < 0 ? exit(2) : exit(0));
+#else
+     exit(2);
+#endif
+}
+EOCP
+echo "Checking if fcntl-based file locking works... "
+case "$d_fcntl" in
+"$define")
+	set try
+	if eval $compile_ok; then
+		if ./try; then
+			echo "Yes, it seems to work."
+			val="$define"
+		else
+			echo "Nope, it didn't work."
+			val="$undef"
+		fi
+	else
+		echo "I'm unable to compile the test program, so I'll assume not."
+		val="$undef"
+	fi
+	;;
+*) val="$undef";
+	echo "Nope, since you don't even have fcntl()."
+	;;
+esac
+set d_fcntl_can_lock
+eval $setvar
+$rm -f try*
+
 
 hasfield='varname=$1; struct=$2; field=$3; shift; shift; shift;
 while $test $# -ge 2; do
@@ -11540,7 +11592,7 @@ EOP
 	if eval $compile; then
  		case `./try$exe_ext` in
 		Pass_changed)
-			echo "Increasing ptr in your stdio decreases cnt by the same amount. Good." >&4
+			echo "Increasing ptr in your stdio decreases cnt by the same amount.  Good." >&4
 			d_stdio_ptr_lval_sets_cnt="$define" ;;
 		Pass_unchanged)
 			echo "Increasing ptr in your stdio leaves cnt unchanged.  Good." >&4
@@ -15467,6 +15519,7 @@ d_eunice='$d_eunice'
 d_fchmod='$d_fchmod'
 d_fchown='$d_fchown'
 d_fcntl='$d_fcntl'
+d_fcntl_can_lock='$d_fcntl_can_lock'
 d_fd_macros='$d_fd_macros'
 d_fd_set='$d_fd_set'
 d_fds_bits='$d_fds_bits'

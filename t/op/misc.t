@@ -562,3 +562,36 @@ Modification of a read-only value attempted at - line 2.
 print qw(ab a\b a\\b);
 EXPECT
 aba\ba\b
+########
+# This test is here instead of pragma/locale.t because
+# the bug depends on in the internal state of the locale
+# settings and pragma/locale messes up that state pretty badly.
+# We need a "fresh run".
+use Config;
+my $have_setlocale = $Config{d_setlocale} eq 'define';
+eval {
+    require POSIX;
+};
+$have_setlocale = 0 if $@;
+# Visual C's CRT goes silly on strings of the form "en_US.ISO8859-1"
+# and mingw32 uses said silly CRT
+$have_setlocale = 0 if $^O eq 'MSWin32' && $Config{cc} =~ /^(cl|gcc)/i;
+exit(0) unless $have_setlocale;
+my @locales;
+if (-x "/usr/bin/locale" && open(LOCALES, "/usr/bin/locale -a|")) {
+    while(<LOCALES>) {
+        chomp;
+        push(@locales, $_);
+    }
+    close(LOCALES);
+}
+exit(0) unless @locales;
+for (@locales) {
+    use POSIX qw(locale_h);
+    use locale;
+    setlocale(LC_NUMERIC, $_) or die "setlocale(LC_NUMERIC, $_): $!";
+    my $s = sprintf "%g %g", 3.1, 3.1;
+    next if $s eq '3.1 3.1' || $s =~ /^(3.+1) \1$/;
+    print "$_ $s\n";
+}
+EXPECT

@@ -269,13 +269,13 @@ sub checksum
         );
 
     $len_msg = length($msg);
-    $num_short = $len_msg / 2;
+    $num_short = int($len_msg / 2);
     $chk = 0;
     foreach $short (unpack("S$num_short", $msg))
     {
         $chk += $short;
     }                                           # Add the odd byte in
-    $chk += unpack("C", substr($msg, $len_msg - 1, 1)) if $len_msg % 2;
+    $chk += (unpack("C", substr($msg, $len_msg - 1, 1)) << 8) if $len_msg % 2;
     $chk = ($chk >> 16) + ($chk & 0xffff);      # Fold high into low
     return(~(($chk >> 16) + $chk) & 0xffff);    # Again and complement
 }
@@ -369,16 +369,17 @@ sub ping_udp
         elsif ($nfound)         # A packet is waiting
         {
             $from_msg = "";
-            $from_saddr = recv($self->{"fh"}, $from_msg, 1500, $flags);
-            ($from_port, $from_ip) = sockaddr_in($from_saddr);
-            if (($from_ip eq $ip) &&        # Does the packet check out?
-                ($from_port == $self->{"port_num"}) &&
-                ($from_msg eq $msg))
-            {
-                $ret = 1;       # It's a winner
-                $done = 1;
-            }
-        }
+            $from_saddr = recv($self->{"fh"}, $from_msg, 1500, $flags)
+		or last; # For example an unreachable host will make recv() fail.
+	    ($from_port, $from_ip) = sockaddr_in($from_saddr);
+	    if (($from_ip eq $ip) &&        # Does the packet check out?
+		($from_port == $self->{"port_num"}) &&
+		($from_msg eq $msg))
+	    {
+		$ret = 1;       # It's a winner
+		$done = 1;
+	    }
+	}
         else                    # Oops, timed out
         {
             $done = 1;

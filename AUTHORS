@@ -1,8 +1,8 @@
 # To give due honor to those who have made Perl 5 what is is today,
-# here the easily-extractable people and their (hopefully) current
-# and preferred email addresses (as of October 2000, if known) from
-# the Changes files.  These people have either submitted patches
-# or suggestions, or their bug reports or comments have inspired
+# here are easily-from-changelogs-extractable people and their
+# (hopefully) current and preferred email addresses (as of late 2000
+# if known) from the Changes files.  These people have either submitted
+# patches or suggestions, or their bug reports or comments have inspired
 # the appropriate patches.  Corrections and additions welcome.
 
 Aaron B. Dossett               <aaron@iglou.com>
@@ -26,8 +26,8 @@ Andrew M. Langmead             <aml@world.std.com>
 Andrew Pimlott                 <pimlott@abel.math.harvard.edu>
 Andrew Vignaux
 Andrew Wilcox
-Andy Dougherty                 <doughera@lafcol.lafayette.edu>
-Anno Siegel                    <<anno4000@lublin.zrz.tu-berlin.de>
+Andy Dougherty                 <doughera@lafayette.edu>
+Anno Siegel                    <anno4000@lublin.zrz.tu-berlin.de>
 Anthony David                  <adavid@netinfo.com.au>
 Anton Berezin                  <tobez@plab.ku.dk>
 Art Green                      <Art_Green@mercmarine.com>
@@ -181,7 +181,7 @@ Henrik Tougaard                <ht.000@foa.dk>
 Holger Bechtold
 Horst von Brand                <vonbrand@sleipnir.valparaiso.cl>
 Hubert Feyrer                  <hubert.feyrer@informatik.fh-regensburg.de>
-Hugo van der Sanden            <hv@crypt.demon.co.uk>
+Hugo van der Sanden            <hv@crypt0.demon.co.uk>
 Hunter Kelly                   <retnuh@zule.pixar.com>
 Huw Rogers
 Ian Maloney                    <ian.malonet@ubs.com>
@@ -245,7 +245,7 @@ John Hughes                    <john@AtlanTech.COM>
 John L. Allen                  <allen@grumman.com>
 John Macdonald                 <jmm@revenge.elegant.com>
 John Nolan                     <jpnolan@Op.Net>
-John Peacock                   <JPeacock@UnivPress.com>
+John Peacock                   <jpeacock@rowman.com>
 John Q. Linux                  <jql@accessone.com>
 John Rowe
 John Stoffel                   <jfs@fluent.com>
@@ -278,7 +278,7 @@ Keong Lim                      <Keong.Lim@sr.com.au>
 Kim Frutiger
 Kragen Sitaker                 <kragen@dnaco.net>
 Krishna Sethuraman             <krishna@sgi.com>
-Kurt D. Starsinic              <kstar@chapin.edu>
+Kurt D. Starsinic              <kstar@smithrenaud.com>
 Kyriakos Georgiou
 Larry Parmelee                 <parmelee@CS.Cornell.EDU>
 Larry Schuler
@@ -386,7 +386,7 @@ Peter van Heusden              <pvh@junior.uwc.ac.za>
 Petter Reinholdtsen            <pere@hungry.com>
 Phil Lobbes                    <phil@finchcomputer.com>
 Philip Hazel
-Philip Newton                  <Philip.Newton@gmx.net>
+Philip Newton                  <pne@cpan.org>
 Piers Cawley                   <pdcawley@bofh.org.uk>
 Piotr Klaban                   <makler@oryl.man.torun.pl>
 Prymmer/Kahn                   <pvhp@best.com>
@@ -500,7 +500,7 @@ Wayne Scott
 Wayne Thompson                 <Wayne.Thompson@Ebay.sun.com>
 Wilfredo Sánchez               <wsanchez@apple.com>
 William Mann                   <wmann@avici.com>
-William Middleton
+William J. Middleton
 William R Ward                 <hermit@BayView.COM>
 William Setzer
 Winfried König                 <win@in.rhein-main.de>

@@ -56,8 +56,8 @@ You should definitely use version 5.  Version 4 is old, limited, and
 no longer maintained; its last patch (4.036) was in 1992, long ago and
 far away.  Sure, it's stable, but so is anything that's dead; in fact,
 perl4 had been called a dead, flea-bitten camel carcass.  The most recent
-production release is 5.005_03 (although 5.004_05 is still supported).
-The most cutting-edge development release is 5.005_57.  Further references
+production release is 5.6 (although 5.005_03 is still supported).
+The most cutting-edge development release is 5.7.  Further references
 to the Perl language in this document refer to the production release
 unless otherwise specified.  There may be one or more official bug fixes
 by the time you read this, and also perhaps some experimental versions
@@ -120,10 +120,10 @@ and the rare new keyword).
 
 =head2 Is Perl difficult to learn?
 
-No, Perl is easy to start learning -- and easy to keep learning.  It looks
+No, Perl is easy to start learning--and easy to keep learning.  It looks
 like most programming languages you're likely to have experience
 with, so if you've ever written a C program, an awk script, a shell
-script, or even a BASIC program, you're already part way there.
+script, or even a BASIC program, you're already partway there.
 
 Most tasks only require a small subset of the Perl language.  One of
 the guiding mottos for Perl development is "there's more than one way
@@ -183,7 +183,7 @@ languages that come to mind include prolog and matlab.
 
 =head2 When shouldn't I program in Perl?
 
-When your manager forbids it -- but do consider replacing them :-).
+When your manager forbids it--but do consider replacing them :-).
 
 Actually, one good reason is when you already have an existing
 application written in another language that's all done (and done
@@ -201,7 +201,7 @@ limitations given in the previous statement to some degree, but understand
 that Perl remains fundamentally a dynamically typed language, not
 a statically typed one.  You certainly won't be chastised if you don't
 trust nuclear-plant or brain-surgery monitoring code to it.  And Larry
-will sleep easier, too -- Wall Street programs not withstanding. :-)
+will sleep easier, too--Wall Street programs not withstanding. :-)
 
 =head2 What's the difference between "perl" and "Perl"?
 
@@ -220,17 +220,17 @@ Larry doesn't really care.  He says (half in jest) that "a script is
 what you give the actors.  A program is what you give the audience."
 
 Originally, a script was a canned sequence of normally interactive
-commands, that is, a chat script.  Something like a UUCP or PPP chat
+commands--that is, a chat script.  Something like a UUCP or PPP chat
 script or an expect script fits the bill nicely, as do configuration
 scripts run by a program at its start up, such F<.cshrc> or F<.ircrc>,
 for example.  Chat scripts were just drivers for existing programs,
 not stand-alone programs in their own right.
 
 A computer scientist will correctly explain that all programs are
-interpreted, and that the only question is at what level.  But if you
+interpreted and that the only question is at what level.  But if you
 ask this question of someone who isn't a computer scientist, they might
 tell you that a I<program> has been compiled to physical machine code
-once, and can then be run multiple times, whereas a I<script> must be
+once and can then be run multiple times, whereas a I<script> must be
 translated by a program each time it's used.
 
 Perl programs are (usually) neither strictly compiled nor strictly
@@ -263,7 +263,7 @@ Newer examples can be found by perusing Larry's postings:
 
     http://x1.dejanews.com/dnquery.xp?QRY=*&DBS=2&ST=PS&defaultOp=AND&LNG=ALL&format=terse&showsort=date&maxhits=100&subjects=&groups=&authors=larry@*wall.org&fromdate=&todate=
 
-=head2 How can I convince my sysadmin/supervisor/employees to use version (5/5.005/Perl instead of some other language)?
+=head2 How can I convince my sysadmin/supervisor/employees to use (version 5/5.005/Perl) instead of some other language?
 
 If your manager or employees are wary of unsupported software, or
 software which doesn't officially ship with your operating system, you
@@ -272,15 +272,15 @@ more productive using and utilizing Perl constructs, functionality,
 simplicity, and power, then the typical manager/supervisor/employee
 may be persuaded.  Regarding using Perl in general, it's also
 sometimes helpful to point out that delivery times may be reduced
-using Perl, as compared to other languages.
+using Perl compared to other languages.
 
 If you have a project which has a bottleneck, especially in terms of
 translation or testing, Perl almost certainly will provide a viable,
-and quick solution.  In conjunction with any persuasion effort, you
+quick solution.  In conjunction with any persuasion effort, you
 should not fail to point out that Perl is used, quite extensively, and
 with extremely reliable and valuable results, at many large computer
-software and/or hardware companies throughout the world.  In fact,
-many Unix vendors now ship Perl by default, and support is usually
+software and hardware companies throughout the world.  In fact,
+many Unix vendors now ship Perl by default.  Support is usually
 just a news-posting away, if you can't find the answer in the
 I<comprehensive> documentation, including this FAQ.
 
@@ -292,7 +292,7 @@ by the Perl Development Team.  Another big sell for Perl5 is the large
 number of modules and extensions which greatly reduce development time
 for any given task.  Also mention that the difference between version
 4 and version 5 of Perl is like the difference between awk and C++.
-(Well, OK, maybe not quite that distinct, but you get the idea.)  If you
+(Well, OK, maybe it's not quite that distinct, but you get the idea.)  If you
 want support and a reasonable guarantee that what you're developing
 will continue to work in the future, then you have to run the supported
 version.  That probably means running the 5.005 release, although 5.004

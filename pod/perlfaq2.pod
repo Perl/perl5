@@ -69,11 +69,11 @@ eventually live on, and then type C<make install>.  Most other
 approaches are doomed to failure.
 
 One simple way to check that things are in the right place is to print out
-the hard-coded @INC which perl is looking for.
+the hard-coded @INC that perl looks through for libraries:
 
     % perl -e 'print join("\n",@INC)'
 
-If this command lists any paths which don't exist on your system, then you
+If this command lists any paths that don't exist on your system, then you
 may need to move the appropriate libraries to these locations, or create
 symbolic links, aliases, or shortcuts appropriately.  @INC is also printed as
 part of the output of
@@ -133,7 +133,7 @@ If you have Perl installed locally, you probably have the documentation
 installed as well: type C<man perl> if you're on a system resembling Unix.
 This will lead you to other important man pages, including how to set your
 $MANPATH.  If you're not on a Unix system, access to the documentation
-will be different; for example, it might be only in HTML format.  But all
+will be different; for example, documentation might only be in HTML format.  All
 proper Perl installations have fully-accessible documentation.
 
 You might also try C<perldoc perl> in case your system doesn't
@@ -145,14 +145,16 @@ complete documentation in various formats, including native pod,
 troff, html, and plain text.  There's also a web page at
 http://www.perl.com/perl/info/documentation.html that might help.
 
-Many good books have been written about Perl -- see the section below
+Many good books have been written about Perl--see the section below
 for more details.
 
 Tutorial documents are included in current or upcoming Perl releases
-include L<perltoot> for objects, L<perlopentut> for file opening
-semantics, L<perlreftut> for managing references, and L<perlxstut>
-for linking C and Perl together.  There may be more by the 
-time you read this.  The following URLs might also be of 
+include L<perltoot> for objects or L<perlboot> for a beginner's
+approach to objects, L<perlopentut> for file opening semantics,
+L<perlreftut> for managing references, L<perlretut> for regular
+expressions, L<perlthrtut> for threads, L<perldebtut> for debugging,
+and L<perlxstut> for linking C and Perl together.  There may be more
+by the time you read this.  The following URLs might also be of
 assistance:
 
     http://language.perl.com/info/documentation.html
@@ -193,7 +195,7 @@ a request.
 A number of books on Perl and/or CGI programming are available.  A few of
 these are good, some are OK, but many aren't worth your money.  Tom
 Christiansen maintains a list of these books, some with extensive
-reviews, at http://www.perl.com/perl/critiques/index.html.
+reviews, at http://www.perl.com/perl/critiques/index.html .
 
 The incontestably definitive reference book on Perl, written by
 the creator of Perl, is now (July 2000) in its third edition:
@@ -206,7 +208,7 @@ the creator of Perl, is now (July 2000) in its third edition:
 
 The companion volume to the Camel containing thousands
 of real-world examples, mini-tutorials, and complete programs
-(first premiering at the 1998 Perl Conference), is:
+(first premiered at the 1998 Perl Conference), is:
 
     The Perl Cookbook (the "Ram Book"):
 	by Tom Christiansen and Nathan Torkington, 
@@ -215,8 +217,8 @@ of real-world examples, mini-tutorials, and complete programs
 	http://perl.oreilly.com/cookbook/
 
 If you're already a hard-core systems programmer, then the Camel Book
-might suffice for you to learn Perl from.  But if you're not, check
-out:
+might suffice for you to learn Perl from.  If you're not, check
+out
 
     Learning Perl (the "Llama Book"):
 	by Randal Schwartz and Tom Christiansen 
@@ -225,9 +227,9 @@ out:
 	http://www.oreilly.com/catalog/lperl2/
 
 Despite the picture at the URL above, the second edition of "Llama
-Book" really has a blue cover, and is updated for the 5.004 release
+Book" really has a blue cover and was updated for the 5.004 release
 of Perl.  Various foreign language editions are available, including
-I<Learning Perl on Win32 Systems> (the Gecko Book).
+I<Learning Perl on Win32 Systems> (the "Gecko Book").
 
 If you're not an accidental programmer, but a more serious and possibly
 even degreed computer scientist who doesn't need as much hand-holding as
@@ -350,7 +352,7 @@ Recommended books on (or mostly on) Perl follow.
 
 The first and only periodical devoted to All Things Perl, I<The
 Perl Journal> contains tutorials, demonstrations, case studies,
-announcements, contests, and much more.  TPJ has columns on web
+announcements, contests, and much more.  I<TPJ> has columns on web
 development, databases, Win32 Perl, graphical programming, regular
 expressions, and networking, and sponsors the Obfuscated Perl
 Contest.  It is published quarterly under the gentle hand of its
@@ -362,11 +364,11 @@ on Perl are I<Web Techniques> (see http://www.webtechniques.com/),
 I<Performance Computing> (http://www.performance-computing.com/), and Usenix's
 newsletter/magazine to its members, I<login:>, at http://www.usenix.org/.
 Randal's Web Technique's columns are available on the web at
-http://www.stonehenge.com/merlyn/WebTechniques/.
+http://www.stonehenge.com/merlyn/WebTechniques/ .
 
 =head2 Perl on the Net: FTP and WWW Access
 
-To get the best (and possibly cheapest) performance, pick a site from
+To get the best performance, pick a site from
 the list below and use it to grab the complete list of mirror sites.
 From there you can find the quickest site for you.  Remember, the
 following list is I<not> the complete list of CPAN mirrors
@@ -399,7 +401,7 @@ best archives.  Just look up "*perl*" as a newsgroup.
 
     http://www.deja.com/dnquery.xp?QRY=&DBS=2&ST=PS&defaultOp=AND&LNG=ALL&format=terse&showsort=date&maxhits=25&subjects=&groups=*perl*&authors=&fromdate=&todate=
 
-You'll probably want to trim that down a bit, though.
+You might want to trim that down a bit, though.
 
 You'll probably want more a sophisticated query and retrieval mechanism
 than a file listing, preferably one that allows you to retrieve
@@ -413,7 +415,7 @@ let perlfaq-suggestions@perl.com know.
 
 =head2 Where can I buy a commercial version of Perl?
 
-In a real sense, Perl already I<is> commercial software: It has a license
+In a real sense, Perl already I<is> commercial software: it has a license
 that you can grab and carefully read to your manager. It is distributed
 in releases and comes in well-defined packages. There is a very large
 user community and an extensive literature.  The comp.lang.perl.*
@@ -427,13 +429,13 @@ However, these answers may not suffice for managers who require a
 purchase order from a company whom they can sue should anything go awry.
 Or maybe they need very serious hand-holding and contractual obligations.
 Shrink-wrapped CDs with Perl on them are available from several sources if
-that will help.  For example, many Perl books carry a Perl distribution
-on them, as do the O'Reilly Perl Resource Kits (in both the Unix flavor
+that will help.  For example, many Perl books include a distribution of Perl,
+as do the O'Reilly Perl Resource Kits (in both the Unix flavor
 and in the proprietary Microsoft flavor); the free Unix distributions
 also all come with Perl.
 
-Or you can purchase commercial incidence based support through the Perl
-Clinic.  The following is a commercial from them:
+Alternatively, you can purchase commercial incidence based support
+through the Perl Clinic.  The following is a commercial from them:
 
 "The Perl Clinic is a commercial Perl support service operated by
 ActiveState Tool Corp. and The Ingram Group.  The operators have many
@@ -444,7 +446,7 @@ on a wide range of platforms.
 we will put our best effort into understanding your problem, providing an
 explanation of the situation, and a recommendation on how to proceed."
 
-Contact The Perl Clinic at:
+Contact The Perl Clinic at
 
     www.PerlClinic.com
 

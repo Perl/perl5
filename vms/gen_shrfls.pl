@@ -68,6 +68,9 @@ if ($docc) {
   elsif (-f '[-]perl.h') { $dir = '[-]'; }
   else { die "$0: Can't find perl.h\n"; }
 
+  $use_threads = $use_mymalloc = $case_about_case = $debugging_enabled = 0;
+  $hide_mymalloc = $isgcc = 0;
+
   # Go see what is enabled in config.sh
   $config = $dir . "config.sh";
   open CONFIG, "< $config";
@@ -77,6 +80,7 @@ if ($docc) {
     $care_about_case++ if /d_vms_case_sensitive_symbols='define'/;
     $debugging_enabled++ if /usedebugging_perl='Y'/;
     $hide_mymalloc++ if /embedmymalloc='Y'/;
+    $isgcc++ if /gccversion='[^']/;
   }
   close CONFIG;
   
@@ -93,8 +97,7 @@ if ($docc) {
 
   # check for gcc - if present, we'll need to use MACRO hack to
   # define global symbols for shared variables
-  $isgcc = `$cc_cmd _nla0:/Version` =~ /GNU/
-           or 0; # make debug output nice
+
   print "\$isgcc: $isgcc\n" if $debug;
   print "\$debugging_enabled: $debugging_enabled\n" if $debug;
 

@@ -3180,4 +3180,11 @@
 /*#define HAS_SETPGRP		/ **/
 /*#define USE_BSD_SETPGRP	/ **/
 
+/* FCNTL_CAN_LOCK:
+ *	This symbol, if defined, indicates that fcntl() can be used
+ *	for file locking.  Normally on Unix systems this is defined.
+ *	It may be undefined on VMS.
+ */
+/*#define FCNTL_CAN_LOCK		/ **/
+
 #endif

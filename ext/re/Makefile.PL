@@ -4,10 +4,6 @@ use Config;
 
 my $object = 're_exec$(OBJ_EXT) re_comp$(OBJ_EXT) re$(OBJ_EXT)';
 
-if ($^O eq 'aix' && defined($Config{'ccversion'}) && $Config{'ccversion'} eq '3.6.6.0') {
-    $object .= ' ../../deb$(OBJ_EXT)';
-}
-
 WriteMakefile(
     NAME		=> 're',
     VERSION_FROM	=> 're.pm',

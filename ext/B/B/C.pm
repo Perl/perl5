@@ -1338,7 +1338,7 @@ sub should_save
  # Now see if current package looks like an OO class this is probably too strong.
  foreach my $m (qw(new DESTROY TIESCALAR TIEARRAY TIEHASH TIEHANDLE)) 
   {
-   if ($package->can($m)) 
+   if (UNIVERSAL::can($package, $m))
     {
      warn "$package has method $m: saving package\n";#debug
      return mark_package($package);

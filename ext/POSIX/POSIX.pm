@@ -734,16 +734,6 @@ sub setbuf {
     redef "IO::Handle::setbuf()";
 }
 
-sub setgid {
-    usage "setgid(gid)" if @_ != 1;
-    $( = $_[0];
-}
-
-sub setuid {
-    usage "setuid(uid)" if @_ != 1;
-    $< = $_[0];
-}
-
 sub setvbuf {
     redef "IO::Handle::setvbuf()";
 }

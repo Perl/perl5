@@ -195,6 +195,7 @@ ext/Encode/Makefile.PL		Encode extension
 ext/Encode/Todo			Encode extension
 ext/Encode/Encode/ascii.enc	Encoding tables
 ext/Encode/Encode/big5.enc	Encoding tables
+ext/Encode/Encode/cp1047.enc	Encoding tables
 ext/Encode/Encode/cp1250.enc	Encoding tables
 ext/Encode/Encode/cp1251.enc	Encoding tables
 ext/Encode/Encode/cp1252.enc	Encoding tables
@@ -204,6 +205,7 @@ ext/Encode/Encode/cp1255.enc	Encoding tables
 ext/Encode/Encode/cp1256.enc	Encoding tables
 ext/Encode/Encode/cp1257.enc	Encoding tables
 ext/Encode/Encode/cp1258.enc	Encoding tables
+ext/Encode/Encode/cp37.enc	Encoding tables
 ext/Encode/Encode/cp437.enc	Encoding tables
 ext/Encode/Encode/cp737.enc	Encoding tables
 ext/Encode/Encode/cp775.enc	Encoding tables
@@ -260,6 +262,7 @@ ext/Encode/Encode/macRomania.enc	Encoding tables
 ext/Encode/Encode/macThai.enc		Encoding tables
 ext/Encode/Encode/macTurkish.enc	Encoding tables
 ext/Encode/Encode/macUkraine.enc	Encoding tables
+ext/Encode/Encode/posix-bc.enc		Encoding tables
 ext/Encode/Encode/shiftjis.enc		Encoding tables
 ext/Encode/Encode/symbol.enc		Encoding tables
 ext/Errno/ChangeLog		Errno perl module change log
@@ -423,6 +426,7 @@ ext/attrs/Makefile.PL	attrs extension makefile writer
 ext/attrs/attrs.pm	attrs extension Perl module
 ext/attrs/attrs.xs	attrs extension external subroutines
 ext/re/Makefile.PL	re extension makefile writer
+ext/re/hints/aix.pl	Hints for re for named architecture
 ext/re/hints/mpeix.pl	Hints for re for named architecture
 ext/re/re.pm		re extension Perl module
 ext/re/re.xs		re extension external subroutines
@@ -1444,10 +1448,12 @@ t/lib/texttabs.t	See if Text::Tabs works
 t/lib/textwrap.t	See if Text::Wrap::wrap works
 t/lib/thr5005.t		Test 5.005-style threading (skipped if no use5005threads)
 t/lib/tie-push.t	Test for Tie::Array
+t/lib/tie-refhash.t	Test for Tie::RefHash and Tie::RefHash::Nestable
 t/lib/tie-splice.t	Test for Tie::Array::SPLICE
 t/lib/tie-stdarray.t	Test for Tie::StdArray
 t/lib/tie-stdhandle.t	Test for Tie::StdHandle
 t/lib/tie-stdpush.t	Test for Tie::StdArray
+t/lib/tie-substrhash.t	Test for Tie::SubstrHash
 t/lib/timelocal.t	See if Time::Local works
 t/lib/trig.t		See if Math::Trig works
 t/op/64bitint.t		See if 64 bit integers work

@@ -165,6 +165,13 @@
  */
 #define HAS_FCNTL		/**/
 
+/* FCNTL_CAN_LOCK:
+ *	This symbol, if defined, indicates that fcntl() can be used
+ *	for file locking.  Normally on Unix systems this is defined.
+ *	It may be undefined on VMS.
+ */
+#define FCNTL_CAN_LOCK		/**/
+
 /* HAS_FGETPOS:
  *	This symbol, if defined, indicates that the fgetpos routine is
  *	available to get the file position indicator, similar to ftell().

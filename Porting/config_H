@@ -17,7 +17,7 @@
 /*
  * Package name      : perl5
  * Source directory  : /m/fs/work/work/permanent/perl/pp4/perl
- * Configuration time: Tue Oct 24 21:07:39 EET DST 2000
+ * Configuration time: Sat Nov  4 02:04:31 EET 2000
  * Configured by     : jhi
  * Target system     : osf1 alpha.hut.fi v4.0 878 alpha 
  */
@@ -3183,5 +3183,12 @@
  */
 #define HAS_SETPGRP		/**/
 #define USE_BSD_SETPGRP	/**/
+
+/* FCNTL_CAN_LOCK:
+ *	This symbol, if defined, indicates that fcntl() can be used
+ *	for file locking.  Normally on Unix systems this is defined.
+ *	It may be undefined on VMS.
+ */
+#define FCNTL_CAN_LOCK		/**/
 
 #endif
