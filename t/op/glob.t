@@ -5,7 +5,7 @@ BEGIN {
     @INC = '../lib';
 }
 
-print "1..8\n";
+print "1..9\n";
 
 @oops = @ops = <op/*>;
 
@@ -58,3 +58,10 @@ print $i == 2 ? "ok 7\n" : "not ok 7\n";
 my $ok = "not ok 8\n";
 $ok = "ok 8\n" while my $var = glob("0");
 print $ok;
+
+# The formerly-broken test for the situation above would accidentally
+# test definedness for an assignment with a LOGOP on the right:
+my $f=0;
+$ok="ok 9\n";
+$ok="not ok 9\n", undef $f while $x = $f||$f;
+print $ok
