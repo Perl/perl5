@@ -31,6 +31,212 @@ or any other branch.
 Version v5.7.1		Development release working toward v5.8
 --------------
 ____________________________________________________________________________
+[ 10995] By: jhi                                   on 2001/06/27  20:06:28
+        Log: Tiny EPOC updates.
+     Branch: perl
+	   ! epoc/config.sh
+____________________________________________________________________________
+[ 10994] By: jhi                                   on 2001/06/27  19:55:16
+        Log: The Test::More and Test::Simple tests required help
+             thanks to our schizophrenic test scheme.
+     Branch: perl
+	   ! lib/Test/More/t/fail-like.t lib/Test/More/t/fail.t
+	   ! lib/Test/More/t/plan_is_noplan.t lib/Test/More/t/skipall.t
+	   ! lib/Test/Simple/t/exit.t lib/Test/Simple/t/extra.t
+	   ! lib/Test/Simple/t/fail.t lib/Test/Simple/t/missing.t
+	   ! lib/Test/Simple/t/no_plan.t lib/Test/Simple/t/plan_is_noplan.t
+____________________________________________________________________________
+[ 10993] By: jhi                                   on 2001/06/27  17:17:30
+        Log: Upgrade to Test::Simple 0.09.
+     Branch: perl
+	   + lib/Test/Simple/Changes
+	   ! MANIFEST lib/Test/Simple.pm lib/Test/Simple/t/exit.t
+	   ! lib/Test/Simple/t/extra.t lib/Test/Simple/t/fail.t
+	   ! lib/Test/Simple/t/missing.t lib/Test/Simple/t/no_plan.t
+	   ! lib/Test/Simple/t/plan_is_noplan.t
+____________________________________________________________________________
+[ 10992] By: jhi                                   on 2001/06/27  17:11:28
+        Log: Upgrade to Test::More 0.07.
+     Branch: perl
+	   + lib/Test/More/Changes
+	   ! MANIFEST lib/Test/More.pm lib/Test/More/t/fail-like.t
+	   ! lib/Test/More/t/fail.t lib/Test/More/t/plan_is_noplan.t
+	   ! lib/Test/More/t/skipall.t
+____________________________________________________________________________
+[ 10991] By: jhi                                   on 2001/06/27  17:04:13
+        Log: Subject: Re: [PATCH] gcc-3.0 warnings on HP-UX
+             From: "H.Merijn Brand" <h.m.brand@hccnet.nl>
+             Date: Wed, 27 Jun 2001 18:40:04 +0200
+             Message-Id: <20010627182601.7261.H.M.BRAND@hccnet.nl>
+     Branch: perl
+	   ! hints/hpux.sh
+____________________________________________________________________________
+[ 10990] By: jhi                                   on 2001/06/27  17:02:55
+        Log: Subject: [PATCH README.qnx hints/qnx.sh]
+             From: Norton Allen <allen@huarp.harvard.edu>
+             Date: Wed, 27 Jun 2001 13:46:03 -0400 (edt)
+             Message-Id: <200106271746.NAA02789@bottesini.harvard.edu>
+     Branch: perl
+	   ! README.qnx hints/qnx.sh
+____________________________________________________________________________
+[ 10989] By: jhi                                   on 2001/06/27  14:33:53
+        Log: Subject: [PATCH] two little documentation nits
+             From: Abhijit Menon-Sen <ams@wiw.org>
+             Date: Wed, 27 Jun 2001 20:07:50 +0530
+             Message-ID: <20010627200750.A15756@lustre.lustre.dyn.wiw.org>
+     Branch: perl
+	   ! sv.c sv.h
+____________________________________________________________________________
+[ 10988] By: jhi                                   on 2001/06/27  13:33:32
+        Log: Subject: [PATCH File/Spec/Unix.pm ExtUtils/MM_Unix.pm] for QNX
+             From: Norton Allen <allen@huarp.harvard.edu>
+             Date: Wed, 27 Jun 2001 10:33:05 -0400 (edt)
+             Message-Id: <200106271433.KAA04947@bottesini.harvard.edu>
+     Branch: perl
+	   ! lib/ExtUtils/MM_Unix.pm lib/File/Spec/Unix.pm
+____________________________________________________________________________
+[ 10987] By: jhi                                   on 2001/06/27  12:14:36
+        Log: Subject: [PATCH vms/test.com] Adding TODO tests (was:  Re: a report on perl@10930 results on a couple of Alphas)
+             From: Michael G Schwern <schwern@pobox.com>
+             Date: Wed, 27 Jun 2001 02:34:58 -0400
+             Message-ID: <20010627023458.K23874@blackrider>
+     Branch: perl
+	   ! vms/test.com
+____________________________________________________________________________
+[ 10986] By: jhi                                   on 2001/06/27  12:01:49
+        Log: Add perl_clone_host() for Netware.
+     Branch: perl
+	   ! NetWare/nw5.c
+____________________________________________________________________________
+[ 10985] By: jhi                                   on 2001/06/27  11:56:53
+        Log: GCC 3.0 hints for HP-UX.
+     Branch: perl
+	   ! hints/hpux.sh
+____________________________________________________________________________
+[ 10984] By: jhi                                   on 2001/06/27  11:55:06
+        Log: In some Linux distributions the libndbm is broken
+             (no null key support), therefore link with libgdbm
+             (if available), since it has a working ndbm emulation,
+             from Jonathan Stowe.
+     Branch: perl
+	   + ext/NDBM_File/hints/linux.pl
+	   ! MANIFEST
+____________________________________________________________________________
+[ 10983] By: jhi                                   on 2001/06/27  11:48:56
+        Log: Subject: [PATCH perl@10930] find.t hack for VMS
+             From: "Craig A. Berry" <craigberry@mac.com>
+             Date: Tue, 26 Jun 2001 23:40:25 -0500
+             Message-Id: <a05101000b75f10cdc80f@[192.168.56.145]>
+     Branch: perl
+	   ! lib/File/Find/find.t
+____________________________________________________________________________
+[ 10982] By: jhi                                   on 2001/06/27  11:47:30
+        Log: AUTHORS updates.
+     Branch: perl
+	   ! AUTHORS
+____________________________________________________________________________
+[ 10981] By: jhi                                   on 2001/06/27  11:46:02
+        Log: Metaconfig unit change like #10980.
+     Branch: metaconfig
+	   ! U/compline/d_stdstdio.U
+____________________________________________________________________________
+[ 10980] By: jhi                                   on 2001/06/27  11:45:29
+        Log: "lose the it's", from Abhijit Menon-Sen.
+             ("It's" not searched, pods not searched.)
+     Branch: perl
+	   ! Porting/Glossary Porting/config_H README.qnx config_h.SH
+	   ! emacs/cperl-mode.el ext/IPC/SysV/Semaphore.pm
+	   ! ext/List/Util/lib/Scalar/Util.pm hints/next_3.sh hints/qnx.sh
+	   ! lib/CPAN/Nox.pm lib/ExtUtils/Embed.pm lib/ExtUtils/MM_NW5.pm
+	   ! lib/ExtUtils/MM_Unix.pm lib/ExtUtils/MM_VMS.pm
+	   ! lib/ExtUtils/MM_Win32.pm lib/Net/DummyInetd.pm win32/win32.c
+____________________________________________________________________________
+[ 10979] By: jhi                                   on 2001/06/27  11:36:40
+        Log: "lose the looses", from Abhijit Menon-Sen.
+     Branch: perl
+	   ! ext/B/B/Assembler.pm gv.c
+____________________________________________________________________________
+[ 10978] By: jhi                                   on 2001/06/27  11:35:38
+        Log: Catch FP exceptions also in z/OS (aka OS/390), from Peter Prymmer.
+     Branch: perl
+	   ! hints/os390.sh
+____________________________________________________________________________
+[ 10977] By: jhi                                   on 2001/06/27  11:33:28
+        Log: DEC C 5.3 on the VAX simply doesn't seem to like
+             compiling the MD5 extension, disable it there for now,
+             from Peter Prymmer.
+     Branch: perl
+	   ! configure.com
+____________________________________________________________________________
+[ 10976] By: jhi                                   on 2001/06/26  21:35:40
+        Log: Subject: Re: [PATCH perlfaq3.pod] and a question about it.
+             From: Jonathan Stowe <gellyfish@gellyfish.com>
+             Date: Tue, 26 Jun 2001 20:53:40 +0100 (BST)
+             Message-ID: <Pine.LNX.4.33.0106262052060.10849-100000@orpheus.gellyfish.com>
+     Branch: perl
+	   ! pod/perlfaq3.pod
+____________________________________________________________________________
+[ 10975] By: jhi                                   on 2001/06/26  21:32:41
+        Log: Subject: [PATCH 5.6.1] perlxs misprints
+             From: Ilya Zakharevich <ilya@math.ohio-state.edu>
+             Date: Tue, 26 Jun 2001 17:20:00 -0400
+             Message-ID: <20010626172000.A26951@math.ohio-state.edu>
+     Branch: perl
+	   ! pod/perlxs.pod
+____________________________________________________________________________
+[ 10974] By: jhi                                   on 2001/06/26  21:31:51
+        Log: Subject: [PATCH 5.6.1] xsubpp flags from the command line
+             From: Ilya Zakharevich <ilya@math.ohio-state.edu>
+             Date: Tue, 26 Jun 2001 17:27:07 -0400
+             Message-ID: <20010626172707.A27097@math.ohio-state.edu>
+     Branch: perl
+	   ! lib/ExtUtils/MM_Unix.pm
+____________________________________________________________________________
+[ 10973] By: jhi                                   on 2001/06/26  21:27:05
+        Log: Subject: [PATCH 5.6.1] OPTIMIZE=-g
+             From: Ilya Zakharevich <ilya@math.ohio-state.edu>
+             Date: Tue, 26 Jun 2001 17:23:24 -0400
+             Message-ID: <20010626172324.A27003@math.ohio-state.edu>
+     Branch: perl
+	   ! hints/os2.sh lib/ExtUtils/MM_Unix.pm os2/Makefile.SHs
+____________________________________________________________________________
+[ 10972] By: jhi                                   on 2001/06/26  20:27:19
+        Log: Better place for nop IN_LOCALE_NUMERIC, pointed out
+             by Olaf Flebbe.
+     Branch: perl
+	   ! perl.h
+____________________________________________________________________________
+[ 10971] By: jhi                                   on 2001/06/26  19:59:41
+        Log: Detypo.
+     Branch: perl
+	   ! lib/Memoize/t/tie_sdbm.t
+____________________________________________________________________________
+[ 10970] By: jhi                                   on 2001/06/26  19:10:19
+        Log: perl_clone_host() needs PERL_IMPLICIT_SYS.
+     Branch: perl
+	   ! win32/perllib.c
+____________________________________________________________________________
+[ 10969] By: jhi                                   on 2001/06/26  17:21:31
+        Log: Subject: [patch] perl_clone+CvFILE
+             From: Doug MacEachern <dougm@covalent.net>
+             Date: Tue, 26 Jun 2001 09:01:16 -0700 (PDT)
+             Message-ID: <Pine.LNX.4.21.0106260900480.28420-100000@mako.covalent.net>
+     Branch: perl
+	   ! sv.c
+____________________________________________________________________________
+[ 10968] By: jhi                                   on 2001/06/26  16:48:32
+        Log: Subject: Re: SDBM on VMS (was Re: a report on perl@10930 results on a couple of Alphas)
+             From: Mark-Jason Dominus <mjd@plover.com>
+             Date: Tue, 26 Jun 2001 12:33:01 -0400
+             Message-ID: <20010626163301.31298.qmail@plover.com>
+     Branch: perl
+	   ! lib/Memoize/t/tie.t lib/Memoize/t/tie_sdbm.t
+____________________________________________________________________________
+[ 10967] By: jhi                                   on 2001/06/26  14:21:49
+        Log: Update Changes.
+     Branch: perl
+	   ! Changes patchlevel.h
+____________________________________________________________________________
 [ 10966] By: jhi                                   on 2001/06/26  14:08:34
         Log: Also catfile() needs now to explicitly exported.
      Branch: perl
