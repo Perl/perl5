@@ -26,7 +26,7 @@
 #ifdef PERLIO_IS_STDIO 
 
 void
-PerlIO_init()
+PerlIO_init(void)
 {
  /* Does nothing (yet) except force this file to be included 
     in perl binary. That allows this file to force inclusion
@@ -37,7 +37,7 @@ PerlIO_init()
 
 #undef PerlIO_tmpfile
 PerlIO *
-PerlIO_tmpfile()
+PerlIO_tmpfile(void)
 {
  return tmpfile();
 }
@@ -610,11 +610,7 @@ char *pat, *args;
 
 #ifndef PerlIO_vsprintf
 int 
-PerlIO_vsprintf(s,n,fmt,ap)
-char *s;
-const char *fmt;
-int n;
-va_list ap;
+PerlIO_vsprintf(char *s, int n, const char *fmt, va_list ap)
 {
  int val = vsprintf(s, fmt, ap);
  if (n >= 0)

@@ -82,7 +82,7 @@ threadstart(void *arg)
 #else
     Thread thr = (Thread) arg;
     LOGOP myop;
-    dSP;
+    djSP;
     I32 oldmark = TOPMARK;
     I32 oldscope = scopestack_ix;
     I32 retval;
@@ -163,6 +163,8 @@ threadstart(void *arg)
     SvREFCNT_dec(thr->cvcache);
     SvREFCNT_dec(thr->magicals);
     SvREFCNT_dec(thr->specific);
+    SvREFCNT_dec(thr->errsv);
+    SvREFCNT_dec(thr->errhv);
     Safefree(markstack);
     Safefree(scopestack);
     Safefree(savestack);
@@ -214,7 +216,6 @@ threadstart(void *arg)
 static SV *
 newthread (SV *startsv, AV *initargs, char *Class)
 {
-    dTHR;
 #ifdef USE_THREADS
     dSP;
     Thread savethread;

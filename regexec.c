@@ -86,8 +86,7 @@ static CHECKPOINT regcppush _((I32 parenfloor));
 static char * regcppop _((void));
 
 static CHECKPOINT
-regcppush(parenfloor)
-I32 parenfloor;
+regcppush(I32 parenfloor)
 {
     dTHR;
     int retval = savestack_ix;
@@ -109,7 +108,7 @@ I32 parenfloor;
 }
 
 static char *
-regcppop()
+regcppop(void)
 {
     dTHR;
     I32 i = SSPOPINT;
@@ -145,8 +144,7 @@ regcppop()
  *	0 > length [ "foobar" =~ / ( (foo) | (bar) )* /x ]->[1]
  */
 static void
-regcppartblow(base)
-I32 base;
+regcppartblow(I32 base)
 {
     dTHR;
     I32 i = SSPOPINT;
@@ -188,14 +186,14 @@ static bool regtainted;		/* tainted information used? */
  - pregexec - match a regexp against a string
  */
 I32
-pregexec(prog, stringarg, strend, strbeg, minend, screamer, safebase)
-register regexp *prog;
-char *stringarg;
-register char *strend;	/* pointer to null at end of string */
-char *strbeg;	/* real beginning of string */
-I32 minend;	/* end of match must be at least minend after stringarg */
-SV *screamer;
-I32 safebase;	/* no need to remember string in subbase */
+pregexec(register regexp *prog, char *stringarg, register char *strend, char *strbeg, I32 minend, SV *screamer, I32 safebase)
+                      
+                
+                      	/* pointer to null at end of string */
+             	/* real beginning of string */
+           	/* end of match must be at least minend after stringarg */
+             
+             	/* no need to remember string in subbase */
 {
     register char *s;
     register char *c;
@@ -595,9 +593,7 @@ phooey:
  - regtry - try match at specific point
  */
 static I32			/* 0 failure, 1 success */
-regtry(prog, startpos)
-regexp *prog;
-char *startpos;
+regtry(regexp *prog, char *startpos)
 {
     register I32 i;
     register char **sp;
@@ -642,8 +638,7 @@ char *startpos;
  * advantage of machines that use a register save mask on subroutine entry.
  */
 static I32			/* 0 failure, 1 success */
-regmatch(prog)
-char *prog;
+regmatch(char *prog)
 {
     register char *scan;	/* Current node. */
     char *next;			/* Next node. */
@@ -1186,9 +1181,7 @@ no:
  * rather than incrementing count on every character.]
  */
 static I32
-regrepeat(p, max)
-char *p;
-I32 max;
+regrepeat(char *p, I32 max)
 {
     register char *scan;
     register char *opnd;
@@ -1288,9 +1281,7 @@ I32 max;
  */
 
 static bool
-reginclass(p, c)
-register char *p;
-register I32 c;
+reginclass(register char *p, register I32 c)
 {
     char flags = *p;
     bool match = FALSE;
@@ -1332,8 +1323,7 @@ register I32 c;
  * that bypass this code for speed.]
  */
 char *
-regnext(p)
-register char *p;
+regnext(register char *p)
 {
     register I32 offset;
 

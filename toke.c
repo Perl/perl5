@@ -144,8 +144,7 @@ static struct {
 #define OLDLOP(f) return(yylval.ival=f,expect = XTERM,bufptr = s,(int)LSTOP)
 
 static int
-ao(toketype)
-int toketype;
+ao(int toketype)
 {
     if (*bufptr == '=') {
 	bufptr++;
@@ -159,9 +158,7 @@ int toketype;
 }
 
 static void
-no_op(what, s)
-char *what;
-char *s;
+no_op(char *what, char *s)
 {
     char *oldbp = bufptr;
     bool is_first = (oldbufptr == linestart);
@@ -184,8 +181,7 @@ char *s;
 }
 
 static void
-missingterm(s)
-char *s;
+missingterm(char *s)
 {
     char tmpbuf[3];
     char q;
@@ -211,22 +207,20 @@ char *s;
 }
 
 void
-deprecate(s)
-char *s;
+deprecate(char *s)
 {
     if (dowarn)
 	warn("Use of %s is deprecated", s);
 }
 
 static void
-depcom()
+depcom(void)
 {
     deprecate("comma-less variable list");
 }
 
 void
-lex_start(line)
-SV *line;
+lex_start(SV *line)
 {
     dTHR;
     char *s;
@@ -290,14 +284,13 @@ SV *line;
 }
 
 void
-lex_end()
+lex_end(void)
 {
     doextract = FALSE;
 }
 
 static void
-restore_rsfp(f)
-void *f;
+restore_rsfp(void *f)
 {
     PerlIO *fp = (PerlIO*)f;
 
@@ -309,8 +302,7 @@ void *f;
 }
 
 static void
-incline(s)
-char *s;
+incline(char *s)
 {
     dTHR;
     char *t;
@@ -351,8 +343,7 @@ char *s;
 }
 
 static char *
-skipspace(s)
-register char *s;
+skipspace(register char *s)
 {
     dTHR;
     if (lex_formbrack && lex_brackets <= lex_formbrack) {
@@ -410,7 +401,7 @@ register char *s;
 }
 
 static void
-check_uni() {
+check_uni(void) {
     char *s;
     char ch;
     char *t;
@@ -434,9 +425,7 @@ check_uni() {
 #define UNI(f) return uni(f,s)
 
 static int
-uni(f,s)
-I32 f;
-char *s;
+uni(I32 f, char *s)
 {
     yylval.ival = f;
     expect = XTERM;
@@ -486,8 +475,7 @@ char *s;
 }
 
 static void 
-force_next(type)
-I32 type;
+force_next(I32 type)
 {
     nexttype[nexttoke] = type;
     nexttoke++;
@@ -499,12 +487,7 @@ I32 type;
 }
 
 static char *
-force_word(start,token,check_keyword,allow_pack,allow_tick)
-register char *start;
-int token;
-int check_keyword;
-int allow_pack;
-int allow_tick;
+force_word(register char *start, int token, int check_keyword, int allow_pack, int allow_tick)
 {
     register char *s;
     STRLEN len;
@@ -536,9 +519,7 @@ int allow_tick;
 }
 
 static void
-force_ident(s, kind)
-register char *s;
-int kind;
+force_ident(register char *s, int kind)
 {
     if (s && *s) {
 	OP* o = (OP*)newSVOP(OP_CONST, 0, newSVpv(s,0));
@@ -561,8 +542,7 @@ int kind;
 }
 
 static char *
-force_version(s)
-char *s;
+force_version(char *s)
 {
     OP *version = Nullop;
 
@@ -589,8 +569,7 @@ char *s;
 }
 
 static SV *
-q(sv)
-SV *sv;
+q(SV *sv)
 {
     register char *s;
     register char *send;
@@ -623,7 +602,7 @@ SV *sv;
 }
 
 static I32
-sublex_start()
+sublex_start(void)
 {
     register I32 op_type = yylval.ival;
 
@@ -658,7 +637,7 @@ sublex_start()
 }
 
 static I32
-sublex_push()
+sublex_push(void)
 {
     dTHR;
     push_scope();
@@ -711,7 +690,7 @@ sublex_push()
 }
 
 static I32
-sublex_done()
+sublex_done(void)
 {
     if (!lex_starts++) {
 	expect = XOPERATOR;
@@ -756,8 +735,7 @@ sublex_done()
 }
 
 static char *
-scan_const(start)
-char *start;
+scan_const(char *start)
 {
     register char *send = bufend;
     SV *sv = NEWSV(93, send - start);
@@ -896,8 +874,7 @@ char *start;
 
 /* This is the one truly awful dwimmer necessary to conflate C and sed. */
 static int
-intuit_more(s)
-register char *s;
+intuit_more(register char *s)
 {
     if (lex_brackets)
 	return TRUE;
@@ -1025,9 +1002,7 @@ register char *s;
 }
 
 static int
-intuit_method(start,gv)
-char *start;
-GV *gv;
+intuit_method(char *start, GV *gv)
 {
     char *s = start + (*start == '$');
     char tmpbuf[sizeof tokenbuf];
@@ -1073,7 +1048,7 @@ GV *gv;
 }
 
 static char*
-incl_perldb()
+incl_perldb(void)
 {
     if (perldb) {
 	char *pdb = getenv("PERL5DB");
@@ -1104,9 +1079,7 @@ incl_perldb()
 static int filter_debug = 0;
 
 SV *
-filter_add(funcp, datasv)
-    filter_t funcp;
-    SV *datasv;
+filter_add(filter_t funcp, SV *datasv)
 {
     if (!funcp){ /* temporary handy debugging hack to be deleted */
 	filter_debug = atoi((char*)datasv);
@@ -1129,8 +1102,7 @@ filter_add(funcp, datasv)
 
 /* Delete most recently added instance of this filter function.	*/
 void
-filter_del(funcp)
-    filter_t funcp;
+filter_del(filter_t funcp)
 {
     if (filter_debug)
 	warn("filter_del func %p", funcp);
@@ -1150,10 +1122,10 @@ filter_del(funcp)
 
 /* Invoke the n'th filter function for the current rsfp.	 */
 I32
-filter_read(idx, buf_sv, maxlen)
-    int idx;
-    SV *buf_sv;
-    int maxlen;		/* 0 = read one text line */
+filter_read(int idx, SV *buf_sv, int maxlen)
+            
+               
+               		/* 0 = read one text line */
 {
     filter_t funcp;
     SV *datasv = NULL;
@@ -1208,10 +1180,7 @@ filter_read(idx, buf_sv, maxlen)
 }
 
 static char *
-filter_gets(sv,fp, append)
-register SV *sv;
-register PerlIO *fp;
-STRLEN append;
+filter_gets(register SV *sv, register FILE *fp, STRLEN append)
 {
     if (rsfp_filters) {
 
@@ -1236,7 +1205,7 @@ STRLEN append;
 EXT int yychar;		/* last token */
 
 int
-yylex()
+yylex(void)
 {
     dTHR;
     register char *s;
@@ -1263,7 +1232,7 @@ yylex()
 		&& !isALPHA(tokenbuf[1]) /* Rule out obvious non-magicals */
 		&& (tmp = find_thread_magical(&tokenbuf[1])) != NOT_IN_PAD)
 	    {
-		yylval.opval = newOP(OP_SPECIFIC, 0);
+		yylval.opval = newOP(OP_THREADSV, 0);
 		yylval.opval->op_targ = tmp;
 		return PRIVATEREF;
 	    }
@@ -1404,7 +1373,7 @@ yylex()
 	    nextval[nexttoke].ival = 0;
 	    force_next(',');
 #ifdef USE_THREADS
-	    nextval[nexttoke].opval = newOP(OP_SPECIFIC, 0);
+	    nextval[nexttoke].opval = newOP(OP_THREADSV, 0);
 	    nextval[nexttoke].opval->op_targ = find_thread_magical("\"");
 	    force_next(PRIVATEREF);
 #else
@@ -2667,7 +2636,7 @@ yylex()
 		    (oldoldbufptr == last_lop || oldoldbufptr == last_uni) &&
 		    /* NO SKIPSPACE BEFORE HERE! */
 		    (expect == XREF ||
-		     (opargs[last_lop_op] >> OASHIFT & 7) == OA_FILEREF) )
+		     ((opargs[last_lop_op] >> OASHIFT)& 7) == OA_FILEREF) )
 		{
 		    bool immediate_paren = *s == '(';
 
@@ -3797,9 +3766,7 @@ yylex()
 }
 
 I32
-keyword(d, len)
-register char *d;
-I32 len;
+keyword(register char *d, I32 len)
 {
     switch (*d) {
     case '_':
@@ -4415,10 +4382,7 @@ I32 len;
 }
 
 static void
-checkcomma(s,name,what)
-register char *s;
-char *name;
-char *what;
+checkcomma(register char *s, char *name, char *what)
 {
     char *w;
 
@@ -4460,12 +4424,7 @@ char *what;
 }
 
 static char *
-scan_word(s, dest, destlen, allow_package, slp)
-register char *s;
-char *dest;
-STRLEN destlen;
-int allow_package;
-STRLEN *slp;
+scan_word(register char *s, char *dest, STRLEN destlen, int allow_package, STRLEN *slp)
 {
     register char *d = dest;
     register char *e = d + destlen - 3;  /* two-character token, ending NUL */
@@ -4492,12 +4451,7 @@ STRLEN *slp;
 }
 
 static char *
-scan_ident(s, send, dest, destlen, ck_uni)
-register char *s;
-register char *send;
-char *dest;
-STRLEN destlen;
-I32 ck_uni;
+scan_ident(register char *s, register char *send, char *dest, STRLEN destlen, I32 ck_uni)
 {
     register char *d;
     register char *e;
@@ -4613,9 +4567,7 @@ I32 ck_uni;
     return s;
 }
 
-void pmflag(pmfl,ch)
-U16* pmfl;
-int ch;
+void pmflag(U16 *pmfl, int ch)
 {
     if (ch == 'i')
 	*pmfl |= PMf_FOLD;
@@ -4634,8 +4586,7 @@ int ch;
 }
 
 static char *
-scan_pat(start)
-char *start;
+scan_pat(char *start)
 {
     PMOP *pm;
     char *s;
@@ -4661,8 +4612,7 @@ char *start;
 }
 
 static char *
-scan_subst(start)
-char *start;
+scan_subst(char *start)
 {
     register char *s;
     register PMOP *pm;
@@ -4727,8 +4677,7 @@ char *start;
 }
 
 void
-hoistmust(pm)
-register PMOP *pm;
+hoistmust(register PMOP *pm)
 {
     dTHR;
     if (!pm->op_pmshort && pm->op_pmregexp->regstart &&
@@ -4768,14 +4717,13 @@ register PMOP *pm;
 }
 
 static char *
-scan_trans(start)
-char *start;
+scan_trans(char *start)
 {
     register char* s;
     OP *o;
     short *tbl;
     I32 squash;
-    I32 delete;
+    I32 Delete;
     I32 complement;
 
     yylval.ival = OP_NULL;
@@ -4804,17 +4752,17 @@ char *start;
     New(803,tbl,256,short);
     o = newPVOP(OP_TRANS, 0, (char*)tbl);
 
-    complement = delete = squash = 0;
+    complement = Delete = squash = 0;
     while (*s == 'c' || *s == 'd' || *s == 's') {
 	if (*s == 'c')
 	    complement = OPpTRANS_COMPLEMENT;
 	else if (*s == 'd')
-	    delete = OPpTRANS_DELETE;
+	    Delete = OPpTRANS_DELETE;
 	else
 	    squash = OPpTRANS_SQUASH;
 	s++;
     }
-    o->op_private = delete|squash|complement;
+    o->op_private = Delete|squash|complement;
 
     lex_op = o;
     yylval.ival = OP_TRANS;
@@ -4822,8 +4770,7 @@ char *start;
 }
 
 static char *
-scan_heredoc(s)
-register char *s;
+scan_heredoc(register char *s)
 {
     dTHR;
     SV *herewas;
@@ -4949,8 +4896,7 @@ register char *s;
 }
 
 static char *
-scan_inputsymbol(start)
-char *start;
+scan_inputsymbol(char *start)
 {
     register char *s = start;
     register char *d;
@@ -5006,8 +4952,7 @@ char *start;
 }
 
 static char *
-scan_str(start)
-char *start;
+scan_str(char *start)
 {
     dTHR;
     SV *sv;
@@ -5103,8 +5048,7 @@ char *start;
 }
 
 char *
-scan_num(start)
-char *start;
+scan_num(char *start)
 {
     register char *s = start;
     register char *d;
@@ -5232,8 +5176,7 @@ char *start;
 }
 
 static char *
-scan_formline(s)
-register char *s;
+scan_formline(register char *s)
 {
     dTHR;
     register char *eol;
@@ -5303,7 +5246,7 @@ register char *s;
 }
 
 static void
-set_csh()
+set_csh(void)
 {
 #ifdef CSH
     if (!cshlen)
@@ -5312,9 +5255,7 @@ set_csh()
 }
 
 I32
-start_subparse(is_format, flags)
-I32 is_format;
-U32 flags;
+start_subparse(I32 is_format, U32 flags)
 {
     dTHR;
     I32 oldsavestack_ix = savestack_ix;
@@ -5374,8 +5315,7 @@ U32 flags;
 }
 
 int
-yywarn(s)
-char *s;
+yywarn(char *s)
 {
     dTHR;
     --error_count;
@@ -5386,8 +5326,7 @@ char *s;
 }
 
 int
-yyerror(s)
-char *s;
+yyerror(char *s)
 {
     dTHR;
     char *where = NULL;
@@ -5448,7 +5387,7 @@ char *s;
     if (in_eval & 2)
 	warn("%_", msg);
     else if (in_eval)
-	sv_catsv(errsv, msg);
+	sv_catsv(ERRSV, msg);
     else
 	PerlIO_write(PerlIO_stderr(), SvPVX(msg), SvCUR(msg));
     if (++error_count >= 10)
@@ -5457,3 +5396,4 @@ char *s;
     in_my_stash = Nullhv;
     return 0;
 }
+

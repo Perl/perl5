@@ -76,13 +76,7 @@
 #endif
 
 bool
-do_open(gv,name,len,as_raw,rawmode,rawperm,supplied_fp)
-GV *gv;
-register char *name;
-I32 len;
-int as_raw;
-int rawmode, rawperm;
-PerlIO *supplied_fp;
+do_open(GV *gv, register char *name, I32 len, int as_raw, int rawmode, int rawperm, FILE *supplied_fp)
 {
     register IO *io = GvIOn(gv);
     PerlIO *saveifp = Nullfp;
@@ -364,8 +358,7 @@ say_false:
 }
 
 PerlIO *
-nextargv(gv)
-register GV *gv;
+nextargv(register GV *gv)
 {
     register SV *sv;
 #ifndef FLEXFILENAMES
@@ -514,10 +507,7 @@ register GV *gv;
 
 #ifdef HAS_PIPE
 void
-do_pipe(sv, rgv, wgv)
-SV *sv;
-GV *rgv;
-GV *wgv;
+do_pipe(SV *sv, GV *rgv, GV *wgv)
 {
     register IO *rstio;
     register IO *wstio;
@@ -596,8 +586,7 @@ do_close(GV *gv, bool not_implicit)
 }
 
 bool
-io_close(io)
-IO* io;
+io_close(IO *io)
 {
     bool retval = FALSE;
     int status;
@@ -625,8 +614,7 @@ IO* io;
 }
 
 bool
-do_eof(gv)
-GV *gv;
+do_eof(GV *gv)
 {
     dTHR;
     register IO *io;
@@ -664,8 +652,7 @@ GV *gv;
 }
 
 long
-do_tell(gv)
-GV *gv;
+do_tell(GV *gv)
 {
     register IO *io;
     register PerlIO *fp;
@@ -684,10 +671,7 @@ GV *gv;
 }
 
 bool
-do_seek(gv, pos, whence)
-GV *gv;
-long pos;
-int whence;
+do_seek(GV *gv, long int pos, int whence)
 {
     register IO *io;
     register PerlIO *fp;
@@ -706,10 +690,7 @@ int whence;
 }
 
 long
-do_sysseek(gv, pos, whence)
-GV *gv;
-long pos;
-int whence;
+do_sysseek(GV *gv, long int pos, int whence)
 {
     register IO *io;
     register PerlIO *fp;
@@ -774,9 +755,7 @@ Off_t length;		/* length to set file to */
 #endif /* F_FREESP */
 
 bool
-do_print(sv,fp)
-register SV *sv;
-PerlIO *fp;
+do_print(register SV *sv, FILE *fp)
 {
     register char *tmps;
     STRLEN len;
@@ -820,10 +799,9 @@ PerlIO *fp;
 }
 
 I32
-my_stat(ARGS)
-dARGS
+my_stat(ARGSproto)
 {
-    dSP;
+    djSP;
     IO *io;
     GV* tmpgv;
 
@@ -872,10 +850,9 @@ dARGS
 }
 
 I32
-my_lstat(ARGS)
-dARGS
+my_lstat(ARGSproto)
 {
-    dSP;
+    djSP;
     SV *sv;
     if (op->op_flags & OPf_REF) {
 	EXTEND(sp,1);
@@ -903,10 +880,7 @@ dARGS
 }
 
 bool
-do_aexec(really,mark,sp)
-SV *really;
-register SV **mark;
-register SV **sp;
+do_aexec(SV *really, register SV **mark, register SV **sp)
 {
     register char **a;
     char *tmps;
@@ -936,7 +910,7 @@ register SV **sp;
 }
 
 void
-do_execfree()
+do_execfree(void)
 {
     if (Argv) {
 	Safefree(Argv);
@@ -951,8 +925,7 @@ do_execfree()
 #if !defined(OS2) && !defined(WIN32)
 
 bool
-do_exec(cmd)
-char *cmd;
+do_exec(char *cmd)
 {
     register char **a;
     register char *s;
@@ -1042,10 +1015,7 @@ char *cmd;
 #endif /* OS2 || WIN32 */
 
 I32
-apply(type,mark,sp)
-I32 type;
-register SV **mark;
-register SV **sp;
+apply(I32 type, register SV **mark, register SV **sp)
 {
     dTHR;
     register I32 val;
@@ -1215,10 +1185,7 @@ register SV **sp;
 /* Do the permissions allow some operation?  Assumes statcache already set. */
 #ifndef VMS /* VMS' cando is in vms.c */
 I32
-cando(bit, effective, statbufp)
-I32 bit;
-I32 effective;
-register struct stat *statbufp;
+cando(I32 bit, I32 effective, register struct stat *statbufp)
 {
 #ifdef DOSISH
     /* [Comments and code from Len Reed]
@@ -1270,9 +1237,7 @@ register struct stat *statbufp;
 #endif /* ! VMS */
 
 I32
-ingroup(testgid,effective)
-I32 testgid;
-I32 effective;
+ingroup(I32 testgid, I32 effective)
 {
     if (testgid == (effective ? egid : gid))
 	return TRUE;
@@ -1296,10 +1261,7 @@ I32 effective;
 #if defined(HAS_MSG) || defined(HAS_SEM) || defined(HAS_SHM)
 
 I32
-do_ipcget(optype, mark, sp)
-I32 optype;
-SV **mark;
-SV **sp;
+do_ipcget(I32 optype, SV **mark, SV **sp)
 {
     dTHR;
     key_t key;
@@ -1332,10 +1294,7 @@ SV **sp;
 }
 
 I32
-do_ipcctl(optype, mark, sp)
-I32 optype;
-SV **mark;
-SV **sp;
+do_ipcctl(I32 optype, SV **mark, SV **sp)
 {
     dTHR;
     SV *astr;
@@ -1457,9 +1416,7 @@ SV **sp;
 }
 
 I32
-do_msgsnd(mark, sp)
-SV **mark;
-SV **sp;
+do_msgsnd(SV **mark, SV **sp)
 {
 #ifdef HAS_MSG
     dTHR;
@@ -1482,9 +1439,7 @@ SV **sp;
 }
 
 I32
-do_msgrcv(mark, sp)
-SV **mark;
-SV **sp;
+do_msgrcv(SV **mark, SV **sp)
 {
 #ifdef HAS_MSG
     dTHR;
@@ -1521,9 +1476,7 @@ SV **sp;
 }
 
 I32
-do_semop(mark, sp)
-SV **mark;
-SV **sp;
+do_semop(SV **mark, SV **sp)
 {
 #ifdef HAS_SEM
     dTHR;
@@ -1548,10 +1501,7 @@ SV **sp;
 }
 
 I32
-do_shmio(optype, mark, sp)
-I32 optype;
-SV **mark;
-SV **sp;
+do_shmio(I32 optype, SV **mark, SV **sp)
 {
 #ifdef HAS_SHM
     dTHR;
@@ -1572,7 +1522,7 @@ SV **sp;
 	SETERRNO(EFAULT,SS$_ACCVIO);		/* can't do as caller requested */
 	return -1;
     }
-    shm = (Shmat_t)shmat(id, (char*)NULL, (optype == OP_SHMREAD) ? SHM_RDONLY : 0);
+    shm = (char *)shmat(id, (char*)NULL, (optype == OP_SHMREAD) ? SHM_RDONLY : 0);
     if (shm == (char *)-1)	/* I hate System V IPC, I really do */
 	return -1;
     if (optype == OP_SHMREAD) {
@@ -1601,3 +1551,4 @@ SV **sp;
 }
 
 #endif /* SYSV IPC */
+

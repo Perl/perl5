@@ -49,7 +49,7 @@ typedef struct {
 
 extern datum nullitem;
 
-#ifdef __STDC__
+#if defined(__STDC__) || defined(__cplusplus)
 #define proto(p) p
 #else
 #define proto(p) ()
@@ -183,6 +183,10 @@ extern long sdbm_hash proto((char *, int));
 
 #ifdef I_MEMORY
 #include <memory.h>
+#endif      
+
+#ifdef __cplusplus
+#define HAS_MEMCPY
 #endif
 
 #ifdef HAS_MEMCPY
@@ -239,7 +243,9 @@ extern long sdbm_hash proto((char *, int));
 #	else
 #	    define memcmp Perl_my_memcmp
 #	endif
+#ifndef __cplusplus
 	extern int memcmp proto((char*, char*, int));
+#endif
 #   endif
 #endif /* HAS_MEMCMP */
 
@@ -262,3 +268,4 @@ extern long sdbm_hash proto((char *, int));
 #endif
 
 #endif /* Include guard */
+

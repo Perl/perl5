@@ -77,6 +77,8 @@ print <<END;
 };
 #endif
 
+START_EXTERN_C
+
 END
 
 # Emit function declarations.
@@ -95,10 +97,12 @@ for (@ops) {
 
 print <<END;
 
+END_EXTERN_C
+
 #ifndef DOINIT
-EXT OP * (*ppaddr[])();
+EXT OP * (*ppaddr[])(ARGSproto);
 #else
-EXT OP * (*ppaddr[])() = {
+EXT OP * (*ppaddr[])(ARGSproto) = {
 END
 
 for (@ops) {
@@ -677,4 +681,4 @@ syscall		syscall			ck_fun		imst@	S L
 
 # For multi-threading
 lock		lock			ck_rfun		s%	S
-specific	thread-specific		ck_null		ds0
+threadsv	per-thread variable	ck_null		ds0

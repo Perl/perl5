@@ -4,7 +4,7 @@
 #undef  __attribute__
 #endif
 #define __attribute__(attr)
-#endif 
+#endif
 #endif
 #ifdef OVERLOAD
 SV*	amagic_call _((SV* left,SV* right,int method,int dir));

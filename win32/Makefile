@@ -204,7 +204,7 @@ WIN32_C = perllib.c \
 WIN32_OBJ = win32.obj \
 	win32io.obj \
 	win32sck.obj \
-	win32thread.obj
+	win32thread.obj 
 
 PERL95_OBJ = perl95.obj \
 	win32mt.obj \
@@ -273,7 +273,7 @@ DYNALOADMODULES=	\
 	$(OPCODE_DLL)	\
 	$(SDBM_FILE_DLL)\
 	$(IO_DLL)	\
-	$(ATTRS_DLL)	\
+	$(ATTRS_DLL)    \
 	$(THREAD_DLL)
 
 POD2HTML=$(PODDIR)\pod2html
@@ -307,6 +307,7 @@ config.w32 : $(CFGSH_TMPL)
 .\config.h : $(CFGH_TMPL)
 	-del /f config.h
 	copy $(CFGH_TMPL) config.h
+	
 
 ..\config.sh : config.w32 $(MINIPERL) config_sh.PL
 	$(MINIPERL) -I..\lib config_sh.PL "INST_DRV=$(INST_DRV)" \

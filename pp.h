@@ -10,12 +10,15 @@
 #ifdef USE_THREADS
 #define ARGS thr
 #define dARGS struct thread *thr;
-#define PP(s) OP* s(ARGS) dARGS
 #else
 #define ARGS
 #define dARGS
-#define PP(s) OP* s(ARGS) dARGS
 #endif /* USE_THREADS */
+#ifdef CAN_PROTOTYPE
+#define PP(s) OP * s(ARGSproto)
+#else /* CAN_PROTOTYPE */
+#define PP(s) OP* s(ARGS) dARGS
+#endif /* CAN_PROTOTYPE */
 
 #define SP sp
 #define MARK mark
@@ -28,7 +31,8 @@
 #define TOPMARK		(*markstack_ptr)
 #define POPMARK		(*markstack_ptr--)
 
-#define dSP		register SV **sp = stack_sp
+#define djSP		register SV **sp = stack_sp
+#define dSP		dTHR; djSP
 #define dMARK		register SV **mark = stack_base + POPMARK
 #define dORIGMARK	I32 origmark = mark - stack_base
 #define SETORIGMARK	origmark = mark - stack_base

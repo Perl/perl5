@@ -16,10 +16,7 @@
 #include "perl.h"
 
 SV**
-stack_grow(sp, p, n)
-SV** sp;
-SV** p;
-int n;
+stack_grow(SV **sp, SV **p, int n)
 {
     dTHR;
     stack_sp = sp;
@@ -28,7 +25,7 @@ int n;
 }
 
 I32
-cxinc()
+cxinc(void)
 {
     dTHR;
     cxstack_max = cxstack_max * 3 / 2;
@@ -37,8 +34,7 @@ cxinc()
 }
 
 void
-push_return(retop)
-OP *retop;
+push_return(OP *retop)
 {
     dTHR;
     if (retstack_ix == retstack_max) {
@@ -49,7 +45,7 @@ OP *retop;
 }
 
 OP *
-pop_return()
+pop_return(void)
 {
     dTHR;
     if (retstack_ix > 0)
@@ -59,7 +55,7 @@ pop_return()
 }
 
 void
-push_scope()
+push_scope(void)
 {
     dTHR;
     if (scopestack_ix == scopestack_max) {
@@ -71,7 +67,7 @@ push_scope()
 }
 
 void
-pop_scope()
+pop_scope(void)
 {
     dTHR;
     I32 oldsave = scopestack[--scopestack_ix];
@@ -79,7 +75,7 @@ pop_scope()
 }
 
 void
-markstack_grow()
+markstack_grow(void)
 {
     dTHR;
     I32 oldmax = markstack_max - markstack;
@@ -91,7 +87,7 @@ markstack_grow()
 }
 
 void
-savestack_grow()
+savestack_grow(void)
 {
     dTHR;
     savestack_max = savestack_max * 3 / 2;
@@ -99,7 +95,7 @@ savestack_grow()
 }
 
 void
-free_tmps()
+free_tmps(void)
 {
     dTHR;
     /* XXX should tmps_floor live in cxstack? */
@@ -117,8 +113,7 @@ free_tmps()
 }
 
 static SV *
-save_scalar_at(sptr)
-SV **sptr;
+save_scalar_at(SV **sptr)
 {
     dTHR;
     register SV *sv;
@@ -149,8 +144,7 @@ SV **sptr;
 }
 
 SV *
-save_scalar(gv)
-GV *gv;
+save_scalar(GV *gv)
 {
     dTHR;
     SSCHECK(3);
@@ -161,8 +155,7 @@ GV *gv;
 }
 
 SV*
-save_svref(sptr)
-SV **sptr;
+save_svref(SV **sptr)
 {
     dTHR;
     SSCHECK(3);
@@ -173,9 +166,7 @@ SV **sptr;
 }
 
 void
-save_gp(gv, empty)
-GV *gv;
-I32 empty;
+save_gp(GV *gv, I32 empty)
 {
     dTHR;
     SSCHECK(6);
@@ -203,8 +194,7 @@ I32 empty;
 }
 
 AV *
-save_ary(gv)
-GV *gv;
+save_ary(GV *gv)
 {
     dTHR;
     AV *oav, *av;
@@ -229,8 +219,7 @@ GV *gv;
 }
 
 HV *
-save_hash(gv)
-GV *gv;
+save_hash(GV *gv)
 {
     dTHR;
     HV *ohv, *hv;
@@ -255,8 +244,7 @@ GV *gv;
 }
 
 void
-save_item(item)
-register SV *item;
+save_item(register SV *item)
 {
     dTHR;
     register SV *sv;
@@ -270,8 +258,7 @@ register SV *item;
 }
 
 void
-save_int(intp)
-int *intp;
+save_int(int *intp)
 {
     dTHR;
     SSCHECK(3);
@@ -281,8 +268,7 @@ int *intp;
 }
 
 void
-save_long(longp)
-long *longp;
+save_long(long int *longp)
 {
     dTHR;
     SSCHECK(3);
@@ -292,8 +278,7 @@ long *longp;
 }
 
 void
-save_I32(intp)
-I32 *intp;
+save_I32(I32 *intp)
 {
     dTHR;
     SSCHECK(3);
@@ -303,8 +288,7 @@ I32 *intp;
 }
 
 void
-save_I16(intp)
-I16 *intp;
+save_I16(I16 *intp)
 {
     dTHR;
     SSCHECK(3);
@@ -314,8 +298,7 @@ I16 *intp;
 }
 
 void
-save_iv(ivp)
-IV *ivp;
+save_iv(IV *ivp)
 {
     dTHR;
     SSCHECK(3);
@@ -328,8 +311,7 @@ IV *ivp;
  * force word-alignment and we'll miss the pointer.
  */
 void
-save_pptr(pptr)
-char **pptr;
+save_pptr(char **pptr)
 {
     dTHR;
     SSCHECK(3);
@@ -339,8 +321,7 @@ char **pptr;
 }
 
 void
-save_sptr(sptr)
-SV **sptr;
+save_sptr(SV **sptr)
 {
     dTHR;
     SSCHECK(3);
@@ -350,8 +331,7 @@ SV **sptr;
 }
 
 void
-save_nogv(gv)
-GV *gv;
+save_nogv(GV *gv)
 {
     dTHR;
     SSCHECK(2);
@@ -360,8 +340,7 @@ GV *gv;
 }
 
 void
-save_hptr(hptr)
-HV **hptr;
+save_hptr(HV **hptr)
 {
     dTHR;
     SSCHECK(3);
@@ -371,8 +350,7 @@ HV **hptr;
 }
 
 void
-save_aptr(aptr)
-AV **aptr;
+save_aptr(AV **aptr)
 {
     dTHR;
     SSCHECK(3);
@@ -382,8 +360,7 @@ AV **aptr;
 }
 
 void
-save_freesv(sv)
-SV *sv;
+save_freesv(SV *sv)
 {
     dTHR;
     SSCHECK(2);
@@ -392,8 +369,7 @@ SV *sv;
 }
 
 void
-save_freeop(o)
-OP *o;
+save_freeop(OP *o)
 {
     dTHR;
     SSCHECK(2);
@@ -402,8 +378,7 @@ OP *o;
 }
 
 void
-save_freepv(pv)
-char *pv;
+save_freepv(char *pv)
 {
     dTHR;
     SSCHECK(2);
@@ -412,8 +387,7 @@ char *pv;
 }
 
 void
-save_clearsv(svp)
-SV** svp;
+save_clearsv(SV **svp)
 {
     dTHR;
     SSCHECK(2);
@@ -422,10 +396,7 @@ SV** svp;
 }
 
 void
-save_delete(hv,key,klen)
-HV *hv;
-char *key;
-I32 klen;
+save_delete(HV *hv, char *key, I32 klen)
 {
     dTHR;
     SSCHECK(4);
@@ -436,9 +407,7 @@ I32 klen;
 }
 
 void
-save_list(sarg,maxsarg)
-register SV **sarg;
-I32 maxsarg;
+save_list(register SV **sarg, I32 maxsarg)
 {
     dTHR;
     register SV *sv;
@@ -455,9 +424,7 @@ I32 maxsarg;
 }
 
 void
-save_destructor(f,p)
-void (*f) _((void*));
-void* p;
+save_destructor(void (*f) (void *), void *p)
 {
     dTHR;
     SSCHECK(3);
@@ -467,7 +434,7 @@ void* p;
 }
 
 void
-save_op()
+save_op(void)
 {
     dTHR;
     SSCHECK(2);
@@ -476,8 +443,7 @@ save_op()
 }
 
 void
-leave_scope(base)
-I32 base;
+leave_scope(I32 base)
 {
     dTHR;
     register SV *sv;
@@ -717,8 +683,7 @@ I32 base;
 #ifdef DEBUGGING
 
 void
-cx_dump(cx)
-CONTEXT* cx;
+cx_dump(CONTEXT *cx)
 {
     dTHR;
     PerlIO_printf(Perl_debug_log, "CX %ld = %s\n", (long)(cx - cxstack), block_type[cx->cx_type]);

@@ -10,8 +10,8 @@
 # Set these to wherever you want "nmake install" to put your
 # newly built perl.
 INST_DRV=c:
-INST_TOP=$(INST_DRV)\perl\perl5004.5X
-BUILDOPT=-DUSE_THREADS 
+INST_TOP=$(INST_DRV)\perl
+BUILDOPT=-DUSE_THREADS
 
 # -DUSE_PERLIO -D__STDC__=1 -DUSE_SFIO -DI_SFIO -I\sfio97\include
 

@@ -20,7 +20,7 @@ dEXT char **watchaddr = 0;
 dEXT char *watchok;
 
 int
-runops_standard() {
+runops_standard(void) {
     dTHR;
 
     while ( op = (*op->op_ppaddr)(ARGS) ) ;
@@ -33,7 +33,7 @@ runops_standard() {
 static void debprof _((OP*o));
 
 int
-runops_debug() {
+runops_debug(void) {
     dTHR;
     if (!op) {
 	warn("NULL OP IN RUN");
@@ -56,8 +56,7 @@ runops_debug() {
 }
 
 I32
-debop(o)
-OP *o;
+debop(OP *o)
 {
     SV *sv;
     deb("%s", op_name[o->op_type]);
@@ -84,8 +83,7 @@ OP *o;
 }
 
 void
-watch(addr)
-char **addr;
+watch(char **addr)
 {
     watchaddr = addr;
     watchok = *addr;
@@ -94,8 +92,7 @@ char **addr;
 }
 
 static void
-debprof(o)
-OP* o;
+debprof(OP *o)
 {
     if (!profiledata)
 	New(000, profiledata, MAXO, U32);
@@ -103,7 +100,7 @@ OP* o;
 }
 
 void
-debprofdump()
+debprofdump(void)
 {
     unsigned i;
     if (!profiledata)

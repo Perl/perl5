@@ -8,11 +8,7 @@
  */
 
 static SV *
-isa_lookup(stash, name, len, level)
-HV *stash;
-char *name;
-int len;
-int level;
+isa_lookup(HV *stash, char *name, int len, int level)
 {
     AV* av;
     GV* gv;
@@ -75,9 +71,7 @@ int level;
 }
 
 bool
-sv_derived_from(sv, name)
-SV * sv ;
-char * name ;
+sv_derived_from(SV *sv, char *name)
 {
     SV *rv;
     char *type;
@@ -203,7 +197,7 @@ XS(XS_UNIVERSAL_VERSION)
 }
 
 void
-boot_core_UNIVERSAL()
+boot_core_UNIVERSAL(void)
 {
     char *file = __FILE__;
 

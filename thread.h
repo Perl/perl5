@@ -220,11 +220,13 @@ struct thread {
     U32		flags;
     AV *	magicals;		/* Per-thread magicals */
     AV *	specific;		/* Thread-specific user data */
+    SV *	errsv;			/* Backing SV for $@ */
+    HV *	errhv;			/* HV for what was %@ in pp_ctl.c */
     perl_mutex	mutex;			/* For the fields others can change */
     U32		tid;
     struct thread *next, *prev;		/* Circular linked list of threads */
     JMPENV	Tstart_env;	        /* Top of top_env longjmp() chain */ 
-#ifdef ADD_THREAD_INTERN
+#ifdef HAVE_THREAD_INTERN
     struct thread_intern i;		/* Platform-dependent internals */
 #endif
     char	trailing_nul;		/* For the sake of thrsv and oursv */

@@ -47,9 +47,7 @@
  * cannot distinguish between failure and a local broadcast address.
  */
 static int
-my_inet_aton(cp, addr)
-register const char *cp;
-struct in_addr *addr;
+my_inet_aton(register const char *cp, struct in_addr *addr)
 {
 	register U32 val;
 	register int base;
@@ -145,17 +143,14 @@ struct in_addr *addr;
 
 
 static int
-not_here(s)
-char *s;
+not_here(char *s)
 {
     croak("Socket::%s not implemented on this architecture", s);
     return -1;
 }
 
 static double
-constant(name, arg)
-char *name;
-int arg;
+constant(char *name, int arg)
 {
     errno = 0;
     switch (*name) {

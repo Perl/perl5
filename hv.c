@@ -17,10 +17,10 @@
 static void hsplit _((HV *hv));
 static void hfreeentries _((HV *hv));
 
-static HE* more_he();
+static HE* more_he(void);
 
 static HE*
-new_he()
+new_he(void)
 {
     HE* he;
     if (he_root) {
@@ -32,15 +32,14 @@ new_he()
 }
 
 static void
-del_he(p)
-HE* p;
+del_he(HE *p)
 {
     HeNEXT(p) = (HE*)he_root;
     he_root = p;
 }
 
 static HE*
-more_he()
+more_he(void)
 {
     register HE* he;
     register HE* heend;
@@ -56,10 +55,7 @@ more_he()
 }
 
 static HEK *
-save_hek(str, len, hash)
-char *str;
-I32 len;
-U32 hash;
+save_hek(char *str, I32 len, U32 hash)
 {
     char *k;
     register HEK *hek;
@@ -74,8 +70,7 @@ U32 hash;
 }
 
 void
-unshare_hek(hek)
-HEK *hek;
+unshare_hek(HEK *hek)
 {
     unsharepvn(HEK_KEY(hek),HEK_LEN(hek),HEK_HASH(hek));
 }
@@ -84,11 +79,7 @@ HEK *hek;
  * contains an SV* */
 
 SV**
-hv_fetch(hv,key,klen,lval)
-HV *hv;
-char *key;
-U32 klen;
-I32 lval;
+hv_fetch(HV *hv, char *key, U32 klen, I32 lval)
 {
     register XPVHV* xhv;
     register U32 hash;
@@ -153,11 +144,7 @@ I32 lval;
 /* returns a HE * structure with the all fields set */
 /* note that hent_val will be a mortal sv for MAGICAL hashes */
 HE *
-hv_fetch_ent(hv,keysv,lval,hash)
-HV *hv;
-SV *keysv;
-I32 lval;
-register U32 hash;
+hv_fetch_ent(HV *hv, SV *keysv, I32 lval, register U32 hash)
 {
     register XPVHV* xhv;
     register char *key;
@@ -230,12 +217,7 @@ register U32 hash;
 }
 
 SV**
-hv_store(hv,key,klen,val,hash)
-HV *hv;
-char *key;
-U32 klen;
-SV *val;
-register U32 hash;
+hv_store(HV *hv, char *key, U32 klen, SV *val, register U32 hash)
 {
     register XPVHV* xhv;
     register I32 i;
@@ -298,11 +280,7 @@ register U32 hash;
 }
 
 HE *
-hv_store_ent(hv,keysv,val,hash)
-HV *hv;
-SV *keysv;
-SV *val;
-register U32 hash;
+hv_store_ent(HV *hv, SV *keysv, SV *val, register U32 hash)
 {
     register XPVHV* xhv;
     register char *key;
@@ -376,11 +354,7 @@ register U32 hash;
 }
 
 SV *
-hv_delete(hv,key,klen,flags)
-HV *hv;
-char *key;
-U32 klen;
-I32 flags;
+hv_delete(HV *hv, char *key, U32 klen, I32 flags)
 {
     register XPVHV* xhv;
     register I32 i;
@@ -436,11 +410,7 @@ I32 flags;
 }
 
 SV *
-hv_delete_ent(hv,keysv,flags,hash)
-HV *hv;
-SV *keysv;
-I32 flags;
-U32 hash;
+hv_delete_ent(HV *hv, SV *keysv, I32 flags, U32 hash)
 {
     register XPVHV* xhv;
     register I32 i;
@@ -498,10 +468,7 @@ U32 hash;
 }
 
 bool
-hv_exists(hv,key,klen)
-HV *hv;
-char *key;
-U32 klen;
+hv_exists(HV *hv, char *key, U32 klen)
 {
     register XPVHV* xhv;
     register U32 hash;
@@ -542,10 +509,7 @@ U32 klen;
 
 
 bool
-hv_exists_ent(hv,keysv,hash)
-HV *hv;
-SV *keysv;
-U32 hash;
+hv_exists_ent(HV *hv, SV *keysv, U32 hash)
 {
     register XPVHV* xhv;
     register char *key;
@@ -589,8 +553,7 @@ U32 hash;
 }
 
 static void
-hsplit(hv)
-HV *hv;
+hsplit(HV *hv)
 {
     register XPVHV* xhv = (XPVHV*)SvANY(hv);
     I32 oldsize = (I32) xhv->xhv_max + 1; /* sic(k) */
@@ -654,9 +617,7 @@ HV *hv;
 }
 
 void
-hv_ksplit(hv, newmax)
-HV *hv;
-IV newmax;
+hv_ksplit(HV *hv, IV newmax)
 {
     register XPVHV* xhv = (XPVHV*)SvANY(hv);
     I32 oldsize = (I32) xhv->xhv_max + 1; /* sic(k) */
@@ -732,7 +693,7 @@ IV newmax;
 }
 
 HV *
-newHV()
+newHV(void)
 {
     register HV *hv;
     register XPVHV* xhv;
@@ -753,9 +714,7 @@ newHV()
 }
 
 void
-hv_free_ent(hv, entry)
-HV *hv;
-register HE *entry;
+hv_free_ent(HV *hv, register HE *entry)
 {
     if (!entry)
 	return;
@@ -774,9 +733,7 @@ register HE *entry;
 }
 
 void
-hv_delayfree_ent(hv, entry)
-HV *hv;
-register HE *entry;
+hv_delayfree_ent(HV *hv, register HE *entry)
 {
     if (!entry)
 	return;
@@ -795,8 +752,7 @@ register HE *entry;
 }
 
 void
-hv_clear(hv)
-HV *hv;
+hv_clear(HV *hv)
 {
     register XPVHV* xhv;
     if (!hv)
@@ -813,8 +769,7 @@ HV *hv;
 }
 
 static void
-hfreeentries(hv)
-HV *hv;
+hfreeentries(HV *hv)
 {
     register HE **array;
     register HE *entry;
@@ -847,8 +802,7 @@ HV *hv;
 }
 
 void
-hv_undef(hv)
-HV *hv;
+hv_undef(HV *hv)
 {
     register XPVHV* xhv;
     if (!hv)
@@ -870,8 +824,7 @@ HV *hv;
 }
 
 I32
-hv_iterinit(hv)
-HV *hv;
+hv_iterinit(HV *hv)
 {
     register XPVHV* xhv;
     HE *entry;
@@ -894,8 +847,7 @@ HV *hv;
 }
 
 HE *
-hv_iternext(hv)
-HV *hv;
+hv_iternext(HV *hv)
 {
     register XPVHV* xhv;
     register HE *entry;
@@ -961,9 +913,7 @@ HV *hv;
 }
 
 char *
-hv_iterkey(entry,retlen)
-register HE *entry;
-I32 *retlen;
+hv_iterkey(register HE *entry, I32 *retlen)
 {
     if (HeKLEN(entry) == HEf_SVKEY) {
 	STRLEN len;
@@ -979,8 +929,7 @@ I32 *retlen;
 
 /* unlike hv_iterval(), this always returns a mortal copy of the key */
 SV *
-hv_iterkeysv(entry)
-register HE *entry;
+hv_iterkeysv(register HE *entry)
 {
     if (HeKLEN(entry) == HEf_SVKEY)
 	return sv_mortalcopy(HeKEY_sv(entry));
@@ -990,9 +939,7 @@ register HE *entry;
 }
 
 SV *
-hv_iterval(hv,entry)
-HV *hv;
-register HE *entry;
+hv_iterval(HV *hv, register HE *entry)
 {
     if (SvRMAGICAL(hv)) {
 	if (mg_find((SV*)hv,'P')) {
@@ -1007,10 +954,7 @@ register HE *entry;
 }
 
 SV *
-hv_iternextsv(hv, key, retlen)
-    HV *hv;
-    char **key;
-    I32 *retlen;
+hv_iternextsv(HV *hv, char **key, I32 *retlen)
 {
     HE *he;
     if ( (he = hv_iternext(hv)) == NULL)
@@ -1020,19 +964,13 @@ hv_iternextsv(hv, key, retlen)
 }
 
 void
-hv_magic(hv, gv, how)
-HV* hv;
-GV* gv;
-int how;
+hv_magic(HV *hv, GV *gv, int how)
 {
     sv_magic((SV*)hv, (SV*)gv, how, Nullch, 0);
 }
 
 char*	
-sharepvn(sv, len, hash)
-char* sv;
-I32 len;
-U32 hash;
+sharepvn(char *sv, I32 len, U32 hash)
 {
     return HEK_KEY(share_hek(sv, len, hash));
 }
@@ -1041,10 +979,7 @@ U32 hash;
  * len and hash must both be valid for str.
  */
 void
-unsharepvn(str, len, hash)
-char* str;
-I32 len;
-U32 hash;
+unsharepvn(char *str, I32 len, U32 hash)
 {
     register XPVHV* xhv;
     register HE *entry;
@@ -1088,10 +1023,7 @@ U32 hash;
  * len and hash must both be valid for str.
  */
 HEK *
-share_hek(str, len, hash)
-char *str;
-I32 len;
-register U32 hash;
+share_hek(char *str, I32 len, register U32 hash)
 {
     register XPVHV* xhv;
     register HE *entry;

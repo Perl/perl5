@@ -6,15 +6,12 @@
 #pragma runopts(HEAP(1M,32K,ANYWHERE,KEEP,8K,4K))
 #endif
 
-#ifdef __cplusplus
-extern "C" {
-#endif
 
 #include "EXTERN.h"
 #include "perl.h"
 
+#undef EXTERN_C
 #ifdef __cplusplus
-}
 #  define EXTERN_C extern "C"
 #else
 #  define EXTERN_C extern
@@ -58,6 +55,7 @@ char **env;
     PERL_SYS_TERM();
 
     exit( exitstatus );
+    return exitstatus;
 }
 
 /* Register any extra external extensions */
@@ -65,7 +63,7 @@ char **env;
 /* Do not delete this line--writemain depends on it */
 
 static void
-xs_init()
+xs_init(void)
 {
   dXSUB_SYS;
 }
