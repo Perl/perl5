@@ -310,6 +310,10 @@ keyword and must follow immediately after it when used.
 
      [ XS code in package RPC ]
 
+The same package name can be used more than once, allowing for
+non-contiguous code. This is useful if you have a stronger ordering
+principle than package names.
+
 Although this keyword is optional and in some cases provides redundant
 information it should always be used.  This keyword will ensure that the
 XSUBs appear in the desired package.
