@@ -930,7 +930,7 @@ static	u_int goodsbrk;
 
 static char *emergency_buffer;
 static MEM_SIZE emergency_buffer_size;
-static int no_mem;	/* 0 if the last request for more memory succeeded.
+static MEM_SIZE no_mem;	/* 0 if the last request for more memory succeeded.
 			   Otherwise the size of the failing request. */
 
 static Malloc_t
@@ -1167,7 +1167,7 @@ Perl_malloc(register size_t nbytes)
 
 static char *last_sbrk_top;
 static char *last_op;			/* This arena can be easily extended. */
-static int sbrked_remains;
+static MEM_SIZE sbrked_remains;
 static int sbrk_good = SBRK_ALLOW_FAILURES * SBRK_FAILURE_PRICE;
 
 #ifdef DEBUGGING_MSTATS

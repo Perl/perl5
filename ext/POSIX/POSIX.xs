@@ -1,9 +1,5 @@
 #define PERL_EXT_POSIX
 
-#ifdef WIN32
-#define _POSIX_
-#endif
-
 #ifdef NETWARE
 	#define _POSIX_
 	/*

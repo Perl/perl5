@@ -113,6 +113,7 @@ DllExport  void		win32_free(void *block);
 
 DllExport  int		win32_open_osfhandle(intptr_t handle, int flags);
 DllExport  intptr_t	win32_get_osfhandle(int fd);
+DllExport  FILE*	win32_fdupopen(FILE *pf);
 
 DllExport  DIR*		win32_opendir(char *filename);
 DllExport  struct direct*	win32_readdir(DIR *dirp);

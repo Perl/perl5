@@ -338,7 +338,7 @@ newopn		PL_op					U8		x
 newpv		none					PV
 pv_cur		bstate->bs_pv.xpv_cur			STRLEN
 pv_free		bstate->bs_pv				none		x
-sv_upgrade	bstate->bs_sv				char		x
+sv_upgrade	bstate->bs_sv				U8		x
 sv_refcnt	SvREFCNT(bstate->bs_sv)			U32
 sv_refcnt_add	SvREFCNT(bstate->bs_sv)			I32		x
 sv_flags	SvFLAGS(bstate->bs_sv)			U32

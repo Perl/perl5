@@ -4021,7 +4021,7 @@ win32_free(void *block)
 }
 
 
-int
+DllExport int
 win32_open_osfhandle(intptr_t handle, int flags)
 {
 #ifdef USE_FIXED_OSFHANDLE
@@ -4031,13 +4031,13 @@ win32_open_osfhandle(intptr_t handle, int flags)
     return _open_osfhandle(handle, flags);
 }
 
-intptr_t
+DllExport intptr_t
 win32_get_osfhandle(int fd)
 {
     return (intptr_t)_get_osfhandle(fd);
 }
 
-FILE *
+DllExport FILE *
 win32_fdupopen(FILE *pf)
 {
     FILE* pfdup;

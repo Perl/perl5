@@ -197,7 +197,7 @@ typedef IV IV64;
 	    av_push(PL_beginav, cv);			\
 	    call_list(oldscope, PL_beginav);		\
 	    PL_curcop = &PL_compiling;			\
-	    PL_compiling.op_private = PL_hints;		\
+	    PL_compiling.op_private = (U8)(PL_hints & HINT_PRIVATE_MASK);\
 	    LEAVE;					\
 	} STMT_END
 #define BSET_push_init(ary,cv)								\

@@ -3464,7 +3464,7 @@
  *	to the program to supply one.  A good guess is
  *		extern int flock(int, int);
  */
-/*#define	HAS_FLOCK_PROTO	/**/
+#define	HAS_FLOCK_PROTO	/**/
 
 /* HAS_FPCLASSL:
  *	This symbol, if defined, indicates that the fpclassl routine is

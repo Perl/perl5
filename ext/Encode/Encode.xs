@@ -106,7 +106,7 @@ encode_method(pTHX_ encode_t * enc, encpage_t * dir, SV * src,
 		more = (1.0*tlen*SvLEN(dst)+sdone-1)/sdone
 		    - SvLEN(dst);
 #elif ENCODE_XS_USEFP
-		more = (1.0*SvLEN(dst)+1)/sdone * sleft;
+		more = (STRLEN)((1.0*SvLEN(dst)+1)/sdone * sleft);
 #else
 		/* safe until SvLEN(dst) == MAX_INT/16 */
 		more = (16*SvLEN(dst)+1)/sdone/16 * sleft;
