@@ -195,7 +195,7 @@ Perl_sv_peek(pTHX_ SV *sv)
 	unref++;
     }
     else if (DEBUG_R_TEST && SvREFCNT(sv) > 1) {
-	sv_catpvf(t, "<%u>", SvREFCNT(sv));
+	Perl_sv_catpvf(aTHX_ t, "<%u>", SvREFCNT(sv));
     }
 
 
@@ -278,7 +278,7 @@ Perl_sv_peek(pTHX_ SV *sv)
 		Perl_sv_catpvf(aTHX_ t, "[%s]", pv_display(tmp, SvPVX(sv)-SvIVX(sv), SvIVX(sv), 0, 127));
 	    Perl_sv_catpvf(aTHX_ t, "%s)", pv_display(tmp, SvPVX(sv), SvCUR(sv), SvLEN(sv), 127));
 	    if (SvUTF8(sv))
-		Perl_sv_catpvf(aTHX_ t, " [UTF8]"); 
+		Perl_sv_catpvf(aTHX_ t, " [UTF8]");
 	    SvREFCNT_dec(tmp);
 	}
     }
@@ -295,7 +295,7 @@ Perl_sv_peek(pTHX_ SV *sv)
     }
     else
 	sv_catpv(t, "()");
-    
+
   finish:
     if (unref) {
 	while (unref--)
@@ -475,7 +475,7 @@ Perl_do_op_dump(pTHX_ I32 level, PerlIO *file, OP *o)
 		if (o->op_private & OPpENTERSUB_HASTARG)
 		    sv_catpv(tmpsv, ",HASTARG");
 	    }
-	    else 
+	    else
 		switch (o->op_private & OPpDEREF) {
 	    case OPpDEREF_SV:
 		sv_catpv(tmpsv, ",SV");
@@ -782,7 +782,7 @@ Perl_do_sv_dump(pTHX_ I32 level, PerlIO *file, SV *sv, I32 nest, I32 maxnest, bo
 	Perl_dump_indent(aTHX_ level, file, "SV = 0\n");
 	return;
     }
-    
+
     flags = SvFLAGS(sv);
     type = SvTYPE(sv);
 
@@ -1006,7 +1006,7 @@ Perl_do_sv_dump(pTHX_ I32 level, PerlIO *file, SV *sv, I32 nest, I32 maxnest, bo
 		SV** elt = av_fetch((AV*)sv,count,0);
 
 		Perl_dump_indent(aTHX_ level + 1, file, "Elt No. %"IVdf"\n", (IV)count);
-		if (elt) 
+		if (elt)
 		    do_sv_dump(level+1, file, *elt, nest+1, maxnest, dumpops, pvlim);
 	    }
 	}
@@ -1122,7 +1122,7 @@ Perl_do_sv_dump(pTHX_ I32 level, PerlIO *file, SV *sv, I32 nest, I32 maxnest, bo
 		if (SvPOK(pname[ix]))
 		    Perl_dump_indent(aTHX_ level,
 				/* %5d below is enough whitespace. */
-				file, 
+				file,
 				"%5d. 0x%"UVxf" (%s\"%s\" %"IVdf"-%"IVdf")\n",
 				(int)ix, PTR2UV(ppad[ix]),
 				SvFAKE(pname[ix]) ? "FAKE " : "",
@@ -1133,7 +1133,7 @@ Perl_do_sv_dump(pTHX_ I32 level, PerlIO *file, SV *sv, I32 nest, I32 maxnest, bo
 	}
 	{
 	    CV *outside = CvOUTSIDE(sv);
-	    Perl_dump_indent(aTHX_ level, file, "  OUTSIDE = 0x%"UVxf" (%s)\n", 
+	    Perl_dump_indent(aTHX_ level, file, "  OUTSIDE = 0x%"UVxf" (%s)\n",
 			PTR2UV(outside),
 			(!outside ? "null"
 			 : CvANON(outside) ? "ANON"
