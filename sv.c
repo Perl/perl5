@@ -1483,8 +1483,8 @@ Perl_sv_2iv(pTHX_ register SV *sv)
 
 	    if (SvTYPE(sv) < SVt_PVIV)
 		sv_upgrade(sv, SVt_PVIV);
-	    SvIVX(sv) = 0;
 	    (void)SvIOK_on(sv);
+	    SvIVX(sv) = 0;
 	    if (ckWARN(WARN_NUMERIC))
 		not_a_number(sv);
 	}
@@ -1637,10 +1637,10 @@ Perl_sv_2uv(pTHX_ register SV *sv)
 
 	    if (SvTYPE(sv) < SVt_PVIV)
 		sv_upgrade(sv, SVt_PVIV);
-	    SvUVX(sv) = 0;		/* We assume that 0s have the
-					   same bitmap in IV and UV. */
 	    (void)SvIOK_on(sv);
 	    (void)SvIsUV_on(sv);
+	    SvUVX(sv) = 0;		/* We assume that 0s have the
+					   same bitmap in IV and UV. */
 	    if (ckWARN(WARN_NUMERIC))
 		not_a_number(sv);
 	}
