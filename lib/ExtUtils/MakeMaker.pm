@@ -1781,18 +1781,26 @@ branch from that node into lib/, lib/ARCHNAME or whatever Configure
 decided at the build time of your perl (unless you override one of
 them, of course).
 
-=item PREREQ_FATAL
-
-Bool. If this parameter is true, failing to have the prequired modules
-(or the right versions thereof) will be fatal. perl Makefile.PL will die
-with the proper message.
-
 =item PREREQ_PM
 
 Hashref: Names of modules that need to be available to run this
 extension (e.g. Fcntl for SDBM_File) are the keys of the hash and the
 desired version is the value. If the required version number is 0, we
 only check if any version is installed already.
+
+=item PREREQ_FATAL
+
+Bool. If this parameter is true, failing to have the required modules
+(or the right versions thereof) will be fatal. perl Makefile.PL will die
+with the proper message.
+
+Note: see L<Test::Harness> for a shortcut for stopping tests early if
+you are missing dependencies.
+
+Do I<not> use this parameter for simple requirements, which could be resolved
+at a later time, e.g. after an unsuccessful B<make test> of your module.
+
+It is I<extremely> rare to have to use C<PREREQ_FATAL> at all!
 
 =item SKIP
 
