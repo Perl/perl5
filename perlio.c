@@ -585,7 +585,15 @@ Fpos_t *pos;
 #if (defined(PERLIO_IS_STDIO) || !defined(USE_SFIO)) && !defined(HAS_VPRINTF)
 
 int
-vprintf(fd, pat, args)
+vprintf(pat, args)
+char *pat, *args;
+{
+    _doprnt(pat, args, stdout);
+    return 0;		/* wrong, but perl doesn't use the return value */
+}
+
+int
+vfprintf(fd, pat, args)
 FILE *fd;
 char *pat, *args;
 {
