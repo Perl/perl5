@@ -114,6 +114,8 @@ Init();
 
 if($::opt_h) { Help(); exit; }
 
+if($::opt_d) { Dump(*STDOUT); exit; }
+
 if(!-t STDIN) {
 	paraprint <<EOF;
 Please use perlbug interactively. If you want to 
@@ -122,7 +124,7 @@ EOF
 	die "\n";
 }
 
-if($::opt_d or !-t STDOUT) { Dump(*STDOUT); exit; }
+if(!-t STDOUT) { Dump(*STDOUT); exit; }
 
 Query();
 Edit() unless $usefile;
