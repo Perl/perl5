@@ -14,6 +14,37 @@ which wasn't being compatible with some of the newest compilers (most
 notably gcc 3.x), libraries and operating systems that have appeared since
 5.6.1 was released.
 
+Note also that perl no longer installs itself as F</usr/bin/perl> by
+default if it exists. (see the F<INSTALL> file.)
+
+The following modules have been upgraded :
+
+=over
+
+=item Data::Dumper 2.121
+
+=item DB_File 1.806
+
+=item ExtUtils::MakeMaker 6.17
+
+=item File::Spec 0.85
+
+=item File::Temp 0.14
+
+=item Test 1.24
+
+=item Test::Builder 0.17
+
+=item Test::Harness 2.30
+
+=item Test::More 0.47
+
+=item Test::Simple 0.47
+
+=back
+
+In addition to this, the C<if> pragma was added.
+
 =head1 Summary of changes between 5.6.0 and 5.6.1
 
 This section contains a summary of the changes between the 5.6.0 release
