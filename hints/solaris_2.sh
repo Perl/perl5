@@ -65,7 +65,7 @@ case "$ccisworkshop" in
 #include <sunmath.h>
 int main() { return(0); }
 EOF
-	workshoplibs=`cc -### try.c -lsunmath -o try 2>&1|grep -e -Y|sed 's%.* -Y "P,\(.*\)".*%\1%'|tr ':' '\n'|grep '/SUNWspro/'|sort -u`
+	workshoplibs=`cc -### try.c -lsunmath -o try 2>&1|grep " -Y "|sed 's%.* -Y "P,\(.*\)".*%\1%'|tr ':' '\n'|grep '/SUNWspro/'|sort -u`
 	loclibpth="$loclibpth $workshoplibs"
 	;;
 esac
