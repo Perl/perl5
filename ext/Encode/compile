@@ -48,7 +48,7 @@ sub encode_M
 eval "\@ARGV = map(glob(\$_),\@ARGV)" if ($^O eq 'MSWin32');
 
 my %opt;
-getopts('qo:F:',\%opt);
+getopts('qo:F:n:',\%opt);
 my $cname = (exists $opt{'o'}) ? $opt{'o'} : shift(@ARGV);
 chmod(0666,$cname) if -f $cname && !-w $cname;
 open(C,">$cname") || die "Cannot open $cname:$!";
@@ -132,6 +132,7 @@ sub cmp_name
 foreach my $enc (sort cmp_name @encfiles)
  {
   my ($name,$sfx) = $enc =~ /^.*?([\w-]+)\.(enc|ucm)$/;
+  $name = delete $opt{'n'} if exists $opt{'n'};
   if (open(E,$enc))
    {
     if ($sfx eq 'enc')
@@ -305,6 +306,7 @@ sub compile_enc
   no strict 'refs';
   $rep = &{"encode_$type"}($v & 0xFF, ($v >> 8) & 0xffe);
  }
+ my %seen;
  while ($pages--)
   {
    my $line = <$fh>;
@@ -319,12 +321,22 @@ sub compile_enc
        no strict 'refs';
        my $ech = &{"encode_$type"}($ch,$page);
        my $val = hex(substr($line,0,4,''));
+       next if $val == 0xFFFD;
        if ($val || (!$ch && !$page))
         {
          my $el  = length($ech);
          $max_el = $el if (!defined($max_el) || $el > $max_el);
          $min_el = $el if (!defined($min_el) || $el < $min_el);
          my $uch = encode_U($val);
+         if (exists $seen{$uch})
+          {
+           warn sprintf("U%04X is %02X%02X and %02X%02X\n",
+                        $val,$page,$ch,@{$seen{$uch}});
+          }
+         else
+          {
+           $seen{$uch} = [$page,$ch];
+          }
          enter($e2u,$ech,$uch,$e2u,0);
          enter($u2e,$uch,$ech,$u2e,0);
         }
