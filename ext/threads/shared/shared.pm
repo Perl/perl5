@@ -190,6 +190,10 @@ implemented in a future version of Perl.
 
 Does not support splice on arrays!
 
+Taking references to the elements of shared arrays and hashes does not
+autovivify the elements, and neither does slicing a shared array/hash
+over non-existent indices/keys autovivify the elements.
+
 =head1 AUTHOR
 
 Arthur Bergman E<lt>arthur at contiller.seE<gt>

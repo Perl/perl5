@@ -3337,6 +3337,15 @@ behaviour may be fixed at a later date.
 
 Self-tying of scalars and IO thingies works.
 
+=head2 Tied/Magical Array/Hash Elements Do Not Autovivify
+
+For normal arrays C<$foo = \$bar[1]> will assign C<undef> to
+C<$bar[1]> (assuming that it didn't exist before), but for
+tied/magical arrays and hashes such autovivification does not happen
+because there is currently no way to catch the reference creation.
+The same problem affects slicing over non-existent indices/keys of
+a tied/magical array/hash.
+
 =head2 Building Extensions Can Fail Because Of Largefiles
 
 Some extensions like mod_perl are known to have issues with
