@@ -797,3 +797,4 @@ ab(?i)cd	abCd	y	-	-
 (A|B)*?(?(1)(CD)|(CD))	CD	y	$2-$3	-CD	# [ID 20010803.016]
 (A|B)*?(?(1)(CD)|(CD))	ABCD	y	$2-$3	CD-
 '^(o)(?!.*\1)'i	Oo	n	-	-
+(.*)\d+\1	abc12bc	y	$1	bc
