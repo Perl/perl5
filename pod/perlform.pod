@@ -29,8 +29,8 @@ Output record formats are declared as follows:
     FORMLIST
     .
 
-If name is omitted, format "STDOUT" is defined.  FORMLIST consists of a
-sequence of lines, each of which may be of one of three types:
+If name is omitted, format "STDOUT" is defined.  FORMLIST consists of
+a sequence of lines, each of which may be of one of three types:
 
 =over 4
 
@@ -315,11 +315,16 @@ is to printf(), do this:
 
 =head1 WARNINGS
 
+The lone dot that ends a format can also prematurely end an E-Mail
+message passing through a misconfigured Internet mailer (and based on
+experience, such misconfiguration is the rule, not the exception).  So
+when sending format code through E-Mail, you should indent it so that
+the format-ending dot is not on the left margin; this will prevent
+E-Mail cutoff.
+
 Lexical variables (declared with "my") are not visible within a
 format unless the format is declared within the scope of the lexical
-variable.  (They weren't visible at all before version 5.001.)  Furthermore,
-lexical aliases will not be compiled correctly: see
-L<perlfunc/my> for other issues.
+variable.  (They weren't visible at all before version 5.001.)
 
 Formats are the only part of Perl which unconditionally use information
 from a program's locale; if a program's environment specifies an
