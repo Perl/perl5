@@ -5787,6 +5787,8 @@ Perl_sv_pos_b2u(pTHX_ register SV* sv, I32* offsetp)
 			U8 *p = s + cache[1];
 			STRLEN ubackw = 0;
 			     
+			cache[1] -= backw;
+
 			while (backw--) {
 			    p--;
 			    while (UTF8_IS_CONTINUATION(*p))
@@ -5795,7 +5797,6 @@ Perl_sv_pos_b2u(pTHX_ register SV* sv, I32* offsetp)
 			}
 
 			cache[0] -= ubackw;
-			cache[1] -= backw;
 
 			return;
 		    }
