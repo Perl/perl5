@@ -1,3 +1,7 @@
+5.95_01 Sat May 18 14:40:12 EDT 2002
+    - Fixed ExtUtils::testlib so it has a reasonable chance of working
+      under taint mode.
+
 5.94_02 Fri May 17 17:16:04 EDT 2002
     - Fixing Manifest.t test for relative @INC when core testing.
 

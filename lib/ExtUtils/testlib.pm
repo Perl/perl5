@@ -1,9 +1,13 @@
 package ExtUtils::testlib;
-$VERSION = 1.12_01;
+$VERSION = 1.13_01;
+
+use Cwd;
+use File::Spec;
 
 # So the tests can chdir around and not break @INC.
-use File::Spec;
-use lib map File::Spec->rel2abs($_), qw(blib/arch blib/lib);
+# We use getcwd() because otherwise rel2abs will blow up under taint
+# mode pre-5.8
+use lib map File::Spec->rel2abs($_, getcwd()), qw(blib/arch blib/lib);
 1;
 __END__
 
