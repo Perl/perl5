@@ -20,7 +20,7 @@
 
 # $Id: Head.U,v 3.0.1.9 1997/02/28 15:02:09 ram Exp $
 #
-# Generated on Sat Jun 16 17:56:14 EET DST 2001 [metaconfig 3.0 PL70]
+# Generated on Sat Jun 16 19:06:04 EET DST 2001 [metaconfig 3.0 PL70]
 # (with additional metaconfig patches by perlbug@perl.org)
 
 cat >c1$$ <<EOF
@@ -17300,7 +17300,9 @@ esac
 
 echo " "
 exec 1>&4
+pwd=`pwd`
 . ./UU/extract
+cd $pwd
 
 if $contains '^depend:' [Mm]akefile >/dev/null 2>&1; then
 	dflt=y
