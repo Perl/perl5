@@ -15,9 +15,15 @@ esac
 echo "Extracting makedepend (with variable substitutions)"
 $spitshell >makedepend <<!GROK!THIS!
 $startsh
-# $Header: makedepend.SH,v 4.0 91/03/20 01:27:04 lwall Locked $
+# $RCSfile: makedepend.SH,v $$Revision: 4.0.1.2 $$Date: 91/06/07 15:40:06 $
 #
 # $Log:	makedepend.SH,v $
+# Revision 4.0.1.2  91/06/07  15:40:06  lwall
+# patch4: fixed cppstdin to run in the right directory
+# 
+# Revision 4.0.1.1  91/06/07  11:20:06  lwall
+# patch4: Makefile is no longer self-modifying code under makedepend
+# 
 # Revision 4.0  91/03/20  01:27:04  lwall
 # 4.0 baseline.
 # 
@@ -28,7 +34,8 @@ export PATH || (echo "OOPS, this isn't sh.  Desperation time.  I will feed mysel
 cat='$cat'
 cppflags='$cppflags'
 cp='$cp'
-cpp='$cppstdin'
+cppstdin='$cppstdin'
+cppminus='$cppminus'
 echo='$echo'
 egrep='$egrep'
 expr='$expr'
@@ -46,10 +53,9 @@ $spitshell >>makedepend <<'!NO!SUBS!'
 $cat /dev/null >.deptmp
 $rm -f *.c.c c/*.c.c
 if test -f Makefile; then
-    mf=Makefile
-else
-    mf=makefile
+    cp Makefile makefile
 fi
+mf=makefile
 if test -f $mf; then
     defrule=`<$mf sed -n		\
 	-e '/^\.c\.o:.*;/{'		\
@@ -84,7 +90,7 @@ for file in `$cat .clist`; do
 	-e 's|\\$||' \
 	-e p \
 	-e '}'
-    $cpp -I/usr/local/include -I. $cppflags $file.c | \
+    $cppstdin -I/usr/local/include -I. $cppflags $cppminus <$file.c | sed -e 's#\.[0-9][0-9]*\.c#'"$file.c#" | \
     $sed \
 	-e '/^# *[0-9]/!d' \
 	-e 's/^.*"\(.*\)".*$/'$filebase'.o: \1/' \
@@ -93,52 +99,52 @@ for file in `$cat .clist`; do
     $uniq | $sort | $uniq >> .deptmp
 done
 
-$sed <Makefile >Makefile.new -e '1,/^# AUTOMATICALLY/!d'
+$sed <$mf >$mf.new -e '1,/^# AUTOMATICALLY/!d'
 
 make shlist || ($echo "Searching for .SH files..."; \
 	$echo *.SH | $tr ' ' '\012' | $egrep -v '\*' >.shlist)
 if $test -s .deptmp; then
     for file in `cat .shlist`; do
-	$echo `$expr X$file : 'X\(.*\).SH`: $file config.sh \; \
+	$echo `$expr X$file : 'X\(.*\).SH'`: $file config.sh \; \
 	    /bin/sh $file >> .deptmp
     done
-    $echo "Updating Makefile..."
+    $echo "Updating $mf..."
     $echo "# If this runs make out of memory, delete /usr/include lines." \
-	>> Makefile.new
+	>> $mf.new
     $sed 's|^\(.*\.o:\) *\(.*/.*\.c\) *$|\1 \2; '"$defrule \2|" .deptmp \
-       >>Makefile.new
+       >>$mf.new
 else
     make hlist || ($echo "Searching for .h files..."; \
 	$echo *.h | $tr ' ' '\012' | $egrep -v '\*' >.hlist)
     $echo "You don't seem to have a proper C preprocessor.  Using grep instead."
     $egrep '^#include ' `cat .clist` `cat .hlist`  >.deptmp
-    $echo "Updating Makefile..."
+    $echo "Updating $mf..."
     <.clist $sed -n							\
 	-e '/\//{'							\
 	-e   's|^\(.*\)/\(.*\)\.c|\2.o: \1/\2.c; '"$defrule \1/\2.c|p"	\
 	-e   d								\
 	-e '}'								\
-	-e 's|^\(.*\)\.c|\1.o: \1.c|p' >> Makefile.new
+	-e 's|^\(.*\)\.c|\1.o: \1.c|p' >> $mf.new
     <.hlist $sed -n 's|\(.*/\)\(.*\)|s= \2= \1\2=|p' >.hsed
     <.deptmp $sed -n 's|c:#include "\(.*\)".*$|o: \1|p' | \
        $sed 's|^[^;]*/||' | \
-       $sed -f .hsed >> Makefile.new
+       $sed -f .hsed >> $mf.new
     <.deptmp $sed -n 's|c:#include <\(.*\)>.*$|o: /usr/include/\1|p' \
-       >> Makefile.new
+       >> $mf.new
     <.deptmp $sed -n 's|h:#include "\(.*\)".*$|h: \1|p' | \
-       $sed -f .hsed >> Makefile.new
+       $sed -f .hsed >> $mf.new
     <.deptmp $sed -n 's|h:#include <\(.*\)>.*$|h: /usr/include/\1|p' \
-       >> Makefile.new
+       >> $mf.new
     for file in `$cat .shlist`; do
-	$echo `$expr X$file : 'X\(.*\).SH`: $file config.sh \; \
-	    /bin/sh $file >> Makefile.new
+	$echo `$expr X$file : 'X\(.*\).SH'`: $file config.sh \; \
+	    /bin/sh $file >> $mf.new
     done
 fi
-$rm -f Makefile.old
-$cp Makefile Makefile.old
-$cp Makefile.new Makefile
-$rm Makefile.new
-$echo "# WARNING: Put nothing here or make depend will gobble it up!" >> Makefile
+$rm -f $mf.old
+$cp $mf $mf.old
+$cp $mf.new $mf
+$rm $mf.new
+$echo "# WARNING: Put nothing here or make depend will gobble it up!" >> $mf
 $rm -f .deptmp `sed 's/\.c/.c.c/' .clist` .shlist .clist .hlist .hsed
 
 !NO!SUBS!

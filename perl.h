@@ -1,11 +1,16 @@
-/* $RCSfile: perl.h,v $$Revision: 4.0.1.1 $$Date: 91/04/11 17:49:51 $
+/* $RCSfile: perl.h,v $$Revision: 4.0.1.2 $$Date: 91/06/07 11:28:33 $
  *
- *    Copyright (c) 1989, Larry Wall
+ *    Copyright (c) 1991, Larry Wall
  *
- *    You may distribute under the terms of the GNU General Public License
- *    as specified in the README file that comes with the perl 3.0 kit.
+ *    You may distribute under the terms of either the GNU General Public
+ *    License or the Artistic License, as specified in the README file.
  *
  * $Log:	perl.h,v $
+ * Revision 4.0.1.2  91/06/07  11:28:33  lwall
+ * patch4: new copyright notice
+ * patch4: made some allowances for "semi-standard" C
+ * patch4: many, many itty-bitty portability fixes
+ * 
  * Revision 4.0.1.1  91/04/11  17:49:51  lwall
  * patch1: hopefully straightened out some of the Xenix mess
  * 
@@ -47,7 +52,11 @@
 
 #endif /* !MSDOS */
 
-#if defined(HASVOLATILE) || defined(__STDC__)
+#if defined(__STDC__) || defined(_AIX) || defined(__stdc__)
+# define STANDARD_C 1
+#endif
+
+#if defined(HASVOLATILE) || defined(STANDARD_C)
 #define VOLATILE volatile
 #else
 #define VOLATILE
@@ -81,13 +90,16 @@
 #include <ctype.h>
 #include <setjmp.h>
 #ifndef MSDOS
-#include <sys/param.h>	/* if this needs types.h we're still wrong */
+#ifdef PARAM_NEEDS_TYPES
+#include <sys/types.h>
 #endif
-#ifdef __STDC__
+#include <sys/param.h>
+#endif
+#ifdef STANDARD_C
 /* Use all the "standard" definitions */
 #include <stdlib.h>
 #include <string.h>
-#endif /* __STDC__ */
+#endif /* STANDARD_C */
 
 #if defined(HAS_MEMCMP) && defined(mips) && BYTEORDER == 0x1234
 #undef HAS_MEMCMP
@@ -95,19 +107,25 @@
 
 #ifdef HAS_MEMCPY
 
-#  ifndef __STDC__
+#  ifndef STANDARD_C
 #    ifndef memcpy
 extern char * memcpy(), *memset();
 extern int memcmp();
 #    endif /* ndef memcpy */
-#  endif /* ndef __STDC__ */
+#  endif /* ndef STANDARD_C */
 
-#define bcopy(s1,s2,l) memcpy(s2,s1,l)
-#define bzero(s,l) memset(s,0,l)
+#   ifndef bcopy
+#	define bcopy(s1,s2,l) memcpy(s2,s1,l)
+#   endif
+#   ifndef bzero
+#	define bzero(s,l) memset(s,0,l)
+#   endif
 #endif /* HAS_MEMCPY */
 
 #ifndef HAS_BCMP		/* prefer bcmp slightly 'cuz it doesn't order */
-#define bcmp(s1,s2,l) memcmp(s1,s2,l)
+#   ifndef bcmp
+#	define bcmp(s1,s2,l) memcmp(s1,s2,l)
+#   endif
 #endif
 
 #ifndef _TYPES_		/* If types.h defines this it's easy. */
@@ -245,6 +263,13 @@ EXT int dbmlen;
 #   endif
 #endif
 
+#ifdef FPUTS_BOTCH
+/* work around botch in SunOS 4.0.1 and 4.0.2 */
+#   ifndef fputs
+#	define fputs(str,fp) fprintf(fp,"%s",str)
+#   endif
+#endif
+
 /*
  * The following gobbledygook brought to you on behalf of __STDC__.
  * (I could just use #ifndef __STDC__, but this is more bulletproof
@@ -345,6 +370,10 @@ EXT int dbmlen;
 #   define S_ISGID 02000
 #endif
 
+#ifdef f_next
+#undef f_next
+#endif
+
 typedef unsigned int STRLEN;
 
 typedef struct arg ARG;
@@ -377,7 +406,7 @@ typedef struct callsave CSV;
 #   define I286
 #endif
 
-#ifndef	__STDC__
+#ifndef	STANDARD_C
 #ifdef CHARSPRINTF
     char *sprintf();
 #else
@@ -681,6 +710,11 @@ EXT bool sawi INIT(FALSE);		/* study must assume case insensitive */
 EXT bool sawvec INIT(FALSE);
 EXT bool localizing INIT(FALSE);	/* are we processing a local() list? */
 
+#ifndef MAXSYSFD
+#   define MAXSYSFD 2
+#endif
+EXT int maxsysfd INIT(MAXSYSFD);	/* top fd to pass to subprocesses */
+
 #ifdef CSH
 char *cshname INIT(CSH);
 int cshlen INIT(0);
@@ -790,14 +824,14 @@ EXT short *ds;
 /* Fix these up for __STDC__ */
 EXT long basetime INIT(0);
 char *mktemp();
-#ifndef __STDC__
+#ifndef STANDARD_C
 /* All of these are in stdlib.h or time.h for ANSI C */
 double atof();
 long time();
 struct tm *gmtime(), *localtime();
 char *index(), *rindex();
 char *strcpy(), *strcat();
-#endif /* ! __STDC__ */
+#endif /* ! STANDARD_C */
 
 #ifdef EUNICE
 #define UNLINK unlnk

@@ -1,6 +1,9 @@
-/* $RCSfile: malloc.c,v $$Revision: 4.0.1.1 $$Date: 91/04/11 17:48:31 $
+/* $RCSfile: malloc.c,v $$Revision: 4.0.1.2 $$Date: 91/06/07 11:20:45 $
  *
  * $Log:	malloc.c,v $
+ * Revision 4.0.1.2  91/06/07  11:20:45  lwall
+ * patch4: many, many itty-bitty portability fixes
+ * 
  * Revision 4.0.1.1  91/04/11  17:48:31  lwall
  * patch1: Configure now figures out malloc ptr type
  * 
@@ -160,7 +163,7 @@ malloc(nbytes)
 	p->ov_rmagic = RMAGIC;
   	*((u_int *)((caddr_t)p + nbytes - RSLOP)) = RMAGIC;
 #endif
-  	return ((char *)(p + 1));
+  	return ((MALLOCPTRTYPE *)(p + 1));
 }
 
 /*
@@ -230,11 +233,12 @@ morecore(bucket)
 }
 
 void
-free(cp)
-	char *cp;
+free(mp)
+	MALLOCPTRTYPE *mp;
 {   
   	register int size;
 	register union overhead *op;
+	char *cp = (char*)mp;
 
   	if (cp == NULL)
   		return;
@@ -277,8 +281,8 @@ free(cp)
 int reall_srchlen = 4;	/* 4 should be plenty, -1 =>'s whole list */
 
 MALLOCPTRTYPE *
-realloc(cp, nbytes)
-	char *cp; 
+realloc(mp, nbytes)
+	MALLOCPTRTYPE *mp; 
 	unsigned nbytes;
 {   
   	register u_int onb;
@@ -286,6 +290,7 @@ realloc(cp, nbytes)
   	char *res;
 	register int i;
 	int was_alloced = 0;
+	char *cp = (char*)mp;
 
   	if (cp == NULL)
   		return (malloc(nbytes));
@@ -331,15 +336,15 @@ realloc(cp, nbytes)
 			*((u_int *)((caddr_t)op + nbytes - RSLOP)) = RMAGIC;
 		}
 #endif
-		return(cp);
+		return((MALLOCPTRTYPE*)cp);
 	}
-  	if ((res = malloc(nbytes)) == NULL)
+  	if ((res = (char*)malloc(nbytes)) == NULL)
   		return (NULL);
   	if (cp != res)			/* common optimization */
 		(void)bcopy(cp, res, (int)((nbytes < onb) ? nbytes : onb));
   	if (was_alloced)
 		free(cp);
-  	return (res);
+  	return ((MALLOCPTRTYPE*)res);
 }
 
 /*

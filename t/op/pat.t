@@ -1,8 +1,8 @@
 #!./perl
 
-# $Header: pat.t,v 4.0 91/03/20 01:54:01 lwall Locked $
+# $RCSfile: pat.t,v $$Revision: 4.0.1.1 $$Date: 91/06/07 12:01:26 $
 
-print "1..43\n";
+print "1..48\n";
 
 $x = "abc\ndef\n";
 
@@ -118,3 +118,59 @@ print /(y{2,3}.)/ ? "ok 40\n" : "not ok 40\n";
 print $1 eq 'yyy ' ? "ok 41\n" : "not ok 41\n";
 print /x {3,4}/ ? "not ok 42\n" : "ok 42\n";
 print /^xxx {3,4}/ ? "not ok 43\n" : "ok 43\n";
+
+$_ = "now is the time for all good men to come to.";
+@words = /(\w+)/g;
+print join(':',@words) eq "now:is:the:time:for:all:good:men:to:come:to"
+    ? "ok 44\n"
+    : "not ok 44\n";
+
+@words = ();
+while (/\w+/g) {
+    push(@words, $&);
+}
+print join(':',@words) eq "now:is:the:time:for:all:good:men:to:come:to"
+    ? "ok 45\n"
+    : "not ok 45\n";
+
+@words = ();
+while (/to/g) {
+    push(@words, $&);
+}
+print join(':',@words) eq "to:to"
+    ? "ok 46\n"
+    : "not ok 46 @words\n";
+
+@words = /to/g;
+print join(':',@words) eq "to:to"
+    ? "ok 47\n"
+    : "not ok 47 @words\n";
+
+$_ = "abcdefghi";
+
+$pat1 = 'def';
+$pat2 = '^def';
+$pat3 = '.def.';
+$pat4 = 'abc';
+$pat5 = '^abc';
+$pat6 = 'abc$';
+$pat7 = 'ghi';
+$pat8 = '\w*ghi';
+$pat9 = 'ghi$';
+
+$t1=$t2=$t3=$t4=$t5=$t6=$t7=$t8=$t9=0;
+
+for $iter (1..5) {
+    $t1++ if /$pat1/o;
+    $t2++ if /$pat2/o;
+    $t3++ if /$pat3/o;
+    $t4++ if /$pat4/o;
+    $t5++ if /$pat5/o;
+    $t6++ if /$pat6/o;
+    $t7++ if /$pat7/o;
+    $t8++ if /$pat8/o;
+    $t9++ if /$pat9/o;
+}
+
+$x = "$t1$t2$t3$t4$t5$t6$t7$t8$t9";
+print $x eq '505550555' ? "ok 48\n" : "not ok 48 $x\n";

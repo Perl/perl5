@@ -1,11 +1,20 @@
-char rcsid[] = "$RCSfile: perl.c,v $$Revision: 4.0.1.1 $$Date: 91/04/11 17:49:05 $\nPatch level: ###\n";
+char rcsid[] = "$RCSfile: perl.c,v $$Revision: 4.0.1.3 $$Date: 91/06/07 11:40:18 $\nPatch level: ###\n";
 /*
- *    Copyright (c) 1989, Larry Wall
+ *    Copyright (c) 1991, Larry Wall
  *
- *    You may distribute under the terms of the GNU General Public License
- *    as specified in the README file that comes with the perl 3.0 kit.
+ *    You may distribute under the terms of either the GNU General Public
+ *    License or the Artistic License, as specified in the README file.
  *
  * $Log:	perl.c,v $
+ * Revision 4.0.1.3  91/06/07  11:40:18  lwall
+ * patch4: changed old $^P to $^X
+ * 
+ * Revision 4.0.1.2  91/06/07  11:26:16  lwall
+ * patch4: new copyright notice
+ * patch4: added $^P variable to control calling of perldb routines
+ * patch4: added $^F variable to specify maximum system fd, default 2
+ * patch4: debugger lost track of lines in eval
+ * 
  * Revision 4.0.1.1  91/04/11  17:49:05  lwall
  * patch1: fixed undefined environ problem
  * 
@@ -22,6 +31,8 @@ char rcsid[] = "$RCSfile: perl.c,v $$Revision: 4.0.1.1 $$Date: 91/04/11 17:49:05
 #else
 #include "patchlevel.h"
 #endif
+
+char *getenv();
 
 #ifdef IAMSUID
 #ifndef DOSUID
@@ -50,7 +61,7 @@ register char **env;
 {
     register STR *str;
     register char *s;
-    char *index(), *strcpy(), *getenv();
+    char *getenv();
     bool dosearch = FALSE;
 #ifdef DOSUID
     char *validarg = "";
@@ -656,7 +667,7 @@ FIX YOUR KERNEL, PUT A C WRAPPER AROUND THIS SCRIPT, OR USE -u AND UNDUMP!\n");
 	(void)hadd(sigstab);
     }
 
-    magicalize("!#?^~=-%.+&*()<>,\\/[|`':\004\t\024\027");
+    magicalize("!#?^~=-%.+&*()<>,\\/[|`':\004\t\020\024\027\006");
     userinit();		/* in case linked C routines want magical variables */
 
     amperstab = stabent("&",allstabs);
@@ -740,7 +751,7 @@ FIX YOUR KERNEL, PUT A C WRAPPER AROUND THIS SCRIPT, OR USE -u AND UNDUMP!\n");
 	str_set(stab_val(tmpstab),origfilename);
 	magicname("0", Nullch, 0);
     }
-    if (tmpstab = stabent("\020",allstabs))
+    if (tmpstab = stabent("\030",allstabs))
 	str_set(stab_val(tmpstab),origargv[0]);
     if (argvstab = stabent("ARGV",allstabs)) {
 	argvstab->str_pok |= SP_MULTI;
@@ -830,6 +841,31 @@ int namlen;
     }
 }
 
+void
+savelines(array, str)
+ARRAY *array;
+STR *str;
+{
+    register char *s = str->str_ptr;
+    register char *send = str->str_ptr + str->str_cur;
+    register char *t;
+    register int line = 1;
+
+    while (s && s < send) {
+	STR *tmpstr = Str_new(85,0);
+
+	t = index(s, '\n');
+	if (t)
+	    t++;
+	else
+	    t = send;
+
+	str_nset(tmpstr, s, t - s);
+	astore(array, line++, tmpstr);
+	s = t;
+    }
+}
+
 /* this routine is in perl.c by virtue of being sort of an alternate main() */
 
 int
@@ -871,7 +907,9 @@ int *arglast;
 	curcmd->c_filestab = fstab("(eval)");
 	curcmd->c_line = 1;
 	str_sset(linestr,str);
-	str_cat(linestr,";");		/* be kind to them */
+	str_cat(linestr,";\n");		/* be kind to them */
+	if (perldb)
+	    savelines(stab_xarray(curcmd->c_filestab), linestr);
     }
     else {
 	if (last_root && !in_eval) {
@@ -1201,6 +1239,9 @@ my_unexec()
 	fprintf(stderr, "unexec of %s into %s failed!\n", perlpath, dumpname);
     exit(status);
 #else
+#ifdef MSDOS
+    abort();	/* nothing else to do */
+#else /* ! MSDOS */
 #   ifndef SIGABRT
 #	define SIGABRT SIGILL
 #   endif
@@ -1208,6 +1249,7 @@ my_unexec()
 #	define SIGILL 6		/* blech */
 #   endif
     kill(getpid(),SIGABRT);	/* for use with undump */
+#endif /* ! MSDOS */
 #endif
 }
 

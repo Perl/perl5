@@ -1,7 +1,14 @@
 .rn '' }`
-''' $RCSfile: perl.man,v $$Revision: 4.0.1.1 $$Date: 91/04/11 17:50:44 $
+''' $RCSfile: perl.man,v $$Revision: 4.0.1.2 $$Date: 91/06/07 11:41:23 $
 ''' 
 ''' $Log:	perl.man,v $
+''' Revision 4.0.1.2  91/06/07  11:41:23  lwall
+''' patch4: added global modifier for pattern matches
+''' patch4: default top-of-form format is now FILEHANDLE_TOP
+''' patch4: added $^P variable to control calling of perldb routines
+''' patch4: added $^F variable to specify maximum system fd, default 2
+''' patch4: changed old $^P to $^X
+''' 
 ''' Revision 4.0.1.1  91/04/11  17:50:44  lwall
 ''' patch1: fixed some typos
 ''' 
@@ -1606,58 +1613,6 @@ Thus, a portable way to find out the home directory might be:
 	    (getpwuid($<))[7] || die "You're homeless!\en";
 
 .fi
-''' Beginning of part 2
-''' $RCSfile: perl.man,v $$Revision: 4.0.1.1 $$Date: 91/04/11 17:50:44 $
-'''
-''' $Log:	perl.man,v $
-''' Revision 4.0.1.1  91/04/11  17:50:44  lwall
-''' patch1: fixed some typos
-''' 
-''' Revision 4.0  91/03/20  01:38:08  lwall
-''' 4.0 baseline.
-''' 
-''' Revision 3.0.1.11  91/01/11  18:17:08  lwall
-''' patch42: fixed some man page entries
-''' 
-''' Revision 3.0.1.10  90/11/10  01:46:29  lwall
-''' patch38: random cleanup
-''' patch38: added alarm function
-''' 
-''' Revision 3.0.1.9  90/10/15  18:17:37  lwall
-''' patch29: added caller
-''' patch29: index and substr now have optional 3rd args
-''' patch29: added SysV IPC
-''' 
-''' Revision 3.0.1.8  90/08/13  22:21:00  lwall
-''' patch28: documented that you can't interpolate $) or $| in pattern
-''' 
-''' Revision 3.0.1.7  90/08/09  04:27:04  lwall
-''' patch19: added require operator
-''' 
-''' Revision 3.0.1.6  90/08/03  11:15:29  lwall
-''' patch19: Intermediate diffs for Randal
-''' 
-''' Revision 3.0.1.5  90/03/27  16:15:17  lwall
-''' patch16: MSDOS support
-''' 
-''' Revision 3.0.1.4  90/03/12  16:46:02  lwall
-''' patch13: documented behavior of @array = /noparens/
-''' 
-''' Revision 3.0.1.3  90/02/28  17:55:58  lwall
-''' patch9: grep now returns number of items matched in scalar context
-''' patch9: documented in-place modification capabilites of grep
-''' 
-''' Revision 3.0.1.2  89/11/17  15:30:16  lwall
-''' patch5: fixed some manual typos and indent problems
-''' 
-''' Revision 3.0.1.1  89/11/11  04:43:10  lwall
-''' patch2: made some line breaks depend on troff vs. nroff
-''' patch2: example of unshift had args backwards
-''' 
-''' Revision 3.0  89/10/18  15:21:37  lwall
-''' 3.0 baseline
-''' 
-'''
 .PP
 Along with the literals and variables mentioned earlier,
 the operations in the following section can serve as terms in an expression.
@@ -1796,7 +1751,7 @@ Returns the number of files successfully changed.
 
 .fi
 .ne 23
-Here's an example of looking up non-numeric uids:
+Here's an example that looks up non-numeric uids in the passwd file:
 .nf
 
 	print "User: ";
@@ -2718,8 +2673,8 @@ If EXPR is omitted, returns log of $_.
 Does the same thing as the stat() function, but stats a symbolic link
 instead of the file the symbolic link points to.
 If symbolic links are unimplemented on your system, a normal stat is done.
-.Ip "m/PATTERN/io" 8 4
-.Ip "/PATTERN/io" 8
+.Ip "m/PATTERN/gio" 8 4
+.Ip "/PATTERN/gio" 8
 Searches a string for a pattern match, and returns true (1) or false (\'\').
 If no string is specified via the =~ or !~ operator,
 the $_ string is searched.
@@ -2778,6 +2733,36 @@ This last example splits $foo into the first two words and the remainder
 of the line, and assigns those three fields to $F1, $F2 and $Etc.
 The conditional is true if any variables were assigned, i.e. if the pattern
 matched.
+.Sp
+The \*(L"g\*(R" modifier specifies global pattern matching\*(--that is,
+matching as many times as possible within the string.  How it behaves
+depends on the context.  In an array context, it returns a list of
+all the substrings matched by all the parentheses in the regular expression.
+If there are no parentheses, it returns a list of all the matched strings,
+as if there were parentheses around the whole pattern.  In a scalar context,
+it iterates through the string, returning TRUE each time it matches, and
+FALSE when it eventually runs out of matches.  (In other words, it remembers
+where it left off last time and restarts the search at that point.)  It
+presumes that you have not modified the string since the last match.
+Modifying the string between matches may result in undefined behavior.
+(You can actually get away with in-place modifications via substr()
+that do not change the length of the entire string.  In general, however,
+you should be using s///g for such modifications.)  Examples:
+.nf
+
+	# array context
+	($one,$five,$fifteen) = (\`uptime\` =~ /(\ed+\e.\ed+)/g);
+
+	# scalar context
+	$/ = 1; $* = 1;
+	while ($paragraph = <>) {
+	    while ($paragraph =~ /[a-z][\'")]*[.!?]+[\'")]*\es/g) {
+		$sentences++;
+	    }
+	}
+	print "$sentences\en";
+
+.fi
 .Ip "mkdir(FILENAME,MODE)" 8 3
 Creates the directory specified by FILENAME, with permissions specified by
 MODE (as modified by umask).
@@ -2802,70 +2787,6 @@ SIZE.  Note that if a message is received, the message type will be
 the first thing in VAR, and the maximum length of VAR is SIZE plus the
 size of the message type.  Returns true if successful, or false if
 there is an error.
-''' Beginning of part 3
-''' $RCSfile: perl.man,v $$Revision: 4.0.1.1 $$Date: 91/04/11 17:50:44 $
-'''
-''' $Log:	perl.man,v $
-''' Revision 4.0.1.1  91/04/11  17:50:44  lwall
-''' patch1: fixed some typos
-''' 
-''' Revision 4.0  91/03/20  01:38:08  lwall
-''' 4.0 baseline.
-''' 
-''' Revision 3.0.1.12  91/01/11  18:18:15  lwall
-''' patch42: added binary and hex pack/unpack options
-''' 
-''' Revision 3.0.1.11  90/11/10  01:48:21  lwall
-''' patch38: random cleanup
-''' patch38: documented tr///cds
-''' 
-''' Revision 3.0.1.10  90/10/20  02:15:17  lwall
-''' patch37: patch37: fixed various typos in man page
-''' 
-''' Revision 3.0.1.9  90/10/16  10:02:43  lwall
-''' patch29: you can now read into the middle string
-''' patch29: index and substr now have optional 3rd args
-''' patch29: added scalar reverse
-''' patch29: added scalar
-''' patch29: added SysV IPC
-''' patch29: added waitpid
-''' patch29: added sysread and syswrite
-''' 
-''' Revision 3.0.1.8  90/08/09  04:39:04  lwall
-''' patch19: added require operator
-''' patch19: added truncate operator
-''' patch19: unpack can do checksumming
-''' 
-''' Revision 3.0.1.7  90/08/03  11:15:42  lwall
-''' patch19: Intermediate diffs for Randal
-''' 
-''' Revision 3.0.1.6  90/03/27  16:17:56  lwall
-''' patch16: MSDOS support
-''' 
-''' Revision 3.0.1.5  90/03/12  16:52:21  lwall
-''' patch13: documented that print $filehandle &foo is ambiguous
-''' patch13: added splice operator: @oldelems = splice(@array,$offset,$len,LIST)
-''' 
-''' Revision 3.0.1.4  90/02/28  18:00:09  lwall
-''' patch9: added pipe function
-''' patch9: documented how to handle arbitrary weird characters in filenames
-''' patch9: documented the unflushed buffers problem on piped opens
-''' patch9: documented how to force top of page
-''' 
-''' Revision 3.0.1.3  89/12/21  20:10:12  lwall
-''' patch7: documented that s`pat`repl` does command substitution on replacement
-''' patch7: documented that $timeleft from select() is likely not implemented
-''' 
-''' Revision 3.0.1.2  89/11/17  15:31:05  lwall
-''' patch5: fixed some manual typos and indent problems
-''' patch5: added warning about print making an array context
-''' 
-''' Revision 3.0.1.1  89/11/11  04:45:06  lwall
-''' patch2: made some line breaks depend on troff vs. nroff
-''' 
-''' Revision 3.0  89/10/18  15:21:46  lwall
-''' 3.0 baseline
-''' 
 .Ip "next LABEL" 8 8
 .Ip "next" 8
 The
@@ -3661,6 +3582,7 @@ If SUBROUTINE is omitted, sorts in standard string comparison order.
 If SUBROUTINE is specified, gives the name of a subroutine that returns
 an integer less than, equal to, or greater than 0,
 depending on how the elements of the array are to be ordered.
+(The <=> and cmp operators are extremely useful in such routines.)
 In the interests of efficiency the normal calling code for subroutines
 is bypassed, with the following effects: the subroutine may not be a recursive
 subroutine, and the two elements to be compared are passed into the subroutine
@@ -3673,12 +3595,12 @@ Examples:
 
 .ne 4
 	sub byage {
-	    $age{$a} - $age{$b};	# presuming integers
+	    $age{$a} <=> $age{$b};	# presuming integers
 	}
 	@sortedclass = sort byage @class;
 
 .ne 9
-	sub reverse { $a lt $b ? 1 : $a gt $b ? \-1 : 0; }
+	sub reverse { $b cmp $a; }
 	@harry = (\'dog\',\'cat\',\'x\',\'Cain\',\'Abel\');
 	@george = (\'gone\',\'chased\',\'yz\',\'Punished\',\'Axed\');
 	print sort @harry;
@@ -3842,6 +3764,7 @@ Example:
 	}
 
 .fi
+(This only works on machines for which the device number is negative under NFS.)
 .Ip "study(SCALAR)" 8 6
 .Ip "study SCALAR" 8
 .Ip "study"
@@ -4266,65 +4189,6 @@ resulting string is used to look up the name of the FILEHANDLE at run time.
 For more on formats, see the section on formats later on.
 .Sp
 Note that write is NOT the opposite of read.
-''' Beginning of part 4
-''' $RCSfile: perl.man,v $$Revision: 4.0.1.1 $$Date: 91/04/11 17:50:44 $
-'''
-''' $Log:	perl.man,v $
-''' Revision 4.0.1.1  91/04/11  17:50:44  lwall
-''' patch1: fixed some typos
-''' 
-''' Revision 4.0  91/03/20  01:38:08  lwall
-''' 4.0 baseline.
-''' 
-''' Revision 3.0.1.14  91/01/11  18:18:53  lwall
-''' patch42: started an addendum and errata section in the man page
-''' 
-''' Revision 3.0.1.13  90/11/10  01:51:00  lwall
-''' patch38: random cleanup
-''' 
-''' Revision 3.0.1.12  90/10/20  02:15:43  lwall
-''' patch37: patch37: fixed various typos in man page
-''' 
-''' Revision 3.0.1.11  90/10/16  10:04:28  lwall
-''' patch29: added @###.## fields to format
-''' 
-''' Revision 3.0.1.10  90/08/09  04:47:35  lwall
-''' patch19: added require operator
-''' patch19: added numeric interpretation of $]
-''' 
-''' Revision 3.0.1.9  90/08/03  11:15:58  lwall
-''' patch19: Intermediate diffs for Randal
-''' 
-''' Revision 3.0.1.8  90/03/27  16:19:31  lwall
-''' patch16: MSDOS support
-''' 
-''' Revision 3.0.1.7  90/03/14  12:29:50  lwall
-''' patch15: man page falsely states that you can't subscript array values
-''' 
-''' Revision 3.0.1.6  90/03/12  16:54:04  lwall
-''' patch13: improved documentation of *name
-''' 
-''' Revision 3.0.1.5  90/02/28  18:01:52  lwall
-''' patch9: $0 is now always the command name
-''' 
-''' Revision 3.0.1.4  89/12/21  20:12:39  lwall
-''' patch7: documented that package'filehandle works as well as $package'variable
-''' patch7: documented which identifiers are always in package main
-''' 
-''' Revision 3.0.1.3  89/11/17  15:32:25  lwall
-''' patch5: fixed some manual typos and indent problems
-''' patch5: clarified difference between $! and $@
-''' 
-''' Revision 3.0.1.2  89/11/11  04:46:40  lwall
-''' patch2: made some line breaks depend on troff vs. nroff
-''' patch2: clarified operation of ^ and $ when $* is false
-''' 
-''' Revision 3.0.1.1  89/10/26  23:18:43  lwall
-''' patch1: documented the desirability of unnecessary parentheses
-''' 
-''' Revision 3.0  89/10/18  15:21:55  lwall
-''' 3.0 baseline
-''' 
 .Sh "Precedence"
 .I Perl
 operators have the following associativity and precedence:
@@ -4736,7 +4600,7 @@ Examples:
 
 .ne 10
 # a report on the /etc/passwd file
-format top =
+format STDOUT_TOP =
 \&                        Passwd File
 Name                Login    Office   Uid   Gid Home
 ------------------------------------------------------------------
@@ -4748,7 +4612,7 @@ $name,              $login,  $office,$uid,$gid, $home
 
 .ne 29
 # a report from a bug report form
-format top =
+format STDOUT_TOP =
 \&                        Bug Reports
 @<<<<<<<<<<<<<<<<<<<<<<<     @|||         @>>>>>>>>>>>>>>>>>>>>>>>
 $system,                      $%,         $date
@@ -4990,10 +4854,12 @@ The number of lines left on the page of the currently selected output channel.
 .Ip $~ 8
 The name of the current report format for the currently selected output
 channel.
+Default is name of the filehandle.
 (Mnemonic: brother to $^.)
 .Ip $^ 8
 The name of the current top-of-page format for the currently selected output
 channel.
+Default is name of the filehandle with \*(L"_TOP\*(R" appended.
 (Mnemonic: points to top of page.)
 .Ip $| 8
 If set to nonzero, forces a flush after every write or print on the currently
@@ -5197,6 +5063,11 @@ The current value of the debugging flags.
 (Mnemonic: value of
 .B \-D
 switch.)
+.Ip $^F 8 2
+The maximum system file descriptor, ordinarily 2.  System file descriptors
+are passed to subprocesses, while higher file descriptors are not.
+During an open, system file descriptors are preserved even if the open
+fails.  Ordinary file descriptors are closed before the open is attempted.
 .Ip $^I 8 2
 The current value of the inplace-edit extension.
 Use undef to disable inplace editing.
@@ -5204,7 +5075,9 @@ Use undef to disable inplace editing.
 .B \-i
 switch.)
 .Ip $^P 8 2
-The name that Perl itself was invoked as, from argv[0].
+The internal flag that the debugger clears so that it doesn't
+debug itself.  You could conceivable disable debugging yourself
+by clearing it.
 .Ip $^T 8 2
 The time at which the script began running, in seconds since the epoch.
 The values returned by the
@@ -5218,6 +5091,8 @@ The current value of the warning switch.
 (Mnemonic: related to the
 .B \-w
 switch.)
+.Ip $^X 8 2
+The name that Perl itself was executed as, from argv[0].
 .Ip $ARGV 8 3
 contains the name of the current file when reading from <>.
 .Ip @ARGV 8 3

@@ -572,7 +572,7 @@ Returns new value of point in all cases."
   (or arg (setq arg 1))
   (if (< arg 0) (forward-char 1))
   (and (/= arg 0)
-       (re-search-backward "^\\s(\\|^\\s-*sub\\b[^{]+{\\|^\\s-*format\\b[^=]*="
+       (re-search-backward "^\\s(\\|^\\s-*sub\\b[^{]+{\\|^\\s-*format\\b[^=]*=\\|^\\."
 			   nil 'move arg)
        (goto-char (1- (match-end 0))))
   (point))

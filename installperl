@@ -6,8 +6,8 @@ while (@ARGV) {
     shift;
 }
 
-@scripts = 'h2ph';
-@manpages = ('perl.man', 'h2ph.man');
+@scripts = ('h2ph', 'x2p/s2p', 'x2p/find2perl');
+@manpages = ('perl.man', 'h2ph.man', 'x2p/a2p.man', 'x2p/s2p.man');
 
 $version = sprintf("%5.3f", $]);
 $release = substr($version,0,3);
@@ -72,6 +72,14 @@ if ($bdev != $ddev || $bino != $dino) {
     &link("$installbin/sperl$ver", "$installbin/suidperl") if $d_dosuid;
 }
 
+($bdev,$bino) = stat($installbin);
+($ddev,$dino) = stat('x2p');
+
+if ($bdev != $ddev || $bino != $dino) {
+    &unlink("$installbin/a2p");
+    &cmd("cp x2p/a2p $installbin/a2p");
+}
+
 # Make some enemies in the name of standardization.   :-)
 
 ($udev,$uino) = stat("/usr/bin");
@@ -85,11 +93,11 @@ if (-w _ && ($udev != $ddev || $uino != $dino) && !$nonono) {
 
 # Install scripts.
 
-&makedir($scriptdir);
+&makedir($installscr);
 
 for (@scripts) {
-    &cmd("cp $_ $scriptdir");
-    &chmod(0755, "$scriptdir/$_");
+    &cmd("cp $_ $installscr");
+    s#.*/##; &chmod(0755, "$installscr/$_");
 }
 
 # Install library files.
@@ -111,6 +119,7 @@ if ($mansrc ne '') {
     if ($mdev != $ddev || $mino != $dino) {
 	for (@manpages) {
 	    ($new = $_) =~ s/man$/$manext/;
+	    $new =~ s#.*/##;
 	    print STDERR "  Installing $mansrc/$new\n";
 	    next if $nonono;
 	    open(MI,$_);

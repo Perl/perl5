@@ -19,7 +19,7 @@ foreach $include (@ARGV) {
 	    $val = eval "&$var;";
 	    if ($@) {
 		warn "$@: $_";
-		print <<EOT
+		print <<EOT;
 warn "\$$var isn't correctly set" if defined \$_main{'$var'};
 EOT
 		next;

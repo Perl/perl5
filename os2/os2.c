@@ -1,11 +1,14 @@
-/* $Header: os2.c,v 4.0 91/03/20 01:36:21 lwall Locked $
+/* $RCSfile: os2.c,v $$Revision: 4.0.1.1 $$Date: 91/06/07 11:23:06 $
  *
  *    (C) Copyright 1989, 1990 Diomidis Spinellis.
  *
- *    You may distribute under the terms of the GNU General Public License
- *    as specified in the README file that comes with the perl 3.0 kit.
+ *    You may distribute under the terms of either the GNU General Public
+ *    License or the Artistic License, as specified in the README file.
  *
  * $Log:	os2.c,v $
+ * Revision 4.0.1.1  91/06/07  11:23:06  lwall
+ * patch4: new copyright notice
+ * 
  * Revision 4.0  91/03/20  01:36:21  lwall
  * 4.0 baseline.
  * 
