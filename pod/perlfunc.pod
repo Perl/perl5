@@ -3426,7 +3426,7 @@ Generalized quotes.  See L<perlop/"Regexp Quote-Like Operators">.
 
 =item quotemeta
 
-Returns the value of EXPR with all non-alphanumeric
+Returns the value of EXPR with all non-"word"
 characters backslashed.  (That is, all characters not matching
 C</[A-Za-z_0-9]/> will be preceded by a backslash in the
 returned string, regardless of any locale settings.)
