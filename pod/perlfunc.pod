@@ -2636,8 +2636,26 @@ replaces "F<::>" with "F</>" in the filename for you,
 to make it easy to load standard modules.  This form of loading of
 modules does not risk altering your namespace.
 
-For a yet-more-powerful import facility, see L</use> and
-L<perlmod>.
+In other words, if you try this:
+
+        require Foo::Bar ; # a splendid bareword 
+
+The require function will actually look for the "Foo/Bar.pm" file in the 
+directories specified in the @INC array.
+
+But if you try this :
+
+        $class = 'Foo::Bar';
+        require $class ; # $class is not a bareword
+or
+        require "Foo::Bar" ; # not a bareword because of the ""
+
+The require function will look for the "Foo::Bar" file in the @INC array and 
+will complain about not finding "Foo::Bar" there. In this case you can do :
+
+        eval "require $class";
+
+For a yet-more-powerful import facility, see L</use> and L<perlmod>.
 
 =item reset EXPR
 

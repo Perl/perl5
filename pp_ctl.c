@@ -2454,7 +2454,7 @@ PP(pp_require)
     SvREFCNT_dec(namesv);
     if (!tryrsfp) {
 	if (op->op_type == OP_REQUIRE) {
-	    SV *msg = sv_2mortal(newSVpvf("Can't locate %s in @INC", name));
+	    SV *msg = sv_2mortal(newSVpvf("Can't locate file '%s' in @INC", name));
 	    SV *dirmsgsv = NEWSV(0, 0);
 	    AV *ar = GvAVn(incgv);
 	    I32 i;

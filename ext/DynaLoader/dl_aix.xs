@@ -29,6 +29,20 @@
 #include <a.out.h>
 #include <ldfcn.h>
 
+/*
+ * AIX 4.3 does remove some useful definitions from ldfcn.h. Define
+ * these here to compensate for that lossage.
+ */
+#ifndef BEGINNING
+# define BEGINNING SEEK_SET
+#endif
+#ifndef FSEEK
+# define FSEEK(ldptr,o,p)	fseek(IOPTR(ldptr),(p==BEGINNING)?(OFFSET(ldptr) +o):o,p)
+#endif
+#ifndef FREAD
+# define FREAD(p,s,n,ldptr)	fread(p,s,n,IOPTR(ldptr))
+#endif
+
 /* If using PerlIO, redefine these macros from <ldfcn.h> */
 #ifdef USE_PERLIO
 #define FSEEK(ldptr,o,p)        PerlIO_seek(IOPTR(ldptr),(p==BEGINNING)?(OFFSET(ldptr)+o):o,p)

@@ -1681,9 +1681,12 @@ fold_constants(register OP *o)
     if (type == OP_RV2GV)
 	return newGVOP(OP_GV, 0, (GV*)sv);
     else {
-	if ((SvFLAGS(sv) & (SVf_IOK|SVf_NOK|SVf_POK)) == SVf_NOK) {
+	/* try to smush double to int, but don't smush -2.0 to -2 */
+	if ((SvFLAGS(sv) & (SVf_IOK|SVf_NOK|SVf_POK)) == SVf_NOK &&
+	    type != OP_NEGATE)
+	{
 	    IV iv = SvIV(sv);
-	    if ((double)iv == SvNV(sv)) {	/* can we smush double to int */
+	    if ((double)iv == SvNV(sv)) {
 		SvREFCNT_dec(sv);
 		sv = newSViv(iv);
 	    }
