@@ -6,7 +6,6 @@
 case "$cc" in
 '') cc='/bin/cc'
     test -f $cc || cc='/usr/ccs/bin/cc'
-    cccdlflags='-Kpic'
     ;;
 esac
 ldflags='-L/usr/ccs/lib -L/usr/ucblib'
@@ -15,7 +14,6 @@ ccflags='-I/usr/include -I/usr/ucbinclude'
 libswanted=`echo " $libswanted " | sed -e 's/ malloc / /' `
 d_index='undef'
 d_suidsafe=define
-lddlflags="-G $ldflags"
 usevfork='false'
 if test "$osvers" = "3.0"; then
 	d_gconvert='undef'
@@ -31,9 +29,13 @@ EOM
 	fi
 	rm -f /tmp/esix$$
 fi
-# dlopen routines exist but they don't work with perl.
-# The case statement allows experimenters to override hint with
-# Configure -D usedl
-case "$usedl" in
-'') usedl="$undef" ;;	
-esac
+
+cat <<'EOM'
+
+If you wish to use dynamic linking, you must use 
+	LD_LIBRARY_PATH=`pwd`; export LD_LIBRARY_PATH
+or
+	setenv LD_LIBRARY_PATH `pwd`
+before running make.
+
+EOM

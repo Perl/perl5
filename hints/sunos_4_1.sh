@@ -12,4 +12,3 @@ else # sys5
 fi
 # we don't set gidtype because unistd.h says gid_t getgid() but man
 # page says int getgid() for bsd. utils.c includes unistd.h :-(
-

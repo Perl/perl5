@@ -1,23 +1,31 @@
-optimize=-g
-tmp=`(uname -a) 2>/dev/null`
-case "$tmp" in
-*RISC*) cat <<EOF
+# hints/ultrix_4.sh
+# Last updated by Andy Dougherty  <doughera@lafcol.lafayette.edu>
+# Wed Nov  2 13:41:14 EST 1994
+#
+# I don't know if -g is really needed.  (AD)
+case "$optimize" in
+'') optimize=-g ;;
+esac
+case "$myuname" in
+*risc*) cat <<EOF
 Note that there is a bug in some versions of NFS on the DECStation that
 may cause utime() to work incorrectly.  If so, regression test io/fs
 may fail if run under NFS.  Ignore the failure.
 EOF
-    case "$tmp" in
+    case "$osvers" in
     *4.2*) d_volatile=undef;;
     esac
-;;
+    ;;
 esac
-case "$tmp" in
+case "$osvers" in
 *4.1*)	ccflags="$ccflags -DLANGUAGE_C -Olimit 2900" 
 	;;
 *4.2*)	ccflags="$ccflags -DLANGUAGE_C -Olimit 2900"
 	libswanted=`echo $libswanted | sed 's/ malloc / /'`
 	;;
-*4.4*)	ccflags="$ccflags -std -Olimit 2900"
+*4.3*)	ccflags="$ccflags -std1 -DLANGUAGE_C -Olimit 2900"
+	;;
+*4*)	ccflags="$ccflags -std -Olimit 2900"
 	ranlib='ranlib'
 	;;
 esac

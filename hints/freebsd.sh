@@ -24,5 +24,3 @@ case "$osvers" in
 esac
 # Avoid telldir prototype conflict in pp_sys.c  (FreeBSD uses const DIR *)
 pp_sys_cflags='ccflags="$ccflags -DHAS_TELLDIR_PROTOTYPE"'
-# FreeBSD has an older <db.h> header file.
-DB_File_cflags='ccflags="$ccflags -DDBXS_HASH_TYPE=int -DDBXS_PREFIX_TYPE=int"'

@@ -29,6 +29,3 @@ case "$osvers" in
 	esac
 	;;
 esac
-
-# BSD/386 has an older <db.h> header file.
-DB_File_cflags='ccflags="$ccflags -DDBXS_HASH_TYPE=int -DDBXS_PREFIX_TYPE=int"'

@@ -1,5 +1,7 @@
 # hints/dec_osf.sh
-optimize="-g"
+case "$optimize" in
+'') optimize="-g" ;;
+esac
 ccflags="$ccflags -DSTANDARD_C -DDEBUGGING"
 # Version 1 has problems with -no_archive if only an archive
 # lib is available.
