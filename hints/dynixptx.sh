@@ -24,6 +24,24 @@ usenm='n'
 d_vfork='define'
 optimize='-Wc,-O3 -W0,-xstring'
 
+# We override d_socket because it's very hard for Configure to get it right
+# in Dynix/Ptx, for several reasons.
+# (1) the socket interface is in libsocket.so -- this wouldn't be so hard
+#     for Configure to fathom...but it gets more tangled.
+# (2) if the system has been patched there can be libsocket.so.1.FOO.BAR,
+#     the FOO.BAR being the old version of the system before the patching.
+#     Configure picks up the old broken version.
+# (3) libsocket.so points to either libsocket.so.1 (v4.2)
+#     or libsocket.so.1.1 (v4.4)  The socket call in libsocket.so.1.1
+#     (BSD socket library) is called bsd_socket(), and has a macro wrapper
+#     to hide this.
+# This information kindly provided by Martin J. Bligh of Sequent.
+# As he puts it:
+# "Sequent has unusual capabilities, taking it above and beyond
+#  the complexity of any other vendor" :-)
+#
+# Jarkko Hietaniemi August 1998
+
 case "$osvers" in
 4.4*) # configure doesn't find sockets, as they're in libsocket, not libc
         d_socket='define'
