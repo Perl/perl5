@@ -3691,14 +3691,20 @@ typedef SV * gptr;		/* pointers in our lists */
  * The original author of the mergesort implementation included here
  * is Peter M. McIlroy <pmcilroy@lucent.com> (see: Optimistic Merge Sort
  * (SODA '92)), and the integrator of it to the Perl source code is
- * John Linderman <jpl@research.att.com>.
+ * John P. Linderman <jpl@research.att.com>.
  *
  * Both Peter and John agree with the inclusion of their code in here
  * and with their code being distributed under the same terms as Perl.
  *
- * This code originally developed in conjunction with the BSD Computer
- * Software Research Group and the University of California at Berkeley.
+ * Much of this code is original source code from BSD4.4, and is
+ * copyright (c) 1991 The Regents of the University of California.
  *
+ * 1. Redistributions in binary form must reproduce the above copyright
+ *    notice, this list of conditions and the following disclaimer in the
+ *    documentation and/or other materials provided with the distribution.
+ * 2. Neither the name of the University nor the names of its contributors
+ *    may be used to endorse or promote products derived from this software
+ *    without specific prior written permission.         
  */
 
 /* Binary merge internal sort, with a few special mods

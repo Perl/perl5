@@ -20,7 +20,7 @@
 
 # $Id: Head.U,v 3.0.1.9 1997/02/28 15:02:09 ram Exp $
 #
-# Generated on Thu Aug 31 21:06:17 EET DST 2000 [metaconfig 3.0 PL70]
+# Generated on Fri Sep  1 02:17:50 EET DST 2000 [metaconfig 3.0 PL70]
 # (with additional metaconfig patches by perlbug@perl.org)
 
 cat >/tmp/c1$$ <<EOF
@@ -7856,12 +7856,13 @@ EOP
 case "$d_Gconvert" in
 gconvert*) xxx_list='gconvert gcvt sprintf' ;;
 gcvt*) xxx_list='gcvt gconvert sprintf' ;;
+sprintf*) xxx_list='sprintf gconvert gcvt' ;;
 *) xxx_list='gconvert gcvt sprintf' ;;
 esac
 
 case "$d_longdbl$uselongdouble$d_PRIgldbl" in
 "$define$define$define")
-    # for long doubles prefer sprintf
+    # for long doubles prefer first qgcvt, then sprintf
     xxx_list="`echo $xxx_list|sed s/sprintf//`" 
     xxx_list="sprintf $xxx_list"
     case "$d_qgcvt" in
