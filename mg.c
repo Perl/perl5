@@ -1934,14 +1934,14 @@ Perl_magic_killbackrefs(pTHX_ SV *sv, MAGIC *mg)
     SV **svp = AvARRAY(av);
     I32 i = AvFILLp(av);
     while (i >= 0) {
-	if (svp[i]) {
+	if (svp[i] && svp[i] != &PL_sv_undef) {
 	    if (!SvWEAKREF(svp[i]))
 		Perl_croak(aTHX_ "panic: magic_killbackrefs");
 	    /* XXX Should we check that it hasn't changed? */
 	    SvRV(svp[i]) = 0;
 	    (void)SvOK_off(svp[i]);
 	    SvWEAKREF_off(svp[i]);
-	    svp[i] = Nullsv;
+	    svp[i] = &PL_sv_undef;
 	}
 	i--;
     }
