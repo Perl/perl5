@@ -98,56 +98,64 @@ if ($Config{'d_msgget'} eq 'define' &&
 if($Config{'d_semget'} eq 'define' &&
    $Config{'d_semctl'} eq 'define') {
 
-    use IPC::SysV qw(IPC_CREAT GETALL SETALL);
+    if ($Config{'d_semctl_semid_ds'} eq 'define' ||
+	$Config{'d_semctl_semun'}    eq 'define') {
 
-    $sem = semget(IPC_PRIVATE, 10, $perm | IPC_CREAT);
-    # Very first time called after machine is booted value may be 0 
-    die "semget: $!\n" unless defined($sem) && $sem >= 0;
+	use IPC::SysV qw(IPC_CREAT GETALL SETALL);
 
-    print "ok 7\n";
+	$sem = semget(IPC_PRIVATE, 10, $perm | IPC_CREAT);
+	# Very first time called after machine is booted value may be 0 
+	die "semget: $!\n" unless defined($sem) && $sem >= 0;
 
-    my $data;
-    semctl($sem,0,IPC_STAT,$data) or print "not ";
-    print "ok 8\n";
+	print "ok 7\n";
 
-    print "not " unless length($data);
-    print "ok 9\n";
+	my $data;
+	semctl($sem,0,IPC_STAT,$data) or print "not ";
+	print "ok 8\n";
+	
+	print "not " unless length($data);
+	print "ok 9\n";
 
-    my $nsem = 10;
+	my $nsem = 10;
 
-    semctl($sem,0,SETALL,pack("s!*",(0) x $nsem)) or print "not ";
-    print "ok 10\n";
+	semctl($sem,0,SETALL,pack("s!*",(0) x $nsem)) or print "not ";
+	print "ok 10\n";
 
-    $data = "";
-    semctl($sem,0,GETALL,$data) or print "not ";
-    print "ok 11\n";
+	$data = "";
+	semctl($sem,0,GETALL,$data) or print "not ";
+	print "ok 11\n";
 
-    print "not " unless length($data) == length(pack("s!*",(0) x $nsem));
-    print "ok 12\n";
+	print "not " unless length($data) == length(pack("s!*",(0) x $nsem));
+	print "ok 12\n";
 
-    my @data = unpack("s!*",$data);
+	my @data = unpack("s!*",$data);
 
-    my $adata = "0" x $nsem;
+	my $adata = "0" x $nsem;
 
-    print "not " unless @data == $nsem and join("",@data) eq $adata;
-    print "ok 13\n";
+	print "not " unless @data == $nsem and join("",@data) eq $adata;
+	print "ok 13\n";
 
-    my $poke = 2;
+	my $poke = 2;
 
-    $data[$poke] = 1;
-    semctl($sem,0,SETALL,pack("s!*",@data)) or print "not ";
-    print "ok 14\n";
+	$data[$poke] = 1;
+	semctl($sem,0,SETALL,pack("s!*",@data)) or print "not ";
+	print "ok 14\n";
     
-    $data = "";
-    semctl($sem,0,GETALL,$data) or print "not ";
-    print "ok 15\n";
+	$data = "";
+	semctl($sem,0,GETALL,$data) or print "not ";
+	print "ok 15\n";
 
-    @data = unpack("s!*",$data);
+	@data = unpack("s!*",$data);
 
-    my $bdata = "0" x $poke . "1" . "0" x ($nsem-$poke-1);
+	my $bdata = "0" x $poke . "1" . "0" x ($nsem-$poke-1);
 
-    print "not " unless join("",@data) eq $bdata;
-    print "ok 16\n";
+	print "not " unless join("",@data) eq $bdata;
+	print "ok 16\n";
+    } else {
+	for (7..16) {
+	    print "ok $_ # skipped, no semctl possible\n";
+	}
+    }
 } else {
     for (7..16) {
 	print "ok $_\n"; # fake it
