@@ -10,7 +10,7 @@ use Exporter;
 use SelfLoader;
 use vars qw { $VERSION @ISA %EXPORT_TAGS };
 
-$VERSION = '1.95';
+$VERSION = '1.95_01';
 @ISA		= qw ( Exporter );
 		     
 %EXPORT_TAGS	= ( ALL => [ qw(
@@ -583,12 +583,15 @@ sub _match_codeblock($$$$$$$)
 
 
 		# NEED TO COVER MANY MORE CASES HERE!!!
+		# NB 'case' is included here, because in Switch.pm,
+		# it's followed by a term, not an op
+
 		if ($$textref =~ m#\G\s*(?!$ldel_inner)
 					( [-+*x/%^&|.]=?
 					| [!=]~
 					| =(?!>)
 					| (\*\*|&&|\|\||<<|>>)=?
-					| split|grep|map|return
+					| case|split|grep|map|return
 					| [([]
 					)#gcx)
 		{

@@ -13,7 +13,7 @@ BEGIN {
 # Change 1..1 below to 1..last_test_to_print .
 # (It may become useful if the test is moved to ./t subdirectory.)
 
-BEGIN { $| = 1; print "1..41\n"; }
+BEGIN { $| = 1; print "1..43\n"; }
 END {print "not ok 1\n" unless $loaded;}
 use Text::Balanced qw ( extract_codeblock );
 $loaded = 1;
@@ -64,6 +64,7 @@ __DATA__
 
 # USING: extract_codeblock($str);
 { $data[4] =~ /['"]/; };
+{ case /^bar\s+\S+/ {\n#+\n}};
 
 # USING: extract_codeblock($str,'<>');
 < %x = ( try => "this") >;
