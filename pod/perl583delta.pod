@@ -142,7 +142,17 @@ they are called for. Previously callbacks were only invoked in the
 C<case $variable $define)> branch. This change should only affect platform
 maintainers writing configuration hints files.
 
+=head1 Platform Specific Problems
+
+The regression test ext/threads/shared/t/wait.t fails on early RedHat 9
+and HP-UX 10.20 due to bugs in their threading implementations.
+RedHat users should see https://rhn.redhat.com/errata/RHBA-2003-136.html
+and consider upgrading their glibc.
+
 =head1 Known Problems
+
+Detached threads aren't supported on Windows yet, as they may lead to 
+memory access violation problems.
 
 We have a backlog of unresolved bugs. Dealing with bugs and bug reports
 is unglamorous work; not something ideally suited to volunteer labour,
@@ -150,6 +160,18 @@ but that is all that we have.
 
 The perl5 development team are implementing changes to help address this
 problem, which should go live in early 2004.
+
+=head1 Future Directions
+
+Code freeze for the next maintenance release (5.8.4) is on March 31st 2004,
+with release expected by mid April. Similarly 5.8.5's freeze will be at
+the end of June, with release by mid July.
+
+=head1 Obituary
+
+Iain 'Spoon' Truskett, Perl hacker, author of <perlreref> and
+contributor to CPAN, died suddenly on 29th December 2003, aged 24.
+He will be missed.
 
 =head1 Reporting Bugs
 
