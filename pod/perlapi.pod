@@ -725,7 +725,9 @@ Found in file pp_pack.c
 
 =item unpackstring
 
-The engine implementing unpack() Perl function.
+The engine implementing unpack() Perl function. C<unpackstring> puts the
+extracted list items on the stack and returns the number of elements.
+Issue C<PUTBACK> before and C<SPAGAIN> after the call to this function.
 
 	I32	unpackstring(char *pat, char *patend, char *s, char *strend, U32 flags)
 
