@@ -4064,6 +4064,7 @@ PP(pp_unpack)
     U16 aushort;
     unsigned int auint;
     U32 aulong;
+    UV auv;
 #ifdef HAS_QUAD
     Uquad_t auquad;
 #endif
@@ -4331,20 +4332,44 @@ PP(pp_unpack)
 	    if (len > strend - s)
 		len = strend - s;
 	    if (checksum) {
-	      uchar_checksum:
-		while (len-- > 0) {
-		    auint = *s++ & 255;
-		    culong += auint;
+		if (DO_UTF8(right)) {
+		    while (len > 0) {
+			STRLEN l;
+			auv = utf8_to_uv((U8*)s, len, &l, UTF8_ALLOW_ANYUV);
+			culong += auv;
+			s += l;
+			len -= l;
+		    }
+		}
+		else {
+		uchar_checksum:
+		    while (len-- > 0) {
+			auint = *s++ & 0xFF;
+			culong += auint;
+		    }
 		}
 	    }
 	    else {
 		EXTEND(SP, len);
 		EXTEND_MORTAL(len);
-		while (len-- > 0) {
-		    auint = *s++ & 255;
-		    sv = NEWSV(37, 0);
-		    sv_setiv(sv, (IV)auint);
-		    PUSHs(sv_2mortal(sv));
+		if (DO_UTF8(right)) {
+		    while (len > 0) {
+			STRLEN l;
+			auv = utf8_to_uv((U8*)s, len, &l, UTF8_ALLOW_ANYUV);
+			sv = NEWSV(37, 0);
+			sv_setuv(sv, auv);
+			PUSHs(sv_2mortal(sv));
+			s += l;
+			len -= l;
+		    }
+		}
+		else {
+		    while (len-- > 0) {
+			auint = *s++ & 0xFF;
+			sv = NEWSV(37, 0);
+			sv_setuv(sv, auint);
+			PUSHs(sv_2mortal(sv));
+		    }
 		}
 	    }
 	    break;
@@ -5145,6 +5170,7 @@ PP(pp_pack)
     unsigned int auint;
     I32 along;
     U32 aulong;
+    UV auv;
 #ifdef HAS_QUAD
     Quad_t aquad;
     Uquad_t auquad;
@@ -5156,6 +5182,7 @@ PP(pp_pack)
 #ifdef PERL_NATINT_PACK
     int natint;		/* native integer */
 #endif
+    bool has_utf8;
 
     items = SP - MARK;
     MARK++;
@@ -5392,7 +5419,6 @@ PP(pp_pack)
 		items = saveitems;
 	    }
 	    break;
-	case 'C':
 	case 'c':
 	    while (len-- > 0) {
 		fromstr = NEXTFROM;
@@ -5401,12 +5427,41 @@ PP(pp_pack)
 		sv_catpvn(cat, &achar, sizeof(char));
 	    }
 	    break;
-	case 'U':
+	case 'C':
+	    has_utf8 = SvUTF8(cat);
 	    while (len-- > 0) {
 		fromstr = NEXTFROM;
-		auint = SvUV(fromstr);
-		SvGROW(cat, SvCUR(cat) + UTF8_MAXLEN + 1);
-		SvCUR_set(cat, (char*)uv_to_utf8((U8*)SvEND(cat),auint)
+		auv = SvUV(fromstr);
+		if (!has_utf8 && auv > 0xFF && !IN_BYTE) {
+		    has_utf8 = TRUE;
+		    if (SvCUR(cat))
+			sv_utf8_upgrade(cat);
+		    else
+			SvUTF8_on(cat); /* There will be UTF8. */
+		}
+		if (has_utf8) {
+		    SvGROW(cat, SvCUR(cat) + UNISKIP(auv) + 1);
+		    SvCUR_set(cat, (char*)uv_to_utf8((U8*)SvEND(cat),auv)
+			           - SvPVX(cat));
+		}
+		else {
+		    achar = auv;
+		    sv_catpvn(cat, &achar, sizeof(char));
+		}
+	    }
+	    *SvEND(cat) = '\0';
+	    break;
+	case 'U':
+	    has_utf8 = SvUTF8(cat);
+	    while (len-- > 0) {
+		fromstr = NEXTFROM;
+		auv = SvUV(fromstr);
+		if (!has_utf8 && auv > 0x80) {
+		    has_utf8 = TRUE;
+		    sv_utf8_upgrade(cat);
+		}
+		SvGROW(cat, SvCUR(cat) + UNISKIP(auv) + 1);
+		SvCUR_set(cat, (char*)uv_to_utf8((U8*)SvEND(cat),auv)
 			       - SvPVX(cat));
 	    }
 	    *SvEND(cat) = '\0';
