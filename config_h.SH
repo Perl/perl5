@@ -2370,6 +2370,12 @@ sed <<!GROK!THIS! >config.h -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un-
  */
 #$i_socks	I_SOCKS		/**/
 
+/* I_SUNMATH:
+ *	This symbol, if defined, indicates that <sunmath.h> exists and
+ *	should be included.
+ */
+#$i_sunmath	I_SUNMATH		/**/
+
 /* I_SYSLOG:
  *	This symbol, if defined, indicates that <syslog.h> exists and
  *	should be included.

@@ -333,8 +333,8 @@ EOM
 esac
 EOCBU
 
-cat > UU/useuselargefiles.cbu <<'EOCBU'
-# This script UU/useuselargefiles.cbu will get 'called-back' by Configure 
+cat > UU/uselargefiles.cbu <<'EOCBU'
+# This script UU/uselargefiles.cbu will get 'called-back' by Configure 
 # after it has prompted the user for whether to use large files.
 case "$uselargefiles" in
 ''|$define|true|[yY]*)
@@ -373,12 +373,12 @@ case "$use64bitall" in
 		# I don't know what are the flags to make gcc sparcv9-aware,
 	        # I'm just guessing. --jhi
 		ccflags="$ccflags -mv9"
-		ldflags="$ccflags -mv9"
+		ldflags="$ldflags -mv9"
 		lddlflags="$lddlflags -G -mv9"
 		;;
 	    *)
 		ccflags="$ccflags `getconf XBS5_LP64_OFF64_CFLAGS 2>/dev/null`"
-		ldflags="$ccflags `getconf XBS5_LP64_OFF64_LDFLAGS 2>/dev/null`"
+		ldflags="$ldflags `getconf XBS5_LP64_OFF64_LDFLAGS 2>/dev/null`"
 		lddlflags="$lddlflags -G `getconf XBS5_LP64_OFF64_LDFLAGS 2>/dev/null`"
 		;;
 	    esac	
@@ -392,7 +392,6 @@ Cannot continue, aborting.
 EOM
 		exit 1
 	    fi 
-	    loclibpth="$loclibpth /usr/lib/sparcv9"
 	    libscheck='case "`/usr/bin/file $xxx`" in
 *64-bit*|*SPARCV9*) ;;
 *) xxx=/no/64-bit$xxx ;;
@@ -402,12 +401,32 @@ esac
 EOCBU
  
 # Actually, we want to run this already now, if so requested,
-# because we need to fix up the library paths right now.
+# because we need to fix up the flags right now.
 case "$use64bitall" in
 "$define"|true|[yY]*)
 	. ./UU/use64bitall.cbu
 	;;
 esac
+
+cat > UU/uselongdouble.cbu <<'EOCBU'
+# This script UU/uselongdouble.cbu will get 'called-back' by Configure 
+# after it has prompted the user for whether to use long doubles.
+case "$uselongdouble" in
+"$define"|true|[yY]*)
+	if test ! -f /opt/SUNWspro/lib/libsunmath.so; then
+		cat <<EOM
+
+I do not see the libsunmath.so in /opt/SUNWspro/lib;
+therefore I cannot do long doubles, sorry.
+
+EOM
+		exit 1
+	fi
+	libswanted="$libswanted sunmath"
+	loclibpth="$loclibpth /opt/SUNWspro/lib"
+	;;
+esac
+EOCBU
 
 # This is just a trick to include some useful notes.
 cat > /dev/null <<'End_of_Solaris_Notes'

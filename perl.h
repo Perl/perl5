@@ -1135,7 +1135,11 @@ typedef UVTYPE UV;
 
 typedef NVTYPE NV;
 
+
 #ifdef USE_LONG_DOUBLE
+#   ifdef I_SUNMATH
+#       include <sunmath.h>
+#   endif
 #   define NV_DIG LDBL_DIG
 #   ifdef HAS_SQRTL
 #       define Perl_modf modfl
