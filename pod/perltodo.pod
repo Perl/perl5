@@ -27,6 +27,11 @@ it would be a good thing.
 
 Fix (or rewrite) the implementation of the C</(?{...})/> closures.
 
+=head1 A re-entrant regexp engine
+
+This will allow the use of a regex from inside (?{ }), (??{ }) and
+(?(?{ })|) constructs.
+
 =head1 pragmata
 
 =head2 lexical pragmas
