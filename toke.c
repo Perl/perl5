@@ -2751,6 +2751,21 @@ Perl_yylex(pTHX)
 	    attrs = Nullop;
 	    while (isIDFIRST_lazy(s)) {
 		d = scan_word(s, PL_tokenbuf, sizeof PL_tokenbuf, FALSE, &len);
+		if (isLOWER(*s) && (tmp = keyword(PL_tokenbuf, len))) {
+		    if (tmp < 0) tmp = -tmp;
+		    switch (tmp) {
+		    case KEY_or:
+		    case KEY_and:
+		    case KEY_for:
+		    case KEY_unless:
+		    case KEY_if:
+		    case KEY_while:
+		    case KEY_until:
+			goto got_attrs;
+		    default:
+			break;
+		    }
+		}
 		if (*d == '(') {
 		    d = scan_str(d,TRUE,TRUE);
 		    if (!d) {
@@ -2785,8 +2800,8 @@ Perl_yylex(pTHX)
 		while (*s == ',')
 		    s = skipspace(s+1);
 	    }
-	    tmp = (PL_expect == XOPERATOR ? '=' : '{'); /*'}' for vi */
-	    if (*s != ';' && *s != tmp) {
+	    tmp = (PL_expect == XOPERATOR ? '=' : '{'); /*'}(' for vi */
+	    if (*s != ';' && *s != tmp && (tmp != '=' || *s != ')')) {
 		char q = ((*s == '\'') ? '"' : '\'');
 		/* If here for an expression, and parsed no attrs, back off. */
 		if (tmp == '=' && !attrs) {
@@ -2806,6 +2821,7 @@ Perl_yylex(pTHX)
 		    op_free(attrs);
 		OPERATOR(':');
 	    }
+	got_attrs:
 	    if (attrs) {
 		PL_nextval[PL_nexttoke].opval = attrs;
 		force_next(THING);
