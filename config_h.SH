@@ -1700,6 +1700,12 @@ sed <<!GROK!THIS! >config.h -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un-
 #define LONGLONGSIZE $longlongsize		/**/
 #endif
 
+/* HAS_MEMCHR:
+ *	This symbol, if defined, indicates that the memchr routine is available
+ *	to locate characters within a C string.
+ */
+#$d_memchr HAS_MEMCHR	/**/
+
 /* HAS_MMAP:
  *	This symbol, if defined, indicates that the mmap system call is
  *	available to map a file into memory.

@@ -20,7 +20,7 @@
 
 # $Id: Head.U,v 3.0.1.9 1997/02/28 15:02:09 ram Exp $
 #
-# Generated on Thu May 13 15:54:16 EET DST 1999 [metaconfig 3.0 PL70]
+# Generated on Thu May 13 16:42:40 EET DST 1999 [metaconfig 3.0 PL70]
 # (with additional metaconfig patches by perlbug@perl.com)
 
 cat >/tmp/c1$$ <<EOF
@@ -404,6 +404,7 @@ d_madvise=''
 d_mblen=''
 d_mbstowcs=''
 d_mbtowc=''
+d_memchr=''
 d_memcmp=''
 d_memcpy=''
 d_memmove=''
@@ -8680,6 +8681,10 @@ eval $inlibc
 set mbtowc d_mbtowc
 eval $inlibc
 
+: see if memchr exists
+set memchr d_memchr
+eval $inlibc
+
 : see if memcmp exists
 set memcmp d_memcmp
 eval $inlibc
@@ -10965,7 +10970,13 @@ $cat >try.c <<EOCP
 #$d_sysconf HAS_SYSCONF
 int main() {
   FILE* p = fopen("try.out", "w");
+#ifdef TRY_FPUTC
   fputc('x', p);
+#else
+# ifdef TRY_FPRINTF
+  fprintf(p, "x");
+# endif
+#endif
 #ifdef TRY_FFLUSH_NULL
   fflush(NULL);
 #endif
@@ -10997,17 +11008,41 @@ int main() {
   _exit(42);
 }
 EOCP
+: first we have to find out how _not_ to flush
+if $test "X$fflushNULL" = X -o "X$fflushall" = X; then
+    output=''
+    set try -DTRY_FPUTC
+    $rm -f try.out
+    if eval $compile_ok; then
+ 	    ./try$exe_ext 2>/dev/null
+	    if $test ! -s try.out -a "X$?" = X42; then
+		output=-DTRY_FPUTC
+	    fi
+    fi
+    case "$output" in
+    '')
+	    set try -DTRY_FPRINTF
+	    $rm -f try.out
+	    if eval $compile_ok; then
+ 		    ./try$exe_ext 2>/dev/null
+		    if $test ! -s try.out -a "X$?" = X42; then
+			output=-DTRY_FPRINTF
+		    fi
+	    fi
+	;;
+    esac
+fi
 : check for fflush NULL behaviour
 case "$fflushNULL" in
-'') 	set try -DTRY_FFLUSH_NULL
+'') 	set try -DTRY_FFLUSH_NULL $output
 	$rm -f try.out
 	if eval $compile_ok; then
 	    	./try$exe_ext 2>/dev/null
 		if $test -s try.out -a "X$?" = X42; then
 			fflushNULL="`$cat try.out`"
 		fi
-		$rm -f core try.core core.try.*
 	fi
+	$rm -f core try.core core.try.*
 	case "$fflushNULL" in
 	x)	cat >&4 <<EOM
 Your fflush(NULL) works okay.
@@ -11036,15 +11071,15 @@ $define|true|[yY]*)
 esac
 : check for fflush all behaviour
 case "$fflushall" in
-'') 	set try -DTRY_FFLUSH_ALL
+'') 	set try -DTRY_FFLUSH_ALL $output
 	$rm -f try.out
 	if eval $compile_ok; then
 	    	./try$exe_ext 2>/dev/null
 		if $test -s try.out -a "X$?" = X42; then
 			fflushall="`$cat try.out`"
 		fi
-		$rm -f core try.core core.try.*
 	fi
+	$rm -f core try.core core.try.*
 	case "$fflushall" in
 	x)	cat >&4 <<EOM
 Flushing explicitly all the stdio streams works.
@@ -12991,6 +13026,7 @@ d_madvise='$d_madvise'
 d_mblen='$d_mblen'
 d_mbstowcs='$d_mbstowcs'
 d_mbtowc='$d_mbtowc'
+d_memchr='$d_memchr'
 d_memcmp='$d_memcmp'
 d_memcpy='$d_memcpy'
 d_memmove='$d_memmove'

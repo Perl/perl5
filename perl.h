@@ -502,6 +502,12 @@ Free_t   Perl_mfree _((Malloc_t where));
 #   endif
 #endif
 
+#ifndef memchr
+#   ifndef HAS_MEMCHR
+#       define memchr(s,c,n) ninstr((char*)(s), ((char*)(s)) + n, &(c), &(c) + 1)
+#   endif
+#endif
+
 #ifndef HAS_BCMP
 #   ifndef bcmp
 #	define bcmp(s1,s2,l) memcmp(s1,s2,l)
