@@ -8427,9 +8427,11 @@ Returns a string describing what the SV is a reference to.
 char *
 Perl_sv_reftype(pTHX_ const SV *sv, int ob)
 {
+    /* The fact that I don't need to downcast to char * everywhere, only in ?:
+       inside return suggests a const propagation bug in g++.  */
     if (ob && SvOBJECT(sv)) {
 	char *name = HvNAME(SvSTASH(sv));
-	return name ? name : "__ANON__";
+	return name ? name : (char *) "__ANON__";
     }
     else {
 	switch (SvTYPE(sv)) {
@@ -8449,11 +8451,11 @@ Perl_sv_reftype(pTHX_ const SV *sv, int ob)
 				else
 				    return "SCALAR";
 
-	case SVt_PVLV:		return SvROK(sv) ? "REF"
+	case SVt_PVLV:		return (char *)  (SvROK(sv) ? "REF"
 				/* tied lvalues should appear to be
 				 * scalars for backwards compatitbility */
 				: (LvTYPE(sv) == 't' || LvTYPE(sv) == 'T')
-				    ? "SCALAR" : "LVALUE";
+				    ? "SCALAR" : "LVALUE");
 	case SVt_PVAV:		return "ARRAY";
 	case SVt_PVHV:		return "HASH";
 	case SVt_PVCV:		return "CODE";

@@ -417,7 +417,7 @@ PPCODE:
     char *path;
     char buf[MAXPATHLEN];
 
-    path = pathsv ? SvPV_nolen(pathsv) : ".";
+    path = pathsv ? SvPV_nolen(pathsv) : (char *)".";
 
     if (bsd_realpath(path, buf)) {
         sv_setpvn(TARG, buf, strlen(buf));

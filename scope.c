@@ -287,7 +287,9 @@ Perl_save_gp(pTHX_ GV *gv, I32 empty)
 	GvGP(gv) = gp_ref(gp);
 	GvSV(gv) = NEWSV(72,0);
 	GvLINE(gv) = CopLINE(PL_curcop);
-	GvFILE(gv) = CopFILE(PL_curcop) ? CopFILE(PL_curcop) : "";
+	/* XXX Ideally this cast would be replaced with a change to const char*
+	   in the struct.  */
+	GvFILE(gv) = CopFILE(PL_curcop) ? CopFILE(PL_curcop) : (char *) "";
 	GvEGV(gv) = gv;
     }
     else {

@@ -373,7 +373,7 @@ prof_mark(pTHX_ opcode ptype)
 	gv = CvGV(cv);
 	pname = ((GvSTASH(gv) && HvNAME(GvSTASH(gv))) 
 		 ? HvNAME(GvSTASH(gv)) 
-		 : "(null)");
+		 : (char *) "(null)");
 	gname = GvNAME(gv);
 
 	set_cv_key(aTHX_ cv, pname, gname);

@@ -1653,7 +1653,7 @@ CvXSUBANY(cv)
 	B::CV	cv
     CODE:
 	ST(0) = CvCONST(cv) ?
-	    make_sv_object(aTHX_ sv_newmortal(),CvXSUBANY(cv).any_ptr) :
+	    make_sv_object(aTHX_ sv_newmortal(),(SV *)CvXSUBANY(cv).any_ptr) :
 	    sv_2mortal(newSViv(CvXSUBANY(cv).any_iv));
 
 MODULE = B    PACKAGE = B::CV

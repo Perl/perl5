@@ -186,7 +186,7 @@ perl_alloc(void)
     my_perl = (PerlInterpreter*)PerlMem_malloc(sizeof(PerlInterpreter));
 
     S_init_tls_and_interp(my_perl);
-    return ZeroD(my_perl, 1, PerlInterpreter);
+    return (PerlInterpreter *) ZeroD(my_perl, 1, PerlInterpreter);
 }
 #endif /* PERL_IMPLICIT_SYS */
 

@@ -796,10 +796,10 @@ Perl_savepvn(pTHX_ const char *pv, register I32 len)
     if (pv) {
 	/* might not be null terminated */
     	newaddr[len] = '\0';
-    	return CopyD(pv,newaddr,len,char);
+    	return (char *) CopyD(pv,newaddr,len,char);
     }
     else {
-	return ZeroD(newaddr,len+1,char);
+	return (char *) ZeroD(newaddr,len+1,char);
     }
 }
 
@@ -845,7 +845,7 @@ Perl_savesvpv(pTHX_ SV *sv)
 
     ++len;
     New(903,newaddr,len,char);
-    return CopyD(pv,newaddr,len,char);
+    return (char *) CopyD(pv,newaddr,len,char);
 }
 
 

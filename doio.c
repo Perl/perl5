@@ -1830,16 +1830,17 @@ nothing in the core.
 	if (sp - mark > 2) {
 #if defined(I_UTIME) || defined(VMS)
 	    struct utimbuf utbuf;
+	    struct utimbuf *utbufp = &utbuf;
 #else
 	    struct {
 		Time_t	actime;
 		Time_t	modtime;
 	    } utbuf;
+	    void *utbufp = &utbuf;
 #endif
 
            SV* accessed = *++mark;
            SV* modified = *++mark;
-           void * utbufp = &utbuf;
 
            /* Be like C, and if both times are undefined, let the C
             * library figure out what to do.  This usually means
