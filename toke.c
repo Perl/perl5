@@ -1772,9 +1772,6 @@ yylex()
 		s++;
 
 	    if (strnEQ(s,"=>",2)) {
-		if (dowarn)
-		    warn("Ambiguous use of -%c => resolved to \"-%c\" =>",
-			(int)tmp, (int)tmp);
 		s = force_word(bufptr,WORD,FALSE,FALSE,FALSE);
 		OPERATOR('-');		/* unary minus */
 	    }
@@ -1976,12 +1973,6 @@ yylex()
 		    d++;
 		if (*d == '}') {
 		    char minus = (tokenbuf[0] == '-');
-		    if (dowarn &&
-			(keyword(tokenbuf + 1, len) ||
-			 (minus && len == 1 && isALPHA(tokenbuf[1])) ||
-			 perl_get_cv(tokenbuf + 1, FALSE) ))
-			warn("Ambiguous use of {%s} resolved to {\"%s\"}",
-			     tokenbuf + !minus, tokenbuf + !minus);
 		    s = force_word(s + minus, WORD, FALSE, TRUE, FALSE);
 		    if (minus)
 			force_next('-');
@@ -2565,9 +2556,6 @@ yylex()
 	/* Is this a word before a => operator? */
 	if (strnEQ(d,"=>",2)) {
 	    CLINE;
-	    if (dowarn && (tmp || perl_get_cv(tokenbuf, FALSE)))
-		warn("Ambiguous use of %s => resolved to \"%s\" =>",
-			tokenbuf, tokenbuf);
 	    yylval.opval = (OP*)newSVOP(OP_CONST, 0, newSVpv(tokenbuf,0));
 	    yylval.opval->op_private = OPpCONST_BARE;
 	    TERM(WORD);
