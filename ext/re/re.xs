@@ -30,6 +30,7 @@ static void
 install(void)
 {
     dTHR;
+    PL_colorset = 0;			/* Allow reinspection of ENV. */
     PL_regexecp = &my_regexec;
     PL_regcompp = &my_regcomp;
     oldfl = PL_debug & R_DB;
