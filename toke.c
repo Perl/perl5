@@ -2570,9 +2570,6 @@ Perl_yylex(pTHX)
 		}
 	    }
 	    if (PL_doextract) {
-		if (*s == '#' && s[1] == '!' && instr(s,"perl"))
-		    PL_doextract = FALSE;
-
 		/* Incest with pod. */
 		if (*s == '=' && strnEQ(s, "=cut", 4)) {
 		    sv_setpv(PL_linestr, "");
