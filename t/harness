@@ -39,7 +39,7 @@ if (@ARGV) {
     @tests = @ARGV;
 } else {
     unless (@tests) {
-	@tests = <base/*.t comp/*.t cmd/*.t io/*.t op/*.t lib/*.t>;
+	@tests = <base/*.t comp/*.t cmd/*.t run/*.t io/*.t op/*.t lib/*.t>;
 	use File::Spec;
 	my $updir = File::Spec->updir;
 	my $mani  = File::Spec->catdir(File::Spec->updir, "MANIFEST");

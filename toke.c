@@ -2166,132 +2166,8 @@ Perl_yylex(pTHX)
     bool bof = FALSE;
 
     /* check if there's an identifier for us to look at */
-    if (PL_pending_ident) {
-        /* pit holds the identifier we read and pending_ident is reset */
-	char pit = PL_pending_ident;
-	PL_pending_ident = 0;
-
-	DEBUG_T({ PerlIO_printf(Perl_debug_log,
-              "### Tokener saw identifier '%s'\n", PL_tokenbuf); });
-
-	/* if we're in a my(), we can't allow dynamics here.
-	   $foo'bar has already been turned into $foo::bar, so
-	   just check for colons.
-
-	   if it's a legal name, the OP is a PADANY.
-	*/
-	if (PL_in_my) {
-	    if (PL_in_my == KEY_our) {	/* "our" is merely analogous to "my" */
-		if (strchr(PL_tokenbuf,':'))
-		    yyerror(Perl_form(aTHX_ "No package name allowed for "
-				      "variable %s in \"our\"",
-				      PL_tokenbuf));
-		tmp = pad_allocmy(PL_tokenbuf);
-	    }
-	    else {
-		if (strchr(PL_tokenbuf,':'))
-		    yyerror(Perl_form(aTHX_ PL_no_myglob,PL_tokenbuf));
-
-		yylval.opval = newOP(OP_PADANY, 0);
-		yylval.opval->op_targ = pad_allocmy(PL_tokenbuf);
-		return PRIVATEREF;
-	    }
-	}
-
-	/*
-	   build the ops for accesses to a my() variable.
-
-	   Deny my($a) or my($b) in a sort block, *if* $a or $b is
-	   then used in a comparison.  This catches most, but not
-	   all cases.  For instance, it catches
-	       sort { my($a); $a <=> $b }
-	   but not
-	       sort { my($a); $a < $b ? -1 : $a == $b ? 0 : 1; }
-	   (although why you'd do that is anyone's guess).
-	*/
-
-	if (!strchr(PL_tokenbuf,':')) {
-#ifdef USE_THREADS
-	    /* Check for single character per-thread SVs */
-	    if (PL_tokenbuf[0] == '$' && PL_tokenbuf[2] == '\0'
-		&& !isALPHA(PL_tokenbuf[1]) /* Rule out obvious non-threadsvs */
-		&& (tmp = find_threadsv(&PL_tokenbuf[1])) != NOT_IN_PAD)
-	    {
-		yylval.opval = newOP(OP_THREADSV, 0);
-		yylval.opval->op_targ = tmp;
-		return PRIVATEREF;
-	    }
-#endif /* USE_THREADS */
-	    if ((tmp = pad_findmy(PL_tokenbuf)) != NOT_IN_PAD) {
-		SV *namesv = AvARRAY(PL_comppad_name)[tmp];
-		/* might be an "our" variable" */
-		if (SvFLAGS(namesv) & SVpad_OUR) {
-		    /* build ops for a bareword */
-		    SV *sym = newSVpv(HvNAME(GvSTASH(namesv)),0);
-		    sv_catpvn(sym, "::", 2);
-		    sv_catpv(sym, PL_tokenbuf+1);
-		    yylval.opval = (OP*)newSVOP(OP_CONST, 0, sym);
-		    yylval.opval->op_private = OPpCONST_ENTERED;
-		    gv_fetchpv(SvPVX(sym),
-			(PL_in_eval
-			    ? (GV_ADDMULTI | GV_ADDINEVAL)
-			    : TRUE
-			),
-			((PL_tokenbuf[0] == '$') ? SVt_PV
-			 : (PL_tokenbuf[0] == '@') ? SVt_PVAV
-			 : SVt_PVHV));
-		    return WORD;
-		}
-
-		/* if it's a sort block and they're naming $a or $b */
-		if (PL_last_lop_op == OP_SORT &&
-		    PL_tokenbuf[0] == '$' &&
-		    (PL_tokenbuf[1] == 'a' || PL_tokenbuf[1] == 'b')
-		    && !PL_tokenbuf[2])
-		{
-		    for (d = PL_in_eval ? PL_oldoldbufptr : PL_linestart;
-			 d < PL_bufend && *d != '\n';
-			 d++)
-		    {
-			if (strnEQ(d,"<=>",3) || strnEQ(d,"cmp",3)) {
-			    Perl_croak(aTHX_ "Can't use \"my %s\" in sort comparison",
-				  PL_tokenbuf);
-			}
-		    }
-		}
-
-		yylval.opval = newOP(OP_PADANY, 0);
-		yylval.opval->op_targ = tmp;
-		return PRIVATEREF;
-	    }
-	}
-
-	/*
-	   Whine if they've said @foo in a doublequoted string,
-	   and @foo isn't a variable we can find in the symbol
-	   table.
-	*/
-	if (pit == '@' && PL_lex_state != LEX_NORMAL && !PL_lex_brackets) {
-	    GV *gv = gv_fetchpv(PL_tokenbuf+1, FALSE, SVt_PVAV);
-	    if ((!gv || ((PL_tokenbuf[0] == '@') ? !GvAV(gv) : !GvHV(gv)))
-		 && ckWARN(WARN_AMBIGUOUS))
-	    {
-                /* Downgraded from fatal to warning 20000522 mjd */
-		Perl_warner(aTHX_ WARN_AMBIGUOUS,
-			    "Possible unintended interpolation of %s in string",
-			     PL_tokenbuf);
-	    }
-	}
-
-	/* build ops for a bareword */
-	yylval.opval = (OP*)newSVOP(OP_CONST, 0, newSVpv(PL_tokenbuf+1, 0));
-	yylval.opval->op_private = OPpCONST_ENTERED;
-	gv_fetchpv(PL_tokenbuf+1, PL_in_eval ? (GV_ADDMULTI | GV_ADDINEVAL) : TRUE,
-		   ((PL_tokenbuf[0] == '$') ? SVt_PV
-		    : (PL_tokenbuf[0] == '@') ? SVt_PVAV
-		    : SVt_PVHV));
-	return WORD;
-    }
+    if (PL_pending_ident) 
+        return S_pending_ident(aTHX);
 
     /* no identifier pending identification */
 
@@ -5236,6 +5112,137 @@ Perl_yylex(pTHX)
 #pragma segment Main
 #endif
 
+static int
+S_pending_ident(pTHX)
+{
+    register char *d;
+    register I32 tmp;
+    /* pit holds the identifier we read and pending_ident is reset */
+    char pit = PL_pending_ident;
+    PL_pending_ident = 0;
+
+    DEBUG_T({ PerlIO_printf(Perl_debug_log,
+          "### Tokener saw identifier '%s'\n", PL_tokenbuf); });
+
+    /* if we're in a my(), we can't allow dynamics here.
+       $foo'bar has already been turned into $foo::bar, so
+       just check for colons.
+
+       if it's a legal name, the OP is a PADANY.
+    */
+    if (PL_in_my) {
+        if (PL_in_my == KEY_our) {	/* "our" is merely analogous to "my" */
+            if (strchr(PL_tokenbuf,':'))
+                yyerror(Perl_form(aTHX_ "No package name allowed for "
+                                  "variable %s in \"our\"",
+                                  PL_tokenbuf));
+            tmp = pad_allocmy(PL_tokenbuf);
+        }
+        else {
+            if (strchr(PL_tokenbuf,':'))
+                yyerror(Perl_form(aTHX_ PL_no_myglob,PL_tokenbuf));
+
+            yylval.opval = newOP(OP_PADANY, 0);
+            yylval.opval->op_targ = pad_allocmy(PL_tokenbuf);
+            return PRIVATEREF;
+        }
+    }
+
+    /*
+       build the ops for accesses to a my() variable.
+
+       Deny my($a) or my($b) in a sort block, *if* $a or $b is
+       then used in a comparison.  This catches most, but not
+       all cases.  For instance, it catches
+           sort { my($a); $a <=> $b }
+       but not
+           sort { my($a); $a < $b ? -1 : $a == $b ? 0 : 1; }
+       (although why you'd do that is anyone's guess).
+    */
+
+    if (!strchr(PL_tokenbuf,':')) {
+#ifdef USE_THREADS
+        /* Check for single character per-thread SVs */
+        if (PL_tokenbuf[0] == '$' && PL_tokenbuf[2] == '\0'
+            && !isALPHA(PL_tokenbuf[1]) /* Rule out obvious non-threadsvs */
+            && (tmp = find_threadsv(&PL_tokenbuf[1])) != NOT_IN_PAD)
+        {
+            yylval.opval = newOP(OP_THREADSV, 0);
+            yylval.opval->op_targ = tmp;
+            return PRIVATEREF;
+        }
+#endif /* USE_THREADS */
+        if ((tmp = pad_findmy(PL_tokenbuf)) != NOT_IN_PAD) {
+            SV *namesv = AvARRAY(PL_comppad_name)[tmp];
+            /* might be an "our" variable" */
+            if (SvFLAGS(namesv) & SVpad_OUR) {
+                /* build ops for a bareword */
+                SV *sym = newSVpv(HvNAME(GvSTASH(namesv)),0);
+                sv_catpvn(sym, "::", 2);
+                sv_catpv(sym, PL_tokenbuf+1);
+                yylval.opval = (OP*)newSVOP(OP_CONST, 0, sym);
+                yylval.opval->op_private = OPpCONST_ENTERED;
+                gv_fetchpv(SvPVX(sym),
+                    (PL_in_eval
+                        ? (GV_ADDMULTI | GV_ADDINEVAL)
+                        : TRUE
+                    ),
+                    ((PL_tokenbuf[0] == '$') ? SVt_PV
+                     : (PL_tokenbuf[0] == '@') ? SVt_PVAV
+                     : SVt_PVHV));
+                return WORD;
+            }
+
+            /* if it's a sort block and they're naming $a or $b */
+            if (PL_last_lop_op == OP_SORT &&
+                PL_tokenbuf[0] == '$' &&
+                (PL_tokenbuf[1] == 'a' || PL_tokenbuf[1] == 'b')
+                && !PL_tokenbuf[2])
+            {
+                for (d = PL_in_eval ? PL_oldoldbufptr : PL_linestart;
+                     d < PL_bufend && *d != '\n';
+                     d++)
+                {
+                    if (strnEQ(d,"<=>",3) || strnEQ(d,"cmp",3)) {
+                        Perl_croak(aTHX_ "Can't use \"my %s\" in sort comparison",
+                              PL_tokenbuf);
+                    }
+                }
+            }
+
+            yylval.opval = newOP(OP_PADANY, 0);
+            yylval.opval->op_targ = tmp;
+            return PRIVATEREF;
+        }
+    }
+
+    /*
+       Whine if they've said @foo in a doublequoted string,
+       and @foo isn't a variable we can find in the symbol
+       table.
+    */
+    if (pit == '@' && PL_lex_state != LEX_NORMAL && !PL_lex_brackets) {
+        GV *gv = gv_fetchpv(PL_tokenbuf+1, FALSE, SVt_PVAV);
+        if ((!gv || ((PL_tokenbuf[0] == '@') ? !GvAV(gv) : !GvHV(gv)))
+             && ckWARN(WARN_AMBIGUOUS))
+        {
+            /* Downgraded from fatal to warning 20000522 mjd */
+            Perl_warner(aTHX_ WARN_AMBIGUOUS,
+                        "Possible unintended interpolation of %s in string",
+                         PL_tokenbuf);
+        }
+    }
+
+    /* build ops for a bareword */
+    yylval.opval = (OP*)newSVOP(OP_CONST, 0, newSVpv(PL_tokenbuf+1, 0));
+    yylval.opval->op_private = OPpCONST_ENTERED;
+    gv_fetchpv(PL_tokenbuf+1, PL_in_eval ? (GV_ADDMULTI | GV_ADDINEVAL) : TRUE,
+               ((PL_tokenbuf[0] == '$') ? SVt_PV
+                : (PL_tokenbuf[0] == '@') ? SVt_PVAV
+                : SVt_PVHV));
+    return WORD;
+}
+
 I32
 Perl_keyword(pTHX_ register char *d, I32 len)
 {
@@ -7211,91 +7218,39 @@ Perl_scan_num(pTHX_ char *start, YYSTYPE* lvalp)
 	    }
 	}
 
-	/* terminate the string */
-	*d = '\0';
 
 	/* make an sv from the string */
 	sv = NEWSV(92,0);
 
-#if defined(Strtol) && defined(Strtoul)
-
 	/*
-	   strtol/strtoll sets errno to ERANGE if the number is too big
-	   for an integer. We try to do an integer conversion first
-	   if no characters indicating "float" have been found.
+           We try to do an integer conversion first if no characters
+           indicating "float" have been found.
 	 */
 
 	if (!floatit) {
-    	    IV iv = 0;
-    	    UV uv = 0;
-	    errno = 0;
-	    if (*PL_tokenbuf == '-')
-		iv = Strtol(PL_tokenbuf, (char**)NULL, 10);
-	    else
-		uv = Strtoul(PL_tokenbuf, (char**)NULL, 10);
-	    if (errno)
-	    	floatit = TRUE; /* Probably just too large. */
-	    else if (*PL_tokenbuf == '-')
-	    	sv_setiv(sv, iv);
-	    else if (uv <= IV_MAX)
+    	    UV uv;
+            int flags = grok_number (PL_tokenbuf, d - PL_tokenbuf, &uv);
+
+            if (flags == IS_NUMBER_IN_UV) {
+              if (uv <= IV_MAX)
 		sv_setiv(sv, uv); /* Prefer IVs over UVs. */
-	    else
+              else
 	    	sv_setuv(sv, uv);
-	}
+            } else if (flags == (IS_NUMBER_IN_UV | IS_NUMBER_NEG)) {
+              if (uv <= (UV) IV_MIN)
+                sv_setiv(sv, -(IV)uv);
+              else
+	    	floatit = TRUE;
+            } else
+              floatit = TRUE;
+        }
 	if (floatit) {
+	    /* terminate the string */
+	    *d = '\0';
 	    nv = Atof(PL_tokenbuf);
 	    sv_setnv(sv, nv);
 	}
-#else
-	/*
-	   No working strtou?ll?.
 
-	   Unfortunately atol() doesn't do range checks (returning
-	   LONG_MIN/LONG_MAX, and setting errno to ERANGE on overflows)
-	   everywhere [1], so we cannot use use atol() (or atoll()).
-	   If we could, they would be used, as Atol(), very much like
-	   Strtol() and Strtoul() are used above.
-
-	   [1] XXX Configure test needed to check for atol()
-	           (and atoll()) overflow behaviour XXX
-
-	   --jhi
-
-	   We need to do this the hard way.  */
-
-	nv = Atof(PL_tokenbuf);
-
-	/* See if we can make do with an integer value without loss of
-	   precision.  We use U_V to cast to a UV, because some
-	   compilers have issues.  Then we try casting it back and see
-	   if it was the same [1].  We only do this if we know we
-	   specifically read an integer.  If floatit is true, then we
-	   don't need to do the conversion at all.
-
-	   [1] Note that this is lossy if our NVs cannot preserve our
-	   UVs.  There are metaconfig defines NV_PRESERVES_UV (a boolean)
-	   and NV_PRESERVES_UV_BITS (a number), but in general we really
-	   do hope all such potentially lossy platforms have strtou?ll?
-	   to do a lossless IV/UV conversion.
-
-	   Maybe could do some tricks with DBL_DIG, LDBL_DIG and
-	   DBL_MANT_DIG and LDBL_MANT_DIG (these are already available
-	   as NV_DIG and NV_MANT_DIG)?
-	
-	   --jhi
-	   */
-	{
-	    UV uv = U_V(nv);
-	    if (!floatit && (NV)uv == nv) {
-		if (uv <= IV_MAX)
-		    sv_setiv(sv, uv); /* Prefer IVs over UVs. */
-		else
-		    sv_setuv(sv, uv);
-	    }
-	    else
-		sv_setnv(sv, nv);
-	}
-#endif
 	if ( floatit ? (PL_hints & HINT_NEW_FLOAT) :
 	               (PL_hints & HINT_NEW_INTEGER) )
 	    sv = new_constant(PL_tokenbuf, d - PL_tokenbuf,

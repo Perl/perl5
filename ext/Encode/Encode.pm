@@ -102,8 +102,16 @@ sub define_alias
 # Allow variants of iso-8859-1 etc.
 define_alias( qr/^iso[-_]?(\d+)[-_](\d+)$/i => '"iso-$1-$2"' );
 
+# At least HP-UX has these.
+define_alias( qr/^iso8859(\d+)$/i => '"iso-8859-$1"' );
+
+# This is a font issue, not an encoding issue.
+# (The currency symbol of the Latin 1 upper half
+#  has been redefined as the euro symbol.)
+define_alias( qr/^(.+)\@euro$/i => '"$1"' );
+
 # Allow latin-1 style names as well
-define_alias( qr/^latin[-_]?(\d+)$/i => '"iso-8859-$latin2iso_num[$1]"' );
+define_alias( qr/^(?:iso[-_]?)?latin[-_]?(\d+)$/i => '"iso-8859-$latin2iso_num[$1]"' );
 
 # Common names for non-latin prefered MIME names
 define_alias( 'ascii'    => 'US-ascii',
@@ -112,7 +120,17 @@ define_alias( 'ascii'    => 'US-ascii',
               'greek'    => 'iso-8859-7',
               'hebrew'   => 'iso-8859-8');
 
-define_alias( 'ibm-1047' => 'cp1047');
+# At least AIX has IBM-NNN (surprisingly...) instead of cpNNN.
+define_alias( qr/^ibm[-_]?(\d\d\d\d?)$/i => '"cp$1"');
+
+# Standardize on the dashed versions.
+define_alias( qr/^utf8$/i  => 'utf-8' );
+define_alias( qr/^koi8r$/i => 'koi8-r' );
+
+# TODO: the HP-UX '8' encodings:  arabic8 greek8 hebrew8 roman8 turkish8
+# TODO: the Thai Encoding tis620
+# TODO: the Chinese Encoding gb18030
+# TODO: what is the Japanese 'ujis' encoding seen in some Linuxes?
 
 # Map white space and _ to '-'
 define_alias( qr/^(\S+)[\s_]+(.*)$/i => '"$1-$2"' );
@@ -721,6 +739,7 @@ If Perl is configured to use the new 'perlio' IO system then
 C<Encode> provides a "layer" (See L<perliol>) which can transform
 data as it is read or written.
 
+    use Encode;
     open(my $ilyad,'>:encoding(iso-8859-7)','ilyad.greek');
     print $ilyad @epic;
 

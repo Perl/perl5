@@ -749,7 +749,7 @@ else {
 sub try_symbol {
     my $symbol = shift;
 
-    return if $symbol !~ /^[A-Za-z]/;
+    return if $symbol !~ /^[A-Za-z_]/;
     return if $symbol =~ /^\#/;
     $symbol =~s/\r//g;
     chomp($symbol);

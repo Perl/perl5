@@ -842,12 +842,12 @@ clear_pmop:
 		    lastpmop = pmop;
 		    pmop = pmop->op_pmnext;
 		}
-#ifdef USE_ITHREADS
-		Safefree(PmopSTASHPV(cPMOPo));
-#else
-		/* NOTE: PMOP.op_pmstash is not refcounted */
-#endif
 	    }
+#ifdef USE_ITHREADS
+	    Safefree(PmopSTASHPV(cPMOPo));
+#else
+	    /* NOTE: PMOP.op_pmstash is not refcounted */
+#endif
 	}
 	cPMOPo->op_pmreplroot = Nullop;
 	ReREFCNT_dec(PM_GETRE(cPMOPo));
@@ -2326,7 +2326,11 @@ Perl_fold_constants(pTHX_ register OP *o)
 	    SvIV_please(sv);
 #endif
 	}
-	return newSVOP(OP_CONST, 0, sv);
+	o = newSVOP(OP_CONST, 0, sv);
+	/* We don't want folded constants to trigger OCTMODE warnings,
+	   so we cheat a bit and mark them OCTAL. AMS 20010709 */
+	o->op_private |= OPpCONST_OCTAL;
+	return o;
     }
 
   nope:

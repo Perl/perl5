@@ -535,16 +535,15 @@ $(INST_DYNAMIC): $(OBJECT) $(MYEXTLIB) $(BOOTSTRAP) $(INST_ARCHAUTODIR)\.exists 
 
 sub clean
 {
- my ($self) = @_;
- my $s = &ExtUtils::MM_Unix::clean;
- if ($GCC) {
-	$s .= <<'END';
+    my ($self) = @_;
+    my $s = &ExtUtils::MM_Unix::clean;
+    my $clean = $GCC ? 'dll.base dll.exp' : '*.pdb';
+    $s .= <<END;
 clean ::
-	-$(RM_F) dll.base dll.exp
+	-\$(RM_F) $clean
 
 END
- }
- return $s;
+    return $s;
 }
 
 

@@ -1,6 +1,6 @@
 package AutoLoader;
 
-use 5.005_64;
+use 5.6.0;
 our(@EXPORT, @EXPORT_OK, $VERSION);
 
 my $is_dosish;
@@ -68,7 +68,8 @@ AUTOLOAD {
 			unless ($filename =~ m{^([a-z?]:)?[\\/]}is) {
 			     $filename = "./$filename";
 			}
-		    }elsif ($is_vms) {
+		    }
+		    elsif ($is_vms) {
 			# XXX todo by VMSmiths
 			$filename = "./$filename";
 		    }
@@ -143,7 +144,13 @@ sub import {
     my $path = $INC{$calldir . '.pm'};
     if (defined($path)) {
 	# Try absolute path name.
-	$path =~ s#^(.*)$calldir\.pm$#$1auto/$calldir/autosplit.ix#;
+	if ($is_macos) {
+	    (my $malldir = $calldir) =~ tr#/#:#;
+	    $path =~ s#^(.*)$malldir\.pm\z#$1auto:$malldir:autosplit.ix#s;
+	} else {
+	    $path =~ s#^(.*)$calldir\.pm\z#$1auto/$calldir/autosplit.ix#;
+	}
+
 	eval { require $path; };
 	# If that failed, try relative path with normal @INC searching.
 	if ($@) {

@@ -112,7 +112,8 @@ layer specification.  Thus:
 
 Forces the use of C<perlio> layer even if the platform default, or
 C<use open> default is something else (such as ":encoding(iso-8859-7)")
-which would interfere with binary nature of the stream.
+(the C<:encoding> requires C<use Encode>) which would interfere with
+binary nature of the stream.
 
 =back
 

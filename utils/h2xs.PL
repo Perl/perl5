@@ -442,6 +442,7 @@ version: $H2XS_VERSION
     -P   Omit the stub POD section.
     -X   Omit the XS portion (implies both -c and -f).
     -a   Generate get/set accessors for struct and union members (used with -x).
+    -b   Specify a perl version to be backwards compatibile with
     -c   Omit the constant() function and specialised AUTOLOAD from the XS file.
     -d   Turn on debugging messages.
     -f   Force creation of the extension even if the C header does not exist.
@@ -452,10 +453,9 @@ version: $H2XS_VERSION
     -o   Regular expression for \"opaque\" types.
     -p   Specify a prefix which should be removed from the Perl function names.
     -s   Create subroutines for specified macros.
+    -t   Default type for autoloaded constants
     -v   Specify a version number for this extension.
     -x   Autogenerate XSUBs using C::Scan.
-    -b   Specify a perl version to be backwards compatibile with
-    -t   Default type for autoloaded constants
 extra_libraries
          are any libraries that might be needed for loading the
          extension, e.g. -lm would try to link in the math library.
@@ -1150,7 +1150,8 @@ my $types = {};
 
 if( ! $opt_c ) {
   print XS constant_types(), "\n";
-  foreach (C_constant (undef, $opt_t, $types, undef, undef, @const_names)) {
+  foreach (C_constant ($module, undef, $opt_t, $types, undef, undef,
+           @const_names)) {
     print XS $_, "\n";
   }
 }

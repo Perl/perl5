@@ -401,49 +401,49 @@ Perl_grok_number(pTHX_ const char *pv, STRLEN len, UV *valuep)
        With it gcc on arm is managing 6 instructions (6 cycles) per digit.
        In theory the optimiser could deduce how far to unroll the loop
        before checking for overflow.  */
-    if (s < send) {
-      int digit = *++s - '0';
+    if (++s < send) {
+      int digit = *s - '0';
       if (digit >= 0 && digit <= 9) {
         value = value * 10 + digit;
-        if (s < send) {
-          digit = *++s - '0';
+        if (++s < send) {
+          digit = *s - '0';
           if (digit >= 0 && digit <= 9) {
             value = value * 10 + digit;
-            if (s < send) {
-              digit = *++s - '0';
+            if (++s < send) {
+              digit = *s - '0';
               if (digit >= 0 && digit <= 9) {
                 value = value * 10 + digit;
-		if (s < send) {
-                  digit = *++s - '0';
+		if (++s < send) {
+                  digit = *s - '0';
                   if (digit >= 0 && digit <= 9) {
                     value = value * 10 + digit;
-                    if (s < send) {
-                      digit = *++s - '0';
+                    if (++s < send) {
+                      digit = *s - '0';
                       if (digit >= 0 && digit <= 9) {
                         value = value * 10 + digit;
-                        if (s < send) {
-                          digit = *++s - '0';
+                        if (++s < send) {
+                          digit = *s - '0';
                           if (digit >= 0 && digit <= 9) {
                             value = value * 10 + digit;
-                            if (s < send) {
-                              digit = *++s - '0';
+                            if (++s < send) {
+                              digit = *s - '0';
                               if (digit >= 0 && digit <= 9) {
                                 value = value * 10 + digit;
-                                if (s < send) {
-                                  digit = *++s - '0';
+                                if (++s < send) {
+                                  digit = *s - '0';
                                   if (digit >= 0 && digit <= 9) {
                                     value = value * 10 + digit;
-                                    if (s < send) {
+                                    if (++s < send) {
                                       /* Now got 9 digits, so need to check
                                          each time for overflow.  */
-                                      digit = *++s - '0';
+                                      digit = *s - '0';
                                       while (digit >= 0 && digit <= 9
                                              && (value < max_div_10
                                                  || (value == max_div_10
                                                      && digit <= max_mod_10))) {
                                         value = value * 10 + digit;
-                                        if (s < send)
-                                          digit = *++s - '0';
+                                        if (++s < send)
+                                          digit = *s - '0';
                                         else
                                           break;
                                       }

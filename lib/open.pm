@@ -4,6 +4,33 @@ $open::hint_bits = 0x20000;
 
 our $VERSION = '1.01';
 
+my $locale_encoding;
+
+sub in_locale { $^H & $locale::hint_bits }
+
+sub _get_locale_encoding {
+    unless (defined $locale_encoding) {
+	eval { use I18N::Langinfo qw(langinfo CODESET) };
+	unless ($@) {
+	    $locale_encoding = langinfo(CODESET);
+	}
+        if (not $locale_encoding && in_locale()) {
+	    if ($ENV{LC_ALL} =~ /^[^.]+\.([^.]+)$/) {
+		$locale_encoding = $1;
+	    } elsif ($ENV{LANG} =~ /^[^.]+\.([^.]+)$/) {
+		$locale_encoding = $1;
+	    }
+	} else {
+	    # Could do heuristics based on the country and language
+	    # parts of LC_ALL and LANG (the parts before the dot (if any)),
+	    # since we have Locale::Country and Locale::Language available.
+	    # TODO: get a database of Language -> Encoding mappings
+	    # (the Estonian database would be excellent!)
+	    # --jhi
+	}
+    }
+}
+
 sub import {
     my ($class,@args) = @_;
     croak("`use open' needs explicit list of disciplines") unless @args;
@@ -17,6 +44,14 @@ sub import {
 	my @val;
 	foreach my $layer (split(/\s+/,$discp)) {
             $layer =~ s/^://;
+	    if ($layer eq 'locale') {
+		use Encode;
+		_get_locale_encoding()
+		    unless defined $locale_encoding;
+		croak "Cannot figure out an encoding to use"
+		    unless defined $locale_encoding;
+		$layer = "encoding($locale_encoding)";
+	    }
 	    unless(PerlIO::Layer::->find($layer)) {
 		carp("Unknown discipline layer '$layer'");
 	    }

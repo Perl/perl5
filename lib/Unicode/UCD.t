@@ -27,7 +27,7 @@ ok($charinfo{upper},          '');
 ok($charinfo{lower},          '0061');
 ok($charinfo{title},          '');
 ok($charinfo{block},          'Basic Latin');
-ok($charinfo{script},         'LATIN');
+ok($charinfo{script},         'Latin');
 
 %charinfo = charinfo(0x100);
 
@@ -47,7 +47,7 @@ ok($charinfo{upper},          '');
 ok($charinfo{lower},          '0101');
 ok($charinfo{title},          '');
 ok($charinfo{block},          'Latin Extended-A');
-ok($charinfo{script},         'LATIN');
+ok($charinfo{script},         'Latin');
 
 # 0x0590 is in the Hebrew block but unused.
 

@@ -73,12 +73,14 @@ bsd_realpath(path, resolved)
        return Perl_rmsexpand((char*)path, resolved, NULL, 0);
 #else
 	struct stat sb;
-	int fd, n, rootd, serrno;
+	int n, rootd, serrno;
 	char *p, *q, wbuf[MAXPATHLEN];
 	int symlinks = 0;
 
 	/* Save the starting point. */
 #ifdef HAS_FCHDIR
+	int fd;
+
 	if ((fd = open(".", O_RDONLY)) < 0) {
 		(void)strcpy(resolved, ".");
 		return (NULL);
@@ -120,7 +122,7 @@ loop:
 	} else
 		p = resolved;
 
-#ifdef HAS_LSTAT
+#if defined(HAS_LSTAT) && defined(HAS_READLINK) && defined(HAS_SYMLINK)
 	/* Deal with the last component. */
 	if (lstat(p, &sb) == 0) {
 		if (S_ISLNK(sb.st_mode)) {

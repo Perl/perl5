@@ -8,8 +8,8 @@ BEGIN {
     @INC = '../lib';
 }
 
-# VMS needs -e "...", most everything else works better with '
-my $quote = $^O eq 'VMS' ? q{"} : q{'};
+# VMS and Windows need -e "...", most everything else works better with '
+my $quote = $^O =~ /^(VMS|MSWin\d+)$/ ? q{"} : q{'};
 
 # Run some code, return its wait status.
 sub run {
