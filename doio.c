@@ -723,11 +723,13 @@ Perl_nextargv(pTHX_ register GV *gv)
     if (PL_filemode & (S_ISUID|S_ISGID)) {
 	PerlIO_flush(IoIFP(GvIOn(PL_argvoutgv)));  /* chmod must follow last write */
 #ifdef HAS_FCHMOD
-	(void)fchmod(PL_lastfd,PL_filemode);
+	if (PL_lastfd != -1)
+	    (void)fchmod(PL_lastfd,PL_filemode);
 #else
 	(void)PerlLIO_chmod(PL_oldname,PL_filemode);
 #endif
     }
+    PL_lastfd = -1;
     PL_filemode = 0;
     if (!GvAV(gv))
         return Nullfp;
