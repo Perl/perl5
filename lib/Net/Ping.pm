@@ -353,7 +353,7 @@ sub ping_tcp_win32
 
 	# Wait for the child to return or for the timeout to expire.
 	do {
-		$child = waitpid($pid, WNOHANG);
+		$child = waitpid($pid, &WNOHANG());
 		$ret = $?;
 	} until time > ($time + $timeout) or $child;
 
