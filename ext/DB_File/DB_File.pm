@@ -1,10 +1,10 @@
 # DB_File.pm -- Perl 5 interface to Berkeley DB 
 #
 # written by Paul Marquess (pmarquess@bfsec.bt.co.uk)
-# last modified 20th Dec 1997
-# version 1.57
+# last modified 16th May 1998
+# version 1.60
 #
-#     Copyright (c) 1995, 1996, 1997 Paul Marquess. All rights reserved.
+#     Copyright (c) 1995-8 Paul Marquess. All rights reserved.
 #     This program is free software; you can redistribute it and/or
 #     modify it under the same terms as Perl itself.
 
@@ -145,7 +145,7 @@ use vars qw($VERSION @ISA @EXPORT $AUTOLOAD $DB_BTREE $DB_HASH $DB_RECNO $db_ver
 use Carp;
 
 
-$VERSION = "1.58" ;
+$VERSION = "1.60" ;
 
 #typedef enum { DB_BTREE, DB_HASH, DB_RECNO } DBTYPE;
 $DB_BTREE = new DB_File::BTREEINFO ;
@@ -295,8 +295,9 @@ sub STORESIZE
         for ($key = $current_length - 1 ; $key >= $length ; -- $key)
 	  { $self->del($key) }
     }
-    elsif ($length > $current_length)
-        { $self->put($length-1, "") }
+    elsif ($length > $current_length) {
+        $self->put($length-1, "") ;
+    }
 }
  
 sub get_dup
@@ -1656,34 +1657,25 @@ compile properly on IRIX 5.3.
 
 =head1 COPYRIGHT
 
-Copyright (c) 1997 Paul Marquess. All rights reserved. This program is
-free software; you can redistribute it and/or modify it under the same
-terms as Perl itself.
+Copyright (c) 1995-8 Paul Marquess. All rights reserved. This program
+is free software; you can redistribute it and/or modify it under the
+same terms as Perl itself.
 
 Although B<DB_File> is covered by the Perl license, the library it
 makes use of, namely Berkeley DB, is not. Berkeley DB has its own
 copyright and its own license. Please take the time to read it.
 
-The license for Berkeley DB version 2, and how it relates to DB_File
-does need some extra clarification. Here are are few words taken from
-the Berkeley DB FAQ regarding the version 2 license:
+Here are are few words taken from the Berkeley DB FAQ (at
+http://www.sleepycat.com) regarding the license:
 
-    The major difference is that the license for DB 2.0, when
-    downloaded from the net, requires that the software that
-    uses DB 2.0 be freely redistributable.
+    Do I have to license DB to use it in Perl scripts? 
 
-That means that if you want to use DB_File, and you have changed either
-the source for Berkeley DB or Perl, then the changes must be freely
-available.
-
-In the case of Perl, the term source refers to the complete source
-code for Perl (e.g. sv.c, toke.c, perl.h) and any external modules that
-you are using (e.g. DB_File, Tk).
-
-Note that any Perl scripts that you write are your property - this
-includes scripts that make use of DB_File. Neither the Perl license or
-the Berkeley DB license place any restriction on what you have to do
-with them.
+    No. The Berkeley DB license requires that software that uses
+    Berkeley DB be freely redistributable. In the case of Perl, that
+    software is Perl, and not your scripts. Any Perl scripts that you
+    write are your property, including scripts that make use of
+    Berkeley DB. Neither the Perl license nor the Berkeley DB license
+    place any restriction on what you may do with them.
 
 If you are in any doubt about the license situation, contact either the
 Berkeley DB authors or the author of DB_File. See L<"AUTHOR"> for details.

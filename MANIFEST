@@ -175,6 +175,7 @@ ext/DB_File/DB_File.pm		Berkeley DB extension Perl module
 ext/DB_File/DB_File.xs		Berkeley DB extension external subroutines
 ext/DB_File/DB_File_BS		Berkeley DB extension mkbootstrap fodder
 ext/DB_File/Makefile.PL		Berkeley DB extension makefile writer
+ext/DB_File/dbinfo		Berkeley DB database version checker
 ext/DB_File/typemap		Berkeley DB extension interface types
 ext/DynaLoader/DynaLoader.pm.PL	Dynamic Loader perl module
 ext/DynaLoader/Makefile.PL	Dynamic Loader makefile writer
