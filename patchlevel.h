@@ -40,6 +40,7 @@
 static	char	*local_patches[] = {
 	NULL
 	,"DEVEL_BETA_ISSUE_1 - 5.005 Public Beta, Issue 1"
+	,"PL_ prefix on vars"
 	,NULL
 };
 

@@ -2780,18 +2780,18 @@ new_struct_thread(struct perl_thread *t)
     PL_in_eval = FALSE;
     PL_restartop = 0;
 
-    PL_tainted = t->Ttainted;
-    PL_curpm = t->Tcurpm;         /* XXX No PMOP ref count */
-    PL_nrs = newSVsv(t->Tnrs);
-    PL_rs = SvREFCNT_inc(PL_nrs);
-    PL_last_in_gv = (GV*)SvREFCNT_inc(t->Tlast_in_gv);
-    PL_ofslen = t->Tofslen;
-    PL_ofs = savepvn(t->Tofs, PL_ofslen);
-    PL_defoutgv = (GV*)SvREFCNT_inc(t->Tdefoutgv);
-    PL_chopset = t->Tchopset;
-    PL_formtarget = newSVsv(t->Tformtarget);
-    PL_bodytarget = newSVsv(t->Tbodytarget);
-    PL_toptarget = newSVsv(t->Ttoptarget);
+    tainted = t->Ttainted;
+    curpm = t->Tcurpm;         /* XXX No PMOP ref count */
+    nrs = newSVsv(t->Tnrs);
+    rs = SvREFCNT_inc(nrs);
+    last_in_gv = Nullgv;
+    ofslen = t->Tofslen;
+    ofs = savepvn(t->Tofs, ofslen);
+    defoutgv = (GV*)SvREFCNT_inc(t->Tdefoutgv);
+    chopset = t->Tchopset;
+    formtarget = newSVsv(t->Tformtarget);
+    bodytarget = newSVsv(t->Tbodytarget);
+    toptarget = newSVsv(t->Ttoptarget);
 
     PL_statname = NEWSV(66,0);
     PL_maxscream = -1;
