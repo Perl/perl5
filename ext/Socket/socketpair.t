@@ -98,7 +98,8 @@ ok (shutdown(LEFT, SHUT_WR), "shutdown left for writing");
 # Calls. Hence the child process minder.
 {
   local $SIG{ALRM} = sub { warn "EOF on right took over 3 seconds" };
-  local $TODO = "Known problems with unix sockets on $^O" if $^O eq 'hpux';
+  local $TODO = "Known problems with unix sockets on $^O"
+      if $^O eq 'hpux' || $^O eq 'unicosmk';
   alarm 3;
   $! = 0;
   ok (eof RIGHT, "right is at EOF");
