@@ -98,7 +98,7 @@ The special pattern C<\X> match matches any extended Unicode sequence
 (a "combining character sequence" in Standardese), where the first
 character is a base character and subsequent characters are mark
 characters that apply to the base character.  It is equivalent to
-C<(?:\pM\PM*)>.
+C<(?:\PM\pM*)>.
 
 =item *
 
