@@ -2658,6 +2658,11 @@ page.  See L<perlform>.
 
 (P) An internal error.
 
+=item panic: array extend
+
+(P) An attempt was made to extend an array beyond the largest possible
+memory allocation.
+
 =item panic: ck_grep
 
 (P) Failed an internal consistency check trying to compile a grep.
@@ -2734,6 +2739,11 @@ scope.
 (P) The savestack probably got out of sync.  At least, there was an
 invalid enum on the top of it.
 
+=item panic: list extend
+
+(P) An attempt was made to extend a list beyond the largest possible
+memory allocation.
+
 =item panic: magic_killbackrefs
 
 (P) Failed an internal consistency check while trying to reset all weak
@@ -2746,6 +2756,10 @@ references to an object.
 =item panic: mapstart
 
 (P) The compiler is screwed up with respect to the map() function.
+
+=item panic: memory wrap
+
+(P) Something tried to allocate more memory than possible.
 
 =item panic: null array
 
@@ -2813,6 +2827,11 @@ then discovered it wasn't a subroutine or eval context.
 =item panic: scan_num
 
 (P) scan_num() got called on something that wasn't a number.
+
+=item panic: string extend
+
+(P) An attempt was made to extend a string beyond the largest possible
+memory allocation.
 
 =item panic: sv_insert
 

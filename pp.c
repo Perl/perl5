@@ -1387,8 +1387,12 @@ PP(pp_repeat)
 	dMARK;
 	I32 items = SP - MARK;
 	I32 max;
+	static const char list_extend[] = "panic: list extend";
 
 	max = items * count;
+	MEM_WRAP_CHECK_1(max, SV*, list_extend);
+	if (items > 0 && max > 0 && (max < items || max < count))
+	   Perl_croak(aTHX_ list_extend);
 	MEXTEND(MARK, max);
 	if (count > 1) {
 	    while (SP > MARK) {
@@ -1441,6 +1445,7 @@ PP(pp_repeat)
 	    if (count < 1)
 		SvCUR_set(TARG, 0);
 	    else {
+	        MEM_WRAP_CHECK_1(count, len, "panic: string extend");
 		SvGROW(TARG, (count * len) + 1);
 		repeatcpy(SvPVX(TARG) + len, SvPVX(TARG), len, count - 1);
 		SvCUR(TARG) *= count;

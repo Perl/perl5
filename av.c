@@ -114,6 +114,7 @@ Perl_av_extend(pTHX_ AV *av, I32 key)
 #endif 
 		newmax = key + AvMAX(av) / 5;
 	      resize:
+		MEM_WRAP_CHECK_1(newmax+1, SV*, "panic: array extend");
 #if defined(STRANGE_MALLOC) || defined(MYMALLOC)
 		Renew(AvALLOC(av),newmax+1, SV*);
 #else
@@ -148,6 +149,7 @@ Perl_av_extend(pTHX_ AV *av, I32 key)
 	    }
 	    else {
 		newmax = key < 3 ? 3 : key;
+		MEM_WRAP_CHECK_1(newmax+1, SV*, "panic: array extend");
 		New(2,AvALLOC(av), newmax+1, SV*);
 		ary = AvALLOC(av) + 1;
 		tmp = newmax;

@@ -943,6 +943,7 @@ freetype=''
 mallocobj=''
 mallocsrc=''
 malloctype=''
+usemallocwrap=''
 usemymalloc=''
 installman1dir=''
 man1dir=''
@@ -6261,6 +6262,26 @@ EOM
 	;;
 esac
 
+: determine whether to use malloc wrapping
+echo " "
+case "$usemallocwrap" in
+[yY]*|true|$define)	dflt='y' ;;
+[nN]*|false|$undef)	dflt='n' ;;
+*)	case "$usedevel" in
+	[yY]*|true|$define)	dflt='y' ;;
+	*) dflt='n' ;;
+	esac
+	;;
+esac
+rp="Do you wish to wrap malloc calls to protect against potential overflows?"
+. ./myread
+usemallocwrap="$ans"
+case "$ans" in
+y*|true)
+	usemallocwrap="$define" ;;
+*)
+	usemallocwrap="$undef" ;;
+esac
 
 : determine which malloc to compile in
 echo " "
@@ -21152,6 +21173,7 @@ make_set_make='$make_set_make'
 mallocobj='$mallocobj'
 mallocsrc='$mallocsrc'
 malloctype='$malloctype'
+usemallocwrap='$usemallocwrap'
 man1dir='$man1dir'
 man1direxp='$man1direxp'
 man1ext='$man1ext'
