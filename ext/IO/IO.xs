@@ -47,67 +47,19 @@ typedef FILE * OutputStream;
 #endif
 
 static int
-not_here(s)
-char *s;
+not_here(char *s)
 {
     croak("%s not implemented on this architecture", s);
     return -1;
 }
 
-#ifndef newCONSTSUB
-/*
- * Define an XSUB that returns a constant scalar. The resulting structure is
- * identical to that created by the parser when it parses code like :
- *
- *    sub xyz () { 123 }
- *
- * This allows the constants from the XSUB to be inlined.
- *
- * !!! THIS SHOULD BE ADDED INTO THE CORE CODE !!!!
- *
- */
- 
-static void
-newCONSTSUB(stash,name,sv)
-    HV *stash;
-    char *name;
-    SV *sv;
-{
-#ifdef dTHR
-    dTHR;
-#endif
-    U32 oldhints = hints;
-    HV *old_cop_stash = curcop->cop_stash;
-    HV *old_curstash = curstash;
-    line_t oldline = curcop->cop_line;
-    curcop->cop_line = copline;
-
-    hints &= ~HINT_BLOCK_SCOPE;
-    if(stash)
-	curstash = curcop->cop_stash = stash;
-
-    newSUB(
-	MY_start_subparse(FALSE, 0),
-	newSVOP(OP_CONST, 0, newSVpv(name,0)),
-	newSVOP(OP_CONST, 0, &sv_no),	/* SvPV(&sv_no) == "" -- GMB */
-	newSTATEOP(0, Nullch, newSVOP(OP_CONST, 0, sv))
-    );
-
-    hints = oldhints;
-    curcop->cop_stash = old_cop_stash;
-    curstash = old_curstash;
-    curcop->cop_line = oldline;
-}
-#endif
 
 #ifndef PerlIO
 #define PerlIO_fileno(f) fileno(f)
 #endif
 
 static int
-io_blocking(f,block)
-InputStream f;
-int block;
+io_blocking(InputStream f, int block)
 {
     int RETVAL;
     if(!f) {
@@ -205,7 +157,7 @@ fgetpos(handle)
 	    ST(0) = sv_2mortal(newSVpv((char*)&pos, sizeof(Fpos_t)));
 	}
 	else {
-	    ST(0) = &sv_undef;
+	    ST(0) = &PL_sv_undef;
 	    errno = EINVAL;
 	}
 
@@ -214,11 +166,13 @@ fsetpos(handle, pos)
 	InputStream	handle
 	SV *		pos
     CODE:
-	if (handle)
+        char *p;
+	STRLEN len;
+	if (handle && (p = SvPV(pos,len)) && len == sizeof(Fpos_t))
 #ifdef PerlIO
-	    RETVAL = PerlIO_setpos(handle, (Fpos_t*)SvPVX(pos));
+	    RETVAL = PerlIO_setpos(handle, (Fpos_t*)p);
 #else
-	    RETVAL = fsetpos(handle, (Fpos_t*)SvPVX(pos));
+	    RETVAL = fsetpos(handle, (Fpos_t*)p);
 #endif
 	else {
 	    RETVAL = -1;
@@ -249,7 +203,7 @@ new_tmpfile(packname = "IO::File")
 	    SvREFCNT_dec(gv);   /* undo increment in newRV() */
 	}
 	else {
-	    ST(0) = &sv_undef;
+	    ST(0) = &PL_sv_undef;
 	    SvREFCNT_dec(gv);
 	}
 
