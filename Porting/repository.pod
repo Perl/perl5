@@ -83,8 +83,7 @@ TCP "tunnel" rather than by using ssh to login to or invoke any
 ordinary commands on the repository. When you want to start a
 session using the repository, use the command
 
-    ssh -l perlrep -f -q -x -L 1666:127.0.0.1:1666 sickle.activestate.com 
-foo
+    ssh -l perlrep -f -q -x -L 1666:127.0.0.1:1666 sickle.activestate.com foo
 
 If you are not using the default filename of F<~/.ssh/identity>
 to hold your perl repository private key then you'll need to add
@@ -100,10 +99,10 @@ describe what all those ssh arguments are for.
 
 =over 4
 
-=item B<-l perl>
+=item B<-l perlrep>
 
-Use a remote username of perl. The account on the repository which
-provides the end-point of the ssh tunnel is named "perl".
+Use a remote username of perlrep. (The account on the repository which
+provides the end-point of the ssh tunnel is named "perlrep".)
 
 =item B<-f>
 
@@ -145,8 +144,8 @@ be used for the value of the P4PORT environment variable (q.v.).
 
 =item sickle.activestate.com
 
-This is the canonical IP name of the host on which the perl
-repository runs. Its IP number is 199.60.48.20.
+This is the canonical name of the host on which the perl repository
+resides. Its IP address is 199.60.48.20.
 
 =item foo
 
@@ -406,5 +405,3 @@ More updates by Jarkko Hietaniemi, jhi@iki.fi, 28 June 2001.
 Perforce clarifications by Randall Gellens, rcg@users.sourceforge.net, 12 July 2001.
 
 =cut
-
-
