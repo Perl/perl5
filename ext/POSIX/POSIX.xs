@@ -510,8 +510,14 @@ mini_mktime(struct tm *ptm)
 	}
     }
     ptm->tm_year = year - 1900;
-    ptm->tm_mon = month;
-    ptm->tm_mday = yearday;
+    if (yearday) {
+      ptm->tm_mday = yearday;
+      ptm->tm_mon = month;
+    }
+    else {
+      ptm->tm_mday = 31;
+      ptm->tm_mon = month - 1;
+    }
     /* re-build yearday based on Jan 1 to get tm_yday */
     year--;
     yearday = year*DAYS_PER_YEAR + year/4 - year/100 + year/400;
