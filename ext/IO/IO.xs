@@ -26,7 +26,7 @@
 #endif
 
 #ifdef PerlIO
-#ifdef MACOS_TRADITIONAL
+#if defined(MACOS_TRADITIONAL) && defined(USE_SFIO)
 #define PERLIO_IS_STDIO 1
 #undef setbuf
 #undef setvbuf
