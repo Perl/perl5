@@ -4521,6 +4521,10 @@ You can effect a sleep of 250 milliseconds this way:
 Note that whether C<select> gets restarted after signals (say, SIGALRM)
 is implementation-dependent.
 
+Also note that on Windows platforms, select() can B<only> be used
+on socket filehandles.  This means that select() cannot be used to
+multiplex normal filehandles such as STDIN or STDOUT.
+
 B<WARNING>: One should not attempt to mix buffered I/O (like C<read>
 or <FH>) with C<select>, except as permitted by POSIX, and even
 then only on POSIX systems.  You have to use C<sysread> instead.
