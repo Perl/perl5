@@ -1098,7 +1098,6 @@ sv_2uv
 sv_add_arena
 sv_backoff
 sv_bless
-sv_bless3
 sv_catpvf
 sv_catpv
 sv_catpvn

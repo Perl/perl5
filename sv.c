@@ -4054,14 +4054,9 @@ I32 n;
 }
 
 SV*
-#ifndef CAN_PROTOTYPE
-sv_bless3(sv,stash,zaptilde)
+sv_bless(sv,stash)
 SV* sv;
 HV* stash;
-bool zaptilde;
-#else
-sv_bless3(SV *sv, HV *stash, bool zaptilde)
-#endif /* CAN_PROTOTYPE */
 {
     dTHR;
     SV *ref;
@@ -4074,8 +4069,6 @@ sv_bless3(SV *sv, HV *stash, bool zaptilde)
 	if (SvOBJECT(ref)) {
 	    if (SvTYPE(ref) != SVt_PVIO)
 		--sv_objcount;
-	    if (zaptilde && SvRMAGICAL(ref))
-		sv_unmagic(ref, '~');	/* stop cross-class pointer forgery */
 	    SvREFCNT_dec(SvSTASH(ref));
 	}
     }
@@ -4093,14 +4086,6 @@ sv_bless3(SV *sv, HV *stash, bool zaptilde)
 #endif /* OVERLOAD */
 
     return sv;
-}
-
-SV*
-sv_bless(sv,stash)
-SV* sv;
-HV* stash;
-{
-    return sv_bless3(sv, stash, FALSE);
 }
 
 static void

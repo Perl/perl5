@@ -465,7 +465,6 @@ UV	sv_2uv _((SV* sv));
 void	sv_add_arena _((char* ptr, U32 size, U32 flags));
 int	sv_backoff _((SV* sv));
 SV*	sv_bless _((SV* sv, HV* stash));
-SV*	sv_bless3 _((SV* sv, HV* stash, bool zaptilde));
 void	sv_catpvf _((SV* sv, const char* pat, ...));
 void	sv_catpv _((SV* sv, char* ptr));
 void	sv_catpvn _((SV* sv, char* ptr, STRLEN len));
