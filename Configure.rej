@@ -1,0 +1,17 @@
+***************
+*** 2994,3000 ****
+  #endif
+  }
+  EOP
+!       (cc -o pdp11 pdp11.c) >/dev/null 2>&1
+        if ./pdp11 2>/dev/null; then
+                dflt='unsplit split'
+        else
+--- 2994,3000 ----
+  #endif
+  }
+  EOP
+!       cc -o pdp11 pdp11.c >/dev/null 2>&1
+        if ./pdp11 2>/dev/null; then
+                dflt='unsplit split'
+        else
