@@ -399,7 +399,6 @@ gv_fetchpv(char *nambeg, I32 add, I32 sv_type)
     register char *namend;
     HV *stash = 0;
     U32 add_gvflags = 0;
-    char *tmpbuf;
 
     if (*name == '*' && isALPHA(name[1])) /* accidental stringify on a GV? */
 	name++;
@@ -415,20 +414,21 @@ gv_fetchpv(char *nambeg, I32 add, I32 sv_type)
 
 	    len = namend - name;
 	    if (len > 0) {
-		New(601, tmpbuf, len+3, char);
+		char *tmpbuf;
+		char autobuf[64];
+
+		if (len < sizeof(autobuf) - 2)
+		    tmpbuf = autobuf;
+		else
+		    New(601, tmpbuf, len+3, char);
 		Copy(name, tmpbuf, len, char);
 		tmpbuf[len++] = ':';
 		tmpbuf[len++] = ':';
 		tmpbuf[len] = '\0';
 		gvp = (GV**)hv_fetch(stash,tmpbuf,len,add);
-		gv = gvp ? *gvp : Nullgv;
-		if (gv && gv != (GV*)&sv_undef) {
-		    if (SvTYPE(gv) != SVt_PVGV)
-			gv_init(gv, stash, tmpbuf, len, (add & 2));
-		    else
-			GvMULTI_on(gv);
-		}
-		Safefree(tmpbuf);
+		if (tmpbuf != autobuf)
+		    Safefree(tmpbuf);
+
 		if (!gv || gv == (GV*)&sv_undef)
 		    return Nullgv;
 		else
