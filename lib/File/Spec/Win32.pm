@@ -117,11 +117,11 @@ sub canonpath {
     my ($self,$path) = @_;
     $path =~ s/^([a-z]:)/\u$1/s;
     $path =~ s|/|\\|g;
-    $path =~ s|([^\\])\\+|$1\\|g;                  # xx////xx  -> xx/xx
-    $path =~ s|(\\\.)+\\|\\|g;                     # xx/././xx -> xx/xx
-    $path =~ s|^(\.\\)+||s unless $path eq ".\\";  # ./xx      -> xx
+    $path =~ s|([^\\])\\+|$1\\|g;                  # xx\\\\xx  -> xx\xx
+    $path =~ s|(\\\.)+\\|\\|g;                     # xx\.\.\xx -> xx\xx
+    $path =~ s|^(\.\\)+||s unless $path eq ".\\";  # .\xx      -> xx
     $path =~ s|\\\Z(?!\n)||
-             unless $path =~ m#^([A-Z]:)?\\\Z(?!\n)#s;   # xx/       -> xx
+             unless $path =~ m#^([A-Z]:)?\\\Z(?!\n)#s;   # xx\       -> xx
     return $path;
 }
 

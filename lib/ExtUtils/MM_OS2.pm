@@ -12,6 +12,8 @@ require Exporter;
 require ExtUtils::MakeMaker;
 ExtUtils::MakeMaker->import(qw( $Verbose &neatvalue));
 
+use File::Spec;
+
 unshift @MM::ISA, 'ExtUtils::MM_OS2';
 
 =pod
@@ -110,8 +112,8 @@ sub maybe_command {
 }
 
 sub file_name_is_absolute {
-    my($self,$file) = @_;
-    $file =~ m{^([a-z]:)?[\\/]}i ;
+    shift;
+    return File::Spec->file_name_is_absolute(@_);
 }
 
 sub perl_archive
