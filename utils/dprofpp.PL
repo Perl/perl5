@@ -18,21 +18,19 @@ $file =~ s/\.pl$//
 	if ($Config{'osname'} eq 'VMS' or
 	    $Config{'osname'} eq 'OS2');  # "case-forgiving"
 
-print "Pulling version from Makefile for dprofpp...\n";
+my $dprof_pm = '../ext/Devel/DProf/DProf.pm';
 my $VERSION = 0;
-open( MK, "<Makefile" ) || die "Can't open Makefile: $!";
-while(<MK>){
-	if( /^VERSION\s*=\s*(\d+)/ ){
+open( PM, "<$dprof_pm" ) || die "Can't open $dprof_pm: $!";
+while(<PM>){
+	if( /^\$Devel::DProf::VERSION\s*=\s*'(\d+)'/ ){
 		$VERSION = $1;
 		last;
 	}
 }
-close MK;
+close PM;
 if( $VERSION == 0 ){
-	die "Did not find VERSION in Makefile";
+	die "Did not find VERSION in $dprof_pm";
 }
-print "   version is ($VERSION).\n";
-
 open OUT,">$file" or die "Can't create $file: $!";
 
 print "Extracting $file (with variable substitutions)\n";
