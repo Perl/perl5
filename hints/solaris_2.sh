@@ -376,8 +376,8 @@ EOM
 		;;
 	    esac
 	    case "$ccflags" in
-	    *-DUSE_LONG_LONG*) ;;
-	    *) ccflags="$ccflags -DUSE_LONG_LONG" ;;
+	    *-DUSE_64_BITS*) ;;
+	    *) ccflags="$ccflags -DUSE_64_BITS" ;;
 	    esac
 	    # When a 64-bit cc becomes available $archname64
 	    # may need setting so that $archname gets it attached.

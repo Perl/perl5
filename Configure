@@ -20,7 +20,7 @@
 
 # $Id: Head.U,v 3.0.1.9 1997/02/28 15:02:09 ram Exp $
 #
-# Generated on Sat Feb 12 03:16:21 EET 2000 [metaconfig 3.0 PL70]
+# Generated on Sat Feb 12 21:21:49 EET 2000 [metaconfig 3.0 PL70]
 # (with additional metaconfig patches by perlbug@perl.com)
 
 cat >/tmp/c1$$ <<EOF
@@ -4426,12 +4426,12 @@ EOM
 		case "$gccversion" in
 		'')	;;
 		*)	case "$ccflags" in
-			*-DUSE_LONG_LONG*) ;;
+			*-DUSE_64_BITS*) ;;
 			*) $cat <<EOM
-But since you seem to be using gcc, I will now add -DUSE_LONG_LONG
-to the compilation flags.
+But since you seem to be using gcc, I will now add -DUSE_64_BITS
+to the compilation flags to get long longs.
 EOM
-			   ccflags="$ccflags -DUSE_LONG_LONG"
+			   ccflags="$ccflags -DUSE_64_BITS"
 			   ;;
 			esac
 			;;
