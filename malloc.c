@@ -269,20 +269,21 @@ malloc(nbytes)
   	register int bucket = 0;
   	register MEM_SIZE shiftr;
 
-#ifdef PERL_CORE
 #if defined(DEBUGGING) || defined(RCHECK)
 	MEM_SIZE size = nbytes;
 #endif
 
+#ifdef PERL_CORE
 #ifdef HAS_64K_LIMIT
 	if (nbytes > 0xffff) {
-		PerlIO_printf(PerlIO_stderr(), "Allocation too large: %lx\n", (long)nbytes);
+		PerlIO_printf(PerlIO_stderr(),
+			      "Allocation too large: %lx\n", (long)nbytes);
 		my_exit(1);
 	}
 #endif /* HAS_64K_LIMIT */
 #ifdef DEBUGGING
 	if ((long)nbytes < 0)
-	    croak("panic: malloc");
+		croak("panic: malloc");
 #endif
 #endif /* PERL_CORE */
 
@@ -293,20 +294,18 @@ malloc(nbytes)
 	 * space used per block for accounting.
 	 */
 #ifdef PACK_MALLOC
-	if (nbytes > MAX_2_POT_ALGO) {
-#endif
-#ifdef TWO_POT_OPTIMIZE
-	    if (nbytes >= FIRST_BIG_BOUND) {
-		nbytes -= PERL_PAGESIZE;
-	    }
-#endif 
-	    nbytes += M_OVERHEAD;
-	    nbytes = (nbytes + 3) &~ 3; 
-#ifdef PACK_MALLOC
-	} else if (nbytes == 0) {
+	if (nbytes == 0)
 	    nbytes = 1;
-	}
+	else if (nbytes > MAX_2_POT_ALGO)
 #endif
+	{
+#ifdef TWO_POT_OPTIMIZE
+		if (nbytes >= FIRST_BIG_BOUND)
+			nbytes -= PERL_PAGESIZE;
+#endif 
+		nbytes += M_OVERHEAD;
+		nbytes = (nbytes + 3) &~ 3; 
+	}
   	shiftr = (nbytes - 1) >> 2;
 	/* apart from this loop, this is O(1) */
   	while (shiftr >>= 1)
@@ -556,14 +555,15 @@ realloc(mp, nbytes)
 	int was_alloced = 0;
 	char *cp = (char*)mp;
 
-#ifdef PERL_CORE
 #ifdef DEBUGGING
 	MEM_SIZE size = nbytes;
 #endif
 
+#ifdef PERL_CORE
 #ifdef HAS_64K_LIMIT
 	if (nbytes > 0xffff) {
-		PerlIO_printf(PerlIO_stderr(), "Reallocation too large: %lx\n", size);
+		PerlIO_printf(PerlIO_stderr(),
+			      "Reallocation too large: %lx\n", size);
 		my_exit(1);
 	}
 #endif /* HAS_64K_LIMIT */
