@@ -28,6 +28,97 @@ example from http://www.xray.mpe.mpg.de/mailing-lists/perl5-porters/
 Version v5.8.1		Maintenance release working toward v5.8.1
 --------------
 ____________________________________________________________________________
+[ 20013] By: jhi                                   on 2003/07/05  13:58:18
+        Log: Integrate:
+             [ 19998]
+             Fix non-numeric $VERSION.
+             
+             [ 19999]
+             Macro reorganization in the Makefile, so that $(LDLIBPTH) always
+             appears just before the name of the command to be run. See
+             
+             Subject: Re: PERL_SKIP_TTY_TEST fix
+             From: Alexey Tourbin <at@altlinux.ru>
+             Date: Fri, 4 Jul 2003 17:25:34 +0400
+             Message-ID: <20030704132534.GC1531@julia.office.altlinux.ru>
+             
+             [ 20000]
+             Upgrade to Math::BigInt v1.65, Math::BigRat v0.10,
+             and bignum v0.14.
+             
+             [ 20001]
+             Add a new test target in the makefile, test_harness_notty.
+             It's like test_harness, but sets HARNESS_NOTTY=1 to make
+             Test::Harness' output less blinking.
+             
+             [ 20002]
+             Author list update (to be continued...)
+             
+             [ 20003]
+             Allow to create more than one Shell object :
+             Subject: [patch] Shell.pm fix
+             From: Stéphane Payrard <stef@payrard.net>
+             Date: Sat, 5 Jul 2003 01:16:50 +0200
+             Message-ID: <20030704231650.GA19701@stefp.dyndns.org>
+             
+             [ 20004]
+             Subject: [PATCH] dump.c -Wformat; Re: maint @ 19975, maint @ 19997
+             From: Robin Barker <Robin.Barker@npl.co.uk>
+             Date: Fri, 4 Jul 2003 19:15:01 +0100
+             Message-ID: <533D273D4014D411AB1D00062938C4D9040465BD@hotel.npl.co.uk>
+             
+             [ 20006]
+             Subject: [PATCH] MM_VMS.pm -- fix xs installation
+             From: "Craig A. Berry" <craigberry@mac.com>
+             Date: Sat, 05 Jul 2003 00:38:28 -0500
+             Message-ID: <3F066454.90003@mac.com>
+             
+             [ 20007]
+             Allow $ENV{PERL_HASH_SEED_DEBUG} to work even under taint;
+             since CGI scripts are (should be) run under -T, being able
+             to show the HASH_SEED in case of problems is good.
+             The $ENV{PERL_HASH_SEED} is still ignored under taint.
+             
+             [ 20008]
+             IIRC gcc would complain about if (s = ...).
+             
+             [ 20009]
+             The logic for additional randomisation for 64-bit UV
+             cases was wrong.
+             
+             [ 20010]
+             Comment out some debugging output in Math::BigInt, that
+             causes confusion in t/TEST when running Math/BigInt/t/bare_mbi.t.
+             
+             [ 20012]
+             Be explicit about the $0 pain in Linux 2.2.
+     Branch: maint-5.8/perl
+	  +> lib/Math/BigInt/t/biglog.t lib/Math/BigInt/t/req_mbf0.t
+	  +> lib/Math/BigInt/t/req_mbf1.t lib/Math/BigInt/t/req_mbfa.t
+	  +> lib/Math/BigInt/t/req_mbfi.t lib/Math/BigInt/t/req_mbfn.t
+	  +> lib/Math/BigInt/t/req_mbfw.t lib/Math/BigInt/t/trap.t
+	  +> lib/Math/BigInt/t/use_mbfw.t lib/Math/BigRat/t/bigratup.t
+	  +> lib/Math/BigRat/t/requirer.t lib/Math/BigRat/t/trap.t
+	  !> (integrate 48 files)
+____________________________________________________________________________
+[ 20011] By: jhi                                   on 2003/07/05  13:44:30
+        Log: perldelta tweaks.
+     Branch: maint-5.8/perl
+	   ! pod/perldelta.pod
+____________________________________________________________________________
+[ 20005] By: jhi                                   on 2003/07/05  07:50:53
+        Log: Subject: [PATCH maint] partially rescind Concise pad patch.
+             From: Dave Mitchell <davem@fdgroup.com>
+             Date: Fri, 4 Jul 2003 22:10:11 +0100
+             Message-ID: <20030704211010.GD10426@fdgroup.com>
+     Branch: maint-5.8/perl
+	   ! ext/B/B/Concise.pm
+____________________________________________________________________________
+[ 19997] By: jhi                                   on 2003/07/04  14:45:20
+        Log: Update Changes.
+     Branch: maint-5.8/perl
+	   ! Changes patchlevel.h
+____________________________________________________________________________
 [ 19996] By: jhi                                   on 2003/07/04  14:41:18
         Log: Integrate:
              [ 19993]
