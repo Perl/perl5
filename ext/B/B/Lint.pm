@@ -111,6 +111,8 @@ include other package names whose subs are then checked by Lint.
 
 This is only a very preliminary version.
 
+This module doesn't work correctly on thread-enabled perls.
+
 =head1 AUTHOR
 
 Malcolm Beattie, mbeattie@sable.ox.ac.uk.
@@ -164,7 +166,7 @@ sub gimme {
     my $op = shift;
     my $flags = $op->flags;
     if ($flags & OPf_WANT) {
-	return(($flags & OPf_WANT == OPf_WANT_LIST) ? 1 : 0);
+	return(($flags & OPf_WANT) == OPf_WANT_LIST ? 1 : 0);
     }
     return undef;
 }
