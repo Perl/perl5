@@ -1486,6 +1486,15 @@ The C variable which corresponds to Perl's $^W warning variable.
 =for hackers
 Found in file intrpvar.h
 
+=item PL_last_in_gv
+
+The GV which was last used for a filehandle input operation. (C<< <FH> >>)
+
+	GV*	PL_last_in_gv
+
+=for hackers
+Found in file thrdvar.h
+
 =item PL_modglobal
 
 C<PL_modglobal> is a general purpose, interpreter global HV for use by
@@ -1507,6 +1516,24 @@ to either declare a local variable and use that instead or to use the
 C<SvPV_nolen> macro.
 
 	STRLEN	PL_na
+
+=for hackers
+Found in file thrdvar.h
+
+=item PL_ofs_sv
+
+The output field separator - C<$,> in Perl space.
+
+	SV*	PL_ofs_sv
+
+=for hackers
+Found in file thrdvar.h
+
+=item PL_rs
+
+The input record separator - C<$/> in Perl space.
+
+	SV*	PL_rs
 
 =for hackers
 Found in file thrdvar.h
@@ -2369,19 +2396,19 @@ false, defined or undefined.  Does not handle 'get' magic.
 =for hackers
 Found in file sv.h
 
-=item svtype
-
-An enum of flags for Perl types.  These are found in the file B<sv.h> 
-in the C<svtype> enum.  Test these flags with the C<SvTYPE> macro.
-
-=for hackers
-Found in file sv.h
-
 =item SvTYPE
 
 Returns the type of the SV.  See C<svtype>.
 
 	svtype	SvTYPE(SV* sv)
+
+=for hackers
+Found in file sv.h
+
+=item svtype
+
+An enum of flags for Perl types.  These are found in the file B<sv.h> 
+in the C<svtype> enum.  Test these flags with the C<SvTYPE> macro.
 
 =for hackers
 Found in file sv.h
