@@ -123,9 +123,9 @@ special way.  If you open minus for reading, it really means to access
 the standard input.  If you open minus for writing, it really means to
 access the standard output.
 
-If minus can be used as the default input or default output?  What happens
+If minus can be used as the default input or default output, what happens
 if you open a pipe into or out of minus?  What's the default command it
-would run?  The same script as you're current running!  This is actually
+would run?  The same script as you're currently running!  This is actually
 a stealth C<fork> hidden inside an C<open> call.  See L<perlipc/"Safe Pipe
 Opens"> for details.
 

@@ -1,6 +1,6 @@
 =head1 NAME
 
-perldelta - what's new for perl v5.6 (as of v5.005_62)
+perldelta - what's new for perl v5.6 (as of v5.005_64)
 
 =head1 DESCRIPTION
 
@@ -15,8 +15,8 @@ This document describes differences between the 5.005 release and this one.
 
 =head2 Perl Source Incompatibilities
 
-Beware that any new warnings that have been added or enhanced old
-warnings are B<not> considered incompatible changes.
+Beware that any new warnings that have been added or old ones
+that have been enhanced are B<not> considered incompatible changes.
 
 Since all new warnings must be explicitly requested via the C<-w>
 switch or the C<warnings> pragma, it is ultimately the programmer's
@@ -26,9 +26,9 @@ responsibility to ensure that warnings are enabled judiciously.
 
 =item STOP is a new keyword
 
-In addition to C<BEGIN>, C<INIT> and C<END>, subroutines named
-C<STOP> are now special.  They are queued up for execution at the
-end of compilation, and cannot be called directly.
+In addition to C<BEGIN>, C<INIT>, C<END>, C<DESTROY> and C<AUTOLOAD>,
+subroutines named C<STOP> are now special.  They are queued up for
+execution at the end of compilation, and cannot be called directly.
 
 =item Treatment of list slices of undef has changed
 

@@ -57,7 +57,7 @@ Every source stream is associated with only one file.
 
 A source filter is a special kind of Perl module that intercepts and
 modifies a source stream before it reaches the parser. A source filter
-changes the our diagram like this:
+changes our diagram like this:
 
     file ----> filter ----> parser
 
@@ -510,8 +510,7 @@ doesn't know Perl. It can be fooled quite easily:
     EOM
 
 Such things aside, you can see that a lot can be achieved with a modest
-amount of code. I<[Note that Tuomas' toy VRML parser on p. 17 had the
-same difficulty parsing VRML strings that look like comments. -Jon]>
+amount of code.
 
 =head1 CONCLUSION
 
