@@ -1872,8 +1872,7 @@ PP(pp_iter)
     }
     if (sv && SvREFCNT(sv) == 0) {
 	*itersvp = Nullsv;
-	Perl_croak(aTHX_
-	    "Use of freed value in iteration (perhaps you modified the iterated array within the loop?)");
+	Perl_croak(aTHX_ "Use of freed value in iteration");
     }
 
     if (sv)
