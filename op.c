@@ -3288,16 +3288,29 @@ SV *
 cv_const_sv(cv)
 CV* cv;
 {
-    OP *o;
-    SV *sv;
-    
     if (!cv || !SvPOK(cv) || SvCUR(cv))
 	return Nullsv;
+    return op_const_sv(CvSTART(cv), cv);
+}
 
-    sv = Nullsv;
-    for (o = CvSTART(cv); o; o = o->op_next) {
+SV *
+op_const_sv(o, cv)
+OP* o;
+CV* cv;
+{
+    SV *sv = Nullsv;
+
+    if(!o)
+	return Nullsv;
+ 
+    if(o->op_type == OP_LINESEQ && cLISTOPo->op_first) 
+	o = cLISTOPo->op_first->op_sibling;
+
+    for (; o; o = o->op_next) {
 	OPCODE type = o->op_type;
-	
+
+	if(sv && o->op_next == o) 
+	    return sv;
 	if (type == OP_NEXTSTATE || type == OP_NULL || type == OP_PUSHMARK)
 	    continue;
 	if (type == OP_LEAVESUB || type == OP_RETURN)
@@ -3306,7 +3319,7 @@ CV* cv;
 	    return Nullsv;
 	if (type == OP_CONST)
 	    sv = cSVOPo->op_sv;
-	else if (type == OP_PADSV) {
+	else if (type == OP_PADSV && cv) {
 	    AV* pad = (AV*)(AvARRAY(CvPADLIST(cv))[1]);
 	    sv = pad ? AvARRAY(pad)[o->op_targ] : Nullsv;
 	    if (!sv || (!SvREADONLY(sv) && SvREFCNT(sv) > 1))
@@ -3363,6 +3376,7 @@ OP *block;
 	/* already defined (or promised)? */
 	if (CvROOT(cv) || CvXSUB(cv) || GvASSUMECV(gv)) {
 	    SV* const_sv;
+	    bool const_changed = TRUE;
 	    if (!block) {
 		/* just a "sub foo;" when &foo is already defined */
 		SAVEFREESV(compcv);
@@ -3371,8 +3385,9 @@ OP *block;
 	    /* ahem, death to those who redefine active sort subs */
 	    if (curstack == sortstack && sortcop == CvSTART(cv))
 		croak("Can't redefine active sort subroutine %s", name);
-	    const_sv = cv_const_sv(cv);
-	    if (const_sv || dowarn && !(CvGV(cv) && GvSTASH(CvGV(cv))
+	    if(const_sv = cv_const_sv(cv))
+		const_changed = sv_cmp(const_sv, op_const_sv(block, Nullcv));
+	    if ((const_sv && const_changed) || dowarn && !(CvGV(cv) && GvSTASH(CvGV(cv))
 					&& HvNAME(GvSTASH(CvGV(cv)))
 					&& strEQ(HvNAME(GvSTASH(CvGV(cv))),
 						 "autouse"))) {
