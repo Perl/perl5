@@ -490,6 +490,7 @@ CFG_VARS=   "INST_DRV=$(INST_DRV)"		\
 	    "incpath=$(CCINCDIR)"		\
 	    "libpth=$(strip $(CCLIBDIR) $(LIBFILES:d))" \
 	    "libc=$(LIBC)"			\
+	    "make=dmake"			\
 	    "static_ext=$(STATIC_EXT)"		\
 	    "dynamic_ext=$(DYNAMIC_EXT)"	\
 	    "usethreads=$(USE_THREADS)"		\
