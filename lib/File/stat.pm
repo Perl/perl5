@@ -1,8 +1,12 @@
 package File::stat;
-use strict;
+use 5.006;
 
-use 5.005_64;
+use strict;
+use warnings;
+
 our(@EXPORT, @EXPORT_OK, %EXPORT_TAGS);
+
+our $VERSION = '1.00';
 
 BEGIN { 
     use Exporter   ();
@@ -44,9 +48,15 @@ sub stat ($) {
     my $arg = shift;
     my $st = populate(CORE::stat $arg);
     return $st if $st;
-    no strict 'refs';
-    require Symbol;
-    return populate(CORE::stat \*{Symbol::qualify($arg)});
+	my $fh;
+    {
+		local $!;
+		no strict 'refs';
+		require Symbol;
+		$fh = \*{ Symbol::qualify( $arg, caller() )};
+		return unless defined fileno $fh;
+	}
+    return populate(CORE::stat $fh);
 }
 
 1;

@@ -116,7 +116,7 @@ nonxs)      makeargs="";
 esac
 
 if test ! -f $makefile ; then
-	test -f Makefile.PL && ../$depth/miniperl -I../$depth/lib Makefile.PL INSTALLDIRS=perl $passthru
+	test -f Makefile.PL && ../$depth/miniperl -I../$depth/lib Makefile.PL INSTALLDIRS=perl PERL_CORE=1 $passthru
 fi
 if test ! -f $makefile ; then
 	if test -f Makefile.SH; then

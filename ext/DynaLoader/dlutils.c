@@ -53,10 +53,10 @@ START_MY_CXT
 #define DLDEBUG(level,code)	NOOP
 #endif
 
-
+#ifdef DL_UNLOAD_ALL_AT_EXIT
 /* Close all dlopen'd files */
 static void
-dl_unload_all_files(pTHXo_ void *unused)
+dl_unload_all_files(pTHX_ void *unused)
 {
     CV *sub;
     AV *dl_librefs;
@@ -77,10 +77,10 @@ dl_unload_all_files(pTHXo_ void *unused)
         }
     }
 }
-
+#endif
 
 static void
-dl_generic_private_init(pTHXo)	/* called by dl_*.xs dl_private_init() */
+dl_generic_private_init(pTHX)	/* called by dl_*.xs dl_private_init() */
 {
     char *perl_dl_nonlazy;
     MY_CXT_INIT;
@@ -112,7 +112,7 @@ dl_generic_private_init(pTHXo)	/* called by dl_*.xs dl_private_init() */
 
 /* SaveError() takes printf style args and saves the result in dl_last_error */
 static void
-SaveError(pTHXo_ char* pat, ...)
+SaveError(pTHX_ char* pat, ...)
 {
     dMY_CXT;
     va_list args;

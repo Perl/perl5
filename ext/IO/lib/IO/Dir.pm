@@ -6,7 +6,7 @@
 
 package IO::Dir;
 
-use 5.6.0;
+use 5.006;
 
 use strict;
 use Carp;
@@ -19,7 +19,7 @@ use File::stat;
 use File::Spec;
 
 @ISA = qw(Tie::Hash Exporter);
-$VERSION = "1.03";
+$VERSION = "1.03_00";
 @EXPORT_OK = qw(DIR_UNLINK);
 
 sub DIR_UNLINK () { 1 }
@@ -47,7 +47,7 @@ sub open {
 	unless opendir($dh, $dirname);
     # a dir name should always have a ":" in it; assume dirname is
     # in current directory
-    $dirname = ':' .  $dirname if ( ($^O eq 'MacOS') && ($dirname =~ /^[^:]+$/) );
+    $dirname = ':' .  $dirname if ( ($^O eq 'MacOS') && ($dirname !~ /:/) );
     ${*$dh}{io_dir_path} = $dirname;
     1;
 }
@@ -201,7 +201,7 @@ for details of these functions.
 
 =back
 
-C<IO::Dir> also provides a interface to reading directories via a tied
+C<IO::Dir> also provides an interface to reading directories via a tied
 HASH. The tied HASH extends the interface beyond just the directory
 reading routines by the use of C<lstat>, from the C<File::stat> package,
 C<unlink>, C<rmdir> and C<utime>.

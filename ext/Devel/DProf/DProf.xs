@@ -87,7 +87,7 @@ typedef struct {
     U32		total;
     U32		lastid;
     U32		default_perldb;
-    U32		depth;
+    UV		depth;
 #ifdef OS2
     ULONG	frequ;
     long long	start_cnt;
@@ -384,7 +384,7 @@ test_time(pTHX_ clock_t *r, clock_t *u, clock_t *s)
     int i, j, k = 0;
     HV *oldstash = PL_curstash;
     struct tms t1, t2;
-    clock_t realtime1, realtime2;
+    clock_t realtime1 = 0, realtime2 = 0;
     U32 ototal = g_total;
     U32 ostack = g_SAVE_STACK;
     U32 operldb = PL_perldb;
@@ -497,7 +497,7 @@ check_depth(pTHX_ void *foo)
 	    warn("garbled call depth when profiling");
 	}
 	else {
-	    I32 marks = g_depth - need_depth;
+	    IV marks = g_depth - need_depth;
 
 /* 	    warn("Check_depth: got %d, expected %d\n", g_depth, need_depth); */
 	    while (marks--) {
@@ -513,7 +513,7 @@ check_depth(pTHX_ void *foo)
 
 XS(XS_DB_sub)
 {
-    dXSARGS;
+    dMARK;
     dORIGMARK;
     SV *Sub = GvSV(PL_DBsub);		/* name of current sub */
 
@@ -521,7 +521,7 @@ XS(XS_DB_sub)
     /* profile only the interpreter that loaded us */
     if (g_THX != aTHX) {
         PUSHMARK(ORIGMARK);
-        perl_call_sv(INT2PTR(SV*,SvIV(Sub)), GIMME | G_NODEBUG);
+        perl_call_sv(INT2PTR(SV*,SvIV(Sub)), GIMME_V | G_NODEBUG);
     }
     else
 #endif
@@ -530,12 +530,12 @@ XS(XS_DB_sub)
 
         DBG_SUB_NOTIFY("XS DBsub(%s)\n", SvPV_nolen(Sub));
 
-	SAVEDESTRUCTOR_X(check_depth, (void*)g_depth);
+	SAVEDESTRUCTOR_X(check_depth, INT2PTR(void*,g_depth));
 	g_depth++;
 
         prof_mark(aTHX_ OP_ENTERSUB);
         PUSHMARK(ORIGMARK);
-        perl_call_sv(INT2PTR(SV*,SvIV(Sub)), GIMME | G_NODEBUG);
+        perl_call_sv(INT2PTR(SV*,SvIV(Sub)), GIMME_V | G_NODEBUG);
         PL_curstash = oldstash;
         prof_mark(aTHX_ OP_LEAVESUB);
 	g_depth--;
@@ -576,7 +576,7 @@ XS(XS_DB_goto)
                 PUSHMARK(ORIGMARK);
 
                 PL_curstash = PL_debstash;	/* To disable debugging of perl_call_sv */
-                perl_call_sv(Sub, GIMME);
+                perl_call_sv(Sub, GIMME_V);
                 PL_curstash = oldstash;
 
                 prof_mark(aTHX_ OP_LEAVESUB);

@@ -334,3 +334,40 @@ pre 5.6.1:
 	    compartment.  As a result, the return string was not initialized.
 	A complete example of a mini-application added to OS2::REXX.
 	README.os2 updated to reflect the current state of Perl.
+
+pre 5.6.2:
+	aout build: kid bootstrap_* were not associated with XS.
+	bldlevel did not contain enough info.
+	extLibpath* was failing on the call of the second type.
+	Configure defines flushNULL now (EMX -Zomf bug broke autodetection).
+	Configure did not find SIGBREAK.
+	extLibpath supports LIBSTRICT, better error detection.
+	crypt() used if present in -lcrypt or -lufc.
+	dumb getpw*(), getgr*() etc. supported; as in EMX, but if no
+	    $ENV{PW_PASSWD}, the passwd field contains a string which
+	    cannot be returned by crypt() (for security reasons).
+	The unwound recursion in detecting executable by script was
+	    using static buffers.  Thus system('pod2text') would fail if the
+	    current directory contained an empty file named 'perl'.
+	Put ordinals in the base DLL.
+	Enable EXE-compression.
+	    Load time (ms):  Without /e:2: 70.6; With /e:2: 75.3; Lxlite: 62.8
+	    Size drops from 750K to 627K, with lxlite to 515K.
+	    lxlite /c:max gives 488K, but dumps core in t/TEST
+	os2ish.h defines SYSLOG constants ==> Sys::Syslog works.
+	Corrected warnings related to OS/2 code.
+	    At one place = was put instead of ==.
+	Setting $^E should work.
+	Force "SYS0dddd=0xbar: " to error messages and to dlerror().
+	    ($^E == 2 printed SYS0002 itself, but 110 did not.)
+	$OS2::nsyserror=0 switches off forcing SYSdddd on $^E.
+	perl_.exe does not require PM dlls any more (symbols resolved at
+	    runtime on the as needed basis).
+	OS2::Process:
+	    get/set: term size; codepages; screen's cursor; screen's contents
+	    reliable session name setting;
+	    process's parent pid, and the session id;
+	    switching to and enumeration of sessions
+	    window hierarchy inspection
+	    post a message to a window
+	More robust getpriority() on older Warps.

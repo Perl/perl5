@@ -47,8 +47,9 @@ if ($^O eq 'VMS') { # clean up directory spec
     $INSTDIR =~ s#/$##;
     $INSTDIR =~ s#/000000/#/#;
 }
-
-$INSTDIR =~ s{t[/\\:]pod:?$}{}i; # cut 't/pod' from path (cut 't:pod:' on Mac OS) 
+# cut 't/pod' from path (cut 't:pod:' on Mac OS)
+$INSTDIR = (dirname $INSTDIR) if (basename($INSTDIR) eq 'pod');
+$INSTDIR = (dirname $INSTDIR) if (basename($INSTDIR) eq 't');
 
 my @PODINCDIRS = ( catfile($INSTDIR, 'lib', 'Pod'),
                    catfile($INSTDIR, 'scripts'),
@@ -157,7 +158,7 @@ sub testpodplaintext( @ ) {
    for $podfile (@testpods) {
       ($testname, $_) = fileparse($podfile);
       $testdir ||=  $_;
-      $testname  =~ s/\.t$//;
+      $testname  =~ s/\..*$//;
       $cmpfile   =  $testdir . $testname . '.xr';
       $outfile   =  $testdir . $testname . '.OUT';
 

@@ -157,7 +157,7 @@ sub canonpath {
     }
     else {
       $path =~ s/([\[<])000000\./$1/g;                  # [000000.foo     ==> [foo
-      $path =~ s/([^-]+)\.000000([\]\>])/$1$2/g;        # foo.000000]     ==> foo]
+      $path =~ s/([^-]+)\.(\]\[|><)?000000([\]\>])/$1$3/g;  # foo.000000] ==> foo]
       $path =~ s-\]\[--g;  $path =~ s/><//g;            # foo.][bar       ==> foo.bar
       1 while $path =~ s{([\[<-])\.-}{$1-};             # [.-.-           ==> [--
       $path =~ s/\.[^\[<\.]+\.-([\]\>])/$1/;            # bar.foo.-]      ==> bar]
@@ -269,12 +269,23 @@ from the following list or '' if none are writable:
     sys$scratch:
     $ENV{TMPDIR}
 
+Since perl 5.8.0, if running under taint mode, and if $ENV{TMPDIR}
+is tainted, it is not used.
+
 =cut
 
 my $tmpdir;
 sub tmpdir {
     return $tmpdir if defined $tmpdir;
-    foreach ('sys$scratch:', $ENV{TMPDIR}) {
+    my @dirlist = ('sys$scratch:', $ENV{TMPDIR});
+    {
+	no strict 'refs';
+	if (${"\cTAINT"}) { # Check for taint mode on perl >= 5.8.0
+            require Scalar::Util;
+	    pop @dirlist if Scalar::Util::tainted($ENV{TMPDIR});
+	}
+    }
+    foreach (@dirlist) {
 	next unless defined && -d && -w _;
 	$tmpdir = $_;
 	last;

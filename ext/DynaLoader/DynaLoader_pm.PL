@@ -80,8 +80,10 @@ $Is_MacOS  = $^O eq 'MacOS';
 @dl_require_symbols = ();       # names of symbols we need
 @dl_resolve_using   = ();       # names of files to link with
 @dl_library_path    = ();       # path to look for files
-@dl_librefs         = ();       # things we have loaded
-@dl_modules         = ();       # Modules we have loaded
+
+#XSLoader.pm may have added elements before we were required
+#@dl_librefs         = ();       # things we have loaded
+#@dl_modules         = ();       # Modules we have loaded
 
 # This is a fix to support DLD's unfortunate desire to relink -lc
 @dl_resolve_using = dl_findfile('-lc') if $dlsrc eq "dl_dld.xs";

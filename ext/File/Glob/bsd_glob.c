@@ -73,7 +73,7 @@ static char sscsid[]=  "$OpenBSD: glob.c,v 1.8.10.1 2001/04/10 jason Exp $";
 #ifdef I_PWD
 #	include <pwd.h>
 #else
-#ifdef HAS_PASSWD
+#if defined(HAS_PASSWD) && !defined(VMS)
 	struct passwd *getpwnam(char *);
 	struct passwd *getpwuid(Uid_t);
 #endif
@@ -200,7 +200,11 @@ static Direntry_t *	my_readdir(DIR*);
 static Direntry_t *
 my_readdir(DIR *d)
 {
+#ifndef NETWARE
     return PerlDir_read(d);
+#else
+    return (DIR *)PerlDir_read(d);
+#endif
 }
 #else
 #define	my_readdir	readdir
@@ -259,7 +263,7 @@ bsd_glob(const char *pattern, int flags,
 	 * colon specially, so it looks for files beginning "C:" in
 	 * the current directory. To fix this, change the pattern to
 	 * add an explicit "./" at the start (just after the drive
-	 * letter and colon - ie change to "C:./*").
+	 * letter and colon - ie change to "C:./").
 	 */
 	if (isalpha(pattern[0]) && pattern[1] == ':' &&
 	    pattern[2] != BG_SEP && pattern[2] != BG_SEP2 &&
@@ -506,7 +510,6 @@ globexp2(const Char *ptr, const Char *pattern,
 static const Char *
 globtilde(const Char *pattern, Char *patbuf, size_t patbuf_len, glob_t *pglob)
 {
-	struct passwd *pwd;
 	char *h;
 	const Char *p;
 	Char *b, *eb;
@@ -534,6 +537,7 @@ globtilde(const Char *pattern, Char *patbuf, size_t patbuf_len, glob_t *pglob)
 		 */
 		if ((h = getenv("HOME")) == NULL) {
 #ifdef HAS_PASSWD
+			struct passwd *pwd;
 			if ((pwd = getpwuid(getuid())) == NULL)
 				return pattern;
 			else
@@ -547,6 +551,7 @@ globtilde(const Char *pattern, Char *patbuf, size_t patbuf_len, glob_t *pglob)
 		 * Expand a ~user
 		 */
 #ifdef HAS_PASSWD
+		struct passwd *pwd;
 		if ((pwd = getpwnam((char*) patbuf)) == NULL)
 			return pattern;
 		else
@@ -686,12 +691,12 @@ ci_compare(const void *p, const void *q)
 	const char *qq = *(const char **)q;
 	int ci;
 	while (*pp && *qq) {
-		if (tolower(*pp) != tolower(*qq))
+		if (toLOWER(*pp) != toLOWER(*qq))
 			break;
 		++pp;
 		++qq;
 	}
-	ci = tolower(*pp) - tolower(*qq);
+	ci = toLOWER(*pp) - toLOWER(*qq);
 	if (ci == 0)
 		return compare(p, q);
 	return ci;

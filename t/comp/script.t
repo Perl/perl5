@@ -1,24 +1,28 @@
 #!./perl
 
-# $RCSfile: script.t,v $$Revision: 4.1 $$Date: 92/08/07 18:27:23 $
+BEGIN {
+    chdir 't';
+    @INC = '../lib';
+    require './test.pl';	# for which_perl() etc
+}
+
+my $Perl = which_perl();
 
 print "1..3\n";
 
-$PERL = ($^O eq 'MSWin32') ? '.\perl'
-    : ($^O eq 'MacOS') ? $^X : './perl';
-$x = `$PERL -le "print 'ok';"`;
+$x = `$Perl -le "print 'ok';"`;
 
 if ($x eq "ok\n") {print "ok 1\n";} else {print "not ok 1\n";}
 
 open(try,">Comp.script") || (die "Can't open temp file.");
 print try 'print "ok\n";'; print try "\n";
-close try;
+close try or die "Could not close: $!";
 
-$x = `$PERL Comp.script`;
+$x = `$Perl Comp.script`;
 
 if ($x eq "ok\n") {print "ok 2\n";} else {print "not ok 2\n";}
 
-$x = `$PERL <Comp.script`;
+$x = `$Perl <Comp.script`;
 
 if ($x eq "ok\n") {print "ok 3\n";} else {print "not ok 3\n";}
 

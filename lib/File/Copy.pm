@@ -7,10 +7,12 @@
 
 package File::Copy;
 
-use 5.6.0;
+use 5.006;
 use strict;
+use warnings;
 use Carp;
 use File::Spec;
+use Config;
 our(@ISA, @EXPORT, @EXPORT_OK, $VERSION, $Too_Big, $Syscopy_is_copy);
 sub copy;
 sub syscopy;
@@ -22,7 +24,7 @@ sub mv;
 # package has not yet been updated to work with Perl 5.004, and so it
 # would be a Bad Thing for the CPAN module to grab it and replace this
 # module.  Therefore, we set this module's version higher than 2.0.
-$VERSION = '2.04';
+$VERSION = '2.05';
 
 require Exporter;
 @ISA = qw(Exporter);
@@ -40,7 +42,7 @@ sub _catname {
 
     if ($^O eq 'MacOS') {
 	# a partial dir name that's valid only in the cwd (e.g. 'tmp')
-	$to = ':' . $to if $to =~ /^[^:]+$/;
+	$to = ':' . $to if $to !~ /:/;
     }
 
     return File::Spec->catfile($to, basename($from));
@@ -64,6 +66,22 @@ sub copy {
                             || UNIVERSAL::isa($to, 'IO::Handle'))
 			 : (ref(\$to) eq 'GLOB'));
 
+    if ($from eq $to) { # works for references, too
+	croak("'$from' and '$to' are identical (not copied)");
+    }
+
+    if ($Config{d_symlink} && $Config{d_readlink} &&
+	!($^O eq 'Win32' || $^O eq 'os2' || $^O eq 'vms')) {
+	no warnings 'io'; # don't warn if -l on filehandle
+	if ((-e $from && -l $from) || (-e $to && -l $to)) {
+	    my @fs = stat($from);
+	    my @ts = stat($to);
+	    if (@fs && @ts && $fs[0] == $ts[0] && $fs[1] == $ts[1]) {
+		croak("'$from' and '$to' are identical (not copied)");
+	    }
+	}
+    }
+
     if (!$from_a_handle && !$to_a_handle && -d $to && ! -d $from) {
 	$to = _catname($from, $to);
     }
@@ -74,6 +92,7 @@ sub copy {
 	&& !($from_a_handle && $^O eq 'mpeix')	# and neither can MPE/iX.
 	&& !($from_a_handle && $^O eq 'MSWin32')
 	&& !($from_a_handle && $^O eq 'MacOS')
+	&& !($from_a_handle && $^O eq 'NetWare')
        )
     {
 	return syscopy($from, $to);
@@ -82,24 +101,27 @@ sub copy {
     my $closefrom = 0;
     my $closeto = 0;
     my ($size, $status, $r, $buf);
-    local(*FROM, *TO);
     local($\) = '';
 
+    my $from_h;
     if ($from_a_handle) {
-	*FROM = *$from{FILEHANDLE};
+       $from_h = $from;
     } else {
 	$from = _protect($from) if $from =~ /^\s/s;
-	open(FROM, "< $from\0") or goto fail_open1;
-	binmode FROM or die "($!,$^E)";
+       $from_h = \do { local *FH };
+       open($from_h, "< $from\0") or goto fail_open1;
+       binmode $from_h or die "($!,$^E)";
 	$closefrom = 1;
     }
 
+    my $to_h;
     if ($to_a_handle) {
-	*TO = *$to{FILEHANDLE};
+       $to_h = $to;
     } else {
 	$to = _protect($to) if $to =~ /^\s/s;
-	open(TO,"> $to\0") or goto fail_open2;
-	binmode TO or die "($!,$^E)";
+       $to_h = \do { local *FH };
+       open($to_h,"> $to\0") or goto fail_open2;
+       binmode $to_h or die "($!,$^E)";
 	$closeto = 1;
     }
 
@@ -107,7 +129,7 @@ sub copy {
 	$size = shift(@_) + 0;
 	croak("Bad buffer size for copy: $size\n") unless ($size > 0);
     } else {
-	$size = -s FROM;
+	$size = tied(*$from_h) ? 0 : -s $from_h || 0;
 	$size = 1024 if ($size < 512);
 	$size = $Too_Big if ($size > $Too_Big);
     }
@@ -115,17 +137,17 @@ sub copy {
     $! = 0;
     for (;;) {
 	my ($r, $w, $t);
-	defined($r = sysread(FROM, $buf, $size))
+       defined($r = sysread($from_h, $buf, $size))
 	    or goto fail_inner;
 	last unless $r;
 	for ($w = 0; $w < $r; $w += $t) {
-	    $t = syswrite(TO, $buf, $r - $w, $w)
+           $t = syswrite($to_h, $buf, $r - $w, $w)
 		or goto fail_inner;
 	}
     }
 
-    close(TO) || goto fail_open2 if $closeto;
-    close(FROM) || goto fail_open1 if $closefrom;
+    close($to_h) || goto fail_open2 if $closeto;
+    close($from_h) || goto fail_open1 if $closefrom;
 
     # Use this idiom to avoid uninitialized value warning.
     return 1;
@@ -135,14 +157,14 @@ sub copy {
     if ($closeto) {
 	$status = $!;
 	$! = 0;
-	close TO;
+       close $to_h;
 	$! = $status unless $!;
     }
   fail_open2:
     if ($closefrom) {
 	$status = $!;
 	$! = 0;
-	close FROM;
+       close $from_h;
 	$! = $status unless $!;
     }
   fail_open1:
@@ -269,7 +291,8 @@ argument may be a string, a FileHandle reference or a FileHandle
 glob. Obviously, if the first argument is a filehandle of some
 sort, it will be read from, and if it is a file I<name> it will
 be opened for reading. Likewise, the second argument will be
-written to (and created if need be).
+written to (and created if need be).  Trying to copy a file on top
+of itself is a fatal error.
 
 B<Note that passing in
 files as handles instead of names may lead to loss of information
@@ -310,9 +333,10 @@ File::Copy also provides the C<syscopy> routine, which copies the
 file specified in the first parameter to the file specified in the
 second parameter, preserving OS-specific attributes and file
 structure.  For Unix systems, this is equivalent to the simple
-C<copy> routine.  For VMS systems, this calls the C<rmscopy>
-routine (see below).  For OS/2 systems, this calls the C<syscopy>
-XSUB directly. For Win32 systems, this calls C<Win32::CopyFile>.
+C<copy> routine, which doesn't preserve OS-specific attributes.  For
+VMS systems, this calls the C<rmscopy> routine (see below).  For OS/2
+systems, this calls the C<syscopy> XSUB directly. For Win32 systems,
+this calls C<Win32::CopyFile>.
 
 =head2 Special behaviour if C<syscopy> is defined (OS/2, VMS and Win32)
 

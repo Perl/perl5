@@ -1,0 +1,80 @@
+#!/bin/sh
+
+#
+# testall.atom
+# 
+# This script creates all.Counts file that can be fed to prof(1)
+# to produce various basic block counting profiles.
+#
+# This script needs to be run at the top level of the Perl build
+# directory after the "make all" and "make test" targets have been run.
+#
+# You will also need to have perl.pixie built,
+# which means that you will also have Configured with -Doptimize=-g.
+#
+# After the script has been run (this will take several minutes)
+# you will have a file called all.Counts, which contains the cumulative
+# basic block counting results over the whole Perl test suite.
+# You can produce various reports using prof(1);
+#
+#   prof -pixie               -all -L. perl all.Counts
+#   prof -pixie -heavy        -all -L. perl all.Counts
+#   prof -pixie -invocations  -all -L. perl all.Counts
+#   prof -pixie -lines        -all -L. perl all.Counts
+#   prof -pixie -testcoverage -all -L. perl all.Counts
+#   prof -pixie -zero         -all -L. perl all.Counts
+#
+# io/openpid and op/fork core on me, I don't know why and haven't
+# taken a look yet.
+#
+# jhi@iki.fi
+#
+
+if test ! -f /usr/bin/atom
+then
+    echo "$0: no /usr/bin/atom"
+    exit 1
+fi
+
+if test ! -f perl;       then echo "$0: no perl";      exit 1; fi
+if test ! -f perl.pixie; then echo "$0: no perl.pixie; exit 1; fi
+if test ! -f t/perl;     then echo "$0: no t/perl;     exit 1; fi
+
+LD_LIBRARY_PATH=`pwd`
+export LD_LIBRARY_PATH
+
+cd t || exit 1
+
+ln -sf ../perl.pixie .
+
+the_t=`echo base/*.t comp/*.t cmd/*.t run/*.t io/*.t; echo op/*.t pragma/*.t lib/*.t pod/*.t camel-III/*.t`
+
+PERL_DESTRUCT_LEVEL=2
+export PERL_DESTRUCT_LEVEL
+
+rm -f all.Counts
+
+for t in $the_t
+do
+    echo `echo $t|sed s:\.t$::`" \c"
+    case "$t" in
+    *taint*|pragma/locale.t|lib/basename.t)
+	T=-T ;;
+    *)
+	T='' ;;
+    esac
+    ./perl.pixie $T $t > /dev/null
+    if cd ..
+    then
+        if test -f all.Counts
+        then
+            prof -pixie -merge new.Counts -L. -incobj libperl.so perl t/perl.Counts all.Counts
+            mv new.Counts all.Counts
+        else
+            mv t/perl.Counts all.Counts
+        fi 
+        cd t
+    fi
+done
+
+exit 0

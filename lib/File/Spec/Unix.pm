@@ -3,7 +3,7 @@ package File::Spec::Unix;
 use strict;
 our($VERSION);
 
-$VERSION = '1.3';
+$VERSION = '1.4';
 
 use Cwd;
 
@@ -42,7 +42,12 @@ sub canonpath {
     if ( $^O =~ m/^(?:qnx|nto)$/ && $path =~ s:^(//[^/]+)(/|\z):/:s ) {
       $node = $1;
     }
-    $path =~ s|/+|/|g unless($^O eq 'cygwin');     # xx////xx  -> xx/xx
+    # This used to be
+    # $path =~ s|/+|/|g unless($^O eq 'cygwin');
+    # but that made tests 29, 30, 35, 46, and 213 (as of #13272) to fail
+    # (Mainly because trailing "" directories didn't get stripped).
+    # Why would cygwin avoid collapsing multiple slashes into one? --jhi
+    $path =~ s|/+|/|g;                             # xx////xx  -> xx/xx
     $path =~ s@(/\.)+(/|\Z(?!\n))@/@g;             # xx/././xx -> xx/xx
     $path =~ s|^(\./)+||s unless $path eq "./";    # ./xx      -> xx
     $path =~ s|^/(\.\./)+|/|s;                     # /../../xx -> xx
@@ -124,12 +129,23 @@ from the following list or "" if none are writable:
     $ENV{TMPDIR}
     /tmp
 
+Since perl 5.8.0, if running under taint mode, and if $ENV{TMPDIR}
+is tainted, it is not used.
+
 =cut
 
 my $tmpdir;
 sub tmpdir {
     return $tmpdir if defined $tmpdir;
-    foreach ($ENV{TMPDIR}, "/tmp") {
+    my @dirlist = ($ENV{TMPDIR}, "/tmp");
+    {
+	no strict 'refs';
+	if (${"\cTAINT"}) { # Check for taint mode on perl >= 5.8.0
+            require Scalar::Util;
+	    shift @dirlist if Scalar::Util::tainted($ENV{TMPDIR});
+	}
+    }
+    foreach (@dirlist) {
 	next unless defined && -d && -w _;
 	$tmpdir = $_;
 	last;

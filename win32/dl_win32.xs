@@ -30,10 +30,6 @@ calls.
 #include "perl.h"
 #include "win32.h"
 
-#ifdef PERL_OBJECT
-#define NO_XSLOCKS
-#endif  /* PERL_OBJECT */
-
 #include "XSUB.h"
 
 typedef struct {
@@ -46,7 +42,7 @@ typedef struct {
 #define dl_error_sv	(dl_cxtx.x_error_sv)
 
 static char *
-OS_Error_String(pTHXo)
+OS_Error_String(pTHX)
 {
     dMY_CXT;
     DWORD err = GetLastError();
@@ -58,9 +54,9 @@ OS_Error_String(pTHXo)
 }
 
 static void
-dl_private_init(pTHXo)
+dl_private_init(pTHX)
 {
-    (void)dl_generic_private_init(aTHXo);
+    (void)dl_generic_private_init(aTHX);
 }
 
 /* 
@@ -102,7 +98,7 @@ dl_static_linked(char *filename)
 MODULE = DynaLoader	PACKAGE = DynaLoader
 
 BOOT:
-    (void)dl_private_init(aTHXo);
+    (void)dl_private_init(aTHX);
 
 void *
 dl_load_file(filename,flags=0)
@@ -120,8 +116,8 @@ dl_load_file(filename,flags=0)
     DLDEBUG(2,PerlIO_printf(Perl_debug_log," libref=%x\n", RETVAL));
     ST(0) = sv_newmortal() ;
     if (RETVAL == NULL)
-	SaveError(aTHXo_ "load_file:%s",
-		  OS_Error_String(aTHXo)) ;
+	SaveError(aTHX_ "load_file:%s",
+		  OS_Error_String(aTHX)) ;
     else
 	sv_setiv( ST(0), (IV)RETVAL);
   }
@@ -137,8 +133,8 @@ dl_find_symbol(libhandle, symbolname)
     DLDEBUG(2,PerlIO_printf(Perl_debug_log,"  symbolref = %x\n", RETVAL));
     ST(0) = sv_newmortal() ;
     if (RETVAL == NULL)
-	SaveError(aTHXo_ "find_symbol:%s",
-		  OS_Error_String(aTHXo)) ;
+	SaveError(aTHX_ "find_symbol:%s",
+		  OS_Error_String(aTHX)) ;
     else
 	sv_setiv( ST(0), (IV)RETVAL);
 
@@ -160,7 +156,7 @@ dl_install_xsub(perl_name, symref, filename="$Package")
     DLDEBUG(2,PerlIO_printf(Perl_debug_log,"dl_install_xsub(name=%s, symref=%x)\n",
 		      perl_name, symref));
     ST(0) = sv_2mortal(newRV((SV*)newXS(perl_name,
-					(void(*)(pTHXo_ CV *))symref,
+					(void(*)(pTHX_ CV *))symref,
 					filename)));
 
 

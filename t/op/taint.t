@@ -14,11 +14,22 @@ BEGIN {
 
 use strict;
 use Config;
-use File::Spec::Functions;
 
-# We do not want the whole taint.t to fail
-# just because Errno possibly failing.
-eval { require Errno; import Errno };
+my $test = 177;
+sub ok ($;$) {
+    my($ok, $name) = @_;
+
+    # You have to do it this way or VMS will get confused.
+    print $ok ? "ok $test - $name\n" : "not ok $test - $name\n";
+
+    printf "# Failed test at line %d\n", (caller)[2] unless $ok;
+
+    $test++;
+    return $ok;
+}
+
+
+$| = 1;
 
 use vars qw($ipcsysv); # did we manage to load IPC::SysV?
 
@@ -37,12 +48,14 @@ BEGIN {
   }
 }
 
-my $Is_MacOS = $^O eq 'MacOS';
 my $Is_VMS = $^O eq 'VMS';
 my $Is_MSWin32 = $^O eq 'MSWin32';
+my $Is_NetWare = $^O eq 'NetWare';
 my $Is_Dos = $^O eq 'dos';
+my $Is_Cygwin = $^O eq 'cygwin';
 my $Invoke_Perl = $Is_VMS ? 'MCR Sys$Disk:[]Perl.' :
-                  $Is_MSWin32 ? '.\perl' : $Is_MacOS ? '::macos:perl' : './perl';
+                  ($Is_MSWin32 ? '.\perl' :
+                  ($Is_NetWare ? 'perl' : './perl'));
 my @MoreEnv = qw/IFS CDPATH ENV BASH_ENV/;
 
 if ($Is_VMS) {
@@ -99,14 +112,14 @@ sub test ($$;$) {
 }
 
 # We need an external program to call.
-my $ECHO = ($Is_MSWin32 ? ".\\echo$$" : $Is_MacOS ? ":echo$$" : "./echo$$");
+my $ECHO = ($Is_MSWin32 ? ".\\echo$$" : ($Is_NetWare ? "echo$$" : "./echo$$"));
 END { unlink $ECHO }
 open PROG, "> $ECHO" or die "Can't create $ECHO: $!";
 print PROG 'print "@ARGV\n"', "\n";
 close PROG;
 my $echo = "$Invoke_Perl $ECHO";
 
-print "1..155\n";
+print "1..203\n";
 
 # First, let's make sure that Perl is checking the dangerous
 # environment variables. Maybe they aren't set yet, so we'll
@@ -118,9 +131,15 @@ print "1..155\n";
     delete @ENV{@MoreEnv};
     $ENV{TERM} = 'dumb';
 
+    if ($Is_Cygwin && ! -f 'cygwin1.dll') {
+	system("/usr/bin/cp /usr/bin/cygwin1.dll .") &&
+	    die "$0: failed to cp cygwin1.dll: $!\n";
+	END { unlink "cygwin1.dll" } # yes, done for all platforms...
+    }
+
     test 1, eval { `$echo 1` } eq "1\n";
 
-    if ($Is_MSWin32 || $Is_VMS || $Is_Dos || $Is_MacOS) {
+    if ($Is_MSWin32 || $Is_NetWare || $Is_VMS || $Is_Dos) {
 	print "# Environment tainting tests skipped\n";
 	for (2..5) { print "ok $_\n" }
     }
@@ -144,7 +163,7 @@ print "1..155\n";
     }
 
     my $tmp;
-    if ($^O eq 'os2' || $^O eq 'amigaos' || $Is_MSWin32 || $Is_Dos) {
+    if ($^O eq 'os2' || $^O eq 'amigaos' || $Is_MSWin32 || $Is_NetWare || $Is_Dos) {
 	print "# all directories are writeable\n";
     }
     else {
@@ -237,7 +256,7 @@ print "1..155\n";
 # How about command-line arguments? The problem is that we don't
 # always get some, so we'll run another process with some.
 {
-    my $arg = catfile(curdir(), "arg$$");
+    my $arg = "./arg$$";
     open PROG, "> $arg" or die "Can't create $arg: $!";
     print PROG q{
 	eval { join('', @ARGV), kill 0 };
@@ -253,7 +272,7 @@ print "1..155\n";
 
 # Reading from a file should be tainted
 {
-    my $file = catfile(curdir(), 'TEST');
+    my $file = './TEST';
     test 32, open(FILE, $file), "Couldn't open '$file': $!";
 
     my $block;
@@ -386,7 +405,9 @@ else {
     test 72, $@ eq '', $@;		# NB: This should be allowed
 
     # Try first new style but allow also old style.
-    test 73, $!{ENOENT} ||
+    # We do not want the whole taint.t to fail
+    # just because Errno possibly failing.
+    test 73, eval('$!{ENOENT}') ||
 	$! == 2 || # File not found
 	($Is_Dos && $! == 22) ||
 	($^O eq 'mint' && $! == 33);
@@ -554,7 +575,7 @@ else {
 # Test for system/library calls returning string data of dubious origin.
 {
     # No reliable %Config check for getpw*
-    if (eval { setpwent(); getpwent(); 1 }) {
+    if (eval { setpwent(); getpwent() }) {
 	setpwent();
 	my @getpwent = getpwent();
 	die "getpwent: $!\n" unless (@getpwent);
@@ -585,10 +606,7 @@ else {
     if ($Config{d_readlink} && $Config{d_symlink}) {
 	my $symlink = "sl$$";
 	unlink($symlink);
-	my $sl = "/something/naughty";
-	# it has to be a real path on Mac OS
-	$sl = MacPerl::MakePath((MacPerl::Volumes())[0]) if $Is_MacOS;
-	symlink($sl, $symlink) or die "symlink: $!\n";
+	symlink("/something/naughty", $symlink) or die "symlink: $!\n";
 	my $readlink = readlink($symlink);
 	test 144, tainted $readlink;
 	unlink($symlink);
@@ -702,7 +720,7 @@ else {
 {
     # bug id 20001004.006
 
-    open IN, catfile(curdir(), 'TEST') or warn "$0: cannot read ./TEST: $!" ;
+    open IN, "./TEST" or warn "$0: cannot read ./TEST: $!" ;
     local $/;
     my $a = <IN>;
     my $b = <IN>;
@@ -714,7 +732,7 @@ else {
 {
     # bug id 20001004.007
 
-    open IN, catfile(curdir(), 'TEST') or warn "$0: cannot read ./TEST: $!" ;
+    open IN, "./TEST" or warn "$0: cannot read ./TEST: $!" ;
     my $a = <IN>;
 
     my $c = { a => 42,
@@ -738,3 +756,206 @@ else {
     close IN;
 }
 
+{
+    # bug id 20010519.003
+
+    BEGIN {
+	use vars qw($has_fcntl);
+	eval { require Fcntl; import Fcntl; };
+	unless ($@) {
+	    $has_fcntl = 1;
+	}
+    }
+
+    unless ($has_fcntl) {
+	for (156..173) {
+	    print "ok $_ # Skip: no Fcntl (no dynaloading?)\n";
+	}
+    } else {
+	my $evil = "foo" . $TAINT;
+
+	eval { sysopen(my $ro, $evil, &O_RDONLY) };
+	test 156, $@ !~ /^Insecure dependency/, $@;
+	
+	eval { sysopen(my $wo, $evil, &O_WRONLY) };
+	test 157, $@ =~ /^Insecure dependency/, $@;
+	
+	eval { sysopen(my $rw, $evil, &O_RDWR) };
+	test 158, $@ =~ /^Insecure dependency/, $@;
+	
+	eval { sysopen(my $ap, $evil, &O_APPEND) };
+	test 159, $@ =~ /^Insecure dependency/, $@;
+	
+	eval { sysopen(my $cr, $evil, &O_CREAT) };
+	test 160, $@ =~ /^Insecure dependency/, $@;
+	
+	eval { sysopen(my $tr, $evil, &O_TRUNC) };
+	test 161, $@ =~ /^Insecure dependency/, $@;
+	
+	eval { sysopen(my $ro, "foo", &O_RDONLY | $evil) };
+	test 162, $@ !~ /^Insecure dependency/, $@;
+	
+	eval { sysopen(my $wo, "foo", &O_WRONLY | $evil) };
+	test 163, $@ =~ /^Insecure dependency/, $@;
+
+	eval { sysopen(my $rw, "foo", &O_RDWR | $evil) };
+	test 164, $@ =~ /^Insecure dependency/, $@;
+
+	eval { sysopen(my $ap, "foo", &O_APPEND | $evil) };
+	test 165, $@ =~ /^Insecure dependency/, $@;
+	
+	eval { sysopen(my $cr, "foo", &O_CREAT | $evil) };
+	test 166, $@ =~ /^Insecure dependency/, $@;
+
+	eval { sysopen(my $tr, "foo", &O_TRUNC | $evil) };
+	test 167, $@ =~ /^Insecure dependency/, $@;
+
+	eval { sysopen(my $ro, "foo", &O_RDONLY, $evil) };
+	test 168, $@ !~ /^Insecure dependency/, $@;
+	
+	eval { sysopen(my $wo, "foo", &O_WRONLY, $evil) };
+	test 169, $@ =~ /^Insecure dependency/, $@;
+	
+	eval { sysopen(my $rw, "foo", &O_RDWR, $evil) };
+	test 170, $@ =~ /^Insecure dependency/, $@;
+	
+	eval { sysopen(my $ap, "foo", &O_APPEND, $evil) };
+	test 171, $@ =~ /^Insecure dependency/, $@;
+	
+	eval { sysopen(my $cr, "foo", &O_CREAT, $evil) };
+	test 172, $@ =~ /^Insecure dependency/, $@;
+
+	eval { sysopen(my $tr, "foo", &O_TRUNC, $evil) };
+	test 173, $@ =~ /^Insecure dependency/, $@;
+	
+	unlink("foo"); # not unlink($evil), because that would fail...
+    }
+}
+
+{
+    # bug 20010526.004
+
+    use warnings;
+
+    local $SIG{__WARN__} = sub { print "not " };
+
+    sub fmi {
+	my $divnum = shift()/1;
+	sprintf("%1.1f\n", $divnum);
+    }
+
+    fmi(21 . $TAINT);
+    fmi(37);
+    fmi(248);
+
+    print "ok 174\n";
+}
+
+
+{
+    # Bug ID 20010730.010
+
+    my $i = 0;
+
+    sub Tie::TIESCALAR {
+        my $class =  shift;
+        my $arg   =  shift;
+
+        bless \$arg => $class;
+    }
+
+    sub Tie::FETCH {
+        $i ++;
+        ${$_ [0]}
+    }
+
+ 
+    package main;
+ 
+    my $bar = "The Big Bright Green Pleasure Machine";
+    taint_these $bar;
+    tie my ($foo), Tie => $bar;
+
+    my $baz = $foo;
+
+    print $i == 1 ? "ok 175\n" : "not ok 175\n"
+
+}
+
+{
+    # Check that all environment variables are tainted.
+    my @untainted;
+    while (my ($k, $v) = each %ENV) {
+	if (!tainted($v) &&
+	    # These we have untainted explicitly earlier.
+	    $k !~ /^(BASH_ENV|CDPATH|ENV|IFS|PATH|TEMP|TERM|TMP)$/) {
+	    push @untainted, "# '$k' = '$v'\n";
+	}
+    }
+    print @untainted == 0 ? "ok 176\n" : "not ok 176\n";
+    print "# untainted:\n", @untainted if @untainted; 
+}
+
+
+ok( ${^TAINT},  '$^TAINT is on' );
+
+eval { ${^TAINT} = 0 };
+ok( ${^TAINT},  '$^TAINT is not assignable' );
+ok( $@ =~ /^Modification of a read-only value attempted/,
+                                'Assigning to ${^TAINT} fails' );
+
+{
+    # bug 20011111.105
+    
+    my $re1 = qr/x$TAINT/;
+    test 180, tainted $re1;
+    
+    my $re2 = qr/^$re1\z/;
+    test 181, tainted $re2;
+    
+    my $re3 = "$re2";
+    test 182, tainted $re3;
+}
+
+if ($Is_MSWin32) {
+    print "ok 183 # Skipped: system {} has different semantics\n"; 
+}
+else
+{
+    # bug 20010221.005
+    local $ENV{PATH} .= $TAINT;
+    eval { system { "echo" } "/arg0", "arg1" };
+    test 183, $@ =~ /^Insecure \$ENV/;
+}
+if ($Is_VMS) {
+    for (184..203) {print "not ok $_ # TODO tainted %ENV warning occludes tainted arguments warning\n";}
+}
+else 
+{
+    # bug 20020208.005 plus some extras
+    # single arg exec/system are tests 80-83
+    use if $] lt '5.009', warnings => FATAL => 'taint';
+    my $err = $] ge '5.009' ? qr/^Insecure dependency/ 
+                            : qr/^Use of tainted arguments/;
+    test 184, eval { exec $TAINT, $TAINT } eq '', 'exec';
+    test 185, $@ =~ $err, $@;
+    test 186, eval { exec $TAINT $TAINT } eq '', 'exec';
+    test 187, $@ =~ $err, $@;
+    test 188, eval { exec $TAINT $TAINT, $TAINT } eq '', 'exec';
+    test 189, $@ =~ $err, $@;
+    test 190, eval { exec $TAINT 'notaint' } eq '', 'exec';
+    test 191, $@ =~ $err, $@;
+    test 192, eval { exec {'notaint'} $TAINT } eq '', 'exec';
+    test 193, $@ =~ $err, $@;
+
+    test 194, eval { system $TAINT, $TAINT } eq '', 'system';
+    test 195, $@ =~ $err, $@;
+    test 196, eval { system $TAINT $TAINT } eq '', 'exec';
+    test 197, $@ =~ $err, $@;
+    test 198, eval { system $TAINT $TAINT, $TAINT } eq '', 'exec';
+    test 199, $@ =~ $err, $@;
+    test 200, eval { system $TAINT 'notaint' } eq '', 'exec';
+    test 201, $@ =~ $err, $@;
+    test 202, eval { system {'notaint'} $TAINT } eq '', 'exec';
+    test 203, $@ =~ $err, $@;
+}

@@ -1,5 +1,4 @@
-/* We need access to debugger hooks */
-#ifndef DEBUGGING
+#if defined(PERL_EXT_RE_DEBUG) && !defined(DEBUGGING)
 #  define DEBUGGING
 #endif
 
@@ -7,6 +6,8 @@
 #include "EXTERN.h"
 #include "perl.h"
 #include "XSUB.h"
+
+START_EXTERN_C
 
 extern regexp*	my_regcomp (pTHX_ char* exp, char* xend, PMOP* pm);
 extern I32	my_regexec (pTHX_ regexp* prog, char* stringarg, char* strend,
@@ -18,6 +19,8 @@ extern char*	my_re_intuit_start (pTHX_ regexp *prog, SV *sv, char *strpos,
 				    struct re_scream_pos_data_s *data);
 extern SV*	my_re_intuit_string (pTHX_ regexp *prog);
 
+END_EXTERN_C
+
 #define MY_CXT_KEY "re::_guts" XS_VERSION
 
 typedef struct {
@@ -27,8 +30,6 @@ typedef struct {
 START_MY_CXT
 
 #define oldflag		(MY_CXT.x_oldflag)
-
-#define R_DB 512
 
 static void
 uninstall(pTHX)
@@ -41,7 +42,7 @@ uninstall(pTHX)
     PL_regfree = Perl_pregfree;
 
     if (!oldflag)
-	PL_debug &= ~R_DB;
+	PL_debug &= ~DEBUG_r_FLAG;
 }
 
 static void
@@ -54,16 +55,17 @@ install(pTHX)
     PL_regint_start = &my_re_intuit_start;
     PL_regint_string = &my_re_intuit_string;
     PL_regfree = &my_regfree;
-    oldflag = PL_debug & R_DB;
-    PL_debug |= R_DB;
+    oldflag = PL_debug & DEBUG_r_FLAG;
+    PL_debug |= DEBUG_r_FLAG;
 }
 
 MODULE = re	PACKAGE = re
 
 BOOT:
 {
-    MY_CXT_INIT;
+   MY_CXT_INIT;
 }
+
 
 void
 install()

@@ -1,8 +1,9 @@
 package ExtUtils::testlib;
-$VERSION = substr q$Revision: 1.11 $, 10;
-# $Id: testlib.pm,v 1.11 1996/05/31 08:27:07 k Exp $
+$VERSION = 1.12_01;
 
-use lib qw(blib/arch blib/lib);
+# So the tests can chdir around and not break @INC.
+use File::Spec;
+use lib map File::Spec->rel2abs($_), qw(blib/arch blib/lib);
 1;
 __END__
 
@@ -12,7 +13,7 @@ ExtUtils::testlib - add blib/* directories to @INC
 
 =head1 SYNOPSIS
 
-C<use ExtUtils::testlib;>
+  use ExtUtils::testlib;
 
 =head1 DESCRIPTION
 

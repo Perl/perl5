@@ -3,6 +3,18 @@
 #include "perl.h"
 #include "XSUB.h"
 
+bool
+_runops_debug(int flag)
+{
+    dTHX;
+    bool d = PL_runops == MEMBER_TO_FPTR(Perl_runops_debug);
+
+    if (flag >= 0)
+	PL_runops 
+	    = MEMBER_TO_FPTR(flag ? Perl_runops_debug : Perl_runops_standard);
+    return d;
+}
+
 SV *
 DeadCode(pTHX)
 {
@@ -10,7 +22,7 @@ DeadCode(pTHX)
     return Nullsv;
 #else
     SV* sva;
-    SV* sv, *dbg;
+    SV* sv;
     SV* ret = newRV_noinc((SV*)newAV());
     register SV* svend;
     int tm = 0, tref = 0, ts = 0, ta = 0, tas = 0;
@@ -115,16 +127,16 @@ DeadCode(pTHX)
 #endif /* !PURIFY */
 }
 
-#if defined(PERL_DEBUGGING_MSTATS) || defined(DEBUGGING_MSTATS) \
-	|| (defined(MYMALLOC) && !defined(PLAIN_MALLOC))
+#if (defined(PERL_DEBUGGING_MSTATS) || defined(DEBUGGING_MSTATS)) \
+	&& (defined(MYMALLOC) && !defined(PLAIN_MALLOC))
 #   define mstat(str) dump_mstats(str)
 #else
 #   define mstat(str) \
 	PerlIO_printf(Perl_debug_log, "%s: perl not compiled with DEBUGGING_MSTATS\n",str);
 #endif
 
-#if defined(PERL_DEBUGGING_MSTATS) || defined(DEBUGGING_MSTATS) \
-	|| (defined(MYMALLOC) && !defined(PLAIN_MALLOC))
+#if (defined(PERL_DEBUGGING_MSTATS) || defined(DEBUGGING_MSTATS)) \
+	&& (defined(MYMALLOC) && !defined(PLAIN_MALLOC))
 
 /* Very coarse overestimate, 2-per-power-of-2, one more to determine NBUCKETS. */
 #  define _NBUCKETS (2*8*IVSIZE+1)
@@ -151,8 +163,6 @@ void
 fill_mstats(SV *sv, int level)
 {
     dTHX;
-    int nbuckets;
-    struct mstats_buffer buf;
 
     if (SvREADONLY(sv))
 	croak("Cannot modify a readonly value");
@@ -216,7 +226,7 @@ _mstats_to_hv(HV *hv, struct mstats_buffer *b, int level)
 	warn("FIXME: internal mstats buffer too short");
     
     for (type = 0; type < (level ? 4 : 2); type++) {
-	UV *p, *p1;
+	UV *p = 0, *p1 = 0;
 	AV *av;
 	int i;
 	static const char *types[4] = { 
@@ -229,7 +239,7 @@ _mstats_to_hv(HV *hv, struct mstats_buffer *b, int level)
 	    croak("Unexpected value for the key '%s' in the mstats hash", types[type]);
 	if (!SvOK(*svp)) {
 	    av = newAV();
-	    SvUPGRADE(*svp, SVt_RV);
+	    (void)SvUPGRADE(*svp, SVt_RV);
 	    SvRV(*svp) = (SV*)av;
 	    SvROK_on(*svp);
 	} else
@@ -404,3 +414,6 @@ MODULE = Devel::Peek		PACKAGE = Devel::Peek	PREFIX = _
 SV *
 _CvGV(cv)
     SV *cv
+
+bool
+_runops_debug(int flag = -1)

@@ -62,7 +62,7 @@ op_names_init(pTHX)
     bitmap = SvPV(opset_all, len);
     i = len-1; /* deal with last byte specially, see below */
     while(i-- > 0)
-	bitmap[i] = 0xFF;
+	bitmap[i] = (char)0xFF;
     /* Take care to set the right number of bits in the last byte */
     bitmap[len-1] = (PL_maxo & 0x07) ? ~(0xFF << (PL_maxo & 0x07)) : 0xFF;
     put_op_bitspec(aTHX_ ":all",0, opset_all); /* don't mortalise */
@@ -163,6 +163,7 @@ static void
 set_opset_bits(pTHX_ char *bitmap, SV *bitspec, int on, char *opname)
 {
     dMY_CXT;
+
     if (SvIOK(bitspec)) {
 	int myopcode = SvIV(bitspec);
 	int offset = myopcode >> 3;
@@ -229,13 +230,11 @@ opmask_addlocal(pTHX_ SV *opset, char *op_mask_buf) /* Localise PL_op_mask then 
     dMY_CXT;
 
     SAVEVPTR(PL_op_mask);
-#if !defined(PERL_OBJECT)
     /* XXX casting to an ordinary function ptr from a member function ptr
      * is disallowed by Borland
      */
     if (opcode_debug >= 2)
 	SAVEDESTRUCTOR((void(*)(void*))Perl_warn,"PL_op_mask restored");
-#endif
     PL_op_mask = &op_mask_buf[0];
     if (orig_op_mask)
 	Copy(orig_op_mask, PL_op_mask, PL_maxo, char);
@@ -261,6 +260,27 @@ BOOT:
 }
 
 void
+_safe_pkg_prep(Package)
+    char *	Package
+PPCODE:
+    HV *hv; 
+    ENTER;
+   
+    hv = gv_stashpv(Package, GV_ADDWARN); /* should exist already	*/
+
+    if (strNE(HvNAME(hv),"main")) {
+        Safefree(HvNAME(hv));         
+        HvNAME(hv) = savepv("main"); /* make it think it's in main:: */
+        hv_store(hv,"_",1,(SV *)PL_defgv,0);  /* connect _ to global */
+        SvREFCNT_inc((SV *)PL_defgv);  /* want to keep _ around! */
+    }
+    LEAVE;
+
+
+
+
+
+void
 _safe_call_sv(Package, mask, codesv)
     char *	Package
     SV *	mask
@@ -279,6 +299,7 @@ PPCODE:
     save_hptr(&PL_defstash);		/* save current default stash	*/
     /* the assignment to global defstash changes our sense of 'main'	*/
     PL_defstash = gv_stashpv(Package, GV_ADDWARN); /* should exist already	*/
+
     save_hptr(&PL_curstash);
     PL_curstash = PL_defstash;
 
@@ -316,8 +337,8 @@ CODE:
     {
     char *bitmap;
     dMY_CXT;
-
     STRLEN len = opset_len;
+
     opset = sv_2mortal(new_opset(aTHX_ opset));	/* verify and clone opset */
     bitmap = SvPVX(opset);
     while(len-- > 0)
@@ -359,6 +380,7 @@ CODE:
     SV *bitspec, *opset;
     char *bitmap;
     STRLEN len, on;
+
     opset = sv_2mortal(new_opset(aTHX_ Nullsv));
     bitmap = SvPVX(opset);
     for (i = 0; i < items; i++) {
@@ -429,6 +451,7 @@ PPCODE:
     SV **args;
     char **op_desc = get_op_descs(); 
     dMY_CXT;
+
     /* copy args to a scratch area since we may push output values onto	*/
     /* the stack faster than we read values off it if masks are used.	*/
     args = (SV**)SvPVX(sv_2mortal(newSVpvn((char*)&ST(0), items*sizeof(SV*))));
@@ -466,6 +489,7 @@ define_optag(optagsv, mask)
 CODE:
     STRLEN len;
     char *optag = SvPV(optagsv, len);
+
     put_op_bitspec(aTHX_ optag, len, mask); /* croaks */
     ST(0) = &PL_sv_yes;
 

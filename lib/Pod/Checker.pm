@@ -10,7 +10,7 @@
 package Pod::Checker;
 
 use vars qw($VERSION);
-$VERSION = 1.2;  ## Current version of this package
+$VERSION = 1.3;  ## Current version of this package
 require  5.005;    ## requires this Perl version or later
 
 use Pod::ParseUtils; ## for hyperlinks and lists
@@ -150,8 +150,8 @@ C<"">.
 =item * Unknown command "I<CMD>"
 
 An invalid POD command has been found. Valid are C<=head1>, C<=head2>,
-C<=over>, C<=item>, C<=back>, C<=begin>, C<=end>, C<=for>, C<=pod>,
-C<=cut>
+C<=head3>, C<=head4>, C<=over>, C<=item>, C<=back>, C<=begin>, C<=end>,
+C<=for>, C<=pod>, C<=cut>
 
 =item * Unknown interior-sequence "I<SEQ>"
 
@@ -290,7 +290,7 @@ LE<lt>...E<gt>.
 =item * (section) in '$page' deprecated
 
 There is a section detected in the page name of LE<lt>...E<gt>, e.g.
-C<LE<gt>passwd(2)E<gt>>. POD hyperlinks may point to POD documents only.
+C<LE<lt>passwd(2)E<gt>>. POD hyperlinks may point to POD documents only.
 Please write C<CE<lt>passwd(2)E<gt>> instead. Some formatters are able
 to expand this to appropriate code. For links to (builtin) functions,
 please say C<LE<lt>perlfunc/mkdirE<gt>>, without ().
@@ -345,6 +345,8 @@ my %VALID_COMMANDS = (
     'cut'    =>  1,
     'head1'  =>  1,
     'head2'  =>  1,
+    'head3'  =>  1,
+    'head4'  =>  1,
     'over'   =>  1,
     'back'   =>  1,
     'item'   =>  1,
@@ -693,7 +695,7 @@ sub idx {
 =item C<$checker-E<gt>hyperlink()>
 
 Add (if argument specified) and retrieve the hyperlinks (as defined by
-C<LE<lt>E<gt>>) of the current POD. They consist of an 2-item array: line
+C<LE<lt>E<gt>>) of the current POD. They consist of a 2-item array: line
 number and C<Pod::Hyperlink> object.
 
 =back

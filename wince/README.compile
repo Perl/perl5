@@ -1,0 +1,16 @@
+Change config.ce. The makefile will automatically generate new
+config.h.
+
+To generate a new Config.pm, delete config.h or
+touch config.ce.
+
+The socket stuff has been rewritten so fds from ceio are used. This
+makes it easy to use them as perl file handles.
+
+Socket and IO dlls compiled. Seem to work.
+
+The sequence for building a new target is:
+
+make clean      # clean up
+make all	# build for target
+

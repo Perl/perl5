@@ -1,5 +1,7 @@
 package locale;
 
+our $VERSION = '1.00';
+
 =head1 NAME
 
 locale - Perl pragma to use and avoid POSIX locales for built-in operations

@@ -1,15 +1,12 @@
 package File::Glob;
 
 use strict;
-use Carp;
 our($VERSION, @ISA, @EXPORT_OK, @EXPORT_FAIL, %EXPORT_TAGS,
     $AUTOLOAD, $DEFAULT_FLAGS);
 
-require Exporter;
 use XSLoader ();
-require AutoLoader;
 
-@ISA = qw(Exporter AutoLoader);
+@ISA = qw(Exporter);
 
 # NOTE: The glob() export is only here for compatibility with 5.6.0.
 # csh_glob() should not be used directly, unless you know what you're doing.
@@ -59,9 +56,10 @@ require AutoLoader;
     ) ],
 );
 
-$VERSION = '1.0';
+$VERSION = '1.01';
 
 sub import {
+    require Exporter;
     my $i = 1;
     while ($i < @_) {
 	if ($_[$i] =~ /^:(case|nocase|globally)$/) {
@@ -69,7 +67,7 @@ sub import {
 	    $DEFAULT_FLAGS &= ~GLOB_NOCASE() if $1 eq 'case';
 	    $DEFAULT_FLAGS |= GLOB_NOCASE() if $1 eq 'nocase';
 	    if ($1 eq 'globally') {
-		no warnings;
+		local $^W;
 		*CORE::GLOBAL::glob = \&File::Glob::csh_glob;
 	    }
 	    next;
@@ -86,15 +84,10 @@ sub AUTOLOAD {
 
     my $constname;
     ($constname = $AUTOLOAD) =~ s/.*:://;
-    my $val = constant($constname, @_ ? $_[0] : 0);
-    if ($! != 0) {
-	if ($! =~ /Invalid/) {
-	    $AutoLoader::AUTOLOAD = $AUTOLOAD;
-	    goto &AutoLoader::AUTOLOAD;
-	}
-	else {
-		croak "Your vendor has not defined File::Glob macro $constname";
-	}
+    my ($error, $val) = constant($constname);
+    if ($error) {
+	require Carp;
+	Carp::croak($error);
     }
     eval "sub $AUTOLOAD { $val }";
     goto &$AUTOLOAD;
@@ -105,7 +98,7 @@ XSLoader::load 'File::Glob', $VERSION;
 # Preloaded methods go here.
 
 sub GLOB_ERROR {
-    return constant('GLOB_ERROR', 0);
+    return (constant('GLOB_ERROR'))[1];
 }
 
 sub GLOB_CSH () {
@@ -317,7 +310,7 @@ implemented in the Perl version because they involve more complex
 interaction with the underlying C structures.
 
 The following flag has been added in the Perl implementation for
-compatibility with common flavors of csh:
+csh compatibility:
 
 =over 4
 
@@ -397,6 +390,12 @@ pattern without doing any expansion.
 Glob on Mac OS is case-insensitive by default (if you don't use any
 flags). If you specify any flags at all and still want glob
 to be case-insensitive, you must include C<GLOB_NOCASE> in the flags.
+
+The path separator is ':' (aka colon), not '/' (aka slash). Mac OS users
+should be careful about specifying relative pathnames. While a full path
+always begins with a volume name, a relative pathname should always
+begin with a ':'.  If specifying a volume name only, a trailing ':' is
+required.
 
 The specification of pathnames in glob patterns adheres to the usual Mac
 OS conventions: The path separator is a colon ':', not a slash '/'. A

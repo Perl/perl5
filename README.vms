@@ -36,7 +36,7 @@ but the media charges might prohibit an upgrade), consider getting Gnu C
 instead.
 
 
-=head2 Introduction
+=head2 Introduction to Perl on VMS
 
 The VMS port of Perl is as functionally complete as any other Perl port
 (and as complete as the ports on some Unix systems). The Perl binaries
@@ -59,7 +59,7 @@ There are issues with various versions of DEC C, so if you're not running a
 relatively modern version, check the "DEC C issues" section later on in this
 document.
 
-=head2 Other required software
+=head2 Other required software for Compiling Perl on VMS
 
 In addition to VMS and DCL you will need two things:
 
@@ -79,7 +79,7 @@ go ahead and use that.
 
 =back
 
-=head2 Additional software that is optional
+=head2 Additional software that is optional for Perl on VMS
 
 You may also want to have on hand:
 
@@ -92,8 +92,7 @@ of web/ftp sites and is distributed on the OpenVMS Freeware CD-ROM
 from Compaq.
 
     http://www.fsf.org/order/ftp.html
-    http://www.openvms.compaq.com/freeware/GZIP/
-    ftp://ftp.compaq.com/pub/VMS/
+    http://www.openvms.compaq.com/freeware/
     http://www.crinoid.com/utils/
 
 =item 2  VMS TAR 
@@ -103,20 +102,18 @@ available from a number of web/ftp sites and is distributed on the OpenVMS
 Freeware CD-ROM from Compaq.
 
     ftp://ftp.lp.se/vms/
-    http://www.openvms.compaq.com/freeware/VMSTAR/
-    ftp://ftp.compaq.com/pub/VMS/
+    http://www.openvms.compaq.com/freeware/
 
 =item 3  UNZIP.EXE for VMS
 
 A combination decompressor and archive reader/writer for *.zip files.  
 Unzip is available from a number of web/ftp sites.
 
-    http://www.cdrom.com/pub/infozip/UnZip.html
-    http://www.openvms.compaq.com/freeware/INFO-ZIP/
-    ftp://ftp.compaq.com/pub/VMS/
+    http://www.info-zip.org/UnZip.html
+    http://www.openvms.compaq.com/freeware/
     ftp://ftp.openvms.compaq.com/
     ftp://ftp.madgoat.com/madgoat/
-    ftp://ftp.wku.edu/vms/
+    ftp://ftp.process.com/vms-freeware/
 
 =item 4  MOST
 
@@ -126,7 +123,7 @@ regular expression searching).  Most builds with the slang
 library on VMS.  Most and slang are available from:
 
     ftp://space.mit.edu/pub/davis/
-    ftp://ftp.wku.edu/vms/narnia/most.zip
+    ftp://ftp.process.com/vms-freeware/narnia/
 
 =item 5 GNU PATCH and DIFFUTILS for VMS
 
@@ -136,6 +133,7 @@ distribution) and applied with GNU patch.  VMS ports of these utilities are
 available here:
 
     http://www.crinoid.com/utils/
+    http://www.openvms.compaq.com/freeware/
 
 =back
 
@@ -194,6 +192,17 @@ non-default location for where Perl will be installed:
 
     @ Configure "-d" "-Dprefix=dka100:[utils.perl5.]"
 
+Note that the installation location would be by default where you unpacked 
+the source with a "_ROOT." appended.  For example if you unpacked the perl 
+source into:
+
+   DKA200:[PERL-5_10_2...]
+
+Then the PERL_SETUP.COM that gets written out by CONFIGURE.COM will
+try to DEFINE your installation PERL_ROOT to be:
+
+   DKA200:[PERL-5_10_2_ROOT.]
+
 More help with configure.com is available from:
 
     @ Configure "-h"
@@ -205,24 +214,21 @@ then be sure to also follow the advice in the "Cleaning up and starting
 fresh (optional)" and the checklist of items in the "CAVEATS" sections 
 below.
 
-=head2 Changing compile-time options (optional)
+=head2 Changing compile-time options (optional) for Perl on VMS
 
 Most of the user definable features of Perl are enabled or disabled in
-[.VMS]CONFIG.VMS. There is code in there to Do The Right Thing, but that 
-may end up being the wrong thing for you.  Make sure you understand what 
-you are doing since inappropriate changes to CONFIG.VMS can render perl 
-unbuildable.
-
-Odds are that there's nothing here to change, unless you're on a version of
-VMS later than 6.2 and DEC C later than 5.6.  Even if you are, the correct
-values will still be chosen, most likely.  Poking around here should be
-unnecessary.
+configure.com, which processes the hints file config_h.SH.  There is
+code in there to Do The Right Thing, but that  may end up being the
+wrong thing for you.  Make sure you understand what you are doing since
+inappropriate changes to configure.com or config_h.SH can render perl 
+unbuildable; odds are that there's nothing in there you'll need to
+change.
 
 The one exception is the various *DIR install locations. Changing those
 requires changes in genconfig.pl as well.  Be really careful if you need to
 change these, as they can cause some fairly subtle problems.
 
-=head2 Socket Support (optional)
+=head2 Socket Support (optional) for Perl on VMS
 
 Perl includes a number of functions for IP sockets, which are available if
 you choose to compile Perl with socket support.  Since IP networking is an 
@@ -320,7 +326,7 @@ with DEC C, "gcc --version" with GNU CC).  To obtain the version of MMS or
 MMK you are running try "MMS/ident" or "MMK /ident".  The GNU make version 
 can be identified with "make --version".
 
-=head2 Cleaning up and starting fresh (optional)
+=head2 Cleaning up and starting fresh (optional) installing Perl on VMS
 
 If you need to recompile from scratch, you have to make sure you clean up
 first.  There is a procedure to do it--enter the *exact* MMS line you used 
@@ -406,7 +412,7 @@ is to simply copy it into the system shareable library directory with:
 
 See also the "INSTALLing images (optional)" section.
 
-=head2 Installing Perl into DCLTABLES (optional)
+=head2 Installing Perl into DCLTABLES (optional) on VMS
 
 Execute the following command file to define PERL as a DCL command.
 You'll need CMKRNL privilege to install the new dcltables.exe.
@@ -424,11 +430,11 @@ You'll need CMKRNL privilege to install the new dcltables.exe.
     $ install replace sys$common:[syslib]dcltables.exe
     $ exit
 
-=head2 INSTALLing images (optional)
+=head2 INSTALLing Perl images (optional) on VMS
 
 On systems that are using perl quite a bit, and particularly those with 
 minimal RAM, you can boost the performance of perl by INSTALLing it as
-a known image.  PERLSHR.EXE is typically larger than 2500 blocks
+a known image.  PERLSHR.EXE is typically larger than 3000 blocks
 and that is a reasonably large amount of IO to load each time perl is 
 invoked. 
 
@@ -449,6 +455,20 @@ it is probably beneficial to INSTALL at least portions of perl.
 While there is code in perl to remove privileges as it runs you are advised
 to NOT INSTALL PERL.EXE with PRIVs!
 
+=head2 Running h2ph to create perl header files (optional) on VMS
+
+If using DEC C or Compaq C ensure that you have extracted loose versions
+of your compiler's header or *.H files.  Be sure to check the contents of:
+
+    SYS$LIBRARY:DECC$RTLDEF.TLB
+    SYS$LIBRARY:SYS$LIB_C.TLB
+    SYS$LIBRARY:SYS$STARLET_C.TLB
+
+etcetera.
+
+If using GNU cc then also check your GNU_CC:[000000...] tree for the locations
+of the GNU cc headers.
+
 =head1 Reporting Bugs
 
 If you come across what you think might be a bug in Perl, please report
@@ -465,8 +485,9 @@ script prints!
 
 The next big gotcha is directory depth.  Perl can create directories four,
 five, or even six levels deep during the build, so you don't have to be 
-too deep to start to hit the RMS 8 level limit (for versions of VMS prior 
-to V7.2 and even with V7.2 on the VAX).  It is best to do
+too deep to start to hit the RMS 8 level limit (for ODS 2 volumes which were
+common on versions of VMS prior to V7.2 and even with V7.2 on the VAX).  
+It is best to do:
 
     DEFINE/TRANS=(CONC,TERM) PERLSRC "disk:[dir.dir.dir.perldir.]"
     SET DEFAULT PERLSRC:[000000]
@@ -492,7 +513,7 @@ A final thing that causes trouble is leftover pieces from a failed
 build.  If things go wrong make sure you do a "(MMK|MMS|make) realclean"
 before you rebuild.
 
-=head2 DEC C issues
+=head2 DEC C issues with Perl on VMS
 
 Note to DEC C users: Some early versions (pre-5.2, some pre-4. If you're DEC
 C 5.x or higher, with current patches if any, you're fine) of the DECCRTL
@@ -522,14 +543,14 @@ though the call specified that the change should not persist after
 Perl exited.  This is fixed by DEC CSC patch ALPACRT04_061 or later.
 See also:
 
-    http://ftp.service.compaq.com/patches/.new/openvms.html
+    http://ftp.support.compaq.com/patches/.new/openvms.shtml
 
 =back
 
 Please note that in later versions "DEC C" may also be known as 
 "Compaq C".
 
-=head2 GNU issues
+=head2 GNU issues with Perl on VMS
 
 It has been a while since the GNU utilities such as GCC or GNU make
 were used to build perl on VMS.  Hence they may require a great deal
@@ -537,7 +558,6 @@ of source code modification to work again.
 
     http://slacvx.slac.stanford.edu/HELP/GCC
     http://www.progis.de/
-    http://vms.gnu.org/
     http://www.lp.se/products/gnu.html
 
 =head1 Mailing Lists
@@ -553,11 +573,11 @@ to all subscribers of the list.  There is a searchable archive of the list
 on the web at:
 
     http://www.xray.mpe.mpg.de/mailing-lists/vmsperl/
-   
+
 To unsubscribe from VMSPERL send a message to VMSPERL-UNSUBSCRIBE@PERL.ORG.
 Be sure to do so from the subscribed account that you are canceling.
 
-=head2 Web sites
+=head2 Web sites for Perl on VMS
 
 Vmsperl pages on the web include:
 
@@ -566,11 +586,11 @@ Vmsperl pages on the web include:
     http://duphy4.physics.drexel.edu/pub/cgi_info.htmlx
     http://www.cpan.org/modules/by-module/VMS/
     http://www.xray.mpe.mpg.de/mailing-lists/vmsperl/
-    http://nucwww.chem.sunysb.edu/htbin/software_list.cgi
     http://www.best.com/~pvhp/vms/
-    http://bkfug.kfunigraz.ac.at/~binder/perl.html
+    http://www-ang.kfunigraz.ac.at/~binder/perl.html
     http://lists.perl.org/showlist.cgi?name=vmsperl
     http://archive.develooper.com/vmsperl@perl.org/
+    http://www.openvms.compaq.com/openvms/products/ips/apache/csws_modperl.html
 
 =head1 SEE ALSO
 
@@ -581,7 +601,7 @@ of extending vmsperl with CPAN modules after Perl has been installed.
 
 =head1 AUTHORS
 
-Revised 5-April-2001 by Craig Berry craigberry@mac.com.  
+Revised 10-October-2001 by Craig Berry craigberry@mac.com.  
 Revised 25-February-2000 by Peter Prymmer pvhp@best.com.  
 Revised 27-October-1999 by Craig Berry craigberry@mac.com.  
 Revised 01-March-1999 by Dan Sugalski dan@sidhe.org.  

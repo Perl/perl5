@@ -13,6 +13,7 @@ $|=1;
 
 # catch warnings into fatal errors
 $SIG{__WARN__} = sub { die "WARNING: @_" } ;
+$SIG{__DIE__}  = sub { die @_ };
 
 undef $/;
 @prgs = split "\n########\n", <DATA>;
@@ -25,7 +26,7 @@ for (@prgs){
     $results = $@ ;
     $results =~ s/\n+$//;
     $expected =~ s/\n+$//;
-    if ( $status or $results and $results !~ /^WARNING: $expected/){
+    if ( $status or $results and $results !~ /^(WARNING: )?$expected/){
 	print STDERR "STATUS: $status\n";
 	print STDERR "PROG: $prog\n";
 	print STDERR "EXPECTED:\n$expected\n";
@@ -161,17 +162,27 @@ $C = $B = tied %H ;
 untie %H;
 EXPECT
 ########
-
-# verify no leak when underlying object is selfsame tied variable
-my ($a, $b);
+# Forbidden aggregate self-ties
+my ($a, $b) = (0, 0);
 sub Self::TIEHASH { bless $_[1], $_[0] }
-sub Self::DESTROY { $b = $_[0] + 0; }
+sub Self::DESTROY { $b = $_[0] + 1; }
 {
-    my %b5;
-    $a = \%b5 + 0;
-    tie %b5, 'Self', \%b5;
+    my %c = 42;
+    tie %c, 'Self', \%c;
 }
-die unless $a == $b;
+EXPECT
+Self-ties of arrays and hashes are not supported 
+########
+# Allowed scalar self-ties
+my ($a, $b) = (0, 0);
+sub Self::TIESCALAR { bless $_[1], $_[0] }
+sub Self::DESTROY   { $b = $_[0] + 1; }
+{
+    my $c = 42;
+    $a = $c + 0;
+    tie $c, 'Self', \$c;
+}
+die unless $a == 0 && $b == 43;
 EXPECT
 ########
 # Interaction of tie and vec
@@ -185,3 +196,9 @@ vec($a,1,1)=0;
 vec($b,1,1)=0;
 die unless $a eq $b;
 EXPECT
+########
+# An attempt at lvalueable barewords broke this
+
+tie FH, 'main';
+EXPECT
+

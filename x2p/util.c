@@ -1,6 +1,6 @@
 /* $RCSfile: util.c,v $$Revision: 4.1 $$Date: 92/08/07 18:29:29 $
  *
- *    Copyright (c) 1991-2001, Larry Wall
+ *    Copyright (c) 1991-2002, Larry Wall
  *
  *    You may distribute under the terms of either the GNU General Public
  *    License or the Artistic License, as specified in the README file.
@@ -183,6 +183,7 @@ croak(char *pat,...)
 
     va_start(args, pat);
     vfprintf(stderr,pat,args);
+    va_end(args);
 #else
     fprintf(stderr,pat,a1,a2,a3,a4);
 #endif
@@ -197,6 +198,7 @@ fatal(char *pat,...)
 
     va_start(args, pat);
     vfprintf(stderr,pat,args);
+    va_end(args);
 #else
     fprintf(stderr,pat,a1,a2,a3,a4);
 #endif
@@ -214,6 +216,7 @@ warn(char *pat,...)
 
     va_start(args, pat);
     vfprintf(stderr,pat,args);
+    va_end(args);
 #else
     fprintf(stderr,pat,a1,a2,a3,a4);
 #endif

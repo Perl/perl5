@@ -1,4 +1,7 @@
 package Thread::Queue;
+
+our $VERSION = '1.00';
+
 use Thread qw(cond_wait cond_broadcast);
 
 =head1 NAME
@@ -59,7 +62,7 @@ before checking to make sure that it stays in a consistent state)
 =head1 SEE ALSO
 
 L<Thread>
-  
+
 =cut
 
 sub new {

@@ -1,6 +1,6 @@
 #!./perl
 
-print "1..69\n";
+print "1..71\n";
 
 sub foo {
     local($a, $b) = @_;
@@ -232,3 +232,14 @@ while (/(o.+?),/gc) {
     untie $_;
 }
 
+{
+    # BUG 20001205.22
+    my %x;
+    $x{a} = 1;
+    { local $x{b} = 1; }
+    print "not " if exists $x{b};
+    print "ok 70\n";
+    { local @x{c,d,e}; }
+    print "not " if exists $x{c};
+    print "ok 71\n"; 
+}

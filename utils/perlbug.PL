@@ -137,7 +137,7 @@ my $Version = "1.33";
 
 my( $file, $usefile, $cc, $address, $perlbug, $testaddress, $filename,
     $subject, $from, $verbose, $ed, $outfile, $Is_MacOS, $category, $severity,
-    $fh, $me, $Is_MSWin32, $Is_VMS, $msg, $body, $andcc, %REP, $ok);
+    $fh, $me, $Is_MSWin32, $Is_Linux, $Is_VMS, $msg, $body, $andcc, %REP, $ok);
 
 my $perl_version = $^V ? sprintf("v%vd", $^V) : $];
 
@@ -209,6 +209,7 @@ sub Init {
 
     $Is_MSWin32 = $^O eq 'MSWin32';
     $Is_VMS = $^O eq 'VMS';
+    $Is_Linux = lc($^O) eq 'linux';
     $Is_MacOS = $^O eq 'MacOS';
 
     @ARGV = split m/\s+/,
@@ -342,6 +343,11 @@ EOF
     }
 
     # Prompt for subject of message, if needed
+    
+    if (TrivialSubject($subject)) {
+	$subject = '';
+    }
+
     unless ($subject) {
 	paraprint <<EOF;
 First of all, please provide a subject for the
@@ -349,18 +355,16 @@ message. It should be a concise description of
 the bug or problem. "perl bug" or "perl problem"
 is not a concise description.
 EOF
-	print "Subject: ";
-	$subject = <>;
 
 	my $err = 0;
-	while ($subject !~ /\S/) {
-	    print "\nPlease enter a subject: ";
+	do {
+	    print "Subject: ";
 	    $subject = <>;
-	    if ($err++ > 5) {
+	    chomp $subject;
+	    if ($err++ == 5) {
 		die "Aborting.\n";
 	    }
-	}
-	chop $subject;
+	} while (TrivialSubject($subject));
     }
 
     # Prompt for return address, if needed
@@ -416,7 +420,7 @@ EOF
 	    # verify it
 	    print "Your address [$guess]: ";
 	    $from = <>;
-	    chop $from;
+	    chomp $from;
 	    $from = $guess if $from eq '';
 	}
     }
@@ -436,7 +440,7 @@ a copy.
 EOF
 	print "Local perl administrator [$cc]: ";
 	my $entry = scalar <>;
-	chop $entry;
+	chomp $entry;
 
 	if ($entry ne "") {
 	    $cc = $entry;
@@ -474,7 +478,7 @@ If you would like to use a prepared file, type
 EOF
 	print "Editor [$ed]: ";
 	my $entry =scalar <>;
-	chop $entry;
+	chomp $entry;
 
 	$usefile = 0;
 	if ($entry eq "file") {
@@ -501,7 +505,7 @@ What is the name of the file that contains your report?
 EOF
 	print "Filename: ";
 	my $entry = scalar <>;
-	chop $entry;
+	chomp $entry;
 
 	if ($entry eq "") {
 	    paraprint <<EOF;
@@ -618,7 +622,7 @@ EOF
     my @env =
         qw(PATH LD_LIBRARY_PATH LANG PERL_BADLANG SHELL HOME LOGDIR LANGUAGE);
     push @env, $Config{ldlibpthname} if $Config{ldlibpthname} ne '';
-    push @env, grep /^(?:PERL|LC_|LANG)/, keys %ENV;
+    push @env, grep /^(?:PERL|LC_|LANG|CYGWIN)/, keys %ENV;
     my %env;
     @env{@env} = @env;
     for my $env (sort keys %env) {
@@ -645,7 +649,7 @@ Please make sure that the name of the editor you want to use is correct.
 EOF
 	print "Editor [$ed]: ";
 	my $entry =scalar <>;
-	chop $entry;
+	chomp $entry;
 	$ed = $entry unless $entry eq '';
     }
 
@@ -668,7 +672,7 @@ correct it here, otherwise just press Enter.
 EOF
 	print "Editor [$ed]: ";
 	my $entry =scalar <>;
-	chop $entry;
+	chomp $entry;
 
 	if ($entry ne "") {
 	    $ed = $entry;
@@ -722,19 +726,21 @@ sub NowWhat {
 	    paraprint <<EOF;
 Now that you have completed your report, would you like to send
 the message to $address$andcc, display the message on
-the screen, re-edit it, or cancel without sending anything?
+the screen, re-edit it, display/change the subject,
+or cancel without sending anything?
 You may also save the message as a file to mail at another time.
 EOF
       retry:
-	    print "Action (Send/Display/Edit/Cancel/Save to File): ";
+	    print "Action (Send/Display/Edit/Subject/Save to File): ";
 	    my $action = scalar <>;
-	    chop $action;
+	    chomp $action;
 
 	    if ($action =~ /^(f|sa)/i) { # <F>ile/<Sa>ve
-		print "\n\nName of file to save message in [perlbug.rep]: ";
+		my $file_save = $outfile || "perlbug.rep";
+		print "\n\nName of file to save message in [$file_save]: ";
 		my $file = scalar <>;
-		chop $file;
-		$file = "perlbug.rep" if $file eq "";
+		chomp $file;
+		$file = $file_save if $file eq "";
 
 		unless (open(FILE, ">$file")) {
 		    print "\nError opening $file: $!\n\n";
@@ -756,12 +762,25 @@ EOF
 		open(REP, "<$filename") or die "Couldn't open file `$filename': $!\n";
 		while (<REP>) { print $_ }
 		close(REP) or die "Error closing report file `$filename': $!";
+	    } elsif ($action =~ /^su/i) { # <Su>bject
+		print "Subject: $subject\n";
+		print "If the above subject is fine, just press Enter.\n";
+		print "If not, type in the new subject.\n";
+		print "Subject: ";
+		my $reply = scalar <STDIN>;
+		chomp $reply;
+		if ($reply ne '') {
+		    unless (TrivialSubject($reply)) {
+			$subject = $reply;
+			print "Subject: $subject\n";
+		    }
+		}
 	    } elsif ($action =~ /^se/i) { # <S>end
 		# Send the message
 		print "Are you certain you want to send this message?\n"
 		    . 'Please type "yes" if you are: ';
 		my $reply = scalar <STDIN>;
-		chop $reply;
+		chomp $reply;
 		if ($reply eq "yes") {
 		    last;
 		} else {
@@ -785,13 +804,30 @@ EOF
     }
 } # sub NowWhat
 
+sub TrivialSubject {
+    my $subject = shift;
+    if ($subject =~
+	/^(y(es)?|no?|help|perl( (bug|problem))?|bug|problem)$/i ||
+	length($subject) < 4 ||
+	$subject !~ /\s/) {
+	print "\nThat doesn't look like a good subject.  Please be more verbose.\n\n";
+        return 1;
+    } else {
+	return 0;
+    }
+}
+
 sub Send {
     # Message has been accepted for transmission -- Send the message
     if ($outfile) {
 	open SENDMAIL, ">$outfile" or die "Couldn't open '$outfile': $!\n";
 	goto sendout;
     }
-    if ($::HaveSend) {
+
+    # on linux certain mail implementations won't accept the subject
+    # as "~s subject" and thus the Subject header will be corrupted
+    # so don't use Mail::Send to be safe
+    if ($::HaveSend && !$Is_Linux) {
 	$msg = new Mail::Send Subject => $subject, To => $address;
 	$msg->cc($cc) if $cc;
 	$msg->add("Reply-To",$from) if $from;

@@ -1,6 +1,6 @@
 package attributes;
 
-$VERSION = 0.03;
+our $VERSION = '0.04_01';
 
 @EXPORT_OK = qw(get reftype);
 @EXPORT = ();
@@ -27,7 +27,7 @@ sub carp {
 #
 # The extra trips through newATTRSUB in the interpreter wipe out any savings
 # from avoiding the BEGIN block.  Just do the bootstrap now.
-BEGIN { bootstrap }
+BEGIN { bootstrap attributes }
 
 sub import {
     @_ > 2 && ref $_[2] or do {
@@ -98,7 +98,7 @@ attributes - get/set subroutine or variable attributes
 =head1 SYNOPSIS
 
   sub foo : method ;
-  my ($x,@y,%z) : Bent ;
+  my ($x,@y,%z) : Bent = 1;
   my $s = sub : method { ... };
 
   use attributes ();	# optional, to get subroutine declarations
@@ -120,11 +120,14 @@ the following:
 
 The second example in the synopsis does something equivalent to this:
 
-    use attributes __PACKAGE__, \$x, 'Bent';
-    use attributes __PACKAGE__, \@y, 'Bent';
-    use attributes __PACKAGE__, \%z, 'Bent';
+    use attributes ();
+    my ($x,@y,%z);
+    attributes::->import(__PACKAGE__, \$x, 'Bent');
+    attributes::->import(__PACKAGE__, \@y, 'Bent');
+    attributes::->import(__PACKAGE__, \%z, 'Bent');
+    ($x,@y,%z) = 1;
 
-Yes, that's three invocations.
+Yes, that's a lot of expansion.
 
 B<WARNING>: attribute declarations for variables are an I<experimental>
 feature.  The semantics of such declarations could change or be removed
@@ -137,7 +140,18 @@ directly by this module, depending on how you look at it.)  However,
 package-specific attributes are allowed by an extension mechanism.
 (See L<"Package-specific Attribute Handling"> below.)
 
-The setting of attributes happens at compile time.  An attempt to set
+The setting of subroutine attributes happens at compile time.
+Variable attributes in C<our> declarations are also applied at compile time.
+However, C<my> variables get their attributes applied at run-time.
+This means that you have to I<reach> the run-time component of the C<my>
+before those attributes will get applied.  For example:
+
+    my $x : Bent = 42 if 0;
+
+will neither assign 42 to $x I<nor> will it apply the C<Bent> attribute
+to the variable.
+
+An attempt to set
 an unrecognized attribute is a fatal error.  (The error is trappable, but
 it still stops the compilation within that C<eval>.)  Setting an attribute
 with a name that's all lowercase letters that's not a built-in attribute
@@ -178,6 +192,9 @@ as a scalar variable, as described in L<perlsub>.
 =back
 
 There are no built-in attributes for anything other than subroutines.
+
+=for hackers
+What about C<unique>?
 
 =head2 Available Subroutines
 
@@ -329,7 +346,8 @@ Code:
 
 Effect:
 
-    use attributes Canine => \$spot, "Watchful";
+    use attributes ();
+    attributes::->import(Canine => \$spot, "Watchful");
 
 =item 2.
 
@@ -340,7 +358,8 @@ Code:
 
 Effect:
 
-    use attributes Felis => \$cat, "Nervous";
+    use attributes ();
+    attributes::->import(Felis => \$cat, "Nervous");
 
 =item 3.
 

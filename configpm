@@ -249,7 +249,7 @@ sub config_sh {
 
 sub config_re {
     my $re = shift;
-    my @matches = ($config_sh =~ /^$re=.*\n/mg);
+    my @matches = grep /^$re=/, split /^/, $config_sh;
     @matches ? (print @matches) : print "$re: not found\n";
 }
 
@@ -274,7 +274,19 @@ if ($OS2::is_aout) {
         $preconfig{$_} = $v eq 'undef' ? undef : $v;
     }
 }
+$preconfig{d_fork} = undef unless $OS2::can_fork; # Some funny cases can't
 sub TIEHASH { bless {%preconfig} }
+ENDOFSET
+  # Extract the name of the DLL from the makefile to avoid duplication
+  my ($f) = grep -r, qw(GNUMakefile Makefile);
+  my $dll;
+  if (open my $fh, '<', $f) {
+    while (<$fh>) {
+      $dll = $1, last if /^PERL_DLL_BASE\s*=\s*(\S*)\s*$/;
+    }
+  }
+  print CONFIG <<ENDOFSET if $dll;
+\$preconfig{dll_name} = '$dll';
 ENDOFSET
 } else {
   print CONFIG <<'ENDOFSET';
@@ -408,20 +420,25 @@ $text = 0;
 $/ = '';
 
 sub process {
-  s/\A(\w*)\s+\(([\w.]+)\):\s*\n(\t?)/=item C<$1>\n\nFrom F<$2>:\n\n/m;
-  my $c = substr $1, 0, 1;
-  unless ($seen{$c}++) {
-    print CONFIG <<EOF if $text;
+  if (s/\A(\w*)\s+\(([\w.]+)\):\s*\n(\t?)/=item C<$1>\n\nFrom F<$2>:\n\n/m) {
+    my $c = substr $1, 0, 1;
+    unless ($seen{$c}++) {
+      print CONFIG <<EOF if $text;
 =back
 
 EOF
-    print CONFIG <<EOF;
+      print CONFIG <<EOF;
 =head2 $c
 
-=over
+=over 4
 
 EOF
-    $text = 1;
+     $text = 1;
+    }
+  }
+  elsif (!$text || !/\A\t/) {
+    warn "Expected a Configure variable header",
+      ($text ? " or another paragraph of description" : () );
   }
   s/n't/n\00t/g;		# leave can't, won't etc untouched
   s/^\t\s+(.*)/\n\t$1\n/gm;	# Indented lines ===> paragraphs
@@ -434,8 +451,14 @@ EOF
      (?! e \. g \. )		# Not e.g.
      (?! \. \. \. )		# Not ...
      (?! \d )			# Not 5.004
-     ( [\w./]* [./] [\w./]* )	# Require . or / inside
-     (?<! \. (?= \s ) )		# Do not include trailing dot
+     (?! read/ )		# Not read/write
+     (?! etc\. )		# Not etc.
+     (?! I/O )			# Not I/O
+     (
+	\$ ?			# Allow leading $
+	[\w./]* [./] [\w./]*	# Require . or / inside
+     )
+     (?<! \. (?= [\s)] ) )	# Do not include trailing dot
      (?! [\w/] )		# Include all of it
    }
    (F<$1>)xg;			# /usr/local

@@ -75,7 +75,7 @@ This information should not be considered complete; it includes possibly
 transient information about idiosyncrasies of some of the ports, almost
 all of which are in a state of constant evolution.  Thus, this material
 should be considered a perpetual work in progress
-(<IMG SRC="yellow_sign.gif" ALT="Under Construction">).
+(C<< <IMG SRC="yellow_sign.gif" ALT="Under Construction"> >>).
 
 =head1 ISSUES
 
@@ -797,7 +797,7 @@ and L<perldos>.
 
 The EMX environment for DOS, OS/2, etc. emx@iaehv.nl,
 http://www.leo.org/pub/comp/os/os2/leo/gnu/emx+gcc/index.html or
-ftp://hobbes.nmsu.edu/pub/os2/dev/emx.  Also L<perlos2>.
+ftp://hobbes.nmsu.edu/pub/os2/dev/emx/  Also L<perlos2>.
 
 =item *
 
@@ -1024,12 +1024,12 @@ Perl on VOS is discussed in F<README.vos> in the perl distribution
 (installed as L<perlvos>).  Perl on VOS can accept either VOS- or
 Unix-style file specifications as in either of the following:
 
-    $ perl -ne "print if /perl_setup/i" >system>notices
-    $ perl -ne "print if /perl_setup/i" /system/notices
+    C<< $ perl -ne "print if /perl_setup/i" >system>notices >>
+    C<< $ perl -ne "print if /perl_setup/i" /system/notices >>
 
 or even a mixture of both as in:
 
-    $ perl -ne "print if /perl_setup/i" >system/notices
+    C<< $ perl -ne "print if /perl_setup/i" >system/notices >>
 
 Even though VOS allows the slash character to appear in object
 names, because the VOS port of Perl interprets it as a pathname
@@ -1038,11 +1038,12 @@ contain a slash character cannot be processed.  Such files must be
 renamed before they can be processed by Perl.  Note that VOS limits
 file names to 32 or fewer characters.
 
-See F<README.vos> for restrictions that apply when Perl is built
-with the alpha version of VOS POSIX.1 support.
-
-Perl on VOS is built without any extensions and does not support
-dynamic loading.
+Perl on VOS can be built using two different compilers and two different
+versions of the POSIX runtime.  The recommended method for building full
+Perl is with the GNU C compiler and the generally-available version of
+VOS POSIX support.  See F<README.vos> (installed as L<perlvos>) for
+restrictions that apply when Perl is built using the VOS Standard C
+compiler or the alpha version of VOS POSIX support.
 
 The value of C<$^O> on VOS is "VOS".  To determine the architecture that
 you are running on without resorting to loading all of C<%Config> you
@@ -1074,7 +1075,7 @@ Also see:
 
 =item *
 
-F<README.vos>
+F<README.vos> (installed as L<perlvos>)
 
 =item *
 
@@ -1082,12 +1083,12 @@ The VOS mailing list.
 
 There is no specific mailing list for Perl on VOS.  You can post
 comments to the comp.sys.stratus newsgroup, or subscribe to the general
-Stratus mailing list.  Send a letter with "Subscribe Info-Stratus" in
+Stratus mailing list.  Send a letter with "subscribe Info-Stratus" in
 the message body to majordomo@list.stratagy.com.
 
 =item *
 
-VOS Perl on the web at http://ftp.stratus.com/pub/vos/vos.html
+VOS Perl on the web at http://ftp.stratus.com/pub/vos/posix/posix.html
 
 =back
 
@@ -1439,6 +1440,9 @@ bits are meaningless. (Win32)
 Only good for changing "owner" and "other" read-write access. (S<RISC OS>)
 
 Access permissions are mapped onto VOS access-control list changes. (VOS)
+
+The actual permissions set depend on the value of the C<CYGWIN>
+in the SYSTEM environment settings.  (Cygwin)
 
 =item chown LIST
 
@@ -2027,7 +2031,7 @@ distribution available at http://www.cpan.org/src/index.html
 	DG/UX
 	DOS DJGPP 	1)
 	DYNIX/ptx
-	EPOC
+	EPOC R5
 	FreeBSD
 	HP-UX
 	IRIX
@@ -2145,7 +2149,7 @@ Support for the following platform is planned for a future Perl release:
 	Netware
 
 The following platforms have their own source code distributions and
-binaries available via http://www.cpan.org/ports/index.html:
+binaries available via http://www.cpan.org/ports/
 
 				Perl release
 
@@ -2211,3 +2215,4 @@ Paul J. Schinder <schinder@pobox.com>,
 Michael G Schwern <schwern@pobox.com>,
 Dan Sugalski <dan@sidhe.org>,
 Nathan Torkington <gnat@frii.com>.
+

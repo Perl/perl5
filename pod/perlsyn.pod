@@ -230,9 +230,10 @@ which is Perl short-hand for the more explicitly written version:
 	# now process $line
     }
 
-Note that if there were a C<continue> block on the above code, it would get
-executed even on discarded lines.  This is often used to reset line counters 
-or C<?pat?> one-time matches.
+Note that if there were a C<continue> block on the above code, it would
+get executed only on lines discarded by the regex (since redo skips the
+continue block). A continue block is often used to reset line counters
+or C<?pat?> one-time matches:
 
     # inspired by :1,$g/fred/s//WILMA/
     while (<>) {
@@ -393,8 +394,18 @@ structures.
     }
 
 There is no official C<switch> statement in Perl, because there are
-already several ways to write the equivalent.  In addition to the
-above, you could write
+already several ways to write the equivalent.
+
+However, starting from Perl 5.8 to get switch and case one can use
+the Switch extension and say:
+
+	use Switch;
+
+after which one has switch and case.  It is not as fast as it could be
+because it's not really part of the language (it's done using source
+filters) but it is available, and it's very flexible.
+
+In addition to the above BLOCK construct, you could write
 
     SWITCH: {
 	$abc = 1, last SWITCH  if /^abc/;
@@ -486,7 +497,7 @@ Or
                                   "read-only";
         };
 
-Or if you are certainly that all the C<&&> clauses are true, you can use
+Or if you are certain that all the C<&&> clauses are true, you can use
 something like this, which "switches" on the value of the
 C<HTTP_USER_AGENT> environment variable.
 

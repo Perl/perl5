@@ -1,6 +1,6 @@
 package ExtUtils::Command;
 
-use 5.005_64;
+use 5.006;
 use strict;
 # use AutoLoader;
 use Carp;
@@ -12,7 +12,7 @@ require Exporter;
 our(@ISA, @EXPORT, $VERSION);
 @ISA     = qw(Exporter);
 @EXPORT  = qw(cp rm_f rm_rf mv cat eqtime mkpath touch test_f);
-$VERSION = '1.01';
+$VERSION = '1.03_01';
 
 =head1 NAME
 
@@ -33,8 +33,7 @@ ExtUtils::Command - utilities to replace common UNIX commands in Makefiles etc.
 
 =head1 DESCRIPTION
 
-The module is used in the Win32 port to replace common UNIX commands.
-Most commands are wrappers on generic modules File::Path and File::Basename.
+The module is used to replace common UNIX commands.
 
 =over 4
 
@@ -71,7 +70,7 @@ sub eqtime
  utime((stat($src))[8,9],$dst);
 }
 
-=item rm_f files....
+=item rm_rf files....
 
 Removes directories - recursively (even if readonly)
 
@@ -108,8 +107,8 @@ Makes files exist, with current timestamp
 
 sub touch
 {
- expand_wildcards();
  my $t    = time;
+ expand_wildcards();
  while (@ARGV)
   {
    my $file = shift(@ARGV);               

@@ -14,6 +14,23 @@
 #define PERLIO_NOT_STDIO 0
 
 /*
+ * On AIX 4.3 and above the emulation layer is not needed any more, and
+ * indeed if perl uses its emulation and perl is linked into apache
+ * which is supposed to use the native dlopen conflicts arise.
+ * Jens-Uwe Mager jum@helios.de
+ */
+#ifdef USE_NATIVE_DLOPEN
+
+#include "EXTERN.h"
+#include "perl.h"
+#include "XSUB.h"
+#include <dlfcn.h>
+
+#include "dlutils.c"	/* SaveError() etc	*/
+
+#else
+
+/*
  * @(#)dlfcn.c	1.5 revision of 93/02/14  20:14:17
  * This is an unpublished work copyright (c) 1992 Helios Software GmbH
  * 3000 Hannover 1, Germany
@@ -94,6 +111,13 @@
 # define FREAD(p,s,n,ldptr)	fread(p,s,n,IOPTR(ldptr))
 #endif
 
+#ifndef RTLD_LAZY
+# define RTLD_LAZY 0
+#endif
+#ifndef RTLD_GLOBAL
+# define RTLD_GLOBAL 0
+#endif
+
 /*
  * We simulate dlopen() et al. through a call to load. Because AIX has
  * no call to find an exported symbol we read the loader section of the
@@ -155,7 +179,7 @@ char *strerrorcat(char *str, int err) {
     int msgsiz;
     char *msg;
 
-#ifdef USE_THREADS
+#ifdef USE_5005THREADS
     char *buf = malloc(BUFSIZ);
 
     if (buf == 0)
@@ -169,6 +193,8 @@ char *strerrorcat(char *str, int err) {
       strcat(str, msg);
     free(buf);
 #else
+    dTHX;
+
     if ((msg = strerror(err)) == 0)
       msg = strerror_failed;
     msgsiz = strlen(msg);		/* Note msg = buf and free() above. */
@@ -183,7 +209,7 @@ char *strerrorcpy(char *str, int err) {
     int msgsiz;
     char *msg;
 
-#ifdef USE_THREADS
+#ifdef USE_5005THREADS
     char *buf = malloc(BUFSIZ);
 
     if (buf == 0)
@@ -197,6 +223,8 @@ char *strerrorcpy(char *str, int err) {
       strcpy(str, msg);
     free(buf);
 #else
+    dTHX;
+
     if ((msg = strerror(err)) == 0)
       msg = strerror_failed;
     msgsiz = strlen(msg);	/* Note msg = buf and free() above. */
@@ -655,6 +683,7 @@ static void * findMain(void)
 	safefree(buf);
 	return ret;
 }
+#endif /* USE_NATIVE_DLOPEN */
 
 /* dl_dlopen.xs
  * 
@@ -697,7 +726,7 @@ dl_load_file(filename, flags=0)
 	DLDEBUG(1,PerlIO_printf(Perl_debug_log, "dl_load_file(%s,%x):\n", filename,flags));
 	if (flags & 0x01)
 	    Perl_warn(aTHX_ "Can't make loaded symbols global on this platform while loading %s",filename);
-	RETVAL = dlopen(filename, 1) ;
+	RETVAL = dlopen(filename, RTLD_GLOBAL|RTLD_LAZY) ;
 	DLDEBUG(2,PerlIO_printf(Perl_debug_log, " libref=%x\n", RETVAL));
 	ST(0) = sv_newmortal() ;
 	if (RETVAL == NULL)

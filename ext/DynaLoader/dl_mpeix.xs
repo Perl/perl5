@@ -3,6 +3,7 @@
  * Version: 2.1, 1996/07/25
  * Version: 2.2, 1997/09/25 Mark Bixby (markb@cccd.edu)
  * Version: 2.3, 1998/11/19 Mark Bixby (markb@cccd.edu)
+ * Version: 2.4, 2002/03/24 Mark Bixby (mark@bixby.org)
  */
 
 #include "EXTERN.h"
@@ -12,7 +13,7 @@
 #ifdef __GNUC__
 extern void HPGETPROCPLABEL(    int    parms,
                                 char * procname,
-                                int  * plabel,
+                                void * plabel,
                                 int  * status,
                                 char * firstfile,
                                 int    casesensitive,
@@ -48,7 +49,7 @@ dl_load_file(filename, flags=0)
     PREINIT:
     char                buf[PATH_MAX + 3];
     p_mpe_dld           obj = NULL;
-    int                 i;
+
     CODE:
     DLDEBUG(1,PerlIO_printf(Perl_debug_log, "dl_load_file(%s,%x):\n", filename,
 flags));

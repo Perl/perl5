@@ -13,7 +13,7 @@ use Socket;
 use Carp;
 
 @ISA = qw(IO::Socket);
-$VERSION = "1.20";
+$VERSION = "1.20_00";
 
 IO::Socket::UNIX->register_domain( AF_UNIX );
 
@@ -103,7 +103,7 @@ be a C<Peer> specification.
 
 
  NOTE NOTE NOTE NOTE NOTE NOTE NOTE NOTE NOTE NOTE NOTE NOTE
- 
+
 As of VERSION 1.18 all IO::Socket objects have autoflush turned on
 by default. This was not the case with earlier releases.
 

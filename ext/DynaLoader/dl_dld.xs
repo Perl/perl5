@@ -180,8 +180,9 @@ dl_install_xsub(perl_name, symref, filename="$Package")
 
 char *
 dl_error()
-    CODE:
+    PREINIT:
     dMY_CXT;
+    CODE:
     RETVAL = dl_last_error ;
     OUTPUT:
     RETVAL

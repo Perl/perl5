@@ -1,67 +1,243 @@
 package charnames;
+use strict;
+use warnings;
+use Carp;
+our $VERSION = '1.01';
+
 use bytes ();		# for $bytes::hint_bits
-use warnings();
 $charnames::hint_bits = 0x20000;
+
+my %alias1 = (
+		# Icky 3.2 names with parentheses.
+		'LINE FEED'		=> 'LINE FEED (LF)',
+		'FORM FEED'		=> 'FORM FEED (FF)',
+		'CARRIAGE RETURN'	=> 'CARRIAGE RETURN (CR)',
+		'NEXT LINE'		=> 'NEXT LINE (NEL)',
+		# Convenience.
+		'LF'			=> 'LINE FEED (LF)',
+		'FF'			=> 'FORM FEED (FF)',
+		'CR'			=> 'CARRIAGE RETURN (LF)',
+		'NEL'			=> 'NEXT LINE (NEL)',
+	        # More convenience.  For futher convencience,
+	        # it is suggested some way using using the NamesList
+		# aliases is implemented.
+	        'ZWNJ'			=> 'ZERO WIDTH NON-JOINER',
+	        'ZWJ'			=> 'ZERO WIDTH JOINER',
+		'BOM'			=> 'BYTE ORDER MARK',
+	    );
+
+my %alias2 = (
+		# Pre-3.2 compatibility (only for the first 256 characters).
+		'HORIZONTAL TABULATION'	=> 'CHARACTER TABULATION',
+		'VERTICAL TABULATION'	=> 'LINE TABULATION',
+		'FILE SEPARATOR'	=> 'INFORMATION SEPARATOR FOUR',
+		'GROUP SEPARATOR'	=> 'INFORMATION SEPARATOR THREE',
+		'RECORD SEPARATOR'	=> 'INFORMATION SEPARATOR TWO',
+		'UNIT SEPARATOR'	=> 'INFORMATION SEPARATOR ONE',
+		'PARTIAL LINE DOWN'	=> 'PARTIAL LINE FORWARD',
+		'PARTIAL LINE UP'	=> 'PARTIAL LINE BACKWARD',
+	    );
 
 my $txt;
 
 # This is not optimized in any way yet
-sub charnames {
-  $name = shift;
-  $txt = do "unicode/Name.pl" unless $txt;
-  my @off;
-  if ($^H{charnames_full} and $txt =~ /\t\t$name$/m) {
-    @off = ($-[0], $+[0]);
-  }
-  unless (@off) {
-    if ($^H{charnames_short} and $name =~ /^(.*?):(.*)/s) {
-      my ($script, $cname) = ($1,$2);
-      my $case = ( $cname =~ /[[:upper:]]/ ? "CAPITAL" : "SMALL");
-      if ($txt =~ m/\t\t\U$script\E (?:$case )?LETTER \U$cname$/m) {
-	@off = ($-[0], $+[0]);
-      }
-    }
-  }
-  unless (@off) {
-    my $case = ( $name =~ /[[:upper:]]/ ? "CAPITAL" : "SMALL");
-    for ( @{$^H{charnames_scripts}} ) {
-      (@off = ($-[0], $+[0])), last 
-	if $txt =~ m/\t\t$_ (?:$case )?LETTER \U$name$/m;
-    }
-  }
-  die "Unknown charname '$name'" unless @off;
+sub charnames
+{
+  my $name = shift;
 
-  my $hexlen = 4; # Unicode guarantees 4-, 5-, or 6-digit format
-  $hexlen++ while
-      $hexlen < 6 && substr($txt, $off[0] - $hexlen - 1, 1) =~ /[0-9a-f]/;
-  my $ord = hex substr $txt, $off[0] - $hexlen, $hexlen;
+  if (exists $alias1{$name}) {
+      $name = $alias1{$name};
+  }
+  if (exists $alias2{$name}) {
+      require warnings;
+      warnings::warnif('deprecated', qq{Unicode character name "$name" is deprecated, use "$alias2{$name}" instead});
+      $name = $alias2{$name};
+  }
+
+  my $ord;
+  my @off;
+  my $fname;
+
+  if ($name eq "BYTE ORDER MARK") {
+      $fname = $name;
+      $ord = 0xFEFF;
+  } else {
+      ## Suck in the code/name list as a big string.
+      ## Lines look like:
+      ##     "0052\t\tLATIN CAPITAL LETTER R\n"
+      $txt = do "unicore/Name.pl" unless $txt;
+
+      ## @off will hold the index into the code/name string of the start and
+      ## end of the name as we find it.
+      
+      ## If :full, look for the the name exactly
+      if ($^H{charnames_full} and $txt =~ /\t\t\Q$name\E$/m) {
+	  @off = ($-[0], $+[0]);
+      }
+
+      ## If we didn't get above, and :short allowed, look for the short name.
+      ## The short name is like "greek:Sigma"
+      unless (@off) {
+	  if ($^H{charnames_short} and $name =~ /^(.+?):(.+)/s) {
+	      my ($script, $cname) = ($1,$2);
+	      my $case = ( $cname =~ /[[:upper:]]/ ? "CAPITAL" : "SMALL");
+	      if ($txt =~ m/\t\t\U$script\E (?:$case )?LETTER \U\Q$cname\E$/m) {
+		  @off = ($-[0], $+[0]);
+	      }
+	  }
+      }
+      
+      ## If we still don't have it, check for the name among the loaded
+      ## scripts.
+      if (not @off)
+      {
+	  my $case = ( $name =~ /[[:upper:]]/ ? "CAPITAL" : "SMALL");
+	  for my $script ( @{$^H{charnames_scripts}} )
+	  {
+	      if ($txt =~ m/\t\t$script (?:$case )?LETTER \U\Q$name\E$/m) {
+		  @off = ($-[0], $+[0]);
+		  last;
+	      }
+	  }
+      }
+      
+      ## If we don't have it by now, give up.
+      unless (@off) {
+	  carp "Unknown charname '$name'";
+	  return "\x{FFFD}";
+      }
+      
+      ##
+      ## Now know where in the string the name starts.
+      ## The code, in hex, is before that.
+      ##
+      ## The code can be 4-6 characters long, so we've got to sort of
+      ## go look for it, just after the newline that comes before $off[0].
+      ##
+      ## This would be much easier if unicore/Name.pl had info in
+      ## a name/code order, instead of code/name order.
+      ##
+      ## The +1 after the rindex() is to skip past the newline we're finding,
+      ## or, if the rindex() fails, to put us to an offset of zero.
+      ##
+      my $hexstart = rindex($txt, "\n", $off[0]) + 1;
+
+      ## we know where it starts, so turn into number -
+      ## the ordinal for the char.
+      $ord = hex substr($txt, $hexstart, $off[0] - $hexstart);
+  }
+
   if ($^H & $bytes::hint_bits) {	# "use bytes" in effect?
     use bytes;
     return chr $ord if $ord <= 255;
-    my $hex = sprintf '%X=0%o', $ord, $ord;
-    my $fname = substr $txt, $off[0] + 2, $off[1] - $off[0] - 2;
-    die "Character 0x$hex with name '$fname' is above 0xFF";
+    my $hex = sprintf "%04x", $ord;
+    if (not defined $fname) {
+	$fname = substr $txt, $off[0] + 2, $off[1] - $off[0] - 2;
+    }
+    croak "Character 0x$hex with name '$fname' is above 0xFF";
   }
-  return chr $ord;
+
+  no warnings 'utf8'; # allow even illegal characters
+  return pack "U", $ord;
 }
 
-sub import {
-  shift;
-  die "`use charnames' needs explicit imports list" unless @_;
+sub import
+{
+  shift; ## ignore class name
+
+  if (not @_)
+  {
+      carp("`use charnames' needs explicit imports list");
+  }
   $^H |= $charnames::hint_bits;
   $^H{charnames} = \&charnames ;
+
+  ##
+  ## fill %h keys with our @_ args.
+  ##
   my %h;
   @h{@_} = (1) x @_;
+
   $^H{charnames_full} = delete $h{':full'};
   $^H{charnames_short} = delete $h{':short'};
   $^H{charnames_scripts} = [map uc, keys %h];
-  if (warnings::enabled('utf8') && @{$^H{charnames_scripts}}) {
-	$txt = do "unicode/Name.pl" unless $txt;
-    for (@{$^H{charnames_scripts}}) {
-        warnings::warn('utf8',  "No such script: '$_'") unless
-	    $txt =~ m/\t\t$_ (?:CAPITAL |SMALL )?LETTER /;
-	}
+
+  ##
+  ## If utf8? warnings are enabled, and some scripts were given,
+  ## see if at least we can find one letter of each script.
+  ##
+  if (warnings::enabled('utf8') && @{$^H{charnames_scripts}})
+  {
+      $txt = do "unicore/Name.pl" unless $txt;
+
+      for my $script (@{$^H{charnames_scripts}})
+      {
+          if (not $txt =~ m/\t\t$script (?:CAPITAL |SMALL )?LETTER /) {
+              warnings::warn('utf8',  "No such script: '$script'");
+          }
+      }
   }
+}
+
+require Unicode::UCD; # for Unicode::UCD::_getcode()
+
+my %viacode;
+
+sub viacode
+{
+    if (@_ != 1) {
+        carp "charnames::viacode() expects one argument";
+        return ()
+    }
+
+    my $arg = shift;
+    my $code = Unicode::UCD::_getcode($arg);
+
+    my $hex;
+
+    if (defined $code) {
+        $hex = sprintf "%04X", $arg;
+    } else {
+        carp("unexpected arg \"$arg\" to charnames::viacode()");
+        return;
+    }
+
+    if ($code > 0x10FFFF) {
+	carp "Unicode characters only allocated up to 0x10FFFF (you asked for $hex)";
+	return;
+    }
+
+    return $viacode{$hex} if exists $viacode{$hex};
+
+    $txt = do "unicore/Name.pl" unless $txt;
+
+    if ($txt =~ m/^$hex\t\t(.+)/m) {
+        return $viacode{$hex} = $1;
+    } else {
+        return;
+    }
+}
+
+my %vianame;
+
+sub vianame
+{
+    if (@_ != 1) {
+        carp "charnames::vianame() expects one name argument";
+        return ()
+    }
+
+    my $arg = shift;
+
+    return $vianame{$arg} if exists $vianame{$arg};
+
+    $txt = do "unicore/Name.pl" unless $txt;
+
+    if ($txt =~ m/^([0-9A-F]+)\t\t($arg)/m) {
+        return $vianame{$arg} = hex $1;
+    } else {
+        return;
+    }
 }
 
 
@@ -70,7 +246,7 @@ __END__
 
 =head1 NAME
 
-charnames - define character names for C<\N{named}> string literal escape.
+charnames - define character names for C<\N{named}> string literal escapes
 
 =head1 SYNOPSIS
 
@@ -82,6 +258,9 @@ charnames - define character names for C<\N{named}> string literal escape.
 
   use charnames qw(cyrillic greek);
   print "\N{sigma} is Greek sigma, and \N{be} is Cyrillic b.\n";
+
+  print charnames::viacode(0x1234); # prints "ETHIOPIC SYLLABLE SEE"
+  printf "%04X", charnames::vianame("GOTHIC LETTER AHSA"); # prints "10330"
 
 =head1 DESCRIPTION
 
@@ -103,8 +282,20 @@ this pragma looks for the names
   SCRIPTNAME LETTER CHARNAME
 
 in the table of standard Unicode names.  If C<CHARNAME> is lowercase,
-then the C<CAPITAL> variant is ignored, otherwise the C<SMALL> variant is
-ignored.
+then the C<CAPITAL> variant is ignored, otherwise the C<SMALL> variant
+is ignored.
+
+Note that C<\N{...}> is compile-time, it's a special form of string
+constant used inside double-quoted strings: in other words, you cannot
+use variables inside the C<\N{...}>.  If you want similar run-time
+functionality, use charnames::vianame().
+
+For the C0 and C1 control characters (U+0000..U+001F, U+0080..U+009F)
+as of Unicode 3.1, there are no official Unicode names but you can
+use instead the ISO 6429 names (LINE FEED, ESCAPE, and so forth).
+In Unicode 3.2 some naming changes will happen since ISO 6429 has been
+updated.  Also note that the U+UU80, U+0081, U+0084, and U+0099
+do not have names even in ISO 6429.
 
 =head1 CUSTOM TRANSLATORS
 
@@ -135,6 +326,92 @@ state of C<bytes>-flag as in:
 	    return utf8_translator(@_);
 	}
     }
+
+=head1 charnames::viacode(code)
+
+Returns the full name of the character indicated by the numeric code.
+The example
+
+    print charnames::viacode(0x2722);
+
+prints "FOUR TEARDROP-SPOKED ASTERISK".
+
+Returns undef if no name is known for the code.
+
+This works only for the standard names, and does not yet apply 
+to custom translators.
+
+Notice that the name returned for of U+FEFF is "ZERO WIDTH NO-BREAK
+SPACE", not "BYTE ORDER MARK".
+
+=head1 charnames::vianame(code)
+
+Returns the code point indicated by the name.
+The example
+
+    printf "%04X", charnames::vianame("FOUR TEARDROP-SPOKED ASTERISK");
+
+prints "2722".
+
+Returns undef if no name is known for the name.
+
+This works only for the standard names, and does not yet aply 
+to custom translators.
+
+=head1 ALIASES
+
+A few aliases have been defined for convenience: instead of having
+to use the official names
+
+    LINE FEED (LF)
+    FORM FEED (FF)
+    CARRIAGE RETURN (CR)
+    NEXT LINE (NEL)
+
+(yes, with parentheses) one can use
+
+    LINE FEED
+    FORM FEED
+    CARRIAGE RETURN
+    NEXT LINE
+    LF
+    FF
+    CR
+    NEL
+
+One can also use
+
+    BYTE ORDER MARK
+    BOM
+
+and
+
+    ZWNJ
+    ZWJ
+
+for ZERO WIDTH NON-JOINER and ZERO WIDTH JOINER.
+
+For backward compatibility one can use the old names for
+certain C0 and C1 controls
+
+    old                         new
+
+    HORIZONTAL TABULATION       CHARACTER TABULATION
+    VERTICAL TABULATION         LINE TABULATION
+    FILE SEPARATOR              INFORMATION SEPARATOR FOUR
+    GROUP SEPARATOR             INFORMATION SEPARATOR THREE
+    RECORD SEPARATOR            INFORMATION SEPARATOR TWO
+    UNIT SEPARATOR              INFORMATION SEPARATOR ONE
+    PARTIAL LINE DOWN           PARTIAL LINE FORWARD
+    PARTIAL LINE UP             PARTIAL LINE BACKWARD
+
+but the old names in addition to giving the character
+will also give a warning about being deprecated.
+
+=head1 ILLEGAL CHARACTERS
+
+If you ask for a character that does not exist, a warning is given
+and the Unicode I<replacement character> "\x{FFFD}" is returned.
 
 =head1 BUGS
 

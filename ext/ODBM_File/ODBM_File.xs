@@ -15,6 +15,16 @@
 #  endif
 #endif
 
+#ifndef HAS_DBMINIT_PROTO
+int	dbminit(char* filename);
+int	dbmclose(void);
+datum	fetch(datum key);
+int	store(datum key, datum dat);
+int	delete(datum key);
+datum	firstkey(void);
+datum	nextkey(datum key);
+#endif
+
 #ifdef DBM_BUG_DUPLICATE_FREE 
 /*
  * DBM on at least Ultrix and HPUX call dbmclose() from dbminit(),
@@ -43,6 +53,7 @@ typedef struct {
 
 typedef ODBM_File_type * ODBM_File ;
 typedef datum datum_key ;
+typedef datum datum_key_copy ;
 typedef datum datum_value ;
 
 #define ckFilter(arg,type,name)					\
@@ -140,7 +151,7 @@ DESTROY(db)
 datum_value
 odbm_FETCH(db, key)
 	ODBM_File	db
-	datum_key	key
+	datum_key_copy	key
 
 int
 odbm_STORE(db, key, value, flags = DBM_REPLACE)

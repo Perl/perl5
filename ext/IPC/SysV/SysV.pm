@@ -14,7 +14,7 @@ use Config;
 require Exporter;
 @ISA = qw(Exporter);
 
-$VERSION = "1.03";
+$VERSION = "1.03_00";
 
 @EXPORT_OK = qw(
 	GETALL GETNCNT GETPID GETVAL GETZCNT
@@ -74,7 +74,7 @@ C<IPC::SysV> defines and conditionally exports all the constants
 defined in your system include files which are needed by the SysV
 IPC calls.
 
-=over
+=over 4
 
 =item ftok( PATH, ID )
 

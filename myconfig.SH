@@ -27,7 +27,7 @@ $startsh
 
 # Note that the text lines /^Summary of/ .. /^\s*$/ are copied into Config.pm.
 cat <<'!NO!SUBS!'
-Summary of my $package (revision $baserev version $PERL_VERSION subversion $PERL_SUBVERSION) configuration:
+Summary of my $package (revision $baserev $version_patchlevel_string) configuration:
   Platform:
     osname=$osname, osvers=$osvers, archname=$archname
     uname='$myuname'
@@ -36,6 +36,7 @@ Summary of my $package (revision $baserev version $PERL_VERSION subversion $PERL
     usethreads=$usethreads use5005threads=$use5005threads useithreads=$useithreads usemultiplicity=$usemultiplicity
     useperlio=$useperlio d_sfio=$d_sfio uselargefiles=$uselargefiles usesocks=$usesocks
     use64bitint=$use64bitint use64bitall=$use64bitall uselongdouble=$uselongdouble
+    usemymalloc=$usemymalloc, bincompat5005=$d_bincompat5005
   Compiler:
     cc='$cc', ccflags ='$ccflags',
     optimize='$optimize',
@@ -44,7 +45,7 @@ Summary of my $package (revision $baserev version $PERL_VERSION subversion $PERL
     intsize=$intsize, longsize=$longsize, ptrsize=$ptrsize, doublesize=$doublesize, byteorder=$byteorder
     d_longlong=$d_longlong, longlongsize=$longlongsize, d_longdbl=$d_longdbl, longdblsize=$longdblsize
     ivtype='$ivtype', ivsize=$ivsize, nvtype='$nvtype', nvsize=$nvsize, Off_t='$lseektype', lseeksize=$lseeksize
-    alignbytes=$alignbytes, usemymalloc=$usemymalloc, prototype=$prototype
+    alignbytes=$alignbytes, prototype=$prototype
   Linker and Libraries:
     ld='$ld', ldflags ='$ldflags'
     libpth=$libpth

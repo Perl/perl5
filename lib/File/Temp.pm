@@ -472,14 +472,14 @@ sub _gettemp {
       if ( $open_success ) {
 
 	# Reset umask
-	umask($umask) if $umask;
+	umask($umask);
 
 	# Opened successfully - return file handle and name
 	return ($fh, $path);
 
       } else {
 	# Reset umask
-	umask($umask) if $umask;
+	umask($umask);
 
 	# Error opening file - abort with error
 	# if the reason was anything but EEXIST
@@ -503,13 +503,13 @@ sub _gettemp {
       if (mkdir( $path, 0700)) {
 	# created okay
 	# Reset umask
-	umask($umask) if $umask;
+	umask($umask);
 
 	return undef, $path;
       } else {
 
 	# Reset umask
-	umask($umask) if $umask;
+	umask($umask);
 
 	# Abort with error if the reason for failure was anything
 	# except EEXIST
@@ -736,7 +736,7 @@ sub _is_verysafe {
   # Split directory into components - assume no file
   my ($volume, $directories, undef) = File::Spec->splitpath( $path, 1);
 
-  # Slightly less efficient than having a a function in File::Spec
+  # Slightly less efficient than having a function in File::Spec
   # to chop off the end of a directory or even a function that
   # can handle ../ in a directory tree
   # Sometimes splitdir() returns a blank at the end

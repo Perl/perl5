@@ -3,6 +3,10 @@
  */
 
 /*
+ * "'The Chamber of Records,' said Gimli. 'I guess that is where we now stand.'"
+ */
+
+/*
   Here are some notes on configuring Perl's malloc.  (For non-perl
   usage see below.)
  
@@ -255,7 +259,6 @@
 #    include <stdlib.h>
 #    include <stdio.h>
 #    include <memory.h>
-#    define _(arg) arg
 #    ifndef Malloc_t
 #      define Malloc_t void *
 #    endif
@@ -304,7 +307,11 @@
 #  ifndef pTHX
 #     define pTHX		void
 #     define pTHX_
-#     define dTHX		extern int Perl___notused
+#     ifdef HASATTRIBUTE
+#        define dTHX		extern int Perl___notused PERL_UNUSED_DECL
+#     else
+#        define dTHX            extern int Perl___notused
+#     endif
 #     define WITH_THX(s)	s
 #  endif
 #  ifndef PERL_GET_INTERP
@@ -351,7 +358,7 @@
 #  undef DEBUG_m
 #  define DEBUG_m(a)  \
     STMT_START {							\
-	if (PERL_GET_INTERP) { dTHX; if (PL_debug & 128) { a; } }	\
+	if (PERL_GET_INTERP) { dTHX; if (DEBUG_m_TEST) { a; } }	\
     } STMT_END
 #endif
 
@@ -889,9 +896,9 @@ static	union overhead *nextf[NBUCKETS];
 # define sbrk(a) Perl_sbrk(a)
 Malloc_t Perl_sbrk (int size);
 #else
-#ifndef HAS_SBRK_PROTO
+# ifndef HAS_SBRK_PROTO /* <unistd.h> usually takes care of this */
 extern	Malloc_t sbrk(int);
-#endif
+# endif
 #endif
 
 #ifdef DEBUGGING_MSTATS
@@ -1041,7 +1048,9 @@ Perl_malloc(register size_t nbytes)
 	    POW2_OPTIMIZE_ADJUST(nbytes);
 	    nbytes += M_OVERHEAD;
 	    nbytes = (nbytes + 3) &~ 3; 
+#if defined(PACK_MALLOC) && !defined(SMALL_BUCKET_VIA_TABLE)
 	  do_shifts:
+#endif
 	    shiftr = (nbytes - 1) >> START_SHIFT;
 	    bucket = START_SHIFTS_BUCKET;
 	    /* apart from this loop, this is O(1) */
@@ -1586,12 +1595,12 @@ Perl_mfree(void *mp)
 		{
 		    dTHX;
 		    if (!PERL_IS_ALIVE || !PL_curcop || ckWARN_d(WARN_MALLOC))
-			Perl_warner(aTHX_ WARN_MALLOC, "%s free() ignored",
+			Perl_warner(aTHX_ packWARN(WARN_MALLOC), "%s free() ignored (RMAGIC, PERL_CORE)",
 				    ovp->ov_rmagic == RMAGIC - 1 ?
 				    "Duplicate" : "Bad");
 		}
 #else
-		warn("%s free() ignored",
+		warn("%s free() ignored (RMAGIC)",
 		    ovp->ov_rmagic == RMAGIC - 1 ? "Duplicate" : "Bad");
 #endif		
 #else
@@ -1599,7 +1608,7 @@ Perl_mfree(void *mp)
 		{
 		    dTHX;
 		    if (!PERL_IS_ALIVE || !PL_curcop || ckWARN_d(WARN_MALLOC))
-			Perl_warner(aTHX_ WARN_MALLOC, "%s", "Bad free() ignored");
+			Perl_warner(aTHX_ packWARN(WARN_MALLOC), "%s", "Bad free() ignored (PERL_CORE)");
 		}
 #else
 		warn("%s", "Bad free() ignored");
@@ -1686,7 +1695,7 @@ Perl_realloc(void *mp, size_t nbytes)
 		{
 		    dTHX;
 		    if (!PERL_IS_ALIVE || !PL_curcop || ckWARN_d(WARN_MALLOC))
-			Perl_warner(aTHX_ WARN_MALLOC, "%srealloc() %signored",
+			Perl_warner(aTHX_ packWARN(WARN_MALLOC), "%srealloc() %signored",
 				    (ovp->ov_rmagic == RMAGIC - 1 ? "" : "Bad "),
 				    ovp->ov_rmagic == RMAGIC - 1
 				    ? "of freed memory " : "");
@@ -1701,7 +1710,7 @@ Perl_realloc(void *mp, size_t nbytes)
 		{
 		    dTHX;
 		    if (!PERL_IS_ALIVE || !PL_curcop || ckWARN_d(WARN_MALLOC))
-			Perl_warner(aTHX_ WARN_MALLOC, "%s",
+			Perl_warner(aTHX_ packWARN(WARN_MALLOC), "%s",
 				    "Bad realloc() ignored");
 		}
 #else
