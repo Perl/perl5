@@ -77,6 +77,8 @@ extern __inline__ int atomic_sub_return(int i, atomic_t *v)
 #define atomic_inc(v) atomic_add(1,(v))
 #define atomic_dec_and_test(v) (atomic_sub_return(1, (v)) == 0)
 /* Add further gcc architectures here */
+#  else
+#    define EMULATE_ATOMIC_REFCOUNTS
 #  endif /* sparc64 */
 #endif /* i386 */
 #else

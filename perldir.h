@@ -3,7 +3,7 @@
 
 #ifdef PERL_OBJECT
 #else
-#define PerlDir_mkdir(name, mode) mkdir((name), (mode))
+#define PerlDir_mkdir(name, mode) Mkdir((name), (mode))
 #define PerlDir_chdir(name) chdir((name))
 #define PerlDir_rmdir(name) rmdir((name))
 #define PerlDir_close(dir) closedir((dir))

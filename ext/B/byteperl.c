@@ -3,7 +3,6 @@
 #ifndef PATCHLEVEL
 #include "patchlevel.h"
 #endif
-#include "byterun.h"
 
 static void xs_init _((void));
 static PerlInterpreter *my_perl;

@@ -46,7 +46,11 @@
 #  ifdef __GNUC__
 #    define stringify_immed(s) #s
 #    define stringify(s) stringify_immed(s)
+#ifdef EMBED
+register struct op *Perl_op asm(stringify(OP_IN_REGISTER));
+#else
 register struct op *op asm(stringify(OP_IN_REGISTER));
+#endif
 #  endif
 #endif
 
@@ -784,7 +788,11 @@ Free_t   Perl_free _((Malloc_t where));
 #  ifdef MAXUSHORT
 #    define PERL_USHORT_MAX ((unsigned short)MAXUSHORT)
 #  else
-#    define PERL_USHORT_MAX       ((unsigned short)~(unsigned)0)
+#    ifdef USHRT_MAX
+#      define PERL_USHORT_MAX ((unsigned short)USHRT_MAX)
+#    else
+#      define PERL_USHORT_MAX       ((unsigned short)~(unsigned)0)
+#    endif
 #  endif
 #endif
 
@@ -794,7 +802,11 @@ Free_t   Perl_free _((Malloc_t where));
 #  ifdef MAXSHORT    /* Often used in <values.h> */
 #    define PERL_SHORT_MAX ((short)MAXSHORT)
 #  else
-#    define PERL_SHORT_MAX      ((short) (PERL_USHORT_MAX >> 1))
+#    ifdef SHRT_MAX
+#      define PERL_SHORT_MAX ((short)SHRT_MAX)
+#    else
+#      define PERL_SHORT_MAX      ((short) (PERL_USHORT_MAX >> 1))
+#    endif
 #  endif
 #endif
 
@@ -804,7 +816,11 @@ Free_t   Perl_free _((Malloc_t where));
 #  ifdef MINSHORT
 #    define PERL_SHORT_MIN ((short)MINSHORT)
 #  else
-#    define PERL_SHORT_MIN        (-PERL_SHORT_MAX - ((3 & -1) == 3))
+#    ifdef SHRT_MIN
+#      define PERL_SHORT_MIN ((short)SHRT_MIN)
+#    else
+#      define PERL_SHORT_MIN        (-PERL_SHORT_MAX - ((3 & -1) == 3))
+#    endif
 #  endif
 #endif
 

@@ -257,12 +257,6 @@ sed <<!GROK!THIS! >config.h -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un-
  */
 #$d_getgrps HAS_GETGROUPS		/**/
 
-/* HAS_GETHOSTENT:
- *	This symbol, if defined, indicates that the gethostent routine is
- *	available to lookup host names in some data base or other.
- */
-#$d_gethent HAS_GETHOSTENT		/**/
-
 /* HAS_UNAME:
  *	This symbol, if defined, indicates that the C program may use the
  *	uname() routine to derive the host name.  See also HAS_GETHOSTNAME
@@ -1485,6 +1479,12 @@ sed <<!GROK!THIS! >config.h -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un-
 #$d_vprintf HAS_VPRINTF	/**/
 #$d_charvspr USE_CHAR_VSPRINTF 	/**/
 
+/* DOUBLESIZE:
+ *	This symbol contains the size of a double, so that the C preprocessor
+ *	can make decisions based on it.
+ */
+#define DOUBLESIZE $doublesize		/**/
+
 /* I_TIME:
  *	This symbol, if defined, indicates to the C program that it should
  *	include <time.h>.
@@ -1543,6 +1543,14 @@ sed <<!GROK!THIS! >config.h -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un-
 #define VAL_EAGAIN $eagain
 #define RD_NODATA $rd_nodata
 #$d_eofnblk EOF_NONBLOCK
+
+/* PTRSIZE:
+ *	This symbol contains the size of a pointer, so that the C preprocessor
+ *	can make decisions based on it.  It will be sizeof(void *) if
+ *	the compiler supports (void *); otherwise it will be
+ *	sizeof(char *).
+ */
+#define PTRSIZE $ptrsize		/**/
 
 /* RANDBITS:
  *	This symbol contains the number of bits of random number the rand()
@@ -1609,12 +1617,70 @@ sed <<!GROK!THIS! >config.h -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un-
  */
 #$d_csh CSH "$full_csh"		/**/
 
+/* HAS_GETHOSTBYADDR:
+ *	This symbol, if defined, indicates that the gethostbyaddr() routine is
+ *	available to look up hosts by their IP addresses.
+ */
+#$d_gethbyaddr HAS_GETHOSTBYADDR		/**/
+
+/* HAS_GETHOSTBYNAME:
+ *	This symbol, if defined, indicates that the gethostbyname() routine is
+ *	available to look up host names in some data base or other.
+ */
+#$d_gethbyname HAS_GETHOSTBYNAME		/**/
+
+/* HAS_GETHOSTENT:
+ *	This symbol, if defined, indicates that the gethostent() routine is
+ *	available to look up host names in some data base or another.
+ */
+#$d_gethent HAS_GETHOSTENT		/**/
+
+/* HAS_GETNETBYADDR:
+ *	This symbol, if defined, indicates that the getnetbyaddr() routine is
+ *	available to look up networks by their IP addresses.
+ */
+#$d_getnbyaddr HAS_GETNETBYADDR		/**/
+
+/* HAS_GETNETBYNAME:
+ *	This symbol, if defined, indicates that the getnetbyname() routine is
+ *	available to look up networks by their names.
+ */
+#$d_getnbyname HAS_GETNETBYNAME		/**/
+
+/* HAS_GETPROTOBYNAME:
+ *	This symbol, if defined, indicates that the getprotobyname()
+ *	routine is available to look up protocols by their name.
+ */
+/* HAS_GETPROTOBYNUMBER:
+ *	This symbol, if defined, indicates that the getprotobynumber()
+ *	routine is available to look up protocols by their number.
+ */
+#$d_getpbyname HAS_GETPROTOBYNAME		/**/
+#$d_getpbynumber HAS_GETPROTOBYNUMBER		/**/
+
+/* HAS_GETSERVBYNAME:
+ *	This symbol, if defined, indicates that the getservbyname()
+ *	routine is available to look up services by their name.
+ */
+/* HAS_GETSERVBYPORT:
+ *	This symbol, if defined, indicates that the getservbyport()
+ *	routine is available to look up services by their port.
+ */
+#$d_getsbyname HAS_GETSERVBYNAME		/**/
+#$d_getsbyport HAS_GETSERVBYPORT		/**/
+
 /* HAS_SETGROUPS:
  *	This symbol, if defined, indicates that the setgroups() routine is
  *	available to set the list of process groups.  If unavailable, multiple
  *	groups are probably not supported.
  */
 #$d_setgrps HAS_SETGROUPS		/**/
+
+/* HAS_SETHOSTENT:
+ *	This symbol, if defined, indicates that the sethostent() routine is
+ *	available.
+ */
+#$d_sethent HAS_SETHOSTENT		/**/
 
 /* Signal_t:
  *	This symbol's value is either "void" or "int", corresponding to the
@@ -1820,7 +1886,12 @@ sed <<!GROK!THIS! >config.h -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un-
  *	This symbol, if defined, indicates that Perl should
  *	be built to use threads.
  */
+/* OLD_PTHREADS_API:
+ *	This symbol, if defined, indicates that Perl should
+ *	be built to use the old draft POSIX threads API.
+ */
 #$usethreads	USE_THREADS		/**/
+#$d_oldpthreads	OLD_PTHREADS_API		/**/
 
 #endif
 !GROK!THIS!

@@ -3584,7 +3584,7 @@ PP(pp_semop)
 
 PP(pp_ghbyname)
 {
-#ifdef HAS_SOCKET
+#ifdef HAS_GETHOSTBYNAME
     return pp_ghostent(ARGS);
 #else
     DIE(no_sock_func, "gethostbyname");
@@ -3593,7 +3593,7 @@ PP(pp_ghbyname)
 
 PP(pp_ghbyaddr)
 {
-#ifdef HAS_SOCKET
+#ifdef HAS_GETHOSTBYADDR
     return pp_ghostent(ARGS);
 #else
     DIE(no_sock_func, "gethostbyaddr");
@@ -3603,7 +3603,7 @@ PP(pp_ghbyaddr)
 PP(pp_ghostent)
 {
     djSP;
-#ifdef HAS_SOCKET
+#if defined(HAS_GETHOSTBYNAME) || defined(HAS_GETHOSTBYADDR) || defined(HAS_GETHOSTENT)
     I32 which = op->op_type;
     register char **elem;
     register SV *sv;
@@ -3687,7 +3687,7 @@ PP(pp_ghostent)
 
 PP(pp_gnbyname)
 {
-#ifdef HAS_SOCKET
+#ifdef HAS_GETNETBYNAME
     return pp_gnetent(ARGS);
 #else
     DIE(no_sock_func, "getnetbyname");
@@ -3696,7 +3696,7 @@ PP(pp_gnbyname)
 
 PP(pp_gnbyaddr)
 {
-#ifdef HAS_SOCKET
+#ifdef HAS_GETNETBYADDR
     return pp_gnetent(ARGS);
 #else
     DIE(no_sock_func, "getnetbyaddr");
@@ -3706,7 +3706,7 @@ PP(pp_gnbyaddr)
 PP(pp_gnetent)
 {
     djSP;
-#ifdef HAS_SOCKET
+#if defined(HAS_GETNETBYNAME) || defined(HAS_GETNETBYADDR) || defined(HAS_GETNETENT)
     I32 which = op->op_type;
     register char **elem;
     register SV *sv;
@@ -3762,7 +3762,7 @@ PP(pp_gnetent)
 
 PP(pp_gpbyname)
 {
-#ifdef HAS_SOCKET
+#ifdef HAS_GETPROTOBYNAME
     return pp_gprotoent(ARGS);
 #else
     DIE(no_sock_func, "getprotobyname");
@@ -3771,7 +3771,7 @@ PP(pp_gpbyname)
 
 PP(pp_gpbynumber)
 {
-#ifdef HAS_SOCKET
+#ifdef HAS_GETPROTOBYNUMBER
     return pp_gprotoent(ARGS);
 #else
     DIE(no_sock_func, "getprotobynumber");
@@ -3781,7 +3781,7 @@ PP(pp_gpbynumber)
 PP(pp_gprotoent)
 {
     djSP;
-#ifdef HAS_SOCKET
+#if defined(HAS_GETPROTOBYNAME) || defined(HAS_GETPROTOBYNUMBER) || defined(HAS_GETPROTOENT)
     I32 which = op->op_type;
     register char **elem;
     register SV *sv;  
@@ -3834,7 +3834,7 @@ PP(pp_gprotoent)
 
 PP(pp_gsbyname)
 {
-#ifdef HAS_SOCKET
+#ifdef HAS_GETSERVICEBYNAME
     return pp_gservent(ARGS);
 #else
     DIE(no_sock_func, "getservbyname");
@@ -3843,7 +3843,7 @@ PP(pp_gsbyname)
 
 PP(pp_gsbyport)
 {
-#ifdef HAS_SOCKET
+#ifdef HAS_GETSERVICEBYPORT
     return pp_gservent(ARGS);
 #else
     DIE(no_sock_func, "getservbyport");
@@ -3853,7 +3853,7 @@ PP(pp_gsbyport)
 PP(pp_gservent)
 {
     djSP;
-#ifdef HAS_SOCKET
+#if defined(HAS_GETSERVBYNAME) || defined(HAS_GETSERVBYPORT) || defined(HAS_GETSERVENT)
     I32 which = op->op_type;
     register char **elem;
     register SV *sv;
@@ -3932,7 +3932,7 @@ PP(pp_gservent)
 PP(pp_shostent)
 {
     djSP;
-#ifdef HAS_SOCKET
+#ifdef HAS_SETHOSTENT
     sethostent(TOPi);
     RETSETYES;
 #else
@@ -3943,7 +3943,7 @@ PP(pp_shostent)
 PP(pp_snetent)
 {
     djSP;
-#ifdef HAS_SOCKET
+#ifdef HAS_SETNETENT
     setnetent(TOPi);
     RETSETYES;
 #else
@@ -3954,7 +3954,7 @@ PP(pp_snetent)
 PP(pp_sprotoent)
 {
     djSP;
-#ifdef HAS_SOCKET
+#ifdef HAS_SETPROTOENT
     setprotoent(TOPi);
     RETSETYES;
 #else
@@ -3965,7 +3965,7 @@ PP(pp_sprotoent)
 PP(pp_sservent)
 {
     djSP;
-#ifdef HAS_SOCKET
+#ifdef HAS_SETSERVENT
     setservent(TOPi);
     RETSETYES;
 #else
@@ -3976,7 +3976,7 @@ PP(pp_sservent)
 PP(pp_ehostent)
 {
     djSP;
-#ifdef HAS_SOCKET
+#ifdef HAS_ENDHOSTENT
     endhostent();
     EXTEND(sp,1);
     RETPUSHYES;
@@ -3988,7 +3988,7 @@ PP(pp_ehostent)
 PP(pp_enetent)
 {
     djSP;
-#ifdef HAS_SOCKET
+#ifdef HAS_ENDNETENT
     endnetent();
     EXTEND(sp,1);
     RETPUSHYES;
@@ -4000,7 +4000,7 @@ PP(pp_enetent)
 PP(pp_eprotoent)
 {
     djSP;
-#ifdef HAS_SOCKET
+#ifdef HAS_ENDPROTOENT
     endprotoent();
     EXTEND(sp,1);
     RETPUSHYES;
@@ -4012,7 +4012,7 @@ PP(pp_eprotoent)
 PP(pp_eservent)
 {
     djSP;
-#ifdef HAS_SOCKET
+#ifdef HAS_ENDSERVENT
     endservent();
     EXTEND(sp,1);
     RETPUSHYES;

@@ -2155,7 +2155,11 @@ sv_compile_2op(SV *sv, OP** startop, char *code, AV** avp)
     safestr = savepv(tmpbuf);
     SAVEDELETE(defstash, safestr, strlen(safestr));
     SAVEI32(hints);
+#ifdef OP_IN_REGISTER
+    opsave = op;
+#else
     SAVEPPTR(op);
+#endif
     hints = 0;
 
     op = &dummy;
@@ -2172,6 +2176,9 @@ sv_compile_2op(SV *sv, OP** startop, char *code, AV** avp)
     lex_end();
     *avp = (AV*)SvREFCNT_inc(comppad);
     LEAVE;
+#ifdef OP_IN_REGISTER
+    op = opsave;
+#endif
     return rop;
 }
 
@@ -3559,9 +3566,10 @@ qsortsv(
             if (j != i) {
                /* Looks like we really need to move some things
                */
+	       int k;
 	       temp = array[i];
-	       for (--i; i >= j; --i)
-		  array[i + 1] = array[i];
+	       for (k = i - 1; k >= j; --k)
+		  array[k + 1] = array[k];
                array[j] = temp;
             }
          }

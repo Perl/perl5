@@ -3333,7 +3333,10 @@ newSUB(I32 floor, OP *o, OP *proto, OP *block)
 	    if (curstack == sortstack && sortcop == CvSTART(cv))
 		croak("Can't redefine active sort subroutine %s", name);
 	    const_sv = cv_const_sv(cv);
-	    if (const_sv || dowarn) {
+	    if (const_sv || dowarn && !(CvGV(cv) && GvSTASH(CvGV(cv))
+					&& HvNAME(GvSTASH(CvGV(cv)))
+					&& strEQ(HvNAME(GvSTASH(CvGV(cv))),
+						 "autouse"))) {
 		line_t oldline = curcop->cop_line;
 		curcop->cop_line = copline;
 		warn(const_sv ? "Constant subroutine %s redefined"
@@ -3528,7 +3531,9 @@ newXS(char *name, void (*subaddr) (CV *), char *filename)
 	}
 	else if (CvROOT(cv) || CvXSUB(cv) || GvASSUMECV(gv)) {
 	    /* already defined (or promised) */
-	    if (dowarn) {
+	    if (dowarn && !(CvGV(cv) && GvSTASH(CvGV(cv))
+			    && HvNAME(GvSTASH(CvGV(cv)))
+			    && strEQ(HvNAME(GvSTASH(CvGV(cv))), "autouse"))) {
 		line_t oldline = curcop->cop_line;
 		curcop->cop_line = copline;
 		warn("Subroutine %s redefined",name);
@@ -4257,7 +4262,7 @@ ck_index(OP *o)
     if (o->op_flags & OPf_KIDS) {
 	OP *kid = cLISTOPo->op_first->op_sibling;	/* get past pushmark */
 	if (kid && kid->op_type == OP_CONST)
-	    fbm_compile(((SVOP*)kid)->op_sv);
+	    fbm_compile(((SVOP*)kid)->op_sv, 0);
     }
     return ck_fun(o);
 }

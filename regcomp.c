@@ -131,6 +131,7 @@ static void regset _((char *, I32));
 static void regtail _((regnode *, regnode *));
 static char* regwhite _((char *, char *));
 static char* nextchar _((void));
+static void re_croak2 _((const char* pat1,const char* pat2,...)) __attribute__((noreturn));
 
 static U32 regseen;
 static I32 seen_zerolen;
@@ -811,6 +812,11 @@ pregcomp(char *exp, char *xend, PMOP *pm)
     r->regstclass = NULL;
     r->naughty = regnaughty >= 10;	/* Probably an expensive pattern. */
     scan = r->program + 1;		/* First BRANCH. */
+
+    /* XXXX To minimize changes to RE engine we always allocate
+       3-units-long substrs field. */
+    Newz(1004, r->substrs, 1, struct reg_substr_data);
+
     if (OP(scan) != BRANCH) {	/* Only one top-level choice. */
 	scan_data_t data;
 	I32 fake;
@@ -905,7 +911,7 @@ pregcomp(char *exp, char *xend, PMOP *pm)
 	    r->float_substr = data.longest_float;
 	    r->float_min_offset = data.offset_float_min;
 	    r->float_max_offset = data.offset_float_max;
-	    fbm_compile(r->float_substr);
+	    fbm_compile(r->float_substr, 0);
 	    BmUSEFUL(r->float_substr) = 100;
 	    if (data.flags & SF_FL_BEFORE_EOL /* Cannot have SEOL and MULTI */
 		&& (!(data.flags & SF_FL_BEFORE_MEOL)
@@ -925,7 +931,7 @@ pregcomp(char *exp, char *xend, PMOP *pm)
 		    || (regflags & PMf_MULTILINE)))) {
 	    r->anchored_substr = data.longest_fixed;
 	    r->anchored_offset = data.offset_fixed;
-	    fbm_compile(r->anchored_substr);
+	    fbm_compile(r->anchored_substr, 0);
 	    BmUSEFUL(r->anchored_substr) = 100;
 	    if (data.flags & SF_FIX_BEFORE_EOL /* Cannot have SEOL and MULTI */
 		&& (!(data.flags & SF_FIX_BEFORE_MEOL)
@@ -2564,6 +2570,8 @@ pregfree(struct regexp *r)
 	Safefree(r->precomp);
     if (r->subbase)
 	Safefree(r->subbase);
+    if (r->substrs)
+	Safefree(r->substrs);
     if (r->anchored_substr)
 	SvREFCNT_dec(r->anchored_substr);
     if (r->float_substr)
@@ -2621,11 +2629,11 @@ regnext(register regnode *p)
 }
 
 #ifdef I_STDARG
-void	
+static void	
 re_croak2(const char* pat1,const char* pat2,...)
 #else
 /*VARARGS0*/
-void	
+static void	
 re_croak2(const char* pat1,const char* pat2, va_alist)
     const char* pat1;
     const char* pat2;

@@ -137,7 +137,7 @@ void	dump_op _((OP* arg));
 void	dump_pm _((PMOP* pm));
 void	dump_packsubs _((HV* stash));
 void	dump_sub _((GV* gv));
-void	fbm_compile _((SV* sv));
+void	fbm_compile _((SV* sv, U32 flags));
 char*	fbm_instr _((unsigned char* big, unsigned char* bigend, SV* littlesv));
 #ifdef USE_THREADS
 PADOFFSET	find_threadsv _((char *name));

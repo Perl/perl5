@@ -1,3 +1,4 @@
+#ifndef __PATCHLEVEL_H_INCLUDED__
 #define PATCHLEVEL 4
 #define SUBVERSION 61
 
@@ -44,3 +45,6 @@ static	char	*local_patches[] = {
 /* Initial space prevents this variable from being inserted in config.sh  */
 #  define	LOCAL_PATCH_COUNT	\
 	(sizeof(local_patches)/sizeof(local_patches[0])-2)
+
+#define __PATCHLEVEL_H_INCLUDED__
+#endif

@@ -447,5 +447,3 @@ const static char reg_off_by_arg[] = {
 #ifdef DEBUGGING
 extern char *colors[4];
 #endif 
-
-void	re_croak2 _((const char* pat1,const char* pat2,...)) __attribute__((noreturn));

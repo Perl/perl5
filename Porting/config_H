@@ -17,7 +17,7 @@
 /*
  * Package name      : perl5
  * Source directory  : .
- * Configuration time: Tue Feb 24 12:39:16 EST 1998
+ * Configuration time: Tue Mar  3 11:39:44 EST 1998
  * Configured by     : doughera
  * Target system     : linux fractal 2.0.33 #1 tue feb 3 10:11:46 est 1998 i686 unknown 
  */
@@ -242,12 +242,6 @@
  *	groups are probably not supported.
  */
 #define HAS_GETGROUPS		/**/
-
-/* HAS_GETHOSTENT:
- *	This symbol, if defined, indicates that the gethostent routine is
- *	available to lookup host names in some data base or other.
- */
-#define HAS_GETHOSTENT		/**/
 
 /* HAS_UNAME:
  *	This symbol, if defined, indicates that the C program may use the
@@ -1471,6 +1465,12 @@
 #define HAS_VPRINTF	/**/
 /*#define USE_CHAR_VSPRINTF 	/ **/
 
+/* DOUBLESIZE:
+ *	This symbol contains the size of a double, so that the C preprocessor
+ *	can make decisions based on it.
+ */
+#define DOUBLESIZE 8		/**/
+
 /* I_TIME:
  *	This symbol, if defined, indicates to the C program that it should
  *	include <time.h>.
@@ -1530,6 +1530,14 @@
 #define RD_NODATA -1
 #define EOF_NONBLOCK
 
+/* PTRSIZE:
+ *	This symbol contains the size of a pointer, so that the C preprocessor
+ *	can make decisions based on it.  It will be sizeof(void *) if
+ *	the compiler supports (void *); otherwise it will be
+ *	sizeof(char *).
+ */
+#define PTRSIZE 4		/**/
+
 /* RANDBITS:
  *	This symbol contains the number of bits of random number the rand()
  *	function produces.  Usual values are 15, 16, and 31.
@@ -1566,8 +1574,8 @@
  *	This symbol contains the ~name expanded version of ARCHLIB, to be used
  *	in programs that are not prepared to deal with ~ expansion at run-time.
  */
-#define ARCHLIB "/opt/perl/lib/i686-linux-thread/5.00460"		/**/
-#define ARCHLIB_EXP "/opt/perl/lib/i686-linux-thread/5.00460"		/**/
+#define ARCHLIB "/opt/perl/lib/i686-linux-thread/5.00461"		/**/
+#define ARCHLIB_EXP "/opt/perl/lib/i686-linux-thread/5.00461"		/**/
 
 /* CAT2:
  *	This macro catenates 2 tokens together.
@@ -1595,12 +1603,70 @@
  */
 #define CSH "/bin/csh"		/**/
 
+/* HAS_GETHOSTBYADDR:
+ *	This symbol, if defined, indicates that the gethostbyaddr() routine is
+ *	available to look up hosts by their IP addresses.
+ */
+#define HAS_GETHOSTBYADDR		/**/
+
+/* HAS_GETHOSTBYNAME:
+ *	This symbol, if defined, indicates that the gethostbyname() routine is
+ *	available to look up host names in some data base or other.
+ */
+#define HAS_GETHOSTBYNAME		/**/
+
+/* HAS_GETHOSTENT:
+ *	This symbol, if defined, indicates that the gethostent() routine is
+ *	available to look up host names in some data base or another.
+ */
+#define HAS_GETHOSTENT		/**/
+
+/* HAS_GETNETBYADDR:
+ *	This symbol, if defined, indicates that the getnetbyaddr() routine is
+ *	available to look up networks by their IP addresses.
+ */
+#define HAS_GETNETBYADDR		/**/
+
+/* HAS_GETNETBYNAME:
+ *	This symbol, if defined, indicates that the getnetbyname() routine is
+ *	available to look up networks by their names.
+ */
+#define HAS_GETNETBYNAME		/**/
+
+/* HAS_GETPROTOBYNAME:
+ *	This symbol, if defined, indicates that the getprotobyname()
+ *	routine is available to look up protocols by their name.
+ */
+/* HAS_GETPROTOBYNUMBER:
+ *	This symbol, if defined, indicates that the getprotobynumber()
+ *	routine is available to look up protocols by their number.
+ */
+#define HAS_GETPROTOBYNAME		/**/
+#define HAS_GETPROTOBYNUMBER		/**/
+
+/* HAS_GETSERVBYNAME:
+ *	This symbol, if defined, indicates that the getservbyname()
+ *	routine is available to look up services by their name.
+ */
+/* HAS_GETSERVBYPORT:
+ *	This symbol, if defined, indicates that the getservbyport()
+ *	routine is available to look up services by their port.
+ */
+#define HAS_GETSERVBYNAME		/**/
+#define HAS_GETSERVBYPORT		/**/
+
 /* HAS_SETGROUPS:
  *	This symbol, if defined, indicates that the setgroups() routine is
  *	available to set the list of process groups.  If unavailable, multiple
  *	groups are probably not supported.
  */
 #define HAS_SETGROUPS		/**/
+
+/* HAS_SETHOSTENT:
+ *	This symbol, if defined, indicates that the sethostent() routine is
+ *	available.
+ */
+#define HAS_SETHOSTENT		/**/
 
 /* Signal_t:
  *	This symbol's value is either "void" or "int", corresponding to the
@@ -1806,6 +1872,11 @@
  *	This symbol, if defined, indicates that Perl should
  *	be built to use threads.
  */
+/* OLD_PTHREADS_API:
+ *	This symbol, if defined, indicates that Perl should
+ *	be built to use the old draft POSIX threads API.
+ */
 #define	USE_THREADS		/**/
+/*#define	OLD_PTHREADS_API		/ **/
 
 #endif

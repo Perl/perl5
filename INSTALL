@@ -48,6 +48,26 @@ If there is a hint file for your system (in the hints/ directory) you
 should also read that hint file for specific information for your
 system.  (Unixware users should use the svr4.sh hint file.)
 
+=head1 NOTE:  This version is not binary compatible with Perl 5.004.
+
+For Perl 5.004 it was possible to be binary compatible with 5.003.
+Starting from Perl 5.004_50 this is no longer possible because there were
+many deep and far-reaching changes to the language internals.
+
+If you have dynamically loaded extensions that you built under perl
+5.003 or 5.004 and the so-called 'bincompat3' mode (the default mode)
+and that you wish to continue to use with perl 5.005, you may need to
+reinstall the extensions.  If you wish to continue to support both 5.004
+and 5.005 on your system, you will have to move the 5.004 extensions
+over to the 5.004 architecture-dependent library.  See the discussion
+below on L<"Coexistence with earlier versions of perl5.">
+
+The standard extensions supplied with Perl will be handled automatically.
+
+In a related issue, old extensions may possibly be affected by the
+changes in the Perl language in the current release.  Please see
+pod/perldelta.pod for a description of what's changed.
+
 =head1 Space Requirements
 
 The complete perl5 source tree takes up about 7 MB of disk space.  The
@@ -149,32 +169,31 @@ For my Solaris system, I usually use
 If you prefer the GNU-style configure command line interface, you can
 use the supplied configure command, e.g.
 
-	CC=gcc ./configure
+	CC=gcc ./configure.gnu
 
 The configure script emulates a few of the more common configure
 options.  Try
 
-	./configure --help
+	./configure.gnu --help
 
 for a listing.
 
 Cross compiling is not supported.
 
-For systems that do not distinguish the files "Configure" and
-"configure", Perl includes a copy of configure named
-configure.gnu.
+(The file is called configugre.gnu to avoid problems on systems
+that would not distinguish the files "Configure" and "configure".)
 
 =head2 Extensions
 
 By default, Configure will offer to build every extension which appears
 to be supported.  For example, Configure will offer to build GDBM_File
 only if it is able to find the gdbm library.  (See examples below.)
-DynaLoader, Fcntl, and IO are always built by default.  Configure does
-not contain code to test for POSIX compliance, so POSIX is always built
-by default as well.  If you wish to skip POSIX, you can set the
-Configure variable useposix=false either in a hint file or from the
-Configure command line.  Similarly, the Opcode extension is always built
-by default, but you can skip it by setting the Configure variable
+B, DynaLoader, Fcntl, IO, and attrs are always built by default.
+Configure does not contain code to test for POSIX compliance, so POSIX
+is always built by default as well.  If you wish to skip POSIX, you can
+set the Configure variable useposix=false either in a hint file or from
+the Configure command line.  Similarly, the Opcode extension is always
+built by default, but you can skip it by setting the Configure variable
 useopcode=false either in a hint file for from the command line.
 
 You can learn more about each of these extensions by consulting the
@@ -188,6 +207,7 @@ version.  (Configure will suggest this as the default.)
 In summary, here are the Configure command-line variables you can set
 to turn off each extension:
 
+    B			(Always included by default)
     DB_File		i_db
     DynaLoader		(Must always be included as a static extension)
     Fcntl		(Always included by default)
@@ -199,6 +219,8 @@ to turn off each extension:
     SDBM_File		(Always included by default)
     Opcode		useopcode
     Socket		d_socket
+    Threads		usethreads
+    attrs		(Always included by default)
 
 Thus to skip the NDBM_File extension, you can use
 
@@ -210,10 +232,9 @@ library.
 Of course, you may always run Configure interactively and select only
 the extensions you want.
 
-Note:  The DB_File module will only work with version 1.x of
-Berkeley DB.  Once Berkeley DB version 2 is released, DB_File will be
-upgraded to work with it.  Configure will automatically detect this
-for you and refuse to try to build DB_File with version 2.
+Note:  The DB_File module will only work with version 1.x of Berkeley
+DB or newer releases of version 2.  Configure will automatically detect
+this for you and refuse to try to build DB_File with version 2.
 
 Finally, if you have dynamic loading (most modern Unix systems do)
 remember that these extensions do not increase the size of your perl
@@ -363,12 +384,12 @@ above.
 
 The  directories site_perl and site_perl/archname are empty, but are
 intended to be used for installing local or site-wide extensions.  Perl
-will automatically look in these directories. 
+will automatically look in these directories.
 
 In order to support using things like #!/usr/local/bin/perl5.004 after
 a later version is released, architecture-dependent libraries are
 stored in a version-specific directory, such as
-/usr/local/lib/perl5/archname/5.004/.  
+/usr/local/lib/perl5/archname/5.004/.
 
 Again, these are just the defaults, and can be changed as you run
 Configure.
@@ -410,6 +431,11 @@ Then, you can Configure and install in the usual way:
     make test
     make install
 
+Beware, though, that if you go to try to install new add-on
+extensions, they too will get installed in under '/tmp/perl5' if you
+follow this example.  The next section shows one way of dealing with
+that problem.
+
 =head2 Creating an installable tar archive
 
 If you need to install perl on many identical systems, it is
@@ -431,6 +457,15 @@ installed on multiple systems.  Here's one way to do that:
     cd /usr/local  # Or wherever you specified as $prefix
     tar xvf perl5-archive.tar
 
+=head2 Site-wide "Policy" settings
+
+After Configure runs, it stores a number of common site-wide "policy"
+answers (such as installation directories and the local perl contact
+person) in the Policy.sh file.  If you want to build perl on another
+system using the same policy defaults, simply copy the Policy.sh file
+to the new system and Configure will use it along with the appropriate
+hint file for your system.
+
 =head2 Configure-time Options
 
 There are several different ways to Configure and build perl for your
@@ -438,30 +473,17 @@ system.  For most users, the defaults are sensible and will work.
 Some users, however, may wish to further customize perl.  Here are
 some of the main things you can change.
 
-=head2 Binary Compatibility With Earlier Versions of Perl 5
+=head2 Threads
 
-For Perl 5.004 it was possible to be binary compatible with 5.003.
-Starting from Perl 5.005 this is no more possible because there were
-many deep and far-reaching changes to the language internals.
+On some platforms, perl5.005 can be compiled to use threads.  To
+enable this, read the file README.threads, and then try
 
-If you have dynamically loaded extensions that you built under perl
-5.003 or 5.004 and the so-called 'bincompat3' mode (the default mode)
-and that you wish to continue to use with perl 5.005, you may need to
-reinstall the extensions.
+	sh Configure -Dusethreads
 
-Background: starting with Perl 5.003, all functions in the Perl C
-source code have been protected by default by the prefix Perl_ (or
-perl_) so that you may link with third-party libraries without fear of
-namespace collisions.  This change broke compatibility with version
-5.002, so installing 5.003 or 5.004 over 5.002 or earlier will force
-you to re-build and install all of your dynamically loadable
-extensions.  (The standard extensions supplied with Perl are handled
-automatically).  You can turn off this namespace protection by adding
--DNO_EMBED to your ccflags variable in config.sh.
+Currently, you need to specify -Dusethreads on the Configure command
+line so that the hint files can make appropriate adjustments.
 
-In a related issue, old extensions may possibly be affected by the
-changes in the Perl language in the current release.  Please see
-pod/perldelta.pod for a description of what's changed.
+The default is to compile without thread support.
 
 =head2 Selecting File IO mechanisms
 
@@ -633,7 +655,7 @@ the malloc function on your system.
 
 The perl source is shipped with a version of malloc that is very fast
 but somewhat wasteful of space.  On the other hand, your system's
-malloc() function is probably a bit slower but also a bit more frugal.
+malloc() function may be a bit slower but also a bit more frugal.
 
 For many uses, speed is probably the most important consideration, so
 the default behavior (for most systems) is to use the malloc supplied
@@ -1270,37 +1292,63 @@ program even if the Perl source is no longer available.
 
 =head1 Coexistence with earlier versions of perl5
 
-You can safely install the current version of perl5 and still run scripts
-under the old binaries for versions 5.003 and later ONLY.  Instead of
-starting your script with #!/usr/local/bin/perl, just start it with
-#!/usr/local/bin/perl5.003 (or whatever version you want to run.)
-If you want to retain a version of Perl 5 prior to 5.003, you'll
-need to install the current version in a separate directory tree,
-since some of the architecture-independent library files have changed
-in incompatible ways.
+WARNING:  The upgrade from 5.004_0x to 5.005 is going to be a bit
+tricky.  See L<"Upgrading from 5.004 to 5.005">  below.
 
-The old architecture-dependent files are stored in a version-specific
-directory (such as /usr/local/lib/perl5/sun4-sunos/5.003) so that they
-will still be accessible even after a later version is installed.
-(Note:  Perl 5.000 and 5.001 did not put their architecture-dependent
-libraries in a version-specific directory.  They are simply in
-/usr/local/lib/perl5/$archname.  If you will not be using 5.000 or
-5.001, you may safely remove those files.)
+In general, you can usually safely upgrade from one version of Perl (e.g.
+5.004_04) to another similar version (e.g. 5.004_05) without re-compiling
+all of your add-on extensions.  You can also safely leave the old version
+around in case the new version causes you problems for some reason.
+For example, if you want to be sure that your script continues to run
+with 5.004_04, simplly replace the '#!/usr/local/bin/perl' line at the
+top of the script with the particular version you want to run, e.g.
+#!/usr/local/bin/perl5.00404.
 
-In general, the standard library files in /usr/local/lib/perl5 should
-be usable by all versions of perl5.  However, the diagnostics.pm module
-uses the /usr/local/lib/perl5/pod/perldiag.pod documentation file, so
-the C<use diagnostics;> pragma and the splain script will only identify
-and explain any warnings or errors that the most recently-installed
-version of perl can generate.
+(If you are upgrading from 5.002 or earlier, beware that some of the
+standard library files have changed in incompatible ways, so you are
+probably better off starting with a fresh installation.)
 
-Most extensions will probably not need to be recompiled to use with a newer
-version of perl.  If you do run into problems, and you want to continue
-to use the old version of perl along with your extension, simply move
+The standard library files in /usr/local/lib/perl5 should be usable by
+all versions of perl5 after 5.002.  An exception is the diagnostics.pm
+module.  Since that module uses the /usr/local/lib/perl5/pod/perldiag.pod
+documentation file, the C<use diagnostics;> pragma and the splain script
+will only identify and explain any warnings or errors that the most
+recently-installed version of perl can generate.  Usually, this is not
+a problem.
+
+Most extensions will probably not need to be recompiled to use
+with a newer version of perl.   Here is how it is supposed to work.
+(These examples assume you accept all the Configure defaults.)
+
+The directories searched by version 5.004_05 will be
+
+	/usr/local/lib/perl5/archname/5.00405
+	/usr/local/lib/perl5/
+	/usr/local/lib/perl5/site_perl/archname
+	/usr/local/lib/perl5/site_perl
+
+while the directories searched by version 5.004_04 are
+
+	/usr/local/lib/perl5/archname/5.00404
+	/usr/local/lib/perl5/
+	/usr/local/lib/perl5/site_perl/archname
+	/usr/local/lib/perl5/site_perl
+
+When you install an add-on extension, it gets installed into
+/usr/local/lib/perl5/site_perl/archname (if it is architecture-specific.)
+This directory is deliberately NOT version-specific so that both 5.004_04
+and 5.004_05 can use the extension.
+
+However, if you do run into problems, and you want to continue to
+use the old version of perl along with your extension, simply move
 those extension files to the appropriate version directory, such as
-/usr/local/lib/perl/archname/5.003.  Then Perl 5.003 will find your
-files in the 5.003 directory, and newer versions of perl will find your
-newer extension in the site_perl directory.
+/usr/local/lib/perl5/archname/5.00404.  Then use your newer version of
+perl to rebuild and re-install the extension into site_perl.  This way,
+Perl 5.004_04 will find your files in the 5.00404 directory, and
+newer versions of perl will find your newer extension in the site_perl
+directory.
+
+=head2 Maintaining completely separate versions
 
 Many users prefer to keep all versions of perl in completely
 separate directories.  One convenient way to do this is by
@@ -1312,10 +1360,35 @@ and adding /opt/perl5.004/bin to the shell PATH variable.  Such users
 may also wish to add a symbolic link /usr/local/bin/perl so that
 scripts can still start with #!/usr/local/bin/perl.
 
+Others might share a common directory for maintenance sub-versions
+(e.g. 5.004 for all 5.004_0x versions), but change directory with
+each major version.
+
 If you are installing a development subversion, you probably ought to
 seriously consider using a separate directory, since development
 subversions may not have all the compatibility wrinkles ironed out
 yet.
+
+=head2 Upgrading from 5.004 to 5.005
+
+Extensions compiled with versions of perl prior to 5.004_50 will need
+to be recompiled to be used with 5.004_50 and later.
+
+If you wish to continue using those extensions under 5.004_04, for
+example, then you need to move those extensions from their current
+direcotries, which are something like
+
+	/usr/local/lib/perl5/site_perl/
+	/usr/local/lib/perl5/site_perl/archname
+
+to the version-specific directory such as
+
+	/usr/local/lib/perl5/archname/5.00404
+
+as described above.
+
+Once you have moved the 5.00404 versions of the extensions out of the
+way, you may recompile and reinstall with 5.005.
 
 =head1 Coexistence with perl4
 
@@ -1436,4 +1509,4 @@ above.
 
 =head1 LAST MODIFIED
 
-$Id: INSTALL,v 1.28 1997/10/10 16:50:59 doughera Released $
+$Id: INSTALL,v 1.31 1998/03/03 18:08:52 doughera Released $

@@ -891,7 +891,7 @@ mem_collxfrm(const char *s, STRLEN len, STRLEN *xlen)
 #endif /* USE_LOCALE_COLLATE */
 
 void
-fbm_compile(SV *sv)
+fbm_compile(SV *sv, U32 flags /* not used yet */)
 {
     register unsigned char *s;
     register unsigned char *table;
