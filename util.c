@@ -3233,7 +3233,7 @@ Perl_new_struct_thread(pTHX_ struct perl_thread *t)
     Zero(thr, 1, struct perl_thread);
 #endif
 
-    PL_protect = FUNC_NAME_TO_PTR(Perl_default_protect);
+    PL_protect = MEMBER_TO_FPTR(Perl_default_protect);
 
     thr->oursv = sv;
     init_stacks();
@@ -3266,11 +3266,11 @@ Perl_new_struct_thread(pTHX_ struct perl_thread *t)
 
     PL_statname = NEWSV(66,0);
     PL_maxscream = -1;
-    PL_regcompp = FUNC_NAME_TO_PTR(Perl_pregcomp);
-    PL_regexecp = FUNC_NAME_TO_PTR(Perl_regexec_flags);
-    PL_regint_start = FUNC_NAME_TO_PTR(Perl_re_intuit_start);
-    PL_regint_string = FUNC_NAME_TO_PTR(Perl_re_intuit_string);
-    PL_regfree = FUNC_NAME_TO_PTR(Perl_pregfree);
+    PL_regcompp = MEMBER_TO_FPTR(Perl_pregcomp);
+    PL_regexecp = MEMBER_TO_FPTR(Perl_regexec_flags);
+    PL_regint_start = MEMBER_TO_FPTR(Perl_re_intuit_start);
+    PL_regint_string = MEMBER_TO_FPTR(Perl_re_intuit_string);
+    PL_regfree = MEMBER_TO_FPTR(Perl_pregfree);
     PL_regindent = 0;
     PL_reginterp_cnt = 0;
     PL_lastscream = Nullsv;

@@ -677,7 +677,7 @@ Perl_op_free(pTHX_ OP *o)
 #endif /* USE_THREADS */
     default:
 	if (!(o->op_flags & OPf_REF)
-	    || (PL_check[o->op_type] != FUNC_NAME_TO_PTR(Perl_ck_ftst)))
+	    || (PL_check[o->op_type] != MEMBER_TO_FPTR(Perl_ck_ftst)))
 	    break;
 	/* FALL THROUGH */
     case OP_GVSV:

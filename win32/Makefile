@@ -138,10 +138,7 @@ CCLIBDIR	= $(CCHOME)\lib
 # We don't enable this by default because we want the modules to get fixed
 # instead of clinging to shortcuts like this one.
 #
-# Don't enable -DPERL_IMPLICIT_CONTEXT if you don't know what it is. :-)
-#
 #BUILDOPT	= $(BUILDOPT) -DPERL_POLLUTE
-#BUILDOPT	= $(BUILDOPT) -DPERL_IMPLICIT_CONTEXT
 
 #
 # specify semicolon-separated list of extra directories that modules will
@@ -184,6 +181,10 @@ USE_THREADS	= undef
 
 !IF "$(USE_MULTI)" == ""
 USE_MULTI	= undef
+!ENDIF
+
+!IF "$(USE_MULTI)$(USE_THREADS)$(USE_OBJECT)" != ""
+BUILDOPT	= $(BUILDOPT) -DPERL_IMPLICIT_CONTEXT
 !ENDIF
 
 !IF "$(PROCESSOR_ARCHITECTURE)" == ""

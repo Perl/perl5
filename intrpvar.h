@@ -226,7 +226,7 @@ PERLVAR(Ihe_root,	HE *)		/* free he list--shared by interpreters */
 PERLVAR(Inice_chunk,	char *)		/* a nice chunk of memory to reuse */
 PERLVAR(Inice_chunk_size,	U32)	/* how nice the chunk of memory is */
 
-PERLVARI(Irunops,	runops_proc_t,	FUNC_NAME_TO_PTR(RUNOPS_DEFAULT))
+PERLVARI(Irunops,	runops_proc_t,	MEMBER_TO_FPTR(RUNOPS_DEFAULT))
 
 PERLVARA(Itokenbuf,256,	char)
 

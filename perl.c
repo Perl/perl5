@@ -110,7 +110,7 @@ perl_construct(pTHXx)
 	thr = init_main_thread();
 #endif /* USE_THREADS */
 
-	PL_protect = FUNC_NAME_TO_PTR(Perl_default_protect); /* for exceptions */
+	PL_protect = MEMBER_TO_FPTR(Perl_default_protect); /* for exceptions */
 
 	PL_curcop = &PL_compiling;	/* needed by ckWARN, right away */
 
@@ -626,7 +626,7 @@ setuid perl scripts securely.\n");
     oldscope = PL_scopestack_ix;
     PL_dowarn = G_WARN_OFF;
 
-    CALLPROTECT(aTHX_ &ret, FUNC_NAME_TO_PTR(S_parse_body), env, xsinit);
+    CALLPROTECT(aTHX_ &ret, MEMBER_TO_FPTR(S_parse_body), env, xsinit);
     switch (ret) {
     case 0:
 	return 0;
@@ -999,7 +999,7 @@ perl_run(pTHXx)
     oldscope = PL_scopestack_ix;
 
  redo_body:
-    CALLPROTECT(aTHX_ &ret, FUNC_NAME_TO_PTR(S_run_body), oldscope);
+    CALLPROTECT(aTHX_ &ret, MEMBER_TO_FPTR(S_run_body), oldscope);
     switch (ret) {
     case 1:
 	cxstack_ix = -1;		/* start context stack again */
@@ -1254,7 +1254,7 @@ Perl_call_sv(pTHX_ SV *sv, I32 flags)
 	PL_markstack_ptr++;
 
   redo_body:
-	CALLPROTECT(aTHX_ &ret, FUNC_NAME_TO_PTR(S_call_body), (OP*)&myop, FALSE);
+	CALLPROTECT(aTHX_ &ret, MEMBER_TO_FPTR(S_call_body), (OP*)&myop, FALSE);
 	switch (ret) {
 	case 0:
 	    retval = PL_stack_sp - (PL_stack_base + oldmark);
@@ -1376,7 +1376,7 @@ Perl_eval_sv(pTHX_ SV *sv, I32 flags)
 	myop.op_flags |= OPf_SPECIAL;
 
  redo_body:
-    CALLPROTECT(aTHX_ &ret, FUNC_NAME_TO_PTR(S_call_body), (OP*)&myop, TRUE);
+    CALLPROTECT(aTHX_ &ret, MEMBER_TO_FPTR(S_call_body), (OP*)&myop, TRUE);
     switch (ret) {
     case 0:
 	retval = PL_stack_sp - (PL_stack_base + oldmark);
@@ -2936,11 +2936,11 @@ S_init_main_thread(pTHX)
     (void) find_threadsv("@");	/* Ensure $@ is initialised early */
 
     PL_maxscream = -1;
-    PL_regcompp = FUNC_NAME_TO_PTR(Perl_pregcomp);
-    PL_regexecp = FUNC_NAME_TO_PTR(Perl_regexec_flags);
-    PL_regint_start = FUNC_NAME_TO_PTR(Perl_re_intuit_start);
-    PL_regint_string = FUNC_NAME_TO_PTR(Perl_re_intuit_string);
-    PL_regfree = FUNC_NAME_TO_PTR(Perl_pregfree);
+    PL_regcompp = MEMBER_TO_FPTR(Perl_pregcomp);
+    PL_regexecp = MEMBER_TO_FPTR(Perl_regexec_flags);
+    PL_regint_start = MEMBER_TO_FPTR(Perl_re_intuit_start);
+    PL_regint_string = MEMBER_TO_FPTR(Perl_re_intuit_string);
+    PL_regfree = MEMBER_TO_FPTR(Perl_pregfree);
     PL_regindent = 0;
     PL_reginterp_cnt = 0;
 
@@ -2961,7 +2961,7 @@ Perl_call_list(pTHX_ I32 oldscope, AV *paramList)
     while (AvFILL(paramList) >= 0) {
 	cv = (CV*)av_shift(paramList);
 	SAVEFREESV(cv);
-	CALLPROTECT(aTHX_ &ret, FUNC_NAME_TO_PTR(S_call_list_body), cv);
+	CALLPROTECT(aTHX_ &ret, MEMBER_TO_FPTR(S_call_list_body), cv);
 	switch (ret) {
 	case 0:
 	    (void)SvPV(atsv, len);

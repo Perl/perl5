@@ -83,8 +83,7 @@
 	  save_delete(SOFT_CAST(HV*)(h), SOFT_CAST(char*)(k), (I32)(l))
 #define CALLDESTRUCTOR (*SSPOPDPTR)
 #define SAVEDESTRUCTOR(f,p) \
-	  save_destructor((DESTRUCTORFUNC_t)(FUNC_NAME_TO_PTR(f)),	\
-			  SOFT_CAST(void*)(p))
+	  save_destructor((DESTRUCTORFUNC_t)(f), SOFT_CAST(void*)(p))
 
 #define SAVESTACK_POS() \
     STMT_START {				\

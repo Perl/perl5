@@ -182,7 +182,7 @@ struct utsname {
 
 /* Borland is picky about a bare member function name used as its ptr */
 #ifdef PERL_OBJECT
-#define FUNC_NAME_TO_PTR(name)	&(name)
+#  define MEMBER_TO_FPTR(name)	&(name)
 #endif
 
 #endif
@@ -256,7 +256,7 @@ typedef long		gid_t;
 #define fcloseall	_fcloseall
 
 #ifdef PERL_OBJECT
-#define FUNC_NAME_TO_PTR(name)	&(name)
+#  define MEMBER_TO_FPTR(name)	&(name)
 #endif
 
 #ifndef _O_NOINHERIT

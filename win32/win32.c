@@ -66,6 +66,11 @@
 int _CRT_glob = 0;
 #endif
 
+#ifdef __BORLANDC__
+#  define _stat stat
+#  define _utimbuf utimbuf
+#endif
+
 #define EXECF_EXEC 1
 #define EXECF_SPAWN 2
 #define EXECF_SPAWN_NOWAIT 3
@@ -1551,9 +1556,9 @@ extern char *	des_fcrypt(const char *txt, const char *salt, char *cbuf);
 DllExport char *
 win32_crypt(const char *txt, const char *salt)
 {
+    dTHXo;
 #ifdef HAVE_DES_FCRYPT
     dTHR;
-    dTHXo;
     return des_fcrypt(txt, salt, crypt_buffer);
 #else
     die("The crypt() function is unimplemented due to excessive paranoia.");

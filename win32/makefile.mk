@@ -153,10 +153,7 @@ CCLIBDIR	*= $(CCHOME)\lib
 # We don't enable this by default because we want the modules to get fixed
 # instead of clinging to shortcuts like this one.
 #
-# Don't enable -DPERL_IMPLICIT_CONTEXT if you don't know what it is. :-)
-#
 #BUILDOPT	+= -DPERL_POLLUTE
-#BUILDOPT	+= -DPERL_IMPLICIT_CONTEXT
 
 #
 # specify semicolon-separated list of extra directories that modules will
@@ -174,7 +171,7 @@ EXTRALIBDIRS	*=
 # set this to your email address (perl will guess a value from
 # from your loginname and your hostname, which may not be right)
 #
-EMAIL		*= support@activestate.com
+#EMAIL		*=
 
 ##
 ## Build configuration ends.
@@ -199,6 +196,12 @@ PERL_MALLOC	*= undef
 
 USE_THREADS	*= undef
 USE_MULTI	*= undef
+
+
+.IF "$(USE_MULTI)$(USE_THREADS)$(USE_OBJECT)" != ""
+BUILDOPT	+= -DPERL_IMPLICIT_CONTEXT
+.ENDIF
+
 
 .IMPORT .IGNORE : PROCESSOR_ARCHITECTURE
 
@@ -639,12 +642,7 @@ X2P_OBJ		= $(X2P_SRC:db:+$(o))
 PERLDLL_OBJ	= $(CORE_OBJ)
 PERLEXE_OBJ	= perlmain$(o)
 
-.IF "$(USE_OBJECT)" != "define"
 PERLDLL_OBJ	+= $(WIN32_OBJ) $(DLL_OBJ)
-.ELSE
-PERLEXE_OBJ	+= $(WIN32_OBJ) $(DLL_OBJ)
-PERL95_OBJ	+= DynaLoadmt$(o)
-.ENDIF
 
 .IF "$(USE_SETARGV)" != ""
 SETARGV_OBJ	= setargv$(o)

@@ -294,17 +294,17 @@ S_visit(pTHX_ SVFUNC_t f)
 void
 Perl_sv_report_used(pTHX)
 {
-    visit(FUNC_NAME_TO_PTR(do_report_used));
+    visit(do_report_used);
 }
 
 void
 Perl_sv_clean_objs(pTHX)
 {
     PL_in_clean_objs = TRUE;
-    visit(FUNC_NAME_TO_PTR(do_clean_objs));
+    visit(do_clean_objs);
 #ifndef DISABLE_DESTRUCTOR_KLUDGE
     /* some barnacles may yet remain, clinging to typeglobs */
-    visit(FUNC_NAME_TO_PTR(do_clean_named_objs));
+    visit(do_clean_named_objs);
 #endif
     PL_in_clean_objs = FALSE;
 }
@@ -313,7 +313,7 @@ void
 Perl_sv_clean_all(pTHX)
 {
     PL_in_clean_all = TRUE;
-    visit(FUNC_NAME_TO_PTR(do_clean_all));
+    visit(do_clean_all);
     PL_in_clean_all = FALSE;
 }
 

@@ -1494,10 +1494,6 @@ typedef union any ANY;
 #  endif
 #endif
 
-#ifndef FUNC_NAME_TO_PTR
-#define FUNC_NAME_TO_PTR(name)		name
-#endif
-
 /* 
  * USE_THREADS needs to be after unixish.h as <pthread.h> includes
  * <sys/signal.h> which defines NSIG - which will stop inclusion of <signal.h>
@@ -1591,6 +1587,10 @@ typedef pthread_key_t	perl_key;
 #   define STATUS_CURRENT STATUS_POSIX
 #   define STATUS_ALL_SUCCESS	(PL_statusvalue = 0)
 #   define STATUS_ALL_FAILURE	(PL_statusvalue = 1)
+#endif
+
+#ifndef MEMBER_TO_FPTR
+#define MEMBER_TO_FPTR(name)		name
 #endif
 
 /* This defines a way to flush all output buffers.  This may be a
