@@ -88,6 +88,7 @@ AUTOLOAD {
 	}
     }
     my $save = $@;
+    local $!; # Do not munge the value. 
     eval { local $SIG{__DIE__}; require $filename };
     if ($@) {
 	if (substr($sub,-9) eq '::DESTROY') {
