@@ -420,6 +420,10 @@ C<REFCNT> (corresponding to the C function C<SvREFCNT>).
 
 =over 4
 
+=item is_empty
+
+This method returns TRUE if the GP field of the GV is NULL.
+
 =item NAME
 
 =item STASH

@@ -998,6 +998,14 @@ GvNAME(gv)
     CODE:
 	ST(0) = sv_2mortal(newSVpvn(GvNAME(gv), GvNAMELEN(gv)));
 
+bool
+is_empty(gv)
+        B::GV   gv
+    CODE:
+        RETVAL = GvGP(gv) == Null(GP*);
+    OUTPUT:
+        RETVAL
+
 B::HV
 GvSTASH(gv)
 	B::GV	gv

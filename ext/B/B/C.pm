@@ -391,9 +391,10 @@ sub B::NULL::save {
     return $sym if defined $sym;
 #   warn "Saving SVt_NULL SV\n"; # debug
     # debug
-    #if ($$sv == 0) {
-    #	warn "NULL::save for sv = 0 called from @{[(caller(1))[3]]}\n";
-    #}
+    if ($$sv == 0) {
+    	warn "NULL::save for sv = 0 called from @{[(caller(1))[3]]}\n";
+	return savesym($sv, "Nullsv /* XXX */");
+    }
     $svsect->add(sprintf("0, %u, 0x%x", $sv->REFCNT , $sv->FLAGS));
     return savesym($sv, sprintf("&sv_list[%d]", $svsect->index));
 }
@@ -764,24 +765,31 @@ sub B::GV::save {
 	$sym = savesym($gv, "gv_list[$ix]");
 	#warn sprintf("Saving GV 0x%x as $sym\n", $$gv); # debug
     }
+    my $is_empty = $gv->is_empty;
     my $gvname = $gv->NAME;
     my $name = cstring($gv->STASH->NAME . "::" . $gvname);
     #warn "GV name is $name\n"; # debug
-    my $egv = $gv->EGV;
     my $egvsym;
-    if ($$gv != $$egv) {
-	#warn(sprintf("EGV name is %s, saving it now\n",
-	#	     $egv->STASH->NAME . "::" . $egv->NAME)); # debug
-	$egvsym = $egv->save;
+    unless ($is_empty) {
+	my $egv = $gv->EGV;
+	if ($$gv != $$egv) {
+	    #warn(sprintf("EGV name is %s, saving it now\n",
+	    #	     $egv->STASH->NAME . "::" . $egv->NAME)); # debug
+	    $egvsym = $egv->save;
+	}
     }
     $init->add(qq[$sym = gv_fetchpv($name, TRUE, SVt_PV);],
 	       sprintf("SvFLAGS($sym) = 0x%x;", $gv->FLAGS),
-	       sprintf("GvFLAGS($sym) = 0x%x;", $gv->GvFLAGS),
-	       sprintf("GvLINE($sym) = %u;", $gv->LINE));
+	       sprintf("GvFLAGS($sym) = 0x%x;", $gv->GvFLAGS));
+    $init->add(sprintf("GvLINE($sym) = %u;", $gv->LINE)) unless $is_empty;
+
     # Shouldn't need to do save_magic since gv_fetchpv handles that
     #$gv->save_magic;
     my $refcnt = $gv->REFCNT + 1;
     $init->add(sprintf("SvREFCNT($sym) += %u;", $refcnt - 1)) if $refcnt > 1;
+
+    return $sym if $is_empty;
+
     my $gvrefcnt = $gv->GvREFCNT;
     if ($gvrefcnt > 1) {
 	$init->add(sprintf("GvREFCNT($sym) += %u;", $gvrefcnt - 1));
