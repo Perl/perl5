@@ -738,7 +738,7 @@ dynamic :: $self->{BASEEXT}.exp
 
     push(@m,"
 $self->{BASEEXT}.exp: Makefile.PL$extlib
-",'	$(PERL) "-I$(PERL_LIB)" -e \'use ExtUtils::Mksymlists; ',
+", qq[\t\$(PERL) "-I\$(PERL_LIB)" -e 'use ExtUtils::Mksymlists; ],
         'Mksymlists("NAME" => "',$self->{NAME},'", "DL_FUNCS" => ',
 	neatvalue($funcs),', "DL_VARS" => ', neatvalue($vars), ');\'
 ');
@@ -849,8 +849,8 @@ realclean purge ::  clean
     my(@otherfiles) = ($self->{MAKEFILE},
 		       "$self->{MAKEFILE}.old"); # Makefiles last
     push(@otherfiles, patternify($attribs{FILES})) if $attribs{FILES};
-    push(@m, "	\$(RM_RF) @otherfiles\n") if @otherfiles;
-    push(@m, "	$attribs{POSTOP}\n")       if $attribs{POSTOP};
+    push(@m, "\t\$(RM_RF) @otherfiles\n") if @otherfiles;
+    push(@m, "\t$attribs{POSTOP}\n")       if $attribs{POSTOP};
     join("", @m);
 }
 
@@ -866,7 +866,7 @@ sub rulez {
     }
     qq'
 install install_static install_dynamic :: 
-	\$(MACPERL_SRC)PerlInstall -l \$(PERL_LIB)
+\t\$(MACPERL_SRC)PerlInstall -l \$(PERL_LIB)
 
 .INCLUDE : \$(MACPERL_SRC)BulkBuildRules.mk
 ';
@@ -895,10 +895,10 @@ sub processPL {
 	foreach $target (@$list) {
 	push @m, "
 ProcessPL :: $target
-	$self->{NOECHO}\$(NOOP)
+\t$self->{NOECHO}\$(NOOP)
 
 $target :: $plfile
-	\$(PERL) -I\$(MACPERL_LIB) -I\$(PERL_LIB) $plfile $target
+\t\$(PERL) -I\$(MACPERL_LIB) -I\$(PERL_LIB) $plfile $target
 ";
 	}
     }
