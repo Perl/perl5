@@ -2655,6 +2655,8 @@ Perl_sv_setsv(pTHX_ SV *dstr, register SV *sstr)
 	    *SvEND(dstr) = '\0';
 	    (void)SvPOK_only(dstr);
 	}
+	if (SvUTF8(sstr))
+	    SvUTF8_on(dstr);
 	/*SUPPRESS 560*/
 	if (sflags & SVp_NOK) {
 	    SvNOK_on(dstr);
@@ -6710,7 +6712,7 @@ perl_clone_using(PerlInterpreter *proto_perl, UV flags,
 
     /* switches */
     PL_minus_c		= proto_perl->Iminus_c;
-    Copy(proto_perl->Ipatchlevel, PL_patchlevel, 10, char);
+    PL_patchlevel	= sv_dup_inc(proto_perl->Ipatchlevel);
     PL_localpatches	= proto_perl->Ilocalpatches;
     PL_splitstr		= proto_perl->Isplitstr;
     PL_preprocess	= proto_perl->Ipreprocess;
@@ -6850,7 +6852,6 @@ perl_clone_using(PerlInterpreter *proto_perl, UV flags,
     /* more statics moved here */
     PL_generation	= proto_perl->Igeneration;
     PL_DBcv		= cv_dup(proto_perl->IDBcv);
-    PL_archpat_auto	= SAVEPV(proto_perl->Iarchpat_auto);
 
     PL_in_clean_objs	= proto_perl->Iin_clean_objs;
     PL_in_clean_all	= proto_perl->Iin_clean_all;

@@ -803,13 +803,12 @@ S_force_version(pTHX_ char *s)
 
     s = skipspace(s);
 
-    /* default VERSION number -- GBARR */
-
-    if(isDIGIT(*s)) {
-        char *d;
-        int c;
-        for( d=s, c = 1; isDIGIT(*d) || *d == '_' || (*d == '.' && c--); d++);
-        if((*d == ';' || isSPACE(*d)) && *(skipspace(d)) != ',') {
+    if (isDIGIT(*s) || (*s == 'v' && isDIGIT(s[1]))) {
+        char *d = s;
+	if (*d == 'v')
+	    d++;
+        for (; isDIGIT(*d) || *d == '_' || *d == '.'; d++);
+        if ((*d == ';' || isSPACE(*d)) && *(skipspace(d)) != ',') {
             s = scan_num(s);
             /* real VERSION number -- GBARR */
             version = yylval.opval;
@@ -3399,6 +3398,19 @@ Perl_yylex(pTHX)
 	    no_op("Backslash",s);
 	OPERATOR(REFGEN);
 
+    case 'v':
+	if (isDIGIT(s[1]) && PL_expect == XTERM) {
+	    char *start = s;
+	    start++;
+	    start++;
+	    while (isDIGIT(*start))
+		start++;
+	    if (*start == '.' && isDIGIT(start[1])) {
+		s = scan_num(s);
+		TERM(THING);
+	    }
+	}
+	goto keylookup;
     case 'x':
 	if (isDIGIT(s[1]) && PL_expect == XOPERATOR) {
 	    s++;
@@ -3428,7 +3440,7 @@ Perl_yylex(pTHX)
     case 's': case 'S':
     case 't': case 'T':
     case 'u': case 'U':
-    case 'v': case 'V':
+	      case 'V':
     case 'w': case 'W':
 	      case 'X':
     case 'y': case 'Y':
@@ -4362,12 +4374,18 @@ Perl_yylex(pTHX)
 	    OLDLOP(OP_RETURN);
 
 	case KEY_require:
-	    *PL_tokenbuf = '\0';
-	    s = force_word(s,WORD,TRUE,TRUE,FALSE);
-	    if (isIDFIRST_lazy(PL_tokenbuf))
-		gv_stashpvn(PL_tokenbuf, strlen(PL_tokenbuf), TRUE);
-	    else if (*s == '<')
-		yyerror("<> should be quotes");
+	    s = skipspace(s);
+	    if (isDIGIT(*s) || (*s == 'v' && isDIGIT(s[1]))) {
+		s = force_version(s);
+	    }
+	    else {
+		*PL_tokenbuf = '\0';
+		s = force_word(s,WORD,TRUE,TRUE,FALSE);
+		if (isIDFIRST_lazy(PL_tokenbuf))
+		    gv_stashpvn(PL_tokenbuf, strlen(PL_tokenbuf), TRUE);
+		else if (*s == '<')
+		    yyerror("<> should be quotes");
+	    }
 	    UNI(OP_REQUIRE);
 
 	case KEY_reset:
@@ -4729,9 +4747,9 @@ Perl_yylex(pTHX)
 	    if (PL_expect != XSTATE)
 		yyerror("\"use\" not allowed in expression");
 	    s = skipspace(s);
-	    if(isDIGIT(*s)) {
+	    if (isDIGIT(*s) || (*s == 'v' && isDIGIT(s[1]))) {
 		s = force_version(s);
-		if(*s == ';' || (s = skipspace(s), *s == ';')) {
+		if (*s == ';' || (s = skipspace(s), *s == ';')) {
 		    PL_nextval[PL_nexttoke].opval = Nullop;
 		    force_next(WORD);
 		}
@@ -6506,7 +6524,7 @@ Perl_scan_num(pTHX_ char *start)
     register char *e;			/* end of temp buffer */
     IV tryiv;				/* used to see if it can be an IV */
     NV value;				/* number read, as a double */
-    SV *sv;				/* place to put the converted number */
+    SV *sv = Nullsv;			/* place to put the converted number */
     bool floatit;			/* boolean: int or float? */
     char *lastub = 0;			/* position of last underbar */
     static char number_too_long[] = "Number too long";
@@ -6518,8 +6536,7 @@ Perl_scan_num(pTHX_ char *start)
       Perl_croak(aTHX_ "panic: scan_num");
       
     /* if it starts with a 0, it could be an octal number, a decimal in
-       0.13 disguise, or a hexadecimal number, or a binary number.
-    */
+       0.13 disguise, or a hexadecimal number, or a binary number. */
     case '0':
 	{
 	  /* variables:
@@ -6781,11 +6798,61 @@ Perl_scan_num(pTHX_ char *start)
 			      (floatit ? "float" : "integer"),
 			      sv, Nullsv, NULL);
 	break;
+    /* if it starts with a v, it could be a version number */
+    case 'v':
+	{
+	    UV rev, ver, sver;
+	    char *pos = s;
+	    pos++;
+	    while (isDIGIT(*pos))
+		pos++;
+	    if (*pos == '.' && isDIGIT(pos[1])) {
+		U8 tmpbuf[10];
+		U8 *tmpend;
+		NV nshift = 1.0;
+		s++;				/* get past 'v' */
+
+		sv = NEWSV(92,5);
+		SvUPGRADE(sv, SVt_PVNV);
+		sv_setpvn(sv, "", 0);
+
+		do {
+		    rev = atoi(s);
+		    s = ++pos;
+		    while (isDIGIT(*pos))
+			pos++;
+
+		    tmpend = uv_to_utf8(tmpbuf, rev);
+		    *tmpend = '\0';
+		    sv_catpvn(sv, tmpbuf, tmpend - tmpbuf);
+		    if (rev > 0)
+			SvNVX(sv) += (NV)rev/nshift;
+		    nshift *= 1000;
+		} while (*pos == '.' && isDIGIT(pos[1]));
+
+		rev = atoi(s);
+		s = pos;
+		tmpend = uv_to_utf8(tmpbuf, rev);
+		*tmpend = '\0';
+		sv_catpvn(sv, tmpbuf, tmpend - tmpbuf);
+		if (rev > 0)
+		    SvNVX(sv) += (NV)rev/nshift;
+
+		SvPOK_on(sv);
+		SvNOK_on(sv);
+		SvREADONLY_on(sv);
+		SvUTF8_on(sv);
+	    }
+	}
+	break;
     }
 
     /* make the op for the constant and return */
 
-    yylval.opval = newSVOP(OP_CONST, 0, sv);
+    if (sv)
+	yylval.opval = newSVOP(OP_CONST, 0, sv);
+    else
+	yylval.opval = Nullop;
 
     return s;
 }

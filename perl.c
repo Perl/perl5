@@ -204,14 +204,29 @@ perl_construct(pTHXx)
     init_i18nl10n(1);
     SET_NUMERIC_STANDARD();
 
+    {
+	U8 *s;
+	PL_patchlevel = NEWSV(0,4);
+	SvUPGRADE(PL_patchlevel, SVt_PVNV);
+	if (PERL_REVISION > 127 || PERL_VERSION > 127 || PERL_SUBVERSION > 127)
+	    SvGROW(PL_patchlevel,24);
+	s = (U8*)SvPVX(PL_patchlevel);
+	s = uv_to_utf8(s, (UV)PERL_REVISION);
+	s = uv_to_utf8(s, (UV)PERL_VERSION);
+	s = uv_to_utf8(s, (UV)PERL_SUBVERSION);
+	*s = '\0';
+	SvCUR_set(PL_patchlevel, s - (U8*)SvPVX(PL_patchlevel));
+	SvPOK_on(PL_patchlevel);
+	SvNVX(PL_patchlevel) = (NV)PERL_REVISION
+				+ ((NV)PERL_VERSION / (NV)1000)
 #if defined(PERL_SUBVERSION) && PERL_SUBVERSION > 0
-    sprintf(PL_patchlevel, "%7.5f",   (double) PERL_REVISION
-				+ ((double) PERL_VERSION / (double) 1000)
-				+ ((double) PERL_SUBVERSION / (double) 100000));
-#else
-    sprintf(PL_patchlevel, "%5.3f", (double) PERL_REVISION +
-				((double) PERL_VERSION / (double) 1000));
+				+ ((NV)PERL_SUBVERSION / (NV)1000000)
 #endif
+				;
+	SvNOK_on(PL_patchlevel);	/* dual valued */
+	SvUTF8_on(PL_patchlevel);
+	SvREADONLY_on(PL_patchlevel);
+    }
 
 #if defined(LOCAL_PATCH_COUNT)
     PL_localpatches = local_patches;	/* For possible -v */
@@ -394,6 +409,7 @@ perl_destruct(pTHXx)
 
     Safefree(PL_inplace);
     PL_inplace = Nullch;
+    SvREFCNT_dec(PL_patchlevel);
 
     if (PL_e_script) {
 	SvREFCNT_dec(PL_e_script);
@@ -599,7 +615,6 @@ perl_destruct(pTHXx)
 
     /* No SVs have survived, need to clean out */
     Safefree(PL_origfilename);
-    Safefree(PL_archpat_auto);
     Safefree(PL_reg_start_tmp);
     if (PL_reg_curpm)
 	Safefree(PL_reg_curpm);
@@ -1841,13 +1856,8 @@ Perl_moreswitches(pTHX_ char *s)
 	s++;
 	return s;
     case 'v':
-#if defined(PERL_SUBVERSION) && PERL_SUBVERSION > 0
-	printf("\nThis is perl, version %d.%03d_%02d built for %s",
-	    PERL_REVISION, PERL_VERSION, PERL_SUBVERSION, ARCHNAME);
-#else
-	printf("\nThis is perl, version %s built for %s",
-		PL_patchlevel, ARCHNAME);
-#endif
+	printf("\nThis is perl, v%"UVuf".%"UVuf".%"UVuf" built for %s",
+	       (UV)PERL_REVISION, (UV)PERL_VERSION, (UV)PERL_SUBVERSION, ARCHNAME);
 #if defined(LOCAL_PATCH_COUNT)
 	if (LOCAL_PATCH_COUNT > 0)
 	    printf("\n(with %d registered patch%s, see perl -V for more detail)",
@@ -2243,7 +2253,9 @@ sed %s -e \"/^[^#]/b\" \
 	    PL_statbuf.st_mode & (S_ISUID|S_ISGID))
 	{
 	    /* try again */
-	    PerlProc_execv(Perl_form(aTHX_ "%s/sperl%s", BIN_EXP, PL_patchlevel), PL_origargv);
+	    PerlProc_execv(Perl_form(aTHX_ "%s/sperl"PERL_FS_VER_FMT, BIN_EXP,
+				     (UV)PERL_REVISION, (UV)PERL_VERSION,
+				     (UV)PERL_SUBVERSION), PL_origargv);
 	    Perl_croak(aTHX_ "Can't do setuid\n");
 	}
 #endif
@@ -2490,7 +2502,9 @@ FIX YOUR KERNEL, PUT A C WRAPPER AROUND THIS SCRIPT, OR USE -u AND UNDUMP!\n");
 	    (void)PerlIO_close(PL_rsfp);
 #ifndef IAMSUID
 	    /* try again */
-	    PerlProc_execv(Perl_form(aTHX_ "%s/sperl%s", BIN_EXP, PL_patchlevel), PL_origargv);
+	    PerlProc_execv(Perl_form(aTHX_ "%s/sperl"PERL_FS_VER_FMT, BIN_EXP,
+				     (UV)PERL_REVISION, (UV)PERL_VERSION,
+				     (UV)PERL_SUBVERSION), PL_origargv);
 #endif
 	    Perl_croak(aTHX_ "Can't do setuid\n");
 	}
@@ -2572,7 +2586,9 @@ FIX YOUR KERNEL, PUT A C WRAPPER AROUND THIS SCRIPT, OR USE -u AND UNDUMP!\n");
 #if defined(HAS_FCNTL) && defined(F_SETFD)
     fcntl(PerlIO_fileno(PL_rsfp),F_SETFD,0);	/* ensure no close-on-exec */
 #endif
-    PerlProc_execv(Perl_form(aTHX_ "%s/perl%s", BIN_EXP, PL_patchlevel), PL_origargv);/* try again */
+    PerlProc_execv(Perl_form(aTHX_ "%s/perl"PERL_FS_VER_FMT, BIN_EXP,
+			     (UV)PERL_REVISION, (UV)PERL_VERSION,
+			     (UV)PERL_SUBVERSION), PL_origargv);/* try again */
     Perl_croak(aTHX_ "Can't do setuid\n");
 #endif /* IAMSUID */
 #else /* !DOSUID */
@@ -2969,17 +2985,6 @@ S_incpush(pTHX_ char *p, int addsubdirs)
 
     if (addsubdirs) {
 	subdir = sv_newmortal();
-	if (!PL_archpat_auto) {
-	    STRLEN len = (sizeof(ARCHNAME) + strlen(PL_patchlevel)
-			  + sizeof("//auto"));
-	    New(55, PL_archpat_auto, len, char);
-	    sprintf(PL_archpat_auto, "/%s/%s/auto", ARCHNAME, PL_patchlevel);
-#ifdef VMS
-	for (len = sizeof(ARCHNAME) + 2;
-	     PL_archpat_auto[len] != '\0' && PL_archpat_auto[len] != '/'; len++)
-		if (PL_archpat_auto[len] == '.') PL_archpat_auto[len] = '_';
-#endif
-	}
     }
 
     /* Break at all separators */
@@ -3025,16 +3030,16 @@ S_incpush(pTHX_ char *p, int addsubdirs)
 			      SvPV(libdir,len));
 #endif
 	    /* .../archname/version if -d .../archname/version/auto */
-	    sv_setsv(subdir, libdir);
-	    sv_catpv(subdir, PL_archpat_auto);
+	    Perl_sv_setpvf(aTHX_ subdir, "%_/%s/"PERL_FS_VER_FMT"/auto", libdir,
+			   ARCHNAME, (UV)PERL_REVISION,
+			   (UV)PERL_VERSION, (UV)PERL_SUBVERSION);
 	    if (PerlLIO_stat(SvPVX(subdir), &tmpstatbuf) >= 0 &&
 		  S_ISDIR(tmpstatbuf.st_mode))
 		av_push(GvAVn(PL_incgv),
 			newSVpvn(SvPVX(subdir), SvCUR(subdir) - sizeof "auto"));
 
 	    /* .../archname if -d .../archname/auto */
-	    sv_insert(subdir, SvCUR(libdir) + sizeof(ARCHNAME),
-		      strlen(PL_patchlevel) + 1, "", 0);
+	    Perl_sv_setpvf(aTHX_ subdir, "%_/%s/auto", libdir, ARCHNAME);
 	    if (PerlLIO_stat(SvPVX(subdir), &tmpstatbuf) >= 0 &&
 		  S_ISDIR(tmpstatbuf.st_mode))
 		av_push(GvAVn(PL_incgv),

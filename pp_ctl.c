@@ -2834,10 +2834,54 @@ PP(pp_require)
     SV *filter_sub = 0;
 
     sv = POPs;
-    if (SvNIOKp(sv) && !SvPOKp(sv)) {
-	if (Atof(PL_patchlevel) + 0.00000999 < SvNV(sv))
-	    DIE(aTHX_ "Perl %s required--this is only version %s, stopped",
-		SvPV(sv,n_a),PL_patchlevel);
+    if (SvNIOKp(sv)) {
+	UV rev, ver, sver;
+	if (SvPOKp(sv) && SvUTF8(sv)) {		/* require v5.6.1 */
+	    I32 len;
+	    U8 *s = (U8*)SvPVX(sv);
+	    U8 *end = (U8*)SvPVX(sv) + SvCUR(sv);
+	    if (s < end) {
+		rev = utf8_to_uv(s, &len);
+		s += len;
+		if (s < end) {
+		    ver = utf8_to_uv(s, &len);
+		    s += len;
+		    if (s < end)
+			sver = utf8_to_uv(s, &len);
+		    else
+			sver = 0;
+		}
+		else
+		    ver = 0;
+	    }
+	    else
+		rev = 0;
+	    if (PERL_REVISION < rev
+		|| (PERL_REVISION == rev
+		    && (PERL_VERSION < ver
+			|| (PERL_VERSION == ver
+			    && PERL_SUBVERSION < sver))))
+	    {
+		DIE(aTHX_ "Perl v%"UVuf".%"UVuf".%"UVuf" required--this is only version "
+		    "v%"UVuf".%"UVuf".%"UVuf", stopped", rev, ver, sver, PERL_REVISION,
+		    PERL_VERSION, PERL_SUBVERSION);
+	    }
+	}
+	else if (!SvPOKp(sv)) {			/* require 5.005_03 */
+	    NV n = SvNV(sv);
+	    rev = (UV)n;
+	    ver = (UV)((n-rev)*1000);
+	    sver = (UV)((((n-rev)*1000 - ver) + 0.0009) * 1000);
+
+	    if ((NV)PERL_REVISION + ((NV)PERL_VERSION/(NV)1000)
+		+ ((NV)PERL_SUBVERSION/(NV)1000000)
+		+ 0.00000099 < SvNV(sv))
+	    {
+		DIE(aTHX_ "Perl v%"UVuf".%"UVuf".%"UVuf" required--this is only version "
+		    "v%"UVuf".%"UVuf".%"UVuf", stopped", rev, ver, sver, PERL_REVISION,
+		    PERL_VERSION, PERL_SUBVERSION);
+	    }
+	}
 	RETPUSHYES;
     }
     name = SvPV(sv, len);

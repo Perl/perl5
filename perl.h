@@ -1596,7 +1596,12 @@ typedef pthread_key_t	perl_key;
 #define PERL_EXIT_EXPECTED	0x01
 
 #ifndef MEMBER_TO_FPTR
-#define MEMBER_TO_FPTR(name)		name
+#  define MEMBER_TO_FPTR(name)		name
+#endif
+
+/* format to use for version numbers in file/directory names */
+#ifndef PERL_FS_VER_FMT
+#  define PERL_FS_VER_FMT	"%"UVuf".%"UVuf".%"UVuf
 #endif
 
 /* This defines a way to flush all output buffers.  This may be a

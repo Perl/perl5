@@ -48,8 +48,6 @@
 #define PL_amagic_generation	(*Perl_Iamagic_generation_ptr(aTHXo))
 #undef  PL_an
 #define PL_an			(*Perl_Ian_ptr(aTHXo))
-#undef  PL_archpat_auto
-#define PL_archpat_auto		(*Perl_Iarchpat_auto_ptr(aTHXo))
 #undef  PL_argvgv
 #define PL_argvgv		(*Perl_Iargvgv_ptr(aTHXo))
 #undef  PL_argvout_stack

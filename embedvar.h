@@ -191,7 +191,6 @@
 #define PL_StdIO		(PERL_GET_INTERP->IStdIO)
 #define PL_amagic_generation	(PERL_GET_INTERP->Iamagic_generation)
 #define PL_an			(PERL_GET_INTERP->Ian)
-#define PL_archpat_auto		(PERL_GET_INTERP->Iarchpat_auto)
 #define PL_argvgv		(PERL_GET_INTERP->Iargvgv)
 #define PL_argvout_stack	(PERL_GET_INTERP->Iargvout_stack)
 #define PL_argvoutgv		(PERL_GET_INTERP->Iargvoutgv)
@@ -456,7 +455,6 @@
 #define PL_StdIO		(vTHX->IStdIO)
 #define PL_amagic_generation	(vTHX->Iamagic_generation)
 #define PL_an			(vTHX->Ian)
-#define PL_archpat_auto		(vTHX->Iarchpat_auto)
 #define PL_argvgv		(vTHX->Iargvgv)
 #define PL_argvout_stack	(vTHX->Iargvout_stack)
 #define PL_argvoutgv		(vTHX->Iargvoutgv)
@@ -858,7 +856,6 @@
 #define PL_StdIO		(aTHXo->interp.IStdIO)
 #define PL_amagic_generation	(aTHXo->interp.Iamagic_generation)
 #define PL_an			(aTHXo->interp.Ian)
-#define PL_archpat_auto		(aTHXo->interp.Iarchpat_auto)
 #define PL_argvgv		(aTHXo->interp.Iargvgv)
 #define PL_argvout_stack	(aTHXo->interp.Iargvout_stack)
 #define PL_argvoutgv		(aTHXo->interp.Iargvoutgv)
@@ -1124,7 +1121,6 @@
 #define PL_IStdIO		PL_StdIO
 #define PL_Iamagic_generation	PL_amagic_generation
 #define PL_Ian			PL_an
-#define PL_Iarchpat_auto	PL_archpat_auto
 #define PL_Iargvgv		PL_argvgv
 #define PL_Iargvout_stack	PL_argvout_stack
 #define PL_Iargvoutgv		PL_argvoutgv

@@ -373,9 +373,9 @@ struct xpvio {
 #define SvNOK_only(sv)		(SvOK_off(sv), \
 				    SvFLAGS(sv) |= (SVf_NOK|SVp_NOK))
 
-#define SvUTF8(sv)		(SvFLAGS(sv) & SVf_ISUTF8)
-#define SvUTF8_on(sv)		(SvFLAGS(sv) |= (SVf_ISUTF8))
-#define SvUTF8_off(sv)		(SvFLAGS(sv) &= ~(SVf_ISUTF8))
+#define SvUTF8(sv)		(SvFLAGS(sv) & SVf_UTF8)
+#define SvUTF8_on(sv)		(SvFLAGS(sv) |= (SVf_UTF8))
+#define SvUTF8_off(sv)		(SvFLAGS(sv) &= ~(SVf_UTF8))
 
 #define SvPOK(sv)		(SvFLAGS(sv) & SVf_POK)
 #define SvPOK_on(sv)		(SvFLAGS(sv) |= (SVf_POK|SVp_POK))
