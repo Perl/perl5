@@ -1477,8 +1477,8 @@ This surprising autovivification in what does not at first--or even
 second--glance appear to be an lvalue context may be fixed in a future
 release.
 
-See L<perlref/"Pseudo-hashes"> for specifics on how exists() acts when
-used on a pseudo-hash.
+See L<perlref/"Pseudo-hashes: Using an array as a hash"> for specifics
+on how exists() acts when used on a pseudo-hash.
 
 Use of a subroutine call, rather than a subroutine name, as an argument
 to exists() is an error.

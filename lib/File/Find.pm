@@ -135,7 +135,7 @@ This library is useful for the C<find2perl> tool, which when fed,
 produces something like:
 
     sub wanted {
-        /^\.nfs.*$/ &&
+        /^\.nfs.*\z/s &&
         (($dev, $ino, $mode, $nlink, $uid, $gid) = lstat($_)) &&
         int(-M _) > 7 &&
         unlink($_)
@@ -306,7 +306,7 @@ sub _find_opt {
     Proc_Top_Item:
     foreach my $TOP (@_) {
         my $top_item = $TOP;
-        $top_item =~ s|/$||  unless $top_item eq '/';
+        $top_item =~ s|/\z|| unless $top_item eq '/';
         $Is_Dir= 0;
         
         ($topdev,$topino,$topmode,$topnlink) = stat $top_item;
@@ -338,7 +338,7 @@ sub _find_opt {
                 next Proc_Top_Item;
             }
             if (-d _) {
-		$top_item =~ s/\.dir$// if $Is_VMS;
+		$top_item =~ s/\.dir\z// if $Is_VMS;
 		_find_dir($wanted, $top_item, $topnlink);
 		$Is_Dir= 1;
             }
@@ -466,7 +466,7 @@ sub _find_dir($$$) {
 	if ($nlink == 2 && !$avoid_nlink) {
 	    # This dir has no subdirectories.
 	    for my $FN (@filenames) {
-		next if $FN =~ /^\.{1,2}$/;
+		next if $FN =~ /^\.{1,2}\z/;
 		
 		$name = $dir_pref . $FN;
 		$_ = ($no_chdir ? $name : $FN);
@@ -479,7 +479,7 @@ sub _find_dir($$$) {
 	    $subcount = $nlink - 2;
 
 	    for my $FN (@filenames) {
-		next if $FN =~ /^\.{1,2}$/;
+		next if $FN =~ /^\.{1,2}\z/;
 		if ($subcount > 0 || $avoid_nlink) {
 		    # Seen all the subdirs?
 		    # check for directoriness.
@@ -488,7 +488,7 @@ sub _find_dir($$$) {
 
 		    if (-d _) {
 			--$subcount;
-			$FN =~ s/\.dir$// if $Is_VMS;
+			$FN =~ s/\.dir\z// if $Is_VMS;
 			push @Stack,[$CdLvl,$dir_name,$FN,$sub_nlink];
 		    }
 		    else {
@@ -609,7 +609,7 @@ sub _find_dir_symlnk($$$) {
 	closedir(DIR);
 
 	for my $FN (@filenames) {
-	    next if $FN =~ /^\.{1,2}$/;
+	    next if $FN =~ /^\.{1,2}\z/;
 
 	    # follow symbolic links / do an lstat
 	    $new_loc = Follow_SymLink($loc_pref.$FN);

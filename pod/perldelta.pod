@@ -1042,6 +1042,12 @@ delete() now works on pseudo-hashes.  When given a pseudo-hash element
 or slice it deletes the values corresponding to the keys (but not the keys
 themselves).  See L<perlref/"Pseudo-hashes: Using an array as a hash">.
 
+Pseudo-hash slices with constant keys are now optimized to array lookups
+at compile-time.
+
+The C<fields> pragma now provides ways to create pseudo-hashes, via
+fields::new() and fields::phash().  See L<fields>.
+
 =head2 C<goto &sub> and AUTOLOAD
 
 The C<goto &sub> construct works correctly when C<&sub> happens
