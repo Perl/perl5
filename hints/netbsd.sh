@@ -48,7 +48,7 @@ esac
 # ($<, $>) = ($u, $u); will work (same for $(/$)).  this is because
 # you can not change the real userid of a process under 4.4BSD.
 # netbsd fixed this in 1.2A.
-case "$osver" in
+case "$osvers" in
 0.9*|1.0*|1.1*|1.2_*|1.2|1.2.*)
 	d_setregid="$undef"
 	d_setreuid="$undef"
