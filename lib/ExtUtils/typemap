@@ -262,7 +262,7 @@ T_ARRAY
 		ST(ix_$var) = sv_newmortal();
 	DO_ARRAY_ELEM
 	}
-	sp += $var.size - 1;
+	SP += $var.size - 1;
 T_IN
 	{
 	    GV *gv = newGVgen("$Package");
