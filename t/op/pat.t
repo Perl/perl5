@@ -6,7 +6,7 @@
 
 $| = 1;
 
-print "1..632\n";
+print "1..634\n";
 
 BEGIN {
     chdir 't' if -d 't';
@@ -1786,13 +1786,13 @@ EOT
 #test /o feature
 sub test_o { $_[0] =~/$_[1]/o; return $1}
 if(test_o('abc','(.)..') eq 'a') {
-    print "ok 631\n";
+    print "ok 633\n";
 } else {
-    print "not ok 631\n";
+    print "not ok 633\n";
 }
 if(test_o('abc','..(.)') eq 'a') {
-    print "ok 632\n";
+    print "ok 634\n";
 } else {
-    print "not ok 632\n";
+    print "not ok 634\n";
 }
 
