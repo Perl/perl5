@@ -12,9 +12,10 @@ package CPAN::FirstTime;
 
 use strict;
 use ExtUtils::MakeMaker qw(prompt);
-require File::Path;
+use FileHandle ();
+use File::Path ();
 use vars qw($VERSION);
-$VERSION = substr q$Revision: 1.13 $, 10;
+$VERSION = substr q$Revision: 1.15 $, 10;
 
 =head1 NAME
 
@@ -48,7 +49,6 @@ sub init {
     #
 
     print qq{
-
 The CPAN module needs a directory of its own to cache important
 index files and maybe keep a temporary mirror of CPAN files. This may
 be a site-wide directory or a personal directory.
@@ -72,11 +72,15 @@ First of all, I\'d like to create this directory. Where?
     }
 
     $default = $cpan_home;
-    until (-d ($ans = prompt("CPAN build and cache directory?",$default)) && -w _) {
-	print "Couldn't find directory $ans
+    while ($ans = prompt("CPAN build and cache directory?",$default)) {
+	File::Path::mkpath($ans); # dies if it can't
+	if (-d $ans && -w _) {
+	    last;
+	} else {
+	    warn "Couldn't find directory $ans
   or directory is not writable. Please retry.\n";
+	}
     }
-    File::Path::mkpath($ans); # dies if it can't
     $CPAN::Config->{cpan_home} = $ans;
     
     print qq{
@@ -117,6 +121,8 @@ with all the intermediate files?
 
 The CPAN module will need a few external programs to work
 properly. Please correct me, if I guess the wrong path for a program.
+Don\'t panic if you do not have some of them, just press ENTER for
+those.
 
 };
 
@@ -134,6 +140,7 @@ properly. Please correct me, if I guess the wrong path for a program.
     $CPAN::Config->{'pager'} = $ans;
     $path = $CPAN::Config->{'shell'} || $ENV{SHELL} || "";
     $ans = prompt("What is your favorite shell?",$path) || $path;
+    $CPAN::Config->{'shell'} = $ans;
 
     #
     # Arguments to make etc.
@@ -145,6 +152,8 @@ Every Makefile.PL is run by perl in a separate process. Likewise we
 run \'make\' and \'make install\' in processes. If you have any parameters
 \(e.g. PREFIX, INSTALLPRIVLIB, UNINST or the like\) you want to pass to
 the calls, please specify them here.
+
+If you don\'t understand this question, just press ENTER.
 
 };
 
@@ -183,26 +192,56 @@ If you set this value to 0, these processes will wait forever.
     #
 
     $local = 'MIRRORED.BY';
+    $local = MM->catfile($CPAN::Config->{keep_source_where},"MIRRORED.BY") unless -f $local;
     if (@{$CPAN::Config->{urllist}||[]}) {
 	print qq{
 I found a list of URLs in CPAN::Config and will use this.
 You can change it later with the 'o conf' command.
 
 }
-    } elsif (-f $local) { # if they really have a wrong MIRRORED.BY in
-                          # the current directory, we can't help
+    } elsif (
+	     -s $local
+	     &&
+	     -M $local < 30
+	    ) {
 	read_mirrored_by($local);
     } else {
 	$CPAN::Config->{urllist} ||= [];
 	while (! @{$CPAN::Config->{urllist}}) {
-	    print qq{
+	    my($input) = prompt(qq{
 We need to know the URL of your favorite CPAN site.
-Please enter it here: };
-	    chop($_ = <>);
-	    s/\s//g;
-	    push @{$CPAN::Config->{urllist}}, $_ if $_;
+Please enter it here:});
+	    $input =~ s/\s//g;
+	    next unless $input;
+	    my($wanted) = "MIRRORED.BY";
+	    print qq{
+Testing "$input" ...
+};
+	    push @{$CPAN::Config->{urllist}}, $input;
+	    CPAN::FTP->localize($wanted,$local,"force");
+	    if (-s $local) {
+		print qq{
+"$input" seems to work
+};
+	    } else {
+		my $ans = prompt(qq{$input doesn\'t seem to work. Keep it in the list?},"n");
+		last unless $ans =~ /^n/i;
+		pop @{$CPAN::Config->{urllist}};
+	    }
 	}
     }
+
+    print qq{
+
+WAIT support is available as a Plugin. You need the CPAN::WAIT module
+to actually use it.  But we need to know your favorite WAIT server. If
+you don\'t know a WAIT server near you, just press ENTER.
+
+};
+
+    $default = "wait://ls6.informatik.uni-dortmund.de:1404";
+    $ans = prompt("Your favorite WAIT server?\n  ",$default);
+    push @{$CPAN::Config->{'wait_list'}}, $ans;
 
     print qq{
 
@@ -240,8 +279,9 @@ sub find_exe {
 sub read_mirrored_by {
     my($local) = @_;
     my(%all,$url,$expected_size,$default,$ans,$host,$dst,$country,$continent,@location);
-    open FH, $local or die "Couldn't open $local: $!";
-    while (<FH>) {
+    my $fh = FileHandle->new;
+    $fh->open($local) or die "Couldn't open $local: $!";
+    while (<$fh>) {
 	($host) = /^([\w\.\-]+)/ unless defined $host;
 	next unless defined $host;
 	next unless /\s+dst_(dst|location)/;
@@ -254,6 +294,7 @@ sub read_mirrored_by {
 	undef $host;
 	$dst=$continent=$country="";
     }
+    $fh->close;
     $CPAN::Config->{urllist} ||= [];
     if ($expected_size = @{$CPAN::Config->{urllist}}) {
 	for $url (@{$CPAN::Config->{urllist}}) {
@@ -286,12 +327,13 @@ file:, ftp: or http: URL, or "q" to finish selecting.
     while () {
 	my $pipe = -t *STDIN ? "| $CPAN::Config->{'pager'}" : ">/dev/null";
 	my(@valid,$previous_best);
-	open FH, $pipe;
+	my $fh = FileHandle->new;
+	$fh->open($pipe);
 	{
 	    my($cont,$country,$url,$item);
 	    my(@cont) = sort keys %all;
 	    for $cont (@cont) {
-		print FH "    $cont\n";
+		$fh->print("    $cont\n");
 		for $country (sort {lc $a cmp lc $b} keys %{$all{$cont}}) {
 		    for $url (sort {lc $a cmp lc $b} keys %{$all{$cont}{$country}}) {
 			my $t = sprintf(
@@ -304,12 +346,11 @@ file:, ftp: or http: URL, or "q" to finish selecting.
 			    $previous_best ||= $item;
 			}
 			push @valid, $all{$cont}{$country}{$url};
-			print FH $t;
+			$fh->print($t);
 		    }
 		}
 	    }
 	}
-	close FH;
 	$previous_best ||= 1;
 	$default =
 	    @{$CPAN::Config->{urllist}} >= $expected_size ? "q" : $previous_best;
