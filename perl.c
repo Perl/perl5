@@ -1358,7 +1358,6 @@ print \"  \\@INC:\\n    @INC\\n\";");
 	}
     }
   switch_end:
-    sv_setsv(get_sv("/", TRUE), PL_rs);
 
     if (
 #ifndef SECURE_INTERNAL_GETENV
@@ -2389,6 +2388,7 @@ Perl_moreswitches(pTHX_ char *s)
 		   PL_rs = newSVpvn(&ch, 1);
 	      }
 	 }
+	 sv_setsv(get_sv("/", TRUE), PL_rs);
 	 return s + numlen;
     }
     case 'C':
