@@ -3257,12 +3257,13 @@ operator is discussed in more detail in L<perlop/"I/O Operators">.
 =item recv SOCKET,SCALAR,LENGTH,FLAGS
 
 Receives a message on a socket.  Attempts to receive LENGTH bytes of
-data into variable SCALAR from the specified SOCKET filehandle.
-Actually does a C C<recvfrom>, so that it can return the address of the
-sender.  Returns the undefined value if there's an error.  SCALAR will
-be grown or shrunk to the length actually read.  Takes the same flags
-as the system call of the same name.
-See L<perlipc/"UDP: Message Passing"> for examples.
+data into variable SCALAR from the specified SOCKET filehandle.  SCALAR
+will be grown or shrunk to the length actually read.  Takes the same
+flags as the system call of the same name.  Returns the address of the
+sender if SOCKET's protocol supports this; returns an empty string
+otherwise.  If there's an error, returns the undefined value.  This call
+is actually implemented in terms of recvfrom(2) system call.  See
+L<perlipc/"UDP: Message Passing"> for examples.
 
 =item redo LABEL
 
