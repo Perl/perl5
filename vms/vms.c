@@ -5571,7 +5571,7 @@ int my_sigdelset(sigset_t *set, int sig) {
 int my_sigismember(sigset_t *set, int sig) {
     if (!set) { SETERRNO(EFAULT,SS$_ACCVIO); return -1; }
     if (sig > NSIG) { SETERRNO(EINVAL,LIB$_INVARG); return -1; }
-    *set & (1 << (sig - 1));
+    return *set & (1 << (sig - 1));
 }
 /*}}}*/
 
