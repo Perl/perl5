@@ -9,7 +9,7 @@
 # ifdef I_SYS_TYPES
 #  include <sys/types.h>
 # endif
-# if !defined(ultrix)
+# if !defined(ultrix) /* Avoid double definition. */
 #   include <sys/socket.h>
 # endif
 # if defined(USE_SOCKS) && defined(I_SOCKS)
@@ -34,7 +34,9 @@
 #  include <netinet/in.h>
 # endif
 # ifdef I_NETDB
-#  include <netdb.h>
+#  if !defined(ultrix)  /* Avoid double definition. */
+#   include <netdb.h>
+#  endif
 # endif
 # ifdef I_ARPA_INET
 #  include <arpa/inet.h>
