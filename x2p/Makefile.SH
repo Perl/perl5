@@ -95,7 +95,7 @@ lintflags = -phbvxac
 	$(CCCMD) -DPERL_FOR_X2P $*.c
 
 all: $(public) $(private) $(util)
-	touch all
+	@echo " "
 
 compile: all
 	$(REALPERL) -I../lib ../utils/perlcc -regex 's/$$/.exe/' $(plextract) -prog -verbose dcf -log ../compilelog;  
@@ -115,7 +115,7 @@ run_byacc:	FORCE
 # We don't want to regenerate a2p.c, but it might appear out-of-date
 # after a patch is applied or a new distribution is made.
 a2p.c: a2p.y
-	-@touch a2p.c
+	-@sh -c true
 
 a2p$(OBJ_EXT): a2p.c a2py.c a2p.h EXTERN.h util.h INTERN.h \
 		../handy.h ../config.h str.h hash.h
