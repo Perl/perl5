@@ -581,7 +581,6 @@ do_aspawn(void *vreally, void **vmark, void **vsp)
     }
     else {
 	if (status < 0) {
-    	    dTHR;
 	    if (ckWARN(WARN_EXEC))
 		Perl_warner(aTHX_ WARN_EXEC, "Can't spawn \"%s\": %s", argv[0], strerror(errno));
 	    status = 255 * 256;
@@ -674,7 +673,6 @@ do_spawn2(char *cmd, int exectype)
     }
     else {
 	if (status < 0) {
-    	    dTHR;
 	    if (ckWARN(WARN_EXEC))
 		Perl_warner(aTHX_ WARN_EXEC, "Can't %s \"%s\": %s",
 		     (exectype == EXECF_EXEC ? "exec" : "spawn"),
@@ -1875,7 +1873,6 @@ win32_crypt(const char *txt, const char *salt)
 {
     dTHXo;
 #ifdef HAVE_DES_FCRYPT
-    dTHR;
     return des_fcrypt(txt, salt, w32_crypt_buffer);
 #else
     Perl_croak(aTHX_ "The crypt() function is unimplemented due to excessive paranoia.");

@@ -1262,7 +1262,6 @@ Perl_fbm_instr(pTHX_ unsigned char *big, register unsigned char *bigend, SV *lit
 char *
 Perl_screaminstr(pTHX_ SV *bigstr, SV *littlestr, I32 start_shift, I32 end_shift, I32 *old_posp, I32 last)
 {
-    dTHR;
     register unsigned char *s, *x;
     register unsigned char *big;
     register I32 pos;
@@ -1432,7 +1431,6 @@ Perl_savepvn(pTHX_ const char *sv, register I32 len)
 STATIC SV *
 S_mess_alloc(pTHX)
 {
-    dTHR;
     SV *sv;
     XPVMG *any;
 
@@ -1518,7 +1516,6 @@ Perl_vmess(pTHX_ const char *pat, va_list *args)
 
     sv_vsetpvfn(sv, pat, strlen(pat), args, Null(SV**), 0, Null(bool*));
     if (!SvCUR(sv) || *(SvEND(sv) - 1) != '\n') {
-	dTHR;
 	if (CopLINE(PL_curcop))
 	    Perl_sv_catpvf(aTHX_ sv, " at %s line %"IVdf,
 			   CopFILE(PL_curcop), (IV)CopLINE(PL_curcop));
@@ -1542,7 +1539,6 @@ Perl_vmess(pTHX_ const char *pat, va_list *args)
 OP *
 Perl_vdie(pTHX_ const char* pat, va_list *args)
 {
-    dTHR;
     char *message;
     int was_in_eval = PL_in_eval;
     HV *stash;
@@ -1643,7 +1639,6 @@ Perl_die(pTHX_ const char* pat, ...)
 void
 Perl_vcroak(pTHX_ const char* pat, va_list *args)
 {
-    dTHR;
     char *message;
     HV *stash;
     GV *gv;
@@ -1776,7 +1771,6 @@ Perl_vwarn(pTHX_ const char* pat, va_list *args)
 
     if (PL_warnhook) {
 	/* sv_2cv might call Perl_warn() */
-	dTHR;
 	SV *oldwarnhook = PL_warnhook;
 	ENTER;
 	SAVESPTR(PL_warnhook);
@@ -1874,7 +1868,6 @@ Perl_warner(pTHX_ U32  err, const char* pat,...)
 void
 Perl_vwarner(pTHX_ U32  err, const char* pat, va_list* args)
 {
-    dTHR;
     char *message;
     HV *stash;
     GV *gv;
@@ -1931,7 +1924,6 @@ Perl_vwarner(pTHX_ U32  err, const char* pat, va_list* args)
     else {
         if (PL_warnhook) {
             /* sv_2cv might call Perl_warn() */
-            dTHR;
             SV *oldwarnhook = PL_warnhook;
             ENTER;
             SAVESPTR(PL_warnhook);
@@ -2965,7 +2957,6 @@ Perl_scan_bin(pTHX_ char *start, STRLEN len, STRLEN *retlen)
 		continue;
 	    }
 	    else {
-		dTHR;
 		if (ckWARN(WARN_DIGIT))
 		    Perl_warner(aTHX_ WARN_DIGIT,
 				"Illegal binary digit '%c' ignored", *s);
@@ -2976,7 +2967,6 @@ Perl_scan_bin(pTHX_ char *start, STRLEN len, STRLEN *retlen)
 	    register UV xuv = ruv << 1;
 
 	    if ((xuv >> 1) != ruv) {
-		dTHR;
 		overflowed = TRUE;
 		rnv = (NV) ruv;
 		if (ckWARN_d(WARN_OVERFLOW))
@@ -3004,7 +2994,6 @@ Perl_scan_bin(pTHX_ char *start, STRLEN len, STRLEN *retlen)
 	|| (!overflowed && ruv > 0xffffffff  )
 #endif
 	) {
-	dTHR;
 	if (ckWARN(WARN_PORTABLE))
 	    Perl_warner(aTHX_ WARN_PORTABLE,
 			"Binary number > 0b11111111111111111111111111111111 non-portable");
@@ -3034,7 +3023,6 @@ Perl_scan_oct(pTHX_ char *start, STRLEN len, STRLEN *retlen)
 		 * as soon as non-octal characters are seen, complain only iff
 		 * someone seems to want to use the digits eight and nine). */
 		if (*s == '8' || *s == '9') {
-		    dTHR;
 		    if (ckWARN(WARN_DIGIT))
 			Perl_warner(aTHX_ WARN_DIGIT,
 				    "Illegal octal digit '%c' ignored", *s);
@@ -3046,7 +3034,6 @@ Perl_scan_oct(pTHX_ char *start, STRLEN len, STRLEN *retlen)
 	    register UV xuv = ruv << 3;
 
 	    if ((xuv >> 3) != ruv) {
-		dTHR;
 		overflowed = TRUE;
 		rnv = (NV) ruv;
 		if (ckWARN_d(WARN_OVERFLOW))
@@ -3074,7 +3061,6 @@ Perl_scan_oct(pTHX_ char *start, STRLEN len, STRLEN *retlen)
 	|| (!overflowed && ruv > 0xffffffff  )
 #endif
 	) {
-	dTHR;
 	if (ckWARN(WARN_PORTABLE))
 	    Perl_warner(aTHX_ WARN_PORTABLE,
 			"Octal number > 037777777777 non-portable");
@@ -3113,7 +3099,6 @@ Perl_scan_hex(pTHX_ char *start, STRLEN len, STRLEN *retlen)
 		++s;
 	    }
 	    else {
-		dTHR;
 		if (ckWARN(WARN_DIGIT))
 		    Perl_warner(aTHX_ WARN_DIGIT,
 				"Illegal hexadecimal digit '%c' ignored", *s);
@@ -3124,7 +3109,6 @@ Perl_scan_hex(pTHX_ char *start, STRLEN len, STRLEN *retlen)
 	    register UV xuv = ruv << 4;
 
 	    if ((xuv >> 4) != ruv) {
-		dTHR;
 		overflowed = TRUE;
 		rnv = (NV) ruv;
 		if (ckWARN_d(WARN_OVERFLOW))
@@ -3152,7 +3136,6 @@ Perl_scan_hex(pTHX_ char *start, STRLEN len, STRLEN *retlen)
 	|| (!overflowed && ruv > 0xffffffff  )
 #endif
 	) {
-	dTHR;
 	if (ckWARN(WARN_PORTABLE))
 	    Perl_warner(aTHX_ WARN_PORTABLE,
 			"Hexadecimal number > 0xffffffff non-portable");
@@ -3164,7 +3147,6 @@ Perl_scan_hex(pTHX_ char *start, STRLEN len, STRLEN *retlen)
 char*
 Perl_find_script(pTHX_ char *scriptname, bool dosearch, char **search_ext, I32 flags)
 {
-    dTHR;
     char *xfound = Nullch;
     char *xfailed = Nullch;
     char tmpbuf[MAXPATHLEN];

@@ -34,10 +34,8 @@ Perl_av_reify(pTHX_ AV *av)
     while (key) {
 	sv = AvARRAY(av)[--key];
 	assert(sv);
-	if (sv != &PL_sv_undef) {
-	    dTHR;
+	if (sv != &PL_sv_undef)
 	    (void)SvREFCNT_inc(sv);
-	}
     }
     key = AvARRAY(av) - AvALLOC(av);
     while (key)
@@ -58,7 +56,6 @@ extended.
 void
 Perl_av_extend(pTHX_ AV *av, I32 key)
 {
-    dTHR;			/* only necessary if we have to extend stack */
     MAGIC *mg;
     if ((mg = SvTIED_mg((SV*)av, 'P'))) {
 	dSP;
@@ -189,7 +186,6 @@ Perl_av_fetch(pTHX_ register AV *av, I32 key, I32 lval)
 
     if (SvRMAGICAL(av)) {
 	if (mg_find((SV*)av,'P') || mg_find((SV*)av,'D')) {
-	    dTHR;
 	    sv = sv_newmortal();
 	    mg_copy((SV*)av, sv, 0, key);
 	    PL_av_fetch_sv = sv;
@@ -272,7 +268,6 @@ Perl_av_store(pTHX_ register AV *av, I32 key, SV *val)
     ary = AvARRAY(av);
     if (AvFILLp(av) < key) {
 	if (!AvREAL(av)) {
-	    dTHR;
 	    if (av == PL_curstack && key > PL_stack_sp - PL_stack_base)
 		PL_stack_sp = PL_stack_base + key;	/* XPUSH in disguise */
 	    do

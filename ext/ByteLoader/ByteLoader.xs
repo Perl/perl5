@@ -77,7 +77,6 @@ bl_read(struct byteloader_fdata *data, char *buf, size_t size, size_t n)
 static I32
 byteloader_filter(pTHXo_ int idx, SV *buf_sv, int maxlen)
 {
-    dTHR;
     OP *saveroot = PL_main_root;
     OP *savestart = PL_main_start;
     struct byteloader_state bstate;

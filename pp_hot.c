@@ -406,7 +406,6 @@ PP(pp_print)
 	RETURN;
     }
     if (!(io = GvIO(gv))) {
-        dTHR;
         if ((GvEGV(gv)) && (mg = SvTIED_mg((SV*)GvEGV(gv),'q')))
             goto had_magic;
 	if (ckWARN2(WARN_UNOPENED,WARN_CLOSED))
@@ -2288,7 +2287,6 @@ PP(pp_leavesublv)
 STATIC CV *
 S_get_db_sub(pTHX_ SV **svp, CV *cv)
 {
-    dTHR;
     SV *dbsv = GvSV(PL_DBsub);
 
     if (!PERLDB_SUB_NN) {
@@ -2992,9 +2990,6 @@ static void
 unset_cvowner(pTHXo_ void *cvarg)
 {
     register CV* cv = (CV *) cvarg;
-#ifdef DEBUGGING
-    dTHR;
-#endif /* DEBUGGING */
 
     DEBUG_S((PerlIO_printf(Perl_debug_log, "%p unsetting CvOWNER of %p:%s\n",
 			   thr, cv, SvPEEK((SV*)cv))));

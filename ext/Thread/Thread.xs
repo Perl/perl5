@@ -98,7 +98,6 @@ threadstart(void *arg)
     DEBUG_S(PerlIO_printf(Perl_debug_log, "new thread %p waiting to start\n",
 			  thr));
 
-    /* Don't call *anything* requiring dTHR until after PERL_SET_THX() */
     /*
      * Wait until our creator releases us. If we didn't do this, then
      * it would be potentially possible for out thread to carry on and
@@ -116,7 +115,6 @@ threadstart(void *arg)
      */
     PERL_SET_THX(thr);
 
-    /* Only now can we use SvPEEK (which calls sv_newmortal which does dTHR) */
     DEBUG_S(PerlIO_printf(Perl_debug_log, "new thread %p starting at %s\n",
 			  thr, SvPEEK(TOPs)));
 

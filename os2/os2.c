@@ -377,7 +377,6 @@ spawn_sighandler(int sig)
 static int
 result(pTHX_ int flag, int pid)
 {
-        dTHR;
 	int r, status;
 	Signal_t (*ihand)();     /* place to save signal during system() */
 	Signal_t (*qhand)();     /* place to save signal during system() */
@@ -469,7 +468,6 @@ static ULONG os2_mytype;
 int
 do_spawn_ve(pTHX_ SV *really, U32 flag, U32 execf, char *inicmd, U32 addflag)
 {
-    dTHR;
 	int trueflag = flag;
 	int rc, pass = 1;
 	char *tmps;
@@ -825,7 +823,6 @@ do_spawn_ve(pTHX_ SV *really, U32 flag, U32 execf, char *inicmd, U32 addflag)
 int
 do_spawn3(pTHX_ char *cmd, int execf, int flag)
 {
-    dTHR;
     register char **a;
     register char *s;
     char flags[10];
@@ -953,7 +950,6 @@ do_spawn3(pTHX_ char *cmd, int execf, int flag)
 int
 os2_do_aspawn(pTHX_ SV *really, register SV **mark, register SV **sp)
 {
-    dTHR;
     register char **a;
     int rc;
     int flag = P_WAIT, flag_set = 0;
@@ -991,21 +987,18 @@ os2_do_aspawn(pTHX_ SV *really, register SV **mark, register SV **sp)
 int
 os2_do_spawn(pTHX_ char *cmd)
 {
-    dTHR;
     return do_spawn3(aTHX_ cmd, EXECF_SPAWN, 0);
 }
 
 int
 do_spawn_nowait(pTHX_ char *cmd)
 {
-    dTHR;
     return do_spawn3(aTHX_ cmd, EXECF_SPAWN_NOWAIT,0);
 }
 
 bool
 Perl_do_exec(pTHX_ char *cmd)
 {
-    dTHR;
     do_spawn3(aTHX_ cmd, EXECF_EXEC, 0);
     return FALSE;
 }
@@ -1013,7 +1006,6 @@ Perl_do_exec(pTHX_ char *cmd)
 bool
 os2exec(pTHX_ char *cmd)
 {
-    dTHR;
     return do_spawn3(aTHX_ cmd, EXECF_TRUEEXEC, 0);
 }
 
@@ -1374,7 +1366,6 @@ os2error(int rc)
 char *
 os2_execname(pTHX)
 {
-  dTHR;
   char buf[300], *p;
 
   if (_execname(buf, sizeof buf) != 0)

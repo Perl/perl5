@@ -198,7 +198,6 @@ various flags to allow deviations from the strict UTF-8 encoding
 UV
 Perl_utf8_to_uv(pTHX_ U8* s, STRLEN curlen, STRLEN* retlen, U32 flags)
 {
-    dTHR;
     UV uv = *s, ouv;
     STRLEN len = 1;
 #ifdef EBCDIC
@@ -503,7 +502,6 @@ reflect the new length.
 U8*
 Perl_bytes_to_utf8(pTHX_ U8* s, STRLEN *len)
 {
-    dTHR;
     U8 *send;
     U8 *d;
     U8 *dst;
@@ -556,7 +554,6 @@ Perl_utf16_to_utf8(pTHX_ U8* p, U8* d, I32 bytelen, I32 *newlen)
 	    continue;
 	}
 	if (uv >= 0xd800 && uv < 0xdbff) {	/* surrogates */
-            dTHR;
 	    UV low = *p++;
 	    if (low < 0xdc00 || low >= 0xdfff)
 		Perl_croak(aTHX_ "Malformed UTF-16 surrogate");

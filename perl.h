@@ -183,7 +183,7 @@ class CPerlObj;
 struct perl_thread;
 #    define pTHX	register struct perl_thread *thr
 #    define aTHX	thr
-#    define dTHR	dNOOP
+#    define dTHR	dNOOP /* only backward compatibility */
 #    define dTHXa(a)	pTHX = (struct perl_thread*)a
 #  else
 #    ifndef MULTIPLICITY
@@ -303,7 +303,7 @@ register struct op *Perl_op asm(stringify(OP_IN_REGISTER));
 #endif
 
 #define WITH_THX(s) STMT_START { dTHX; s; } STMT_END
-#define WITH_THR(s) STMT_START { dTHR; s; } STMT_END
+#define WITH_THR(s) WITH_THX(s)
 
 /*
  * SOFT_CAST can be used for args to prototyped functions to retain some

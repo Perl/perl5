@@ -936,7 +936,7 @@ Perl_hv_delayfree_ent(pTHXo_ HV* hv, HE* entry)
 
 #undef  Perl_hv_delete
 SV*
-Perl_hv_delete(pTHXo_ HV* tb, const char* key, U32 klen, I32 flags)
+Perl_hv_delete(pTHXo_ HV* tb, const char* key, I32 klen, I32 flags)
 {
     return ((CPerlObj*)pPerl)->Perl_hv_delete(tb, key, klen, flags);
 }
@@ -950,7 +950,7 @@ Perl_hv_delete_ent(pTHXo_ HV* tb, SV* key, I32 flags, U32 hash)
 
 #undef  Perl_hv_exists
 bool
-Perl_hv_exists(pTHXo_ HV* tb, const char* key, U32 klen)
+Perl_hv_exists(pTHXo_ HV* tb, const char* key, I32 klen)
 {
     return ((CPerlObj*)pPerl)->Perl_hv_exists(tb, key, klen);
 }
@@ -964,7 +964,7 @@ Perl_hv_exists_ent(pTHXo_ HV* tb, SV* key, U32 hash)
 
 #undef  Perl_hv_fetch
 SV**
-Perl_hv_fetch(pTHXo_ HV* tb, const char* key, U32 klen, I32 lval)
+Perl_hv_fetch(pTHXo_ HV* tb, const char* key, I32 klen, I32 lval)
 {
     return ((CPerlObj*)pPerl)->Perl_hv_fetch(tb, key, klen, lval);
 }
@@ -1041,7 +1041,7 @@ Perl_hv_magic(pTHXo_ HV* hv, GV* gv, int how)
 
 #undef  Perl_hv_store
 SV**
-Perl_hv_store(pTHXo_ HV* tb, const char* key, U32 klen, SV* val, U32 hash)
+Perl_hv_store(pTHXo_ HV* tb, const char* key, I32 klen, SV* val, U32 hash)
 {
     return ((CPerlObj*)pPerl)->Perl_hv_store(tb, key, klen, val, hash);
 }
@@ -3365,7 +3365,7 @@ Perl_utf8_length(pTHXo_ U8* s, U8 *e)
 }
 
 #undef  Perl_utf8_distance
-I32
+IV
 Perl_utf8_distance(pTHXo_ U8 *a, U8 *b)
 {
     return ((CPerlObj*)pPerl)->Perl_utf8_distance(a, b);

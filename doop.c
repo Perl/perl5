@@ -36,7 +36,6 @@
 STATIC I32
 S_do_trans_simple(pTHX_ SV *sv)
 {
-    dTHR;
     U8 *s;
     U8 *d;
     U8 *send;
@@ -102,7 +101,6 @@ S_do_trans_simple(pTHX_ SV *sv)
 STATIC I32
 S_do_trans_count(pTHX_ SV *sv)/* SPC - OK */
 {
-    dTHR;
     U8 *s;
     U8 *send;
     I32 matches = 0;
@@ -140,7 +138,6 @@ S_do_trans_count(pTHX_ SV *sv)/* SPC - OK */
 STATIC I32
 S_do_trans_complex(pTHX_ SV *sv)/* SPC - NOT OK */
 {
-    dTHR;
     U8 *s;
     U8 *send;
     U8 *d;
@@ -222,7 +219,6 @@ S_do_trans_complex(pTHX_ SV *sv)/* SPC - NOT OK */
 STATIC I32
 S_do_trans_simple_utf8(pTHX_ SV *sv)/* SPC - OK */
 {
-    dTHR;
     U8 *s;
     U8 *send;
     U8 *d;
@@ -293,7 +289,6 @@ S_do_trans_simple_utf8(pTHX_ SV *sv)/* SPC - OK */
 STATIC I32
 S_do_trans_count_utf8(pTHX_ SV *sv)/* SPC - OK */
 {
-    dTHR;
     U8 *s;
     U8 *send;
     I32 matches = 0;
@@ -322,7 +317,6 @@ S_do_trans_count_utf8(pTHX_ SV *sv)/* SPC - OK */
 STATIC I32
 S_do_trans_complex_utf8(pTHX_ SV *sv) /* SPC - NOT OK */
 {
-    dTHR;
     U8 *s;
     U8 *send;
     U8 *d;
@@ -449,7 +443,6 @@ S_do_trans_complex_utf8(pTHX_ SV *sv) /* SPC - NOT OK */
 I32
 Perl_do_trans(pTHX_ SV *sv)
 {
-    dTHR;
     STRLEN len;
     I32 hasutf = (PL_op->op_private &
                     (OPpTRANS_FROM_UTF|OPpTRANS_TO_UTF));
@@ -600,7 +593,6 @@ Perl_do_vecget(pTHX_ SV *sv, I32 offset, I32 size)
 	    }
 #ifdef UV_IS_QUAD
 	    else if (size == 64) {
-		dTHR;
 		if (ckWARN(WARN_PORTABLE))
 		    Perl_warner(aTHX_ WARN_PORTABLE,
 				"Bit vector size > 32 non-portable");
@@ -670,7 +662,6 @@ Perl_do_vecget(pTHX_ SV *sv, I32 offset, I32 size)
 		      s[offset + 3];
 #ifdef UV_IS_QUAD
 	else if (size == 64) {
-	    dTHR;
 	    if (ckWARN(WARN_PORTABLE))
 		Perl_warner(aTHX_ WARN_PORTABLE,
 			    "Bit vector size > 32 non-portable");
@@ -758,7 +749,6 @@ Perl_do_vecset(pTHX_ SV *sv)
 	}
 #ifdef UV_IS_QUAD
 	else if (size == 64) {
-	    dTHR;
 	    if (ckWARN(WARN_PORTABLE))
 		Perl_warner(aTHX_ WARN_PORTABLE,
 			    "Bit vector size > 32 non-portable");
@@ -781,7 +771,6 @@ Perl_do_chop(pTHX_ register SV *astr, register SV *sv)
 {
     STRLEN len;
     char *s;
-    dTHR;
 
     if (SvTYPE(sv) == SVt_PVAV) {
 	register I32 i;
@@ -843,7 +832,6 @@ Perl_do_chop(pTHX_ register SV *astr, register SV *sv)
 I32
 Perl_do_chomp(pTHX_ register SV *sv)
 {
-    dTHR;
     register I32 count;
     STRLEN len;
     char *s;
@@ -921,7 +909,6 @@ Perl_do_chomp(pTHX_ register SV *sv)
 void
 Perl_do_vop(pTHX_ I32 optype, SV *sv, SV *left, SV *right)
 {
-    dTHR;	/* just for taint */
 #ifdef LIBERAL
     register long *dl;
     register long *ll;

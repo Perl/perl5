@@ -128,7 +128,6 @@ static void restore_pos(pTHXo_ void *arg);
 STATIC CHECKPOINT
 S_regcppush(pTHX_ I32 parenfloor)
 {
-    dTHR;
     int retval = PL_savestack_ix;
     int i = (PL_regsize - parenfloor) * 4;
     int p;
@@ -161,7 +160,6 @@ S_regcppush(pTHX_ I32 parenfloor)
 STATIC char *
 S_regcppop(pTHX)
 {
-    dTHR;
     I32 i = SSPOPINT;
     U32 paren = 0;
     char *input;
@@ -217,7 +215,6 @@ S_regcppop(pTHX)
 STATIC char *
 S_regcp_set_to(pTHX_ I32 ss)
 {
-    dTHR;
     I32 tmp = PL_savestack_ix;
 
     PL_savestack_ix = ss;
@@ -276,7 +273,6 @@ Perl_pregexec(pTHX_ register regexp *prog, char *stringarg, register char *stren
 STATIC void
 S_cache_re(pTHX_ regexp *prog)
 {
-    dTHR;
     PL_regprecomp = prog->precomp;		/* Needed for FAIL. */
 #ifdef DEBUGGING
     PL_regprogram = prog->program;
@@ -1342,7 +1338,6 @@ Perl_regexec_flags(pTHX_ register regexp *prog, char *stringarg, register char *
 /* data: May be used for some additional optimizations. */
 /* nosave: For optimizations. */
 {
-    dTHR;
     register char *s;
     register regnode *c;
     register char *startpos = stringarg;
@@ -1726,7 +1721,6 @@ phooey:
 STATIC I32			/* 0 failure, 1 success */
 S_regtry(pTHX_ regexp *prog, char *startpos)
 {
-    dTHR;
     register I32 i;
     register I32 *sp;
     register I32 *ep;
@@ -1884,7 +1878,6 @@ typedef union re_unwind_t {
 STATIC I32			/* 0 failure, 1 success */
 S_regmatch(pTHX_ regnode *prog)
 {
-    dTHR;
     register regnode *scan;	/* Current node. */
     regnode *next;		/* Next node. */
     regnode *inner;		/* Next node in internal branch. */
@@ -3464,7 +3457,6 @@ do_no:
 STATIC I32
 S_regrepeat(pTHX_ regnode *p, I32 max)
 {
-    dTHR;
     register char *scan;
     register I32 c;
     register char *loceol = PL_regeol;
@@ -3676,7 +3668,6 @@ S_regrepeat(pTHX_ regnode *p, I32 max)
 STATIC I32
 S_regrepeat_hard(pTHX_ regnode *p, I32 max, I32 *lp)
 {
-    dTHR;
     register char *scan;
     register char *start;
     register char *loceol = PL_regeol;
@@ -3727,7 +3718,6 @@ S_regrepeat_hard(pTHX_ regnode *p, I32 max, I32 *lp)
 STATIC bool
 S_reginclass(pTHX_ register regnode *p, register I32 c)
 {
-    dTHR;
     char flags = ANYOF_FLAGS(p);
     bool match = FALSE;
 
@@ -3791,7 +3781,6 @@ S_reginclass(pTHX_ register regnode *p, register I32 c)
 STATIC bool
 S_reginclassutf8(pTHX_ regnode *f, U8 *p)
 {                                           
-    dTHR;
     char flags = ARG1(f);
     bool match = FALSE;
 #ifdef DEBUGGING
@@ -3825,7 +3814,6 @@ S_reginclassutf8(pTHX_ regnode *f, U8 *p)
 STATIC U8 *
 S_reghop(pTHX_ U8 *s, I32 off)
 {                               
-    dTHR;
     if (off >= 0) {
 	while (off-- && s < (U8*)PL_regeol)
 	    s += UTF8SKIP(s);
@@ -3847,7 +3835,6 @@ S_reghop(pTHX_ U8 *s, I32 off)
 STATIC U8 *
 S_reghopmaybe(pTHX_ U8* s, I32 off)
 {
-    dTHR;
     if (off >= 0) {
 	while (off-- && s < (U8*)PL_regeol)
 	    s += UTF8SKIP(s);
@@ -3879,7 +3866,6 @@ S_reghopmaybe(pTHX_ U8* s, I32 off)
 static void
 restore_pos(pTHXo_ void *arg)
 {
-    dTHR;
     if (PL_reg_eval_set) {
 	if (PL_reg_oldsaved) {
 	    PL_reg_re->subbeg = PL_reg_oldsaved;

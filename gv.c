@@ -53,7 +53,6 @@ Perl_gv_IOadd(pTHX_ register GV *gv)
 GV *
 Perl_gv_fetchfile(pTHX_ const char *name)
 {
-    dTHR;
     char smallbuf[256];
     char *tmpbuf;
     STRLEN tmplen;
@@ -85,7 +84,6 @@ Perl_gv_fetchfile(pTHX_ const char *name)
 void
 Perl_gv_init(pTHX_ GV *gv, HV *stash, const char *name, STRLEN len, int multi)
 {
-    dTHR;
     register GP *gp;
     bool doproto = SvTYPE(gv) > SVt_NULL;
     char *proto = (doproto && SvPOK(gv)) ? SvPVX(gv) : NULL;
@@ -227,7 +225,6 @@ Perl_gv_fetchmeth(pTHX_ HV *stash, const char *name, STRLEN len, I32 level)
 	    basestash = gv_stashpvn(packname, packlen, TRUE);
 	    gvp = (GV**)hv_fetch(basestash, "ISA", 3, FALSE);
 	    if (gvp && (gv = *gvp) != (GV*)&PL_sv_undef && (av = GvAV(gv))) {
-		dTHR;		/* just for SvREFCNT_dec */
 		gvp = (GV**)hv_fetch(stash, "ISA", 3, TRUE);
 		if (!gvp || !(gv = *gvp))
 		    Perl_croak(aTHX_ "Cannot create %s::ISA", HvNAME(stash));
@@ -247,7 +244,6 @@ Perl_gv_fetchmeth(pTHX_ HV *stash, const char *name, STRLEN len, I32 level)
 	    SV* sv = *svp++;
 	    HV* basestash = gv_stashsv(sv, FALSE);
 	    if (!basestash) {
-		dTHR;		/* just for ckWARN */
 		if (ckWARN(WARN_MISC))
 		    Perl_warner(aTHX_ WARN_MISC, "Can't locate package %s for @%s::ISA",
 			SvPVX(sv), HvNAME(stash));
@@ -342,7 +338,6 @@ C<call_sv> apply equally to these functions.
 GV *
 Perl_gv_fetchmethod_autoload(pTHX_ HV *stash, const char *name, I32 autoload)
 {
-    dTHR;
     register const char *nend;
     const char *nsplit = 0;
     GV* gv;
@@ -403,7 +398,6 @@ Perl_gv_fetchmethod_autoload(pTHX_ HV *stash, const char *name, I32 autoload)
 GV*
 Perl_gv_autoload4(pTHX_ HV *stash, const char *name, STRLEN len, I32 method)
 {
-    dTHR;
     static char autoload[] = "AUTOLOAD";
     static STRLEN autolen = 8;
     GV* gv;
@@ -525,7 +519,6 @@ Perl_gv_stashsv(pTHX_ SV *sv, I32 create)
 GV *
 Perl_gv_fetchpv(pTHX_ const char *nambeg, I32 add, I32 sv_type)
 {
-    dTHR;
     register const char *name = nambeg;
     register GV *gv = 0;
     GV**gvp;
@@ -999,7 +992,6 @@ Perl_gv_efullname(pTHX_ SV *sv, GV *gv)
 IO *
 Perl_newIO(pTHX)
 {
-    dTHR;
     IO *io;
     GV *iogv;
 
@@ -1018,7 +1010,6 @@ Perl_newIO(pTHX)
 void
 Perl_gv_check(pTHX_ HV *stash)
 {
-    dTHR;
     register HE *entry;
     register I32 i;
     register GV *gv;
@@ -1095,7 +1086,6 @@ Perl_gp_ref(pTHX_ GP *gp)
 void
 Perl_gp_free(pTHX_ GV *gv)
 {
-    dTHR;
     GP* gp;
 
     if (!gv || !(gp = GvGP(gv)))
@@ -1156,7 +1146,6 @@ register GV *gv;
 bool
 Perl_Gv_AMupdate(pTHX_ HV *stash)
 {
-  dTHR;
   GV* gv;
   CV* cv;
   MAGIC* mg=mg_find((SV*)stash,'c');
@@ -1319,7 +1308,6 @@ Perl_Gv_AMupdate(pTHX_ HV *stash)
 SV*
 Perl_amagic_call(pTHX_ SV *left, SV *right, int method, int flags)
 {
-  dTHR;
   MAGIC *mg;
   CV *cv;
   CV **cvp=NULL, **ocvp=NULL;
