@@ -19,6 +19,11 @@ my $marker2 = " <<<HERE<<< ";
 ##
 ## Key-value pairs of code/error of code that should have fatal errors.
 ##
+
+eval 'use Config';         # assume defaults if fail
+our %Config;
+my $inf_m1 = ($Config{reg_infty} || 32767) - 1;
+my $inf_p1 = $inf_m1 + 2;
 my @death =
 (
  '/[[=foo=]]/' => 'POSIX syntax [= =] is reserved for future extensions at {#} mark in regex m/[[=foo=]{#}]/',
@@ -44,7 +49,7 @@ my @death =
 
  '/((x)/' => 'Unmatched ( at {#} mark in regex m/({#}(x)/',
 
- '/x{99999}/' => 'Quantifier in {,} bigger than 32766 at {#} mark in regex m/x{{#}99999}/',
+ "/x{$inf_p1}/" => "Quantifier in {,} bigger than $inf_m1 at {#} mark in regex m/x{{#}$inf_p1}/",
 
  '/x{3,1}/' => 'Can\'t do {n,m} with n > m at {#} mark in regex m/x{3,1}{#}/',
 
@@ -106,28 +111,17 @@ while (@death)
     my $regex = shift @death;
     my $result = shift @death;
 
-    undef $@;
     $_ = "x";
     eval $regex;
     if (not $@) {
-	if ($debug) {
-	    print "oops, $regex didn't die\n"
-	} else {
-	    print "not ok $count\n";
-	}
+	print "# oops, $regex didn't die\nnot ok $count\n";
 	next;
     }
     chomp $@;
-    $@ =~ s/ at \(.*?\) line \d+\.$//;
     $result =~ s/{\#}/$marker1/;
     $result =~ s/{\#}/$marker2/;
-    if ($@ ne $result) {
-	if ($debug) {
-	    print "For $regex, expected:\n  $result\nGot:\n  $@\n\n";
-	} else {
-	    print "not ok $count\n";
-	}
-	next;
+    if ($@ !~ /^\Q$result/) {
+	print "# For $regex, expected:\n#  $result\n# Got:\n#  $@\n#\nnot ";
     }
     print "ok $count\n";
 }
@@ -148,34 +142,27 @@ while (@warning)
 
     if ($@)
     {
-	if ($debug) {
-	    print "oops, $regex died with:\n\t$@\n";
-	} else {
-	    print "not ok $count\n";
-	}
+	print "# oops, $regex died with:\n#\t$@#\nnot ok $count\n";
 	next;
     }
 
     if (not $warning)
     {
-	if ($debug) {
-	    print "oops, $regex didn't generate a warning\n";
-	} else {
-	    print "not ok $count\n";
-	}
+	print "# oops, $regex didn't generate a warning\nnot ok $count\n";
 	next;
     }
-    chomp $warning;
-    $warning =~ s/ at \(.*?\) line \d+\.$//;
     $result =~ s/{\#}/$marker1/;
     $result =~ s/{\#}/$marker2/;
-    if ($warning ne $result)
+    if ($warning !~ /^\Q$result/)
     {
-	if ($debug) {
-	    print "For $regex, expected:\n  $result\nGot:\n  $warning\n\n";
-	} else {
-	    print "not ok $count\n";
-	}
+	print <<"EOM";
+# For $regex, expected:
+#   $result
+# Got:
+#   $warning
+#
+not ok $count
+EOM
 	next;
     }
     print "ok $count\n";
