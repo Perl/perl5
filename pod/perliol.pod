@@ -420,7 +420,10 @@ struct.  It should also C<Unread()> any unconsumed data that has been
 read and buffered from the layer below back to that layer, so that it
 can be re-provided to what ever is now above.
 
-Returns 0 on success and failure.
+Returns 0 on success and failure.  If C<Popped()> returns I<true> then
+I<perlio.c> assumes that either the layer has popped itself, or the
+layer is super special and needs to be retained for other reasons.
+In most cases it should return I<false>.
 
 =item Open
 
@@ -477,6 +480,10 @@ C<Open()> at all, but rather leave the opening to a lower level layer
 and wait to be "pushed".  If a layer does provide C<Open()> it should
 normally call the C<Open()> method of next layer down (if any) and
 then push itself on top if that succeeds.
+
+If C<PerlIO_push> was performed and open has failed, it must
+C<PerlIO_pop> itself, since if it's not, the layer won't be removed
+and may cause bad problems.
 
 Returns C<NULL> on failure.
 

@@ -769,7 +769,7 @@ sub _find_dir($$$) {
 		}
 	    }
 	}
-	unless (chdir ($Is_VMS && $udir !~ /\// ? "./$udir" : $udir)) {
+	unless (chdir ($Is_VMS && $udir !~ /[\/\[<]+/ ? "./$udir" : $udir)) {
 	    warnings::warnif "Can't cd to $udir: $!\n";
 	    return;
 	}
@@ -811,7 +811,7 @@ sub _find_dir($$$) {
 		    }
 		}
 	    }
-	    unless (chdir ($Is_VMS && $udir !~ /\// ? "./$udir" : $udir)) {
+	    unless (chdir ($Is_VMS && $udir !~ /[\/\[<]+/ ? "./$udir" : $udir)) {
 		if ($Is_MacOS) {
 		    warnings::warnif "Can't cd to ($p_dir) $udir: $!\n";
 		}

@@ -780,6 +780,8 @@ S_force_word(pTHX_ register char *start, int token, int check_keyword, int allow
 	}
 	PL_nextval[PL_nexttoke].opval = (OP*)newSVOP(OP_CONST,0, newSVpv(PL_tokenbuf,0));
 	PL_nextval[PL_nexttoke].opval->op_private |= OPpCONST_BARE;
+	if (UTF && !IN_BYTES && is_utf8_string((U8*)PL_tokenbuf, len))
+	    SvUTF8_on(((SVOP*)PL_nextval[PL_nexttoke].opval)->op_sv);
 	force_next(token);
     }
     return s;
