@@ -31,6 +31,251 @@ or any other branch.
 Version v5.7.2		Development release working toward v5.8
 --------------
 ____________________________________________________________________________
+[ 12604] By: jhi                                   on 2001/10/23  13:03:21
+        Log: Make the PerlIO_init() prototypes consistent.
+     Branch: perl
+	   ! perlio.c
+____________________________________________________________________________
+[ 12603] By: jhi                                   on 2001/10/23  12:54:52
+        Log: Upping the test count is a good idea.
+     Branch: perl
+	   ! t/op/lc.t
+____________________________________________________________________________
+[ 12602] By: jhi                                   on 2001/10/23  12:52:10
+        Log: Document the final sigma spot.
+     Branch: perl
+	   ! pp.c
+____________________________________________________________________________
+[ 12601] By: jhi                                   on 2001/10/23  12:26:12
+        Log: Fix multicharacter titlecase (ucfirst).
+     Branch: perl
+	   ! pod/perlunicode.pod pp.c t/op/lc.t
+____________________________________________________________________________
+[ 12600] By: jhi                                   on 2001/10/23  11:47:19
+        Log: Subject: [PATCH 5.6.1 perldoc] one more touch on File::Temp
+             From: Mikhail Zabaluev <mhz@alt-linux.org>
+             Date: Tue, 23 Oct 2001 10:40:37 +0400
+             Message-ID: <20011023104037.A12761@localhost.localdomain>
+             
+             (#12406 replaced with this)
+     Branch: perl
+	   ! utils/perldoc.PL
+____________________________________________________________________________
+[ 12599] By: jhi                                   on 2001/10/23  00:26:17
+        Log: MacOS Classic updates from Pudge.
+     Branch: perl
+	   ! lib/File/Spec.t lib/File/Spec/Mac.pm
+____________________________________________________________________________
+[ 12598] By: jhi                                   on 2001/10/22  22:32:59
+        Log: Subject: [PATCH bleadperl] AutoSplit.t now passes (partialy) on Win32
+             From: Nikola Knezevic <indy@tesla.rcub.bg.ac.yu>
+             Date: Sun, 14 Oct 2001 23:14:46 +0200
+             Message-ID: <265984377.20011014231446@tesla.rcub.bg.ac.yu>
+             
+             except for the 2->4 changes.
+     Branch: perl
+	   ! lib/AutoSplit.t
+____________________________________________________________________________
+[ 12597] By: gsar                                  on 2001/10/22  22:02:50
+        Log: integrate macperl contents into maint-5.6
+     Branch: maint-5.6/perl
+	   ! mg.c
+	  !> AUTHORS README.macos ext/DynaLoader/DynaLoader_pm.PL
+	  !> ext/DynaLoader/dl_mac.xs lib/File/Find.pm lib/File/Spec.pm
+	  !> lib/File/Spec/Epoc.pm lib/File/Spec/Functions.pm
+	  !> lib/File/Spec/Mac.pm lib/File/Spec/Unix.pm
+	  !> lib/File/Spec/VMS.pm lib/File/Spec/Win32.pm lib/File/Temp.pm
+	  !> perl.c perl.h pod/perlport.pod t/lib/filefind-taint.t
+	  !> t/lib/filefind.t t/lib/filespec.t
+____________________________________________________________________________
+[ 12596] By: jhi                                   on 2001/10/22  21:43:44
+        Log: At some point the #6234 has been lost from the mainline
+             (noticed by Pudge; what's a Mac guy doing reading Win modules? :-)
+     Branch: perl
+	   ! lib/File/Spec/Win32.pm
+____________________________________________________________________________
+[ 12595] By: jhi                                   on 2001/10/22  21:31:31
+        Log: Cygwin seems to round up (or closest, but not down)
+             for time(), so half of the time (bad pun intended)
+             Time::HiRes::time() is less than time(), half of
+             the time it's more.  So let's try harder in the loop.
+     Branch: perl
+	   ! ext/Time/HiRes/HiRes.t
+____________________________________________________________________________
+[ 12594] By: jhi                                   on 2001/10/22  21:23:15
+        Log: MacOS Classic timeofday(), from Chris Nandor. 
+     Branch: perl
+	   ! ext/Time/HiRes/HiRes.xs
+____________________________________________________________________________
+[ 12593] By: jhi                                   on 2001/10/22  21:17:39
+        Log: Integrate changes #12580 and #12581 from macperl;
+             
+             Fix path construction.
+             
+             (Copyright) Nit.
+     Branch: perl
+	  !> ext/DynaLoader/DynaLoader_pm.PL perl.c
+____________________________________________________________________________
+[ 12592] By: jhi                                   on 2001/10/22  21:00:18
+        Log: No domainname(1) in Cygwin, either, and the 2>/dev/null
+             doesn't seem to help (the error being output to console, maybe?)
+     Branch: perl
+	   ! lib/Net/Domain.pm
+____________________________________________________________________________
+[ 12591] By: jhi                                   on 2001/10/22  20:55:08
+        Log: Taint the getcwd() result also in Cygwin.
+             (TODO: which other platforms need the same thing?)
+     Branch: perl
+	   ! cygwin/cygwin.c
+____________________________________________________________________________
+[ 12590] By: jhi                                   on 2001/10/22  20:27:47
+        Log: Pretty hard for eval { setpwent(); getpwent(); 1 } to return false.
+     Branch: perl
+	   ! t/op/taint.t
+____________________________________________________________________________
+[ 12589] By: jhi                                   on 2001/10/22  20:10:40
+        Log: getpwuid() fragility continues.
+     Branch: perl
+	   ! utils/h2xs.PL
+____________________________________________________________________________
+[ 12588] By: jhi                                   on 2001/10/22  19:58:34
+        Log: getpwuid() might succeed but that's no guarantee
+             that the $home will be defined.
+     Branch: perl
+	   ! ext/File/Glob/t/basic.t
+____________________________________________________________________________
+[ 12587] By: jhi                                   on 2001/10/22  19:50:35
+        Log: It's safer to to expand the variable, too... (see #12571)
+     Branch: perl
+	   ! t/TEST
+____________________________________________________________________________
+[ 12586] By: pudge                                 on 2001/10/22  19:42:04
+        Log: Integrate with maintperl.
+     Branch: maint-5.6/macperl
+	  !> win32/bin/pl2bat.pl win32/win32.c
+____________________________________________________________________________
+[ 12585] By: pudge                                 on 2001/10/22  19:32:02
+        Log: Oops, forgot to include Win32 ... just as well, since it
+             seems in bleadperl, change #7764 was not included
+             (adding C:\temp).  Re-added.  Rip it back out if it
+             doesn't belong.  :-)
+     Branch: maint-5.6/macperl
+	   ! lib/File/Spec/Win32.pm
+____________________________________________________________________________
+[ 12584] By: jhi                                   on 2001/10/22  19:26:47
+        Log: Subject: [PATCH perl@12567] configure.com: no threads/shared without ithreads
+             From: "Craig A. Berry" <craigberry@mac.com>
+             Date: Mon, 22 Oct 2001 15:25:19 -0500
+             Message-Id: <5.1.0.14.2.20011022151232.032544e8@exchi01>
+     Branch: perl
+	   ! configure.com
+____________________________________________________________________________
+[ 12583] By: pudge                                 on 2001/10/22  19:26:00
+        Log: Add in lots of File::Spec changes, from Thomas Wegner,
+             and sync with changes from bleadperl.
+     Branch: maint-5.6/macperl
+	   ! lib/File/Spec.pm lib/File/Spec/Epoc.pm
+	   ! lib/File/Spec/Functions.pm lib/File/Spec/Mac.pm
+	   ! lib/File/Spec/Unix.pm lib/File/Spec/VMS.pm
+	   ! lib/File/Spec/Win32.pm t/lib/filespec.t
+____________________________________________________________________________
+[ 12582] By: pudge                                 on 2001/10/22  19:23:28
+        Log: Sync with latest File::Find and tests from bleadperl.
+     Branch: maint-5.6/macperl
+	   ! lib/File/Find.pm t/lib/filefind-taint.t t/lib/filefind.t
+____________________________________________________________________________
+[ 12581] By: pudge                                 on 2001/10/22  19:22:12
+        Log: Nit.
+     Branch: maint-5.6/macperl
+	   ! perl.c
+____________________________________________________________________________
+[ 12580] By: pudge                                 on 2001/10/22  19:21:37
+        Log: Fix path construction.
+     Branch: maint-5.6/macperl
+	   ! ext/DynaLoader/DynaLoader_pm.PL
+____________________________________________________________________________
+[ 12579] By: nick                                  on 2001/10/22  19:08:35
+        Log: Integrate mainline (for Arthurs thread.xs fix)
+     Branch: perlio
+	  !> ext/threads/threads.xs lib/Net/Domain.pm t/TEST t/op/groups.t
+____________________________________________________________________________
+[ 12578] By: pudge                                 on 2001/10/22  19:02:34
+        Log: Fix up exported symbols, move relevant docs
+             over from macperl.pod.
+     Branch: maint-5.6/macperl
+	   ! macos/ext/MacPerl/MacPerl.pm
+____________________________________________________________________________
+[ 12577] By: pudge                                 on 2001/10/22  19:01:38
+        Log: Make ADDRESS called optionally as a method.
+     Branch: maint-5.6/macperl
+	   ! macos/lib/Mac/Glue.pm
+____________________________________________________________________________
+[ 12576] By: pudge                                 on 2001/10/22  18:58:22
+        Log: Fix exit code (MacPerl bug #422129) and add Stop Script
+             Apple event.
+     Branch: maint-5.6/macperl
+	   ! macos/macish.c macos/macish.h macos/macperl/MPAppleEvents.c
+	   ! macos/macperl/MPConsole.cp macos/macperl/MPMain.c
+	   ! macos/macperl/MPTerminology.aete
+____________________________________________________________________________
+[ 12575] By: pudge                                 on 2001/10/22  18:56:34
+        Log: Clean up some build utilities. Change Entab to Duplicate;
+             fix docs and error reporting; improve macify() of paths;
+             remove requirement for Exporter.pm presence.
+     Branch: maint-5.6/macperl
+	   ! macos/InstallBLIB macos/MacPerlTests.cmd
+	   ! macos/lib/ExtUtils/MM_MacOS.pm macos/lib/Mac/BuildTools.pm
+____________________________________________________________________________
+[ 12574] By: pudge                                 on 2001/10/22  18:53:28
+        Log: Sync Time::HiRes with bleadperl
+     Branch: maint-5.6/macperl
+	   ! macos/bundled_ext/Time/HiRes/HiRes.pm
+	   ! macos/bundled_ext/Time/HiRes/HiRes.t
+	   ! macos/bundled_ext/Time/HiRes/HiRes.xs
+____________________________________________________________________________
+[ 12573] By: pudge                                 on 2001/10/22  18:52:58
+        Log: Fix up Changes
+     Branch: maint-5.6/macperl
+	   ! macos/Changes
+____________________________________________________________________________
+[ 12572] By: jhi                                   on 2001/10/22  18:49:32
+        Log: A user might belong to only a single group
+             (the group equal to the group id).
+     Branch: perl
+	   ! t/op/groups.t
+____________________________________________________________________________
+[ 12571] By: jhi                                   on 2001/10/22  18:36:46
+        Log: Prepending (instead of replacing with) the pwd is safer. 
+     Branch: perl
+	   ! t/TEST
+____________________________________________________________________________
+[ 12570] By: jhi                                   on 2001/10/22  18:34:54
+        Log: Be more robust if no hostname or domainname
+             (especially the latter)
+     Branch: perl
+	   ! lib/Net/Domain.pm
+____________________________________________________________________________
+[ 12569] By: sky                                   on 2001/10/22  17:41:07
+        Log: Flush IO buffers before starting a thread, this mimics fork and seems like a saneer behaviour.
+     Branch: perl
+	   ! ext/threads/threads.xs
+____________________________________________________________________________
+[ 12568] By: nick                                  on 2001/10/22  16:31:24
+        Log: Integrate mainline
+     Branch: perlio
+	  +> ext/threads/shared/Makefile.PL ext/threads/shared/README
+	  +> ext/threads/shared/shared.pm ext/threads/shared/shared.xs
+	  +> ext/threads/shared/t/sv_refs.t
+	  +> ext/threads/shared/t/sv_simple.t pod/perlpodspec.pod
+	   - lib/unicore/To/SpecLower.pl lib/unicore/To/SpecTitle.pl
+	   - lib/unicore/To/SpecUpper.pl
+	  !> (integrate 42 files)
+____________________________________________________________________________
+[ 12567] By: jhi                                   on 2001/10/22  12:56:20
+        Log: Update Changes.
+     Branch: perl
+	   ! Changes patchlevel.h
+____________________________________________________________________________
 [ 12566] By: jhi                                   on 2001/10/22  12:22:29
         Log: Subject: [PATCH pod/perlvar.pod] Undeprecating $]
              From: Michael G Schwern <schwern@pobox.com>
@@ -897,7 +1142,8 @@ ____________________________________________________________________________
 	   ! perlio.c perliol.h
 ____________________________________________________________________________
 [ 12446] By: jhi                                   on 2001/10/15  18:44:19
-        Log: In AIX vac 5 just can't seem to get regcomp right.
+        Log: (retracted by #12497)
+             In AIX vac 5 just can't seem to get regcomp right.
      Branch: perl
 	   ! hints/aix.sh
 ____________________________________________________________________________
@@ -1234,7 +1480,9 @@ ____________________________________________________________________________
 	   ! ext/threads/threads.xs
 ____________________________________________________________________________
 [ 12406] By: ams                                   on 2001/10/12  13:26:04
-        Log: Subject: [PATCH 5.6.1 perldoc] use File::Temp
+        Log: (replaced with #12600)
+             
+             Subject: [PATCH 5.6.1 perldoc] use File::Temp
              From: Mikhail Zabaluev <mhz@alt-linux.org>
              Date: Fri, 12 Oct 2001 12:47:47 +0400
              Message-Id: <20011012124747.E13918@localhost.localdomain>
@@ -2419,7 +2667,9 @@ ____________________________________________________________________________
 	   ! ext/B/B/Terse.pm
 ____________________________________________________________________________
 [ 12249] By: jhi                                   on 2001/09/27  22:29:32
-        Log: Subject: [PATCH] Cleanup of perldsc.pod      
+        Log: (retracted by #12338)
+             
+             Subject: [PATCH] Cleanup of perldsc.pod      
              From: Casey West <casey@geeknest.com>
              Date: Thu, 27 Sep 2001 11:13:17 -0400
              Message-ID: <20010927111317.A1942@stupid.geeknest.com>
@@ -3199,7 +3449,9 @@ ____________________________________________________________________________
 	   ! embed.pl proto.h sharedsv.h
 ____________________________________________________________________________
 [ 12136] By: ams                                   on 2001/09/22  15:14:34
-        Log: Subject: [PATCH MANIFEST lib/warnings/register.t lib/warnings/register.pm]
+        Log: (Retracted by #12185)
+             
+             Subject: [PATCH MANIFEST lib/warnings/register.t lib/warnings/register.pm]
              Add Tests for warnings::register, Doc Update
              From: "chromatic" <chromatic@rmci.net>
              Date: Sat, 22 Sep 2001 09:43:20 -0600
