@@ -49,7 +49,7 @@ use strict;
 sub paraprint;
 
 
-my($Version) = "1.16";
+my($Version) = "1.17";
 
 # Changed in 1.06 to skip Mail::Send and Mail::Util if not available.
 # Changed in 1.07 to see more sendmail execs, and added pipe output.
@@ -68,6 +68,7 @@ my($Version) = "1.16";
 # Changed in 1.15 to add warnings to stop people using perlbug for non-bugs.
 #                 Also report selected environment variables.
 # Changed in 1.16 to include @INC, and allow user to re-edit if no changes.
+# Changed in 1.17 Win32 support added.  GSAR 97-04-12
 
 # TODO: Allow the user to re-name the file on mail failure, and
 #       make sure failure (transmission-wise) of Mail::Send is 
@@ -75,7 +76,7 @@ my($Version) = "1.16";
 
 my( $file, $usefile, $cc, $address, $perlbug, $testaddress, $filename,
     $subject, $from, $verbose, $ed, 
-    $fh, $me, $Is_VMS, $msg, $body, $andcc, %REP);
+    $fh, $me, $Is_MSWin32, $Is_VMS, $msg, $body, $andcc, %REP);
 
 Init();
 
@@ -102,6 +103,7 @@ sub Init {
  
 	# -------- Setup --------
 
+	$Is_MSWin32 = $^O eq 'MSWin32';
 	$Is_VMS = $^O eq 'VMS';
 
 	getopts("dhva:s:b:f:r:e:SCc:t");
@@ -149,12 +151,12 @@ sub Init {
 
 	# Editor
 	$ed = (	$::opt_e || $ENV{VISUAL} || $ENV{EDITOR} || $ENV{EDIT} || 
-		      ($Is_VMS ? "edit/tpu" : "vi")
+		      ($Is_VMS ? "edit/tpu" : $Is_MSWin32 ? "notepad" : "vi")
 	      );
 	      
       
 	# My username
-	$me = getpwuid($<);
+	$me = ($Is_MSWin32 ? $ENV{'USERNAME'} : getpwuid($<));
 
 }
 
@@ -212,6 +214,8 @@ EOF
 		
 		if($::HaveUtil) {
 			$domain = Mail::Util::maildomain();
+		} elsif ($Is_MSWin32) {
+			$domain = $ENV{'USERDOMAIN'};
 		} elsif ($Is_VMS) {
 			require Sys::Hostname;
 			$domain = Sys::Hostname::hostname();
@@ -345,7 +349,8 @@ EOF
 	# Generate scratch file to edit report in
 	
 	{
-	my($dir) = $Is_VMS ? 'sys$scratch:' : '/tmp/';
+	my($dir) = ($Is_VMS ? 'sys$scratch:' :
+		    ($Is_MSWin32 and $ENV{'TEMP'} ? $ENV{'TEMP'} : '/tmp/'));
 	$filename = "bugrep0$$";
 	$filename++ while -e "$dir$filename";
 	$filename = "$dir$filename";

@@ -947,6 +947,7 @@ pp_symlink
 pp_syscall
 pp_sysopen
 pp_sysread
+pp_sysseek
 pp_system
 pp_syswrite
 pp_tell

@@ -237,6 +237,7 @@ symlink
 syscall
 sysopen
 sysread
+sysseek
 system
 syswrite
 tell

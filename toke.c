@@ -3533,6 +3533,9 @@ yylex()
 	case KEY_sysread:
 	    LOP(OP_SYSREAD,XTERM);
 
+	case KEY_sysseek:
+	    LOP(OP_SYSSEEK,XTERM);
+
 	case KEY_syswrite:
 	    LOP(OP_SYSWRITE,XTERM);
 
@@ -4180,10 +4183,11 @@ I32 len;
 		if (strEQ(d,"system"))		return -KEY_system;
 		break;
 	    case 7:
-		if (strEQ(d,"sysopen"))		return -KEY_sysopen;
-		if (strEQ(d,"sysread"))		return -KEY_sysread;
 		if (strEQ(d,"symlink"))		return -KEY_symlink;
 		if (strEQ(d,"syscall"))		return -KEY_syscall;
+		if (strEQ(d,"sysopen"))		return -KEY_sysopen;
+		if (strEQ(d,"sysread"))		return -KEY_sysread;
+		if (strEQ(d,"sysseek"))		return -KEY_sysseek;
 		break;
 	    case 8:
 		if (strEQ(d,"syswrite"))	return -KEY_syswrite;

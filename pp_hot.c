@@ -818,7 +818,8 @@ PP(pp_match)
     }
     if (!rx->nparens && !global)
 	gimme = G_SCALAR;			/* accidental array context? */
-    safebase = (((gimme == G_ARRAY) || global) && !sawampersand);
+    safebase = (((gimme == G_ARRAY) || global || !rx->nparens)
+		&& !sawampersand);
     if (pm->op_pmflags & (PMf_MULTILINE|PMf_SINGLELINE)) {
 	SAVEINT(multiline);
 	multiline = pm->op_pmflags & PMf_MULTILINE;
@@ -1387,13 +1388,6 @@ PP(pp_iter)
     RETPUSHYES;
 }
 
-static void
-leave_subst(p)
-void *p;
-{
-    ((PMOP*)p)->op_private &= ~OPpLVAL_INTRO;
-}
-
 PP(pp_subst)
 {
     dSP; dTARG;
@@ -1434,13 +1428,6 @@ PP(pp_subst)
     if (!SvPOKp(TARG) || SvTYPE(TARG) == SVt_PVGV)
 	force_on_match = 1;
     TAINT_NOT;
-
-    if (pm->op_private & OPpLVAL_INTRO)
-	croak("Recursive substitution detected");
-    if (!dstr) {
-	SAVEDESTRUCTOR(leave_subst, pm);
-	pm->op_private |= OPpLVAL_INTRO;
-    }
 
   force_it:
     if (!pm || !s)
@@ -1498,7 +1485,7 @@ PP(pp_subst)
     c = dstr ? SvPV(dstr, clen) : Nullch;
 
     /* can do inplace substitution? */
-    if (c && clen <= rx->minlen) {
+    if (c && clen <= rx->minlen && safebase) {
 	if (! pregexec(rx, s, strend, orig, 0,
 		       SvSCREAM(TARG) ? TARG : Nullsv, safebase)) {
 	    PUSHs(&sv_no);
@@ -1510,8 +1497,6 @@ PP(pp_subst)
 	    s = SvPV_force(TARG, len);
 	    goto force_it;
 	}
-	if (rx->subbase) 	/* oops, no we can't */
-	    goto long_way;
 	d = s;
 	curpm = pm;
 	SvSCREAM_off(TARG);	/* disable possible screamer */
@@ -1592,7 +1577,6 @@ PP(pp_subst)
 
     if (pregexec(rx, s, strend, orig, 0,
 		 SvSCREAM(TARG) ? TARG : Nullsv, safebase)) {
-    long_way:
 	if (force_on_match) {
 	    force_on_match = 0;
 	    s = SvPV_force(TARG, len);

@@ -5,7 +5,7 @@ use Config;
 use File::Basename qw(basename dirname fileparse);
 use DirHandle;
 use strict;
-use vars qw($VERSION $Is_Mac $Is_OS2 $Is_VMS
+use vars qw($VERSION $Is_Mac $Is_OS2 $Is_VMS $Is_Win32
 	    $Verbose %pm %static $Xsubpp_Version);
 
 $VERSION = substr q$Revision: 1.114 $, 10;
@@ -15,7 +15,8 @@ Exporter::import('ExtUtils::MakeMaker',
 	qw( $Verbose &neatvalue));
 
 $Is_OS2 = $^O eq 'os2';
-$Is_Mac = $^O eq "MacOS";
+$Is_Mac = $^O eq 'MacOS';
+$Is_Win32 = $^O eq 'MSWin32';
 
 if ($Is_VMS = $^O eq 'VMS') {
     require VMS::Filespec;
@@ -1431,9 +1432,9 @@ sub init_main {
     if ($self->{PERL_SRC}){
 	$self->{PERL_LIB}     ||= $self->catdir("$self->{PERL_SRC}","lib");
 	$self->{PERL_ARCHLIB} = $self->{PERL_LIB};
-	$self->{PERL_INC}     = $self->{PERL_SRC};
-	# catch a situation that has occurred a few times in the past:
+	$self->{PERL_INC}     = ($Is_Win32) ? $self->catdir($self->{PERL_LIB},"CORE") : $self->{PERL_SRC};
 
+	# catch a situation that has occurred a few times in the past:
 	unless (
 		-s $self->catfile($self->{PERL_SRC},'cflags')
 		or
@@ -1442,6 +1443,8 @@ sub init_main {
 		-s $self->catfile($self->{PERL_SRC},'perlshr_attr.opt')
 		or
 		$Is_Mac
+		or
+		$Is_Win32
 	       ){
 	    warn qq{
 You cannot build extensions below the perl source tree after executing

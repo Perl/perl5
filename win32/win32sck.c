@@ -22,13 +22,8 @@
 #ifdef USE_SOCKETS_AS_HANDLES
 /* thanks to Beverly Brown	(beverly@datacube.com) */
 
-#	if defined(_WIN32) && !defined(WIN95_OSFHANDLE_FIXED) && defined(_M_IX86)
-/*#		define OPEN_SOCKET(x)	_patch_open_osfhandle(x, _O_RDWR | _O_BINARY) */
-#		define OPEN_SOCKET(x)	_open_osfhandle(x,_O_RDWR|_O_BINARY)
-#	else
-#		define OPEN_SOCKET(x)	_open_osfhandle(x,_O_RDWR|_O_BINARY)
-#	endif
-#		define TO_SOCKET(x)	_get_osfhandle(x)
+#define OPEN_SOCKET(x)	_open_osfhandle(x,_O_RDWR|_O_BINARY)
+#define TO_SOCKET(x)	_get_osfhandle(x)
 
 #else
 
@@ -37,123 +32,9 @@
 
 #endif	/* USE_SOCKETS_AS_HANDLES */
 
-/*
- * This is a clone of fdopen so that we can handle the version of
- * sockets that NT gets to use.
- *
- * The problem is that sockets are not real file handles and 
- * cannot be fdopen'ed. This causes problems in the do_socket
- * routine in doio.c, since it tries to create two file pointers
- * for the socket just created. We'll fake out an fdopen and see
- * if we can prevent perl from trying to do stdio on sockets.
- */
-
-#if defined(_WIN32) && !defined(WIN95_OSFHANDLE_FIXED) && defined(_M_IX86)
-
-#	ifdef __cplusplus
-#define EXT_C_FUNC	extern "C"
-#	else
-#define EXT_C_FUNC	extern
-#	endif
-
-EXT_C_FUNC int __cdecl _alloc_osfhnd(void);
-EXT_C_FUNC int __cdecl _set_osfhnd(int fh, long value);
-EXT_C_FUNC void __cdecl _lock_fhandle(int);
-EXT_C_FUNC void __cdecl _unlock_fhandle(int);
-EXT_C_FUNC void __cdecl _unlock(int);
-EXT_C_FUNC struct servent* win32_savecopyservent(struct servent*d, 
-						 struct servent*s, const char *proto);
-
-#if	(_MSC_VER >= 1000)
-typedef struct 	{
-    long osfhnd;    /* underlying OS file HANDLE */
-    char osfile;    /* attributes of file (e.g., open in text mode?) */
-    char pipech;    /* one char buffer for handles opened on pipes */
-#if defined (_MT) && !defined (DLL_FOR_WIN32S)
-    int lockinitflag;
-    CRITICAL_SECTION lock;
-#endif  /* defined (_MT) && !defined (DLL_FOR_WIN32S) */
-}	ioinfo;
-
-EXT_C_FUNC ioinfo * __pioinfo[];
-
-#define IOINFO_L2E			5
-#define IOINFO_ARRAY_ELTS	(1 << IOINFO_L2E)
-#define _pioinfo(i)	(__pioinfo[i >> IOINFO_L2E] + (i & (IOINFO_ARRAY_ELTS - 1)))
-#define _osfile(i)	(_pioinfo(i)->osfile)
-#else	/* (_MSC_VER >= 1000) */
-	extern char _osfile[];
-#endif	/* (_MSC_VER >= 1000) */
-
-#define FOPEN			0x01	/* file handle open */
-#define FAPPEND			0x20	/* file handle opened O_APPEND */
-#define FDEV			0x40	/* file handle refers to device */
-#define FTEXT			0x80	/* file handle is in text mode */
-
-#define _STREAM_LOCKS   26		/* Table of stream locks */
-#define _LAST_STREAM_LOCK  (_STREAM_LOCKS+_NSTREAM_-1)	/* Last stream lock */
-#define _FH_LOCKS          (_LAST_STREAM_LOCK+1)	/* Table of fh locks */
-
-/***
-*int _patch_open_osfhandle(long osfhandle, int flags) - open C Runtime file handle
-*
-*Purpose:
-*       This function allocates a free C Runtime file handle and associates
-*       it with the Win32 HANDLE specified by the first parameter. This is a
-*	temperary fix for WIN95's brain damage GetFileType() error on socket
-*	we just bypass that call for socket
-*
-*Entry:
-*       long osfhandle - Win32 HANDLE to associate with C Runtime file handle.
-*       int flags      - flags to associate with C Runtime file handle.
-*
-*Exit:
-*       returns index of entry in fh, if successful
-*       return -1, if no free entry is found
-*
-*Exceptions:
-*
-*******************************************************************************/
-
-int __cdecl
-_patch_open_osfhandle(long osfhandle, int flags)
-{
-    int fh;
-    char fileflags;		/* _osfile flags */
-
-    /* copy relevant flags from second parameter */
-    fileflags = FDEV;
-
-    if(flags & _O_APPEND)
-	fileflags |= FAPPEND;
-
-    if(flags & _O_TEXT)
-	fileflags |= FTEXT;
-
-    /* attempt to allocate a C Runtime file handle */
-    if((fh = _alloc_osfhnd()) == -1) {
-	errno = EMFILE;		/* too many open files */
-	_doserrno = 0L;		/* not an OS error */
-	return -1;		/* return error to caller */
-    }
-
-    /* the file is open. now, set the info in _osfhnd array */
-    _set_osfhnd(fh, osfhandle);
-
-    fileflags |= FOPEN;		/* mark as open */
-
-#if (_MSC_VER >= 1000)
-    _osfile(fh) = fileflags;	/* set osfile entry */
-    _unlock_fhandle(fh);
-#else
-    _osfile[fh] = fileflags;	/* set osfile entry */
-    _unlock(fh+_FH_LOCKS);		/* unlock handle */
-#endif
-
-    return fh;			/* return handle */
-}
-#endif	/* _M_IX86 */
-
+static struct servent* win32_savecopyservent(struct servent*d,
+                                             struct servent*s,
+                                             const char *proto);
 #define SOCKETAPI PASCAL 
 
 typedef SOCKET (SOCKETAPI *LPSOCKACCEPT)(SOCKET, struct sockaddr *, int *);
@@ -804,6 +685,26 @@ void
 win32_setservent(int stayopen)
 {
     CROAK("setservent not implemented!\n");
+}
+
+#define WIN32IO_IS_STDIO
+#include <io.h>
+#include "win32iop.h"
+
+static struct servent*
+win32_savecopyservent(struct servent*d, struct servent*s, const char *proto)
+{
+    d->s_name = s->s_name;
+    d->s_aliases = s->s_aliases;
+    d->s_port = s->s_port;
+    if (!IsWin95() && s->s_proto && strlen(s->s_proto))
+	d->s_proto = s->s_proto;
+    else if (proto && strlen(proto))
+	d->s_proto = (char *)proto;
+    else
+	d->s_proto = "tcp";
+   
+    return d;
 }
 
 

@@ -91,7 +91,7 @@ extern int h_errno;
 
 /* Put this after #includes because <unistd.h> defines _XOPEN_*. */
 #ifndef Sock_size_t
-#  if _XOPEN_VERSION >= 5 || defined(_XOPEN_SOURCE_EXTENDED)
+#  if _XOPEN_VERSION >= 5 || defined(_XOPEN_SOURCE_EXTENDED) || defined(__GLIBC__)
 #    define Sock_size_t Size_t
 #  else
 #    define Sock_size_t int
@@ -1162,7 +1162,9 @@ PP(pp_sysread)
     MAGIC *mg;
 
     gv = (GV*)*++MARK;
-    if (SvMAGICAL(gv) && (mg = mg_find((SV*)gv, 'q'))) {
+    if (op->op_type == OP_READ &&
+	SvMAGICAL(gv) && (mg = mg_find((SV*)gv, 'q')))
+    {
 	SV *sv;
 	
 	PUSHMARK(MARK-1);
@@ -1367,6 +1369,11 @@ PP(pp_tell)
 }
 
 PP(pp_seek)
+{
+    return pp_sysseek(ARGS);
+}
+
+PP(pp_sysseek)
 {
     dSP;
     GV *gv;

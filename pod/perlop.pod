@@ -27,7 +27,7 @@ operate on scalar values only, not array values.
     left	| ^
     left	&&
     left	||
-    nonassoc	..
+    nonassoc	..  ...
     right	?:
     right	= += -= *= etc.
     left	, =>
@@ -722,7 +722,7 @@ beginning.  Examples:
     print "$sentences\n";
 
     # using m//g with \G
-    $_ = "ppooqppq";
+    $_ = "ppooqppqq";
     while ($i++ < 2) {
         print "1: '";
         print $1 while /(o)/g; print "', pos=", pos, "\n";
@@ -735,14 +735,11 @@ beginning.  Examples:
 The last example should print:
 
     1: 'oo', pos=4
-    2: 'q', pos=4
+    2: 'q', pos=5
     3: 'pp', pos=7
     1: '', pos=7
-    2: 'q', pos=7
-    3: '', pos=7
-
-Note how C<m//g> matches change the value reported by C<pos()>, but the
-non-global match doesn't.
+    2: 'q', pos=8
+    3: '', pos=8
 
 A useful idiom for C<lex>-like scanners is C</\G.../g>. You can
 combine several regexps like this to process a string part-by-part,

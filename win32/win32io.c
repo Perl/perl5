@@ -65,6 +65,12 @@ dummy_globalmode(int mode)
     return o;
 }
 
+#ifdef _DLL
+/* It may or may not be fixed (ok on NT), but DLL runtime
+   does not export the functions used in the workround
+*/
+#define WIN95_OSFHANDLE_FIXED
+#endif
 
 #if defined(_WIN32) && !defined(WIN95_OSFHANDLE_FIXED) && defined(_M_IX86)
 
@@ -172,7 +178,7 @@ my_open_osfhandle(long osfhandle, int flags)
 #else
 
 int __cdecl
-stolen_open_osfhandle(long osfhandle, int flags)
+my_open_osfhandle(long osfhandle, int flags)
 {
     return _open_osfhandle(osfhandle, flags);
 }

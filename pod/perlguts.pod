@@ -1960,6 +1960,12 @@ Tells Perl to C<eval> the string in the SV.
 
 	I32	perl_eval_sv _((SV* sv, I32 flags));
 
+=item perl_eval_pv
+
+Tells Perl to C<eval> the given string and return an SV* result.
+
+	SV*	perl_eval_pv _((char* p, I32 croak_on_error));
+
 =item perl_free
 
 Releases a Perl interpreter.  See L<perlembed>.
@@ -2930,4 +2936,4 @@ API Listing by Dean Roehrich <F<roehrich@cray.com>>.
 
 =head1 DATE
 
-Version 31.5: 1997/4/1
+Version 31.6: 1997/4/14

@@ -263,57 +263,49 @@ your C program>.
 
 =head2 Evaluating a Perl statement from your C program
 
-One way to evaluate pieces of Perl code is to use
-L<perlguts/perl_eval_sv()>.  We've wrapped this inside our own
-I<perl_eval()> function, which converts a command string to an SV,
-passing this and the L<perlcall/G_DISCARD> flag to
-L<perlguts/perl_eval_sv()>.
+Perl provides two API functions to evaluate pieces of Perl code.
+These are L<perlguts/perl_eval_sv()> and L<perlguts/perl_eval_pv()>.
 
-Arguably, this is the only routine you'll ever need to execute
-snippets of Perl code from within your C program.  Your string can be
+Arguably, these are the only routines you'll ever need to execute
+snippets of Perl code from within your C program.  Your code can be
 as long as you wish; it can contain multiple statements; it can employ
 L<perlfunc/use>, L<perlfunc/require> and L<perlfunc/do> to include
 external Perl files.
 
-Our I<perl_eval()> lets us evaluate individual Perl strings, and then
+I<perl_eval_pv()> lets us evaluate individual Perl strings, and then
 extract variables for coercion into C types.  The following program,
 I<string.c>, executes three Perl strings, extracting an C<int> from
 the first, a C<float> from the second, and a C<char *> from the third.
 
    #include <EXTERN.h>
    #include <perl.h>
-
+   
    static PerlInterpreter *my_perl;
-
-   I32 perl_eval(char *string)
-   {
-     return perl_eval_sv(newSVpv(string,0), G_DISCARD);
-   }
-
+   
    main (int argc, char **argv, char **env)
    {
-     char *embedding[] = { "", "-e", "0" };
-     STRLEN length;
-
-     my_perl = perl_alloc();
-     perl_construct( my_perl );
-
-     perl_parse(my_perl, NULL, 3, embedding, NULL);
-     perl_run(my_perl);
-                                       /** Treat $a as an integer **/
-     perl_eval("$a = 3; $a **= 2");
-     printf("a = %d\n", SvIV(perl_get_sv("a", FALSE)));
-
-                                       /** Treat $a as a float **/
-     perl_eval("$a = 3.14; $a **= 2");
-     printf("a = %f\n", SvNV(perl_get_sv("a", FALSE)));
-
-                                       /** Treat $a as a string **/
-     perl_eval("$a = 'rekcaH lreP rehtonA tsuJ'; $a = reverse($a); ");
-     printf("a = %s\n", SvPV(perl_get_sv("a", FALSE), length));
-
-     perl_destruct(my_perl);
-     perl_free(my_perl);
+       char *embedding[] = { "", "-e", "0" };
+   
+       my_perl = perl_alloc();
+       perl_construct( my_perl );
+   
+       perl_parse(my_perl, NULL, 3, embedding, NULL);
+       perl_run(my_perl);
+   
+       /** Treat $a as an integer **/
+       perl_eval_pv("$a = 3; $a **= 2", TRUE);
+       printf("a = %d\n", SvIV(perl_get_sv("a", FALSE)));
+   
+       /** Treat $a as a float **/
+       perl_eval_pv("$a = 3.14; $a **= 2", TRUE);
+       printf("a = %f\n", SvNV(perl_get_sv("a", FALSE)));
+   
+       /** Treat $a as a string **/
+       perl_eval_pv("$a = 'rekcaH lreP rehtonA tsuJ'; $a = reverse($a);", TRUE);
+       printf("a = %s\n", SvPV(perl_get_sv("a", FALSE), na));
+   
+       perl_destruct(my_perl);
+       perl_free(my_perl);
    }
 
 All of those strange functions with I<sv> in their names help convert Perl scalars to C types.  They're described in L<perlguts>.
@@ -329,28 +321,10 @@ I<SvPV()> to create a string:
 In the example above, we've created a global variable to temporarily
 store the computed value of our eval'd expression.  It is also
 possible and in most cases a better strategy to fetch the return value
-from L<perl_eval_sv> instead.  Example:
+from L<perl_eval_pv> instead.  Example:
 
-   SV *perl_eval(char *string, int croak_on_error)
-   {
-       dSP;
-       SV *sv = newSVpv(string,0);
-
-       PUSHMARK(sp);
-       perl_eval_sv(sv, G_SCALAR);
-       SvREFCNT_dec(sv);
-
-       SPAGAIN;
-       sv = POPs;
-       PUTBACK;
-
-       if (croak_on_error && SvTRUE(GvSV(errgv)))
-	     croak(SvPV(GvSV(errgv),na));
-
-       return sv;
-   }
    ...
-   SV *val = perl_eval("reverse 'rekcaH lreP rehtonA tsuJ'", TRUE);
+   SV *val = perl_eval_pv("reverse 'rekcaH lreP rehtonA tsuJ'", TRUE);
    printf("%s\n", SvPV(val,na));
    ...
 
@@ -359,7 +333,7 @@ variables and we've simplified our code as well.
 
 =head2 Performing Perl pattern matches and substitutions from your C program
 
-Our I<perl_eval()> lets us evaluate strings of Perl code, so we can
+The I<perl_eval_pv()> function lets us evaluate strings of Perl code, so we can
 define some functions that use it to "specialize" in matches and
 substitutions: I<match()>, I<substitute()>, and I<matches()>.
 
@@ -390,10 +364,7 @@ been wrapped here):
    #include <perl.h>
 
    static PerlInterpreter *my_perl;
-   I32 perl_eval(char *string)
-   {
-      return perl_eval_sv(newSVpv(string,0), G_DISCARD);
-   }
+
    /** match(string, pattern)
    **
    ** Used for matches in a scalar context.
@@ -406,7 +377,7 @@ been wrapped here):
      command = malloc(sizeof(char) * strlen(string) + strlen(pattern) + 37);
      sprintf(command, "$string = '%s'; $return = $string =~ %s",
                       string, pattern);
-     perl_eval(command);
+     perl_eval_pv(command, TRUE);
      free(command);
      return SvIV(perl_get_sv("return", FALSE));
    }
@@ -424,7 +395,7 @@ been wrapped here):
      command = malloc(sizeof(char) * strlen(*string) + strlen(pattern) + 35);
      sprintf(command, "$string = '%s'; $ret = ($string =~ %s)",
                       *string, pattern);
-     perl_eval(command);
+     perl_eval_pv(command, TRUE);
      free(command);
      *string = SvPV(perl_get_sv("string", FALSE), length);
      return SvIV(perl_get_sv("ret", FALSE));
@@ -447,7 +418,7 @@ been wrapped here):
      command = malloc(sizeof(char) * strlen(string) + strlen(pattern) + 38);
      sprintf(command, "$string = '%s'; @array = ($string =~ %s)",
                       string, pattern);
-     perl_eval(command);
+     perl_eval_pv(command, TRUE);
      free(command);
      array = perl_get_av("array", FALSE);
      num_matches = av_len(array) + 1; /** assume $[ is 0 **/
@@ -990,7 +961,7 @@ Dov Grobgeld, and Ilya Zakharevich.
 Check out Doug's article on embedding in Volume 1, Issue 4 of The Perl
 Journal.  Info about TPJ is available from http://tpj.com.
 
-February 1, 1997
+April 14, 1997
 
 Some of this material is excerpted from Jon Orwant's book: I<Perl 5
 Interactive>, Waite Group Press, 1996 (ISBN 1-57169-064-6) and appears

@@ -860,10 +860,10 @@ $^E, $^H, $^M
 =item New and changed builtin functions
 
 delete on slices, flock, printf and sprintf, keys as an lvalue, my() in
-Control Structures, unpack() and pack(), use VERSION, use Module VERSION
-LIST, prototype(FUNCTION), srand, $_ as Default, C<m//g> does not reset
-search position on failure, C<m//x> ignores whitespace before ?*+{}, nested
-C<sub{}> closures work now, formats work right on changing lexicals
+Control Structures, pack() and unpack(), sysseek(), use VERSION, use Module
+VERSION LIST, prototype(FUNCTION), srand, $_ as Default, C<m//g> does not
+reset search position on failure, C<m//x> ignores whitespace before ?*+{},
+nested C<sub{}> closures work now, formats work right on changing lexicals
 
 =item New builtin methods
 
@@ -925,7 +925,8 @@ C<void> XSUBs now default to returning nothing
 
 =item C Language API Changes
 
-C<gv_fetchmethod> and C<perl_call_sv>, Extended API for manipulating hashes
+C<gv_fetchmethod> and C<perl_call_sv>, C<perl_eval_pv>, Extended API for
+manipulating hashes
 
 =item Documentation Changes
 
@@ -947,16 +948,15 @@ number, Integer overflow in octal number, internal error: glob failed, Name
 "%s::%s" used only once: possible typo, Null picture in formline, Offset
 outside string, Out of memory!, Out of memory during request for %s,
 Possible attempt to put comments in qw() list, Possible attempt to separate
-words with commas, Recursive substitution detected, Scalar value @%s{%s}
-better written as $%s{%s}, Stub found while resolving method `%s'
-overloading `%s' in package `%s', Too late for "B<-T>" option, untie
-attempted while %d inner references still exist, Unrecognized character %s,
-Unsupported function fork, Use of "$$<digit>" to mean "${$}<digit>" is
-deprecated, Value of %s can be "0"; test with defined(), Variable "%s" may
-be unavailable, Variable "%s" will not stay shared, Warning: something's
-wrong, Ill-formed logical name |%s| in prime_env_iter, Got an error from
-DosAllocMem, Malformed PERLLIB_PREFIX, PERL_SH_DIR too long, Process
-terminated by SIG%s
+words with commas, Scalar value @%s{%s} better written as $%s{%s}, Stub
+found while resolving method `%s' overloading `%s' in package `%s', Too
+late for "B<-T>" option, untie attempted while %d inner references still
+exist, Unrecognized character %s, Unsupported function fork, Use of
+"$$<digit>" to mean "${$}<digit>" is deprecated, Value of %s can be "0";
+test with defined(), Variable "%s" may be unavailable, Variable "%s" will
+not stay shared, Warning: something's wrong, Ill-formed logical name |%s|
+in prime_env_iter, Got an error from DosAllocMem, Malformed PERLLIB_PREFIX,
+PERL_SH_DIR too long, Process terminated by SIG%s
 
 =item BUGS
 
@@ -1220,16 +1220,16 @@ srand, stat FILEHANDLE, stat EXPR, stat, study SCALAR, study, sub BLOCK,
 sub NAME, sub NAME BLOCK, substr EXPR,OFFSET,LEN, substr EXPR,OFFSET,
 symlink OLDFILE,NEWFILE, syscall LIST, sysopen FILEHANDLE,FILENAME,MODE,
 sysopen FILEHANDLE,FILENAME,MODE,PERMS, sysread
-FILEHANDLE,SCALAR,LENGTH,OFFSET, sysread FILEHANDLE,SCALAR,LENGTH, system
-LIST, syswrite FILEHANDLE,SCALAR,LENGTH,OFFSET, syswrite
-FILEHANDLE,SCALAR,LENGTH, tell FILEHANDLE, tell, telldir DIRHANDLE, tie
-VARIABLE,CLASSNAME,LIST, tied VARIABLE, time, times, tr///, truncate
-FILEHANDLE,LENGTH, truncate EXPR,LENGTH, uc EXPR, uc, ucfirst EXPR,
-ucfirst, umask EXPR, umask, undef EXPR, undef, unlink LIST, unlink, unpack
-TEMPLATE,EXPR, untie VARIABLE, unshift ARRAY,LIST, use Module LIST, use
-Module, use Module VERSION LIST, use VERSION, utime LIST, values HASH, vec
-EXPR,OFFSET,BITS, wait, waitpid PID,FLAGS, wantarray, warn LIST, write
-FILEHANDLE, write EXPR, write, y///
+FILEHANDLE,SCALAR,LENGTH,OFFSET, sysread FILEHANDLE,SCALAR,LENGTH, sysseek
+FILEHANDLE,POSITION,WHENCE, system LIST, syswrite
+FILEHANDLE,SCALAR,LENGTH,OFFSET, syswrite FILEHANDLE,SCALAR,LENGTH, tell
+FILEHANDLE, tell, telldir DIRHANDLE, tie VARIABLE,CLASSNAME,LIST, tied
+VARIABLE, time, times, tr///, truncate FILEHANDLE,LENGTH, truncate
+EXPR,LENGTH, uc EXPR, uc, ucfirst EXPR, ucfirst, umask EXPR, umask, undef
+EXPR, undef, unlink LIST, unlink, unpack TEMPLATE,EXPR, untie VARIABLE,
+unshift ARRAY,LIST, use Module LIST, use Module, use Module VERSION LIST,
+use VERSION, utime LIST, values HASH, vec EXPR,OFFSET,BITS, wait, waitpid
+PID,FLAGS, wantarray, warn LIST, write FILEHANDLE, write EXPR, write, y///
 
 =back
 
@@ -2339,8 +2339,8 @@ mg_get, mg_len, mg_magical, mg_set, Move, na, New, Newc, Newz, newAV,
 newHV, newRV_inc, newRV_noinc, newSV, newSViv, newSVnv, newSVpv, newSVrv,
 newSVsv, newXS, newXSproto, Nullav, Nullch, Nullcv, Nullhv, Nullsv,
 ORIGMARK, perl_alloc, perl_call_argv, perl_call_method, perl_call_pv,
-perl_call_sv, perl_construct, perl_destruct, perl_eval_sv, perl_free,
-perl_get_av, perl_get_cv, perl_get_hv, perl_get_sv, perl_parse,
+perl_call_sv, perl_construct, perl_destruct, perl_eval_sv, perl_eval_pv,
+perl_free, perl_get_av, perl_get_cv, perl_get_hv, perl_get_sv, perl_parse,
 perl_require_pv, perl_run, POPi, POPl, POPp, POPn, POPs, PUSHMARK, PUSHi,
 PUSHn, PUSHp, PUSHs, PUTBACK, Renew, Renewc, RETVAL, safefree, safemalloc,
 saferealloc, savepv, savepvn, SAVETMPS, SP, SPAGAIN, ST, strEQ, strGE,
@@ -2962,7 +2962,9 @@ Kevin B. Hendricks (kbhend@dogwood.tyler.wm.edu), Stephen Dahmen
 
 =item DESCRIPTION
 
-=item NOTE
+=item NOTE 1
+
+=item NOTE 2
 
 =item SEE ALSO
 

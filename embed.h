@@ -815,6 +815,7 @@
 #define pp_syscall		Perl_pp_syscall
 #define pp_sysopen		Perl_pp_sysopen
 #define pp_sysread		Perl_pp_sysread
+#define pp_sysseek		Perl_pp_sysseek
 #define pp_system		Perl_pp_system
 #define pp_syswrite		Perl_pp_syswrite
 #define pp_tell			Perl_pp_tell

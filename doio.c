@@ -68,7 +68,7 @@
 
 /* Put this after #includes because <unistd.h> defines _XOPEN_*. */
 #ifndef Sock_size_t
-#  if _XOPEN_VERSION >= 5 || defined(_XOPEN_SOURCE_EXTENDED)
+#  if _XOPEN_VERSION >= 5 || defined(_XOPEN_SOURCE_EXTENDED) || defined(__GLIBC__)
 #    define Sock_size_t Size_t
 #  else
 #    define Sock_size_t int
@@ -689,22 +689,18 @@ long pos;
 int whence;
 {
     register IO *io;
+    register PerlIO *fp;
 
-    if (!gv)
-	goto nuts;
-
-    io = GvIO(gv);
-    if (!io || !IoIFP(io))
-	goto nuts;
-
+    if (gv && (io = GvIO(gv)) && (fp = IoIFP(io))) {
 #ifdef ULTRIX_STDIO_BOTCH
-    if (PerlIO_eof(IoIFP(io)))
-	(void)PerlIO_seek (IoIFP(io), 0L, 2);		/* ultrix 1.2 workaround */
+	if (PerlIO_eof(fp))
+	    (void)PerlIO_seek(fp, 0L, 2);	/* ultrix 1.2 workaround */
 #endif
-
-    return PerlIO_seek(IoIFP(io), pos, whence) >= 0;
-
-nuts:
+	if (op->op_type == OP_SYSSEEK)
+	    return lseek(PerlIO_fileno(fp), pos, whence) >= 0;
+	else
+	    return PerlIO_seek(fp, pos, whence) >= 0;
+    }
     if (dowarn)
 	warn("seek() on unopened file");
     SETERRNO(EBADF,RMS$_IFI);

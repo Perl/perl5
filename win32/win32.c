@@ -54,22 +54,18 @@ IsWinNT(void) {
 void *
 SetIOSubSystem(void *p)
 {
+    PWIN32_IOSUBSYSTEM old = pIOSubSystem;
     if (p) {
 	PWIN32_IOSUBSYSTEM pio = (PWIN32_IOSUBSYSTEM)p;
-
 	if (pio->signature_begin == 12345678L
 	    && pio->signature_end == 87654321L) {
-	    PWIN32_IOSUBSYSTEM pold = pIOSubSystem;
 	    pIOSubSystem = pio;
-	    return pold;
 	}
     }
     else {
-	/* re-assign our stuff */
-/*	pIOSubSystem = &win32stdio; */
-	pIOSubSystem = NULL;
+	pIOSubSystem = &win32stdio;
     }
-    return pIOSubSystem;
+    return old;
 }
 
 char *

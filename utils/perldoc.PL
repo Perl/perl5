@@ -57,6 +57,7 @@ EOF
 
 use Getopt::Std;
 $Is_VMS = $^O eq 'VMS';
+$Is_MSWin32 = $^O eq 'MSWin32';
 
 sub usage{
     warn "@_\n" if @_;
@@ -67,12 +68,13 @@ perldoc [options] PageName|ModuleName|ProgramName...
 perldoc [options] -f BuiltinFunction
 
 Options:
-    -h   Display this help message.
-    -t   Display pod using pod2text instead of pod2man and nroff.
+    -h   Display this help message
+    -t   Display pod using pod2text instead of pod2man and nroff
+             (-t is the default on win32)
     -u	 Display unformatted pod text
     -m   Display modules file in its entirety
     -l   Display the modules file name
-    -v	 Verbosely describe what's going on.
+    -v	 Verbosely describe what's going on
 
 PageName|ModuleName...
          is the name of a piece of documentation that you want to look at. You 
@@ -100,7 +102,11 @@ getopts("mhtluvf:") || usage;
 
 usage if $opt_h || $opt_h; # avoid -w warning
 
-usage("only one of -t, -u, -m or -l") if $opt_t + $opt_u + $opt_m + $opt_l > 1;
+if ($opt_t + $opt_u + $opt_m + $opt_l > 1) {
+    usage("only one of -t, -u, -m or -l")
+} elsif ($Is_MSWin32) {
+    $opt_t = 1 unless $opt_t + $opt_u + $opt_m + $opt_l;
+}
 
 if ($opt_t) { require Pod::Text; import Pod::Text; }
 
@@ -132,7 +138,7 @@ sub containspod {
      local($")="/";
      my(@p,$p,$cip);
      foreach $p (split(/\//, $file)){
-	if (($Is_VMS or $^O eq 'os2') and not scalar @p) {
+	if (($Is_VMS or $Is_MSWin32 or $^O eq 'os2') and not scalar @p) {
 	    # VMSish filesystems don't begin at '/'
 	    push(@p,$p);
 	    next;
@@ -176,8 +182,10 @@ sub containspod {
  	    if ((    $ret = minus_f_nocase "$dir/$s.pod")
  		or ( $ret = minus_f_nocase "$dir/$s.pm"  and containspod($ret))
  		or ( $ret = minus_f_nocase "$dir/$s"     and containspod($ret))
- 		or ( $Is_VMS and 
+  		or ( $Is_VMS and 
  		     $ret = minus_f_nocase "$dir/$s.com" and containspod($ret))
+		or ( $Is_MSWin32 and 
+ 		     $ret = minus_f_nocase "$dir/$s.bat" and containspod($ret))
  		or ( $ret = minus_f_nocase "$dir/pod/$s.pod")
  		or ( $ret = minus_f_nocase "$dir/pod/$s" and containspod($ret)))
  		{ return $ret; }
@@ -207,6 +215,8 @@ foreach (@pages) {
 		for ($i = 0; $trn = $ENV{'DCL$PATH'.$i}; $i++) {
 		    push(@searchdirs,$trn);
 		}
+	    } elsif ($Is_MSWin32) {
+	        push(@searchdirs, grep(-d, split(';', $ENV{'PATH'})));
 	    } else {
 		    push(@searchdirs, grep(-d, split(':', $ENV{'PATH'})));
 	    }
@@ -241,13 +251,17 @@ if ($opt_l) {
 
 if( ! -t STDOUT ) { $no_tty = 1 }
 
-unless($Is_VMS) {
+if ($Is_MSWin32) {
+	$tmp = "$ENV{TEMP}\\perldoc1.$$";
+	push @pagers, qw( more< less notepad );
+	unshift @pagers, $ENV{PAGER}  if $ENV{PAGER};
+} elsif ($Is_VMS) {
+	$tmp = 'Sys$Scratch:perldoc.tmp1_'.$$;
+	push @pagers, qw( most more less type/page );
+} else {
 	$tmp = "/tmp/perldoc1.$$";
 	push @pagers, qw( more less pg view cat );
 	unshift @pagers, $ENV{PAGER}  if $ENV{PAGER};
-} else {
-	$tmp = 'Sys$Scratch:perldoc.tmp1_'.$$;
-	push @pagers, qw( most more less type/page );
 }
 unshift @pagers, $ENV{PERLDOC_PAGER} if $ENV{PERLDOC_PAGER};
 
@@ -428,6 +442,9 @@ Minor updates by Andy Dougherty <doughera@lafcol.lafayette.edu>
 =cut
 
 #
+# Version 1.12: Sat Apr 12 22:41:09 EST 1997
+#       Gurusamy Sarathy <gsar@umich.edu>
+#	-various fixes for win32
 # Version 1.11: Tue Dec 26 09:54:33 EST 1995
 #       Kenneth Albanowski <kjahds@kjahds.com>
 #   -added Charles Bailey's further VMS patches, and -u switch

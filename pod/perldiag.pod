@@ -1914,12 +1914,6 @@ which is why it's currently left out of your copy.
 (F) More than 100 levels of inheritance were used.  Probably indicates
 an unintended loop in your inheritance hierarchy.
 
-=item Recursive substitution detected
-
-(F) The replacement string of a substitution caused the recursive
-execution of that very same substituion.  Perl cannot keep track of
-special variables (C<$1>, etc.) under such circumstances.
-
 =item Reference miscount in sv_replace()
 
 (W) The internal sv_replace() function was handed a new SV with a

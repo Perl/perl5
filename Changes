@@ -46,6 +46,162 @@ And the Keepers of the Patch Pumpkin:
 
 
 -------------------
+ Version 5.003_97e
+-------------------
+
+Y'know, I've heard of this "beta" thing, but it's been so long since
+I've seen one, I'm not sure it really exists...
+
+ CORE LANGUAGE CHANGES
+
+  Title:  "New operator: sysseek()"
+   From:  Chip Salzenberg
+  Files:  doio.c ext/Opcode/Makefile.PL ext/Opcode/Opcode.pm global.sym
+          keywords.pl opcode.pl pod/perldelta.pod pod/perlfunc.pod
+          pp_sys.c t/op/sysio.t toke.c
+
+  Title:  "Allow recursive substitution again"
+   From:  Chip Salzenberg
+  Files:  pod/perldelta.pod pod/perldiag.pod pp_hot.c
+
+ CORE PORTABILITY
+
+  Title:  "Use size_t for socket size parameters of GNU libc"
+   From:  Chip Salzenberg
+  Files:  doio.c pp_sys.c
+
+  Title:  "Fix STMT_{START,END} under g++"
+   From:  Steven Parkes <parkes@sierravista.com>
+ Msg-ID:  <199704141935.MAA11240@monterey.sierravista.com>
+   Date:  Mon, 14 Apr 1997 12:35:34 -0700
+  Files:  perl.h
+
+  Title:  "Win32 update (four patches)"
+   From:  Gurusamy Sarathy and Nick Ing-Simmons
+  Files:  MANIFEST README.win32 dosish.h ext/SDBM_File/Makefile.PL
+          ext/SDBM_File/sdbm/Makefile.PL ext/SDBM_File/sdbm/sdbm.c
+          ext/SDBM_File/sdbm/sdbm.h lib/ExtUtils/MM_Unix.pm perl.c
+          utils/perlbug.PL utils/perldoc.PL win32/Makefile win32/TEST
+          win32/config.H win32/config.w32 win32/config_h.PL
+          win32/config_sh.PL win32/perllib.c win32/runperl.c
+          win32/win32.c win32/win32io.c win32/win32sck.c
+
+ OTHER CORE CHANGES
+
+  Title:  "New API function: perl_eval_pv()"
+   From:  Doug MacEachern
+ Msg-ID:  <199704142113.RAA06823@postman.osf.org>
+   Date:  Mon, 14 Apr 1997 17:13:41 -0400
+  Files:  perl.c pod/perlcall.pod pod/perldelta.pod pod/perlembed.pod
+          pod/perlguts.pod proto.h
+
+  Title:  "Fix C< s//whatever/ >, which reuses old pattern"
+   From:  Chip Salzenberg
+  Files:  pp_hot.c regexec.c
+
+  Title:  "Return a value from PerlIO_{,un}getc"
+   From:  Hallvard B Furuseth
+ Msg-ID:  <199704131228.OAA05695@bombur2.uio.no>
+   Date:  Sun, 13 Apr 1997 14:28:14 +0200 (MET DST)
+  Files:  perlio.c
+
+  Title:  "Fix for environment leak"
+   From:  skimo@breughel.ufsia.ac.be (Sven Verdoolaege)
+ Msg-ID:  <19970415103246.NN46698@breughel.ufsia.ac.be>
+   Date:  Tue, 15 Apr 1997 10:32:46 +0200
+  Files:  util.c
+
+  Title:  "Fix comments in seed()"
+   From:  Hallvard B Furuseth
+ Msg-ID:  <199704141758.TAA06895@bombur2.uio.no>
+   Date:  Mon, 14 Apr 1997 19:58:38 +0200 (MET DST)
+  Files:  pp.c
+
+ BUILD PROCESS
+
+  Title:  "Put extensions' autoload files in $archlib"
+   From:  Chip Salzenberg
+  Files:  installperl
+
+  Title:  "Use '-fPIC' for debugging compiles under Solaris with gcc"
+   From:  Hallvard B Furuseth
+  Files:  Configure
+
+ LIBRARY AND EXTENSIONS
+
+  Title:  "Refresh CGI to 2.34"
+   From:  Chip Salzenberg
+  Files:  eg/cgi/customize.cgi eg/cgi/tryit.cgi lib/CGI.pm
+          lib/CGI/Apache.pm
+
+  Title:  "Debugger update"
+   From:  Ilya Zakharevich
+ Msg-ID:  <199704142115.RAA09923@monk.mps.ohio-state.edu>
+   Date:  Mon, 14 Apr 1997 17:15:27 -0400 (EDT)
+  Files:  lib/perl5db.pl
+
+  Title:  "diagnostics: $/ gotcha"
+   From:  Andreas Koenig
+ Msg-ID:  <199704151814.UAA03404@anna.in-berlin.de>
+   Date:  Tue, 15 Apr 1997 20:14:01 +0200
+  Files:  lib/diagnostics.pm
+
+  Title:  "Update File::Path"
+   From:  Andreas Koenig
+ Msg-ID:  <199704151401.QAA02556@anna.in-berlin.de>
+   Date:  Tue, 15 Apr 1997 16:01:07 +0200
+  Files:  lib/File/Path.pm t/lib/filepath.t
+
+  Title:  "User::pwent.pm: g{,e}cos"
+   From:  Tom Christiansen
+ Msg-ID:  <199704130135.TAA23274@jhereg.perl.com>
+   Date:  Sat, 12 Apr 1997 19:35:54 -0600
+  Files:  lib/User/pwent.pm
+
+  Title:  "Sys::Syslog: hyphens in hostnames"
+   From:  Jarkko Hietaniemi
+ Msg-ID:  <199704151421.RAA19693@alpha.hut.fi>
+   Date:  Tue, 15 Apr 1997 17:21:53 +0300 (EET DST)
+  Files:  lib/Sys/Syslog.pm
+
+  Title:  "Clean up format of dlopen() debug info"
+   From:  Hallvard B Furuseth
+  Files:  ext/DynaLoader/dl_dlopen.xs
+
+ TESTS
+
+   (no changes)
+
+ UTILITIES
+
+  Title:  "xsubpp incorrectly handles 'class::newthing()'"
+   From:  "John Q. Linux" <jql@jql.accessone.com>
+ Msg-ID:  <199704122201.PAA01780@jql.accessone.com>
+   Date:  Sat, 12 Apr 1997 15:01:33 -0700
+  Files:  lib/ExtUtils/xsubpp
+
+ DOCUMENTATION
+
+  Title:  "Add CGI to perldelta.pod and improve its description in MANIFEST"
+   From:  Chip Salzenberg
+  Files:  MANIFEST pod/perldelta.pod
+
+  Title:  "Describe probs with majordomo 1.94.1"
+   From:  Chip Salzenberg
+  Files:  pod/perldelta.pod
+
+  Title:  "Fix description of /\G/g"
+   From:  Chip Salzenberg
+  Files:  pod/perlop.pod
+
+  Title:  "Mention '...' operator in precedence table"
+   From:  Tom Christiansen
+ Msg-ID:  <199704131724.LAA23120@jhereg.perl.com>
+   Date:  Sun, 13 Apr 1997 11:24:16 -0600
+  Files:  pod/perlop.pod
+
+
+-------------------
  Version 5.003_97d
 -------------------
 

@@ -1,6 +1,7 @@
 /*
- * This file was produced by running the config_h.SH script, on a UNIX machine
- * with config.sh set to conif.w32 from this directory
+ * This file was produced by running the config_h.SH script, which
+ * gets its values from config.sh, which is generally produced by
+ * running Configure.
  *
  * Feel free to modify any of this as the need arises.  Note, however,
  * that running config_h.SH again will wipe out any changes you've made.
@@ -1412,11 +1413,8 @@
  *	This symbol contains the ~name expanded version of ARCHLIB, to be used
  *	in programs that are not prepared to deal with ~ expansion at run-time.
  */
-/* This added by hand */
-#define APPLLIB_EXP (win32PerlLibPath())
-
 #define ARCHLIB "C:\\perl\\lib"		/**/
-/* #define ARCHLIB_EXP "C:\\perl\\lib"		/**/
+#define ARCHLIB_EXP "C:\\perl\\lib"		/**/
 
 /* BINCOMPAT3:
  *	This symbol, if defined, indicates that Perl 5.004 should be
@@ -1672,7 +1670,7 @@
  *	/bin/pdksh, /bin/ash, /bin/bash, or even something such as
  *	D:/bin/sh.exe.
  */
-#define SH_PATH "/bin/sh"  /**/
+#define SH_PATH "cmd /c"  /**/
 
 /* SIG_NAME:
  *	This symbol contains a list of signal names in order of
@@ -1719,7 +1717,7 @@
  *	in programs that are not prepared to deal with ~ expansion at run-time.
  */
 #define SITEARCH "C:\\perl\\lib\\site"		/**/
-/* #define SITEARCH_EXP "C:\\perl\\lib\\site"		/**/
+#define SITEARCH_EXP "C:\\perl\\lib\\site"		/**/
 
 /* SITELIB:
  *	This symbol contains the name of the private library for this package.
@@ -1776,7 +1774,8 @@
 #define M_VOID			/* Xenix strikes again */
 #endif
 
+#endif
 #include <win32.h>
+#define ARCHLIBEXP (win32PerlLibPath())
 #define DEBUGGING
 #define MULTIPLCITY
-#endif

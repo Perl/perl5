@@ -1,26 +1,30 @@
 use ExtUtils::MakeMaker;
+
+$define = '-DSDBM -DDUFF';
+$define .= ' -DWIN32' if ($^O eq 'MSWin32');
+
 WriteMakefile(
     NAME      => 'SDBM_File/sdbm', # doesn't matter what the name is here
     LINKTYPE  => 'static',
-    DEFINE    => '-DSDBM -DDUFF',
-    SKIP      => [qw(static static_lib dynamic dynamic_lib)],
+    DEFINE    => $define,
+    SKIP      => [qw(dynamic dynamic_lib)],
+    OBJECT    => '$(O_FILES)',
     clean     => {'FILES' => 'dbu libsdbm.a dbd dba dbe x-dbu *.dir *.pag'},
     H         => [qw(tune.h sdbm.h pair.h $(PERL_INC)/config.h)],
     C         => [qw(sdbm.c pair.c hash.c)]
 );
 
+sub MY::post_constants {
+'
+INST_STATIC = libsdbm$(LIB_EXT)
+'
+}
 
 sub MY::top_targets {
 	'
 all :: static
 
-static ::	libsdbm$(LIB_EXT)
-
 config ::
-
-libsdbm$(LIB_EXT): $(O_FILES)
-	$(AR) cr libsdbm$(LIB_EXT) $(O_FILES)
-	$(RANLIB) libsdbm$(LIB_EXT)
 
 lint:
 	lint -abchx $(LIBSRCS)

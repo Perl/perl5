@@ -33,6 +33,10 @@ if ($ARGV[0] eq '') {
     grep( s/.*t\\//, @ARGV );
 #    @ARGV = split(/[ \n]/,
 #      `echo base/*.t comp/*.t cmd/*.t io/*.t; echo op/*.t pragma/*.t lib/*.t`);
+} else {
+
+@ARGV = map(glob($_),@ARGV);
+
 }
 
 if ($^O eq 'os2' || $^O eq 'MSWin32' || $^O eq 'qnx' || 1) {

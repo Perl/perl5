@@ -1922,35 +1922,16 @@ anonymous subroutine.  However, our example showed how Perl script
 invoking an XSUB to preform this operation.  Let's see how it can be
 done inside our C code:
 
-   SV *perl_eval(char *string, int croak_on_error)
-   {
-       dSP;
-       SV *sv = newSVpv(string,0);
-
-       PUSHMARK(sp);
-       perl_eval_sv(sv, G_SCALAR);
-       SvREFCNT_dec(sv);
-
-       SPAGAIN;
-       sv = POPs;
-       PUTBACK;
-
-       if (croak_on_error && SvTRUE(GvSV(errgv)))
-	     croak(SvPV(GvSV(errgv),na));
-
-       return sv;
-   }
-
  ...
 
- SV *cvrv = perl_eval("sub { print 'You will not find me cluttering any namespace!' }", TRUE);
+ SV *cvrv = perl_eval_pv("sub { print 'You will not find me cluttering any namespace!' }", TRUE);
 
  ...
 
  perl_call_sv(cvrv, G_VOID|G_NOARGS);
 
-L<perl_eval_sv> is used to compile the anonymous subroutine, which can
-then be POPed off the stack.  Once this code reference is in hand, it
+L<perlguts/perl_eval_pv> is used to compile the anonymous subroutine, which
+will be the return value as well.  Once this code reference is in hand, it
 can be mixed in with all the previous examples we've shown.
 
 =head1 SEE ALSO
@@ -1969,4 +1950,4 @@ and Larry Wall.
 
 =head1 DATE
 
-Version 1.2, 16th Jan 1996
+Version 1.3, 14th Apr 1997

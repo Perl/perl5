@@ -2582,7 +2582,12 @@ call of stdio.  FILEHANDLE may be an expression whose value gives the name
 of the filehandle.  The values for WHENCE are 0 to set the file pointer to
 POSITION, 1 to set the it to current plus POSITION, and 2 to set it to EOF
 plus offset.  You may use the values SEEK_SET, SEEK_CUR, and SEEK_END for
-this from the POSIX module.  Returns 1 upon success, 0 otherwise.
+this from either the IO::Seekable or the POSIX module.  Returns 1 upon
+success, 0 otherwise.
+
+If you want to position a file pointer for sysread() or syswrite(), don't
+use seek() -- buffering makes its effect on the system file pointer
+unpredictable and non-portable.  Use sysseek() instead.
 
 On some systems you have to do a seek whenever you switch between reading
 and writing.  Amongst other things, this may have the effect of calling
@@ -3326,10 +3331,10 @@ into that kind of thing.
 
 Attempts to read LENGTH bytes of data into variable SCALAR from the
 specified FILEHANDLE, using the system call read(2).  It bypasses
-stdio, so mixing this with other kinds of reads may cause confusion.
-Returns the number of bytes actually read, or undef if there was an
-error.  SCALAR will be grown or shrunk so that the last byte actually
-read is the last byte of the scalar after the read.
+stdio, so mixing this with other kinds of reads or with seek() may
+cause confusion.  Returns the number of bytes actually read, or undef
+if there was an error.  SCALAR will be grown or shrunk so that the
+last byte actually read is the last byte of the scalar after the read.
 
 An OFFSET may be specified to place the read data at some place in the
 string other than the beginning.  A negative OFFSET specifies
@@ -3337,6 +3342,17 @@ placement at that many bytes counting backwards from the end of the
 string.  A positive OFFSET greater than the length of SCALAR results
 in the string being padded to the required size with "\0" bytes before
 the result of the read is appended.
+
+=item sysseek FILEHANDLE,POSITION,WHENCE
+
+Randomly positions the system file pointer for FILEHANDLE using the
+system call lseek(2).  It bypasses stdio, so mixing this with read(),
+print(), write(), or seek() may cause confusion.  FILEHANDLE may be an
+expression whose value gives the name of the filehandle.  The values for
+WHENCE are 0 to set the file pointer to POSITION, 1 to set the it to
+current plus POSITION, and 2 to set it to EOF plus offset.  You may use
+the values SEEK_SET, SEEK_CUR, and SEEK_END for this from either the
+IO::Seekable or the POSIX module.  Returns 1 upon success, 0 otherwise.
 
 =item system LIST
 
@@ -3388,10 +3404,10 @@ signals and core dumps.
 
 Attempts to write LENGTH bytes of data from variable SCALAR to the
 specified FILEHANDLE, using the system call write(2).  It bypasses
-stdio, so mixing this with prints may cause confusion.  Returns the
-number of bytes actually written, or undef if there was an error.
-If the length is greater than the available data, only as much data as
-is available will be written.
+stdio, so mixing this with prints or with seek() may cause confusion.
+Returns the number of bytes actually written, or undef if there was an
+error.  If the length is greater than the available data, only as much
+data as is available will be written.
 
 An OFFSET may be specified to write the data from some part of the
 string other than the beginning.  A negative OFFSET specifies writing

@@ -1223,6 +1223,28 @@ I32 flags;		/* See G_* flags in cop.h */
     return retval;
 }
 
+SV*
+perl_eval_pv(p, croak_on_error)
+char* p;
+I32 croak_on_error;
+{
+    dSP;
+    SV* sv = newSVpv(p, 0);
+
+    PUSHMARK(sp);
+    perl_eval_sv(sv, G_SCALAR);
+    SvREFCNT_dec(sv);
+
+    SPAGAIN;
+    sv = POPs;
+    PUTBACK;
+
+    if (croak_on_error && SvTRUE(GvSV(errgv)))
+	croak(SvPVx(GvSV(errgv), na));
+
+    return sv;
+}
+
 /* Require a module. */
 
 void
@@ -2293,6 +2315,9 @@ register char **env;
 	    if (!(s = strchr(*env,'=')))
 		continue;
 	    *s++ = '\0';
+#ifdef WIN32
+	    (void)strupr(*env);
+#endif
 	    sv = newSVpv(s--,0);
 	    (void)hv_store(hv, *env, s - *env, sv, 0);
 	    *s = '=';

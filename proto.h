@@ -333,6 +333,7 @@ I32	perl_call_pv _((char* subname, I32 flags));
 I32	perl_call_sv _((SV* sv, I32 flags));
 void	perl_construct _((PerlInterpreter* sv_interp));
 void	perl_destruct _((PerlInterpreter* sv_interp));
+SV*	perl_eval_pv _((char* p, I32 croak_on_error));
 I32	perl_eval_sv _((SV* sv, I32 flags));
 void	perl_free _((PerlInterpreter* sv_interp));
 SV*	perl_get_sv _((char* name, I32 create));

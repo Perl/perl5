@@ -1,6 +1,8 @@
 #define ABORT() abort();
 
+#ifndef SH_PATH
 #define SH_PATH "/bin/sh"
+#endif
 
 #ifdef DJGPP
 #  define BIT_BUCKET "nul"

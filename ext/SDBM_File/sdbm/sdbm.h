@@ -120,7 +120,7 @@ extern long sdbm_hash proto((char *, int));
 #include <unistd.h>
 #endif
 
-#ifndef MSDOS
+#if !defined(MSDOS) && !defined(WIN32)
 #   ifdef PARAM_NEEDS_TYPES
 #	include <sys/types.h>
 #   endif

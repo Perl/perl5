@@ -2,9 +2,10 @@ package Opcode;
 
 require 5.002;
 
-use vars qw($VERSION @ISA @EXPORT_OK);
+use vars qw($VERSION $XS_VERSION @ISA @EXPORT_OK);
 
-$VERSION = "1.01";
+$VERSION = "1.02";
+$XS_VERSION = "1.00";
 
 use strict;
 use Carp;
@@ -27,7 +28,7 @@ sub opset_to_hex ($);
 sub opdump (;$);
 use subs @EXPORT_OK;
 
-bootstrap Opcode $VERSION;
+bootstrap Opcode $XS_VERSION;
 
 _init_optags();
 
@@ -379,7 +380,7 @@ such as open would need to be enabled.
 
     formline enterwrite leavewrite
 
-    print sysread syswrite send recv eof tell seek
+    print sysread syswrite send recv eof tell seek sysseek
 
     readdir telldir seekdir rewinddir
 

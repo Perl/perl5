@@ -291,13 +291,18 @@ the loop, but not beyond it.
 Note that you still cannot use my() on global punctuation variables
 such as $_ and the like.
 
-=item unpack() and pack()
+=item pack() and unpack()
 
 A new format 'w' represents a BER compressed integer (as defined in
 ASN.1).  Its format is a sequence of one or more bytes, each of which
 provides seven bits of the total value, with the most significant
 first.  Bit eight of each byte is set, except for the last byte, in
 which bit eight is clear.
+
+=item sysseek()
+
+This is a variant of seek() that works on the system file pointer.
+It is the only reliable way to seek before sysread() or syswrite().
 
 =item use VERSION
 
@@ -657,9 +662,13 @@ with Perl 5.003, there are a few exceptions:
 
     Module   Required Version for Perl 5.004
     ------   -------------------------------
-    Filter   1.12
-    LWP      5.08
+    Filter   Filter-1.12
+    LWP      libwww-perl-5.08
     Tk       Tk400.202 (-w makes noise)
+
+Also, the majordomo mailing list program, version 1.94.1, doesn't work
+with Perl 5.004 (nor with perl 4), because it executes an invalid
+regular expression.  This bug is fixed in majordomo version 1.94.2.
 
 =head2 Installation directories
 
@@ -676,9 +685,16 @@ shared libraries.
 Brand new modules, arranged by topic rather than strictly
 alphabetically:
 
-    CPAN                 interface to Comprehensive Perl Archive Network
-    CPAN::FirstTime      create a CPAN configuration file
-    CPAN::Nox            run CPAN while avoiding compiled extensions
+    CGI.pm               Web server interface ("Common Gateway Interface")
+    CGI/Apache.pm        Support for Apache's Perl module
+    CGI/Carp.pm          Log server errors with helpful context
+    CGI/Fast.pm          Support for FastCGI (persistent server process)
+    CGI/Push.pm          Support for server push
+    CGI/Switch.pm        Simple interface for multiple server types
+
+    CPAN                 Interface to Comprehensive Perl Archive Network
+    CPAN::FirstTime      Utility for creating CPAN configuration file
+    CPAN::Nox            Runs CPAN while avoiding compiled extensions
 
     IO.pm                Top-level interface to IO::* classes
     IO/File.pm           IO::File extension Perl module
@@ -886,6 +902,13 @@ The most likely symptom of passing the result of C<gv_fetchmethod> to
 C<perl_call_sv> is Perl's producing an "Undefined subroutine called"
 error on the I<second> call to a given method (since there is no cache
 on the first call).
+
+=item C<perl_eval_pv>
+
+A new function handy for eval'ing strings of Perl code inside C code. 
+This function returns the value from the eval statement, which can
+be used instead of fetching globals from the symbol table.  See
+L<perlguts>, L<perlembed> and L<perlcall> for details and examples.
 
 =item Extended API for manipulating hashes
 
@@ -1155,12 +1178,6 @@ which puts literal commas into some of the list items.  Write it without
 commas if you don't want them to appear in your data:
 
     qw! a b c !;
-
-=item Recursive substitution detected
-
-(F) The replacement string of a substitution caused the recursive
-execution of that very same substituion.  Perl cannot keep track of
-special variables (C<$1>, etc.) under such circumstances.
 
 =item Scalar value @%s{%s} better written as $%s{%s}
 

@@ -65,7 +65,6 @@ xs_init()
 {
     char *file = __FILE__;
     dXSUB_SYS;
-
     newXS("DynaLoader::boot_DynaLoader", boot_DynaLoader, file);
 }
 

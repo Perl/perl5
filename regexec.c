@@ -529,18 +529,26 @@ got_it:
     prog->exec_tainted = regtainted;
 
     /* make sure $`, $&, $', and $digit will work later */
-    if (!safebase && (strbeg != prog->subbase)) {
-	I32 i = strend - startpos + (stringarg - strbeg);
-	s = savepvn(strbeg, i);
-	Safefree(prog->subbase);
-	prog->subbase = s;
-	prog->subbeg = prog->subbase;
-	prog->subend = prog->subbase + i;
-	s = prog->subbase + (stringarg - strbeg);
-	for (i = 0; i <= prog->nparens; i++) {
-	    if (prog->endp[i]) {
-		prog->startp[i] = s + (prog->startp[i] - startpos);
-		prog->endp[i] = s + (prog->endp[i] - startpos);
+    if (strbeg != prog->subbase) {
+	if (safebase) {
+	    if (prog->subbase) {
+		Safefree(prog->subbase);
+		prog->subbase = Nullch;
+	    }
+	}
+	else {
+	    I32 i = strend - startpos + (stringarg - strbeg);
+	    s = savepvn(strbeg, i);
+	    Safefree(prog->subbase);
+	    prog->subbase = s;
+	    prog->subbeg = prog->subbase;
+	    prog->subend = prog->subbase + i;
+	    s = prog->subbase + (stringarg - strbeg);
+	    for (i = 0; i <= prog->nparens; i++) {
+		if (prog->endp[i]) {
+		    prog->startp[i] = s + (prog->startp[i] - startpos);
+		    prog->endp[i] = s + (prog->endp[i] - startpos);
+		}
 	    }
 	}
     }

@@ -1,6 +1,7 @@
 use ExtUtils::MakeMaker;
 WriteMakefile(
     NAME => 'Opcode',
+    MAN3PODS 	=> ' ',
     VERSION_FROM => 'Opcode.pm',
-    MAN3PODS 	=> ' '
+    XS_VERSION => '1.00'
 );
