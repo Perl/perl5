@@ -25,7 +25,7 @@ sub ok;
 
 use Storable qw(freeze thaw);
 
-print "1..22\n";
+print "1..23\n";
 
 ($scalar_fetch, $array_fetch, $hash_fetch) = (0, 0, 0);
 
