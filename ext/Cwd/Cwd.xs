@@ -211,7 +211,7 @@ err2:
 }
 
 #ifndef getcwd_sv
-// Taken from perl 5.8's util.c
+/* Taken from perl 5.8's util.c */
 int getcwd_sv(pTHX_ register SV *sv)
 {
 #ifndef PERL_MICRO
