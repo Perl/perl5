@@ -78,6 +78,39 @@ Version 5.005_51        Development release working toward 5.006
 ----------------
 
 ____________________________________________________________________________
+[  1775] By: gsar                                  on 1998/08/09  14:35:33
+        Log: tweak warning test
+     Branch: perl
+           ! t/pragma/warn-toke
+____________________________________________________________________________
+[  1774] By: gsar                                  on 1998/08/09  14:13:46
+        Log: add missing dTHR; notes for test failures due to small stacksize
+     Branch: perl
+	   ! doio.c gv.c op.c sv.c t/pragma/warn-mg t/pragma/warn-regexec
+           ! toke.c universal.c util.c
+____________________________________________________________________________
+[  1773] By: gsar                                  on 1998/08/09  11:31:53
+        Log: lexical warnings; tweaks to places that didn't apply correctly
+             From:    pmarquess@bfsec.bt.co.uk (Paul Marquess)
+             Date:    Wed, 29 Jul 1998 09:28:45 BST
+             Message-Id: <9807290828.AA26286@claudius.bfsec.bt.co.uk>
+             Subject: lexical warnings patch for 5.005_50
+     Branch: perl
+	   + README.lexwarn lib/warning.pm t/pragma/warn-2use
+	   + t/pragma/warn-3both t/pragma/warn-4lint t/pragma/warn-5nolint
+	   + t/pragma/warn-doio t/pragma/warn-gv t/pragma/warn-mg
+	   + t/pragma/warn-op t/pragma/warn-perl t/pragma/warn-perly
+	   + t/pragma/warn-pp t/pragma/warn-pp_ctl t/pragma/warn-pp_hot
+	   + t/pragma/warn-pp_sys t/pragma/warn-regcomp
+	   + t/pragma/warn-regexec t/pragma/warn-sv t/pragma/warn-taint
+	   + t/pragma/warn-toke t/pragma/warn-universal t/pragma/warn-util
+           + warning.h warning.pl
+	   ! Changes MANIFEST Makefile.SH cop.h doio.c global.sym gv.c
+	   ! lib/diagnostics.pm mg.c op.c op.h perl.c perl.h pp.c pp_ctl.c
+	   ! pp_hot.c pp_sys.c proto.h regcomp.c regexec.c sv.c t/op/tie.t
+	   ! t/pragma/warn-1global t/pragma/warning.t taint.c toke.c
+           ! universal.c util.c
+____________________________________________________________________________
 [  1772] By: gsar                                  on 1998/08/08  23:06:00
         Log: bump patchlevel to 5.005_51
      Branch: perl

@@ -141,6 +141,8 @@ perl_construct(register PerlInterpreter *sv_interp)
 	thr = init_main_thread();
 #endif /* USE_THREADS */
 
+	PL_curcop = &PL_compiling;	/* needed by ckWARN, right away */
+
 	PL_linestr = NEWSV(65,79);
 	sv_upgrade(PL_linestr,SVt_PVIV);
 

@@ -1132,6 +1132,9 @@ t/pragma/strict.t	See if strictures work
 t/pragma/subs.t		See if subroutine pseudo-importation works
 t/pragma/warn-1global	Tests of global warnings for warning.t
 t/pragma/warn-2use	Tests for "use warning" for warning.t
+t/pragma/warn-3both	Tests for interaction of $^W and "use warning"
+t/pragma/warn-4lint	Tests for -W switch
+t/pragma/warn-5nolint	Tests for -X switch
 t/pragma/warn-doio	Tests for doio.c for warning.t
 t/pragma/warn-gv	Tests for gv.c for warning.t
 t/pragma/warn-mg	Tests for mg.c for warning.t
