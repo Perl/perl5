@@ -972,3 +972,19 @@ Perl_my_atof2(pTHX_ const char* orig, NV* value)
     return s;
 }
 
+#if ! defined(HAS_MODFL) && defined(HAS_AINTL) && defined(HAS_COPYSIGNL)
+long double
+Perl_my_modfl(long double x, long double *ip)
+{
+	*ip = aintl(x);
+	return (x == *ip ? copysignl(0.0L, x) : x - *ip);
+}
+#endif
+
+#if ! defined(HAS_FREXPL) && defined(HAS_ILOGBL) && defined(HAS_SCALBNL)
+long double
+Perl_my_frexpl(long double x, int *e) {
+	*e = x == 0.0L ? 0 : ilogbl(x) + 1;
+	return (scalbnl(x, -*e));
+}
+#endif

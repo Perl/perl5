@@ -2891,24 +2891,14 @@ PP(pp_int)
 		  SETu(U_V(value));
 	      } else {
 #if defined(SPARC64_MODF_WORKAROUND)
-		(void)sparc64_workaround_modf(value, &value);
-#else
-#   if defined(HAS_MODFL) || defined(LONG_DOUBLE_EQUALS_DOUBLE)
-#       ifdef HAS_MODFL_POW32_BUG
+                  (void)sparc64_workaround_modf(value, &value);
+#elif defined(HAS_MODFL_POW32_BUG)
 /* some versions of glibc split (i + d) into (i-1, d+1) for 2^32 <= i < 2^64 */
-                {
-                    NV offset = Perl_modf(value, &value);
-                    (void)Perl_modf(offset, &offset);
-                    value += offset;
-                }
-#       else
-		  (void)Perl_modf(value, &value);
-#       endif
-#   else
-		  double tmp = (double)value;
-		  (void)Perl_modf(tmp, &tmp);
-		  value = (NV)tmp;
-#   endif
+                  NV offset = Perl_modf(value, &value);
+                  (void)Perl_modf(offset, &offset);
+                  value += offset;
+#else
+                  (void)Perl_modf(value, &value);
 #endif
 		  SETn(value);
 	      }
@@ -2917,24 +2907,17 @@ PP(pp_int)
 	      if (value > (NV)IV_MIN - 0.5) {
 		  SETi(I_V(value));
 	      } else {
-#if defined(HAS_MODFL) || defined(LONG_DOUBLE_EQUALS_DOUBLE)
-#   ifdef HAS_MODFL_POW32_BUG
+#if defined(SPARC64_MODF_WORKAROUND)
+                  (void)sparc64_workaround_modf(-value, &value);
+#elif defined(HAS_MODFL_POW32_BUG)
 /* some versions of glibc split (i + d) into (i-1, d+1) for 2^32 <= i < 2^64 */
-                 {
-                     NV offset = Perl_modf(-value, &value);
-                     (void)Perl_modf(offset, &offset);
-                     value += offset;
-                 }
-#   else
-		  (void)Perl_modf(-value, &value);
-#   endif
-		  value = -value;
+                  NV offset = Perl_modf(-value, &value);
+                  (void)Perl_modf(offset, &offset);
+                  value += offset;
 #else
-		  double tmp = (double)value;
-		  (void)Perl_modf(-tmp, &tmp);
-		  value = -(NV)tmp;
+		  (void)Perl_modf(-value, &value);
 #endif
-		  SETn(value);
+		  SETn(-value);
 	      }
 	  }
       }
