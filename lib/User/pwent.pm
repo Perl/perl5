@@ -41,8 +41,8 @@ sub populate (@) {
 
 sub getpwent ( ) { populate(CORE::getpwent()) } 
 sub getpwnam ($) { populate(CORE::getpwnam(shift)) } 
-sub getpwgid ($) { populate(CORE::getpwgid(shift)) } 
-sub getpw    ($) { ($_[0] =~ /^\d+/) ? &getpwgid : &getpwnam } 
+sub getpwuid ($) { populate(CORE::getpwuid(shift)) } 
+sub getpw    ($) { ($_[0] =~ /^\d+/) ? &getpwuid : &getpwnam } 
 
 1;
 __END__
