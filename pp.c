@@ -4392,7 +4392,7 @@ PP(pp_threadsv)
     if (op->op_private & OPpLVAL_INTRO)
 	PUSHs(*save_threadsv(op->op_targ));
     else
-	PUSHs(*av_fetch(thr->threadsv, op->op_targ, FALSE));
+	PUSHs(THREADSV(op->op_targ));
     RETURN;
 #else
     DIE("tried to access per-thread data in non-threaded perl");

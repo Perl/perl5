@@ -87,6 +87,7 @@ PERLVAR(cvcache,	HV *)
 PERLVAR(self,		perl_os_thread)		/* Underlying thread object */
 PERLVAR(flags,		U32)		
 PERLVAR(threadsv,	AV *)			/* Per-thread SVs ($_, $@ etc.) */
+PERLVAR(threadsvp,	SV **)			/* AvARRAY(threadsv) */
 PERLVAR(specific,	AV *)			/* Thread-specific user data */
 PERLVAR(errsv,		SV *)			/* Backing SV for $@ */
 PERLVAR(errhv,		HV *)			/* HV for what was %@ in pp_ctl.c */

@@ -57,10 +57,6 @@
 static void xstat _((void));
 #endif
 
-#ifdef USE_THREADS
-static U32 threadnum = 0;
-#endif /* USE_THREADS */
-
 #ifndef MYMALLOC
 
 /* paranoid version of malloc */
@@ -2444,11 +2440,11 @@ condpair_magic(SV *sv)
 	COND_INIT(&cp->owner_cond);
 	COND_INIT(&cp->cond);
 	cp->owner = 0;
-	MUTEX_LOCK(&sv_mutex);
+	LOCK_SV_MUTEX;
 	mg = mg_find(sv, 'm');
 	if (mg) {
 	    /* someone else beat us to initialising it */
-	    MUTEX_UNLOCK(&sv_mutex);
+	    UNLOCK_SV_MUTEX;
 	    MUTEX_DESTROY(&cp->mutex);
 	    COND_DESTROY(&cp->owner_cond);
 	    COND_DESTROY(&cp->cond);
@@ -2459,7 +2455,7 @@ condpair_magic(SV *sv)
 	    mg = SvMAGIC(sv);
 	    mg->mg_ptr = (char *)cp;
 	    mg->mg_len = sizeof(cp);
-	    MUTEX_UNLOCK(&sv_mutex);
+	    UNLOCK_SV_MUTEX;
 	    DEBUG_L(WITH_THR(PerlIO_printf(PerlIO_stderr(),
 					   "%p: condpair_magic %p\n", thr, sv));)
 	}
@@ -2553,6 +2549,7 @@ new_struct_thread(struct perl_thread *t)
 		"new_struct_thread: copied threadsv %d %p->%p\n",i, t, thr));
 	}
     } 
+    thr->threadsvp = AvARRAY(thr->threadsv);
 
     MUTEX_LOCK(&threads_mutex);
     nthreads++;

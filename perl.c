@@ -936,7 +936,7 @@ print \"  \\@INC:\\n    @INC\\n\";");
     SvREFCNT_dec(rs);
     rs = SvREFCNT_inc(nrs);
 #ifdef USE_THREADS
-    sv_setsv(*av_fetch(thr->threadsv, find_threadsv("/"), FALSE), rs); 
+    sv_setsv(THREADSV(find_threadsv("/")), rs); 
 #else
     sv_setsv(GvSV(gv_fetchpv("/", TRUE, SVt_PV)), rs);
 #endif /* USE_THREADS */
@@ -1054,7 +1054,7 @@ perl_get_sv(char *name, I32 create)
 	PADOFFSET tmp = find_threadsv(name);
     	if (tmp != NOT_IN_PAD) {
 	    dTHR;
-	    return *av_fetch(thr->threadsv, tmp, FALSE);
+	    return THREADSV(tmp);
 	}
     }
 #endif /* USE_THREADS */
@@ -2510,7 +2510,7 @@ init_predump_symbols(void)
     GV *othergv;
 
 #ifdef USE_THREADS
-    sv_setpvn(*av_fetch(thr->threadsv,find_threadsv("\""),FALSE)," ", 1);
+    sv_setpvn(THREADSV(find_threadsv("\"")), " ", 1);
 #else
     sv_setpvn(GvSV(gv_fetchpv("\"", TRUE, SVt_PV)), " ", 1);
 #endif /* USE_THREADS */
@@ -2799,6 +2799,7 @@ init_main_thread()
     curcop = &compiling;
     thr->cvcache = newHV();
     thr->threadsv = newAV();
+    /* thr->threadsvp is set when find_threadsv is called */
     thr->specific = newAV();
     thr->errhv = newHV();
     thr->flags = THRf_R_JOINABLE;

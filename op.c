@@ -514,6 +514,7 @@ find_threadsv(char *name)
     if (!svp) {
 	SV *sv = NEWSV(0, 0);
 	av_store(thr->threadsv, key, sv);
+	thr->threadsvp = AvARRAY(thr->threadsv);
 	/*
 	 * Some magic variables used to be automagically initialised
 	 * in gv_fetchpv. Those which are now per-thread magicals get

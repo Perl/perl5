@@ -12,7 +12,6 @@
 #endif
 #include <fcntl.h>
                         
-static U32 threadnum = 0;
 static int sig_pipe[2];
             
 #ifndef THREAD_RET_TYPE
@@ -208,6 +207,8 @@ newthread (SV *startsv, AV *initargs, char *classname)
     SV *sv;
     int err;
 #ifndef THREAD_CREATE
+    static pthread_attr_t attr;
+    static int attr_inited = 0;
     sigset_t fullmask, oldmask;
 #endif
     
@@ -233,33 +234,22 @@ newthread (SV *startsv, AV *initargs, char *classname)
     sigfillset(&fullmask);
     if (sigprocmask(SIG_SETMASK, &fullmask, &oldmask) == -1)
 	croak("panic: sigprocmask");
-#ifdef PTHREADS_CREATED_JOINABLE
-    err = pthread_create(&thr->self, pthread_attr_default,
-			 threadstart, (void*) thr);
-#else
-    {
-	pthread_attr_t attr;
-
+    err = 0;
+    if (!attr_inited) {
+	attr_inited = 1;
 	err = pthread_attr_init(&attr);
-	if (err == 0) {
-#ifdef PTHREAD_CREATE_UNDETACHED
-	  err = pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_UNDETACHED);
-#else
-	  croak("panic: pthread_attr_setdetachstate");
-#endif
-	  if (err == 0) 
-	    err = pthread_create(&thr->self, &attr,
-				 threadstart, (void*) thr);
-	}
-	pthread_attr_destroy(&attr);
+	if (err == 0)
+	    err = pthread_attr_setdetachstate(&attr, ATTR_JOINABLE);
     }
-#endif
+    if (err == 0)
+	err = pthread_create(&thr->self, &attr, threadstart, (void*) thr);
     /* Go */
     MUTEX_UNLOCK(&thr->mutex);
 #endif
     if (err) {
         DEBUG_L(PerlIO_printf(PerlIO_stderr(),
-			  "%p: create of %p failed %d\n", savethread, thr, err));
+			      "%p: create of %p failed %d\n",
+			      savethread, thr, err));
 	/* Thread creation failed--clean up */
 	SvREFCNT_dec(thr->cvcache);
 	remove_thread(thr);
