@@ -1226,9 +1226,14 @@ sed <<!GROK!THIS! >config.h -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un-
  *	available directly to the user. Note that it may well be different from
  *	the preprocessor used to compile the C program.
  */
+/* CPPLAST:
+ *	This symbol is intended to be used along with CPPRUN in the same manner
+ *	symbol CPPMINUS is used with CPPSTDIN. It contains either "-" or "".
+ */
 #define CPPSTDIN "$cppstdin"
 #define CPPMINUS "$cppminus"
 #define CPPRUN "$cpprun"
+#define CPPLAST "$cpplast"
 
 /* HAS_ACCESS:
  *	This manifest constant lets the C program know that the access()
@@ -1419,6 +1424,11 @@ sed <<!GROK!THIS! >config.h -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un-
  *	and HAS_UNAME.	Note that the command uses a fully qualified path,
  *	so that it is safe even if used by a process with super-user
  *	privileges.
+ */
+/* HAS_PHOSTNAME:
+ *	This symbol, if defined, indicates that the C program may use the
+ *	contents of PHOSTNAME as a command to feed to the popen() routine
+ *	to derive the host name.
  */
 #$d_gethname HAS_GETHOSTNAME	/**/
 #$d_uname HAS_UNAME		/**/
@@ -2773,6 +2783,10 @@ sed <<!GROK!THIS! >config.h -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un-
 #$uselonglong	USE_LONG_LONG		/**/
 #endif
 
+/* USE_MORE_BITS:
+ *	This symbol, if defined, indicates that 64-bit interfaces and
+ *	long doubles should be used when available.
+ */
 #ifndef USE_MORE_BITS
 #$usemorebits	USE_MORE_BITS		/**/
 #endif
