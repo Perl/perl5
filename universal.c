@@ -167,6 +167,8 @@ XS(XS_utf8_upgrade);
 XS(XS_utf8_downgrade);
 XS(XS_utf8_unicode_to_native);
 XS(XS_utf8_native_to_unicode);
+XS(XS_Internals_SvREADONLY);
+XS(XS_Internals_SvREFCNT);
 
 void
 Perl_boot_core_UNIVERSAL(pTHX)
@@ -183,6 +185,8 @@ Perl_boot_core_UNIVERSAL(pTHX)
     newXS("utf8::downgrade", XS_utf8_downgrade, file);
     newXS("utf8::native_to_unicode", XS_utf8_native_to_unicode, file);
     newXS("utf8::unicode_to_native", XS_utf8_unicode_to_native, file);
+    newXSproto("Internals::SvREADONLY",XS_Internals_SvREADONLY, file, "\\[$%@];$");
+    newXSproto("Internals::SvREFCNT",XS_Internals_SvREFCNT, file, "\\[$%@];$");
 }
 
 
@@ -456,5 +460,41 @@ XS(XS_utf8_unicode_to_native)
 
  ST(0) = sv_2mortal(newSViv(UNI_TO_NATIVE(uv)));
  XSRETURN(1);
+}
+
+XS(XS_Internals_SvREADONLY)
+{
+    dXSARGS;
+    SV *sv = SvRV(ST(0));
+    if (items == 1) {
+	 if (SvREADONLY(sv))
+	     XSRETURN_YES;
+	 else
+	     XSRETURN_NO;
+    }
+    else if (items == 2) {
+	if (SvTRUE(ST(1))) {
+	    SvREADONLY_on(sv);
+	    XSRETURN_YES;
+	}
+	else {
+	    SvREADONLY_off(sv);
+	    XSRETURN_NO;
+	}
+    }
+    XSRETURN_UNDEF;
+}
+
+XS(XS_Internals_SvREFCNT)
+{
+    dXSARGS;
+    SV *sv = SvRV(ST(0));
+    if (items == 1)
+	 XSRETURN_IV(SvREFCNT(sv) - 1); /* minus the SvRV above */
+    else if (items == 2) {
+	 SvREFCNT(sv) = SvIV(ST(1));
+	 XSRETURN_IV(SvREFCNT(sv));
+    }
+    XSRETURN_UNDEF;
 }
 

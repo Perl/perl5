@@ -2,7 +2,6 @@ package Hash::Util;
 
 require 5.007003;
 use strict;
-use Data::Util qw(sv_readonly_flag);
 use Carp;
 
 require Exporter;
@@ -87,14 +86,14 @@ sub lock_keys (\%;@) {
         foreach my $k (@keys) {
             $hash->{$k} = undef unless exists $hash->{$k};
         }
-        sv_readonly_flag %$hash, 1;
+        Internals::SvREADONLY %$hash, 1;
 
         foreach my $k (@keys) {
             delete $hash->{$k} unless $original_keys{$k};
         }
     }
     else {
-        sv_readonly_flag %$hash, 1;
+        Internals::SvREADONLY %$hash, 1;
     }
 
     return undef;
@@ -103,7 +102,7 @@ sub lock_keys (\%;@) {
 sub unlock_keys (\%) {
     my($hash) = shift;
 
-    sv_readonly_flag %$hash, 0;
+    Internals::SvREADONLY %$hash, 0;
     return undef;
 }
 
@@ -124,13 +123,13 @@ key cannot be changed.
 sub lock_value (\%$) {
     my($hash, $key) = @_;
     carp "Cannot usefully lock values in an unlocked hash" 
-      unless sv_readonly_flag %$hash;
-    sv_readonly_flag $hash->{$key}, 1;
+      unless Internals::SvREADONLY %$hash;
+    Internals::SvREADONLY $hash->{$key}, 1;
 }
 
 sub unlock_value (\%$) {
     my($hash, $key) = @_;
-    sv_readonly_flag $hash->{$key}, 0;
+    Internals::SvREADONLY $hash->{$key}, 0;
 }
 
 

@@ -7,7 +7,6 @@ BEGIN {
     }
 }
 use Test::More tests => 45;
-use Data::Util qw(sv_readonly_flag);
 
 my @Exported_Funcs;
 BEGIN { 
@@ -154,15 +153,15 @@ TODO: {
     my %hash = (foo => 42, bar => 23);
     lock_hash( %hash );
 
-    ok( sv_readonly_flag(%hash) );
-    ok( sv_readonly_flag($hash{foo}) );
-    ok( sv_readonly_flag($hash{bar}) );
+    ok( Internals::SvREADONLY(%hash) );
+    ok( Internals::SvREADONLY($hash{foo}) );
+    ok( Internals::SvREADONLY($hash{bar}) );
 
     unlock_hash ( %hash );
 
-    ok( !sv_readonly_flag(%hash) );
-    ok( !sv_readonly_flag($hash{foo}) );
-    ok( !sv_readonly_flag($hash{bar}) );
+    ok( !Internals::SvREADONLY(%hash) );
+    ok( !Internals::SvREADONLY($hash{foo}) );
+    ok( !Internals::SvREADONLY($hash{bar}) );
 }
 
 
