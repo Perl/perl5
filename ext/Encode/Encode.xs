@@ -1,5 +1,5 @@
 /*
- $Id: Encode.xs,v 1.46 2002/05/20 15:25:44 dankogai Exp dankogai $
+ $Id: Encode.xs,v 1.49 2002/10/21 19:47:47 dankogai Exp $
  */
 
 #define PERL_NO_GET_CONTEXT
@@ -238,6 +238,134 @@ encode_method(pTHX_ encode_t * enc, encpage_t * dir, SV * src,
     return dst;
 }
 
+MODULE = Encode		PACKAGE = Encode::utf8	PREFIX = Method_
+
+void
+Method_decode(obj,src,check = 0)
+SV *	obj
+SV *	src
+int	check
+CODE:
+{
+    STRLEN slen;
+    U8 *s = (U8 *) SvPV(src, slen);
+    U8 *e = (U8 *) SvEND(src);
+    SV *dst = newSV(slen);
+    SvPOK_only(dst);
+    SvCUR_set(dst,0);
+    if (SvUTF8(src)) {
+	s = utf8_to_bytes(s,&slen);
+	if (s) {
+	    SvCUR_set(src,slen);
+	    SvUTF8_off(src);
+	    e = s+slen;
+	}
+	else {
+	    croak("Cannot decode string with wide characters");
+	}
+    }
+    while (s < e) {
+    	if (UTF8_IS_INVARIANT(*s) || UTF8_IS_START(*s)) {
+	    U8 skip = UTF8SKIP(s);
+	    if ((s + skip) > e) {
+	    	/* Partial character - done */
+	    	break;
+	    }
+	    else if (is_utf8_char(s)) {
+	    	/* Whole char is good */
+		sv_catpvn(dst,(char *)s,skip);
+		s += skip;
+		continue;
+	    }
+	    else {
+	    	/* starts ok but isn't "good" */
+	    }
+	}
+	else {
+	    /* Invalid start byte */
+	}
+	/* If we get here there is something wrong with alleged UTF-8 */
+	if (check & ENCODE_DIE_ON_ERR){
+	    Perl_croak(aTHX_ ERR_DECODE_NOMAP, "utf8", (UV)*s);
+	    XSRETURN(0);
+	}
+	if (check & ENCODE_WARN_ON_ERR){
+	    Perl_warner(aTHX_ packWARN(WARN_UTF8),
+			ERR_DECODE_NOMAP, "utf8", (UV)*s);
+        }
+    	if (check & ENCODE_RETURN_ON_ERR) {
+		break;
+    	}
+        if (check & (ENCODE_PERLQQ|ENCODE_HTMLCREF|ENCODE_XMLCREF)){
+	    SV* perlqq = newSVpvf("\\x%02" UVXf, (UV)*s);
+    	    sv_catsv(dst, perlqq);
+	    SvREFCNT_dec(perlqq);
+	} else {
+	    sv_catpv(dst, FBCHAR_UTF8);
+	}
+	s++;
+    }
+    *SvEND(dst) = '\0';
+
+    /* Clear out translated part of source unless asked not to */
+    if (check && !(check & ENCODE_LEAVE_SRC)){
+	slen = e-s;
+	if (slen) {
+	    sv_setpvn(src, (char*)s, slen);
+	}
+	SvCUR_set(src, slen);
+    }
+    SvUTF8_on(dst);
+    ST(0) = sv_2mortal(dst);
+    XSRETURN(1);
+}
+
+void
+Method_encode(obj,src,check = 0)
+SV *	obj
+SV *	src
+int	check
+CODE:
+{
+    STRLEN slen;
+    U8 *s = (U8 *) SvPV(src, slen);
+    U8 *e = (U8 *) SvEND(src);
+    SV *dst = newSV(slen);
+    if (SvUTF8(src)) {
+        /* Already encoded - trust it and just copy the octets */
+    	sv_setpvn(dst,(char *)s,(e-s));
+	s = e;
+    }
+    else {
+    	/* Native bytes - can always encode */
+	U8 *d = (U8 *) SvGROW(dst,2*slen);
+    	while (s < e) {
+    	    UV uv = NATIVE_TO_UNI((UV) *s++);
+            if (UNI_IS_INVARIANT(uv))
+            	*d++ = (U8)UTF_TO_NATIVE(uv);
+            else {
+    	        *d++ = (U8)UTF8_EIGHT_BIT_HI(uv);
+                *d++ = (U8)UTF8_EIGHT_BIT_LO(uv);
+            }
+	}
+        SvCUR_set(dst, d- (U8 *)SvPVX(dst));
+    	*SvEND(dst) = '\0';
+    }
+
+    /* Clear out translated part of source unless asked not to */
+    if (check && !(check & ENCODE_LEAVE_SRC)){
+	slen = e-s;
+	if (slen) {
+	    sv_setpvn(src, (char*)s, slen);
+	}
+	SvCUR_set(src, slen);
+    }
+    SvPOK_only(dst);
+    SvUTF8_off(dst);
+    ST(0) = sv_2mortal(dst);
+    XSRETURN(1);
+}
+
 MODULE = Encode		PACKAGE = Encode::XS	PREFIX = Method_
 
 PROTOTYPES: ENABLE
@@ -260,6 +388,9 @@ int	check
 CODE:
 {
     encode_t *enc = INT2PTR(encode_t *, SvIV(SvRV(obj)));
+    if (SvUTF8(src)) {
+    	sv_utf8_downgrade(src, FALSE);
+    }
     ST(0) = encode_method(aTHX_ enc, enc->t_utf8, src, check);
     SvUTF8_on(ST(0));
     XSRETURN(1);

@@ -1,8 +1,8 @@
 #
-# $Id: cp949.ucm,v 1.20 2002/04/04 19:50:53 dankogai Exp $
+# $Id: cp949.ucm,v 1.22 2002/10/21 06:05:37 dankogai Exp $
 #
 # Original table can be obtained at
-# http://www.unicode.org/Public/MAPPINGS/VENDORS/MICSFT/WINDOWS/CP949.TXT
+# http://www.microsoft.com/typography/unicode/949.txt
 #
 <code_set_name> "cp949"
 <mb_cur_min> 1
@@ -137,6 +137,7 @@ CHARMAP
 <U007D> \x7D |0 # RIGHT CURLY BRACKET
 <U007E> \x7E |0 # TILDE
 <U007F> \x7F |0 # DELETE
+<U0080> \x80 |0 #
 <U00A1> \xA2\xAE |0 # INVERTED EXCLAMATION MARK
 <U00A4> \xA2\xB4 |0 # CURRENCY SIGN
 <U00A7> \xA1\xD7 |0 # SECTION SIGN
@@ -16817,6 +16818,195 @@ CHARMAP
 <UD7A1> \xC6\x50 |0 # HANGUL SYLLABLE HIEUH I THIEUTH
 <UD7A2> \xC6\x51 |0 # HANGUL SYLLABLE HIEUH I PHIEUPH
 <UD7A3> \xC6\x52 |0 # HANGUL SYLLABLE HIEUH I HIEUH
+<UE000> \xC9\xA1 |0 #
+<UE001> \xC9\xA2 |0 #
+<UE002> \xC9\xA3 |0 #
+<UE003> \xC9\xA4 |0 #
+<UE004> \xC9\xA5 |0 #
+<UE005> \xC9\xA6 |0 #
+<UE006> \xC9\xA7 |0 #
+<UE007> \xC9\xA8 |0 #
+<UE008> \xC9\xA9 |0 #
+<UE009> \xC9\xAA |0 #
+<UE00A> \xC9\xAB |0 #
+<UE00B> \xC9\xAC |0 #
+<UE00C> \xC9\xAD |0 #
+<UE00D> \xC9\xAE |0 #
+<UE00E> \xC9\xAF |0 #
+<UE00F> \xC9\xB0 |0 #
+<UE010> \xC9\xB1 |0 #
+<UE011> \xC9\xB2 |0 #
+<UE012> \xC9\xB3 |0 #
+<UE013> \xC9\xB4 |0 #
+<UE014> \xC9\xB5 |0 #
+<UE015> \xC9\xB6 |0 #
+<UE016> \xC9\xB7 |0 #
+<UE017> \xC9\xB8 |0 #
+<UE018> \xC9\xB9 |0 #
+<UE019> \xC9\xBA |0 #
+<UE01A> \xC9\xBB |0 #
+<UE01B> \xC9\xBC |0 #
+<UE01C> \xC9\xBD |0 #
+<UE01D> \xC9\xBE |0 #
+<UE01E> \xC9\xBF |0 #
+<UE01F> \xC9\xC0 |0 #
+<UE020> \xC9\xC1 |0 #
+<UE021> \xC9\xC2 |0 #
+<UE022> \xC9\xC3 |0 #
+<UE023> \xC9\xC4 |0 #
+<UE024> \xC9\xC5 |0 #
+<UE025> \xC9\xC6 |0 #
+<UE026> \xC9\xC7 |0 #
+<UE027> \xC9\xC8 |0 #
+<UE028> \xC9\xC9 |0 #
+<UE029> \xC9\xCA |0 #
+<UE02A> \xC9\xCB |0 #
+<UE02B> \xC9\xCC |0 #
+<UE02C> \xC9\xCD |0 #
+<UE02D> \xC9\xCE |0 #
+<UE02E> \xC9\xCF |0 #
+<UE02F> \xC9\xD0 |0 #
+<UE030> \xC9\xD1 |0 #
+<UE031> \xC9\xD2 |0 #
+<UE032> \xC9\xD3 |0 #
+<UE033> \xC9\xD4 |0 #
+<UE034> \xC9\xD5 |0 #
+<UE035> \xC9\xD6 |0 #
+<UE036> \xC9\xD7 |0 #
+<UE037> \xC9\xD8 |0 #
+<UE038> \xC9\xD9 |0 #
+<UE039> \xC9\xDA |0 #
+<UE03A> \xC9\xDB |0 #
+<UE03B> \xC9\xDC |0 #
+<UE03C> \xC9\xDD |0 #
+<UE03D> \xC9\xDE |0 #
+<UE03E> \xC9\xDF |0 #
+<UE03F> \xC9\xE0 |0 #
+<UE040> \xC9\xE1 |0 #
+<UE041> \xC9\xE2 |0 #
+<UE042> \xC9\xE3 |0 #
+<UE043> \xC9\xE4 |0 #
+<UE044> \xC9\xE5 |0 #
+<UE045> \xC9\xE6 |0 #
+<UE046> \xC9\xE7 |0 #
+<UE047> \xC9\xE8 |0 #
+<UE048> \xC9\xE9 |0 #
+<UE049> \xC9\xEA |0 #
+<UE04A> \xC9\xEB |0 #
+<UE04B> \xC9\xEC |0 #
+<UE04C> \xC9\xED |0 #
+<UE04D> \xC9\xEE |0 #
+<UE04E> \xC9\xEF |0 #
+<UE04F> \xC9\xF0 |0 #
+<UE050> \xC9\xF1 |0 #
+<UE051> \xC9\xF2 |0 #
+<UE052> \xC9\xF3 |0 #
+<UE053> \xC9\xF4 |0 #
+<UE054> \xC9\xF5 |0 #
+<UE055> \xC9\xF6 |0 #
+<UE056> \xC9\xF7 |0 #
+<UE057> \xC9\xF8 |0 #
+<UE058> \xC9\xF9 |0 #
+<UE059> \xC9\xFA |0 #
+<UE05A> \xC9\xFB |0 #
+<UE05B> \xC9\xFC |0 #
+<UE05C> \xC9\xFD |0 #
+<UE05D> \xC9\xFE |0 #
+<UE05E> \xFE\xA1 |0 #
+<UE05F> \xFE\xA2 |0 #
+<UE060> \xFE\xA3 |0 #
+<UE061> \xFE\xA4 |0 #
+<UE062> \xFE\xA5 |0 #
+<UE063> \xFE\xA6 |0 #
+<UE064> \xFE\xA7 |0 #
+<UE065> \xFE\xA8 |0 #
+<UE066> \xFE\xA9 |0 #
+<UE067> \xFE\xAA |0 #
+<UE068> \xFE\xAB |0 #
+<UE069> \xFE\xAC |0 #
+<UE06A> \xFE\xAD |0 #
+<UE06B> \xFE\xAE |0 #
+<UE06C> \xFE\xAF |0 #
+<UE06D> \xFE\xB0 |0 #
+<UE06E> \xFE\xB1 |0 #
+<UE06F> \xFE\xB2 |0 #
+<UE070> \xFE\xB3 |0 #
+<UE071> \xFE\xB4 |0 #
+<UE072> \xFE\xB5 |0 #
+<UE073> \xFE\xB6 |0 #
+<UE074> \xFE\xB7 |0 #
+<UE075> \xFE\xB8 |0 #
+<UE076> \xFE\xB9 |0 #
+<UE077> \xFE\xBA |0 #
+<UE078> \xFE\xBB |0 #
+<UE079> \xFE\xBC |0 #
+<UE07A> \xFE\xBD |0 #
+<UE07B> \xFE\xBE |0 #
+<UE07C> \xFE\xBF |0 #
+<UE07D> \xFE\xC0 |0 #
+<UE07E> \xFE\xC1 |0 #
+<UE07F> \xFE\xC2 |0 #
+<UE080> \xFE\xC3 |0 #
+<UE081> \xFE\xC4 |0 #
+<UE082> \xFE\xC5 |0 #
+<UE083> \xFE\xC6 |0 #
+<UE084> \xFE\xC7 |0 #
+<UE085> \xFE\xC8 |0 #
+<UE086> \xFE\xC9 |0 #
+<UE087> \xFE\xCA |0 #
+<UE088> \xFE\xCB |0 #
+<UE089> \xFE\xCC |0 #
+<UE08A> \xFE\xCD |0 #
+<UE08B> \xFE\xCE |0 #
+<UE08C> \xFE\xCF |0 #
+<UE08D> \xFE\xD0 |0 #
+<UE08E> \xFE\xD1 |0 #
+<UE08F> \xFE\xD2 |0 #
+<UE090> \xFE\xD3 |0 #
+<UE091> \xFE\xD4 |0 #
+<UE092> \xFE\xD5 |0 #
+<UE093> \xFE\xD6 |0 #
+<UE094> \xFE\xD7 |0 #
+<UE095> \xFE\xD8 |0 #
+<UE096> \xFE\xD9 |0 #
+<UE097> \xFE\xDA |0 #
+<UE098> \xFE\xDB |0 #
+<UE099> \xFE\xDC |0 #
+<UE09A> \xFE\xDD |0 #
+<UE09B> \xFE\xDE |0 #
+<UE09C> \xFE\xDF |0 #
+<UE09D> \xFE\xE0 |0 #
+<UE09E> \xFE\xE1 |0 #
+<UE09F> \xFE\xE2 |0 #
+<UE0A0> \xFE\xE3 |0 #
+<UE0A1> \xFE\xE4 |0 #
+<UE0A2> \xFE\xE5 |0 #
+<UE0A3> \xFE\xE6 |0 #
+<UE0A4> \xFE\xE7 |0 #
+<UE0A5> \xFE\xE8 |0 #
+<UE0A6> \xFE\xE9 |0 #
+<UE0A7> \xFE\xEA |0 #
+<UE0A8> \xFE\xEB |0 #
+<UE0A9> \xFE\xEC |0 #
+<UE0AA> \xFE\xED |0 #
+<UE0AB> \xFE\xEE |0 #
+<UE0AC> \xFE\xEF |0 #
+<UE0AD> \xFE\xF0 |0 #
+<UE0AE> \xFE\xF1 |0 #
+<UE0AF> \xFE\xF2 |0 #
+<UE0B0> \xFE\xF3 |0 #
+<UE0B1> \xFE\xF4 |0 #
+<UE0B2> \xFE\xF5 |0 #
+<UE0B3> \xFE\xF6 |0 #
+<UE0B4> \xFE\xF7 |0 #
+<UE0B5> \xFE\xF8 |0 #
+<UE0B6> \xFE\xF9 |0 #
+<UE0B7> \xFE\xFA |0 #
+<UE0B8> \xFE\xFB |0 #
+<UE0B9> \xFE\xFC |0 #
+<UE0BA> \xFE\xFD |0 #
+<UE0BB> \xFE\xFE |0 #
+<UF8F7> \xFF |0 #
 <UF900> \xCB\xD0 |0 # CJK COMPATIBILITY IDEOGRAPH
 <UF901> \xCB\xD6 |0 # CJK COMPATIBILITY IDEOGRAPH
 <UF902> \xCB\xE7 |0 # CJK COMPATIBILITY IDEOGRAPH
