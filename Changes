@@ -28,6 +28,82 @@ example from http://www.xray.mpe.mpg.de/mailing-lists/perl5-porters/
 Version v5.8.1		Maintenance release working toward v5.8.1
 --------------
 ____________________________________________________________________________
+[ 19991] By: jhi                                   on 2003/07/04  13:54:33
+        Log: Integrate:
+             [ 19976]
+             Subject: [PATCH: perl@19956] switch vmspipe.com over to using local symbols instead of global
+             From: PPrymmer@factset.com
+             Date: Thu, 3 Jul 2003 23:59:51 -0400
+             Message-ID: <OF4DF4AA68.1EF12116-ON85256D59.00120F5E-85256D59.0015F58D@factset.com>
+             
+             [ 19977]
+             $0 is pain.
+             
+             [ 19979]
+             Remove PL_earlytaint since the hash seed code
+             can be delayed until perl_parse().
+             
+             [ 19980]
+             line_t is U32, not I32.
+             
+             [ 19981]
+             AUTHORS updates.
+             
+             [ 19982]
+             No energy now to figure out what is wrong with $0
+             (or ps) in Tru64.  The test works fine when run from
+             command line.
+             
+             [ 19984]
+             Upgrade to CGI.pm 2.97.
+             
+             [ 19985]
+             Upgrade to CPAN 1.71.
+             
+             [ 19986]
+             Upgrade to Digest::MD5 2.24, with few extra tweaks:
+             (1) make the PATCHLEVEL logic as it is with List::Util
+             (more portable to older Perls)
+             (2) regen the MD5 checksums with ...
+             (3) ... the Mac OS Classic checksums generated via MacRoman
+             (just a guess)
+             (4) Keep the core Makefile.PL.
+             
+             [ 19987]
+             Upgrade to Locale::Maketext 1.06.
+             
+             [ 19988]
+             Upgrade to Net::Ping 2.31.
+             
+             [ 19989]
+             Upgrade to Text::Balanced 1.94.
+             
+             [ 19990]
+             Upgrade to PodParser 1.23; but do not update
+             t/pod/find.t or t/pod/testp2pt.pl since the
+             first one does not work at all under core,
+             and the second change would drop MacOS Classic
+             portability tweaks introduced by change #18669.
+     Branch: maint-5.8/perl
+	  +> lib/Locale/Maketext/Guts.pm lib/Locale/Maketext/GutsLoader.pm
+	  +> lib/Locale/Maketext/t/90utf8.t
+	  !> (integrate 40 files)
+____________________________________________________________________________
+[ 19983] By: jhi                                   on 2003/07/04  12:28:01
+        Log: perldelta tweak.
+     Branch: maint-5.8/perl
+	   ! pod/perldelta.pod
+____________________________________________________________________________
+[ 19978] By: jhi                                   on 2003/07/04  05:27:56
+        Log: perldelta tweaks.
+     Branch: maint-5.8/perl
+	   ! pod/perldelta.pod
+____________________________________________________________________________
+[ 19975] By: jhi                                   on 2003/07/03  21:39:48
+        Log: Update Changes.
+     Branch: maint-5.8/perl
+	   ! Changes patchlevel.h
+____________________________________________________________________________
 [ 19974] By: jhi                                   on 2003/07/03  21:36:16
         Log: Integrate:
              [ 19971]
