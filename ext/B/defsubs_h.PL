@@ -7,9 +7,12 @@ $out =~ s/_h$/.h/;
 open(OUT,">$out") || die "Cannot open $file:$!";
 print "Extracting $out...\n";
 foreach my $const (qw(AVf_REAL 
-		      HEf_SVKEY
-                      SVf_IOK SVf_IVisUV SVf_NOK SVf_POK 
-		      SVf_ROK SVp_IOK SVp_POK ))
+		      HEf_SVKEY SVphv_SHAREKEYS
+		      SVf_READONLY
+		      GVf_IMPORTED_AV GVf_IMPORTED_HV
+		      GVf_IMPORTED_SV GVf_IMPORTED_CV
+		      SVf_IOK SVf_IVisUV SVf_NOK SVf_POK
+		      SVf_ROK SVp_IOK SVp_POK SVp_NOK))
  {
   doconst($const);
  }
