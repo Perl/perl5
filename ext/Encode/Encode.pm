@@ -253,14 +253,18 @@ sub predefine_encodings{
 	    $_[1] = '' if $chk;
 	    return $octets;
 	};
-	$Encode::Encoding{utf8} = 
+	$Encode::Encoding{utf8} =
 	    bless {Name => "utf8"} => "Encode::utf8";
     }
 }
 
 require Encode::Encoding;
+@Encode::XS::ISA = qw(Encode::Encoding);
 
-eval { 
+# This is very dodgy - PerlIO::encoding does "use Encode" and  _BEFORE_ it gets a
+# chance to set its VERSION we potentially delete it from %INC so it will be re-loaded
+# NI-S
+eval {
     require PerlIO::encoding;
     unless (PerlIO::encoding->VERSION >= 0.02){
 	delete $INC{"PerlIO/encoding.pm"};

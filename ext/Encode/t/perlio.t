@@ -59,7 +59,7 @@ for my $e (qw/euc-jp shiftjis 7bit-jis iso-2022-jp iso-2022-jp-1/){
 
     # first create a file without perlio
     dump2file($sfile, &encode($e, $utext, 0));
-    
+
     # then create a file via perlio without autoflush
 	
  SKIP:{

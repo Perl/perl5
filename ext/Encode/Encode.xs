@@ -11,11 +11,11 @@
 
 /* set 1 or more to profile.  t/encoding.t dumps core because of
    Perl_warner and PerlIO don't work well */
-#define ENCODE_XS_PROFILE 0 
+#define ENCODE_XS_PROFILE 0
 
 /* set 0 to disable floating point to calculate buffer size for
    encode_method().  1 is recommended. 2 restores NI-S original */
-#define ENCODE_XS_USEFP   1 
+#define ENCODE_XS_USEFP   1
 
 #define UNIMPLEMENTED(x,y) y x (SV *sv, char *encoding) {dTHX;   \
                          Perl_croak(aTHX_ "panic_unimplemented"); \
@@ -119,40 +119,40 @@ encode_method(pTHX_ encode_t * enc, encpage_t * dir, SV * src,
 	}
 	case ENCODE_NOREP:
 	    /* encoding */	
-	    if (dir == enc->f_utf8) { 
+	    if (dir == enc->f_utf8) {
 		STRLEN clen;
 		UV ch =
-		    utf8n_to_uvuni(s+slen, (SvCUR(src)-slen), 
+		    utf8n_to_uvuni(s+slen, (SvCUR(src)-slen),
 				   &clen, UTF8_ALLOW_ANY|UTF8_CHECK_ONLY);
 		if (check & ENCODE_DIE_ON_ERR) {
 		    Perl_croak(
-			aTHX_ "\"\\N{U+%" UVxf "}\" does not map to %s, %d", 
+			aTHX_ "\"\\N{U+%" UVxf "}\" does not map to %s, %d",
 			ch, enc->name[0], __LINE__);
 		}else{
 		    if (check & ENCODE_RETURN_ON_ERR){
 			if (check & ENCODE_WARN_ON_ERR){
 			    Perl_warner(
 				aTHX_ packWARN(WARN_UTF8),
-				"\"\\N{U+%" UVxf "}\" does not map to %s", 
+				"\"\\N{U+%" UVxf "}\" does not map to %s",
 				ch,enc->name[0]);
 			}
        			goto ENCODE_SET_SRC;
 		    }else if (check & ENCODE_PERLQQ){
-			SV* perlqq = 
+			SV* perlqq =
 			    sv_2mortal(newSVpvf("\\x{%04x}", ch));
 			sdone += slen + clen;
 			ddone += dlen + SvCUR(perlqq);
 			sv_catsv(dst, perlqq);
-		    } else { 
+		    } else {
 			/* fallback char */
 			sdone += slen + clen;
-			ddone += dlen + enc->replen; 
-			sv_catpvn(dst, (char*)enc->rep, enc->replen); 
+			ddone += dlen + enc->replen;
+			sv_catpvn(dst, (char*)enc->rep, enc->replen);
 		    }			
-		} 
+		}
 	    }
 	    /* decoding */
-	    else {           
+	    else {
 		if (check & ENCODE_DIE_ON_ERR){
 		    Perl_croak(
 			aTHX_ "%s \"\\x%02X\" does not map to Unicode (%d)",
@@ -167,22 +167,22 @@ encode_method(pTHX_ encode_t * enc, encpage_t * dir, SV * src,
 			}
 			goto ENCODE_SET_SRC;
 		    }else if (check & ENCODE_PERLQQ){
-			SV* perlqq = 
+			SV* perlqq =
 			    sv_2mortal(newSVpvf("\\x%02X", s[slen]));
 			sdone += slen + 1;
 			ddone += dlen + SvCUR(perlqq);
 			sv_catsv(dst, perlqq);
 		    } else {
 			sdone += slen + 1;
-			ddone += dlen + strlen(FBCHAR_UTF8); 
-			sv_catpv(dst, FBCHAR_UTF8); 
+			ddone += dlen + strlen(FBCHAR_UTF8);
+			sv_catpv(dst, FBCHAR_UTF8);
 		    }
 		}
 	    }
 	    /* settle variables when fallback */
 	    d    = (U8 *)SvEND(dst);
-            dlen = SvLEN(dst) - ddone - 1;
-	    s    = (U8*)SvPVX(src) + sdone; 
+	    dlen = SvLEN(dst) - ddone - 1;
+	    s    = (U8*)SvPVX(src) + sdone;
 	    slen = tlen - sdone;
 	    break;
 
@@ -205,10 +205,10 @@ encode_method(pTHX_ encode_t * enc, encpage_t * dir, SV * src,
     if (code && !(check & ENCODE_RETURN_ON_ERR)) {
     	return &PL_sv_undef;
     }
-    
+
     SvCUR_set(dst, dlen+ddone);
     SvPOK_only(dst);
-    
+
 #if ENCODE_XS_PROFILE
     if (SvCUR(dst) > SvCUR(src)){
 	Perl_warn(aTHX_
@@ -217,7 +217,7 @@ encode_method(pTHX_ encode_t * enc, encpage_t * dir, SV * src,
 		  (SvLEN(dst) - SvCUR(dst))*1.0/SvLEN(dst)*100.0);
     }
 #endif
-    
+
  ENCODE_END:
     *SvEND(dst) = '\0';
     return dst;
@@ -273,7 +273,7 @@ SV *    sv
 CODE:
 {
     SV * encoding = items == 2 ? ST(1) : Nullsv;
-    
+
     if (encoding)
     RETVAL = _encoded_bytes_to_utf8(sv, SvPV_nolen(encoding));
     else {
@@ -310,7 +310,7 @@ CODE:
 	    /* Must do things the slow way */
 	    U8 *dest;
             /* We need a copy to pass to check() */
-	    U8 *src  = (U8*)savepv((char *)s); 
+	    U8 *src  = (U8*)savepv((char *)s);
 	    U8 *send = s + len;
 
 	    New(83, dest, len, U8); /* I think */
@@ -335,8 +335,8 @@ CODE:
 		
 		    /* Note change to utf8.c variable naming, for variety */
 		    while (ulen--) {
-			if ((*s & 0xc0) != 0x80){ 
-			    goto failure; 
+			if ((*s & 0xc0) != 0x80){
+			    goto failure;
 			} else {
 			    uv = (uv << 6) | (*s++ & 0x3f);
 			}
@@ -422,7 +422,7 @@ CODE:
 OUTPUT:
     RETVAL
 
-int 
+int
 WARN_ON_ERR()
 CODE:
     RETVAL = ENCODE_WARN_ON_ERR;
