@@ -194,10 +194,6 @@ Tests for everything, At which point Schwern coughs up $500 to TPF.
 
 A test suite for the B module would be nice.
 
-=head2 Improve tests for Config.pm
-
-Config.pm doesn't appear to be well tested.
-
 =head2 common test code for timed bailout
 
 Write portable self destruct code for tests to stop them burning CPU in

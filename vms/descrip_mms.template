@@ -329,7 +329,7 @@ CRTLOPTS =,$(CRTL)/Options
 unidatadirs = lib/unicore/To lib/unicore/lib
 
 # Modules which must be installed before we can build extensions
-LIBPREREQ = $(ARCHDIR)Config.pm [.lib.VMS]Filespec.pm [.lib]DynaLoader.pm [.lib]XSLoader.pm [.lib]lib.pm [.lib.ExtUtils]XSSymSet.pm $(ARCHDIR)vmspipe.com [.lib]re.pm unidatafiles.ts
+LIBPREREQ = $(ARCHDIR)Config.pm $(ARCHDIR)Config_heavy.pl [.lib.VMS]Filespec.pm [.lib]DynaLoader.pm [.lib]XSLoader.pm [.lib]lib.pm [.lib.ExtUtils]XSSymSet.pm $(ARCHDIR)vmspipe.com [.lib]re.pm unidatafiles.ts
 
 utils1 = [.lib.pod]perldoc.com [.lib.ExtUtils]Miniperl.pm [.utils]c2ph.com [.utils]h2ph.com 
 utils2 = [.utils]h2xs.com [.utils]libnetcfg.com [.lib]perlbug.com [.lib]perlcc.com [.utils]dprofpp.com 
@@ -471,6 +471,10 @@ $(ARCHDIR)Config.pm : [.lib]Config.pm
 	Create/Directory $(ARCHDIR)
 	Copy/NoConfirm/Log $(MMS$SOURCE) $(ARCHDIR)
 
+$(ARCHDIR)Config_heavy.pl : [.lib]Config_heavy.pl
+	Create/Directory $(ARCHDIR)
+	Copy/NoConfirm/Log $(MMS$SOURCE) $(ARCHDIR)
+
 [.lib]Config.pm : config.h $(MINIPERL_EXE)
 	$(MINIPERL) ConfigPM.
 
@@ -522,68 +526,68 @@ dynext : $(LIBPREREQ) $(DBG)perlshr$(E) preplibrary
 
 [.lib.pod]perldoc.com : [.utils]perldoc.PL $(ARCHDIR)Config.pm
 	@ If F$Search("[.lib]pod.dir").eqs."" Then Create/Directory [.lib.pod]
-	$(MINIPERL) $(MMS$SOURCE)
+	$(MINIPERL) -"I[-.lib]" $(MMS$SOURCE)
 	Copy/NoConfirm/Log [.utils]perldoc.com [.lib.pod]
 
 [.lib.ExtUtils]Miniperl.pm : Minimod.PL miniperlmain.c $(ARCHDIR)Config.pm
-	$(MINIPERL) $(MMS$SOURCE) >$(MMS$TARGET)
+	$(MINIPERL) -"I[-.lib]" $(MMS$SOURCE) >$(MMS$TARGET)
 
 [.utils]perlivp.com : [.utils]perlivp.PL $(ARCHDIR)Config.pm
-	$(MINIPERL) $(MMS$SOURCE)
+	$(MINIPERL) -"I[-.lib]" $(MMS$SOURCE)
 
 [.utils]cpan.com : [.utils]cpan.PL $(ARCHDIR)Config.pm
-	$(MINIPERL) $(MMS$SOURCE)
+	$(MINIPERL) -"I[-.lib]" $(MMS$SOURCE)
 
 [.utils]prove.com : [.utils]prove.PL $(ARCHDIR)Config.pm
-	$(MINIPERL) $(MMS$SOURCE)
+	$(MINIPERL) -"I[-.lib]" $(MMS$SOURCE)
 
 [.utils]c2ph.com : [.utils]c2ph.PL $(ARCHDIR)Config.pm
-	$(MINIPERL) $(MMS$SOURCE)
+	$(MINIPERL) -"I[-.lib]" $(MMS$SOURCE)
 
 [.utils]dprofpp.com : [.utils]dprofpp.PL $(ARCHDIR)Config.pm
-	$(MINIPERL) $(MMS$SOURCE)
+	$(MINIPERL) -"I[-.lib]" $(MMS$SOURCE)
 
 [.utils]enc2xs.com : [.utils]enc2xs.PL $(ARCHDIR)Config.pm
-	$(MINIPERL) $(MMS$SOURCE)
+	$(MINIPERL) -"I[-.lib]" $(MMS$SOURCE)
 
 [.utils]h2ph.com : [.utils]h2ph.PL $(ARCHDIR)Config.pm
-	$(MINIPERL) $(MMS$SOURCE)
+	$(MINIPERL) -"I[-.lib]" $(MMS$SOURCE)
 
 [.utils]h2xs.com : [.utils]h2xs.PL $(ARCHDIR)Config.pm
-	$(MINIPERL) $(MMS$SOURCE)
+	$(MINIPERL) -"I[-.lib]" $(MMS$SOURCE)
 
 [.utils]instmodsh.com : [.utils]instmodsh.PL $(ARCHDIR)Config.pm
-	$(MINIPERL) $(MMS$SOURCE)
+	$(MINIPERL) -"I[-.lib]" $(MMS$SOURCE)
 
 [.utils]libnetcfg.com : [.utils]libnetcfg.PL $(ARCHDIR)Config.pm
-       $(MINIPERL) $(MMS$SOURCE)
+       $(MINIPERL) -"I[-.lib]" $(MMS$SOURCE)
 
 [.lib]perlbug.com : [.utils]perlbug.PL $(ARCHDIR)Config.pm
-	$(MINIPERL) $(MMS$SOURCE)
+	$(MINIPERL) -"I[-.lib]" $(MMS$SOURCE)
 	Copy/NoConfirm/Log [.utils]perlbug.com [.lib]
 
 [.lib]perlcc.com : [.utils]perlcc.PL $(ARCHDIR)Config.pm
-	$(MINIPERL) $(MMS$SOURCE)
+	$(MINIPERL) -"I[-.lib]" $(MMS$SOURCE)
 	Copy/NoConfirm/Log [.utils]perlcc.com [.lib]
 
 [.utils]piconv.com : [.utils]piconv.PL $(ARCHDIR)Config.pm
-	$(MINIPERL) $(MMS$SOURCE)
+	$(MINIPERL) -"I[-.lib]" $(MMS$SOURCE)
 
 [.utils]pl2pm.com : [.utils]pl2pm.PL $(ARCHDIR)Config.pm
-	$(MINIPERL) $(MMS$SOURCE)
+	$(MINIPERL) -"I[-.lib]" $(MMS$SOURCE)
 
 [.lib]splain.com : [.utils]splain.PL $(ARCHDIR)Config.pm
-	$(MINIPERL) $(MMS$SOURCE)
+	$(MINIPERL) -"I[-.lib]" $(MMS$SOURCE)
 	Copy/NoConfirm/Log [.utils]splain.com [.lib]
 
 [.x2p]find2perl.com : [.x2p]find2perl.PL $(ARCHDIR)Config.pm
-	$(MINIPERL) $(MMS$SOURCE)
+	$(MINIPERL) -"I[-.lib]" $(MMS$SOURCE)
 
 [.x2p]s2p.com : [.x2p]s2p.PL $(ARCHDIR)Config.pm
-	$(MINIPERL) $(MMS$SOURCE)
+	$(MINIPERL) -"I[-.lib]" $(MMS$SOURCE)
 
 [.utils]xsubpp.com : [.utils]xsubpp.PL $(ARCHDIR)Config.pm
-	$(MINIPERL) $(MMS$SOURCE)
+	$(MINIPERL) -"I[-.lib]" $(MMS$SOURCE)
 
 # Rename catches problem with some DECC versions in which object file is
 # placed in current default dir, not same one as source file.
@@ -616,37 +620,37 @@ dynext : $(LIBPREREQ) $(DBG)perlshr$(E) preplibrary
 
 [.lib.pod]pod2html.com : [.pod]pod2html.PL $(ARCHDIR)Config.pm
 	@ If F$Search("[.lib]pod.dir").eqs."" Then Create/Directory [.lib.pod]
-	$(MINIPERL) $(MMS$SOURCE)
+	$(MINIPERL) -"I[-.lib]" $(MMS$SOURCE)
 	Copy/NoConfirm/Log [.pod]pod2html.com [.lib.pod]
 
 [.lib.pod]pod2latex.com : [.pod]pod2latex.PL $(ARCHDIR)Config.pm
 	@ If F$Search("[.lib]pod.dir").eqs."" Then Create/Directory [.lib.pod]
-	$(MINIPERL) $(MMS$SOURCE)
+	$(MINIPERL) -"I[-.lib]" $(MMS$SOURCE)
 	Copy/NoConfirm/Log [.pod]pod2latex.com [.lib.pod]
 
 [.lib.pod]pod2man.com : [.pod]pod2man.PL $(ARCHDIR)Config.pm
 	@ If F$Search("[.lib]pod.dir").eqs."" Then Create/Directory [.lib.pod]
-	$(MINIPERL) $(MMS$SOURCE)
+	$(MINIPERL) -"I[-.lib]" $(MMS$SOURCE)
 	Copy/NoConfirm/Log [.pod]pod2man.com [.lib.pod]
 
 [.lib.pod]pod2text.com : [.pod]pod2text.PL $(ARCHDIR)Config.pm
 	@ If F$Search("[.lib]pod.dir").eqs."" Then Create/Directory [.lib.pod]
-	$(MINIPERL) $(MMS$SOURCE)
+	$(MINIPERL) -"I[-.lib]" $(MMS$SOURCE)
 	Copy/NoConfirm/Log [.pod]pod2text.com [.lib.pod]
 
 [.lib.pod]podchecker.com : [.pod]podchecker.PL $(ARCHDIR)Config.pm
 	@ If F$Search("[.lib]pod.dir").eqs."" Then Create/Directory [.lib.pod]
-	$(MINIPERL) $(MMS$SOURCE)
+	$(MINIPERL) -"I[-.lib]" $(MMS$SOURCE)
 	Copy/NoConfirm/Log [.pod]podchecker.com [.lib.pod]
 
 [.lib.pod]pod2usage.com : [.pod]pod2usage.PL $(ARCHDIR)Config.pm
 	@ If F$Search("[.lib]pod.dir").eqs."" Then Create/Directory [.lib.pod]
-	$(MINIPERL) $(MMS$SOURCE)
+	$(MINIPERL) -"I[-.lib]" $(MMS$SOURCE)
 	Copy/NoConfirm/Log [.pod]pod2usage.com [.lib.pod]
 
 [.lib.pod]podselect.com : [.pod]podselect.PL $(ARCHDIR)Config.pm
 	@ If F$Search("[.lib]pod.dir").eqs."" Then Create/Directory [.lib.pod]
-	$(MINIPERL) $(MMS$SOURCE)
+	$(MINIPERL) -"I[-.lib]" $(MMS$SOURCE)
 	Copy/NoConfirm/Log [.pod]podselect.com [.lib.pod]
 
 preplibrary : $(MINIPERL_EXE) $(LIBPREREQ) 
@@ -1301,6 +1305,7 @@ archify : all
 	Backup/Log/Verify [.lib.auto...]*.*;/Exclude=(*.al,*.ix) 'archroot'/New_Version
 	Delete/Log/NoConfirm [.lib.auto...]*.*;*/exclude=(*.al,*.ix,*.dir)
 	Delete/Log/NoConfirm [.lib]Config.pm;*
+	Delete/Log/NoConfirm [.lib]Config_heavy.pl;*
 	Copy/Log/NoConfirm *$(E);,[.x2p]$(DBG)a2p$(E); $(ARCHDIR)
 	Delete/Log/NoConfirm Perl*$(E);*,[.x2p]$(DBG)a2p$(E);*
 	@ QUALIFIERS := $(MMSQUALIFIERS)
@@ -1637,6 +1642,8 @@ tidy : cleanlis
 	- If F$Search("[.Lib]XSLoader.pm;-1").nes."" Then Purge/NoConfirm/Log [.Lib]XSLoader.pm
 	- If F$Search("[.Lib]Config.pm;-1").nes."" Then Purge/NoConfirm/Log [.Lib]Config.pm
 	- If F$Search("$(ARCHDIR)Config.pm;-1").nes."" Then Purge/NoConfirm/Log $(ARCHDIR)Config.pm
+	- If F$Search("[.Lib]Config_heavy.pl;-1").nes."" Then Purge/NoConfirm/Log [.Lib]Config_heavy.pl
+	- If F$Search("$(ARCHDIR)Config_heavy.pl;-1").nes."" Then Purge/NoConfirm/Log $(ARCHDIR)Config_heavy.pl
 	- If F$Search("[.lib.ExtUtils]Miniperl.pm").nes."" Then Purge/NoConfirm/Log [.lib.ExtUtils]Miniperl.pm
 	- If F$Search("[.lib.ExtUtils]XSSymSet.pm").nes."" Then Purge/NoConfirm/Log [.lib.ExtUtils]XSSymSet.pm
 	- If F$Search("[.Lib.VMS]*.*;-1").nes."" Then Purge/NoConfirm/Log [.Lib.VMS]*.*
@@ -1687,11 +1694,13 @@ realclean : clean
 	- If F$Search("[.Lib]DynaLoader.pm").nes."" Then Delete/NoConfirm/Log [.Lib]DynaLoader.pm;*
 	- If F$Search("[.Lib]XSLoader.pm").nes."" Then Delete/NoConfirm/Log [.Lib]XSLoader.pm;*
 	- If F$Search("[.Lib]Config.pm").nes."" Then Delete/NoConfirm/Log [.Lib]Config.pm;*
+	- If F$Search("[.Lib]Config_heavy.pl").nes."" Then Delete/NoConfirm/Log [.Lib]Config_heavy.pl;*
 	- If F$Search("[.Lib]*.com").nes."" Then Delete/NoConfirm/Log [.Lib]*.com;*
 	- If F$Search("[.pod]*.com").nes."" Then Delete/NoConfirm/Log [.pod]*.com;*
 	- If F$Search("[.utils]*.com").nes."" Then Delete/NoConfirm/Log [.utils]*.com;*
 	- If F$Search("[.x2p]*.com").nes."" Then Delete/NoConfirm/Log [.x2p]*.com;*
 	- If F$Search("$(ARCHDIR)Config.pm").nes."" Then Delete/NoConfirm/Log $(ARCHDIR)Config.pm;*
+	- If F$Search("$(ARCHDIR)Config_heavy.pl").nes."" Then Delete/NoConfirm/Log $(ARCHDIR)Config_heavy.pl;*
 	- If F$Search("[.lib.ExtUtils]Miniperl.pm").nes."" Then Delete/NoConfirm/Log [.lib.ExtUtils]Miniperl.pm;*
 	- If F$Search("[.lib.ExtUtils]XSSymSet.pm").nes."" Then Delete/NoConfirm/Log [.lib.ExtUtils]XSSymSet.pm;*
 	- If F$Search("[.lib.pod]*.pod").nes."" Then Delete/NoConfirm/Log [.lib.pod]*.pod;*
