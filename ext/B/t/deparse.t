@@ -119,7 +119,12 @@ $b =~ s/(LINE:)/sub BEGIN {
     'XL'->bootstrap;
 }
 $1/ if $Is_MacOS;
-print "# [$a]\n\# vs expected\n# [$b]\nnot " if $a ne $b;
+if ($a ne $b) {
+    # A temporary debugging aid (Tru64 threaded smoke test somehow
+    # broke between 19150 and 19160, but works okay from command line.)
+    print STDERR "# [$a]\n\# vs expected\n# [$b]\n";
+    print "not ";
+}
 print "ok " . $i++ . "\n";
 
 __DATA__
