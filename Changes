@@ -269,7 +269,7 @@ ____________________________________________________________________________
              Date: Mon, 04 Dec 2000 22:21:59 -0800
              Message-ID: <HmIL6gzkgepS092yn@efn.org>
              
-             Harness shouldn't ignore responses like "ok 3\r\n\n".
+             Harness shouldn't ignore responses like "ok 3\r\r\n".
      Branch: perl
 	   ! lib/Test/Harness.pm
 ____________________________________________________________________________
