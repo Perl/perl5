@@ -164,7 +164,7 @@ $_ = "global";
 {
     my $_ = "abc";
     my $x = reverse;
-    ok( $x eq "cba", 'reverse without arguments picks up $_ # TODO' );
+    ok( $x eq "cba", 'reverse without arguments picks up $_' );
 }
 
 {

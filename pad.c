@@ -582,6 +582,19 @@ Perl_pad_findmy(pTHX_ char *name)
     return NOT_IN_PAD;
 }
 
+/*
+ * Returns the offset of a lexical $_, if there is one, at run time.
+ * Used by the UNDERBAR XS macro.
+ */
+
+PADOFFSET
+Perl_find_rundefsvoffset()
+{
+    SV *out_sv;
+    int out_flags;
+    return pad_findlex("$_", find_runcv(NULL), PL_curcop->cop_seq, 1,
+	    Null(SV**), &out_sv, &out_flags);
+}
 
 /*
 =for apidoc pad_findlex

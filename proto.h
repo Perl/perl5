@@ -529,6 +529,7 @@ PERL_CALLCONV void	Perl_package(pTHX_ OP* o);
 PERL_CALLCONV PADOFFSET	Perl_pad_alloc(pTHX_ I32 optype, U32 tmptype);
 PERL_CALLCONV PADOFFSET	Perl_allocmy(pTHX_ char* name);
 PERL_CALLCONV PADOFFSET	Perl_pad_findmy(pTHX_ char* name);
+PERL_CALLCONV PADOFFSET	Perl_find_rundefsvoffset(pTHX);
 PERL_CALLCONV OP*	Perl_oopsAV(pTHX_ OP* o);
 PERL_CALLCONV OP*	Perl_oopsHV(pTHX_ OP* o);
 PERL_CALLCONV void	Perl_pad_leavemy(pTHX);

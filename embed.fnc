@@ -551,6 +551,7 @@ p	|void	|package	|OP* o
 pd	|PADOFFSET|pad_alloc	|I32 optype|U32 tmptype
 p	|PADOFFSET|allocmy	|char* name
 pd	|PADOFFSET|pad_findmy	|char* name
+Ap	|PADOFFSET|find_rundefsvoffset	|
 p	|OP*	|oopsAV		|OP* o
 p	|OP*	|oopsHV		|OP* o
 pd	|void	|pad_leavemy

@@ -4334,12 +4334,17 @@ PP(pp_reverse)
 	register I32 tmp;
 	dTARGET;
 	STRLEN len;
+	I32 padoff_du;
 
 	SvUTF8_off(TARG);				/* decontaminate */
 	if (SP - MARK > 1)
 	    do_join(TARG, &PL_sv_no, MARK, SP);
 	else
-	    sv_setsv(TARG, (SP > MARK) ? *SP : DEFSV);
+	    sv_setsv(TARG, (SP > MARK)
+		    ? *SP
+		    : (padoff_du = Perl_find_rundefsvoffset(),
+			(padoff_du == NOT_IN_PAD || PAD_COMPNAME_FLAGS(padoff_du) & SVpad_OUR)
+			? DEFSV : PAD_SVl(padoff_du)));
 	up = SvPV_force(TARG, len);
 	if (len > 1) {
 	    if (DO_UTF8(TARG)) {	/* first reverse each character */
