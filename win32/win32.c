@@ -3564,6 +3564,25 @@ win32_dynaload(const char* filename)
 {
     dTHXo;
     HMODULE hModule;
+    char buf[MAX_PATH+1];
+    char *first;
+
+    /* LoadLibrary() doesn't recognize forward slashes correctly,
+     * so turn 'em back. */
+    first = strchr(filename, '/');
+    if (first) {
+	STRLEN len = strlen(filename);
+	if (len <= MAX_PATH) {
+	    strcpy(buf, filename);
+	    filename = &buf[first - filename];
+	    while (*filename) {
+		if (*filename == '/')
+		    *(char*)filename = '\\';
+		++filename;
+	    }
+	    filename = buf;
+	}
+    }
     if (USING_WIDE()) {
 	WCHAR wfilename[MAX_PATH+1];
 	A2WHELPER(filename, wfilename, sizeof(wfilename));
