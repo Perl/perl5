@@ -127,7 +127,7 @@ instead of raw C<char *> strings:
     strncat(dt, src)            sv_catpvn(sv, s)
     sprintf(s, fmt, ...)        sv_setpvf(sv, fmt, ...)
 
-Note also the existence of C<sv_catpvf> and C<sv_catpvfn>, combining
+Note also the existence of C<sv_catpvf> and C<sv_vcatpvfn>, combining
 concatenation with formatting.
 
 =head2 Character Class Tests

@@ -54,7 +54,7 @@ To change the value of an *already-existing* SV, there are seven routines:
     void  sv_setpv(SV*, const char*);
     void  sv_setpvn(SV*, const char*, int)
     void  sv_setpvf(SV*, const char*, ...);
-    void  sv_setpvfn(SV*, const char*, STRLEN, va_list *, SV **, I32, bool);
+    void  sv_vsetpvfn(SV*, const char*, STRLEN, va_list *, SV **, I32, bool);
     void  sv_setsv(SV*, SV*);
 
 Notice that you can choose to specify the length of the string to be
@@ -67,7 +67,7 @@ string terminating with a NUL character.
 The arguments of C<sv_setpvf> are processed like C<sprintf>, and the
 formatted output becomes the value.
 
-C<sv_setpvfn> is an analogue of C<vsprintf>, but it allows you to specify
+C<sv_vsetpvfn> is an analogue of C<vsprintf>, but it allows you to specify
 either a pointer to a variable argument list or the address and length of
 an array of SVs.  The last argument points to a boolean; on return, if that
 boolean is true, then locale-specific information has been used to format
@@ -162,7 +162,7 @@ you can use the following functions:
     void  sv_catpv(SV*, const char*);
     void  sv_catpvn(SV*, const char*, STRLEN);
     void  sv_catpvf(SV*, const char*, ...);
-    void  sv_catpvfn(SV*, const char*, STRLEN, va_list *, SV **, I32, bool);
+    void  sv_vcatpvfn(SV*, const char*, STRLEN, va_list *, SV **, I32, bool);
     void  sv_catsv(SV*, SV*);
 
 The first function calculates the length of the string to be appended by
