@@ -41,7 +41,7 @@ repair()
      -e 's=digest/md5=Digest/MD5=' \
      -e 's=perlio/scalar=PerlIO/Scalar=' \
      -e 's=mime/base64=MIME/Base64=' \
-     -e 's=time/hires=Time/HiRes='
+     -e 's=time/hires=Time/HiRes=' \
      -e 's=list/util=List/Util=' \
      -e 's=time/piece=Time/Piece='
 }
