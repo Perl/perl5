@@ -1246,12 +1246,12 @@ STRLEN *lp;
 	    return s;
 	}
 	if (SvREADONLY(sv)) {
-	    if (SvIOKp(sv)) {
-		(void)sprintf(tokenbuf,"%ld",(long)SvIVX(sv));
-		goto tokensave;
-	    }
 	    if (SvNOKp(sv)) {
 		Gconvert(SvNVX(sv), DBL_DIG, 0, tokenbuf);
+		goto tokensave;
+	    }
+	    if (SvIOKp(sv)) {
+		(void)sprintf(tokenbuf,"%ld",(long)SvIVX(sv));
 		goto tokensave;
 	    }
 	    if (dowarn)
