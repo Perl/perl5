@@ -803,6 +803,11 @@ Perl_savesharedpv(pTHX_ const char *pv)
     register char *newaddr = Nullch;
     if (pv) {
 	newaddr = (char*)PerlMemShared_malloc(strlen(pv)+1);
+	if (!newaddr) {
+	    PerlLIO_write(PerlIO_fileno(Perl_error_log),
+			  PL_no_mem, strlen(PL_no_mem));
+	    my_exit(1);
+	}
     	(void)strcpy(newaddr,pv);
     }
     return newaddr;
