@@ -71,19 +71,11 @@ my $nop3 = *File::Spec::catfile;
 # without changing it, and then I'd always forget to change it before a
 # release. Sorry, Edward :)
 
-sub TMPDIR {
-    my $TMPDIR =
-	(grep(defined $_ && -d $_ && -w _,
-	      ((defined $ENV{'TMPDIR'} ? $ENV{'TMPDIR'} : undef),
-	       qw(/var/tmp /usr/tmp /tmp c:/temp))))[0];
-    $TMPDIR || die "Cannot find writable temporary directory.\n";
-}
-
 sub try_compile_and_link {
     my ($c, %args) = @_;
 
     my ($ok) = 0;
-    my ($tmp) = (($^O eq 'VMS') ? "sys\$scratch:tmp$$" : TMPDIR() . '/' . "tmp$$");
+    my ($tmp) = "tmp$$";
     local(*TMPC);
 
     my $obj_ext = $Config{obj_ext} || ".o";

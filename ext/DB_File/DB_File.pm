@@ -1821,7 +1821,7 @@ fix very easily.
     use DB_File ;
 
     my %hash ;
-    my $filename = "/tmp/filt" ;
+    my $filename = "filt" ;
     unlink $filename ;
 
     my $db = tie %hash, 'DB_File', $filename, O_CREAT|O_RDWR, 0666, $DB_HASH 
@@ -1863,7 +1863,7 @@ Here is a DBM Filter that does it:
     use strict ;
     use DB_File ;
     my %hash ;
-    my $filename = "/tmp/filt" ;
+    my $filename = "filt" ;
     unlink $filename ;
 
 
@@ -1894,8 +1894,8 @@ peril!
 
 The locking technique went like this. 
 
-    $db = tie(%db, 'DB_File', '/tmp/foo.db', O_CREAT|O_RDWR, 0666)
-        || die "dbcreat /tmp/foo.db $!";
+    $db = tie(%db, 'DB_File', 'foo.db', O_CREAT|O_RDWR, 0644)
+        || die "dbcreat foo.db $!";
     $fd = $db->fd;
     open(DB_FH, "+<&=$fd") || die "dup $!";
     flock (DB_FH, LOCK_EX) || die "flock: $!";

@@ -28,14 +28,7 @@ if ($@) {
 
 print "1..4\n";
 
-
-if (eval {require File::Spec::Functions}) {
- File::Spec::Functions->import();
-} else {
-  *catfile = sub { join '/', @_ };
-}
-$tmpdir = $ENV{TMP} || $ENV{TMPDIR} ||  '/tmp';  
-$file = catfile($tmpdir, "md$$");
+$file = "md$$";
 1 while unlink $file, "$file.dir", "$file.pag";
 tryout('Memoize::NDBM_File', $file, 1);  # Test 1..4
 1 while unlink $file, "$file.dir", "$file.pag";

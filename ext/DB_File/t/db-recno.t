@@ -1198,7 +1198,7 @@ my @tests = ([ [ 'falsely', 'dinosaur', 'remedy', 'commotion',
 
 my $testnum = 181;
 my $failed = 0;
-require POSIX; my $tmp = POSIX::tmpnam();
+my $tmp = "dbr$$";
 foreach my $test (@tests) {
     my $err = test_splice(@$test);
     if (defined $err) {

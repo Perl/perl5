@@ -349,13 +349,13 @@ foreach $filename (map(glob($_),@ARGV)) {
 	}
 	
 	if ($changes) {
-		open(OUT,">/tmp/ppport.h.$$");
+		open(OUT,"ppport.h.$$");
 		print OUT $c;
 		close(OUT);
-		open(DIFF, "diff -u $filename /tmp/ppport.h.$$|");
-		while (<DIFF>) { s!/tmp/ppport\.h\.$$!$filename.patched!; print STDOUT; }
+		open(DIFF, "diff -u $filename ppport.h.$$|");
+		while (<DIFF>) { s!ppport\.h\.$$!$filename.patched!; print STDOUT; }
 		close(DIFF);
-		unlink("/tmp/ppport.h.$$");
+		unlink("ppport.h.$$");
 	} else {
 		print "Looks OK\n";
 	}

@@ -105,7 +105,6 @@ sub create_archive {
     my($reply, $module) = @_;
 
     my $file = (split(' ', $reply))[1];
-    my $tmp = "/tmp/inst.$$";
 
     if( !(defined $file and length $file) ) {
         print "No tar file specified\n";

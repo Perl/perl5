@@ -192,11 +192,11 @@ whether it only works on existing files or always clobbers existing ones.
     open(WTMP, "+< /usr/adm/wtmp") 
         || die "can't open /usr/adm/wtmp: $!";
 
-    open(SCREEN, "+> /tmp/lkscreen")
-        || die "can't open /tmp/lkscreen: $!";
+    open(SCREEN, "+> lkscreen")
+        || die "can't open lkscreen: $!";
 
-    open(LOGFILE, "+>> /tmp/applog"
-        || die "can't open /tmp/applog: $!";
+    open(LOGFILE, "+>> /var/log/applog"
+        || die "can't open /var/log/applog: $!";
 
 The first one won't create a new file, and the second one will always
 clobber an old one.  The third one will create a new file if necessary

@@ -407,7 +407,7 @@ same semantics as fetch(), but performs no unescaping.
 You may also retrieve cookies that were stored in some external
 form using the parse() class method:
 
-       $COOKIES = `cat /usr/tmp/Cookie_stash`;
+       $COOKIES = `cat /some/path/Cookie_stash`;
        %cookies = parse CGI::Cookie($COOKIES);
 
 If you are in a mod_perl environment, you can save some overhead by

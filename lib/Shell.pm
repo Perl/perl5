@@ -144,7 +144,7 @@ Here's one that'll whack your mind a little out.
     sub ps;
     print ps -ww;
 
-    cp("/etc/passwd", "/tmp/passwd");
+    cp("/etc/passwd", "/etc/passwd.orig");
 
 That's maybe too gonzo.  It actually exports an AUTOLOAD to the current
 package (and uncovered a bug in Beta 3, by the way).  Maybe the usual

@@ -2929,7 +2929,7 @@ Examples:
     open(ARTICLE, "caesar <$article |")		# ditto
 	or die "Can't start caesar: $!";
 
-    open(EXTRACT, "|sort >/tmp/Tmp$$")		# $$ is our process id
+    open(EXTRACT, "|sort >Tmp$$")		# $$ is our process id
 	or die "Can't start sort: $!";
 
     # in memory files

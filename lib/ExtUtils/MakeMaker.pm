@@ -1018,7 +1018,7 @@ The generated Makefile enables the user of the extension to invoke
 The Makefile to be produced may be altered by adding arguments of the
 form C<KEY=VALUE>. E.g.
 
-  perl Makefile.PL PREFIX=/tmp/myperl5
+  perl Makefile.PL PREFIX=~/myperl5
 
 Other interesting targets in the generated Makefile are
 
@@ -1369,13 +1369,13 @@ Something like C<"-DHAVE_UNISTD_H">
 
 This is the root directory into which the code will be installed.  It
 I<prepends itself to the normal prefix>.  For example, if your code
-would normally go into /usr/local/lib/perl you could set DESTDIR=/tmp/
-and installation would go into /tmp/usr/local/lib/perl.
+would normally go into /usr/local/lib/perl you could set DESTDIR=/other/
+and installation would go into /other/usr/local/lib/perl.
 
 This is primarily of use for people who repackage Perl modules.
 
 NOTE: Due to the nature of make, it is important that you put the trailing
-slash on your DESTDIR.  "/tmp/" not "/tmp".
+slash on your DESTDIR.  "/other/" not "/other".
 
 =item DIR
 
