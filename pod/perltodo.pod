@@ -571,16 +571,6 @@ With C<gdb>, you can attach the debugger to a running program if you
 pass the process ID. It would be good to do this with the Perl debugger
 on a running Perl program, although I'm not sure how it would be done.
 
-=head2 Alternative RE syntax module
-
-    use Regex::Newbie;
-    $re = Regex::Newbie->new
-                       ->start
-                       ->match("foo")
-                       ->repeat(Regex::Newbie->class("char"),3)
-                       ->end;
-    /$re/;
-
 =head2 GUI::Native
 
 A non-core module that would use "native" GUI to create graphical
@@ -622,6 +612,23 @@ The code we ship with Perl should look like good Perl 5.
 
 These are things which have been on the todo lists in previous releases
 but have recently been completed.
+
+=head2 Alternative RE syntax module
+
+The C<Regexp::English> module, available from the CPAN, provides this:
+
+    my $re = Regexp::English
+    -> start_of_line
+    -> literal('Flippers')
+    -> literal(':')
+    -> optional
+        -> whitespace_char
+    -> end
+    -> remember
+        -> multiple
+            -> digit;
+
+    /$re/;
 
 =head2 Safe signal handling
 
