@@ -286,7 +286,7 @@ my %preconfig;
 	my $arch = $MacPerl::Architecture || "";
 	my $cc   = $MacPerl::Compiler || "";
 
-	%extra = (
+	%preconfig = (
 		installsitelib		=> $inst,
 		installsitearch		=> "$inst$arch:",
 		archname		=> $arch,
