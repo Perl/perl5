@@ -1,8 +1,8 @@
 # DB_File.pm -- Perl 5 interface to Berkeley DB 
 #
 # written by Paul Marquess (pmarquess@bfsec.bt.co.uk)
-# last modified 14th Jan 1997
-# version 1.10
+# last modified 6th Feb 1997
+# version 1.11
 #
 #     Copyright (c) 1995, 1996, 1997 Paul Marquess. All rights reserved.
 #     This program is free software; you can redistribute it and/or
@@ -146,7 +146,7 @@ use vars qw($VERSION @ISA @EXPORT $AUTOLOAD $DB_BTREE $DB_HASH $DB_RECNO) ;
 use Carp;
 
 
-$VERSION = "1.10" ;
+$VERSION = "1.11" ;
 
 #typedef enum { DB_BTREE, DB_HASH, DB_RECNO } DBTYPE;
 $DB_BTREE = new DB_File::BTREEINFO ;
@@ -1144,6 +1144,8 @@ destroyed.
     undef $db ;
     untie %hash ;
 
+See L<The untie gotcha> for more details.
+
 All the functions defined in L<dbopen> are available except for
 close() and dbopen() itself. The B<DB_File> method interface to the
 supported functions have been implemented to mirror the way Berkeley DB
@@ -1389,6 +1391,73 @@ F<authors/id/TOMC/scripts/nshist.gz>).
 
     untie %hist_db ;
 
+=head2 The untie gotcha
+
+If you make use of the Berkeley DB API, it is is I<very> strongly
+recommended that you read L<perltie/The untie gotcha>. 
+
+Even if you don't currently make use of the API interface, it is still
+worth reading it.
+
+Here is an example which illustrates the problem from a B<DB_File>
+perspective:
+
+    use DB_File ;
+    use Fcntl ;
+
+    my %x ;
+    my $X ;
+
+    $X = tie %x, 'DB_File', 'tst.fil' , O_RDWR|O_TRUNC
+        or die "Cannot tie first time: $!" ;
+
+    $x{123} = 456 ;
+
+    untie %x ;
+
+    tie %x, 'DB_File', 'tst.fil' , O_RDWR|O_CREAT
+        or die "Cannot tie second time: $!" ;
+
+    untie %x ;
+
+When run, the script will produce this error message:
+
+    Cannot tie second time: Invalid argument at bad.file line 14.
+
+Although the error message above refers to the second tie() statement
+in the script, the source of the problem is really with the untie()
+statement that precedes it.
+
+Having read L<perltie> you will probably have already guessed that the
+error is caused by the extra copy of the tied object stored in C<$X>.
+If you haven't, then the problem boils down to the fact that the
+B<DB_File> destructor, DESTROY, will not be called until I<all>
+references to the tied object are destroyed. Both the tied variable,
+C<%x>, and C<$X> above hold a reference to the object. The call to
+untie() will destroy the first, but C<$X> still holds a valid
+reference, so the destructor will not get called and the database file
+F<tst.fil> will remain open. The fact that Berkeley DB then reports the
+attempt to open a database that is alreday open via the catch-all
+"Invalid argument" doesn't help.
+
+If you run the script with the C<-w> flag the error message becomes:
+
+    untie attempted while 1 inner references still exist at bad.file line 12.
+    Cannot tie second time: Invalid argument at bad.file line 14.
+
+which pinpoints the real problem. Finally the script can now be
+modified to fix the original problem by destroying the API object
+before the untie:
+
+    ...
+    $x{123} = 456 ;
+
+    undef $X ;
+    untie %x ;
+
+    $X = tie %x, 'DB_File', 'tst.fil' , O_RDWR|O_CREAT
+    ...
+
 
 =head1 COMMON QUESTIONS
 
@@ -1569,6 +1638,10 @@ Changed default mode to 0666.
 Fixed fd method so that it still returns -1 for in-memory files when db
 1.86 is used.
 
+=item 1.11
+
+Documented the untie gotcha.
+
 =back
 
 =head1 BUGS
@@ -1597,7 +1670,7 @@ compile properly on IRIX 5.3.
 
 As of January 1997, version 1.86 of Berkeley DB is available from the
 Berkeley DB home page. Although this release does fix a number of bugs
-that were present in 1.85 you should ba aware of the following
+that were present in 1.85 you should be aware of the following
 information (taken from the Berkeley DB home page) before you consider
 using it:
 

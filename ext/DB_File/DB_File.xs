@@ -3,8 +3,8 @@
  DB_File.xs -- Perl 5 interface to Berkeley DB 
 
  written by Paul Marquess (pmarquess@bfsec.bt.co.uk)
- last modified 14th Jan 1997
- version 1.10
+ last modified 6th Feb 1997
+ version 1.11
 
  All comments/suggestions/problems are welcome
 
@@ -37,6 +37,7 @@
 	1.09 -  Default mode for dbopen changed to 0666
 	1.10 -  Fixed fd method so that it still returns -1 for
 		in-memory files when db 1.86 is used.
+	1.11 -  No change to DB_File.xs
 
 */
 
