@@ -337,6 +337,7 @@ gv_init
 gv_stashpv
 gv_stashpvn
 gv_stashsv
+hexdigit
 hv_clear
 hv_delayfree_ent
 hv_delete
