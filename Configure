@@ -2454,7 +2454,7 @@ case "$usethreads" in
 		. ./usethreads.cbu
 	fi
 	case "$osname" in
-	aix|dec_osf|dos_djgpp|freebsd|hpux|irix|linux|openbsd|os2|solaris|vmesa)
+	aix|dec_osf|dos_djgpp|freebsd|hpux|irix|linux|next|openbsd|os2|solaris|vmesa)
 		# Known thread-capable platforms.
 		;;
 	*)
