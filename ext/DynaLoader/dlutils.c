@@ -11,7 +11,7 @@
 #ifndef XS_VERSION
 #  define XS_VERSION "0"
 #endif
-#define MY_CXT_KEY "DynaLoader::_guts"##XS_VERSION
+#define MY_CXT_KEY "DynaLoader::_guts" XS_VERSION
 
 typedef struct {
     char *	x_dl_last_error;	/* pointer to allocated memory for
