@@ -62,16 +62,11 @@ die "Aborted.\n" if @$missentry or @$missfile;
 print "\n";
 
 
-print "Updating VMS version specific files with $vms_vers...\n";
-system("perl -pi -e 's/^\QPERL_VERSION = \E\d\_\d+(\s*\#)/PERL_VERSION = $vms_vers$1/' vms/descrip.mms");
-
-
 print "Creating $relroot/$reldir release directory...\n";
 die "$relroot/$reldir release directory already exists\n"   if -e "$relroot/$reldir";
 die "$relroot/$reldir.tar.gz release file already exists\n" if -e "$relroot/$reldir.tar.gz";
 mkdir("$relroot/$reldir", 0755) or die "mkdir $relroot/$reldir: $!\n";
 print "\n";
-
 
 print "Copying files to release directory...\n";
 # ExtUtils::Manifest maniread does not preserve the order
@@ -79,11 +74,16 @@ $cmd = "awk '{print \$1}' MANIFEST | cpio -pdm $relroot/$reldir";
 system($cmd) == 0 or die "$cmd failed";
 print "\n";
 
+
 chdir "$relroot/$reldir" or die $!;
+
+
+print "Updating VMS version specific files with $vms_vers...\n";
+system("perl -pi -e 's/^\QPERL_VERSION = \E\d\_\d+(\s*\#)/PERL_VERSION = $vms_vers$1/' vms/descrip.mms");
 
 print "Setting file permissions...\n";
 system("find . -type f -print     | xargs chmod -w");
-system("find . -type d -print     | xargs chmod g-s");
+system("find . -type d -print     | xargs chmod 755");
 system("find t -name '*.t' -print | xargs chmod +x");
 system("chmod +w configure"); # special case (see pumpkin.pod)
 my @exe = qw(
