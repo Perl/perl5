@@ -154,5 +154,5 @@ Return the SV from the GV.
 #define GV_ADDINEVAL	0x08	/* add, as though we're doing so within an eval */
 #define GV_NOINIT	0x10	/* add, but don't init symbol, if type != PVGV */
 
-#define gv_fullname3(sv,gv,prefix) gv_fullname4(sv,gv,prefix,TRUE);
-#define gv_efullname3(sv,gv,prefix) gv_efullname4(sv,gv,prefix,TRUE);
+#define gv_fullname3(sv,gv,prefix) gv_fullname4(sv,gv,prefix,TRUE)
+#define gv_efullname3(sv,gv,prefix) gv_efullname4(sv,gv,prefix,TRUE)
