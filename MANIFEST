@@ -517,6 +517,7 @@ lib/DirHandle.pm	like FileHandle only for directories
 lib/Dumpvalue.pm	Screen dump of perl values
 lib/English.pm		Readable aliases for short variables
 lib/Env.pm		Map environment into ordinary variables
+lib/Exporter/Heavy.pm	Complicated routines for Exporter
 lib/Exporter.pm		Exporter base class
 lib/ExtUtils/Command.pm	Utilities for Make on non-UNIX platforms
 lib/ExtUtils/Embed.pm	Utilities for embedding Perl in C programs
