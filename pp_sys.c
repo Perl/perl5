@@ -2846,12 +2846,10 @@ PP(pp_stat)
 	}
 	sv_setpv(PL_statname, SvPV(sv,n_a));
 	PL_statgv = Nullgv;
-#ifdef HAS_LSTAT
 	PL_laststype = PL_op->op_type;
 	if (PL_op->op_type == OP_LSTAT)
 	    PL_laststatval = PerlLIO_lstat(SvPV(PL_statname, n_a), &PL_statcache);
 	else
-#endif
 	    PL_laststatval = PerlLIO_stat(SvPV(PL_statname, n_a), &PL_statcache);
 	if (PL_laststatval < 0) {
 	    if (ckWARN(WARN_NEWLINE) && strchr(SvPV(PL_statname, n_a), '\n'))
