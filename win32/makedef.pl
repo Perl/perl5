@@ -121,6 +121,7 @@ if ($define{'MYMALLOC'})
 else
  {
   skip_symbols [qw(
+    Perl_dump_mstats
     Perl_malloced_size)];
  }
 
