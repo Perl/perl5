@@ -3112,9 +3112,8 @@ to have its own copy of the global.)  Examples:
     our $VERSION : unique = "1.00";
 
 Note that this attribute also has the effect of making the global
-readonly in the main interpreter after the first new interpreter
-has been cloned (for example, after the first new thread has been
-created).
+readonly after the first new interpreter has been cloned (for example,
+after the first new thread has been created).
 
 Multi-interpreter environments can come to being either through the
 fork() emulation on Windows platforms, or by embedding perl in a
