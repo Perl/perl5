@@ -66,9 +66,7 @@ USE_IMP_SYS = define
 
 #
 # uncomment to enable the experimental PerlIO I/O subsystem.
-# This is currently incompatible with USE_MULTI, USE_ITHREADS,
-# and USE_IMP_SYS
-#USE_PERLIO	= define
+USE_PERLIO	= define
 
 #
 # WARNING! This option is deprecated and will eventually go away (enable
@@ -247,6 +245,10 @@ USE_ITHREADS	= undef
 USE_IMP_SYS	= undef
 !ENDIF
 
+!IF "$(USE_PERLIO)" == ""
+USE_PERLIO	= undef
+!ENDIF
+
 !IF "$(USE_PERLCRT)" == ""
 USE_PERLCRT	= undef
 !ENDIF
@@ -321,7 +323,7 @@ INST_LIB	= $(INST_TOP)$(INST_VER)\lib
 INST_ARCHLIB	= $(INST_LIB)$(INST_ARCH)
 INST_COREDIR	= $(INST_ARCHLIB)\CORE
 INST_POD	= $(INST_LIB)\pod
-INST_HTML	= $(INST_POD)\html
+INST_HTML	= $(INST_TOP)$(INST_VER)\html
 
 #
 # Programs to compile, build .lib files and link
@@ -729,6 +731,7 @@ CFG_VARS	=					\
 		"useithreads=$(USE_ITHREADS)"		\
 		"usethreads=$(USE_5005THREADS)"		\
 		"usemultiplicity=$(USE_MULTI)"		\
+		"useperlio=$(USE_PERLIO)"		\
 		"LINK_FLAGS=$(LINK_FLAGS:"=\")"		\
 		"optimize=$(OPTIMIZE:"=\")"
 
@@ -1025,7 +1028,8 @@ utils: $(PERLEXE) $(X2P)
 	copy ..\README.machten .\perlmachten.pod
 	copy ..\README.os2 .\perlos2.pod
 	copy ..\README.os390 .\perlos390.pod
-	copy ..\README.posix .\perlposix.pod
+	copy ..\README.vmesa .\perlvmesa.pod
+	copy ..\README.bs2000 .\perlbs2000.pod
 	copy ..\README.solaris .\perlsolaris.pod
 	copy ..\vms\perlvms.pod .\perlvms.pod
 	copy ..\README.vos .\perlvos.pod

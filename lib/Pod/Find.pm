@@ -242,7 +242,7 @@ sub _check_and_extract_name {
 
 The function B<simplify_name> is equivalent to B<basename>, but also
 strips Perl-like extensions (.pm, .pl, .pod) and extensions like
-F<.bat>, F<.cmd> on Win32 and OS/2, respectively.
+F<.bat>, F<.cmd> on Win32 and OS/2, or F<.com> on VMS, respectively.
 
 =cut
 
@@ -262,6 +262,8 @@ sub _simplify {
     $_[0] =~ s/\.(pod|pm|plx?)\z//i;
     # strip meaningless extensions on Win32 and OS/2
     $_[0] =~ s/\.(bat|exe|cmd)\z//i if($^O =~ /win|os2/i);
+    # strip meaningless extensions on VMS
+    $_[0] =~ s/\.(com)\z//i if($^O eq 'VMS');
 }
 
 # contribution from Tim Jenness <t.jenness@jach.hawaii.edu>

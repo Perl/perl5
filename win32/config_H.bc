@@ -3123,7 +3123,7 @@
  *	used in a fully backward compatible manner.
  */
 #ifndef USE_PERLIO
-/*#define	USE_PERLIO		/**/
+#define	USE_PERLIO		/**/
 #endif
 
 /* USE_SOCKS:

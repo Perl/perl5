@@ -87,11 +87,11 @@ $WANT = <<'EOT';
 #$a = [
 #       1,
 #       {
-#         'a' => $a,
-#         'b' => $a->[1],
 #         'c' => [
 #                  'c'
-#                ]
+#                ],
+#         'a' => $a,
+#         'b' => $a->[1]
 #       },
 #       $a->[1]{'c'}
 #     ];
@@ -109,11 +109,11 @@ $WANT = <<'EOT';
 #@a = (
 #       1,
 #       {
-#         'a' => [],
-#         'b' => {},
 #         'c' => [
 #                  'c'
-#                ]
+#                ],
+#         'a' => [],
+#         'b' => {}
 #       },
 #       []
 #     );
@@ -131,19 +131,19 @@ TEST q(Data::Dumper->Dumpxs([$a, $b], [qw(*a b)])) if $XS;
 ##
 $WANT = <<'EOT';
 #%b = (
+#       'c' => [
+#                'c'
+#              ],
 #       'a' => [
 #                1,
 #                {},
-#                [
-#                  'c'
-#                ]
+#                []
 #              ],
-#       'b' => {},
-#       'c' => []
+#       'b' => {}
 #     );
 #$b{'a'}[1] = \%b;
+#$b{'a'}[2] = $b{'c'};
 #$b{'b'} = \%b;
-#$b{'c'} = $b{'a'}[2];
 #$a = $b{'a'};
 EOT
 
@@ -156,15 +156,15 @@ $WANT = <<'EOT';
 #$a = [
 #  1,
 #  {
+#    'c' => [],
 #    'a' => [],
-#    'b' => {},
-#    'c' => []
+#    'b' => {}
 #  },
 #  []
 #];
+#$a->[1]{'c'} = \@c;
 #$a->[1]{'a'} = $a;
 #$a->[1]{'b'} = $a->[1];
-#$a->[1]{'c'} = \@c;
 #$a->[2] = \@c;
 #$b = $a->[1];
 EOT
@@ -192,12 +192,12 @@ $WANT = <<'EOT';
 #       1,
 #       #1
 #       {
-#         a => $a,
-#         b => $a->[1],
 #         c => [
 #                #0
 #                'c'
-#              ]
+#              ],
+#         a => $a,
+#         b => $a->[1]
 #       },
 #       #2
 #       $a->[1]{c}
@@ -217,11 +217,11 @@ $WANT = <<'EOT';
 #$VAR1 = [
 #  1,
 #  {
-#    'a' => [],
-#    'b' => {},
 #    'c' => [
 #      'c'
-#    ]
+#    ],
+#    'a' => [],
+#    'b' => {}
 #  },
 #  []
 #];
@@ -239,11 +239,11 @@ $WANT = <<'EOT';
 #[
 #  1,
 #  {
-#    a => $VAR1,
-#    b => $VAR1->[1],
 #    c => [
 #      'c'
-#    ]
+#    ],
+#    a => $VAR1,
+#    b => $VAR1->[1]
 #  },
 #  $VAR1->[1]{c}
 #]
@@ -262,8 +262,8 @@ EOT
 ##
 $WANT = <<'EOT';
 #$VAR1 = {
-#  "abc\0'\efg" => "mno\0",
-#  "reftest" => \\1
+#  "reftest" => \\1,
+#  "abc\0'\efg" => "mno\0"
 #};
 EOT
 
@@ -277,8 +277,8 @@ $foo = { "abc\000\'\efg" => "mno\000",
 
   $WANT = <<"EOT";
 #\$VAR1 = {
-#  'abc\0\\'\efg' => 'mno\0',
-#  'reftest' => \\\\1
+#  'reftest' => \\\\1,
+#  'abc\0\\'\efg' => 'mno\0'
 #};
 EOT
 
@@ -313,15 +313,15 @@ EOT
 #           do{my $o},
 #           #2
 #           {
+#             'c' => [],
 #             'a' => 1,
 #             'b' => do{my $o},
-#             'c' => [],
 #             'd' => {}
 #           }
 #         ];
 #*::foo{ARRAY}->[1] = $foo;
-#*::foo{ARRAY}->[2]{'b'} = *::foo{SCALAR};
 #*::foo{ARRAY}->[2]{'c'} = *::foo{ARRAY};
+#*::foo{ARRAY}->[2]{'b'} = *::foo{SCALAR};
 #*::foo{ARRAY}->[2]{'d'} = *::foo{ARRAY}->[2];
 #*::foo = *::foo{ARRAY}->[2];
 #@bar = @{*::foo{ARRAY}};
@@ -342,15 +342,15 @@ EOT
 #  -10,
 #  do{my $o},
 #  {
+#    'c' => [],
 #    'a' => 1,
 #    'b' => do{my $o},
-#    'c' => [],
 #    'd' => {}
 #  }
 #];
 #*::foo{ARRAY}->[1] = $foo;
-#*::foo{ARRAY}->[2]{'b'} = *::foo{SCALAR};
 #*::foo{ARRAY}->[2]{'c'} = *::foo{ARRAY};
+#*::foo{ARRAY}->[2]{'b'} = *::foo{SCALAR};
 #*::foo{ARRAY}->[2]{'d'} = *::foo{ARRAY}->[2];
 #*::foo = *::foo{ARRAY}->[2];
 #$bar = *::foo{ARRAY};
@@ -372,13 +372,13 @@ EOT
 #*::foo = \5;
 #*::foo = \@bar;
 #*::foo = {
+#  'c' => [],
 #  'a' => 1,
 #  'b' => do{my $o},
-#  'c' => [],
 #  'd' => {}
 #};
-#*::foo{HASH}->{'b'} = *::foo{SCALAR};
 #*::foo{HASH}->{'c'} = \@bar;
+#*::foo{HASH}->{'b'} = *::foo{SCALAR};
 #*::foo{HASH}->{'d'} = *::foo{HASH};
 #$bar[2] = *::foo{HASH};
 #%baz = %{*::foo{HASH}};
@@ -399,13 +399,13 @@ EOT
 #*::foo = \5;
 #*::foo = $bar;
 #*::foo = {
+#  'c' => [],
 #  'a' => 1,
 #  'b' => do{my $o},
-#  'c' => [],
 #  'd' => {}
 #};
-#*::foo{HASH}->{'b'} = *::foo{SCALAR};
 #*::foo{HASH}->{'c'} = $bar;
+#*::foo{HASH}->{'b'} = *::foo{SCALAR};
 #*::foo{HASH}->{'d'} = *::foo{HASH};
 #$bar->[2] = *::foo{HASH};
 #$baz = *::foo{HASH};
@@ -423,9 +423,9 @@ EOT
 #  -10,
 #  $foo,
 #  {
+#    c => \@bar,
 #    a => 1,
 #    b => \5,
-#    c => \@bar,
 #    d => $bar[2]
 #  }
 #);
@@ -445,9 +445,9 @@ EOT
 #  -10,
 #  $foo,
 #  {
+#    c => $bar,
 #    a => 1,
 #    b => \5,
-#    c => $bar,
 #    d => $bar->[2]
 #  }
 #];
@@ -476,8 +476,8 @@ EOT
 ##
   $WANT = <<'EOT';
 #%kennels = (
-#  First => \'Fido',
-#  Second => \'Wags'
+#  Second => \'Wags',
+#  First => \'Fido'
 #);
 #@dogs = (
 #  ${$kennels{First}},
@@ -515,8 +515,8 @@ EOT
 ##
   $WANT = <<'EOT';
 #%kennels = (
-#  First => \'Fido',
-#  Second => \'Wags'
+#  Second => \'Wags',
+#  First => \'Fido'
 #);
 #@dogs = (
 #  ${$kennels{First}},
@@ -539,8 +539,8 @@ EOT
 #  'Fido',
 #  'Wags',
 #  {
-#    First => \$dogs[0],
-#    Second => \$dogs[1]
+#    Second => \$dogs[1],
+#    First => \$dogs[0]
 #  }
 #);
 #%kennels = %{$dogs[2]};
@@ -574,13 +574,13 @@ EOT
 #  'Fido',
 #  'Wags',
 #  {
-#    First => \'Fido',
-#    Second => \'Wags'
+#    Second => \'Wags',
+#    First => \'Fido'
 #  }
 #);
 #%kennels = (
-#  First => \'Fido',
-#  Second => \'Wags'
+#  Second => \'Wags',
+#  First => \'Fido'
 #);
 EOT
 

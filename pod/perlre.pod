@@ -40,7 +40,7 @@ is, no matter what C<$*> contains, C</s> without C</m> will force
 "^" to match only at the beginning of the string and "$" to match
 only at the end (or just before a newline at the end) of the string.
 Together, as /ms, they let the "." match any character whatsoever,
-while yet allowing "^" and "$" to match, respectively, just after
+while still allowing "^" and "$" to match, respectively, just after
 and just before newlines within the string.
 
 =item x
@@ -334,12 +334,14 @@ I<backreference>.
 
 There is no limit to the number of captured substrings that you may
 use.  However Perl also uses \10, \11, etc. as aliases for \010,
-\011, etc.  (Recall that 0 means octal, so \011 is the 9'th ASCII
-character, a tab.)  Perl resolves this ambiguity by interpreting
-\10 as a backreference only if at least 10 left parentheses have
-opened before it.  Likewise \11 is a backreference only if at least
-11 left parentheses have opened before it.  And so on.  \1 through
-\9 are always interpreted as backreferences."
+\011, etc.  (Recall that 0 means octal, so \011 is the character at
+number 9 in your coded character set; which would be the 10th character,
+a horizontal tab under ASCII.)  Perl resolves this 
+ambiguity by interpreting \10 as a backreference only if at least 10 
+left parentheses have opened before it.  Likewise \11 is a 
+backreference only if at least 11 left parentheses have opened 
+before it.  And so on.  \1 through \9 are always interpreted as 
+backreferences.
 
 Examples:
 
@@ -955,10 +957,10 @@ escape it with a backslash.  "-" is also taken literally when it is
 at the end of the list, just before the closing "]".  (The
 following all specify the same class of three characters: C<[-az]>,
 C<[az-]>, and C<[a\-z]>.  All are different from C<[a-z]>, which
-specifies a class containing twenty-six characters.)
-Also, if you try to use the character classes C<\w>, C<\W>, C<\s>,
-C<\S>, C<\d>, or C<\D> as endpoints of a range, that's not a range,
-the "-" is understood literally.
+specifies a class containing twenty-six characters, even on EBCDIC
+based coded character sets.)  Also, if you try to use the character 
+classes C<\w>, C<\W>, C<\s>, C<\S>, C<\d>, or C<\D> as endpoints of 
+a range, that's not a range, the "-" is understood literally.
 
 Note also that the whole range idea is rather unportable between
 character sets--and even within character sets they may cause results
@@ -970,11 +972,11 @@ spell out the character sets in full.
 Characters may be specified using a metacharacter syntax much like that
 used in C: "\n" matches a newline, "\t" a tab, "\r" a carriage return,
 "\f" a form feed, etc.  More generally, \I<nnn>, where I<nnn> is a string
-of octal digits, matches the character whose ASCII value is I<nnn>.
-Similarly, \xI<nn>, where I<nn> are hexadecimal digits, matches the
-character whose ASCII value is I<nn>. The expression \cI<x> matches the
-ASCII character control-I<x>.  Finally, the "." metacharacter matches any
-character except "\n" (unless you use C</s>).
+of octal digits, matches the character whose coded character set value 
+is I<nnn>.  Similarly, \xI<nn>, where I<nn> are hexadecimal digits, 
+matches the character whose numeric value is I<nn>. The expression \cI<x> 
+matches the character control-I<x>.  Finally, the "." metacharacter 
+matches any character except "\n" (unless you use C</s>).
 
 You can specify a series of alternatives for a pattern using "|" to
 separate them, so that C<fee|fie|foe> will match any of "fee", "fie",
@@ -1277,6 +1279,8 @@ L<perlfaq6>.
 L<perlfunc/pos>.
 
 L<perllocale>.
+
+L<perlebcdic>.
 
 I<Mastering Regular Expressions> by Jeffrey Friedl, published
 by O'Reilly and Associates.

@@ -46,8 +46,8 @@ $x = 3 ;
 use warnings 'once' ;
 $z = 3 ;
 EXPECT
-Name "main::x" used only once: possible typo at - line 4.
 Name "main::z" used only once: possible typo at - line 6.
+Name "main::x" used only once: possible typo at - line 4.
 ########
 -X
 # perl.c

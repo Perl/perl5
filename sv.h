@@ -1107,3 +1107,7 @@ Returns a pointer to the character buffer.
 #define Sv_Grow sv_grow
 
 #define SV_IMMEDIATE_UNREF	1
+
+#define CLONEf_COPY_STACKS 1
+#define CLONEf_KEEP_PTR_TABLE 2
+

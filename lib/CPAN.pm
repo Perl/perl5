@@ -5388,7 +5388,7 @@ sub TIEHANDLE {
     $ret = bless {GZ => $gz}, $class;
   } else {
     my $pipe = "$CPAN::Config->{gzip} --decompress --stdout $file |";
-    my $fh = FileHandle->new($pipe) or die "Could pipe[$pipe]: $!";
+    my $fh = FileHandle->new($pipe) or die "Could not pipe[$pipe]: $!";
     binmode $fh;
     $ret = bless {FH => $fh}, $class;
   }

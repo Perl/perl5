@@ -38,6 +38,7 @@ README.aix		Notes about AIX port
 README.amiga		Notes about AmigaOS port
 README.apollo		Notes about Apollo DomainOS port
 README.beos		Notes about BeOS port
+README.bs2000		Notes about BS2000 POSIX port
 README.cygwin		Notes about Cygwin port
 README.dos		Notes about dos/djgpp port
 README.epoc		Notes about EPOC port
@@ -50,7 +51,6 @@ README.mpeix		Notes about MPE/iX port
 README.os2		Notes about OS/2 port
 README.os390		Notes about OS/390 (nee MVS) port
 README.plan9		Notes about Plan9 port
-README.posix-bc		Notes about BS2000 POSIX port
 README.qnx		Notes about QNX port
 README.solaris		Notes about Solaris port
 README.threads		Notes about multithreading
@@ -1383,6 +1383,7 @@ t/lib/bigfloat.t	See if bigfloat.pl works
 t/lib/bigfltpm.t	See if BigFloat.pm works
 t/lib/bigint.t		See if bigint.pl works
 t/lib/bigintpm.t	See if BigInt.pm works
+t/lib/cgi-esc.t		See if CGI.pm works
 t/lib/cgi-form.t	See if CGI.pm works
 t/lib/cgi-function.t	See if CGI.pm works
 t/lib/cgi-html.t	See if CGI.pm works

@@ -4058,6 +4058,20 @@ Perl_ptr_table_split(pTHXo_ PTR_TBL_t *tbl)
 {
     ((CPerlObj*)pPerl)->Perl_ptr_table_split(tbl);
 }
+
+#undef  Perl_ptr_table_clear
+void
+Perl_ptr_table_clear(pTHXo_ PTR_TBL_t *tbl)
+{
+    ((CPerlObj*)pPerl)->Perl_ptr_table_clear(tbl);
+}
+
+#undef  Perl_ptr_table_free
+void
+Perl_ptr_table_free(pTHXo_ PTR_TBL_t *tbl)
+{
+    ((CPerlObj*)pPerl)->Perl_ptr_table_free(tbl);
+}
 #endif
 #if defined(HAVE_INTERP_INTERN)
 

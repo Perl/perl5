@@ -2248,6 +2248,14 @@
 #define Perl_ptr_table_split	pPerl->Perl_ptr_table_split
 #undef  ptr_table_split
 #define ptr_table_split		Perl_ptr_table_split
+#undef  Perl_ptr_table_clear
+#define Perl_ptr_table_clear	pPerl->Perl_ptr_table_clear
+#undef  ptr_table_clear
+#define ptr_table_clear		Perl_ptr_table_clear
+#undef  Perl_ptr_table_free
+#define Perl_ptr_table_free	pPerl->Perl_ptr_table_free
+#undef  ptr_table_free
+#define ptr_table_free		Perl_ptr_table_free
 #endif
 #if defined(HAVE_INTERP_INTERN)
 #undef  Perl_sys_intern_clear

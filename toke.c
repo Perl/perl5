@@ -175,7 +175,7 @@ int yyactlevel = -1;
 /* grandfather return to old style */
 #define OLDLOP(f) return(yylval.ival=f,PL_expect = XTERM,PL_bufptr = s,(int)LSTOP)
 
-void
+STATIC void
 S_tokereport(pTHX_ char *thing, char* s, I32 rv)
 { 
     SV *report;
@@ -4170,10 +4170,6 @@ Perl_yylex(pTHX)
 			(void)PerlIO_seek(PL_rsfp, 0L, 0);
 		    }
 		    if (PerlLIO_setmode(PerlIO_fileno(PL_rsfp), O_TEXT) != -1) {
-#if defined(__BORLANDC__)
-			/* XXX see note in do_binmode() */
-			((FILE*)PL_rsfp)->flags |= _F_BIN;
-#endif
 			if (loc > 0)
 			    PerlIO_seek(PL_rsfp, loc, 0);
 		    }

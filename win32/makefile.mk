@@ -67,6 +67,10 @@ USE_ITHREADS	*= define
 USE_IMP_SYS	*= define
 
 #
+# uncomment to enable the experimental PerlIO I/O subsystem.
+USE_PERLIO	= define
+
+#
 # WARNING! This option is deprecated and will eventually go away (enable
 # USE_ITHREADS instead).
 #
@@ -248,6 +252,7 @@ USE_MULTI	*= undef
 USE_OBJECT	*= undef
 USE_ITHREADS	*= undef
 USE_IMP_SYS	*= undef
+USE_PERLIO	*= undef
 USE_PERLCRT	*= undef
 
 .IF "$(USE_IMP_SYS)$(USE_MULTI)$(USE_5005THREADS)$(USE_OBJECT)" == "defineundefundefundef"
@@ -278,6 +283,11 @@ ARCHNAME	= MSWin32-$(PROCESSOR_ARCHITECTURE)-thread
 .ELIF "$(USE_MULTI)" == "define"
 ARCHNAME	= MSWin32-$(PROCESSOR_ARCHITECTURE)-multi
 .ELSE
+.IF "$(USE_PERLIO)" == "define"
+ARCHNAME	= MSWin32-$(PROCESSOR_ARCHITECTURE)-perlio
+.ELSE
+ARCHNAME	= MSWin32-$(PROCESSOR_ARCHITECTURE)
+.ENDIF
 ARCHNAME	= MSWin32-$(PROCESSOR_ARCHITECTURE)
 .ENDIF
 
@@ -315,7 +325,7 @@ INST_LIB	= $(INST_TOP)$(INST_VER)\lib
 INST_ARCHLIB	= $(INST_LIB)$(INST_ARCH)
 INST_COREDIR	= $(INST_ARCHLIB)\CORE
 INST_POD	= $(INST_LIB)\pod
-INST_HTML	= $(INST_POD)\html
+INST_HTML	= $(INST_TOP)$(INST_VER)\html
 
 #
 # Programs to compile, build .lib files and link
@@ -862,6 +872,7 @@ CFG_VARS	=					\
 		useithreads=$(USE_ITHREADS)	~	\
 		usethreads=$(USE_5005THREADS)	~	\
 		usemultiplicity=$(USE_MULTI)	~	\
+		useperlio=$(USE_PERLIO)		~	\
 		LINK_FLAGS=$(LINK_FLAGS:s/\/\\/)		~	\
 		optimize=$(OPTIMIZE)
 
@@ -1240,7 +1251,8 @@ utils: $(PERLEXE) $(X2P)
 	copy ..\README.machten ..\pod\perlmachten.pod
 	copy ..\README.os2 ..\pod\perlos2.pod
 	copy ..\README.os390 ..\pod\perlos390.pod
-	copy ..\README.posix-bc ..\pod\perlposix-bc.pod
+	copy ..\README.vmesa ..\pod\perlvmesa.pod
+	copy ..\README.bs2000 ..\pod\perlbs2000.pod
 	copy ..\README.solaris ..\pod\perlsolaris.pod
 	copy ..\vms\perlvms.pod ..\pod\perlvms.pod
 	copy ..\README.vos ..\pod\perlvos.pod

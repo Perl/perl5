@@ -9,7 +9,7 @@ BEGIN {
 
 use strict;
 my ($Is_VMS, $Is_W32, $Is_OS2, $Is_Cygwin, $nonono, $dostrip,
-    $versiononly, $silent, $verbose, $otherperls);
+    $versiononly, $silent, $verbose, $otherperls, $archname);
 use vars qw /$depth/;
 
 BEGIN {
@@ -54,13 +54,15 @@ while (@ARGV) {
     $nonono = 1 if $ARGV[0] eq '-n';
     $dostrip = 1 if $ARGV[0] eq '-s';
     $versiononly = 1 if $ARGV[0] eq '-v';
+    $versiononly = 0 if $ARGV[0] eq '+v';
     $silent = 1 if $ARGV[0] eq '-S';
     $otherperls = 0 if $ARGV[0] eq '-o';
     $verbose = 1 if $ARGV[0] eq '-V' || $ARGV [0] eq '-n';
+    $archname = 1 if $ARGV[0] eq '-A';
     shift;
 }
 
-$versiononly = 1 if $Config{versiononly};
+$versiononly = 1 if $Config{versiononly} && !defined $versiononly;
 
 my @scripts = qw(utils/c2ph utils/h2ph utils/h2xs utils/perlbug utils/perldoc
 		utils/pl2pm utils/splain utils/perlcc utils/dprofpp
@@ -318,6 +320,21 @@ if (! $versiononly && ! samepath($installbin, '.') && ($^O ne 'dos') && ! $Is_VM
     link("$installbin/s$perl_verbase$ver$exe_ext",
 	    "$installbin/suid$perl$exe_ext") 
       if $d_dosuid;
+}
+
+# For development purposes it can be very useful to have multiple perls
+# build for different "architectures" (eg threading or not) simultaneously.
+if ($archname && ! samepath($installbin, '.') && ($^O ne 'dos') && ! $Is_VMS) {
+    my $archperl = "$perl_verbase$ver-$Config{archname}$exe_ext";
+    safe_unlink("$installbin/$archperl");
+    if ($^O eq 'mpeix') {
+	# MPE doesn't support hard links, so use a symlink.
+	# We don't want another cloned copy.
+        symlink($Config{perlpath}, "$installbin/$archperl");
+    } else {
+	link("$installbin/$perl_verbase$ver$exe_ext",
+		"$installbin/$archperl");
+    }
 }
 
 # Offer to install perl in a "standard" location
