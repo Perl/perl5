@@ -1,6 +1,6 @@
 #!./perl
 
-print "1..39\n";
+print "1..40\n";
 
 chdir('op') || chdir('t/op') || die "sysio.t: cannot look for myself: $!";
 
@@ -210,6 +210,18 @@ print 'not ' if defined sysseek(I, -1, 1);
 print "ok 39\n";
 
 close(I);
+
+{
+    use Fcntl qw(O_RDONLY O_TEXT);
+    open I, ">$outfile";
+    print I "a\nb\nc";
+    close I;
+    sysopen I, $outfile, O_RDONLY|O_TEXT; 
+    sysread I, $buf, 7;
+    print "not " if $buf ne "a\nb\nc";
+    print "ok 40 - sysopen with O_TEXT\n";
+    close I;
+}
 
 unlink $outfile;
 
