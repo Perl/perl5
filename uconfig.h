@@ -2728,12 +2728,27 @@
  */
 /* UVxf:
  *	This symbol defines the format string used for printing a Perl UV
- *	as an unsigned hexadecimal integer.
+ *	as an unsigned hexadecimal integer in lowercase abcdef.
+ */
+/* NVef:
+ *	This symbol defines the format string used for printing a Perl NV
+ *	using %e-ish floating point format.
+ */
+/* NVff:
+ *	This symbol defines the format string used for printing a Perl NV
+ *	using %f-ish floating point format.
+ */
+/* NVgf:
+ *	This symbol defines the format string used for printing a Perl NV
+ *	using %g-ish floating point format.
  */
 #define	IVdf		"ld"		/**/
 #define	UVuf		"lu"		/**/
 #define	UVof		"lo"		/**/
 #define	UVxf		"lx"		/**/
+#define	NVef		"e"		/**/
+#define	NVff		"f"		/**/
+#define	NVgf		"g"		/**/
 
 /* Pid_t:
  *	This symbol holds the type used to declare process ids in the kernel.

@@ -1,29 +1,35 @@
+case "$CONFIG_SH" in
+'') CONFIG_SH=config.sh ;;
+esac
+case "$CONFIG_H" in
+'') CONFIG_H=config.h ;;
+esac
 case $CONFIG in
 '')
-	if test -f config.sh; then TOP=.;
-	elif test -f ../config.sh; then TOP=..;
-	elif test -f ../../config.sh; then TOP=../..;
-	elif test -f ../../../config.sh; then TOP=../../..;
-	elif test -f ../../../../config.sh; then TOP=../../../..;
+	if test -f $CONFIG_SH; then TOP=.;
+	elif test -f ../$CONFIG_SH; then TOP=..;
+	elif test -f ../../$CONFIG_SH; then TOP=../..;
+	elif test -f ../../../$CONFIG_SH; then TOP=../../..;
+	elif test -f ../../../../$CONFIG_SH; then TOP=../../../..;
 	else
-		echo "Can't find config.sh."; exit 1
+		echo "Can't find $CONFIG_SH."; exit 1
 	fi
-	. $TOP/config.sh
+	. $TOP/$CONFIG_SH
 	;;
 esac
 case "$0" in
 */*) cd `expr X$0 : 'X\(.*\)/'` ;;
 esac
-echo "Extracting config.h (with variable substitutions)"
-sed <<!GROK!THIS! >config.h -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un-def!#undef!'
+echo "Extracting $CONFIG_H (with variable substitutions)"
+sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un-def!#undef!'
 /*
  * This file was produced by running the config_h.SH script, which
- * gets its values from config.sh, which is generally produced by
+ * gets its values from $CONFIG_SH, which is generally produced by
  * running Configure.
  *
  * Feel free to modify any of this as the need arises.  Note, however,
  * that running config_h.SH again will wipe out any changes you've made.
- * For a more permanent change edit config.sh and rerun config_h.SH.
+ * For a more permanent change edit $CONFIG_SH and rerun config_h.SH.
  *
  * \$Id: Config_h.U,v 3.0.1.5 1997/02/28 14:57:43 ram Exp $
  */
@@ -1198,18 +1204,18 @@ sed <<!GROK!THIS! >config.h -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un-
  *	This macro surrounds its token with double quotes.
  */
 #if $cpp_stuff == 1
-#  define CAT2(a,b)	a/**/b
-#  define STRINGIFY(a)	"a"
+#define CAT2(a,b)	a/**/b
+#define STRINGIFY(a)	"a"
 		/* If you can get stringification with catify, tell me how! */
 #endif
 #if $cpp_stuff == 42
-#  define PeRl_CaTiFy(a, b)	a ## b	
-#  define PeRl_StGiFy(a)	#a
+#define PeRl_CaTiFy(a, b)	a ## b	
+#define PeRl_StGiFy(a)	#a
 /* the additional level of indirection enables these macros to be
  * used as arguments to other macros.  See K&R 2nd ed., page 231. */
-#  define CAT2(a,b)	PeRl_CaTiFy(a,b)
-#  define StGiFy(a)	PeRl_StGiFy(a)
-#  define STRINGIFY(a)	PeRl_StGiFy(a)
+#define CAT2(a,b)	PeRl_CaTiFy(a,b)
+#define StGiFy(a)	PeRl_StGiFy(a)
+#define STRINGIFY(a)	PeRl_StGiFy(a)
 #endif
 #if $cpp_stuff != 1 && $cpp_stuff != 42
 #   include "Bletch: How does this C preprocessor catenate tokens?"
@@ -1875,6 +1881,12 @@ sed <<!GROK!THIS! >config.h -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un-
  *	available.
  */
 #$d_setpent HAS_SETPROTOENT		/**/
+
+/* HAS_SETPROCTITLE:
+ *	This symbol, if defined, indicates that the setproctitle routine is
+ *	available to set process title.
+ */
+#$d_setproctitle HAS_SETPROCTITLE		/**/
 
 /* HAS_SETPWENT:
  *	This symbol, if defined, indicates that the setpwent routine is
@@ -2693,6 +2705,10 @@ sed <<!GROK!THIS! >config.h -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un-
  *	This symbol, if defined, indicates that a variable of type NVTYPE
  *	can preserve all the bits of a variable of type UVTYPE.
  */
+/* NV_PRESERVES_UV_BITS:
+ *	This symbol contains the number of bits a variable of type NVTYPE
+ *	can preserve of a variable of type UVTYPE.
+ */
 #define	IVTYPE		$ivtype		/**/
 #define	UVTYPE		$uvtype		/**/
 #define	I8TYPE		$i8type		/**/
@@ -2720,6 +2736,7 @@ sed <<!GROK!THIS! >config.h -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un-
 #endif
 #define	NVSIZE		$nvsize		/**/
 #$d_nv_preserves_uv	NV_PRESERVES_UV
+#define	NV_PRESERVES_UV_BITS	$d_nv_preserves_uv_bits
 
 /* IVdf:
  *	This symbol defines the format string used for printing a Perl IV
@@ -2735,12 +2752,27 @@ sed <<!GROK!THIS! >config.h -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un-
  */
 /* UVxf:
  *	This symbol defines the format string used for printing a Perl UV
- *	as an unsigned hexadecimal integer.
+ *	as an unsigned hexadecimal integer in lowercase abcdef.
+ */
+/* NVef:
+ *	This symbol defines the format string used for printing a Perl NV
+ *	using %e-ish floating point format.
+ */
+/* NVff:
+ *	This symbol defines the format string used for printing a Perl NV
+ *	using %f-ish floating point format.
+ */
+/* NVgf:
+ *	This symbol defines the format string used for printing a Perl NV
+ *	using %g-ish floating point format.
  */
 #define	IVdf		$ivdformat		/**/
 #define	UVuf		$uvuformat		/**/
 #define	UVof		$uvoformat		/**/
 #define	UVxf		$uvxformat		/**/
+#define	NVef		$nveformat		/**/
+#define	NVff		$nvfformat		/**/
+#define	NVgf		$nvgformat		/**/
 
 /* Pid_t:
  *	This symbol holds the type used to declare process ids in the kernel.
@@ -3138,6 +3170,12 @@ sed <<!GROK!THIS! >config.h -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un-
  */
 #define PERL_XS_APIVERSION "$xs_apiversion"
 #define PERL_PM_APIVERSION "$pm_apiversion"
+
+/* I_LIBUTIL:
+ *	This symbol, if defined, indicates that <libutil.h> exists and
+ *	should be included.
+ */
+#$i_libutil	I_LIBUTIL		/**/
 
 #endif
 !GROK!THIS!
