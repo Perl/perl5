@@ -1,7 +1,15 @@
 #!/usr/local/bin/perl -w
 
+BEGIN {
+	chdir 't' if -d 't';
+	if ($ENV{PERL_CORE}) {
+		@INC = '../lib';
+	} else {
+		unshift @INC, qw( ../blib/lib ../blib/arch lib );
+	}
+}
+
 use strict;
-use lib 't/lib','../blib/lib','./blib/lib';
 use Test::More tests => 5;
 
 BEGIN { use_ok('CGI::Pretty') };
