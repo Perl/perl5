@@ -266,7 +266,7 @@ a scalar is encoded internally in UTF-8 (Unicode).
 
 =head2 Updated Modules And Pragmata
 
-The following modules and pragmata have been updated since Perl 5.8.0
+The following modules and pragmata have been updated since Perl 5.8.0:
 
 =over 4
 
@@ -325,6 +325,8 @@ Significant updates on the encoding pragma functionality
 table has been corrected (the 0x30..0x39 erroneously mapped to
 U+0660..U+0669, instead of U+0030..U+0039).  The UTF-7 encoding has
 been added (making Encode feature-complete with Unicode::String).
+
+=item fields
 
 =item libnet
 
@@ -515,7 +517,7 @@ contains a very complex nesting of anonymous subs, evals and lexicals.
 =head2 Generic fixes
 
 If an input filehandle is marked C<:utf8> and Perl sees illegal UTF-8
-coming in when doing C<< <FH> >, if warnings are enabled a warning is
+coming in when doing C<< <FH> >>, if warnings are enabled a warning is
 immediately given - instead of being silent about it and Perl being
 unhappy about the broken data later.  (The C<:encoding(utf8)> layer
 also works the same way.)
@@ -901,13 +903,9 @@ IBM z/OS and other EBCDIC platforms continue to be problematic
 regarding Unicode support.  Many Unicode tests are skipped when
 they really should be fixed.
 
-=head2 Cygwin 1.5 sysio.t
+=head2 Cygwin 1.5 sysio
 
-The one test
-
-  op/sysio.t                                39    1   2.56%  39
-
-is failing in 1.5.3s for some yet unknown reason.
+The F<op/sysio> test has failures failing in 1.5 for some yet unknown reason.
 
 Perl 5.8.1 does build and work well with Cygwin 1.3: with (uname -a)
 C<CYGWIN_NT-5.0 ... 1.3.22(0.78/3/2) 2003-03-18 09:20 i686 ...>
