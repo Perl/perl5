@@ -1404,16 +1404,6 @@ See L<perlfunc/pack>.
 but this did not follow some numeric unpack specification.
 See L<perlfunc/pack>.
 
-=item Repeat count in pack overflows
-
-(F) You can't specify a repeat count so large that it overflows
-your signed integers.  See L<perlfunc/pack>.
-
-=item Repeat count in unpack overflows
-
-(F) You can't specify a repeat count so large that it overflows
-your signed integers.  See L<perlfunc/unpack>.
-
 =item /%s/: Unrecognized escape \\%c passed through
 
 (W) You used a backslash-character combination which is not recognized
@@ -1503,6 +1493,15 @@ so it was truncated to the string shown.
 =item Can't check filesystem of script "%s"
 
 (P) For some reason you can't check the filesystem of the script for nosuid.
+
+=item Can't ignore signal CHLD, forcing to default
+
+(W) Perl has detected that it is being run with the SIGCHLD signal
+(sometimes known as SIGCLD) disabled.  Since disabling this signal
+will interfere with proper determination of exit status of child
+processes, Perl has reset the signal to its default value.
+This situation typically indicates that the parent program under
+which Perl may be running (e.g. cron) is being very careless.
 
 =item Can't modify non-lvalue subroutine call
 
@@ -1745,6 +1744,16 @@ could be a potential Year 2000 problem.
 =item Premature end of script headers
 
 See Server error.
+
+=item Repeat count in pack overflows
+
+(F) You can't specify a repeat count so large that it overflows
+your signed integers.  See L<perlfunc/pack>.
+
+=item Repeat count in unpack overflows
+
+(F) You can't specify a repeat count so large that it overflows
+your signed integers.  See L<perlfunc/unpack>.
 
 =item realloc() of freed memory ignored
 
