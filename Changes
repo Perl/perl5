@@ -95,6 +95,113 @@ Version v5.7.0		Development release working toward v5.8
 --------------
 
 ____________________________________________________________________________
+[  6595] By: jhi                                   on 2000/08/11  01:47:16
+        Log: nitfix
+     Branch: perl
+	   ! Changes
+____________________________________________________________________________
+[  6594] By: jhi                                   on 2000/08/11  01:36:16
+        Log: Subject: Getting perlio and threads to compile
+             From: Lupe Christoph <lupe@lupe-christoph.de>
+             Date: Wed, 9 Aug 2000 11:35:54 +0200
+             Message-ID: <20000809113554.G23160@alanya.lupe-christoph.de>
+             
+             (the Solaris version changes in Configure skipped)
+     Branch: perl
+	   ! hints/solaris_2.sh thread.h
+____________________________________________________________________________
+[  6593] By: jhi                                   on 2000/08/11  01:30:16
+        Log: Subject: Re: [ID 20000730.003] utf8::length() bad
+             From: simon@brecon.co.uk (Simon Cozens)
+             Date: 1 Aug 2000 06:55:19 GMT
+             Message-ID: <slrn8oct2n.19l.simon@justanother.perlhacker.org>
+     Branch: perl
+	   ! lib/utf8.pm
+____________________________________________________________________________
+[  6592] By: jhi                                   on 2000/08/11  01:26:39
+        Log: Subject: Re: [ID 20000809.006] Debugger lost the ability to see $1 et al
+             From: Peter Scott <Peter@PeterScott.com>
+             Date: Thu, 10 Aug 2000 08:23:27 -0700
+             Message-Id: <4.3.2.7.2.20000810081749.00aa92c0@peterscott.com>
+     Branch: perl
+	   ! lib/perl5db.pl
+____________________________________________________________________________
+[  6591] By: jhi                                   on 2000/08/11  01:22:02
+        Log: Subject: Re: [ID 20000809.005] trouble with long string and /m modifier - uninitialized value 
+             From: Hugo <hv@crypt.compulink.co.uk>
+             Date: Thu, 10 Aug 2000 19:23:04 +0100
+             Message-Id: <200008101823.TAA23580@crypt.compulink.co.uk>
+     Branch: perl
+	   ! regexec.c t/op/pat.t
+____________________________________________________________________________
+[  6590] By: jhi                                   on 2000/08/11  01:19:19
+        Log: Preprocessing and postprocessing for File::Find.
+             
+             Subject: Patch to Find::File.pm to allow alphabetical results
+             From: Joe Smith <jsmith@inwap.com>
+             Date: Wed, 9 Aug 2000 02:44:54 -0700
+             Message-Id: <20000809024453.A21193@tardis.Tymnet.COM>
+     Branch: perl
+	   ! lib/File/Find.pm
+____________________________________________________________________________
+[  6589] By: jhi                                   on 2000/08/11  01:12:39
+        Log: B::Deparse didn't do sub attributes.
+             
+             Subject: B::Deparse was Re: [ID 20000808.005] refs to returned lvalues are lvalues??
+             From: simon@brecon.co.uk (Simon Cozens)
+             Date: 9 Aug 2000 04:49:20 GMT
+             Message-ID: <slrn8p1omg.beq.simon@justanother.perlhacker.org>
+     Branch: perl
+	   ! ext/B/B.xs ext/B/B/Deparse.pm ext/B/defsubs_h.PL
+____________________________________________________________________________
+[  6588] By: jhi                                   on 2000/08/11  01:06:40
+        Log: Subject: debugger "d" command doesnt check line number
+             From: Mike Guy <mjtg@cam.ac.uk>
+             Date: Tue, 08 Aug 2000 21:54:29 +0100
+             Message-Id: <E13MGOL-000053-00@libra.cus.cam.ac.uk>
+     Branch: perl
+	   ! lib/perl5db.pl mg.c pod/perldiag.pod
+____________________________________________________________________________
+[  6587] By: jhi                                   on 2000/08/11  00:45:03
+        Log: sleep(1) does not necessarily return 1.
+             
+             Subject: [PATCH bleadperl] op/lex_assign.t  
+             From: Hugo <hv@crypt.compulink.co.uk>
+             Date: Thu, 03 Aug 2000 14:34:22 +0100        
+             Message-Id: <200008031334.OAA03379@crypt.compulink.co.uk>
+     Branch: perl
+	   ! t/op/lex_assign.t
+____________________________________________________________________________
+[  6586] By: jhi                                   on 2000/08/11  00:31:50
+        Log: Document the IO::Select timeout.
+     Branch: perl
+	   ! ext/IO/lib/IO/Select.pm
+____________________________________________________________________________
+[  6585] By: jhi                                   on 2000/08/11  00:13:54
+        Log: Forgot contributor.
+     Branch: perl
+	   ! Changes
+____________________________________________________________________________
+[  6584] By: jhi                                   on 2000/08/11  00:09:19
+        Log: detypo
+     Branch: perl
+	   ! Changes
+____________________________________________________________________________
+[  6583] By: jhi                                   on 2000/08/11  00:07:53
+        Log: Fixes to looking-like-number to keep behaviour as it was in 5.005_03.
+             
+             Subject: Re: [ID 20000810.002] $a["1foo"] same as $a[0]
+             From: Mike Guy <mjtg@cam.ac.uk> 
+             Date: Thu, 10 Aug 2000 15:50:54 +0100
+             Message-Id: <E13Mtfa-0005Ge-00@libra.cus.cam.ac.uk>
+     Branch: perl
+	   ! sv.c t/op/int.t
+____________________________________________________________________________
+[  6582] By: jhi                                   on 2000/08/10  23:29:32
+        Log: Update Changes.
+     Branch: perl
+	   ! Changes
+____________________________________________________________________________
 [  6581] By: jhi                                   on 2000/08/10  23:26:16
         Log: Put back the std @INC thing.
      Branch: perl
