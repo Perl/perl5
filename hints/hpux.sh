@@ -290,6 +290,10 @@ EOM
 esac
 EOCBU
 
+# Existence of the 64-bit libraries dictating whether to use large files?
+# Twisted?  You betcha.
+test -f /lib/pa20_64/libc.sl || uselargefiles="$undef"
+
 # This script UU/uselfs.cbu will get 'called-back' by Configure 
 # after it has prompted the user for whether to use 64 bits.
 cat > UU/uselfs.cbu <<'EOCBU'
@@ -305,16 +309,25 @@ $define|true|[yY]*)
 	   # (+DD64), too.  A callback file (a hack) calling another, yuck.
 	   case "$use64bits" in
            $undef|false|[nN]*|'')
-	       use64bits="$define"
-	       if $test -f use64bits.cbu; then
-                   echo "(Large files in HP-UX require also 64-bitness, picking up 64-bit hints...)"
-		   . ./use64bits.cbu
+	       if [ -f /lib/pa20_64/libc.sl ]; then
+	           use64bits="$define"
+	           if $test -f use64bits.cbu; then
+                       echo "(Large files in HP-UX require also 64-bitness, picking up 64-bit hints...)"
+		       . ./use64bits.cbu
+		   fi
+	       else
+                 echo "(No 64-bit libraries, therefore no large files, either...)"
+		 uselargefiles="$undef"
 	       fi
                ;;
+	   *) use64bits="$define" ;;
            esac
-	   ccflags="$ccflags $lfcflags"
-	   ldflags="$ldflags $ldldflags"
-	   libswanted="$libswanted $lflibs"
+	   case "$use64bits" in
+	   $define) ccflags="$ccflags $lfcflags"
+	            ldflags="$ldflags $ldldflags"
+	            libswanted="$libswanted $lflibs"
+		    ;;
+	   esac
 	   ;;
 	esac
 	lfcflags=''
