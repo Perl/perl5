@@ -1494,6 +1494,7 @@ t/op/chars.t		See if character escapes work
 t/op/chop.t		See if chop works
 t/op/closure.t		See if closures work
 t/op/cmp.t		See if the various string and numeric compare work
+t/op/concat.t		See if string concatenation works
 t/op/cond.t		See if conditional expressions work
 t/op/context.t		See if context propagation works
 t/op/defins.t		See if auto-insert of defined() works
