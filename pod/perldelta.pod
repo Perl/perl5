@@ -42,6 +42,14 @@ reveal few bugs from the Perl core and core modules.
 See L<perlsec/"Algorithmic Complexity Attacks"> for the rationale
 behind this change.
 
+=head2 Closures, eval and lexicals
+
+There have been many fixes in the area of anonymous subs, lexicals and
+closures. Although this means that Perl is now more "correct", it is
+possible that some existing code will break that happens to rely on
+the faulty behaviour.  In practice this is unlikely unless your code
+contains very complexly nested anonymous subs, evals and lexicals.
+
 =head1 Core Enhancements
 
 =head2 UTF-8 no more default under UTF-8 locales
@@ -308,6 +316,9 @@ been fixed.
 
 In VMS IO::Poll now works.
 
+FETCH etc may now safely access tied values (ie resulting in a recursive
+call to FETCH etc).
+
 =head1 New or Changed Diagnostics
 
 All the warnings related to pack() and unpack() were made more
@@ -414,7 +425,7 @@ cpp define PERL_NO_SHORT_NAMES, for cleaner embedding.
 
 Perl_save_bool() has been added.
 
--DL removed, -Dv and -Dxv added, see L<perlrun>.
+-DL removed; verbose modifier v added for -DXv and -Dsv, see L<perlrun>.
 
 =head1 New Tests
 
