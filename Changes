@@ -32,6 +32,151 @@ Version v5.7.0		Development release working toward v5.8
 --------------
 
 ____________________________________________________________________________
+[  7594] By: jhi                                   on 2000/11/07  19:18:58
+        Log: Be more robust in Dynaloader.pm.
+     Branch: perl
+	   ! ext/DynaLoader/DynaLoader_pm.PL
+____________________________________________________________________________
+[  7593] By: jhi                                   on 2000/11/07  16:49:31
+        Log: AUTHORS update.
+     Branch: perl
+	   ! AUTHORS
+____________________________________________________________________________
+[  7592] By: gsar                                  on 2000/11/07  16:39:51
+        Log: normalize relative paths in virtualized current directory on windows,
+             under ithreads (avoids ".." etc showing up in what Cwd::cwd()
+             returns)
+     Branch: perl
+	   ! win32/vdir.h
+____________________________________________________________________________
+[  7591] By: jhi                                   on 2000/11/07  16:04:26
+        Log: Too profiler-happy: with optimization the #7590 actually makes
+             the test to run 0.5% _slower_.  Requires much more instrumentation.
+             Retract #7590.
+     Branch: perl
+	   ! regcomp.c regcomp.h
+____________________________________________________________________________
+[  7590] By: jhi                                   on 2000/11/07  15:51:13
+        Log: Shave off about 5% (Digital UNIX, -g, pixie) of the op/regexp
+             execution time in regcomp.c S_cl_any() and S_cl_is_anything()
+             by using memset() and testing bytewise (as opposed to bitwise).
+     Branch: perl
+	   ! regcomp.c regcomp.h
+____________________________________________________________________________
+[  7589] By: jhi                                   on 2000/11/07  12:56:39
+        Log: Subject: [PATCH perl@7573] configure.com and st-lock.t changes for   
+             From: "Craig A. Berry" <craig.berry@psinetcs.com>
+             Date: Mon, 06 Nov 2000 23:45:30 -0500
+             Message-Id: <0011079735.AA973576259@univpress.com>
+     Branch: perl
+	   ! configure.com t/lib/st-lock.t
+____________________________________________________________________________
+[  7588] By: jhi                                   on 2000/11/07  01:03:28
+        Log: Tweak #7587.
+     Branch: perl
+	   ! pod/perldiag.pod
+____________________________________________________________________________
+[  7587] By: jhi                                   on 2000/11/07  01:00:27
+        Log: A doc addition for bug id 20001105.019, beware \p.
+     Branch: perl
+	   ! pod/perldiag.pod
+____________________________________________________________________________
+[  7586] By: jhi                                   on 2000/11/07  00:32:22
+        Log: Fake support of holey files in win/dosish platforms.
+             
+             Subject: SDBM_File under MS-Windows95/98 does not work correctly. (APR#1302)
+             From: kipp@shonanblue.ne.jp
+             Date: Mon, 6 Nov 2000 13:30:55 -0800
+             Message-Id: <200011062130.eA6LUpZ17387@smtp3.ActiveState.com>
+     Branch: perl
+	   ! ext/SDBM_File/sdbm/sdbm.c
+____________________________________________________________________________
+[  7585] By: jhi                                   on 2000/11/07  00:12:54
+        Log: Subject: Pod updates
+             From: "Stephen P. Potter" <spp@spotter.yi.org>
+             Date: Mon, 06 Nov 2000 18:56:43 -0500
+             Message-Id: <200011062357.SAA18173@spotter.yi.org>
+     Branch: perl
+	   ! README.dos README.os2 README.win32 pod/buildtoc.PL
+	   ! pod/perl.pod pod/perl5004delta.pod pod/perl5005delta.pod
+	   ! pod/perl56delta.pod pod/perldebguts.pod pod/perldebtut.pod
+	   ! pod/perldebug.pod pod/perldelta.pod pod/perldiag.pod
+	   ! pod/perlembed.pod pod/perlfaq.pod pod/perlfaq1.pod
+	   ! pod/perlfaq2.pod pod/perlfaq5.pod pod/perlfaq7.pod
+	   ! pod/perlfaq8.pod pod/perlfilter.pod pod/perlfunc.pod
+	   ! pod/perlguts.pod pod/perlhack.pod pod/perlhist.pod
+	   ! pod/perlipc.pod pod/perllexwarn.pod pod/perllocale.pod
+	   ! pod/perlmodlib.pod pod/perlnumber.pod pod/perlop.pod
+	   ! pod/perlopentut.pod pod/perlport.pod pod/perlre.pod
+	   ! pod/perlsub.pod pod/perltie.pod pod/perltoot.pod
+	   ! pod/perltootc.pod pod/perlunicode.pod
+____________________________________________________________________________
+[  7584] By: jhi                                   on 2000/11/07  00:04:17
+        Log: Varargs don't always work too well if one puts an unsigned
+             char on the stack and pop an unsigned quad off the stack.
+             
+             Subject: Re: [ID 20001103.002] Not OK: perl v5.7.0 +DEVEL7523 on os2-64int-ld-2.30 (UNINSTALLED)
+             From: sthoenna@efn.org (Yitzchak Scott-Thoennes)         
+             Date: Mon, 06 Nov 2000 15:19:05 -0800
+             Message-ID: <pxzB6gzkgKXY092yn@efn.org>  
+     Branch: perl
+	   ! utf8.c
+____________________________________________________________________________
+[  7583] By: jhi                                   on 2000/11/06  23:58:48
+        Log: %ENV note tweaks from Dan Sugalski.
+     Branch: perl
+	   ! pod/perlport.pod vms/perlvms.pod
+____________________________________________________________________________
+[  7582] By: jhi                                   on 2000/11/06  23:05:49
+        Log: glibc5 detection by __GNU_LIBRARY__.
+     Branch: perl
+	   ! toke.c
+____________________________________________________________________________
+[  7581] By: jhi                                   on 2000/11/06  22:51:29
+        Log: Make the stdio test program of 7427 less noisy while being	
+             compiled so that Digital UNIX wouldn't get both
+             d_stdio_ptr_lval_nochange_cnt and d_stdio_ptr_lval_sets_cnt
+             undefined.  This makes perlio happy.
+     Branch: metaconfig
+	   ! U/compline/d_stdstdio.U
+     Branch: perl
+	   ! Configure config_h.SH
+____________________________________________________________________________
+[  7580] By: jhi                                   on 2000/11/06  22:41:41
+        Log: Document %ENV = () portability issues.
+     Branch: perl
+	   ! pod/perlport.pod vms/perlvms.pod
+____________________________________________________________________________
+[  7579] By: jhi                                   on 2000/11/06  21:29:24
+        Log: VOS updates from Paul Green.
+     Branch: perl
+	   ! vos/config.alpha.h vos/config.ga.def vos/config.ga.h
+____________________________________________________________________________
+[  7578] By: jhi                                   on 2000/11/06  21:00:40
+        Log: Sanitize the environment further.
+     Branch: perl
+	   ! t/pragma/locale.t
+____________________________________________________________________________
+[  7577] By: jhi                                   on 2000/11/06  20:53:51
+        Log: Re-introduce 7552 lost in integration.
+     Branch: perl
+	   ! perlio.c
+____________________________________________________________________________
+[  7576] By: jhi                                   on 2000/11/06  20:33:46
+        Log: Admit that the test leaks scalars.
+     Branch: perl
+	   ! t/comp/proto.t
+____________________________________________________________________________
+[  7575] By: jhi                                   on 2000/11/06  20:17:08
+        Log: Integrate perlio.
+     Branch: perl
+	  !> perlio.c
+____________________________________________________________________________
+[  7573] By: jhi                                   on 2000/11/06  13:56:05
+        Log: Update Changes.
+     Branch: perl
+	   ! Changes patchlevel.h
+____________________________________________________________________________
 [  7572] By: jhi                                   on 2000/11/06  13:48:41
         Log: Subject: Re: rsync'ed patches vs. rsync'ed source
              From: "H.Merijn Brand" <h.m.brand@hccnet.nl>
