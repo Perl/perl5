@@ -1818,6 +1818,7 @@ typedef enum {
 #define RsSNARF(sv)   (! SvOK(sv))
 #define RsSIMPLE(sv)  (SvOK(sv) && SvCUR(sv))
 #define RsPARA(sv)    (SvOK(sv) && ! SvCUR(sv))
+#define RsRECORD(sv)  (SvROK(sv) && (SvIV(SvRV(sv)) > 0))
 
 /* Set up PERLVAR macros for populating structs */
 #define PERLVAR(var,type) type var;

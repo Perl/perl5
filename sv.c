@@ -3153,6 +3153,31 @@ sv_gets(register SV *sv, register PerlIO *fp, I32 append)
 	rsptr = NULL;
 	rslen = 0;
     }
+    else if (RsRECORD(rs)) {
+      I32 recsize, bytesread;
+      char *buffer;
+
+      /* Grab the size of the record we're getting */
+      recsize = SvIV(SvRV(rs));
+      (void)SvPOK_only(sv);    /* Validate pointer */
+      /* Make sure we've got the room to yank in the whole thing */
+      if (SvLEN(sv) <= recsize + 3) {
+        /* No, so make it bigger */
+        SvGROW(sv, recsize + 3);
+      }
+      buffer = SvPVX(sv); /* Get the location of the final buffer */
+      /* Go yank in */
+#ifdef VMS
+      /* VMS wants read instead of fread, because fread doesn't respect */
+      /* RMS record boundaries. This is not necessarily a good thing to be */
+      /* doing, but we've got no other real choice */
+      bytesread = PerlLIO_read(PerlIO_fileno(fp), buffer, recsize);
+#else
+      bytesread = PerlIO_read(fp, buffer, recsize);
+#endif
+      SvCUR_set(sv, bytesread);
+      return(SvCUR(sv) ? SvPVX(sv) : Nullch);
+    }
     else if (RsPARA(rs)) {
 	rsptr = "\n\n";
 	rslen = 2;
