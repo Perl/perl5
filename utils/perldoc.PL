@@ -123,8 +123,10 @@ getopts("mhtluvriFf:Xq:") || usage;
 
 usage if $opt_h || $opt_h; # avoid -w warning
 
-$podidx = "$Config{'archlib'}/pod.idx";
-$podidx = "" if $opt_X || !-f "pod.idx" && !-r _ && -M _ > 7;
+if( $opt_X ) {
+    $podidx = "$Config{'archlib'}/pod.idx";
+    $podidx = "" unless -f $podidx && -r _ && -M _ <= 7;
+}
 
 if ($opt_t + $opt_u + $opt_m + $opt_l > 1) {
     usage("only one of -t, -u, -m or -l")
