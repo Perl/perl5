@@ -791,7 +791,7 @@ Perl_swash_fetch(pTHX_ SV *sv, U8 *ptr)
 
     if (hv == PL_last_swash_hv &&
 	klen == PL_last_swash_klen &&
-	(!klen || memEQ(ptr,PL_last_swash_key,klen)) )
+	(!klen || memEQ((char *)ptr,(char *)PL_last_swash_key,klen)) )
     {
 	tmps = PL_last_swash_tmps;
 	slen = PL_last_swash_slen;

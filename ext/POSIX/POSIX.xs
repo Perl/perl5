@@ -83,7 +83,7 @@
 
    /* The non-POSIX CRTL times() has void return type, so we just get the
       current time directly */
-   clock_t vms_times(struct tms *PL_bufptr) {
+   clock_t vms_times(struct tms *bufptr) {
 	dTHX;
 	clock_t retval;
 	/* Get wall time and convert to 10 ms intervals to
@@ -104,7 +104,7 @@
 	_ckvmssts(lib$ediv(&divisor,vmstime,(long int *)&retval,&remainder));
 #  endif
 	/* Fill in the struct tms using the CRTL routine . . .*/
-	times((tbuffer_t *)PL_bufptr);
+	times((tbuffer_t *)bufptr);
 	return (clock_t) retval;
    }
 #  define times(t) vms_times(t)

@@ -31,6 +31,7 @@ INSTALL
 INTERN.h	
 MANIFEST	
 Makefile.SH	
+Makefile.micro			simon
 objXSUB.h	
 Policy_sh.SH	
 Porting/*			cfg
@@ -56,6 +57,7 @@ README.dos			dos
 README.hpux			hpux
 README.lexwarn			lexwarn
 README.machten			machten
+README.micro			simon
 README.mpeix			mpeix
 README.os2			os2
 README.os390			mvs
@@ -69,6 +71,7 @@ README.vos			vos
 README.win32			win32
 Todo	
 Todo-5.005	
+Todo.micro			simon
 XSlock.h	
 XSUB.h	
 av.c	
@@ -848,6 +851,8 @@ taint.c
 thrdvar.h	
 thread.h	
 toke.c	
+uconfig.h			simon
+uconfig.sh			simon
 universal.c	
 unixish.h	
 utf*				lwall

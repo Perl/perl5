@@ -79,6 +79,16 @@ struct itmlst_3 {
   unsigned short int *retlen;
 };
 
+#define do_fileify_dirspec(a,b,c)	mp_do_fileify_dirspec(aTHX_ a,b,c)
+#define do_pathify_dirspec(a,b,c)	mp_do_pathify_dirspec(aTHX_ a,b,c)
+#define do_tovmsspec(a,b,c)		mp_do_tovmsspec(aTHX_ a,b,c)
+#define do_tovmspath(a,b,c)		mp_do_tovmspath(aTHX_ a,b,c)
+#define do_rmsexpand(a,b,c,d,e)		mp_do_rmsexpand(aTHX_ a,b,c,d,e)
+#define do_tounixspec(a,b,c)		mp_do_tounixspec(aTHX_ a,b,c)
+#define do_tounixpath(a,b,c)		mp_do_tounixpath(aTHX_ a,b,c)
+#define expand_wild_cards(a,b,c,d)	mp_expand_wild_cards(aTHX_ a,b,c,d)
+#define getredirection(a,b)		mp_getredirection(aTHX_ a,b)
+
 static char *__mystrtolower(char *str)
 {
   if (str) for (; *str; ++str) *str= tolower(*str);
@@ -103,7 +113,7 @@ static struct dsc$descriptor_s VMScmd = {0,DSC$K_DTYPE_T,DSC$K_CLASS_S,Nullch};
 
 /*{{{int vmstrnenv(const char *lnm, char *eqv, unsigned long int idx, struct dsc$descriptor_s **tabvec, unsigned long int flags) */
 int
-vmstrnenv(const char *lnm, char *eqv, unsigned long int idx,
+Perl_vmstrnenv(pTHX_ const char *lnm, char *eqv, unsigned long int idx,
   struct dsc$descriptor_s **tabvec, unsigned long int flags)
 {
     char uplnm[LNM$C_NAMLENGTH+1], *cp1, *cp2;
@@ -240,7 +250,7 @@ vmstrnenv(const char *lnm, char *eqv, unsigned long int idx,
 
 /*{{{ int my_trnlnm(const char *lnm, char *eqv, unsigned long int idx)*/
 /* Define as a function so we can access statics. */
-int my_trnlnm(const char *lnm, char *eqv, unsigned long int idx)
+int Perl_my_trnlnm(pTHX_ const char *lnm, char *eqv, unsigned long int idx)
 {
   return vmstrnenv(lnm,eqv,idx,fildev,                                   
 #ifdef SECURE_INTERNAL_GETENV
@@ -757,13 +767,13 @@ my_crypt(const char *textpasswd, const char *usrname)
 /*}}}*/
 
 
-static char *do_rmsexpand(char *, char *, int, char *, unsigned);
-static char *do_fileify_dirspec(char *, char *, int);
-static char *do_tovmsspec(char *, char *, int);
+static char *mp_do_rmsexpand(pTHX_ char *, char *, int, char *, unsigned);
+static char *mp_do_fileify_dirspec(pTHX_ char *, char *, int);
+static char *mp_do_tovmsspec(pTHX_ char *, char *, int);
 
 /*{{{int do_rmdir(char *name)*/
 int
-do_rmdir(char *name)
+Perl_do_rmdir(pTHX_ char *name)
 {
     char dirfile[NAM$C_MAXRSS+1];
     int retval;
@@ -1110,7 +1120,7 @@ popen_completion_ast(struct pipe_details *thispipe)
 }
 
 static unsigned long int setup_cmddsc(char *cmd, int check_img);
-static void vms_execfree();
+static void vms_execfree(pTHX);
 
 static PerlIO *
 safe_popen(char *cmd, char *mode)
@@ -1157,7 +1167,7 @@ safe_popen(char *cmd, char *mode)
                      0, popen_completion_ast,info,0,0,0));
     }
 
-    vms_execfree();
+    vms_execfree(aTHX);
     if (!handler_set_up) {
       _ckvmssts(sys$dclexh(&pipe_exitblock));
       handler_set_up = TRUE;
@@ -1315,10 +1325,10 @@ my_gconvert(double val, int ndig, int trail, char *buf)
  * rmesexpand() returns the address of the resultant string if
  * successful, and NULL on error.
  */
-static char *do_tounixspec(char *, char *, int);
+static char *mp_do_tounixspec(pTHX_ char *, char *, int);
 
 static char *
-do_rmsexpand(char *filespec, char *outbuf, int ts, char *defspec, unsigned opts)
+mp_do_rmsexpand(pTHX_ char *filespec, char *outbuf, int ts, char *defspec, unsigned opts)
 {
   static char __rmsexpand_retbuf[NAM$C_MAXRSS+1];
   char vmsfspec[NAM$C_MAXRSS+1], tmpfspec[NAM$C_MAXRSS+1];
@@ -1453,9 +1463,9 @@ do_rmsexpand(char *filespec, char *outbuf, int ts, char *defspec, unsigned opts)
 }
 /*}}}*/
 /* External entry points */
-char *rmsexpand(char *spec, char *buf, char *def, unsigned opt)
+char *Perl_rmsexpand(pTHX_ char *spec, char *buf, char *def, unsigned opt)
 { return do_rmsexpand(spec,buf,0,def,opt); }
-char *rmsexpand_ts(char *spec, char *buf, char *def, unsigned opt)
+char *Perl_rmsexpand_ts(pTHX_ char *spec, char *buf, char *def, unsigned opt)
 { return do_rmsexpand(spec,buf,1,def,opt); }
 
 
@@ -1494,7 +1504,7 @@ char *rmsexpand_ts(char *spec, char *buf, char *def, unsigned opt)
  */
 
 /*{{{ char *fileify_dirspec[_ts](char *path, char *buf)*/
-static char *do_fileify_dirspec(char *dir,char *buf,int ts)
+static char *mp_do_fileify_dirspec(pTHX_ char *dir,char *buf,int ts)
 {
     static char __fileify_retbuf[NAM$C_MAXRSS+1];
     unsigned long int dirlen, retlen, addmfd = 0, hasfilename = 0;
@@ -1806,13 +1816,13 @@ static char *do_fileify_dirspec(char *dir,char *buf,int ts)
 }  /* end of do_fileify_dirspec() */
 /*}}}*/
 /* External entry points */
-char *fileify_dirspec(char *dir, char *buf)
+char *Perl_fileify_dirspec(pTHX_ char *dir, char *buf)
 { return do_fileify_dirspec(dir,buf,0); }
-char *fileify_dirspec_ts(char *dir, char *buf)
+char *Perl_fileify_dirspec_ts(pTHX_ char *dir, char *buf)
 { return do_fileify_dirspec(dir,buf,1); }
 
 /*{{{ char *pathify_dirspec[_ts](char *path, char *buf)*/
-static char *do_pathify_dirspec(char *dir,char *buf, int ts)
+static char *mp_do_pathify_dirspec(pTHX_ char *dir,char *buf, int ts)
 {
     static char __pathify_retbuf[NAM$C_MAXRSS+1];
     unsigned long int retlen;
@@ -1992,13 +2002,13 @@ static char *do_pathify_dirspec(char *dir,char *buf, int ts)
 }  /* end of do_pathify_dirspec() */
 /*}}}*/
 /* External entry points */
-char *pathify_dirspec(char *dir, char *buf)
+char *Perl_pathify_dirspec(pTHX_ char *dir, char *buf)
 { return do_pathify_dirspec(dir,buf,0); }
-char *pathify_dirspec_ts(char *dir, char *buf)
+char *Perl_pathify_dirspec_ts(pTHX_ char *dir, char *buf)
 { return do_pathify_dirspec(dir,buf,1); }
 
 /*{{{ char *tounixspec[_ts](char *path, char *buf)*/
-static char *do_tounixspec(char *spec, char *buf, int ts)
+static char *mp_do_tounixspec(pTHX_ char *spec, char *buf, int ts)
 {
   static char __tounixspec_retbuf[NAM$C_MAXRSS+1];
   char *dirend, *rslt, *cp1, *cp2, *cp3, tmp[NAM$C_MAXRSS+1];
@@ -2122,11 +2132,11 @@ static char *do_tounixspec(char *spec, char *buf, int ts)
 }  /* end of do_tounixspec() */
 /*}}}*/
 /* External entry points */
-char *tounixspec(char *spec, char *buf) { return do_tounixspec(spec,buf,0); }
-char *tounixspec_ts(char *spec, char *buf) { return do_tounixspec(spec,buf,1); }
+char *Perl_tounixspec(pTHX_ char *spec, char *buf) { return do_tounixspec(spec,buf,0); }
+char *Perl_tounixspec_ts(pTHX_ char *spec, char *buf) { return do_tounixspec(spec,buf,1); }
 
 /*{{{ char *tovmsspec[_ts](char *path, char *buf)*/
-static char *do_tovmsspec(char *path, char *buf, int ts) {
+static char *mp_do_tovmsspec(pTHX_ char *path, char *buf, int ts) {
   static char __tovmsspec_retbuf[NAM$C_MAXRSS+1];
   char *rslt, *dirend;
   register char *cp1, *cp2;
@@ -2266,11 +2276,11 @@ static char *do_tovmsspec(char *path, char *buf, int ts) {
 }  /* end of do_tovmsspec() */
 /*}}}*/
 /* External entry points */
-char *tovmsspec(char *path, char *buf) { return do_tovmsspec(path,buf,0); }
-char *tovmsspec_ts(char *path, char *buf) { return do_tovmsspec(path,buf,1); }
+char *Perl_tovmsspec(pTHX_ char *path, char *buf) { return do_tovmsspec(path,buf,0); }
+char *Perl_tovmsspec_ts(pTHX_ char *path, char *buf) { return do_tovmsspec(path,buf,1); }
 
 /*{{{ char *tovmspath[_ts](char *path, char *buf)*/
-static char *do_tovmspath(char *path, char *buf, int ts) {
+static char *mp_do_tovmspath(pTHX_ char *path, char *buf, int ts) {
   static char __tovmspath_retbuf[NAM$C_MAXRSS+1];
   int vmslen;
   char pathified[NAM$C_MAXRSS+1], vmsified[NAM$C_MAXRSS+1], *cp;
@@ -2294,12 +2304,12 @@ static char *do_tovmspath(char *path, char *buf, int ts) {
 }  /* end of do_tovmspath() */
 /*}}}*/
 /* External entry points */
-char *tovmspath(char *path, char *buf) { return do_tovmspath(path,buf,0); }
-char *tovmspath_ts(char *path, char *buf) { return do_tovmspath(path,buf,1); }
+char *Perl_tovmspath(pTHX_ char *path, char *buf) { return do_tovmspath(path,buf,0); }
+char *Perl_tovmspath_ts(pTHX_ char *path, char *buf) { return do_tovmspath(path,buf,1); }
 
 
 /*{{{ char *tounixpath[_ts](char *path, char *buf)*/
-static char *do_tounixpath(char *path, char *buf, int ts) {
+static char *mp_do_tounixpath(pTHX_ char *path, char *buf, int ts) {
   static char __tounixpath_retbuf[NAM$C_MAXRSS+1];
   int unixlen;
   char pathified[NAM$C_MAXRSS+1], unixified[NAM$C_MAXRSS+1], *cp;
@@ -2323,8 +2333,8 @@ static char *do_tounixpath(char *path, char *buf, int ts) {
 }  /* end of do_tounixpath() */
 /*}}}*/
 /* External entry points */
-char *tounixpath(char *path, char *buf) { return do_tounixpath(path,buf,0); }
-char *tounixpath_ts(char *path, char *buf) { return do_tounixpath(path,buf,1); }
+char *Perl_tounixpath(pTHX_ char *path, char *buf) { return do_tounixpath(path,buf,0); }
+char *Perl_tounixpath_ts(pTHX_ char *path, char *buf) { return do_tounixpath(path,buf,1); }
 
 /*
  * @(#)argproc.c 2.2 94/08/16	Mark Pizzolato (mark@infocomm.com)
@@ -2369,10 +2379,10 @@ static void add_item(struct list_item **head,
 		     char *value,
 		     int *count);
 
-static void expand_wild_cards(char *item,
-			      struct list_item **head,
-			      struct list_item **tail,
-			      int *count);
+static void mp_expand_wild_cards(pTHX_ char *item,
+				struct list_item **head,
+				struct list_item **tail,
+				int *count);
 
 static int background_process(int argc, char **argv);
 
@@ -2380,7 +2390,7 @@ static void pipe_and_fork(char **cmargv);
 
 /*{{{ void getredirection(int *ac, char ***av)*/
 static void
-getredirection(int *ac, char ***av)
+mp_getredirection(pTHX_ int *ac, char ***av)
 /*
  * Process vms redirection arg's.  Exit if any error is seen.
  * If getredirection() processes an argument, it is erased
@@ -2630,7 +2640,7 @@ static void add_item(struct list_item **head,
     ++(*count);
 }
 
-static void expand_wild_cards(char *item,
+static void mp_expand_wild_cards(pTHX_ char *item,
 			      struct list_item **head,
 			      struct list_item **tail,
 			      int *count)
@@ -2984,7 +2994,7 @@ vms_image_init(int *argcp, char ***argvp)
  */
 /*{{{int trim_unixpath(char *fspec, char *wildspec, int opts)*/
 int
-trim_unixpath(char *fspec, char *wildspec, int opts)
+Perl_trim_unixpath(pTHX_ char *fspec, char *wildspec, int opts)
 {
   char unixified[NAM$C_MAXRSS+1], unixwild[NAM$C_MAXRSS+1],
        *template, *base, *end, *cp1, *cp2;
@@ -3143,7 +3153,7 @@ trim_unixpath(char *fspec, char *wildspec, int opts)
  */
 /*{{{ DIR *opendir(char*name) */
 DIR *
-opendir(char *name)
+Perl_opendir(pTHX_ char *name)
 {
     DIR *dd;
     char dir[NAM$C_MAXRSS+1];
@@ -3397,7 +3407,7 @@ my_vfork()
 
 
 static void
-vms_execfree() {
+vms_execfree(pTHX) {
   if (PL_Cmd) {
     if (PL_Cmd != VMScmd.dsc$a_pointer) Safefree(PL_Cmd);
     PL_Cmd = Nullch;
@@ -3647,7 +3657,7 @@ vms_do_exec(char *cmd)
       Perl_warner(aTHX_ WARN_EXEC,"Can't exec \"%*s\": %s",
              VMScmd.dsc$w_length, VMScmd.dsc$a_pointer, Strerror(errno));
     }
-    vms_execfree();
+    vms_execfree(aTHX);
   }
 
   return FALSE;
@@ -3712,7 +3722,7 @@ do_spawn(char *cmd)
              Strerror(errno));
     }
   }
-  vms_execfree();
+  vms_execfree(aTHX);
   return substs;
 
 }  /* end of do_spawn() */
@@ -4858,7 +4868,7 @@ my_getlogin()
  */
 /*{{{int rmscopy(char *src, char *dst, int preserve_dates)*/
 int
-rmscopy(char *spec_in, char *spec_out, int preserve_dates)
+Perl_rmscopy(pTHX_ char *spec_in, char *spec_out, int preserve_dates)
 {
     char vmsin[NAM$C_MAXRSS+1], vmsout[NAM$C_MAXRSS+1], esa[NAM$C_MAXRSS],
          rsa[NAM$C_MAXRSS], ubf[32256];

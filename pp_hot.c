@@ -1887,7 +1887,7 @@ PP(pp_subst)
 	    SPAGAIN;
 	    PUSHs(sv_2mortal(newSViv((I32)iters)));
 	}
-	(void)SvPOK_only(TARG);
+	(void)SvPOK_only_UTF8(TARG);
 	TAINT_IF(rxtainted);
 	if (SvSMAGICAL(TARG)) {
 	    PUTBACK;

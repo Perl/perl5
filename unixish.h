@@ -5,6 +5,8 @@
  * here.
  */
 
+#ifndef PERL_MICRO
+
 /* HAS_IOCTL:
  *	This symbol, if defined, indicates that the ioctl() routine is
  *	available to set I/O characteristics
@@ -33,6 +35,8 @@
 
 #define HAS_KILL
 #define HAS_WAIT
+
+#endif /* !PERL_MICRO */
   
 /* USEMYBINMODE
  *	This symbol, if defined, indicates that the program should

@@ -21,7 +21,11 @@
 #endif /* PERL_FOR_X2P */
 
 #define VOIDUSED 1
-#include "config.h"
+#ifdef PERL_MICRO 
+#   include "uconfig.h"
+#else
+#   include "config.h"
+#endif
 
 #if defined(USE_ITHREADS) && defined(USE_5005THREADS)
 #  include "error: USE_ITHREADS and USE_5005THREADS are incompatible"
@@ -461,6 +465,10 @@ register struct op *Perl_op asm(stringify(OP_IN_REGISTER));
 #undef METHOD
 #endif
 
+#ifdef PERL_MICRO
+#   define NO_LOCALE
+#endif
+
 #ifdef I_LOCALE
 #   include <locale.h>
 #endif
@@ -594,6 +602,7 @@ struct perl_mstats {
 #    endif
 #  endif
 #else
+#  undef  memset
 #  define memset(d,c,l) my_memset(d,c,l)
 #endif /* HAS_MEMSET */
 
@@ -810,6 +819,12 @@ struct perl_mstats {
 #		include <sys/dir.h>
 #	    endif
 #	endif
+#   endif
+#endif
+
+#ifdef PERL_MICRO
+#   ifndef DIR
+#      define DIR void
 #   endif
 #endif
 
@@ -2795,10 +2810,14 @@ EXT MGVTBL PL_vtbl_envelem =	{0,	MEMBER_TO_FPTR(Perl_magic_setenv),
 					0,	MEMBER_TO_FPTR(Perl_magic_clearenv),
 							0};
 EXT MGVTBL PL_vtbl_sig =	{0,	0,		 0, 0, 0};
+#ifdef PERL_MICRO
+EXT MGVTBL PL_vtbl_sigelem =	{0,	0,		 0, 0, 0};
+#else
 EXT MGVTBL PL_vtbl_sigelem =	{MEMBER_TO_FPTR(Perl_magic_getsig),
 					MEMBER_TO_FPTR(Perl_magic_setsig),
 					0,	MEMBER_TO_FPTR(Perl_magic_clearsig),
 							0};
+#endif
 EXT MGVTBL PL_vtbl_pack =	{0,	0,	MEMBER_TO_FPTR(Perl_magic_sizepack),	MEMBER_TO_FPTR(Perl_magic_wipepack),
 							0};
 EXT MGVTBL PL_vtbl_packelem =	{MEMBER_TO_FPTR(Perl_magic_getpack),

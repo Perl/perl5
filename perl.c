@@ -1190,6 +1190,7 @@ print \"  \\@INC:\\n    @INC\\n\";");
 
     validate_suid(validarg, scriptname,fdscript);
 
+#ifndef PERL_MICRO
 #if defined(SIGCHLD) || defined(SIGCLD)
     {
 #ifndef SIGCHLD
@@ -1203,6 +1204,7 @@ print \"  \\@INC:\\n    @INC\\n\";");
 	    (void)rsignal(SIGCHLD, (Sighandler_t)SIG_DFL);
 	}
     }
+#endif
 #endif
 
 #ifdef MACOS_TRADITIONAL
@@ -1249,8 +1251,10 @@ print \"  \\@INC:\\n    @INC\\n\";");
 
     if (xsinit)
 	(*xsinit)(aTHXo);	/* in case linked C routines want magical variables */
+#ifndef PERL_MICRO
 #if defined(VMS) || defined(WIN32) || defined(DJGPP) || defined(__CYGWIN__)
     init_os_extras();
+#endif
 #endif
 
 #ifdef USE_SOCKS

@@ -15,8 +15,10 @@
 #define PERL_IN_DOOP_C
 #include "perl.h"
 
+#ifndef PERL_MICRO
 #if !defined(NSIG) || defined(M_UNIX) || defined(M_XENIX)
 #include <signal.h>
+#endif
 #endif
 
 STATIC I32
@@ -855,7 +857,7 @@ Perl_do_vecset(pTHX_ SV *sv)
     len = (offset + size + 7) / 8;	/* required number of bytes */
     if (len > targlen) {
 	s = (unsigned char*)SvGROW(targ, len + 1);
-	(void)memzero(s + targlen, len - targlen + 1);
+	(void)memzero((char *)(s + targlen), len - targlen + 1);
 	SvCUR_set(targ, len);
     }
     

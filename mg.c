@@ -950,6 +950,7 @@ Perl_magic_clear_all_env(pTHX_ SV *sv, MAGIC *mg)
     return 0;
 }
 
+#ifndef PERL_MICRO
 int
 Perl_magic_getsig(pTHX_ SV *sv, MAGIC *mg)
 {
@@ -1066,6 +1067,7 @@ Perl_magic_setsig(pTHX_ SV *sv, MAGIC *mg)
     }
     return 0;
 }
+#endif /* !PERL_MICRO */
 
 int
 Perl_magic_setisa(pTHX_ SV *sv, MAGIC *mg)

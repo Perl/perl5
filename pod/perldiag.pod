@@ -1774,7 +1774,7 @@ or
 with nonempty prefix1 and prefix2.  If C<prefix1> is indeed a prefix of
 a builtin library search path, prefix2 is substituted.  The error may
 appear if components are not found, or are too long.  See
-"PERLLIB_PREFIX" in F<README.os2>.
+"PERLLIB_PREFIX" in L<perlos2>.
 
 =item %s matches null string many times
 
@@ -2499,7 +2499,7 @@ you upgraded, anyway?  See L<perlfunc/require>.
 =item PERL_SH_DIR too long
 
 (F) An error peculiar to OS/2. PERL_SH_DIR is the directory to find the
-C<sh>-shell in.  See "PERL_SH_DIR" in F<README.os2>.
+C<sh>-shell in.  See "PERL_SH_DIR" in L<perlos2>.
 
 =item perl: warning: Setting locale failed.
 
@@ -2647,7 +2647,7 @@ before now.  Check your logic flow.
 applications die in silence.  It is considered a feature of the OS/2
 port.  One can easily disable this by appropriate sighandlers, see
 L<perlipc/"Signals">.  See also "Process terminated by SIGTERM/SIGINT"
-in F<README.os2>.
+in L<perlos2>.
 
 =item Prototype mismatch: %s vs %s
 
