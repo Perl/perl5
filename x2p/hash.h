@@ -41,11 +41,12 @@ struct htbl {
     HENT	*tbl_eiter;	/* current entry of iterator */
 };
 
-STR *hfetch();
-bool hstore();
-bool hdelete();
-HASH *hnew();
-int hiterinit();
-HENT *hiternext();
-char *hiterkey();
-STR *hiterval();
+bool hdelete _((HASH *tb, char *key));
+STR * hfetch _(( HASH *tb, char *key ));
+int hiterinit _(( HASH *tb ));
+char * hiterkey _(( HENT *entry ));
+HENT * hiternext _(( HASH *tb ));
+STR * hiterval _(( HENT *entry ));
+HASH * hnew _(( void ));
+void hsplit _(( HASH *tb ));
+bool hstore _(( HASH *tb, char *key, STR *val ));

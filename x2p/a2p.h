@@ -18,6 +18,35 @@
 #   define bzero(s,l) memset(s,0,l)
 #endif
 
+/* Use all the "standard" definitions? */
+#if defined(STANDARD_C) && defined(I_STDLIB)
+#   include <stdlib.h>
+#endif /* STANDARD_C */
+#include <stdio.h>
+
+#ifdef I_MATH
+#include <math.h>
+#endif
+
+#ifdef USE_NEXT_CTYPE 
+#include <appkit/NXCType.h>
+#else
+#include <ctype.h>
+#endif
+
+#define MEM_SIZE Size_t
+
+#if defined(I_STRING) || defined(__cplusplus)
+#   include <string.h>
+#else
+#   include <strings.h>
+#endif
+
+#if !defined(HAS_STRCHR) && defined(HAS_INDEX) && !defined(strchr)
+#define strchr index
+#define strrchr rindex
+#endif
+
 #include "handy.h"
 #define Nullop 0
 
@@ -220,14 +249,12 @@ union u_ops {
 #endif						 	/* 80286 hack */
 EXT union u_ops ops[OPSMAX];
 
-#include <stdio.h>
-#include <ctype.h>
-
 typedef struct string STR;
 typedef struct htbl HASH;
 
 #include "str.h"
 #include "hash.h"
+
 
 /* A string is TRUE if not "" or "0". */
 #define True(val) (tmps = (val), (*tmps && !(*tmps == '0' && !tmps[1])))
@@ -243,12 +270,28 @@ EXT STR *Str;
 
 #define GROWSTR(pp,lp,len) if (*(lp) < (len)) growstr(pp,lp,len)
 
-STR *str_new();
-
-char *scanpat();
-char *scannum();
-
-void str_free();
+/* Prototypes for things in a2p.c */
+int aryrefarg _(( int arg ));
+int bl _(( int arg, int maybe ));
+int dump _(( int branch ));
+int fixfargs _(( int name, int arg, int prevargs ));
+int fixrargs _(( char *name, int arg, int prevargs ));
+int fixup _(( STR *str ));
+int numary _(( int arg ));
+int oper0 _(( int type ));
+int oper1 _(( int type, int arg1 ));
+int oper2 _(( int type, int arg1, int arg2 ));
+int oper3 _(( int type, int arg1, int arg2, int arg3 ));
+int oper4 _(( int type, int arg1, int arg2, int arg3, int arg4 ));
+int oper5 _(( int type, int arg1, int arg2, int arg3, int arg4, int arg5 ));
+int putlines _(( STR *str ));
+int putone _(( void ));
+int rememberargs _(( int arg ));
+char * scannum _(( char *s ));
+char * scanpat _(( char *s ));
+int string _(( char *ptr, int len ));
+int yyerror _(( char *s ));
+int yylex _(( void ));
 
 EXT int line INIT(0);
 

@@ -8,10 +8,9 @@
  * $Log:	walk.c,v $
  */
 
-#include "handy.h"
 #include "EXTERN.h"
-#include "util.h"
 #include "a2p.h"
+#include "util.h"
 
 bool exitval = FALSE;
 bool realexit = FALSE;
@@ -26,6 +25,15 @@ char *rparen;
 char *limit;
 STR *subs;
 STR *curargs = Nullstr;
+
+void addsemi _(( STR *str ));
+void emit_split _(( STR *str, int level ));
+void fixtab _(( STR *str, int lvl ));
+void numericize _(( int node ));
+int prewalk _(( int numit, int level, int node, int *numericptr ));
+void tab _(( STR *str, int lvl ));
+STR * walk _(( int useval, int level, int node, int *numericptr, int minprec ));
+
 
 STR *
 walk(useval,level,node,numericptr,minprec)
@@ -1547,6 +1555,7 @@ sub Pick {\n\
     return str;
 }
 
+void
 tab(str,lvl)
 register STR *str;
 register int lvl;
@@ -1559,6 +1568,7 @@ register int lvl;
 	str_cat(str,"    ");
 }
 
+void
 fixtab(str,lvl)
 register STR *str;
 register int lvl;
@@ -1578,6 +1588,7 @@ register int lvl;
     tab(str,lvl);
 }
 
+void
 addsemi(str)
 register STR *str;
 {
@@ -1590,6 +1601,7 @@ register STR *str;
 	str_cat(str,";");
 }
 
+void
 emit_split(str,level)
 register STR *str;
 int level;
@@ -1624,6 +1636,7 @@ int level;
     tab(str,level);
 }
 
+int
 prewalk(numit,level,node,numericptr)
 int numit;
 int level;
@@ -1633,8 +1646,6 @@ int *numericptr;
     register int len;
     register int type;
     register int i;
-    char *t;
-    char *d, *s;
     int numarg;
     int numeric = FALSE;
     STR *tmpstr;
@@ -2046,12 +2057,12 @@ int *numericptr;
     return 1;
 }
 
+void
 numericize(node)
 register int node;
 {
     register int len;
     register int type;
-    register int i;
     STR *tmpstr;
     STR *tmp2str;
     int numarg;

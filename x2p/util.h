@@ -15,27 +15,21 @@
 #define MD_DIR 0
 #define MD_FILE 1
 
-void	util_init();
-int	doshell();
-char	*safemalloc();
-char	*saferealloc();
-char	*safecpy();
-char	*safecat();
-char	*cpytill();
-char	*cpy2();
-char	*instr();
 #ifdef SETUIDGID
     int		eaccess();
 #endif
+
 char	*getwd();
-void	cat();
-void	prexit();
-char	*get_a_line();
-char	*savestr();
 int	makedir();
-void	setenv();
-int	envix();
-void	notincl();
-char	*getval();
-void	growstr();
-void	setdef();
+
+char * cpy2 _(( char *to, char *from, int delim ));
+char * cpytill _(( char *to, char *from, int delim ));
+int croak _(( char *pat, int a1, int a2, int a3, int a4 ));
+int envix _(( char *nam ));
+void growstr _(( char **strptr, int *curlen, int newlen ));
+char * instr _(( char *big, char *little ));
+int Myfatal ();
+char * safecpy _(( char *to, char *from, int len ));
+char * savestr _(( char *str ));
+void setenv _(( char *nam, char *val ));
+void warn ();

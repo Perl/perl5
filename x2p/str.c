@@ -8,11 +8,11 @@
  * $Log:	str.c,v $
  */
 
-#include "handy.h"
 #include "EXTERN.h"
-#include "util.h"
 #include "a2p.h"
+#include "util.h"
 
+void
 str_numset(str,num)
 register STR *str;
 double num;
@@ -64,6 +64,7 @@ register STR *str;
     return str->str_nval;
 }
 
+void
 str_sset(dstr,sstr)
 STR *dstr;
 register STR *sstr;
@@ -78,6 +79,7 @@ register STR *sstr;
 	str_nset(dstr,"",0);
 }
 
+void
 str_nset(str,ptr,len)
 register STR *str;
 register char *ptr;
@@ -91,6 +93,7 @@ register int len;
     str->str_pok = 1;		/* validate pointer */
 }
 
+void
 str_set(str,ptr)
 register STR *str;
 register char *ptr;
@@ -107,6 +110,7 @@ register char *ptr;
     str->str_pok = 1;		/* validate pointer */
 }
 
+void
 str_chop(str,ptr)	/* like set but assuming ptr is in str */
 register STR *str;
 register char *ptr;
@@ -119,6 +123,7 @@ register char *ptr;
     str->str_pok = 1;		/* validate pointer */
 }
 
+void
 str_ncat(str,ptr,len)
 register STR *str;
 register char *ptr;
@@ -134,6 +139,7 @@ register int len;
     str->str_pok = 1;		/* validate pointer */
 }
 
+void
 str_scat(dstr,sstr)
 STR *dstr;
 register STR *sstr;
@@ -144,6 +150,7 @@ register STR *sstr;
 	str_ncat(dstr,sstr->str_ptr,sstr->str_cur);
 }
 
+void
 str_cat(str,ptr)
 register STR *str;
 register char *ptr;
@@ -236,7 +243,7 @@ str_replace(str,nstr)
 register STR *str;
 register STR *nstr;
 {
-    safefree(str->str_ptr);
+    Safefree(str->str_ptr);
     str->str_ptr = nstr->str_ptr;
     str->str_len = nstr->str_len;
     str->str_cur = nstr->str_cur;
@@ -261,6 +268,7 @@ register STR *str;
     freestrroot = str;
 }
 
+int
 str_len(str)
 register STR *str;
 {

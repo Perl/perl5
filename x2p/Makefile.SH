@@ -17,6 +17,11 @@ case "$0" in
 */*) cd `expr X$0 : 'X\(.*\)/'` ;;
 esac
 
+: Configure sets byacc=byacc if byacc is not found.  We reset it to ''
+case "$byacc" in
+'byacc') byacc='';;
+esac
+
 echo "Extracting x2p/Makefile (with variable substitutions)"
 rm -f Makefile
 cat >Makefile <<!GROK!THIS!
@@ -25,7 +30,7 @@ cat >Makefile <<!GROK!THIS!
 # $Log:	Makefile.SH,v $
 
 CC = $cc
-YACC = $yacc
+BYACC = $byacc
 mansrc = $mansrc
 manext = $manext
 LDFLAGS = $ldflags
@@ -72,19 +77,45 @@ all: $(public) $(private) $(util)
 a2p: $(obj) a2p.o
 	$(CC) $(LDFLAGS) $(obj) a2p.o $(libs) -o a2p
 
-a2p.c: a2p.y
-	@ echo Expect many shift/reduce and reduce/reduce conflicts...
-	$(YACC) a2p.y
-	mv y.tab.c a2p.c
+!NO!SUBS!
+
+: Only print out the rules for running byacc if the user _has_ byacc.
+: Otherwise, comment them out.  Users who really know what they are
+: doing can uncomment them and run yacc or bison or whatever.
+: Configure sets byacc=byacc if byacc is not found.
+case "$byacc" in
+'')
+	comment1='#' 
+	comment2='' ;;
+*)	comment1=''
+	comment2='#' ;;
+esac
+
+$spitshell >>Makefile <<!GROK!THIS!
+
+# I now supply a2p.c with the kits, so the following section is
+# commented out if you don't have byacc.
+
+${comment1}a2p.c: 	a2p.y
+${comment1}	@ echo Expect many shift/reduce and reduce/reduce conflicts
+${comment1}	\$(BYACC) a2p.y
+${comment1}	mv y.tab.c a2p.c
+
+# This version is used if you do not have byacc.
+${comment2}a2p.c:	a2p.y
+${comment2}	touch a2p.c
+
+!GROK!THIS!
+cat >>Makefile <<'!NO!SUBS!'
 
 a2p.o: a2p.c a2py.c a2p.h EXTERN.h util.h INTERN.h handy.h ../config.h str.h hash.h
 	$(CCCMD) $(LARGE) a2p.c
 
 clean:
-	rm -f a2p *.o a2p.c
+	rm -f a2p *.o 
 
 realclean: clean
-	rm -f *.orig */*.orig core $(addedbyconf) a2p.c all malloc.c
+	rm -f *.orig core $(addedbyconf) all malloc.c
 	rm -f Makefile cflags find2perl s2p makefile makefile.old
 
 # The following lint has practically everything turned on.  Unfortunately,

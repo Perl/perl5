@@ -41,7 +41,6 @@ register char **argv;
 register char **env;
 {
     register STR *str;
-    register char *s;
     int i;
     STR *tmpstr;
 

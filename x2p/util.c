@@ -8,16 +8,12 @@
  * $Log:	util.c,v $
  */
 
-#include <stdio.h>
-
-#include "handy.h"
 #include "EXTERN.h"
 #include "a2p.h"
 #include "INTERN.h"
 #include "util.h"
 
 #define FLUSH
-#define MEM_SIZE unsigned int
 
 static char nomem[] = "Out of memory!\n";
 
@@ -73,6 +69,7 @@ MEM_SIZE size;
 
 /* safe version of free */
 
+void
 safefree(where)
 char *where;
 {
@@ -192,24 +189,30 @@ int newlen;
 }
 
 /*VARARGS1*/
+int
 croak(pat,a1,a2,a3,a4)
 char *pat;
+int a1,a2,a3,a4;
 {
     fprintf(stderr,pat,a1,a2,a3,a4);
     exit(1);
 }
 
 /*VARARGS1*/
+int
 fatal(pat,a1,a2,a3,a4)
 char *pat;
+int a1,a2,a3,a4;
 {
     fprintf(stderr,pat,a1,a2,a3,a4);
     exit(1);
 }
 
 /*VARARGS1*/
+void
 warn(pat,a1,a2,a3,a4)
 char *pat;
+int a1,a2,a3,a4;
 {
     fprintf(stderr,pat,a1,a2,a3,a4);
 }
