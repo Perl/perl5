@@ -80,6 +80,9 @@ SKIP: {
 
     SKIP: {
         skip "No link count", 1 if $Config{dont_use_nlink};
+        skip "Cygwin9X fakes hard links by copying", 1
+          if $Config{myuname} =~ /^cygwin_9\d\b/;
+
         is($nlink, 2,     'Link count on hard linked file' );
     }
 
