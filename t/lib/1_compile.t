@@ -37,8 +37,10 @@ if (@Core_Modules) {
 my $test_num = 2;
 
 foreach my $module (@Core_Modules) {
-    print "$module compile failed\nnot " unless compile_module($module);
-    print "ok $test_num\n";
+    my $todo = '';
+    $todo = "# TODO $module needs porting on $^O" if $module eq 'ByteLoader' && $^O eq 'VMS';
+    print "# $module compile failed\nnot " unless compile_module($module);
+    print "ok $test_num $todo\n";
     $test_num++;
 }
 

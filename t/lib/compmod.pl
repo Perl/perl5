@@ -11,7 +11,8 @@ my $module = shift;
 eval "use $module ();";
 if( $@ ) {
     print "not ";
-    warn "require failed with '$@'\n";
+    $@ =~ s/\n/\n# /g;
+    warn "# require failed with '$@'\n";
 }
 print "ok - $module\n";
 
