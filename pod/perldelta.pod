@@ -143,6 +143,9 @@ variable PERL_UNICODE can now be used to control how Perl and Unicode
 interact at interfaces like I/O and for example the command line
 arguments.  See L<perlrun> for more information.
 
+You can also now use safe signals with POSIX::SigAction.
+See L<POSIX/POSIX::SigAction>.
+
 =head2 Unsafe signals again available
 
 In Perl 5.8.0 the so-called "safe signals" were introduced.  This
