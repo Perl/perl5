@@ -526,7 +526,7 @@ known but the current suspect is the F<ixemul> library.
 
 Don't panic.  Read INSTALL 'make test' section instead.
 
-=head Cygwin intermittent failures of lib/Memoize/t/expire_file 11 and 12
+=head2 Cygwin intermittent failures of lib/Memoize/t/expire_file 11 and 12
 
 The subtests 11 and 12 sometimes fail and sometimes work.
 
