@@ -186,7 +186,6 @@ S_hv_notallowed(pTHX_ int flags, const char *key, I32 klen,
 #define HV_FETCH_ISEXISTS  0x02
 #define HV_FETCH_LVALUE    0x04
 #define HV_FETCH_JUST_SV   0x08
-#define HV_FETCH_PLACEHOLDER   0x10
 
 /*
 =for apidoc hv_store
@@ -333,46 +332,6 @@ Perl_hv_fetch(pTHX_ HV *hv, const char *key, I32 klen_i32, I32 lval)
     }
     hek = hv_fetch_common (hv, NULL, key, klen, flags,
 			   HV_FETCH_JUST_SV | (lval ? HV_FETCH_LVALUE : 0),
-			   Nullsv, 0);
-    return hek ? &HeVAL(hek) : NULL;
-}
-
-/*
-=for apidoc hv_fetch_flags
-
-Returns the SV which corresponds to the specified key in the hash.
-See C<hv_fetch>.
-The C<flags> value will normally be zero; if HV_FETCH_WANTPLACEHOLDERS is
-set then placeholders keys (for restricted hashes) will be returned in addition
-to normal keys. By default placeholders are automatically skipped over.
-Currently a placeholder is implemented with a value that is
-C<&Perl_sv_placeholder>. Note that the implementation of placeholders and
-restricted hashes may change.
-
-=cut
-*/
-
-SV**
-Perl_hv_fetch_flags(pTHX_ HV *hv, const char *key, I32 klen_i32, I32 lval, 
-		    I32 flags)
-{
-    HE *hek;
-    STRLEN klen;
-    int common_flags;
-
-    if (klen_i32 < 0) {
-	klen = -klen_i32;
-	common_flags = HVhek_UTF8;
-    } else {
-	klen = klen_i32;
-	common_flags = 0;
-    }
-    hek = hv_fetch_common (hv, NULL, key, klen, common_flags,
-			   ((flags & HV_FETCH_WANTPLACEHOLDERS) 
-				? HV_FETCH_PLACEHOLDER 
-				: 0)
-			    | HV_FETCH_JUST_SV 
-			    | (lval ? HV_FETCH_LVALUE : 0),
 			   Nullsv, 0);
     return hek ? &HeVAL(hek) : NULL;
 }
@@ -734,9 +693,7 @@ S_hv_fetch_common(pTHX_ HV *hv, SV *keysv, const char *key, STRLEN klen,
 		SvREFCNT_dec(HeVAL(entry));
 		HeVAL(entry) = val;
 	    }
-	} else if (HeVAL(entry) == &PL_sv_placeholder 
-		    && !(action & HV_FETCH_PLACEHOLDER)) 
-	{
+	} else if (HeVAL(entry) == &PL_sv_placeholder) {
 	    /* if we find a placeholder, we pretend we haven't found
 	       anything */
 	    break;

@@ -1196,25 +1196,6 @@ information on how to use this function on tied hashes.
 =for hackers
 Found in file hv.c
 
-=item hv_fetch_flags
-
-Returns the SV which corresponds to the specified key in the hash.
-See C<hv_fetch>.
-The C<flags> value will normally be zero; if HV_FETCH_WANTPLACEHOLDERS is
-set then placeholders keys (for restricted hashes) will be returned in addition
-to normal keys. By default placeholders are automatically skipped over.
-Currently a placeholder is implemented with a value that is
-C<&Perl_sv_placeholder>. Note that the implementation of placeholders and
-restricted hashes may change.
-
-NOTE: this function is experimental and may change or be
-removed without notice.
-
-	SV**	hv_fetch_flags(HV* tb, const char* key, I32 klen, I32 lval, I32 flags)
-
-=for hackers
-Found in file hv.c
-
 =item hv_iterinit
 
 Prepares a starting point to traverse a hash table.  Returns the number of

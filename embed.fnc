@@ -271,7 +271,6 @@ Apd	|SV*	|hv_delete_ent	|HV* tb|SV* key|I32 flags|U32 hash
 Apd	|bool	|hv_exists	|HV* tb|const char* key|I32 klen
 Apd	|bool	|hv_exists_ent	|HV* tb|SV* key|U32 hash
 Apd	|SV**	|hv_fetch	|HV* tb|const char* key|I32 klen|I32 lval
-ApMd	|SV**	|hv_fetch_flags	|HV* tb|const char* key|I32 klen|I32 lval|I32 flags
 Apd	|HE*	|hv_fetch_ent	|HV* tb|SV* key|I32 lval|U32 hash
 Ap	|void	|hv_free_ent	|HV* hv|HE* entry
 Apd	|I32	|hv_iterinit	|HV* tb

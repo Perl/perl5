@@ -1469,7 +1469,7 @@ Perl_die_where(pTHX_ char *message, STRLEN msglen)
 		char* msg = SvPVx(ERRSV, n_a);
                SV *nsv = cx->blk_eval.old_namesv;
                (void)hv_store(GvHVn(PL_incgv), SvPVX(nsv), SvCUR(nsv),
-                               &PL_sv_placeholder, 0);
+                               &PL_sv_undef, 0);
 		DIE(aTHX_ "%sCompilation failed in require",
 		    *msg ? msg : "Unknown error\n");
 	    }
@@ -2941,7 +2941,7 @@ S_doeval(pTHX_ int gimme, OP** startop, CV* outside, U32 seq)
 	    char* msg = SvPVx(ERRSV, n_a);
            SV *nsv = cx->blk_eval.old_namesv;
            (void)hv_store(GvHVn(PL_incgv), SvPVX(nsv), SvCUR(nsv),
-                          &PL_sv_placeholder, 0);
+                          &PL_sv_undef, 0);
 	    DIE(aTHX_ "%sCompilation failed in require",
 		*msg ? msg : "Unknown error\n");
 	}
@@ -3083,10 +3083,8 @@ PP(pp_require)
 	DIE(aTHX_ "Null filename used");
     TAINT_PROPER("require");
     if (PL_op->op_type == OP_REQUIRE &&
-       (svp = hv_fetch_flags(GvHVn(PL_incgv), name, len, 0,
-		       HV_FETCH_WANTPLACEHOLDERS)))
-    {
-       if (*svp != &PL_sv_placeholder)
+       (svp = hv_fetch(GvHVn(PL_incgv), name, len, 0))) {
+       if (*svp != &PL_sv_undef)
            RETPUSHYES;
        else
            DIE(aTHX_ "Compilation failed in require");

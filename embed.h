@@ -327,7 +327,6 @@
 #define hv_exists		Perl_hv_exists
 #define hv_exists_ent		Perl_hv_exists_ent
 #define hv_fetch		Perl_hv_fetch
-#define hv_fetch_flags		Perl_hv_fetch_flags
 #define hv_fetch_ent		Perl_hv_fetch_ent
 #define hv_free_ent		Perl_hv_free_ent
 #define hv_iterinit		Perl_hv_iterinit
@@ -2935,7 +2934,6 @@
 #define hv_exists(a,b,c)	Perl_hv_exists(aTHX_ a,b,c)
 #define hv_exists_ent(a,b,c)	Perl_hv_exists_ent(aTHX_ a,b,c)
 #define hv_fetch(a,b,c,d)	Perl_hv_fetch(aTHX_ a,b,c,d)
-#define hv_fetch_flags(a,b,c,d,e)	Perl_hv_fetch_flags(aTHX_ a,b,c,d,e)
 #define hv_fetch_ent(a,b,c,d)	Perl_hv_fetch_ent(aTHX_ a,b,c,d)
 #define hv_free_ent(a,b)	Perl_hv_free_ent(aTHX_ a,b)
 #define hv_iterinit(a)		Perl_hv_iterinit(aTHX_ a)

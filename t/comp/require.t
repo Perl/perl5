@@ -11,9 +11,8 @@ $i = 1;
 
 my $Is_EBCDIC = (ord('A') == 193) ? 1 : 0;
 my $Is_UTF8   = (${^OPEN} || "") =~ /:utf8/;
-my $total_tests = 43;
-my $ebcdic_utf8_skips = 3;
-if ($Is_EBCDIC || $Is_UTF8) { $total_tests -= $ebcdic_utf8_skips; }
+my $total_tests = 44;
+if ($Is_EBCDIC || $Is_UTF8) { $total_tests = 41; }
 print "1..$total_tests\n";
 
 sub do_require {
@@ -123,6 +122,8 @@ for my $expected_compile (1,0) {
     print "ok ",$i++,"\n";
     print "not " unless -e $flag_file xor $expected_compile;
     print "ok ",$i++,"\n";
+    print "not " unless exists $INC{'bleah.pm'};
+    print "ok ",$i++,"\n";
 }
 
 # compile-time failure in require
@@ -132,6 +133,9 @@ do_require "1)\n";
 print "# $@\nnot " unless $@ =~ /(syntax|parse) error/mi;
 print "ok ",$i++,"\n";
 
+# previous failure cached in %INC
+print "not " unless exists $INC{'bleah.pm'};
+print "ok ",$i++,"\n";
 write_file($flag_file, 1);
 write_file('bleah.pm', "unlink '$flag_file'; 1");
 print "# $@\nnot " if eval { require 'bleah.pm' };
@@ -140,18 +144,12 @@ print "# $@\nnot " unless $@ =~ /Compilation failed/i;
 print "ok ",$i++,"\n";
 print "not " unless -e $flag_file;
 print "ok ",$i++,"\n";
-# [perl #31924]
-eval { $INC{'bleah.pm'} = 'bleah.pm' };
-print "# $@\nnot " if $@;
-print "ok ",$i++,"\n";
-print "not " unless $INC{'bleah.pm'} eq 'bleah.pm';
+print "not " unless exists $INC{'bleah.pm'};
 print "ok ",$i++,"\n";
 
 # successful require
 do_require "1";
 print "# $@\nnot " if $@;
-print "ok ",$i++,"\n";
-print "not " unless $INC{'bleah.pm'} eq 'bleah.pm';
 print "ok ",$i++,"\n";
 
 # do FILE shouldn't see any outside lexicals
