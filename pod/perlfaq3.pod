@@ -1,6 +1,6 @@
 =head1 NAME
 
-perlfaq3 - Programming Tools ($Revision: 1.33 $, $Date: 2003/01/31 17:34:56 $)
+perlfaq3 - Programming Tools ($Revision: 1.35 $, $Date: 2003/08/24 05:26:59 $)
 
 =head1 DESCRIPTION
 
@@ -48,6 +48,11 @@ power of Perl. The goal is a full featured shell that behaves as
 expected for normal shell activity and uses Perl syntax and
 functionality for control-flow statements and other things.
 You can get psh at http://www.focusresearch.com/gregor/psh/ .
+
+Zoidberg is a similar project and provides a shell written in perl,
+configured in perl and operated in perl. It is intended as a login shell
+and development environment. It can be found at http://zoidberg.sf.net/
+or your local CPAN mirror.
 
 The Shell.pm module (distributed with Perl) makes Perl try commands
 which aren't part of the Perl language as shell commands.  perlsh
