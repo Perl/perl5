@@ -1159,8 +1159,8 @@ parentheses to test I<EACH> file in a while (E<lt>E<gt>) loop.  Examples:
     }
 
 Practical hint: you almost never need to use C<eof> in Perl, because the
-input operators return false values when they run out of data, or if there
-was an error.
+input operators typically return C<undef> when they run out of data, or if
+there was an error.
 
 =item eval EXPR
 
