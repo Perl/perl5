@@ -194,13 +194,13 @@ Free the padlist associated with a CV.
 If parts of it happen to be current, we null the relevant
 PL_*pad* global vars so that we don't have any dangling references left.
 We also repoint the CvOUTSIDE of any about-to-be-orphaned
-inner subs to outercv.
+inner subs to the outer of this cv.
 
 =cut
 */
 
 void
-Perl_pad_undef(pTHX_ CV* cv, CV* outercv)
+Perl_pad_undef(pTHX_ CV* cv)
 {
     I32 ix;
     PADLIST *padlist = CvPADLIST(cv);
@@ -218,10 +218,12 @@ Perl_pad_undef(pTHX_ CV* cv, CV* outercv)
     if ((CvEVAL(cv) && !CvGV(cv) /* is this eval"" ? */
 	    && !PL_dirty) || CvSPECIAL(cv))
     {
+	CV *outercv = CvOUTSIDE(cv);
+	U32 seq     = CvOUTSIDE_SEQ(cv);
 	/* XXX DAPM the following code is very similar to
 	 * pad_fixup_inner_anons(). Merge??? */
 
-	/* inner references to eval's cv must be fixed up */
+	/* inner references to eval's/BEGIN's/etc cv must be fixed up */
 	AV *comppad_name = (AV*)AvARRAY(padlist)[0];
 	SV **namepad = AvARRAY(comppad_name);
 	AV *comppad = (AV*)AvARRAY(padlist)[1];
@@ -237,6 +239,8 @@ Perl_pad_undef(pTHX_ CV* cv, CV* outercv)
 		    && CvOUTSIDE(innercv) == cv)
 		{
 		    CvOUTSIDE(innercv) = outercv;
+		    CvOUTSIDE_SEQ(innercv) = seq;
+		    /* anon prototypes aren't refcounted */
 		    if (!CvANON(innercv) || CvCLONED(innercv)) {
 			(void)SvREFCNT_inc(outercv);
 			if (SvREFCNT(cv))
@@ -529,8 +533,6 @@ Perl_pad_findmy(pTHX_ char *name)
     SV *sv;
     SV **svp = AvARRAY(PL_comppad_name);
     U32 seq = PL_cop_seqmax;
-    PERL_CONTEXT *cx;
-    CV *outside;
 
     ASSERT_CURPAD_ACTIVE("pad_findmy");
     DEBUG_Xv(PerlIO_printf(Perl_debug_log, "Pad findmy:  \"%s\"\n", name));
@@ -550,20 +552,8 @@ Perl_pad_findmy(pTHX_ char *name)
 	}
     }
 
-    outside = CvOUTSIDE(PL_compcv);
-
-    /* Check if if we're compiling an eval'', and adjust seq to be the
-     * eval's seq number.  This depends on eval'' having a non-null
-     * CvOUTSIDE() while it is being compiled.  The eval'' itself is
-     * identified by CvEVAL being true and CvGV being null. */
-    if (outside && CvEVAL(PL_compcv) && !CvGV(PL_compcv) && cxstack_ix >= 0) {
-	cx = &cxstack[cxstack_ix];
-	if (CxREALEVAL(cx))
-	    seq = cx->blk_oldcop->cop_seq;
-    }
-
     /* See if it's in a nested scope */
-    off = pad_findlex(name, 0, seq, outside, cxstack_ix, 0, 0);
+    off = pad_findlex(name, 0, PL_compcv);
     if (!off)			/* pad_findlex returns 0 for failure...*/
 	return NOT_IN_PAD;	/* ...but we return NOT_IN_PAD for failure */
 
@@ -579,41 +569,40 @@ Perl_pad_findmy(pTHX_ char *name)
 =for apidoc pad_findlex
 
 Find a named lexical anywhere in a chain of nested pads. Add fake entries
-in the inner pads if its found in an outer one.
-
-If flags == FINDLEX_NOSEARCH we don't bother searching outer contexts.
+in the inner pads if it's found in an outer one. innercv is the CV *inside*
+the chain of outer CVs to be searched. If newoff is non-null, this is a
+run-time cloning: don't add fake entries, just find the lexical and add a
+ref to it at newoff in the current pad.
 
 =cut
 */
 
-#define FINDLEX_NOSEARCH	1	/* don't search outer contexts */
-
 STATIC PADOFFSET
-S_pad_findlex(pTHX_ char *name, PADOFFSET newoff, U32 seq, CV* startcv,
-	    I32 cx_ix, I32 saweval, U32 flags)
+S_pad_findlex(pTHX_ char *name, PADOFFSET newoff, CV* innercv)
 {
     CV *cv;
     I32 off;
     SV *sv;
-    register I32 i;
-    register PERL_CONTEXT *cx;
+    CV* startcv;
+    U32 seq;
 
     ASSERT_CURPAD_ACTIVE("pad_findlex");
     DEBUG_Xv(PerlIO_printf(Perl_debug_log,
-	"Pad findlex: \"%s\" off=%ld seq=%lu cv=0x%"UVxf
-	    " ix=%ld saweval=%d flags=%lu\n",
-	    name, (long)newoff, (unsigned long)seq, PTR2UV(startcv),
-	    (long)cx_ix, (int)saweval, (unsigned long)flags
-	)
+	"Pad findlex: \"%s\" off=%ld startcv=0x%"UVxf"\n",
+	    name, (long)newoff, PTR2UV(innercv))
     );
 
-    for (cv = startcv; cv; cv = CvOUTSIDE(cv)) {
+    seq = CvOUTSIDE_SEQ(innercv);
+    startcv = CvOUTSIDE(innercv);
+
+    for (cv = startcv; cv; seq = CvOUTSIDE_SEQ(cv), cv = CvOUTSIDE(cv)) {
 	AV *curlist = CvPADLIST(cv);
 	SV **svp = av_fetch(curlist, 0, FALSE);
 	AV *curname;
 
 	DEBUG_Xv(PerlIO_printf(Perl_debug_log,
-	    "             searching: cv=0x%"UVxf"\n", PTR2UV(cv))
+	    "             searching: cv=0x%"UVxf" seq=%d\n",
+	    PTR2UV(cv), (int) seq )
 	);
 
 	if (!svp || *svp == &PL_sv_undef)
@@ -735,59 +724,6 @@ S_pad_findlex(pTHX_ char *name, PADOFFSET newoff, U32 seq, CV* startcv,
 	    return newoff;
 	}
     }
-
-    if (flags & FINDLEX_NOSEARCH)
-	return 0;
-
-    /* Nothing in current lexical context--try eval's context, if any.
-     * This is necessary to let the perldb get at lexically scoped variables.
-     * XXX This will also probably interact badly with eval tree caching.
-     */
-
-    for (i = cx_ix; i >= 0; i--) {
-	cx = &cxstack[i];
-	switch (CxTYPE(cx)) {
-	default:
-	    if (i == 0 && saweval) {
-		return pad_findlex(name, newoff, seq, PL_main_cv, -1, saweval, 0);
-	    }
-	    break;
-	case CXt_EVAL:
-	    switch (cx->blk_eval.old_op_type) {
-	    case OP_ENTEREVAL:
-		if (CxREALEVAL(cx)) {
-		    PADOFFSET off;
-		    saweval = i;
-		    seq = cxstack[i].blk_oldcop->cop_seq;
-		    startcv = cxstack[i].blk_eval.cv;
-		    if (startcv && CvOUTSIDE(startcv)) {
-			off = pad_findlex(name, newoff, seq, CvOUTSIDE(startcv),
-					  i - 1, saweval, 0);
-			if (off)	/* continue looking if not found here */
-			    return off;
-		    }
-		}
-		break;
-	    case OP_DOFILE:
-	    case OP_REQUIRE:
-		/* require/do must have their own scope */
-		return 0;
-	    }
-	    break;
-	case CXt_FORMAT:
-	case CXt_SUB:
-	    if (!saweval)
-		return 0;
-	    cv = cx->blk_sub.cv;
-	    if (PL_debstash && CvSTASH(cv) == PL_debstash) {	/* ignore DB'* scope */
-		saweval = i;	/* so we know where we were called from */
-		seq = cxstack[i].blk_oldcop->cop_seq;
-		continue;
-	    }
-	    return pad_findlex(name, newoff, seq, cv, i - 1, saweval, FINDLEX_NOSEARCH);
-	}
-    }
-
     return 0;
 }
 
@@ -1315,8 +1251,10 @@ S_cv_clone2(pTHX_ CV *proto, CV *outside)
     CvSTASH(cv)		= CvSTASH(proto);
     CvROOT(cv)		= OpREFCNT_inc(CvROOT(proto));
     CvSTART(cv)		= CvSTART(proto);
-    if (outside)
+    if (outside) {
 	CvOUTSIDE(cv)	= (CV*)SvREFCNT_inc(outside);
+	CvOUTSIDE_SEQ(cv) = CvOUTSIDE_SEQ(proto);
+    }
 
     if (SvPOK(proto))
 	sv_setpvn((SV*)cv, SvPVX(proto), SvCUR(proto));
@@ -1334,8 +1272,7 @@ S_cv_clone2(pTHX_ CV *proto, CV *outside)
 	if (namesv && namesv != &PL_sv_undef) {
 	    char *name = SvPVX(namesv);    /* XXX */
 	    if (SvFLAGS(namesv) & SVf_FAKE) {   /* lexical from outside? */
-		I32 off = pad_findlex(name, ix, SvIVX(namesv),
-				      CvOUTSIDE(cv), cxstack_ix, 0, 0);
+		I32 off = pad_findlex(name, ix, cv);
 		if (!off)
 		    PL_curpad[ix] = SvREFCNT_inc(ppad[ix]);
 		else if (off != ix)
@@ -1432,6 +1369,7 @@ Perl_pad_fixup_inner_anons(pTHX_ PADLIST *padlist, CV *old_cv, CV *new_cv)
 	    CV *innercv = (CV*)curpad[ix];
 	    if (CvOUTSIDE(innercv) == old_cv) {
 		CvOUTSIDE(innercv) = new_cv;
+		/* anon prototypes aren't refcounted */
 		if (!CvANON(innercv) || CvCLONED(innercv)) {
 		    (void)SvREFCNT_inc(new_cv);
 		    SvREFCNT_dec(old_cv);

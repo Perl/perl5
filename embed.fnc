@@ -1070,7 +1070,7 @@ s	|I32	|dopoptoloop	|I32 startingblock
 s	|I32	|dopoptosub	|I32 startingblock
 s	|I32	|dopoptosub_at	|PERL_CONTEXT* cxstk|I32 startingblock
 s	|void	|save_lines	|AV *array|SV *sv
-s	|OP*	|doeval		|int gimme|OP** startop
+s	|OP*	|doeval		|int gimme|OP** startop|CV* outside|U32 seq
 s	|PerlIO *|doopen_pmc	|const char *name|const char *mode
 s	|bool	|path_is_absolute|char *name
 #endif
@@ -1329,7 +1329,7 @@ s	|void	|deb_stack_n	|SV** stack_base|I32 stack_min \
 #endif
 
 pd	|PADLIST*|pad_new	|padnew_flags flags
-pd	|void	|pad_undef	|CV* cv|CV* outercv
+pd	|void	|pad_undef	|CV* cv
 pd	|PADOFFSET|pad_add_name	|char *name\
 				|HV* typestash|HV* ourstash \
 				|bool clone
@@ -1347,13 +1347,13 @@ pd	|void	|pad_fixup_inner_anons|PADLIST *padlist|CV *old_cv|CV *new_cv
 pd	|void	|pad_push	|PADLIST *padlist|int depth|int has_args
 
 #if defined(PERL_IN_PAD_C) || defined(PERL_DECL_PROT)
-sd	|PADOFFSET|pad_findlex	|char* name|PADOFFSET newoff|U32 seq \
-				|CV* startcv|I32 cx_ix|I32 saweval|U32 flags
+sd	|PADOFFSET|pad_findlex	|char* name|PADOFFSET newoff|CV* innercv
 #  if defined(DEBUGGING)
 sd	|void	|cv_dump	|CV *cv|char *title
 #  endif
 s	|CV*	|cv_clone2	|CV *proto|CV *outside
 #endif
+pd 	|CV*	|find_runcv
 
 
 

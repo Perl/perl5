@@ -7568,6 +7568,7 @@ Perl_start_subparse(pTHX_ I32 is_format, U32 flags)
     PL_subline = CopLINE(PL_curcop);
     CvPADLIST(PL_compcv) = pad_new(padnew_SAVE|padnew_SAVESUB);
     CvOUTSIDE(PL_compcv) = (CV*)SvREFCNT_inc(outsidecv);
+    CvOUTSIDE_SEQ(PL_compcv) = PL_cop_seqmax;
 
     return oldsavestack_ix;
 }

@@ -2572,6 +2572,8 @@ Perl_sv_compile_2op(pTHX_ SV *sv, OP** startop, char *code, PAD** padp)
     char tbuf[TYPE_DIGITS(long) + 12 + 10];
     char *tmpbuf = tbuf;
     char *safestr;
+    int runtime;
+    CV* runcv;
 
     ENTER;
     lex_start(sv);
@@ -2610,12 +2612,21 @@ Perl_sv_compile_2op(pTHX_ SV *sv, OP** startop, char *code, PAD** padp)
 #endif
     PL_hints &= HINT_UTF8;
 
+    /* we get here either during compilation, or via pp_regcomp at runtime */
+    runtime = PL_op && (PL_op->op_type == OP_REGCOMP);
+    if (runtime)
+	runcv = find_runcv();
+
     PL_op = &dummy;
     PL_op->op_type = OP_ENTEREVAL;
     PL_op->op_flags = 0;			/* Avoid uninit warning. */
     PUSHBLOCK(cx, CXt_EVAL|(PL_curcop == &PL_compiling ? 0 : CXp_REAL), SP);
     PUSHEVAL(cx, 0, Nullgv);
-    rop = doeval(G_SCALAR, startop);
+
+    if (runtime)
+	rop = doeval(G_SCALAR, startop, runcv, PL_curcop->cop_seq);
+    else
+	rop = doeval(G_SCALAR, startop, PL_compcv, PL_cop_seqmax);
     POPBLOCK(cx,PL_curpm);
     POPEVAL(cx);
 
@@ -2633,31 +2644,53 @@ Perl_sv_compile_2op(pTHX_ SV *sv, OP** startop, char *code, PAD** padp)
     return rop;
 }
 
+
+/*
+=for apidoc find_runcv
+
+Locate the CV corresponding to the currently executing sub or eval.
+
+=cut
+*/
+
+CV*
+Perl_find_runcv(pTHX)
+{
+    I32		 ix;
+    PERL_SI	 *si;
+    PERL_CONTEXT *cx;
+
+    for (si = PL_curstackinfo; si; si = si->si_prev) {
+	for (ix = si->si_cxix; ix >= 0; ix--) {
+	    cx = &(si->si_cxstack[ix]);
+	    if (CxTYPE(cx) == CXt_SUB || CxTYPE(cx) == CXt_FORMAT)
+		return cx->blk_sub.cv;
+	    else if (CxTYPE(cx) == CXt_EVAL && !CxTRYBLOCK(cx))
+		return PL_compcv;
+	}
+    }
+    return PL_main_cv;
+}
+
+
+/* Compile a require/do, an eval '', or a /(?{...})/.
+ * In the last case, startop is non-null, and contains the address of
+ * a pointer that should be set to the just-compiled code.
+ * outside is the lexically enclosing CV (if any) that invoked us.
+ */
+
 /* With USE_5005THREADS, eval_owner must be held on entry to doeval */
 STATIC OP *
-S_doeval(pTHX_ int gimme, OP** startop)
+S_doeval(pTHX_ int gimme, OP** startop, CV* outside, U32 seq)
 {
     dSP;
     OP *saveop = PL_op;
-    CV *caller;
-    I32 i;
 
     PL_in_eval = ((saveop && saveop->op_type == OP_REQUIRE)
 		  ? (EVAL_INREQUIRE | (PL_in_eval & EVAL_INEVAL))
 		  : EVAL_INEVAL);
 
     PUSHMARK(SP);
-
-    caller = PL_compcv;
-    for (i = cxstack_ix - 1; i >= 0; i--) {
-	PERL_CONTEXT *cx = &cxstack[i];
-	if (CxTYPE(cx) == CXt_EVAL)
-	    break;
-	else if (CxTYPE(cx) == CXt_SUB || CxTYPE(cx) == CXt_FORMAT) {
-	    caller = cx->blk_sub.cv;
-	    break;
-	}
-    }
 
     SAVESPTR(PL_compcv);
     PL_compcv = (CV*)NEWSV(1104,0);
@@ -2666,15 +2699,13 @@ S_doeval(pTHX_ int gimme, OP** startop)
     assert(CxTYPE(&cxstack[cxstack_ix]) == CXt_EVAL);
     cxstack[cxstack_ix].blk_eval.cv = PL_compcv;
 
+    CvOUTSIDE_SEQ(PL_compcv) = seq;
+    CvOUTSIDE(PL_compcv) = outside ? (CV*)SvREFCNT_inc(outside) : outside;
+
     /* set up a scratch pad */
 
     CvPADLIST(PL_compcv) = pad_new(padnew_SAVE);
 
-    if (!saveop ||
-	(saveop->op_type != OP_REQUIRE && saveop->op_type != OP_DOFILE))
-    {
-	CvOUTSIDE(PL_compcv) = (CV*)SvREFCNT_inc(caller);
-    }
 
     SAVEMORTALIZESV(PL_compcv);	/* must remain until end of current statement */
 
@@ -2743,8 +2774,6 @@ S_doeval(pTHX_ int gimme, OP** startop)
     CopLINE_set(&PL_compiling, 0);
     if (startop) {
 	*startop = PL_eval_root;
-	SvREFCNT_dec(CvOUTSIDE(PL_compcv));
-	CvOUTSIDE(PL_compcv) = Nullcv;
     } else
 	SAVEFREEOP(PL_eval_root);
     if (gimme & G_VOID)
@@ -3168,7 +3197,7 @@ PP(pp_require)
     encoding = PL_encoding;
     PL_encoding = Nullsv;
 
-    op = DOCATCH(doeval(gimme, NULL));
+    op = DOCATCH(doeval(gimme, NULL, Nullcv, PL_curcop->cop_seq));
     
     /* Restore encoding. */
     PL_encoding = encoding;
@@ -3192,6 +3221,7 @@ PP(pp_entereval)
     char *safestr;
     STRLEN len;
     OP *ret;
+    CV* runcv;
 
     if (!SvPV(sv,len))
 	RETPUSHUNDEF;
@@ -3239,6 +3269,7 @@ PP(pp_entereval)
         PL_compiling.cop_io = newSVsv(PL_curcop->cop_io);
         SAVEFREESV(PL_compiling.cop_io);
     }
+    runcv = find_runcv();
 
     push_return(PL_op->op_next);
     PUSHBLOCK(cx, (CXt_EVAL|CXp_REAL), SP);
@@ -3249,7 +3280,7 @@ PP(pp_entereval)
     if (PERLDB_LINE && PL_curstash != PL_debstash)
 	save_lines(CopFILEAV(&PL_compiling), PL_linestr);
     PUTBACK;
-    ret = doeval(gimme, NULL);
+    ret = doeval(gimme, NULL, runcv, PL_curcop->cop_seq);
     if (PERLDB_INTER && was != (I32)PL_sub_generation /* Some subs defined here. */
 	&& ret != PL_op->op_next) {	/* Successive compilation. */
 	strcpy(safestr, "_<(eval )");	/* Anything fake and short. */

@@ -216,6 +216,23 @@ Found in file pad.h
 
 =back
 
+=head1 Functions in file pp_ctl.c
+
+
+=over 8
+
+=item find_runcv
+
+Locate the CV corresponding to the currently executing sub or eval.
+
+	CV*	find_runcv()
+
+=for hackers
+Found in file pp_ctl.c
+
+
+=back
+
 =head1 Global Variables
 
 =over 8
@@ -505,11 +522,12 @@ Found in file pad.c
 =item pad_findlex
 
 Find a named lexical anywhere in a chain of nested pads. Add fake entries
-in the inner pads if its found in an outer one.
+in the inner pads if it's found in an outer one. innercv is the CV *inside*
+the chain of outer CVs to be searched. If newoff is non-null, this is a
+run-time cloning: don't add fake entries, just find the lexical and add a
+ref to it at newoff in the current pad.
 
-If flags == FINDLEX_NOSEARCH we don't bother searching outer contexts.
-
-	PADOFFSET	pad_findlex(char* name, PADOFFSET newoff, U32 seq, CV* startcv, I32 cx_ix, I32 saweval, U32 flags)
+	PADOFFSET	pad_findlex(char* name, PADOFFSET newoff, CV* innercv)
 
 =for hackers
 Found in file pad.c
@@ -629,9 +647,9 @@ Free the padlist associated with a CV.
 If parts of it happen to be current, we null the relevant
 PL_*pad* global vars so that we don't have any dangling references left.
 We also repoint the CvOUTSIDE of any about-to-be-orphaned
-inner subs to outercv.
+inner subs to the outer of this cv.
 
-	void	pad_undef(CV* cv, CV* outercv)
+	void	pad_undef(CV* cv)
 
 =for hackers
 Found in file pad.c

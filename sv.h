@@ -318,7 +318,9 @@ struct xpvfm {
     AV *	xcv_padlist;
     CV *	xcv_outside;
     cv_flags_t	xcv_flags;
-
+    U32		xcv_outside_seq; /* the COP sequence (at the point of our
+				  * compilation) in the lexically enclosing
+				  * sub */
     IV		xfm_lines;
 };
 

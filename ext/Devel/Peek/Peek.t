@@ -221,6 +221,7 @@ do_test(13,
 (?:    MUTEXP = $ADDR
     OWNER = $ADDR
 )?    FLAGS = 0x4
+    OUTSIDE_SEQ = \\d+
     PADLIST = $ADDR
     PADNAME = $ADDR\\($ADDR\\) PAD = $ADDR\\($ADDR\\)
     OUTSIDE = $ADDR \\(MAIN\\)');
@@ -247,6 +248,7 @@ do_test(14,
 (?:    MUTEXP = $ADDR
     OWNER = $ADDR
 )?    FLAGS = 0x0
+    OUTSIDE_SEQ = \\d+
     PADLIST = $ADDR
     PADNAME = $ADDR\\($ADDR\\) PAD = $ADDR\\($ADDR\\)
        \\d+\\. $ADDR<\\d+>      \\(\\d+,\\d+\\) "\\$pattern"

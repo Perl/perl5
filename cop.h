@@ -5,6 +5,11 @@
  *    You may distribute under the terms of either the GNU General Public
  *    License or the Artistic License, as specified in the README file.
  *
+ * Control ops (cops) are one of the three ops OP_NEXTSTATE, OP_DBSTATE,
+ * and OP_SETSTATE that (loosely speaking) separate statements. They hold
+ * imformation important for lexical state and error reporting. At run
+ * time, PL_curcop is set to point to the most recently executed cop,
+ * and thus can be used to determine our current state.
  */
 
 struct cop {

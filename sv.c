@@ -9602,10 +9602,12 @@ Perl_sv_dup(pTHX_ SV *sstr, CLONE_PARAMS* param)
 	  CvDEPTH(dstr) = 0;
 	}
 	PAD_DUP(CvPADLIST(dstr), CvPADLIST(sstr), param);
+	/* anon prototypes aren't refcounted */
 	if (!CvANON(sstr) || CvCLONED(sstr))
 	    CvOUTSIDE(dstr)	= cv_dup_inc(CvOUTSIDE(sstr), param);
 	else
 	    CvOUTSIDE(dstr)	= cv_dup(CvOUTSIDE(sstr), param);
+	CvOUTSIDE_SEQ(dstr)	= CvOUTSIDE_SEQ(sstr);
 	CvFLAGS(dstr)	= CvFLAGS(sstr);
 	CvFILE(dstr) = CvXSUB(sstr) ? CvFILE(sstr) : SAVEPV(CvFILE(sstr));
 	break;
