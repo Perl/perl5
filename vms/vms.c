@@ -5679,12 +5679,6 @@ cando_by_name(I32 bit, Uid_t effective, char *fname)
   if (retsts == SS$_ACCONFLICT) {
     return TRUE;
   }
-
-#if defined(__ALPHA) && defined(__VMS_VER) && __VMS_VER == 70100022 &&  defined(__DECC_VER) && __DECC_VER == 6009001
-  /* XXX Hideous kluge to accomodate error in specific version of RTL;
-     we hope it'll be buried soon */
-  if (retsts == 114762) return TRUE;
-#endif
   _ckvmssts(retsts);
 
   return FALSE;  /* Should never get here */
