@@ -872,8 +872,8 @@ where data sharing was implicit.  See L<threads::shared>.
 
 =item *
 
-C<Tie::File>, by Mark-Jason Dominis, allows one to handle a file
-like an array of lines.
+C<Tie::File>, by Mark-Jason Dominus, associates a Perl array with the
+lines of a file.
 
 =item *
 
