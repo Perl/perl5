@@ -133,6 +133,7 @@ else
 	selecttype='int *'
 fi
 
+# Do this right now instead of the delayed callback unit approach.
 case "$use64bitint" in
 $define|true|[yY]*)
     if [ "$xxOsRevMajor" -lt 11 ]; then
@@ -175,18 +176,20 @@ esac'
 	    echo "(Changing from strict ANSI compilation to extended because of 64-bitness)"
 	    ccflags=`echo $ccflags|sed 's@ -Aa @ -Ae @'`
 	    ;;
+    *)	ccflags="$ccflags -Ae" ;;
     esac    
 
     set `echo " $libswanted " | sed -e 's@ dl @ @'`
     libswanted="$*"
 
     case "`$cc -v 2>&1`" in
+    # Even if you use gcc, prefer the HP math library over the GNU one.
     *gcc*) test -d /lib/pa20_64 && ccflags="$ccflags -L/lib/pa20_64" ;;
     esac
     ;;
-*) loclibpth="$loclibpth /lib/pa1.1"
-    case "`$cc -v 2>&1`" in
-    *gcc*) test -d /lib/pa20_64 && ccflags="$ccflags -L/lib/pa20_64" ;;
+*)  case "`$cc -v 2>&1`" in
+    # Even if you use gcc, prefer the HP math library over the GNU one.
+    *gcc*) test -d /lib/pa1.1 && ccflags="$ccflags -L/lib/pa1.1" ;;
     esac
     ;;
 esac
@@ -360,6 +363,7 @@ case "$uselargefiles" in
 	    echo "(Changing from strict ANSI compilation to extended because of large files)"
 	    ccflags=`echo $ccflags|sed 's@ -Aa @ -Ae @'`
 	    ;;
+	*)  ccflags="$ccflags -Ae" ;;
 	esac    
 	;;
 esac
