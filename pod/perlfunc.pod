@@ -3807,12 +3807,19 @@ with the wrong number of RANDBITS.)
 Attempts to read LENGTH I<characters> of data into variable SCALAR
 from the specified FILEHANDLE.  Returns the number of characters
 actually read, C<0> at end of file, or undef if there was an error (in
-the latter case C<$!> is also set).  SCALAR will be grown or shrunk to
-the length actually read.  If SCALAR needs growing, the new bytes will
-be zero bytes.  An OFFSET may be specified to place the read data into
-some other place in SCALAR than the beginning.  The call is actually
-implemented in terms of either Perl's or system's fread() call.  To
-get a true read(2) system call, see C<sysread>.
+the latter case C<$!> is also set).  SCALAR will be grown or shrunk 
+so that the last character actually read is the last character of the
+scalar after the read.
+
+An OFFSET may be specified to place the read data at some place in the
+string other than the beginning.  A negative OFFSET specifies
+placement at that many characters counting backwards from the end of
+the string.  A positive OFFSET greater than the length of SCALAR
+results in the string being padded to the required size with C<"\0">
+bytes before the result of the read is appended.
+
+The call is actually implemented in terms of either Perl's or system's
+fread() call.  To get a true read(2) system call, see C<sysread>.
 
 Note the I<characters>: depending on the status of the filehandle,
 either (8-bit) bytes or characters are read.  By default all
