@@ -49,7 +49,7 @@ CvNAME(cv)
 CV* cv;
 {
     SV* tmpsv = sv_newmortal();
-    gv_efullname(tmpsv, CvGV(cv), Nullch);
+    gv_efullname3(tmpsv, CvGV(cv), Nullch);
     return SvPV(tmpsv,na);
 }
 
@@ -1010,6 +1010,11 @@ I32 type;
     case OP_PUSHMARK:
 	break;
 	
+    case OP_KEYS:
+	if (type != OP_SASSIGN)
+	    goto nomod;
+	mtype = 'k';
+	goto makelv;
     case OP_POS:
 	mtype = '.';
 	goto makelv;
@@ -2977,7 +2982,7 @@ OP *block;
 	sv_catpv(sv,"-");
 	sprintf(buf,"%ld",(long)curcop->cop_line);
 	sv_catpv(sv,buf);
-	gv_efullname(tmpstr, gv, Nullch);
+	gv_efullname3(tmpstr, gv, Nullch);
 	hv_store(GvHV(DBsub), SvPVX(tmpstr), SvCUR(tmpstr), sv, 0);
     }
     op_free(op);
