@@ -69,6 +69,13 @@ Version 5.004_74        Developer release working toward 5.005
 ----------------
 
 ____________________________________________________________________________
+[  1491] By: gsar                                  on 1998/07/14  08:48:28
+        Log: up patchlevel to 74; introduce distinct archname for PERL_OBJECT
+     Branch: perl
+	   ! Changes patchlevel.h pod/perlhist.pod win32/Makefile
+	   ! win32/config_H.bc win32/config_H.gc win32/config_H.vc
+           ! win32/makefile.mk
+____________________________________________________________________________
 [  1490] By: gsar                                  on 1998/07/14  08:31:13
         Log: From:    Gisle Aas <gisle@aas.no>
              Date:    14 Jul 1998 10:20:34 +0200

@@ -7,7 +7,7 @@ perldelta - what's new for perl5.005
 This document describes differences between the 5.004 release and this one.
 
 [XXX this needs more verbose summaries of the sub topics, instead of just
-the "See L<foo>."  Scheduled for a second iteration. GSAR]
+the "See foo."  Scheduled for a second iteration. GSAR]
 
 =head1 About the new versioning system
 
@@ -480,12 +480,6 @@ only with arrays that have a hash reference at index 0.
 
 (F) The "goto subroutine" call can't be used to jump out of an eval "string".
 (You can use it to jump out of an eval {BLOCK}, but you probably don't want to.)
-
-=item Can't use %%! because Errno.pm is not available
-
-(F) The first time the %! hash is used, perl automatically loads the
-Errno.pm module. The Errno module is expected to tie the %! hash to
-provide symbolic names for C<$!> errno values.
 
 =item Can't use %%! because Errno.pm is not available
 

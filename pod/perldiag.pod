@@ -1523,13 +1523,13 @@ catches that.  But an easy way to do the same thing is:
 
 Another way is to assign to a substr() that's off the end of the string.
 
-=item Modification of noncreatable array value attempted, subscript %d
+=item Modification of non-creatable array value attempted, subscript %d
 
 (F) You tried to make an array value spring into existence, and the
 subscript was probably negative, even counting from end of the array
 backwards.
 
-=item Modification of noncreatable hash value attempted, subscript "%s"
+=item Modification of non-creatable hash value attempted, subscript "%s"
 
 (F) You tried to make a hash value spring into existence, and it couldn't
 be created for some peculiar reason.
