@@ -2504,7 +2504,7 @@ Perl_moreswitches(pTHX_ char *s)
 #endif
 #ifdef __VOS__
 	PerlIO_printf(PerlIO_stdout(),
-		      "Stratus VOS port by Paul_Green@stratus.com, 1997-2002\n");
+		      "Stratus VOS port by Paul.Green@stratus.com, 1997-2002\n");
 #endif
 #ifdef __OPEN_VM
 	PerlIO_printf(PerlIO_stdout(),
