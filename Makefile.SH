@@ -405,7 +405,8 @@ perly.c: perly.y
 perly.h: perly.y
 	-@sh -c true
 
-SYM  = global.sym interp.sym compat3.sym
+# No compat3.sym here since and including the 5.004_50.
+SYM  = global.sym interp.sym perlio.sym thread.sym
 
 SYMH = perlvars.h thrdvar.h
 

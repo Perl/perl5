@@ -38,31 +38,14 @@ echo "Extracting perl.exp"
 rm -f perl.exp
 echo "#!" > perl.exp
 
-case "$bincompat3" in
-y*)
-	global=/tmp/exp$$g
-	interp=/tmp/exp$$i
-	compat3=/tmp/exp$$c
-	grep '^[A-Za-z]' global.sym | sort >$global
-	grep '^[A-Za-z]' interp.sym | sort >$interp
-	grep '^[A-Za-z]' compat3.sym | sort >$compat3
-	comm -23 $global $compat3 | sed 's/^/Perl_/' >> perl.exp
-	comm -12 $interp $compat3 | sed 's/^/Perl_/' >> perl.exp
-	comm -12 $global $compat3 >> perl.exp
-	comm -23 $interp $compat3 >> perl.exp
-	rm -f $global $interp $compat3
-	;;
-*)
-	sed -n '/^[A-Za-z]/ s/^/Perl_/p' global.sym interp.sym >> perl.exp
-	expperlvars=/tmp/exp$$pv
-	expthrdvar=/tmp/exp$$tv
-	sed -n 's/^PERLVARI*(G\([^,]*\).*/Perl_\1/p' perlvars.h >> $expperlvars
-	sed -n 's/^PERLVARI*(T\([^,]*\).*/Perl_\1/p' thrdvar.h  >> $expthrdvar
-	# The shebang line nicely sorts as the first one.
-	sort -o perl.exp -u perl.exp $expperlvars $expthrdvar
-	rm -f $expperlvars $expthrdvar
-	;;
-esac
+# No compat3 since and including the 5.004_50.
+# perlio.sym added later if needed.
+syms=`ls -1 *.sym|egrep -v 'compat3|perlio'`
+
+sed -n '/^[A-Za-z]/ s/^/Perl_/p' $syms                  >> perl.exp
+
+sed -n 's/^PERLVAR.*(G\([^,]*\).*/Perl_\1/p' perlvars.h >> perl.exp
+sed -n 's/^PERLVAR.*(T\([^,]*\).*/Perl_\1/p' thrdvar.h  >> perl.exp
 
 # 
 # If we use the PerlIO abstraction layer, add its symbols
@@ -112,3 +95,8 @@ Perl_calloc
 Perl_realloc
 Perl_free
 END
+
+# The shebang line nicely sorts as the first one.
+sort -o perl.exp -u perl.exp
+
+# eof
