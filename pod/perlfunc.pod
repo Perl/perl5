@@ -2882,7 +2882,7 @@ another way to protect your filenames from interpretation.  For example:
     sysopen(HANDLE, $path, O_RDWR|O_CREAT|O_EXCL)
 	or die "sysopen $path: $!";
     $oldfh = select(HANDLE); $| = 1; select($oldfh);
-    print HANDLE "stuff $$\n");
+    print HANDLE "stuff $$\n";
     seek(HANDLE, 0, 0);
     print "File contains: ", <HANDLE>;
 
