@@ -3210,6 +3210,7 @@ Perl_sv_insert(pTHX_ SV *bigstr, STRLEN offset, STRLEN len, char *little, STRLEN
 	SvCUR_set(bigstr, offset+len);
     }
 
+    SvTAINT(bigstr);
     i = littlelen - len;
     if (i > 0) {			/* string might grow */
 	big = SvGROW(bigstr, SvCUR(bigstr) + i + 1);

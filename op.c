@@ -5593,31 +5593,6 @@ Perl_ck_sassign(pTHX_ OP *o)
 	if (kkid && kkid->op_type == OP_PADSV
 	    && !(kkid->op_private & OPpLVAL_INTRO))
 	{
-	    /* Concat has problems if target is equal to right arg. */
-	    if (kid->op_type == OP_CONCAT) {
-		if (kLISTOP->op_first->op_sibling->op_type == OP_PADSV
-		    && kLISTOP->op_first->op_sibling->op_targ == kkid->op_targ)
-		    return o;
-	    }
-	    else if (kid->op_type == OP_JOIN) {
-		/* do_join has problems if the arguments coincide with target.
-		   In fact the second argument *can* safely coincide,
-		   but ignore=pessimize this rare occasion. */
-		OP *arg = kLISTOP->op_first->op_sibling; /* Skip PUSHMARK */
-
-		while (arg) {
-		    if (arg->op_type == OP_PADSV
-			&& arg->op_targ == kkid->op_targ)
-			return o;
-		    arg = arg->op_sibling;
-		}
-	    }
-	    else if (kid->op_type == OP_QUOTEMETA) {
-		/* quotemeta has problems if the argument coincides with target. */
-		if (kLISTOP->op_first->op_type == OP_PADSV
-		    && kLISTOP->op_first->op_targ == kkid->op_targ)
-		    return o;
-	    }
 	    kid->op_targ = kkid->op_targ;
 	    kkid->op_targ = 0;
 	    /* Now we do not need PADSV and SASSIGN. */
@@ -6201,26 +6176,13 @@ Perl_peep(pTHX_ register OP *o)
 	case OP_UCFIRST:
 	case OP_LC:
 	case OP_LCFIRST:
-	    if ( o->op_next && o->op_next->op_type == OP_STRINGIFY
-		 && !(o->op_next->op_private & OPpTARGET_MY) )
-		null(o->op_next);
-	    o->op_seq = PL_op_seqmax++;
-	    break;
 	case OP_CONCAT:
 	case OP_JOIN:
 	case OP_QUOTEMETA:
 	    if (o->op_next && o->op_next->op_type == OP_STRINGIFY) {
 		if (o->op_next->op_private & OPpTARGET_MY) {
-		    if ((o->op_flags & OPf_STACKED) /* chained concats */
-			|| (o->op_type == OP_CONCAT
-	    /* Concat has problems if target is equal to right arg. */
-			    && (((LISTOP*)o)->op_first->op_sibling->op_type
-				== OP_PADSV)
-			    && (((LISTOP*)o)->op_first->op_sibling->op_targ
-				== o->op_next->op_targ)))
-		    {
+		    if (o->op_flags & OPf_STACKED) /* chained concats */
 			goto ignore_optimization;
-		    }
 		    else {
 			o->op_targ = o->op_next->op_targ;
 			o->op_next->op_targ = 0;

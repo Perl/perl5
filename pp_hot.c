@@ -152,8 +152,14 @@ PP(pp_concat)
     dPOPTOPssrl;
     STRLEN len;
     char *s;
+
     if (TARG != left) {
 	s = SvPV(left,len);
+	if (TARG == right) {
+	    sv_insert(TARG, 0, 0, s, len);
+	    SETs(TARG);
+	    RETURN;
+	}
 	sv_setpvn(TARG,s,len);
     }
     else if (SvGMAGICAL(TARG))

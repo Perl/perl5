@@ -1576,7 +1576,7 @@ EXT U32 PL_opargs[] = {
 	0x0001368e,	/* lcfirst */
 	0x0001368e,	/* uc */
 	0x0001368e,	/* lc */
-	0x0001378e,	/* quotemeta */
+	0x0001368e,	/* quotemeta */
 	0x00000248,	/* rv2av */
 	0x00026c04,	/* aelemfast */
 	0x00026404,	/* aelem */
@@ -1592,7 +1592,7 @@ EXT U32 PL_opargs[] = {
 	0x00022800,	/* unpack */
 	0x0004280d,	/* pack */
 	0x00222808,	/* split */
-	0x0004290d,	/* join */
+	0x0004280d,	/* join */
 	0x00004801,	/* list */
 	0x00448400,	/* lslice */
 	0x00004805,	/* anonlist */

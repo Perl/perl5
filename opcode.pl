@@ -298,6 +298,7 @@ sub tab {
 #	ref not OK (RETPUSHNO)
 #	trans not OK (dTARG; TARG = sv_newmortal();)
 #	ucfirst etc not OK: TMP arg processed inplace
+#	quotemeta not OK (unsafe when TARG == arg)
 #	each repeat not OK too due to array context
 #	pack split - unknown whether they are safe
 #	sprintf: is calling do_sprintf(TARG,...) which can act on TARG
@@ -314,6 +315,7 @@ sub tab {
 #	readline - unknown whether it is safe
 #	match subst not OK (dTARG)
 #	grepwhile not OK (not always setting)
+#	join not OK (unsafe when TARG == arg)
 
 #	Suspicious wrt "additional mode of failure": concat (dealt with
 #	in ck_sassign()), join (same).
@@ -506,7 +508,7 @@ ucfirst		ucfirst			ck_fun_locale	fstu%	S?
 lcfirst		lcfirst			ck_fun_locale	fstu%	S?
 uc		uc			ck_fun_locale	fstu%	S?
 lc		lc			ck_fun_locale	fstu%	S?
-quotemeta	quotemeta		ck_fun		fsTu%	S?
+quotemeta	quotemeta		ck_fun		fstu%	S?
 
 # Arrays.
 
@@ -531,7 +533,7 @@ hslice		hash slice		ck_null		m@	H L
 unpack		unpack			ck_fun		@	S S
 pack		pack			ck_fun		mst@	S L
 split		split			ck_split	t@	S S S
-join		join			ck_join		msT@	S L
+join		join			ck_join		mst@	S L
 
 # List operators.
 
