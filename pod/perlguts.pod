@@ -274,6 +274,14 @@ pointer in an SV, you can use the following three macros instead:
 These will tell you if you truly have an integer, double, or string pointer
 stored in your SV.  The "p" stands for private.
 
+The are various ways in which the private and public flags may differ.
+For example, a tied SV may have a valid underlying value in the IV slot
+(so SvIOKp is true), but the data should be accessed via the FETCH
+routine rather than directly, so SvIOK is false. Another is when
+numeric conversion has occured and precision has been lost: only the
+private flag is set on 'lossy' values. So when an NV is converted to an
+IV with loss, SvIOKp, SvNOKp and SvNOK will be set, while SvIOK wont be.
+
 In general, though, it's best to use the C<Sv*V> macros.
 
 =head2 Working with AVs
