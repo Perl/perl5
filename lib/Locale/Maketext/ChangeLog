@@ -1,6 +1,18 @@
 Revision history for Perl suite Locale::Maketext
-                                        Time-stamp: "2001-06-21 23:18:31 MDT"
+                                        Time-stamp: "2003-04-02 10:37:42 AHST"
 
+2003-04-02  Sean M. Burke  sburke@cpan.org
+	* Release 1.04: Implementing proper HTTP "tag;q=rank" parsing for
+	get_handle.  This should make all the difference for users/victims
+	of the current version of Safari, which uses that syntax as well
+	as inserts random languages with low q numbers.
+	Thanks to Jesse Vincent and the whole RT junta for finding this.
+
+	* Added more tests, now in t/
+
+	* Lots of typo fixes to Maketext.pm.  Thanks to Evan A. Zacks for
+	patient help in finding them all.	
+	
 2001-06-21  Sean M. Burke  sburke@cpan.org
 	* Release 1.03: basically cosmetic tweaks to the docs and the
 	test.pl.

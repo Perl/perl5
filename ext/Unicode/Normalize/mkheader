@@ -15,7 +15,11 @@ use warnings;
 use Carp;
 use File::Spec;
 
-our $IsEBCDIC = ord("A") != 0x41;
+BEGIN {
+    unless ("A" eq pack('U', 0x41) || "A" eq pack('U', ord("A"))) {
+	die "Unicode::Normalize cannot stringify a Unicode code point\n";
+    }
+}
 
 our $PACKAGE = 'Unicode::Normalize, mkheader';
 
@@ -197,12 +201,17 @@ foreach my $key (keys %Compat) {
     $Compat{$key} = [ getCompatList($key) ];
 }
 
+sub _pack_U {
+    return "A" eq pack('U', 0x41)
+	? pack('U*', @_)
+	: "A" eq pack('U', ord("A"))
+	    ? pack('U*', map utf8::unicode_to_native($_), @_)
+	    : die "$PACKAGE, a Unicode code point cannot be stringified.\n";
+}
+
 sub _U_stringify {
     sprintf '"%s"', join '',
-	map sprintf("\\x%02x", $_), unpack 'C*',
-	    $IsEBCDIC
-		? pack('U*', map utf8::unicode_to_native($_), @_)
-		: pack('U*', @_);
+	map sprintf("\\x%02x", $_), unpack 'C*', _pack_U(@_);
 }
 
 foreach my $hash (\%Canon, \%Compat) {

@@ -1,7 +1,8 @@
 
 BEGIN {
-    if (ord("A") == 193) {
-	print "1..0 # Unicode::Normalize not ported to EBCDIC\n";
+    unless ("A" eq pack('U', 0x41) || "A" eq pack('U', ord("A"))) {
+	print "1..0 # Unicode::Normalize " .
+	    "cannot stringify a Unicode code point\n";
 	exit 0;
     }
 }
@@ -9,7 +10,7 @@ BEGIN {
 BEGIN {
     if ($ENV{PERL_CORE}) {
         chdir('t') if -d 't';
-        @INC = qw(../lib);
+        @INC = $^O eq 'MacOS' ? qw(::lib) : qw(../lib);
     }
 }
 
@@ -22,19 +23,8 @@ BEGIN { plan tests => 20 };
 use Unicode::Normalize;
 ok(1); # If we made it this far, we're ok.
 
-our $IsEBCDIC = ord("A") != 0x41;
-
-sub _pack_U {
-    return $IsEBCDIC
-	? pack('U*', map utf8::unicode_to_native($_), @_)
-	: pack('U*', @_);
-}
-
-sub _unpack_U {
-    return $IsEBCDIC
-	? map(utf8::native_to_unicode($_), unpack 'U*', shift)
-	: unpack('U*', shift);
-}
+sub _pack_U   { Unicode::Normalize::pack_U(@_) }
+sub _unpack_U { Unicode::Normalize::unpack_U(@_) }
 
 #########################
 

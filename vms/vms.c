@@ -284,7 +284,7 @@ Perl_vmstrnenv(const char *lnm, char *eqv, unsigned long int idx,
         }
       }
       else if (!ivlnm) {
-        if (idx == 0) {
+        if ( (idx == 0) && (flags & PERL__TRNENV_JOIN_SEARCHLIST) ) {
           midx = my_maxidx((char *) lnm);
           for (idx = 0, cp1 = eqv; idx <= midx; idx++) {
             lnmlst[1].bufadr = cp1;
@@ -312,7 +312,6 @@ Perl_vmstrnenv(const char *lnm, char *eqv, unsigned long int idx,
               (retsts == SS$_NOLOGNAM)) { continue; }
         }
         else {
-	  idx -= 1;
           retsts = sys$trnlnm(&attr,tabvec[curtab],&lnmdsc,&acmode,lnmlst);
           if (retsts == SS$_IVLOGNAM) { ivlnm = 1; continue; }
           if (retsts == SS$_NOLOGNAM) continue;
@@ -363,7 +362,7 @@ Perl_my_getenv(pTHX_ const char *lnm, bool sys)
     char uplnm[LNM$C_NAMLENGTH+1], *cp1, *cp2, *eqv;
     unsigned long int idx = 0;
     int trnsuccess, success, secure, saverr, savvmserr;
-    int midx;
+    int midx, flags;
     SV *tmpsv;
 
     midx = my_maxidx((char *) lnm) + 1;
@@ -392,27 +391,43 @@ Perl_my_getenv(pTHX_ const char *lnm, bool sys)
       return eqv;
     }
     else {
-      if ((cp2 = strchr(lnm,';')) != NULL) {
-        strcpy(uplnm,lnm);
-        uplnm[cp2-lnm] = '\0';
-        idx = strtoul(cp2+1,NULL,0) + 1;
-        lnm = uplnm;
-      }
       /* Impose security constraints only if tainting */
       if (sys) {
         /* Impose security constraints only if tainting */
         secure = PL_curinterp ? PL_tainting : will_taint;
         saverr = errno;  savvmserr = vaxc$errno;
       }
-      else secure = 0;
-      success = vmstrnenv(lnm,eqv,idx,
-                          secure ? fildev : NULL,
+      else {
+        secure = 0;
+      }
+
+      flags = 
 #ifdef SECURE_INTERNAL_GETENV
-                          secure ? PERL__TRNENV_SECURE : 0
+              secure ? PERL__TRNENV_SECURE : 0
 #else
-			  0
+              0
 #endif
-			                                     );
+      ;
+
+      /* For the getenv interface we combine all the equivalence names
+       * of a search list logical into one value to acquire a maximum
+       * value length of 255*128 (assuming %ENV is using logicals).
+       */
+      flags |= PERL__TRNENV_JOIN_SEARCHLIST;
+
+      /* If the name contains a semicolon-delimited index, parse it
+       * off and make sure we only retrieve the equivalence name for 
+       * that index.  */
+      if ((cp2 = strchr(lnm,';')) != NULL) {
+        strcpy(uplnm,lnm);
+        uplnm[cp2-lnm] = '\0';
+        idx = strtoul(cp2+1,NULL,0);
+        lnm = uplnm;
+        flags &= ~PERL__TRNENV_JOIN_SEARCHLIST;
+      }
+
+      success = vmstrnenv(lnm,eqv,idx,secure ? fildev : NULL,flags);
+
       /* Discard NOLOGNAM on internal calls since we're often looking
        * for an optional name, and this "error" often shows up as the
        * (bogus) exit status for a die() call later on.  */
@@ -430,7 +445,7 @@ Perl_my_getenv_len(pTHX_ const char *lnm, unsigned long *len, bool sys)
 {
     char *buf, *cp1, *cp2;
     unsigned long idx = 0;
-    int midx;
+    int midx, flags;
     static char *__my_getenv_len_eqv = NULL;
     int secure, saverr, savvmserr;
     SV *tmpsv;
@@ -462,26 +477,35 @@ Perl_my_getenv_len(pTHX_ const char *lnm, unsigned long *len, bool sys)
       return buf;
     }
     else {
-      if ((cp2 = strchr(lnm,';')) != NULL) {
-        strcpy(buf,lnm);
-        buf[cp2-lnm] = '\0';
-        idx = strtoul(cp2+1,NULL,0) + 1;
-        lnm = buf;
-      }
       if (sys) {
         /* Impose security constraints only if tainting */
         secure = PL_curinterp ? PL_tainting : will_taint;
         saverr = errno;  savvmserr = vaxc$errno;
       }
-      else secure = 0;
-      *len = vmstrnenv(lnm,buf,idx,
-                       secure ? fildev : NULL,
+      else {
+        secure = 0;
+      }
+
+      flags = 
 #ifdef SECURE_INTERNAL_GETENV
-                       secure ? PERL__TRNENV_SECURE : 0
+              secure ? PERL__TRNENV_SECURE : 0
 #else
-                                                      0
+              0
 #endif
-		                                       );
+      ;
+
+      flags |= PERL__TRNENV_JOIN_SEARCHLIST;
+
+      if ((cp2 = strchr(lnm,';')) != NULL) {
+        strcpy(buf,lnm);
+        buf[cp2-lnm] = '\0';
+        idx = strtoul(cp2+1,NULL,0);
+        lnm = buf;
+        flags &= ~PERL__TRNENV_JOIN_SEARCHLIST;
+      }
+
+      *len = vmstrnenv(lnm,buf,idx,secure ? fildev : NULL,flags);
+
       /* Discard NOLOGNAM on internal calls since we're often looking
        * for an optional name, and this "error" often shows up as the
        * (bogus) exit status for a die() call later on.  */

@@ -408,6 +408,10 @@ sub doMakefile {
         realclean => {FILES=> 'const-c.inc const-xs.inc'},
     );
 
+    if ($ENV{PERL_CORE}) {
+	push @makefileopts, MAN3PODS => {};
+    }
+
     WriteMakefile(@makefileopts);
 }
 

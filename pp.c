@@ -3433,8 +3433,8 @@ PP(pp_crypt)
 	    /* work around glibc-2.2.5 bug */
 	    PL_reentrant_buffer->_crypt_struct_buffer->current_saltbits = 0;
 	}
-    }
 #endif
+    }
 #     endif /* HAS_CRYPT_R */
 #   endif /* USE_ITHREADS */
 #   ifdef FCRYPT
@@ -4803,12 +4803,10 @@ PP(pp_split)
 	if (gimme == G_ARRAY)
 	    RETURN;
     }
-    if (iters || !pm->op_pmreplroot) {
-	GETTARGET;
-	PUSHi(iters);
-	RETURN;
-    }
-    RETPUSHUNDEF;
+
+    GETTARGET;
+    PUSHi(iters);
+    RETURN;
 }
 
 #ifdef USE_5005THREADS

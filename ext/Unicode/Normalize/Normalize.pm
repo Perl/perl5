@@ -1,8 +1,8 @@
 package Unicode::Normalize;
 
 BEGIN {
-    if (ord("A") == 193) {
-	die "Unicode::Normalize not ported to EBCDIC\n";
+    unless ("A" eq pack('U', 0x41) || "A" eq pack('U', ord("A"))) {
+	die "Unicode::Normalize cannot stringify a Unicode code point\n";
     }
 }
 
@@ -11,7 +11,7 @@ use strict;
 use warnings;
 use Carp;
 
-our $VERSION = '0.20';
+our $VERSION = '0.21';
 our $PACKAGE = __PACKAGE__;
 
 require Exporter;
@@ -34,6 +34,29 @@ our %EXPORT_TAGS = (
 );
 
 bootstrap Unicode::Normalize $VERSION;
+
+use constant UNICODE_FOR_PACK => "A" eq pack('U', 0x41);
+use constant NATIVE_FOR_PACK  => "A" eq pack('U', ord("A"));
+
+use constant UNICODE_FOR_UNPACK => 0x41 == unpack('U', "A");
+use constant NATIVE_FOR_UNPACK  => ord("A") == unpack('U', "A");
+
+sub pack_U {
+    return UNICODE_FOR_PACK
+	? pack('U*', @_)
+	: NATIVE_FOR_PACK
+	    ? pack('U*', map utf8::unicode_to_native($_), @_)
+	    : die "$PACKAGE, a Unicode code point cannot be stringified.\n";
+}
+
+sub unpack_U {
+    return UNICODE_FOR_UNPACK
+	? unpack('U*', shift)
+	: NATIVE_FOR_UNPACK
+	    ? map(utf8::native_to_unicode($_), unpack 'U*', shift)
+	    : die "$PACKAGE, a code point returned from unpack U " .
+		"cannot be converted into Unicode.\n";
+}
 
 use constant COMPAT => 1;
 
@@ -136,7 +159,7 @@ As C<$form_name>, one of the following names must be given.
 
 =item C<$decomposed_string = decompose($string, $useCompatMapping)>
 
-Decompose the specified string and returns the result.
+Decomposes the specified string and returns the result.
 
 If the second parameter (a boolean) is omitted or false, decomposes it
 using the Canonical Decomposition Mapping.
@@ -150,7 +173,7 @@ Reordering may be required.
 
 =item C<$reordered_string  = reorder($string)>
 
-Reorder the combining characters and the like in the canonical ordering
+Reorders the combining characters and the like in the canonical ordering
 and returns the result.
 
 E.g., when you have a list of NFD/NFKD strings,

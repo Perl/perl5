@@ -284,12 +284,13 @@ qq/STRING/	String	doubly quote a string
 quotemeta	Regexp	quote regular expression magic characters
 qw/STRING/	LIST	quote a list of words
 qx/STRING/	Process	backquote quote a string
-qr/PATTERN/	Regexp	Compile pattern 
+qr/STRING/	Regexp	Compile pattern 
 rand	Math	retrieve the next pseudorandom number 
 read	I/O,Binary	fixed-length buffered input from a filehandle
 readdir	I/O	get a directory from a directory handle
 readline	I/O	fetch a record from a file
 readlink	File	determine where a symbolic link is pointing
+readpipe	Process	execute a system command and collect standard output
 recv	Socket	receive a message over a Socket
 redo	Flow	start this loop iteration over again
 ref	Objects	find out the type of thing being referenced
@@ -341,6 +342,7 @@ sub	Flow	declare a subroutine, possibly anonymously
 substr	String	get or alter a portion of a stirng
 symlink	File	create a symbolic link to a file
 syscall	I/O,Binary	execute an arbitrary system call
+sysopen	File	open a file, pipe, or descriptor
 sysread	I/O,Binary	fixed-length unbuffered input from a filehandle
 sysseek	I/O,Binary	position I/O pointer on handle used with sysread and syswrite
 system	Process	run a separate program 
@@ -348,6 +350,7 @@ syswrite	I/O,Binary	fixed-length unbuffered output to a filehandle
 tell	I/O	get current seekpointer on a filehandle
 telldir	I/O	get current seekpointer on a directory handle
 tie	Objects	bind a variable to an object class 
+tied	Objects	get a reference to the object underlying a tied variable
 time	Time	return number of seconds since 1970
 times	Process,Time	return elapsed time for self and child processes
 tr///	String	transliterate a string

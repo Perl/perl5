@@ -3181,7 +3181,7 @@ sub single_delim {
 sub const {
     my $sv = shift;
     if (class($sv) eq "SPECIAL") {
-	return ('undef', '1', '0')[$$sv-1]; # sv_undef, sv_yes, sv_no
+	return ('undef', '1', '(!1)')[$$sv-1]; # sv_undef, sv_yes, sv_no
     } elsif (class($sv) eq "NULL") {
        return 'undef';
     } elsif ($sv->FLAGS & SVf_IOK) {
@@ -3243,10 +3243,10 @@ sub dq {
 	my $first = $self->dq($op->first);
 	my $last  = $self->dq($op->last);
 
-	# Disambiguate "${foo}bar", "${foo}{bar}", "${foo}[1]"
+	# Disambiguate "${foo}bar", "${foo}{bar}", "${foo}[1]", "$foo\::bar"
 	($last =~ /^[A-Z\\\^\[\]_?]/ &&
 	    $first =~ s/([\$@])\^$/${1}{^}/)  # "${^}W" etc
-	    || ($last =~ /^[{\[\w_]/ &&
+	    || ($last =~ /^[:'{\[\w_]/ &&
 		$first =~ s/([\$@])([A-Za-z_]\w*)$/${1}{$2}/);
 
 	return $first . $last;

@@ -313,6 +313,8 @@ perl_construct(pTHXx)
 #endif
 	 PL_clocktick = HZ;
 
+    PL_stashcache = newHV();
+
     ENTER;
 }
 
@@ -569,6 +571,9 @@ perl_destruct(pTHXx)
     PL_regex_padav = Nullav;
     PL_regex_pad = NULL;
 #endif
+
+    SvREFCNT_dec((SV*) PL_stashcache);
+    PL_stashcache = NULL;
 
     /* loosen bonds of global variables */
 

@@ -1,7 +1,8 @@
 
 BEGIN {
-    if (ord("A") == 193) {
-	print "1..0 # Unicode::Normalize not ported to EBCDIC\n";
+    unless ("A" eq pack('U', 0x41) || "A" eq pack('U', ord("A"))) {
+	print "1..0 # Unicode::Normalize " .
+	    "cannot stringify a Unicode code point\n";
 	exit 0;
     }
 }
@@ -9,7 +10,7 @@ BEGIN {
 BEGIN {
     if ($ENV{PERL_CORE}) {
         chdir('t') if -d 't';
-        @INC = qw(../lib);
+        @INC = $^O eq 'MacOS' ? qw(::lib) : qw(../lib);
     }
 }
 
@@ -22,19 +23,8 @@ BEGIN { plan tests => 13 };
 use Unicode::Normalize qw(:all);
 ok(1); # If we made it this far, we're ok.
 
-our $IsEBCDIC = ord("A") != 0x41;
-
-sub _pack_U {
-    return $IsEBCDIC
-	? pack('U*', map utf8::unicode_to_native($_), @_)
-	: pack('U*', @_);
-}
-
-sub _unpack_U {
-    return $IsEBCDIC
-	? map(utf8::native_to_unicode($_), unpack 'U*', shift)
-	: unpack('U*', shift);
-}
+sub _pack_U   { Unicode::Normalize::pack_U(@_) }
+sub _unpack_U { Unicode::Normalize::unpack_U(@_) }
 
 #########################
 
@@ -50,7 +40,7 @@ print ! defined getCanon( 0)
    && getCanon(0x00EF) eq _pack_U(0x0069, 0x0308)
    && getCanon(0x304C) eq _pack_U(0x304B, 0x3099)
    && getCanon(0x1EA4) eq _pack_U(0x0041, 0x0302, 0x0301)
-   && getCanon(0x1F82) eq "\x{03B1}\x{0313}\x{0300}\x{0345}"
+   && getCanon(0x1F82) eq _pack_U(0x03B1, 0x0313, 0x0300, 0x0345)
    && getCanon(0x1FAF) eq _pack_U(0x03A9, 0x0314, 0x0342, 0x0345)
    && getCanon(0xAC00) eq _pack_U(0x1100, 0x1161)
    && getCanon(0xAE00) eq _pack_U(0x1100, 0x1173, 0x11AF)

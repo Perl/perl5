@@ -192,7 +192,7 @@ CPU        = ARM
 TARGETCPU  = ARM
 CEVersion  = 300
 OSVERSION  = WCE300
-PLATFORM   = HPC2000
+#PLATFORM   = HPC2000
 MCFLAGS    = -D _MT -D _DLL -D ARM -D arm -D _arm_ -D _ARM_ \
              -DPROCESSOR_ARM -DPALM_SIZE \
              -I $(CELIBDLLDIR)\inc
@@ -349,7 +349,11 @@ CECFLAGS  = $(CECFLAGS) -Zi -Od
 !if "$(CFG)" == "RELEASE"
 # -O2 and -Ot give internal compiler error in perl.c and lexer.
 # Also the dll cannot be loaded by perl.exe...
+!if "$(CPU)" == "SH3"
+!else
 CECFLAGS  = $(CECFLAGS) -O2 -Ot
+!endif
+
 !endif
 
 RCDEFS    = /l 0x407 /r /d "UNICODE" /d UNDER_CE=$(CEVersion) \
@@ -767,7 +771,7 @@ $(EXTDIR)\DynaLoader\dl_win32.xs: dl_win32.xs
 #----------------------------------------------------------------------------------
 Extensions: ..\win32\buildext.pl $(PERLDEP) $(CONFIGPM)
 	$(HPERL) -I..\lib -I..\win32 -MCross=$(CROSS_NAME) ..\win32\buildext.pl $(MAKE) $(PERLDEP) $(EXTDIR) \
-	!POSIX !Time/HiRes
+	!POSIX !Time/HiRes !XS/Typemap
 
 Extensions_clean: 
 	-if exist $(MINIPERL) $(MINIPERL) -I..\lib buildext.pl $(MAKE) $(PERLDEP) $(EXTDIR) clean
@@ -913,7 +917,14 @@ install: all
 !endif
 
 dist: all
-	$(HPERL) -I..\lib -MCross=$(CROSS_NAME) makedist.pl --distdir=dist-$(CROSS_NAME)
+	$(HPERL) -I..\lib -MCross=$(CROSS_NAME) makedist.pl --distdir=dist-$(CROSS_NAME) --cross-name=$(CROSS_NAME)
+
+zipdist: all
+	$(HPERL) -I..\lib -MCross=$(CROSS_NAME) makedist.pl --distdir=dist-$(CROSS_NAME) --cross-name=$(CROSS_NAME)
+	$(HPERL) -I..\lib -MCross=$(CROSS_NAME) makedist.pl --distdir=dist-$(CROSS_NAME) --cross-name=$(CROSS_NAME) --zip
+
+zip:
+	$(HPERL) -I..\lib -MCross=$(CROSS_NAME) makedist.pl --distdir=dist-$(CROSS_NAME) --cross-name=$(CROSS_NAME) --zip
 
 perl.ico:
 	$(HPERL) makeico.pl

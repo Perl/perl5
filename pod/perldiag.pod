@@ -44,7 +44,7 @@ letter.
 
 =over 4
 
-=item A thread exited while %d other threads were still running
+=item A thread exited while %d threads were running
 
 (W) When using threaded Perl, a thread (not necessarily the main
 thread) exited while there were still other threads running.

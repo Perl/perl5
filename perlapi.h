@@ -520,6 +520,8 @@ END_EXTERN_C
 #define PL_splitstr		(*Perl_Isplitstr_ptr(aTHX))
 #undef  PL_srand_called
 #define PL_srand_called		(*Perl_Isrand_called_ptr(aTHX))
+#undef  PL_stashcache
+#define PL_stashcache		(*Perl_Istashcache_ptr(aTHX))
 #undef  PL_statusvalue
 #define PL_statusvalue		(*Perl_Istatusvalue_ptr(aTHX))
 #undef  PL_statusvalue_vms

@@ -11115,6 +11115,8 @@ perl_clone_using(PerlInterpreter *proto_perl, UV flags,
     /* Pluggable optimizer */
     PL_peepp		= proto_perl->Tpeepp;
 
+    PL_stashcache       = newHV();
+
     if (!(flags & CLONEf_KEEP_PTR_TABLE)) {
         ptr_table_free(PL_ptr_table);
         PL_ptr_table = NULL;
