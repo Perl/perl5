@@ -175,8 +175,11 @@ dl_load_file(filename, flags=0)
     }
 #endif
 #ifdef RTLD_NOW
-    if (dl_nonlazy)
-	mode = RTLD_NOW;
+    {
+	dMY_CXT;
+	if (dl_nonlazy)
+	    mode = RTLD_NOW;
+    }
 #endif
     if (flags & 0x01)
 #ifdef RTLD_GLOBAL
@@ -255,7 +258,8 @@ dl_install_xsub(perl_name, symref, filename="$Package")
 char *
 dl_error()
     CODE:
-    RETVAL = LastError ;
+    dMY_CXT;
+    RETVAL = dl_last_error ;
     OUTPUT:
     RETVAL
 

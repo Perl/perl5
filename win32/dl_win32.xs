@@ -32,20 +32,26 @@ calls.
 
 #include "XSUB.h"
 
-static SV *error_sv;
+typedef struct {
+    SV *	x_error_sv;
+} my_cxtx_t;		/* this *must* be named my_cxtx_t */
+
+#define DL_CXT_EXTRA	/* ask for dl_cxtx to be defined in dlutils.c */
+#include "dlutils.c"	/* SaveError() etc	*/
+
+#define dl_error_sv	(dl_cxtx.x_error_sv)
 
 static char *
 OS_Error_String(pTHX)
 {
- DWORD err = GetLastError();
- STRLEN len;
- if (!error_sv)
-  error_sv = newSVpvn("",0);
- PerlProc_GetOSError(error_sv,err);
- return SvPV(error_sv,len);
+    dMY_CXT;
+    DWORD err = GetLastError();
+    STRLEN len;
+    if (!dl_error_sv)
+	dl_error_sv = newSVpvn("",0);
+    PerlProc_GetOSError(dl_error_sv,err);
+    return SvPV(dl_error_sv,len);
 }
-
-#include "dlutils.c"	/* SaveError() etc	*/
 
 static void
 dl_private_init(pTHX)
@@ -157,7 +163,8 @@ dl_install_xsub(perl_name, symref, filename="$Package")
 char *
 dl_error()
     CODE:
-    RETVAL = LastError ;
+    dMY_CXT;
+    RETVAL = dl_last_error;
     OUTPUT:
     RETVAL
 

@@ -30,13 +30,10 @@ typedef struct {
   char  filename[PATH_MAX + 3];
   } t_mpe_dld, *p_mpe_dld;
 
-static AV *dl_resolve_using = Nullav;
-
 static void
 dl_private_init(pTHX)
 {
     (void)dl_generic_private_init(aTHX);
-    dl_resolve_using = get_av("DynaLoader::dl_resolve_using", GV_ADDMULTI);
 }
 
 MODULE = DynaLoader     PACKAGE = DynaLoader
@@ -124,7 +121,8 @@ dl_install_xsub(perl_name, symref, filename="$Package")
 char *
 dl_error()
     CODE:
-    RETVAL = LastError ;
+    dMY_CXT;
+    RETVAL = dl_last_error ;
     OUTPUT:
     RETVAL
 
