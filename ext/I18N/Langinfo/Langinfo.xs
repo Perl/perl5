@@ -20,7 +20,7 @@ langinfo(code)
   CODE:
 #ifdef HAS_NL_LANGINFO
 	char *s;
-	if (code) { /* bold assumption: all valid langinfo codes > 0 */
+	if (code > 0) { /* bold assumption: all valid langinfo codes > 0 */
 #ifdef _MAXSTRMSG
 	    if (code >= _MAXSTRMSG
 	        RETVAL = &PL_sv_undef;
