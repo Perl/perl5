@@ -132,7 +132,18 @@ sub timelocal {
 	or return $loc_t;
 
     # Adjust for DST change
-    $loc_t + $dst_off;
+    $loc_t += $dst_off;
+
+    # for a negative offset from GMT, and if the original date
+    # was a non-extent gap in a forward DST jump, we should
+    # now have the wrong answer - undo the DST adjust;
+
+    return $loc_t if $zone_off <= 0;
+
+    my ($s,$m,$h) = localtime($loc_t);
+    $loc_t -= $dst_off if $s != $_[0] || $m != $_[1] || $h != $_[2];
+
+    $loc_t;
 }
 
 
