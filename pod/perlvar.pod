@@ -873,19 +873,6 @@ The time at which the program began running, in seconds since the
 epoch (beginning of 1970).  The values returned by the B<-M>, B<-A>,
 and B<-C> filetests are based on this value.
 
-=item $^U
-
-Global flag that enables system calls made by Perl to use wide character
-APIs native to the system, if available.  This is currently only implemented
-on the Windows platform.
-
-The initial value is typically C<0> for compatibility with Perl versions
-earlier than 5.6, but may be automatically set to C<1> by Perl if the system
-provides a user-settable default (e.g., C<$ENV{LC_CTYPE}>).
-
-The C<byte> pragma always overrides the effect of this flag in the current
-lexical scope.  See L<byte>.
-
 =item $^V
 
 The revision, version, and subversion of the Perl interpreter, represented
@@ -918,6 +905,21 @@ related to the B<-w> switch.)  See also L<warnings>.
 
 The current set of warning checks enabled by the C<use warnings> pragma.
 See the documentation of C<warnings> for more details.
+
+=item ${^WIDE_SYSTEM_CALLS}
+
+Global flag that enables system calls made by Perl to use wide character
+APIs native to the system, if available.  This is currently only implemented
+on the Windows platform.
+
+This can also be enabled from the command line using the C<-C> switch.
+
+The initial value is typically C<0> for compatibility with Perl versions
+earlier than 5.6, but may be automatically set to C<1> by Perl if the system
+provides a user-settable default (e.g., C<$ENV{LC_CTYPE}>).
+
+The C<byte> pragma always overrides the effect of this flag in the current
+lexical scope.  See L<byte>.
 
 =item $EXECUTABLE_NAME
 

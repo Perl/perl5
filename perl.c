@@ -845,6 +845,7 @@ S_parse_body(pTHX_ va_list args)
 #endif
 	case ' ':
 	case '0':
+	case 'C':
 	case 'F':
 	case 'a':
 	case 'c':
@@ -1797,6 +1798,7 @@ S_usage(pTHX_ char *name)		/* XXX move this out into a module ? */
     static char *usage_msg[] = {
 "-0[octal]       specify record separator (\\0, if no argument)",
 "-a              autosplit mode with -n or -p (splits $_ into @F)",
+"-C              enable native wide character system interfaces",
 "-c              check syntax only (runs BEGIN and END blocks)",
 "-d[:debugger]   run program under debugger",
 "-D[number/list] set debugging flags (argument is a bit mask or alphabets)",
@@ -1852,6 +1854,10 @@ Perl_moreswitches(pTHX_ char *s)
 	}
 	return s + numlen;
     }
+    case 'C':
+	PL_widesyscalls = TRUE;
+	s++;
+	return s;
     case 'F':
 	PL_minus_F = TRUE;
 	PL_splitstr = savepv(s + 1);

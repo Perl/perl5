@@ -567,10 +567,7 @@ Perl_magic_get(pTHX_ SV *sv, MAGIC *mg)
 	sv_setiv(sv, (IV)PL_basetime);
 #endif
 	break;
-    case '\025':		/* ^U */
-	sv_setiv(sv, (IV)PL_bigchar);
-	break;
-    case '\027':		/* ^W  & $^WARNING_BITS */
+    case '\027':		/* ^W  & $^WARNING_BITS & ^WIDE_SYSTEM_CALLS */
 	if (*(mg->mg_ptr+1) == '\0')
 	    sv_setiv(sv, (IV)((PL_dowarn & G_WARN_ON) ? TRUE : FALSE));
 	else if (strEQ(mg->mg_ptr, "\027ARNING_BITS")) {
@@ -586,6 +583,8 @@ Perl_magic_get(pTHX_ SV *sv, MAGIC *mg)
 	        sv_setsv(sv, PL_compiling.cop_warnings);
 	    }    
 	}
+	else if (strEQ(mg->mg_ptr, "\027IDE_SYSTEM_CALLS"))
+	    sv_setiv(sv, (IV)PL_widesyscalls);
 	break;
     case '1': case '2': case '3': case '4':
     case '5': case '6': case '7': case '8': case '9': case '&':
@@ -1710,10 +1709,7 @@ Perl_magic_set(pTHX_ SV *sv, MAGIC *mg)
 	PL_basetime = (Time_t)(SvIOK(sv) ? SvIVX(sv) : sv_2iv(sv));
 #endif
 	break;
-    case '\025':	/* ^U */
-	PL_bigchar = SvTRUE(sv);
-	break;
-    case '\027':	/* ^W & $^WARNING_BITS */
+    case '\027':	/* ^W & $^WARNING_BITS & ^WIDE_SYSTEM_CALLS */
 	if (*(mg->mg_ptr+1) == '\0') {
 	    if ( ! (PL_dowarn & G_WARN_ALL_MASK)) {
 	        i = SvIOK(sv) ? SvIVX(sv) : sv_2iv(sv);
@@ -1739,6 +1735,8 @@ Perl_magic_set(pTHX_ SV *sv, MAGIC *mg)
 	        }
 	    }
 	}
+	else if (strEQ(mg->mg_ptr, "\027IDE_SYSTEM_CALLS"))
+	    PL_widesyscalls = SvTRUE(sv);
 	break;
     case '.':
 	if (PL_localizing) {

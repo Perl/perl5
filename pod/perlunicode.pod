@@ -31,9 +31,10 @@ or from literals and constants in the source text.  Later, in
 L</Character encodings for input and output>, we'll see how such
 inputs may be marked as being Unicode character data sources.
 
-If the C<$^U> global flag is set to C<1>, all system calls will use the
+If the C<-C> command line switch is used, (or the ${^WIDE_SYSTEM_CALLS}
+global flag is set to C<1>), all system calls will use the
 corresponding wide character APIs.  This is currently only implemented
-on Windows.  [XXX: Should there be a -C switch to enable $^U?]
+on Windows.
 
 Regardless of the above, the C<byte> pragma can always be used to force
 byte semantics in a particular lexical scope.  See L<byte>.
@@ -226,6 +227,6 @@ tend to run slower.  Avoidance of locales is strongly encouraged.
 
 =head1 SEE ALSO
 
-L<byte>, L<utf8>, L<perlvar/"$^U">
+L<byte>, L<utf8>, L<perlvar/"${^WIDE_SYSTEM_CALLS}">
 
 =cut
