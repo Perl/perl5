@@ -67,11 +67,11 @@ sub TEST {
 $Data::Dumper::Useperl = 1;
 if (defined &Data::Dumper::Dumpxs) {
   print "### XS extension loaded, will run XS tests\n";
-  $TMAX = 351; $XS = 1;
+  $TMAX = 357; $XS = 1;
 }
 else {
   print "### XS extensions not loaded, will NOT run XS tests\n";
-  $TMAX = 177; $XS = 0;
+  $TMAX = 180; $XS = 0;
 }
 
 print "1..$TMAX\n";
@@ -1333,4 +1333,23 @@ EOT
     TEST q(Data::Dumper->Dump([\\*ping, \\%ping], ['*ping', '*pong']));
     TEST q(Data::Dumper->Dumpxs([\\*ping, \\%ping], ['*ping', '*pong'])) if $XS;
   }
+}
+
+# XS for quotekeys==0 was not being defensive enough against utf8 flagged
+# scalars
+
+{
+  $WANT = <<'EOT';
+#$VAR1 = {
+#  perl => 'rocks'
+#};
+EOT
+  local $Data::Dumper::Quotekeys = 0;
+  my $k = 'perl' . chr 256;
+  chop $k;
+  %foo = ($k => 'rocks');
+
+  TEST q(Data::Dumper->Dump([\\%foo])), "quotekeys == 0 for utf8 flagged ASCII";
+  TEST q(Data::Dumper->Dumpxs([\\%foo])),
+    "XS quotekeys == 0 for utf8 flagged ASCII" if $XS;
 }
