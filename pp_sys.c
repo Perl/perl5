@@ -1271,15 +1271,15 @@ PP(pp_leavewrite)
     fp = IoOFP(io);
     if (!fp) {
 	if (ckWARN2(WARN_CLOSED,WARN_IO)) {
-	    SV* sv = sv_newmortal();
-	    gv_efullname3(sv, gv, Nullch);
-	    if (IoIFP(io))
+	    if (IoIFP(io)) {
+		SV* sv = sv_newmortal();
+		gv_efullname3(sv, gv, Nullch);
 		Perl_warner(aTHX_ WARN_IO,
 			    "Filehandle %s opened only for input",
 			    SvPV_nolen(sv));
+	    }
 	    else if (ckWARN(WARN_CLOSED))
-		Perl_warner(aTHX_ WARN_CLOSED,
-			    "write() on closed filehandle %s", SvPV_nolen(sv));
+		report_closed_fh(gv, io, "write", "filehandle");
 	}
 	PUSHs(&PL_sv_no);
     }
@@ -1352,14 +1352,14 @@ PP(pp_prtf)
     }
     else if (!(fp = IoOFP(io))) {
 	if (ckWARN2(WARN_CLOSED,WARN_IO))  {
-	    gv_efullname3(sv, gv, Nullch);
-	    if (IoIFP(io))
+	    if (IoIFP(io)) {
+		gv_efullname3(sv, gv, Nullch);
 		Perl_warner(aTHX_ WARN_IO,
 			    "Filehandle %s opened only for input",
 			    SvPV(sv,n_a));
+	    }
 	    else if (ckWARN(WARN_CLOSED))
-		Perl_warner(aTHX_ WARN_CLOSED,
-			    "printf() on closed filehandle %s", SvPV(sv,n_a));
+		report_closed_fh(gv, io, "printf", "filehandle");
 	}
 	SETERRNO(EBADF,IoIFP(io)?RMS$_FAC:RMS$_IFI);
 	goto just_say_no;
@@ -1629,9 +1629,9 @@ PP(pp_send)
 	length = -1;
 	if (ckWARN(WARN_CLOSED)) {
 	    if (PL_op->op_type == OP_SYSWRITE)
-		Perl_warner(aTHX_ WARN_CLOSED, "syswrite() on closed filehandle");
+		report_closed_fh(gv, io, "syswrite", "filehandle");
 	    else
-		Perl_warner(aTHX_ WARN_CLOSED, "send() on closed socket");
+		report_closed_fh(gv, io, "send", "socket");
 	}
     }
     else if (PL_op->op_type == OP_SYSWRITE) {
@@ -1984,8 +1984,12 @@ PP(pp_flock)
 	(void)PerlIO_flush(fp);
 	value = (I32)(PerlLIO_flock(PerlIO_fileno(fp), argtype) >= 0);
     }
-    else
+    else {
 	value = 0;
+	SETERRNO(EBADF,RMS$_IFI);
+	if (ckWARN(WARN_CLOSED))
+	    report_closed_fh(gv, GvIO(gv), "flock", "filehandle");
+    }
     PUSHi(value);
     RETURN;
 #else
@@ -2138,7 +2142,7 @@ PP(pp_bind)
 
 nuts:
     if (ckWARN(WARN_CLOSED))
-	Perl_warner(aTHX_ WARN_CLOSED, "bind() on closed socket");
+	report_closed_fh(gv, io, "bind", "socket");
     SETERRNO(EBADF,SS$_IVCHAN);
     RETPUSHUNDEF;
 #else
@@ -2168,7 +2172,7 @@ PP(pp_connect)
 
 nuts:
     if (ckWARN(WARN_CLOSED))
-	Perl_warner(aTHX_ WARN_CLOSED, "connect() on closed socket");
+	report_closed_fh(gv, io, "connect", "socket");
     SETERRNO(EBADF,SS$_IVCHAN);
     RETPUSHUNDEF;
 #else
@@ -2194,7 +2198,7 @@ PP(pp_listen)
 
 nuts:
     if (ckWARN(WARN_CLOSED))
-	Perl_warner(aTHX_ WARN_CLOSED, "listen() on closed socket");
+	report_closed_fh(gv, io, "listen", "socket");
     SETERRNO(EBADF,SS$_IVCHAN);
     RETPUSHUNDEF;
 #else
@@ -2248,7 +2252,7 @@ PP(pp_accept)
 
 nuts:
     if (ckWARN(WARN_CLOSED))
-	Perl_warner(aTHX_ WARN_CLOSED, "accept() on closed socket");
+	report_closed_fh(ggv, ggv ? GvIO(ggv) : 0, "accept", "socket");
     SETERRNO(EBADF,SS$_IVCHAN);
 
 badexit:
@@ -2275,7 +2279,7 @@ PP(pp_shutdown)
 
 nuts:
     if (ckWARN(WARN_CLOSED))
-	Perl_warner(aTHX_ WARN_CLOSED, "shutdown() on closed socket");
+	report_closed_fh(gv, io, "shutdown", "socket");
     SETERRNO(EBADF,SS$_IVCHAN);
     RETPUSHUNDEF;
 #else
@@ -2354,8 +2358,9 @@ PP(pp_ssockopt)
 
 nuts:
     if (ckWARN(WARN_CLOSED))
-	Perl_warner(aTHX_ WARN_CLOSED, "%cetsockopt() on closed socket",
-		    optype == OP_GSOCKOPT ? 'g' : 's');
+	report_closed_fh(gv, io,
+			 optype == OP_GSOCKOPT ? "getsockopt" : "setsockopt",
+			 "socket");
     SETERRNO(EBADF,SS$_IVCHAN);
 nuts2:
     RETPUSHUNDEF;
@@ -2428,8 +2433,10 @@ PP(pp_getpeername)
 
 nuts:
     if (ckWARN(WARN_CLOSED))
-	Perl_warner(aTHX_ WARN_CLOSED, "get%sname() on closed socket",
-		    optype == OP_GETSOCKNAME ? "sock" : "peer");
+	report_closed_fh(gv, io,
+			 optype == OP_GETSOCKNAME ? "getsockname"
+						  : "getpeername",
+			 "socket");
     SETERRNO(EBADF,SS$_IVCHAN);
 nuts2:
     RETPUSHUNDEF;
