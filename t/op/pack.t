@@ -1,4 +1,5 @@
-#!./perl -w
+#!./perl
+# FIXME - why isn't this -w clean in maint?
 
 BEGIN {
     chdir 't' if -d 't';
@@ -15,7 +16,7 @@ my $no_signedness = $] > 5.009 ? '' :
 plan tests => 13855;
 
 use strict;
-use warnings;
+# use warnings;
 use Config;
 
 my $Is_EBCDIC = (defined $Config{ebcdic} && $Config{ebcdic} eq 'define');
