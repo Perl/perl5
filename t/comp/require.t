@@ -12,7 +12,7 @@ $i = 1;
 my $Is_EBCDIC = (ord('A') == 193) ? 1 : 0;
 my $Is_UTF8   = (${^OPEN} || "") =~ /:utf8/;
 my $total_tests = 44;
-if ($Is_EBCDIC || $Is_UTF8) { $total_tests = 27; }
+if ($Is_EBCDIC || $Is_UTF8) { $total_tests = 41; }
 print "1..$total_tests\n";
 
 sub do_require {
