@@ -459,7 +459,7 @@ EOT
 			 *perl.core so_locations pm_to_blib
 			 *~ */*~ */*/*~ *$(OBJ_EXT) *$(LIB_EXT) perl.exe
 			 $(BOOTSTRAP) $(BASEEXT).bso $(BASEEXT).def
-			 $(BASEEXT).exp
+			 $(BASEEXT).exp .nfs* .*.c
 			]);
     push @m, "\t-$self->{RM_RF} @otherfiles\n";
     # See realclean and ext/utils/make_ext for usage of Makefile.old
