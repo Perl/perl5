@@ -6,7 +6,7 @@
 
 $| = 1;
 
-print "1..986\n";
+print "1..988\n";
 
 BEGIN {
     chdir 't' if -d 't';
@@ -3090,5 +3090,23 @@ ok("bbbbac" =~ /$pattern/ && $1 eq 'a', "[perl #3547]");
     ok( $1 ne "\xC4\x80", '$1 is not non-utf-8' );
 }
 
-# last test 986
+{
+    use utf8;
+    my $attr = 'Name-1' ;
+
+    my $NormalChar          = qr/[\p{IsDigit}\p{IsLower}\p{IsUpper}]/;
+    my $NormalWord          = qr/${NormalChar}+?/;
+    my $PredNameHyphen      = qr/^${NormalWord}(\-${NormalWord})*?$/;
+
+    $attr =~ /^$/;
+    ok( $attr =~ $PredNameHyphen, "[perl #19767] original test" );
+}
+
+{
+    use utf8;
+    "a" =~ m/[b]/;
+    ok ( "0" =~ /\p{N}+\z/, "[perl #19767] variant test" );
+}
+
+# last test 988
 
