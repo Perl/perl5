@@ -3098,6 +3098,9 @@ yylex()
 	case KEY_listen:
 	    LOP(OP_LISTEN,XTERM);
 
+	case KEY_lock:
+	    UNI(OP_LOCK);
+
 	case KEY_lstat:
 	    UNI(OP_LSTAT);
 
@@ -3966,6 +3969,7 @@ I32 len;
 	case 4:
 	    if (strEQ(d,"last"))		return KEY_last;
 	    if (strEQ(d,"link"))		return -KEY_link;
+	    if (strEQ(d,"lock"))		return -KEY_lock;
 	    break;
 	case 5:
 	    if (strEQ(d,"local"))		return KEY_local;

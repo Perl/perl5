@@ -699,6 +699,7 @@
 #define pp_list			Perl_pp_list
 #define pp_listen		Perl_pp_listen
 #define pp_localtime		Perl_pp_localtime
+#define pp_lock			Perl_pp_lock
 #define pp_log			Perl_pp_log
 #define pp_lslice		Perl_pp_lslice
 #define pp_lstat		Perl_pp_lstat

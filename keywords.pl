@@ -145,6 +145,7 @@ link
 listen
 local
 localtime
+lock
 log
 lstat
 lt

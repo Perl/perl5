@@ -1272,54 +1272,9 @@ const void *b;
     return sv_cmp_locale(*(SV * const *)a, *(SV * const *)b);
 }
 
-#ifdef USE_THREADS
-static void
-unlock_condpair(svv)
-void *svv;
-{
-    dTHR;
-    MAGIC *mg = mg_find((SV*)svv, 'm');
-    
-    if (!mg)
-	croak("panic: unlock_condpair unlocking non-mutex");
-    MUTEX_LOCK(MgMUTEXP(mg));
-    if (MgOWNER(mg) != thr)
-	croak("panic: unlock_condpair unlocking mutex that we don't own");
-    MgOWNER(mg) = 0;
-    COND_SIGNAL(MgOWNERCONDP(mg));
-    MUTEX_UNLOCK(MgMUTEXP(mg));
-}
-#endif /* USE_THREADS */
-
 PP(pp_reset)
 {
     dSP;
-#ifdef USE_THREADS
-    dTOPss;
-    MAGIC *mg;
-    
-    if (MAXARG < 1)
-	croak("reset requires mutex argument with USE_THREADS");
-    if (SvROK(sv)) {
-	/*
-	 * Kludge to allow lock of real objects without requiring
-	 * to pass in every type of argument by explicit reference.
-	 */
-	sv = SvRV(sv);
-    }
-    mg = condpair_magic(sv);
-    MUTEX_LOCK(MgMUTEXP(mg));
-    if (MgOWNER(mg) == thr)
-	MUTEX_UNLOCK(MgMUTEXP(mg));
-    else {
-	while (MgOWNER(mg))
-	    COND_WAIT(MgOWNERCONDP(mg), MgMUTEXP(mg));
-	MgOWNER(mg) = thr;
-	MUTEX_UNLOCK(MgMUTEXP(mg));
-	save_destructor(unlock_condpair, sv);
-    }
-    RETURN;
-#else
     char *tmps;
 
     if (MAXARG < 1)
@@ -1329,7 +1284,6 @@ PP(pp_reset)
     sv_reset(tmps, curcop->cop_stash);
     PUSHs(&sv_yes);
     RETURN;
-#endif /* USE_THREADS */
 }
 
 PP(pp_lineseq)

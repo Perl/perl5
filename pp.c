@@ -89,6 +89,9 @@ typedef unsigned UBW;
 static void doencodes _((SV* sv, char* s, I32 len));
 static SV* refto _((SV* sv));
 static U32 seed _((void));
+#ifdef USE_THREADS
+static void unlock_condpair _((void*));
+#endif /* USE_THREADS */
 
 static bool srand_called = FALSE;
 
@@ -4109,3 +4112,47 @@ PP(pp_split)
     RETPUSHUNDEF;
 }
 
+#ifdef USE_THREADS
+static void
+unlock_condpair(svv)
+void *svv;
+{
+    dTHR;
+    MAGIC *mg = mg_find((SV*)svv, 'm');
+    
+    if (!mg)
+	croak("panic: unlock_condpair unlocking non-mutex");
+    MUTEX_LOCK(MgMUTEXP(mg));
+    if (MgOWNER(mg) != thr)
+	croak("panic: unlock_condpair unlocking mutex that we don't own");
+    MgOWNER(mg) = 0;
+    COND_SIGNAL(MgOWNERCONDP(mg));
+    MUTEX_UNLOCK(MgMUTEXP(mg));
+}
+#endif /* USE_THREADS */
+
+PP(pp_lock)
+{
+    dSP;
+#ifdef USE_THREADS
+    dTOPss;
+    MAGIC *mg;
+    
+    if (SvROK(sv))
+	sv = SvRV(sv);
+
+    mg = condpair_magic(sv);
+    MUTEX_LOCK(MgMUTEXP(mg));
+    if (MgOWNER(mg) == thr)
+	MUTEX_UNLOCK(MgMUTEXP(mg));
+    else {
+	while (MgOWNER(mg))
+	    COND_WAIT(MgOWNERCONDP(mg), MgMUTEXP(mg));
+	MgOWNER(mg) = thr;
+	MUTEX_UNLOCK(MgMUTEXP(mg));
+	save_destructor(unlock_condpair, sv);
+    }
+#endif /* USE_THREADS */
+    PUSHs(&sv_yes);
+    RETURN;
+}

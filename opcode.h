@@ -348,10 +348,11 @@ typedef enum {
 	OP_EGRENT,	/* 341 */
 	OP_GETLOGIN,	/* 342 */
 	OP_SYSCALL,	/* 343 */
+	OP_LOCK,	/* 344 */
 	OP_max		
 } opcode;
 
-#define MAXO 344
+#define MAXO 345
 
 #ifndef DOINIT
 EXT char *op_name[];
@@ -701,6 +702,7 @@ EXT char *op_name[] = {
 	"egrent",
 	"getlogin",
 	"syscall",
+	"lock",
 };
 #endif
 
@@ -1052,6 +1054,7 @@ EXT char *op_desc[] = {
 	"endgrent",
 	"getlogin",
 	"syscall",
+	"lock",
 };
 #endif
 
@@ -1432,6 +1435,7 @@ OP *	pp_sgrent	_((ARGSproto));
 OP *	pp_egrent	_((ARGSproto));
 OP *	pp_getlogin	_((ARGSproto));
 OP *	pp_syscall	_((ARGSproto));
+OP *	pp_lock		_((ARGSproto));
 
 #ifndef DOINIT
 EXT OP * (*ppaddr[])();
@@ -1781,6 +1785,7 @@ EXT OP * (*ppaddr[])() = {
 	pp_egrent,
 	pp_getlogin,
 	pp_syscall,
+	pp_lock,
 };
 #endif
 
@@ -2132,6 +2137,7 @@ EXT OP * (*check[]) _((OP *op)) = {
 	ck_null,	/* egrent */
 	ck_null,	/* getlogin */
 	ck_fun,		/* syscall */
+	ck_null,	/* lock */
 };
 #endif
 
@@ -2483,5 +2489,6 @@ EXT U32 opargs[] = {
 	0x00000014,	/* egrent */
 	0x0000000c,	/* getlogin */
 	0x0000211d,	/* syscall */
+	0x00000114,	/* lock */
 };
 #endif

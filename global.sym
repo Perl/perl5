@@ -832,6 +832,7 @@ pp_link
 pp_list
 pp_listen
 pp_localtime
+pp_lock
 pp_log
 pp_lslice
 pp_lstat

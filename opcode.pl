@@ -652,3 +652,6 @@ getlogin	getlogin		ck_null		st
 # Miscellaneous.
 
 syscall		syscall			ck_fun		imst	S L
+
+# For multi-threading
+lock		lock			ck_null		is	S
