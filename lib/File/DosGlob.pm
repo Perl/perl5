@@ -19,13 +19,18 @@ sub doglob {
 	my $sepchr = '/';
 	next OUTER unless defined $_ and $_ ne '';
 	# if arg is within quotes strip em and do no globbing
-	if (/^"(.*)"$/) {
+	if (/^"(.*)"\z/s) {
 	    $_ = $1;
 	    if ($cond eq 'd') { push(@retval, $_) if -d $_ }
 	    else              { push(@retval, $_) if -e $_ }
 	    next OUTER;
 	}
-	if (m|^(.*)([\\/])([^\\/]*)$|) {
+	# wildcards with a drive prefix such as h:*.pm must be changed
+	# to h:./*.pm to expand correctly
+	if (m|^([A-Za-z]:)[^/\\]|s) {
+	    substr($_,0,2) = $1 . "./";
+	}
+	if (m|^(.*)([\\/])([^\\/]*)\z|s) {
 	    my $tail;
 	    ($head, $sepchr, $tail) = ($1,$2,$3);
 	    #print "div: |$head|$sepchr|$tail|\n";
@@ -35,7 +40,7 @@ sub doglob {
 		push(@retval, doglob($cond, map {"$_$sepchr$tail"} @globdirs)),
 		    next OUTER if @globdirs;
 	    }
-	    $head .= $sepchr if $head eq '' or $head =~ /^[A-Za-z]:$/;
+	    $head .= $sepchr if $head eq '' or $head =~ /^[A-Za-z]:\z/s;
 	    $_ = $tail;
 	}
 	#
@@ -142,7 +147,7 @@ sub import {
     my $pkg = shift;
     return unless @_;
     my $sym = shift;
-    my $callpkg = ($sym =~ s/^GLOBAL_// ? 'CORE::GLOBAL' : caller(0));
+    my $callpkg = ($sym =~ s/^GLOBAL_//s ? 'CORE::GLOBAL' : caller(0));
     *{$callpkg.'::'.$sym} = \&{$pkg.'::'.$sym} if $sym eq 'glob';
 }
 
