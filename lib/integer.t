@@ -43,4 +43,4 @@ SKIP: {
     }
 }
 
-is(~0, -1, "unsigned");
+is(~0, -1, "signed instead of unsigned");
