@@ -48,10 +48,10 @@ Null SV pointer.
    just figure out all the headers such a test needs.
    Andy Dougherty	August 1996
 */
-/* bool is built-in for g++-2.6.3 and later, which might be used 
+/* bool is built-in for g++-2.6.3 and later, which might be used
    for extensions.  <_G_config.h> defines _G_HAVE_BOOL, but we can't
    be sure _G_config.h will be included before this file.  _G_config.h
-   also defines _G_HAVE_BOOL for both gcc and g++, but only g++ 
+   also defines _G_HAVE_BOOL for both gcc and g++, but only g++
    actually has bool.  Hence, _G_HAVE_BOOL is pretty useless for us.
    g++ can be identified by __GNUG__.
    Andy Dougherty	February 2000
@@ -101,8 +101,8 @@ Null SV pointer.
    Similarly, there is no guarantee that I16 and U16 have exactly 16
    bits.
 
-   For dealing with issues that may arise from various 32/64-bit 
-   systems, we will ask Configure to check out 
+   For dealing with issues that may arise from various 32/64-bit
+   systems, we will ask Configure to check out
 
    	SHORTSIZE == sizeof(short)
    	INTSIZE == sizeof(int)
@@ -448,21 +448,21 @@ Converts the specified character to lowercase.
 #define isPSXSPC_utf8(c)	(isSPACE_utf8(c) ||(c) == '\f')
 #define isBLANK_utf8(c)		isBLANK(c) /* could be wrong */
 
-#define isALNUM_LC_utf8(p)	isALNUM_LC_uni(utf8_to_uv(p, 0, 0))
-#define isIDFIRST_LC_utf8(p)	isIDFIRST_LC_uni(utf8_to_uv(p, 0, 0))
-#define isALPHA_LC_utf8(p)	isALPHA_LC_uni(utf8_to_uv(p, 0, 0))
-#define isSPACE_LC_utf8(p)	isSPACE_LC_uni(utf8_to_uv(p, 0, 0))
-#define isDIGIT_LC_utf8(p)	isDIGIT_LC_uni(utf8_to_uv(p, 0, 0))
-#define isUPPER_LC_utf8(p)	isUPPER_LC_uni(utf8_to_uv(p, 0, 0))
-#define isLOWER_LC_utf8(p)	isLOWER_LC_uni(utf8_to_uv(p, 0, 0))
-#define isALNUMC_LC_utf8(p)	isALNUMC_LC_uni(utf8_to_uv(p, 0, 0))
-#define isCNTRL_LC_utf8(p)	isCNTRL_LC_uni(utf8_to_uv(p, 0, 0))
-#define isGRAPH_LC_utf8(p)	isGRAPH_LC_uni(utf8_to_uv(p, 0, 0))
-#define isPRINT_LC_utf8(p)	isPRINT_LC_uni(utf8_to_uv(p, 0, 0))
-#define isPUNCT_LC_utf8(p)	isPUNCT_LC_uni(utf8_to_uv(p, 0, 0))
-#define toUPPER_LC_utf8(p)	toUPPER_LC_uni(utf8_to_uv(p, 0, 0))
-#define toTITLE_LC_utf8(p)	toTITLE_LC_uni(utf8_to_uv(p, 0, 0))
-#define toLOWER_LC_utf8(p)	toLOWER_LC_uni(utf8_to_uv(p, 0, 0))
+#define isALNUM_LC_utf8(p)	isALNUM_LC_uni(utf8_to_uv_chk(p, 0, 0))
+#define isIDFIRST_LC_utf8(p)	isIDFIRST_LC_uni(utf8_to_uv_chk(p, 0, 0))
+#define isALPHA_LC_utf8(p)	isALPHA_LC_uni(utf8_to_uv_chk(p, 0, 0))
+#define isSPACE_LC_utf8(p)	isSPACE_LC_uni(utf8_to_uv_chk(p, 0, 0))
+#define isDIGIT_LC_utf8(p)	isDIGIT_LC_uni(utf8_to_uv_chk(p, 0, 0))
+#define isUPPER_LC_utf8(p)	isUPPER_LC_uni(utf8_to_uv_chk(p, 0, 0))
+#define isLOWER_LC_utf8(p)	isLOWER_LC_uni(utf8_to_uv_chk(p, 0, 0))
+#define isALNUMC_LC_utf8(p)	isALNUMC_LC_uni(utf8_to_uv_chk(p, 0, 0))
+#define isCNTRL_LC_utf8(p)	isCNTRL_LC_uni(utf8_to_uv_chk(p, 0, 0))
+#define isGRAPH_LC_utf8(p)	isGRAPH_LC_uni(utf8_to_uv_chk(p, 0, 0))
+#define isPRINT_LC_utf8(p)	isPRINT_LC_uni(utf8_to_uv_chk(p, 0, 0))
+#define isPUNCT_LC_utf8(p)	isPUNCT_LC_uni(utf8_to_uv_chk(p, 0, 0))
+#define toUPPER_LC_utf8(p)	toUPPER_LC_uni(utf8_to_uv_chk(p, 0, 0))
+#define toTITLE_LC_utf8(p)	toTITLE_LC_uni(utf8_to_uv_chk(p, 0, 0))
+#define toLOWER_LC_utf8(p)	toLOWER_LC_uni(utf8_to_uv_chk(p, 0, 0))
 
 #define isPSXSPC_LC_utf8(c)	(isSPACE_LC_utf8(c) ||(c) == '\f')
 #define isBLANK_LC_utf8(c)	isBLANK(c) /* could be wrong */
@@ -484,7 +484,7 @@ typedef U16 line_t;
 #endif
 
 
-/* 
+/*
    XXX LEAKTEST doesn't really work in perl5.  There are direct calls to
    safemalloc() in the source, so LEAKTEST won't pick them up.
    (The main "offenders" are extensions.)
@@ -501,7 +501,7 @@ typedef U16 line_t;
 Creates a new SV.  A non-zero C<len> parameter indicates the number of
 bytes of preallocated string space the SV should have.  An extra byte for a
 tailing NUL is also reserved.  (SvPOK is not set for the SV even if string
-space is allocated.)  The reference count for the new SV is set to 1. 
+space is allocated.)  The reference count for the new SV is set to 1.
 C<id> is an integer id between 0 and 1299 (used to identify leaks).
 
 =for apidoc Am|void|New|int id|void* ptr|int nitems|type

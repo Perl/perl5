@@ -2959,13 +2959,13 @@ PP(pp_require)
 	    U8 *s = (U8*)SvPVX(sv);
 	    U8 *end = (U8*)SvPVX(sv) + SvCUR(sv);
 	    if (s < end) {
-		rev = utf8_to_uv(s, &len, 0);
+		rev = utf8_to_uv_chk(s, &len, 0);
 		s += len;
 		if (s < end) {
-		    ver = utf8_to_uv(s, &len, 0);
+		    ver = utf8_to_uv_chk(s, &len, 0);
 		    s += len;
 		    if (s < end)
-			sver = utf8_to_uv(s, &len, 0);
+			sver = utf8_to_uv_chk(s, &len, 0);
 		}
 	    }
 	    if (PERL_REVISION < rev

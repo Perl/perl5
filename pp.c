@@ -2195,7 +2195,7 @@ PP(pp_ord)
     I32 retlen;
 
     if ((*tmps & 0x80) && DO_UTF8(tmpsv))
-	value = utf8_to_uv(tmps, &retlen, 0);
+	value = utf8_to_uv_chk(tmps, &retlen, 0);
     else
 	value = (UV)(*tmps & 255);
     XPUSHu(value);
@@ -2262,7 +2262,7 @@ PP(pp_ucfirst)
 	I32 ulen;
 	U8 tmpbuf[UTF8_MAXLEN];
 	U8 *tend;
-	UV uv = utf8_to_uv(s, &ulen, 0);
+	UV uv = utf8_to_uv_chk(s, &ulen, 0);
 
 	if (PL_op->op_private & OPpLOCALE) {
 	    TAINT;
@@ -2321,7 +2321,7 @@ PP(pp_lcfirst)
 	I32 ulen;
 	U8 tmpbuf[UTF8_MAXLEN];
 	U8 *tend;
-	UV uv = utf8_to_uv(s, &ulen, 0);
+	UV uv = utf8_to_uv_chk(s, &ulen, 0);
 
 	if (PL_op->op_private & OPpLOCALE) {
 	    TAINT;
@@ -2398,7 +2398,7 @@ PP(pp_uc)
 		TAINT;
 		SvTAINTED_on(TARG);
 		while (s < send) {
-		    d = uv_to_utf8(d, toUPPER_LC_uni( utf8_to_uv(s, &ulen, 0)));
+		    d = uv_to_utf8(d, toUPPER_LC_uni( utf8_to_uv_chk(s, &ulen, 0)));
 		    s += ulen;
 		}
 	    }
@@ -2472,7 +2472,7 @@ PP(pp_lc)
 		TAINT;
 		SvTAINTED_on(TARG);
 		while (s < send) {
-		    d = uv_to_utf8(d, toLOWER_LC_uni( utf8_to_uv(s, &ulen, 0)));
+		    d = uv_to_utf8(d, toLOWER_LC_uni( utf8_to_uv_chk(s, &ulen, 0)));
 		    s += ulen;
 		}
 	    }
@@ -3614,7 +3614,7 @@ PP(pp_unpack)
 		len = strend - s;
 	    if (checksum) {
 		while (len-- > 0 && s < strend) {
-		    auint = utf8_to_uv((U8*)s, &along, 0);
+		    auint = utf8_to_uv_chk((U8*)s, &along, 0);
 		    s += along;
 		    if (checksum > 32)
 			cdouble += (NV)auint;
@@ -3626,7 +3626,7 @@ PP(pp_unpack)
 		EXTEND(SP, len);
 		EXTEND_MORTAL(len);
 		while (len-- > 0 && s < strend) {
-		    auint = utf8_to_uv((U8*)s, &along, 0);
+		    auint = utf8_to_uv_chk((U8*)s, &along, 0);
 		    s += along;
 		    sv = NEWSV(37, 0);
 		    sv_setuv(sv, (UV)auint);

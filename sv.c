@@ -6318,7 +6318,7 @@ Perl_sv_vcatpvfn(pTHX_ SV *sv, const char *pat, STRLEN patlen, va_list *args, SV
 		    break;
 		}
 		if (utf)
-		    iv = (IV)utf8_to_uv(vecstr, &ulen, 0);
+		    iv = (IV)utf8_to_uv_chk(vecstr, &ulen, 0);
 		else {
 		    iv = *vecstr;
 		    ulen = 1;
@@ -6400,7 +6400,7 @@ Perl_sv_vcatpvfn(pTHX_ SV *sv, const char *pat, STRLEN patlen, va_list *args, SV
 		    break;
 		}
 		if (utf)
-		    uv = utf8_to_uv(vecstr, &ulen, 0);
+		    uv = utf8_to_uv_chk(vecstr, &ulen, 0);
 		else {
 		    uv = *vecstr;
 		    ulen = 1;

@@ -730,6 +730,7 @@
 #define utf8_to_bytes		Perl_utf8_to_bytes
 #define bytes_to_utf8		Perl_bytes_to_utf8
 #define utf8_to_uv		Perl_utf8_to_uv
+#define utf8_to_uv_chk		Perl_utf8_to_uv_chk
 #define uv_to_utf8		Perl_uv_to_utf8
 #define vivify_defelem		Perl_vivify_defelem
 #define vivify_ref		Perl_vivify_ref
@@ -2186,7 +2187,8 @@
 #define utf8_hop(a,b)		Perl_utf8_hop(aTHX_ a,b)
 #define utf8_to_bytes(a,b)	Perl_utf8_to_bytes(aTHX_ a,b)
 #define bytes_to_utf8(a,b)	Perl_bytes_to_utf8(aTHX_ a,b)
-#define utf8_to_uv(a,b,c)	Perl_utf8_to_uv(aTHX_ a,b,c)
+#define utf8_to_uv(a,b)		Perl_utf8_to_uv(aTHX_ a,b)
+#define utf8_to_uv_chk(a,b,c)	Perl_utf8_to_uv_chk(aTHX_ a,b,c)
 #define uv_to_utf8(a,b)		Perl_uv_to_utf8(aTHX_ a,b)
 #define vivify_defelem(a)	Perl_vivify_defelem(aTHX_ a)
 #define vivify_ref(a,b)		Perl_vivify_ref(aTHX_ a,b)
@@ -4286,6 +4288,8 @@
 #define bytes_to_utf8		Perl_bytes_to_utf8
 #define Perl_utf8_to_uv		CPerlObj::Perl_utf8_to_uv
 #define utf8_to_uv		Perl_utf8_to_uv
+#define Perl_utf8_to_uv_chk	CPerlObj::Perl_utf8_to_uv_chk
+#define utf8_to_uv_chk		Perl_utf8_to_uv_chk
 #define Perl_uv_to_utf8		CPerlObj::Perl_uv_to_utf8
 #define uv_to_utf8		Perl_uv_to_utf8
 #define Perl_vivify_defelem	CPerlObj::Perl_vivify_defelem

@@ -143,7 +143,7 @@ string, false otherwise.
 =cut
 */
 
-bool 
+bool
 Perl_is_utf8_string(pTHX_ U8 *s, STRLEN len)
 {
     U8* x=s;
@@ -159,7 +159,7 @@ Perl_is_utf8_string(pTHX_ U8 *s, STRLEN len)
 }
 
 /*
-=for apidoc Am|U8* s|utf8_to_uv|I32 *retlen|I32 checking
+=for apidoc Am|U8* s|utf8_to_uv_chk|I32 *retlen|I32 checking
 
 Returns the character value of the first character in the string C<s>
 which is assumed to be in UTF8 encoding; C<retlen> will be set to the
@@ -176,7 +176,7 @@ warning is produced.
 */
 
 UV
-Perl_utf8_to_uv(pTHX_ U8* s, I32* retlen, bool checking)
+Perl_utf8_to_uv_chk(pTHX_ U8* s, I32* retlen, bool checking)
 {
     UV uv = *s;
     int len;
@@ -192,7 +192,7 @@ Perl_utf8_to_uv(pTHX_ U8* s, I32* retlen, bool checking)
 	    return 0;
 	}
 
-	if (ckWARN_d(WARN_UTF8))     
+	if (ckWARN_d(WARN_UTF8))
 	    Perl_warner(aTHX_ WARN_UTF8, "Malformed UTF-8 character");
 	if (retlen)
 	    *retlen = 1;
@@ -219,7 +219,7 @@ Perl_utf8_to_uv(pTHX_ U8* s, I32* retlen, bool checking)
 		return 0;
             }
 
-	    if (ckWARN_d(WARN_UTF8))     
+	    if (ckWARN_d(WARN_UTF8))
 	        Perl_warner(aTHX_ WARN_UTF8, "Malformed UTF-8 character");
 	    if (retlen)
 		*retlen -= len + 1;
@@ -229,6 +229,26 @@ Perl_utf8_to_uv(pTHX_ U8* s, I32* retlen, bool checking)
 	    uv = (uv << 6) | (*s++ & 0x3f);
     }
     return uv;
+}
+
+/*
+=for apidoc Am|U8* s|utf8_to_uv|I32 *retlen
+
+Returns the character value of the first character in the string C<s>
+which is assumed to be in UTF8 encoding; C<retlen> will be set to the
+length, in bytes, of that character, and the pointer C<s> will be
+advanced to the end of the character.
+
+If C<s> does not point to a well-formed UTF8 character, an optional UTF8
+warning is produced.
+
+=cut
+*/
+
+UV
+Perl_utf8_to_uv(pTHX_ U8* s, I32* retlen)
+{
+ return Perl_utf8_to_uv_chk(aTHX_ s, retlen, 0);
 }
 
 /* utf8_distance(a,b) returns the number of UTF8 characters between
@@ -302,7 +322,7 @@ Perl_utf8_to_bytes(pTHX_ U8* s, STRLEN *len)
         if (c >= 0x80 &&
 	    ( (s >= send) || ((*s++ & 0xc0) != 0x80) || ((c & 0xfe) != 0xc2))) {
 	    *len = -1;
-	    return 0;    
+	    return 0;
 	}
     }
     s = save;
@@ -311,7 +331,7 @@ Perl_utf8_to_bytes(pTHX_ U8* s, STRLEN *len)
             *d++ = *s++;
         else {
             I32 ulen;
-            *d++ = (U8)utf8_to_uv(s, &ulen, 0);
+            *d++ = (U8)utf8_to_uv(s, &ulen);
             s += ulen;
         }
     }
@@ -839,7 +859,7 @@ Perl_to_utf8_upper(pTHX_ U8 *p)
     if (!PL_utf8_toupper)
 	PL_utf8_toupper = swash_init("utf8", "ToUpper", &PL_sv_undef, 4, 0);
     uv = swash_fetch(PL_utf8_toupper, p);
-    return uv ? uv : utf8_to_uv(p,0,0);
+    return uv ? uv : utf8_to_uv_chk(p,0,0);
 }
 
 UV
@@ -850,7 +870,7 @@ Perl_to_utf8_title(pTHX_ U8 *p)
     if (!PL_utf8_totitle)
 	PL_utf8_totitle = swash_init("utf8", "ToTitle", &PL_sv_undef, 4, 0);
     uv = swash_fetch(PL_utf8_totitle, p);
-    return uv ? uv : utf8_to_uv(p,0,0);
+    return uv ? uv : utf8_to_uv_chk(p,0,0);
 }
 
 UV
@@ -861,7 +881,7 @@ Perl_to_utf8_lower(pTHX_ U8 *p)
     if (!PL_utf8_tolower)
 	PL_utf8_tolower = swash_init("utf8", "ToLower", &PL_sv_undef, 4, 0);
     uv = swash_fetch(PL_utf8_tolower, p);
-    return uv ? uv : utf8_to_uv(p,0,0);
+    return uv ? uv : utf8_to_uv_chk(p,0,0);
 }
 
 /* a "swash" is a swatch hash */
@@ -871,7 +891,7 @@ Perl_swash_init(pTHX_ char* pkg, char* name, SV *listsv, I32 minbits, I32 none)
 {
     SV* retval;
     char tmpbuf[256];
-    dSP;    
+    dSP;
 
     if (!gv_stashpv(pkg, 0)) {	/* demand load utf8 */
 	ENTER;
@@ -895,7 +915,7 @@ Perl_swash_init(pTHX_ char* pkg, char* name, SV *listsv, I32 minbits, I32 none)
     if (PL_curcop == &PL_compiling)	/* XXX ought to be handled by lex_start */
 	strncpy(tmpbuf, PL_tokenbuf, sizeof tmpbuf);
     if (call_method("SWASHNEW", G_SCALAR))
-	retval = newSVsv(*PL_stack_sp--);    
+	retval = newSVsv(*PL_stack_sp--);
     else
 	retval = &PL_sv_undef;
     LEAVE;
@@ -951,11 +971,11 @@ Perl_swash_fetch(pTHX_ SV *sv, U8 *ptr)
 	    PUSHMARK(SP);
 	    EXTEND(SP,3);
 	    PUSHs((SV*)sv);
-	    PUSHs(sv_2mortal(newSViv(utf8_to_uv(ptr, 0, 0) & ~(needents - 1))));
+	    PUSHs(sv_2mortal(newSViv(utf8_to_uv_chk(ptr, 0, 0) & ~(needents - 1))));
 	    PUSHs(sv_2mortal(newSViv(needents)));
 	    PUTBACK;
 	    if (call_method("SWASHGET", G_SCALAR))
-		retval = newSVsv(*PL_stack_sp--);    
+		retval = newSVsv(*PL_stack_sp--);
 	    else
 		retval = &PL_sv_undef;
 	    POPSTACK;
