@@ -339,11 +339,15 @@ register struct op *op asm(stringify(OP_IN_REGISTER));
 
 #ifdef USE_NEXT_CTYPE
 
-#if NX_CURRENT_COMPILER_RELEASE >= 400
-#include <objc/NXCType.h>
-#else /*  NX_CURRENT_COMPILER_RELEASE < 400 */
-#include <appkit/NXCType.h>
-#endif /*  NX_CURRENT_COMPILER_RELEASE >= 400 */
+#if NX_CURRENT_COMPILER_RELEASE >= 500
+#  include <bsd/ctypes.h>
+#else
+#  if NX_CURRENT_COMPILER_RELEASE >= 400
+#    include <objc/NXCType.h>
+#  else /*  NX_CURRENT_COMPILER_RELEASE < 400 */
+#    include <appkit/NXCType.h>
+#  endif /*  NX_CURRENT_COMPILER_RELEASE >= 400 */
+#endif /*  NX_CURRENT_COMPILER_RELEASE >= 500 */
 
 #else /* !USE_NEXT_CTYPE */
 #include <ctype.h>
