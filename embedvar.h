@@ -336,7 +336,6 @@
 #define PL_oldname		(vTHX->Ioldname)
 #define PL_oldoldbufptr		(vTHX->Ioldoldbufptr)
 #define PL_op_mask		(vTHX->Iop_mask)
-#define PL_op_seqmax		(vTHX->Iop_seqmax)
 #define PL_origalen		(vTHX->Iorigalen)
 #define PL_origargc		(vTHX->Iorigargc)
 #define PL_origargv		(vTHX->Iorigargv)
@@ -636,7 +635,6 @@
 #define PL_Ioldname		PL_oldname
 #define PL_Ioldoldbufptr	PL_oldoldbufptr
 #define PL_Iop_mask		PL_op_mask
-#define PL_Iop_seqmax		PL_op_seqmax
 #define PL_Iorigalen		PL_origalen
 #define PL_Iorigargc		PL_origargc
 #define PL_Iorigargv		PL_origargv

@@ -11296,7 +11296,6 @@ perl_clone_using(PerlInterpreter *proto_perl, UV flags,
     PL_egid		= proto_perl->Iegid;
     PL_nomemok		= proto_perl->Inomemok;
     PL_an		= proto_perl->Ian;
-    PL_op_seqmax	= proto_perl->Iop_seqmax;
     PL_evalseq		= proto_perl->Ievalseq;
     PL_origenviron	= proto_perl->Iorigenviron;	/* XXX not quite right */
     PL_origalen		= proto_perl->Iorigalen;

@@ -2194,6 +2194,7 @@
 #define ck_sort			Perl_ck_sort
 #define ck_spair		Perl_ck_spair
 #define ck_split		Perl_ck_split
+#define ck_state		Perl_ck_state
 #define ck_subr			Perl_ck_subr
 #define ck_substr		Perl_ck_substr
 #define ck_svconst		Perl_ck_svconst
@@ -4690,6 +4691,7 @@
 #define ck_sort(a)		Perl_ck_sort(aTHX_ a)
 #define ck_spair(a)		Perl_ck_spair(aTHX_ a)
 #define ck_split(a)		Perl_ck_split(aTHX_ a)
+#define ck_state(a)		Perl_ck_state(aTHX_ a)
 #define ck_subr(a)		Perl_ck_subr(aTHX_ a)
 #define ck_substr(a)		Perl_ck_substr(aTHX_ a)
 #define ck_svconst(a)		Perl_ck_svconst(aTHX_ a)

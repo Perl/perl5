@@ -430,8 +430,6 @@ END_EXTERN_C
 #define PL_oldoldbufptr		(*Perl_Ioldoldbufptr_ptr(aTHX))
 #undef  PL_op_mask
 #define PL_op_mask		(*Perl_Iop_mask_ptr(aTHX))
-#undef  PL_op_seqmax
-#define PL_op_seqmax		(*Perl_Iop_seqmax_ptr(aTHX))
 #undef  PL_origalen
 #define PL_origalen		(*Perl_Iorigalen_ptr(aTHX))
 #undef  PL_origargc
@@ -674,18 +672,6 @@ END_EXTERN_C
 #define PL_xrv_arenaroot	(*Perl_Ixrv_arenaroot_ptr(aTHX))
 #undef  PL_xrv_root
 #define PL_xrv_root		(*Perl_Ixrv_root_ptr(aTHX))
-#undef  PL_yycharBINCOMPAT
-#define PL_yycharBINCOMPAT	(*Perl_IyycharBINCOMPAT_ptr(aTHX))
-#undef  PL_yydebugBINCOMPAT
-#define PL_yydebugBINCOMPAT	(*Perl_IyydebugBINCOMPAT_ptr(aTHX))
-#undef  PL_yyerrflagBINCOMPAT
-#define PL_yyerrflagBINCOMPAT	(*Perl_IyyerrflagBINCOMPAT_ptr(aTHX))
-#undef  PL_yylvalBINCOMPAT
-#define PL_yylvalBINCOMPAT	(*Perl_IyylvalBINCOMPAT_ptr(aTHX))
-#undef  PL_yynerrsBINCOMPAT
-#define PL_yynerrsBINCOMPAT	(*Perl_IyynerrsBINCOMPAT_ptr(aTHX))
-#undef  PL_yyvalBINCOMPAT
-#define PL_yyvalBINCOMPAT	(*Perl_IyyvalBINCOMPAT_ptr(aTHX))
 #undef  PL_Sv
 #define PL_Sv			(*Perl_TSv_ptr(aTHX))
 #undef  PL_Xpv

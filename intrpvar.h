@@ -235,7 +235,6 @@ PERLVAR(Iegid,		Gid_t)		/* current effective group id */
 PERLVAR(Inomemok,	bool)		/* let malloc context handle nomem */
 PERLVARI(Ian,		U32,	0)	/* malloc sequence number */
 PERLVARI(Icop_seqmax,	U32,	0)	/* statement sequence number */
-PERLVARI(Iop_seqmax,	U16,	0)	/* op sequence number */
 PERLVARI(Ievalseq,	U32,	0)	/* eval sequence number */
 PERLVAR(Iorigenviron,	char **)
 PERLVAR(Iorigalen,	U32)

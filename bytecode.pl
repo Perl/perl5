@@ -442,7 +442,8 @@ op_sibling	PL_op->op_sibling			opindex
 op_ppaddr	PL_op->op_ppaddr			strconst	x
 op_targ		PL_op->op_targ				PADOFFSET
 op_type		PL_op					OPCODE		x
-op_seq		PL_op->op_seq				U16
+op_opt		PL_op->op_opt				U8
+op_static	PL_op->op_static			U8
 op_flags	PL_op->op_flags				U8
 op_private	PL_op->op_private			U8
 op_first	cUNOP->op_first				opindex

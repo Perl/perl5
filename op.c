@@ -216,7 +216,7 @@ Perl_op_free(pTHX_ OP *o)
     register OP *kid, *nextkid;
     OPCODE type;
 
-    if (!o || o->op_seq == (U16)-1)
+    if (!o || o->op_static)
 	return;
 
     if (o->op_private & OPpREFCOUNTED) {
@@ -2022,7 +2022,7 @@ Perl_gen_constant_list(pTHX_ register OP *o)
     o->op_ppaddr = PL_ppaddr[OP_RV2AV];
     o->op_flags &= ~OPf_REF;	/* treat \(1..2) like an ordinary list */
     o->op_flags |= OPf_PARENS;	/* and flatten \(1..2,3) */
-    o->op_seq = 0;		/* needs to be revisited in peep() */
+    o->op_opt = 0;		/* needs to be revisited in peep() */
     curop = ((UNOP*)o)->op_first;
     ((UNOP*)o)->op_first = newSVOP(OP_CONST, 0, SvREFCNT_inc(*PL_stack_sp--));
     op_free(curop);
@@ -6305,25 +6305,21 @@ Perl_peep(pTHX_ register OP *o)
 {
     register OP* oldop = 0;
 
-    if (!o || o->op_seq)
+    if (!o || o->op_opt)
 	return;
     ENTER;
     SAVEOP();
     SAVEVPTR(PL_curcop);
     for (; o; o = o->op_next) {
-	if (o->op_seq)
+	if (o->op_opt)
 	    break;
-        /* The special value -1 is used by the B::C compiler backend to indicate
-         * that an op is statically defined and should not be freed */
-	if (!PL_op_seqmax || PL_op_seqmax == (U16)-1)
-	    PL_op_seqmax = 1;
 	PL_op = o;
 	switch (o->op_type) {
 	case OP_SETSTATE:
 	case OP_NEXTSTATE:
 	case OP_DBSTATE:
 	    PL_curcop = ((COP*)o);		/* for warnings */
-	    o->op_seq = PL_op_seqmax++;
+	    o->op_opt = 1;
 	    break;
 
 	case OP_CONST:
@@ -6354,7 +6350,7 @@ Perl_peep(pTHX_ register OP *o)
 		o->op_targ = ix;
 	    }
 #endif
-	    o->op_seq = PL_op_seqmax++;
+	    o->op_opt = 1;
 	    break;
 
 	case OP_CONCAT:
@@ -6372,11 +6368,11 @@ Perl_peep(pTHX_ register OP *o)
 		op_null(o->op_next);
 	    }
 	  ignore_optimization:
-	    o->op_seq = PL_op_seqmax++;
+	    o->op_opt = 1;
 	    break;
 	case OP_STUB:
 	    if ((o->op_flags & OPf_WANT) != OPf_WANT_LIST) {
-		o->op_seq = PL_op_seqmax++;
+		o->op_opt = 1;
 		break; /* Scalar stub must produce undef.  List stub is noop */
 	    }
 	    goto nothin;
@@ -6391,6 +6387,7 @@ Perl_peep(pTHX_ register OP *o)
 	       to peep() from mistakenly concluding that optimisation
 	       has already occurred. This doesn't fix the real problem,
 	       though (See 20010220.007). AMS 20010719 */
+	    /* op_seq functionality is now replaced by op_opt */
 	    if (oldop && o->op_next) {
 		oldop->op_next = o->op_next;
 		continue;
@@ -6404,7 +6401,7 @@ Perl_peep(pTHX_ register OP *o)
 		oldop->op_next = o->op_next;
 		continue;
 	    }
-	    o->op_seq = PL_op_seqmax++;
+	    o->op_opt = 1;
 	    break;
 
 	case OP_GV:
@@ -6466,7 +6463,7 @@ Perl_peep(pTHX_ register OP *o)
 		op_null(o->op_next);
 	    }
 
-	    o->op_seq = PL_op_seqmax++;
+	    o->op_opt = 1;
 	    break;
 
 	case OP_MAPWHILE:
@@ -6479,7 +6476,7 @@ Perl_peep(pTHX_ register OP *o)
 	case OP_DORASSIGN:
 	case OP_COND_EXPR:
 	case OP_RANGE:
-	    o->op_seq = PL_op_seqmax++;
+	    o->op_opt = 1;
 	    while (cLOGOP->op_other->op_type == OP_NULL)
 		cLOGOP->op_other = cLOGOP->op_other->op_next;
 	    peep(cLOGOP->op_other); /* Recursive calls are not replaced by fptr calls */
@@ -6487,7 +6484,7 @@ Perl_peep(pTHX_ register OP *o)
 
 	case OP_ENTERLOOP:
 	case OP_ENTERITER:
-	    o->op_seq = PL_op_seqmax++;
+	    o->op_opt = 1;
 	    while (cLOOP->op_redoop->op_type == OP_NULL)
 		cLOOP->op_redoop = cLOOP->op_redoop->op_next;
 	    peep(cLOOP->op_redoop);
@@ -6502,7 +6499,7 @@ Perl_peep(pTHX_ register OP *o)
 	case OP_QR:
 	case OP_MATCH:
 	case OP_SUBST:
-	    o->op_seq = PL_op_seqmax++;
+	    o->op_opt = 1;
 	    while (cPMOP->op_pmreplstart &&
 		   cPMOP->op_pmreplstart->op_type == OP_NULL)
 		cPMOP->op_pmreplstart = cPMOP->op_pmreplstart->op_next;
@@ -6510,7 +6507,7 @@ Perl_peep(pTHX_ register OP *o)
 	    break;
 
 	case OP_EXEC:
-	    o->op_seq = PL_op_seqmax++;
+	    o->op_opt = 1;
 	    if (ckWARN(WARN_SYNTAX) && o->op_next
 		&& o->op_next->op_type == OP_NEXTSTATE) {
 		if (o->op_next->op_sibling &&
@@ -6535,7 +6532,7 @@ Perl_peep(pTHX_ register OP *o)
 	    char *key = NULL;
 	    STRLEN keylen;
 
-	    o->op_seq = PL_op_seqmax++;
+	    o->op_opt = 1;
 
 	    if (((BINOP*)o)->op_last->op_type != OP_CONST)
 		break;
@@ -6560,7 +6557,7 @@ Perl_peep(pTHX_ register OP *o)
 	    OP *oleft, *oright;
 	    OP *o2;
 
-	    o->op_seq = PL_op_seqmax++;
+	    o->op_opt = 1;
 
 	    /* check that RHS of sort is a single plain array */
 	    oright = cUNOPo->op_first;
@@ -6644,7 +6641,7 @@ Perl_peep(pTHX_ register OP *o)
 
 
 	default:
-	    o->op_seq = PL_op_seqmax++;
+	    o->op_opt = 1;
 	    break;
 	}
 	oldop = o;

@@ -1,6 +1,6 @@
 package B::Debug;
 
-our $VERSION = '1.01';
+our $VERSION = '1.02';
 
 use strict;
 use B qw(peekop class walkoptree walkoptree_exec
@@ -11,14 +11,15 @@ my %done_gv;
 
 sub B::OP::debug {
     my ($op) = @_;
-    printf <<'EOT', class($op), $$op, ${$op->next}, ${$op->sibling}, $op->ppaddr, $op->targ, $op->type, $op->seq, $op->flags, $op->private;
+    printf <<'EOT', class($op), $$op, ${$op->next}, ${$op->sibling}, $op->ppaddr, $op->targ, $op->type, $op->opt, $op->static, $op->flags, $op->private;
 %s (0x%lx)
 	op_next		0x%x
 	op_sibling	0x%x
 	op_ppaddr	%s
 	op_targ		%d
 	op_type		%d
-	op_seq		%d
+	op_opt		%d
+	op_static	%d
 	op_flags	%d
 	op_private	%d
 EOT

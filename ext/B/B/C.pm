@@ -7,7 +7,7 @@
 #
 package B::C::Section;
 
-our $VERSION = '1.03';
+our $VERSION = '1.04';
 
 use B ();
 use base B::Section;
@@ -226,14 +226,11 @@ sub walk_and_save_optree {
     return objsym($start);
 }
 
-# Current workaround/fix for op_free() trying to free statically
-# defined OPs is to set op_seq = -1 and check for that in op_free().
-# Instead of hardwiring -1 in place of $op->seq, we use $op_seq
-# so that it can be changed back easily if necessary. In fact, to
-# stop compilers from moaning about a U16 being initialised with an
-# uncast -1 (the printf format is %d so we can't tweak it), we have
-# to "know" that op_seq is a U16 and use 65535. Ugh.
-my $op_seq = 65535;
+# Set the values for op_opt and op_static in each op.  The value of
+# op_opt is irrelevant, and the value of op_static needs to be 1 to tell
+# op_free that this is a statically defined op and that is shouldn't be
+# freed.
+my $op_os = "0, 1, 0";
 
 # Look this up here so we can do just a number compare
 # rather than looking up the name of every BASEOP in B::OP
@@ -346,9 +343,9 @@ sub B::OP::save {
 	$init->add(sprintf("(void)find_threadsv(%s);",
 			   cstring($threadsv_names[$op->targ])));
     }
-    $opsect->add(sprintf("s\\_%x, s\\_%x, %s, %u, %u, %u, 0x%x, 0x%x",
+    $opsect->add(sprintf("s\\_%x, s\\_%x, %s, %u, %u, $op_os, 0x%x, 0x%x",
 			 ${$op->next}, ${$op->sibling}, $op->fake_ppaddr, $op->targ,
-			 $type, $op_seq, $op->flags, $op->private));
+			 $type, $op->flags, $op->private));
     my $ix = $opsect->index;
     $init->add(sprintf("op_list[$ix].op_ppaddr = %s;", $op->ppaddr))
         unless $optimize_ppaddr;
@@ -362,9 +359,9 @@ sub B::FAKEOP::new {
 
 sub B::FAKEOP::save {
     my ($op, $level) = @_;
-    $opsect->add(sprintf("%s, %s, %s, %u, %u, %u, 0x%x, 0x%x",
+    $opsect->add(sprintf("%s, %s, %s, %u, %u, $op_os, 0x%x, 0x%x",
 			 $op->next, $op->sibling, $op->fake_ppaddr, $op->targ,
-			 $op->type, $op_seq, $op->flags, $op->private));
+			 $op->type, $op->flags, $op->private));
     my $ix = $opsect->index;
     $init->add(sprintf("op_list[$ix].op_ppaddr = %s;", $op->ppaddr))
         unless $optimize_ppaddr;
@@ -383,9 +380,9 @@ sub B::UNOP::save {
     my ($op, $level) = @_;
     my $sym = objsym($op);
     return $sym if defined $sym;
-    $unopsect->add(sprintf("s\\_%x, s\\_%x, %s, %u, %u, %u, 0x%x, 0x%x, s\\_%x",
+    $unopsect->add(sprintf("s\\_%x, s\\_%x, %s, %u, %u, $op_os, 0x%x, 0x%x, s\\_%x",
 			   ${$op->next}, ${$op->sibling}, $op->fake_ppaddr,
-			   $op->targ, $op->type, $op_seq, $op->flags,
+			   $op->targ, $op->type, $op->flags,
 			   $op->private, ${$op->first}));
     my $ix = $unopsect->index;
     $init->add(sprintf("unop_list[$ix].op_ppaddr = %s;", $op->ppaddr))
@@ -397,9 +394,9 @@ sub B::BINOP::save {
     my ($op, $level) = @_;
     my $sym = objsym($op);
     return $sym if defined $sym;
-    $binopsect->add(sprintf("s\\_%x, s\\_%x, %s, %u, %u, %u, 0x%x, 0x%x, s\\_%x, s\\_%x",
+    $binopsect->add(sprintf("s\\_%x, s\\_%x, %s, %u, %u, $op_os, 0x%x, 0x%x, s\\_%x, s\\_%x",
 			    ${$op->next}, ${$op->sibling}, $op->fake_ppaddr,
-			    $op->targ, $op->type, $op_seq, $op->flags,
+			    $op->targ, $op->type, $op->flags,
 			    $op->private, ${$op->first}, ${$op->last}));
     my $ix = $binopsect->index;
     $init->add(sprintf("binop_list[$ix].op_ppaddr = %s;", $op->ppaddr))
@@ -411,9 +408,9 @@ sub B::LISTOP::save {
     my ($op, $level) = @_;
     my $sym = objsym($op);
     return $sym if defined $sym;
-    $listopsect->add(sprintf("s\\_%x, s\\_%x, %s, %u, %u, %u, 0x%x, 0x%x, s\\_%x, s\\_%x",
+    $listopsect->add(sprintf("s\\_%x, s\\_%x, %s, %u, %u, $op_os, 0x%x, 0x%x, s\\_%x, s\\_%x",
 			     ${$op->next}, ${$op->sibling}, $op->fake_ppaddr,
-			     $op->targ, $op->type, $op_seq, $op->flags,
+			     $op->targ, $op->type, $op->flags,
 			     $op->private, ${$op->first}, ${$op->last}));
     my $ix = $listopsect->index;
     $init->add(sprintf("listop_list[$ix].op_ppaddr = %s;", $op->ppaddr))
@@ -425,9 +422,9 @@ sub B::LOGOP::save {
     my ($op, $level) = @_;
     my $sym = objsym($op);
     return $sym if defined $sym;
-    $logopsect->add(sprintf("s\\_%x, s\\_%x, %s, %u, %u, %u, 0x%x, 0x%x, s\\_%x, s\\_%x",
+    $logopsect->add(sprintf("s\\_%x, s\\_%x, %s, %u, %u, $op_os, 0x%x, 0x%x, s\\_%x, s\\_%x",
 			    ${$op->next}, ${$op->sibling}, $op->fake_ppaddr,
-			    $op->targ, $op->type, $op_seq, $op->flags,
+			    $op->targ, $op->type, $op->flags,
 			    $op->private, ${$op->first}, ${$op->other}));
     my $ix = $logopsect->index;
     $init->add(sprintf("logop_list[$ix].op_ppaddr = %s;", $op->ppaddr))
@@ -442,9 +439,9 @@ sub B::LOOP::save {
     #warn sprintf("LOOP: redoop %s, nextop %s, lastop %s\n",
     #		 peekop($op->redoop), peekop($op->nextop),
     #		 peekop($op->lastop)); # debug
-    $loopsect->add(sprintf("s\\_%x, s\\_%x, %s, %u, %u, %u, 0x%x, 0x%x, s\\_%x, s\\_%x, s\\_%x, s\\_%x, s\\_%x",
+    $loopsect->add(sprintf("s\\_%x, s\\_%x, %s, %u, %u, $op_os, 0x%x, 0x%x, s\\_%x, s\\_%x, s\\_%x, s\\_%x, s\\_%x",
 			   ${$op->next}, ${$op->sibling}, $op->fake_ppaddr,
-			   $op->targ, $op->type, $op_seq, $op->flags,
+			   $op->targ, $op->type, $op->flags,
 			   $op->private, ${$op->first}, ${$op->last},
 			   ${$op->redoop}, ${$op->nextop},
 			   ${$op->lastop}));
@@ -458,9 +455,9 @@ sub B::PVOP::save {
     my ($op, $level) = @_;
     my $sym = objsym($op);
     return $sym if defined $sym;
-    $pvopsect->add(sprintf("s\\_%x, s\\_%x, %s,  %u, %u, %u, 0x%x, 0x%x, %s",
+    $pvopsect->add(sprintf("s\\_%x, s\\_%x, %s,  %u, %u, $op_os, 0x%x, 0x%x, %s",
 			   ${$op->next}, ${$op->sibling}, $op->fake_ppaddr,
-			   $op->targ, $op->type, $op_seq, $op->flags,
+			   $op->targ, $op->type, $op->flags,
 			   $op->private, cstring($op->pv)));
     my $ix = $pvopsect->index;
     $init->add(sprintf("pvop_list[$ix].op_ppaddr = %s;", $op->ppaddr))
@@ -475,9 +472,9 @@ sub B::SVOP::save {
     my $sv = $op->sv;
     my $svsym = '(SV*)' . $sv->save;
     my $is_const_addr = $svsym =~ m/Null|\&/;
-    $svopsect->add(sprintf("s\\_%x, s\\_%x, %s, %u, %u, %u, 0x%x, 0x%x, %s",
+    $svopsect->add(sprintf("s\\_%x, s\\_%x, %s, %u, %u, $op_os, 0x%x, 0x%x, %s",
 			   ${$op->next}, ${$op->sibling}, $op->fake_ppaddr,
-			   $op->targ, $op->type, $op_seq, $op->flags,
+			   $op->targ, $op->type, $op->flags,
 			   $op->private,
                            ( $is_const_addr ? $svsym : 'Nullsv' )));
     my $ix = $svopsect->index;
@@ -492,9 +489,9 @@ sub B::PADOP::save {
     my ($op, $level) = @_;
     my $sym = objsym($op);
     return $sym if defined $sym;
-    $padopsect->add(sprintf("s\\_%x, s\\_%x, %s, %u, %u, %u, 0x%x, 0x%x, %d",
+    $padopsect->add(sprintf("s\\_%x, s\\_%x, %s, %u, %u, $op_os, 0x%x, 0x%x, %d",
 			   ${$op->next}, ${$op->sibling}, $op->fake_ppaddr,
-			   $op->targ, $op->type, $op_seq, $op->flags,
+			   $op->targ, $op->type, $op->flags,
 			   $op->private,$op->padix));
     my $ix = $padopsect->index;
     $init->add(sprintf("padop_list[$ix].op_ppaddr = %s;", $op->ppaddr))
@@ -536,9 +533,9 @@ sub B::COP::save {
         $warn_sv = $warnings->save;
     }
 
-    $copsect->add(sprintf("s\\_%x, s\\_%x, %s, %u, %u, %u, 0x%x, 0x%x, %s, NULL, NULL, %u, %d, %u, %s",
+    $copsect->add(sprintf("s\\_%x, s\\_%x, %s, %u, %u, $op_os, 0x%x, 0x%x, %s, NULL, NULL, %u, %d, %u, %s",
 			  ${$op->next}, ${$op->sibling}, $op->fake_ppaddr,
-			  $op->targ, $op->type, $op_seq, $op->flags,
+			  $op->targ, $op->type, $op->flags,
 			  $op->private, cstring($op->label), $op->cop_seq,
 			  $op->arybase, $op->line,
                           ( $optimize_warn_sv ? $warn_sv : 'NULL' )));
@@ -582,9 +579,9 @@ sub B::PMOP::save {
     # pmnext handling is broken in perl itself, I think. Bad op_pmnext
     # fields aren't noticed in perl's runtime (unless you try reset) but we
     # segfault when trying to dereference it to find op->op_pmnext->op_type
-    $pmopsect->add(sprintf("s\\_%x, s\\_%x, %s, %u, %u, %u, 0x%x, 0x%x, s\\_%x, s\\_%x, %s, %s, 0, %u, 0x%x, 0x%x, 0x%x",
+    $pmopsect->add(sprintf("s\\_%x, s\\_%x, %s, %u, %u, $op_os, 0x%x, 0x%x, s\\_%x, s\\_%x, %s, %s, 0, %u, 0x%x, 0x%x, 0x%x",
 			   ${$op->next}, ${$op->sibling}, $op->fake_ppaddr, $op->targ,
-			   $op->type, $op_seq, $op->flags, $op->private,
+			   $op->type, $op->flags, $op->private,
 			   ${$op->first}, ${$op->last}, 
 			   $replrootfield, $replstartfield,
                            ( $ithreads ? $op->pmoffset : 0 ),

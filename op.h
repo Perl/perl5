@@ -17,6 +17,12 @@
  *			parent takes over role of remembering starting op.)
  *	op_ppaddr	Pointer to current ppcode's function.
  *	op_type		The type of the operation.
+ *	op_opt		Whether or not the op has been optimised by the
+ *			peephole optimiser.
+ *	op_static	Whether or not the op is statically defined.
+ *			This flag is used by the B::C compiler backend
+ *			and indicates that the op should not be freed.
+ *	op_spare	Five spare bits!
  *	op_flags	Flags common to all operations.  See OPf_* below.
  *	op_private	Flags peculiar to a particular operation (BUT,
  *			by default, set to the number of children until
@@ -38,8 +44,10 @@
     OP*		op_sibling;		\
     OP*		(CPERLscope(*op_ppaddr))(pTHX);		\
     PADOFFSET	op_targ;		\
-    OPCODE	op_type;		\
-    U16		op_seq;			\
+    unsigned	op_type:9;		\
+    unsigned	op_opt:1;		\
+    unsigned	op_static:1;		\
+    unsigned	op_spare:5;		\
     U8		op_flags;		\
     U8		op_private;
 #endif
