@@ -70,7 +70,8 @@ my %seen;
 setgrent();
 while (<GR>) {
     chomp;
-    my @s = split /:/;
+    # LIMIT -1 so that groups with no users don't fall off
+    my @s = split /:/, $_, -1;
     my ($name_s,$passwd_s,$gid_s,$members_s) = @s;
     if (@s) {
 	push @{ $seen{$name_s} }, $.;

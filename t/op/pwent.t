@@ -71,7 +71,8 @@ my %seen;
 setpwent();
 while (<PW>) {
     chomp;
-    my @s = split /:/;
+    # LIMIT -1 so that users with empty shells don't fall off
+    my @s = split /:/, $_, -1;
     my ($name_s, $passwd_s, $uid_s, $gid_s, $gcos_s, $home_s, $shell_s) = @s;
     next if /^\+/; # ignore NIS includes
     if (@s) {
