@@ -256,6 +256,7 @@ ext/Encode/lib/Encode/PerlIO.pod	Documents for Encode & PerlIO
 ext/Encode/lib/Encode/Supported.pod	Documents for supported encodings
 ext/Encode/Makefile.PL		Encode extension makefile writer
 ext/Encode/MANIFEST		Encode extension
+ext/Encode/META.yml		Module meta-data in YAML
 ext/Encode/README		Encode extension
 ext/Encode/Symbol/Makefile.PL	Encode extension
 ext/Encode/Symbol/Symbol.pm	Encode extension
