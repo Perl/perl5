@@ -72,8 +72,8 @@ EOT
 print "The tests ", join(' ', keys(%infinite)),
     " generate infinite loops! Skipping!\n";
 
-$ENV{'COMPILE_TEST'} = 1; 
-$ENV{'COMPILE_TIMEOUT'} = 120 unless $ENV{'COMPILE_TIMEOUT'};
+$ENV{'HARNESS_COMPILE_TEST'} = 1; 
+$ENV{'PERLCC_TIMEOUT'} = 120 unless $ENV{'PERLCC_TIMEOUT'};
 
 Test::Harness::runtests @tests; 
 foreach (keys %datahandle) {

@@ -12,7 +12,7 @@ plextractexe  = c2ph.exe h2ph.exe h2xs.exe perlbug.exe perldoc.exe pl2pm.exe spl
 all: $(plextract) 
 
 compile: all
-	$(REALPERL) -I../lib perlcc -regex 's/$$/.exe/' $(plextract) -prog -verbose dcf -log ../compilelog;
+	$(REALPERL) -I../lib perlcc -opt -regex 's/$$/.exe/' $(plextract) -prog -verbose dcf -log ../compilelog;
 
 $(plextract):
 	$(PERL) -I../lib $@.PL
