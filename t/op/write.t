@@ -487,7 +487,9 @@ for my $tref ( @NumTests ){
         my $writeres = swrite( $writefmt, $val );
         $nt++;
 
-        print $expected eq $writeres ? "ok $nt\n" : "not ok $nt\n";
+        print $expected eq $writeres
+	    ? "ok $nt\n"
+	    : "not ok $nt\n# f=[$writefmt] exp=[$expected] got=[$writeres]\n";
     }
 }
 
