@@ -7,7 +7,7 @@ perldelta - what's new for perl v5.7.0
 This document describes differences between the 5.6.0 release and
 the 5.7.0 release.
 
-=head1 Security Vulnerability
+=head1 Security Vulnerability Closed
 
 A potential security vulnerability in the optional suidperl component
 of Perl has been identified.  The suidperl is neither built nor
@@ -56,10 +56,10 @@ the examples need to be documented, tested, and--most importantly--maintained.
 The obsolete chat2 library that should never have been allowed
 to escape the laboratory has been decommissioned.
 
-=head2 Unimplemented (But Recognized) POSIX Regex Features Now Fatal
+=head2 Unimplemented (But Recognised) POSIX Regex Features Now Fatal
 
 The unimplemented POSIX regex features [[.cc.]] and [[=c=]] are still
-recognized but now cause fatal errors.  The previous behaviour of
+recognised but now cause fatal errors.  The previous behaviour of
 ignoring them by default and warning if requested was unacceptable
 since it, in a way, falsely promised that the features could be used.
 
@@ -109,7 +109,7 @@ is a NaN.  Previously the behaviour was unspecified.
 
 =item *
 
-C<pack('U0a*', ...)> can now be used to force the string to UTF8.
+C<pack('U0a*', ...)> can now be used to force a string to UTF8.
 
 =item *
 
@@ -264,7 +264,7 @@ The 'debug' subpragma the 're' pragma now produces cleaner output.
 
 =item *
 
-C<%INC> now localized in a Safe compartment so that use/require work.
+C<%INC> now localised in a Safe compartment so that use/require work.
 
 =item *
 
@@ -442,7 +442,7 @@ Warn about the vagaries of UDP.
 
 =item *
 
-The uninitialized variable warnings now say "concat or string" or
+The "uninitialized variable" warnings now say "concat or string" or
 "join or string" instead of just "concat" or "join" since many users
 found the "concat" a bit surprising when they were doing "just"
 variable interpolation.
@@ -507,9 +507,9 @@ map() that changes the size of the list should now work faster.
 =head2 INSTALL now explains 64-bit configuration.
 
 In some platforms Perl can be configured to use 64-bit integers,
-allowing 4 billion times better...sorry, switched accidentally to
-marketdroid mode for a moment in there.  (In platforms which are
-natively 64-bit this makes no difference.)
+allowing 4 billion times better... sorry, switched accidentally
+to marketdroid mode for a moment in there.  (In platforms which
+are natively 64-bit this makes no difference.)
 
 =head2 Policy.sh policy change
 
@@ -549,7 +549,7 @@ lie ahead.
 If no binary compatibility with the 5.005 release is wanted, Configure
 does not suggest including the 5.005 modules in the @INC.
 
-=head2 Configuration and Installation fixes
+=head2 Configuration and Installation Fixes
 
 =over 4
 
@@ -589,7 +589,7 @@ Setting the C<$0> now works (as much as possible; see perlvar for details).
 
 =item *
 
-Numerous updates; currently synchronized with Cygwin 1.1.4.
+Numerous updates; currently synchronised with Cygwin 1.1.4.
 
 =back
 
@@ -801,14 +801,7 @@ winsock handle leak fixed.
 
 =head1 Selected Bug Fixes
 
-The following is by no means a comprehensive list of all the
-numerous bug fixes.
-
 =over 4
-
-=item *
-
-Redefining constant subroutines using eval (again) warns.
 
 =item *
 
@@ -844,12 +837,8 @@ return 27406, instead of 27047).
 
 =item *
 
-msgrcv() no longer warns about uninitialized input scalar.
-
-=item *
-
 Some "not a number" warnings introduced in 5.6.0 eliminated to be
-more compatible with 5.005.  Infinity is now recognized as a number.
+more compatible with 5.005.  Infinity is now recognised as a number.
 
 =item *
 
@@ -866,20 +855,11 @@ Fix password routines which in some shadow password platforms
 
 =item *
 
-POSIX::STDERR_FILENO (not POSIX::STRERR_FILENO).
-
-=item *
-
 printf() no longer resets the numeric locale to "C".
 
 =item *
 
-C<q(a\\b)> now parses as C<'a\\b'>.
-
-=item *
-
-In quad (64-bit) platforms numbers now stay integers longer
-(as opposed to converting automatically to floating point numbers).
+C<q(a\\b)> now parses correctly as C<'a\\b'>.
 
 =item *
 
@@ -892,23 +872,7 @@ Regular expressions on references and overloaded scalars now work.
 
 =item *
 
-Multiline matching of C<"a\nxb\n" =~ /(?!\A)x/m> now works.
-
-=item *
-
-C</(?i)/> now works.
-
-=item *
-
-C</x{ab}/> now works.
-
-=item *
-
 scalar() now forces scalar context even when used in void context.
-
-=item *
-
-All the documented Shell.pm examples now work.
 
 =item *
 	
@@ -921,18 +885,6 @@ Changed the POSIX character class C<[[:space:]]> to include the (very
 rare) vertical tabulator character.  Added a new POSIX-ish character
 class C<[[:blank:]]> which stands for horizontal whitespace (currently,
 the space and the tabulator).
-
-=item *
-
-sprintf() format specs like C<%v-*d> now work.
-
-=item *
-
-The (nonsensical) C<%#p> format made illegal.
-
-=item *
-
-C<${$1}> now works (again).
 
 =item *
 
@@ -971,15 +923,6 @@ broken.  Note that the C<tr///CU> functionality has been removed (but
 see pack('U0', ...)).
 
 Zero entries were missing from the Unicode classes like C<IsDigit>.
-
-=item *
-
-Unsignedness could disappear from a scalar causing later numeric
-comparisons to fail.
-
-=item *
-
-vec() now drops numericalness.
 
 =back
 
@@ -1020,78 +963,6 @@ C<\9>, and C<\_>.  There is no need to escape any of the C<\w> characters.
 
 =back
 
-=head1 New tests
-
-=over 4
-
-=item *
-
-lib/b tests the various compiler backends (see L<perlcompile>).
-
-=item *
-
-lib/cgi-pretty tests CGI pretty printing.
-
-=item *
-
-lib/ftmp-*.t test File::Temp.
-
-=item *
-
-lib/gol-oo tests Getopt::Long objected-oriented interface.
-
-=item *
-
-lib/peek tests Devel::Peek.
-
-=item *
-
-lib/selfloader tests SelfLoader.
-
-=item *
-
-lib/syslog tests Sys::Syslog.
-
-=item *
-
-op/bless tests bless().
-
-=item *
-
-op/stash tests the "my Package ..." feature.
-
-=item *
-
-op/regmesg exercises all various regex errors.
-
-=item *
-
-pod/find tests Pod::Find.
-
-=back
-
-=head2 Improved Tests
-
-=over 4
-
-=item *
-
-op/sprintf coverage is now much more comprehensive.
-
-=item *
-
-op/taint now continues on failed shmget().
-
-=item *
-
-lib/sysfs.t now continues even if SIXFSZ happens.
-
-=item *
-
-lib/syslog.t now works without sockets.
-
-=back
-
 =head1 Changed Internals
 
 =head2 apidoc
@@ -1108,13 +979,13 @@ many assumptions, some of which may be too bold; the resulting
 executable may crash or otherwise misbehave in wondrous ways.  For
 careful hackers only.
 
-=head2 Publicize More Functions
+=head2 Publicise More Functions
 
-Added rsignal(), whichsig(), do_join() to the publicized API.
+Added rsignal(), whichsig(), do_join() to the publicised API.
 
 =head2 Propagating Exception Objects via Perl_croak() IN XS code
 
-Made possible to propagate customized exceptions via croak()ing.
+Made possible to propagate customised exceptions via croak()ing.
 
 =head2 UTF8 Interfaces
 
