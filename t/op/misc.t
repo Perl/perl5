@@ -368,3 +368,47 @@ EXPECT
 1
 2
 ########
+package X;
+sub ascalar { my $r; bless \$r }
+sub DESTROY { print "destroyed\n" };
+package main;
+*s = ascalar X;
+EXPECT
+destroyed
+########
+package X;
+sub anarray { bless [] }
+sub DESTROY { print "destroyed\n" };
+package main;
+*a = anarray X;
+EXPECT
+destroyed
+########
+package X;
+sub ahash { bless {} }
+sub DESTROY { print "destroyed\n" };
+package main;
+*h = ahash X;
+EXPECT
+destroyed
+########
+package X;
+sub aclosure { my $x; bless sub { ++$x } }
+sub DESTROY { print "destroyed\n" };
+package main;
+*c = aclosure X;
+EXPECT
+destroyed
+########
+package X;
+sub any { bless {} }
+my $f = "FH000"; # just to thwart any future optimisations
+sub afh { select select ++$f; my $r = *{$f}{IO}; delete $X::{$f}; bless $r }
+sub DESTROY { print "destroyed\n" }
+package main;
+$x = any X; # to bump sv_objcount. IO objs aren't counted??
+*f = afh X;
+EXPECT
+destroyed
+destroyed
+########
