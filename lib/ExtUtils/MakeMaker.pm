@@ -994,8 +994,8 @@ $Config{install*} values.
 
 Note, that in both cases the tilde expansion is done by MakeMaker, not
 by perl by default, nor by make. Conflicts between parameters LIB,
-PREFIX and the various INSTALL* arguments are resolved so that 
-XXX
+PREFIX and the various INSTALL* arguments are resolved such that 
+INSTALL* takes precedence.
 
 If the user has superuser privileges, and is not working on AFS
 (Andrew File System) or relatives, then the defaults for
