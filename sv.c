@@ -3677,7 +3677,7 @@ Perl_sv_setsv_flags(pTHX_ SV *dstr, register SV *sstr, I32 flags)
 	if (dtype < SVt_RV)
 	    sv_upgrade(dstr, SVt_RV);
 	else if (dtype == SVt_PVGV &&
-		 SvTYPE(SvRV(sstr)) == SVt_PVGV) {
+		 SvROK(sstr) && SvTYPE(SvRV(sstr)) == SVt_PVGV) {
 	    sstr = SvRV(sstr);
 	    if (sstr == dstr) {
 		if (GvIMPORTED(dstr) != GVf_IMPORTED
@@ -7837,7 +7837,9 @@ Perl_sv_unref_flags(pTHX_ SV *sv, U32 flags)
     }
     SvRV(sv) = 0;
     SvROK_off(sv);
-    if (SvREFCNT(rv) != 1 || SvREADONLY(rv) || flags) /* SV_IMMEDIATE_UNREF */
+    /* You can't have a || SvREADONLY(rv) here, as $a = $$a, where $a was
+       assigned to as BEGIN {$a = \"Foo"} will fail.  */
+    if (SvREFCNT(rv) != 1 || (flags & SV_IMMEDIATE_UNREF))
 	SvREFCNT_dec(rv);
     else /* XXX Hack, but hard to make $a=$a->[1] work otherwise */
 	sv_2mortal(rv);		/* Schedule for freeing later */
