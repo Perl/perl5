@@ -1292,9 +1292,7 @@ Perl_to_utf8_case(pTHX_ U8 *p, U8* ustrp, STRLEN *lenp, SV **swashp,char *normal
     if (!*swashp)
         *swashp = swash_init("utf8", normal, &PL_sv_undef, 4, 0);
     uv = swash_fetch(*swashp, p, TRUE);
-    if (uv)
-	 uv = UNI_TO_NATIVE(uv);
-    else {
+    if (!uv) {
 	 HV *hv;
 	 SV *keysv;
 	 HE *he;
@@ -1315,6 +1313,21 @@ Perl_to_utf8_case(pTHX_ U8 *p, U8* ustrp, STRLEN *lenp, SV **swashp,char *normal
 		   ustrp[1] = UTF8_EIGHT_BIT_LO(c);
 		   *lenp = 2;
 	      }
+#ifdef EBCDIC
+	      {
+		   U8 tmpbuf[UTF8_MAXLEN_FOLD+1];
+		   U8 *d = tmpbuf;
+		   U8 *t, *tend;
+		   STRLEN tlen;
+
+		   for (t = ustrp, tend = t + *lenp; t < tend; t += tlen) {
+			UV c = utf8_to_uvchr(t, &tlen);
+			d = uvchr_to_utf8(d, UNI_TO_NATIVE(c));
+		   }
+		   *lenp = d - tmpbuf; 
+		   Copy(tmpbuf, ustrp, *lenp, U8);
+	      }
+#endif
 	      return utf8_to_uvchr(ustrp, 0);
 	 }
     }
