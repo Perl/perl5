@@ -3179,7 +3179,7 @@ S_regwhite(pTHX_ char *p, char *e)
    Character classes ([:foo:]) can also be negated ([:^foo:]).
    Returns a named class id (ANYOF_XXX) if successful, -1 otherwise.
    Equivalence classes ([=foo=]) and composites ([.foo.]) are parsed,
-   but trigger warnings because they are currently unimplemented. */
+   but trigger failures because they are currently unimplemented. */
 STATIC I32
 S_regpposixcc(pTHX_ RExC_state_t *pRExC_state, I32 value)
 {
