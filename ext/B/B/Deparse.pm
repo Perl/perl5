@@ -94,9 +94,6 @@ use strict;
 # Todo:
 # - finish tr/// changes
 # - add option for even more parens (generalize \&foo change)
-# - {} around variables in strings ("${var}letters")
-#   base/lex.t 25-27
-#   comp/term.t 11
 # - left/right context
 # - recognize `use utf8', `use integer', etc
 # - treat top-level block specially for incremental output
@@ -356,8 +353,11 @@ sub new {
     $self->{'linenums'} = 0;
     $self->{'parens'} = 0;
     $self->{'ex_const'} = "'???'";
-    $self->{'arybase'} = 0;
-    $self->{'warnings'} = "\0"x12;
+
+    $self->{'ambient_arybase'} = 0;
+    $self->{'ambient_warnings'} = "\0"x12;
+    $self->init();
+
     while (my $arg = shift @_) {
 	if (substr($arg, 0, 2) eq "-u") {
 	    $self->stash_subs(substr($arg, 2));
@@ -374,6 +374,16 @@ sub new {
 	}
     }
     return $self;
+}
+
+# Initialise the contextual information, either from
+# defaults provided with the ambient_pragmas method,
+# or from perl's own defaults otherwise.
+sub init {
+    my $self = shift;
+
+    $self->{'arybase'}  = $self->{'ambient_arybase'};
+    $self->{'warnings'} = $self->{'ambient_warnings'};
 }
 
 sub compile {
@@ -400,7 +410,92 @@ sub coderef2text {
     my $self = shift;
     my $sub = shift;
     croak "Usage: ->coderef2text(CODEREF)" unless ref($sub) eq "CODE";
+
+    $self->init();
     return $self->indent($self->deparse_sub(svref_2object($sub)));
+}
+
+sub ambient_pragmas {
+    my $self = shift;
+    my ($arybase, $hint_bits, $warning_bits) = (0, 0, "\0"x12);
+
+    while (@_ > 1) {
+	my $name = shift();
+	my $val  = shift();
+
+	if ($name eq 'strict') {
+	    require strict;
+
+	    if ($val eq 'none') {
+		$hint_bits &= ~strict::bits(qw/refs subs vars/);
+		next();
+	    }
+
+	    my @names;
+	    if ($val eq "all") {
+		@names = qw/refs subs vars/;
+	    }
+	    elsif (ref $val) {
+		@names = @$val;
+	    }
+	    else {
+		@names = split/\s+/, $val;
+	    }
+	    $hint_bits |= strict::bits(@names);
+	}
+
+	elsif ($name eq '$[') {
+	    $arybase = $val;
+	}
+
+	elsif ($name eq 'integer') {
+	    require integer;
+	    if ($val) {
+		$hint_bits |= $integer::hint_bits;
+	    }
+	    else {
+		$hint_bits &= ~$integer::hint_bits;
+	    }
+	}
+
+	elsif ($name eq 'warnings') {
+	    require warnings;
+	    if ($val eq 'none') {
+		$warning_bits = "\0"x12;
+		next();
+	    }
+
+	    my @names;
+	    if (ref $val) {
+		@names = @$val;
+	    }
+	    else {
+		@names = split/\s+/, $val;
+	    }
+
+	    $warning_bits |= warnings::bits(@names);
+	}
+
+	elsif ($name eq 'warning_bits') {
+	    $warning_bits = $val;
+	}
+
+	elsif ($name eq 'hint_bits') {
+	    $hint_bits = $val;
+	}
+
+	else {
+	    croak "Unknown pragma type: $name";
+	}
+    }
+    if (@_) {
+	croak "The ambient_pragmas method expects an even number of args";
+    }
+
+    $self->{'ambient_arybase'} = $arybase;
+    $self->{'ambient_warnings'} = $warning_bits;
+
+    # $^H pragmas not yet implemented here
 }
 
 sub deparse {
@@ -799,7 +894,8 @@ sub gv_name {
     return $stash . $name;
 }
 
-# Notice how subs and formats are inserted between statements here
+# Notice how subs and formats are inserted between statements here;
+# also $[ assignments and the warnings pragma.
 sub pp_nextstate {
     my $self = shift;
     my($op, $cx) = @_;
@@ -819,6 +915,7 @@ sub pp_nextstate {
 	push @text, "\f#line " . $op->line . 
 	  ' "' . $op->file, qq'"\n';
     }
+
     if ($self->{'arybase'} != $op->arybase) {
 	push @text, '$[ = '. $op->arybase .";\n";
 	$self->{'arybase'} = $op->arybase;
@@ -837,11 +934,16 @@ sub pp_nextstate {
     }
 
     if ($self->{'warnings'} ne $warning_bits) {
-	push @text, 'BEGIN {${^WARNING_BITS} = '. cstring($warning_bits) ."}\n";
+	push @text, declare_warnings($self->{'warnings'}, $warning_bits);
 	$self->{'warnings'} = $warning_bits;
     }
 
     return join("", @text);
+}
+
+sub declare_warnings {
+    my ($from, $to) = @_;
+    return "BEGIN {\${^WARNING_BITS} = ".cstring($to)."};\n";
 }
 
 sub pp_dbstate { pp_nextstate(@_) }
@@ -2380,6 +2482,16 @@ sub unback {
     return $str;
 }
 
+# Remove backslashes which precede literal control characters,
+# to avoid creating ambiguity when we escape the latter.
+sub re_unback {
+    my($str) = @_;
+
+    # the insane complexity here is due to the behaviour of "\c\"
+    $str =~ s/(^|[^\\]|\\c\\)(?<!\\c)\\(\\\\)*(?=[\0-\031\177-\377])/$1$2/g;
+    return $str;
+}
+
 sub balanced_delim {
     my($str) = @_;
     my @str = split //, $str;
@@ -2769,7 +2881,7 @@ sub re_dq {
     my $op = shift;
     my $type = $op->name;
     if ($type eq "const") {
-	return re_uninterp($self->const_sv($op)->PV);
+	return re_uninterp(escape_str(re_unback($self->const_sv($op)->PV)));
     } elsif ($type eq "concat") {
 	my $first = $self->re_dq($op->first);
 	my $last  = $self->re_dq($op->last);
@@ -2822,7 +2934,7 @@ sub matchop {
 	$kid = $kid->sibling;
     }
     if (null $kid) {
-	$re = re_uninterp(escape_str($op->precomp));
+	$re = re_uninterp(escape_str(re_unback($op->precomp)));
     } else {
 	$re = $self->deparse($kid, 1);
     }
@@ -2909,7 +3021,7 @@ sub pp_subst {
 	}
     }
     if (null $kid) {
-	$re = re_uninterp(escape_str($op->precomp));
+	$re = re_uninterp(escape_str(re_unback($op->precomp)));
     } else {
 	$re = $self->deparse($kid, 1);
     }
@@ -3160,6 +3272,108 @@ command line (see L</OPTIONS>); options that are separated by commas
 after B<-MO=Deparse> should be given as separate strings. Some
 options, like B<-u>, don't make sense for a single subroutine, so
 don't pass them.
+
+=head2 ambient_pragmas
+
+    $deparse->ambient_pragmas(strict => 'all', '$[' => $[);
+
+The compilation of a subroutine can be affected by a few compiler
+directives, B<pragmas>. These are:
+
+=over 4
+
+=item *
+
+use strict;
+
+=item *
+
+use warnings;
+
+=item *
+
+Assigning to the special variable $[
+
+=item *
+
+use integer;
+
+=back
+
+Ordinarily, if you use B::Deparse on a subroutine which has
+been compiled in the presence of one or more of these pragmas,
+the output will include statements to turn on the appropriate
+directives. So if you then compile the code returned by coderef2text, 
+it will behave the same way as the subroutine which you deparsed.
+
+However, you may know that you intend to use the results in a
+particular context, where some pragmas are already in scope. In
+this case, you use the B<ambient_pragmas> method to describe the
+assumptions you wish to make.
+
+The parameters it accepts are:
+
+=over 4
+
+=item strict
+
+Takes a string, possibly containing several values separated
+by whitespace. The special values "all" and "none" mean what you'd
+expect.
+
+    $deparse->ambient_pragmas(strict => 'subs refs');
+
+=item $[
+
+Takes a number, the value of the array base $[.
+
+=item integer
+
+If the value is true, then the B<integer> pragma is assumed to
+be in the ambient scope, otherwise not.
+
+=item warnings
+
+Takes a string, possibly containing a whitespace-separated list of
+values. The values "all" and "none" are special, again. It's also
+permissible to pass an array reference here.
+
+    $deparser->ambient_pragmas(warnings => [qw[void io]]);
+
+If one of the values is the string "FATAL", then all the warnings
+in that list will be considered fatal, just as with the B<warnings>
+pragma itself. Should you need to specify that some warnings are
+fatal, and others are merely enabled, you can pass the B<warnings>
+parameter twice:
+
+    $deparser->ambient_pragmas(
+	warnings => 'all',
+	warnings => [FATAL => qw/void io/],
+    );
+
+See L<perllexwarn> for more information about lexical warnings. 
+
+=item hint_bits
+
+=item warning_bits
+
+These two parameters are used to specify the ambient pragmas in
+the format used by the special variables $^H and ${^WARNING_BITS}.
+
+They exist principally so that you can write code like:
+
+    { my ($hint_bits, $warning_bits);
+    BEGIN {($hint_bits, $warning_bits) = ($^H, ${^WARNING_BITS})}
+    $deparser->ambient_pragmas (
+	hint_bits    => $hint_bits,
+	warning_bits => $warning_bits,
+	'$['         => 0 + $[
+    ); }
+
+which specifies that the ambient pragmas are exactly those which
+are in scope at the point of calling.
+
+=back
 
 =head2 coderef2text
 
