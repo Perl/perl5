@@ -95,6 +95,7 @@ sub walk_table (&@) {
     else {
 	safer_unlink $filename;
 	open F, ">$filename" or die "Can't open $filename: $!";
+	binmode F;
 	$F = \*F;
     }
     print $F $leader if $leader;
@@ -338,6 +339,7 @@ sub multoff ($$) {
 
 safer_unlink 'embed.h';
 open(EM, '> embed.h') or die "Can't create embed.h: $!\n";
+binmode EM;
 
 print EM do_not_edit ("embed.h"), <<'END';
 
@@ -547,6 +549,7 @@ close(EM) or die "Error closing EM: $!";
 safer_unlink 'embedvar.h';
 open(EM, '> embedvar.h')
     or die "Can't create embedvar.h: $!\n";
+binmode EM;
 
 print EM do_not_edit ("embedvar.h"), <<'END';
 
@@ -654,7 +657,9 @@ close(EM) or die "Error closing EM: $!";
 safer_unlink 'perlapi.h';
 safer_unlink 'perlapi.c';
 open(CAPI, '> perlapi.c') or die "Can't create perlapi.c: $!\n";
+binmode CAPI;
 open(CAPIH, '> perlapi.h') or die "Can't create perlapi.h: $!\n";
+binmode CAPIH;
 
 print CAPIH do_not_edit ("perlapi.h"), <<'EOT';
 
