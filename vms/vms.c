@@ -49,6 +49,9 @@
 #  define SS$_NOSUCHOBJECT 2696
 #endif
 
+/* We implement I/O here, so we will be mixing PerlIO and stdio calls. */
+#define PERLIO_NOT_STDIO 0 
+
 /* Don't replace system definitions of vfork, getenv, and stat, 
  * code below needs to get to the underlying CRTL routines. */
 #define DONT_MASK_RTL_CALLS
@@ -2184,8 +2187,8 @@ safe_popen(pTHX_ char *cmd, char *mode)
 }  /* end of safe_popen */
 
 
-/*{{{  FILE *my_popen(char *cmd, char *mode)*/
-FILE *
+/*{{{  PerlIO *my_popen(char *cmd, char *mode)*/
+PerlIO *
 Perl_my_popen(pTHX_ char *cmd, char *mode)
 {
     TAINT_ENV();
@@ -2196,8 +2199,8 @@ Perl_my_popen(pTHX_ char *cmd, char *mode)
 
 /*}}}*/
 
-/*{{{  I32 my_pclose(FILE *fp)*/
-I32 Perl_my_pclose(pTHX_ FILE *fp)
+/*{{{  I32 my_pclose(PerlIO *fp)*/
+I32 Perl_my_pclose(pTHX_ PerlIO *fp)
 {
     pInfo info, last = NULL;
     unsigned long int retsts;
@@ -2220,7 +2223,7 @@ I32 Perl_my_pclose(pTHX_ FILE *fp)
      *  the first EOF closing the pipe (and DASSGN'ing the channel)...
      */
 
-     fsync(fileno(info->fp));   /* first, flush data */
+     PerlIO_flush(info->fp);   /* first, flush data */
 
     _ckvmssts(sys$setast(0));
      info->closing = TRUE;
@@ -3620,7 +3623,7 @@ mp_getredirection(pTHX_ int *ac, char ***av)
 	/* Input from a pipe, reopen it in binary mode to disable	*/
 	/* carriage control processing.	 				*/
 
-	PerlIO_getname(stdin, mbxname);
+       fgetname(stdin, mbxname);
 	mbxnam.dsc$a_pointer = mbxname;
 	mbxnam.dsc$w_length = strlen(mbxnam.dsc$a_pointer);	
 	lib$getdvi(&dvi_item, 0, &mbxnam, &bufsize, 0, 0);
@@ -3652,7 +3655,7 @@ mp_getredirection(pTHX_ int *ac, char ***av)
 
     if (err != NULL) {
         if (strcmp(err,"&1") == 0) {
-            dup2(fileno(stdout), fileno(Perl_debug_log));
+            dup2(fileno(stdout), fileno(stderr));
             Perl_vmssetuserlnm(aTHX_ "SYS$ERROR","SYS$OUTPUT");
         } else {
 	FILE *tmperr;
@@ -3662,7 +3665,7 @@ mp_getredirection(pTHX_ int *ac, char ***av)
 	    exit(vaxc$errno);
 	    }
 	    fclose(tmperr);
-	    if (NULL == freopen(err, "a", Perl_debug_log, "mbc=32", "mbf=2"))
+           if (NULL == freopen(err, "a", stderr, "mbc=32", "mbf=2"))
 		{
 		exit(vaxc$errno);
 		}
@@ -4847,9 +4850,9 @@ int my_fclose(FILE *fp) {
  * data with nulls sprinkled in the middle but also data with no null 
  * byte at the end.
  */
-/*{{{ int my_fwrite(void *src, size_t itmsz, size_t nitm, FILE *dest)*/
+/*{{{ int my_fwrite(const void *src, size_t itmsz, size_t nitm, FILE *dest)*/
 int
-my_fwrite(void *src, size_t itmsz, size_t nitm, FILE *dest)
+my_fwrite(const void *src, size_t itmsz, size_t nitm, FILE *dest)
 {
   register char *cp, *end, *cpd, *data;
   register unsigned int fd = fileno(dest);
@@ -6577,7 +6580,7 @@ candelete_fromperl(pTHX_ CV *cv)
 
   mysv = SvROK(ST(0)) ? SvRV(ST(0)) : ST(0);
   if (SvTYPE(mysv) == SVt_PVGV) {
-    if (!(io = GvIOp(mysv)) || !fgetname(IoIFP(io),fspec,1)) {
+    if (!(io = GvIOp(mysv)) || !PerlIO_getname(IoIFP(io),fspec)) {
       set_errno(EINVAL); set_vaxc_errno(LIB$_INVARG);
       ST(0) = &PL_sv_no;
       XSRETURN(1);
@@ -6614,7 +6617,7 @@ rmscopy_fromperl(pTHX_ CV *cv)
 
   mysv = SvROK(ST(0)) ? SvRV(ST(0)) : ST(0);
   if (SvTYPE(mysv) == SVt_PVGV) {
-    if (!(io = GvIOp(mysv)) || !fgetname(IoIFP(io),inspec,1)) {
+    if (!(io = GvIOp(mysv)) || !PerlIO_getname(IoIFP(io),inspec)) {
       set_errno(EINVAL); set_vaxc_errno(LIB$_INVARG);
       ST(0) = &PL_sv_no;
       XSRETURN(1);
@@ -6630,7 +6633,7 @@ rmscopy_fromperl(pTHX_ CV *cv)
   }
   mysv = SvROK(ST(1)) ? SvRV(ST(1)) : ST(1);
   if (SvTYPE(mysv) == SVt_PVGV) {
-    if (!(io = GvIOp(mysv)) || !fgetname(IoIFP(io),outspec,1)) {
+    if (!(io = GvIOp(mysv)) || !PerlIO_getname(IoIFP(io),outspec)) {
       set_errno(EINVAL); set_vaxc_errno(LIB$_INVARG);
       ST(0) = &PL_sv_no;
       XSRETURN(1);

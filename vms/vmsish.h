@@ -310,7 +310,7 @@
 #define _ckvmssts_noperl(call) STMT_START { register unsigned long int __ckvms_sts; \
   if (!((__ckvms_sts=(call))&1)) { \
   set_errno(EVMSERR); set_vaxc_errno(__ckvms_sts); \
-  fprintf(Perl_debug_log,"Fatal VMS error (status=%d) at %s, line %d", \
+  fprintf(stderr,"Fatal VMS error (status=%d) at %s, line %d", \
   __ckvms_sts,__FILE__,__LINE__); lib$signal(__ckvms_sts); } } STMT_END
 
 #ifdef VMS_DO_SOCKETS
@@ -411,6 +411,7 @@
 
 
 #ifndef DONT_MASK_RTL_CALLS
+#  define fwrite my_fwrite     /* for PerlSIO_fwrite */
 #  define fdopen my_fdopen
 #  define fclose my_fclose
 #endif
@@ -774,7 +775,7 @@ unsigned long int	Perl_do_aspawn (pTHX_ void *, void **, void **);
 unsigned long int	Perl_do_spawn (pTHX_ char *);
 FILE *  my_fdopen (int, const char *);
 int     my_fclose (FILE *);
-int	my_fwrite (void *, size_t, size_t, FILE *);
+int    my_fwrite (const void *, size_t, size_t, FILE *);
 int	Perl_my_flush (pTHX_ FILE *);
 struct passwd *	Perl_my_getpwnam (pTHX_ char *name);
 struct passwd *	Perl_my_getpwuid (pTHX_ Uid_t uid);

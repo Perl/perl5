@@ -566,7 +566,7 @@ Perl_do_openn(pTHX_ GV *gv, register char *name, I32 len, int as_raw,
 #ifdef VMS
 	    if (savefd != PerlIO_fileno(PerlIO_stdin())) {
 	      char newname[FILENAME_MAX+1];
-	      if (fgetname(fp, newname)) {
+             if (PerlIO_getname(fp, newname)) {
  	        if (fd == PerlIO_fileno(PerlIO_stdout())) Perl_vmssetuserlnm(aTHX_ "SYS$OUTPUT", newname);
  	        if (fd == PerlIO_fileno(PerlIO_stderr())) Perl_vmssetuserlnm(aTHX_ "SYS$ERROR",  newname);
 	      }
@@ -2103,7 +2103,6 @@ Perl_start_glob (pTHX_ SV *tmpglob, IO *io)
 	char rslt[NAM$C_MAXRSS+1+sizeof(unsigned short int)] = {'\0','\0'};
 	char vmsspec[NAM$C_MAXRSS+1];
 	char *rstr = rslt + sizeof(unsigned short int), *begin, *end, *cp;
-	char tmpfnam[L_tmpnam] = "SYS$SCRATCH:";
 	$DESCRIPTOR(dfltdsc,"SYS$DISK:[]*.*;");
 	PerlIO *tmpfp;
 	STRLEN i;
@@ -2118,7 +2117,6 @@ Perl_start_glob (pTHX_ SV *tmpglob, IO *io)
 	   ((struct NAM *)((struct FAB *)cxt)->fab$l_nam)->nam$l_fnb
 	   but that's unsupported, so I don't want to do it now and
 	   have it bite someone in the future. */
-	strcat(tmpfnam,PerlLIO_tmpnam(NULL));
 	cp = SvPV(tmpglob,i);
 	for (; i; i--) {
 	    if (cp[i] == ';') hasver = 1;
@@ -2135,7 +2133,7 @@ Perl_start_glob (pTHX_ SV *tmpglob, IO *io)
 		break;
 	    }
 	}
-	if ((tmpfp = PerlIO_open(tmpfnam,"w+","fop=dlt")) != NULL) {
+       if ((tmpfp = PerlIO_tmpfile()) != NULL) {
 	    Stat_t st;
 	    if (!PerlLIO_stat(SvPVX(tmpglob),&st) && S_ISDIR(st.st_mode))
 		ok = ((wilddsc.dsc$a_pointer = tovmspath(SvPVX(tmpglob),vmsspec)) != NULL);

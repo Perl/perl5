@@ -3647,8 +3647,14 @@ char *
 PerlIO_getname(PerlIO *f, char *buf)
 {
  dTHX;
+ char *name = NULL;
+#ifdef VMS
+ FILE *stdio = PerlIOSelf(f,PerlIOStdio)->stdio;
+ if (stdio) name = fgetname(stdio, buf);
+#else
  Perl_croak(aTHX_ "Don't know how to get file name");
- return NULL;
+#endif
+ return name;
 }
 
 

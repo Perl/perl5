@@ -237,6 +237,9 @@ extern void	PerlIO_releaseFILE	(PerlIO *,FILE *);
 #ifndef PerlIO_read
 extern SSize_t	PerlIO_read		(PerlIO *,void *,Size_t);
 #endif
+#ifndef PerlIO_unread
+extern SSize_t PerlIO_unread           (PerlIO *,const void *,Size_t);
+#endif
 #ifndef PerlIO_write
 extern SSize_t	PerlIO_write		(PerlIO *,const void *,Size_t);
 #endif
@@ -325,6 +328,9 @@ extern int	PerlIO_apply_layers	(pTHX_ PerlIO *f, const char *mode, const char *n
 #endif
 #ifndef PerlIO_binmode
 extern int	PerlIO_binmode		(pTHX_ PerlIO *f, int iotype, int omode, const char *names);
+#endif
+#ifndef PerlIO_getname
+extern char *  PerlIO_getname          (PerlIO *, char *);
 #endif
 
 extern void PerlIO_destruct(pTHX);
