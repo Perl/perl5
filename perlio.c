@@ -178,8 +178,6 @@ PerlIO_flush(PerlIO *f)
  int code = 0;
  if (f)
   {
-   PerlIO_debug(__FUNCTION__ " f=%p flags=%08X c=%d buf=%p ptr=%p\n",
-                f,f->flags,(f->ptr-f->buf),f->buf,f->ptr);
    if (f->flags & PERLIO_F_WRBUF)
     {
      /* write() the buffer */
@@ -217,7 +215,7 @@ PerlIO_flush(PerlIO *f)
  else
   {
    int i;
-   for (i=_perlio_size; i >= 0; i--)
+   for (i=_perlio_size-1; i >= 0; i--)
     {
      if ((f = _perlio[i]))
       {
@@ -233,7 +231,6 @@ int
 PerlIO_oflags(const char *mode)
 {
  int oflags = -1;
- PerlIO_debug(__FUNCTION__ " %s = ",mode);
  switch(*mode)
   {
    case 'r':
@@ -272,7 +269,6 @@ PerlIO_oflags(const char *mode)
    errno = EINVAL;
    oflags = -1;
   }
- PerlIO_debug(" %X '%s'\n",oflags,mode);
  return oflags;
 }
 
@@ -288,7 +284,6 @@ PerlIO_allocate(void)
    while (i < _perlio_size)
     {
      f = table[i];
-     PerlIO_debug(__FUNCTION__ " try %d %p\n",i,f);
      if (!f)
       {
        Newz('F',f,1,PerlIO);
@@ -329,7 +324,6 @@ PerlIO_fdopen(int fd, const char *mode)
      f->flags  |= (PERLIO_F_OPEN|PERLIO_F_USED);
     }
   }
- PerlIO_debug(__FUNCTION__ " fd=%d m=%s f=%p\n",fd,mode,f);
  return f;
 }
 
@@ -379,7 +373,6 @@ PerlIO_cleanup(void)
 {
  /* Close all the files */
  int i;
- PerlIO_debug(__FUNCTION__ "\n");
  for (i=_perlio_size-1; i >= 0; i--)
   {
    PerlIO *f = _perlio[i];
@@ -406,13 +399,11 @@ PerlIO_open(const char *path, const char *mode)
    int fd = open(path,oflags,0666);
    if (fd >= 0)
     {
-     PerlIO_debug(__FUNCTION__ "fd=%d\n",fd);
      f = PerlIO_fdopen(fd,mode);
      if (!f)
       close(fd);
     }
   }
- PerlIO_debug(__FUNCTION__ " path=%s m=%s f=%p\n",path,mode,f);
  return f;
 }
 
@@ -420,7 +411,6 @@ PerlIO_open(const char *path, const char *mode)
 PerlIO *
 PerlIO_reopen(const char *path, const char *mode, PerlIO *f)
 {
- PerlIO_debug(__FUNCTION__ " n=%s m=%s f=%p\n",path,mode,f);
  if (f)
   {
    int oflags = PerlIO_oflags(mode);
@@ -430,7 +420,6 @@ PerlIO_reopen(const char *path, const char *mode, PerlIO *f)
      int fd = open(path,oflags,0666);
      if (fd >= 0)
       {
-       PerlIO_debug(__FUNCTION__ "fd=%d\n",fd);
        f->oflags = oflags;
        f->flags  |= (PERLIO_F_OPEN|PERLIO_F_USED);
       }
@@ -453,7 +442,6 @@ PerlIO_init(void)
    PerlIO_fdopen(1,"w");
    PerlIO_fdopen(2,"w");
   }
- PerlIO_debug(__FUNCTION__ "\n");
 }
 
 #undef PerlIO_stdin
@@ -639,7 +627,6 @@ PerlIO_ungetc(PerlIO *f, int ch)
    *--(f->ptr) = ch;
    return ch;
   }
- PerlIO_debug(__FUNCTION__ " f=%p c=%c - cannot\n",f,ch);
  return -1;
 }
 
@@ -653,7 +640,8 @@ PerlIO_read(PerlIO *f, void *vbuf, Size_t count)
    Size_t got = 0;
    if (!f->ptr)
     PerlIO_alloc_buf(f);
-
+   if ((f->oflags & (O_RDONLY|O_WRONLY|O_RDWR)) == O_WRONLY)
+    return 0;
    while (count > 0)
     {
      SSize_t avail = (f->end - f->ptr);
@@ -739,11 +727,12 @@ PerlIO_write(PerlIO *f, const void *vbuf, Size_t count)
 {
  const STDCHAR *buf = (const STDCHAR *) vbuf;
  Size_t written = 0;
- PerlIO_debug(__FUNCTION__ " f=%p c=%d\n",f,count);
  if (f)
   {
    if (!f->buf)
     PerlIO_alloc_buf(f);
+   if ((f->oflags & (O_RDONLY|O_WRONLY|O_RDWR)) == O_RDONLY)
+    return 0;
    while (count > 0)
     {
      SSize_t avail = f->bufsiz - (f->ptr - f->buf);
@@ -789,7 +778,7 @@ int
 PerlIO_putc(PerlIO *f, int ch)
 {
  STDCHAR buf = ch;
- PerlIO_write(f,&ch,1);
+ PerlIO_write(f,&buf,1);
 }
 
 #undef PerlIO_tell
@@ -799,7 +788,6 @@ PerlIO_tell(PerlIO *f)
  Off_t posn = f->posn;
  if (f->buf)
   posn += (f->ptr - f->buf);
- PerlIO_debug(__FUNCTION__ " f=%p b=%ld a=%ld\n",f,(long)f->posn,(long)posn);
  return posn;
 }
 
@@ -808,14 +796,11 @@ int
 PerlIO_seek(PerlIO *f, Off_t offset, int whence)
 {
  int code;
- PerlIO_debug(__FUNCTION__ " f=%p i=%ld+%d\n",f,(long)f->posn,(f->ptr-f->buf));
  code = PerlIO_flush(f);
  if (code == 0)
   {
    f->flags &= ~PERLIO_F_EOF;
    f->posn = PerlLIO_lseek(f->fd,offset,whence);
-   PerlIO_debug(__FUNCTION__ " f=%p o=%ld w=%d p=%ld\n",
-                f,(long)offset,whence,(long)f->posn);
    if (f->posn == (Off_t) -1)
     {
      f->posn = 0;
