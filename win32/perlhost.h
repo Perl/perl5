@@ -210,6 +210,7 @@ protected:
 
     DWORD   m_dwEnvCount;
     LPSTR*  m_lppEnvList;
+    BOOL    m_bTopLevel;	// is this a toplevel host?
     static long num_hosts;
 public:
     inline  int LastHost(void) { return num_hosts == 1L; };
@@ -1932,6 +1933,7 @@ CPerlHost::CPerlHost(void)
 
     m_dwEnvCount = 0;
     m_lppEnvList = NULL;
+    m_bTopLevel = TRUE;
 
     CopyMemory(&m_hostperlMem, &perlMem, sizeof(perlMem));
     CopyMemory(&m_hostperlMemShared, &perlMemShared, sizeof(perlMemShared));
@@ -1981,6 +1983,7 @@ CPerlHost::CPerlHost(struct IPerlMem** ppMem, struct IPerlMem** ppMemShared,
 
     m_dwEnvCount = 0;
     m_lppEnvList = NULL;
+    m_bTopLevel = FALSE;
 
     CopyMemory(&m_hostperlMem, &perlMem, sizeof(perlMem));
     CopyMemory(&m_hostperlMemShared, &perlMemShared, sizeof(perlMemShared));
@@ -2037,6 +2040,7 @@ CPerlHost::CPerlHost(CPerlHost& host)
 
     m_dwEnvCount = 0;
     m_lppEnvList = NULL;
+    m_bTopLevel = FALSE;
 
     /* duplicate environment info */
     LPSTR lpPtr;
@@ -2351,7 +2355,7 @@ CPerlHost::Clearenv(void)
 	    ch = *++lpPtr;
 	    *lpPtr = 0;
 	    Add(lpStr);
-	    if (!w32_pseudo_id)
+	    if (m_bTopLevel)
 		(void)win32_putenv(lpStr);
 	    *lpPtr = ch;
 	}
@@ -2366,7 +2370,7 @@ char*
 CPerlHost::Getenv(const char *varname)
 {
     dTHX;
-    if (w32_pseudo_id) {
+    if (!m_bTopLevel) {
 	char *pEnv = Find(varname);
 	if (pEnv && *pEnv)
 	    return pEnv;
@@ -2379,7 +2383,7 @@ CPerlHost::Putenv(const char *envstring)
 {
     dTHX;
     Add(envstring);
-    if (!w32_pseudo_id)
+    if (m_bTopLevel)
 	return win32_putenv(envstring);
 
     return 0;
