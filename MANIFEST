@@ -1280,6 +1280,7 @@ lib/Pod/t/basic.ovr		podlators test
 lib/Pod/t/basic.pod		podlators test
 lib/Pod/t/basic.t		podlators test
 lib/Pod/t/basic.txt		podlators test
+lib/Pod/t/eol.t			end of line agnosticism
 lib/Pod/t/Functions.t		See if Pod::Functions works
 lib/Pod/t/htmlescp.pod          pod2html escape test input data
 lib/Pod/t/htmlescp.t            pod2html escape test

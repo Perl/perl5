@@ -1260,6 +1260,15 @@ C<pod2html> now allows specifying a cache directory.
 
 =item *
 
+C<pod2html> now produces XHTML 1.0.
+
+=item *
+
+C<pod2html> now understands POD written using different line endings\
+(PC-like CRLF versus UNIX-like LF versus MacClassic-like CR).
+
+=item *
+
 C<s2p> has been completely rewritten in Perl.  (It is in fact a full
 implementation of sed in Perl: you can use the sed functionality by
 using the C<psed> utility.)
