@@ -2798,11 +2798,11 @@ constant(name,arg)
 
 int
 isalnum(charstring)
-	char *		charstring
+	unsigned char *	charstring
     CODE:
-	char *s;
-	RETVAL = 1;
-	for (s = charstring; *s && RETVAL; s++)
+	unsigned char *s = charstring;
+	unsigned char *e = s + na;	/* "na" set by typemap side effect */
+	for (RETVAL = 1; RETVAL && s < e; s++)
 	    if (!isalnum(*s))
 		RETVAL = 0;
     OUTPUT:
@@ -2810,11 +2810,11 @@ isalnum(charstring)
 
 int
 isalpha(charstring)
-	char *		charstring
+	unsigned char *	charstring
     CODE:
-	char *s;
-	RETVAL = 1;
-	for (s = charstring; *s && RETVAL; s++)
+	unsigned char *s = charstring;
+	unsigned char *e = s + na;	/* "na" set by typemap side effect */
+	for (RETVAL = 1; RETVAL && s < e; s++)
 	    if (!isalpha(*s))
 		RETVAL = 0;
     OUTPUT:
@@ -2822,11 +2822,11 @@ isalpha(charstring)
 
 int
 iscntrl(charstring)
-	char *		charstring
+	unsigned char *	charstring
     CODE:
-	char *s;
-	RETVAL = 1;
-	for (s = charstring; *s && RETVAL; s++)
+	unsigned char *s = charstring;
+	unsigned char *e = s + na;	/* "na" set by typemap side effect */
+	for (RETVAL = 1; RETVAL && s < e; s++)
 	    if (!iscntrl(*s))
 		RETVAL = 0;
     OUTPUT:
@@ -2834,11 +2834,11 @@ iscntrl(charstring)
 
 int
 isdigit(charstring)
-	char *		charstring
+	unsigned char *	charstring
     CODE:
-	char *s;
-	RETVAL = 1;
-	for (s = charstring; *s && RETVAL; s++)
+	unsigned char *s = charstring;
+	unsigned char *e = s + na;	/* "na" set by typemap side effect */
+	for (RETVAL = 1; RETVAL && s < e; s++)
 	    if (!isdigit(*s))
 		RETVAL = 0;
     OUTPUT:
@@ -2846,11 +2846,11 @@ isdigit(charstring)
 
 int
 isgraph(charstring)
-	char *		charstring
+	unsigned char *	charstring
     CODE:
-	char *s;
-	RETVAL = 1;
-	for (s = charstring; *s && RETVAL; s++)
+	unsigned char *s = charstring;
+	unsigned char *e = s + na;	/* "na" set by typemap side effect */
+	for (RETVAL = 1; RETVAL && s < e; s++)
 	    if (!isgraph(*s))
 		RETVAL = 0;
     OUTPUT:
@@ -2858,11 +2858,11 @@ isgraph(charstring)
 
 int
 islower(charstring)
-	char *		charstring
+	unsigned char *	charstring
     CODE:
-	char *s;
-	RETVAL = 1;
-	for (s = charstring; *s && RETVAL; s++)
+	unsigned char *s = charstring;
+	unsigned char *e = s + na;	/* "na" set by typemap side effect */
+	for (RETVAL = 1; RETVAL && s < e; s++)
 	    if (!islower(*s))
 		RETVAL = 0;
     OUTPUT:
@@ -2870,11 +2870,11 @@ islower(charstring)
 
 int
 isprint(charstring)
-	char *		charstring
+	unsigned char *	charstring
     CODE:
-	char *s;
-	RETVAL = 1;
-	for (s = charstring; *s && RETVAL; s++)
+	unsigned char *s = charstring;
+	unsigned char *e = s + na;	/* "na" set by typemap side effect */
+	for (RETVAL = 1; RETVAL && s < e; s++)
 	    if (!isprint(*s))
 		RETVAL = 0;
     OUTPUT:
@@ -2882,11 +2882,11 @@ isprint(charstring)
 
 int
 ispunct(charstring)
-	char *		charstring
+	unsigned char *	charstring
     CODE:
-	char *s;
-	RETVAL = 1;
-	for (s = charstring; *s && RETVAL; s++)
+	unsigned char *s = charstring;
+	unsigned char *e = s + na;	/* "na" set by typemap side effect */
+	for (RETVAL = 1; RETVAL && s < e; s++)
 	    if (!ispunct(*s))
 		RETVAL = 0;
     OUTPUT:
@@ -2894,11 +2894,11 @@ ispunct(charstring)
 
 int
 isspace(charstring)
-	char *		charstring
+	unsigned char *	charstring
     CODE:
-	char *s;
-	RETVAL = 1;
-	for (s = charstring; *s && RETVAL; s++)
+	unsigned char *s = charstring;
+	unsigned char *e = s + na;	/* "na" set by typemap side effect */
+	for (RETVAL = 1; RETVAL && s < e; s++)
 	    if (!isspace(*s))
 		RETVAL = 0;
     OUTPUT:
@@ -2906,11 +2906,11 @@ isspace(charstring)
 
 int
 isupper(charstring)
-	char *		charstring
+	unsigned char *	charstring
     CODE:
-	char *s;
-	RETVAL = 1;
-	for (s = charstring; *s && RETVAL; s++)
+	unsigned char *s = charstring;
+	unsigned char *e = s + na;	/* "na" set by typemap side effect */
+	for (RETVAL = 1; RETVAL && s < e; s++)
 	    if (!isupper(*s))
 		RETVAL = 0;
     OUTPUT:
@@ -2918,11 +2918,11 @@ isupper(charstring)
 
 int
 isxdigit(charstring)
-	char *		charstring
+	unsigned char *	charstring
     CODE:
-	char *s;
-	RETVAL = 1;
-	for (s = charstring; *s && RETVAL; s++)
+	unsigned char *s = charstring;
+	unsigned char *e = s + na;	/* "na" set by typemap side effect */
+	for (RETVAL = 1; RETVAL && s < e; s++)
 	    if (!isxdigit(*s))
 		RETVAL = 0;
     OUTPUT:
