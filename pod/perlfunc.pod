@@ -2861,7 +2861,7 @@ L<Config>:
        print $Config{longsize},     "\n";
        print $Config{longlongsize}, "\n";
 
-(The C<$Config{longlongsize}> will be empty if your system does
+(The C<$Config{longlongsize}> will be undefine if your system does
 not support long longs.) 
 
 =item *
@@ -2869,7 +2869,7 @@ not support long longs.)
 The integer formats C<"s">, C<"S">, C<"i">, C<"I">, C<"l">, and C<"L">
 are inherently non-portable between processors and operating systems
 because they obey the native byteorder and endianness.  For example a
-4-byte integer 0x87654321 (2271560481 decimal) be ordered natively
+4-byte integer 0x12345678 (305419896 decimal) be ordered natively
 (arranged in and handled by the CPU registers) into bytes as
  
  	0x12 0x34 0x56 0x78	# little-endian
@@ -2885,7 +2885,7 @@ the classic "Gulliver's Travels" (via the paper "On Holy Wars and a
 Plea for Peace" by Danny Cohen, USC/ISI IEN 137, April 1, 1980) and
 the egg-eating habits of the Lilliputians.
  
-Some systems may even have weird byte orders such as
+Some systems may have even weirder byte orders such as
  
  	0x56 0x78 0x12 0x34
  	0x34 0x12 0x78 0x56

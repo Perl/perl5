@@ -20,7 +20,7 @@
 
 # $Id: Head.U,v 3.0.1.9 1997/02/28 15:02:09 ram Exp $
 #
-# Generated on Fri Sep 17 12:06:13 EET DST 1999 [metaconfig 3.0 PL70]
+# Generated on Mon Sep 20 12:57:28 EET DST 1999 [metaconfig 3.0 PL70]
 # (with additional metaconfig patches by perlbug@perl.com)
 
 cat >/tmp/c1$$ <<EOF
@@ -817,7 +817,9 @@ trnl=''
 uidtype=''
 archname64=''
 use64bits=''
+uselfs=''
 uselongdouble=''
+usemorebits=''
 usemultiplicity=''
 nm_opt=''
 nm_so_opt=''
@@ -3014,12 +3016,47 @@ case "$gccversion" in
 1*) cpp=`./loc gcc-cpp $cpp $pth` ;;
 esac
 
+
+case "$usemorebits" in
+"$define"|true|[yY]*)
+	use64bits="$define"
+	uselongdouble="$define"
+	usemorebits="$define"
+	;;
+*)	usemorebits="$undef"
+	;;
+esac
+
+
+cat <<EOM
+
+Perl can be built to understand large files (files larger than 2 gigabytes)
+on some systems.  To do so, Configure must be run with -Duselfs.
+
+If this doesn't make any sense to you, just accept the default.
+EOM
+case "$uselfs" in
+"$define"|true|[yY]*) dflt='y' ;;
+*)	dflt='n' ;;
+esac
+rp='Try to understand large files?'
+. ./myread
+case "$ans" in
+y|Y) 	val="$define" ;;
+*)   	val="$undef"  ;;
+esac
+set uselfs
+eval $setvar
+case "$uselfs" in
+"$define") use64bits="$define" ;;
+esac
+
 cat <<EOM
 
 Perl can be built to take advantage of explicit 64-bit interfaces,
 on some systems.  To do so, Configure must be run with -Duse64bits.
 
-If this doesn't make any sense to you, just accept the default 'n'.
+If this doesn't make any sense to you, just accept the default.
 EOM
 case "$use64bits" in
 $define|true|[yY]*)	dflt='y';;
@@ -4261,7 +4298,7 @@ default|recommended)
 	case "$gccversion" in
 	1*) ;;
 	2.[0-8]*) ;;
-	*) 	echo " "
+	?*) 	echo " "
 		echo "Checking if your compiler accepts -fno-strict-aliasing" 2>&1
 		echo 'int main(void) { return 0; }' > gcctest.c
 		if $cc -O2 -fno-strict-aliasing -o gcctest gcctest.c; then
@@ -13969,7 +14006,9 @@ uname='$uname'
 uniq='$uniq'
 use64bits='$use64bits'
 usedl='$usedl'
+uselfs='$uselfs'
 uselongdouble='$uselongdouble'
+usemorebits='$usemorebits'
 usemultiplicity='$usemultiplicity'
 usemymalloc='$usemymalloc'
 usenm='$usenm'

@@ -1422,17 +1422,13 @@ typedef union any ANY;
 
 #include "handy.h"
 
-#ifdef USE_64_BITS
-#   define USE_64_BIT_FILES
-#endif
-
-#if defined(USE_64_BIT_FILES) || defined(USE_LARGE_FILES)
-#   define USE_64_BIT_OFFSETS /* Explicit */
+#if defined(USE_LARGE_FILES)
+#   define USE_64_BIT_RAWIO /* Explicit */
 #   define USE_64_BIT_STDIO
 #endif
 
-#if LSEEKSIZE == 8 && !defined(USE_64_BIT_OFFSETS)
-#   define USE_64_BIT_OFFSETS /* Implicit */
+#if LSEEKSIZE == 8 && !defined(USE_64_BIT_RAWIO)
+#   define USE_64_BIT_RAWIO /* Implicit */
 #endif
 
 /* Do we need FSEEKSIZE? */
@@ -1449,7 +1445,7 @@ typedef union any ANY;
 #define USE_FREOPEN64
 #endif
 
-#ifdef USE_64_BIT_OFFSETS
+#ifdef USE_64_BIT_RAWIO
 #   ifdef HAS_OFF64_T
 #       undef Off_t
 #       define Off_t off64_t
@@ -1458,7 +1454,7 @@ typedef union any ANY;
 #   endif
 /* Most 64-bit environments have defines like _LARGEFILE_SOURCE that
  * will trigger defines like the ones below.  Some 64-bit environments,
- * however, do not. */
+ * however, do not.  Therefore we have to explicitly mix and match. */
 #   if defined(USE_OPEN64)
 #       define open open64
 #   endif
@@ -1712,22 +1708,6 @@ typedef pthread_key_t	perl_key;
 
 #ifndef PERL_GET_INTERP
 #  define PERL_GET_INTERP		(PL_curinterp)
-#endif
-
-#if defined(PERL_IMPLICIT_CONTEXT) && !defined(PERL_GET_THX)
-#  ifdef USE_THREADS
-#    define PERL_GET_THX		THR
-#  else
-#  ifdef MULTIPLICITY
-#    define PERL_GET_THX		PERL_GET_INTERP
-#  else
-#  ifdef PERL_OBJECT
-#    define PERL_GET_THX		((CPerlObj*)PERL_GET_INTERP)
-#  else
-#    define PERL_GET_THX		((void*)0)
-#  endif
-#  endif
-#  endif
 #endif
 
 #if defined(PERL_IMPLICIT_CONTEXT) && !defined(PERL_GET_THX)

@@ -8,7 +8,7 @@
 
 # Package name      : perl5
 # Source directory  : .
-# Configuration time: Fri Sep 17 12:08:19 EET DST 1999
+# Configuration time: Mon Sep 20 12:44:36 EET DST 1999
 # Configured by     : jhi
 # Target system     : osf1 alpha.hut.fi v4.0 878 alpha 
 
@@ -56,7 +56,7 @@ ccflags='-pthread -std -DLANGUAGE_C'
 ccsymbols='__LANGUAGE_C__=1 _LONGLONG=1 LANGUAGE_C=1 SYSTYPE_BSD=1'
 cf_by='jhi'
 cf_email='yourname@yourhost.yourplace.com'
-cf_time='Fri Sep 17 12:08:19 EET DST 1999'
+cf_time='Mon Sep 20 12:44:36 EET DST 1999'
 chgrp=''
 chmod=''
 chown=''
@@ -667,7 +667,9 @@ uname='uname'
 uniq='uniq'
 use64bits='define'
 usedl='define'
+uselfs='define'
 uselongdouble='undef'
+usemorebits='undef'
 usemultiplicity='undef'
 usemymalloc='n'
 usenm='true'
@@ -694,18 +696,19 @@ zcat=''
 zip='zip'
 # Configure command line arguments.
 config_arg0='Configure'
-config_args='-Dprefix=/opt/perl -Doptimize=-O -Dusethreads -Duse64bits -Dcf_by=yourname -Dcf_email=yourname@yourhost.yourplace.com -Dperladmin=yourname@yourhost.yourplace.com -Dmydomain=.yourplace.com -Dmyhostname=yourhost -dE'
-config_argc=10
+config_args='-Dprefix=/opt/perl -Doptimize=-O -Dusethreads -Duse64bits -Duselfs -Dcf_by=yourname -Dcf_email=yourname@yourhost.yourplace.com -Dperladmin=yourname@yourhost.yourplace.com -Dmydomain=.yourplace.com -Dmyhostname=yourhost -dE'
+config_argc=11
 config_arg1='-Dprefix=/opt/perl'
 config_arg2='-Doptimize=-O'
 config_arg3='-Dusethreads'
 config_arg4='-Duse64bits'
-config_arg5='-Dcf_by=yourname'
-config_arg6='-Dcf_email=yourname@yourhost.yourplace.com'
-config_arg7='-Dperladmin=yourname@yourhost.yourplace.com'
-config_arg8='-Dmydomain=.yourplace.com'
-config_arg9='-Dmyhostname=yourhost'
-config_arg10='-dE'
+config_arg5='-Duselfs'
+config_arg6='-Dcf_by=yourname'
+config_arg7='-Dcf_email=yourname@yourhost.yourplace.com'
+config_arg8='-Dperladmin=yourname@yourhost.yourplace.com'
+config_arg9='-Dmydomain=.yourplace.com'
+config_arg10='-Dmyhostname=yourhost'
+config_arg11='-dE'
 PERL_REVISION=5
 PERL_VERSION=5
 PERL_SUBVERSION=61

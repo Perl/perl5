@@ -3031,9 +3031,19 @@ usedl (dlsrc.U):
 	This variable indicates if the the system supports dynamic
 	loading of some sort.  See also dlsrc and dlobj.
 
+uselfs (uselfs.U):
+	This variable conditionally defines the USE_LARGE_FILES symbol,
+	and indicates that large file interfaces should be used when
+	available.  The use64bits symbol will also be turned on if necessary.
+
 uselongdouble (uselongdbl.U):
 	This variable conditionally defines the USE_LONG_DOUBLE symbol,
 	and indicates that long doubles should be used when available.
+
+usemorebits (usemorebits.U):
+	This variable conditionally defines the USE_MORE_BITS symbol,
+	and indicates that explicit 64-bit interfaces and long doubles
+	should be used when available.
 
 usemultiplicity (usemultiplicity.U):
 	This variable conditionally defines the MULTIPLICITY symbol,

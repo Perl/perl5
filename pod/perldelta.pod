@@ -183,7 +183,9 @@ start losing precision (their lower digits).
 =head2 Large file support
 
 If you have filesystems that support "large files" (files larger than
-2 gigabytes), you may now also be able to create and access them from Perl.
+2 gigabytes), you may now also be able to create and access them from
+Perl.  You have to use Configure -Duselfs.  Turning on the large file
+support turns on also the 64-bit support, for obvious reasons.
 
 Note that in addition to requiring a proper file system to do large
 files you may also need to adjust your per-process (or your
@@ -203,7 +205,17 @@ included with the standard Perl distribution) may also be of use, it
 offers the getrlimit/setrlimit interface that can be used to adjust
 process resource usage limits, including the maximum filesize limit.
  
-(Large file support is related to 64-bit support, for obvious reasons.)
+=head2 Long doubles
+
+In some systems you may be able to use long doubles to enhance the
+range of precision of your double precision floating point numbers
+(that is, Perl's numbers).  Use Configure -Duselongdouble to enable
+this support (if it is available).
+
+=head2 "more bits"
+
+You can Configure -Dusemorebits to turn on both the 64-bit support
+and the long double support.
 
 =head2 Better syntax checks on parenthesized unary operators
 
@@ -722,11 +734,6 @@ too soon.
 (W) You are concatenating the number 19 with another number, which
 could be a potential Year 2000 problem.
 
-=item Possible Y2K bug: %s
-
-(W) You are concatenating the number 19 with another number, which
-could be a potential Year 2000 problem.
-
 =item Unterminated attribute parameter in subroutine attribute list
 
 (F) The lexer saw an opening (left) parenthesis character while parsing a
@@ -740,13 +747,6 @@ character to get your parentheses to balance.
 of a subroutine attribute, and it wasn't a semicolon or the start of a
 block.  Perhaps you terminated the parameter list of the previous attribute
 too soon.
-
-=item /%s/ should probably be written as "%s"
-
-(W) You have used a pattern where Perl expected to find a string,
-like in the first argument to C<join>.  Perl will treat the true
-or false result of matching the pattern against $_ as the string,
-which is probably not what you had in mind.
 
 =item /%s/ should probably be written as "%s"
 
