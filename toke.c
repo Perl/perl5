@@ -2631,8 +2631,8 @@ Perl_yylex(pTHX)
 		    PL_doextract = FALSE;
 		}
 		if (!PL_in_eval && (PL_minus_n || PL_minus_p)) {
-		    sv_setpv(PL_linestr,PL_minus_p ? ";}continue{print" : "");
-		    sv_catpv(PL_linestr,";}");
+		    sv_setpv(PL_linestr,PL_minus_p
+			     ? ";}continue{print;}" : ";}");
 		    PL_oldoldbufptr = PL_oldbufptr = s = PL_linestart = SvPVX(PL_linestr);
 		    PL_bufend = SvPVX(PL_linestr) + SvCUR(PL_linestr);
 		    PL_last_lop = PL_last_uni = Nullch;
