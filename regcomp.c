@@ -2013,8 +2013,6 @@ Perl_pregcomp(pTHX_ char *exp, char *xend, PMOP *pm)
 	r->reganch |= ROPT_LOOKBEHIND_SEEN;
     if (RExC_seen & REG_SEEN_EVAL)
 	r->reganch |= ROPT_EVAL_SEEN;
-    if (RExC_seen & REG_SEEN_SANY)
-	r->reganch |= ROPT_SANY_SEEN;
     if (RExC_seen & REG_SEEN_CANY)
 	r->reganch |= ROPT_CANY_SEEN;
     Newz(1002, r->startp, RExC_npar, I32);
@@ -2719,10 +2717,8 @@ tryagain:
 	break;
     case '.':
 	nextchar(pRExC_state);
-	if (RExC_flags16 & PMf_SINGLELINE) {
+	if (RExC_flags16 & PMf_SINGLELINE)
 	    ret = reg_node(pRExC_state, SANY);
-	    RExC_seen |= REG_SEEN_SANY;
-	}
 	else
 	    ret = reg_node(pRExC_state, REG_ANY);
 	*flagp |= HASWIDTH|SIMPLE;

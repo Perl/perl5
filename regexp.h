@@ -56,8 +56,8 @@ typedef struct regexp {
 #define ROPT_CHECK_ALL		0x00100
 #define ROPT_LOOKBEHIND_SEEN	0x00200
 #define ROPT_EVAL_SEEN		0x00400
-#define ROPT_SANY_SEEN		0x00800
-#define ROPT_CANY_SEEN		0x01000
+#define ROPT_CANY_SEEN		0x00800
+#define ROPT_SANY_SEEN		ROPT_CANY_SEEN /* src bckwrd cmpt */
 
 /* 0xf800 of reganch is used by PMf_COMPILETIME */
 

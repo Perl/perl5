@@ -6,7 +6,7 @@
 
 $| = 1;
 
-print "1..675\n";
+print "1..683\n";
 
 BEGIN {
     chdir 't' if -d 't';
@@ -1952,3 +1952,30 @@ print "ok 674\n";
     print "not " unless $#a == 12;
     print "ok 675\n";
 }
+
+@a = ("foo\nbar" =~ /./g);
+print "ok 676\n" if @a == 6 && "@a" eq "f o o b a r";
+
+@a = ("foo\nbar" =~ /./gs);
+print "ok 677\n" if @a == 7 && "@a" eq "f o o \n b a r";
+
+@a = ("foo\nbar" =~ /\C/g);
+print "ok 678\n" if @a == 7 && "@a" eq "f o o \n b a r";
+
+@a = ("foo\nbar" =~ /\C/gs);
+print "ok 679\n" if @a == 7 && "@a" eq "f o o \n b a r";
+
+@a = ("foo\n\x{100}bar" =~ /./g);
+print "ok 680\n" if @a == 7 && "@a" eq "f o o \x{100} b a r";
+
+@a = ("foo\n\x{100}bar" =~ /./gs);
+print "ok 681\n" if @a == 8 && "@a" eq "f o o \n \x{100} b a r";
+
+($a, $b) = map { chr } ord('A') == 65 ? (0xc4, 0x80) : (0x8c, 0x41);
+
+@a = ("foo\n\x{100}bar" =~ /\C/g);
+print "ok 682\n" if @a == 9 && "@a" eq "f o o \n $a $b b a r";
+
+@a = ("foo\n\x{100}bar" =~ /\C/gs);
+print "ok 683\n" if @a == 9 && "@a" eq "f o o \n $a $b b a r";
+

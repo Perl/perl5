@@ -414,7 +414,7 @@ Perl_re_intuit_start(pTHX_ regexp *prog, SV *sv, char *strpos,
 	      goto fail;
 	  }
 	  if (prog->check_offset_min == prog->check_offset_max &&
-	      !(prog->reganch & ROPT_SANY_SEEN)) {
+	      !(prog->reganch & ROPT_CANY_SEEN)) {
 	    /* Substring at constant offset from beg-of-str... */
 	    I32 slen;
 

@@ -1328,7 +1328,7 @@ play_it_again:
 		len = rx->endp[i] - rx->startp[i];
 		s = rx->startp[i] + truebase;
 		sv_setpvn(*SP, s, len);
-		if (DO_UTF8(TARG))
+		if (DO_UTF8(TARG) && is_utf8_string((U8*)s, len))
 		    SvUTF8_on(*SP);
 	    }
 	}
