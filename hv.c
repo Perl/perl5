@@ -186,11 +186,21 @@ information on how to use this function on tied hashes.
 #define HV_FETCH_JUST_SV 0x02
 
 SV**
-Perl_hv_fetch(pTHX_ HV *hv, const char *key, I32 klen, I32 lval)
+Perl_hv_fetch(pTHX_ HV *hv, const char *key, I32 klen_i32, I32 lval)
 {
-    HE *hek = hv_fetch_common (hv, NULL, key, klen, 0,
-			       HV_FETCH_JUST_SV | (lval ? HV_FETCH_LVALUE : 0),
-			       0);
+    HE *hek;
+    STRLEN klen;
+    int flags;
+
+    if (klen_i32 < 0) {
+	klen = -klen_i32;
+	flags = HVhek_UTF8;
+    } else {
+	klen = klen_i32;
+	flags = 0;
+    }
+    hek = hv_fetch_common (hv, NULL, key, klen, flags,
+			   HV_FETCH_JUST_SV | (lval ? HV_FETCH_LVALUE : 0), 0);
     return hek ? &HeVAL(hek) : NULL;
 }
 
@@ -221,11 +231,10 @@ Perl_hv_fetch_ent(pTHX_ HV *hv, SV *keysv, I32 lval, register U32 hash)
 }
 
 HE *
-S_hv_fetch_common(pTHX_ HV *hv, SV *keysv, const char *key, I32 klen_i32,
+S_hv_fetch_common(pTHX_ HV *hv, SV *keysv, const char *key, STRLEN klen,
 		  int flags, int action, register U32 hash)
 {
     register XPVHV* xhv;
-    STRLEN klen;
     register HE *entry;
     SV *sv;
     bool is_utf8;
@@ -237,15 +246,10 @@ S_hv_fetch_common(pTHX_ HV *hv, SV *keysv, const char *key, I32 klen_i32,
 
     if (keysv) {
 	key = SvPV(keysv, klen);
+	flags = 0;
 	is_utf8 = (SvUTF8(keysv) != 0);
     } else {
-	if (klen_i32 < 0) {
-	    klen = -klen_i32;
-	    is_utf8 = TRUE;
-	} else {
-	    klen = klen_i32;
-	    is_utf8 = FALSE;
-	}
+	is_utf8 = ((flags & HVhek_UTF8) ? TRUE : FALSE);
     }
     keysave = key;
 
@@ -334,7 +338,9 @@ S_hv_fetch_common(pTHX_ HV *hv, SV *keysv, const char *key, I32 klen_i32,
 	int oldflags = flags;
 	key = (char*)bytes_from_utf8((U8*)key, &klen, &is_utf8);
         if (is_utf8)
-            flags = HVhek_UTF8;
+	    flags |= HVhek_UTF8;
+	else
+	    flags &= ~HVhek_UTF8;
         if (key != keysave)
             flags |= HVhek_WASUTF8 | HVhek_FREEKEY;
 	if (oldflags & HVhek_FREEKEY)

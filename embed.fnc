@@ -1396,7 +1396,7 @@ Apod	|void	|hv_assert	|HV* tb
 #if defined(PERL_IN_HV_C) || defined(PERL_DECL_PROT)
 sM	|SV*	|hv_delete_common|HV* tb|SV* key_sv|const char* key|I32 klen|I32 flags|U32 hash
 sM	|bool	|hv_exists_common|HV* tb|SV* key_sv|const char* key|I32 klen|U32 hash
-sM	|HE*	|hv_fetch_common|HV* tb|SV* key_sv|const char* key|I32 klen|int flags|int action|U32 hash
+sM	|HE*	|hv_fetch_common|HV* tb|SV* key_sv|const char* key|STRLEN klen|int flags|int action|U32 hash
 sM	|HE*	|hv_store_common|HV* tb|SV* key_sv|const char* key|I32 klen|int flags|SV* val|U32 hash
 #endif
 
