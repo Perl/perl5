@@ -17,26 +17,27 @@
 #include "perl.h"
 
 void *
-Perl_default_protect(pTHX_ int *excpt, protect_body_t body, ...)
+Perl_default_protect(pTHX_ volatile JMPENV *pcur_env, int *excpt,
+		     protect_body_t body, ...)
 {
     void *ret;
     va_list args;
     va_start(args, body);
-    ret = vdefault_protect(excpt, body, &args);
+    ret = vdefault_protect(pcur_env, excpt, body, &args);
     va_end(args);
     return ret;
 }
 
 void *
-Perl_vdefault_protect(pTHX_ int *excpt, protect_body_t body, va_list *args)
+Perl_vdefault_protect(pTHX_ volatile JMPENV *pcur_env, int *excpt,
+		      protect_body_t body, va_list *args)
 {
     dTHR;
-    dJMPENV;
     int ex;
     void *ret;
 
     DEBUG_l(Perl_deb(aTHX_ "Setting up local jumplevel %p, was %p\n",
-		&cur_env, PL_top_env));
+		pcur_env, PL_top_env));
     JMPENV_PUSH(ex);
     if (ex)
 	ret = NULL;

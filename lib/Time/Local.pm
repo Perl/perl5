@@ -44,7 +44,7 @@ sub timelocal {
     if ($t < $DAY and ($lt[5] >= 70 or $gt[5] >= 70 )) {
 	# Wrap error, too early a date
 	# Try a safer date
-	$tt = $DAY;
+	$tt += $DAY;
 	@lt = localtime($tt);
 	@gt = gmtime($tt);
     }

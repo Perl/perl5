@@ -195,10 +195,11 @@ to the modulus operator as implemented by your C compiler.  This
 operator is not as well defined for negative operands, but it will
 execute faster.
 
-Binary "x" is the repetition operator.  In scalar context, it
-returns a string consisting of the left operand repeated the number of
-times specified by the right operand.  In list context, if the left
-operand is a list in parentheses, it repeats the list.
+Binary "x" is the repetition operator.  In scalar context or if the left
+operand is not enclosed in parentheses, it returns a string consisting
+of the left operand repeated the number of times specified by the right
+operand.  In list context, if the left operand is enclosed in
+parentheses, it repeats the list.
 
     print '-' x 80;		# print row of dashes
 
