@@ -127,7 +127,6 @@ static regnode *reg_node _((U8));
 static regnode *regpiece _((I32 *));
 static void reginsert _((U8, regnode *));
 static void regoptail _((regnode *, regnode *));
-static void regset _((char *, I32));
 static void regtail _((regnode *, regnode *));
 static char* regwhite _((char *, char *));
 static char* nextchar _((void));
@@ -1831,15 +1830,6 @@ regwhite(char *p, char *e)
     return p;
 }
 
-static void
-regset(char *opnd, register I32 c)
-{
-    if (SIZE_ONLY)
-	return;
-    c &= 0xFF;
-    opnd[1 + (c >> 3)] |= (1 << (c & 7));
-}
-
 static regnode *
 regclass(void)
 {
@@ -1903,63 +1893,67 @@ regclass(void)
 	    Class = UCHARAT(regparse++);
 	    switch (Class) {
 	    case 'w':
-		if (regflags & PMf_LOCALE) {
-		    if (!SIZE_ONLY)
+		if (!SIZE_ONLY) {
+		    if (regflags & PMf_LOCALE)
 			*opnd |= ANYOF_ALNUML;
-		}
-		else {
-		    for (Class = 0; Class < 256; Class++)
-			if (isALNUM(Class))
-			    regset(opnd, Class);
+		    else {
+			for (Class = 0; Class < 256; Class++)
+			    if (isALNUM(Class))
+				ANYOF_SET(opnd, Class);
+		    }
 		}
 		lastclass = 1234;
 		continue;
 	    case 'W':
-		if (regflags & PMf_LOCALE) {
-		    if (!SIZE_ONLY)
+		if (!SIZE_ONLY) {
+		    if (regflags & PMf_LOCALE)
 			*opnd |= ANYOF_NALNUML;
-		}
-		else {
-		    for (Class = 0; Class < 256; Class++)
-			if (!isALNUM(Class))
-			    regset(opnd, Class);
+		    else {
+			for (Class = 0; Class < 256; Class++)
+			    if (!isALNUM(Class))
+				ANYOF_SET(opnd, Class);
+		    }
 		}
 		lastclass = 1234;
 		continue;
 	    case 's':
-		if (regflags & PMf_LOCALE) {
-		    if (!SIZE_ONLY)
+		if (!SIZE_ONLY) {
+		    if (regflags & PMf_LOCALE)
 			*opnd |= ANYOF_SPACEL;
-		}
-		else {
-		    for (Class = 0; Class < 256; Class++)
-			if (isSPACE(Class))
-			    regset(opnd, Class);
+		    else {
+			for (Class = 0; Class < 256; Class++)
+			    if (isSPACE(Class))
+				ANYOF_SET(opnd, Class);
+		    }
 		}
 		lastclass = 1234;
 		continue;
 	    case 'S':
-		if (regflags & PMf_LOCALE) {
-		    if (!SIZE_ONLY)
+		if (!SIZE_ONLY) {
+		    if (regflags & PMf_LOCALE)
 			*opnd |= ANYOF_NSPACEL;
-		}
-		else {
-		    for (Class = 0; Class < 256; Class++)
-			if (!isSPACE(Class))
-			    regset(opnd, Class);
+		    else {
+			for (Class = 0; Class < 256; Class++)
+			    if (!isSPACE(Class))
+				ANYOF_SET(opnd, Class);
+		    }
 		}
 		lastclass = 1234;
 		continue;
 	    case 'd':
-		for (Class = '0'; Class <= '9'; Class++)
-		    regset(opnd, Class);
+		if (!SIZE_ONLY) {
+		    for (Class = '0'; Class <= '9'; Class++)
+			ANYOF_SET(opnd, Class);
+		}
 		lastclass = 1234;
 		continue;
 	    case 'D':
-		for (Class = 0; Class < '0'; Class++)
-		    regset(opnd, Class);
-		for (Class = '9' + 1; Class < 256; Class++)
-		    regset(opnd, Class);
+		if (!SIZE_ONLY) {
+		    for (Class = 0; Class < '0'; Class++)
+			ANYOF_SET(opnd, Class);
+		    for (Class = '9' + 1; Class < 256; Class++)
+			ANYOF_SET(opnd, Class);
+		}
 		lastclass = 1234;
 		continue;
 	    case 'n':
@@ -2012,13 +2006,31 @@ regclass(void)
 		continue;	/* do it next time */
 	    }
 	}
-	for ( ; lastclass <= Class; lastclass++)
-	    regset(opnd, lastclass);
+	if (!SIZE_ONLY) {
+	    for ( ; lastclass <= Class; lastclass++)
+		ANYOF_SET(opnd, lastclass);
+	}
 	lastclass = Class;
     }
     if (*regparse != ']')
 	FAIL("unmatched [] in regexp");
     nextchar();
+    /* optimize case-insensitive simple patterns (e.g. /[a-z]/i) */
+    if (!SIZE_ONLY && (*opnd & (0xFF ^ ANYOF_INVERT)) == ANYOF_FOLD) {
+	for (Class = 0; Class < 256; ++Class) {
+	    if (ANYOF_TEST(opnd, Class)) {
+		I32 cf = fold[Class];
+		ANYOF_SET(opnd, cf);
+	    }
+	}
+	*opnd &= ~ANYOF_FOLD;
+    }
+    /* optimize inverted simple patterns (e.g. [^a-z]) */
+    if (!SIZE_ONLY && (*opnd & 0xFF) == ANYOF_INVERT) {
+	for (Class = 0; Class < 32; ++Class)
+	    opnd[1 + Class] ^= 0xFF;
+	*opnd = 0;
+    }
     return ret;
 }
 

@@ -370,6 +370,13 @@ typedef char* regnode;
 #define ANYOF_SPACEL	 0x02
 #define ANYOF_NSPACEL	 0x01
 
+/* Utility macros for bitmap of ANYOF */
+#define ANYOF_BYTE(p,c)     (p)[1 + (((c) >> 3) & 31)]
+#define ANYOF_BIT(c)        (1 << ((c) & 7))
+#define ANYOF_SET(p,c)      (ANYOF_BYTE(p,c) |=  ANYOF_BIT(c))
+#define ANYOF_CLEAR(p,c)    (ANYOF_BYTE(p,c) &= ~ANYOF_BIT(c))
+#define ANYOF_TEST(p,c)     (ANYOF_BYTE(p,c) &   ANYOF_BIT(c))
+
 #ifdef REGALIGN_STRUCT
 #define ANY_SKIP ((33 - 1)/sizeof(regnode) + 1)
 #else
