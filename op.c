@@ -4619,9 +4619,12 @@ Perl_ck_bitop(pTHX_ OP *o)
 	    || o->op_type == OP_BIT_AND
 	    || o->op_type == OP_BIT_XOR)
     {
-	OPCODE typfirst = cBINOPo->op_first->op_type;
-	OPCODE typlast  = cBINOPo->op_first->op_sibling->op_type;
-	if (OP_IS_NUMCOMPARE(typfirst) || OP_IS_NUMCOMPARE(typlast))
+	OP * left = cBINOPo->op_first;
+	OP * right = left->op_sibling;
+	if ((OP_IS_NUMCOMPARE(left->op_type) &&
+		(left->op_flags & OPf_PARENS) == 0) ||
+	    (OP_IS_NUMCOMPARE(right->op_type) &&
+		(right->op_flags & OPf_PARENS) == 0))
 	    if (ckWARN(WARN_PRECEDENCE))
 		Perl_warner(aTHX_ packWARN(WARN_PRECEDENCE),
 			"Possible precedence problem on bitwise %c operator",
