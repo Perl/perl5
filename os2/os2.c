@@ -5,6 +5,8 @@
 #define INCL_DOSERRORS
 #include <os2.h>
 
+#include <sys/uflags.h>
+
 /*
  * Various Unix compatibility functions for OS/2
  */
@@ -378,6 +380,48 @@ result(int flag, int pid)
 #define EXECF_TRUEEXEC 2
 #define EXECF_SPAWN_NOWAIT 3
 
+/* const char* const ptypes[] = { "FS", "DOS", "VIO", "PM", "DETACH" }; */
+
+static int
+my_type()
+{
+    int rc;
+    TIB *tib;
+    PIB *pib;
+    
+    if (!(_emx_env & 0x200)) return 1; /* not OS/2. */
+    if (CheckOSError(DosGetInfoBlocks(&tib, &pib))) 
+	return -1; 
+    
+    return (pib->pib_ultype);
+}
+
+static ULONG
+file_type(char *path)
+{
+    int rc;
+    ULONG apptype;
+    
+    if (!(_emx_env & 0x200)) 
+	croak("file_type not implemented on DOS"); /* not OS/2. */
+    if (CheckOSError(DosQueryAppType(path, &apptype))) {
+	switch (rc) {
+	case ERROR_FILE_NOT_FOUND:
+	case ERROR_PATH_NOT_FOUND:
+	    return -1;
+	case ERROR_ACCESS_DENIED:	/* Directory with this name found? */
+	    return -3;
+	default:			/* Found, but not an
+					   executable, or some other
+					   read error. */
+	    return -2;
+	}
+    }    
+    return apptype;
+}
+
+static ULONG os2_mytype;
+
 /* Spawn/exec a program, revert to shell if needed. */
 /* global PL_Argv[] contains arguments. */
 
@@ -390,14 +434,15 @@ char *inicmd;
 {
     dTHR;
 	int trueflag = flag;
-	int rc, pass = 1, err;
+	int rc, pass = 1;
 	char *tmps;
-	char buf[256], *s = 0;
+	char buf[256], *s = 0, scrbuf[280];
 	char *args[4];
 	static char * fargs[4] 
 	    = { "/bin/sh", "-c", "\"$@\"", "spawn-via-shell", };
 	char **argsp = fargs;
 	char nargs = 4;
+	int force_shell;
 	
 	if (flag == P_WAIT)
 		flag = P_NOWAIT;
@@ -414,6 +459,71 @@ char *inicmd;
 	/* We should check PERL_SH* and PERLLIB_* as well? */
 	if (!really || !*(tmps = SvPV(really, PL_na)))
 	    tmps = PL_Argv[0];
+
+      reread:
+	force_shell = 0;
+	if (_emx_env & 0x200) { /* OS/2. */ 
+	    int type = file_type(tmps);
+	  type_again:
+	    if (type == -1) {		/* Not found */
+		errno = ENOENT;
+		rc = -1;
+		goto do_script;
+	    }
+	    else if (type == -2) {		/* Not an EXE */
+		errno = ENOEXEC;
+		rc = -1;
+		goto do_script;
+	    }
+	    else if (type == -3) {		/* Is a directory? */
+		/* Special-case this */
+		char tbuf[512];
+		int l = strlen(tmps);
+
+		if (l + 5 <= sizeof tbuf) {
+		    strcpy(tbuf, tmps);
+		    strcpy(tbuf + l, ".exe");
+		    type = file_type(tbuf);
+		    if (type >= -3)
+			goto type_again;
+		}
+		
+		errno = ENOEXEC;
+		rc = -1;
+		goto do_script;
+	    }
+	    switch (type & 7) {
+		/* Ignore WINDOWCOMPAT and FAPI, start them the same type we are. */
+	    case FAPPTYP_WINDOWAPI: 
+	    {
+		if (os2_mytype != 3) {	/* not PM */
+		    if (flag == P_NOWAIT)
+			flag = P_PM;
+		    else if ((flag & 7) != P_PM && (flag & 7) != P_SESSION)
+			warn("Starting PM process with flag=%d, mytype=%d",
+			     flag, os2_mytype);
+		}
+	    }
+	    break;
+	    case FAPPTYP_NOTWINDOWCOMPAT: 
+	    {
+		if (os2_mytype != 0) {	/* not full screen */
+		    if (flag == P_NOWAIT)
+			flag = P_SESSION;
+		    else if ((flag & 7) != P_SESSION)
+			warn("Starting Full Screen process with flag=%d, mytype=%d",
+			     flag, os2_mytype);
+		}
+	    }
+	    break;
+	    case FAPPTYP_NOTSPEC: 
+		/* Let the shell handle this... */
+		force_shell = 1;
+		goto doshell_args;
+		break;
+	    }
+	}
+
 #if 0
 	rc = result(trueflag, spawnvp(flag,tmps,PL_Argv));
 #else
@@ -422,19 +532,32 @@ char *inicmd;
 	else if (execf == EXECF_EXEC)
 	    rc = spawnvp(trueflag | P_OVERLAY,tmps,PL_Argv);
 	else if (execf == EXECF_SPAWN_NOWAIT)
-	    rc = spawnvp(trueflag | P_NOWAIT,tmps,PL_Argv);
+	    rc = spawnvp(flag,tmps,PL_Argv);
         else				/* EXECF_SPAWN */
 	    rc = result(trueflag, 
-			spawnvp(trueflag | P_NOWAIT,tmps,PL_Argv));
+			spawnvp(flag,tmps,PL_Argv));
 #endif 
 	if (rc < 0 && pass == 1
 	    && (tmps == PL_Argv[0])) { /* Cannot transfer `really' via shell. */
-	    err = errno;
+	      do_script:
+	    {
+	    int err = errno;
+
 	    if (err == ENOENT || err == ENOEXEC) {
 		/* No such file, or is a script. */
 		/* Try adding script extensions to the file name, and
 		   search on PATH. */
 		char *scr = find_script(PL_Argv[0], TRUE, NULL, 0);
+		int l = strlen(scr);
+		
+		if (l >= sizeof scrbuf) {
+		   Safefree(scr);
+		 longbuf:
+		   croak("Size of scriptname too big: %d", l);
+		}
+		strcpy(scrbuf, scr);
+		Safefree(scr);
+		scr = scrbuf;
 
 		if (scr) {
 		    FILE *file = fopen(scr, "r");
@@ -443,9 +566,27 @@ char *inicmd;
 		    PL_Argv[0] = scr;
 		    if (!file)
 			goto panic_file;
-		    if (!fgets(buf, sizeof buf, file)) {
+		    if (!fgets(buf, sizeof buf, file)) { /* Empty... */
+
+			buf[0] = 0;
 			fclose(file);
-			goto panic_file;
+			/* Special case: maybe from -Zexe build, so
+			   there is an executable around (contrary to
+			   documentation, DosQueryAppType sometimes (?)
+			   does not append ".exe", so we could have
+			   reached this place). */
+			if (l + 5 < sizeof scrbuf) {
+			    strcpy(scrbuf + l, ".exe");
+			    if (PerlLIO_stat(scrbuf,&PL_statbuf) >= 0
+				&& !S_ISDIR(PL_statbuf.st_mode)) {
+				/* Found */
+				tmps = scr;
+				pass++;
+				goto reread;
+			    } else
+				scrbuf[l] = 0;
+			} else
+			    goto longbuf;
 		    }
 		    if (fclose(file) != 0) { /* Failure */
 		      panic_file:
@@ -503,7 +644,8 @@ char *inicmd;
 			char **a = PL_Argv;
 			char *exec_args[2];
 
-			if (!buf[0] && file) { /* File without magic */
+			if (force_shell 
+			    || (!buf[0] && file)) { /* File without magic */
 			    /* In fact we tried all what pdksh would
 			       try.  There is no point in calling
 			       pdksh, we may just emulate its logic. */
@@ -581,7 +723,8 @@ char *inicmd;
 		/* Not found: restore errno */
 		errno = err;
 	    }
-	} else if (rc < 0 && pass == 2 && err == ENOENT) { /* File not found */
+	  }
+	} else if (rc < 0 && pass == 2 && errno == ENOENT) { /* File not found */
 	    char *no_dir = strrchr(PL_Argv[0], '/');
 
 	    /* Do as pdksh port does: if not found with /, try without
@@ -596,7 +739,7 @@ char *inicmd;
 	    warn("Can't %s \"%s\": %s\n", 
 		 ((execf != EXECF_EXEC && execf != EXECF_TRUEEXEC) 
 		  ? "spawn" : "exec"),
-		 PL_Argv[0], Strerror(err));
+		 PL_Argv[0], Strerror(errno));
 	if (rc < 0 && (execf != EXECF_SPAWN_NOWAIT) 
 	    && ((trueflag & 0xFF) == P_WAIT)) 
 	    rc = 255 << 8; /* Emulate the fork(). */
@@ -773,7 +916,8 @@ bool
 do_exec(cmd)
 char *cmd;
 {
-    return do_spawn2(cmd, EXECF_EXEC);
+    do_spawn2(cmd, EXECF_EXEC);
+    return FALSE;
 }
 
 bool
@@ -865,7 +1009,7 @@ char	*mode;
 int
 fork(void)
 {
-    die(no_func, "Unsupported function fork");
+    die(PL_no_func, "Unsupported function fork");
     errno = EINVAL;
     return -1;
 }
@@ -1022,6 +1166,8 @@ XS(XS_File__Copy_syscopy)
     XSRETURN(1);
 }
 
+#include "patchlevel.h"
+
 char *
 mod2fname(sv)
      SV   *sv;
@@ -1061,6 +1207,7 @@ mod2fname(sv)
 #ifdef USE_THREADS
     sum++;				/* Avoid conflict of DLLs in memory. */
 #endif 
+    sum += PATCHLEVEL * 200 + SUBVERSION * 2;  /*  */
     fname[pos] = 'A' + (sum % 26);
     fname[pos + 1] = 'A' + (sum / 26 % 26);
     fname[pos + 2] = '\0';
@@ -1096,6 +1243,12 @@ os2error(int rc)
 		sprintf(buf, "OS/2 system error code %d=0x%x", rc, rc);
 	else
 		buf[len] = '\0';
+	if (len > 0 && buf[len - 1] == '\n')
+	    buf[len - 1] = '\0';
+	if (len > 1 && buf[len - 2] == '\r')
+	    buf[len - 2] = '\0';
+	if (len > 2 && buf[len - 3] == '.')
+	    buf[len - 3] = '\0';
 	return buf;
 }
 
@@ -1482,6 +1635,7 @@ Perl_OS2_init(char **env)
     MALLOC_INIT;
     settmppath();
     OS2_Perl_data.xs_init = &Xs_OS2_init;
+    _uflags (_UF_SBRK_MODEL, _UF_SBRK_ARBITRARY);
     if (environ == NULL) {
 	environ = env;
     }
@@ -1502,6 +1656,7 @@ Perl_OS2_init(char **env)
 	}
     }
     MUTEX_INIT(&start_thread_mutex);
+    os2_mytype = my_type();		/* Do it before morphing.  Needed? */
 }
 
 #undef tmpnam

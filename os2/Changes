@@ -198,3 +198,17 @@ after 5.004_73:
 	metachars, or if magic-line asks for sh, or there is no magic
 	line and EXECSHELL is set to sh.
 	Shell is supplied the original command line if possible.
+
+after 5.005_02:
+	Can start PM programs from non-PM sessions by plain system()
+		and friends.  Can start DOS/Win programs.  Can start
+		fullscreen programs from non-fullscreen sessions too.
+	In fact system(P_PM,...) was broken.
+	We mangle the name of perl*.DLL, to allow coexistence of different
+		versions of Perl executables on the system.  Mangling of
+		names of extension DLL is also changed, thus running two
+		different versions of the executable with loaded
+		extensions should not lead to conflicts (since 
+		extension-full-name and Perl-version mangling work in the 
+		same set ot 576 possible keys, this may lead to clashes).
+	$^E was reset on the second read, and contained ".\r\n" at the end.
