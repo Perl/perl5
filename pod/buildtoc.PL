@@ -73,6 +73,7 @@ if (-d "pod") {
     perlfreebsd             
     perlhpux            
     perlhurd            
+    perlirix            
     perlmachten         
     perlmacos
     perlmint

@@ -2250,6 +2250,7 @@ README.epoc		Notes about EPOC port
 README.freebsd		Notes about FreeBSD
 README.hpux		Notes about HP-UX port
 README.hurd		Notes about GNU/Hurd port
+README.irix		Notes about Irix port
 README.jp		About using Perl and Japanese
 README.ko		About using Perl and Korean
 README.machten		Notes about Power MachTen port
