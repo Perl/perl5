@@ -192,6 +192,24 @@ Macro to verify that a PM module's $VERSION variable matches the XS
 module's C<XS_VERSION> variable.  This is usually handled automatically by
 C<xsubpp>.  See L<perlxs/"The VERSIONCHECK: Keyword">.
 
+=head1 Simple Exception Handling Macros
+
+=for apidoc Ams||dXCPT
+Set up neccessary local variables for exception handling.
+See L<perlguts/"Exception Handling">.
+
+=for apidoc AmU||XCPT_TRY_START
+Starts a try block.  See L<perlguts/"Exception Handling">.
+
+=for apidoc AmU||XCPT_TRY_END
+Ends a try block.  See L<perlguts/"Exception Handling">.
+
+=for apidoc AmU||XCPT_CATCH
+Introduces a catch block.  See L<perlguts/"Exception Handling">.
+
+=for apidoc Ams||XCPT_RETHROW
+Rethrows a previously caught exception.  See L<perlguts/"Exception Handling">.
+
 =cut
 */
 
@@ -253,6 +271,12 @@ C<xsubpp>.  See L<perlxs/"The VERSIONCHECK: Keyword">.
 #else
 #  define XS_VERSION_BOOTCHECK
 #endif
+
+#define dXCPT             dJMPENV; int rEtV = 0
+#define XCPT_TRY_START    JMPENV_PUSH(rEtV); if (rEtV == 0)
+#define XCPT_TRY_END      JMPENV_POP;
+#define XCPT_CATCH        if (rEtV != 0)
+#define XCPT_RETHROW      JMPENV_JUMP(rEtV)
 
 /* 
    The DBM_setFilter & DBM_ckFilter macros are only used by 

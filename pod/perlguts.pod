@@ -2260,6 +2260,34 @@ and
         AV *av = ...;
         UV  uv = PTR2UV(av);
 
+=head2 Exception Handling
+
+There are a couple of macros to do very basic exception handling in
+XS modules. You can use these macros if you call code that may croak,
+but you need to do some cleanup before giving control back to Perl.
+For example:
+
+        dXCPT;    /* set up neccessary variables */
+
+        XCPT_TRY_START {
+          code_that_may_croak();
+        } XCPT_TRY_END
+
+        XCPT_CATCH
+        {
+          /* do cleanup here */
+          XCPT_RETHROW;
+        }
+
+Note that you always have to rethrow an exception that has been
+caught. Using these macros, it is not possible to just catch the
+exception and ignore it. If you have to ignore the exception, you
+have to use the C<call_*> function.
+
+The advantage of using the above macros is that you don't have
+to setup an extra function for C<call_*>, and that using these
+macros is faster than using C<call_*>.
+
 =head2 Source Documentation
 
 There's an effort going on to document the internal functions and
