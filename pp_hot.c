@@ -2064,61 +2064,80 @@ PP(pp_method)
     dSP;
     SV* sv;
     SV* ob;
+    HV* stash;
     GV* gv;
-    SV* nm;
+    char* packname;
+    STRLEN packlen;
+    char* name;
+    char* origname;
+    char* sep;
+    char* p;
 
-    nm = TOPs;
     sv = *(stack_base + TOPMARK + 1);
-    
-    gv = 0;
+
+    sep = name = origname = SvPV(TOPs, na);
+    for (p = name; *p; p++) {
+	if (*p == '\'')
+	    sep = p, name = p + 1;
+	else if (*p == ':' && *(p + 1) == ':')
+	    sep = p, name = p + 2;
+    }
+    if (name == origname)
+	packname = Nullch;
+    else {
+	packname = origname;
+	packlen = sep - origname;
+
+	/* let gv_fetchmethod() handle SUPER:: */
+	if (packlen == 5 && strnEQ(packname, "SUPER", 5)) {
+	    packname = Nullch;
+	    name = origname;
+	}
+    }
+
     if (SvGMAGICAL(sv))
         mg_get(sv);
     if (SvROK(sv))
 	ob = (SV*)SvRV(sv);
     else {
+	char* tname = Nullch;
+	STRLEN tlen = 0;
 	GV* iogv;
-	char* packname = 0;
-	STRLEN packlen;
 
 	if (!SvOK(sv) ||
-	    !(packname = SvPV(sv, packlen)) ||
-	    !(iogv = gv_fetchpv(packname, FALSE, SVt_PVIO)) ||
-	    !(ob=(SV*)GvIO(iogv)))
+	    !(tname = SvPV(sv, tlen)) ||
+	    !(iogv = gv_fetchpv(tname, FALSE, SVt_PVIO)) ||
+	    !(ob = (SV*)GvIO(iogv)))
 	{
-	    char *name = SvPV(nm, na);
-	    HV *stash;
-	    if (!packname || !isALPHA(*packname))
-DIE("Can't call method \"%s\" without a package or object reference", name);
-	    if (!(stash = gv_stashpvn(packname, packlen, FALSE))) {
-		if (gv_stashpvn("UNIVERSAL", 9, FALSE))
-		    stash = gv_stashpvn(packname, packlen, TRUE);
-		else
-		    DIE("Can't call method \"%s\" in empty package \"%s\"",
-			name, packname);
+	    if (!packname) {
+		packname = tname;
+		packlen = tlen;
 	    }
-	    gv = gv_fetchmethod(stash,name);
-	    if (!gv)
-		DIE("Can't locate object method \"%s\" via package \"%s\"",
-		    name, packname);
-	    SETs(isGV(gv) ? (SV*)GvCV(gv) : (SV*)gv);
-	    RETURN;
+	    if (!packname || !isALPHA(*packname))
+  DIE("Can't call method \"%s\" without a package or object reference", name);
+	    goto fetch;
 	}
+
+	/* working on an IO object */
 	*(stack_base + TOPMARK + 1) = sv_2mortal(newRV((SV*)iogv));
     }
 
-    if (!ob || !SvOBJECT(ob)) {
-	char *name = SvPV(nm, na);
-	DIE("Can't call method \"%s\" on unblessed reference", name);
-    }
+    if (!ob || !SvOBJECT(ob))
+	DIE("Can't call method \"%s\" on unblessed reference", origname);
 
-    if (!gv) {		/* nothing cached */
-	char *name = SvPV(nm, na);
-	gv = gv_fetchmethod(SvSTASH(ob),name);
-	if (!gv)
-	    DIE("Can't locate object method \"%s\" via package \"%s\"",
-		name, HvNAME(SvSTASH(ob)));
+    if (!packname)
+	stash = SvSTASH(ob);
+    else {
+  fetch:
+	stash = gv_stashpvn(packname, packlen, TRUE);
     }
-
+    gv = gv_fetchmethod(stash, name);
+    if (!gv)
+	DIE("Can't locate object method \"%s\" via package \"%s\"",
+	    name, HvNAME((strnEQ(name, "SUPER", 5) &&
+			  (name[5] == '\'' ||
+			   (name[5] == ':' && name[6] == ':')))
+			 ? curcop->cop_stash : stash));
     SETs(isGV(gv) ? (SV*)GvCV(gv) : (SV*)gv);
     RETURN;
 }
