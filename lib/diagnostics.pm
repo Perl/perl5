@@ -163,7 +163,6 @@ Tom Christiansen F<E<lt>tchrist@mox.perl.comE<gt>>, 25 June 1995.
 =cut
 
 require 5.001;
-use English;
 use Carp;
 
 use Config;
@@ -177,7 +176,7 @@ else {
 $DEBUG ||= 0;
 my $WHOAMI = ref bless [];  # nobody's business, prolly not even mine
 
-$OUTPUT_AUTOFLUSH = 1;
+$| = 1;
 
 local $_;
 
