@@ -227,7 +227,7 @@ struct thread {
     U32		tid;
     struct thread *next, *prev;		/* Circular linked list of threads */
     JMPENV	Tstart_env;	        /* Top of top_env longjmp() chain */ 
-#ifdef ADD_THREAD_INTERN
+#ifdef HAVE_THREAD_INTERN
     struct thread_intern i;		/* Platform-dependent internals */
 #endif
     char	trailing_nul;		/* For the sake of thrsv and oursv */
