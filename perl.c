@@ -397,15 +397,16 @@ perl_destruct(pTHXx)
     }
 #endif
 
-    LEAVE;
     {
-      dJMPENV;
-      int x = 0;
-      JMPENV_PUSH(x);
-      if (PL_endav && !PL_minus_c)
-       call_list(PL_scopestack_ix, PL_endav);
-      JMPENV_POP;
+        dJMPENV;
+        int x = 0;
+
+        JMPENV_PUSH(x);
+        if (PL_endav && !PL_minus_c)
+            call_list(PL_scopestack_ix, PL_endav);
+        JMPENV_POP;
     }
+    LEAVE;
     FREETMPS;
 
     /* We must account for everything.  */
