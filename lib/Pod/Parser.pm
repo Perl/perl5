@@ -13,7 +13,7 @@
 package Pod::Parser;
 
 use vars qw($VERSION);
-$VERSION = 1.08;   ## Current version of this package
+$VERSION = 1.081;  ## Current version of this package
 require  5.004;    ## requires this Perl version or later
 
 #############################################################################
@@ -654,6 +654,7 @@ is a reference to the parse-tree object.
 ## an interior sequence looks like '-' or '=', but not '--' or '=='
 use vars qw( $ARROW_RE );
 $ARROW_RE = join('', qw{ (?: [^=]+= | [^-]+- )$ });  
+#$ARROW_RE = qr/(?:[^=]+=|[^-]+-)$/;  ## 5.005+ only!
 
 sub parse_text {
     my $self = shift;
@@ -672,7 +673,7 @@ sub parse_text {
     ## Convert method calls into closures, for our convenience
     my $xseq_sub   = $expand_seq;
     my $xptree_sub = $expand_ptree;
-    if ($expand_seq eq 'interior_sequence') {
+    if (defined $expand_seq  and  $expand_seq eq 'interior_sequence') {
         ## If 'interior_sequence' is the method to use, we have to pass
         ## more than just the sequence object, we also need to pass the
         ## sequence name and text.
@@ -705,7 +706,7 @@ sub parse_text {
         ++$line  if ($_ eq "\n");
         ## Look for the beginning of a sequence
         if ( /^([A-Z])(<)$/ ) {
-            ## Push a new sequence onto the stack on of those "in-progress"
+            ## Push a new sequence onto the stack of those "in-progress"
             $seq = Pod::InteriorSequence->new(
                        -name   => ($cmd = $1),
                        -ldelim => $2,     -rdelim => '',
@@ -729,7 +730,7 @@ sub parse_text {
         }
         else {
             ## In the middle of a sequence, append this text to it
-            $seq->append($_)  if $_;
+            $seq->append($_)  if length;
         }
         ## Remember the "current" sequence and the previously seen token
         ($seq, $prev) = ( $seq_stack[-1], $_ );

@@ -928,10 +928,10 @@ scan_const(char *start)
     register char *d = SvPVX(sv);		/* destination for copies */
     bool dorange = FALSE;			/* are we in a translit range? */
     I32 len;					/* ? */
-    I32 utf = PL_lex_inwhat == OP_TRANS
+    I32 utf = (PL_lex_inwhat == OP_TRANS && PL_sublex_info.sub_op)
 	? (PL_sublex_info.sub_op->op_private & (OPpTRANS_FROM_UTF|OPpTRANS_TO_UTF))
 	: UTF;
-    I32 thisutf = PL_lex_inwhat == OP_TRANS
+    I32 thisutf = (PL_lex_inwhat == OP_TRANS && PL_sublex_info.sub_op)
 	? (PL_sublex_info.sub_op->op_private & (PL_lex_repl ? OPpTRANS_FROM_UTF : OPpTRANS_TO_UTF))
 	: UTF;
 
@@ -5669,19 +5669,23 @@ scan_inputsymbol(char *start)
     register char *s = start;		/* current position in buffer */
     register char *d;
     register char *e;
+    char *end;
     I32 len;
 
     d = PL_tokenbuf;			/* start of temp holding space */
     e = PL_tokenbuf + sizeof PL_tokenbuf;	/* end of temp holding space */
-    s = delimcpy(d, e, s + 1, PL_bufend, '>', &len);	/* extract until > */
+    end = strchr(s, '\n');
+    if (!end)
+	end = PL_bufend;
+    s = delimcpy(d, e, s + 1, end, '>', &len);	/* extract until > */
 
     /* die if we didn't have space for the contents of the <>,
-       or if it didn't end
+       or if it didn't end, or if we see a newline
     */
 
     if (len >= sizeof PL_tokenbuf)
 	croak("Excessively long <> operator");
-    if (s >= PL_bufend)
+    if (s >= end)
 	croak("Unterminated <> operator");
 
     s++;

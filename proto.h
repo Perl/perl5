@@ -154,6 +154,9 @@ VIRTUAL OP*	fold_constants _((OP* arg));
 VIRTUAL char*	form _((const char* pat, ...));
 VIRTUAL void	free_tmps _((void));
 VIRTUAL OP*	gen_constant_list _((OP* o));
+#ifndef HAS_GETENV_SV
+VIRTUAL SV*	getenv_sv _((char* key));
+#endif
 VIRTUAL void	gp_free _((GV* gv));
 VIRTUAL GP*	gp_ref _((GP* gp));
 VIRTUAL GV*	gv_AVadd _((GV* gv));

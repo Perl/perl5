@@ -4306,7 +4306,7 @@ newAVREF(OP *o)
 OP *
 newGVREF(I32 type, OP *o)
 {
-    if (type == OP_MAPSTART || type == OP_GREPSTART)
+    if (type == OP_MAPSTART || type == OP_GREPSTART || type == OP_SORT)
 	return newUNOP(OP_NULL, 0, o);
     return ref(newUNOP(OP_RV2GV, OPf_REF, o), type);
 }
@@ -5119,7 +5119,7 @@ ck_sort(OP *o)
     if (o->op_flags & OPf_STACKED) {		     /* may have been cleared */
 	OP *kid = cLISTOPo->op_first->op_sibling;	/* get past pushmark */
 	OP *k;
-	kid = kUNOP->op_first;				/* get past rv2gv */
+	kid = kUNOP->op_first;				/* get past null */
 
 	if (kid->op_type == OP_SCOPE || kid->op_type == OP_LEAVE) {
 	    linklist(kid);
@@ -5144,7 +5144,6 @@ ck_sort(OP *o)
 	    peep(k);
 
 	    kid = cLISTOPo->op_first->op_sibling;	/* get past pushmark */
-	    null(kid);					/* wipe out rv2gv */
 	    if (o->op_type == OP_SORT)
 		kid->op_next = kid;
 	    else
@@ -5169,7 +5168,7 @@ simplify_sort(OP *o)
 	return;
     GvMULTI_on(gv_fetchpv("a", TRUE, SVt_PV)); 
     GvMULTI_on(gv_fetchpv("b", TRUE, SVt_PV)); 
-    kid = kUNOP->op_first;				/* get past rv2gv */
+    kid = kUNOP->op_first;				/* get past null */
     if (kid->op_type != OP_SCOPE)
 	return;
     kid = kLISTOP->op_last;				/* get past scope */

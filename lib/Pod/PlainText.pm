@@ -13,7 +13,7 @@
 package Pod::PlainText;
 
 use vars qw($VERSION);
-$VERSION = 1.08;   ## Current version of this package
+$VERSION = 1.081;  ## Current version of this package
 require  5.004;    ## requires this Perl version or later
 
 =head1 NAME
@@ -279,7 +279,7 @@ sub fill {
             $line .= $_;
         }
     }
-    $par .= "$line\n" if $line;
+    $par .= "$line\n" if length $line;
     $par .= "\n";
     return $par;
 }

@@ -11,7 +11,7 @@
 package Pod::InputObjects;
 
 use vars qw($VERSION);
-$VERSION = 1.08;   ## Current version of this package
+$VERSION = 1.081;  ## Current version of this package
 require  5.004;    ## requires this Perl version or later
 
 #############################################################################
@@ -496,7 +496,7 @@ sub _set_child2parent_links {
    my ($self, @children) = @_;
    ## Make sure any sequences know who their parent is
    for (@children) {
-      next unless ref $_;
+      next unless ref;
       if ($_->isa('Pod::InteriorSequence') or $_->can('nested')) {
           $_->nested($self);
       }
@@ -510,7 +510,7 @@ sub _unset_child2parent_links {
    $self->{'-parent_sequence'} = undef;
    my $ptree = $self->{'-ptree'};
    for (@$ptree) {
-      next  unless ($_ and ref $_ and $_->isa('Pod::InteriorSequence'));
+      next  unless (length  and  ref  and  $_->isa('Pod::InteriorSequence'));
       $_->_unset_child2parent_links();
    }
 }
@@ -801,7 +801,7 @@ sub prepend {
    my $self = shift;
    local *ptree = $self;
    for (@_) {
-      next  unless $_;
+      next  unless length;
       if (@ptree  and  !(ref $ptree[0])  and  !(ref $_)) {
          $ptree[0] = $_ . $ptree[0];
       }
@@ -827,7 +827,7 @@ sub append {
    my $self = shift;
    local *ptree = $self;
    for (@_) {
-      next  unless $_;
+      next  unless length;
       if (@ptree  and  !(ref $ptree[-1])  and  !(ref $_)) {
          $ptree[-1] .= $_;
       }
@@ -863,7 +863,7 @@ sub _unset_child2parent_links {
    my $self = shift;
    local *ptree = $self;
    for (@ptree) {
-       next  unless ($_ and ref $_ and $_->isa('Pod::InteriorSequence'));
+       next  unless (length  and  ref  and  $_->isa('Pod::InteriorSequence'));
        $_->_unset_child2parent_links();
    }
 }

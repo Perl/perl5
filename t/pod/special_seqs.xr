@@ -11,3 +11,5 @@
 
     Dont forget `$self->method()->{FIELDNAME} = {FOO=>BAR}'.
 
+    And make sure that `0' works too!
+

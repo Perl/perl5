@@ -3,8 +3,9 @@ package TestPodIncPlainText;
 BEGIN {
    use File::Basename;
    use File::Spec;
+   use Cwd qw(abs_path);
    push @INC, '..';
-   my $THISDIR = dirname $0;
+   my $THISDIR = abs_path(dirname $0);
    unshift @INC, $THISDIR;
    require "testcmp.pl";
    import TestCompare;
@@ -19,6 +20,7 @@ use vars qw(@ISA @EXPORT $MYPKG);
 use Carp;
 use Exporter;
 #use File::Compare;
+#use Cwd qw(abs_path);
 
 @ISA = qw(Pod::PlainText);
 @EXPORT = qw(&testpodplaintext);
@@ -29,6 +31,16 @@ $MYPKG = eval { (caller)[0] };
 @ENV{qw(TERMCAP COLUMNS)} = ('co=72:do=^J', 72);
 
 sub catfile(@) { File::Spec->catfile(@_); }
+
+my $INSTDIR = abs_path(dirname $0);
+$INSTDIR = (dirname $INSTDIR) if (basename($INSTDIR) eq 'xtra');
+$INSTDIR = (dirname $INSTDIR) if (basename($INSTDIR) eq 'pod');
+$INSTDIR = (dirname $INSTDIR) if (basename($INSTDIR) eq 't');
+my @PODINCDIRS = ( catfile($INSTDIR, 'lib', 'Pod'),
+                   catfile($INSTDIR, 'scripts'),
+                   catfile($INSTDIR, 't', 'pod'),
+                   catfile($INSTDIR, 't', 'pod', 'xtra')
+                 );
 
 ## Find the path to the file to =include
 sub findinclude {
@@ -42,19 +54,8 @@ sub findinclude {
     ##   1. the directory containing this pod file
     my $thispoddir = dirname $self->input_file;
     ##   2. the parent directory of the above
-    my $parentdir  = ($thispoddir eq '.') ? '..' : dirname $thispoddir;
-    ##   3. any Pod/ or scripts/ subdirectory of these two
-    my @dirs = ();
-    for ($thispoddir, $parentdir) {
-       my $dir = $_;
-       for ( qw(scripts lib) ) {
-          push @dirs, $dir, catfile($dir, $_),
-                            catfile($dir, 'Pod'),
-                            catfile($dir, $_, 'Pod');
-       }
-    }
-    my %dirs = (map { ($_ => 1) } @dirs);
-    my @podincdirs = (sort keys %dirs);
+    my $parentdir  = dirname $thispoddir;
+    my @podincdirs = ($thispoddir, $parentdir, @PODINCDIRS);
 
     for (@podincdirs) {
        my $incfile = catfile($_, $incname);

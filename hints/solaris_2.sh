@@ -285,6 +285,19 @@ rm -f core
 # XXX
 EOSH
 
+# Damon.Atkins@nabaus.com.au 19-Mar-1999
+# Large Files Support
+if [ -x /usr/bin/getconf ] ; then
+    ccflags="$ccflags `/usr/bin/getconf LFS_CFLAGS`"
+    [ "X${ccflags}"    = "X " ]    && ccflags=''
+    ldflags="$ldflags `/usr/bin/getconf LFS_LDFLAGS`"
+    [ "X${ldflags}" = "X " ]       && ldflags=''
+    libswanted="$libswanted `/usr/bin/getconf LFS_LIBS`"
+    [ "X${libswanted}" = "X " ]    && libswanted=''
+    lintflags="$lintflags `/usr/bin/getconf LFS_LINTFLAGS`"
+    [ "X${lintflags}"  = "X " ]    && lintflags=''
+fi
+
 # This script UU/usethreads.cbu will get 'called-back' by Configure 
 # after it has prompted the user for whether to use threads.
 cat > UU/usethreads.cbu <<'EOCBU'
