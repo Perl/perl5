@@ -20,7 +20,7 @@
 
 # $Id: Head.U,v 3.0.1.9 1997/02/28 15:02:09 ram Exp $
 #
-# Generated on Wed Dec 12 00:49:11 EET 2001 [metaconfig 3.0 PL70]
+# Generated on Wed Dec 12 17:09:05 EET 2001 [metaconfig 3.0 PL70]
 # (with additional metaconfig patches by perlbug@perl.org)
 
 cat >c1$$ <<EOF
@@ -7668,7 +7668,7 @@ case "$man3dir" in
 esac
 
 : see if we have to deal with yellow pages, now NIS.
-if $test -d /usr/etc/yp || $test -d /etc/yp; then
+if $test -d /usr/etc/yp || $test -d /etc/yp || $test -d /usr/lib/yp; then
 	if $test -f /usr/etc/nibindd; then
 		echo " "
 		echo "I'm fairly confident you're on a NeXT."
