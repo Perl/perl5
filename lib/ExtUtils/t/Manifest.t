@@ -204,9 +204,16 @@ SKIP: {
     chmod( 0400, 'MANIFEST' );
     skip "Can't make MANIFEST read-only", 2 if -w 'MANIFEST';
 
-    eval {
-        maniadd({ 'META.yml' => 'hock' });
-    };
+    if ( $^O eq 'VMS' ) {
+        eval {
+            maniadd({ 'meta.yml' => 'hock' });
+        };
+    }
+    else {
+        eval {
+            maniadd({ 'META.yml' => 'hock' });
+        };
+    }
     is( $@, '',  "maniadd() won't open MANIFEST if it doesn't need to" );
 
     eval {
