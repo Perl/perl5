@@ -3027,22 +3027,22 @@ which guarantees to evaluate sv only once.
 =for hackers
 Found in file sv.h
 
-=item SvNVx
-
-Coerces the given SV to a double and returns it. Guarantees to evaluate
-sv only once. Use the more efficient C<SvNV> otherwise.
-
-	NV	SvNVx(SV* sv)
-
-=for hackers
-Found in file sv.h
-
 =item SvNVX
 
 Returns the raw value in the SV's NV slot, without checks or conversions.
 Only use when you are sure SvNOK is true. See also C<SvNV()>.
 
 	NV	SvNVX(SV* sv)
+
+=for hackers
+Found in file sv.h
+
+=item SvNVx
+
+Coerces the given SV to a double and returns it. Guarantees to evaluate
+sv only once. Use the more efficient C<SvNV> otherwise.
+
+	NV	SvNVx(SV* sv)
 
 =for hackers
 Found in file sv.h
@@ -3236,21 +3236,21 @@ Like C<SvPV_nolen>, but converts sv to utf8 first if necessary.
 =for hackers
 Found in file sv.h
 
+=item SvPVx
+
+A version of C<SvPV> which guarantees to evaluate sv only once.
+
+	char*	SvPVx(SV* sv, STRLEN len)
+
+=for hackers
+Found in file sv.h
+
 =item SvPVX
 
 Returns a pointer to the physical string in the SV.  The SV must contain a
 string.
 
 	char*	SvPVX(SV* sv)
-
-=for hackers
-Found in file sv.h
-
-=item SvPVx
-
-A version of C<SvPV> which guarantees to evaluate sv only once.
-
-	char*	SvPVx(SV* sv, STRLEN len)
 
 =for hackers
 Found in file sv.h
@@ -3498,22 +3498,22 @@ for a version which guarantees to evaluate sv only once.
 =for hackers
 Found in file sv.h
 
-=item SvUVx
-
-Coerces the given SV to an unsigned integer and returns it. Guarantees to
-evaluate sv only once. Use the more efficient C<SvUV> otherwise.
-
-	UV	SvUVx(SV* sv)
-
-=for hackers
-Found in file sv.h
-
 =item SvUVX
 
 Returns the raw value in the SV's UV slot, without checks or conversions.
 Only use when you are sure SvIOK is true. See also C<SvUV()>.
 
 	UV	SvUVX(SV* sv)
+
+=for hackers
+Found in file sv.h
+
+=item SvUVx
+
+Coerces the given SV to an unsigned integer and returns it. Guarantees to
+evaluate sv only once. Use the more efficient C<SvUV> otherwise.
+
+	UV	SvUVx(SV* sv)
 
 =for hackers
 Found in file sv.h
