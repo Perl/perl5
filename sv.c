@@ -6911,7 +6911,7 @@ Perl_sv_vcatpvfn(pTHX_ SV *sv, const char *pat, STRLEN patlen, va_list *args, SV
 		else
 		    vecsv = (evix ? evix <= svmax : svix < svmax) ?
 			svargs[ewix ? ewix-1 : svix++] : &PL_sv_undef;
-		dotstr = (U8*)SvPVx(vecsv, dotstrlen);
+		dotstr = SvPVx(vecsv, dotstrlen);
 		if (DO_UTF8(vecsv))
 		    is_utf = TRUE;
 	    }
@@ -7405,7 +7405,7 @@ Perl_sv_vcatpvfn(pTHX_ SV *sv, const char *pat, STRLEN patlen, va_list *args, SV
 	    /* ... right here, because formatting flags should not apply */
 	    SvGROW(sv, SvCUR(sv) + elen + 1);
 	    p = SvEND(sv);
-	    memcpy(p, eptr, elen);
+	    Copy(eptr, p, elen, char);
 	    p += elen;
 	    *p = '\0';
 	    SvCUR(sv) = p - SvPVX(sv);
@@ -7435,7 +7435,7 @@ Perl_sv_vcatpvfn(pTHX_ SV *sv, const char *pat, STRLEN patlen, va_list *args, SV
 		*p++ = '0';
 	}
 	if (elen) {
-	    memcpy(p, eptr, elen);
+	    Copy(eptr, p, elen, char);
 	    p += elen;
 	}
 	if (gap && left) {
@@ -7444,7 +7444,7 @@ Perl_sv_vcatpvfn(pTHX_ SV *sv, const char *pat, STRLEN patlen, va_list *args, SV
 	}
 	if (vectorize) {
 	    if (veclen) {
-		memcpy(p, dotstr, dotstrlen);
+		Copy(dotstr, p, dotstrlen, char);
 		p += dotstrlen;
 	    }
 	    else
