@@ -3961,23 +3961,20 @@ PERLIO_F_TEMP, PERLIO_F_OPEN, PERLIO_F_FASTGETS
 
 =item Methods in Detail
 
-IV	(*Fileno)(PerlIO *f);,	PerlIO *	(*Fdopen)(PerlIO_funcs
-*tab, int fd, const char *mode);,  PerlIO *	 (*Open)(PerlIO_funcs *tab,
-const char *path, const char *mode);,  int	     (*Reopen)(const char
-*path, const char *mode, PerlIO *f);,  IV	   (*Pushed)(PerlIO
-*f,const char *mode,const char *arg,STRLEN len);,  IV	      
-(*Popped)(PerlIO *f);,	SSize_t (*Read)(PerlIO *f, void *vbuf, Size_t
-count);,  SSize_t (*Unread)(PerlIO *f, const void *vbuf, Size_t count);, 
-SSize_t (*Write)(PerlIO *f, const void *vbuf, Size_t count);,  IV	   
-    (*Seek)(PerlIO *f, Off_t offset, int whence);,  Off_t	   
-(*Tell)(PerlIO *f);,  IV		(*Close)(PerlIO *f);,  IV	   
-    (*Flush)(PerlIO *f);,  IV		    (*Fill)(PerlIO *f);,  IV	   
-	(*Eof)(PerlIO *f);,  IV 	(*Error)(PerlIO *f);,  void	   
-    (*Clearerr)(PerlIO *f);,  void	    (*Setlinebuf)(PerlIO *f);, 
-STDCHAR *   (*Get_base)(PerlIO *f);,  Size_t		   
-(*Get_bufsiz)(PerlIO *f);,  STDCHAR *	(*Get_ptr)(PerlIO *f);,  SSize_t   
-    (*Get_cnt)(PerlIO *f);,  void	    (*Set_ptrcnt)(PerlIO *f,STDCHAR
-*ptr,SSize_t cnt);
+ IV		(*Pushed)(PerlIO *f,const char *mode, SV *arg);,  IV	   
+    (*Popped)(PerlIO *f);,  PerlIO *	    (*Open)(...);, SV * 	   
+(*Getarg)(PerlIO *f);, IV	(*Fileno)(PerlIO *f);,	SSize_t
+(*Read)(PerlIO *f, void *vbuf, Size_t count);,	SSize_t (*Unread)(PerlIO
+*f, const void *vbuf, Size_t count);,  SSize_t (*Write)(PerlIO *f, const
+void *vbuf, Size_t count);,  IV 	      (*Seek)(PerlIO *f, Off_t
+offset, int whence);,  Off_t	       (*Tell)(PerlIO *f);,  IV 	   
+   (*Close)(PerlIO *f);,  IV		   (*Flush)(PerlIO *f);,  IV	   
+       (*Fill)(PerlIO *f);,  IV 	       (*Eof)(PerlIO *f);,  IV	   
+   (*Error)(PerlIO *f);,  void		   (*Clearerr)(PerlIO *f);,  void  
+       (*Setlinebuf)(PerlIO *f);,  STDCHAR *   (*Get_base)(PerlIO *f);, 
+Size_t		      (*Get_bufsiz)(PerlIO *f);,  STDCHAR *  
+(*Get_ptr)(PerlIO *f);,  SSize_t	(*Get_cnt)(PerlIO *f);,  void	   
+    (*Set_ptrcnt)(PerlIO *f,STDCHAR *ptr,SSize_t cnt);
 
 =item Core Layers
 
@@ -3985,7 +3982,7 @@ STDCHAR *   (*Get_base)(PerlIO *f);,  Size_t
 
 =item Extension Layers
 
-"encoding"
+":encoding", ":Scalar", ":Object" or ":Perl"
 
 =back
 
@@ -4412,6 +4409,14 @@ finish, 'enter', print
 =item Purify on NT
 
 DEFINES, USE_MULTI = define, #PERL_MALLOC = define, CFG = Debug
+
+=item Compaq's/Digital's Third Degree
+
+=item PERL_DESTRUCT_LEVEL
+
+=item Pixie Profiling
+
+-h, -l, -p, -h, -i, -l, -testcoverage, -zero
 
 =item CONCLUSION
 
@@ -6052,13 +6057,12 @@ DATAMODEL_NATIVE specified", sh: ar: not found
 
 =item Configure
 
-- Don't turn on the compiler optimization flag "-O".  There's	  a bug in
-the compiler (APAR PQ18812) that generates some bad code       the
-optimizer is on, - As VM/ESA doesn't fully support the fork() API programs
-relying on	 this call will not work. I've replaced fork()/exec() with
-spawn()       and the standalone exec() with spawn(). This has a side
-effect when	opening unnamed pipes in a shell script: there is no child
-process      generated under
+Don't turn on the compiler optimization flag "-O".  There's a bug in the
+compiler (APAR PQ18812) that generates some bad code the optimizer is on,
+As VM/ESA doesn't fully support the fork() API programs relying on this
+call will not work. I've replaced fork()/exec() with spawn() and the
+standalone exec() with spawn(). This has a side effect when opening unnamed
+pipes in a shell script: there is no child process generated under
 
 =item testing anomalies
 
@@ -8075,8 +8079,8 @@ C<d_setproctitle>, C<d_setpwent>, C<d_setregid>, C<d_setresgid>,
 C<d_setresuid>, C<d_setreuid>, C<d_setrgid>, C<d_setruid>, C<d_setsent>,
 C<d_setsid>, C<d_setvbuf>, C<d_sfio>, C<d_shm>, C<d_shmat>,
 C<d_shmatprototype>, C<d_shmctl>, C<d_shmdt>, C<d_shmget>, C<d_sigaction>,
-C<d_sigprocmask>, C<d_sigsetjmp>, C<d_socket>, C<d_socklen_t>,
-C<d_sockpair>, C<d_socks5_init>, C<d_sqrtl>, C<d_statblks>,
+C<d_sigprocmask>, C<d_sigsetjmp>, C<d_sockatmark>, C<d_socket>,
+C<d_socklen_t>, C<d_sockpair>, C<d_socks5_init>, C<d_sqrtl>, C<d_statblks>,
 C<d_statfs_f_flags>, C<d_statfs_s>, C<d_statvfs>, C<d_stdio_cnt_lval>,
 C<d_stdio_ptr_lval>, C<d_stdio_ptr_lval_nochange_cnt>,
 C<d_stdio_ptr_lval_sets_cnt>, C<d_stdio_stream_array>, C<d_stdiobase>,
@@ -8254,7 +8258,7 @@ C<zcat>, C<zip>
 
 =back
 
-=head2 Cwd, getcwd - get pathname of current working directory
+=head2 Cwd - get pathname of current working directory
 
 =over 4
 
@@ -8566,6 +8570,55 @@ Dumper
 =item SYNOPSIS
 
 =item DESCRIPTION
+
+=back
+
+=head2 Digest:: - Modules that calculate message digests
+
+=over 4
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+I<binary>, I<hex>, I<base64>
+
+=item OO INTERFACE
+
+$ctx = Digest->XXX($arg,...), $ctx = Digest->new(XXX => $arg,...), $ctx =
+Digest::XXX->new($arg,...), $ctx->reset, $ctx->add($data,...),
+$ctx->addfile($io_handle), $ctx->digest, $ctx->hexdigest, $ctx->b64digest
+
+=item SEE ALSO
+
+=item AUTHOR
+
+=back
+
+=head2 Digest::MD5 - Perl interface to the MD5 Algorithm
+
+=over 4
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+=item FUNCTIONS
+
+md5($data,...), md5_hex($data,...), md5_base64($data,...)
+
+=item METHODS
+
+$md5 = Digest::MD5->new, $md5->reset, $md5->add($data,...),
+$md5->addfile($io_handle), $md5->digest, $md5->hexdigest, $md5->b64digest
+
+=item EXAMPLES
+
+=item SEE ALSO
+
+=item COPYRIGHT
+
+=item AUTHORS
 
 =back
 
@@ -9674,7 +9727,8 @@ C<untaint_pattern>, C<untaint_skip>
 =item DESCRIPTION
 
 C<GLOB_ERR>, C<GLOB_MARK>, C<GLOB_NOCASE>, C<GLOB_NOCHECK>, C<GLOB_NOSORT>,
-C<GLOB_BRACE>, C<GLOB_NOMAGIC>, C<GLOB_QUOTE>, C<GLOB_TILDE>, C<GLOB_CSH>
+C<GLOB_BRACE>, C<GLOB_NOMAGIC>, C<GLOB_QUOTE>, C<GLOB_TILDE>, C<GLOB_CSH>,
+C<GLOB_ALPHASORT>
 
 =item DIAGNOSTICS
 
@@ -10494,8 +10548,8 @@ new ( [ARGS] )
 
 =item METHODS
 
-accept([PKG]), socketpair(DOMAIN, TYPE, PROTOCOL), timeout([VAL]),
-sockopt(OPT [, VAL]), sockdomain, socktype, protocol, connected
+accept([PKG]), socketpair(DOMAIN, TYPE, PROTOCOL), atmark, connected,
+protocol, sockdomain, sockopt(OPT [, VAL]), socktype, timeout([VAL])
 
 =item SEE ALSO
 
@@ -10736,8 +10790,8 @@ new ( [ARGS] )
 
 =item METHODS
 
-accept([PKG]), socketpair(DOMAIN, TYPE, PROTOCOL), timeout([VAL]),
-sockopt(OPT [, VAL]), sockdomain, socktype, protocol, connected
+accept([PKG]), socketpair(DOMAIN, TYPE, PROTOCOL), atmark, connected,
+protocol, sockdomain, sockopt(OPT [, VAL]), socktype, timeout([VAL])
 
 =item SEE ALSO
 
@@ -11115,6 +11169,56 @@ http://lcweb.loc.gov/standards/iso639-2/langhome.html
 
 =back
 
+=head2 MIME::Base64 - Encoding and decoding of base64 strings
+
+=over 4
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+encode_base64($str, [$eol]), decode_base64($str)
+
+=item DIAGNOSTICS
+
+Premature end of base64 data, Premature padding of base64 data
+
+=item EXAMPLES
+
+=item COPYRIGHT
+
+=back
+
+=head2 MIME::Base64::QuotedPrint, MIME::QuotedPrint - Encoding and decoding
+of quoted-printable strings
+
+=over 4
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+encode_qp($str), decode_qp($str);
+
+=item COPYRIGHT
+
+=back
+
+=head2 MIME::QuotedPrint - Encoding and decoding of quoted-printable
+strings
+
+=over 4
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+encode_qp($str), decode_qp($str);
+
+=item COPYRIGHT
+
+=back
+
 =head2 Math::BigFloat - Arbitrary length float math package
 
 =over 4
@@ -11268,8 +11372,6 @@ Net::Ping->new([$proto [, $def_timeout [, $bytes]]]);, $p->ping($host [,
 $timeout]);, $p->close();, pingecho($host [, $timeout]);
 
 =back
-
-=item WARNING
 
 =item NOTES
 
@@ -13063,6 +13165,8 @@ C<tkRunning>, C<ornaments>, C<newTTY>
 
 =item ENVIRONMENT
 
+=item CAVEATS
+
 =back
 
 =head2 Test - provides a simple framework for writing test scripts
@@ -13514,18 +13618,6 @@ function
 
 isa ( TYPE ), can ( METHOD ), VERSION ( [ REQUIRE ] ), UNIVERSAL::isa (
 VAL, TYPE ), UNIVERSAL::can ( VAL, METHOD )
-
-=back
-
-=head2 Unicode::UCD - Unicode character database versioning
-
-=over 4
-
-=item SYNOPSIS
-
-=item DESCRIPTION
-
-=item SEE ALSO
 
 =back
 
