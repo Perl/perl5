@@ -389,6 +389,9 @@ sub init {
 
     $self->{'arybase'}  = $self->{'ambient_arybase'};
     $self->{'warnings'} = $self->{'ambient_warnings'};
+
+    # also a convenient place to clear out subs_declared
+    delete $self->{'subs_declared'};
 }
 
 sub compile {
