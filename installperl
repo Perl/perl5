@@ -727,14 +727,16 @@ sub link {
 	$packlist->{$xto} = { from => $xfrom, type => 'link' };
     };
     if ($@) {
-	warn $@;
+	warn "Replacing link() with File::Copy::copy(): $@";
 	print $verbose ? "  cp $from $xto\n" : "  $xto\n" unless $silent;
 	print "  creating new version of $xto\n"
 		 if $Is_VMS and -e $to and !$silent;
-	File::Copy::copy($from, $to)
-	    ? $success++
-	    : warn "Couldn't copy $from to $to: $!\n"
-	  unless $nonono;
+	unless ($nonono or File::Copy::copy($from, $to) and ++$success) {
+	    # Might have been that F::C::c can't overwrite the target
+	    warn "Couldn't copy $from to $to: $!\n"
+		unless -f $to and (chmod(0666, $to), unlink $to)
+			and File::Copy::copy($from, $to) and ++$success;
+	}
 	$packlist->{$xto} = { type => 'file' };
     }
     $success;
@@ -757,9 +759,12 @@ sub copy {
     $xto =~ s/^\Q$destdir\E// if $destdir;
     print $verbose ? "  cp $from $xto\n" : "  $xto\n" unless $silent;
     print "  creating new version of $xto\n" if $Is_VMS and -e $to and !$silent;
-    File::Copy::copy($from, $to)
-	|| warn "Couldn't copy $from to $to: $!\n"
-      unless $nonono;
+    unless ($nonono or File::Copy::copy($from, $to)) {
+	# Might have been that F::C::c can't overwrite the target
+	warn "Couldn't copy $from to $to: $!\n"
+	    unless -f $to and (chmod(0666, $to), unlink $to)
+		   and File::Copy::copy($from, $to);
+    }
     $packlist->{$xto} = { type => 'file' };
 }
 
