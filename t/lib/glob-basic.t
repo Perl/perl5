@@ -103,8 +103,8 @@ print "ok 7\n";
 );
 
 # Working on t/TEST often causes this test to fail because it sees temp
-# and RCS files.  Filter them out.
-@a = grep !/(,v$|~$)/, @a;
+# and RCS files.  Filter them out, and .pm files too.
+@a = grep !/(,v$|~$|\.pm$)/, @a;
 
 unless (@a == 3
         and $a[0] eq ($^O eq 'VMS'? 'test.' : 'TEST')
