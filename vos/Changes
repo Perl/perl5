@@ -6,6 +6,10 @@ For 5.9.0:
      custom VOS command macros.  Henceforth, perl must be built
      using the native Configure script.
 
+For 5.8.4:
+     Updated "config.alpha.def", "config.ga.def", "build.cm" and
+     "perl.bind" to build this version of perl.
+
 For 5.8.0:
      Updated "config.alpha.def", "config.ga.def", "build.cm", and
      "install_perl.cm" to use directory naming conventions that
