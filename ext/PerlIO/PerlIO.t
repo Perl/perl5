@@ -113,6 +113,7 @@ ok(close($utffh));
         #close STDOUT;
         my $status = open(STDOUT,">",\$var);
         my $error = "$!" unless $status; # remember the error
+	close STDOUT unless $status;
         open STDOUT,  ">&OLDOUT" or die "cannot dup OLDOUT: $!";
         print "# $error\n" unless $status;
         # report after STDOUT is restored
