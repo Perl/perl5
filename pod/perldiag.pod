@@ -23,7 +23,7 @@ L<perlfunc/eval>.
 
 Some of these messages are generic.  Spots that vary are denoted with a %s,
 just as in a printf format.  Note that some messages start with a %s!
-The symbols C<"%-?@> sort before the letters, while C<[> and C<\> sort after.
+The symbols C<"%(-?@> sort before the letters, while C<[> and C<\> sort after.
 
 =over 4
 
@@ -142,6 +142,12 @@ Perl yourself.
 (A) You've accidentally run your script through the Bourne shell
 instead of Perl.  Check the #! line, or manually feed your script
 into Perl yourself.
+
+=item         (Missing semicolon on previous line?)
+
+(S) This is an educated guess made in conjunction with the message "%s
+found where operator expected".  Don't automatically put a semicolon on
+the previous line just because you saw this message.
 
 =item B<-P> not allowed for setuid/setgid script
 
@@ -1368,12 +1374,6 @@ found where operator expected".  Often the missing operator is a comma.
 (F) The lexer counted more opening curly brackets (braces) than closing ones.
 As a general rule, you'll find it's missing near the place you were last
 editing.
-
-=item Missing semicolon on previous line?
-
-(S) This is an educated guess made in conjunction with the message "%s
-found where operator expected".  Don't automatically put a semicolon on
-the previous line just because you saw this message.
 
 =item Modification of a read-only value attempted
 
