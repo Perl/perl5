@@ -3,6 +3,11 @@
 #include <sfio.h>
 #endif
 
+/* sfio 2000 changed _stdopen to _stdfdopen */
+#if SFIO_VERSION >= 20000101L
+#define _stdopen _stdfdopen 
+#endif
+
 extern Sfio_t*	_stdopen _ARG_((int, const char*));
 extern int	_stdprintf _ARG_((const char*, ...));
 
