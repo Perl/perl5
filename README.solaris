@@ -134,7 +134,7 @@ If you use Sun's C compiler, make sure the correct directory
 
 If you use gcc, make sure your installation is recent and
 complete.  As a point of reference, perl-5.6.0 built fine with
-gcc-2.8.1 on both Solaris 2.6 and Solaris 8.  You'll be able to
+gcc-2.8.1 on both Solaris 2.6 and Solaris 8.  You should
 Configure perl with
 
 	sh Configure -Dcc=gcc
