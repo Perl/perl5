@@ -62,7 +62,8 @@ struct block_sub {
     } STMT_END
 #endif /* USE_THREADS */
 
-#define POPSUB(cx)							\
+#define POPSUB(cx,sv)							\
+    STMT_START {							\
 	if (cx->blk_sub.hasargs) {					\
 	    POPSAVEARRAY();						\
 	    /* abandon @_ if it got reified */				\
@@ -75,10 +76,16 @@ struct block_sub {
 		PL_curpad[0] = (SV*)cx->blk_sub.argarray;		\
 	    }								\
 	}								\
-	if (cx->blk_sub.cv) {						\
-	    if (!(CvDEPTH(cx->blk_sub.cv) = cx->blk_sub.olddepth))	\
-		SvREFCNT_dec(cx->blk_sub.cv);				\
-	}
+	sv = (SV*)cx->blk_sub.cv;					\
+	if (sv && (CvDEPTH((CV*)sv) = cx->blk_sub.olddepth))		\
+	    sv = Nullsv;						\
+    } STMT_END
+
+#define LEAVESUB(sv)							\
+    STMT_START {							\
+	if (sv)								\
+	    SvREFCNT_dec(sv);						\
+    } STMT_END
 
 #define POPFORMAT(cx)							\
 	setdefout(cx->blk_sub.dfoutgv);					\

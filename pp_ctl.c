@@ -1187,6 +1187,7 @@ Perl_dounwind(pTHX_ I32 cxix)
     I32 optype;
 
     while (cxstack_ix > cxix) {
+	SV *sv;
 	cx = &cxstack[cxstack_ix];
 	DEBUG_l(PerlIO_printf(Perl_debug_log, "Unwinding block %ld, type %s\n",
 			      (long) cxstack_ix, PL_block_type[CxTYPE(cx)]));
@@ -1196,7 +1197,8 @@ Perl_dounwind(pTHX_ I32 cxix)
 	    POPSUBST(cx);
 	    continue;  /* not break */
 	case CXt_SUB:
-	    POPSUB(cx);
+	    POPSUB(cx,sv);
+	    LEAVESUB(sv);
 	    break;
 	case CXt_EVAL:
 	    POPEVAL(cx);
@@ -1700,6 +1702,7 @@ PP(pp_return)
     SV **newsp;
     PMOP *newpm;
     I32 optype = 0;
+    SV *sv;
 
     if (PL_curstackinfo->si_type == PERLSI_SORT) {
 	if (cxstack_ix == PL_sortcxix || dopoptosub(cxstack_ix) <= PL_sortcxix) {
@@ -1771,11 +1774,14 @@ PP(pp_return)
 
     /* Stack values are safe: */
     if (popsub2) {
-	POPSUB(cx);	/* release CV and @_ ... */
+	POPSUB(cx,sv);	/* release CV and @_ ... */
     }
+    else
+	sv = Nullsv;
     PL_curpm = newpm;	/* ... and pop $1 et al */
 
     LEAVE;
+    LEAVESUB(sv);
     return pop_return();
 }
 
@@ -1791,6 +1797,7 @@ PP(pp_last)
     SV **newsp;
     PMOP *newpm;
     SV **mark;
+    SV *sv = Nullsv;
 
     if (PL_op->op_flags & OPf_SPECIAL) {
 	cxix = dopoptoloop(cxstack_ix);
@@ -1850,12 +1857,13 @@ PP(pp_last)
 	LEAVE;
 	break;
     case CXt_SUB:
-	POPSUB(cx);	/* release CV and @_ ... */
+	POPSUB(cx,sv);	/* release CV and @_ ... */
 	break;
     }
     PL_curpm = newpm;	/* ... and pop $1 et al */
 
     LEAVE;
+    LEAVESUB(sv);
     return nextop;
 }
 

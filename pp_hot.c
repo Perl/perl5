@@ -1914,6 +1914,7 @@ PP(pp_leavesub)
     PMOP *newpm;
     I32 gimme;
     register PERL_CONTEXT *cx;
+    SV *sv;
 
     POPBLOCK(cx,newpm);
  
@@ -1951,10 +1952,11 @@ PP(pp_leavesub)
     }
     PUTBACK;
     
-    POPSUB(cx);		/* Stack values are safe: release CV and @_ ... */
+    POPSUB(cx,sv);	/* Stack values are safe: release CV and @_ ... */
     PL_curpm = newpm;	/* ... and pop $1 et al */
 
     LEAVE;
+    LEAVESUB(sv);
     return pop_return();
 }
 
@@ -1968,6 +1970,7 @@ PP(pp_leavesublv)
     PMOP *newpm;
     I32 gimme;
     register PERL_CONTEXT *cx;
+    SV *sv;
 
     POPBLOCK(cx,newpm);
  
@@ -2005,8 +2008,10 @@ PP(pp_leavesublv)
 	 * the refcounts so the caller gets a live guy. Cannot set
 	 * TEMP, so sv_2mortal is out of question. */
 	if (!CvLVALUE(cx->blk_sub.cv)) {
-	    POPSUB(cx);
+	    POPSUB(cx,sv);
 	    PL_curpm = newpm;
+	    LEAVE;
+	    LEAVESUB(sv);
 	    DIE(aTHX_ "Can't modify non-lvalue subroutine call");
 	}
 	if (gimme == G_SCALAR) {
@@ -2014,8 +2019,10 @@ PP(pp_leavesublv)
 	    EXTEND_MORTAL(1);
 	    if (MARK == SP) {
 		if (SvFLAGS(TOPs) & (SVs_TEMP | SVs_PADTMP | SVf_READONLY)) {
-		    POPSUB(cx);
+		    POPSUB(cx,sv);
 		    PL_curpm = newpm;
+		    LEAVE;
+		    LEAVESUB(sv);
 		    DIE(aTHX_ "Can't return a %s from lvalue subroutine",
 			SvREADONLY(TOPs) ? "readonly value" : "temporary");
 		}
@@ -2026,8 +2033,10 @@ PP(pp_leavesublv)
 		}
 	    }
 	    else {			/* Should not happen? */
-		POPSUB(cx);
+		POPSUB(cx,sv);
 		PL_curpm = newpm;
+		LEAVE;
+		LEAVESUB(sv);
 		DIE(aTHX_ "%s returned from lvalue subroutine in scalar context",
 		    (MARK > SP ? "Empty array" : "Array"));
 	    }
@@ -2039,8 +2048,10 @@ PP(pp_leavesublv)
 		if (SvFLAGS(*mark) & (SVs_TEMP | SVs_PADTMP | SVf_READONLY)) {
 		    /* Might be flattened array after $#array =  */
 		    PUTBACK;
-		    POPSUB(cx);
+		    POPSUB(cx,sv);
 		    PL_curpm = newpm;
+		    LEAVE;
+		    LEAVESUB(sv);
 		    DIE(aTHX_ "Can't return %s from lvalue subroutine",
 			(*mark != &PL_sv_undef)
 			? (SvREADONLY(TOPs)
@@ -2093,10 +2104,11 @@ PP(pp_leavesublv)
     }
     PUTBACK;
     
-    POPSUB(cx);		/* Stack values are safe: release CV and @_ ... */
+    POPSUB(cx,sv);	/* Stack values are safe: release CV and @_ ... */
     PL_curpm = newpm;	/* ... and pop $1 et al */
 
     LEAVE;
+    LEAVESUB(sv);
     return pop_return();
 }
 
