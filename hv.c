@@ -1005,6 +1005,7 @@ S_hv_delete_common(pTHX_ HV *hv, SV *keysv, const char *key, STRLEN klen,
 	 * an error.
 	 */
 	if (SvREADONLY(hv)) {
+	    SvREFCNT_dec(HeVAL(entry));
 	    HeVAL(entry) = &PL_sv_placeholder;
 	    /* We'll be saving this slot, so the number of allocated keys
 	     * doesn't go down, but the number placeholders goes up */
