@@ -11,15 +11,17 @@ use strict;
 use File::Temp qw(tempdir);
 use File::Compare;
 use Time::Local;
+use Getopt::Long;
+use Cwd qw(cwd);
 
 sub correctmtime ($$$);
 sub Usage ();
 
-my $VERSION = '0.04';
-$0 =~ s|^.*/||;
-our(%OPT, @P4opt);
-%OPT = ( "d" => "u", b => "//depot/perl", "D" => "diff" );
-use Getopt::Long;
+$0 =~ s|^.*[\\/]||;
+my $VERSION = '0.05';
+my $TOPDIR = cwd();
+my @P4opt;
+our %OPT = ( "d" => "u", b => "//depot/perl", "D" => "diff" );
 Getopt::Long::Configure("no_ignore_case");
 GetOptions(\%OPT, "b=s", "p=s", "d=s", "D=s", "h", "v", "V") or die Usage;
 print Usage and exit if $OPT{h};
@@ -66,6 +68,7 @@ for my $a (@action) {
       warn "$0: system[$system] failed, status[$?]\n";
       next;
     }
+    chmod 0644, "$tempdir/$d1";
     if (my($prevch) = $status =~ / \s change \s (\d+) \s /x) {
       my $oldd1 = $d1;
       $d1 .= "~$prevch~";
@@ -83,18 +86,22 @@ for my $a (@action) {
     warn "$0: `$system` failed, status[$?]\n";
     next;
   }
+  chmod 0644, "$tempdir/$d2";
   $type =~ m|^//.*\((.+)\)$| or next;
   $type = $1;
   if (File::Compare::compare("$tempdir/$d1", "$tempdir/$d2")) {
-    print "\n==== $file ($type) ====\nIndex: $path$basename\n";
+    print "\n==== $file ($type) ====\n";
     unless ($type =~ /text/) {
       next;
     }
+    print "Index: $path$basename\n";
     my @filelog = `p4 @P4opt filelog $file`;
     correctmtime(\@filelog,$prev,"$tempdir/$d1");
     correctmtime(\@filelog,$number,"$tempdir/$d2");
-    $system = "cd $tempdir && $OPT{D} -$OPT{d} '$d1' '$d2'";
+    chdir $tempdir or warn "Could not chdir '$tempdir': $!";
+    $system = qq[$OPT{D} -$OPT{d} "$d1" "$d2"];
     system($system); # no return check because diff doesn't always return 0
+    chdir $TOPDIR or warn "Could not chdir '$TOPDIR': $!";
   }
   for ("$tempdir/$d1","$tempdir/$d2") {
     unlink or warn "Could not unlink $_: $!" if -f;
