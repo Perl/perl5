@@ -4,7 +4,7 @@ BEGIN { chdir 't' if -d 't'; }
 
 use strict;
 use lib '../lib';
-use Test::More tests => 9;
+use Test::More tests => ($^O =~ /MSWin32/ ? 9 : 6);
 
 my $Class       = 'IO::File';
 my $All_Chars   = join '', "\r\n", map( chr, 1..255 ), "zzz\n\r";
