@@ -129,7 +129,9 @@ fi
 
 # [Maybe we should just remove c from $libswanted ?]
 
-libs='-lsocket -lm'
+# Test would pick up wrong rand, so we hardwire the value for random()
+libs='-lsocket -lm -lbsd'
+randbits=31
 archobjs="os2$obj_ext dl_os2$obj_ext"
 
 # Run files without extension with sh:

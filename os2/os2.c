@@ -158,22 +158,6 @@ getpriority(int which /* ignored */, int pid)
 /* spawn */
 typedef void (*Sigfunc) _((int));
 
-static
-Sigfunc rsignal(signo,handler)
-int signo;
-Sigfunc handler;
-{
-    struct sigaction act,oact;
-    
-    act.sa_handler = handler;
-    sigemptyset(&act.sa_mask);
-    act.sa_flags = 0;
-    if (sigaction(signo, &act, &oact) < 0)
-    	return(SIG_ERR);
-    else
-    	return(oact.sa_handler);
-}
-
 static int
 result(int flag, int pid)
 {

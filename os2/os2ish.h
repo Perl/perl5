@@ -99,6 +99,8 @@ char *my_tmpnam (char *);
 #define tmpfile	my_tmpfile
 #define tmpnam	my_tmpnam
 #define isatty	_isterm
+#define rand	random
+#define srand	srandom
 
 /*
  * fwrite1() should be a routine with the same calling sequence as fwrite(),
@@ -153,6 +155,11 @@ void *emx_realloc (void *, size_t);
 #define Fstat(fd,bufptr)   fstat((fd),(bufptr))
 #define Fflush(fp)         fflush(fp)
 
+#endif
+
+/* With SD386 it is impossible to debug register variables. */
+#if !defined(PERL_IS_AOUT) && defined(DEBUGGING) && !defined(register)
+#  define register
 #endif
 
 /* Our private OS/2 specific data. */

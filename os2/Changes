@@ -122,3 +122,8 @@ after 5.003_08:
 after 5.003_11:
 	Functions emx_{malloc,realloc,calloc,free} are exported from DLL.
 	get_sysinfo() bugs corrected (flags were not used and wrongly defined).
+
+after 5.003_20:
+	_isterm is substituted instead of isatty, s?random instead of srand.
+	`register' disabled if -DDEBUGGING and not AOUT build: stupid SD386.
+	3-argument select() was stomping over memory.
