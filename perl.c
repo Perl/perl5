@@ -157,7 +157,7 @@ perl_construct(pTHXx)
 
 #ifdef MULTIPLICITY
     init_interp();
-    PL_perl_destruct_level = 1; 
+    PL_perl_destruct_level = 1;
 #else
    if (PL_perl_destruct_level > 0)
        init_interp();
@@ -344,7 +344,7 @@ perl_destruct(pTHXx)
 	    DEBUG_S(PerlIO_printf(Perl_debug_log,
 				  "perl_destruct: detaching thread %p\n", t));
 	    ThrSETSTATE(t, THRf_R_DETACHED);
-	    /* 
+	    /*
 	     * We unlock threads_mutex and t->mutex in the opposite order
 	     * from which we locked them just so that DETACH won't
 	     * deadlock if it panics. It's only a breach of good style
@@ -434,7 +434,7 @@ perl_destruct(pTHXx)
     if (destruct_level == 0){
 
 	DEBUG_P(debprofdump());
-    
+
 	/* The exit() function will do everything that needs doing. */
 	return;
     }
@@ -603,6 +603,9 @@ perl_destruct(pTHXx)
     if (!specialWARN(PL_compiling.cop_warnings))
 	SvREFCNT_dec(PL_compiling.cop_warnings);
     PL_compiling.cop_warnings = Nullsv;
+    if (!specialCopIO(PL_compiling.cop_io))
+	SvREFCNT_dec(PL_compiling.cop_io);
+    PL_compiling.cop_io = Nullsv;
 #ifdef USE_ITHREADS
     Safefree(CopFILE(&PL_compiling));
     CopFILE(&PL_compiling) = Nullch;
@@ -724,7 +727,7 @@ perl_destruct(pTHXx)
     Safefree(PL_psig_name);
     nuke_stacks();
     PL_hints = 0;		/* Reset hints. Should hints be per-interpreter ? */
-    
+
     DEBUG_P(debprofdump());
 #ifdef USE_THREADS
     MUTEX_DESTROY(&PL_strtab_mutex);
@@ -986,7 +989,7 @@ S_parse_body(pTHX_ char **env, XSINIT_t xsinit)
 #ifdef MACOS_TRADITIONAL
 	    /* ignore -e for Dev:Pseudo argument */
 	    if (argv[1] && !strcmp(argv[1], "Dev:Pseudo"))
-	    	break; 
+	    	break;
 #endif
 	    if (PL_euid != PL_uid || PL_egid != PL_gid)
 		Perl_croak(aTHX_ "No -e allowed in setuid scripts");
@@ -1267,7 +1270,7 @@ print \"  \\@INC:\\n    @INC\\n\";");
 #   else
     SOCKSinit(argv[0]);
 #   endif
-#endif    
+#endif
 
     init_predump_symbols();
     /* init_postdump_symbols not currently designed to be called */
@@ -1434,7 +1437,7 @@ S_run_body(pTHX_ I32 oldscope)
 	    my_exit(0);
 	}
 	if (PERLDB_SINGLE && PL_DBsingle)
-	    sv_setiv(PL_DBsingle, 1); 
+	    sv_setiv(PL_DBsingle, 1);
 	if (PL_initav)
 	    call_list(oldscope, PL_initav);
     }
@@ -1569,7 +1572,7 @@ Performs a callback to the specified Perl sub.  See L<perlcall>.
 
 I32
 Perl_call_argv(pTHX_ const char *sub_name, I32 flags, register char **argv)
-              
+
           		/* See G_* flags in cop.h */
                      	/* null terminated arg list */
 {
@@ -1694,15 +1697,15 @@ Perl_call_sv(pTHX_ SV *sv, I32 flags)
 	{
 	    register PERL_CONTEXT *cx;
 	    I32 gimme = GIMME_V;
-	    
+	
 	    ENTER;
 	    SAVETMPS;
-	    
+	
 	    push_return(Nullop);
 	    PUSHBLOCK(cx, (CXt_EVAL|CXp_TRYBLOCK), PL_stack_sp);
 	    PUSHEVAL(cx, 0, 0);
 	    PL_eval_root = PL_op;             /* Only needed so that goto works right. */
-	    
+	
 	    PL_in_eval = EVAL_INEVAL;
 	    if (flags & G_KEEPERR)
 		PL_in_eval |= EVAL_KEEPERR;
@@ -1821,7 +1824,7 @@ Tells Perl to C<eval> the string in the SV.
 
 I32
 Perl_eval_sv(pTHX_ SV *sv, I32 flags)
-       
+
           		/* See G_* flags in cop.h */
 {
     dSP;
@@ -2117,7 +2120,7 @@ Perl_moreswitches(pTHX_ char *s)
 	return s;
     }	
     case 'h':
-	usage(PL_origargv[0]);    
+	usage(PL_origargv[0]);
 	PerlProc_exit(0);
     case 'i':
 	if (PL_inplace)
@@ -2329,16 +2332,16 @@ Internet, point your browser at http://www.perl.com/, the Perl Home Page.\n\n");
 	PerlProc_exit(0);
     case 'w':
 	if (! (PL_dowarn & G_WARN_ALL_MASK))
-	    PL_dowarn |= G_WARN_ON; 
+	    PL_dowarn |= G_WARN_ON;
 	s++;
 	return s;
     case 'W':
-	PL_dowarn = G_WARN_ALL_ON|G_WARN_ON; 
+	PL_dowarn = G_WARN_ALL_ON|G_WARN_ON;
 	PL_compiling.cop_warnings = pWARN_ALL ;
 	s++;
 	return s;
     case 'X':
-	PL_dowarn = G_WARN_ALL_OFF; 
+	PL_dowarn = G_WARN_ALL_OFF;
 	PL_compiling.cop_warnings = pWARN_NONE ;
 	s++;
 	return s;
@@ -2496,7 +2499,7 @@ S_init_main_stash(pTHX)
 #endif
     HvSHAREKEYS_off(PL_strtab);			/* mandatory */
     hv_ksplit(PL_strtab, 512);
-    
+
     PL_curstash = PL_defstash = newHV();
     PL_curstname = newSVpvn("main",4);
     gv = gv_fetchpv("main::",TRUE, SVt_PVHV);
@@ -2719,7 +2722,7 @@ S_fd_on_nosuid_fs(pTHX_ int fd)
     check_okay = fstatvfs(fd, &stfs) == 0;
     on_nosuid  = check_okay && (stfs.f_flag  & ST_NOSUID);
 #   endif /* fstatvfs */
- 
+
 #   if !defined(FD_ON_NOSUID_CHECK_OKAY) && \
         defined(PERL_MOUNT_NOSUID)	&& \
         defined(HAS_FSTATFS) 		&& \
@@ -2789,7 +2792,7 @@ S_fd_on_nosuid_fs(pTHX_ int fd)
         fclose(mtab);
 #   endif /* getmntent+hasmntopt */
 
-    if (!check_okay) 
+    if (!check_okay)
 	Perl_croak(aTHX_ "Can't check filesystem of script \"%s\" for nosuid", PL_origfilename);
     return on_nosuid;
 }
@@ -3046,7 +3049,7 @@ S_find_beginning(pTHX)
     forbid_setid("-x");
 #ifdef MACOS_TRADITIONAL
     /* Since the Mac OS does not honor !# arguments for us, we do it ourselves */
-    
+
     while (PL_doextract || gMacPerl_AlwaysExtract) {
 	if ((s = sv_gets(PL_linestr, PL_rsfp, 0)) == Nullch) {
 	    if (!gMacPerl_AlwaysExtract)
@@ -3060,7 +3063,7 @@ S_find_beginning(pTHX)
 		
 	    /* Pater peccavi, file does not have #! */
 	    PerlIO_rewind(PL_rsfp);
-	    
+	
 	    break;
 	}
 #else
@@ -3123,11 +3126,11 @@ Perl_init_debugger(pTHX)
     PL_DBsub = gv_HVadd(gv_fetchpv("sub", GV_ADDMULTI, SVt_PVHV));
     sv_upgrade(GvSV(PL_DBsub), SVt_IV);	/* IVX accessed if PERLDB_SUB_NN */
     PL_DBsingle = GvSV((gv_fetchpv("single", GV_ADDMULTI, SVt_PV)));
-    sv_setiv(PL_DBsingle, 0); 
+    sv_setiv(PL_DBsingle, 0);
     PL_DBtrace = GvSV((gv_fetchpv("trace", GV_ADDMULTI, SVt_PV)));
-    sv_setiv(PL_DBtrace, 0); 
+    sv_setiv(PL_DBtrace, 0);
     PL_DBsignal = GvSV((gv_fetchpv("signal", GV_ADDMULTI, SVt_PV)));
-    sv_setiv(PL_DBsignal, 0); 
+    sv_setiv(PL_DBsignal, 0);
     PL_curstash = ostash;
 }
 
@@ -3404,7 +3407,7 @@ S_init_perllib(pTHX)
 	Perl_sv_setpvf(aTHX_ privdir, "%ssite_perl:", macperl);
 	if (PerlLIO_stat(SvPVX(privdir), &tmpstatbuf) >= 0 && S_ISDIR(tmpstatbuf.st_mode))
 	    incpush(SvPVX(privdir), TRUE, FALSE);
-	    
+	
    	SvREFCNT_dec(privdir);
     }
     if (!PL_tainting)
@@ -3413,7 +3416,7 @@ S_init_perllib(pTHX)
 #ifndef PRIVLIB_EXP
 #  define PRIVLIB_EXP "/usr/local/lib/perl5:/usr/local/lib/perl"
 #endif
-#if defined(WIN32) 
+#if defined(WIN32)
     incpush(PRIVLIB_EXP, TRUE, FALSE);
 #else
     incpush(PRIVLIB_EXP, FALSE, FALSE);
@@ -3483,7 +3486,7 @@ S_init_perllib(pTHX)
 #endif
 #ifndef PERLLIB_MANGLE
 #  define PERLLIB_MANGLE(s,n) (s)
-#endif 
+#endif
 
 STATIC void
 S_incpush(pTHX_ char *p, int addsubdirs, int addoldvers)
@@ -3559,7 +3562,7 @@ S_incpush(pTHX_ char *p, int addsubdirs, int addoldvers)
 #define PERL_ARCH_FMT 		"/%s"
 #endif
 		/* .../version/archname if -d .../version/archname */
-		Perl_sv_setpvf(aTHX_ subdir, "%"SVf PERL_AV_SUFFIX_FMT PERL_FS_VER_FMT PERL_ARCH_FMT, 
+		Perl_sv_setpvf(aTHX_ subdir, "%"SVf PERL_AV_SUFFIX_FMT PERL_FS_VER_FMT PERL_ARCH_FMT,
 				libdir,
 			       (int)PERL_REVISION, (int)PERL_VERSION,
 			       (int)PERL_SUBVERSION, ARCHNAME);
@@ -3823,7 +3826,7 @@ Perl_my_failure_exit(pTHX)
     if (errno & 255)
 	STATUS_POSIX_SET(errno);
     else {
-	exitstatus = STATUS_POSIX >> 8; 
+	exitstatus = STATUS_POSIX >> 8;
 	if (exitstatus & 255)
 	    STATUS_POSIX_SET(exitstatus);
 	else

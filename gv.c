@@ -848,10 +848,13 @@ Perl_gv_fetchpv(pTHX_ const char *nambeg, I32 add, I32 sv_type)
     case '\006':	/* $^F */
     case '\010':	/* $^H */
     case '\011':	/* $^I, NOT \t in EBCDIC */
-    case '\017':	/* $^O */
     case '\020':	/* $^P */
     case '\024':	/* $^T */
 	if (len > 1)
+	    break;
+	goto magicalize;
+    case '\017':	/* $^O & $^OPEN */
+	if (len > 1 && strNE(name, "\017PEN"))
 	    break;
 	goto magicalize;
     case '\023':	/* $^S */
@@ -1672,6 +1675,13 @@ Perl_is_gv_magical(pTHX_ char *name, STRLEN len, U32 flags)
 	if (len == 3 && strEQ(name, "SIG"))
 	    goto yes;
 	break;
+    case '\017':   /* $^O & $^OPEN */
+	if (len == 1
+	    || (len == 4 && strEQ(name, "\027PEN")))
+	{
+	    goto yes;
+	}
+	break;
     case '\027':   /* $^W & $^WARNING_BITS */
 	if (len == 1
 	    || (len == 12 && strEQ(name, "\027ARNING_BITS"))
@@ -1715,7 +1725,6 @@ Perl_is_gv_magical(pTHX_ char *name, STRLEN len, U32 flags)
     case '\010':   /* $^H */
     case '\011':   /* $^I, NOT \t in EBCDIC */
     case '\014':   /* $^L */
-    case '\017':   /* $^O */
     case '\020':   /* $^P */
     case '\023':   /* $^S */
     case '\024':   /* $^T */

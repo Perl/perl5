@@ -81,7 +81,7 @@ typedef PerlIOl *PerlIO;
 #define PERLIO_LAYERS 1
 
 extern void	PerlIO_define_layer	(PerlIO_funcs *tab);
-extern SV *	PerlIO_find_layer(char *name, STRLEN len);
+extern SV *	PerlIO_find_layer	(const char *name, STRLEN len);
 extern PerlIO *	PerlIO_push		(PerlIO *f,PerlIO_funcs *tab,const char *mode);
 extern void	PerlIO_pop		(PerlIO *f);
 
@@ -129,6 +129,8 @@ extern void	PerlIO_pop		(PerlIO *f);
 #include "fakesdio.h"
 #endif /* ifndef PERLIO_NOT_STDIO */
 #endif /* PERLIO_IS_STDIO */
+
+#define specialCopIO(sv) ((sv) != Nullsv)
 
 /* ----------- fill in things that have not got #define'd  ---------- */
 
@@ -305,6 +307,9 @@ extern PerlIO *	PerlIO_fdupopen		(PerlIO *);
 #endif
 #ifndef PerlIO_isutf8
 extern int	PerlIO_isutf8		(PerlIO *);
+#endif
+#ifndef PerlIO_isutf8
+extern int	PerlIO_apply_layers	(pTHX_ PerlIO *f,const char *mode, const char *names);
 #endif
 
 #endif /* _PERLIO_H */

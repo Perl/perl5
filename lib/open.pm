@@ -1,23 +1,43 @@
 package open;
+use Carp;
 $open::hint_bits = 0x20000;
+
+use vars qw(%layers @layers);
+
+# Populate hash in non-PerlIO case
+%layers = (crlf => 1, raw => 0) unless (@layers);
 
 sub import {
     shift;
     die "`use open' needs explicit list of disciplines" unless @_;
     $^H |= $open::hint_bits;
+    my ($in,$out) = split(/\0/,(${^OPEN} || '\0'));
+    my @in  = split(/\s+/,$in);
+    my @out = split(/\s+/,$out);
     while (@_) {
 	my $type = shift;
-	if ($type =~ /^(IN|OUT)\z/s) {
-	    my $discp = shift;
-	    unless ($discp =~ /^\s*:(raw|crlf)\s*\z/s) {
-		die "Unknown discipline '$discp'";
+	my $discp = shift;
+	my @val;
+	foreach my $layer (split(/\s+:?/,$discp)) {
+	    unless(exists $layers{$layer}) {
+		croak "Unknown discipline layer '$layer'";
 	    }
-	    $^H{"open_$type"} = $discp;
+	    push(@val,":$layer");
+	    if ($layer =~ /^(crlf|raw)$/) {
+		$^H{"open_$type"} = $layer;
+	    }
+	}
+	if ($type eq 'IN') {
+	    $in  = join(' ',@val);
+	}
+	elsif ($type eq 'OUT') {
+	    $out = join(' ',@val);
 	}
 	else {
-	    die "Unknown discipline class '$type'";
+	    croak "Unknown discipline class '$type'";
 	}
     }
+    ${^OPEN} = join('\0',$in,$out);
 }
 
 1;

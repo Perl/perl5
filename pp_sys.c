@@ -302,6 +302,16 @@ PP(pp_backtick)
 	mode = "rt";
     fp = PerlProc_popen(tmps, mode);
     if (fp) {
+	char *type = NULL;
+	if (PL_curcop->cop_io) {
+	    type = SvPV_nolen(PL_curcop->cop_io);
+	}
+	else if (O_BINARY != O_TEXT) {
+	    type = ":crlf";
+	}
+	if (type && *type)
+	    PerlIO_apply_layers(aTHX_ fp,mode,type);
+
 	if (gimme == G_VOID) {
 	    char tmpbuf[256];
 	    while (PerlIO_read(fp, tmpbuf, sizeof tmpbuf) > 0)
