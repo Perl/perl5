@@ -153,6 +153,15 @@ sub GET_IV {
     $Config{ivsize} == 4 ? &GET_I32 : &GET_IV64;
 }
 
+sub B::::GET_PADOFFSET {
+    $Config{ptrsize} == 8 ? &B::GET_IV64 : &B::GET_U32;
+}
+
+sub B::::GET_long {
+    $Config{longsize} == 8 ? &B::GET_IV64 : &B::GET_U32;
+}
+
+
 package B::Disassembler;
 use Exporter;
 @ISA = qw(Exporter);

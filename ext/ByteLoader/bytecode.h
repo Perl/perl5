@@ -22,6 +22,8 @@ typedef char *pvindex;
 	BGET_FREAD(&arg, sizeof(UV), 1)
 #define BGET_PADOFFSET(arg)	\
 	BGET_FREAD(&arg, sizeof(PADOFFSET), 1)
+#define BGET_long(arg)		\
+	BGET_FREAD(&arg, sizeof(long), 1)
 
 #define BGET_I32(arg)	BGET_U32(arg)
 #define BGET_IV(arg)	BGET_UV(arg)
