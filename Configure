@@ -3195,7 +3195,7 @@ EOM
 			mips)	osname=mips_osf1 ;;
 			esac
 			;;
-		unixware) osname=svr5
+		openunix|unixware) osname=svr5
 			osvers="$4"
 			;;
 		uts)	osname=uts

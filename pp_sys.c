@@ -2516,6 +2516,9 @@ PP(pp_accept)
     len = sizeof saddr;          /* EPOC somehow truncates info */
     setbuf( IoIFP(nstio), NULL); /* EPOC gets confused about sockets */
 #endif
+#ifdef __SCO_VERSION__
+    len = sizeof saddr;          /* OpenUNIX 8 somehow truncates info */
+#endif
 
     PUSHp((char *)&saddr, len);
     RETURN;
