@@ -7,6 +7,10 @@ my $incdir;
 my $lib = '"-I../lib"'; # ok on unix, nt, The extra \" are for VMS
 BEGIN {
     chdir 't' if -d 't';
+    if ($^O eq 'dos') {
+	print "1..0 # This test is not 8.3-aware.\n";
+	    exit 0;
+    }
     if ($^O eq 'MacOS') {
 	$incdir = ":auto-$$";
         $lib = '-x -I::lib:'; # -x overcomes MPW $Config{startperl} anomaly
