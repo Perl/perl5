@@ -376,11 +376,11 @@ extra.pods : miniperl
 
 pod0 = [.lib.pod]perl.pod [.lib.pod]perl5004delta.pod [.lib.pod]perl5005delta.pod [.lib.pod]perl561delta.pod [.lib.pod]perl56delta.pod
 pod1 = [.lib.pod]perl570delta.pod [.lib.pod]perl571delta.pod [.lib.pod]perl572delta.pod [.lib.pod]perl573delta.pod [.lib.pod]perl581delta.pod
-pod2 = [.lib.pod]perl582delta.pod [.lib.pod]perl583delta.pod [.lib.pod]perl584delta.pod [.lib.pod]perl58delta.pod [.lib.pod]perl590delta.pod
-pod3 = [.lib.pod]perl591delta.pod [.lib.pod]perl592delta.pod [.lib.pod]perlaix.pod [.lib.pod]perlamiga.pod [.lib.pod]perlapi.pod [.lib.pod]perlapio.pod
-pod4 = [.lib.pod]perlapollo.pod [.lib.pod]perlartistic.pod [.lib.pod]perlbeos.pod [.lib.pod]perlbook.pod [.lib.pod]perlboot.pod [.lib.pod]perlbot.pod
-pod5 = [.lib.pod]perlbs2000.pod [.lib.pod]perlcall.pod [.lib.pod]perlce.pod [.lib.pod]perlcheat.pod [.lib.pod]perlclib.pod [.lib.pod]perlcn.pod
-pod6 = [.lib.pod]perlcompile.pod [.lib.pod]perlcygwin.pod [.lib.pod]perldata.pod [.lib.pod]perldbmfilter.pod [.lib.pod]perldebguts.pod
+pod2 = [.lib.pod]perl582delta.pod [.lib.pod]perl583delta.pod [.lib.pod]perl584delta.pod [.lib.pod]perl585delta.pod [.lib.pod]perl58delta.pod
+pod3 = [.lib.pod]perl590delta.pod [.lib.pod]perl591delta.pod [.lib.pod]perl592delta.pod [.lib.pod]perlaix.pod [.lib.pod]perlamiga.pod [.lib.pod]perlapi.pod
+pod4 = [.lib.pod]perlapio.pod [.lib.pod]perlapollo.pod [.lib.pod]perlartistic.pod [.lib.pod]perlbeos.pod [.lib.pod]perlbook.pod [.lib.pod]perlboot.pod
+pod5 = [.lib.pod]perlbot.pod [.lib.pod]perlbs2000.pod [.lib.pod]perlcall.pod [.lib.pod]perlce.pod [.lib.pod]perlcheat.pod [.lib.pod]perlclib.pod
+pod6 = [.lib.pod]perlcn.pod [.lib.pod]perlcompile.pod [.lib.pod]perlcygwin.pod [.lib.pod]perldata.pod [.lib.pod]perldbmfilter.pod [.lib.pod]perldebguts.pod
 pod7 = [.lib.pod]perldebtut.pod [.lib.pod]perldebug.pod [.lib.pod]perldelta.pod [.lib.pod]perldgux.pod [.lib.pod]perldiag.pod [.lib.pod]perldoc.pod
 pod8 = [.lib.pod]perldos.pod [.lib.pod]perldsc.pod [.lib.pod]perlebcdic.pod [.lib.pod]perlembed.pod [.lib.pod]perlepoc.pod [.lib.pod]perlfaq.pod
 pod9 = [.lib.pod]perlfaq1.pod [.lib.pod]perlfaq2.pod [.lib.pod]perlfaq3.pod [.lib.pod]perlfaq4.pod [.lib.pod]perlfaq5.pod [.lib.pod]perlfaq6.pod
@@ -713,6 +713,10 @@ preplibrary : $(MINIPERL_EXE) $(LIBPREREQ)
 	Copy/NoConfirm/Log $(MMS$SOURCE) [.lib.pod]
 
 [.lib.pod]perl584delta.pod : [.pod]perl584delta.pod
+	@ If F$Search("[.lib]pod.dir").eqs."" Then Create/Directory [.lib.pod]
+	Copy/NoConfirm/Log $(MMS$SOURCE) [.lib.pod]
+
+[.lib.pod]perl585delta.pod : [.pod]perl585delta.pod
 	@ If F$Search("[.lib]pod.dir").eqs."" Then Create/Directory [.lib.pod]
 	Copy/NoConfirm/Log $(MMS$SOURCE) [.lib.pod]
 

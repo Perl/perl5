@@ -115,6 +115,10 @@ ext/B/t/concise.t	See whether B::Concise works
 ext/B/t/debug.t		See if B::Debug works
 ext/B/t/deparse.t	See if B::Deparse works
 ext/B/TESTS		Compiler backend test data
+ext/B/t/f_map			code from perldoc -f map
+ext/B/t/f_map.t			converted to optreeCheck()s
+ext/B/t/f_sort			optree test raw material
+ext/B/t/f_sort.t		optree test raw material
 ext/B/t/lint.t		See if B::Lint works
 ext/B/Todo		Compiler backend Todo list
 ext/B/t/OptreeCheck.pm		optree comparison tool
@@ -124,10 +128,6 @@ ext/B/t/optree_samples.t	various basic codes: if for while
 ext/B/t/optree_sort.t		inplace sort optimization regression
 ext/B/t/optree_specials.t	BEGIN, END, etc code
 ext/B/t/optree_varinit.t	my,our,local var init optimization
-ext/B/t/f_map			code from perldoc -f map
-ext/B/t/f_map.t			converted to optreeCheck()s
-ext/B/t/f_sort			optree test raw material
-ext/B/t/f_sort.t		optree test raw material
 ext/B/t/o.t		See if O works
 ext/B/t/showlex.t	See if B::ShowLex works
 ext/B/t/stash.t		See if B::Stash works
@@ -1306,8 +1306,8 @@ lib/hostname.pl			Old hostname code
 lib/I18N/Collate.pm		Routines to do strxfrm-based collation
 lib/I18N/Collate.t		See if I18N::Collate works
 lib/I18N/LangTags/ChangeLog	I18N::LangTags
-lib/I18N/LangTags/List.pm	List of tags for human languages
 lib/I18N/LangTags/Detect.pm	Detect language preferences
+lib/I18N/LangTags/List.pm	List of tags for human languages
 lib/I18N/LangTags.pm		I18N::LangTags
 lib/I18N/LangTags/README	I18N::LangTags
 lib/I18N/LangTags/t/01_about_verbose.t	See whether I18N::LangTags works
@@ -1705,15 +1705,15 @@ lib/Test/Simple/t/todo.t	Test::More test, TODO tests
 lib/Test/Simple/t/undef.t	Test::More test, undefs don't cause warnings
 lib/Test/Simple/t/useing.t	Test::More test, compile test
 lib/Test/Simple/t/use_ok.t	Test::More test, use_ok()
+lib/Test/t/05_about_verbose.t	See if Test works
 lib/Test/t/fail.t		See if Test works
 lib/Test/t/mix.t		See if Test works
+lib/Test/t/multiline.t		See if Test works
 lib/Test/t/onfail.t		See if Test works
 lib/Test/t/qr.t			See if Test works
 lib/Test/t/skip.t		See if Test works
 lib/Test/t/success.t		See if Test works
 lib/Test/t/todo.t		See if Test works
-lib/Test/t/multiline.t		See if Test works
-lib/Test/t/05_about_verbose.t	See if Test works
 lib/Test/Tutorial.pod		A tutorial on writing tests
 lib/Text/Abbrev.pm		An abbreviation table builder
 lib/Text/Abbrev.t		Test Text::Abbrev
@@ -1838,18 +1838,18 @@ lib/unicore/Index.txt		Unicode character database
 lib/unicore/Jamo.txt		Unicode character database
 lib/unicore/LineBreak.txt	Unicode character database
 lib/unicore/Makefile		Unicode character database
+lib/unicore/mktables		Unicode character database generator
 lib/unicore/NamesList.txt	Unicode character database
 lib/unicore/NormalizationCorrections.txt	Unicode character database
+lib/unicore/PropertyAliases.txt	Unicode character database
 lib/unicore/PropList.txt	Unicode character database
 lib/unicore/PropValueAliases.txt	Unicode character database
-lib/unicore/PropertyAliases.txt	Unicode character database
 lib/unicore/README.perl		Unicode character database
 lib/unicore/ReadMe.txt		Unicode character database info
 lib/unicore/Scripts.txt		Unicode character database
 lib/unicore/SpecialCasing.txt	Unicode character database
 lib/unicore/StandardizedVariants.txt	Unicode character database
 lib/unicore/UnicodeData.txt	Unicode character database
-lib/unicore/mktables		Unicode character database generator
 lib/unicore/version		The version of the Unicode
 lib/UNIVERSAL.pm		Base class for ALL classes
 lib/User/grent.pm		By-name interface to Perl's builtin getgr*
@@ -2066,6 +2066,7 @@ pod/perl581delta.pod		Perl changes in version 5.8.1
 pod/perl582delta.pod		Perl changes in version 5.8.2
 pod/perl583delta.pod		Perl changes in version 5.8.3
 pod/perl584delta.pod		Perl changes in version 5.8.4
+pod/perl585delta.pod		Perl changes in version 5.8.5
 pod/perl58delta.pod		Perl changes in version 5.8.0
 pod/perl590delta.pod		Perl changes in version 5.9.0
 pod/perl591delta.pod		Perl changes in version 5.9.1
@@ -2168,9 +2169,9 @@ pod/splitman			Splits perlfunc into multiple man pages
 pod/splitpod			Splits perlfunc into multiple pod pages
 Policy_sh.SH		Hold site-wide preferences between Configure runs.
 Porting/apply		Apply patches sent by mail
-Porting/checkcase.pl	Check whether we are case-insensitive-fs-friendly
 Porting/check83.pl	Check whether we are 8.3-friendly
 Porting/checkAUTHORS.pl	Check that the AUTHORS file is complete
+Porting/checkcase.pl	Check whether we are case-insensitive-fs-friendly
 Porting/checkURL.pl	Check whether we have working URLs
 Porting/checkVERSION.pl	Check whether we have $VERSIONs
 Porting/cmpVERSION.pl	Compare whether two trees have changed modules
