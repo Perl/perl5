@@ -495,7 +495,7 @@ A new dumper is created by a call
 
 Recognized options:
 
-=over
+=over 4
 
 =item C<arrayDepth>, C<hashDepth>
 
@@ -563,7 +563,7 @@ method and set() method (which accept multiple arguments).
 
 =head2 Methods
 
-=over
+=over 4
 
 =item dumpValue
 

@@ -120,7 +120,7 @@ B<Example 2>
 	$huge = 'overflow';
 
 B<Example 3>
-	
+
 	use Text::Wrap
 
 	$Text::Wrap::columns = 72;

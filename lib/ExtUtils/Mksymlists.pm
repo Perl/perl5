@@ -217,7 +217,7 @@ C<Mksymlists>, which is exported by default from C<ExtUtils::Mksymlists>.
 It takes one argument, a list of key-value pairs, in which the following
 keys are recognized:
 
-=over
+=over 4
 
 =item DLBASE
 

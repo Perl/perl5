@@ -52,7 +52,6 @@ __END__
 
 Filter::Simple - Simplified source filtering
 
-
 =head1 SYNOPSIS
 
  # in MyFilter.pm:
@@ -141,7 +140,7 @@ to the sequence C<die 'BANG' if $BANG> in any piece of code following a
 C<use BANG;> statement (until the next C<no BANG;> statement, if any):
 
         package BANG;
- 
+
         use Filter::Util::Call ;
 
         sub import {
@@ -198,7 +197,7 @@ contents of $_ to change the source code in the desired manner.
 In other words, the previous example, would become:
 
         package BANG;
- 
+
         use Filter::Simple sub {
             s/BANG\s+BANG/die 'BANG' if \$BANG/g;
         };
@@ -218,7 +217,7 @@ list to the filtering subroutine, so the BANG.pm filter could easily
 be made parametric:
 
         package BANG;
- 
+
         use Filter::Simple sub {
             my ($die_msg, $var_name) = @_;
             s/BANG\s+BANG/die '$die_msg' if \${$var_name}/g;

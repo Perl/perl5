@@ -14,6 +14,28 @@ ExtUtils::MakeMaker->import(qw( $Verbose &neatvalue));
 
 unshift @MM::ISA, 'ExtUtils::MM_OS2';
 
+=pod
+
+=head1 NAME
+
+ExtUtils::MM_OS2 - methods to override UN*X behaviour in ExtUtils::MakeMaker
+
+=head1 SYNOPSIS
+
+ use ExtUtils::MM_OS2; # Done internally by ExtUtils::MakeMaker if needed
+
+=head1 DESCRIPTION
+
+See ExtUtils::MM_Unix for a documentation of the methods provided
+there. This package overrides the implementation of these methods, not
+the semantics.
+
+=head1 METHODS
+
+=over 4
+
+=cut
+
 sub dlsyms {
     my($self,%attribs) = @_;
 
@@ -120,19 +142,11 @@ sub export_list
 }
 
 1;
+
 __END__
 
-=head1 NAME
+=pod
 
-ExtUtils::MM_OS2 - methods to override UN*X behaviour in ExtUtils::MakeMaker
+=back
 
-=head1 SYNOPSIS
-
- use ExtUtils::MM_OS2; # Done internally by ExtUtils::MakeMaker if needed
-
-=head1 DESCRIPTION
-
-See ExtUtils::MM_Unix for a documentation of the methods provided
-there. This package overrides the implementation of these methods, not
-the semantics.
-
+=cut

@@ -650,7 +650,7 @@ test program.
 
 =over 4
 
-=item B<1..M>
+=item B<'1..M'>
 
 This header tells how many tests there will be.  It should be the
 first line output by your test program (but its okay if its preceded

@@ -7,10 +7,10 @@ Locale::Language - ISO two letter codes for language identification (ISO 639)
 =head1 SYNOPSIS
 
     use Locale::Language;
-    
+
     $lang = code2language('en');        # $lang gets 'English'
     $code = language2code('French');    # $code gets 'fr'
-    
+
     @codes   = all_language_codes();
     @names   = all_language_names();
 
@@ -173,7 +173,7 @@ The user is prompted for a language code, and then told the corresponding
 language name:
 
     $| = 1;    # turn off buffering
-    
+
     print "Enter language code: ";
     chop($code = <STDIN>);
     $lang = code2language($code);

@@ -432,7 +432,7 @@ Looks like this:
 
 This shows that 
 
-=over
+=over 4
 
 =item *
 

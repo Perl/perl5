@@ -527,7 +527,7 @@ same object.
 
 Here is the hooking interface:
 
-=over
+=over 4
 
 =item C<STORABLE_freeze> I<obj>, I<cloning>
 
@@ -596,7 +596,7 @@ Returned value: none.
 Predicates are not exportable.  They must be called by explicitely prefixing
 them with the Storable package name.
 
-=over
+=over 4
 
 =item C<Storable::last_op_in_netorder>
 
@@ -623,7 +623,7 @@ serialization string?
 
 There are a few things you need to know however:
 
-=over
+=over 4
 
 =item *
 

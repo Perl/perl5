@@ -31,7 +31,7 @@ Locale::Constants - constants for Locale codes
 =head1 SYNOPSIS
 
     use Locale::Constants;
-    
+
     $codeset = LOCALE_CODE_ALPHA_2;
 
 =head1 DESCRIPTION

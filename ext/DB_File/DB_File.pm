@@ -388,8 +388,8 @@ DB_File - Perl5 access to Berkeley DB version 1.x
 
 =head1 SYNOPSIS
 
- use DB_File ;
- 
+ use DB_File;
+
  [$X =] tie %hash,  'DB_File', [$filename, $flags, $mode, $DB_HASH] ;
  [$X =] tie %hash,  'DB_File', $filename, $flags, $mode, $DB_BTREE ;
  [$X =] tie @array, 'DB_File', $filename, $flags, $mode, $DB_RECNO ;
@@ -699,7 +699,7 @@ contents of the database.
 here is the output:
 
     Banana Exists
- 
+
     orange -> orange
     tomato -> red
     banana -> yellow
@@ -797,13 +797,13 @@ code:
 
     $filename = "tree" ;
     unlink $filename ;
- 
+
     # Enable duplicate records
     $DB_BTREE->{'flags'} = R_DUP ;
- 
+
     tie %h, "DB_File", $filename, O_RDWR|O_CREAT, 0640, $DB_BTREE 
 	or die "Cannot open $filename: $!\n";
- 
+
     # Add some key/value pairs to the file
     $h{'Wall'} = 'Larry' ;
     $h{'Wall'} = 'Brick' ; # Note the duplicate key
@@ -847,25 +847,25 @@ Here is the script above rewritten using the C<seq> API method.
     use warnings ;
     use strict ;
     use DB_File ;
- 
+
     use vars qw($filename $x %h $status $key $value) ;
 
     $filename = "tree" ;
     unlink $filename ;
- 
+
     # Enable duplicate records
     $DB_BTREE->{'flags'} = R_DUP ;
- 
+
     $x = tie %h, "DB_File", $filename, O_RDWR|O_CREAT, 0640, $DB_BTREE 
 	or die "Cannot open $filename: $!\n";
- 
+
     # Add some key/value pairs to the file
     $h{'Wall'} = 'Larry' ;
     $h{'Wall'} = 'Brick' ; # Note the duplicate key
     $h{'Wall'} = 'Brick' ; # Note the duplicate key and value
     $h{'Smith'} = 'John' ;
     $h{'mouse'} = 'mickey' ;
- 
+
     # iterate through the btree using seq
     # and print each key/value pair.
     $key = $value = 0 ;
@@ -873,7 +873,7 @@ Here is the script above rewritten using the C<seq> API method.
          $status == 0 ;
          $status = $x->seq($key, $value, R_NEXT) )
       {  print "$key -> $value\n" }
- 
+
     undef $x ;
     untie %h ;
 
@@ -919,14 +919,14 @@ this:
     use warnings ;
     use strict ;
     use DB_File ;
- 
+
     use vars qw($filename $x %h ) ;
 
     $filename = "tree" ;
- 
+
     # Enable duplicate records
     $DB_BTREE->{'flags'} = R_DUP ;
- 
+
     $x = tie %h, "DB_File", $filename, O_RDWR|O_CREAT, 0640, $DB_BTREE 
 	or die "Cannot open $filename: $!\n";
 
@@ -942,7 +942,7 @@ this:
 
     @list = $x->get_dup("Smith") ;
     print "Smith =>	[@list]\n" ;
- 
+
     @list = $x->get_dup("Dog") ;
     print "Dog =>	[@list]\n" ;
 
@@ -969,23 +969,23 @@ Assuming the database from the previous example:
     use warnings ;
     use strict ;
     use DB_File ;
- 
+
     use vars qw($filename $x %h $found) ;
 
     my $filename = "tree" ;
- 
+
     # Enable duplicate records
     $DB_BTREE->{'flags'} = R_DUP ;
- 
+
     $x = tie %h, "DB_File", $filename, O_RDWR|O_CREAT, 0640, $DB_BTREE 
 	or die "Cannot open $filename: $!\n";
 
     $found = ( $x->find_dup("Wall", "Larry") == 0 ? "" : "not") ; 
     print "Larry Wall is $found there\n" ;
-    
+
     $found = ( $x->find_dup("Wall", "Harry") == 0 ? "" : "not") ; 
     print "Harry Wall is $found there\n" ;
-    
+
     undef $x ;
     untie %h ;
 
@@ -1008,14 +1008,14 @@ Again assuming the existence of the C<tree> database
     use warnings ;
     use strict ;
     use DB_File ;
- 
+
     use vars qw($filename $x %h $found) ;
 
     my $filename = "tree" ;
- 
+
     # Enable duplicate records
     $DB_BTREE->{'flags'} = R_DUP ;
- 
+
     $x = tie %h, "DB_File", $filename, O_RDWR|O_CREAT, 0640, $DB_BTREE 
 	or die "Cannot open $filename: $!\n";
 
@@ -1023,7 +1023,7 @@ Again assuming the existence of the C<tree> database
 
     $found = ( $x->find_dup("Wall", "Larry") == 0 ? "" : "not") ; 
     print "Larry Wall is $found there\n" ;
-    
+
     undef $x ;
     untie %h ;
 
@@ -1071,22 +1071,22 @@ and print the first matching key/value pair given a partial key.
 
     $x = tie %h, "DB_File", $filename, O_RDWR|O_CREAT, 0640, $DB_BTREE
         or die "Cannot open $filename: $!\n";
- 
+
     # Add some key/value pairs to the file
     $h{'mouse'} = 'mickey' ;
     $h{'Wall'} = 'Larry' ;
     $h{'Walls'} = 'Brick' ; 
     $h{'Smith'} = 'John' ;
- 
+
 
     $key = $value = 0 ;
     print "IN ORDER\n" ;
     for ($st = $x->seq($key, $value, R_FIRST) ;
 	 $st == 0 ;
          $st = $x->seq($key, $value, R_NEXT) )
-	
+
       {  print "$key	-> $value\n" }
- 
+
     print "\nPARTIAL MATCH\n" ;
 
     match "Wa" ;
@@ -1250,14 +1250,14 @@ L<THE API INTERFACE>).
     use vars qw(@h $H $file $i) ;
     use DB_File ;
     use Fcntl ;
-    
+
     $file = "text" ;
 
     unlink $file ;
 
     $H = tie @h, "DB_File", $file, O_RDWR|O_CREAT, 0640, $DB_RECNO 
         or die "Cannot open file $file: $!\n" ;
-    
+
     # first create a text file to play with
     $h[0] = "zero" ;
     $h[1] = "one" ;
@@ -1265,7 +1265,7 @@ L<THE API INTERFACE>).
     $h[3] = "three" ;
     $h[4] = "four" ;
 
-    
+
     # Print the records in order.
     #
     # The length method is needed here because evaluating a tied

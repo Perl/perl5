@@ -179,7 +179,7 @@ For developers wishing to write their own tied arrays, the required methods
 are briefly defined below. See the L<perltie> section for more detailed
 descriptive, as well as example code:
 
-=over
+=over 4
 
 =item TIEARRAY classname, LIST
 

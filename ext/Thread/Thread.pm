@@ -22,7 +22,7 @@ Thread - manipulate threads in Perl (EXPERIMENTAL, subject to change)
     $result = $t->eval;
     $t->detach;
     $flags = $t->flags;
-    
+
     if ($t->done) {
         $t->join;
     }

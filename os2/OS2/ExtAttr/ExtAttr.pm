@@ -133,7 +133,7 @@ OS2::ExtAttr - Perl access to extended attributes.
   tie %ea, 'OS2::ExtAttr', 'my.file';
   print $ea{eaname};
   $ea{myfield} = 'value';
-  
+
   untie %ea;
 
 =head1 DESCRIPTION

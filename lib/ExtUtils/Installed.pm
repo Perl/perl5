@@ -208,7 +208,7 @@ described below.
 
 =head1 FUNCTIONS
 
-=over
+=over 4
 
 =item new()
 

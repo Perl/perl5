@@ -287,7 +287,7 @@ Tom Christiansen
 
 =head1 HISTORY
 
-=over
+=over 4
 
 =item March 18th, 2000
 

@@ -74,7 +74,7 @@ C<IPC::SysV> defines and conditionally exports all the constants
 defined in your system include files which are needed by the SysV
 IPC calls.
 
-=over
+=over 4
 
 =item ftok( PATH, ID )
 

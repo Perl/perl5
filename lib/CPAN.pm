@@ -6181,7 +6181,7 @@ beta and partially even alpha. In the following paragraphs only those
 methods are documented that have proven useful over a longer time and
 thus are unlikely to change.
 
-=over
+=over 4
 
 =item CPAN::Author::as_glimpse()
 
@@ -6746,7 +6746,7 @@ that you can configure ncftp so that it works for your firewall.
 
 Firewalls can be categorized into three basic types.
 
-=over
+=over 4
 
 =item http firewall
 
@@ -6780,7 +6780,7 @@ FTP connections need to be done in a passive mode.
 
 There are two that I can think off.
 
-=over
+=over 4
 
 =item SOCKS
 
@@ -6819,7 +6819,7 @@ Your milage may vary...
 
 =head1 FAQ
 
-=over
+=over 4
 
 =item 1)
 

@@ -267,7 +267,7 @@ is called with arguments C<($a,undef,'')> when $a++ is executed.
 
 Two types of mutators have different calling conventions:
 
-=over
+=over 4
 
 =item C<++> and C<-->
 
@@ -450,7 +450,7 @@ A computer-readable form of the above table is available in the hash
 
 Inheritance interacts with overloading in two ways.
 
-=over
+=over 4
 
 =item Strings as values of C<use overload> directive
 
@@ -1028,7 +1028,7 @@ reference to the intermediate array, which keeps a reference to an
 actual array, and the access hash.  The tie()ing object for the access
 hash is a reference to a reference to the actual array, so
 
-=over
+=over 4
 
 =item *
 
@@ -1058,8 +1058,8 @@ Put this in F<symbolic.pm> in your Perl library directory:
   }
 
 This module is very unusual as overloaded modules go: it does not
-provide any usual overloaded operators, instead it provides the L<Last
-Resort> operator C<nomethod>.  In this example the corresponding
+provide any usual overloaded operators, instead it provides the 
+L<Last Resort> operator C<nomethod>.  In this example the corresponding
 subroutine returns an object which encapsulates operations done over
 the objects: C<new symbolic 3> contains C<['n', 3]>, C<2 + new
 symbolic 3> contains C<['+', 2, ['n', 3]]>.

@@ -187,7 +187,7 @@ Term::ANSIColor - Color screen output using ANSI escape sequences
 
 This module has two interfaces, one through color() and colored() and the
 other through constants.
-    
+
 color() takes any number of strings as arguments and considers them to be
 space-separated lists of attributes.  It then forms and returns the escape
 sequence to set those attributes.  It doesn't print it out, just returns

@@ -7,13 +7,13 @@ Locale::Country - ISO codes for country identification (ISO 3166)
 =head1 SYNOPSIS
 
     use Locale::Country;
-    
+
     $country = code2country('jp');               # $country gets 'Japan'
     $code    = country2code('Norway');           # $code gets 'no'
-    
+
     @codes   = all_country_codes();
     @names   = all_country_names();
-    
+
     # add "uk" as a pseudo country code for United Kingdom
     Locale::Country::_alias_code('uk' => 'gb');
 
@@ -285,7 +285,7 @@ an ISO standard. If you would like 'uk' to work as the two-letter
 code for United Kingdom, use the following:
 
     use Locale::Country;
-    
+
     Locale::Country::_alias_code('uk' => 'gb');
 
 With this code, both "uk" and "gb" are valid codes for United Kingdom,
@@ -325,7 +325,7 @@ The user is prompted for a country code, and then told the corresponding
 country name:
 
     $| = 1;   # turn off buffering
-    
+
     print "Enter country code: ";
     chop($code = <STDIN>);
     $country = code2country($code, LOCALE_CODE_ALPHA_2);

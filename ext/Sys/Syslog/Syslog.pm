@@ -46,7 +46,7 @@ just like C<syslog(3)>.
 
 Syslog provides the functions:
 
-=over
+=over 4
 
 =item openlog $ident, $logopt, $facility
 

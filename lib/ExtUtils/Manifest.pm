@@ -447,7 +447,7 @@ produced.
 
 All diagnostic output is sent to C<STDERR>.
 
-=over
+=over 4
 
 =item C<Not in MANIFEST:> I<file>
 

@@ -1326,7 +1326,7 @@ used on the command line.
 
 The argument specification can be
 
-=over
+=over 4
 
 =item !
 
@@ -1352,7 +1352,7 @@ The C<+> specifier is ignored if the option destination is not a scalar.
 The option requires an argument of the given type. Supported types
 are:
 
-=over
+=over 4
 
 =item s
 

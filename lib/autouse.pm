@@ -116,7 +116,7 @@ with the correct definitions.
 Using C<autouse> will move important steps of your program's execution
 from compile time to runtime.  This can
 
-=over
+=over 4
 
 =item *
 

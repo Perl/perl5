@@ -100,7 +100,7 @@ The following methods are not supported on a per-filehandle basis.
 
 Furthermore, for doing normal I/O you might need these:
 
-=over 
+=over 4
 
 =item $io->fdopen ( FD, MODE )
 
@@ -206,7 +206,7 @@ failure.
 Lastly, there is a special method for working under B<-T> and setuid/gid
 scripts:
 
-=over
+=over 4
 
 =item $io->untaint
 
