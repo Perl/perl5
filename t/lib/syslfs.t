@@ -116,6 +116,12 @@ unless($syswrite && $close) {
 
 print "# @s\n";
 
+unless ($s[7] == 5_000_000_003) {
+    print "1..0\n# not configured to use large files?\n";
+    explain();
+    bye();
+}
+
 sub fail () {
     print "not ";
     $fail++;

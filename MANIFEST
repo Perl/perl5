@@ -91,7 +91,7 @@ eg/cgi/cookie.cgi		CGI example
 eg/cgi/crash.cgi		CGI example
 eg/cgi/customize.cgi		CGI example
 eg/cgi/diff_upload.cgi		CGI example
-eg/cgi/dna.small.gif.uu		Small image for CGI examples
+eg/cgi/dna_small_gif.uu		Small image for CGI examples
 eg/cgi/file_upload.cgi		CGI example
 eg/cgi/frameset.cgi		CGI example
 eg/cgi/index.html		Index page for CGI examples
@@ -104,7 +104,7 @@ eg/cgi/nph-multipart.cgi	CGI example
 eg/cgi/popup.cgi		CGI example
 eg/cgi/save_state.cgi		CGI example
 eg/cgi/tryit.cgi		CGI example
-eg/cgi/wilogo.gif.uu		Small image for CGI examples
+eg/cgi/wilogo_gif.uu		Small image for CGI examples
 eg/changes		A program to list recently changed files
 eg/client		A sample client
 eg/down			A program to do things to subdirectories

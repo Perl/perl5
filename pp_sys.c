@@ -825,17 +825,10 @@ PP(pp_untie)
     if (ckWARN(WARN_UNTIE)) {
         MAGIC * mg ;
         if (mg = SvTIED_mg(sv, how)) {
-#ifdef IV_IS_QUAD
             if (mg && SvREFCNT(SvRV(mg->mg_obj)) > 1)  
 		Perl_warner(aTHX_ WARN_UNTIE,
-		    "untie attempted while %" PERL_PRIu64 " inner references still exist",
+		    "untie attempted while %"UVuf" inner references still exist",
 		    (UV)SvREFCNT(SvRV(mg->mg_obj)) - 1 ) ;
-#else
-            if (mg && SvREFCNT(SvRV(mg->mg_obj)) > 1)  
-		Perl_warner(aTHX_ WARN_UNTIE,
-		    "untie attempted while %lu inner references still exist",
-		    (unsigned long)SvREFCNT(SvRV(mg->mg_obj)) - 1 ) ;
-#endif
         }
     }
  

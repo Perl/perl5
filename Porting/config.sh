@@ -8,7 +8,7 @@
 
 # Package name      : perl5
 # Source directory  : .
-# Configuration time: Thu Sep 30 19:44:33 EET DST 1999
+# Configuration time: Sun Oct  3 02:17:38 EET DST 1999
 # Configured by     : jhi
 # Target system     : osf1 alpha.hut.fi v4.0 878 alpha 
 
@@ -30,7 +30,7 @@ afs='false'
 alignbytes='8'
 ansi2knr=''
 aphostname=''
-apiversion=''
+apiversion='5.00561'
 ar='ar'
 archlib='/opt/perl/lib/5.00561/alpha-dec_osf-thread'
 archlibexp='/opt/perl/lib/5.00561/alpha-dec_osf-thread'
@@ -56,7 +56,7 @@ ccflags='-pthread -std -DLANGUAGE_C'
 ccsymbols='__LANGUAGE_C__=1 _LONGLONG=1 LANGUAGE_C=1 SYSTYPE_BSD=1'
 cf_by='jhi'
 cf_email='yourname@yourhost.yourplace.com'
-cf_time='Thu Sep 30 19:44:33 EET DST 1999'
+cf_time='Sun Oct  3 02:17:38 EET DST 1999'
 chgrp=''
 chmod=''
 chown=''
@@ -478,7 +478,7 @@ installprefix='/opt/perl'
 installprefixexp='/opt/perl'
 installprivlib='/opt/perl/lib/5.00561'
 installscript='/opt/perl/bin'
-installsitearch='/opt/perl/lib/site_perl//alpha-dec_osf-thread'
+installsitearch='/opt/perl/lib/site_perl/5.00561/alpha-dec_osf-thread'
 installsitelib='/opt/perl/lib/site_perl'
 installstyle='lib'
 installusrbinperl='define'
@@ -569,6 +569,7 @@ pg='pg'
 phostname=''
 pidtype='pid_t'
 plibpth=''
+pm_apiversion='5.005'
 pmake=''
 pr=''
 prefix='/opt/perl'
@@ -618,8 +619,8 @@ sig_name_init='"ZERO", "HUP", "INT", "QUIT", "ILL", "TRAP", "ABRT", "EMT", "FPE"
 sig_num='0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31 32 33 34 35 36 37 38 39 40 41 42 43 44 45 46 47 48 6 6 16 20 23 23 23 29 48 '
 sig_num_init='0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 6, 6, 16, 20, 23, 23, 23, 29, 48, 0'
 signal_t='void'
-sitearch='/opt/perl/lib/site_perl//alpha-dec_osf-thread'
-sitearchexp='/opt/perl/lib/site_perl//alpha-dec_osf-thread'
+sitearch='/opt/perl/lib/site_perl/5.00561/alpha-dec_osf-thread'
+sitearchexp='/opt/perl/lib/site_perl/5.00561/alpha-dec_osf-thread'
 sitelib='/opt/perl/lib/site_perl'
 sitelibexp='/opt/perl/lib/site_perl'
 siteprefix='/opt/perl'
@@ -662,6 +663,7 @@ touch='touch'
 tr='tr'
 trnl='\n'
 troff=''
+uidsign='1'
 uidtype='uid_t'
 uname='uname'
 uniq='uniq'
@@ -692,6 +694,7 @@ version='5.00561'
 vi=''
 voidflags='15'
 xlibpth='/usr/lib/386 /lib/386'
+xs_apiversion='5.00561'
 zcat=''
 zip='zip'
 # Configure command line arguments.
@@ -712,6 +715,7 @@ config_arg11='-dE'
 PERL_REVISION=5
 PERL_VERSION=5
 PERL_SUBVERSION=61
+PERL_APIVERSION=5.00561
 CONFIGDOTSH=true
 # Variables propagated from previous config.sh file.
 pp_sys_cflags='ccflags="$ccflags -DNO_EFF_ONLY_OK"'

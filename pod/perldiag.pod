@@ -1967,13 +1967,13 @@ your system.
 (F) The argument to B<-I> must follow the B<-I> immediately with no
 intervening space.
 
-=item No such array field
+=item No such pseudo-hash field "%s"
 
 (F) You tried to access an array as a hash, but the field name used is
 not defined.  The hash at index 0 should map all valid field names to
 array indices for that to work.
 
-=item No such field "%s" in variable %s of type %s
+=item No such pseudo-hash field "%s" in variable %s of type %s
 
 (F) You tried to access a field of a typed variable where the type
 does not know about the field name.  The field names are looked up in

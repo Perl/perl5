@@ -739,3 +739,4 @@ tt+$	xxxtt	y	-	-
 [\w-z]	-	c	-	/[\w-z]/: invalid [] range in regexp
 [0-[:digit:]]	-	c	-	/[0-[:digit:]]/: invalid [] range in regexp
 [[:digit:]-9]	-	c	-	/[[:digit:]-9]/: invalid [] range in regexp
+\GX.*X	aaaXbX	n	-	-

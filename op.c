@@ -5048,17 +5048,10 @@ Perl_ck_fun(pTHX_ OP *o)
 		    char *name = SvPVx(((SVOP*)kid)->op_sv, n_a);
 		    OP *newop = newAVREF(newGVOP(OP_GV, 0,
 			gv_fetchpv(name, TRUE, SVt_PVAV) ));
-#ifdef IV_IS_QUAD
 		    if (ckWARN(WARN_SYNTAX))
 			Perl_warner(aTHX_ WARN_SYNTAX,
-			    "Array @%s missing the @ in argument %" PERL_PRId64 " of %s()",
+			    "Array @%s missing the @ in argument %"IVdf" of %s()",
 			    name, (IV)numargs, PL_op_desc[type]);
-#else
-		    if (ckWARN(WARN_SYNTAX))
-			Perl_warner(aTHX_ WARN_SYNTAX,
-			    "Array @%s missing the @ in argument %ld of %s()",
-			    name, (long)numargs, PL_op_desc[type]);
-#endif
 		    op_free(kid);
 		    kid = newop;
 		    kid->op_sibling = sibl;
@@ -5075,17 +5068,10 @@ Perl_ck_fun(pTHX_ OP *o)
 		    char *name = SvPVx(((SVOP*)kid)->op_sv, n_a);
 		    OP *newop = newHVREF(newGVOP(OP_GV, 0,
 			gv_fetchpv(name, TRUE, SVt_PVHV) ));
-#ifdef IV_IS_QUAD
 		    if (ckWARN(WARN_SYNTAX))
 			Perl_warner(aTHX_ WARN_SYNTAX,
-			    "Hash %%%s missing the %% in argument %" PERL_PRId64 " of %s()",
+			    "Hash %%%s missing the %% in argument %"IVdf" of %s()",
 			    name, (IV)numargs, PL_op_desc[type]);
-#else
-		    if (ckWARN(WARN_SYNTAX))
-			Perl_warner(aTHX_ WARN_SYNTAX,
-			    "Hash %%%s missing the %% in argument %ld of %s()",
-			    name, (long)numargs, PL_op_desc[type]);
-#endif
 		    op_free(kid);
 		    kid = newop;
 		    kid->op_sibling = sibl;
@@ -6155,7 +6141,7 @@ Perl_peep(pTHX_ register OP *o)
 	    key = SvPV(*svp, keylen);
 	    indsvp = hv_fetch(GvHV(*fields), key, keylen, FALSE);
 	    if (!indsvp) {
-		Perl_croak(aTHX_ "No such field \"%s\" in variable %s of type %s",
+		Perl_croak(aTHX_ "No such pseudo-hash field \"%s\" in variable %s of type %s",
 		      key, SvPV(lexname, n_a), HvNAME(SvSTASH(lexname)));
 	    }
 	    ind = SvIV(*indsvp);

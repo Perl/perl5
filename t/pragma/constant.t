@@ -151,7 +151,7 @@ print CHASH->{foo};
 print CARRAY->[1];
 print CPHASH->{foo};
 eval q{ CPHASH->{bar} };
-test 44, scalar($@ =~ /^No such array/);
+test 44, scalar($@ =~ /^No such pseudo-hash field/);
 print CCODE->(45);
 eval q{ CCODE->{foo} };
 test 46, scalar($@ =~ /^Constant is not a HASH/);

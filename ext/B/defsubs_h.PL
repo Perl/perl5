@@ -3,7 +3,6 @@
 # Extracting defsubs.h (with variable substitutions)
 #!perl
 my ($out) = __FILE__ =~ /(^.*)\.PL/;
-if ($^O eq 'VMS') { ($out) = __FILE__ =~ /^(.+)_PL$/i; }
 $out =~ s/_h$/.h/;
 open(OUT,">$out") || die "Cannot open $file:$!";
 print "Extracting $out...\n";

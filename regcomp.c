@@ -702,11 +702,7 @@ S_study_chunk(pTHX_ regnode **scanp, I32 *deltap, regnode *last, scan_data_t *da
 		    FAIL("variable length lookbehind not implemented");
 		}
 		else if (minnext > U8_MAX) {
-#ifdef UV_IS_QUAD
-		    FAIL2("lookbehind longer than %" PERL_PRIu64 " not implemented", (UV)U8_MAX);
-#else
-		    FAIL2("lookbehind longer than %d not implemented", U8_MAX);
-#endif
+		    FAIL2("lookbehind longer than %"UVuf" not implemented", (UV)U8_MAX);
 		}
 		scan->flags = minnext;
 	    }
@@ -1080,7 +1076,9 @@ Perl_pregcomp(pTHX_ char *exp, char *xend, PMOP *pm)
 	    r->check_offset_min = data.offset_float_min;
 	    r->check_offset_max = data.offset_float_max;
 	}
-	if (r->check_substr) {
+	/* XXXX Currently intuiting is not compatible with ANCH_GPOS.
+	   This should be changed ASAP!  */
+	if (r->check_substr && !(r->reganch & ROPT_ANCH_GPOS)) {
 	    r->reganch |= RE_USE_INTUIT;
 	    if (SvTAIL(r->check_substr))
 		r->reganch |= RE_INTUIT_TAIL;
@@ -2840,13 +2838,8 @@ S_regclassutf8(pTHX)
         if (range) {
 	    if (lastvalue > value)
 		FAIL("invalid [] range in regexp"); /* [b-a] */
-#ifdef UV_IS_QUAD
 	    if (!SIZE_ONLY)
-                Perl_sv_catpvf(aTHX_ listsv, "%04" PERL_PRIx64 "\t%04" PERL_PRIx64 "\n", (UV)lastvalue, (UV)value);
-#else
-	    if (!SIZE_ONLY)
-	        Perl_sv_catpvf(aTHX_ listsv, "%04x\t%04x\n", lastvalue, value);
-#endif
+                Perl_sv_catpvf(aTHX_ listsv, "%04"UVxf"\t%04"UVxf"\n", (UV)lastvalue, (UV)value);
 	    range = 0;
 	}
 	else {
@@ -2861,13 +2854,8 @@ S_regclassutf8(pTHX)
 	    }
 	}
 	/* now is the next time */
-#ifdef UV_IS_QUAD
 	if (!SIZE_ONLY)
-	    Perl_sv_catpvf(aTHX_ listsv, "%04" PERL_PRIx64 "\n", (UV)value);
-#else
-	if (!SIZE_ONLY)
-	    Perl_sv_catpvf(aTHX_ listsv, "%04x\n", value);
-#endif
+	    Perl_sv_catpvf(aTHX_ listsv, "%04"UVxf"\n", (UV)value);
 	range = 0;
     }
 

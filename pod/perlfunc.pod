@@ -1412,6 +1412,9 @@ This surprising autovivification in what does not at first--or even
 second--glance appear to be an lvalue context may be fixed in a future
 release.
 
+See L<perlref/"Pseudo-hashes"> for specifics on how exists() acts when
+used on a pseudo-hash.
+
 =item exit EXPR
 
 Evaluates EXPR and exits immediately with that value.    Example:
