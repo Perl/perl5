@@ -2415,6 +2415,10 @@ sed <<!GROK!THIS! >config.h -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un-
  *	This symbol, if defined, indicates that the ftruncate64 routine is
  *	available to tell files larger than 2 gigabytes.
  */
+/* HAS_LLSEEK:
+ *	This symbol, if defined, indicates that the llseek routine is
+ *	available to seek files larger than 2 gigabytes.
+ */
 /* HAS_LSEEK64:
  *	This symbol, if defined, indicates that the lseek64 routine is
  *	available to seek files larger than 2 gigabytes.
@@ -2459,6 +2463,7 @@ sed <<!GROK!THIS! >config.h -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un-
  */
 #$d_fstat64     HAS_FSTAT64		/**/
 #$d_ftruncate64 HAS_FTRUNCATE64	/**/
+#$d_llseek      HAS_LLSEEK		/**/
 #$d_lseek64     HAS_LSEEK64		/**/
 #$d_lstat64     HAS_LSTAT64		/**/
 #$d_open64      HAS_OPEN64		/**/

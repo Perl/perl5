@@ -1372,6 +1372,10 @@ typedef union any ANY;
 #               undef Off_t
 #               define Off_t off64_t
 #           endif
+#       else
+#           ifdef HAS_LLSEEK
+#               define lseek llseek
+#           endif
 #       endif
 #       ifdef HAS_LSTAT64
 #           define lstat lstat64
