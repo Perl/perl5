@@ -244,17 +244,20 @@ Generates the path name for the controlling terminal.
 
 =item ctime
 
-This is identical to the C function C<ctime()>.
+This is identical to the C function C<ctime()> and equivalent
+to C<asctime(localtime(...))>, see L</asctime> and L</localtime>.
 
 =item cuserid
 
-Get the character login name of the user.
+Get the login name of the owner of the current process.
 
 	$name = POSIX::cuserid();
 
 =item difftime
 
-This is identical to the C function C<difftime()>.
+This is identical to the C function C<difftime()>, for returning
+the time difference (in seconds) between two times (as returned
+by C<time()>), see L</time>.
 
 =item div
 
@@ -263,7 +266,8 @@ the modulus C<%>.
 
 =item dup
 
-This is similar to the C function C<dup()>.
+This is similar to the C function C<dup()>, for duplicating a file
+descriptor.
 
 This uses file descriptors such as those obtained by calling
 C<POSIX::open>.
@@ -272,7 +276,8 @@ Returns C<undef> on failure.
 
 =item dup2
 
-This is similar to the C function C<dup2()>.
+This is similar to the C function C<dup2()>, for duplicating a file
+descriptor to an another known file descriptor.
 
 This uses file descriptors such as those obtained by calling
 C<POSIX::open>.
@@ -285,7 +290,7 @@ Returns the value of errno.
 
 	$errno = POSIX::errno();
 
-This identical to the numerical values of the C<$!>, see L<perlvar>.
+This identical to the numerical values of the C<$!>, see L<perlvar/$ERRNO>.
 
 =item execl
 
@@ -362,7 +367,7 @@ Use method C<IO::Seekable::getpos()> instead.
 
 =item fgets
 
-Use method C<IO::Handle::gets()> instead.  Similar to <>, also known
+Use method C<IO::Handle::gets()> instead.  Similar to E<lt>E<gt>, also known
 as L<perlfunc/readline>.
 
 =item fileno
@@ -433,11 +438,11 @@ freopen() is C-specific, see L<perlfunc/open> instead.
 
 Return the mantissa and exponent of a floating-point number.
 
-	($mantissa, $exponent) = POSIX::frexp( 3.14 );
+	($mantissa, $exponent) = POSIX::frexp( 1.234e56 );
 
 =item fscanf
 
-fscanf() is C-specific--use <> and regular expressions instead.
+fscanf() is C-specific, use E<lt>E<gt> and regular expressions instead.
 
 =item fseek
 
@@ -471,15 +476,18 @@ see L<perlfunc/getc>.
 
 =item getchar
 
-Returns one character from STDIN.
+Returns one character from STDIN.  Identical to Perl's C<getc()>,
+see L<perlfunc/getc>.
 
 =item getcwd
 
 Returns the name of the current working directory.
+See also L<Cwd>.
 
 =item getegid
 
-Returns the effective group id.
+Returns the effective group identifier.  Similar to Perl' s builtin
+variable C<$(>, see L<perlvar/$EGID>.
 
 =item getenv
 
@@ -488,74 +496,89 @@ The same information is available through the C<%ENV> array.
 
 =item geteuid
 
-Returns the effective user id.
+Returns the effective user identifier.  Identical to Perl's builtin C<$E<gt>>
+variable, see L<perlvar/$EUID>.
 
 =item getgid
 
-Returns the user's real group id.
+Returns the user's real group identifier.  Similar to Perl's builtin
+variable C<$)>, see L<perlvar/$GID>.
 
 =item getgrgid
 
-This is identical to Perl's builtin C<getgrgid()> function,
-see L<perlfunc/getgrgid>.
+This is identical to Perl's builtin C<getgrgid()> function for
+returning group entries by group identifiers, see
+L<perlfunc/getgrgid>.
 
 =item getgrnam
 
-This is identical to Perl's builtin C<getgrnam()> function,
-see L<perlfunc/getgrnam>.
+This is identical to Perl's builtin C<getgrnam()> function for
+returning group entries by group names, see L<perlfunc/getgrnam>.
 
 =item getgroups
 
-Returns the ids of the user's supplementary groups.
+Returns the ids of the user's supplementary groups.  Similar to Perl's
+builtin variable C<$)>, see L<perlvar/$GID>.
 
 =item getlogin
 
-This is identical to Perl's builtin C<getlogin()> function,
-see L<perlfunc/getlogin>.
+This is identical to Perl's builtin C<getlogin()> function for
+returning the user name associated with the current session, see
+L<perlfunc/getlogin>.
 
 =item getpgrp
 
-This is identical to Perl's builtin C<getpgrp()> function,
-see L<perlfunc/getpgrp>.
+This is identical to Perl's builtin C<getpgrp()> function for
+returning the prcess group identifier of the current process, see
+L<perlfunc/getpgrp>.
 
 =item getpid
 
-Returns the process's id.
+Returns the process identifier.  Identical to Perl's builtin
+variable C<$$>, see L<perlvar/$PID>.
 
 =item getppid
 
-This is identical to Perl's builtin C<getppid()> function,
-see L<perlfunc/getppid>.
+This is identical to Perl's builtin C<getppid()> function for
+returning the process identifier of the parent process of the current
+process , see L<perlfunc/getppid>.
 
 =item getpwnam
 
-This is identical to Perl's builtin C<getpwnam()> function,
-see L<perlfunc/getpwnam>.
+This is identical to Perl's builtin C<getpwnam()> function for
+returning user entries by user names, see L<perlfunc/getpwnam>.
 
 =item getpwuid
 
-This is identical to Perl's builtin C<getpwuid()> function,
-see L<perlfunc/getpwuid>.
+This is identical to Perl's builtin C<getpwuid()> function for
+returning user entries by user identifiers, see L<perlfunc/getpwuid>.
 
 =item gets
 
-Returns one line from C<STDIN>, similar to <>, also known
-as the C<readline()> functions, see L<perlfunc/readline>.
+Returns one line from C<STDIN>, similar to E<lt>E<gt>, also known
+as the C<readline()> function, see L<perlfunc/readline>.
+
+B<NOTE>: if you have C programs that still use C<gets()>, be very
+afraid.  The C<gets()> function is a source of endless grief because
+it has no buffer overrun checks.  It should B<never> be used.  The
+C<fgets()> function should be preferred instead.
 
 =item getuid
 
-Returns the user's id.
+Returns the user's identifier.  Identical to Perl's builtin C<$E<lt>> variable,
+see L<perlvar/$UID>.
 
 =item gmtime
 
-This is identical to Perl's builtin C<gmtime()> function,
+This is identical to Perl's builtin C<gmtime()> function for
+converting seconds since the epoch to a date in Greenwich Mean Time,
 see L<perlfunc/gmtime>.
 
 =item isalnum
 
 This is identical to the C function, except that it can apply to a single
 character or to a whole string.  Consider using regular expressions and the
-C</[[:isalnum:]]/> construct instead.
+C</[[:isalnum:]]/> construct instead, or possibly the C</\w/> construct.
 
 =item isalpha
 
@@ -578,7 +601,7 @@ C</[[:iscntrl:]]/> construct instead.
 
 This is identical to the C function, except that it can apply to a single
 character or to a whole string.  Consider using regular expressions and the
-C</[[:isdigit:]]/> construct instead.
+C</[[:isdigit:]]/> construct instead, or the C</\d/> construct.
 
 =item isgraph
 
@@ -590,7 +613,7 @@ C</[[:isgraph:]]/> construct instead.
 
 This is identical to the C function, except that it can apply to a single
 character or to a whole string.  Consider using regular expressions and the
-C</[[:islower:]]/> construct instead.
+C</[[:islower:]]/> construct instead.  Do B<not> use C</a-z/>.
 
 =item isprint
 
@@ -608,39 +631,46 @@ C</[[:ispunct:]]/> construct instead.
 
 This is identical to the C function, except that it can apply to a single
 character or to a whole string.  Consider using regular expressions and the
-C</[[:isspace:]]/> construct instead.
+C</[[:isspace:]]/> construct instead, or the C</\s/> construct.
 
 =item isupper
 
 This is identical to the C function, except that it can apply to a single
 character or to a whole string.  Consider using regular expressions and the
-C</[[:isupper:]]/> construct instead.
+C</[[:isupper:]]/> construct instead.  Do B<not> use C</A-Z/>.
 
 =item isxdigit
 
 This is identical to the C function, except that it can apply to a single
 character or to a whole string.  Consider using regular expressions and the
-C</[[:isxdigit:]]/> construct instead.
+C</[[:isxdigit:]]/> construct instead, or simply C</[0-9a-f]/i>.
 
 =item kill
 
-This is identical to Perl's builtin C<kill()> function.
+This is identical to Perl's builtin C<kill()> function for sending
+signals to processes (oftern to terminate them), see L<perlfunc/kill>.
 
 =item labs
 
+(For returning absolute values of long integers.)
 labs() is C-specific, see L<perlfunc/abs> instead.
 
 =item ldexp
 
-This is identical to the C function C<ldexp()>.
+This is identical to the C function C<ldexp()>
+for multiplying floating point numbers with powers of two.
+
+	$x_quadrupled = POSIX::ldexp($x, 2);
 
 =item ldiv
 
+(For computing dividends of long integers.)
 ldiv() is C-specific, use C</> and C<int()> instead.
 
 =item link
 
-This is identical to Perl's builtin C<link()> function.
+This is identical to Perl's builtin C<link()> function
+for creating hard links into files, see L<perlfunc/link>.
 
 =item localeconv
 
@@ -673,7 +703,8 @@ Here is how to query the database for the B<de> (Deutsch or German) locale.
 
 =item localtime
 
-This is identical to Perl's builtin C<localtime()> function.
+This is identical to Perl's builtin C<localtime()> function for
+converting seconds since the epoch to a date see L<perlfunc/localtime>.
 
 =item log
 
@@ -718,14 +749,23 @@ malloc() is C-specific.  Perl does memory management transparently.
 =item mblen
 
 This is identical to the C function C<mblen()>.
+Perl does not have any support for the wide and multibyte
+characters of the C standards, so this might be a rather 
+useless function.
 
 =item mbstowcs
 
 This is identical to the C function C<mbstowcs()>.
+Perl does not have any support for the wide and multibyte
+characters of the C standards, so this might be a rather 
+useless function.
 
 =item mbtowc
 
 This is identical to the C function C<mbtowc()>.
+Perl does not have any support for the wide and multibyte
+characters of the C standards, so this might be a rather 
+useless function.
 
 =item memchr
 
@@ -860,7 +900,7 @@ Returns C<undef> on failure.
 This is identical to the C function C<perror()>, which outputs to the
 standard error stream the specified message followed by ": " and the
 current error string.  Use the C<warn()> function and the C<$!>
-variable instead, see L<perlfunc/warn> and L<perlvar>.
+variable instead, see L<perlfunc/warn> and L<perlvar/$ERRNO>.
 
 =item pipe
 
@@ -905,11 +945,11 @@ qsort() is C-specific, see L<perlfunc/sort> instead.
 =item raise
 
 Sends the specified signal to the current process.
-See also L<perlfunc/kill> and the C<$$> in L<perlvar>.
+See also L<perlfunc/kill> and the C<$$> in L<perlvar/$PID>.
 
 =item rand
 
-rand() is non-portable, see L<perlfunc/rand> instead.
+C<rand()> is non-portable, see L<perlfunc/rand> instead.
 
 =item read
 
@@ -959,12 +999,14 @@ for removing (empty) directories, see L<perlfunc/rmdir>.
 
 =item scanf
 
-scanf() is C-specific--use <> and regular expressions instead,
+scanf() is C-specific, use E<lt>E<gt> and regular expressions instead,
 see L<perlre>.
 
 =item setgid
 
-Sets the real group id for this process.
+Sets the real group identifier for this process.
+Identical to assigning a value to the Perl's builtin C<$)> variable,
+see L<perlvar/$UID>.
 
 =item setjmp
 
@@ -1005,17 +1047,21 @@ out which locales are available in your system.
 
 =item setpgid
 
-This is similar to the C function C<setpgid()>.
+This is similar to the C function C<setpgid()> for
+setting the process group identifier of the current process.
 
 Returns C<undef> on failure.
 
 =item setsid
 
-This is identical to the C function C<setsid()>.
+This is identical to the C function C<setsid()> for
+setting the session identifier of the current process.
 
 =item setuid
 
-Sets the real user id for this process.
+Sets the real user identifier for this process.
+Identical to assigning a value to the Perl's builtin C<$E<lt>> variable,
+see L<perlvar/$UID>.
 
 =item sigaction
 
@@ -1114,7 +1160,8 @@ see L<perlre>.
 
 =item stat
 
-This is identical to Perl's builtin C<stat()> function.
+This is identical to Perl's builtin C<stat()> function
+for retutning information about files and directories.
 
 =item strcat
 
@@ -1126,7 +1173,7 @@ strchr() is C-specific, see L<perlfunc/index> instead.
 
 =item strcmp
 
-strcmp() is C-specific, use C<eq> instead, see L<perlop>.
+strcmp() is C-specific, use C<eq> or C<cmp> instead, see L<perlop>.
 
 =item strcoll
 
@@ -1141,12 +1188,13 @@ strcpy() is C-specific, use C<=> instead, see L<perlop>.
 
 =item strcspn
 
-strcspn() is C-specific, use regular expressions instead.
+strcspn() is C-specific, use regular expressions instead,
+see L<perlre>.
 
 =item strerror
 
 Returns the error string for the specified errno.
-Identical to the string form of the C<$!>, see L<perlvar>.
+Identical to the string form of the C<$!>, see L<perlvar/$ERRNO>.
 
 =item strftime
 
@@ -1191,7 +1239,8 @@ strncpy() is C-specific, use C<=> instead, see L<perlop>.
 
 =item strpbrk
 
-strpbrk() is C-specific, use regular expressions instead, see L<perlre>.
+strpbrk() is C-specific, use regular expressions instead,
+see L<perlre>.
 
 =item strrchr
 
@@ -1334,7 +1383,7 @@ Returns C<undef> on failure.
 =item tcgetpgrp
 
 This is identical to the C function C<tcgetpgrp()> for returning the
-process group id of the foreground process group of the controlling
+process group identifier of the foreground process group of the controlling
 terminal.
 
 =item tcsendbreak
@@ -1347,7 +1396,7 @@ Returns C<undef> on failure.
 =item tcsetpgrp
 
 This is similar to the C function C<tcsetpgrp()> for setting the
-process group id of the foreground process group of the controlling
+process group identifier of the foreground process group of the controlling
 terminal.
 
 Returns C<undef> on failure.
@@ -1372,7 +1421,7 @@ seconds.
 
 =item tmpfile
 
-Use method C<IO::File::new_tmpfile()> instead.
+Use method C<IO::File::new_tmpfile()> instead, or see L<File::Temp>.
 
 =item tmpnam
 
@@ -1380,7 +1429,7 @@ Returns a name for a temporary file.
 
 	$tmpfile = POSIX::tmpnam();
 
-See also the L<File::Temp> module.
+See also L<File::Temp>.
 
 =item tolower
 
@@ -1425,7 +1474,16 @@ see L<perlfunc/umask>.
 
 Get name of current operating system.
 
-	($sysname, $nodename, $release, $version, $machine ) = POSIX::uname();
+	($sysname, $nodename, $release, $version, $machine) = POSIX::uname();
+
+Note that the actual meanings of the various fields are not
+that well standardized, do not expect any great portability.
+The C<$sysname> might be the name of the operating system,
+the C<$nodename> might be the name of the host, the C<$release>
+might be the (major) release number of the operating system,
+the C<$version> might be the (minor) release number of the
+operating system, and the C<$machine> might be a hardware identifier.
+Maybe.
 
 =item ungetc
 
@@ -1470,10 +1528,16 @@ builtin C<waitpid()> function, see L<perlfunc/waitpid>.
 =item wcstombs
 
 This is identical to the C function C<wcstombs()>.
+Perl does not have any support for the wide and multibyte
+characters of the C standards, so this might be a rather 
+useless function.
 
 =item wctomb
 
 This is identical to the C function C<wctomb()>.
+Perl does not have any support for the wide and multibyte
+characters of the C standards, so this might be a rather 
+useless function.
 
 =item write
 
@@ -1910,8 +1974,4 @@ WNOHANG WUNTRACED
 WIFEXITED WEXITSTATUS WIFSIGNALED WTERMSIG WIFSTOPPED WSTOPSIG
 
 =back
-
-=head1 CREATION
-
-This document generated by ./mkposixman.PL version 19960129.
 
