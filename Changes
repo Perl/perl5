@@ -28,6 +28,245 @@ example from http://www.xray.mpe.mpg.de/mailing-lists/perl5-porters/
 Version v5.8.1		Maintenance release working toward v5.8.1
 --------------
 ____________________________________________________________________________
+[ 21199] By: jhi                                   on 2003/09/12  18:01:40
+        Log: Integrate:
+             [ 21198]
+             It's UTF-8, not UTF8.  (Note: not s/UTF-8/UTF8/,
+             since that would break a lot of code.)  Also few
+             stray UTF16s, UTF32s, and "encoded in Unicode".
+     Branch: maint-5.8/perl
+	  !> doop.c hv.h pod/Makefile.SH pod/perl570delta.pod
+	  !> pod/perl58delta.pod pod/perlapi.pod pod/perlfunc.pod
+	  !> pod/perlguts.pod pod/perlhack.pod pod/perlpodspec.pod
+	  !> pod/perltoc.pod pod/perltodo.pod pod/perlunicode.pod
+	  !> pod/perluniintro.pod pp_hot.c pp_sys.c sv.c sv.h utf8.c utf8.h
+	  !> utfebcdic.h
+____________________________________________________________________________
+[ 21195] By: jhi                                   on 2003/09/12  14:26:32
+        Log: Integrate:
+             [ 21191]
+             More comments for the FreeBSD threads hints.
+             
+             [ 21193]
+             Document the new strict strict in strict.
+             
+             [ 21194]
+             Slightly more documentation for open ...&=.
+     Branch: maint-5.8/perl
+	  !> hints/freebsd.sh lib/strict.pm pod/perlfunc.pod
+____________________________________________________________________________
+[ 21192] By: jhi                                   on 2003/09/12  03:17:59
+        Log: Move the strict pragma change to "fixes"; the "incompatible
+             changes" section is meant for things that used to work but
+             do no more.
+     Branch: maint-5.8/perl
+	   ! pod/perldelta.pod
+____________________________________________________________________________
+[ 21189] By: jhi                                   on 2003/09/11  20:29:42
+        Log: Integrate:
+             [ 21178]
+             Upgrading to fields.pm 2.0 strangely helps also fields.t.
+             
+             [ 21179]
+             Upgrade to Pod::Perldoc 3.10.
+             (Yes, the doughera address change is wrong, but hardly worth 3.11.) 
+             
+             [ 21180]
+             Changed warning due to fields.pm 2.0.
+             
+             [ 21181]
+             The change of not needing -pthread in FreeBSD 5.x
+             is very recent (Sep 3) (from Anton Berezin).
+             
+             [ 21182]
+             The fields.pm had lost the change #19009.
+             
+             [ 21186]
+             Subject: [PATCH maint@21148] Security: suidperl path disclosure revisited
+             From: "Brendan O'Dea" <bod@debian.org>
+             Date: Fri, 12 Sep 2003 00:12:51 +1000
+             Message-ID: <20030911141251.GA26907@londo.c47.org>
+             
+             [ 21187]
+             Subject: [PATCH 5.8.1 @20218] OS/2 API
+             From: Ilya Zakharevich <nospam-abuse@ilyaz.org>
+             Date: Thu, 11 Sep 2003 09:15:04 -0700
+             Message-ID: <20030911161504.GA16113@math.berkeley.edu>
+             
+             [ 21188]
+             More refactoring of the FreeBSD threads hints.
+             Basically, for fresh enough 5.x the -pthread is dropped,
+             otherwise keep it, and no known FreeBSD release has
+             a functional gethostbyaddr_r.
+     Branch: maint-5.8/perl
+	  !> hints/freebsd.sh lib/Pod/Perldoc.pm os2/OS2/Process/MANIFEST
+	  !> os2/OS2/Process/Process.pm os2/OS2/Process/Process.xs perl.c
+____________________________________________________________________________
+[ 21184] By: jhi                                   on 2003/09/11  14:31:18
+        Log: Slight rewording for #21183.
+     Branch: maint-5.8/perl
+	   ! pod/perldelta.pod
+____________________________________________________________________________
+[ 21183] By: jhi                                   on 2003/09/11  14:25:24
+        Log: Subject: [DOCPATCH] strict changes
+             From: Elizabeth Mattijsen <liz@dijkmat.nl>
+             Date: Thu, 11 Sep 2003 15:55:13 +0200
+             Message-Id: <p05111b06bb862edd9687@[192.168.56.4]>
+     Branch: maint-5.8/perl
+	   ! pod/perldelta.pod
+____________________________________________________________________________
+[ 21182] By: jhi                                   on 2003/09/11  11:16:33
+        Log: The fields.pm had lost the change #19009.
+     Branch: maint-5.8/perl
+	   ! lib/fields.pm t/lib/warnings/av
+____________________________________________________________________________
+[ 21180] By: jhi                                   on 2003/09/11  06:40:42
+        Log: Changed warning due to fields.pm 2.0.
+     Branch: maint-5.8/perl
+	   ! t/lib/warnings/av
+____________________________________________________________________________
+[ 21178] By: jhi                                   on 2003/09/11  06:08:38
+        Log: Upgrading to fields.pm 2.0 strangely helps also fields.t.
+     Branch: maint-5.8/perl
+	   ! lib/fields.pm lib/fields.t
+____________________________________________________________________________
+[ 21177] By: jhi                                   on 2003/09/11  05:25:51
+        Log: Integrate:
+             [ 21176]
+             Upgrade to base 2.02.
+             
+             (except keep our fields.t, 5.8.1 doesn't like the new one)
+     Branch: maint-5.8/perl
+	  +> lib/fields-base.t
+	  !> MANIFEST lib/base.pm
+____________________________________________________________________________
+[ 21175] By: jhi                                   on 2003/09/11  05:13:43
+        Log: Integrate:
+             [ 21151]
+             Document a PerlIO/Encode warning.
+             
+             [ 21152]
+             A new UTF-8 API, Perl_is_utf8_string_loc(), a variant
+             of Perl_utf8_is_string().
+             
+             [ 21153]
+             [perl #23770] Reading a latin1 file with open(... "<:utf8") will freeze
+             is no more valid, the script doesn't freeze, but I noticed
+             that neither does the <FILE> complain about bad UTF-8 as it
+             should and as it does with :encoding(utf8).
+             
+             [ 21154]
+             No utf8 warnings without use warnings.
+             
+             [ 21155]
+             If doing rcatline no point rescanning each time
+             the beginning of the SV for utf8 validity.
+             
+             [ 21156]
+             Detypo and explain better.
+             
+             [ 21157]
+             Linenumbers for utf8 warnings were wrong, test also rcatline.
+             
+             [ 21158]
+             [perl #23769] Unicode regex broken on simple example
+             regrepeat() did not work right for UTF-8(ed Latin-1)
+             in the EXACT case, which made the \x{a0}+ fail.
+             
+             [ 21159]
+             Subject: [PATCH 5.8.1] Unwanted "redefined" warnings in h2ph
+             From: Kurt Starsinic <kstar@cpan.org>
+             Date: Tue, 9 Sep 2003 23:16:00 -0400
+             Message-ID: <20030910031600.GA30554@verizon.net>
+             
+             Subject: Re: [PATCH 5.8.1] Unwanted "redefined" warnings in h2ph
+             From: "Brendan O'Dea" <bod@debian.org>
+             Date: Wed, 10 Sep 2003 22:03:15 +1000
+             Message-ID: <20030910120315.GA1372@londo.c47.org>
+             
+             [ 21160]
+             Subject: Re: Decreasing VMS tests in File::Spec::VMS?
+             From: PPrymmer@factset.com
+             Message-ID: <OF103BAFC0.72D92F9B-ON85256D98.00742293-85256D98.0077A3F5@factset.com>
+             Date: Fri, 5 Sep 2003 17:46:48 -0400
+             
+             [ 21161]
+             Subject: [PATCH pod/perlvar.pod]  Remove deprecated English names.
+             From: Abigail <abigail@abigail.nl>
+             Date: Wed, 10 Sep 2003 09:50:16 +0200
+             Message-ID: <20030910075016.GA23847@abigail.nl>
+             
+             [ 21163]
+             Subject: [perl #23778] hints/aix.sh 
+             Date: 10 Sep 2003 16:30:32 -0000
+             From: "Gary L. Armstrong" (via RT) <perlbug-followup@perl.org>
+             Message-ID: <rt-23778-64471.11.7773626323738@rt.perl.org>
+             
+             [ 21164]
+             Regen perlapi.
+             
+             [ 21165]
+             Subject: [PATCH] AUTHORS
+             From: enache@rdslink.ro (Enache Adrian)
+             Date: Tue, 9 Sep 2003 19:34:05 +0300
+             Message-ID: <20030909163405.GB1398@ratsnest.hole>
+             
+             [ 21166]
+             Remove the warning in perlfaq about using map in void context :
+             From: abigail@abigail.nl (Abigail)
+             Subject: [PATCH perlfaq6] map in a void context.
+             Date: Tue, 9 Sep 2003 10:31:58 +0200
+             Message-ID: <20030909083158.GA24125@abigail.nl>
+             
+             [ 21168]
+             Subject: nit to hints/freebsd.sh
+             From: Enache Adrian <enache@rdslink.ro>
+             Date: Wed, 10 Sep 2003 19:50:59 +0300
+             Message-ID: <20030910165059.GB1321@ratsnest.hole>
+             
+             [ 21169]
+             Retract #21168 based on advice from Anton Berezin (added).
+             
+             [ 21171]
+             Subject: [patch] more fullpath TAGS patches (emacs/cperl-mode.el + emacs/ptags)
+             From: Stas Bekman <stas@stason.org>
+             Date: Thu, 28 Aug 2003 16:10:48 -0700
+             Message-ID: <3F4E8BF8.1090800@stason.org>
+             
+             [ 21172]
+             Enache still wants -pthread gone for FreeBSD 5.x
+             since it doesn't work with the latest -current.
+             
+             [ 21173]
+             Subject: [PATCH][TESTS] dumpvar.pl
+             From: Joe McMahon <mcmahon@metalab.unc.edu>
+             Date: Thu, 11 Sep 2003 00:10:29 -0400 (EDT)
+             Message-ID: <Pine.LNX.4.44.0309102337150.2043-300000@tribal.metalab.unc.edu>
+             
+             [ 21174]
+             Replace #21158 with a better patch from Hugo
+             (for [perl #23769]).
+     Branch: maint-5.8/perl
+	  !> AUTHORS emacs/cperl-mode.el emacs/ptags embed.fnc embed.h
+	  !> global.sym hints/aix.sh hints/freebsd.sh
+	  !> lib/File/Spec/t/Spec.t lib/dumpvar.pl lib/dumpvar.t
+	  !> pod/perlapi.pod pod/perldiag.pod pod/perlfaq6.pod pp_hot.c
+	  !> proto.h regcomp.c regexec.c t/io/utf8.t t/lib/h2ph.pht
+	  !> t/op/pat.t utf8.c utils/h2ph.PL
+____________________________________________________________________________
+[ 21161] By: jhi                                   on 2003/09/10  15:21:16
+        Log: Subject: [PATCH pod/perlvar.pod]  Remove deprecated English names.
+             From: Abigail <abigail@abigail.nl>
+             Date: Wed, 10 Sep 2003 09:50:16 +0200
+             Message-ID: <20030910075016.GA23847@abigail.nl>
+     Branch: maint-5.8/perl
+	   ! pod/perlvar.pod
+____________________________________________________________________________
+[ 21148] By: jhi                                   on 2003/09/09  16:00:51
+        Log: Update Changes.
+     Branch: maint-5.8/perl
+	   ! Changes patchlevel.h
+____________________________________________________________________________
 [ 21147] By: jhi                                   on 2003/09/09  15:36:59
         Log: Integrate:
              [ 21146]
