@@ -31,6 +31,12 @@ $SIG{__WARN__} = sub {
 
 for ($i = 1; @tests; $i++) {
     ($template, $data, $result, $comment) = @{shift @tests};
+    if ($^O eq 'os390') {
+        $data   =~ s/([eE])96$/${1}63/;      # smaller exponents
+        $result =~ s/([eE]\+)102$/${1}69/;   #  "       "
+        $data   =~ s/([eE])\-101$/${1}-56/;  # larger exponents
+        $result =~ s/([eE])\-102$/${1}-57/;  #  "       "
+    }
     $evalData = eval $data;
     $w = undef;
     $x = sprintf(">$template<",
@@ -96,6 +102,12 @@ for ($i = 1; @tests; $i++) {
 >%.0f<      >-0.1<        >-0<  >C library bug: no minus on VMS, HP-UX<
 >%.0f<      >1.5<         >2<   >Standard vague: no rounding rules<
 >%.0f<      >2.5<         >2<   >Standard vague: no rounding rules<
+>%G<        >1234567e96<  >1.23457E+102<	>exponent too big for OS/390<
+>%G<        >.1234567e-101< >1.23457E-102<	>exponent too small for OS/390<
+>%e<        >1234567E96<  >1.234567e+102<	>exponent too big for OS/390<
+>%e<        >.1234567E-101< >1.234567e-102<	>exponent too small for OS/390<
+>%g<        >.1234567E-101< >1.23457e-102<	>exponent too small for OS/390<
+>%g<        >1234567E96<  >1.23457e+102<	>exponent too big for OS/390<
 
 =end problematic
 
