@@ -565,7 +565,9 @@ sub tcp_connect
   };
   my $do_connect = sub {
     $self->{"ip"} = $ip;
-    return ($ret = connect($self->{"fh"}, $saddr));
+    # ECONNREFUSED is 10061 on MSWin32. If we pass it as child error through $?,
+    # we'll get (10061 & 255) = 77, so we cannot check it in the parent process.
+    return ($ret = connect($self->{"fh"}, $saddr) || ($! == ECONNREFUSED && !$self->{"econnrefused"}));
   };
   my $do_connect_nb = sub {
     # Set O_NONBLOCK property on filehandle
@@ -667,7 +669,8 @@ sub tcp_connect
         exit 0;
       } else {
         # Pass the error status to the parent
-        exit $!;
+        # Make sure that $! <= 255
+        exit($! <= 255 ? $! : 255);
       }
     }
 
@@ -692,6 +695,8 @@ sub tcp_connect
         # within the timeout
         &{ $do_connect }();
       }
+      # $ret cannot be set by the child process
+      $ret = !$child_errno;
     } else {
       # Time must have run out.
       # Put that choking client out of its misery
