@@ -1,3 +1,32 @@
+Change 770 on 2003/02/14 by <gbarr@pobox.com> (Graham Barr)
+
+	Release 1.11
+
+Change 769 on 2003/02/14 by <gbarr@pobox.com> (Graham Barr)
+
+	Add t/proto.t to MANIFEST
+
+Change 768 on 2003/02/14 by <gbarr@pobox.com> (Graham Barr)
+
+	Add set_prototype from Rafael Garcia-Suarez
+
+Change 767 on 2003/02/14 by <gbarr@pobox.com> (Graham Barr)
+
+	Fix t/isvstring.t so it does not cause perl5.004 to segv
+	because of the exit from within BEGIN
+
+Change 766 on 2003/02/14 by <gbarr@pobox.com> (Graham Barr)
+
+	Change how patchlevel.h is included and check we got what we wanted (from Jarkko)
+
+Change 765 on 2003/02/14 by <gbarr@pobox.com> (Graham Barr)
+
+	Add -DPERL_EXT to DEFINEs, requested by Jarkko for 5.8.1
+
+Change 764 on 2003/02/04 by <gbarr@pobox.com> (Graham Barr)
+
+	Release 1.10
+
 Change 763 on 2003/02/04 by <gbarr@pobox.com> (Graham Barr)
 
 	Fix linking error for older perls
@@ -36,7 +65,7 @@ Change 756 on 2002/11/03 by <gbarr@pobox.com> (Graham Barr)
 Change 751 on 2002/10/18 by <gbarr@pobox.com> (Graham Barr)
 
 	Fix context so that sub for reduce/first  is always in a scalar context
-	Fix sum/min/max so that they dont upgrade thier arguments to NVs
+	Fix sum/min/max so that they don't upgrade their arguments to NVs
 	if they are IV or UV
 
 Change 750 on 2002/10/14 by <gbarr@pobox.com> (Graham Barr)
