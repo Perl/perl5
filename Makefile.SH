@@ -506,14 +506,14 @@ quantperl: $& perlmain$(OBJ_EXT) $(LIBPERL) $(DYNALOADER) $(static_ext) ext.libs
 
 # Third Degree Perl (Tru64 only)
 
-perl.config.-g:
+perl.config.dashg:
 	@echo "Checking optimize='-g'..."
 	@grep "^optimize=" config.sh
 	@grep -q "^optimize='-g'" config.sh || exit 1
 
 perl.third.config: config.sh
 	@echo "To build perl.third you must Configure -Doptimize=-g -Uusemymalloc, checking..."
-	$(MAKE) perl.config.-g
+	$(MAKE) perl.config.dashg
 	@echo "Checking usemymalloc='n'..."
 	@grep "^usemymalloc=" config.sh
 	@grep -q "^usemymalloc='n'" config.sh || exit 1
@@ -523,17 +523,17 @@ perl.third: /usr/bin/atom perl.third.config perl
 
 # Pixie Perls (Tru64 and IRIX only)
 
-perl.pixie.atom.config: config.sh
+perl.pixie.config: config.sh
 	@echo "To build perl.pixie you must Configure -Doptimize=-g, checking..."
-	$(MAKE) perl.config.-g
+	$(MAKE) perl.config.dashg
 
-perl.pixie.atom: /usr/bin/atom perl.pixie.atom.config perl
+perl.pixie.atom: /usr/bin/atom perl
 	atom -tool pixie -L. -all -toolargs="-quiet" perl
 
 perl.pixie.irix: perl
 	pixie perl
 
-perl.pixie: perl
+perl.pixie: /usr/bin/pixie perl.pixie.config perl
 	if test -x /usr/bin/atom; then \
 	  $(MAKE) perl.pixie.atom; \
 	else \
