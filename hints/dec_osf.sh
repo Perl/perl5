@@ -198,7 +198,7 @@ pp_sys_cflags='ccflags="$ccflags -DNO_EFF_ONLY_OK"'
 cat > UU/usethreads.cbu <<'EOCBU'
 case "$usethreads" in
 $define|true|[yY]*)
-        # Threads interfaces changed with V4.0.
+        # Threads interfaces and flags changed with V4.0.
         case "`uname -r`" in
         *[123].*)
 	    libswanted="$libswanted pthreads mach exc c_r"
@@ -209,7 +209,7 @@ $define|true|[yY]*)
     	    ccflags="-pthread $ccflags"
 	    ;;
         esac
-
+  	ccflags="-D_REENTRANT $ccflags"
         usemymalloc='n'
 	;;
 esac
