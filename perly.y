@@ -528,7 +528,7 @@ term	:	term ASSIGNOP term
 	|	FUNC0 '(' ')'
 			{ $$ = newOP($1, 0); }
 	|	FUNC0SUB
-			{ $$ = newUNOP(OP_ENTERSUB, 0,
+			{ $$ = newUNOP(OP_ENTERSUB, OPf_STACKED,
 				scalar($1)); }
 	|	FUNC1 '(' ')'
 			{ $$ = newOP($1, OPf_SPECIAL); }

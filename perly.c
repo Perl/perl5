@@ -2097,7 +2097,7 @@ case 141:
 break;
 case 142:
 #line 531 "perly.y"
-{ yyval.opval = newUNOP(OP_ENTERSUB, 0,
+{ yyval.opval = newUNOP(OP_ENTERSUB, OPf_STACKED,
 				scalar(yyvsp[0].opval)); }
 break;
 case 143:
