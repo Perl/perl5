@@ -356,7 +356,7 @@ struct xpvio {
 				    SvFLAGS(sv) |= (SVf_IOK|SVp_IOK))
 #define SvIOK_only_UV(sv)	(SvOK_off_exc_UV(sv), \
 				    SvFLAGS(sv) |= (SVf_IOK|SVp_IOK))
- 
+
 #define SvIOK_UV(sv)		((SvFLAGS(sv) & (SVf_IOK|SVf_IVisUV))	\
 				 == (SVf_IOK|SVf_IVisUV))
 #define SvIOK_notUV(sv)		((SvFLAGS(sv) & (SVf_IOK|SVf_IVisUV))	\
@@ -372,7 +372,7 @@ struct xpvio {
 #define SvNOK_only(sv)		(SvOK_off(sv), \
 				    SvFLAGS(sv) |= (SVf_NOK|SVp_NOK))
 
-#define SvUTF8(sv)		(SvFLAGS(sv) & SVf_ISUTF8)	    
+#define SvUTF8(sv)		(SvFLAGS(sv) & SVf_ISUTF8)
 #define SvUTF8_on(sv)		(SvFLAGS(sv) |= (SVf_ISUTF8))
 #define SvUTF8_off(sv)		(SvFLAGS(sv) &= ~(SVf_ISUTF8))
 
@@ -381,7 +381,7 @@ struct xpvio {
 #define SvPOK_off(sv)		(SvFLAGS(sv) &= ~(SVf_POK|SVp_POK))
 #define SvPOK_only(sv)		(SvFLAGS(sv) &= ~(SVf_OK|SVf_AMAGIC|SVf_IVisUV),	\
 				    SvFLAGS(sv) |= (SVf_POK|SVp_POK))
-				    
+
 #define SvOOK(sv)		(SvFLAGS(sv) & SVf_OOK)
 #define SvOOK_on(sv)		(SvIOK_off(sv), SvFLAGS(sv) |= SVf_OOK)
 #define SvOOK_off(sv)		(SvOOK(sv) && sv_backoff(sv))
@@ -595,7 +595,7 @@ struct xpvio {
 #define SvPV(sv, lp) \
     ((SvFLAGS(sv) & (SVf_POK)) == SVf_POK \
      ? ((lp = SvCUR(sv)), SvPVX(sv)) : sv_2pv(sv, &lp))
-     
+
 
 #undef SvPV_force
 #define SvPV_force(sv, lp) \
@@ -606,42 +606,42 @@ struct xpvio {
 #define SvPV_nolen(sv) \
     ((SvFLAGS(sv) & (SVf_POK)) == SVf_POK \
      ? SvPVX(sv) : sv_2pv_nolen(sv))
-     
-#undef SvPVutf8
-#define SvPVutf8(sv, lp) \
-    ((SvFLAGS(sv) & (SVf_POK|SVf_UTF8)) == (SVf_POK|SVf_UTF8) \
-     ? ((lp = SvCUR(sv)), SvPVX(sv)) : sv_2pvutf8(sv, &lp))
-     
-#undef SvPVutf8_force
-#define SvPVutf8_force(sv, lp) \
-    ((SvFLAGS(sv) & (SVf_POK|SVf_THINKFIRST)) == (SVf_POK||SVf_UTF8) \
-     ? ((lp = SvCUR(sv)), SvPVX(sv)) : sv_pvutf8n_force(sv, &lp))
 
-#undef SvPVutf8_nolen
-#define SvPVutf8_nolen(sv) \
-    ((SvFLAGS(sv) & (SVf_POK|SVf_UTF8)) == (SVf_POK||SVf_UTF8)\
-     ? SvPVX(sv) : sv_2pvutf8_nolen(sv))
-     
 #undef SvPVutf8
 #define SvPVutf8(sv, lp) \
     ((SvFLAGS(sv) & (SVf_POK|SVf_UTF8)) == (SVf_POK|SVf_UTF8) \
      ? ((lp = SvCUR(sv)), SvPVX(sv)) : sv_2pvutf8(sv, &lp))
-     
+
 #undef SvPVutf8_force
 #define SvPVutf8_force(sv, lp) \
-    ((SvFLAGS(sv) & (SVf_POK|SVf_THINKFIRST)) == (SVf_POK||SVf_UTF8) \
+    ((SvFLAGS(sv) & (SVf_POK|SVf_THINKFIRST)) == (SVf_POK|SVf_UTF8) \
      ? ((lp = SvCUR(sv)), SvPVX(sv)) : sv_pvutf8n_force(sv, &lp))
 
 #undef SvPVutf8_nolen
 #define SvPVutf8_nolen(sv) \
     ((SvFLAGS(sv) & (SVf_POK|SVf_UTF8)) == (SVf_POK|SVf_UTF8)\
      ? SvPVX(sv) : sv_2pvutf8_nolen(sv))
-     
+
+#undef SvPVutf8
+#define SvPVutf8(sv, lp) \
+    ((SvFLAGS(sv) & (SVf_POK|SVf_UTF8)) == (SVf_POK|SVf_UTF8) \
+     ? ((lp = SvCUR(sv)), SvPVX(sv)) : sv_2pvutf8(sv, &lp))
+
+#undef SvPVutf8_force
+#define SvPVutf8_force(sv, lp) \
+    ((SvFLAGS(sv) & (SVf_POK|SVf_THINKFIRST)) == (SVf_POK|SVf_UTF8) \
+     ? ((lp = SvCUR(sv)), SvPVX(sv)) : sv_pvutf8n_force(sv, &lp))
+
+#undef SvPVutf8_nolen
+#define SvPVutf8_nolen(sv) \
+    ((SvFLAGS(sv) & (SVf_POK|SVf_UTF8)) == (SVf_POK|SVf_UTF8)\
+     ? SvPVX(sv) : sv_2pvutf8_nolen(sv))
+
 #undef SvPVbyte
 #define SvPVbyte(sv, lp) \
     ((SvFLAGS(sv) & (SVf_POK|SVf_UTF8)) == (SVf_POK) \
      ? ((lp = SvCUR(sv)), SvPVX(sv)) : sv_2pvbyte(sv, &lp))
-     
+
 #undef SvPVbyte_force
 #define SvPVbyte_force(sv, lp) \
     ((SvFLAGS(sv) & (SVf_POK|SVf_UTF8|SVf_THINKFIRST)) == (SVf_POK) \
@@ -651,7 +651,7 @@ struct xpvio {
 #define SvPVbyte_nolen(sv) \
     ((SvFLAGS(sv) & (SVf_POK|SVf_UTF8)) == (SVf_POK)\
      ? SvPVX(sv) : sv_2pvbyte_nolen(sv))
-     
+
 
 #ifdef __GNUC__
 #  undef SvIVx
