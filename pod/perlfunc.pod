@@ -96,8 +96,9 @@ than one place.
 =item Functions for SCALARs or strings
 
 C<chomp>, C<chop>, C<chr>, C<crypt>, C<hex>, C<index>, C<lc>, C<lcfirst>,
-C<length>, C<oct>, C<ord>, C<pack>, C<q/STRING/>, C<qq/STRING/>, C<reverse>,
-C<rindex>, C<sprintf>, C<substr>, C<tr///>, C<uc>, C<ucfirst>, C<y///>
+C<length>, C<oct>, C<ord>, C<pack>, C<q/STRING/>, C<qq/STRING/>, C<qu/STRING/>,
+C<reverse>, C<rindex>, C<sprintf>, C<substr>, C<tr///>, C<uc>, C<ucfirst>,
+C<y///>
 
 =item Regular expressions and pattern matching
 
@@ -3469,9 +3470,11 @@ but is more efficient.  Returns the new number of elements in the array.
 
 =item qr/STRING/
 
-=item qx/STRING/
+=item qu/STRING/
 
 =item qw/STRING/
+
+=item qx/STRING/
 
 Generalized quotes.  See L<perlop/"Regexp Quote-Like Operators">.
 
