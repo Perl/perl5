@@ -4886,6 +4886,24 @@ register OP* o;
 	    o->op_seq = op_seqmax++;
 	    break;
 
+	case OP_PADAV:
+	    if (o->op_next->op_type == OP_RV2AV
+		&& (o->op_next->op_flags && OPf_REF))
+	    {
+		null(o->op_next);
+	       	o->op_next = o->op_next->op_next;
+	    }
+	    break;
+	    
+	case OP_PADHV:
+	    if (o->op_next->op_type == OP_RV2HV
+		&& (o->op_next->op_flags && OPf_REF))
+	    {
+		null(o->op_next);
+	       	o->op_next = o->op_next->op_next;
+	    }
+	    break;
+
 	case OP_MAPWHILE:
 	case OP_GREPWHILE:
 	case OP_AND:
