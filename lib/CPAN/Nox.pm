@@ -1,4 +1,4 @@
-BEGIN{$CPAN::Suppress_readline++;}
+BEGIN{$CPAN::Suppress_readline=1 unless defined $CPAN::term;}
 
 use CPAN;
 

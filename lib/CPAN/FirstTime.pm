@@ -15,7 +15,7 @@ use ExtUtils::MakeMaker qw(prompt);
 use FileHandle ();
 use File::Path ();
 use vars qw($VERSION);
-$VERSION = substr q$Revision: 1.15 $, 10;
+$VERSION = substr q$Revision: 1.16 $, 10;
 
 =head1 NAME
 
@@ -231,17 +231,18 @@ Testing "$input" ...
 	}
     }
 
-    print qq{
+    unless (@{$CPAN::Config->{'wait_list'}||[]}) {
+	print qq{
 
 WAIT support is available as a Plugin. You need the CPAN::WAIT module
 to actually use it.  But we need to know your favorite WAIT server. If
 you don\'t know a WAIT server near you, just press ENTER.
 
 };
-
-    $default = "wait://ls6.informatik.uni-dortmund.de:1404";
-    $ans = prompt("Your favorite WAIT server?\n  ",$default);
-    push @{$CPAN::Config->{'wait_list'}}, $ans;
+	$default = "wait://ls6.informatik.uni-dortmund.de:1404";
+	$ans = prompt("Your favorite WAIT server?\n  ",$default);
+	push @{$CPAN::Config->{'wait_list'}}, $ans;
+    }
 
     print qq{
 
@@ -324,8 +325,8 @@ file:, ftp: or http: URL, or "q" to finish selecting.
     $ans = $other = "";
     my(%seen);
     
+    my $pipe = -t *STDIN ? "| $CPAN::Config->{'pager'}" : ">/dev/null";
     while () {
-	my $pipe = -t *STDIN ? "| $CPAN::Config->{'pager'}" : ">/dev/null";
 	my(@valid,$previous_best);
 	my $fh = FileHandle->new;
 	$fh->open($pipe);
@@ -351,6 +352,7 @@ file:, ftp: or http: URL, or "q" to finish selecting.
 		}
 	    }
 	}
+	$fh->close;
 	$previous_best ||= 1;
 	$default =
 	    @{$CPAN::Config->{urllist}} >= $expected_size ? "q" : $previous_best;
