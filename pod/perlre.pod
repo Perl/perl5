@@ -1265,7 +1265,7 @@ Overloaded constants (see L<overload>) provide a simple way to extend
 the functionality of the RE engine.
 
 Suppose that we want to enable a new RE escape-sequence C<\Y|> which
-matches at boundary between white-space characters and non-whitespace
+matches at boundary between whitespace characters and non-whitespace
 characters.  Note that C<(?=\S)(?<!\S)|(?!\S)(?<=\S)> matches exactly
 at these positions, so we want to have each C<\Y|> in the place of the
 more complicated version.  We can create a module C<customre> to do

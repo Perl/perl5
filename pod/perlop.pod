@@ -1383,9 +1383,9 @@ Examples:
 	\*/	# Match the closing delimiter.
     } []gsx;
 
-    s/^\s*(.*?)\s*$/$1/;	# trim white space in $_, expensively
+    s/^\s*(.*?)\s*$/$1/;	# trim whitespace in $_, expensively
 
-    for ($variable) {		# trim white space in $variable, cheap
+    for ($variable) {		# trim whitespace in $variable, cheap
 	s/^\s+//;
 	s/\s+$//;
     }
