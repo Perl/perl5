@@ -79,6 +79,274 @@ Version 5.005_57        Development release working toward 5.006
 ----------------
 
 ____________________________________________________________________________
+[  3120] By: jhi                                   on 1999/03/17  14:52:17
+        Log: Rhapsody change assumed too much.
+     Branch: cfgperl
+           ! t/op/stat.t
+____________________________________________________________________________
+[  3119] By: jhi                                   on 1999/03/17  14:33:43
+        Log: More Apollo fixes.
+     Branch: maint-5.005/perl
+           ! README.apollo hints/apollo.sh t/lib/io_udp.t
+____________________________________________________________________________
+[  3118] By: jhi                                   on 1999/03/16  17:23:39
+        Log: Nada.
+     Branch: maint-5.005/perl
+           ! README.apollo
+____________________________________________________________________________
+[  3117] By: jhi                                   on 1999/03/16  17:18:49
+        Log: Apollo DomainOS AVAILABILITY.
+     Branch: cfgperl
+           ! pod/perl.pod
+     Branch: maint-5.005/perl
+           ! pod/perl.pod
+____________________________________________________________________________
+[  3116] By: jhi                                   on 1999/03/16  17:14:00
+        Log: Apollo DomainOS patch
+             From: Johann Klasek <jk@auto.tuwien.ac.at>
+             Subject: Re: DomainPerl
+             Date: Tue, 16 Mar 1999 17:46:32 +0100
+             Message-ID: <19990316174632.A19759@euklid.auto.tuwien.ac.at>
+     Branch: maint-5.005/perl
+           + README.apollo apollo/netinet/in.h
+           ! MANIFEST hints/apollo.sh
+____________________________________________________________________________
+[  3115] By: jhi                                   on 1999/03/16  14:23:54
+        Log: From: Paul Marquess <pmarquess@bfsec.bt.co.uk>
+             To: Gurusamy Sarathy <gsar@activestate.com>,
+             Graham Barr <gbarr@pobox.com>
+             Cc: Perl5 Porters <perl5-porters@perl.org>,
+             "Paul.Marquess" <Paul.Marquess@btinternet.com>
+             Subject: [PATCH 5.005_56 & 5.005_03_T6] Upgrade DB_File to version 1.65
+             Date: Sun, 14 Mar 1999 14:43:57 -0000
+             Message-Id: <199903141841.NAA17040@defender.perl.org>
+     Branch: maint-5.005/perl
+	   ! ext/DB_File/Changes ext/DB_File/DB_File.pm
+           ! ext/DB_File/DB_File.xs ext/DB_File/typemap
+____________________________________________________________________________
+[  3114] By: jhi                                   on 1999/03/16  12:42:20
+        Log: Mention Rhapsody in 5.005_5X perldelta,
+             and in Rhapsody and Netware in 5.005_0X and 5.005_5X
+             *planned* AVAILABILITY.
+     Branch: cfgperl
+           ! pod/perl.pod pod/perldelta.pod
+     Branch: maint-5.005/perl
+           ! pod/perl.pod
+____________________________________________________________________________
+[  3113] By: jhi                                   on 1999/03/16  10:38:53
+        Log: perldelta niggling.
+     Branch: cfgperl
+           ! pod/perldelta.pod
+     Branch: maint-5.005/perl
+           ! pod/perldelta.pod
+____________________________________________________________________________
+[  3112] By: jhi                                   on 1999/03/16  10:35:21
+        Log: Integrate from mainperl.
+     Branch: cfgperl
+	  !> lib/unicode/MakeEthiopicSyllables.PL pod/perldelta.pod
+          !> pod/perlhist.pod pod/perlmodinstall.pod pod/perltodo.pod
+____________________________________________________________________________
+[  3111] By: jhi                                   on 1999/03/16  10:28:10
+        Log: AVAILABILITY update: still mention PowerUX,
+             Novell Netware now has sources available.
+     Branch: cfgperl
+           ! pod/perl.pod
+     Branch: maint-5.005/perl
+           ! pod/perl.pod
+____________________________________________________________________________
+[  3110] By: gsar                                  on 1999/03/16  04:34:23
+        Log: sundry pod niggles
+     Branch: perl
+	   ! lib/unicode/MakeEthiopicSyllables.PL pod/perldelta.pod
+           ! pod/perlhist.pod pod/perlmodinstall.pod pod/perltodo.pod
+____________________________________________________________________________
+[  3109] By: jhi                                   on 1999/03/15  17:00:11
+        Log: Integrate from mainperl.
+     Branch: cfgperl
+	  +> lib/unicode/EthiopicSyllables.txt lib/unicode/In/Ethiopic.pl
+	  +> lib/unicode/Is/Syllable.pl
+	  +> lib/unicode/MakeEthiopicSyllables.PL
+          +> lib/unicode/README.Ethiopic
+	  !> AUTHORS MAINTAIN MANIFEST lib/unicode/Block.pl
+	  !> lib/unicode/Category.pl lib/unicode/Is/Alnum.pl
+	  !> lib/unicode/Is/Alpha.pl lib/unicode/Is/Digit.pl
+	  !> lib/unicode/Is/L.pl lib/unicode/Is/Lo.pl lib/unicode/Is/N.pl
+	  !> lib/unicode/Is/Nd.pl lib/unicode/Is/No.pl lib/unicode/Is/P.pl
+	  !> lib/unicode/Is/Po.pl lib/unicode/Is/Space.pl
+	  !> lib/unicode/Is/Z.pl lib/unicode/Is/Zs.pl lib/unicode/Makefile
+          !> lib/unicode/Name.pl lib/unicode/Number.pl op.c
+____________________________________________________________________________
+[  3108] By: jhi                                   on 1999/03/15  16:58:12
+        Log: First pass of integrating the Rhapsody port,
+             
+             From: Wilfredo Sanchez <wsanchez@apple.com> 
+             Subject: Keeping the world in sync.
+             Reply-To: wsanchez@apple.com 
+             To: perlbug@perl.com 
+             Date: Fri, 13 Nov 1998 17:11:30 -0800 
+             Message-Id: <199811140111.RAA41784@scv4.apple.com> 
+     Branch: cfgperl
+           + ext/DynaLoader/dl_rhapsody.xs hints/rhapsody.sh
+	   ! Configure Makefile.SH config_h.SH configure.gnu handy.h
+	   ! installperl malloc.c perl.c perl.h pp_sys.c t/op/stat.t
+           ! x2p/util.c
+____________________________________________________________________________
+[  3107] By: gsar                                  on 1999/03/15  03:22:10
+        Log: applied suggested patch (mailed to perl-unicode@perl.org) with minor tweaks
+             From: Daniel Yacob <dmulholl@cs.indiana.edu>
+             Date: Tue, 23 Feb 1999 16:13:42 -0500 (EST)
+             Message-Id: <199902232113.QAA26135@drum.cs.indiana.edu>
+             Subject: ../lib/unicode/ Unicode 3.0 Extensions for Ethiopic
+     Branch: perl
+	   + lib/unicode/EthiopicSyllables.txt lib/unicode/In/Ethiopic.pl
+	   + lib/unicode/Is/Syllable.pl
+	   + lib/unicode/MakeEthiopicSyllables.PL
+           + lib/unicode/README.Ethiopic
+	   ! AUTHORS MAINTAIN MANIFEST lib/unicode/Block.pl
+	   ! lib/unicode/Category.pl lib/unicode/Is/Alnum.pl
+	   ! lib/unicode/Is/Alpha.pl lib/unicode/Is/Digit.pl
+	   ! lib/unicode/Is/L.pl lib/unicode/Is/Lo.pl lib/unicode/Is/N.pl
+	   ! lib/unicode/Is/Nd.pl lib/unicode/Is/No.pl lib/unicode/Is/P.pl
+	   ! lib/unicode/Is/Po.pl lib/unicode/Is/Space.pl
+	   ! lib/unicode/Is/Z.pl lib/unicode/Is/Zs.pl lib/unicode/Makefile
+           ! lib/unicode/Name.pl lib/unicode/Number.pl
+____________________________________________________________________________
+[  3106] By: gsar                                  on 1999/03/12  20:35:36
+        Log: change#3067 failed package.t due to needless creation of $a and $b;
+             fixed to do that only for C<sort BLOCK|CODE @foo>, not C<sort(@foo)>
+     Branch: perl
+           ! op.c
+____________________________________________________________________________
+[  3105] By: jhi                                   on 1999/03/12  15:54:57
+        Log: Recognize the NetBSD packages collection.
+     Branch: maint-5.005/perl
+           ! hints/netbsd.sh
+____________________________________________________________________________
+[  3104] By: jhi                                   on 1999/03/12  09:07:04
+        Log: From: pvhp@forte.com (Peter Prymmer)
+             To: jhi@iki.fi, perl-mvs@perl.org, perlbug@perl.com
+             Subject: [PATCH MT6,_56] was Re: Not OK: perl 5.00503 +MAINT_TRIAL_6 on os390 06.00 (UNINSTALLED)
+             Date: Thu, 11 Mar 99 14:24:54 PST
+             Message-Id: <9903112224.AA24346@forte.com>
+     Branch: maint-5.005/perl
+           ! README.os390 t/lib/posix.t
+____________________________________________________________________________
+[  3103] By: jhi                                   on 1999/03/10  11:07:46
+        Log: Integrate from mainperl.
+     Branch: cfgperl
+	  !> Changes embed.h embed.pl embedvar.h global.sym objXSUB.h op.c
+	  !> perl.c perl.h pod/perldelta.pod pod/pod2man.PL t/base/lex.t
+          !> t/pragma/warn/1global toke.c win32/makedef.pl
+____________________________________________________________________________
+[  3102] By: jhi                                   on 1999/03/10  11:01:20
+        Log: From: pvhp@forte.com (Peter Prymmer)
+             To: perl5-porters@perl.org
+             Subject: [5.005_03-MT6]Patch: time passes
+             Date: Tue, 9 Mar 99 18:42:17 PST
+             Message-Id: <9903100242.AA29057@forte.com>
+     Branch: maint-5.005/perl
+           ! perl.c
+____________________________________________________________________________
+[  3101] By: jhi                                   on 1999/03/10  10:30:15
+        Log: From: Mark-Jason Dominus <mjd@plover.com>
+             To: perl5-porters@perl.com
+             Subject: Minor fix to perlfunc.pod
+             Date: Mon, 08 Mar 1999 20:05:53 -0500
+             Message-ID: <19990309010553.13757.qmail@plover.com>
+     Branch: maint-5.005/perl
+           ! pod/perlfunc.pod
+____________________________________________________________________________
+[  3100] By: gsar                                  on 1999/03/09  23:04:44
+        Log: change#3060 had the wrong quotes
+     Branch: perl
+           ! pod/pod2man.PL
+____________________________________________________________________________
+[  3099] By: jhi                                   on 1999/03/09  12:52:21
+        Log: d_uname was broken (probably since _53), reported by
+             
+             From: Alan Burlison <Alan.Burlison@uk.sun.com>
+             To: p5p <perl5-porters@perl.org>, Gurusamy Sarathy <gsar@umich.edu>,
+             cpan-testers@perl.org
+             Subject: Not OK: perl 5.00556 on sun4-solaris 2.6
+             Date: Mon, 08 Mar 1999 13:22:31 +0000
+             Message-ID: <36E3CF17.EA1FEDAA@uk.sun.com>
+             
+             and
+             
+             From: lvirden@cas.org (Larry W. Virden)
+             To: perlbug@perl.com
+             Subject: configure not correctly identifying uname posix compatibility
+             Date: Mon, 8 Mar 1999 06:36:16 -0500 (EST)
+             Message-Id: <199903081136.GAA23682@cas.org>
+     Branch: cfgperl
+           ! Configure config_h.SH
+____________________________________________________________________________
+[  3098] By: gsar                                  on 1999/03/09  03:16:07
+        Log: fix parsing of here documents in C<eval 's/.../<<FOO/e'>
+     Branch: perl
+           ! op.c perl.h pod/perldelta.pod t/base/lex.t toke.c
+____________________________________________________________________________
+[  3097] By: gsar                                  on 1999/03/09  02:50:43
+        Log: use yyerror() instead of croak() so that compile-time failures in
+             my(LIST) don't confuse globals with lexicals
+     Branch: perl
+           ! op.c toke.c
+____________________________________________________________________________
+[  3096] By: gsar                                  on 1999/03/09  02:47:36
+        Log: adjust testsuite for change#3067
+     Branch: perl
+           ! t/pragma/warn/1global
+____________________________________________________________________________
+[  3095] By: gsar                                  on 1999/03/08  21:04:48
+        Log: remove bogus symbols from global.sym
+     Branch: perl
+	   ! Changes embed.h embed.pl embedvar.h global.sym objXSUB.h
+           ! perl.h win32/makedef.pl
+____________________________________________________________________________
+[  3094] By: jhi                                   on 1999/03/06  16:16:15
+        Log: From: Mark Kettenis <kettenis@wins.uva.nl>
+             To: jhi@iki.fi
+             Subject: Oops
+             Date: Sat, 6 Mar 1999 17:15:35 +0100 (CET)
+             Message-Id: <199903061615.RAA00207@delius.kettenis.nl>
+     Branch: maint-5.005/perl
+           ! README.hurd
+____________________________________________________________________________
+[  3093] By: jhi                                   on 1999/03/06  15:59:46
+        Log: From: Mark Kettenis <kettenis@wins.uva.nl>
+             To: jhi@iki.fi
+             Subject: New Hurd README
+             Date: Sat, 6 Mar 1999 16:46:12 +0100 (CET)
+             Message-Id: <199903061601.RAA00185@delius.kettenis.nl>
+     Branch: maint-5.005/perl
+           ! README.hurd
+____________________________________________________________________________
+[  3092] By: jhi                                   on 1999/03/06  12:52:06
+        Log: From: Paul_Green@stratus.com
+             To: perl5-porters@perl.org
+             Cc: jhi@iki.fi, Paul_Green@stratus.com
+             Subject: [PATCH 5.005_03-MAINT_TRIAL_6]: platform: vos -- updates to VOS port of Perl5
+             Date: Fri, 5 Mar 1999 18:08:49 -0500 
+             Message-ID: <1D1A4EF7AD4DD211A80D00A0C9D7DB665A035A@exna1.stratus.com>
+     Branch: maint-5.005/perl
+           ! vos/config.h vos/config_h.SH_orig
+____________________________________________________________________________
+[  3091] By: jhi                                   on 1999/03/06  12:42:21
+        Log: From: Dan Sugalski <sugalskd@osshe.edu>
+             To: perl5-porters@perl.org, vmsperl@perl.org
+             Subject: [PATCH 5.005_03-MT6]VMS build patch
+             Date: Fri, 05 Mar 1999 12:36:19 -0800
+             Message-Id: <3.0.6.32.19990305123619.02d326a0@ous.edu>
+     Branch: maint-5.005/perl
+           ! vms/subconfigure.com
+____________________________________________________________________________
+[  3090] By: gsar                                  on 1999/03/06  04:40:03
+        Log: integrate change#3089 from mainline
+             
+             tolerate CRs after options
+     Branch: maint-5.005/perl
+          !> perl.c
+____________________________________________________________________________
 [  3089] By: gsar                                  on 1999/03/06  04:30:40
         Log: tolerate CRs after options
      Branch: perl

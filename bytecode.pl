@@ -22,7 +22,7 @@ while (($from, $tos) = each %alias_to) {
 
 my $c_header = <<'EOT';
 /*
- *      Copyright (c) 1996-1998 Malcolm Beattie
+ *      Copyright (c) 1996-1999 Malcolm Beattie
  *
  *      You may distribute under the terms of either the GNU General Public
  *      License or the Artistic License, as specified in the README file.

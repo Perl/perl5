@@ -1,6 +1,6 @@
 /*    utf8.c
  *
- *    Copyright (c) 1998, Larry Wall
+ *    Copyright (c) 1998-1999, Larry Wall
  *
  *    You may distribute under the terms of either the GNU General Public
  *    License or the Artistic License, as specified in the README file.
