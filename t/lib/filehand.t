@@ -20,7 +20,7 @@ $| = 1;
 autoflush $mystdout;
 print "1..11\n";
 
-print $mystdout "ok ",fileno($mystdout),"\n";
+print $mystdout "ok ".fileno($mystdout)."\n";
 
 $fh = (new FileHandle "./TEST", O_RDONLY
        or new FileHandle "TEST", O_RDONLY)

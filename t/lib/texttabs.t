@@ -91,9 +91,7 @@ DONE
 
 $| = 1;
 
-print "1..";
-print @tests/2;
-print "\n";
+print "1..".scalar(@tests/2)."\n";
 
 use Text::Tabs;
 
