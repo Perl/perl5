@@ -1822,7 +1822,8 @@ Run the test suite with the F<t/harness> controlling program, instead of
 F<t/TEST>. F<t/harness> is more sophisticated, and uses the
 L<Test::Harness> module, thus using this test target supposes that perl
 mostly works. The main advantage for our purposes is that it prints a
-detailed summary of failed tests at the end.
+detailed summary of failed tests at the end. Also, unlike F<t/TEST>, it
+doesn't redirect stderr to stdout.
 
 =back
 
