@@ -259,6 +259,7 @@ elsif ($PLATFORM eq 'aix') {
 		     Perl_safexrealloc
 		     Perl_same_dirent
 		     Perl_unlnk
+		     Perl_sys_intern_clear
 		     Perl_sys_intern_dup
 		     Perl_sys_intern_init
 		     PL_cryptseen

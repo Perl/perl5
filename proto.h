@@ -941,15 +941,14 @@ PERL_CALLCONV GP*	Perl_gp_dup(pTHX_ GP* gp);
 PERL_CALLCONV MAGIC*	Perl_mg_dup(pTHX_ MAGIC* mg);
 PERL_CALLCONV SV*	Perl_sv_dup(pTHX_ SV* sstr);
 #if defined(HAVE_INTERP_INTERN)
+PERL_CALLCONV void	Perl_sys_intern_clear(pTHX);
 PERL_CALLCONV void	Perl_sys_intern_dup(pTHX_ struct interp_intern* src, struct interp_intern* dst);
+PERL_CALLCONV void	Perl_sys_intern_init(pTHX);
 #endif
 PERL_CALLCONV PTR_TBL_t*	Perl_ptr_table_new(pTHX);
 PERL_CALLCONV void*	Perl_ptr_table_fetch(pTHX_ PTR_TBL_t *tbl, void *sv);
 PERL_CALLCONV void	Perl_ptr_table_store(pTHX_ PTR_TBL_t *tbl, void *oldsv, void *newsv);
 PERL_CALLCONV void	Perl_ptr_table_split(pTHX_ PTR_TBL_t *tbl);
-#endif
-#if defined(HAVE_INTERP_INTERN)
-PERL_CALLCONV void	Perl_sys_intern_init(pTHX);
 #endif
 
 #if defined(PERL_OBJECT)

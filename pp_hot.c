@@ -1421,8 +1421,7 @@ Perl_do_readline(pTHX)
 /* delay EOF state for a snarfed empty file */
 #define SNARF_EOF(gimme,rs,io,sv) \
     (gimme != G_SCALAR || SvCUR(sv)					\
-     || !RsSNARF(rs) || (IoFLAGS(io) & IOf_NOLINE)			\
-     || ((IoFLAGS(io) |= IOf_NOLINE), FALSE))
+     || (IoFLAGS(io) & IOf_NOLINE) || !RsSNARF(rs))
 
     for (;;) {
 	if (!sv_gets(sv, fp, offset)
@@ -1455,6 +1454,7 @@ Perl_do_readline(pTHX)
 	    SvTAINTED_on(sv);
 	}
 	IoLINES(io)++;
+	IoFLAGS(io) |= IOf_NOLINE;
 	SvSETMAGIC(sv);
 	XPUSHs(sv);
 	if (type == OP_GLOB) {
