@@ -718,7 +718,7 @@ Perl_grok_number(pTHX_ const char *pv, STRLEN len, UV *valuep)
   return 0;
 }
 
-NV
+STATIC NV
 S_mulexp10(NV value, I32 exponent)
 {
     NV result = 1.0;

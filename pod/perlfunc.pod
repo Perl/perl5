@@ -6148,17 +6148,22 @@ Changes the access and modification times on each file of a list of
 files.  The first two elements of the list must be the NUMERICAL access
 and modification times, in that order.  Returns the number of files
 successfully changed.  The inode change time of each file is set
-to the current time.  This code has the same effect as the C<touch>
-command if the files already exist:
+to the current time.  For example, this code has the same effect as the
+Unix touch(1) command when the files I<already exist>.
 
     #!/usr/bin/perl
     $now = time;
     utime $now, $now, @ARGV;
 
-If the first two elements of the list are C<undef>, then the utime(2)
-function in the C library will be called with a null second argument.
-On most systems, this will set the file's access and modification
-times to the current time.  (i.e. equivalent to the example above.)
+B<Note:>  Under NFS, touch(1) uses the time of the NFS server, not
+the time of the local machine.  If there is a time synchronization
+problem, the NFS server and local machine will have different times.
+
+Since perl 5.7.2, if the first two elements of the list are C<undef>, then
+the utime(2) function in the C library will be called with a null second
+argument. On most systems, this will set the file's access and
+modification times to the current time (i.e. equivalent to the example
+above.)
 
     utime undef, undef, @ARGV;
 

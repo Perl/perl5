@@ -200,6 +200,20 @@ Should yield no problems.
 Threads seem to work OK, though at the moment not all tests pass when
 threads are used in combination with 64bit configurations.
 
+You may get a warning when doing a threaded build:
+
+  "pp_sys.c", line 4640.39: 1506-280 (W) Function argument assignment between types "unsigned char*" and "const void*" is not allowed.
+
+The exact line number may vary, but if the warning (W) comes from a line
+line this
+
+  hent = PerlSock_gethostbyaddr(addr, (Netdb_hlen_t) addrlen, addrtype);
+
+in the "pp_ghostent" function, you may ignore it safely.  The warning
+is caused by the reentrant variant of gethostbyaddr() having a slightly
+different prototype than its non-reentrant variant, but the difference
+is not really significant here.
+
 =head2 64-bit Perl
 
 If your AIX is installed with 64-bit support, you can expect 64bit
