@@ -277,7 +277,6 @@ register PerlInterpreter *sv_interp;
 			  "perl_destruct: waiting for %d threads...\n",
 			  nthreads - 1));
     for (t = thr->next; t != thr; t = t->next) {
-	MUTEX_LOCK(&threads_mutex);
 	MUTEX_LOCK(&t->mutex);
 	switch (ThrSTATE(t)) {
 	    AV *av;

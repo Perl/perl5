@@ -2,11 +2,24 @@
 #include "perl.h"
 #include "XSUB.h"
 
+#ifdef WIN32
+#define ssize_t int
+#include <fcntl.h>
+#define THR_RET_TYPE	DWORD
+#define THR_FUNC_TYPE	THR_RET_TYPE WINAPI
+#else
+#define THR_RET_TYPE	void *
+#define THR_FUNC_TYPE	THR_RET_TYPE
+#endif
+
 /* Magic signature for Thread's mg_private is "Th" */ 
 #define Thread_MAGIC_SIGNATURE 0x5468
 
 static U32 threadnum = 0;
 static int sig_pipe[2];
+
+static void remove_thread _((Thread t));
+static THR_FUNC_TYPE threadstart _((void *));
 
 static void
 remove_thread(t)
@@ -23,7 +36,8 @@ Thread t;
     MUTEX_UNLOCK(&threads_mutex);
 }
 
-static void *
+
+static THR_FUNC_TYPE
 threadstart(arg)
 void *arg;
 {
@@ -92,7 +106,11 @@ void *arg;
      * from our pthread_t structure to our struct thread, since we're
      * the only thread who can get at it anyway.
      */
+#ifdef WIN32
+    if (TlsSetValue(thr_key, (void *) thr) == 0)
+#else
     if (pthread_setspecific(thr_key, (void *) thr))
+#endif
 	croak("panic: pthread_setspecific");
 
     /* Only now can we use SvPEEK (which calls sv_newmortal which does dTHR) */
@@ -182,7 +200,7 @@ void *arg;
 	croak("panic: illegal state %u at end of threadstart", ThrSTATE(thr));
 	/* NOTREACHED */
     }
-    return (void *) returnav;	/* Available for anyone to join with us */
+    return (THR_RET_TYPE) returnav;/* Available for anyone to join with us */
 				/* unless we are detached in which case */
 				/* noone will see the value anyway. */
 #endif    
@@ -199,7 +217,11 @@ char *class;
     Thread savethread;
     int i;
     SV *sv;
+#ifndef WIN32
     sigset_t fullmask, oldmask;
+#else
+    DWORD junk;
+#endif
     
     savethread = thr;
     sv = newSVpv("", 0);
@@ -253,15 +275,21 @@ char *class;
     /* Get set...
      * Increment the global thread count.
      */
+#ifndef WIN32
     sigfillset(&fullmask);
     if (sigprocmask(SIG_SETMASK, &fullmask, &oldmask) == -1)
 	croak("panic: sigprocmask");
     if (pthread_create(&self, NULL, threadstart, (void*) thr))
+#else
+    if ((self = CreateThread(NULL,0,threadstart,(void*)thr,0,&junk)) == 0)
+#endif
 	return NULL;	/* XXX should clean up first */
     /* Go */
     MUTEX_UNLOCK(&thr->mutex);
+#ifndef WIN32
     if (sigprocmask(SIG_SETMASK, &oldmask, 0))
 	croak("panic: sigprocmask");
+#endif
 #endif
     sv = newSViv(thr->tid);
     sv_magic(sv, oursv, '~', 0, 0);
@@ -312,7 +340,12 @@ join(t)
 	    croak("can't join with thread");
 	    /* NOTREACHED */
 	}
+#ifdef WIN32
+	if ((WaitForSingleObject(t->Tself,INFINITE) == WAIT_FAILED)
+	    || (GetExitCodeThread(t->Tself,(LPDWORD)&av) == 0))
+#else
 	if (pthread_join(t->Tself, (void **) &av))
+#endif
 	    croak("pthread_join failed");
 
 	/* Could easily speed up the following if necessary */
@@ -393,7 +426,11 @@ yield()
 	pthread_yield();
 #else
 #ifndef NO_SCHED_YIELD
+#ifdef WIN32
+	Sleep(0);	/* same semantics as POSIX sched_yield() */
+#else
 	sched_yield();
+#endif /* WIN32 */
 #endif /* NO_SCHED_YIELD */
 #endif /* OLD_PTHREADS_API */
 

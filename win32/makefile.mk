@@ -311,7 +311,7 @@ CORE_H = ..\av.h	\
 	.\win32.h
 
 
-EXTENSIONS=DynaLoader Socket IO Fcntl Opcode SDBM_File attrs
+EXTENSIONS=DynaLoader Socket IO Fcntl Opcode SDBM_File attrs Thread
 
 DYNALOADER=$(EXTDIR)\DynaLoader\DynaLoader
 SOCKET=$(EXTDIR)\Socket\Socket
@@ -320,6 +320,7 @@ OPCODE=$(EXTDIR)\Opcode\Opcode
 SDBM_FILE=$(EXTDIR)\SDBM_File\SDBM_File
 IO=$(EXTDIR)\IO\IO
 ATTRS=$(EXTDIR)\attrs\attrs
+THREAD=$(EXTDIR)\Thread\Thread
 
 SOCKET_DLL=..\lib\auto\Socket\Socket.dll
 FCNTL_DLL=..\lib\auto\Fcntl\Fcntl.dll
@@ -327,6 +328,7 @@ OPCODE_DLL=..\lib\auto\Opcode\Opcode.dll
 SDBM_FILE_DLL=..\lib\auto\SDBM_File\SDBM_File.dll
 IO_DLL=..\lib\auto\IO\IO.dll
 ATTRS_DLL=..\lib\auto\attrs\attrs.dll
+THREAD_DLL=..\lib\auto\Thread\Thread.dll
 
 STATICLINKMODULES=DynaLoader
 DYNALOADMODULES=	\
@@ -335,7 +337,8 @@ DYNALOADMODULES=	\
 	$(OPCODE_DLL)	\
 	$(SDBM_FILE_DLL)\
 	$(IO_DLL)	\
-	$(ATTRS_DLL)
+	$(ATTRS_DLL)	\
+	$(THREAD_DLL)
 
 POD2HTML=$(PODDIR)\pod2html
 POD2MAN=$(PODDIR)\pod2man
@@ -489,6 +492,11 @@ $(DYNALOADER).c: $(MINIPERL) $(EXTDIR)\DynaLoader\dl_win32.xs $(CONFIGPM)
 $(EXTDIR)\DynaLoader\dl_win32.xs: dl_win32.xs
 	copy dl_win32.xs $(EXTDIR)\DynaLoader\dl_win32.xs
 
+$(THREAD_DLL): $(PERLEXE) $(THREAD).xs
+	cd $(EXTDIR)\$(*B) && \
+	..\..\miniperl -I..\..\lib Makefile.PL INSTALLDIRS=perl
+	cd $(EXTDIR)\$(*B) && $(MAKE)
+
 $(ATTRS_DLL): $(PERLEXE) $(ATTRS).xs
 	cd $(EXTDIR)\$(*B) && \
 	..\..\miniperl -I..\..\lib Makefile.PL INSTALLDIRS=perl
@@ -541,9 +549,9 @@ distclean: clean
 		$(PERLIMPLIB) ..\miniperl.lib $(MINIMOD)
 	-del /f *.def *.map
 	-del /f $(SOCKET_DLL) $(IO_DLL) $(SDBM_FILE_DLL) $(FCNTL_DLL) \
-		$(OPCODE_DLL) $(ATTRS_DLL)
+		$(OPCODE_DLL) $(ATTRS_DLL) $(THREAD_DLL)
 	-del /f $(SOCKET).c $(IO).c $(SDBM_FILE).c $(FCNTL).c $(OPCODE).c \
-		$(DYNALOADER).c $(ATTRS).c
+		$(DYNALOADER).c $(ATTRS).c $(THREAD).c
 	-del /f $(PODDIR)\*.html
 	-del /f $(PODDIR)\*.bat
 	-del /f ..\config.sh ..\splittree.pl perlmain.c dlutils.c config.h.new

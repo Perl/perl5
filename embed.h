@@ -1090,6 +1090,7 @@
 #define taint_env		Perl_taint_env
 #define taint_proper		Perl_taint_proper
 #define thisexpr		Perl_thisexpr
+#define thr_key			Perl_thr_key
 #define timesbuf		Perl_timesbuf
 #define tokenbuf		Perl_tokenbuf
 #define too_few_arguments	Perl_too_few_arguments
