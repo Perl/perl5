@@ -6382,10 +6382,6 @@ Perl_sv_vcatpvfn(pTHX_ SV *sv, const char *pat, STRLEN patlen, va_list *args, SV
 #  include "error: USE_THREADS and USE_ITHREADS are incompatible"
 #endif
 
-#ifndef OpREFCNT_inc
-#  define OpREFCNT_inc(o)	((o) ? (++(o)->op_targ, (o)) : Nullop)
-#endif
-
 #ifndef GpREFCNT_inc
 #  define GpREFCNT_inc(gp)	((gp) ? (++(gp)->gp_refcnt, (gp)) : (GP*)NULL)
 #endif

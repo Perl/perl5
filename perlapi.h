@@ -878,6 +878,8 @@ START_EXTERN_C
 #define PL_hexdigit		(*Perl_Ghexdigit_ptr(NULL))
 #undef  PL_malloc_mutex
 #define PL_malloc_mutex		(*Perl_Gmalloc_mutex_ptr(NULL))
+#undef  PL_op_mutex
+#define PL_op_mutex		(*Perl_Gop_mutex_ptr(NULL))
 #undef  PL_patleave
 #define PL_patleave		(*Perl_Gpatleave_ptr(NULL))
 #undef  PL_thr_key

@@ -64,8 +64,12 @@ static I32 read_e_script(pTHXo_ int idx, SV *buf_sv, int maxlen);
 	    PERL_SET_INTERP(my_perl);		\
 	    INIT_THREADS;			\
 	    ALLOC_THREAD_KEY;			\
+	    PERL_SET_THX(my_perl);		\
+	    OP_REFCNT_INIT;			\
 	}					\
-	PERL_SET_THX(my_perl);			\
+	else {					\
+	    PERL_SET_THX(my_perl);		\
+	}					\
     } STMT_END
 #  else
 #  define INIT_TLS_AND_INTERP \

@@ -22,19 +22,6 @@
 
 /* #define PL_OP_SLAB_ALLOC */
 
-/* XXXXXX testing */
-#ifdef USE_ITHREADS
-#  define OP_REFCNT_LOCK		NOOP
-#  define OP_REFCNT_UNLOCK		NOOP
-#  define OpREFCNT_set(o,n)		((o)->op_targ = (n))
-#  define OpREFCNT_dec(o)		(--(o)->op_targ)
-#else
-#  define OP_REFCNT_LOCK		NOOP
-#  define OP_REFCNT_UNLOCK		NOOP
-#  define OpREFCNT_set(o,n)		NOOP
-#  define OpREFCNT_dec(o)		0
-#endif
-
 #ifdef PL_OP_SLAB_ALLOC 
 #define SLAB_SIZE 8192
 static char    *PL_OpPtr  = NULL;

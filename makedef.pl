@@ -413,6 +413,7 @@ unless ($define{'USE_5005THREADS'}) {
 unless ($define{'USE_ITHREADS'}) {
     skip_symbols [qw(
 		    PL_ptr_table
+		    PL_op_mutex
 		    Perl_dirp_dup
 		    Perl_cx_dup
 		    Perl_si_dup
