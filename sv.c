@@ -2353,7 +2353,7 @@ sv_magic(register SV *sv, SV *obj, int how, char *name, I32 namlen)
     if (SvMAGICAL(sv) || (how == 't' && SvTYPE(sv) >= SVt_PVMG)) {
 	if (SvMAGIC(sv) && (mg = mg_find(sv, how))) {
 	    if (how == 't')
-		mg->mg_length |= 1;
+		mg->mg_len |= 1;
 	    return;
 	}
     }
@@ -2373,7 +2373,7 @@ sv_magic(register SV *sv, SV *obj, int how, char *name, I32 namlen)
 	mg->mg_flags |= MGf_REFCOUNTED;
     }
     mg->mg_type = how;
-    mg->mg_length = namlen;
+    mg->mg_len = namlen;
     if (name)
 	if (namlen >= 0)
 	    mg->mg_ptr = savepvn(name, namlen);
@@ -2454,7 +2454,7 @@ sv_magic(register SV *sv, SV *obj, int how, char *name, I32 namlen)
 	break;
     case 't':
 	mg->mg_virtual = &vtbl_taint;
-	mg->mg_length = 1;
+	mg->mg_len = 1;
 	break;
     case 'U':
 	mg->mg_virtual = &vtbl_uvar;
@@ -2506,9 +2506,9 @@ sv_unmagic(SV *sv, int type)
 	    if (vtbl && (vtbl->svt_free != NULL))
 		(VTBL->svt_free)(sv, mg);
 	    if (mg->mg_ptr && mg->mg_type != 'g')
-		if (mg->mg_length >= 0)
+		if (mg->mg_len >= 0)
 		    Safefree(mg->mg_ptr);
-		else if (mg->mg_length == HEf_SVKEY)
+		else if (mg->mg_len == HEf_SVKEY)
 		    SvREFCNT_dec((SV*)mg->mg_ptr);
 	    if (mg->mg_flags & MGf_REFCOUNTED)
 		SvREFCNT_dec(mg->mg_obj);
@@ -2833,7 +2833,7 @@ sv_len(register SV *sv)
 	return 0;
 
     if (SvGMAGICAL(sv))
-	len = mg_len(sv);
+	len = mg_length(sv);
     else
 	junk = SvPV(sv, len);
     return len;
@@ -2971,17 +2971,17 @@ sv_collxfrm(SV *sv, STRLEN *nxp)
 		assert(mg);
 	    }
 	    mg->mg_ptr = xf;
-	    mg->mg_length = xlen;
+	    mg->mg_len = xlen;
 	}
 	else {
 	    if (mg) {
 		mg->mg_ptr = NULL;
-		mg->mg_length = -1;
+		mg->mg_len = -1;
 	    }
 	}
     }
     if (mg && mg->mg_ptr) {
-	*nxp = mg->mg_length;
+	*nxp = mg->mg_len;
 	return mg->mg_ptr + sizeof(collation_ix);
     }
     else {
@@ -4016,7 +4016,7 @@ sv_untaint(SV *sv)
     if (SvTYPE(sv) >= SVt_PVMG && SvMAGIC(sv)) {
 	MAGIC *mg = mg_find(sv, 't');
 	if (mg)
-	    mg->mg_length &= ~1;
+	    mg->mg_len &= ~1;
     }
 }
 
@@ -4025,7 +4025,7 @@ sv_tainted(SV *sv)
 {
     if (SvTYPE(sv) >= SVt_PVMG && SvMAGIC(sv)) {
 	MAGIC *mg = mg_find(sv, 't');
-	if (mg && ((mg->mg_length & 1) || (mg->mg_length & 2) && mg->mg_obj == sv))
+	if (mg && ((mg->mg_len & 1) || (mg->mg_len & 2) && mg->mg_obj == sv))
 	    return TRUE;
     }
     return FALSE;

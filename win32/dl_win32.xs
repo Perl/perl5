@@ -26,16 +26,24 @@ calls.
 
 #include "EXTERN.h"
 #include "perl.h"
+
+#ifdef PERL_OBJECT
+#define NO_XSLOCKS
+#endif  /* PERL_OBJECT */
+
 #include "XSUB.h"
 
 #include "dlutils.c"	/* SaveError() etc	*/
 
 static void
-dl_private_init(void)
+dl_private_init(CPERLarg)
 {
-    (void)dl_generic_private_init();
+    (void)dl_generic_private_init(THIS);
 }
 
+#ifdef PERL_OBJECT
+#define dl_static_linked(x) 0
+#else
 static int
 dl_static_linked(char *filename)
 {
@@ -45,6 +53,7 @@ dl_static_linked(char *filename)
     };
     return 0;
 }
+#endif
 
 MODULE = DynaLoader	PACKAGE = DynaLoader
 

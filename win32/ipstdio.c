@@ -16,6 +16,7 @@ public:
 		pPerl = NULL;
 		pSock = NULL;
 		w32_platform = -1;
+		ZeroMemory(bSocketTable, sizeof(bSocketTable));
 	};
 	virtual PerlIO* Stdin(void);
 	virtual PerlIO* Stdout(void);
@@ -36,8 +37,11 @@ public:
 	virtual int Ungetc(PerlIO*,int, int &err);
 	virtual int Fileno(PerlIO*, int &err);
 	virtual PerlIO* Fdopen(int, const char *, int &err);
+	virtual PerlIO* Reopen(const char*, const char*, PerlIO*, int &err);
 	virtual SSize_t Read(PerlIO*,void *,Size_t, int &err);
 	virtual SSize_t Write(PerlIO*,const void *,Size_t, int &err);
+	virtual void SetBuf(PerlIO *, char*, int &err);
+	virtual int SetVBuf(PerlIO *, char*, int, Size_t, int &err);
 	virtual void SetCnt(PerlIO *, int, int &err);
 	virtual void SetPtrCnt(PerlIO *, char *, int, int& err);
 	virtual void Setlinebuf(PerlIO*, int &err);
@@ -218,7 +222,11 @@ PerlIO* CPerlStdIO::Open(const char *path, const char *mode, int &err)
 	PerlIO* ret = NULL;
 	if(*path != '\0')
 	{
-		ret = (PerlIO*)fopen(path, mode);
+	    if(stricmp(path, "/dev/null") == 0)
+			ret = (PerlIO*)fopen("NUL", mode);
+		else
+			ret = (PerlIO*)fopen(path, mode);
+
 		if(errno)
 			err = errno;
 	}
@@ -324,6 +332,14 @@ PerlIO* CPerlStdIO::Fdopen(int fh, const char *mode, int &err)
 	return ret;
 }
 
+PerlIO* CPerlStdIO::Reopen(const char* filename, const char* mode, PerlIO* pf, int &err)
+{
+	PerlIO* ret = (PerlIO*)freopen(filename, mode, (FILE*)pf);
+	if(errno)
+		err = errno;
+	return ret;
+}
+
 SSize_t CPerlStdIO::Read(PerlIO* pf, void * buffer, Size_t count, int &err)
 {
 	size_t ret = fread(buffer, 1, count, (FILE*)pf);
@@ -340,9 +356,9 @@ SSize_t CPerlStdIO::Write(PerlIO* pf, const void * buffer, Size_t count, int &er
 	return ret;
 }
 
-void CPerlStdIO::Setlinebuf(PerlIO*, int &err)
+void CPerlStdIO::Setlinebuf(PerlIO*pf, int &err)
 {
-	croak("setlinebuf not implemented!\n");
+    setvbuf((FILE*)pf, NULL, _IOLBF, 0);
 }
 
 int CPerlStdIO::Printf(PerlIO* pf, int &err, const char *format, ...)
@@ -423,6 +439,16 @@ int CPerlStdIO::GetCnt(PerlIO *pf, int &err)
 char* CPerlStdIO::GetPtr(PerlIO *pf, int &err)
 {
 	return ((FILE*)pf)->_ptr;
+}
+
+void CPerlStdIO::SetBuf(PerlIO *pf, char* buffer, int &err)
+{
+    setbuf((FILE*)pf, buffer);
+}
+
+int CPerlStdIO::SetVBuf(PerlIO *pf, char* buffer, int type, Size_t size, int &err)
+{
+    return setvbuf((FILE*)pf, buffer, type, size);
 }
 
 void CPerlStdIO::SetCnt(PerlIO *pf, int n, int &err)

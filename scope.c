@@ -452,7 +452,7 @@ save_list(register SV **sarg, I32 maxsarg)
 
 void
 #ifdef PERL_OBJECT
-save_destructor(void (*f) (void*, void*), void* p)
+save_destructor(DESTRUCTORFUNC f, void* p)
 #else
 save_destructor(void (*f) (void *), void *p)
 #endif
@@ -691,7 +691,7 @@ leave_scope(I32 base)
 	    break;
 	case SAVEt_DESTRUCTOR:
 	    ptr = SSPOPPTR;
-	    (*SSPOPDPTR)(THIS_ ptr);
+	    (CALLDESTRUCTOR)(ptr);
 	    break;
 	case SAVEt_REGCONTEXT:
 	    {

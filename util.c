@@ -2458,7 +2458,7 @@ condpair_magic(SV *sv)
 	    sv_magic(sv, Nullsv, 'm', 0, 0);
 	    mg = SvMAGIC(sv);
 	    mg->mg_ptr = (char *)cp;
-	    mg->mg_length = sizeof(cp);
+	    mg->mg_len = sizeof(cp);
 	    MUTEX_UNLOCK(&sv_mutex);
 	    DEBUG_L(WITH_THR(PerlIO_printf(PerlIO_stderr(),
 					   "%p: condpair_magic %p\n", thr, sv));)

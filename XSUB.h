@@ -76,4 +76,9 @@
 
 #ifdef PERL_OBJECT
 #include "ObjXSub.h"
-#endif
+#ifndef NO_XSLOCKS
+#ifdef WIN32
+#include "XSLock.h"
+#endif  /* WIN32 */
+#endif  /* NO_XSLOCKS */
+#endif	/* PERL_OBJECT */

@@ -61,9 +61,11 @@
 #define SAVEDELETE(h,k,l) \
 	  save_delete(SOFT_CAST(HV*)(h), SOFT_CAST(char*)(k), (I32)(l))
 #ifdef PERL_OBJECT
+#define CALLDESTRUCTOR this->*SSPOPDPTR
 #define SAVEDESTRUCTOR(f,p) \
-	  save_destructor(SOFT_CAST(void(*)_((void*, void*)))(f),SOFT_CAST(void*)(p))
+	  save_destructor((DESTRUCTORFUNC)(f),SOFT_CAST(void*)(p))
 #else
+#define CALLDESTRUCTOR *SSPOPDPTR
 #define SAVEDESTRUCTOR(f,p) \
 	  save_destructor(SOFT_CAST(void(*)_((void*)))(f),SOFT_CAST(void*)(p))
 #endif

@@ -367,7 +367,13 @@ av_undef(register AV *av)
 	    SvREFCNT_dec(AvARRAY(av)[--key]);
     }
     Safefree(AvALLOC(av));
+#ifdef PERL_OBJECT
+	(((XPVAV*)  SvANY(av))->xav_array) = 0;
+	/* the following line is is a problem with VC */
+    /* AvARRAY(av) = 0; */
+#else
     AvARRAY(av) = 0;
+#endif
     AvALLOC(av) = 0;
     SvPVX(av) = 0;
     AvMAX(av) = AvFILLp(av) = -1;

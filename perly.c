@@ -1326,16 +1326,6 @@ yydestruct(void *ptr)
     Safefree(ysave);
 }
 
-#ifdef PERL_OBJECT
-static void YYDestructor(void *pPerl, void *ptr)
-{
-    ((CPerlObj*)pPerl)->yydestruct(ptr);
-}
-#define YYDESTRUCT YYDestructor
-#else
-#define YYDESTRUCT yydestruct
-#endif
-
 int
 yyparse(void)
 {
@@ -1354,7 +1344,7 @@ yyparse(void)
 #endif
 
     struct ysv *ysave = (struct ysv*)safemalloc(sizeof(struct ysv));
-    SAVEDESTRUCTOR(YYDESTRUCT, ysave);
+    SAVEDESTRUCTOR(yydestruct, ysave);
     ysave->oldyydebug	= yydebug;
     ysave->oldyynerrs	= yynerrs;
     ysave->oldyyerrflag	= yyerrflag;

@@ -25,8 +25,6 @@ PERLVAR(Gcurthr,	struct perl_thread *)	/* Currently executing (fake) thread */
 #endif
 #endif /* USE_THREADS */
 #ifdef PERL_OBJECT
-/* TODO: move into thread section */
-PERLVAR(Gsort_mutex,	CRITICAL_SECTION)		/* Mutex for qsort */
 #ifdef WIN32
 PERLVAR(Gerror_no,    int)	/* errno for each interpreter */
 #endif

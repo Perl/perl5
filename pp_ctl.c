@@ -637,15 +637,6 @@ PP(pp_mapwhile)
     }
 }
 
-
-#ifdef PERL_OBJECT
-static CPerlObj *pSortPerl;
-static int SortCv(const void *a, const void *b)
-{
-    return pSortPerl->sortcv(a, b);
-}
-#endif
-
 PP(pp_sort)
 {
     djSP; dMARK; dORIGMARK;
@@ -751,15 +742,7 @@ PP(pp_sort)
 		    (void)SvREFCNT_inc(cv); /* in preparation for POPSUB */
 	    }
 	    sortcxix = cxstack_ix;
-
-#ifdef PERL_OBJECT
-	    MUTEX_LOCK(&sort_mutex);
-	    pSortPerl = this;
-	    qsortsv((myorigmark+1), max, SortCv);
-	    MUTEX_UNLOCK(&sort_mutex);
-#else
 	    qsortsv((myorigmark+1), max, sortcv);
-#endif
 
 	    POPBLOCK(cx,curpm);
 	    SWITCHSTACK(sortstack, oldstack);
@@ -770,18 +753,8 @@ PP(pp_sort)
     else {
 	if (max > 1) {
 	    MEXTEND(SP, 20);	/* Can't afford stack realloc on signal. */
-#ifdef PERL_OBJECT
-	    /* XXX sort_mutex is probably not needed since qsort is now
-	     * internal GSAR */
-	    MUTEX_LOCK(&sort_mutex);
-	    pSortPerl = this;
 	    qsortsv(ORIGMARK+1, max,
 		  (op->op_private & OPpLOCALE) ? sv_cmp_locale : sv_cmp);
-	    MUTEX_UNLOCK(&sort_mutex);
-#else
-	    qsortsv(ORIGMARK+1, max,
-		  (op->op_private & OPpLOCALE) ? sv_cmp_locale : sv_cmp);
-#endif
 	}
     }
     stack_sp = ORIGMARK + max;
@@ -3017,8 +2990,13 @@ struct partition_stack_entry {
 
 /* Return < 0 == 0 or > 0 as the value of elt1 is < elt2, == elt2, > elt2
 */
+#ifdef PERL_OBJECT
+#define qsort_cmp(elt1, elt2) \
+   ((this->*compare)(array[elt1], array[elt2]))
+#else
 #define qsort_cmp(elt1, elt2) \
    ((*compare)(array[elt1], array[elt2]))
+#endif
 
 #ifdef QSORT_ORDER_GUESS
 #define QSORT_NOTICE_SWAP swapped++;
@@ -3099,10 +3077,14 @@ doqsort_all_asserts(
 /* ****************************************************************** qsort */
 
 void
+#ifdef PERL_OBJECT
+qsortsv(SV ** array, size_t num_elts, SVCOMPARE compare)
+#else
 qsortsv(
    SV ** array,
    size_t num_elts,
    I32 (*compare)(SV *a, SV *b))
+#endif
 {
    register SV * temp;
 

@@ -43,7 +43,7 @@ class CPerlObj;
 #define CPERLscope(x) x
 #define CPERLproto
 #define CPERLproto_ 
-#define CPERLarg
+#define CPERLarg void
 #define CPERLarg_
 #define THIS
 #define THIS_
@@ -1101,11 +1101,7 @@ union any {
     I32		any_i32;
     IV		any_iv;
     long	any_long;
-#ifdef PERL_OBJECT
-    void	(*any_dptr) _((void*, void*));
-#else
-    void	(*any_dptr) _((void*));
-#endif
+    void	(CPERLscope(*any_dptr)) _((void*));
 };
 
 #ifdef USE_THREADS

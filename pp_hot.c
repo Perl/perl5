@@ -806,8 +806,8 @@ PP(pp_match)
 	rx->startp[0] = 0;
 	if (SvTYPE(TARG) >= SVt_PVMG && SvMAGIC(TARG)) {
 	    MAGIC* mg = mg_find(TARG, 'g');
-	    if (mg && mg->mg_length >= 0) {
-		rx->endp[0] = rx->startp[0] = s + mg->mg_length; 
+	    if (mg && mg->mg_len >= 0) {
+		rx->endp[0] = rx->startp[0] = s + mg->mg_len; 
 		minmatch = (mg->mg_flags & MGf_MINMATCH);
 		update_minmatch = 0;
 	    }
@@ -929,7 +929,7 @@ play_it_again:
 		mg = mg_find(TARG, 'g');
 	    }
 	    if (rx->startp[0]) {
-		mg->mg_length = rx->endp[0] - rx->subbeg;
+		mg->mg_len = rx->endp[0] - rx->subbeg;
 		if (rx->startp[0] == rx->endp[0])
 		    mg->mg_flags |= MGf_MINMATCH;
 		else
@@ -976,7 +976,7 @@ ret_no:
 	if (SvTYPE(TARG) >= SVt_PVMG && SvMAGIC(TARG)) {
 	    MAGIC* mg = mg_find(TARG, 'g');
 	    if (mg)
-		mg->mg_length = -1;
+		mg->mg_len = -1;
 	}
     }
     LEAVE_SCOPE(oldsave);

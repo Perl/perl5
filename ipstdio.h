@@ -34,8 +34,11 @@ public:
 	virtual int Ungetc(PerlIO*,int, int &err) = 0;
 	virtual int Fileno(PerlIO*, int &err) = 0;
 	virtual PerlIO* Fdopen(int, const char *, int &err) = 0;
+	virtual PerlIO* Reopen(const char*, const char*, PerlIO*, int &err) = 0;
 	virtual SSize_t Read(PerlIO*,void *,Size_t, int &err) = 0;
 	virtual SSize_t Write(PerlIO*,const void *,Size_t, int &err) = 0;
+	virtual void SetBuf(PerlIO *, char*, int &err) = 0;
+	virtual int SetVBuf(PerlIO *, char*, int, Size_t, int &err) = 0;
 	virtual void SetCnt(PerlIO *, int, int &err) = 0;
 	virtual void SetPtrCnt(PerlIO *, char *, int, int& err) = 0;
 	virtual void Setlinebuf(PerlIO*, int &err) = 0;

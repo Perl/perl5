@@ -707,7 +707,6 @@
 #define scrgv			(Perl_Vars.Gscrgv)
 #define sh_path			(Perl_Vars.Gsh_path)
 #define sighandlerp		(Perl_Vars.Gsighandlerp)
-#define sort_mutex		(Perl_Vars.Gsort_mutex)
 #define sub_generation		(Perl_Vars.Gsub_generation)
 #define subline			(Perl_Vars.Gsubline)
 #define subname			(Perl_Vars.Gsubname)
@@ -827,7 +826,6 @@
 #define Gscrgv			scrgv
 #define Gsh_path		sh_path
 #define Gsighandlerp		sighandlerp
-#define Gsort_mutex		sort_mutex
 #define Gsub_generation		sub_generation
 #define Gsubline		subline
 #define Gsubname		subname
@@ -947,7 +945,6 @@
 #define scrgv			Perl_scrgv
 #define sh_path			Perl_sh_path
 #define sighandlerp		Perl_sighandlerp
-#define sort_mutex		Perl_sort_mutex
 #define sub_generation		Perl_sub_generation
 #define subline			Perl_subline
 #define subname			Perl_subname

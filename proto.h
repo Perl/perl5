@@ -278,7 +278,7 @@ VIRTUAL int	mg_copy _((SV* , SV* , char* , I32));
 VIRTUAL MAGIC*	mg_find _((SV* sv, int type));
 VIRTUAL int	mg_free _((SV* sv));
 VIRTUAL int	mg_get _((SV* sv));
-VIRTUAL U32	mg_len _((SV* sv));
+VIRTUAL U32	mg_length _((SV* sv));
 VIRTUAL void	mg_magical _((SV* sv));
 VIRTUAL int	mg_set _((SV* sv));
 VIRTUAL I32	mg_size _((SV* sv));
@@ -344,7 +344,7 @@ VIRTUAL OP*	newLISTOP _((I32 type, I32 flags, OP* first, OP* last));
 VIRTUAL OP*	newPMOP _((I32 type, I32 flags));
 VIRTUAL OP*	newPVOP _((I32 type, I32 flags, char* pv));
 VIRTUAL SV*	newRV _((SV* ref));
-#if !defined(__GNUC__) && (defined(CRIPPLED_CC) || defined(USE_THREADS))
+#if !defined(__GNUC__) && (defined(CRIPPLED_CC) || defined(USE_THREADS) || defined(PERL_OBJECT))
 VIRTUAL SV*	newRV_noinc _((SV *));
 #endif
 #ifdef LEAKTEST
@@ -465,7 +465,8 @@ VIRTUAL void	save_clearsv _((SV** svp));
 VIRTUAL void	save_delete _((HV* hv, char* key, I32 klen));
 #ifndef titan  /* TitanOS cc can't handle this */
 #ifdef PERL_OBJECT
-VIRTUAL void	save_destructor _((void (*f)(void*, void*), void* p));
+typedef void (CPerlObj::*DESTRUCTORFUNC) _((void*));
+VIRTUAL void	save_destructor _((DESTRUCTORFUNC f, void* p));
 #else
 void	save_destructor _((void (*f)(void*), void* p));
 #endif
@@ -670,8 +671,12 @@ void not_a_number _((SV *sv));
 typedef void (CPerlObj::*SVFUNC) _((SV*));
 void visit _((SVFUNC f));
 
+typedef I32 (CPerlObj::*SVCOMPARE) _((SV*, SV*));
+void qsortsv _((SV ** array, size_t num_elts, SVCOMPARE f));
+I32 sortcv _((SV *a, SV *b));
 void save_magic _((MGS *mgs, SV *sv));
 int magic_methpack _((SV *sv, MAGIC *mg, char *meth));
+int magic_methcall _((MAGIC *mg, char *meth, I32 flags, int n, SV *val));
 OP * doform _((CV *cv, GV *gv, OP *retop));
 void doencodes _((SV* sv, char* s, I32 len));
 SV* refto _((SV* sv));
@@ -795,6 +800,7 @@ char * regcppop _((void));
 void dump _((char *pat,...));
 #ifdef WIN32
 int do_aspawn _((void *vreally, void **vmark, void **vsp));
+void BootDynaLoader(void);
 #endif
 
 #ifdef DEBUGGING
@@ -1186,9 +1192,6 @@ void unwind_handler_stack _((void *p));
 void restore_magic _((void *p));
 void restore_rsfp _((void *f));
 void yydestruct _((void *ptr));
-int sortcv _((const void *, const void *));
-int sortcmp _((const void *, const void *));
-int sortcmp_locale _((const void *, const void *));
 VIRTUAL int fprintf _((PerlIO *, const char *, ...));
 
 #ifdef WIN32

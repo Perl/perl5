@@ -164,10 +164,6 @@ perl_construct(register PerlInterpreter *sv_interp)
 	MUTEX_INIT(&threads_mutex);
 	COND_INIT(&nthreads_cond);
 
-#ifdef PERL_OBJECT
-	MUTEX_INIT(&sort_mutex);
-#endif
-	
 	thr = init_main_thread();
 #endif /* USE_THREADS */
 
@@ -561,9 +557,6 @@ perl_destruct(register PerlInterpreter *sv_interp)
     hints = 0;		/* Reset hints. Should hints be per-interpreter ? */
     
     DEBUG_P(debprofdump());
-#ifdef PERL_OBJECT
-    MUTEX_DESTROY(&sort_mutex);
-#endif
 #ifdef USE_THREADS
     MUTEX_DESTROY(&sv_mutex);
     MUTEX_DESTROY(&eval_mutex);
@@ -596,6 +589,7 @@ perl_free(PerlInterpreter *sv_interp)
 #endif
 {
 #ifdef PERL_OBJECT
+	Safefree(this);
 #else
     if (!(curinterp = sv_interp))
 	return;
@@ -946,6 +940,9 @@ print \"  \\@INC:\\n    @INC\\n\";");
     CvPADLIST(compcv) = comppadlist;
 
     boot_core_UNIVERSAL();
+#if defined(WIN32) && defined(PERL_OBJECT)
+	BootDynaLoader();
+#endif
     if (xsinit)
 	(*xsinit)(THIS);	/* in case linked C routines want magical variables */
 #if defined(VMS) || defined(WIN32) || defined(DJGPP)

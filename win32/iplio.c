@@ -171,10 +171,7 @@ int CPerlLIO::Flock(int fd, int oper, int &err)
 
 int CPerlLIO::FStat(int fd, struct stat *sbufptr, int &err)
 {
-	int ret = fstat(fd, sbufptr);
-	if(errno)
-		err = errno;
-	return ret;
+	CALLFUNCERR(fstat(fd, sbufptr))
 }
 
 int CPerlLIO::IOCtl(int i, unsigned int u, char *data, int &err)
@@ -194,7 +191,7 @@ long CPerlLIO::Lseek(int fd, long offset, int origin, int &err)
 
 int CPerlLIO::Lstat(const char *path, struct stat *sbufptr, int &err)
 {
-	return stat(path, sbufptr);
+	return STat(path, sbufptr, err);
 }
 
 char *CPerlLIO::Mktemp(char *Template, int &err)
@@ -204,12 +201,28 @@ char *CPerlLIO::Mktemp(char *Template, int &err)
 
 int CPerlLIO::Open(const char *filename, int oflag, int &err)
 {
-	CALLFUNCERR(open(filename, oflag))
+	int ret;
+    if(stricmp(filename, "/dev/null") == 0)
+		ret = open("NUL", oflag);
+	else
+		ret = open(filename, oflag);
+
+	if(errno)
+		err = errno;
+	return ret;
 }
 
 int CPerlLIO::Open(const char *filename, int oflag, int pmode, int &err)
 {
-	CALLFUNCERR(open(filename, oflag, pmode))
+	int ret;
+    if(stricmp(filename, "/dev/null") == 0)
+		ret = open("NUL", oflag, pmode);
+	else
+		ret = open(filename, oflag, pmode);
+
+	if(errno)
+		err = errno;
+	return ret;
 }
 
 int CPerlLIO::Read(int fd, void *buffer, unsigned int cnt, int &err)
@@ -276,7 +289,44 @@ int CPerlLIO::Setmode(int fd, int mode, int &err)
 
 int CPerlLIO::STat(const char *path, struct stat *sbufptr, int &err)
 {
-	return stat(path, sbufptr);
+    char		t[MAX_PATH]; 
+    const char	*p = path;
+    int		l = strlen(path);
+    int		res;
+
+    if (l > 1) {
+	switch(path[l - 1]) {
+	case '\\':
+	case '/':
+	    if (path[l - 2] != ':') {
+		strncpy(t, path, l - 1);
+		t[l - 1] = 0;
+		p = t;
+	    };
+	}
+    }
+	res = stat(path, sbufptr);
+#ifdef __BORLANDC__
+    if (res == 0) {
+	if (S_ISDIR(buffer->st_mode))
+	    buffer->st_mode |= S_IWRITE | S_IEXEC;
+	else if (S_ISREG(buffer->st_mode)) {
+	    if (l >= 4 && path[l-4] == '.') {
+		const char *e = path + l - 3;
+		if (strnicmp(e,"exe",3)
+		    && strnicmp(e,"bat",3)
+		    && strnicmp(e,"com",3)
+		    && (IsWin95() || strnicmp(e,"cmd",3)))
+		    buffer->st_mode &= ~S_IEXEC;
+		else
+		    buffer->st_mode |= S_IEXEC;
+	    }
+	    else
+		buffer->st_mode &= ~S_IEXEC;
+	}
+    }
+#endif
+    return res;
 }
 
 char *CPerlLIO::Tmpnam(char *string, int &err)

@@ -145,16 +145,6 @@ static struct {
 /* grandfather return to old style */
 #define OLDLOP(f) return(yylval.ival=f,expect = XTERM,bufptr = s,(int)LSTOP)
 
-#ifdef PERL_OBJECT
-static void RestoreRsfp(void *pPerl, void *ptr)
-{
-    ((CPerlObj*)pPerl)->restore_rsfp(ptr);
-}
-#define RESTORERSFP RestoreRsfp
-#else
-#define RESTORERSFP restore_rsfp
-#endif
-
 STATIC int
 ao(int toketype)
 {
@@ -268,7 +258,7 @@ lex_start(SV *line)
     SAVESPTR(linestr);
     SAVEPPTR(lex_brackstack);
     SAVEPPTR(lex_casestack);
-    SAVEDESTRUCTOR(RESTORERSFP, rsfp);
+    SAVEDESTRUCTOR(restore_rsfp, rsfp);
 
     lex_state = LEX_NORMAL;
     lex_defer = 0;

@@ -100,6 +100,10 @@ sv_derived_from(SV *sv, char *name)
  
 }
 
+#ifdef PERL_OBJECT
+#define NO_XSLOCKS
+#endif  /* PERL_OBJECT */
+
 #include "XSUB.h"
 
 static

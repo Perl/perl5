@@ -1435,14 +1435,11 @@ CPerlObj::Init(void)
 	curcop = &compiling;
 	cxstack_ix = -1;
 	cxstack_max = 128;
+	chopset = " \n-";
 #ifdef USE_THREADS
 	threadsv_names = THREADSV_NAMES;
-	chopset = " \n-";
 	tmps_ix = -1;
 	tmps_floor = -1;
-	curcop = &compiling;
-	cxstack_ix = -1;
-	cxstack_max = 128;
 #endif
 	maxo = MAXO;
 	sh_path = SH_PATH;
@@ -1495,6 +1492,15 @@ int
 do_aspawn(void *vreally, void **vmark, void **vsp)
 {
 	return PerlProc_aspawn(vreally, vmark, vsp);
+}
+
+EXTERN_C void boot_DynaLoader _((CPERLarg_ CV* cv));
+
+void CPerlObj::BootDynaLoader(void)
+{
+    char *file = __FILE__;
+    dXSUB_SYS;
+    newXS("DynaLoader::boot_DynaLoader", boot_DynaLoader, file);
 }
 
 #endif  /* WIN32 */

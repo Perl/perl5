@@ -10,12 +10,20 @@
 #define gid					pPerl->Perl_gid
 #undef  egid
 #define egid				pPerl->Perl_egid
+#undef  endav
+#define endav               pPerl->Perl_endav
 #undef  an
 #define an					pPerl->Perl_an
+#undef  compcv
+#define compcv              pPerl->Perl_compcv
 #undef  cop_seqmax
 #define cop_seqmax			pPerl->Perl_cop_seqmax
+#undef  defstash
+#define defstash            pPerl->Perl_defstash
 #undef  evalseq
 #define evalseq				pPerl->Perl_evalseq
+#undef  hexdigit
+#define hexdigit            pPerl->Perl_hexdigit
 #undef  sub_generation
 #define sub_generation		pPerl->Perl_sub_generation
 #undef  origenviron
@@ -68,14 +76,16 @@
 #define markstack_ptr		pPerl->Perl_markstack_ptr
 #undef  markstack_max
 #define markstack_max		pPerl->Perl_markstack_max
+#undef  maxo
+#define maxo                pPerl->Perl_maxo
+#undef  op_mask
+#define op_mask             pPerl->Perl_op_mask
 #undef  curpad
 #define curpad				pPerl->Perl_curpad
 #undef  Sv
 #define Sv					pPerl->Perl_Sv
 #undef  Xpv
 #define Xpv					pPerl->Perl_Xpv
-#undef  buf
-#define buf					pPerl->Perl_buf
 #undef  tokenbuf
 #define tokenbuf			pPerl->Perl_tokenbuf
 #undef  statbuf
@@ -330,6 +340,10 @@
 #define gen_constant_list   pPerl->Perl_gen_constant_list
 #undef  getlogin
 #define getlogin            pPerl->getlogin
+#undef  get_op_descs
+#define get_op_descs        pPerl->Perl_get_op_descs
+#undef  get_op_names
+#define get_op_names        pPerl->Perl_get_op_names
 #undef  gp_free
 #define gp_free             pPerl->Perl_gp_free
 #undef  gp_ref
@@ -540,8 +554,6 @@
 #define mg_free               pPerl->Perl_mg_free
 #undef  mg_get
 #define mg_get                pPerl->Perl_mg_get
-#undef  mg_Len
-#define mg_Len                pPerl->mg_Len
 #undef  mg_magical
 #define mg_magical            pPerl->Perl_mg_magical
 #undef  mg_set
@@ -848,6 +860,8 @@
 #define save_clearsv          pPerl->Perl_save_clearsv
 #undef  save_delete
 #define save_delete           pPerl->Perl_save_delete
+#undef  save_destructor
+#define save_destructor       pPerl->Perl_save_destructor
 #undef  save_freesv
 #define save_freesv           pPerl->Perl_save_freesv
 #undef  save_freeop
@@ -926,10 +940,6 @@
 #define sighandler            pPerl->Perl_sighandler
 #undef  skipspace
 #define skipspace             pPerl->Perl_skipspace
-#undef  sortcv
-#define sortcv                pPerl->sortcv
-#undef  sortcmp
-#define sortcmp               pPerl->sortcmp
 #undef  stack_grow
 #define stack_grow            pPerl->Perl_stack_grow
 #undef  start_subparse
@@ -1064,18 +1074,184 @@
 #define warn    			pPerl->Perl_warn
 
 
+#undef piMem
+#define piMem               (pPerl->piMem)
+#undef piENV
+#define piENV               (pPerl->piENV)
+#undef piStdIO
+#define piStdIO             (pPerl->piStdIO)
+#undef piLIO
+#define piLIO               (pPerl->piLIO)
+#undef piDir
+#define piDir               (pPerl->piDir)
+#undef piSock
+#define piSock              (pPerl->piSock)
+#undef piProc
+#define piProc              (pPerl->piProc)
+
 #undef SAVETMPS
 #define SAVETMPS			pPerl->SaveTmps()
 #undef FREETMPS
 #define FREETMPS			pPerl->FreeTmps()
 
+#ifndef NO_XSLOCKS
+#undef closedir
+#undef opendir
+#undef stdin
+#undef stdout
+#undef stderr
+#undef feof
+#undef ferror
+#undef fgetpos
+#undef ioctl
+#undef getlogin
+#undef setjmp
+
+#define mkdir PerlDir_mkdir
+#define chdir PerlDir_chdir
+#define rmdir PerlDir_rmdir
+#define closedir PerlDir_close
+#define opendir PerlDir_open
+#define readdir PerlDir_read
+#define rewinddir PerlDir_rewind
+#define seekdir PerlDir_seek
+#define telldir PerlDir_tell
+#define putenv PerlEnv_putenv
+#define getenv PerlEnv_getenv
+#define stdin PerlIO_stdin
+#define stdout PerlIO_stdout
+#define stderr PerlIO_stderr
+#define fopen PerlIO_open
+#define fclose PerlIO_close
+#define feof PerlIO_eof
+#define ferror PerlIO_error
+#define fclearerr PerlIO_clearerr
+#define getc PerlIO_getc
+#define fputc(c, f) PerlIO_putc(f,c)
+#define fputs(s, f) PerlIO_puts(f,s)
+#define fflush PerlIO_flush
+#define ungetc(c, f) PerlIO_ungetc((f),(c))
+#define fileno PerlIO_fileno
+#define fdopen PerlIO_fdopen
+#define freopen PerlIO_reopen
+#define fread(b,s,c,f) PerlIO_read((f),(b),(s*c))
+#define fwrite(b,s,c,f) PerlIO_write((f),(b),(s*c))
+#define setbuf PerlIO_setbuf
+#define setvbuf PerlIO_setvbuf
+#define setlinebuf PerlIO_setlinebuf
+#define stdoutf PerlIO_stdoutf
+#define vfprintf PerlIO_vprintf
+#define ftell PerlIO_tell
+#define fseek PerlIO_seek
+#define fgetpos PerlIO_getpos
+#define fsetpos PerlIO_setpos
+#define frewind PerlIO_rewind
+#define tmpfile PerlIO_tmpfile
+#define access PerlLIO_access
+#define chmod PerlLIO_chmod
+#define chsize PerlLIO_chsize
+#define close PerlLIO_close
+#define dup PerlLIO_dup
+#define dup2 PerlLIO_dup2
+#define flock PerlLIO_flock
+#define fstat PerlLIO_fstat
+#define ioctl PerlLIO_ioctl
+#define isatty PerlLIO_isatty
+#define lseek PerlLIO_lseek
+#define lstat PerlLIO_lstat
+#define mktemp PerlLIO_mktemp
+#define open PerlLIO_open
+#define read PerlLIO_read
+#define rename PerlLIO_rename
+#define setmode PerlLIO_setmode
+#define stat PerlLIO_stat
+#define tmpnam PerlLIO_tmpnam
+#define umask PerlLIO_umask
+#define unlink PerlLIO_unlink
+#define utime PerlLIO_utime
+#define write PerlLIO_write
+#define malloc PerlMem_malloc
+#define realloc PerlMem_realloc
+#define free PerlMem_free
+#define abort PerlProc_abort
+#define exit PerlProc_exit
+#define _exit PerlProc__exit
+#define execl PerlProc_execl
+#define execv PerlProc_execv
+#define execvp PerlProc_execvp
+#define getuid PerlProc_getuid
+#define geteuid PerlProc_geteuid
+#define getgid PerlProc_getgid
+#define getegid PerlProc_getegid
+#define getlogin PerlProc_getlogin
+#define kill PerlProc_kill
+#define killpg PerlProc_killpg
+#define pause PerlProc_pause
+#define popen PerlProc_popen
+#define pclose PerlProc_pclose
+#define pipe PerlProc_pipe
+#define setuid PerlProc_setuid
+#define setgid PerlProc_setgid
+#define sleep PerlProc_sleep
+#define times PerlProc_times
+#define wait PerlProc_wait
+#define setjmp PerlProc_setjmp
+#define longjmp PerlProc_longjmp
+#define signal PerlProc_signal
+#define htonl PerlSock_htonl
+#define htons PerlSock_htons
+#define ntohs PerlSock_ntohl
+#define ntohl PerlSock_ntohs
+#define accept PerlSock_accept
+#define bind PerlSock_bind
+#define connect PerlSock_connect
+#define endhostent PerlSock_endhostent
+#define endnetent PerlSock_endnetent
+#define endprotoent PerlSock_endprotoent
+#define endservent PerlSock_endservent
+#define gethostbyaddr PerlSock_gethostbyaddr
+#define gethostbyname PerlSock_gethostbyname
+#define gethostent PerlSock_gethostent
+#define gethostname PerlSock_gethostname
+#define getnetbyaddr PerlSock_getnetbyaddr
+#define getnetbyname PerlSock_getnetbyname
+#define getnetent PerlSock_getnetent
+#define getpeername PerlSock_getpeername
+#define getprotobyname PerlSock_getprotobyname
+#define getprotobynumber PerlSock_getprotobynumber
+#define getprotoent PerlSock_getprotoent
+#define getservbyname PerlSock_getservbyname
+#define getservbyport PerlSock_getservbyport
+#define getservent PerlSock_getservent
+#define getsockname PerlSock_getsockname
+#define getsockopt PerlSock_getsockopt
+#define inet_addr PerlSock_inet_addr
+#define inet_ntoa PerlSock_inet_ntoa
+#define listen PerlSock_listen
+#define recvfrom PerlSock_recvfrom
+#define select PerlSock_select
+#define send PerlSock_send
+#define sendto PerlSock_sendto
+#define sethostent PerlSock_sethostent
+#define setnetent PerlSock_setnetent
+#define setprotoent PerlSock_setprotoent
+#define setservent PerlSock_setservent
+#define setsockopt PerlSock_setsockopt
+#define shutdown PerlSock_shutdown
+#define socket PerlSock_socket
+#define socketpair PerlSock_socketpair
+#endif  /* NO_XSLOCKS */
+
+#undef  THIS
+#define THIS pPerl
+#undef  THIS_
+#define THIS_ pPerl,
+
 #ifdef WIN32
 #undef errno
-#define errno				pPerl->ErrorNo()
-#undef pVtbl
-#define pVtbl				(pPerl->GetpVtbl())
-#undef  g_lpObj
-#define g_lpObj				pPerl->Perl_g_lpObj
+#define errno				ErrorNo()
+#undef  ErrorNo
+#define ErrorNo				pPerl->ErrorNo
 #undef  LastOLEError
 #define LastOLEError		pPerl->Perl_LastOLEError
 #undef  bOleInit

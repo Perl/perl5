@@ -573,6 +573,8 @@
 #define magic_getuvar     CPerlObj::Perl_magic_getuvar
 #undef  magic_len
 #define magic_len         CPerlObj::Perl_magic_len
+#undef  magic_methcall
+#define magic_methcall    CPerlObj::magic_methcall
 #undef  magic_methpack
 #define magic_methpack    CPerlObj::magic_methpack
 #undef  magic_nextpack
@@ -619,6 +621,8 @@
 #define magic_setuvar     CPerlObj::Perl_magic_setuvar
 #undef  magic_setvec
 #define magic_setvec      CPerlObj::Perl_magic_setvec
+#undef  magic_sizepack
+#define magic_sizepack    CPerlObj::Perl_magic_sizepack
 #undef  magic_wipepack
 #define magic_wipepack    CPerlObj::Perl_magic_wipepack
 #undef  magicname
@@ -643,12 +647,14 @@
 #define mg_free           CPerlObj::Perl_mg_free
 #undef  mg_get
 #define mg_get            CPerlObj::Perl_mg_get
-#undef  mg_len
-#define mg_len            CPerlObj::Perl_mg_len
+#undef  mg_length
+#define mg_length         CPerlObj::mg_length
 #undef  mg_magical
 #define mg_magical        CPerlObj::Perl_mg_magical
 #undef  mg_set
 #define mg_set            CPerlObj::Perl_mg_set
+#undef  mg_size
+#define mg_size           CPerlObj::Perl_mg_size
 #undef  missingterm
 #define missingterm       CPerlObj::missingterm
 #undef  mod
@@ -929,6 +935,8 @@
 #define push_scope        CPerlObj::Perl_push_scope
 #undef  pregcomp
 #define pregcomp          CPerlObj::Perl_pregcomp
+#undef  qsortsv
+#define qsortsv           CPerlObj::qsortsv
 #undef  ref
 #define ref               CPerlObj::Perl_ref
 #undef  refkids
@@ -1153,10 +1161,6 @@
 #define skipspace         CPerlObj::Perl_skipspace
 #undef  sortcv
 #define sortcv            CPerlObj::sortcv
-#undef  sortcmp
-#define sortcmp           CPerlObj::sortcmp
-#undef  sortcmp_locale
-#define sortcmp_locale    CPerlObj::sortcmp_locale
 #ifndef PERL_OBJECT
 #undef  stack_base
 #define stack_base        CPerlObj::Perl_stack_base

@@ -4,7 +4,15 @@
 #include "EXTERN.h"
 #include "perl.h"
 
+#define NO_XSLOCKS
 #include "XSUB.H"
+#undef errno
+#if defined(_MT)
+_CRTIMP int * __cdecl _errno(void);
+#define errno (*_errno())
+#else
+_CRTIMP extern int errno;
+#endif
 
 #include <ipdir.h>
 #include <ipenv.h>

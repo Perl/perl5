@@ -31,17 +31,7 @@
  */
 
 #ifdef PERL_OBJECT
-static void UnwindHandler(void *pPerl, void *ptr)
-{
-	((CPerlObj*)pPerl)->unwind_handler_stack(ptr);
-}
 
-static void RestoreMagic(void *pPerl, void *ptr)
-{
-	((CPerlObj*)pPerl)->restore_magic(ptr);
-}
-#define UNWINDHANDLER   UnwindHandler
-#define RESTOREMAGIC    RestoreMagic
 #define VTBL            this->*vtbl
 
 #else
@@ -52,8 +42,6 @@ struct magic_state {
 typedef struct magic_state MGS;
 
 static void restore_magic _((void *p));
-#define UNWINDHANDLER   unwind_handler_stack
-#define RESTOREMAGIC	restore_magic
 #define VTBL			*vtbl
 
 #endif
@@ -65,7 +53,7 @@ save_magic(MGS *mgs, SV *sv)
 
     mgs->mgs_sv = sv;
     mgs->mgs_flags = SvMAGICAL(sv) | SvREADONLY(sv);
-    SAVEDESTRUCTOR(RESTOREMAGIC, mgs);
+    SAVEDESTRUCTOR(restore_magic, mgs);
 
     SvMAGICAL_off(sv);
     SvREADONLY_off(sv);
@@ -166,7 +154,7 @@ mg_set(SV *sv)
 }
 
 U32
-mg_len(SV *sv)
+mg_length(SV *sv)
 {
     MAGIC* mg;
     char *junk;
@@ -198,11 +186,11 @@ mg_size(SV *sv)
     
     for (mg = SvMAGIC(sv); mg; mg = mg->mg_moremagic) {
 	MGVTBL* vtbl = mg->mg_virtual;
-	if (vtbl && vtbl->svt_len) {
+	if (vtbl && (vtbl->svt_len != NULL)) {
 	    MGS mgs;
 	    ENTER;
 	    /* omit MGf_GSKIP -- not changed here */
-	    len = (*vtbl->svt_len)(sv, mg);
+	    len = (VTBL->svt_len)(sv, mg);
 	    LEAVE;
 	    return len;
 	}
@@ -278,9 +266,9 @@ mg_free(SV *sv)
 	if (vtbl && (vtbl->svt_free != NULL))
 	    (VTBL->svt_free)(sv, mg);
 	if (mg->mg_ptr && mg->mg_type != 'g')
-	    if (mg->mg_length >= 0)
+	    if (mg->mg_len >= 0)
 		Safefree(mg->mg_ptr);
-	    else if (mg->mg_length == HEf_SVKEY)
+	    else if (mg->mg_len == HEf_SVKEY)
 		SvREFCNT_dec((SV*)mg->mg_ptr);
 	if (mg->mg_flags & MGf_REFCOUNTED)
 	    SvREFCNT_dec(mg->mg_obj);
@@ -984,7 +972,7 @@ magic_setnkeys(SV *sv, MAGIC *mg)
     return 0;
 }          
 
-static int
+STATIC int
 magic_methcall(MAGIC *mg, char *meth, I32 flags, int n, SV *val)
 {
     dSP;
@@ -994,13 +982,13 @@ magic_methcall(MAGIC *mg, char *meth, I32 flags, int n, SV *val)
     PUSHs(mg->mg_obj);
     if (n > 1) { 
 	if (mg->mg_ptr) {
-	    if (mg->mg_length >= 0)
-		PUSHs(sv_2mortal(newSVpv(mg->mg_ptr, mg->mg_length)));
-	    else if (mg->mg_length == HEf_SVKEY)
+	    if (mg->mg_len >= 0)
+		PUSHs(sv_2mortal(newSVpv(mg->mg_ptr, mg->mg_len)));
+	    else if (mg->mg_len == HEf_SVKEY)
 		PUSHs((SV*)mg->mg_ptr);
 	}
 	else if (mg->mg_type == 'p') {
-	    PUSHs(sv_2mortal(newSViv(mg->mg_length)));
+	    PUSHs(sv_2mortal(newSViv(mg->mg_len)));
 	}
     }
     if (n > 2) {
@@ -1155,9 +1143,9 @@ magic_getpos(SV *sv, MAGIC *mg)
     
     if (SvTYPE(lsv) >= SVt_PVMG && SvMAGIC(lsv)) {
 	mg = mg_find(lsv, 'g');
-	if (mg && mg->mg_length >= 0) {
+	if (mg && mg->mg_len >= 0) {
 	    dTHR;
-	    sv_setiv(sv, mg->mg_length + curcop->cop_arybase);
+	    sv_setiv(sv, mg->mg_len + curcop->cop_arybase);
 	    return 0;
 	}
     }
@@ -1183,7 +1171,7 @@ magic_setpos(SV *sv, MAGIC *mg)
 	mg = mg_find(lsv, 'g');
     }
     else if (!SvOK(sv)) {
-	mg->mg_length = -1;
+	mg->mg_len = -1;
 	return 0;
     }
     len = SvPOK(lsv) ? SvCUR(lsv) : sv_len(lsv);
@@ -1196,7 +1184,7 @@ magic_setpos(SV *sv, MAGIC *mg)
     }
     else if (pos > len)
 	pos = len;
-    mg->mg_length = pos;
+    mg->mg_len = pos;
     mg->mg_flags &= ~MGf_MINMATCH;
 
     return 0;
@@ -1248,8 +1236,8 @@ int
 magic_gettaint(SV *sv, MAGIC *mg)
 {
     dTHR;
-    TAINT_IF((mg->mg_length & 1) ||
-	     (mg->mg_length & 2) && mg->mg_obj == sv);	/* kludge */
+    TAINT_IF((mg->mg_len & 1) ||
+	     (mg->mg_len & 2) && mg->mg_obj == sv);	/* kludge */
     return 0;
 }
 
@@ -1259,14 +1247,14 @@ magic_settaint(SV *sv, MAGIC *mg)
     dTHR;
     if (localizing) {
 	if (localizing == 1)
-	    mg->mg_length <<= 1;
+	    mg->mg_len <<= 1;
 	else
-	    mg->mg_length >>= 1;
+	    mg->mg_len >>= 1;
     }
     else if (tainted)
-	mg->mg_length |= 1;
+	mg->mg_len |= 1;
     else
-	mg->mg_length &= ~1;
+	mg->mg_len &= ~1;
     return 0;
 }
 
@@ -1366,7 +1354,7 @@ vivify_defelem(SV *sv)
 int
 magic_setmglob(SV *sv, MAGIC *mg)
 {
-    mg->mg_length = -1;
+    mg->mg_len = -1;
     SvSCREAM_off(sv);
     return 0;
 }
@@ -1416,7 +1404,7 @@ magic_setcollxfrm(SV *sv, MAGIC *mg)
     if (mg->mg_ptr) {
 	Safefree(mg->mg_ptr);
 	mg->mg_ptr = NULL;
-	mg->mg_length = -1;
+	mg->mg_len = -1;
     }
     return 0;
 }
@@ -1866,7 +1854,7 @@ sighandler(int sig)
     if (flags & 1) {
 	savestack_ix += 5;		/* Protect save in progress. */
 	o_save_i = savestack_ix;
-	SAVEDESTRUCTOR(UNWINDHANDLER, (void*)&flags);
+	SAVEDESTRUCTOR(unwind_handler_stack, (void*)&flags);
     }
     if (flags & 4) 
 	markstack_ptr++;		/* Protect mark. */

@@ -325,8 +325,8 @@ PP(pp_pos)
 
 	if (SvTYPE(sv) >= SVt_PVMG && SvMAGIC(sv)) {
 	    mg = mg_find(sv, 'g');
-	    if (mg && mg->mg_length >= 0) {
-		PUSHi(mg->mg_length + curcop->cop_arybase);
+	    if (mg && mg->mg_len >= 0) {
+		PUSHi(mg->mg_len + curcop->cop_arybase);
 		RETURN;
 	    }
 	}
