@@ -233,6 +233,3 @@ EOM
 esac
 EOCBU
 
-# /proc/.../file is broken on FreeBSD
-# see http://www.freebsd.org/cgi/query-pr.cgi?pr=35703
-d_procselfexe='undef'

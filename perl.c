@@ -3441,7 +3441,13 @@ S_procself_val(pTHX_ SV *sv, char *arg0)
 {
     char buf[MAXPATHLEN];
     int len = readlink(PROCSELFEXE_PATH, buf, sizeof(buf) - 1);
-    if (len > 0) {
+    /* FreeBSD's implementation is acknowledged to be imperfect, sometimes
+       returning the text "unknown" from the readlink rather than the path
+       to the exacutable (or returing an error from the readlink).  Any valid
+       path has a '/' in it somewhere, so use that to validate the result.
+       See http://www.freebsd.org/cgi/query-pr.cgi?pr=35703
+    */
+    if (len > 0 && memchr (buf, '/', len)) {
 	sv_setpvn(sv,buf,len);
     }
     else {
