@@ -122,7 +122,9 @@
 # ifdef __NetBSD__
 #  define dlerror() strerror(errno)
 # else
-#  define dlerror() "Unknown error - dlerror() not implemented"
+#  ifndef dlerror	/* dlerror could be a more useful macro */
+#   define dlerror() "Unknown error - dlerror() not implemented"
+#  endif
 # endif
 #endif
 
