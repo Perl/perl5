@@ -22,6 +22,7 @@ my $Is_VMS = $^O eq 'VMS';
 my $Is_MacOS = $^O eq 'MacOS';
 
 my $path = join " ", map { qq["-I$_"] } @INC;
+$path = '"-I../lib" "-Iperl_root:[lib]"' if $Is_VMS;   # gets too long otherwise
 my $redir = $Is_MacOS ? "" : "2>&1";
 my $is_thread = $Config{use5005threads} && $Config{use5005threads} eq 'define';
 
