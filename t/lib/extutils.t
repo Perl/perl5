@@ -185,7 +185,7 @@ if ($?) {
   print "not ok 8 # $make failed: $?\n";
 } else {
   # Perl babblings
-  $makeout =~ s/^PERL_DL_NONLAZY=.+?\n//m;
+  $makeout =~ s/^\s*PERL_DL_NONLAZY=.+?\n//m;
 
   # GNU make babblings
   $makeout =~ s/^\w*?make.+?(?:entering|leaving) directory.+?\n//mig;
