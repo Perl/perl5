@@ -549,7 +549,7 @@ PerlLIOIsatty(struct IPerlLIO *I, int fd)
 }
 
 int
-PerlLIOLink(struct IPerlLIO*, const char*oldname, const char *newname)
+PerlLIOLink(struct IPerlLIO *I, const char*oldname, const char *newname)
 {
     return win32_link(oldname, newname);
 }
@@ -1527,7 +1527,7 @@ EXTERN_C DllExport int
 RunPerl(int argc, char **argv, char **env)
 {
     int exitstatus;
-    PerlInterpreter *my_perl;
+    PerlInterpreter *my_perl, *new_perl = NULL;
     struct perl_thread *thr;
 
 #ifndef __BORLANDC__
@@ -1564,12 +1564,11 @@ RunPerl(int argc, char **argv, char **env)
     exitstatus = perl_parse(my_perl, xs_init, argc, argv, env);
     if (!exitstatus) {
 #ifdef USE_ITHREADS		/* XXXXXX testing */
-extern PerlInterpreter * perl_clone(pTHXx_ IV flags);
+	extern PerlInterpreter * perl_clone(pTHXx_ IV flags);
 
-	PerlInterpreter *new_perl = perl_clone(my_perl, 0);
+	new_perl = perl_clone(my_perl, 0);
 	Perl_push_scope(new_perl); /* ENTER; (hack in lieu of perl_destruct()) */
 	exitstatus = perl_run( new_perl );
-	perl_destruct(new_perl); perl_free(new_perl);
 	SetPerlInterpreter(my_perl);
 #else
 	exitstatus = perl_run( my_perl );
@@ -1578,6 +1577,13 @@ extern PerlInterpreter * perl_clone(pTHXx_ IV flags);
 
     perl_destruct( my_perl );
     perl_free( my_perl );
+#ifdef USE_ITHREADS
+    if (new_perl) {
+	SetPerlInterpreter(new_perl);
+	perl_destruct(new_perl);
+	perl_free(new_perl);
+    }
+#endif
 
     PERL_SYS_TERM();
 

@@ -39,6 +39,10 @@ struct cop {
 #  define CopSTASH(c)		(CopSTASHPV(c) \
 				 ? gv_stashpv(CopSTASHPV(c),GV_ADD) : Nullhv)
 #  define CopSTASH_set(c,hv)	CopSTASHPV_set(c, HvNAME(hv))
+#  define CopSTASH_eq(c,hv)	(hv 					\
+				 && (CopSTASHPV(c) == HvNAME(hv)	\
+				     || (CopSTASHPV(c) && HvNAME(hv)	\
+					 && strEQ(CopSTASHPV(c), HvNAME(hv)))))
 #else
 #  define CopFILEGV(c)		((c)->cop_filegv)
 #  define CopFILEGV_set(c,gv)	((c)->cop_filegv = gv)
@@ -50,8 +54,10 @@ struct cop {
 #  define CopSTASH_set(c,hv)	((c)->cop_stash = hv)
 #  define CopSTASHPV(c)		(CopSTASH(c) ? HvNAME(CopSTASH(c)) : Nullch)
 #  define CopSTASHPV_set(c,pv)	CopSTASH_set(c, gv_stashpv(pv,GV_ADD))
+#  define CopSTASH_eq(c,hv)	(CopSTASH(c) == hv)
 #endif /* USE_ITHREADS */
 
+#define CopSTASH_ne(c,hv)	(!CopSTASH_eq(c,hv))
 #define CopLINE(c)		((c)->cop_line)
 #define CopLINE_inc(c)		(++CopLINE(c))
 #define CopLINE_dec(c)		(--CopLINE(c))

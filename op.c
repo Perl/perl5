@@ -4455,8 +4455,8 @@ Perl_newATTRSUB(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs, OP *block)
 	    CV *cv;
 	    HV *hv;
 
-	    Perl_sv_setpvf(aTHX_ sv, "%_:%ld-%ld",
-			   CopFILESV(PL_curcop),
+	    Perl_sv_setpvf(aTHX_ sv, "%s:%ld-%ld",
+			   CopFILE(PL_curcop),
 			   (long)PL_subline, (long)CopLINE(PL_curcop));
 	    gv_efullname3(tmpstr, gv, Nullch);
 	    hv_store(GvHV(PL_DBsub), SvPVX(tmpstr), SvCUR(tmpstr), sv, 0);
@@ -4475,6 +4475,10 @@ Perl_newATTRSUB(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs, OP *block)
 	    s++;
 	else
 	    s = name;
+
+	if (*s != 'B' && *s != 'E' && *s != 'S' && *s != 'I')
+	    goto done;
+
 	if (strEQ(s, "BEGIN")) {
 	    I32 oldscope = PL_scopestack_ix;
 	    ENTER;
@@ -4486,7 +4490,7 @@ Perl_newATTRSUB(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs, OP *block)
 	    if (!PL_beginav)
 		PL_beginav = newAV();
 	    DEBUG_x( dump_sub(gv) );
-	    av_push(PL_beginav, (SV *)cv);
+	    av_push(PL_beginav, SvREFCNT_inc(cv));
 	    GvCV(gv) = 0;
 	    call_list(oldscope, PL_beginav);
 
@@ -4497,20 +4501,23 @@ Perl_newATTRSUB(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs, OP *block)
 	else if (strEQ(s, "END") && !PL_error_count) {
 	    if (!PL_endav)
 		PL_endav = newAV();
+	    DEBUG_x( dump_sub(gv) );
 	    av_unshift(PL_endav, 1);
-	    av_store(PL_endav, 0, (SV *)cv);
+	    av_store(PL_endav, 0, SvREFCNT_inc(cv));
 	    GvCV(gv) = 0;
 	}
 	else if (strEQ(s, "STOP") && !PL_error_count) {
 	    if (!PL_stopav)
 		PL_stopav = newAV();
+	    DEBUG_x( dump_sub(gv) );
 	    av_unshift(PL_stopav, 1);
-	    av_store(PL_stopav, 0, (SV *)cv);
+	    av_store(PL_stopav, 0, SvREFCNT_inc(cv));
 	    GvCV(gv) = 0;
 	}
 	else if (strEQ(s, "INIT") && !PL_error_count) {
 	    if (!PL_initav)
 		PL_initav = newAV();
+	    DEBUG_x( dump_sub(gv) );
 	    av_push(PL_initav, SvREFCNT_inc(cv));
 	    GvCV(gv) = 0;
 	}
@@ -4614,36 +4621,41 @@ Perl_newXS(pTHX_ char *name, XSUBADDR_t subaddr, char *filename)
 	    s++;
 	else
 	    s = name;
+
+	if (*s != 'B' && *s != 'E' && *s != 'S' && *s != 'I')
+	    goto done;
+
 	if (strEQ(s, "BEGIN")) {
 	    if (!PL_beginav)
 		PL_beginav = newAV();
-	    av_push(PL_beginav, (SV *)cv);
+	    av_push(PL_beginav, SvREFCNT_inc(cv));
 	    GvCV(gv) = 0;
 	}
 	else if (strEQ(s, "END")) {
 	    if (!PL_endav)
 		PL_endav = newAV();
 	    av_unshift(PL_endav, 1);
-	    av_store(PL_endav, 0, (SV *)cv);
+	    av_store(PL_endav, 0, SvREFCNT_inc(cv));
 	    GvCV(gv) = 0;
 	}
 	else if (strEQ(s, "STOP")) {
 	    if (!PL_stopav)
 		PL_stopav = newAV();
 	    av_unshift(PL_stopav, 1);
-	    av_store(PL_stopav, 0, (SV *)cv);
+	    av_store(PL_stopav, 0, SvREFCNT_inc(cv));
 	    GvCV(gv) = 0;
 	}
 	else if (strEQ(s, "INIT")) {
 	    if (!PL_initav)
 		PL_initav = newAV();
-	    av_push(PL_initav, (SV *)cv);
+	    av_push(PL_initav, SvREFCNT_inc(cv));
 	    GvCV(gv) = 0;
 	}
     }
     else
 	CvANON_on(cv);
 
+done:
     return cv;
 }
 

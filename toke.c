@@ -3729,7 +3729,7 @@ Perl_yylex(pTHX)
 
 	case KEY___FILE__:
 	    yylval.opval = (OP*)newSVOP(OP_CONST, 0,
-					newSVsv(CopFILESV(PL_curcop)));
+					newSVpv(CopFILE(PL_curcop),0));
 	    TERM(THING);
 
 	case KEY___LINE__:
@@ -6989,8 +6989,8 @@ Perl_yyerror(pTHX_ char *s)
 	where = SvPVX(where_sv);
     }
     msg = sv_2mortal(newSVpv(s, 0));
-    Perl_sv_catpvf(aTHX_ msg, " at %_ line %"IVdf", ",
-		   CopFILESV(PL_curcop), (IV)CopLINE(PL_curcop));
+    Perl_sv_catpvf(aTHX_ msg, " at %s line %"IVdf", ",
+		   CopFILE(PL_curcop), (IV)CopLINE(PL_curcop));
     if (context)
 	Perl_sv_catpvf(aTHX_ msg, "near \"%.*s\"\n", contlen, context);
     else
@@ -7006,7 +7006,7 @@ Perl_yyerror(pTHX_ char *s)
     else
 	qerror(msg);
     if (PL_error_count >= 10)
-	Perl_croak(aTHX_ "%_ has too many errors.\n", CopFILESV(PL_curcop));
+	Perl_croak(aTHX_ "%s has too many errors.\n", CopFILE(PL_curcop));
     PL_in_my = 0;
     PL_in_my_stash = Nullhv;
     return 0;

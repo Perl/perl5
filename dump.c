@@ -539,8 +539,12 @@ Perl_do_op_dump(pTHX_ I32 level, PerlIO *file, OP *o)
     case OP_DBSTATE:
 	if (CopLINE(cCOPo))
 	    Perl_dump_indent(aTHX_ level, file, "LINE = %d\n",CopLINE(cCOPo));
+	if (CopSTASHPV(cCOPo))
+	    Perl_dump_indent(aTHX_ level, file, "PACKAGE = \"%s\"\n",
+			     CopSTASHPV(cCOPo));
 	if (cCOPo->cop_label)
-	    Perl_dump_indent(aTHX_ level, file, "LABEL = \"%s\"\n",cCOPo->cop_label);
+	    Perl_dump_indent(aTHX_ level, file, "LABEL = \"%s\"\n",
+			     cCOPo->cop_label);
 	break;
     case OP_ENTERLOOP:
 	Perl_dump_indent(aTHX_ level, file, "REDO ===> ");

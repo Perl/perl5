@@ -1392,7 +1392,7 @@ PP(pp_caller)
     PERL_SI *top_si = PL_curstackinfo;
     I32 dbcxix;
     I32 gimme;
-    HV *hv;
+    char *stashname;
     SV *sv;
     I32 count = 0;
 
@@ -1428,23 +1428,23 @@ PP(pp_caller)
 	    cx = &ccstack[dbcxix];
     }
 
-    hv = CopSTASH(cx->blk_oldcop);
+    stashname = CopSTASHPV(cx->blk_oldcop);
     if (GIMME != G_ARRAY) {
-	if (!hv)
+	if (!stashname)
 	    PUSHs(&PL_sv_undef);
 	else {
 	    dTARGET;
-	    sv_setpv(TARG, HvNAME(hv));
+	    sv_setpv(TARG, stashname);
 	    PUSHs(TARG);
 	}
 	RETURN;
     }
 
-    if (!hv)
+    if (!stashname)
 	PUSHs(&PL_sv_undef);
     else
-	PUSHs(sv_2mortal(newSVpv(HvNAME(hv), 0)));
-    PUSHs(sv_2mortal(newSVsv(CopFILESV(cx->blk_oldcop))));
+	PUSHs(sv_2mortal(newSVpv(stashname, 0)));
+    PUSHs(sv_2mortal(newSVpv(CopFILE(cx->blk_oldcop), 0)));
     PUSHs(sv_2mortal(newSViv((I32)CopLINE(cx->blk_oldcop))));
     if (!MAXARG)
 	RETURN;
@@ -1479,7 +1479,7 @@ PP(pp_caller)
 	PUSHs(&PL_sv_undef);
     }
     if (CxTYPE(cx) == CXt_SUB && cx->blk_sub.hasargs
-	&& CopSTASH(PL_curcop) == PL_debstash)
+	&& CopSTASH_eq(PL_curcop, PL_debstash))
     {
 	AV *ary = cx->blk_sub.argarray;
 	int off = AvARRAY(ary) - AvALLOC(ary);
@@ -2538,7 +2538,6 @@ S_doeval(pTHX_ int gimme, OP** startop)
 {
     dSP;
     OP *saveop = PL_op;
-    HV *newstash;
     CV *caller;
     AV* comppadlist;
     I32 i;
@@ -2604,10 +2603,9 @@ S_doeval(pTHX_ int gimme, OP** startop)
 
     /* make sure we compile in the right package */
 
-    newstash = CopSTASH(PL_curcop);
-    if (PL_curstash != newstash) {
+    if (CopSTASH_ne(PL_curcop, PL_curstash)) {
 	SAVESPTR(PL_curstash);
-	PL_curstash = newstash;
+	PL_curstash = CopSTASH(PL_curcop);
     }
     SAVESPTR(PL_beginav);
     PL_beginav = newAV();
@@ -2963,7 +2961,7 @@ PP(pp_require)
 
     /* Assume success here to prevent recursive requirement. */
     (void)hv_store(GvHVn(PL_incgv), name, strlen(name),
-		   newSVsv(CopFILESV(&PL_compiling)), 0 );
+		   newSVpv(CopFILE(&PL_compiling), 0), 0 );
 
     ENTER;
     SAVETMPS;
