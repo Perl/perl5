@@ -1824,6 +1824,8 @@ FAILED:
     return -1;
 }
 
+#ifndef PERL_IMPLICIT_CONTEXT
+
 static UINT timerid = 0;
 
 static VOID CALLBACK TimerProc(HWND win, UINT msg, UINT id, DWORD time)
@@ -1834,9 +1836,12 @@ static VOID CALLBACK TimerProc(HWND win, UINT msg, UINT id, DWORD time)
     CALL_FPTR(PL_sighandlerp)(14);
 }
 
+#endif /* !PERL_IMPLICIT_CONTEXT */
+
 DllExport unsigned int
 win32_alarm(unsigned int sec)
 {
+#ifndef PERL_IMPLICIT_CONTEXT
     /* 
      * the 'obvious' implentation is SetTimer() with a callback
      * which does whatever receiving SIGALRM would do 
@@ -1862,6 +1867,7 @@ win32_alarm(unsigned int sec)
        }
      }
     return 0;
+#endif /* !PERL_IMPLICIT_CONTEXT */
 }
 
 #ifdef HAVE_DES_FCRYPT
@@ -3271,19 +3277,39 @@ GIVE_UP:
  * environment and the current directory to CreateProcess
  */
 
-void*
-get_childenv(void)
+DllExport void*
+win32_get_childenv(void)
 {
     return NULL;
 }
 
-void
-free_childenv(void* d)
+DllExport void
+win32_free_childenv(void* d)
 {
 }
 
-char*
-get_childdir(void)
+DllExport void
+win32_clearenv(void)
+{
+    char *envv = GetEnvironmentStrings();
+    char *cur = envv;
+    STRLEN len;
+    while (*cur) {
+	char *end = strchr(cur,'=');
+	if (end && end != cur) {
+	    *end = '\0';
+	    SetEnvironmentVariable(cur, NULL);
+	    *end = '=';
+	    cur = end + strlen(end+1)+2;
+	}
+	else if ((len = strlen(cur)))
+	    cur += len+1;
+    }
+    FreeEnvironmentStrings(envv);
+}
+
+DllExport char*
+win32_get_childdir(void)
 {
     dTHX;
     char* ptr;
@@ -3302,8 +3328,8 @@ get_childdir(void)
     return ptr;
 }
 
-void
-free_childdir(char* d)
+DllExport void
+win32_free_childdir(char* d)
 {
     dTHX;
     Safefree(d);
@@ -3556,12 +3582,12 @@ win32_putchar(int c)
 
 #ifndef USE_PERL_SBRK
 
-static char *committed = NULL;
-static char *base      = NULL;
-static char *reserved  = NULL;
-static char *brk       = NULL;
-static DWORD pagesize  = 0;
-static DWORD allocsize = 0;
+static char *committed = NULL;		/* XXX threadead */
+static char *base      = NULL;		/* XXX threadead */
+static char *reserved  = NULL;		/* XXX threadead */
+static char *brk       = NULL;		/* XXX threadead */
+static DWORD pagesize  = 0;		/* XXX threadead */
+static DWORD allocsize = 0;		/* XXX threadead */
 
 void *
 sbrk(int need)

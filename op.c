@@ -24,10 +24,10 @@
 
 /* #define PL_OP_SLAB_ALLOC */
 
-#ifdef PL_OP_SLAB_ALLOC
+#if defined(PL_OP_SLAB_ALLOC) && !defined(PERL_IMPLICIT_CONTEXT)
 #define SLAB_SIZE 8192
-static char    *PL_OpPtr  = NULL;
-static int     PL_OpSpace = 0;
+static char    *PL_OpPtr  = NULL;	/* XXX threadead */
+static int     PL_OpSpace = 0;		/* XXX threadead */
 #define NewOp(m,var,c,type) do { if ((PL_OpSpace -= c*sizeof(type)) >= 0)     \
                               var =  (type *)(PL_OpPtr -= c*sizeof(type));    \
                              else                                             \

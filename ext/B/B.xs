@@ -70,7 +70,7 @@ static char *opclassnames[] = {
     "B::COP"	
 };
 
-#define MY_CXT_KEY "B::_guts"##XS_VERSION
+#define MY_CXT_KEY "B::_guts" XS_VERSION
 
 typedef struct {
     int		x_walkoptree_debug;	/* Flag for walkoptree debug hook */

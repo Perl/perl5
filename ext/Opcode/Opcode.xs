@@ -7,7 +7,7 @@
 #define OP_MASK_BUF_SIZE (MAXO + 100)
 
 /* XXX op_named_bits and opset_all are never freed */
-#define MY_CXT_KEY "Opcode::_guts"##XS_VERSION
+#define MY_CXT_KEY "Opcode::_guts" XS_VERSION
 
 typedef struct {
     HV *	x_op_named_bits;	/* cache shared for whole process */

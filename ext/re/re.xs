@@ -17,7 +17,7 @@ extern char*	my_re_intuit_start (pTHX_ regexp *prog, SV *sv, char *strpos,
 				    struct re_scream_pos_data_s *data);
 extern SV*	my_re_intuit_string (pTHX_ regexp *prog);
 
-#define MY_CXT_KEY "re::_guts"##XS_VERSION
+#define MY_CXT_KEY "re::_guts" XS_VERSION
 
 typedef struct {
     int		x_oldflag;		/* debug flag */

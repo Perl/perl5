@@ -4,7 +4,7 @@
 
 #include "bsd_glob.h"
 
-#define MY_CXT_KEY "File::Glob::_guts"##XS_VERSION
+#define MY_CXT_KEY "File::Glob::_guts" XS_VERSION
 
 typedef struct {
     int		x_GLOB_ERROR;
