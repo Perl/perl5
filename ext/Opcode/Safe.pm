@@ -3,7 +3,7 @@ package Safe;
 use 5.003_11;
 use strict;
 
-our $VERSION = "2.08";
+$Safe::VERSION = "2.09";
 
 use Carp;
 
@@ -47,7 +47,7 @@ sub new {
     # the whole glob *_ rather than $_ and @_ separately, otherwise
     # @_ in non default packages within the compartment don't work.
     $obj->share_from('main', $default_share);
-    Opcode::_safe_pkg_prep($obj->{Root});
+    Opcode::_safe_pkg_prep($obj->{Root}) if($Opcode::VERSION > 1.04);
     return $obj;
 }
 
