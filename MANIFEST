@@ -861,6 +861,7 @@ lib/DirHandle.pm		like FileHandle only for directories
 lib/DirHandle.t			See if DirHandle works
 lib/dotsh.pl			Code to "dot" in a shell script
 lib/Dumpvalue.pm		Screen dump of perl values
+lib/Dumpvalue.t			See if Dumpvalue works
 lib/dumpvar.pl			A variable dumper
 lib/English.pm			Readable aliases for short variables
 lib/English.t			See if English works

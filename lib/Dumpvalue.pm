@@ -1,9 +1,10 @@
 use 5.006_001;			# for (defined ref) and $#$v and our
 package Dumpvalue;
 use strict;
-our $VERSION = '1.00';
+our $VERSION = '1.10';
 our(%address, $stab, @stab, %stab, %subs);
 
+# documentation nits, handle complex data structures better by chromatic
 # translate control chars to ^X - Randal Schwartz
 # Modifications to print types by Peter Gordon v1.0
 
@@ -428,7 +429,14 @@ EOP
 
 sub scalarUsage {
   my $self = shift;
-  my $size = length($_[0]);
+  my $size;
+  if (UNIVERSAL::isa($_[0], 'ARRAY')) {
+	$size = $self->arrayUsage($_[0]);
+  } elsif (UNIVERSAL::isa($_[0], 'HASH')) {
+	$size = $self->hashUsage($_[0]);
+  } elsif (!ref($_[0])) {
+	$size = length($_[0]);
+  }
   $self->{TotalStrings} += $size;
   $self->{Strings}++;
   $size;
@@ -511,28 +519,28 @@ may be printed on one line.
 
 Whether to print contents of globs.
 
-=item C<DumpDBFiles>
+=item C<dumpDBFiles>
 
 Dump arrays holding contents of debugged files.
 
-=item C<DumpPackages>
+=item C<dumpPackages>
 
 Dump symbol tables of packages.
 
-=item C<DumpReused>
+=item C<dumpReused>
 
 Dump contents of "reused" addresses.
 
-=item C<tick>, C<HighBit>, C<printUndef>
+=item C<tick>, C<quoteHighBit>, C<printUndef>
 
 Change style of string dump.  Default value of C<tick> is C<auto>, one
 can enable either double-quotish dump, or single-quotish by setting it
 to C<"> or C<'>.  By default, characters with high bit set are printed
-I<as is>.
+I<as is>.  If C<quoteHighBit> is set, they will be quoted.
 
-=item C<UsageOnly>
+=item C<usageOnly>
 
-I<very> rudimentally per-package memory usage dump.  If set,
+rudimentally per-package memory usage dump.  If set,
 C<dumpvars> calculates total size of strings in variables in the package.
 
 =item unctrl
