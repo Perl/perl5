@@ -925,6 +925,9 @@ module that does attempt to address this need partially is the MLDBM
 module.  Check your nearest CPAN site as described in L<perlmodlib> for
 source code to MLDBM.
 
+Tied filehandles are still incomplete.  sysopen(), truncate(),
+flock(), fcntl(), stat() and -X can't currently be trapped.
+
 =head1 AUTHOR
 
 Tom Christiansen

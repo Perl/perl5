@@ -5119,6 +5119,12 @@ A class implementing a file handle should have the following methods:
     WRITE this, scalar, length, offset
     PRINT this, LIST
     PRINTF this, format, LIST
+    BINMODE this
+    EOF this
+    FILENO this
+    SEEK this, position, whence
+    TELL this
+    OPEN this, mode, LIST
     CLOSE this
     DESTROY this
     UNTIE this
