@@ -74,7 +74,7 @@ sub maybe_command {
     for (@e) { $e .= "\Q$_\E|" }
     chop $e;
     # see if file ends in one of the known extensions
-    if ($file =~ /($e)$/) {
+    if ($file =~ /($e)$/i) {
 	return $file if -e $file;
     }
     else {
