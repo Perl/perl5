@@ -24,6 +24,8 @@ Compiler
     $^C to track compiler/checker status
     END blocks need saving in compiled output
     _AUTOLOAD prodding
+    fix comppadlist (names in comppad_name can have fake SvCUR
+	from where newASSIGNOP steals the field)
 
 Documentation
     lots
