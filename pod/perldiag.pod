@@ -1301,10 +1301,11 @@ for more information.
 script if C<$ENV{PATH}> contains a directory that is writable by the world.
 See L<perlsec>.
 
-=item Insecure PATH
+=item Insecure $ENV{%s} while running %s
 
 (F) You can't use system(), exec(), or a piped open in a setuid or
-setgid script if C<$ENV{PATH}> is derived from data supplied (or
+setgid script if any of C<$ENV{PATH}>, C<$ENV{IFS}>, C<$ENV{CDPATH}>,
+C<$ENV{ENV}> or C<$ENV{BASH_ENV}> are derived from data supplied (or
 potentially supplied) by the user.  The script must set the path to a
 known value, using trustworthy data.  See L<perlsec>.
 
