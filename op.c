@@ -5965,7 +5965,7 @@ S_simplify_sort(pTHX_ OP *o)
 {
     register OP *kid = cLISTOPo->op_first->op_sibling;	/* get past pushmark */
     OP *k;
-    int reversed;
+    int descending;
     GV *gv;
     if (!(o->op_flags & OPf_STACKED))
 	return;
@@ -5994,11 +5994,12 @@ S_simplify_sort(pTHX_ OP *o)
     if (GvSTASH(gv) != PL_curstash)
 	return;
     if (strEQ(GvNAME(gv), "a"))
-	reversed = 0;
+	descending = 0;
     else if (strEQ(GvNAME(gv), "b"))
-	reversed = 1;
+	descending = 1;
     else
 	return;
+
     kid = k;						/* back to cmp */
     if (kBINOP->op_last->op_type != OP_RV2SV)
 	return;
@@ -6008,13 +6009,13 @@ S_simplify_sort(pTHX_ OP *o)
     kid = kUNOP->op_first;				/* get past rv2sv */
     gv = kGVOP_gv;
     if (GvSTASH(gv) != PL_curstash
-	|| ( reversed
+	|| ( descending
 	    ? strNE(GvNAME(gv), "a")
 	    : strNE(GvNAME(gv), "b")))
 	return;
     o->op_flags &= ~(OPf_STACKED | OPf_SPECIAL);
-    if (reversed)
-	o->op_private |= OPpSORT_REVERSE;
+    if (descending)
+	o->op_private |= OPpSORT_DESCEND;
     if (k->op_type == OP_NCMP)
 	o->op_private |= OPpSORT_NUMERIC;
     if (k->op_type == OP_I_NCMP)
@@ -6722,18 +6723,38 @@ Perl_peep(pTHX_ register OP *o)
 	}
 
 	case OP_SORT: {
-	    /* make @a = sort @a act in-place */
-
 	    /* will point to RV2AV or PADAV op on LHS/RHS of assign */
 	    OP *oleft, *oright;
 	    OP *o2;
-
-	    o->op_seq = PL_op_seqmax++;
 
 	    /* check that RHS of sort is a single plain array */
 	    oright = cUNOPo->op_first;
 	    if (!oright || oright->op_type != OP_PUSHMARK)
 		break;
+
+	    /* reverse sort ... can be optimised.  */
+	    if (!cUNOPo->op_sibling) {
+		/* Nothing follows us on the list. */
+		OP *reverse = o->op_next;
+
+		if (reverse->op_type == OP_REVERSE &&
+		    (reverse->op_flags & OPf_WANT) == OPf_WANT_LIST) {
+		    OP *pushmark = cUNOPx(reverse)->op_first;
+		    if (pushmark && (pushmark->op_type == OP_PUSHMARK)
+			&& (cUNOPx(pushmark)->op_sibling == o)) {
+			/* reverse -> pushmark -> sort */
+			o->op_private |= OPpSORT_REVERSE;
+			op_null(reverse);
+			pushmark->op_next = oright->op_next;
+			op_null(oright);
+		    }
+		}
+	    }
+
+	    /* make @a = sort @a act in-place */
+
+	    o->op_seq = PL_op_seqmax++;
+
 	    oright = cUNOPx(oright)->op_sibling;
 	    if (!oright)
 		break;
@@ -6820,8 +6841,6 @@ Perl_peep(pTHX_ register OP *o)
 	    break;
 	}
 	
-
-
 	default:
 	    o->op_seq = PL_op_seqmax++;
 	    break;
