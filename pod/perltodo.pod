@@ -211,6 +211,23 @@ with Config.pm. We could use a syntax of ... for location of current binary?
 
 =head2 make HTML install work
 
+=head2 put patchlevel in -v
+
+Currently perl from p4/rsync ships with a patchlevel.h file that usually
+defines one local patch, of the form "MAINT12345" or "RC1". The output of
+perl -v doesn't report that a perl isn't an official release, and this
+information can get lost in bugs reports. Because of this, the minor version
+isn't bumped up util RC time, to minimise the possibility of versions of perl
+escaping that believe themselves to be newer than they actually are.
+
+It would be useful to find an elegant way to have the "this is an interim
+maintenance release" or "this is a release candidate" in the terse -v output,
+and have it so that it's easy for the pumpking to remove this just as the
+release tarball is rolled up. This way the version pulled out of rsync would
+always say "I'm a development release" and it would be safe to bump the
+reported minor version as soon as a release ships, which would aid perl
+developers.
+
 =head1 Incremental things
 
 Some tasks that don't need to get done in one big hit.
