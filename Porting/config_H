@@ -17,7 +17,7 @@
 /*
  * Package name      : perl5
  * Source directory  : .
- * Configuration time: Sat Jun  1 19:20:35 EET DST 2002
+ * Configuration time: Wed Jun  5 16:58:08 EET DST 2002
  * Configured by     : jhi
  * Target system     : osf1 alpha.hut.fi v4.0 878 alpha 
  */
@@ -1797,7 +1797,8 @@
 
 /* HAS_GNULIBC:
  *	This symbol, if defined, indicates to the C program that 
- *	the GNU C library is being used.
+ *	the GNU C library is being used.  A better check is to use
+ *	the __GLIBC__ and __GLIBC_MINOR__ symbols supplied with glibc.
  */
 /*#define HAS_GNULIBC  	/ **/
 #if defined(HAS_GNULIBC) && !defined(_GNU_SOURCE)

@@ -8,7 +8,7 @@
 
 # Package name      : perl5
 # Source directory  : .
-# Configuration time: Sat Jun  1 19:20:35 EET DST 2002
+# Configuration time: Wed Jun  5 16:58:08 EET DST 2002
 # Configured by     : jhi
 # Target system     : osf1 alpha.hut.fi v4.0 878 alpha 
 
@@ -63,7 +63,7 @@ ccsymbols='__alpha=1 __LANGUAGE_C__=1 __osf__=1 __unix__=1 _LONGLONG=1 _SYSTYPE_
 ccversion='V5.6-082'
 cf_by='jhi'
 cf_email='yourname@yourhost.yourplace.com'
-cf_time='Sat Jun  1 19:20:35 EET DST 2002'
+cf_time='Wed Jun  5 16:58:08 EET DST 2002'
 charsize='1'
 chgrp=''
 chmod='chmod'
@@ -551,6 +551,7 @@ gidtype='gid_t'
 glibpth='/usr/shlib /usr/ccs/lib /usr/lib/cmplrs/cc /usr/lib /usr/local/lib /var/shlib'
 gmake='gmake'
 gmtime_r_proto='0'
+gnulibc_version=''
 grep='grep'
 groupcat='cat /etc/group'
 groupstype='gid_t'
@@ -769,7 +770,7 @@ patchlevel='8'
 path_sep=':'
 perl5='perl'
 perl=''
-perl_patchlevel='16943'
+perl_patchlevel='16967'
 perladmin='yourname@yourhost.yourplace.com'
 perllibs='-lm -lutil'
 perlpath='/opt/perl/bin/perl'
@@ -953,7 +954,7 @@ vendorlibexp=''
 vendorprefix=''
 vendorprefixexp=''
 version='5.8.0'
-version_patchlevel_string='version 8 subversion 0 patch 16943'
+version_patchlevel_string='version 8 subversion 0 patch 16967'
 versiononly='undef'
 vi=''
 voidflags='15'
@@ -982,7 +983,7 @@ PERL_SUBVERSION=0
 PERL_API_REVISION=5
 PERL_API_VERSION=8
 PERL_API_SUBVERSION=0
-PERL_PATCHLEVEL=16943
+PERL_PATCHLEVEL=16967
 PERL_CONFIG_SH=true
 # Variables propagated from previous config.sh file.
 pp_sys_cflags='ccflags="$ccflags -DNO_EFF_ONLY_OK"'
