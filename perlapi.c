@@ -1610,7 +1610,7 @@ Perl_mg_set(pTHXo_ SV* sv)
 }
 
 #undef  Perl_mg_size
-IV
+I32
 Perl_mg_size(pTHXo_ SV* sv)
 {
     return ((CPerlObj*)pPerl)->Perl_mg_size(sv);
