@@ -1,4 +1,6 @@
 #!/usr/bin/perl
+# $Id: ucm2table,v 1.0 2002/03/28 23:26:29 dankogai Exp dankogai $
+#
 
 use 5.006;
 use strict;
@@ -12,8 +14,6 @@ while(<>){
 	chomp;
 	my ($uni, $enc, $fb, $comment) = 
 	    /^<U($Hex+)>\s+(\S+)\s+\|(\d)\s+#\s+(.*)$/o or next;
-	$comment =~ /<control>/io and next;
-	$comment =~ /^DELETE/o and next;
 	# print "$uni $enc $fb $comment\n";
 	my @byte = ();
 	my $ord = 0;
@@ -33,9 +33,10 @@ while(<>){
 for (my $x = 0x20; $x <= 0xffff; $ x+= 32) {
     my $line =  '';
     for my $i (0..31){
-	my $char = $Chartab[$x+$i];
+	my $num = $x+$i; $num eq 0x7f and next; # skip delete
+	my $char = $Chartab[$num];
 	$line .= !$char ? " " : 
-	    ($x+$i < 0x7f ) ? " $char" : $char ;
+	    ($num < 0x7f ) ? " $char" : $char ;
     }
     $line =~ /^\s+$/o and next;
     printf "0x%04x: $line\n", $x;

@@ -35,14 +35,14 @@ most cases.  Encode.pm will automatically load those modules in need.
 
 The following encodings are always available.
 
-  Canonical	Aliases
-  -----------------------
-  iso-8859-1	latin1
-  US-ascii	ascii
-  UCS-2		ucs2, iso-10646-1
-  UCS-2le
-  UTF-8		utf8
-  -----------------------
+  Canonical	Aliases                      Comments & References
+  ----------------------------------------------------------------
+  iso-8859-1	latin1					     [ISO]
+  US-ascii	ascii					    [ECMA]
+  UCS-2		ucs2, iso-10646-1	             [IANA, et al]
+  UCS-2l
+  UTF-8		utf8					 [RFC2279]
+  ----------------------------------------------------------------
 
 =head2 Encode::Byte
 
@@ -50,30 +50,35 @@ The following encodings are based single-byte encoding implemented as
 extended ASCII.  For most cases it uses \x80-\xff (upper half) to map
 non-ASCII characters.
 
-  -----------------------
+  ----------------------------------------------------------------
+  # ISO 8859 series
   (iso-8859-1	is in built-in)
-  iso-8859-2	latin2
-  iso-8859-3	latin3
-  iso-8859-4	latin4
-  iso-8859-5
-  iso-8859-6
-  iso-8859-7
-  iso-8859-8
-  iso-8859-9	latin5
-  iso-8859-10	latin6
+  iso-8859-2	latin2					     [ISO]
+  iso-8859-3	latin3					     [ISO]
+  iso-8859-4	latin4					     [ISO]
+  iso-8859-5						     [ISO]
+  iso-8859-6						     [ISO]
+  iso-8859-7						     [ISO]
+  iso-8859-8						     [ISO]
+  iso-8859-9	latin5					     [ISO]
+  iso-8859-10	latin6					     [ISO]
   iso-8859-11
   (iso-8859-12 is nonexistent)
-  iso-8859-13   latin7
-  iso-8859-14	latin8
-  iso-8859-15	latin9
-  iso-8859-16	latin10
+  iso-8859-13   latin7					     [ISO]
+  iso-8859-14	latin8					     [ISO]
+  iso-8859-15	latin9					     [ISO]
+  iso-8859-16	latin10					     [ISO]
 
-  koi8-f
-  koi8-r
-  koi8-u
+  # Cyrillic
+  koi8-f					
+  koi8-r						 [RFC1489]
+  koi8-u						 [RFC2319]
 
-  viscii	# ASCII + vietnamese
-
+  # Vietnamese
+  viscii
+  
+  # all cp* are also available as ibm-*, ms-*, and windows-*
+  # also see L<http://msdn.microsoft.com/workshop/author/dhtml/reference/charsets/charset4.asp>
   cp1250	WinLatin2
   cp1251	WinCyrillic
   cp1252	WinLatin1
@@ -83,24 +88,26 @@ non-ASCII characters.
   cp1256	WinArabic
   cp1257	WinBaltic
   cp1258	WinVietnamese
-  # all cp* are also available as ibm-* and ms-*
 
-  maccentraleuropean  
-  maccroatian
-  macroman
-  maccyrillic
-  macromanian
-  macsami
-  macgreek 
-  macthai
-  macicelandic    
-  macturkish
-  macukraine
+  # Macintosh
+  # Also see L<http://developer.apple.com/technotes/tn/tn1150.html>
+  MacCentralEurRoman
+  MacCroatian
+  MacRoman
+  MacCyrillic
+  MacRomanian
+  MacSami
+  MacGreek 
+  MacThai
+  MacIcelandic    
+  MacTurkish
+  MacUkrainian
 
+  # More vendor encodings
   nextstep
   gsm0338	# used in GSM handsets
-  roman8	# what is this?
-  -----------------------
+  hp-roman8
+  ----------------------------------------------------------------
 
 =head2 The CJK: Chinese, Japanese, Korean (Multibyte)
 
@@ -113,53 +120,55 @@ respective document pages.
 
 =item Encode::CN -- Continental China
 
-  -----------------------
+  ----------------------------------------------------------------
   cp936      gbk		    
-  euc-cn
-  gb12345
-  gb2312
+  euc-cn     gb2312
+  gb12345-raw
+  gb2312-raw
   hz
   iso-ir-165
-  -----------------------
+  ----------------------------------------------------------------
 
 =item Encode::JP -- Japan
 
-  -----------------------
+  ----------------------------------------------------------------
   7bit-jis	  jis
-  cp932
+  cp932		  ms_Kanji
   euc-jp	  ujis
-  iso-2022-jp
-  iso-2022-jp-1
-  macjapan
+  iso-2022-jp						 [RFC1468]
+  iso-2022-jp-1						 [RFC2237]
+  macJapan
   shiftjis	  Shift_JIS, sjis
-  -----------------------
+  ----------------------------------------------------------------
 
 =item Encode::KR -- Korea
 
-  -----------------------
+  ----------------------------------------------------------------
   euc-kr
-  ksc5601
-  cp949
-  -----------------------
+  cp949		ks_c_5601-1987 x-windows-949 uhc
+  iso-2022-kr					         [RFC1557]
+  johab
+  ksc5601-raw
+  ----------------------------------------------------------------
 
 =item Encode::TW -- Taiwan
 
-  -----------------------
+  ----------------------------------------------------------------
   big5
   big5-hkscs
   cp950
-  -----------------------
+  ----------------------------------------------------------------
 
 =item Encode::HanExtra -- More Chinese via CPAN
 
 Due to size concerns, additional Chinese encodings below are
 distributed separately on CPAN, under the name Encode::HanExtra.
 
-  -----------------------
+  ----------------------------------------------------------------
   gb18030
   euc-tw
   big5plus
-  -----------------------
+  ----------------------------------------------------------------
 
 =back
 
@@ -171,21 +180,83 @@ distributed separately on CPAN, under the name Encode::HanExtra.
 
 See perlebcdic for details.
 
-  -----------------------
+  ----------------------------------------------------------------
   cp1047
   cp37
   posix-bc
-  -----------------------
+  ----------------------------------------------------------------
 
 =item Encode::Symbols
 
 For symbols  and dingbats.
 
-  -----------------------
+  ----------------------------------------------------------------
   symbol
   dingbats
-  macdingbats
-  -----------------------
+  macDingbats
+  ----------------------------------------------------------------
+
+=back
+
+=head1 Unsupported encodings
+
+The following are not supported as yet.  Some because they are rarely
+usede, some because of technical difficulty.  They may be supported by
+external modules via CPAN in future, however.
+
+=over 4
+
+=item   ISO-2022-JP-2 [RFC1554]
+
+Not very popular yet.  Needs Unicode Database or equivalent to
+implement encode() (Because it includes JIS X 0208/0212, KSC5601, and
+GB2312 sumulteniously, which code points in unicode overlap.  So you
+need to lookup the database to determine what character set a given
+Unicode character should belong). 
+
+=item   ISO-2022-CN [RFC1922]
+
+Not very popular.  Needs CNS 11643-1 and 2 which are not available in
+this module.  CNS 11643 is supported (via euc-tw) in
+Encode::HanExtra.  Autrijus may add support for this encoding in his
+module in future 
+
+=item various UP-UX encodings
+
+The following are unsoported due to the lack of mapping data.
+  
+  '8'  - arabic8, greek8, hebrew8, kana8, thai8, and turkish8
+  '15' - japanese15, korean15, and  roi15
+
+=item Cyrillic encoding ISO-IR-111
+
+Anton doubts its usefulness.
+
+=item ISO-8859-8-1 [Hebrew]
+
+None of the Encode team knows Hebrew enough.  Contribution welcome.
+
+=item Thai encoding TCVN
+
+Ditto.
+
+=item Vietnamese encodings VPS
+
+Ditto.
+
+=item various Mac encodings
+
+The following are unsoported due to the lack of mapping data. "Mac"
+that prepends the encoding names are omitted.
+
+ Arabic, Armenian, Bengali, Burmese
+ ChineseSimp, ChineseTrad, Devanagari, Ethiopic, ExtArabic
+ Farsi, Georgian, Gujarati, Gurmukhi, Hebrew
+ Kannada, Khmer, Korean, Laotian, Malayalam, Mongolian
+ Oriya Sinhalese Symbol Tamil Telugu Tibetan Vietnamese
+
+The rest of which already available are based upon the vendor mapping
+available at L<http://www.unicode.org/>
 
 =back
 
@@ -195,19 +266,36 @@ Character encoding (or just "encoding") and Character Set (or just
 "charset") are often used interchangeably but they are different
 concepts.
 
-Charset determines which characters to be included in a given text.
+=over 2
 
-Encoding actually maps charset(s) to stream of bits.
+=item Character I<Set> (I<charset> for short)
 
-Note a given encoding may contain multiple charsets and complex CJK 
-encodings are usually implemented that way.
+Is a collection of characters in which each character is distinguished
+with unique ID (in most cases, ID is number). 
 
-For instance, euc-jp contains ASCII, JIS X 0201-1978 (Hankaku Kana),
-JIS X 0208-1997 (ZenkakuKana and Kanji) and JIS X 0212-1990 (Extended
-Kanji) in a single encoding.
+=item Character I<Encoding>
+
+Is a way to represent character set(s) in a stream of bits.
+
+=back
+
+A character encoding may contain a single character set
+(i.e. US-ascii) or multiple character sets (i.e. EUC-JP;
+US-ascii, JIS X 0201 Kana, JIS X 0208 and JIS X 0212).  
+
+A character encoding may also encode character set as-is (also called
+a I<raw> encoding.  i.e. US-ascii) or processed (i.e. EUC-JP, US-ascii is
+as-is, JIS X 0201 is prepended  with \x8E, JIS X 0208 is added by
+0x8080, and JIS X 0212 is added by 0x8080 then prepended with \x8F).
 
 As the name suggests, the Encode module supports encodings, not
 individual charsets.
+
+However, the word I<charset> is casually used even in Internet
+Assigned Number Authority to actually mean I<encoding>.  Encode tries
+to soothe this misconception via aliases.  For instance,
+C<gb2312> is aliased to C<euc-cn>, while "raw" encoded version is
+available as C<gb2312-raw>.
 
 =head1 Encoding Classification (by Anton Tagunov and Dan Kogai)
 
@@ -216,36 +304,46 @@ applicability for information exchange over the Internet and to
 choose the most suitable aliases to name them in the context of 
 such communication.
 
+=over 2
+
+=item * 
+
+To (en|de) code Encodings marked as C<*>, You need C<Encode::HanExtra>
+,available from CPAN.
+
+=back
+
 Encoding names
 
-  US-ASCII    UTF-8       
-  ISO-8859-*  KOI8-R
+  US-ASCII    UTF-8     ISO-8859-*  KOI8-R
   Shift_JIS   EUC-JP  ISO-2022-JP ISO-2022-JP-1
-  EUC-KR 
-  Big5
+  EUC-KR      Big5
 
-are L<http://www.iana.org/assignments/character-sets>-registered as
-preferred MIME names and may probably be used over the Internet.
+are registered to IANA as preferred MIME names and may probably be used over the Internet.
 
 C<Shift_JIS> is no longer Microsft proprietary since it has been
-officialized by JIS X 0208-1997. It is probably the most wide
-spread encoding for Japanese on the Internet.
+officialized by JIS X 0208-1997.
 
   EUC-CN
 
 has not been registered with IANA (as of march 2002) but
-seems to be supported by major web browsers. (IANA has registered
-this encoding as C<GB2312>, but C<gb2312> currently has a different
-meaning to the C<Encode> module. It will probably become alias to 
-C<EUC-CN> in the future; until then it is safer to avoid using 
-C<gb2312> as encoding name within Perl). 
+seems to be supported by major web browsers. In Encode, GB2312
+is aliased to EUC-CN, with "uncooked" version of GB2312 canonicalized
+as gb2312-raw.  See L<Encode::CN> for details.
+
+  KS_C_5601-1987
+
+has been registered to IANA but when they are used, they are
+EUC-coded.  Internet community in Korea is not happy with this.
+so C<KS_C_5601-1987> is aliased to C<cp949>, an enhanced version
+of C<euc-kr>, with ksc5601-raw for "uncooked".
 
   UTF-16 
   KOI8-U        (http://www.faqs.org/rfcs/rfc2319.html)
 
 are IANA-registered (C<UTF-16> even as a preferred MIME name)
 but probably should be avoided as encoding for web pages due to 
-lack of browser support.
+the lack of browser supports.
 
   ISO-IR-165    (http://www.faqs.org/rfcs/rfc1345.html)
   GBK
@@ -259,39 +357,39 @@ The names under which they are listed here are probably the
 most widely-known names for these encodings and are recommended
 names.
 
-
-=for comment this used to be listed as supported but
-
-do not work @15457 when it's clear they will be uncommented 
-or deleted - Anton
-ISO-2022      (http://www.ecma.ch/ecma1/STAND/ECMA-035.HTM)
-CNS 11643     (only plains 1 and 2 available)
-
   BIG5PLUS (*)
 
-is a bit proprietary name. C<(*)>-marked encodings belong to
-C<Encode::HanExtra> available from CPAN.
+is a bit proprietary name. 
 
-You may probably get some info on CJK encodings at
+=head1 Bookmarks
 
-brief description for most of the mentioned CJK encodings
-L<http://www.debian.org.ru/doc/manuals/intro-i18n/ch-codes.html>
+=over 2
 
-several years old, but still useful
+=item Assigned Charset Names by IANA
+
+L<http://www.iana.org/assignments/character-sets>
+
+Most of the C<canonical names> in Encode derive from this list
+so you can directly apply the string you have extracted from MIME
+header of mails and we pages.
+
+=item CJK.inf
+
 L<http://www.oreilly.com/people/authors/lunde/cjk_inf.html>
 
-and some in-depth reading for the heroes :-)
-L<http://www.ecma.ch/ecma1/STAND/ECMA-035.HTM> (eq C<ISO-2022>)
+Somewhat obsolete (last update in 1996), but still useful.  Also try
 
-gives brief info on C<EUC-CN>, C<GBK> and mostly on C<GB 18030>
-F<ftp://ftp.oreilly.com/pub/examples/nutshell/cjkv/pdf/GB18030_Summary.pdf>
+L<ftp://ftp.oreilly.com/pub/examples/nutshell/cjkv/pdf/GB18030_Summary.pdf>
 
-The nature of information in this section is most fragile and
-error-prone; I<probably> is the most popular adverb :)
-Please feel free to send your comments, disagreements and 
-additions to L<...>. (Note however,
-that the mission of this document is to cover the
-C<Encode>-supported encodings only.
+You will find brief info on C<EUC-CN>, C<GBK> and mostly on C<GB 18030>
+
+=item EMCA-035 (eq C<ISO-2022>)
+
+L<http://www.ecma.ch/ecma1/STAND/ECMA-035.HTM> 
+
+The very dspecification of ISO-2022 is available from the link above.
+
+=back
 
 =head1 See Also
 
@@ -301,3 +399,8 @@ L<Encode::CN>, L<Encode::JP>, L<Encode::KR>, L<Encode::TW>,
 L<Encode::EBCDIC>, L<Encode::Symbol>
 
 =cut
+
+I could not find this page because the hostname doesn't resolve!
+
+ Brief description for most of the mentioned CJK encodings
+L<http://www.debian.org.ru/doc/manuals/intro-i18n/ch-codes.html>

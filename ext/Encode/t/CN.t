@@ -59,7 +59,7 @@ run_tests('Simplified Chinese only', {
 '首出庶物，万国咸宁。',
     ),
 
-    'gb2312'	=> join('',
+    'gb2312-raw'	=> join('',
 '!6RW>-!75ZR;XT',
 'ehT;#:',
 '4sTUG,T*#,MrNoWJJ<#,',
@@ -118,7 +118,7 @@ run_tests('Simplified Chinese + ASCII', {
 
 run_tests('Traditional Chinese', {
     'utf',	=> 20094.65306.20803.12289.20136.12289.21033.12289.35998,
-    'gb12345'	=> 'G,#:T*!":`!"@{!"Uj',
+    'gb12345-raw'	=> 'G,#:T*!":`!"@{!"Uj',
     'gbk'	=> '乾：元、亨、利、貞',
 });
 

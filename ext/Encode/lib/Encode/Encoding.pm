@@ -1,7 +1,7 @@
 package Encode::Encoding;
 # Base class for classes which implement encodings
 use strict;
-our $VERSION = do { my @r = (q$Revision: 0.96 $ =~ /\d+/g); sprintf "%d."."%02d" x $#r, @r };
+our $VERSION = do { my @r = (q$Revision: 1.0 $ =~ /\d+/g); sprintf "%d."."%02d" x $#r, @r };
 
 sub Define
 {
@@ -123,79 +123,13 @@ C<Encode::Encoding>.
 
 =head2 Compiled Encodings
 
-F<Encode.xs> provides a class C<Encode::XS> which provides the
-interface described above. It calls a generic octet-sequence to
-octet-sequence "engine" that is driven by tables (defined in
-F<encengine.c>). The same engine is used for both encode and
-decode. C<Encode:XS>'s C<encode> forces Perl's characters to their
-UTF-8 form and then treats them as just another multibyte
-encoding. C<Encode:XS>'s C<decode> transforms the sequence and then
-turns the UTF-8-ness flag as that is the form that the tables are
-defined to produce. For details of the engine see the comments in
-F<encengine.c>.
+For the sake of speed and efficiency, Most of the encodings are now
+supported via I<Compiled Form> that are XS modules generated from UCM
+files.   Encode provides enc2xs tool to achieve that.  Please see
+L<enc2xs> for more details.
 
-The tables are produced by the Perl script F<compile> (the name needs
-to change so we can eventually install it somewhere). F<compile> can
-currently read two formats:
+=head1 SEE ALSO
 
-=over 4
-
-=item *.enc
-
-This is a coined format used by Tcl. It is documented in
-Encode/EncodeFormat.pod.
-
-=item *.ucm
-
-This is the semi-standard format used by IBM's ICU package.
-
-=back
-
-F<compile> can write the following forms:
-
-=over 4
-
-=item *.ucm
-
-See above - the F<Encode/*.ucm> files provided with the distribution have
-been created from the original Tcl .enc files using this approach.
-
-=item *.c
-
-Produces tables as C data structures - this is used to build in encodings
-into F<Encode.so>/F<Encode.dll>.
-
-=item *.xs
-
-In theory this allows encodings to be stand-alone loadable Perl
-extensions.  The process has not yet been tested. The plan is to use
-this approach for large East Asian encodings.
-
-=back
-
-The set of encodings built-in to F<Encode.so>/F<Encode.dll> is
-determined by F<Makefile.PL>.  The current set is as follows:
-
-=over 4
-
-=item ascii and iso-8859-*
-
-That is all the common 8-bit "western" encodings.
-
-=item IBM-1047 and two other variants of EBCDIC.
-
-These are the same variants that are supported by EBCDIC Perl as
-"native" encodings.  They are included to prove "reversibility" of
-some constructs in EBCDIC Perl.
-
-=item symbol and dingbats as used by Tk on X11.
-
-(The reason Encode got started was to support Perl/Tk.)
-
-=back
-
-That set is rather ad hoc and has been driven by the needs of the
-tests rather than the needs of typical applications. It is likely
-to be rationalized.
+L<perlmod>, L<enc2xs>
 
 =cut

@@ -1,3 +1,6 @@
+#
+# $Id: ir-165.ucm,v 1.0 2002/03/28 23:26:27 dankogai Exp dankogai $
+#
 # ./compile -n iso-ir-165 -o Encode/iso-ir-165.ucm Encode/iso-ir-165.enc
 <code_set_name> "iso-ir-165"
 <mb_cur_min> 2

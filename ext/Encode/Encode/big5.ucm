@@ -1,3 +1,6 @@
+#
+# $Id: big5.ucm,v 1.0 2002/03/28 23:26:25 dankogai Exp dankogai $
+#
 # ./compile -n big5 -o Encode/big5.ucm Encode/big5.enc
 <code_set_name> "big5"
 <mb_cur_min> 1

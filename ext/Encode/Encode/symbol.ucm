@@ -1,3 +1,6 @@
+#
+# $Id: symbol.ucm,v 1.0 2002/03/28 23:26:28 dankogai Exp dankogai $
+#
 # compile -n symbol -o Encode/symbol.ucm Encode/symbol.enc
 <code_set_name> "symbol"
 <mb_cur_min> 1

@@ -20,6 +20,13 @@ To install this module type the following:
    make test
    make install
 
+To install scripts under bin/ directories also,
+
+   perl Makefile.PL USE_SCRIPTS
+   make
+   make test
+   make install
+
 DEPENDENCIES
 
 This module requires perl5.7.2 or later.

@@ -1,4 +1,7 @@
-# Written $Id$
+#
+# $Id: koi8-u.ucm,v 1.0 2002/03/28 23:26:27 dankogai Exp dankogai $
+#
+# Written $Id: koi8-u.ucm,v 1.0 2002/03/28 23:26:27 dankogai Exp dankogai $
 # ./compile -n koi8-u -o Encode/koi8-u.ucm Encode/koi8-u.enc
 <code_set_name> "koi8-u"
 <mb_cur_min> 1

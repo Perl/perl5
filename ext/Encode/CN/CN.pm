@@ -4,7 +4,7 @@ BEGIN {
 	die "Encode::CN not supported on EBCDIC\n";
     }
 }
-our $VERSION = do { my @r = (q$Revision: 0.99 $ =~ /\d+/g); sprintf "%d."."%02d" x $#r, @r };
+our $VERSION = do { my @r = (q$Revision: 1.0 $ =~ /\d+/g); sprintf "%d."."%02d" x $#r, @r };
 
 use Encode;
 use Encode::CN::HZ;
@@ -12,13 +12,12 @@ use XSLoader;
 XSLoader::load('Encode::CN',$VERSION);
 
 # Relocated from Encode.pm
-# CP936 doesn't have vendor-addon for GBK, so they're identical.
-Encode::define_alias( qr/^gbk$/i => '"cp936"');
 
-use Encode::CN::2022_CN;
+# use Encode::CN::2022_CN;
 
 1;
 __END__
+
 =head1 NAME
 
 Encode::CN - China-based Chinese Encodings
@@ -36,10 +35,11 @@ Encodings supported are as follows.
 
   Canonical   Alias		Description
   --------------------------------------------------------------------
-  euc-cn      /euc.*cn$/i	EUC (Extended Unix Character)
-	      /cn.*euc$/i
-  gb2312			The raw (low-bit) GB2312 character map
-  gb12345			Traditional chinese counterpart to 
+  euc-cn      /\beuc.*cn$/i	EUC (Extended Unix Character)
+	      /\bcn.*euc$/i
+              /\bGB[-_ ]?2312(?:\D.*$|$)/i (see below)
+  gb2312-raw			The raw (low-bit) GB2312 character map
+  gb12345-raw			Traditional chinese counterpart to 
 				GB2312 (raw)
   iso-ir-165			GB2312 + GB6345 + GB8565 + additions
   cp936				Code Page 936, also known as GBK 
@@ -57,6 +57,10 @@ also contains extra Taiwan-based encodings.
 
 =head1 BUGS
 
+When you see C<charset=gb2312> on mails and web pages, they really
+mean "euc-cn" encodings.  To fix that, gb2312 is aliased to euc-cn.  Use
+gb2312-raw when you really mean it.
+
 ASCII part (0x00-0x7f) is preserved for all encodings, even though it
 conflicts with mappings by the Unicode Consortium.  See
 
@@ -66,6 +70,6 @@ to find why it is implemented that way.
 
 =head1 SEE ALSO
 
-L<Encode>
+L<Encode>,L<Encode::CJKguide>
 
 =cut

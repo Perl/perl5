@@ -1,7 +1,7 @@
 package Encode::Alias;
 use strict;
 use Encode;
-our $VERSION = do { my @r = (q$Revision: 0.98 $ =~ /\d+/g); sprintf "%d."."%02d" x $#r, @r };
+our $VERSION = do { my @r = (q$Revision: 1.0 $ =~ /\d+/g); sprintf "%d."."%02d" x $#r, @r };
 our $DEBUG = 0;
 require Exporter;
 
@@ -123,31 +123,33 @@ sub undef_aliases{
 sub init_aliases
 {
     undef_aliases();
-# Allow variants of iso-8859-1 etc.
-    define_alias( qr/^iso[-_]?(\d+)[-_](\d+)$/i => '"iso-$1-$2"' );
+    # 'C' => 'US-ascii' so you can feed default locale directly.
+    define_alias('C' => 'US-ascii');
+    # Allow variants of iso-8859-1 etc.
+    define_alias( qr/\biso[-_]?(\d+)[-_](\d+)$/i => '"iso-$1-$2"' );
 
-# At least HP-UX has these.
-    define_alias( qr/^iso8859(\d+)$/i => '"iso-8859-$1"' );
+    # At least HP-UX has these.
+    define_alias( qr/\biso8859(\d+)$/i => '"iso-8859-$1"' );
 
-# More HP stuff.
-    define_alias( qr/^(?:hp-)?(arabic|greek|hebrew|kana|roman|thai|turkish)8$/i => '"${1}8"' );
+    # More HP stuff.
+    define_alias( qr/\b(?:hp-)?(arabic|greek|hebrew|kana|roman|thai|turkish)8$/i => '"${1}8"' );
 
-# The Official name of ASCII.
-    define_alias( qr/^ANSI[-_]?X3\.4[-_]?1968$/i => '"ascii"' );
+    # The Official name of ASCII.
+    define_alias( qr/\bANSI[-_]?X3\.4[-_]?1968$/i => '"ascii"' );
 
-# This is a font issue, not an encoding issue.
-# (The currency symbol of the Latin 1 upper half
-#  has been redefined as the euro symbol.)
+    # This is a font issue, not an encoding issue.
+    # (The currency symbol of the Latin 1 upper half
+    #  has been redefined as the euro symbol.)
     define_alias( qr/^(.+)\@euro$/i => '"$1"' );
 
-    define_alias( qr/^(?:iso[-_]?)?latin[-_]?(\d+)$/i 
+    define_alias( qr/\b(?:iso[-_]?)?latin[-_]?(\d+)$/i 
 		  => '"iso-8859-$Encode::Alias::Latin2iso[$1]"' );
 
-    define_alias( qr/win(latin[12]|cyrillic|baltic|greek|turkish|
+    define_alias( qr/\bwin(latin[12]|cyrillic|baltic|greek|turkish|
 			 hebrew|arabic|baltic|vietnamese)$/ix => 
 		  '"cp" . $Encode::Alias::Winlatin2cp{lc($1)}' );
 
-# Common names for non-latin prefered MIME names
+    # Common names for non-latin prefered MIME names
     define_alias( 'ascii'    => 'US-ascii',
 		  'cyrillic' => 'iso-8859-5',
 		  'arabic'   => 'iso-8859-6',
@@ -157,42 +159,51 @@ sub init_aliases
 		  'tis620'   => 'iso-8859-11',
 		  );
 
-# At least AIX has IBM-NNN (surprisingly...) instead of cpNNN.
-# And Microsoft has their own naming (again, surprisingly).
-    define_alias( qr/^(?:ibm|ms)[-_]?(\d\d\d\d?)$/i => '"cp$1"');
+    # At least AIX has IBM-NNN (surprisingly...) instead of cpNNN.
+    # And Microsoft has their own naming (again, surprisingly).
+    # And windows-* is registered in IANA! 
+    define_alias( qr/\b(?:ibm|ms|windows)[-_]?(\d\d\d\d?)$/i => '"cp$1"');
 
-# Sometimes seen with a leading zero.
-    define_alias( qr/^cp037$/i => '"cp37"');
+    # Sometimes seen with a leading zero.
+    define_alias( qr/\bcp037\b/i => '"cp37"');
 
-# Ououououou.
-    define_alias( qr/^macRomanian$/i => '"macRumanian"');
+    # Ououououou.
+    define_alias( qr/\bmacRomanian$/i => '"macRumanian"');
 
 # Standardize on the dashed versions.
-    # define_alias( qr/^utf8$/i  => 'utf-8' );
-    define_alias( qr/^koi8r$/i => 'koi8-r' );
-    define_alias( qr/^koi8u$/i => 'koi8-u' );
+    # define_alias( qr/\butf8$/i  => 'utf-8' );
+    define_alias( qr/\bkoi8r$/i => 'koi8-r' );
+    define_alias( qr/\bkoi8u$/i => 'koi8-u' );
 
     unless ($Encode::ON_EBCDIC){
         # for Encode::CN
-	define_alias( qr/euc.*cn$/i     => '"euc-cn"' );
-	define_alias( qr/cn.*euc/i      => '"euc-cn"' );
-	define_alias( qr/^GB[- ]?(\d+)$/i => '"gb$1"' );
-        # for Encode::JP
-	define_alias( qr/euc.*jp$/i     => '"euc-jp"' );
-	define_alias( qr/jp.*euc/i      => '"euc-jp"' );
-	define_alias( qr/ujis$/i        => '"euc-jp"' );
-	define_alias( qr/shift.*jis$/i  => '"shiftjis"' );
-	define_alias( qr/sjis$/i        => '"shiftjis"' );
-	define_alias( qr/^jis$/i        => '"7bit-jis"' );
+	define_alias( qr/\beuc.*cn$/i        => '"euc-cn"' );
+	define_alias( qr/\bcn.*euc$/i        => '"euc-cn"' );
+	# define_alias( qr/\bGB[- ]?(\d+)$/i => '"euc-cn"' )
+	# CP936 doesn't have vendor-addon for GBK, so they're identical.
+	define_alias( qr/^gbk$/i => '"cp936"');
+	# This fixes gb2312 vs. euc-cn confusion, practically
+	define_alias( qr/\bGB[-_ ]?2312(?:\D.*$|$)/i => '"euc-cn"' );
+	# for Encode::JP
+	define_alias( qr/\bjis$/i            => '"7bit-jis"' );
+	define_alias( qr/\beuc.*jp$/i        => '"euc-jp"' );
+	define_alias( qr/\bjp.*euc$/i        => '"euc-jp"' );
+	define_alias( qr/\bujis$/i           => '"euc-jp"' );
+	define_alias( qr/\bshift.*jis$/i     => '"shiftjis"' );
+	define_alias( qr/\bsjis$/i           => '"shiftjis"' );
         # for Encode::KR
-	define_alias( qr/euc.*kr$/i     => '"euc-kr"' );
-	define_alias( qr/kr.*euc/i      => '"euc-kr"' );
+	define_alias( qr/\beuc.*kr$/i        => '"euc-kr"' );
+	define_alias( qr/\bkr.*euc$/i        => '"euc-kr"' );
+	# This fixes ksc5601 vs. euc-kr confusion, practically
+        define_alias( qr/(?:x-)?uhc$/i            => '"cp949"' );
+        define_alias( qr/(?:x-)?windows-949$/i    => '"cp949"' );
+        define_alias( qr/\bks_c_5601-1987$/i      => '"cp949"' );
         # for Encode::TW
-	define_alias( qr/big-?5$/i		=> '"big5"' );
-	define_alias( qr/big5-hk(?:scs)?/i	=> '"big5-hkscs"' );
+	define_alias( qr/\bbig-?5$/i		  => '"big5"' );
+	define_alias( qr/\bbig5-hk(?:scs)?$/i	  => '"big5-hkscs"' );
     }
 
-# At last, Map white space and _ to '-'
+    # At last, Map white space and _ to '-'
     define_alias( qr/^(\S+)[\s_]+(.*)$/i => '"$1-$2"' );
 }
 
@@ -205,7 +216,6 @@ __END__
 # TODO: Armenian encoding ARMSCII-8
 # TODO: Hebrew encoding ISO-8859-8-1
 # TODO: Thai encoding TCVN
-# TODO: Korean encoding Johab
 # TODO: Vietnamese encodings VPS
 # TODO: Mac Asian+African encodings: Arabic Armenian Bengali Burmese
 #       ChineseSimp ChineseTrad Devanagari Ethiopic ExtArabic

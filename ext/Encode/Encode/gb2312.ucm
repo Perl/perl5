@@ -1,5 +1,12 @@
+#
+# $Id: gb2312.ucm,v 1.0 2002/03/28 23:26:26 dankogai Exp dankogai $
+#
 # ./compile -n gb2312 -o Encode/gb2312.ucm Encode/gb2312.enc
-<code_set_name> "gb2312"
+#
+# Uncooked (without MSB set) version of GB 2312.
+# Cooked version is actually euc-cn -- dankogai
+#
+<code_set_name> "gb2312-raw"
 <mb_cur_min> 2
 <mb_cur_max> 2
 <subchar> \x22\x3F

@@ -1,5 +1,8 @@
+#
+# $Id: macCyrillic.ucm,v 1.0 2002/03/28 23:26:27 dankogai Exp dankogai $
+#
 # ./compile -n macCyrillic -o Encode/macCyrillic.ucm Encode/macCyrillic.enc
-<code_set_name> "maccyrillic"
+<code_set_name> "MacCyrillic"
 <mb_cur_min> 1
 <mb_cur_max> 1
 <subchar> \x3F

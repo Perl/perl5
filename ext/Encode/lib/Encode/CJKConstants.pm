@@ -1,13 +1,13 @@
 #
-# $Id: CJKConstants.pm,v 0.99 2002/03/25 19:29:22 dankogai Exp dankogai $
+# $Id: CJKConstants.pm,v 1.0 2002/03/28 23:26:28 dankogai Exp dankogai $
 #
 
 package Encode::CJKConstants;
 
 use strict;
 
-our $RCSID = q$Id: CJKConstants.pm,v 0.99 2002/03/25 19:29:22 dankogai Exp dankogai $;
-our $VERSION = do { my @r = (q$Revision: 0.99 $ =~ /\d+/g); sprintf "%d."."%02d" x $#r, @r };
+our $RCSID = q$Id: CJKConstants.pm,v 1.0 2002/03/28 23:26:28 dankogai Exp dankogai $;
+our $VERSION = do { my @r = (q$Revision: 1.0 $ =~ /\d+/g); sprintf "%d."."%02d" x $#r, @r };
 
 use Carp;
 
@@ -50,6 +50,7 @@ our %RE =
      JIS_0212  => "\e" . '\$\(D',
      ISO_ASC   => "\e" . '\([BJ]',     
      JIS_KANA  => "\e" . '\(I',
+     '2022_KR' => "\e" . '\$\)C',
      SJIS_C    => '[\x81-\x9f\xe0-\xfc][\x40-\x7e\x80-\xfc]',
      SJIS_KANA => '[\xa1-\xdf]',
      UTF8      => '[\xc0-\xdf][\x80-\xbf]|[\xe0-\xef][\x80-\xbf][\x80-\xbf]'
@@ -57,3 +58,8 @@ our %RE =
 
 1;
 
+=head1 NAME
+
+  Encode::CJKConstants.pm -- Internally used by Encode::??::ISO_2022_*
+
+=cut

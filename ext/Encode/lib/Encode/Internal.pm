@@ -1,6 +1,6 @@
 package Encode::Internal;
 use strict;
-our $VERSION = do { my @r = (q$Revision: 0.96 $ =~ /\d+/g); sprintf "%d."."%02d" x $#r, @r };
+our $VERSION = do { my @r = (q$Revision: 1.0 $ =~ /\d+/g); sprintf "%d."."%02d" x $#r, @r };
 
 use base 'Encode::Encoding';
 
@@ -24,3 +24,9 @@ sub decode
 *encode = \&decode;
 1;
 __END__
+
+=head1 NAME
+
+Encode::Internal -- for internal use only
+
+=cut

@@ -1,13 +1,12 @@
 package Encode::CN::HZ;
 
 use strict;
-no warnings 'redefine'; # to quell the "use Encode" below
 
 use vars qw($VERSION);
-$VERSION = do { my @r = (q$Revision: 0.92 $ =~ /\d+/g); sprintf "%d."."%02d" x $#r, @r };
+$VERSION = do { my @r = (q$Revision: 1.0 $ =~ /\d+/g); sprintf "%d."."%02d" x $#r, @r };
 
+use Encode ();
 use Encode::CN;
-use Encode qw|encode decode|;
 use base 'Encode::Encoding';
 
 # HZ is but escaped GB, so we implement it with the
@@ -20,7 +19,7 @@ $obj->Define($canon);
 sub decode
 {
     my ($obj,$str,$chk) = @_;
-    my $gb = Encode::find_encoding('gb2312');
+    my $gb = Encode::find_encoding('gb2312-raw');
 
     $str =~ s{~			# starting tilde
 	(?:
@@ -44,7 +43,7 @@ sub decode
 	    :
 	(defined $2)	? $gb->decode($2, $chk)	# decode the characters
 	    :
-	''					# '' on ~\n and invalid escape
+	''					# ~\n and invalid escape = ''
     }egx;
 
     return $str;
@@ -54,41 +53,48 @@ sub encode
 {
     my ($obj,$str,$chk) = @_;
     my ($out, $in_gb);
-    my $gb = Encode::find_encoding('gb2312');
+    my $gb = Encode::find_encoding('gb2312-raw');
 
     $str =~ s/~/~~/g;
 
-    # XXX: Since CHECK and partial decoding  has not been implemented yet,
+    # XXX: Since CHECK and partial decoding has not been implemented yet,
     #      we'll use a very crude way to test for GB2312ness.
 
     for my $index (0 .. length($str) - 1) {
 	no warnings 'utf8';
 
 	my $char = substr($str, $index, 1);
-	my $try  = $gb->encode($char);	# try encode this char
+	my $try  = $gb->encode($char);	# try to encode this character
 
-	if (defined($try)) {		# is a GB character
+	if (defined($try)) {		# is a GB character:
 	    if ($in_gb) {
-		$out .= $try;		# in GB mode - just append it
+		$out .= $try;		#  in GB mode - just append it
 	    }
 	    else {
-		$out .= "~{$try";	# enter GB mode, then append it
-		$in_gb = 1;
+		$in_gb = 1;		#  enter GB mode, then append it
+		$out .= "~{$try";
 	    }
-	}
+	}				# not a GB character:
 	elsif ($in_gb) {
-	    $out .= "~}$char";		# leave GB mode, then append it
-	    $in_gb = 0;
+	    $in_gb = 0;			#  leave GB mode, then append it
+	    $out .= "~}$char";
 	}
 	else {
-	    $out .= $char;		# not in GB mode - just append it
+	    $out .= $char;		#  not in GB mode - just append it
 	}
     }
 
-    $out .= '~}' if $in_gb;		# add closing brace as needed
+    $out .= '~}' if $in_gb;		# add closing brace if needed
 
     return $out;
 }
 
 1;
 __END__
+
+
+=head1 NAME
+
+Encode::CN::HZ -- internally used by Encode::CN
+
+=cut

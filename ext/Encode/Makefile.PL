@@ -9,8 +9,18 @@ my %tables =
 	       ]
      );
 
+my @exe_files = ();
+my @more_exe_files = qw(bin/enc2xs bin/piconv);
+
+for my $arg (@ARGV){
+    if ($arg eq "USE_SCRIPTS"){
+	push @exe_files, @more_exe_files;
+    }
+}
+
 WriteMakefile(
 	      NAME		=> "Encode",
+	      EXE_FILES         => \@exe_files,
 	      VERSION_FROM	=> 'Encode.pm',
 	      OBJECT		=> '$(O_FILES)',
 	      'dist'		=> {
@@ -19,6 +29,7 @@ WriteMakefile(
 		  DIST_DEFAULT => 'all tardist',
 	      },
 	      MAN3PODS	=> {},
+	      INC       => "-I./Encode"
 	      );
 
 package MY;
@@ -60,7 +71,7 @@ sub postamble
 {
     my $self = shift;
     my $dir  = $self->catdir($self->curdir,'Encode');
-    my $str  = "# Encode\$(OBJ_EXT) depends on .h and _def.h files not .c files - but all written by compile\n";
+    my $str  = "# Encode\$(OBJ_EXT) depends on .h and _def.h files not .c files - but all written by enc2xs\n";
     $str  .= 'Encode$(OBJ_EXT) :';
     foreach my $table (keys %tables)
     {
@@ -72,7 +83,8 @@ sub postamble
 	my $numlines = 1;
 	my $lengthsofar = length($str);
 	my $continuator = '';
-	$str .= "$table.c : compile Makefile.PL";
+	my $enc2xs = $self->catfile('bin', 'enc2xs');
+	$str .= "$table.c : $enc2xs Makefile.PL";
 	foreach my $file (@{$tables{$table}})
 	{
 	    $str .= $continuator.' '.$self->catfile($dir,$file);
@@ -85,8 +97,8 @@ sub postamble
 	    }
 	}
         $str .= $^O eq 'VMS' # In VMS quote to preserve case
-            ? qq{\n\t\$(PERL) compile -"Q" -"O" -o \$\@ -f $table.fnm\n\n}
-            : qq{\n\t\$(PERL) compile -Q -O -o \$\@ -f $table.fnm\n\n};
+            ? qq{\n\t\$(PERL) $enc2xs -"Q" -"O" -o \$\@ -f $table.fnm\n\n}
+            : qq{\n\t\$(PERL) $enc2xs -Q -O -o \$\@ -f $table.fnm\n\n};
 	open (FILELIST, ">$table.fnm")
 	    || die "Could not open $table.fnm: $!";
 	foreach my $file (@{$tables{$table}})

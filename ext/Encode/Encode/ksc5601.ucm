@@ -1,5 +1,8 @@
+#
+# $Id: ksc5601.ucm,v 1.0 2002/03/28 23:26:27 dankogai Exp dankogai $
+#
 # ./compile -n ksc5601 -o Encode/ksc5601.ucm Encode/ksc5601.enc
-<code_set_name> "ksc5601"
+<code_set_name> "ksc5601-raw"
 <mb_cur_min> 2
 <mb_cur_max> 2
 <subchar> \x22\x3F
@@ -168,6 +171,8 @@ CHARMAP
 <U33C2> \x22\x63 |0 # SQUARE AM
 <U33D8> \x22\x64 |0 # SQUARE PM
 <U2121> \x22\x65 |0 # TELEPHONE SIGN
+<U20AC> \x22\x66 |0 # EURO SIGN
+<U00AE> \x22\x67 |0 # REGISTERED SIGN
 <UFF01> \x23\x21 |0 # FULLWIDTH EXCLAMATION MARK
 <UFF02> \x23\x22 |0 # FULLWIDTH QUOTATION MARK
 <UFF03> \x23\x23 |0 # FULLWIDTH NUMBER SIGN
