@@ -176,6 +176,10 @@ shlist:
 $(plextract):
 	../miniperl -I../lib $@.PL
 
+find2perl: find2perl.PL
+
+s2p: s2p.PL
+
 malloc.c: ../malloc.c
 	rm -f malloc.c
 	sed <../malloc.c >malloc.c \
