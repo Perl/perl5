@@ -40,7 +40,7 @@ esac
 
 # get extension directory path, module name and depth
 pname=`echo "$extspec" | sed -e 's:^ext/::' -e 's:/[^/]*$::'`
-mname=`echo "$pname"   | sed -e 's!/!::!'`
+mname=`echo "$pname"   | sed -e 's!/!::!g'`
 depth=`echo "$pname"   | sed -e 's![^/][^/]*!..!g'`
 make=${altmake-make}
 makeargs=''

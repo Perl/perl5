@@ -31,7 +31,8 @@ esac
 dynamic_list=' '
 for f in $dynamic_ext; do
     : the dependency named here will never exist
-    dynamic_list="$dynamic_list $f.$dlext"
+	base=`echo "$f" | sed 's/.*\///'`
+    dynamic_list="$dynamic_list ext/$f/$base.$dlext"
 done
 
 static_list=' '

@@ -1,6 +1,6 @@
 package ExtUtils::MakeMaker;
 
-$Version = 3.6;		# Last edited 19th Dec 1994 by Tim Bunce
+$Version = 3.7;		# Last edited 19th Dec 1994 by Tim Bunce
 
 use Config;
 use Carp;
@@ -283,7 +283,7 @@ $Attrib_Help = <<'END';
 
  PERL_LIB:	Directory containing the Perl library to use.
  PERL_SRC:	Directory containing the Perl source code
-		(use of this should be avoided, it may be removed later)
+		(use of this should be avoided, it may be undefined)
 
  INC:		Include file dirs eg: '-I/usr/5include -I/path/to/inc'
  DEFINE:	something like "-DHAVE_UNISTD_H"
@@ -557,7 +557,7 @@ sub initialize {
     # Perl Macro:    With source    No source
     # PERL_LIB       ../../lib      /usr/local/lib/perl5
     # PERL_ARCHLIB   ../../lib      /usr/local/lib/perl5/sun4-sunos
-    # PERL_SRC       ../..          (undecided)
+    # PERL_SRC       ../..          (undefined)
 
     # INST Macro:    Locally        Publically
     # INST_LIB       ../../lib      /usr/local/lib/perl5
@@ -572,14 +572,17 @@ sub initialize {
 	}
     }
     unless ($att{PERL_SRC}){
-	# Later versions will not die here.
-	die "Unable to locate perl source. Try setting PERL_SRC.\n";
+	warn "Unable to locate perl source.\n";
 	# we should also consider $ENV{PERL5LIB} here
 	$att{PERL_LIB}     = $Config{'privlib'} unless $att{PERL_LIB};
 	$att{PERL_ARCHLIB} = $Config{'archlib'} unless $att{PERL_ARCHLIB};
+	$att{PERL_INC}     = "$att{PERL_ARCHLIB}/CORE"; # wild guess for now
+	die "Try setting PERL_SRC in Makefile.PL or on command line.\n"
+		unless (-f "$att{PERL_INC}/perl.h");
     } else {
 	$att{PERL_LIB}     = "$att{PERL_SRC}/lib" unless $att{PERL_LIB};
 	$att{PERL_ARCHLIB} = $att{PERL_LIB};
+	$att{PERL_INC}     = $att{PERL_SRC};
     }
 
     # INST_LIB typically pre-set if building an extension after
@@ -730,7 +733,8 @@ sub initialize {
       $att{OBJECT} =~ s/\n+/ \\\n\t/g;
     }
     $att{BOOTDEP}  = (-f "$att{BASEEXT}_BS") ? "$att{BASEEXT}_BS" : "";
-    $att{LDTARGET} = '$(OBJECT)'    unless $att{LDTARGET};
+    $att{LD}       = ($Config{'ld'} || 'ld') unless $att{LD};
+    $att{LDTARGET} = '$(OBJECT)' unless $att{LDTARGET};
     $att{LINKTYPE} = ($Config{'usedl'}) ? 'dynamic' : 'static'
 	unless $att{LINKTYPE};
 
@@ -802,7 +806,7 @@ PERL_ARCHLIB = $att{PERL_ARCHLIB}
 # but that's a way off yet).
 PERL_SRC = $att{PERL_SRC}
 # Perl header files (will eventually be under PERL_LIB)
-PERL_INC = $att{PERL_SRC}
+PERL_INC = $att{PERL_INC}
 # Perl binaries
 PERL = $att{'PERL'}
 FULLPERL = $att{'FULLPERL'}
@@ -865,8 +869,11 @@ sub const_cccmd{
     # same manner as extliblist, e.g., do both and compare results during
     # the transition period.
   my($cc,$ccflags,$optimize,$large,$split)=@Config{qw(cc ccflags optimize large split)};
-  my($prog);
-  chop(my($old) = `cd $att{PERL_SRC}; sh $Config{'shellflags'} ./cflags $att{BASEEXT}.c`);
+  my($prog, $old);
+
+  chop($old = `cd $att{PERL_SRC}; sh $Config{'shellflags'} ./cflags $att{BASEEXT}.c`)
+	if $att{PERL_SRC};
+
   # Why is this written this way ?
   if ($prog = $Config{"$att{BASEEXT}_cflags"}) {
     my(@o)=`cc=\"$cc\"
@@ -893,7 +900,7 @@ sub const_cccmd{
   }
 
   my($new) = "$cc -c $ccflags $optimize  $large $split";
-  if ($new ne $old) {
+  if (defined($old) and $new ne $old) {
     warn "Warning (non-fatal): cflags evaluation in MakeMaker differs from shell output\n"
       ."   package: $att{NAME}\n"
       ."   old: $old\n"
@@ -901,7 +908,7 @@ sub const_cccmd{
       ."   Using 'old' set.\n"
       ."Please notify perl5-porters\@isu.edu\n";
   }
-  my($cccmd)=$old;
+  my($cccmd)=($old) ? $old : $new;
   "CCCMD = $cccmd\n";
 }
 
@@ -978,11 +985,15 @@ AUTOSPLITFILE = $(PERL) -I$(PERL_ARCHLIB) -I$(PERL_LIB) -e 'use AutoSplit;}.$asl
 
 
 sub tool_xsubpp{
-    my(@tmdeps) = ('$(PERL_SRC)/ext/typemap');
+    my($xsdir)  = '$(PERL_LIB)/ExtUtils';
+    # drop back to old location if xsubpp is not in new location yet
+    $xsdir = '$(PERL_SRC)/ext' unless (-f "$att{PERL_LIB}/ExtUtils/xsubpp");
+    my(@tmdeps) = ('$(XSUBPPDIR)/typemap');
     push(@tmdeps, "typemap") if -f "typemap";
     my(@tmargs) = map("-typemap $_", @tmdeps);
     "
-XSUBPP = \$(PERL_SRC)/ext/xsubpp
+XSUBPPDIR = $xsdir
+XSUBPP = \$(XSUBPPDIR)/xsubpp
 XSUBPPDEPS = @tmdeps
 XSUBPPARGS = @tmargs
 ";
@@ -990,9 +1001,10 @@ XSUBPPARGS = @tmargs
 
 
 sub tools_other{
-    q{
+    "
 SHELL = /bin/sh
-
+LD = $att{LD}
+".q{
 # The following is a portable way to say mkdir -p
 MKPATH = $(PERL) -wle '$$"="/"; foreach $$p (@ARGV){ my(@p); foreach(split(/\//,$$p)){ push(@p,$$_); next if -d "@p/"; print "mkdir @p"; mkdir("@p",0777)||die $$! }} exit 0;'
 };
@@ -1072,7 +1084,8 @@ BOOTSTRAP = '."$att{BASEEXT}.bs".'
 # we use touch to prevent make continually trying to remake it.
 # The DynaLoader only reads a non-empty file.
 $(BOOTSTRAP): '.$att{BOOTDEP}.' $(CONFIGDEP)
-	$(PERL) -I$(PERL_LIB) -e \'use ExtUtils::MakeMaker; &mkbootstrap("$(BSLOADLIBS)");\' INST_LIB=$(INST_LIB) PERL_SRC=$(PERL_SRC) NAME=$(NAME)
+	$(PERL) -I$(PERL_LIB) -e \'use ExtUtils::MakeMaker; &mkbootstrap("$(BSLOADLIBS)");\' \
+		INST_LIB=$(INST_LIB) INST_ARCHLIB=$(INST_ARCHLIB) PERL_SRC=$(PERL_SRC) NAME=$(NAME)
 	@touch $(BOOTSTRAP)
 
 $(INST_BOOT): $(BOOTSTRAP)
@@ -1092,7 +1105,7 @@ OTHERLDFLAGS = '.$otherldflags.'
 $(INST_DYNAMIC): $(OBJECT) $(MYEXTLIB) $(BOOTSTRAP)
 	@$(MKPATH) $(INST_AUTODIR)
 	$(ARMAYBE) cr $(BASEEXT).a $(OBJECT) 
-	ld $(LDDLFLAGS) -o $@ $(LDTARGET) $(OTHERLDFLAGS) $(MYEXTLIB) $(LDLOADLIBS)
+	$(LD) $(LDDLFLAGS) -o $@ $(LDTARGET) $(OTHERLDFLAGS) $(MYEXTLIB) $(LDLOADLIBS)
 ';
 }
 
@@ -1118,11 +1131,13 @@ END
 
     push(@m, <<'END');
 	ar cr $@ $(OBJECT) && $(RANLIB) $@
-	@: Old mechanism - still needed:
-	echo $(EXTRALIBS) >> $(PERL_SRC)/ext.libs
 	@: New mechanism - not yet used:
-	echo $(EXTRALIBS) > $(INST_ARCHAUTODIR)/extralibs.ld
+	@echo $(EXTRALIBS) > $(INST_ARCHAUTODIR)/extralibs.ld
 	cp $@ $(INST_ARCHAUTODIR)/
+END
+    push(@m, <<'END') if $att{PERL_SRC};
+	@: Old mechanism - still needed:
+	@echo $(EXTRALIBS) >> $(PERL_SRC)/ext.libs
 END
     join('', "\n",@m);
 }
@@ -1339,11 +1354,12 @@ PERL_HDRS = $(PERL_INC)/EXTERN.h $(PERL_INC)/INTERN.h \
 
 $(OBJECT) : $(PERL_HDRS)
 ');
-	# Don't output this if PERL_SRC not available:
+
     push(@m,'
 $(PERL_INC)/config.h: $(PERL_SRC)/config.sh; cd $(PERL_SRC); /bin/sh config_h.SH
 $(PERL_INC)/embed.h:  $(PERL_SRC)/config.sh; cd $(PERL_SRC); /bin/sh embed_h.SH
-');
+') if $att{PERL_SRC};
+
     # This needs a better home:
     push(@m, join(" ", values %{$att{XS}})." : \$(XSUBPPDEPS)\n")
 	if %{$att{XS}};
@@ -1376,16 +1392,18 @@ sub extliblist{
     my($self, $libs) = @_;
     return ("", "", "") unless $libs;
     print STDERR "Potential libraries are '$libs':" if $Verbose;
-    my(@old) = MY->old_extliblist($libs);
     my(@new) = MY->new_extliblist($libs);
 
-    my($oldlibs) = join(" : ",@old);
-    my($newlibs) = join(" : ",@new);
-    warn "Warning (non-fatal): $att{NAME} extliblist consistency check failed:\n".
-	"  old: $oldlibs\n".
-	"  new: $newlibs\n".
-	"Using 'new' set. Please notify perl5-porters\@isu.edu.\n"
-	    if "$newlibs" ne "$oldlibs";
+    if ($att{PERL_SRC}){
+	my(@old) = MY->old_extliblist($libs);
+	my($oldlibs) = join(" : ",@old);
+	my($newlibs) = join(" : ",@new);
+	warn "Warning (non-fatal): $att{NAME} extliblist consistency check failed:\n".
+	    "  old: $oldlibs\n".
+	    "  new: $newlibs\n".
+	    "Using 'new' set. Please notify perl5-porters\@isu.edu.\n"
+		if ("$newlibs" ne "$oldlibs");
+    }
     @new;
 }
 
@@ -1393,6 +1411,7 @@ sub extliblist{
 sub old_extliblist {
     my($self, $potential_libs)=@_;
     return ("", "", "") unless $potential_libs;
+    die "old_extliblist requires PERL_SRC" unless $att{PERL_SRC};
 
     my(%attrib, @w);
     # Now run ext/util/extliblist to discover what *libs definitions
@@ -1471,7 +1490,8 @@ sub new_extliblist {
 	    if (@fullname=<${thispth}/lib${thislib}.${so}.[0-9]*>){
 		$fullname=$fullname[-1]; #ATTN: 10 looses against 9!
 	    } elsif (-f ($fullname="$thispth/lib$thislib.$so")){
-	    } elsif (-f ($fullname="$thispth/lib${thislib}_s.a")){
+	    } elsif (-f ($fullname="$thispth/lib${thislib}_s.a")
+		&& ($thislib .= "_s") ){ # we must explicitly ask for _s version
 	    } elsif (-f ($fullname="$thispth/lib$thislib.a")){
 	    } elsif (-f ($fullname="$thispth/Slib$thislib.a")){
 	    } else { 
@@ -1485,7 +1505,7 @@ sub new_extliblist {
 
 	    # what do we know about this library...
 	    my $is_dyna = ($fullname !~ /\.a$/);
-	    my $in_perl = ($libs =~ /\B-l${thislib}\b|\B-l${thislib}_s\b/s);
+	    my $in_perl = ($libs =~ /\B-l${thislib}\b/s);
 
 	    # Do not add it into the list if it is already linked in
 	    # with the main perl executable.

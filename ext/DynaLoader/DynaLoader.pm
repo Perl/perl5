@@ -80,7 +80,7 @@ sub bootstrap {
     croak "Usage: DynaLoader::bootstrap(module)"
 	unless ($module);
 
-    croak "Can't load module $module, DynaLoader not linked into this perl"
+    croak "Can't load module $module, dynamic loading not available in this perl"
 	unless defined(&dl_load_file);
 
     print STDERR "DynaLoader::bootstrap($module)\n" if $dl_debug;

@@ -5,44 +5,56 @@
 
 use Getopt::Std;
 
-$usage='h2xs [-Aachfm] [-n module_name] [headerfile [extra_libraries]]
-	-a	Omit AutoLoad facilities from .pm file.
-	-c	Omit the constant() function from the XS file.
-	-A	Equivalent to -a -c 
-	-f	Force creation of the extension even if the C header does not exist.
-	-h 	help
-	-n	Specify a name to use for the extension.
-extra_libraries are any libraries that might be needed for loading
-	the extension, e.g. -lm would try to link in the math library.
+sub usage{
+	warn "@_\n" if @_;
+    die 'h2xs [-fnch] [-n module_name] [headerfile [extra_libraries]]
+    -f   Force creation of the extension even if the C header does not exist.
+    -n   Specify a name to use for the extension (recommended).
+    -c   Omit the constant() function and specialised AUTOLOAD from the XS file.
+    -h   Display this help message
+extra_libraries
+         are any libraries that might be needed for loading the
+         extension, e.g. -lm would try to link in the math library.
 ';
-
-sub usage{ die "Usage: $usage\n" }
-
-getopts("fhcaAn:") || &usage;
-
-&usage if $opt_h;
-
-if( @ARGV ){
-	$path_h = shift;
-}
-elsif( ! @ARGV && ! $opt_n ){
-	die "Must supply header file or module name\n";
 }
 
+
+getopts("fhcAn:") || usage;
+
+usage if $opt_h;
+$opt_c = 1 if $opt_A;
+
+$path_h    = shift;
 $extralibs = "@ARGV";
-if( $opt_A ){
-	$opt_a = $opt_c = 1;
-}
+
+usage "Must supply header file or module name\n"
+	unless ($path_h or $opt_n);
+
 
 if( $path_h ){
-	$name = $path_h;
-	if( $path_h =~ s#::#/#g && $opt_n ){
-		warn "Nesting of headerfile ignored with -n\n";
+    $name = $path_h;
+    if( $path_h =~ s#::#/#g && $opt_n ){
+	warn "Nesting of headerfile ignored with -n\n";
+    }
+    $path_h .= ".h" unless $path_h =~ /\.h$/;
+    $path_h = "/usr/include/$path_h" unless $path_h =~ m#^[./]#;
+    die "Can't find $path_h\n" if ( ! $opt_f && ! -f $path_h );
+
+    # Scan the header file (we should deal with nested header files)
+    # Record the names of simple #define constants into const_names
+    # Function prototypes are not (currently) processed.
+    open(CH, "<$path_h") || die "Can't open $path_h: $!\n";
+    while (<CH>) {
+	if (/^#[ \t]*define\s+(\w+)\b\s*[^("]/) {
+	    $_ = $1;
+	    next if /^_.*_h_*$/i; # special case, but for what?
+	    $const_names{$_}++;
 	}
-	$path_h .= ".h" unless $path_h =~ /\.h$/;
-	$path_h = "/usr/include/$path_h" unless $path_h =~ m#^[./]#;
-	die "Can't find $path_h\n" if( ! $opt_f && ! -f $path_h );
+    }
+    close(CH);
+    @const_names = sort keys %const_names;
 }
+
 
 $module = $opt_n || do {
 	$name =~ s/\.h$//;
@@ -77,45 +89,38 @@ chdir($modpname) || die "Can't chdir ext/$modpname: $!\n";
 open(XS, ">$modfname.xs") || die "Can't create ext/$modpname/$modfname.xs: $!\n";
 open(PM, ">$modfname.pm") || die "Can't create ext/$modpname/$modfname.pm: $!\n";
 
-
-if( -r $path_h ){
-    open(CH, "<$path_h") || die "Can't open $path_h: $!\n";
-    while (<CH>) {
-	if (/^#[ \t]*define\s+(\w+)\b\s*[^("]/) {
-	    $_ = $1;
-	    next if /^_.*_h_*$/i;
-	    $names{$_}++;
-	    @AZ = 'A' .. 'Z' if !@AZ && /^[A-Z]/;
-	    @az = 'a' .. 'z' if !@az && /^[a-z]/;
-	    @under = '_' if !@under && /^_/;
-	}
-    }
-    close(CH);
-    @names = sort keys %names;
-}
-
 $" = "\n\t";
 warn "Writing ext/$modpname/$modfname.pm\n";
 
-if( ! $opt_a ){
 print PM <<"END";
 package $module;
 
 require Exporter;
 require AutoLoader;
 require DynaLoader;
+
 \@ISA = qw(Exporter AutoLoader DynaLoader);
-# Items to export into callers namespace by default
-# (move infrequently used names to \@EXPORT_OK below)
+
+# Items to export into callers namespace by default. Note: do not export
+# names by default without a very good reason. Use EXPORT_OK instead.
+# Do not simply export all your public functions/methods/constants.
 \@EXPORT = qw(
-	@names
+	@const_names
 );
 # Other items we are prepared to export if requested
 \@EXPORT_OK = qw(
 );
 
+END
+
+print PM <<"END" unless $opt_c;
 sub AUTOLOAD {
-    if (\@_ > 1) {
+    # This AUTOLOAD function overrides the one inherited from AutoLoader.
+    # It is used to 'autoload' constants from the constant() XS function.
+
+    # NOTE: THIS AUTOLOAD FUNCTION IS FLAWED (but is the best we can do for now).
+    # Avoid old-style ``&CONST'' usage. Either remove the ``&'' or add ``()''.
+    if (\@_ > 0) {
 	\$AutoLoader::AUTOLOAD = \$AUTOLOAD;
 	goto &AutoLoader::AUTOLOAD;
     }
@@ -136,37 +141,24 @@ sub AUTOLOAD {
     goto &\$AUTOLOAD;
 }
 
+END
+
+print PM <<"END";
 bootstrap $module;
 
-# Preloaded methods go here.  Autoload methods go after __END__, and are
-# processed by the autosplit program.
+# Preloaded methods go here.
+
+# Autoload methods go after __END__, and are processed by the autosplit program.
 
 1;
 __END__
 END
-}
-else{
-print PM <<"END";
-package $module;
-
-require Exporter;
-require DynaLoader;
-\@ISA = qw(Exporter DynaLoader);
-# Items to export into callers namespace by default
-\@EXPORT = qw();
-# Other items we are prepared to export if requested
-\@EXPORT_OK = qw();
-
-
-bootstrap $module;
-
-1;
-END
-}
 
 close PM;
 
+
 warn "Writing ext/$modpname/$modfname.xs\n";
+
 print XS <<"END";
 #include "EXTERN.h"
 #include "perl.h"
@@ -201,14 +193,22 @@ int arg;
     switch (*name) {
 END
 
+my(@AZ, @az, @under);
+
+foreach(@const_names){
+    @AZ = 'A' .. 'Z' if !@AZ && /^[A-Z]/;
+    @az = 'a' .. 'z' if !@az && /^[a-z]/;
+    @under = '_'  if !@under && /^_/;
+}
+
 foreach $letter (@AZ, @az, @under) {
 
-    last if $letter eq 'a' && !@names;
+    last if $letter eq 'a' && !@const_names;
 
     print XS "    case '$letter':\n";
     my($name);
-    while (substr($names[0],0,1) eq $letter) {
-	$name = shift(@names);
+    while (substr($const_names[0],0,1) eq $letter) {
+	$name = shift(@const_names);
 	print XS <<"END";
 	if (strEQ(name, "$name"))
 #ifdef $name
@@ -232,8 +232,19 @@ not_there:
     return 0;
 }
 
+END
+}
+
+# Now switch from C to XS by issuing the first MODULE declaration:
+print XS <<"END";
 
 MODULE = $module		PACKAGE = $module
+
+END
+
+# If a constant() function was written then output a corresponding
+# XS declaration:
+print XS <<"END" unless $opt_c;
 
 double
 constant(name,arg)
@@ -241,18 +252,10 @@ constant(name,arg)
 	int		arg
 
 END
-}
-else{
-print XS <<"END";
-
-MODULE = $module		PACKAGE = $module
-
-END
-}
 
 close XS;
 
-{
+
 warn "Writing ext/$modpname/Makefile.PL\n";
 open(PL, ">Makefile.PL") || die "Can't create ext/$modpname/Makefile.PL: $!\n";
 
@@ -268,7 +271,7 @@ print PL "    'LIBS'	=> ['$extralibs'],   # e.g., '-lm' \n";
 print PL "    'DEFINE'	=> '',     # e.g., '-DHAVE_SOMETHING' \n";
 print PL "    'INC'	=> '',     # e.g., '-I/usr/include/other' \n";
 print PL ");\n";
-}
+
 
 system '/bin/ls > MANIFEST';
 
@@ -311,21 +314,19 @@ can be augmented by including arguments of the form -L/another/library/path
 in the extra-libraries argument.
 .SH OPTIONS
 .TP
-.B \-f
-Allows an extension to be created for a header even if that
-header is not found in /usr/include.
+.B \-n module_name
+Specifies a name to be used for the extension, e.g., -n RPC::DCE
 .TP
-.B \-a
-Omit AutoLoad(), AUTOLOAD, and autosplit from the .pm and Makefile files.
+.B \-f
+Allows an extension to be created for a header even if that header is
+not found in /usr/include.
 .TP
 .B \-c
-Omit constant() from the .xs file.
-.TP
-.B \-n module_name
-Specifies a name to be used for the extension.
+Omit constant() from the .xs file and corresponding specialised AUTOLOAD from
+the .pm file.
 .TP
 .B \-A
-Turns on both -a and -c.
+Deprecated synonym for -c.
 .SH EXAMPLES
 .nf
 
@@ -341,14 +342,14 @@ Turns on both -a and -c.
 	# Extension is ONC::RPC.  Still finds <rpcsvc/rusers.h>
 	h2xs -n ONC::RPC rpcsvc/rusers
 
-	# Without AUTOLOAD, AutoLoad, autosplit
-	h2xs -a rpcsvc/rusers
+	# Without constant() or AUTOLOAD
+	h2xs -c rpcsvc/rusers
 
 	# Creates templates for an extension named RPC
-	h2xs -Afn RPC
+	h2xs -cfn RPC
 
 	# Extension is ONC::RPC.
-	h2xs -An ONC::RPC
+	h2xs -cfn ONC::RPC
 
 	# Makefile.PL will look for library -lrpc in 
 	# additional directory /opt/net/lib
@@ -358,7 +359,7 @@ Turns on both -a and -c.
 .SH ENVIRONMENT
 No environment variables are used.
 .SH AUTHOR
-Larry Wall
+Larry Wall and others
 .SH "SEE ALSO"
 perl(1) ExtUtils::MakeMaker
 .SH DIAGNOSTICS
