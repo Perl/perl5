@@ -96,6 +96,125 @@ Version v5.7.0		Development release working toward v5.8
 --------------
 
 ____________________________________________________________________________
+[  6771] By: jhi                                   on 2000/08/22  15:01:44
+        Log: perldelta fixes from HUgo van der Sanden.
+     Branch: perl
+	   ! pod/perldelta.pod
+____________________________________________________________________________
+[  6770] By: jhi                                   on 2000/08/22  14:34:49
+        Log: Subject: [PATCH blead] nextchar() abuse misses an optimisation
+             From: Hugo <hv@crypt.compulink.co.uk>
+             Date: Tue, 22 Aug 2000 11:21:53 +0100
+             Message-Id: <200008221021.LAA03332@crypt.compulink.co.uk>
+     Branch: perl
+	   ! regcomp.c
+____________________________________________________________________________
+[  6769] By: jhi                                   on 2000/08/22  14:30:02
+        Log: Add Yitzchak, reformat.
+     Branch: perl
+	   ! Changes config_h.SH
+____________________________________________________________________________
+[  6768] By: jhi                                   on 2000/08/22  14:21:35
+        Log: Long double Gconvert fixes from Yitzchak Scott-Thoennes
+             and Spider Boardman.
+     Branch: metaconfig
+	   ! U/compline/d_gconvert.U
+     Branch: perl
+	   ! Configure
+____________________________________________________________________________
+[  6767] By: jhi                                   on 2000/08/22  14:11:24
+        Log: Subject: Re: [PATCH] [ID 20000820.012] Not OK: perl v5.7.0 +SUIDMAIL +DEVEL6735 on
+             From: sthoenna@efn.org (Yitzchak Scott-Thoennes)
+             Date: Mon, 21 Aug 2000 19:08:31 -0700
+             Message-ID: <fCeo5gzkgmhY092yn@efn.org>
+     Branch: perl
+	   - ext/Storable/patchlevel.h
+	   ! MANIFEST ext/Storable/MANIFEST
+____________________________________________________________________________
+[  6766] By: jhi                                   on 2000/08/22  13:49:29
+        Log: Subject: [PATCH: 6757] configure.com updates and syslog build
+             From: Peter Prymmer <pvhp@forte.com>
+             Date: Mon, 21 Aug 2000 17:15:35 -0700 (PDT)
+             Message-ID: <Pine.OSF.4.10.10008211653270.17516-100000@aspara.forte.com>
+     Branch: perl
+	   ! configure.com ext/Storable/Makefile.PL
+____________________________________________________________________________
+[  6765] By: jhi                                   on 2000/08/22  13:44:59
+        Log: Subject: [PATCH blead] B:: missing dependency
+             From: Hugo <hv@crypt.compulink.co.uk>
+             Date: Tue, 22 Aug 2000 06:44:33 +0100
+             Message-Id: <200008220544.GAA31051@crypt.compulink.co.uk>
+     Branch: perl
+	   ! ext/B/Makefile.PL
+____________________________________________________________________________
+[  6764] By: jhi                                   on 2000/08/22  13:38:12
+        Log: More bytecompiler.
+     Branch: perl
+	   ! pod/perlutil.pod utils/Makefile utils/perlbc.PL
+____________________________________________________________________________
+[  6763] By: jhi                                   on 2000/08/22  13:36:44
+        Log: Bytecompiler patches from Benajim Stuhl.
+     Branch: perl
+	   ! bytecode.pl embedvar.h ext/B/B.pm ext/B/B.xs
+	   ! ext/B/B/Asmdata.pm ext/B/B/Assembler.pm ext/B/B/Bytecode.pm
+	   ! ext/B/O.pm ext/B/defsubs_h.PL ext/ByteLoader/ByteLoader.pm
+	   ! ext/ByteLoader/ByteLoader.xs ext/ByteLoader/bytecode.h
+	   ! ext/ByteLoader/byterun.c ext/ByteLoader/byterun.h intrpvar.h
+	   ! perl.c perlapi.h pod/perldelta.pod
+____________________________________________________________________________
+[  6762] By: jhi                                   on 2000/08/21  23:43:40
+        Log: An obsoleted diagnostic.
+     Branch: perl
+	   ! pod/perldelta.pod
+____________________________________________________________________________
+[  6761] By: jhi                                   on 2000/08/21  23:01:45
+        Log: The #6759 wasn't quite right.
+     Branch: perl
+	   ! t/lib/st-06compat.t t/lib/st-blessed.t t/lib/st-canonical.t
+	   ! t/lib/st-dclone.t t/lib/st-forgive.t t/lib/st-freeze.t
+	   ! t/lib/st-overload.t t/lib/st-recurse.t t/lib/st-retrieve.t
+	   ! t/lib/st-store.t t/lib/st-tied.t t/lib/st-tiedhook.t
+	   ! t/lib/st-tieditems.t
+____________________________________________________________________________
+[  6760] By: jhi                                   on 2000/08/21  22:35:49
+        Log: Be verydeepclean.
+     Branch: perl
+	   ! Makefile.SH
+____________________________________________________________________________
+[  6759] By: jhi                                   on 2000/08/21  22:25:40
+        Log: Subject: [PATCH: 6757] make new Storable tests forgiving of places where not built
+             From: Peter Prymmer <pvhp@forte.com>
+             Date: Mon, 21 Aug 2000 14:58:16 -0700 (PDT)
+             Message-ID: <Pine.OSF.4.10.10008211456250.17516-100000@aspara.forte.com>
+     Branch: perl
+	   ! t/lib/st-06compat.t t/lib/st-blessed.t t/lib/st-canonical.t
+	   ! t/lib/st-dclone.t t/lib/st-forgive.t t/lib/st-freeze.t
+	   ! t/lib/st-overload.t t/lib/st-recurse.t t/lib/st-retrieve.t
+	   ! t/lib/st-store.t t/lib/st-tied.t t/lib/st-tiedhook.t
+	   ! t/lib/st-tieditems.t
+____________________________________________________________________________
+[  6758] By: jhi                                   on 2000/08/21  22:22:32
+        Log: Few more casts, need reported in
+             
+             Subject: Re: [ID 20000821.010] OK: perl v5.7.0 +SUIDMAIL +DEVEL6756 on i586-linux-64all 2.2.16-9mdk (UNINSTALLED)
+             From: Mike Stok <mike@stok.co.uk>
+             Date: Mon, 21 Aug 2000 15:59:29 -0500 (CDT)
+             Message-ID: <Pine.LNX.4.21.0008211558480.19081-100000@ratdog.stok.co.uk>
+             
+             and
+             
+             Subject: [ID 20000821.013] Not OK: perl v5.7.0 +SUIDMAIL +DEVEL6756 on i686-linux-64int 2.2.13
+             From: abigail@foad.org
+             Date: 21 Aug 2000 21:31:34 -0000
+             Message-Id: <20000821213134.30170.qmail@foad.org>
+     Branch: perl
+	   ! ext/Storable/Storable.xs
+____________________________________________________________________________
+[  6757] By: jhi                                   on 2000/08/21  18:37:07
+        Log: Update Changes.
+     Branch: perl
+	   ! Changes patchlevel.h
+____________________________________________________________________________
 [  6756] By: jhi                                   on 2000/08/21  18:34:02
         Log: A pod nit.
              
