@@ -6,7 +6,7 @@ BEGIN {
     require './test.pl';
 }
 
-plan tests => 5619;
+plan tests => 5625;
 
 use strict;
 use warnings;
@@ -122,11 +122,28 @@ sub list_eq ($$) {
     $y = pack('w*', Math::BigInt::->new(5000000000));
     };
     is($x, $y);
+
+    $x = pack 'w', ~0;
+    $y = pack 'w', (~0).'';
+    is($x, $y);
+    is(unpack ('w',$x), ~0);
+    is(unpack ('w',$y), ~0);
+
+    $x = pack 'w', ~0 - 1;
+    $y = pack 'w', (~0) - 2;
+
+    if (~0 - 1 == (~0) - 2) {
+        is($x, $y, "NV arithmetic");
+    } else {
+        isnt($x, $y, "IV/NV arithmetic");
+    }
+    cmp_ok(unpack ('w',$x), '==', ~0 - 1);
+    cmp_ok(unpack ('w',$y), '==', ~0 - 2);
 }
 
 
 {
-  # test exeptions
+  # test exceptions
   my $x;
   eval { $x = unpack 'w', pack 'C*', 0xff, 0xff};
   like($@, qr/^Unterminated compressed integer/);
