@@ -1079,17 +1079,30 @@ portable concept.  Similarly for the qx and system: how well will the
 
 =over 4
 
-=item chmod, chmod, chown, chroot, exec, link, mkdir, rename, rmdir, stat, symlink, truncate, unlink, utime
+=item *
 
-=item %ENV
+chmod, chmod, chown, chroot, exec, link, mkdir
+rename, rmdir stat, symlink, truncate, unlink, utime
 
-=item glob (aka the <*>)
+=item *
 
-=item open, opendir, sysopen
+%ENV
 
-=item qx (aka the backtick operator), system
+=item *
 
-=item readdir, readlink
+glob (aka the <*>)
+
+=item *
+
+open, opendir, sysopen
+
+=item *
+
+qx (aka the backtick operator), system
+
+=item *
+
+readdir, readlink
 
 =back
 
