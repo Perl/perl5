@@ -244,7 +244,10 @@ sub next_todo {
 	$self->{'subs_declared'}{$name} = 1;
 	if ($name eq "BEGIN") {
 	    my $use_dec = $self->begin_is_use($cv);
-	    return $use_dec if defined ($use_dec);
+	    if (defined ($use_dec)) {
+		return () if 0 == length($use_dec);
+		return $use_dec;
+	    }
 	}
         return "sub $name " . $self->deparse_sub($cv);
     }
@@ -323,7 +326,7 @@ sub begin_is_use {
     # Certain pragmas are dealt with using hint bits,
     # so we ignore them here
     if ($module eq 'strict' || $module eq 'integer'
-	|| $module eq 'bytes') {
+	|| $module eq 'bytes' || $module eq 'warnings') {
 	return "";
     }
 
