@@ -781,8 +781,14 @@ Perl_screaminstr(pTHX_ SV *bigstr, SV *littlestr, I32 start_shift, I32 end_shift
     /* The value of pos we can stop at: */
     stop_pos = SvCUR(bigstr) - end_shift - (SvCUR(littlestr) - 1 - previous);
     if (previous + start_shift > stop_pos) {
+/*
+  stop_pos does not include SvTAIL in the count, so this check is incorrect
+  (I think) - see [ID 20010618.006] and t/op/study.t. HVDS 2001/06/19
+*/
+#if 0
 	if (previous + start_shift == stop_pos + 1) /* A fake '\n'? */
 	    goto check_tail;
+#endif
 	return Nullch;
     }
     while (pos < previous + start_shift) {
