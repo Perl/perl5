@@ -740,6 +740,12 @@ and the decoding is
 
 	$uni = 0x10000 + ($hi - 0xD8000) * 0x400 + ($lo - 0xDC00);
 
+If you try to generate surrogates (for example by using chr()), you
+will get an error because firstly a surrogate on its own is
+meaningless, and secondly because Perl encodes its Unicode characters
+in UTF-8 (not 16-bit numbers), which makes the encoded character doubly
+illegal.
+
 Because of the 16-bitness, UTF-16 is byteorder dependent.  UTF-16
 itself can be used for in-memory computations, but if storage or
 transfer is required, either UTF-16BE (Big Endian) or UTF-16LE

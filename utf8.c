@@ -68,6 +68,8 @@ Perl_uvuni_to_utf8(pTHX_ U8 *d, UV uv)
 	return d;
     }
     if (uv < 0x10000) {
+        if (UNICODE_IS_SURROGATE(uv))
+	    Perl_croak(aTHX_ "UTF-16 surrogate 0x%04"UVxf, uv);
 	*d++ = (( uv >> 12)         | 0xe0);
 	*d++ = (((uv >>  6) & 0x3f) | 0x80);
 	*d++ = (( uv        & 0x3f) | 0x80);
