@@ -128,6 +128,7 @@ Perl_gv_efullname3
 Perl_gv_efullname4
 Perl_gv_fetchfile
 Perl_gv_fetchmeth
+Perl_gv_fetchmeth_autoload
 Perl_gv_fetchmethod
 Perl_gv_fetchmethod_autoload
 Perl_gv_fetchpv
@@ -228,6 +229,7 @@ Perl_grok_number
 Perl_grok_numeric_radix
 Perl_grok_oct
 Perl_markstack_grow
+Perl_memcmp_byte_utf8
 Perl_mess
 Perl_vmess
 Perl_sortsv
