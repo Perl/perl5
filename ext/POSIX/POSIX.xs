@@ -1563,10 +1563,12 @@ strtoul(str, base = 0)
 	char *unparsed;
     PPCODE:
 	num = strtoul(str, &unparsed, base);
-	if (num <= IV_MAX)
-	    PUSHs(sv_2mortal(newSViv((IV)num)));
-	else
+#if IVSIZE <= LONGSIZE
+	if (num > IV_MAX)
 	    PUSHs(sv_2mortal(newSVnv((double)num)));
+	else
+#endif
+	    PUSHs(sv_2mortal(newSViv((IV)num)));
 	if (GIMME == G_ARRAY) {
 	    EXTEND(SP, 1);
 	    if (unparsed)
