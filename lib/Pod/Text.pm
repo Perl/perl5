@@ -1,5 +1,5 @@
 # Pod::Text -- Convert POD data to formatted ASCII text.
-# $Id: Text.pm,v 2.4 2000/03/17 00:17:08 eagle Exp $
+# $Id: Text.pm,v 2.5 2000/09/03 09:23:29 eagle Exp $
 #
 # Copyright 1999, 2000 by Russ Allbery <rra@stanford.edu>
 #
@@ -37,7 +37,7 @@ use vars qw(@ISA @EXPORT %ESCAPES $VERSION);
 # Perl core and too many things could munge CVS magic revision strings.
 # This number should ideally be the same as the CVS revision in podlators,
 # however.
-$VERSION = 2.04;
+$VERSION = 2.05;
 
 
 ############################################################################
@@ -53,7 +53,7 @@ $VERSION = 2.04;
     'lt'        =>    '<',      # left chevron, less-than
     'gt'        =>    '>',      # right chevron, greater-than
     'quot'      =>    '"',      # double quote
-    'sol'       =>    '/',      # solidus
+    'sol'       =>    '/',      # solidus (forward slash)
     'verbar'    =>    '|',      # vertical bar
                                  
     "Aacute"    =>    "\xC1",   # capital A, acute accent
@@ -172,6 +172,20 @@ sub initialize {
     $$self{sentence} = 0  unless defined $$self{sentence};
     $$self{width}    = 76 unless defined $$self{width};
 
+    # Figure out what quotes we'll be using for C<> text.
+    $$self{quotes} ||= "'";
+    if ($$self{quotes} eq 'none') {
+        $$self{LQUOTE} = $$self{RQUOTE} = '';
+    } elsif (length ($$self{quotes}) == 1) {
+        $$self{LQUOTE} = $$self{RQUOTE} = $$self{quotes};
+    } elsif ($$self{quotes} =~ /^(.)(.)$/
+             || $$self{quotes} =~ /^(..)(..)$/) {
+        $$self{LQUOTE} = $1;
+        $$self{RQUOTE} = $2;
+    } else {
+        croak qq(Invalid quote specification "$$self{quotes}");
+    }
+
     $$self{INDENTS}  = [];              # Stack of indentations.
     $$self{MARGIN}   = $$self{indent};  # Current left margin in spaces.
 
@@ -193,8 +207,17 @@ sub command {
     return if $command eq 'pod';
     return if ($$self{EXCLUDE} && $command ne 'end');
     $self->item ("\n") if defined $$self{ITEM};
-    $command = 'cmd_' . $command;
-    $self->$command (@_);
+    if ($self->can ('cmd_' . $command)) {
+        $command = 'cmd_' . $command;
+        $self->$command (@_);
+    } else {
+        my ($text, $line, $paragraph) = @_;
+        my ($file, $line) = $paragraph->file_line;
+        $text =~ s/\n+\z//;
+        $text = " $text" if ($text =~ /^\S/);
+        warn qq($file:$line: Unknown command paragraph "=$command$text"\n);
+        return;
+    }
 }
 
 # Called for a verbatim paragraph.  Gets the paragraph, the line number, and
@@ -419,9 +442,11 @@ sub cmd_for {
 # The simple formatting ones.  These are here mostly so that subclasses can
 # override them and do more complicated things.
 sub seq_b { return $_[0]{alt} ? "``$_[1]''" : $_[1] }
-sub seq_c { return $_[0]{alt} ? "``$_[1]''" : "`$_[1]'" }
 sub seq_f { return $_[0]{alt} ? "\"$_[1]\"" : $_[1] }
 sub seq_i { return '*' . $_[1] . '*' }
+sub seq_c {
+    return $_[0]{alt} ? "``$_[1]''" : "$_[0]{LQUOTE}$_[1]$_[0]{RQUOTE}"
+}
 
 # The complicated one.  Handle links.  Since this is plain text, we can't
 # actually make any real links, so this is all to figure out what text we
@@ -592,13 +617,14 @@ sub pod2text {
     # means we need to turn the first argument into a file handle.  Magic
     # open will handle the <&STDIN case automagically.
     if (defined $_[1]) {
+        my @fhs = @_;
         local *IN;
-        unless (open (IN, $_[0])) {
-            croak ("Can't open $_[0] for reading: $!\n");
+        unless (open (IN, $fhs[0])) {
+            croak ("Can't open $fhs[0] for reading: $!\n");
             return;
         }
-        $_[0] = \*IN;
-        return $parser->parse_from_filehandle (@_);
+        $fhs[0] = \*IN;
+        return $parser->parse_from_filehandle (@fhs);
     } else {
         return $parser->parse_from_file (@_);
     }
@@ -664,6 +690,17 @@ it's the expected formatting for manual pages; if you're formatting
 arbitrary text documents, setting this to true may result in more pleasing
 output.
 
+=item quotes
+
+Sets the quote marks used to surround CE<lt>> text.  If the value is a
+single character, it is used as both the left and right quote; if it is two
+characters, the first character is used as the left quote and the second as
+the right quoted; and if it is four characters, the first two are used as
+the left quote and the second two as the right quote.
+
+This may also be set to the special value C<none>, in which case no quote
+marks are added around CE<lt>> text.
+
 =item sentence
 
 If set to a true value, Pod::Text will assume that each sentence ends in two
@@ -698,6 +735,16 @@ indicates a bug in Pod::Text; you should never see it.
 
 (F) Pod::Text was invoked via the compatibility mode pod2text() interface
 and the input file it was given could not be opened.
+
+=item Invalid quote specification "%s"
+
+(F) The quote specification given (the quotes option to the constructor) was
+invalid.  A quote specification must be one, two, or four characters long.
+
+=item %s:%d: Unknown command paragraph "%s".
+
+(W) The POD source contained a non-standard command paragraph (something of
+the form C<=command args>) that Pod::Man didn't know about.  It was ignored.
 
 =item Unknown escape: %s
 
