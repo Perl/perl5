@@ -1246,7 +1246,8 @@ Perl_gp_free(pTHX_ GV *gv)
     if (gp->gp_refcnt == 0) {
 	if (ckWARN_d(WARN_INTERNAL))
 	    Perl_warner(aTHX_ packWARN(WARN_INTERNAL),
-			"Attempt to free unreferenced glob pointers");
+			"Attempt to free unreferenced glob pointers"
+                        pTHX__FORMAT pTHX__VALUE);
         return;
     }
     if (gp->gp_cv) {

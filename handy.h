@@ -665,3 +665,19 @@ hopefully catches attempts to access uninitialized memory.
 # endif
 #endif
 
+/* convenience debug macros */
+#ifdef USE_ITHREADS
+#define pTHX_FORMAT  "Perl interpreter: 0x%p"
+#define pTHX__FORMAT ", Perl interpreter: 0x%p"
+#define pTHX_VALUE_   (unsigned long)my_perl,
+#define pTHX_VALUE    (unsigned long)my_perl
+#define pTHX__VALUE_ ,(unsigned long)my_perl,
+#define pTHX__VALUE  ,(unsigned long)my_perl
+#else
+#define pTHX_FORMAT 
+#define pTHX__FORMAT
+#define pTHX_VALUE_ 
+#define pTHX_VALUE
+#define pTHX__VALUE_ 
+#define pTHX__VALUE
+#endif /* USE_ITHREADS */
