@@ -1898,6 +1898,29 @@ For example:
 
 The IVdf will expand to whatever is the correct format for the IVs.
 
+If you are printing addresses of pointers, use UVxf combined
+with PTR2UV(), do not use %lx or %p.
+
+=head2 Pointer-To-Integer and Integer-To-Pointer
+
+Because pointer size does not necessarily equal integer size,
+use the follow macros to do it right.
+
+	PTR2UV(pointer)
+	PTR2IV(pointer)
+	PTR2NV(pointer)
+	INT2PTR(pointertotype, integer)
+
+For example:
+
+	IV  iv = ...;
+	SV *sv = INT2PTR(SV*, iv);
+
+and
+
+	AV *av = ...;
+	UV  uv = PTR2UV(av);
+
 =head2 Source Documentation
 
 There's an effort going on to document the internal functions and
