@@ -141,7 +141,7 @@ EOT
         if 0;
 EOH
     }
-    $s1 = $s2 = "\$^X is $perl, \$0 is $script\n";
+    $s1 = "\$^X is $perl, \$0 is $script\n";
     ok 19, open(SCRIPT, ">$script"), $!;
     ok 20, print(SCRIPT $headmaybe . <<EOB . <<'EOF' . $tailmaybe), $!;
 #!$wd/perl
@@ -151,12 +151,12 @@ EOF
     ok 21, close(SCRIPT), $!;
     ok 22, chmod(0755, $script), $!;
     $_ = `$script`;
-    s/.exe//i if $Is_Dos;
+    s/\.exe//i if $Is_Dos;
     s{\bminiperl\b}{perl}; # so that test doesn't fail with miniperl
     s{is perl}{is $perl}; # for systems where $^X is only a basename
-    ok 23, ($Is_MSWin32 ? uc($_) eq uc($s2) : $_ eq $s2), ":$_:!=:$s2:";
+    ok 23, ($Is_MSWin32 ? uc($_) eq uc($s1) : $_ eq $s1), ":$_:!=:$s1:";
     $_ = `$perl $script`;
-    s/.exe//i if $Is_Dos;
+    s/\.exe//i if $Is_Dos;
     ok 24, ($Is_MSWin32 ? uc($_) eq uc($s1) : $_ eq $s1), ":$_:!=:$s1: after `$perl $script`";
     ok 25, unlink($script), $!;
 }
@@ -185,7 +185,7 @@ else {
 }
 
 {
-    local $SIG{'__WARN__'} = sub { print "not " };
+    local $SIG{'__WARN__'} = sub { print "# @_\nnot " };
     $! = undef;
     print "ok 31\n";
 }
