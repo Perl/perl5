@@ -321,11 +321,17 @@ and values.
 =item Encode
 
 Significant updates on the encoding pragma functionality
-(tr/// and the DATA filehandle, formats).  The ISO 8859-6 conversion
-table has been corrected (the 0x30..0x39 erroneously mapped to
-U+0660..U+0669, instead of U+0030..U+0039).  The GSM 03.38 conversion
-did not handle escape sequences correctly.  The UTF-7 encoding has
-been added (making Encode feature-complete with Unicode::String).
+(tr/// and the DATA filehandle, formats).
+
+If a filehandle has been marked as to have an encoding, unmappable
+characters are detected already during input, not later (when the
+corrupted data is being used).
+
+The ISO 8859-6 conversion table has been corrected (the 0x30..0x39
+erroneously mapped to U+0660..U+0669, instead of U+0030..U+0039).  The
+GSM 03.38 conversion did not handle escape sequences correctly.  The
+UTF-7 encoding has been added (making Encode feature-complete with
+Unicode::String).
 
 =item fields
 
@@ -340,6 +346,11 @@ been added (making Encode feature-complete with Unicode::String).
 Diamond inheritance now works.
 
 =item Net::Ping
+
+=item PerlIO::scalar
+
+Reading from non-string scalars (like the special variables, see
+L<perlvar>) now works.
 
 =item podlators
 
@@ -359,6 +370,37 @@ New utilities: refaddr, isvstring, looks_like_number, set_prototype.
 =item Storable
 
 Can now store code references (via B::Deparse, so not foolproof).
+
+=item strict
+
+Earlier versions of the strict pragma did not check the parameters
+implicitly passed to its "import" (use) and "unimport" (no) routine.
+This caused the false idiom such as:
+
+        use strict qw(@ISA);
+        @ISA = qw(Foo);
+
+This however (probably) raised the false expectation that the strict
+refs, vars and subs were being enforced (and that @ISA was somehow
+"declared").  But the strict refs, vars, and subs are B<not> enforced
+when using this false idiom.
+
+Starting from Perl 5.8.1, the above B<will> cause an error to be
+raised.  This may cause programs which used to execute seemingly
+correctly without warnings and errors to fail when run under 5.8.1.
+This happens because
+
+        use strict qw(@ISA);
+
+will now fail with the error:
+
+        Unknown 'strict' tag(s) '@ISA'
+
+The remedy to this problem is to replace this code with the correct idiom:
+
+        use strict;
+        use vars qw(@ISA);
+        @ISA = qw(Foo);
 
 =item Term::ANSIcolor
 
@@ -559,54 +601,6 @@ around".)  While scripts that large usually indicate a need to rethink
 your code a bit, such Perl scripts do exist, for example as results
 from generated code.  Now linenumbers can go all the way to
 4294967296, or 2**32.
-
-=head2 Module and pragma specific fixes
-
-=over 4
-
-=item Encode
-
-If a filehandle has been marked as to have an encoding, unmappable
-characters are detected already during input, not later (when the
-corrupted data is being used).
-
-=item PerlIO::scalar
-
-Reading from non-string scalars (like the special variables, see
-L<perlvar>) now works.
-
-=item strict
-
-Earlier versions of the strict pragma did not check the parameters
-implicitly passed to its "import" (use) and "unimport" (no) routine.
-This caused the false idiom such as:
-
-        use strict qw(@ISA);
-        @ISA = qw(Foo);
-
-This however (probably) raised the false expectation that the strict
-refs, vars and subs were being enforced (and that @ISA was somehow
-"declared").  But the strict refs, vars, and subs are B<not> enforced
-when using this false idiom.
-
-Starting from Perl 5.8.1, the above B<will> cause an error to be
-raised.  This may cause programs which used to execute seemingly
-correctly without warnings and errors to fail when run under 5.8.1.
-This happens because
-
-        use strict qw(@ISA);
-
-will now fail with the error:
-
-        Unknown 'strict' tag(s) '@ISA'
-
-The remedy to this problem is to replace this code with the correct idiom:
-
-        use strict;
-        use vars qw(@ISA);
-        @ISA = qw(Foo);
-
-=back
 
 =head2 Platform-specific fixes
 
