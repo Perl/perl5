@@ -23,6 +23,8 @@ through to locate the proper section you're looking for.
 
 =item Tutorials
 
+=item Reference Manual
+
 =item Internals and C Language Interface
 
 =item Miscellaneous
@@ -848,7 +850,8 @@ B<-x> I<directory>
 
 HOME, LOGDIR, PATH, PERL5LIB, PERL5OPT, PERLLIB, PERL5DB, PERL5SHELL
 (specific to the Win32 port), PERL_DEBUG_MSTATS, PERL_DESTRUCT_LEVEL,
-PERL_ROOT (specific to the VMS port), SYS$LOGIN (specific to the VMS port)
+PERL_ENCODING, PERL_ROOT (specific to the VMS port), SYS$LOGIN (specific to
+the VMS port)
 
 =back
 
@@ -1016,17 +1019,17 @@ C<substr $var, $-[3], $+[3] - $-[3])>, HANDLE->format_name(EXPR),
 $FORMAT_NAME, $~, HANDLE->format_top_name(EXPR), $FORMAT_TOP_NAME, $^,
 IO::Handle->format_line_break_characters EXPR,
 $FORMAT_LINE_BREAK_CHARACTERS, $:, IO::Handle->format_formfeed EXPR,
-$FORMAT_FORMFEED, $^L, $ACCUMULATOR, $^A, $CHILD_ERROR, $?, $OS_ERROR,
-$ERRNO, $!, $EXTENDED_OS_ERROR, $^E, $EVAL_ERROR, $@, $PROCESS_ID, $PID,
-$$, $REAL_USER_ID, $UID, $<, $EFFECTIVE_USER_ID, $EUID, $>, $REAL_GROUP_ID,
-$GID, $(, $EFFECTIVE_GROUP_ID, $EGID, $), $PROGRAM_NAME, $0, $[, $],
-$COMPILING, $^C, $DEBUGGING, $^D, $SYSTEM_FD_MAX, $^F, $^H, %^H,
-$INPLACE_EDIT, $^I, $^M, $OSNAME, $^O, $PERLDB, $^P, 0x01, 0x02, 0x04,
-0x08, 0x10, 0x20, 0x40, 0x80, 0x100, 0x200, $LAST_REGEXP_CODE_RESULT, $^R,
-$EXCEPTIONS_BEING_CAUGHT, $^S, $BASETIME, $^T, ${^TAINT}, $PERL_VERSION,
-$^V, $WARNING, $^W, ${^WARNING_BITS}, ${^WIDE_SYSTEM_CALLS},
-$EXECUTABLE_NAME, $^X, ARGV, $ARGV, @ARGV, @F, @INC, @_, %INC, %ENV,
-$ENV{expr}, %SIG, $SIG{expr}
+$FORMAT_FORMFEED, $^L, $ACCUMULATOR, $^A, $CHILD_ERROR, $?, ${^ENCODING},
+$OS_ERROR, $ERRNO, $!, $EXTENDED_OS_ERROR, $^E, $EVAL_ERROR, $@,
+$PROCESS_ID, $PID, $$, $REAL_USER_ID, $UID, $<, $EFFECTIVE_USER_ID, $EUID,
+$>, $REAL_GROUP_ID, $GID, $(, $EFFECTIVE_GROUP_ID, $EGID, $),
+$PROGRAM_NAME, $0, $[, $], $COMPILING, $^C, $DEBUGGING, $^D,
+$SYSTEM_FD_MAX, $^F, $^H, %^H, $INPLACE_EDIT, $^I, $^M, $OSNAME, $^O,
+$PERLDB, $^P, 0x01, 0x02, 0x04, 0x08, 0x10, 0x20, 0x40, 0x80, 0x100, 0x200,
+$LAST_REGEXP_CODE_RESULT, $^R, $EXCEPTIONS_BEING_CAUGHT, $^S, $BASETIME,
+$^T, ${^TAINT}, $PERL_VERSION, $^V, $WARNING, $^W, ${^WARNING_BITS},
+${^WIDE_SYSTEM_CALLS}, $EXECUTABLE_NAME, $^X, ARGV, $ARGV, @ARGV, @F, @INC,
+@_, %INC, %ENV, $ENV{expr}, %SIG, $SIG{expr}
 
 =item Error Indicators
 
@@ -2575,8 +2578,8 @@ tarball, Announce to the modules list, Announce to clpa, Fix bugs!
 
 =back
 
-=head2 perlfaq1 - General Questions About Perl ($Revision: 1.1 $, $Date:
-2001/09/20 03:03:00 $)
+=head2 perlfaq1 - General Questions About Perl ($Revision: 1.2 $, $Date:
+2001/11/09 08:06:04 $)
 
 =over 4
 
@@ -2622,8 +2625,8 @@ Scheme, or Tcl?
 
 =back
 
-=head2 perlfaq2 - Obtaining and Learning about Perl ($Revision: 1.2 $,
-$Date: 2001/10/16 13:27:22 $)
+=head2 perlfaq2 - Obtaining and Learning about Perl ($Revision: 1.3 $,
+$Date: 2001/11/09 08:06:04 $)
 
 =over 4
 
@@ -2678,8 +2681,8 @@ References, Tutorials, Task-Oriented, Special Topics
 
 =back
 
-=head2 perlfaq3 - Programming Tools ($Revision: 1.8 $, $Date: 2001/10/17
-14:14:20 $)
+=head2 perlfaq3 - Programming Tools ($Revision: 1.9 $, $Date: 2001/11/09
+08:06:04 $)
 
 =over 4
 
@@ -2748,6 +2751,8 @@ stringification, Pass by reference, Tie large variables to disk
 
 =item Where can I learn about CGI or Web programming in Perl?
 
+=item Where can I learn about object-oriented Perl programming?
+
 =item Where can I learn about linking C with Perl? [h2xs, xsubpp]
 
 =item I've read perlembed, perlguts, etc., but I can't embed perl in
@@ -2764,8 +2769,8 @@ mean?
 
 =back
 
-=head2 perlfaq4 - Data Manipulation ($Revision: 1.7 $, $Date: 2001/10/26
-19:46:03 $)
+=head2 perlfaq4 - Data Manipulation ($Revision: 1.8 $, $Date: 2001/11/09
+08:06:04 $)
 
 =over 4
 
@@ -2979,8 +2984,8 @@ array of hashes or arrays?
 
 =back
 
-=head2 perlfaq5 - Files and Formats ($Revision: 1.3 $, $Date: 2001/10/16
-13:27:22 $)
+=head2 perlfaq5 - Files and Formats ($Revision: 1.4 $, $Date: 2001/11/09
+08:06:04 $)
 
 =over 4
 
@@ -3072,7 +3077,7 @@ protected files?  Isn't this a bug in Perl?
 
 =back
 
-=head2 perlfaq6 - Regexes ($Revision: 1.3 $, $Date: 2001/10/16 13:27:22 $)
+=head2 perlfaq6 - Regexes ($Revision: 1.4 $, $Date: 2001/11/09 08:06:04 $)
 
 =over 4
 
@@ -3138,8 +3143,8 @@ file?
 
 =back
 
-=head2 perlfaq7 - Perl Language Issues ($Revision: 1.3 $, $Date: 2001/10/19
-14:39:24 $)
+=head2 perlfaq7 - Perl Language Issues ($Revision: 1.4 $, $Date: 2001/11/07
+02:27:50 $)
 
 =over 4
 
@@ -3217,8 +3222,8 @@ is in scope?
 
 =back
 
-=head2 perlfaq8 - System Interaction ($Revision: 1.2 $, $Date: 2001/10/16
-13:27:22 $)
+=head2 perlfaq8 - System Interaction ($Revision: 1.4 $, $Date: 2001/11/09
+08:06:04 $)
 
 =over 4
 
@@ -3345,7 +3350,7 @@ search path?
 
 =back
 
-=head2 perlfaq9 - Networking ($Revision: 1.3 $, $Date: 2001/10/16 13:27:22
+=head2 perlfaq9 - Networking ($Revision: 1.5 $, $Date: 2001/11/09 08:06:04
 $)
 
 =over 4
@@ -4151,7 +4156,7 @@ hv_iterval, hv_magic, hv_store, hv_store_ent, hv_undef, isALNUM, isALPHA,
 isDIGIT, isLOWER, isSPACE, isUPPER, is_utf8_char, is_utf8_string, items,
 ix, LEAVE, load_module, looks_like_number, MARK, mg_clear, mg_copy,
 mg_find, mg_free, mg_get, mg_length, mg_magical, mg_set, Move, New, newAV,
-Newc, newCONSTSUB, newHV, newRV_inc, newRV_noinc, newSV, NEWSV, newSViv,
+Newc, newCONSTSUB, newHV, newRV_inc, newRV_noinc, NEWSV, newSV, newSViv,
 newSVnv, newSVpv, newSVpvf, newSVpvn, newSVpvn_share, newSVrv, newSVsv,
 newSVuv, newXS, newXSproto, Newz, Nullav, Nullch, Nullcv, Nullhv, Nullsv,
 ORIGMARK, perl_alloc, perl_clone, perl_construct, perl_destruct, perl_free,
@@ -4164,17 +4169,17 @@ sharedsv_thrcnt_dec, sharedsv_thrcnt_inc, sharedsv_unlock, sortsv, SP,
 SPAGAIN, ST, strEQ, strGE, strGT, strLE, strLT, strNE, strnEQ, strnNE,
 StructCopy, SvCUR, SvCUR_set, SvEND, SvGETMAGIC, SvGROW, SvIOK, SvIOKp,
 SvIOK_notUV, SvIOK_off, SvIOK_on, SvIOK_only, SvIOK_only_UV, SvIOK_UV,
-SvIV, SvIVX, SvIVx, SvLEN, SvNIOK, SvNIOKp, SvNIOK_off, SvNOK, SvNOKp,
+SvIV, SvIVx, SvIVX, SvLEN, SvNIOK, SvNIOKp, SvNIOK_off, SvNOK, SvNOKp,
 SvNOK_off, SvNOK_on, SvNOK_only, SvNV, SvNVX, SvNVx, SvOK, SvOOK, SvPOK,
 SvPOKp, SvPOK_off, SvPOK_on, SvPOK_only, SvPOK_only_UTF8, SvPV, SvPVbyte,
 SvPVbytex, SvPVbytex_force, SvPVbyte_force, SvPVbyte_nolen, SvPVutf8,
-SvPVutf8x, SvPVutf8x_force, SvPVutf8_force, SvPVutf8_nolen, SvPVx, SvPVX,
+SvPVutf8x, SvPVutf8x_force, SvPVutf8_force, SvPVutf8_nolen, SvPVX, SvPVx,
 SvPV_force, SvPV_force_nomg, SvPV_nolen, SvREFCNT, SvREFCNT_dec,
 SvREFCNT_inc, SvROK, SvROK_off, SvROK_on, SvRV, SvSETMAGIC, SvSetMagicSV,
 SvSetMagicSV_nosteal, SvSetSV, SvSetSV_nosteal, SvSTASH, SvTAINT,
-SvTAINTED, SvTAINTED_off, SvTAINTED_on, SvTRUE, SvTYPE, svtype, SVt_IV,
+SvTAINTED, SvTAINTED_off, SvTAINTED_on, SvTRUE, svtype, SvTYPE, SVt_IV,
 SVt_NV, SVt_PV, SVt_PVAV, SVt_PVCV, SVt_PVHV, SVt_PVMG, SvUOK, SvUPGRADE,
-SvUTF8, SvUTF8_off, SvUTF8_on, SvUV, SvUVX, SvUVx, sv_2bool, sv_2cv,
+SvUTF8, SvUTF8_off, SvUTF8_on, SvUV, SvUVx, SvUVX, sv_2bool, sv_2cv,
 sv_2io, sv_2iv, sv_2mortal, sv_2nv, sv_2pvbyte, sv_2pvbyte_nolen,
 sv_2pvutf8, sv_2pvutf8_nolen, sv_2pv_flags, sv_2pv_nolen, sv_2uv,
 sv_backoff, sv_bless, sv_catpv, sv_catpvf, sv_catpvf_mg, sv_catpvn,
@@ -4185,21 +4190,22 @@ sv_gets, sv_grow, sv_inc, sv_insert, sv_isa, sv_isobject, sv_iv, sv_len,
 sv_len_utf8, sv_magic, sv_mortalcopy, sv_newmortal, sv_newref, sv_nv,
 sv_pos_b2u, sv_pos_u2b, sv_pv, sv_pvbyte, sv_pvbyten, sv_pvbyten_force,
 sv_pvn, sv_pvn_force, sv_pvn_force_flags, sv_pvutf8, sv_pvutf8n,
-sv_pvutf8n_force, sv_reftype, sv_replace, sv_report_used, sv_reset,
-sv_rvweaken, sv_setiv, sv_setiv_mg, sv_setnv, sv_setnv_mg, sv_setpv,
-sv_setpvf, sv_setpvf_mg, sv_setpviv, sv_setpviv_mg, sv_setpvn,
-sv_setpvn_mg, sv_setpv_mg, sv_setref_iv, sv_setref_nv, sv_setref_pv,
-sv_setref_pvn, sv_setref_uv, sv_setsv, sv_setsv_flags, sv_setsv_mg,
-sv_setuv, sv_setuv_mg, sv_taint, sv_tainted, sv_true, sv_unmagic, sv_unref,
-sv_unref_flags, sv_untaint, sv_upgrade, sv_usepvn, sv_usepvn_mg,
-sv_utf8_decode, sv_utf8_downgrade, sv_utf8_encode, sv_utf8_upgrade,
-sv_utf8_upgrade_flags, sv_uv, sv_vcatpvfn, sv_vsetpvfn, THIS, toLOWER,
-toUPPER, utf8n_to_uvchr, utf8n_to_uvuni, utf8_distance, utf8_hop,
-utf8_length, utf8_to_bytes, utf8_to_uvchr, utf8_to_uvuni, uvchr_to_utf8,
-uvuni_to_utf8, warn, XPUSHi, XPUSHn, XPUSHp, XPUSHs, XPUSHu, XS, XSRETURN,
-XSRETURN_EMPTY, XSRETURN_IV, XSRETURN_NO, XSRETURN_NV, XSRETURN_PV,
-XSRETURN_UNDEF, XSRETURN_YES, XST_mIV, XST_mNO, XST_mNV, XST_mPV,
-XST_mUNDEF, XST_mYES, XS_VERSION, XS_VERSION_BOOTCHECK, Zero
+sv_pvutf8n_force, sv_recode_to_utf8, sv_reftype, sv_replace,
+sv_report_used, sv_reset, sv_rvweaken, sv_setiv, sv_setiv_mg, sv_setnv,
+sv_setnv_mg, sv_setpv, sv_setpvf, sv_setpvf_mg, sv_setpviv, sv_setpviv_mg,
+sv_setpvn, sv_setpvn_mg, sv_setpv_mg, sv_setref_iv, sv_setref_nv,
+sv_setref_pv, sv_setref_pvn, sv_setref_uv, sv_setsv, sv_setsv_flags,
+sv_setsv_mg, sv_setuv, sv_setuv_mg, sv_taint, sv_tainted, sv_true,
+sv_unmagic, sv_unref, sv_unref_flags, sv_untaint, sv_upgrade, sv_usepvn,
+sv_usepvn_mg, sv_utf8_decode, sv_utf8_downgrade, sv_utf8_encode,
+sv_utf8_upgrade, sv_utf8_upgrade_flags, sv_uv, sv_vcatpvfn, sv_vsetpvfn,
+THIS, toLOWER, toUPPER, to_utf8_case, utf8n_to_uvchr, utf8n_to_uvuni,
+utf8_distance, utf8_hop, utf8_length, utf8_to_bytes, utf8_to_uvchr,
+utf8_to_uvuni, uvchr_to_utf8, uvuni_to_utf8, warn, XPUSHi, XPUSHn, XPUSHp,
+XPUSHs, XPUSHu, XS, XSRETURN, XSRETURN_EMPTY, XSRETURN_IV, XSRETURN_NO,
+XSRETURN_NV, XSRETURN_PV, XSRETURN_UNDEF, XSRETURN_YES, XST_mIV, XST_mNO,
+XST_mNV, XST_mPV, XST_mUNDEF, XST_mYES, XS_VERSION, XS_VERSION_BOOTCHECK,
+Zero
 
 =item AUTHORS
 
@@ -4392,8 +4398,6 @@ PerlIO_apply_layers(f,mode,layers), PerlIO_binmode(f,ptype,imode,layers),
 
 =item Custom opcodes
 
-=item spawnvp() on Win32
-
 =item DLL Versioning
 
 =item Introduce @( and @)
@@ -4511,6 +4515,8 @@ PerlIO_apply_layers(f,mode,layers), PerlIO_binmode(f,ptype,imode,layers),
 =item Update sprintf documentation
 
 =item Use fchown/fchmod internally
+
+=item Make v-strings overloaded objects
 
 =back
 
@@ -4756,7 +4762,7 @@ finish, 'enter', print
 =item Writing a test
 
 F<t/base/>, F<t/cmd/>, F<t/comp/>, F<t/io/>, F<t/lib/>, F<t/op/>,
-F<t/pod/>, F<t/run/>
+F<t/pod/>, F<t/run/>, t/base t/comp, t/cmd t/run t/io t/op, t/lib ext lib
 
 =back
 
@@ -6252,6 +6258,50 @@ Source, Compiled Module Source, Perl Modules/Scripts
 
 =back
 
+=head2 perldos - Perl under DOS, W31, W95.
+
+=over 4
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+=over 4
+
+=item Prerequisites for Compiling Perl on DOS
+
+DJGPP, Pthreads
+
+=item Shortcomings of Perl under DOS
+
+=item Building Perl on DOS
+
+=item Testing Perl on DOS
+
+=item Installation of Perl on DOS
+
+=back
+
+=item BUILDING AND INSTALLING MODULES ON DOS
+
+=over 4
+
+=item Building Prerequisites for Perl on DOS
+
+=item Unpacking CPAN Modules on DOS
+
+=item Building Non-XS Modules on DOS
+
+=item Building XS Modules on DOS
+
+=back
+
+=item AUTHOR
+
+=item SEE ALSO
+
+=back
+
 =head2 perlepoc, README.epoc - Perl for EPOC
 
 =over 4
@@ -7130,6 +7180,48 @@ LIST, waitpid PID,FLAGS
 
 =back
 
+=head2 perlwin32 - Perl under Win32
+
+=over 4
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+=over 4
+
+=item Setting Up Perl on Win32
+
+Make, Command Shell, Borland C++, Microsoft Visual C++, Mingw32 with GCC
+
+=item Building
+
+=item Testing Perl on Win32
+
+=item Installation of Perl on Win32
+
+=item Usage Hints for Perl on Win32
+
+Environment Variables, File Globbing, Using perl from the command line,
+Building Extensions, Command-line Wildcard Expansion, Win32 Specific
+Extensions, Running Perl Scripts, Miscellaneous Things
+
+=back
+
+=item BUGS AND CAVEATS
+
+=item AUTHORS
+
+Gary Ng E<lt>71564.1743@CompuServe.COME<gt>, Gurusamy Sarathy
+E<lt>gsar@activestate.comE<gt>, Nick Ing-Simmons
+E<lt>nick@ing-simmons.netE<gt>
+
+=item SEE ALSO
+
+=item HISTORY
+
+=back
+
 =head1 PRAGMA DOCUMENTATION
 
 =head2 attrs - set/get attributes of a subroutine (deprecated)
@@ -7163,11 +7255,12 @@ data structures between threads
 
 =item DESCRIPTION
 
-=over 4
-
 =item EXPORT
 
-=back
+=item FUNCTIONS
+
+share VARIABLE, lock VARIABLE, unlock VARIABLE, cond_wait VARIABLE,
+cond_signal VARIABLE, cond_broadcast VARIABLE
 
 =item BUGS
 
@@ -7186,8 +7279,8 @@ from perl
 
 =item DESCRIPTION
 
-new, function, LIST, $threads->join, $threads->detach, threads->self,
-$threads->tid
+new, function, LIST, $thread->join, $thread->detach, threads->self,
+$thread->tid
 
 =item TODO
 
@@ -7246,6 +7339,18 @@ FETCH_I<type>_ATTRIBUTES, MODIFY_I<type>_ATTRIBUTES
 =item EXAMPLES
 
 =item SEE ALSO
+
+=back
+
+=head2 attrs - set/get attributes of a subroutine (deprecated)
+
+=over 4
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+method, locked
 
 =back
 
@@ -7375,6 +7480,21 @@ diagnostics
 =item BUGS
 
 =item AUTHOR
+
+=back
+
+=head2 encoding - pragma to control the conversion of legacy data into
+Unicode
+
+=over 4
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+=item KNOWN PROBLEMS
+
+=item SEE ALSO
 
 =back
 
@@ -8527,7 +8647,8 @@ B<Parameters:>
 
 =item CREATING A CLICKABLE IMAGE BUTTON
 
-B<Parameters:>
+B<Parameters:>, 3. The third option (-align, optional) is an alignment
+type, and may be TOP, BOTTOM or MIDDLE
 
 =item CREATING A JAVASCRIPT ACTION BUTTON
 
@@ -8557,8 +8678,9 @@ the <FORM> tag
 =item FETCHING ENVIRONMENT VARIABLES
 
 B<Accept()>, B<raw_cookie()>, B<user_agent()>, B<path_info()>,
-B<path_translated()>, B<remote_host()>, B<script_name()>, B<referer()>,
-B<auth_type ()>, B<server_name ()>, B<virtual_host ()>, B<server_port ()>,
+B<path_translated()>, B<remote_host()>, B<script_name()> Return the script
+name as a partial URL, for self-refering scripts, B<referer()>, B<auth_type
+()>, B<server_name ()>, B<virtual_host ()>, B<server_port ()>,
 B<server_software ()>, B<remote_user ()>, B<user_name ()>,
 B<request_method()>, B<content_type()>, B<http()>, B<https()>
 
@@ -9539,7 +9661,8 @@ $Data::Dumper::Quotekeys  I<or>  $I<OBJ>->Quotekeys(I<[NEWVAL]>),
 $Data::Dumper::Bless  I<or>  $I<OBJ>->Bless(I<[NEWVAL]>),
 $Data::Dumper::Maxdepth  I<or>	$I<OBJ>->Maxdepth(I<[NEWVAL]>),
 $Data::Dumper::Useperl	I<or>  $I<OBJ>->Useperl(I<[NEWVAL]>),
-$Data::Dumper::Sortkeys  I<or>	$I<OBJ>->Sortkeys(I<[NEWVAL]>)
+$Data::Dumper::Sortkeys  I<or>	$I<OBJ>->Sortkeys(I<[NEWVAL]>),
+$Data::Dumper::Deparse	I<or>  $I<OBJ>->Deparse(I<[NEWVAL]>)
 
 =item Exports
 
@@ -9787,7 +9910,7 @@ Fixed length 32-bit encodings, Multi-byte encodings, "Escape" encodings
 =item Encoding Names
 
 The MIME name as defined in IETF RFC-XXXX, The name in the IANA registry,
-The name used by the organization that defined it
+The name used by the the organization that defined it
 
 =back
 
@@ -9901,6 +10024,22 @@ arrays
 =item LIMITATIONS
 
 =item AUTHOR
+
+=back
+
+=head2 Errno - System errno constants
+
+=over 4
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+=item CAVEATS
+
+=item AUTHOR
+
+=item COPYRIGHT
 
 =back
 
@@ -10358,6 +10497,8 @@ prefixify
 
 processPL (o)
 
+quote_paren
+
 realclean (o)
 
 replace_manpage_separator
@@ -10613,8 +10754,9 @@ MAKEAPERL, MAKEFILE, MAN1PODS, MAN3PODS, MAP_TARGET, MYEXTLIB, NAME,
 NEEDS_LINKING, NOECHO, NORECURS, NO_VC, OBJECT, OPTIMIZE, PERL, PERL_CORE,
 PERLMAINCC, PERL_ARCHLIB, PERL_LIB, PERL_MALLOC_OK, PERLRUN, PERM_RW,
 PERM_RWX, PL_FILES, PM, PMLIBDIRS, PM_FILTER, POLLUTE, PPM_INSTALL_EXEC,
-PPM_INSTALL_SCRIPT, PREFIX, PREREQ_PM, PREREQ_FATAL, SKIP, TEST_LIBS,
-VERSION, VERSION_FROM, XS, XSOPT, XSPROTOARG, XS_VERSION
+PPM_INSTALL_SCRIPT, PREFIX, PREREQ_PM, PREREQ_FATAL, PREREQ_PRINT,
+PRINT_PREREQ, SKIP, TEST_LIBS, VERSION, VERSION_FROM, XS, XSOPT,
+XSPROTOARG, XS_VERSION
 
 =item Additional lowercase attributes
 
@@ -10866,6 +11008,8 @@ rmscopy($from,$to[,$date_flag])
 C<wanted>, C<bydepth>, C<preprocess>, C<postprocess>, C<follow>,
 C<follow_fast>, C<follow_skip>, C<dangling_symlinks>, C<no_chdir>,
 C<untaint>, C<untaint_pattern>, C<untaint_skip>
+
+=item WARNINGS
 
 =item CAVEAT
 
@@ -12379,40 +12523,6 @@ set ( NAME => VALUE [, NAME => VALUE ...] ), setall ( VALUES ), setval ( N
 
 =back
 
-=head2 Lingua::KO::Hangul::Util - utility functions for Hangul Syllables
-
-=over 4
-
-=item SYNOPSIS
-
-=item DESCRIPTION
-
-=over 4
-
-=item Composition and Decomposition
-
-C<$string_decomposed = decomposeHangul($codepoint)>, C<@codepoints =
-decomposeHangul($codepoint)>, C<$string_composed =
-composeHangul($src_string)>, C<@codepoints_composed =
-composeHangul($src_string)>
-
-=item Hangul Syllable Name
-
-C<$name = getHangulName($codepoint)>, C<$codepoint =
-parseHangulName($name)>
-
-=item EXPORT
-
-=back
-
-=item AUTHOR
-
-=item SEE ALSO
-
-http://www.unicode.org/unicode/reports/tr15
-
-=back
-
 =head2 List::Util - A selection of general-utility list subroutines
 
 =over 4
@@ -12886,8 +12996,9 @@ Out of Memory!, Fails to load Calc on Perl prior 5.6.0
 
 =item CAVEATS
 
-stringify, bstr(), bsstr() and 'cmp', int(), bdiv, bdiv, Modifying and =,
-bpow, Overloading -$x, Mixing different object types, bsqrt()
+stringify, bstr(), bsstr() and 'cmp', int(), length, bdiv, infinity
+handling, Modifying and =, bpow, Overloading -$x, Mixing different object
+types, bsqrt()
 
 =item LICENSE
 
@@ -16402,6 +16513,8 @@ L<Lingua::KO::Hangul::Util>, http://www.unicode.org/unicode/reports/tr15/
 =back
 
 =over 4
+
+=item BUGS
 
 =item AUTHOR
 
