@@ -1457,6 +1457,7 @@ lib/Tie/File/t/31_autodefer.t   Test for Tie::File
 lib/Tie/File/t/32_defer_misc.t  Test for Tie::File
 lib/Tie/File/t/33_defer_vs.t	Test for Tie::File
 lib/Tie/File/t/40_abs_cache.t	Test for Tie::File
+lib/Tie/File/t/41_heap.t	Test for Tie::File
 lib/Tie/Handle.pm		Base class for tied handles
 lib/Tie/Handle/stdhandle.t	Test for Tie::StdHandle
 lib/Tie/Hash.pm			Base class for tied hashes
