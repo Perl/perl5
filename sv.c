@@ -1497,6 +1497,9 @@ Perl_sv_2iv(pTHX_ register SV *sv)
 	      return SvIV(tmpstr);
 	  return PTR2IV(SvRV(sv));
 	}
+	if (SvREADONLY(sv) && SvFAKE(sv)) {
+	    sv_force_normal(sv);
+	}
 	if (SvREADONLY(sv) && !SvOK(sv)) {
 	    dTHR;
 	    if (ckWARN(WARN_UNINITIALIZED))
@@ -2764,7 +2767,7 @@ Perl_sv_setsv(pTHX_ SV *dstr, register SV *sstr)
  				    Perl_warner(aTHX_ WARN_REDEFINE,
  					CvCONST(cv)
  					? "Constant subroutine %s redefined"
- 					: "Subroutine %s redefined", 
+ 					: "Subroutine %s redefined",
  					GvENAME((GV*)dstr));
  				}
 			    }
