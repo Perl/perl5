@@ -1004,7 +1004,6 @@ Europe
     Spain           ftp://ftp.etse.urv.es/pub/mirror/perl/
                     ftp://ftp.rediris.es/mirror/CPAN/
     Sweden          ftp://ftp.sunet.se/pub/lang/perl/CPAN/
-    Switzerland     ftp://sunsite.cnlab-switch.ch/mirror/CPAN/
     UK              ftp://ftp.demon.co.uk/pub/mirrors/perl/CPAN/
                     ftp://sunsite.doc.ic.ac.uk/packages/CPAN/
                     ftp://unix.hensa.ac.uk/mirrors/perl-CPAN/
@@ -1016,7 +1015,7 @@ North America
                     ftp://enterprise.ic.gc.ca/pub/perl/CPAN/
     Manitoba        ftp://theory.uwinnipeg.ca/pub/CPAN/
     California      ftp://ftp.digital.com/pub/plan/perl/CPAN/
-                    ftp://ftp.cdrom.com/pub/perl/
+                    ftp://ftp.cdrom.com/pub/perl/CPAN/
     Colorado        ftp://ftp.cs.colorado.edu/pub/perl/CPAN/
     Florida         ftp://ftp.cis.ufl.edu/pub/perl/CPAN/
     Illinois        ftp://uiarchive.uiuc.edu/pub/lang/perl/CPAN/
@@ -1024,11 +1023,11 @@ North America
     New York        ftp://ftp.rge.com/pub/languages/perl/
     North Carolina  ftp://ftp.duke.edu/pub/perl/
     Oklahoma        ftp://ftp.ou.edu/mirrors/CPAN/
-    Oregon          ftp://ftp.orst.edu/pub/packages/CPAN/
+    Oregon          http://www.perl.org/CPAN/
+                    ftp://ftp.orst.edu/pub/packages/CPAN/
     Pennsylvania    ftp://ftp.epix.net/pub/languages/perl/
     Texas           ftp://ftp.sedl.org/pub/mirrors/CPAN/
                     ftp://ftp.metronet.com/pub/perl/
-    Washington      ftp://ftp.spu.edu/pub/CPAN/
 
 =item *
 South America
@@ -1118,7 +1117,7 @@ the module after __END__ either using AutoSplit or by saying:
 
  eval join('',<main::DATA>) || die $@ unless caller();
 
-Does your module pass the 'empty sub-class' test? If you say
+Does your module pass the 'empty subclass' test? If you say
 "C<@SUBCLASS::ISA = qw(YOURCLASS);>" your applications should be able
 to use SUBCLASS in exactly the same way as YOURCLASS.  For example,
 does your application still work if you change:  C<$obj = new YOURCLASS;>
