@@ -1715,6 +1715,7 @@ t/pragma/warn/universal	Tests for universal.c for warnings.t
 t/pragma/warn/utf8	Tests for utf8.c for warnings.t
 t/pragma/warn/util	Tests for util.c for warnings.t
 t/pragma/warnings.t	See if warning controls work
+t/run/runenv.t		Test if perl honors its environment variables.
 taint.c			Tainting code
 thrdvar.h		Per-thread variables
 thread.h		Threading header
