@@ -149,6 +149,16 @@ f()->();
 EXPECT
 Variable "$x" is not available at (eval 1) line 2.
 ########
+use warnings 'closure' ;
+{
+    my $x = 1;
+    $y = \$x; # force abandonment rather than clear-in-place at scope exit
+    sub f2 { eval '$x' }
+}
+f2();
+EXPECT
+Variable "$x" is not available at (eval 1) line 2.
+########
 # pad.c
 no warnings 'closure' ;
 sub x {
