@@ -27,6 +27,9 @@ re - Perl pragma to alter regular expression behaviour
     /^(.*)$/s;			   # output debugging info during
     				   #     compile and run time
 
+    use re 'debugcolor';	   # same as 'debug', but with colored output
+    ...
+
 (We use $^X in these examples because it's tainted by default.)
 
 =head1 DESCRIPTION
@@ -57,7 +60,11 @@ When C<use re 'debug'> is in effect, perl emits debugging messages when
 compiling and using regular expressions.  The output is the same as that
 obtained by running a C<-DDEBUGGING>-enabled perl interpreter with the
 B<-Dr> switch. It may be quite voluminous depending on the complexity
-of the match.
+of the match.  Using C<debugcolor> instead of C<debug> enables a
+form of output that can be used to get a colorful display on terminals
+that understand termcap color sequences.  Set C<$ENV{PERL_RE_TC}> to a
+comma-separated list of C<termcap> properties to use for highlighting
+strings on/off, pre-point part on/off.  
 See L<perldebug/"Debugging regular expressions"> for additional info.
 
 The directive C<use re 'debug'> is I<not lexically scoped>, as the
@@ -72,6 +79,23 @@ taint	=> 0x00100000,
 eval	=> 0x00200000,
 );
 
+sub setcolor {
+ eval {				# Ignore errors
+  require Term::Cap;
+
+  my $terminal = Tgetent Term::Cap ({OSPEED => 9600}); # Avoid warning.
+  my $props = $ENV{PERL_RE_TC} || 'md,me,so,se'; # can use us/ue later
+  my @props = split /,/, $props;
+
+
+  $ENV{TERMCAP_COLORS} = join "\t", map {$terminal->Tputs($_,1)} @props;
+ };
+
+ not defined $ENV{TERMCAP_COLORS} or ($ENV{TERMCAP_COLORS} =~ tr/\t/\t/) >= 4
+    or not defined $ENV{PERL_RE_TC}
+    or die "Not enough fields in \$ENV{PERL_RE_TC}=`$ENV{PERL_RE_TC}'";
+}
+
 sub bits {
     my $on = shift;
     my $bits = 0;
@@ -80,7 +104,8 @@ sub bits {
 	Carp::carp("Useless use of \"re\" pragma");
     }
     foreach my $s (@_){
-      if ($s eq 'debug') {
+      if ($s eq 'debug' or $s eq 'debugcolor') {
+ 	  setcolor() if $s eq 'debugcolor';
 	  require DynaLoader;
 	  @ISA = ('DynaLoader');
 	  bootstrap re;
