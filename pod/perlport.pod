@@ -832,8 +832,9 @@ Win32::GetOSVersion().  For example:
         print +('3.1','95','NT')[$os_version_info[4]],"\n";
     }
 
-There are also Win32::IsWinNT() and Win32::IsWin95(), try
-C<perldoc Win32>.  The very portable POSIX::uname() will work too:
+There are also Win32::IsWinNT() and Win32::IsWin95(), try C<perldoc Win32>,
+and as of libwin32 0.19 (not part of the core Perl distribution)
+Win32::GetOSName().  The very portable POSIX::uname() will work too:
 
     c:\> perl -MPOSIX -we "print join '|', uname"
     Windows NT|moonru|5.0|Build 2195 (Service Pack 2)|x86
