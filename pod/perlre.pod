@@ -573,3 +573,7 @@ You can't disambiguate that by saying C<\{1}000>, whereas you can fix it with
 C<${1}000>.  Basically, the operation of interpolation should not be confused
 with the operation of matching a backreference.  Certainly they mean two
 different things on the I<left> side of the C<s///>.
+
+=head2 SEE ALSO
+
+"Mastering Regular Expressions" (see L<perlbook>) by Jeffrey Friedl.
