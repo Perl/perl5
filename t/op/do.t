@@ -16,7 +16,7 @@ sub foo2
     $x;
 }
 
-print "1..15\n";
+print "1..18\n";
 
 $_[0] = "not ok 1\n";
 $result = do foo1("ok 1\n");
@@ -42,3 +42,30 @@ do blather("ok 9\n","ok 10\n");
 @x = ("ok 11\n", "ok 12\n");
 @y = ("ok 14\n", "ok 15\n");
 do blather(@x,"ok 13\n",@y);
+
+unshift @INC, '.';
+
+if (open(DO, ">$$.16")) {
+    print DO "print qq{ok 16\n} if defined wantarray && not wantarray\n";
+    close DO;
+}
+
+my $a = do "$$.16";
+
+if (open(DO, ">$$.17")) {
+    print DO "print qq{ok 17\n} if defined wantarray &&     wantarray\n";
+    close DO;
+}
+
+my @a = do "$$.17";
+
+if (open(DO, ">$$.18")) {
+    print DO "print qq{ok 18\n} if not defined wantarray\n";
+    close DO;
+}
+
+do "$$.18";
+
+END {
+    1 while unlink("$$.16", "$$.17", "$$.18");
+}
