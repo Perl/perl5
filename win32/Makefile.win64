@@ -1045,7 +1045,7 @@ distclean: clean
 	-del /f $(LIBDIR)\XSLoader.pm $(EXTDIR)\DynaLoader\XSLoader.pm
 	-del /f $(LIBDIR)\Devel\.exists $(LIBDIR)\File\.exists $(LIBDIR)\Sys\.exists
 	-del /f $(LIBDIR)\Fcntl.pm $(LIBDIR)\IO.pm $(LIBDIR)\Opcode.pm
-	-del /f $(LIBDIR)\ops.pm $(LIBDIR)\Safe.pm $(LIBDIR)\Thread.pm
+	-del /f $(LIBDIR)\ops.pm $(LIBDIR)\Safe.pm
 	-del /f $(LIBDIR)\SDBM_File.pm $(LIBDIR)\Socket.pm $(LIBDIR)\POSIX.pm
 	-del /f $(LIBDIR)\B.pm $(EXTDIR)\B\defsubs.h $(LIBDIR)\O.pm $(LIBDIR)\re.pm
 	-del /f $(LIBDIR)\Data\Dumper.pm $(LIBDIR)\ByteLoader.pm
