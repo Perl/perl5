@@ -104,7 +104,10 @@ case `$cc -v 2>&1`"" in
 	    ;;
     *)      ccisgcc=''
 	    ccversion=`which cc | xargs what | awk '/Compiler/{print $2}'`
-	    ccflags="-Ae $cc_cppflags -Wl,+vnocompatwarnings"
+	    case "$ccflags" in
+	    "-Ae "*) ;;
+	    *) ccflags="-Ae $cc_cppflags -Wl,+vnocompatwarnings" ;;
+	    esac
 	    # Needed because cpp does only support -Aa (not -Ae)
 	    cpplast='-'
 	    cppminus='-'
@@ -359,7 +362,10 @@ case "$uselargefiles" in
 	# but we cheat for now.  (Keep that in the left margin.)
 ccflags_uselargefiles="-D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64"
 
-	ccflags="$ccflags $ccflags_uselargefiles"
+	case "$ccflags" in
+	*" $ccflags_uselargefiles") ;;
+	*) ccflags="$ccflags $ccflags_uselargefiles" ;;
+	esac
 
         if test -z "$ccisgcc" -a -z "$gccversion"; then
 	    # The strict ANSI mode (-Aa) doesn't like large files.
