@@ -3611,9 +3611,15 @@ development release).
 
 The C<PerlIO::Scalar> and C<PerlIO::Via> (capitalised) were renamed as
 C<PerlIO::scalar> and C<PerlIO::via> (all lowercase) just before 5.8.0.
-The main rationale was to have all core IO layers to have all
+The main rationale was to have all core PerlIO layers to have all
 lowercase names.  The "plugins" are named as usual, for example
 C<PerlIO::via::QuotedPrint>.
+
+The C<threads::shared::queue> and C<threads::shared::semaphore> were
+renamed as C<Thread::Queue> and C<Thread::Semaphore> just before 5.8.0.
+The main rationale was to have thread modules to obey normal naming,
+C<Thread::> (the C<threads> and C<threads::shared> themselves are
+more pragma-like, they affect compile-time, so they stay lowercase).
 
 =head1 Reporting Bugs
 
