@@ -16,18 +16,6 @@
 #endif
 #include <windows.h>
 
-#ifndef __MINGW32__
-#include <lmcons.h>
-#include <lmerr.h>
-/* ugliness to work around a buggy struct definition in lmwksta.h */
-#undef LPTSTR
-#define LPTSTR LPWSTR
-#include <lmwksta.h>
-#undef LPTSTR
-#define LPTSTR LPSTR
-#include <lmapibuf.h>
-#endif /* __MINGW32__ */
-
 /* #include "config.h" */
 
 #define PERLIO_NOT_STDIO 0 
@@ -3014,43 +3002,63 @@ static
 XS(w32_DomainName)
 {
     dXSARGS;
-#ifndef HAS_NETWKSTAGETINFO
-    /* mingw32 (and Win95) don't have NetWksta*(), so do it the old way */
-    char name[256];
-    DWORD size = sizeof(name);
+    HINSTANCE hNetApi32 = LoadLibrary("netapi32.dll");
+    DWORD (__stdcall *pfnNetApiBufferFree)(LPVOID Buffer);
+    DWORD (__stdcall *pfnNetWkstaGetInfo)(LPWSTR servername, DWORD level,
+					  void *bufptr);
+
+    if (hNetApi32) {
+	pfnNetApiBufferFree = (DWORD (__stdcall *)(void *))
+	    GetProcAddress(hNetApi32, "NetApiBufferFree");
+	pfnNetWkstaGetInfo = (DWORD (__stdcall *)(LPWSTR, DWORD, void *))
+	    GetProcAddress(hNetApi32, "NetWkstaGetInfo");
+    }
     EXTEND(SP,1);
-    if (GetUserName(name,&size)) {
-	char sid[1024];
-	DWORD sidlen = sizeof(sid);
+    if (hNetApi32 && pfnNetWkstaGetInfo && pfnNetApiBufferFree) {
+	/* this way is more reliable, in case user has a local account. */
 	char dname[256];
 	DWORD dnamelen = sizeof(dname);
-	SID_NAME_USE snu;
-	if (LookupAccountName(NULL, name, (PSID)&sid, &sidlen,
-			      dname, &dnamelen, &snu)) {
-	    XSRETURN_PV(dname);		/* all that for this */
+	struct {
+	    DWORD   wki100_platform_id;
+	    LPWSTR  wki100_computername;
+	    LPWSTR  wki100_langroup;
+	    DWORD   wki100_ver_major;
+	    DWORD   wki100_ver_minor;
+	} *pwi;
+	/* NERR_Success *is* 0*/
+	if (0 == pfnNetWkstaGetInfo(NULL, 100, &pwi)) {
+	    if (pwi->wki100_langroup && *(pwi->wki100_langroup)) {
+		WideCharToMultiByte(CP_ACP, NULL, pwi->wki100_langroup,
+				    -1, (LPSTR)dname, dnamelen, NULL, NULL);
+	    }
+	    else {
+		WideCharToMultiByte(CP_ACP, NULL, pwi->wki100_computername,
+				    -1, (LPSTR)dname, dnamelen, NULL, NULL);
+	    }
+	    pfnNetApiBufferFree(pwi);
+	    FreeLibrary(hNetApi32);
+	    XSRETURN_PV(dname);
+	}
+	FreeLibrary(hNetApi32);
+    }
+    else {
+	/* Win95 doesn't have NetWksta*(), so do it the old way */
+	char name[256];
+	DWORD size = sizeof(name);
+	if (hNetApi32)
+	    FreeLibrary(hNetApi32);
+	if (GetUserName(name,&size)) {
+	    char sid[1024];
+	    DWORD sidlen = sizeof(sid);
+	    char dname[256];
+	    DWORD dnamelen = sizeof(dname);
+	    SID_NAME_USE snu;
+	    if (LookupAccountName(NULL, name, (PSID)&sid, &sidlen,
+				  dname, &dnamelen, &snu)) {
+		XSRETURN_PV(dname);		/* all that for this */
+	    }
 	}
     }
-#else
-    /* this way is more reliable, in case user has a local account.
-     * XXX need dynamic binding of netapi32.dll symbols or this will fail on
-     * Win95. Probably makes more sense to move it into libwin32. */
-    char dname[256];
-    DWORD dnamelen = sizeof(dname);
-    PWKSTA_INFO_100 pwi;
-    EXTEND(SP,1);
-    if (NERR_Success == NetWkstaGetInfo(NULL, 100, (LPBYTE*)&pwi)) {
-	if (pwi->wki100_langroup && *(pwi->wki100_langroup)) {
-	    WideCharToMultiByte(CP_ACP, NULL, pwi->wki100_langroup,
-				-1, (LPSTR)dname, dnamelen, NULL, NULL);
-	}
-	else {
-	    WideCharToMultiByte(CP_ACP, NULL, pwi->wki100_computername,
-				-1, (LPSTR)dname, dnamelen, NULL, NULL);
-	}
-	NetApiBufferFree(pwi);
-	XSRETURN_PV(dname);
-    }
-#endif
     XSRETURN_UNDEF;
 }
 
