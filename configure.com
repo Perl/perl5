@@ -39,7 +39,7 @@ $ cat  = "type"
 $ gcc_symbol = "gcc"
 $ ans = ""
 $ macros = ""
-$ extra_fags = ""
+$ extra_flags = ""
 $ user_c_flags = ""
 $ use_debugging_perl = "y"
 $ use_ieee_math = "n"
@@ -2219,6 +2219,8 @@ $   file_2_find = "[-]''packageup'.cld"
 $   echo ""
 $   echo4 "%Config-I-VMS, The perl.cld file is now being written..."
 $   OPEN/WRITE CONFIG 'file_2_find'
+$   ext = ".exe"
+$   IF ((sharedperl) .AND. (f$getsyi("ARCH_NAME") .NES. "VAX")) THEN ext := .AXE
 $   IF (use_vmsdebug_perl)
 $   THEN
 $     WRITE CONFIG "define verb dbgperl"
