@@ -1610,7 +1610,7 @@ Ap	|I32	|ibcmp_locale	|const char* a|const char* b|I32 len
 p	|bool	|ingroup	|Gid_t testgid|Uid_t effective
 p	|void	|init_debugger
 Ap	|void	|init_stacks
-p	|void	|init_tm	|struct tm *ptm
+Ap	|void	|init_tm	|struct tm *ptm
 p	|U32	|intro_my
 Ap	|char*	|instr		|const char* big|const char* little
 p	|bool	|io_close	|IO* io|bool not_implicit
@@ -1749,7 +1749,7 @@ Apd	|U32	|mg_length	|SV* sv
 Apd	|void	|mg_magical	|SV* sv
 Apd	|int	|mg_set		|SV* sv
 Ap	|I32	|mg_size	|SV* sv
-p	|void	|mini_mktime	|struct tm *pm
+Ap	|void	|mini_mktime	|struct tm *pm
 p	|OP*	|mod		|OP* o|I32 type
 p	|int	|mode_from_discipline|SV* discp
 Ap	|char*	|moreswitches	|char* s
@@ -1778,7 +1778,7 @@ Ap	|PerlIO*|my_popen_list	|char* mode|int n|SV ** args
 #endif
 Ap	|void	|my_setenv	|char* nam|char* val
 Ap	|I32	|my_stat
-p	|char *	|my_strftime	|char *fmt|int sec|int min|int hour|int mday|int mon|int year|int wday|int yday|int isdst
+Ap	|char *	|my_strftime	|char *fmt|int sec|int min|int hour|int mday|int mon|int year|int wday|int yday|int isdst
 #if defined(MYSWAP)
 Ap	|short	|my_swap	|short s
 Ap	|long	|my_htonl	|long l
