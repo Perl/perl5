@@ -29,9 +29,7 @@
 
 #if defined(PERL_IMPLICIT_SYS)
 #endif
-#ifdef PERL_CORE
 #define doing_taint		Perl_doing_taint
-#endif
 #if defined(USE_ITHREADS)
 #  if defined(PERL_IMPLICIT_SYS)
 #  endif
@@ -2539,9 +2537,7 @@
 
 #if defined(PERL_IMPLICIT_SYS)
 #endif
-#ifdef PERL_CORE
 #define doing_taint		Perl_doing_taint
-#endif
 #if defined(USE_ITHREADS)
 #  if defined(PERL_IMPLICIT_SYS)
 #  endif
