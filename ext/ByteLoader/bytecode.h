@@ -205,7 +205,7 @@ typedef IV IV64;
 	bset_obj_store(aTHX_ bstate, obj, (I32)ix) : (bstate->bs_obj_list[ix] = obj)
 
 /* NOTE: the bytecode header only sanity-checks the bytecode. If a script cares about
- * what version of Perl it's being called under, it should do a 'require 5.6.0' or
+ * what version of Perl it's being called under, it should do a 'use 5.006_001' or
  * equivalent. However, since the header includes checks requiring an exact match in
  * ByteLoader versions (we can't guarantee forward compatibility), you don't 
  * need to specify one:

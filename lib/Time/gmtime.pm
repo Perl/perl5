@@ -1,8 +1,9 @@
 package Time::gmtime;
 use strict;
+use 5.006_001;
+
 use Time::tm;
 
-use 5.6.1;
 our(@ISA, @EXPORT, @EXPORT_OK, %EXPORT_TAGS, $VERSION);
 BEGIN { 
     use Exporter   ();

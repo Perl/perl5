@@ -1,5 +1,5 @@
 package Cwd;
-require 5.6.0;
+use 5.006;
 
 =head1 NAME
 

@@ -3078,7 +3078,7 @@ PP(pp_require)
 		if (sver == 0 && (rev > 5 || (rev == 5 && ver >= 100))) {
 		    DIE(aTHX_ "Perl v%"UVuf".%"UVuf".%"UVuf" required--"
 			"this is only v%d.%d.%d, stopped"
-			" (did you mean v%"UVuf".%"UVuf".0?)",
+			" (did you mean v%"UVuf".%03"UVuf"?)",
 			rev, ver, sver, PERL_REVISION, PERL_VERSION,
 			PERL_SUBVERSION, rev, ver/100);
 		}

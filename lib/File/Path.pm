@@ -91,7 +91,7 @@ Charles Bailey <F<bailey@newman.upenn.edu>>
 
 =cut
 
-use 5.6.0;
+use 5.006;
 use Carp;
 use File::Basename ();
 use Exporter ();

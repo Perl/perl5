@@ -1,6 +1,6 @@
 package AutoLoader;
 
-use 5.6.0;
+use 5.006_001;
 our(@EXPORT, @EXPORT_OK, $VERSION);
 
 my $is_dosish;

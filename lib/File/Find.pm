@@ -1,7 +1,7 @@
 package File::Find;
+use 5.006;
 use strict;
 use warnings;
-use 5.6.0;
 our $VERSION = '1.02';
 require Exporter;
 require Cwd;

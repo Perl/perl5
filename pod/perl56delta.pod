@@ -112,16 +112,14 @@ to check if you're running a particular version of Perl:
         # new features supported
     }
 
-C<require> and C<use> also have some special magic to support such literals.
-They will be interpreted as a version rather than as a module name:
+C<require> and C<use> also have some special magic to support such
+literals, but this particular usage should be avoided because it leads to
+misleading error messages under versions of Perl which don't support vector
+strings.  Using a true version number will ensure correct behavior in all
+versions of Perl:
 
-    require v5.6.0;		# croak if $^V lt v5.6.0
-    use v5.6.0;			# same, but croaks at compile-time
-
-Alternatively, the C<v> may be omitted if there is more than one dot:
-
-    require 5.6.0;
-    use 5.6.0;
+    require 5.006;    # run time check for v5.6
+    use 5.006_001;    # compile time check for v5.6.1
 
 Also, C<sprintf> and C<printf> support the Perl-specific format flag C<%v>
 to print ordinals of characters in arbitrary strings:

@@ -13,7 +13,7 @@ $VERSION = '2.103';
 
 #$| = 1;
 
-require 5.6.1;
+use 5.006_001;
 require Exporter;
 use XSLoader ();
 require overload;

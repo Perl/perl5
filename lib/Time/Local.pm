@@ -1,5 +1,5 @@
 package Time::Local;
-require 5.6.0;
+use 5.006;
 require Exporter;
 use Carp;
 use strict;

@@ -247,7 +247,7 @@ Derived from FileHandle.pm by Graham Barr E<lt>F<gbarr@pobox.com>E<gt>
 
 =cut
 
-require 5.6.1;
+use 5.006_001;
 use strict;
 our($VERSION, @EXPORT_OK, @ISA);
 use Carp;

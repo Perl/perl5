@@ -2,7 +2,7 @@ package File::CheckTree;
 
 our $VERSION = '4.1';
 
-require 5.6.0;
+use 5.006;
 require Exporter;
 use warnings;
 

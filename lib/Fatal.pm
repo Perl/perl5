@@ -1,6 +1,6 @@
 package Fatal;
 
-use 5.6.1;
+use 5.006_001;
 use Carp;
 use strict;
 our($AUTOLOAD, $Debug, $VERSION);

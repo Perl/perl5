@@ -1,6 +1,6 @@
 package Tie::Array;
 
-use 5.6.1;
+use 5.006_001;
 use strict;
 use Carp;
 our $VERSION = '1.02';

@@ -1,4 +1,4 @@
-use 5.6.1;			# for (defined ref) and $#$v and our
+use 5.006_001;			# for (defined ref) and $#$v and our
 package Dumpvalue;
 use strict;
 our $VERSION = '1.00';
