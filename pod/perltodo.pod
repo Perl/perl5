@@ -20,13 +20,16 @@ of archives may be found at:
 C<perlio> provides this, but the interface could be a lot more
 straightforward.
 
-=head2 Eliminate need for "use utf8";
+=head2 Autoload bytes.pm
 
-While the C<utf8> pragma is autoloaded when necessary, it's still needed
-for things like Unicode characters in a source file. The UTF8 hint can
-always be set to true, but it needs to be set to false when F<utf8.pm>
-is being compiled. (To stop Perl trying to autoload the C<utf8>
-pragma...)
+When the lexer sees, for instance, C<bytes::length>, it should
+automatically load the C<bytes> pragma.
+
+=head2 Make "\u{XXXX}" et al work
+
+Danger, Will Robinson! Discussing the semantics of C<"\x{F00}">,
+C<"\xF00"> and C<"\U{F00}"> on P5P I<will> lead to a long and boring
+flamewar.
 
 =head2 Create a char *sv_pvprintify(sv, STRLEN *lenp, UV flags)
 
@@ -50,17 +53,6 @@ Possible options, controlled by the flags:
 - have a maximum length for the produced string (read it from *lenp)
 - append a "..." to the produced string if the maximum length is exceeded
 - really fancy: print unicode characters as \N{...}
-
-=head2 Autoload byte.pm
-
-When the lexer sees, for instance, C<bytes::length>, it should
-automatically load the C<bytes> pragma.
-
-=head2 Make "\u{XXXX}" et al work
-
-Danger, Will Robinson! Discussing the semantics of C<"\x{F00}">,
-C<"\xF00"> and C<"\U{F00}"> on P5P I<will> lead to a long and boring
-flamewar.
 
 =head2 Overloadable regex assertions
 
