@@ -51,17 +51,6 @@
 #include <signal.h>
 #endif
 
-#ifdef SOCKS_64BIT_BUG
-typedef struct __s64_iobuffer {
-    struct __s64_iobuffer *next, *last;		/* Queue pointer */
-    PerlIO *fp;					/* assigned file pointer */
-    int cnt;					/* Buffer counter */
-    int size;					/* Buffer size */
-    int *buffer;				/* the buffer */
-} S64_IOB;
-
-#endif
-
 bool
 Perl_do_open(pTHX_ GV *gv, register char *name, I32 len, int as_raw,
 	     int rawmode, int rawperm, PerlIO *supplied_fp)
@@ -2089,6 +2078,7 @@ Perl_do_shmio(pTHX_ I32 optype, SV **mark, SV **sp)
  ** without checking the ungetc buffer.
  **/
 
+/* Not very thread-safe? */
 static S64_IOB *s64_buffer = (S64_IOB *) NULL;
 
 /* initialize the buffer area */
@@ -2122,7 +2112,7 @@ static S64_IOB *S_s64_create_buffer( PerlIO *f) {
 
 /* delete a buffered stream pointer */
 void Perl_do_s64_delete_buffer( PerlIO *f) {
-    S64_IOB *ptr = _s64_get_buffer(f);
+    S64_IOB *ptr = S_s64_get_buffer(f);
     if( ptr) {
 	/* fix the stream pointer according to the bytes buffered */
 	/* required, if this is called in a seek-context */
@@ -2160,7 +2150,7 @@ static int S_s64_malloc( S64_IOB *ptr) {
 
 /* SOCKS 64 bit getc replacement */
 int Perl_do_s64_getc( PerlIO *f) {
-    S64_IOB *ptr = _s64_get_buffer(f);
+    S64_IOB *ptr = S_s64_get_buffer(f);
     if( ptr) {
 	if( ptr->cnt) 
 	    return( ptr->buffer[--ptr->cnt]);
@@ -2170,12 +2160,12 @@ int Perl_do_s64_getc( PerlIO *f) {
 
 /* SOCKS 64 bit ungetc replacement */
 int Perl_do_s64_ungetc( int ch, PerlIO *f) {
-    S64_IOB *ptr = _s64_get_buffer(f);
+    S64_IOB *ptr = S_s64_get_buffer(f);
 
-    if( !ptr) ptr=_s64_create_buffer(f);
+    if( !ptr) ptr = S_s64_create_buffer(f);
     if( !ptr) return( EOF);
     if( !ptr->buffer || (ptr->buffer && ptr->cnt >= ptr->size)) 
-	if( !_s64_malloc( ptr)) return( EOF);
+	if( !S_s64_malloc( ptr)) return( EOF);
     ptr->buffer[ptr->cnt++] = ch;
 
     return( ch);
@@ -2185,7 +2175,7 @@ int Perl_do_s64_ungetc( int ch, PerlIO *f) {
 SSize_t	Perl_do_s64_fread(void *buf, SSize_t count, PerlIO* f) {
     SSize_t len = 0;
     char *bufptr = (char *) buf;
-    S64_IOB *ptr = _s64_get_buffer(f);
+    S64_IOB *ptr = S_s64_get_buffer(f);
     if( ptr) {
 	while( ptr->cnt && count) {
 	    *bufptr++ = ptr->buffer[--ptr->cnt];
@@ -2200,7 +2190,7 @@ SSize_t	Perl_do_s64_fread(void *buf, SSize_t count, PerlIO* f) {
 
 /* SOCKS 64 bit fseek replacement */
 int	Perl_do_s64_seek(PerlIO* f, Off_t offset, int whence) {
-    S64_IOB *ptr = _s64_get_buffer(f);
+    S64_IOB *ptr = S_s64_get_buffer(f);
 
     /* Simply clear the buffer and seek if the position is absolute */
     if( SEEK_SET == whence || SEEK_END == whence) {
@@ -2223,7 +2213,7 @@ int	Perl_do_s64_seek(PerlIO* f, Off_t offset, int whence) {
 /* SOCKS 64 bit ftell replacement */
 Off_t	Perl_do_s64_tell(PerlIO* f) {
     Off_t offset = 0;
-    S64_IOB *ptr = _s64_get_buffer(f);
+    S64_IOB *ptr = S_s64_get_buffer(f);
     if( ptr)
 	offset = ptr->cnt;
     return( ftello(f) - offset);
