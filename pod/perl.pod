@@ -35,6 +35,7 @@ sections:
     perlmodlib		Perl modules: how to write and use
     perlmodinstall	Perl modules: how to install from CPAN
     perlform		Perl formats
+    perlunicode		Perl unicode support
     perllocale		Perl locale support
 
     perlreftut		Perl references short introduction
@@ -50,7 +51,8 @@ sections:
     perlipc		Perl interprocess communication
     perlfork		Perl fork() information
     perlthrtut		Perl threads tutorial
-    perldbmfilter	Perl DBM Filters
+    perllexwarn		Perl warnings and their control
+    perldbmfilter	Perl DBM filters
 
     perlcompile		Perl compiler suite intro
     perldebug		Perl debugging
@@ -76,6 +78,15 @@ sections:
     perltodo		Perl things to do
     perlhack		Perl hackers guide
     perlhist		Perl history records
+
+    perlamiga		Perl notes for Amiga
+    perlcygwin		Perl notes for Cygwin
+    perldos		Perl notes for DOS
+    perlhpux		Perl notes for HP-UX
+    perlos2		Perl notes for OS/2
+    perlos390		Perl notes for OS/390
+    perlvms		Perl notes for VMS
+    perlwin32		Perl notes for Windows
 
 (If you're intending to read these straight through for the first time,
 the suggested order will tend to reduce the number of forward references.)
