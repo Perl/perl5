@@ -1644,7 +1644,12 @@ PP(pp_helem)
 
     if (SvTYPE(hv) == SVt_PVHV) {
 	if (PL_op->op_private & OPpLVAL_INTRO)
-	    preeminent = SvRMAGICAL(hv) ? 1 : hv_exists_ent(hv, keysv, 0);
+	    preeminent =  
+		( SvRMAGICAL(hv)
+		  && !mg_find((SV*)hv, PERL_MAGIC_tied)
+		  && !mg_find((SV*)hv, PERL_MAGIC_env)
+		) ? 1 : hv_exists_ent(hv, keysv, 0);
+
 	he = hv_fetch_ent(hv, keysv, lval && !defer, hash);
 	svp = he ? &HeVAL(he) : 0;
     }
@@ -1682,8 +1687,17 @@ PP(pp_helem)
 		    STRLEN keylen;
 		    char *key = SvPV(keysv, keylen);
 		    SAVEDELETE(hv, savepvn(key,keylen), keylen);
-		} else
+		} else {
+		    SV *sv;
 		    save_helem(hv, keysv, svp);
+		    sv = *svp;
+		    /* If we're localizing a tied hash element, this new
+		     * sv won't actually be stored in the hash - so it
+		     * won't get reaped when the localize ends. Ensure it
+		     * gets reaped by mortifying it instead. DAPM */
+		    if (SvTIED_mg(sv, PERL_MAGIC_tiedelem))
+			sv_2mortal(sv);
+		}
             }
 	}
 	else if (PL_op->op_private & OPpDEREF)
@@ -2938,8 +2952,17 @@ PP(pp_aelem)
 	    PUSHs(lv);
 	    RETURN;
 	}
-	if (PL_op->op_private & OPpLVAL_INTRO)
+	if (PL_op->op_private & OPpLVAL_INTRO) {
+	    SV *sv;
 	    save_aelem(av, elem, svp);
+	    sv = *svp;
+	    /* If we're localizing a tied array element, this new sv
+	     * won't actually be stored in the array - so it won't get
+	     * reaped when the localize ends. Ensure it gets reaped by
+	     * mortifying it instead. DAPM */
+	    if (SvTIED_mg(sv, PERL_MAGIC_tiedelem))
+		sv_2mortal(sv);
+	}
 	else if (PL_op->op_private & OPpDEREF)
 	    vivify_ref(*svp, PL_op->op_private & OPpDEREF);
     }

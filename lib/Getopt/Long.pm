@@ -2,12 +2,12 @@
 
 package Getopt::Long;
 
-# RCS Status      : $Id: GetoptLong.pm,v 2.56 2002-04-30 13:00:14+02 jv Exp $
+# RCS Status      : $Id: GetoptLong.pm,v 2.57 2002-05-03 17:03:38+02 jv Exp $
 # Author          : Johan Vromans
 # Created On      : Tue Sep 11 15:00:12 1990
 # Last Modified By: Johan Vromans
-# Last Modified On: Tue Apr 30 12:48:49 2002
-# Update Count    : 1078
+# Last Modified On: Fri May  3 17:01:26 2002
+# Update Count    : 1080
 # Status          : Released
 
 ################ Copyright ################
@@ -35,10 +35,10 @@ use 5.004;
 use strict;
 
 use vars qw($VERSION);
-$VERSION        =  2.30;
+$VERSION        =  2.31;
 # For testing versions only.
 use vars qw($VERSION_STRING);
-$VERSION_STRING = "2.30";
+$VERSION_STRING = "2.31";
 
 use Exporter;
 
@@ -183,7 +183,7 @@ sub configure {
     my $save = Getopt::Long::Configure ($self->{settings}, @_);
 
     # Restore orig config and save the new config.
-    $self->{settings} = Configure ($save);
+    $self->{settings} = Getopt::Long::Configure ($save);
 }
 
 sub getoptions {
@@ -260,7 +260,7 @@ sub GetOptions {
     $error = '';
 
     print STDERR ("GetOpt::Long $Getopt::Long::VERSION (",
-		  '$Revision: 2.56 $', ") ",
+		  '$Revision: 2.57 $', ") ",
 		  "called from package \"$pkg\".",
 		  "\n  ",
 		  "ARGV: (@ARGV)",

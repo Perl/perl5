@@ -206,12 +206,6 @@ S_save_scalar_at(pTHX_ SV **sptr)
 	PL_localizing = 1;
 	SvSETMAGIC(sv);
 	PL_localizing = 0;
-	/* If we're localizing a tied array/hash element, this new sv
-	 * won't actually be stored in the array/hash - so it won't get
-	 * reaped when the localize ends. Ensure it gets reaped by
-	 * mortifying it instead. DAPM */
-	if (SvTIED_mg(sv, PERL_MAGIC_tiedelem))
-	    sv_2mortal(sv);
     }
     return sv;
 }

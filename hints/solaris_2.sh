@@ -96,14 +96,15 @@ EOCBU
 
 case "$cc" in
 '')	if test -f /opt/SUNWspro/bin/cc; then
+		cc=/opt/SUNWspro/bin/cc
 		cat <<EOF >&4	
 
-You specified no cc but you seem to have the Workshop compiler installed,
-using that.  If you want something else, specify that in the command line,
+You specified no cc but you seem to have the Workshop compiler
+($cc) installed, using that.
+If you want something else, specify that in the command line,
 e.g. Configure -Dcc=gcc
 
 EOF
-		cc=/opt/SUNWspro/bin/cc
 	fi
 	;;
 esac

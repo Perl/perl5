@@ -67,11 +67,11 @@ sub TEST {
 $Data::Dumper::Useperl = 1;
 if (defined &Data::Dumper::Dumpxs) {
   print "### XS extension loaded, will run XS tests\n";
-  $TMAX = 339; $XS = 1;
+  $TMAX = 357; $XS = 1;
 }
 else {
   print "### XS extensions not loaded, will NOT run XS tests\n";
-  $TMAX = 171; $XS = 0;
+  $TMAX = 180; $XS = 0;
 }
 
 print "1..$TMAX\n";
@@ -1309,4 +1309,47 @@ EOT
   if ($XS) {
     TEST q(Data::Dumper->Dumpxs([$a])), "XS utf8 flag with '";
   }
+}
+
+# Jarkko found that -Mutf8 caused some tests to fail.  Turns out that there
+# was an otherwise untested code path in the XS for utf8 hash keys with purity
+# 1
+
+{
+  $WANT = <<'EOT';
+#$ping = \*::ping;
+#*::ping = \5;
+#*::ping = {
+#  "\x{decaf}\x{decaf}\x{decaf}\x{decaf}" => do{my $o}
+#};
+#*::ping{HASH}->{"\x{decaf}\x{decaf}\x{decaf}\x{decaf}"} = *::ping{SCALAR};
+#%pong = %{*::ping{HASH}};
+EOT
+  local $Data::Dumper::Purity = 1;
+  local $Data::Dumper::Sortkeys;
+  $ping = 5;
+  %ping = (chr (0xDECAF) x 4  =>\$ping);
+  for $Data::Dumper::Sortkeys (0, 1) {
+    TEST q(Data::Dumper->Dump([\\*ping, \\%ping], ['*ping', '*pong']));
+    TEST q(Data::Dumper->Dumpxs([\\*ping, \\%ping], ['*ping', '*pong'])) if $XS;
+  }
+}
+
+# XS for quotekeys==0 was not being defensive enough against utf8 flagged
+# scalars
+
+{
+  $WANT = <<'EOT';
+#$VAR1 = {
+#  perl => 'rocks'
+#};
+EOT
+  local $Data::Dumper::Quotekeys = 0;
+  my $k = 'perl' . chr 256;
+  chop $k;
+  %foo = ($k => 'rocks');
+
+  TEST q(Data::Dumper->Dump([\\%foo])), "quotekeys == 0 for utf8 flagged ASCII";
+  TEST q(Data::Dumper->Dumpxs([\\%foo])),
+    "XS quotekeys == 0 for utf8 flagged ASCII" if $XS;
 }

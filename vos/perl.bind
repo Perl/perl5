@@ -26,6 +26,7 @@ modules:  miniperlmain,
           pp_sort,
           pp_sys,
           reentr,
+          regcomp,
           regexec,
           run,
           scope,
@@ -35,6 +36,7 @@ modules:  miniperlmain,
           universal,
           utf8,
           util,
+          vos,
           xsutils;
 
 end;

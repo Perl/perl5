@@ -7296,9 +7296,6 @@ Perl_sv_bless(pTHX_ SV *sv, HV *stash)
 }
 
 /* Downgrades a PVGV to a PVMG.
- *
- * XXX This function doesn't actually appear to be used anywhere
- * DAPM 15-Jun-01
  */
 
 STATIC void

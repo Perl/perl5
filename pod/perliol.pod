@@ -754,10 +754,14 @@ of I<$scalar>, and writes change the value. In both cases the position
 in I<$scalar> starts as zero but can be altered via C<seek>, and
 determined via C<tell>.
 
-=item ":Object" or ":Perl"
+=item ":Via"
 
-May be provided to allow layers to be implemented as perl code -
-implementation is being investigated.
+Provided to allow layers to be implemented as Perl code.  For instance:
+
+   use MIME::QuotedPrint;
+   open(my $fh, ">Via(MIME::QuotedPrint)", "qp");
+
+See L<PerlIO::Via> for details.
 
 =back
 

@@ -88,8 +88,8 @@ that too.  Additional information is in the Porting/ directory.
 =head1 WARNING:  This version requires an extra step to build old extensions.
 
 5.005_53 and later releases do not export unadorned
-global symbols anymore.  This means you may need to build older
-extensions that have not been updated for the new naming convention
+global symbols anymore.  This means you may need to build rather old
+extensions that have not been updated for the current naming convention
 with:
 
 	perl Makefile.PL POLLUTE=1
@@ -101,17 +101,12 @@ building perl itself with:
 
 pod/perldelta.pod contains more details about this.
 
-=head1 WARNING:  This version may not be binary compatible with Perl 5.005.
+=head1 WARNING:  This version is not binary compatible with releases of
+Perl prior to 5.8.0.
 
-Using the default Configure options for building perl should get you
-a perl that will be binary compatible with the 5.005 release.
-
-However, if you run Configure with any custom options, such as
--Dusethreads, -Dusemultiplicity, -Dusemymalloc, etc.,
-the resulting perl will not be binary compatible.  Under these
-circumstances, if you have dynamically loaded extensions that were
-built under perl 5.005, you will need to rebuild and reinstall all
-those extensions to use them with 5.6.
+If you have built extensions (ie modules that include C code)
+using an earlier version of Perl, you will need to rebuild and reinstall
+those extensions.
 
 Pure perl modules without XS or C code should continue to work fine
 without reinstallation.  See the discussions below on

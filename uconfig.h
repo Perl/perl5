@@ -3810,7 +3810,9 @@
  *	This symbol, if defined, indicates that you must access
  *	character data through U32-aligned pointers.
  */
+#ifndef U32_ALIGNMENT_REQUIRED
 #define U32_ALIGNMENT_REQUIRED	/**/
+#endif
 
 /* HAS_USLEEP_PROTO:
  *	This symbol, if defined, indicates that the system provides

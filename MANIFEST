@@ -2206,8 +2206,7 @@ Porting/fixvars		Find undeclared variables with C compiler and fix em
 Porting/genlog		Generate formatted changelogs by querying p4d
 Porting/Glossary	Glossary of config.sh variables
 Porting/makerel		Release making utility
-Porting/p4d2p		Generate standard patches from p4 diffs
-Porting/p4desc		Smarter 'p4 describe', outputs diffs for new files
+Porting/p4genpatch	Obsoletes both p4desc and p4d2p
 Porting/patching.pod	How to report changes made to Perl
 Porting/patchls		Flexible patch file listing utility
 Porting/pumpkin.pod	Guidelines and hints for Perl maintainers
@@ -2673,17 +2672,20 @@ vms/vmsish.h			VMS-specific C header for Perl core
 vms/vmspipe.com			VMS-specific piped command helper script
 vms/vms_yfix.pl			convert Unix perly.[ch] to VMS perly_[ch].vms
 vms/writemain.pl		Generate perlmain.c from miniperlmain.c+extensions
-vos/build.cm			VOS command macro to build Perl
+vos/build.cm			VOS command macro to build "mini" Perl
 vos/Changes			Changes made to port Perl to the VOS operating system
-vos/compile_perl.cm		VOS command macro to build multiple version of Perl
+vos/compile_full_perl.cm	VOS command macro to build "full" Perl
+vos/compile_perl.cm		VOS command macro to build "mini" Perl
 vos/config.alpha.def		definitions used by config.pl
 vos/config.alpha.h		config.h for use with alpha VOS POSIX.1 support
 vos/config.ga.def		definitions used by config.pl
 vos/config.ga.h			config.h for use with generally-available VOS POSIX.1 support
 vos/config.pl			script to convert a config_h.SH to a config.h
-vos/configure_perl.cm		VOS command macro to configure perl before building
-vos/install_perl.cm		VOS command macro to install perl after building
+vos/configure_full_perl.sh	VOS shell script to configure "full" perl before building
+vos/configure_perl.cm		VOS command macro to configure "mini" perl before building
+vos/install_perl.cm		VOS command macro to install "mini" perl after building
 vos/Makefile			A helper for maintaining the config.*.* in UNIX
+vos/make_full_perl.sh	VOS shell script to build and test "full" perl
 vos/perl.bind			VOS bind control file
 vos/test_vos_dummies.c		Test program for "vos_dummies.c"
 vos/vos.c			VOS emulations for missing POSIX functions
@@ -2741,9 +2743,9 @@ wince/bin/pl2bat.pl			WinCE port
 wince/bin/runperl.pl			WinCE port
 wince/bin/search.pl			WinCE port
 wince/cecopy-lib.pl			WinCE port
+wince/compile.bat			WinCE port
 wince/comp.pl				WinCE port
 wince/config.ce				WinCE port
-wince/config.h				WinCE port
 wince/config_H.ce			WinCE port
 wince/config_h.PL			WinCE port
 wince/config_sh.PL			WinCE port
@@ -2761,7 +2763,6 @@ wince/include/time.h			WinCE port
 wince/Makefile.ce			WinCE port
 wince/makeico.pl			WinCE port
 wince/perl.rc				WinCE port
-wince/perldll.def			WinCE port
 wince/perllib.c				WinCE port
 wince/perlmain.c			WinCE port
 wince/README.compile			WinCE port
@@ -2773,6 +2774,7 @@ wince/win32.h				WinCE port
 wince/win32iop.h			WinCE port
 wince/win32thread.c			WinCE port
 wince/win32thread.h			WinCE port
+wince/win32io.c				WinCE port
 wince/wince.c				WinCE port
 wince/wince.h				WinCE port
 wince/wincesck.c			WinCE port

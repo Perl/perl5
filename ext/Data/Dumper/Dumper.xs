@@ -574,10 +574,12 @@ DD_dump(pTHX_ SV *val, char *name, STRLEN namelen, SV *retval, HV *seenhv,
 
             /* foreach (keys %hash) */
             for (i = 0; 1; i++) {
-		char *nkey = NULL;
+		char *nkey;
+                char *nkey_buffer = NULL;
 		I32 nticks = 0;
 		SV* keysv;
 		STRLEN keylen;
+                I32 nlen;
 		bool do_utf8 = FALSE;
 
                 if ((sortkeys && !(keys && (I32)i <= av_len(keys))) ||
@@ -592,7 +594,8 @@ DD_dump(pTHX_ SV *val, char *name, STRLEN namelen, SV *retval, HV *seenhv,
 		    svp = av_fetch(keys, i, FALSE);
 		    keysv = svp ? *svp : sv_mortalcopy(&PL_sv_undef);
 		    key = SvPV(keysv, keylen);
-		    svp = hv_fetch((HV*)ival, key, keylen, 0);
+		    svp = hv_fetch((HV*)ival, key,
+                                   SvUTF8(keysv) ? -keylen : keylen, 0);
 		    hval = svp ? *svp : sv_mortalcopy(&PL_sv_undef);
 		}
 		else {
@@ -604,22 +607,39 @@ DD_dump(pTHX_ SV *val, char *name, STRLEN namelen, SV *retval, HV *seenhv,
 		key = SvPV(keysv, keylen);
 		klen = keylen;
 
-		if (do_utf8) {
-		    char *okey = SvPVX(retval) + SvCUR(retval);
-		    I32 nlen;
+                sv_catsv(retval, totpad);
+                sv_catsv(retval, ipad);
+                /* old logic was first to check utf8 flag, and if utf8 always
+                   call esc_q_utf8.  This caused test to break under -Mutf8,
+                   because there even strings like 'c' have utf8 flag on.
+                   Hence with quotekeys == 0 the XS code would still '' quote
+                   them based on flags, whereas the perl code would not,
+                   based on regexps.
+                   The perl code is correct.
+                   needs_quote() decides that anything that isn't a valid
+                   perl identifier needs to be quoted, hence only correctly
+                   formed strings with no characters outside [A-Za-z0-9_:]
+                   won't need quoting.  None of those characters are used in
+                   the byte encoding of utf8, so anything with utf8
+                   encoded characters in will need quoting. Hence strings
+                   with utf8 encoded characters in will end up inside do_utf8
+                   just like before, but now strings with utf8 flag set but
+                   only ascii characters will end up in the unquoted section.
 
-		    sv_catsv(retval, totpad);
-		    sv_catsv(retval, ipad);
-		    nlen = esc_q_utf8(aTHX_ retval, key, klen);
-
-		    sname = newSVsv(iname);
-		    sv_catpvn(sname, okey, nlen);
-		    sv_catpvn(sname, "}", 1);
-		}
-		else {
-		    if (quotekeys || needs_quote(key)) {
+                   There should also be less tests for the (probably currently)
+                   more common doesn't need quoting case.
+                   The code is also smaller (22044 vs 22260) because I've been
+                   able to pull the comon logic out to both sides.  */
+                if (quotekeys || needs_quote(key)) {
+                    if (do_utf8) {
+                        STRLEN ocur = SvCUR(retval);
+                        nlen = esc_q_utf8(aTHX_ retval, key, klen);
+                        nkey = SvPVX(retval) + ocur;
+                    }
+                    else {
 		        nticks = num_q(key, klen);
-			New(0, nkey, klen+nticks+3, char);
+			New(0, nkey_buffer, klen+nticks+3, char);
+                        nkey = nkey_buffer;
 			nkey[0] = '\'';
 			if (nticks)
 			    klen += esc_q(nkey+1, key, klen);
@@ -627,20 +647,19 @@ DD_dump(pTHX_ SV *val, char *name, STRLEN namelen, SV *retval, HV *seenhv,
 			    (void)Copy(key, nkey+1, klen, char);
 			nkey[++klen] = '\'';
 			nkey[++klen] = '\0';
+                        nlen = klen;
+                        sv_catpvn(retval, nkey, klen);
 		    }
-		    else {
-		        New(0, nkey, klen, char);
-			(void)Copy(key, nkey, klen, char);
-		    }
-
-		    sname = newSVsv(iname);
-		    sv_catpvn(sname, nkey, klen);
-		    sv_catpvn(sname, "}", 1);
-
-		    sv_catsv(retval, totpad);
-		    sv_catsv(retval, ipad);
-		    sv_catpvn(retval, nkey, klen);
+                }
+                else {
+                    nkey = key;
+                    nlen = klen;
+                    sv_catpvn(retval, nkey, klen);
 		}
+                sname = newSVsv(iname);
+                sv_catpvn(sname, nkey, nlen);
+                sv_catpvn(sname, "}", 1);
+
 		sv_catpvn(retval, " => ", 4);
 		if (indent >= 2) {
 		    char *extra;
@@ -661,7 +680,7 @@ DD_dump(pTHX_ SV *val, char *name, STRLEN namelen, SV *retval, HV *seenhv,
 			freezer, toaster, purity, deepcopy, quotekeys, bless,
 			maxdepth, sortkeys);
 		SvREFCNT_dec(sname);
-		Safefree(nkey);
+		Safefree(nkey_buffer);
 		if (indent >= 2)
 		    SvREFCNT_dec(newapad);
 	    }

@@ -271,7 +271,7 @@ SKIP: {
 # Check truncating a closed file.
     eval { truncate "Iofs.tmp", 5; };
 
-    skip("no truncate - $@", 10) if $@;
+    skip("no truncate - $@", 6) if $@;
 
     is(-s "Iofs.tmp", 5, "truncation to five bytes");
 
@@ -304,7 +304,7 @@ SKIP: {
     }
 
     if ($^O eq 'vos') {
-        skip ("# TODO - hit VOS bug posix-973 - cannot resize an open file below the current file pos.", 7);
+        skip ("# TODO - hit VOS bug posix-973 - cannot resize an open file below the current file pos.", 3);
     }
 
     is(-s "Iofs.tmp", 200, "fh resize to 200 working (filename check)");

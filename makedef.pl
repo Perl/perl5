@@ -17,12 +17,12 @@ while (@ARGV) {
     $define{$1} = $2 if ($flag =~ /^-D(\w+)=(.+)$/);
     $CCTYPE   = $1 if ($flag =~ /^CCTYPE=(\w+)$/);
     $PLATFORM = $1 if ($flag =~ /^PLATFORM=(\w+)$/);
-	if ($PLATFORM eq 'netware') {
-		$FILETYPE = $1 if ($flag =~ /^FILETYPE=(\w+)$/);
-	}
+    if ($PLATFORM eq 'netware') {
+	$FILETYPE = $1 if ($flag =~ /^FILETYPE=(\w+)$/);
+    }
 }
 
-my @PLATFORM = qw(aix win32 os2 MacOS netware);
+my @PLATFORM = qw(aix win32 wince os2 MacOS netware);
 my %PLATFORM;
 @PLATFORM{@PLATFORM} = ();
 
@@ -42,7 +42,7 @@ my $perlio_sym  = "perlio.sym";
 if ($PLATFORM eq 'aix') {
     # Nothing for now.
 }
-elsif ($PLATFORM eq 'win32' || $PLATFORM eq 'netware') {
+elsif ($PLATFORM =~ /^win(?:32|ce)$/ || $PLATFORM eq 'netware') {
     $CCTYPE = "MSVC" unless defined $CCTYPE;
     foreach ($thrdvar_h, $intrpvar_h, $perlvars_h, $global_sym,
 		$pp_sym, $globvar_sym, $perlio_sym) {
@@ -56,7 +56,7 @@ elsif ($PLATFORM eq 'MacOS') {
     }
 }
 
-unless ($PLATFORM eq 'win32' || $PLATFORM eq 'MacOS' || $PLATFORM eq 'netware') {
+unless ($PLATFORM eq 'win32' || $PLATFORM eq 'wince' || $PLATFORM eq 'MacOS' || $PLATFORM eq 'netware') {
     open(CFG,$config_sh) || die "Cannot open $config_sh: $!\n";
     while (<CFG>) {
 	if (/^(?:ccflags|optimize)='(.+)'$/) {
@@ -106,9 +106,10 @@ if ($define{USE_ITHREADS} && $PLATFORM ne 'win32' && $^O ne 'darwin') {
 
 my $sym_ord = 0;
 
-if ($PLATFORM eq 'win32') {
+if ($PLATFORM =~ /^win(?:32|ce)$/) {
     warn join(' ',keys %define)."\n";
-    print "LIBRARY perl58\n";
+    ($dll = ($define{PERL_DLL} || "perl58")) =~ s/\.dll$//i;
+    print "LIBRARY $dll\n";
     print "DESCRIPTION 'Perl interpreter'\n";
     print "EXPORTS\n";
     if ($define{PERL_IMPLICIT_SYS}) {
@@ -206,6 +207,77 @@ if ($PLATFORM eq 'win32') {
 		     PL_sortcxix
 		     PL_sublex_info
 		     PL_timesbuf
+		     main
+		     Perl_ErrorNo
+		     Perl_GetVars
+		     Perl_do_exec3
+		     Perl_do_ipcctl
+		     Perl_do_ipcget
+		     Perl_do_msgrcv
+		     Perl_do_msgsnd
+		     Perl_do_semop
+		     Perl_do_shmio
+		     Perl_dump_fds
+		     Perl_init_thread_intern
+		     Perl_my_bzero
+		     Perl_my_bcopy
+		     Perl_my_htonl
+		     Perl_my_ntohl
+		     Perl_my_swap
+		     Perl_my_chsize
+		     Perl_same_dirent
+		     Perl_setenv_getix
+		     Perl_unlnk
+		     Perl_watch
+		     Perl_safexcalloc
+		     Perl_safexmalloc
+		     Perl_safexfree
+		     Perl_safexrealloc
+		     Perl_my_memcmp
+		     Perl_my_memset
+		     PL_cshlen
+		     PL_cshname
+		     PL_opsave
+		     Perl_do_exec
+		     Perl_getenv_len
+		     Perl_my_pclose
+		     Perl_my_popen
+		     )];
+}
+elsif ($PLATFORM eq 'wince') {
+    skip_symbols [qw(
+		     PL_statusvalue_vms
+		     PL_archpat_auto
+		     PL_cryptseen
+		     PL_DBcv
+		     PL_generation
+		     PL_lastgotoprobe
+		     PL_linestart
+		     PL_modcount
+		     PL_pending_ident
+		     PL_sortcxix
+		     PL_sublex_info
+		     PL_timesbuf
+		     PL_collation_ix
+		     PL_collation_name
+		     PL_collation_standard
+		     PL_collxfrm_base
+		     PL_collxfrm_mult
+		     PL_numeric_compat1
+		     PL_numeric_local
+		     PL_numeric_name
+		     PL_numeric_radix_sv
+		     PL_numeric_standard
+		     PL_vtbl_collxfrm
+		     Perl_sv_collxfrm
+		     setgid
+		     setuid
+		     win32_async_check
+		     win32_free_childdir
+		     win32_free_childenv
+		     win32_get_childdir
+		     win32_get_childenv
+		     win32_spawnvp
 		     main
 		     Perl_ErrorNo
 		     Perl_GetVars
@@ -880,7 +952,7 @@ while (<DATA>) {
     try_symbol($_);
 }
 
-if ($PLATFORM eq 'win32') {
+if ($PLATFORM =~ /^win(?:32|ce)$/) {
     foreach my $symbol (qw(
 			    setuid
 			    setgid
@@ -1221,7 +1293,7 @@ sub emit_symbol {
 
 sub output_symbol {
     my $symbol = shift;
-    if ($PLATFORM eq 'win32') {
+    if ($PLATFORM =~ /^win(?:32|ce)$/) {
 	$symbol = "_$symbol" if $CCTYPE eq 'BORLAND';
 	print "\t$symbol\n";
 # XXX: binary compatibility between compilers is an exercise

@@ -13,7 +13,7 @@ use Carp;
 
 require Exporter;
 
-our $VERSION = '0.11';
+our $VERSION = '0.12';
 our $PACKAGE = __PACKAGE__;
 
 our @ISA = qw(Exporter);
@@ -25,6 +25,26 @@ our @EXPORT = ();
 (our $Path = $INC{'Unicode/Collate.pm'}) =~ s/\.pm$//;
 our $KeyFile = "allkeys.txt";
 
+our $UNICODE_VERSION;
+
+eval { require Unicode::UCD };
+
+unless ($@) {
+    $UNICODE_VERSION = Unicode::UCD::UnicodeVersion();
+}
+else { # XXX, Perl 5.6.1
+    my($f, $fh);
+    foreach my $d (@INC) {
+	use File::Spec;
+	$f = File::Spec->catfile($d, "unicode", "Unicode.301");
+	if (open($fh, $f)) {
+	    $UNICODE_VERSION = '3.0.1';
+	    close $fh;
+	    last;
+	}
+    }
+}
+
 our $getCombinClass; # coderef for combining class from Unicode::Normalize
 
 use constant Min2      => 0x20;   # minimum weight at level 2
@@ -32,6 +52,10 @@ use constant Min3      => 0x02;   # minimum weight at level 3
 use constant UNDEFINED => 0xFF80; # special value for undefined CE's
 
 our $DefaultRearrange = [ 0x0E40..0x0E44, 0x0EC0..0x0EC4 ];
+
+sub UCA_Version { "8.0" }
+
+sub Base_Unicode_Version { $UNICODE_VERSION || 'unknown' }
 
 ##
 ## constructor
@@ -809,7 +833,7 @@ these tags doesn't work validly.
 
 =back
 
-=head2 Other methods
+=head2 Methods for Collation
 
 =over 4
 
@@ -910,6 +934,22 @@ e.g. you say
 
 and get C<"mu\x{00DF}"> in C<$match> since C<"mu>E<223>C<">
 is primary equal to C<"m>E<252>C<ss">. 
+
+=back
+
+=head2 Other Methods
+
+=over 4
+
+=item UCA_Version
+
+Returns the version number of Unicode Technical Standard 10
+this module consults.
+
+=item Base_Unicode_Version
+
+Returns the version number of the Unicode Standard
+this module is based on.
 
 =back
 
