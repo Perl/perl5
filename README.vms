@@ -1,5 +1,10 @@
-Last Revised 11-September-1997 by Dan Sugalski <sugalsd@lbcc.cc.or.us>
+Last Revised 02-June-1998 by Dan Sugalski <sugalskd@ous.edu>
 Originally by Charles Bailey <bailey@newman.upenn.edu>
+
+* Important safety tip
+
+The build procedure has changed significantly from the 5.004 releases! Make
+sure you read the "Building Perl" section before you build.
 
 * Intro
 
@@ -38,71 +43,43 @@ In addition to VMS, you'll need:
 If you want to include socket support, you'll need a TCP stack and either
 Dec C, or socket libraries. See the Socket Support topic for more details.
 
-* Compiling Perl
+* Building Perl
 
->From the top level of the Perl source directory, do this:
+Building perl has two steps, configuration and compilation.
 
-MMS/DESCRIP=[.VMS]DESCRIP.MMS
+To configure perl (a necessary first step), issue the command
 
-If you're on an Alpha, add /Macro=("__AXP__=1","decc=1")
-If you're using Dec C as your C compiler (you are on all alphas), add
-/Macro=("decc=1")
-If Vac C is your default C compiler and you want to use Dec C, add
-/Macro=("CC=CC/DECC") (Don't forget the /macro=("decc=1")
-If Dec C is your default C compiler and you want to use Vax C, add
-/Macro=("CC=CC/VAXC")
-If you want Socket support and are using the SOCKETSHR socket library, add
-/Macro=("SOCKETSHR_SOCKETS=1")
-If you want Socket support and are using the Dec C RTL socket interface
-(You must be using Dec C for this), add /Macro=("DECC_SOCKETS=1")
+@CONFIGURE
 
-If you have multiple /macro= items, combine them together in one /Macro=()
-switch, with all the options inside the parentheses separated by commas.
+from the top of an unpacked perl directory. You'll be asked a series of
+questions, and the answers to them (along with the capabilities of your C
+compiler and network stack) will determine how perl's built.
 
-Samples:
-
-VMS AXP, with Socketshr sockets:
-
-$MMS/DESCRIP=[.VMS]DESCRIP.MMS/Macro=("decc=1","__AXP__=1","SOCKETSHR_SOCKETS=1")
-
-VMS AXP with no sockets
-
-$MMS/DESCRIP=[.VMS]DESCRIP.MMS/Macro=("decc=1","__AXP__=1")
-
-VMS AXP with the Dec C RTL sockets
-
-$MMS/DESCRIP=[.VMS]/Macro=("decc=1","__AXP__=1","DECC_SOCKETS=1")
-
-VMS VAX with default system compiler, no sockets
-
-$MMS/DESCRIP=[.VMS]DESCRIP.MMS
-
-VMS VAX with Dec C compiler, no sockets
-
-$MMS/DESCRIP=[.VMS]DESCRIP.MMS/Macro=("CC=CC/DECC","decc=1")
-
-VMS VAX with Dec C compiler, Dec C RTL sockets
-
-$MMS/DESCRIP=[.VMS]DESCRIP.MMS/Macro=("CC=CC/DECC","decc=1","DECC_SOCKETS=1")
-
-VMS VAX with Dec C compiler, Socketshr sockets
-
-$MMS/DESCRIP=[.VMS]DESCRIP.MMS/Macro=("CC=CC/DECC","decc=1","SOCKETSHR_SOCKETS=1")
-
-Using Dec C is recommended over Vax C. The compiler is newer, and
-supported. (Vax C was decommisioned around 1993) Various older versions had
-some gotchas, so if you're using a version older than 5.2, check the Dec C
-Issues section.
+If you've got multiple C compilers installed, you'll have your choice of
+which one to use. Using Dec C is recommended over Vax C--the compiler is
+newer, and supported. (Vax C was decommisioned around 1993) Various older
+versions had some gotchas, so if you're using a version older than 5.2,
+check the Dec C Issues section.
 
 We'll also point out that Dec C will get you at least a ten-fold increase
 in line-oriented IO over Vax C. The optimizer is amazingly better, too. If
 you can use Dec C, then you *really*, *really* should.
 
+The configuration script will print out, at the very end, the MMS or MMK
+command you need to compile perl. Issue it (exactly as printed) to start
+the build.
 
 Once you issue your MMS command, sit back and wait. Perl should build and
 link without a problem. If it doesn't, check the Gotchas to watch out for
 section. If that doesn't help, send some mail to the VMSPERL mailing list.
 Instructions are in the Mailing Lists section.
+
+As a handy shortcut, the command:
+
+@CONFIGURE "-des"
+
+(note the quotes and case) will choose reasonable defaults. (It takes Dec C
+over Vax C, Dec C sockets over SOCKETSHR sockets, and either over no sockets)
 
 * Testing Perl
 
@@ -116,11 +93,11 @@ compile Perl and add the word "test" to the end, like this:
 
 Compile Command:
 
-$MMS/DESCRIP=[.VMS]DESCRIP.MMS/Macro=("__AXP__=1","decc=1","DECCRTL_SOCKETS=1")
+$MMS/Macro=("__AXP__=1","decc=1","DECCRTL_SOCKETS=1")
 
 Test Command:
 
-$MMS/DESCRIP=[.VMS]DESCRIP.MMS/Macro=("__AXP__=1","decc=1","DECCRTL_SOCKETS=1") test
+$MMS/Macro=("__AXP__=1","decc=1","DECCRTL_SOCKETS=1") test
 
 MMS will run all the tests. This may take some time, as there are a lot of
 tests. If any tests fail, there will be a note made on-screen. At the end
@@ -137,16 +114,14 @@ confident you are, make a bug report to the VMSPerl mailing list.
 If one or more tests fail, you can get more info on the failure by issuing
 this command sequence:
 
-$ SET DEFAULT [.T]
-$ @[-.VMS]TEST .typ -v [.subdir]test.T
+$ @[.VMS]TEST .typ "-v" [.subdir]test.T
 
 where ".typ" is the file type of the Perl images you just built (if you
 didn't do anything special, use .EXE), and "[.subdir]test.T" is the test
 that failed. For example, with a normal Perl build, if the test indicated
 that [.op]time failed, then you'd do this:
 
-$ SET DEFAULT [.T]
-$ @[-.VMS]TEST .EXE -v [.OP]TIME.T
+$ @[.VMS]TEST .EXE "-v" [.OP]TIME.T
 
 When you send in a bug report for failed tests, please include the output
 from this command, which is run from the main source directory:
@@ -164,11 +139,11 @@ compile and add "realclean" at the end, like this:
 
 Compile Command:
 
-$MMS/DESCRIP=[.VMS]DESCRIP.MMS/Macro=("__AXP__=1","decc=1","DECCRTL_SOCKETS=1")
+$MMS/Macro=("__AXP__=1","decc=1","DECCRTL_SOCKETS=1")
 
 Cleanup Command:
 
-$MMS/DESCRIP=[.VMS]DESCRIP.MMS/Macro=("__AXP__=1","decc=1","DECCRTL_SOCKETS=1") realclean
+$MMS/Macro=("__AXP__=1","decc=1","DECCRTL_SOCKETS=1") realclean
 
 If you don't do this, things may behave erratically. They might not, too,
 so it's best to be sure and do it.
@@ -299,17 +274,16 @@ PERLBUG@PERL.COM.
 * Gotchas to watch out for
 
 Probably the single biggest gotcha in compiling Perl is giving the wrong
-switches to MMS/MMK when you build. If Perl's building oddly, double-check
-your switches. If you're on a VAX, be sure to add a /Macro=("decc=1") if
-you're using Dec C, and if you're on an alpha and using MMS, you'll need a
-/Macro=("__AXP__=1")
+switches to MMS/MMK when you build. Use *exactly* what the configure script
+prints!
 
 The next big gotcha is directory depth. Perl can create directories four
 and five levels deep during the build, so you don't have to be too deep to
 start to hit the RMS 8 level point. It's best to do a
 $DEFINE/TRANS=(CONC,TERM) PERLSRC disk:[dir.dir.dir.perldir.]"  (note the
 trailing period) and $SET DEFAULT PERLSRC:[000000] before building. Perl
-modules can be just as bad (or worse), so watch out for them, too.
+modules can be just as bad (or worse), so watch out for them, too. The
+configuration script will warn if it thinks you're too deep.
 
 Finally, the third thing that bites people is leftover pieces from a failed
 build. If things go wrong, make sure you do a "(MMK|MMS|make) realclean"

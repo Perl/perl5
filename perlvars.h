@@ -107,7 +107,6 @@ PERLVAR(Gmulti_end,	I32)		/* last line of multi-line string */
 PERLVAR(Gmulti_open,	I32)		/* delimiter of said string */
 PERLVAR(Gmulti_close,	I32)		/* delimiter of said string */
 
-PERLVAR(Gscrgv,	GV *)		
 PERLVAR(Gerror_count,	I32)		/* how many errors so far, max 10 */
 PERLVAR(Gsubline,	I32)		/* line this subroutine began on */
 PERLVAR(Gsubname,	SV *)		/* name of current subroutine */
@@ -167,4 +166,6 @@ PERLVARIC(GYes,		char *, "1")
 PERLVARIC(GNo,		char *, "")
 PERLVARIC(Ghexdigit,	char *, "0123456789abcdef0123456789ABCDEFx")
 PERLVARIC(Gpatleave,	char *, "\\.^$@dDwWsSbB+*?|()-nrtfeaxc0123456789[{]}")
+
+PERLVAR(Gspecialsv_list[4], SV *)		/* from byterun.h */
 

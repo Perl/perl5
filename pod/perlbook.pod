@@ -11,15 +11,17 @@ web-connected, you can even mosey on over to http://www.ora.com/ for
 an online order form.
 
 I<Programming Perl, Second Edition> is a reference work that covers
-nearly all of Perl, while I<Learning Perl, Second Edition> is a
-tutorial that covers the most frequently used subset of the language,
-and I<Advanced Perl Programming> is an indepth study of complex topics
-including the internals of perl.  You might also check out the very 
-handy, inexpensive, and compact I<Perl 5 Desktop Reference>, especially
-when the thought of lugging the 676-page Camel around doesn't make much
-sense.  I<Mastering Regular Expressions>, by Jeffrey Friedl, is a 
-reference work that covers the art and implementation of regular
-expressions in various languages including Perl.
+nearly all of Perl; I<Learning Perl, Second Edition> is a tutorial that
+covers the most frequently used subset of the language; and I<Advanced
+Perl Programming> is an in-depth study of complex topics including the
+internals of perl.  You might also check out the very handy, inexpensive,
+and compact I<Perl 5 Desktop Reference>, especially when the thought of
+lugging the 676-page Camel around doesn't make much sense.  I<Mastering
+Regular Expressions>, by Jeffrey Friedl, is a reference work that covers
+the art and implementation of regular expressions in various languages
+including Perl.  Currently published quarterly by Jon Orwant, I<The Perl
+Journal> is the first and only periodical devoted to All Things Perl.
+See http://www.tpj.com/ for information.
 
     Programming Perl, Second Edition (the Camel Book):
 	ISBN 1-56592-149-6	(English)
@@ -27,7 +29,10 @@ expressions in various languages including Perl.
     Learning Perl, Second Edition (the Llama Book):
 	ISBN 1-56592-284-0      (English)
 
-    Advanced Perl Programming:
+    Learning Perl on Win32 Systems (the Gecko Book):
+	ISBN 1-56592-324-3      (English)
+
+    Advanced Perl Programming (the Panther Book):
 	ISBN 1-56592-220-4	(English)
 
     Perl 5 Desktop Reference (the reference card):

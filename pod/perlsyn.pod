@@ -95,10 +95,25 @@ conditional is evaluated.  This is so that you can write loops like:
 	...
     } until $line  eq ".\n";
 
-See L<perlfunc/do>.  Note also that the loop control
-statements described later will I<NOT> work in this construct, because
-modifiers don't take loop labels.  Sorry.  You can always wrap
-another block around it to do that sort of thing.
+See L<perlfunc/do>.  Note also that the loop control statements described
+later will I<NOT> work in this construct, because modifiers don't take
+loop labels.  Sorry.  You can always put another block inside of it
+(for C<next>) or around it (for C<last>) to do that sort of thing.
+For next, just double the braces:
+
+    do {{
+	next if $x == $y;
+	# do something here
+    }} until $x++ > $z;
+
+For last, you have to be more elaborate:
+
+    LOOP: { 
+	    do {
+		last if $x = $y**2;
+		# do something here
+	    } while $x++ <= $z;
+    }
 
 =head2 Compound statements
 
@@ -201,30 +216,33 @@ which is Perl short-hand for the more explicitly written version:
 	# now process $line
     }
 
-Or here's a simpleminded Pascal comment stripper (warning: assumes no
-{ or } in strings).
-
-    LINE: while (<STDIN>) {
-	while (s|({.*}.*){.*}|$1 |) {}
-	s|{.*}| |;
-	if (s|{.*| |) {
-	    $front = $_;
-	    while (<STDIN>) {
-		if (/}/) {	# end of comment?
-		    s|^|$front{|;
-		    redo LINE;
-		}
-	    }
-	}
-	print;
-    }
-
 Note that if there were a C<continue> block on the above code, it would get
-executed even on discarded lines.
+executed even on discarded lines.  This is often used to reset line counters 
+or C<?pat?> one-time matches.
+
+    # inspired by :1,$g/fred/s//WILMA/
+    while (<>) {
+	?(fred)?    && s//WILMA $1 WILMA/;
+	?(barney)?  && s//BETTY $1 BETTY/;
+	?(homer)?   && s//MARGE $1 MARGE/;
+    } continue {
+	print "$ARGV $.: $_";
+	close ARGV  if eof();		# reset $.
+	reset	    if eof();		# reset ?pat?
+    }
 
 If the word C<while> is replaced by the word C<until>, the sense of the
 test is reversed, but the conditional is still tested before the first
 iteration.
+
+The loop control statements don't work in an C<if> or C<unless>, since
+they aren't loops.  You can double the braces to make them such, though.
+
+    if (/pattern/) {{
+	next if /fred/;
+	next if /barney/;
+	# so something here
+    }}
 
 The form C<while/if BLOCK BLOCK>, available in Perl 4, is no longer
 available.   Replace any occurrence of C<if BLOCK> by C<if (do BLOCK)>.
@@ -276,11 +294,12 @@ if you have subroutine or format declarations within the loop which
 refer to it.)
 
 The C<foreach> keyword is actually a synonym for the C<for> keyword, so
-you can use C<foreach> for readability or C<for> for brevity.  If VAR is
-omitted, $_ is set to each value.  If any element of LIST is an lvalue,
-you can modify it by modifying VAR inside the loop.  That's because
-the C<foreach> loop index variable is an implicit alias for each item
-in the list that you're looping over.
+you can use C<foreach> for readability or C<for> for brevity.  (Or because
+the Bourne shell is more familiar to you than I<csh>, so writing C<for>
+comes more naturally.)  If VAR is omitted, $_ is set to each value.
+If any element of LIST is an lvalue, you can modify it by modifying VAR
+inside the loop.  That's because the C<foreach> loop index variable is
+an implicit alias for each item in the list that you're looping over.
 
 If any part of LIST is an array, C<foreach> will get very confused if
 you add or remove elements within the loop body, for example with
@@ -409,18 +428,6 @@ or
 	$nothing = 1;
     }
 
-or, using experimental C<EVAL blocks> of regular expressions
-(see L<perlre/"(?{ code })">),
-
-	/ ^abc (?{ $abc = 1 })
-         |
-	  ^def (?{  $def = 1 })
-	 |
-	  ^xyz (?{ $xyz = 1 })
-	 |
-	  (?{ $nothing = 1 })
-	/x;
-
 or even, horrors,
 
     if (/^abc/)
@@ -431,7 +438,6 @@ or even, horrors,
 	{ $xyz = 1 }
     else
 	{ $nothing = 1 }
-
 
 A common idiom for a switch statement is to use C<foreach>'s aliasing to make
 a temporary assignment to $_ for convenient matching:
@@ -447,13 +453,45 @@ Another interesting approach to a switch statement is arrange
 for a C<do> block to return the proper value:
 
     $amode = do {
-	if     ($flag & O_RDONLY) { "r" }
+	if     ($flag & O_RDONLY) { "r" }	# XXX: isn't this 0?
 	elsif  ($flag & O_WRONLY) { ($flag & O_APPEND) ? "a" : "w" }
 	elsif  ($flag & O_RDWR)   {
 	    if ($flag & O_CREAT)  { "w+" }
 	    else                  { ($flag & O_APPEND) ? "a+" : "r+" }
 	}
     };
+
+Or 
+
+        print do {
+            ($flags & O_WRONLY) ? "write-only"          :
+            ($flags & O_RDWR)   ? "read-write"          :
+                                  "read-only";
+        };
+
+Or if you are certainly that all the C<&&> clauses are true, you can use
+something like this, which "switches" on the value of the
+HTTP_USER_AGENT envariable.
+
+    #!/usr/bin/perl 
+    # pick out jargon file page based on browser
+    $dir = 'http://www.wins.uva.nl/~mes/jargon';
+    for ($ENV{HTTP_USER_AGENT}) { 
+	$page  =    /Mac/            && 'm/Macintrash.html'
+		 || /Win(dows )?NT/  && 'e/evilandrude.html'
+		 || /Win|MSIE|WebTV/ && 'm/MicroslothWindows.html'
+		 || /Linux/          && 'l/Linux.html'
+		 || /HP-UX/          && 'h/HP-SUX.html'
+		 || /SunOS/          && 's/ScumOS.html'
+		 ||                     'a/AppendixB.html';
+    }
+    print "Location: $dir/$page\015\012\015\012";
+
+That kind of switch statement only works when you know the C<&&> clauses
+will be true.  If you don't, the previous C<?:> example should be used.
+
+You might also consider writing a hash instead of synthesizing a switch
+statement.
 
 =head2 Goto
 
@@ -539,8 +577,8 @@ of code.
 
 =head2 Plain Old Comments (Not!)
 
-Much like the C preprocessor, perl can process line directives.  Using
-this, one can control perl's idea of filenames and line numbers in
+Much like the C preprocessor, Perl can process line directives.  Using
+this, one can control Perl's idea of filenames and line numbers in
 error or warning messages (especially for strings that are processed
 with eval()).  The syntax for this mechanism is the same as for most
 C preprocessors: it matches the regular expression

@@ -385,6 +385,8 @@
 #define get_no_modify     CPerlObj::Perl_get_no_modify
 #undef  get_opargs
 #define get_opargs        CPerlObj::Perl_get_opargs
+#undef  get_specialsv_list
+#define get_specialsv_list CPerlObj::Perl_get_specialsv_list
 #undef  getlogin
 #define getlogin          CPerlObj::getlogin
 #undef  gp_free
@@ -643,6 +645,8 @@
 #define magic_setvec      CPerlObj::Perl_magic_setvec
 #undef  magic_sizepack
 #define magic_sizepack    CPerlObj::Perl_magic_sizepack
+#undef  magic_unchain
+#define magic_unchain     CPerlObj::Perl_magic_unchain
 #undef  magic_wipepack
 #define magic_wipepack    CPerlObj::Perl_magic_wipepack
 #undef  magicname

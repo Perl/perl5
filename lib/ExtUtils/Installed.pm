@@ -7,7 +7,7 @@ use Config;
 use File::Find;
 use File::Basename;
 use vars qw($VERSION);
-$VERSION = '0.01';
+$VERSION = '0.02';
 
 sub _is_type($$$)
 {
@@ -134,7 +134,7 @@ my (%dirs);
 foreach my $dir ($self->directories($module, $type, @under))
    {
    $dirs{$dir}++;
-   my ($last);
+   my ($last) = ("");
    while ($last ne $dir)
       {
       $last = $dir;

@@ -222,6 +222,9 @@ save_gp(GV *gv, I32 empty)
 
     if (empty) {
 	register GP *gp;
+
+	if (GvCVu(gv))
+	    sub_generation++;	/* taking a method out of circulation */
 	Newz(602, gp, 1, GP);
 	GvGP(gv) = gp_ref(gp);
 	GvSV(gv) = NEWSV(72,0);
@@ -678,6 +681,8 @@ leave_scope(I32 base)
             SvLEN(gv) = (STRLEN)SSPOPIV;
             gp_free(gv);
             GvGP(gv) = (GP*)ptr;
+	    if (GvCVu(gv))
+		sub_generation++;  /* putting a method back into circulation */
 	    SvREFCNT_dec(gv);
             break;
 	case SAVEt_FREESV:

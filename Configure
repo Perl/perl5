@@ -20,7 +20,7 @@
 
 # $Id: Head.U,v 3.0.1.9 1997/02/28 15:02:09 ram Exp $
 #
-# Generated on Thu May 28 12:01:39 EDT 1998 [metaconfig 3.0 PL70]
+# Generated on Tue Jun  9 14:56:54 EDT 1998 [metaconfig 3.0 PL70]
 
 cat >/tmp/c1$$ <<EOF
 ARGGGHHHH!!!!!
@@ -140,7 +140,7 @@ esac
 
 : Configure runs within the UU subdirectory
 test -d UU || mkdir UU
-CDPATH=''
+CDPATH='.'
 cd UU && rm -f ./*
 
 dynamic_ext=''
@@ -375,7 +375,6 @@ d_memmove=''
 d_memset=''
 d_mkdir=''
 d_mkfifo=''
-d_mkstemp=''
 d_mktime=''
 d_msg=''
 d_msgctl=''
@@ -920,6 +919,23 @@ else
 	echo "You may have to fix up the shell scripts to make sure $sh runs them."
 fi
 rm -f try
+
+
+: Save command line options in file UU/cmdline.opt for later use in
+: generating config.sh.
+cat > cmdline.opt <<EOSH
+# Configure command line arguments.
+config_arg0='$0'
+config_args='$*'
+config_argc=$#
+EOSH
+argn=1
+for arg in "$@"; do
+	cat >>cmdline.opt <<EOSH
+config_arg$argn='$arg'
+EOSH
+	argn=`expr $argn + 1`
+done
 
 : produce awk script to parse command line options
 cat >options.awk <<'EOF'
@@ -4024,15 +4040,19 @@ $cc $optimize $ccflags $ldflags -o ${mc_file} $* ${mc_file}.c $libs;'
 echo " "
 echo "Checking for GNU C Library..." >&4
 cat >gnulibc.c <<EOM
+#include <stdio.h>
 int
 main()
 {
-	return __libc_main();
+#ifdef __GLIBC__
+    exit(0);
+#else
+    exit(1);
+#endif
 }
 EOM
 set gnulibc
-if eval $compile && \
-  ./gnulibc | $contains '^GNU C Library'; then
+if eval $compile_ok && ./gnulibc; then
 	val="$define"
 	echo "You are using the GNU C Library"
 else
@@ -6196,10 +6216,14 @@ main()
 	$xxx i32;
 	double f, g;
 	int result = 0;
+	char str[16];
 	signal(SIGFPE, blech);
 
-	/* Don't let compiler optimize the test away */
-	sscanf("2147483647", "%lf", &f); /* f = (double) 0x7fffffff; */
+	/* Don't let compiler optimize the test away.  Store the number 
+	   in a writable string for gcc to pass to sscanf under HP/UX.
+	*/
+	sprintf(str, "2147483647");
+	sscanf(str, "%lf", &f); /* f = (double) 0x7fffffff; */
 	g = 10 * f;
 	i32  = ($xxx) g;
 
@@ -6252,11 +6276,17 @@ main()
 	unsigned int aint;
 	unsigned short ashort;
 	int result = 0;
+	char str[16];
+	
 	/* Frustrate gcc-2.7.2's optimizer which failed this test with
 	   a direct f = -123. assignment.  gcc-2.8.0 reportedly
 	   optimized the whole file away
 	*/
-	sscanf("-123.", "%lf", &f);  /* f = -123.; */
+	/* Store the number in a writable string for gcc to pass to 
+	   sscanf under HP/UX.
+	*/
+	sprintf(str, "-123");
+	sscanf(str, "%lf", &f);  /* f = -123.; */
 
 	signal(SIGFPE, blech);
 	along = (unsigned long)f;
@@ -6268,7 +6298,8 @@ main()
 		result |= 1;
 	if (ashort != (unsigned short)-123)
 		result |= 1;
-	sscanf("1073741824.", "%lf", &f); /* f = (double)0x40000000; */
+	sprintf(str, "1073741824.");
+	sscanf(str, "%lf", &f); /* f = (double)0x40000000; */
 	f = f + f;
 	along = 0;
 	along = (unsigned long)f;
@@ -6287,7 +6318,8 @@ main()
 	if (result)
 		exit(result);
 	signal(SIGFPE, blech_in_list);
-	sscanf("123.", "%lf", &f);  /* f = 123.; */
+	sprintf(str, "123.");
+	sscanf(str, "%lf", &f);  /* f = 123.; */
 	along = dummy_long((unsigned long)f);
 	aint = dummy_int((unsigned int)f);
 	ashort = dummy_short((unsigned short)f);
@@ -7362,10 +7394,6 @@ eval $inlibc
 
 : see if mkfifo exists
 set mkfifo d_mkfifo
-eval $inlibc
-
-: see if mkstemp exists
-set mkstemp d_mkstemp
 eval $inlibc
 
 : see if mktime exists
@@ -11254,7 +11282,6 @@ d_memmove='$d_memmove'
 d_memset='$d_memset'
 d_mkdir='$d_mkdir'
 d_mkfifo='$d_mkfifo'
-d_mkstemp='$d_mkstemp'
 d_mktime='$d_mktime'
 d_msg='$d_msg'
 d_msgctl='$d_msgctl'
@@ -11642,6 +11669,9 @@ xlibpth='$xlibpth'
 zcat='$zcat'
 zip='$zip'
 EOT
+
+: Add in command line options if available
+$test -f UU/cmdline.opt && $cat UU/cmdline.opt >> config.sh
 
 : add special variables
 $test -f $src/patchlevel.h && \

@@ -145,6 +145,7 @@ regsize
 regstartp
 regtill
 regxend
+replgv
 restartop
 rightgv
 rs

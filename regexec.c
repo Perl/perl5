@@ -57,7 +57,10 @@
 
 #define RF_tainted	1		/* tainted information used? */
 #define RF_warned	2		/* warned about big count? */
-#define RF_evaled	4		/* Did an EVAL? */
+#define RF_evaled	4		/* Did an EVAL with setting? */
+
+#define RS_init		1		/* eval environment created */
+#define RS_set		2		/* replsv value is set */
 
 #ifndef STATIC
 #define	STATIC	static
@@ -194,6 +197,7 @@ regexec_flags(register regexp *prog, char *stringarg, register char *strend, cha
     I32 end_shift = 0;			/* Same for the end. */
     I32 scream_pos = -1;		/* Internal iterator of scream. */
     char *scream_olds;
+    SV* oreplsv = GvSV(replgv);
 
     cc.cur = 0;
     cc.oldcc = 0;
@@ -632,6 +636,12 @@ got_it:
 	    }
 	}
     }
+    /* Preserve the current value of $^R */
+    if (oreplsv != GvSV(replgv)) {
+	sv_setsv(oreplsv, GvSV(replgv));/* So that when GvSV(replgv) is
+					   restored, the value remains
+					   the same. */
+    }
     return 1;
 
 phooey:
@@ -650,6 +660,19 @@ regtry(regexp *prog, char *startpos)
     register char **ep;
     CHECKPOINT lastcp;
 
+    if ((prog->reganch & ROPT_EVAL_SEEN) && !reg_eval_set) {
+	reg_eval_set = RS_init;
+	DEBUG_r(DEBUG_s(
+	    PerlIO_printf(Perl_debug_log, "  setting stack tmpbase at %i\n", stack_sp - stack_base);
+	    ));
+	SAVEINT(cxstack[cxstack_ix].blk_oldsp);
+	cxstack[cxstack_ix].blk_oldsp = stack_sp - stack_base;
+	/* Otherwise OP_NEXTSTATE will free whatever on stack now.  */
+	SAVETMPS;
+	/* Apparently this is not needed, judging by wantarray. */
+	/* SAVEINT(cxstack[cxstack_ix].blk_gimme);
+	   cxstack[cxstack_ix].blk_gimme = G_SCALAR; */
+    }
     reginput = startpos;
     regstartp = prog->startp;
     regendp = prog->endp;
@@ -753,13 +776,9 @@ regmatch(regnode *prog)
 			  SvPVX(prop));
 	} );
 
-#ifdef REGALIGN
 	next = scan + NEXT_OFF(scan);
 	if (next == scan)
 	    next = NULL;
-#else
-	next = regnext(scan);
-#endif
 
 	switch (OP(scan)) {
 	case BOL:
@@ -980,22 +999,6 @@ regmatch(regnode *prog)
 	    op = (OP_4tree*)regdata->data[n];
 	    DEBUG_r( PerlIO_printf(Perl_debug_log, "  re_eval 0x%x\n", op) );
 	    curpad = AvARRAY((AV*)regdata->data[n + 1]);
-	    if (!reg_eval_set) {
-		/* Preserve whatever is on stack now, otherwise
-		   OP_NEXTSTATE will overwrite it. */
-		SAVEINT(reg_eval_set);	/* Protect against unwinding. */
-		reg_eval_set = 1;
-		DEBUG_r(DEBUG_s(
-		    PerlIO_printf(Perl_debug_log, "  setting stack tmpbase at %i\n", stack_sp - stack_base);
-		    ));
-		SAVEINT(cxstack[cxstack_ix].blk_oldsp);
-		cxstack[cxstack_ix].blk_oldsp = stack_sp - stack_base;
-		/* Otherwise OP_NEXTSTATE will free whatever on stack now.  */
-		SAVETMPS;
-		/* Apparently this is not needed, judging by wantarray. */
-		/* SAVEINT(cxstack[cxstack_ix].blk_gimme);
-		   cxstack[cxstack_ix].blk_gimme = G_SCALAR; */
-	    }
 
 	    CALLRUNOPS();			/* Scalar context. */
 	    SPAGAIN;
@@ -1005,7 +1008,8 @@ regmatch(regnode *prog)
 	    if (logical) {
 		logical = 0;
 		sw = SvTRUE(ret);
-	    }
+	    } else
+		sv_setsv(save_scalar(replgv), ret);
 	    op = oop;
 	    curpad = ocurpad;
 	    curcop = ocurcop;
@@ -1234,15 +1238,11 @@ regmatch(regnode *prog)
 			    regendp[n] = 0;
 			*reglastparen = n;
 			scan = next;
-#ifdef REGALIGN
 			/*SUPPRESS 560*/
 			if (n = (c1 == BRANCH ? NEXT_OFF(next) : ARG(next)))
 			    next += n;
 			else
 			    next = NULL;
-#else
-			next = regnext(next);
-#endif
 			inner = NEXTOPER(scan);
 			if (c1 == BRANCHJ) {
 			    inner = NEXTOPER(inner);
@@ -1258,7 +1258,7 @@ regmatch(regnode *prog)
 	    break;
 	case CURLYM:
 	{
-	    I32 l;
+	    I32 l = 0;
 	    CHECKPOINT lastcp;
 	    
 	    /* We suppose that the next guy does not need
@@ -1266,7 +1266,6 @@ regmatch(regnode *prog)
 	       and has no parenths to influence future backrefs. */
 	    ln = ARG1(scan);  /* min to match */
 	    n  = ARG2(scan);  /* max to match */
-#ifdef REGALIGN_STRUCT
 	    paren = scan->flags;
 	    if (paren) {
 		if (paren > regsize)
@@ -1274,7 +1273,6 @@ regmatch(regnode *prog)
 		if (paren > *reglastparen)
 		    *reglastparen = paren;
 	    }
-#endif 
 	    scan = NEXTOPER(scan) + NODE_STEP_REGNODE;
 	    if (paren)
 		scan += NEXT_OFF(scan); /* Skip former OPEN. */
@@ -1283,7 +1281,7 @@ regmatch(regnode *prog)
 		minmod = 0;
 		if (ln && regrepeat_hard(scan, ln, &l) < ln)
 		    sayNO;
-		if (l == 0 && n >= ln
+		if (ln && l == 0 && n >= ln
 		    /* In fact, this is tricky.  If paren, then the
 		       fact that we did/didnot match may influence
 		       future execution. */
@@ -1301,6 +1299,7 @@ regmatch(regnode *prog)
 		} else
 		    c1 = c2 = -1000;
 		REGCP_SET;
+		/* This may be improved if l == 0.  */
 		while (n >= ln || (n == REG_INFTY && ln > 0 && l)) { /* ln overflow ? */
 		    /* If it could work, try it. */
 		    if (c1 == -1000 ||

@@ -9,8 +9,6 @@ get_flag(char *attr)
 	return CVf_METHOD;
     else if (strnEQ(attr, "locked", 6))
 	return CVf_LOCKED;
-    else if (strnEQ(attr, "package", 7))
-	return CVf_PACKAGE;
     else
 	return 0;
 }
@@ -58,6 +56,4 @@ SV *	sub
 	    XPUSHs(sv_2mortal(newSVpv("method", 0)));
 	if (CvFLAGS(sub) & CVf_LOCKED)
 	    XPUSHs(sv_2mortal(newSVpv("locked", 0)));
-	if (CvFLAGS(sub) & CVf_PACKAGE)
-	    XPUSHs(sv_2mortal(newSVpv("package", 0)));
 

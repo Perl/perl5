@@ -2,7 +2,7 @@
 
 # $RCSfile: s.t,v $$Revision: 4.1 $$Date: 92/08/07 18:28:22 $
 
-print "1..69\n";
+print "1..70\n";
 
 $x = 'foo';
 $_ = "x";
@@ -270,3 +270,31 @@ print $_ eq "bbcbb" ? "ok 68\n" : "not ok 68 # `$_' ne `bbcbb'\n";
 # XXX TODO: Most tests above don't test return values of the ops. They should.
 $_ = "ab";
 print (s/a/b/ == 1 ? "ok 69\n" : "not ok 69\n");
+
+$_ = <<'EOL';
+     $url = new URI::URL "http://www/";   die if $url eq "xXx";
+EOL
+$^R = 'junk';
+
+$foo = ' $@%#lowercase $@%# lowercase UPPERCASE$@%#UPPERCASE' .
+  ' $@%#lowercase$@%#lowercase$@%# lowercase lowercase $@%#lowercase' .
+  ' lowercase $@%#MiXeD$@%# ';
+
+s{  \d+          \b [,.;]? (?{ 'digits' })
+   |
+    [a-z]+       \b [,.;]? (?{ 'lowercase' })
+   |
+    [A-Z]+       \b [,.;]? (?{ 'UPPERCASE' })
+   |
+    [A-Z] [a-z]+ \b [,.;]? (?{ 'Capitalized' })
+   |
+    [A-Za-z]+    \b [,.;]? (?{ 'MiXeD' })
+   |
+    [A-Za-z0-9]+ \b [,.;]? (?{ 'alphanumeric' })
+   |
+    \s+                    (?{ ' ' })
+   |
+    [^A-Za-z0-9\s]+          (?{ '$@%#' })
+}{$^R}xg;
+print ($_ eq $foo ? "ok 70\n" : "not ok 70\n#'$_'\n#'$foo'\n");
+

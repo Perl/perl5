@@ -1097,10 +1097,289 @@ convenient as arguments to C<E<lt>>, C<E<lt>E<lt>> commands.
 
 You did try the B<-w> switch, didn't you?
 
-=head1 BUGS
+=head2 BUGS
 
 You cannot get the stack frame information or otherwise debug functions
 that were not compiled by Perl, such as C or C++ extensions.
 
 If you alter your @_ arguments in a subroutine (such as with B<shift>
 or B<pop>, the stack backtrace will not show the original values.
+
+=head1 Debugging Perl memory usage
+
+Perl is I<very> frivolous with memory.  There is a saying that to
+estimate memory usage of Perl, assume a reasonable algorithm of
+allocation, and multiply your estimages by 10.  This is not absolutely
+true, but may give you a good grasp of what happens.
+
+Say, an integer cannot take less than 20 bytes of memory, a float
+cannot take less than 24 bytes, a string cannot take less than 32
+bytes (all these examples assume 32-bit architectures, the result are
+much worse on 64-bit architectures).  If a variable is accessed in two
+of three different ways (which require an integer, a float, or a
+string), the memory footprint may increase by another 20 bytes.  A
+sloppy malloc() implementation will make these numbers yet more.
+
+On the opposite end of the scale, a declaration like
+
+  sub foo;
+
+may take (on some versions of perl) up to 500 bytes of memory.
+
+Off-the-cuff anecdotal estimates of a code bloat give a factor around
+8.  This means that the compiled form of reasonable (commented
+indented etc.)  code will take approximately 8 times more than the
+disk space the code takes.
+
+There are two Perl-specific ways to analyze the memory usage:
+$ENV{PERL_DEBUG_MSTATS} and B<-DL> switch.  First one is available
+only if perl is compiled with Perl's malloc(), the second one only if
+Perl compiled with C<-DDEBUGGING> (as with giving C<-D optimise=-g>
+option to F<Configure>).
+
+=head2 Using C<$ENV{PERL_DEBUG_MSTATS}>
+
+If your perl is using Perl's malloc(), and compiled with correct
+switches (this is the default), then it will print memory usage
+statistics after compiling your code (if C<$ENV{PERL_DEBUG_MSTATS}> >
+1), and before termination of the script (if
+C<$ENV{PERL_DEBUG_MSTATS}> >= 1).  The report format is similar to one
+in the following example:
+
+  env PERL_DEBUG_MSTATS=2 perl -e "require Carp"
+  Memory allocation statistics after compilation: (buckets 4(4)..8188(8192)
+     14216 free:   130   117    28     7     9   0   2     2   1 0 0
+		437    61    36     0     5
+     60924 used:   125   137   161    55     7   8   6    16   2 0 1
+		 74   109   304    84    20
+  Total sbrk(): 77824/21:119. Odd ends: pad+heads+chain+tail: 0+636+0+2048.
+  Memory allocation statistics after execution:   (buckets 4(4)..8188(8192)
+     30888 free:   245    78    85    13     6   2   1     3   2 0 1
+		315   162    39    42    11
+    175816 used:   265   176  1112   111    26  22  11    27   2 1 1
+		196   178  1066   798    39
+  Total sbrk(): 215040/47:145. Odd ends: pad+heads+chain+tail: 0+2192+0+6144.
+
+It is possible to ask for such a statistic at arbitrary moment by
+usind Devel::Peek::mstats() (module Devel::Peek is available on CPAN).
+
+Here is the explanation of different parts of the format:
+
+=over
+
+=item C<buckets SMALLEST(APPROX)..GREATEST(APPROX)>
+
+Perl's malloc() uses bucketed allocations.  Every request is rounded
+up to the closest bucket size available, and a bucket of these size is
+taken from the pool of the buckets of this size.
+
+The above line describes limits of buckets currently in use.  Each
+bucket has two sizes: memory footprint, and the maximal size of user
+data which may be put into this bucket.  Say, in the above example the
+smallest bucket is both sizes 4.  The biggest bucket has usable size
+8188, and the memory footprint 8192.  
+
+With debugging Perl some buckets may have negative usable size.  This
+means that these buckets cannot (and will not) be used.  For greater
+buckets the memory footprint may be one page greater than a power of
+2.  In such a case the corresponding power of two is printed instead
+in the C<APPROX> field above.
+
+=item Free/Used
+
+The following 1 or 2 rows of numbers correspond to the number of
+buckets of each size between C<SMALLEST> and C<GREATEST>.  In the
+first row the sizes (memory footprints) of buckets are powers of two
+(or possibly one page greater).  In the second row (if present) the
+memory footprints of the buckets are between memory footprints of two
+buckets "above".  
+
+Say, with the above example the memory footprints are (with current
+algorith)
+
+     free:    8     16    32    64    128  256 512 1024 2048 4096 8192
+	   4     12    24    48    80
+
+With non-C<DEBUGGING> perl the buckets starting from C<128>-long ones
+have 4-byte overhead, thus 8192-long bucket may take up to
+8188-byte-long allocations.
+
+=item C<Total sbrk(): SBRKed/SBRKs:CONTINUOUS>
+
+The first two fields give the total amount of memory perl sbrk()ed,
+and number of sbrk()s used.  The third number is what perl thinks
+about continuity of returned chunks.  As far as this number is
+positive, malloc() will assume that it is probable that sbrk() will
+provide continuous memory.
+
+The amounts sbrk()ed by external libraries is not counted.
+
+=item C<pad: 0>
+
+The amount of sbrk()ed memory needed to keep buckets aligned.
+
+=item C<heads: 2192>
+
+While memory overhead of bigger buckets is kept inside the bucket, for
+smaller buckets it is kept in separate areas.  This field gives the
+total size of these areas.
+
+=item C<chain: 0>
+
+malloc() may want to subdivide a bigger bucket into smaller buckets.
+If only a part of the deceased-bucket is left non-subdivided, the rest
+is kept as an element of a linked list.  This field gives the total
+size of these chunks.
+
+=item C<tail: 6144>
+
+To minimize amount of sbrk()s malloc() asks for more memory.  This
+field gives the size of the yet-unused part, which is sbrk()ed, but
+never touched.
+
+=back
+
+=head2 Example of using B<-DL> switch
+
+Below we show how to analyse memory usage by 
+
+  do 'lib/auto/POSIX/autosplit.ix';
+
+The file in question contains a header and 146 lines similar to
+
+  sub getcwd ;
+
+B<Note:> I<the discussion below supposes 32-bit architecture.  In the
+newer versions of perl the memory usage of the constructs discussed
+here is much improved, but the story discussed below is a real-life
+story.  This story is very terse, and assumes more than cursory
+knowledge of Perl internals.>
+
+Here is the itemized list of Perl allocations performed during parsing
+of this file:
+
+ !!! "after" at test.pl line 3.
+    Id  subtot   4   8  12  16  20  24  28  32  36  40  48  56  64  72  80 80+
+  0 02   13752   .   .   .   . 294   .   .   .   .   .   .   .   .   .   .   4
+  0 54    5545   .   .   8 124  16   .   .   .   1   1   .   .   .   .   .   3
+  5 05      32   .   .   .   .   .   .   .   1   .   .   .   .   .   .   .   .
+  6 02    7152   .   .   .   .   .   .   .   .   .   . 149   .   .   .   .   .
+  7 02    3600   .   .   .   .   . 150   .   .   .   .   .   .   .   .   .   .
+  7 03      64   .  -1   .   1   .   .   2   .   .   .   .   .   .   .   .   .
+  7 04    7056   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   7
+  7 17   38404   .   .   .   .   .   .   .   1   .   . 442 149   .   . 147   .
+  9 03    2078  17 249  32   .   .   .   .   2   .   .   .   .   .   .   .   .
+
+
+To see this list insert two C<warn('!...')> statements around the call:
+
+  warn('!');
+  do 'lib/auto/POSIX/autosplit.ix';
+  warn('!!! "after"');
+
+and run it with B<-DL> option.  The first warn() will print memory
+allocation info before the parsing of the file, and will memorize the
+statistics at this point (we ignore what it prints). The second warn()
+will print increments w.r.t. this memorized statistics.  This is the
+above printout.
+
+Different I<Id>s on the left correspond to different subsystems of
+perl interpreter, they are just first argument given to perl memory
+allocation API New().  To find what C<9 03> means C<grep> the perl
+source for C<903>.  You will see that it is F<util.c>, function
+savepvn().  This function is used to store a copy of existing chunk of
+memory.  Using C debugger, one can see that it is called either
+directly from gv_init(), or via sv_magic(), and gv_init() is called
+from gv_fetchpv() - which is called from newSUB().
+
+B<Note:> to reach this place in debugger and skip all the calls to
+savepvn during the compilation of the main script, set a C breakpoint
+in Perl_warn(), C<continue> this point is reached, I<then> set
+breakpoint in Perl_savepvn().  Note that you may need to skip a
+handful of Perl_savepvn() which do not correspond to mass production
+of CVs (there are more C<903> allocations than 146 similar lines of
+F<lib/auto/POSIX/autosplit.ix>).  Note also that C<Perl_> prefixes are
+added by macroization code in perl header files to avoid conflicts
+with external libraries.
+
+Anyway, we see that C<903> ids correspond to creation of globs, twice
+per glob - for glob name, and glob stringification magic.
+
+Here are explanations for other I<Id>s above: 
+
+=over
+
+=item C<717> 
+
+is for creation of bigger C<XPV*> structures.  In the above case it
+creates 3 C<AV> per subroutine, one for a list of lexical variable
+names, one for a scratchpad (which contains lexical variables and
+C<targets>), and one for the array of scratchpads needed for
+recursion.  
+
+It also creates a C<GV> and a C<CV> per subroutine (all called from
+start_subparse()).
+
+=item C<002>
+
+Creates C array corresponding to the C<AV> of scratchpads, and the
+scratchpad itself (the first fake entry of this scratchpad is created
+though the subroutine itself is not defined yet).
+
+It also creates C arrays to keep data for the stash (this is one HV,
+but it grows, thus there are 4 big allocations: the big chunks are not
+freeed, but are kept as additional arenas for C<SV> allocations).
+
+=item C<054>
+
+creates a C<HEK> for the name of the glob for the subroutine (this
+name is a key in a I<stash>).
+
+Big allocations with this I<Id> correspond to allocations of new
+arenas to keep C<HE>.
+
+=item C<602>
+
+creates a C<GP> for the glob for the subroutine.
+
+=item C<702>
+
+creates the C<MAGIC> for the glob for the subroutine.
+
+=item C<704>
+
+creates I<arenas> which keep SVs.
+
+=back
+
+=head2 B<-DL> details
+
+If Perl is run with B<-DL> option, then warn()s which start with `!'
+behave specially.  They print a list of I<categories> of memory
+allocations, and statistics of allocations of different sizes for
+these categories.
+
+If warn() string starts with
+
+=over
+
+=item C<!!!> 
+
+print changed categories only, print the differences in counts of allocations;
+
+=item C<!!> 
+
+print grown categories only; print the absolute values of counts, and totals;
+
+=item C<!>
+
+print nonempty categories, print the absolute values of counts and totals.
+
+=back
+
+=head2 Limitations of B<-DL> statistic
+
+If an extension or an external library does not use Perl API to
+allocate memory, these allocations are not counted.
+
+=cut

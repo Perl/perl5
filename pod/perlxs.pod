@@ -541,6 +541,32 @@ The XS code, with ellipsis, follows.
           timep
           RETVAL
 
+=head2 The C_ARGS: Keyword
+
+The C_ARGS: keyword allows creating of XSUBS which have different
+calling sequence from Perl than from C, without a need to write
+CODE: or CPPCODE: section.  The contents of the C_ARGS: paragraph is
+put as the argument to the called C function without any change.
+
+For example, suppose that C function is declared as
+
+    symbolic nth_derivative(int n, symbolic function, int flags);
+
+and that the default flags are kept in a global C variable
+C<default_flags>.  Suppose that you want to create an interface which
+is called as
+
+    $second_deriv = $function->nth_derivative(2);
+
+To do this, declare the XSUB as
+
+    symbolic
+    nth_derivative(function, n)
+	symbolic	function
+	int		n
+    C_ARGS:
+	n, function, default_flags
+
 =head2 The PPCODE: Keyword
 
 The PPCODE: keyword is an alternate form of the CODE: keyword and is used
@@ -750,7 +776,7 @@ prototypes.
 
 =head2 The ALIAS: Keyword
 
-The ALIAS: keyword allows an XSUB to have two more unique Perl names
+The ALIAS: keyword allows an XSUB to have two or more unique Perl names
 and to know which of those names was used when it was invoked.  The Perl
 names may be fully-qualified with package names.  Each alias is given an
 index.  The compiler will setup a variable called C<ix> which contain the
@@ -771,6 +797,77 @@ C<BAR::getit()> for this function.
 	  printf("# ix = %d\n", ix );
           OUTPUT:
           timep
+
+=head2 The INTERFACE: Keyword
+
+This keyword declares the current XSUB as a keeper of the given
+calling signature.  If some text follows this keyword, it is
+considered as a list of functions which have this signature, and
+should be attached to XSUBs.
+
+Say, if you have 4 functions multiply(), divide(), add(), subtract() all
+having the signature
+
+    symbolic f(symbolic, symbolic);
+
+you code them all by using XSUB
+
+    symbolic
+    interface_s_ss(arg1, arg2)  
+	symbolic	arg1
+	symbolic	arg2
+    INTERFACE:
+	multiply divide 
+	add subtract
+
+The advantage of this approach comparing to ALIAS: keyword is that one
+can attach an extra function remainder() at runtime by using
+    
+    CV *mycv = newXSproto("Symbolic::remainder", 
+			  XS_Symbolic_interface_s_ss, __FILE__, "$$");
+    XSINTERFACE_FUNC_SET(mycv, remainder);
+
+(This example supposes that there was no INTERFACE_MACRO: section,
+otherwise one needs to use something else instead of
+C<XSINTERFACE_FUNC_SET>.)
+
+=head2 The INTERFACE_MACRO: Keyword
+
+This keyword allows one to define an INTERFACE using a different way
+to extract a function pointer from an XSUB.  The text which follows
+this keyword should give the name of macros which would extract/set a
+function pointer.  The extractor macro is given return type, C<CV*>,
+and C<XSANY.any_dptr> for this C<CV*>.  The setter macro is given cv,
+and the function pointer.
+
+The default value is C<XSINTERFACE_FUNC> and C<XSINTERFACE_FUNC_SET>.
+An INTERFACE keyword with an empty list of functions can be omitted if
+INTERFACE_MACRO keyword is used.
+
+Suppose that in the previous example functions pointers for 
+multiply(), divide(), add(), subtract() are kept in a global C array
+C<fp[]> with offsets being C<multiply_off>, C<divide_off>, C<add_off>,
+C<subtract_off>.  Then one can use 
+
+    #define XSINTERFACE_FUNC_BYOFFSET(ret,cv,f) \
+	((XSINTERFACE_CVT(ret,))fp[CvXSUBANY(cv).any_i32])
+    #define XSINTERFACE_FUNC_BYOFFSET_set(cv,f) \
+	CvXSUBANY(cv).any_i32 = CAT2( f, _off )
+
+in C section,
+
+    symbolic
+    interface_s_ss(arg1, arg2)  
+	symbolic	arg1
+	symbolic	arg2
+    INTERFACE_MACRO: 
+	XSINTERFACE_FUNC_BYOFFSET
+	XSINTERFACE_FUNC_BYOFFSET_set
+    INTERFACE:
+	multiply divide 
+	add subtract
+
+in XSUB section.
 
 =head2 The INCLUDE: Keyword
 

@@ -17,7 +17,7 @@
 /*
  * Package name      : perl5
  * Source directory  : .
- * Configuration time: Thu May 28 12:44:36 EDT 1998
+ * Configuration time: Mon Jun  8 12:25:25 EDT 1998
  * Configured by     : doughera
  * Target system     : linux fractal 2.0.33 #1 tue feb 3 10:11:46 est 1998 i686 unknown 
  */
@@ -1467,8 +1467,8 @@
  *	This symbol contains the ~name expanded version of ARCHLIB, to be used
  *	in programs that are not prepared to deal with ~ expansion at run-time.
  */
-#define ARCHLIB "/opt/perl/lib/i686-linux-thread/5.00465"		/**/
-#define ARCHLIB_EXP "/opt/perl/lib/i686-linux-thread/5.00465"		/**/
+#define ARCHLIB "/opt/perl/lib/i686-linux-thread/5.00466"		/**/
+#define ARCHLIB_EXP "/opt/perl/lib/i686-linux-thread/5.00466"		/**/
 
 /* CAT2:
  *	This macro catenates 2 tokens together.
@@ -1619,12 +1619,6 @@
 #ifdef HAS_LONG_LONG
 #define LONGLONGSIZE 8		/**/
 #endif
-
-/* HAS_MKSTEMP:
- *	This symbol, if defined, indicates that the mkstemp routine is
- *	available to create and open a unique temporary file.
- */
-#define HAS_MKSTEMP		/**/
 
 /* HAS_SETGROUPS:
  *	This symbol, if defined, indicates that the setgroups() routine is

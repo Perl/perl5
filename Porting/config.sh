@@ -8,7 +8,7 @@
 
 # Package name      : perl5
 # Source directory  : .
-# Configuration time: Thu May 28 12:44:36 EDT 1998
+# Configuration time: Mon Jun  8 12:25:25 EDT 1998
 # Configured by     : doughera
 # Target system     : linux fractal 2.0.33 #1 tue feb 3 10:11:46 est 1998 i686 unknown 
 
@@ -31,8 +31,8 @@ alignbytes='4'
 ansi2knr=''
 aphostname=''
 ar='ar'
-archlib='/opt/perl/lib/i686-linux-thread/5.00465'
-archlibexp='/opt/perl/lib/i686-linux-thread/5.00465'
+archlib='/opt/perl/lib/i686-linux-thread/5.00466'
+archlibexp='/opt/perl/lib/i686-linux-thread/5.00466'
 archname='i686-linux-thread'
 archobjs=''
 awk='awk'
@@ -52,7 +52,7 @@ ccdlflags='-rdynamic'
 ccflags='-D_REENTRANT -Dbool=char -DHAS_BOOL -I/usr/local/include'
 cf_by='doughera'
 cf_email='yourname@yourhost.yourplace.com'
-cf_time='Thu May 28 12:44:36 EDT 1998'
+cf_time='Mon Jun  8 12:25:25 EDT 1998'
 chgrp=''
 chmod=''
 chown=''
@@ -167,7 +167,6 @@ d_memmove='define'
 d_memset='define'
 d_mkdir='define'
 d_mkfifo='define'
-d_mkstemp='define'
 d_mktime='define'
 d_msg='define'
 d_msgctl='define'
@@ -376,7 +375,7 @@ i_varhdr='stdarg.h'
 i_vfork='undef'
 incpath=''
 inews=''
-installarchlib='/opt/perl/lib/i686-linux-thread/5.00465'
+installarchlib='/opt/perl/lib/i686-linux-thread/5.00466'
 installbin='/opt/perl/bin'
 installman1dir='/opt/perl/man/man1'
 installman3dir='/opt/perl/man/man3'
@@ -522,7 +521,7 @@ stdio_filbuf=''
 stdio_ptr='((fp)->_IO_read_ptr)'
 strings='/usr/include/string.h'
 submit=''
-subversion='65'
+subversion='66'
 sysman='/usr/man/man1'
 tail=''
 tar=''
@@ -554,6 +553,19 @@ voidflags='15'
 xlibpth='/usr/lib/386 /lib/386'
 zcat=''
 zip='zip'
+# Configure command line arguments.
+config_arg0='Configure'
+config_args='-Dprefix=/opt/perl -Doptimize=-O -Dusethreads -Dcf_by=yourname -Dcf_email=yourname@yourhost.yourplace.com -Dperladmin=yourname@yourhost.yourplace.com -Dmydomain=.yourplace.com -Dmyhostname=yourhost -dE'
+config_argc=9
+config_arg1='-Dprefix=/opt/perl'
+config_arg2='-Doptimize=-O'
+config_arg3='-Dusethreads'
+config_arg4='-Dcf_by=yourname'
+config_arg5='-Dcf_email=yourname@yourhost.yourplace.com'
+config_arg6='-Dperladmin=yourname@yourhost.yourplace.com'
+config_arg7='-Dmydomain=.yourplace.com'
+config_arg8='-Dmyhostname=yourhost'
+config_arg9='-dE'
 PATCHLEVEL=4
-SUBVERSION=65
+SUBVERSION=66
 CONFIG=true

@@ -68,6 +68,7 @@ PERLVAR(Iscreamfirst,	I32 *)
 PERLVAR(Iscreamnext,	I32 *)		
 PERLVARI(Imaxscream,	I32,	-1)	
 PERLVAR(Ilastscream,	SV *)		
+PERLVAR(Ireplgv,	GV *)		
 
 /* shortcuts to misc objects */
 PERLVAR(Ierrgv,		GV *)		
@@ -183,10 +184,10 @@ PERLVAR(Iregseen,	U32)		/* from regcomp.c */
 PERLVAR(Iseen_zerolen,	I32)		/* from regcomp.c */
 PERLVAR(Iregcomp_rx,	regexp *)	/* from regcomp.c */
 PERLVAR(Iextralen,	I32)		/* from regcomp.c */
-#ifdef DEBUGGING
+/* #ifdef DEBUGGING -- keep the structure the same with/without DEBUGGING defined */
 PERLVAR(Icolorset,	int)		/* from regcomp.c */
 PERLVAR(Icolors[4],	char *)		/* from regcomp.c */
-#endif 
+/* #endif */
 
 PERLVAR(Ireginput,	char *)		/* String-input pointer. */
 PERLVAR(Iregbol,	char *)		/* Beginning of input, for ^ check. */
@@ -204,11 +205,11 @@ PERLVAR(Ibostr,		char *)		/* from regexec.c */
 PERLVAR(Ireg_flags,	U32)		/* from regexec.c */
 PERLVAR(Ireg_eval_set,	I32)		/* from regexec.c */
 
-#ifdef DEBUGGING
+/* #ifdef DEBUGGING -- keep the structure the same with/without DEBUGGING defined */
 PERLVAR(Iregnarrate,	I32)		/* from regexec.c */
 PERLVAR(Iregprogram,	regnode *)	/* from regexec.c */
 PERLVARI(Iregindent,	int,	    0)	/* from regexec.c */
-#endif
+/* #endif */
 
 PERLVAR(Iregcc,		CURCUR *)	/* from regexec.c */
 PERLVARI(Iin_clean_objs,bool,	    FALSE)  /* from sv.c */

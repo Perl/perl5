@@ -122,13 +122,18 @@ saferealloc(Malloc_t where,MEM_SIZE size)
 	my_exit(1);
     }
 #endif /* HAS_64K_LIMIT */
+    if (!size) {
+	safefree(where);
+	return NULL;
+    }
+
     if (!where)
-	croak("Null realloc");
+	return safemalloc(size);
 #ifdef DEBUGGING
     if ((long)size < 0)
 	croak("panic: realloc");
 #endif
-    ptr = PerlMem_realloc(where,size?size:1);	/* realloc(0) is NASTY on our system */
+    ptr = PerlMem_realloc(where,size);
 
 #if !(defined(I286) || defined(atarist))
     DEBUG_m( {
@@ -2129,7 +2134,7 @@ wait4pid(int pid, int *statusp, int flags)
     if (!HAS_WAITPID_RUNTIME)
 	goto hard_way;
 #  endif
-    return waitpid(pid,statusp,flags);
+    return PerlProc_waitpid(pid,statusp,flags);
 #endif
 #if !defined(HAS_WAITPID) && defined(HAS_WAIT4)
     return wait4((pid==-1)?0:pid,statusp,flags,Null(struct rusage *));
@@ -2847,4 +2852,11 @@ U32 *
 get_opargs(void)
 {
  return opargs;
+}
+
+
+SV **
+get_specialsv_list(void)
+{
+ return specialsv_list;
 }

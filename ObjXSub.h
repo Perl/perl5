@@ -1,7 +1,6 @@
 #ifndef __ObjXSub_h__
 #define __ObjXSub_h__
 
-
 /* Varibles */ 
 #undef  Argv
 #define Argv			pPerl->Perl_Argv
@@ -41,6 +40,8 @@
 #define argvgv			pPerl->Perl_argvgv
 #undef  argvoutgv
 #define argvoutgv		pPerl->Perl_argvoutgv
+#undef  av_fetch_sv
+#define av_fetch_sv         pPerl->av_fetch_sv
 #undef  basetime
 #define basetime		pPerl->Perl_basetime
 #undef  beginav
@@ -177,6 +178,10 @@
 #define eval_start		pPerl->Perl_eval_start
 #undef  evalseq
 #define evalseq			pPerl->Perl_evalseq
+#undef  exitlist
+#define exitlist            pPerl->exitlist
+#undef  exitlistlen
+#define exitlistlen         pPerl->exitlistlen
 #undef  expect
 #define expect			pPerl->Perl_expect
 #undef  extralen
@@ -207,6 +212,10 @@
 #define hexdigit		pPerl->Perl_hexdigit
 #undef  hints
 #define hints			pPerl->Perl_hints
+#undef  hv_fetch_ent_mh
+#define hv_fetch_ent_mh     pPerl->hv_fetch_ent_mh
+#undef  hv_fetch_sv
+#define hv_fetch_sv         pPerl->hv_fetch_sv
 #undef  in_clean_all
 #define in_clean_all		pPerl->Perl_in_clean_all
 #undef  in_clean_objs
@@ -331,6 +340,8 @@
 #define minus_p			pPerl->Perl_minus_p
 #undef  modcount
 #define modcount		pPerl->Perl_modcount
+#undef  modglobal
+#define modglobal       pPerl->Perl_modglobal
 #undef  multi_close
 #define multi_close		pPerl->Perl_multi_close
 #undef  multi_end
@@ -533,8 +544,6 @@
 #define screamfirst		pPerl->Perl_screamfirst
 #undef  screamnext
 #define screamnext		pPerl->Perl_screamnext
-#undef  scrgv
-#define scrgv			pPerl->Perl_scrgv
 #undef  secondgv
 #define secondgv		pPerl->Perl_secondgv
 #undef  seen_zerolen
@@ -551,6 +560,8 @@
 #define sortcxix		pPerl->Perl_sortcxix
 #undef  sortstash
 #define sortstash		pPerl->Perl_sortstash
+#undef  specialsv_list
+#define specialsv_list  pPerl->Perl_specialsv_list
 #undef  splitstr
 #define splitstr		pPerl->Perl_splitstr
 #undef  stack_base
@@ -603,6 +614,8 @@
 #define sv_undef		pPerl->Perl_sv_undef
 #undef  sv_yes
 #define sv_yes			pPerl->Perl_sv_yes
+#undef  svref_mutex
+#define svref_mutex         pPerl->svref_mutex
 #undef  sys_intern
 #define sys_intern		pPerl->Perl_sys_intern
 #undef  tainted
@@ -949,7 +962,9 @@
 #undef  get_no_modify
 #define get_no_modify       pPerl->Perl_get_no_modify
 #undef  get_opargs
-#define get_opargs	    pPerl->Perl_get_opargs
+#define get_opargs	        pPerl->Perl_get_opargs
+#undef  get_specialsv_list
+#define get_specialsv_list  pPerl->Perl_get_specialsv_list
 #undef  gp_free
 #define gp_free             pPerl->Perl_gp_free
 #undef  gp_ref
@@ -1176,6 +1191,8 @@
 #define magic_setvec        pPerl->Perl_magic_setvec
 #undef  magic_sizepack
 #define magic_sizepack      pPerl->Perl_magic_sizepack
+#undef  magic_unchain
+#define magic_unchain       pPerl->Perl_magic_unchain
 #undef  magic_wipepack
 #define magic_wipepack      pPerl->Perl_magic_wipepack
 #undef  magicname
@@ -1997,10 +2014,10 @@
 #define socketpair PerlSock_socketpair
 #endif  /* NO_XSLOCKS */
 
-#undef  THIS
-#define THIS pPerl
-#undef  THIS_
-#define THIS_ pPerl,
+#undef  PERL_OBJECT_THIS
+#define PERL_OBJECT_THIS pPerl
+#undef  PERL_OBJECT_THIS_
+#define PERL_OBJECT_THIS_ pPerl,
 
 #undef  SAVEDESTRUCTOR
 #define SAVEDESTRUCTOR(f,p) \

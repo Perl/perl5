@@ -442,8 +442,7 @@ term	:	term ASSIGNOP term
 	|	scalar	%prec '('
 			{ $$ = $1; }
 	|	star '{' expr ';' '}'
-			{ $$ = newBINOP(OP_GELEM, 0, newGVREF(0,$1),
-					scalar($3)); }
+			{ $$ = newBINOP(OP_GELEM, 0, $1, scalar($3)); }
 	|	star	%prec '('
 			{ $$ = $1; }
 	|	scalar '[' expr ']'	%prec '('

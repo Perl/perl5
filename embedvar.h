@@ -208,6 +208,7 @@
 #define regstartp		(curinterp->Iregstartp)
 #define regtill			(curinterp->Iregtill)
 #define regxend			(curinterp->Iregxend)
+#define replgv			(curinterp->Ireplgv)
 #define rightgv			(curinterp->Irightgv)
 #define sawampersand		(curinterp->Isawampersand)
 #define sawstudy		(curinterp->Isawstudy)
@@ -371,6 +372,7 @@
 #define Iregstartp		regstartp
 #define Iregtill		regtill
 #define Iregxend		regxend
+#define Ireplgv			replgv
 #define Irightgv		rightgv
 #define Isawampersand		sawampersand
 #define Isawstudy		sawstudy
@@ -596,6 +598,7 @@
 #define regstartp		Perl_regstartp
 #define regtill			Perl_regtill
 #define regxend			Perl_regxend
+#define replgv			Perl_replgv
 #define rightgv			Perl_rightgv
 #define sawampersand		Perl_sawampersand
 #define sawstudy		Perl_sawstudy
@@ -849,9 +852,9 @@
 #define rsfp			(Perl_Vars.Grsfp)
 #define rsfp_filters		(Perl_Vars.Grsfp_filters)
 #define runops			(Perl_Vars.Grunops)
-#define scrgv			(Perl_Vars.Gscrgv)
 #define sh_path			(Perl_Vars.Gsh_path)
 #define sighandlerp		(Perl_Vars.Gsighandlerp)
+#define specialsv_list		(Perl_Vars.Gspecialsv_list)
 #define sub_generation		(Perl_Vars.Gsub_generation)
 #define subline			(Perl_Vars.Gsubline)
 #define subname			(Perl_Vars.Gsubname)
@@ -968,9 +971,9 @@
 #define Grsfp			rsfp
 #define Grsfp_filters		rsfp_filters
 #define Grunops			runops
-#define Gscrgv			scrgv
 #define Gsh_path		sh_path
 #define Gsighandlerp		sighandlerp
+#define Gspecialsv_list		specialsv_list
 #define Gsub_generation		sub_generation
 #define Gsubline		subline
 #define Gsubname		subname
@@ -1087,9 +1090,9 @@
 #define rsfp			Perl_rsfp
 #define rsfp_filters		Perl_rsfp_filters
 #define runops			Perl_runops
-#define scrgv			Perl_scrgv
 #define sh_path			Perl_sh_path
 #define sighandlerp		Perl_sighandlerp
+#define specialsv_list		Perl_specialsv_list
 #define sub_generation		Perl_sub_generation
 #define subline			Perl_subline
 #define subname			Perl_subname

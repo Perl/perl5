@@ -112,10 +112,6 @@ sub _write_win32 {
     # put library name in quotes (it could be a keyword, like 'Alias')
     if ($Config::Config{'cc'} !~ /^gcc/i) {
       print DEF "LIBRARY \"$data->{DLBASE}\"\n";
-      if ($Config{'ccflags'} !~ /PERL_OBJECT/i) {
-        print DEF "CODE LOADONCALL\n";
-        print DEF "DATA LOADONCALL NONSHARED MULTIPLE\n";
-      }
     }
     print DEF "EXPORTS\n  ";
     my @syms;

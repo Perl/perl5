@@ -28,7 +28,7 @@ INST_STATIC = libsdbm$(LIB_EXT)
 }
 
 sub MY::top_targets {
-	'
+    my $r = '
 all :: static
 	$(NOECHO) $(NOOP)
 
@@ -38,10 +38,14 @@ config ::
 lint:
 	lint -abchx $(LIBSRCS)
 
+';
+    $r .= '
 # This is a workaround, the problem is that our old GNU make exports
 # variables into the environment so $(MYEXTLIB) is set in here to this
 # value which can not be built.
 sdbm/libsdbm.a:
-	true
-';
+	$(NOECHO) $(NOOP)
+' unless $^O eq 'VMS';
+
+    return $r;
 }

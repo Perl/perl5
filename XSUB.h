@@ -19,6 +19,16 @@
 
 #define dXSI32 I32 ix = XSANY.any_i32
 
+#ifdef __cplusplus
+#  define XSINTERFACE_CVT(ret,name) ret (*name)(...)
+#else
+#  define XSINTERFACE_CVT(ret,name) ret (*name)()
+#endif
+#define dXSFUNCTION(ret)		XSINTERFACE_CVT(ret,XSFUNCTION)
+#define XSINTERFACE_FUNC(ret,cv,f)	((XSINTERFACE_CVT(ret,))(f))
+#define XSINTERFACE_FUNC_SET(cv,f)	\
+		CvXSUBANY(cv).any_dptr = (void (*) _((void*)))(f)
+
 #define XSRETURN(off)					\
     STMT_START {					\
 	stack_sp = stack_base + ax + ((off) - 1);	\

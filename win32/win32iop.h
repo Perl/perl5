@@ -90,6 +90,7 @@ DllExport  int		win32_mkdir(const char *dir, int mode);
 DllExport  int		win32_rmdir(const char *dir);
 DllExport  int		win32_chdir(const char *dir);
 DllExport  int		win32_flock(int fd, int oper);
+DllExport  int		win32_execv(const char *cmdname, const char *const *argv);
 DllExport  int		win32_execvp(const char *cmdname, const char *const *argv);
 DllExport  void		win32_perror(const char *str);
 DllExport  void		win32_setbuf(FILE *pf, char *buf);
@@ -122,6 +123,8 @@ DllExport  int		win32_stat(const char *path, struct stat *buf);
 DllExport  int		win32_ioctl(int i, unsigned int u, char *data);
 DllExport  int		win32_utime(const char *f, struct utimbuf *t);
 DllExport  int		win32_wait(int *status);
+DllExport  int		win32_waitpid(int pid, int *status, int flags);
+DllExport  int		win32_kill(int pid, int sig);
 
 #ifdef HAVE_DES_FCRYPT
 DllExport char *	win32_crypt(const char *txt, const char *salt);
@@ -217,6 +220,7 @@ END_EXTERN_C
 #define rmdir			win32_rmdir
 #define chdir			win32_chdir
 #define flock(fd,o)		win32_flock(fd,o)
+#define execv			win32_execv
 #define execvp			win32_execvp
 #define perror			win32_perror
 #define setbuf			win32_setbuf
@@ -255,6 +259,8 @@ END_EXTERN_C
 #define ioctl			win32_ioctl
 #define utime			win32_utime
 #define wait			win32_wait
+#define waitpid			win32_waitpid
+#define kill			win32_kill
 
 #ifdef HAVE_DES_FCRYPT
 #undef crypt

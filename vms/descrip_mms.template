@@ -1,3 +1,4 @@
+!GROK!THIS!
 # Descrip.MMS for perl5 on VMS
 # Last revised 27-Feb-1998 by Charles Bailey  bailey@genetics.upenn.edu
 #
@@ -46,6 +47,11 @@
 
 #### Start of system configuration section. ####
 
+~DECC~
+~GNUC~
+~ARCH-TYPE~ = 1
+~THREAD~
+~SOCKET~
 
 #: >>>>> Architecture-specific options <<<<<
 .ifdef AXE
@@ -74,7 +80,7 @@ OBJVAL = $(MMS$TARGET_NAME)$(O)
 .endif
 
 # Updated by fndvers.com -- do not edit by hand
-PERL_VERSION = 5_00463#
+PERL_VERSION = 5_00$PATCHLEVEL$SUBVERSION
 
 .ifdef DECC_SOCKETS
 SOCKET=1
@@ -113,7 +119,6 @@ NOX2P = 1
 #: >>>>>Compiler-specific options <<<<<
 .ifdef GNUC
 .first
-	@ @[.vms]fndvers.com "" "" "[.vms]descrip.mms"
 	@ If F$TrnLnm("Sys").eqs."" Then Define/NoLog SYS GNU_CC_Include:[VMS]
 CC = gcc
 PIPES_BROKEN = 1
@@ -139,7 +144,6 @@ DBGSPECFLAGS = /Show=All
 # just in case.
 .first
 	@ Set Process/Privilege=(NoSYSNAM)
-	@ @[.vms]fndvers.com "" "" "[.vms]descrip.mms"
 	@ If F$TrnLnm("Sys").eqs."" .and. F$TrnLnm("DECC$System_Include").nes."" Then Define/NoLog SYS DECC$System_Include
 .ifdef __AXP__
 	@ If F$TrnLnm("Sys").eqs."" .and. F$TrnLnm("DECC$System_Include").eqs."" Then Define/NoLog SYS Sys$Library
@@ -153,7 +157,6 @@ XTRADEF =
 POSIX = POSIX
 .else # VAXC
 .first
-	@ @[.vms]fndvers.com "" "" "[.vms]descrip.mms"
 	@ If F$TrnLnm("Sys").eqs."" .and. F$TrnLnm("VAXC$Include").eqs."" Then Define/NoLog SYS Sys$Library
 	@ If F$TrnLnm("Sys").eqs."" .and. F$TrnLnm("VAXC$Include").nes."" Then Define/NoLog SYS VAXC$Include
 
@@ -211,12 +214,12 @@ SOCKPM =
 THREAD = 
 
 .ifdef THREADED
-THREADDEF = ,USE_THREADS,MULTIPLICITY
+THREADDEF = 
 THREAD = THREAD
 .endif
 
 .ifdef OLDTHREADED
-THREADDEF = ,USE_THREADS,MULTIPLICITY,OLD_PTHREADS_API
+THREADDEF = ,OLD_PTHREADS_API
 THREAD = THREAD
 LIBS2 = sys$share:cma$lib_shr/share,cma$rtl/share
 .ifdef __AXP__
@@ -225,7 +228,7 @@ LIBS2 = $(LIBS2),sys$share:cma$open_lib_shr/share,cma$open_rtl/share
 .endif
 
 .ifdef FAKETHREADED
-THREADDEF = ,USE_THREADS,MULTIPLICITY,FAKE_THREADS
+THREADDEF = ,FAKE_THREADS
 THREADH = fakethr.h
 acth = $(ARCHCORE)fakethr.h
 THREAD = THREAD
@@ -239,7 +242,7 @@ CFLAGS = /Define=(DEBUGGING$(SOCKDEF)$(XTRADEF)$(THREADDEF))$(XTRACCFLAGS)$(DBGC
 LINKFLAGS = $(DBGLINKFLAGS)
 
 MAKE = $(MMS)
-MAKEFILE = [.VMS]Descrip.MMS   # this file
+MAKEFILE = Descrip.MMS   # this file
 NOOP = continue
 
 # Macros to invoke a copy of miniperl during the build.  Targets which
@@ -347,7 +350,8 @@ all : base extras x2p archcorefiles preplibrary perlpods
 .endif
 base : miniperl perl
 	@ $(NOOP)
-extras : Fcntl IO Opcode attrs Stdio DCLsym B $(POSIX) $(THREAD) SDBM_File libmods utils podxform
+#extras : Fcntl IO Opcode attrs Stdio DCLsym B $(POSIX) $(THREAD) SDBM_File libmods utils podxform
+extras : $extensions libmods utils podxform
 	@ $(NOOP)
 libmods : $(LIBPREREQ)
 	@ $(NOOP)
@@ -443,15 +447,10 @@ $(ARCHDIR)config.pm : [.lib]config.pm
 	Create/Directory $(ARCHDIR)
 	Copy $(MMS$SOURCE) $(MMS$TARGET)
 
-# Once again, we accomodate DCL's 255 character buffer
-[.lib]config.pm : [.vms]config.vms [.vms]genconfig.pl $(MINIPERL_EXE)
-	@ $(MINIPERL) -e "print join('|',@ARGV),'|';" "cc=$(CC)$(CFLAGS)" >genconfig.opt
-	@ $(MINIPERL) -e "print join('|',@ARGV),'|';" "ldflags=$(LINKFLAGS)|obj_ext=$(O)|exe_ext=$(E)|lib_ext=$(OLB)|dbgprefix=$(DBG)" >>genconfig.opt
-	$(MINIPERL) [.VMS]GenConfig.Pl -f genconfig.opt
-	@ Delete/NoLog/NoConfirm genconfig.opt;
+[.lib]config.pm : config.h $(MINIPERL_EXE)
 	$(MINIPERL) ConfigPM.
 
-[.ext.dynaloader]dl_vms.c : [.ext.dynaloader]dl_vms.xs [.lib.ExtUtils]XSSymSet.pm $(MINIPERL_EXE)
+[.ext.dynaloader]dl_vms.c : $(ARCHDIR)Config.pm [.ext.dynaloader]dl_vms.xs [.lib.ExtUtils]XSSymSet.pm $(MINIPERL_EXE)
 	$(XSUBPP) $(MMS$SOURCE) >$(MMS$TARGET)
 
 [.ext.dynaloader]dl_vms$(O) : [.ext.dynaloader]dl_vms.c
@@ -1331,9 +1330,6 @@ vms$(O) : vms.c EXTERN.h perl.h bytecode.h byterun.h config.h embed.h perlio.h p
 # End of automatically generated make dependencies
 .endif # !LINK_ONLY
 
-config.h : [.vms]config.vms
-	Copy/Log/NoConfirm [.vms]config.vms []config.h
-
 vmsish.h : [.vms]vmsish.h
 	Copy/Log/NoConfirm [.vms]vmsish.h []vmsish.h
 
@@ -1479,6 +1475,7 @@ realclean : clean
 	Set Default [---]
 	- If F$Search("*$(OLB)").nes."" Then Delete/NoConfirm/Log *$(OLB);*
 	- If F$Search("*.Opt").nes."" Then Delete/NoConfirm/Log *.Opt;*
+	- If F$Search("descrip.mms").nes."" Then Delete/NoConfirm/Log descrip.mms;*
 	- $(MINIPERL) -e "use File::Path; rmtree(['lib/auto','lib/VMS','lib/$(ARCH)'],1,0);"
 	- If F$Search("[.Lib]DynaLoader.pm").nes."" Then Delete/NoConfirm/Log [.Lib]DynaLoader.pm;*
 	- If F$Search("[.Lib]Socket.pm").nes."" Then Delete/NoConfirm/Log [.Lib]Socket.pm;*
@@ -1506,3 +1503,4 @@ cleansrc : clean
 	- If F$Search("[.VMS]*.VMS;-1").nes."" Then Purge/NoConfirm/Log [.VMS]*.VMS
 	- If F$Search("[.VMS...]*.pm;-1").nes."" Then Purge/NoConfirm/Log [.VMS...]*.pm
 	- If F$Search("[.VMS...]*.xs;-1").nes."" Then Purge/NoConfirm/Log [.VMS...]*.xs
+!GROK!THIS!

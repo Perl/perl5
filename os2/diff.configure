@@ -27,12 +27,3 @@
  case "$libs" in
  '') ;;
  *)  for thislib in $libs; do
-@@ -10392,7 +10392,7 @@
- 	echo " "
- 	echo "Stripping down executable paths..." >&4
- 	for file in $loclist $trylist; do
--		eval $file="\$file"
-+		if test X$file != Xln -o X$osname != Xos2; then eval $file="\$file"; fi
- 	done
- 	;;
- esac

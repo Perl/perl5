@@ -6,7 +6,7 @@ perlhist - the Perl history records
 
 =for RCS
 #
-# $Id: perlhist.pod,v 1.32 1998/04/04 12:20:50 jhi Exp $
+# $Id: perlhist.pod,v 1.41 1998/06/09 15:20:18 jhi Exp $
 #
 =end RCS
 
@@ -31,7 +31,8 @@ Perl history in brief, by Larry Wall:
 =head1 THE KEEPERS OF THE PUMPKIN
 
 Larry Wall, Andy Dougherty, Tom Christiansen, Charles Bailey, Nick
-Ing-Simmons, Chip Salzenberg, Tim Bunce, Malcolm Beattie.
+Ing-Simmons, Chip Salzenberg, Tim Bunce, Malcolm Beattie, Gurusamy
+Sarathy.
 
 =head2 PUMPKIN?
 
@@ -54,7 +55,8 @@ No one was allowed to make backups unless they had the "backup pumpkin".
 [end quote]
 
 The name has stuck.  The holder of the pumpkin is sometimes called
-the pumpking or the pumpkineer.
+the pumpking (keeping the source afloat?) or the pumpkineer (pulling
+the strings?).
 
 =head1 THE RECORDS
 
@@ -92,7 +94,7 @@ the pumpking or the pumpkineer.
           3.037         1990-Oct-20
           3.040         1990-Nov-10
           3.041         1990-Nov-13
-          3.042..43     1990-Jan-91
+          3.042..43     1990-Jan-??
           3.044         1991-Jan-12
                                    
  Larry   4.000          1991-Mar-21
@@ -112,7 +114,7 @@ the pumpking or the pumpkineer.
           5.000alpha3   1993-Oct-10
           5.000alpha4   1993-???-??
           5.000alpha5   1993-???-??
-          5.000alpha6   1993-Mar-18
+          5.000alpha6   1994-Mar-18
           5.003alpha7   1994-Mar-25
  Andy     5.000alpha8   1994-Apr-04
  Larry    5.000alpha9   1994-May-05     ext appears.
@@ -137,7 +139,7 @@ the pumpking or the pumpkineer.
  Andy     5.000b2a      1994-Sep-14
           5.000b2b      1994-Sep-17
           5.000b2c      1994-Sep-17
- Larry    5.000beta3    1994-???-??
+ Larry    5.000beta3    1994-Sep-??
  Andy     5.000b3a      1994-Sep-18
           5.000b3b      1994-Sep-22
           5.000b3c      1994-Sep-23
@@ -258,6 +260,9 @@ the pumpking or the pumpkineer.
           5.004_02      1997-Aug-07
           5.004_03      1997-Sep-05
           5.004_04      1997-Oct-15
+          5.004m5t1     1998-Mar-04     Maintenance Trials (for 5.004_05).
+          5.004_04-m2   1997-May-01
+          5.004_04-m3   1998-May-15
                                    
  Malcolm  5.004_50      1997-Sep-09     The 5.005 development track.
           5.004_51      1997-Oct-02
@@ -274,6 +279,9 @@ the pumpking or the pumpkineer.
           5.004_62      1998-Mar-06
           5.004_63      1998-Mar-17
           5.004_64      1998-Apr-03
+          5.004_65      1998-May-15
+          5.004_66      1998-May-29
+ Sarathy  5.004_67      1998-Jun-15
 
 =head2 SELECTED RELEASE SIZES
 
@@ -294,10 +302,10 @@ explained below.
  4.019           680  37     85  29      -   -     98  76    199   4
  4.036           709  37     89  30      -   -     98  76    208   5
  5.000alpha2     785  50    114  32      -   -    112  86    209   5
- 5.000a3         801  50    117  33      -   -    121  87    209   5
- 5.000a9        1022  56    149  43    116  29    125  90    217   6
+ 5.000alpha3     801  50    117  33      -   -    121  87    209   5
+ 5.000alpha9    1022  56    149  43    116  29    125  90    217   6
  5.000a12h       978  49    140  49    205  46    152  97    228   9
- 5.000beta3h    1035  53    232  70    216  38    162  94    218  21
+ 5.000b3h       1035  53    232  70    216  38    162  94    218  21
  5.000          1038  53    250  76    216  38    154  92    536  62
  5.001m         1071  54    388  82    240  38    159  95    544  29
  5.002          1121  54    661 101    287  43    155  94    847  35
@@ -310,7 +318,8 @@ explained below.
  5.004_53       1422  62   1295 141    438  70    394 162   1637  56
  5.004_56       1501  66   1301 140    447  74    408 165   1648  57
  5.004_59       1555  72   1317 142    448  74    424 171   1678  58   
- 5.004_62	1602  77   1327 144    629  92    428 173   1674  58
+ 5.004_62       1602  77   1327 144    629  92    428 173   1674  58
+ 5.004_65       1626  77   1358 146    615  92    446 179   1698  60
 
 The "core"..."doc" mean the following files from the Perl source code
 distribution.  The glob notation ** means recursively, (.) means
@@ -366,29 +375,30 @@ the Perl source distribution for somewhat more selected releases.
 
  ======================================================================
 
-            5.003_07 5.004   5.004_04 5.004_62
+            5.003_07 5.004   5.004_04 5.004_62 5.004_65
                                               
- Configure  217  1   225  1  225  1   240  1
- cygwin32     -  -    23  5   23  5    23  5  
- djgpp        -  -     -  -    -  -    14  5
- eg          54 44    81 62   81 62    81 62
- emacs      143  1   194  1  204  1   212  2
- h2pl        12 12    12 12   12 12    12 12
- hints       90 62   129 69  132 71   144 72
- os2        117 42   121 42  127 42   127 44
- plan9       79 15    82 15   82 15    82 15
- Porting     51  1    94  2  109  4   203  6
- qnx          -  -     1  2    1  2     1  2
- utils       97  7   112  8  118  8   124  8
- vms        505 27   518 34  524 34   538 34
- win32        -  -   285 33  378 36   470 39
- x2p        280 19   281 19  281 19   281 19
+ beos         -  -     -  -    -  -     -  -     1   1
+ Configure  217  1   225  1  225  1   240  1   248   1
+ cygwin32     -  -    23  5   23  5    23  5    24   5
+ djgpp        -  -     -  -    -  -    14  5    14   5
+ eg          54 44    81 62   81 62    81 62    81  62
+ emacs      143  1   194  1  204  1   212  2   212   2
+ h2pl        12 12    12 12   12 12    12 12    12  12
+ hints       90 62   129 69  132 71   144 72   151  74
+ os2        117 42   121 42  127 42   127 44   129  44
+ plan9       79 15    82 15   82 15    82 15    82  15
+ Porting     51  1    94  2  109  4   203  6   234   8
+ qnx          -  -     1  2    1  2     1  2     1   2
+ utils       97  7   112  8  118  8   124  8   156   9
+ vms        505 27   518 34  524 34   538 34   569  34
+ win32        -  -   285 33  378 36   470 39   493  39
+ x2p        280 19   281 19  281 19   281 19   282  19
 
 =head2 SELECTED PATCH SIZES
 
-The "diff lines kb" means that for example the patch 5.003_08,
-to be applied on top 5.003_07 (or whatever was before it) added
-lines for 110 kilobytes, it removed lines for 19 kilobytes, and
+The "diff lines kb" means that for example the patch 5.003_08, to be
+applied on top of the 5.003_07 (or whatever was before the 5.003_08)
+added lines for 110 kilobytes, it removed lines for 19 kilobytes, and
 changed lines for 424 kilobytes.  Just the lines themselves are
 counted, not their context.  The "+ - !" become from the diff(1)s
 context diff output format.
@@ -454,9 +464,8 @@ context diff output format.
 Jarkko Hietaniemi <F<jhi@iki.fi>>.
 
 Thanks to the collective memory of the Perlfolk.  In addition to the
-Keepers of the Pumpkin also Alan Champion, Andreas Knig, John
+Keepers of the Pumpkin also Alan Champion, Andreas König, John
 Macdonald, Matthias Neeracher, Michael Peppler, Randal Schwartz, and
 Paul D. Smith sent corrections and additions.
 
 =cut
-

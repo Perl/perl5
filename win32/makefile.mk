@@ -22,7 +22,7 @@ INST_TOP	*= $(INST_DRV)\perl
 # locations it installs files to.  If you disable it, an alternative
 # versioned installation can be obtained by setting INST_TOP above to a
 # path that includes an arbitrary version string.
-INST_VER	*= \5.00466
+INST_VER	*= \5.00467
 
 #
 # uncomment to enable threads-capabilities
@@ -352,7 +352,7 @@ NOOP		= @echo
 XSUBPP		= ..\$(MINIPERL) -I..\..\lib ..\$(EXTUTILSDIR)\xsubpp \
 		-C++ -prototypes
 
-CORE_SRC	=		\
+MICROCORE_SRC	=		\
 		..\av.c		\
 		..\byterun.c	\
 		..\deb.c	\
@@ -381,15 +381,15 @@ CORE_SRC	=		\
 		..\util.c
 
 .IF "$(CRYPT_SRC)" != ""
-CORE_SRC	+= ..\$(CRYPT_SRC)
+MICROCORE_SRC	+= ..\$(CRYPT_SRC)
 .ENDIF
 
 .IF "$(PERL_MALLOC)" == "define"
-CORE_SRC	+= ..\malloc.c
+EXTRACORE_SRC	+= ..\malloc.c
 .ENDIF
 
 .IF "$(OBJECT)" == ""
-CORE_SRC	+= ..\perlio.c
+EXTRACORE_SRC	+= ..\perlio.c
 .ENDIF
 
 WIN32_SRC	=		\
@@ -423,7 +423,7 @@ X2P_SRC		=		\
 		..\x2p\util.c	\
 		..\x2p\walk.c
 
-CORE_H		=		\
+CORE_NOCFG_H	=		\
 		..\av.h		\
 		..\byterun.h	\
 		..\bytecode.h	\
@@ -453,7 +453,6 @@ CORE_H		=		\
 		..\unixish.h	\
 		..\util.h	\
 		..\XSUB.h	\
-		.\config.h	\
 		..\EXTERN.h	\
 		..\perlvars.h	\
 		..\intrpvar.h	\
@@ -463,18 +462,17 @@ CORE_H		=		\
 		.\include\sys\socket.h	\
 		.\win32.h
 
-CORE_OBJ	= $(CORE_SRC:db:+$(o))
+CORE_H		= $(CORE_NOCFG_H) .\config.h
+
+MICROCORE_OBJ	= $(MICROCORE_SRC:db:+$(o))
+CORE_OBJ	= $(MICROCORE_OBJ) $(EXTRACORE_SRC:db:+$(o))
 WIN32_OBJ	= $(WIN32_SRC:db:+$(o))
-MINICORE_OBJ	= $(MINIDIR)\{$(CORE_OBJ:f) miniperlmain$(o)}
+MINICORE_OBJ	= $(MINIDIR)\{$(MICROCORE_OBJ:f) miniperlmain$(o) perlio$(o)}
 MINIWIN32_OBJ	= $(MINIDIR)\{$(WIN32_OBJ:f)}
 MINI_OBJ	= $(MINICORE_OBJ) $(MINIWIN32_OBJ)
 PERL95_OBJ	= $(PERL95_SRC:db:+$(o))
 DLL_OBJ		= $(DLL_SRC:db:+$(o))
 X2P_OBJ		= $(X2P_SRC:db:+$(o))
-
-.IF "$(OBJECT)" != ""
-MINICORE_OBJ	+= $(MINIDIR)\perlio$(o)
-.ENDIF
 
 PERLDLL_OBJ	= $(CORE_OBJ)
 PERLEXE_OBJ	= perlmain$(o)
@@ -528,12 +526,12 @@ EXTENSION_DLL	=		\
 		$(SDBM_FILE_DLL)\
 		$(IO_DLL)	\
 		$(POSIX_DLL)	\
-		$(ATTRS_DLL)
+		$(ATTRS_DLL)	\
+		$(B_DLL)
 
 .IF "$(OBJECT)" == ""
 EXTENSION_DLL	+=		\
-		$(THREAD_DLL)	\
-		$(B_DLL)
+		$(THREAD_DLL)
 .ENDIF
 
 POD2HTML	= $(PODDIR)\pod2html
@@ -567,8 +565,8 @@ CFG_VARS	=					\
 # Top targets
 #
 
-all : $(GLOBEXE) $(MINIMOD) $(CONFIGPM) $(PERLEXE) $(PERL95EXE) $(CAPILIB) $(X2P) \
-	$(EXTENSION_DLL)
+all : .\config.h $(GLOBEXE) $(MINIMOD) $(CONFIGPM) $(PERLEXE) $(PERL95EXE) \
+	$(CAPILIB) $(X2P) $(EXTENSION_DLL)
 
 $(DYNALOADER)$(o) : $(DYNALOADER).c $(CORE_H) $(EXTDIR)\DynaLoader\dlutils.c
 
@@ -591,7 +589,7 @@ perlglob$(o)  : perlglob.c
 config.w32 : $(CFGSH_TMPL)
 	copy $(CFGSH_TMPL) config.w32
 
-.\config.h : $(CFGH_TMPL)
+.\config.h : $(CFGH_TMPL) $(CORE_NOCFG_H)
 	-del /f config.h
 	copy $(CFGH_TMPL) config.h
 
@@ -634,15 +632,18 @@ $(MINIPERL) : $(MINIDIR) $(MINI_OBJ)
 $(MINIDIR) :
 	if not exist "$(MINIDIR)" mkdir "$(MINIDIR)"
 
-$(MINICORE_OBJ) : $(CORE_H)
+$(MINICORE_OBJ) : $(CORE_NOCFG_H)
 	$(CC) -c $(CFLAGS) $(OBJOUT_FLAG)$@ ..\$(*B).c
 
-$(MINIWIN32_OBJ) : $(CORE_H)
+$(MINIWIN32_OBJ) : $(CORE_NOCFG_H)
 	$(CC) -c $(CFLAGS) $(OBJOUT_FLAG)$@ $(*B).c
+
+# 1. we don't want to rebuild miniperl.exe when config.h changes
+# 2. we don't want to rebuild miniperl.exe with non-default config.h
+$(MINI_OBJ)	: $(CORE_NOCFG_H)
 
 $(WIN32_OBJ)	: $(CORE_H)
 $(CORE_OBJ)	: $(CORE_H)
-$(MINI_OBJ)	: $(CORE_H)
 $(DLL_OBJ)	: $(CORE_H)
 $(PERL95_OBJ)	: $(CORE_H)
 $(X2P_OBJ)	: $(CORE_H)
@@ -763,7 +764,7 @@ $(PERL95EXE): $(PERLDLL) $(CONFIGPM) $(PERL95_OBJ)
 
 $(DYNALOADER).c: $(MINIPERL) $(EXTDIR)\DynaLoader\dl_win32.xs $(CONFIGPM)
 	if not exist $(AUTODIR) mkdir $(AUTODIR)
-	cd $(EXTDIR)\$(*B) && ..\$(MINIPERL) -I..\..\lib $(*B).pm.PL
+	cd $(EXTDIR)\$(*B) && ..\$(MINIPERL) -I..\..\lib $(*B)_pm.PL
 	$(XCOPY) $(EXTDIR)\$(*B)\$(*B).pm $(LIBDIR)\$(NULL)
 	cd $(EXTDIR)\$(*B) && $(XSUBPP) dl_win32.xs > $(*B).c
 	$(XCOPY) $(EXTDIR)\$(*B)\dlutils.c .
@@ -779,7 +780,7 @@ PerlCAPI$(o) : PerlCAPI.cpp
 .ELIF "$(CCTYPE)" == "GCC"
 	$(CC) $(CFLAGS_O) -c $(OBJOUT_FLAG)PerlCAPI$(o) PerlCAPI.cpp
 .ELSE
-	$(CC) $(CFLAGS_O) -MT -UPERLDLL -DWIN95FIX -c \
+	$(CC) $(CFLAGS_O) $(RUNTIME) -UPERLDLL -c \
 	    $(OBJOUT_FLAG)PerlCAPI$(o) PerlCAPI.cpp
 .ENDIF
 
@@ -940,6 +941,7 @@ clean :
 	-@erase $(MINIPERL)
 	-@erase perlglob$(o)
 	-@erase perlmain$(o)
+	-@erase PerlCAPI.cpp
 	-@erase config.w32
 	-@erase /f config.h
 	-@erase $(GLOBEXE)

@@ -12,6 +12,7 @@ INSTALL			Detailed installation instructions
 INTERN.h		Included before domestic .h files
 MANIFEST		This list of files
 Makefile.SH		A script that generates Makefile
+ObjXSub.h		Scoping macros for Perl Object in extensions
 Policy_sh.SH		Hold site-wide preferences between Configure runs.
 Porting/Contract	Social contract for contributed modules in Perl core
 Porting/Glossary	Glossary of config.sh variables
@@ -50,6 +51,7 @@ compat3.sym		List of symbols for binary-compatibility with 5.003
 config_h.SH		Produces config.h
 configpm		Produces lib/Config.pm
 configure.gnu		Crude emulation of GNU configure
+configure.com   Configure-equivalent for VMS
 cop.h			Control operator header
 cv.h			Code value header
 cygwin32/cw32imp.h	Cygwin32 port
@@ -173,8 +175,9 @@ ext/DB_File/DB_File.pm		Berkeley DB extension Perl module
 ext/DB_File/DB_File.xs		Berkeley DB extension external subroutines
 ext/DB_File/DB_File_BS		Berkeley DB extension mkbootstrap fodder
 ext/DB_File/Makefile.PL		Berkeley DB extension makefile writer
+ext/DB_File/dbinfo		Berkeley DB database version checker
 ext/DB_File/typemap		Berkeley DB extension interface types
-ext/DynaLoader/DynaLoader.pm.PL	Dynamic Loader perl module
+ext/DynaLoader/DynaLoader_pm.PL	Dynamic Loader perl module
 ext/DynaLoader/Makefile.PL	Dynamic Loader makefile writer
 ext/DynaLoader/README		Dynamic Loader notes and intro
 ext/DynaLoader/dl_aix.xs	AIX implementation
@@ -571,7 +574,6 @@ mv-if-diff		Script to mv a file if it changed
 myconfig		Prints summary of the current configuration
 nostdio.h		Cause compile error on stdio calls
 objpp.h			Scoping macros for Perl Object
-ObjXSub.h		Scoping macros for Perl Object in extensions
 op.c			Opcode syntax tree code
 op.h			Opcode syntax tree header
 opcode.h		Automatically generated opcode header
@@ -739,6 +741,7 @@ t/base/cond.t		See if conditionals work
 t/base/if.t		See if if works
 t/base/lex.t		See if lexical items work
 t/base/pat.t		See if pattern matching works
+t/base/rs.t		See if record-read works
 t/base/term.t		See if various terms work
 t/cmd/elsif.t		See if else-if works
 t/cmd/for.t		See if for loops work
@@ -884,6 +887,7 @@ t/op/readdir.t		See if readdir() works
 t/op/recurse.t		See if deep recursion works
 t/op/ref.t		See if refs and objects work
 t/op/regexp.t		See if regular expressions work
+t/op/regexp_noamp.t	See if regular expressions work with optimizations
 t/op/repeat.t		See if x operator works
 t/op/runlevel.t		See if die() works from perl_call_*()
 t/op/sleep.t		See if sleep works
@@ -934,8 +938,7 @@ utils/perlcc.PL		Front-end for compiler
 utils/perldoc.PL	A simple tool to find & display perl's documentation
 utils/pl2pm.PL		A pl to pm translator
 utils/splain.PL		Stand-alone version of diagnostics.pm
-vms/config.vms		default config.h for VMS
-vms/descrip.mms		MM[SK] description file for build
+vms/descrip_mms.template		Template MM[SK] description file for build
 vms/ext/DCLsym/0README.txt	ReadMe file for VMS::DCLsym
 vms/ext/DCLsym/DCLsym.pm	Perl access to CLI symbols
 vms/ext/DCLsym/DCLsym.xs	Perl access to CLI symbols
@@ -951,23 +954,25 @@ vms/ext/XSSymSet.pm	manage linker symbols when building extensions
 vms/ext/filespec.t	See if VMS::Filespec funtions work
 vms/ext/vmsish.pm	Control VMS-specific behavior of Perl core
 vms/ext/vmsish.t	Tests for vmsish.pm
-vms/fndvers.com		parse Perl version from patchlevel.h
 vms/gen_shrfls.pl	generate options files and glue for shareable image
 vms/genconfig.pl	retcon config.sh from config.h
 vms/genopt.com		hack to write options files in case of broken makes
 vms/make_command.com	record MM[SK] command used to build Perl
 vms/mms2make.pl		convert descrip.mms to make syntax
+vms/munchconfig.c   performs shell $var substitution for VMS
 vms/myconfig.com	record local configuration info for bug report
 vms/perlvms.pod		VMS-specific additions to Perl documentation
 vms/perly_c.vms		perly.c with fixed declarations for global syms
 vms/perly_h.vms		perly.h with fixed declarations for global syms
 vms/sockadapt.c		glue for SockshShr socket support
 vms/sockadapt.h		glue for SockshShr socket support
+vms/subconfigure.com    performs compiler checks and writes config.sh, config.h, and descrip.mms
 vms/test.com		DCL driver for regression tests
 vms/vms.c		VMS-specific C code for Perl core
 vms/vms_yfix.pl		convert Unix perly.[ch] to VMS perly_[ch].vms
 vms/vmsish.h		VMS-specific C header for Perl core
 vms/writemain.pl	Generate perlmain.c from miniperlmain.c+extensions
+win32/GenCAPI.pl	Win32 port for C API with PERL_OBJECT
 win32/Makefile		Win32 makefile for NMAKE (Visual C++ build)
 win32/TEST		Win32 port
 win32/autosplit.pl	Win32 port
@@ -988,7 +993,6 @@ win32/config_h.PL	Perl code to convert Win32 config.sh to config.h
 win32/config_sh.PL	Perl code to update Win32 config.sh from Makefile 
 win32/dl_win32.xs	Win32 port
 win32/genxsdef.pl	Win32 port
-win32/GenCAPI.pl	Win32 port for C API with PERL_OBJECT
 win32/include/arpa/inet.h	Win32 port
 win32/include/dirent.h		Win32 port
 win32/include/netdb.h		Win32 port

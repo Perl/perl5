@@ -2105,7 +2105,7 @@ PP(pp_entersub)
 		curcopdb = NULL;
 	    }
 	    /* Do we need to open block here? XXXX */
-	    (void)(*CvXSUB(cv))(cv _THIS);
+	    (void)(*CvXSUB(cv))(cv _PERL_OBJECT_THIS);
 
 	    /* Enforce some sanity in scalar context. */
 	    if (gimme == G_SCALAR && ++markix != stack_sp - stack_base ) {

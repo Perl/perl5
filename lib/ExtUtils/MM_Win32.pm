@@ -164,8 +164,8 @@ sub init_others
    $self->{'LDLOADLIBS'}
       ||= ( $BORLAND
             ? 'import32.lib cw32mti.lib '
-            : ( $OBJ ? '' : 'msvcrt.lib ' )
-              .'oldnames.lib kernel32.lib comdlg32.lib winspool.lib gdi32.lib '
+            : # compiler adds msvcrtd?.lib according to debug switches
+               'oldnames.lib kernel32.lib comdlg32.lib winspool.lib gdi32.lib '
 	      .'advapi32.lib user32.lib shell32.lib netapi32.lib ole32.lib '
 	      .'oleaut32.lib uuid.lib wsock32.lib mpr.lib winmm.lib version.lib '
   	) . ' odbc32.lib odbccp32.lib';

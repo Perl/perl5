@@ -141,7 +141,7 @@ and added mass commenting to L<perlfaq7>.  Added Net::Telnet, fixed
 backticks, added reader/writer pair to telnet question, added FindBin,
 grouped module questions together in L<perlfaq8>.  Expanded caveats
 for the simple URL extractor, gave LWP example, added CGI security
-question, expanded on the email address answer in L<perlfaq9>.
+question, expanded on the mail address answer in L<perlfaq9>.
 
 =item 25/March/97
 

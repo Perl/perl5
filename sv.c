@@ -96,17 +96,17 @@ typedef void (*SVFUNC) _((SV*));
     } while (0)
 
 static SV **registry;
-static I32 regsize;
+static I32 registry_size;
 
 #define REGHASH(sv,size)  ((((U32)(sv)) >> 2) % (size))
 
 #define REG_REPLACE(sv,a,b) \
     do {				\
 	void* p = sv->sv_any;		\
-	I32 h = REGHASH(sv, regsize);	\
+	I32 h = REGHASH(sv, registry_size);	\
 	I32 i = h;			\
 	while (registry[i] != (a)) {	\
-	    if (++i >= regsize)		\
+	    if (++i >= registry_size)	\
 		i = 0;			\
 	    if (i == h)			\
 		die("SV registry bug");	\
@@ -121,13 +121,13 @@ static void
 reg_add(sv)
 SV* sv;
 {
-    if (sv_count >= (regsize >> 1))
+    if (sv_count >= (registry_size >> 1))
     {
 	SV **oldreg = registry;
-	I32 oldsize = regsize;
+	I32 oldsize = registry_size;
 
-	regsize = regsize ? ((regsize << 2) + 1) : 2037;
-	Newz(707, registry, regsize, SV*);
+	registry_size = registry_size ? ((registry_size << 2) + 1) : 2037;
+	Newz(707, registry, registry_size, SV*);
 
 	if (oldreg) {
 	    I32 i;
@@ -159,9 +159,9 @@ SVFUNC f;
 {
     I32 i;
 
-    for (i = 0; i < regsize; ++i) {
+    for (i = 0; i < registry_size; ++i) {
 	SV* sv = registry[i];
-	if (sv)
+	if (sv && SvTYPE(sv) != SVTYPEMASK)
 	    (*f)(sv);
     }
 }
@@ -1696,7 +1696,21 @@ sv_2pv(register SV *sv, STRLEN *lp)
 	    if (!sv)
 		s = "NULLREF";
 	    else {
+		MAGIC *mg;
+		
 		switch (SvTYPE(sv)) {
+		case SVt_PVMG:
+		    if ( ((SvFLAGS(sv) &
+			   (SVs_OBJECT|SVf_OK|SVs_GMG|SVs_SMG|SVs_RMG)) 
+			  == (SVs_OBJECT|SVs_RMG))
+			 && strEQ(s=HvNAME(SvSTASH(sv)), "Regexp")
+			 && (mg = mg_find(sv, 'r'))) {
+			regexp *re = (regexp *)mg->mg_obj;
+
+			*lp = re->prelen;
+			return re->precomp;
+		    }
+					/* Fall through */
 		case SVt_NULL:
 		case SVt_IV:
 		case SVt_NV:
@@ -1704,8 +1718,7 @@ sv_2pv(register SV *sv, STRLEN *lp)
 		case SVt_PV:
 		case SVt_PVIV:
 		case SVt_PVNV:
-		case SVt_PVBM:
-		case SVt_PVMG:	s = "SCALAR";			break;
+		case SVt_PVBM:	s = "SCALAR";			break;
 		case SVt_PVLV:	s = "LVALUE";			break;
 		case SVt_PVAV:	s = "ARRAY";			break;
 		case SVt_PVHV:	s = "HASH";			break;
@@ -2562,6 +2575,7 @@ sv_magic(register SV *sv, SV *obj, int how, char *name, I32 namlen)
 	mg->mg_virtual = &vtbl_packelem;
 	break;
     case 'r':
+	SvRMAGICAL_on(sv);
 	mg->mg_virtual = &vtbl_regexp;
 	break;
     case 'S':
@@ -3152,6 +3166,31 @@ sv_gets(register SV *sv, register PerlIO *fp, I32 append)
     if (RsSNARF(rs)) {
 	rsptr = NULL;
 	rslen = 0;
+    }
+    else if (RsRECORD(rs)) {
+      I32 recsize, bytesread;
+      char *buffer;
+
+      /* Grab the size of the record we're getting */
+      recsize = SvIV(SvRV(rs));
+      (void)SvPOK_only(sv);    /* Validate pointer */
+      /* Make sure we've got the room to yank in the whole thing */
+      if (SvLEN(sv) <= recsize + 3) {
+        /* No, so make it bigger */
+        SvGROW(sv, recsize + 3);
+      }
+      buffer = SvPVX(sv); /* Get the location of the final buffer */
+      /* Go yank in */
+#ifdef VMS
+      /* VMS wants read instead of fread, because fread doesn't respect */
+      /* RMS record boundaries. This is not necessarily a good thing to be */
+      /* doing, but we've got no other real choice */
+      bytesread = PerlLIO_read(PerlIO_fileno(fp), buffer, recsize);
+#else
+      bytesread = PerlIO_read(fp, buffer, recsize);
+#endif
+      SvCUR_set(sv, bytesread);
+      return(SvCUR(sv) ? SvPVX(sv) : Nullch);
     }
     else if (RsPARA(rs)) {
 	rsptr = "\n\n";

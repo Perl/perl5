@@ -15,9 +15,6 @@ struct bytestream {
     int (*fread)(char *, size_t, size_t, void*);
     void (*freadpv)(U32, void*);
 };
-void byterun _((struct bytestream));
-/* #else
-void byterun _((PerlIO *)); */
 #endif /* INDIRECT_BGET_MACROS */
 
 void *bset_obj_store _((void *, I32));
@@ -179,7 +176,6 @@ EXT int optype_size[]
 #endif /* DOINIT */
 ;
 
-EXT SV * specialsv_list[4];
 #define INIT_SPECIALSV_LIST STMT_START { \
 	specialsv_list[0] = Nullsv; \
 	specialsv_list[1] = &sv_undef; \

@@ -51,8 +51,6 @@ dEXTCONST char rcsid[] = "perl.c\nPatch level: ###\n";
     copline	= NOLINE;	\
     curcop	= &compiling;	\
     curcopdb    = NULL;		\
-    cxstack_ix  = -1;		\
-    cxstack_max = 128;		\
     dbargs	= 0;		\
     dlmax	= 128;		\
     laststatval	= -1;		\
@@ -67,6 +65,13 @@ dEXTCONST char rcsid[] = "perl.c\nPatch level: ###\n";
     laststatval = -1;		\
     laststype   = OP_STAT;	\
     mess_sv     = Nullsv;	\
+    splitstr    = " ";		\
+    generation  = 100;		\
+    exitlist    = NULL;		\
+    exitlistlen = 0;		\
+    regindent   = 0;		\
+    in_clean_objs = FALSE;	\
+    in_clean_all= FALSE;	\
   } STMT_END
 
 #ifdef PERL_OBJECT
@@ -386,7 +391,7 @@ perl_destruct(register PerlInterpreter *sv_interp)
 
     /* call exit list functions */
     while (exitlistlen-- > 0)
-	exitlist[exitlistlen].fn(THIS_ exitlist[exitlistlen].ptr);
+	exitlist[exitlistlen].fn(PERL_OBJECT_THIS_ exitlist[exitlistlen].ptr);
 
     Safefree(exitlist);
 
@@ -476,6 +481,7 @@ perl_destruct(register PerlInterpreter *sv_interp)
     argvoutgv = Nullgv;
     stdingv = Nullgv;
     last_in_gv = Nullgv;
+    replgv = Nullgv;
 
     /* reset so print() ends up where we expect */
     setdefout(Nullgv);
@@ -550,8 +556,11 @@ perl_destruct(register PerlInterpreter *sv_interp)
     /* No SVs have survived, need to clean out */
     linestr = NULL;
     pidstatus = Nullhv;
-    if (origfilename)
-    	Safefree(origfilename);
+    Safefree(origfilename);
+    Safefree(archpat_auto);
+    Safefree(reg_start_tmp);
+    Safefree(HeKEY_hek(&hv_fetch_ent_mh));
+    Safefree(op_mask);
     nuke_stacks();
     hints = 0;		/* Reset hints. Should hints be per-interpreter ? */
     
@@ -944,7 +953,7 @@ print \"  \\@INC:\\n    @INC\\n\";");
     boot_core_UNIVERSAL();
 
     if (xsinit)
-	(*xsinit)(THIS);	/* in case linked C routines want magical variables */
+	(*xsinit)(PERL_OBJECT_THIS);	/* in case linked C routines want magical variables */
 #if defined(VMS) || defined(WIN32) || defined(DJGPP)
     init_os_extras();
 #endif
@@ -1815,6 +1824,8 @@ init_main_stash(void)
     defgv = gv_fetchpv("_",TRUE, SVt_PVAV);
     errgv = gv_HVadd(gv_fetchpv("@", TRUE, SVt_PV));
     GvMULTI_on(errgv);
+    replgv = gv_HVadd(gv_fetchpv("\022", TRUE, SVt_PV)); /* ^R */
+    GvMULTI_on(replgv);
     (void)form("%240s","");	/* Preallocate temp - for immediate signals. */
     sv_grow(ERRSV, 240);	/* Preallocate - for immediate signals. */
     sv_setpvn(ERRSV, "", 0);
@@ -2348,6 +2359,12 @@ nuke_stacks(void)
 	curstackinfo = p;
     }
     Safefree(tmps_stack);
+    /*  XXX refcount interpreters to determine when to free global data
+    Safefree(markstack);
+    Safefree(scopestack);
+    Safefree(savestack);
+    Safefree(retstack);
+    */
     DEBUG( {
 	Safefree(debname);
 	Safefree(debdelim);
@@ -2575,7 +2592,7 @@ incpush(char *p, int addsubdirs)
 	return;
 
     if (addsubdirs) {
-	subdir = NEWSV(55,0);
+	subdir = sv_newmortal();
 	if (!archpat_auto) {
 	    STRLEN len = (sizeof(ARCHNAME) + strlen(patchlevel)
 			  + sizeof("//auto"));
@@ -2651,8 +2668,6 @@ incpush(char *p, int addsubdirs)
 	/* finally push this lib directory on the end of @INC */
 	av_push(GvAVn(incgv), libdir);
     }
-
-    SvREFCNT_dec(subdir);
 }
 
 #ifdef USE_THREADS

@@ -13,6 +13,7 @@ if ($] =~ /\.(\d\d\d)?(\d\d)?$/) { # should always be true
 $opt{'cf_by'} = $ENV{USERNAME} unless $opt{'cf_by'};
 $opt{'cf_email'} = $opt{'cf_by'} . '@' . (gethostbyname('localhost'))[0]
 	unless $opt{'cf_email'};
+$opt{'usemymalloc'} = 'y' if $opt{'d_mymalloc'} eq 'define';
 
 while (<>)
  {

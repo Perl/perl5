@@ -2,7 +2,7 @@ package ExtUtils::Packlist;
 use strict;
 use Carp qw();
 use vars qw($VERSION);
-$VERSION = '0.02';
+$VERSION = '0.03';
 
 # Used for generating filehandle globs.  IO::File might not be available!
 my $fhname = "FH1";
@@ -89,7 +89,7 @@ while (defined($line = <$fh>))
    {
    chomp $line;
    my ($key, @kvs) = split(' ', $line);
-   $key =~ s!/./!/!g;   # Some .packlists have spurious '/./' bits in the paths
+   $key =~ s!/\./!/!g;   # Some .packlists have spurious '/./' bits in the paths
    if (! @kvs)
       {
       $self->{data}->{$key} = undef;
@@ -147,6 +147,13 @@ foreach my $key (sort(keys(%{$self->{data}})))
       }
    }
 return(@missing);
+}
+
+sub packlist_file($)
+{
+my ($self) = @_;
+$self = tied(%$self) || $self;
+return($self->{packfile});
 }
 
 1;
@@ -221,6 +228,10 @@ This checks that every file listed in the .packlist actually exists.  If an
 argument which evaluates to true is given, any missing files will be removed
 from the internal hash.  The return value is a list of the missing files, which
 will be empty if they all exist.
+
+=item packlist_file()
+
+This returns the name of the associated .packlist file
 
 =back
 

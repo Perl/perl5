@@ -271,7 +271,7 @@ supply object methods for filehandles
 
 =item FindBin
 
-locate directory of original perl script
+locate directory of original Perl script
 
 =item GDBM_File
 
@@ -368,7 +368,7 @@ by-name interface to Perl's builtin getserv*() functions
 
 =item Opcode
 
-disable named opcodes when compiling or running perl code
+disable named opcodes when compiling or running Perl code
 
 =item Pod::Text
 
@@ -400,7 +400,7 @@ load functions only on demand
 
 =item Shell
 
-run shell commands transparently within perl
+run shell commands transparently within Perl
 
 =item Socket
 
@@ -432,7 +432,7 @@ interface to various C<readline> packages
 
 =item Test::Harness
 
-run perl standard test scripts with statistics
+run Perl standard test scripts with statistics
 
 =item Text::Abbrev
 
@@ -503,7 +503,7 @@ by-name interface to Perl's builtin getpw*() functions
 To find out I<all> the modules installed on your system, including
 those without documentation or outside the standard release, do this:
 
-    find `perl -e 'print "@INC"'` -name '*.pm' -print
+    % find `perl -e 'print "@INC"'` -name '*.pm' -print
 
 They should all have their own documentation installed and accessible via
 your system man(1) command.  If that fails, try the I<perldoc> program.
@@ -762,7 +762,7 @@ Avoid C<$r-E<gt>Class::func()> where using C<@ISA=qw(... Class ...)> and
 C<$r-E<gt>func()> would work (see L<perlbot> for more details).
 
 Use autosplit so little used or newly added functions won't be a
-burden to programs which don't use them. Add test functions to
+burden to programs that don't use them. Add test functions to
 the module after __END__ either using AutoSplit or by saying:
 
  eval join('',<main::DATA>) || die $@ unless caller();
@@ -779,12 +779,12 @@ information in objects.
 
 Always use B<-w>. Try to C<use strict;> (or C<use strict qw(...);>).
 Remember that you can add C<no strict qw(...);> to individual blocks
-of code which need less strictness. Always use B<-w>. Always use B<-w>!
+of code that need less strictness. Always use B<-w>. Always use B<-w>!
 Follow the guidelines in the perlstyle(1) manual.
 
 =item Some simple style guidelines
 
-The perlstyle manual supplied with perl has many helpful points.
+The perlstyle manual supplied with Perl has many helpful points.
 
 Coding style is a matter of personal taste. Many people evolve their
 style over several years as they learn what helps them write and
@@ -804,7 +804,7 @@ use mixed case with no underscores (need to be short and portable).
 You may find it helpful to use letter case to indicate the scope
 or nature of a variable. For example:
 
- $ALL_CAPS_HERE   constants only (beware clashes with perl vars)
+ $ALL_CAPS_HERE   constants only (beware clashes with Perl vars)
  $Some_Caps_Here  package-wide global/static
  $no_caps_here    function scope my() or local() variables
 
@@ -934,7 +934,7 @@ GPL and The Artistic Licence (see the files README, Copying, and
 Artistic).  Larry has good reasons for NOT just using the GNU GPL.
 
 My personal recommendation, out of respect for Larry, Perl, and the
-perl community at large is to state something simply like:
+Perl community at large is to state something simply like:
 
  Copyright (c) 1995 Your Name. All rights reserved.
  This program is free software; you can redistribute it and/or
@@ -969,7 +969,7 @@ If possible you should place the module into a major ftp archive and
 include details of its location in your announcement.
 
 Some notes about ftp archives: Please use a long descriptive file
-name which includes the version number. Most incoming directories
+name that includes the version number. Most incoming directories
 will not be readable/listable, i.e., you won't be able to see your
 file after uploading it. Remember to send your email notification
 message as soon as possible after uploading else your file may get
@@ -1019,7 +1019,7 @@ there is no need to convert a .pl file into a Module for just that.
 
 =item Consider the implications.
 
-All the perl applications which make use of the script will need to
+All Perl applications that make use of the script will need to
 be changed (slightly) if the script is converted into a module.  Is
 it worth it unless you plan to make other changes at the same time?
 
@@ -1062,7 +1062,7 @@ Don't delete the original .pl file till the new .pm one works!
 
 =item Complete applications rarely belong in the Perl Module Library.
 
-=item Many applications contain some perl code which could be reused.
+=item Many applications contain some Perl code that could be reused.
 
 Help save the world! Share your code in a form that makes it easy
 to reuse.
@@ -1076,9 +1076,9 @@ to reuse.
 fragment of code built on top of the reusable modules. In these cases
 the application could invoked as:
 
-     perl -e 'use Module::Name; method(@ARGV)' ...
+     % perl -e 'use Module::Name; method(@ARGV)' ...
 or
-     perl -mModule::Name ...    (in perl5.002 or higher)
+     % perl -mModule::Name ...    (in perl5.002 or higher)
 
 =back
 

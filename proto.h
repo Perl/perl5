@@ -269,6 +269,7 @@ VIRTUAL int	magic_setuvar	_((SV* sv, MAGIC* mg));
 VIRTUAL int	magic_setvec	_((SV* sv, MAGIC* mg));
 VIRTUAL int	magic_set_all_env _((SV* sv, MAGIC* mg));
 VIRTUAL U32	magic_sizepack	_((SV* sv, MAGIC* mg));
+VIRTUAL int	magic_unchain	_((SV* sv, MAGIC* mg));
 VIRTUAL int	magic_wipepack	_((SV* sv, MAGIC* mg));
 VIRTUAL void	magicname _((char* sym, char* name, I32 namlen));
 int	main _((int argc, char** argv, char** env));
@@ -358,6 +359,7 @@ VIRTUAL OP*	newSVOP _((I32 type, I32 flags, SV* sv));
 VIRTUAL SV*	newSViv _((IV i));
 VIRTUAL SV*	newSVnv _((double n));
 VIRTUAL SV*	newSVpv _((char* s, STRLEN len));
+VIRTUAL SV*	newSVpvn _((char *s, STRLEN len));
 VIRTUAL SV*	newSVpvf _((const char* pat, ...));
 VIRTUAL SV*	newSVrv _((SV* rv, char* classname));
 VIRTUAL SV*	newSVsv _((SV* old));
@@ -672,7 +674,6 @@ void sv_mortalgrow _((void));
 void sv_unglob _((SV* sv));
 void sv_check_thinkfirst _((SV *sv));
 
-SV *newSVpvn _((char *s, STRLEN len));
 
 void sv_catpv_mg _((SV *sv, char *ptr));
 void sv_catpvf_mg _((SV *sv, const char* pat, ...));
@@ -837,11 +838,6 @@ OP *new_logop _((I32 type, I32 flags, OP **firstp, OP **otherp));
 
 #define PPDEF(s) OP* CPerlObj::s _((ARGSproto));
 public:
-#ifdef INDIRECT_BGET_MACROS
-VIRTUAL void byterun _((struct bytestream bs));
-#else
-VIRTUAL void byterun _((PerlIO *fp));
-#endif /* INDIRECT_BGET_MACROS */
 
 PPDEF(pp_aassign)
 PPDEF(pp_abs)
@@ -1228,6 +1224,7 @@ void restore_expect _((void *e));
 void restore_lex_expect _((void *e));
 void yydestruct _((void *ptr));
 VIRTUAL int fprintf _((PerlIO *pf, const char *pat, ...));
+VIRTUAL SV**	get_specialsv_list _((void));
 
 #ifdef WIN32
 VIRTUAL int&	ErrorNo _((void));
@@ -1235,4 +1232,10 @@ VIRTUAL int&	ErrorNo _((void));
 #else	/* !PERL_OBJECT */
 END_EXTERN_C
 #endif	/* PERL_OBJECT */
+
+#ifdef INDIRECT_BGET_MACROS
+VIRTUAL void byterun _((struct bytestream bs));
+#else
+VIRTUAL void byterun _((PerlIO *fp));
+#endif /* INDIRECT_BGET_MACROS */
 

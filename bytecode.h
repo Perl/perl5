@@ -62,7 +62,7 @@ EXT I32 obj_list_fill INIT(-1);
     } STMT_END
 #endif /* INDIRECT_BGET_MACROS */
 
-#define BGET_comment(arg) \
+#define BGET_comment_t(arg) \
 	do { arg = BGET_FGETC(); } while (arg != '\n' && arg != EOF)
 
 /*

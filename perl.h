@@ -108,9 +108,9 @@ class CPerlObj;
 #define CPERLarg CPerlObj *pPerl
 #define CPERLarg_ CPERLarg,
 #define _CPERLarg ,CPERLarg
-#define THIS this
-#define _THIS ,this
-#define THIS_ this,
+#define PERL_OBJECT_THIS this
+#define _PERL_OBJECT_THIS ,this
+#define PERL_OBJECT_THIS_ this,
 #define CALLRUNOPS (this->*runops)
 
 #else /* !PERL_OBJECT */
@@ -122,9 +122,9 @@ class CPerlObj;
 #define CPERLarg void
 #define CPERLarg_
 #define _CPERLarg
-#define THIS
-#define _THIS
-#define THIS_
+#define PERL_OBJECT_THIS
+#define _PERL_OBJECT_THIS
+#define PERL_OBJECT_THIS_
 #define CALLRUNOPS runops
 
 #endif /* PERL_OBJECT */
@@ -1818,6 +1818,7 @@ typedef enum {
 #define RsSNARF(sv)   (! SvOK(sv))
 #define RsSIMPLE(sv)  (SvOK(sv) && SvCUR(sv))
 #define RsPARA(sv)    (SvOK(sv) && ! SvCUR(sv))
+#define RsRECORD(sv)  (SvROK(sv) && (SvIV(SvRV(sv)) > 0))
 
 /* Set up PERLVAR macros for populating structs */
 #define PERLVAR(var,type) type var;
@@ -2040,7 +2041,7 @@ EXT MGVTBL vtbl_mutex =	{0,	0,	0,	0,	magic_mutexfree};
 EXT MGVTBL vtbl_defelem = {magic_getdefelem,magic_setdefelem,
 					0,	0,	magic_freedefelem};
 
-EXT MGVTBL vtbl_regexp = {0,0,0,0, magic_freeregexp};
+EXT MGVTBL vtbl_regexp = {0,magic_unchain,0,0, magic_freeregexp};
 
 #ifdef USE_LOCALE_COLLATE
 EXT MGVTBL vtbl_collxfrm = {0,
