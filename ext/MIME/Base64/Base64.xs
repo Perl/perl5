@@ -1,4 +1,4 @@
-/* $Id: Base64.xs,v 1.18 2001/02/24 06:27:01 gisle Exp $
+/*
 
 Copyright 1997-1999,2001 Gisle Aas
 
@@ -35,10 +35,6 @@ extern "C" {
 }
 #endif
 
-#include "patchlevel.h"
-#if PERL_VERSION <= 4 && !defined(PL_dowarn)
-   #define PL_dowarn dowarn
-#endif
 
 #define MAX_LINE  76 /* size of encoded lines */
 
@@ -89,9 +85,7 @@ encode_base64(sv,...)
 	int chunk;
 
 	CODE:
-#ifdef sv_utf8_downgrade
 	sv_utf8_downgrade(sv, FALSE);
-#endif
 	str = SvPV(sv, rlen); /* SvPV(sv, len) gives warning for signed len */
 	len = (SSize_t)rlen;
 
