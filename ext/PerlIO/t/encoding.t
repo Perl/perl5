@@ -16,7 +16,7 @@ my $utf = "utf$$";
 my $fail1 = "fail$$";
 my $russki = "koi8r$$";
 
-if (open(GRK, ">$grk")) {
+if (open(GRK, ">:raw", $grk)) {
     # alpha beta gamma in ISO 8859-7
     print GRK "\xe1\xe2\xe3";
     close GRK or die "Could not close: $!";
@@ -34,7 +34,7 @@ if (open(GRK, ">$grk")) {
     close($i);
 }
 
-if (open(UTF, "<$utf")) {
+if (open(UTF, "<:raw", $utf)) {
     if (ord('A') == 193) { # EBCDIC
 	# alpha beta gamma in UTF-EBCDIC Unicode (0x3b1 0x3b2 0x3b3)
 	print "not " unless <UTF> eq "\xb4\x58\xb4\x59\xb4\x62";
@@ -58,7 +58,7 @@ if (open(UTF, "<$utf")) {
     close($i);
 }
 
-if (open(GRK, "<$grk")) {
+if (open(GRK, "<:raw", $grk)) {
     print "not " unless <GRK> eq "\xe1\xe2\xe3";
     print "ok 8\n";
     close GRK;
