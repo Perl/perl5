@@ -1776,9 +1776,13 @@ be linked.
 
   {FILES => '$(INST_ARCHAUTODIR)/*.xyz'}
 
+=item test
+
+  {TESTS => 't/*.t'}
+
 =item tool_autosplit
 
-  {MAXLEN =E<gt> 8}
+  {MAXLEN => 8}
 
 =back
 
