@@ -1574,7 +1574,7 @@ PP(pp_sort)
 	if (SvMAGICAL(av)) {
 	    MEXTEND(SP, max);
 	    p2 = SP;
-	    for (i=0; i < (U32)max; i++) {
+	    for (i=0; i < max; i++) {
 		SV **svp = av_fetch(av, i, FALSE);
 		*SP++ = (svp) ? *svp : Nullsv;
 	    }

@@ -1533,7 +1533,7 @@ Perl_hv_clear_placeholders(pTHX_ HV *hv)
 
 		if (--items == 0) {
 		    /* Finished.  */
-		    HvTOTALKEYS(hv) -= HvPLACEHOLDERS(hv);
+		    HvTOTALKEYS(hv) -= (IV)HvPLACEHOLDERS(hv);
 		    if (HvKEYS(hv) == 0)
 			HvHASKFLAGS_off(hv);
 		    HvPLACEHOLDERS(hv) = 0;

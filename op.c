@@ -2129,7 +2129,7 @@ Perl_convert(pTHX_ I32 type, I32 flags, OP *o)
     o->op_flags |= flags;
 
     o = CHECKOP(type, o);
-    if (o->op_type != type)
+    if (o->op_type != (unsigned)type)
 	return o;
 
     return fold_constants(o);
@@ -2146,7 +2146,7 @@ Perl_append_elem(pTHX_ I32 type, OP *first, OP *last)
     if (!last)
 	return first;
 
-    if (first->op_type != type
+    if (first->op_type != (unsigned)type
 	|| (type == OP_LIST && (first->op_flags & OPf_PARENS)))
     {
 	return newLISTOP(type, 0, first, last);
@@ -2171,10 +2171,10 @@ Perl_append_list(pTHX_ I32 type, LISTOP *first, LISTOP *last)
     if (!last)
 	return (OP*)first;
 
-    if (first->op_type != type)
+    if (first->op_type != (unsigned)type)
 	return prepend_elem(type, (OP*)first, (OP*)last);
 
-    if (last->op_type != type)
+    if (last->op_type != (unsigned)type)
 	return append_elem(type, (OP*)first, (OP*)last);
 
     first->op_last->op_sibling = last->op_first;
@@ -2195,7 +2195,7 @@ Perl_prepend_elem(pTHX_ I32 type, OP *first, OP *last)
     if (!last)
 	return first;
 
-    if (last->op_type == type) {
+    if (last->op_type == (unsigned)type) {
 	if (type == OP_LIST) {	/* already a PUSHMARK there */
 	    first->op_sibling = ((LISTOP*)last)->op_first->op_sibling;
 	    ((LISTOP*)last)->op_first->op_sibling = first;

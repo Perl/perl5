@@ -1863,7 +1863,7 @@ Perl_pv_uni_display(pTHX_ SV *dsv, const U8 *spv, STRLEN len, STRLEN pvlim, UV f
 	 }
 	 u = utf8_to_uvchr((U8*)s, 0);
 	 if (u < 256) {
-	     unsigned char c = u & 0xFF;
+	     unsigned char c = (unsigned char)u & 0xFF;
 	     if (!ok && (flags & UNI_DISPLAY_BACKSLASH)) {
 	         switch (c) {
 		 case '\n':

@@ -145,7 +145,7 @@ int
 Perl_mg_get(pTHX_ SV *sv)
 {
     const I32 mgs_ix = SSNEW(sizeof(MGS));
-    const bool was_temp = SvTEMP(sv);
+    const bool was_temp = (bool)SvTEMP(sv);
     int new = 0;
     MAGIC *newmg, *head, *cur, *mg;
     /* guard against sv having being freed midway by holding a private
