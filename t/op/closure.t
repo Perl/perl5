@@ -13,7 +13,7 @@ BEGIN {
 
 use Config;
 
-print "1..181\n";
+print "1..185\n";
 
 my $test = 1;
 sub test (&) {
@@ -604,3 +604,34 @@ sub linger {
     linger(\$watch);
     test { $watch eq '12' }
 }
+
+require "./test.pl";
+
+curr_test(182);
+
+SKIP: { skip("tests not in maint because change #19637 not applied", 3) }
+
+$test= 185;
+
+# bugid #23265 - this used to coredump during destruction of PL_maincv
+# and its children
+
+my $got = runperl(
+    prog => q[
+	print
+	    sub {$_[0]->(@_)} -> (
+		sub {
+		    $_[1]
+			?  $_[0]->($_[0], $_[1] - 1) .  sub {"x"}->()
+			: "y"
+		},   
+		2
+	    )
+	    , "\n"
+	;            
+    
+    ],
+   stderr => 1
+);
+test { $got eq "yxx\n" };
+
