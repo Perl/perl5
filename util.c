@@ -2187,9 +2187,9 @@ repeatcpy(register char *to, register char *from, I32 len, register I32 count)
     register char *frombase = from;
 
     if (len == 1) {
-	todo = *from;
+	register char c = *from;
 	while (count-- > 0)
-	    *to++ = todo;
+	    *to++ = c;
 	return;
     }
     while (count-- > 0) {
