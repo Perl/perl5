@@ -190,10 +190,10 @@ If C<s> does not point to a well-formed UTF8 character, the behaviour
 is dependent on the value of C<flags>: if it contains UTF8_CHECK_ONLY,
 it is assumed that the caller will raise a warning, and this function
 will set C<retlen> to C<-1> and return zero.  If the C<flags> does not
-contain UTF8_CHECK_ONLY, the UNICODE_REPLACEMENT_CHARACTER (0xFFFD)
-will be returned, and C<retlen> will be set to the expected length of
-the UTF-8 character in bytes.  The C<flags> can also contain various
-flags to allow deviations from the strict UTF-8 encoding (see F<utf8.h>).
+contain UTF8_CHECK_ONLY, the UNICODE_REPLACEMENT (0xFFFD) will be
+returned, and C<retlen> will be set to the expected length of the
+UTF-8 character in bytes.  The C<flags> can also contain various flags
+to allow deviations from the strict UTF-8 encoding (see F<utf8.h>).
 
 =cut */
 
@@ -216,13 +216,13 @@ Perl_utf8_to_uv(pTHX_ U8* s, STRLEN curlen, STRLEN* retlen, U32 flags)
 	goto malformed;
     }
 
-    if (uv <= 0x7f) { /* Pure ASCII. */
+    if (UTF8_IS_ASCII(uv)) {
 	if (retlen)
 	    *retlen = 1;
 	return *s;
     }
 
-    if ((uv >= 0x80 && uv <= 0xbf) &&
+    if (UTF8_IS_CONTINUATION(uv) &&
 	!(flags & UTF8_ALLOW_CONTINUATION)) {
 	if (dowarn)
 	    Perl_warner(aTHX_ WARN_UTF8,
@@ -231,11 +231,11 @@ Perl_utf8_to_uv(pTHX_ U8* s, STRLEN curlen, STRLEN* retlen, U32 flags)
 	goto malformed;
     }
 
-    if ((uv >= 0xc0 && uv <= 0xfd && curlen > 1 && s[1] < 0x80) &&
+    if (UTF8_IS_START(uv) && curlen > 1 && !UTF8_IS_CONTINUATION(s[1]) &&
 	!(flags & UTF8_ALLOW_NON_CONTINUATION)) {
 	if (dowarn)
 	    Perl_warner(aTHX_ WARN_UTF8,
-			"Malformed UTF-8 character (unexpected non-continuation byte 0x%02"UVxf" after byte 0x%02"UVxf")",
+			"Malformed UTF-8 character (unexpected non-continuation byte 0x%02"UVxf" after start byte 0x%02"UVxf")",
 			(UV)s[1], uv);
 	goto malformed;
     }
@@ -276,10 +276,11 @@ Perl_utf8_to_uv(pTHX_ U8* s, STRLEN curlen, STRLEN* retlen, U32 flags)
     ouv = uv;
 
     while (len--) {
-	if ((*s & 0xc0) != 0x80) {
+	if (!UTF8_IS_CONTINUATION(*s) &&
+	    !(flags & UTF8_ALLOW_NON_CONTINUATION)) {
 	    if (dowarn)
 		Perl_warner(aTHX_ WARN_UTF8,
-			    "Malformed UTF-8 character (unexpected continuation byte 0x%02x)",
+			    "Malformed UTF-8 character (unexpected non-continuation byte 0x%02x)",
 			    *s);
 	    goto malformed;
 	}
@@ -297,14 +298,14 @@ Perl_utf8_to_uv(pTHX_ U8* s, STRLEN curlen, STRLEN* retlen, U32 flags)
 	ouv = uv;
     }
 
-    if ((uv >= 0xd800 && uv <= 0xdfff) &&
+    if (UNICODE_IS_SURROGATE(uv) &&
 	!(flags & UTF8_ALLOW_SURROGATE)) {
 	if (dowarn)
 	    Perl_warner(aTHX_ WARN_UTF8,
 			"Malformed UTF-8 character (UTF-16 surrogate 0x%04"UVxf")",
 			uv);
 	goto malformed;
-    } else if ((uv == 0xfffe) &&
+    } else if (UNICODE_IS_BYTE_ORDER_MARK(uv) &&
 	       !(flags & UTF8_ALLOW_BOM)) {
 	if (dowarn)
 	    Perl_warner(aTHX_ WARN_UTF8,
@@ -318,7 +319,7 @@ Perl_utf8_to_uv(pTHX_ U8* s, STRLEN curlen, STRLEN* retlen, U32 flags)
 			"Malformed UTF-8 character (%d byte%s, need %d)",
 			expectlen, expectlen == 1 ? "": "s", UNISKIP(uv));
 	goto malformed;
-    } else if ((uv == 0xffff) &&
+    } else if (UNICODE_IS_ILLEGAL(uv) &&
 	       !(flags & UTF8_ALLOW_FFFF)) {
 	if (dowarn)
 	    Perl_warner(aTHX_ WARN_UTF8,
@@ -340,7 +341,7 @@ malformed:
     if (retlen)
 	*retlen = expectlen;
 
-    return UNICODE_REPLACEMENT_CHARACTER;
+    return UNICODE_REPLACEMENT;
 }
 
 /*

@@ -46,9 +46,25 @@ END_EXTERN_C
 #define UTF8_ALLOW_ANY			0x00ff
 #define UTF8_CHECK_ONLY			0x0100
 
+#define UNICODE_SURROGATE_FIRST		0xd800
+#define UNICODE_SURROGATE_LAST		0xdfff
+#define UNICODE_REPLACEMENT		0xfffd
+#define UNICODE_BYTER_ORDER_MARK	0xfffe
+#define UNICODE_ILLEGAL			0xffff
+
+#define UNICODE_IS_SURROGATE(c)		((c) >= UNICODE_SURROGATE_FIRST && \
+					 (c) <= UNICODE_SURROGATE_LAST)
+#define UNICODE_IS_REPLACEMENT(c)	((c) == UNICODE_REPLACMENT)
+#define UNICODE_IS_BYTE_ORDER_MARK(c)	((c) == UNICODE_BYTER_ORDER_MARK)
+#define UNICODE_IS_ILLEGAL(c)		((c) == UNICODE_ILLEGAL)
+
 #define UTF8SKIP(s) PL_utf8skip[*(U8*)s]
 
 #define UTF8_QUAD_MAX	UINT64_C(0x1000000000)
+
+#define UTF8_IS_ASCII(c) 		((c) <  0x80)
+#define UTF8_IS_START(c)		((c) >= 0xc0 && ((c) <= 0xfd))
+#define UTF8_IS_CONTINUATION(c)		((c) >= 0x80 && ((c) <= 0xbf))
 
 #ifdef HAS_QUAD
 #define UNISKIP(uv) ( (uv) < 0x80           ? 1 : \
@@ -68,7 +84,6 @@ END_EXTERN_C
 		      (uv) < 0x80000000     ? 6 : 7 )
 #endif
 
-#define UNICODE_REPLACEMENT_CHARACTER	0xfffd
 
 /*
  * Note: we try to be careful never to call the isXXX_utf8() functions
