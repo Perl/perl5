@@ -136,6 +136,12 @@
  */
 #define HAS_DUP2	/**/
 
+/* HAS_FAST_STDIO:
+ *	This symbol, if defined, indicates that the "fast stdio"
+ *	is available to manipulate the stdio buffers directly.
+ */
+/*#define HAS_FAST_STDIO		/**/
+
 /* HAS_FCHDIR:
  *	This symbol, if defined, indicates that the fchdir routine is
  *	available to change directory using a file descriptor.
@@ -3151,6 +3157,15 @@
 
 #ifndef USE_64_BIT_ALL
 /*#define	USE_64_BIT_ALL		/**/
+#endif
+
+/* USE_FAST_STDIO:
+ *	This symbol, if defined, indicates that Perl should
+ *	be built to use 'fast stdio'.
+ *	Defaults to define in Perls 5.8 and earlier, to undef later.
+ */
+#ifndef USE_FAST_STDIO
+/*#define	USE_FAST_STDIO		/ **/
 #endif
 
 /* USE_LARGE_FILES:
