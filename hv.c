@@ -168,20 +168,20 @@ register U32 hash;
 	return 0;
 
     if (SvRMAGICAL(hv) && mg_find((SV*)hv,'P')) {
-	char *k;
-	HEK *hek;
+	static HE mh;
 
-	New(54, k, HEK_BASESIZE + sizeof(SV*), char);
-	hek = (HEK*)k;
 	sv = sv_newmortal();
 	keysv = sv_2mortal(newSVsv(keysv));
 	mg_copy((SV*)hv, sv, (char*)keysv, HEf_SVKEY);
-	entry = &He;
-	HeVAL(entry) = sv;
-	HeKEY_hek(entry) = hek;
-	HeSVKEY_set(entry, keysv);
-	HeKLEN(entry) = HEf_SVKEY;	/* hent_key is holding an SV* */
-	return entry;
+	if (!HeKEY_hek(&mh)) {
+	    char *k;
+	    New(54, k, HEK_BASESIZE + sizeof(SV*), char);
+	    HeKEY_hek(&mh) = (HEK*)k;
+	    HeKLEN(&mh) = HEf_SVKEY;	/* key will always hold an SV* */
+	}
+	HeSVKEY_set(&mh, keysv);
+	HeVAL(&mh) = sv;
+	return &mh;
     }
 
     xhv = (XPVHV*)SvANY(hv);
@@ -248,14 +248,14 @@ register U32 hash;
     xhv = (XPVHV*)SvANY(hv);
     if (SvMAGICAL(hv)) {
 	mg_copy((SV*)hv, val, key, klen);
-#ifndef OVERLOAD
-	if (!xhv->xhv_array)
-	    return 0;
-#else
-	if (!xhv->xhv_array && (SvMAGIC(hv)->mg_type != 'A'
-				|| SvMAGIC(hv)->mg_moremagic))
-	  return 0;
+	if (!xhv->xhv_array
+	    && (SvMAGIC(hv)->mg_moremagic
+		|| (SvMAGIC(hv)->mg_type != 'E'
+#ifdef OVERLOAD
+		    && SvMAGIC(hv)->mg_type != 'A'
 #endif /* OVERLOAD */
+		    )))
+	    return 0;
     }
     if (!hash)
 	PERL_HASH(hash, key, klen);
@@ -318,14 +318,14 @@ register U32 hash;
     if (SvMAGICAL(hv)) {
 	keysv = sv_2mortal(newSVsv(keysv));
 	mg_copy((SV*)hv, val, (char*)keysv, HEf_SVKEY);
-#ifndef OVERLOAD
-	if (!xhv->xhv_array)
-	    return Nullhe;
-#else
-	if (!xhv->xhv_array && (SvMAGIC(hv)->mg_type != 'A'
-				|| SvMAGIC(hv)->mg_moremagic))
-	  return Nullhe;
+	if (!xhv->xhv_array
+	    && (SvMAGIC(hv)->mg_moremagic
+		|| (SvMAGIC(hv)->mg_type != 'E'
+#ifdef OVERLOAD
+		    && SvMAGIC(hv)->mg_type != 'A'
 #endif /* OVERLOAD */
+		    )))
+	  return Nullhe;
     }
 
     key = SvPV(keysv, klen);
