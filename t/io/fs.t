@@ -165,7 +165,7 @@ if (($^O eq 'MSWin32') || ($^O eq 'NetWare')) {
 if ($wd =~ m#$Config{'afsroot'}/# ||
     $^O eq 'amigaos' ||
     $^O eq 'dos' || $^O eq 'MSWin32' || $^O eq 'NetWare' || $^O eq 'cygwin') {
-    fail("Skip - granularity of the atime/mtime");
+    pass("Skip - granularity of the atime/mtime");
 } elsif ($atime == 500000000 && $mtime == 500000000 + $delta) {
     pass("atime/mtime");
 } elsif ($^O =~ /\blinux\b/i) {
