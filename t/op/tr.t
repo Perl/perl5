@@ -59,11 +59,18 @@ print "ok 6\n";
 print "not " if $x ne 256.65.258 or length $x != 3;
 print "ok 7\n";
 $x =~ tr/A/B/;
-print "not " if $x ne 256.66.258 or length $x != 3;
+if (ord("\t") == 9) { # ASCII
+    print "not " if $x ne 256.66.258 or length $x != 3;
+}
+else {
+    print "not " if $x ne 256.65.258 or length $x != 3;
+}
 print "ok 8\n";
 
 {
-use utf8;
+if (ord("\t") == 9) { # ASCII
+    use utf8;
+}
 
 # 9 - changing UTF8 characters in a UTF8 string, same length.
 $l = chr(300); $r = chr(400);
