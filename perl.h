@@ -2278,5 +2278,18 @@ EXT bool	numeric_local INIT(TRUE);    /* Assume local numerics */
 #define printf PerlIO_stdoutf
 #endif
 
+/*
+ * nice_chunk and nice_chunk size need to be set
+ * and queried under the protection of sv_mutex
+ */
+#define offer_nice_chunk(chunk, chunk_size) do {	\
+	MUTEX_LOCK(&sv_mutex);				\
+	if (!nice_chunk) {				\
+	    nice_chunk = (char*)(chunk);		\
+	    nice_chunk_size = (chunk_size);		\
+	}						\
+	MUTEX_UNLOCK(&sv_mutex);			\
+    } while (0)
+
 #endif /* Include guard */
 

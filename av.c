@@ -90,10 +90,8 @@ I32 key;
 		newmax = tmp - 1;
 		New(2,ary, newmax+1, SV*);
 		Copy(AvALLOC(av), ary, AvMAX(av)+1, SV*);
-		if (AvMAX(av) > 64 && !nice_chunk) {
-		    nice_chunk = (char*)AvALLOC(av);
-		    nice_chunk_size = (AvMAX(av) + 1) * sizeof(SV*);
-		}
+		if (AvMAX(av) > 64)
+		    offer_nice_chunk(AvALLOC(av), (AvMAX(av)+1) * sizeof(SV*));
 		else
 		    Safefree(AvALLOC(av));
 		AvALLOC(av) = ary;

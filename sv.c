@@ -65,14 +65,18 @@ typedef void (*SVFUNC) _((SV*));
 
 #define new_SV(p)			\
     do {				\
+	MUTEX_LOCK(&sv_mutex);		\
 	(p) = (SV*)safemalloc(sizeof(SV)); \
 	reg_add(p);			\
+	MUTEX_UNLOCK(&sv_mutex);	\
     } while (0)
 
 #define del_SV(p)			\
     do {				\
+	MUTEX_LOCK(&sv_mutex);		\
 	reg_remove(p);			\
         free((char*)(p));		\
+	MUTEX_UNLOCK(&sv_mutex);	\
     } while (0)
 
 static SV **registry;
@@ -171,28 +175,33 @@ U32 flags;
 	--sv_count;			\
     } while (0)
 
+/* sv_mutex must be held while calling uproot_SV() */
 #define uproot_SV(p)			\
     do {				\
-	MUTEX_LOCK(&sv_mutex);		\
 	(p) = sv_root;			\
 	sv_root = (SV*)SvANY(p);	\
 	++sv_count;			\
+    } while (0)
+
+#define new_SV(p)	do {		\
+	MUTEX_LOCK(&sv_mutex);		\
+	if (sv_root)			\
+	    uproot_SV(p);		\
+	else				\
+	    (p) = more_sv();		\
 	MUTEX_UNLOCK(&sv_mutex);	\
     } while (0)
 
-#define new_SV(p)			\
-    if (sv_root)			\
-	uproot_SV(p);			\
-    else				\
-	(p) = more_sv()
-
 #ifdef DEBUGGING
 
-#define del_SV(p)			\
-    if (debug & 32768)			\
-	del_sv(p);			\
-    else				\
-	plant_SV(p)
+#define del_SV(p)	do {		\
+	MUTEX_LOCK(&sv_mutex);		\
+	if (debug & 32768)		\
+	    del_sv(p);			\
+	else				\
+	    plant_SV(p);		\
+	MUTEX_UNLOCK(&sv_mutex);	\
+    } while (0)
 
 static void
 del_sv(p)
@@ -253,6 +262,7 @@ U32 flags;
     SvFLAGS(sv) = SVTYPEMASK;
 }
 
+/* sv_mutex must be held while calling more_sv() */
 static SV*
 more_sv()
 {
