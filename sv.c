@@ -5908,7 +5908,7 @@ Perl_sv_vcatpvfn(pTHX_ SV *sv, const char *pat, STRLEN patlen, va_list *args, SV
 			STRLEN off = vptr - (U8*)SvPVX(vsv);
 			vlen *= 2;
 			SvGROW(vsv, vlen);
-			vptr = SvPVX(vsv) + off;
+			vptr = (U8*)SvPVX(vsv) + off;
 		    }
 		    do {
 			*--eptr = '0' + uv % 10;
