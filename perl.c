@@ -1900,20 +1900,28 @@ open_script(char *scriptname, bool dosearch, SV *sv, int *fdscript)
     dTHR;
     register char *s;
 
-    /* scriptname will be non-NULL if find_script() returns */
-    scriptname = find_script(scriptname, dosearch, NULL, 1);
+    *fdscript = -1;
 
-    if (strnEQ(scriptname, "/dev/fd/", 8) && isDIGIT(scriptname[8]) ) {
-	char *s = scriptname + 8;
-	*fdscript = atoi(s);
-	while (isDIGIT(*s))
-	    s++;
-	if (*s)
-	    scriptname = s + 1;
+    if (e_script) {
+	origfilename = savepv("-e");
     }
-    else
-	*fdscript = -1;
-    origfilename = (e_script ? savepv("-e") : scriptname);
+    else {
+	/* if find_script() returns, it returns a malloc()-ed value */
+	origfilename = scriptname = find_script(scriptname, dosearch, NULL, 1);
+
+	if (strnEQ(scriptname, "/dev/fd/", 8) && isDIGIT(scriptname[8]) ) {
+	    char *s = scriptname + 8;
+	    *fdscript = atoi(s);
+	    while (isDIGIT(*s))
+		s++;
+	    if (*s) {
+		scriptname = savepv(s + 1);
+		Safefree(origfilename);
+		origfilename = scriptname;
+	    }
+	}
+    }
+
     curcop->cop_filegv = gv_fetchfile(origfilename);
     if (strEQ(origfilename,"-"))
 	scriptname = "";
