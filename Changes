@@ -31,6 +31,539 @@ or any other branch.
 Version v5.7.1		Development release working toward v5.8
 --------------
 ____________________________________________________________________________
+[ 10906] By: jhi                                   on 2001/06/24  19:50:40
+        Log: Partially fix a problem noticed by IRIX compiler:
+             the initialization of parse_start was bypassed by
+             several gotos.  Now initialized to zero, which may
+             not be the best choice.
+     Branch: perl
+	   ! regcomp.c
+____________________________________________________________________________
+[ 10905] By: jhi                                   on 2001/06/24  19:43:25
+        Log: Relax the group and password tests back to moaning only
+             if no matches at all are found.  (Even with a small sample
+             I could find many sites where there are, umm, anomalies in
+             the said databases.)	
+     Branch: perl
+	   ! t/op/grent.t t/op/pwent.t
+____________________________________________________________________________
+[ 10904] By: jhi                                   on 2001/06/24  18:45:55
+        Log: Argh.  How hard it can be to re-apply a patch manually? :-)
+     Branch: perl
+	   ! pp_ctl.c
+____________________________________________________________________________
+[ 10903] By: jhi                                   on 2001/06/24  18:40:52
+        Log: De-cut-and-pasto in #10902.
+     Branch: perl
+	   ! pp_ctl.c
+____________________________________________________________________________
+[ 10902] By: jhi                                   on 2001/06/24  18:35:18
+        Log: The #10771 didn't take?
+     Branch: perl
+	   ! pp_ctl.c
+____________________________________________________________________________
+[ 10901] By: jhi                                   on 2001/06/24  18:29:50
+        Log: Undo the filetests part of #10900, under multiplicity
+             weird errors take place.
+     Branch: perl
+	   ! pp_sys.c
+____________________________________________________________________________
+[ 10900] By: jhi                                   on 2001/06/24  18:20:36
+        Log: Misplaces dSPs and the like revealed by MPE/iX and Cygwin.
+     Branch: perl
+	   ! ext/Cwd/Cwd.xs ext/Devel/Peek/Peek.xs pp_sys.c
+____________________________________________________________________________
+[ 10899] By: jhi                                   on 2001/06/24  17:00:34
+        Log: Subject: Re: [PATCH] Re: [ID 20010624.001] debugger T, and Carp::carp don't trace arg of
+             From: Tony Bowden <tony@kasei.com>
+             Date: Sun, 24 Jun 2001 17:32:40 +0100
+             Message-ID: <20010624173240.A16293@blackstar.co.uk>
+             
+             Document (well, mention) shortmess() and longmess()
+             to rob people of their fun of reinventing the weel.
+     Branch: perl
+	   ! lib/Carp.pm
+____________________________________________________________________________
+[ 10898] By: jhi                                   on 2001/06/24  16:51:40
+        Log: Subject: Patch: pp_system() bounces out of Cygwin subsystem
+             From: Brian Jepson <bjepson@oreilly.com>
+             Date: Sun, 24 Jun 2001 12:13:21 -0400 (EDT)
+             Message-ID: <Pine.GSO.4.21.0106241044110.15051-200000@sol.east.ora.com>
+     Branch: perl
+	   ! pp_sys.c
+____________________________________________________________________________
+[ 10897] By: jhi                                   on 2001/06/24  16:38:23
+        Log: Subject: [PATCH CPAN.pm] missing DATE_OF_02
+             From: Robin Barker <rmb1@cise.npl.co.uk> 
+             Date: Fri, 22 Jun 2001 19:25:56 +0100 (BST)
+             Message-Id: <200106221825.TAA16884@tempest.npl.co.uk>
+     Branch: perl
+	   ! lib/CPAN.pm
+____________________________________________________________________________
+[ 10896] By: jhi                                   on 2001/06/24  16:36:32
+        Log: Memoize patch from mjd.
+     Branch: perl
+	   ! lib/Memoize/t/tie_storable.t
+____________________________________________________________________________
+[ 10895] By: jhi                                   on 2001/06/24  16:33:59
+        Log: Spec the sv_pvprintify() a bit more.
+     Branch: perl
+	   ! pod/perltodo.pod
+____________________________________________________________________________
+[ 10894] By: jhi                                   on 2001/06/24  14:43:36
+        Log: Upgrade to Memoize 0.65.
+     Branch: perl
+	   + lib/Memoize/t/array_confusion.t
+	   ! MANIFEST lib/Memoize.pm lib/Memoize/AnyDBM_File.pm
+	   ! lib/Memoize/Expire.pm lib/Memoize/ExpireFile.pm
+	   ! lib/Memoize/ExpireTest.pm lib/Memoize/NDBM_File.pm
+	   ! lib/Memoize/README lib/Memoize/SDBM_File.pm
+	   ! lib/Memoize/Saves.pm lib/Memoize/Storable.pm lib/Memoize/TODO
+	   ! lib/Memoize/t/errors.t lib/Memoize/t/expire.t
+	   ! lib/Memoize/t/expire_file.t lib/Memoize/t/expire_module_n.t
+	   ! lib/Memoize/t/expire_module_t.t lib/Memoize/t/speed.t
+	   ! lib/Memoize/t/tie.t lib/Memoize/t/tie_gdbm.t
+	   ! lib/Memoize/t/tie_ndbm.t lib/Memoize/t/tie_sdbm.t
+	   ! lib/Memoize/t/tie_storable.t
+____________________________________________________________________________
+[ 10893] By: jhi                                   on 2001/06/24  14:21:09
+        Log: Metaconfig unit change for #10892.
+     Branch: metaconfig
+	   ! U/modified/Options.U
+____________________________________________________________________________
+[ 10892] By: jhi                                   on 2001/06/24  14:20:38
+        Log: Subject: Re: [PATCH 5.6.1] OS2 Configure
+             From: Ilya Zakharevich <ilya@math.ohio-state.edu>
+             Date: Sun, 24 Jun 2001 05:24:40 -0400
+             Message-ID: <20010624052440.A27698@math.ohio-state.edu>
+     Branch: perl
+	   ! Configure hints/os2.sh
+____________________________________________________________________________
+[ 10891] By: jhi                                   on 2001/06/24  13:50:26
+        Log: Subject: [PATCH] Re: [ID 20010624.001] debugger T, and Carp::carp don't trace arg of 
+             From: Mike Guy <mjtg@cam.ac.uk>
+             Date: Sun, 24 Jun 2001 15:28:39 +0100
+             Message-Id: <E15EAsR-0007Bi-00@draco.cus.cam.ac.uk>
+             
+             Fix an ancient (5.002) bug.
+     Branch: perl
+	   ! lib/Carp/Heavy.pm
+____________________________________________________________________________
+[ 10890] By: jhi                                   on 2001/06/24  13:44:43
+        Log: The #10881 was too vigorous in pp_system() in moving 'unused'
+             variables.
+     Branch: perl
+	   ! pp_sys.c
+____________________________________________________________________________
+[ 10889] By: jhi                                   on 2001/06/24  13:24:00
+        Log: Make UTS as per #10888.
+     Branch: perl
+	   ! hints/uts.sh
+____________________________________________________________________________
+[ 10888] By: jhi                                   on 2001/06/24  13:21:23
+        Log: Factor the PERL_SYS_INIT() code, from Hugo van der Sanden.
+     Branch: perl
+	   ! hints/freebsd.sh hints/posix-bc.sh hints/sco.sh
+	   ! mpeix/mpeixish.h perl.h unixish.h
+____________________________________________________________________________
+[ 10887] By: jhi                                   on 2001/06/24  13:15:45
+        Log: AUTHORS update.
+     Branch: perl
+	   ! AUTHORS
+____________________________________________________________________________
+[ 10886] By: jhi                                   on 2001/06/24  13:14:31
+        Log: Subject: Encode::Tcl for multibyte doesnot work
+             From: SADAHIRO Tomoyuki <BQW10602@nifty.com>
+             Date: Sun, 24 Jun 2001 22:48:21 +0900
+             Message-Id: <20010624223252.6658.BQW10602@nifty.com>
+     Branch: perl
+	   ! ext/Encode/Encode/Tcl.pm
+____________________________________________________________________________
+[ 10885] By: jhi                                   on 2001/06/24  13:12:46
+        Log: Subject: [PATCH] Remove tautology in error messages
+             From: Mike Guy <mjtg@cam.ac.uk>
+             Date: Sun, 24 Jun 2001 13:31:00 +0100
+             Message-Id: <E15E92a-0006em-00@draco.cus.cam.ac.uk>
+     Branch: perl
+	   ! pp_sys.c
+____________________________________________________________________________
+[ 10884] By: jhi                                   on 2001/06/24  13:11:36
+        Log: Darwin needs -traditional-cpp for cppflags to build Errno. 
+     Branch: perl
+	   ! hints/darwin.sh
+____________________________________________________________________________
+[ 10883] By: jhi                                   on 2001/06/24  13:09:55
+        Log: Subject: Re: [PATCH 5.6.1] test suite
+             From: Ilya Zakharevich <ilya@math.ohio-state.edu>
+             Date: Sun, 24 Jun 2001 05:47:05 -0400
+             Message-ID: <20010624054705.A27890@math.ohio-state.edu>
+             
+             Test suite fixes.
+     Branch: perl
+	   ! ext/POSIX/sigaction.t lib/File/stat.t perl.c t/io/utf8.t
+____________________________________________________________________________
+[ 10882] By: jhi                                   on 2001/06/24  13:07:46
+        Log: Subject: Re: [PATCH 5.6.1] OS2 warnings
+             From: Ilya Zakharevich <ilya@math.ohio-state.edu>
+             Date: Sun, 24 Jun 2001 05:37:19 -0400
+             Message-ID: <20010624053719.A27866@math.ohio-state.edu>
+     Branch: perl
+	   ! os2/dl_os2.c os2/os2.c os2/os2ish.h
+____________________________________________________________________________
+[ 10881] By: jhi                                   on 2001/06/24  13:05:24
+        Log: Subject: Re: [PATCH 5.6.1] pp_sys.c warnings
+             From: Ilya Zakharevich <ilya@math.ohio-state.edu>
+             Date: Sun, 24 Jun 2001 05:34:50 -0400
+             Message-ID: <20010624053450.A27856@math.ohio-state.edu>
+             
+             Pacify compiler warnings.
+     Branch: perl
+	   ! pp_sys.c
+____________________________________________________________________________
+[ 10880] By: jhi                                   on 2001/06/24  13:02:30
+        Log: Subject: Re: [PATCH 5.6.1] OS2 linking
+             From: Ilya Zakharevich <ilya@math.ohio-state.edu>
+             Date: Sun, 24 Jun 2001 05:21:18 -0400
+             Message-ID: <20010624052118.A27615@math.ohio-state.edu>
+             
+             Enable compression of executables during link time.
+     Branch: perl
+	   ! hints/os2.sh
+____________________________________________________________________________
+[ 10879] By: jhi                                   on 2001/06/24  13:00:47
+        Log: Subject: Re: [PATCH 5.6.1] OS2 linking
+             From: Ilya Zakharevich <ilya@math.ohio-state.edu>
+             Date: Sun, 24 Jun 2001 05:15:11 -0400
+             Message-ID: <20010624051511.A27544@math.ohio-state.edu>
+             
+             Add ordinals to the export list for Perl DLL.
+             (Breaks intra-version DLL compatibility.)
+     Branch: perl
+	   ! makedef.pl
+____________________________________________________________________________
+[ 10878] By: jhi                                   on 2001/06/24  02:12:04
+        Log: Allow (displaying and) re-editing the Subject in perlbug.
+             Also abstract the Subject quality control into a function.
+     Branch: perl
+	   ! utils/perlbug.PL
+____________________________________________________________________________
+[ 10877] By: jhi                                   on 2001/06/24  01:40:53
+        Log: Display $ENV{CYGWIN} in perlbug if set (like #10875 for perl -V).
+     Branch: perl
+	   ! utils/perlbug.PL
+____________________________________________________________________________
+[ 10876] By: jhi                                   on 2001/06/24  01:37:05
+        Log: Regen toc and modlib.
+     Branch: perl
+	   ! pod/perlmodlib.pod pod/perltoc.pod
+____________________________________________________________________________
+[ 10875] By: jhi                                   on 2001/06/24  01:29:33
+        Log: In Cygwin display the $ENV{CYGWIN} under perl -V, as suggested
+             by John Peacock.  (Can be 'ntea' which means emulate UNIX file
+             attribute semantics as much as possible, or 'ntsec' which uses
+             native NTFS semantics.)  (See also #10877.)
+     Branch: perl
+	   ! perl.c
+____________________________________________________________________________
+[ 10874] By: jhi                                   on 2001/06/23  23:57:28
+        Log: Hack to get rid of the UNEXPECTEDLY succeeded message for now.
+     Branch: perl
+	   ! lib/Test/Harness.pm
+____________________________________________________________________________
+[ 10873] By: jhi                                   on 2001/06/23  23:36:56
+        Log: Just zap the -uPerlio.
+     Branch: perl
+	   ! ext/B/Stash.t
+____________________________________________________________________________
+[ 10872] By: jhi                                   on 2001/06/23  21:29:10
+        Log: Do not test PerlIO if PerlIO not used.
+     Branch: perl
+	   ! ext/PerlIO/PerlIO.t
+____________________________________________________________________________
+[ 10871] By: jhi                                   on 2001/06/23  21:12:49
+        Log: Regen perlapi.
+     Branch: perl
+	   ! pod/perlapi.pod
+____________________________________________________________________________
+[ 10870] By: jhi                                   on 2001/06/23  21:03:31
+        Log: Subject: [PATCH] Re: [PATCH] nuke strtol (was Re: One fix for strtoul not setting errno)
+             From: Nicholas Clark <nick@ccl4.org>
+             Date: Sat, 23 Jun 2001 22:55:47 +0100
+             Message-ID: <20010623225547.Z98663@plum.flirble.org>
+     Branch: perl
+	   ! numeric.c
+____________________________________________________________________________
+[ 10869] By: jhi                                   on 2001/06/23  17:13:21
+        Log: Subject: [PATCH: perl@10825] MacOS fixups for new lib/h2xs.t
+             From: Prymmer/Kahn <pvhp@best.com>
+             Date: Sat, 23 Jun 2001 11:08:52 -0700 (PDT)
+             Message-ID: <Pine.BSF.4.21.0106231105380.25634-100000@shell8.ba.best.com>
+     Branch: perl
+	   ! lib/h2xs.t
+____________________________________________________________________________
+[ 10868] By: jhi                                   on 2001/06/23  16:04:38
+        Log: cygwin needs cygwin1.dll in PATH or cwd to run external programs.
+             cygwin does not taint cwd, just like win32.
+     Branch: perl
+	   ! lib/File/Find/taint.t t/op/taint.t
+____________________________________________________________________________
+[ 10867] By: jhi                                   on 2001/06/23  15:39:15
+        Log: Retract #10865, the patch should be unnecessary.
+             (But seemingly helpful in Cygwin?  Strange.)
+     Branch: perl
+	   ! lib/Memoize/t/tie_ndbm.t
+____________________________________________________________________________
+[ 10866] By: jhi                                   on 2001/06/23  15:06:30
+        Log: Misplaced test file; plus Cygwin filesystem semantics.
+     Branch: perl
+	   + ext/SDBM_File/sdbm.t
+	   - ext/ODBM_File/sdbm.t
+	   ! MANIFEST
+____________________________________________________________________________
+[ 10865] By: jhi                                   on 2001/06/23  15:01:02
+        Log: (Retracted by #10867.)
+     Branch: perl
+	   ! lib/Memoize/t/tie_ndbm.t
+____________________________________________________________________________
+[ 10864] By: jhi                                   on 2001/06/23  14:25:43
+        Log: Metaconfig unit change for #10863.
+     Branch: metaconfig/U/perl
+	   ! Extensions.U
+____________________________________________________________________________
+[ 10863] By: jhi                                   on 2001/06/23  14:25:20
+        Log: In Cygwin do not build NDBM_File and ODBM_File unless
+             -lndbm and -ldbm are available.
+     Branch: perl
+	   ! Configure config_h.SH
+____________________________________________________________________________
+[ 10862] By: jhi                                   on 2001/06/23  14:02:14
+        Log: More Cygwin filesystem semantics.
+     Branch: perl
+	   ! t/io/fs.t t/op/stat.t
+____________________________________________________________________________
+[ 10861] By: jhi                                   on 2001/06/23  13:38:00
+        Log: More DOSish permission semantics for Cygwin.
+     Branch: perl
+	   ! lib/AnyDBM_File.t
+____________________________________________________________________________
+[ 10860] By: jhi                                   on 2001/06/23  13:32:41
+        Log: Cygwin too has different permission semantics.
+     Branch: perl
+	   ! ext/GDBM_File/gdbm.t
+____________________________________________________________________________
+[ 10859] By: jhi                                   on 2001/06/23  13:30:06
+        Log: The group (and assumedly passwd) databases can have
+             only one entry (this is the case in cygwin).
+     Branch: perl
+	   ! t/op/grent.t t/op/pwent.t
+____________________________________________________________________________
+[ 10858] By: jhi                                   on 2001/06/23  13:16:26
+        Log: Also in Cygwin use Socket to figure out domainname
+             (if any) (avoids trying to call external 'domainname',
+             which doesn't at the moment exist in Cygwin)
+     Branch: perl
+	   ! lib/Net/Domain.pm
+____________________________________________________________________________
+[ 10857] By: jhi                                   on 2001/06/23  12:48:32
+        Log: Remove also the lib$Foo.def, not just $Foo.def.
+     Branch: perl
+	   ! lib/ExtUtils/MM_Unix.pm
+____________________________________________________________________________
+[ 10856] By: jhi                                   on 2001/06/23  12:21:53
+        Log: In UTS do signal(SIGFPE, SIG_IGN) in PERL_SYS_INIT().
+     Branch: perl
+	   ! unixish.h
+____________________________________________________________________________
+[ 10855] By: jhi                                   on 2001/06/23  12:14:15
+        Log: Fix for ID 20010619.003, the [[:print:]] is not supposed
+             to match the whole isprint(), only the space character.
+     Branch: perl
+	   ! handy.h pod/perlre.pod t/op/pat.t
+____________________________________________________________________________
+[ 10854] By: nick                                  on 2001/06/23  08:09:33
+        Log: Integrate mainline
+     Branch: perlio
+	  !> Configure ext/IPC/SysV/Semaphore.pm hints/unicos.sh
+	  !> lib/ExtUtils.t lib/File/Find/taint.t
+	  !> lib/Math/BigInt/t/bigintpm.t lib/Net/netent.t
+	  !> lib/Net/protoent.t lib/Net/servent.t mg.c t/op/mkdir.t
+	  !> t/op/sprintf.t vms/descrip_mms.template vms/ext/Stdio/Stdio.xs
+____________________________________________________________________________
+[ 10853] By: jhi                                   on 2001/06/23  03:48:09
+        Log: Make also the bigintpm.t (like op/sprintf.t) be less demanding
+             with its floats	in os390 and s390 (UTS).
+     Branch: perl
+	   ! lib/Math/BigInt/t/bigintpm.t
+____________________________________________________________________________
+[ 10852] By: jhi                                   on 2001/06/23  03:38:53
+        Log: Add also UTS (s390) to the non-IEEE float platforms.
+     Branch: perl
+	   ! t/op/sprintf.t
+____________________________________________________________________________
+[ 10851] By: jhi                                   on 2001/06/23  03:36:04
+        Log: Subject: RFC: what are applicable standards for exponent sizes?
+             From: Peter Prymmer <pvhp@forte.com>
+             Date: Tue, 19 Jun 2001 17:18:06 -0700 (PDT)
+             Message-ID: <Pine.OSF.4.10.10106191712070.361736-100000@aspara.forte.com>
+     Branch: perl
+	   ! t/op/sprintf.t
+____________________________________________________________________________
+[ 10850] By: jhi                                   on 2001/06/23  03:29:04
+        Log: Subject: [PATCH: perl@10825] build (and test!) VMS::Stdio on VMS
+             From: Peter Prymmer <pvhp@forte.com>
+             Date: Fri, 22 Jun 2001 19:08:23 -0700 (PDT)
+             Message-ID: <Pine.OSF.4.10.10106221903270.24012-100000@aspara.forte.com>
+     Branch: perl
+	   ! vms/descrip_mms.template vms/ext/Stdio/Stdio.xs
+____________________________________________________________________________
+[ 10849] By: jhi                                   on 2001/06/23  03:27:21
+        Log: Subject: [PATCH: perl@10825] correction to lib/ExtUtils.t patch
+             From: Peter Prymmer <pvhp@forte.com>
+             Date: Fri, 22 Jun 2001 17:56:01 -0700 (PDT)
+             Message-ID: <Pine.OSF.4.10.10106221754180.24012-100000@aspara.forte.com>
+     Branch: perl
+	   ! lib/ExtUtils.t
+____________________________________________________________________________
+[ 10848] By: jhi                                   on 2001/06/22  21:51:31
+        Log: Retract #10845.
+     Branch: perl
+	   ! lib/File/Find/taint.t
+____________________________________________________________________________
+[ 10847] By: jhi                                   on 2001/06/22  21:50:38
+        Log: Yet another error message.
+     Branch: perl
+	   ! t/op/mkdir.t
+____________________________________________________________________________
+[ 10846] By: jhi                                   on 2001/06/22  21:48:39
+        Log: The croak message for nonexistent socket functions may vary.
+     Branch: perl
+	   ! lib/Net/netent.t lib/Net/protoent.t lib/Net/servent.t
+____________________________________________________________________________
+[ 10845] By: jhi                                   on 2001/06/22  21:42:38
+        Log: (Retracted by #10848.)
+     Branch: perl
+	   ! lib/File/Find/taint.t
+____________________________________________________________________________
+[ 10844] By: jhi                                   on 2001/06/22  21:32:58
+        Log: Integrate perlio.
+     Branch: perl
+	  !> lib/File/Find/taint.t t/op/write.t
+____________________________________________________________________________
+[ 10843] By: nick                                  on 2001/06/22  21:24:51
+        Log: Back out debug in taint.t
+     Branch: perlio
+	   ! lib/File/Find/taint.t
+____________________________________________________________________________
+[ 10842] By: jhi                                   on 2001/06/22  21:20:02
+        Log: setitimer() does not exist in Unicos, despite of what
+             Configure thinks, from Mark P. Lutz.
+     Branch: perl
+	   ! hints/unicos.sh
+____________________________________________________________________________
+[ 10841] By: nick                                  on 2001/06/22  21:19:36
+        Log: Skip cwd test on Win32 ???
+     Branch: perlio
+	   ! lib/File/Find/taint.t
+____________________________________________________________________________
+[ 10840] By: jhi                                   on 2001/06/22  21:17:34
+        Log: Casting this way seems to keep both 64-bitint x86 FreeBSD
+             and Tru64 gcc -Wall happy.
+     Branch: perl
+	   ! mg.c
+____________________________________________________________________________
+[ 10839] By: jhi                                   on 2001/06/22  21:15:32
+        Log: The packs must be done in native shorts, fix from Mark P. Lutz.
+     Branch: perl
+	   ! ext/IPC/SysV/Semaphore.pm
+____________________________________________________________________________
+[ 10838] By: jhi                                   on 2001/06/22  21:12:02
+        Log: Metaconfig unit change for #10837.
+     Branch: metaconfig/U/perl
+	   ! Cross.U
+____________________________________________________________________________
+[ 10837] By: jhi                                   on 2001/06/22  21:09:42
+        Log: Cleanup of the cross-compilation unit.
+     Branch: perl
+	   ! Configure
+____________________________________________________________________________
+[ 10836] By: nick                                  on 2001/06/22  20:45:12
+        Log: Skip |- based op/write.t on Win32 as well as VMS
+     Branch: perlio
+	   ! t/op/write.t
+____________________________________________________________________________
+[ 10835] By: jhi                                   on 2001/06/22  20:44:20
+        Log: Integrate perlio.
+     Branch: perl
+	  !> util.c
+____________________________________________________________________________
+[ 10834] By: nick                                  on 2001/06/22  20:41:54
+        Log: Integrate mainline
+     Branch: perlio
+	  !> Configure Porting/Glossary Porting/config.sh Porting/config_H
+	  !> config_h.SH pp_sys.c uconfig.h util.c vos/config.alpha.h
+	  !> vos/config.ga.h
+____________________________________________________________________________
+[ 10833] By: nick                                  on 2001/06/22  20:22:58
+        Log: Patcho fix.
+     Branch: perlio
+	   ! util.c
+____________________________________________________________________________
+[ 10832] By: jhi                                   on 2001/06/22  20:13:02
+        Log: Metaconfig unit changes for #10831.
+     Branch: metaconfig
+	   ! U/compline/d_safebcpy.U U/compline/d_safemcpy.U
+____________________________________________________________________________
+[ 10831] By: jhi                                   on 2001/06/22  20:12:29
+        Log: Subject: [PATCH 5.7.x] Further tiny bcopy cleanup
+             From: Andy Dougherty <doughera@lafayette.edu>
+             Date: Fri, 22 Jun 2001 14:29:51 -0400 (EDT)
+             Message-ID: <Pine.SOL.4.10.10106221417030.28044-100000@maxwell.phys.lafayette.edu>
+     Branch: perl
+	   ! Configure Porting/Glossary Porting/config.sh Porting/config_H
+	   ! config_h.SH uconfig.h vos/config.alpha.h vos/config.ga.h
+____________________________________________________________________________
+[ 10830] By: jhi                                   on 2001/06/22  19:50:15
+        Log: MPE/iX prototype nits from Mark Bixby.
+     Branch: perl
+	   ! pp_sys.c
+____________________________________________________________________________
+[ 10829] By: jhi                                   on 2001/06/22  16:25:16
+        Log: Detypo.
+     Branch: perl
+	   ! util.c
+____________________________________________________________________________
+[ 10828] By: nick                                  on 2001/06/22  15:33:37
+        Log: Integrate mainline (in near desperate attempt to get Win32 to build...)
+     Branch: perlio
+	  +> lib/h2xs.t
+	  !> AUTHORS Changes MANIFEST Makefile.SH NetWare/t/NWScripts.pl
+	  !> ext/B/Deparse.t ext/POSIX/POSIX.xs lib/ExtUtils.t
+	  !> lib/ExtUtils/Constant.pm lib/I18N/LangTags.pm
+	  !> lib/I18N/LangTags/ChangeLog lib/I18N/LangTags/test.pl
+	  !> lib/Locale/Maketext.pm lib/Locale/Maketext.pod
+	  !> lib/Locale/Maketext/ChangeLog lib/Locale/Maketext/test.pl
+	  !> lib/Math/BigFloat.pm lib/Math/BigInt.pm patchlevel.h
+	  !> t/op/write.t t/pod/plainer.t utils/h2xs.PL vms/vms.c
+	  !> vms/vmsish.h
+____________________________________________________________________________
+[ 10827] By: jhi                                   on 2001/06/22  14:15:26
+        Log: Subject: [PATCH perl@10800] sigaction workaround for VMS
+             Date: Fri, 22 Jun 2001 10:08:35 -0500
+             From: "Craig A. Berry" <craigberry@mac.com>
+             Message-Id: <a05101001b75908704194@[192.168.56.145]>
+     Branch: perl
+	   ! vms/vms.c vms/vmsish.h
+____________________________________________________________________________
+[ 10826] By: jhi                                   on 2001/06/22  13:35:37
+        Log: NetWare scripts tweak from Ananth Kesari.
+     Branch: perl
+	   ! NetWare/t/NWScripts.pl
+____________________________________________________________________________
+[ 10825] By: jhi                                   on 2001/06/22  13:00:55
+        Log: Update Changes.
+     Branch: perl
+	   ! Changes patchlevel.h
+____________________________________________________________________________
 [ 10824] By: jhi                                   on 2001/06/22  12:46:56
         Log: Add .i and .s targets.
      Branch: perl
