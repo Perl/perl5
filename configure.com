@@ -2498,6 +2498,7 @@ $   IF F$EXTRACT(0,4,line) .EQS. "ext/" THEN -
       xxx = F$EXTRACT(4,line_len - 16,line)
 $   IF xxx .EQS. "DynaLoader" THEN goto ext_loop     ! omit
 $   IF xxx .EQS. "SDBM_File/sdbm" THEN goto ext_loop ! sub extension - omit
+$   IF xxx .EQS. "Devel/PPPort/harness" THEN goto ext_loop ! sub extension - omit
 $   IF F$EXTRACT(0,8,line) .EQS. "vms/ext/" THEN -
       xxx = "VMS/" + F$EXTRACT(8,line_len - 20,line)
 $   known_extensions = known_extensions + " ''xxx'"

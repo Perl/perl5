@@ -14,17 +14,31 @@ WriteMakefile(
 
 );
 
-sub MY::postamble {<<'EOM'};
+sub MY::postamble {
+
+  use File::Spec;
+
+  my $libdir = File::Spec->catdir(File::Spec->updir(), File::Spec->updir(),  
+				  File::Spec->updir(),  File::Spec->updir(),  
+                                  'lib');
+  my $blibdir = File::Spec->catdir(File::Spec->curdir(), 'blib');
+  my $pmfile = File::Spec->catfile(File::Spec->updir(), 'PPPort.pm');
+  my $retval = <<'EOM';
 
 sweep:
 	$(RM_F) pm_to_blib Harness.c Harness$(OBJ_EXT) module2$(OBJ_EXT) module3$(OBJ_EXT) ppport.h
-	$(RM_RF) ./blib
-
-Harness.c module2.c module3.c :	ppport.h
-
-ppport.h: ../PPPort.pm
-	$(PERL) -I../../../../lib -e "require '../PPPort.pm'; Devel::PPPort::WriteFile('ppport.h')"
-	
 EOM
+ 
+  $retval .= "\t\$(RM_RF) $blibdir\n\n";
+  $retval .= "Harness.c :      ppport.h\n\n";  
+  $retval .= "module2.c module3.c : ppport.h\n\t\$(NOECHO) \$(NOOP)\n\n";  
+  $retval .= "ppport.h: $pmfile\n";  
+
+  my $Ilibdir = $^O eq 'VMS' ? qq{"-I$libdir"} : qq{-I$libdir};
+
+  $retval .= qq[\t\$(PERL) $Ilibdir -e "require qq{$pmfile}; Devel::PPPort::WriteFile(qq{ppport.h})"];
+
+  return $retval;
+}
 
 sub MY::install { "install ::\n"  };
