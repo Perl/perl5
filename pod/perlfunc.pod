@@ -2244,6 +2244,8 @@ element) and returns the list value composed of the results of each such
 evaluation.  Evaluates BLOCK or EXPR in a list context, so each element of LIST
 may produce zero, one, or more elements in the returned value.
 
+In scalar context, returns the total number of elements so generated.
+
     @chars = map(chr, @nums);
 
 translates a list of numbers to the corresponding characters.  And
