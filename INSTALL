@@ -2267,6 +2267,132 @@ available in TeX format.  Type
 
 	(cd pod && make tex && <process the latex files>)
 
+=head1 Minimizing the Perl installation
+
+The following section is meant for people worrying about squeezing the
+Perl installation into minimal systems (for example when installing
+operating systems, or in really small filesystems).
+
+In the following we offer two different slimmed down installation
+recipes.  They are informative, not normative: the choice of files
+depends on what you need.
+
+Firstly, the bare minimum to run this script
+
+  use strict;
+  use warnings;
+  foreach my $f (</*>) {
+     print("$f\n");
+  }
+
+in Solaris is as follows (under $Config{prefix}):
+
+  ./bin/perl
+  ./lib/perl5/5.6.1/sun4-solaris-64int/auto/DynaLoader/autosplit.ix
+  ./lib/perl5/5.6.1/sun4-solaris-64int/auto/DynaLoader/dl_expandspec.al
+  ./lib/perl5/5.6.1/sun4-solaris-64int/auto/DynaLoader/dl_find_symbol_anywhere.al
+  ./lib/perl5/5.6.1/sun4-solaris-64int/auto/DynaLoader/dl_findfile.al
+  ./lib/perl5/5.6.1/sun4-solaris-64int/auto/File/Glob/Glob.so
+  ./lib/perl5/5.6.1/sun4-solaris-64int/auto/File/Glob/autosplit.ix
+  ./lib/perl5/5.6.1/sun4-solaris-64int/Config.pm
+  ./lib/perl5/5.6.1/sun4-solaris-64int/XSLoader.pm
+  ./lib/perl5/5.6.1/sun4-solaris-64int/DynaLoader.pm
+  ./lib/perl5/5.6.1/sun4-solaris-64int/CORE/libperl.so
+  ./lib/perl5/5.6.1/strict.pm
+  ./lib/perl5/5.6.1/warnings.pm
+  ./lib/perl5/5.6.1/Carp.pm
+  ./lib/perl5/5.6.1/Exporter.pm
+  ./lib/perl5/5.6.1/File/Glob.pm
+  ./lib/perl5/5.6.1/AutoLoader.pm
+  ./lib/perl5/5.6.1/vars.pm
+  ./lib/perl5/5.6.1/warnings/register.pm
+  ./lib/perl5/5.6.1/Carp/Heavy.pm
+  ./lib/perl5/5.6.1/Exporter/Heavy.pm
+
+Secondly, Debian perl-base package contains the following files,
+size about 1.2MB in its i386 version:
+
+  /usr/share/doc/perl/Documentation
+  /usr/share/doc/perl/README.Debian
+  /usr/share/doc/perl/copyright
+  /usr/share/doc/perl/AUTHORS.gz
+  /usr/share/doc/perl/changelog.Debian.gz
+  /usr/share/man/man1/perl.1.gz
+  /usr/share/perl/5.6.1/AutoLoader.pm
+  /usr/share/perl/5.6.1/Carp.pm
+  /usr/share/perl/5.6.1/Carp/Heavy.pm
+  /usr/share/perl/5.6.1/Cwd.pm
+  /usr/share/perl/5.6.1/Exporter.pm
+  /usr/share/perl/5.6.1/Exporter/Heavy.pm
+  /usr/share/perl/5.6.1/File/Spec.pm
+  /usr/share/perl/5.6.1/File/Spec/Unix.pm
+  /usr/share/perl/5.6.1/FileHandle.pm
+  /usr/share/perl/5.6.1/Getopt/Long.pm
+  /usr/share/perl/5.6.1/IO/Socket/INET.pm
+  /usr/share/perl/5.6.1/IO/Socket/UNIX.pm
+  /usr/share/perl/5.6.1/IPC/Open2.pm
+  /usr/share/perl/5.6.1/IPC/Open3.pm
+  /usr/share/perl/5.6.1/SelectSaver.pm
+  /usr/share/perl/5.6.1/Symbol.pm
+  /usr/share/perl/5.6.1/Text/Tabs.pm
+  /usr/share/perl/5.6.1/Text/Wrap.pm
+  /usr/share/perl/5.6.1/attributes.pm
+  /usr/share/perl/5.6.1/auto/Getopt/Long/GetOptions.al
+  /usr/share/perl/5.6.1/auto/Getopt/Long/FindOption.al
+  /usr/share/perl/5.6.1/auto/Getopt/Long/Configure.al
+  /usr/share/perl/5.6.1/auto/Getopt/Long/config.al
+  /usr/share/perl/5.6.1/auto/Getopt/Long/Croak.al
+  /usr/share/perl/5.6.1/auto/Getopt/Long/autosplit.ix
+  /usr/share/perl/5.6.1/base.pm
+  /usr/share/perl/5.6.1/constant.pm
+  /usr/share/perl/5.6.1/fields.pm
+  /usr/share/perl/5.6.1/integer.pm
+  /usr/share/perl/5.6.1/lib.pm
+  /usr/share/perl/5.6.1/locale.pm
+  /usr/share/perl/5.6.1/overload.pm
+  /usr/share/perl/5.6.1/strict.pm
+  /usr/share/perl/5.6.1/vars.pm
+  /usr/share/perl/5.6.1/warnings.pm
+  /usr/share/perl/5.6.1/warnings/register.pm
+  /usr/bin/perl
+  /usr/lib/perl/5.6.1/Config.pm
+  /usr/lib/perl/5.6.1/Data/Dumper.pm
+  /usr/lib/perl/5.6.1/DynaLoader.pm
+  /usr/lib/perl/5.6.1/Errno.pm
+  /usr/lib/perl/5.6.1/Fcntl.pm
+  /usr/lib/perl/5.6.1/File/Glob.pm
+  /usr/lib/perl/5.6.1/IO.pm
+  /usr/lib/perl/5.6.1/IO/File.pm
+  /usr/lib/perl/5.6.1/IO/Handle.pm
+  /usr/lib/perl/5.6.1/IO/Pipe.pm
+  /usr/lib/perl/5.6.1/IO/Seekable.pm
+  /usr/lib/perl/5.6.1/IO/Select.pm
+  /usr/lib/perl/5.6.1/IO/Socket.pm
+  /usr/lib/perl/5.6.1/POSIX.pm
+  /usr/lib/perl/5.6.1/Socket.pm
+  /usr/lib/perl/5.6.1/XSLoader.pm
+  /usr/lib/perl/5.6.1/auto/Data/Dumper/Dumper.so
+  /usr/lib/perl/5.6.1/auto/Data/Dumper/Dumper.bs
+  /usr/lib/perl/5.6.1/auto/DynaLoader/dl_findfile.al
+  /usr/lib/perl/5.6.1/auto/DynaLoader/dl_expandspec.al
+  /usr/lib/perl/5.6.1/auto/DynaLoader/dl_find_symbol_anywhere.al
+  /usr/lib/perl/5.6.1/auto/DynaLoader/autosplit.ix
+  /usr/lib/perl/5.6.1/auto/DynaLoader/DynaLoader.a
+  /usr/lib/perl/5.6.1/auto/DynaLoader/extralibs.ld
+  /usr/lib/perl/5.6.1/auto/Fcntl/Fcntl.so
+  /usr/lib/perl/5.6.1/auto/Fcntl/Fcntl.bs
+  /usr/lib/perl/5.6.1/auto/File/Glob/Glob.bs
+  /usr/lib/perl/5.6.1/auto/File/Glob/Glob.so
+  /usr/lib/perl/5.6.1/auto/File/Glob/autosplit.ix
+  /usr/lib/perl/5.6.1/auto/IO/IO.so
+  /usr/lib/perl/5.6.1/auto/IO/IO.bs
+  /usr/lib/perl/5.6.1/auto/POSIX/POSIX.bs
+  /usr/lib/perl/5.6.1/auto/POSIX/POSIX.so
+  /usr/lib/perl/5.6.1/auto/POSIX/autosplit.ix
+  /usr/lib/perl/5.6.1/auto/POSIX/load_imports.al
+  /usr/lib/perl/5.6.1/auto/Socket/Socket.so
+  /usr/lib/perl/5.6.1/auto/Socket/Socket.bs
+
 =head1 Reporting Problems
 
 If you have difficulty building perl, and none of the advice in this file
