@@ -2388,6 +2388,14 @@ PerlIO_funcs PerlIO_unix = {
  * stdio as a layer
  */
 
+#if defined(VMS) && !defined(STDIO_BUFFER_WRITABLE)
+/* perl5.8 - This ensures the last minute VMS ungetc fix is not
+   broken by the last second glibc 2.3 fix
+ */
+#define STDIO_BUFFER_WRITABLE
+#endif
+
+
 typedef struct {
     struct _PerlIO base;
     FILE *stdio;                /* The stream */
@@ -2639,6 +2647,7 @@ PerlIOStdio_unread(pTHX_ PerlIO *f, const void *vbuf, Size_t count)
     SSize_t unread = 0;
     FILE *s = PerlIOSelf(f, PerlIOStdio)->stdio;
 
+#ifdef STDIO_BUFFER_WRITABLE
     if (PerlIO_fast_gets(f) && PerlIO_has_base(f)) {
 	STDCHAR *buf = ((STDCHAR *) vbuf) + count;
 	STDCHAR *base = PerlIO_get_base(f);
@@ -2658,7 +2667,9 @@ PerlIOStdio_unread(pTHX_ PerlIO *f, const void *vbuf, Size_t count)
 		PerlSIO_clearerr(s);
 	}
     }
-    else if (PerlIO_has_cntptr(f)) {
+    else
+#endif
+    if (PerlIO_has_cntptr(f)) {
 	/* We can get pointer to buffer but not its base
 	   Do ungetc() but check chars are ending up in the
 	   buffer
@@ -2852,6 +2863,8 @@ PerlIOStdio_fill(pTHX_ PerlIO *f)
 	return EOF;
 
 #if (defined(STDIO_PTR_LVALUE) && (defined(STDIO_CNT_LVALUE) || defined(STDIO_PTR_LVAL_SETS_CNT)))
+
+#ifdef STDIO_BUFFER_WRITABLE
     if (PerlIO_fast_gets(f) && PerlIO_has_base(f)) {
 	/* Fake ungetc() to the real buffer in case system's ungetc
 	   goes elsewhere
@@ -2867,7 +2880,9 @@ PerlIOStdio_fill(pTHX_ PerlIO *f)
 	    return 0;
 	}
     }
-    else if (PerlIO_has_cntptr(f)) {
+    else
+#endif
+    if (PerlIO_has_cntptr(f)) {
 	STDCHAR ch = c;
 	if (PerlIOStdio_unread(aTHX_ f,&ch,1) == 1) {
 	    return 0;
