@@ -1870,6 +1870,8 @@ struct ptr_tbl {
 #define U_V(what) (cast_uv((NV)(what)))
 #endif
 
+/* Mention NV_PRESERVES_UV so that Configure picks it up. */
+
 /* These do not care about the fractional part, only about the range. */
 #define NV_WITHIN_IV(nv) (I_V(nv) >= IV_MIN && I_V(nv) <= IV_MAX)
 #define NV_WITHIN_UV(nv) ((nv)>=0.0 && U_V(nv) >= UV_MIN && U_V(nv) <= UV_MAX)

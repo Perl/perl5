@@ -8,7 +8,7 @@
 
 # Package name      : perl5
 # Source directory  : .
-# Configuration time: Sun Jan 16 21:10:53 EET 2000
+# Configuration time: Wed Jan 19 19:31:56 EET 2000
 # Configured by     : jhi
 # Target system     : osf1 alpha.hut.fi v4.0 878 alpha 
 
@@ -59,7 +59,7 @@ ccflags='-pthread -std -DLANGUAGE_C'
 ccsymbols='__LANGUAGE_C__=1 _LONGLONG=1 LANGUAGE_C=1 SYSTYPE_BSD=1'
 cf_by='jhi'
 cf_email='yourname@yourhost.yourplace.com'
-cf_time='Sun Jan 16 21:10:53 EET 2000'
+cf_time='Wed Jan 19 19:31:56 EET 2000'
 charsize='1'
 chgrp=''
 chmod=''
@@ -229,6 +229,7 @@ d_msgrcv='define'
 d_msgsnd='define'
 d_mymalloc='undef'
 d_nice='define'
+d_nvpresuv='undef'
 d_off64_t='undef'
 d_old_pthread_create_joinable='undef'
 d_oldpthreads='undef'

@@ -17,7 +17,7 @@
 /*
  * Package name      : perl5
  * Source directory  : .
- * Configuration time: Sun Jan 16 21:10:53 EET 2000
+ * Configuration time: Wed Jan 19 19:31:56 EET 2000
  * Configured by     : jhi
  * Target system     : osf1 alpha.hut.fi v4.0 878 alpha 
  */
@@ -1533,6 +1533,9 @@
  *	the GNU C library is being used.
  */
 /*#define HAS_GNULIBC  	/ **/
+#if defined(HAS_GNULIBC) && !defined(_GNU_SOURCE)
+#   define _GNU_SOURCE
+#endif
 /* HAS_HASMNTOPT:
  *	This symbol, if defined, indicates that the hasmntopt routine is
  *	available to query the mount options of file systems.
@@ -2480,6 +2483,10 @@
 /* U64SIZE:
  *	This symbol contains the sizeof(U64).
  */
+/* NV_PRESERVES_UV:
+ *	This symbol, if defined, indicates that a variable of type NVTYPE
+ *	can preserve all the bit of a variable of type UVSIZE.
+ */
 #define	IVTYPE		long		/**/
 #define	UVTYPE		unsigned long		/**/
 #define	I8TYPE		char		/**/
@@ -2505,6 +2512,7 @@
 #define	I64SIZE		8	/**/
 #define	U64SIZE		8	/**/
 #endif
+#undef	NV_PRESERVES_UV
 
 /* IVdf:
  *	This symbol defines the format string used for printing a Perl IV
