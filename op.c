@@ -257,16 +257,16 @@ S_pad_findlex(pTHX_ char *name, PADOFFSET newoff, U32 seq, CV* startcv,
 		    SvNVX(namesv) = (NV)PL_curcop->cop_seq;
 		    SvIVX(namesv) = PAD_MAX;	/* A ref, intro immediately */
 		    SvFAKE_on(namesv);		/* A ref, not a real var */
+		    if (SvFLAGS(sv) & SVpad_OUR) { /* An "our" variable */
+			SvFLAGS(namesv) |= SVpad_OUR;
+			(void)SvUPGRADE(namesv, SVt_PVGV);
+			GvSTASH(namesv) = (HV*)SvREFCNT_inc((SV*)GvSTASH(sv));
+		    }
 		    if (SvOBJECT(sv)) {		/* A typed var */
 			SvOBJECT_on(namesv);
 			(void)SvUPGRADE(namesv, SVt_PVMG);
 			SvSTASH(namesv) = (HV*)SvREFCNT_inc((SV*)SvSTASH(sv));
 			PL_sv_objcount++;
-		    }
-		    if (SvFLAGS(sv) & SVpad_OUR) { /* An "our" variable */
-			SvFLAGS(namesv) |= SVpad_OUR;
-			(void)SvUPGRADE(namesv, SVt_PVGV);
-			GvSTASH(namesv) = (HV*)SvREFCNT_inc((SV*)GvSTASH(sv));
 		    }
 		    if (CvANON(PL_compcv) || SvTYPE(PL_compcv) == SVt_PVFM) {
 			/* "It's closures all the way down." */
