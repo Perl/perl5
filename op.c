@@ -1670,19 +1670,22 @@ Perl_mod(pTHX_ OP *o, I32 type)
 	    goto nomod;
 	break; /* mod()ing was handled by ck_return() */
     }
-    if (type != OP_LEAVESUBLV)
-        o->op_flags |= OPf_MOD;
+    if (type != OP_REFGEN ||
+	PL_check[o->op_type] != MEMBER_TO_FPTR(Perl_ck_ftst)) {
+	if (type != OP_LEAVESUBLV)
+	    o->op_flags |= OPf_MOD;
 
-    if (type == OP_AASSIGN || type == OP_SASSIGN)
-	o->op_flags |= OPf_SPECIAL|OPf_REF;
-    else if (!type) {
-	o->op_private |= OPpLVAL_INTRO;
-	o->op_flags &= ~OPf_SPECIAL;
-	PL_hints |= HINT_BLOCK_SCOPE;
+	if (type == OP_AASSIGN || type == OP_SASSIGN)
+	    o->op_flags |= OPf_SPECIAL|OPf_REF;
+	else if (!type) {
+	    o->op_private |= OPpLVAL_INTRO;
+	    o->op_flags &= ~OPf_SPECIAL;
+	    PL_hints |= HINT_BLOCK_SCOPE;
+	}
+	else if (type != OP_GREPSTART && type != OP_ENTERSUB
+		 && type != OP_LEAVESUBLV)
+	    o->op_flags |= OPf_REF;
     }
-    else if (type != OP_GREPSTART && type != OP_ENTERSUB
-             && type != OP_LEAVESUBLV)
-	o->op_flags |= OPf_REF;
     return o;
 }
 
