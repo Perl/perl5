@@ -1079,7 +1079,7 @@ while (fetch_para()) {
 
     $orig_args =~ s/\\\s*/ /g;		# process line continuations
 
-    my %only_output;
+    my %only_outlist;
     if ($process_argtypes and $orig_args =~ /\S/) {
 	my $args = "$orig_args ,";
 	if ($args =~ /^( (??{ $C_arg }) , )* $ /x) {
@@ -1105,7 +1105,7 @@ while (fetch_para()) {
 		    $arg_types{$name} = $arg;
 		    $_ = "$name$default";
 		}
-		$only_output{$_} = 1 if $out_type =~ /^OUT/;
+		$only_outlist{$_} = 1 if $out_type eq "OUTLIST";
 		push @outlist, $name if $out_type =~ /OUTLIST$/;
 		$in_out{$name} = $out_type if $out_type;
 	    }
@@ -1119,7 +1119,7 @@ while (fetch_para()) {
 	    if ($process_inout and s/^(IN|IN_OUTLIST|OUTLIST|IN_OUT|OUT)\s+//) {
 		my $out_type = $1;
 		next if $out_type eq 'IN';
-		$only_output{$_} = 1 if $out_type =~ /^OUT/;
+		$only_outlist{$_} = 1 if $out_type eq "OUTLIST";
 		push @outlist, $name if $out_type =~ /OUTLIST$/;
 		$in_out{$_} = $out_type;
 	    }
@@ -1144,7 +1144,7 @@ while (fetch_para()) {
 			last;
 		    }
 	    }
-	    if ($only_output{$args[$i]}) {
+	    if ($only_outlist{$args[$i]}) {
 		push @args_num, undef;
 	    } else {
 		push @args_num, ++$num_args;
