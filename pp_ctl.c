@@ -698,7 +698,7 @@ PP(pp_sort)
 	    bool oldcatch = CATCH_GET;
 
 	    SAVETMPS;
-	    SAVESPTR(op);
+	    SAVEOP();
 
 	    oldstack = curstack;
 	    if (!sortstack) {

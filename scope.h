@@ -22,6 +22,7 @@
 #define SAVEt_REGCONTEXT 21
 #define SAVEt_STACK_POS  22
 #define SAVEt_I16	23
+#define SAVEt_OP	24
 
 #define SSCHECK(need) if (savestack_ix + need > savestack_max) savestack_grow()
 #define SSPUSHINT(i) (savestack[savestack_ix++].any_i32 = (I32)(i))
@@ -69,7 +70,7 @@
     SSPUSHINT(stack_sp - stack_base);	\
     SSPUSHINT(SAVEt_STACK_POS);		\
  } STMT_END
-
+#define SAVEOP()	save_op()
 
 /* A jmpenv packages the state required to perform a proper non-local jump.
  * Note that there is a start_env initialized when perl starts, and top_env
@@ -95,11 +96,21 @@ struct jmpenv {
 
 typedef struct jmpenv JMPENV;
 
+#ifdef OP_IN_REGISTER
+#define OP_REG_TO_MEM	opsave = op
+#define OP_MEM_TO_REG	op = opsave
+#else
+#define OP_REG_TO_MEM	NOOP
+#define OP_MEM_TO_REG	NOOP
+#endif
+
 #define dJMPENV		JMPENV cur_env
 #define JMPENV_PUSH(v) \
     STMT_START {					\
 	cur_env.je_prev = top_env;			\
+	OP_REG_TO_MEM;					\
 	cur_env.je_ret = Sigsetjmp(cur_env.je_buf, 1);	\
+	OP_MEM_TO_REG;					\
 	top_env = &cur_env;				\
 	cur_env.je_mustcatch = FALSE;			\
 	(v) = cur_env.je_ret;				\
@@ -108,6 +119,7 @@ typedef struct jmpenv JMPENV;
     STMT_START { top_env = cur_env.je_prev; } STMT_END
 #define JMPENV_JUMP(v) \
     STMT_START {						\
+	OP_REG_TO_MEM;						\
 	if (top_env->je_prev)					\
 	    Siglongjmp(top_env->je_buf, (v));			\
 	if ((v) == 2)						\

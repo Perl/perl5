@@ -1346,7 +1346,7 @@ int flags;
     myop.op_flags = OPf_WANT_SCALAR | OPf_STACKED;
 
     ENTER;
-    SAVESPTR(op);
+    SAVEOP();
     op = (OP *) &myop;
     if (perldb && curstash != debstash)
 	op->op_private |= OPpENTERSUB_DB;

@@ -491,6 +491,7 @@
 #define op_name			Perl_op_name
 #define op_seqmax		Perl_op_seqmax
 #define opargs			Perl_opargs
+#define opsave			Perl_opsave
 #define origalen		Perl_origalen
 #define origenviron		Perl_origenviron
 #define osname			Perl_osname
@@ -941,6 +942,7 @@
 #define save_list		Perl_save_list
 #define save_long		Perl_save_long
 #define save_nogv		Perl_save_nogv
+#define save_op			Perl_save_op
 #define save_pptr		Perl_save_pptr
 #define save_scalar		Perl_save_scalar
 #define save_sptr		Perl_save_sptr

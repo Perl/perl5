@@ -150,6 +150,7 @@ op_desc
 op_name
 op_seqmax
 opargs
+opsave
 origalen
 origenviron
 osname
@@ -1045,6 +1046,7 @@ save_iv
 save_list
 save_long
 save_nogv
+save_op
 save_pptr
 save_scalar
 save_sptr

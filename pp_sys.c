@@ -522,7 +522,7 @@ PP(pp_tie)
     CATCH_SET(TRUE);
 
     ENTER;
-    SAVESPTR(op);
+    SAVEOP();
     op = (OP *) &myop;
     if (perldb && curstash != debstash)
 	op->op_private |= OPpENTERSUB_DB;
@@ -633,7 +633,7 @@ PP(pp_dbmopen)
     CATCH_SET(TRUE);
 
     ENTER;
-    SAVESPTR(op);
+    SAVEOP();
     op = (OP *) &myop;
     if (perldb && curstash != debstash)
 	op->op_private |= OPpENTERSUB_DB;

@@ -438,6 +438,15 @@ void* p;
 }
 
 void
+save_op()
+{
+    dTHR;
+    SSCHECK(2);
+    SSPUSHPTR(op);
+    SSPUSHINT(SAVEt_OP);
+}
+
+void
 leave_scope(base)
 I32 base;
 {
@@ -635,6 +644,9 @@ I32 base;
 		I32 delta = SSPOPINT;
 		stack_sp = stack_base + delta;
 	    }
+	    break;
+	case SAVEt_OP:
+	    op = (OP*)SSPOPPTR;
 	    break;
 	default:
 	    croak("panic: leave_scope inconsistency");

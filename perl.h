@@ -29,6 +29,14 @@
 
 #include "embed.h"
 
+#ifdef OP_IN_REGISTER
+#  ifdef __GNUC__
+#    define stringify_immed(s) #s
+#    define stringify(s) stringify_immed(s)
+register struct op *op asm(stringify(OP_IN_REGISTER));
+#  endif
+#endif
+
 /*
  * STMT_START { statements; } STMT_END;
  * can be used as a single statement, as in
@@ -51,6 +59,8 @@
 #  endif
 # endif
 #endif
+
+#define NOOP (void)0
 
 #ifdef USE_THREADS
 #include <pthread.h>
@@ -843,6 +853,11 @@
 
 #endif
 
+/* Digital UNIX defines CONTEXT when pthreads is in use */
+#ifdef CONTEXT
+#  undef CONTEXT
+#endif
+
 typedef MEM_SIZE STRLEN;
 
 typedef struct op OP;
@@ -1361,8 +1376,11 @@ EXT SV **	stack_max;	/* stack->array_ary + stack->array_max */
 
 /* likewise for these */
 
-EXT OP *	op;		/* current op--oughta be in a global register */
-
+#ifdef OP_IN_REGISTER
+EXT OP *	opsave;		/* save current op register across longjmps */
+#else
+EXT OP *	op;		/* current op--when not in a global register */
+#endif
 EXT I32 *	scopestack;	/* blocks we've entered */
 EXT I32		scopestack_ix;
 EXT I32		scopestack_max;

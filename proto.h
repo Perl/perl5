@@ -432,6 +432,7 @@ void	save_iv _((IV* iv));
 void	save_list _((SV** sarg, I32 maxsarg));
 void	save_long _((long* longp));
 void	save_nogv _((GV* gv));
+void	save_op _((void));
 SV*	save_scalar _((GV* gv));
 void	save_pptr _((char** pptr));
 void	save_sptr _((SV** sptr));

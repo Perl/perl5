@@ -4766,7 +4766,7 @@ register OP* o;
     if (!o || o->op_seq)
 	return;
     ENTER;
-    SAVESPTR(op);
+    SAVEOP();
     SAVESPTR(curcop);
     for (; o; o = o->op_next) {
 	if (o->op_seq)

@@ -1126,7 +1126,7 @@ I32 flags;		/* See G_* flags in cop.h */
     myop.op_flags |= ((flags & G_VOID) ? OPf_WANT_VOID :
 		      (flags & G_ARRAY) ? OPf_WANT_LIST :
 		      OPf_WANT_SCALAR);
-    SAVESPTR(op);
+    SAVEOP();
     op = (OP*)&myop;
 
     EXTEND(stack_sp, 1);
@@ -1259,7 +1259,7 @@ I32 flags;		/* See G_* flags in cop.h */
 	SAVETMPS;
     }
 
-    SAVESPTR(op);
+    SAVEOP();
     op = (OP*)&myop;
     Zero(op, 1, UNOP);
     EXTEND(stack_sp, 1);

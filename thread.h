@@ -60,7 +60,11 @@ struct thread {
     SV **	Tstack_sp;
     SV **	Tstack_max;
 
+#ifdef OP_IN_REGISTER
+    OP *	Topsave;
+#else
     OP *	Top;
+#endif
 
     I32 *	Tscopestack;
     I32		Tscopestack_ix;
@@ -176,7 +180,6 @@ typedef struct condpair {
 #undef	curpad
 #undef	Sv
 #undef	Xpv
-#undef	op
 #undef	top_env
 #undef	runlevel
 #undef	in_eval
@@ -185,7 +188,12 @@ typedef struct condpair {
 #define stack_base	(thr->Tstack_base)
 #define stack_sp	(thr->Tstack_sp)
 #define stack_max	(thr->Tstack_max)
+#ifdef OP_IN_REGISTER
+#define opsave		(thr->Topsave)
+#else
+#undef	op
 #define op		(thr->Top)
+#endif
 #define	stack		(thr->Tstack)
 #define	mainstack	(thr->Tmainstack)
 #define	markstack	(thr->Tmarkstack)
