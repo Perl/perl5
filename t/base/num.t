@@ -1,6 +1,6 @@
 #!./perl
 
-print "1..30\n";
+print "1..45\n";
 
 # First test whether the number stringification works okay.
 # (Testing with == would exercize the IV/NV part, not the PV.)
@@ -105,3 +105,51 @@ print $a + 1 == 0x101 ? "ok 29\n" : "not ok 29 #" . $a + 1 . "\n";
 
 $a = 1000; "$a";
 print $a + 1 == 1001  ? "ok 30\n" : "not ok 30 #" . $a + 1 . "\n";
+
+# back to some basic stringify tests
+# we expect NV stringification to work according to C sprintf %.g rules
+
+$a = 0.01; "$a";
+print $a eq "0.01"    ? "ok 31\n" : "not ok 31 # $a\n";
+
+$a = 0.001; "$a";
+print $a eq "0.001"   ? "ok 32\n" : "not ok 32 # $a\n";
+
+$a = 0.0001; "$a";
+print $a eq "0.0001"  ? "ok 33\n" : "not ok 33 # $a\n";
+
+$a = 0.00009; "$a";
+print $a eq "9e-05" || $a eq "9e-005" ? "ok 34\n"  : "not ok 34 # $a\n";
+
+$a = 1.1; "$a";
+print $a eq "1.1"     ? "ok 35\n" : "not ok 35 # $a\n";
+
+$a = 1.01; "$a";
+print $a eq "1.01"    ? "ok 36\n" : "not ok 36 # $a\n";
+
+$a = 1.001; "$a";
+print $a eq "1.001"   ? "ok 37\n" : "not ok 37 # $a\n";
+
+$a = 1.0001; "$a";
+print $a eq "1.0001"  ? "ok 38\n" : "not ok 38 # $a\n";
+
+$a = 1.00001; "$a";
+print $a eq "1.00001" ? "ok 39\n" : "not ok 39 # $a\n";
+
+$a = 1.000001; "$a";
+print $a eq "1.000001" ? "ok 40\n" : "not ok 40 # $a\n";
+
+$a = 0.; "$a";
+print $a eq "0"       ? "ok 41\n" : "not ok 41 # $a\n";
+
+$a = 100000.; "$a";
+print $a eq "100000"  ? "ok 42\n" : "not ok 42 # $a\n";
+
+$a = -100000.; "$a";
+print $a eq "-100000" ? "ok 43\n" : "not ok 43 # $a\n";
+
+$a = 123.456; "$a";
+print $a eq "123.456" ? "ok 44\n" : "not ok 44 # $a\n";
+
+$a = 1e30; "$a";
+print $a eq "1e+30" || $a eq "1e+030" ? "ok 45\n" : "not ok 45 $a\n";
