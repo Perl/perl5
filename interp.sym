@@ -85,7 +85,6 @@ minus_l
 minus_n
 minus_p
 multiline
-mustcatch
 mystack_base
 mystack_mark
 mystack_max
@@ -126,6 +125,7 @@ sortcop
 sortstack
 sortstash
 splitstr
+start_env
 statcache
 statgv
 statname

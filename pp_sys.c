@@ -463,7 +463,7 @@ PP(pp_tie)
     SV **mark = stack_base + ++*markstack_ptr;	/* reuse in entersub */
     I32 markoff = mark - stack_base - 1;
     char *methname;
-    bool oldmustcatch = mustcatch;
+    bool oldcatch = CATCH_GET;
 
     varsv = mark[0];
     if (SvTYPE(varsv) == SVt_PVHV)
@@ -484,7 +484,7 @@ PP(pp_tie)
     myop.op_last = (OP *) &myop;
     myop.op_next = Nullop;
     myop.op_flags = OPf_KNOW|OPf_STACKED;
-    mustcatch = TRUE;
+    CATCH_SET(TRUE);
 
     ENTER;
     SAVESPTR(op);
@@ -499,7 +499,7 @@ PP(pp_tie)
         runops();
     SPAGAIN;
 
-    mustcatch = oldmustcatch;
+    CATCH_SET(oldcatch);
     sv = TOPs;
     if (sv_isobject(sv)) {
 	if (SvTYPE(varsv) == SVt_PVHV || SvTYPE(varsv) == SVt_PVAV) {
@@ -576,7 +576,7 @@ PP(pp_dbmopen)
     GV *gv;
     BINOP myop;
     SV *sv;
-    bool oldmustcatch = mustcatch;
+    bool oldcatch = CATCH_GET;
 
     hv = (HV*)POPs;
 
@@ -595,7 +595,7 @@ PP(pp_dbmopen)
     myop.op_last = (OP *) &myop;
     myop.op_next = Nullop;
     myop.op_flags = OPf_KNOW|OPf_STACKED;
-    mustcatch = TRUE;
+    CATCH_SET(TRUE);
 
     ENTER;
     SAVESPTR(op);
@@ -638,7 +638,7 @@ PP(pp_dbmopen)
 	SPAGAIN;
     }
 
-    mustcatch = oldmustcatch;
+    CATCH_SET(oldcatch);
     if (sv_isobject(TOPs))
 	sv_magic((SV*)hv, TOPs, 'P', Nullch, 0);
     LEAVE;

@@ -23,7 +23,7 @@
 #define WORD_ALIGN sizeof(U16)
 #endif
 
-#define DOCATCH(o) (mustcatch ? docatch(o) : (o))
+#define DOCATCH(o) ((CATCH_GET == TRUE) ? docatch(o) : (o))
 
 static OP *docatch _((OP *o));
 static OP *doeval _((int gimme));
@@ -628,7 +628,7 @@ PP(pp_sort)
 	    AV *oldstack;
 	    CONTEXT *cx;
 	    SV** newsp;
-	    bool oldmustcatch = mustcatch;
+	    bool oldcatch = CATCH_GET;
 
 	    SAVETMPS;
 	    SAVESPTR(op);
@@ -639,7 +639,7 @@ PP(pp_sort)
 		AvREAL_off(sortstack);
 		av_extend(sortstack, 32);
 	    }
-	    mustcatch = TRUE;
+	    CATCH_SET(TRUE);
 	    SWITCHSTACK(curstack, sortstack);
 	    if (sortstash != stash) {
 		firstgv = gv_fetchpv("a", TRUE, SVt_PV);
@@ -656,7 +656,7 @@ PP(pp_sort)
 
 	    POPBLOCK(cx,curpm);
 	    SWITCHSTACK(sortstack, oldstack);
-	    mustcatch = oldmustcatch;
+	    CATCH_SET(oldcatch);
 	}
 	LEAVE;
     }
@@ -1843,7 +1843,7 @@ PP(pp_goto)
 
     if (curstack == signalstack) {
         restartop = retop;
-        Siglongjmp(top_env, 3);
+        JMPENV_JUMP(3);
     }
 
     RETURNOP(retop);
@@ -1943,28 +1943,25 @@ OP *o;
     int ret;
     int oldrunlevel = runlevel;
     OP *oldop = op;
-    Sigjmp_buf oldtop;
+    dJMPENV;
 
     op = o;
-    Copy(top_env, oldtop, 1, Sigjmp_buf);
 #ifdef DEBUGGING
-    assert(mustcatch == TRUE);
+    assert(CATCH_GET == TRUE);
+    DEBUG_l(deb("(Setting up local jumplevel, runlevel = %d)\n", runlevel+1));
 #endif
-    mustcatch = FALSE;
-    switch ((ret = Sigsetjmp(top_env,1))) {
+    switch ((ret = JMPENV_PUSH)) {
     default:				/* topmost level handles it */
-	Copy(oldtop, top_env, 1, Sigjmp_buf);
+	JMPENV_POP;
 	runlevel = oldrunlevel;
-	mustcatch = TRUE;
 	op = oldop;
-	Siglongjmp(top_env, ret);
+	JMPENV_JUMP(ret);
 	/* NOTREACHED */
     case 3:
 	if (!restartop) {
 	    PerlIO_printf(PerlIO_stderr(), "panic: restartop\n");
 	    break;
 	}
-	mustcatch = FALSE;
 	op = restartop;
 	restartop = 0;
 	/* FALL THROUGH */
@@ -1972,9 +1969,8 @@ OP *o;
         runops();
 	break;
     }
-    Copy(oldtop, top_env, 1, Sigjmp_buf);
+    JMPENV_POP;
     runlevel = oldrunlevel;
-    mustcatch = TRUE;
     op = oldop;
     return Nullop;
 }
