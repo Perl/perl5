@@ -22,7 +22,7 @@ my $dprof_pm = '../ext/Devel/DProf/DProf.pm';
 my $VERSION = 0;
 open( PM, "<$dprof_pm" ) || die "Can't open $dprof_pm: $!";
 while(<PM>){
-	if( /^\$Devel::DProf::VERSION\s*=\s*'(\d+)'/ ){
+	if( /^\$Devel::DProf::VERSION\s*=\s*'([\d._]+)'/ ){
 		$VERSION = $1;
 		last;
 	}
@@ -45,7 +45,7 @@ $Config{'startperl'}
 
 require 5.003;
 
-my \$VERSION = $VERSION;
+my \$VERSION = '$VERSION';
 
 !GROK!THIS!
 
