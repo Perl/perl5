@@ -20,7 +20,7 @@
 
 # $Id: Head.U,v 3.0.1.9 1997/02/28 15:02:09 ram Exp $
 #
-# Generated on Thu Nov 16 16:33:41 EET 2000 [metaconfig 3.0 PL70]
+# Generated on Tue Nov 21 20:33:35 EET 2000 [metaconfig 3.0 PL70]
 # (with additional metaconfig patches by perlbug@perl.org)
 
 cat >/tmp/c1$$ <<EOF
@@ -780,6 +780,7 @@ d_eofnblk=''
 eagain=''
 o_nonblock=''
 rd_nodata=''
+need_va_copy=''
 netdb_hlen_type=''
 netdb_host_type=''
 netdb_name_type=''
@@ -13461,6 +13462,161 @@ rp="What is the type used for file modes for system calls (e.g. fchmod())?"
 set mode_t modetype int stdio.h sys/types.h
 eval $typedef_ask
 
+: see if stdarg is available
+echo " "
+if $test `./findhdr stdarg.h`; then
+	echo "<stdarg.h> found." >&4
+	valstd="$define"
+else
+	echo "<stdarg.h> NOT found." >&4
+	valstd="$undef"
+fi
+
+: see if varags is available
+echo " "
+if $test `./findhdr varargs.h`; then
+	echo "<varargs.h> found." >&4
+else
+	echo "<varargs.h> NOT found, but that's ok (I hope)." >&4
+fi
+
+: set up the varargs testing programs
+$cat > varargs.c <<EOP
+#ifdef I_STDARG
+#include <stdarg.h>
+#endif
+#ifdef I_VARARGS
+#include <varargs.h>
+#endif
+
+#ifdef I_STDARG
+int f(char *p, ...)
+#else
+int f(va_alist)
+va_dcl
+#endif
+{
+	va_list ap;
+#ifndef I_STDARG
+	char *p;
+#endif
+#ifdef I_STDARG
+	va_start(ap,p);
+#else
+	va_start(ap);
+	p = va_arg(ap, char *);
+#endif
+	va_end(ap);
+}
+EOP
+$cat > varargs <<EOP
+$startsh
+if $cc -c $ccflags -D\$1 varargs.c >/dev/null 2>&1; then
+	echo "true"
+else
+	echo "false"
+fi
+$rm -f varargs$_o
+EOP
+chmod +x varargs
+
+: now check which varargs header should be included
+echo " "
+i_varhdr=''
+case "$valstd" in
+"$define")
+	if `./varargs I_STDARG`; then
+		val='stdarg.h'
+	elif `./varargs I_VARARGS`; then
+		val='varargs.h'
+	fi
+	;;
+*)
+	if `./varargs I_VARARGS`; then
+		val='varargs.h'
+	fi
+	;;
+esac
+case "$val" in
+'')
+echo "I could not find the definition for va_dcl... You have problems..." >&4
+	val="$undef"; set i_stdarg; eval $setvar
+	val="$undef"; set i_varargs; eval $setvar
+	;;
+*) 
+	set i_varhdr
+	eval $setvar
+	case "$i_varhdr" in
+	stdarg.h)
+		val="$define"; set i_stdarg; eval $setvar
+		val="$undef"; set i_varargs; eval $setvar
+		;;
+	varargs.h)
+		val="$undef"; set i_stdarg; eval $setvar
+		val="$define"; set i_varargs; eval $setvar
+		;;
+	esac
+	echo "We'll include <$i_varhdr> to get va_dcl definition." >&4;;
+esac
+$rm -f varargs*
+
+: see if we need va_copy
+echo " "
+case "$i_stdarg" in
+"$define")
+	$cat >try.c <<EOCP
+#include <stdarg.h>
+#include <stdio.h>
+
+int
+ivfprintf(FILE *f, const char *fmt, va_list *valp)
+{
+  return vfprintf(f, fmt, *valp);
+}
+ 
+int    
+myvfprintf(FILE *f, const  char *fmt, va_list val)
+{
+  return ivfprintf(f, fmt, &val);
+}
+      
+int
+myprintf(char *fmt, ...) 
+{
+  va_list val;
+  va_start(val, fmt);
+  return myvfprintf(stdout, fmt, val); 
+}         
+
+int
+main(int ac, char **av)
+{
+  myprintf("%s%cs all right, then\n", "that", '\'');                            
+  exit(0);      
+}
+EOCP
+	set try
+	if eval $compile_ok && ./try >/dev/null; then
+		case "`./try`" in
+		"that's all right, then")
+			okay=yes
+			;;
+		esac
+	fi
+	case "$okay" in
+	yes)	echo "It seems that you don't need va_copy()." >&4
+		need_va_copy="$undef"
+		;;
+	*)	echo "It seems that va_copy() or similar will be needed." >&4
+		need_va_copy="$define"
+		;;
+	esac
+	$rm -f try.* core core.* *.core *.core.*
+	;;
+*)	echo "You don't have <stdarg.h>, not checking for va_copy()." >&4
+	;;
+esac
+
 : define a fucntion to check prototypes
 $cat > protochk <<EOSH
 $startsh
@@ -14896,104 +15052,6 @@ val=$val3; set i_termios; eval $setvar
 set shadow.h i_shadow
 eval $inhdr
 
-: see if stdarg is available
-echo " "
-if $test `./findhdr stdarg.h`; then
-	echo "<stdarg.h> found." >&4
-	valstd="$define"
-else
-	echo "<stdarg.h> NOT found." >&4
-	valstd="$undef"
-fi
-
-: see if varags is available
-echo " "
-if $test `./findhdr varargs.h`; then
-	echo "<varargs.h> found." >&4
-else
-	echo "<varargs.h> NOT found, but that's ok (I hope)." >&4
-fi
-
-: set up the varargs testing programs
-$cat > varargs.c <<EOP
-#ifdef I_STDARG
-#include <stdarg.h>
-#endif
-#ifdef I_VARARGS
-#include <varargs.h>
-#endif
-
-#ifdef I_STDARG
-int f(char *p, ...)
-#else
-int f(va_alist)
-va_dcl
-#endif
-{
-	va_list ap;
-#ifndef I_STDARG
-	char *p;
-#endif
-#ifdef I_STDARG
-	va_start(ap,p);
-#else
-	va_start(ap);
-	p = va_arg(ap, char *);
-#endif
-	va_end(ap);
-}
-EOP
-$cat > varargs <<EOP
-$startsh
-if $cc -c $ccflags -D\$1 varargs.c >/dev/null 2>&1; then
-	echo "true"
-else
-	echo "false"
-fi
-$rm -f varargs$_o
-EOP
-chmod +x varargs
-
-: now check which varargs header should be included
-echo " "
-i_varhdr=''
-case "$valstd" in
-"$define")
-	if `./varargs I_STDARG`; then
-		val='stdarg.h'
-	elif `./varargs I_VARARGS`; then
-		val='varargs.h'
-	fi
-	;;
-*)
-	if `./varargs I_VARARGS`; then
-		val='varargs.h'
-	fi
-	;;
-esac
-case "$val" in
-'')
-echo "I could not find the definition for va_dcl... You have problems..." >&4
-	val="$undef"; set i_stdarg; eval $setvar
-	val="$undef"; set i_varargs; eval $setvar
-	;;
-*) 
-	set i_varhdr
-	eval $setvar
-	case "$i_varhdr" in
-	stdarg.h)
-		val="$define"; set i_stdarg; eval $setvar
-		val="$undef"; set i_varargs; eval $setvar
-		;;
-	varargs.h)
-		val="$undef"; set i_stdarg; eval $setvar
-		val="$define"; set i_varargs; eval $setvar
-		;;
-	esac
-	echo "We'll include <$i_varhdr> to get va_dcl definition." >&4;;
-esac
-$rm -f varargs*
-
 : see if stddef is available
 set stddef.h i_stddef
 eval $inhdr
@@ -16047,6 +16105,7 @@ mydomain='$mydomain'
 myhostname='$myhostname'
 myuname='$myuname'
 n='$n'
+need_va_copy='$need_va_copy'
 netdb_hlen_type='$netdb_hlen_type'
 netdb_host_type='$netdb_host_type'
 netdb_name_type='$netdb_name_type'

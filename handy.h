@@ -623,3 +623,14 @@ extern long lastxycount[MAXXCOUNT][MAXYCOUNT];
 #else
 #define StructCopy(s,d,t) Copy(s,d,1,t)
 #endif
+
+#ifdef NEED_VA_COPY
+# ifdef va_copy
+#  define Perl_va_copy(s, d) va_copy(d, s)
+# elif defined(__va_copy)
+#  define Perl_va_copy(s, d) __va_copy(d, s)
+# else
+#  define Perl_va_copy(s, d) Copy(s, d, 1, va_list)
+# endif
+#endif
+
