@@ -2594,3 +2594,4 @@ Apd	|void	|sv_catsv_flags	|SV* dsv|SV* ssv|I32 flags
 Apd	|STRLEN	|sv_utf8_upgrade_flags|SV *sv|I32 flags
 Apd	|char*	|sv_pvn_force_flags|SV* sv|STRLEN* lp|I32 flags
 Ap	|char*	|sv_2pv_flags	|SV* sv|STRLEN* lp|I32 flags
+Ap	|char*	|my_atof2	|const char *s|NV* value

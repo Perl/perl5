@@ -2414,6 +2414,10 @@
 #define Perl_sv_2pv_flags	pPerl->Perl_sv_2pv_flags
 #undef  sv_2pv_flags
 #define sv_2pv_flags		Perl_sv_2pv_flags
+#undef  Perl_my_atof2
+#define Perl_my_atof2		pPerl->Perl_my_atof2
+#undef  my_atof2
+#define my_atof2		Perl_my_atof2
 
 #endif  /* PERL_CORE && PERL_OBJECT */
 #endif	/* __objXSUB_h__ */

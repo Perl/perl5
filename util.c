@@ -4018,19 +4018,86 @@ Perl_my_atof(pTHX_ const char* s)
     if ((PL_hints & HINT_LOCALE) && PL_numeric_local) {
 	NV y;
 
-	Perl_atof2(s, x);
+	Perl_atof2(s, &x);
 	SET_NUMERIC_STANDARD();
-	Perl_atof2(s, y);
+	Perl_atof2(s, &y);
 	SET_NUMERIC_LOCAL();
 	if ((y < 0.0 && y < x) || (y > 0.0 && y > x))
 	    return y;
     }
     else
-	Perl_atof2(s, x);
+	Perl_atof2(s, &x);
 #else
-    Perl_atof2(s, x);
+    Perl_atof2(s, &x);
 #endif
     return x;
+}
+
+char*
+Perl_my_atof2(pTHX_ const char* orig, NV* value)
+{
+    NV result = 0.0;
+    bool negative = 0;
+    char* s = (char*)orig;
+    char* point = ".";	/* locale-dependent decimal point equivalent */
+    STRLEN pointlen = 1;
+    bool seendigit = 0;
+
+    if (PL_numeric_radix_sv)
+	point = SvPV(PL_numeric_radix_sv, pointlen);
+
+    switch (*s) {
+	case '-':
+	    negative = 1;
+	    /* fall through */
+	case '+':
+	    ++s;
+    }
+    while (isDIGIT(*s)) {
+	result = result * 10 + (*s++ - '0');
+	seendigit = 1;
+    }
+    if (memEQ(s, point, pointlen)) {
+	NV decimal = 0.1;
+
+	s += pointlen;
+	while (isDIGIT(*s)) {
+	    result += (*s++ - '0') * decimal;
+	    decimal *= 0.1;
+	    seendigit = 1;
+	}
+    }
+    if (seendigit && (*s == 'e' || *s == 'E')) {
+	I32 exponent = 0;
+	I32 expnegative = 0;
+	I32 bit;
+	NV power;
+
+	++s;
+	switch (*s) {
+	    case '-':
+		expnegative = 1;
+		/* fall through */
+	    case '+':
+		++s;
+	}
+	while (isDIGIT(*s))
+	    exponent = exponent * 10 + (*s++ - '0');
+
+	/* now apply the exponent */
+	power = (expnegative) ? 0.1 : 10.0;
+	for (bit = 1; exponent; bit <<= 1) {
+	    if (exponent & bit) {
+		exponent ^= bit;
+		result *= power;
+	    }
+	    power *= power;
+	}
+    }
+    if (negative)
+	result = -result;
+    *value = result;
+    return s;
 }
 
 void

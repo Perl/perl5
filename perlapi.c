@@ -4289,6 +4289,13 @@ Perl_sv_2pv_flags(pTHXo_ SV* sv, STRLEN* lp, I32 flags)
     return ((CPerlObj*)pPerl)->Perl_sv_2pv_flags(sv, lp, flags);
 }
 
+#undef  Perl_my_atof2
+char*
+Perl_my_atof2(pTHXo_ const char *s, NV* value)
+{
+    return ((CPerlObj*)pPerl)->Perl_my_atof2(s, value);
+}
+
 #undef Perl_fprintf_nocontext
 int
 Perl_fprintf_nocontext(PerlIO *stream, const char *format, ...)

@@ -579,3 +579,4 @@ Perl_sv_catsv_flags
 Perl_sv_utf8_upgrade_flags
 Perl_sv_pvn_force_flags
 Perl_sv_2pv_flags
+Perl_my_atof2

@@ -1311,24 +1311,8 @@ typedef NVTYPE NV;
 #   endif
 #endif
 
-#if !defined(Perl_atof) && defined(USE_LONG_DOUBLE) && defined(HAS_LONG_DOUBLE)
-#   if !defined(Perl_atof) && defined(HAS_STRTOLD)
-#       define Perl_atof(s) (NV)strtold(s, (char**)NULL)
-#   endif
-#   if !defined(Perl_atof) && defined(HAS_ATOLF)
-#       define Perl_atof (NV)atolf
-#   endif
-#   if !defined(Perl_atof) && defined(PERL_SCNfldbl)
-#       define Perl_atof PERL_SCNfldbl
-#       define Perl_atof2(s,f) sscanf((s), "%"PERL_SCNfldbl, &(f))
-#   endif
-#endif
-#if !defined(Perl_atof)
-#   define Perl_atof atof /* we assume atof being available anywhere */
-#endif
-#if !defined(Perl_atof2)
-#   define Perl_atof2(s,f) ((f) = (NV)Perl_atof(s))
-#endif
+#define Perl_atof(s) Perl_my_atof(s)
+#define Perl_atof2(s, np) Perl_my_atof2(s, np)
 
 /* Previously these definitions used hardcoded figures.
  * It is hoped these formula are more portable, although

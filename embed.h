@@ -1178,6 +1178,7 @@
 #define sv_utf8_upgrade_flags	Perl_sv_utf8_upgrade_flags
 #define sv_pvn_force_flags	Perl_sv_pvn_force_flags
 #define sv_2pv_flags		Perl_sv_2pv_flags
+#define my_atof2		Perl_my_atof2
 #define ck_anoncode		Perl_ck_anoncode
 #define ck_bitop		Perl_ck_bitop
 #define ck_concat		Perl_ck_concat
@@ -2667,6 +2668,7 @@
 #define sv_utf8_upgrade_flags(a,b)	Perl_sv_utf8_upgrade_flags(aTHX_ a,b)
 #define sv_pvn_force_flags(a,b,c)	Perl_sv_pvn_force_flags(aTHX_ a,b,c)
 #define sv_2pv_flags(a,b,c)	Perl_sv_2pv_flags(aTHX_ a,b,c)
+#define my_atof2(a,b)		Perl_my_atof2(aTHX_ a,b)
 #define ck_anoncode(a)		Perl_ck_anoncode(aTHX_ a)
 #define ck_bitop(a)		Perl_ck_bitop(aTHX_ a)
 #define ck_concat(a)		Perl_ck_concat(aTHX_ a)
@@ -5186,6 +5188,8 @@
 #define sv_pvn_force_flags	Perl_sv_pvn_force_flags
 #define Perl_sv_2pv_flags	CPerlObj::Perl_sv_2pv_flags
 #define sv_2pv_flags		Perl_sv_2pv_flags
+#define Perl_my_atof2		CPerlObj::Perl_my_atof2
+#define my_atof2		Perl_my_atof2
 #define Perl_ck_anoncode	CPerlObj::Perl_ck_anoncode
 #define ck_anoncode		Perl_ck_anoncode
 #define Perl_ck_bitop		CPerlObj::Perl_ck_bitop
