@@ -33,12 +33,23 @@ usevfork='false'
 d_lstat=define
 
 # UnixWare has a broken csh.  The undocumented -X argument to uname is probably
-# a reasonable way of detecting UnixWare
+# a reasonable way of detecting UnixWare.  Also in 2.1.1 the fields in
+# FILE* got renamed!
 uw_ver=`uname -v`
 uw_isuw=`uname -X 2>&1 | grep Release`
-if [ "$uw_isuw" = "Release = 4.2MP" -a \
-     \( "$uw_ver" = "2.1" -o "$uw_ver" = "2.1.1" \) ]; then
-   d_csh='undef'
+if [ "$uw_isuw" = "Release = 4.2MP" ]; then
+   case $uw_ver in
+   2.1)
+      d_csh='undef'
+      ;;
+   2.1.*)
+      d_csh='undef'
+      stdio_cnt='((fp)->__cnt)'
+      d_stdio_cnt_lval='define'
+      stdio_ptr='((fp)->__ptr)'
+      d_stdio_ptr_lval='define'
+      ;;
+   esac
 fi
 
 # DDE SMES Supermax Enterprise Server
