@@ -1,6 +1,6 @@
 #!./perl
 
-print "1..37\n";
+print "1..63\n";
 
 @ary = (1,2,3,4,5);
 if (join('',@ary) eq '12345') {print "ok 1\n";} else {print "not ok 1\n";}
@@ -120,3 +120,82 @@ print $foo eq 'b' ? "ok 36\n" : "not ok 36\n";
 @foo = ( 'foo', 'bar', 'burbl');
 push(foo, 'blah');
 print $#foo == 3 ? "ok 37\n" : "not ok 37\n";
+
+# various AASSIGN_COMMON checks (see newASSIGNOP() in op.c)
+
+$test = 37;
+sub t { ++$test; print "not " unless $_[0]; print "ok $test\n"; }
+
+@foo = @foo;
+t("@foo" eq "foo bar burbl blah");				# 38
+
+(undef,@foo) = @foo;
+t("@foo" eq "bar burbl blah");					# 39
+
+@foo = ('XXX',@foo, 'YYY');
+t("@foo" eq "XXX bar burbl blah YYY");				# 40
+
+@foo = @foo = qw(foo bar burbl blah);
+t("@foo" eq "foo bar burbl blah");				# 41
+
+@bar = @foo = qw(foo bar);					# 42
+t("@foo" eq "foo bar");
+t("@bar" eq "foo bar");						# 43
+
+# try the same with local
+@foo = ( 'foo', 'bar', 'burbl', 'blah');
+{
+
+    local @foo = @foo;
+    t("@foo" eq "foo bar burbl blah");				# 44
+    {
+	local (undef,@foo) = @foo;
+	t("@foo" eq "bar burbl blah");				# 45
+	{
+	    local @foo = ('XXX',@foo,'YYY');
+	    t("@foo" eq "XXX bar burbl blah YYY");		# 46
+	    {
+		local @foo = local(@foo) = qw(foo bar burbl blah);
+		t("@foo" eq "foo bar burbl blah");		# 47
+		{
+		    local (@bar) = local(@foo) = qw(foo bar);
+		    t("@foo" eq "foo bar");			# 48
+		    t("@bar" eq "foo bar");			# 49
+		}
+		t("@foo" eq "foo bar burbl blah");		# 50
+	    }
+	    t("@foo" eq "XXX bar burbl blah YYY");		# 51
+	}
+	t("@foo" eq "bar burbl blah");				# 52
+    }
+    t("@foo" eq "foo bar burbl blah");				# 53
+}
+
+# try the same with my
+{
+
+    my @foo = @foo;
+    t("@foo" eq "foo bar burbl blah");				# 54
+    {
+	my (undef,@foo) = @foo;
+	t("@foo" eq "bar burbl blah");				# 55
+	{
+	    my @foo = ('XXX',@foo,'YYY');
+	    t("@foo" eq "XXX bar burbl blah YYY");		# 56
+	    {
+		my @foo = my @foo = qw(foo bar burbl blah);
+		t("@foo" eq "foo bar burbl blah");		# 57
+		{
+		    my (@bar) = my(@foo) = qw(foo bar);
+		    t("@foo" eq "foo bar");			# 58
+		    t("@bar" eq "foo bar");			# 59
+		}
+		t("@foo" eq "foo bar burbl blah");		# 60
+	    }
+	    t("@foo" eq "XXX bar burbl blah YYY");		# 61
+	}
+	t("@foo" eq "bar burbl blah");				# 62
+    }
+    t("@foo" eq "foo bar burbl blah");				# 63
+}
+
