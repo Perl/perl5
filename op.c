@@ -1074,7 +1074,7 @@ Perl_scalarvoid(pTHX_ OP *o)
     case OP_RV2SV:
     case OP_RV2AV:
     case OP_RV2HV:
-	if (!(o->op_private & OPpLVAL_INTRO) &&
+	if (!(o->op_private & (OPpLVAL_INTRO|OPpOUR_INTRO)) &&
 		(!o->op_sibling || o->op_sibling->op_type != OP_READLINE))
 	    useless = "a variable";
 	break;
@@ -1830,6 +1830,7 @@ S_my_kid(pTHX_ OP *o, OP *attrs)
     } else if (type == OP_RV2SV ||	/* "our" declaration */
 	       type == OP_RV2AV ||
 	       type == OP_RV2HV) { /* XXX does this let anything illegal in? */
+	o->op_private |= OPpOUR_INTRO;
 	return o;
     } else if (type != OP_PADSV &&
 	     type != OP_PADAV &&

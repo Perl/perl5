@@ -485,6 +485,8 @@ Perl_do_op_dump(pTHX_ I32 level, PerlIO *file, OP *o)
 	    else {
 		if (o->op_private & HINT_STRICT_REFS)
 		    sv_catpv(tmpsv, ",STRICT_REFS");
+		if (o->op_private & OPpOUR_INTRO)
+		    sv_catpv(tmpsv, ",OUR_INTRO");
 	    }
 	}
 	else if (o->op_type == OP_CONST) {
