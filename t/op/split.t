@@ -1,6 +1,6 @@
 #!./perl
 
-print "1..30\n";
+print "1..32\n";
 
 $FS = ':';
 
@@ -129,6 +129,27 @@ print "not" if $_ ne "r:m :b";
 print "ok 29\n";
 
 # unicode splittage
+
 @ary = map {ord} split //, v1.20.300.4000.50000.4000.300.20.1;
 print "not " unless "@ary" eq "1 20 300 4000 50000 4000 300 20 1";
 print "ok 30\n";
+
+@ary = split(/\x{FE}/, "\x{FF}\x{FE}\x{FD}"); # bug id 20010105.016
+print "not " unless @ary == 2 &&
+                    $ary[0] eq "\xFF"   && $ary[1] eq "\xFD" &&
+                    $ary[0] eq "\x{FF}" && $ary[1] eq "\x{FD}";
+print "ok 31\n";
+
+@ary = split(/(\x{FE}\xFE)/, "\xFF\x{FF}\xFE\x{FE}\xFD\x{FD}"); # variant of 31
+print "not " unless @ary == 3 &&
+                    $ary[0] eq "\xFF\xFF"     &&
+                    $ary[0] eq "\x{FF}\xFF"   &&
+                    $ary[0] eq "\x{FF}\x{FF}" &&
+                    $ary[1] eq "\xFE\xFE"     &&
+                    $ary[1] eq "\x{FE}\xFE"   &&
+                    $ary[1] eq "\x{FE}\x{FE}" &&
+                    $ary[2] eq "\xFD\xFD"     &&
+                    $ary[2] eq "\x{FD}\xFD"   &&
+                    $ary[2] eq "\x{FD}\x{FD}";
+
+print "ok 32\n";
