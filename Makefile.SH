@@ -198,6 +198,8 @@ shellflags = $shellflags
 # do it for you.
 $make_set_make
 
+# Mention $gmake here so it gets probed for by Configure.
+
 # These variables may need to be manually set for non-Unix systems.
 AR = $full_ar
 EXE_EXT = $_exe
