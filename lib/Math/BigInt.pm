@@ -2806,7 +2806,7 @@ Math::BigInt - Arbitrary size integer math package
   $x->precision();              # return P of $x (or global, if P of $x undef)
   $x->precision($n);            # set P of $x to $n
   $x->accuracy();               # return A of $x (or global, if A of $x undef)
-  $x->accuracy($n);             # set P $x to $n
+  $x->accuracy($n);             # set A $x to $n
 
   Math::BigInt->precision();	# get/set global P for all BigInt objects
   Math::BigInt->accuracy();	# get/set global A for all BigInt objects
@@ -2835,9 +2835,12 @@ zeros suppressed.
 =item Input
 
 Input values to these routines may be either Math::BigInt objects or
-strings of the form C</^\s*[+-]?[\d]+\.?[\d]*E?[+-]?[\d]*$/>.
+strings of the form C</^[+-]?[\d]+\.?[\d]*E?[+-]?[\d]*$/>.
 
-You can include one underscore between any two digits.
+You can include one underscore between any two digits. The input string may
+have leading and trailing whitespace, which will be ignored. In later
+versions, a more strict (no whitespace at all) or more lax (whitespace
+allowed everywhere) input checking will also be possible.
 
 This means integer values like 1.01E2 or even 1000E-2 are also accepted.
 Non integer values result in NaN.
@@ -3892,6 +3895,11 @@ versions to a more sophisticated scheme):
 =head1 BUGS
 
 =over 2
+
+=item Input with trailing newlines
+
+Input with trailing newlines is handled wrong (e.g. lead to corrupted numbers)
+in some cases, for instance "123\n" or "123456789\n".
 
 =item Out of Memory!
 
