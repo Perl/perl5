@@ -5,6 +5,10 @@ BEGIN {
 	chdir 't' if -d 't';
 	@INC = '../lib';
     }
+    unless (find PerlIO::Layer 'perlio') {
+        print "1..0 # Skip: PerlIO not used\n";
+	exit 0;
+    }
 }
 
 use Test::More tests => 11;
