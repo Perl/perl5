@@ -2090,18 +2090,20 @@ Perl_do_shmio(pTHX_ I32 optype, SV **mark, SV **sp)
 
 #endif /* SYSV IPC */
 
+#ifdef SOCKS_64BIT_BUG
+
 /**
  ** getc and ungetc wrappers for the 64 bit problems with SOCKS 5 support
  ** Workaround to the problem, that SOCKS maps a socket 'getc' to revc
  ** without checking the ungetc buffer.
  **/
-#ifdef SOCKS_64BIT_BUG
+
 static S64_IOB *s64_buffer = (S64_IOB *) NULL;
 
 /* get a buffered stream pointer */
-static S64_IOB *_s64_get_buffer( PerlIO *f) {
+static S64_IOB *S_s64_get_buffer( PerlIO *fp) {
     S64_IOB *ptr = s64_buffer;
-    while( ptr && ptr->fp != f)
+    while( ptr && ptr->fp != fp)
 	ptr = ptr->next;
     return( ptr);
 }
