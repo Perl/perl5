@@ -185,7 +185,7 @@ sub walksymtable {
 	*glob = "*main::".$prefix.$sym;
 	if ($sym =~ /::$/) {
 	    $sym = $prefix . $sym;
-	    if ($sym ne "main::" && &$recurse($sym)) {
+	    if ($sym ne "main::" && $sym ne "<none>::" && &$recurse($sym)) {
 		walksymtable(\%glob, $method, $recurse, $sym);
 	    }
 	} else {
