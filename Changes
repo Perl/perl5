@@ -30,9 +30,292 @@ file in the latest development release.
 
 
 --------------
-Version v5.6.1 Trial release 3
+Version v5.6.1
 --------------
 
+____________________________________________________________________________
+[  9514] By: gsar                                  on 2001/04/02  04:07:13
+        Log: add some notes about gutsy threading matters
+     Branch: maint-5.6/perl
+	   ! pod/perlguts.pod
+____________________________________________________________________________
+[  9513] By: gsar                                  on 2001/04/02  03:25:21
+        Log: add more prominent caveat notices about experimental features
+     Branch: maint-5.6/perl
+	   ! pod/perlfork.pod pod/perlunicode.pod
+____________________________________________________________________________
+[  9512] By: gsar                                  on 2001/04/02  02:54:33
+        Log: integrate changes#9479,9509 from mainline
+             
+             [PATCH] File::Glob stuff for Mac OS
+             
+             [PATH bsd_glob.c perl@9472] Shut up gcc warning in bsd_glob.c
+     Branch: maint-5.6/perl
+	  !> ext/File/Glob/Glob.pm ext/File/Glob/bsd_glob.c
+	  !> t/lib/glob-basic.t t/lib/glob-case.t t/lib/glob-global.t
+	  !> t/lib/glob-taint.t
+____________________________________________________________________________
+[  9511] By: gsar                                  on 2001/04/02  02:38:24
+        Log: README.win32 tweaks; add a note about alternative location for
+             getting a gcc-2.95.2 that will build perl properly on windows
+     Branch: maint-5.6/perl
+	   ! README.win32
+____________________________________________________________________________
+[  9507] By: jhi                                   on 2001/04/01  19:24:01
+        Log: Integrate changes #9378,9458,9469,9475,9489,9490,9505,9506
+             from mainline to maintperl: pod tweaks.
+     Branch: maint-5.6/perl
+	  !> pod/perldebug.pod pod/perldiag.pod pod/perlfaq1.pod
+	  !> pod/perlguts.pod pod/perlhack.pod pod/perlop.pod
+	  !> pod/perlvar.pod
+____________________________________________________________________________
+[  9501] By: gsar                                  on 2001/04/01  07:21:57
+        Log: fix the perlembed notes on multiple interpreters
+             
+             fix ExtUtils::Embed to work passably on Windows
+     Branch: maint-5.6/perl
+	   ! lib/ExtUtils/Embed.pm pod/perlembed.pod
+____________________________________________________________________________
+[  9496] By: gsar                                  on 2001/03/31  23:22:28
+        Log: various nits identified by the Borland 5.5 compiler; remove suppression
+             of a few warnings
+     Branch: maint-5.6/perl
+	   ! ext/File/Glob/bsd_glob.c sv.c win32/win32.h
+____________________________________________________________________________
+[  9495] By: gsar                                  on 2001/03/31  21:03:08
+        Log: avoid redefinition warnings under Borland 5.02
+     Branch: maint-5.6/perl
+	   ! win32/makefile.mk
+____________________________________________________________________________
+[  9494] By: gsar                                  on 2001/03/31  20:18:59
+        Log: nits spotted by Borland compiler
+     Branch: maint-5.6/perl
+	   ! utf8.h win32/win32.h
+____________________________________________________________________________
+[  9493] By: gsar                                  on 2001/03/31  20:18:05
+        Log: fix a broken workaround for Borland compiler in change#4739
+             (caused weird "short reads" on DATA, which caused op/misc.t to fail)
+     Branch: maint-5.6/perl
+	   ! toke.c
+____________________________________________________________________________
+[  9491] By: gsar                                  on 2001/03/31  17:01:56
+        Log: Cwd::chdir() doesn't set $ENV{PWD} correctly on windows when the
+             directory is relative (need to fetch the full path name *before*
+             the chdir!)
+             
+             this is a followup patch for change#6749
+     Branch: maint-5.6/perl
+	   ! lib/Cwd.pm
+____________________________________________________________________________
+[  9426] By: gsar                                  on 2001/03/29  00:28:04
+        Log: dmake can only handle == and != in comparisons; support building
+             with Borland's VCL libraries (from Vadim Konovalov)
+     Branch: maint-5.6/perl
+	   ! win32/makefile.mk
+____________________________________________________________________________
+[  9416] By: jhi                                   on 2001/03/28  18:06:07
+        Log: Integrate change #9409 from mainline to maintperl.
+             
+             Yet another tweak on AIX dynaloading.
+     Branch: maint-5.6/perl
+	  !> ext/DynaLoader/dl_aix.xs ext/DynaLoader/hints/aix.pl
+____________________________________________________________________________
+[  9415] By: gsar                                  on 2001/03/28  17:13:01
+        Log: integrate changes#9377,9385,9401 from mainline
+             
+             Subject: RE: 5.6.0 BUG: Lexical warnings aren't lexical
+             
+             If directory entries compare equal case-insensitively,
+             retry case-sensitively.
+             
+             Subject: [PATCH] B::Terse and warnings
+     Branch: maint-5.6/perl
+	  !> ext/B/B.pm ext/B/B/Terse.pm ext/File/Glob/bsd_glob.c gv.c
+	  !> t/pragma/warn/perl
+____________________________________________________________________________
+[  9312] By: gsar                                  on 2001/03/23  16:25:25
+        Log: add execute bit to files with shebang lines in the repository;
+             avoid clobbering execute bit in Porting/makerel 
+     Branch: maint-5.6/perl
+	   ! (edit 144 files)
+____________________________________________________________________________
+[  9306] By: jhi                                   on 2001/03/23  12:51:36
+        Log: There are AIXes without /usr/include/load.h,
+             patch from H.Merijn Brand.
+     Branch: maint-5.6/perl
+	   ! ext/DynaLoader/hints/aix.pl
+____________________________________________________________________________
+[  9299] By: gsar                                  on 2001/03/22  16:53:45
+        Log: back out changes#7532,7521 for now (appears to have problems
+             on IRIX)
+     Branch: maint-5.6/perl
+	   ! ext/POSIX/POSIX.pm ext/POSIX/POSIX.pod ext/POSIX/POSIX.xs
+	   ! ext/POSIX/typemap pod/perlvar.pod
+____________________________________________________________________________
+[  9292] By: gsar                                  on 2001/03/22  07:12:00
+        Log: integrate changes#8306,8532 from mainline (missing USE_PURE_BISON
+             fixes)
+     Branch: maint-5.6/perl
+	  !> embed.h embed.pl objXSUB.h perlapi.c perly.y proto.h toke.c
+____________________________________________________________________________
+[  9290] By: jhi                                   on 2001/03/22  05:57:01
+        Log: Move MacOS Classic higher in the list of supported platforms.
+     Branch: maint-5.6/perl
+	   ! pod/perlport.pod
+____________________________________________________________________________
+[  9289] By: gsar                                  on 2001/03/22  05:35:04
+        Log: revert part of change#6438 for compatibility (av_reify()
+             appears to be needed to implement av_splice()ish things
+             in XS)
+     Branch: maint-5.6/perl
+	   ! embed.pl global.sym objXSUB.h perlapi.c
+____________________________________________________________________________
+[  9288] By: gsar                                  on 2001/03/22  03:09:19
+        Log: update copyright year
+     Branch: maint-5.6/perl
+	   ! EXTERN.h INTERN.h README av.c av.h cop.h cv.h deb.c doio.c
+	   ! doop.c dump.c form.h gv.c gv.h handy.h hv.c hv.h mg.c mg.h
+	   ! op.c op.h perl.c perl.h perlio.c perly.y pp.c pp.h pp_ctl.c
+	   ! pp_hot.c pp_sys.c regcomp.c regexec.c run.c scope.c sv.c sv.h
+	   ! toke.c utf8.c utf8.h util.c util.h x2p/EXTERN.h x2p/INTERN.h
+	   ! x2p/a2p.c x2p/a2p.h x2p/a2p.y x2p/a2py.c x2p/hash.c x2p/hash.h
+	   ! x2p/proto.h x2p/str.c x2p/str.h x2p/util.c x2p/util.h
+	   ! x2p/walk.c
+____________________________________________________________________________
+[  9286] By: gsar                                  on 2001/03/21  19:49:54
+        Log: makefile.mk tweak
+     Branch: maint-5.6/perl
+	   ! win32/Makefile win32/makefile.mk
+____________________________________________________________________________
+[  9283] By: jhi                                   on 2001/03/21  17:17:35
+        Log: Integrate change #9282 from mainline into maintperl,
+             4-arg UTF-8 substr().
+     Branch: maint-5.6/perl
+	  !> pp.c
+____________________________________________________________________________
+[  9281] By: gsar                                  on 2001/03/21  17:03:14
+        Log: makefile.mk defaults to GCC, not BORLAND (as mentioned in README.win32)
+     Branch: maint-5.6/perl
+	   ! win32/makefile.mk
+____________________________________________________________________________
+[  9280] By: gsar                                  on 2001/03/21  17:01:20
+        Log: some tweaks to change#9278 (fork() emulation should be enabled
+             by setting BUILD_FLAVOR instead of changing the defaults)
+     Branch: maint-5.6/perl
+	   ! win32/makefile.mk
+____________________________________________________________________________
+[  9279] By: gsar                                  on 2001/03/21  16:47:19
+        Log: integrate change#9271 from mainline; a tweak to Glob.pm docs
+     Branch: maint-5.6/perl
+	   ! ext/File/Glob/Glob.pm
+	  !> lib/Cwd.pm
+____________________________________________________________________________
+[  9278] By: jhi                                   on 2001/03/21  14:35:10
+        Log: Subject: [PATCH: 5.6.1-trial3] Borland C++ for Win32 fixes
+             From: "Vadim Konovalov" <watman@inbox.ru>
+             Date: Wed, 21 Mar 2001 01:53:51 +0300
+             Message-ID: <004101c0b190$a749ea20$f7c030d4@vad>
+     Branch: maint-5.6/perl
+	   ! win32/makefile.mk win32/win32sck.c
+____________________________________________________________________________
+[  9277] By: jhi                                   on 2001/03/21  13:58:28
+        Log: Integrate change #9270 from mainline to maintperl:
+             continued 4-arg UTF-8 substr() fixing.
+     Branch: maint-5.6/perl
+	  !> pp.c t/op/substr.t
+____________________________________________________________________________
+[  9266] By: gsar                                  on 2001/03/20  19:16:43
+        Log: VMS piping fixes (from Charles Lane)
+     Branch: maint-5.6/perl
+	   ! vms/vms.c vms/vmspipe.com
+____________________________________________________________________________
+[  9265] By: gsar                                  on 2001/03/20  17:53:52
+        Log: cut-n-paste goof in change#9264
+     Branch: maint-5.6/perl
+	   ! ext/File/Glob/Glob.xs
+____________________________________________________________________________
+[  9264] By: gsar                                  on 2001/03/20  17:43:47
+        Log: do alphabetical sorting by default (for csh compatibility);
+             bsd_glob() does ASCII sort by default as usual, unless
+             GLOB_ALPHASORT was specified
+     Branch: maint-5.6/perl
+	   ! ext/File/Glob/Changes ext/File/Glob/Glob.pm
+	   ! ext/File/Glob/Glob.xs ext/File/Glob/bsd_glob.c
+	   ! ext/File/Glob/bsd_glob.h
+____________________________________________________________________________
+[  9263] By: gsar                                  on 2001/03/20  16:40:08
+        Log: integrate change#9255 from mainline (unicode fix)
+             
+             substr($bytestr, i, n, $charstr)
+     Branch: maint-5.6/perl
+	  !> Todo-5.6 pp.c t/op/substr.t
+____________________________________________________________________________
+[  9262] By: gsar                                  on 2001/03/20  15:57:41
+        Log: revert the leak fix in change#9142 (problem needs a more experimental
+             fix unsuitable for 5.6.1)
+     Branch: maint-5.6/perl
+	   ! scope.c
+____________________________________________________________________________
+[  9260] By: jhi                                   on 2001/03/20  14:05:46
+        Log: Subject: [PATCH perl-5.6.1-TRIAL3/run.c] printf warning
+             From: Robin Barker <rmb1@cise.npl.co.uk>
+             Date: Tue, 20 Mar 2001 10:12:04 GMT
+             Message-Id: <200103201012.KAA04738@tempest.npl.co.uk>
+     Branch: maint-5.6/perl
+	   ! run.c
+____________________________________________________________________________
+[  9259] By: jhi                                   on 2001/03/20  14:04:39
+        Log: Subject: [MacPerl-Porters] [PATCH] POSIX, File::Path (Mac OS) for 5.6.1 and 5.7
+             From: Chris Nandor <pudge@pobox.com>
+             Date: Tue, 20 Mar 2001 00:40:56 -0500
+             Message-Id: <p05010401b6dc9d57a62d@[10.0.1.107]>
+     Branch: maint-5.6/perl
+	   ! ext/POSIX/POSIX.xs lib/File/Path.pm
+____________________________________________________________________________
+[  9256] By: jhi                                   on 2001/03/20  04:43:12
+        Log: Subject: [PATCH: 5.6.1-trial3] test fixes and installation cleanliness for OS/390
+             From: Peter Prymmer <pvhp@forte.com>
+             Date: Mon, 19 Mar 2001 16:43:13 -0800 (PST)
+             Message-ID: <Pine.OSF.4.10.10103191627310.162127-100000@aspara.forte.com>
+     Branch: maint-5.6/perl
+	   ! installperl t/comp/proto.t t/comp/require.t t/op/regmesg.t
+____________________________________________________________________________
+[  9250] By: jhi                                   on 2001/03/19  21:18:00
+        Log: A more robust solution for the 64bitall AIX dynaloading
+             problem, from Jens-Uwe Mager.
+     Branch: maint-5.6/perl
+	   ! ext/DynaLoader/dl_aix.xs ext/DynaLoader/hints/aix.pl
+____________________________________________________________________________
+[  9247] By: jhi                                   on 2001/03/19  19:59:53
+        Log: 64-bit AIX dynaloading problem (see #9244) idea
+             from Jens-Uwe Mager.
+     Branch: maint-5.6/perl
+	   ! ext/DynaLoader/dl_aix.xs
+____________________________________________________________________________
+[  9245] By: jhi                                   on 2001/03/19  19:05:19
+        Log: Integrate change #9243 from mainline into maintperl.
+             
+             Subject: [PATCH perl-5.6.1-TRIAL3/README.vmesa] bad =item paragraphs
+     Branch: maint-5.6/perl
+	  !> README.vmesa
+____________________________________________________________________________
+[  9244] By: jhi                                   on 2001/03/19  19:03:15
+        Log: Get 64bitall AIX building, but still does not test okay:
+             dynaloading anything fails, for example for op/defins:
+             Can't load '../lib/auto/File/Glob/Glob.so' for module File::Glob: loadbind: A system call received a parameter that is not valid. at ../lib/XSLoader.pm line 75. at ../lib/File/Glob.pm line 99
+             (update: fixed by #9247,9250)
+     Branch: maint-5.6/perl
+	   ! hints/aix.sh
+____________________________________________________________________________
+[  9241] By: gsar                                  on 2001/03/19  17:34:46
+        Log: VMSify tests (from Charles Lane)
+     Branch: maint-5.6/perl
+	   ! t/lib/filehand.t t/lib/texttabs.t
+____________________________________________________________________________
+[  9239] By: gsar                                  on 2001/03/19  09:23:17
+        Log: this is 5.6.1-trial3
+     Branch: maint-5.6/perl
+	   ! Changes
 ____________________________________________________________________________
 [  9238] By: gsar                                  on 2001/03/19  08:47:04
         Log: some new symbols are only available under ithreads
@@ -2281,6 +2564,20 @@ ____________________________________________________________________________
 ____________________________________________________________________________
 [  8180] By: gsar                                  on 2000/12/18  09:20:27
         Log: integrate changes#7924..7926,7946,7952 from mainline
+             
+             A test works better if it has the right 1..$n output.
+             
+             All the core library users of Class::Struct seem to be
+             using "use Class::Struct 'struct';" instead of the bare
+             "use Class::Struct;", which isn't documented in Class::Struct.
+             This can't be right.
+             
+             Make the Class::Struct import() wiser.
+             
+             Upgrade to CPAN 1.59_51, from Andreas König.
+             
+             Subject: Re: long shell lines
+             Split overly long shell command lines.
      Branch: maint-5.6/perl
 	  !> lib/CPAN.pm lib/CPAN/FirstTime.pm lib/ExtUtils/MM_Unix.pm
 	  !> lib/File/stat.pm t/lib/class-struct.t
@@ -2288,6 +2585,34 @@ ____________________________________________________________________________
 [  8179] By: gsar                                  on 2000/12/18  08:55:54
         Log: integrate changes#7889,7890,7900,7903,7904,7907,7910,7917,
              7918,7919,7988,8907 from mainline (various)
+             
+             Subject: [ID 20001127.004] White space problem in perlamiga.pod
+             
+             Subject: [PATCH perl@7825] Re: [ID 20001122.006] weird behaviour of $|
+             
+             Subject: [PATCH] perlcc.PL cleanups
+             
+             Subject: [PATCH] Updating perltie.pod for arrays
+             
+             Subject: [ID 20001128.002] what's the point of example code if it is buggy?
+             Subject: Re: [PATCH] Updating perltie.pod for arrays
+             Subject: Re: [PATCH] Updating perltie.pod for arrays
+             
+             One more perltie.pod nit from Casey R. Tweten.
+             
+             Subject: [PATCH] $^O  win32 -> MSWin32
+             plus similar nits for vms, err, VMS, and UNICOS.
+             
+             Subject: Re: Minor suggestion for Sys::Syslog  [PATCH]
+             More checking in case someone has broken their services or
+             protocol databases.
+             
+             Make "use Class::Struct 'struct';" work again (broken by #7617);
+             add a test for Class::Struct.
+             
+             Integrate the "skip" messages to explain().
+             
+             Subject: [PATCH: perl@8892] treat unicoding and null bytes in op/append.t
      Branch: maint-5.6/perl
 	  +> t/lib/class-struct.t
 	  !> MANIFEST README.amiga ext/Sys/Syslog/Syslog.pm gv.c
@@ -2320,6 +2645,196 @@ ____________________________________________________________________________
              7725,7726,7729..7732,7737,7748,7749,7758,7759,7761,7773,
              7775,7776,7782,7785..7787,7804,7807,7808,7810,7811,7816,
              7823,7825,7838
+             
+             Subject: Re: [PATCH] README.solaris
+             
+             Add getpagesize() probing, on non-UNIX guess 'undef'.
+             
+             Simplify the getpagesize() unit by dropping the
+             pagesize probe since it's nowadays slightly more
+             complicated because of sysconf(). (Note: if some
+             platform really needs the -lPW for getpagesize,
+             I just broke it.)
+             TODO: a new pagesize unit.
+             
+             Subject: [PATCH] fwd: Re: [ID 20001105.011] Perl 5.6.0 documentation glitch
+             
+             MachTen doesn't really do mmap() and munmap().
+             Subject: [PATCHES Bleadperl] Re: PerlIO - what all of you can all do.   
+             
+             More README.solaris updates from Andy Dougherty.
+             
+             Copy the s// information of README.hpux also to the perlrun.
+             
+             Add HAS_FSYNC, lack noticed by Nicholas Clark.
+             
+             Add a metaconfig unit for fsync.
+             
+             Subject: [ID 20001112.004] man perlfunc omits tell()'s error return
+             
+             Many subdocumented return values of the IO extension now documented.
+             ungetc and write still left subdocumented.
+             Subject: [PATCH] (was Re: IO::Handle::ungetc)
+             
+             Document tell() on special streams.
+             
+             Subject: [ID 20001112.006] IO::Seekable::getpos doesn't check for fgetpos() failure
+             
+             Subject: [ID 20001112.007] sfio's sftell isn't ftell
+             
+             Couple of tests from #7660 salvaged.
+             
+             Tweak the definition of the bit complement on UTF-8 data:
+             if none of the characters in the string are > 0xff,
+             the result is a complemented byte string, not a (UTF-8)
+             char string.  Based on the summary in
+             Subject: Re: [ID 20000918.005] ~ on wide chars
+             This should give us the maximum backward (pre-char string)
+             compatibility and utf8 compatibility.  The other alternative
+             would be to limit the bit complement to be always byte only,
+             taking the least significant byte of the chars.
+             
+             Cleanup messy #ifdef.
+             
+             Typos in #7667.
+             
+             Declare reg_data like reg_substr_data.
+             
+             Placate nervous compilers that see longer than ints switch()ing.
+             
+             Remove the new two tests of lib/io_xs for now, they seem to
+             fail under perlio on some platforms.
+             
+             Subject: Re: [ID 20001112.008] perlio.c's PerlIO_getpos ingores error return
+             
+             Subject: [ID 20001113.003] utf8_to_uv on malformed utf returns wrong values
+             
+             Subject: tiny typo in perl5db.pl
+             
+             Subject: some additions for makefiles for win32 (for perl@7674)
+             
+             Hoist the duplicated socket/netdb include logic to perl.h;
+             undef SETERRNO in case SOCKS has defined it.  Based on:
+             Subject: [ID 20001114.002] Code-Cleanups concerning SOCKS5 and Solaris   
+             
+             Regen Configure.
+             
+             Defined INT64_C() and UINT64_C() unless defined by <inttypes.h>
+             (a macro to define signed and unsigned integer constants).
+             
+             Use UINT64_C().
+             Subject: [ID 20001114.006] 5.7.0-7680 Solaris 8, 64 bit, utf8 patch
+             
+             Use u_int32_t for the size of hash_cb(), not size_t.
+             Subject: [ID 20001114.003] Solaris 8, 64 Bit DB_file patch
+             
+             Quit utf8_to_uv() instantly if curlen == 0.
+             
+             Subject: [PATCH: perl@7674] updates to README.os390
+             
+             Subject: [PATCH: perl@7674 + Scott-Thoennes] hush warnings about malformed EBCDIC text
+             
+             EBCDIC tweaks.
+             Subject: [PATCH: perl@7674 ++] fixes for warnings and regmesg (reprise)
+             
+             Linenumber fix.
+             
+             SOCKS has its own USE_THREADS, based on
+             Subject: [ID 20001114.002] et. al. bugfix followup
+             
+             UINT64_C() work continues.
+             
+             Detypo.
+             
+             The type of the hash_cb() size argument is tricky.
+             
+             Add fwalk() probe to the configuration files and regen perltoc.
+             
+             Subject: perllocale.pod changes
+             
+             Avoid an infinite loop in VMS when utils scripts are run
+             with no arguments, from Charles Lane.
+             
+             Subject: Re: Bug in Carp::Heavy/5.6.0?
+             
+             For Solaris use64bitall the stdchar needs a little bit of help.
+             
+             The long double hints can be here or there.
+             
+             Test tweak for the open pragma.
+             
+             Also the 64bitall hints can be either here or there.
+             
+             As surmised the #7719 wasn't a good move.
+             
+             Subject: Fix for 20000409.001
+             
+             Subject: Fix for 20000815.006
+             It's really 20000518.006.
+             
+             Subject: [PATCH 5.6.0 README.win32] very minor typos
+             
+             Subject: Fix for README.amiga (20000323.033)
+             
+             Explain in more detail the {} syntax ambiguousity.
+             Subject: [PATCH] Re: [ID 20001117.003] map { "$_", 1} @array is syntax error
+             
+             Sparc 64-bit pack() fix from Jens Hamisch.
+             
+             Upgrade to CPAN.pm 1.58_93 (the RC1 for 1.59), from Andreas König.
+             
+             Subject: podlators 1.05 available        
+             
+             Subject: [ID 20001118.006] [PATCH] perl@7707 djgpp/config.over, hints/dos_djgpp.sh and Storable.pm
+             
+             Subject: [perl 7711: EPOC] updates
+             
+             Make certain MacOS Classic has NO_ENVIRON_ARRAY.
+             
+             Miraculous typo.
+             
+             sysseek() instead of seek().
+             
+             Solaris hints tweaks.
+             
+             Assume SOCKS is broken in all 64bitall platforms, not just Solaris.
+             This may be overly harsh but until proven otherwise, we think this
+             way, or until we have a simple test for Configure (having to start
+             up servers is does not count as simple) to check for the problems.
+             
+             Remove the shared object before attempting to create
+             (by linking) a new one.  E.g. in AIX not removing
+             becomes quite painful if one tries to do more than one
+             build in the same tree (an interrupted build, for example),
+             since the AIX' shared dynaloader seemingly keeps the shared
+             objects open and therefore 'busy' for quite a while, even when
+             nobody is using the objects, leading into link failures.
+             
+             Subject: [ID 20001120.010] typo in lib/Cwd.pm broke Cwd::chdir
+             
+             Subject: DOC PATCH 5.6.0 perlreftut
+             
+             Subject: [PATCH: perl@7777] add system locale testing for VMS
+             
+             Subject: [PATCH] Test.pm POD peculiarity
+             
+             Subject: [ID 20001120.002] [PATCH] io_sock.t fails without 'localhost'
+             
+             Subject: [ID 20001120.003] [PATCH] io_udp.t fails without 'localhost'
+             
+             Subject: Re: perl@7777 
+             Detypoing.
+             
+             Subject: [PATCH: perl@7777] make VMS' test.com tail compatible w/ unix
+             
+             Go ahead and #include <unistd.h> in perl.h.
+             
+             Subject: [PATCH perl@7795] small cleanup task for test suite
+             
+             Subject: Re: av.c patch (having slight problems)
+             unshift() speedup.
+             
+             Reach back one higher up when searching for PERL_SRC.
      Branch: maint-5.6/perl
 	  +> lib/File/Spec/Epoc.pm
 	  !> (integrate 88 files)
@@ -2327,6 +2842,77 @@ ____________________________________________________________________________
 [  8174] By: gsar                                  on 2000/12/18  03:53:09
         Log: integrate changes#7602,7604..7611,7614,7616..7619,7621..7623,
              7625..7629,7631..7634,7637,7639,7642 from mainline
+             
+             Fix for the tie-refhash string table leaks.
+             
+             Subject: [patch perl@7595] VMS configure.com tweak
+             
+             More careful detection of how well NVs and UVs mix.
+             Subject: [PATCH] Re: NV preserving UV (wasRe: [ID 20001007.002] Not OK: perl v5.7.0 +DEVEL7158 on armv4l-linux-64int 2.2.17-rmk1 (UNINSTALLED))
+             Added some SIGFPE paranoia.
+             
+             Forgot to bump the line numbers in #7601.
+             
+             Subject: PATCH std stdio for (Free)BSD
+             
+             Deleting $ENV{PATH} in VMS is not recommendable.
+             
+             Locale buglets.
+             Subject: RE: Locales support (setlocale) fixes
+             
+             Do not test UTF-8 locales since that the tests would require
+             polymorphic regexen.
+             
+             Subject: [PATCH bleadperl] Re: Patch 7533 prevents malloc.c from compiling on MachTen
+             
+             A missing aTHX_.
+             
+             Subject: [ID 20001108.013] spelling
+             
+             Subject: [PATCH] Class::Struct at compile time
+             
+             Make deleting for %ENV work for (newer versions of) VMS,
+             from Craig A. Berry.
+             
+             Forgot from #7618.
+             
+             More VMS moves on environment handling, from Charles Lane.
+             
+             Remove unused extra arguments.
+             
+             Typo in an ifndef.
+             Subject: Re: [PATCH 5.7.0] better messages from malloc()
+             
+             Subject: [PATCH: perl@7613] updates to Porting/pumpkin.pod
+             All except the "cow orker" change.
+             
+             The generated boot_* headers are wrong.  Pickier compiler,
+             such as KAI C++ will refuse to compile the resulting perlmain.
+             Subject: [ID 20001109.005] Bug in minimod.pl, perl 5.6.0
+             
+             There's no =head3.
+             
+             Disable only the tests 99 and 166 for UTF-8 locales.
+             
+             Missing dTHXs.
+             Subject: RE: perl@7595 builds not on cygwin
+             
+             Subject: Re: bash -c exit and linux hints 
+             
+             Various doc oddball characters.
+             Subject: [ID 20001106.004] Perl 5.6.0 bugs  
+             
+             Subject: [PATCH] IO::Seekable pod
+             
+             Amdahl UTS hints updates.
+             Subject: [ID 20001109.016] Trouble going from 5.4 to 5.6
+             
+             Explain better why certain regex tests are skipped.
+             Subject: Re: tests skipped: unknown reason
+             
+             Subject: [PATCH] README.solaris
+             
+             Subject: [PATCH perl@7638] cygwin port
      Branch: maint-5.6/perl
 	  +> README.solaris
 	  !> (integrate 26 files)
@@ -2336,6 +2922,242 @@ ____________________________________________________________________________
              7497,7499..7503,7505..7507,7509..7513,7515..7523,7526..7534,
              7536,7540,7542,7544..7546,7549,7553,7556,7557,7559,7561..7563,
              7565,7568..7572,7576,7578..7589,9592..7594,7596..7601 from mainline
+             
+             Better create a true mailing list for the repository keepers.
+             
+             Subject: [ID 20001027.007] uniq array in perlfaq
+             
+             De-quoted-unreadable to ISO Latin 1.
+             (There's one ISO-2022-JP name in Changes5.004.)
+             
+             Have only one master list of AUTHORS, drop unmaintained MAINTAIN.
+             
+             The #7476 needs a MANIFEST change, too.
+             
+             Add also emailless people.
+             
+             Prototype (stdio-like) PerlIO passing basic tests. Checked in
+             in case of accidents. Still several worrying fails, no line disciplines yet.
+             
+             UTF-8 decoder tweak.
+             
+             Make \x{...} consistently produce UTF-8.
+             Subject: Re: \x{...} is confused 
+             
+             Subject: [Chris Winters <cwinters@intes.net>] patch to ExtUtils::Manifest
+             
+             Add a perlbug flag, -A, to avoid acknowledgement messages.
+             Subject: PATCH (Re: [ID 20001030.008] OK: perl v5.7.0 +DEVEL7445 on i586-linux 2.2.16 (UNINSTALLED))
+             
+             Use Errno magic.
+             Subject: [ID 20001030.009] [PATCH] ftmp-mktemp failing
+             
+             Subject: [PATCH: perl@7483] CRLF fix for cgi-function.t tests
+             
+             Subject: [PATCH: perl@7483] fix coded control chars in cgi-html.t
+             
+             Subject: [ID 20001030.001] 5.7.0-7489: Null-Pointer reference in mg.c
+             
+             Be more lenient on bad UTF-8 when doing bit arithmetics.
+             Subject: Re: [ID 20000918.005] ~ on wide chars
+             (The ord() part of the patch skipped.)
+             
+             Subject: perlfaq style changes
+             
+             AUTHORS tweaks.
+             
+             Whitespace style tweak.  Was originally going to see to
+             Subject: PATCH (Re: PerlIO - Configure tweak for Linux/glibc?)
+             but that had already been taken care of.
+             
+             The compiler is either gcc or cc, from Tom Bates.
+             
+             The osname has been lowercased by now, from Tom Bates.
+             
+             The NonStop-UX libraries have a novel way to say NaN.
+             
+             printf UVs the correct way, noticed by Robin Barker.
+             
+             Subject: [PATCH] startperl to respect versiononly
+             
+             AUTHORS updates.
+             
+             Subject: [ID 20001031.004] Uninitialized auto variable in regcomp.c
+             
+             Subject: [ID 20001101.001] Net::Ping icmp odd $bytes
+             
+             Subject: [ID 20001005.004] doc bug: perlsec misleading re file output
+             
+             Generalize the Camel wording.
+             Subject: Re: perlfaq style changes
+             
+             Subject: [ID 20001005.006] Documentation -- description of qr//
+             
+             C.pm part of
+             Subject: [ID 20001010.001] [Daniel.Stutz@astaro.de: perlcc and C.pm in perl-5.7.0]
+             
+             Locale warning explanation tweak.
+             
+             Subject: [ID 20000904.004] perlsec Manual Page Incorrect Doing "Safe Backticks"
+             
+             Make the POSIX::setuid and POSIX::setgid to really call setuid()
+             and setgid() because they were just changing $< and $( which means
+             only changing the real uid/gid, as opposed to changing both
+             real and effective ids.  (The alternative way could have been
+             in POSIX.pm to change $> and $), too, but making a direct call
+             to the C API feels cleaner.)  Fixes the bug
+             Subject: [ID 20000904.005] POSIX::setuid() Doesn't Call setuid()
+             
+             Expand %Config variables and %ENV variables only if
+             so requested during build time using the
+             PERL_BUILD_EXPAND_CONFIG_VARS and PERL_BUILD_EXPAND_ENV_VARS.
+             Not expanding makes relocating distributions easier.
+             
+             More tweaking on the #7522 theme.
+             
+             Test::Harness revealed buglets in the new DynaLoader.
+             Subject: [ID 20001102.001] Not OK: perl v5.7.0 +DEVEL7523 on i686-linux 2.2.16a (UNINSTALLED)
+             
+             Add Tie::RefHash::Nestable (lives in Tie/RefHash.pm),
+             fix a autovivification bug in Tie::RefHash, add tests for both.
+             Subject: Re: Tie::RefHash: use hash refs as keys in nested hashes
+             
+             Detpyo.
+             
+             recv() can fail and return undef.
+             Subject: [ID 20001102.003] Net::Ping patch: "Bad arg lenght" error appears if host is unreachable    
+             
+             Fix the problem discussed in
+             Subject: [ID 20001015.004] Fwd: Tie::SubstrHash -- bug & fix (all Perl versions)
+             originally from Linc Madison.  Also Andreas König's comments
+             taken into account.  Some other problems with Tie::SubstrHash
+             fixed: didn't croak when the table exceeded the requested number
+             of entries (as documented) but instead when the number of entries
+             exceeded the size of the table, a croak() had an unnecessary \n,
+             didn't have a CLEAR method, documented that there is no exists().
+             Didn't fix to be strict-proof because the module uses &foo; and
+             dynamic scope.  Added a test script exercizing both first tamely 
+             the basic functionality, and then the failure cases reported by
+             Linc Madison.
+             
+             Subject:  [PATCH] Perl@7504, vms/gen_shrfls.pl
+             
+             The #7521 touched things it shouldn't have.
+             
+             Subject: [PATCH 5.7.0] better messages from malloc()
+             
+             Subject: Re: README.aix
+             
+             Add FCNTL_CAN_LOCK.
+             Subject: Re: [ID 20001030.011] Not OK: perl v5.7.0 +DEVEL7481 on VMS_AXP V7.1 (UNINSTALLED)
+             Subject: Re: [ID 20001030.011] Not OK: perl v5.7.0 +DEVEL7481 on VMS_AXP V7.1 (UNINSTALLED)
+             
+             Locale tweakery.  Add test case for bug id 20000809.003 to op/misc,
+             create a "fast path" for locale name probing using "locale -a"
+             if available, squash finally hopefully the s?printf resetting
+             the numeric locale (since, IIUC perllocale, it never shouldn't). 
+             
+             More Changes tweakery.
+             
+             Dying is too strict here, better just skip.
+             
+             Subject: Locales support (setlocale) fixes
+             Modified quite a bit to be more portable.
+             
+             Configure would use a bad $myuname from an old config.sh.
+             Subject: [PATCH 5.6.1-to-be and 5.7.x] Very old Configure myuname bug
+             
+             Fix for
+             Subject: [ID 20001004.006] undef is never tainted
+             An undef read from a slurped file was not tainted.
+             
+             Fix for
+             Subject: [ID 20001004.007] taint propogation is inconsistent
+             The culprit was sv_setsv() which was rather blindly
+             propagating taint, which lead to behaviour where if
+             a tainted anon hash value was seen all the hash values
+             from then on at that level became tainted, or at any
+             upper levels in the case of nested anon hashes.
+             
+             Test tweak: show also the failed locales.
+             Subject: [ID 20001105.001] Not OK: perl v5.7.0 +DEVEL7523 on i86pc-solaris 2.8  
+             
+             A fix of sorts for 20000329.026, a better error message
+             for a missing "use charnames" when using the \N{...}. 
+             
+             Subject: [Corrected/tested PATCH] Re: [ID 20001102.008] Not OK: perl v5.7.0 +DEVEL7503 on i686-linux 2.2.16
+             
+             Add =pod to be tidy.
+             
+             Fix for bug id 19990615.008, pos() unset during s///ge.
+             
+             Add a note for future generations about bug id 20000229.006.
+             
+             Use -dM for gcc (the suggested patch did it only for Linux,
+             but I think it can be generalized).
+             Subject: Re: connect and $!{EINPROGRESS} pb (was [ID 20001030.010] [PATCH] io_multihomed.t failing)
+             
+             opmini.o can linger from Configures past.
+             
+             Document that the evaled syntax errors cause scalar leaks.
+             
+             Fix for
+             Subject: [ID 20000728.005] perl -P broken
+             (hopefully).  The fix is also not complete, it seems to break
+             BOM swallowing for libc5 systems, but until someone figures
+             out a way to do this without ftell(), this will do.
+             
+             AUTHORS updates.
+             
+             Subject: Re: rsync'ed patches vs. rsync'ed source
+             
+             Admit that the test leaks scalars.
+             
+             Sanitize the environment further.
+             
+             VOS updates from Paul Green.
+             
+             Document %ENV = () portability issues.
+             
+             Make the stdio test program of 7427 less noisy while being	
+             compiled so that Digital UNIX wouldn't get both
+             d_stdio_ptr_lval_nochange_cnt and d_stdio_ptr_lval_sets_cnt
+             undefined.  This makes perlio happy.
+             
+             glibc5 detection by __GNU_LIBRARY__.
+             
+             %ENV note tweaks from Dan Sugalski.
+             
+             Varargs don't always work too well if one puts an unsigned
+             char on the stack and pop an unsigned quad off the stack.
+             Subject: Re: [ID 20001103.002] Not OK: perl v5.7.0 +DEVEL7523 on os2-64int-ld-2.30 (UNINSTALLED)
+             
+             Subject: Pod updates
+             
+             Fake support of holey files in win/dosish platforms.
+             Subject: SDBM_File under MS-Windows95/98 does not work correctly. (APR#1302)
+             
+             A doc addition for bug id 20001105.019, beware \p.
+             
+             Tweak #7587.
+             
+             Subject: [PATCH perl@7573] configure.com and st-lock.t changes for   
+             
+             perlhack updates from H.Merijn Brand.
+             
+             Subject: [PATCH perl@7573] cygwin port
+             Synchronize with Cygwin 1.1.5.
+             
+             Bad thinko in #7581 (I used the test program with the expanded
+             values as-is).
+             
+             Make perlbug not insist on dumping to a file when stdout isn't a tty.
+             Subject: [PATCH] perlbug.PL
+             
+             Overrideable keys, each, pop, push, shift, splice, unshift.
+             Subject: [PATCH] prototyped functions that should be overrideable
+             
+             Try to avoid flockless and emulationless places.
      Branch: maint-5.6/perl
 	  +> t/lib/tie-refhash.t t/lib/tie-substrhash.t
 	   - MAINTAIN
@@ -2496,6 +3318,30 @@ ____________________________________________________________________________
         Log: integrate changes#7626,7632,7717,7738,7814,7817,7902,7912,7915
              from mainline (xsubpp and ExtUtils::LibList fixups, various
              other small items)
+             
+             The generated boot_* headers are wrong.  Pickier compiler,
+             such as KAI C++ will refuse to compile the resulting perlmain.
+             Subject: [ID 20001109.005] Bug in minimod.pl, perl 5.6.0
+             
+             Various doc oddball characters.
+             Subject: [ID 20001106.004] Perl 5.6.0 bugs  
+             
+             Subject: [PATCH] Re: 20001101.003 PDL
+             
+             Subject: [PATCH 5.7.0] etags broken again
+             
+             Subject: [PATCH 5.7.0] Liblist finally works
+             
+             Subject: [PATCH 5.7.0] Liblist returns found libraries
+             
+             Subject: [PATCH] Re: 5.6 bug: split /^/ implies /m modifier (from CLPM)
+             
+             Subject: [PATCH 5.7.0] OUT keyword for xsubpp
+             
+             Subject: Re: [PATCH 5.7.0] OUT keyword for xsubpp
+             OUT keyword nits.
+             Subject: Re: [PATCH 5.7.0] OUT keyword for xsubpp
+             OUT and IN_OUT documentation.
      Branch: maint-5.6/perl
 	  !> emacs/cperl-mode.el emacs/ptags lib/ExtUtils/Liblist.pm
 	  !> lib/ExtUtils/MM_VMS.pm lib/ExtUtils/MakeMaker.pm
@@ -2547,8 +3393,216 @@ ____________________________________________________________________________
 [  8159] By: gsar                                  on 2000/12/18  00:03:38
         Log: integrate changes#7205..7210,7212,7214..7219,7222,7223,7225,7226,
              7228,7230..7241,7243,7346,7347,7350..7354,7356,7358..7360,7362,
-             7363,7365..7368,7370..7374,7376..7386,7391,7393..7399,7304..7408,
+             7363,7365..7368,7370..7374,7376..7386,7391,7393..7399,7404..7408,
              7410..7413 from mainline
+             
+             Introduce the man[24-8] variables, from Andy Dougherty.
+             
+             Upgrade to CPAN 1.58, from Andreas König.
+             
+             An updated EBCDIC tr patch.
+             Subject: Re: [PATCH: perl@7181] op/tr tests on OS/390
+             
+             Subject:  [PATCH] 5.6.0 & 5.7.1,  VMS fixes
+             
+             Two thirds of
+             Subject: Proposed patches, Install.pm getopts.pl termcap.pl
+             The Install.pm changes will be submitted separately because
+             they need some work and discussion still.
+             
+             The Install.pm third of
+             Subject: Proposed patches, Install.pm getopts.pl termcap.pl
+             
+             Subject: [PATCH: perl@7181] was: Re: off to a bad start on fixing regression tests
+             
+             Subject: [PATCH 5.7.0] IVs in mtats
+             
+             Subject: [PATCH 5.7.0] Perl API for mstats
+             
+             Ilya implemented the memory profiling API.
+             
+             In Amdahl UTS "struct sv" is defined by a system header,
+             <ksync.h>.
+             
+             Slight tweak of the code to appease Amdahl UTS cc.
+             
+             Amdahl UTS doesn't seem to do dynaloading.
+             
+             Use UTF8SKIP(), from Simon Cozens.
+             
+             Thinko in #7222.
+             
+             op/sprintf.t patch for OS/390 (and any other host with limited
+             floating-point exponent length)
+             Subject: Re: [ID 20001006.014] Not OK: perl v5.7.0 +DEVEL7158 on os390 05.00  (UNINSTALLED) [PATCH bleadperl]
+             
+             Tweak #7225.
+             Subject: Re: [ID 20001006.014] Not OK: perl v5.7.0 +DEVEL7158 on os390 05.00 (UNINSTALLED) [PATCH bleadperl]
+             
+             Subject: RFC: a (temporary?) way around utf8.pm for EBCDIC
+             
+             Needs to be conditional on SunOS 4.
+             Subject: [Pach 5.7.0@7229] Removing -ldb from the core build
+             
+             Test cases for bug id 20000323.056 (the bug seems to be fixed).
+             
+             Add test for bug id 20000427.003 (which seems to have
+             been fixed) (also duplicate as 20000427.004, though
+             with a higher severity).  Move one utf8 from op/append
+             to pragma/utf8, tag the tests with bug ids.
+             
+             Document FNCASE=y as discussed in the bug 20000902.009.
+             
+             split() utf8 fixes.  Should fix both 20001014.001 and 20000426.003.
+             The problem was that rx->minlen was in chars while pp_split()
+             thought it would be in bytes. 
+             
+             Make ~(chr(a).chr(b)) eq chr(~a).chr(~b) on utf8.
+             Subject: [PATCH] Re: [ID 20000918.005] ~ on wide chars
+             
+             Fix few quad issues, which for example broke chr(~chr(~0)) for UTF8.
+             
+             Fix a couple of compiler-noted nits in #7235.
+             
+             Tweak the test of #7235.
+             
+             One more ~utf8 tweak.
+             
+             -w cleanup.
+             Subject: Re: Problems with bleadperl 
+             
+             Subject: small pod patch
+             
+             Subject: [PATCH perlguts.pod] Document offset hack
+             
+             Add Charles Lane.
+             
+             Add the capability to include/exclude branches.
+             
+             Subject: [ID 20001016.012] [PATCHes Included]OK: perl v5.7.0 on dos-djgpp djgpp
+             
+             Detect early whether the std streams have gone bad.
+             Subject: PATCH (was Re: [ID 20001016.007] Not OK: perl v5.7.0 +DEVEL7228 on i586-linux 2.2.16 (UNINSTALLED))
+             
+             More IoTYPE sprinkling.
+             
+             Workaround for a sfio bug where the stream error indicator
+             is not cleared as documented.
+             Subject: PATCH (was Re: [ID 20001016.007] Not OK: perl v5.7.0 +DEVEL7228 on i586-linux 2.2.16 (UNINSTALLED))
+             
+             Clarify documentation on 'use bytes'.
+             Subject: Re: What does 'use bytes' "mean" ?
+             
+             Show the failed remote port, instead of the failing line number.
+             Subject: [PATCH 5.6.1 Debugger] More diagnostics
+             
+             Make Cwd more bulletproof in chrooted environments.
+             Subject: [ID 20001018.001] Fix for Cwd.pm (chroot)
+             
+             Subject: Pod patch for Devel::Peek
+             
+             Subject: Re: [ID 20001013.008] perl 5.6.0 on AIX 4.3.2 w/GCC 2.95.2
+             
+             Borland C fstat() never saw the fd as writable.
+             Subject: fix for Borland's weak "stat" (perl@7211)
+             
+             Missing change from #7362.
+             
+             Subject: [PATCH 5.7.0] Re: [ID 20001018.008] flip-flop bug when there's no <FH> 
+             
+             Add the test case for the bug id 20000730.004 which seems
+             to have been fixed by now.
+             
+             Fix of sorts for bug id 20000901.092.  There seems to be no trace
+             of a 'pmshort' anywhere in the B, so the offending line was simply
+             removed.
+             
+             Subject: Re: [ID 20001013.008] perl 5.6.0 on AIX w/GCC
+             
+             Subject: PATCH do_print has 2 PerlIO_error()s
+             
+             NonStop-UX patches from Tom Bates <tom.bates@compaq.com>
+             
+             Typo noted by Mark Lutz.
+             
+             Subject: PATCH CR+LF should be "\cM\cJ" in perlop
+             
+             In the latest compiler builds cccdlflags must not become -fpic,
+             from Wilfredo Sánchez.
+             
+             Subject:  [PATCH] Perl 5.6.0/5.7.0, vms/gen_shrfls.pl update
+             
+             Subject:  [PATCH] Perl 5.6.0/5.7.0 enable DProf test for VMS
+             
+             SOCKS function redefinitions need prototypes, too, otherwise
+             for example 32 bit versus 64 bit differences cause a lot of
+             problems.  Part of
+             Subject: [ID 20001016.017] [jens: 5.7.0 Solaris 8, 64 Bit, Workshop 6.0 Compiler]
+             
+             Portability tweak on #7377.
+             Subject:  Re: [nick@cow.org.uk: [ID 20001020.004] Not OK: perl v5.7.0 +DEVEL7368 on i386-freebsd-64all 4.1-stable (UNINSTALLED)]
+             
+             Don't write double values through long double pointers,
+             based on a part of
+             Subject: [ID 20001016.017] [jens: 5.7.0 Solaris 8, 64 Bit, Workshop 6.0 Compiler]
+             
+             Reëntrancy fix.
+             Subject: [PATCH perl@7229] Rentrant parser and yylex()
+             
+             Make scan_num() reëntrant, as suggested in
+             Subject: [PATCH perl@7229] Rentrant parser and yylex()
+             
+             Fix for ID 20001020.006, concatenating an unset submatch
+             with utf8 resulted in "Modification of a read-only value".
+             
+             Fix for ID 20000915.011, IO::Select warning for an undefined fd.
+             
+             The #7383 was right only in the context of the original bug report,
+             not in more general case.
+             
+             Update Changes.
+             
+             Testcases for a #7383,#7385 related bug.
+             Subject: PATCH Re: [ID 20001020.006] "$2$utf8" == modification of read-only-variable
+             
+             Subject: [PATCH@blead Tie/Array.pm] Re: [ID 20001020.002] Tie::Array SPLICE method is buggy
+             
+             Tweak the Is* definitions of Unicode character classes
+             to better match the official categorizations; embrace
+             the official categorizations; add the combining marks
+             as alpha (and -numeric); fix DCinital (a typo and edito)
+             to be DCmedial.
+             
+             Hints tweak from Anton Berezin.
+             
+             Subject: installman go-faster stripes
+             Subject: Re: installman go-faster stripes
+             
+             Subject: [ID 20001021.003] updated hints/openbsd.sh
+             
+             Subject: [PATCH bleadperl] -MO=C falls over on package <none>
+             
+             Subject: PATCH $Config::Config{ldlibpthname} in ext/DynaLoader/DynaLoader_pm.PL
+             
+             Subject: [PATCH] Re: [ID 20000121.007] XXX documentation in man ExtUtils::MakeMaker
+             
+             Doc patch.
+             Subject: [ID 19991128.002] \&{'foo'} not caught by strict refs
+             
+             Retract #7404 with a patch from Robin Barker, via Andy Dougherty.
+             
+             Subject: Re: [ID 20001021.005] SEGV with regex match 
+             
+             Subject: Re: [20000731.007] potential syntax error not detected [PATCH]
+             
+             The change #7187 was not so good on VMS.
+             Subject: [PATCH perl@7369] VMS perldoc.PL fix for double quoted temp filename
+             
+             Subject: [PATCH: perl@7386] miscellaneous typos in 3 pods
+             
+             Miscellaneous MacOS Classic library updates from Matthias Neeracher.
+             
+             Document PERL_INSTALL_ROOT of #7210.
      Branch: maint-5.6/perl
 	  +> README.aix hints/nonstopux.sh lib/unicode/Is/DCmedial.pl
 	  +> t/lib/tie-splice.t
@@ -2561,6 +3615,262 @@ ____________________________________________________________________________
              7136..7139,7141..7146,7148,7149,7151,7153..7155,7157,7158,
              7160,7161,7164,7165,7169..7178,7180..7191,7193..7197,7199,
              7201,7204 from mainline
+             
+             Remove vestiges of tr//CU.
+             Subject: [ID 20000912.009] perlunicode.pod still mentions tr///CU
+             Subject: Re: [ID 20000912.009] perlunicode.pod still mentions tr///CU
+             
+             The return value of setlocale must be copied away.
+             Subject: [ID 20000913.001] Heap corruption in Perl_init_i18nl10n
+             
+             Allow chop() and chomp() to be overridden.
+             Subject: [PATCH] Re: [ID 20000911.006] I can override glob but not chop?
+             
+             Hints optimization.
+             Subject: Minor nit
+             
+             Subject: [PATCH] de-wall t/README
+             
+             Subject: Re: Two advertising clauses need to be removed
+             
+             Batch of UTF-8 patches from Simon Cozens.
+             
+             Fix for a parsing bug, not for the original bug.
+             Subject: Re: [ID 20000910.005] Another segfault with regexes. 
+             
+             Compilation warnings and an error.
+             
+             Subject: File::Find 5.7.0 POD nits
+             
+             Subject: [PATCH perl-5.7.0] continued -Wformat support
+             
+             The one that got away.
+             
+             Subject: Re: perl@7078
+             
+             UTF8-encoded version of 256 is 0xc4 0x80; test that a char is
+             convertable to bytes by checking it doesn't go above 0xc3
+             Subject: Re: perl@7078
+             
+             Replace #7084 with
+             Subject: Re: perl@7078 
+             
+             We don't need to count the high bit bytes, a boolean is enough. 
+             
+             Subject: [PATCH] utf8.c apidoc
+             
+             Subject: Re: perl@7078 
+             
+             Botched the #7090 check-in.
+             
+             Fix for the charnames.t failures from Spider Boardman.
+             
+             Re-instate Perl_utf8_to_uv without checking parameter - added in change 7075.
+             i.e. rename Simon's function to Perl_utf8_to_uv_chk, change all calls to it
+             to use new name and add Perl_utf8_to_uv() as a wrapper which calls it passing
+             0 to checking to get the warning.
+             
+             Subject: [PATCH] Nits in perlmod.pod
+             
+             Subject: Re: Trapping by opmask sets strange parser state [PATCH]
+             
+             Subject: Re: unicode support and perl [ID 20000901.097]
+             
+             Subject: Re: unicode support and perl [ID 20000901.097]
+             
+             Subject: [PATCH perl@7065] another VMS my_fwrite() fix for Storable
+             
+             Subject: [PATCH] Re: [ID 20000915.010] Infinite loop with -MO=Deparse
+             
+             Subject: [ID 20000917.002] 5.7.0 and blead@7095 make html makes man
+             
+             Subject: [PATCH@blead] Fix some recursion in overload.pm
+             
+             s/Robin Parker/Robin Barker/
+             
+             Subject: [PATCH] Fix aliasing of tied filehandles
+             
+             Subject: Re: [ID 20000912.008] substr replacement of tainted data (bug) 
+             
+             Subject: Re: [PATCH 5.005_64 missed]
+             
+             SOCK_DGRAM and listen() do not mix as reported in
+             Subject: [ID 20000930.001] Bug in perl 5.00503 IO::Socket
+             The patch for 5.7.0+ had to be reengineered, though.
+             
+             Subject: DOC PATCH 5.6.0
+             
+             Subject: [PATCH 5.7.0] Minor optimization in re_intuit_start
+             
+             Document the issue (is not a syntax error, kind of)
+             Subject: Re: [ID 20000901.011] the list (1,,3) ought to be a syntax error
+             
+             Subject: [ID 20000928.002] perlcc & ByteCode.pm option mismatch
+             Did not apply cleanly, manual intervention was needed.
+             
+             Subject: [PATCH] DLL not restartabke with threaded perl
+             
+             Inside require() $^S was always left undefined.
+             Subject: Re: Tiny 2-byte change to fix debugger's eval bug
+             
+             Subject: [PATCH pod/perlop.pod]  Documentation glitch in magic autoincrement.
+             
+             OpenBSD flags tweak from Todd C. Miller, tweaked some more by Abigail.
+             
+             Regen headers.
+             
+             Subject: [PATCH 5.7.0] Epoc update
+             
+             Introduce NO_ENVIRON_ARRAY (and USE_ENVIRON_ARRAY) defines
+             as suggested by Olaf Flebbe and Nick Clark.
+             
+             Subject: [ID 20000915.007] Not OK: perl v5.7.0 +DEVEL7092 on os2-64int-ld 2.30 '(UNINSTALLED)'
+             
+             Misplaced else.
+             
+             Scale down the VMS message boxes, by Charles Lane.
+             Fix for ID 20000903.009, workaround at
+             http://www.xray.mpe.mpg.de/mailing-lists/vmsperl/2000-09/msg00039.html
+             
+             Subject: [ID 20001003.006] B::Debug not -w clean
+             
+             Test harness update to sync with the new perlcc,
+             from Simon Cozens.
+             
+             One remaining nit less at the VMS mailbox sizing.
+             
+             Subject: [PATCH: 7131] PWPASSWD problem for passwd less pwd's
+             
+             It is possible to have no hosts database at all.  Pointed out in
+             Subject: [PATCH: 7131] PWPASSWD problem for passwd less pwd's
+             
+             Subject: [PATCH 5.7.0] h2xs not working
+             Subject: [PATCH 5.7.0] h2xs not documenting the created module
+             
+             Subject:  [PATCH] 5.6.0 & 5.7.0  VMS TZ fix for VMS6.2 and earlier
+             
+             Subject: perlhack.pod Patch for Externals Tools
+             
+             Subject: [PATCH perlrun.pod] Re: [ID 20000930.002] perlrun nor perldelta mention -s modification
+             
+             Subject: Re: [PATCH 5.7.0] h2xs not documenting the created module
+             
+             Enable disabling scripts installation by Configure -Uinstallscripts,
+             suggested by H. Merijn Brand.
+             
+             Code around the stat-on-a-pipe-returns-a-mode-of-zero bug
+             reported several times by Dominic Dunlop, for example in
+             ID 20000315.008.  Patch from Dominic.  Patch affects at
+             least MachTen, and possibly other oldish BSDs. Should not
+             break non-broken platforms (tested on LinuxPPC). 
+             
+             Regen toc.
+             
+             Subject: Re: Questions about Tie::Array and perl modules
+             Bug reported and fix suggested by Philip D Crow <pcrow@hertz.com>.
+             
+             Patch from Simon Cozens to avoid using utf8 routines in EBCDIC.
+             
+             Tweak #7153.
+             
+             IO::Handle->syswrite() did not handle length omission
+             like CORE::syswrite() does.
+             Subject: [Fwd] IO::Handle, syswrite and arguments
+             The original patch from andrew@ugh.net.au.
+             
+             Also the $ccflags is needed for the C compiler check.
+             Subject: Configure (check for C-compiler)
+             
+             Eliminate $Is_VMS code from the test.
+             Subject:  Re: [ID 20001004.005] Not OK: perl v5.7.0 +DEVEL7129 on VMS_AXP V7.1
+             
+             Fix bug in #7157 (s/cflags/ccflags); moved the -o foo
+             as the first option of cc/ld because of ultrapicky compilers
+             (e.g. OS/390 R2.5)
+             
+             Change the version number of Tie::Handle in the core to 4.0,
+             the (unrelated) Tie::Handle in CPAN will remain at 3.0.
+             Subject: Note on Tie::Handle
+             
+             UTF8ize split() so that the cloned substrings get the UTF8
+             flag of the original scalar.  Problem reported by Simon Cozens.
+             
+             save_re_context() could reset PL_curcop to freed memory, causing core
+             dumps in code such as C<use CGI::Carp; use something_that_calls_die;>
+             
+             Subject: PATCH 5.6 perldebguts grammar cleanup
+             
+             Add a todo note about overloadable assertions.
+             
+             on Windows, LoadLibrary() could load an extension DLL multiple
+             times if forward slashes are used in the path
+             
+             on Windows, cwd strings in the environment should be of the
+             form =X:=X:\foo instead of =X=X:\foo\
+             
+             on Windows, avoid potential exception (could happen if MSVCRT isn't
+             being used) when closing a socket handle
+             
+             avoid nonportable example code
+             
+             Windows9x doesn't support link(), despite what Config.pm
+             might think
+             
+             pod nit
+             
+             Change #7160 had a nasty typo.
+             
+             Warn about unknown scripts.
+             Subject: Re: ideas? patches? [PATCH bleadperl]
+             
+             on Windows, clean targets might not work under some flavors of the shell
+             
+             tweak for change#7173
+             
+             Make eq work again with utf8 (disabling the upgrading
+             should no more be necessary since the copies of the
+             scalars are upgraded, not the scalars themselves).
+             Takes care of ID 20001009.001.  (The claimed length()
+             bug in 20001009.001 seems bogus to me.)
+             
+             Subject: [PATCH: perl@7159] various VMS cleanup issues + CXX configure
+             
+             Upgrade to CGI.pm 2.74, from Lincoln Stein.
+             
+             Upgrade to podlators 1.04, from Russ Allbery.
+             
+             Subject: [PATCH 5.6.0] Re: [ID 20001009.004] SEGV from sprintf in a thread 
+             
+             Quote the temp file name, needed in Win32 because the
+             default name unfortunately contains spaces, shouldn't
+             hurt elsewhere.
+             Subject: FW: perldoc fails if $TEMP contains spaces
+             
+             Subject: RE: [ID 19990803.001] README.win32 suggestions 
+             
+             Subject: [ID 20000720.004] ExtUtils::MakeMaker finds wrong version of perl
+             
+             Subject: Re: utf8 concat, mg_get
+             
+             Subject: [PATCH: perl@7181] perlebcdic.pod updates and corrections
+             
+             Subject: [PATCH: perl@7181] op/tr tests on OS/390
+             
+             Subject: [PATCH: perl@7181] ver.t v string tests for os/390
+             
+             Use the versiononly instead of the installscripts,
+             retract the changes 7146 and 7147.
+             
+             Reapply Andy's patch and regen Configure.
+             
+             Add the test case for #7190, from the original bug report
+             by Andreas König.
+             
+             Remove duplicated code.
+             
+             SvPV() (via mg_get() of sv_2pv()) can update the UTF8ness of the SVs.
+             
+             restore change#7202
      Branch: maint-5.6/perl
 	  !> (integrate 121 files)
 ____________________________________________________________________________
