@@ -2643,6 +2643,7 @@ win32_popen(const char *command, const char *mode)
 #ifdef USE_RTL_POPEN
     return _popen(command, mode);
 #else
+    dTHX;
     int p[2];
     int parent, child;
     int stdfd, oldfd;
