@@ -3002,7 +3002,7 @@ Perl_pmruntime(pTHX_ OP *o, OP *expr, OP *repl)
 	    p = SvPV(pat, plen);
 	    pm->op_pmflags |= PMf_SKIPWHITE;
 	}
-	if ((PL_hints & HINT_UTF8) || DO_UTF8(pat))
+	if (DO_UTF8(pat))
 	    pm->op_pmdynflags |= PMdf_UTF8;
 	PM_SETRE(pm, CALLREGCOMP(aTHX_ p, p + plen, pm));
 	if (strEQ("\\s+", PM_GETRE(pm)->precomp))
@@ -3010,7 +3010,7 @@ Perl_pmruntime(pTHX_ OP *o, OP *expr, OP *repl)
 	op_free(expr);
     }
     else {
-	if (PL_hints & HINT_UTF8)
+	if (!IN_BYTES)
 	    pm->op_pmdynflags |= PMdf_UTF8;
 	if (pm->op_pmflags & PMf_KEEP || !(PL_hints & HINT_RE_EVAL))
 	    expr = newUNOP((!(PL_hints & HINT_RE_EVAL)
