@@ -2176,6 +2176,12 @@ ____________________________________________________________________________
              Date: Mon, 20 Jan 2003 15:26:21 -0000
              Message-ID: <533D273D4014D411AB1D00062938C4D904046299@hotel.npl.co.uk>
              
+             [ 18558]
+             Subject: Re: slight tweak to -DR flag - display whether on tmps stack
+             From: Dave Mitchell <davem@fdgroup.com>
+             Date: Sun, 19 Jan 2003 17:22:05 +0000
+             Message-ID: <20030119172204.D24444@fdgroup.com>
+
              [ 18559]
              Upgrade to Encode 1.86.
      Branch: maint-5.8/perl
