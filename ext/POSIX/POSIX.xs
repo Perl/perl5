@@ -1806,9 +1806,18 @@ access(filename, mode)
 
 char *
 ctermid(s = 0)
-	char *          s = safemalloc((size_t) L_ctermid);
+	char *          s = 0;
+    CODE:
+#ifdef HAS_CTERMID_R
+	s = safemalloc((size_t) L_ctermid);
+#endif
+	RETVAL = ctermid(s);
+    OUTPUT:
+	RETVAL
     CLEANUP:
+#ifdef HAS_CTERMID_R
 	Safefree(s);
+#endif
 
 char *
 cuserid(s = 0)
