@@ -2140,6 +2140,14 @@ typedef pthread_key_t	perl_key;
 #  endif
 #endif
 
+#ifndef __attribute__format__
+#  ifdef CHECK_FORMAT
+#    define __attribute__format__(x,y,z) __attribute__((__format__(x,y,z)))
+#  else
+#    define __attribute__format__(x,y,z)
+#  endif
+#endif
+ 
 /* Some unistd.h's give a prototype for pause() even though
    HAS_PAUSE ends up undefined.  This causes the #define
    below to be rejected by the compiler.  Sigh.
