@@ -4378,6 +4378,9 @@ A C<split> on C</\s+/> is like a C<split(' ')> except that any leading
 whitespace produces a null first field.  A C<split> with no arguments
 really does a C<split(' ', $_)> internally.
 
+A PATTERN of C</^/) is treated as if it were C/^/m), since it isn't
+much use otherwise.
+
 Example:
 
     open(PASSWD, '/etc/passwd');
