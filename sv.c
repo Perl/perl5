@@ -10049,14 +10049,7 @@ Perl_sv_vcatpvfn(pTHX_ SV *sv, const char *pat, STRLEN patlen, va_list *args, SV
 	     p = SvEND(sv);
 	     *p = '\0';
 	}
-	/* Use memchr() instead of strchr(), as eptr is not guaranteed */
-	/* to point to a null-terminated string.                       */
-	if (left && ckWARN(WARN_PRINTF) && memchr(eptr, '\n', elen) &&
-	    (PL_op->op_type == OP_PRTF || PL_op->op_type == OP_SPRINTF))
-	    Perl_warner(aTHX_ packWARN(WARN_PRINTF),
-		"Newline in left-justified string for %sprintf",
-			(PL_op->op_type == OP_PRTF) ? "" : "s");
-	
+
 	need = (have > width ? have : width);
 	gap = need - have;
 
