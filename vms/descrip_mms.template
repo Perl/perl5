@@ -240,7 +240,7 @@ INSTPERL = perl
 
 # Space-separated list of "dynamic" extensions which should be built for
 # run-time dynamic loading.
-dynamic_ext = Fcntl Errno IO Opcode Data::Dumper attrs re VMS::Stdio VMS::DCLsym B SDBM_File POSIX
+dynamic_ext = $extensions
 
 # Space-separated list of "static" extensions to build into perlshr (case counts).
 MYEXT = DynaLoader
