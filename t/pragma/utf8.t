@@ -10,7 +10,7 @@ BEGIN {
     }
 }
 
-print "1..61\n";
+print "1..65\n";
 
 my $test = 1;
 
@@ -19,6 +19,14 @@ sub ok {
     print "# expected [$expect], got [$got]\nnot " if $got ne $expect;
     print "ok $test\n";
 }
+
+sub ok_bytes {
+    use bytes;
+    my ($got,$expect) = @_;
+    print "# expected [$expect], got [$got]\nnot " if $got ne $expect;
+    print "ok $test\n";
+}
+
 
 {
     use utf8;
@@ -120,9 +128,9 @@ sub ok {
     $test++;				# 22
 
     {
-        use bytes;
+	use bytes;
 
-        my $tmp = $&;
+	my $tmp = $&;
 	ok $tmp, pack("C*", ord(">"), 0342, 0230, 0272);
 	$test++;				# 23
 
@@ -139,39 +147,51 @@ sub ok {
 	$test++;				# 26
     }
 
+    ok_bytes $&, pack("C*", ord(">"), 0342, 0230, 0272);
+    $test++;				# 27
+
+    ok_bytes $', pack("C*", 0342, 0230, 0272);
+    $test++;				# 28
+
+    ok_bytes $`, pack("C*", 0342, 0230, 0272);
+    $test++;				# 29
+
+    ok_bytes $1, pack("C*", 0342, 0230, 0272);
+    $test++;				# 30
+
     {
 	use bytes;
 	no utf8;
 
 	ok length, 10;
-	$test++;				# 27
+	$test++;				# 31
 
     	ok length((m/>(.)/)[0]), 1;
-    	$test++;				# 28
-
-    	ok length($&), 2;
-    	$test++;				# 29
-
-    	ok length($'), 5;
-    	$test++;				# 30
-
-    	ok length($`), 3;
-    	$test++;				# 31
-
-    	ok length($1), 1;
     	$test++;				# 32
 
+    	ok length($&), 2;
+    	$test++;				# 33
+
+    	ok length($'), 5;
+    	$test++;				# 34
+
+    	ok length($`), 3;
+    	$test++;				# 35
+
+    	ok length($1), 1;
+    	$test++;				# 36
+
 	ok $&, pack("C*", ord(">"), 0342);
-	$test++;				# 33
+	$test++;				# 37
 
 	ok $', pack("C*", 0230, 0272, 0342, 0230, 0272);
-	$test++;				# 34
+	$test++;				# 38
 
 	ok $`, pack("C*", 0342, 0230, 0272);
-	$test++;				# 35
+	$test++;				# 39
 
 	ok $1, pack("C*", 0342);
-	$test++;				# 36
+	$test++;				# 40
 
     }
 
@@ -182,90 +202,90 @@ sub ok {
     }
 
     ok length, 10;
-    $test++;				# 37
-
-    ok length((m/>(.)/)[0]), 1;
-    $test++;				# 38
-
-    ok length($&), 2;
-    $test++;				# 39
-
-    ok length($'), 1;
-    $test++;				# 40
-
-    ok length($`), 1;
     $test++;				# 41
 
-    ok length($1), 1;
+    ok length((m/>(.)/)[0]), 1;
     $test++;				# 42
 
-    ok length($tmp=$&), 2;
+    ok length($&), 2;
     $test++;				# 43
 
-    ok length($tmp=$'), 1;
+    ok length($'), 1;
     $test++;				# 44
 
-    ok length($tmp=$`), 1;
+    ok length($`), 1;
     $test++;				# 45
 
-    ok length($tmp=$1), 1;
+    ok length($1), 1;
     $test++;				# 46
+
+    ok length($tmp=$&), 2;
+    $test++;				# 47
+
+    ok length($tmp=$'), 1;
+    $test++;				# 48
+
+    ok length($tmp=$`), 1;
+    $test++;				# 49
+
+    ok length($tmp=$1), 1;
+    $test++;				# 50
 
     {
 	use bytes;
 
         my $tmp = $&;
 	ok $tmp, pack("C*", ord(">"), 0342, 0230, 0272);
-	$test++;				# 47
+	$test++;				# 51
 
         $tmp = $';
 	ok $tmp, pack("C*", 0342, 0230, 0272);
-	$test++;				# 48
+	$test++;				# 52
 
         $tmp = $`;
 	ok $tmp, pack("C*", 0342, 0230, 0272);
-	$test++;				# 49
+	$test++;				# 53
 
         $tmp = $1;
 	ok $tmp, pack("C*", 0342, 0230, 0272);
-	$test++;				# 50
+	$test++;				# 54
     }
     {
 	use bytes;
 	no utf8;
 
 	ok length, 10;
-	$test++;				# 51
+	$test++;				# 55
 
     	ok length((m/>(.)/)[0]), 1;
-    	$test++;				# 52
-
-    	ok length($&), 2;
-    	$test++;				# 53
-
-    	ok length($'), 5;
-    	$test++;				# 54
-
-    	ok length($`), 3;
-    	$test++;				# 55
-
-    	ok length($1), 1;
     	$test++;				# 56
 
+    	ok length($&), 2;
+    	$test++;				# 57
+
+    	ok length($'), 5;
+    	$test++;				# 58
+
+    	ok length($`), 3;
+    	$test++;				# 59
+
+    	ok length($1), 1;
+    	$test++;				# 60
+
 	ok $&, pack("C*", ord(">"), 0342);
-	$test++;				# 57
+	$test++;				# 61
 
 	ok $', pack("C*", 0230, 0272, 0342, 0230, 0272);
-	$test++;				# 58
+	$test++;				# 62
 
 	ok $`, pack("C*", 0342, 0230, 0272);
-	$test++;				# 59
+	$test++;				# 63
 
 	ok $1, pack("C*", 0342);
-	$test++;				# 60
+	$test++;				# 64
 
     }
 
     ok "\x{ab}" =~ /^\x{ab}$/, 1;
-    $test++;					# 61
+    $test++;					# 65
 }

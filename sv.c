@@ -3923,7 +3923,7 @@ Perl_sv_eq(pTHX_ register SV *str1, register SV *str2)
     if (cur1) {
 	if (!str2)
 	    return 0;
-	if (SvUTF8(str1) != SvUTF8(str2)) {
+	if (SvUTF8(str1) != SvUTF8(str2) && !IN_BYTE) {
 	    if (SvUTF8(str1)) {
 		sv_utf8_upgrade(str2);
 	    }

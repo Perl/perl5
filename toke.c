@@ -896,7 +896,7 @@ S_tokeq(pTHX_ SV *sv)
 	goto finish;
 
     s = SvPV_force(sv, len);
-    if (SvIVX(sv) == -1)
+    if (SvTYPE(sv) >= SVt_PVIV && SvIVX(sv) == -1)
 	goto finish;
     send = s + len;
     while (s < send && *s != '\\')
