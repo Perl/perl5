@@ -16,6 +16,10 @@ Perl now compiles and runs under modern Unix systems, including those
 with recent Berkeley DB libraries or GCC 3. Additionally, it now runs
 under Mac OS X (10.3).
 
+This also contains a security fix for a suidperl vulnerability. See
+http://www.cpan.org/src/5.0/sperl-2000-08-05/sperl-2000-08-05.txt for
+more information.
+
 =head1 About the new versioning system
 
 Perl is now developed on two tracks: a maintenance track that makes

@@ -2220,16 +2220,6 @@ validate_suid(char *validarg, char *scriptname, int fdscript)
 	    if (tmpstatbuf.st_dev != PL_statbuf.st_dev ||
 		tmpstatbuf.st_ino != PL_statbuf.st_ino) {
 		(void)PerlIO_close(PL_rsfp);
-		if (PL_rsfp = PerlProc_popen("/bin/mail root","w")) {	/* heh, heh */
-		    PerlIO_printf(PL_rsfp,
-"User %ld tried to run dev %ld ino %ld in place of dev %ld ino %ld!\n\
-(Filename of set-id script was %s, uid %ld gid %ld.)\n\nSincerely,\nperl\n",
-			(long)PL_uid,(long)tmpstatbuf.st_dev, (long)tmpstatbuf.st_ino,
-			(long)PL_statbuf.st_dev, (long)PL_statbuf.st_ino,
-			SvPVX(GvSV(PL_curcop->cop_filegv)),
-			(long)PL_statbuf.st_uid, (long)PL_statbuf.st_gid);
-		    (void)PerlProc_pclose(PL_rsfp);
-		}
 		croak("Permission denied\n");
 	    }
 	    if (
