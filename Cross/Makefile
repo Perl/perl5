@@ -1,6 +1,6 @@
 ## Toplevel Makefile for cross-compilation of perl
 #
-## $Id: Makefile,v 1.3 2003/05/27 21:23:19 red Exp red $
+## $Id: Makefile,v 1.4 2003/09/05 00:48:19 red Exp red $
 
 export TOPDIR?=${shell pwd}
 include $(TOPDIR)/config
@@ -50,7 +50,6 @@ perl:
 	@echo Optimizations: $(FULL_OPTIMIZATION)
 
 	$(TOPDIR)/generate_config_sh config.sh-$(SYS) > $(TOPDIR)/../config.sh
-	$(TOPDIR)/generate_config_sh config.sh-$(SYS) > $(TOPDIR)/../config.sh-arse
 	cd $(TOPDIR)/.. ; ./Configure -S ; make depend ; make ; make more
 	cd $(TOPDIR)/.. ; mkdir -p fake_config_library ; cp lib/Config.pm fake_config_library
 	cd $(TOPDIR)/.. ; $(MAKE) more2 "PERLRUN=/usr/bin/perl -I$(TOPDIR)/../fake_config_library -MConfig"
