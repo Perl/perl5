@@ -5088,6 +5088,7 @@ Perl_ck_ftst(pTHX_ OP *o)
 		gv_fetchpv(SvPVx(kid->op_sv, n_a), TRUE, SVt_PVIO));
 	    op_free(o);
 	    o = newop;
+	    return o;
 	}
 	else {
 	  if ((PL_hints & HINT_FILETEST_ACCESS) &&
