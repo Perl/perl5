@@ -492,7 +492,7 @@ package DB;
 use IO::Handle;
 
 # Debugger for Perl 5.00x; perl5db.pl patch level:
-$VERSION = 1.24;
+$VERSION = 1.25;
 
 $header  = "perl5db.pl version $VERSION";
 
@@ -906,6 +906,8 @@ sub eval {
 #   + Added command to save all debugger commands for sourcing later.
 #   + Added command to display parent inheritence tree of given class.
 #   + Fixed minor newline in history bug.
+# Changes: 1.25: Apr 17, 2004 Richard Foley <richard.foley@rfi.net>
+#   + Fixed option bug (setting invalid options + not recognising valid short forms)
 ####################################################################
 
 =head1 DEBUGGER INITIALIZATION
@@ -6261,9 +6263,6 @@ sub parse_options {
               or print($OUT "Unclosed option value `$opt$sep$_'\n"), last;
             ($val = $1) =~ s/\\([\\$end])/$1/g;
         } ## end else [ if ("?" eq $sep)
-
-        # Impedance-match the code above to the code below.
-        my $option = $opt;
 
         # Exclude non-booleans from getting set to 1 by default.
         if ($opt_needs_val{$option} && $val_defaulted) {
