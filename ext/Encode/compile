@@ -538,7 +538,8 @@ sub decode_U
 my @uname;
 sub char_names
 {
- my $s = do "unicode/Name.pl";
+ my $s = do "unicore/Name.pl";
+ die "char_names: unicore/Name.pl: $!\n" unless defined $s;
  pos($s) = 0;
  while ($s =~ /\G([0-9a-f]+)\t([0-9a-f]*)\t(.*?)\s*\n/igc)
   {
