@@ -858,20 +858,6 @@ compatible behavior may be re-introduced in a future release.  Until
 then, the use of sysopen(), sysread() and syswrite() is not supported
 for "text" mode operations.
 
-=head1 Win32: binmode(FH, ":crlf") results in CR CR LF
-
-In Perl 5.6
-
-	binmode(FH, ":crlf");
-
-had no effect ignored in Win32 for "text" streams.  In Perl 5.8,
-however, that does have an effect: a new CRLF "layer" is pushed to the
-PerlIO layer stack B<on top of an already existing CRLF layer>.  The
-end result is C<CR CR LF> since first the first CRLF layer transforms
-any LFs in output to CR LFs, and then the second CRLF layer does the
-same.  The workaround in 5.8 is to leave out the binmode() call:
-the PerlIO default in Win32 already includes the CRLF transformation.
-
 =head1 Future Directions
 
 The following things B<might> happen in future.  The first publicly
