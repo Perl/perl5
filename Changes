@@ -78,6 +78,11 @@ Version 5.005_02        Second maintenance release of 5.005
 ----------------
 
 ____________________________________________________________________________
+[  1758] By: gsar                                  on 1998/08/08  03:45:04
+        Log: set patchlevel.h, other minor tweaks
+     Branch: maint-5.005/perl
+           ! Changes patchlevel.h pod/perlhist.pod pod/perlport.pod
+____________________________________________________________________________
 [  1757] By: gsar                                  on 1998/08/08  03:33:33
         Log: prevent lexical leaks from Benchmark into target code (inspired by
              an attempt by John Allen)
