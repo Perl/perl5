@@ -8,6 +8,10 @@ BEGIN {
 	print "1..0 # Skip: not perlio\n";
 	exit 0;
     }
+    if (exists $ENV{PERLIO} && $ENV{PERLIO} !~ /^(stdio|perlio|mmap)$/) {
+	print "1..0 # PERLIO='$ENV{PERLIO}' unknown\n";
+	exit 0;
+    }
 }
 
 plan tests => 43;
@@ -36,7 +40,8 @@ SKIP: {
 		ok($j->($result->[$i]), "$id - $i is ok");
 	    } else {
 		is($result->[$i], $j,
-		   sprintf("$id - $i is %s", defined $j ? $j : "undef"));
+		   sprintf("$id - $i is %s",
+			   defined $j ? $j : "undef"));
 	    }
 	}
     }
