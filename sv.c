@@ -5309,6 +5309,7 @@ Perl_sv_replace(pTHX_ register SV *sv, register SV *nsv)
 #endif
     SvREFCNT(sv) = refcnt;
     SvFLAGS(nsv) |= SVTYPEMASK;		/* Mark as freed */
+    SvREFCNT(nsv) = 0;
     del_SV(nsv);
 }
 
