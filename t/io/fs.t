@@ -155,14 +155,24 @@ else {
 unlink "Iofs.tmp";
 `echo helloworld > Iofs.tmp`;
 eval { truncate "Iofs.tmp", 5; };
-if ($@ =~ /not implemented/) {
-  print "# truncate not implemented -- skipping tests 23 through 26\n";
-  for (23 .. 26) {
-    print "ok $_\n";
+if ($@) {
+  if ($@ =~ /not implemented/) {
+    print "# truncate not implemented -- skipping tests 23 through 26\n";
+    for (23 .. 26) {
+      print "ok $_ # Skip: no truncate\n";
+    }
+  } else {
+    warn "io/fs before test 23: truncate dies with \$\@[$@]";
   }
 }
 else {
-  if (-s "Iofs.tmp" == 5) {print "ok 23\n"} else {print "not ok 23\n"}
+  if (-s "Iofs.tmp" == 5) {
+    print "ok 23\n";
+  } else {
+    my $s = -s "Iofs.tmp";
+    printf "# -s Iofs.tmp: %s\n", defined($s) ? $s : "UNDEFINED";
+    print "not ok 23\n";
+  }
   truncate "Iofs.tmp", 0;
   if (-z "Iofs.tmp") {print "ok 24\n"} else {print "not ok 24\n"}
   open(FH, ">Iofs.tmp") or die "Can't create Iofs.tmp";
