@@ -163,7 +163,7 @@ sharedsv_shared_mg_free(pTHX_ SV *sv, MAGIC *mg)
     shared_sv *shared = (shared_sv *) mg->mg_ptr;
     assert( aTHX == PL_sharedsv_space );
     if (shared) {
-	recursive_lock_init(aTHX_ &shared->lock);
+	recursive_lock_destroy(aTHX_ &shared->lock);
 	COND_DESTROY(&shared->user_cond);
 	PerlMemShared_free(shared);
 	mg->mg_ptr = NULL;
