@@ -2200,13 +2200,8 @@ yylex()
 		else
 		    lex_brackstack[lex_brackets++] = XOPERATOR;
 		s = skipspace(s);
-		if (*s == '}') {
-		    if (expect == XSTATE) {
-			lex_brackstack[lex_brackets-1] = XSTATE;
-			break;
-		    }
+		if (*s == '}')
 		    OPERATOR(HASHBRACK);
-		}
 		/* This hack serves to disambiguate a pair of curlies
 		 * as being a block or an anon hash.  Normally, expectation
 		 * determines that, but in cases where we're not in a
