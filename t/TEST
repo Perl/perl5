@@ -7,19 +7,19 @@
 
 $| = 1;
 
-if ($ARGV[0] eq '-v') {
+if ($#ARGV >= 0 && $ARGV[0] eq '-v') {
     $verbose = 1;
     shift;
 }
 
 chdir 't' if -f 't/TEST';
 
-die "You need to run \"make test\" first to set things up.\n" 
+die "You need to run \"make test\" first to set things up.\n"
   unless -e 'perl' or -e 'perl.exe';
 
 $ENV{EMXSHELL} = 'sh';        # For OS/2
 
-if ($ARGV[0] eq '') {
+if ($#ARGV == -1) {
     @ARGV = split(/[ \n]/,
       `echo base/*.t comp/*.t cmd/*.t io/*.t; echo op/*.t pragma/*.t lib/*.t`);
 }
@@ -49,11 +49,11 @@ while ($test = shift) {
     chop($te);
     print "$te" . '.' x (18 - length($te));
     if ($sharpbang) {
-	open(results,"./$test |") || (print "can't run.\n");
+	open(RESULTS,"./$test |") || (print "can't run.\n");
     } else {
-	open(script,"$test") || die "Can't run $test.\n";
-	$_ = <script>;
-	close(script);
+	open(SCRIPT,"$test") || die "Can't run $test.\n";
+	$_ = <SCRIPT>;
+	close(SCRIPT);
 	if (/#!..perl(.*)/) {
 	    $switch = $1;
 	    if ($^O eq 'VMS') {
@@ -63,11 +63,13 @@ while ($test = shift) {
 	} else {
 	    $switch = '';
 	}
-	open(results,"./perl$switch $test |") || (print "can't run.\n");
+	open(RESULTS,"./perl$switch $test |") || (print "can't run.\n");
     }
     $ok = 0;
     $next = 0;
-    while (<results>) {
+    $files  = 0;
+    $totmax = 0;
+    while (<RESULTS>) {
 	if ($verbose) {
 	    print $_;
 	}
@@ -137,4 +139,4 @@ SHRDLU
 ($user,$sys,$cuser,$csys) = times;
 print sprintf("u=%g  s=%g  cu=%g  cs=%g  scripts=%d  tests=%d\n",
     $user,$sys,$cuser,$csys,$files,$totmax);
-exit $bad != 0;
+exit ($bad != 0);
