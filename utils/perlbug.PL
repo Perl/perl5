@@ -155,7 +155,7 @@ sub Init {
     $Is_MSWin32 = $^O eq 'MSWin32';
     $Is_VMS = $^O eq 'VMS';
 
-    getopts("dhva:s:b:f:F:r:e:SCc:to:n:");
+    if (!getopts("dhva:s:b:f:F:r:e:SCc:to:n:")) { Help(); exit; };
 
     # This comment is needed to notify metaconfig that we are
     # using the $perladmin, $cf_by, and $cf_time definitions.

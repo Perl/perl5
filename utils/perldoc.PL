@@ -2,6 +2,7 @@
 
 use Config;
 use File::Basename qw(&basename &dirname);
+use Cwd;
 
 # List explicitly here the variables you want Configure to
 # generate.  Metaconfig only looks for shell variables, so you
@@ -12,6 +13,7 @@ use File::Basename qw(&basename &dirname);
 
 # This forces PL files to create target in same directory as PL file.
 # This is so that make depend always knows where to find PL derivatives.
+$origdir = cwd;
 chdir dirname($0);
 $file = basename($0, '.PL');
 $file .= '.com' if $^O eq 'VMS';
@@ -26,9 +28,10 @@ print "Extracting $file (with variable substitutions)\n";
 print OUT <<"!GROK!THIS!";
 $Config{startperl}
     eval 'exec $Config{perlpath} -S \$0 \${1+"\$@"}'
-	if \$running_under_some_shell;
+	if 0;
 
-\@pagers = ();
+use strict;
+my \@pagers = ();
 push \@pagers, "$Config{'pager'}" if -x "$Config{'pager'}";
 !GROK!THIS!
 
@@ -45,7 +48,7 @@ print OUT <<'!NO!SUBS!';
 # the perl manuals, though it too is written in perl.
 
 if(@ARGV<1) {
-	$me = $0;		# Editing $0 is unportable
+	my $me = $0;		# Editing $0 is unportable
 	$me =~ s,.*/,,;
 	die <<EOF;
 Usage: $me [-h] [-r] [-i] [-v] [-t] [-u] [-m] [-l] [-F] [-X] PageName|ModuleName|ProgramName
@@ -60,12 +63,12 @@ EOF
 use Getopt::Std;
 use Config '%Config';
 
-@global_found = ();
-$global_target = "";
+my @global_found = ();
+my $global_target = "";
 
-$Is_VMS = $^O eq 'VMS';
-$Is_MSWin32 = $^O eq 'MSWin32';
-$Is_Dos = $^O eq 'dos';
+my $Is_VMS = $^O eq 'VMS';
+my $Is_MSWin32 = $^O eq 'MSWin32';
+my $Is_Dos = $^O eq 'dos';
 
 sub usage{
     warn "@_\n" if @_;
@@ -88,7 +91,7 @@ Options:
     -F   Arguments are file names, not modules
     -v	 Verbosely describe what's going on
     -X	 use index if present (looks for pod.idx at $Config{archlib})
-
+    -q   Search the text of questions (not answers) in perlfaq[1-9]
 
 PageName|ModuleName...
          is the name of a piece of documentation that you want to look at. You 
@@ -112,26 +115,39 @@ filenames, one per line.
 EOF
 }
 
-use Text::ParseWords;
+if( defined $ENV{"PERLDOC"} ) {
+    require Text::ParseWords;
+    unshift(@ARGV, Text::ParseWords::shellwords($ENV{"PERLDOC"}));
+}
+!NO!SUBS!
 
+my $getopts = "mhtluvriFf:Xq:";
+print OUT <<"!GET!OPTS!";
 
-unshift(@ARGV,shellwords($ENV{"PERLDOC"}));
+use vars qw( @{[map "\$opt_$_", ($getopts =~ /\w/g)]} );
 
-getopts("mhtluvriFf:Xq") || usage;
+getopts("$getopts") || usage;
+!GET!OPTS!
 
-usage if $opt_h || $opt_h; # avoid -w warning
+print OUT <<'!NO!SUBS!';
 
-$podidx = "$Config{'archlib'}/pod.idx";
-$podidx = "" if $opt_X || !-f "pod.idx" && !-r _ && -M _ > 7;
+usage if $opt_h;
 
-if ($opt_t + $opt_u + $opt_m + $opt_l > 1) {
+my $podidx;
+if( $opt_X ) {
+    $podidx = "$Config{'archlib'}/pod.idx";
+    $podidx = "" unless -f $podidx && -r _ && -M _ <= 7;
+}
+
+if( (my $opts = do{ local $^W; $opt_t + $opt_u + $opt_m + $opt_l }) > 1) {
     usage("only one of -t, -u, -m or -l")
 } elsif ($Is_MSWin32 || $Is_Dos) {
-    $opt_t = 1 unless $opt_t + $opt_u + $opt_m + $opt_l;
+    $opt_t = 1 unless $opts
 }
 
 if ($opt_t) { require Pod::Text; import Pod::Text; }
 
+my @pages;
 if ($opt_f) {
    @pages = ("perlfunc");
 } elsif ($opt_q) {
@@ -185,7 +201,7 @@ sub minus_f_nocase {
  	if (-d _){
  	    push @p, $p;
 	    if ( $p eq $global_target) {
-		$tmp_path = join ('/', @p);
+		my $tmp_path = join ('/', @p);
 		my $path_f = 0;
 		for (@global_found) {
 		    $path_f = 1 if $_ eq $tmp_path;
@@ -224,7 +240,7 @@ sub check_file {
 	return minus_f_nocase($dir,$file);
     } else {
 	my $path = minus_f_nocase($dir,$file);
-        return $path if containspod($path);
+        return $path if length $path and containspod($path);
     }
     return "";
 }
@@ -275,7 +291,7 @@ sub searchfor {
     return ();
 }
 
-
+my @found;
 foreach (@pages) {
         if ($podidx && open(PODIDX, $podidx)) {
 	    my $searchfor = $_;
@@ -292,7 +308,7 @@ foreach (@pages) {
 	print STDERR "Searching for $_\n" if $opt_v;
 	# We must look both in @INC for library modules and in PATH
 	# for executables, like h2xs or perldoc itself.
-	@searchdirs = @INC;
+	my @searchdirs = @INC;
 	if ($opt_F) {
 	  next unless -r;
 	  push @found, $_ if $opt_m or containspod($_);
@@ -304,13 +320,13 @@ foreach (@pages) {
 		for ($i = 0; $trn = $ENV{'DCL$PATH'.$i}; $i++) {
 		    push(@searchdirs,$trn);
 		}
-	    push(@dirs,'perl_root:[lib.pod]')  # installed pods
+		push(@searchdirs,'perl_root:[lib.pod]')  # installed pods
 	    } else {
 	        push(@searchdirs, grep(-d, split($Config{path_sep}, 
 						 $ENV{'PATH'})));
 	    }
-	    @files= searchfor(0,$_,@searchdirs);
 	}
+	my @files = searchfor(0,$_,@searchdirs);
 	if( @files ) {
 		print STDERR "Found as @files\n" if $opt_v;
 	} else {
@@ -325,10 +341,9 @@ foreach (@pages) {
 			print STDERR "No documentation found for \"$_\".\n";
 			if (@global_found) {
 			    print STDERR "However, try\n";
-			    my $dir = $file = "";
-			    for $dir (@global_found) {
+			    for my $dir (@global_found) {
 				opendir(DIR, $dir) or die "$!";
-				while ($file = readdir(DIR)) {
+				while (my $file = readdir(DIR)) {
 				    next if ($file =~ /^\./);
 				    $file =~ s/\.(pm|pod)$//;
 				    print STDERR "\tperldoc $_\::$file\n";
@@ -350,8 +365,12 @@ if ($opt_l) {
     exit;
 }
 
+my $lines = $ENV{LINES} || 24;
+
+my $no_tty;
 if( ! -t STDOUT ) { $no_tty = 1 }
 
+my $tmp;
 if ($Is_MSWin32) {
 	$tmp = "$ENV{TEMP}\\perldoc1.$$";
 	push @pagers, qw( more< less notepad );
@@ -378,7 +397,7 @@ if ($Is_MSWin32) {
 unshift @pagers, $ENV{PERLDOC_PAGER} if $ENV{PERLDOC_PAGER};
 
 if ($opt_m) {
-	foreach $pager (@pagers) {
+	foreach my $pager (@pagers) {
 		system("$pager @found") or exit;
 	}
 	if ($Is_VMS) { eval 'use vmsish qw(status exit); exit $?' }
@@ -389,6 +408,9 @@ if ($opt_f) {
    my $perlfunc = shift @found;
    open(PFUNC, $perlfunc) or die "Can't open $perlfunc: $!";
 
+   # Functions like -r, -e, etc. are listed under `-X'.
+   my $search_string = ($opt_f =~ /^-[rwxoRWXOeszfdlpSbctugkTBMAC]$/) ? 'I<-X' : $opt_f ;
+
    # Skip introduction
    while (<PFUNC>) {
        last if /^=head2 Alphabetical Listing of Perl Functions/;
@@ -398,7 +420,7 @@ if ($opt_f) {
    my $found = 0;
    my @pod;
    while (<PFUNC>) {
-       if (/^=item\s+\Q$opt_f\E\b/o)  {
+       if (/^=item\s+\Q$search_string\E\b/o)  {
 	   $found = 1;
        } elsif (/^=item/) {
 	   last if $found > 1;
@@ -408,8 +430,6 @@ if ($opt_f) {
        ++$found if /^\w/;	# found descriptive text
    }
    if (@pod) {
-	my $lines = $ENV{LINES} || 24;
-
        if ($opt_t) {
 	   open(FORMATTER, "| pod2text") || die "Can't start filter";
 	   print FORMATTER "=over 8\n\n";
@@ -419,7 +439,7 @@ if ($opt_f) {
        } elsif (@pod < $lines-2) {
 	   print @pod;
        } else {
-	   foreach $pager (@pagers) {
+	   foreach my $pager (@pagers) {
 		open (PAGER, "| $pager") or next;
 		print PAGER @pod ;
 		close(PAGER) or next;
@@ -439,7 +459,7 @@ if ($opt_q) {
    my @pod;
 
    while (<>) {
-      if (/^=head2\s+.*$opt_q/oi) {
+      if (/^=head2\s+.*(?:$opt_q)/oi) {
 	 $found = 1;
 	 push @pod, "=head1 Found in $ARGV\n\n" unless $found_in{$ARGV}++;
       } elsif (/^=head2/) {
@@ -456,17 +476,25 @@ if ($opt_q) {
 	 print FORMATTER @pod;
 	 print FORMATTER "=back\n";
 	 close(FORMATTER);
-      } else {
+      } elsif (@pod < $lines-2) {
 	 print @pod;
+      } else {
+	 foreach my $pager (@pagers) {
+	    open (PAGER, "| $pager") or next;
+	    print PAGER @pod ;
+	    close(PAGER) or next;
+	    last;
+	 }
       }
    } else {
-      die "No documentation for perl function `$opt_f' found\n";
+      die "No documentation for perl FAQ keyword `$opt_q' found\n";
    }
    exit;
 }
 
 foreach (@found) {
 
+	my $err;
 	if($opt_t) {
 		open(TMP,">>$tmp");
 		Pod::Text::pod2text($_,*TMP);
@@ -474,7 +502,7 @@ foreach (@found) {
 	} elsif(not $opt_u) {
 		my $cmd = "pod2man --lax $_ | nroff -man";
 		$cmd .= " | col -x" if $^O =~ /hpux/;
-		$rslt = `$cmd`;
+		my $rslt = `$cmd`;
 		unless(($err = $?)) {
 			open(TMP,">>$tmp");
 			print TMP $rslt;
@@ -485,7 +513,7 @@ foreach (@found) {
 	if( $opt_u or $err or -z $tmp) {
 		open(OUT,">>$tmp");
 		open(IN,"<$_");
-		$cut = 1;
+		my $cut = 1;
 		while (<IN>) {
 			$cut = $1 eq 'cut' if /^=(\w+)/;
 			next if $cut;
@@ -501,7 +529,7 @@ if( $no_tty ) {
 	print while <TMP>;
 	close(TMP);
 } else {
-	foreach $pager (@pagers) {
+	foreach my $pager (@pagers) {
 		system("$pager $tmp") or last;
 	}
 }
@@ -521,6 +549,8 @@ perldoc - Look up Perl documentation in pod format.
 B<perldoc> [B<-h>] [B<-v>] [B<-t>] [B<-u>] [B<-m>] [B<-l>] [B<-F>]  [B<-X>] PageName|ModuleName|ProgramName
 
 B<perldoc> B<-f> BuiltinFunction
+
+B<perldoc> B<-q> FAQ Keyword
 
 =head1 DESCRIPTION
 
@@ -574,6 +604,12 @@ Consider arguments as file names, no search in directories will be performed.
 The B<-f> option followed by the name of a perl built in function will
 extract the documentation of this function from L<perlfunc>.
 
+=item B<-q> perlfaq
+
+The B<-q> option takes a regular expression as an argument.  It will search
+the question headings in perlfaq[1-9] and print the entries matching
+the regular expression.
+
 =item B<-X> use an index if present
 
 The B<-X> option looks for a entry whose basename matches the name given on the
@@ -612,6 +648,9 @@ Minor updates by Andy Dougherty <doughera@lafcol.lafayette.edu>
 =cut
 
 #
+# Version 1.14: Wed Jul 15 01:50:20 EST 1998
+#       Robin Barker <rmb1@cise.npl.co.uk>
+#	-strict, -w cleanups
 # Version 1.13: Fri Feb 27 16:20:50 EST 1997
 #       Gurusamy Sarathy <gsar@umich.edu>
 #	-doc tweaks for -F and -X options
@@ -648,3 +687,4 @@ Minor updates by Andy Dougherty <doughera@lafcol.lafayette.edu>
 close OUT or die "Can't close $file: $!";
 chmod 0755, $file or die "Can't reset permissions for $file: $!\n";
 exec("$Config{'eunicefix'} $file") if $Config{'eunicefix'} ne ':';
+chdir $origdir;

@@ -170,8 +170,7 @@ sub export {
 sub export_to_level
 {
       my $pkg = shift;
-      my ($level, $junk) = (shift, shift);  # need to get rid of first arg
-                                            # we know it already.
+      my $level = shift;
       my $callpkg = caller($level);
       $pkg->export($callpkg, @_);
 }

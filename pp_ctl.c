@@ -871,7 +871,7 @@ char *label;
 
     for (i = cxstack_ix; i >= 0; i--) {
 	cx = &cxstack[i];
-	switch (cx->cx_type) {
+	switch (CxTYPE(cx)) {
 	case CXt_SUBST:
 	    if (dowarn)
 		warn("Exiting substitution via %s", op_name[op->op_type]);
@@ -942,7 +942,7 @@ I32 startingblock;
     register PERL_CONTEXT *cx;
     for (i = startingblock; i >= 0; i--) {
 	cx = &cxstack[i];
-	switch (cx->cx_type) {
+	switch (CxTYPE(cx)) {
 	default:
 	    continue;
 	case CXt_EVAL:
@@ -963,7 +963,7 @@ I32 startingblock;
     register PERL_CONTEXT *cx;
     for (i = startingblock; i >= 0; i--) {
 	cx = &cxstack[i];
-	switch (cx->cx_type) {
+	switch (CxTYPE(cx)) {
 	default:
 	    continue;
 	case CXt_EVAL:
@@ -983,7 +983,7 @@ I32 startingblock;
     register PERL_CONTEXT *cx;
     for (i = startingblock; i >= 0; i--) {
 	cx = &cxstack[i];
-	switch (cx->cx_type) {
+	switch (CxTYPE(cx)) {
 	case CXt_SUBST:
 	    if (dowarn)
 		warn("Exiting substitution via %s", op_name[op->op_type]);
@@ -1020,9 +1020,9 @@ I32 cxix;
     while (cxstack_ix > cxix) {
 	cx = &cxstack[cxstack_ix];
 	DEBUG_l(PerlIO_printf(Perl_debug_log, "Unwinding block %ld, type %s\n",
-			      (long) cxstack_ix, block_type[cx->cx_type]));
+			      (long) cxstack_ix, block_type[CxTYPE(cx)]));
 	/* Note: we don't need to restore the base context info till the end. */
-	switch (cx->cx_type) {
+	switch (CxTYPE(cx)) {
 	case CXt_SUBST:
 	    POPSUBST(cx);
 	    continue;  /* not break */
@@ -1088,7 +1088,7 @@ char *message;
 		dounwind(cxix);
 
 	    POPBLOCK(cx,curpm);
-	    if (cx->cx_type != CXt_EVAL) {
+	    if (CxTYPE(cx) != CXt_EVAL) {
 		PerlIO_printf(PerlIO_stderr(), "panic: die %s", message);
 		my_exit(1);
 	    }
@@ -1184,7 +1184,7 @@ PP(pp_caller)
 	cxix = dopoptosub(cxix - 1);
     }
     cx = &cxstack[cxix];
-    if (cxstack[cxix].cx_type == CXt_SUB) {
+    if (CxTYPE(cx) == CXt_SUB) {
         dbcxix = dopoptosub(cxix - 1);
 	/* We expect that cxstack[dbcxix] is CXt_SUB, anyway, the
 	   field below is defined for any cx. */
@@ -1213,7 +1213,7 @@ PP(pp_caller)
     PUSHs(sv_2mortal(newSViv((I32)cx->blk_oldcop->cop_line)));
     if (!MAXARG)
 	RETURN;
-    if (cx->cx_type == CXt_SUB) { /* So is cxstack[dbcxix]. */
+    if (CxTYPE(cx) == CXt_SUB) { /* So is cxstack[dbcxix]. */
 	sv = NEWSV(49, 0);
 	gv_efullname3(sv, CvGV(cxstack[cxix].blk_sub.cv), Nullch);
 	PUSHs(sv_2mortal(sv));
@@ -1228,7 +1228,7 @@ PP(pp_caller)
 	PUSHs(&sv_undef);
     else
 	PUSHs(sv_2mortal(newSViv(gimme & G_ARRAY)));
-    if (cx->cx_type == CXt_EVAL) {
+    if (CxTYPE(cx) == CXt_EVAL) {
 	if (cx->blk_eval.old_op_type == OP_ENTEREVAL) {
 	    PUSHs(cx->blk_eval.cur_text);
 	    PUSHs(&sv_no);
@@ -1239,7 +1239,7 @@ PP(pp_caller)
 	    PUSHs(&sv_yes);
 	}
     }
-    else if (cx->cx_type == CXt_SUB &&
+    else if (CxTYPE(cx) == CXt_SUB &&
 	    cx->blk_sub.hasargs &&
 	    curcop->cop_stash == debstash)
     {
@@ -1479,7 +1479,7 @@ PP(pp_return)
 	dounwind(cxix);
 
     POPBLOCK(cx,newpm);
-    switch (cx->cx_type) {
+    switch (CxTYPE(cx)) {
     case CXt_SUB:
 	POPSUB1(cx);	/* Delay POPSUB2 until stack values are safe */
 	popsub2 = TRUE;
@@ -1555,7 +1555,7 @@ PP(pp_last)
 	dounwind(cxix);
 
     POPBLOCK(cx,newpm);
-    switch (cx->cx_type) {
+    switch (CxTYPE(cx)) {
     case CXt_LOOP:
 	POPLOOP1(cx);	/* Delay POPLOOP2 until stack values are safe */
 	pop2 = CXt_LOOP;
@@ -1735,6 +1735,7 @@ PP(pp_goto)
 	    SV** mark;
 	    I32 items = 0;
 	    I32 oldsave;
+	    int arg_was_real = 0;
 
 	retry:
 	    if (!CvROOT(cv) && !CvXSUB(cv)) {
@@ -1763,10 +1764,10 @@ PP(pp_goto)
 	    if (cxix < cxstack_ix)
 		dounwind(cxix);
 	    TOPBLOCK(cx);
-	    if (cx->cx_type == CXt_EVAL && cx->blk_eval.old_op_type == OP_ENTEREVAL) 
+	    if (CxTYPE(cx) == CXt_EVAL && cx->blk_eval.old_op_type == OP_ENTEREVAL) 
 		DIE("Can't goto subroutine from an eval-string");
 	    mark = stack_sp;
-	    if (cx->cx_type == CXt_SUB &&
+	    if (CxTYPE(cx) == CXt_SUB &&
 		cx->blk_sub.hasargs) {   /* put @_ back onto stack */
 		AV* av = cx->blk_sub.argarray;
 		
@@ -1777,7 +1778,10 @@ PP(pp_goto)
 		stack_sp += items;
 		SvREFCNT_dec(GvAV(defgv));
 		GvAV(defgv) = cx->blk_sub.savearray;
-		AvREAL_off(av);
+		if (AvREAL(av)) {
+		    arg_was_real = 1;
+		    AvREAL_off(av);	/* so av_clear() won't clobber elts */
+		}
 		av_clear(av);
 	    }
 	    else if (CvXSUB(cv)) {	/* put GvAV(defgv) back onto stack */
@@ -1790,7 +1794,7 @@ PP(pp_goto)
 		Copy(AvARRAY(av), stack_sp, items, SV*);
 		stack_sp += items;
 	    }
-	    if (cx->cx_type == CXt_SUB &&
+	    if (CxTYPE(cx) == CXt_SUB &&
 		!(CvDEPTH(cx->blk_sub.cv) = cx->blk_sub.olddepth))
 		SvREFCNT_dec(cx->blk_sub.cv);
 	    oldsave = scopestack[scopestack_ix - 1];
@@ -1829,7 +1833,7 @@ PP(pp_goto)
 	    else {
 		AV* padlist = CvPADLIST(cv);
 		SV** svp = AvARRAY(padlist);
-		if (cx->cx_type == CXt_EVAL) {
+		if (CxTYPE(cx) == CXt_EVAL) {
 		    in_eval = cx->blk_eval.old_in_eval;
 		    eval_root = cx->blk_eval.old_eval_root;
 		    cx->cx_type = CXt_SUB;
@@ -1911,7 +1915,11 @@ PP(pp_goto)
 		    }
 		    Copy(mark,AvARRAY(av),items,SV*);
 		    AvFILLp(av) = items - 1;
-		    
+		    /* preserve @_ nature */
+		    if (arg_was_real) {
+			AvREIFY_off(av);
+			AvREAL_on(av);
+		    }
 		    while (items--) {
 			if (*mark)
 			    SvTEMP_off(*mark);
@@ -1961,7 +1969,7 @@ PP(pp_goto)
 	*enterops = 0;
 	for (ix = cxstack_ix; ix >= 0; ix--) {
 	    cx = &cxstack[ix];
-	    switch (cx->cx_type) {
+	    switch (CxTYPE(cx)) {
 	    case CXt_EVAL:
 		gotoprobe = eval_root; /* XXX not good for nested eval */
 		break;
@@ -2204,11 +2212,11 @@ int gimme;
     SAVEI32(max_intro_pending);
 
     caller = compcv;
-    for (i = cxstack_ix; i >= 0; i--) {
+    for (i = cxstack_ix - 1; i >= 0; i--) {
 	PERL_CONTEXT *cx = &cxstack[i];
-	if (cx->cx_type == CXt_EVAL)
+	if (CxTYPE(cx) == CXt_EVAL)
 	    break;
-	else if (cx->cx_type == CXt_SUB) {
+	else if (CxTYPE(cx) == CXt_SUB) {
 	    caller = cx->blk_sub.cv;
 	    break;
 	}
@@ -2500,7 +2508,7 @@ PP(pp_entereval)
     hints = op->op_targ;
 
     push_return(op->op_next);
-    PUSHBLOCK(cx, CXt_EVAL, SP);
+    PUSHBLOCK(cx, (CXt_EVAL|CXp_REAL), SP);
     PUSHEVAL(cx, 0, compiling.cop_filegv);
 
     /* prepare to compile string */

@@ -2415,13 +2415,21 @@ init_perllib()
 #ifndef PRIVLIB_EXP
 #define PRIVLIB_EXP "/usr/local/lib/perl5:/usr/local/lib/perl"
 #endif
+#if defined(WIN32)
+    incpush(PRIVLIB_EXP, TRUE);
+#else
     incpush(PRIVLIB_EXP, FALSE);
+#endif
 
 #ifdef SITEARCH_EXP
     incpush(SITEARCH_EXP, FALSE);
 #endif
 #ifdef SITELIB_EXP
+#if defined(WIN32)
+    incpush(SITELIB_EXP, TRUE);
+#else
     incpush(SITELIB_EXP, FALSE);
+#endif
 #endif
 #ifdef OLDARCHLIB_EXP  /* 5.00[01] compatibility */
     incpush(OLDARCHLIB_EXP, FALSE);

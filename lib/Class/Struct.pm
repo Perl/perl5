@@ -40,6 +40,11 @@ sub printem {
         $self->[$index];
     }
 
+    sub FETCHSIZE {
+        my $self = shift;
+        return scalar(@$self);
+    }
+
     sub DESTROY { }
 }
 

@@ -51,7 +51,9 @@ C<$CRLF>, which map to C<\015>, C<\012>, and C<\015\012>.  If you do
 not want to use the literal characters in your programs, then use
 the constants provided here.  They are not exported by default, but can
 be imported individually, and with the C<:crlf> export tag:
-    use Socket qw(:default :crlf);
+
+    use Socket qw(:DEFAULT :crlf);
+
 In addition, some structure manipulation functions are available:
 
 =over
@@ -245,17 +247,20 @@ require DynaLoader;
 	SO_TYPE
 	SO_USELOOPBACK
 );
+
 @EXPORT_OK = qw(CR LF CRLF $CR $LF $CRLF);
+
 %EXPORT_TAGS = (
-    default => [@EXPORT],
+    crlf    => [qw(CR LF CRLF $CR $LF $CRLF)],
     all     => [@EXPORT, @EXPORT_OK],
-    crlf    => [qw(CR LF CRLF $CR $LF $CRLF)]
 );
+
 BEGIN {
     sub CR   () {"\015"}
     sub LF   () {"\012"}
     sub CRLF () {"\015\012"}
 }
+
 *CR   = \CR();
 *LF   = \LF();
 *CRLF = \CRLF();

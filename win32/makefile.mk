@@ -10,6 +10,10 @@
 #
 
 ##
+## Make sure you read README.win32 *before* you mess with anything here!
+##
+
+##
 ## Build configuration.  Edit the values below to suit your needs.
 ##
 
@@ -19,6 +23,19 @@
 #
 INST_DRV	*= c:
 INST_TOP	*= $(INST_DRV)\perl
+
+#
+# Set this if you want your perl installation to be versioned. Leaving
+# it disabled means the new installation will overwrite any files from the
+# old installation at the same INST_TOP location.  Leaving it disabled
+# preserves compatibility with the simple layout in previous versions.
+#
+# When enabled, perl adds the extra version directory to all the
+# locations it installs files to.  An alternative versioned installation
+# can be obtained by setting INST_TOP above to a path that includes an
+# arbitrary version string.
+#
+#INST_VER	*= \5.00405
 
 #
 # uncomment one
@@ -34,9 +51,22 @@ CCTYPE		*= BORLAND
 #CFG		*= Debug
 
 #
+# uncomment next option if you want to use the VC++ compiler optimization.
+# This option is only relevant for the Microsoft compiler; we automatically
+# use maximum optimization with the other compilers (unless you specify a
+# DEBUGGING build).
+# Warning: This is known to produce incorrect code for compiler versions
+# earlier than VC++ 98 (Visual Studio 6.0). VC++ 98 generates code that
+# successfully passes the Perl regression test suite. It hasn't yet been
+# widely tested with real applications though.
+#
+#CFG		*= Optimize
+
+#
 # uncomment to enable use of PerlCRT.DLL when using the Visual C compiler.
-# Highly recommended.  It has patches that fix known bugs in MSCVRT.DLL.
-# You will need to download it from: http://www.activestate.com/<TBD>
+# Highly recommended.  It has patches that fix known bugs in MSVCRT.DLL.
+# This currently requires VC 5.0 with Service Pack 3.
+# Get it from CPAN at http://www.perl.com/CPAN/authors/id/D/DO/DOUGL/
 # and follow the directions in the package to install.
 #
 #USE_PERLCRT	*= define
@@ -53,16 +83,16 @@ CCTYPE		*= BORLAND
 #
 # if you have the source for des_fcrypt(), uncomment this and make sure the
 # file exists (see README.win32).  File should be located in the same
-# directory as this file.  Not (yet) supported with PERL_OBJECT.
+# directory as this file.
 #
-#CRYPT_SRC	*= des_fcrypt.c
+#CRYPT_SRC	*= fcrypt.c
 
 #
 # if you didn't set CRYPT_SRC and if you have des_fcrypt() available in a
 # library, uncomment this, and make sure the library exists (see README.win32)
 # Specify the full pathname of the library.
 #
-#CRYPT_LIB	*= des_fcrypt.lib
+#CRYPT_LIB	*= fcrypt.lib
 
 #
 # set this if you wish to use perl's malloc
@@ -75,9 +105,12 @@ CCTYPE		*= BORLAND
 
 #
 # set the install locations of the compiler include/libraries
+# Running VCVARS32.BAT is *required* when using Visual C.
+# Some versions of Visual C don't define MSVCDIR in the environment,
+# so you may have to set CCHOME explicitly.
 #
-#CCHOME		*= f:\msdev\vc
 CCHOME		*= C:\bc5
+#CCHOME		*= $(MSVCDIR)
 #CCHOME		*= D:\packages\mingw32
 CCINCDIR	*= $(CCHOME)\include
 CCLIBDIR	*= $(CCHOME)\lib
@@ -173,7 +206,7 @@ OPTIMIZE	= -O2 $(RUNTIME)
 LINK_DBG	= 
 .ENDIF
 
-CFLAGS		= -w -d -tWM -tWD $(INCLUDES) $(DEFINES) $(LOCDEFS) \
+CFLAGS		= -w -g0 -tWM -tWD $(INCLUDES) $(DEFINES) $(LOCDEFS) \
 		$(PCHFLAGS) $(OPTIMIZE)
 LINK_FLAGS	= $(LINK_DBG) -L$(CCLIBDIR) $(EXTRALIBDIRS:^"-L")
 OBJOUT_FLAG	= -o
@@ -201,8 +234,8 @@ SUBSYS		= console
 CXX_FLAG	= -xc++
 
 LIBC		= -lcrtdll
-LIBFILES	= $(CRYPT_LIB) -ladvapi32 -luser32 -lnetapi32 -lwsock32 -lmingw32 \
-		-lgcc -lmoldname $(LIBC) -lkernel32
+LIBFILES	= $(CRYPT_LIB) -ladvapi32 -luser32 -lnetapi32 -lwsock32 \
+		-lmingw32 -lgcc -lmoldname $(LIBC) -lkernel32
 
 .IF  "$(CFG)" == "Debug"
 OPTIMIZE	= -g -O2 $(RUNTIME) -DDEBUGGING
@@ -264,8 +297,8 @@ OPTIMIZE	= -Od $(RUNTIME)d -Zi -D_DEBUG -DDEBUGGING
 .ENDIF
 LINK_DBG	= -debug -pdb:none
 .ELSE
-.IF "$(CCTYPE)" == "MSVC20"
-OPTIMIZE	= -Od $(RUNTIME) -DNDEBUG
+.IF "$(CFG)" == "Optimize"
+OPTIMIZE	= -O2 $(RUNTIME) -DNDEBUG
 .ELSE
 OPTIMIZE	= -Od $(RUNTIME) -DNDEBUG
 .ENDIF
@@ -274,8 +307,8 @@ LINK_DBG	= -release
 
 LIBBASEFILES	= $(CRYPT_LIB) oldnames.lib kernel32.lib user32.lib gdi32.lib \
 		winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib \
-		oleaut32.lib netapi32.lib uuid.lib wsock32.lib mpr.lib \
-		winmm.lib version.lib odbc32.lib odbccp32.lib
+		oleaut32.lib netapi32.lib uuid.lib wsock32.lib mpr.lib winmm.lib \
+		version.lib odbc32.lib odbccp32.lib
 
 # we add LIBC here, since we may be using PerlCRT.dll
 LIBFILES	= $(LIBBASEFILES) $(LIBC)
@@ -329,8 +362,9 @@ $(o).dll:
 .ENDIF
 
 #
-INST_BIN	= $(INST_TOP)\bin
-INST_LIB	= $(INST_TOP)\lib
+INST_BIN	= $(INST_TOP)$(INST_VER)\bin
+INST_SCRIPT	= $(INST_TOP)$(INST_VER)\bin
+INST_LIB	= $(INST_TOP)$(INST_VER)\lib
 INST_POD	= $(INST_LIB)\pod
 INST_HTML	= $(INST_POD)\html
 LIBDIR		= ..\lib
@@ -340,7 +374,6 @@ EXTUTILSDIR	= $(LIBDIR)\extutils
 
 #
 # various targets
-
 MINIPERL	= ..\miniperl.exe
 MINIDIR		= .\mini
 PERLEXE		= ..\perl.exe
@@ -368,7 +401,6 @@ UTILS		=			\
 		..\pod\pod2text		\
 		..\x2p\find2perl	\
 		..\x2p\s2p		\
-		bin\www.pl		\
 		bin\runperl.pl		\
 		bin\pl2bat.pl		\
 		bin\perlglob.pl		\
@@ -383,20 +415,26 @@ CFGH_TMPL	= config_H.bc
 
 CFGSH_TMPL	= config.gc
 CFGH_TMPL	= config_H.gc
-PERLIMPLIB	*= ..\libperl$(a)
+.IF "$(OBJECT)" == "-DPERL_OBJECT"
+PERLIMPLIB	= ..\libperlcore$(a)
+.ELSE
+PERLIMPLIB	= ..\libperl$(a)
+.ENDIF
 
 .ELSE
 
 CFGSH_TMPL	= config.vc
 CFGH_TMPL	= config_H.vc
+.IF "$(USE_PERLCRT)" == ""
 PERL95EXE	= ..\perl95.exe
+.ENDIF
 
 .ENDIF
 
 .IF "$(OBJECT)" == "-DPERL_OBJECT"
 PERLIMPLIB	*= ..\perlcore$(a)
 PERLDLL		= ..\perlcore.dll
-CAPILIB		= $(COREDIR)\PerlCAPI$(a)
+CAPILIB		= $(COREDIR)\perlCAPI$(a)
 .ELSE
 PERLIMPLIB	*= ..\perl$(a)
 PERLDLL		= ..\perl.dll
@@ -483,7 +521,7 @@ X2P_SRC		=		\
 		..\x2p\util.c	\
 		..\x2p\walk.c
 
-CORE_NOCFG_H		=		\
+CORE_NOCFG_H	=		\
 		..\av.h		\
 		..\cop.h	\
 		..\cv.h		\
@@ -584,9 +622,10 @@ POD2TEXT	= $(PODDIR)\pod2text
 CFG_VARS	=					\
 		"INST_DRV=$(INST_DRV)"			\
 		"INST_TOP=$(INST_TOP)"			\
+		"INST_VER=$(INST_VER)"			\
 		"archname=$(ARCHNAME)"			\
 		"cc=$(CC)"				\
-		"ccflags=$(OPTIMIZE) $(DEFINES)"	\
+		"ccflags=$(OPTIMIZE) $(DEFINES) $(OBJECT)"	\
 		"cf_email=$(EMAIL)"			\
 		"d_crypt=$(D_CRYPT)"			\
 		"d_mymalloc=$(PERL_MALLOC)"		\
@@ -645,7 +684,7 @@ regen_config_h:
 	cd .. && perl configpm
 	-del /f $(CFGH_TMPL)
 	-mkdir ..\lib\CORE
-	-perl -I..\lib config_h.PL
+	-perl -I..\lib config_h.PL "INST_VER=$(INST_VER)"
 	rename config.h $(CFGH_TMPL)
 
 $(CONFIGPM) : $(MINIPERL) ..\config.sh config_h.PL ..\minimod.pl
@@ -654,7 +693,8 @@ $(CONFIGPM) : $(MINIPERL) ..\config.sh config_h.PL ..\minimod.pl
 	$(XCOPY) ..\*.h $(COREDIR)\*.*
 	$(XCOPY) *.h $(COREDIR)\*.*
 	$(RCOPY) include $(COREDIR)\*.*
-	$(MINIPERL) -I..\lib config_h.PL || $(MAKE) $(MAKEMACROS) $(CONFIGPM)
+	$(MINIPERL) -I..\lib config_h.PL "INST_VER=$(INST_VER)" \
+	    || $(MAKE) $(MAKEMACROS) $(CONFIGPM)
 
 $(MINIPERL) : $(MINIDIR) $(MINI_OBJ)
 .IF "$(CCTYPE)" == "BORLAND"
@@ -769,7 +809,6 @@ $(PERLEXE): $(PERLDLL) $(CONFIGPM) $(PERLEXE_OBJ)
 .ELSE
 	$(LINK32) -subsystem:console -out:$@ $(LINK_FLAGS) $(LIBFILES) \
 	    $(PERLEXE_OBJ) $(SETARGV_OBJ) $(PERLIMPLIB) 
-	    $(PERLEXE_OBJ) $(PERLIMPLIB) 
 .ENDIF
 	copy splittree.pl .. 
 	$(MINIPERL) -I..\lib ..\splittree.pl "../LIB" $(AUTODIR)
@@ -860,7 +899,7 @@ distclean: clean
 	-del /f $(MINIPERL) $(PERLEXE) $(PERL95EXE) $(PERLDLL) $(GLOBEXE) \
 		$(PERLIMPLIB) ..\miniperl$(a) $(MINIMOD)
 	-del /f *.def *.map
-	-del /f $(EXTENSION_DLL)
+	-del /f $(EXTENSION_DLL) $(EXTENSION_PM)
 	-del /f $(EXTENSION_C) $(DYNALOADER).c
 	-del /f $(EXTDIR)\DynaLoader\dl_win32.xs
 	-del /f $(LIBDIR)\.exists $(LIBDIR)\attrs.pm $(LIBDIR)\DynaLoader.pm
@@ -873,7 +912,8 @@ distclean: clean
 	-rmdir /s /q $(LIBDIR)\B || rmdir /s $(LIBDIR)\B
 	-del /f $(PODDIR)\*.html
 	-del /f $(PODDIR)\*.bat
-	-cd ..\utils && del /f h2ph splain perlbug pl2pm c2ph h2xs perldoc pstruct *.bat
+	-cd ..\utils && del /f h2ph splain perlbug pl2pm c2ph h2xs perldoc \
+	    pstruct *.bat
 	-cd ..\x2p && del /f find2perl s2p *.bat
 	-del /f ..\config.sh ..\splittree.pl perlmain.c dlutils.c config.h.new
 	-del /f $(CONFIGPM)
@@ -881,7 +921,8 @@ distclean: clean
 	-del /f perl95.c
 .ENDIF
 	-del /f bin\*.bat
-	-cd $(EXTDIR) && del /s *$(a) *.def *.map *.bs Makefile *$(o) pm_to_blib
+	-cd $(EXTDIR) && del /s *$(a) *.def *.map *.pdb *.bs Makefile *$(o) \
+	    pm_to_blib
 	-rmdir /s /q $(AUTODIR) || rmdir /s $(AUTODIR)
 	-rmdir /s /q $(COREDIR) || rmdir /s $(COREDIR)
 
@@ -892,11 +933,8 @@ installbare : utils
 .IF "$(PERL95EXE)" != ""
 	$(XCOPY) $(PERL95EXE) $(INST_BIN)\*.*
 .ENDIF
-
-installutils : utils
 	$(XCOPY) $(GLOBEXE) $(INST_BIN)\*.*
-	$(XCOPY) bin\*.bat $(INST_BIN)\*.*
-	$(XCOPY) bin\network.pl $(INST_LIB)\*.*
+	$(XCOPY) bin\*.bat $(INST_SCRIPT)\*.*
 
 installhtml : doc
 	$(RCOPY) html\*.* $(INST_HTML)\*.*
@@ -939,6 +977,7 @@ clean :
 	-@erase $(MINIPERL)
 	-@erase perlglob$(o)
 	-@erase perlmain$(o)
+	-@erase perlCAPI.cpp
 	-@erase config.w32
 	-@erase /f config.h
 	-@erase $(GLOBEXE)

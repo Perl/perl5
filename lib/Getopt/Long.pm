@@ -24,8 +24,8 @@ package Getopt::Long;
 # GNU General Public License for more details.
 # 
 # If you do not have a copy of the GNU General Public License write to
-# the Free Software Foundation, Inc., 675 Mass Ave, Cambridge, 
-# MA 02139, USA.
+# the Free Software Foundation, Inc., 59 Temple Place, Suite 330, Boston,
+# MA 02111-1307, USA.
 
 ################ Module Preamble ################
 
@@ -1375,7 +1375,7 @@ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 GNU General Public License for more details.
 
 If you do not have a copy of the GNU General Public License write to
-the Free Software Foundation, Inc., 675 Mass Ave, Cambridge, 
-MA 02139, USA.
+the Free Software Foundation, Inc., 59 Temple Place, Suite 330, Boston,
+MA 02111-1307, USA.
 
 =cut

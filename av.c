@@ -38,6 +38,7 @@ AV* av;
     key = AvARRAY(av) - AvALLOC(av);
     while (key)
 	AvALLOC(av)[--key] = &sv_undef;
+    AvREIFY_off(av);
     AvREAL_on(av);
 }
 
@@ -153,10 +154,7 @@ I32 lval;
     else if (key > AvFILLp(av)) {
 	if (!lval)
 	    return 0;
-	if (AvREALISH(av))
-	    sv = NEWSV(5,0);
-	else
-	    sv = sv_newmortal();
+	sv = NEWSV(5,0);
 	return av_store(av,key,sv);
     }
     if (AvARRAY(av)[key] == &sv_undef) {

@@ -4,7 +4,7 @@
 # various typeglob tests
 #
 
-print "1..16\n";
+print "1..23\n";
 
 # type coersion on assignment
 $foo = 'foo';
@@ -83,3 +83,16 @@ print +($foo || @foo || %foo) ? "not ok" : "ok", " 14\n";
     *foo = undef;
     print $msg ? "ok" : "not ok", " 16\n";
 }
+
+# test *glob{THING} syntax
+$x = "ok 17\n";
+@x = ("ok 18\n");
+%x = ("ok 19" => "\n");
+sub x { "ok 20\n" }
+print ${*x{SCALAR}}, @{*x{ARRAY}}, %{*x{HASH}}, &{*x{CODE}};
+*x = *STDOUT;
+print *{*x{GLOB}} eq "*main::STDOUT" ? "ok 21\n" : "not ok 21\n";
+print {*x{IO}} "ok 22\n";
+print {*x{FILEHANDLE}} "ok 23\n";
+
+

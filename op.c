@@ -45,7 +45,7 @@ static OP *too_few_arguments _((OP *o, char* name));
 static OP *too_many_arguments _((OP *o, char* name));
 static void null _((OP* o));
 static PADOFFSET pad_findlex _((char* name, PADOFFSET newoff, U32 seq,
-	CV* startcv, I32 cx_ix));
+	CV* startcv, I32 cx_ix, I32 saweval));
 static OP *new_logop _((I32 type, I32 flags, OP **firstp, OP **otherp));
 
 static char*
@@ -175,8 +175,9 @@ PADOFFSET newoff;
 U32 seq;
 CV* startcv;
 I32 cx_ix;
+I32 saweval;
 #else
-pad_findlex(char *name, PADOFFSET newoff, U32 seq, CV* startcv, I32 cx_ix)
+pad_findlex(char *name, PADOFFSET newoff, U32 seq, CV* startcv, I32 cx_ix, I32 saweval)
 #endif
 {
     dTHR;
@@ -185,7 +186,6 @@ pad_findlex(char *name, PADOFFSET newoff, U32 seq, CV* startcv, I32 cx_ix)
     SV *sv;
     register I32 i;
     register PERL_CONTEXT *cx;
-    int saweval;
 
     for (cv = startcv; cv; cv = CvOUTSIDE(cv)) {
 	AV *curlist = CvPADLIST(cv);
@@ -238,14 +238,18 @@ pad_findlex(char *name, PADOFFSET newoff, U32 seq, CV* startcv, I32 cx_ix)
 			    CV *bcv;
 			    for (bcv = startcv;
 				 bcv && bcv != cv && !CvCLONE(bcv);
-				 bcv = CvOUTSIDE(bcv)) {
+				 bcv = CvOUTSIDE(bcv))
+			    {
 				if (CvANON(bcv))
 				    CvCLONE_on(bcv);
 				else {
-				    if (dowarn && !CvUNIQUE(cv))
+				    if (dowarn
+					&& !CvUNIQUE(bcv) && !CvUNIQUE(cv))
+				    {
 					warn(
 					  "Variable \"%s\" may be unavailable",
 					     name);
+				    }
 				    break;
 				}
 			    }
@@ -267,20 +271,20 @@ pad_findlex(char *name, PADOFFSET newoff, U32 seq, CV* startcv, I32 cx_ix)
      * XXX This will also probably interact badly with eval tree caching.
      */
 
-    saweval = 0;
     for (i = cx_ix; i >= 0; i--) {
 	cx = &cxstack[i];
-	switch (cx->cx_type) {
+	switch (CxTYPE(cx)) {
 	default:
 	    if (i == 0 && saweval) {
 		seq = cxstack[saweval].blk_oldcop->cop_seq;
-		return pad_findlex(name, newoff, seq, main_cv, 0);
+		return pad_findlex(name, newoff, seq, main_cv, -1, saweval);
 	    }
 	    break;
 	case CXt_EVAL:
 	    switch (cx->blk_eval.old_op_type) {
 	    case OP_ENTEREVAL:
-		saweval = i;
+		if (CxREALEVAL(cx))
+		    saweval = i;
 		break;
 	    case OP_REQUIRE:
 		/* require must have its own scope */
@@ -296,7 +300,7 @@ pad_findlex(char *name, PADOFFSET newoff, U32 seq, CV* startcv, I32 cx_ix)
 		continue;
 	    }
 	    seq = cxstack[saweval].blk_oldcop->cop_seq;
-	    return pad_findlex(name, newoff, seq, cv, i-1);
+	    return pad_findlex(name, newoff, seq, cv, i-1, saweval);
 	}
     }
 
@@ -313,6 +317,8 @@ char *name;
     SV *sv;
     SV **svp = AvARRAY(comppad_name);
     U32 seq = cop_seqmax;
+    PERL_CONTEXT *cx;
+    CV *outside;
 
     /* The one we're looking for is probably just before comppad_name_fill. */
     for (off = AvFILLp(comppad_name); off > 0; off--) {
@@ -329,8 +335,20 @@ char *name;
 	}
     }
 
+    outside = CvOUTSIDE(compcv);
+
+    /* Check if if we're compiling an eval'', and adjust seq to be the
+     * eval's seq number.  This depends on eval'' having a non-null
+     * CvOUTSIDE() while it is being compiled.  The eval'' itself is
+     * identified by CvUNIQUE being set and CvGV being null. */
+    if (outside && CvUNIQUE(compcv) && !CvGV(compcv) && cxstack_ix >= 0) {
+	cx = &cxstack[cxstack_ix];
+	if (CxREALEVAL(cx))
+	    seq = cx->blk_oldcop->cop_seq;
+    }
+
     /* See if it's in a nested scope */
-    off = pad_findlex(name, 0, seq, CvOUTSIDE(compcv), cxstack_ix);
+    off = pad_findlex(name, 0, seq, outside, cxstack_ix, 0);
     if (off) {
 	/* If there is a pending local definition, this new alias must die */
 	if (pendoff)
@@ -1787,7 +1805,7 @@ LISTOP* last;
     first->op_last = last->op_last;
     first->op_children += last->op_children;
     if (first->op_children)
-	last->op_flags |= OPf_KIDS;
+	first->op_flags |= OPf_KIDS;
 
     Safefree(last);
     return (OP*)first;
@@ -1959,7 +1977,7 @@ OP* last;
     if (binop->op_next)
 	return (OP*)binop;
 
-    binop->op_last = last = binop->op_first->op_sibling;
+    binop->op_last = binop->op_first->op_sibling;
 
     return fold_constants((OP *)binop);
 }
@@ -3140,7 +3158,7 @@ CV* cv;
 		  cv,
 		  (CvANON(cv) ? "ANON"
 		   : (cv == main_cv) ? "MAIN"
-		   : CvUNIQUE(outside) ? "UNIQUE"
+		   : CvUNIQUE(cv) ? "UNIQUE"
 		   : CvGV(cv) ? GvNAME(CvGV(cv)) : "UNDEFINED"),
 		  outside,
 		  (!outside ? "null"
@@ -3237,7 +3255,7 @@ CV* outside;
 	    char *name = SvPVX(namesv);    /* XXX */
 	    if (SvFLAGS(namesv) & SVf_FAKE) {   /* lexical from outside? */
 		I32 off = pad_findlex(name, ix, SvIVX(namesv),
-				      CvOUTSIDE(cv), cxstack_ix);
+				      CvOUTSIDE(cv), cxstack_ix, 0);
 		if (!off)
 		    curpad[ix] = SvREFCNT_inc(ppad[ix]);
 		else if (off != ix)

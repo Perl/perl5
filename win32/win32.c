@@ -37,7 +37,16 @@
 
 #include "EXTERN.h"
 #include "perl.h"
+
+#include "patchlevel.h"
+
+#define NO_XSLOCKS
+#ifdef PERL_OBJECT
+extern CPerlObj* pPerl;
+#endif
 #include "XSUB.h"
+
+#include "Win32iop.h"
 #include <fcntl.h>
 #include <sys/stat.h>
 #ifndef __GNUC__
@@ -65,13 +74,29 @@ int _CRT_glob = 0;
 #define EXECF_SPAWN 2
 #define EXECF_SPAWN_NOWAIT 3
 
+#if defined(PERL_OBJECT)
+#undef win32_get_privlib
+#define win32_get_privlib g_win32_get_privlib
+#undef win32_get_sitelib
+#define win32_get_sitelib g_win32_get_sitelib
+#undef do_aspawn
+#define do_aspawn g_do_aspawn
+#undef do_spawn
+#define do_spawn g_do_spawn
+#undef do_exec
+#define do_exec g_do_exec
+#undef getlogin
+#define getlogin g_getlogin
+#endif
+
 static DWORD		os_id(void);
 static void		get_shell(void);
 static long		tokenize(char *str, char **dest, char ***destv);
-static int		do_spawn2(char *cmd, int exectype);
-static BOOL		has_redirection(char *ptr);
+	int		do_spawn2(char *cmd, int exectype);
+static BOOL		has_shell_metachars(char *ptr);
 static long		filetime_to_clock(PFILETIME ft);
 static BOOL		filetime_from_time(PFILETIME ft, time_t t);
+static char *		get_emd_part(char *leading, char *trailing, ...);
 static void		remove_dead_process(HANDLE deceased);
 
 HANDLE	w32_perldll_handle = INVALID_HANDLE_VALUE;
@@ -129,46 +154,183 @@ IsWinNT(void) {
     return (os_id() == VER_PLATFORM_WIN32_NT);
 }
 
-char *
-win32_perllib_path(char *sfx,...)
-{
-    dTHR;
-    va_list ap;
-    char *end;
+char*
+GetRegStrFromKey(HKEY hkey, const char *lpszValueName, char** ptr, DWORD* lpDataLen)
+{   /* Retrieve a REG_SZ or REG_EXPAND_SZ from the registry */
+    HKEY handle;
+    DWORD type;
+    const char *subkey = "Software\\Perl";
+    long retval;
 
-    va_start(ap,sfx);
-    GetModuleFileName((w32_perldll_handle == INVALID_HANDLE_VALUE) 
+    retval = RegOpenKeyEx(hkey, subkey, 0, KEY_READ, &handle);
+    if (retval == ERROR_SUCCESS){
+	retval = RegQueryValueEx(handle, lpszValueName, 0, &type, NULL, lpDataLen);
+	if (retval == ERROR_SUCCESS && type == REG_SZ) {
+	    if (*ptr) {
+		Renew(*ptr, *lpDataLen, char);
+	    }
+	    else {
+		New(1312, *ptr, *lpDataLen, char);
+	    }
+	    retval = RegQueryValueEx(handle, lpszValueName, 0, NULL, (PBYTE)*ptr, lpDataLen);
+	    if (retval != ERROR_SUCCESS) {
+		Safefree(*ptr);
+		*ptr = Nullch;
+	    }
+	}
+	RegCloseKey(handle);
+    }
+    return *ptr;
+}
+
+char*
+GetRegStr(const char *lpszValueName, char** ptr, DWORD* lpDataLen)
+{
+    *ptr = GetRegStrFromKey(HKEY_CURRENT_USER, lpszValueName, ptr, lpDataLen);
+    if (*ptr == Nullch)
+    {
+	*ptr = GetRegStrFromKey(HKEY_LOCAL_MACHINE, lpszValueName, ptr, lpDataLen);
+    }
+    return *ptr;
+}
+
+static char *
+get_emd_part(char *prev_path, char *trailing_path, ...)
+{
+    char base[10];
+    va_list ap;
+    char mod_name[MAX_PATH+1];
+    char *ptr;
+    char *optr;
+    char *strip;
+    int oldsize, newsize;
+
+    va_start(ap, trailing_path);
+    strip = va_arg(ap, char *);
+
+    sprintf(base, "%5.3f", (double) 5 + ((double) PATCHLEVEL / (double) 1000));
+
+    GetModuleFileName((w32_perldll_handle == INVALID_HANDLE_VALUE)
 		      ? GetModuleHandle(NULL)
-		      : w32_perldll_handle,
-		      w32_perllib_root, 
-		      sizeof(w32_perllib_root));
-    *(end = strrchr(w32_perllib_root, '\\')) = '\0';
-    if (stricmp(end-4,"\\bin") == 0)
-     end -= 4;
-    strcpy(end,"\\lib");
-    while (sfx)
-     {
-      strcat(end,"\\");
-      strcat(end,sfx);
-      sfx = va_arg(ap,char *);
-     }
-    va_end(ap); 
-    return (w32_perllib_root);
+		      : w32_perldll_handle, mod_name, sizeof(mod_name));
+    ptr = strrchr(mod_name, '\\');
+    while (ptr && strip) {
+        /* look for directories to skip back */
+	optr = ptr;
+	*ptr = '\0';
+	ptr = strrchr(mod_name, '\\');
+	if (!ptr || stricmp(ptr+1, strip) != 0) {
+	    *optr = '\\';
+	    ptr = optr;
+	}
+	strip = va_arg(ap, char *);
+    }
+    if (!ptr) {
+	ptr = mod_name;
+	*ptr++ = '.';
+	*ptr = '\\';
+    }
+    va_end(ap);
+    strcpy(++ptr, trailing_path);
+
+    /* only add directory if it exists */
+    if(GetFileAttributes(mod_name) != (DWORD) -1) {
+	/* directory exists */
+	newsize = strlen(mod_name) + 1;
+	if (prev_path) {
+	    oldsize = strlen(prev_path) + 1;
+	    newsize += oldsize;			/* includes plus 1 for ';' */
+	    Renew(prev_path, newsize, char);
+	    prev_path[oldsize-1] = ';';
+	    strcpy(&prev_path[oldsize], mod_name);
+	}
+	else {
+	    New(1311, prev_path, newsize, char);
+	    strcpy(prev_path, mod_name);
+	}
+    }
+
+    return prev_path;
+}
+
+char *
+win32_get_privlib(char *pl)
+{
+    char *stdlib = "lib";
+    char buffer[MAX_PATH+1];
+    char *path = Nullch;
+    DWORD datalen;
+
+    /* $stdlib = $HKCU{"lib-$]"} || $HKLM{"lib-$]"} || $HKCU{"lib"} || $HKLM{"lib"} || "";  */
+    sprintf(buffer, "%s-%s", stdlib, pl);
+    path = GetRegStr(buffer, &path, &datalen);
+    if (!path)
+	path = GetRegStr(stdlib, &path, &datalen);
+
+    /* $stdlib .= ";$EMD/../../lib" */
+    return get_emd_part(path, stdlib, ARCHNAME, "bin", Nullch);
+}
+
+char *
+win32_get_sitelib(char *pl)
+{
+    char *sitelib = "sitelib";
+    char regstr[40];
+    char pathstr[MAX_PATH+1];
+    DWORD datalen;
+    char *path1 = Nullch;
+    char *path2 = Nullch;
+    int len, newsize;
+
+    /* $HKCU{"sitelib-$]"} || $HKLM{"sitelib-$]"} . ---; */
+    sprintf(regstr, "%s-%s", sitelib, pl);
+    path1 = GetRegStr(regstr, &path1, &datalen);
+
+    /* $sitelib .=
+     * ";$EMD/" . ((-d $EMD/../../../$]) ? "../../.." : "../.."). "/site/$]/lib";  */
+    sprintf(pathstr, "site\\%s\\lib", pl);
+    path1 = get_emd_part(path1, pathstr, ARCHNAME, "bin", pl, Nullch);
+
+    /* $HKCU{'sitelib'} || $HKLM{'sitelib'} . ---; */
+    path2 = GetRegStr(sitelib, &path2, &datalen);
+
+    /* $sitelib .=
+     * ";$EMD/" . ((-d $EMD/../../../$]) ? "../../.." : "../.."). "/site/lib";  */
+    path2 = get_emd_part(path2, "site\\lib", ARCHNAME, "bin", pl, Nullch);
+
+    if (!path1)
+	return path2;
+
+    if (!path2)
+	return path1;
+
+    len = strlen(path1);
+    newsize = len + strlen(path2) + 2; /* plus one for ';' */
+
+    Renew(path1, newsize, char);
+    path1[len++] = ';';
+    strcpy(&path1[len], path2);
+
+    Safefree(path2);
+    return path1;
 }
 
 
 static BOOL
-has_redirection(char *ptr)
+has_shell_metachars(char *ptr)
 {
     int inquote = 0;
     char quote = '\0';
 
     /*
      * Scan string looking for redirection (< or >) or pipe
-     * characters (|) that are not in a quoted string
+     * characters (|) that are not in a quoted string.
+     * Shell variable interpolation (%VAR%) can also happen inside strings.
      */
     while (*ptr) {
 	switch(*ptr) {
+	case '%':
+	    return TRUE;
 	case '\'':
 	case '\"':
 	    if (inquote) {
@@ -195,6 +357,7 @@ has_redirection(char *ptr)
     return FALSE;
 }
 
+#if !defined(PERL_OBJECT)
 /* since the current process environment is being updated in util.c
  * the library functions will get the correct environment
  */
@@ -227,6 +390,7 @@ my_pclose(PerlIO *fp)
 {
     return win32_pclose(fp);
 }
+#endif
 
 static DWORD
 os_id(void)
@@ -388,7 +552,7 @@ do_spawn2(char *cmd, int exectype)
 
     /* Save an extra exec if possible. See if there are shell
      * metacharacters in it */
-    if (!has_redirection(cmd)) {
+    if (!has_shell_metachars(cmd)) {
 	New(1301,argv, strlen(cmd) / 2 + 2, char*);
 	New(1302,cmd2, strlen(cmd) + 1, char);
 	strcpy(cmd2, cmd);
@@ -503,12 +667,8 @@ win32_opendir(char *filename)
 	return NULL;
 
     /* check to see if filename is a directory */
-    if (win32_stat(filename, &sbuf) < 0 || (sbuf.st_mode & S_IFDIR) == 0) {
-	/* CRT is buggy on sharenames, so make sure it really isn't */
-	DWORD r = GetFileAttributes(filename);
-	if (r == 0xffffffff || !(r & FILE_ATTRIBUTE_DIRECTORY))
-	    return NULL;
-    }
+    if (win32_stat(filename, &sbuf) < 0 || !S_ISDIR(sbuf.st_mode))
+	return NULL;
 
     /* Get us a DIR structure */
     Newz(1303, p, 1, DIR);
@@ -525,6 +685,10 @@ win32_opendir(char *filename)
     /* do the FindFirstFile call */
     fh = FindFirstFile(scanname, &FindData);
     if (fh == INVALID_HANDLE_VALUE) {
+	/* FindFirstFile() fails on empty drives! */
+	if (GetLastError() == ERROR_FILE_NOT_FOUND)
+	    return p;
+	Safefree( p);
 	return NULL;
     }
 
@@ -748,7 +912,7 @@ win32_sleep(unsigned int t)
 DllExport int
 win32_stat(const char *path, struct stat *buffer)
 {
-    char		t[MAX_PATH+1]; 
+    char	t[MAX_PATH+1]; 
     const char	*p = path;
     int		l = strlen(path);
     int		res;
@@ -765,8 +929,31 @@ win32_stat(const char *path, struct stat *buffer)
 	}
     }
     res = stat(p,buffer);
+    if (res < 0) {
+	/* CRT is buggy on sharenames, so make sure it really isn't.
+	 * XXX using GetFileAttributesEx() will enable us to set
+	 * buffer->st_*time (but note that's not available on the
+	 * Windows of 1995) */
+	DWORD r = GetFileAttributes(p);
+	if (r != 0xffffffff && (r & FILE_ATTRIBUTE_DIRECTORY)) {
+	    buffer->st_mode |= S_IFDIR | S_IREAD;
+	    errno = 0;
+	    if (!(r & FILE_ATTRIBUTE_READONLY))
+		buffer->st_mode |= S_IWRITE | S_IEXEC;
+	    return 0;
+	}
+    }
+    else {
+	if (l == 3 && path[l-2] == ':'
+	    && (path[l-1] == '\\' || path[l-1] == '/'))
+	{
+	    /* The drive can be inaccessible, some _stat()s are buggy */
+	    if (!GetVolumeInformation(path,NULL,0,NULL,NULL,NULL,NULL,0)) {
+		errno = ENOENT;
+		return -1;
+	    }
+	}
 #ifdef __BORLANDC__
-    if (res == 0) {
 	if (S_ISDIR(buffer->st_mode))
 	    buffer->st_mode |= S_IWRITE | S_IEXEC;
 	else if (S_ISREG(buffer->st_mode)) {
@@ -783,8 +970,8 @@ win32_stat(const char *path, struct stat *buffer)
 	    else
 		buffer->st_mode &= ~S_IEXEC;
 	}
-    }
 #endif
+    }
     return res;
 }
 
@@ -793,18 +980,40 @@ win32_stat(const char *path, struct stat *buffer)
 DllExport char *
 win32_getenv(const char *name)
 {
-    static char *curitem = Nullch;
-    static DWORD curlen = 512;
+    static char *curitem = Nullch;	/* XXX threadead */
+    static DWORD curlen = 0;		/* XXX threadead */
     DWORD needlen;
-    if (!curitem)
+    if (!curitem) {
+	curlen = 512;
 	New(1305,curitem,curlen,char);
-    if (!(needlen = GetEnvironmentVariable(name,curitem,curlen)))
-	return Nullch;
-    while (needlen > curlen) {
-	Renew(curitem,needlen,char);
-	curlen = needlen;
-	needlen = GetEnvironmentVariable(name,curitem,curlen);
     }
+
+    needlen = GetEnvironmentVariable(name,curitem,curlen);
+    if (needlen != 0) {
+	while (needlen > curlen) {
+	    Renew(curitem,needlen,char);
+	    curlen = needlen;
+	    needlen = GetEnvironmentVariable(name,curitem,curlen);
+	}
+    }
+    else {
+	/* allow any environment variables that begin with 'PERL'
+	   to be stored in the registry */
+	if (curitem)
+	    *curitem = '\0';
+
+	if (strncmp(name, "PERL", 4) == 0) {
+	    if (curitem) {
+		Safefree(curitem);
+		curitem = Nullch;
+		curlen = 0;
+	    }
+	    curitem = GetRegStr(name, &curitem, &curlen);
+	}
+    }
+    if (curitem && *curitem == '\0')
+	return Nullch;
+
     return curitem;
 }
 
@@ -914,10 +1123,10 @@ win32_waitpid(int pid, int *status, int flags)
       return win32_wait(status);
     else {
       rc = cwait(status, pid, WAIT_CHILD);
-    /* cwait() returns differently on Borland */
-#ifdef __BORLANDC__
+    /* cwait() returns "correctly" on Borland */
+#ifndef __BORLANDC__
     if (status)
-	*status =  (((*status >> 8) & 0xff) | ((*status << 8) & 0xff00));
+	*status *= 256;
 #endif
       remove_dead_process((HANDLE)pid);
     }
@@ -1008,14 +1217,21 @@ win32_alarm(unsigned int sec)
     return 0;
 }
 
+#if defined(HAVE_DES_FCRYPT) || defined(PERL_OBJECT)
 #ifdef HAVE_DES_FCRYPT
-extern char *	des_fcrypt(char *cbuf, const char *txt, const char *salt);
+extern char *	des_fcrypt(const char *txt, const char *salt, char *cbuf);
+#endif
 
 DllExport char *
 win32_crypt(const char *txt, const char *salt)
 {
+#ifdef HAVE_DES_FCRYPT
     dTHR;
-    return des_fcrypt(crypt_buffer, txt, salt);
+    return des_fcrypt(txt, salt, crypt_buffer);
+#else
+    die("The crypt() function is unimplemented due to excessive paranoia.");
+    return Nullch;
+#endif
 }
 #endif
 
@@ -1563,12 +1779,11 @@ win32_pclose(FILE *pf)
     /* wait for the child */
     if (cwait(&status, childpid, WAIT_CHILD) == -1)
         return (-1);
-    /* cwait() returns differently on Borland */
-#ifdef __BORLANDC__
-    return (((status >> 8) & 0xff) | ((status << 8) & 0xff00));
-#else
-    return (status);
+    /* cwait() returns "correctly" on Borland */
+#ifndef __BORLANDC__
+    status *= 256;
 #endif
+    return (status);
 
 #endif /* USE_RTL_POPEN */
 }
@@ -2036,7 +2251,7 @@ XS(w32_DomainName)
 	char dname[256];
 	DWORD dnamelen = sizeof(dname);
 	SID_NAME_USE snu;
-	if (LookupAccountName(NULL, name, &sid, &sidlen,
+	if (LookupAccountName(NULL, name, (PSID)&sid, &sidlen,
 			      dname, &dnamelen, &snu)) {
 	    XSRETURN_PV(dname);		/* all that for this */
 	}

@@ -95,7 +95,7 @@ or string.
 
 In the C<SvPV> macro, the length of the string returned is placed into the
 variable C<len> (this is a macro, so you do I<not> use C<&len>).  If you do not
-care what the length of the data is, use the global variable C<na>.  Remember,
+care what the length of the data is, use the global variable C<PL_na>.  Remember,
 however, that Perl allows arbitrary strings of data that may both contain
 NULs and might not be terminated by a NUL.
 
@@ -167,14 +167,14 @@ you can call:
 
     SvOK(SV*)
 
-The scalar C<undef> value is stored in an SV instance called C<sv_undef>.  Its
+The scalar C<undef> value is stored in an SV instance called C<PL_sv_undef>.  Its
 address can be used whenever an C<SV*> is needed.
 
-There are also the two values C<sv_yes> and C<sv_no>, which contain Boolean
-TRUE and FALSE values, respectively.  Like C<sv_undef>, their addresses can
+There are also the two values C<PL_sv_yes> and C<PL_sv_no>, which contain Boolean
+TRUE and FALSE values, respectively.  Like C<PL_sv_undef>, their addresses can
 be used whenever an C<SV*> is needed.
 
-Do not be fooled into thinking that C<(SV *) 0> is the same as C<&sv_undef>.
+Do not be fooled into thinking that C<(SV *) 0> is the same as C<&PL_sv_undef>.
 Take this code:
 
     SV* sv = (SV*) 0;
@@ -186,7 +186,7 @@ Take this code:
 This code tries to return a new SV (which contains the value 42) if it should
 return a real value, or undef otherwise.  Instead it has returned a NULL
 pointer which, somewhere down the line, will cause a segmentation violation,
-bus error, or just weird results.  Change the zero to C<&sv_undef> in the first
+bus error, or just weird results.  Change the zero to C<&PL_sv_undef> in the first
 line and all will be well.
 
 To free an SV that you've created, call C<SvREFCNT_dec(SV*)>.  Normally this
@@ -618,10 +618,10 @@ including (but not limited to) the following:
     Format
     Subroutine
 
-There is a single stash called "defstash" that holds the items that exist
+There is a single stash called "PL_defstash" that holds the items that exist
 in the "main" package.  To get at the items in other packages, append the
 string "::" to the package name.  The items in the "Foo" package are in
-the stash "Foo::" in defstash.  The items in the "Bar::Baz" package are
+the stash "Foo::" in PL_defstash.  The items in the "Bar::Baz" package are
 in the stash "Baz::" in "Bar::"'s stash.
 
 To get the stash pointer for a particular package, use the function:
@@ -861,7 +861,20 @@ C<mg_ptr> field points to a C<ufuncs> structure:
 
 When the SV is read from or written to, the C<uf_val> or C<uf_set>
 function will be called with C<uf_index> as the first arg and a
-pointer to the SV as the second.
+pointer to the SV as the second.  A simple example of how to add 'U'
+magic is shown below.  Note that the ufuncs structure is copied by
+sv_magic, so you can safely allocate it on the stack.
+
+    void
+    Umagic(sv)
+        SV *sv;
+    PREINIT:
+        struct ufuncs uf;
+    CODE:
+        uf.uf_val   = &my_get_fn;
+        uf.uf_set   = &my_set_fn;
+        uf.uf_index = 0;
+        sv_magic(sv, 0, 'U', (char*)&uf, sizeof(uf));
 
 Note that because multiple extensions may be using '~' or 'U' magic,
 it is important for extensions to take extra care to avoid conflict.
@@ -906,6 +919,33 @@ of these caveats are actually considered bugs in the API, to be fixed
 in later releases, and are bracketed with [MAYCHANGE] below. If
 you find yourself actually applying such information in this section, be
 aware that the behavior may change in the future, umm, without warning.
+
+The perl tie function associates a variable with an object that implements
+the various GET, SET etc methods.  To perform the equivalent of the perl
+tie function from an XSUB, you must mimic this behaviour.  The code below
+carries out the necessary steps - firstly it creates a new hash, and then
+creates a second hash which it blesses into the class which will implement
+the tie methods. Lastly it ties the two hashes together, and returns a
+reference to the new tied hash.  Note that the code below does NOT call the
+TIEHASH method in the MyTie class -
+see L<Calling Perl Routines from within C Programs> for details on how
+to do this.
+
+    SV*
+    mytie()
+    PREINIT:
+        HV *hash;
+        HV *stash;
+        SV *tie;
+    CODE:
+        hash = newHV();
+        tie = newRV_noinc((SV*)newHV());
+        stash = gv_stashpv("MyTie", TRUE);
+        sv_bless(tie, stash);
+        hv_magic(hash, tie, 'P');
+        RETVAL = newRV_noinc(hash);
+    OUTPUT:
+        RETVAL
 
 The C<av_store> function, when given a tied array argument, merely
 copies the magic of the array onto the value to be "stored", using
@@ -1041,7 +1081,7 @@ string pointed to by C<key> is Safefree()ed.  If one has a I<key> in
 short-lived storage, the corresponding string may be reallocated like
 this:
 
-  SAVEDELETE(defstash, savepv(tmpbuf), strlen(tmpbuf));
+  SAVEDELETE(PL_defstash, savepv(tmpbuf), strlen(tmpbuf));
 
 =item C<SAVEDESTRUCTOR(f,p)>
 
@@ -1451,6 +1491,14 @@ are subject to the same restrictions as in the pass 2.
 This is a listing of functions, macros, flags, and variables that may be
 useful to extension writers or that may be found while reading other
 extensions.
+
+Note that all Perl API global variables must be referenced with the C<PL_>
+prefix.  Some macros are provided for compatibility with the older,
+unadorned names, but this support will be removed in a future release.
+
+It is strongly recommended that all Perl API functions that don't begin
+with C<perl> be referenced with an explicit C<Perl_> prefix.
+
 The sort order of the listing is case insensitive, with any
 occurrences of '_' ignored for the the purpose of sorting.
 
@@ -1501,7 +1549,7 @@ will have a reference count of 1.
 
 =item av_pop
 
-Pops an SV off the end of the array.  Returns C<&sv_undef> if the array is
+Pops an SV off the end of the array.  Returns C<&PL_sv_undef> if the array is
 empty.
 
 	SV*	av_pop (AV* ar)
@@ -1572,27 +1620,27 @@ Returns the stash of the CV.
 
 	HV*	CvSTASH( SV* sv )
 
-=item DBsingle
+=item PL_DBsingle
 
 When Perl is run in debugging mode, with the B<-d> switch, this SV is a
 boolean which indicates whether subs are being single-stepped.
 Single-stepping is automatically turned on after every step.  This is the C
-variable which corresponds to Perl's $DB::single variable.  See C<DBsub>.
+variable which corresponds to Perl's $DB::single variable.  See C<PL_DBsub>.
 
-=item DBsub
+=item PL_DBsub
 
 When Perl is run in debugging mode, with the B<-d> switch, this GV contains
 the SV which holds the name of the sub being debugged.  This is the C
-variable which corresponds to Perl's $DB::sub variable.  See C<DBsingle>.
+variable which corresponds to Perl's $DB::sub variable.  See C<PL_DBsingle>.
 The sub name can be found by
 
-	SvPV( GvSV( DBsub ), na )
+	SvPV( GvSV( PL_DBsub ), PL_na )
 
-=item DBtrace
+=item PL_DBtrace
 
 Trace variable used when Perl is run in debugging mode, with the B<-d>
 switch.  This is the C variable which corresponds to Perl's $DB::trace
-variable.  See C<DBsingle>.
+variable.  See C<PL_DBsingle>.
 
 =item dMARK
 
@@ -1603,7 +1651,7 @@ C<dORIGMARK>.
 
 Saves the original stack mark for the XSUB.  See C<ORIGMARK>.
 
-=item dowarn
+=item PL_dowarn
 
 The C variable which corresponds to Perl's $^W warning variable.
 
@@ -1647,7 +1695,7 @@ Used to extend the argument stack for an XSUB's return values.
 Analyses the string in order to make fast searches on it using fbm_instr() --
 the Boyer-Moore algorithm.
 
-	void	fbm_compile(SV* sv)
+	void	fbm_compile(SV* sv, U32 flags)
 
 =item fbm_instr
 
@@ -1656,7 +1704,7 @@ C<strend>.  It returns C<Nullch> if the string can't be found.  The
 C<sv> does not have to be fbm_compiled, but the search will not be as
 fast then.
 
-	char*	fbm_instr(char *str, char *strend, SV *sv)
+	char*	fbm_instr(char *str, char *strend, SV *sv, U32 flags)
 
 =item FREETMPS
 
@@ -1806,7 +1854,7 @@ Returns the key slot of the hash entry as a C<char*> value, doing any
 necessary dereferencing of possibly C<SV*> keys.  The length of
 the string is placed in C<len> (this is a macro, so do I<not> use
 C<&len>).  If you do not care about what the length of the key is,
-you may use the global variable C<na>.  Remember though, that hash
+you may use the global variable C<PL_na>.  Remember though, that hash
 keys in perl are free to contain embedded nulls, so using C<strlen()>
 or similar is not a good way to find the length of hash keys.
 This is very similar to the C<SvPV()> macro described elsewhere in
@@ -1846,15 +1894,6 @@ Returns the value slot (type C<SV*>) stored in the hash entry.
 Clears a hash, making it empty.
 
 	void	hv_clear (HV* tb)
-
-=item hv_delayfree_ent
-
-Releases a hash entry, such as while iterating though the hash, but
-delays actual freeing of key and value until the end of the current
-statement (or thereabouts) with C<sv_2mortal>.  See C<hv_iternext>
-and C<hv_free_ent>.
-
-	void    hv_delayfree_ent (HV* hv, HE* entry)
 
 =item hv_delete
 
@@ -1914,13 +1953,6 @@ See L<Understanding the Magic of Tied Hashes and Arrays> for more
 information on how to use this function on tied hashes.
 
 	HE*     hv_fetch_ent  (HV* tb, SV* key, I32 lval, U32 hash)
-
-=item hv_free_ent
-
-Releases a hash entry, such as while iterating though the hash.  See
-C<hv_iternext> and C<hv_delayfree_ent>.
-
-	void    hv_free_ent (HV* hv, HE* entry)
 
 =item hv_iterinit
 
@@ -2143,7 +2175,7 @@ the type.  Can do overlapping moves.  See also C<Copy>.
 
 	void	Move( s, d, n, t )
 
-=item na
+=item PL_na
 
 A variable which may be used with C<SvPV> to tell Perl to calculate the
 string length.
@@ -2746,7 +2778,7 @@ indicated number of bytes (remember to reserve space for an extra
 trailing NUL character).  Calls C<sv_grow> to perform the expansion if
 necessary.  Returns a pointer to the character buffer.
 
-	char*	SvGROW( SV* sv, int len )
+	char*	SvGROW( SV* sv, STRLEN len )
 
 =item sv_grow
 
@@ -2878,9 +2910,9 @@ double.  Checks the B<private> setting.  Use C<SvNIOK>.
 
 	int	SvNIOKp (SV* SV)
 
-=item sv_no
+=item PL_sv_no
 
-This is the C<false> SV.  See C<sv_yes>.  Always refer to this as C<&sv_no>.
+This is the C<false> SV.  See C<PL_sv_yes>.  Always refer to this as C<&PL_sv_no>.
 
 =item SvNOK
 
@@ -2974,7 +3006,7 @@ Checks the B<private> setting.  Use C<SvPOK>.
 =item SvPV
 
 Returns a pointer to the string in the SV, or a stringified form of the SV
-if the SV does not contain a string.  If C<len> is C<na> then Perl will
+if the SV does not contain a string.  If C<len> is C<PL_na> then Perl will
 handle the length on its own.  Handles 'get' magic.
 
 	char*	SvPV (SV* sv, int len )
@@ -3144,7 +3176,7 @@ will be returned and will have a reference count of 1.
 
 Copies a pointer into a new SV, optionally blessing the SV.  The C<rv>
 argument will be upgraded to an RV.  That RV will be modified to point to
-the new SV.  If the C<pv> argument is NULL then C<sv_undef> will be placed
+the new SV.  If the C<pv> argument is NULL then C<PL_sv_undef> will be placed
 into the SV.  The C<classname> argument indicates the package for the
 blessing.  Set C<classname> to C<Nullch> to avoid the blessing.  The new SV
 will be returned and will have a reference count of 1.
@@ -3291,9 +3323,9 @@ Returns the type of the SV.  See C<svtype>.
 An enum of flags for Perl types.  These are found in the file B<sv.h> in the
 C<svtype> enum.  Test these flags with the C<SvTYPE> macro.
 
-=item sv_undef
+=item PL_sv_undef
 
-This is the C<undef> SV.  Always refer to this as C<&sv_undef>.
+This is the C<undef> SV.  Always refer to this as C<&PL_sv_undef>.
 
 =item sv_unref
 
@@ -3363,9 +3395,9 @@ Returns the unsigned integer which is stored in the SV.
 
 	UV      SvUVX(SV* sv)
 
-=item sv_yes
+=item PL_sv_yes
 
-This is the C<true> SV.  See C<sv_no>.  Always refer to this as C<&sv_yes>.
+This is the C<true> SV.  See C<PL_sv_no>.  Always refer to this as C<&PL_sv_yes>.
 
 =item THIS
 
@@ -3449,7 +3481,7 @@ Return an integer from an XSUB immediately.  Uses C<XST_mIV>.
 
 =item XSRETURN_NO
 
-Return C<&sv_no> from an XSUB immediately.  Uses C<XST_mNO>.
+Return C<&PL_sv_no> from an XSUB immediately.  Uses C<XST_mNO>.
 
 	XSRETURN_NO;
 
@@ -3467,13 +3499,13 @@ Return a copy of a string from an XSUB immediately.  Uses C<XST_mPV>.
 
 =item XSRETURN_UNDEF
 
-Return C<&sv_undef> from an XSUB immediately.  Uses C<XST_mUNDEF>.
+Return C<&PL_sv_undef> from an XSUB immediately.  Uses C<XST_mUNDEF>.
 
 	XSRETURN_UNDEF;
 
 =item XSRETURN_YES
 
-Return C<&sv_yes> from an XSUB immediately.  Uses C<XST_mYES>.
+Return C<&PL_sv_yes> from an XSUB immediately.  Uses C<XST_mYES>.
 
 	XSRETURN_YES;
 
@@ -3493,7 +3525,7 @@ stored in a new mortal SV.
 
 =item XST_mNO
 
-Place C<&sv_no> into the specified position C<i> on the stack.
+Place C<&PL_sv_no> into the specified position C<i> on the stack.
 
 	XST_mNO( int i )
 
@@ -3506,13 +3538,13 @@ value is stored in a new mortal SV.
 
 =item XST_mUNDEF
 
-Place C<&sv_undef> into the specified position C<i> on the stack.
+Place C<&PL_sv_undef> into the specified position C<i> on the stack.
 
 	XST_mUNDEF( int i )
 
 =item XST_mYES
 
-Place C<&sv_yes> into the specified position C<i> on the stack.
+Place C<&PL_sv_yes> into the specified position C<i> on the stack.
 
 	XST_mYES( int i )
 
