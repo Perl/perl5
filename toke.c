@@ -821,24 +821,22 @@ STATIC char *
 S_force_version(pTHX_ char *s)
 {
     OP *version = Nullop;
-    bool is_vstr = FALSE;
     char *d;
 
     s = skipspace(s);
 
     d = s;
-    if (*d == 'v') {
-	is_vstr = TRUE;
+    if (*d == 'v')
 	d++;
-    }
     if (isDIGIT(*d)) {
         for (; isDIGIT(*d) || *d == '_' || *d == '.'; d++);
         if (*d == ';' || isSPACE(*d) || *d == '}' || !*d) {
+	    SV *ver;
             s = scan_num(s);
             /* real VERSION number -- GBARR */
             version = yylval.opval;
-	    if (is_vstr) {
-		SV *ver = cSVOPx(version)->op_sv;
+	    ver = cSVOPx(version)->op_sv;
+	    if (SvPOK(ver) && !SvNIOK(ver)) {
 		SvUPGRADE(ver, SVt_PVIV);
 		SvIOKp_on(ver);		/* hint that it is a version */
 	    }
@@ -3499,7 +3497,7 @@ Perl_yylex(pTHX)
 	    char *start = s;
 	    start++;
 	    start++;
-	    while (isDIGIT(*start))
+	    while (isDIGIT(*start) || *start == '_')
 		start++;
 	    if (*start == '.' && isDIGIT(start[1])) {
 		s = scan_num(s);
@@ -6886,6 +6884,11 @@ Perl_scan_num(pTHX_ char *start)
 		if (*s != '_')
 		    *d++ = *s;
 	    }
+	    if (*s == '.' && isDIGIT(s[1])) {
+		/* oops, it's really a v-string, but without the "v" */
+		s = start - 1;
+		goto vstring;
+	    }
 	}
 
 	/* read exponent part, if present */
@@ -6939,10 +6942,11 @@ Perl_scan_num(pTHX_ char *start)
 	break;
     /* if it starts with a v, it could be a version number */
     case 'v':
+vstring:
 	{
 	    char *pos = s;
 	    pos++;
-	    while (isDIGIT(*pos))
+	    while (isDIGIT(*pos) || *pos == '_')
 		pos++;
 	    if (!isALPHA(*pos)) {
 		UV rev;
@@ -6957,7 +6961,23 @@ Perl_scan_num(pTHX_ char *start)
 		for (;;) {
 		    if (*s == '0' && isDIGIT(s[1]))
 			yyerror("Octal number in vector unsupported");
-		    rev = atoi(s);
+		    rev = 0;
+		    {
+			/* this is atoi() that tolerates underscores */
+			char *end = pos;
+			UV mult = 1;
+			while (--end >= s) {
+			    UV orev;
+			    if (*end == '_')
+				continue;
+			    orev = rev;
+			    rev += (*end - '0') * mult;
+			    mult *= 10;
+			    if (orev > rev && ckWARN_d(WARN_OVERFLOW))
+				Perl_warner(aTHX_ WARN_OVERFLOW,
+					    "Integer overflow in decimal number");
+			}
+		    }
 		    tmpend = uv_to_utf8(tmpbuf, rev);
 		    utf8 = utf8 || rev > 127;
 		    sv_catpvn(sv, (const char*)tmpbuf, tmpend - tmpbuf);
@@ -6967,7 +6987,7 @@ Perl_scan_num(pTHX_ char *start)
 			s = pos;
 			break;
 		    }
-		    while (isDIGIT(*pos))
+		    while (isDIGIT(*pos) || *pos == '_')
 			pos++;
 		}
 

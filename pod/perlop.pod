@@ -1811,6 +1811,9 @@ readable interpolation form C<"\x{1}\x{14}\x{12c}\x{fa0}">.  This is useful
 for representing Unicode strings, and for comparing version "numbers"
 using the string comparison operators, C<cmp>, C<gt>, C<lt> etc.
 
+If there are more than two dots in the literal, the leading C<v> may be
+omitted.
+
 Such literals are accepted by both C<require> and C<use> for doing a version
 check.  The C<$^V> special variable also contains the running Perl
 interpreter's version in this form.  See L<perlvar/$^V>.
