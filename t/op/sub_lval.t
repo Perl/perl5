@@ -1,4 +1,4 @@
-print "1..64\n";
+print "1..67\n";
 
 BEGIN {
     chdir 't' if -d 't';
@@ -532,3 +532,34 @@ sub lval2 : lvalue { $ary[1]; }
 (lval1(), lval2()) = split ' ', "1 2 3 4";
 print "not " unless join(':', @ary) eq "1:2:6";
 print "ok 64\n";
+
+require './test.pl';
+curr_test(65);
+
+TODO: {
+    local $TODO = 'test explicit return of lval expr';
+
+    # subs are corrupted copies from tests 1-~4
+    sub bad_get_lex : lvalue { return $in };
+    sub bad_get_st  : lvalue { return $blah }
+
+    sub bad_id  : lvalue { return ${\shift} }
+    sub bad_id1 : lvalue { return $_[0] }
+    sub bad_inc : lvalue { return ${\++$_[0]} }
+
+    $in = 5;
+    $blah = 3;
+
+    bad_get_st = 7;
+
+    is( $blah, 7 );
+
+    bad_get_lex = 7;
+
+    is($in, 7, "yada");
+
+    ++bad_get_st;
+
+    is($blah, 8, "yada");
+}
+
