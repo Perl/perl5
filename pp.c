@@ -4636,7 +4636,7 @@ PP(pp_split)
 	    if (TOPs && !make_mortal)
 		sv_2mortal(TOPs);
 	    iters--;
-	    SP--;
+	    *SP-- = &PL_sv_undef;
 	}
     }
 

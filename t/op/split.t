@@ -6,7 +6,7 @@ BEGIN {
     require './test.pl';
 }
 
-plan tests => 54;
+plan tests => 55;
 
 $FS = ':';
 
@@ -289,3 +289,16 @@ ok(@ary == 3 &&
     $n = @a = split /,/,$p;
     is ($n, 0, '#21765 - pmreplroot hack used to return undef for 0 iters');
 }
+
+{
+    # [perl #28938]
+    # assigning off the end of the array after a split could leave garbage
+    # in the inner elements
+
+    my $x;
+    @a = split /,/, ',,,,,';
+    $a[3]=1;
+    $x = \$a[2];
+    is (ref $x, 'SCALAR', '#28938 - garbage after extend');
+}
+
