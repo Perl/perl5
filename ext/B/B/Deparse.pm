@@ -968,6 +968,8 @@ sub AUTOLOAD {
     }
 }
 
+sub DESTROY {}	#	Do not AUTOLOAD
+
 # $root should be the op which represents the root of whatever
 # we're sequencing here. If it's undefined, then we don't append
 # any subroutine declarations to the deparsed ops, otherwise we

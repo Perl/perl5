@@ -249,6 +249,8 @@ Ap	|void	|gv_efullname4	|SV* sv|GV* gv|const char* prefix|bool keepmain
 Ap	|GV*	|gv_fetchfile	|const char* name
 Apd	|GV*	|gv_fetchmeth	|HV* stash|const char* name|STRLEN len \
 				|I32 level
+Apd	|GV*	|gv_fetchmeth_autoload	|HV* stash|const char* name|STRLEN len \
+				|I32 level
 Apd	|GV*	|gv_fetchmethod	|HV* stash|const char* name
 Apd	|GV*	|gv_fetchmethod_autoload|HV* stash|const char* name \
 				|I32 autoload
