@@ -147,6 +147,7 @@ dynamic_ext=''
 extensions=''
 known_extensions=''
 static_ext=''
+nonxs_ext=''
 useopcode=''
 useposix=''
 d_bsd=''
@@ -10867,6 +10868,7 @@ cd $rsrc/ext
 : If we are using the old config.sh, known_extensions may contain
 : old or inaccurate or duplicate values.
 known_extensions=''
+nonxs_extensions=''
 : We do not use find because it might not be available.
 : We do not just use MANIFEST because the user may have dropped
 : some additional extensions into the source tree and expect them
@@ -10879,17 +10881,27 @@ for xxx in * ; do
 		else
 			if $test -d $xxx; then
 				cd $xxx
+				zzz=$known_extensions
 				for yyy in * ; do
 				if $test -f $yyy/$yyy.xs; then
 					known_extensions="$known_extensions $xxx/$yyy"
 				fi
 				done
 				cd ..
+				if $test "$zzz" = "$known_extensions"; then
+					if $test -f $xxx/Makefile.PL; then
+						known_extensions="$known_extensions $xxx"
+						nonxs_extensions="$nonxs_extensions $xxx"
+					fi
+				fi
 			fi
 		fi 
 		;;
 	esac
 done
+set X $nonxs_extensions
+shift
+nonxs_extensions="$*"
 set X $known_extensions
 shift
 known_extensions="$*"
@@ -10939,7 +10951,11 @@ for xxx in $known_extensions ; do
 		true|$define|y) avail_ext="$avail_ext $xxx" ;;
 		esac
 		;;
-	*)	avail_ext="$avail_ext $xxx"
+	*)
+		case " $nonxs_extensions " in
+		*" $xxx "*) ;;
+		*) avail_ext="$avail_ext $xxx" ;;
+		esac
 		;;
 	esac
 done
@@ -10947,6 +10963,19 @@ done
 set X $avail_ext
 shift
 avail_ext="$*"
+
+: Now see which nonxs extensions are supported on this system.
+nonxs_ext=''
+for xxx in $nonxs_extensions ; do
+	case "$xxx" in
+	*)	nonxs_ext="$nonxs_ext $xxx"
+		;;
+	esac
+done
+
+set X $nonxs_ext
+shift
+nonxs_ext="$*"
 
 case $usedl in
 $define)
@@ -10978,6 +11007,7 @@ EOM
 		esac
 		;;
 	esac
+	: Exclude those that are not xs extensions
 	case "$dflt" in
 	'')	dflt=none;;
 	esac
@@ -10993,7 +11023,7 @@ EOM
 		: Exclude those already listed in dynamic linking
 		dflt=''
 		for xxx in $avail_ext; do
-			case " $dynamic_ext " in
+			case " $dynamic_ext $nonxs_ext " in
 			*" $xxx "*) ;;
 			*) dflt="$dflt $xxx" ;;
 			esac
@@ -11574,6 +11604,7 @@ path_sep='$path_sep'
 perl='$perl'
 perladmin='$perladmin'
 perlpath='$perlpath'
+nonxs_ext='$nonxs_ext'
 pg='$pg'
 phostname='$phostname'
 pidtype='$pidtype'

@@ -711,9 +711,9 @@ gv_fetchpv(char *nambeg, I32 add, I32 sv_type)
 	goto magicalize;
 
     case '!':
-	if(len > 1)
+	if (len > 1)
 	    break;
-	if(sv_type > SVt_PV) {
+	if (sv_type > SVt_PV && curcop != &compiling) {
 	    HV* stash = gv_stashpvn("Errno",5,FALSE);
 	    if(!stash || !(gv_fetchmethod(stash, "TIEHASH"))) {
 		dSP;

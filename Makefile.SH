@@ -85,6 +85,12 @@ for f in $static_ext; do
 	static_list="$static_list lib/auto/$f/$base\$(LIB_EXT)"
 done
 
+nonxs_list=' '
+for f in $nonxs_ext; do
+    base=`echo "$f" | sed 's/.*\///'`
+    nonxs_list="$nonxs_list ext/$f/pm_to_blib"
+done
+
 echo "Extracting Makefile (with variable substitutions)"
 $spitshell >Makefile <<!GROK!THIS!
 # Makefile.SH
@@ -140,7 +146,8 @@ LDLIBPTH = $ldlibpth
 
 dynamic_ext = $dynamic_list
 static_ext = $static_list
-ext = \$(dynamic_ext) \$(static_ext)
+nonxs_ext = $nonxs_list
+ext = \$(dynamic_ext) \$(static_ext) \$(nonxs_ext)
 DYNALOADER = lib/auto/DynaLoader/DynaLoader\$(LIB_EXT)
 
 libs = $libs $cryptlib
@@ -230,7 +237,7 @@ lintflags = -hbvxac
 .c$(OBJ_EXT):
 	$(CCCMD) $(PLDLFLAGS) $*.c
 
-all: $(FIRSTMAKEFILE) miniperl $(private) $(plextract) $(public) $(dynamic_ext)
+all: $(FIRSTMAKEFILE) miniperl $(private) $(plextract) $(public) $(dynamic_ext) $(nonxs_ext)
 	@echo " "; echo "	Everything is up to date."
 
 compile: all
@@ -454,9 +461,9 @@ regen_headers:	FORCE
 	perl bytecode.pl
 
 # Extensions:
-# Names added to $(dynamic_ext) or $(static_ext) will automatically
-# get built.  There should ordinarily be no need to change any of
-# this part of makefile.
+# Names added to $(dynamic_ext) or $(static_ext) or $(nonxs_ext) will
+# automatically get built.  There should ordinarily be no need to change
+# any of this part of makefile.
 #
 # The dummy dependency is a place holder in case $(dynamic_ext) or
 # $(static_ext) is empty.
@@ -471,6 +478,9 @@ d_dummy $(dynamic_ext):	miniperl preplibrary $(DYNALOADER) FORCE
 
 s_dummy $(static_ext):	miniperl preplibrary $(DYNALOADER) FORCE
 	@$(LDLIBPTH) sh ext/util/make_ext static $@ MAKE=$(MAKE) LIBPERL_A=$(LIBPERL)
+
+n_dummy $(nonxs_ext):	miniperl preplibrary $(DYNALOADER) FORCE
+	@$(LDLIBPTH) sh ext/util/make_ext nonxs $@ MAKE=$(MAKE) LIBPERL_A=$(LIBPERL)
 
 clean:		_tidy _mopup
 
@@ -494,7 +504,7 @@ _tidy:
 	-cd pod; $(MAKE) clean
 	-cd utils; $(MAKE) clean
 	-cd x2p; $(MAKE) clean
-	-@for x in $(DYNALOADER) $(dynamic_ext) $(static_ext) ; do \
+	-@for x in $(DYNALOADER) $(dynamic_ext) $(static_ext) $(nonxs_ext) ; do \
 	sh ext/util/make_ext clean $$x MAKE=$(MAKE) ; \
 	done
 	rm -f testcompile compilelog
@@ -505,7 +515,7 @@ _cleaner:
 	-cd pod; $(MAKE) realclean
 	-cd utils; $(MAKE) realclean
 	-cd x2p; $(MAKE) realclean
-	-@for x in $(DYNALOADER) $(dynamic_ext) $(static_ext) ; do \
+	-@for x in $(DYNALOADER) $(dynamic_ext) $(static_ext) $(nonxs_ext) ; do \
 	sh ext/util/make_ext realclean $$x MAKE=$(MAKE) ; \
 	done
 	rm -f *.orig */*.orig *~ */*~ core t/core t/c t/perl
@@ -552,7 +562,7 @@ depend: makedepend
 makedepend: makedepend.SH config.sh
 	sh ./makedepend.SH
 
-test-prep: miniperl perl preplibrary utilities $(dynamic_ext)
+test-prep: miniperl perl preplibrary utilities $(dynamic_ext) $(nonxs_ext)
 	cd t && (rm -f perl$(EXE_EXT); $(LNS) ../perl$(EXE_EXT) perl$(EXE_EXT))
 
 test check: test-prep
