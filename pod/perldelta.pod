@@ -2297,7 +2297,7 @@ Sys::Syslog ignored the C<LOG_AUTH> constant.
 
 =item *
 
-All but the first argument of the IO syswrite() method are now optional.
+Also the LENGTH argument of syswrite() is now optional.
 
 =item *
 
