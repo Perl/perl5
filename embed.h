@@ -537,6 +537,7 @@
 #define reentrant_size		Perl_reentrant_size
 #define reentrant_init		Perl_reentrant_init
 #define reentrant_free		Perl_reentrant_free
+#define reentrant_retry		Perl_reentrant_retry
 #endif
 #define call_atexit		Perl_call_atexit
 #define call_argv		Perl_call_argv
