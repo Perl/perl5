@@ -1367,7 +1367,7 @@ Perl_mod(pTHX_ OP *o, I32 type)
             GV *gv;
 
             /* Could be a filehandle */
-            if (gv = gv_fetchpv(SvPV_nolen(sv), FALSE, SVt_PVIO)) {
+            if ((gv = gv_fetchpv(SvPV_nolen(sv), FALSE, SVt_PVIO))) {
                 OP* gvio = newUNOP(OP_RV2GV, 0, newGVOP(OP_GV, 0, gv));
                 op_free(o);
                 o = gvio;
@@ -2400,9 +2400,6 @@ Perl_gen_constant_list(pTHX_ register OP *o)
 OP *
 Perl_convert(pTHX_ I32 type, I32 flags, OP *o)
 {
-    OP *kid;
-    OP *last = 0;
-
     if (!o || o->op_type != OP_LIST)
 	o = newLISTOP(OP_LIST, 0, o, Nullop);
     else
@@ -2695,7 +2692,6 @@ Perl_pmtrans(pTHX_ OP *o, OP *expr, OP *repl)
 	if (complement) {
 	    U8 tmpbuf[UTF8_MAXLEN+1];
 	    U8** cp;
-	    I32* cl;
 	    UV nextmin = 0;
 	    New(1109, cp, tlen, U8*);
 	    i = 0;
@@ -4190,6 +4186,7 @@ Perl_cv_undef(pTHX_ CV *cv)
     }
 }
 
+#ifdef DEBUG_CLOSURES
 STATIC void
 S_cv_dump(pTHX_ CV *cv)
 {
@@ -4236,6 +4233,7 @@ S_cv_dump(pTHX_ CV *cv)
     }
 #endif /* DEBUGGING */
 }
+#endif /* DEBUG_CLOSURES */
 
 STATIC CV *
 S_cv_clone2(pTHX_ CV *proto, CV *outside)
@@ -6959,6 +6957,12 @@ static void
 const_sv_xsub(pTHXo_ CV* cv)
 {
     dXSARGS;
+    if (items != 0) {
+#if 0
+        Perl_croak(aTHX_ "usage: %s::%s()",
+                   HvNAME(GvSTASH(CvGV(cv))), GvNAME(CvGV(cv)));
+#endif
+    }
     EXTEND(sp, 1);
     ST(0) = (SV*)XSANY.any_ptr;
     XSRETURN(1);

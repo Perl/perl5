@@ -2205,7 +2205,6 @@ Ap	|DIR*	|dirp_dup	|DIR* dp
 Ap	|GP*	|gp_dup		|GP* gp
 Ap	|MAGIC*	|mg_dup		|MAGIC* mg
 Ap	|SV*	|sv_dup		|SV* sstr
-s	|SV*	|gv_share	|SV *sv
 #if defined(HAVE_INTERP_INTERN)
 Ap	|void	|sys_intern_dup	|struct interp_intern* src \
 				|struct interp_intern* dst
@@ -2284,7 +2283,9 @@ s	|OP*	|new_logop	|I32 type|I32 flags|OP **firstp|OP **otherp
 s	|void	|simplify_sort	|OP *o
 s	|bool	|is_handle_constructor	|OP *o|I32 argnum
 s	|char*	|gv_ename	|GV *gv
+#  if defined(DEBUG_CLOSURES)
 s	|void	|cv_dump	|CV *cv
+#  endif
 s	|CV*	|cv_clone2	|CV *proto|CV *outside
 s	|bool	|scalar_mod_type|OP *o|I32 type
 s	|OP *	|my_kid		|OP *o|OP *attrs
@@ -2488,6 +2489,10 @@ s      |int    |sv_2inuv_non_preserve  |SV *sv|I32 numtype
 s      |int    |sv_2iuv_non_preserve   |SV *sv|I32 numtype
 #  endif
 s	|I32	|expect_number	|char** pattern
+#
+#  if defined(USE_ITHREADS)
+s	|SV*	|gv_share	|SV *sv
+#  endif
 #endif
 
 #if defined(PERL_IN_TOKE_C) || defined(PERL_DECL_PROT)

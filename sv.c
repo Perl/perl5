@@ -3048,7 +3048,7 @@ Perl_sv_utf8_decode(pTHX_ register SV *sv)
     if (SvPOK(sv)) {
         char *c;
         char *e;
-        bool has_utf = FALSE;
+
         if (!sv_utf8_downgrade(sv, TRUE))
 	    return FALSE;
 
@@ -3325,7 +3325,6 @@ Perl_sv_setsv(pTHX_ SV *dstr, register SV *sstr)
 			    if (!GvCVGEN((GV*)dstr) &&
 				(CvROOT(cv) || CvXSUB(cv)))
 			    {
- 				SV *const_sv;
 				/* ahem, death to those who redefine
 				 * active sort subs */
 				if (PL_curstackinfo->si_type == PERLSI_SORT &&
@@ -3492,8 +3491,8 @@ Perl_sv_setsv(pTHX_ SV *dstr, register SV *sstr)
 	if (sflags & SVf_IOK)
 	    (void)SvIOK_only(dstr);
 	else {
-	    SvOK_off(dstr);
-	    SvIOKp_on(dstr);
+	    (void)SvOK_off(dstr);
+	    (void)SvIOKp_on(dstr);
 	}
 	/* XXXX Do we want to set IsUV for IV(ROK)?  Be extra safe... */
 	if (sflags & SVf_IVisUV)
@@ -3511,7 +3510,7 @@ Perl_sv_setsv(pTHX_ SV *dstr, register SV *sstr)
 	if (sflags & SVf_NOK)
 	    (void)SvNOK_only(dstr);
 	else {
-	    SvOK_off(dstr);
+	    (void)SvOK_off(dstr);
 	    SvNOKp_on(dstr);
 	}
 	SvNVX(dstr) = SvNVX(sstr);
@@ -3957,11 +3956,12 @@ Perl_sv_magic(pTHX_ register SV *sv, SV *obj, int how, const char *name, I32 nam
     }
     mg->mg_type = how;
     mg->mg_len = namlen;
-    if (name)
+    if (name) {
 	if (namlen >= 0)
 	    mg->mg_ptr = savepvn(name, namlen);
 	else if (namlen == HEf_SVKEY)
 	    mg->mg_ptr = (char*)SvREFCNT_inc((SV*)name);
+    }
 
     switch (how) {
     case 0:
@@ -4103,11 +4103,12 @@ Perl_sv_unmagic(pTHX_ SV *sv, int type)
 	    *mgp = mg->mg_moremagic;
 	    if (vtbl && vtbl->svt_free)
 		CALL_FPTR(vtbl->svt_free)(aTHX_ sv, mg);
-	    if (mg->mg_ptr && mg->mg_type != 'g')
+	    if (mg->mg_ptr && mg->mg_type != 'g') {
 		if (mg->mg_len >= 0)
 		    Safefree(mg->mg_ptr);
 		else if (mg->mg_len == HEf_SVKEY)
 		    SvREFCNT_dec((SV*)mg->mg_ptr);
+            }
 	    if (mg->mg_flags & MGf_REFCOUNTED)
 		SvREFCNT_dec(mg->mg_obj);
 	    Safefree(mg);
@@ -6919,7 +6920,7 @@ Perl_sv_vcatpvfn(pTHX_ SV *sv, const char *pat, STRLEN patlen, va_list *args, SV
 	    q++;
 	    if (vectorize)
 		goto unknown;
-	    if (vectorarg = asterisk) {
+	    if ((vectorarg = asterisk)) {
 		evix = ewix;
 		ewix = 0;
 		asterisk = FALSE;

@@ -846,7 +846,6 @@
 #define gp_dup			Perl_gp_dup
 #define mg_dup			Perl_mg_dup
 #define sv_dup			Perl_sv_dup
-#define gv_share		S_gv_share
 #if defined(HAVE_INTERP_INTERN)
 #define sys_intern_dup		Perl_sys_intern_dup
 #endif
@@ -913,7 +912,9 @@
 #define simplify_sort		S_simplify_sort
 #define is_handle_constructor	S_is_handle_constructor
 #define gv_ename		S_gv_ename
+#  if defined(DEBUG_CLOSURES)
 #define cv_dump			S_cv_dump
+#  endif
 #define cv_clone2		S_cv_clone2
 #define scalar_mod_type		S_scalar_mod_type
 #define my_kid			S_my_kid
@@ -1101,6 +1102,9 @@
 #define sv_2iuv_non_preserve	S_sv_2iuv_non_preserve
 #  endif
 #define expect_number		S_expect_number
+#  if defined(USE_ITHREADS)
+#define gv_share		S_gv_share
+#  endif
 #endif
 #if defined(PERL_IN_TOKE_C) || defined(PERL_DECL_PROT)
 #define check_uni		S_check_uni
@@ -2324,7 +2328,6 @@
 #define gp_dup(a)		Perl_gp_dup(aTHX_ a)
 #define mg_dup(a)		Perl_mg_dup(aTHX_ a)
 #define sv_dup(a)		Perl_sv_dup(aTHX_ a)
-#define gv_share(a)		S_gv_share(aTHX_ a)
 #if defined(HAVE_INTERP_INTERN)
 #define sys_intern_dup(a,b)	Perl_sys_intern_dup(aTHX_ a,b)
 #endif
@@ -2391,7 +2394,9 @@
 #define simplify_sort(a)	S_simplify_sort(aTHX_ a)
 #define is_handle_constructor(a,b)	S_is_handle_constructor(aTHX_ a,b)
 #define gv_ename(a)		S_gv_ename(aTHX_ a)
+#  if defined(DEBUG_CLOSURES)
 #define cv_dump(a)		S_cv_dump(aTHX_ a)
+#  endif
 #define cv_clone2(a,b)		S_cv_clone2(aTHX_ a,b)
 #define scalar_mod_type(a,b)	S_scalar_mod_type(aTHX_ a,b)
 #define my_kid(a,b)		S_my_kid(aTHX_ a,b)
@@ -2578,6 +2583,9 @@
 #define sv_2iuv_non_preserve(a,b)	S_sv_2iuv_non_preserve(aTHX_ a,b)
 #  endif
 #define expect_number(a)	S_expect_number(aTHX_ a)
+#  if defined(USE_ITHREADS)
+#define gv_share(a)		S_gv_share(aTHX_ a)
+#  endif
 #endif
 #if defined(PERL_IN_TOKE_C) || defined(PERL_DECL_PROT)
 #define check_uni()		S_check_uni(aTHX)
@@ -4561,8 +4569,6 @@
 #define mg_dup			Perl_mg_dup
 #define Perl_sv_dup		CPerlObj::Perl_sv_dup
 #define sv_dup			Perl_sv_dup
-#define S_gv_share		CPerlObj::S_gv_share
-#define gv_share		S_gv_share
 #if defined(HAVE_INTERP_INTERN)
 #define Perl_sys_intern_dup	CPerlObj::Perl_sys_intern_dup
 #define sys_intern_dup		Perl_sys_intern_dup
@@ -4676,8 +4682,10 @@
 #define is_handle_constructor	S_is_handle_constructor
 #define S_gv_ename		CPerlObj::S_gv_ename
 #define gv_ename		S_gv_ename
+#  if defined(DEBUG_CLOSURES)
 #define S_cv_dump		CPerlObj::S_cv_dump
 #define cv_dump			S_cv_dump
+#  endif
 #define S_cv_clone2		CPerlObj::S_cv_clone2
 #define cv_clone2		S_cv_clone2
 #define S_scalar_mod_type	CPerlObj::S_scalar_mod_type
@@ -5016,6 +5024,10 @@
 #  endif
 #define S_expect_number		CPerlObj::S_expect_number
 #define expect_number		S_expect_number
+#  if defined(USE_ITHREADS)
+#define S_gv_share		CPerlObj::S_gv_share
+#define gv_share		S_gv_share
+#  endif
 #endif
 #if defined(PERL_IN_TOKE_C) || defined(PERL_DECL_PROT)
 #define S_check_uni		CPerlObj::S_check_uni

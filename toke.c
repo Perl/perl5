@@ -6277,8 +6277,6 @@ S_scan_trans(pTHX_ char *start)
     I32 squash;
     I32 del;
     I32 complement;
-    I32 utf8;
-    I32 count = 0;
 
     yylval.ival = OP_NULL;
 

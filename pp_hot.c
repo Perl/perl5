@@ -542,7 +542,6 @@ PP(pp_print)
     IO *io;
     register PerlIO *fp;
     MAGIC *mg;
-    STRLEN n_a;
 
     if (PL_op->op_flags & OPf_STACKED)
 	gv = (GV*)*++MARK;

@@ -497,8 +497,6 @@ PP(pp_open)
     dTARGET;
     GV *gv;
     SV *sv;
-    SV *name = Nullsv;
-    I32 have_name = 0;
     char *tmps;
     STRLEN len;
     MAGIC *mg;
@@ -1364,7 +1362,7 @@ PP(pp_leavewrite)
 	    PUSHs(&PL_sv_yes);
 	}
     }
-bad_ofp:
+    /* bad_ofp: */
     PL_formtarget = PL_bodytarget;
     PUTBACK;
     return pop_return();
@@ -1378,7 +1376,6 @@ PP(pp_prtf)
     PerlIO *fp;
     SV *sv;
     MAGIC *mg;
-    STRLEN n_a;
 
     if (PL_op->op_flags & OPf_STACKED)
 	gv = (GV*)*++MARK;
@@ -3206,11 +3203,12 @@ PP(pp_fttext)
 	    PL_laststatval = PerlLIO_fstat(PerlIO_fileno(IoIFP(io)), &PL_statcache);
 	    if (PL_laststatval < 0)
 		RETPUSHUNDEF;
-	    if (S_ISDIR(PL_statcache.st_mode))	/* handle NFS glitch */
+	    if (S_ISDIR(PL_statcache.st_mode)) { /* handle NFS glitch */
 		if (PL_op->op_type == OP_FTTEXT)
 		    RETPUSHNO;
 		else
 		    RETPUSHYES;
+            }
 	    if (PerlIO_get_cnt(IoIFP(io)) <= 0) {
 		i = PerlIO_getc(IoIFP(io));
 		if (i != EOF)

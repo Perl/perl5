@@ -3258,7 +3258,9 @@ S_init_postdump_symbols(pTHX_ register int argc, register char **argv, register 
     SV *sv;
     GV* tmpgv;
     char **dup_env_base = 0;
+#ifdef NEED_ENVIRON_DUP_FOR_MODIFY
     int dup_env_count = 0;
+#endif
 
     argc--,argv++;	/* skip name of script */
     if (PL_doswitches) {

@@ -192,7 +192,6 @@ S_do_trans_complex(pTHX_ SV *sv)/* SPC - NOT OK */
 #endif
 
 	if (PL_op->op_private & OPpTRANS_SQUASH) {
-	    U8* p = send;
 	    UV pch = 0xfeedface;
 	    while (s < send) {
 		STRLEN len;

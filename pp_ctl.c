@@ -226,7 +226,7 @@ PP(pp_substcont)
 	MAGIC *mg;
 	I32 i;
 	if (SvTYPE(sv) < SVt_PVMG)
-	    SvUPGRADE(sv, SVt_PVMG);
+	    (void)SvUPGRADE(sv, SVt_PVMG);
 	if (!(mg = mg_find(sv, 'g'))) {
 	    sv_magic(sv, Nullsv, 'g', Nullch, 0);
 	    mg = mg_find(sv, 'g');
