@@ -3,6 +3,7 @@
 #include "XSUB.h"
 
 static I32 threadnum = 0;
+static int sig_pipe[2];
 
 static void *
 threadstart(arg)
