@@ -1,8 +1,23 @@
 # Revision history for Perl extension Encode.
 #
-# $Id: Changes,v 1.88 2003/02/20 14:42:34 dankogai Exp dankogai $
+# $Id: Changes,v 1.89 2003/02/28 01:40:27 dankogai Exp dankogai $
 #
-$Revision: 1.88 $ $Date: 2003/02/20 14:42:34 $
+$Revision: 1.89 $ $Date: 2003/02/28 01:40:27 $
+! Encode.xs
+  signed vs. unsigned issue discovered by Craig on OpenVM
+  Message-Id: <a05200f12ba81fe9d6298@[172.16.52.1]>
+! encoding.pm AUTHORS
++ t/Mod_EUCJP.pm t/enc_module.enc t/enc_module.t
+  Because  binmode() stacks layers instead of overwrite, you have to 
+  ":raw :encoding()" in encoding.pm or your are in trouble when you 
+  call encoding.pm multiple times.  There are several workarounds
+  but Inaba-san's idea is in. SUGAWARA Hajime <sugawara@hdt.co.jp>, 
+  who was the first to address this problem was added to AUTHORS.
+  The test suites was added for this, which is a modified version
+  of SUGAWARA-san's scripts
+  Message-Id: <3E5CF695.6AE07852@st.rim.or.jp>
+
+1.88 2003/02/20 14:42:34
 ! Encode.xs
   one signedness nit for Encode by jhi
   <200302161933.h1GJX876018710@kosh.hut.fi>

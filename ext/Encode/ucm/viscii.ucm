@@ -1,7 +1,7 @@
 #
-# $Id: viscii.ucm,v 1.1 2003/02/20 14:42:34 dankogai Exp dankogai $
+# $Id: viscii.ucm,v 1.1 2003/02/20 14:42:34 dankogai Exp $
 #
-# Written $Id: viscii.ucm,v 1.1 2003/02/20 14:42:34 dankogai Exp dankogai $
+# Written $Id: viscii.ucm,v 1.1 2003/02/20 14:42:34 dankogai Exp $
 # ./compile -n viscii -o Encode/viscii.ucm Encode/viscii.enc
 <code_set_name> "viscii"
 <mb_cur_min> 1
