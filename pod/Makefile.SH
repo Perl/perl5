@@ -72,7 +72,7 @@ converters: $(CONVERTERS)
 
 regen_pods: perlmodlib.pod toc
 
-buildtoc:	buildtoc.PL
+buildtoc:	buildtoc.PL perl.pod ../MANIFEST
 	$(PERL) -I ../lib buildtoc.PL
 
 man:	pod2man $(MAN)
@@ -81,7 +81,7 @@ html:	pod2html $(HTML)
 
 tex:	pod2latex $(TEX)
 
-toc:
+toc:	buildtoc
 	$(PERL) -I../lib buildtoc
 
 .SUFFIXES: .pm .pod

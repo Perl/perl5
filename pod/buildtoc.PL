@@ -63,6 +63,7 @@ if (-d "pod") {
     perl
     perlfaq
     perltoc
+    perlbook
 
     perlsyn
     perldata
@@ -152,6 +153,7 @@ if (-d "pod") {
     perlmachten         
     perlos2             
     perlos390           
+    perlposix-bc
     perlvms             
     perlwin32           
 	  );
@@ -164,6 +166,7 @@ if (-d "pod") {
     perlmachten         
     perlos2             
     perlos390           
+    perlposix-bc
     perlvms             
     perlwin32           
           );
@@ -186,7 +189,7 @@ close(MANI);
 open(PERLPOD, "perl.pod") || die "$0: opening perl.pod failed: $!\n";
 while (<PERLPOD>) {
   if (/^For ease of access, /../^\(If you're intending /) {
-	if (/^\s+(perl\w*)\s+\w/) {
+	if (/^\s+(perl\S*)\s+\w/) {
 		push @PERLPODS, "$1.pod";
 	}
   }
