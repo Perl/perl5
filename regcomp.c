@@ -3206,7 +3206,7 @@ tryagain:
 			 }
 			 else {
 			      reguni(pRExC_state, ender, s, &unilen);
-			      if (numlen > 0) {
+			      if (unilen > 0) {
 				   s   += unilen;
 				   len += unilen;
 			      }
@@ -3243,7 +3243,7 @@ tryagain:
 		     }
 		     else {
 			  reguni(pRExC_state, ender, s, &unilen);
-			  if (numlen > 0) {
+			  if (unilen > 0) {
 			       s   += unilen;
 			       len += unilen;
 			  }
