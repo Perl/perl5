@@ -104,6 +104,7 @@ sub nok_bytes {
     ok $1, '123alpha';
     $test++;				# 12
 }
+
 {
     use utf8;
 
@@ -204,9 +205,7 @@ sub nok_bytes {
 
 	ok $1, pack("C*", 0342);
 	$test++;				# 40
-
     }
-
 
     {
 	no utf8;
@@ -262,6 +261,7 @@ sub nok_bytes {
 	ok $tmp, pack("C*", 0342, 0230, 0272);
 	$test++;				# 54
     }
+
     {
 	use bytes;
 	no utf8;
@@ -295,7 +295,6 @@ sub nok_bytes {
 
 	ok $1, pack("C*", 0342);
 	$test++;				# 64
-
     }
 
     ok "\x{ab}" =~ /^\x{ab}$/, 1;
@@ -388,8 +387,6 @@ sub nok_bytes {
 
 {
     # bug id 20000323.056
-
-    use utf8;
 
     print "not " unless "\x{41}" eq +v65;
     print "ok $test\n";
