@@ -2577,7 +2577,7 @@ EOM
 			mips)	osname=mips_osf1 ;;
 			esac
 			;;
-		unixware) osname=svr5
+		openunix|unixware) osname=svr5
 			osvers="$4"
 			;;
 		uts) osname=uts
@@ -3613,6 +3613,18 @@ dflt="$orig_dflt"
 rm -f getfile.ok
 test "X$gfpthkeep" != Xy && gfpth=""
 EOSC
+
+# gcc 3.1 complains about adding -Idirectories that it already knows about,
+# so we will take those off from locincpth.
+case "$gccversion" in
+3*)
+    echo "main(){}">try.c
+    for incdir in `$cc -v -c try.c 2>&1 | \
+       sed '1,/^#include <\.\.\.>/d;/^End of search list/,$d;s/^ //'` ; do
+       locincpth=`echo $locincpth | sed s!$incdir!!`
+    done
+    $rm -f try try.*
+esac
 
 : What should the include directory be ?
 echo " "

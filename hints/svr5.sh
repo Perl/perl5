@@ -1,4 +1,4 @@
-# svr5 hints, System V Release 5.x (UnixWare 7)
+# svr5 hints, System V Release 5.x (UnixWare 7, OpenUNIX 8)
 # mods after mail fm Andy Dougherty
 # Reworked by hops@sco.com Sept/Oct 1999 for UW7.1 platform support 
 #   Boyd Gerber, gerberb@zenez.com 1999/09/21 for threads support.
@@ -100,7 +100,7 @@ d_setregid='undef' d_setreuid='undef'  # -- in /usr/lib/libc.so.1
 	csh_cnt=`csh -f -c 'glob /*' 2>/dev/null | wc -c`
 	csh_cnt=`expr 1 + $csh_cnt`
 if [ "$sh_cnt" -ne "$csh_cnt" ]; then
-    echo "You're csh has a broken 'glob', disabling..." >&2
+    echo "Your csh has a broken 'glob', disabling..." >&2
     d_csh='undef'
 fi
 
@@ -113,9 +113,9 @@ fi
 	uw_ver=`uname -v`
 	uw_isuw=`uname -s 2>&1`
 
-if [ "$uw_isuw" = "UnixWare" ]; then
+if [ "$uw_isuw" = "UnixWare" -o "$uw_isuw" = "OpenUNIX" ]; then
    case $uw_ver in
-   7.1*)
+   8.*|7.1*)
 	d_csh='undef'
 	d_memcpy='define'
 	d_memset='define'
