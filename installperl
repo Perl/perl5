@@ -159,11 +159,6 @@ if ($Is_VMS) {
     copy("perlshr$exe_ext", "$installbin/${perl}shr$exe_ext");
     chmod(0755, "$installbin/${perl}shr$exe_ext");
 }
-elsif ($^O ne 'dos') {
-    safe_unlink("$installbin/$perl$ver$exe_ext");
-    copy("perl$exe_ext", "$installbin/$perl$ver$exe_ext");
-    chmod(0755, "$installbin/$perl$ver$exe_ext");
-}
 elsif ($^O eq 'mpeix') {
     # MPE lacks hard links and requires that executables with special
     # capabilities reside in the MPE namespace.
@@ -173,6 +168,11 @@ elsif ($^O eq 'mpeix') {
     chmod(0755, $Config{perlpath});
     # Create a backup copy with the version number.
     link($Config{perlpath}, "$installbin/perl$ver$exe_ext");
+}
+elsif ($^O ne 'dos') {
+    safe_unlink("$installbin/$perl$ver$exe_ext");
+    copy("perl$exe_ext", "$installbin/$perl$ver$exe_ext");
+    chmod(0755, "$installbin/$perl$ver$exe_ext");
 }
 else {
     safe_unlink("$installbin/$perl.exe");

@@ -181,7 +181,7 @@ unless (defined &syscopy) {
 	*syscopy = \&rmscopy;
     } elsif ($^O eq 'mpeix') {
 	*syscopy = sub {
-	    return 0 unless @_ == 0;
+	    return 0 unless @_ == 2;
 	    # Use the MPE cp program in order to
 	    # preserve MPE file attributes.
 	    return system('/bin/cp', '-f', $_[0], $_[1]) == 0;
