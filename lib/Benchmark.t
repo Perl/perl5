@@ -305,10 +305,12 @@ sub check_graph_consistency {
         $all_passed
           &= is ($slowrate, $fastrate,
                  "slow rate isn't less than fast rate, so should be the same");
+	# In OpenBSD the $slowfast is sometimes a really, really, really
+	# small number less than zero, and this gets stringified as -0.
         $all_passed
-          &= is ($slowfast, 0, "slowfast should be zero");
+          &= like ($slowfast, qr/^-?0$/, "slowfast should be zero");
         $all_passed
-          &= is ($fastslow, 0, "fastslow should be zero");
+          &= like ($fastslow, qr/^-?0$/, "fastslow should be zero");
     }
     return $all_passed;
 }
