@@ -1,5 +1,5 @@
 #
-# $Id: cp936.ucm,v 1.0 2002/03/28 23:26:25 dankogai Exp dankogai $
+# $Id: cp936.ucm,v 1.0 2002/03/28 23:26:25 dankogai Exp $
 #
 # ./compile -n cp936 -o Encode/cp936.ucm Encode/cp936.enc
 <code_set_name> "cp936"

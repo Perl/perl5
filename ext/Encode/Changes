@@ -1,8 +1,23 @@
 # Revision history for Perl extension Encode.
 #
-# $Id: Changes,v 1.0 2002/03/28 23:26:24 dankogai Exp dankogai $
+# $Id: Changes,v 1.1 2002/03/29 20:59:39 dankogai Exp dankogai $
 #
-1.00  Wed Mar 27 2002
+1.01  $Date: 2002/03/29 20:59:39 $
+! Makefile.PL
+! README
+  s/USE_SCRIPTS/MORE_SCRIPTS/
+! Makefile.PL
+  installs enc2xs by default for external Encode:: modules in CPAN, 
+  such as Encode::HanExtra
+! t/*.t
+  More sensible perl core detection via $ENV{PERL_CORE}
+  suggested by Spider
+  Message-Id: <200203291007.FAA07329@Orb.Nashua.NH.US>
+! bin/enc2xs
+  Perl core ditection via $^X =~ m/\bminiperl$/o
+  Message-Id: <A5C7B0CA-42F1-11D6-B5AD-00039301D480@dan.co.jp>
+
+1.00  Wed Mar 29 2002
 ! *
   The version of all files is updated to 1.00 via "ci -f -l1.00",
   commemorating version 1.00.  All files, including *.ucm are now

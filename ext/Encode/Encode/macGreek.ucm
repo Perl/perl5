@@ -1,5 +1,5 @@
 #
-# $Id: macGreek.ucm,v 1.0 2002/03/28 23:26:27 dankogai Exp dankogai $
+# $Id: macGreek.ucm,v 1.0 2002/03/28 23:26:27 dankogai Exp $
 #
 # ./compile -n macGreek -o Encode/macGreek.ucm Encode/macGreek.enc
 <code_set_name> "MacGreek"

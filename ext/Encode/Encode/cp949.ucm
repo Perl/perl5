@@ -1,5 +1,5 @@
 #
-# $Id: cp949.ucm,v 1.0 2002/03/28 23:26:25 dankogai Exp dankogai $
+# $Id: cp949.ucm,v 1.0 2002/03/28 23:26:25 dankogai Exp $
 #
 # ./compile -n cp949 -o Encode/cp949.ucm Encode/cp949.enc
 <code_set_name> "cp949"

@@ -1,5 +1,5 @@
 #
-# $Id: macJapan.ucm,v 1.0 2002/03/28 23:26:27 dankogai Exp dankogai $
+# $Id: macJapan.ucm,v 1.0 2002/03/28 23:26:27 dankogai Exp $
 #
 # ./compile -n macJapan -o Encode/macJapan.ucm Encode/macJapan.enc
 <code_set_name> "MacJapanese"

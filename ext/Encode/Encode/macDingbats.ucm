@@ -1,5 +1,5 @@
 #
-# $Id: macDingbats.ucm,v 1.0 2002/03/28 23:26:27 dankogai Exp dankogai $
+# $Id: macDingbats.ucm,v 1.0 2002/03/28 23:26:27 dankogai Exp $
 #
 # ./compile -n macDingbats -o Encode/macDingbats.ucm Encode/macDingbats.enc
 <code_set_name> "MacDingbats"

@@ -1,5 +1,5 @@
 #
-# $Id: 8859-1.ucm,v 1.0 2002/03/28 23:26:24 dankogai Exp dankogai $
+# $Id: 8859-1.ucm,v 1.0 2002/03/28 23:26:24 dankogai Exp $
 #
 # ./compile -n iso-8859-1 -o Encode/iso8859-1.ucm Encode/iso8859-1.enc
 <code_set_name> "iso-8859-1"

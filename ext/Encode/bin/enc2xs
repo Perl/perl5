@@ -1,12 +1,16 @@
 #!../../../perl -w
 BEGIN {
-    unshift @INC, qw(../../lib ../../../lib ../../../../lib);
-    $ENV{PATH} .= ';../..;../../..;../../../..' if $^O eq 'MSWin32';
+    # fiddle with @INC iff I am a part of perl dist
+    if ($^X =~ m/\bminiperl$/o){
+       warn "Fixing \@INC for perl core.\n";
+       unshift @INC, qw(../../lib ../../../lib ../../../../lib);
+       $ENV{PATH} .= ';../..;../../..;../../../..' if $^O eq 'MSWin32';
+    }
 }
 use strict;
 use Getopt::Std;
 my @orig_ARGV = @ARGV;
-our $VERSION  = do { my @r = (q$Revision: 1.0 $ =~ /\d+/g); sprintf "%d."."%02d" x $#r, @r };
+our $VERSION  = do { my @r = (q$Revision: 1.1 $ =~ /\d+/g); sprintf "%d."."%02d" x $#r, @r };
 
 
 # These may get re-ordered.
@@ -1090,6 +1094,14 @@ The following files are created.
   Makefle.PL - MakeMaker script
   My.pm      - Encode Submodule
   t/My.t     - test file
+
+=item 1.1.
+
+If you want *.ucm installed together with the modules, do as follows;
+
+  $ mkdir Encode
+  $ mv *.ucm Encode
+  $ enc2xs -M My Encode/*ucm
 
 =item 2.
 

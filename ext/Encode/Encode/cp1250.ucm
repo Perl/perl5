@@ -1,5 +1,5 @@
 #
-# $Id: cp1250.ucm,v 1.0 2002/03/28 23:26:25 dankogai Exp dankogai $
+# $Id: cp1250.ucm,v 1.0 2002/03/28 23:26:25 dankogai Exp $
 #
 # ./compile -n cp1250 -o Encode/cp1250.ucm Encode/cp1250.enc
 <code_set_name> "cp1250"

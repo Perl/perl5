@@ -1,5 +1,5 @@
 #
-# $Id: macIceland.ucm,v 1.0 2002/03/28 23:26:27 dankogai Exp dankogai $
+# $Id: macIceland.ucm,v 1.0 2002/03/28 23:26:27 dankogai Exp $
 #
 # ./compile -n macIceland -o Encode/macIceland.ucm Encode/macIceland.enc
 <code_set_name> "MacIcelandic"

@@ -22,10 +22,12 @@ To install this module type the following:
 
 To install scripts under bin/ directories also,
 
-   perl Makefile.PL USE_SCRIPTS
+   perl Makefile.PL MORE_SCRIPTS
    make
    make test
    make install
+
+by default, only bin/enc2xs is installed.
 
 DEPENDENCIES
 

@@ -1,5 +1,5 @@
 #
-# $Id: macCyrillic.ucm,v 1.0 2002/03/28 23:26:27 dankogai Exp dankogai $
+# $Id: macCyrillic.ucm,v 1.0 2002/03/28 23:26:27 dankogai Exp $
 #
 # ./compile -n macCyrillic -o Encode/macCyrillic.ucm Encode/macCyrillic.enc
 <code_set_name> "MacCyrillic"

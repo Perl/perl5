@@ -1,8 +1,10 @@
 #!../perl
 
 BEGIN {
-    if (! -d 'blib' and -d 't'){ chdir 't' };
-    unshift @INC, '../lib';
+    if ($ENV{'PERL_CORE'}){
+	chdir 't';
+	unshift @INC, '../lib';
+    }
     require Config; import Config;
     if ($Config{'extensions'} !~ /\bEncode\b/) {
 	print "1..0 # Skip: Encode was not built\n";

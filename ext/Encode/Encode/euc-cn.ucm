@@ -1,5 +1,5 @@
 #
-# $Id: euc-cn.ucm,v 1.0 2002/03/28 23:26:26 dankogai Exp dankogai $
+# $Id: euc-cn.ucm,v 1.0 2002/03/28 23:26:26 dankogai Exp $
 #
 # ./compile -n euc-cn -o Encode/euc-cn.ucm Encode/euc-cn.enc
 <code_set_name> "euc-cn"

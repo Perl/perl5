@@ -1,5 +1,5 @@
 #
-# $Id: macThai.ucm,v 1.0 2002/03/28 23:26:27 dankogai Exp dankogai $
+# $Id: macThai.ucm,v 1.0 2002/03/28 23:26:27 dankogai Exp $
 #
 # ./compile -n macThai -o Encode/macThai.ucm Encode/macThai.enc
 <code_set_name> "MacThai"

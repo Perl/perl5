@@ -1,5 +1,5 @@
 #
-# $Id: koi8-r.ucm,v 1.0 2002/03/28 23:26:27 dankogai Exp dankogai $
+# $Id: koi8-r.ucm,v 1.0 2002/03/28 23:26:27 dankogai Exp $
 #
 # ./compile -n koi8-r -o Encode/koi8-r.ucm Encode/koi8-r.enc
 <code_set_name> "koi8-r"

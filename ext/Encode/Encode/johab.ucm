@@ -1,5 +1,5 @@
 #
-# $Id: johab.ucm,v 1.0 2002/03/28 23:26:27 dankogai Exp dankogai $
+# $Id: johab.ucm,v 1.0 2002/03/28 23:26:27 dankogai Exp $
 #
 # ./compile -o johab.ucm johab.enc
 <code_set_name> "johab"

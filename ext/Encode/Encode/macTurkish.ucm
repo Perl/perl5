@@ -1,5 +1,5 @@
 #
-# $Id: macTurkish.ucm,v 1.0 2002/03/28 23:26:27 dankogai Exp dankogai $
+# $Id: macTurkish.ucm,v 1.0 2002/03/28 23:26:27 dankogai Exp $
 #
 # ./compile -n macTurkish -o Encode/macTurkish.ucm Encode/macTurkish.enc
 <code_set_name> "MacTurkish"

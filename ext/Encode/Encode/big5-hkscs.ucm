@@ -1,5 +1,5 @@
 #
-# $Id: big5-hkscs.ucm,v 1.0 2002/03/28 23:26:25 dankogai Exp dankogai $
+# $Id: big5-hkscs.ucm,v 1.0 2002/03/28 23:26:25 dankogai Exp $
 #
 # ./compile -n big5-hkscs -o Encode/big5-hkscs.ucm Encode/big5-hkscs.enc
 <code_set_name> "big5-hkscs"

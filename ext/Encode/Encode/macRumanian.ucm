@@ -1,5 +1,5 @@
 #
-# $Id: macRumanian.ucm,v 1.0 2002/03/28 23:26:27 dankogai Exp dankogai $
+# $Id: macRumanian.ucm,v 1.0 2002/03/28 23:26:27 dankogai Exp $
 #
 # ./compile -n macRumanian -o Encode/macRumanian.ucm Encode/macRumanian.enc
 <code_set_name> "MacRumanian"

@@ -9,11 +9,11 @@ my %tables =
 	       ]
      );
 
-my @exe_files = ();
-my @more_exe_files = qw(bin/enc2xs bin/piconv);
+my @exe_files = qw(bin/enc2xs);
+my @more_exe_files = qw(bin/piconv);
 
 for my $arg (@ARGV){
-    if ($arg eq "USE_SCRIPTS"){
+    if ($arg eq "MORE_SCRIPTS"){
 	push @exe_files, @more_exe_files;
     }
 }

@@ -1,5 +1,5 @@
 #
-# $Id: jis0201.ucm,v 1.0 2002/03/28 23:26:27 dankogai Exp dankogai $
+# $Id: jis0201.ucm,v 1.0 2002/03/28 23:26:27 dankogai Exp $
 #
 # compile -o Encode/jis0201.ucm Encode/jis0201.enc
 <code_set_name> "jis0201"

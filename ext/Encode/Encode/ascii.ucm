@@ -1,5 +1,5 @@
 #
-# $Id: ascii.ucm,v 1.0 2002/03/28 23:26:25 dankogai Exp dankogai $
+# $Id: ascii.ucm,v 1.0 2002/03/28 23:26:25 dankogai Exp $
 #
 # ./compile -n US-ascii -o Encode/ascii.ucm Encode/ascii.enc
 <code_set_name> "US-ascii"
