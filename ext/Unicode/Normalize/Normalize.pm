@@ -11,7 +11,7 @@ use strict;
 use warnings;
 use Carp;
 
-our $VERSION = '0.16';
+our $VERSION = '0.17';
 our $PACKAGE = __PACKAGE__;
 
 require Exporter;
@@ -45,24 +45,26 @@ sub NFKC ($) { compose(reorder(decompose($_[0], COMPAT))) }
 sub normalize($$)
 {
     my $form = shift;
+    my $str = shift;
     $form =~ s/^NF//;
     return
-	$form eq 'D'  ? NFD ($_[0]) :
-	$form eq 'C'  ? NFC ($_[0]) :
-	$form eq 'KD' ? NFKD($_[0]) :
-	$form eq 'KC' ? NFKC($_[0]) :
+	$form eq 'D'  ? NFD ($str) :
+	$form eq 'C'  ? NFC ($str) :
+	$form eq 'KD' ? NFKD($str) :
+	$form eq 'KC' ? NFKC($str) :
       croak $PACKAGE."::normalize: invalid form name: $form";
 }
 
 sub check($$)
 {
     my $form = shift;
+    my $str = shift;
     $form =~ s/^NF//;
     return
-	$form eq 'D'  ? checkNFD ($_[0]) :
-	$form eq 'C'  ? checkNFC ($_[0]) :
-	$form eq 'KD' ? checkNFKD($_[0]) :
-	$form eq 'KC' ? checkNFKC($_[0]) :
+	$form eq 'D'  ? checkNFD ($str) :
+	$form eq 'C'  ? checkNFC ($str) :
+	$form eq 'KD' ? checkNFKD($str) :
+	$form eq 'KC' ? checkNFKC($str) :
       croak $PACKAGE."::check: invalid form name: $form";
 }
 
@@ -71,7 +73,7 @@ __END__
 
 =head1 NAME
 
-Unicode::Normalize - normalized forms of Unicode text
+Unicode::Normalize - Unicode Normalization Forms
 
 =head1 SYNOPSIS
 
@@ -185,23 +187,23 @@ The result returned will be:
 
 =item C<$result = checkNFD($string)>
 
-returns YES (1) or NO (empty string).
+returns C<YES> (C<1>) or C<NO> (C<empty string>).
 
 =item C<$result = checkNFC($string)>
 
-returns YES (1), NO (empty string), or MAYBE (undef).
+returns C<YES> (C<1>), C<NO> (C<empty string>), or C<MAYBE> (C<undef>).
 
 =item C<$result = checkNFKD($string)>
 
-returns YES (1) or NO (empty string).
+returns C<YES> (C<1>) or C<NO> (C<empty string>).
 
 =item C<$result = checkNFKC($string)>
 
-returns YES (1), NO (empty string), or MAYBE (undef).
+returns C<YES> (C<1>), C<NO> (C<empty string>), or C<MAYBE> (C<undef>).
 
 =item C<$result = check($form_name, $string)>
 
-returns YES (1), NO (empty string), or MAYBE (undef).
+returns C<YES> (C<1>), C<NO> (C<empty string>), or C<MAYBE> (C<undef>).
 
 C<$form_name> is alike to that for C<normalize()>.
 
@@ -218,7 +220,7 @@ For example, C<COMBINING ACUTE ACCENT> has
 the MAYBE_NFC/MAYBE_NFKC property.
 Both C<checkNFC("A\N{COMBINING ACUTE ACCENT}")>
 and C<checkNFC("B\N{COMBINING ACUTE ACCENT}")> will return C<MAYBE>.
-Though, C<"A\N{COMBINING ACUTE ACCENT}"> is not in NFC 
+C<"A\N{COMBINING ACUTE ACCENT}"> is not in NFC
 (its NFC is C<"\N{LATIN CAPITAL LETTER A WITH ACUTE}">),
 while C<"B\N{COMBINING ACUTE ACCENT}"> is in NFC.
 
@@ -241,7 +243,7 @@ If the character of the specified codepoint is canonically
 decomposable (including Hangul Syllables),
 returns the B<completely decomposed> string canonically equivalent to it.
 
-If it is not decomposable, returns undef.
+If it is not decomposable, returns C<undef>.
 
 =item C<$compatibility_decomposed = getCompat($codepoint)>
 
@@ -249,7 +251,7 @@ If the character of the specified codepoint is compatibility
 decomposable (including Hangul Syllables),
 returns the B<completely decomposed> string compatibility equivalent to it.
 
-If it is not decomposable, returns undef.
+If it is not decomposable, returns C<undef>.
 
 =item C<$codepoint_composite = getComposite($codepoint_here, $codepoint_next)>
 
@@ -257,7 +259,7 @@ If two characters here and next (as codepoints) are composable
 (including Hangul Jamo/Syllables and Composition Exclusions),
 returns the codepoint of the composite.
 
-If they are not composable, returns undef.
+If they are not composable, returns C<undef>.
 
 =item C<$combining_class = getCombinClass($codepoint)>
 
