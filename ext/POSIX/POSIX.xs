@@ -524,13 +524,14 @@ __END__
 static void
 restore_sigmask(SV *osset_sv)
 {
-	    /* Fortunately, restoring the signal mask can't fail, because
-	     * there's nothing we can do about it if it does -- we're not
-	     * supposed to return -1 from sigaction unless the disposition
-	     * was unaffected.
-	     */
-	    sigset_t *ossetp = (sigset_t *) SvPV_nolen( osset_sv );
-	    (void)sigprocmask(SIG_SETMASK, ossetp, (sigset_t *)0);
+     /* Fortunately, restoring the signal mask can't fail, because
+      * there's nothing we can do about it if it does -- we're not
+      * supposed to return -1 from sigaction unless the disposition
+      * was unaffected.
+      */
+     dTHX;
+     sigset_t *ossetp = (sigset_t *) SvPV_nolen( osset_sv );
+     (void)sigprocmask(SIG_SETMASK, ossetp, (sigset_t *)0);
 }
 
 MODULE = SigSet		PACKAGE = POSIX::SigSet		PREFIX = sig
