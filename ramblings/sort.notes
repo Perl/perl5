@@ -1,0 +1,16 @@
+pp_sort (LISTOP)
+
+If scalar context, just drop all arguments, push undef and return op_next.
+
+if OPf_STACKED is set then there's a comparison sub: either inline
+(in which case OPf_SPECIAL is set) or via a named sub (OPf_SPECIAL not set).
+For an inline sub, the sortcop is op->first->sibling->first->first->next. Eek.
+For a named sub, CvROOT(cv)->op_ppaddr (the pp_leave at the end of the sub) is
+saved for recovery at end-of-scope and replaced by pp_addr[OP_NULL]. Ick.
+Nulls are then weeded out whilst copying down the stack.
+
+If there's no comparison sub (and the array is non-trivial), we just make a
+bit of room on the stack (in case of signals) and call qsort with "sortcmp"
+as the C comparison function. Otherwise, with a comparison sub (and a
+non-trivial array), we fake up a new stack, switch to it, set up $a and $b
+and call qsort with C comparison function "sortcv".

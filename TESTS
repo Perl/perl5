@@ -1,0 +1,78 @@
+Test results from compiling t/*/*.t
+		C		Bytecode	CC
+
+base/cond.t	OK		OK		OK
+base/if.t	OK		OK		OK
+base/lex.t	OK		OK		OK
+base/pat.t	OK		OK		OK
+base/term.t	OK		OK		OK
+cmd/elsif.t	OK		OK		OK
+cmd/for.t	OK		OK		OK
+cmd/mod.t	OK		OK		OK
+cmd/subval.t	OK		OK		1..34, not ok 27,28 (simply
+						because filename changes).
+cmd/switch.t	OK		OK		OK
+cmd/while.t	OK		OK		OK
+io/argv.t	OK		OK		OK
+io/dup.t	OK		OK		OK
+io/fs.t		OK		OK		OK
+io/inplace.t	OK		OK		OK
+io/pipe.t	OK with -umain	OK		OK with -umain
+io/print.t	OK		OK		OK
+io/tell.t	OK		OK		OK
+op/append.t	OK		OK		OK
+op/array.t	OK		OK		1..36, not ok 7,10 (no $[)
+op/auto.t	OK		OK		OK
+op/chop.t	OK		OK		OK
+op/cond.t	OK		OK		OK
+op/delete.t	OK		OK		OK
+op/do.t		OK		OK		OK
+op/each.t	OK		OK		OK
+op/eval.t	OK		OK		OK
+op/exec.t	OK		OK		OK
+op/exp.t	OK		OK		OK
+op/flip.t	OK		OK		OK
+op/fork.t	OK		OK		OK
+op/glob.t	OK		OK		OK
+op/goto.t	OK		OK		1..9, Can't find label label1.
+op/groups.t	OK (s/ucb/bin/ under Linux)	OK 1..0 for now.
+op/index.t	OK		OK		OK
+op/int.t	OK		OK		OK
+op/join.t	OK		OK		OK
+op/list.t	OK		OK		OK
+op/local.t	OK		OK		OK
+op/magic.t	OK		OK		OK with -umain
+op/misc.t	no DATA filehandle so succeeds trivially with 1..0
+op/mkdir.t	OK		OK		OK
+op/my.t		OK		OK		OK
+op/oct.t	OK		OK		OK (C large const warnings)
+op/ord.t	OK		OK		OK
+op/overload.t	Mostly not ok	Mostly not ok	C errors.
+op/pack.t	OK		OK		OK
+op/pat.t	OK		OK		OK
+op/push.t	OK		OK		OK
+op/quotemeta.t	OK		OK		OK
+op/rand.t	OK		OK		OK
+op/range.t	OK		OK		OK
+op/read.t	OK		OK		OK
+op/readdir.t	OK		OK		OK
+op/ref.t	omits "ok 40" (lex destruction)	OK (Bytecode)
+						CC: need -u for OBJ,BASEOBJ,
+						MYHASH,UNIVERSAL,WHATEVER,main
+						FINALE. 1..41, ok1-33,36-38,
+						then ok 41, ok 39.DESTROY probs
+op/regexp.t	OK		OK		OK (trivially all eval'd)
+op/repeat.t	OK		OK		OK
+op/sleep.t	OK		OK		OK
+op/sort.t	OK		OK		1..10, ok 1, Out of memory!
+op/split.t	OK		OK		OK
+op/sprintf.t	OK		OK		OK
+op/stat.t	OK		OK		OK
+op/study.t	OK		OK		OK
+op/subst.t	OK		OK		OK
+op/substr.t	OK		OK		ok1-22 except 7-9,11 (all $[)
+op/time.t	OK		OK		OK
+op/undef.t	OK		OK		OK
+op/unshift.t	OK		OK		OK
+op/vec.t	OK		OK		OK
+op/write.t	not ok 3 (no CvOUTSIDE lex from runtime eval). CC: 1..3, hang

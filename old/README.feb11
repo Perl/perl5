@@ -1,0 +1,137 @@
+The following is what you could do with an old snapshot. I've probably
+broken some things since then or made other ways to do them. It gives a
+bit of information about what's in there, though, so it may be worth a look.
+
+USAGE
+
+Here are a few things you can try. I'll assume the executable is called perl
+and I'll leave out all the debugging info that ends up on stderr.
+
+(1) Writing out bytecode for a main program
+% perl -Iblib -e 'use B::Bytecode; print "Hello world\n"; exit 0' > foo
+% perl -Iblib -e 'use B::Run "foo"'
+Hello world
+
+(2) Writing out bytecode for a sub (not as a main program)
+% perl -Iblib -e 'use B::Bytecode qw(\*main::foo); sub foo { my $arg = shift; my $c = 42; return $c + $arg }' > foo
+% perl -Iblib -le 'use B::Run "foo"; print foo(3)'
+45
+
+(3) Writing out C code for a main program
+% perl -Iblib -e 'use B::C; print "Hello world\n"; exit 0' > hello.c
+% make hello.o
+cc -I../perl/perl5.001m -D__USE_BSD_SIGNAL -Dbool=char -DHAS_BOOL -D_POSIX_SOURCE -DDEBUGGING -g   -c hello.c -o hello.o
+[if you've done a proper Makefile, otherwise do it manually]
+% cc -o hello hello.o -L../perl/perl5.001m -lperl -lbsd -lm 
+[or whatever libs you need along with libperl]
+% ./hello -e ""
+[you need the -e "" since perl_parse still reads the command line]
+Hello world
+
+(4) Writing out C code for a partial program (not working properly).
+% perl -Iblib -e 'use B::C qw(\*main::foo); sub foo { print "Hello world\n" }' > bar.c
+That should produce C source and you could then call perl_init() in it
+(ought to be renamed automagically) to load in the appropriate ops.
+The current problem at the moment is that CvOUTSIDE of the CV for &foo
+(which points to the next outermost lexical context) points into the CV
+for file-scope lexicals so you get an undefined symbol. It'll get fixed.
+
+(5) A utility op tree walker
+% perl -Iblib -ce 'use B; END { B::walkoptree(B::main_root, "terse") } my $i; for ($i = 0; $i < 10; $i++) { print "foo $i\n" }'
+
+LISTOP (0xc31c0) pp_leave
+    OP (0xc2480) pp_enter
+    COP (0xc3ec0) pp_nextstate
+    OP (0x1091c0) pp_padsv
+    COP (0xc35c0) pp_nextstate
+    BINOP (0xc2120) pp_sassign
+        SVOP (0xc2040) pp_const IV (0xbb86c) 0
+        OP (0xc2ee0) pp_padsv
+    LISTOP (0xc3600) pp_lineseq
+        COP (0xc3380) pp_nextstate
+        BINOP (0xc25a0) pp_leaveloop
+            LOOP (0xc3640) pp_enterloop
+            OP (0xc24c0) pp_null
+
+(6) Another utility op tree walker
+% perl -Iblib -ce 'use B; END { B::walkoptree(B::main_root, "debug")} print "Hello world\n"'
+-e syntax OK
+LISTOP (0xc3180)
+        op_next         0x0
+        op_sibling      0x0
+        op_ppaddr       pp_leave
+        op_targ         0
+        op_type         174
+        op_seq          3777
+        op_flags        14
+        op_private      0
+        op_first        0xc5fc0
+        op_last         0xc31c0
+        op_children     3
+...
+SVOP (0x10bf40)
+        op_next         0xc31c0
+        op_sibling      0x0
+        op_ppaddr       pp_const
+        op_targ         0
+        op_type         5
+        op_seq          3780
+        op_flags        2
+        op_private      0
+        op_sv           0xac514
+PV (0xac514)
+        REFCNT          1
+        FLAGS           0x4840004
+        xpv_pv          "Hello world\n"
+        xpv_cur         12
+
+(7) An op tree walker for execution order
+perl -Iblib -ce 'use B; END { B::walkoptree_exec(B::main_start, "terse")} my $i; for ($i = 0; $i < 10; $i++) { next if $i == 5; print "foo\n" }'
+-e syntax OK
+OP (0xc2480) pp_enter
+COP (0xc4f40) pp_nextstate
+OP (0x10b920) pp_padsv
+COP (0xc3600) pp_nextstate
+SVOP (0xc2ee0) pp_const IV (0xbb86c) 0
+OP (0xc5000) pp_padsv
+BINOP (0xc2040) pp_sassign
+COP (0xc3380) pp_nextstate
+LOOP (0xc33c0) pp_enterloop
+REDO => {
+    COP (0xc31c0) pp_nextstate
+    OP (0xc21a0) pp_padsv
+    SVOP (0xc2160) pp_const IV (0xbb6b8) 5
+    BINOP (0xc22c0) pp_eq
+    LOGOP (0xc2340) pp_and
+    AND => {
+        OP (0xc2180) pp_next
+        COP (0xc3140) pp_nextstate
+        OP (0xc2300) pp_pushmark
+        SVOP (0xc22e0) pp_const PV (0xbb664) "foo\n"
+        LISTOP (0xc3400) pp_print
+        OP (0xc21c0) pp_padsv
+        UNOP (0xc22a0) pp_preinc
+        OP (0xc2320) pp_unstack
+        OP (0xc2120) pp_padsv
+        SVOP (0xc2020) pp_const IV (0xbb70c) 10
+        BINOP (0xc2140) pp_lt
+        LOGOP (0xc2440) pp_and
+        AND => {
+            goto COP (0xc31c0)
+        }
+        BINOP (0xc25a0) pp_leaveloop
+        LISTOP (0xc3ec0) pp_leave
+    }
+    goto COP (0xc3140)
+}
+NEXT => {
+    goto OP (0xc21c0)
+}
+LAST => {
+    goto BINOP (0xc25a0)
+}
+goto OP (0xc2120)
+
+
+Malcolm Beattie
+11 February 1996

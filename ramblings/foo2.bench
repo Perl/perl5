@@ -1,0 +1,11 @@
+# The following doesn't work: if $foo_ir and $bar_ir aren't initialised
+# then when we hit the $bar += $foo_ir in the middle of the loop for the
+# first time, we trigger a load_int for $bar_ir from its backing SV.
+use integer;
+my $foo_ir;
+my $bar_ir;
+
+for ($foo_ir = 0; $foo_ir < 3000000; $foo_ir += 2) {
+    $bar_ir += $foo_ir;
+}
+print "\$foo_ir = $foo_ir, \$bar_ir = $bar_ir\n";

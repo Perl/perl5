@@ -1,0 +1,9 @@
+use integer;
+my $foo_ir = 0;
+my $bar_ir = 0;
+
+while ($foo_ir < 3000000) {
+    $bar_ir += $foo_ir;
+    $foo_ir += 2;
+}
+print "\$foo_ir = $foo_ir, \$bar_ir = $bar_ir\n";

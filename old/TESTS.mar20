@@ -1,0 +1,70 @@
+Test results from t/*/*.t compiled with -MO=C
+
+base/cond.t	OK
+base/if.t	OK
+base/lex.t	not ok 7 :2591024652:
+base/pat.t	OK
+cmd/elsif.t	Linux: ok 1,2 then seg fault at pp_hot.c:1850, av is a
+		read-only IV, value 2. OSF/1: core dump
+cmd/for.t	OK
+cmd/mod.t	OK
+cmd/subval.t	core dump
+cmd/switch.t	core dump
+cmd/while.t	OK (but UNOP pp_eof has an SV* in its op_first field)
+io/argv.t	OK
+io/dup.t	OK
+io/fs.t		OK
+io/inplace.t	OK
+io/pipe.t	"ok 4\n 5\n 6\nok 8"
+io/print.t	OK
+io/tell.t	OK
+op/append.t	OK
+op/array.t	OK
+op/auto.t	OK
+op/chop.t	core dump
+op/cond.t	OK
+op/delete.t	OK
+op/do.t		core dump
+op/each.t	not ok 2
+op/eval.t	OK
+op/exec.t	OK
+op/exp.t	OK
+op/flip.t	not ok 8 0::
+op/fork.t	OK
+op/glob.t	OK
+op/goto.t	not ok 3, core dump
+op/groups.t	prints "1..2\n", nothing more
+op/index.t	OK
+op/int.t	OK
+op/join.t	OK
+op/list.t	OK
+op/local.t	core dump
+op/magic.t	omits ok 3 and ok 4
+op/misc.t	walkoptree gets called on a GV
+op/mkdir.t	OK
+op/my.t		core dump
+op/oct.t	not ok: 4, 5, 6	
+op/ord.t	OK
+op/overload.t	core dump
+op/pack.t	OK
+op/pat.t	OK (but UNOP for pp_reset has an SV* in its op_first)
+op/push.t	walkoptree gets called on a GV
+op/quotemeta.t	OK
+op/rand.t	OK
+op/range.t	OK
+op/read.t	Can't open op.read at ../perl5.002/t/op/read.t line 8.
+op/readdir.t	OK (but UNOP pp_exit has an SV* in its op_first)
+op/ref.t	OK
+op/sleep.t	OK
+op/sort.t	ok 1 then core dump
+op/split.t	not ok 11
+op/sprintf.t	OK
+op/stat.t	not ok 1, 2, 35, 36, 37, 40, 45, 48, 51, 53
+op/study.t	OK
+op/subst.t	not ok 44-49, 52-56
+op/substr.t	no PVLV support
+op/time.t	OK
+op/undef.t	ok1-18 then core dump
+op/unshift.t	OK
+op/vec.t	no PVLV support
+op/write.t	No format support (GvFORM(gv) not NULL while saving GV)

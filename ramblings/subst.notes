@@ -1,0 +1,27 @@
+pp_subst PMOP (pp_hot.c)
+Returns op_next or cPMOP->op_pmreplroot.
+
+pp_substcont LOGOP (pp_ctl.c)
+Gets PMOP pm from cLOGOP->op_other.
+Returns pm->op_next or pm->op_pmreplstart.
+
+pmreplroot is pp_substcont (I think).
+
+sub pp_subst {
+    ...
+    my $sym = doop($op);
+    runtime sprintf("if (op == ((PMOP*)(%s))->op_pmreplroot) goto %s;",
+		    $sym, label($op->op_pmreplroot));
+    push(@bblock_todo, $op->pmreplroot);
+    ...
+}
+
+sub pp_substcont {
+    ...
+    doop($op);
+    my $pmop = op->other;
+    my $restartsym = objsym($pmop->pmreplstart);
+    runtime sprintf("if (op == ((PMOP*)(%s))->op_pmreplstart) goto %s;",
+		    $restartsym, label($pmop->pmreplstart));
+    return $pmop->next;
+}

@@ -1,0 +1,11 @@
+#!/bin/sh
+if [ -f bperl ]; then
+    perl=./bperl
+else
+    perl="perl -Iblib/arch"
+fi
+for pl in ${1+"$@"}
+do
+    echo "*****	$pl *****"
+    $perl -MO=Bytecode,-obtest $pl && ./byteperl btest
+done

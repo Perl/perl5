@@ -1,0 +1,19 @@
+dSP;
+dATARGET;
+dPOPTOPiirl;
+SETi( left + right );
+RETURN;
+
+
+register SV **sp = stack_sp;
+SV * targ = op->op_flags & OPf_STACKED ? sp[-1] : curpad[op->op_targ];
+IV right, left;
+Sv = *sp--;
+right = SvIOK(Sv) ? SvIVX(Sv) : sv_2iv(Sv);
+left = SvIOK(sv) ? SvIVX(*sp) : sv_2iv(*sp);
+sv_setiv(targ, left + right);
+if (SvSMAGICAL(targ))
+    mg_set(targ);
+*sp = targ;
+stack_sp = sp;
+return op->op_next;

@@ -1,0 +1,19 @@
+*** op.c.ORI	Sat Apr  6 15:14:05 1996
+--- op.c	Sat Apr  6 15:16:05 1996
+***************
+*** 393,399 ****
+  {
+      register OP *kid, *nextkid;
+  
+!     if (!op)
+  	return;
+  
+      if (op->op_flags & OPf_KIDS) {
+--- 393,399 ----
+  {
+      register OP *kid, *nextkid;
+  
+!     if (!op || op->op_seq == (U16)-1)
+  	return;
+  
+      if (op->op_flags & OPf_KIDS) {

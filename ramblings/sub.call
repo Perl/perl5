@@ -1,0 +1,62 @@
+/* Typical code executed for a sub call. */
+
+PP(pp_entersub)
+{
+    dSP; dPOPss;
+    GV *gv;
+    HV *stash;
+    register CV *cv;
+    register CONTEXT *cx;
+    I32 gimme;
+    
+    if (!sv) ...;
+    switch (SvTYPE(sv)) {
+	...;
+      case SVt_PVGV:
+        if (!(cv = GvCV((GV*)sv))) ...;
+        break;
+    }
+    
+    ENTER;
+    SAVETMPS;
+
+    if (!cv) ...;
+    if (!CvROOT(cv) && !CvXSUB(cv)) ...;
+    gimme = GIMME;
+    if ((op->op_private & OPpENTERSUB_DB) && ...) ...;
+    if (CvXSUB(cv)) ...; else {
+	dMARK;
+        register I32 items = SP - MARK;
+        I32 hasargs = (op->op_flags & OPf_STACKED) != 0;
+        AV* padlist = CvPADLIST(cv);
+        SV** svp = AvARRAY(padlist);
+        push_return(op->op_next);
+        PUSHBLOCK(cx, CXt_SUB, MARK);
+        PUSHSUB(cx);
+        CvDEPTH(cv)++;
+        if (CvDEPTH(cv) < 2)
+            (void)SvREFCNT_inc(cv);
+	else ...;
+        SAVESPTR(curpad);
+        curpad = AvARRAY((AV*)svp[CvDEPTH(cv)]);
+        if (hasargs) {
+            AV* av = (AV*)curpad[0];
+            SV** ary;
+	    
+            if (AvREAL(av)) ...;
+            cx->blk_sub.savearray = GvAV(defgv);
+            cx->blk_sub.argarray = av;
+            GvAV(defgv) = cx->blk_sub.argarray;
+            ++MARK;
+            if (items > AvMAX(av) + 1) ...;
+	    Copy(MARK,AvARRAY(av),items,SV*);
+            AvFILL(av) = items - 1;
+            while (items--) {
+                if (*MARK)
+                    SvTEMP_off(*MARK);
+                MARK++;
+            }
+	}
+	RETURNOP(CvSTART(cv));
+    }
+}

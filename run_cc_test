@@ -1,0 +1,17 @@
+#!/bin/sh
+testdir=../perl5.002/t
+cwd=`pwd`
+if [ -f bperl ]; then
+    perl=./bperl
+else
+    perl="perl -Iblib/arch"
+fi
+for pl in ${1+"$@"}
+do
+    echo "*****	$pl *****"
+    $perl -MO=CC,-obtest.tc $pl			\
+	&& mv btest.tc btest.c			\
+	&& $perl cc_harness -O2 -o btest btest.c\
+	&& echo Running...			\
+	&& (cd $testdir; $cwd/btest)
+done

@@ -1,0 +1,14 @@
+#!/bin/sh
+testdir=../perl5.002/t
+cwd=`pwd`
+if [ -f bperl ]; then
+    perl=./bperl
+else
+    perl="perl -Iblib/arch"
+fi
+for pl in ${1+"$@"}
+do
+    echo "*****	$pl *****"
+    $perl -MO=Bytecode,-obtest $pl	\
+	&& (cd $testdir; $cwd/byteperl $cwd/btest)
+done
