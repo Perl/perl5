@@ -703,7 +703,7 @@ S_varname(pTHX_ GV *gv, char *gvtype, PADOFFSET targ,
 	    p = "???";
 	else if (!HvNAME(hv))
 	    p = "__ANON__";
-	else 
+	else
 	    p = HvNAME(hv);
 	if (strNE(p, "main")) {
 	    sv_catpv(name,p);
@@ -969,7 +969,7 @@ S_find_uninit_var(pTHX_ OP* obase, SV* uninit_sv, bool match)
 		gv = cGVOPx_gv(o);
 		if (match && GvSV(gv) != uninit_sv)
 		    break;
-		return S_varname(aTHX_ gv, "$", 0, 
+		return S_varname(aTHX_ gv, "$", 0,
 			    Nullsv, 0, FUV_SUBSCRIPT_NONE);
 	    }
 	    /* other possibilities not handled are:
@@ -3945,7 +3945,6 @@ Perl_sv_utf8_upgrade_flags(pTHX_ register SV *sv, I32 flags)
     }
 
     if (SvUTF8(sv)) {
-	SvSETMAGIC(sv);
 	return SvCUR(sv);
     }
 
@@ -3982,7 +3981,6 @@ Perl_sv_utf8_upgrade_flags(pTHX_ register SV *sv, I32 flags)
 	 /* Mark as UTF-8 even if no hibit - saves scanning loop */
 	 SvUTF8_on(sv);
     }
-    SvSETMAGIC(sv);
     return SvCUR(sv);
 }
 
@@ -4155,7 +4153,7 @@ Perl_sv_setsv_flags(pTHX_ SV *dstr, register SV *sstr, I32 flags)
     dtype = SvTYPE(dstr);
 
     SvAMAGIC_off(dstr);
-    if ( SvVOK(dstr) ) 
+    if ( SvVOK(dstr) )
     {
 	/* need to nuke the magic */
 	mg_free(dstr);
@@ -4627,11 +4625,11 @@ Perl_sv_setsv_flags(pTHX_ SV *dstr, register SV *sstr, I32 flags)
 	    SvIVX(dstr) = SvIVX(sstr);
 	}
 	if (SvVOK(sstr)) {
-	    MAGIC *smg = mg_find(sstr,PERL_MAGIC_vstring); 
+	    MAGIC *smg = mg_find(sstr,PERL_MAGIC_vstring);
 	    sv_magic(dstr, NULL, PERL_MAGIC_vstring,
 			smg->mg_ptr, smg->mg_len);
 	    SvRMAGICAL_on(dstr);
-	} 
+	}
     }
     else if (sflags & SVp_IOK) {
 	if (sflags & SVf_IOK)
@@ -4918,7 +4916,7 @@ S_sv_release_COW(pTHX_ register SV *sv, char *pvx, STRLEN cur, STRLEN len,
     if (len) { /* this SV was SvIsCOW_normal(sv) */
          /* we need to find the SV pointing to us.  */
         SV *current = SV_COW_NEXT_SV(after);
-        
+
         if (current == sv) {
             /* The SV we point to points back to us (there were only two of us
                in the loop.)
@@ -5087,7 +5085,7 @@ Perl_sv_chop(pTHX_ register SV *sv, register char *ptr)
 	/* Same SvOOK_on but SvOOK_on does a SvIOK_off
 	   and we do that anyway inside the SvNIOK_off
 	*/
-	SvFLAGS(sv) |= SVf_OOK; 
+	SvFLAGS(sv) |= SVf_OOK;
     }
     SvNIOK_off(sv);
     SvLEN(sv) -= delta;
@@ -5883,8 +5881,8 @@ Perl_sv_clear(pTHX_ register SV *sv)
 		    PUSHs(tmpref);
 		    PUTBACK;
 		    call_sv((SV*)destructor, G_DISCARD|G_EVAL|G_KEEPERR|G_VOID);
-		   
-		    
+		
+		
 		    POPSTACK;
 		    SPAGAIN;
 		    LEAVE;
@@ -6192,7 +6190,7 @@ UTF-8 bytes as a single character. Handles magic and type coercion.
  * The length is cached in PERL_UTF8_magic, in the mg_len field.  Also the
  * mg_ptr is used, by sv_pos_u2b(), see the comments of S_utf8_mg_pos_init().
  * (Note that the mg_len is not the length of the mg_ptr field.)
- * 
+ *
  */
 
 STRLEN
@@ -6242,7 +6240,7 @@ Perl_sv_len_utf8(pTHX_ register SV *sv)
 STATIC bool
 S_utf8_mg_pos_init(pTHX_ SV *sv, MAGIC **mgp, STRLEN **cachep, I32 i, I32 *offsetp, U8 *s, U8 *start)
 {
-    bool found = FALSE; 
+    bool found = FALSE;
 
     if (SvMAGICAL(sv) && !SvREADONLY(sv)) {
 	if (!*mgp)
@@ -6284,7 +6282,7 @@ S_utf8_mg_pos(pTHX_ SV *sv, MAGIC **mgp, STRLEN **cachep, I32 i, I32 *offsetp, I
 	    *cachep = (STRLEN *) (*mgp)->mg_ptr;
 	    ASSERT_UTF8_CACHE(*cachep);
 	    if ((*cachep)[i] == (STRLEN)uoff)	/* An exact match. */
-                 found = TRUE;          
+                 found = TRUE;
 	    else {			/* We will skip to the right spot. */
 		 STRLEN forw  = 0;
 		 STRLEN backw = 0;
@@ -6345,7 +6343,7 @@ S_utf8_mg_pos(pTHX_ SV *sv, MAGIC **mgp, STRLEN **cachep, I32 i, I32 *offsetp, I
 			  (*cachep)[2] = 0;
 			  (*cachep)[3] = 0;
 		      }
- 
+
 		      found = TRUE;
 		 }
 	    }
@@ -6382,7 +6380,7 @@ S_utf8_mg_pos(pTHX_ SV *sv, MAGIC **mgp, STRLEN **cachep, I32 i, I32 *offsetp, I
 
     return found;
 }
- 
+
 /*
 =for apidoc sv_pos_u2b
 
@@ -6511,7 +6509,7 @@ Perl_sv_pos_b2u(pTHX_ register SV* sv, I32* offsetp)
 		    /* We already know part of the way. */
 		    len = cache[0];
 		    s  += cache[1];
-		    /* Let the below loop do the rest. */ 
+		    /* Let the below loop do the rest. */
 		}
 		else { /* cache[1] > *offsetp */
 		    /* We already know all of the way, now we may
@@ -6525,7 +6523,7 @@ Perl_sv_pos_b2u(pTHX_ register SV* sv, I32* offsetp)
 		    if (!(forw < 2 * backw)) {
 			U8 *p = s + cache[1];
 			STRLEN ubackw = 0;
-			     
+			
 			cache[1] -= backw;
 
 			while (backw--) {
@@ -6947,9 +6945,9 @@ Perl_sv_gets(pTHX_ register SV *sv, register PerlIO *fp, I32 append)
 	rslen = 1;
     }
     else if (RsSNARF(PL_rs)) {
-    	/* If it is a regular disk file use size from stat() as estimate 
-	   of amount we are going to read - may result in malloc-ing 
-	   more memory than we realy need if layers bellow reduce 
+    	/* If it is a regular disk file use size from stat() as estimate
+	   of amount we are going to read - may result in malloc-ing
+	   more memory than we realy need if layers bellow reduce
 	   size we read (e.g. CRLF or a gzip layer)
 	 */
 	Stat_t st;
@@ -7054,12 +7052,12 @@ Perl_sv_gets(pTHX_ register SV *sv, register PerlIO *fp, I32 append)
 
     cnt = PerlIO_get_cnt(fp);			/* get count into register */
     /* make sure we have the room */
-    if ((I32)(SvLEN(sv) - append) <= cnt + 1) { 
+    if ((I32)(SvLEN(sv) - append) <= cnt + 1) {
     	/* Not room for all of it
-	   if we are looking for a separator and room for some 
+	   if we are looking for a separator and room for some
 	 */
 	if (rslen && cnt > 80 && (I32)SvLEN(sv) > append) {
-	    /* just process what we have room for */ 
+	    /* just process what we have room for */
 	    shortbuffered = cnt - SvLEN(sv) + append + 1;
 	    cnt -= shortbuffered;
 	}
@@ -7069,7 +7067,7 @@ Perl_sv_gets(pTHX_ register SV *sv, register PerlIO *fp, I32 append)
 	    SvGROW(sv, (STRLEN)(append + (cnt <= 0 ? 2 : (cnt + 1))));
 	}
     }
-    else 
+    else
 	shortbuffered = 0;
     bp = (STDCHAR*)SvPVX(sv) + append;  /* move these two too to registers */
     ptr = (STDCHAR*)PerlIO_get_ptr(fp);
@@ -8630,7 +8628,7 @@ Copies a string into a new SV, optionally blessing the SV.  The length of the
 string must be specified with C<n>.  The C<rv> argument will be upgraded to
 an RV.  That RV will be modified to point to the new SV.  The C<classname>
 argument indicates the package for the blessing.  Set C<classname> to
-C<Nullch> to avoid the blessing.  The new SV will have a reference count 
+C<Nullch> to avoid the blessing.  The new SV will have a reference count
 of 1, and the RV will be returned.
 
 Note that C<sv_setref_pv> copies the pointer while this copies the string.
@@ -9346,7 +9344,7 @@ Perl_sv_vcatpvfn(pTHX_ SV *sv, const char *pat, STRLEN patlen, va_list *args, SV
 	}
 
 	if (!asterisk)
-	    if( *q == '0' ) 
+	    if( *q == '0' )
 		fill = *q++;
 	    EXPECT_NUMBER(q, width);
 
@@ -10036,8 +10034,8 @@ Perl_sv_vcatpvfn(pTHX_ SV *sv, const char *pat, STRLEN patlen, va_list *args, SV
 	}
 	/* Use memchr() instead of strchr(), as eptr is not guaranteed */
 	/* to point to a null-terminated string.                       */
-	if (left && ckWARN(WARN_PRINTF) && memchr(eptr, '\n', elen) && 
-	    (PL_op->op_type == OP_PRTF || PL_op->op_type == OP_SPRINTF)) 
+	if (left && ckWARN(WARN_PRINTF) && memchr(eptr, '\n', elen) &&
+	    (PL_op->op_type == OP_PRTF || PL_op->op_type == OP_SPRINTF))
 	    Perl_warner(aTHX_ packWARN(WARN_PRINTF),
 		"Newline in left-justified string for %sprintf",
 			(PL_op->op_type == OP_PRTF) ? "" : "s");
@@ -10799,7 +10797,7 @@ Perl_sv_dup(pTHX_ SV *sstr, CLONE_PARAMS* param)
 	IoPAGE(dstr)		= IoPAGE(sstr);
 	IoPAGE_LEN(dstr)	= IoPAGE_LEN(sstr);
 	IoLINES_LEFT(dstr)	= IoLINES_LEFT(sstr);
-        if(IoFLAGS(sstr) & IOf_FAKE_DIRP) { 
+        if(IoFLAGS(sstr) & IOf_FAKE_DIRP) {
             /* I have no idea why fake dirp (rsfps)
                should be treaded differently but otherwise
                we end up with leaks -- sky*/
@@ -11386,31 +11384,31 @@ Create and return a new interpreter by cloning the current one.
 
 perl_clone takes these flags as parameters:
 
-CLONEf_COPY_STACKS - is used to, well, copy the stacks also, 
-without it we only clone the data and zero the stacks, 
-with it we copy the stacks and the new perl interpreter is 
-ready to run at the exact same point as the previous one. 
-The pseudo-fork code uses COPY_STACKS while the 
+CLONEf_COPY_STACKS - is used to, well, copy the stacks also,
+without it we only clone the data and zero the stacks,
+with it we copy the stacks and the new perl interpreter is
+ready to run at the exact same point as the previous one.
+The pseudo-fork code uses COPY_STACKS while the
 threads->new doesn't.
 
 CLONEf_KEEP_PTR_TABLE
-perl_clone keeps a ptr_table with the pointer of the old 
-variable as a key and the new variable as a value, 
-this allows it to check if something has been cloned and not 
-clone it again but rather just use the value and increase the 
-refcount. If KEEP_PTR_TABLE is not set then perl_clone will kill 
-the ptr_table using the function 
-C<ptr_table_free(PL_ptr_table); PL_ptr_table = NULL;>, 
-reason to keep it around is if you want to dup some of your own 
-variable who are outside the graph perl scans, example of this 
+perl_clone keeps a ptr_table with the pointer of the old
+variable as a key and the new variable as a value,
+this allows it to check if something has been cloned and not
+clone it again but rather just use the value and increase the
+refcount. If KEEP_PTR_TABLE is not set then perl_clone will kill
+the ptr_table using the function
+C<ptr_table_free(PL_ptr_table); PL_ptr_table = NULL;>,
+reason to keep it around is if you want to dup some of your own
+variable who are outside the graph perl scans, example of this
 code is in threads.xs create
 
 CLONEf_CLONE_HOST
-This is a win32 thing, it is ignored on unix, it tells perls 
-win32host code (which is c++) to clone itself, this is needed on 
-win32 if you want to run two threads at the same time, 
-if you just want to do some stuff in a separate perl interpreter 
-and then throw it away and return to the original one, 
+This is a win32 thing, it is ignored on unix, it tells perls
+win32host code (which is c++) to clone itself, this is needed on
+win32 if you want to run two threads at the same time,
+if you just want to do some stuff in a separate perl interpreter
+and then throw it away and return to the original one,
 you don't need to do anything.
 
 =cut
@@ -12255,14 +12253,14 @@ Perl_sv_recode_to_utf8(pTHX_ SV *sv, SV *encoding)
 	EXTEND(SP, 3);
 	XPUSHs(encoding);
 	XPUSHs(sv);
-/* 
+/*
   NI-S 2002/07/09
   Passing sv_yes is wrong - it needs to be or'ed set of constants
-  for Encode::XS, while UTf-8 decode (currently) assumes a true value means 
+  for Encode::XS, while UTf-8 decode (currently) assumes a true value means
   remove converted chars from source.
 
   Both will default the value - let them.
-  
+
 	XPUSHs(&PL_sv_yes);
 */
 	PUTBACK;
