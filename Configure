@@ -20,7 +20,7 @@
 
 # $Id: Head.U,v 3.0.1.9 1997/02/28 15:02:09 ram Exp $
 #
-# Generated on Wed Dec 19 03:02:32 EET 2001 [metaconfig 3.0 PL70]
+# Generated on Wed Dec 19 03:25:46 EET 2001 [metaconfig 3.0 PL70]
 # (with additional metaconfig patches by perlbug@perl.org)
 
 cat >c1$$ <<EOF
@@ -2152,19 +2152,19 @@ for file in $trylist; do
 	esac
 done
 case "$egrep" in
-*egrep*)
+egrep$_exe)
 	echo "Substituting grep for egrep."
 	egrep=$grep
 	;;
 esac
 case "$ln" in
-*ln*)
+ln$_exe)
 	echo "Substituting cp for ln."
 	ln=$cp
 	;;
 esac
 case "$make$gmake" in
-*make*)
+*make$_exe)
 	;;
 *)
 	echo "I can't find make or gmake, and my life depends on it." >&4
