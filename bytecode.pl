@@ -5,8 +5,8 @@ BEGIN {
 use strict;
 my %alias_to = (
     U32 => [qw(PADOFFSET STRLEN)],
-    I32 => [qw(SSize_t long)],
-    U16 => [qw(OPCODE line_t short)],
+    I32 => [qw(SSize_t line_t long)],
+    U16 => [qw(OPCODE short)],
     U8 => [qw(char)],
 );
 

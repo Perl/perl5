@@ -512,12 +512,12 @@ Converts the specified character to lowercase.
 #  define toCTRL(c)    (toUPPER(c) ^ 64)
 #endif
 
-/* Line numbers are unsigned, 16 bits. */
-typedef U16 line_t;
+/* Line numbers are unsigned, 32 bits. */
+typedef U32 line_t;
 #ifdef lint
 #define NOLINE ((line_t)0)
 #else
-#define NOLINE ((line_t) 65535)
+#define NOLINE ((line_t) 4294967295UL)
 #endif
 
 

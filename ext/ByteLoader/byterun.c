@@ -624,7 +624,7 @@ byterun(pTHX_ register struct byteloader_state *bstate)
 	  case INSN_GP_LINE:		/* 81 */
 	    {
 		line_t arg;
-		BGET_U16(arg);
+		BGET_U32(arg);
 		GvLINE(bstate->bs_sv) = arg;
 		break;
 	    }
@@ -855,7 +855,7 @@ byterun(pTHX_ register struct byteloader_state *bstate)
 	  case INSN_COP_LINE:		/* 114 */
 	    {
 		line_t arg;
-		BGET_U16(arg);
+		BGET_U32(arg);
 		BSET_cop_line(cCOP, arg);
 		break;
 	    }

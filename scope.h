@@ -179,7 +179,7 @@ Closing bracket on a callback.  See C<ENTER> and L<perlcall>.
 #  define SAVECOPFILE_FREE(c)	SAVEGENERICSV(CopFILEGV(c))
 #endif
 
-#define SAVECOPLINE(c)		SAVEI16(CopLINE(c))
+#define SAVECOPLINE(c)		SAVEI32(CopLINE(c))
 
 /* SSNEW() temporarily allocates a specified number of bytes of data on the
  * savestack.  It returns an integer index into the savestack, because a
