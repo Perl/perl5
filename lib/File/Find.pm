@@ -70,7 +70,7 @@ that don't resolve:
 
 sub find {
     my $wanted = shift;
-    my $cwd = Cwd::fastcwd();
+    my $cwd = Cwd::cwd();
     my ($topdir,$topdev,$topino,$topmode,$topnlink);
     foreach $topdir (@_) {
 	(($topdev,$topino,$topmode,$topnlink) = stat($topdir))
