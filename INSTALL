@@ -1412,6 +1412,30 @@ Study also how other non-UNIX ports have solved problems.
 
 =back
 
+=head1 Adding extra modules to the build
+
+You can specify extra modules or module bundles to be fetched from the
+CPAN and installed as part of the Perl build.  Either use the -Dextras=...
+command line parameter to Configure, for example like this:
+
+	Configure -Dextras="Compress::Zlib Bundle::LWP DBI"
+
+or answer first 'y' to the question 'Install any extra modules?' and
+then answer "Compress::Zlib Bundle::LWP DBI" to the 'Extras?' question.
+The module or the bundle names are as for the CPAN module 'install' command.
+
+Notice that because the CPAN module will be used to fetch the extra
+modules, you will need access to the CPAN, either via the Internet,
+or via a local copy such as a CD-ROM or a local CPAN mirror.  If you
+do not, using the extra modules option will die horribly.
+
+Also notice that you yourself are responsible for satisfying any extra
+dependencies such as external headers or libraries BEFORE trying the build.
+For example: you will need to have the zlib.h header and the libz
+library installed for the Compress::Zlib, or the Foo database specific
+headers and libraries installed for the DBD::Foo module.  The Configure
+process or the Perl build process will not help you with these.
+
 =head1 suidperl
 
 suidperl is an optional component, which is built or installed by default.
