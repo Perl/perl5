@@ -1,4 +1,4 @@
-/* $Id: Base64.xs,v 1.36 2003/05/13 16:21:25 gisle Exp $
+/* $Id: Base64.xs,v 1.37 2003/05/13 18:20:18 gisle Exp $
 
 Copyright 1997-2003 Gisle Aas
 
@@ -398,23 +398,31 @@ decode_qp(sv)
 		    }
 		    whitespace = 0;
                 }
-            	if (*str == '=' && (str + 2) < end && isxdigit(str[1]) && isxdigit(str[2])) {
-	            char buf[3];
-                    str++;
-	            buf[0] = *str++;
-		    buf[1] = *str++;
-	            buf[2] = '\0';
-		    *r++ = (char)strtol(buf, 0, 16);
-	        }
-		else if (*str == '=' && (str + 1) < end && str[1] == '\n') {
-		    str += 2;
+            	if (*str == '=') {
+		    if ((str + 2) < end && isxdigit(str[1]) && isxdigit(str[2])) {
+	                char buf[3];
+                        str++;
+	                buf[0] = *str++;
+		        buf[1] = *str++;
+	                buf[2] = '\0';
+		        *r++ = (char)strtol(buf, 0, 16);
+	            }
+		    else {
+		        /* look for soft line break */
+		        char *p = str + 1;
+		        while (p < end && (*p == ' ' || *p == '\t'))
+		            p++;
+		        if (p < end && *p == '\n')
+		     	    str = p + 1;
+		        else if ((p + 1) < end && *p == '\r' && *(p + 1) == '\n')
+		            str = p + 2;
+		        else
+		            *r++ = *str++; /* give up */
+		    }
 		}
-		else if (*str == '=' && (str + 2) < end && str[1] == '\r' && str[2] == '\n') {
-		    str += 3;
+		else {
+		    *r++ = *str++;
 		}
-	    	else {
-	            *r++ = *str++;
-                }
 	    }
 	}
 	if (whitespace) {

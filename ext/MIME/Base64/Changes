@@ -1,5 +1,14 @@
 2003-05-13   Gisle Aas <gisle@ActiveState.com>
 
+   Release 2.20
+
+   decode_qp() recognize soft whitespace when there is whitespace
+   between the '=' and the '\n'.
+
+
+
+2003-05-13   Gisle Aas <gisle@ActiveState.com>
+
    Release 2.19
 
    decode_qp() did eat up all trailing whitespace in the string decoded.

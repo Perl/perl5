@@ -91,7 +91,7 @@ y. -- H. L. Mencken"],
    ["foo\t \n \t", "foo=09=20\n=20=09"],
 );
 
-$notests = @tests + 7;
+$notests = @tests + 13;
 print "1..$notests\n";
 
 $testno = 0;
@@ -136,6 +136,24 @@ print "not " unless decode_qp("foo  ") eq "foo  ";
 $testno++; print "ok $testno\n";
 
 print "not " unless decode_qp("foo  \n") eq "foo\n";
+$testno++; print "ok $testno\n";
+
+print "not " unless decode_qp("foo = \t\x20\nbar\t\x20\n") eq "foo bar\n";
+$testno++; print "ok $testno\n";
+
+print "not " unless decode_qp("foo = \t\x20\r\nbar\t\x20\r\n") eq "foo bar\n";
+$testno++; print "ok $testno\n";
+
+print "not " unless decode_qp("foo = \t\x20\n") eq "foo ";
+$testno++; print "ok $testno\n";
+
+print "not " unless decode_qp("foo = \t\x20\r\n") eq "foo ";
+$testno++; print "ok $testno\n";
+
+print "not " unless decode_qp("foo = \t\x20y\r\n") eq "foo = \t\x20y\n";
+$testno++; print "ok $testno\n";
+
+print "not " unless decode_qp("foo =xy\n") eq "foo =xy\n";
 $testno++; print "ok $testno\n";
 
 # Test with with alternative line break
