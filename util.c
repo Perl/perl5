@@ -1037,14 +1037,52 @@ Perl_write_to_stderr(pTHX_ const char* message, int msglen)
     }
 }
 
+void
+S_vdie_common(pTHX_ const char *message, STRLEN msglen, I32 utf8)
+{
+    HV *stash;
+    GV *gv;
+    CV *cv;
+    /* sv_2cv might call Perl_croak() */
+    SV *olddiehook = PL_diehook;
+
+    assert(PL_diehook);
+    ENTER;
+    SAVESPTR(PL_diehook);
+    PL_diehook = Nullsv;
+    cv = sv_2cv(olddiehook, &stash, &gv, 0);
+    LEAVE;
+    if (cv && !CvDEPTH(cv) && (CvROOT(cv) || CvXSUB(cv))) {
+	dSP;
+	SV *msg;
+
+	ENTER;
+	save_re_context();
+	if (message) {
+	    msg = newSVpvn(message, msglen);
+	    SvFLAGS(msg) |= utf8;
+	    SvREADONLY_on(msg);
+	    SAVEFREESV(msg);
+	}
+	else {
+	    msg = ERRSV;
+	}
+
+	PUSHSTACKi(PERLSI_DIEHOOK);
+	PUSHMARK(SP);
+	XPUSHs(msg);
+	PUTBACK;
+	call_sv((SV*)cv, G_DISCARD);
+	POPSTACK;
+	LEAVE;
+    }
+}
+
 OP *
 Perl_vdie(pTHX_ const char* pat, va_list *args)
 {
     char *message;
     int was_in_eval = PL_in_eval;
-    HV *stash;
-    GV *gv;
-    CV *cv;
     SV *msv;
     STRLEN msglen;
     I32 utf8 = 0;
@@ -1073,37 +1111,7 @@ Perl_vdie(pTHX_ const char* pat, va_list *args)
 			  "%p: die: message = %s\ndiehook = %p\n",
 			  thr, message, PL_diehook));
     if (PL_diehook) {
-	/* sv_2cv might call Perl_croak() */
-	SV *olddiehook = PL_diehook;
-	ENTER;
-	SAVESPTR(PL_diehook);
-	PL_diehook = Nullsv;
-	cv = sv_2cv(olddiehook, &stash, &gv, 0);
-	LEAVE;
-	if (cv && !CvDEPTH(cv) && (CvROOT(cv) || CvXSUB(cv))) {
-	    dSP;
-	    SV *msg;
-
-	    ENTER;
-	    save_re_context();
-	    if (message) {
-		msg = newSVpvn(message, msglen);
-		SvFLAGS(msg) |= utf8;
-		SvREADONLY_on(msg);
-		SAVEFREESV(msg);
-	    }
-	    else {
-		msg = ERRSV;
-	    }
-
-	    PUSHSTACKi(PERLSI_DIEHOOK);
-	    PUSHMARK(SP);
-	    XPUSHs(msg);
-	    PUTBACK;
-	    call_sv((SV*)cv, G_DISCARD);
-	    POPSTACK;
-	    LEAVE;
-	}
+	S_vdie_common(aTHX_ message, msglen, utf8);
     }
 
     PL_restartop = die_where(message, msglen);
@@ -1362,45 +1370,14 @@ void
 Perl_vwarner(pTHX_ U32  err, const char* pat, va_list* args)
 {
     if (ckDEAD(err)) {
-	char *message;
-	HV *stash;
-	GV *gv;
-	CV *cv;
-	SV *msv;
+	SV *msv = vmess(pat, args);
 	STRLEN msglen;
-	I32 utf8 = 0;
-
-	msv = vmess(pat, args);
-	message = SvPV(msv, msglen);
-	utf8 = SvUTF8(msv);
+	char *message = SvPV(msv, msglen);
+	I32 utf8 = SvUTF8(msv);
 
 	if (PL_diehook) {
-	    /* sv_2cv might call Perl_croak() */
-	    SV *olddiehook = PL_diehook;
-	    ENTER;
-	    SAVESPTR(PL_diehook);
-	    PL_diehook = Nullsv;
-	    cv = sv_2cv(olddiehook, &stash, &gv, 0);
-	    LEAVE;
-	    if (cv && !CvDEPTH(cv) && (CvROOT(cv) || CvXSUB(cv))) {
-		dSP;
-		SV *msg;
-
-		ENTER;
-		save_re_context();
-		msg = newSVpvn(message, msglen);
-		SvFLAGS(msg) |= utf8;
-		SvREADONLY_on(msg);
-		SAVEFREESV(msg);
-
-		PUSHSTACKi(PERLSI_DIEHOOK);
-		PUSHMARK(sp);
-		XPUSHs(msg);
-		PUTBACK;
-		call_sv((SV*)cv, G_DISCARD);
-		POPSTACK;
-		LEAVE;
-	    }
+	    assert(message);
+	    S_vdie_common(aTHX_ message, msglen, utf8);
 	}
 	if (PL_in_eval) {
 	    PL_restartop = die_where(message, msglen);
