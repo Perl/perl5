@@ -1714,6 +1714,7 @@ typedef struct perl_thread *Thread;
 
 #undef PERLVAR
 #undef PERLVARI
+#undef PERLVARIC
 
 #if defined(HASATTRIBUTE) && defined(WIN32)
 /*
