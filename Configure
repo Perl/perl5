@@ -6094,8 +6094,9 @@ eval $setvar
 
 : get csh whereabouts
 case "$csh" in
-*csh) val="$undef" ;;
-*) val="$define" ;;
+'csh')	val="$undef" ;;
+'tcsh')	val="$undef" ;;
+*)	val="$define" ;;
 esac
 set d_csh
 eval $setvar
