@@ -700,6 +700,15 @@ went bang?)
 
 Also see L<Error Indicators>.
 
+=item %!
+
+Each element of C<%!> has a true value only if C<$!> is set to that
+value.  For example, C<$!{ENOENT}> is true if and only if the current
+value of C<$!> is C<ENOENT>; that is, if the mot recent error was "No
+such file or directory".  To check if a particular key is meaningful
+on your system, use C<exists $!{the_key}>; for a list of legal keys,
+use C<keys %!>.  See L<Errno> for more information.
+
 =item $EXTENDED_OS_ERROR
 
 =item $^E
