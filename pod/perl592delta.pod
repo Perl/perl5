@@ -47,17 +47,60 @@ For consistency, C<A> in unpack() format now trims all Unicode whitespace
 from the end of the string. Before perl 5.9.2, it used to strip only the
 classical ASCII space characters.
 
-=head2 The -C option can no longer be used on the #! line
+=head2 Miscellaneous
 
-It wasn't working anyway.
+The internal dump output has been improved, so that non-printable characters
+such as newline and backspace are output in C<\x> notation, rather than
+octal.
+
+The B<-C> option can no longer be used on the C<#!> line. It wasn't
+working anyway.
 
 =head1 Core Enhancements
 
-=head2 Regexp debug flags
+=head2 Malloc wrapping
 
-A new variable, ${^RE_DEBUG_FLAGS}, controls what debug flags are in
-effect for the regular expression engine when running under C<use re
-"debug">. See L<re> for details.
+Perl can now be built to detect attempts to assign pathologically large chunks
+of memory.  Previously such assignments would suffer from integer wrap-around
+during size calculations causing a misallocation, which would crash perl, and
+could theoretically be used for "stack smashing" attacks.  The wrapping
+defaults to enabled on platforms where we know it works (most AIX
+configurations, BSDi, Darwin, DEC OSF/1, FreeBSD, HP/UX, GNU Linux, OpenBSD,
+Solaris, VMS and most Win32 compilers) and defaults to disabled on other
+platforms.
+
+=head2 Unicode Character Database 4.0.1
+
+The copy of the Unicode Character Database included in Perl 5.9 has
+been updated to 4.0.1 from 4.0.0.
+
+=head2 suidperl less insecure
+
+Paul Szabo has analysed and patched C<suidperl> to remove existing known
+insecurities. Currently there are no known holes in C<suidperl>, but previous
+experience shows that we cannot be confident that these were the last. You may
+no longer invoke the set uid perl directly, so to preserve backwards
+compatibility with scripts that invoke #!/usr/bin/suidperl the only set uid
+binary is now C<sperl5.9.>I<n> (C<sperl5.9.2> for this release). C<suidperl>
+is installed as a hard link to C<perl>; both C<suidperl> and C<perl> will
+invoke C<sperl5.9.2> automatically the set uid binary, so this change should
+be completely transparent.
+
+For new projects the core perl team would strongly recommend that you use
+dedicated, single purpose security tools such as C<sudo> in preference to
+C<suidperl>.
+
+=head2 Formats
+
+In addition to bug fixes, C<format>'s features have been enhanced. See
+L<perlform>.
+
+=head2 Unicode Character Classes
+
+Perl's regular expression engine now contains support for matching on the
+intersection of two Unicode character classes. You can also now refer to
+user-defined character classes from within other user defined character
+classes.
 
 =head2 Byte-order modifiers for pack() and unpack()
 
@@ -65,6 +108,15 @@ There are two new byte-order modifiers, C<E<gt>> (big-endian) and C<E<lt>>
 (little-endian), that can be appended to most pack() and unpack() template
 characters and groups to force a certain byte-order for that type or group.
 See L<perlfunc/pack> and L<perlpacktut> for details.
+
+=head2 New variables
+
+A new variable, ${^RE_DEBUG_FLAGS}, controls what debug flags are in
+effect for the regular expression engine when running under C<use re
+"debug">. See L<re> for details.
+
+A new variable ${^UTF8LOCALE} indicates where an UTF-8 locale was detected
+by perl at startup.
 
 =head1 Modules and Pragmata
 
@@ -82,6 +134,35 @@ comes with a command-line frontend, C<corelist>.
 
 =head2 Updated And Improved Modules and Pragmata
 
+Dual-lived modules have been updated to be kept up-to-date with respect to
+CPAN.
+
+The dual-lived modules which contain an C<_> in their version number are
+actually I<ahead> of the corresponding CPAN release.
+
+=over 4
+
+=item *
+
+=item B::Concise
+
+C<B::Concise> was significantly improved.
+
+=item Socket
+
+There is experimental support for Linux abstract Unix domain sockets.
+
+=item Sys::Syslog
+
+C<syslog()> can now use numeric constants for facility names and priorities,
+in addition to strings.
+
+=item threads
+
+Detached threads are now also supported on Windows.
+
+=back
+
 =head1 Utility Changes
 
 =over 4
@@ -96,30 +177,98 @@ above).
 C<h2ph> and C<h2xs> have been made a bit more robust with regard to
 "modern" C code.
 
+=item *
+
+Several bugs have been fixed in C<find2perl>, regarding C<-exec> and
+C<-eval>. Also the options C<-path>, C<-ipath> and C<-iname> have been
+added.
+
+=item *
+
+The Perl debugger can now save all debugger commands for sourcing later;
+notably, it can now emulate stepping backwards, by restarting and
+rerunning all bar the last command from a saved command history.
+
+It can also display the parent inheritance tree of a given class.
+
+Perl has a new -dt command-line flag, which enables threads support in the
+debugger.
+
 =back
 
 =head1 Documentation
 
 =head1 Performance Enhancements
 
-=head2 Trie optimization for regexp engine
+=over 4
 
-The regexp engine is now able to factorize common prefixes and suffixes in
-regular expressions. A new special variable, ${^RE_TRIE_MAXBUF}, has been
-added to fine tune this optimization.
+=item *
+
+Unicode case mappings (C</i>, C<lc>, C<uc>, etc) are faster.
+
+=item *
+
+C<@a = sort @a> was optimized to do in-place sort. Likewise, C<reverse
+sort ...> is now optimized to sort in reverse, avoiding the generation of
+a temporary intermediate list.
+
+=item *
+
+Unnecessary assignment optimised away in
+
+  my $s = undef;
+  my @a = ();
+  my %h = ();
+
+=item *
+
+Optimised C<map> in scalar context
+
+=item *
+
+The regexp engine now implements the trie optimization : it's able to
+factorize common prefixes and suffixes in regular expressions. A new
+special variable, ${^RE_TRIE_MAXBUF}, has been added to fine tune this
+optimization.
+
+=back
 
 =head1 Installation and Configuration Improvements
 
+There is alpha support for relocatable @INC entries.
+
+Perl should build on Interix and on GNU/kFreeBSD.
+
 =head1 Selected Bug Fixes
 
+Most of those bugs were reported in the perl 5.8.x maintainance track.
+Notably, quite a few utf8 bugs were fixed, and several memory leaks were
+suppressed.
+
+Development-only bug fixes include :
+
+C<$Foo::_> was wrongly forced as C<$main::_>.
+
 =head1 New or Changed Diagnostics
+
+A new warning, C<!=~ should be !~>, is emitted to prevent this misspelling
+of the non-matching operator.
 
 The warning I<Newline in left-justified string> has been removed.
 
 The error I<Too late for "-T" option> has been reformulated to be more
 descriptive.
 
-There is a new compilation error, I<Illegal declaration of subroutine>.
+There is a new compilation error, I<Illegal declaration of subroutine>,
+for an obscure case of syntax errors.
+
+The diagnostic output of Carp has been changed slightly, to add a space after
+the comma between arguments. This makes it much easier for tools such as
+web browsers to wrap it, but might confuse any automatic tools which perform
+detailed parsing of Carp output.
+
+Perl -V has several improvements, making it more useable from shell
+scripts.
 
 =head1 Changed Internals
 
