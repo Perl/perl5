@@ -427,7 +427,6 @@ END_OF_BLOCK
 <HTML>
 <HEAD>
 <TITLE>$title</TITLE>$csslink
-<LINK REV="made" HREF="mailto:$Config{perladmin}">
 </HEAD>
 
 <BODY>
