@@ -140,6 +140,14 @@ L<Scalar::Util> - selection of general-utility scalar subroutines
 
 =item *
 
+L<Test::More> - yet another framework for writing test scripts
+
+=item *
+
+L<Test::Simple> - Basic utilities for writing tests
+
+=item *
+
 L<Time::HiRes> - high resolution ualarm, usleep, and gettimeofday
 
 =item *
