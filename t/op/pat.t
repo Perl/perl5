@@ -6,7 +6,7 @@
 
 $| = 1;
 
-print "1..983\n";
+print "1..986\n";
 
 BEGIN {
     chdir 't' if -d 't';
@@ -3081,5 +3081,15 @@ ok("bbac"   =~ /$pattern/ && $1 eq 'a', "[perl #3547]");
 ok("bbbac"  =~ /$pattern/ && $1 eq 'a', "[perl #3547]");
 ok("bbbbac" =~ /$pattern/ && $1 eq 'a', "[perl #3547]");
 
-# last test 983
+{
+    # [perl #18232]
+    "\x{100}" =~ /(.)/;
+    ok( $1 eq "\x{100}", '$1 is utf-8 [perl #18232]' );
+    { 'a' =~ /./; }
+    ok( $1 eq "\x{100}", '$1 is still utf-8' );
+    ok( $1 ne "\xC4\x80", '$1 is not non-utf-8' );
+}
+
+# last test 984
+
 

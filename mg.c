@@ -418,7 +418,7 @@ Perl_magic_regdatum_get(pTHX_ SV *sv, MAGIC *mg)
 		else			/* @- */
 		    i = s;
 
-		if (i > 0 && PL_reg_match_utf8) {
+		if (i > 0 && RX_MATCH_UTF8(rx)) {
 		    char *b = rx->subbeg;
 		    if (b)
 		        i = Perl_utf8_length(aTHX_ (U8*)b, (U8*)(b+i));
@@ -459,7 +459,7 @@ Perl_magic_len(pTHX_ SV *sv, MAGIC *mg)
 	    {
 		i = t1 - s1;
 	      getlen:
-		if (i > 0 && PL_reg_match_utf8) {
+		if (i > 0 && RX_MATCH_UTF8(rx)) {
 		    char *s    = rx->subbeg + s1;
 		    char *send = rx->subbeg + t1;
 
@@ -707,7 +707,7 @@ Perl_magic_get(pTHX_ SV *sv, MAGIC *mg)
 	      getrx:
 		if (i >= 0) {
 		    sv_setpvn(sv, s, i);
-		    if (PL_reg_match_utf8 && is_utf8_string((U8*)s, i))
+		    if (RX_MATCH_UTF8(rx) && is_utf8_string((U8*)s, i))
 			SvUTF8_on(sv);
 		    else
 			SvUTF8_off(sv);
