@@ -619,6 +619,7 @@ static const struct {
   {&pmwin_handle, NULL, 745},		/* WinFlashWindow */
   {&pmwin_handle, NULL, 780},		/* WinLoadPointer */
   {&pmwin_handle, NULL, 828},		/* WinQuerySysPointer */
+  {&doscalls_handle, NULL, 417},	/* DosReplaceModule */
 };
 
 HMODULE
@@ -1827,6 +1828,29 @@ XS(XS_File__Copy_syscopy)
     }
     XSRETURN(1);
 }
+
+/* APIRET APIENTRY DosReplaceModule (PCSZ pszOld, PCSZ pszNew, PCSZ pszBackup); */
+
+DeclOSFuncByORD(ULONG,replaceModule,ORD_DosReplaceModule,
+		(char *old, char *new, char *backup), (old, new, backup))
+
+XS(XS_OS2_replaceModule); /* prototype to pass -Wmissing-prototypes */
+XS(XS_OS2_replaceModule)
+{
+    dXSARGS;
+    if (items < 1 || items > 3)
+	Perl_croak(aTHX_ "Usage: OS2::replaceModule(target [, source [, backup]])");
+    {
+	char *	target = (char *)SvPV_nolen(ST(0));
+	char *	source = (items < 2) ? Nullch : (char *)SvPV_nolen(ST(1));
+	char *	backup = (items < 3) ? Nullch : (char *)SvPV_nolen(ST(2));
+
+	if (!replaceModule(target, source, backup))
+	    croak_with_os2error("replaceModule() error");
+    }
+    XSRETURN_EMPTY;
+}
+
 
 #define PERL_PATCHLEVEL_H_IMPLICIT	/* Do not init local_patches. */
 #include "patchlevel.h"
@@ -3478,6 +3502,7 @@ Xs_OS2_init(pTHX)
         newXS("Cwd::sys_is_relative", XS_Cwd_sys_is_relative, file);
         newXS("Cwd::sys_cwd", XS_Cwd_sys_cwd, file);
         newXS("Cwd::sys_abspath", XS_Cwd_sys_abspath, file);
+        newXS("OS2::replaceModule", XS_OS2_replaceModule, file);
         newXSproto("OS2::_control87", XS_OS2__control87, file, "$$");
         newXSproto("OS2::get_control87", XS_OS2_get_control87, file, "");
         newXSproto("OS2::set_control87", XS_OS2_set_control87, file, ";$$");
