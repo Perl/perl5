@@ -5046,6 +5046,7 @@ Perl_ck_defined(pTHX_ OP *o)		/* 19990527 MJD */
     if ((o->op_flags & OPf_KIDS) && ckWARN(WARN_DEPRECATED)) {
 	switch (cUNOPo->op_first->op_type) {
 	case OP_RV2AV:
+	    break;                      /* Globals via GV can be undef */ 
 	case OP_PADAV:
 	case OP_AASSIGN:		/* Is this a good idea? */
 	    Perl_warner(aTHX_ WARN_DEPRECATED,
@@ -5054,6 +5055,7 @@ Perl_ck_defined(pTHX_ OP *o)		/* 19990527 MJD */
 			"(Maybe you should just omit the defined()?)\n");
 	break;
 	case OP_RV2HV:
+	    break;                      /* Globals via GV can be undef */ 
 	case OP_PADHV:
 	    Perl_warner(aTHX_ WARN_DEPRECATED,
 			"defined(%hash) is deprecated");
