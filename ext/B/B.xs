@@ -838,6 +838,14 @@ SvPV(sv)
 	ST(0) = sv_newmortal();
 	sv_setpvn(ST(0), SvPVX(sv), SvCUR(sv));
 
+STRLEN
+SvLEN(sv)
+	B::PV	sv
+
+STRLEN
+SvCUR(sv)
+	B::PV	sv
+
 MODULE = B	PACKAGE = B::PVMG	PREFIX = Sv
 
 void
