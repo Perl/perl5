@@ -367,7 +367,7 @@ for my $syms (@syms)
 # variables
 
 if ($define{'PERL_OBJECT'}) {
-    for my $f ($perlvars_h, $ntrpvar_h, $thrdvar_h) {
+    for my $f ($perlvars_h, $intrpvar_h, $thrdvar_h) {
 	my $glob = readvar($f, sub { "Perl_" . $_[1] . $_[2] . "_ptr" });
 	emit_symbols $glob;
     }
@@ -395,7 +395,7 @@ sub try_symbol {
     return if $symbol =~ /^\#/;
     $symbol =~s/\r//g;
     chomp($symbol);
-    next if exists $skip{$symbol};
+    return if exists $skip{$symbol};
     emit_symbol($symbol);
 }
 
@@ -412,6 +412,8 @@ Perl_setTHR
 Perl_thread_create
 Perl_win32_init
 RunPerl
+GetPerlInterpreter
+SetPerlInterpreter
 win32_errno
 win32_environ
 win32_stdin
