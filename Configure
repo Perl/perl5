@@ -20,7 +20,7 @@
 
 # $Id: Head.U,v 3.0.1.9 1997/02/28 15:02:09 ram Exp $
 #
-# Generated on Fri Feb 15 17:48:38 EET 2002 [metaconfig 3.0 PL70]
+# Generated on Sat Feb 16 18:18:46 EET 2002 [metaconfig 3.0 PL70]
 # (with additional metaconfig patches by perlbug@perl.org)
 
 cat >c1$$ <<EOF
@@ -8808,22 +8808,22 @@ int main()
 	Gconvert((DOUBLETYPE)123.456, 8, 0, buf); 
 	checkit("123.456", buf);
 
-        /* Testing of 1e+129 in bigintpm.t must not get extra '.' here. */
-        Gconvert((DOUBLETYPE)1e30, 8, 0, buf);
-        if (strlen(buf) > 5)
-            checkit("1e+030", buf); /* for Microsoft */
-        else
-            checkit("1e+30", buf);
+	/* Testing of 1e+129 in bigintpm.t must not get extra '.' here. */
+	Gconvert((DOUBLETYPE)1e30, 8, 0, buf);
+	if (strlen(buf) > 5)
+	    checkit("1e+030", buf); /* for Microsoft */
+	else
+	    checkit("1e+30", buf);
 
 	exit(0);
 }
 EOP
-: add prefered functions to our list first
+: first add preferred functions to our list
 xxx_list=""
-for xxx_convert in $gcvt_preference; do
+for xxx_convert in $gconvert_preference; do
     case $xxx_convert in
     gcvt|gconvert|sprintf) xxx_list="$xxx_list $xxx_convert" ;;
-    *) echo "Discarding unrecognized gcvt_preference $xxx_convert" ;;
+    *) echo "Discarding unrecognized gconvert_preference $xxx_convert" >&4 ;;
     esac 
 done
 : then add any others
@@ -8838,10 +8838,10 @@ case "$d_longdbl$uselongdouble" in
 "$define$define")
     : again, add prefered functions to our list first
     xxx_ld_list=""
-    for xxx_convert in $gcvt_ld_preference; do
+    for xxx_convert in $gconvert_ld_preference; do
         case $xxx_convert in
         qgcvt|gcvt|gconvert|sprintf) xxx_ld_list="$xxx_ld_list $xxx_convert" ;;
-        *) echo "Discarding unrecognized gcvt_preference $xxx_convert" ;;
+        *) echo "Discarding unrecognized gconvert_ld_preference $xxx_convert" ;;
         esac
     done
     : then add qgcvt, sprintf--then, in xxx_list order, gconvert and gcvt
@@ -8881,7 +8881,7 @@ for xxx_convert in $xxx_list; do
 		echo "$xxx_convert NOT found." >&4
 	fi
 done
-	
+
 if test X$xxx_convert = X; then
     echo "*** WHOA THERE!!! ***" >&4
     echo "None of ($xxx_list)  seemed to work properly.  I'll use sprintf." >&4
