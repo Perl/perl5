@@ -667,11 +667,11 @@ can be considered as being in this form without encoding. An encoding
 to transfer strings in this form (e.g. to write them to a file) would
 need to
 
-     pack('L',map(chr($_),split(//,$string)));   # native
+     pack('L',map(ord($_),split(//,$string)));   # native
   or
-     pack('V',map(chr($_),split(//,$string)));   # little-endian
+     pack('V',map(ord($_),split(//,$string)));   # little-endian
   or
-     pack('N',map(chr($_),split(//,$string)));   # big-endian
+     pack('N',map(ord($_),split(//,$string)));   # big-endian
 
 depending on the endian required.
 
