@@ -438,6 +438,15 @@ However, when accessing an executable as a normal file (e.g., I<cp>
 in a makefile) the F<.exe> is not transparent.  The I<install> included
 with Cygwin automatically appends a F<.exe> when necessary.
 
+=item * cygwin vs. windows process ids
+
+Cygwin processes have their own pid, which is different from the
+underlying windows pid.  Most posix compliant Proc functions expect
+the cygwin pid, but several Win32::Process functions expect the
+winpid. E.g. C<$$> is the cygwin pid of F</usr/bin/perl>, which is not
+the winpid.  Use C<Cygwin::winpid_to_pid()> and C<Cygwin::winpid_to_pid()> 
+to translate between them.
+
 =item * C<chown()>
 
 On WinNT C<chown()> can change a file's user and group IDs.  On Win9x C<chown()>
@@ -549,12 +558,14 @@ be kept as clean as possible (listing not updated yet).
   t/op/stat.t           - no /dev, skip Win32 ftCreationTime quirk
                           (cache manager sometimes preserves ctime of file
                           previously created and deleted), no -u (setuid)
+  t/lib/cygwin.t	- builtin cygwin function tests
 
 =item Compiled Perl Source
 
   EXTERN.h              - __declspec(dllimport)
   XSUB.h                - __declspec(dllexport)
-  cygwin/cygwin.c       - os_extras (getcwd, spawn)
+  cygwin/cygwin.c       - os_extras (getcwd, spawn, Cygwin::winpid_to_pid, 
+                          Cygwin::pid_to_winpid)
   perl.c                - os_extras
   perl.h                - binmode
   doio.c                - win9x can not rename a file when it is open
@@ -603,4 +614,4 @@ Gerrit P. Haase <gp@familiehaase.de>.
 
 =head1 HISTORY
 
-Last updated: 2003-08-12
+Last updated: 2005-02-11
