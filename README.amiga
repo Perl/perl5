@@ -8,13 +8,10 @@ perlamiga - Perl under Amiga OS (possibly very outdated information)
 
 =head1 SYNOPSIS
 
-NOTE: No one has reported building Perl on the Amiga in a long
-time.  The following information is highly unlikely to be correct.
-If you would like to help the Amiga port to stay current, see:
+NOTE: The following information is highly unlikely to be correct.
+A recent version of perl for the Amiga can be found at the Aminet site:
 
     http://us.aminet.net/aminet/dirs/dev_gg.html
-
-for Amiga resources and information.
 
 One can read this document in the following formats:
 
@@ -62,12 +59,11 @@ Contents
 
 You need the Unix emulation for AmigaOS, whose most important part is
 B<ixemul.library>. For a minimum setup, get the following archives from
-ftp://ftp.ninemoons.com/pub/ade/current or a mirror:
+the Aminet archives (http://www.aminet.net/~aminet/):
 
-ixemul-46.0-bin.lha
-ixemul-46.0-env-bin.lha
-pdksh-4.9-bin.lha
-ADE-misc-bin.lha
+ixemul-bin.lha
+ixemul-env-bin.lha
+pdksh-bin.lha
 
 Note that there might be newer versions available by the time you read
 this.
@@ -126,11 +122,11 @@ deficiencies in the UNIX-emulation, most notably:
 Change to the installation directory (most probably ADE:), and
 extract the binary distribution:
 
-lha -mraxe x perl-5.003-bin.lha
+lha -mraxe x perl-$VERSION-bin.lha
 
 or
 
-tar xvzpf perl-5.003-bin.tgz
+tar xvzpf perl-$VERSION-bin.tgz
 
 (Of course you need lha or tar and gunzip for this.)
 
@@ -189,16 +185,15 @@ Here we discuss how to build Perl under AmigaOS.
 
 =head2 Prerequisites
 
-You need to have the latest B<ADE> (Amiga Developers Environment)
-from ftp://ftp.ninemoons.com/pub/ade/current.
-Also, you need a lot of free memory, probably at least 8MB.
+You need to have the latest B<ixemul> (Unix emulation for Amiga)
+from Aminet.
 
 =head2 Getting the perl source
 
 You can either get the latest perl-for-amiga source from Ninemoons
 and extract it with:
 
-  tar xvzpf perl-5.004-src.tgz
+  tar xvzpf perl-$VERSION-src.tgz
 
 or get the official source from CPAN:
 
@@ -206,7 +201,7 @@ or get the official source from CPAN:
 
 Extract it like this
 
-  tar xvzpf perl5.004.tar.gz
+  tar xvzpf perl$VERSION.tar.gz
 
 You will see a message about errors while extracting F<Configure>. This
 is normal and expected. (There is a conflict with a similarly-named file
