@@ -17,7 +17,9 @@ print "1..5\n";
 
 use IO::Socket;
 
-$port = 4002 + int(rand(time) & 0xff);
+srand(time);
+$port = 4002 + int(rand 0xff);
+print "# using port $port.\n";
 $SIG{ALRM} = sub {};
 
 $pid =  fork();
