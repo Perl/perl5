@@ -242,7 +242,7 @@ sub file_path_name {
 
 
 
-MkDir( dir_path('for_find'), 0777 );
+MkDir( dir_path('for_find'), 0770 );
 CheckDie(chdir( dir_path('for_find')));
 
 $cwd = cwd(); # save cwd
@@ -374,7 +374,6 @@ if ( $symlink_exists ) {
     eval {File::Find::find( {wanted => \&simple_wanted, follow => 1},
 			    topdir('fa') );};
 
-    $^D = 8;
     Check( $@ =~ m|Insecure dependency| );
     chdir($cwd_untainted);
 
