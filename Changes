@@ -32,6 +32,235 @@ Version v5.7.0		Development release working toward v5.8
 --------------
 
 ____________________________________________________________________________
+[  7673] By: jhi                                   on 2000/11/13  14:42:42
+        Log: Remove the new two tests of lib/io_xs for now, they seem to
+             fail under perlio on some platforms.
+     Branch: perl
+	   ! t/lib/io_xs.t
+____________________________________________________________________________
+[  7672] By: jhi                                   on 2000/11/13  13:57:53
+        Log: Make PerlIO_getpos() to behave like fgetpos() on return.
+     Branch: perl
+	   ! perlio.c
+____________________________________________________________________________
+[  7671] By: jhi                                   on 2000/11/13  05:30:48
+        Log: Placate nervous compilers that see longer than ints switch()ing.
+     Branch: perl
+	   ! utf8.c
+____________________________________________________________________________
+[  7670] By: jhi                                   on 2000/11/13  05:14:21
+        Log: fputs() does return EOF on error but here we don't care.
+     Branch: perl
+	   ! perlio.c
+____________________________________________________________________________
+[  7669] By: jhi                                   on 2000/11/13  05:02:45
+        Log: Declare reg_data like reg_substr_data.
+     Branch: perl
+	   ! regexp.h
+____________________________________________________________________________
+[  7668] By: jhi                                   on 2000/11/13  04:54:34
+        Log: Typos in #7667.
+     Branch: perl
+	   ! perl.h
+____________________________________________________________________________
+[  7667] By: jhi                                   on 2000/11/13  04:49:49
+        Log: Cleanup messy #ifdef.
+     Branch: perl
+	   ! perl.h
+____________________________________________________________________________
+[  7666] By: jhi                                   on 2000/11/13  04:17:34
+        Log: Subject: [ID 20001112.008] perlio.c's PerlIO_getpos ingores error return
+             From: Nicholas Clark <nick@talking.bollo.cx>
+             Date: Sun, 12 Nov 2000 21:14:11 +0000
+             Message-Id: <E13v4S3-0000iY-00@Bagpuss.unfortu.net>
+             
+             Note: only one breakage of the two reported is fixed by this patch.
+     Branch: perl
+	   ! perlio.c
+____________________________________________________________________________
+[  7665] By: jhi                                   on 2000/11/13  04:05:07
+        Log: Tweak the definition of the bit complement on UTF-8 data:
+             if none of the characters in the string are > 0xff,
+             the result is a complemented byte string, not a (UTF-8)
+             char string.  Based on the summary in
+             
+             Subject: Re: [ID 20000918.005] ~ on wide chars
+             From: sthoenna@efn.org (Yitzchak Scott-Thoennes) 
+             Date: Fri, 10 Nov 2000 09:47:15 -0800
+             Message-ID: <jSDD6gzkgi/T092yn@efn.org>
+             
+             This should give us the maximum backward (pre-char string)
+             compatibility and utf8 compatibility.  The other alternative
+             would be to limit the bit complement to be always byte only,
+             taking the least significant byte of the chars.
+     Branch: perl
+	   ! doop.c pod/perlunicode.pod pp.c t/op/bop.t
+____________________________________________________________________________
+[  7664] By: jhi                                   on 2000/11/13  00:23:44
+        Log: Couple of tests from #7660 salvaged.
+     Branch: perl
+	   - t/op/tell.t
+	   ! MANIFEST t/io/tell.t
+____________________________________________________________________________
+[  7663] By: jhi                                   on 2000/11/13  00:02:48
+        Log: Subject: [ID 20001112.007] sfio's sftell isn't ftell
+             From: Nicholas Clark <nick@talking.bollo.cx>
+             Date: Sun, 12 Nov 2000 21:23:43 +0000
+             Message-Id: <E13v4bH-0000lN-00@Bagpuss.unfortu.net>
+     Branch: perl
+	   ! perlsfio.h
+____________________________________________________________________________
+[  7662] By: jhi                                   on 2000/11/13  00:01:39
+        Log: Subject: [ID 20001112.006] IO::Seekable::getpos doesn't check for fgetpos() failure
+             From: Nicholas Clark <nick@talking.bollo.cx>
+             Date: Sun, 12 Nov 2000 21:30:04 +0000
+             Message-Id: <E13v4hQ-0000mn-00@Bagpuss.unfortu.net>
+     Branch: perl
+	   ! ext/IO/IO.xs ext/IO/lib/IO/Seekable.pm t/lib/io_xs.t
+____________________________________________________________________________
+[  7661] By: jhi                                   on 2000/11/12  23:57:29
+        Log: Document tell() on special streams.
+     Branch: perl
+	   ! pod/perlfunc.pod
+____________________________________________________________________________
+[  7660] By: jhi                                   on 2000/11/12  23:54:22
+        Log: (Subsumed by #7664)
+     Branch: perl
+	   + t/op/tell.t
+	   ! MANIFEST
+____________________________________________________________________________
+[  7659] By: jhi                                   on 2000/11/12  22:55:25
+        Log: Many subdocumented return values of the IO extension now documented.
+             ungetc and write still left subdocumented.
+             
+             Subject: [PATCH] (was Re: IO::Handle::ungetc)
+             From: Nicholas Clark <nick@talking.bollo.cx>
+             Date: Sun, 12 Nov 2000 21:35:53 +0000
+             Message-ID: <20001112213552.A3034@Bagpuss.unfortu.net>
+     Branch: perl
+	   ! ext/IO/lib/IO/Handle.pm
+____________________________________________________________________________
+[  7658] By: jhi                                   on 2000/11/12  21:37:06
+        Log: Subject: [ID 20001112.004] man perlfunc omits tell()'s error return
+             From: Nicholas Clark <nick@talking.bollo.cx>
+             Date: Sun, 12 Nov 2000 20:03:22 +0000
+             Message-Id: <E13v3LV-0008Pd-00@Bagpuss.unfortu.net>
+     Branch: perl
+	   ! pod/perlfunc.pod
+____________________________________________________________________________
+[  7657] By: jhi                                   on 2000/11/12  20:34:55
+        Log: Integrate perlio.
+     Branch: perl
+	  !> perlio.c
+____________________________________________________________________________
+[  7653] By: jhi                                   on 2000/11/12  19:00:01
+        Log: Add HAS_FSYNC, lack noticed by Nicholas Clark.
+     Branch: perl
+	   ! Configure Porting/Glossary Porting/config.sh Porting/config_H
+	   ! config_h.SH configure.com epoc/config.sh uconfig.h uconfig.sh
+	   ! vos/config.alpha.def vos/config.alpha.h vos/config.ga.def
+	   ! vos/config.ga.h win32/config.bc win32/config.gc
+	   ! win32/config.vc
+____________________________________________________________________________
+[  7652] By: jhi                                   on 2000/11/11  21:12:01
+        Log: Copy the s// information of README.hpux also to the perlrun.
+     Branch: perl
+	   ! README.hpux pod/perlrun.pod
+____________________________________________________________________________
+[  7651] By: jhi                                   on 2000/11/11  21:03:13
+        Log: More README.solaris updates from Andy Dougherty.
+     Branch: perl
+	   ! README.solaris
+____________________________________________________________________________
+[  7650] By: jhi                                   on 2000/11/11  18:38:57
+        Log: More descriptive error for unknown perlio layers.
+             
+             Subject: [PATCHES Bleadperl] Re: PerlIO - what all of you can all do.   
+             From: Dominic Dunlop <domo@computer.org> 
+             Date: Sat, 11 Nov 2000 18:20:32 +0100             
+             Message-Id: <p04320401b632c4c3335b@[192.168.1.4]>
+     Branch: perl
+	   ! perlio.c pod/perldiag.pod
+____________________________________________________________________________
+[  7649] By: jhi                                   on 2000/11/11  18:37:52
+        Log: MachTen doesn't really do mmap() and munmap().
+             
+             Subject: [PATCHES Bleadperl] Re: PerlIO - what all of you can all do.   
+             From: Dominic Dunlop <domo@computer.org> 
+             Date: Sat, 11 Nov 2000 18:20:32 +0100             
+             Message-Id: <p04320401b632c4c3335b@[192.168.1.4]>
+     Branch: perl
+	   ! hints/machten.sh
+____________________________________________________________________________
+[  7648] By: jhi                                   on 2000/11/11  18:36:46
+        Log: Subject: [PATCH] fwd: Re: [ID 20001105.011] Perl 5.6.0 documentation glitch
+             From: rspier@pobox.com (Robert Spier)
+             Date: Sat, 11 Nov 2000 12:22:15 -0500 (EST)
+             Message-ID: <14861.32839.491271.985797@rls.cx>
+     Branch: perl
+	   ! Porting/Contract pod/perltoot.pod
+____________________________________________________________________________
+[  7646] By: jhi                                   on 2000/11/11  18:33:23
+        Log: Add getpagesize() probing, on non-UNIX guess 'undef'.
+     Branch: perl
+	   ! Configure Porting/Glossary Porting/config.sh Porting/config_H
+	   ! config_h.SH configure.com epoc/config.sh uconfig.h uconfig.sh
+	   ! vos/config.alpha.def vos/config.alpha.h vos/config.ga.def
+	   ! vos/config.ga.h win32/config.bc win32/config.gc
+	   ! win32/config.vc
+____________________________________________________________________________
+[  7645] By: jhi                                   on 2000/11/11  16:45:15
+        Log: Use sysconf() or getpagesize() to find out the pagesize.
+     Branch: perl
+	   ! perlio.c
+____________________________________________________________________________
+[  7644] By: jhi                                   on 2000/11/11  15:46:08
+        Log: Integrate perlio.
+     Branch: perl
+	  !> perlio.c
+____________________________________________________________________________
+[  7643] By: jhi                                   on 2000/11/11  15:33:36
+        Log: Subject: Re: [PATCH] README.solaris
+             From: Lupe Christoph <lupe@lupe-christoph.de>
+             Date: Sat, 11 Nov 2000 14:08:10 +0100
+             Message-ID: <20001111140810.C10394@alanya.lupe-christoph.de>
+     Branch: perl
+	   ! README.solaris
+____________________________________________________________________________
+[  7642] By: jhi                                   on 2000/11/11  15:22:12
+        Log: Subject: [PATCH perl@7638] cygwin port
+             From: "Eric Fifer" <egf7@columbia.edu>            
+             Date: Fri, 10 Nov 2000 19:30:30 -0000
+             Message-ID: <000001c04b4c$b96b7980$243670c2@fifer>
+     Branch: perl
+	   ! README.cygwin lib/ExtUtils/MM_Cygwin.pm
+____________________________________________________________________________
+[  7640] By: jhi                                   on 2000/11/11  02:05:02
+        Log: Add more encoding tables.
+     Branch: perl
+	   + ext/Encode/Encode/cp1006.enc ext/Encode/Encode/cp424.enc
+	   + ext/Encode/Encode/cp856.enc ext/Encode/Encode/gsm0338.enc
+	   + ext/Encode/Encode/iso8859-10.enc
+	   + ext/Encode/Encode/iso8859-13.enc
+	   + ext/Encode/Encode/iso8859-14.enc
+	   + ext/Encode/Encode/iso8859-15.enc
+	   ! MANIFEST
+____________________________________________________________________________
+[  7639] By: jhi                                   on 2000/11/10  18:49:25
+        Log: Subject: [PATCH] README.solaris
+             From: Andy Dougherty <doughera@lafayette.edu>
+             Date: Fri, 10 Nov 2000 12:18:00 -0500 (EST)
+             Message-ID: <Pine.SOL.4.10.10011101217100.28341-100000@maxwell.phys.lafayette.edu>
+     Branch: perl
+	   + README.solaris
+	   ! INSTALL MANIFEST hints/solaris_2.sh pod/buildtoc.PL
+	   ! pod/perl.pod pod/perltoc.pod
+____________________________________________________________________________
+[  7638] By: jhi                                   on 2000/11/10  15:04:15
+        Log: Update Changes.
+     Branch: perl
+	   ! Changes patchlevel.h
+____________________________________________________________________________
 [  7637] By: jhi                                   on 2000/11/10  14:14:28
         Log: Explain better why certain regex tests are skipped.
              
