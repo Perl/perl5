@@ -154,25 +154,6 @@ enum {
     OPt_COP		/* 11 */
 };
 
-EXT int PL_optype_size[]
-#ifdef DOINIT
-= {
-    sizeof(OP),
-    sizeof(UNOP),
-    sizeof(BINOP),
-    sizeof(LOGOP),
-    sizeof(CONDOP),
-    sizeof(LISTOP),
-    sizeof(PMOP),
-    sizeof(SVOP),
-    sizeof(GVOP),
-    sizeof(PVOP),
-    sizeof(LOOP),
-    sizeof(COP)
-}
-#endif /* DOINIT */
-;
-
 EXT void byterun(pTHXo_ struct bytestream bs);
 
 #define INIT_SPECIALSV_LIST STMT_START { \
