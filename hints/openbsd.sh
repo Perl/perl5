@@ -134,7 +134,7 @@ $define|true|[yY]*)
 	echo "Checking if your C library has broken 64-bit functions..." >&4
 	$cat >check.c <<EOCP
 #include <stdio.h>
-typedef unsigned long long myULL;
+typedef $uquadtype myULL;
 int main (void)
 {
     struct {
@@ -174,7 +174,9 @@ EOCP
 
 *** You have a C library with broken 64-bit functions.
 *** 64-bit support does not work reliably in this configuration.
+*** Please rerun Configure without -Duse64bitint and/or -Dusemorebits.
 *** Cannot continue, aborting.
+
 EOM
 		exit 1
 		;;
