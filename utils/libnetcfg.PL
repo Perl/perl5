@@ -75,8 +75,9 @@ To change the configuration you will need to use either the C<-c> or
 the C<-d> options.
 
 The default name of the old configuration file is by default
-"libnet.cfg", unless otherwise specified using the -i option, and it
-is searched from your module path, C<-i oldfile>.
+"libnet.cfg", unless otherwise specified using the -i option,
+C<-i oldfile>, and it is searched first from the current directory,
+and the from your module path.
 
 The default name of new configuration file is "libnet.cfg", and by
 default it is written to the current directory, unless otherwise
@@ -365,8 +366,9 @@ Without options, the old configuration is shown.
    -h show this help
 
 The default name of the old configuration file is by default
-"libnet.cfg", unless otherwise specified using the -i option, and it
-is searched from your module path.
+"libnet.cfg", unless otherwise specified using the -i option,
+C<-i oldfile>, and it is searched first from the current directory,
+and the from your module path.
 
 The default name of new configuration file is "libnet.cfg", and by
 default it is written to the current directory, unless otherwise
