@@ -20,6 +20,12 @@
 # include <unistd.h>
 #endif
 
+#ifdef HAS_GETGROUPS
+#  ifndef NGROUPS
+#    define NGROUPS 32
+#  endif
+#endif
+
 /*
  * Use the "DESTRUCTOR" scope cleanup to reinstate magic.
  */
@@ -337,7 +343,7 @@ MAGIC *mg;
 	sv_setsv(sv, bodytarget);
 	break;
     case '\004':		/* ^D */
-	sv_setiv(sv,(I32)(debug & 32767));
+	sv_setiv(sv, (IV)(debug & 32767));
 	break;
     case '\005':  /* ^E */
 #ifdef VMS
@@ -346,7 +352,7 @@ MAGIC *mg;
 #	    include <starlet.h>
 	    char msg[255];
 	    $DESCRIPTOR(msgdsc,msg);
-	    sv_setnv(sv,(double)vaxc$errno);
+	    sv_setiv(sv, (IV)vaxc$errno);
 	    if (sys$getmsg(vaxc$errno,&msgdsc.dsc$w_length,&msgdsc,0,0) & 1)
 		sv_setpvn(sv,msgdsc.dsc$a_pointer,msgdsc.dsc$w_length);
 	    else
@@ -354,42 +360,42 @@ MAGIC *mg;
 	}
 #else
 #ifdef OS2
-	sv_setnv(sv,(double)Perl_rc);
+	sv_setiv(sv, (IV)Perl_rc);
 	sv_setpv(sv, os2error(Perl_rc));
 #else
-	sv_setnv(sv,(double)errno);
+	sv_setiv(sv, (IV)errno);
 	sv_setpv(sv, errno ? Strerror(errno) : "");
 #endif
 #endif
-	SvNOK_on(sv);	/* what a wonderful hack! */
+	SvIOK_on(sv);	/* what a wonderful hack! */
 	break;
     case '\006':		/* ^F */
-	sv_setiv(sv,(I32)maxsysfd);
+	sv_setiv(sv, (IV)maxsysfd);
 	break;
     case '\010':		/* ^H */
-	sv_setiv(sv,(I32)hints);
+	sv_setiv(sv, (IV)hints);
 	break;
     case '\t':			/* ^I */
 	if (inplace)
 	    sv_setpv(sv, inplace);
 	else
-	    sv_setsv(sv,&sv_undef);
+	    sv_setsv(sv, &sv_undef);
 	break;
     case '\017':		/* ^O */
-	sv_setpv(sv,osname);
+	sv_setpv(sv, osname);
 	break;
     case '\020':		/* ^P */
-	sv_setiv(sv,(I32)perldb);
+	sv_setiv(sv, (IV)perldb);
 	break;
     case '\024':		/* ^T */
 #ifdef BIG_TIME
- 	sv_setnv(sv,basetime);
+ 	sv_setnv(sv, basetime);
 #else
-	sv_setiv(sv,(I32)basetime);
+	sv_setiv(sv, (IV)basetime);
 #endif
 	break;
     case '\027':		/* ^W */
-	sv_setiv(sv,(I32)dowarn);
+	sv_setiv(sv, (IV)dowarn);
 	break;
     case '1': case '2': case '3': case '4':
     case '5': case '6': case '7': case '8': case '9': case '&':
@@ -446,12 +452,12 @@ MAGIC *mg;
     case '.':
 #ifndef lint
 	if (GvIO(last_in_gv)) {
-	    sv_setiv(sv,(I32)IoLINES(GvIO(last_in_gv)));
+	    sv_setiv(sv, (IV)IoLINES(GvIO(last_in_gv)));
 	}
 #endif
 	break;
     case '?':
-	sv_setiv(sv,(I32)statusvalue);
+	sv_setiv(sv, (IV)statusvalue);
 	break;
     case '^':
 	s = IoTOP_NAME(GvIOp(defoutgv));
@@ -470,13 +476,13 @@ MAGIC *mg;
 	break;
 #ifndef lint
     case '=':
-	sv_setiv(sv,(I32)IoPAGE_LEN(GvIOp(defoutgv)));
+	sv_setiv(sv, (IV)IoPAGE_LEN(GvIOp(defoutgv)));
 	break;
     case '-':
-	sv_setiv(sv,(I32)IoLINES_LEFT(GvIOp(defoutgv)));
+	sv_setiv(sv, (IV)IoLINES_LEFT(GvIOp(defoutgv)));
 	break;
     case '%':
-	sv_setiv(sv,(I32)IoPAGE(GvIOp(defoutgv)));
+	sv_setiv(sv, (IV)IoPAGE(GvIOp(defoutgv)));
 	break;
 #endif
     case ':':
@@ -484,10 +490,10 @@ MAGIC *mg;
     case '/':
 	break;
     case '[':
-	sv_setiv(sv,(I32)curcop->cop_arybase);
+	sv_setiv(sv, (IV)curcop->cop_arybase);
 	break;
     case '|':
-	sv_setiv(sv, (IoFLAGS(GvIOp(defoutgv)) & IOf_FLUSH) != 0 );
+	sv_setiv(sv, (IV)(IoFLAGS(GvIOp(defoutgv)) & IOf_FLUSH) != 0 );
 	break;
     case ',':
 	sv_setpvn(sv,ofs,ofslen);
@@ -500,12 +506,12 @@ MAGIC *mg;
 	break;
     case '!':
 #ifdef VMS
-	sv_setnv(sv,(double)((errno == EVMSERR) ? vaxc$errno : errno));
+	sv_setiv(sv, (IV)((errno == EVMSERR) ? vaxc$errno : errno));
 	sv_setpv(sv, errno ? Strerror(errno) : "");
 #else
 	{
 	int saveerrno = errno;
-	sv_setnv(sv,(double)errno);
+	sv_setiv(sv, (IV)errno);
 #ifdef OS2
 	if (errno == errno_isOS2) sv_setpv(sv, os2error(Perl_rc));
 	else
@@ -514,38 +520,38 @@ MAGIC *mg;
 	errno = saveerrno;
 	}
 #endif
-	SvNOK_on(sv);	/* what a wonderful hack! */
+	SvIOK_on(sv);	/* what a wonderful hack! */
 	break;
     case '<':
-	sv_setiv(sv,(I32)uid);
+	sv_setiv(sv, (IV)uid);
 	break;
     case '>':
-	sv_setiv(sv,(I32)euid);
+	sv_setiv(sv, (IV)euid);
 	break;
     case '(':
+	sv_setiv(sv, (IV)gid);
 	s = buf;
 	(void)sprintf(s,"%d",(int)gid);
 	goto add_groups;
     case ')':
+	sv_setiv(sv, (IV)egid);
 	s = buf;
 	(void)sprintf(s,"%d",(int)egid);
       add_groups:
 	while (*s) s++;
 #ifdef HAS_GETGROUPS
-#ifndef NGROUPS
-#define NGROUPS 32
-#endif
 	{
 	    Groups_t gary[NGROUPS];
 
 	    i = getgroups(NGROUPS,gary);
 	    while (--i >= 0) {
-		(void)sprintf(s," %ld", (long)gary[i]);
+		(void)sprintf(s," %d", (int)gary[i]);
 		while (*s) s++;
 	    }
 	}
 #endif
 	sv_setpv(sv,buf);
+	SvIOK_on(sv);	/* what a wonderful hack! */
 	break;
     case '*':
 	break;
@@ -577,15 +583,19 @@ MAGIC* mg;
     STRLEN len;
     I32 i;
     s = SvPV(sv,len);
-    ptr = (mg->mg_len == HEf_SVKEY) ? SvPV((SV*)mg->mg_ptr, na) : mg->mg_ptr;
+    ptr = MgPV(mg);
     my_setenv(ptr, s);
 #ifdef DYNAMIC_ENV_FETCH
      /* We just undefd an environment var.  Is a replacement */
      /* waiting in the wings? */
     if (!len) {
 	HE *envhe;
-	if (envhe = hv_fetch_ent(GvHVn(envgv),HeSVKEY((HE*)(mg->mg_ptr)),FALSE,0))
+	SV *keysv;
+	if (mg->mg_len == HEf_SVKEY) keysv = (SV *)mg->mg_ptr;
+	else keysv = newSVpv(mg->mg_ptr,mg->mg_len);
+	if (envhe = hv_fetch_ent(GvHVn(envgv),keysv,FALSE,0))
 	    s = SvPV(HeVAL(envhe),len);
+	if (mg->mg_len != HEf_SVKEY) SvREFCNT_dec(keysv);
     }
 #endif
 			    /* And you'll never guess what the dog had */
@@ -611,8 +621,7 @@ magic_clearenv(sv,mg)
 SV* sv;
 MAGIC* mg;
 {
-    my_setenv(((mg->mg_len == HEf_SVKEY) ?
-	       SvPV((SV*)mg->mg_ptr, na) : mg->mg_ptr),Nullch);
+    my_setenv(MgPV(mg),Nullch);
     return 0;
 }
 
@@ -663,7 +672,7 @@ MAGIC* mg;
 {
     I32 i;
     /* Are we fetching a signal entry? */
-    i = whichsig((mg->mg_len == HEf_SVKEY) ? SvPV((SV*)mg->mg_ptr, na) : mg->mg_ptr);
+    i = whichsig(MgPV(mg));
     if (i) {
     	if(psig_ptr[i])
     	    sv_setsv(sv,psig_ptr[i]);
@@ -693,7 +702,7 @@ MAGIC* mg;
 {
     I32 i;
     /* Are we clearing a signal entry? */
-    i = whichsig((mg->mg_len == HEf_SVKEY) ? SvPV((SV*)mg->mg_ptr, na) : mg->mg_ptr);
+    i = whichsig(MgPV(mg));
     if (i) {
     	if(psig_ptr[i]) {
     	    SvREFCNT_dec(psig_ptr[i]);
@@ -716,7 +725,7 @@ MAGIC* mg;
     I32 i;
     SV** svp;
 
-    s = (mg->mg_len == HEf_SVKEY) ? SvPV((SV*)mg->mg_ptr, na) : mg->mg_ptr;
+    s = MgPV(mg);
     if (*s == '_') {
 	if (strEQ(s,"__DIE__"))
 	    svp = &diehook;
@@ -943,7 +952,8 @@ MAGIC* mg;
 
     gv = DBline;
     i = SvTRUE(sv);
-    svp = av_fetch(GvAV(gv),atoi(mg->mg_ptr), FALSE);
+    svp = av_fetch(GvAV(gv),
+		     atoi(MgPV(mg)), FALSE);
     if (svp && SvIOKp(*svp) && (o = (OP*)SvSTASH(*svp)))
 	o->op_private = i;
     else
