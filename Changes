@@ -78,6 +78,104 @@ Version 5.005_02        Second maintenance release of 5.005
 ----------------
 
 ____________________________________________________________________________
+[  1710] By: gsar                                  on 1998/08/02  07:31:37
+        Log: remove CRs from djgpp/configure.bat (Porting/makerel adds them)
+     Branch: maint-5.005/perl
+           ! djgpp/configure.bat
+____________________________________________________________________________
+[  1709] By: gsar                                  on 1998/08/02  07:27:34
+        Log: Porting/makerel tweaks
+     Branch: maint-5.005/perl
+           ! Porting/makerel
+____________________________________________________________________________
+[  1708] By: gsar                                  on 1998/08/02  07:09:35
+        Log: fixes for pod noises
+     Branch: maint-5.005/perl
+	   ! ext/B/B/Bytecode.pm ext/Thread/Thread/Specific.pm
+           ! pod/perlembed.pod pod/perlfaq.pod
+____________________________________________________________________________
+[  1707] By: gsar                                  on 1998/08/02  06:59:47
+        Log: malloc.c tweaks
+             From:    Ilya Zakharevich <ilya@math.ohio-state.edu>
+             Date:    Sat, 01 Aug 1998 18:46:32 EDT
+             Message-Id: <199808012246.SAA00699@monk.mps.ohio-state.edu>
+             Subject: [PATCH 5.005_*] Better malloc.c
+     Branch: maint-5.005/perl
+           ! malloc.c
+____________________________________________________________________________
+[  1706] By: gsar                                  on 1998/08/02  06:56:37
+        Log: fix quoting of keys with embedded nulls 
+             From:    Slaven Rezic <eserte@cs.tu-berlin.de>
+             Date:    Sat, 01 Aug 1998 13:38:03 +0200
+             Message-Id: <199808011138.NAA05189@mail.cs.tu-berlin.de>
+             Subject: Data::Dumper 2.09, patch
+     Branch: maint-5.005/perl
+           ! ext/Data/Dumper/Dumper.xs
+____________________________________________________________________________
+[  1705] By: gsar                                  on 1998/08/02  06:50:07
+        Log: From:    pvhp@forte.com (Peter Prymmer)
+             Date:    Fri, 31 Jul 1998 14:50:41 PDT
+             Message-Id: <9807312150.AA08867@forte.com>
+             Subject: Re: \Q doesn't work in interpolated regular expressions
+     Branch: maint-5.005/perl
+           ! pod/perlre.pod
+____________________________________________________________________________
+[  1704] By: gsar                                  on 1998/08/02  06:37:06
+        Log: add test for magic autovivification
+             From: "M.J.T. Guy" <mjtg@cus.cam.ac.uk>
+             Date: Thu, 30 Jul 1998 12:18:15 +0100
+             Message-Id: <E0z1qit-0003O5-00@taurus.cus.cam.ac.uk>
+             Subject: Re: Perl5.005_01 failing to autovivify subroutine args
+     Branch: maint-5.005/perl
+           ! pod/perldiag.pod t/cmd/subval.t
+____________________________________________________________________________
+[  1703] By: gsar                                  on 1998/08/02  06:26:57
+        Log: From: Ilya Zakharevich <ilya@math.ohio-state.edu>
+             Date: Tue, 21 Jul 1998 23:58:53 -0400 (EDT)
+             Message-Id: <199807220358.XAA19811@monk.mps.ohio-state.edu>
+             Subject: [PATCH 5.004_76] better RE colors
+     Branch: maint-5.005/perl
+           ! ext/re/re.pm regcomp.c regexec.c thrdvar.h
+____________________________________________________________________________
+[  1702] By: gsar                                  on 1998/08/02  06:22:15
+        Log: mark link type of exported functions for OS/2
+             From: Ilya Zakharevich <ilya@math.ohio-state.edu>
+             Date: Sun, 26 Jul 1998 21:03:03 -0400 (EDT)
+             Message-Id: <199807270103.VAA04977@monk.mps.ohio-state.edu>
+             Subject: Re: Compiler linkage's types [PATCH 5.005]
+     Branch: maint-5.005/perl
+           ! os2/os2ish.h proto.h
+____________________________________________________________________________
+[  1701] By: gsar                                  on 1998/08/02  06:16:03
+        Log: tweaked version of suggested patch
+             From: Ilya Zakharevich <ilya@math.ohio-state.edu>
+             Date: Mon, 20 Jul 1998 21:40:00 -0400 (EDT)
+             Message-Id: <199807210140.VAA17186@monk.mps.ohio-state.edu>
+             Subject: [PATCH 5.004_75] Enable -DS
+     Branch: maint-5.005/perl
+	   ! README.threads ext/Thread/Thread.xs ext/Thread/typemap mg.c
+	   ! op.c perl.c perl.h pod/perlrun.pod pp.c pp_hot.c scope.c
+           ! thread.h util.c win32/win32thread.c
+____________________________________________________________________________
+[  1700] By: gsar                                  on 1998/08/02  05:54:00
+        Log: up patchlevel to 5.005_02
+     Branch: maint-5.005/perl
+	   ! Changes patchlevel.h win32/Makefile win32/config_H.bc
+           ! win32/config_H.gc win32/config_H.vc win32/makefile.mk
+____________________________________________________________________________
+[  1699] By: gsar                                  on 1998/08/02  05:50:01
+        Log: From: Ilya Zakharevich <ilya@math.ohio-state.edu>
+             Message-Id: <199807180809.EAA09379@monk.mps.ohio-state.edu>
+             Date: Sat, 18 Jul 1998 04:09:26 -0400 (EDT)
+             Subject: [PATCH 5.004_72] Make tests succeed on OS/2
+     Branch: maint-5.005/perl
+           ! t/io/fs.t t/lib/io_pipe.t t/lib/io_sock.t t/op/stat.t
+____________________________________________________________________________
+[  1698] By: gsar                                  on 1998/08/02  05:41:41
+        Log: use I32_MAX as the limit when U16_MAX > I32_MAX (for CRAY)
+     Branch: maint-5.005/perl
+           ! regcomp.c
+____________________________________________________________________________
 [  1697] By: gsar                                  on 1998/08/02  05:20:12
         Log: support OE/MVS
              From: Jarkko Hietaniemi <jhi@iki.fi>
