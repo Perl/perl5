@@ -169,9 +169,9 @@ else
     else
 	d_fork='undef'
     fi
-    lddlflags="-Zdll -Zomf -Zmt -Zcrtdll $ld_dll_optimize"
+    lddlflags="-Zdll -Zomf -Zmt -Zcrtdll -Zlinker /e:2 $ld_dll_optimize"
     # Recursive regmatch may eat 2.5M of stack alone.
-    ldflags='-Zexe -Zomf -Zmt -Zcrtdll -Zstack 32000'
+    ldflags='-Zexe -Zomf -Zmt -Zcrtdll -Zstack 32000 -Zlinker /e:2'
     if [ $emxcrtrev -ge 50 ]; then 
 	ccflags="-Zomf -Zmt -DDOSISH -DOS2=2 -DEMBED -I. $_defemxcrtrev"
     else
