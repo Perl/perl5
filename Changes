@@ -31,6 +31,350 @@ or any other branch.
 Version v5.7.1		Development release working toward v5.8
 --------------
 ____________________________________________________________________________
+[ 10654] By: jhi                                   on 2001/06/16  23:18:37
+        Log: Subject: [PATCH] Re: DYNAMIC_ENV_FETCH HvNAME abuse.
+             From: Abhijit Menon-Sen <ams@wiw.org>
+             Date: Sat, 16 Jun 2001 07:41:19 +0530
+             Message-ID: <20010616074119.A24720@lustre.linux.in>
+     Branch: perl
+	   ! hv.c perl.c vms/vmsish.h win32/win32.h
+____________________________________________________________________________
+[ 10653] By: jhi                                   on 2001/06/16  23:15:11
+        Log: Document tests failing when threaded, since we now have more.
+     Branch: perl
+	   ! pod/perl572delta.pod
+____________________________________________________________________________
+[ 10652] By: jhi                                   on 2001/06/16  23:12:19
+        Log: -Wall cleanup.
+     Branch: perl
+	   ! ext/Thread/Thread.xs
+____________________________________________________________________________
+[ 10651] By: jhi                                   on 2001/06/16  23:06:55
+        Log: pthread_attr_setstacksize() isn't absolutely necessary
+             to call, only iff THREAD_CREATE_NEEDS_STACK.
+     Branch: perl
+	   ! ext/Thread/Thread.xs
+____________________________________________________________________________
+[ 10650] By: jhi                                   on 2001/06/16  22:58:48
+        Log: -Wall strays.
+     Branch: perl
+	   ! perl.c util.c
+____________________________________________________________________________
+[ 10649] By: jhi                                   on 2001/06/16  22:47:40
+        Log: Add workaround for Darwin's (Mac OS X's) INT32_MIN
+             (and INT64_MIN) brokenness.
+     Branch: perl
+	   ! hints/darwin.sh perl.h
+____________________________________________________________________________
+[ 10648] By: jhi                                   on 2001/06/16  22:27:48
+        Log: Subject: [PATCH] Re: [PATCH] Re: perl@10611
+             From: Nicholas Clark <nick@ccl4.org>
+             Date: Sun, 17 Jun 2001 00:16:05 +0100
+             Message-ID: <20010617001605.V98663@plum.flirble.org>
+     Branch: perl
+	   ! ext/Fcntl/Fcntl.xs ext/Fcntl/Makefile.PL ext/File/Glob/Glob.pm
+	   ! ext/File/Glob/Glob.xs ext/File/Glob/Makefile.PL
+	   ! lib/ExtUtils/Constant.pm t/lib/extutils.t
+____________________________________________________________________________
+[ 10647] By: jhi                                   on 2001/06/16  22:24:47
+        Log: Add perlnetware to docs; regen toc; supply skeleton
+             docs for some Memoize submodules.
+     Branch: perl
+	   ! lib/Memoize/AnyDBM_File.pm lib/Memoize/ExpireFile.pm
+	   ! lib/Memoize/ExpireTest.pm lib/Memoize/NDBM_File.pm
+	   ! lib/Memoize/SDBM_File.pm lib/Memoize/Storable.pm
+	   ! pod/buildtoc.PL pod/perl.pod pod/perlport.pod pod/perltoc.pod
+	   ! win32/Makefile win32/makefile.mk
+____________________________________________________________________________
+[ 10646] By: jhi                                   on 2001/06/16  22:06:52
+        Log: pod cleanup.
+     Branch: perl
+	   ! README.netware
+____________________________________________________________________________
+[ 10645] By: jhi                                   on 2001/06/16  21:47:00
+        Log: Integrate Memoize 0.64.  Few tweaks were required in
+             the test scripts.  Note that the speed and expire*
+             tests take several dozen seconds to run.
+     Branch: perl
+	   + lib/Memoize.pm lib/Memoize/AnyDBM_File.pm
+	   + lib/Memoize/Expire.pm lib/Memoize/ExpireFile.pm
+	   + lib/Memoize/ExpireTest.pm lib/Memoize/NDBM_File.pm
+	   + lib/Memoize/README lib/Memoize/SDBM_File.pm
+	   + lib/Memoize/Saves.pm lib/Memoize/Storable.pm lib/Memoize/TODO
+	   + lib/Memoize/t/array.t lib/Memoize/t/correctness.t
+	   + lib/Memoize/t/errors.t lib/Memoize/t/expire.t
+	   + lib/Memoize/t/expire_file.t lib/Memoize/t/expire_module_n.t
+	   + lib/Memoize/t/expire_module_t.t lib/Memoize/t/flush.t
+	   + lib/Memoize/t/normalize.t lib/Memoize/t/prototype.t
+	   + lib/Memoize/t/speed.t lib/Memoize/t/tie.t
+	   + lib/Memoize/t/tie_gdbm.t lib/Memoize/t/tie_ndbm.t
+	   + lib/Memoize/t/tie_sdbm.t lib/Memoize/t/tie_storable.t
+	   + lib/Memoize/t/tiefeatures.t lib/Memoize/t/unmemoize.t
+	   ! MANIFEST t/lib/1_compile.t
+____________________________________________________________________________
+[ 10644] By: jhi                                   on 2001/06/16  20:35:49
+        Log: Document the cross-compilation options.
+     Branch: perl
+	   ! Cross/README INSTALL
+____________________________________________________________________________
+[ 10643] By: jhi                                   on 2001/06/16  19:46:38
+        Log: NetWare port from Guruprasad S <SGURUPRASAD@novell.com>.
+     Branch: perl
+	   + NetWare/CLIBsdio.h NetWare/CLIBstr.h NetWare/CLIBstuf.c
+	   + NetWare/CLIBstuf.h NetWare/Main.c NetWare/Makefile
+	   + NetWare/NWTInfo.c NetWare/NWUtil.c NetWare/Nwmain.c
+	   + NetWare/Nwpipe.c NetWare/bat/BldNWExt.bat
+	   + NetWare/bat/Buildtype.bat NetWare/bat/MPKBuild.bat
+	   + NetWare/bat/SetNWBld.bat NetWare/bat/Setmpksdk.bat
+	   + NetWare/bat/Setnlmsdk.bat NetWare/bat/Setwatcom.bat
+	   + NetWare/bat/ToggleD2.bat NetWare/bat/ToggleXDC.bat
+	   + NetWare/config.wc NetWare/config_H.wc NetWare/config_h.PL
+	   + NetWare/config_sh.PL NetWare/deb.h NetWare/dl_netware.xs
+	   + NetWare/intdef.h NetWare/interface.c NetWare/interface.h
+	   + NetWare/iperlhost.h NetWare/netware.h NetWare/nw5.c
+	   + NetWare/nw5iop.h NetWare/nw5sck.c NetWare/nw5sck.h
+	   + NetWare/nw5thread.c NetWare/nw5thread.h NetWare/nwperlsys.c
+	   + NetWare/nwperlsys.h NetWare/nwpipe.h NetWare/nwplglob.c
+	   + NetWare/nwplglob.h NetWare/nwtinfo.h NetWare/nwutil.h
+	   + NetWare/t/NWModify.pl NetWare/t/NWScripts.pl
+	   + NetWare/t/Readme.txt NetWare/testnlm/echo/echo.c
+	   + NetWare/testnlm/type/type.c NetWare/win32ish.h README.netware
+	   + lib/ExtUtils/MM_NW5.pm
+	   ! MANIFEST XSUB.h dosish.h ext/Errno/Errno_pm.PL ext/IO/IO.xs
+	   ! ext/POSIX/POSIX.xs ext/Socket/Socket.xs installperl iperlsys.h
+	   ! lib/AutoLoader.pm lib/AutoSplit.pm lib/ExtUtils/MakeMaker.pm
+	   ! lib/File/Copy.pm lib/File/Find.pm lib/perl5db.pl makedef.pl
+	   ! perl.c perl.h perlio.c perlio.h pp_sys.c t/comp/multiline.t
+	   ! t/comp/script.t t/io/argv.t t/io/dup.t t/io/fs.t
+	   ! t/io/inplace.t t/io/iprefix.t t/io/tell.t t/lib/anydbm.t
+	   ! t/lib/b-stash.t t/lib/cwd.t t/lib/db-btree.t t/lib/db-hash.t
+	   ! t/lib/db-recno.t t/lib/filehand.t t/lib/filter-util.t
+	   ! t/lib/ftmp-security.t t/lib/gdbm.t t/lib/glob-basic.t
+	   ! t/lib/glob-case.t t/lib/io_dup.t t/lib/io_poll.t
+	   ! t/lib/io_sel.t t/lib/io_taint.t t/lib/ndbm.t
+	   ! t/lib/net-hostent.t t/lib/odbm.t t/lib/open2.t t/lib/open3.t
+	   ! t/lib/posix.t t/lib/sdbm.t t/lib/sigaction.t t/lib/syslfs.t
+	   ! t/op/anonsub.t t/op/closure.t t/op/die_exit.t t/op/exec.t
+	   ! t/op/fork.t t/op/goto.t t/op/groups.t t/op/lfs.t t/op/magic.t
+	   ! t/op/misc.t t/op/rand.t t/op/runlevel.t t/op/split.t
+	   ! t/op/stat.t t/op/sysio.t t/op/taint.t t/op/write.t
+	   ! t/pragma/locale.t t/pragma/strict.t t/pragma/subs.t
+	   ! t/pragma/warn/mg t/pragma/warnings.t thread.h toke.c util.c
+	   ! util.h x2p/a2py.c
+____________________________________________________________________________
+[ 10642] By: jhi                                   on 2001/06/16  19:16:04
+        Log: Resort MANIFEST.
+     Branch: perl
+	   ! MANIFEST
+____________________________________________________________________________
+[ 10641] By: jhi                                   on 2001/06/16  18:52:26
+        Log: Integrate perlio.
+     Branch: perl
+	  +> win32/win32io.c
+	  !> MANIFEST perlio.c perliol.h win32/makefile.mk
+____________________________________________________________________________
+[ 10640] By: nick                                  on 2001/06/16  18:38:31
+        Log: Disable :win32 layer as default till I get it working
+     Branch: perlio
+	   ! MANIFEST perlio.c
+____________________________________________________________________________
+[ 10639] By: jhi                                   on 2001/06/16  18:35:46
+        Log: Try the new scheme by moving the Text::Abbrev test
+             to a new place under lib.
+     Branch: perl
+	   + lib/Text/Abbrev/t/abbrev.t
+	   - t/lib/abbrev.t
+	   ! MANIFEST
+____________________________________________________________________________
+[ 10638] By: jhi                                   on 2001/06/16  18:34:30
+        Log: Make the code even more dynamical so that testname
+             suffix length can change.
+     Branch: perl
+	   ! lib/Test/Harness.pm t/TEST
+____________________________________________________________________________
+[ 10637] By: jhi                                   on 2001/06/16  18:16:28
+        Log: Allow for deeper t/ and also a single test.pl.
+     Branch: perl
+	   ! t/TEST t/harness
+____________________________________________________________________________
+[ 10636] By: jhi                                   on 2001/06/16  18:13:59
+        Log: #define fix from Nicholas Clark.
+     Branch: perl
+	   ! ext/POSIX/POSIX.xs
+____________________________________________________________________________
+[ 10635] By: jhi                                   on 2001/06/16  17:50:43
+        Log: Initialization is nice.
+     Branch: perl
+	   ! lib/Test/Harness.pm
+____________________________________________________________________________
+[ 10634] By: jhi                                   on 2001/06/16  17:38:53
+        Log: Make t/TEST and t/harness to test also the t/ tests
+             under the main lib/ and ext/ directories.  Fix Test::Harness
+             to dynamically change the width of its "foo/bar....ok" output.
+     Branch: perl
+	   ! lib/Test/Harness.pm t/TEST t/TestInit.pm t/harness
+____________________________________________________________________________
+[ 10633] By: jhi                                   on 2001/06/16  16:58:57
+        Log: Subject: [PATCH] Re: perl@10611 
+             From: Nicholas Clark <nick@ccl4.org>
+             Date: Sat, 16 Jun 2001 16:52:47 +0100
+             Message-ID: <20010616165247.O98663@plum.flirble.org>
+             
+             The .xs parts, too.
+     Branch: perl
+	   ! ext/GDBM_File/GDBM_File.xs ext/POSIX/POSIX.xs
+	   ! ext/Socket/Socket.xs ext/Sys/Syslog/Syslog.xs
+____________________________________________________________________________
+[ 10632] By: nick                                  on 2001/06/16  16:44:35
+        Log: Work-in-progress win32 layer semi-functional, checking 
+             for UNIX breakage.
+     Branch: perlio
+	   ! perlio.c perliol.h win32/makefile.mk win32/win32io.c
+____________________________________________________________________________
+[ 10631] By: jhi                                   on 2001/06/16  16:40:30
+        Log: Subject: [PATCH] Re: perl@10611 
+             From: Nicholas Clark <nick@ccl4.org>
+             Date: Sat, 16 Jun 2001 16:52:47 +0100
+             Message-ID: <20010616165247.O98663@plum.flirble.org>
+     Branch: perl
+	   ! ext/GDBM_File/GDBM_File.xs ext/GDBM_File/Makefile.PL
+	   ! ext/POSIX/Makefile.PL ext/POSIX/POSIX.xs
+	   ! ext/Socket/Makefile.PL ext/Socket/Socket.xs
+	   ! ext/Sys/Syslog/Makefile.PL ext/Sys/Syslog/Syslog.xs
+	   ! lib/ExtUtils/Constant.pm
+____________________________________________________________________________
+[ 10630] By: jhi                                   on 2001/06/16  15:11:38
+        Log: Metaconfig unit change for #10629.
+     Branch: metaconfig
+	   ! U/modified/Finish.U
+____________________________________________________________________________
+[ 10629] By: jhi                                   on 2001/06/16  15:11:10
+        Log: The extraction changed directories.
+     Branch: perl
+	   ! Configure
+____________________________________________________________________________
+[ 10628] By: jhi                                   on 2001/06/16  14:59:38
+        Log: Math::BigInt 1.35 from Tels.
+     Branch: perl
+	   + t/lib/mbimbf.t
+	   ! MANIFEST lib/Math/BigFloat.pm lib/Math/BigInt.pm
+	   ! t/lib/bigfltpm.t t/lib/bigintpm.t
+____________________________________________________________________________
+[ 10627] By: nick                                  on 2001/06/16  14:54:52
+        Log: Work in progress UNIX-side edit of win32 PerLIO layer
+     Branch: perlio
+	   + win32/win32io.c
+	   ! perlio.c win32/makefile.mk
+____________________________________________________________________________
+[ 10626] By: jhi                                   on 2001/06/16  14:01:50
+        Log: Subject: [PATCH 5.6.1] os2/diff-configure
+             From: Ilya Zakharevich <ilya@math.ohio-state.edu>
+             Date: Fri, 15 Jun 2001 01:19:36 -0400
+             Message-ID: <20010615011936.A26982@math.ohio-state.edu>
+             
+             Empty all of it because I think #10624 made even the
+             last patch hunk unnecessary.
+     Branch: perl
+	   ! os2/diff.configure
+____________________________________________________________________________
+[ 10625] By: jhi                                   on 2001/06/16  13:58:34
+        Log: Metaconfig unit change for 10624.
+     Branch: metaconfig
+	   ! U/modified/libc.U
+     Branch: perl
+	   ! config_h.SH
+____________________________________________________________________________
+[ 10624] By: jhi                                   on 2001/06/16  13:58:13
+        Log: Move the initialization of libnames to the beginning so
+             that can one 'seed' it (as OS/2 does.)
+     Branch: perl
+	   ! Configure
+____________________________________________________________________________
+[ 10623] By: jhi                                   on 2001/06/16  13:47:54
+        Log: Subject: [PATCH 5.6.1] OS2::DLL patch
+             From: Ilya Zakharevich <ilya@math.ohio-state.edu>
+             Date: Fri, 15 Jun 2001 19:10:57 -0400
+             Message-ID: <20010615191057.A8050@math.ohio-state.edu>
+     Branch: perl
+	   ! os2/OS2/REXX/DLL/DLL.pm
+____________________________________________________________________________
+[ 10622] By: jhi                                   on 2001/06/16  13:29:42
+        Log: Subject: [PATCH perl@10611] make VMS find util.c's offspring 
+             From: "Craig A. Berry" <craigberry@mac.com>
+             Date: Fri, 15 Jun 2001 17:00:03 -0500
+             Message-Id: <a05101007b750342599be@[172.16.52.1]>
+     Branch: perl
+	   ! vms/descrip_mms.template
+____________________________________________________________________________
+[ 10621] By: jhi                                   on 2001/06/16  13:28:37
+        Log: Subject: [PATCH perl@10611] get extutils.t working on VMS (again)
+             From: "Craig A. Berry" <craigberry@mac.com>
+             Date: Fri, 15 Jun 2001 18:39:42 -0500
+             Message-Id: <a05101008b7503dc9dc2f@[172.16.52.1]>
+     Branch: perl
+	   ! lib/File/Spec/VMS.pm t/lib/extutils.t
+____________________________________________________________________________
+[ 10620] By: jhi                                   on 2001/06/16  13:25:06
+        Log: Integrate perlio.
+     Branch: perl
+	  !> embed.h embed.pl lib/open.pm perl.c perlio.c proto.h
+	  !> t/io/utf8.t t/lib/io_scalar.t
+____________________________________________________________________________
+[ 10619] By: nick                                  on 2001/06/15  21:05:19
+        Log: Generated files
+     Branch: perlio
+	   ! embed.h proto.h
+____________________________________________________________________________
+[ 10618] By: nick                                  on 2001/06/15  20:27:42
+        Log: Fix open.pm to work via XS-implemented method calls rather
+             than *open::layers variables which caused all the HV/AV hassle.
+     Branch: perlio
+	   ! embed.pl lib/open.pm perl.c perlio.c t/io/utf8.t
+	   ! t/lib/io_scalar.t
+____________________________________________________________________________
+[ 10617] By: jhi                                   on 2001/06/15  18:50:53
+        Log: Integrate perlio.
+     Branch: perl
+	  !> lib/ExtUtils/Constant.pm
+____________________________________________________________________________
+[ 10616] By: nick                                  on 2001/06/15  18:46:47
+        Log: pTHX_ / aTHX_ for ExtUtils/Constant.pm
+     Branch: perlio
+	   ! lib/ExtUtils/Constant.pm
+____________________________________________________________________________
+[ 10615] By: jhi                                   on 2001/06/15  18:36:43
+        Log: Integrate perlio.
+     Branch: perl
+	  !> ext/Socket/Socket.xs
+____________________________________________________________________________
+[ 10614] By: nick                                  on 2001/06/15  18:33:37
+        Log: MULTIPLICITY fix for Socket.xs
+     Branch: perlio
+	   ! ext/Socket/Socket.xs
+____________________________________________________________________________
+[ 10613] By: jhi                                   on 2001/06/15  16:34:06
+        Log: Subject: Re: perl@10611
+             From: Doug MacEachern <dougm@covalent.net>
+             Date: Fri, 15 Jun 2001 10:10:33 -0700 (PDT)
+             Message-ID: <Pine.LNX.4.21.0106151007420.10871-100000@mako.covalent.net>
+     Branch: perl
+	   ! ext/Socket/Socket.xs
+____________________________________________________________________________
+[ 10612] By: nick                                  on 2001/06/15  16:14:38
+        Log: Raw integrate on mainline - MULTIPLICITY issues with Socket.xs
+     Branch: perlio
+	  !> Changes ext/GDBM_File/GDBM_File.pm ext/GDBM_File/GDBM_File.xs
+	  !> ext/Socket/Socket.pm ext/Socket/Socket.xs
+	  !> lib/ExtUtils/Constant.pm lib/File/Find.pm opcode.pl
+	  !> patchlevel.h perlio.c t/lib/extutils.t t/lib/filefind.t
+	  !> t/lib/gdbm.t t/lib/h2ph.h t/lib/h2ph.pht t/lib/h2ph.t
+	  !> utils/h2ph.PL
+____________________________________________________________________________
+[ 10611] By: jhi                                   on 2001/06/15  14:29:04
+        Log: Update Changes.
+     Branch: perl
+	   ! Changes patchlevel.h
+____________________________________________________________________________
 [ 10610] By: jhi                                   on 2001/06/15  14:20:33
         Log: Upping the test count.
      Branch: perl
