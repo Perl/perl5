@@ -119,7 +119,7 @@ pack, read, syscall, sysread, syswrite, unpack, vec
 
 =item Functions for filehandles, files, or directories
 
--X, chdir, chmod, chown, chroot, fcntl, glob, ioctl, link,
+I<-X>, chdir, chmod, chown, chroot, fcntl, glob, ioctl, link,
 lstat, mkdir, open, opendir, readlink, rename, rmdir,
 stat, symlink, umask, unlink, utime
 
@@ -183,8 +183,8 @@ gmtime, localtime, time, times
 =item Functions new in perl5
 
 abs, bless, chomp, chr, exists, formline, glob, import, lc,
-lcfirst, map, my, no, qx, qw, ref, sub*, sysopen, tie, tied, uc,
-ucfirst, untie, use
+lcfirst, map, my, no, prototype, qx, qw, readline, readpipe,
+ref, sub*, sysopen, tie, tied, uc, ucfirst, untie, use
 
 * - C<sub> was a keyword in perl4, but in perl5 it is an
 operator which can be used in expressions.
@@ -776,11 +776,14 @@ Example:
 
 =item each ASSOC_ARRAY
 
-Returns a 2-element array consisting of the key and value for the next
-value of an associative array, so that you can iterate over it.
+When called in a list context, returns a 2-element array consisting
+of the key and value for the next element of an associative array,
+so that you can iterate over it.  When called in a scalar context,
+returns the key only for the next element in the associative array.
 Entries are returned in an apparently random order.  When the array is
-entirely read, a null array is returned (which when assigned produces a
-FALSE (0) value).  The next call to each() after that will start
+entirely read, a null array is returned in list context (which when
+assigned produces a FALSE (0) value), and C<undef> is returned in a
+scalar context.  The next call to each() after that will start
 iterating again.  The iterator can be reset only by reading all the
 elements from the array.  You should not add elements to an array while
 you're iterating over it.  There is a single iterator for each
@@ -1123,7 +1126,7 @@ getpwuid().
 
     $login = getlogin || (getpwuid($<))[0] || "Kilroy";
 
-Do not consider getlogin() for authorentication: it is not as
+Do not consider getlogin() for authentication: it is not as
 secure as getpwuid().
 
 =item getpeername SOCKET
@@ -1455,7 +1458,7 @@ Unlike in the shell, in Perl if the I<SIGNAL> is negative, it kills
 process groups instead of processes.  (On System V, a negative I<PROCESS>
 number will also kill process groups, but that's not portable.)  That
 means you usually want to use positive not negative signals.  You may also
-use a signal name in quotes.  See the L<perlipc/"Signals"> man page for details.
+use a signal name in quotes.  See L<perlipc/"Signals"> for details.
 
 =item last LABEL
 
@@ -1527,7 +1530,7 @@ In a scalar context, prints out the ctime(3) value:
     $now_string = localtime;  # e.g. "Thu Oct 13 04:54:34 1994"
 
 Also see the F<timelocal.pl> library, and the strftime(3) function available
-via the POSIX modulie.
+via the POSIX module.
 
 =item log EXPR
 
@@ -1660,7 +1663,7 @@ If the filename begins with "|", the filename is interpreted
 as a command to which output is to be piped, and if the filename ends with
 a "|", the filename is interpreted See L<perlipc/"Using open() for IPC">
 for more examples of this.  as command which pipes input to us.  (You may
-not have a raw open() to a command that pipes both in I<and> out, but see See L<open2>,
+not have a raw open() to a command that pipes both in I<and> out, but see L<open2>,
 L<open3>, and L<perlipc/"Bidirectional Communication"> for alternatives.)
 
 Opening '-' opens STDIN and opening '>-' opens STDOUT.  Open returns
@@ -1982,7 +1985,7 @@ level of indirection.  (NOTE: If FILEHANDLE is a variable and the next
 token is a term, it may be misinterpreted as an operator unless you
 interpose a + or put parens around the arguments.)  If FILEHANDLE is
 omitted, prints by default to standard output (or to the last selected
-output channel--see select()).  If LIST is also omitted, prints $_ to
+output channel--see L</select>).  If LIST is also omitted, prints $_ to
 STDOUT.  To set the default output channel to something other than
 STDOUT use the select operation.  Note that, because print takes a
 LIST, anything in the LIST is evaluated in a list context, and any
@@ -1993,7 +1996,7 @@ parenthesis to terminate the arguments to the print--interpose a + or
 put parens around all the arguments.
 
 Note that if you're storing FILEHANDLES in an array or other expression,
-you will have to use a block returning its value instead
+you will have to use a block returning its value instead:
 
     print { $files[$i] } "stuff\n";
     print { $OK ? STDOUT : STDERR } "stuff\n";
@@ -2004,6 +2007,12 @@ you will have to use a block returning its value instead
 
 Equivalent to a "print FILEHANDLE sprintf(LIST)".  The first argument
 of the list will be interpreted as the printf format.
+
+=item prototype FUNCTION
+
+Returns the prototype of a function as a string (or C<undef> if the
+function has no prototype).  FUNCTION is a reference to the the
+function whose prototype you want to retrieve.
 
 =item push ARRAY,LIST
 
@@ -2190,11 +2199,12 @@ end such a file with "1;" unless you're sure it'll return TRUE
 otherwise.  But it's better just to put the "C<1;>", in case you add more
 statements.
 
-If EXPR is a bare word, the require assumes a "F<.pm>" extension for you,
+If EXPR is a bare word, the require assumes a "F<.pm>" extension and
+replaces "F<::>" with "F</>" in the filename for you,
 to make it easy to load standard modules.  This form of loading of 
 modules does not risk altering your namespace.
 
-For a yet-more-powerful import facility, see the L</use()> and 
+For a yet-more-powerful import facility, see L</use> and 
 L<perlmod>.
 
 =item reset EXPR
@@ -2217,7 +2227,7 @@ resets variables or searches in the current package.  Always returns
 Resetting "A-Z" is not recommended since you'll wipe out your
 ARGV and ENV arrays.  Only resets package variables--lexical variables
 are unaffected, but they clean themselves up on scope exit anyway,
-so anymore you probably want to use them instead.  See L</my>.
+so you'll probably want to use them instead.  See L</my>.
 
 =item return LIST
 
@@ -2382,7 +2392,7 @@ in seconds, which may be fractional.  Note: not all implementations are
 capable of returning the $timeleft.  If not, they always return
 $timeleft equal to the supplied $timeout.
 
-You can effect a 250-microsecond sleep this way:
+You can effect a 250-millisecond sleep this way:
 
     select(undef, undef, undef, 0.25);
 
@@ -2711,7 +2721,7 @@ into more fields than you really need.
 If the PATTERN contains parentheses, additional array elements are
 created from each matching substring in the delimiter.
 
-    split(/([,-])/, "1-10,20");
+    split(/([,-])/, "1-10,20", 3);
 
 produces the list value
 
@@ -2764,8 +2774,8 @@ root of $_.
 =item srand EXPR
 
 Sets the random number seed for the C<rand> operator.  If EXPR is omitted,
-does C<srand(time)>.  Many folks use an explicit C<srand(time ^ $$)>
-instead.  Of course, you'd need something much more random than that for
+uses a semirandom value based on the current time and process ID, among
+other things.  Of course, you'd need something much more random than that for
 cryptographic purposes, since it's easy to guess the current time.
 Checksumming the compressed output of rapidly changing operating system
 status programs is the usual method.  Examples are posted regularly to
@@ -3016,7 +3026,7 @@ use the each() function to iterate over such.  Example:
 
     # print out history file offsets
     use NDBM_File;
-    tie(%HIST, NDBM_File, '/usr/lib/news/history', 1, 0);
+    tie(%HIST, 'NDBM_File', '/usr/lib/news/history', 1, 0);
     while (($key,$val) = each %HIST) {
 	print $key, ' = ', unpack('L',$val), "\n";
     }
@@ -3062,8 +3072,10 @@ package.
 
 =item time
 
-Returns the number of non-leap seconds since 00:00:00 UTC, January 1,
-1970.  Suitable for feeding to gmtime() and localtime().
+Returns the number of non-leap seconds since whatever time the system
+considers to be the epoch (that's 00:00:00, January 1, 1904 for MacOS,
+and 00:00:00 UTC, January 1, 1970 for most other systems).
+Suitable for feeding to gmtime() and localtime().
 
 =item times
 
@@ -3187,11 +3199,25 @@ reverse.
 
 =item use Module
 
+=item use Module VERSION LIST
+
+=item use VERSION
+
 Imports some semantics into the current package from the named module,
 generally by aliasing certain subroutine or variable names into your
 package.  It is exactly equivalent to
 
     BEGIN { require Module; import Module LIST; }
+
+except that Module I<must> be a bare word.
+
+If the first argument to C<use> is a number, it is treated as a version
+number instead of a module name.  If the version of the Perl interpreter
+is less than VERSION, then an error message is printed and Perl exits
+immediately.  This is often useful if you need to check the current
+Perl version before C<use>ing library modules which have changed in
+incompatible ways from older versions of Perl.  (We try not to do
+this more than we have to.)
 
 The BEGIN forces the require and import to happen at compile time.  The
 require makes sure the module is loaded into memory if it hasn't been
@@ -3210,6 +3236,10 @@ That is exactly equivalent to
 
     BEGIN { require Module; }
 
+If the VERSION argument is present between Module and LIST, then the
+C<use> will fail if the C<$VERSION> variable in package Module is
+less than VERSION.
+
 Because this is a wide-open interface, pragmas (compiler directives)
 are also implemented this way.  Currently implemented pragmas are:
 
@@ -3224,7 +3254,7 @@ ordinary modules, which import symbols into the current package (which are
 effective through the end of the file).
 
 There's a corresponding "no" command that unimports meanings imported
-by use.
+by use, i.e. it calls C<unimport Module LIST> instead of C<import>.
 
     no integer;
     no strict 'refs';
