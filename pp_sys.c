@@ -304,9 +304,14 @@ PP(pp_backtick)
     STRLEN n_a;
     char *tmps = POPpx;
     I32 gimme = GIMME_V;
+    char *mode = "r";
 
     TAINT_PROPER("``");
-    fp = PerlProc_popen(tmps, "r");
+    if (PL_op->op_private & OPpOPEN_IN_RAW)
+	mode = "rb";
+    else if (PL_op->op_private & OPpOPEN_IN_CRLF)
+	mode = "rt";
+    fp = PerlProc_popen(tmps, mode);
     if (fp) {
 	if (gimme == G_VOID) {
 	    char tmpbuf[256];
@@ -687,15 +692,20 @@ PP(pp_binmode)
     IO *io;
     PerlIO *fp;
     MAGIC *mg;
+    SV *discp = Nullsv;
 
     if (MAXARG < 1)
 	RETPUSHUNDEF;
+    if (MAXARG > 1)
+	discp = POPs;
 
     gv = (GV*)POPs; 
 
     if (gv && (mg = SvTIED_mg((SV*)gv, 'q'))) {
 	PUSHMARK(SP);
 	XPUSHs(SvTIED_obj((SV*)gv, mg));
+	if (discp)
+	    XPUSHs(discp);
 	PUTBACK;
 	ENTER;
 	call_method("BINMODE", G_SCALAR);
@@ -708,12 +718,11 @@ PP(pp_binmode)
     if (!(io = GvIO(gv)) || !(fp = IoIFP(io)))
 	RETPUSHUNDEF;
 
-    if (do_binmode(fp,IoTYPE(io),TRUE)) 
+    if (do_binmode(fp,IoTYPE(io),mode_from_discipline(discp))) 
 	RETPUSHYES;
     else
 	RETPUSHUNDEF;
 }
-
 
 PP(pp_tie)
 {

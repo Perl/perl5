@@ -1692,6 +1692,7 @@ Apd	|void	|mg_magical	|SV* sv
 Apd	|int	|mg_set		|SV* sv
 Ap	|I32	|mg_size	|SV* sv
 p	|OP*	|mod		|OP* o|I32 type
+p	|int	|mode_from_discipline|SV* discp
 Ap	|char*	|moreswitches	|char* s
 p	|OP*	|my		|OP* o
 Ap	|NV	|my_atof	|const char *s

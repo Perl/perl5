@@ -197,6 +197,12 @@ Deprecated.  Use C<GIMME_V> instead.
 /* Private for OP_THREADSV */
 #define OPpDONE_SVREF		64	/* Been through newSVREF once */
 
+/* Private for OP_OPEN and OP_BACKTICK */
+#define OPpOPEN_IN_RAW		16	/* binmode(F,":raw") on input fh */
+#define OPpOPEN_IN_CRLF		32	/* binmode(F,":crlf") on input fh */
+#define OPpOPEN_OUT_RAW		64	/* binmode(F,":raw") on output fh */
+#define OPpOPEN_OUT_CRLF	128	/* binmode(F,":crlf") on output fh */
+
 struct op {
     BASEOP
 };

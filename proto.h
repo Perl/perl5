@@ -468,6 +468,7 @@ PERL_CALLCONV void	Perl_mg_magical(pTHX_ SV* sv);
 PERL_CALLCONV int	Perl_mg_set(pTHX_ SV* sv);
 PERL_CALLCONV I32	Perl_mg_size(pTHX_ SV* sv);
 PERL_CALLCONV OP*	Perl_mod(pTHX_ OP* o, I32 type);
+PERL_CALLCONV int	Perl_mode_from_discipline(pTHX_ SV* discp);
 PERL_CALLCONV char*	Perl_moreswitches(pTHX_ char* s);
 PERL_CALLCONV OP*	Perl_my(pTHX_ OP* o);
 PERL_CALLCONV NV	Perl_my_atof(pTHX_ const char *s);

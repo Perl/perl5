@@ -395,6 +395,7 @@
 #define mg_set			Perl_mg_set
 #define mg_size			Perl_mg_size
 #define mod			Perl_mod
+#define mode_from_discipline	Perl_mode_from_discipline
 #define moreswitches		Perl_moreswitches
 #define my			Perl_my
 #define my_atof			Perl_my_atof
@@ -1141,6 +1142,7 @@
 #define ck_match		Perl_ck_match
 #define ck_method		Perl_ck_method
 #define ck_null			Perl_ck_null
+#define ck_open			Perl_ck_open
 #define ck_repeat		Perl_ck_repeat
 #define ck_require		Perl_ck_require
 #define ck_rfun			Perl_ck_rfun
@@ -1835,6 +1837,7 @@
 #define mg_set(a)		Perl_mg_set(aTHX_ a)
 #define mg_size(a)		Perl_mg_size(aTHX_ a)
 #define mod(a,b)		Perl_mod(aTHX_ a,b)
+#define mode_from_discipline(a)	Perl_mode_from_discipline(aTHX_ a)
 #define moreswitches(a)		Perl_moreswitches(aTHX_ a)
 #define my(a)			Perl_my(aTHX_ a)
 #define my_atof(a)		Perl_my_atof(aTHX_ a)
@@ -2571,6 +2574,7 @@
 #define ck_match(a)		Perl_ck_match(aTHX_ a)
 #define ck_method(a)		Perl_ck_method(aTHX_ a)
 #define ck_null(a)		Perl_ck_null(aTHX_ a)
+#define ck_open(a)		Perl_ck_open(aTHX_ a)
 #define ck_repeat(a)		Perl_ck_repeat(aTHX_ a)
 #define ck_require(a)		Perl_ck_require(aTHX_ a)
 #define ck_rfun(a)		Perl_ck_rfun(aTHX_ a)
@@ -3600,6 +3604,8 @@
 #define mg_size			Perl_mg_size
 #define Perl_mod		CPerlObj::Perl_mod
 #define mod			Perl_mod
+#define Perl_mode_from_discipline	CPerlObj::Perl_mode_from_discipline
+#define mode_from_discipline	Perl_mode_from_discipline
 #define Perl_moreswitches	CPerlObj::Perl_moreswitches
 #define moreswitches		Perl_moreswitches
 #define Perl_my			CPerlObj::Perl_my
@@ -4991,6 +4997,8 @@
 #define ck_method		Perl_ck_method
 #define Perl_ck_null		CPerlObj::Perl_ck_null
 #define ck_null			Perl_ck_null
+#define Perl_ck_open		CPerlObj::Perl_ck_open
+#define ck_open			Perl_ck_open
 #define Perl_ck_repeat		CPerlObj::Perl_ck_repeat
 #define ck_repeat		Perl_ck_repeat
 #define Perl_ck_require		CPerlObj::Perl_ck_require

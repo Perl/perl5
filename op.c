@@ -5836,6 +5836,36 @@ Perl_ck_null(pTHX_ OP *o)
 }
 
 OP *
+Perl_ck_open(pTHX_ OP *o)
+{
+    HV *table = GvHV(PL_hintgv);
+    if (table) {
+	SV **svp;
+	I32 mode;
+	svp = hv_fetch(table, "open_IN", 7, FALSE);
+	if (svp && *svp) {
+	    mode = mode_from_discipline(*svp);
+	    if (mode & O_BINARY)
+		o->op_private |= OPpOPEN_IN_RAW;
+	    else if (mode & O_TEXT)
+		o->op_private |= OPpOPEN_IN_CRLF;
+	}
+
+	svp = hv_fetch(table, "open_OUT", 8, FALSE);
+	if (svp && *svp) {
+	    mode = mode_from_discipline(*svp);
+	    if (mode & O_BINARY)
+		o->op_private |= OPpOPEN_OUT_RAW;
+	    else if (mode & O_TEXT)
+		o->op_private |= OPpOPEN_OUT_CRLF;
+	}
+    }
+    if (o->op_type == OP_BACKTICK)
+	return o;
+    return ck_fun(o);
+}
+
+OP *
 Perl_ck_repeat(pTHX_ OP *o)
 {
     if (cBINOPo->op_first->op_flags & OPf_PARENS) {
