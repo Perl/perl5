@@ -56,6 +56,14 @@ case "$osvers" in
 	d_setruid="$undef"
 	;;
 esac
+# netbsd 1.3 linker warns about setr[gu]id being deprecated.
+# (setregid, setreuid, preferred?)
+case "$osvers" in
+1.3|1.3*)
+	d_setrgid="$undef"
+	d_setruid="$undef"
+	;;
+esac
 
 # Avoid telldir prototype conflict in pp_sys.c  (NetBSD uses const DIR *)
 # Configure should test for this.  Volunteers?
