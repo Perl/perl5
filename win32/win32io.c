@@ -31,6 +31,12 @@ dummy_errno(void)
     return (&(errno));
 }
 
+static char ***
+dummy_environ(void)
+{
+    return (&(_environ));
+}
+
 /* the rest are the remapped stdio routines */
 static FILE *
 dummy_stderr(void)
@@ -184,6 +190,7 @@ __declspec(dllexport)
 WIN32_IOSUBSYSTEM	win32stdio = {
     12345678L,		/* begin of structure; */
     dummy_errno,	/* (*pfunc_errno)(void); */
+    dummy_environ,	/* (*pfunc_environ)(void); */
     dummy_stdin,	/* (*pfunc_stdin)(void); */
     dummy_stdout,	/* (*pfunc_stdout)(void); */
     dummy_stderr,	/* (*pfunc_stderr)(void); */

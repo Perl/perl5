@@ -4,6 +4,7 @@
 typedef struct {
 int	signature_begin;
 int *	(*pfnerrno)(void);
+char ***(*pfnenviron)(void);
 FILE*	(*pfnstdin)(void);
 FILE*	(*pfnstdout)(void);
 FILE*	(*pfnstderr)(void);

@@ -10,6 +10,7 @@
  * function prototypes for our own win32io layer
  */
 EXT int * 	win32_errno();
+EXT char *** 	win32_environ();
 EXT FILE*	win32_stdin(void);
 EXT FILE*	win32_stdout(void);
 EXT FILE*	win32_stderr(void);
@@ -77,6 +78,7 @@ void *	SetIOSubSystem(void	*piosubsystem);
  */
 #ifndef WIN32IO_IS_STDIO
 #undef errno
+#undef environ
 #undef stderr
 #undef stdin
 #undef stdout
@@ -89,6 +91,7 @@ void *	SetIOSubSystem(void	*piosubsystem);
 #define feof(f)				win32_feof(f)
 #define ferror(f)			win32_ferror(f)
 #define errno 				(*win32_errno())
+#define environ				(*win32_environ())
 #define strerror			win32_strerror
 
 /*

@@ -756,6 +756,12 @@ win32_errno(void)
     return (pIOSubSystem->pfnerrno());
 }
 
+DllExport char ***
+win32_environ(void)
+{
+    return (pIOSubSystem->pfnenviron());
+}
+
 /* the rest are the remapped stdio routines */
 DllExport FILE *
 win32_stderr(void)
