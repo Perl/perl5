@@ -1,7 +1,7 @@
 #
 # Locale::Language - ISO two letter codes for language identification (ISO 639)
 #
-# $Id: Language.pm,v 2.1 2002/02/06 04:07:10 neilb Exp $
+# $Id: Language.pm,v 2.2 2002/07/10 16:33:27 neilb Exp $
 #
 
 package Locale::Language;
@@ -14,7 +14,7 @@ require Exporter;
 #	Public Global Variables
 #-----------------------------------------------------------------------
 use vars qw($VERSION @ISA @EXPORT);
-$VERSION      = sprintf("%d.%02d", q$Revision: 2.1 $ =~ /(\d+)\.(\d+)/);
+$VERSION      = sprintf("%d.%02d", q$Revision: 2.2 $ =~ /(\d+)\.(\d+)/);
 @ISA          = qw(Exporter);
 @EXPORT       = qw(&code2language &language2code
                    &all_language_codes &all_language_names );
@@ -107,7 +107,6 @@ sub all_language_names
     my $code;
     my $language;
 
-    use bytes;
 
     while (<DATA>)
     {
@@ -117,6 +116,8 @@ sub all_language_names
         $CODES{$code} = $language;
         $LANGUAGES{"\L$language"} = $code;
     }
+
+    close(DATA);
 }
 
 1;
