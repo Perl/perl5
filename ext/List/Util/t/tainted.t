@@ -27,12 +27,12 @@ my $var = 2;
 print "not " if tainted($var);
 print "ok 2\n";
 
-my $key = (keys %ENV)[0];
+my $key = (grep $_ ne 'PERL_CORE', keys %ENV)[0];
 
 $var = $ENV{$key};
 
 print "not " unless tainted($var);
-print "ok 3\n";
+print "ok 3 - '$var'\n";
 
 print "not " unless tainted($ENV{$key});
-print "ok 4\n";
+print "ok 4 - key '$key', val '$ENV{$key}'\n";
