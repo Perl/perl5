@@ -1184,6 +1184,7 @@ t/op/assignwarn.t	See if OP= operators warn correctly for undef targets
 t/op/auto.t		See if autoincrement et all work
 t/op/avhv.t		See if pseudo-hashes work
 t/op/bop.t		See if bitops work
+t/op/chars.t		See if character escapes work
 t/op/chop.t		See if chop works
 t/op/closure.t		See if closures work
 t/op/cmp.t		See if the various string and numeric compare work

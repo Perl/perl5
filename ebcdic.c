@@ -25,6 +25,14 @@ ebcdic_control(int ch)
 	} else { /* Want uncontrol */
         	if (ch == '\177' || ch == -1)
                 	return('?');
+        	else if (ch == '\157')
+                	return('\177');
+        	else if (ch == '\174')
+                	return('\000');
+        	else if (ch == '^')    /* '\137' in 1047, '\260' in 819 */
+                	return('\036');
+        	else if (ch == '\155')
+                	return('\037');
         	else if (0 < ch && ch < (sizeof(controllablechars) - 1))
                 	return(controllablechars[ch+1]);
         	else
