@@ -47,19 +47,24 @@ specifying C<{ bydepth => 1 }> in the first argument of find().
 
 =item C<preprocess>
 
-The value should be a code reference.  This code reference is used to
-preprocess a directory; it is called after readdir() but before the loop that
-calls the wanted() function.  It is called with a list of strings and is
-expected to return a list of strings.  The code can be used to sort the
-strings alphabetically, numerically, or to filter out directory entries based
-on their name alone.
+The value should be a code reference. This code reference is used to 
+preprocess the current directory. The name of currently processed 
+directory is in $File::Find::dir. Your preprocessing function is 
+called after readdir() but before the loop that calls the wanted() 
+function. It is called with a list of strings (actually file/directory 
+names) and is expected to return a list of strings. The code can be 
+used to sort the file/directory names alphabetically, numerically, 
+or to filter out directory entries based on their name alone. When 
+I<follow> or I<follow_fast> are in effect, C<preprocess> is a no-op.
 
 =item C<postprocess>
 
-The value should be a code reference.  It is invoked just before leaving the
-current directory.  It is called in void context with no arguments.  The name
-of the current directory is in $File::Find::dir.  This hook is handy for
-summarizing a directory, such as calculating its disk usage.
+The value should be a code reference. It is invoked just before leaving 
+the currently processed directory. It is called in void context with no 
+arguments. The name of the current directory is in $File::Find::dir. This 
+hook is handy for summarizing a directory, such as calculating its disk 
+usage. When I<follow> or I<follow_fast> are in effect, C<preprocess> is a 
+no-op.
 
 =item C<follow>
 
@@ -101,7 +106,7 @@ are about to be processed a second time, File::Find dies.
 C<follow_skip==0> causes File::Find to die if any file is about to be
 processed a second time.
 C<follow_skip==2> causes File::Find to ignore any duplicate files and
-dirctories but to proceed normally otherwise.
+directories but to proceed normally otherwise.
 
 
 =item C<no_chdir>
@@ -114,9 +119,10 @@ C<$_> will be the same as C<$File::Find::name>.
 
 If find is used in taint-mode (-T command line switch or if EUID != UID
 or if EGID != GID) then internally directory names have to be untainted
-before they can be cd'ed to. Therefore they are checked against a regular
-expression I<untaint_pattern>.  Note that all names passed to the
-user's I<wanted()> function are still tainted. 
+before they can be chdir'ed to. Therefore they are checked against a regular
+expression I<untaint_pattern>.  Note that all names passed to the user's 
+I<wanted()> function are still tainted. If this option is used while 
+not in taint-mode, C<untaint> is a no-op.
 
 =item C<untaint_pattern>
 
@@ -126,8 +132,8 @@ Note that the parantheses are vital.
 
 =item C<untaint_skip>
 
-If set, directories (subtrees) which fail the I<untaint_pattern>
-are skipped. The default is to 'die' in such a case.
+If set, a directory which fails the I<untaint_pattern> is skipped, 
+including all its sub-directories. The default is to 'die' in such a case.
 
 =back
 
@@ -136,7 +142,7 @@ C<$File::Find::dir> contains the current directory name, and C<$_> the
 current filename within that directory.  C<$File::Find::name> contains
 the complete pathname to the file. You are chdir()'d to
 C<$File::Find::dir> when the function is called, unless C<no_chdir>
-was specified.  When <follow> or <follow_fast> are in effect, there is
+was specified.  When C<follow> or C<follow_fast> are in effect, there is
 also a C<$File::Find::fullname>.  The function may set
 C<$File::Find::prune> to prune the tree unless C<bydepth> was
 specified.  Unless C<follow> or C<follow_fast> is specified, for
@@ -187,6 +193,80 @@ Furthermore, deleting or changing files in a symbolically linked directory
 might cause very unpleasant surprises, since you delete or change files
 in an unknown directory.
 
+=head1 NOTES
+
+=over 4
+
+=item *
+
+Mac OS (Classic) users should note a few differences:
+
+=over 4
+
+=item *   
+
+The path separator is ':', not '/', and the current directory is denoted 
+as ':', not '.'. You should be careful about specifying relative pathnames. 
+While a full path always begins with a volume name, a relative pathname 
+should always begin with a ':'.  If specifying a volume name only, a 
+trailing ':' is required.
+
+=item *   
+
+C<$File::Find::dir> is guaranteed to end with a ':'. If C<$_> 
+contains the name of a directory, that name may or may not end with a 
+':'. Likewise, C<$File::Find::name>, which contains the complete 
+pathname to that directory, and C<$File::Find::fullname>, which holds 
+the absolute pathname of that directory with all symbolic links resolved,
+may or may not end with a ':'.
+
+=item *   
+
+The default C<untaint_pattern> (see above) on Mac OS is set to  
+C<qr|^(.+)$|>. Note that the parentheses are vital.
+
+=item *   
+
+The invisible system file "Icon\015" is ignored. While this file may 
+appear in every directory, there are some more invisible system files 
+on every volume, which are all located at the volume root level (i.e. 
+"MacintoshHD:"). These system files are B<not> excluded automatically. 
+Your filter may use the following code to recognize invisible files or 
+directories (requires Mac::Files):
+
+ use Mac::Files;
+
+ # invisible() --  returns 1 if file/directory is invisible,  
+ # 0 if it's visible or undef if an error occured
+
+ sub invisible($) { 
+   my $file = shift;
+   my ($fileCat, $fileInfo); 
+   my $invisible_flag =  1 << 14; 
+
+   if ( $fileCat = FSpGetCatInfo($file) ) {
+     if ($fileInfo = $fileCat->ioFlFndrInfo() ) {
+       return (($fileInfo->fdFlags & $invisible_flag) && 1);
+     }
+   }
+   return undef;
+ }
+
+Generally, invisible files are system files, unless an odd application 
+decides to use invisible files for its own purposes. To distinguish 
+such files from system files, you have to look at the B<type> and B<creator> 
+file attributes. The MacPerl built-in functions C<GetFileInfo(FILE)> and 
+C<SetFileInfo(CREATOR, TYPE, FILES)> offer access to these attributes 
+(see MacPerl.pm for details).
+
+Files that appear on the desktop actually reside in an (hidden) directory
+named "Desktop Folder" on the particular disk volume. Note that, although
+all desktop files appear to be on the same "virtual" desktop, each disk 
+volume actually maintains its own "Desktop Folder" directory.
+
+=back
+
+=back
 
 =cut
 
@@ -196,8 +276,10 @@ our @EXPORT = qw(find finddepth);
 
 use strict;
 my $Is_VMS;
+my $Is_MacOS;
 
 require File::Basename;
+require File::Spec;
 
 my %SLnkSeen;
 my ($wanted_callback, $avoid_nlink, $bydepth, $no_chdir, $follow,
@@ -207,7 +289,7 @@ my ($wanted_callback, $avoid_nlink, $bydepth, $no_chdir, $follow,
 sub contract_name {
     my ($cdir,$fn) = @_;
 
-    return substr($cdir,0,rindex($cdir,'/')) if $fn eq '.';
+    return substr($cdir,0,rindex($cdir,'/')) if $fn eq $File::Find::current_dir;
 
     $cdir = substr($cdir,0,rindex($cdir,'/')+1);
 
@@ -222,25 +304,83 @@ sub contract_name {
     return $abs_name;
 }
 
+# return the absolute name of a directory or file
+sub contract_name_Mac {
+    my ($cdir,$fn) = @_; 
+    my $abs_name;
+
+    if ($fn =~ /^(:+)(.*)$/) { # valid pathname starting with a ':'
+
+	my $colon_count = length ($1);
+	if ($colon_count == 1) {
+	    $abs_name = $cdir . $2;
+	    return $abs_name;
+	}
+	else { 
+	    # need to move up the tree, but 
+	    # only if it's not a volume name
+	    for (my $i=1; $i<$colon_count; $i++) {
+		unless ($cdir =~ /^[^:]+:$/) { # volume name
+		    $cdir =~ s/[^:]+:$//;
+		}
+		else {
+		    return undef;
+		}
+	    }
+	    $abs_name = $cdir . $2;
+	    return $abs_name;
+	}
+
+    }
+    else {
+
+	# $fn may be a valid path to a directory or file or (dangling)
+	# symlink, without a leading ':'
+	if ( (-e $fn) || (-l $fn) ) {
+	    if ($fn =~ /^[^:]+:/) { # a volume name like DataHD:*
+		return $fn; # $fn is already an absolute path
+	    }
+	    else {
+		$abs_name = $cdir . $fn;
+		return $abs_name;
+	    }
+	}
+	else { # argh!, $fn is not a valid directory/file 
+	     return undef;
+	}
+    }
+}
 
 sub PathCombine($$) {
     my ($Base,$Name) = @_;
     my $AbsName;
 
-    if (substr($Name,0,1) eq '/') {
-	$AbsName= $Name;
+    if ($Is_MacOS) {
+	# $Name is the resolved symlink (always a full path on MacOS),
+	# i.e. there's no need to call contract_name_Mac()
+	$AbsName = $Name; 
+
+	# (simple) check for recursion
+	if ( ( $Base =~ /^$AbsName/) && (-d $AbsName) ) { # recursion
+	    return undef;
+	}
     }
     else {
-	$AbsName= contract_name($Base,$Name);
-    }
+	if (substr($Name,0,1) eq '/') {
+	    $AbsName= $Name;
+	}
+	else {
+	    $AbsName= contract_name($Base,$Name);
+	}
 
-    # (simple) check for recursion
-    my $newlen= length($AbsName);
-    if ($newlen <= length($Base)) {
-	if (($newlen == length($Base) || substr($Base,$newlen,1) eq '/')
-	    && $AbsName eq substr($Base,0,$newlen))
-	{
-	    return undef;
+	# (simple) check for recursion
+	my $newlen= length($AbsName);
+	if ($newlen <= length($Base)) {
+	    if (($newlen == length($Base) || substr($Base,$newlen,1) eq '/')
+		&& $AbsName eq substr($Base,0,$newlen))
+	    {
+		return undef;
+	    }
 	}
     }
     return $AbsName;
@@ -278,7 +418,7 @@ sub Follow_SymLink($) {
     }
 
     if ($full_check && $SLnkSeen{$DEV, $INO}++) {
-	if ($follow_skip < 1) {
+	if ( ($follow_skip < 1) || ((-d _) && ($follow_skip < 2)) ) {
 	    die "$AbsName encountered a second time";
 	}
 	else {
@@ -293,12 +433,23 @@ our($dir, $name, $fullname, $prune);
 sub _find_dir_symlnk($$$);
 sub _find_dir($$$);
 
+# check whether or not a scalar variable is tainted
+# (code straight from the Camel, 3rd ed., page 561)
+sub is_tainted_pp {
+    my $arg = shift;
+    my $nada = substr($arg, 0, 0); # zero-length
+    local $@;
+    eval { eval "# $nada" };
+    return length($@) != 0;
+} 
+
 sub _find_opt {
     my $wanted = shift;
     die "invalid top directory" unless defined $_[0];
 
     my $cwd           = $wanted->{bydepth} ? Cwd::fastcwd() : Cwd::cwd();
     my $cwd_untainted = $cwd;
+    my $check_t_cwd   = 1;
     $wanted_callback  = $wanted->{wanted};
     $bydepth          = $wanted->{bydepth};
     $pre_process      = $wanted->{preprocess};
@@ -317,88 +468,125 @@ sub _find_opt {
     # a symbolic link to a directory doesn't increase the link count
     $avoid_nlink      = $follow || $File::Find::dont_use_nlink;
     
-    if ( $untaint ) {
-	$cwd_untainted= $1 if $cwd_untainted =~ m|$untaint_pat|;
-	die "insecure cwd in find(depth)"  unless defined($cwd_untainted);
-    }
-    
     my ($abs_dir, $Is_Dir);
 
     Proc_Top_Item:
     foreach my $TOP (@_) {
-        my $top_item = $TOP;
-        $top_item =~ s|/\z|| unless $top_item eq '/';
-        $Is_Dir= 0;
-        
-        if ($follow) {
- 	    ($topdev,$topino,$topmode,$topnlink) = stat $top_item;
-            if (substr($top_item,0,1) eq '/') {
-                $abs_dir = $top_item;
-            }
-	    elsif ($top_item eq '.') {
-		$abs_dir = $cwd;
+	my $top_item = $TOP;
+
+	if ($Is_MacOS) {
+	    ($topdev,$topino,$topmode,$topnlink) = $follow ? stat $top_item : lstat $top_item;
+	    $top_item = ":$top_item"
+		if ( (-d _) && ($top_item =~ /^[^:]+\z/) );
+	}
+	else {
+	    $top_item =~ s|/\z|| unless $top_item eq '/';
+	    ($topdev,$topino,$topmode,$topnlink) = $follow ? stat $top_item : lstat $top_item;
+	}
+
+	$Is_Dir= 0;
+
+	if ($follow) {
+
+	    if ($Is_MacOS) {
+		$cwd = "$cwd:" unless ($cwd =~ /:$/); # for safety
+
+		if ($top_item eq $File::Find::current_dir) {
+		    $abs_dir = $cwd;
+		}
+		else {
+		    $abs_dir = contract_name_Mac($cwd, $top_item);
+		    unless (defined $abs_dir) {
+			warn "Can't determine absolute path for $top_item (No such file or directory)\n";
+			next Proc_Top_Item;
+		    }
+		}
+
 	    }
-            else {  # care about any  ../
-		$abs_dir = contract_name("$cwd/",$top_item); 
-            }
-            $abs_dir= Follow_SymLink($abs_dir);
-            unless (defined $abs_dir) {
+	    else {
+		if (substr($top_item,0,1) eq '/') {
+		    $abs_dir = $top_item;
+		}
+		elsif ($top_item eq $File::Find::current_dir) {
+		    $abs_dir = $cwd;
+		}
+		else {  # care about any  ../
+		    $abs_dir = contract_name("$cwd/",$top_item);
+		}
+	    }
+	    $abs_dir= Follow_SymLink($abs_dir);
+	    unless (defined $abs_dir) {
 		warn "$top_item is a dangling symbolic link\n";
 		next Proc_Top_Item;
-            }
-            if (-d _) {
+	    }
+
+	    if (-d _) {
 		_find_dir_symlnk($wanted, $abs_dir, $top_item);
 		$Is_Dir= 1;
-            }
-        }
+	    }
+	}
 	else { # no follow
-	    ($topdev,$topino,$topmode,$topnlink) = lstat $top_item;
-            $topdir = $top_item;
-            unless (defined $topnlink) {
-                warn "Can't stat $top_item: $!\n";
-                next Proc_Top_Item;
-            }
-            if (-d _) {
+	    $topdir = $top_item;
+	    unless (defined $topnlink) {
+		warn "Can't stat $top_item: $!\n";
+		next Proc_Top_Item;
+	    }
+	    if (-d _) {
 		$top_item =~ s/\.dir\z// if $Is_VMS;
 		_find_dir($wanted, $top_item, $topnlink);
 		$Is_Dir= 1;
-            }
+	    }
 	    else {
 		$abs_dir= $top_item;
-            }
-        }
+	    }
+	}
 
-        unless ($Is_Dir) {
+	unless ($Is_Dir) {
 	    unless (($_,$dir) = File::Basename::fileparse($abs_dir)) {
-		($dir,$_) = ('./', $top_item);
+		if ($Is_MacOS) {
+		    ($dir,$_) = (':', $top_item); # $File::Find::dir, $_
+		}
+		else {
+		    ($dir,$_) = ('./', $top_item);
+		}
 	    }
 
-            $abs_dir = $dir;
-            if ($untaint) {
-		my $abs_dir_save = $abs_dir;
-		$abs_dir = $1 if $abs_dir =~ m|$untaint_pat|;
+	    $abs_dir = $dir;
+	    if (( $untaint ) && (is_tainted($dir) )) {
+		( $abs_dir ) = $dir =~ m|$untaint_pat|;
 		unless (defined $abs_dir) {
 		    if ($untaint_skip == 0) {
-			die "directory $abs_dir_save is still tainted";
+			die "directory $dir is still tainted";
 		    }
 		    else {
 			next Proc_Top_Item;
 		    }
 		}
-            }
+	    }
 
-            unless ($no_chdir or chdir $abs_dir) {
-                warn "Couldn't chdir $abs_dir: $!\n";
-                next Proc_Top_Item;
-            }
+	    unless ($no_chdir || chdir $abs_dir) {
+		warn "Couldn't chdir $abs_dir: $!\n";
+		next Proc_Top_Item;
+	    }
 
-            $name = $abs_dir . $_;
+	    $name = $abs_dir . $_; # $File::Find::name
 
-            { &$wanted_callback }; # protect against wild "next"
+	    { &$wanted_callback }; # protect against wild "next"
 
-        }
+	}
 
-        $no_chdir or chdir $cwd_untainted;
+	unless ( $no_chdir ) {
+	    if ( ($check_t_cwd) && (($untaint) && (is_tainted($cwd) )) ) {
+		( $cwd_untainted ) = $cwd =~ m|$untaint_pat|;
+		unless (defined $cwd_untainted) {
+		    die "insecure cwd in find(depth)";
+		}
+		$check_t_cwd = 0;
+	    }
+	    unless (chdir $cwd_untainted) {
+		die "Can't cd to $cwd: $!\n";
+	    }
+	}
     }
 }
 
@@ -417,15 +605,25 @@ sub _find_dir($$$) {
     my ($subcount,$sub_nlink);
     my $SE= [];
     my $dir_name= $p_dir;
-    my $dir_pref= ( $p_dir eq '/' ? '/' : "$p_dir/" );
-    my $dir_rel= '.';      # directory name relative to current directory
+    my $dir_pref;
+    my $dir_rel;
+    my $tainted = 0;
+
+    if ($Is_MacOS) {
+	$dir_pref= ($p_dir =~ /:$/) ? $p_dir : "$p_dir:"; # preface
+	$dir_rel= ':'; # directory name relative to current directory
+    }
+    else {
+	$dir_pref= ( $p_dir eq '/' ? '/' : "$p_dir/" );
+	$dir_rel= '.'; # directory name relative to current directory
+    }
 
     local ($dir, $name, $prune, *DIR);
-     
-    unless ($no_chdir or $p_dir eq '.') {
+
+    unless ( $no_chdir || ($p_dir eq $File::Find::current_dir)) {
 	my $udir = $p_dir;
-	if ($untaint) {
-	    $udir = $1 if $p_dir =~ m|$untaint_pat|;
+	if (( $untaint ) && (is_tainted($p_dir) )) {
+	    ( $udir ) = $p_dir =~ m|$untaint_pat|;
 	    unless (defined $udir) {
 		if ($untaint_skip == 0) {
 		    die "directory $p_dir is still tainted";
@@ -440,46 +638,63 @@ sub _find_dir($$$) {
 	    return;
 	}
     }
-    
+
+    # push the starting directory
     push @Stack,[$CdLvl,$p_dir,$dir_rel,-1]  if  $bydepth;
+
+    if ($Is_MacOS) {
+	$p_dir = $dir_pref;  # ensure trailing ':'
+    }
 
     while (defined $SE) {
 	unless ($bydepth) {
-            $dir= $p_dir;
-            $name= $dir_name;
-            $_= ($no_chdir ? $dir_name : $dir_rel );
+	    $dir= $p_dir; # $File::Find::dir 
+	    $name= $dir_name; # $File::Find::name 
+	    $_= ($no_chdir ? $dir_name : $dir_rel ); # $_
 	    # prune may happen here
-            $prune= 0;
-            { &$wanted_callback }; 	# protect against wild "next"
-            next if $prune;
+	    $prune= 0;
+	    { &$wanted_callback };	# protect against wild "next"
+	    next if $prune;
 	}
-      
+
 	# change to that directory
-	unless ($no_chdir or $dir_rel eq '.') {
+	unless ($no_chdir || ($dir_rel eq $File::Find::current_dir)) {
 	    my $udir= $dir_rel;
-	    if ($untaint) {
-		$udir = $1 if $dir_rel =~ m|$untaint_pat|;
+	    if ( ($untaint) && (($tainted) || ($tainted = is_tainted($dir_rel) )) ) {
+		( $udir ) = $dir_rel =~ m|$untaint_pat|;
 		unless (defined $udir) {
 		    if ($untaint_skip == 0) {
-			die "directory ("
-			    . ($p_dir ne '/' ? $p_dir : '')
-			    . "/) $dir_rel is still tainted";
+			if ($Is_MacOS) {
+			    die "directory ($p_dir) $dir_rel is still tainted";
+			}
+			else {
+			    die "directory (" . ($p_dir ne '/' ? $p_dir : '') . "/) $dir_rel is still tainted";
+			}
+		    } else { # $untaint_skip == 1
+			next; 
 		    }
 		}
 	    }
 	    unless (chdir $udir) {
-		warn "Can't cd to ("
-		    . ($p_dir ne '/' ? $p_dir : '')
-		    . "/) $udir : $!\n";
+		if ($Is_MacOS) {
+		    warn "Can't cd to ($p_dir) $udir: $!\n";
+		}
+		else {
+		    warn "Can't cd to (" . ($p_dir ne '/' ? $p_dir : '') . "/) $udir: $!\n";
+		}
 		next;
 	    }
 	    $CdLvl++;
 	}
 
-	$dir= $dir_name;
+	if ($Is_MacOS) {
+	    $dir_name = "$dir_name:" unless ($dir_name =~ /:$/);
+	}
+
+	$dir= $dir_name; # $File::Find::dir 
 
 	# Get the list of files in the current directory.
-	unless (opendir DIR, ($no_chdir ? $dir_name : '.')) {
+	unless (opendir DIR, ($no_chdir ? $dir_name : $File::Find::current_dir)) {
 	    warn "Can't opendir($dir_name): $!\n";
 	    next;
 	}
@@ -491,10 +706,10 @@ sub _find_dir($$$) {
 	if ($nlink == 2 && !$avoid_nlink) {
 	    # This dir has no subdirectories.
 	    for my $FN (@filenames) {
-		next if $FN =~ /^\.{1,2}\z/;
+		next if $FN =~ $File::Find::skip_pattern;
 		
-		$name = $dir_pref . $FN;
-		$_ = ($no_chdir ? $name : $FN);
+		$name = $dir_pref . $FN; # $File::Find::name
+		$_ = ($no_chdir ? $name : $FN); # $_
 		{ &$wanted_callback }; # protect against wild "next"
 	    }
 
@@ -504,7 +719,7 @@ sub _find_dir($$$) {
 	    $subcount = $nlink - 2;
 
 	    for my $FN (@filenames) {
-		next if $FN =~ /^\.{1,2}\z/;
+		next if $FN =~ $File::Find::skip_pattern;
 		if ($subcount > 0 || $avoid_nlink) {
 		    # Seen all the subdirs?
 		    # check for directoriness.
@@ -517,14 +732,14 @@ sub _find_dir($$$) {
 			push @Stack,[$CdLvl,$dir_name,$FN,$sub_nlink];
 		    }
 		    else {
-			$name = $dir_pref . $FN;
-			$_= ($no_chdir ? $name : $FN);
+			$name = $dir_pref . $FN; # $File::Find::name
+			$_= ($no_chdir ? $name : $FN); # $_
 			{ &$wanted_callback }; # protect against wild "next"
 		    }
 		}
 		else {
-		    $name = $dir_pref . $FN;
-		    $_= ($no_chdir ? $name : $FN);
+		    $name = $dir_pref . $FN; # $File::Find::name
+		    $_= ($no_chdir ? $name : $FN); # $_
 		    { &$wanted_callback }; # protect against wild "next"
 		}
 	    }
@@ -534,32 +749,65 @@ sub _find_dir($$$) {
 	while ( defined ($SE = pop @Stack) ) {
 	    ($Level, $p_dir, $dir_rel, $nlink) = @$SE;
 	    if ($CdLvl > $Level && !$no_chdir) {
-                my $tmp = join('/',('..') x ($CdLvl-$Level));
-                die "Can't cd to $dir_name" . $tmp
-                    unless chdir ($tmp);
+		my $tmp;
+		if ($Is_MacOS) {
+		    $tmp = (':' x ($CdLvl-$Level)) . ':';
+		}
+		else {
+		    $tmp = join('/',('..') x ($CdLvl-$Level));
+		}
+		die "Can't cd to $dir_name" . $tmp
+		    unless chdir ($tmp);
 		$CdLvl = $Level;
 	    }
-	    $dir_name = ($p_dir eq '/' ? "/$dir_rel" : "$p_dir/$dir_rel");
-	    $dir_pref = "$dir_name/";
+
+	    if ($Is_MacOS) {
+		# $pdir always has a trailing ':', except for the starting dir,
+		# where $dir_rel eq ':'
+		$dir_name = "$p_dir$dir_rel";
+		$dir_pref = "$dir_name:";
+	    }
+	    else {
+		$dir_name = ($p_dir eq '/' ? "/$dir_rel" : "$p_dir/$dir_rel");
+		$dir_pref = "$dir_name/";
+	    }
+
 	    if ( $nlink == -2 ) {
-		$name = $dir = $p_dir;
-		$_ = ".";
+		$name = $dir = $p_dir; # $File::Find::name / dir
+		if ($Is_MacOS) {
+		    $_ = ':'; # $_
+		}
+		else {
+		    $_ = '.';
+		}
 		&$post_process;		# End-of-directory processing
-            } elsif ( $nlink < 0 ) {  # must be finddepth, report dirname now
-                $name = $dir_name;
-                if ( substr($name,-2) eq '/.' ) {
-                  $name =~ s|/\.$||;
-                }
-                $dir = $p_dir;
-                $_ = ($no_chdir ? $dir_name : $dir_rel );
-                if ( substr($_,-2) eq '/.' ) {
-                  s|/\.$||;
-                }
-                { &$wanted_callback }; # protect against wild "next"
-            } else {
-                push @Stack,[$CdLvl,$p_dir,$dir_rel,-1]  if  $bydepth;
-                last;
-            }
+	    }
+	    elsif ( $nlink < 0 ) {  # must be finddepth, report dirname now
+		$name = $dir_name;
+		if ($Is_MacOS) {
+		    if ($dir_rel eq ':') { # must be the top dir, where we started
+			$name =~ s|:$||; # $File::Find::name
+			$p_dir = "$p_dir:" unless ($p_dir =~ /:$/);
+		    }
+		    $dir = $p_dir; # $File::Find::dir
+		    $_ = ($no_chdir ? $name : $dir_rel); # $_
+		}
+		else {
+		    if ( substr($name,-2) eq '/.' ) {
+			$name =~ s|/\.$||;
+		    }
+		    $dir = $p_dir;
+		    $_ = ($no_chdir ? $dir_name : $dir_rel );
+		    if ( substr($_,-2) eq '/.' ) {
+			s|/\.$||;
+		    }
+		}
+		{ &$wanted_callback }; # protect against wild "next"
+	     }
+	     else {
+		push @Stack,[$CdLvl,$p_dir,$dir_rel,-1]  if  $bydepth;
+		last;
+	    }
 	}
     }
 }
@@ -573,25 +821,40 @@ sub _find_dir($$$) {
 #  chdir (if not no_chdir) to dir
 
 sub _find_dir_symlnk($$$) {
-    my ($wanted, $dir_loc, $p_dir) = @_;
+    my ($wanted, $dir_loc, $p_dir) = @_; # $dir_loc is the absolute directory
     my @Stack;
     my @filenames;
     my $new_loc;
-    my $pdir_loc = $dir_loc;
+    my $updir_loc = $dir_loc; # untainted parent directory
     my $SE = [];
     my $dir_name = $p_dir;
-    my $dir_pref = ( $p_dir   eq '/' ? '/' : "$p_dir/" );
-    my $loc_pref = ( $dir_loc eq '/' ? '/' : "$dir_loc/" );
-    my $dir_rel = '.';		# directory name relative to current directory
-    my $byd_flag;               # flag for pending stack entry if $bydepth
+    my $dir_pref;
+    my $loc_pref;
+    my $dir_rel;
+    my $byd_flag; # flag for pending stack entry if $bydepth
+    my $tainted = 0;
+    my $ok = 1;
+
+    if ($Is_MacOS) {
+	$dir_pref = ($p_dir =~ /:$/) ? "$p_dir" : "$p_dir:";
+	$loc_pref = ($dir_loc =~ /:$/) ? "$dir_loc" : "$dir_loc:";
+	$dir_rel  = ':'; # directory name relative to current directory
+    } else {
+	$dir_pref = ( $p_dir   eq '/' ? '/' : "$p_dir/" );
+	$loc_pref = ( $dir_loc eq '/' ? '/' : "$dir_loc/" );
+	$dir_rel  = '.'; # directory name relative to current directory
+    }
 
     local ($dir, $name, $fullname, $prune, *DIR);
-    
-    unless ($no_chdir or $p_dir eq '.') {
-	my $udir = $dir_loc;
-	if ($untaint) {
-	    $udir = $1 if $dir_loc =~ m|$untaint_pat|;
-	    unless (defined $udir) {
+
+    unless ($no_chdir) {
+	# untaint the topdir
+	if (( $untaint ) && (is_tainted($dir_loc) )) {
+	    ( $updir_loc ) = $dir_loc =~ m|$untaint_pat|; # parent dir, now untainted
+	     # once untainted, $updir_loc is pushed on the stack (as parent directory);
+	    # hence, we don't need to untaint the parent directory every time we chdir 
+	    # to it later 
+	    unless (defined $updir_loc) {
 		if ($untaint_skip == 0) {
 		    die "directory $dir_loc is still tainted";
 		}
@@ -600,45 +863,47 @@ sub _find_dir_symlnk($$$) {
 		}
 	    }
 	}
-	unless (chdir $udir) {
-	    warn "Can't cd to $udir: $!\n";
+	$ok = chdir($updir_loc) unless ($p_dir eq $File::Find::current_dir);
+	unless ($ok) {
+	    warn "Can't cd to $updir_loc: $!\n";
 	    return;
 	}
     }
 
-    push @Stack,[$dir_loc,$pdir_loc,$p_dir,$dir_rel,-1]  if  $bydepth;
+    push @Stack,[$dir_loc,$updir_loc,$p_dir,$dir_rel,-1]  if  $bydepth;
+
+    if ($Is_MacOS) {
+	$p_dir = $dir_pref; # ensure trailing ':'
+    }
 
     while (defined $SE) {
 
 	unless ($bydepth) {
-	    # change to parent directory
+	    # change (back) to parent directory (always untainted)
 	    unless ($no_chdir) {
-		my $udir = $pdir_loc;
-		if ($untaint) {
-		    $udir = $1 if $pdir_loc =~ m|$untaint_pat|;
-		}
-		unless (chdir $udir) {
-		    warn "Can't cd to $udir: $!\n";
+		unless (chdir $updir_loc) {
+		    warn "Can't cd to $updir_loc: $!\n";
 		    next;
 		}
 	    }
-	    $dir= $p_dir;
-            $name= $dir_name;
-            $_= ($no_chdir ? $dir_name : $dir_rel );
-            $fullname= $dir_loc;
+	    $dir= $p_dir; # $File::Find::dir
+	    $name= $dir_name; # $File::Find::name
+	    $_= ($no_chdir ? $dir_name : $dir_rel ); # $_
+	    $fullname= $dir_loc; # $File::Find::fullname
 	    # prune may happen here
-            $prune= 0;
+	    $prune= 0;
 	    lstat($_); # make sure  file tests with '_' work
-            { &$wanted_callback }; # protect against wild "next"
-            next if  $prune;
+	    { &$wanted_callback }; # protect against wild "next"
+	    next if $prune;
 	}
 
 	# change to that directory
-	unless ($no_chdir or $dir_rel eq '.') {
-	    my $udir = $dir_loc;
-	    if ($untaint) {
-		$udir = $1 if $dir_loc =~ m|$untaint_pat|;
-		unless (defined $udir ) {
+	unless ($no_chdir || ($dir_rel eq $File::Find::current_dir)) {
+	    $updir_loc = $dir_loc;
+	    if ( ($untaint) && (($tainted) || ($tainted = is_tainted($dir_loc) )) ) {
+		# untaint $dir_loc, what will be pushed on the stack as (untainted) parent dir 
+		( $updir_loc ) = $dir_loc =~ m|$untaint_pat|;
+		unless (defined $updir_loc) {
 		    if ($untaint_skip == 0) {
 			die "directory $dir_loc is still tainted";
 		    }
@@ -647,16 +912,20 @@ sub _find_dir_symlnk($$$) {
 		    }
 		}
 	    }
-	    unless (chdir $udir) {
-		warn "Can't cd to $udir: $!\n";
+	    unless (chdir $updir_loc) {
+		warn "Can't cd to $updir_loc: $!\n";
 		next;
 	    }
 	}
 
-	$dir = $dir_name;
+	if ($Is_MacOS) {
+	    $dir_name = "$dir_name:" unless ($dir_name =~ /:$/);
+	}
+
+	$dir = $dir_name; # $File::Find::dir
 
 	# Get the list of files in the current directory.
-	unless (opendir DIR, ($no_chdir ? $dir_loc : '.')) {
+	unless (opendir DIR, ($no_chdir ? $dir_loc : $File::Find::current_dir)) {
 	    warn "Can't opendir($dir_loc): $!\n";
 	    next;
 	}
@@ -664,21 +933,21 @@ sub _find_dir_symlnk($$$) {
 	closedir(DIR);
 
 	for my $FN (@filenames) {
-	    next if $FN =~ /^\.{1,2}\z/;
+	    next if $FN =~ $File::Find::skip_pattern;
 
 	    # follow symbolic links / do an lstat
 	    $new_loc = Follow_SymLink($loc_pref.$FN);
 
 	    # ignore if invalid symlink
 	    next unless defined $new_loc;
-     
+
 	    if (-d _) {
-		push @Stack,[$new_loc,$dir_loc,$dir_name,$FN,1];
+		push @Stack,[$new_loc,$updir_loc,$dir_name,$FN,1];
 	    }
 	    else {
-		$fullname = $new_loc;
-		$name = $dir_pref . $FN;
-		$_ = ($no_chdir ? $name : $FN);
+		$fullname = $new_loc; # $File::Find::fullname 
+		$name = $dir_pref . $FN; # $File::Find::name
+		$_ = ($no_chdir ? $name : $FN); # $_
 		{ &$wanted_callback }; # protect against wild "next"
 	    }
 	}
@@ -686,38 +955,54 @@ sub _find_dir_symlnk($$$) {
     }
     continue {
 	while (defined($SE = pop @Stack)) {
-	    ($dir_loc, $pdir_loc, $p_dir, $dir_rel, $byd_flag) = @$SE;
-	    $dir_name = ($p_dir eq '/' ? "/$dir_rel" : "$p_dir/$dir_rel");
-	    $dir_pref = "$dir_name/";
-	    $loc_pref = "$dir_loc/";
-            if ( $byd_flag < 0 ) {  # must be finddepth, report dirname now
-	        unless ($no_chdir or $dir_rel eq '.') {
-	            my $udir = $pdir_loc;
-	            if ($untaint) {
-		        $udir = $1 if $dir_loc =~ m|$untaint_pat|;
-	            }
-	            unless (chdir $udir) {
-		        warn "Can't cd to $udir: $!\n";
-		        next;
-	            }
-	        }
-	        $fullname = $dir_loc;
-	        $name = $dir_name;
-                if ( substr($name,-2) eq '/.' ) {
-                  $name =~ s|/\.$||;
-                }
-                $dir = $p_dir;
-	        $_ = ($no_chdir ? $dir_name : $dir_rel);
-                if ( substr($_,-2) eq '/.' ) {
-                  s|/\.$||;
-                }
+	    ($dir_loc, $updir_loc, $p_dir, $dir_rel, $byd_flag) = @$SE;
+	    if ($Is_MacOS) {
+		# $p_dir always has a trailing ':', except for the starting dir,
+		# where $dir_rel eq ':'
+		$dir_name = "$p_dir$dir_rel";
+		$dir_pref = "$dir_name:";
+		$loc_pref = ($dir_loc =~ /:$/) ? $dir_loc : "$dir_loc:";
+	    }
+	    else {
+		$dir_name = ($p_dir eq '/' ? "/$dir_rel" : "$p_dir/$dir_rel");
+		$dir_pref = "$dir_name/";
+		$loc_pref = "$dir_loc/";
+	    }
+	    if ( $byd_flag < 0 ) {  # must be finddepth, report dirname now
+		unless ($no_chdir || ($dir_rel eq $File::Find::current_dir)) {
+		    unless (chdir $updir_loc) { # $updir_loc (parent dir) is always untainted 
+			warn "Can't cd to $updir_loc: $!\n";
+			next;
+		    }
+		}
+		$fullname = $dir_loc; # $File::Find::fullname
+		$name = $dir_name; # $File::Find::name
+		if ($Is_MacOS) {
+		    if ($dir_rel eq ':') { # must be the top dir, where we started
+			$name =~ s|:$||; # $File::Find::name
+			$p_dir = "$p_dir:" unless ($p_dir =~ /:$/);
+		    }
+		    $dir = $p_dir; # $File::Find::dir
+		     $_ = ($no_chdir ? $name : $dir_rel); # $_
+		}
+		else {
+		    if ( substr($name,-2) eq '/.' ) {
+			$name =~ s|/\.$||; # $File::Find::name
+		    }
+		    $dir = $p_dir; # $File::Find::dir
+		    $_ = ($no_chdir ? $dir_name : $dir_rel); # $_
+		    if ( substr($_,-2) eq '/.' ) {
+			s|/\.$||;
+		    }
+		}
 
-		lstat($_); # make sure  file tests with '_' work
-	        { &$wanted_callback }; # protect against wild "next"
-            } else {
-                push @Stack,[$dir_loc, $pdir_loc, $p_dir, $dir_rel,-1]  if  $bydepth;
-                last;
-            }
+		lstat($_); # make sure file tests with '_' work
+		{ &$wanted_callback }; # protect against wild "next"
+	    }
+	    else {
+		push @Stack,[$dir_loc, $updir_loc, $p_dir, $dir_rel,-1]  if  $bydepth;
+		last;
+	    }
 	}
     }
 }
@@ -730,7 +1015,7 @@ sub wrap_wanted {
 	    $wanted->{follow_skip} = 1 unless defined $wanted->{follow_skip};
 	}
 	if ( $wanted->{untaint} ) {
-	    $wanted->{untaint_pattern} = qr|^([-+@\w./]+)$|  
+	    $wanted->{untaint_pattern} = $File::Find::untaint_pattern  
 		unless defined $wanted->{untaint_pattern};
 	    $wanted->{untaint_skip} = 0 unless defined $wanted->{untaint_skip};
 	}
@@ -743,22 +1028,38 @@ sub wrap_wanted {
 
 sub find {
     my $wanted = shift;
+    %SLnkSeen= (); # clear hash first
     _find_opt(wrap_wanted($wanted), @_);
     %SLnkSeen= ();  # free memory
 }
 
 sub finddepth {
     my $wanted = wrap_wanted(shift);
+    %SLnkSeen= (); # clear hash first
     $wanted->{bydepth} = 1;
     _find_opt($wanted, @_);
     %SLnkSeen= ();  # free memory
 }
 
+# default
+$File::Find::skip_pattern    = qr/^\.{1,2}\z/;
+$File::Find::untaint_pattern = qr|^([-+@\w./]+)$|;
+
 # These are hard-coded for now, but may move to hint files.
 if ($^O eq 'VMS') {
     $Is_VMS = 1;
-    $File::Find::dont_use_nlink = 1;
+    $File::Find::dont_use_nlink  = 1;
 }
+elsif ($^O eq 'MacOS') {
+    $Is_MacOS = 1;
+    $File::Find::dont_use_nlink  = 1;
+    $File::Find::skip_pattern    = qr/^Icon\015\z/;
+    $File::Find::untaint_pattern = qr|^(.+)$|;
+}
+
+# this _should_ work properly on all platforms
+# where File::Find can be expected to work
+$File::Find::current_dir = File::Spec->curdir || '.';
 
 $File::Find::dont_use_nlink = 1
     if $^O eq 'os2' || $^O eq 'dos' || $^O eq 'amigaos' || $^O eq 'MSWin32' ||
@@ -771,6 +1072,15 @@ $File::Find::dont_use_nlink = 1
 unless ($File::Find::dont_use_nlink) {
     require Config;
     $File::Find::dont_use_nlink = 1 if ($Config::Config{'dont_use_nlink'});
+}
+
+# We need a function that checks if a scalar is tainted. Either use the 
+# Scalar::Util module's tainted() function or our (slower) pure Perl 
+# fallback is_tainted_pp()
+{
+    local $@;
+    eval { require Scalar::Util };
+    *is_tainted = $@ ? \&is_tainted_pp : \&Scalar::Util::tainted;
 }
 
 1;
