@@ -12,7 +12,6 @@ Encode/2022.enc
 Encode/7bit-greek.enc
 Encode/7bit-jis.enc
 Encode/7bit-kana.enc
-Encode/7bit-kr.enc
 Encode/7bit-latin1.enc
 Encode/8859-1.enc
 Encode/8859-1.ucm
@@ -157,7 +156,6 @@ lib/Encode/XS.pm
 lib/Encode/CN/HZ.pm
 lib/Encode/Tcl/Escape.pm
 lib/Encode/Tcl/Extended.pm
-lib/Encode/Tcl/HanZi.pm
 lib/Encode/Tcl/Table.pm
 lib/Encode/JP/Tr.pm
 lib/Encode/JP/ISO_2022_JP.pm
@@ -169,7 +167,5 @@ t/Tcl.t
 t/Encode.t
 t/table.euc
 t/table.ref
-t/table.utf8
-t/table.rnd
 t/japanese.pl
 t/JP.t
