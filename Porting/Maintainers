@@ -88,7 +88,7 @@ sub get_maintainer_modules {
 
 if ($Maintainer) {
     for my $m (sort keys %Maintainers) {
-	if ($m =~ /$Maintainer/io) {
+	if ($m =~ /$Maintainer/io || $Maintainers{$m} =~ /$Maintainer/io) {
 	    my @modules = get_maintainer_modules($m);
 	    if ($Module) {
 		@modules = grep { /$Module/io } @modules;
