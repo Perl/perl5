@@ -241,18 +241,6 @@ my @CharinfoRanges = (
   [ 0x100000, 0x10FFFD, undef,   undef  ],
 );
 
-sub TIEHANDLE {
-    my $class = shift;
-    bless { @_ }, $class;
-}
-
-sub READLINE {
-    warn "READLINE @_\n";
-    my $self = shift;
-    my $fh   = $self->{FH};
-    "00 ". <$fh>;
-}
-
 sub charinfo {
     my $arg  = shift;
     my $code = _getcode($arg);
@@ -272,11 +260,9 @@ sub charinfo {
     openunicode(\$UNICODEFH, "Unicode.txt");
     if (defined $UNICODEFH) {
 	use Search::Dict;
-	tie *UNICODEFH, __PACKAGE__, FH => *UNICODEFH unless tied *UNICODEFH;
-	if (look($UNICODEFH, "$hexk;") >= 0) {
+	if (look($UNICODEFH, "$hexk;")) {
 	    my $line = <$UNICODEFH>;
 	    chomp $line;
-	    $line =~ s/^0+(\w{4};)/$1/;
 	    my %prop;
 	    @prop{qw(
 		     code name category
