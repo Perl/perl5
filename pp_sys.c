@@ -1083,7 +1083,7 @@ PP(pp_select)
     else {
 	GV **gvp = (GV**)hv_fetch(hv, GvNAME(egv), GvNAMELEN(egv), FALSE);
 	if (gvp && *gvp == egv) {
-	    gv_efullname4(TARG, PL_defoutgv, Nullch, FALSE);
+	    gv_efullname4(TARG, PL_defoutgv, Nullch, TRUE);
 	    XPUSHTARG;
 	}
 	else {
