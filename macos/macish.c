@@ -497,7 +497,7 @@ typedef struct WEPDesc {
 static WEPDescPtr	 	gEmulators[128];
 static Boolean			gHasEmulators = false;
 
-void AddWriteEmulationProc(const char * command, MacPerl_EmulationProc proc)
+void MacPerl_AddWriteEmulationProc(const char * command, MacPerl_EmulationProc proc)
 {
 	WEPDescPtr	wepdesc 	= (WEPDescPtr) malloc(sizeof(WEPDesc));
 	
@@ -560,10 +560,10 @@ PerlIO * Perl_my_popen(pTHX_ char * command, char * mode)
 	
 	if (!gHasEmulators) {
 		gHasEmulators = true;
-		AddWriteEmulationProc("pwd", (MacPerl_EmulationProc)EmulatePwd);
-		AddWriteEmulationProc("directory", (MacPerl_EmulationProc)EmulatePwd);
-		AddWriteEmulationProc("Directory", (MacPerl_EmulationProc)EmulatePwd);
-		AddWriteEmulationProc("hostname", (MacPerl_EmulationProc)EmulateHostname);
+		MacPerl_AddWriteEmulationProc("pwd", (MacPerl_EmulationProc)EmulatePwd);
+		MacPerl_AddWriteEmulationProc("directory", (MacPerl_EmulationProc)EmulatePwd);
+		MacPerl_AddWriteEmulationProc("Directory", (MacPerl_EmulationProc)EmulatePwd);
+		MacPerl_AddWriteEmulationProc("hostname", (MacPerl_EmulationProc)EmulateHostname);
 	}
 	
 	if (!strcmp(command, "-"))
