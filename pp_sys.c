@@ -2266,8 +2266,10 @@ PP(pp_sockpair)
 	RETPUSHUNDEF;
     }
 
-    if (IoIFP(io))
-	do_close(gv, FALSE);
+    if (IoIFP(io1))
+	do_close(gv1, FALSE);
+    if (IoIFP(io2))
+	do_close(gv2, FALSE);
 
     TAINT_PROPER("socketpair");
     if (PerlSock_socketpair(domain, type, protocol, fd) < 0)
