@@ -7,6 +7,7 @@ use Carp;
 @EXPORT = qw(openlog closelog setlogmask syslog);
 
 use Socket;
+use Sys::Hostname;
 
 # adapted from syslog.pl
 #
@@ -23,7 +24,7 @@ Sys::Syslog, openlog, closelog, setlogmask, syslog - Perl interface to the UNIX 
     use Sys::Syslog;
 
     openlog $ident, $logopt, $facility;
-    syslog $priority, $mask, $format, @args;
+    syslog $priority, $format, @args;
     $oldmask = setlogmask $mask_priority;
     closelog;
 
@@ -43,9 +44,9 @@ I<$ident> is prepended to every message.
 I<$logopt> contains one or more of the words I<pid>, I<ndelay>, I<cons>, I<nowait>.
 I<$facility> specifies the part of the system
 
-=item syslog $priority, $mask, $format, @args
+=item syslog $priority, $format, @args
 
-If I<$priority> and I<$mask> permit, logs I<($format, @args)>
+If I<$priority> permits, logs I<($format, @args)>
 printed as by C<printf(3V)>, with the addition that I<%m>
 is replaced with C<"$!"> (the latest error message).
 
@@ -85,11 +86,9 @@ L<syslog(3)>
 
 =head1 AUTHOR
 
-Tom Christiansen E<lt>F<tchrist@perl.com>E<gt> and Larry Wall E<lt>F<lwall@sems.com>E<gt>
+Tom Christiansen E<lt>F<tchrist@perl.com>E<gt> and Larry Wall E<lt>F<larry@wall.org>E<gt>
 
 =cut
-
-$host = hostname() unless $host;	# set $Syslog::host to change
 
 require 'syslog.ph';
 
@@ -155,7 +154,7 @@ sub syslog {
 
     $whoami = $ident;
 
-    if (!$ident && $mask =~ /^(\S.*):\s?(.*)/) {
+    if (!$whoami && $mask =~ /^(\S.*?):\s?(.*)/) {
 	$whoami = $1;
 	$mask = $2;
     } 
@@ -192,16 +191,17 @@ sub syslog {
 
 sub xlate {
     local($name) = @_;
-    $name =~ y/a-z/A-Z/;
+    $name = uc $name;
     $name = "LOG_$name" unless $name =~ /^LOG_/;
     $name = "Sys::Syslog::$name";
-    eval(&$name) || -1;
+    defined &$name ? &$name : -1;
 }
 
 sub connect {
     unless ($host) {
 	require Sys::Hostname;
-	$host = Sys::Hostname::hostname();
+	my($host_uniq) = Sys::Hostname::hostname();
+	($host) = $host_uniq =~ /([\w\-]+)/;
     }
     my $udp = getprotobyname('udp');
     my $syslog = getservbyname('syslog','udp');

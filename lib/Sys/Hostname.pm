@@ -25,7 +25,7 @@ All nulls, returns, and newlines are removed from the result.
 
 =head1 AUTHOR
 
-David Sundstrom <sunds@asictest.sc.ti.com>
+David Sundstrom E<lt>F<sunds@asictest.sc.ti.com>E<gt>
 
 Texas Instruments
 
@@ -39,7 +39,7 @@ sub hostname {
   if ($^O eq 'VMS') {
 
     # method 2 - no sockets ==> return DECnet node name
-    eval {gethostbyname('me')};
+    eval {my($test) = gethostbyname('me')}; # returns 'me' on most systems
     if ($@) { return $host = $ENV{'SYS$NODE'}; }
 
     # method 3 - has someone else done the job already?  It's common for the
@@ -59,6 +59,11 @@ sub hostname {
     $host = '';
     Carp::croak "Cannot get host name of local machine";  
 
+  }
+  elsif ($^O eq 'MSWin32') {
+    ($host) = gethostbyname('localhost');
+    chomp($host = `hostname 2> NUL`) unless defined $host;
+    return $host;
   }
   else {  # Unix
 

@@ -138,8 +138,8 @@ sub import {
 
 	*CHILD_ERROR				= *?	;
 	*OS_ERROR				= *!	;
-	*EXTENDED_OS_ERROR			= *^E	;
 	    *ERRNO				= *!	;
+	*EXTENDED_OS_ERROR			= *^E	;
 	*EVAL_ERROR				= *@	;
 
 # Process info.

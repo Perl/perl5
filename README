@@ -1,7 +1,7 @@
 
 			   Perl Kit, Version 5.0
 
-		       Copyright 1989-1996, Larry Wall
+		       Copyright 1989-1997, Larry Wall
 			    All rights reserved.
 
     This program is free software; you can redistribute it and/or modify
@@ -75,7 +75,7 @@ defaults.
 2) Read the manual entries before running perl.
 
 3) IMPORTANT!  Help save the world!  Communicate any problems and suggested
-patches to me, lwall@sems.com (Larry Wall), so we can
+patches to me, larry@wall.org (Larry Wall), so we can
 keep the world in sync.  If you have a problem, there's someone else
 out there who either has had or will have the same problem.
 It's usually helpful if you send the output of the "myconfig" script

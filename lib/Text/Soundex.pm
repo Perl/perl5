@@ -48,7 +48,7 @@ sub soundex
 
   foreach (@s)
   {
-    tr/a-z/A-Z/;
+    $_ = uc $_;
     tr/A-Z//cd;
 
     if ($_ eq '')

@@ -31,6 +31,9 @@ C<"$File::Find::dir/$_">.  You are chdir()'d to $File::Find::dir when
 the function is called.  The function may set $File::Find::prune to
 prune the tree.
 
+File::Find assumes that you don't alter the $_ variable.  If you do then
+make sure you return it to its original value before exiting your function.
+
 This library is primarily for the C<find2perl> tool, which when fed, 
 
     find2perl / -name .nfs\* -mtime +7 \
@@ -70,8 +73,10 @@ that don't resolve:
 
 sub find {
     my $wanted = shift;
-    my $cwd = Cwd::fastcwd();
-    my ($topdir,$topdev,$topino,$topmode,$topnlink);
+    my $cwd = Cwd::cwd();
+    # Localize these rather than lexicalizing them for backwards
+    # compatibility.
+    local($topdir,$topdev,$topino,$topmode,$topnlink);
     foreach $topdir (@_) {
 	(($topdev,$topino,$topmode,$topnlink) = stat($topdir))
 	  || (warn("Can't stat $topdir: $!\n"), next);
@@ -82,7 +87,8 @@ sub find {
 		&$wanted;
 		my $fixtopdir = $topdir;
 	        $fixtopdir =~ s,/$,, ;
-		$fixtopdir =~ s/\.dir$// if $Is_VMS; ;
+		$fixtopdir =~ s/\.dir$// if $Is_VMS;
+		$fixtopdir =~ s/\\dir$// if $Is_NT;
 		&finddir($wanted,$fixtopdir,$topnlink);
 	    }
 	    else {
@@ -90,7 +96,7 @@ sub find {
 	    }
 	}
 	else {
-	    unless (($dir,$_) = File::Basename::fileparse($topdir)) {
+	    unless (($_,$dir) = File::Basename::fileparse($topdir)) {
 		($dir,$_) = ('.', $topdir);
 	    }
 	    $name = $topdir;
@@ -142,6 +148,7 @@ sub finddir {
 
 		    if (!$prune && chdir $_) {
 			$name =~ s/\.dir$// if $Is_VMS;
+			$name =~ s/\\dir$// if $Is_NT;
 			&finddir($wanted,$name,$nlink);
 			chdir '..';
 		    }
@@ -158,7 +165,9 @@ sub finddepth {
 
     $cwd = Cwd::fastcwd();;
 
-    my($topdir, $topdev, $topino, $topmode, $topnlink);
+    # Localize these rather than lexicalizing them for backwards
+    # compatibility.
+    local($topdir, $topdev, $topino, $topmode, $topnlink);
     foreach $topdir (@_) {
 	(($topdev,$topino,$topmode,$topnlink) = stat($topdir))
 	  || (warn("Can't stat $topdir: $!\n"), next);
@@ -167,6 +176,7 @@ sub finddepth {
 		my $fixtopdir = $topdir;
 		$fixtopdir =~ s,/$,, ;
 		$fixtopdir =~ s/\.dir$// if $Is_VMS;
+		$fixtopdir =~ s/\\dir$// if $Is_NT;
 		&finddepthdir($wanted,$fixtopdir,$topnlink);
 		($dir,$_) = ($fixtopdir,'.');
 		$name = $fixtopdir;
@@ -177,7 +187,7 @@ sub finddepth {
 	    }
 	}
 	else {
-	    unless (($dir,$_) = File::Basename::fileparse($topdir)) {
+	    unless (($_,$dir) = File::Basename::fileparse($topdir)) {
 		($dir,$_) = ('.', $topdir);
 	    }
 	    chdir $dir && &$wanted;
@@ -225,6 +235,7 @@ sub finddepthdir {
 
 		    if (chdir $_) {
 			$name =~ s/\.dir$// if $Is_VMS;
+			$name =~ s/\\dir$// if $Is_NT;
 			&finddepthdir($wanted,$name,$nlink);
 			chdir '..';
 		    }
@@ -247,9 +258,13 @@ if ($^O eq 'VMS') {
   $Is_VMS = 1;
   $dont_use_nlink = 1;
 }
+if ($^O =~ m:^mswin32:i) {
+  $Is_NT = 1;
+  $dont_use_nlink = 1;
+}
 
-$dont_use_nlink = 1 if $^O eq 'os2';
-$dont_use_nlink = 1 if $^O =~ m:^mswin32$:i ;
+$dont_use_nlink = 1
+    if $^O eq 'os2' || $^O eq 'msdos' || $^O eq 'amigaos';
 
 1;
 

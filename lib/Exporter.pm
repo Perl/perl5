@@ -2,21 +2,31 @@ package Exporter;
 
 require 5.001;
 
+#
+# We go to a lot of trouble not to 'require Carp' at file scope,
+#  because Carp requires Exporter, and something has to give.
+#
+
 $ExportLevel = 0;
 $Verbose = 0 unless $Verbose;
-
-require Carp;
 
 sub export {
 
     # First make import warnings look like they're coming from the "use".
     local $SIG{__WARN__} = sub {
 	my $text = shift;
-	$text =~ s/ at \S*Exporter.pm line \d+.*\n//;
-	local $Carp::CarpLevel = 1;	# ignore package calling us too.
-	Carp::carp($text);
+	if ($text =~ s/ at \S*Exporter.pm line \d+.*\n//) {
+	    require Carp;
+	    local $Carp::CarpLevel = 1;	# ignore package calling us too.
+	    Carp::carp($text);
+	}
+	else {
+	    warn $text;
+	}
     };
     local $SIG{__DIE__} = sub {
+	require Carp;
+	local $Carp::CarpLevel = 1;	# ignore package calling us too.
 	Carp::croak("$_[0]Illegal null symbol in \@${1}::EXPORT")
 	    if $_[0] =~ /^Unable to create sub named "(.*?)::"/;
     };
@@ -91,13 +101,22 @@ sub export {
 			@imports = @exports;
 			last;
 		    }
+		    # We need a way to emulate 'use Foo ()' but still
+		    # allow an easy version check: "use Foo 1.23, ''";
+		    if (@imports == 2 and !$imports[1]) {
+			@imports = ();
+			last;
+		    }
 		} elsif ($sym !~ s/^&// || !$exports{$sym}) {
 		    warn qq["$sym" is not exported by the $pkg module];
 		    $oops++;
 		}
 	    }
 	}
-	Carp::croak("Can't continue after import errors") if $oops;
+	if ($oops) {
+	    require Carp;
+	    Carp::croak("Can't continue after import errors");
+	}
     }
     else {
 	@imports = @exports;
@@ -121,7 +140,10 @@ sub export {
 		warn qq["$sym" is not implemented by the $pkg module ],
 			"on this architecture";
 	    }
-	    Carp::croak("Can't continue after import errors") if @failed;
+	    if (@failed) {
+		require Carp;
+		Carp::croak("Can't continue after import errors");
+	    }
 	}
     }
 
@@ -139,7 +161,7 @@ sub export {
 	    $type eq '@' ? \@{"${pkg}::$sym"} :
 	    $type eq '%' ? \%{"${pkg}::$sym"} :
 	    $type eq '*' ?  *{"${pkg}::$sym"} :
-		Carp::croak("Can't export symbol: $type$sym");
+	    do { require Carp; Carp::croak("Can't export symbol: $type$sym") };
     }
 }
 
@@ -159,8 +181,11 @@ sub _push_tags {
     push(@{"${pkg}::$var"},
 	map { $export_tags{$_} ? @{$export_tags{$_}} : scalar(++$nontag,$_) }
 		(@$syms) ? @$syms : keys %export_tags);
-    # This may change to a die one day
-    Carp::carp("Some names are not tags") if $nontag and $^W;
+    if ($nontag and $^W) {
+	# This may change to a die one day
+	require Carp;
+	Carp::carp("Some names are not tags");
+    }
 }
 
 sub export_tags    { _push_tags((caller)[0], "EXPORT",    \@_) }
@@ -170,15 +195,21 @@ sub export_ok_tags { _push_tags((caller)[0], "EXPORT_OK", \@_) }
 # Default methods
 
 sub export_fail {
+    my $self = shift;
     @_;
 }
 
 sub require_version {
     my($self, $wanted) = @_;
     my $pkg = ref $self || $self;
-    my $version = ${"${pkg}::VERSION"} || "(undef)";
-    Carp::croak("$pkg $wanted required--this is only version $version")
-		if $version < $wanted;
+    my $version = ${"${pkg}::VERSION"};
+    if (!$version or $version < $wanted) {
+	$version ||= "(undef)";
+	my $file = $INC{"$pkg.pm"};
+	$file &&= " ($file)";
+	require Carp;
+	Carp::croak("$pkg $wanted required--this is only version $version$file")
+    }
     $version;
 }
 
@@ -235,7 +266,7 @@ In other files which wish to use ModuleName:
 =head1 DESCRIPTION
 
 The Exporter module implements a default C<import> method which
-many modules choose inherit rather than implement their own.
+many modules choose to inherit rather than implement their own.
 
 Perl automatically calls the C<import> method when processing a
 C<use> statement for a module. Modules and C<use> are documented
@@ -254,7 +285,7 @@ try to use @EXPORT_OK in preference to @EXPORT and avoid short or
 common symbol names to reduce the risk of name clashes.
 
 Generally anything not exported is still accessible from outside the
-module using the ModuleName::item_name (or $blessed_ref->method)
+module using the ModuleName::item_name (or $blessed_ref-E<gt>method)
 syntax.  By convention you can use a leading underscore on names to
 informally indicate that they are 'internal' and not for public use.
 
@@ -318,7 +349,7 @@ into modules.
 =head2 Module Version Checking
 
 The Exporter module will convert an attempt to import a number from a
-module into a call to $module_name->require_version($value). This can
+module into a call to $module_name-E<gt>require_version($value). This can
 be used to validate that the version of the module being used is
 greater than or equal to the required version.
 
@@ -339,7 +370,7 @@ or constants that may not exist on some systems.
 The names of any symbols that cannot be exported should be listed
 in the C<@EXPORT_FAIL> array.
 
-If a module attempts to import any of these symbols the Exporter will
+If a module attempts to import any of these symbols the Exporter
 will give the module an opportunity to handle the situation before
 generating an error. The Exporter will call an export_fail method
 with a list of the failed symbols:

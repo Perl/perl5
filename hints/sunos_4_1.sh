@@ -3,7 +3,9 @@
 # Andy Dougherty  <doughera@lafcol.lafayette.edu>
 
 case "$cc" in
-*gcc*)	usevfork=false ;;
+*gcc*)	usevfork=false 
+	# GNU as and GNU ld might not work.  See the INSTALL file.
+	;;
 *)	usevfork=true ;;
 esac
 
@@ -12,6 +14,26 @@ esac
 # environment, you can set d_tzname='define' since tzname[] is
 # available in the System V environment.
 d_tzname='undef'
+
+# Configure will issue a WHOA warning.  The problem is that unistd.h
+# contains incorrect prototypes for some functions in the usual
+# BSD-ish environment.  In particular, it has
+# extern int	getgroups(/* int gidsetsize, gid_t grouplist[] */);
+# but groupslist[] ought to be of type int, not gid_t.
+# This is only really a problem for perl if the
+# user is using gcc, and not running in the SysV environment.
+# The gcc fix-includes script exposes those incorrect prototypes.
+# There may be other examples as well.  Volunteers are welcome to
+# track them all down :-).  In the meantime, we'll just skip unistd.h
+# for SunOS.
+i_unistd='undef'
+
+cat << 'EOM' >&4
+
+You will probably see  *** WHOA THERE!!! ***  messages from Configure for
+d_tzname and i_unistd.  Keep the recommended values.  See
+hints/sunos_4_1.sh for more information.
+EOM
 
 # SunOS 4.1.3 has two extra fields in struct tm.  This works around
 # the problem.  Other BSD platforms may have similar problems.
@@ -24,4 +46,12 @@ then # bsd
 else # sys5
       groupstype='gid_t'
 fi
- 
+
+# If you get the message "unresolved symbol '__lib_version' " while
+# linking, your system probably has the optional 'acc' compiler (and
+# libraries) installed, but you are using the bundled 'cc' compiler with
+# the unbundled libraries.  The solution is either to use 'acc' and the
+# unbundled libraries (specifically /lib/libm.a), or 'cc' and the bundled
+# library.
+# 
+# Thanks to William Setzer <William_Setzer@ncsu.edu> for this info.

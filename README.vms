@@ -292,10 +292,10 @@ of to the Perl bug reporting address, perlbug@perl.com.
 
 * For more information
 
-If you're interested in more information on Perl in general, consult the Usenet
-newsgroups comp.lang.perl.announce and comp.lang.perl.misc.  The FAQ for these
-groups provides pointers to other online sources of information, as well as
-books describing Perl in depth.
+If you're interested in more information on Perl in general, you may wish to
+consult the Usenet newsgroups comp.lang.perl.announce and comp.lang.perl.misc.
+The FAQ for these groups provides pointers to other online sources of
+information, as well as books describing Perl in depth.
 
 If you're interested in up-to-date information on Perl development and
 internals, you might want to subscribe to the perl5-porters mailing list.  You
@@ -305,11 +305,12 @@ subscribe perl5-porters
 This is a high-volume list at the moment (>50 messages/day).
 
 If you're interested in ongoing information about the VMS port, you can
-subscribe to the VMSperl mailing list by sending a request to
-bailey@genetics.upenn.edu (it's to a human, not a list server - this is a small
-operation at the moment).  And, as always, we welcome any help or code you'd
+subscribe to the VMSPerl mailing list by sending a request to
+vmsperl-request@genetics.upenn.edu, containing the single line
+subscribe VMSPerl
+as the body of the message.  And, as always, we welcome any help or code you'd
 like to offer - you can send mail to bailey@genetics.upenn.edu or directly to
-the VMSperl list at vmsperl@genetics.upenn.edu.
+the VMSPerl list at vmsperl@genetics.upenn.edu.
 
 Finally, if you'd like to try out the latest changes to VMS Perl, you can
 retrieve a test distribution kit by anonymous ftp from genetics.upenn.edu, in
@@ -341,14 +342,17 @@ missed someone.  That said, special thanks are due to the following:
      for the getredirection() code
   Rich Salz <rsalz@bbn.com>
      for readdir() and related routines
-  Richard Dyson <dyson@blaze.physics.uiowa.edu> and
-  Kent Covert <kacovert@miavx1.acs.muohio.edu>
-     for additional testing on the AXP.
+  Peter Prymmer <pvhp@lns62.lns.cornell.edu)
+     for extensive testing, as well as development work on
+     configuration and documentation for VMS Perl,
+  the Stanford Synchrotron Radiation Laboratory and the
+     Laboratory of Nuclear Studies at Cornell University for
+     the the opportunity to test and develop for the AXP,
 and to the entire VMSperl group for useful advice and suggestions.  In addition
 the perl5-porters, especially Andy Dougherty <doughera@lafcol.lafayette.edu>
 and Tim Bunce <Tim.Bunce@ig.co.uk>,  deserve credit for their creativity and
 willingness to work with the VMS newcomers.  Finally, the greatest debt of
-gratitude is due to Larry Wall <lwall@sems.com>, for having the ideas which
+gratitude is due to Larry Wall <larry@wall.org>, for having the ideas which
 have made our sleepless nights possible.
 
 Thanks,

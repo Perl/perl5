@@ -1,6 +1,6 @@
 /*    av.c
  *
- *    Copyright (c) 1991-1994, Larry Wall
+ *    Copyright (c) 1991-1997, Larry Wall
  *
  *    You may distribute under the terms of either the GNU General Public
  *    License or the Artistic License, as specified in the README file.
@@ -33,6 +33,9 @@ AV* av;
 	if (sv != &sv_undef)
 	    (void)SvREFCNT_inc(sv);
     }
+    key = AvARRAY(av) - AvALLOC(av);
+    while (key)
+	AvALLOC(av)[--key] = &sv_undef;
     AvREAL_on(av);
 }
 
@@ -94,7 +97,7 @@ I32 key;
 #endif
 		ary = AvALLOC(av) + AvMAX(av) + 1;
 		tmp = newmax - AvMAX(av);
-		if (av == stack) {	/* Oops, grew stack (via av_store()?) */
+		if (av == curstack) {	/* Oops, grew stack (via av_store()?) */
 		    stack_sp = AvALLOC(av) + (stack_sp - stack_base);
 		    stack_base = AvALLOC(av);
 		    stack_max = stack_base + newmax;
@@ -153,11 +156,18 @@ I32 lval;
 	return av_store(av,key,sv);
     }
     if (AvARRAY(av)[key] == &sv_undef) {
+    emptyness:
 	if (lval) {
 	    sv = NEWSV(6,0);
 	    return av_store(av,key,sv);
 	}
 	return 0;
+    }
+    else if (AvREIFY(av)
+	     && (!AvARRAY(av)[key]	/* eg. @_ could have freed elts */
+		 || SvTYPE(AvARRAY(av)[key]) == SVTYPEMASK)) {
+	AvARRAY(av)[key] = &sv_undef;	/* 1/2 reify */
+	goto emptyness;
     }
     return &AvARRAY(av)[key];
 }
@@ -172,10 +182,13 @@ SV *val;
 
     if (!av)
 	return 0;
+    if (!val)
+	val = &sv_undef;
 
     if (SvRMAGICAL(av)) {
 	if (mg_find((SV*)av,'P')) {
-	    mg_copy((SV*)av, val, 0, key);
+	    if (val != &sv_undef)
+		mg_copy((SV*)av, val, 0, key);
 	    return 0;
 	}
     }
@@ -185,18 +198,16 @@ SV *val;
 	if (key < 0)
 	    return 0;
     }
-    if (!val)
-	val = &sv_undef;
-
+    if (SvREADONLY(av) && key >= AvFILL(av))
+	croak(no_modify);
+    if (!AvREAL(av) && AvREIFY(av))
+	av_reify(av);
     if (key > AvMAX(av))
 	av_extend(av,key);
-    if (AvREIFY(av))
-	av_reify(av);
-
     ary = AvARRAY(av);
     if (AvFILL(av) < key) {
 	if (!AvREAL(av)) {
-	    if (av == stack && key > stack_sp - stack_base)
+	    if (av == curstack && key > stack_sp - stack_base)
 		stack_sp = stack_base + key;	/* XPUSH in disguise */
 	    do
 		ary[++AvFILL(av)] = &sv_undef;
@@ -289,6 +300,11 @@ register AV *av;
     register I32 key;
     SV** ary;
 
+#ifdef DEBUGGING
+    if (SvREFCNT(av) <= 0) {
+	warn("Attempt to clear deleted array");
+    }
+#endif
     if (!av || AvMAX(av) < 0)
 	return;
     /*SUPPRESS 560*/
@@ -322,10 +338,6 @@ register AV *av;
 	while (key)
 	    SvREFCNT_dec(AvARRAY(av)[--key]);
     }
-    if (key = AvARRAY(av) - AvALLOC(av)) {
-	AvMAX(av) += key;
-	SvPVX(av) = (char*)AvALLOC(av);
-    }
     Safefree(AvALLOC(av));
     AvALLOC(av) = 0;
     SvPVX(av) = 0;
@@ -354,6 +366,8 @@ register AV *av;
 
     if (!av || AvFILL(av) < 0)
 	return &sv_undef;
+    if (SvREADONLY(av))
+	croak(no_modify);
     retval = AvARRAY(av)[AvFILL(av)];
     AvARRAY(av)[AvFILL(av)--] = &sv_undef;
     if (SvSMAGICAL(av))
@@ -371,12 +385,10 @@ register I32 num;
 
     if (!av || num <= 0)
 	return;
-    if (!AvREAL(av)) {
-	if (AvREIFY(av))
-	    av_reify(av);
-	else
-	    croak("Can't unshift");
-    }
+    if (SvREADONLY(av))
+	croak(no_modify);
+    if (!AvREAL(av) && AvREIFY(av))
+	av_reify(av);
     i = AvARRAY(av) - AvALLOC(av);
     if (i) {
 	if (i > num)
@@ -414,6 +426,8 @@ register AV *av;
 
     if (!av || AvFILL(av) < 0)
 	return &sv_undef;
+    if (SvREADONLY(av))
+	croak(no_modify);
     retval = *AvARRAY(av);
     if (AvREAL(av))
 	*AvARRAY(av) = &sv_undef;

@@ -8,8 +8,9 @@ BEGIN {
 }
 
 use Config;
-if ( ($Config{'cppstdin'} =~ /\bcppstdin\b/) and
-     ( ! -x $Config{'scriptdir'} . "/cppstdin") ) {
+if ( $^O eq 'MSWin32' or
+     ($Config{'cppstdin'} =~ /\bcppstdin\b/) and
+     ( ! -x $Config{'binexp'} . "/cppstdin") ) {
     print "1..0\n";
     exit; 		# Cannot test till after install, alas.
 }

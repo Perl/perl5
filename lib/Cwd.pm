@@ -1,6 +1,5 @@
 package Cwd;
 require 5.000;
-require Exporter;
 
 =head1 NAME
 
@@ -38,22 +37,30 @@ the trailing line terminator). It is recommended that cwd (or another
 
 If you ask to override your chdir() built-in function, then your PWD
 environment variable will be kept up to date.  (See
-L<perlsub/Overriding builtin functions>.) Note that it will only be
-kept up to date it all packages which use chdir import it from Cwd.
+L<perlsub/Overriding Builtin Functions>.) Note that it will only be
+kept up to date if all packages which use chdir import it from Cwd.
 
 =cut
 
+## use strict;
+
+use Carp;
+
+$VERSION = '2.00';
+
+require Exporter;
 @ISA = qw(Exporter);
 @EXPORT = qw(cwd getcwd fastcwd fastgetcwd);
-@EXPORT_OK = qw(chdir);
+@EXPORT_OK = qw(chdir abs_path fast_abs_path);
 
-# use strict;
 
-sub _backtick_pwd {  # The 'natural and safe form' for UNIX (pwd may be setuid root)
+# The 'natural and safe form' for UNIX (pwd may be setuid root)
+
+sub _backtick_pwd {
     my $cwd;
     chop($cwd = `pwd`);
     $cwd;
-} 
+}
 
 # Since some ports may predefine cwd internally (e.g., NT)
 # we take care not to override an existing definition for cwd().
@@ -108,7 +115,7 @@ sub getcwd
 		}
 		unless (@tst = lstat("$dotdots/$dir"))
 		{
-		    warn "lstat($dotdots/$dir): $!";
+		    # warn "lstat($dotdots/$dir): $!";
 		    # Just because you can't lstat this directory
 		    # doesn't mean you'll never find the right one.
 		    # closedir(PARENT);
@@ -121,7 +128,7 @@ sub getcwd
 	$cwd = "$dir/$cwd";
 	closedir(PARENT);
     } while ($dir);
-    chop($cwd); # drop the trailing /
+    chop($cwd) unless $cwd eq '/'; # drop the trailing /
     $cwd;
 }
 
@@ -172,7 +179,7 @@ sub fastcwd {
 my $chdir_init = 0;
 
 sub chdir_init {
-    if ($ENV{'PWD'} and $^O ne 'os2') {
+    if ($ENV{'PWD'} and $^O ne 'os2' and $^O ne 'msdos') {
 	my($dd,$di) = stat('.');
 	my($pd,$pi) = stat($ENV{'PWD'});
 	if (!defined $dd or !defined $pd or $di != $pi or $dd != $pd) {
@@ -216,20 +223,94 @@ sub chdir {
     1;
 }
 
+# Taken from Cwd.pm It is really getcwd with an optional
+# parameter instead of '.'
+#
+
+sub abs_path
+{
+    my $start = shift || '.';
+    my($dotdots, $cwd, @pst, @cst, $dir, @tst);
+
+    unless (@cst = stat( $start ))
+    {
+	carp "stat($start): $!";
+	return '';
+    }
+    $cwd = '';
+    $dotdots = $start;
+    do
+    {
+	$dotdots .= '/..';
+	@pst = @cst;
+	unless (opendir(PARENT, $dotdots))
+	{
+	    carp "opendir($dotdots): $!";
+	    return '';
+	}
+	unless (@cst = stat($dotdots))
+	{
+	    carp "stat($dotdots): $!";
+	    closedir(PARENT);
+	    return '';
+	}
+	if ($pst[0] == $cst[0] && $pst[1] == $cst[1])
+	{
+	    $dir = '';
+	}
+	else
+	{
+	    do
+	    {
+		unless (defined ($dir = readdir(PARENT)))
+	        {
+		    carp "readdir($dotdots): $!";
+		    closedir(PARENT);
+		    return '';
+		}
+		$tst[0] = $pst[0]+1 unless (@tst = lstat("$dotdots/$dir"))
+	    }
+	    while ($dir eq '.' || $dir eq '..' || $tst[0] != $pst[0] ||
+		   $tst[1] != $pst[1]);
+	}
+	$cwd = "$dir/$cwd";
+	closedir(PARENT);
+    } while ($dir);
+    chop($cwd); # drop the trailing /
+    $cwd;
+}
+
+sub fast_abs_path {
+    my $cwd = getcwd();
+    my $path = shift || '.';
+    chdir($path) || croak "Cannot chdir to $path:$!";
+    my $realpath = getcwd();
+    chdir($cwd)  || croak "Cannot chdir back to $cwd:$!";
+    $realpath;
+}
+
 
 # --- PORTING SECTION ---
 
 # VMS: $ENV{'DEFAULT'} points to default directory at all times
 # 06-Mar-1996  Charles Bailey  bailey@genetics.upenn.edu
 # Note: Use of Cwd::chdir() causes the logical name PWD to be defined
-#   in the process logical name table as the default device and directory 
-#   seen by Perl. This may not be the same as the default device 
+#   in the process logical name table as the default device and directory
+#   seen by Perl. This may not be the same as the default device
 #   and directory seen by DCL after Perl exits, since the effects
 #   the CRTL chdir() function persist only until Perl exits.
 
 sub _vms_cwd {
-    return $ENV{'DEFAULT'}
+    return $ENV{'DEFAULT'};
 }
+
+sub _vms_abs_path {
+    return $ENV{'DEFAULT'} unless @_;
+    my $path = VMS::Filespec::pathify($_[0]);
+    croak("Invalid path name $_[0]") unless defined $path;
+    return VMS::Filespec::rmsexpand($path);
+}
+
 sub _os2_cwd {
     $ENV{'PWD'} = `cmd /c cd`;
     chop $ENV{'PWD'};
@@ -237,27 +318,59 @@ sub _os2_cwd {
     return $ENV{'PWD'};
 }
 
-my($oldw) = $^W;
-$^W = 0;  # assignments trigger 'subroutine redefined' warning
-if ($^O eq 'VMS') {
+sub _win32_cwd {
+    $ENV{'PWD'} = Win32::GetCurrentDirectory();
+    $ENV{'PWD'} =~ s:\\:/:g ;
+    return $ENV{'PWD'};
+}
 
-    *cwd        = \&_vms_cwd;
-    *getcwd     = \&_vms_cwd;
-    *fastcwd    = \&_vms_cwd;
-    *fastgetcwd = \&_vms_cwd;
-}
-elsif ($^O eq 'NT') {
+*_NT_cwd = \&_win32_cwd if (!defined &_NT_cwd && 
+                            defined &Win32::GetCurrentDirectory);
 
-    *getcwd     = \&cwd;
-    *fastgetcwd = \&cwd;
+*_NT_cwd = \&_os2_cwd unless defined &_NT_cwd;
+
+sub _msdos_cwd {
+    $ENV{'PWD'} = `command /c cd`;
+    chop $ENV{'PWD'};
+    $ENV{'PWD'} =~ s:\\:/:g ;
+    return $ENV{'PWD'};
 }
-elsif ($^O eq 'os2') {
-    *cwd     = \&_os2_cwd;
-    *getcwd     = \&_os2_cwd;
-    *fastgetcwd = \&_os2_cwd;
-    *fastcwd = \&_os2_cwd;
+
+{
+    local $^W = 0;	# assignments trigger 'subroutine redefined' warning
+
+    if ($^O eq 'VMS') {
+        *cwd		= \&_vms_cwd;
+        *getcwd		= \&_vms_cwd;
+        *fastcwd	= \&_vms_cwd;
+        *fastgetcwd	= \&_vms_cwd;
+        *abs_path	= \&_vms_abs_path;
+        *fast_abs_path	= \&_vms_abs_path;
+    }
+    elsif ($^O eq 'NT' or $^O eq 'MSWin32') {
+        # We assume that &_NT_cwd is defined as an XSUB or in the core.
+        *cwd		= \&_NT_cwd;
+        *getcwd		= \&_NT_cwd;
+        *fastcwd	= \&_NT_cwd;
+        *fastgetcwd	= \&_NT_cwd;
+        *abs_path	= \&fast_abs_path;
+    }
+    elsif ($^O eq 'os2') {
+        # sys_cwd may keep the builtin command
+        *cwd		= defined &sys_cwd ? \&sys_cwd : \&_os2_cwd;
+        *getcwd		= \&cwd;
+        *fastgetcwd	= \&cwd;
+        *fastcwd	= \&cwd;
+        *abs_path	= \&fast_abs_path;
+    }
+    elsif ($^O eq 'msdos') {
+        *cwd		= \&_msdos_cwd;
+        *getcwd		= \&_msdos_cwd;
+        *fastgetcwd	= \&_msdos_cwd;
+        *fastcwd	= \&_msdos_cwd;
+        *abs_path	= \&fast_abs_path;
+    }
 }
-$^W = $oldw;
 
 # package main; eval join('',<DATA>) || die $@;	# quick test
 

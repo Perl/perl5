@@ -33,20 +33,20 @@ char **env;
 
     PERL_SYS_INIT(&argc,&argv);
 
-    perl_init_i18nl14n(1);
+    perl_init_i18nl10n(1);
 
     if (!do_undump) {
 	my_perl = perl_alloc();
 	if (!my_perl)
 	    exit(1);
 	perl_construct( my_perl );
+	perl_destruct_level = 0;
     }
 
     exitstatus = perl_parse( my_perl, xs_init, argc, argv, (char **) NULL );
-    if (exitstatus)
-	exit( exitstatus );
-
-    exitstatus = perl_run( my_perl );
+    if (!exitstatus) {
+	exitstatus = perl_run( my_perl );
+    }
 
     perl_destruct( my_perl );
     perl_free( my_perl );

@@ -1,4 +1,4 @@
-#define PATCHLEVEL 3
+#define PATCHLEVEL 4
 #define SUBVERSION 0
 
 /*
@@ -41,5 +41,6 @@ static	char	*local_patches[] = {
 	,NULL
 };
 
-#define	LOCAL_PATCH_COUNT	\
+/* Initial space prevents this variable from being inserted in config.sh  */
+#  define	LOCAL_PATCH_COUNT	\
 	(sizeof(local_patches)/sizeof(local_patches[0])-2)
