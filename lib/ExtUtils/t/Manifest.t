@@ -200,20 +200,16 @@ my %expect = ( 'makefile.pl' => '',
              );
 is_deeply( $files, \%expect, 'maniadd() vs MANIFEST without trailing newline');
 
+add_file('MANIFEST'   => 'Makefile.PL');
+maniadd({ foo => 'bar' });
+
 SKIP: {
     chmod( 0400, 'MANIFEST' );
     skip "Can't make MANIFEST read-only", 2 if -w 'MANIFEST';
 
-    if ( $^O eq 'VMS' ) {
-        eval {
-            maniadd({ 'meta.yml' => 'hock' });
-        };
-    }
-    else {
-        eval {
-            maniadd({ 'META.yml' => 'hock' });
-        };
-    }
+    eval {
+        maniadd({ 'foo' => 'bar' });
+    };
     is( $@, '',  "maniadd() won't open MANIFEST if it doesn't need to" );
 
     eval {
