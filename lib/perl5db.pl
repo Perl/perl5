@@ -541,9 +541,8 @@ if ($notty) {
                                );
     if (!$OUT) { die "Unable to connect to remote host: $remoteport\n"; }
     $IN = $OUT;
-  } elsif ($CreateTTY & 4) {
-    create_IN_OUT(4);
   } else {
+    create_IN_OUT(4) if $CreateTTY & 4;
     if (defined $console) {
       my ($i, $o) = split /,/, $console;
       $o = $i unless defined $o;
@@ -2315,7 +2314,7 @@ sub TTY {
     }
     &warn("Too late to set TTY, enabled on next `R'!\n") if $term and @_;
     # Useful if done through PERLDB_OPTS:
-    $tty = shift if @_;
+    $console = $tty = shift if @_;
     $tty or $console;
 }
 
