@@ -628,11 +628,13 @@ perl_destruct(pTHXx)
     SvREFCNT_dec(PL_beginav_save);
     SvREFCNT_dec(PL_endav);
     SvREFCNT_dec(PL_checkav);
+    SvREFCNT_dec(PL_checkav_save);
     SvREFCNT_dec(PL_initav);
     PL_beginav = Nullav;
     PL_beginav_save = Nullav;
     PL_endav = Nullav;
     PL_checkav = Nullav;
+    PL_checkav_save = Nullav;
     PL_initav = Nullav;
 
     /* shortcuts just get cleared */
@@ -3651,6 +3653,9 @@ S_init_postdump_symbols(pTHX_ register int argc, register char **argv, register 
 	sv_setiv(GvSV(tmpgv), (IV)PerlProc_getpid());
         SvREADONLY_on(GvSV(tmpgv));
     }
+#ifdef THREADS_HAVE_PIDS
+    PL_ppid = (IV)getppid();
+#endif
 
     /* touch @F array to prevent spurious warnings 20020415 MJD */
     if (PL_minus_a) {
@@ -4004,11 +4009,19 @@ Perl_call_list(pTHX_ I32 oldscope, AV *paramList)
 
     while (AvFILL(paramList) >= 0) {
 	cv = (CV*)av_shift(paramList);
-	if (PL_savebegin && (paramList == PL_beginav)) {
+	if (PL_savebegin) {
+	    if (paramList == PL_beginav) {
 		/* save PL_beginav for compiler */
-	    if (! PL_beginav_save)
-		PL_beginav_save = newAV();
-	    av_push(PL_beginav_save, (SV*)cv);
+		if (! PL_beginav_save)
+		    PL_beginav_save = newAV();
+		av_push(PL_beginav_save, (SV*)cv);
+	    }
+	    else if (paramList == PL_checkav) {
+		/* save PL_checkav for compiler */
+		if (! PL_checkav_save)
+		    PL_checkav_save = newAV();
+		av_push(PL_checkav_save, (SV*)cv);
+	    }
 	} else {
 	    SAVEFREESV(cv);
 	}

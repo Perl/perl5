@@ -209,6 +209,28 @@ esac
 # the required -bE:$installarchlib/CORE/perl.exp is added by
 # libperl.U (Configure) later.
 
+case "$cc" in
+*gcc*) ;;
+cc*|xlc*) # cc should've been set by line 116 or so if empty.
+	if test ! -x /usr/bin/$cc -a -x /usr/vac/bin/$cc; then
+		case ":$PATH:" in
+		*:/usr/vac/bin:*) ;;
+		*) cat <<EOF
+
+***
+*** You either implicitly or explicitly specified an IBM C compiler,
+*** but you do not seem to have one in /usr/bin, but you seem to have
+*** the VAC installed in /usr/vac, but you do not have the /usr/vac/bin
+*** in your PATH.  I suggest adding that and retrying Configure.
+***
+EOF
+		   exit 1
+		   ;;
+		esac
+	fi
+	;;
+esac
+
 case "$ldlibpthname" in
 '') ldlibpthname=LIBPATH ;;
 esac

@@ -1550,10 +1550,22 @@ referring to __inet_* symbols, check to see whether BIND 8.1 is
 installed.  It installs a /usr/local/include/arpa/inet.h that refers to
 these symbols.  Versions of BIND later than 8.1 do not install inet.h
 in that location and avoid the errors.  You should probably update to a
-newer version of BIND.  If you can't, you can either link with the
-updated resolver library provided with BIND 8.1 or rename
-/usr/local/bin/arpa/inet.h during the Perl build and test process to
-avoid the problem.
+newer version of BIND (and remove the files the old one left behind).
+If you can't, you can either link with the updated resolver library provided
+with BIND 8.1 or rename /usr/local/bin/arpa/inet.h during the Perl build and
+test process to avoid the problem.
+
+=item *_r() prototype NOT found
+
+On a related note, if you see a bunch of complaints like the above about
+reentrant functions - specifically networking-related ones - being present
+but without prototypes available, check to see if BIND 8.1 (or possibly
+other BIND 8 versions) is (or has been) installed. They install
+header files such as netdb.h into places such as /usr/local/include (or into
+another directory as specified at build/install time), at least optionally.
+Remove them or put them in someplace that isn't in the C preprocessor's 
+header file include search path (determined by -I options plus defaults,
+normally /usr/include).
 
 =item #error "No DATAMODEL_NATIVE specified"
 

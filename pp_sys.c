@@ -3960,6 +3960,9 @@ PP(pp_fork)
 	    sv_setiv(GvSV(tmpgv), (IV)PerlProc_getpid());
             SvREADONLY_on(GvSV(tmpgv));
         }
+#ifdef THREADS_HAVE_PIDS
+	PL_ppid = (IV)getppid();
+#endif
 	hv_clear(PL_pidstatus);	/* no kids, so don't wait for 'em */
     }
     PUSHi(childpid);
@@ -4239,7 +4242,11 @@ PP(pp_getppid)
 {
 #ifdef HAS_GETPPID
     dSP; dTARGET;
+#   ifdef THREADS_HAVE_PIDS
+    XPUSHi( PL_ppid );
+#   else
     XPUSHi( getppid() );
+#   endif
     RETURN;
 #else
     DIE(aTHX_ PL_no_func, "getppid");

@@ -1,6 +1,6 @@
 package ExtUtils::Constant;
 use vars qw (@ISA $VERSION %XS_Constant %XS_TypeSet @EXPORT_OK %EXPORT_TAGS);
-$VERSION = '0.13';
+$VERSION = '0.14';
 
 =head1 NAME
 
@@ -263,6 +263,11 @@ is equal to the C variable C<name>. If I<CHECKED_AT> is defined, then it
 is used to avoid C<memEQ> for short names, or to generate a comment to
 highlight the position of the character in the C<switch> statement.
 
+If I<CHECKED_AT> is a reference to a scalar, then instead it gives
+the characters pre-checked at the beginning, (and the number of chars by
+which the C variable name has been advanced. These need to be chopped from
+the front of I<NAME>).
+
 =cut
 
 sub memEQ_clause {
@@ -270,6 +275,14 @@ sub memEQ_clause {
   # Which could actually be a character comparison or even ""
   my ($name, $checked_at, $indent) = @_;
   $indent = ' ' x ($indent || 4);
+  my $front_chop;
+  if (ref $checked_at) {
+    # regexp won't work on 5.6.1 without use utf8; in turn that won't work
+    # on 5.005_03.
+    substr ($name, 0, length $$checked_at,) = '';
+    $front_chop = C_stringify ($$checked_at);
+    undef $checked_at;
+  }
   my $len = length $name;
 
   if ($len < 2) {
@@ -289,12 +302,38 @@ sub memEQ_clause {
       return $indent . "if (name[$check] == '$char') {\n";
     }
   }
-  # Could optimise a memEQ on 3 to 2 single character checks here
+  if (($len == 2 and !defined $checked_at)
+     or ($len == 3 and defined ($checked_at) and $checked_at == 2)) {
+    my $char1 = C_stringify (substr $name, 0, 1);
+    my $char2 = C_stringify (substr $name, 1, 1);
+    return $indent . "if (name[0] == '$char1' && name[1] == '$char2') {\n";
+  }
+  if (($len == 3 and defined ($checked_at) and $checked_at == 1)) {
+    my $char1 = C_stringify (substr $name, 0, 1);
+    my $char2 = C_stringify (substr $name, 2, 1);
+    return $indent . "if (name[0] == '$char1' && name[2] == '$char2') {\n";
+  }
+
+  my $pointer = '^';
+  my $have_checked_last = defined ($checked_at) && $len == $checked_at + 1;
+  if ($have_checked_last) {
+    # Checked at the last character, so no need to memEQ it.
+    $pointer = C_stringify (chop $name);
+    $len--;
+  }
+
   $name = C_stringify ($name);
   my $body = $indent . "if (memEQ(name, \"$name\", $len)) {\n";
-    $body .= $indent . "/*               ". (' ' x $checked_at) . '^'
-      . (' ' x ($len - $checked_at + length $len)) . "    */\n"
-        if defined $checked_at;
+  # Put a little ^ under the letter we checked at
+  # Screws up for non printable and non-7 bit stuff, but that's too hard to
+  # get right.
+  if (defined $checked_at) {
+    $body .= $indent . "/*               ". (' ' x $checked_at) . $pointer
+      . (' ' x ($len - $checked_at + length $len)) . "    */\n";
+  } elsif (defined $front_chop) {
+    $body .= $indent . "/*              $front_chop"
+      . (' ' x ($len + 1 + length $len)) . "    */\n";
+  }
   return $body;
 }
 
@@ -504,7 +543,9 @@ sub switch_clause {
   # Figure out what to switch on.
   # (RMS, Spread of jump table, Position, Hashref)
   my @best = (1e38, ~0);
-  foreach my $i (0 .. ($namelen - 1)) {
+  # Prefer the last character over the others. (As it lets us shortern the
+  # memEQ clause at no cost).
+  foreach my $i ($namelen - 1, 0 .. ($namelen - 2)) {
     my ($min, $max) = (~0, 0);
     my %spread;
     if ($is_perl56) {
@@ -533,6 +574,8 @@ sub switch_clause {
     # the string wins. Because if that passes but the memEQ fails, it may
     # only need the start of the string to bin the choice.
     # I think. But I'm micro-optimising. :-)
+    # OK. Trump that. Now favour the last character of the string, before the
+    # rest.
     my $ss;
     $ss += @$_ * @$_ foreach values %spread;
     my $rms = sqrt ($ss / keys %spread);
@@ -540,12 +583,18 @@ sub switch_clause {
       @best = ($rms, $max - $min, $i, \%spread);
     }
   }
-  die "Internal error. Failed to pick a switch point for @names"
+  confess "Internal error. Failed to pick a switch point for @names"
     unless defined $best[2];
   # use Data::Dumper; print Dumper (@best);
   my ($offset, $best) = @best[2,3];
   $body .= $indent . "/* Offset $offset gives the best switch position.  */\n";
-  $body .= $indent . "switch (name[$offset]) {\n";
+
+  my $do_front_chop = $offset == 0 && $namelen > 2;
+  if ($do_front_chop) {
+    $body .= $indent . "switch (*name++) {\n";
+  } else {
+    $body .= $indent . "switch (name[$offset]) {\n";
+  }
   foreach my $char (sort keys %$best) {
     confess sprintf "'$char' is %d bytes long, not 1", length $char
       if length ($char) != 1;
@@ -554,7 +603,11 @@ sub switch_clause {
     foreach my $name (sort @{$best->{$char}}) {
       my $thisone = $items->{$name};
       # warn "You are here";
-      $body .= match_clause ($thisone, $offset, 2 + length $indent);
+      if ($do_front_chop) {
+        $body .= match_clause ($thisone, \$char, 2 + length $indent);
+      } else {
+        $body .= match_clause ($thisone, $offset, 2 + length $indent);
+      }
     }
     $body .= $indent . "  break;\n";
   }

@@ -1870,6 +1870,13 @@ does not accept a PID argument, so only C<PID==0> is truly portable.
 
 Returns the process id of the parent process.
 
+Note for Linux users: on Linux, the C functions C<getpid()> and
+C<getppid()> return different values from different threads. In order to
+be portable, this behavior is not reflected by the perl-level function
+C<getppid()>, that returns a consistent value across threads. If you want
+to call the underlying C<getppid()>, consider using C<Inline::C> or
+another way to call a C library function.
+
 =item getpriority WHICH,WHO
 
 Returns the current priority for a process, a process group, or a user.

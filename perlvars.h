@@ -58,3 +58,7 @@ PERLVARI(Glockhook,	share_proc_t,	MEMBER_TO_FPTR(Perl_sv_nolocking))
 PERLVARI(Gunlockhook,	share_proc_t,	MEMBER_TO_FPTR(Perl_sv_nounlocking))
 PERLVARI(Gthreadhook,	thrhook_proc_t,	MEMBER_TO_FPTR(Perl_nothreadhook))
 
+/* Stores the PPID */
+#ifdef THREADS_HAVE_PIDS
+PERLVARI(Gppid,		IV,		0)
+#endif
