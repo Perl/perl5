@@ -1408,7 +1408,7 @@ including a glossary of all those config.sh variables, is in the Porting
 subdirectory.  Especially Porting/Glossary should come in handy.
 
 Ports for other systems may also be available.  You should check out
-http://www.perl.com/CPAN/ports for current information on ports to
+http://www.cpan.org/ports for current information on ports to
 various other operating systems.
 
 If you plan to port Perl to a new architecture study carefully the

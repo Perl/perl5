@@ -94,7 +94,7 @@ USE_PERLIO	= define
 # uncomment to enable use of PerlCRT.DLL when using the Visual C compiler.
 # It has patches that fix known bugs in older versions of MSVCRT.DLL.
 # This currently requires VC 5.0 with Service Pack 3 or later.
-# Get it from CPAN at http://www.perl.com/CPAN/authors/id/D/DO/DOUGL/
+# Get it from CPAN at http://www.cpan.org/authors/id/D/DO/DOUGL/
 # and follow the directions in the package to install.
 #
 # Not recommended if you have VC 6.x and you're not running Windows 9x.

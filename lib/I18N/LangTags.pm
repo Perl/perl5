@@ -768,7 +768,7 @@ Continuations".
 "Language Tagging in Unicode Plain Text".
 
 * Locale::Codes, in
-C<http://www.perl.com/CPAN/modules/by-module/Locale/>
+C<http://www.cpan.org/modules/by-module/Locale/>
 
 * ISO 639, "Code for the representation of names of languages",
 C<http://www.indigo.ie/egt/standards/iso639/iso639-1-en.html>

@@ -829,8 +829,8 @@ link386 prompts, press C<Ctrl-C> to exit.
 You need to fetch the latest perl source (including developers
 releases). With some probability it is located in 
 
-  http://www.perl.com/CPAN/src/5.0
-  http://www.perl.com/CPAN/src/5.0/unsupported
+  http://www.cpan.org/src/5.0
+  http://www.cpan.org/src/5.0/unsupported
 
 If not, you may need to dig in the indices to find it in the directory
 of the current maintainer.
@@ -838,7 +838,7 @@ of the current maintainer.
 Quick cycle of developers release may break the OS/2 build time to
 time, looking into 
 
-  http://www.perl.com/CPAN/ports/os2/ilyaz/
+  http://www.cpan.org/ports/os2/ilyaz/
 
 may indicate the latest release which was publicly released by the
 maintainer. Note that the release may include some additional patches
