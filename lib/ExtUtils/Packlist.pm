@@ -3,7 +3,7 @@ package ExtUtils::Packlist;
 use 5.005_64;
 use strict;
 use Carp qw();
-our $VERSION = '0.03';
+our $VERSION = '0.04';
 
 # Used for generating filehandle globs.  IO::File might not be available!
 my $fhname = "FH1";

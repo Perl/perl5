@@ -3,7 +3,7 @@ package Tie::Array;
 use 5.005_64;
 use strict;
 use Carp;
-our $VERSION = '1.01';
+our $VERSION = '1.02';
 
 # Pod documentation after __END__ below.
 

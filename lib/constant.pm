@@ -5,7 +5,7 @@ use 5.005_64;
 use warnings::register;
 
 our($VERSION, %declared);
-$VERSION = '1.02';
+$VERSION = '1.03';
 
 #=======================================================================
 

@@ -3,7 +3,7 @@ require Exporter;
 use XSLoader ();
 our($VERSION, @ISA, @EXPORT);
 
-$VERSION = "1.0";
+$VERSION = "1.01";
 
 @ISA = qw(Exporter);
 @EXPORT_OK = qw(yield cond_signal cond_broadcast cond_wait async);

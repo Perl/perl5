@@ -11,7 +11,7 @@ use warnings::register;
 use     vars qw($VERSION @ISA);
 require Exporter;
 
-$VERSION = "1.14";
+$VERSION = "1.15";
 
 @ISA = qw(Exporter); # This is only so we can do version checking
 

@@ -13,7 +13,7 @@ use Socket;
 use Carp;
 
 @ISA = qw(IO::Socket);
-$VERSION = "1.20";
+$VERSION = "1.21";
 
 IO::Socket::UNIX->register_domain( AF_UNIX );
 

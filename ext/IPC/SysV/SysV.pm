@@ -14,7 +14,7 @@ use Config;
 require Exporter;
 @ISA = qw(Exporter);
 
-$VERSION = "1.03";
+$VERSION = "1.04";
 
 @EXPORT_OK = qw(
 	GETALL GETNCNT GETPID GETVAL GETZCNT

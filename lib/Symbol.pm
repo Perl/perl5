@@ -70,7 +70,7 @@ require Exporter;
 @EXPORT = qw(gensym ungensym qualify qualify_to_ref);
 @EXPORT_OK = qw(delete_package);
 
-$VERSION = 1.02;
+$VERSION = 1.03;
 
 my $genpkg = "Symbol::";
 my $genseq = 0;
