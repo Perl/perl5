@@ -4720,6 +4720,7 @@ PP(pp_split)
 		}
 	    }
 	    s = rx->endp[0] + orig;
+	    PUTBACK;
 	}
     }
 

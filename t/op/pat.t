@@ -6,7 +6,7 @@
 
 $| = 1;
 
-print "1..993\n";
+print "1..994\n";
 
 BEGIN {
     chdir 't' if -d 't';
@@ -3139,5 +3139,11 @@ ok("bbbbac" =~ /$pattern/ && $1 eq 'a', "[perl #3547]");
   ok("\x{2019}" =~ /\S/, "Markus Kuhn 2003-02-26");
 }
 
-# last test 993
+{
+    my $i;
+    ok('-1-3-5-' eq join('', split /((??{$i++}))/, '-1-3-5-'),
+	"[perl #21411] (??{ .. }) corrupts split's stack")
+}
+
+# last test 994
 
