@@ -6801,12 +6801,12 @@ Perl_scan_num(pTHX_ char *start)
     /* if it starts with a v, it could be a version number */
     case 'v':
 	{
-	    UV rev, ver, sver;
 	    char *pos = s;
 	    pos++;
 	    while (isDIGIT(*pos))
 		pos++;
 	    if (*pos == '.' && isDIGIT(pos[1])) {
+		UV rev;
 		U8 tmpbuf[10];
 		U8 *tmpend;
 		NV nshift = 1.0;
