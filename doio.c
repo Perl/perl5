@@ -430,6 +430,8 @@ nextargv(register GV *gv)
 			    sv_catpvn(sv, oldname, oldlen);
 			    begin = ++star;
 			} while ((star = strchr(begin, '*')));
+			if (*begin)
+			    sv_catpv(sv,begin);
 		    }
 		    else {
 			sv_catpv(sv,inplace);
