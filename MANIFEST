@@ -214,7 +214,7 @@ ext/DynaLoader/hints/netbsd.pl	Hint for DynaLoader for named architecture
 ext/DynaLoader/hints/openbsd.pl	Hint for DynaLoader for named architecture
 ext/DynaLoader/Makefile.PL	Dynamic Loader makefile writer
 ext/DynaLoader/README		Dynamic Loader notes and intro
-ext/DynaLoader/t/XSLoader.t     See if XSLoader works
+ext/DynaLoader/t/XSLoader.t	See if XSLoader works
 ext/DynaLoader/XSLoader_pm.PL	Simple XS Loader perl module
 ext/Encode/AUTHORS		List of authors
 ext/Encode/bin/enc2xs		Encode module generator
@@ -2289,9 +2289,9 @@ plan9/plan9.c			Plan9 port: Plan9-specific C routines
 plan9/plan9ish.h		Plan9 port: Plan9-specific C header file
 plan9/setup.rc			Plan9 port: script for easy build+install
 plan9/versnum			Plan9 port: script to print version number
-pod.lst				List the pods and their roles
 pod/buildtoc			Update files based on pod.lst
 pod/checkpods.PL		Tool to check for common errors in pods
+pod.lst				List the pods and their roles
 pod/Makefile.SH			generate Makefile which makes pods into something else
 pod/perl5004delta.pod		Perl changes in version 5.004
 pod/perl5005delta.pod		Perl changes in version 5.005
