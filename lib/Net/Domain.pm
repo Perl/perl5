@@ -28,7 +28,7 @@ sub _hostname {
     return $host
     	if(defined $host);
 
-    if ($^O eq 'MSWin32') {
+    if ($^O eq 'MSWin32' || $^O eq 'cygwin') {
         require Socket;
         my ($name,$alias,$type,$len,@addr) =  gethostbyname($ENV{'COMPUTERNAME'}||'localhost');
         while (@addr)
