@@ -341,8 +341,8 @@ sub abs2rel {
 
 Converts a relative path to an absolute path. 
 
-    $abs_path = $File::Spec->rel2abs( $destination ) ;
-    $abs_path = $File::Spec->rel2abs( $destination, $base ) ;
+    $abs_path = File::Spec->rel2abs( $destination ) ;
+    $abs_path = File::Spec->rel2abs( $destination, $base ) ;
 
 If $base is not present or '', then L<cwd()> is used. If $base is relative, 
 then it is converted to absolute form using L</rel2abs()>. This means that it
@@ -368,11 +368,11 @@ sub rel2abs($;$;) {
 
     if ( ! $self->file_name_is_absolute( $path ) ) {
 
-        if ( ! $self->file_name_is_absolute( $base ) ) {
-            $base = $self->rel2abs( $base ) ;
-        }
-        elsif ( !defined( $base ) || $base eq '' ) {
+        if ( !defined( $base ) || $base eq '' ) {
             $base = cwd() ;
+        }
+        elsif ( ! $self->file_name_is_absolute( $base ) ) {
+            $base = $self->rel2abs( $base ) ;
         }
         else {
             $base = $self->canonpath( $base ) ;
