@@ -160,6 +160,7 @@ Ap	|I32	|debstackptrs
 Ap	|char*	|delimcpy	|char* to|char* toend|char* from \
 				|char* fromend|int delim|I32* retlen
 p	|void	|deprecate	|char* s
+p	|void	|deprecate_old	|char* s
 Afp	|OP*	|die		|const char* pat|...
 p	|OP*	|vdie		|const char* pat|va_list* args
 p	|OP*	|die_where	|char* message|STRLEN msglen

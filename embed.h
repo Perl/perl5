@@ -157,6 +157,7 @@
 #define debstackptrs		Perl_debstackptrs
 #define delimcpy		Perl_delimcpy
 #define deprecate		Perl_deprecate
+#define deprecate_old		Perl_deprecate_old
 #define die			Perl_die
 #define vdie			Perl_vdie
 #define die_where		Perl_die_where
@@ -1718,6 +1719,7 @@
 #define debstackptrs()		Perl_debstackptrs(aTHX)
 #define delimcpy(a,b,c,d,e,f)	Perl_delimcpy(aTHX_ a,b,c,d,e,f)
 #define deprecate(a)		Perl_deprecate(aTHX_ a)
+#define deprecate_old(a)	Perl_deprecate_old(aTHX_ a)
 #define vdie(a,b)		Perl_vdie(aTHX_ a,b)
 #define die_where(a,b)		Perl_die_where(aTHX_ a,b)
 #define dounwind(a)		Perl_dounwind(aTHX_ a)
