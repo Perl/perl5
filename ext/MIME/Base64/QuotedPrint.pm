@@ -1,5 +1,5 @@
 #
-# $Id: QuotedPrint.pm,v 2.3 1997/12/02 10:24:27 aas Exp $
+# $Id: QuotedPrint.pm,v 2.4 2002/12/28 05:50:05 gisle Exp $
 
 package MIME::QuotedPrint;
 
@@ -74,13 +74,18 @@ require Exporter;
 
 use Carp qw(croak);
 
-$VERSION = sprintf("%d.%02d", q$Revision: 2.3 $ =~ /(\d+)\.(\d+)/);
+$VERSION = sprintf("%d.%02d", q$Revision: 2.4 $ =~ /(\d+)\.(\d+)/);
 
 sub encode_qp ($)
 {
     my $res = shift;
-    croak("The Quoted-Printable encoding is only defined for bytes")
-	if $res =~ /[^\0-\xFF]/;
+    if ($] >= 5.006) {
+	require bytes;
+	if (bytes::length($res) > length($res) ||
+	    ($] >= 5.008 && $res =~ /[^\0-\xFF]/)) {
+	    croak("The Quoted-Printable encoding is only defined for bytes");
+	}
+    }
 
     # Do not mention ranges such as $res =~ s/([^ \t\n!-<>-~])/sprintf("=%02X", ord($1))/eg;
     # since that will not even compile on an EBCDIC machine (where ord('!') > ord('<')).
