@@ -18,8 +18,8 @@ my $cc = $Config{'cc'};
 my $cl  = ($^O eq 'MSWin32' && $cc eq 'cl');
 my $exe = 'embed_test' . $Config{'exe_ext'};
 my $obj = 'embed_test' . $Config{'obj_ext'};
-my $inc = File::Spec->catdir($INC[0],"..");
-my $lib = File::Spec->catdir($INC[0],"..");
+my $inc = File::Spec->updir;
+my $lib = File::Spec->updir;
 my @cmd;
 my (@cmd2) if $^O eq 'VMS';
 
