@@ -1025,6 +1025,7 @@ pp_hot.c		Push/Pop code for heavily used opcodes
 pp_proto.h		C++ definitions for Push/Pop code
 pp_sys.c		Push/Pop code for system interaction
 proto.h			Prototypes
+proto.pl		Produces proto.h and global.sym
 qnx/ar			QNX implementation of "ar" utility
 qnx/cpp			QNX implementation of preprocessor filter
 regcomp.c		Regular expression compiler
