@@ -251,16 +251,20 @@ be used.
 
 One approach is:
 
-    #!perl
-    while( <DATA> ) {
-	last   if  /^__END__$/;
-	[...]
-    }
-    __END__
-    lines of data
-    to be processed
-    __END__
-    :endofperl
+    .  #!perl
+    .  while( <DATA> ) {
+    .	  last   if  /^__END__$/;
+    .	  [...]
+    .  }
+    .  __END__
+    .  lines of data
+    .  to be processed
+    .  __END__
+    .  :endofperl
+
+The dots in the first column are only there to prevent F<cmd.exe> to interpret
+the C<:endofperl> line in this documentation.  Otherwise F<pl2bat.bat> itself
+wouldn't work.  See the previous item. :-)
 
 =item The batch file always "succeeds"
 
