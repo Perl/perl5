@@ -44,6 +44,7 @@ BEGIN {
  *IS_MSWin32 = $^O eq 'MSWin32' ? \&TRUE : \&FALSE unless defined &IS_MSWin32;
  *IS_Dos     = $^O eq 'dos'     ? \&TRUE : \&FALSE unless defined &IS_Dos;
  *IS_OS2     = $^O eq 'os2'     ? \&TRUE : \&FALSE unless defined &IS_OS2;
+ *IS_Cygwin  = $^O eq 'cygwin'  ? \&TRUE : \&FALSE unless defined &IS_Cygwin;
 }
 
 $Temp_File_Lifetime ||= 60 * 60 * 24 * 5;
@@ -358,7 +359,7 @@ sub init_formatter_class_list {
 
   $self->opt_M_with('Pod::Perldoc::ToPod');   # the always-there fallthru
   $self->opt_o_with('text');
-  $self->opt_o_with('man') unless IS_MSWin32 || IS_Dos
+  $self->opt_o_with('man') unless IS_MSWin32 || IS_Dos || IS_Cygwin
        || !($ENV{TERM} && $ENV{TERM} !~ /dumb|emacs|none|unknown/i);
 
   return;
