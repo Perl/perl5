@@ -323,6 +323,7 @@ sub scan_thing{           # scan a chunk for later references
     my($cmd,$title,$pod) = @_;
     $_ = $title;
     s/\n$//;
+    s/E<(\d+)>/&#$1;/g;
     s/E<(.*?)>/&$1;/g;
     # remove any formatting information for the headers
     s/[SFCBI]<(.*?)>/$1/g;         
@@ -507,6 +508,7 @@ sub pre_escapes {  # twiddle these, and stay up late  :-)
 	s/&/noremap("&amp;")/ge;
 	s/<</noremap("&lt;&lt;")/eg;
 	s/([^ESIBLCF])</$1\&lt\;/g;
+	s/E<(\d+)>/\&#$1\;/g;                     # embedded numeric special
 	s/E<([^\/][^<>]*)>/\&$1\;/g;              # embedded special
     }
 }

@@ -108,7 +108,9 @@ here and in commands:
 		    E<gt>		A literal >
 		    (these are optional except in other interior
 		     sequences and when preceded by a capital letter)
-		    E<nnn>		Character number nnn.
+		    E<n>		Character number n
+    	    	    E<html>		Some non-numeric HTML entity, such
+					as E<Agrave>
 
 =back
 
