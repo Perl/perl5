@@ -666,7 +666,7 @@ and there's a B<vi> interface too.
 
 You don't have to do this all on the command line, though, there are a few GUI
 options out there.  The nice thing about these is you can wave a mouse over a
-variable and a dump of it's data will appear in an appropriate window, or in a
+variable and a dump of its data will appear in an appropriate window, or in a
 popup balloon, no more tiresome typing of 'x $varname' :-)
 
 In particular have a hunt around for the following:

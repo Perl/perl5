@@ -418,9 +418,9 @@ There are a few suggestions for what to do with C<perldoc>: maybe a
 full-text search, an index function, locating pages on a particular
 high-level subject, and so on.
 
-=head2 Install .3p man pages
+=head2 Install .3p manpages
 
-This is a bone of contention; we can create C<.3p> man pages for each
+This is a bone of contention; we can create C<.3p> manpages for each
 built-in function, but should we install them by default? Tcl does this,
 and it clutters up C<apropos>.
 
@@ -429,6 +429,7 @@ and it clutters up C<apropos>.
 Simon Cozens promises to do this before he gets old.
 
 =head2 Update POSIX.pm for 1003.1-2
+
 =head2 Retargetable installation
 
 Allow C<@INC> to be changed after Perl is built.
@@ -468,7 +469,9 @@ code.
 There is a patch for this, but it may require Unicodification.
 
 =head2 Compile to real threaded code
+
 =head2 Structured types
+
 =head2 Modifiable $1 et al.
 
     ($x = "elephant") =~ /e(ph)/;
@@ -690,11 +693,13 @@ This would break old code; use C<do{{ }}> instead.
 Not needed now we have lexical IO handles.
 
 =head2 format BOTTOM
+
 =head2 report HANDLE
 
 Damian Conway's text formatting modules seem to be the Way To Go.
 
 =head2 Generalised want()/caller())
+
 =head2 Named prototypes
 
 These both seem to be delayed until Perl 6.

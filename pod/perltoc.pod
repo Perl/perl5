@@ -4214,11 +4214,12 @@ PerlIO_apply_layers(f,mode,layers), PerlIO_binmode(f,ptype,imode,layers),
 
 =item Rewrite perldoc
 
-=item Install .3p man pages
+=item Install .3p manpages
 
 =item Unicode tutorial
 
 =item Update POSIX.pm for 1003.1-2
+
 =head2 Retargetable installation
 
 =item POSIX emulation on non-POSIX systems
@@ -4242,7 +4243,9 @@ PerlIO_apply_layers(f,mode,layers), PerlIO_binmode(f,ptype,imode,layers),
 =item Make tr/// return histogram
 
 =item Compile to real threaded code
+
 =head2 Structured types
+
 =head2 Modifiable $1 et al.
 
 =item Procedural interfaces for IO::*, etc.
@@ -4352,9 +4355,11 @@ PerlIO_apply_layers(f,mode,layers), PerlIO_binmode(f,ptype,imode,layers),
 =item Lexically scoped typeglobs
 
 =item format BOTTOM
+
 =head2 report HANDLE
 
 =item Generalised want()/caller())
+
 =head2 Named prototypes
 
 =item Built-in globbing

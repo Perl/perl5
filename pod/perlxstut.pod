@@ -915,9 +915,9 @@ way to store and load your extra subroutines.
 
 There is absolutely no excuse for not documenting your extension.
 Documentation belongs in the .pm file.  This file will be fed to pod2man,
-and the embedded documentation will be converted to the man page format,
-then placed in the blib directory.  It will be copied to Perl's man
-page directory when the extension is installed.
+and the embedded documentation will be converted to the manpage format,
+then placed in the blib directory.  It will be copied to Perl's
+manpage directory when the extension is installed.
 
 You may intersperse documentation and Perl code within the .pm file.
 In fact, if you want to use method autoloading, you must do this,

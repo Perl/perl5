@@ -29,7 +29,7 @@ described in this document.
 
 If it's run from a terminal, F<perldoc> will usually call F<pod2man> to
 translate POD (Plain Old Documentation - see L<perlpod> for an
-explanation) into a man page, and then run F<man> to display it; if
+explanation) into a manpage, and then run F<man> to display it; if
 F<man> isn't available, F<pod2text> will be used instead and the output
 piped through your favourite pager.
 

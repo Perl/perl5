@@ -45,7 +45,7 @@ A particular 8-bit extension to ASCII that includes grave and acute
 accented Latin characters.  Languages that can employ ISO 8859-1 
 include all the languages covered by ASCII as well as Afrikaans, 
 Albanian, Basque, Catalan, Danish, Faroese, Finnish, Norwegian, 
-Portugese, Spanish, and Swedish.  Dutch is covered albeit without 
+Portuguese, Spanish, and Swedish.  Dutch is covered albeit without 
 the ij ligature.  French is covered too but without the oe ligature. 
 German can use ISO 8859-1 but must do so without German-style
 quotation marks.  This set is based on Western European extensions 
@@ -597,7 +597,7 @@ XPG operability often implies the presence of an I<iconv> utility
 available from the shell or from the C library.  Consult your system's
 documentation for information on iconv.
 
-On OS/390 or z/OS see the iconv(1) man page.  One way to invoke the iconv 
+On OS/390 or z/OS see the iconv(1) manpage.  One way to invoke the iconv 
 shell utility from within perl would be to:
 
     # OS/390 or z/OS example
@@ -1243,7 +1243,7 @@ translation difficulties.  In particular one popular nroff implementation
 was known to strip accented characters to their unaccented counterparts 
 while attempting to view this document through the B<pod2man> program 
 (for example, you may see a plain C<y> rather than one with a diaeresis 
-as in E<yuml>).  Another nroff truncated the resultant man page at
+as in E<yuml>).  Another nroff truncated the resultant manpage at
 the first occurrence of 8 bit characters.
 
 Not all shells will allow multiple C<-e> string arguments to perl to
