@@ -2545,7 +2545,7 @@ Perl_yylex(pTHX)
 		}
 	    } 
 	    if (bof)
-		s = swallow_bom(s);
+		s = swallow_bom((U8*)s);
 	    incline(s);
 	} while (PL_doextract);
 	PL_oldoldbufptr = PL_oldbufptr = PL_bufptr = PL_linestart = s;
@@ -7424,7 +7424,8 @@ S_swallow_bom(pTHX_ U8 *s)
 	    s += 2;
 	    filter_add(S_utf16rev_textfilter, NULL);
 	    New(898, news, (PL_bufend - (char*)s) * 3 / 2 + 1, U8);
-	    PL_bufend = utf16_to_utf8((U16*)s, news, PL_bufend - (char*)s);
+	    PL_bufend = (char*)utf16_to_utf8((U16*)s, news,
+					     PL_bufend - (char*)s);
 	    s = news;
 #else
 	    Perl_croak(aTHX_ "Unsupported script encoding");
@@ -7437,7 +7438,8 @@ S_swallow_bom(pTHX_ U8 *s)
 	    U8 *news;
 	    filter_add(S_utf16_textfilter, NULL);
 	    New(898, news, (PL_bufend - (char*)s) * 3 / 2 + 1, U8);
-	    PL_bufend = utf16_to_utf8((U16*)s, news, PL_bufend - (char*)s);
+	    PL_bufend = (char*)utf16_to_utf8((U16*)s, news,
+					     PL_bufend - (char*)s);
 	    s = news;
 #else
 	    Perl_croak(aTHX_ "Unsupported script encoding");
@@ -7456,7 +7458,7 @@ S_swallow_bom(pTHX_ U8 *s)
 	    Perl_croak(aTHX_ "Unsupported script encoding");
 	}
     }
-    return s;
+    return (char*)s;
 }
 
 #ifdef PERL_OBJECT
