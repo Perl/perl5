@@ -1241,16 +1241,10 @@ Perl_call_sv(pTHX_ SV *sv, I32 flags)
 	PL_op->op_private |= OPpENTERSUB_DB;
 
     if (!(flags & G_EVAL)) {
-        /* G_NOCATCH is a hack for perl_vdie using this path to call
-	   a __DIE__ handler */
-        if (!(flags & G_NOCATCH)) {
-	    CATCH_SET(TRUE);
-	}
+	CATCH_SET(TRUE);
 	call_xbody((OP*)&myop, FALSE);
 	retval = PL_stack_sp - (PL_stack_base + oldmark);
-        if (!(flags & G_NOCATCH)) {
-	    CATCH_SET(FALSE);
-	}
+	CATCH_SET(FALSE);
     }
     else {
 	cLOGOP->op_other = PL_op;

@@ -1495,11 +1495,7 @@ Perl_vdie(pTHX_ const char* pat, va_list *args)
 	    PUSHMARK(SP);
 	    XPUSHs(msg);
 	    PUTBACK;
-	    /* HACK - REVISIT - avoid CATCH_SET(TRUE) in call_sv()
-	       or we come back here due to a JMPENV_JMP() and do 
-	       a POPSTACK - but die_where() will have already done 
-	       one as it unwound - NI-S 1999/08/14 */
-	    call_sv((SV*)cv, G_DISCARD|G_NOCATCH);
+	    call_sv((SV*)cv, G_DISCARD);
 	    POPSTACK;
 	    LEAVE;
 	}

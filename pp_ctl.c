@@ -2436,6 +2436,7 @@ S_docatch(pTHX_ OP *o)
     dTHR;
     int ret;
     OP *oldop = PL_op;
+    volatile PERL_SI *cursi = PL_curstackinfo;
     dJMPENV;
 
 #ifdef DEBUGGING
@@ -2448,7 +2449,7 @@ S_docatch(pTHX_ OP *o)
     case 0:
 	break;
     case 3:
-	if (PL_restartop) {
+	if (PL_restartop && cursi == PL_curstackinfo) {
 	    PL_op = PL_restartop;
 	    PL_restartop = 0;
 	    goto redo_body;
