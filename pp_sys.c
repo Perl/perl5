@@ -1286,7 +1286,7 @@ PP(pp_truncate)
 	{
 	    int tmpfd;
 
-	    if ((tmpfd = open(SvPV (sv, na), 0)) < 0)
+	    if ((tmpfd = open(SvPV (sv, na), O_RDWR)) < 0)
 	        result = 0;
 	    else {
 		if (my_chsize(tmpfd, len) < 0)
