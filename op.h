@@ -235,7 +235,11 @@ struct pmop {
     OP *	op_pmreplroot;
     OP *	op_pmreplstart;
     PMOP *	op_pmnext;		/* list of all scanpats */
-    REGEXP *	op_pmregexp;		/* compiled expression */
+#ifdef USE_ITHREADS
+    I32         op_pmoffset;
+#else
+    REGEXP *    op_pmregexp;            /* compiled expression */
+#endif
     U16		op_pmflags;
     U16		op_pmpermflags;
     U8		op_pmdynflags;
@@ -246,8 +250,13 @@ struct pmop {
 #endif
 };
 
+#ifdef USE_ITHREADS
+#define PM_GETRE(o)     ((REGEXP*)SvIV(PL_regex_pad[(o)->op_pmoffset]))
+#define PM_SETRE(o,r)   (sv_setiv(PL_regex_pad[(o)->op_pmoffset], (IV)r))
+#else
 #define PM_GETRE(o)     ((o)->op_pmregexp)
 #define PM_SETRE(o,r)   ((o)->op_pmregexp = (r))
+#endif
 
 #define PMdf_USED	0x01		/* pm has been used once already */
 #define PMdf_TAINTED	0x02		/* pm compiled from tainted pattern */

@@ -458,6 +458,10 @@ START_EXTERN_C
 #define PL_psig_ptr		(*Perl_Ipsig_ptr_ptr(aTHXo))
 #undef  PL_ptr_table
 #define PL_ptr_table		(*Perl_Iptr_table_ptr(aTHXo))
+#undef  PL_regex_pad
+#define PL_regex_pad		(*Perl_Iregex_pad_ptr(aTHXo))
+#undef  PL_regex_padav
+#define PL_regex_padav		(*Perl_Iregex_padav_ptr(aTHXo))
 #undef  PL_replgv
 #define PL_replgv		(*Perl_Ireplgv_ptr(aTHXo))
 #undef  PL_rsfp

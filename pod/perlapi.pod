@@ -1344,6 +1344,17 @@ SV is B<not> incremented.
 =for hackers
 Found in file sv.c
 
+=item newSV
+
+Create a new null SV, or if len > 0, create a new empty SVt_PV type SV
+with an initial PV allocation of len+1. Normally accessed via the C<NEWSV>
+macro.
+
+	SV*	newSV(STRLEN len)
+
+=for hackers
+Found in file sv.c
+
 =item NEWSV
 
 Creates a new SV.  A non-zero C<len> parameter indicates the number of
@@ -1356,17 +1367,6 @@ C<id> is an integer id between 0 and 1299 (used to identify leaks).
 
 =for hackers
 Found in file handy.h
-
-=item newSV
-
-Create a new null SV, or if len > 0, create a new empty SVt_PV type SV
-with an initial PV allocation of len+1. Normally accessed via the C<NEWSV>
-macro.
-
-	SV*	newSV(STRLEN len)
-
-=for hackers
-Found in file sv.c
 
 =item newSViv
 
@@ -2119,22 +2119,22 @@ version which guarantees to evaluate sv only once.
 =for hackers
 Found in file sv.h
 
-=item SvIVx
-
-Coerces the given SV to an integer and returns it. Guarantees to evaluate
-sv only once. Use the more efficent C<SvIV> otherwise.
-
-	IV	SvIVx(SV* sv)
-
-=for hackers
-Found in file sv.h
-
 =item SvIVX
 
 Returns the raw value in the SV's IV slot, without checks or conversions.
 Only use when you are sure SvIOK is true. See also C<SvIV()>.
 
 	IV	SvIVX(SV* sv)
+
+=for hackers
+Found in file sv.h
+
+=item SvIVx
+
+Coerces the given SV to an integer and returns it. Guarantees to evaluate
+sv only once. Use the more efficent C<SvIV> otherwise.
+
+	IV	SvIVx(SV* sv)
 
 =for hackers
 Found in file sv.h
@@ -2443,21 +2443,21 @@ Like C<SvPV_nolen>, but converts sv to uft8 first if necessary.
 =for hackers
 Found in file sv.h
 
-=item SvPVx
-
-A version of C<SvPV> which guarantees to evaluate sv only once.
-
-	char*	SvPVx(SV* sv, STRLEN len)
-
-=for hackers
-Found in file sv.h
-
 =item SvPVX
 
 Returns a pointer to the physical string in the SV.  The SV must contain a
 string.
 
 	char*	SvPVX(SV* sv)
+
+=for hackers
+Found in file sv.h
+
+=item SvPVx
+
+A version of C<SvPV> which guarantees to evaluate sv only once.
+
+	char*	SvPVx(SV* sv, STRLEN len)
 
 =for hackers
 Found in file sv.h
@@ -2664,19 +2664,19 @@ false, defined or undefined.  Does not handle 'get' magic.
 =for hackers
 Found in file sv.h
 
+=item svtype
+
+An enum of flags for Perl types.  These are found in the file B<sv.h> 
+in the C<svtype> enum.  Test these flags with the C<SvTYPE> macro.
+
+=for hackers
+Found in file sv.h
+
 =item SvTYPE
 
 Returns the type of the SV.  See C<svtype>.
 
 	svtype	SvTYPE(SV* sv)
-
-=for hackers
-Found in file sv.h
-
-=item svtype
-
-An enum of flags for Perl types.  These are found in the file B<sv.h> 
-in the C<svtype> enum.  Test these flags with the C<SvTYPE> macro.
 
 =for hackers
 Found in file sv.h
