@@ -1123,7 +1123,7 @@ I32 Perl_my_pclose(pTHX_ FILE *fp)
     /* If we were writing to a subprocess, insure that someone reading from
      * the mailbox gets an EOF.  It looks like a simple fclose() doesn't
      * produce an EOF record in the mailbox.  */
-    if (info->mode != 'r' && !info->done) pipe_eof(info->fp,0);
+    if (info->mode != 'r' && !info->done) pipe_eof(info->fp,1);
     PerlIO_close(info->fp);
 
     if (info->done) retsts = info->completion;
