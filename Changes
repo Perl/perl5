@@ -105,6 +105,242 @@ Version v5.7.0		Development release working toward v5.8
 --------------
 
 ____________________________________________________________________________
+[  7210] By: jhi                                   on 2000/10/12  23:59:40
+        Log: The Install.pm third of
+             
+             Subject: Proposed patches, Install.pm getopts.pl termcap.pl
+             From: Bill Campbell <bill@celestial.com>
+             Message-ID: <20001005180451.A22029@kstarr.celestial.com>
+             Date: Thu, 5 Oct 2000 18:04:51 -0700
+     Branch: perl
+	   ! lib/ExtUtils/Install.pm
+____________________________________________________________________________
+[  7209] By: jhi                                   on 2000/10/12  23:58:43
+        Log: Two thirds of
+             
+             Subject: Proposed patches, Install.pm getopts.pl termcap.pl
+             Date: Thu, 5 Oct 2000 18:04:51 -0700
+             From: Bill Campbell <bill@celestial.com>
+             Message-ID: <20001005180451.A22029@kstarr.celestial.com>
+             
+             The Install.pm changes will be submitted separately because
+             they need some work and discussion still.
+     Branch: perl
+	   ! lib/getopts.pl lib/termcap.pl
+____________________________________________________________________________
+[  7208] By: jhi                                   on 2000/10/12  23:41:19
+        Log: Subject:  [PATCH] 5.6.0 & 5.7.1,  VMS fixes
+             From: lane@DUPHY4.Physics.Drexel.Edu (Charles Lane)
+             Date:     Thu, 12 Oct 2000 07:30:02 EDT
+             Message-Id: <001012072828.2eabc@DUPHY4.Physics.Drexel.Edu>
+     Branch: perl
+	   ! lib/File/Temp.pm t/lib/st-lock.t t/pod/find.t
+	   ! t/pod/testp2pt.pl vms/gen_shrfls.pl
+____________________________________________________________________________
+[  7207] By: jhi                                   on 2000/10/12  23:39:01
+        Log: An updated EBCDIC tr patch.
+             
+             Subject: Re: [PATCH: perl@7181] op/tr tests on OS/390
+             From: Peter Prymmer <pvhp@forte.com>
+             Date: Wed, 11 Oct 2000 17:16:30 -0700 (PDT)
+             Message-ID: <Pine.OSF.4.10.10010111707430.516446-100000@aspara.forte.com>
+     Branch: perl
+	   ! t/op/tr.t
+____________________________________________________________________________
+[  7206] By: jhi                                   on 2000/10/12  23:34:55
+        Log: Upgrade to CPAN 1.58, from Andreas König.
+     Branch: perl
+	   ! lib/CPAN.pm lib/CPAN/FirstTime.pm
+____________________________________________________________________________
+[  7205] By: jhi                                   on 2000/10/12  23:29:08
+        Log: Introduce the man[24-8] variables, from Andy Dougherty.
+     Branch: metaconfig/U/perl
+	   + mandirs.U mandirstyle.U
+     Branch: perl
+	   ! Configure Porting/Glossary Porting/config.sh Porting/config_H
+	   ! config_h.SH epoc/config.sh uconfig.h uconfig.sh vos/config.def
+	   ! vos/config.h vos/config.pl vos/config_h.SH_orig
+	   ! win32/config.bc win32/config.gc win32/config.vc
+____________________________________________________________________________
+[  7204] By: gsar                                  on 2000/10/12  18:11:24
+        Log: restore change#7202
+     Branch: perl
+	   ! mg.c
+____________________________________________________________________________
+[  7203] By: gsar                                  on 2000/10/12  18:09:40
+        Log: another test of the Emergency Broadcast System--back out 
+             change#7202
+     Branch: perl
+	   ! mg.c
+____________________________________________________________________________
+[  7202] By: gsar                                  on 2000/10/12  16:40:47
+        Log: (submitted on behalf of Jarkko)
+             Fix the lib/encode.t subtest 6 failure as reported by Andreas
+             Koenig, gmagical substr() wasn't propagating UTF8ness.  The bug
+             was unearthed by change 7182, as was a bug in HTML::Entities.
+     Branch: perl
+	   ! mg.c
+____________________________________________________________________________
+[  7201] By: jhi                                   on 2000/10/11  03:16:05
+        Log: SvPV() (via mg_get() of sv_2pv()) can update the UTF8ness of the SVs.
+     Branch: perl
+	   ! pp_hot.c t/pragma/utf8.t
+____________________________________________________________________________
+[  7200] By: jhi                                   on 2000/10/11  00:40:30
+        Log: The #7198 was a false alarm.
+     Branch: perl
+	   ! pp_hot.c
+____________________________________________________________________________
+[  7199] By: jhi                                   on 2000/10/11  00:26:04
+        Log: Remove duplicated code.
+     Branch: perl
+	   ! t/lib/cgi-html.t
+____________________________________________________________________________
+[  7198] By: jhi                                   on 2000/10/10  23:30:46
+        Log: (Retracted by #7200.)
+     Branch: perl
+	   ! pp_hot.c
+____________________________________________________________________________
+[  7197] By: jhi                                   on 2000/10/10  21:49:30
+        Log: Add the test case for #7190, from the original bug report
+             by Andreas König.
+     Branch: perl
+	   ! t/pragma/utf8.t
+____________________________________________________________________________
+[  7196] By: jhi                                   on 2000/10/10  21:40:49
+        Log: Reapply Andy's patch and regen Configure.
+     Branch: perl
+	   ! Configure INSTALL Makefile.SH Porting/Glossary
+	   ! Porting/config.sh config_h.SH epoc/config.sh installperl
+	   ! uconfig.sh vos/config.def win32/config.bc win32/config.gc
+	   ! win32/config.vc
+____________________________________________________________________________
+[  7195] By: jhi                                   on 2000/10/10  21:09:30
+        Log: Use the versiononly instead of the installscripts,
+             retract the changes 7146 and 7147.
+     Branch: perl
+	   ! Configure INSTALL Makefile.SH Porting/Glossary
+	   ! Porting/config.sh Porting/config_H config_h.SH epoc/config.sh
+	   ! installperl uconfig.sh vos/config.def win32/config.bc
+	   ! win32/config.gc win32/config.vc
+____________________________________________________________________________
+[  7194] By: jhi                                   on 2000/10/10  21:06:15
+        Log: Subject: [PATCH: perl@7181] ver.t v string tests for os/390
+             From: Peter Prymmer <pvhp@forte.com>
+             Date: Tue, 10 Oct 2000 13:24:18 -0700 (PDT)
+             Message-ID: <Pine.OSF.4.10.10010101322510.441897-100000@aspara.forte.com>
+     Branch: perl
+	   ! t/op/ver.t
+____________________________________________________________________________
+[  7193] By: jhi                                   on 2000/10/10  21:05:12
+        Log: Subject: [PATCH: perl@7181] op/tr tests on OS/390
+             From: Peter Prymmer <pvhp@forte.com>
+             Date: Tue, 10 Oct 2000 13:56:35 -0700 (PDT)
+             Message-ID: <Pine.OSF.4.10.10010101355140.441897-100000@aspara.forte.com>
+     Branch: perl
+	   ! t/op/tr.t
+____________________________________________________________________________
+[  7192] By: jhi                                   on 2000/10/10  20:57:30
+        Log: Add versiononly, delete installscripts, from Andy Dougherty.
+     Branch: metaconfig
+	   - U/installdirs/installscripts.U
+     Branch: metaconfig/U/perl
+	   + versiononly.U
+____________________________________________________________________________
+[  7191] By: jhi                                   on 2000/10/10  19:41:21
+        Log: Subject: [PATCH: perl@7181] perlebcdic.pod updates and corrections
+             From: Peter Prymmer <pvhp@forte.com>
+             Date: Tue, 10 Oct 2000 12:35:57 -0700 (PDT)
+             Message-ID: <Pine.OSF.4.10.10010101231390.441897-100000@aspara.forte.com>
+     Branch: perl
+	   ! pod/perlebcdic.pod
+____________________________________________________________________________
+[  7190] By: jhi                                   on 2000/10/10  19:26:14
+        Log: Subject: Re: utf8 concat, mg_get
+             From: Simon Cozens <simon@cozens.net>
+             Date: Tue, 10 Oct 2000 17:40:17 +0100
+             Message-ID: <20001010174017.A13130@pembro4.pmb.ox.ac.uk>
+     Branch: perl
+	   ! pp_hot.c
+____________________________________________________________________________
+[  7189] By: jhi                                   on 2000/10/10  19:23:03
+        Log: Subject: [ID 20000720.004] ExtUtils::MakeMaker finds wrong version of perl
+             From: jdb@dfwnet.sbms.sbc.com (J. David Blackstone)
+             Date: Thu, 20 Jul 2000 13:31:22 -0500 (CDT)
+             Message-Id: <200007201831.NAA05776@dfwnet1.dfwnet.sbms.sbc.com>
+     Branch: perl
+	   ! lib/ExtUtils/MM_Unix.pm
+____________________________________________________________________________
+[  7188] By: jhi                                   on 2000/10/10  15:31:24
+        Log: Subject: RE: [ID 19990803.001] README.win32 suggestions 
+             From: "Moore, Paul" <Paul.Moore@uk.origin-it.com>
+             Date: Fri, 14 Jul 2000 10:47:36 +0100
+             Message-ID: <714DFA46B9BBD0119CD000805FC1F53B012A8224@UKRUX002.rundc.uk.origin-it.com>
+     Branch: perl
+	   ! README.win32
+____________________________________________________________________________
+[  7187] By: jhi                                   on 2000/10/10  13:30:10
+        Log: Quote the temp file name, needed in Win32 because the
+             default name unfortunately contains spaces, shouldn't
+             hurt elsewhere.
+             
+             Subject: FW: perldoc fails if $TEMP contains spaces
+             From: "Moore, Paul" <Paul.Moore@uk.origin-it.com>
+             Date: Thu, 14 Sep 2000 08:58:45 +0100
+             Message-ID: <714DFA46B9BBD0119CD000805FC1F53B012A82AA@UKRUX002.rundc.uk.origin-it.com>
+     Branch: perl
+	   ! utils/perldoc.PL
+____________________________________________________________________________
+[  7186] By: jhi                                   on 2000/10/10  13:16:27
+        Log: Subject: [PATCH 5.6.0] Re: [ID 20001009.004] SEGV from sprintf in a thread 
+             From: hv@hugo.hybyte.com
+             Date: Tue, 10 Oct 2000 14:10:20 +0100
+             Message-Id: <200010101310.OAA00953@hugo.hybyte.com>
+     Branch: perl
+	   ! t/lib/thr5005.t util.c
+____________________________________________________________________________
+[  7185] By: jhi                                   on 2000/10/10  12:06:22
+        Log: Upgrade to podlators 1.04, from Russ Allbery.
+     Branch: perl
+	   ! lib/Pod/Man.pm lib/Pod/Text.pm
+____________________________________________________________________________
+[  7184] By: jhi                                   on 2000/10/10  12:01:32
+        Log: Upgrade to CGI.pm 2.74, from Lincoln Stein.
+     Branch: perl
+	   ! lib/CGI.pm t/lib/cgi-form.t t/lib/cgi-html.t
+____________________________________________________________________________
+[  7183] By: jhi                                   on 2000/10/09  23:47:15
+        Log: Subject: [PATCH: perl@7159] various VMS cleanup issues + CXX configure
+             From: Peter Prymmer <pvhp@forte.com>
+             Message-ID: <Pine.OSF.4.10.10010091625290.260786-100000@aspara.forte.com>
+             Date: Mon, 9 Oct 2000 16:30:44 -0700 (PDT)
+     Branch: perl
+	   ! configure.com vms/descrip_mms.template vms/vms.c vms/vmsish.h
+____________________________________________________________________________
+[  7182] By: jhi                                   on 2000/10/09  23:43:16
+        Log: Make eq work again with utf8 (disabling the upgrading
+             should no more be necessary since the copies of the
+             scalars are upgraded, not the scalars themselves).
+             Takes care of ID 20001009.001.  (The claimed length()
+             bug in 20001009.001 seems bogus to me.)
+     Branch: perl
+	   ! sv.c t/pragma/utf8.t
+____________________________________________________________________________
+[  7181] By: gsar                                  on 2000/10/09  19:41:54
+        Log: tweak for change#7173
+     Branch: perl
+	   ! win32/win32sck.c
+____________________________________________________________________________
+[  7180] By: gsar                                  on 2000/10/09  19:26:56
+        Log: on Windows, clean targets might not work under some flavors of the shell
+     Branch: perl
+	   ! win32/Makefile win32/makefile.mk
+____________________________________________________________________________
+[  7179] By: jhi                                   on 2000/10/09  19:21:02
+        Log: Update Changes.
+     Branch: perl
+	   ! Changes patchlevel.h
+____________________________________________________________________________
 [  7178] By: jhi                                   on 2000/10/09  19:18:23
         Log: Warn about unknown scripts.
              
