@@ -437,7 +437,6 @@ sub _vms_abs_path {
 sub _os2_cwd {
     $ENV{'PWD'} = `cmd /c cd`;
     chop $ENV{'PWD'};
-    $ENV{'PWD'} =~ s:\\:/:g ;
     return $ENV{'PWD'};
 }
 
@@ -455,7 +454,6 @@ sub _dos_cwd {
     if (!defined &Dos::GetCwd) {
         $ENV{'PWD'} = `command /c cd`;
         chop $ENV{'PWD'};
-        $ENV{'PWD'} =~ s:\\:/:g ;
     } else {
         $ENV{'PWD'} = Dos::GetCwd();
     }
@@ -498,6 +496,7 @@ sub _epoc_cwd {
         *fastcwd	= \&_NT_cwd;
         *fastgetcwd	= \&_NT_cwd;
         *abs_path	= \&fast_abs_path;
+        *realpath   = \&fast_abs_path;
     }
     elsif ($^O eq 'os2') {
         # sys_cwd may keep the builtin command
