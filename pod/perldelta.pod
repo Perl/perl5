@@ -3165,6 +3165,10 @@ is serious but as of yet unsolved.  It points at some problems with the
 signedness handling of the C compiler, as do the 64bitint, arith, and pow
 failures.  Most of the rest point at problems with SysV IPC.
 
+=head2 PDL failing some tests
+
+Use PDL 2.3.4 or later.
+
 =head2 Term::ReadKey not working on Win32
 
 Use Term::ReadKey 2.20 or later.
