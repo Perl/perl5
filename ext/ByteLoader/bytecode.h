@@ -370,8 +370,4 @@ typedef char *pvindex;
 	    if (sz != PTRSIZE) {				\
 		HEADER_FAIL("different PTRSIZE");		\
 	    }							\
-	    BGET_strconst(str); /* byteorder */			\
-	    if (strNE(str, STRINGIFY(BYTEORDER))) {		\
-		HEADER_FAIL("different byteorder");	\
-	    }							\
 	} STMT_END

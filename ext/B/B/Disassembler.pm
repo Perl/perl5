@@ -162,7 +162,7 @@ use strict;
 
 use B::Asmdata qw(%insn_data @insn_name);
 
-our( $magic, $archname, $blversion, $ivsize, $ptrsize, $byteorder );
+our( $magic, $archname, $blversion, $ivsize, $ptrsize );
 
 sub dis_header($){
     my( $fh ) = @_;
@@ -172,11 +172,10 @@ sub dis_header($){
     $blversion = $fh->GET_strconst();
     $ivsize    = $fh->GET_U32();
     $ptrsize   = $fh->GET_U32();
-    $byteorder = $fh->GET_strconst();
 }
 
 sub get_header(){
-    return( $magic, $archname, $blversion, $ivsize, $ptrsize, $byteorder );
+    return( $magic, $archname, $blversion, $ivsize, $ptrsize);
 }
 
 sub disassemble_fh {

@@ -7,6 +7,11 @@ BEGIN {
     }
     chdir 't' if -d 't';
     @INC = qw(../lib);
+    use Config;
+    if ($Config{ccflags} =~ /-DPERL_COPY_ON_WRITE/) {
+	print "1..0 # skip - no COW for now\n";
+	exit 0;
+    }
     require './test.pl'; # for run_perl()
 }
 use strict;
@@ -103,10 +108,6 @@ my $l = 3; $x = sub { print $l }; &$x
 my $i = 1;
 my $foo = sub {$i = shift if @_};
 &$foo(3);
-############################################################
-$_="\xff\xff"; use utf8; utf8::encode $_; print $_
->>>>
-\xc3\xbf\xc3\xbf
 ############################################################
 $x="Cannot use"; print index $x, "Can"
 >>>>

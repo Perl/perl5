@@ -181,8 +181,6 @@ sub gen_header {
     $header .= B::Asmdata::PUT_strconst(qq["$ByteLoader::VERSION"]);
     $header .= B::Asmdata::PUT_U32($Config{ivsize});
     $header .= B::Asmdata::PUT_U32($Config{ptrsize});
-    $header .= B::Asmdata::PUT_strconst(sprintf(qq["0x%s"], $Config{byteorder}));
-
     $header;
 }
 

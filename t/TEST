@@ -256,7 +256,7 @@ EOT
 	    my $bytecompile =
 		"$perl $testswitch $switch -I../lib $bswitch". 
 		"-o$test.plc $test 2>/dev/null &&".
-		"$perl $testswitch $switch $utf $test.plc $redir|";
+		"$perl $testswitch $switch -I../lib $utf $test.plc $redir|";
 	    open(RESULTS,$bytecompile)
 		or print "can't byte-compile '$bytecompile': $!.\n";
 	}
