@@ -3834,7 +3834,9 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
  *	This symbol, if defined, indicates that you must access
  *	character data through U32-aligned pointers.
  */
+#ifndef U32_ALIGNMENT_REQUIRED
 #$d_u32align U32_ALIGNMENT_REQUIRED	/**/
+#endif
 
 /* HAS_USLEEP_PROTO:
  *	This symbol, if defined, indicates that the system provides
