@@ -1344,7 +1344,10 @@ Ap	|char*	|instr		|const char* big|const char* little
 p	|bool	|io_close	|IO* io|bool not_implicit
 p	|OP*	|invert		|OP* cmd
 dp	|bool	|is_gv_magical	|char *name|STRLEN len|U32 flags
-p	|I32	|is_lvalue_sub
+Ap	|I32	|is_lvalue_sub
+Ap	|U32	|to_uni_upper_lc|U32 c
+Ap	|U32	|to_uni_title_lc|U32 c
+Ap	|U32	|to_uni_lower_lc|U32 c
 Ap	|bool	|is_uni_alnum	|UV c
 Ap	|bool	|is_uni_alnumc	|UV c
 Ap	|bool	|is_uni_idfirst	|UV c

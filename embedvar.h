@@ -68,6 +68,7 @@
 #define PL_maxscream		(vTHX->Tmaxscream)
 #define PL_modcount		(vTHX->Tmodcount)
 #define PL_na			(vTHX->Tna)
+#define PL_nrs			(vTHX->Tnrs)
 #define PL_ofs_sv		(vTHX->Tofs_sv)
 #define PL_op			(vTHX->Top)
 #define PL_opsave		(vTHX->Topsave)
@@ -161,7 +162,6 @@
 #define PL_tmps_stack		(vTHX->Ttmps_stack)
 #define PL_top_env		(vTHX->Ttop_env)
 #define PL_toptarget		(vTHX->Ttoptarget)
-#define PL_unused_1		(vTHX->Tunused_1)
 #define PL_watchaddr		(vTHX->Twatchaddr)
 #define PL_watchok		(vTHX->Twatchok)
 
@@ -1095,6 +1095,7 @@
 #define PL_maxscream		(aTHX->Tmaxscream)
 #define PL_modcount		(aTHX->Tmodcount)
 #define PL_na			(aTHX->Tna)
+#define PL_nrs			(aTHX->Tnrs)
 #define PL_ofs_sv		(aTHX->Tofs_sv)
 #define PL_op			(aTHX->Top)
 #define PL_opsave		(aTHX->Topsave)
@@ -1188,7 +1189,6 @@
 #define PL_tmps_stack		(aTHX->Ttmps_stack)
 #define PL_top_env		(aTHX->Ttop_env)
 #define PL_toptarget		(aTHX->Ttoptarget)
-#define PL_unused_1		(aTHX->Tunused_1)
 #define PL_watchaddr		(aTHX->Twatchaddr)
 #define PL_watchok		(aTHX->Twatchok)
 
@@ -1234,6 +1234,7 @@
 #define PL_Tmaxscream		PL_maxscream
 #define PL_Tmodcount		PL_modcount
 #define PL_Tna			PL_na
+#define PL_Tnrs			PL_nrs
 #define PL_Tofs_sv		PL_ofs_sv
 #define PL_Top			PL_op
 #define PL_Topsave		PL_opsave
@@ -1327,7 +1328,6 @@
 #define PL_Ttmps_stack		PL_tmps_stack
 #define PL_Ttop_env		PL_top_env
 #define PL_Ttoptarget		PL_toptarget
-#define PL_Tunused_1		PL_unused_1
 #define PL_Twatchaddr		PL_watchaddr
 #define PL_Twatchok		PL_watchok
 

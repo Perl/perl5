@@ -1041,6 +1041,24 @@ Perl_is_uni_xdigit_lc(pTHX_ UV c)
     return is_uni_xdigit(c);	/* XXX no locale support yet */
 }
 
+U32
+Perl_to_uni_upper_lc(pTHX_ U32 c)
+{
+    return to_uni_upper(c);    /* XXX no locale support yet */
+}
+
+U32
+Perl_to_uni_title_lc(pTHX_ U32 c)
+{
+    return to_uni_title(c);    /* XXX no locale support yet */
+}
+
+U32
+Perl_to_uni_lower_lc(pTHX_ U32 c)
+{
+    return to_uni_lower(c);    /* XXX no locale support yet */
+}
+
 bool
 Perl_is_utf8_alnum(pTHX_ U8 *p)
 {
