@@ -72,7 +72,7 @@ Alternatively, you can import the subroutine (or pretend that it's
 imported with the C<use subs> pragma).
 
 To silently interpret it as the Perl operator, use the C<CORE::> prefix
-on the operator (e.g. C<CORE::log($x)>) or by declaring the subroutine
+on the operator (e.g. C<CORE::log($x)>) or declare the subroutine
 to be an object method (see L<perlsub/"Subroutine Attributes"> or
 L<attributes>).
 
@@ -112,8 +112,8 @@ which 'splits' output into two streams, such as
 
 =item Applying %s to %s will act on scalar(%s)
 
-(W misc) The pattern match (//), substitution (s///), and
-transliteration (tr///) operators work on scalar values.  If you apply
+(W misc) The pattern match (C<//>), substitution (C<s///>), and
+transliteration (C<tr///>) operators work on scalar values.  If you apply
 one of them to an array or a hash, it will convert the array or hash to
 a scalar value -- the length of an array, or the population info of a
 hash -- and then work on that scalar value.  This is probably not what
@@ -184,7 +184,7 @@ know which context to supply to the right side.
 
 =item Negative offset to vec in lvalue context
 
-(F) When vec is called in an lvalue context, the second argument must be
+(F) When C<vec> is called in an lvalue context, the second argument must be
 greater than or equal to zero.
 
 =item Attempt to bless into a reference
@@ -270,7 +270,7 @@ S<sizeof(struct shmid_ds *)>.
 
 =item Bad evalled substitution pattern
 
-(F) You've used the /e switch to evaluate the replacement for a
+(F) You've used the C</e> switch to evaluate the replacement for a
 substitution, but perl found a syntax error in the code to evaluate,
 most likely an unexpected right brace '}'.
 
@@ -3930,16 +3930,17 @@ program.
 
 =item Using a hash as a reference is deprecated
 
-(D deprecated) You tried to use a hash as a reference, as in C<%foo->{"bar"}>
-or C<%$ref->{"hello"}.  Versions of perl <= 5.6.1 used to allow this syntax,
-but shouldn't have. It is now deprecated, and will be removed in a future
-version.
+(D deprecated) You tried to use a hash as a reference, as in
+C<< %foo->{"bar"} >> or C<< %$ref->{"hello"} >>.  Versions of perl <= 5.6.1 
+used to allow this syntax, but shouldn't have. It is now deprecated, and will 
+be removed in a future version.
 
 =item Using an array as a reference is deprecated
 
-(D deprecated) You tried to use an array as a reference, as in C<@foo->[23]>
-or C<@$ref->[99]>.  Versions of perl <= 5.6.1 used to allow this syntax, but
-shouldn't have. It is now deprecated, and will be removed in a future version.
+(D deprecated) You tried to use an array as a reference, as in
+C<< @foo->[23] >> or C<< @$ref->[99] >>.  Versions of perl <= 5.6.1 used to 
+allow this syntax, but shouldn't have. It is now deprecated, and will be 
+removed in a future version.
 
 =item Value of %s can be "0"; test with defined()
 
@@ -4104,8 +4105,8 @@ Use a filename instead.
 
 (F) And you probably never will, because you probably don't have the
 sources to your kernel, and your vendor probably doesn't give a rip
-about what you want.  Your best bet is to use the wrapsuid script in the
-eg directory to put a setuid C wrapper around your script.
+about what you want.  Your best bet is to put a setuid C wrapper around 
+your script.
 
 =item You need to quote "%s"
 
