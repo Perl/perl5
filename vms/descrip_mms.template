@@ -1277,7 +1277,11 @@ check : test
 	@ Continue
 
 test : all [.t.lib]vmsfspec.t [.t.lib]vms_dclsym.t [.t.lib]vms_stdio.t
-	- @[.VMS]Test.Com "$(E)" "$(__DEBUG__)"
+	- @[.VMS]Test.Com "$(E)" "$(__DEBUG__)" "TEST."
+	@ $(MINIPERL) -e "print ""Ran tests"";" > [.t]rantests.
+
+test_harness : all [.t.lib]vmsfspec.t [.t.lib]vms_dclsym.t [.t.lib]vms_stdio.t
+	- @[.VMS]Test.Com "$(E)" "$(__DEBUG__)" "HARNESS."
 	@ $(MINIPERL) -e "print ""Ran tests"";" > [.t]rantests.
 
 # install ought not need a source, but it doesn't work if one's not
