@@ -1,4 +1,4 @@
-/* $Header: toke.c,v 3.0.1.3 89/11/17 15:43:15 lwall Locked $
+/* $Header: toke.c,v 3.0.1.4 89/12/21 20:26:56 lwall Locked $
  *
  *    Copyright (c) 1989, Larry Wall
  *
@@ -6,6 +6,11 @@
  *    as specified in the README file that comes with the perl 3.0 kit.
  *
  * $Log:	toke.c,v $
+ * Revision 3.0.1.4  89/12/21  20:26:56  lwall
+ * patch7: -d switch incompatible with -p or -n
+ * patch7: " ''$foo'' " didn't parse right
+ * patch7: grandfathered m'pat' and s'pat'repl' to not be package qualifiers
+ * 
  * Revision 3.0.1.3  89/11/17  15:43:15  lwall
  * patch5: IBM PC/RT compiler can't deal with UNI() and LOP() macros
  * patch5: } misadjusted expection of subsequent term or operator
@@ -196,6 +201,7 @@ yylex()
 		str_cat(linestr,"}");
 		oldoldbufptr = oldbufptr = s = str_get(linestr);
 		bufend = linestr->str_ptr + linestr->str_cur;
+		minus_n = minus_p = 0;
 		goto retry;
 	    }
 	    oldoldbufptr = oldbufptr = s = str_get(linestr);
@@ -429,7 +435,7 @@ yylex()
 	while (isascii(*s) && \
 	  (isalpha(*s) || isdigit(*s) || *s == '_' || *s == '\'')) \
 	    *d++ = *s++; \
-	if (d[-1] == '\'') \
+	while (d[-1] == '\'') \
 	    d--,s--; \
 	*d = '\0'; \
 	d = tokenbuf;
@@ -758,7 +764,13 @@ yylex()
 	    FOP(O_LSTAT);
 	break;
     case 'm': case 'M':
-	SNARFWORD;
+	if (s[1] == '\'') {
+	    d = "m";
+	    s++;
+	}
+	else {
+	    SNARFWORD;
+	}
 	if (strEQ(d,"m")) {
 	    s = scanpat(s-1);
 	    if (yylval.arg)
@@ -849,7 +861,13 @@ yylex()
 	    UNI(O_READLINK);
 	break;
     case 's': case 'S':
-	SNARFWORD;
+	if (s[1] == '\'') {
+	    d = "s";
+	    s++;
+	}
+	else {
+	    SNARFWORD;
+	}
 	if (strEQ(d,"s")) {
 	    s = scansubst(s);
 	    if (yylval.arg)
@@ -1088,7 +1106,13 @@ yylex()
 	    MOP(O_REPEAT);
 	break;
     case 'y': case 'Y':
-	SNARFWORD;
+	if (s[1] == '\'') {
+	    d = "y";
+	    s++;
+	}
+	else {
+	    SNARFWORD;
+	}
 	if (strEQ(d,"y")) {
 	    s = scantrans(s);
 	    TERM(TRANS);
@@ -1151,7 +1175,7 @@ char *dest;
 	while (isalpha(*s) || isdigit(*s) || *s == '_' || *s == '\'')
 	    *d++ = *s++;
     }
-    if (d > dest+1 && d[-1] == '\'')
+    while (d > dest+1 && d[-1] == '\'')
 	d--,s--;
     *d = '\0';
     d = dest;
@@ -1675,7 +1699,11 @@ register char *s;
 	  out:
 	    (void)sprintf(tokenbuf,"%ld",i);
 	    arg[1].arg_ptr.arg_str = str_make(tokenbuf,strlen(tokenbuf));
+#ifdef MICROPORT	/* Microport 2.4 hack */
+	    { double zz = str_2num(arg[1].arg_ptr.arg_str); }
+#else
 	    (void)str_2num(arg[1].arg_ptr.arg_str);
+#endif		/* Microport 2.4 hack */
 	}
 	break;
     case '1': case '2': case '3': case '4': case '5':
@@ -1707,7 +1735,11 @@ register char *s;
 	}
 	*d = '\0';
 	arg[1].arg_ptr.arg_str = str_make(tokenbuf, d - tokenbuf);
+#ifdef MICROPORT	/* Microport 2.4 hack */
+	{ double zz = str_2num(arg[1].arg_ptr.arg_str); }
+#else
 	(void)str_2num(arg[1].arg_ptr.arg_str);
+#endif		/* Microport 2.4 hack */
 	break;
     case '<':
 	if (*++s == '<') {

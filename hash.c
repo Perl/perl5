@@ -1,4 +1,4 @@
-/* $Header: hash.c,v 3.0.1.1 89/11/11 04:34:18 lwall Locked $
+/* $Header: hash.c,v 3.0.1.2 89/12/21 20:03:39 lwall Locked $
  *
  *    Copyright (c) 1989, Larry Wall
  *
@@ -6,6 +6,9 @@
  *    as specified in the README file that comes with the perl 3.0 kit.
  *
  * $Log:	hash.c,v $
+ * Revision 3.0.1.2  89/12/21  20:03:39  lwall
+ * patch7: errno may now be a macro with an lvalue
+ * 
  * Revision 3.0.1.1  89/11/11  04:34:18  lwall
  * patch2: CX/UX needed to set the key each time in associative iterators
  * 
@@ -16,9 +19,6 @@
 
 #include "EXTERN.h"
 #include "perl.h"
-#include <errno.h>
-
-extern int errno;
 
 STR *
 hfetch(tb,key,klen,lval)

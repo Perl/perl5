@@ -1,4 +1,4 @@
-/* $Header: doio.c,v 3.0.1.3 89/11/17 15:13:06 lwall Locked $
+/* $Header: doio.c,v 3.0.1.4 89/12/21 19:55:10 lwall Locked $
  *
  *    Copyright (c) 1989, Larry Wall
  *
@@ -6,6 +6,12 @@
  *    as specified in the README file that comes with the perl 3.0 kit.
  *
  * $Log:	doio.c,v $
+ * Revision 3.0.1.4  89/12/21  19:55:10  lwall
+ * patch7: select now works on big-endian machines
+ * patch7: errno may now be a macro with an lvalue
+ * patch7: ANSI strerror() is now supported
+ * patch7: Configure now detects DG/UX thingies like [sg]etpgrp2 and utime.h
+ * 
  * Revision 3.0.1.3  89/11/17  15:13:06  lwall
  * patch5: some systems have symlink() but not lstat()
  * patch5: some systems have dirent.h but not readdir()
@@ -36,15 +42,15 @@
 #include <netdb.h>
 #endif
 
-#include <errno.h>
 #ifdef I_PWD
 #include <pwd.h>
 #endif
 #ifdef I_GRP
 #include <grp.h>
 #endif
-
-extern int errno;
+#ifdef I_UTIME
+#include <utime.h>
+#endif
 
 bool
 do_open(stab,name)
@@ -1475,20 +1481,52 @@ int *arglast;
     int nfound;
     struct timeval timebuf;
     struct timeval *tbuf = &timebuf;
+    int growsize;
+#if BYTEORDER != 0x1234 && BYTEORDER != 0x12345678
+    int masksize;
+    int offset;
+    char *fd_sets[4];
+    int k;
+
+#if BYTEORDER & 0xf0000
+#define ORDERBYTE (0x88888888 - BYTEORDER)
+#else
+#define ORDERBYTE (0x4444 - BYTEORDER)
+#endif
+
+#endif
 
     for (i = 1; i <= 3; i++) {
-	j = st[sp+i]->str_len;
+	j = st[sp+i]->str_cur;
 	if (maxlen < j)
 	    maxlen = j;
     }
+
+#if BYTEORDER == 0x1234 || BYTEORDER == 0x12345678
+    growsize = maxlen;		/* little endians can use vecs directly */
+#else
+#ifdef NFDBITS
+
+#ifndef NBBY
+#define NBBY 8
+#endif
+
+    masksize = NFDBITS / NBBY;
+#else
+    masksize = sizeof(long);	/* documented int, everyone seems to use long */
+#endif
+    growsize = maxlen + (masksize - (maxlen % masksize));
+    Zero(&fd_sets[0], 4, char*);
+#endif
+
     for (i = 1; i <= 3; i++) {
 	str = st[sp+i];
 	j = str->str_len;
-	if (j < maxlen) {
+	if (j < growsize) {
 	    if (str->str_pok) {
-		str_grow(str,maxlen);
+		str_grow(str,growsize);
 		s = str_get(str) + j;
-		while (++j <= maxlen) {
+		while (++j <= growsize) {
 		    *s++ = '\0';
 		}
 	    }
@@ -1497,6 +1535,16 @@ int *arglast;
 		str->str_ptr = Nullch;
 	    }
 	}
+#if BYTEORDER != 0x1234 && BYTEORDER != 0x12345678
+	s = str->str_ptr;
+	if (s) {
+	    New(403, fd_sets[i], growsize, char);
+	    for (offset = 0; offset < growsize; offset += masksize) {
+		for (j = 0, k=ORDERBYTE; j < masksize; j++, (k >>= 4))
+		    fd_sets[i][j+offset] = s[(k % masksize) + offset];
+	    }
+	}
+#endif
     }
     str = st[sp+4];
     if (str->str_nok || str->str_pok) {
@@ -1510,12 +1558,31 @@ int *arglast;
     else
 	tbuf = Null(struct timeval*);
 
+#if BYTEORDER == 0x1234 || BYTEORDER == 0x12345678
     nfound = select(
 	maxlen * 8,
 	st[sp+1]->str_ptr,
 	st[sp+2]->str_ptr,
 	st[sp+3]->str_ptr,
 	tbuf);
+#else
+    nfound = select(
+	maxlen * 8,
+	fd_sets[1],
+	fd_sets[2],
+	fd_sets[3],
+	tbuf);
+    for (i = 1; i <= 3; i++) {
+	if (fd_sets[i]) {
+	    str = st[sp+i];
+	    s = str->str_ptr;
+	    for (offset = 0; offset < growsize; offset += masksize) {
+		for (j = 0, k=ORDERBYTE; j < masksize; j++, (k >>= 4))
+		    s[(k % masksize) + offset] = fd_sets[i][j+offset];
+	    }
+	}
+    }
+#endif
 
     st[++sp] = str_static(&str_no);
     str_numset(st[sp], (double)nfound);
@@ -1915,13 +1982,21 @@ int *arglast;
 	taintproper("Insecure dependency in utime");
 #endif
 	if (items > 2) {
+#ifdef I_UTIME
+	    struct utimbuf utbuf;
+#else
 	    struct {
-		long    atime,
-			mtime;
+		long    actime;
+		long	modtime;
 	    } utbuf;
+#endif
 
-	    utbuf.atime = (long)str_gnum(st[++sp]);    /* time accessed */
-	    utbuf.mtime = (long)str_gnum(st[++sp]);    /* time modified */
+	    utbuf.actime = (long)str_gnum(st[++sp]);    /* time accessed */
+	    utbuf.modtime = (long)str_gnum(st[++sp]);    /* time modified */
+#ifdef I_UTIME
+	    utbuf.acusec = 0;		/* hopefully I_UTIME implies these */
+	    utbuf.modusec = 0;
+#endif
 	    items -= 2;
 #ifndef lint
 	    tot = items;

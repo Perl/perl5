@@ -1,4 +1,4 @@
-/* $Header: stab.c,v 3.0.1.2 89/11/17 15:35:37 lwall Locked $
+/* $Header: stab.c,v 3.0.1.3 89/12/21 20:18:40 lwall Locked $
  *
  *    Copyright (c) 1989, Larry Wall
  *
@@ -6,6 +6,11 @@
  *    as specified in the README file that comes with the perl 3.0 kit.
  *
  * $Log:	stab.c,v $
+ * Revision 3.0.1.3  89/12/21  20:18:40  lwall
+ * patch7: ANSI strerror() is now supported
+ * patch7: errno may now be a macro with an lvalue
+ * patch7: in stab.c, sighandler() may now return either void or int
+ * 
  * Revision 3.0.1.2  89/11/17  15:35:37  lwall
  * patch5: sighandler() needed to be static
  * 
@@ -26,9 +31,11 @@ static char *sig_name[] = {
     SIG_NAME,0
 };
 
-extern int errno;
-extern int sys_nerr;
-extern char *sys_errlist[];
+#ifdef VOIDSIG
+#define handlertype void
+#else
+#define handlertype int
+#endif
 
 STR *
 stab_str(str)
@@ -143,8 +150,7 @@ STR *str;
 	break;
     case '!':
 	str_numset(stab_val(stab), (double)errno);
-	str_set(stab_val(stab),
-	  errno < 0 || errno >= sys_nerr ? "(unknown)" : sys_errlist[errno]);
+	str_set(stab_val(stab), strerror(errno));
 	stab_val(stab)->str_nok = 1;	/* what a wonderful hack! */
 	break;
     case '<':
@@ -189,7 +195,7 @@ STR *str;
     STAB *stab = mstr->str_u.str_stab;
     char *s;
     int i;
-    static int sighandler();
+    static handlertype sighandler();
 
     switch (mstr->str_rare) {
     case 'E':
@@ -422,7 +428,7 @@ char *sig;
     return 0;
 }
 
-static int
+static handlertype
 sighandler(sig)
 int sig;
 {

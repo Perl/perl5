@@ -1,4 +1,4 @@
-/* $Header: str.c,v 3.0.1.3 89/11/17 15:38:23 lwall Locked $
+/* $Header: str.c,v 3.0.1.4 89/12/21 20:21:35 lwall Locked $
  *
  *    Copyright (c) 1989, Larry Wall
  *
@@ -6,6 +6,10 @@
  *    as specified in the README file that comes with the perl 3.0 kit.
  *
  * $Log:	str.c,v $
+ * Revision 3.0.1.4  89/12/21  20:21:35  lwall
+ * patch7: errno may now be a macro with an lvalue
+ * patch7: made nested or recursive foreach work right
+ * 
  * Revision 3.0.1.3  89/11/17  15:38:23  lwall
  * patch5: some machines typedef unchar too
  * patch5: substitution on leading components occasionally caused <> corruption
@@ -115,8 +119,6 @@ double num;
 #endif
 }
 
-extern int errno;
-
 char *
 str_2ptr(str)
 register STR *str;
@@ -212,8 +214,14 @@ register STR *sstr;
     }
     else if (sstr->str_nok)
 	str_numset(dstr,sstr->str_u.str_nval);
-    else
+    else {
+#ifdef STRUCTCOPY
+	dstr->str_u = sstr->str_u;
+#else
+	dstr->str_u.str_nval = sstr->str_u.str_nval;
+#endif
 	dstr->str_pok = dstr->str_nok = 0;
+    }
 }
 
 str_nset(str,ptr,len)

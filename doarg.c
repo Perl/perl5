@@ -1,4 +1,4 @@
-/* $Header: doarg.c,v 3.0.1.1 89/11/11 04:17:20 lwall Locked $
+/* $Header: doarg.c,v 3.0.1.2 89/12/21 19:52:15 lwall Locked $
  *
  *    Copyright (c) 1989, Larry Wall
  *
@@ -6,6 +6,10 @@
  *    as specified in the README file that comes with the perl 3.0 kit.
  *
  * $Log:	doarg.c,v $
+ * Revision 3.0.1.2  89/12/21  19:52:15  lwall
+ * patch7: a pattern wouldn't match a null string before the first character
+ * patch7: certain patterns didn't match correctly at end of string
+ * 
  * Revision 3.0.1.1  89/11/11  04:17:20  lwall
  * patch2: printf %c, %D, %X and %O didn't work right
  * patch2: printf of unsigned vs signed needed separate casts on some machines
@@ -127,7 +131,7 @@ int sp;
 	clen = dstr->str_cur;
 	if (clen <= spat->spat_slen + spat->spat_regexp->regback) {
 					/* can do inplace substitution */
-	    if (regexec(spat->spat_regexp, s, strend, orig, 1,
+	    if (regexec(spat->spat_regexp, s, strend, orig, 0,
 	      str->str_pok & SP_STUDIED ? str : Nullstr, safebase)) {
 		if (spat->spat_regexp->subbase) /* oops, no we can't */
 		    goto long_way;
@@ -201,8 +205,8 @@ int sp;
 			d += clen;
 		    }
 		    s = spat->spat_regexp->endp[0];
-		} while (regexec(spat->spat_regexp, s, strend, orig, 1, Nullstr,
-		    TRUE));
+		} while (regexec(spat->spat_regexp, s, strend, orig, s == m,
+		    Nullstr, TRUE));	/* (don't match same null twice) */
 		if (s != d) {
 		    i = strend - s;
 		    str->str_cur = d - str->str_ptr + i;
@@ -220,7 +224,7 @@ int sp;
     }
     else
 	c = Nullch;
-    if (regexec(spat->spat_regexp, s, strend, orig, 1,
+    if (regexec(spat->spat_regexp, s, strend, orig, 0,
       str->str_pok & SP_STUDIED ? str : Nullstr, safebase)) {
     long_way:
 	dstr = Str_new(25,str_len(str));
@@ -252,7 +256,7 @@ int sp;
 	    }
 	    if (once)
 		break;
-	} while (regexec(spat->spat_regexp, s, strend, orig, 1, Nullstr,
+	} while (regexec(spat->spat_regexp, s, strend, orig, s == m, Nullstr,
 	    safebase));
 	str_ncat(dstr,s,strend - s);
 	str_replace(str,dstr);

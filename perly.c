@@ -1,4 +1,4 @@
-char rcsid[] = "$Header: perly.c,v 3.0.1.2 89/11/17 15:34:42 lwall Locked $\nPatch level: ###\n";
+char rcsid[] = "$Header: perly.c,v 3.0.1.3 89/12/21 20:15:41 lwall Locked $\nPatch level: ###\n";
 /*
  *    Copyright (c) 1989, Larry Wall
  *
@@ -6,6 +6,11 @@ char rcsid[] = "$Header: perly.c,v 3.0.1.2 89/11/17 15:34:42 lwall Locked $\nPat
  *    as specified in the README file that comes with the perl 3.0 kit.
  *
  * $Log:	perly.c,v $
+ * Revision 3.0.1.3  89/12/21  20:15:41  lwall
+ * patch7: ANSI strerror() is now supported
+ * patch7: errno may now be a macro with an lvalue
+ * patch7: allowed setuid scripts to have a space after #!
+ * 
  * Revision 3.0.1.2  89/11/17  15:34:42  lwall
  * patch5: fixed possible confusion about current effective gid
  * 
@@ -292,9 +297,6 @@ a copy of which can be found with the Perl 3.0 distribution kit.\n",stdout);
     else
 	rsfp = fopen(argv[0],"r");
     if (rsfp == Nullfp) {
-	extern char *sys_errlist[];
-	extern int errno;
-
 #ifdef DOSUID
 #ifndef IAMSUID		/* in case script is not readable before setuid */
 	if (euid && stat(filename,&statbuf) >= 0 &&
@@ -306,7 +308,7 @@ a copy of which can be found with the Perl 3.0 distribution kit.\n",stdout);
 #endif
 #endif
 	fatal("Can't open perl script \"%s\": %s\n",
-	  filename, sys_errlist[errno]);
+	  filename, strerror(errno));
     }
     str_free(str);		/* free -I directories */
 
@@ -398,7 +400,9 @@ a copy of which can be found with the Perl 3.0 distribution kit.\n",stdout);
 	if (fgets(tokenbuf,sizeof tokenbuf, rsfp) == Nullch ||
 	  strnNE(tokenbuf,"#!",2) )	/* required even on Sys V */
 	    fatal("No #! line");
-	for (s = tokenbuf+2; !isspace(*s); s++) ;
+	s = tokenbuf+2;
+	if (*s == ' ') s++;
+	while (!isspace(*s)) s++;
 	if (strnNE(s-4,"perl",4))	/* sanity check */
 	    fatal("Not a perl script");
 	while (*s == ' ' || *s == '\t') s++;
@@ -722,7 +726,7 @@ int *arglast;
     SPAT *oldspat = curspat;
     static char *last_eval = Nullch;
     static CMD *last_root = Nullcmd;
-    int sp = arglast[0];
+    VOLATILE int sp = arglast[0];
 
     tmps_base = tmps_max;
     if (curstash != stash) {

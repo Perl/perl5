@@ -7,9 +7,12 @@
  * blame Henry for some of the lack of readability.
  */
 
-/* $Header: regexec.c,v 3.0.1.1 89/11/11 04:52:04 lwall Locked $
+/* $Header: regexec.c,v 3.0.1.2 89/12/21 20:16:27 lwall Locked $
  *
  * $Log:	regexec.c,v $
+ * Revision 3.0.1.2  89/12/21  20:16:27  lwall
+ * patch7: certain patterns didn't match correctly at end of string
+ * 
  * Revision 3.0.1.1  89/11/11  04:52:04  lwall
  * patch2: /\b$foo/ didn't work
  * 
@@ -341,7 +344,8 @@ int safebase;	/* no need to remember string in subbase */
 		}
 	}
 	else {
-		dontbother = minend;
+		if (minlen)
+		    dontbother = minlen - 1;
 		strend -= dontbother;
 		/* We don't know much -- general case. */
 		do {

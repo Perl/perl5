@@ -1,4 +1,4 @@
-/* $Header: stab.h,v 3.0 89/10/18 15:23:30 lwall Locked $
+/* $Header: stab.h,v 3.0.1.1 89/12/21 20:19:53 lwall Locked $
  *
  *    Copyright (c) 1989, Larry Wall
  *
@@ -6,6 +6,9 @@
  *    as specified in the README file that comes with the perl 3.0 kit.
  *
  * $Log:	stab.h,v $
+ * Revision 3.0.1.1  89/12/21  20:19:53  lwall
+ * patch7: in stab.h, added some CRIPPLED_CC support for Microport
+ * 
  * Revision 3.0  89/10/18  15:23:30  lwall
  * 3.0 baseline
  * 
@@ -24,18 +27,30 @@ struct stabptrs {
     char	stbp_flags;
 };
 
+#if defined(CRIPPLED_CC) && (defined(iAPX286) || defined(M_I286) || defined(I80286))
+#define MICROPORT
+#endif
+
 #define stab_magic(stab)	(((STBP*)(stab->str_ptr))->stbp_magic)
 #define stab_val(stab)		(((STBP*)(stab->str_ptr))->stbp_val)
 #define stab_io(stab)		(((STBP*)(stab->str_ptr))->stbp_io)
 #define stab_form(stab)		(((STBP*)(stab->str_ptr))->stbp_form)
 #define stab_xarray(stab)	(((STBP*)(stab->str_ptr))->stbp_array)
+#ifdef	MICROPORT	/* Microport 2.4 hack */
+ARRAY *stab_array();
+#else
 #define stab_array(stab)	(((STBP*)(stab->str_ptr))->stbp_array ? \
 				 ((STBP*)(stab->str_ptr))->stbp_array : \
 				 ((STBP*)(aadd(stab)->str_ptr))->stbp_array)
+#endif
 #define stab_xhash(stab)	(((STBP*)(stab->str_ptr))->stbp_hash)
+#ifdef	MICROPORT	/* Microport 2.4 hack */
+HASH *stab_hash();
+#else
 #define stab_hash(stab)		(((STBP*)(stab->str_ptr))->stbp_hash ? \
 				 ((STBP*)(stab->str_ptr))->stbp_hash : \
 				 ((STBP*)(hadd(stab)->str_ptr))->stbp_hash)
+#endif			/* Microport 2.4 hack */
 #define stab_sub(stab)		(((STBP*)(stab->str_ptr))->stbp_sub)
 #define stab_lastexpr(stab)	(((STBP*)(stab->str_ptr))->stbp_lastexpr)
 #define stab_line(stab)		(((STBP*)(stab->str_ptr))->stbp_line)

@@ -1,4 +1,4 @@
-/* $Header: eval.c,v 3.0.1.2 89/11/17 15:19:34 lwall Locked $
+/* $Header: eval.c,v 3.0.1.3 89/12/21 20:03:05 lwall Locked $
  *
  *    Copyright (c) 1989, Larry Wall
  *
@@ -6,8 +6,14 @@
  *    as specified in the README file that comes with the perl 3.0 kit.
  *
  * $Log:	eval.c,v $
+ * Revision 3.0.1.3  89/12/21  20:03:05  lwall
+ * patch7: errno may now be a macro with an lvalue
+ * patch7: ANSI strerror() is now supported
+ * patch7: send() didn't allow a TO argument
+ * patch7: ord() now always returns positive even on signed char machines
+ * 
  * Revision 3.0.1.2  89/11/17  15:19:34  lwall
- * patch5: simplified a too-complex expression for some machine or other
+ * patch5: constant numeric subscripts get lost inside ?:
  * 
  * Revision 3.0.1.1  89/11/11  04:31:51  lwall
  * patch2: mkdir and rmdir needed to quote argument when passed to shell
@@ -23,13 +29,10 @@
 #include "perl.h"
 
 #include <signal.h>
-#include <errno.h>
 
 #ifdef I_VFORK
 #   include <vfork.h>
 #endif
-
-extern int errno;
 
 #ifdef VOIDSIG
 static void (*ihand)();
@@ -49,9 +52,6 @@ static char old_record_separator;
 double sin(), cos(), atan2(), pow();
 
 char *getlogin();
-
-extern int sys_nerr;
-extern char *sys_errlist[];
 
 int
 eval(arg,gimme,sp)
@@ -962,7 +962,13 @@ register int sp;
 	errno = 0;
 	if (optype > 4)
 	    warn("Too many args on send");
-	if (optype >= 4) {
+	stio = stab_io(stab);
+	if (!stio || !stio->ifp) {
+	    anum = -1;
+	    if (dowarn)
+		warn("Send on closed socket");
+	}
+	else if (optype >= 4) {
 	    tmps2 = str_get(st[4]);
 	    anum = sendto(fileno(stab_io(stab)->ifp), tmps, st[2]->str_cur,
 	      anum, tmps2, st[4]->str_cur);
@@ -1197,10 +1203,10 @@ register int sp;
 	else
 	    tmps = str_get(st[1]);
 #ifndef I286
-	value = (double) *tmps;
+	value = (double) (*tmps & 255);
 #else
 	anum = (int) *tmps;
-	value = (double) anum;
+	value = (double) (anum & 255);
 #endif
 	goto donumset;
     case O_SLEEP:

@@ -1,4 +1,4 @@
-/* $Header: cons.c,v 3.0.1.2 89/11/17 15:08:53 lwall Locked $
+/* $Header: cons.c,v 3.0.1.3 89/12/21 19:20:25 lwall Locked $
  *
  *    Copyright (c) 1989, Larry Wall
  *
@@ -6,6 +6,9 @@
  *    as specified in the README file that comes with the perl 3.0 kit.
  *
  * $Log:	cons.c,v $
+ * Revision 3.0.1.3  89/12/21  19:20:25  lwall
+ * patch7: made nested or recursive foreach work right
+ * 
  * Revision 3.0.1.2  89/11/17  15:08:53  lwall
  * patch5: nested foreach on same array didn't work
  * 
@@ -1194,20 +1197,26 @@ int willsave;				/* willsave passes down the tree */
 		/* Here we check to see if the temporary array generated for
 		 * a foreach needs to be localized because of recursion.
 		 */
-		if (tmpsave && (cmd->c_flags & CF_OPTIMIZE) == CFT_ARRAY &&
-		  lastcmd &&
-		  lastcmd->c_type == C_EXPR &&
-		  lastcmd->ucmd.acmd.ac_expr) {
-		    ARG *arg = lastcmd->ucmd.acmd.ac_expr;
+		if (tmpsave && (cmd->c_flags & CF_OPTIMIZE) == CFT_ARRAY) {
+		    if (lastcmd &&
+		      lastcmd->c_type == C_EXPR &&
+		      lastcmd->ucmd.acmd.ac_expr) {
+			ARG *arg = lastcmd->ucmd.acmd.ac_expr;
 
-		    if (arg->arg_type == O_ASSIGN &&
-			arg[1].arg_type == A_LEXPR &&
-			arg[1].arg_ptr.arg_arg->arg_type == O_LARRAY &&
-			strnEQ("_GEN_",
-			  stab_name(arg[1].arg_ptr.arg_arg[1].arg_ptr.arg_stab),
-			  5)) {		/* array generated for foreach */
-			(void)localize(arg[1].arg_ptr.arg_arg);
+			if (arg->arg_type == O_ASSIGN &&
+			    arg[1].arg_type == A_LEXPR &&
+			    arg[1].arg_ptr.arg_arg->arg_type == O_LARRAY &&
+			    strnEQ("_GEN_",
+			      stab_name(
+				arg[1].arg_ptr.arg_arg[1].arg_ptr.arg_stab),
+			      5)) {	/* array generated for foreach */
+			    (void)localize(arg[1].arg_ptr.arg_arg);
+			}
 		    }
+
+		    /* in any event, save the iterator */
+
+		    (void)apush(tosave,cmd->c_short);
 		}
 		shouldsave |= tmpsave;
 	    }

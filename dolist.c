@@ -1,4 +1,4 @@
-/* $Header: dolist.c,v 3.0.1.3 89/11/17 15:14:45 lwall Locked $
+/* $Header: dolist.c,v 3.0.1.4 89/12/21 19:58:46 lwall Locked $
  *
  *    Copyright (c) 1989, Larry Wall
  *
@@ -6,6 +6,10 @@
  *    as specified in the README file that comes with the perl 3.0 kit.
  *
  * $Log:	dolist.c,v $
+ * Revision 3.0.1.4  89/12/21  19:58:46  lwall
+ * patch7: grep(1,@array) didn't work
+ * patch7: /$pat/; //; wrongly freed runtime pattern twice
+ * 
  * Revision 3.0.1.3  89/11/17  15:14:45  lwall
  * patch5: grep() occasionally loses arguments or dumps core
  * 
@@ -81,7 +85,8 @@ int *arglast;
 	if (!*spat->spat_regexp->precomp && lastspat)
 	    spat = lastspat;
 	if (spat->spat_flags & SPAT_KEEP) {
-	    arg_free(spat->spat_runtime);	/* it won't change, so */
+	    if (spat->spat_runtime)
+		arg_free(spat->spat_runtime);	/* it won't change, so */
 	    spat->spat_runtime = Nullarg;	/* no point compiling again */
 	}
 	if (!spat->spat_regexp->nparens)
@@ -729,8 +734,11 @@ int *arglast;
     int oldsave = savestack->ary_fill;
 
     savesptr(&stab_val(defstab));
-    if ((arg[1].arg_type & A_MASK) != A_EXPR)
+    if ((arg[1].arg_type & A_MASK) != A_EXPR) {
+	arg[1].arg_type &= A_MASK;
 	dehoist(arg,1);
+	arg[1].arg_type |= A_DONT;
+    }
     arg = arg[1].arg_ptr.arg_arg;
     while (i-- > 0) {
 	stab_val(defstab) = st[src];

@@ -1,4 +1,4 @@
-/* $Header: util.c,v 3.0.1.2 89/11/17 15:46:35 lwall Locked $
+/* $Header: util.c,v 3.0.1.3 89/12/21 20:27:41 lwall Locked $
  *
  *    Copyright (c) 1989, Larry Wall
  *
@@ -6,6 +6,9 @@
  *    as specified in the README file that comes with the perl 3.0 kit.
  *
  * $Log:	util.c,v $
+ * Revision 3.0.1.3  89/12/21  20:27:41  lwall
+ * patch7: errno may now be a macro with an lvalue
+ * 
  * Revision 3.0.1.2  89/11/17  15:46:35  lwall
  * patch5: BZERO separate from BCOPY now
  * patch5: byteorder now is a hex value
@@ -20,7 +23,6 @@
 
 #include "EXTERN.h"
 #include "perl.h"
-#include "errno.h"
 #include <signal.h>
 
 #ifdef I_VFORK
@@ -694,8 +696,6 @@ int newlen;
 	*curlen = newlen;
     }
 }
-
-extern int errno;
 
 #ifndef VARARGS
 /*VARARGS1*/

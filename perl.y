@@ -1,4 +1,4 @@
-/* $Header: perl.y,v 3.0.1.2 89/11/11 04:49:04 lwall Locked $
+/* $Header: perl.y,v 3.0.1.3 89/12/21 20:13:41 lwall Locked $
  *
  *    Copyright (c) 1989, Larry Wall
  *
@@ -6,6 +6,9 @@
  *    as specified in the README file that comes with the perl 3.0 kit.
  *
  * $Log:	perl.y,v $
+ * Revision 3.0.1.3  89/12/21  20:13:41  lwall
+ * patch7: send() didn't allow a TO argument
+ * 
  * Revision 3.0.1.2  89/11/11  04:49:04  lwall
  * patch2: moved yydebug to where its type doesn't matter
  * patch2: !$foo++ was unreasonably illegal
@@ -596,7 +599,7 @@ term	:	'-' term %prec UMINUS
 	|	FILOP2 '(' handle cexpr ')'
 			{ $$ = make_op($1, 2, $3, $4, Nullarg); }
 	|	FILOP3 '(' handle csexpr cexpr ')'
-			{ $$ = make_op($1, 3, $3, $4, $5); }
+			{ $$ = make_op($1, 3, $3, $4, make_list($5)); }
 	|	FILOP22 '(' handle ',' handle ')'
 			{ $$ = make_op($1, 2, $3, $5, Nullarg); }
 	|	FILOP4 '(' handle csexpr csexpr cexpr ')'

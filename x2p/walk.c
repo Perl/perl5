@@ -1,4 +1,4 @@
-/* $Header: walk.c,v 3.0.1.2 89/11/17 15:53:00 lwall Locked $
+/* $Header: walk.c,v 3.0.1.3 89/12/21 20:32:35 lwall Locked $
  *
  *    Copyright (c) 1989, Larry Wall
  *
@@ -6,6 +6,9 @@
  *    as specified in the README file that comes with the perl 3.0 kit.
  *
  * $Log:	walk.c,v $
+ * Revision 3.0.1.3  89/12/21  20:32:35  lwall
+ * patch7: in a2p, user-defined functions didn't work on some machines
+ * 
  * Revision 3.0.1.2  89/11/17  15:53:00  lwall
  * patch5: on Pyramids, index(s, '}' + 128) doesn't find meta-}
  * 
@@ -1844,7 +1847,7 @@ int *numericptr;
     case OUSERFUN:
 	tmp2str = str_new(0);
 	str_scat(tmp2str,tmpstr=walk(1,level,ops[node+1].ival,&numarg,P_MIN));
-	fixrargs(tmpstr->str_ptr,ops[node+2],0);
+	fixrargs(tmpstr->str_ptr,ops[node+2].ival,0);
 	str_free(tmpstr);
 	str_cat(tmp2str,"(");
 	tmpstr = hfetch(symtab,tmp2str->str_ptr);

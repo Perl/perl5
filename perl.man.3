@@ -1,7 +1,11 @@
 ''' Beginning of part 3
-''' $Header: perl.man.3,v 3.0.1.2 89/11/17 15:31:05 lwall Locked $
+''' $Header: perl.man.3,v 3.0.1.3 89/12/21 20:10:12 lwall Locked $
 '''
 ''' $Log:	perl.man.3,v $
+''' Revision 3.0.1.3  89/12/21  20:10:12  lwall
+''' patch7: documented that s`pat`repl` does command substitution on replacement
+''' patch7: documented that $timeleft from select() is likely not implemented
+''' 
 ''' Revision 3.0.1.2  89/11/17  15:31:05  lwall
 ''' patch5: fixed some manual typos and indent problems
 ''' patch5: added warning about print making an array context
@@ -467,7 +471,8 @@ the replacement string is to be evaluated as an expression rather than just
 as a double-quoted string.
 Any delimiter may replace the slashes; if single quotes are used, no
 interpretation is done on the replacement string (the e modifier overrides
-this, however).
+this, however); if backquotes are used, the replacement string is a command
+to execute whose output will be used as the actual replacement text.
 If no string is specified via the =~ or !~ operator,
 the $_ string is searched and modified.
 (The string specified with =~ must be a scalar variable, an array element,
@@ -582,6 +587,8 @@ or to block until something becomes ready:
 .fi
 Any of the bitmasks can also be undef.
 The timeout, if specified, is in seconds, which may be fractional.
+NOTE: not all implementations are capable of returning the $timeleft.
+If not, they always return $timeleft equal to the supplied $timeout.
 .Ip "setpgrp(PID,PGRP)" 8 4
 Sets the current process group for the specified PID, 0 for the current
 process.
@@ -707,15 +714,15 @@ For example:
 .fi
 produces the output \*(L'h:i:t:h:e:r:e\*(R'.
 .Sp
-The NUM parameter can be used to partially split a line
+The LIMIT parameter can be used to partially split a line
 .nf
 
 	($login, $passwd, $remainder) = split(\|/\|:\|/\|, $_, 3);
 
 .fi
-(When assigning to a list, if NUM is omitted, perl supplies a NUM one
+(When assigning to a list, if LIMIT is omitted, perl supplies a LIMIT one
 larger than the number of variables in the list, to avoid unnecessary work.
-For the list above NUM would have been 4 by default.
+For the list above LIMIT would have been 4 by default.
 In time critical applications it behooves you not to split into
 more fields than you really need.)
 .Sp

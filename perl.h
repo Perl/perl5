@@ -1,4 +1,4 @@
-/* $Header: perl.h,v 3.0.1.3 89/11/17 15:28:57 lwall Locked $
+/* $Header: perl.h,v 3.0.1.4 89/12/21 20:07:35 lwall Locked $
  *
  *    Copyright (c) 1989, Larry Wall
  *
@@ -6,6 +6,15 @@
  *    as specified in the README file that comes with the perl 3.0 kit.
  *
  * $Log:	perl.h,v $
+ * Revision 3.0.1.4  89/12/21  20:07:35  lwall
+ * patch7: arranged for certain registers to be restored after longjmp()
+ * patch7: Configure now compiles a test program to figure out time.h fiasco
+ * patch7: Configure now detects DG/UX thingies like [sg]etpgrp2 and utime.h
+ * patch7: memcpy() and memset() return void in __STDC__
+ * patch7: errno may now be a macro with an lvalue
+ * patch7: ANSI strerror() is now supported
+ * patch7: Xenix support for sys/ndir.h, cross compilation
+ * 
  * Revision 3.0.1.3  89/11/17  15:28:57  lwall
  * patch5: byteorder now is a hex value
  * patch5: Configure now looks for <time.h> including <sys/time.h>
@@ -26,6 +35,14 @@
  * 
  */
 
+#ifdef __STDC__
+#define VOLATILE volatile
+#define VREG
+#else
+#define VOLATILE
+#define VREG register
+#endif
+
 #define VOIDUSED 1
 #include "config.h"
 
@@ -39,12 +56,32 @@
 #   define vfork fork
 #endif
 
+#ifdef GETPGRP2
+#   ifndef GETPGRP
+#	define GETPGRP
+#   endif
+#   define getpgrp getpgrp2
+#endif
+
+#ifdef SETPGRP2
+#   ifndef SETPGRP
+#	define SETPGRP
+#   endif
+#   define setpgrp setpgrp2
+#endif
+
 #if defined(MEMCMP) && defined(mips) && BYTEORDER == 0x1234
 #undef MEMCMP
 #endif
 
 #ifdef MEMCPY
+#ifndef memcpy
+#ifdef __STDC__
+extern void *memcpy(), *memset();
+#else
 extern char *memcpy(), *memset();
+#endif
+#endif
 #define bcopy(s1,s2,l) memcpy(s2,s1,l)
 #define bzero(s,l) memset(s,0,l)
 #endif
@@ -69,19 +106,38 @@ extern char *memcpy(), *memset();
 
 #include <sys/stat.h>
 
-#if defined(TMINSYS) || defined(I_SYSTIME)
-#include <sys/time.h>
-#ifdef I_TIMETOO
-#include <time.h>
+#ifdef I_TIME
+#   include <time.h>
 #endif
-#else
-#include <time.h>
-#ifdef I_SYSTIMETOO
-#include <time.h>
-#endif
+
+#ifdef I_SYSTIME
+#   ifdef SYSTIMEKERNEL
+#	define KERNEL
+#   endif
+#   include <sys/time.h>
+#   ifdef SYSTIMEKERNEL
+#	undef KERNEL
+#   endif
 #endif
 
 #include <sys/times.h>
+
+#if defined(STRERROR) && (!defined(MKDIR) || !defined(RMDIR))
+#undef STRERROR
+#endif
+
+#include <errno.h>
+#ifndef errno
+extern int errno;     /* ANSI allows errno to be an lvalue expr */
+#endif
+
+#ifdef STRERROR
+char *strerror();
+#else
+extern int sys_nerr;
+extern char *sys_errlist[];
+#define strerror(e) ((e) < 0 || (e) >= sys_nerr ? "(unknown)" : sys_errlist[e])
+#endif
 
 #ifdef I_SYSIOCTL
 #ifndef _IOCTL_
@@ -135,18 +191,23 @@ EXT int dbmlen;
 #define ntohi ntohl
 #endif
 
-#ifdef I_DIRENT
-#include <dirent.h>
-#define DIRENT dirent
+#if defined(I_DIRENT) && !defined(xenix)
+#   include <dirent.h>
+#   define DIRENT dirent
 #else
-#ifdef I_SYSDIR
-#ifdef hp9000s500
-#include <ndir.h>	/* may be wrong in the future */
-#else
-#include <sys/dir.h>
-#endif
-#define DIRENT direct
-#endif
+#   ifdef I_SYSDIR
+#	ifdef hp9000s500
+#	    include <ndir.h>	/* may be wrong in the future */
+#	else
+#	    include <sys/dir.h>
+#	endif
+#	define DIRENT direct
+#   else
+#	ifdef I_SYSNDIR
+#	    include <sys/ndir.h>
+#	    define DIRENT direct
+#	endif
+#   endif
 #endif
 
 typedef struct arg ARG;
