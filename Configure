@@ -20,7 +20,7 @@
 
 # $Id: Head.U,v 3.0.1.9 1997/02/28 15:02:09 ram Exp $
 #
-# Generated on Fri Oct  6 15:40:31 EET DST 2000 [metaconfig 3.0 PL70]
+# Generated on Fri Oct  6 21:10:34 EET DST 2000 [metaconfig 3.0 PL70]
 # (with additional metaconfig patches by perlbug@perl.org)
 
 cat >/tmp/c1$$ <<EOF
@@ -2099,7 +2099,7 @@ int main(int argc, char *argv[]) {
   return 0;
 }
 EOM
-    if $cc $cflags -o try try.c; then
+    if $cc -o try $ccflags try.c; then
        :
     else
         echo "Uh-oh, the C compiler '$cc' doesn't seem to be working." >&4
@@ -3013,7 +3013,7 @@ int main() {
 	exit(0);
 }
 EOM
-if $cc $ldflags -o gccvers gccvers.c; then
+if $cc -o gccvers $ldflags gccvers.c; then
 	gccversion=`./gccvers`
 	case "$gccversion" in
 	'') echo "You are not using GNU cc." ;;
@@ -4021,7 +4021,7 @@ $cat > try.c <<'EOF'
 #include <stdio.h>
 int main() { printf("Ok\n"); exit(0); }
 EOF
-set X $cc $optimize $ccflags -o try $ldflags try.c $libs
+set X $cc -o try $optimize $ccflags $ldflags try.c $libs
 shift
 $cat >try.msg <<'EOM'
 I've tried to compile and run the following simple program:
@@ -4040,7 +4040,7 @@ and I got the following output:
 
 EOM
 dflt=y
-if sh -c "$cc $optimize $ccflags -o try $ldflags try.c $libs" >>try.msg 2>&1; then
+if sh -c "$cc -o try $optimize $ccflags $ldflags try.c $libs" >>try.msg 2>&1; then
 	if sh -c './try' >>try.msg 2>&1; then
 		xxx=`./try`
 		case "$xxx" in
@@ -4152,12 +4152,12 @@ esac'
 compile='
 mc_file=$1;
 shift;
-$cc $optimize $ccflags $ldflags -o ${mc_file} $* ${mc_file}.c $libs > /dev/null 2>&1;'
+$cc -o ${mc_file} $optimize $ccflags $ldflags$* ${mc_file}.c $libs > /dev/null 2>&1;'
 : define a shorthand compile call for compilations that should be ok.
 compile_ok='
 mc_file=$1;
 shift;
-$cc $optimize $ccflags $ldflags -o ${mc_file} $* ${mc_file}.c $libs;'
+$cc -o ${mc_file} $optimize $ccflags $ldflags $* ${mc_file}.c $libs;'
 
 : check for lengths of integral types
 echo " "
@@ -4979,7 +4979,7 @@ yes)
 		fi;;
 	*)
 		echo "int main() { extern short $1$tdc; printf(\"%hd\", $1$tc); }" > t.c;
-		if $cc $optimize $ccflags $ldflags -o t t.c $libs >/dev/null 2>&1;
+		if $cc -o t $optimize $ccflags $ldflags t.c $libs >/dev/null 2>&1;
 		then tval=true;
 		else tval=false;
 		fi;
@@ -7775,15 +7775,15 @@ int main() {
 EOCP
 	: check sys/file.h first, no particular reason here
 	if $test `./findhdr sys/file.h` && \
-		$cc $cppflags -DI_SYS_FILE -o access access.c >/dev/null 2>&1 ; then
+		$cc -o access $cppflags -DI_SYS_FILE access.c >/dev/null 2>&1 ; then
 		h_sysfile=true;
 		echo "<sys/file.h> defines the *_OK access constants." >&4
 	elif $test `./findhdr fcntl.h` && \
-		$cc $cppflags -DI_FCNTL -o access access.c >/dev/null 2>&1 ; then
+		$cc -o access $cppflags -DI_FCNTL access.c >/dev/null 2>&1 ; then
 		h_fcntl=true;
 		echo "<fcntl.h> defines the *_OK access constants." >&4
 	elif $test `./findhdr unistd.h` && \
-		$cc $cppflags -DI_UNISTD -o access access.c >/dev/null 2>&1 ; then
+		$cc -o access $cppflags -DI_UNISTD access.c >/dev/null 2>&1 ; then
 		echo "<unistd.h> defines the *_OK access constants." >&4
 	else
 		echo "I can't find the four *_OK access constants--I'll use mine." >&4
@@ -7873,10 +7873,10 @@ int main()
 	exit(1);
 }
 EOP
-	if $cc -DTRY_BSD_PGRP $ccflags $ldflags -o set set.c $libs >/dev/null 2>&1 && ./set; then
+	if $cc -o set -DTRY_BSD_PGRP $ccflags $ldflags set.c $libs >/dev/null 2>&1 && ./set; then
 		echo "You have to use getpgrp(pid) instead of getpgrp()." >&4
 		val="$define"
-	elif $cc $ccflags $ldflags -o set set.c $libs >/dev/null 2>&1 && ./set; then
+	elif $cc -o set $ccflags $ldflags set.c $libs >/dev/null 2>&1 && ./set; then
 		echo "You have to use getpgrp() instead of getpgrp(pid)." >&4
 		val="$undef"
 	else
@@ -7935,10 +7935,10 @@ int main()
 	exit(1);
 }
 EOP
-	if $cc -DTRY_BSD_PGRP $ccflags $ldflags -o set set.c $libs >/dev/null 2>&1 && ./set; then
+	if $cc -o set -DTRY_BSD_PGRP $ccflags $ldflags set.c $libs >/dev/null 2>&1 && ./set; then
 		echo 'You have to use setpgrp(pid,pgrp) instead of setpgrp().' >&4
 		val="$define"
-	elif $cc $ccflags $ldflags -o set set.c $libs >/dev/null 2>&1 && ./set; then
+	elif $cc -o set $ccflags $ldflags set.c $libs >/dev/null 2>&1 && ./set; then
 		echo 'You have to use setpgrp() instead of setpgrp(pid,pgrp).' >&4
 		val="$undef"
 	else
@@ -8490,8 +8490,8 @@ EOM
 	: Call the object file tmp-dyna.o in case dlext=o.
 	if $cc $ccflags $cccdlflags -c dyna.c > /dev/null 2>&1 && 
 		mv dyna${_o} tmp-dyna${_o} > /dev/null 2>&1 && 
-		$ld $lddlflags -o dyna.$dlext tmp-dyna${_o} > /dev/null 2>&1 && 
-		$cc $ccflags -o fred $ldflags $cccdlflags $ccdlflags fred.c $libs > /dev/null 2>&1; then
+		$ld -o dyna.$dlext $lddlflags tmp-dyna${_o} > /dev/null 2>&1 && 
+		$cc -o fred $ccflags $ldflags $cccdlflags $ccdlflags fred.c $libs > /dev/null 2>&1; then
 		xxx=`./fred`
 		case $xxx in
 		1)	echo "Test program failed using dlopen." >&4
@@ -13534,13 +13534,13 @@ $cc $ccflags -c bar1.c >/dev/null 2>&1
 $cc $ccflags -c bar2.c >/dev/null 2>&1
 $cc $ccflags -c foo.c >/dev/null 2>&1
 $ar rc bar$_a bar2$_o bar1$_o >/dev/null 2>&1
-if $cc $ccflags $ldflags -o foobar foo$_o bar$_a $libs > /dev/null 2>&1 &&
+if $cc -o foobar $ccflags $ldflags foo$_o bar$_a $libs > /dev/null 2>&1 &&
 	./foobar >/dev/null 2>&1; then
 	echo "$ar appears to generate random libraries itself."
 	orderlib=false
 	ranlib=":"
 elif $ar ts bar$_a >/dev/null 2>&1 &&
-	$cc $ccflags $ldflags -o foobar foo$_o bar$_a $libs > /dev/null 2>&1 &&
+	$cc -o foobar $ccflags $ldflags foo$_o bar$_a $libs > /dev/null 2>&1 &&
 	./foobar >/dev/null 2>&1; then
 		echo "a table of contents needs to be added with '$ar ts'."
 		orderlib=false
@@ -14556,7 +14556,7 @@ case "$osname-$gccversion" in
 irix-) ccflags="\$ccflags -woff 1178" ;;
 os2-*) ccflags="\$ccflags -Zlinker /PM:VIO" ;;
 esac
-$cc $optimize \$ccflags $ldflags -o try try.c $libs && ./try$exe_ext
+$cc -o try $optimize \$ccflags $ldflags try.c $libs && ./try$exe_ext
 EOSH
 chmod +x Cppsym.try
 $eunicefix Cppsym.try
