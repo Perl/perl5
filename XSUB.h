@@ -49,7 +49,7 @@
 		Sv = perl_get_sv(vn = form("%s::VERSION", module), FALSE); \
 	}								\
 	if (Sv && (!SvOK(Sv) || strNE(XS_VERSION, SvPV(Sv, na))))	\
-	    croak("%s object version %s does not match $%s %S",		\
+	    croak("%s object version %s does not match $%s %_",		\
 		  module, XS_VERSION, vn, Sv);				\
     } STMT_END
 #else
