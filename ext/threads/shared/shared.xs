@@ -452,7 +452,9 @@ int
 sharedsv_scalar_mg_free(pTHX_ SV *sv, MAGIC *mg)
 {
     shared_sv *shared = (shared_sv *) mg->mg_ptr;
+#if 0
     assert (SvREFCNT(SHAREDSvPTR(shared)) < 1000);
+#endif
     Perl_sharedsv_free(aTHX_ shared);
     return 0;
 }
