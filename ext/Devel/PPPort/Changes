@@ -1,3 +1,7 @@
+3.01 - 2004-08-23
+
+    * patchlevel.h tweak
+
 3.00_03 - 2004-08-20
 
     * make sure the @INC path is kept up-to-date when changing

@@ -866,7 +866,7 @@ require DynaLoader;
 use strict;
 use vars qw($VERSION @ISA $data);
 
-$VERSION = do { my @r = '$Snapshot: /Devel-PPPort/3.00_03 $' =~ /(\d+\.\d+(?:_\d+)?)/; @r ? $r[0] : '9.99' };
+$VERSION = do { my @r = '$Snapshot: /Devel-PPPort/3.01 $' =~ /(\d+\.\d+(?:_\d+)?)/; @r ? $r[0] : '9.99' };
 
 @ISA = qw(DynaLoader);
 
@@ -3408,7 +3408,7 @@ __DATA__
 #define DPPP_(name) DPPP_CAT2(DPPP_NAMESPACE, name)
 
 #ifndef PERL_REVISION
-#  ifndef __PATCHLEVEL_H_INCLUDED__
+#  if !defined(__PATCHLEVEL_H_INCLUDED__) && !(defined(PATCHLEVEL) && defined(SUBVERSION))
 #    define PERL_PATCHLEVEL_H_IMPLICIT
 #    include <patchlevel.h>
 #  endif

@@ -57,8 +57,8 @@ if ($perl =~ m!^\./!) {
 }
 
 END {
-  chdir("..") if !-d $tmp && -d "../$tmp";
-  rmtree($tmp);
+  chdir('..') if !-d $tmp && -d "../$tmp";
+  rmtree($tmp) if -d $tmp;
 }
 
 ok(&Devel::PPPort::WriteFile("ppport.h"));
