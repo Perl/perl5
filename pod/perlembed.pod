@@ -12,7 +12,7 @@ Do you want to:
 
 =item B<Use C from Perl?>
 
-Read L<perlcall> and L<perlxs>.
+Read L<perlxs>, L<perlxstut> and L<h2xs>.
 
 =item B<Use a Unix program from Perl?>
 

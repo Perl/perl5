@@ -208,6 +208,7 @@ register PerlInterpreter *sv_interp;
 	op_free(main_root);
 	main_root = Nullop;
     }
+    curcop = &compiling;
     main_start = Nullop;
     SvREFCNT_dec(main_cv);
     main_cv = Nullcv;
@@ -1590,6 +1591,7 @@ Internet, point your browser at http://www.perl.com/, the Perl Home Page.\n\n");
 /* compliments of Tom Christiansen */
 
 /* unexec() can be found in the Gnu emacs distribution */
+/* Known to work with -DUNEXEC and using unexelf.c from GNU emacs-20.2 */
 
 void
 my_unexec()
@@ -1597,7 +1599,7 @@ my_unexec()
 #ifdef UNEXEC
     SV*    prog;
     SV*    file;
-    int    status;
+    int    status = 1;
     extern int etext;
 
     prog = newSVpv(BIN_EXP, 0);
@@ -1606,6 +1608,7 @@ my_unexec()
     sv_catpv(file, ".perldump");
 
     unexec(SvPVX(file), SvPVX(prog), &etext, sbrk(0), 0);
+    /* unexec prints msg to stderr in case of failure */
     exit(status);
 #else
 #  ifdef VMS
