@@ -1822,110 +1822,124 @@ created even in rvalue contexts.
 C<flags> is not used at present but available for future extension to
 allow selecting particular classes of magical variable.
 
+Currently assumes that C<name> is NUL terminated (as well as len being valid).
+This assumption is met by all callers within the perl core, which all pass
+pointers returned by SvPV.
+
 =cut
 */
 bool
 Perl_is_gv_magical(pTHX_ char *name, STRLEN len, U32 flags)
 {
-    if (!len)
-	return FALSE;
-
-    switch (*name) {
-    case 'I':
-	if (len == 3 && strEQ(name, "ISA"))
-	    goto yes;
-	break;
-    case 'O':
-	if (len == 8 && strEQ(name, "OVERLOAD"))
-	    goto yes;
-	break;
-    case 'S':
-	if (len == 3 && strEQ(name, "SIG"))
-	    goto yes;
-	break;
-    case '\017':   /* $^O & $^OPEN */
-	if (len == 1
-	    || (len == 4 && strEQ(name, "\017PEN")))
+    if (len > 1) {
+	switch (*name) {
+	case 'I':
+	    if (len == 3 && strEQ(name, "ISA"))
+		goto yes;
+	    break;
+	case 'O':
+	    if (len == 8 && strEQ(name, "OVERLOAD"))
+		goto yes;
+	    break;
+	case 'S':
+	    if (len == 3 && strEQ(name, "SIG"))
+		goto yes;
+	    break;
+	    /* Using ${^...} variables is likely to be sufficiently rare that
+	       it seems sensible to avoid the space hit of also checking the
+	       length.  */
+	case '\017':   /* ${^OPEN} */
+	    if (strEQ(name, "\017PEN"))
+		goto yes;
+	    break;
+	case '\024':   /* ${^TAINT} */
+	    if (strEQ(name, "\024AINT"))
+		goto yes;
+	    break;
+	case '\025':	/* ${^UNICODE} */
+	    if (strEQ(name, "\025NICODE"))
+		goto yes;
+	    break;
+	case '\027':   /* ${^WARNING_BITS} */
+	    if (strEQ(name, "\027ARNING_BITS"))
+		goto yes;
+	    break;
+	case '1':
+	case '2':
+	case '3':
+	case '4':
+	case '5':
+	case '6':
+	case '7':
+	case '8':
+	case '9':
 	{
-	    goto yes;
-	}
-	break;
-    case '\025':
-        if (len > 1 && strEQ(name, "\025NICODE"))
-	    goto yes;
-    case '\027':   /* $^W & $^WARNING_BITS */
-	if (len == 1
-	    || (len == 12 && strEQ(name, "\027ARNING_BITS"))
-	    )
-	{
-	    goto yes;
-	}
-	break;
-
-    case '&':
-    case '`':
-    case '\'':
-    case ':':
-    case '?':
-    case '!':
-    case '-':
-    case '#':
-    case '[':
-    case '^':
-    case '~':
-    case '=':
-    case '%':
-    case '.':
-    case '(':
-    case ')':
-    case '<':
-    case '>':
-    case ',':
-    case '\\':
-    case '/':
-    case '|':
-    case '+':
-    case ';':
-    case ']':
-    case '\001':   /* $^A */
-    case '\003':   /* $^C */
-    case '\004':   /* $^D */
-    case '\005':   /* $^E */
-    case '\006':   /* $^F */
-    case '\010':   /* $^H */
-    case '\011':   /* $^I, NOT \t in EBCDIC */
-    case '\014':   /* $^L */
-    case '\016':   /* $^N */
-    case '\020':   /* $^P */
-    case '\023':   /* $^S */
-    case '\026':   /* $^V */
-	if (len == 1)
-	    goto yes;
-	break;
-    case '\024':   /* $^T, ${^TAINT} */
-        if (len == 1 || strEQ(name, "\024AINT"))
-            goto yes;
-        break;
-    case '1':
-    case '2':
-    case '3':
-    case '4':
-    case '5':
-    case '6':
-    case '7':
-    case '8':
-    case '9':
-	if (len > 1) {
 	    char *end = name + len;
 	    while (--end > name) {
 		if (!isDIGIT(*end))
 		    return FALSE;
 	    }
+	    goto yes;
 	}
-    yes:
-	return TRUE;
-    default:
-	break;
+	}
+    } else {
+	/* Because we're already assuming that name is NUL terminated
+	   below, we can treat an empty name as "\0"  */
+	switch (*name) {
+	case '&':
+	case '`':
+	case '\'':
+	case ':':
+	case '?':
+	case '!':
+	case '-':
+	case '#':
+	case '[':
+	case '^':
+	case '~':
+	case '=':
+	case '%':
+	case '.':
+	case '(':
+	case ')':
+	case '<':
+	case '>':
+	case ',':
+	case '\\':
+	case '/':
+	case '|':
+	case '+':
+	case ';':
+	case ']':
+	case '\001':   /* $^A */
+	case '\003':   /* $^C */
+	case '\004':   /* $^D */
+	case '\005':   /* $^E */
+	case '\006':   /* $^F */
+	case '\010':   /* $^H */
+	case '\011':   /* $^I, NOT \t in EBCDIC */
+	case '\014':   /* $^L */
+	case '\016':   /* $^N */
+	case '\017':   /* $^O */
+	case '\020':   /* $^P */
+	case '\023':   /* $^S */
+	case '\024':   /* $^T */
+	case '\026':   /* $^V */
+	case '\027':   /* $^W */
+	case '1':
+	case '2':
+	case '3':
+	case '4':
+	case '5':
+	case '6':
+	case '7':
+	case '8':
+	case '9':
+	yes:
+	    return TRUE;
+	default:
+	    break;
+	}
     }
     return FALSE;
 }
