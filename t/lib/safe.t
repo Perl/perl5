@@ -5,7 +5,7 @@ BEGIN {
     @INC = '../lib';
     require Config; import Config;
     if ($Config{'extensions'} !~ /\bSafe\b/) {
-        print STDERR "1..0\n";
+        print "1..0\n";
         exit 0;
     }
 }
