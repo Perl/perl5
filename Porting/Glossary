@@ -387,6 +387,11 @@ d_dup2 (d_dup2.U):
 	This variable conditionally defines HAS_DUP2 if dup2() is
 	available to duplicate file descriptors.
 
+d_endgrent (d_endgrent.U):
+	This variable conditionally defines the HAS_ENDGRENT symbol, which
+	indicates to the C program that the endgrent() routine is available
+	for sequential access of the group database.
+
 d_endhent (d_endhent.U):
 	This variable conditionally defines HAS_ENDHOSTENT if endhostent() is
 	available to close whatever was being used for host queries.
@@ -398,6 +403,11 @@ d_endnent (d_endnent.U):
 d_endpent (d_endpent.U):
 	This variable conditionally defines HAS_ENDPROTOENT if endprotoent() is
 	available to close whatever was being used for protocol queries.
+
+d_endpwent (d_endpwent.U):
+	This variable conditionally defines the HAS_ENDPWENT symbol, which
+	indicates to the C program that the endpwent() routine is available
+	for sequential access of the passwd database.
 
 d_endsent (d_endsent.U):
 	This variable conditionally defines HAS_ENDSERVENT if endservent() is
@@ -471,6 +481,11 @@ d_ftime (d_ftime.U):
 	This variable conditionally defines the HAS_FTIME symbol, which indicates
 	that the ftime() routine exists.  The ftime() routine is basically
 	a sub-second accuracy clock.
+
+d_getgrent (d_getgrent.U):
+	This variable conditionally defines the HAS_GETGRENT symbol, which
+	indicates to the C program that the getgrent() routine is available
+	for sequential access of the group database.
 
 d_getgrps (d_getgrps.U):
 	This variable conditionally defines the HAS_GETGROUPS symbol, which
@@ -572,6 +587,11 @@ d_getprotoprotos (d_getprotoprotos.U):
 	prototypes for the various getproto*() functions.  
 	See also netdbtype.U for probing for various netdb types.
 
+d_getpwent (d_getpwent.U):
+	This variable conditionally defines the HAS_GETPWENT symbol, which
+	indicates to the C program that the getpwent() routine is available
+	for sequential access of the passwd database.
+
 d_getsbyname (d_getsrvby.U):
 	This variable conditionally defines the HAS_GETSERVBYNAME 
 	symbol, which indicates to the C program that the 
@@ -601,6 +621,10 @@ d_gettimeod (d_ftime.U):
 
 d_gnulibc (d_gnulibc.U):
 	Defined if we're dealing with the GNU C Library.
+
+d_grpasswd (i_grp.U):
+	This variable conditionally defines GRPASSWD, which indicates
+	that struct group in <grp.h> contains gr_passwd.
 
 d_htonl (d_htonl.U):
 	This variable conditionally defines HAS_HTONL if htonl() and its
@@ -810,6 +834,10 @@ d_pwgecos (i_pwd.U):
 	This variable conditionally defines PWGECOS, which indicates
 	that struct passwd contains pw_gecos.
 
+d_pwpasswd (i_pwd.U):
+	This variable conditionally defines PWPASSWD, which indicates
+	that struct passwd contains pw_passwd.
+
 d_pwquota (i_pwd.U):
 	This variable conditionally defines PWQUOTA, which indicates
 	that struct passwd contains pw_quota.
@@ -897,6 +925,11 @@ d_seteuid (d_seteuid.U):
 	indicates to the C program that the seteuid() routine is available
 	to change the effective uid of the current program.
 
+d_setgrent (d_setgrent.U):
+	This variable conditionally defines the HAS_SETGRENT symbol, which
+	indicates to the C program that the setgrent() routine is available
+	for initializing sequential access to the group database.
+
 d_setgrps (d_setgrps.U):
 	This variable conditionally defines the HAS_SETGROUPS symbol, which
 	indicates to the C program that the setgroups() routine is available
@@ -940,6 +973,11 @@ d_setpgrp (d_setpgrp.U):
 d_setprior (d_setprior.U):
 	This variable conditionally defines HAS_SETPRIORITY if setpriority()
 	is available to set a process's priority.
+
+d_setpwent (d_setpwent.U):
+	This variable conditionally defines the HAS_SETPWENT symbol, which
+	indicates to the C program that the setpwent() routine is available
+	for initializing sequential access to the passwd database.
 
 d_setregid (d_setregid.U):
 	This variable conditionally defines HAS_SETREGID if setregid() is
@@ -1262,6 +1300,12 @@ eagain (nblock_io.U):
 	data is present on the file and non-blocking I/O was enabled (otherwise,
 	read() blocks naturally).
 
+ebcdic (ebcdic.U):
+	This variable conditionally defines EBCDIC if this
+	system uses EBCDIC encoding.  Among other things, this
+	means that the character ranges are not contiguous.
+	See trnl.U
+
 echo (Loc.U):
 	This variable is be used internally by Configure to determine the
 	full pathname (if any) of the echo program.  After Configure runs,
@@ -1385,6 +1429,10 @@ huge (models.U):
 	to produce a program running with a huge memory model.  If the
 	huge model is not supported, contains the flag to produce large
 	model programs.  It is up to the Makefile to use this.
+
+i_arpainet (i_arpainet.U):
+	This variable conditionally defines the I_ARPA_INET symbol,
+	and indicates whether a C program should include <arpa/inet.h>.
 
 i_bsdioctl (i_sysioctl.U):
 	This variable conditionally defines the I_SYS_BSDIOCTL symbol, which
@@ -2418,6 +2466,12 @@ tr (Loc.U):
 	This variable is be used internally by Configure to determine the
 	full pathname (if any) of the tr program.  After Configure runs,
 	the value is reset to a plain "tr" and is not useful.
+
+trnl (trnl.U):
+	This variable contains the value to be passed to the tr(1)
+	command to transliterate a newline.  Typical values are
+	'\012' and '\n'.  This is needed for EBCDIC systems where
+	newline is not necessarily '\012'.
 
 troff (Loc.U):
 	This variable is defined but not used by Configure.

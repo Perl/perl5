@@ -223,11 +223,11 @@ ext/IO/lib/IO/Socket.pm		IO::Socket extension Perl module
 ext/IPC/SysV/ChangeLog		IPC::SysV extension Perl module
 ext/IPC/SysV/MANIFEST		IPC::SysV extension Perl module
 ext/IPC/SysV/Makefile.PL	IPC::SysV extension Perl module
+ext/IPC/SysV/Msg.pm		IPC::SysV extension Perl module
 ext/IPC/SysV/README		IPC::SysV extension Perl module
+ext/IPC/SysV/Semaphore.pm	IPC::SysV extension Perl module
 ext/IPC/SysV/SysV.pm		IPC::SysV extension Perl module
 ext/IPC/SysV/SysV.xs		IPC::SysV extension Perl module
-ext/IPC/SysV/Msg.pm		IPC::SysV extension Perl module
-ext/IPC/SysV/Semaphore.pm	IPC::SysV extension Perl module
 ext/IPC/SysV/t/msg.t		IPC::SysV extension Perl module
 ext/IPC/SysV/t/sem.t		IPC::SysV extension Perl module
 ext/NDBM_File/Makefile.PL	NDBM extension makefile writer
@@ -814,13 +814,13 @@ t/lib/cgi-html.t	See if CGI.pm works
 t/lib/cgi-request.t	See if CGI.pm works
 t/lib/checktree.t	See if File::CheckTree works
 t/lib/complex.t		See if Math::Complex works
-t/lib/dumper.t		See if Data::Dumper works
-t/lib/dumper-ovl.t	See if Data::Dumper works for overloaded data
 t/lib/db-btree.t	See if DB_File works
 t/lib/db-hash.t		See if DB_File works
 t/lib/db-recno.t	See if DB_File works
 t/lib/dirhand.t		See if DirHandle works
 t/lib/dosglob.t		See if File::DosGlob works
+t/lib/dumper-ovl.t	See if Data::Dumper works for overloaded data
+t/lib/dumper.t		See if Data::Dumper works
 t/lib/english.t		See if English works
 t/lib/env.t		See if Env works
 t/lib/errno.t		See if Errno works

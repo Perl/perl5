@@ -391,7 +391,7 @@ d_getservprotos=''
 d_getsbyname=''
 d_getsbyport=''
 d_gnulibc=''
-i_arpa_inet=''
+i_arpainet=''
 d_htonl=''
 d_inetaton=''
 d_isascii=''
@@ -4316,16 +4316,20 @@ int main()
   return 1;
 }
 EOM
-$cc $ccflags $ldflags -o tebcdic tebcdic.c $libs >/dev/null 2>&1
-if ./tebcdic; then
-  echo "You have EBCDIC.  Adding -DEBCDIC to ccflags." >&4
-  ccflags="$ccflags -DEBCDIC"
-  val="$define"
+val=$undef
+set tebcdic
+if eval $compile_ok; then
+	if ./tebcdic; then
+		echo "You have EBCDIC." >&4
+		val="$define"
+	else
+		echo "Nope, no EBCDIC.  Assuming ASCII or some ISO Latin." >&4
+	fi
 else
-  echo "Nope, no EBCDIC.  Assuming ASCII or some ISO Latin.  Or UTF-8." >&4
-  val="$undef"
+	echo "I'm unable to compile the test program." >&4
+	echo "I'll asuume ASCII or some ISO Latin." >&4
 fi
-rm -f tebcdic.c tebcdic
+$rm -f tebcdic.c tebcdic
 set ebcdic
 eval $setvar
 
@@ -7302,7 +7306,7 @@ set netinet/in.h i_niin sys/in.h i_sysin
 eval $inhdr
 
 : see if this is an arpa/inet.h
-set arpa/inet.h i_arpa_inet
+set arpa/inet.h i_arpainet
 eval $inhdr
 
 : see if htonl --and friends-- exists
@@ -7318,7 +7322,7 @@ $undef)
 #include <sys/types.h>
 #$i_niin I_NETINET_IN
 #$i_sysin I_SYS_IN
-#$i_arpa_inet I_ARPA_INET
+#$i_arpainet I_ARPA_INET
 #ifdef I_NETINET_IN
 #include <netinet/in.h>
 #endif
@@ -11661,7 +11665,7 @@ h_sysfile='$h_sysfile'
 hint='$hint'
 hostcat='$hostcat'
 huge='$huge'
-i_arpa_inet='$i_arpa_inet'
+i_arpainet='$i_arpainet'
 i_bsdioctl='$i_bsdioctl'
 i_db='$i_db'
 i_dbm='$i_dbm'

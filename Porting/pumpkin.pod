@@ -285,8 +285,8 @@ and running metaconfig is in the F<U/README> file that comes with Perl's
 metaconfig units.  Perl's metaconfig units should be available on CPAN.
 As of perl5.004_70, they were in the file F<mc_units-5.004_70-01.tar.gz>
 under http://www.perl.com/CPAN/authors/id/ANDYD/ .  The mc_units tar
-file should be unpacked in your main perl source directory.  (Note:
-those units were for 5.004_70.  There may have been changes since then.
+file should be unpacked in your main perl source directory.  (Note: those
+units were for 5.004_70.  There have been significant changes since then.
 Check for later versions or contact perl5-porters@perl.org to obtain a
 pointer to the current version.)
 
@@ -1307,4 +1307,4 @@ All opinions expressed herein are those of the authorZ<>(s).
 
 =head1 LAST MODIFIED
 
-$Id: pumpkin.pod,v 1.20 1998/07/08 17:09:06 doughera Released $
+$Id: pumpkin.pod,v 1.21 1998/07/14 17:54:56 doughera Released $

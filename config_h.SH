@@ -820,11 +820,17 @@ sed <<!GROK!THIS! >config.h -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un-
  */
 #$d_wctomb HAS_WCTOMB		/**/
 
+/* EBCDIC:
+ *	This symbol, if defined, indicates that this system uses
+ *	EBCDIC encoding.
+ *.
+#$ebcdic	EBCDIC 		/**/
+
 /* I_ARPA_INET:
  *	This symbol, if defined, indicates that <arpa/inet.h> exists and should
  *	be included.
  */
-#$i_arpa_inet I_ARPA_INET	/**/
+#$i_arpainet I_ARPA_INET	/**/
 
 /* I_DBM:
  *	This symbol, if defined, indicates that <dbm.h> exists and should

@@ -17,7 +17,7 @@
 /*
  * Package name      : perl5
  * Source directory  : .
- * Configuration time: Mon Jul  6 12:35:32 EDT 1998
+ * Configuration time: Tue Jul 14 13:02:14 EDT 1998
  * Configured by     : doughera
  * Target system     : linux fractal 2.0.34 #1 tue jun 23 10:09:17 edt 1998 i686 unknown 
  */
@@ -806,6 +806,18 @@
  */
 #define HAS_WCTOMB		/**/
 
+/* EBCDIC:
+ *	This symbol, if defined, indicates that this system uses
+ *	EBCDIC encoding.
+ *.
+/*#define	EBCDIC 		/ **/
+
+/* I_ARPA_INET:
+ *	This symbol, if defined, indicates that <arpa/inet.h> exists and should
+ *	be included.
+ */
+#define I_ARPA_INET	/**/
+
 /* I_DBM:
  *	This symbol, if defined, indicates that <dbm.h> exists and should
  *	be included.
@@ -859,7 +871,27 @@
  *	This symbol, if defined, indicates to the C program that it should
  *	include <grp.h>.
  */
+/* GRPASSWD:
+ *	This symbol, if defined, indicates to the C program that struct group
+ *	contains gr_passwd.
+ */
+/* HAS_SETGRENT:
+ *	This symbol, if defined, indicates that the getgrent routine is
+ *	available for initializing sequential access of the group database.
+ */
+/* HAS_GETGRENT:
+ *	This symbol, if defined, indicates that the getgrent routine is
+ *	available for sequential access of the group database.
+ */
+/* HAS_ENDGRENT:
+ *	This symbol, if defined, indicates that the getgrent routine is
+ *	available for finalizing sequential access of the group database.
+ */
 #define I_GRP		/**/
+#define GRPASSWD	/**/
+#define HAS_SETGRENT	/**/
+#define HAS_GETGRENT	/**/
+#define HAS_ENDGRENT	/**/
 
 /* I_LIMITS:
  *	This symbol, if defined, indicates to the C program that it should
@@ -1694,6 +1726,22 @@
  *	This symbol, if defined, indicates to the C program that struct passwd
  *	contains pw_gecos.
  */
+/* PWPASSWD:
+ *	This symbol, if defined, indicates to the C program that struct passwd
+ *	contains pw_passwd.
+ */
+/* HAS_SETPWENT:
+ *	This symbol, if defined, indicates that the getpwrent routine is
+ *	available for initializing sequential access of the passwd database.
+ */
+/* HAS_GETPWENT:
+ *	This symbol, if defined, indicates that the getpwent routine is
+ *	available for sequential access of the password database.
+ */
+/* HAS_ENDPWENT:
+ *	This symbol, if defined, indicates that the getpwent routine is
+ *	available for finalizing sequential access of the passwd database.
+ */
 #define I_PWD		/**/
 /*#define PWQUOTA	/ **/
 /*#define PWAGE	/ **/
@@ -1702,6 +1750,10 @@
 /*#define PWEXPIRE	/ **/
 /*#define PWCOMMENT	/ **/
 #define PWGECOS	/**/
+#define PWPASSWD	/**/
+#define HAS_SETPWENT	/**/
+#define HAS_GETPWENT	/**/
+#define HAS_ENDPWENT	/**/
 
 /* Free_t:
  *	This variable contains the return type of free().  It is usually
@@ -1787,8 +1839,8 @@
  *	This symbol contains the ~name expanded version of ARCHLIB, to be used
  *	in programs that are not prepared to deal with ~ expansion at run-time.
  */
-#define ARCHLIB "/opt/perl/lib/5.00470/i686-linux-thread"		/**/
-#define ARCHLIB_EXP "/opt/perl/lib/5.00470/i686-linux-thread"		/**/
+#define ARCHLIB "/opt/perl/lib/5.00474/i686-linux-thread"		/**/
+#define ARCHLIB_EXP "/opt/perl/lib/5.00474/i686-linux-thread"		/**/
 
 /* DLSYM_NEEDS_UNDERSCORE:
  *	This symbol, if defined, indicates that we need to prepend an
@@ -1833,8 +1885,8 @@
  *	This symbol contains the ~name expanded version of PRIVLIB, to be used
  *	in programs that are not prepared to deal with ~ expansion at run-time.
  */
-#define PRIVLIB "/opt/perl/lib/5.00470"		/**/
-#define PRIVLIB_EXP "/opt/perl/lib/5.00470"		/**/
+#define PRIVLIB "/opt/perl/lib/5.00474"		/**/
+#define PRIVLIB_EXP "/opt/perl/lib/5.00474"		/**/
 
 /* SITEARCH:
  *	This symbol contains the name of the private library for this package.
@@ -1849,8 +1901,8 @@
  *	This symbol contains the ~name expanded version of SITEARCH, to be used
  *	in programs that are not prepared to deal with ~ expansion at run-time.
  */
-#define SITEARCH "/opt/perl/lib/site_perl/5.00470/i686-linux-thread"		/**/
-#define SITEARCH_EXP "/opt/perl/lib/site_perl/5.00470/i686-linux-thread"		/**/
+#define SITEARCH "/opt/perl/lib/site_perl/5.00474/i686-linux-thread"		/**/
+#define SITEARCH_EXP "/opt/perl/lib/site_perl/5.00474/i686-linux-thread"		/**/
 
 /* SITELIB:
  *	This symbol contains the name of the private library for this package.
@@ -1865,8 +1917,8 @@
  *	This symbol contains the ~name expanded version of SITELIB, to be used
  *	in programs that are not prepared to deal with ~ expansion at run-time.
  */
-#define SITELIB "/opt/perl/lib/site_perl/5.00470"		/**/
-#define SITELIB_EXP "/opt/perl/lib/site_perl/5.00470"		/**/
+#define SITELIB "/opt/perl/lib/site_perl/5.00474"		/**/
+#define SITELIB_EXP "/opt/perl/lib/site_perl/5.00474"		/**/
 
 /* STARTPERL:
  *	This variable contains the string to put in front of a perl
