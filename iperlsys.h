@@ -667,7 +667,12 @@ struct IPerlLIOInfo
 #define PerlLIO_open3(file, flag, perm)	open((file), (flag), (perm))
 #define PerlLIO_read(fd, buf, count)	read((fd), (buf), (count))
 #define PerlLIO_rename(old, new)	rename((old), (new))
+#if O_BINARY != O_TEXT
 #define PerlLIO_setmode(fd, mode)	setmode((fd), (mode))
+#else
+/* Until we have a "host" on UNIX to supply a stub #define it out */
+#define PerlLIO_setmode(fd, mode)	0
+#endif
 #define PerlLIO_tmpnam(str)		tmpnam((str))
 #define PerlLIO_umask(mode)		umask((mode))
 #define PerlLIO_unlink(file)		unlink((file))
