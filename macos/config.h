@@ -5,7 +5,7 @@
 /*
  * Package name      : perl
  * Configuration time: 22Nov99
- * Configured by     : Matthias Neeracher <neeri@iis.ee.ethz.ch>
+ * Configured by     : Matthias Neeracher <neeracher@mac.com>
  * Target system     : MacOS Traditional
  */
 /*********************************************************************

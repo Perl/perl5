@@ -140,7 +140,7 @@ The low level interface is not likely to be needed, except for the HLock() funct
 
 =head1 Author
 
-Matthias Ulrich Neeracher neeri@iis.ee.ethz.ch "Programs"
+Matthias Ulrich Neeracher neeracher@mac.com "Programs"
 
 Bob Dalgleish <bob.dalgleish@sasknet.sk.ca> "Documentation"
 

@@ -76,7 +76,7 @@ sub dfprintmem {
 
 =head1 AUTHOR(S)
 
-MacPerl DCon glue 			by Matthias Ulrich Neeracher <neeri@iis.ee.ethz.ch> 
+MacPerl DCon glue 			by Matthias Ulrich Neeracher <neeracher@mac.com> 
 
 =cut
 

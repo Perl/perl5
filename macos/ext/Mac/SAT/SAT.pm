@@ -153,7 +153,7 @@ sub kForwardOneCollision()	{ 4; }
 =head1 AUTHOR(S)
 
 Sprite Animation Toolkit 	by Ingemar Ragnemalm <ingemar@lysator.liu.se>
-MacPerl SAT glue 			by Matthias Ulrich Neeracher <neeri@iis.ee.ethz.ch> 
+MacPerl SAT glue 			by Matthias Ulrich Neeracher <neeracher@mac.com> 
 
 =cut
 

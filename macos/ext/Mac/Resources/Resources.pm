@@ -149,7 +149,7 @@ sub kSystemResFile ()              {          0; }
 
 =head1 AUTHOR
 
-Matthias Ulrich Neeracher <neeri@iis.ee.ethz.ch> "Programs"
+Matthias Ulrich Neeracher <neeracher@mac.com> "Programs"
 
 Bob Dalgleish <bob.dalgleish@sasknet.sk.ca> "Documentation"
 

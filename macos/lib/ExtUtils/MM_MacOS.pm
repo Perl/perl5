@@ -3,7 +3,7 @@
 #   This package is inserted into @ISA of MakeMaker's MM before the
 #   built-in ExtUtils::MM_Unix methods if MakeMaker.pm is run under MacOS.
 #
-#   Author:  Matthias Neeracher <neeri@iis.ee.ethz.ch>
+#   Author:  Matthias Neeracher <neeracher@mac.com>
 
 package ExtUtils::MM_MacOS;
 unshift @MM::ISA, 'ExtUtils::MM_MacOS';

@@ -36,7 +36,7 @@
  *
  *	@(#)fcntl.h	8.3 (Berkeley) 1/21/94
  *
- * Adapted for GUSI by Matthias Neeracher <neeri@iis.ee.ethz.ch>
+ * Adapted for GUSI by Matthias Neeracher <neeracher@mac.com>
  */
 
 #ifndef _FCNTL_H_

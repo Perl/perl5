@@ -183,7 +183,7 @@ sub kFemale ()                     {          2; }
 
 =head1 AUTHOR(S)
 
-Matthias Ulrich Neeracher <neeri@iis.ee.ethz.ch> Author
+Matthias Ulrich Neeracher <neeracher@mac.com> Author
 
 =cut
 

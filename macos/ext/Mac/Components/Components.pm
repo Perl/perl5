@@ -163,7 +163,7 @@ sub registerComponentAfterExisting () {          4; }
 
 =head1 AUTHOR(S)
 
-Matthias Ulrich Neeracher <neeri@iis.ee.ethz.ch> Author
+Matthias Ulrich Neeracher <neeracher@mac.com> Author
 
 Bob Dalgleish <bob.dalgleish@sasknet.sk.ca> Documenter
 

@@ -122,7 +122,7 @@ sub appleMark ()                   {         20; }
 
 =head1 AUTHOR(S)
 
-Matthias Ulrich Neeracher <neeri@iis.ee.ethz.ch> 
+Matthias Ulrich Neeracher <neeracher@mac.com> 
 
 =cut
 

@@ -755,7 +755,7 @@ sub FlushVol 	{	_FlushVol  (&_VolumeID);	}
 
 =head1 AUTHOR
 
-Matthias Ulrich Neeracher <neeri@iis.ee.ethz.ch>
+Matthias Ulrich Neeracher <neeracher@mac.com>
 
 =cut
 
