@@ -29,6 +29,7 @@ sub BEGIN {
 }
 
 use Storable qw(store retrieve);
+use File::Spec;
 
 print "1..8\n";
 
@@ -41,6 +42,8 @@ print ((!defined $result)?"ok $test\n":"not ok $test\n"); $test++;
 print (($@ ne '')?"ok $test\n":"not ok $test\n"); $test++;
 
 $Storable::forgive_me=1;
+
+my $devnull = File::Spec->devnull;
 
 open(SAVEERR, ">&STDERR");
 open(STDERR, ">/dev/null") or 
@@ -60,4 +63,4 @@ print (($ret->[2] eq 'bar')?"ok $test\n":"not ok $test\n"); $test++;
 print ((ref $ret->[1] eq 'SCALAR')?"ok $test\n":"not ok $test\n"); $test++;
 
 
-END { unlink 'store' }
+END { 1 while unlink 'store' }

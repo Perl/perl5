@@ -73,5 +73,5 @@ print "ok 13\n";
 print "not " if length $root->[1];
 print "ok 14\n";
 
-END { unlink 'store', 'nstore' }
+END { 1 while unlink('store', 'nstore') }
 

@@ -52,7 +52,7 @@ print "ok 4\n";
 print "not " unless $got eq $dumped; 
 print "ok 5\n";
 
-unlink 'store';
+1 while unlink 'store';
 
 package FOO; @ISA = qw(Storable);
 
@@ -114,6 +114,6 @@ print "not " unless $@;
 print "ok 20\n";
 
 close OUT;
-END { unlink 'store' }
+END { 1 while unlink 'store' }
 
 
