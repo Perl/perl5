@@ -148,10 +148,17 @@ extern int rc;
 #define dTHR struct thread *thr = THR
 */
 
-#define pthread_getspecific(k)		(*_threadstore())
-#define pthread_setspecific(k,v)	(*_threadstore()=v,0)
+#ifdef USE_SLOW_THREAD_SPECIFIC
+#  define pthread_getspecific(k)	(*_threadstore())
+#  define pthread_setspecific(k,v)	(*_threadstore()=v,0)
+#  define pthread_key_create(keyp,flag)	(*keyp=_gettid(),0)
+#else
+#  define pthread_getspecific(k)	(*(k))
+#  define pthread_setspecific(k,v)	(*(k)=(v),0)
+#  define pthread_key_create(keyp,flag)	(DosAllocThreadLocalMemory(1,(U32*)keyp) ? croak("LocalMemory"),1 : 0)
+#endif
+#define pthread_key_delete(keyp)
 #define pthread_self()			_gettid()
-#define pthread_key_create(keyp,flag)	(*keyp=_gettid(),0)
 #define YIELD				DosSleep(0)
 
 #ifdef PTHREADS_INCLUDED		/* For ./x2p stuff. */
