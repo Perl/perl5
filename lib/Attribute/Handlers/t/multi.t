@@ -149,19 +149,22 @@ ok( $out eq "begin\nbye\nbye\n", 46 );
 sub dummy { my $dummy : Dummy; }
 $applied = 0;
 dummy(); dummy();
+if($] < 5.008) {
+ok(1, "47 # skip does not work with perl prior to 5.8");
+} else {
 ok( $applied == 2, 47 );
-
+}
 # 45-47 again, but for our variables
 $out = "begin\n";
 { our $dummy;          $dummy = bless {}, 'Dummy'; }
 ok( $out eq "begin\n", 48 );
-{ our $dummy : Dummy;  $dummy = bless {}, 'Dummy'; }
+{ no warnings; our $dummy : Dummy;  $dummy = bless {}, 'Dummy'; }
 ok( $out eq "begin\nbye\n", 49 );
 undef $::dummy;
 ok( $out eq "begin\nbye\nbye\n", 50 );
 
 # are lexical attributes reapplied correctly?
-sub dummy_our { our $banjo : Dummy; }
+sub dummy_our { no warnings; our $banjo : Dummy; }
 $applied = 0;
 dummy_our(); dummy_our();
 ok( $applied == 0, 51 );
@@ -172,4 +175,9 @@ eval {
 	my $groucho : Stooge;
 };
 my $match = $@ =~ /^Won't be able to apply END handler/; 
+if($] < 5.008) {
+ok(1,"52 # Skip, no difference between lexical handlers and normal handlers prior to 5.8");
+} else {
 ok( $match, 52 );
+}
+
