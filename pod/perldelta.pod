@@ -1035,25 +1035,43 @@ The Dumpvalue module provides screen dumps of Perl data.
 
 =item Benchmark
 
+Overall, Benchmark results exhibit lower average error and better timing
+accuracy.  
+
 You can now run tests for I<n> seconds instead of guessing the right
 number of tests to run: e.g. timethese(-5, ...) will run each 
 code for at least 5 CPU seconds.  Zero as the "number of repetitions"
 means "for at least 3 CPU seconds".  The output format has also
 changed.  For example:
 
-use Benchmark;$x=3;timethese(-5,{a=>sub{$x*$x},b=>sub{$x**2}})
+   use Benchmark;$x=3;timethese(-5,{a=>sub{$x*$x},b=>sub{$x**2}})
 
 will now output something like this:
 
-Benchmark: running a, b, each for at least 5 CPU seconds...
-         a:  5 wallclock secs ( 5.77 usr +  0.00 sys =  5.77 CPU) @ 200551.91/s (n=1156516)
-         b:  4 wallclock secs ( 5.00 usr +  0.02 sys =  5.02 CPU) @ 159605.18/s (n=800686)
+   Benchmark: running a, b, each for at least 5 CPU seconds...
+            a:  5 wallclock secs ( 5.77 usr +  0.00 sys =  5.77 CPU) @ 200551.91/s (n=1156516)
+            b:  4 wallclock secs ( 5.00 usr +  0.02 sys =  5.02 CPU) @ 159605.18/s (n=800686)
 
 New features: "each for at least N CPU seconds...", "wallclock secs",
 and the "@ operations/CPU second (n=operations)".
 
-change#4265,4266,4292
-[TODO - Barrie Slaymaker <barries@slaysys.com>]
+timethese() now returns a reference to a hash of Benchmark objects containing
+the test results, keyed on the names of the tests.
+
+timethis() now returns the iterations field in the Benchmark result object
+instead of 0.
+
+timethese(), timethis(), and the new cmpthese() (see below) can also take
+a format specifier of 'none' to suppress output.
+
+A new function countit() is just like timeit() except that it takes a
+TIME instead of a COUNT.
+
+A new function cmpthese() prints a chart comparing the results of each test
+returned from a timethese() call.  For each possible pair of tests, the
+percentage speed difference (iters/sec or seconds/iter) is shown.
+
+For other details, see L<Benchmark>.
 
 =item Devel::Peek
 
