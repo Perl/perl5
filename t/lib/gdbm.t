@@ -6,7 +6,7 @@ BEGIN {
     unshift @INC, '../lib';
     require Config; import Config;
     if ($Config{'extensions'} !~ /\bGDBM_File\b/) {
-	print "1..0\n";
+	print "1..0 # Skip: GDBM_File was not built\n";
 	exit 0;
     }
 }

@@ -11,7 +11,7 @@ use Config;
 if ( $^O eq 'MSWin32' or
      ($Config{'cppstdin'} =~ /\bcppstdin\b/) and
      ( ! -x $Config{'binexp'} . "/cppstdin") ) {
-    print "1..0\n";
+    print "1..0 # Skip: \$Config{cppstdin} unavailable\n";
     exit; 		# Cannot test till after install, alas.
 }
 

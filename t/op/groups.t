@@ -6,7 +6,7 @@ $ENV{LC_ALL} = "C"; # so that external utilities speak English
 $ENV{LANGUAGE} = 'C'; # GNU locale extension
 
 sub quit {
-    print "1..0\n";
+    print "1..0 # Skip: no `id` or `groups`\n";
     exit 0;
 }
 

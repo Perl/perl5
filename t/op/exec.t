@@ -1,13 +1,10 @@
 #!./perl
 
-# $RCSfile: exec.t,v $$Revision: 4.1 $$Date: 92/08/07 18:27:49 $
-
 $| = 1;				# flush stdout
 
 if ($^O eq 'MSWin32') {
-    print "# exec is unsupported on Win32\n";
     # XXX the system tests could be written to use ./perl and so work on Win32
-    print "1..0\n";
+    print "1..0 # Skip: shh, win32\n";
     exit(0);
 }
 

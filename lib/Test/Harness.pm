@@ -74,9 +74,10 @@ sub runtests {
 	$te = $test;
 	chop($te);
 	if ($^O eq 'VMS') { $te =~ s/^.*\.t\./[.t./; }
+	my $blank = (' ' x 77);
 	my $leader = "$te" . '.' x (20 - length($te));
 	my $ml = "";
-	$ml = "\r$leader" if -t STDOUT and not $ENV{HARNESS_NOTTY};
+	$ml = "\r$blank\r$leader" if -t STDOUT and not $ENV{HARNESS_NOTTY};
 	print $leader;
 	my $fh = new FileHandle;
 	$fh->open($test) or print "can't open $test. $!\n";
@@ -105,16 +106,17 @@ sub runtests {
 		$totmax += $max;
 		$files++;
 		$next = 1;
-	    } elsif (/^1\.\.([0-9]+)/) {
+	    } elsif (/^1\.\.([0-9]+)(\s*\#\s*[Ss]kip\S*(?>\s+)(.+))?/) {
 		$max = $1;
 		$totmax += $max;
 		$files++;
 		$next = 1;
+		$skip_reason = $3 if not $max and defined $3;
 	    } elsif ($max && /^(not\s+)?ok\b/) {
 		my $this = $next;
 		if (/^not ok\s*(\d*)/){
 		    $this = $1 if $1 > 0;
-		    print "${ml}NOK $this   \n" if $ml;
+		    print "${ml}NOK $this\n" if $ml;
 		    if (!$todo{$this}) {
 			push @failed, $this;
 		    } else {
@@ -123,7 +125,7 @@ sub runtests {
 		    }
 		} elsif (/^ok\s*(\d*)(\s*\#\s*[Ss]kip\S*(?:(?>\s+)(.+))?)?/) {
 		    $this = $1 if $1 > 0;
-		    print "${ml}ok $this   " if $ml;
+		    print "${ml}ok $this/$max" if $ml;
 		    $ok++;
 		    $totok++;
 		    $skipped++ if defined $2;
@@ -191,16 +193,18 @@ sub runtests {
 	} elsif ($ok == $max && $next == $max+1) {
 	    if ($max and $skipped + $bonus) {
 		my @msg;
-		push(@msg, "$skipped/$max subtest".($skipped>1?'s':'')." skipped: $skip_reason")
+		push(@msg, "$skipped/$max skipped: $skip_reason")
 		    if $skipped;
-		push(@msg, "$bonus subtest".($bonus>1?'s':'').
-		     " unexpectedly succeeded")
+		push(@msg, "$bonus/$max unexpectedly succeeded")
 		    if $bonus;
-		print "${ml}ok, ".join(', ', @msg)."     \n";
+		print "${ml}ok, ".join(', ', @msg)."\n";
 	    } elsif ($max) {
-		print "${ml}ok      \n";
+		print "${ml}ok\n";
+	    } elsif (defined $skip_reason) {
+		print "skipped: $skip_reason\n";
+		$tests_skipped++;
 	    } else {
-		print "skipping test on this platform\n";
+		print "skipped test on this platform\n";
 		$tests_skipped++;
 	    }
 	    $good++;
@@ -428,6 +432,12 @@ If the standard output line contains substring C< # Skip> (with
 variations in spacing and case) after C<ok> or C<ok NUMBER>, it is
 counted as a skipped test.  If the whole testscript succeeds, the
 count of skipped tests is included in the generated output.
+
+C<Test::Harness> reports the text after C< # Skip(whatever)> as a
+reason for skipping.  Similarly, one can include a similar explanation
+in a C<1..0> line emitted if the test is skipped completely:
+
+  1..0 # Skipped: no leverage found
 
 =head1 EXPORT
 
