@@ -3834,6 +3834,21 @@ operator is discussed in more detail in L<perlop/"I/O Operators">.
     $line = <STDIN>;
     $line = readline(*STDIN);		# same thing
 
+If readline encounters an operating system error, C<$!> will be set with the
+corresponding error message.  It can be helpful to check C<$!> when you are
+reading from filehandles you don't trust, such as a tty or a socket.  The
+following example uses the operator form of C<readline>, and takes the necessary
+steps to ensure that C<readline> was successful.
+
+    for (;;) {
+        undef $!;
+        unless (defined( $line = <> )) {
+            die $! if $!;
+            last; # reached EOF
+        }
+        # ...
+    }
+
 =item readlink EXPR
 
 =item readlink
