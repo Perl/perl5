@@ -14,20 +14,77 @@ use vars qw($VERSION @ISA @EXPORT_OK
 
 $VERSION = 1.38;
 @ISA=('Exporter');
-@EXPORT_OK = ('mkmanifest', 'manicheck', 'fullcheck', 'filecheck', 
-	      'skipcheck', 'maniread', 'manicopy');
+@EXPORT_OK = qw(mkmanifest
+                manicheck  filecheck  fullcheck  skipcheck
+                manifind   maniread   manicopy   maniadd
+               );
 
 $Is_MacOS = $^O eq 'MacOS';
-$Is_VMS = $^O eq 'VMS';
+$Is_VMS   = $^O eq 'VMS';
 require VMS::Filespec if $Is_VMS;
 
-$Debug = $ENV{PERL_MM_MANIFEST_DEBUG} || 0;
+$Debug   = $ENV{PERL_MM_MANIFEST_DEBUG} || 0;
 $Verbose = defined $ENV{PERL_MM_MANIFEST_VERBOSE} ?
                    $ENV{PERL_MM_MANIFEST_VERBOSE} : 1;
 $Quiet = 0;
 $MANIFEST = 'MANIFEST';
-$DEFAULT_MSKIP = (File::Spec->splitpath($INC{"ExtUtils/Manifest.pm"}))[1].
+
+my $manifest_mod = $INC{"ExtUtils/Manifest.pm"} ||
+                   ($Is_VMS ? $INC{'extutils/manifest.pm'} : '');
+$DEFAULT_MSKIP = (File::Spec->splitpath($manifest_mod))[1].
                  "$MANIFEST.SKIP";
+
+
+=head1 NAME
+
+ExtUtils::Manifest - utilities to write and check a MANIFEST file
+
+=head1 SYNOPSIS
+
+    use ExtUtils::Manifest qw(...funcs to import...);
+
+    mkmanifest();
+
+    my @missing_files    = manicheck;
+    my @skipped          = skipcheck;
+    my @extra_files      = filecheck;
+    my($missing, $extra) = fullcheck;
+
+    my $found    = manifind();
+
+    my $manifest = maniread();
+
+    manicopy($read,$target);
+
+    maniadd({$file => $comment, ...});
+
+
+=head1 DESCRIPTION
+
+=head2 Functions
+
+ExtUtils::Manifest exports no functions by default.  The following are
+exported on request
+
+=over 4
+
+=item mkmanifest
+
+    mkmanifest();
+
+Writes all files in and below the current directory to your F<MANIFEST>.
+It works similar to
+
+    find . > MANIFEST
+
+All files that match any regular expression in a file F<MANIFEST.SKIP>
+(if it exists) are ignored.
+
+Any existing F<MANIFEST> file will be saved as F<MANIFEST.bak>.  Lines
+from the old F<MANIFEST> file is preserved, including any comments
+that are found in the existing F<MANIFEST> file in the new one.
+
+=cut
 
 sub mkmanifest {
     my $manimiss = 0;
@@ -72,6 +129,16 @@ sub clean_up_filename {
   return $filename;
 }
 
+
+=item manifind
+
+    my $found = manifind();
+
+returns a hash reference. The keys of the hash are the files found
+below the current directory.
+
+=cut
+
 sub manifind {
     my $p = shift || {};
     my $found = {};
@@ -98,17 +165,65 @@ sub manifind {
     return $found;
 }
 
-sub fullcheck {
-    return [_check_files()], [_check_manifest()];
-}
+
+=item manicheck
+
+    my @missing_files = manicheck();
+
+checks if all the files within a C<MANIFEST> in the current directory
+really do exist. If C<MANIFEST> and the tree below the current
+directory are in sync it exits silently, returning an empty list.
+Otherwise it returns a list of files which are listed in the
+C<MANIFEST> but missing from the directory, and by default also
+outputs these names to STDERR.
+
+=cut
 
 sub manicheck {
     return _check_files();
 }
 
+
+=item filecheck
+
+    my @extra_files = filecheck();
+
+finds files below the current directory that are not mentioned in the
+C<MANIFEST> file. An optional file C<MANIFEST.SKIP> will be
+consulted. Any file matching a regular expression in such a file will
+not be reported as missing in the C<MANIFEST> file. The list of any
+extraneous files found is returned, and by default also reported to
+STDERR.
+
+=cut
+
 sub filecheck {
     return _check_manifest();
 }
+
+
+=item fullcheck
+
+    my($missing, $extra) = fullcheck();
+
+does both a manicheck() and a filecheck(), returning then as two array
+refs.
+
+=cut
+
+sub fullcheck {
+    return [_check_files()], [_check_manifest()];
+}
+
+
+=item skipcheck
+
+    my @skipped = skipcheck();
+
+lists all the files that are skipped due to your C<MANIFEST.SKIP>
+file.
+
+=cut
 
 sub skipcheck {
     my($p) = @_;
@@ -173,6 +288,18 @@ sub _check_manifest {
 }
 
 
+=item maniread
+
+    my $manifest = maniread();
+    my $manifest = maniread($manifest_file);
+
+reads a named C<MANIFEST> file (defaults to C<MANIFEST> in the current
+directory) and returns a HASH reference with files being the keys and
+comments being the values of the HASH.  Blank lines and lines which
+start with C<#> in the C<MANIFEST> file are discarded.
+
+=cut
+
 sub maniread {
     my ($mfile) = @_;
     $mfile ||= $MANIFEST;
@@ -233,6 +360,23 @@ sub _maniskip {
 
     return sub { $_[0] =~ qr{$opts$regex} };
 }
+
+=item manicopy
+
+    manicopy($src, $dest_dir);
+    manicopy($src, $dest_dir, $how);
+
+copies the files that are the keys in the HASH I<%$src> to the
+$dest_dir. The HASH reference $read is typically returned by the
+maniread() function. This function is useful for producing a directory
+tree identical to the intended distribution tree. The third parameter
+$how can be used to specify a different methods of "copying". Valid
+values are C<cp>, which actually copies the files, C<ln> which creates
+hard links, and C<best> which mostly links the files but copies any
+symbolic link to make a tree without any symbolic link. Best is the
+default.
+
+=cut
 
 sub manicopy {
     my($read,$target,$how)=@_;
@@ -372,90 +516,48 @@ sub _unmacify {
     $file;
 }
 
-1;
 
-__END__
+=item maniadd
 
-=head1 NAME
+  maniadd({ $file => $comment, ...});
 
-ExtUtils::Manifest - utilities to write and check a MANIFEST file
+Adds an entry to an existing F<MANIFEST>.
 
-=head1 SYNOPSIS
+$file will be normalized (ie. Unixified).  B<UNIMPLEMENTED>
 
-    require ExtUtils::Manifest;
+=cut
 
-    ExtUtils::Manifest::mkmanifest;
+sub maniadd {
+    my($additions) = shift;
 
-    ExtUtils::Manifest::manicheck;
+    _normalize($additions);
 
-    ExtUtils::Manifest::filecheck;
+    my $manifest = maniread();
+    open(MANIFEST, ">>$MANIFEST") or die "Could not open $MANIFEST: $!";
+    while( my($file, $comment) = each %$additions ) {
+        $comment ||= '';
+        printf MANIFEST "%-40s%s\n", $file, $comment unless
+          exists $manifest->{$file};
+    }
+    close MANIFEST;
+}
 
-    ExtUtils::Manifest::fullcheck;
+# UNIMPLEMENTED
+sub _normalize {
+    return;
+}
 
-    ExtUtils::Manifest::skipcheck;
 
-    ExtUtils::Manifest::manifind();
+=back
 
-    ExtUtils::Manifest::maniread($file);
+=head2 MANIFEST
 
-    ExtUtils::Manifest::manicopy($read,$target,$how);
+Anything between white space and an end of line within a C<MANIFEST>
+file is considered to be a comment.  Filenames and comments are
+separated by one or more TAB characters in the output. 
 
-=head1 DESCRIPTION
 
-mkmanifest() writes all files in and below the current directory to a
-file named in the global variable $ExtUtils::Manifest::MANIFEST (which
-defaults to C<MANIFEST>) in the current directory. It works similar to
-
-    find . -print
-
-but in doing so checks each line in an existing C<MANIFEST> file and
-includes any comments that are found in the existing C<MANIFEST> file
-in the new one. Anything between white space and an end of line within
-a C<MANIFEST> file is considered to be a comment. Filenames and
-comments are separated by one or more TAB characters in the
-output. All files that match any regular expression in a file
-C<MANIFEST.SKIP> (if such a file exists) are ignored.
-
-manicheck() checks if all the files within a C<MANIFEST> in the current
-directory really do exist. If C<MANIFEST> and the tree below the current
-directory are in sync it exits silently, returning an empty list.  Otherwise
-it returns a list of files which are listed in the C<MANIFEST> but missing
-from the directory, and by default also outputs these names to STDERR.
-
-filecheck() finds files below the current directory that are not
-mentioned in the C<MANIFEST> file. An optional file C<MANIFEST.SKIP>
-will be consulted. Any file matching a regular expression in such a
-file will not be reported as missing in the C<MANIFEST> file. The list of
-any extraneous files found is returned, and by default also reported to
-STDERR.
-
-fullcheck() does both a manicheck() and a filecheck(), returning references
-to two arrays, the first for files manicheck() found to be missing, the
-seond for unexpeced files found by filecheck().
-
-skipcheck() lists all the files that are skipped due to your
-C<MANIFEST.SKIP> file.
-
-manifind() returns a hash reference. The keys of the hash are the
-files found below the current directory.
-
-maniread($file) reads a named C<MANIFEST> file (defaults to
-C<MANIFEST> in the current directory) and returns a HASH reference
-with files being the keys and comments being the values of the HASH.
-Blank lines and lines which start with C<#> in the C<MANIFEST> file
-are discarded.
-
-C<manicopy($read,$target,$how)> copies the files that are the keys in
-the HASH I<%$read> to the named target directory. The HASH reference
-$read is typically returned by the maniread() function. This
-function is useful for producing a directory tree identical to the
-intended distribution tree. The third parameter $how can be used to
-specify a different methods of "copying". Valid values are C<cp>,
-which actually copies the files, C<ln> which creates hard links, and
-C<best> which mostly links the files but copies any symbolic link to
-make a tree without any symbolic link. Best is the default.
-
-=head1 MANIFEST.SKIP
+=head2 MANIFEST.SKIP
 
 The file MANIFEST.SKIP may contain regular expressions of files that
 should be ignored by mkmanifest() and filecheck(). The regular
@@ -467,6 +569,7 @@ expression to start with a sharp character. A typical example:
     \bRCS\b
     \bCVS\b
     ,v$
+    \B\.svn\b
 
     # Makemaker generated files and dirs.
     ^MANIFEST\.
@@ -485,12 +588,12 @@ used, similar to the example above.  If you want nothing skipped,
 simply make an empty MANIFEST.SKIP file.
 
 
-=head1 EXPORT_OK
+=head2 EXPORT_OK
 
 C<&mkmanifest>, C<&manicheck>, C<&filecheck>, C<&fullcheck>,
 C<&maniread>, and C<&manicopy> are exportable.
 
-=head1 GLOBAL VARIABLES
+=head2 GLOBAL VARIABLES
 
 C<$ExtUtils::Manifest::MANIFEST> defaults to C<MANIFEST>. Changing it
 results in both a different C<MANIFEST> and a different
@@ -554,3 +657,5 @@ L<ExtUtils::MakeMaker> which has handy targets for most of the functionality.
 Andreas Koenig <F<andreas.koenig@anima.de>>
 
 =cut
+
+1;

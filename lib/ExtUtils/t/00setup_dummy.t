@@ -22,6 +22,12 @@ package Big::Dummy;
 
 $VERSION = 0.01;
 
+=head1 NAME
+
+Big::Dummy - Try "our" hot dog's
+
+=cut
+
 1;
 END
 
@@ -33,7 +39,9 @@ printf "Current package is: %s\n", __PACKAGE__;
 WriteMakefile(
     NAME          => 'Big::Dummy',
     VERSION_FROM  => 'lib/Big/Dummy.pm',
-    PREREQ_PM     => {},
+    PREREQ_PM     => { strict => 0 },
+    ABSTRACT_FROM => 'lib/Big/Dummy.pm',
+    AUTHOR        => 'Michael G Schwern <schwern@pobox.com>',
 );
 END
 

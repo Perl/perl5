@@ -1,0 +1,28 @@
+This is a CPAN distribution of the venerable MakeMaker module.
+
+
+PLEASE NOTE: This distribution does not include the xsubpp or typemap
+programs.  They are extremely specific to your version or Perl, so
+MakeMaker will simply use the one which came with your copy of Perl.
+Do not delete your old ExtUtils/ directory.
+
+
+Known Problems:
+
+(See http://rt.cpan.org for a full list of open problems.)
+
+ActivePerl likely broken if installed in C:\Program Files or other
+prefix with a space in the name.
+
+manifypods target produces command lines too long for some systems
+
+Using the MMS utility on VMS causes lots of extra newlines.  Unknown
+why this is so, might be a bug in MMS.  Problem not seen with MMK.
+
+ActivePerl/Win95 disttest produces "File creation error" from somewhere
+in running Makefile.PL after check_manifest() is run.  Don't know why.
+
+
+See TODO for details.
+
+Please report any bugs via http://rt.cpan.org or to makemaker@perl.org.

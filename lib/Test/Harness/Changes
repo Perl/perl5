@@ -1,5 +1,22 @@
 Revision history for Perl extension Test::Harness
 
+2.27_02  Mon Mar 24 13:17:00 CDT 2003
+2.27_01  Sun Mar 23 19:46:00 CDT 2003
+    - Handed over to Andy Lester for further maintenance.
+    - Fixed when the path to perl contains spaces on Windows
+    * Stas Bekman noticed that tests with no output at all were
+      interpreted as passing
+    - MacPerl test tweak for busted exit codes (bleadperl 17345)
+    - Abigail and Nick Clark both hit the 100000 "huge test that will
+      suck up all your memory" limit with legit tests.  Made the check
+      smarter to allow large, planned tests to work.
+    - Partial fix of stats display when a test fails only because there's
+      too many tests.
+    - Made wait.ph and WCOREDUMP anti-vommit protection more robust in
+      cases where wait.ph loads but WCOREDUMP() pukes when run.
+    - Added a LICENSE.
+    - Ilya noticed the per test skip reason was accumlating between tests.
+
 2.26  Wed Jun 19 16:58:02 EDT 2002
     - Workaround for MacPerl's lack of a working putenv.  It will never 
       see the PERL5LIB environment variable (perl@16942).

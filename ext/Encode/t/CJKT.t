@@ -56,8 +56,10 @@ for my $charset (sort keys %Charset){
     my $dst_utf = File::Spec->catfile($dir,"$$.utf");
 
     open $src, "<$src_enc" or die "$src_enc : $!";
-    binmode($src, ":bytes") # needed if :utf8 in default open layer
-	if PerlIO::Layer->find('perlio');
+    
+    if (PerlIO::Layer->find('perlio')){
+	binmode($src, ":bytes"); # needed when :utf8 in default open layer
+    }
 
     $txt = join('',<$src>);
     close($src);

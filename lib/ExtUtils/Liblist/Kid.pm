@@ -24,6 +24,8 @@ sub ext {
 
 sub _unix_os2_ext {
     my($self,$potential_libs, $verbose, $give_libs) = @_;
+    $verbose ||= 0;
+
     if ($^O =~ 'os2' and $Config{perllibs}) { 
 	# Dynamic libraries are not transitive, so we may need including
 	# the libraries linked against perl.dll again.
@@ -34,8 +36,8 @@ sub _unix_os2_ext {
     return ("", "", "", "", ($give_libs ? [] : ())) unless $potential_libs;
     warn "Potential libraries are '$potential_libs':\n" if $verbose;
 
-    my($so)   = $Config{'so'};
-    my($libs) = $Config{'perllibs'};
+    my($so)   = $Config{so};
+    my($libs) = defined $Config{perllibs} ? $Config{perllibs} : $Config{libs};
     my $Config_libext = $Config{lib_ext} || ".a";
 
 
@@ -157,7 +159,7 @@ sub _unix_os2_ext {
 
 	    # what do we know about this library...
 	    my $is_dyna = ($fullname !~ /\Q$Config_libext\E\z/);
-	    my $in_perl = ($libs =~ /\B-l\Q$ {thislib}\E\b/s);
+	    my $in_perl = ($libs =~ /\B-l\Q${thislib}\E\b/s);
 
 	    # Do not add it into the list if it is already linked in
 	    # with the main perl executable.
@@ -212,6 +214,7 @@ sub _win32_ext {
     require Text::ParseWords;
 
     my($self, $potential_libs, $verbose, $give_libs) = @_;
+    $verbose ||= 0;
 
     # If user did not supply a list, we punt.
     # (caller should probably use the list in $Config{libs})
@@ -340,7 +343,7 @@ sub _win32_ext {
 
 	# give up
 	warn "Note (probably harmless): "
-		     ."No library found for '$thislib'\n"
+		     ."No library found for $thislib\n"
 	    unless $found_lib>0;
 
     }
@@ -364,9 +367,11 @@ sub _win32_ext {
 
 sub _vms_ext {
   my($self, $potential_libs,$verbose,$give_libs) = @_;
+  $verbose ||= 0;
+
   my(@crtls,$crtlstr);
   my($dbgqual) = $self->{OPTIMIZE} || $Config{'optimize'} ||
-                 $self->{CCFLAS}   || $Config{'ccflags'};
+                 $self->{CCFLAGS}   || $Config{'ccflags'};
   @crtls = ( ($dbgqual =~ m-/Debug-i ? $Config{'dbgprefix'} : '')
               . 'PerlShr/Share' );
   push(@crtls, grep { not /\(/ } split /\s+/, $Config{'perllibs'});
@@ -398,8 +403,8 @@ sub _vms_ext {
   my(@dirs,@libs,$dir,$lib,%found,@fndlibs,$ldlib);
   my $cwd = cwd();
   my($so,$lib_ext,$obj_ext) = @Config{'so','lib_ext','obj_ext'};
-  # List of common Unix library names and there VMS equivalents
-  # (VMS equivalent of '' indicates that the library is automatially
+  # List of common Unix library names and their VMS equivalents
+  # (VMS equivalent of '' indicates that the library is automatically
   # searched by the linker, and should be skipped here.)
   my(@flibs, %libs_seen);
   my %libmap = ( 'm' => '', 'f77' => '', 'F77' => '', 'V77' => '', 'c' => '',

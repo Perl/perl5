@@ -1,5 +1,11 @@
 Revision history for Perl extension Time::HiRes.
 
+1.44
+	- add hints/irix.pl to turn off overly POSIX flags that
+	  cause hide struct timespec to be hidden (and compilation
+	  to fail)
+	- documentation tweaks
+
 1.43
 	- add c:/temp to the list of temp directories to probe
 	  so that cygwin (and win*?) builds are happy.  This was

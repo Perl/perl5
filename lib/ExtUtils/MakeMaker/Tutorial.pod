@@ -1,0 +1,124 @@
+package ExtUtils::MakeMaker::Tutorial;
+
+use vars qw($VERSION);
+$VERSION = 0.01;
+
+
+=head1 NAME
+
+ExtUtils::MakeMaker::Tutorial - Writing a module with MakeMaker
+
+=head1 SYNOPSIS
+
+    use ExtUtils::MakeMaker;
+
+    WriteMakefile(
+        NAME            => 'Your::Module',
+        VERSION_FROM    => 'lib/Your/Module.pm'
+    );
+
+=head1 DESCRIPTION
+
+This is a short tutorial on writing a simple module with MakeMaker.
+
+=head2 The Mantra
+
+MakeMaker modules are installed using this simple mantra
+
+        perl Makefile.PL
+        make
+        make test
+        make install
+
+There are lots more commands and options, but the above will do it.
+
+=head2 The Layout
+
+The basic layout of a module looks something like this.
+
+        Makefile.PL
+        MANIFEST
+        lib/Your/Module.pm
+
+That's all that's strictly necessary.  There's additional files you might
+want to add:
+
+        lib/Your/Other/Module.pm
+        t/some_test.t
+        t/some_other_test.t
+        Changes
+        README
+        INSTALL
+        MANIFEST.SKIP
+        bin/some_program
+
+=over 4
+
+=item Makefile.PL
+
+When you run Makefile.PL, it makes a Makefile.  That's the whole point of
+MakeMaker.  The Makefile.PL is a simple module which loads
+ExtUtils::MakeMaker and runs the WriteMakefile() function with a few
+simple arguments.
+
+Here's an example of what you need for a simple module:
+
+    use ExtUtils::MakeMaker;
+
+    WriteMakefile(
+        NAME            => 'Your::Module',
+        VERSION_FROM    => 'lib/Your/Module.pm'
+    );
+
+NAME is the top-level namespace of your module.  VERSION_FROM is the file
+which contains the $VERSION variable for the entire distribution.  Typically
+this is the same as your top-level module.
+
+
+=item MANIFEST
+
+A simple listing of all the files in your distribution.
+
+        Makefile.PL
+        MANIFEST
+        lib/Your/Module.pm
+
+
+=item lib/
+
+This is the directory where your .pm files go.  They are layed out
+according to namespace.  So Foo::Bar is lib/Foo/Bar.pm.
+
+
+=item t/
+
+Tests for your modules go here.  Each test filename ends with a .t.
+So t/foo.t.  'make test' will run these tests.  The directory is flat,
+you cannot, for example, have t/foo/bar.t run by 'make test'.
+
+
+=item Changes
+
+A log of changes you've made to this module.
+
+
+=item README
+
+=item INSTALL
+
+=item MANIFEST.SKIP
+
+=item bin/
+
+=back
+
+=head1 SEE ALSO
+
+L<perlmodstyle> gives stylistic help writing a module.
+
+There are modules to help you through the process of writing a module:
+L<ExtUtils::ModuleMaker>, L<Module::Setup>, L<CPAN::MakeMaker>
+
+=cut
+
+1;

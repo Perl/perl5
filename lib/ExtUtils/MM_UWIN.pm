@@ -49,4 +49,6 @@ Michael G Schwern <schwern@pobox.com> with code from ExtUtils::MM_Unix
 
 L<ExtUtils::MM_Win32>, L<ExtUtils::MakeMaker>
 
+=cut
+
 1;

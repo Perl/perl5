@@ -1,0 +1,49 @@
+Rethink MM_Win32 tests.
+
+Investigate one method per make target.
+
+Test MM_Any and pull some redundant tests out of MM_*.t
+
+Create a way to init MM objects.  (XXX What's wrong with MakeMaker->new?)
+
+Move instmodsh to utils/ in the core.
+
+Handle config files (ie. /etc) and their special PREFIX needs
+(ie. PREFIX=/usr, INSTALLCONFIGDIR=/etc).
+
+Make sure PDL builds
+
+Fix find_perl on Amiga trg@privat.utfors.se
+
+Fix appending of .. when DIRS contains directories not immediately
+below the cwd.
+
+Fill in the IMPORTS docs.
+
+Document "make install UNINST=1"
+
+Remove tar -I Sun-ism from instmodsh.
+
+Consider adding a timeout option to prompt() and env variable.
+
+Unify VMS->find_perl
+
+Consider if VMS->find_perl needs to have pieces put into maybe_command()
+
+Consider if shell escaping all macro data is a good idea.
+
+Move Win32->init_others() ExtUtils::Command overrides into MM_Any.
+
+Figure out and document the 4th arg to ExtUtils::Install::install()
+
+Consider if adding a nativize() routine to replace macify() and
+fixpath() is useful.
+
+Eliminate the above from inside FS::VMS->catfile and catdir.  Make into 
+MM_VMS wrappers.
+
+Add "NO_META" to stop autogeneration (and auto overwrite) of META.yml.
+
+Test ExtUtils::Command::MM
+
+Finish ExtUtils::MakeMaker::Tutorial
