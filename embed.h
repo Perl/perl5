@@ -193,6 +193,8 @@
 #define do_vecget		Perl_do_vecget
 #define do_vecset		Perl_do_vecset
 #define do_vop			Perl_do_vop
+#ifdef SOCKS_64BIT_BUG
+#endif
 #define dofile			Perl_dofile
 #define dowantarray		Perl_dowantarray
 #define dump_all		Perl_dump_all
@@ -1661,6 +1663,8 @@
 #define do_vecget(a,b,c)	Perl_do_vecget(aTHX_ a,b,c)
 #define do_vecset(a)		Perl_do_vecset(aTHX_ a)
 #define do_vop(a,b,c,d)		Perl_do_vop(aTHX_ a,b,c,d)
+#ifdef SOCKS_64BIT_BUG
+#endif
 #define dofile(a)		Perl_dofile(aTHX_ a)
 #define dowantarray()		Perl_dowantarray(aTHX)
 #define dump_all()		Perl_dump_all(aTHX)
@@ -3255,6 +3259,14 @@
 #define do_vecset		Perl_do_vecset
 #define Perl_do_vop		CPerlObj::Perl_do_vop
 #define do_vop			Perl_do_vop
+#ifdef SOCKS_64BIT_BUG
+#define do_getc			Perl_do_getc
+#define do_ungetc		Perl_do_ungetc
+#define do_fread		Perl_do_fread
+#define do_s64_delete_buffer	Perl_do_s64_delete_buffer
+#define do_s64_tell		Perl_do_s64_tell
+#define do_s64_seek		Perl_do_s64_seek
+#endif
 #define Perl_dofile		CPerlObj::Perl_dofile
 #define dofile			Perl_dofile
 #define Perl_dowantarray	CPerlObj::Perl_dowantarray

@@ -56,6 +56,20 @@
 #  include <unistd.h>
 #endif
 
+#ifdef SOCKS_64BIT_BUG
+typedef struct __s64_iobuffer {
+    struct __s64_iobuffer *next, *last;		/* Queue pointer */
+    PerlIO *fp;					/* assigned file pointer */
+    int cnt;					/* Buffer counter */
+    int size;					/* Buffer size */
+    int *buffer;				/* the buffer */
+} S64_IOB;
+
+static S64_IOB *_s64_get_buffer( PerlIO *f);
+static S64_IOB *_s64_create_buffer( PerlIO *f);
+static int _s64_malloc( S64_IOB *ptr);
+#endif
+
 bool
 Perl_do_open(pTHX_ GV *gv, register char *name, I32 len, int as_raw,
 	     int rawmode, int rawperm, PerlIO *supplied_fp)
@@ -941,6 +955,7 @@ Perl_do_eof(pTHX_ GV *gv)
 	    (void)PerlIO_ungetc(IoIFP(io),ch);
 	    return FALSE;
 	}
+
         if (PerlIO_has_cntptr(IoIFP(io)) && PerlIO_canset_cnt(IoIFP(io))) {
 	    if (PerlIO_get_cnt(IoIFP(io)) < -1)
 		PerlIO_set_cnt(IoIFP(io),-1);
@@ -2075,3 +2090,144 @@ Perl_do_shmio(pTHX_ I32 optype, SV **mark, SV **sp)
 
 #endif /* SYSV IPC */
 
+/**
+ ** getc and ungetc wrappers for the 64 bit problems with SOCKS 5 support
+ ** Workaround to the problem, that SOCKS maps a socket 'getc' to revc
+ ** without checking the ungetc buffer.
+ **/
+#ifdef SOCKS_64BIT_BUG
+static S64_IOB *s64_buffer = (S64_IOB *) NULL;
+
+/* get a buffered stream pointer */
+static S64_IOB *_s64_get_buffer( PerlIO *f) {
+    S64_IOB *ptr = s64_buffer;
+    while( ptr && ptr->fp != f)
+	ptr = ptr->next;
+    return( ptr);
+}
+
+/* create a buffered stream pointer */
+static S64_IOB *_s64_create_buffer( PerlIO *f) {
+    S64_IOB *ptr = malloc( sizeof( S64_IOB));
+    if( ptr) {
+	ptr->fp = f;
+	ptr->cnt = ptr->size = 0;
+	ptr->buffer = (int *) NULL;
+	ptr->next = s64_buffer;
+	ptr->last = (S64_IOB *) NULL;
+	if( s64_buffer) s64_buffer->last = ptr;
+	s64_buffer = ptr;
+    }
+    return( ptr);
+}
+
+/* delete a buffered stream pointer */
+void Perl_do_s64_delete_buffer( PerlIO *f) {
+    S64_IOB *ptr = _s64_get_buffer(f);
+    if( ptr) {
+	/* fix the stream pointer according to the bytes buffered */
+	/* required, if this is called in a seek-context */
+	if( ptr->cnt) fseek(f,-ptr->cnt,SEEK_CUR);
+	if( ptr->buffer) free( ptr->buffer);
+	if( ptr->last)
+	    ptr->last->next = ptr->next;
+	else
+	    s64_buffer = ptr->next;
+	free( ptr);
+    }
+}
+
+/* internal buffer management */
+#define _S64_BUFFER_SIZE 32
+static int _s64_malloc( S64_IOB *ptr) {
+    if( ptr) {
+	if( !ptr->buffer) {
+	    ptr->buffer = (int *) calloc( _S64_BUFFER_SIZE, sizeof( int));
+	    ptr->size = ptr->cnt = 0;
+	} else {
+	    ptr->buffer = (int *) realloc( ptr->buffer, ptr->size + _S64_BUFFER_SIZE);
+	}
+	
+	if( !ptr->buffer)
+	    return( 0);
+	
+	ptr->size += _S64_BUFFER_SIZE;
+	 
+	return( 1);
+    }
+
+    return( 0);
+}
+
+/* SOCKS 64 bit getc replacement */
+int Perl_do_s64_getc( PerlIO *f) {
+    S64_IOB *ptr = _s64_get_buffer(f);
+    if( ptr) {
+	if( ptr->cnt) 
+	    return( ptr->buffer[--ptr->cnt]);
+    }
+    return( getc(f));
+}
+
+/* SOCKS 64 bit ungetc replacement */
+int Perl_do_s64_ungetc( int ch, PerlIO *f) {
+    S64_IOB *ptr = _s64_get_buffer(f);
+
+    if( !ptr) ptr=_s64_create_buffer(f);
+    if( !ptr) return( EOF);
+    if( !ptr->buffer || (ptr->buffer && ptr->cnt >= ptr->size)) 
+	if( !_s64_malloc( ptr)) return( EOF);
+    ptr->buffer[ptr->cnt++] = ch;
+
+    return( ch);
+}
+
+/* SOCKS 64 bit fread replacement */
+SSize_t	Perl_do_s64_fread(void *buf, SSize_t count, PerlIO* f) {
+    SSize_t len = 0;
+    char *bufptr = (char *) buf;
+    S64_IOB *ptr = _s64_get_buffer(f);
+    if( ptr) {
+	while( ptr->cnt && count) {
+	    *bufptr++ = ptr->buffer[--ptr->cnt];
+	    count--, len++;
+	}
+    }
+    if( count)
+	len += (SSize_t)fread(bufptr,1,count,f);
+
+    return( len);
+}
+
+/* SOCKS 64 bit fseek replacement */
+int	Perl_do_s64_seek(PerlIO* f, Off_t offset, int whence) {
+    S64_IOB *ptr = _s64_get_buffer(f);
+
+    /* Simply clear the buffer and seek if the position is absolute */
+    if( SEEK_SET == whence || SEEK_END == whence) {
+	if( ptr) ptr->cnt = 0;
+
+    /* In case of relative positioning clear the buffer and calculate */
+    /* a fixed offset */
+    } else if( SEEK_CUR == whence) {
+	if( ptr) {
+	    offset -= (Off_t)ptr->cnt;
+	    ptr->cnt = 0;
+	}
+    }
+
+    /* leave out buffer untouched otherwise, because fseek will fail */
+    /* seek now */
+    return( fseeko( f, offset, whence));
+}
+
+/* SOCKS 64 bit ftell replacement */
+Off_t	Perl_do_s64_tell(PerlIO* f) {
+    Off_t offset = 0;
+    S64_IOB *ptr = _s64_get_buffer(f);
+    if( ptr)
+	offset = ptr->cnt;
+    return( ftello(f) - offset);
+}
+
+#endif

@@ -247,6 +247,14 @@ PERL_CALLCONV I32	Perl_do_trans(pTHX_ SV* sv);
 PERL_CALLCONV UV	Perl_do_vecget(pTHX_ SV* sv, I32 offset, I32 size);
 PERL_CALLCONV void	Perl_do_vecset(pTHX_ SV* sv);
 PERL_CALLCONV void	Perl_do_vop(pTHX_ I32 optype, SV* sv, SV* left, SV* right);
+#ifdef SOCKS_64BIT_BUG
+PERL_CALLCONV int	Perl_do_getc(PerlIO* fp);
+PERL_CALLCONV int	Perl_do_ungetc(int ch, PerlIO* fp);
+PERL_CALLCONV SSize_t	Perl_do_fread(void *buf, SSize_t count, PerlIO* fp);
+PERL_CALLCONV void	Perl_do_s64_delete_buffer(PerlIO* fp);
+PERL_CALLCONV Off_t	Perl_do_s64_tell(PerlIO* fp);
+PERL_CALLCONV int	Perl_do_s64_seek(PerlIO* fp, Off_t pos, int whence);
+#endif
 PERL_CALLCONV OP*	Perl_dofile(pTHX_ OP* term);
 PERL_CALLCONV I32	Perl_dowantarray(pTHX);
 PERL_CALLCONV void	Perl_dump_all(pTHX);
