@@ -5,9 +5,45 @@
 
 ##
 # Paths
-#
-# Since Perl 5.8.1: No more special prefix games, no special handling of /usr.
-#
+##
+
+# Configure hasn't figured out the version number yet.  Bummer.
+perl_revision=`awk '/define[ 	]+PERL_REVISION/ {print $3}' $src/patchlevel.h`
+perl_version=`awk '/define[ 	]+PERL_VERSION/ {print $3}' $src/patchlevel.h`
+perl_subversion=`awk '/define[ 	]+PERL_SUBVERSION/ {print $3}' $src/patchlevel.h`
+version="${perl_revision}.${perl_version}.${perl_subversion}"
+
+# This was previously used in all but causes three cases
+# (no -Ddprefix=, -Dprefix=/usr, -Dprefix=/some/thing/else)
+# but that caused too much grief.
+# vendorlib="/System/Library/Perl/${version}"; # Apple-supplied modules
+
+# BSD paths
+case "$prefix" in
+'')	# Default install; use non-system directories
+	prefix='/usr/local';
+	siteprefix='/usr/local';
+	;;
+'/usr')	# We are building/replacing the built-in perl
+	prefix='/';
+	installprefix='/';
+	bin='/usr/bin';
+	sitebin='/usr/bin';
+	installusrbinperl='define'; # You knew what you were doing.
+	privlib="/System/Library/Perl/${version}";
+	sitelib="/Library/Perl/${version}";
+	vendorprefix='/';
+	usevendorprefix='define';
+	vendorbin='/usr/bin';
+	vendorscript='/usr/bin';
+	vendorlib="/Network/Library/Perl/${version}";
+	# 4BSD uses ${prefix}/share/man, not ${prefix}/man.
+	man1dir='/usr/share/man/man1';
+	man3dir='/usr/share/man/man3';
+	;;
+  *)	# Anything else; use non-system directories, use Configure defaults
+	;;
+esac
 
 ##
 # Tool chain settings
