@@ -55,6 +55,18 @@
 #undef tmpfile
 #undef ungetc
 #undef vfprintf
+#undef printf
+
+/* printf used to live in perl.h like this - more sophisticated 
+   than the rest 
+ */
+#if defined(__GNUC__) && !defined(__STRICT_ANSI__) && !defined(PERL_GCC_PEDANTIC)
+#define printf(fmt,args...) PerlIO_stdoutf(fmt,##args)
+#else
+#define printf PerlIO_stdoutf
+#endif
+#endif
+
 #define fprintf			PerlIO_printf
 #define stdin			PerlIO_stdin()
 #define stdout			PerlIO_stdout()
