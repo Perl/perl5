@@ -4986,7 +4986,7 @@ Example, assuming array lengths are passed before arrays:
 
 Splits the string EXPR into a list of strings and returns that list.  By
 default, empty leading fields are preserved, and empty trailing ones are
-deleted.
+deleted.  (If all fields are empty, they are considered to be trailing.)
 
 In scalar context, returns the number of fields found and splits into
 the C<@_> array.  Use of split in scalar context is deprecated, however,
