@@ -2804,7 +2804,7 @@ but is more efficient.  Returns the new number of elements in the array.
 
 =item qw/STRING/
 
-Generalized quotes.  See L<perlop>.
+Generalized quotes.  See L<perlop/"Regexp Quote-Like Operators">.
 
 =item quotemeta EXPR
 
