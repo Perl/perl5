@@ -33,8 +33,8 @@ if (socket(T,PF_INET,SOCK_STREAM,6)) {
 	print(($read == 0 || $buff eq "hello") ? "ok 3\n" : "not ok 3\n");
   }
   else {
-	print "# You're allowed to fail tests 2 and 3 if.\n";
-	print "# The echo service has been disabled.\n";
+	print "# You're allowed to fail tests 2 and 3 if\n";
+	print "# the echo service has been disabled.\n";
 	print "# $!\n";
 	print "ok 2\n";
 	print "ok 3\n";
@@ -63,8 +63,8 @@ if( socket(S,PF_INET,SOCK_STREAM,6) ){
 	print(($read == 0 || $buff eq "olleh") ? "ok 6\n" : "not ok 6\n");
   }
   else {
-	print "# You're allowed to fail tests 5 and 6 if.\n";
-	print "# The echo service has been disabled.\n";
+	print "# You're allowed to fail tests 5 and 6 if\n";
+	print "# the echo service has been disabled.\n";
 	print "# $!\n";
 	print "ok 5\n";
 	print "ok 6\n";

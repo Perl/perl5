@@ -216,42 +216,59 @@ inet_ntoa(ip_address_sv)
 	char * ip_address;
 	if (DO_UTF8(ip_address_sv) && !sv_utf8_downgrade(ip_address_sv, 1))
 	     croak("Wide character in Socket::inet_ntoa");
-	ip_address = SvPV(ip_address_sv,addrlen);
-	/* Bad assumptions here.
+	ip_address = SvPV(ip_address_sv, addrlen);
+	/*
+	 * Bad assumptions possible here.
 	 *
-	 * Bad Assumption 1: struct in_addr has no other fields than
-	 * the s_addr (which is the field we really care about here).
+	 * Bad Assumption 1: struct in_addr has no other fields
+	 * than the s_addr (which is the field we care about
+	 * in here, really). However, we can be fed either 4-byte
+	 * addresses (from pack("N", ...), or va.b.c.d, or ...),
+	 * or full struct in_addrs (from e.g. pack_sockaddr_in()),
+	 * which may or may not be 4 bytes in size.
 	 *
-	 * Bad Assumption 2: the s_addr field is the first field
-	 * in struct in_addr (the Copy() assumes that).
-	 *
-	 * Bad Assumption 3: the s_addr field is a simple type
-	 * (such as an int).  It can be a bit field, in which
-	 * case using & (address-of) on it or taking sizeof()
+	 * Bad Assumption 2: the s_addr field is a simple type
+	 * (such as an int, u_int32_t).  It can be a bit field,
+	 * in which case using & (address-of) on it or taking sizeof()
 	 * wouldn't go over too well.  (Those are not attempted
-	 * now but in case someone thinks to fix the below uses
-	 * of addr (both in the length check and the Copy())
-	 * by using addr.s_addr.
+	 * now but in case someone thinks to change the below code
+	 * to use addr.s_addr instead of addr, you have warned.)
 	 *
-	 * These bad assumptions currently break UNICOS which has
-	 * struct in_addr struct { u_long  st_addr:32; } s_da;
-	 * #define s_addr          s_da.st_addr   
+	 * Bad Assumption 3: the s_addr is the first field in
+	 * an in_addr, or that its bytes are the first bytes in
+	 * an in_addr.
 	 *
+	 * These bad assumptions are wrong in UNICOS which has
+	 * struct in_addr { struct { u_long  st_addr:32; } s_da };
+	 * #define s_addr s_da.st_addr
 	 * and u_long is 64 bits.
 	 *
-	 * The bold soul attempting to fix this should also
-	 * fix pack_sockaddr_in() to agree.
-	 *
-	 * --jhi
-	 */
-	if (addrlen != sizeof(addr)) {
-	    croak("Bad arg length for %s, length is %d, should be %d",
-			"Socket::inet_ntoa",
-			addrlen, sizeof(addr));
+	 * --jhi */
+#define PERL_IN_ADDR_S_ADDR_SIZE 4
+#if INTSIZE == PERL_IN_ADDR_S_ADDR_SIZE
+	if (addrlen == PERL_IN_ADDR_S_ADDR_SIZE)
+	     addr.s_addr = ntohl(*(int*)ip_address);
+	else
+#endif
+	{
+	     /* The following could be optimized away if we knew
+	      * during compile time what size is struct in_addr. */
+	     if (addrlen == sizeof(addr))
+		  Copy( ip_address, &addr, sizeof addr, char );
+	     else {
+		  if (PERL_IN_ADDR_S_ADDR_SIZE == sizeof(addr))
+		       croak("Bad arg length for %s, length is %d, should be %d",
+			     "Socket::inet_ntoa",
+			     addrlen, PERL_IN_ADDR_S_ADDR_SIZE);
+		  else
+		       croak("Bad arg length for %s, length is %d, should be %d or %d",
+			     "Socket::inet_ntoa",
+			     addrlen, PERL_IN_ADDR_S_ADDR_SIZE, sizeof(addr));
+	     }
 	}
-	Copy( ip_address, &addr, sizeof addr, char );
-#if defined(__hpux) && defined(__GNUC__) && defined(USE_64_BIT_INT)
-        /* GCC on HP_UX breaks the call to inet_ntoa --sky */
+	/* We could use inet_ntoa() but that is broken
+	 * in HP-UX + GCC + 64bitint (returns "0.0.0.0"),
+	 * so let's use this sprintf() workaround everywhere. */
 	New(1138, addr_str, 4 * 3 + 3 + 1, char);
 	sprintf(addr_str, "%d.%d.%d.%d",
 		((addr.s_addr >> 24) & 0xFF),
@@ -260,10 +277,6 @@ inet_ntoa(ip_address_sv)
 		( addr.s_addr        & 0xFF));
 	ST(0) = sv_2mortal(newSVpvn(addr_str, strlen(addr_str)));
 	Safefree(addr_str);
-#else
-	addr_str = inet_ntoa(addr);
-	ST(0) = sv_2mortal(newSVpvn(addr_str, strlen(addr_str)));
-#endif
 	}
 
 void
