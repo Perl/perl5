@@ -575,8 +575,6 @@ pointed out that perllib_mangle() is good for this.
 
 =head2 Rename new headers to be consistent with the rest
 
-=head2 Sort out the spawnvp() mess
-
 =head2 Work out DLL versioning
 
 =head2 Style-check

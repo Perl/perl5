@@ -3414,7 +3414,7 @@ typedef struct am_table_short AMTS;
  * interpreter-local data. */
 #define dMY_CXT	\
 	dMY_CXT_SV;							\
-	my_cxt_t *my_cxtp = (my_cxt_t*)SvUV(my_cxt_sv)
+	my_cxt_t *my_cxtp = INT2PTR(my_cxt_t*,SvUV(my_cxt_sv))
 
 /* Creates and zeroes the per-interpreter data.
  * (We allocate my_cxtp in a Perl SV so that it will be released when
@@ -3424,7 +3424,7 @@ typedef struct am_table_short AMTS;
 	/* newSV() allocates one more than needed */			\
 	my_cxt_t *my_cxtp = (my_cxt_t*)SvPVX(newSV(sizeof(my_cxt_t)-1));\
 	Zero(my_cxtp, 1, my_cxt_t);					\
-	sv_setuv(my_cxt_sv, (UV)my_cxtp)
+	sv_setuv(my_cxt_sv, PTR2UV(my_cxtp))
 
 /* This macro must be used to access members of the my_cxt_t structure.
  * e.g. MYCXT.some_data */

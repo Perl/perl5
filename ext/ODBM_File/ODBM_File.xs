@@ -130,8 +130,9 @@ odbm_TIEHASH(dbtype, filename, flags, mode)
 void
 DESTROY(db)
 	ODBM_File	db
-	CODE:
+	PREINIT:
 	dMY_CXT;
+	CODE:
 	dbmrefcnt--;
 	dbmclose();
 	safefree(db);

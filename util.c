@@ -1707,6 +1707,9 @@ Perl_vcroak(pTHX_ const char* pat, va_list *args)
 	PL_restartop = die_where(message, msglen);
 	JMPENV_JUMP(3);
     }
+    else if (!message)
+	message = SvPVx(ERRSV, msglen);
+
     {
 #ifdef USE_SFIO
 	/* SFIO can really mess with your errno */

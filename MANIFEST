@@ -1502,6 +1502,8 @@ t/op/subst_amp.t	See if $&-related substitution works
 t/op/subst_wamp.t	See if substitution works with $& present
 t/op/substr.t		See if substr works
 t/op/sysio.t		See if sysread and syswrite work
+t/op/system.t		See if system works
+t/op/system_tests	Test runner for system.t
 t/op/taint.t		See if tainting works
 t/op/tie.t		See if tie/untie functions work
 t/op/tiearray.t		See if tie for arrays works
