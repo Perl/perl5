@@ -392,5 +392,19 @@ struct thread_intern {
 #  endif /* !USE_DECLSPEC_THREAD */
 #endif /* USE_THREADS */
 
+/* UNICODE<>ANSI translation helpers */
+/* Use CP_ACP when mode is ANSI */
+/* Use CP_UTF8 when mode is UTF8 */
+
+#define A2WHELPER(lpa, lpw, nChars, acp)\
+    lpw[0] = 0, MultiByteToWideChar(acp, 0, lpa, -1, lpw, nChars)
+
+#define W2AHELPER(lpw, lpa, nChars, acp)\
+    lpa[0] = '\0', WideCharToMultiByte(acp, 0, lpw, -1, lpa, nChars, NULL, NULL)
+
+/* place holders for now */
+#define USING_WIDE() 0
+#define GETINTERPMODE() CP_ACP
+
 #endif /* _INC_WIN32_PERL5 */
 

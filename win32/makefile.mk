@@ -46,11 +46,17 @@ INST_VER	*= \5.00557
 #USE_MULTI	*= define
 
 #
-# uncomment one
-#
+# uncomment exactly one of the following
+# 
+# Visual C++ 2.x
 #CCTYPE		*= MSVC20
+# Visual C++ > 2.x and < 6.x
 #CCTYPE		*= MSVC
+# Visual C++ >= 6.x
+#CCTYPE		*= MSVC60
+# Borland 5.02 or later
 CCTYPE		*= BORLAND
+# mingw32/egcs or mingw32/gcc
 #CCTYPE		*= GCC
 
 #
@@ -62,25 +68,15 @@ CCTYPE		*= BORLAND
 
 #
 # uncomment next line if you want debug version of perl (big,slow)
+# If not enabled, we automatically try to use maximum optimization
+# with all compilers that are known to have a working optimizer.
 #
 #CFG		*= Debug
 
 #
-# uncomment next option if you want to use the VC++ compiler optimization.
-# This option is only relevant for the Microsoft compiler; we automatically
-# use maximum optimization with the other compilers (unless you specify a
-# DEBUGGING build).
-# Warning: This is known to produce incorrect code for compiler versions
-# earlier than VC++ 98 (Visual Studio 6.0). VC++ 98 generates code that
-# successfully passes the Perl regression test suite. It hasn't yet been
-# widely tested with real applications though.
-#
-#CFG		*= Optimize
-
-#
 # uncomment to enable use of PerlCRT.DLL when using the Visual C compiler.
 # Highly recommended.  It has patches that fix known bugs in MSVCRT.DLL.
-# This currently requires VC 5.0 with Service Pack 3.
+# This currently requires VC 5.0 with Service Pack 3 or later.
 # Get it from CPAN at http://www.perl.com/CPAN/authors/id/D/DO/DOUGL/
 # and follow the directions in the package to install.
 #
@@ -194,6 +190,18 @@ ARCHNAME	= MSWin32-$(PROCESSOR_ARCHITECTURE)-object
 ARCHNAME	= MSWin32-$(PROCESSOR_ARCHITECTURE)-thread
 .ELSE
 ARCHNAME	= MSWin32-$(PROCESSOR_ARCHITECTURE)
+.ENDIF
+
+# Visual Studio 98 specific
+.IF "$(CCTYPE)" == "MSVC60"
+
+# VC 6.0 can load the socket dll on demand.  Makes the test suite
+# run in about 10% less time.
+DELAYLOAD	*= -DELAYLOAD:wsock32.dll delayimp.lib 
+
+# VC 6.0 seems capable of compiling perl correctly with optimizations
+# enabled.  Anything earlier fails tests.
+CFG		*= Optimize
 .ENDIF
 
 ARCHDIR		= ..\lib\$(ARCHNAME)
@@ -334,7 +342,8 @@ OPTIMIZE	= -Od $(RUNTIME) -DNDEBUG
 LINK_DBG	= -release
 .ENDIF
 
-LIBBASEFILES	= $(CRYPT_LIB) oldnames.lib kernel32.lib user32.lib gdi32.lib \
+LIBBASEFILES	= $(DELAYLOAD) $(CRYPT_LIB) \
+		oldnames.lib kernel32.lib user32.lib gdi32.lib \
 		winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib \
 		oleaut32.lib netapi32.lib uuid.lib wsock32.lib mpr.lib winmm.lib \
 		version.lib odbc32.lib odbccp32.lib

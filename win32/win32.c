@@ -669,8 +669,12 @@ win32_opendir(char *filename)
     long		idx;
     char		scanname[MAX_PATH+3];
     struct stat		sbuf;
-    WIN32_FIND_DATA	FindData;
+    WIN32_FIND_DATAA	aFindData;
+    WIN32_FIND_DATAW	wFindData;
     HANDLE		fh;
+    char		buffer[MAX_PATH*2];
+    WCHAR		wbuffer[MAX_PATH];
+    char*		ptr;		
 
     len = strlen(filename);
     if (len > MAX_PATH)
@@ -700,7 +704,13 @@ win32_opendir(char *filename)
     scanname[len] = '\0';
 
     /* do the FindFirstFile call */
-    fh = FindFirstFile(scanname, &FindData);
+    if (USING_WIDE()) {
+	A2WHELPER(scanname, wbuffer, sizeof(wbuffer), GETINTERPMODE());
+	fh = FindFirstFileW(wbuffer, &wFindData);
+    }
+    else {
+	fh = FindFirstFileA(scanname, &aFindData);
+    }
     if (fh == INVALID_HANDLE_VALUE) {
 	/* FindFirstFile() fails on empty drives! */
 	if (GetLastError() == ERROR_FILE_NOT_FOUND)
@@ -712,11 +722,18 @@ win32_opendir(char *filename)
     /* now allocate the first part of the string table for
      * the filenames that we find.
      */
-    idx = strlen(FindData.cFileName)+1;
+    if (USING_WIDE()) {
+	W2AHELPER(wFindData.cFileName, buffer, sizeof(buffer), GETINTERPMODE());
+	ptr = buffer;
+    }
+    else {
+	ptr = aFindData.cFileName;
+    }
+    idx = strlen(ptr)+1;
     New(1304, p->start, idx, char);
     if (p->start == NULL)
 	croak("opendir: malloc failed!\n");
-    strcpy(p->start, FindData.cFileName);
+    strcpy(p->start, ptr);
     p->nfiles++;
 
     /* loop finding all the files that match the wildcard
@@ -724,15 +741,21 @@ win32_opendir(char *filename)
      * the variable idx should point one past the null terminator
      * of the previous string found.
      */
-    while (FindNextFile(fh, &FindData)) {
-	len = strlen(FindData.cFileName);
+    while (USING_WIDE()
+	    ? FindNextFileW(fh, &wFindData)
+	    : FindNextFileA(fh, &aFindData)) {
+	if (USING_WIDE()) {
+	    W2AHELPER(wFindData.cFileName, buffer, sizeof(buffer), GETINTERPMODE());
+	}
+	/* ptr is set above to the correct area */
+	len = strlen(ptr);
 	/* bump the string table size by enough for the
 	 * new name and it's null terminator
 	 */
 	Renew(p->start, idx+len+1, char);
 	if (p->start == NULL)
 	    croak("opendir: malloc failed!\n");
-	strcpy(&p->start[idx], FindData.cFileName);
+	strcpy(&p->start[idx], ptr);
 	p->nfiles++;
 	idx += len+1;
     }
@@ -930,6 +953,7 @@ win32_stat(const char *path, struct stat *buffer)
     char	t[MAX_PATH+1]; 
     int		l = strlen(path);
     int		res;
+    WCHAR	wbuffer[MAX_PATH];
 
     if (l > 1) {
 	switch(path[l - 1]) {
@@ -951,13 +975,25 @@ win32_stat(const char *path, struct stat *buffer)
 	    break;
 	}
     }
-    res = stat(path,buffer);
+    if (USING_WIDE()) {
+	A2WHELPER(path, wbuffer, sizeof(wbuffer), GETINTERPMODE());
+	res = _wstat(wbuffer, (struct _stat *)buffer);
+    }
+    else {
+	res = stat(path, buffer);
+    }
     if (res < 0) {
 	/* CRT is buggy on sharenames, so make sure it really isn't.
 	 * XXX using GetFileAttributesEx() will enable us to set
 	 * buffer->st_*time (but note that's not available on the
 	 * Windows of 1995) */
-	DWORD r = GetFileAttributes(path);
+	DWORD r;
+	if (USING_WIDE()) {
+	    r = GetFileAttributesW(wbuffer);
+	}
+	else {
+	    r = GetFileAttributesA(path);
+	}
 	if (r != 0xffffffff && (r & FILE_ATTRIBUTE_DIRECTORY)) {
 	    /* buffer may still contain old garbage since stat() failed */
 	    Zero(buffer, 1, struct stat);
@@ -973,7 +1009,9 @@ win32_stat(const char *path, struct stat *buffer)
 	    && (path[2] == '\\' || path[2] == '/'))
 	{
 	    /* The drive can be inaccessible, some _stat()s are buggy */
-	    if (!GetVolumeInformation(path,NULL,0,NULL,NULL,NULL,NULL,0)) {
+	    if (USING_WIDE()
+		? !GetVolumeInformationW(wbuffer,NULL,0,NULL,NULL,NULL,NULL,0)
+		: !GetVolumeInformationA(path,NULL,0,NULL,NULL,NULL,NULL,0)) {
 		errno = ENOENT;
 		return -1;
 	    }
@@ -1083,19 +1121,46 @@ DllExport char *
 win32_getenv(const char *name)
 {
     static char *curitem = Nullch;	/* XXX threadead */
-    static DWORD curlen = 0;		/* XXX threadead */
+    static WCHAR *wCuritem = (WCHAR*)Nullch;	/* XXX threadead */
+    static DWORD curlen = 0, wCurlen = 0;/* XXX threadead */
+    WCHAR wBuffer[MAX_PATH];
     DWORD needlen;
+    if (USING_WIDE()) {
+	if (!wCuritem) {
+	    wCurlen = 512;
+	    New(1306,wCuritem,wCurlen,WCHAR);
+	}
+    }
     if (!curitem) {
 	curlen = 512;
 	New(1305,curitem,curlen,char);
     }
 
-    needlen = GetEnvironmentVariable(name,curitem,curlen);
+    if (USING_WIDE()) {
+	A2WHELPER(name, wBuffer, sizeof(wBuffer), GETINTERPMODE());
+	needlen = GetEnvironmentVariableW(wBuffer,wCuritem,wCurlen);
+    }
+    else
+	needlen = GetEnvironmentVariableA(name,curitem,curlen);
     if (needlen != 0) {
-	while (needlen > curlen) {
-	    Renew(curitem,needlen,char);
-	    curlen = needlen;
-	    needlen = GetEnvironmentVariable(name,curitem,curlen);
+	if (USING_WIDE()) {
+	    while (needlen > wCurlen) {
+		Renew(wCuritem,needlen,WCHAR);
+		wCurlen = needlen;
+		needlen = GetEnvironmentVariableW(wBuffer,wCuritem,wCurlen);
+	    }
+	    if (needlen > curlen) {
+		Renew(curitem,needlen,char);
+		curlen = needlen;
+	    }
+	    W2AHELPER(wCuritem, curitem, curlen, GETINTERPMODE());
+	}
+	else {
+	    while (needlen > curlen) {
+		Renew(curitem,needlen,char);
+		curlen = needlen;
+		needlen = GetEnvironmentVariableA(name,curitem,curlen);
+	    }
 	}
     }
     else {
@@ -1124,31 +1189,47 @@ win32_putenv(const char *name)
 {
     char* curitem;
     char* val;
-    int relval = -1;
+    WCHAR* wCuritem;
+    WCHAR* wVal;
+    int length, relval = -1;
     if(name) {
-	New(1309,curitem,strlen(name)+1,char);
-	strcpy(curitem, name);
-	val = strchr(curitem, '=');
-	if(val) {
-	    /* The sane way to deal with the environment.
-	     * Has these advantages over putenv() & co.:
-	     *  * enables us to store a truly empty value in the
-	     *    environment (like in UNIX).
-	     *  * we don't have to deal with RTL globals, bugs and leaks.
-	     *  * Much faster.
-	     * Why you may want to enable USE_WIN32_RTL_ENV:
-	     *  * environ[] and RTL functions will not reflect changes,
-	     *    which might be an issue if extensions want to access
-	     *    the env. via RTL.  This cuts both ways, since RTL will
-	     *    not see changes made by extensions that call the Win32
-	     *    functions directly, either.
-	     * GSAR 97-06-07
-	     */
-	    *val++ = '\0';
-	    if(SetEnvironmentVariable(curitem, *val ? val : NULL))
-		relval = 0;
+	if (USING_WIDE()) {
+	    length = strlen(name)+1;
+	    New(1309,wCuritem,length,WCHAR);
+	    A2WHELPER(name, wCuritem, length*2, GETINTERPMODE());
+	    wVal = wcschr(wCuritem, '=');
+	    if(wVal) {
+		*wVal++ = '\0';
+		if(SetEnvironmentVariableW(wCuritem, *wVal ? wVal : NULL))
+		    relval = 0;
+	    }
+	    Safefree(wCuritem);
 	}
-	Safefree(curitem);
+	else {
+	    New(1309,curitem,strlen(name)+1,char);
+	    strcpy(curitem, name);
+	    val = strchr(curitem, '=');
+	    if(val) {
+		/* The sane way to deal with the environment.
+		 * Has these advantages over putenv() & co.:
+		 *  * enables us to store a truly empty value in the
+		 *    environment (like in UNIX).
+		 *  * we don't have to deal with RTL globals, bugs and leaks.
+		 *  * Much faster.
+		 * Why you may want to enable USE_WIN32_RTL_ENV:
+		 *  * environ[] and RTL functions will not reflect changes,
+		 *    which might be an issue if extensions want to access
+		 *    the env. via RTL.  This cuts both ways, since RTL will
+		 *    not see changes made by extensions that call the Win32
+		 *    functions directly, either.
+		 * GSAR 97-06-07
+		 */
+		*val++ = '\0';
+		if(SetEnvironmentVariableA(curitem, *val ? val : NULL))
+		    relval = 0;
+	    }
+	    Safefree(curitem);
+	}
     }
     return relval;
 }
@@ -1220,8 +1301,16 @@ win32_utime(const char *filename, struct utimbuf *times)
     FILETIME ftAccess;
     FILETIME ftWrite;
     struct utimbuf TimeBuffer;
+    WCHAR wbuffer[MAX_PATH];
 
-    int rc = utime(filename,times);
+    int rc;
+    if (USING_WIDE()) {
+	A2WHELPER(filename, wbuffer, sizeof(wbuffer), GETINTERPMODE());
+	rc = _wutime(wbuffer, (struct _utimbuf*)times);
+    }
+    else {
+	rc = utime(filename, times);
+    }
     /* EACCES: path specifies directory or readonly file */
     if (rc == 0 || errno != EACCES /* || !IsWinNT() */)
 	return rc;
@@ -1233,9 +1322,16 @@ win32_utime(const char *filename, struct utimbuf *times)
     }
 
     /* This will (and should) still fail on readonly files */
-    handle = CreateFile(filename, GENERIC_READ | GENERIC_WRITE,
-			FILE_SHARE_READ | FILE_SHARE_DELETE, NULL,
-			OPEN_EXISTING, FILE_FLAG_BACKUP_SEMANTICS, NULL);
+    if (USING_WIDE()) {
+	handle = CreateFileW(wbuffer, GENERIC_READ | GENERIC_WRITE,
+			    FILE_SHARE_READ | FILE_SHARE_DELETE, NULL,
+			    OPEN_EXISTING, FILE_FLAG_BACKUP_SEMANTICS, NULL);
+    }
+    else {
+	handle = CreateFileA(filename, GENERIC_READ | GENERIC_WRITE,
+			    FILE_SHARE_READ | FILE_SHARE_DELETE, NULL,
+			    OPEN_EXISTING, FILE_FLAG_BACKUP_SEMANTICS, NULL);
+    }
     if (handle == INVALID_HANDLE_VALUE)
 	return rc;
 
@@ -1770,11 +1866,20 @@ win32_fwrite(const void *buf, size_t size, size_t count, FILE *fp)
     return fwrite(buf, size, count, fp);
 }
 
+#define MODE_SIZE 10
+
 DllExport FILE *
 win32_fopen(const char *filename, const char *mode)
 {
+    WCHAR wMode[MODE_SIZE], wBuffer[MAX_PATH];
     if (stricmp(filename, "/dev/null")==0)
-	return fopen("NUL", mode);
+	filename = "NUL";
+
+    if (USING_WIDE()) {
+	A2WHELPER(mode, wMode, sizeof(wMode), GETINTERPMODE());
+        A2WHELPER(filename, wBuffer, sizeof(wBuffer), GETINTERPMODE());
+	return _wfopen(wBuffer, wMode);
+    }
     return fopen(filename, mode);
 }
 
@@ -1784,16 +1889,28 @@ win32_fopen(const char *filename, const char *mode)
 #endif
 
 DllExport FILE *
-win32_fdopen( int handle, const char *mode)
+win32_fdopen(int handle, const char *mode)
 {
+    WCHAR wMode[MODE_SIZE];
+    if (USING_WIDE()) {
+	A2WHELPER(mode, wMode, sizeof(wMode), GETINTERPMODE());
+	return _wfdopen(handle, wMode);
+    }
     return fdopen(handle, (char *) mode);
 }
 
 DllExport FILE *
-win32_freopen( const char *path, const char *mode, FILE *stream)
+win32_freopen(const char *path, const char *mode, FILE *stream)
 {
+    WCHAR wMode[MODE_SIZE], wBuffer[MAX_PATH];
     if (stricmp(path, "/dev/null")==0)
-	return freopen("NUL", mode, stream);
+	path = "NUL";
+
+    if (USING_WIDE()) {
+	A2WHELPER(mode, wMode, sizeof(wMode), GETINTERPMODE());
+	A2WHELPER(path, wBuffer, sizeof(wBuffer), GETINTERPMODE());
+	return _wfreopen(wBuffer, wMode, stream);
+    }
     return freopen(path, mode, stream);
 }
 
@@ -2026,12 +2143,24 @@ win32_pclose(FILE *pf)
 DllExport int
 win32_rename(const char *oname, const char *newname)
 {
+    WCHAR wOldName[MAX_PATH];
+    WCHAR wNewName[MAX_PATH];
+    BOOL bResult;
     /* XXX despite what the documentation says about MoveFileEx(),
      * it doesn't work under Windows95!
      */
     if (IsWinNT()) {
-	if (!MoveFileEx(oname,newname,
-			MOVEFILE_COPY_ALLOWED|MOVEFILE_REPLACE_EXISTING)) {
+	if (USING_WIDE()) {
+	    A2WHELPER(oname, wOldName, sizeof(wOldName), GETINTERPMODE());
+	    A2WHELPER(newname, wNewName, sizeof(wNewName), GETINTERPMODE());
+	    bResult = MoveFileExW(wOldName,wNewName,
+			MOVEFILE_COPY_ALLOWED|MOVEFILE_REPLACE_EXISTING);
+	}
+	else {
+	    bResult = MoveFileExA(oname,newname,
+			MOVEFILE_COPY_ALLOWED|MOVEFILE_REPLACE_EXISTING);
+	}
+	if (!bResult) {
 	    DWORD err = GetLastError();
 	    switch (err) {
 	    case ERROR_BAD_NET_NAME:
@@ -2152,8 +2281,14 @@ win32_open(const char *path, int flag, ...)
     pmode = va_arg(ap, int);
     va_end(ap);
 
+    WCHAR wBuffer[MAX_PATH];
     if (stricmp(path, "/dev/null")==0)
-	return open("NUL", flag, pmode);
+	path = "NUL";
+
+    if (USING_WIDE()) {
+        A2WHELPER(path, wBuffer, sizeof(wBuffer), GETINTERPMODE());
+	return _wopen(wBuffer, flag, pmode);
+    }
     return open(path,flag,pmode);
 }
 

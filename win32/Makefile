@@ -42,9 +42,11 @@ INST_VER	= \5.00557
 #USE_MULTI	= define
 
 #
-# uncomment next line if you are using Visual C++ 2.x
+# uncomment one of the following lines if you are using either
+# Visual C++ 2.x or Visual C++ 6.x (aka Visual Studio 98)
 #
 #CCTYPE		= MSVC20
+#CCTYPE		= MSVC60
 
 #
 # uncomment next line if you want to use the perl object
@@ -56,15 +58,6 @@ INST_VER	= \5.00557
 # uncomment next line if you want debug version of perl (big,slow)
 #
 #CFG		= Debug
-
-#
-# uncomment next option if you want to use the VC++ compiler optimization.
-# Warning: This is known to produce incorrect code for compiler versions
-# earlier than VC++ 98 (Visual Studio 6.0). VC++ 98 generates code that
-# successfully passes the Perl regression test suite. It hasn't yet been
-# widely tested with real applications though.
-#
-#CFG		= Optimize
 
 #
 # uncomment to enable use of PerlCRT.DLL when using the Visual C compiler.
@@ -187,6 +180,20 @@ ARCHNAME	= MSWin32-$(PROCESSOR_ARCHITECTURE)
 !ENDIF
 !ENDIF
 
+# Visual Studio 98 specific
+!IF "$(CCTYPE)" == "MSVC60"
+
+# VC 6.0 can load the socket dll on demand.  Makes the test suite
+# run in about 10% less time.
+DELAYLOAD	= -DELAYLOAD:wsock32.dll delayimp.lib 
+
+# VC 6.0 seems capable of compiling perl correctly with optimizations
+# enabled.  Anything earlier fails tests.
+!IF "$(CFG)" == ""
+CFG		= Optimize
+!ENDIF
+!ENDIF
+
 ARCHDIR		= ..\lib\$(ARCHNAME)
 COREDIR		= ..\lib\CORE
 AUTODIR		= ..\lib\auto
@@ -251,7 +258,8 @@ LINK_DBG	= -release
 OPTIMIZE	= $(OPTIMIZE) $(CXX_FLAG)
 !ENDIF
 
-LIBBASEFILES	= $(CRYPT_LIB) oldnames.lib kernel32.lib user32.lib gdi32.lib \
+LIBBASEFILES	= $(DELAYLOAD) $(CRYPT_LIB) \
+		oldnames.lib kernel32.lib user32.lib gdi32.lib \
 		winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib \
 		oleaut32.lib netapi32.lib uuid.lib wsock32.lib mpr.lib winmm.lib \
 		version.lib odbc32.lib odbccp32.lib
