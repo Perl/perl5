@@ -62,16 +62,32 @@ struct timeval {
  long tv_usec;
 }
 */
-#include <sys/timeb.h>
 
+typedef union {
+    unsigned __int64	ft_i64;
+    FILETIME		ft_val;
+} FT_t;
+
+/* Number of 100 nanosecond units from 1/1/1601 to 1/1/1970 */
+#define EPOCH_BIAS  116444736000000000i64
+
+/* NOTE: This does not compute the timezone info (doing so can be expensive,
+ * and appears to be unsupported even by glibc) */
 int
-gettimeofday (struct timeval *tp, int nothing)
+gettimeofday (struct timeval *tp, void *not_used)
 {
- struct _timeb timebuffer;
- _ftime( &timebuffer );
- tp->tv_sec = timebuffer.time;
- tp->tv_usec = timebuffer.millitm * 1000;
- return 0;
+    FT_t ft;
+
+    /* this returns time in 100-nanosecond units  (i.e. tens of usecs) */
+    GetSystemTimeAsFileTime(&ft.ft_val);
+
+    /* seconds since epoch */
+    tp->tv_sec = (long)((ft.ft_i64 - EPOCH_BIAS) / 10000000i64);
+
+    /* microseconds remaining */
+    tp->tv_usec = (long)((ft.ft_i64 / 10i64) % 1000000i64);
+
+    return 0;
 }
 #endif
 
