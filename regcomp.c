@@ -2364,8 +2364,10 @@ S_regclass(pTHX)
 	    }
 	}
 	if (!SIZE_ONLY && namedclass > OOB_NAMEDCLASS) {
-	    if (range)
-		FAIL("invalid [] range in regexp"); /* [a-\w], [a-[:word:]] */
+	    if (range) {
+		ANYOF_BITMAP_SET(opnd, lastvalue);
+		ANYOF_BITMAP_SET(opnd, '-');
+	    }
 	    switch (namedclass) {
 	    case ANYOF_ALNUM:
 		if (LOC)
@@ -2608,6 +2610,8 @@ S_regclass(pTHX)
 		ANYOF_FLAGS(opnd) |= ANYOF_CLASS;
 	    continue;
 	}
+	if (range && namedclass > OOB_NAMEDCLASS)
+	    range = 0; /* [a-\d], [a-[:digit:]], not a true range. */
 	if (range) {
 	    if (lastvalue > value)
 		FAIL("invalid [] range in regexp"); /* [b-a] */
@@ -2617,8 +2621,6 @@ S_regclass(pTHX)
 	    lastvalue = value;
 	    if (*PL_regcomp_parse == '-' && PL_regcomp_parse+1 < PL_regxend &&
 		PL_regcomp_parse[1] != ']') {
-		if (namedclass > OOB_NAMEDCLASS)
-		    FAIL("invalid [] range in regexp"); /* [\w-a] */
 		PL_regcomp_parse++;
 		range = 1;
 		continue;	/* do it next time */
@@ -2777,9 +2779,10 @@ S_regclassutf8(pTHX)
 	    }
 	}
 	if (!SIZE_ONLY && namedclass > OOB_NAMEDCLASS) {
-	    if (range)
-		FAIL("invalid [] range in regexp"); /* [a-\w], [a-[:word:]] */
-	    switch (namedclass) {
+	    if (range) /* [a-\d], [a-[:digit:]] */
+                Perl_sv_catpvf(aTHX_ listsv, /* 0x002D is Unicode for '-' */
+			       "%04"UVxf"\n%002D\n", (UV)lastvalue);
+ 	    switch (namedclass) {
 	    case ANYOF_ALNUM:
 		Perl_sv_catpvf(aTHX_ listsv, "+utf8::IsWord\n");	break;
 	    case ANYOF_NALNUM:
@@ -2835,6 +2838,8 @@ S_regclassutf8(pTHX)
 	    }
 	    continue;
 	}
+	if (range && namedclass > OOB_NAMEDCLASS)
+	    range = 0; /* [a-\d], [a-[:digit:]], not a true range. */
         if (range) {
 	    if (lastvalue > value)
 		FAIL("invalid [] range in regexp"); /* [b-a] */
@@ -2846,8 +2851,6 @@ S_regclassutf8(pTHX)
 	    lastvalue = value;
 	    if (*PL_regcomp_parse == '-' && PL_regcomp_parse+1 < PL_regxend &&
 		PL_regcomp_parse[1] != ']') {
-		if (namedclass > OOB_NAMEDCLASS)
-		    FAIL("invalid [] range in regexp"); /* [\w-a] */
 		PL_regcomp_parse++;
 		range = 1;
 		continue;	/* do it next time */
