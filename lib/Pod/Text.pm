@@ -259,7 +259,6 @@ sub prepare_for_output {
 	elsif ($Cmd eq 'back') {
 	    $indent = pop(@indent);
 	    warn "Unmatched =back\n" unless defined $indent;
-	    $needspace = 1;
 	}
 	elsif ($Cmd eq 'item') {
 	    makespace();
