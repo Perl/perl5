@@ -1,5 +1,8 @@
 #!perl -w
 
+# use strict fails
+#Can't use string ("main::glob") as a symbol ref while "strict refs" in use at /usr/lib/perl5/5.005/File/DosGlob.pm line 191.
+
 #
 # Documentation at the __END__
 #
@@ -116,6 +119,52 @@ sub glob {
 	push @pat, $pat;
     }
 
+    # Mike Mestnik: made to do abc{1,2,3} == abc1 abc2 abc3.
+    #   abc3 will be the original {3} (and drop the {}).
+    #   abc1 abc2 will be put in @appendpat.
+    # This was just the esiest way, not nearly the best.
+    REHASH: {
+	my @appendpat = ();
+	for (@pat) {
+	    # There must be a "," I.E. abc{efg} is not what we want.
+	    while ( /^(.*)(?<!\\)\{(.*?)(?<!\\)\,.*?(?<!\\)\}(.*)$/ ) {
+		my ($start, $match, $end) = ($1, $2, $3);
+		#print "Got: \n\t$start\n\t$match\n\t$end\n";
+		my $tmp = "$start$match$end";
+		while ( $tmp =~ s/^(.*?)(?<!\\)\{(?:.*(?<!\\)\,)?(.*\Q$match\E.*?)(?:(?<!\\)\,.*)?(?<!\\)\}(.*)$/$1$2$3/ ) {
+		    #print "Striped: $tmp\n";
+		    #  these expanshions will be preformed by the original,
+		    #  when we call REHASH.
+		}
+		push @appendpat, ("$tmp");
+		s/^\Q$start\E(?<!\\)\{\Q$match\E(?<!\\)\,/$start\{/;
+		if ( /^\Q$start\E(?<!\\)\{(?!.*?(?<!\\)\,.*?\Q$end\E$)(.*)(?<!\\)\}\Q$end\E$/ ) {
+		    $match = $1;
+		    #print "GOT: \n\t$start\n\t$match\n\t$end\n\n";
+		    $_ = "$start$match$end";
+		}
+	    }
+	    #print "Sould have "GOT" vs "Got"!\n";
+		#FIXME: There should be checking for this.
+		#  How or what should be done about failure is beond me.
+	}
+	if ( $#appendpat != -1
+		) {
+	    #print "LOOP\n";
+	    #FIXME: Max loop, no way! :")
+	    for ( @appendpat ) {
+	        push @pat, $_;
+	    }
+	    goto REHASH;
+	}
+    }
+    for ( @pat ) {
+	s/\\{/{/g;
+	s/\\}/}/g;
+	s/\\,/,/g;
+    }
+    #print join ("\n", @pat). "\n";
+ 
     # assume global context if not provided one
     $cxix = '_G_' unless defined $cxix;
     $iter{$cxix} = 0 unless exists $iter{$cxix};
