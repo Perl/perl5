@@ -277,8 +277,9 @@ Perl_sv_peek(pTHX_ SV *sv)
 	}
     }
     else if (SvNOKp(sv)) {
-	SET_NUMERIC_STANDARD();
+ 	RESTORE_NUMERIC_STANDARD();
 	Perl_sv_catpvf(aTHX_ t, "(%g)",SvNVX(sv));
+ 	RESTORE_NUMERIC_LOCAL();
     }
     else if (SvIOKp(sv)) {		/* XXXX: IV, UV? */
 	if (SvIsUV(sv))
@@ -895,8 +896,9 @@ Perl_do_sv_dump(pTHX_ I32 level, PerlIO *file, SV *sv, I32 nest, I32 maxnest, bo
 	PerlIO_putc(file, '\n');
     }
     if (type >= SVt_PVNV || type == SVt_NV) {
-	SET_NUMERIC_STANDARD();
+	RESTORE_NUMERIC_STANDARD();
 	Perl_dump_indent(aTHX_ level, file, "  NV = %.*g\n", DBL_DIG, SvNVX(sv));
+	RESTORE_NUMERIC_LOCAL();
     }
     if (SvROK(sv)) {
 	Perl_dump_indent(aTHX_ level, file, "  RV = 0x%lx\n", (long)SvRV(sv));

@@ -6146,9 +6146,8 @@ Perl_scan_num(pTHX_ char *start)
 
 	/* make an sv from the string */
 	sv = NEWSV(92,0);
-	/* reset numeric locale in case we were earlier left in Swaziland */
-	SET_NUMERIC_STANDARD();
-	value = atof(PL_tokenbuf);
+
+	value = Atof(PL_tokenbuf);
 
 	/* 
 	   See if we can make do with an integer value without loss of

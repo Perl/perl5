@@ -51,6 +51,10 @@
 #  include <sys/wait.h>
 #endif
 
+#ifdef I_LOCALE
+#  include <locale.h>
+#endif
+
 #define FLUSH
 
 #ifdef LEAKTEST
@@ -536,6 +540,27 @@ Perl_new_collate(pTHX_ const char *newcoll)
 #endif /* USE_LOCALE_COLLATE */
 }
 
+void
+perl_set_numeric_radix(void)
+{
+#ifdef USE_LOCALE_NUMERIC
+# ifdef HAS_LOCALECONV
+    struct lconv* lc;
+
+    lc = localeconv();
+    if (lc && lc->decimal_point)
+	/* We assume that decimal separator aka the radix
+	 * character is always a single character.  If it
+	 * ever is a string, this needs to be rethunk. */
+	PL_numeric_radix = *lc->decimal_point;
+    else
+	PL_numeric_radix = 0;
+# endif /* HAS_LOCALECONV */
+#else
+    PL_numeric_radix = 0;
+#endif /* USE_LOCALE_NUMERIC */
+}
+
 /*
  * Set up for a new numeric locale.
  */
@@ -559,6 +584,7 @@ Perl_new_numeric(pTHX_ const char *newnum)
 	PL_numeric_name = savepv(newnum);
 	PL_numeric_standard = (strEQ(newnum, "C") || strEQ(newnum, "POSIX"));
 	PL_numeric_local = TRUE;
+	perl_set_numeric_radix();
     }
 
 #endif /* USE_LOCALE_NUMERIC */
@@ -587,11 +613,11 @@ Perl_set_numeric_local(pTHX)
 	setlocale(LC_NUMERIC, PL_numeric_name);
 	PL_numeric_standard = FALSE;
 	PL_numeric_local = TRUE;
+	perl_set_numeric_radix();
     }
 
 #endif /* USE_LOCALE_NUMERIC */
 }
-
 
 /*
  * Initialize locale awareness.
@@ -3430,5 +3456,25 @@ Perl_my_fflush_all(pTHX)
 # endif
     SETERRNO(EBADF,RMS$_IFI);
     return EOF;
+#endif
+}
+
+double
+Perl_my_atof(const char* s) {
+#ifdef USE_LOCALE_NUMERIC
+    if ((PL_hints & HINT_LOCALE) && PL_numeric_local) {
+	double x, y;
+
+	x = atof(s);
+	SET_NUMERIC_STANDARD();
+	y = atof(s);
+	SET_NUMERIC_LOCAL();
+	if ((y < 0.0 && y < x) || (y > 0.0 && y > x))
+	    return y;
+	return x;
+    } else
+	return atof(s);
+#else
+    return atof(s);
 #endif
 }

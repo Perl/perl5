@@ -304,6 +304,9 @@ I32	Perl_mg_size(pTHX_ SV* sv);
 OP*	Perl_mod(pTHX_ OP* o, I32 type);
 char*	Perl_moreswitches(pTHX_ char* s);
 OP*	Perl_my(pTHX_ OP* o);
+#ifdef USE_LOCALE_NUMERIC
+double	Perl_my_atof(pTHX_ const char *s);
+#endif
 #if !defined(HAS_BCOPY) || !defined(HAS_SAFE_BCOPY)
 char*	Perl_my_bcopy(pTHX_ const char* from, char* to, I32 len);
 #endif
@@ -420,6 +423,7 @@ void	Perl_new_collate(pTHX_ const char* newcoll);
 void	Perl_new_ctype(pTHX_ const char* newctype);
 void	Perl_new_numeric(pTHX_ const char* newcoll);
 void	Perl_set_numeric_local(pTHX);
+void	Perl_set_numeric_radix(pTHX);
 void	Perl_set_numeric_standard(pTHX);
 int	perl_parse(PerlInterpreter* sv_interp, XSINIT_t xsinit, int argc, char** argv, char** env);
 void	Perl_require_pv(pTHX_ const char* pv);

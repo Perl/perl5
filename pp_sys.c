@@ -1356,12 +1356,6 @@ PP(pp_prtf)
 	goto just_say_no;
     }
     else {
-#ifdef USE_LOCALE_NUMERIC
-	if (PL_op->op_private & OPpLOCALE)
-	    SET_NUMERIC_LOCAL();
-	else
-	    SET_NUMERIC_STANDARD();
-#endif
 	do_sprintf(sv, SP - MARK, MARK + 1);
 	if (!do_print(sv, fp))
 	    goto just_say_no;

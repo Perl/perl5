@@ -1802,7 +1802,7 @@ PP(pp_log)
       double value;
       value = POPn;
       if (value <= 0.0) {
-	SET_NUMERIC_STANDARD();
+	RESTORE_NUMERIC_STANDARD();
 	DIE(aTHX_ "Can't take log of %g", value);
       }
       value = log(value);
@@ -1818,7 +1818,7 @@ PP(pp_sqrt)
       double value;
       value = POPn;
       if (value < 0.0) {
-	SET_NUMERIC_STANDARD();
+	RESTORE_NUMERIC_STANDARD();
 	DIE(aTHX_ "Can't take sqrt of %g", value);
       }
       value = sqrt(value);
@@ -2204,12 +2204,6 @@ PP(pp_rindex)
 PP(pp_sprintf)
 {
     djSP; dMARK; dORIGMARK; dTARGET;
-#ifdef USE_LOCALE_NUMERIC
-    if (PL_op->op_private & OPpLOCALE)
-	SET_NUMERIC_LOCAL();
-    else
-	SET_NUMERIC_STANDARD();
-#endif
     do_sprintf(TARG, SP-MARK, MARK+1);
     TAINT_IF(SvTAINTED(TARG));
     SP = ORIGMARK;

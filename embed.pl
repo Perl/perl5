@@ -1040,6 +1040,9 @@ p	|I32	|mg_size	|SV* sv
 p	|OP*	|mod		|OP* o|I32 type
 p	|char*	|moreswitches	|char* s
 p	|OP*	|my		|OP* o
+#ifdef USE_LOCALE_NUMERIC
+p	|double	|my_atof	|const char *s
+#endif
 #if !defined(HAS_BCOPY) || !defined(HAS_SAFE_BCOPY)
 p	|char*	|my_bcopy	|const char* from|char* to|I32 len
 #endif
@@ -1159,6 +1162,7 @@ p	|void	|new_collate	|const char* newcoll
 p	|void	|new_ctype	|const char* newctype
 p	|void	|new_numeric	|const char* newcoll
 p	|void	|set_numeric_local
+p	|void	|set_numeric_radix
 p	|void	|set_numeric_standard
 no	|int	|perl_parse	|PerlInterpreter* sv_interp|XSINIT_t xsinit \
 				|int argc|char** argv|char** env

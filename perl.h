@@ -2817,10 +2817,22 @@ typedef struct am_table_short AMTS;
 	    set_numeric_local();		\
     } STMT_END
 
+#define IS_NUMERIC_RADIX(c)	\
+	((PL_hints & HINT_LOCALE) && \
+	  PL_numeric_radix && (c) == PL_numeric_radix)
+
+#define RESTORE_NUMERIC_LOCAL()		if ((PL_hints & HINT_LOCALE) && PL_numeric_standard) SET_NUMERIC_LOCAL()
+#define RESTORE_NUMERIC_STANDARD()	if ((PL_hints & HINT_LOCALE) && PL_numeric_local) SET_NUMERIC_STANDARD()
+#define Atof(s)				Perl_my_atof(s)
+
 #else /* !USE_LOCALE_NUMERIC */
 
-#define SET_NUMERIC_STANDARD()  /**/
-#define SET_NUMERIC_LOCAL()     /**/
+#define SET_NUMERIC_STANDARD()  	/**/
+#define SET_NUMERIC_LOCAL()     	/**/
+#define IS_NUMERIC_RADIX(c)		(0)
+#define RESTORE_NUMERIC_LOCAL()		/**/
+#define RESTORE_NUMERIC_STANDARD()	/**/
+#define Atof(s)				atof(s)
 
 #endif /* !USE_LOCALE_NUMERIC */
 

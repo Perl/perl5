@@ -1210,8 +1210,7 @@ Perl_sv_2iv(pTHX_ register SV *sv)
 	     * - otherwise future conversion to NV will be wrong.  */
 	    double d;
 
-	    SET_NUMERIC_STANDARD();
-	    d = atof(SvPVX(sv));
+	    d = Atof(SvPVX(sv));
 
 	    if (SvTYPE(sv) < SVt_PVNV)
 		sv_upgrade(sv, SVt_PVNV);
@@ -1351,8 +1350,7 @@ Perl_sv_2uv(pTHX_ register SV *sv)
 	     * - otherwise future conversion to NV will be wrong.  */
 	    double d;
 
-	    SET_NUMERIC_STANDARD();
-	    d = atof(SvPVX(sv));	/* XXXX 64-bit? */
+	    d = Atof(SvPVX(sv));	/* XXXX 64-bit? */
 
 	    if (SvTYPE(sv) < SVt_PVNV)
 		sv_upgrade(sv, SVt_PVNV);
@@ -1435,8 +1433,7 @@ Perl_sv_2nv(pTHX_ register SV *sv)
 	    dTHR;
 	    if (ckWARN(WARN_NUMERIC) && !SvIOKp(sv) && !looks_like_number(sv))
 		not_a_number(sv);
-	    SET_NUMERIC_STANDARD();
-	    return atof(SvPVX(sv));
+	    return Atof(SvPVX(sv));
 	}
 	if (SvIOKp(sv)) {
 	    if (SvIsUV(sv)) 
@@ -1465,8 +1462,7 @@ Perl_sv_2nv(pTHX_ register SV *sv)
 	    if (SvPOKp(sv) && SvLEN(sv)) {
 		if (ckWARN(WARN_NUMERIC) && !SvIOKp(sv) && !looks_like_number(sv))
 		    not_a_number(sv);
-		SET_NUMERIC_STANDARD();
-		return atof(SvPVX(sv));
+		return Atof(SvPVX(sv));
 	    }
 	    if (SvIOKp(sv)) {
 		if (SvIsUV(sv)) 
@@ -1484,9 +1480,12 @@ Perl_sv_2nv(pTHX_ register SV *sv)
 	    sv_upgrade(sv, SVt_PVNV);
 	else
 	    sv_upgrade(sv, SVt_NV);
-	DEBUG_c(SET_NUMERIC_STANDARD());
-	DEBUG_c(PerlIO_printf(Perl_debug_log,
-			      "0x%lx num(%g)\n",(unsigned long)sv,SvNVX(sv)));
+	DEBUG_c({
+	    RESTORE_NUMERIC_STANDARD();
+	    PerlIO_printf(Perl_debug_log,
+			  "0x%lx num(%g)\n",(unsigned long)sv,SvNVX(sv));
+	    RESTORE_NUMERIC_LOCAL();
+	});
     }
     else if (SvTYPE(sv) < SVt_PVNV)
 	sv_upgrade(sv, SVt_PVNV);
@@ -1499,8 +1498,7 @@ Perl_sv_2nv(pTHX_ register SV *sv)
 	dTHR;
 	if (ckWARN(WARN_NUMERIC) && !SvIOKp(sv) && !looks_like_number(sv))
 	    not_a_number(sv);
-	SET_NUMERIC_STANDARD();
-	SvNVX(sv) = atof(SvPVX(sv));
+	SvNVX(sv) = Atof(SvPVX(sv));
     }
     else  {
 	dTHR;
@@ -1512,9 +1510,12 @@ Perl_sv_2nv(pTHX_ register SV *sv)
 	return 0.0;
     }
     SvNOK_on(sv);
-    DEBUG_c(SET_NUMERIC_STANDARD());
-    DEBUG_c(PerlIO_printf(Perl_debug_log,
-			  "0x%lx 2nv(%g)\n",(unsigned long)sv,SvNVX(sv)));
+    DEBUG_c({
+	RESTORE_NUMERIC_STANDARD();
+	PerlIO_printf(Perl_debug_log,
+		      "0x%lx 2nv(%g)\n",(unsigned long)sv,SvNVX(sv));
+	RESTORE_NUMERIC_LOCAL();
+    });
     return SvNVX(sv);
 }
 
@@ -1531,8 +1532,7 @@ S_asIV(pTHX_ SV *sv)
 	if (ckWARN(WARN_NUMERIC))
 	    not_a_number(sv);
     }
-    SET_NUMERIC_STANDARD();
-    d = atof(SvPVX(sv));
+    d = Atof(SvPVX(sv));
     return I_V(d);
 }
 
@@ -1550,8 +1550,7 @@ S_asUV(pTHX_ SV *sv)
 	if (ckWARN(WARN_NUMERIC))
 	    not_a_number(sv);
     }
-    SET_NUMERIC_STANDARD();
-    return U_V(atof(SvPVX(sv)));
+    return U_V(Atof(SvPVX(sv)));
 }
 
 /*
@@ -1601,11 +1600,12 @@ Perl_looks_like_number(pTHX_ SV *sv)
 
     nbegin = s;
     /*
-     * we return 1 if the number can be converted to _integer_ with atol()
-     * and 2 if you need (int)atof().
+     * we return IS_NUMBER_TO_INT_BY_ATOL if the number can be converted
+     * to _integer_ with atol() and IS_NUMBER_TO_INT_BY_ATOF if you need
+     * (int)atof().
      */
 
-    /* next must be digit or '.' */
+    /* next must be digit or the radix separator */
     if (isDIGIT(*s)) {
         do {
 	    s++;
@@ -1616,17 +1616,25 @@ Perl_looks_like_number(pTHX_ SV *sv)
 	else
 	    numtype |= IS_NUMBER_TO_INT_BY_ATOL;
 
-        if (*s == '.') {
+        if (*s == '.'
+#ifdef USE_LOCALE_NUMERIC 
+	    || IS_NUMERIC_RADIX(*s)
+#endif
+	    ) {
 	    s++;
 	    numtype |= IS_NUMBER_NOT_IV;
-            while (isDIGIT(*s))  /* optional digits after "." */
+            while (isDIGIT(*s))  /* optional digits after the radix */
                 s++;
         }
     }
-    else if (*s == '.') {
+    else if (*s == '.'
+#ifdef USE_LOCALE_NUMERIC 
+	    || IS_NUMERIC_RADIX(*s)
+#endif
+	    ) {
         s++;
 	numtype |= IS_NUMBER_TO_INT_BY_ATOL | IS_NUMBER_NOT_IV;
-        /* no digits before '.' means we need digits after it */
+        /* no digits before the radix means we need digits after it */
         if (isDIGIT(*s)) {
 	    do {
 	        s++;
@@ -1725,7 +1733,6 @@ Perl_sv_2pv(pTHX_ register SV *sv, STRLEN *lp)
 	    goto tokensave;
 	}
 	if (SvNOKp(sv)) {
-	    SET_NUMERIC_STANDARD();
 	    Gconvert(SvNVX(sv), DBL_DIG, 0, tmpbuf);
 	    tsv = Nullsv;
 	    goto tokensave;
@@ -1829,7 +1836,6 @@ Perl_sv_2pv(pTHX_ register SV *sv, STRLEN *lp)
 	if (SvREADONLY(sv)) {
 	    if (SvNOKp(sv)) {		/* See note in sv_2uv() */
 		/* XXXX 64-bit?  IV may have better precision... */
-		SET_NUMERIC_STANDARD();
 		Gconvert(SvNVX(sv), DBL_DIG, 0, tmpbuf);
 		tsv = Nullsv;
 		goto tokensave;
@@ -1867,7 +1873,6 @@ Perl_sv_2pv(pTHX_ register SV *sv, STRLEN *lp)
 	else
 #endif /*apollo*/
 	{
-	    SET_NUMERIC_STANDARD();
 	    Gconvert(SvNVX(sv), DBL_DIG, 0, s);
 	}
 	errno = olderrno;
@@ -3766,8 +3771,7 @@ Perl_sv_inc(pTHX_ register SV *sv)
     while (isALPHA(*d)) d++;
     while (isDIGIT(*d)) d++;
     if (*d) {
-	SET_NUMERIC_STANDARD();
-	sv_setnv(sv,atof(SvPVX(sv)) + 1.0);  /* punt */
+	sv_setnv(sv,Atof(SvPVX(sv)) + 1.0);  /* punt */
 	return;
     }
     d--;
@@ -3866,8 +3870,7 @@ Perl_sv_dec(pTHX_ register SV *sv)
 	(void)SvNOK_only(sv);
 	return;
     }
-    SET_NUMERIC_STANDARD();
-    sv_setnv(sv,atof(SvPVX(sv)) - 1.0);	/* punt */
+    sv_setnv(sv,Atof(SvPVX(sv)) - 1.0);	/* punt */
 }
 
 /* Make a string that will exist for the duration of the expression
@@ -5086,7 +5089,11 @@ Perl_sv_vcatpvfn(pTHX_ SV *sv, const char *pat, STRLEN patlen, va_list *args, SV
 		*--eptr = '#';
 	    *--eptr = '%';
 
-	    (void)sprintf(PL_efloatbuf, eptr, nv);
+	    {
+		RESTORE_NUMERIC_STANDARD();
+		(void)sprintf(PL_efloatbuf, eptr, nv);
+		RESTORE_NUMERIC_LOCAL();
+	    }
 
 	    eptr = PL_efloatbuf;
 	    elen = strlen(PL_efloatbuf);
