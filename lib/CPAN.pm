@@ -4806,7 +4806,8 @@ sub vstring {
 
 sub readable {
   my($self,$n) = @_;
-  return $n if $n =~ /^[\w\-\+\.]+$/;
+  $n =~ /^([\w\-\+\.]+)/;
+  return $1 if length($1)>0;
   if ($] < 5.006) { # or whenever v-strings were introduced
     # we get them wrong anyway, whatever we do, because 5.005 will
     # have already interpreted 0.2.4 to be "0.24". So even if he
