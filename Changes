@@ -28,6 +28,168 @@ example from http://www.xray.mpe.mpg.de/mailing-lists/perl5-porters/
 Version v5.8.1		Maintenance release working toward v5.8.1
 --------------
 ____________________________________________________________________________
+[ 19855] By: jhi                                   on 2003/06/26  05:36:41
+        Log: Integrate:
+             [ 19851]
+             Fix [perl #21742] :
+             require() should always be called in scalar context,
+             even when it's the last statement in an eval("").
+             
+             [ 19852]
+             Enhance some macro robustness.
+             
+             [ 19853]
+             Subject: Re: P and V
+             From: "Philip Newton" <pnewton@gmx.de>
+             Date: Wed, 25 Jun 2003 17:50:22 +0200
+             Message-ID: <3EF9E0DE.4786.16A6869@localhost>
+             
+             [ 19854]
+             Bite the bullet and apply the hash randomisation patch.
+             [perl #22371] Algorimic Complexity Attack on Perl 5.6.1, 5.8.0
+     Branch: maint-5.8/perl
+	  !> INSTALL embedvar.h ext/Data/Dumper/Dumper.pm
+	  !> ext/Data/Dumper/t/dumper.t hv.h intrpvar.h
+	  !> lib/Thread/Semaphore.pm opcode.h opcode.pl perl.c perl.h
+	  !> perlapi.h pod/perlfunc.pod pod/perlrun.pod pod/perlsec.pod
+	  !> pp_ctl.c sv.c t/comp/require.t
+____________________________________________________________________________
+[ 19850] By: jhi                                   on 2003/06/24  18:49:22
+        Log: Integrate:
+             [ 18557]
+             Subject: [PATCH] Re: [perl #9394] Re: [ID 20020525.002] coredump/ bad free warning   in blead with SIGWARN
+             From: Nicholas Clark <nick@unfortu.net>
+             Date: Tue, 21 Jan 2003 22:27:21 +0000
+             Message-ID: <20030121222720.GG293@Bagpuss.unfortu.net>
+             
+             [ 19277]
+             Fix bug #21347 (segfault in UNIVERSAL::AUTOLOAD with qr//)
+             by adding a dummy destructor method Regexp::DESTROY.
+             This prevents infinite recursion, since Regexp::DESTROY
+             is no more autoloaded.
+             
+             Subject: Re: [perl #21347] segfault in UNIVERSAL::AUTOLOAD
+             From: Enache Adrian <enache@rdslink.ro>
+             Date: Wed, 2 Apr 2003 05:02:42 +0300
+             Message-ID: <20030402020242.GA2966@ratsnest.hole>
+             
+             [ 19300]
+             Fix another segfault case (warn called from UNIVERSAL::DESTROY).
+             
+             Subject: Re: [perl #21347] segfault in UNIVERSAL::AUTOLOAD
+             From: Enache Adrian <enache@rdslink.ro>
+             Date: Sun, 20 Apr 2003 02:45:48 +0300
+             Message-ID: <20030419234548.GA849@ratsnest.hole>
+             and
+             Date: Wed, 2 Apr 2003 07:52:28 +0300
+             Message-ID: <20030402045227.GA1023@ratsnest.hole>
+             
+             [ 19729]
+             Subject: [PATCH] Re: nitpick with \(0..2)
+             From: Steve Grazzini <grazz@pobox.com>
+             Date: Fri, 6 Jun 2003 01:42:59 -0400
+             Message-ID: <20030606054259.GA30249@grazzini.net>
+             
+             [ 19845]
+             Test tweaks for VMS from Craig Berry.
+             
+             [ 19846]
+             Subject: [perlport.pod] code point of \cU
+             From: SADAHIRO Tomoyuki <bqw10602@nifty.com>
+             Date: Tue, 24 Jun 2003 01:00:16 +0900
+             Message-Id: <20030624004743.1237.BQW10602@nifty.com>
+             
+             [ 19848]
+             Subject: [PATCH] lib/Perldoc.pm patch for Cygwin Bleadperl
+             From: "Gerrit P. Haase" <gerrit@familiehaase.de>
+             Date: Tue, 24 Jun 2003 11:00:34 +0200
+             Message-ID: <186930306740.20030624110034@familiehaase.de>
+             
+             [ 19849]
+             Subject: [PATCH] Re: [perl #22719] ISA cache problem with blessed stash objects
+             From: Dave Mitchell <davem@fdgroup.com>
+             Date: Tue, 24 Jun 2003 13:16:18 +0100
+             Message-ID: <20030624121618.GC22675@fdgroup.com>
+     Branch: maint-5.8/perl
+	  !> ext/B/t/stash.t lib/Pod/Perldoc.pm lib/strict.t lib/warnings.t
+	  !> pod/perlport.pod pp_sys.c sv.c t/op/ref.t universal.c util.c
+____________________________________________________________________________
+[ 19844] By: jhi                                   on 2003/06/22  19:38:58
+        Log: Integrate:
+             [ 19830]
+             Retract #19785 and #19756: JPL nowadays works without this
+             (verified by a true JPL user).
+             
+             [ 19831]
+             More Perl malloc debugging magic from Ilya.  Seems to work in
+             Linux, Solaris, AIX.  Had to do #ifdef OS2 for the <io.h> in
+             malloc.c, found in AIX since there is no such header.
+             In Tru64 miniperl fails an assert: "free()ed/realloc()ed-away
+             memory was overwritten?"
+             (In IRIX compiles but that doesn't prove much since in IRIX
+             Perl's malloc is simply not used.)
+             
+             [ 19832]
+             Show the source code location of an "assertion botch".
+             
+             [ 19833]
+             Don't do sprintf().
+             
+             [ 19834]
+             Allow for things like -DFILL_CHECK_DEFAULT=0 (from Ilya).
+             
+             [ 19835]
+             For characters beyond the BMP the $bits will be undef,
+             which will cause utf8_heavy.pl noise (reported by Daniel Yacob,
+             analysis and fix from SADAHIRO Tomoyuki)
+             
+             [ 19836]
+             Debian fix from Brendan O'Dea:
+             Bug#156284: the stucture used by pp_accept is too small to hold an
+             IPv6 address.
+             
+             [ 19837]
+             Debian fix from Brendan O'Dea:
+             Use a temporary directory to avoid symlink attacks.
+             Specify -gstabs explicitly (not the default format for gcc 3.2).
+             
+             [ 19838]
+             Debian fix from Brendan O'Dea:
+             Adjust output to screen width.
+             (adjusted to probe for the stty command)
+             
+             [ 19839]
+             Subject: FileCache 1.03 broken on VMS -- possible patch
+             From: "Craig A. Berry" <craigberry@mac.com>
+             Date: Sat, 21 Jun 2003 10:31:59 -0500
+             Message-ID: <3EF47A6F.9060904@mac.com>
+             
+             [ 19840]
+             Subject: [perl #22753] overload::StrVal() fails for regexp refs
+             From: "fergal@esatclear.ie (via RT)" <perlbug-followup@perl.org>
+             Date: 21 Jun 2003 19:02:30 -0000
+             Message-ID: <rt-22753-59662.14.6066295633041@rt.perl.org>
+             
+             [ 19841]
+             Subject: [PATCH] Re: Is it a Bug? ($c .= "5") . "6"
+             From: Enache Adrian <enache@rdslink.ro>
+             Date: Sat, 21 Jun 2003 03:19:31 +0300
+             Message-ID: <20030621001931.GB1255@ratsnest.hole>
+             
+             [ 19842]
+             Until the Perl malloc problems in Tru64 are fixed.
+             
+             [ 19843]
+             Move the (pseudo)seed functio for (pseudo)random numbers to util.c.
+     Branch: maint-5.8/perl
+	  +> malloc_ctl.h
+	  !> (integrate 29 files)
+____________________________________________________________________________
+[ 19829] By: jhi                                   on 2003/06/19  20:29:35
+        Log: Update Changes.
+     Branch: maint-5.8/perl
+	   ! Changes patchlevel.h
+____________________________________________________________________________
 [ 19828] By: jhi                                   on 2003/06/19  20:23:43
         Log: Integrate:
              [ 19827]
