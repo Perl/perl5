@@ -275,7 +275,7 @@ Perl_mg_clear(pTHX_ SV *sv)
     for (mg = SvMAGIC(sv); mg; mg = mg->mg_moremagic) {
 	MGVTBL* vtbl = mg->mg_virtual;
 	/* omit GSKIP -- never set here */
-	
+
 	if (vtbl && vtbl->svt_clear)
 	    CALL_FPTR(vtbl->svt_clear)(aTHX_ sv, mg);
     }
@@ -408,7 +408,7 @@ Perl_magic_regdatum_get(pTHX_ SV *sv, MAGIC *mg)
 		    i = t;
 		else			/* @- */
 		    i = s;
-		
+
 		if (i > 0 && PL_reg_match_utf8) {
 		    char *b = rx->subbeg;
 		    if (b)
@@ -548,11 +548,11 @@ Perl_magic_get(pTHX_ SV *sv, MAGIC *mg)
 #ifdef MACOS_TRADITIONAL
 	     {
 		  char msg[256];
-	
+
 		  sv_setnv(sv,(double)gMacPerl_OSErr);
-		  sv_setpv(sv, gMacPerl_OSErr ? GetSysErrText(gMacPerl_OSErr, msg) : "");	
+		  sv_setpv(sv, gMacPerl_OSErr ? GetSysErrText(gMacPerl_OSErr, msg) : "");
 	     }
-#else	
+#else
 #ifdef VMS
 	     {
 #	          include <descrip.h>
@@ -1521,7 +1521,7 @@ Perl_magic_setpos(pTHX_ SV *sv, MAGIC *mg)
 	sv_pos_u2b(lsv, &p, 0);
 	pos = p;
     }
-	
+
     mg->mg_len = pos;
     mg->mg_flags &= ~MGf_MINMATCH;
 
@@ -1945,7 +1945,7 @@ Perl_magic_set(pTHX_ SV *sv, MAGIC *mg)
 		    else if (isWARN_on(sv, WARN_ALL) && !any_fatals) {
 	                PL_compiling.cop_warnings = pWARN_ALL;
 	                PL_dowarn |= G_WARN_ONCE ;
-	            }	
+	            }
                     else {
 	                if (specialWARN(PL_compiling.cop_warnings))
 		            PL_compiling.cop_warnings = newSVsv(sv) ;
@@ -2347,9 +2347,11 @@ Perl_sighandler(int sig)
     if (PL_scopestack_ix < PL_scopestack_max - 3)
 	flags |= 16;
 
-    if (!PL_psig_ptr[sig])
-	Perl_die(aTHX_ "Signal SIG%s received, but no signal handler set.\n",
-	    PL_sig_name[sig]);
+    if (!PL_psig_ptr[sig]) {
+		Perl_warn(aTHX_ "Signal SIG%s received, but no signal handler set.\n",
+				 PL_sig_name[sig]);
+		exit(sig);
+	}
 
     /* Max number of items pushed there is 3*n or 4. We cannot fix
        infinity, so we fix 4 (in fact 5): */
@@ -2491,6 +2493,5 @@ unwind_handler_stack(pTHX_ void *p)
 	SvREFCNT_dec(sig_sv);
 #endif
 }
-
 
 
