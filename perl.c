@@ -840,18 +840,18 @@ S_parse_body(pTHX_ va_list args)
 	    if (!*++s && (s=argv[1]) != Nullch) {
 		argc--,argv++;
 	    }
-	    while (s && isSPACE(*s))
-		++s;
 	    if (s && *s) {
-		char *e, *p;
-		for (e = s; *e && !isSPACE(*e); e++) ;
-		p = savepvn(s, e-s);
+		char *p;
+		STRLEN len = strlen(s);
+		p = savepvn(s, len);
 		incpush(p, TRUE);
-		sv_catpv(sv,"-I");
-		sv_catpv(sv,p);
-		sv_catpv(sv," ");
+		sv_catpvn(sv, "-I", 2);
+		sv_catpvn(sv, p, len);
+		sv_catpvn(sv, " ", 1);
 		Safefree(p);
-	    }	/* XXX else croak? */
+	    }
+	    else
+		Perl_croak(aTHX_ "No argument specified for -I");
 	    break;
 	case 'P':
 	    forbid_setid("-P");
@@ -962,7 +962,8 @@ print \"  \\@INC:\\n    @INC\\n\";");
 #ifndef SECURE_INTERNAL_GETENV
         !PL_tainting &&
 #endif
-                        (s = PerlEnv_getenv("PERL5OPT"))) {
+	(s = PerlEnv_getenv("PERL5OPT")))
+    {
 	while (isSPACE(*s))
 	    s++;
 	if (*s == '-' && *(s+1) == 'T')
@@ -1746,14 +1747,23 @@ Perl_moreswitches(pTHX_ char *s)
 	    ++s;
 	if (*s) {
 	    char *e, *p;
-	    for (e = s; *e && !isSPACE(*e); e++) ;
-	    p = savepvn(s, e-s);
-	    incpush(p, TRUE);
-	    Safefree(p);
-	    s = e;
+	    p = s;
+	    /* ignore trailing spaces (possibly followed by other switches) */
+	    do {
+		for (e = p; *e && !isSPACE(*e); e++) ;
+		p = e;
+		while (isSPACE(*p))
+		    p++;
+	    } while (*p && *p != '-');
+	    e = savepvn(s, e-s);
+	    incpush(e, TRUE);
+	    Safefree(e);
+	    s = p;
+	    if (*s == '-')
+		s++;
 	}
 	else
-	    Perl_croak(aTHX_ "No space allowed after -I");
+	    Perl_croak(aTHX_ "No argument specified for -I");
 	return s;
     case 'l':
 	PL_minus_l = TRUE;
@@ -2143,7 +2153,7 @@ S_open_script(pTHX_ char *scriptname, bool dosearch, SV *sv, int *fdscript)
 	    Perl_sv_catpvf(aTHX_ cpp, "%s/", BIN_EXP);
 	sv_catpv(cpp, cpp_cfg);
 
-	sv_catpv(sv,"-I");
+	sv_catpvn(sv, "-I", 2);
 	sv_catpv(sv,PRIVLIB_EXP);
 
 #ifdef MSDOS
