@@ -1236,6 +1236,7 @@ s	|bool	|utf8_mg_pos_init	|SV *sv|MAGIC **mgp|STRLEN **cachep|I32 i|I32 *offsetp
 sM	|void	|sv_release_COW	|SV *sv|char *pvx|STRLEN cur|STRLEN len \
 				|U32 hash|SV *after
 #endif
+sn	|const char*|my_strnchr	|const char*	|int c	|size_t
 #endif
 
 #if defined(PERL_IN_TOKE_C) || defined(PERL_DECL_PROT)
