@@ -1,13 +1,11 @@
 package Thread;
 
-$VERSION = '2.00';
-
 use strict;
 
-our $ithreads;
-our $othreads;
+our($VERSION, $ithreads, $othreads);
 
 BEGIN {
+    $VERSION = '2.00';
     use Config;
     $ithreads = $Config{useithreads};
     $othreads = $Config{use5005threads};
@@ -15,7 +13,7 @@ BEGIN {
 
 require Exporter;
 use XSLoader ();
-our($VERSION, @ISA, @EXPORT, @EXPORT_OK);
+our(@ISA, @EXPORT, @EXPORT_OK);
 
 @ISA = qw(Exporter);
 
