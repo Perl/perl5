@@ -3,8 +3,8 @@
  DB_File.xs -- Perl 5 interface to Berkeley DB 
 
  written by Paul Marquess <Paul.Marquess@btinternet.com>
- last modified 30th July 2001
- version 1.78
+ last modified 22nd Oct 2001
+ version 1.79
 
  All comments/suggestions/problems are welcome
 
@@ -93,6 +93,8 @@
         1.76 -  No change to DB_File.xs
         1.77 -  Tidied up a few types used in calling newSVpvn.
         1.78 -  Core patch 10335, 10372, 10534, 10549, 11051 included.
+        1.79 -  NEXTKEY ignores the input key.
+                Added lots of casts
 
 */
 
@@ -412,7 +414,7 @@ typedef DBT DBTKEY ;
 #define ckFilter(arg,type,name)					\
 	if (db->type) {						\
 	    SV * save_defsv ;					\
-            /* printf("filtering %s\n", name) ;*/		\
+            /* printf("filtering %s\n", name) ; */ 		\
 	    if (db->filtering)					\
 	        croak("recursion detected in %s", name) ;	\
 	    db->filtering = TRUE ;				\
@@ -424,7 +426,7 @@ typedef DBT DBTKEY ;
 	    sv_setsv(DEFSV, save_defsv) ;			\
 	    SvREFCNT_dec(save_defsv) ;				\
 	    db->filtering = FALSE ;				\
-	    /*printf("end of filtering %s\n", name) ;*/		\
+	    /* printf("end of filtering %s\n", name) ; */ 	\
 	}
 
 #else
@@ -454,6 +456,7 @@ typedef DBT DBTKEY ;
 	  } 								\
 	}
 
+#define my_SvUV32(sv) ((u_int32_t)SvUV(sv))
 
 #ifdef CAN_PROTOTYPE
 extern void __getBerkeleyDBInfo(void);
@@ -1210,23 +1213,23 @@ SV *   sv ;
 
            svp = hv_fetch(action, "ffactor", 7, FALSE);
 	   if (svp)
-	       (void)dbp->set_h_ffactor(dbp, SvIV(*svp)) ;
+	       (void)dbp->set_h_ffactor(dbp, my_SvUV32(*svp)) ;
          
            svp = hv_fetch(action, "nelem", 5, FALSE);
 	   if (svp)
-               (void)dbp->set_h_nelem(dbp, SvIV(*svp)) ;
+               (void)dbp->set_h_nelem(dbp, my_SvUV32(*svp)) ;
          
            svp = hv_fetch(action, "bsize", 5, FALSE);
 	   if (svp)
-               (void)dbp->set_pagesize(dbp, SvIV(*svp));
+               (void)dbp->set_pagesize(dbp, my_SvUV32(*svp));
            
            svp = hv_fetch(action, "cachesize", 9, FALSE);
 	   if (svp)
-               (void)dbp->set_cachesize(dbp, 0, SvIV(*svp), 0) ;
+               (void)dbp->set_cachesize(dbp, 0, my_SvUV32(*svp), 0) ;
          
            svp = hv_fetch(action, "lorder", 6, FALSE);
 	   if (svp)
-               (void)dbp->set_lorder(dbp, SvIV(*svp)) ;
+               (void)dbp->set_lorder(dbp, (int)SvIV(*svp)) ;
 
            PrintHash(info) ; 
         }
@@ -1253,19 +1256,19 @@ SV *   sv ;
 
            svp = hv_fetch(action, "flags", 5, FALSE);
 	   if (svp)
-              (void)dbp->set_flags(dbp, (u_int32_t)SvIV(*svp)) ;
+	       (void)dbp->set_flags(dbp, my_SvUV32(*svp)) ;
    
            svp = hv_fetch(action, "cachesize", 9, FALSE);
 	   if (svp)
-               (void)dbp->set_cachesize(dbp, 0, SvIV(*svp), 0) ;
+               (void)dbp->set_cachesize(dbp, 0, my_SvUV32(*svp), 0) ;
          
            svp = hv_fetch(action, "psize", 5, FALSE);
 	   if (svp)
-               (void)dbp->set_pagesize(dbp, SvIV(*svp)) ;
+               (void)dbp->set_pagesize(dbp, my_SvUV32(*svp)) ;
          
            svp = hv_fetch(action, "lorder", 6, FALSE);
 	   if (svp)
-               (void)dbp->set_lorder(dbp, SvIV(*svp)) ;
+               (void)dbp->set_lorder(dbp, (int)SvIV(*svp)) ;
 
             PrintBtree(info) ;
          
@@ -1291,17 +1294,17 @@ SV *   sv ;
 
            svp = hv_fetch(action, "cachesize", 9, FALSE);
 	   if (svp) {
-               status = dbp->set_cachesize(dbp, 0, SvIV(*svp), 0) ;
+               status = dbp->set_cachesize(dbp, 0, my_SvUV32(*svp), 0) ;
 	   }
          
            svp = hv_fetch(action, "psize", 5, FALSE);
 	   if (svp) {
-               status = dbp->set_pagesize(dbp, SvIV(*svp)) ;
+               status = dbp->set_pagesize(dbp, my_SvUV32(*svp)) ;
 	    }
          
            svp = hv_fetch(action, "lorder", 6, FALSE);
 	   if (svp) {
-               status = dbp->set_lorder(dbp, SvIV(*svp)) ;
+               status = dbp->set_lorder(dbp, (int)SvIV(*svp)) ;
 	   }
 
 	    svp = hv_fetch(action, "bval", 4, FALSE);
@@ -1311,7 +1314,7 @@ SV *   sv ;
                 if (SvPOK(*svp))
 		    value = (int)*SvPV(*svp, n_a) ;
 		else
-		    value = SvIV(*svp) ;
+		    value = (int)SvIV(*svp) ;
 
 		if (fixed) {
 		    status = dbp->set_re_pad(dbp, value) ;
@@ -1325,7 +1328,7 @@ SV *   sv ;
 	   if (fixed) {
                svp = hv_fetch(action, "reclen", 6, FALSE);
 	       if (svp) {
-		   u_int32_t len =  (u_int32_t)SvIV(*svp) ;
+		   u_int32_t len =  my_SvUV32(*svp) ;
                    status = dbp->set_re_len(dbp, len) ;
 	       }    
 	   }
@@ -1344,10 +1347,10 @@ SV *   sv ;
 		name = NULL ;
          
 
-	    status = dbp->set_flags(dbp, DB_RENUMBER) ;
+	    status = dbp->set_flags(dbp, (u_int32_t)DB_RENUMBER) ;
          
 		if (flags){
-	            (void)dbp->set_flags(dbp, flags) ;
+	            (void)dbp->set_flags(dbp, (u_int32_t)flags) ;
 		}
             PrintRecno(info) ;
         }
@@ -1356,7 +1359,7 @@ SV *   sv ;
     }
 
     {
-        int	 	Flags = 0 ;
+        u_int32_t 	Flags = 0 ;
         int		status ;
 
         /* Map 1.x flags to 3.x flags */
