@@ -2829,7 +2829,7 @@ Perl_scan_bin(pTHX_ char *start, I32 len, I32 *retlen)
     if (!overflowed)
 	rnv = (NV) ruv;
     if (   ( overflowed && rnv > 4294967295.0)
-#if UV_SIZEOF > 4
+#if UVSIZE > 4
 	|| (!overflowed && ruv > 0xffffffff  )
 #endif
 	) { 
@@ -2894,7 +2894,7 @@ Perl_scan_oct(pTHX_ char *start, I32 len, I32 *retlen)
     if (!overflowed)
 	rnv = (NV) ruv;
     if (   ( overflowed && rnv > 4294967295.0)
-#if UV_SIZEOF > 4
+#if UVSIZE > 4
 	|| (!overflowed && ruv > 0xffffffff  )
 #endif
 	) {
@@ -2962,7 +2962,7 @@ Perl_scan_hex(pTHX_ char *start, I32 len, I32 *retlen)
     if (!overflowed)
 	rnv = (NV) ruv;
     if (   ( overflowed && rnv > 4294967295.0)
-#if UV_SIZEOF > 4
+#if UVSIZE > 4
 	|| (!overflowed && ruv > 0xffffffff  )
 #endif
 	) { 

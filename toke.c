@@ -6619,7 +6619,7 @@ Perl_scan_num(pTHX_ char *start)
 		sv_setnv(sv, n);
 	    }
 	    else {
-#if UV_SIZEOF > 4
+#if UVSIZE > 4
 		dTHR;
 		if (ckWARN(WARN_PORTABLE) && u > 0xffffffff)
 		    Perl_warner(aTHX_ WARN_PORTABLE,
