@@ -43,5 +43,5 @@ print $GID == $( ? "ok 12\n" : "not ok 12\n";
 print $EUID == $> ? "ok 13\n" : "not ok 13\n";
 print $EGID == $) ? "ok 14\n" : "not ok 14\n";
 
-print $PROGRAM_NAME == $0 ? "ok 15\n" : "not ok 15\n";
+print $PROGRAM_NAME eq $0 ? "ok 15\n" : "not ok 15\n";
 print $BASETIME == $^T ? "ok 16\n" : "not ok 16\n";

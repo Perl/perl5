@@ -1550,6 +1550,13 @@ config.sh file from an earlier version of perl, you should be sure to
 check that Configure makes sensible choices for the new directories.
 See INSTALL for complete details.
 
+=head2 gcc automatically tried if 'cc' does not seem to be working
+
+In many platforms the vendor-supplied 'cc' is too stripped-down to
+build Perl (basically, the 'cc' doesn't do ANSI C).  If this seems
+to be the case and the 'cc' does not seem to be the GNU C compiler
+'gcc', an automatic attempt is made to find and use 'gcc' instead.
+
 =head1 Platform specific changes
 
 =head2 Supported platforms

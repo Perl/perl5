@@ -34,29 +34,37 @@ for ($i = 1; @tests; $i++) {
     $x = sprintf(">$template<",
                  defined @$evalData ? @$evalData : $evalData);
     substr($x, -1, 0) = $w if $w;
-    # $y may have 3 exponent digits, not 2
-    my $r;
-    if (($y = $x) =~ s/([Ee][-+])0(\d)/$1$2/g) {
-	$y =~ s/^>\s+/>/;
-	$y =~ s/\s+<$/</;
-	$r = $result;
-	$r =~ s/^\s+//;
-	$r =~ s/\s+$//;
+    # $x may have 3 exponent digits, not 2
+    my $y = $x;
+    if ($y =~ s/([Ee][-+])0(\d)/$1$2/) {
+        # if result is left-adjusted, append extra space
+        if ($template =~ /%\+?\-/ and $result =~ / $/) {
+	    $y =~ s/<$/ </;
+	}
+        # if result is zero-filled, add extra zero
+	elsif ($template =~ /%\+?0/ and $result =~ /^0/) {
+	    $y =~ s/^>0/>00/;
+	}
+        # if result is right-adjusted, prepend extra space
+	elsif ($result =~ /^ /) {
+	    $y =~ s/^>/> /;
+	}
     }
 
     if ($x eq ">$result<") {
         print "ok $i\n";
     }
-    elsif ($r and $y eq ">$r<")	# Some C libraries always give
+    elsif ($y eq ">$result<")	# Some C libraries always give
     {				# three-digit exponent
 	print("ok $i >$result< $x # three-digit exponent accepted\n");
     }
     else {
-	print("not ok $i >$template< >$data< >$result< $x",
+	$y = ($x eq $y ? "" : " => $y");
+	print("not ok $i >$template< >$data< >$result< $x$y",
 	    $comment ? " # $comment\n" : "\n");
     }
 }
-    
+
 # In each of the the following lines, there are three required fields:
 # printf template, data to be formatted (as a Perl expression), and
 # expected result of formatting.  An optional fourth field can contain
@@ -149,7 +157,14 @@ __END__
 >%v+-3d<    >"\01\02\03"< >+1 .2  .3  <
 >%v4.3d<    >"\01\02\03"< > 001. 002. 003<
 >%v04.3d<   >"\01\02\03"< >0001.0002.0003<
->%*v02d<    >['-', "\0\7\13"]< >00-07-11<
+>%*v02d<    >['-', "\0\7\14"]< >00-07-12<
+>%v.*d<     >[3, "\01\02\03"]< >001.002.003<
+>%v0*d<     >[3, "\01\02\03"]< >001.002.003<
+>%v-*d<     >[3, "\01\02\03"]< >1  .2  .3  <
+>%v+-*d<    >[3, "\01\02\03"]< >+1 .2  .3  <
+>%v*.*d<    >[4, 3, "\01\02\03"]< > 001. 002. 003<
+>%v0*.*d<   >[4, 3, "\01\02\03"]< >0001.0002.0003<
+>%*v0*d<    >['-', 2, "\0\7\13"]< >00-07-11<
 >%e<        >1234.875<    >1.234875e+03<
 >%e<        >0.000012345< >1.234500e-05<
 >%e<        >1234567E96<  >1.234567e+102<
@@ -189,8 +204,10 @@ __END__
 >%f<        >0<           >0.000000<
 >%.0f<      >0<           >0<
 >%.0f<      >2**38<       >274877906944<   >Should have exact int'l rep'n<
->%.0f<      >0.5<         >0<
->%.0f<      >-0.5<        >-0<
+>%.0f<      >0.1<         >0<
+>%.0f<      >-0.1<        >-0<
+>%.0f<      >0.6<         >1<
+>%.0f<      >-0.6<        >-1<
 >%g<        >12345.6789<  >12345.7<
 >%+g<       >12345.6789<  >+12345.7<
 >%#g<       >12345.6789<  >12345.7<
@@ -231,6 +248,7 @@ __END__
 >%+o<       >2**32-1<     >37777777777<
 >%#o<       >2**32-1<     >037777777777<
 >%d< >$p=sprintf('%p',$p);$p=~/^[0-9a-f]+$/< >1< >Coarse hack: hex from %p?<
+>%#p<       >''<          >%#p INVALID<
 >%q<        >''<          >%q INVALID<
 >%r<        >''<          >%r INVALID<
 >%s<        >'string'<    >string<

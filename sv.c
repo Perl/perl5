@@ -5963,17 +5963,6 @@ Perl_sv_vcatpvfn(pTHX_ SV *sv, const char *pat, STRLEN patlen, va_list *args, SV
 	    case 'v':
 		vectorize = TRUE;
 		q++;
-		if (args)
-		    vecsv = va_arg(*args, SV*);
-		else if (svix < svmax)
-		    vecsv = svargs[svix++];
-		else {
-		    vecstr = (U8*)"";
-		    veclen = 0;
-		    continue;
-		}
-		vecstr = (U8*)SvPVx(vecsv,veclen);
-		utf = DO_UTF8(vecsv);
 		continue;
 
 	    default:
@@ -6022,6 +6011,23 @@ Perl_sv_vcatpvfn(pTHX_ SV *sv, const char *pat, STRLEN patlen, va_list *args, SV
 		    precis = precis * 10 + (*q++ - '0');
 	    }
 	    has_precis = TRUE;
+	}
+
+	if (vectorize) {
+	    if (args) {
+		vecsv = va_arg(*args, SV*);
+		vecstr = (U8*)SvPVx(vecsv,veclen);
+		utf = DO_UTF8(vecsv);
+	    }
+	    else if (svix < svmax) {
+		vecsv = svargs[svix++];
+		vecstr = (U8*)SvPVx(vecsv,veclen);
+		utf = DO_UTF8(vecsv);
+	    }
+	    else {
+		vecstr = (U8*)"";
+		veclen = 0;
+	    }
 	}
 
 	/* SIZE */

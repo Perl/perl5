@@ -13,7 +13,7 @@ sub MY::libscan
  return '' 
 	if($path =~ m:/(RCS|CVS|SCCS)/: ||
 	   $path =~ m:[~%]$: ||
-	   $path =~ m:\.(orig|rej)$:
+	   $path =~ m:(\.(orig|rej)|~)$:
 	  );
  
  $path;
@@ -31,7 +31,7 @@ WriteMakefile(
  
 	'clean'   	=> {FILES => join(" ",
 					map { "$_ */$_ */*/$_" }
-					qw(*% *.html *.b[ac]k *.old *.orig))
+					qw(*% *.html *.b[ac]k *.old))
 			   },
 	'macro'		=> { INSTALLDIRS => 'perl' },
 );

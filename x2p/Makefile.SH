@@ -135,7 +135,7 @@ clean:
 	rm -f a2p *$(OBJ_EXT) $(plexe) $(plc) $(plm)
 
 realclean: clean
-	rm -f *.orig core $(addedbyconf) all malloc.c
+	rm -f core $(addedbyconf) all malloc.c
 	rm -f $(FIRSTMAKEFILE) $(FIRSTMAKEFILE).old
 
 # The following lint has practically everything turned on.  Unfortunately,

@@ -20,7 +20,7 @@
 
 # $Id: Head.U,v 3.0.1.9 1997/02/28 15:02:09 ram Exp $
 #
-# Generated on Tue Jun 27 04:45:48 EET DST 2000 [metaconfig 3.0 PL70]
+# Generated on Wed Jul 12 07:59:35 EET DST 2000 [metaconfig 3.0 PL70]
 # (with additional metaconfig patches by perlbug@perl.com)
 
 cat >/tmp/c1$$ <<EOF
@@ -2032,6 +2032,62 @@ FOO
 	;;
 esac
 
+cat <<EOS >checkcc
+$startsh
+EOS
+cat <<'EOSC' >>checkcc
+case "$cc" in
+'') ;;
+*)  $rm -f try try.*
+    $cat >try.c <<EOM
+int main(int argc, char *argv[]) {
+  return 0;
+}
+EOM
+    if $cc -o try try.c; then
+       :
+    else
+        echo "Uh-oh, the C compiler '$cc' doesn't seem to be working." >&4
+        despair=yes
+        trygcc=yes
+        case "$cc" in
+        *gcc*) trygcc=no ;;
+        esac
+        case "`$cc -v -c try.c 2>&1`" in
+        *gcc*) trygcc=no ;;
+        esac
+        if $test X"$trygcc" = Xyes; then
+            if gcc -o try -c try.c; then
+                echo " "
+                echo "You seem to have a working gcc, though." >&4
+                rp="Would you like to use it?"
+                dflt=y
+                if $test -f myread; then
+                    . ./myread
+                else
+                    if $test -f UU/myread; then
+                        . ./UU/myread
+                    else
+                        echo "Cannot find myread, sorry.  Aborting." >&2
+                        exit 1
+                    fi
+                fi  
+                case "$ans" in
+                [yY]*) cc=gcc; ccflags=''; despair=no ;;
+                esac
+            fi
+        fi
+        if $test X"$despair" = Xyes; then
+            echo "You need to find a working C compiler." >&4
+            echo "I cannot continue any further, aborting." >&4
+            exit 1
+        fi
+    fi
+    $rm -f try try.*
+    ;;
+esac
+EOSC
+
 : determine whether symbolic links are supported
 echo " "
 $touch blurfl
@@ -2164,6 +2220,7 @@ if test -f config.sh; then
 		;;
 	esac
 fi
+. ./UU/checkcc
 if test ! -f config.sh; then
 	$cat <<EOM
 
@@ -3079,46 +3136,7 @@ fi
 if $test -f cc.cbu; then
     . ./cc.cbu
 fi
-: Quick sanity check, we will do a fuller one later when we know
-: the various flags and libs
-$rm -f try try.*
-$cat >try.c <<EOM
-int main(int argc, char *argv[]) {
-  return 0;
-}
-EOM
-if $cc -o try try.c; then
-   :
-else
-   echo "Uh-oh, the C compiler "$cc" doesn't seem to be working..." >&4
-   despair=yes
-   trygcc=yes
-   case "$cc" in
-   *gcc) trygcc=no ;;
-   esac
-   case "`$cc -v 2>&1`" in
-   *gcc*) trygcc=no ;;
-   esac
-   if $test X"$trygcc" = Xyes; then
-      if gcc -o try try.c; then
-        echo " "
-        echo "You seem to have a working gcc, though."
-        rp="Do you want to use it?"
-        dflt=y
-        . ./myread
-        case "$ans" in
-        [yY]*) cc=gcc; despair=no ;;
-        esac
-      fi
-   fi
-   if $test X"$despair" = Xyes; then
-      echo "You need to find a working C compiler." >&4
-      echo "I cannot continue any further, aborting." >&4
-      exit 1
-   fi
-fi
-$rm -f try try.*
-
+. ./checkcc
 
 echo " "
 echo "Checking for GNU cc in disguise and/or its version number..." >&4
@@ -9738,7 +9756,7 @@ echo 'int main() { long long x = 7; return 0; }' > try.c
 set try
 if eval $compile; then
 	val="$define"
-	echo "You have have long long."
+	echo "You have long long."
 else
 	val="$undef"
 	echo "You do not have long long."

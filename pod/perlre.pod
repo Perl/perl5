@@ -216,7 +216,7 @@ character class.  For example:
 
     [01[:alpha:]%]
 
-matches one, zero, any alphabetic character, and the percentage sign.
+matches zero, one, any alphabetic character, and the percentage sign.
 
 If the C<utf8> pragma is used, the following equivalences to Unicode
 \p{} constructs hold:
@@ -250,7 +250,8 @@ The assumedly non-obviously named classes are:
 Any control character.  Usually characters that don't produce output as
 such but instead control the terminal somehow: for example newline and
 backspace are control characters.  All characters with ord() less than
-32 are most often classified as control characters.
+32 are most often classified as control characters (assuming ASCII,
+the ISO Latin character sets, and Unicode).
 
 =item graph
 
@@ -266,7 +267,7 @@ Any punctuation (special) character.
 
 =item xdigit
 
-Any hexadecimal digit.  Though this may feel silly (/0-9a-f/i would
+Any hexadecimal digit.  Though this may feel silly ([0-9A-Fa-f] would
 work just fine) it is included for completeness.
 
 =back
