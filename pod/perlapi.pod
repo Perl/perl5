@@ -349,7 +349,7 @@ obtained from the GV with the C<GvCV> macro.
 
 =item gv_fetchmethod
 
-See L<gv_fetchmethod_autoload.
+See L<gv_fetchmethod_autoload>.
 
 	GV*	gv_fetchmethod(HV* stash, const char* name)
 

@@ -1494,7 +1494,7 @@ Not implemented. (S<Mac OS>, Win32, VMS, Plan9, S<RISC OS>, VOS)
 The C<|> variants are supported only if ToolServer is installed.
 (S<Mac OS>)
 
-open to C<|-> and C<-|> are unsupported. (S<Mac OS>, Win32, S<RISC OS>)
+open to C<|E<45>> and C<-|> are unsupported. (S<Mac OS>, Win32, S<RISC OS>)
 
 =item pipe READHANDLE,WRITEHANDLE
 

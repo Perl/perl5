@@ -2267,8 +2267,8 @@ L<perlvms>) so that the environ array isn't the target of the change to
 =item Unknown open() mode '%s'
 
 (F) The second argument of 3-argument open() is not among the list
-of valid modes: C<L<lt>>, C<L<gt>>, C<E<gt>E<gt>>, C<+L<lt>>,
-C<+L<gt>>, C<+E<gt>E<gt>>, C<-|>, C<|->.
+of valid modes: C<E<lt>>, C<E<gt>>, C<E<gt>E<gt>>, C<+E<lt>>,
+C<+E<gt>>, C<+E<gt>E<gt>>, C<-|>, C<|E<45>>.
 
 =item Unknown process %x sent message to prime_env_iter: %s
 

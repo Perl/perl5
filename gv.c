@@ -299,7 +299,7 @@ Perl_gv_fetchmeth(pTHX_ HV *stash, const char *name, STRLEN len, I32 level)
 /*
 =for apidoc gv_fetchmethod
 
-See L<gv_fetchmethod_autoload.
+See L<gv_fetchmethod_autoload>.
 
 =cut
 */
