@@ -514,7 +514,6 @@ typedef struct Outrec Outrec;
 typedef struct lstring Lstring;
 typedef struct interpreter PerlInterpreter;
 typedef struct ff FF;
-typedef struct io IO;
 typedef struct sv SV;
 typedef struct av AV;
 typedef struct hv HV;
@@ -522,6 +521,7 @@ typedef struct cv CV;
 typedef struct regexp REGEXP;
 typedef struct gp GP;
 typedef struct sv GV;
+typedef struct io IO;
 typedef struct context CONTEXT;
 typedef struct block BLOCK;
 
@@ -538,6 +538,7 @@ typedef struct xpvgv XPVGV;
 typedef struct xpvcv XPVCV;
 typedef struct xpvbm XPVBM;
 typedef struct xpvfm XPVFM;
+typedef struct xpvio XPVIO;
 typedef struct mgvtbl MGVTBL;
 typedef union any ANY;
 
@@ -687,6 +688,7 @@ GIDTYPE getegid P(());
 #define DEBUG_L(a) if (debug & 4096)	a
 #define DEBUG_H(a) if (debug & 8192)	a
 #define DEBUG_X(a) if (debug & 16384)	a
+#define DEBUG_D(a) if (debug & 32768)	a
 #else
 #define DEB(a)
 #define DEBUG(a)
@@ -705,6 +707,7 @@ GIDTYPE getegid P(());
 #define DEBUG_L(a)
 #define DEBUG_H(a)
 #define DEBUG_X(a)
+#define DEBUG_D(a)
 #endif
 #define YYMAXDEPTH 300
 
@@ -804,9 +807,15 @@ EXT bool	nomemok;	/* let malloc context handle nomem */
 EXT U32		an;		/* malloc sequence number */
 EXT U32		cop_seqmax;	/* statement sequence number */
 EXT U32		op_seqmax;	/* op sequence number */
+EXT U32		evalseq;	/* eval sequence number */
 EXT U32		sub_generation;	/* inc to force methods to be looked up again */
 EXT char **	origenviron;
 EXT U32		origalen;
+
+EXT I32 *	xiv_root;	/* free xiv list--shared by interpreters */
+EXT double *	xnv_root;	/* free xnv list--shared by interpreters */
+EXT XRV *	xrv_root;	/* free xrv list--shared by interpreters */
+EXT XPV *	xpv_root;	/* free xpv list--shared by interpreters */
 
 /* Stack for currently executing thread--context switch must handle this.     */
 EXT SV **	stack_base;	/* stack->array_ary */
@@ -858,6 +867,8 @@ EXT char *	hexdigit INIT("0123456789abcdef0123456789ABCDEFx");
 EXT char *	patleave INIT("\\.^$@dDwWsSbB+*?|()-nrtfeaxc0123456789[{]}");
 EXT char *	vert INIT("|");
 
+EXT char	warn_uninit[]
+  INIT("Use of uninitialized variable");
 EXT char	warn_nosemi[]
   INIT("Semicolon seems to be missing");
 EXT char	warn_reserved[]
@@ -865,7 +876,7 @@ EXT char	warn_reserved[]
 EXT char	warn_nl[]
   INIT("Unsuccessful %s on filename containing newline");
 EXT char	no_usym[]
-  INIT("Can't use an undefined value to create a symbol");
+  INIT("Can't use an undefined value as %s reference");
 EXT char	no_aelem[]
   INIT("Modification of non-creatable array value attempted, subscript %d");
 EXT char	no_helem[]
@@ -977,15 +988,32 @@ EXT unsigned char freq[] = {	/* letter frequencies for mixed English/C */
 EXT unsigned char freq[];
 #endif
 
+#ifdef DEBUGGING
+#ifdef DOINIT
+EXT char* block_type[] = {
+	"NULL",
+	"SUB",
+	"EVAL",
+	"LOOP",
+	"SUBST",
+	"BLOCK",
+};
+#else
+EXT char* block_type[];
+#endif
+#endif
+
 /*****************************************************************************/
 /* This lexer/parser stuff is currently global since yacc is hard to reenter */
 /*****************************************************************************/
+/* XXX This needs to be revisited, since BEGIN makes yacc re-enter... */
 
 typedef enum {
     XOPERATOR,
     XTERM,
-    XBLOCK,
     XREF,
+    XSTATE,
+    XBLOCK,
 } expectation;
 
 EXT FILE * VOL	rsfp INIT(Nullfp);
@@ -994,7 +1022,7 @@ EXT char *	bufptr;
 EXT char *	oldbufptr;
 EXT char *	oldoldbufptr;
 EXT char *	bufend;
-EXT expectation expect INIT(XBLOCK);	/* how to interpret ambiguous tokens */
+EXT expectation expect INIT(XSTATE);	/* how to interpret ambiguous tokens */
 
 EXT I32		multi_start;	/* 1st line of multi-line string */
 EXT I32		multi_end;	/* last line of multi-line string */
@@ -1007,8 +1035,10 @@ EXT I32		subline;	/* line this subroutine began on */
 EXT SV *	subname;	/* name of current subroutine */
 
 EXT AV *	comppad;	/* storage for lexically scoped temporaries */
-EXT AV *	comppadname;	/* variable names for "my" variables */
-EXT I32		comppadnamefill;/* last "introduced" variable offset */
+EXT AV *	comppad_name;	/* variable names for "my" variables */
+EXT I32		comppad_name_fill;/* last "introduced" variable offset */
+EXT I32		min_intro_pending;/* start of vars to introduce */
+EXT I32		max_intro_pending;/* end of vars to introduce */
 EXT I32		padix;		/* max used index in current "register" pad */
 EXT COP		compiling;
 
@@ -1016,6 +1046,7 @@ EXT SV *	evstr;		/* op_fold_const() temp string cache */
 EXT I32		thisexpr;	/* name id for nothing_in_common() */
 EXT char *	last_uni;	/* position of last named-unary operator */
 EXT char *	last_lop;	/* position of last list operator */
+EXT OPCODE	last_lop_op;	/* last list operator */
 EXT bool	in_format;	/* we're compiling a run_format */
 EXT bool	in_my;		/* we're compiling a "my" declaration */
 EXT I32		needblockscope INIT(TRUE);	/* block overhead needed? */
@@ -1053,7 +1084,7 @@ EXT char **	regmyendp;
 /* Global only to current interpreter instance */
 /***********************************************/
 
-#ifdef EMBEDDED
+#ifdef MULTIPLICITY
 #define IEXT
 #define IINIT(x)
 struct interpreter {
@@ -1104,12 +1135,12 @@ IEXT SV *	Iformfeed;		/* $^L */
 IEXT char *	Ichopset IINIT(" \n-");	/* $: */
 IEXT char *	Irs IINIT("\n");	/* $/ */
 IEXT U32	Irschar IINIT('\n');	/* final char of rs, or 0777 if none */
-IEXT I32	Irslen IINIT(1);
+IEXT STRLEN	Irslen IINIT(1);
 IEXT bool	Irspara;
 IEXT char *	Iofs;			/* $, */
-IEXT I32	Iofslen;
+IEXT STRLEN	Iofslen;
 IEXT char *	Iors;			/* $\ */
-IEXT I32	Iorslen;
+IEXT STRLEN	Iorslen;
 IEXT char *	Iofmt;			/* $# */
 IEXT I32	Imaxsysfd IINIT(MAXSYSFD); /* top fd to pass to subprocesses */
 IEXT int	Imultiline;	  /* $*--do strings hold >1 line? */
@@ -1159,11 +1190,14 @@ IEXT AV *	Ipad;		/* storage for lexically scoped temporaries */
 IEXT AV *	Ipadname;	/* variable names for "my" variables */
 
 /* memory management */
-IEXT SV *	Ifreestrroot;
 IEXT SV **	Itmps_stack;
 IEXT I32	Itmps_ix IINIT(-1);
 IEXT I32	Itmps_floor IINIT(-1);
-IEXT I32	Itmps_max IINIT(-1);
+IEXT I32	Itmps_max;
+IEXT I32	Isv_count;	/* how many SV* are currently allocated */
+IEXT I32	Isv_rvcount;	/* how many RV* are currently allocated */
+IEXT SV*	Isv_root;	/* storage for SVs belonging to interp */
+IEXT SV*	Isv_arenaroot;	/* list of areas for garbage collection */
 
 /* funky return mechanisms */
 IEXT I32	Ilastspbase;
@@ -1239,7 +1273,7 @@ IEXT I32	Ilaststype IINIT(OP_STAT);
 #undef IEXT
 #undef IINIT
 
-#ifdef EMBEDDED
+#ifdef MULTIPLICITY
 };
 #else
 struct interpreter {

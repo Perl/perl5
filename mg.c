@@ -11,16 +11,33 @@
 #include "EXTERN.h"
 #include "perl.h"
 
+void
+mg_magical(sv)
+SV* sv;
+{
+    MAGIC* mg;
+    for (mg = SvMAGIC(sv); mg; mg = mg->mg_moremagic) {
+	MGVTBL* vtbl = mg->mg_virtual;
+	if (vtbl) {
+	    if (vtbl->svt_get)
+		SvGMAGICAL_on(sv);
+	    if (vtbl->svt_set)
+		SvSMAGICAL_on(sv);
+	    if (!(SvFLAGS(sv) & (SVs_GMG|SVs_SMG)) || vtbl->svt_clear)
+		SvRMAGICAL_on(sv);
+	}
+    }
+}
+
 int
 mg_get(sv)
 SV* sv;
 {
     MAGIC* mg;
+    U32 savemagic = SvMAGICAL(sv);
 
     SvMAGICAL_off(sv);
-    SvFLAGS(sv) &= ~(SVf_IOK|SVf_NOK|SVf_POK);
-    SvFLAGS(sv) |= SvPRIVATE(sv) & (SVf_IOK|SVf_NOK|SVf_POK);
-    SvPRIVATE(sv) &= ~(SVf_IOK|SVf_NOK|SVf_POK);
+    SvFLAGS(sv) |= (SvFLAGS(sv) & (SVp_IOK|SVp_NOK|SVp_POK)) >> PRIVSHIFT;
 
     for (mg = SvMAGIC(sv); mg; mg = mg->mg_moremagic) {
 	MGVTBL* vtbl = mg->mg_virtual;
@@ -28,9 +45,8 @@ SV* sv;
 	    (*vtbl->svt_get)(sv, mg);
     }
 
-    SvMAGICAL_on(sv);
-    SvPRIVATE(sv) &= ~(SVf_IOK|SVf_NOK|SVf_POK);
-    SvPRIVATE(sv) |= SvFLAGS(sv) & (SVf_IOK|SVf_NOK|SVf_POK);
+    SvFLAGS(sv) |= savemagic;
+    assert(SvGMAGICAL(sv));
     SvFLAGS(sv) &= ~(SVf_IOK|SVf_NOK|SVf_POK);
 
     return 0;
@@ -42,6 +58,7 @@ SV* sv;
 {
     MAGIC* mg;
     MAGIC* nextmg;
+    U32 savemagic = SvMAGICAL(sv);
 
     SvMAGICAL_off(sv);
 
@@ -53,10 +70,9 @@ SV* sv;
     }
 
     if (SvMAGIC(sv)) {
-	SvMAGICAL_on(sv);
-/*	SvPRIVATE(sv) &= ~(SVf_IOK|SVf_NOK|SVf_POK);  */
-	SvPRIVATE(sv) |= SvFLAGS(sv) & (SVf_IOK|SVf_NOK|SVf_POK);
-	SvFLAGS(sv) &= ~(SVf_IOK|SVf_NOK|SVf_POK);
+	SvFLAGS(sv) |= savemagic;
+	if (SvGMAGICAL(sv))
+	    SvFLAGS(sv) &= ~(SVf_IOK|SVf_NOK|SVf_POK);
     }
 
     return 0;
@@ -69,11 +85,10 @@ SV* sv;
     MAGIC* mg;
     char *s;
     STRLEN len;
+    U32 savemagic = SvMAGICAL(sv);
 
     SvMAGICAL_off(sv);
-    SvFLAGS(sv) &= ~(SVf_IOK|SVf_NOK|SVf_POK);
-    SvFLAGS(sv) |= SvPRIVATE(sv) & (SVf_IOK|SVf_NOK|SVf_POK);
-    SvPRIVATE(sv) &= ~(SVf_IOK|SVf_NOK|SVf_POK);
+    SvFLAGS(sv) |= (SvFLAGS(sv) & (SVp_IOK|SVp_NOK|SVp_POK)) >> PRIVSHIFT;
 
     for (mg = SvMAGIC(sv); mg; mg = mg->mg_moremagic) {
 	MGVTBL* vtbl = mg->mg_virtual;
@@ -83,10 +98,9 @@ SV* sv;
     mg_get(sv);
     s = SvPV(sv, len);
 
-    SvMAGICAL_on(sv);
-    SvPRIVATE(sv) &= ~(SVf_IOK|SVf_NOK|SVf_POK);
-    SvPRIVATE(sv) |= SvFLAGS(sv) & (SVf_IOK|SVf_NOK|SVf_POK);
-    SvFLAGS(sv) &= ~(SVf_IOK|SVf_NOK|SVf_POK);
+    SvFLAGS(sv) |= savemagic;
+    if (SvGMAGICAL(sv))
+	SvFLAGS(sv) &= ~(SVf_IOK|SVf_NOK|SVf_POK);
 
     return len;
 }
@@ -96,11 +110,10 @@ mg_clear(sv)
 SV* sv;
 {
     MAGIC* mg;
+    U32 savemagic = SvMAGICAL(sv);
 
     SvMAGICAL_off(sv);
-    SvFLAGS(sv) &= ~(SVf_IOK|SVf_NOK|SVf_POK);
-    SvFLAGS(sv) |= SvPRIVATE(sv) & (SVf_IOK|SVf_NOK|SVf_POK);
-    SvPRIVATE(sv) &= ~(SVf_IOK|SVf_NOK|SVf_POK);
+    SvFLAGS(sv) |= (SvFLAGS(sv) & (SVp_IOK|SVp_NOK|SVp_POK)) >> PRIVSHIFT;
 
     for (mg = SvMAGIC(sv); mg; mg = mg->mg_moremagic) {
 	MGVTBL* vtbl = mg->mg_virtual;
@@ -108,18 +121,21 @@ SV* sv;
 	    (*vtbl->svt_clear)(sv, mg);
     }
 
-    SvMAGICAL_on(sv);
-    SvPRIVATE(sv) &= ~(SVf_IOK|SVf_NOK|SVf_POK);
-    SvPRIVATE(sv) |= SvFLAGS(sv) & (SVf_IOK|SVf_NOK|SVf_POK);
-    SvFLAGS(sv) &= ~(SVf_IOK|SVf_NOK|SVf_POK);
+    SvFLAGS(sv) |= savemagic;
+    if (SvGMAGICAL(sv))
+	SvFLAGS(sv) &= ~(SVf_IOK|SVf_NOK|SVf_POK);
 
     return 0;
 }
 
 MAGIC*
+#ifndef STANDARD_C
 mg_find(sv, type)
 SV* sv;
 char type;
+#else
+mg_find(SV *sv, char type)
+#endif /* STANDARD_C */
 {
     MAGIC* mg;
     for (mg = SvMAGIC(sv); mg; mg = mg->mg_moremagic) {
@@ -160,7 +176,8 @@ SV* sv;
 	    (*vtbl->svt_free)(sv, mg);
 	if (mg->mg_ptr && mg->mg_type != 'g')
 	    Safefree(mg->mg_ptr);
-	sv_free(mg->mg_obj);
+	if (mg->mg_obj != sv)
+	    SvREFCNT_dec(mg->mg_obj);
 	Safefree(mg);
     }
     SvMAGIC(sv) = 0;
@@ -332,7 +349,7 @@ MAGIC *mg;
     case '.':
 #ifndef lint
 	if (last_in_gv && GvIO(last_in_gv)) {
-	    sv_setiv(sv,(I32)GvIO(last_in_gv)->lines);
+	    sv_setiv(sv,(I32)IoLINES(GvIO(last_in_gv)));
 	}
 #endif
 	break;
@@ -340,7 +357,7 @@ MAGIC *mg;
 	sv_setiv(sv,(I32)statusvalue);
 	break;
     case '^':
-	s = GvIO(defoutgv)->top_name;
+	s = IoTOP_NAME(GvIO(defoutgv));
 	if (s)
 	    sv_setpv(sv,s);
 	else {
@@ -349,20 +366,20 @@ MAGIC *mg;
 	}
 	break;
     case '~':
-	s = GvIO(defoutgv)->fmt_name;
+	s = IoFMT_NAME(GvIO(defoutgv));
 	if (!s)
 	    s = GvENAME(defoutgv);
 	sv_setpv(sv,s);
 	break;
 #ifndef lint
     case '=':
-	sv_setiv(sv,(I32)GvIO(defoutgv)->page_len);
+	sv_setiv(sv,(I32)IoPAGE_LEN(GvIO(defoutgv)));
 	break;
     case '-':
-	sv_setiv(sv,(I32)GvIO(defoutgv)->lines_left);
+	sv_setiv(sv,(I32)IoLINES_LEFT(GvIO(defoutgv)));
 	break;
     case '%':
-	sv_setiv(sv,(I32)GvIO(defoutgv)->page);
+	sv_setiv(sv,(I32)IoPAGE(GvIO(defoutgv)));
 	break;
 #endif
     case ':':
@@ -375,7 +392,7 @@ MAGIC *mg;
     case '|':
 	if (!GvIO(defoutgv))
 	    GvIO(defoutgv) = newIO();
-	sv_setiv(sv, (GvIO(defoutgv)->flags & IOf_FLUSH) != 0 );
+	sv_setiv(sv, (IoFLAGS(GvIO(defoutgv)) & IOf_FLUSH) != 0 );
 	break;
     case ',':
 	sv_setpvn(sv,ofs,ofslen);
@@ -448,7 +465,7 @@ MAGIC* mg;
 {
     register char *s;
     I32 i;
-    s = SvPVX(sv);
+    s = SvPV(sv,na);
     my_setenv(mg->mg_ptr,s);
 			    /* And you'll never guess what the dog had */
 			    /*   in its mouth... */
@@ -461,7 +478,7 @@ MAGIC* mg;
 		s++;
 		if (*tokenbuf != '/'
 		  || (stat(tokenbuf,&statbuf) && (statbuf.st_mode & 2)) )
-		    SvPRIVATE(sv) |= SVp_TAINTEDDIR;
+		    MgTAINTEDDIR_on(mg);
 	    }
 	}
     }
@@ -475,7 +492,7 @@ MAGIC* mg;
 {
     register char *s;
     I32 i;
-    s = SvPVX(sv);
+    s = SvPV(sv,na);
     i = whichsig(mg->mg_ptr);	/* ...no, a brick */
     if (!i && (dowarn || strEQ(mg->mg_ptr,"ALARM")))
 	warn("No such signal: SIG%s", mg->mg_ptr);
@@ -703,7 +720,7 @@ MAGIC* mg;
     gv = DBline;
     i = SvTRUE(sv);
     svp = av_fetch(GvAV(gv),atoi(mg->mg_ptr), FALSE);
-    if (svp && SvIOK(*svp) && (o = (OP*)SvSTASH(*svp)))
+    if (svp && SvIOKp(*svp) && (o = (OP*)SvSTASH(*svp)))
 	o->op_private = i;
     else
 	warn("Can't break at that line\n");
@@ -770,10 +787,9 @@ magic_setsubstr(sv,mg)
 SV* sv;
 MAGIC* mg;
 {
-    char *tmps = SvPVX(sv);
-    if (!tmps)
-	tmps = "";
-    sv_insert(LvTARG(sv),LvTARGOFF(sv),LvTARGLEN(sv), tmps,SvCUR(sv));
+    STRLEN len;
+    char *tmps = SvPV(sv,len);
+    sv_insert(LvTARG(sv),LvTARGOFF(sv),LvTARGLEN(sv), tmps, len);
     return 0;
 }
 
@@ -844,9 +860,10 @@ MAGIC* mg;
 {
     register char *s;
     I32 i;
+    STRLEN len;
     switch (*mg->mg_ptr) {
     case '\004':	/* ^D */
-	debug = (SvIOK(sv) ? SvIVX(sv) : sv_2iv(sv)) | 32768;
+	debug = (SvIOK(sv) ? SvIVX(sv) : sv_2iv(sv)) | 0x80000000;
 	DEBUG_x(dump_all());
 	break;
     case '\006':	/* ^F */
@@ -856,7 +873,7 @@ MAGIC* mg;
 	if (inplace)
 	    Safefree(inplace);
 	if (SvOK(sv))
-	    inplace = savestr(SvPVX(sv));
+	    inplace = savestr(SvPV(sv,na));
 	else
 	    inplace = Nullch;
 	break;
@@ -881,32 +898,32 @@ MAGIC* mg;
 	    save_sptr((SV**)&last_in_gv);
 	break;
     case '^':
-	Safefree(GvIO(defoutgv)->top_name);
-	GvIO(defoutgv)->top_name = s = savestr(SvPVX(sv));
-	GvIO(defoutgv)->top_gv = gv_fetchpv(s,TRUE);
+	Safefree(IoTOP_NAME(GvIO(defoutgv)));
+	IoTOP_NAME(GvIO(defoutgv)) = s = savestr(SvPV(sv,na));
+	IoTOP_GV(GvIO(defoutgv)) = gv_fetchpv(s,TRUE);
 	break;
     case '~':
-	Safefree(GvIO(defoutgv)->fmt_name);
-	GvIO(defoutgv)->fmt_name = s = savestr(SvPVX(sv));
-	GvIO(defoutgv)->fmt_gv = gv_fetchpv(s,TRUE);
+	Safefree(IoFMT_NAME(GvIO(defoutgv)));
+	IoFMT_NAME(GvIO(defoutgv)) = s = savestr(SvPV(sv,na));
+	IoFMT_GV(GvIO(defoutgv)) = gv_fetchpv(s,TRUE);
 	break;
     case '=':
-	GvIO(defoutgv)->page_len = (long)(SvIOK(sv) ? SvIVX(sv) : sv_2iv(sv));
+	IoPAGE_LEN(GvIO(defoutgv)) = (long)(SvIOK(sv) ? SvIVX(sv) : sv_2iv(sv));
 	break;
     case '-':
-	GvIO(defoutgv)->lines_left = (long)(SvIOK(sv) ? SvIVX(sv) : sv_2iv(sv));
-	if (GvIO(defoutgv)->lines_left < 0L)
-	    GvIO(defoutgv)->lines_left = 0L;
+	IoLINES_LEFT(GvIO(defoutgv)) = (long)(SvIOK(sv) ? SvIVX(sv) : sv_2iv(sv));
+	if (IoLINES_LEFT(GvIO(defoutgv)) < 0L)
+	    IoLINES_LEFT(GvIO(defoutgv)) = 0L;
 	break;
     case '%':
-	GvIO(defoutgv)->page = (long)(SvIOK(sv) ? SvIVX(sv) : sv_2iv(sv));
+	IoPAGE(GvIO(defoutgv)) = (long)(SvIOK(sv) ? SvIVX(sv) : sv_2iv(sv));
 	break;
     case '|':
 	if (!GvIO(defoutgv))
 	    GvIO(defoutgv) = newIO();
-	GvIO(defoutgv)->flags &= ~IOf_FLUSH;
+	IoFLAGS(GvIO(defoutgv)) &= ~IOf_FLUSH;
 	if ((SvIOK(sv) ? SvIVX(sv) : sv_2iv(sv)) != 0) {
-	    GvIO(defoutgv)->flags |= IOf_FLUSH;
+	    IoFLAGS(GvIO(defoutgv)) |= IOf_FLUSH;
 	}
 	break;
     case '*':
@@ -915,8 +932,8 @@ MAGIC* mg;
 	break;
     case '/':
 	if (SvPOK(sv)) {
-	    nrs = rs = SvPVX(sv);
-	    nrslen = rslen = SvCUR(sv);
+	    nrs = rs = SvPV(sv,rslen);
+	    nrslen = rslen;
 	    if (rspara = !rslen) {
 		nrs = rs = "\n\n";
 		nrslen = rslen = 2;
@@ -931,19 +948,17 @@ MAGIC* mg;
     case '\\':
 	if (ors)
 	    Safefree(ors);
-	ors = savestr(SvPVX(sv));
-	orslen = SvCUR(sv);
+	ors = savestr(SvPV(sv,orslen));
 	break;
     case ',':
 	if (ofs)
 	    Safefree(ofs);
-	ofs = savestr(SvPVX(sv));
-	ofslen = SvCUR(sv);
+	ofs = savestr(SvPV(sv, ofslen));
 	break;
     case '#':
 	if (ofmt)
 	    Safefree(ofmt);
-	ofmt = savestr(SvPVX(sv));
+	ofmt = savestr(SvPV(sv,na));
 	break;
     case '[':
 	arybase = SvIOK(sv) ? SvIVX(sv) : sv_2iv(sv);
@@ -1039,7 +1054,7 @@ MAGIC* mg;
 	tainting |= (euid != uid || egid != gid);
 	break;
     case ':':
-	chopset = SvPVX(sv);
+	chopset = SvPV(sv,na);
 	break;
     case '0':
 	if (!origalen) {
@@ -1059,8 +1074,8 @@ MAGIC* mg;
 	    }
 	    origalen = s - origargv[0];
 	}
-	s = SvPVX(sv);
-	i = SvCUR(sv);
+	s = SvPV(sv,len);
+	i = len;
 	if (i >= origalen) {
 	    i = origalen;
 	    SvCUR_set(sv, i);
@@ -1072,9 +1087,10 @@ MAGIC* mg;
 	    s = origargv[0]+i;
 	    *s++ = '\0';
 	    while (++i < origalen)
-		*s++ = '\0';
+		*s++ = ' ';
+	    s = origargv[0]+i;
 	    for (i = 1; i < origargc; i++)
-		origargv[i] = NULL;
+		origargv[i] = Nullch;
 	}
 	break;
     }
@@ -1142,7 +1158,7 @@ I32 sig;
     oldstack = stack;
     SWITCHSTACK(stack, signalstack);
 
-    sv = sv_mortalcopy(&sv_undef);
+    sv = sv_newmortal();
     sv_setpv(sv,sig_name[sig]);
     PUSHs(sv);
 
@@ -1155,6 +1171,7 @@ I32 sig;
     PUSHSUB(cx);
     cx->blk_sub.savearray = GvAV(defgv);
     cx->blk_sub.argarray = av_fake(items, sp);
+    SAVEFREESV(cx->blk_sub.argarray);
     GvAV(defgv) = cx->blk_sub.argarray;
     CvDEPTH(cv)++;
     if (CvDEPTH(cv) >= 2) {

@@ -94,6 +94,7 @@ I32 len;
     FILE *saveofp = Nullfp;
     char savetype = ' ';
 
+    SAVEFREEPV(myname);
     mode[0] = mode[1] = mode[2] = '\0';
     name = myname;
     forkprocess = 1;		/* assume true if no fork */
@@ -101,32 +102,32 @@ I32 len;
 	name[--len] = '\0';
     if (!io)
 	io = GvIO(gv) = newIO();
-    else if (io->ifp) {
-	fd = fileno(io->ifp);
-	if (io->type == '-')
+    else if (IoIFP(io)) {
+	fd = fileno(IoIFP(io));
+	if (IoTYPE(io) == '-')
 	    result = 0;
 	else if (fd <= maxsysfd) {
-	    saveifp = io->ifp;
-	    saveofp = io->ofp;
-	    savetype = io->type;
+	    saveifp = IoIFP(io);
+	    saveofp = IoOFP(io);
+	    savetype = IoTYPE(io);
 	    result = 0;
 	}
-	else if (io->type == '|')
-	    result = my_pclose(io->ifp);
-	else if (io->ifp != io->ofp) {
-	    if (io->ofp) {
-		result = fclose(io->ofp);
-		fclose(io->ifp);	/* clear stdio, fd already closed */
+	else if (IoTYPE(io) == '|')
+	    result = my_pclose(IoIFP(io));
+	else if (IoIFP(io) != IoOFP(io)) {
+	    if (IoOFP(io)) {
+		result = fclose(IoOFP(io));
+		fclose(IoIFP(io));	/* clear stdio, fd already closed */
 	    }
 	    else
-		result = fclose(io->ifp);
+		result = fclose(IoIFP(io));
 	}
 	else
-	    result = fclose(io->ifp);
+	    result = fclose(IoIFP(io));
 	if (result == EOF && fd > maxsysfd)
 	    fprintf(stderr,"Warning: unable to close filehandle %s properly.\n",
 	      GvENAME(gv));
-	io->ofp = io->ifp = Nullfp;
+	IoOFP(io) = IoIFP(io) = Nullfp;
     }
     if (*name == '+' && len > 1 && name[len-1] != '|') {	/* scary */
 	mode[1] = *name++;
@@ -137,7 +138,7 @@ I32 len;
     else  {
 	mode[1] = '\0';
     }
-    io->type = *name;
+    IoTYPE(io) = *name;
     if (*name == '|') {
 	/*SUPPRESS 530*/
 	for (name++; isSPACE(*name); name++) ;
@@ -151,7 +152,7 @@ I32 len;
 	TAINT_PROPER("open");
 	name++;
 	if (*name == '>') {
-	    mode[0] = io->type = 'a';
+	    mode[0] = IoTYPE(io) = 'a';
 	    name++;
 	}
 	else
@@ -172,10 +173,10 @@ I32 len;
 #endif
 		    goto say_false;
 		}
-		if (GvIO(gv) && GvIO(gv)->ifp) {
-		    fd = fileno(GvIO(gv)->ifp);
-		    if (GvIO(gv)->type == 's')
-			io->type = 's';
+		if (GvIO(gv) && IoIFP(GvIO(gv))) {
+		    fd = fileno(IoIFP(GvIO(gv)));
+		    if (IoTYPE(GvIO(gv)) == 's')
+			IoTYPE(io) = 's';
 		}
 		else
 		    fd = -1;
@@ -189,7 +190,7 @@ I32 len;
 		name++;
 	    if (strEQ(name,"-")) {
 		fp = stdout;
-		io->type = '-';
+		IoTYPE(io) = '-';
 	    }
 	    else  {
 		fp = fopen(name,mode);
@@ -206,7 +207,7 @@ I32 len;
 		goto duplicity;
 	    if (strEQ(name,"-")) {
 		fp = stdin;
-		io->type = '-';
+		IoTYPE(io) = '-';
 	    }
 	    else
 		fp = fopen(name,mode);
@@ -221,35 +222,33 @@ I32 len;
 		TAINT_ENV();
 	    TAINT_PROPER("piped open");
 	    fp = my_popen(name,"r");
-	    io->type = '|';
+	    IoTYPE(io) = '|';
 	}
 	else {
-	    io->type = '<';
+	    IoTYPE(io) = '<';
 	    /*SUPPRESS 530*/
 	    for (; isSPACE(*name); name++) ;
 	    if (strEQ(name,"-")) {
 		fp = stdin;
-		io->type = '-';
+		IoTYPE(io) = '-';
 	    }
 	    else
 		fp = fopen(name,"r");
 	}
     }
     if (!fp) {
-	if (dowarn && io->type == '<' && strchr(name, '\n'))
+	if (dowarn && IoTYPE(io) == '<' && strchr(name, '\n'))
 	    warn(warn_nl, "open");
-	Safefree(myname);
 	goto say_false;
     }
-    Safefree(myname);
-    if (io->type &&
-      io->type != '|' && io->type != '-') {
+    if (IoTYPE(io) &&
+      IoTYPE(io) != '|' && IoTYPE(io) != '-') {
 	if (fstat(fileno(fp),&statbuf) < 0) {
 	    (void)fclose(fp);
 	    goto say_false;
 	}
 	if (S_ISSOCK(statbuf.st_mode))
-	    io->type = 's';	/* in case a socket was passed in to us */
+	    IoTYPE(io) = 's';	/* in case a socket was passed in to us */
 #ifdef HAS_SOCKET
 	else if (
 #ifdef S_IFMT
@@ -261,7 +260,7 @@ I32 len;
 	    I32 buflen = sizeof tokenbuf;
 	    if (getsockname(fileno(fp), tokenbuf, &buflen) >= 0
 		|| errno != ENOTSOCK)
-		io->type = 's'; /* some OS's return 0 on fstat()ed socket */
+		IoTYPE(io) = 's'; /* some OS's return 0 on fstat()ed socket */
 				/* but some return 0 for streams too, sigh */
 	}
 #endif
@@ -298,25 +297,25 @@ I32 len;
     fd = fileno(fp);
     fcntl(fd,FFt_SETFD,fd > maxsysfd);
 #endif
-    io->ifp = fp;
+    IoIFP(io) = fp;
     if (writing) {
-	if (io->type == 's'
-	  || (io->type == '>' && S_ISCHR(statbuf.st_mode)) ) {
-	    if (!(io->ofp = fdopen(fileno(fp),"w"))) {
+	if (IoTYPE(io) == 's'
+	  || (IoTYPE(io) == '>' && S_ISCHR(statbuf.st_mode)) ) {
+	    if (!(IoOFP(io) = fdopen(fileno(fp),"w"))) {
 		fclose(fp);
-		io->ifp = Nullfp;
+		IoIFP(io) = Nullfp;
 		goto say_false;
 	    }
 	}
 	else
-	    io->ofp = fp;
+	    IoOFP(io) = fp;
     }
     return TRUE;
 
 say_false:
-    io->ifp = saveifp;
-    io->ofp = saveofp;
-    io->type = savetype;
+    IoIFP(io) = saveifp;
+    IoOFP(io) = saveofp;
+    IoTYPE(io) = savetype;
     return FALSE;
 }
 
@@ -335,7 +334,7 @@ register GV *gv;
     if (!argvoutgv)
 	argvoutgv = gv_fetchpv("ARGVOUT",TRUE);
     if (filemode & (S_ISUID|S_ISGID)) {
-	fflush(GvIO(argvoutgv)->ifp);  /* chmod must follow last write */
+	fflush(IoIFP(GvIO(argvoutgv)));  /* chmod must follow last write */
 #ifdef HAS_FCHMOD
 	(void)fchmod(lastfd,filemode);
 #else
@@ -346,6 +345,7 @@ register GV *gv;
     while (av_len(GvAV(gv)) >= 0) {
 	STRLEN len;
 	sv = av_shift(GvAV(gv));
+	SAVEFREESV(sv);
 	sv_setsv(GvSV(gv),sv);
 	SvSETMAGIC(GvSV(gv));
 	oldname = SvPVx(GvSV(gv), len);
@@ -353,9 +353,8 @@ register GV *gv;
 	    if (inplace) {
 		TAINT_PROPER("inplace open");
 		if (strEQ(oldname,"-")) {
-		    sv_free(sv);
 		    defoutgv = gv_fetchpv("STDOUT",TRUE);
-		    return GvIO(gv)->ifp;
+		    return IoIFP(GvIO(gv));
 		}
 #ifndef FLEXFILENAMES
 		filedev = statbuf.st_dev;
@@ -368,7 +367,6 @@ register GV *gv;
 		    warn("Can't do inplace edit: %s is not a regular file",
 		      oldname );
 		    do_close(gv,FALSE);
-		    sv_free(sv);
 		    continue;
 		}
 		if (*inplace) {
@@ -384,7 +382,6 @@ register GV *gv;
 			warn("Can't do inplace edit: %s > 14 characters",
 			  SvPVX(sv) );
 			do_close(gv,FALSE);
-			sv_free(sv);
 			continue;
 		    }
 #endif
@@ -394,7 +391,6 @@ register GV *gv;
 			warn("Can't rename %s to %s: %s, skipping file",
 			  oldname, SvPVX(sv), strerror(errno) );
 			do_close(gv,FALSE);
-			sv_free(sv);
 			continue;
 		    }
 #else
@@ -409,7 +405,6 @@ register GV *gv;
 			warn("Can't rename %s to %s: %s, skipping file",
 			  oldname, SvPVX(sv), strerror(errno) );
 			do_close(gv,FALSE);
-			sv_free(sv);
 			continue;
 		    }
 		    (void)UNLINK(oldname);
@@ -421,7 +416,6 @@ register GV *gv;
 			warn("Can't rename %s to %s: %s, skipping file",
 			  oldname, SvPVX(sv), strerror(errno) );
 			do_close(gv,FALSE);
-			sv_free(sv);
 			continue;
 		    }
 #else
@@ -436,11 +430,10 @@ register GV *gv;
 		    warn("Can't do inplace edit on %s: %s",
 		      oldname, strerror(errno) );
 		    do_close(gv,FALSE);
-		    sv_free(sv);
 		    continue;
 		}
 		defoutgv = argvoutgv;
-		lastfd = fileno(GvIO(argvoutgv)->ifp);
+		lastfd = fileno(IoIFP(GvIO(argvoutgv)));
 		(void)fstat(lastfd,&statbuf);
 #ifdef HAS_FCHMOD
 		(void)fchmod(lastfd,filemode);
@@ -457,12 +450,10 @@ register GV *gv;
 #endif
 		}
 	    }
-	    sv_free(sv);
-	    return GvIO(gv)->ifp;
+	    return IoIFP(GvIO(gv));
 	}
 	else
 	    fprintf(stderr,"Can't open %s: %s\n",SvPV(sv, na), strerror(errno));
-	sv_free(sv);
     }
     if (inplace) {
 	(void)do_close(argvoutgv,FALSE);
@@ -492,24 +483,24 @@ GV *wgv;
 
     if (!rstio)
 	rstio = GvIO(rgv) = newIO();
-    else if (rstio->ifp)
+    else if (IoIFP(rstio))
 	do_close(rgv,FALSE);
     if (!wstio)
 	wstio = GvIO(wgv) = newIO();
-    else if (wstio->ifp)
+    else if (IoIFP(wstio))
 	do_close(wgv,FALSE);
 
     if (pipe(fd) < 0)
 	goto badexit;
-    rstio->ifp = fdopen(fd[0], "r");
-    wstio->ofp = fdopen(fd[1], "w");
-    wstio->ifp = wstio->ofp;
-    rstio->type = '<';
-    wstio->type = '>';
-    if (!rstio->ifp || !wstio->ofp) {
-	if (rstio->ifp) fclose(rstio->ifp);
+    IoIFP(rstio) = fdopen(fd[0], "r");
+    IoOFP(wstio) = fdopen(fd[1], "w");
+    IoIFP(wstio) = IoOFP(wstio);
+    IoTYPE(rstio) = '<';
+    IoTYPE(wstio) = '>';
+    if (!IoIFP(rstio) || !IoOFP(wstio)) {
+	if (IoIFP(rstio)) fclose(IoIFP(rstio));
 	else close(fd[0]);
-	if (wstio->ofp) fclose(wstio->ofp);
+	if (IoOFP(wstio)) fclose(IoOFP(wstio));
 	else close(fd[1]);
 	goto badexit;
     }
@@ -524,9 +515,13 @@ badexit:
 #endif
 
 bool
+#ifndef STANDARD_C
 do_close(gv,explicit)
 GV *gv;
 bool explicit;
+#else
+do_close(GV *gv, bool explicit)
+#endif /* STANDARD_C */
 {
     bool retval = FALSE;
     register IO *io;
@@ -544,30 +539,30 @@ bool explicit;
 	    warn("Close on unopened file <%s>",GvENAME(gv));
 	return FALSE;
     }
-    if (io->ifp) {
-	if (io->type == '|') {
-	    status = my_pclose(io->ifp);
+    if (IoIFP(io)) {
+	if (IoTYPE(io) == '|') {
+	    status = my_pclose(IoIFP(io));
 	    retval = (status == 0);
 	    statusvalue = (unsigned short)status & 0xffff;
 	}
-	else if (io->type == '-')
+	else if (IoTYPE(io) == '-')
 	    retval = TRUE;
 	else {
-	    if (io->ofp && io->ofp != io->ifp) {		/* a socket */
-		retval = (fclose(io->ofp) != EOF);
-		fclose(io->ifp);	/* clear stdio, fd already closed */
+	    if (IoOFP(io) && IoOFP(io) != IoIFP(io)) {		/* a socket */
+		retval = (fclose(IoOFP(io)) != EOF);
+		fclose(IoIFP(io));	/* clear stdio, fd already closed */
 	    }
 	    else
-		retval = (fclose(io->ifp) != EOF);
+		retval = (fclose(IoIFP(io)) != EOF);
 	}
-	io->ofp = io->ifp = Nullfp;
+	IoOFP(io) = IoIFP(io) = Nullfp;
     }
     if (explicit) {
-	io->lines = 0;
-	io->page = 0;
-	io->lines_left = io->page_len;
+	IoLINES(io) = 0;
+	IoPAGE(io) = 0;
+	IoLINES_LEFT(io) = IoPAGE_LEN(io);
     }
-    io->type = ' ';
+    IoTYPE(io) = ' ';
     return retval;
 }
 
@@ -583,23 +578,23 @@ GV *gv;
     if (!io)
 	return TRUE;
 
-    while (io->ifp) {
+    while (IoIFP(io)) {
 
 #ifdef STDSTDIO			/* (the code works without this) */
-	if (io->ifp->_cnt > 0)	/* cheat a little, since */
+	if (IoIFP(io)->_cnt > 0)	/* cheat a little, since */
 	    return FALSE;		/* this is the most usual case */
 #endif
 
-	ch = getc(io->ifp);
+	ch = getc(IoIFP(io));
 	if (ch != EOF) {
-	    (void)ungetc(ch, io->ifp);
+	    (void)ungetc(ch, IoIFP(io));
 	    return FALSE;
 	}
 #ifdef STDSTDIO
-	if (io->ifp->_cnt < -1)
-	    io->ifp->_cnt = -1;
+	if (IoIFP(io)->_cnt < -1)
+	    IoIFP(io)->_cnt = -1;
 #endif
-	if (gv == argvgv) {		/* not necessarily a real EOF yet? */
+	if (op->op_flags & OPf_SPECIAL) { /* not necessarily a real EOF yet? */
 	    if (!nextargv(argvgv))	/* get another fp handy */
 		return TRUE;
 	}
@@ -619,15 +614,15 @@ GV *gv;
 	goto phooey;
 
     io = GvIO(gv);
-    if (!io || !io->ifp)
+    if (!io || !IoIFP(io))
 	goto phooey;
 
 #ifdef ULTRIX_STDIO_BOTCH
-    if (feof(io->ifp))
-	(void)fseek (io->ifp, 0L, 2);		/* ultrix 1.2 workaround */
+    if (feof(IoIFP(io)))
+	(void)fseek (IoIFP(io), 0L, 2);		/* ultrix 1.2 workaround */
 #endif
 
-    return ftell(io->ifp);
+    return ftell(IoIFP(io));
 
 phooey:
     if (dowarn)
@@ -648,15 +643,15 @@ int whence;
 	goto nuts;
 
     io = GvIO(gv);
-    if (!io || !io->ifp)
+    if (!io || !IoIFP(io))
 	goto nuts;
 
 #ifdef ULTRIX_STDIO_BOTCH
-    if (feof(io->ifp))
-	(void)fseek (io->ifp, 0L, 2);		/* ultrix 1.2 workaround */
+    if (feof(IoIFP(io)))
+	(void)fseek (IoIFP(io), 0L, 2);		/* ultrix 1.2 workaround */
 #endif
 
-    return fseek(io->ifp, pos, whence) >= 0;
+    return fseek(IoIFP(io), pos, whence) >= 0;
 
 nuts:
     if (dowarn)
@@ -676,7 +671,7 @@ SV *argstr;
     register char *s;
     I32 retval;
 
-    if (!gv || !argstr || !(io = GvIO(gv)) || !io->ifp) {
+    if (!gv || !argstr || !(io = GvIO(gv)) || !IoIFP(io)) {
 	errno = EBADF;	/* well, sort of... */
 	return -1;
     }
@@ -714,13 +709,13 @@ SV *argstr;
 
 #ifndef lint
     if (optype == OP_IOCTL)
-	retval = ioctl(fileno(io->ifp), func, s);
+	retval = ioctl(fileno(IoIFP(io)), func, s);
     else
 #ifdef DOSISH
 	croak("fcntl is not implemented");
 #else
 #ifdef HAS_FCNTL
-	retval = fcntl(fileno(io->ifp), func, s);
+	retval = fcntl(fileno(IoIFP(io)), func, s);
 #else
 	croak("fcntl is not implemented");
 #endif
@@ -852,7 +847,7 @@ FILE *fp;
     if (!sv)
 	return TRUE;
     if (ofmt) {
-	if (SvMAGICAL(sv))
+	if (SvGMAGICAL(sv))
 	    mg_get(sv);
         if (SvIOK(sv) && SvIVX(sv) != 0) {
 	    fprintf(fp, ofmt, (double)SvIVX(sv));
@@ -866,9 +861,11 @@ FILE *fp;
     }
     switch (SvTYPE(sv)) {
     case SVt_NULL:
+	if (dowarn)
+	    warn(warn_uninit);
 	return TRUE;
     case SVt_IV:
-	if (SvMAGICAL(sv))
+	if (SvGMAGICAL(sv))
 	    mg_get(sv);
 	fprintf(fp, "%d", SvIVX(sv));
 	return !ferror(fp);
@@ -891,11 +888,11 @@ dARGS
     if (op->op_flags & OPf_SPECIAL) {
 	EXTEND(sp,1);
 	io = GvIO(cGVOP->op_gv);
-	if (io && io->ifp) {
+	if (io && IoIFP(io)) {
 	    statgv = cGVOP->op_gv;
 	    sv_setpv(statname,"");
 	    laststype = OP_STAT;
-	    return (laststatval = fstat(fileno(io->ifp), &statcache));
+	    return (laststatval = fstat(fileno(IoIFP(io)), &statcache));
 	}
 	else {
 	    if (cGVOP->op_gv == defgv)

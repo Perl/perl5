@@ -1,0 +1,142 @@
+Article 38050 of comp.sys.amiga.programmer:
+Newsgroups: comp.sys.amiga.programmer
+Path: netlabs!news.cerf.net!usc!howland.reston.ans.net!pipex!uunet!majipoor.cygnus.com!fnf
+From: fnf@cygnus.com (Fred Fish)
+Subject: Re: FreshFish-dec93 CD; broken perl thereon
+Message-ID: <CKBuwv.7qF@cygnus.com>
+Organization: Cygnus Support, Mountain View, CA
+References: <1994Jan20.095600.8371@philips.oz.au> <D> <bruce.0r61@zuhause.mn.org>
+Date: Fri, 28 Jan 1994 06:48:29 GMT
+Lines: 129
+
+In article <bruce.0r61@zuhause.mn.org>,
+Bruce Albrecht <bruce@zuhause.MN.ORG> wrote:
+>In article <1994Jan20.095600.8371@philips.oz.au> gduncan@philips.oz.au (Gary Duncan) writes:
+>Me too.  I don't have the December Fresh Fish, so I can't comment on it,
+>but I have been wondering what it will take to do a fresh port of it anyway.
+
+The diffs that I applied to the base FSF distribution are:
+
+diff -rc perl-4.036-fsf/Configure perl-4.036-amiga/Configure
+*** perl-4.036-fsf/Configure	Mon Feb  8 20:37:48 1993
+--- perl-4.036-amiga/Configure	Mon Sep 27 21:46:16 1993
+***************
+*** 4023,4029 ****
+      eval $ans;;
+  esac
+  chmod +x doSH
+! ./doSH
+  
+  if $contains '^depend:' [Mm]akefile >/dev/null 2>&1; then
+      dflt=n
+--- 4023,4029 ----
+      eval $ans;;
+  esac
+  chmod +x doSH
+! sh doSH
+  
+  if $contains '^depend:' [Mm]akefile >/dev/null 2>&1; then
+      dflt=n
+diff -rc perl-4.036-fsf/Makefile.SH perl-4.036-amiga/Makefile.SH
+*** perl-4.036-fsf/Makefile.SH	Mon Feb  8 20:35:21 1993
+--- perl-4.036-amiga/Makefile.SH	Tue Sep 28 07:16:24 1993
+***************
+*** 349,355 ****
+  
+  test: perl
+  	- cd t && chmod +x TEST */*.t
+! 	- cd t && (rm -f perl; $(SLN) ../perl perl) && ./perl TEST </dev/tty
+  
+  clist:
+  	echo $(c) | tr ' ' '\012' >.clist
+--- 349,355 ----
+  
+  test: perl
+  	- cd t && chmod +x TEST */*.t
+! 	- cd t && (rm -f perl; $(SLN) ../perl perl) && ./perl TEST
+  
+  clist:
+  	echo $(c) | tr ' ' '\012' >.clist
+***************
+*** 373,376 ****
+      ln Makefile ../Makefile
+      ;;
+  esac
+! rm -f makefile
+--- 373,377 ----
+      ln Makefile ../Makefile
+      ;;
+  esac
+! #rm -f makefile  (AmigaDOS is case-independent)
+! 
+diff -rc perl-4.036-fsf/makedepend.SH perl-4.036-amiga/makedepend.SH
+*** perl-4.036-fsf/makedepend.SH	Mon Feb  8 20:36:27 1993
+--- perl-4.036-amiga/makedepend.SH	Mon Sep 27 22:06:33 1993
+***************
+*** 63,71 ****
+  $cat /dev/null >.deptmp
+  $rm -f *.c.c c/*.c.c
+  if test -f Makefile; then
+!     cp Makefile makefile
+  fi
+! mf=makefile
+  if test -f $mf; then
+      defrule=`<$mf sed -n		\
+  	-e '/^\.c\.o:.*;/{'		\
+--- 63,71 ----
+  $cat /dev/null >.deptmp
+  $rm -f *.c.c c/*.c.c
+  if test -f Makefile; then
+!     cp Makefile Makefile.bak
+  fi
+! mf=Makefile
+  if test -f $mf; then
+      defrule=`<$mf sed -n		\
+  	-e '/^\.c\.o:.*;/{'		\
+diff -rc perl-4.036-fsf/perl.h perl-4.036-amiga/perl.h
+*** perl-4.036-fsf/perl.h	Mon Feb  8 20:36:01 1993
+--- perl-4.036-amiga/perl.h	Mon Sep 27 22:06:19 1993
+***************
+*** 79,85 ****
+--- 79,87 ----
+   */
+  #define HAS_ALARM
+  #define HAS_CHOWN
++ #ifndef amigados
+  #define HAS_CHROOT
++ #endif
+  #define HAS_FORK
+  #define HAS_GETLOGIN
+  #define HAS_GETPPID
+***************
+*** 93,99 ****
+--- 95,103 ----
+   * password and group functions in general.  All Unix systems do.
+   */
+  #define HAS_GROUP
++ #ifndef amigados
+  #define HAS_PASSWD
++ #endif
+  
+  #endif /* !MSDOS */
+  
+diff -rc perl-4.036-fsf/x2p/Makefile.SH perl-4.036-amiga/x2p/Makefile.SH
+*** perl-4.036-fsf/x2p/Makefile.SH	Mon Feb  8 20:36:33 1993
+--- perl-4.036-amiga/x2p/Makefile.SH	Mon Sep 27 22:07:15 1993
+***************
+*** 157,160 ****
+      ln Makefile ../Makefile
+      ;;
+  esac
+! rm -f makefile
+--- 157,160 ----
+      ln Makefile ../Makefile
+      ;;
+  esac
+! #rm -f makefile
+
+
+
+
+
+

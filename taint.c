@@ -42,10 +42,11 @@ taint_env()
     SV** svp;
 
     if (tainting) {
+	MAGIC *mg = 0;
 	svp = hv_fetch(GvHVn(envgv),"PATH",4,FALSE);
-	if (!svp || *svp == &sv_undef || mg_find(*svp, 't')) {
+	if (!svp || *svp == &sv_undef || (mg = mg_find(*svp, 't'))) {
 	    tainted = 1;
-	    if (SvPRIVATE(*svp) & SVp_TAINTEDDIR)
+	    if (mg && MgTAINTEDDIR(mg))
 		taint_proper("Insecure directory in %s%s", "PATH");
 	    else
 		taint_proper("Insecure %s%s", "PATH");

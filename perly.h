@@ -40,14 +40,14 @@
 #define UNIOP 296
 #define SHIFTOP 297
 #define MATCHOP 298
-#define ARROW 299
-#define UMINUS 300
-#define REFGEN 301
-#define POWOP 302
-#define PREINC 303
-#define PREDEC 304
-#define POSTINC 305
-#define POSTDEC 306
+#define UMINUS 299
+#define REFGEN 300
+#define POWOP 301
+#define PREINC 302
+#define PREDEC 303
+#define POSTINC 304
+#define POSTDEC 305
+#define ARROW 306
 typedef union {
     I32	ival;
     char *pval;

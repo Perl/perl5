@@ -36,6 +36,7 @@ struct gp {
     U32		gp_cvgen;	/* generational validity of cached gv_cv */
     I32		gp_lastexpr;	/* used by nothing_in_common() */
     line_t	gp_line;	/* line first declared at (for -w) */
+    GV *	gp_filegv;	/* file first declared in (for -w) */
     char	gp_flags;
 };
 
@@ -79,6 +80,7 @@ HV *GvHVn();
 #define GvLASTEXPR(gv)	(GvGP(gv)->gp_lastexpr)
 
 #define GvLINE(gv)	(GvGP(gv)->gp_line)
+#define GvFILEGV(gv)	(GvGP(gv)->gp_filegv)
 
 #define GvFLAGS(gv)	(GvGP(gv)->gp_flags)
 
@@ -91,30 +93,6 @@ HV *GvHVn();
 
 #define GvSTASH(gv)	(GvXPVGV(gv)->xgv_stash)
 #define GvESTASH(gv)	GvSTASH(GvEGV(gv))
-
-struct io {
-    FILE *	ifp;		/* ifp and ofp are normally the same */
-    FILE *	ofp;		/* but sockets need separate streams */
-#ifdef HAS_READDIR
-    DIR *	dirp;		/* for opendir, readdir, etc */
-#endif
-    long	lines;		/* $. */
-    long	page;		/* $% */
-    long	page_len;	/* $= */
-    long	lines_left;	/* $- */
-    char *	top_name;	/* $^ */
-    GV *	top_gv;		/* $^ */
-    char *	fmt_name;	/* $~ */
-    GV *	fmt_gv;		/* $~ */
-    SV *	object;
-    short	subprocess;	/* -| or |- */
-    char	type;
-    char	flags;
-};
-
-#define IOf_ARGV 1	/* this fp iterates over ARGV */
-#define IOf_START 2	/* check for null ARGV and substitute '-' */
-#define IOf_FLUSH 4	/* this fp wants a flush after write op */
 
 #define Nullgv Null(GV*)
 

@@ -24,7 +24,7 @@ register int items;
 	SDBM_File	RETVAL;
 
 	RETVAL = sdbm_new(dbtype, filename, flags, mode);
-	ST(0) = sv_mortalcopy(&sv_undef);
+	ST(0) = sv_newmortal();
 	sv_setptrobj(ST(0), RETVAL, "SDBM_File");
     }
     return sp;
@@ -42,10 +42,10 @@ register int items;
     {
 	SDBM_File	db;
 
-	if (sv_isa(ST(1), "SDBM_File"))
+	if (SvROK(ST(1)))
 	    db = (SDBM_File)(unsigned long)SvNV((SV*)SvRV(ST(1)));
 	else
-	    croak("db is not of type SDBM_File");
+	    croak("db is not a reference");
 	sdbm_close(db);
     }
     return sp;
@@ -73,7 +73,7 @@ register int items;
 	key.dptr = SvPV(ST(2), key.dsize);;
 
 	RETVAL = sdbm_fetch(db, key);
-	ST(0) = sv_mortalcopy(&sv_undef);
+	ST(0) = sv_newmortal();
 	sv_setpvn(ST(0), RETVAL.dptr, RETVAL.dsize);
     }
     return sp;
@@ -111,7 +111,7 @@ register int items;
 	}
 
 	RETVAL = sdbm_store(db, key, value, flags);
-	ST(0) = sv_mortalcopy(&sv_undef);
+	ST(0) = sv_newmortal();
 	sv_setiv(ST(0), (I32)RETVAL);
     }
     return sp;
@@ -139,7 +139,7 @@ register int items;
 	key.dptr = SvPV(ST(2), key.dsize);;
 
 	RETVAL = sdbm_delete(db, key);
-	ST(0) = sv_mortalcopy(&sv_undef);
+	ST(0) = sv_newmortal();
 	sv_setiv(ST(0), (I32)RETVAL);
     }
     return sp;
@@ -164,7 +164,7 @@ register int items;
 	    croak("db is not of type SDBM_File");
 
 	RETVAL = sdbm_firstkey(db);
-	ST(0) = sv_mortalcopy(&sv_undef);
+	ST(0) = sv_newmortal();
 	sv_setpvn(ST(0), RETVAL.dptr, RETVAL.dsize);
     }
     return sp;
@@ -192,7 +192,7 @@ register int items;
 	key.dptr = SvPV(ST(2), key.dsize);;
 
 	RETVAL = nextkey(db, key);
-	ST(0) = sv_mortalcopy(&sv_undef);
+	ST(0) = sv_newmortal();
 	sv_setpvn(ST(0), RETVAL.dptr, RETVAL.dsize);
     }
     return sp;
@@ -217,7 +217,7 @@ register int items;
 	    croak("db is not of type SDBM_File");
 
 	RETVAL = sdbm_error(db);
-	ST(0) = sv_mortalcopy(&sv_undef);
+	ST(0) = sv_newmortal();
 	sv_setiv(ST(0), (I32)RETVAL);
     }
     return sp;
@@ -242,13 +242,13 @@ register int items;
 	    croak("db is not of type SDBM_File");
 
 	RETVAL = sdbm_clearerr(db);
-	ST(0) = sv_mortalcopy(&sv_undef);
+	ST(0) = sv_newmortal();
 	sv_setiv(ST(0), (I32)RETVAL);
     }
     return sp;
 }
 
-int init_SDBM_File(ix,sp,items)
+int boot_SDBM_File(ix,sp,items)
 int ix;
 int sp;
 int items;

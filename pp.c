@@ -58,8 +58,12 @@ extern int h_errno;
 #include <sys/file.h>
 #endif
 
-#ifdef I_VARARGS
-#  include <varargs.h>
+#ifdef STANDARD_C
+#  include <stdarg.h>
+#else
+#  ifdef I_VARARGS
+#    include <varargs.h>
+#  endif
 #endif
 
 static I32 dopoptosub P((I32 startingblock));
@@ -175,8 +179,8 @@ PP(pp_padsv)
 {
     dSP; dTARGET;
     XPUSHs(TARG);
-    if ((op->op_flags & (OPf_INTRO|OPf_SPECIAL)) == OPf_INTRO)
-	SvOK_off(TARG);
+    if (op->op_flags & OPf_INTRO)
+	SAVECLEARSV(curpad[op->op_targ]);
     RETURN;
 }
 
@@ -184,8 +188,8 @@ PP(pp_padav)
 {
     dSP; dTARGET;
     XPUSHs(TARG);
-    if ((op->op_flags & (OPf_INTRO|OPf_SPECIAL)) == OPf_INTRO)
-	av_clear((AV*)TARG);
+    if (op->op_flags & OPf_INTRO)
+	SAVECLEARSV(curpad[op->op_targ]);
     if (op->op_flags & OPf_LVAL)
 	RETURN;
     PUTBACK;
@@ -196,8 +200,8 @@ PP(pp_padhv)
 {
     dSP; dTARGET;
     XPUSHs(TARG);
-    if ((op->op_flags & (OPf_INTRO|OPf_SPECIAL)) == OPf_INTRO)
-	hv_clear((HV*)TARG);
+    if (op->op_flags & OPf_INTRO)
+	SAVECLEARSV(curpad[op->op_targ]);
     if (op->op_flags & OPf_LVAL)
 	RETURN;
     PUTBACK;
@@ -229,7 +233,7 @@ PP(pp_rv2gv)
     else {
 	if (SvTYPE(sv) != SVt_PVGV) {
 	    if (!SvOK(sv))
-		DIE(no_usym);
+		DIE(no_usym, "a glob");
 	    sv = (SV*)gv_fetchpv(SvPV(sv, na), TRUE);
 	}
     }
@@ -282,26 +286,28 @@ PP(pp_rv2sv)
 	GV *gv = sv;
 	if (SvTYPE(gv) != SVt_PVGV) {
 	    if (!SvOK(sv))
-		DIE(no_usym);
+		DIE(no_usym, "a scalar");
 	    gv = (SV*)gv_fetchpv(SvPV(sv, na), TRUE);
 	}
 	sv = GvSV(gv);
 	if (op->op_private == OP_RV2HV &&
 	  (!SvROK(sv) || SvTYPE(SvRV(sv)) != SVt_PVHV)) {
-	    sv_free(sv);
+	    SvREFCNT_dec(sv);
 	    sv = NEWSV(0,0);
 	    sv_upgrade(sv, SVt_RV);
-	    SvRV(sv) = sv_ref((SV*)newHV());
+	    SvRV(sv) = SvREFCNT_inc(newHV());
 	    SvROK_on(sv);
+	    ++sv_rvcount;
 	    GvSV(gv) = sv;
 	}
 	else if (op->op_private == OP_RV2AV &&
 	  (!SvROK(sv) || SvTYPE(SvRV(sv)) != SVt_PVAV)) {
-	    sv_free(sv);
+	    SvREFCNT_dec(sv);
 	    sv = NEWSV(0,0);
 	    sv_upgrade(sv, SVt_RV);
-	    SvRV(sv) = sv_ref((SV*)newAV());
+	    SvRV(sv) = SvREFCNT_inc(newAV());
 	    SvROK_on(sv);
+	    ++sv_rvcount;
 	    GvSV(gv) = sv;
 	}
     }
@@ -332,7 +338,9 @@ PP(pp_rv2cv)
     SV *sv;
     GV *gv;
     HV *stash;
-    CV *cv = sv_2cv(TOPs, &stash, &gv, 0);
+
+    /* We always try to add a non-existent subroutine in case of AUTOLOAD. */
+    CV *cv = sv_2cv(TOPs, &stash, &gv, TRUE);
 
     SETs((SV*)cv);
     RETURN;
@@ -344,10 +352,11 @@ PP(pp_refgen)
     SV* rv;
     if (!sv)
 	RETSETUNDEF;
-    rv = sv_mortalcopy(&sv_undef);
+    rv = sv_newmortal();
     sv_upgrade(rv, SVt_RV);
-    SvRV(rv) = sv_ref(sv);
+    SvRV(rv) = SvREFCNT_inc(sv);
     SvROK_on(rv);
+    ++sv_rvcount;
     SETs(rv);
     RETURN;
 }
@@ -417,7 +426,7 @@ PP(pp_bless)
     ref = SvRV(sv);
     SvOBJECT_on(ref);
     SvUPGRADE(ref, SVt_PVMG);
-    SvSTASH(ref) = stash;
+    SvSTASH(ref) = (HV*)SvREFCNT_inc(stash);
     RETURN;
 }
 
@@ -444,7 +453,7 @@ PP(pp_backtick)
 	    for (;;) {
 		sv = NEWSV(56, 80);
 		if (sv_gets(sv, fp, 0) == Nullch) {
-		    sv_free(sv);
+		    SvREFCNT_dec(sv);
 		    break;
 		}
 		XPUSHs(sv_2mortal(sv));
@@ -478,26 +487,28 @@ do_readline()
 
     fp = Nullfp;
     if (io) {
-	fp = io->ifp;
+	fp = IoIFP(io);
 	if (!fp) {
-	    if (io->flags & IOf_ARGV) {
-		if (io->flags & IOf_START) {
-		    io->flags &= ~IOf_START;
-		    io->lines = 0;
+	    if (IoFLAGS(io) & IOf_ARGV) {
+		if (IoFLAGS(io) & IOf_START) {
+		    IoFLAGS(io) &= ~IOf_START;
+		    IoLINES(io) = 0;
 		    if (av_len(GvAVn(last_in_gv)) < 0) {
 			SV *tmpstr = newSVpv("-", 1); /* assume stdin */
 			(void)av_push(GvAVn(last_in_gv), tmpstr);
 		    }
 		}
 		fp = nextargv(last_in_gv);
-		if (!fp) { /* Note: fp != io->ifp */
+		if (!fp) { /* Note: fp != IoIFP(io) */
 		    (void)do_close(last_in_gv, FALSE); /* now it does*/
-		    io->flags |= IOf_START;
+		    IoFLAGS(io) |= IOf_START;
 		}
 	    }
 	    else if (type == OP_GLOB) {
 		SV *tmpcmd = NEWSV(55, 0);
 		SV *tmpglob = POPs;
+		ENTER;
+		SAVEFREESV(tmpcmd);
 #ifdef DOSISH
 		sv_setpv(tmpcmd, "perlglob ");
 		sv_catsv(tmpcmd, tmpglob);
@@ -515,8 +526,8 @@ do_readline()
 #endif /* !CSH */
 #endif /* !MSDOS */
 		(void)do_open(last_in_gv, SvPVX(tmpcmd), SvCUR(tmpcmd));
-		fp = io->ifp;
-		sv_free(tmpcmd);
+		fp = IoIFP(io);
+		LEAVE;
 	    }
 	}
 	else if (type == OP_GLOB)
@@ -547,12 +558,12 @@ do_readline()
     for (;;) {
 	if (!sv_gets(sv, fp, offset)) {
 	    clearerr(fp);
-	    if (io->flags & IOf_ARGV) {
+	    if (IoFLAGS(io) & IOf_ARGV) {
 		fp = nextargv(last_in_gv);
 		if (fp)
 		    continue;
 		(void)do_close(last_in_gv, FALSE);
-		io->flags |= IOf_START;
+		IoFLAGS(io) |= IOf_START;
 	    }
 	    else if (type == OP_GLOB) {
 		(void)do_close(last_in_gv, FALSE);
@@ -561,7 +572,7 @@ do_readline()
 		RETPUSHUNDEF;
 	    RETURN;
 	}
-	io->lines++;
+	IoLINES(io)++;
 	XPUSHs(sv);
 	if (tainting) {
 	    tainted = TRUE;
@@ -777,7 +788,7 @@ play_it_again:
 	    }
 	}
 	if (--BmUSEFUL(pm->op_pmshort) < 0) {
-	    sv_free(pm->op_pmshort);
+	    SvREFCNT_dec(pm->op_pmshort);
 	    pm->op_pmshort = Nullsv;	/* opt is being useless */
 	}
     }
@@ -808,7 +819,7 @@ play_it_again:
 	    i = 0;
 	EXTEND(SP, iters + i);
 	for (i = !i; i <= iters; i++) {
-	    PUSHs(sv_mortalcopy(&sv_no));
+	    PUSHs(sv_newmortal());
 	    /*SUPPRESS 560*/
 	    if (s = rx->startp[i]) {
 		len = rx->endp[i] - s;
@@ -955,7 +966,7 @@ PP(pp_subst)
 	    }
 	}
 	if (--BmUSEFUL(pm->op_pmshort) < 0) {
-	    sv_free(pm->op_pmshort);
+	    SvREFCNT_dec(pm->op_pmshort);
 	    pm->op_pmshort = Nullsv;	/* opt is being useless */
 	}
     }
@@ -1049,7 +1060,7 @@ PP(pp_subst)
 		}
 		SvPOK_only(TARG);
 		SvSETMAGIC(TARG);
-		PUSHs(sv_2mortal(newSVnv((double)iters)));
+		PUSHs(sv_2mortal(newSViv((I32)iters)));
 		RETURN;
 	    }
 	    PUSHs(&sv_no);
@@ -1092,7 +1103,7 @@ PP(pp_subst)
 	sv_replace(TARG, dstr);
 	SvPOK_only(TARG);
 	SvSETMAGIC(TARG);
-	PUSHs(sv_2mortal(newSVnv((double)iters)));
+	PUSHs(sv_2mortal(newSViv((I32)iters)));
 	RETURN;
     }
     PUSHs(&sv_no);
@@ -1133,7 +1144,7 @@ PP(pp_substcont)
 	    sv_replace(targ, dstr);
 	    SvPOK_only(targ);
 	    SvSETMAGIC(targ);
-	    PUSHs(sv_2mortal(newSVnv((double)(cx->sb_iters - 1))));
+	    PUSHs(sv_2mortal(newSViv((I32)cx->sb_iters - 1)));
 	    POPSUBST(cx);
 	    RETURNOP(pm->op_next);
 	}
@@ -1175,7 +1186,7 @@ PP(pp_trans)
 PP(pp_sassign)
 {
     dSP; dPOPTOPssrl;
-    if (tainting && tainted && (!SvMAGICAL(lstr) || !mg_find(lstr, 't'))) {
+    if (tainting && tainted && (!SvRMAGICAL(lstr) || !mg_find(lstr, 't'))) {
 	TAINT_NOT;
     }
     SvSetSV(rstr, lstr);
@@ -1225,7 +1236,7 @@ PP(pp_aassign)
 	switch (SvTYPE(sv)) {
 	case SVt_PVAV:
 	    ary = (AV*)sv;
-	    magic = SvMAGICAL(ary) != 0;
+	    magic = SvSMAGICAL(ary) != 0;
 	    AvREAL_on(ary);
 	    AvFILL(ary) = -1;
 	    i = 0;
@@ -1244,7 +1255,7 @@ PP(pp_aassign)
 		SV *tmpstr;
 
 		hash = (HV*)sv;
-		magic = SvMAGICAL(hash) != 0;
+		magic = SvSMAGICAL(hash) != 0;
 		hv_clear(hash);
 
 		while (relem < lastrelem) {	/* gobble up all the rest */
@@ -1266,7 +1277,7 @@ PP(pp_aassign)
 	    break;
 	default:
 	    if (SvTHINKFIRST(sv)) {
-		if (SvREADONLY(sv)) {
+		if (SvREADONLY(sv) && curcop != &compiling) {
 		    if (sv != &sv_undef && sv != &sv_yes && sv != &sv_no)
 			DIE(no_modify);
 		    if (relem <= lastrelem)
@@ -1520,7 +1531,7 @@ PP(pp_study)
     SvSCREAM_on(TARG);
     retval = 1;
   ret:
-    XPUSHs(sv_2mortal(newSVnv((double)retval)));
+    XPUSHs(sv_2mortal(newSViv((I32)retval)));
     RETURN;
 }
 
@@ -1546,6 +1557,8 @@ PP(pp_postinc)
     sv_setsv(TARG, TOPs);
     sv_inc(TOPs);
     SvSETMAGIC(TOPs);
+    if (!SvOK(TARG))
+	sv_setiv(TARG, 0);
     SETs(TARG);
     return NORMAL;
 }
@@ -1651,8 +1664,8 @@ PP(pp_repeat)
 	char *tmps;
 
 	tmpstr = POPs;
-	if (SvTHINKFIRST(tmpstr)) {
-	    if (SvREADONLY(tmpstr))
+	if (TARG == tmpstr && SvTHINKFIRST(tmpstr)) {
+	    if (SvREADONLY(tmpstr) && curcop != &compiling)
 		DIE("Can't x= to readonly value");
 	    if (SvROK(tmpstr))
 		sv_unref(tmpstr);
@@ -1670,7 +1683,7 @@ PP(pp_repeat)
 	    SvCUR(TARG) *= count;
 	    *SvEND(TARG) = '\0';
 	    SvPOK_only(TARG);
-	    sv_free(tmpstr);
+	    SvREFCNT_dec(tmpstr);
 	}
 	else
 	    sv_setsv(TARG, &sv_no);
@@ -2160,7 +2173,7 @@ PP(pp_substr)
 	sv_setpvn(TARG, tmps, rem);
 	if (lvalue) {			/* it's an lvalue! */
 	    if (SvTHINKFIRST(sv)) {
-		if (SvREADONLY(sv))
+		if (SvREADONLY(sv) && curcop != &compiling)
 		    DIE(no_modify);
 		if (SvROK(sv))
 		    sv_unref(sv);
@@ -2216,7 +2229,7 @@ PP(pp_vec)
 
 	if (lvalue) {                      /* it's an lvalue! */
 	    if (SvTHINKFIRST(src)) {
-		if (SvREADONLY(src))
+		if (SvREADONLY(src) && curcop != &compiling)
 		    DIE(no_modify);
 		if (SvROK(src))
 		    sv_unref(src);
@@ -2506,8 +2519,10 @@ PP(pp_formline)
     bool gotsome;
     STRLEN len;
 
-    if (!SvCOMPILED(form))
+    if (!SvCOMPILED(form)) {
+	SvREADONLY_off(form);
 	doparseform(form);
+    }
 
     SvUPGRADE(formtarget, SVt_PV);
     SvGROW(formtarget, SvCUR(formtarget) + SvCUR(form) + 1);
@@ -2600,25 +2615,37 @@ PP(pp_formline)
 	case FF_CHECKCHOP:
 	    s = SvPV(sv, len);
 	    itemsize = len;
-	    if (itemsize > fieldsize)
-		itemsize = fieldsize;
-	    send = chophere = s + itemsize;
-	    while (s < send || (s == send && isSPACE(*s))) {
-		if (isSPACE(*s)) {
-		    if (chopspace)
-			chophere = s;
-		    if (*s == '\r')
+	    if (itemsize <= fieldsize) {
+		send = chophere = s + itemsize;
+		while (s < send) {
+		    if (*s == '\r') {
+			itemsize = s - SvPVX(sv);
 			break;
-		}
-		else {
-		    if (*s & ~31)
+		    }
+		    if (*s++ & ~31)
 			gotsome = TRUE;
-		    if (strchr(chopset, *s))
-			chophere = s + 1;
 		}
-		s++;
 	    }
-	    itemsize = chophere - SvPVX(sv);
+	    else {
+		itemsize = fieldsize;
+		send = chophere = s + itemsize;
+		while (s < send || (s == send && isSPACE(*s))) {
+		    if (isSPACE(*s)) {
+			if (chopspace)
+			    chophere = s;
+			if (*s == '\r')
+			    break;
+		    }
+		    else {
+			if (*s & ~31)
+			    gotsome = TRUE;
+			if (strchr(chopset, *s))
+			    chophere = s + 1;
+		    }
+		    s++;
+		}
+		itemsize = chophere - SvPVX(sv);
+	    }
 	    break;
 
 	case FF_SPACE:
@@ -2935,7 +2962,7 @@ PP(pp_rv2av)
 	else {
 	    if (SvTYPE(sv) != SVt_PVGV) {
 		if (!SvOK(sv))
-		    DIE(no_usym);
+		    DIE(no_usym, "an array");
 		sv = (SV*)gv_fetchpv(SvPV(sv, na), TRUE);
 	    }
 	    av = GvAVn(sv);
@@ -2965,8 +2992,8 @@ PP(pp_rv2av)
 PP(pp_aelemfast)
 {
     dSP;
-    AV *av = (AV*)cSVOP->op_sv;
-    SV** svp = av_fetch(av, op->op_private - arybase, FALSE);
+    AV *av = GvAV((GV*)cSVOP->op_sv);
+    SV** svp = av_fetch(av, op->op_private - arybase, op->op_flags & OPf_LVAL);
     PUSHs(svp ? *svp : &sv_undef);
     RETURN;
 }
@@ -2986,18 +3013,20 @@ PP(pp_aelem)
 	    save_svref(svp);
 	else if (!SvOK(*svp)) {
 	    if (op->op_private == OP_RV2HV) {
-		sv_free(*svp);
+		SvREFCNT_dec(*svp);
 		*svp = NEWSV(0,0);
 		sv_upgrade(*svp, SVt_RV);
-		SvRV(*svp) = sv_ref((SV*)newHV());
+		SvRV(*svp) = SvREFCNT_inc(newHV());
 		SvROK_on(*svp);
+		++sv_rvcount;
 	    }
 	    else if (op->op_private == OP_RV2AV) {
-		sv_free(*svp);
+		SvREFCNT_dec(*svp);
 		*svp = NEWSV(0,0);
 		sv_upgrade(*svp, SVt_RV);
-		SvRV(*svp) = sv_ref((SV*)newAV());
+		SvRV(*svp) = SvREFCNT_inc(newAV());
 		SvROK_on(*svp);
+		++sv_rvcount;
 	    }
 	}
     }
@@ -3047,22 +3076,16 @@ PP(pp_each)
     I32 i;
     char *tmps;
 
-    if (mystrk) {
-	sv_free(mystrk);
-	mystrk = Nullsv;
-    }
-
     EXTEND(SP, 2);
     if (entry) {
+	tmps = hv_iterkey(entry, &i);
+	if (!i)
+	    tmps = "";
+	PUSHs(sv_2mortal(newSVpv(tmps, i)));
 	if (GIMME == G_ARRAY) {
-	    tmps = hv_iterkey(entry, &i);
-	    if (!i)
-		tmps = "";
-	    mystrk = newSVpv(tmps, i);
-	    PUSHs(mystrk);
+	    sv_setsv(TARG, hv_iterval(hash, entry));
+	    PUSHs(TARG);
 	}
-	sv_setsv(TARG, hv_iterval(hash, entry));
-	PUSHs(TARG);
     }
     else if (GIMME == G_SCALAR)
 	RETPUSHUNDEF;
@@ -3128,7 +3151,7 @@ PP(pp_rv2hv)
 	else {
 	    if (SvTYPE(sv) != SVt_PVGV) {
 		if (!SvOK(sv))
-		    DIE(no_usym);
+		    DIE(no_usym, "a hash");
 		sv = (SV*)gv_fetchpv(SvPV(sv, na), TRUE);
 	    }
 	    hv = GvHVn(sv);
@@ -3147,12 +3170,12 @@ PP(pp_rv2hv)
     }
     else {
 	dTARGET;
-	if (HvFILL(hv))
-	    sv_setiv(TARG, 0);
-	else {
+	if (HvFILL(hv)) {
 	    sprintf(buf, "%d/%d", HvFILL(hv), HvMAX(hv)+1);
 	    sv_setpv(TARG, buf);
 	}
+	else
+	    sv_setiv(TARG, 0);
 	SETTARG;
 	RETURN;
     }
@@ -3175,18 +3198,20 @@ PP(pp_helem)
 	    save_svref(svp);
 	else if (!SvOK(*svp)) {
 	    if (op->op_private == OP_RV2HV) {
-		sv_free(*svp);
+		SvREFCNT_dec(*svp);
 		*svp = NEWSV(0,0);
 		sv_upgrade(*svp, SVt_RV);
-		SvRV(*svp) = sv_ref((SV*)newHV());
+		SvRV(*svp) = SvREFCNT_inc(newHV());
 		SvROK_on(*svp);
+		++sv_rvcount;
 	    }
 	    else if (op->op_private == OP_RV2AV) {
-		sv_free(*svp);
+		SvREFCNT_dec(*svp);
 		*svp = NEWSV(0,0);
 		sv_upgrade(*svp, SVt_RV);
-		SvRV(*svp) = sv_ref((SV*)newAV());
+		SvRV(*svp) = SvREFCNT_inc(newAV());
 		SvROK_on(*svp);
+		++sv_rvcount;
 	    }
 	}
     }
@@ -4279,6 +4304,8 @@ PP(pp_split)
 	DIE("panic: do_split");
     if (pm->op_pmreplroot)
 	ary = GvAVn((GV*)pm->op_pmreplroot);
+    else if (gimme != G_ARRAY)
+	ary = GvAVn(defgv);
     else
 	ary = Nullav;
     if (ary && (gimme != G_ARRAY || (pm->op_pmflags & PMf_ONCE))) {
@@ -4455,17 +4482,14 @@ PP(pp_join)
 
 PP(pp_list)
 {
-    dSP;
+    dSP; dMARK;
     if (GIMME != G_ARRAY) {
-	dMARK;
 	if (++MARK <= SP)
 	    *MARK = *SP;		/* unwanted list, return last item */
 	else
 	    *MARK = &sv_undef;
 	SP = MARK;
     }
-    else if (op->op_private & OPpLIST_GUESSED)	/* didn't need that pushmark */
-	markstack_ptr--;
     RETURN;
 }
 
@@ -4626,7 +4650,7 @@ PP(pp_splice)
 	    if (AvREAL(ary)) {
 		sv_2mortal(*MARK);
 		for (i = length - 1, dst = &AvARRAY(ary)[offset]; i > 0; i--)
-		    sv_free(*dst++);	/* free them now */
+		    SvREFCNT_dec(*dst++);	/* free them now */
 	    }
 	}
 	AvFILL(ary) += diff;
@@ -4690,7 +4714,7 @@ PP(pp_splice)
 		dst = AvARRAY(ary) + AvFILL(ary);
 		for (i = diff; i > 0; i--) {
 		    if (*dst)			/* stuff was hanging around */
-			sv_free(*dst);		/*  after $#foo */
+			SvREFCNT_dec(*dst);		/*  after $#foo */
 		    dst--;
 		}
 		if (after) {
@@ -4724,7 +4748,7 @@ PP(pp_splice)
 	    if (AvREAL(ary)) {
 		sv_2mortal(*MARK);
 		while (length-- > 0)
-		    sv_free(tmparyval[length]);
+		    SvREFCNT_dec(tmparyval[length]);
 	    }
 	    Safefree(tmparyval);
 	}
@@ -4823,7 +4847,7 @@ PP(pp_grepstart)
 	GvSV(defgv) = src;
     }
     else
-	GvSV(defgv) = sv_mortalcopy(&sv_undef);
+	GvSV(defgv) = sv_newmortal();
 
     RETURNOP(((LOGOP*)op->op_next)->op_other);
 }
@@ -4865,7 +4889,7 @@ PP(pp_grepwhile)
 	    GvSV(defgv) = src;
 	}
 	else
-	    GvSV(defgv) = sv_mortalcopy(&sv_undef);
+	    GvSV(defgv) = sv_newmortal();
 
 	RETURNOP(cLOGOP->op_other);
     }
@@ -4903,7 +4927,7 @@ PP(pp_sort)
 	    cv = sv_2cv(*++MARK, &stash, &gv, 0);
 	    if (!(cv && CvROOT(cv))) {
 		if (gv) {
-		    SV *tmpstr = sv_mortalcopy(&sv_undef);
+		    SV *tmpstr = sv_newmortal();
 		    gv_efullname(tmpstr, gv);
 		    if (CvUSERSUB(cv))
 			DIE("Usersub \"%s\" called in sort", SvPVX(tmpstr));
@@ -5042,7 +5066,7 @@ PP(pp_flip)
 	SV *targ = PAD_SV(op->op_targ);
 
 	if ((op->op_private & OPpFLIP_LINENUM)
-	  ? last_in_gv && SvIV(sv) == GvIO(last_in_gv)->lines
+	  ? last_in_gv && SvIV(sv) == IoLINES(GvIO(last_in_gv))
 	  : SvTRUE(sv) ) {
 	    sv_setiv(PAD_SV(cUNOP->op_first->op_targ), 1);
 	    if (op->op_flags & OPf_SPECIAL) {
@@ -5104,7 +5128,7 @@ PP(pp_flop)
 	SV *targ = PAD_SV(cUNOP->op_first->op_targ);
 	sv_inc(targ);
 	if ((op->op_private & OPpFLIP_LINENUM)
-	  ? last_in_gv && SvIV(sv) == GvIO(last_in_gv)->lines
+	  ? last_in_gv && SvIV(sv) == IoLINES(GvIO(last_in_gv))
 	  : SvTRUE(sv) ) {
 	    sv_setiv(PAD_SV(((UNOP*)cUNOP->op_first)->op_first->op_targ), 0);
 	    sv_catpv(targ, "E0");
@@ -5230,8 +5254,8 @@ I32 cxix;
 
     while (cxstack_ix > cxix) {
 	cx = &cxstack[cxstack_ix--];
-	DEBUG_l(fprintf(stderr, "Unwinding block %d, type %d\n", cxstack_ix+1,
-		    cx->cx_type));
+	DEBUG_l(fprintf(stderr, "Unwinding block %d, type %s\n", cxstack_ix+1,
+		    block_type[cx->cx_type]));
 	/* Note: we don't need to restore the base context info till the end. */
 	switch (cx->cx_type) {
 	case CXt_SUB:
@@ -5249,13 +5273,15 @@ I32 cxix;
     }
 }
 
+#ifdef STANDARD_C
+OP *
+die(char* pat, ...)
+#else
 /*VARARGS0*/
 OP *
-#ifdef __STDC__
-die(char* pat,...)
-#else
-die(va_alist)
-va_dcl
+die(pat, va_alist)
+    char *pat;
+    va_dcl
 #endif
 {
     va_list args;
@@ -5263,8 +5289,12 @@ va_dcl
     char *message;
     OP *retop;
 
+#ifdef STANDARD_C
+    va_start(args, pat);
+#else
     va_start(args);
-    message = mess(args);
+#endif
+    message = mess(pat, args);
     va_end(args);
     restartop = die_where(message);
     if (stack != mainstack)
@@ -5382,11 +5412,11 @@ PP(pp_method)
 
 	if (!SvOK(sv) ||
 	    !(iogv = gv_fetchpv(SvPVX(sv), FALSE)) ||
-	    !(io=GvIO(iogv)))
+	    !(ob=(SV*)GvIO(iogv)))
 	{
 	    char *name = SvPVX(((SVOP*)cLOGOP->op_other)->op_sv);
 	    char tmpbuf[256];
-	    char* packname = SvPVX(sv);
+	    char* packname = SvPV(sv, na);
 	    HV *stash;
 	    if (!isALPHA(*packname))
 DIE("Can't call method \"%s\" without a package or object reference", name);
@@ -5400,14 +5430,6 @@ DIE("Can't call method \"%s\" without a package or object reference", name);
 	    PUSHs(gv);
 	    PUSHs(sv);
 	    RETURN;
-	}
-	if (!(ob = io->object)) {
-	    ob = sv_ref((SV*)newHV());
-	    SvOBJECT_on(ob);
-	    SvUPGRADE(ob, SVt_PVMG);
-	    iogv = gv_fetchpv("FILEHANDLE'flush", TRUE);
-	    SvSTASH(ob) = GvSTASH(iogv);
-	    io->object = ob;
 	}
     }
 
@@ -5432,30 +5454,74 @@ DIE("Can't call method \"%s\" without a package or object reference", name);
 PP(pp_entersubr)
 {
     dSP; dMARK;
-    SV *sv;
+    SV *sv = *++MARK;
     GV *gv;
     HV *stash;
-    register CV *cv = sv_2cv(*++MARK, &stash, &gv, 0);
+    register CV *cv;
     register I32 items = SP - MARK;
     I32 hasargs = (op->op_flags & OPf_STACKED) != 0;
     register CONTEXT *cx;
 
+    if (!sv)
+	DIE("Not a subroutine reference");
+    switch (SvTYPE(sv)) {
+    default:
+	if (!SvROK(sv)) {
+	    if (!SvOK(sv))
+		DIE(no_usym, "a subroutine");
+	    gv = gv_fetchpv(SvPV(sv, na), FALSE);
+	    if (!gv)
+		cv = 0;
+	    else
+		cv = GvCV(gv);
+	    break;
+	}
+	/* FALL THROUGH */
+    case SVt_RV:
+	cv = (CV*)SvRV(sv);
+	if (SvTYPE(cv) == SVt_PVCV)
+	    break;
+	/* FALL THROUGH */
+    case SVt_PVHV:
+    case SVt_PVAV:
+	DIE("Not a subroutine reference");
+    case SVt_PVCV:
+	cv = (CV*)sv;
+	break;
+    case SVt_PVGV:
+	if (!(cv = GvCV((GV*)sv)))
+	    cv = sv_2cv(sv, &stash, &gv, TRUE);
+	break;
+    }
+
     ENTER;
     SAVETMPS;
 
-    if (!(cv && (CvROOT(cv) || CvUSERSUB(cv)))) {
-	if (gv) {
-	    SV *tmpstr = sv_mortalcopy(&sv_undef);
-	    gv_efullname(tmpstr, gv);
-	    DIE("Undefined subroutine \"%s\" called",SvPVX(tmpstr));
-	}
-	if (cv)
-	    DIE("Undefined subroutine called");
+  retry:
+    if (!cv)
 	DIE("Not a subroutine reference");
+
+    if (!CvROOT(cv) && !CvUSERSUB(cv)) {
+	if (gv = CvGV(cv)) {
+	    SV *tmpstr = sv_newmortal();
+	    GV *ngv;
+	    gv_efullname(tmpstr, gv);
+	    ngv = gv_fetchmethod(GvESTASH(gv), "AUTOLOAD");
+	    if (ngv && ngv != gv && (cv = GvCV(ngv))) {	/* One more chance... */
+		gv = ngv;
+		sv_setsv(GvSV(gv), tmpstr);
+		goto retry;
+	    }
+	    else
+		DIE("Undefined subroutine &%s called",SvPVX(tmpstr));
+	}
+	DIE("Undefined subroutine called");
     }
+
     if ((op->op_private & OPpSUBR_DB) && !CvUSERSUB(cv)) {
 	sv = GvSV(DBsub);
 	save_item(sv);
+	gv = CvGV(cv);
 	gv_efullname(sv,gv);
 	cv = GvCV(DBsub);
 	if (!cv)
@@ -5475,15 +5541,10 @@ PP(pp_entersubr)
 	push_return(op->op_next);
 	PUSHBLOCK(cx, CXt_SUB, MARK - 1);
 	PUSHSUB(cx);
-	if (hasargs) {
-	    cx->blk_sub.savearray = GvAV(defgv);
-	    cx->blk_sub.argarray = av_fake(items, ++MARK);
-	    GvAV(defgv) = cx->blk_sub.argarray;
-	}
 	CvDEPTH(cv)++;
 	if (CvDEPTH(cv) >= 2) {	/* save temporaries on recursion? */
 	    if (CvDEPTH(cv) == 100 && dowarn)
-		warn("Deep recursion on subroutine \"%s\"",GvENAME(gv));
+		warn("Deep recursion on subroutine \"%s\"",GvENAME(CvGV(cv)));
 	    if (CvDEPTH(cv) > AvFILL(padlist)) {
 		AV *newpad = newAV();
 		I32 ix = AvFILL((AV*)svp[1]);
@@ -5501,6 +5562,13 @@ PP(pp_entersubr)
 		    else
 			av_store(newpad, ix--, NEWSV(0,0));
 		}
+		if (hasargs) {
+		    AV* av = newAV();
+		    av_store(av, 0, Nullsv);
+		    av_store(newpad, 0, (SV*)av);
+		    SvOK_on(av);
+		    AvREAL_off(av);
+		}
 		av_store(padlist, CvDEPTH(cv), (SV*)newpad);
 		AvFILL(padlist) = CvDEPTH(cv);
 		svp = AvARRAY(padlist);
@@ -5508,6 +5576,36 @@ PP(pp_entersubr)
 	}
 	SAVESPTR(curpad);
 	curpad = AvARRAY((AV*)svp[CvDEPTH(cv)]);
+	if (hasargs) {
+	    AV* av = (AV*)curpad[0];
+	    SV** ary;
+
+	    cx->blk_sub.savearray = GvAV(defgv);
+	    cx->blk_sub.argarray = av;
+	    GvAV(defgv) = cx->blk_sub.argarray;
+	    ++MARK;
+
+	    if (items >= AvMAX(av)) {
+		ary = AvALLOC(av);
+		if (AvARRAY(av) != ary) {
+		    AvMAX(av) += AvARRAY(av) - AvALLOC(av);
+		    SvPVX(av) = (char*)ary;
+		}
+		if (items >= AvMAX(av)) {
+		    AvMAX(av) = items - 1;
+		    Renew(ary,items+1,SV*);
+		    AvALLOC(av) = ary;
+		    SvPVX(av) = (char*)ary;
+		}
+	    }
+	    Copy(MARK,AvARRAY(av),items,SV*);
+	    AvFILL(av) = items - 1;
+	    while (items--) {
+		if (*MARK)
+		    SvTEMP_off(*MARK);
+		MARK++;
+	    }
+	}
 	RETURNOP(CvSTART(cv));
     }
 }
@@ -5526,7 +5624,10 @@ PP(pp_leavesubr)
     if (gimme == G_SCALAR) {
 	MARK = newsp + 1;
 	if (MARK <= SP)
-	    *MARK = sv_mortalcopy(TOPs);
+	    if (SvFLAGS(TOPs) & (SVs_PADTMP|SVs_TEMP))
+		*MARK = TOPs;
+	    else
+		*MARK = sv_mortalcopy(TOPs);
 	else {
 	    MEXTEND(mark,0);
 	    *MARK = &sv_undef;
@@ -5535,7 +5636,8 @@ PP(pp_leavesubr)
     }
     else {
 	for (mark = newsp + 1; mark <= SP; mark++)
-	    *mark = sv_mortalcopy(*mark);
+	    if (!(SvFLAGS(*mark) & (SVs_PADTMP|SVs_TEMP)))
+		*mark = sv_mortalcopy(*mark);
 		/* in case LEAVE wipes old return values */
     }
 
@@ -5576,11 +5678,6 @@ PP(pp_caller)
 	cxix = nextcxix;
     }
     cx = &cxstack[cxix];
-    if (cx->blk_oldcop == &compiling) {
-	if (GIMME != G_ARRAY)
-	    RETPUSHUNDEF;
-	RETURN;
-    }
     if (GIMME != G_ARRAY) {
 	dTARGET;
 
@@ -5591,19 +5688,29 @@ PP(pp_caller)
 
     PUSHs(sv_2mortal(newSVpv(HvNAME(cx->blk_oldcop->cop_stash), 0)));
     PUSHs(sv_2mortal(newSVpv(SvPVX(GvSV(cx->blk_oldcop->cop_filegv)), 0)));
-    PUSHs(sv_2mortal(newSVnv((double)cx->blk_oldcop->cop_line)));
+    PUSHs(sv_2mortal(newSViv((I32)cx->blk_oldcop->cop_line)));
     if (!MAXARG)
 	RETURN;
-    sv = NEWSV(49, 0);
-    gv_efullname(sv, cx->blk_sub.gv);
-    PUSHs(sv_2mortal(sv));
-    PUSHs(sv_2mortal(newSVnv((double)cx->blk_sub.hasargs)));
-    PUSHs(sv_2mortal(newSVnv((double)cx->blk_gimme)));
-    if (cx->blk_sub.hasargs) {
+    if (cx->cx_type == CXt_SUB) {
+	sv = NEWSV(49, 0);
+	gv_efullname(sv, CvGV(cx->blk_sub.cv));
+	PUSHs(sv_2mortal(sv));
+	PUSHs(sv_2mortal(newSViv((I32)cx->blk_sub.hasargs)));
+    }
+    else {
+	PUSHs(sv_2mortal(newSVpv("(eval)",0)));
+	PUSHs(sv_2mortal(newSViv(0)));
+    }
+    PUSHs(sv_2mortal(newSViv((I32)cx->blk_gimme)));
+    if (cx->blk_sub.hasargs && curstash == debstash) {
 	AV *ary = cx->blk_sub.argarray;
 
-	if (!dbargs)
-	    dbargs = GvAV(gv_AVadd(gv_fetchpv("DB'args", TRUE)));
+	if (!dbargs) {
+	    GV* tmpgv;
+	    dbargs = GvAV(gv_AVadd(tmpgv = gv_fetchpv("DB::args", TRUE)));
+	    SvMULTI_on(tmpgv);
+	    AvREAL_off(dbargs);
+	}
 	if (AvMAX(dbargs) < AvFILL(ary))
 	    av_store(dbargs, AvFILL(ary), Nullsv);
 	Copy(AvARRAY(ary), AvARRAY(dbargs), AvFILL(ary)+1, SV*);
@@ -5732,7 +5839,7 @@ PP(pp_nextstate)
     curcop = (COP*)op;
     TAINT_NOT;		/* Each statement is presumed innocent */
     stack_sp = stack_base + cxstack[cxstack_ix].blk_oldsp;
-    free_tmps();
+    FREE_TMPS();
     return NORMAL;
 }
 
@@ -5741,7 +5848,7 @@ PP(pp_dbstate)
     curcop = (COP*)op;
     TAINT_NOT;		/* Each statement is presumed innocent */
     stack_sp = stack_base + cxstack[cxstack_ix].blk_oldsp;
-    free_tmps();
+    FREE_TMPS();
 
     if (op->op_private || SvIV(DBsingle) || SvIV(DBsignal) || SvIV(DBtrace))
     {
@@ -5755,6 +5862,8 @@ PP(pp_dbstate)
 	ENTER;
 	SAVETMPS;
 
+	SAVEI32(debug);
+	debug = 0;
 	hasargs = 0;
 	gv = DBgv;
 	cv = GvCV(gv);
@@ -5762,14 +5871,14 @@ PP(pp_dbstate)
 	*++sp = Nullsv;
 
 	if (!cv)
-	    DIE("No DB'DB routine defined");
+	    DIE("No DB::DB routine defined");
 
+	if (CvDEPTH(cv) >= 1)		/* don't do recursive DB::DB call */
+	    return NORMAL;
 	push_return(op->op_next);
 	PUSHBLOCK(cx, CXt_SUB, sp - 1);
 	PUSHSUB(cx);
 	CvDEPTH(cv)++;
-	if (CvDEPTH(cv) >= 2)
-	    DIE("DB'DB called recursively");
 	SAVESPTR(curpad);
 	curpad = AvARRAY((AV*)*av_fetch(CvPADLIST(cv),1,FALSE));
 	RETURNOP(CvSTART(cv));
@@ -5783,10 +5892,9 @@ PP(pp_unstack)
     I32 oldsave;
     TAINT_NOT;		/* Each statement is presumed innocent */
     stack_sp = stack_base + cxstack[cxstack_ix].blk_oldsp;
-    free_tmps();
+    FREE_TMPS();
     oldsave = scopestack[scopestack_ix - 1];
-    if (savestack_ix > oldsave)
-        leave_scope(oldsave);
+    LEAVE_SCOPE(oldsave);
     return NORMAL;
 }
 
@@ -5798,7 +5906,7 @@ PP(pp_enter)
     ENTER;
 
     SAVETMPS;
-    PUSHBLOCK(cx,CXt_BLOCK,sp);
+    PUSHBLOCK(cx, CXt_BLOCK, sp);
 
     RETURN;
 }
@@ -5807,10 +5915,32 @@ PP(pp_leave)
 {
     dSP;
     register CONTEXT *cx;
-    I32 gimme;
+    register SV **mark;
     SV **newsp;
+    I32 gimme;
 
     POPBLOCK(cx);
+
+    if (GIMME == G_SCALAR) {
+	MARK = newsp + 1;
+	if (MARK <= SP)
+	    if (SvFLAGS(TOPs) & (SVs_PADTMP|SVs_TEMP))
+		*MARK = TOPs;
+	    else
+		*MARK = sv_mortalcopy(TOPs);
+	else {
+	    MEXTEND(mark,0);
+	    *MARK = &sv_undef;
+	}
+	SP = MARK;
+    }
+    else {
+	for (mark = newsp + 1; mark <= SP; mark++)
+	    if (!(SvFLAGS(*mark) & (SVs_PADTMP|SVs_TEMP)))
+		*mark = sv_mortalcopy(*mark);
+		/* in case LEAVE wipes old return values */
+    }
+
     LEAVE;
 
     RETURN;
@@ -5832,7 +5962,7 @@ PP(pp_enteriter)
     SAVETMPS;
     ENTER;
 
-    PUSHBLOCK(cx,CXt_LOOP,SP);
+    PUSHBLOCK(cx, CXt_LOOP, SP);
     PUSHLOOP(cx, svp, MARK);
     cx->blk_loop.iterary = stack;
     cx->blk_loop.iterix = MARK - stack_base;
@@ -5854,9 +5984,12 @@ PP(pp_iter)
     if (cx->blk_loop.iterix >= cx->blk_oldsp)
 	RETPUSHNO;
 
-    sv = AvARRAY(cx->blk_loop.iterary)[++cx->blk_loop.iterix];
-    SvTEMP_off(sv);
-    *cx->blk_loop.itervar = sv ? sv : &sv_undef;
+    if (sv = AvARRAY(cx->blk_loop.iterary)[++cx->blk_loop.iterix]) {
+	SvTEMP_off(sv);
+	*cx->blk_loop.itervar = sv;
+    }
+    else
+	*cx->blk_loop.itervar = &sv_undef;
 
     RETPUSHYES;
 }
@@ -6041,8 +6174,7 @@ PP(pp_next)
 
     TOPBLOCK(cx);
     oldsave = scopestack[scopestack_ix - 1];
-    if (savestack_ix > oldsave)
-        leave_scope(oldsave);
+    LEAVE_SCOPE(oldsave);
     return cx->blk_loop.next_op;
 }
 
@@ -6068,8 +6200,7 @@ PP(pp_redo)
 
     TOPBLOCK(cx);
     oldsave = scopestack[scopestack_ix - 1];
-    if (savestack_ix > oldsave)
-        leave_scope(oldsave);
+    LEAVE_SCOPE(oldsave);
     return cx->blk_loop.redo_op;
 }
 
@@ -6093,15 +6224,17 @@ OP **opstack;
     if (op->op_flags & OPf_KIDS) {
 	/* First try all the kids at this level, since that's likeliest. */
 	for (kid = cUNOP->op_first; kid; kid = kid->op_sibling) {
-	    if (kid->op_type == OP_NEXTSTATE && kCOP->cop_label &&
-	      strEQ(kCOP->cop_label, label))
+	    if ((kid->op_type == OP_NEXTSTATE || kid->op_type == OP_DBSTATE) &&
+		    kCOP->cop_label && strEQ(kCOP->cop_label, label))
 		return kid;
 	}
 	for (kid = cUNOP->op_first; kid; kid = kid->op_sibling) {
 	    if (kid == lastgotoprobe)
 		continue;
-	    if (kid->op_type == OP_NEXTSTATE) {
-		if (ops > opstack && ops[-1]->op_type == OP_NEXTSTATE)
+	    if (kid->op_type == OP_NEXTSTATE || kid->op_type == OP_DBSTATE) {
+		if (ops > opstack &&
+		  (ops[-1]->op_type == OP_NEXTSTATE ||
+		   ops[-1]->op_type == OP_DBSTATE))
 		    *ops = kid;
 		else
 		    *ops++ = kid;
@@ -6131,7 +6264,126 @@ PP(pp_goto)
     char *label;
 
     label = 0;
-    if (op->op_flags & OPf_SPECIAL) {
+    if (op->op_flags & OPf_STACKED) {
+	SV *sv = POPs;
+
+	/* This egregious kludge implements goto &subroutine */
+	if (SvROK(sv) && SvTYPE(SvRV(sv)) == SVt_PVCV) {
+	    I32 cxix;
+	    register CONTEXT *cx;
+	    CV* cv = (CV*)SvRV(sv);
+	    SV** mark;
+	    I32 items = 0;
+	    I32 oldsave;
+
+	    /* First do some returnish stuff. */
+	    cxix = dopoptosub(cxstack_ix);
+	    if (cxix < 0)
+		DIE("Can't goto subroutine outside a subroutine");
+	    if (cxix < cxstack_ix)
+		dounwind(cxix);
+	    TOPBLOCK(cx);
+	    mark = ++stack_sp;
+	    *stack_sp = (SV*)cv;
+	    if (cx->blk_sub.hasargs) {   /* put @_ back onto stack */
+		items = AvFILL(cx->blk_sub.argarray) + 1;
+		Copy(AvARRAY(cx->blk_sub.argarray), ++stack_sp, items, SV*);
+		stack_sp += items;
+		GvAV(defgv) = cx->blk_sub.savearray;
+	    }
+	    if (!(CvDEPTH(cx->blk_sub.cv) = cx->blk_sub.olddepth)) {
+		if (CvDELETED(cx->blk_sub.cv))
+		    SvREFCNT_dec(cx->blk_sub.cv);
+	    }
+	    oldsave = scopestack[scopestack_ix - 1];
+	    LEAVE_SCOPE(oldsave);
+
+	    /* Now do some callish stuff. */
+	    if (CvUSERSUB(cv)) {
+		items = (*CvUSERSUB(cv))(CvUSERINDEX(cv),
+					    mark - stack_base, items);
+		sp = stack_base + items;
+		LEAVE;
+		return pop_return();
+	    }
+	    else {
+		AV* padlist = CvPADLIST(cv);
+		SV** svp = AvARRAY(padlist);
+		cx->blk_sub.cv = cv;
+		cx->blk_sub.olddepth = CvDEPTH(cv);
+		CvDEPTH(cv)++;
+		if (CvDEPTH(cv) >= 2) {	/* save temporaries on recursion? */
+		    if (CvDEPTH(cv) == 100 && dowarn)
+			warn("Deep recursion on subroutine \"%s\"",
+			    GvENAME(CvGV(cv)));
+		    if (CvDEPTH(cv) > AvFILL(padlist)) {
+			AV *newpad = newAV();
+			I32 ix = AvFILL((AV*)svp[1]);
+			svp = AvARRAY(svp[0]);
+			while (ix > 0) {
+			    if (svp[ix]) {
+				char *name = SvPVX(svp[ix]);	/* XXX */
+				if (*name == '@')
+				    av_store(newpad, ix--, (SV*)newAV());
+				else if (*name == '%')
+				    av_store(newpad, ix--, (SV*)newHV());
+				else
+				    av_store(newpad, ix--, NEWSV(0,0));
+			    }
+			    else
+				av_store(newpad, ix--, NEWSV(0,0));
+			}
+			if (cx->blk_sub.hasargs) {
+			    AV* av = newAV();
+			    av_store(av, 0, Nullsv);
+			    av_store(newpad, 0, (SV*)av);
+			    SvOK_on(av);
+			    AvREAL_off(av);
+			}
+			av_store(padlist, CvDEPTH(cv), (SV*)newpad);
+			AvFILL(padlist) = CvDEPTH(cv);
+			svp = AvARRAY(padlist);
+		    }
+		}
+		SAVESPTR(curpad);
+		curpad = AvARRAY((AV*)svp[CvDEPTH(cv)]);
+		if (cx->blk_sub.hasargs) {
+		    AV* av = (AV*)curpad[0];
+		    SV** ary;
+
+		    cx->blk_sub.savearray = GvAV(defgv);
+		    cx->blk_sub.argarray = av;
+		    GvAV(defgv) = cx->blk_sub.argarray;
+		    ++mark;
+
+		    if (items >= AvMAX(av)) {
+			ary = AvALLOC(av);
+			if (AvARRAY(av) != ary) {
+			    AvMAX(av) += AvARRAY(av) - AvALLOC(av);
+			    SvPVX(av) = (char*)ary;
+			}
+			if (items >= AvMAX(av)) {
+			    AvMAX(av) = items - 1;
+			    Renew(ary,items+1,SV*);
+			    AvALLOC(av) = ary;
+			    SvPVX(av) = (char*)ary;
+			}
+		    }
+		    Copy(mark,AvARRAY(av),items,SV*);
+		    AvFILL(av) = items - 1;
+		    while (items--) {
+			if (*mark)
+			    SvTEMP_off(*mark);
+			mark++;
+		    }
+		}
+		RETURNOP(CvSTART(cv));
+	    }
+	}
+	else
+	    label = SvPV(sv,na);
+    }
+    else if (op->op_flags & OPf_SPECIAL) {
 	if (op->op_type != OP_DUMP)
 	    DIE("goto must have label");
     }
@@ -6190,8 +6442,7 @@ PP(pp_goto)
 	    dounwind(ix);
 	    TOPBLOCK(cx);
 	    oldsave = scopestack[scopestack_ix - 1];
-	    if (savestack_ix > oldsave)
-		leave_scope(oldsave);
+	    LEAVE_SCOPE(oldsave);
 	}
 
 	/* push wanted frames */
@@ -6288,7 +6539,7 @@ PP(pp_open)
     gv = (GV*)POPs;
     tmps = SvPV(sv, len);
     if (do_open(gv, tmps, len)) {
-	GvIO(gv)->lines = 0;
+	IoLINES(GvIO(gv)) = 0;
 	PUSHi( (I32)forkprocess );
     }
     else if (forkprocess == 0)		/* we are a new child */
@@ -6331,24 +6582,24 @@ PP(pp_pipe_op)
     rstio = GvIOn(rgv);
     wstio = GvIOn(wgv);
 
-    if (rstio->ifp)
+    if (IoIFP(rstio))
 	do_close(rgv, FALSE);
-    if (wstio->ifp)
+    if (IoIFP(wstio))
 	do_close(wgv, FALSE);
 
     if (pipe(fd) < 0)
 	goto badexit;
 
-    rstio->ifp = fdopen(fd[0], "r");
-    wstio->ofp = fdopen(fd[1], "w");
-    wstio->ifp = wstio->ofp;
-    rstio->type = '<';
-    wstio->type = '>';
+    IoIFP(rstio) = fdopen(fd[0], "r");
+    IoOFP(wstio) = fdopen(fd[1], "w");
+    IoIFP(wstio) = IoOFP(wstio);
+    IoTYPE(rstio) = '<';
+    IoTYPE(wstio) = '>';
 
-    if (!rstio->ifp || !wstio->ofp) {
-	if (rstio->ifp) fclose(rstio->ifp);
+    if (!IoIFP(rstio) || !IoOFP(wstio)) {
+	if (IoIFP(rstio)) fclose(IoIFP(rstio));
 	else close(fd[0]);
-	if (wstio->ofp) fclose(wstio->ofp);
+	if (IoOFP(wstio)) fclose(IoOFP(wstio));
 	else close(fd[1]);
 	goto badexit;
     }
@@ -6371,7 +6622,7 @@ PP(pp_fileno)
     if (MAXARG < 1)
 	RETPUSHUNDEF;
     gv = (GV*)POPs;
-    if (!gv || !(io = GvIO(gv)) || !(fp = io->ifp))
+    if (!gv || !(io = GvIO(gv)) || !(fp = IoIFP(io)))
 	RETPUSHUNDEF;
     PUSHi(fileno(fp));
     RETURN;
@@ -6410,7 +6661,7 @@ PP(pp_binmode)
     gv = (GV*)POPs;
 
     EXTEND(SP, 1);
-    if (!gv || !(io = GvIO(gv)) || !(fp = io->ifp))
+    if (!gv || !(io = GvIO(gv)) || !(fp = IoIFP(io)))
 	RETSETUNDEF;
 
 #ifdef DOSISH
@@ -6692,7 +6943,7 @@ PP(pp_getc)
 	RETPUSHUNDEF;
     TAINT_IF(1);
     sv_setpv(TARG, " ");
-    *SvPVX(TARG) = getc(GvIO(gv)->ifp); /* should never be EOF */
+    *SvPVX(TARG) = getc(IoIFP(GvIO(gv))); /* should never be EOF */
     PUSHTARG;
     RETURN;
 }
@@ -6742,8 +6993,8 @@ PP(pp_enterwrite)
 	RETPUSHNO;
     }
     curoutgv = gv;
-    if (io->fmt_gv)
-	fgv = io->fmt_gv;
+    if (IoFMT_GV(io))
+	fgv = IoFMT_GV(io);
     else
 	fgv = gv;
 
@@ -6751,7 +7002,7 @@ PP(pp_enterwrite)
 
     if (!cv) {
 	if (fgv) {
-	    SV *tmpstr = sv_mortalcopy(&sv_undef);
+	    SV *tmpstr = sv_newmortal();
 	    gv_efullname(tmpstr, gv);
 	    DIE("Undefined format \"%s\" called",SvPVX(tmpstr));
 	}
@@ -6766,7 +7017,7 @@ PP(pp_leavewrite)
     dSP;
     GV *gv = cxstack[cxstack_ix].blk_sub.gv;
     register IO *io = GvIO(gv);
-    FILE *ofp = io->ofp;
+    FILE *ofp = IoOFP(io);
     FILE *fp;
     SV **mark;
     SV **newsp;
@@ -6774,37 +7025,37 @@ PP(pp_leavewrite)
     register CONTEXT *cx;
 
     DEBUG_f(fprintf(stderr,"left=%ld, todo=%ld\n",
-	  (long)io->lines_left, (long)FmLINES(formtarget)));
-    if (io->lines_left < FmLINES(formtarget) &&
+	  (long)IoLINES_LEFT(io), (long)FmLINES(formtarget)));
+    if (IoLINES_LEFT(io) < FmLINES(formtarget) &&
 	formtarget != toptarget)
     {
-	if (!io->top_gv) {
+	if (!IoTOP_GV(io)) {
 	    GV *topgv;
 	    char tmpbuf[256];
 
-	    if (!io->top_name) {
-		if (!io->fmt_name)
-		    io->fmt_name = savestr(GvNAME(gv));
-		sprintf(tmpbuf, "%s_TOP", io->fmt_name);
+	    if (!IoTOP_NAME(io)) {
+		if (!IoFMT_NAME(io))
+		    IoFMT_NAME(io) = savestr(GvNAME(gv));
+		sprintf(tmpbuf, "%s_TOP", IoFMT_NAME(io));
 		topgv = gv_fetchpv(tmpbuf,FALSE);
 		if (topgv && GvFORM(topgv))
-		    io->top_name = savestr(tmpbuf);
+		    IoTOP_NAME(io) = savestr(tmpbuf);
 		else
-		    io->top_name = savestr("top");
+		    IoTOP_NAME(io) = savestr("top");
 	    }
-	    topgv = gv_fetchpv(io->top_name,FALSE);
+	    topgv = gv_fetchpv(IoTOP_NAME(io),FALSE);
 	    if (!topgv || !GvFORM(topgv)) {
-		io->lines_left = 100000000;
+		IoLINES_LEFT(io) = 100000000;
 		goto forget_top;
 	    }
-	    io->top_gv = topgv;
+	    IoTOP_GV(io) = topgv;
 	}
-	if (io->lines_left >= 0 && io->page > 0)
+	if (IoLINES_LEFT(io) >= 0 && IoPAGE(io) > 0)
 	    fwrite(SvPVX(formfeed), SvCUR(formfeed), 1, ofp);
-	io->lines_left = io->page_len;
-	io->page++;
+	IoLINES_LEFT(io) = IoPAGE_LEN(io);
+	IoPAGE(io)++;
 	formtarget = toptarget;
-	return doform(GvFORM(io->top_gv),gv,op);
+	return doform(GvFORM(IoTOP_GV(io)),gv,op);
     }
 
   forget_top:
@@ -6812,10 +7063,10 @@ PP(pp_leavewrite)
     POPFORMAT(cx);
     LEAVE;
 
-    fp = io->ofp;
+    fp = IoOFP(io);
     if (!fp) {
 	if (dowarn) {
-	    if (io->ifp)
+	    if (IoIFP(io))
 		warn("Filehandle only opened for input");
 	    else
 		warn("Write on closed filehandle");
@@ -6823,7 +7074,7 @@ PP(pp_leavewrite)
 	PUSHs(&sv_no);
     }
     else {
-	if ((io->lines_left -= FmLINES(formtarget)) < 0) {
+	if ((IoLINES_LEFT(io) -= FmLINES(formtarget)) < 0) {
 	    if (dowarn)
 		warn("page overflow");
 	}
@@ -6833,7 +7084,7 @@ PP(pp_leavewrite)
 	else {
 	    FmLINES(formtarget) = 0;
 	    SvCUR_set(formtarget, 0);
-	    if (io->flags & IOf_FLUSH)
+	    if (IoFLAGS(io) & IOf_FLUSH)
 		(void)fflush(fp);
 	    PUSHs(&sv_yes);
 	}
@@ -6861,9 +7112,9 @@ PP(pp_prtf)
 	errno = EBADF;
 	goto just_say_no;
     }
-    else if (!(fp = io->ofp)) {
+    else if (!(fp = IoOFP(io))) {
 	if (dowarn)  {
-	    if (io->ifp)
+	    if (IoIFP(io))
 		warn("Filehandle opened only for input");
 	    else
 		warn("printf on closed filehandle");
@@ -6876,17 +7127,17 @@ PP(pp_prtf)
 	if (!do_print(sv, fp))
 	    goto just_say_no;
 
-	if (io->flags & IOf_FLUSH)
+	if (IoFLAGS(io) & IOf_FLUSH)
 	    if (fflush(fp) == EOF)
 		goto just_say_no;
     }
-    sv_free(sv);
+    SvREFCNT_dec(sv);
     SP = ORIGMARK;
     PUSHs(&sv_yes);
     RETURN;
 
   just_say_no:
-    sv_free(sv);
+    SvREFCNT_dec(sv);
     SP = ORIGMARK;
     PUSHs(&sv_undef);
     RETURN;
@@ -6909,9 +7160,9 @@ PP(pp_print)
 	errno = EBADF;
 	goto just_say_no;
     }
-    else if (!(fp = io->ofp)) {
+    else if (!(fp = IoOFP(io))) {
 	if (dowarn)  {
-	    if (io->ifp)
+	    if (IoIFP(io))
 		warn("Filehandle opened only for input");
 	    else
 		warn("print on closed filehandle");
@@ -6948,7 +7199,7 @@ PP(pp_print)
 		if (fwrite(ors, 1, orslen, fp) == 0 || ferror(fp))
 		    goto just_say_no;
 
-	    if (io->flags & IOf_FLUSH)
+	    if (IoFLAGS(io) & IOf_FLUSH)
 		if (fflush(fp) == EOF)
 		    goto just_say_no;
 	}
@@ -6982,7 +7233,7 @@ PP(pp_sysread)
     buffer = SvPV(bufstr, blen);
     length = SvIVx(*++MARK);
     if (SvTHINKFIRST(bufstr)) {
-	if (SvREADONLY(bufstr))
+	if (SvREADONLY(bufstr) && curcop != &compiling)
 	    DIE(no_modify);
 	if (SvROK(bufstr))
 	    sv_unref(bufstr);
@@ -6995,13 +7246,13 @@ PP(pp_sysread)
     if (MARK < SP)
 	warn("Too many args on read");
     io = GvIO(gv);
-    if (!io || !io->ifp)
+    if (!io || !IoIFP(io))
 	goto say_undef;
 #ifdef HAS_SOCKET
     if (op->op_type == OP_RECV) {
 	bufsize = sizeof buf;
 	SvGROW(bufstr, length+1), (buffer = SvPV(bufstr, blen));  /* sneaky */
-	length = recvfrom(fileno(io->ifp), buffer, length, offset,
+	length = recvfrom(fileno(IoIFP(io)), buffer, length, offset,
 	    buf, &bufsize);
 	if (length < 0)
 	    RETPUSHUNDEF;
@@ -7019,18 +7270,18 @@ PP(pp_sysread)
 #endif
     SvGROW(bufstr, length+offset+1), (buffer = SvPV(bufstr, blen));  /* sneaky */
     if (op->op_type == OP_SYSREAD) {
-	length = read(fileno(io->ifp), buffer+offset, length);
+	length = read(fileno(IoIFP(io)), buffer+offset, length);
     }
     else
 #ifdef HAS_SOCKET
-    if (io->type == 's') {
+    if (IoTYPE(io) == 's') {
 	bufsize = sizeof buf;
-	length = recvfrom(fileno(io->ifp), buffer+offset, length, 0,
+	length = recvfrom(fileno(IoIFP(io)), buffer+offset, length, 0,
 	    buf, &bufsize);
     }
     else
 #endif
-	length = fread(buffer+offset, 1, length, io->ifp);
+	length = fread(buffer+offset, 1, length, IoIFP(io));
     if (length < 0)
 	goto say_undef;
     SvCUR_set(bufstr, length+offset);
@@ -7069,7 +7320,7 @@ PP(pp_send)
     length = SvIVx(*++MARK);
     errno = 0;
     io = GvIO(gv);
-    if (!io || !io->ifp) {
+    if (!io || !IoIFP(io)) {
 	length = -1;
 	if (dowarn) {
 	    if (op->op_type == OP_SYSWRITE)
@@ -7085,7 +7336,7 @@ PP(pp_send)
 	    offset = 0;
 	if (MARK < SP)
 	    warn("Too many args on syswrite");
-	length = write(fileno(io->ifp), buffer+offset, length);
+	length = write(fileno(IoIFP(io)), buffer+offset, length);
     }
 #ifdef HAS_SOCKET
     else if (SP >= MARK) {
@@ -7093,10 +7344,10 @@ PP(pp_send)
 	if (SP > MARK)
 	    warn("Too many args on send");
 	buffer = SvPVx(*++MARK, mlen);
-	length = sendto(fileno(io->ifp), buffer, blen, length, buffer, mlen);
+	length = sendto(fileno(IoIFP(io)), buffer, blen, length, buffer, mlen);
     }
     else
-	length = send(fileno(io->ifp), buffer, blen, length);
+	length = send(fileno(IoIFP(io)), buffer, blen, length);
 #else
     else
 	DIE(no_sock_func, "send");
@@ -7126,7 +7377,7 @@ PP(pp_eof)
 	gv = last_in_gv;
     else
 	gv = (GV*)POPs;
-    PUSHs(do_eof(gv) ? &sv_yes : &sv_no);
+    PUSHs(!gv || do_eof(gv) ? &sv_yes : &sv_no);
     RETURN;
 }
 
@@ -7167,8 +7418,8 @@ PP(pp_truncate)
 #ifdef HAS_TRUNCATE
     if (op->op_flags & OPf_SPECIAL) {
 	tmpgv = gv_fetchpv(POPp,FALSE);
-	if (!tmpgv || !GvIO(tmpgv) || !GvIO(tmpgv)->ifp ||
-	  ftruncate(fileno(GvIO(tmpgv)->ifp), len) < 0)
+	if (!tmpgv || !GvIO(tmpgv) || !IoIFP(GvIO(tmpgv)) ||
+	  ftruncate(fileno(IoIFP(GvIO(tmpgv))), len) < 0)
 	    result = 0;
     }
     else if (truncate(POPp, len) < 0)
@@ -7176,8 +7427,8 @@ PP(pp_truncate)
 #else
     if (op->op_flags & OPf_SPECIAL) {
 	tmpgv = gv_fetchpv(POPp,FALSE);
-	if (!tmpgv || !GvIO(tmpgv) || !GvIO(tmpgv)->ifp ||
-	  chsize(fileno(GvIO(tmpgv)->ifp), len) < 0)
+	if (!tmpgv || !GvIO(tmpgv) || !IoIFP(GvIO(tmpgv)) ||
+	  chsize(fileno(IoIFP(GvIO(tmpgv))), len) < 0)
 	    result = 0;
     }
     else {
@@ -7219,13 +7470,13 @@ PP(pp_ioctl)
     GV *gv = (GV*)POPs;
     IO *io = GvIOn(gv);
 
-    if (!io || !argstr || !io->ifp) {
+    if (!io || !argstr || !IoIFP(io)) {
 	errno = EBADF;	/* well, sort of... */
 	RETPUSHUNDEF;
     }
 
     if (SvPOK(argstr) || !SvNIOK(argstr)) {
-	STRLEN len;
+	STRLEN len = 0;
 	if (!SvPOK(argstr))
 	    s = SvPV(argstr, len);
 	retval = IOCPARM_LEN(func);
@@ -7249,13 +7500,13 @@ PP(pp_ioctl)
     TAINT_PROPER(optype == OP_IOCTL ? "ioctl" : "fcntl");
 
     if (optype == OP_IOCTL)
-	retval = ioctl(fileno(io->ifp), func, s);
+	retval = ioctl(fileno(IoIFP(io)), func, s);
     else
 #ifdef DOSISH
 	DIE("fcntl is not implemented");
 #else
 #   ifdef HAS_FCNTL
-	retval = fcntl(fileno(io->ifp), func, s);
+	retval = fcntl(fileno(IoIFP(io)), func, s);
 #   else
 	DIE("fcntl is not implemented");
 #   endif
@@ -7293,7 +7544,7 @@ PP(pp_flock)
     else
 	gv = (GV*)POPs;
     if (gv && GvIO(gv))
-	fp = GvIO(gv)->ifp;
+	fp = IoIFP(GvIO(gv));
     else
 	fp = Nullfp;
     if (fp) {
@@ -7329,20 +7580,20 @@ PP(pp_socket)
     }
 
     io = GvIOn(gv);
-    if (io->ifp)
+    if (IoIFP(io))
 	do_close(gv, FALSE);
 
     TAINT_PROPER("socket");
     fd = socket(domain, type, protocol);
     if (fd < 0)
 	RETPUSHUNDEF;
-    io->ifp = fdopen(fd, "r");	/* stdio gets confused about sockets */
-    io->ofp = fdopen(fd, "w");
-    io->type = 's';
-    if (!io->ifp || !io->ofp) {
-	if (io->ifp) fclose(io->ifp);
-	if (io->ofp) fclose(io->ofp);
-	if (!io->ifp && !io->ofp) close(fd);
+    IoIFP(io) = fdopen(fd, "r");	/* stdio gets confused about sockets */
+    IoOFP(io) = fdopen(fd, "w");
+    IoTYPE(io) = 's';
+    if (!IoIFP(io) || !IoOFP(io)) {
+	if (IoIFP(io)) fclose(IoIFP(io));
+	if (IoOFP(io)) fclose(IoOFP(io));
+	if (!IoIFP(io) && !IoOFP(io)) close(fd);
 	RETPUSHUNDEF;
     }
 
@@ -7372,27 +7623,27 @@ PP(pp_sockpair)
 
     io1 = GvIOn(gv1);
     io2 = GvIOn(gv2);
-    if (io1->ifp)
+    if (IoIFP(io1))
 	do_close(gv1, FALSE);
-    if (io2->ifp)
+    if (IoIFP(io2))
 	do_close(gv2, FALSE);
 
     TAINT_PROPER("socketpair");
     if (socketpair(domain, type, protocol, fd) < 0)
 	RETPUSHUNDEF;
-    io1->ifp = fdopen(fd[0], "r");
-    io1->ofp = fdopen(fd[0], "w");
-    io1->type = 's';
-    io2->ifp = fdopen(fd[1], "r");
-    io2->ofp = fdopen(fd[1], "w");
-    io2->type = 's';
-    if (!io1->ifp || !io1->ofp || !io2->ifp || !io2->ofp) {
-	if (io1->ifp) fclose(io1->ifp);
-	if (io1->ofp) fclose(io1->ofp);
-	if (!io1->ifp && !io1->ofp) close(fd[0]);
-	if (io2->ifp) fclose(io2->ifp);
-	if (io2->ofp) fclose(io2->ofp);
-	if (!io2->ifp && !io2->ofp) close(fd[1]);
+    IoIFP(io1) = fdopen(fd[0], "r");
+    IoOFP(io1) = fdopen(fd[0], "w");
+    IoTYPE(io1) = 's';
+    IoIFP(io2) = fdopen(fd[1], "r");
+    IoOFP(io2) = fdopen(fd[1], "w");
+    IoTYPE(io2) = 's';
+    if (!IoIFP(io1) || !IoOFP(io1) || !IoIFP(io2) || !IoOFP(io2)) {
+	if (IoIFP(io1)) fclose(IoIFP(io1));
+	if (IoOFP(io1)) fclose(IoOFP(io1));
+	if (!IoIFP(io1) && !IoOFP(io1)) close(fd[0]);
+	if (IoIFP(io2)) fclose(IoIFP(io2));
+	if (IoOFP(io2)) fclose(IoOFP(io2));
+	if (!IoIFP(io2) && !IoOFP(io2)) close(fd[1]);
 	RETPUSHUNDEF;
     }
 
@@ -7412,12 +7663,12 @@ PP(pp_bind)
     register IO *io = GvIOn(gv);
     STRLEN len;
 
-    if (!io || !io->ifp)
+    if (!io || !IoIFP(io))
 	goto nuts;
 
     addr = SvPV(addrstr, len);
     TAINT_PROPER("bind");
-    if (bind(fileno(io->ifp), addr, len) >= 0)
+    if (bind(fileno(IoIFP(io)), addr, len) >= 0)
 	RETPUSHYES;
     else
 	RETPUSHUNDEF;
@@ -7442,12 +7693,12 @@ PP(pp_connect)
     register IO *io = GvIOn(gv);
     STRLEN len;
 
-    if (!io || !io->ifp)
+    if (!io || !IoIFP(io))
 	goto nuts;
 
     addr = SvPV(addrstr, len);
     TAINT_PROPER("connect");
-    if (connect(fileno(io->ifp), addr, len) >= 0)
+    if (connect(fileno(IoIFP(io)), addr, len) >= 0)
 	RETPUSHYES;
     else
 	RETPUSHUNDEF;
@@ -7470,10 +7721,10 @@ PP(pp_listen)
     GV *gv = (GV*)POPs;
     register IO *io = GvIOn(gv);
 
-    if (!io || !io->ifp)
+    if (!io || !IoIFP(io))
 	goto nuts;
 
-    if (listen(fileno(io->ifp), backlog) >= 0)
+    if (listen(fileno(IoIFP(io)), backlog) >= 0)
 	RETPUSHYES;
     else
 	RETPUSHUNDEF;
@@ -7508,23 +7759,23 @@ PP(pp_accept)
 	goto nuts;
 
     gstio = GvIO(ggv);
-    if (!gstio || !gstio->ifp)
+    if (!gstio || !IoIFP(gstio))
 	goto nuts;
 
     nstio = GvIOn(ngv);
-    if (nstio->ifp)
+    if (IoIFP(nstio))
 	do_close(ngv, FALSE);
 
-    fd = accept(fileno(gstio->ifp), (struct sockaddr *)buf, &len);
+    fd = accept(fileno(IoIFP(gstio)), (struct sockaddr *)buf, &len);
     if (fd < 0)
 	goto badexit;
-    nstio->ifp = fdopen(fd, "r");
-    nstio->ofp = fdopen(fd, "w");
-    nstio->type = 's';
-    if (!nstio->ifp || !nstio->ofp) {
-	if (nstio->ifp) fclose(nstio->ifp);
-	if (nstio->ofp) fclose(nstio->ofp);
-	if (!nstio->ifp && !nstio->ofp) close(fd);
+    IoIFP(nstio) = fdopen(fd, "r");
+    IoOFP(nstio) = fdopen(fd, "w");
+    IoTYPE(nstio) = 's';
+    if (!IoIFP(nstio) || !IoOFP(nstio)) {
+	if (IoIFP(nstio)) fclose(IoIFP(nstio));
+	if (IoOFP(nstio)) fclose(IoOFP(nstio));
+	if (!IoIFP(nstio) && !IoOFP(nstio)) close(fd);
 	goto badexit;
     }
 
@@ -7552,10 +7803,10 @@ PP(pp_shutdown)
     GV *gv = (GV*)POPs;
     register IO *io = GvIOn(gv);
 
-    if (!io || !io->ifp)
+    if (!io || !IoIFP(io))
 	goto nuts;
 
-    PUSHi( shutdown(fileno(io->ifp), how) >= 0 );
+    PUSHi( shutdown(fileno(IoIFP(io)), how) >= 0 );
     RETURN;
 
 nuts:
@@ -7598,10 +7849,10 @@ PP(pp_ssockopt)
 
     gv = (GV*)POPs;
     io = GvIOn(gv);
-    if (!io || !io->ifp)
+    if (!io || !IoIFP(io))
 	goto nuts;
 
-    fd = fileno(io->ifp);
+    fd = fileno(IoIFP(io));
     switch (optype) {
     case OP_GSOCKOPT:
 	SvCUR_set(sv, 256);
@@ -7649,13 +7900,13 @@ PP(pp_getpeername)
     GV *gv = (GV*)POPs;
     register IO *io = GvIOn(gv);
 
-    if (!io || !io->ifp)
+    if (!io || !IoIFP(io))
 	goto nuts;
 
     sv = sv_2mortal(NEWSV(22, 257));
     SvCUR_set(sv, 256);
     SvPOK_on(sv);
-    fd = fileno(io->ifp);
+    fd = fileno(IoIFP(io));
     switch (optype) {
     case OP_GETSOCKNAME:
 	if (getsockname(fd, SvPVX(sv), (int*)&SvCUR(sv)) < 0)
@@ -7700,8 +7951,8 @@ PP(pp_stat)
 	    laststype = OP_STAT;
 	    statgv = tmpgv;
 	    sv_setpv(statname, "");
-	    if (!GvIO(tmpgv) || !GvIO(tmpgv)->ifp ||
-	      fstat(fileno(GvIO(tmpgv)->ifp), &statcache) < 0) {
+	    if (!GvIO(tmpgv) || !IoIFP(GvIO(tmpgv)) ||
+	      fstat(fileno(IoIFP(GvIO(tmpgv))), &statcache) < 0) {
 		max = 0;
 		laststatval = -1;
 	    }
@@ -7734,20 +7985,20 @@ PP(pp_stat)
 	    RETPUSHUNDEF;
     }
     if (max) {
-	PUSHs(sv_2mortal(newSVnv((double)statcache.st_dev)));
-	PUSHs(sv_2mortal(newSVnv((double)statcache.st_ino)));
-	PUSHs(sv_2mortal(newSVnv((double)statcache.st_mode)));
-	PUSHs(sv_2mortal(newSVnv((double)statcache.st_nlink)));
-	PUSHs(sv_2mortal(newSVnv((double)statcache.st_uid)));
-	PUSHs(sv_2mortal(newSVnv((double)statcache.st_gid)));
-	PUSHs(sv_2mortal(newSVnv((double)statcache.st_rdev)));
-	PUSHs(sv_2mortal(newSVnv((double)statcache.st_size)));
-	PUSHs(sv_2mortal(newSVnv((double)statcache.st_atime)));
-	PUSHs(sv_2mortal(newSVnv((double)statcache.st_mtime)));
-	PUSHs(sv_2mortal(newSVnv((double)statcache.st_ctime)));
+	PUSHs(sv_2mortal(newSViv((I32)statcache.st_dev)));
+	PUSHs(sv_2mortal(newSViv((I32)statcache.st_ino)));
+	PUSHs(sv_2mortal(newSViv((I32)statcache.st_mode)));
+	PUSHs(sv_2mortal(newSViv((I32)statcache.st_nlink)));
+	PUSHs(sv_2mortal(newSViv((I32)statcache.st_uid)));
+	PUSHs(sv_2mortal(newSViv((I32)statcache.st_gid)));
+	PUSHs(sv_2mortal(newSViv((I32)statcache.st_rdev)));
+	PUSHs(sv_2mortal(newSViv((I32)statcache.st_size)));
+	PUSHs(sv_2mortal(newSViv((I32)statcache.st_atime)));
+	PUSHs(sv_2mortal(newSViv((I32)statcache.st_mtime)));
+	PUSHs(sv_2mortal(newSViv((I32)statcache.st_ctime)));
 #ifdef STATBLOCKS
-	PUSHs(sv_2mortal(newSVnv((double)statcache.st_blksize)));
-	PUSHs(sv_2mortal(newSVnv((double)statcache.st_blocks)));
+	PUSHs(sv_2mortal(newSViv((I32)statcache.st_blksize)));
+	PUSHs(sv_2mortal(newSViv((I32)statcache.st_blocks)));
 #else
 	PUSHs(sv_2mortal(newSVpv("", 0)));
 	PUSHs(sv_2mortal(newSVpv("", 0)));
@@ -8029,8 +8280,8 @@ PP(pp_fttty)
     }
     else
 	gv = gv_fetchpv(tmps = POPp, FALSE);
-    if (gv && GvIO(gv) && GvIO(gv)->ifp)
-	fd = fileno(GvIO(gv)->ifp);
+    if (gv && GvIO(gv) && IoIFP(GvIO(gv)))
+	fd = fileno(IoIFP(GvIO(gv)));
     else if (isDIGIT(*tmps))
 	fd = atoi(tmps);
     else
@@ -8066,23 +8317,23 @@ PP(pp_fttext)
 	    sv_setpv(statname, "");
 	    io = GvIO(statgv);
 	}
-	if (io && io->ifp) {
+	if (io && IoIFP(io)) {
 #if defined(STDSTDIO) || defined(atarist) /* this will work with atariST */
-	    fstat(fileno(io->ifp), &statcache);
+	    fstat(fileno(IoIFP(io)), &statcache);
 	    if (S_ISDIR(statcache.st_mode))	/* handle NFS glitch */
 		if (op->op_type == OP_FTTEXT)
 		    RETPUSHNO;
 		else
 		    RETPUSHYES;
-	    if (io->ifp->_cnt <= 0) {
-		i = getc(io->ifp);
+	    if (IoIFP(io)->_cnt <= 0) {
+		i = getc(IoIFP(io));
 		if (i != EOF)
-		    (void)ungetc(i, io->ifp);
+		    (void)ungetc(i, IoIFP(io));
 	    }
-	    if (io->ifp->_cnt <= 0)	/* null file is anything */
+	    if (IoIFP(io)->_cnt <= 0)	/* null file is anything */
 		RETPUSHYES;
-	    len = io->ifp->_cnt + (io->ifp->_ptr - io->ifp->_base);
-	    s = io->ifp->_base;
+	    len = IoIFP(io)->_cnt + (IoIFP(io)->_ptr - IoIFP(io)->_base);
+	    s = IoIFP(io)->_base;
 #else
 	    DIE("-T and -B not implemented on filehandles");
 #endif
@@ -8423,9 +8674,9 @@ PP(pp_open_dir)
     if (!io)
 	goto nope;
 
-    if (io->dirp)
-	closedir(io->dirp);
-    if (!(io->dirp = opendir(dirname)))
+    if (IoDIRP(io))
+	closedir(IoDIRP(io));
+    if (!(IoDIRP(io) = opendir(dirname)))
 	goto nope;
 
     RETPUSHYES;
@@ -8449,12 +8700,12 @@ PP(pp_readdir)
     GV *gv = (GV*)POPs;
     register IO *io = GvIOn(gv);
 
-    if (!io || !io->dirp)
+    if (!io || !IoDIRP(io))
 	goto nope;
 
     if (GIMME == G_ARRAY) {
 	/*SUPPRESS 560*/
-	while (dp = readdir(io->dirp)) {
+	while (dp = readdir(IoDIRP(io))) {
 #ifdef DIRNAMLEN
 	    XPUSHs(sv_2mortal(newSVpv(dp->d_name, dp->d_namlen)));
 #else
@@ -8463,7 +8714,7 @@ PP(pp_readdir)
 	}
     }
     else {
-	if (!(dp = readdir(io->dirp)))
+	if (!(dp = readdir(IoDIRP(io))))
 	    goto nope;
 #ifdef DIRNAMLEN
 	XPUSHs(sv_2mortal(newSVpv(dp->d_name, dp->d_namlen)));
@@ -8495,10 +8746,10 @@ PP(pp_telldir)
     GV *gv = (GV*)POPs;
     register IO *io = GvIOn(gv);
 
-    if (!io || !io->dirp)
+    if (!io || !IoDIRP(io))
 	goto nope;
 
-    PUSHi( telldir(io->dirp) );
+    PUSHi( telldir(IoDIRP(io)) );
     RETURN;
 nope:
     if (!errno)
@@ -8517,10 +8768,10 @@ PP(pp_seekdir)
     GV *gv = (GV*)POPs;
     register IO *io = GvIOn(gv);
 
-    if (!io || !io->dirp)
+    if (!io || !IoDIRP(io))
 	goto nope;
 
-    (void)seekdir(io->dirp, along);
+    (void)seekdir(IoDIRP(io), along);
 
     RETPUSHYES;
 nope:
@@ -8539,10 +8790,10 @@ PP(pp_rewinddir)
     GV *gv = (GV*)POPs;
     register IO *io = GvIOn(gv);
 
-    if (!io || !io->dirp)
+    if (!io || !IoDIRP(io))
 	goto nope;
 
-    (void)rewinddir(io->dirp);
+    (void)rewinddir(IoDIRP(io));
     RETPUSHYES;
 nope:
     if (!errno)
@@ -8560,12 +8811,12 @@ PP(pp_closedir)
     GV *gv = (GV*)POPs;
     register IO *io = GvIOn(gv);
 
-    if (!io || !io->dirp)
+    if (!io || !IoDIRP(io))
 	goto nope;
 
-    if (closedir(io->dirp) < 0)
+    if (closedir(IoDIRP(io)) < 0)
 	goto nope;
-    io->dirp = 0;
+    IoDIRP(io) = 0;
 
     RETPUSHYES;
 nope:
@@ -8909,15 +9160,15 @@ PP(pp_gmtime)
 	PUSHp(mybuf, strlen(mybuf));
     }
     else if (tmbuf) {
-	PUSHs(sv_2mortal(newSVnv((double)tmbuf->tm_sec)));
-	PUSHs(sv_2mortal(newSVnv((double)tmbuf->tm_min)));
-	PUSHs(sv_2mortal(newSVnv((double)tmbuf->tm_hour)));
-	PUSHs(sv_2mortal(newSVnv((double)tmbuf->tm_mday)));
-	PUSHs(sv_2mortal(newSVnv((double)tmbuf->tm_mon)));
-	PUSHs(sv_2mortal(newSVnv((double)tmbuf->tm_year)));
-	PUSHs(sv_2mortal(newSVnv((double)tmbuf->tm_wday)));
-	PUSHs(sv_2mortal(newSVnv((double)tmbuf->tm_yday)));
-	PUSHs(sv_2mortal(newSVnv((double)tmbuf->tm_isdst)));
+	PUSHs(sv_2mortal(newSViv((I32)tmbuf->tm_sec)));
+	PUSHs(sv_2mortal(newSViv((I32)tmbuf->tm_min)));
+	PUSHs(sv_2mortal(newSViv((I32)tmbuf->tm_hour)));
+	PUSHs(sv_2mortal(newSViv((I32)tmbuf->tm_mday)));
+	PUSHs(sv_2mortal(newSViv((I32)tmbuf->tm_mon)));
+	PUSHs(sv_2mortal(newSViv((I32)tmbuf->tm_year)));
+	PUSHs(sv_2mortal(newSViv((I32)tmbuf->tm_wday)));
+	PUSHs(sv_2mortal(newSViv((I32)tmbuf->tm_yday)));
+	PUSHs(sv_2mortal(newSViv((I32)tmbuf->tm_isdst)));
     }
     RETURN;
 }
@@ -9123,11 +9374,14 @@ doeval()
     SAVEINT(padix);
     SAVESPTR(curpad);
     SAVESPTR(comppad);
-    SAVESPTR(comppadname);
-    SAVEINT(comppadnamefill);
+    SAVESPTR(comppad_name);
+    SAVEINT(comppad_name_fill);
+    SAVEINT(min_intro_pending);
+    SAVEINT(max_intro_pending);
     comppad = newAV();
-    comppadname = newAV();
-    comppadnamefill = -1;
+    comppad_name = newAV();
+    comppad_name_fill = 0;
+    min_intro_pending = 0;
     av_push(comppad, Nullsv);
     curpad = AvARRAY(comppad);
     padix = 0;
@@ -9151,23 +9405,22 @@ doeval()
     rslen = 1;
     rschar = '\n';
     rspara = 0;
-    lex_start();
     if (yyparse() || error_count || !eval_root) {
 	SV **newsp;
 	I32 gimme;
 	CONTEXT *cx;
 	I32 optype;
 
-	lex_end();
 	op = saveop;
-	POPBLOCK(cx);
-	POPEVAL(cx);
-	pop_return();
-	LEAVE;
 	if (eval_root) {
 	    op_free(eval_root);
 	    eval_root = Nullop;
 	}
+	POPBLOCK(cx);
+	POPEVAL(cx);
+	pop_return();
+	lex_end();
+	LEAVE;
 	if (optype == OP_REQUIRE)
 	    DIE("%s", SvPVx(GvSV(gv_fetchpv("@",TRUE)), na));
 	rs = nrs;
@@ -9176,22 +9429,19 @@ doeval()
 	rspara = (nrslen == 2);
 	RETPUSHUNDEF;
     }
-    lex_end();
     rs = nrs;
     rslen = nrslen;
     rschar = nrschar;
     rspara = (nrslen == 2);
     compiling.cop_line = 0;
+    SAVEFREESV(comppad_name);
+    SAVEFREESV(comppad);
+    SAVEFREEOP(eval_root);
 
     DEBUG_x(dump_eval());
 
     /* compiled okay, so do it */
 
-    if (beginav) {
-	calllist(beginav);
-	av_free(beginav);
-	beginav = 0;
-    }
     sv_setpv(GvSV(gv_fetchpv("@",TRUE)),"");
     RETURNOP(eval_start);
 }
@@ -9205,6 +9455,7 @@ PP(pp_require)
     char *tmpname;
     SV** svp;
     I32 gimme = G_SCALAR;
+    FILE *tryrsfp = 0;
 
     if (MAXARG < 1) {
 	sv = GvSV(defgv);
@@ -9212,6 +9463,12 @@ PP(pp_require)
     }
     else
 	sv = POPs;
+    if (SvNIOK(sv) && !SvPOKp(sv)) {
+	if (SvNV(sv) > atof(patchlevel) + 0.000999)
+	    DIE("Perl %3.3f required--this is only version %s, stopped",
+		SvNV(sv),patchlevel);
+	RETPUSHYES;
+    }
     name = SvPV(sv, na);
     if (op->op_type == OP_REQUIRE &&
       (svp = hv_fetch(GvHVn(incgv), name, SvCUR(sv), 0)) &&
@@ -9220,16 +9477,13 @@ PP(pp_require)
 
     /* prepare to compile file */
 
-    sv_setpv(linestr,"");
-
-    SAVESPTR(rsfp);		/* in case we're in a BEGIN */
     tmpname = savestr(name);
     if (*tmpname == '/' ||
 	(*tmpname == '.' && 
 	    (tmpname[1] == '/' ||
 	     (tmpname[1] == '.' && tmpname[2] == '/'))))
     {
-	rsfp = fopen(tmpname,"r");
+	tryrsfp = fopen(tmpname,"r");
     }
     else {
 	AV *ar = GvAVn(incgv);
@@ -9238,8 +9492,8 @@ PP(pp_require)
 	for (i = 0; i <= AvFILL(ar); i++) {
 	    (void)sprintf(buf, "%s/%s",
 		SvPVx(*av_fetch(ar, i, TRUE), na), name);
-	    rsfp = fopen(buf, "r");
-	    if (rsfp) {
+	    tryrsfp = fopen(buf, "r");
+	    if (tryrsfp) {
 		char *s = buf;
 
 		if (*s == '.' && s[1] == '/')
@@ -9253,7 +9507,7 @@ PP(pp_require)
     compiling.cop_filegv = gv_fetchfile(tmpname);
     Safefree(tmpname);
     tmpname = Nullch;
-    if (!rsfp) {
+    if (!tryrsfp) {
 	if (op->op_type == OP_REQUIRE) {
 	    sprintf(tokenbuf,"Can't locate %s in @INC", name);
 	    if (instr(tokenbuf,".h "))
@@ -9268,15 +9522,17 @@ PP(pp_require)
 
     ENTER;
     SAVETMPS;
+    lex_start(sv_2mortal(newSVpv("",0)));
+    rsfp = tryrsfp;
+    name = savestr(name);
+    SAVEFREEPV(name);
  
     /* switch to eval mode */
 
     push_return(op->op_next);
-    PUSHBLOCK(cx,CXt_EVAL,SP);
-    PUSHEVAL(cx,savestr(name));
+    PUSHBLOCK(cx, CXt_EVAL, SP);
+    PUSHEVAL(cx, name, compiling.cop_filegv);
 
-    if (curcop->cop_line == 0)            /* don't debug debugger... */
-        perldb = FALSE;
     compiling.cop_line = 0;
 
     PUTBACK;
@@ -9294,25 +9550,27 @@ PP(pp_entereval)
     register CONTEXT *cx;
     dPOPss;
     I32 gimme = GIMME;
+    char tmpbuf[32];
 
     ENTER;
     SAVETMPS;
+    lex_start(sv);
  
     /* switch to eval mode */
 
+    sprintf(tmpbuf, "_<(eval %d)", ++evalseq);
+    compiling.cop_filegv = gv_fetchfile(tmpbuf+2);
+    compiling.cop_line = 1;
+    SAVEDELETE(defstash, savestr(tmpbuf), strlen(tmpbuf));
+
     push_return(op->op_next);
-    PUSHBLOCK(cx,CXt_EVAL,SP);
-    PUSHEVAL(cx,0);
+    PUSHBLOCK(cx, CXt_EVAL, SP);
+    PUSHEVAL(cx, 0, compiling.cop_filegv);
 
     /* prepare to compile string */
 
-    save_item(linestr);
-    sv_setsv(linestr, sv);
-    sv_catpv(linestr, "\n;");
-    compiling.cop_filegv = gv_fetchfile("(eval)");
-    compiling.cop_line = 1;
-    if (perldb)
-	save_lines(GvAV(curcop->cop_filegv), linestr);
+    if (perldb && curstash != debstash)
+	save_lines(GvAV(compiling.cop_filegv), linestr);
     PUTBACK;
     return doeval();
 }
@@ -9334,8 +9592,12 @@ PP(pp_leaveeval)
 
     if (gimme == G_SCALAR) {
 	MARK = newsp + 1;
-	if (MARK <= SP)
-	    *MARK = sv_mortalcopy(TOPs);
+	if (MARK <= SP) {
+	    if (SvFLAGS(TOPs) & SVs_TEMP)
+		*MARK = TOPs;
+	    else
+		*MARK = sv_mortalcopy(TOPs);
+	}
 	else {
 	    MEXTEND(mark,0);
 	    *MARK = &sv_undef;
@@ -9344,7 +9606,8 @@ PP(pp_leaveeval)
     }
     else {
 	for (mark = newsp + 1; mark <= SP; mark++)
-	    *mark = sv_mortalcopy(*mark);
+	    if (!(SvFLAGS(TOPs) & SVs_TEMP))
+		*mark = sv_mortalcopy(*mark);
 		/* in case LEAVE wipes old return values */
     }
 
@@ -9357,12 +9620,9 @@ PP(pp_leaveeval)
 	}
 	else if (optype == OP_REQUIRE)
 	    retop = die("%s did not return a true value", name);
-	Safefree(name);
     }
-    op_free(eroot);
-    av_free(comppad);
-    av_free(comppadname);
 
+    lex_end();
     LEAVE;
     sv_setpv(GvSV(gv_fetchpv("@",TRUE)),"");
 
@@ -9376,7 +9636,7 @@ PP(pp_evalonce)
     SP = do_eval(st[1], OP_EVAL, curcop->cop_stash, TRUE,
 	GIMME, arglast);
     if (eval_root) {
-	sv_free(cSVOP->op_sv);
+	SvREFCNT_dec(cSVOP->op_sv);
 	op[1].arg_ptr.arg_cmd = eval_root;
 	op[1].op_type = (A_CMD|A_DONT);
 	op[0].op_type = OP_TRY;
@@ -9397,8 +9657,9 @@ PP(pp_entertry)
     SAVETMPS;
 
     push_return(cLOGOP->op_other->op_next);
-    PUSHBLOCK(cx,CXt_EVAL,SP);
-    PUSHEVAL(cx,0);
+    PUSHBLOCK(cx, CXt_EVAL, SP);
+    PUSHEVAL(cx, 0, 0);
+    eval_root = op;		/* Only needed so that goto works right. */
 
     in_eval = 1;
     sv_setpv(GvSV(gv_fetchpv("@",TRUE)),"");
@@ -9420,8 +9681,12 @@ PP(pp_leavetry)
 
     if (gimme == G_SCALAR) {
 	MARK = newsp + 1;
-	if (MARK <= SP)
-	    *MARK = sv_mortalcopy(TOPs);
+	if (MARK <= SP) {
+	    if (SvFLAGS(TOPs) & (SVs_PADTMP|SVs_TEMP))
+		*MARK = TOPs;
+	    else
+		*MARK = sv_mortalcopy(TOPs);
+	}
 	else {
 	    MEXTEND(mark,0);
 	    *MARK = &sv_undef;
@@ -9430,7 +9695,8 @@ PP(pp_leavetry)
     }
     else {
 	for (mark = newsp + 1; mark <= SP; mark++)
-	    *mark = sv_mortalcopy(*mark);
+	    if (!(SvFLAGS(TOPs) & (SVs_PADTMP|SVs_TEMP)))
+		*mark = sv_mortalcopy(*mark);
 		/* in case LEAVE wipes old return values */
     }
 
@@ -9498,7 +9764,7 @@ PP(pp_ghostent)
 #endif
 
     if (GIMME != G_ARRAY) {
-	PUSHs(sv = sv_mortalcopy(&sv_undef));
+	PUSHs(sv = sv_newmortal());
 	if (hent) {
 	    if (which == OP_GHBYNAME) {
 		sv_setpvn(sv, hent->h_addr, hent->h_length);
@@ -9581,7 +9847,7 @@ PP(pp_gnetent)
 
     EXTEND(SP, 4);
     if (GIMME != G_ARRAY) {
-	PUSHs(sv = sv_mortalcopy(&sv_undef));
+	PUSHs(sv = sv_newmortal());
 	if (nent) {
 	    if (which == OP_GNBYNAME)
 		sv_setiv(sv, (I32)nent->n_net);
@@ -9651,7 +9917,7 @@ PP(pp_gprotoent)
 
     EXTEND(SP, 3);
     if (GIMME != G_ARRAY) {
-	PUSHs(sv = sv_mortalcopy(&sv_undef));
+	PUSHs(sv = sv_newmortal());
 	if (pent) {
 	    if (which == OP_GPBYNAME)
 		sv_setiv(sv, (I32)pent->p_proto);
@@ -9730,7 +9996,7 @@ PP(pp_gservent)
 
     EXTEND(SP, 4);
     if (GIMME != G_ARRAY) {
-	PUSHs(sv = sv_mortalcopy(&sv_undef));
+	PUSHs(sv = sv_newmortal());
 	if (sent) {
 	    if (which == OP_GSBYNAME) {
 #ifdef HAS_NTOHS
@@ -9901,7 +10167,7 @@ PP(pp_gpwent)
 
     EXTEND(SP, 10);
     if (GIMME != G_ARRAY) {
-	PUSHs(sv = sv_mortalcopy(&sv_undef));
+	PUSHs(sv = sv_newmortal());
 	if (pwent) {
 	    if (which == OP_GPWNAM)
 		sv_setiv(sv, (I32)pwent->pw_uid);
@@ -10018,7 +10284,7 @@ PP(pp_ggrent)
 
     EXTEND(SP, 4);
     if (GIMME != G_ARRAY) {
-	PUSHs(sv = sv_mortalcopy(&sv_undef));
+	PUSHs(sv = sv_newmortal());
 	if (grent) {
 	    if (which == OP_GGRNAM)
 		sv_setiv(sv, (I32)grent->gr_gid);
@@ -10099,7 +10365,7 @@ PP(pp_syscall)
 
     if (tainting) {
 	while (++MARK <= SP) {
-	    if (SvMAGICAL(*MARK) && mg_find(*MARK, 't'))
+	    if (SvRMAGICAL(*MARK) && mg_find(*MARK, 't'))
 		tainted = TRUE;
 	}
 	MARK = ORIGMARK;

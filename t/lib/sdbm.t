@@ -2,26 +2,19 @@
 
 # $RCSfile: dbm.t,v $$Revision: 4.1 $$Date: 92/08/07 18:27:43 $
 
-if (!-r '/usr/include/dbm.h' && !-r '/usr/include/ndbm.h'
-    && !-r '/usr/include/rpcsvc/dbm.h') {
-    print "1..0\n";
-    exit;
-}
+BEGIN { @INC = '../lib' }
+require SDBM_File;
 
 print "1..12\n";
 
-init SDBM_File;
-
-unlink <Op.dbmx.*>;
-unlink Op.dbmx;		# in case we're running gdbm
+unlink <Op.dbmx*>;
 
 umask(0);
 print (tie(%h,SDBM_File,'Op.dbmx', 0x202, 0640) ? "ok 1\n" : "not ok 1\n");
 
 $Dfile = "Op.dbmx.pag";
 if (! -e $Dfile) {
-	$Dfile = "Op.dbmx";
-	print "# Probably a gdbm database\n";
+	($Dfile) = <Op.dbmx*>;
 }
 ($dev,$ino,$mode,$nlink,$uid,$gid,$rdev,$size,$atime,$mtime,$ctime,
    $blksize,$blocks) = stat($Dfile);

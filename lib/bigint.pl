@@ -33,10 +33,14 @@ package bigint;
 #   bgcd(BINT,BINT) return BINT         greatest common divisor
 #   bnorm(BINT) return BINT             normalization
 #
+
+$zero = 0;
+
 
 # normalize string form of number.   Strip leading zeros.  Strip any
 #   white space and add a sign, if missing.
 # Strings that are not numbers result the value 'NaN'.
+
 sub main'bnorm { #(num_str) return num_str
     local($_) = @_;
     s/\s+//g;                           # strip white space
@@ -263,7 +267,7 @@ sub main'bdiv { #(dividend: num_str, divisor: num_str) return num_str
 	else {
 	    @d = @x;
 	}
-	(&external($sr, @q), &external($srem, @d, 0));
+	(&external($sr, @q), &external($srem, @d, $zero));
     } else {
 	&external($sr, @q);
     }

@@ -343,7 +343,7 @@ char *op_name[] = {
 	"ref-to-scalar cast",
 	"array length",
 	"subroutine reference",
-	"backslash reference",
+	"reference constructor",
 	"reference-type operator",
 	"bless",
 	"backticks",
@@ -644,7 +644,6 @@ char *op_name[] = {
 };
 #endif
 
-OP *	ck_aelem	P((OP* op));
 OP *	ck_chop		P((OP* op));
 OP *	ck_concat	P((OP* op));
 OP *	ck_eof		P((OP* op));
@@ -662,12 +661,15 @@ OP *	ck_listiob	P((OP* op));
 OP *	ck_match	P((OP* op));
 OP *	ck_null		P((OP* op));
 OP *	ck_repeat	P((OP* op));
+OP *	ck_require	P((OP* op));
+OP *	ck_rfun		P((OP* op));
 OP *	ck_rvconst	P((OP* op));
 OP *	ck_select	P((OP* op));
 OP *	ck_shift	P((OP* op));
 OP *	ck_sort		P((OP* op));
 OP *	ck_split	P((OP* op));
 OP *	ck_subr		P((OP* op));
+OP *	ck_svconst	P((OP* op));
 OP *	ck_trunc	P((OP* op));
 
 OP *	pp_null		P((void));
@@ -1321,7 +1323,7 @@ OP * (*check[])() = {
 	ck_fun,		/* scalar */
 	ck_null,	/* pushmark */
 	ck_null,	/* wantarray */
-	ck_null,	/* const */
+	ck_svconst,	/* const */
 	ck_null,	/* interp */
 	ck_null,	/* gvsv */
 	ck_null,	/* gv */
@@ -1352,7 +1354,7 @@ OP * (*check[])() = {
 	ck_null,	/* aassign */
 	ck_null,	/* schop */
 	ck_chop,	/* chop */
-	ck_lfun,	/* defined */
+	ck_rfun,	/* defined */
 	ck_lfun,	/* undef */
 	ck_fun,		/* study */
 	ck_lfun,	/* preinc */
@@ -1418,7 +1420,7 @@ OP * (*check[])() = {
 	ck_fun,		/* lc */
 	ck_rvconst,	/* rv2av */
 	ck_null,	/* aelemfast */
-	ck_aelem,	/* aelem */
+	ck_null,	/* aelem */
 	ck_null,	/* aslice */
 	ck_fun,		/* each */
 	ck_fun,		/* values */
@@ -1594,7 +1596,7 @@ OP * (*check[])() = {
 	ck_fun,		/* semget */
 	ck_fun,		/* semctl */
 	ck_fun,		/* semop */
-	ck_fun,		/* require */
+	ck_require,	/* require */
 	ck_fun,		/* dofile */
 	ck_eval,	/* entereval */
 	ck_null,	/* leaveeval */

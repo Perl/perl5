@@ -44,7 +44,7 @@ mallocobj = malloc.o
 SLN = ln -s
 RMS = rm -f
 
-libs = -ldbm -lm -lposix ext/dbm/sdbm/libsdbm.a
+libs = -ldbm -lm -lposix -Bdynamic -ldl
 
 public = perl
 
@@ -87,7 +87,7 @@ obj1 = av.o scope.o op.o doop.o doio.o dump.o hv.o
 obj2 = $(mallocobj) mg.o pp.o regcomp.o regexec.o
 obj3 = gv.o sv.o taint.o toke.o util.o deb.o run.o
 
-obj = $(obj1) $(obj2) $(obj3) NDBM_File.o ODBM_File.o SDBM_File.o
+obj = $(obj1) $(obj2) $(obj3) NDBM_File.o ODBM_File.o POSIX.o dl.o
 
 lintflags = -hbvxac
 
@@ -100,7 +100,7 @@ SHELL = /bin/sh
 	$(CCCMD) $*.c
 
 
-all: perl
+all: perl lib/Config.pm
 
 #all: $(public) $(private) $(util) $(scripts)
 #	cd x2p; $(MAKE) all
@@ -110,7 +110,7 @@ all: perl
 # and is harmless otherwise.
 
 perl: $& main.o perly.o perl.o $(obj)
-	$(CC) -Bstatic $(LARGE) $(CLDFLAGS) main.o perly.o perl.o $(obj) $(libs) -o perl
+	$(CC) -Bstatic $(LARGE) $(CLDFLAGS) main.o perly.o perl.o $(obj) $(libs) -Bstatic  -o perl
 	echo ""
 
 libperl.rlb: libperl.a
@@ -128,6 +128,9 @@ libperl.a: $& perly.o perl.o $(obj)
 suidperl: $& sperl.o main.o libperl.rlb
 	$(CC) $(LARGE) $(CLDFLAGS) sperl.o main.o libperl.a $(libs) -o suidperl
 
+lib/Config.pm: config.sh
+	./configpm
+
 saber: $(saber)
 	# load $(saber)
 	# load /lib/libm.a
@@ -138,36 +141,60 @@ sperl.o: perl.c perly.h patchlevel.h $(h)
 	$(CCCMD) -DTAINT -DIAMSUID sperl.c
 	$(RMS) sperl.c
 
-ODBM_File.c: ext/dbm/ODBM_File.xs
-	ext/xsubpp ext/typemap ext/dbm/ODBM_File.xs >tmp
+dl.o: ext/dl/dl.c
+	cp ext/dl/dl.c dl.c
+	$(CC) -c dl.c
+
+# ODBM_File extension
+
+ODBM_File.c: ext/dbm/ODBM_File.xs ext/xsubpp ext/typemap
+	ext/xsubpp ext/dbm/ODBM_File.xs >tmp
 	mv tmp ODBM_File.c
 
-NDBM_File.c: ext/dbm/NDBM_File.xs
-	ext/xsubpp ext/typemap ext/dbm/NDBM_File.xs >tmp
+ODBM_File.o: ODBM_File.c
+
+# NDBM_File extension
+
+NDBM_File.c: ext/dbm/NDBM_File.xs ext/xsubpp ext/typemap
+	ext/xsubpp ext/dbm/NDBM_File.xs >tmp
 	mv tmp NDBM_File.c
 
-SDBM_File.c: ext/dbm/SDBM_File.xs
-	ext/xsubpp ext/typemap ext/dbm/SDBM_File.xs > tmp
+NDBM_File.o: NDBM_File.c
+
+# SDBM_File extension
+
+SDBM_File.c: ext/dbm/SDBM_File.xs ext/xsubpp ext/typemap
+	ext/xsubpp ext/dbm/SDBM_File.xs > tmp
 	mv tmp SDBM_File.c
 
-GDBM_File.c: ext/dbm/GDBM_File.xs
-	ext/xsubpp ext/typemap ext/dbm/GDBM_File.xs >tmp
-	mv tmp GDBM_File.c
-
-ODBM_File.o: ODBM_File.c
-	$(CCCMD) ODBM_File.c
-
-NDBM_File.o: NDBM_File.c
-	$(CCCMD) NDBM_File.c
-
 SDBM_File.o: SDBM_File.c
-	$(CCCMD) SDBM_File.c
 
-GDBM_File.o: GDBM_File.c
-	$(CCCMD) GDBM_File.c
+lib/auto/SDBM_File/SDBM_File.so: SDBM_File.o ext/dbm/sdbm/libsdbm.a
+	@- mkdir lib/auto/SDBM_File 2>/dev/null
+	ld -o lib/auto/SDBM_File/SDBM_File.so SDBM_File.o ext/dbm/sdbm/libsdbm.a
 
 ext/dbm/sdbm/libsdbm.a: ext/dbm/sdbm/sdbm.c ext/dbm/sdbm/sdbm.h
 	cd ext/dbm/sdbm; $(MAKE) sdbm
+
+# GDBM_File extension
+
+GDBM_File.c: ext/dbm/GDBM_File.xs ext/xsubpp ext/typemap
+	ext/xsubpp ext/dbm/GDBM_File.xs >tmp
+	mv tmp GDBM_File.c
+
+GDBM_File.o: GDBM_File.c
+
+# POSIX extension
+
+POSIX.c: ext/posix/POSIX.xs ext/xsubpp ext/typemap
+	ext/xsubpp ext/posix/POSIX.xs > tmp
+	mv tmp POSIX.c
+
+POSIX.o: POSIX.c
+
+lib/auto/POSIX/POSIX.so: POSIX.o
+	@- mkdir lib/auto/POSIX 2>/dev/null
+	ld -o lib/auto/POSIX/POSIX.so POSIX.o ext/dbm/sdbm/libsdbm.a
 
 perly.h: perly.c
 	@ echo Dummy dependency for dumb parallel make
@@ -176,7 +203,7 @@ perly.h: perly.c
 opcode.h: opcode.pl
 	- opcode.pl
 
-embed.h: embed_h.SH global.var interp.var
+embed.h: embed_h.SH global.sym interp.sym
 	sh embed_h.SH
 
 perly.c:

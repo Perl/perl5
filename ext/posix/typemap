@@ -1,0 +1,4 @@
+mode_t		T_INT
+pid_t		T_INT
+fd		T_INT
+FILE *		T_PTR

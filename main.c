@@ -33,22 +33,25 @@ perl_init_ext()
 {
     char *file = __FILE__;
 
+    boot_DynamicLoader();
+
 #ifdef HAS_DB
-    newXSUB("DB_File::init",   0, init_DB_File,   file);
+    newXSUB("DB_File::bootstrap",   0, boot_DB_File,   file);
 #endif
 #ifdef HAS_NDBM
-    newXSUB("NDBM_File::init", 0, init_NDBM_File, file);
+    newXSUB("NDBM_File::bootstrap", 0, boot_NDBM_File, file);
 #endif
 #ifdef HAS_GDBM
-    newXSUB("GDBM_File::init", 0, init_GDBM_File, file);
+    newXSUB("GDBM_File::bootstrap", 0, boot_GDBM_File, file);
 #endif
 #ifdef HAS_SDBM
-    newXSUB("SDBM_File::init", 0, init_SDBM_File, file);
+/*    newXSUB("SDBM_File::bootstrap", 0, boot_SDBM_File, file); */
 #endif
 #ifdef HAS_ODBM
-    newXSUB("ODBM_File::init", 0, init_ODBM_File, file);
+    newXSUB("ODBM_File::bootstrap", 0, boot_ODBM_File, file);
 #endif
 #ifdef HAS_DBZ
-    newXSUB("DBZ_File::init",  0, init_DBZ_File,  file);
+    newXSUB("DBZ_File::bootstrap",  0, boot_DBZ_File,  file);
 #endif
+    newXSUB("POSIX::bootstrap",  0, boot_POSIX,  file);
 }

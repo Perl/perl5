@@ -2,7 +2,9 @@
 
 # $RCSfile: goto.t,v $$Revision: 4.1 $$Date: 92/08/07 18:27:56 $
 
-print "1..5\n";
+# "This IS structured code.  It's just randomly structured."
+
+print "1..9\n";
 
 while ($?) {
     $foo = 1;
@@ -43,11 +45,43 @@ bar:
 &foo;
 
 sub bar {
-    $x = 'exitcode';
-    eval "goto $x";	# Do not take this as exemplary code!!!
+    $x = 'bypass';
+    eval "goto $x";
 }
 
 &bar;
 exit;
-exitcode:
+
+FINALE:
+print "ok 9\n";
+exit;
+
+bypass:
 print "ok 5\n";
+
+# Test autoloading mechanism.
+
+sub two {
+    ($pack, $file, $line) = caller;	# Should indicate original call stats.
+    print "@_ $pack $file $line" eq "1 2 3 main $FILE $LINE"
+	? "ok 7\n"
+	: "not ok 7\n";
+}
+
+sub one {
+    eval <<'END';
+    sub one { print "ok 6\n"; goto &two; print "not ok 6\n"; }
+END
+    goto &one;
+}
+
+$FILE = __FILE__;
+$LINE = __LINE__ + 1;
+&one(1,2,3);
+
+$wherever = NOWHERE;
+eval { goto $wherever };
+print $@ =~ /Can't find label NOWHERE/ ? "ok 8\n" : "not ok 8\n";
+
+$wherever = FINALE;
+goto $wherever;

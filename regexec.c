@@ -165,7 +165,7 @@ I32 safebase;	/* no need to remember string in subbase */
 			minlen = prog->regback + SvCUR(prog->regmust);
 		}
 		else if (--BmUSEFUL(prog->regmust) < 0) { /* boo */
-			sv_free(prog->regmust);
+			SvREFCNT_dec(prog->regmust);
 			prog->regmust = Nullsv;	/* disable regmust */
 			s = string;
 		}

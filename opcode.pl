@@ -163,7 +163,7 @@ scalar		scalar			ck_fun		s	S
 pushmark	pushmark		ck_null		s	
 wantarray	wantarray		ck_null		is	
 
-const		constant item		ck_null		s	
+const		constant item		ck_svconst	s	
 interp		interpreted string	ck_null		0	
 
 gvsv		scalar variable		ck_null		ds	
@@ -182,7 +182,7 @@ sv2len		scalar value length	ck_null		ist
 rv2sv		ref-to-scalar cast	ck_rvconst	ds	
 av2arylen	array length		ck_null		is	
 rv2cv		subroutine reference	ck_rvconst	d
-refgen		backslash reference	ck_null		fst	L
+refgen		reference constructor	ck_null		fst	L
 ref		reference-type operator	ck_fun		st	S?
 bless		bless			ck_fun		s	S S?
 
@@ -209,7 +209,7 @@ aassign		list assignment		ck_null		t	L L
 
 schop		scalar chop		ck_null		t
 chop		chop			ck_chop		mt	L
-defined		defined operator	ck_lfun		is	S?
+defined		defined operator	ck_rfun		is	S?
 undef		undef operator		ck_lfun		s	S?
 study		study			ck_fun		st	S?
 
@@ -298,7 +298,7 @@ lc		lower case		ck_fun		ft	S
 
 rv2av		array deref		ck_rvconst	dt	
 aelemfast	known array element	ck_null		s	A S
-aelem		array element		ck_aelem	s	A S
+aelem		array element		ck_null		s	A S
 aslice		array slice		ck_null		m	A L
 
 # Associative arrays.
@@ -539,7 +539,7 @@ semop		semop			ck_fun		imst	S S S
 
 # Eval.
 
-require		require			ck_fun		d	S?
+require		require			ck_require	d	S?
 dofile		do 'file'		ck_fun		d	S
 entereval	eval string		ck_eval		d	S
 leaveeval	eval exit		ck_null		0	S

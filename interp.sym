@@ -56,7 +56,6 @@ firstgv
 forkprocess
 formfeed
 formtarget
-freestrroot
 gensym
 in_eval
 incgv
@@ -133,6 +132,10 @@ statname
 statusvalue
 stdingv
 strchop
+sv_count
+sv_rvcount
+sv_root
+sv_arenaroot
 tainted
 tainting
 tmps_floor

@@ -1,4 +1,7 @@
-# Global variables
+# Global symbols that need to be hidden in embedded applications.
+
+# Variables
+
 No
 Sv
 Xpv
@@ -12,8 +15,8 @@ check
 coeff
 compiling
 comppad
-comppadname
-comppadnamefill
+comppad_name
+comppad_name_fill
 cop_seqmax
 cryptseen
 cshlen
@@ -26,6 +29,7 @@ ds
 egid
 error_count
 euid
+evalseq
 evstr
 expect
 expectterm
@@ -37,11 +41,14 @@ in_format
 in_my
 know_next
 last_lop
+last_lop_op
 last_uni
 linestr
 markstack
 markstack_max
 markstack_ptr
+max_intro_pending
+min_intro_pending
 multi_close
 multi_end
 multi_open
@@ -353,6 +360,7 @@ mg_find
 mg_free
 mg_get
 mg_len
+mg_magical
 mg_set
 mod
 modkids
@@ -384,6 +392,7 @@ newHVREF
 newIO
 newLISTOP
 newLOGOP
+newLOOPEX
 newLOOPOP
 newMETHOD
 newNULLLIST
@@ -747,7 +756,6 @@ pp_xor
 prepend_elem
 push_return
 push_scope
-pv_grow
 q
 ref
 refkids
@@ -763,6 +771,11 @@ run
 save_I32
 save_aptr
 save_ary
+save_clearsv
+save_delete
+save_freeop
+save_freepv
+save_freesv
 save_hash
 save_hptr
 save_int
@@ -797,6 +810,7 @@ scope
 screaminstr
 setenv_getix
 skipspace
+start_subparse
 sublex_done
 sublex_start
 sv_2bool
@@ -810,9 +824,13 @@ sv_catpv
 sv_catpvn
 sv_catsv
 sv_chop
+sv_clean_all
+sv_clean_magic
+sv_clean_refs
 sv_clear
 sv_cmp
 sv_dec
+sv_dump
 sv_eq
 sv_free
 sv_gets
@@ -823,9 +841,11 @@ sv_isa
 sv_len
 sv_magic
 sv_mortalcopy
+sv_newmortal
 sv_peek
 sv_ref
 sv_replace
+sv_report_used
 sv_reset
 sv_setiv
 sv_setnv
@@ -845,6 +865,12 @@ wait4pid
 warn
 watch
 whichsig
+xiv_root
+xnv_root
+xpv_root
+xrv_root
+yyerror
 yyerror
 yylex
 yyparse
+yywarn

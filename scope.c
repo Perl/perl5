@@ -54,8 +54,7 @@ void
 pop_scope()
 {
     I32 oldsave = scopestack[--scopestack_ix];
-    if (savestack_ix > oldsave)
-	leave_scope(oldsave);
+    LEAVE_SCOPE(oldsave);
 }
 
 void
@@ -77,7 +76,7 @@ free_tmps()
 #ifdef DEBUGGING
 	    SvTEMP_off(sv);
 #endif
-	    sv_free(sv);		/* note, can modify tmps_ix!!! */
+	    SvREFCNT_dec(sv);		/* note, can modify tmps_ix!!! */
 	}
     }
 }
@@ -250,6 +249,55 @@ AV **aptr;
 }
 
 void
+save_freesv(sv)
+SV *sv;
+{
+    SSCHECK(2);
+    SSPUSHPTR(sv);
+    SSPUSHINT(SAVEt_FREESV);
+}
+
+void
+save_freeop(op)
+OP *op;
+{
+    SSCHECK(2);
+    SSPUSHPTR(op);
+    SSPUSHINT(SAVEt_FREEOP);
+}
+
+void
+save_freepv(pv)
+char *pv;
+{
+    SSCHECK(2);
+    SSPUSHPTR(pv);
+    SSPUSHINT(SAVEt_FREEPV);
+}
+
+void
+save_clearsv(svp)
+SV** svp;
+{
+    SSCHECK(2);
+    SSPUSHPTR(svp);
+    SSPUSHINT(SAVEt_CLEARSV);
+}
+
+void
+save_delete(hv,key,klen)
+HV *hv;
+char *key;
+I32 klen;
+{
+    SSCHECK(4);
+    SSPUSHINT(klen);
+    SSPUSHPTR(key);
+    SSPUSHPTR(hv);
+    SSPUSHINT(SAVEt_DELETE);
+}
+
+void
 save_list(sarg,maxsarg)
 register SV **sarg;
 I32 maxsarg;
@@ -294,7 +342,7 @@ I32 base;
 	    sv = GvSV(gv);
 	    if (SvTYPE(sv) >= SVt_PVMG)
 		SvMAGIC(sv) = 0;
-            sv_free(sv);
+            SvREFCNT_dec(sv);
             GvSV(gv) = sv = value;
 	    SvSETMAGIC(sv);
             break;
@@ -303,20 +351,20 @@ I32 base;
 	    sv = *(SV**)ptr;
 	    if (SvTYPE(sv) >= SVt_PVMG)
 		SvMAGIC(sv) = 0;
-            sv_free(sv);
+            SvREFCNT_dec(sv);
 	    *(SV**)ptr = sv = (SV*)SSPOPPTR;
 	    SvSETMAGIC(sv);
             break;
         case SAVEt_AV:				/* array reference */
 	    av = (AV*)SSPOPPTR;
 	    gv = (GV*)SSPOPPTR;
-            av_free(GvAV(gv));
+            SvREFCNT_dec(GvAV(gv));
             GvAV(gv) = av;
             break;
         case SAVEt_HV:				/* hash reference */
 	    hv = (HV*)SSPOPPTR;
 	    gv = (GV*)SSPOPPTR;
-            (void)hv_free(GvHV(gv));
+            SvREFCNT_dec(GvHV(gv));
             GvHV(gv) = hv;
             break;
 	case SAVEt_INT:				/* int reference */
@@ -349,8 +397,160 @@ I32 base;
             gp_free(gv);
             GvGP(gv) = (GP*)ptr;
             break;
+	case SAVEt_FREESV:
+	    ptr = SSPOPPTR;
+	    SvREFCNT_dec((SV*)ptr);
+	    break;
+	case SAVEt_FREEOP:
+	    ptr = SSPOPPTR;
+	    curpad = AvARRAY(comppad);
+	    op_free((OP*)ptr);
+	    break;
+	case SAVEt_FREEPV:
+	    ptr = SSPOPPTR;
+	    Safefree((char*)ptr);
+	    break;
+	case SAVEt_CLEARSV:
+	    ptr = SSPOPPTR;
+	    sv = *(SV**)ptr;
+	    if (SvREFCNT(sv) <= 1) {	/* Can clear pad variable in place. */
+		if (SvTHINKFIRST(sv)) {
+		    if (SvREADONLY(sv))
+			croak("panic: leave_scope clearsv");
+		    if (SvROK(sv))
+			sv_unref(sv);
+		}
+
+		switch (SvTYPE(sv)) {
+		case SVt_NULL:
+		    break;
+		case SVt_PVAV:
+		    av_clear((AV*)sv);
+		    break;
+		case SVt_PVHV:
+		    hv_clear((HV*)sv);
+		    break;
+		case SVt_PVCV:
+		    sub_generation++;
+		    cv_clear((CV*)sv);
+		    break;
+		default:
+		    if (SvPOK(sv) && SvLEN(sv))
+			SvOOK_off(sv);
+		    SvOK_off(sv);
+		    SvSETMAGIC(sv);
+		    break;
+		}
+	    }
+	    else {	/* Someone has a claim on this, so abandon it. */
+		SvREFCNT_dec(sv);	/* Cast current value to the winds. */
+		switch (SvTYPE(sv)) {	/* Console ourselves with a new value */
+		case SVt_PVAV:	*(SV**)ptr = (SV*)newAV();	break;
+		case SVt_PVHV:	*(SV**)ptr = (SV*)newHV();	break;
+		default:	*(SV**)ptr = NEWSV(0,0);	break;
+		}
+	    }
+	    break;
+	case SAVEt_DELETE:
+	    ptr = SSPOPPTR;
+	    hv = (HV*)ptr;
+	    ptr = SSPOPPTR;
+	    hv_delete(hv, (char*)ptr, (U32)SSPOPINT);
+	    break;
 	default:
 	    croak("panic: leave_scope inconsistency");
 	}
     }
 }
+
+#ifdef DEBUGGING
+void
+cx_dump(cx)
+CONTEXT* cx;
+{
+    fprintf(stderr, "CX %d = %s\n", cx - cxstack, block_type[cx->cx_type]);
+    if (cx->cx_type != CXt_SUBST) {
+	fprintf(stderr, "BLK_OLDSP = %ld\n", (long)cx->blk_oldsp);
+	fprintf(stderr, "BLK_OLDCOP = 0x%lx\n", (long)cx->blk_oldcop);
+	fprintf(stderr, "BLK_OLDMARKSP = %ld\n", (long)cx->blk_oldmarksp);
+	fprintf(stderr, "BLK_OLDSCOPESP = %ld\n", (long)cx->blk_oldscopesp);
+	fprintf(stderr, "BLK_OLDRETSP = %ld\n", (long)cx->blk_oldretsp);
+	fprintf(stderr, "BLK_OLDPM = 0x%lx\n", (long)cx->blk_oldpm);
+	fprintf(stderr, "BLK_GIMME = %s\n", cx->blk_gimme ? "LIST" : "SCALAR");
+    }
+    switch (cx->cx_type) {
+    case CXt_NULL:
+    case CXt_BLOCK:
+	break;
+    case CXt_SUB:
+	fprintf(stderr, "BLK_SUB.CV = 0x%lx\n",
+		(long)cx->blk_sub.cv);
+	fprintf(stderr, "BLK_SUB.GV = 0x%lx\n",
+		(long)cx->blk_sub.gv);
+	fprintf(stderr, "BLK_SUB.DFOUTGV = 0x%lx\n",
+		(long)cx->blk_sub.dfoutgv);
+	fprintf(stderr, "BLK_SUB.OLDDEPTH = %ld\n",
+		(long)cx->blk_sub.olddepth);
+	fprintf(stderr, "BLK_SUB.HASARGS = %d\n",
+		(int)cx->blk_sub.hasargs);
+	break;
+    case CXt_EVAL:
+	fprintf(stderr, "BLK_EVAL.OLD_IN_EVAL = %ld\n",
+		(long)cx->blk_eval.old_in_eval);
+	fprintf(stderr, "BLK_EVAL.OLD_OP_TYPE = %s\n",
+		op_name[cx->blk_eval.old_op_type]);
+	fprintf(stderr, "BLK_EVAL.OLD_NAME = %s\n",
+		cx->blk_eval.old_name);
+	fprintf(stderr, "BLK_EVAL.OLD_EVAL_ROOT = 0x%lx\n",
+		(long)cx->blk_eval.old_eval_root);
+	break;
+
+    case CXt_LOOP:
+	fprintf(stderr, "BLK_LOOP.LABEL = %s\n",
+		cx->blk_loop.label);
+	fprintf(stderr, "BLK_LOOP.RESETSP = %ld\n",
+		(long)cx->blk_loop.resetsp);
+	fprintf(stderr, "BLK_LOOP.REDO_OP = 0x%lx\n",
+		(long)cx->blk_loop.redo_op);
+	fprintf(stderr, "BLK_LOOP.NEXT_OP = 0x%lx\n",
+		(long)cx->blk_loop.next_op);
+	fprintf(stderr, "BLK_LOOP.LAST_OP = 0x%lx\n",
+		(long)cx->blk_loop.last_op);
+	fprintf(stderr, "BLK_LOOP.ITERIX = %ld\n",
+		(long)cx->blk_loop.iterix);
+	fprintf(stderr, "BLK_LOOP.ITERARY = 0x%lx\n",
+		(long)cx->blk_loop.iterary);
+	fprintf(stderr, "BLK_LOOP.ITERVAR = 0x%lx\n",
+		(long)cx->blk_loop.itervar);
+	if (cx->blk_loop.itervar)
+	    fprintf(stderr, "BLK_LOOP.ITERSAVE = 0x%lx\n",
+		(long)cx->blk_loop.itersave);
+	break;
+
+    case CXt_SUBST:
+	fprintf(stderr, "SB_ITERS = %ld\n",
+		(long)cx->sb_iters);
+	fprintf(stderr, "SB_MAXITERS = %ld\n",
+		(long)cx->sb_maxiters);
+	fprintf(stderr, "SB_SAFEBASE = %ld\n",
+		(long)cx->sb_safebase);
+	fprintf(stderr, "SB_ONCE = %ld\n",
+		(long)cx->sb_once);
+	fprintf(stderr, "SB_ORIG = %s\n",
+		cx->sb_orig);
+	fprintf(stderr, "SB_DSTR = 0x%lx\n",
+		(long)cx->sb_dstr);
+	fprintf(stderr, "SB_TARG = 0x%lx\n",
+		(long)cx->sb_targ);
+	fprintf(stderr, "SB_S = 0x%lx\n",
+		(long)cx->sb_s);
+	fprintf(stderr, "SB_M = 0x%lx\n",
+		(long)cx->sb_m);
+	fprintf(stderr, "SB_STREND = 0x%lx\n",
+		(long)cx->sb_strend);
+	fprintf(stderr, "SB_SUBBASE = 0x%lx\n",
+		(long)cx->sb_subbase);
+	break;
+    }
+}
+#endif

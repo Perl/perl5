@@ -83,18 +83,18 @@
 
 /* Go to some pains in the rare event that we must extend the stack. */
 #define EXTEND(p,n)	do { if (stack_max - p < (n)) {		  	    \
-			    av_fill(stack, (p - stack_base) + (n));	    \
+			    av_fill(stack, (p - stack_base) + (n) + 128);   \
 			    sp = AvARRAY(stack) + (sp - stack_base);	    \
 			    stack_base = AvARRAY(stack);		    \
-			    stack_max = stack_base + AvMAX(stack);	    \
+			    stack_max = stack_base + AvMAX(stack) - 1;	    \
 			} } while (0)
 /* Same thing, but update mark register too. */
 #define MEXTEND(p,n)	do {if (stack_max - p < (n)) {			    \
-			    av_fill(stack, (p - stack_base) + (n));	    \
+			    av_fill(stack, (p - stack_base) + (n) + 128);   \
 			    sp   = AvARRAY(stack) + (sp   - stack_base);    \
 			    mark = AvARRAY(stack) + (mark - stack_base);    \
 			    stack_base = AvARRAY(stack);		    \
-			    stack_max = stack_base + AvMAX(stack);	    \
+			    stack_max = stack_base + AvMAX(stack) - 1;	    \
 			} } while (0)
 
 #define PUSHs(s)	(*++sp = (s))
@@ -169,3 +169,8 @@
 #define SAVELONG(l) save_int((long*)(&l));
 #define SAVESPTR(s) save_sptr((SV**)(&s))
 #define SAVETMPS save_int(&tmps_floor), tmps_floor = tmps_ix
+#define SAVEFREESV(s) save_freesv((SV*)(s))
+#define SAVEFREEOP(o) save_freeop((OP*)(o))
+#define SAVEFREEPV(p) save_freepv((char*)(p))
+#define SAVECLEARSV(sv) save_clearsv((SV**)(&sv))
+#define SAVEDELETE(h,k,l) save_delete((HV*)(h), (char*)(k), (I32)l)

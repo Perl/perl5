@@ -53,7 +53,7 @@ OP *op;
 	    sv = NEWSV(0,0);
 	    gv_fullname(sv, cGVOP->op_gv);
 	    fprintf(stderr, "(%s)", SvPV(sv, na));
-	    sv_free(sv);
+	    SvREFCNT_dec(sv);
 	}
 	else
 	    fprintf(stderr, "(NULL)");

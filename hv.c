@@ -48,9 +48,9 @@ I32 lval;
     if (!hv)
 	return 0;
 
-    if (SvMAGICAL(hv)) {
+    if (SvRMAGICAL(hv)) {
 	if (mg_find((SV*)hv,'P')) {
-	    sv = sv_2mortal(NEWSV(61,0));
+	    sv = sv_newmortal();
 	    mg_copy((SV*)hv, sv, key, klen);
 	    if (!lval) {
 		mg_get(sv);
@@ -111,7 +111,6 @@ register U32 hash;
 
     xhv = (XPVHV*)SvANY(hv);
     if (SvMAGICAL(hv)) {
-	MAGIC* mg = SvMAGIC(hv);
 	mg_copy((SV*)hv, val, key, klen);
 	if (!xhv->xhv_array)
 	    return 0;
@@ -136,7 +135,7 @@ register U32 hash;
 	    continue;
 	if (bcmp(entry->hent_key,key,klen))	/* is this it? */
 	    continue;
-	sv_free(entry->hent_val);
+	SvREFCNT_dec(entry->hent_val);
 	entry->hent_val = val;
 	return &entry->hent_val;
     }
@@ -175,7 +174,7 @@ U32 klen;
 
     if (!hv)
 	return Nullsv;
-    if (SvMAGICAL(hv)) {
+    if (SvRMAGICAL(hv)) {
 	sv = *hv_fetch(hv, key, klen, TRUE);
 	mg_clear(sv);
     }
@@ -276,7 +275,7 @@ register HE *hent;
 {
     if (!hent)
 	return;
-    sv_free(hent->hent_val);
+    SvREFCNT_dec(hent->hent_val);
     Safefree(hent->hent_key);
     Safefree(hent);
 }
@@ -380,8 +379,8 @@ HV *hv;
     xhv = (XPVHV*)SvANY(hv);
     entry = xhv->xhv_eiter;
 
-    if (SvMAGICAL(hv) && (mg = mg_find((SV*)hv,'P'))) {
-	SV *key = sv_2mortal(NEWSV(0,0));
+    if (SvRMAGICAL(hv) && (mg = mg_find((SV*)hv,'P'))) {
+	SV *key = sv_newmortal();
         if (entry)
 	    sv_setpvn(key, entry->hent_key, entry->hent_klen);
         else {
@@ -398,7 +397,7 @@ HV *hv;
 	    return entry;
         }
 	if (entry->hent_val)
-	    sv_free(entry->hent_val);
+	    SvREFCNT_dec(entry->hent_val);
 	Safefree(entry);
 	xhv->xhv_eiter = Null(HE*);
 	return Null(HE*);
@@ -437,9 +436,9 @@ hv_iterval(hv,entry)
 HV *hv;
 register HE *entry;
 {
-    if (SvMAGICAL(hv)) {
+    if (SvRMAGICAL(hv)) {
 	if (mg_find((SV*)hv,'P')) {
-	    SV* sv = sv_2mortal(NEWSV(61,0));
+	    SV* sv = sv_newmortal();
 	    mg_copy((SV*)hv, sv, entry->hent_key, entry->hent_klen);
 	    mg_get(sv);
 	    sv_unmagic(sv,'p');

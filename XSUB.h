@@ -1,1 +1,1 @@
-#define ST(s) stack_base[sp + s]
+#define ST(s) stack_base[ax + s]

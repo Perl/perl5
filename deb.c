@@ -37,47 +37,66 @@
 #include "EXTERN.h"
 #include "perl.h"
 
-#ifdef I_VARARGS
-#  include <varargs.h>
+#ifdef STANDARD_C
+#  include <stdarg.h>
+#else
+#  ifdef I_VARARGS
+#    include <varargs.h>
+#  endif
 #endif
 
 void deb_growlevel();
 
-#  ifndef I_VARARGS
+#if !defined(STANDARD_C) && !defined(I_VARARGS)
+
+/*
+ * Fallback on the old hackers way of doing varargs
+ */
+
 /*VARARGS1*/
-void deb(pat,a1,a2,a3,a4,a5,a6,a7,a8)
-char *pat;
+void
+deb(pat,a1,a2,a3,a4,a5,a6,a7,a8)
+    char *pat;
 {
     register I32 i;
 
-    fprintf(stderr,"%-4ld",(long)curop->cop_line);
+    fprintf(stderr,"(%s:%ld)\t",
+	SvPVX(GvSV(curcop->cop_filegv)),(long)curcop->cop_line);
     for (i=0; i<dlevel; i++)
 	fprintf(stderr,"%c%c ",debname[i],debdelim[i]);
     fprintf(stderr,pat,a1,a2,a3,a4,a5,a6,a7,a8);
 }
+
+#else /* !defined(STANDARD_C) && !defined(I_VARARGS) */
+
+#  ifdef STANDARD_C
+void
+deb(char *pat, ...)
 #  else
 /*VARARGS1*/
-#ifdef __STDC__
-void deb(char *pat,...)
-#else
-void deb(va_alist)
-va_dcl
-#endif
+void
+deb(pat, va_alist)
+    char *pat;
+    va_dcl
+#  endif
 {
     va_list args;
-    char *pat;
     register I32 i;
 
-    va_start(args);
-    fprintf(stderr,"%-4ld",(long)curcop->cop_line);
+    fprintf(stderr,"(%s:%ld)\t",
+	SvPVX(GvSV(curcop->cop_filegv)),(long)curcop->cop_line);
     for (i=0; i<dlevel; i++)
 	fprintf(stderr,"%c%c ",debname[i],debdelim[i]);
 
-    pat = va_arg(args, char *);
+#  if STANDARD_C
+    va_start(args, pat);
+#  else
+    va_start(args);
+#  endif
     (void) vfprintf(stderr,pat,args);
     va_end( args );
 }
-#  endif
+#endif /* !defined(STANDARD_C) && !defined(I_VARARGS) */
 
 void
 deb_growlevel()

@@ -44,6 +44,8 @@ HV* stash;
     U32	i;
     HE	*entry;
 
+    if (!HvARRAY(stash))
+	return;
     for (i = 0; i <= HvMAX(stash); i++) {
 	for (entry = HvARRAY(stash)[i]; entry; entry = entry->hent_next) {
 	    GV *gv = (GV*)entry->hent_val;
@@ -61,7 +63,7 @@ void
 dump_sub(gv)
 GV* gv;
 {
-    SV *sv = sv_mortalcopy(&sv_undef);
+    SV *sv = sv_newmortal();
     if (GvCV(gv)) {
 	gv_fullname(sv,gv);
 	dump("\nSUB %s = ", SvPVX(sv));
@@ -107,8 +109,12 @@ register OP *op;
     else
 	fprintf(stderr, "DONE\n");
     dumplvl++;
-    if (op->op_targ)
-	dump("TARG = %d\n", op->op_targ);
+    if (op->op_targ) {
+	if (op->op_type == OP_NULL)
+	    dump("  (was %s)\n", op_name[op->op_targ]);
+	else
+	    dump("TARG = %d\n", op->op_targ);
+    }
 #ifdef NOTDEF
     dump("ADDR = 0x%lx => 0x%lx\n",op, op->op_next);
 #endif
@@ -182,10 +188,12 @@ register OP *op;
     case OP_GVSV:
     case OP_GV:
 	if (cGVOP->op_gv) {
+	    ENTER;
 	    tmpsv = NEWSV(0,0);
+	    SAVEFREESV(tmpsv);
 	    gv_fullname(tmpsv,cGVOP->op_gv);
 	    dump("GV = %s\n", SvPV(tmpsv, na));
-	    sv_free(tmpsv);
+	    LEAVE;
 	}
 	else
 	    dump("GV = NULL\n");
@@ -264,7 +272,7 @@ register GV *gv;
 	fprintf(stderr,"{}\n");
 	return;
     }
-    sv = sv_mortalcopy(&sv_undef);
+    sv = sv_newmortal();
     dumplvl++;
     fprintf(stderr,"{\n");
     gv_fullname(sv,gv);

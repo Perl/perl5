@@ -1,19 +1,17 @@
-Must-have external packages
-	POSIX
-	X/Motif/whatever
+Modules
+	POSIX (in progress)
+	X/Motif/Tk etc.
+
+Tie Modules
+	VecArray		Implement array using vec()
+	SubstrArray		Implement array using substr()
+	VirtualArray		Implement array using a file
+	ShiftSplice		Defines shift et al in terms of splice method
 
 Bugs
-	BEGIN { require 'perldb.pl' }
 	Make yyparse recursion longjmp() proof.
-	perl -c shell_script bug
-	fix the need for double ^D on $x
-	STDOUT->print("howdy\n");
-	%ENV not there
 	Make "delete $array{$key} while ($key) = each %array" safe
-	using unpack(P,$ref) shouldn't unref the ref
-	binary function is missing
-	wrong line reported for runtime elsif condition error
-	unreference variable warnings busted (but don't warn on $seen{$key}++)
+	Wrong line reported for runtime elsif condition error
 
 Regexp extensions
 	/m  for multiline
@@ -24,16 +22,28 @@ Regexp extensions
 	/f for fixed variable interpolation?
 	Rewrite regexp parser for better integrated optimization
 
-Nice to have
+Would be nice to have
 	Profiler
 	pack "(stuff)*"
 	lexperl
 	Bundled perl preprocessor
-	FILEHANDLE methods
 	Make $[ compile-time instead of run-time
+	Use posix calls internally where possible
+	const variables
+	gettimeofday
+	bytecompiler
+	format BOTTOM
+	willcall()
+	-iprefix.
+	All ARGV input should act like <>
+	Multiple levels of warning
+
+Pragmas ("assume" maybe?)
+	integer, float
+	nodebug, debug
+	autocroak?
 
 Optimizations
-	Make specialized allocators
 	Optimize switch statements
 	Optimize foreach on array
 	Optimize foreach (1..1000000)
@@ -44,25 +54,19 @@ Optimizations
 	Cache hash value?
 	Optimize away @_ where possible
 	sfio?
+	"one pass" global destruction
 
 Need to think more about
-	ref in list context
-	When does split() go to @_?
-	Figure out BEGIN { ... @ARGV ... }
-	Implement eval once?  (Unnecessary with cache?)
-	Detect inconsistent linkage when using -DDEBUGGING?
+	ref function in list context
 	Populate %SIG at startup if appropriate
-	Multiple levels of warning
+	write HANDLE [formats].
 
 Vague possibilities
-	readonly variables
 	sub mysplice(@, $, $, ...)
 	data prettyprint function?  (or is it, as I suspect, a lib routine?)
 	Nested destructors
 	make tr/// return histogram in list context?
 	undef wantarray in void context
-	goto &replacement_routine
-	filehandle references
 	Loop control on do{} et al
 	Explicit switch statements
 	perl to C translator
@@ -70,3 +74,4 @@ Vague possibilities
 	built-in globbing
 	compile to real threaded code
 	structured types
+	paren counting in tokener to queue remote expectations

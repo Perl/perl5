@@ -22,6 +22,7 @@ struct xpvcv {
     OP *	xcv_root;
     I32	      (*xcv_usersub)();
     I32		xcv_userindex;
+    GV *	xcv_gv;
     GV *	xcv_filegv;
     long	xcv_depth;		/* >= 2 indicates recursive call */
     AV *	xcv_padlist;
@@ -33,6 +34,7 @@ struct xpvcv {
 #define CvROOT(sv)	((XPVCV*)SvANY(sv))->xcv_root
 #define CvUSERSUB(sv)	((XPVCV*)SvANY(sv))->xcv_usersub
 #define CvUSERINDEX(sv)	((XPVCV*)SvANY(sv))->xcv_userindex
+#define CvGV(sv)	((XPVCV*)SvANY(sv))->xcv_gv
 #define CvFILEGV(sv)	((XPVCV*)SvANY(sv))->xcv_filegv
 #define CvDEPTH(sv)	((XPVCV*)SvANY(sv))->xcv_depth
 #define CvPADLIST(sv)	((XPVCV*)SvANY(sv))->xcv_padlist

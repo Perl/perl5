@@ -60,6 +60,32 @@ New things
 
     New functions include: abs(), chr(), uc(), ucfirst(), lc(), lcfirst()
 
+    require with a bare word now does an immediate require at compile time.
+    So "require POSIX" is equivalent to "BEGIN { require 'POSIX.pm' }".
+
+    require with a number checks to see that the version of Perl that is
+    currently running is at least that number.
+
+    Dynamic loading of external modules is now supported.
+
+    There is a new quote form qw//, which is equivalent to split(' ', q//).
+
+    Assignment of a reference to a glob value now just replaces the
+    single element of the glob corresponding to the reference type:
+	*foo = \$bar, *foo = \&bletch;
+
+    Filehandle methods are now supported:
+	output_autoflush STDOUT 1;
+
+    There is now an "English" module that provides human readable translations
+    for cryptic variable names.
+
+    Autoload stubs can now call the replacement subroutine with goto &realsub.
+
+    Subroutines can be defined lazily in any package by declaring an AUTOLOAD
+    routine, which will be called if a non-existent subroutine is called in
+    that package.
+
 Incompatibilities
 -----------------
     @ now always interpolates an array in double-quotish strings.  Some programs
@@ -99,4 +125,9 @@ Incompatibilities
     Symbols starting with _ are no longer forced into package main, except
     for $_ itself (and @_, etc.).
 
-    Double-quoted strings may no longer end with an unescaped $.
+    Double-quoted strings may no longer end with an unescaped $ or @.
+
+    Negative array subscripts now count from the end of the array.
+
+    The comma operator in a scalar context is now guaranteed to give a
+    scalar context to its arguments.

@@ -369,10 +369,10 @@ I32 fold;
 			    SvTAIL_on(r->regmust);
 		}
 		else {
-			sv_free(longest);
+			SvREFCNT_dec(longest);
 			longest = Nullsv;
 		}
-		sv_free(longish);
+		SvREFCNT_dec(longish);
 	}
 
 	r->do_folding = fold;
@@ -1448,11 +1448,11 @@ struct regexp *r;
 		r->subbase = Nullch;
 	}
 	if (r->regmust) {
-		sv_free(r->regmust);
+		SvREFCNT_dec(r->regmust);
 		r->regmust = Nullsv;
 	}
 	if (r->regstart) {
-		sv_free(r->regstart);
+		SvREFCNT_dec(r->regstart);
 		r->regstart = Nullsv;
 	}
 	Safefree(r->startp);

@@ -82,7 +82,6 @@ union	overhead {
 };
 
 #define	MAGIC		0xff		/* magic # on accounting info */
-#define OLDMAGIC	0x7f		/* same after a free() */
 #define RMAGIC		0x55555555	/* magic # on range info */
 #ifdef RCHECK
 #define	RSLOP		sizeof (u_int)
@@ -303,16 +302,20 @@ free(mp)
   	ASSERT(op->ov_magic == MAGIC);		/* make sure it was in use */
 #else
 	if (op->ov_magic != MAGIC) {
+#ifdef RCHECK
 		warn("%s free() ignored",
-		    op->ov_magic == OLDMAGIC ? "Duplicate" : "Bad");
+		    op->ov_rmagic == RMAGIC - 1 ? "Duplicate" : "Bad");
+#else
+		warn("Bad free() ignored");
+#endif
 		return;				/* sanity */
 	}
-	op->ov_magic = OLDMAGIC;
 #endif
 #ifdef RCHECK
   	ASSERT(op->ov_rmagic == RMAGIC);
 	if (op->ov_index <= 13)
 		ASSERT(*(u_int *)((caddr_t)op + op->ov_size + 1 - RSLOP) == RMAGIC);
+	op->ov_rmagic = RMAGIC - 1;
 #endif
   	ASSERT(op->ov_index < NBUCKETS);
   	size = op->ov_index;

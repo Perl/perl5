@@ -28,7 +28,7 @@ register int sp;
 register int items;
 {
     if (items < 4 || items > 4) {
-	fatal("Usage: ODBM_File::new(dbtype, filename, flags, mode)");
+	croak("Usage: ODBM_File::new(dbtype, filename, flags, mode)");
     }
     {
 	char *	dbtype = SvPV(ST(1),na);
@@ -39,18 +39,18 @@ register int items;
 	{
 	    char tmpbuf[1025];
 	    if (dbmrefcnt++)
-		fatal("Old dbm can only open one database");
+		croak("Old dbm can only open one database");
 	    sprintf(tmpbuf,"%s.dir",filename);
 	    if (stat(tmpbuf, &statbuf) < 0) {
 		if (flags & O_CREAT) {
 		    if (mode < 0 || close(creat(tmpbuf,mode)) < 0)
-			fatal("ODBM_File: Can't create %s", filename);
+			croak("ODBM_File: Can't create %s", filename);
 		    sprintf(tmpbuf,"%s.pag",filename);
 		    if (close(creat(tmpbuf,mode)) < 0)
-			fatal("ODBM_File: Can't create %s", filename);
+			croak("ODBM_File: Can't create %s", filename);
 		}
 		else
-		    fatal("ODBM_FILE: Can't open %s", filename);
+		    croak("ODBM_FILE: Can't open %s", filename);
 	    }
 	    RETVAL = (void*)(dbminit(filename) >= 0 ? &dbmrefcnt : 0);
 	    ST(0) = sv_mortalcopy(&sv_undef);
@@ -67,15 +67,15 @@ register int sp;
 register int items;
 {
     if (items < 1 || items > 1) {
-	fatal("Usage: ODBM_File::DESTROY(db)");
+	croak("Usage: ODBM_File::DESTROY(db)");
     }
     {
 	ODBM_File	db;
 
 	if (sv_isa(ST(1), "ODBM_File"))
-	    db = (ODBM_File)(unsigned long)SvNV((SV*)SvANY(ST(1)));
+	    db = (ODBM_File)(unsigned long)SvNV((SV*)SvRV(ST(1)));
 	else
-	    fatal("db is not of type ODBM_File");
+	    croak("db is not of type ODBM_File");
 	dbmrefcnt--;
 	dbmclose();
     }
@@ -89,7 +89,7 @@ register int sp;
 register int items;
 {
     if (items < 2 || items > 2) {
-	fatal("Usage: ODBM_File::fetch(db, key)");
+	croak("Usage: ODBM_File::fetch(db, key)");
     }
     {
 	ODBM_File	db;
@@ -97,9 +97,9 @@ register int items;
 	datum	RETVAL;
 
 	if (sv_isa(ST(1), "ODBM_File"))
-	    db = (ODBM_File)(unsigned long)SvNV((SV*)SvANY(ST(1)));
+	    db = (ODBM_File)(unsigned long)SvNV((SV*)SvRV(ST(1)));
 	else
-	    fatal("db is not of type ODBM_File");
+	    croak("db is not of type ODBM_File");
 
 	key.dptr = SvPV(ST(2), key.dsize);;
 
@@ -117,7 +117,7 @@ register int sp;
 register int items;
 {
     if (items < 3 || items > 4) {
-	fatal("Usage: ODBM_File::store(db, key, value, flags = DBM_REPLACE)");
+	croak("Usage: ODBM_File::store(db, key, value, flags = DBM_REPLACE)");
     }
     {
 	ODBM_File	db;
@@ -127,9 +127,9 @@ register int items;
 	int	RETVAL;
 
 	if (sv_isa(ST(1), "ODBM_File"))
-	    db = (ODBM_File)(unsigned long)SvNV((SV*)SvANY(ST(1)));
+	    db = (ODBM_File)(unsigned long)SvNV((SV*)SvRV(ST(1)));
 	else
-	    fatal("db is not of type ODBM_File");
+	    croak("db is not of type ODBM_File");
 
 	key.dptr = SvPV(ST(2), key.dsize);;
 
@@ -155,7 +155,7 @@ register int sp;
 register int items;
 {
     if (items < 2 || items > 2) {
-	fatal("Usage: ODBM_File::delete(db, key)");
+	croak("Usage: ODBM_File::delete(db, key)");
     }
     {
 	ODBM_File	db;
@@ -163,9 +163,9 @@ register int items;
 	int	RETVAL;
 
 	if (sv_isa(ST(1), "ODBM_File"))
-	    db = (ODBM_File)(unsigned long)SvNV((SV*)SvANY(ST(1)));
+	    db = (ODBM_File)(unsigned long)SvNV((SV*)SvRV(ST(1)));
 	else
-	    fatal("db is not of type ODBM_File");
+	    croak("db is not of type ODBM_File");
 
 	key.dptr = SvPV(ST(2), key.dsize);;
 
@@ -183,16 +183,16 @@ register int sp;
 register int items;
 {
     if (items < 1 || items > 1) {
-	fatal("Usage: ODBM_File::firstkey(db)");
+	croak("Usage: ODBM_File::firstkey(db)");
     }
     {
 	ODBM_File	db;
 	datum	RETVAL;
 
 	if (sv_isa(ST(1), "ODBM_File"))
-	    db = (ODBM_File)(unsigned long)SvNV((SV*)SvANY(ST(1)));
+	    db = (ODBM_File)(unsigned long)SvNV((SV*)SvRV(ST(1)));
 	else
-	    fatal("db is not of type ODBM_File");
+	    croak("db is not of type ODBM_File");
 
 	RETVAL = odbm_firstkey(db);
 	ST(0) = sv_mortalcopy(&sv_undef);
@@ -208,7 +208,7 @@ register int sp;
 register int items;
 {
     if (items < 2 || items > 2) {
-	fatal("Usage: ODBM_File::nextkey(db, key)");
+	croak("Usage: ODBM_File::nextkey(db, key)");
     }
     {
 	ODBM_File	db;
@@ -216,9 +216,9 @@ register int items;
 	datum	RETVAL;
 
 	if (sv_isa(ST(1), "ODBM_File"))
-	    db = (ODBM_File)(unsigned long)SvNV((SV*)SvANY(ST(1)));
+	    db = (ODBM_File)(unsigned long)SvNV((SV*)SvRV(ST(1)));
 	else
-	    fatal("db is not of type ODBM_File");
+	    croak("db is not of type ODBM_File");
 
 	key.dptr = SvPV(ST(2), key.dsize);;
 
@@ -229,7 +229,7 @@ register int items;
     return sp;
 }
 
-int init_ODBM_File(ix,sp,items)
+int boot_ODBM_File(ix,sp,items)
 int ix;
 int sp;
 int items;

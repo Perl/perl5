@@ -72,7 +72,8 @@ else {
 }
 
 open(IN, "<$console") || open(IN,  "<&STDIN");	# so we don't dingle stdin
-open(OUT,">$console") || open(OUT, ">&STDOUT");	# so we don't dongle stdout
+open(OUT,">$console") || open(OUT, "<&STDERR")
+    || open(OUT, ">&STDOUT");	# so we don't dongle stdout
 select(OUT);
 $| = 1;				# for DB::OUT
 select(STDOUT);
@@ -95,7 +96,6 @@ sub DB {
     ($package, $filename, $line) = caller;
     $usercontext = '($@, $!, $[, $,, $/, $\) = @saved;' .
 	"package $package;";		# this won't let them modify, alas
-    local($^P) = 0;			# don't debug our own evals
     local(*dbline) = "::_<$filename";
     $max = $#dbline;
     if (($stop,$action) = split(/\0/,$dbline{$line})) {

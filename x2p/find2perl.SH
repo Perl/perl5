@@ -581,7 +581,7 @@ sub fileglob_to_re {
 
     $tmp =~ s#([./^\$()])#\\$1#g;
     $tmp =~ s/([?*])/.$1/g;
-    "^$tmp$";
+    "^$tmp\$";
 }
 
 sub n {

@@ -1,12 +1,6 @@
 make: Warning: Both `makefile' and `Makefile' exists
-`sh  cflags perl.o` perl.c
+`sh  cflags gv.o` gv.c
 	  CCCMD =  cc -c -DDEBUGGING -DHAS_SDBM -g  
-`sh  cflags op.o` op.c
-	  CCCMD =  cc -c -DDEBUGGING -DHAS_SDBM -g  
-`sh  cflags mg.o` mg.c
-	  CCCMD =  cc -c -DDEBUGGING -DHAS_SDBM -g  
-`sh  cflags toke.o` toke.c
-	  CCCMD =  cc -c -DDEBUGGING -DHAS_SDBM -g  
-cc -Bstatic   main.o perly.o perl.o av.o scope.o op.o doop.o doio.o dump.o hv.o malloc.o mg.o pp.o regcomp.o regexec.o gv.o sv.o taint.o toke.o util.o deb.o run.o NDBM_File.o ODBM_File.o SDBM_File.o -ldbm -lm -lposix ext/dbm/sdbm/libsdbm.a -o perl
+cc -Bstatic   main.o perly.o perl.o av.o scope.o op.o doop.o doio.o dump.o hv.o malloc.o mg.o pp.o regcomp.o regexec.o gv.o sv.o taint.o toke.o util.o deb.o run.o NDBM_File.o ODBM_File.o POSIX.o dl.o -ldbm -lm -lposix -Bdynamic -ldl -Bstatic  -o perl
 echo ""
 

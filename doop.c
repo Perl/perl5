@@ -163,8 +163,14 @@ register SV **sp;
     }
 
     if (items-- > 0) {
-	char *s = SvPV(*mark, tmplen);
-	sv_setpvn(sv, s, tmplen);
+	char *s;
+
+	if (*mark) {
+	    s = SvPV(*mark, tmplen);
+	    sv_setpvn(sv, s, tmplen);
+	}
+	else
+	    sv_setpv(sv, "");
 	mark++;
     }
     else
@@ -377,10 +383,14 @@ SV *sv;
     SV *targ = LvTARG(sv);
     register I32 offset;
     register I32 size;
-    register unsigned char *s = (unsigned char*)SvPVX(targ);
-    register unsigned long lval = U_L(SvNV(sv));
+    register unsigned char *s;
+    register unsigned long lval;
     I32 mask;
 
+    if (!targ)
+	return;
+    s = (unsigned char*)SvPVX(targ);
+    lval = U_L(SvNV(sv));
     offset = LvTARGOFF(sv);
     size = LvTARGLEN(sv);
     if (size < 8) {
@@ -584,7 +594,7 @@ dARGS
     if (GIMME != G_ARRAY) {
 	dTARGET;
 
-	if (!SvMAGICAL(hv) || !mg_find((SV*)hv,'P'))
+	if (!SvRMAGICAL(hv) || !mg_find((SV*)hv,'P'))
 	    i = HvKEYS(hv);
 	else {
 	    i = 0;

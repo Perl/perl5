@@ -71,14 +71,12 @@ struct block_sub {
     GV *	dfoutgv;
     AV *	savearray;
     AV *	argarray;
-    AV *	comppad;
     U16		olddepth;
     U8		hasargs;
 };
 
 #define PUSHSUB(cx)							\
 	cx->blk_sub.cv = cv;						\
-	cx->blk_sub.gv = gv;						\
 	cx->blk_sub.olddepth = CvDEPTH(cv);				\
 	cx->blk_sub.hasargs = hasargs;
 
@@ -90,12 +88,13 @@ struct block_sub {
 
 #define POPSUB(cx)							\
 	if (cx->blk_sub.hasargs) {   /* put back old @_ */		\
-	    av_free(cx->blk_sub.argarray);				\
 	    GvAV(defgv) = cx->blk_sub.savearray;			\
 	}								\
-	if (!(CvDEPTH(cx->blk_sub.cv) = cx->blk_sub.olddepth)) {	\
-	    if (CvDELETED(cx->blk_sub.cv))				\
-		sv_free((SV*)cx->blk_sub.cv);				\
+	if (cx->blk_sub.cv) {						\
+	    if (!(CvDEPTH(cx->blk_sub.cv) = cx->blk_sub.olddepth)) {	\
+		if (CvDELETED(cx->blk_sub.cv))				\
+		    SvREFCNT_dec((SV*)cx->blk_sub.cv);			\
+	    }								\
 	}
 
 #define POPFORMAT(cx)							\
@@ -109,7 +108,7 @@ struct block_eval {
     OP *	old_eval_root;
 };
 
-#define PUSHEVAL(cx,n)							\
+#define PUSHEVAL(cx,n,fgv)						\
 	cx->blk_eval.old_in_eval = in_eval;				\
 	cx->blk_eval.old_op_type = op->op_type;				\
 	cx->blk_eval.old_name = n;					\
@@ -176,18 +175,17 @@ struct block {
 #define blk_loop	cx_u.cx_blk.blk_u.blku_loop
 
 /* Enter a block. */
-#define PUSHBLOCK(cx,t,s) CXINC, cx = &cxstack[cxstack_ix],		\
+#define PUSHBLOCK(cx,t,sp) CXINC, cx = &cxstack[cxstack_ix],		\
 	cx->cx_type		= t,					\
-	cx->blk_oldsp		= s - stack_base,			\
+	cx->blk_oldsp		= sp - stack_base,			\
 	cx->blk_oldcop		= curcop,				\
 	cx->blk_oldmarksp	= markstack_ptr - markstack,		\
 	cx->blk_oldscopesp	= scopestack_ix,			\
 	cx->blk_oldretsp	= retstack_ix,				\
 	cx->blk_oldpm		= curpm,				\
 	cx->blk_gimme		= gimme;				\
-	if (debug & 4)							\
-	    fprintf(stderr,"Entering block %d, type %d\n",		\
-		cxstack_ix, t);	
+	DEBUG_l( fprintf(stderr,"Entering block %d, type %s\n",		\
+		    cxstack_ix, block_type[t]); )
 
 /* Exit a block (RETURN and LAST). */
 #define POPBLOCK(cx) cx = &cxstack[cxstack_ix--],			\
@@ -198,9 +196,8 @@ struct block {
 	retstack_ix	= cx->blk_oldretsp,				\
 	curpm		= cx->blk_oldpm,				\
 	gimme		= cx->blk_gimme;				\
-	if (debug & 4)							\
-	    fprintf(stderr,"Leaving block %d, type %d\n",		\
-		cxstack_ix+1,cx->cx_type);
+	DEBUG_l( fprintf(stderr,"Leaving block %d, type %s\n",		\
+		    cxstack_ix+1,block_type[cx->cx_type]); )
 
 /* Continue a block elsewhere (NEXT and REDO). */
 #define TOPBLOCK(cx) cx = &cxstack[cxstack_ix],				\

@@ -51,12 +51,20 @@
 #include <signal.h>
 #endif
 
+#ifdef STANDARD_C
+#  include <unistd.h>
+#endif
+
 #ifdef I_VFORK
 #  include <vfork.h>
 #endif
 
-#ifdef I_VARARGS
-#  include <varargs.h>
+#ifdef STANDARD_C
+#  include <stdarg.h>
+#else
+#  ifdef I_VARARGS
+#    include <varargs.h>
+#  endif
 #endif
 
 #ifdef I_FCNTL
@@ -705,24 +713,12 @@ register I32 len;
     return newaddr;
 }
 
-/* grow a static string to at least a certain length */
+#if !defined(STANDARD_C) && !defined(I_VARARGS)
 
-void
-pv_grow(strptr,curlen,newlen)
-char **strptr;
-I32 *curlen;
-I32 newlen;
-{
-    if (newlen > *curlen) {		/* need more room? */
-	if (*curlen)
-	    Renew(*strptr,newlen,char);
-	else
-	    New(905,*strptr,newlen,char);
-	*curlen = newlen;
-    }
-}
+/*
+ * Fallback on the old hackers way of doing varargs
+ */
 
-#ifndef I_VARARGS
 /*VARARGS1*/
 char *
 mess(pat,a1,a2,a3,a4)
@@ -735,7 +731,7 @@ long a1, a2, a3, a4;
 
     s = buf;
     if (usermess) {
-	tmpstr = sv_mortalcopy(&sv_undef);
+	tmpstr = sv_newmortal();
 	sv_setpv(tmpstr, (char*)a1);
 	*s++ = SvPVX(tmpstr)[SvCUR(tmpstr)-1];
     }
@@ -752,11 +748,11 @@ long a1, a2, a3, a4;
 	}
 	if (last_in_gv &&
 	    GvIO(last_in_gv) &&
-	    GvIO(last_in_gv)->lines ) {
+	    IoLINES(GvIO(last_in_gv)) ) {
 	    (void)sprintf(s,", <%s> %s %ld",
 	      last_in_gv == argvgv ? "" : GvENAME(last_in_gv),
 	      strEQ(rs,"\n") ? "line" : "chunk", 
-	      (long)GvIO(last_in_gv)->lines);
+	      (long)IoLINES(GvIO(last_in_gv)));
 	    s += strlen(s);
 	}
 	(void)strcpy(s,".\n");
@@ -800,13 +796,20 @@ long a1, a2, a3, a4;
 #endif
     (void)fflush(stderr);
 }
+
+#else /* !defined(STANDARD_C) && !defined(I_VARARGS) */
+
+#ifdef STANDARD_C
+char *
+mess(char *pat, va_list args)
 #else
 /*VARARGS0*/
 char *
-mess(args)
-va_list args;
-{
+mess(pat, args)
     char *pat;
+    va_list args;
+#endif
+{
     char *s;
     SV *tmpstr;
     I32 usermess;
@@ -818,11 +821,10 @@ va_list args;
 #endif
 #endif
 
-    pat = va_arg(args, char *);
     s = buf;
     usermess = strEQ(pat, "%s");
     if (usermess) {
-	tmpstr = sv_mortalcopy(&sv_undef);
+	tmpstr = sv_newmortal();
 	sv_setpv(tmpstr, va_arg(args, char *));
 	*s++ = SvPVX(tmpstr)[SvCUR(tmpstr)-1];
     }
@@ -830,6 +832,7 @@ va_list args;
 	(void) vsprintf(s,pat,args);
 	s += strlen(s);
     }
+    va_end(args);
 
     if (s[-1] != '\n') {
 	if (curcop->cop_line) {
@@ -839,11 +842,11 @@ va_list args;
 	}
 	if (last_in_gv &&
 	    GvIO(last_in_gv) &&
-	    GvIO(last_in_gv)->lines ) {
+	    IoLINES(GvIO(last_in_gv)) ) {
 	    (void)sprintf(s,", <%s> %s %ld",
 	      last_in_gv == argvgv ? "" : GvNAME(last_in_gv),
 	      strEQ(rs,"\n") ? "line" : "chunk", 
-	      (long)GvIO(last_in_gv)->lines);
+	      (long)IoLINES(GvIO(last_in_gv)));
 	    s += strlen(s);
 	}
 	(void)strcpy(s,".\n");
@@ -857,21 +860,27 @@ va_list args;
 	return buf;
 }
 
+#ifdef STANDARD_C
+void
+croak(char* pat, ...)
+#else
 /*VARARGS0*/
 void
-#ifdef __STDC__
-croak(char* pat,...)
-#else
-croak(va_alist)
-va_dcl
+croak(pat, va_alist)
+    char *pat;
+    va_dcl
 #endif
 {
     va_list args;
     char *tmps;
     char *message;
 
+#ifdef STANDARD_C
+    va_start(args, pat);
+#else
     va_start(args);
-    message = mess(args);
+#endif
+    message = mess(pat, args);
     va_end(args);
     if (restartop = die_where(message))
 	longjmp(top_env, 3);
@@ -883,19 +892,25 @@ va_dcl
     my_exit((I32)((errno&255)?errno:((statusvalue&255)?statusvalue:255)));
 }
 
-/*VARARGS0*/
-#ifdef __STDC__
-void warn(char* pat,...)
+void
+#ifdef STANDARD_C
+warn(char* pat,...)
 #else
-void warn(va_alist)
-va_dcl
+/*VARARGS0*/
+warn(pat,va_alist)
+    char *pat;
+    va_dcl
 #endif
 {
     va_list args;
     char *message;
 
+#ifdef STANDARD_C
+    va_start(args, pat);
+#else
     va_start(args);
-    message = mess(args);
+#endif
+    message = mess(pat, args);
     va_end(args);
 
     fputs(message,stderr);
@@ -904,7 +919,7 @@ va_dcl
 #endif
     (void)fflush(stderr);
 }
-#endif
+#endif /* !defined(STANDARD_C) && !defined(I_VARARGS) */
 
 void
 my_setenv(nam,val)

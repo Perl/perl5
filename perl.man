@@ -453,6 +453,10 @@ will work under any of csh, sh or perl, such as the following:
 
 .fi
 .TP 5
+.B \-T
+forces "taint" checks to be turned on.  Ordinarily these checks are done
+only when running setuid or setgid.
+.TP 5
 .B \-u
 causes
 .I perl
@@ -1176,6 +1180,8 @@ or the
 .I while
 statement, you may replace \*(L"(EXPR)\*(R" with a BLOCK, and the conditional
 is true if the value of the last command in that block is true.
+(This feature continues to work in Perl 5 but is deprecated.  Please
+change any occurrences of "if BLOCK" to "if (do BLOCK)".)
 .PP
 The
 .I for
@@ -4418,7 +4424,7 @@ record, the page is advanced by writing a form feed,
 a special top-of-page format is used
 to format the new page header, and then the record is written.
 By default the top-of-page format is the name of the filehandle with
-\*(L"_TOP\*(R" appended, but it may be dynamicallly set to the
+\*(L"_TOP\*(R" appended, but it may be dynamically set to the
 format of your choice by assigning the name to the $^ variable while
 the filehandle is selected.
 The number of lines remaining on the current page is in variable $-, which

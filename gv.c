@@ -70,9 +70,11 @@ char *name;
     char tmpbuf[1200];
     GV *gv;
 
-    sprintf(tmpbuf,"'_<%s", name);
+    sprintf(tmpbuf,"::_<%s", name);
     gv = gv_fetchpv(tmpbuf, TRUE);
     sv_setpv(GvSV(gv), name);
+    if (*name == '/')
+	SvMULTI_on(gv);
     if (perldb)
 	hv_magic(GvHVn(gv_AVadd(gv)), gv, 'L');
     return gv;
@@ -92,10 +94,11 @@ int multi;
     if (SvLEN(gv))
 	Safefree(SvPVX(gv));
     Newz(602,gp, 1, GP);
-    GvGP(gv) = gp;
+    GvGP(gv) = gp_ref(gp);
     GvREFCNT(gv) = 1;
     GvSV(gv) = NEWSV(72,0);
     GvLINE(gv) = curcop->cop_line;
+    GvFILEGV(gv) = curcop->cop_filegv;
     GvEGV(gv) = gv;
     sv_magic((SV*)gv, (SV*)gv, '*', name, len);
     GvSTASH(gv) = stash;
@@ -286,6 +289,7 @@ I32 add;
     case 'I':
 	if (strEQ(name, "ISA")) {
 	    AV* av = GvAVn(gv);
+	    SvMULTI_on(gv);
 	    sv_magic((SV*)av, (SV*)gv, 'I', 0, 0);
 	}
 	break;
@@ -435,9 +439,14 @@ IO *
 newIO()
 {
     IO *io;
+    GV *iogv;
 
-    Newz(603,io,1,IO);
-    io->page_len = 60;
+    io = (IO*)NEWSV(0,0);
+    sv_upgrade(io,SVt_PVIO);
+    SvREFCNT(io) = 1;
+    SvOBJECT_on(io);
+    iogv = gv_fetchpv("FileHandle::", TRUE);
+    SvSTASH(io) = (HV*)SvREFCNT_inc(GvHV(iogv));
     return io;
 }
 
@@ -450,6 +459,8 @@ HV* stash;
     register GV *gv;
     HV *hv;
 
+    if (!HvARRAY(stash))
+	return;
     for (i = 0; i <= HvMAX(stash); i++) {
 	for (entry = HvARRAY(stash)[i]; entry; entry = entry->hent_next) {
 	    if (isALPHA(*entry->hent_key)) {
@@ -457,6 +468,9 @@ HV* stash;
 		if (SvMULTI(gv))
 		    continue;
 		curcop->cop_line = GvLINE(gv);
+		curcop->cop_filegv = GvFILEGV(gv);
+		if (SvMULTI(GvFILEGV(gv)))	/* Filename began with slash */
+		    continue;
 		warn("Possible typo: \"%s::%s\"", HvNAME(stash), GvNAME(gv));
 	    }
 	    else if (*entry->hent_key == '_' &&
@@ -503,17 +517,15 @@ GV* gv;
     if (--gp->gp_refcnt > 0)
         return;
 
-    sv_free((SV*)gp->gp_sv);
-    sv_free((SV*)gp->gp_av);
-    sv_free((SV*)gp->gp_hv);
-    if (io = gp->gp_io) {
+    SvREFCNT_dec(gp->gp_sv);
+    SvREFCNT_dec(gp->gp_av);
+    SvREFCNT_dec(gp->gp_hv);
+    if ((io = gp->gp_io) && SvTYPE(io) != SVTYPEMASK) {
 	do_close(gv,FALSE);
-	Safefree(io->top_name);
-	Safefree(io->fmt_name);
-	Safefree(io);
+	SvREFCNT_dec(io);
     }
-    if (cv = gp->gp_cv)
-	sv_free((SV*)cv);
+    if ((cv = gp->gp_cv) && !GvCVGEN(gv))
+	SvREFCNT_dec(cv);
     Safefree(gp);
     GvGP(gv) = 0;
 }

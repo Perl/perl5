@@ -35,11 +35,11 @@ I32 lval;
 {
     SV *sv;
 
-    if (SvMAGICAL(av)) {
+    if (SvRMAGICAL(av)) {
 	if (mg_find((SV*)av,'P')) {
 	    if (key < 0)
 		return 0;
-	    sv = sv_2mortal(NEWSV(61,0));
+	    sv = sv_newmortal();
 	    mg_copy((SV*)av, sv, 0, key);
 	    if (!lval) {
 		mg_get((SV*)sv);
@@ -62,7 +62,7 @@ I32 lval;
 	    if (AvREAL(av))
 		sv = NEWSV(5,0);
 	    else
-		sv = sv_mortalcopy(&sv_undef);
+		sv = sv_newmortal();
 	    return av_store(av,key,sv);
 	}
     }
@@ -91,7 +91,7 @@ SV *val;
 	    return 0;
     }
 
-    if (SvMAGICAL(av)) {
+    if (SvRMAGICAL(av)) {
 	if (mg_find((SV*)av,'P')) {
 	    mg_copy((SV*)av, val, 0, key);
 	    return 0;
@@ -132,16 +132,16 @@ SV *val;
 	if (AvFILL(av) < key) {
 	    while (++AvFILL(av) < key) {
 		if (ary[AvFILL(av)] != Nullsv) {
-		    sv_free(ary[AvFILL(av)]);
+		    SvREFCNT_dec(ary[AvFILL(av)]);
 		    ary[AvFILL(av)] = Nullsv;
 		}
 	    }
 	}
 	if (ary[key])
-	    sv_free(ary[key]);
+	    SvREFCNT_dec(ary[key]);
     }
     ary[key] = val;
-    if (SvMAGICAL(av)) {
+    if (SvSMAGICAL(av)) {
 	MAGIC* mg = SvMAGIC(av);
 	sv_magic(val, (SV*)av, tolower(mg->mg_type), 0, key);
 	mg_set((SV*)av);
@@ -234,7 +234,7 @@ register AV *av;
 	SvPVX(av) = (char*)(AvARRAY(av) - key);
     }
     for (key = 0; key <= AvMAX(av); key++)
-	sv_free(AvARRAY(av)[key]);
+	SvREFCNT_dec(AvARRAY(av)[key]);
     AvFILL(av) = -1;
     Zero(AvARRAY(av), AvMAX(av)+1, SV*);
 }
@@ -254,7 +254,7 @@ register AV *av;
     }
     if (AvREAL(av)) {
 	for (key = 0; key <= AvMAX(av); key++)
-	    sv_free(AvARRAY(av)[key]);
+	    SvREFCNT_dec(AvARRAY(av)[key]);
     }
     Safefree(AvALLOC(av));
     AvALLOC(av) = 0;
@@ -288,7 +288,7 @@ register AV *av;
 	return Nullsv;
     retval = AvARRAY(av)[AvFILL(av)];
     AvARRAY(av)[AvFILL(av)--] = Nullsv;
-    if (SvMAGICAL(av))
+    if (SvSMAGICAL(av))
 	mg_set((SV*)av);
     return retval;
 }
@@ -352,7 +352,7 @@ register AV *av;
     SvPVX(av) = (char*)(AvARRAY(av) + 1);
     AvMAX(av)--;
     AvFILL(av)--;
-    if (SvMAGICAL(av))
+    if (SvSMAGICAL(av))
 	mg_set((SV*)av);
     return retval;
 }
@@ -373,7 +373,7 @@ I32 fill;
 	fill = -1;
     if (fill <= AvMAX(av)) {
 	AvFILL(av) = fill;
-	if (SvMAGICAL(av))
+	if (SvSMAGICAL(av))
 	    mg_set((SV*)av);
     }
     else {

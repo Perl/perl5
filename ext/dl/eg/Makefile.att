@@ -1,0 +1,18 @@
+all: 	main test test1
+main:	main.c
+	cc -g -o main main.c -ldl
+
+test.o:	test.c
+	cc -g -pic -c test.c
+
+test:	test.o
+	cc -o test -G test.o
+
+test1.o:	test1.c
+	cc -g -pic -c test1.c
+
+test1:	test1.o
+	cc -o test1 -G test1.o
+
+clean:
+	/bin/rm -f *.o test test1 main

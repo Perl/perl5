@@ -26,6 +26,8 @@
 #	    $dev < 0 &&
 #	    ($prune = 1);
 #	}
+#
+# Set the variable $dont_use_nlink if you're using AFS, since AFS cheats.
 
 sub find {
     chop($cwd = `pwd`);
@@ -66,7 +68,7 @@ sub finddir {
     local(@filenames) = readdir(DIR);
     closedir(DIR);
 
-    if ($nlink == 2) {        # This dir has no subdirectories.
+    if ($nlink == 2 && !$dont_use_nlink) {  # This dir has no subdirectories.
 	for (@filenames) {
 	    next if $_ eq '.';
 	    next if $_ eq '..';
@@ -83,7 +85,7 @@ sub finddir {
 	    $nlink = $prune = 0;
 	    $name = "$dir/$_";
 	    &wanted;
-	    if ($subcount > 0) {    # Seen all the subdirs?
+	    if ($subcount > 0 || $dont_use_nlink) {    # Seen all the subdirs?
 
 		# Get link count and check for directoriness.
 

@@ -38,48 +38,7 @@ for file do
     : or customize here
 
     case "$file" in
-    array) ;;
-    cmd) ;;
-    cons) ;;
-    consarg) ;;
-    doarg) ;;
-    doio) ;;
-    dolist) ;;
-    dump) ;;
-    eval) ;;
-    form) ;;
-    hash) ;;
-    malloc) ;;
-    perl) ;;
-    perly) ;;
-    regcomp) ;;
-    regexec) ;;
-    stab) ;;
-    str) ;;
-    toke) ;;
-    usersub) ;;
-    util) ;;
-    tarray) ;;
-    tcmd) ;;
-    tcons) ;;
-    tconsarg) ;;
-    tdoarg) ;;
-    tdoio) ;;
-    tdolist) ;;
-    tdump) ;;
-    teval) ;;
-    tform) ;;
-    thash) ;;
-    tmalloc) ;;
-    tperl) ;;
-    tperly) ;;
-    tregcomp) ;;
-    tregexec) ;;
-    tstab) ;;
-    tstr) ;;
-    ttoke) ;;
-    tusersub) ;;
-    tutil) ;;
+    SDBM*) ccflags="$ccflags -pic";;
     *) ;;
     esac
 

@@ -78,9 +78,8 @@ static void find_beginning();
 static void init_main_stash();
 static void open_script();
 static void init_debugger();
-static void init_stack();
+static void init_stacks();
 static void init_lexer();
-static void init_context_stack();
 static void init_predump_symbols();
 static void init_postdump_symbols();
 static void init_perllib();
@@ -91,8 +90,8 @@ perl_alloc()
     PerlInterpreter *sv_interp;
     PerlInterpreter junk;
 
-    curinterp = &junk;
-    Zero(&junk, 1, PerlInterpreter);
+    curinterp = 0;
+/*    Zero(&junk, 1, PerlInterpreter); */
     New(53, sv_interp, 1, PerlInterpreter);
     return sv_interp;
 }
@@ -104,7 +103,9 @@ register PerlInterpreter *sv_interp;
     if (!(curinterp = sv_interp))
 	return;
 
+#ifdef MULTIPLICITY
     Zero(sv_interp, 1, PerlInterpreter);
+#endif
 
     /* Init the real globals? */
     if (!linestr) {
@@ -132,12 +133,10 @@ register PerlInterpreter *sv_interp;
 #endif
     }
 
-#ifdef EMBEDDED
+#ifdef MULTIPLICITY
     chopset	= " \n-";
     copline	= NOLINE;
     curcop	= &compiling;
-    cxstack_ix	= -1;
-    cxstack_max	= 128;
     dlmax	= 128;
     laststatval	= -1;
     laststype	= OP_STAT;
@@ -152,8 +151,6 @@ register PerlInterpreter *sv_interp;
     rslen	= 1;
     statname	= Nullsv;
     tmps_floor	= -1;
-    tmps_ix	= -1;
-    tmps_max	= -1;
 #endif
 
     uid = (int)getuid();
@@ -167,19 +164,76 @@ register PerlInterpreter *sv_interp;
 
     fdpid = newAV();	/* for remembering popen pids by fd */
     pidstatus = newHV();/* for remembering status of dead pids */
+
+    init_stacks();
+    ENTER;
 }
 
 void
 perl_destruct(sv_interp)
 register PerlInterpreter *sv_interp;
 {
+    I32 last_sv_count;
+
     if (!(curinterp = sv_interp))
 	return;
-#ifdef EMBEDDED
-    if (main_root)
-	op_free(main_root);
-    main_root = 0;
+    LEAVE;
+    FREE_TMPS();
+
+#ifndef EMBED
+    /* The exit() function may do everything that needs doing. */
+    if (!sv_rvcount)
+	return;
 #endif
+
+    /* Not so lucky.  We must account for everything.  First the syntax tree. */
+    if (main_root) {
+	curpad = AvARRAY(comppad);
+	op_free(main_root);
+	main_root = 0;
+    }
+
+    /*
+     * Try to destruct global references.  We do this first so that the
+     * destructors and destructees still exist.  This code currently
+     * will break simple reference loops but may fail on more complicated
+     * ones.  If so, the code below will clean up, but any destructors
+     * may fail to find what they're looking for.
+     */
+    if (sv_count != 0)
+	sv_clean_refs();
+
+    /* Delete self-reference from main symbol table */
+    GvHV(gv_fetchpv("::_main",TRUE)) = 0;
+    --SvREFCNT(defstash);
+
+    /* Try to destruct main symbol table.  May fail on reference loops. */
+    SvREFCNT_dec(defstash);
+
+    FREE_TMPS();
+#ifdef DEBUGGING
+    if (scopestack_ix != 0)
+	warn("Unbalanced scopes: %d more ENTERs than LEAVEs\n", scopestack_ix);
+    if (savestack_ix != 0)
+	warn("Unbalanced saves: %d more saves than restores\n", savestack_ix);
+    if (tmps_floor != -1)
+	warn("Unbalanced tmps: %d more allocs than frees\n", tmps_floor + 1);
+    if (cxstack_ix != -1)
+	warn("Unbalanced context: %d more PUSHes than POPs\n", cxstack_ix + 1);
+#endif
+
+    /* Now absolutely destruct everything, somehow or other, loops or no. */
+#ifdef APPARENTLY_UNNECESSARY
+    if (sv_count != 0)
+	sv_clean_magic();
+#endif
+    last_sv_count = 0;
+    while (sv_count != 0 && sv_count != last_sv_count) {
+	last_sv_count = sv_count;
+	sv_clean_all();
+    }
+    if (sv_count != 0)
+	warn("Scalars leaked: %d\n", sv_count);
 }
 
 void
@@ -228,20 +282,29 @@ setuid perl scripts securely.\n");
     case 1:
 	statusvalue = 255;
     case 2:
+	curstash = defstash;
+	if (endav)
+	    calllist(endav);
 	return(statusvalue);	/* my_exit() was called */
     case 3:
 	fprintf(stderr, "panic: top_env\n");
-	exit(1);
+	return 1;
     }
 
     if (do_undump) {
+
+	/* Come here if running an undumped a.out. */
+
 	origfilename = savestr(argv[0]);
 	do_undump = FALSE;
 	cxstack_ix = -1;		/* start label stack again */
-	goto just_doit;
+	init_postdump_symbols(argc,argv,env);
+	return 0;
     }
+
     sv_setpvn(linestr,"",0);
     sv = newSVpv("",0);		/* first used for -I flags */
+    SAVEFREESV(sv);
     init_main_stash();
     for (argc--,argv++; argc > 0; argc--,argv++) {
 	if (argv[0][0] != '-' || !argv[0][1])
@@ -352,9 +415,6 @@ setuid perl scripts securely.\n");
 
     open_script(scriptname,dosearch,sv);
 
-    sv_free(sv);		/* free -I directories */
-    sv = Nullsv;
-
     validate_suid(validarg);
 
     if (doextract)
@@ -368,17 +428,16 @@ setuid perl scripts securely.\n");
     av_push(comppad, Nullsv);
     curpad = AvARRAY(comppad);
     padname = newAV();
-    comppadname = padname;
-    comppadnamefill = -1;
+    comppad_name = padname;
+    comppad_name_fill = 0;
+    min_intro_pending = 0;
     padix = 0;
-
-    init_stack();
-
-    init_context_stack();
 
     perl_init_ext();	/* in case linked C routines want magical variables */
 
     init_predump_symbols();
+    if (!do_undump)
+	init_postdump_symbols(argc,argv,env);
 
     init_lexer();
 
@@ -412,8 +471,9 @@ setuid perl scripts securely.\n");
     if (do_undump)
 	my_unexec();
 
-  just_doit:		/* come here if running an undumped a.out */
-    init_postdump_symbols(argc,argv,env);
+    if (dowarn)
+	gv_check(defstash);
+
     return 0;
 }
 
@@ -423,8 +483,6 @@ PerlInterpreter *sv_interp;
 {
     if (!(curinterp = sv_interp))
 	return 255;
-    if (beginav)
-	calllist(beginav);
     switch (setjmp(top_env)) {
     case 1:
 	cxstack_ix = -1;		/* start context stack again */
@@ -433,11 +491,13 @@ PerlInterpreter *sv_interp;
 	curstash = defstash;
 	if (endav)
 	    calllist(endav);
+	FREE_TMPS();
 	return(statusvalue);		/* my_exit() was called */
     case 3:
 	if (!restartop) {
 	    fprintf(stderr, "panic: restartop\n");
-	    exit(1);
+	    FREE_TMPS();
+	    return 1;
 	}
 	if (stack != mainstack) {
 	    dSP;
@@ -482,10 +542,44 @@ int status;
 /* Be sure to refetch the stack pointer after calling these routines. */
 
 int
-perl_callback(subname, sp, gimme, hasargs, numargs)
+perl_callargv(subname, sp, gimme, argv)
+char *subname;
+register I32 sp;	/* current stack pointer */
+I32 gimme;		/* TRUE if called in list context */
+register char **argv;	/* null terminated arg list, NULL for no arglist */
+{
+    register I32 items = 0;
+    I32 hasargs = (argv != 0);
+
+    av_store(stack, ++sp, Nullsv);	/* reserve spot for sub reference */
+    if (hasargs) {
+	while (*argv) {
+	    av_store(stack, ++sp, sv_2mortal(newSVpv(*argv,0)));
+	    items++;
+	    argv++;
+	}
+    }
+    return perl_callpv(subname, sp, gimme, hasargs, items);
+}
+
+int
+perl_callpv(subname, sp, gimme, hasargs, numargs)
 char *subname;
 I32 sp;			/* stack pointer after args are pushed */
-I32 gimme;		/* called in array or scalar context */
+I32 gimme;		/* TRUE if called in list context */
+I32 hasargs;		/* whether to create a @_ array for routine */
+I32 numargs;		/* how many args are pushed on the stack */
+{
+    return perl_callsv((SV*)gv_fetchpv(subname, TRUE),
+			sp, gimme, hasargs, numargs);
+}
+
+/* May be called with any of a CV, a GV, or an SV containing the name. */
+int
+perl_callsv(sv, sp, gimme, hasargs, numargs)
+SV* sv;
+I32 sp;			/* stack pointer after args are pushed */
+I32 gimme;		/* TRUE if called in list context */
 I32 hasargs;		/* whether to create a @_ array for routine */
 I32 numargs;		/* how many args are pushed on the stack */
 {
@@ -499,7 +593,7 @@ I32 numargs;		/* how many args are pushed on the stack */
     op = (OP*)&myop;
     Zero(op, 1, BINOP);
     pp_pushmark();	/* doesn't look at op, actually, except to return */
-    *++stack_sp = (SV*)gv_fetchpv(subname, FALSE);
+    *++stack_sp = sv;
     stack_sp += numargs;
 
     if (hasargs) {
@@ -510,30 +604,9 @@ I32 numargs;		/* how many args are pushed on the stack */
 
     if (op = pp_entersubr())
 	run();
-    free_tmps();
+    FREE_TMPS();
     LEAVE;
     return stack_sp - stack_base;
-}
-
-int
-perl_callv(subname, sp, gimme, argv)
-char *subname;
-register I32 sp;	/* current stack pointer */
-I32 gimme;		/* called in array or scalar context */
-register char **argv;	/* null terminated arg list, NULL for no arglist */
-{
-    register I32 items = 0;
-    I32 hasargs = (argv != 0);
-
-    av_store(stack, ++sp, Nullsv);	/* reserve spot for 1st return arg */
-    if (hasargs) {
-	while (*argv) {
-	    av_store(stack, ++sp, sv_2mortal(newSVpv(*argv,0)));
-	    items++;
-	    argv++;
-	}
-    }
-    return perl_callback(subname, sp, gimme, hasargs, items);
 }
 
 void
@@ -621,7 +694,7 @@ char *s;
 #ifdef DEBUGGING
 	taint_not("-D");
 	if (isALPHA(s[1])) {
-	    static char debopts[] = "psltocPmfrxuLHX";
+	    static char debopts[] = "psltocPmfrxuLHXD";
 	    char *d;
 
 	    for (s++; *s && (d = strchr(debopts,*s)); s++)
@@ -631,7 +704,7 @@ char *s;
 	    debug = atoi(s+1);
 	    for (s++; isDIGIT(*s); s++) ;
 	}
-	debug |= 32768;
+	debug |= 0x80000000;
 #else
 	warn("Recompile perl with -DDEBUGGING to use -D switch\n");
 	for (s++; isDIGIT(*s); s++) ;
@@ -694,7 +767,7 @@ char *s;
 	s++;
 	return s;
     case 'v':
-	fputs("\nThis is perl, version 5.0, Alpha 5 (unsupported)\n\n",stdout);
+	fputs("\nThis is perl, version 5.0, Alpha 6 (unsupported)\n\n",stdout);
 	fputs(rcsid,stdout);
 	fputs("\nCopyright (c) 1989, 1990, 1991, 1992, 1993, 1994 Larry Wall\n",stdout);
 #ifdef MSDOS
@@ -762,12 +835,14 @@ init_main_stash()
     GV *gv;
     curstash = defstash = newHV();
     curstname = newSVpv("main",4);
-    GvHV(gv = gv_fetchpv("_main",TRUE)) = defstash;
+    GvHV(gv = gv_fetchpv("_main",TRUE)) = (HV*)SvREFCNT_inc(defstash);
     SvREADONLY_on(gv);
     HvNAME(defstash) = "main";
     incgv = gv_HVadd(gv_AVadd(gv_fetchpv("INC",TRUE)));
     SvMULTI_on(incgv);
     defgv = gv_fetchpv("_",TRUE);
+    curstash = defstash;
+    compiling.cop_stash = defstash;
 }
 
 static void
@@ -827,7 +902,7 @@ SV *sv;
 	scriptname = xfound;
     }
 
-    origfilename = savestr(scriptname);
+    origfilename = savestr(e_fp ? "-e" : scriptname);
     curcop->cop_filegv = gv_fetchfile(origfilename);
     if (strEQ(origfilename,"-"))
 	scriptname = "";
@@ -1141,7 +1216,7 @@ init_debugger()
     GV* tmpgv;
 
     debstash = newHV();
-    GvHV(gv_fetchpv("_DB",TRUE)) = debstash;
+    GvHV(gv_fetchpv("::_DB",TRUE)) = debstash;
     curstash = debstash;
     dbargs = GvAV(gv_AVadd((tmpgv = gv_fetchpv("args",TRUE))));
     SvMULTI_on(tmpgv);
@@ -1162,7 +1237,7 @@ init_debugger()
 }
 
 static void
-init_stack()
+init_stacks()
 {
     stack = newAV();
     mainstack = stack;			/* remember in case we switch stacks */
@@ -1171,7 +1246,7 @@ init_stack()
 
     stack_base = AvARRAY(stack);
     stack_sp = stack_base;
-    stack_max = stack_base + 128;
+    stack_max = stack_base + 127;
 
     New(54,markstack,64,int);
     markstack_ptr = markstack;
@@ -1188,24 +1263,29 @@ init_stack()
     New(54,retstack,16,OP*);
     retstack_ix = 0;
     retstack_max = 16;
+
+    New(50,cxstack,128,CONTEXT);
+    cxstack_ix	= -1;
+    cxstack_max	= 128;
+
+    New(50,tmps_stack,128,SV*);
+    tmps_ix = -1;
+    tmps_max = 128;
+
+    DEBUG( {
+	New(51,debname,128,char);
+	New(52,debdelim,128,char);
+    } )
 }
 
 static void
 init_lexer()
 {
-    bufend = bufptr = SvPV(linestr, na);
-    subname = newSVpv("main",4);
-    lex_start();		/* we never leave */
-}
+    FILE* tmpfp = rsfp;
 
-static void
-init_context_stack()
-{
-    New(50,cxstack,128,CONTEXT);
-    DEBUG( {
-	New(51,debname,128,char);
-	New(52,debdelim,128,char);
-    } )
+    lex_start(linestr);
+    rsfp = tmpfp;
+    subname = newSVpv("main",4);
 }
 
 static void
@@ -1219,28 +1299,28 @@ init_predump_symbols()
     SvMULTI_on(stdingv);
     if (!GvIO(stdingv))
 	GvIO(stdingv) = newIO();
-    GvIO(stdingv)->ifp = stdin;
+    IoIFP(GvIO(stdingv)) = stdin;
     tmpgv = gv_fetchpv("stdin",TRUE);
-    GvIO(tmpgv) = GvIO(stdingv);
+    GvIO(tmpgv) = (IO*)SvREFCNT_inc(GvIO(stdingv));
     SvMULTI_on(tmpgv);
 
     tmpgv = gv_fetchpv("STDOUT",TRUE);
     SvMULTI_on(tmpgv);
     if (!GvIO(tmpgv))
 	GvIO(tmpgv) = newIO();
-    GvIO(tmpgv)->ofp = GvIO(tmpgv)->ifp = stdout;
+    IoOFP(GvIO(tmpgv)) = IoIFP(GvIO(tmpgv)) = stdout;
     defoutgv = tmpgv;
     tmpgv = gv_fetchpv("stdout",TRUE);
-    GvIO(tmpgv) = GvIO(defoutgv);
+    GvIO(tmpgv) = (IO*)SvREFCNT_inc(GvIO(defoutgv));
     SvMULTI_on(tmpgv);
 
     curoutgv = gv_fetchpv("STDERR",TRUE);
     SvMULTI_on(curoutgv);
     if (!GvIO(curoutgv))
 	GvIO(curoutgv) = newIO();
-    GvIO(curoutgv)->ofp = GvIO(curoutgv)->ifp = stderr;
+    IoOFP(GvIO(curoutgv)) = IoIFP(GvIO(curoutgv)) = stderr;
     tmpgv = gv_fetchpv("stderr",TRUE);
-    GvIO(tmpgv) = GvIO(curoutgv);
+    GvIO(tmpgv) = (IO*)SvREFCNT_inc(GvIO(curoutgv));
     SvMULTI_on(tmpgv);
     curoutgv = defoutgv;		/* switch back to STDOUT */
 
@@ -1304,8 +1384,10 @@ register char **env;
 	SvMULTI_on(envgv);
 	hv = GvHVn(envgv);
 	hv_clear(hv);
-	if (env != environ)
+	if (env != environ) {
 	    environ[0] = Nullch;
+	    hv_magic(hv, envgv, 'E');
+	}
 	for (; *env; env++) {
 	    if (!(s = strchr(*env,'=')))
 		continue;
@@ -1320,8 +1402,6 @@ register char **env;
     if (tmpgv = gv_fetchpv("$",TRUE))
 	sv_setiv(GvSV(tmpgv),(I32)getpid());
 
-    if (dowarn)
-	gv_check(defstash);
 }
 
 static void
@@ -1341,31 +1421,26 @@ void
 calllist(list)
 AV* list;
 {
-    I32 i;
-    I32 fill = AvFILL(list);
     jmp_buf oldtop;
     I32 sp = stack_sp - stack_base;
 
-    av_store(stack, ++sp, Nullsv);	/* reserve spot for 1st return arg */
+    av_store(stack, ++sp, Nullsv);	/* reserve spot for sub reference */
     Copy(top_env, oldtop, 1, jmp_buf);
 
-    for (i = 0; i <= fill; i++)
-    {
-	GV *gv = (GV*)av_shift(list);
-	SV* tmpsv = NEWSV(0,0);
+    while (AvFILL(list) >= 0) {
+	CV *cv = (CV*)av_shift(list);
 
-	if (gv && GvCV(gv)) {
-	    gv_efullname(tmpsv, gv);
-	    if (setjmp(top_env)) {
-		if (list == beginav)
-		    exit(1);
-	    }
-	    else {
-		perl_callback(SvPVX(tmpsv), sp, G_SCALAR, 0, 0);
+	SAVEFREESV(cv);
+	if (setjmp(top_env)) {
+	    if (list == beginav) {
+		warn("BEGIN failed--execution aborted");
+		Copy(oldtop, top_env, 1, jmp_buf);
+		my_exit(1);
 	    }
 	}
-	sv_free(tmpsv);
-	sv_free(gv);
+	else {
+	    perl_callsv((SV*)cv, sp, G_SCALAR, 0, 0);
+	}
     }
 
     Copy(oldtop, top_env, 1, jmp_buf);

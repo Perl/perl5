@@ -1,0 +1,8 @@
+#!./perl
+
+require POSIX; import POSIX;
+
+print &getpid, "\n";
+
+@uname = &uname;
+print "@uname\n";

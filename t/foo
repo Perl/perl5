@@ -1,4 +1,2 @@
-#!./perl -Dst
+#!./perl
 
-$ref = [[],2,[3,4,5,]];
-print ${$$ref[2]}[2] == 5 ? "ok 16\n" : "not ok 16\n";

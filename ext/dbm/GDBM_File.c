@@ -21,7 +21,7 @@ register int sp;
 register int items;
 {
     if (items < 5 || items > 6) {
-	fatal("Usage: GDBM_File::new(dbtype, name, block_size, read_write, mode, fatal_func = (FATALFUNC)fatal)");
+	croak("Usage: GDBM_File::new(dbtype, name, block_size, read_write, mode, fatal_func = (FATALFUNC)croak)");
     }
     {
 	char *	dbtype = SvPV(ST(1),na);
@@ -33,7 +33,7 @@ register int items;
 	GDBM_File	RETVAL;
 
 	if (items < 6)
-	    fatal_func = (FATALFUNC)fatal;
+	    fatal_func = (FATALFUNC)croak;
 	else {
 	    fatal_func = (FATALFUNC)SvPV(ST(6),na);
 	}
@@ -52,7 +52,7 @@ register int sp;
 register int items;
 {
     if (items < 4 || items > 5) {
-	fatal("Usage: GDBM_File::open(name, block_size, read_write, mode, fatal_func = (FATALFUNC)fatal)");
+	croak("Usage: GDBM_File::open(name, block_size, read_write, mode, fatal_func = (FATALFUNC)croak)");
     }
     {
 	char *	name = SvPV(ST(1),na);
@@ -63,7 +63,7 @@ register int items;
 	GDBM_File	RETVAL;
 
 	if (items < 5)
-	    fatal_func = (FATALFUNC)fatal;
+	    fatal_func = (FATALFUNC)croak;
 	else {
 	    fatal_func = (FATALFUNC)SvPV(ST(5),na);
 	}
@@ -82,15 +82,15 @@ register int sp;
 register int items;
 {
     if (items < 1 || items > 1) {
-	fatal("Usage: GDBM_File::close(db)");
+	croak("Usage: GDBM_File::close(db)");
     }
     {
 	GDBM_File	db;
 
 	if (sv_isa(ST(1), "GDBM_File"))
-	    db = (GDBM_File)(unsigned long)SvNV((SV*)SvANY(ST(1)));
+	    db = (GDBM_File)(unsigned long)SvNV((SV*)SvRV(ST(1)));
 	else
-	    fatal("db is not of type GDBM_File");
+	    croak("db is not of type GDBM_File");
 
 	gdbm_close(db);
     }
@@ -104,15 +104,15 @@ register int sp;
 register int items;
 {
     if (items < 1 || items > 1) {
-	fatal("Usage: GDBM_File::DESTROY(db)");
+	croak("Usage: GDBM_File::DESTROY(db)");
     }
     {
 	GDBM_File	db;
 
 	if (sv_isa(ST(1), "GDBM_File"))
-	    db = (GDBM_File)(unsigned long)SvNV((SV*)SvANY(ST(1)));
+	    db = (GDBM_File)(unsigned long)SvNV((SV*)SvRV(ST(1)));
 	else
-	    fatal("db is not of type GDBM_File");
+	    croak("db is not of type GDBM_File");
 	gdbm_close(db);
     }
     return sp;
@@ -125,7 +125,7 @@ register int sp;
 register int items;
 {
     if (items < 2 || items > 2) {
-	fatal("Usage: GDBM_File::fetch(db, key)");
+	croak("Usage: GDBM_File::fetch(db, key)");
     }
     {
 	GDBM_File	db;
@@ -133,9 +133,9 @@ register int items;
 	gdatum	RETVAL;
 
 	if (sv_isa(ST(1), "GDBM_File"))
-	    db = (GDBM_File)(unsigned long)SvNV((SV*)SvANY(ST(1)));
+	    db = (GDBM_File)(unsigned long)SvNV((SV*)SvRV(ST(1)));
 	else
-	    fatal("db is not of type GDBM_File");
+	    croak("db is not of type GDBM_File");
 
 	key.dptr = SvPV(ST(2), key.dsize);;
 
@@ -153,7 +153,7 @@ register int sp;
 register int items;
 {
     if (items < 3 || items > 4) {
-	fatal("Usage: GDBM_File::store(db, key, value, flags = GDBM_REPLACE)");
+	croak("Usage: GDBM_File::store(db, key, value, flags = GDBM_REPLACE)");
     }
     {
 	GDBM_File	db;
@@ -163,9 +163,9 @@ register int items;
 	int	RETVAL;
 
 	if (sv_isa(ST(1), "GDBM_File"))
-	    db = (GDBM_File)(unsigned long)SvNV((SV*)SvANY(ST(1)));
+	    db = (GDBM_File)(unsigned long)SvNV((SV*)SvRV(ST(1)));
 	else
-	    fatal("db is not of type GDBM_File");
+	    croak("db is not of type GDBM_File");
 
 	key.dptr = SvPV(ST(2), key.dsize);;
 
@@ -191,7 +191,7 @@ register int sp;
 register int items;
 {
     if (items < 2 || items > 2) {
-	fatal("Usage: GDBM_File::delete(db, key)");
+	croak("Usage: GDBM_File::delete(db, key)");
     }
     {
 	GDBM_File	db;
@@ -199,9 +199,9 @@ register int items;
 	int	RETVAL;
 
 	if (sv_isa(ST(1), "GDBM_File"))
-	    db = (GDBM_File)(unsigned long)SvNV((SV*)SvANY(ST(1)));
+	    db = (GDBM_File)(unsigned long)SvNV((SV*)SvRV(ST(1)));
 	else
-	    fatal("db is not of type GDBM_File");
+	    croak("db is not of type GDBM_File");
 
 	key.dptr = SvPV(ST(2), key.dsize);;
 
@@ -219,16 +219,16 @@ register int sp;
 register int items;
 {
     if (items < 1 || items > 1) {
-	fatal("Usage: GDBM_File::firstkey(db)");
+	croak("Usage: GDBM_File::firstkey(db)");
     }
     {
 	GDBM_File	db;
 	gdatum	RETVAL;
 
 	if (sv_isa(ST(1), "GDBM_File"))
-	    db = (GDBM_File)(unsigned long)SvNV((SV*)SvANY(ST(1)));
+	    db = (GDBM_File)(unsigned long)SvNV((SV*)SvRV(ST(1)));
 	else
-	    fatal("db is not of type GDBM_File");
+	    croak("db is not of type GDBM_File");
 
 	RETVAL = gdbm_firstkey(db);
 	ST(0) = sv_mortalcopy(&sv_undef);
@@ -244,7 +244,7 @@ register int sp;
 register int items;
 {
     if (items < 2 || items > 2) {
-	fatal("Usage: GDBM_File::nextkey(db, key)");
+	croak("Usage: GDBM_File::nextkey(db, key)");
     }
     {
 	GDBM_File	db;
@@ -252,9 +252,9 @@ register int items;
 	gdatum	RETVAL;
 
 	if (sv_isa(ST(1), "GDBM_File"))
-	    db = (GDBM_File)(unsigned long)SvNV((SV*)SvANY(ST(1)));
+	    db = (GDBM_File)(unsigned long)SvNV((SV*)SvRV(ST(1)));
 	else
-	    fatal("db is not of type GDBM_File");
+	    croak("db is not of type GDBM_File");
 
 	key.dptr = SvPV(ST(2), key.dsize);;
 
@@ -272,16 +272,16 @@ register int sp;
 register int items;
 {
     if (items < 1 || items > 1) {
-	fatal("Usage: GDBM_File::reorganize(db)");
+	croak("Usage: GDBM_File::reorganize(db)");
     }
     {
 	GDBM_File	db;
 	int	RETVAL;
 
 	if (sv_isa(ST(1), "GDBM_File"))
-	    db = (GDBM_File)(unsigned long)SvNV((SV*)SvANY(ST(1)));
+	    db = (GDBM_File)(unsigned long)SvNV((SV*)SvRV(ST(1)));
 	else
-	    fatal("db is not of type GDBM_File");
+	    croak("db is not of type GDBM_File");
 
 	RETVAL = gdbm_reorganize(db);
 	ST(0) = sv_mortalcopy(&sv_undef);
@@ -290,7 +290,7 @@ register int items;
     return sp;
 }
 
-int init_GDBM_File(ix,sp,items)
+int boot_GDBM_File(ix,sp,items)
 int ix;
 int sp;
 int items;

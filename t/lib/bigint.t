@@ -1,5 +1,7 @@
 #!./perl
-require "../lib/bigint.pl";
+
+BEGIN { @INC = '../lib' }
+require "bigint.pl";
 
 $test = 0;
 $| = 1;

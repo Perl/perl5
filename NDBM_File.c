@@ -8,12 +8,12 @@ typedef DBM* NDBM_File;
 #define nextkey(db,key) dbm_nextkey(db)
 
 static int
-XS_NDBM_File_dbm_new(ix, sp, items)
+XS_NDBM_File_dbm_new(ix, ax, items)
 register int ix;
-register int sp;
+register int ax;
 register int items;
 {
-    if (items < 4 || items > 4) {
+    if (items != 4) {
 	croak("Usage: NDBM_File::new(dbtype, filename, flags, mode)");
     }
     {
@@ -24,40 +24,40 @@ register int items;
 	NDBM_File	RETVAL;
 
 	RETVAL = dbm_new(dbtype, filename, flags, mode);
-	ST(0) = sv_mortalcopy(&sv_undef);
+	ST(0) = sv_newmortal();
 	sv_setptrobj(ST(0), RETVAL, "NDBM_File");
     }
-    return sp;
+    return ax;
 }
 
 static int
-XS_NDBM_File_dbm_DESTROY(ix, sp, items)
+XS_NDBM_File_dbm_DESTROY(ix, ax, items)
 register int ix;
-register int sp;
+register int ax;
 register int items;
 {
-    if (items < 1 || items > 1) {
+    if (items != 1) {
 	croak("Usage: NDBM_File::DESTROY(db)");
     }
     {
 	NDBM_File	db;
 
-	if (sv_isa(ST(1), "NDBM_File"))
-	    db = (NDBM_File)(unsigned long)SvNV((SV*)SvANY(ST(1)));
+	if (SvROK(ST(1)))
+	    db = (NDBM_File)(unsigned long)SvNV((SV*)SvRV(ST(1)));
 	else
-	    croak("db is not of type NDBM_File");
+	    croak("db is not a reference");
 	dbm_close(db);
     }
-    return sp;
+    return ax;
 }
 
 static int
-XS_NDBM_File_dbm_fetch(ix, sp, items)
+XS_NDBM_File_dbm_fetch(ix, ax, items)
 register int ix;
-register int sp;
+register int ax;
 register int items;
 {
-    if (items < 2 || items > 2) {
+    if (items != 2) {
 	croak("Usage: NDBM_File::fetch(db, key)");
     }
     {
@@ -66,23 +66,23 @@ register int items;
 	datum	RETVAL;
 
 	if (sv_isa(ST(1), "NDBM_File"))
-	    db = (NDBM_File)(unsigned long)SvNV((SV*)SvANY(ST(1)));
+	    db = (NDBM_File)(unsigned long)SvNV((SV*)SvRV(ST(1)));
 	else
 	    croak("db is not of type NDBM_File");
 
 	key.dptr = SvPV(ST(2), key.dsize);;
 
 	RETVAL = dbm_fetch(db, key);
-	ST(0) = sv_mortalcopy(&sv_undef);
+	ST(0) = sv_newmortal();
 	sv_setpvn(ST(0), RETVAL.dptr, RETVAL.dsize);
     }
-    return sp;
+    return ax;
 }
 
 static int
-XS_NDBM_File_dbm_store(ix, sp, items)
+XS_NDBM_File_dbm_store(ix, ax, items)
 register int ix;
-register int sp;
+register int ax;
 register int items;
 {
     if (items < 3 || items > 4) {
@@ -96,7 +96,7 @@ register int items;
 	int	RETVAL;
 
 	if (sv_isa(ST(1), "NDBM_File"))
-	    db = (NDBM_File)(unsigned long)SvNV((SV*)SvANY(ST(1)));
+	    db = (NDBM_File)(unsigned long)SvNV((SV*)SvRV(ST(1)));
 	else
 	    croak("db is not of type NDBM_File");
 
@@ -111,19 +111,19 @@ register int items;
 	}
 
 	RETVAL = dbm_store(db, key, value, flags);
-	ST(0) = sv_mortalcopy(&sv_undef);
+	ST(0) = sv_newmortal();
 	sv_setiv(ST(0), (I32)RETVAL);
     }
-    return sp;
+    return ax;
 }
 
 static int
-XS_NDBM_File_dbm_delete(ix, sp, items)
+XS_NDBM_File_dbm_delete(ix, ax, items)
 register int ix;
-register int sp;
+register int ax;
 register int items;
 {
-    if (items < 2 || items > 2) {
+    if (items != 2) {
 	croak("Usage: NDBM_File::delete(db, key)");
     }
     {
@@ -132,26 +132,26 @@ register int items;
 	int	RETVAL;
 
 	if (sv_isa(ST(1), "NDBM_File"))
-	    db = (NDBM_File)(unsigned long)SvNV((SV*)SvANY(ST(1)));
+	    db = (NDBM_File)(unsigned long)SvNV((SV*)SvRV(ST(1)));
 	else
 	    croak("db is not of type NDBM_File");
 
 	key.dptr = SvPV(ST(2), key.dsize);;
 
 	RETVAL = dbm_delete(db, key);
-	ST(0) = sv_mortalcopy(&sv_undef);
+	ST(0) = sv_newmortal();
 	sv_setiv(ST(0), (I32)RETVAL);
     }
-    return sp;
+    return ax;
 }
 
 static int
-XS_NDBM_File_dbm_firstkey(ix, sp, items)
+XS_NDBM_File_dbm_firstkey(ix, ax, items)
 register int ix;
-register int sp;
+register int ax;
 register int items;
 {
-    if (items < 1 || items > 1) {
+    if (items != 1) {
 	croak("Usage: NDBM_File::firstkey(db)");
     }
     {
@@ -159,24 +159,24 @@ register int items;
 	datum	RETVAL;
 
 	if (sv_isa(ST(1), "NDBM_File"))
-	    db = (NDBM_File)(unsigned long)SvNV((SV*)SvANY(ST(1)));
+	    db = (NDBM_File)(unsigned long)SvNV((SV*)SvRV(ST(1)));
 	else
 	    croak("db is not of type NDBM_File");
 
 	RETVAL = dbm_firstkey(db);
-	ST(0) = sv_mortalcopy(&sv_undef);
+	ST(0) = sv_newmortal();
 	sv_setpvn(ST(0), RETVAL.dptr, RETVAL.dsize);
     }
-    return sp;
+    return ax;
 }
 
 static int
-XS_NDBM_File_nextkey(ix, sp, items)
+XS_NDBM_File_nextkey(ix, ax, items)
 register int ix;
-register int sp;
+register int ax;
 register int items;
 {
-    if (items < 2 || items > 2) {
+    if (items != 2) {
 	croak("Usage: NDBM_File::nextkey(db, key)");
     }
     {
@@ -185,26 +185,26 @@ register int items;
 	datum	RETVAL;
 
 	if (sv_isa(ST(1), "NDBM_File"))
-	    db = (NDBM_File)(unsigned long)SvNV((SV*)SvANY(ST(1)));
+	    db = (NDBM_File)(unsigned long)SvNV((SV*)SvRV(ST(1)));
 	else
 	    croak("db is not of type NDBM_File");
 
 	key.dptr = SvPV(ST(2), key.dsize);;
 
 	RETVAL = nextkey(db, key);
-	ST(0) = sv_mortalcopy(&sv_undef);
+	ST(0) = sv_newmortal();
 	sv_setpvn(ST(0), RETVAL.dptr, RETVAL.dsize);
     }
-    return sp;
+    return ax;
 }
 
 static int
-XS_NDBM_File_dbm_error(ix, sp, items)
+XS_NDBM_File_dbm_error(ix, ax, items)
 register int ix;
-register int sp;
+register int ax;
 register int items;
 {
-    if (items < 1 || items > 1) {
+    if (items != 1) {
 	croak("Usage: NDBM_File::error(db)");
     }
     {
@@ -212,24 +212,24 @@ register int items;
 	int	RETVAL;
 
 	if (sv_isa(ST(1), "NDBM_File"))
-	    db = (NDBM_File)(unsigned long)SvNV((SV*)SvANY(ST(1)));
+	    db = (NDBM_File)(unsigned long)SvNV((SV*)SvRV(ST(1)));
 	else
 	    croak("db is not of type NDBM_File");
 
 	RETVAL = dbm_error(db);
-	ST(0) = sv_mortalcopy(&sv_undef);
+	ST(0) = sv_newmortal();
 	sv_setiv(ST(0), (I32)RETVAL);
     }
-    return sp;
+    return ax;
 }
 
 static int
-XS_NDBM_File_dbm_clearerr(ix, sp, items)
+XS_NDBM_File_dbm_clearerr(ix, ax, items)
 register int ix;
-register int sp;
+register int ax;
 register int items;
 {
-    if (items < 1 || items > 1) {
+    if (items != 1) {
 	croak("Usage: NDBM_File::clearerr(db)");
     }
     {
@@ -237,20 +237,20 @@ register int items;
 	int	RETVAL;
 
 	if (sv_isa(ST(1), "NDBM_File"))
-	    db = (NDBM_File)(unsigned long)SvNV((SV*)SvANY(ST(1)));
+	    db = (NDBM_File)(unsigned long)SvNV((SV*)SvRV(ST(1)));
 	else
 	    croak("db is not of type NDBM_File");
 
 	RETVAL = dbm_clearerr(db);
-	ST(0) = sv_mortalcopy(&sv_undef);
+	ST(0) = sv_newmortal();
 	sv_setiv(ST(0), (I32)RETVAL);
     }
-    return sp;
+    return ax;
 }
 
-int init_NDBM_File(ix,sp,items)
+int boot_NDBM_File(ix,ax,items)
 int ix;
-int sp;
+int ax;
 int items;
 {
     char* file = __FILE__;

@@ -2,7 +2,7 @@
 # makefile for public domain ndbm-clone: sdbm
 # DUFF: use duff's device (loop unroll) in parts of the code
 #
-CFLAGS = -O -DSDBM -DDUFF -DBSD42
+CFLAGS = -O -DSDBM -DDUFF -DBSD42 -pic
 #LDFLAGS = -p
 
 OBJS = sdbm.o pair.o hash.o

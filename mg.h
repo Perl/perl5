@@ -26,3 +26,7 @@ struct magic {
     char*	mg_ptr;
     I32		mg_len;
 };
+
+#define MGf_TAINTEDDIR 1
+#define MgTAINTEDDIR(mg) (mg->mg_flags & MGf_TAINTEDDIR)
+#define MgTAINTEDDIR_on(mg) (mg->mg_flags |= MGf_TAINTEDDIR)

@@ -1,0 +1,27 @@
+#!./perl
+
+@ARGV = "./config.sh";
+
+undef $/;
+$_ = <>;
+s:^#!/bin/sh\n::;
+s/'undef'/undef/g;
+s/\n(\w+)=/;\n\$Config{'$1'} = /g;
+s/;\n\$Config/\n\$Config/;
+
+open STDOUT, ">lib/Config.pm"
+    or die "Can't open lib/Config.pm: $!\n";
+$myver = sprintf("%.3f", $]);
+print <<"ENDOFBEG";
+package Config;
+require Exporter;
+\@ISA = (Exporter);
+\@EXPORT = qw(%Config);
+
+\$] == $myver or die sprintf
+    "Perl lib version ($myver) doesn't match executable version (%.3f)\\n", \$];
+
+ENDOFBEG
+
+print $_;
+

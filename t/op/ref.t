@@ -1,6 +1,6 @@
 #!./perl
 
-print "1..37\n";
+print "1..40\n";
 
 # Test glob operations.
 
@@ -145,9 +145,10 @@ $string = "not ok 34\n";
 $object = "foo";
 $string = "ok 34\n";
 $main'anonhash2 = "foo";
-$string = "not ok 34\n";
+$string = "";
 
 DESTROY {
+    return unless $string;
     print $string;
 
     # Test that the object has already been "cursed".
@@ -177,4 +178,17 @@ sub BASEOBJ'doit {
     local $ref = shift;
     die "Not an OBJ" unless ref $ref eq OBJ;
     $ref->{shift};
+}
+
+package FINALE;
+
+{
+    $ref3 = bless ["ok 40\n"];		# package destruction
+    my $ref2 = bless ["ok 39\n"];	# lexical destruction
+    local $ref1 = bless ["ok 38\n"];	# dynamic destruction
+    1;					# flush any temp values on stack
+}
+
+DESTROY {
+    print $_[0][0];
 }
