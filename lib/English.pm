@@ -67,6 +67,7 @@ sub import {
 	*CHILD_ERROR
 	*OS_ERROR
 	*ERRNO
+	*EXTENDED_OS_ERROR
 	*EVAL_ERROR
 	*PROCESS_ID
 	*PID
@@ -88,6 +89,7 @@ sub import {
 	*BASETIME
 	*WARNING
 	*EXECUTABLE_NAME
+	*OSNAME
 );
 
 # The ground of all being.
@@ -136,6 +138,7 @@ sub import {
 
 	*CHILD_ERROR				= *?	;
 	*OS_ERROR				= *!	;
+	*EXTENDED_OS_ERROR			= *^E	;
 	    *ERRNO				= *!	;
 	*EVAL_ERROR				= *@	;
 
@@ -164,6 +167,7 @@ sub import {
 	*BASETIME				= *^T	;
 	*WARNING				= *^W	;
 	*EXECUTABLE_NAME			= *^X	;
+	*OSNAME					= *^O	;
 
 # Deprecated.
 
