@@ -403,6 +403,7 @@ Perl_ithread_create(pTHX_ SV *obj, char* classname, SV* init_function, SV* param
 	    SvTEMP_off(thread->init_function);
 	    ptr_table_free(PL_ptr_table);
 	    PL_ptr_table = NULL;
+	    PL_exit_flags |= PERL_EXIT_DESTRUCT_END;
 	}
 
 	PERL_SET_CONTEXT(aTHX);
