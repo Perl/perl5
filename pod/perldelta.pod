@@ -312,6 +312,13 @@ The list form of C<open> is now implemented for pipes (at least on UNIX):
 creates a pipe, and runs the equivalent of exec('cat', '/etc/motd') in
 the child process.
 
+=item *
+
+If your locale environment variables (LANGUAGE, LC_ALL, LC_CTYPE, LANG)
+contain the strings 'UTF-8' or 'UTF8' (case-insensitive matching),
+the default encoding of your STDIN, STDOUT, and STDERR, and of
+B<any subsequent file open>, is UTF-8.
+
 =back
 
 =head2 Safe Signals
@@ -334,7 +341,8 @@ out from potentially blocking operations should still work, though.
 Unicode in general should be now much more usable than in Perl 5.6.0
 (or even in 5.6.1).  Unicode can be used in hash keys, Unicode in
 regular expressions should work now, Unicode in tr/// should work now,
-Unicode in I/O should work now.
+Unicode in I/O should work now.  See L<perluniintro> for introduction
+and L<perlunicode> for details.
 
 =over 4
 

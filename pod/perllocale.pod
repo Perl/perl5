@@ -985,6 +985,15 @@ nations, when we all know that the world can equally well be divided
 into bankers, bikers, gamers, and so on.  But, for now, it's the only
 standard we've got.  This may be construed as a bug.
 
+=head1 Unicode and UTF-8
+
+The support of Unicode is new starting from Perl version 5.6, and
+more fully implemented in the version 5.8.  See L<perluniintro> and
+L<perlunicode> for more details.
+
+Usually locale settings and Unicode do not affect each other, but
+there are exceptions, see L<perlunicode/Locales> for examples.
+
 =head1 BUGS
 
 =head2 Broken systems
@@ -1000,7 +1009,8 @@ operating system upgrade.
 
 =head1 SEE ALSO
 
-L<I18N::Langinfo>, L<POSIX/isalnum>, L<POSIX/isalpha>,
+L<I18N::Langinfo>, L<perluniintro>, L<perlunicode>, L<open>,
+L<POSIX/isalnum>, L<POSIX/isalpha>,
 L<POSIX/isdigit>, L<POSIX/isgraph>, L<POSIX/islower>,
 L<POSIX/isprint>, L<POSIX/ispunct>, L<POSIX/isspace>,
 L<POSIX/isupper>, L<POSIX/isxdigit>, L<POSIX/localeconv>,

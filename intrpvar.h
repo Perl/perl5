@@ -515,6 +515,8 @@ PERLVARI(IOpSpace,I32,0)
 PERLVAR(IOpSlab,I32 *)
 #endif
 
+PERLVAR(Iwantutf8, bool)	/* want utf8 as the default discipline */
+
 /* New variables must be added to the very end for binary compatibility.
  * XSUB.h provides wrapper functions via perlapi.h that make this
  * irrelevant, but not all code may be expected to #include XSUB.h. */

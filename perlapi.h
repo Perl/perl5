@@ -606,6 +606,8 @@ END_EXTERN_C
 #define PL_utf8_xdigit		(*Perl_Iutf8_xdigit_ptr(aTHX))
 #undef  PL_uudmap
 #define PL_uudmap		(*Perl_Iuudmap_ptr(aTHX))
+#undef  PL_wantutf8
+#define PL_wantutf8		(*Perl_Iwantutf8_ptr(aTHX))
 #undef  PL_warnhook
 #define PL_warnhook		(*Perl_Iwarnhook_ptr(aTHX))
 #undef  PL_widesyscalls
