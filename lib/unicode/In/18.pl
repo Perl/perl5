@@ -3,9 +3,11 @@
 # Any changes made here will be lost!
 return <<'END';
 0E01	0E30
+0E31	
 0E32	0E33
 0E34	0E3A
 0E40	0E45
+0E46	
 0E47	0E4E
 0E50	0E59
 END

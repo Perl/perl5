@@ -4,9 +4,12 @@
 return <<'END';
 0041	005A	LATIN	# Latin In/0.pl
 0061	007A	LATIN	# Latin In/0.pl
+00AA		LATIN	# Latin In/0.pl
+00BA		LATIN	# Latin In/0.pl
 00C0	00D6	LATIN	# Latin In/0.pl
 00D8	00F6	LATIN	# Latin In/0.pl
 00F8	01BA	LATIN	# Latin In/0.pl
+01BB		LATIN	# Latin In/0.pl
 01BC	01BF	LATIN	# Latin In/0.pl
 01C0	01C3	LATIN	# Latin In/0.pl
 01C4	021F	LATIN	# Latin In/0.pl
@@ -16,11 +19,16 @@ return <<'END';
 02E0	02E4	LATIN	# Latin In/0.pl
 1E00	1E9B	LATIN	# Latin In/0.pl
 1EA0	1EF9	LATIN	# Latin In/0.pl
+207F		LATIN	# Latin In/0.pl
 212A	212B	LATIN	# Latin In/0.pl
 FB00	FB06	LATIN	# Latin In/0.pl
 FF21	FF3A	LATIN	# Latin In/0.pl
 FF41	FF5A	LATIN	# Latin In/0.pl
+00B5		GREEK	# Greek In/1.pl
+037A		GREEK	# Greek In/1.pl
+0386		GREEK	# Greek In/1.pl
 0388	038A	GREEK	# Greek In/1.pl
+038C		GREEK	# Greek In/1.pl
 038E	03A1	GREEK	# Greek In/1.pl
 03A3	03CE	GREEK	# Greek In/1.pl
 03D0	03D7	GREEK	# Greek In/1.pl
@@ -30,9 +38,13 @@ FF41	FF5A	LATIN	# Latin In/0.pl
 1F20	1F45	GREEK	# Greek In/1.pl
 1F48	1F4D	GREEK	# Greek In/1.pl
 1F50	1F57	GREEK	# Greek In/1.pl
+1F59		GREEK	# Greek In/1.pl
+1F5B		GREEK	# Greek In/1.pl
+1F5D		GREEK	# Greek In/1.pl
 1F5F	1F7D	GREEK	# Greek In/1.pl
 1F80	1FB4	GREEK	# Greek In/1.pl
 1FB6	1FBC	GREEK	# Greek In/1.pl
+1FBE		GREEK	# Greek In/1.pl
 1FC2	1FC4	GREEK	# Greek In/1.pl
 1FC6	1FCC	GREEK	# Greek In/1.pl
 1FD0	1FD3	GREEK	# Greek In/1.pl
@@ -40,6 +52,7 @@ FF41	FF5A	LATIN	# Latin In/0.pl
 1FE0	1FEC	GREEK	# Greek In/1.pl
 1FF2	1FF4	GREEK	# Greek In/1.pl
 1FF6	1FFC	GREEK	# Greek In/1.pl
+2126		GREEK	# Greek In/1.pl
 0400	0481	CYRILLIC	# Cyrillic In/2.pl
 0483	0486	CYRILLIC	# Cyrillic In/2.pl
 048C	04C4	CYRILLIC	# Cyrillic In/2.pl
@@ -48,19 +61,23 @@ FF41	FF5A	LATIN	# Latin In/0.pl
 04D0	04F5	CYRILLIC	# Cyrillic In/2.pl
 04F8	04F9	CYRILLIC	# Cyrillic In/2.pl
 0531	0556	ARMENIAN	# Armenian In/3.pl
+0559		ARMENIAN	# Armenian In/3.pl
 0561	0587	ARMENIAN	# Armenian In/3.pl
 FB13	FB17	ARMENIAN	# Armenian In/3.pl
 05D0	05EA	HEBREW	# Hebrew In/4.pl
 05F0	05F2	HEBREW	# Hebrew In/4.pl
+FB1D		HEBREW	# Hebrew In/4.pl
 FB1F	FB28	HEBREW	# Hebrew In/4.pl
 FB2A	FB36	HEBREW	# Hebrew In/4.pl
 FB38	FB3C	HEBREW	# Hebrew In/4.pl
+FB3E		HEBREW	# Hebrew In/4.pl
 FB40	FB41	HEBREW	# Hebrew In/4.pl
 FB43	FB44	HEBREW	# Hebrew In/4.pl
 FB46	FB4F	HEBREW	# Hebrew In/4.pl
 0621	063A	ARABIC	# Arabic In/5.pl
 0641	064A	ARABIC	# Arabic In/5.pl
 0671	06D3	ARABIC	# Arabic In/5.pl
+06D5		ARABIC	# Arabic In/5.pl
 06E5	06E6	ARABIC	# Arabic In/5.pl
 06FA	06FC	ARABIC	# Arabic In/5.pl
 FB50	FBB1	ARABIC	# Arabic In/5.pl
@@ -69,34 +86,48 @@ FD50	FD8F	ARABIC	# Arabic In/5.pl
 FD92	FDC7	ARABIC	# Arabic In/5.pl
 FDF0	FDFB	ARABIC	# Arabic In/5.pl
 FE70	FE72	ARABIC	# Arabic In/5.pl
+FE74		ARABIC	# Arabic In/5.pl
 FE76	FEFC	ARABIC	# Arabic In/5.pl
+0710		SYRIAC	# Syriac In/6.pl
+0711		SYRIAC	# Syriac In/6.pl
 0712	072C	SYRIAC	# Syriac In/6.pl
 0730	074A	SYRIAC	# Syriac In/6.pl
 0780	07A5	THAANA	# Thaana In/7.pl
 07A6	07B0	THAANA	# Thaana In/7.pl
 0901	0902	DEVANAGARI	# Devanagari In/8.pl
+0903		DEVANAGARI	# Devanagari In/8.pl
 0905	0939	DEVANAGARI	# Devanagari In/8.pl
+093C		DEVANAGARI	# Devanagari In/8.pl
+093D		DEVANAGARI	# Devanagari In/8.pl
 093E	0940	DEVANAGARI	# Devanagari In/8.pl
 0941	0948	DEVANAGARI	# Devanagari In/8.pl
 0949	094C	DEVANAGARI	# Devanagari In/8.pl
+094D		DEVANAGARI	# Devanagari In/8.pl
+0950		DEVANAGARI	# Devanagari In/8.pl
 0951	0954	DEVANAGARI	# Devanagari In/8.pl
 0958	0961	DEVANAGARI	# Devanagari In/8.pl
 0962	0963	DEVANAGARI	# Devanagari In/8.pl
 0966	096F	DEVANAGARI	# Devanagari In/8.pl
+0981		BENGALI	# Bengali In/9.pl
 0985	098C	BENGALI	# Bengali In/9.pl
 098F	0990	BENGALI	# Bengali In/9.pl
 0993	09A8	BENGALI	# Bengali In/9.pl
 09AA	09B0	BENGALI	# Bengali In/9.pl
+09B2		BENGALI	# Bengali In/9.pl
 09B6	09B9	BENGALI	# Bengali In/9.pl
+09BC		BENGALI	# Bengali In/9.pl
 09BE	09C0	BENGALI	# Bengali In/9.pl
 09C1	09C4	BENGALI	# Bengali In/9.pl
 09C7	09C8	BENGALI	# Bengali In/9.pl
 09CB	09CC	BENGALI	# Bengali In/9.pl
+09CD		BENGALI	# Bengali In/9.pl
+09D7		BENGALI	# Bengali In/9.pl
 09DC	09DD	BENGALI	# Bengali In/9.pl
 09DF	09E1	BENGALI	# Bengali In/9.pl
 09E2	09E3	BENGALI	# Bengali In/9.pl
 09E6	09EF	BENGALI	# Bengali In/9.pl
 09F0	09F1	BENGALI	# Bengali In/9.pl
+0A02		GURMUKHI	# Gurmukhi In/10.pl
 0A05	0A0A	GURMUKHI	# Gurmukhi In/10.pl
 0A0F	0A10	GURMUKHI	# Gurmukhi In/10.pl
 0A13	0A28	GURMUKHI	# Gurmukhi In/10.pl
@@ -104,26 +135,37 @@ FE76	FEFC	ARABIC	# Arabic In/5.pl
 0A32	0A33	GURMUKHI	# Gurmukhi In/10.pl
 0A35	0A36	GURMUKHI	# Gurmukhi In/10.pl
 0A38	0A39	GURMUKHI	# Gurmukhi In/10.pl
+0A3C		GURMUKHI	# Gurmukhi In/10.pl
 0A3E	0A40	GURMUKHI	# Gurmukhi In/10.pl
 0A41	0A42	GURMUKHI	# Gurmukhi In/10.pl
 0A47	0A48	GURMUKHI	# Gurmukhi In/10.pl
 0A4B	0A4D	GURMUKHI	# Gurmukhi In/10.pl
 0A59	0A5C	GURMUKHI	# Gurmukhi In/10.pl
+0A5E		GURMUKHI	# Gurmukhi In/10.pl
 0A66	0A6F	GURMUKHI	# Gurmukhi In/10.pl
 0A70	0A71	GURMUKHI	# Gurmukhi In/10.pl
 0A72	0A74	GURMUKHI	# Gurmukhi In/10.pl
 0A81	0A82	GUJARATI	# Gujarati In/11.pl
+0A83		GUJARATI	# Gujarati In/11.pl
 0A85	0A8B	GUJARATI	# Gujarati In/11.pl
+0A8D		GUJARATI	# Gujarati In/11.pl
 0A8F	0A91	GUJARATI	# Gujarati In/11.pl
 0A93	0AA8	GUJARATI	# Gujarati In/11.pl
 0AAA	0AB0	GUJARATI	# Gujarati In/11.pl
 0AB2	0AB3	GUJARATI	# Gujarati In/11.pl
 0AB5	0AB9	GUJARATI	# Gujarati In/11.pl
+0ABC		GUJARATI	# Gujarati In/11.pl
+0ABD		GUJARATI	# Gujarati In/11.pl
 0ABE	0AC0	GUJARATI	# Gujarati In/11.pl
 0AC1	0AC5	GUJARATI	# Gujarati In/11.pl
 0AC7	0AC8	GUJARATI	# Gujarati In/11.pl
+0AC9		GUJARATI	# Gujarati In/11.pl
 0ACB	0ACC	GUJARATI	# Gujarati In/11.pl
+0ACD		GUJARATI	# Gujarati In/11.pl
+0AD0		GUJARATI	# Gujarati In/11.pl
+0AE0		GUJARATI	# Gujarati In/11.pl
 0AE6	0AEF	GUJARATI	# Gujarati In/11.pl
+0B01		ORIYA	# Oriya In/12.pl
 0B02	0B03	ORIYA	# Oriya In/12.pl
 0B05	0B0C	ORIYA	# Oriya In/12.pl
 0B0F	0B10	ORIYA	# Oriya In/12.pl
@@ -131,25 +173,39 @@ FE76	FEFC	ARABIC	# Arabic In/5.pl
 0B2A	0B30	ORIYA	# Oriya In/12.pl
 0B32	0B33	ORIYA	# Oriya In/12.pl
 0B36	0B39	ORIYA	# Oriya In/12.pl
+0B3C		ORIYA	# Oriya In/12.pl
+0B3D		ORIYA	# Oriya In/12.pl
+0B3E		ORIYA	# Oriya In/12.pl
+0B3F		ORIYA	# Oriya In/12.pl
+0B40		ORIYA	# Oriya In/12.pl
 0B41	0B43	ORIYA	# Oriya In/12.pl
 0B47	0B48	ORIYA	# Oriya In/12.pl
 0B4B	0B4C	ORIYA	# Oriya In/12.pl
+0B4D		ORIYA	# Oriya In/12.pl
+0B56		ORIYA	# Oriya In/12.pl
+0B57		ORIYA	# Oriya In/12.pl
 0B5C	0B5D	ORIYA	# Oriya In/12.pl
 0B5F	0B61	ORIYA	# Oriya In/12.pl
 0B66	0B6F	ORIYA	# Oriya In/12.pl
+0B82		TAMIL	# Tamil In/13.pl
+0B83		TAMIL	# Tamil In/13.pl
 0B85	0B8A	TAMIL	# Tamil In/13.pl
 0B8E	0B90	TAMIL	# Tamil In/13.pl
 0B92	0B95	TAMIL	# Tamil In/13.pl
 0B99	0B9A	TAMIL	# Tamil In/13.pl
+0B9C		TAMIL	# Tamil In/13.pl
 0B9E	0B9F	TAMIL	# Tamil In/13.pl
 0BA3	0BA4	TAMIL	# Tamil In/13.pl
 0BA8	0BAA	TAMIL	# Tamil In/13.pl
 0BAE	0BB5	TAMIL	# Tamil In/13.pl
 0BB7	0BB9	TAMIL	# Tamil In/13.pl
 0BBE	0BBF	TAMIL	# Tamil In/13.pl
+0BC0		TAMIL	# Tamil In/13.pl
 0BC1	0BC2	TAMIL	# Tamil In/13.pl
 0BC6	0BC8	TAMIL	# Tamil In/13.pl
 0BCA	0BCC	TAMIL	# Tamil In/13.pl
+0BCD		TAMIL	# Tamil In/13.pl
+0BD7		TAMIL	# Tamil In/13.pl
 0BE7	0BEF	TAMIL	# Tamil In/13.pl
 0BF0	0BF2	TAMIL	# Tamil In/13.pl
 0C01	0C03	TELUGU	# Telugu In/14.pl
@@ -171,11 +227,15 @@ FE76	FEFC	ARABIC	# Arabic In/5.pl
 0C92	0CA8	KANNADA	# Kannada In/15.pl
 0CAA	0CB3	KANNADA	# Kannada In/15.pl
 0CB5	0CB9	KANNADA	# Kannada In/15.pl
+0CBE		KANNADA	# Kannada In/15.pl
+0CBF		KANNADA	# Kannada In/15.pl
 0CC0	0CC4	KANNADA	# Kannada In/15.pl
+0CC6		KANNADA	# Kannada In/15.pl
 0CC7	0CC8	KANNADA	# Kannada In/15.pl
 0CCA	0CCB	KANNADA	# Kannada In/15.pl
 0CCC	0CCD	KANNADA	# Kannada In/15.pl
 0CD5	0CD6	KANNADA	# Kannada In/15.pl
+0CDE		KANNADA	# Kannada In/15.pl
 0CE0	0CE1	KANNADA	# Kannada In/15.pl
 0CE6	0CEF	KANNADA	# Kannada In/15.pl
 0D02	0D03	MALAYALAM	# Malayalam In/16.pl
@@ -187,53 +247,79 @@ FE76	FEFC	ARABIC	# Arabic In/5.pl
 0D41	0D43	MALAYALAM	# Malayalam In/16.pl
 0D46	0D48	MALAYALAM	# Malayalam In/16.pl
 0D4A	0D4C	MALAYALAM	# Malayalam In/16.pl
+0D4D		MALAYALAM	# Malayalam In/16.pl
+0D57		MALAYALAM	# Malayalam In/16.pl
 0D60	0D61	MALAYALAM	# Malayalam In/16.pl
 0D66	0D6F	MALAYALAM	# Malayalam In/16.pl
 0D82	0D83	SINHALA	# Sinhala In/17.pl
 0D85	0D96	SINHALA	# Sinhala In/17.pl
 0D9A	0DB1	SINHALA	# Sinhala In/17.pl
 0DB3	0DBB	SINHALA	# Sinhala In/17.pl
+0DBD		SINHALA	# Sinhala In/17.pl
 0DC0	0DC6	SINHALA	# Sinhala In/17.pl
+0DCA		SINHALA	# Sinhala In/17.pl
 0DCF	0DD1	SINHALA	# Sinhala In/17.pl
 0DD2	0DD4	SINHALA	# Sinhala In/17.pl
+0DD6		SINHALA	# Sinhala In/17.pl
 0DD8	0DDF	SINHALA	# Sinhala In/17.pl
 0DF2	0DF3	SINHALA	# Sinhala In/17.pl
 0E01	0E30	THAI	# Thai In/18.pl
+0E31		THAI	# Thai In/18.pl
 0E32	0E33	THAI	# Thai In/18.pl
 0E34	0E3A	THAI	# Thai In/18.pl
 0E40	0E45	THAI	# Thai In/18.pl
+0E46		THAI	# Thai In/18.pl
 0E47	0E4E	THAI	# Thai In/18.pl
 0E50	0E59	THAI	# Thai In/18.pl
 0E81	0E82	LAO	# Lao In/19.pl
+0E84		LAO	# Lao In/19.pl
 0E87	0E88	LAO	# Lao In/19.pl
+0E8A		LAO	# Lao In/19.pl
+0E8D		LAO	# Lao In/19.pl
 0E94	0E97	LAO	# Lao In/19.pl
 0E99	0E9F	LAO	# Lao In/19.pl
 0EA1	0EA3	LAO	# Lao In/19.pl
+0EA5		LAO	# Lao In/19.pl
+0EA7		LAO	# Lao In/19.pl
 0EAA	0EAB	LAO	# Lao In/19.pl
 0EAD	0EB0	LAO	# Lao In/19.pl
+0EB1		LAO	# Lao In/19.pl
 0EB2	0EB3	LAO	# Lao In/19.pl
 0EB4	0EB9	LAO	# Lao In/19.pl
 0EBB	0EBC	LAO	# Lao In/19.pl
+0EBD		LAO	# Lao In/19.pl
 0EC0	0EC4	LAO	# Lao In/19.pl
+0EC6		LAO	# Lao In/19.pl
 0EC8	0ECD	LAO	# Lao In/19.pl
 0ED0	0ED9	LAO	# Lao In/19.pl
 0EDC	0EDD	LAO	# Lao In/19.pl
+0F00		TIBETAN	# Tibetan In/20.pl
 0F18	0F19	TIBETAN	# Tibetan In/20.pl
 0F20	0F29	TIBETAN	# Tibetan In/20.pl
 0F2A	0F33	TIBETAN	# Tibetan In/20.pl
+0F35		TIBETAN	# Tibetan In/20.pl
+0F37		TIBETAN	# Tibetan In/20.pl
+0F39		TIBETAN	# Tibetan In/20.pl
 0F40	0F47	TIBETAN	# Tibetan In/20.pl
 0F49	0F6A	TIBETAN	# Tibetan In/20.pl
 0F71	0F7E	TIBETAN	# Tibetan In/20.pl
+0F7F		TIBETAN	# Tibetan In/20.pl
 0F80	0F84	TIBETAN	# Tibetan In/20.pl
 0F86	0F87	TIBETAN	# Tibetan In/20.pl
 0F88	0F8B	TIBETAN	# Tibetan In/20.pl
 0F90	0F97	TIBETAN	# Tibetan In/20.pl
 0F99	0FBC	TIBETAN	# Tibetan In/20.pl
+0FC6		TIBETAN	# Tibetan In/20.pl
 1000	1021	MYANMAR	# Myanmar In/21.pl
 1023	1027	MYANMAR	# Myanmar In/21.pl
 1029	102A	MYANMAR	# Myanmar In/21.pl
+102C		MYANMAR	# Myanmar In/21.pl
 102D	1030	MYANMAR	# Myanmar In/21.pl
+1031		MYANMAR	# Myanmar In/21.pl
+1032		MYANMAR	# Myanmar In/21.pl
 1036	1037	MYANMAR	# Myanmar In/21.pl
+1038		MYANMAR	# Myanmar In/21.pl
+1039		MYANMAR	# Myanmar In/21.pl
 1040	1049	MYANMAR	# Myanmar In/21.pl
 1050	1055	MYANMAR	# Myanmar In/21.pl
 1056	1057	MYANMAR	# Myanmar In/21.pl
@@ -252,19 +338,25 @@ FFD2	FFD7	HANGUL	# Hangul In/23.pl
 FFDA	FFDC	HANGUL	# Hangul In/23.pl
 1200	1206	ETHIOPIC	# Ethiopic In/24.pl
 1208	1246	ETHIOPIC	# Ethiopic In/24.pl
+1248		ETHIOPIC	# Ethiopic In/24.pl
 124A	124D	ETHIOPIC	# Ethiopic In/24.pl
 1250	1256	ETHIOPIC	# Ethiopic In/24.pl
+1258		ETHIOPIC	# Ethiopic In/24.pl
 125A	125D	ETHIOPIC	# Ethiopic In/24.pl
 1260	1286	ETHIOPIC	# Ethiopic In/24.pl
+1288		ETHIOPIC	# Ethiopic In/24.pl
 128A	128D	ETHIOPIC	# Ethiopic In/24.pl
 1290	12AE	ETHIOPIC	# Ethiopic In/24.pl
+12B0		ETHIOPIC	# Ethiopic In/24.pl
 12B2	12B5	ETHIOPIC	# Ethiopic In/24.pl
 12B8	12BE	ETHIOPIC	# Ethiopic In/24.pl
+12C0		ETHIOPIC	# Ethiopic In/24.pl
 12C2	12C5	ETHIOPIC	# Ethiopic In/24.pl
 12C8	12CE	ETHIOPIC	# Ethiopic In/24.pl
 12D0	12D6	ETHIOPIC	# Ethiopic In/24.pl
 12D8	12EE	ETHIOPIC	# Ethiopic In/24.pl
 12F0	130E	ETHIOPIC	# Ethiopic In/24.pl
+1310		ETHIOPIC	# Ethiopic In/24.pl
 1312	1315	ETHIOPIC	# Ethiopic In/24.pl
 1318	131E	ETHIOPIC	# Ethiopic In/24.pl
 1320	1346	ETHIOPIC	# Ethiopic In/24.pl
@@ -281,13 +373,16 @@ FFDA	FFDC	HANGUL	# Hangul In/23.pl
 17B4	17B6	KHMER	# Khmer In/29.pl
 17B7	17BD	KHMER	# Khmer In/29.pl
 17BE	17C5	KHMER	# Khmer In/29.pl
+17C6		KHMER	# Khmer In/29.pl
 17C7	17C8	KHMER	# Khmer In/29.pl
 17C9	17D3	KHMER	# Khmer In/29.pl
 17E0	17E9	KHMER	# Khmer In/29.pl
 1810	1819	MONGOLIAN	# Mongolian In/30.pl
 1820	1842	MONGOLIAN	# Mongolian In/30.pl
+1843		MONGOLIAN	# Mongolian In/30.pl
 1844	1877	MONGOLIAN	# Mongolian In/30.pl
 1880	18A8	MONGOLIAN	# Mongolian In/30.pl
+18A9		MONGOLIAN	# Mongolian In/30.pl
 3041	3094	HIRAGANA	# Hiragana In/31.pl
 309D	309E	HIRAGANA	# Hiragana In/31.pl
 30A1	30FA	KATAKANA	# Katakana In/32.pl
@@ -299,6 +394,8 @@ FF71	FF9D	KATAKANA	# Katakana In/32.pl
 2E80	2E99	HAN	# Han In/34.pl
 2E9B	2EF3	HAN	# Han In/34.pl
 2F00	2FD5	HAN	# Han In/34.pl
+3005		HAN	# Han In/34.pl
+3007		HAN	# Han In/34.pl
 3021	3029	HAN	# Han In/34.pl
 3038	303A	HAN	# Han In/34.pl
 3400	4DB5	HAN	# Han In/34.pl
@@ -311,8 +408,10 @@ A490	A4A1	YI	# Yi In/35.pl
 A4A4	A4B3	YI	# Yi In/35.pl
 A4B5	A4C0	YI	# Yi In/35.pl
 A4C2	A4C4	YI	# Yi In/35.pl
+A4C6		YI	# Yi In/35.pl
 10300	1031E	OLD-ITALIC	# OldItalic In/36.pl
 10330	10349	GOTHIC	# Gothic In/37.pl
+1034A		GOTHIC	# Gothic In/37.pl
 10400	10425	DESERET	# Deseret In/38.pl
 10428	1044D	DESERET	# Deseret In/38.pl
 0300	034E	INHERITED	# Inherited In/39.pl
@@ -321,8 +420,11 @@ A4C2	A4C4	YI	# Yi In/35.pl
 0591	05A1	INHERITED	# Inherited In/39.pl
 05A3	05B9	INHERITED	# Inherited In/39.pl
 05BB	05BD	INHERITED	# Inherited In/39.pl
+05BF		INHERITED	# Inherited In/39.pl
 05C1	05C2	INHERITED	# Inherited In/39.pl
+05C4		INHERITED	# Inherited In/39.pl
 064B	0655	INHERITED	# Inherited In/39.pl
+0670		INHERITED	# Inherited In/39.pl
 06D6	06DC	INHERITED	# Inherited In/39.pl
 06DD	06DE	INHERITED	# Inherited In/39.pl
 06DF	06E4	INHERITED	# Inherited In/39.pl
@@ -330,9 +432,11 @@ A4C2	A4C4	YI	# Yi In/35.pl
 06EA	06ED	INHERITED	# Inherited In/39.pl
 20D0	20DC	INHERITED	# Inherited In/39.pl
 20DD	20E0	INHERITED	# Inherited In/39.pl
+20E1		INHERITED	# Inherited In/39.pl
 20E2	20E3	INHERITED	# Inherited In/39.pl
 302A	302F	INHERITED	# Inherited In/39.pl
 3099	309A	INHERITED	# Inherited In/39.pl
+FB1E		INHERITED	# Inherited In/39.pl
 FE20	FE23	INHERITED	# Inherited In/39.pl
 1D167	1D169	INHERITED	# Inherited In/39.pl
 1D17B	1D182	INHERITED	# Inherited In/39.pl

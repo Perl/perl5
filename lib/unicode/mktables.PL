@@ -279,7 +279,7 @@ while (<UD>) {
     next if /^#/;
     next if /^$/;
     chomp;
-    ($code, $last, $name) = /^([0-9a-f]+)\.\.([0-9a-f]+)\s+;\s+(.+)\s+\#/i;
+    ($code, $last, $name) = /^([0-9a-f]+)(?:\.\.([0-9a-f]+))?\s+;\s+(.+)\s+\#/i;
     if ($name) {
 	my $InName = lc($name);
 	$InName =~ s/\b(\w)/uc($1)/ge;
@@ -299,6 +299,7 @@ EOH
 	} else {
 	    $id = $InId{$InName};
 	}
+	$last = "" unless defined $last;
 	print OUT "$code\t$last\t$name\t# $InName In/$id.pl\n";
         open(SCRIPT, ">>In/$id.pl");
 	print SCRIPT <<END;
