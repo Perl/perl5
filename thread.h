@@ -211,7 +211,6 @@ struct thread {
     AV *	Tcurstack;
     AV *	Tmainstack;
     JMPENV *	Ttop_env;
-    I32		Trunlevel;
 
     /* XXX Sort stuff, firstgv, secongv and so on? */
 
@@ -310,7 +309,6 @@ typedef struct condpair {
 #undef  start_env
 #undef	toptarget
 #undef	top_env
-#undef	runlevel
 #undef	in_eval
 #undef	restartop
 #undef	delaymagic
@@ -382,7 +380,6 @@ typedef struct condpair {
 #define localizing	(thr->Tlocalizing)
 
 #define	top_env		(thr->Ttop_env)
-#define	runlevel	(thr->Trunlevel)
 #define start_env       (thr->Tstart_env)
 
 #else

@@ -1170,7 +1170,6 @@ die(pat, va_alist)
     dTHR;
     va_list args;
     char *message;
-    I32 oldrunlevel = runlevel;
     int was_in_eval = in_eval;
     HV *stash;
     GV *gv;
@@ -1231,10 +1230,10 @@ die(pat, va_alist)
     restartop = die_where(message);
 #ifdef USE_THREADS
     DEBUG_L(PerlIO_printf(PerlIO_stderr(),
-	  "%p: die: restartop = %p, was_in_eval = %d, oldrunlevel = %d\n",
-	  thr, restartop, was_in_eval, oldrunlevel));
+	  "%p: die: restartop = %p, was_in_eval = %d, top_env = %p\n",
+	  thr, restartop, was_in_eval, top_env));
 #endif /* USE_THREADS */
-    if ((!restartop && was_in_eval) || oldrunlevel > 1)
+    if ((!restartop && was_in_eval) || top_env->je_prev)
 	JMPENV_JUMP(3);
     return restartop;
 }
@@ -2548,8 +2547,6 @@ struct thread *t;
     start_env.je_ret = -1;
     start_env.je_mustcatch = TRUE;
     top_env  = &start_env;
-
-    runlevel = 0;		/* Let entering sub do increment */
 
     in_eval = FALSE;
     restartop = 0;

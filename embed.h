@@ -1331,7 +1331,6 @@
 #define restartop		(curinterp->Irestartop)
 #define rightgv			(curinterp->Irightgv)
 #define rs			(curinterp->Irs)
-#define runlevel		(curinterp->Irunlevel)
 #define sawampersand		(curinterp->Isawampersand)
 #define sawstudy		(curinterp->Isawstudy)
 #define sawvec			(curinterp->Isawvec)
@@ -1484,7 +1483,6 @@
 #define Irestartop		restartop
 #define Irightgv		rightgv
 #define Irs			rs
-#define Irunlevel		runlevel
 #define Isawampersand		sawampersand
 #define Isawstudy		sawstudy
 #define Isawvec			sawvec
@@ -1646,7 +1644,6 @@
 #define restartop		Perl_restartop
 #define rightgv			Perl_rightgv
 #define rs			Perl_rs
-#define runlevel		Perl_runlevel
 #define sawampersand		Perl_sawampersand
 #define sawstudy		Perl_sawstudy
 #define sawvec			Perl_sawvec
