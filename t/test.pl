@@ -433,6 +433,9 @@ sub which_perl {
     unless (defined $Perl) {
 	$Perl = $^X;
 	
+	# VMS should have 'perl' aliased properly
+	return $Perl if $^O eq 'VMS';
+
 	my $exe;
 	eval "require Config; Config->import";
 	if ($@) {
