@@ -35,7 +35,7 @@ print OUT <<'!NO!SUBS!';
 
 #
 # pod2html - convert pod format to html
-# Version 1.15
+# Version 1.21
 # usage: pod2html [podfiles]
 # Will read the cwd and parse all files with .pod extension
 # if no arguments are given on the command line.
@@ -45,10 +45,12 @@ print OUT <<'!NO!SUBS!';
 #
 # Please send patches/fixes/features to me
 #
-#
-# 
+
+require 'find.pl';
+
 *RS = */;
 *ERRNO = *!;
+
 
 ################################################################################
 # Invoke with various levels of debugging possible
@@ -64,67 +66,151 @@ while ($ARGV[0]) {
 }
 
 ################################################################################
-# CONFIGURE
-#
+# CONFIGURE -  change the following to suit your OS and taste
+################################################################################
 # The beginning of the url for the anchors to the other sections.
 # Edit $type to suit.  It's configured for relative url's now.
 # Other possibilities are:
 # $type = '<A HREF="file://localhost/usr/local/htmldir/'; # file url
 # $type = '<A HREF="http://www.bozo.com/perl/manual/html/' # server
-#
-################################################################################
 
 $type = '<A HREF="';		
-$dir = ".";             # location of pods
 
-# look in these pods for things not found within the current pod
+################################################################################
+# location of all podfiles unless on command line
+# $installprivlib="HD:usr:local:lib:perl5"; # uncomment and reset for Mac
+# $installprivlib="C:\usr\local\lib\perl5"; # uncomment and reset for DOS (I hope)
+
+# $installprivlib="/usr/local/lib/perl5"; # Unix
+$installprivlib="./"; # Standard perl pod directory for intallation
+
+################################################################################
+# Where to write out the html files
+# $installhtmldir="HD:usr:local:lib:perl5:html"; # uncomment and reset for Mac
+# $installhtmldir="C:\usr\local\lib\perl5\html"; # uncomment and reset for DOS (I hope)
+$installhtmldir = "./";  
+
+# test for validness
+
+if(!(-d $installhtmldir)){
+    print "Installation directory $installhtmldir does not exist, using cwd\n";
+    print "Hit ^C now to edit this script and configure installhtmldir\n";
+    $installhtmldir = '.';
+}
+
+################################################################################
+# the html extension, change to htm for DOS 
+
+$htmlext = "html"; 
+
+################################################################################
+# arbitrary name for this group of pods
+
+$package = "perl";  
+
+################################################################################
+# look in these pods for links to things not found within the current pod
 # be careful tho, namespace collisions cause stupid links
 
-@inclusions = qw[
-     perlfunc perlvar perlrun perlop 
-];
+@inclusions = qw[ perlfunc perlvar perlrun perlop ];
+
+################################################################################
+# Directory path separator
+# $sep= ":"; # uncomment for Mac 
+# $sep= "\"; # uncomment for DOS 
+
+$sep= "/";          
+
+################################################################################
+# Create 8.3 html files if this equals 1
+
+$DOSify=0;          
+
+################################################################################
+# Create maximum 32 character html files if this equals 1
+$MACify=0;
+
 ################################################################################
 # END CONFIGURE
+# Beyond here be dragons.  :-)
 ################################################################################
 
 $A = {};  # The beginning of all things
 
-unless (@Pods) {
-    opendir(DIR,$dir)  or  die "Can't opendir $dir: $ERRNO";
-    @Pods = grep(/\.pod$/,readdir(DIR));
-    closedir(DIR) or die "Can't closedir $dir: $ERRNO";
+unless(@Pods){  
+    find($installprivlib);
+    splice(@Pods,$#Pods+1,0,@modpods);;
 }
-@Pods or die "aak, expected pods";
 
+@Pods or die "aak, expected pods";
+open(INDEX,">".$installhtmldir.$sep."index.".$htmlext) or 
+	(die "cant open index.$htmlext");
+print INDEX "\n<HTML>\n<HEAD>\n<TITLE>Index of all pods for $package</TITLE></HEAD>\n<BODY>\n";
+print INDEX "<H1>Index of all pods for $package</H1>\n<hr><UL>\n";
 # loop twice through the pods, first to learn the links, then to produce html
 for $count (0,1) {
     print STDERR "Scanning pods...\n" unless $count;
+loop1:
     foreach $podfh ( @Pods ) {
-	($pod = $podfh) =~ s/\.(?:pod|pm)$//;
+	$didindex = 0;
+	$refname = $podfh;
+	$refname =~ s/$installprivlib${sep}?//;
+	$refname =~ s/${sep}/::/g;
+	$refname =~ s/\.p(m|od)$//;
+	$refname =~ s/^pod:://;
+	$savename = $refname;
+	$refname =~ s/::/_/g;  
+	if($DOSify && !$count){  # shorten the name for DOS
+	    (length($refname) > 8) and ( $refname = substr($refname,0,8));
+	    while(defined($DosNames{$refname})){
+        	@refname=split(//,$refname);
+		# allow 25 of em
+                ($refname[$#refname] eq "z") and ($refname[$#refname]  = "a");
+                $refname[$#refname]++;
+                $refname=join('',@refname);
+                $refname =~ s/\W/_/g;
+	    }
+	    $DosNames{$refname} = 1;
+	    $Podnames{$savename} = $refname . ".$htmlext";
+	}
+	elsif(!$DOSify and !$count){
+	    $Podnames{$savename} = $refname . ".$htmlext";
+	}
+        $pod = $savename;
 	Debug("files", "opening 2 $podfh" );
-	print "Creating $pod.html from $podfh\n" if $count;
+	print "Creating $Podnames{$savename} from $podfh\n" if $count;
 	$RS = "\n=";         # grok pods by item (Nonstandard but effecient)
 	open($podfh,"<".$podfh)  || die "can't open $podfh: $ERRNO";
 	@all = <$podfh>;
 	close($podfh);
 	$RS = "\n";
-
-	$all[0] =~ s/^=//;
-	for (@all) { s/=$// }
-	$Podnames{$pod} = 1;
-	$in_list = 0;
-	$html = $pod.".html";
-	if ($count) {              # give us a html and rcs header
-	    open(HTML,">$html") || die "can't create $html: $ERRNO";
-	    print HTML '<!-- $Id$ -->',"\n",'<HTML><HEAD>',"\n";
-	    print HTML "<CENTER>" unless $NO_NS;
-	    print HTML "<TITLE>$pod</TITLE>";
-	    print HTML "</CENTER>" unless $NO_NS;
-	    print HTML "\n</HEAD>\n<BODY>";
+        ($all[0] =~ s/^=//) || pop(@all);
+        for ($i=0;$i <= $#all;$i++){ splice(@all,$i+1,1) unless 
+			(($all[$i] =~ s/=$//) && ($all[$i+1] !~ /^cut/)) ; # whoa..
 	}
+	$in_list = 0;
+	unless (grep(/NAME/,@all)){
+	    print STDERR "NAME header not found in $podfh, skipping\n";
+	    #delete($Podnames{$savename});
+	    next loop1;
+	}
+	if ($count) {   
+	    next unless length($Podnames{$savename});
+	    open(HTML,">".$installhtmldir.$sep.$Podnames{$savename}) or 
+		(die "can't create $Podnames{$savename}: $ERRNO");
+        print HTML "<HTML><HEAD>";
+        print HTML "<TITLE>$refname</TITLE>\n</HEAD>\n<BODY>";
+    }
+
 	for ($i = 0; $i <= $#all; $i++) {       # decide what to do with each chunk
 	    $all[$i] =~ /^(\w+)\s*(.*)\n?([^\0]*)$/ ;
 	    ($cmd, $title, $rest) = ($1,$2,$3);
+	    if(length($cmd)){$cutting =0;}
+	    next if $cutting;
+	    if(($title  =~ /NAME/) and ($didindex == 0) and $count){
+		print INDEX "<LI><A HREF=\"$Podnames{$savename}\">$rest</A>\n";
+		$didindex=1;
+	    }
 	    if ($cmd eq "item") {
 		if ($count ) { # producing html
 		    do_list("over",$all[$i],\$in_list,\$depth) unless $depth;
@@ -152,7 +238,7 @@ for $count (0,1) {
 		if ($count) {  # producing html
 		    ($depth) or next; # just skip it
 		    do_list("back",$all[$i+1],\$in_list,\$depth);
-		    do_rest($title.$rest);
+		    do_rest("$title$rest");
 		}
 	    }
 	    elsif ($cmd =~ /^cut/) {
@@ -162,7 +248,7 @@ for $count (0,1) {
                 if ($count) {  # producing html
                     if ($title =~ s/^html//) {
                         $in_html =1;
-                        do_rest($title.$rest);
+                        do_rest("$title$rest");
                     }
                 }
             }
@@ -189,6 +275,7 @@ for $count (0,1) {
 	}
     }
 }
+print INDEX "\n</UL></BODY>\n</HTML>\n";
 
 sub do_list{   # setup a list type, depending on some grok logic
     my($which,$next_one,$list_type,$depth) = @_;
@@ -210,7 +297,7 @@ sub do_list{   # setup a list type, depending on some grok logic
 	}
 
 	print HTML qq{\n};
-	print HTML $$list_type eq 'DL' ? qq{<DL COMPACT>} : qq{<$$list_type>};
+	print HTML qq{<$$list_type>};
 	$$depth++;
     }
     elsif ($which eq "back") {
@@ -221,28 +308,57 @@ sub do_list{   # setup a list type, depending on some grok logic
 
 sub do_hdr{   # headers
     my($num,$title,$rest,$depth) = @_;
+    my($savename,$restofname);
     print HTML qq{<p><hr>\n} if $num == 1;
+    ($savename = $title) =~ s/^(\w+)([\s,]+.*)/$1/;
+    $restofname = $2;
+    (defined($Podnames{$savename})) ? ($savename = $savename) : ($savename = 0);
     process_thing(\$title,"NAME");
     print HTML qq{\n<H$num> };
-    print HTML $title; 
+    if($savename){
+	print HTML "<A HREF=\"$Podnames{$savename}\">$savename$restofname</A>"; 
+    }
+    else{
+        print HTML $title; 
+    }
     print HTML qq{</H$num>\n};
     do_rest($rest);
 }
 
 sub do_item{  # list items
     my($title,$rest,$list_type) = @_;
-    my $bullet_only = $title eq '*' and $list_type eq 'UL';
+    my $bullet_only;
+    $bullet_only = ($title eq '*' and $list_type eq 'UL') ? 1 : 0;
+    my($savename);
+    $savename = $title;
+    (defined($Podnames{$savename})) ? ($savename = $savename) : ($savename = 0);
     process_thing(\$title,"NAME");
     if ($list_type eq "DL") {
-	print HTML qq{\n<DT><STRONG>\n};
-	print HTML $title; 
-	print HTML qq{\n</STRONG>\n};
+	print HTML qq{\n<DT>\n};
+	if($savename){
+	    print HTML "<A HREF=\"$Podnames{$savename}\">$savename $rest</A>\n</DT>"; 
+	}
+
+	else{
+	    (print HTML qq{\n<STRONG>\n}) unless ($title =~ /STRONG/);
+	    print HTML $title; 
+		if($title !~ /STRONG/){
+        	print HTML "\n</STRONG></DT>\n";
+		} else {
+			print HTML "</DT>\n";
+		}
+	}
 	print HTML qq{<DD>\n};
     }
     else {
 	print HTML qq{\n<LI>};
 	unless ($bullet_only or $list_type eq "OL") {
-	    print HTML $title,"\n";
+	    if($savename){
+		print HTML "<A HREF=\"$savename.$htmlext\">$savename</A>"; 
+	    }
+	    else{
+		print HTML $title,"\n";
+	    }
 	}
     }
     do_rest($rest);
@@ -265,7 +381,7 @@ sub do_rest{   # the rest of the chunk handled here
 	    foreach $line (@lines) { 
 		($line =~ /^\s+(\w*)\t(.*)/) && (($key,$rem) = ($1,$2));
 		print HTML defined($Podnames{$key}) 
-				?  "<LI>$type$key.html\">$key<\/A>\t$rem</LI>\n" 
+				?  "<LI>$type$Podnames{$key}\">$key<\/A>\t$rem</LI>\n" 
 				: "<LI>$line</LI>\n";
 	    }
 	    print HTML qq{</UL>\n};
@@ -276,7 +392,7 @@ sub do_rest{   # the rest of the chunk handled here
 		$inpre=1;
 	    }
 	    else {                         # Still cant beat XMP.  Yes, I know 
-		print HTML qq{\n<XMP>\n}; # it's been obsoleted... suggestions?
+		print HTML qq{\n<XMP>\n};      # it's been obsoleted... suggestions?
 		$inpre = 0;
 	    }
 	    while (defined($paras[$p])) {
@@ -305,6 +421,7 @@ sub do_rest{   # the rest of the chunk handled here
 	    @lines = split(/\n/,$paras[$p]);
 	    foreach $line (@lines) {
                 process_thing(\$line,"HTML");
+		$line =~ s/STRONG([^>])/STRONG>$1/;  # lame attempt to fix strong
 		print HTML qq{$line\n};
 	    }
 	}
@@ -323,7 +440,6 @@ sub scan_thing{           # scan a chunk for later references
     my($cmd,$title,$pod) = @_;
     $_ = $title;
     s/\n$//;
-    s/E<(\d+)>/&#$1;/g;
     s/E<(.*?)>/&$1;/g;
     # remove any formatting information for the headers
     s/[SFCBI]<(.*?)>/$1/g;         
@@ -380,21 +496,27 @@ sub picrefs {
 	    } 
 	} 
 	if (length($key)) {
-            ($pod2, $num) = $value =~ /^(.*)_(\S+_\d+)$/;
+		($pod2, $num) = $value =~ /^(.*)_(\S+_\d+)$/;
 	    if ($htype eq "NAME") {  
-		return "\n<A NAME=\"".$value."\">\n$bigkey</A>\n"
+			return "\n<A NAME=\"".$value."\">\n$bigkey</A>\n"
 	    }
 	    else {
-		return "\n$type$pod2.html\#".$value."\">$bigkey<\/A>\n";
+                1; # break here
+			return "\n$type$Podnames{$pod2}\#".$value."\">$bigkey<\/A>\n";
 	    }
 	} 
     }
     if ($char =~ /[IF]/) {
 	return "<EM>$bigkey</EM>";
     } elsif ($char =~ /C/) {
-	return "<CODE>$bigkey</CODE>";
+		return "<CODE>$bigkey</CODE>";
     } else {
-	return "<STRONG>$bigkey</STRONG>";
+		if($bigkey =~ /STRONG/){
+	    	return $bigkey;
+		}
+		else {
+	    	return "<STRONG>$bigkey</STRONG>";
+		}
     }
 } 
 
@@ -436,7 +558,7 @@ sub lrefs {
     $item =~ s/\(\)$//;
     if (!$item) {
     	if (!defined $section && defined $Podnames{$page}) {
-	    return "\n$type$page.html\">\nthe <EM>$page</EM> manpage<\/A>\n";
+	    return "\n$type$Podnames{$page}\">\nthe <EM>$page</EM> manpage<\/A>\n";
 	} else {
 	    (warn "Bizarre entry $page/$item") if $Debug;
 	    return "the <EM>$_[0]</EM>  manpage\n";
@@ -454,18 +576,18 @@ sub lrefs {
 	undef $value;
 	if ($ref eq "Items") {
 	    if (defined($value = $A->{$podname}->{$ref}->{$item})) {
-		($pod2,$num) = split(/_/,$value,2);
-		return (($pod eq $pod2) && ($htype eq "NAME"))
-	    	? "\n<A NAME=\"".$value."\">\n$text</A>\n"
-	    	: "\n$type$pod2.html\#".$value."\">$text<\/A>\n";
-            }
-        } 
+			($pod2,$num) = split(/_/,$value,2);  # break here
+			return (($pod eq $pod2) && ($htype eq "NAME"))
+	    		? "\n<A NAME=\"".$value."\">\n$text</A>\n"
+	    		: "\n$type$Podnames{$pod2}\#".$value."\">$text<\/A>\n";
+        }
+    } 
 	elsif ($ref eq "Headers") {
 	    if (defined($value = $A->{$podname}->{$ref}->{$item})) {
-		($pod2,$num) = split(/_/,$value,2);
+		($pod2,$num) = split(/_/,$value,2); # break here
 		return (($pod eq $pod2) && ($htype eq "NAME")) 
 	    	? "\n<A NAME=\"".$value."\">\n$text</A>\n"
-	    	: "\n$type$pod2.html\#".$value."\">$text<\/A>\n";
+	    	: "\n$type$Podnames{$pod2}\#".$value."\">$text<\/A>\n";
             }
 	}
     }
@@ -481,11 +603,16 @@ sub varrefs {
 	    Debug("vars", "way cool -- var ref on $var");
 	    return (($pod eq $pod2) && ($htype eq "NAME"))  # INHERIT $_, $pod
 		? "\n<A NAME=\"".$value."\">\n$var</A>\n"
-		: "\n$type$pod2.html\#".$value."\">$var<\/A>\n";
+		: "\n$type$Podnames{$pod2}\#".$value."\">$var<\/A>\n";
 	}
     }
     Debug( "vars", "bummer, $var not a var");
-    return "<STRONG>$var</STRONG>";
+    if($var =~ /STRONG/){
+		return $var;
+    }
+    else{
+		return "<STRONG>$var</STRONG>";
+    }
 } 
 
 sub gensym {
@@ -503,13 +630,13 @@ sub gensym {
 sub pre_escapes {  # twiddle these, and stay up late  :-)
     my($thing) = @_;
     for ($$thing) { 
-    s/([\200-\377])/noremap("&#".ord($1).";")/ge;
-	s/"(.*?)"/``$1''/gs;
-	s/&/noremap("&amp;")/ge;
-	s/<</noremap("&lt;&lt;")/eg;
-	s/([^ESIBLCF])</$1\&lt\;/g;
-	s/E<(\d+)>/\&#$1\;/g;                     # embedded numeric special
-	s/E<([^\/][^<>]*)>/\&$1\;/g;              # embedded special
+		s/([\200-\377])/noremap("&#".ord($1).";")/ge;
+		s/"(.*?)"/``$1''/gs;
+		s/&/noremap("&amp;")/ge;
+		s/<</noremap("&lt;&lt;")/eg;
+		s/([^ESIBLCF])</$1\&lt\;/g;
+		s/E<(\d+)>/\&#$1\;/g;                     # embedded numeric special
+		s/E<([^\/][^<>]*)>/\&$1\;/g;              # embedded special
     }
 }
 sub noremap {   # adding translator for hibit chars soon
@@ -546,6 +673,15 @@ sub trim {
         s/\s\n?$//;
     }
 }
+sub wanted {
+    my $name = $name;
+    if (-f $_) {
+        if ($name =~ /\.p(m|od)$/){
+            push(@modpods, $name) if ($name =~ /\.p(m|od)$/);
+	}
+    }
+}
+
 !NO!SUBS!
 
 close OUT or die "Can't close $file: $!";
