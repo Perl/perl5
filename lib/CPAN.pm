@@ -1185,7 +1185,7 @@ index    re-reads the index files
 sub _binary_extensions {
     my($self) = shift @_;
     my(@result,$module,%seen,%need,$headerdone);
-    my $isaperl = q{perl5[._-]\\d{3}(_[0-4][0-9])?\\.tar[._-]gz$};
+    my $isaperl = q{perl5[._-]\\d{3}(?:(?:_[0-4][0-9])|(?:-beta\\d?))?\\.tar[._-]gz$};
     for $module ($self->expand('Module','/./')) {
 	my $file  = $module->cpan_file;
 	next if $file eq "N/A";
