@@ -1481,13 +1481,10 @@ write one easily.
 
     my $test = 1;
     sub ok {
-        my($ok) = @_;
+        my($ok, $name) = @_;
 
         # You have to do it this way or VMS will get confused.
-        my $out = '';
-        $out =  "not " unless $ok;
-        $out .= "ok $test\n";
-        print $out;
+        print $ok ? "ok $test - $name\n" : "not ok $test - $name\n";
 
         printf "# Failed test at line %d\n", (caller)[2] unless $ok;
 
@@ -1502,16 +1499,19 @@ so instead of this:
 
 we can write the (somewhat) more sensible:
 
- ok( "1.20.300.4000" eq sprintf "%vd", pack("U*",1,20,300,4000) );
+ ok( "1.20.300.4000" eq sprintf "%vd", pack("U*",1,20,300,4000), 
+                                       "U* produces unicode" );
 
 Now we'll test that we got that space-at-the-beginning business right:
 
- ok( "1.20.300.4000" eq sprintf "%vd", pack("  U*",1,20,300,4000) );
+ ok( "1.20.300.4000" eq sprintf "%vd", pack("  U*",1,20,300,4000),
+                                       "  with spaces at the beginning" );
 
 And finally we'll test that we don't make Unicode strings if C<U> is B<not>
 the first active format:
 
- ok( v1.20.300.4000 ne  sprintf "%vd", pack("C0U*",1,20,300,4000) );
+ ok( v1.20.300.4000 ne  sprintf "%vd", pack("C0U*",1,20,300,4000),
+                                       "U* not first isn't unicode" );
 
 Mustn't forget to change the number of tests which appears at the top, or
 else the automated tester will get confused:
