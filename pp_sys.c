@@ -3311,6 +3311,7 @@ PP(pp_fttext)
       really_filename:
 	PL_statgv = Nullgv;
 	PL_laststatval = -1;
+	PL_laststype = OP_STAT;
 	sv_setpv(PL_statname, SvPV(sv, n_a));
 	if (!(fp = PerlIO_open(SvPVX(PL_statname), "r"))) {
 	    if (ckWARN(WARN_NEWLINE) && strchr(SvPV(sv, n_a), '\n'))

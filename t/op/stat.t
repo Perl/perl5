@@ -9,7 +9,7 @@ BEGIN {
 use Config;
 use File::Spec;
 
-plan tests => 69;
+plan tests => 74;
 
 my $Perl = which_perl();
 
@@ -376,3 +376,33 @@ unlink $tmpfile or print "# unlink failed: $!\n";
 # bug id 20011101.069
 my @r = \stat(".");
 is(scalar @r, 13,   'stat returns full 13 elements');
+
+SKIP: {
+    skip "No lstat", 2 unless $Config{d_lstat};
+
+    stat $0;
+    eval { lstat _ };
+    ok( $@ =~ /^The stat preceding lstat\(\) wasn't an lstat/,
+	'lstat _ croaks after stat' );
+    eval { -l _ };
+    ok( $@ =~ /^The stat preceding -l _ wasn't an lstat/,
+	'-l _ croaks after stat' );
+
+    eval { lstat STDIN };
+    ok( $@ =~ /^The stat preceding lstat\(\) wasn't an lstat/,
+	'lstat FILEHANDLE croaks' );
+
+    # bug id 20020124.004
+    # If we have d_lstat, we should have symlink()
+    my $linkname = 'dolzero';
+    symlink $0, $linkname or die "# Can't symlink $0: $!";
+    lstat $linkname;
+    -T _;
+    eval { lstat _ };
+    ok( $@ =~ /^The stat preceding lstat\(\) wasn't an lstat/,
+	'lstat croaks after -T _' );
+    eval { -l _ };
+    ok( $@ =~ /^The stat preceding -l _ wasn't an lstat/,
+	'-l _ croaks after -T _' );
+    unlink $linkname or print "# unlink $linkname failed: $!\n";
+}
