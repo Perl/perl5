@@ -332,7 +332,7 @@ B<[@modules]> is an array ref, same as additional arguments mentioned above.
 
 
 This will generate code with an B<xs_init> function that glues the perl B<Socket::bootstrap> function 
-to the C B<boot_Socket> function and writes it to a file named "xsinit.c".
+to the C B<boot_Socket> function and writes it to a file named F<xsinit.c>.
 
 Note that B<DynaLoader> is a special case where it must call B<boot_DynaLoader> directly.
 
@@ -378,7 +378,7 @@ we should find B<auto/Socket/Socket.a>
 When looking for B<DBD::Oracle> relative to a search path,
 we should find B<auto/DBD/Oracle/Oracle.a>
 
-Keep in mind, you can always supply B</my/own/path/ModuleName.a>
+Keep in mind that you can always supply B</my/own/path/ModuleName.a>
 as an additional linker argument.
 
 B<-->  E<lt>list of linker argsE<gt>
@@ -392,7 +392,7 @@ When invoked with parameters the following are accepted and optional:
 
 C<ldopts($std,[@modules],[@link_args],$path)>
 
-Where,
+Where:
 
 B<$std> is boolean, equivalent to the B<-std> option.  
 

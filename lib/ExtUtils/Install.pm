@@ -339,7 +339,7 @@ There are two keys with a special meaning in the hash: "read" and
 target files to the file named by C<$hashref-E<gt>{write}>. If there is
 another file named by C<$hashref-E<gt>{read}>, the contents of this file will
 be merged into the written file. The read and the written file may be
-identical, but on AFS it is quite likely, people are installing to a
+identical, but on AFS it is quite likely that people are installing to a
 different directory than the one where the files later appear.
 
 install_default() takes one or less arguments.  If no arguments are 
@@ -352,7 +352,7 @@ The argument-less form is convenient for install scripts like
 
   perl -MExtUtils::Install -e install_default Tk/Canvas
 
-Assuming this command is executed in a directory with populated F<blib> 
+Assuming this command is executed in a directory with a populated F<blib> 
 directory, it will proceed as if the F<blib> was build by MakeMaker on 
 this machine.  This is useful for binary distributions.
 

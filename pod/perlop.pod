@@ -963,7 +963,7 @@ notably if the result of qr() is used standalone:
 	my @compiled = map qr/$_/i, @$patterns;
 	grep {
 	    my $success = 0;
-	    foreach my $pat @compiled {
+	    foreach my $pat (@compiled) {
 		$success = 1, last if /$pat/;
 	    }
 	    $success;
