@@ -277,7 +277,7 @@ Digest::MD5
 
 Encode - significant updates on the encoding pragma functionality
 (tr/// and the DATA filehandle, formats).  The ISO 8859-6 conversion
-table has been corrected (the 0x30..0x39 errorneously mapped to
+table has been corrected (the 0x30..0x39 erroneously mapped to
 U+0660..U+0669, instead of U+0030..U+0039), the UTF7 encoding has
 been added.
 
@@ -363,7 +363,7 @@ but simultaneously many system utilities may depend on that
 exact version of Perl, so better not to overwrite it.
 
 One can now specify installation directories for site and vendor man
-and HTML pages, and site and vendor scripts.  See F<INSTALL.>
+and HTML pages, and site and vendor scripts.  See F<INSTALL>.
 
 gcc versions 3.x introduced a new warning that caused a lot of noise
 during Perl compilation: C<gcc -Ialreadyknowndirectory (warning:
@@ -371,16 +371,16 @@ changing search order)>.  This warning has now been avoided by
 Configure weeding out such directories before the compilation.
 
 One can now build subsets of Perl core modules by using the
-Configure flags C<-Dnoextensions=> and C<-Donlyextensions=>,
-see F<INSTALL>
+Configure flags C<-Dnoextensions=...> and C<-Donlyextensions=...>,
+see F<INSTALL>.
 
 =head2 Platform-specific enhancements
 
-In Cygwin Perl can now be built with threads (Configure -Duseithreads).
+In Cygwin Perl can now be built with threads (C<Configure -Duseithreads>).
 
 In newer FreeBSD releases Perl 5.8.0 compilation failed because of
-trying to use <malloc.h>, which in FreeBSD is just a dummy file, and
-a fatal error to even try to use.  Now <malloc.h> is not used.
+trying to use F<malloc.h>, which in FreeBSD is just a dummy file, and
+a fatal error to even try to use.  Now F<malloc.h> is not used.
 
 Perl is now known to build also in Hitachi HI-UXMPP.
 
@@ -399,10 +399,10 @@ Perl has been ported to IBM's OS/400 PASE environment.  The best way
 to build a Perl for PASE is to use an AIX host as a cross-compilation
 environment.  See README.os400.
 
-Yet another cross-compilation option has been added, now Perl builds
-on OpenZaurus, see the Cross subdirectory.
+Yet another cross-compilation option has been added: now Perl builds
+on OpenZaurus.  See the Cross subdirectory.
 
-Tru64 gcc 3.2.1 -O3 toke.c dropped to -O2 because of gigantic
+Tru64 gcc 3.2.1 C<-O3 toke.c> dropped to C<-O2> because of gigantic
 memory use otherwise.
 
 Tru64 can now build Perl with the newer Berkeley DBs.
@@ -518,7 +518,7 @@ value in pieces, each 255-byte piece (up to 128 of them) being an
 element in the search list. When doing a lookup in %ENV from within
 Perl, the elements are combined into a single value.  The existing
 VMS-specific ability to access individual elements of a search list
-logical name via the ENV{'foo;N'} syntax (where N is the search list
+logical name via the $ENV{'foo;N'} syntax (where N is the search list
 index) is unimpaired.
 
 =item *
@@ -664,7 +664,7 @@ UTF-8 length and position cache: to speed up the handling of Unicode
 extension bypasses the official APIs and directly modifies the PV
 of an SV: the UTF-8 cache does not get cleared as it should.
 
-APIs obsoleted in Perl 5.8.0s like sv_2pv, sv_catpvn, sv_catsv,
+APIs obsoleted in Perl 5.8.0, like sv_2pv, sv_catpvn, sv_catsv,
 sv_setsv, are again available.
 
 Certain Perl core C APIs like cxinc and regatom are no longer available.
@@ -725,7 +725,7 @@ doing well.
 Tied hashes do not currently return anything useful in scalar context,
 for example when used as boolean tests:
 
-	if (%tiedhash) { ... }
+	if (%tied_hash) { ... }
 
 The current nonsensical behaviour is always to return false,
 regardless of whether the hash is empty or has elements.
