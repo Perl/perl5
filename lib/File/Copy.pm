@@ -83,7 +83,7 @@ sub copy {
     if ($from_a_handle) {
 	*FROM = *$from{FILEHANDLE};
     } else {
-	$from = "./$from" if $from =~ /^\s/;
+	$from = "./$from" if $from =~ /^\s/s;
 	open(FROM, "< $from\0") or goto fail_open1;
 	binmode FROM or die "($!,$^E)";
 	$closefrom = 1;
@@ -92,7 +92,7 @@ sub copy {
     if ($to_a_handle) {
 	*TO = *$to{FILEHANDLE};
     } else {
-	$to = "./$to" if $to =~ /^\s/;
+	$to = "./$to" if $to =~ /^\s/s;
 	open(TO,"> $to\0") or goto fail_open2;
 	binmode TO or die "($!,$^E)";
 	$closeto = 1;

@@ -38,6 +38,7 @@ POD = \
 	perlreftut.pod	\
 	perldsc.pod	\
 	perllol.pod	\
+	perlboot.pod	\
 	perltoot.pod	\
 	perltootc.pod	\
 	perlobj.pod	\
@@ -102,6 +103,7 @@ MAN = \
 	perlreftut.man	\
 	perldsc.man	\
 	perllol.man	\
+	perlboot.man	\
 	perltoot.man	\
 	perltootc.man	\
 	perlobj.man	\
@@ -166,6 +168,7 @@ HTML = \
 	perlreftut.html	\
 	perldsc.html	\
 	perllol.html	\
+	perlboot.html	\
 	perltoot.html	\
 	perltootc.html	\
 	perlobj.html	\
@@ -230,6 +233,7 @@ TEX = \
 	perlreftut.tex	\
 	perldsc.tex	\
 	perllol.tex	\
+	perlboot.tex	\
 	perltoot.tex	\
 	perltootc.tex	\
 	perlobj.tex	\

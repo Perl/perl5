@@ -3291,8 +3291,46 @@ Perl_find_script(pTHX_ char *scriptname, bool dosearch, char **search_ext, I32 f
     return (scriptname ? savepv(scriptname) : Nullch);
 }
 
+#ifndef PERL_GET_CONTEXT_DEFINED
+
+void *
+Perl_get_context(void)
+{
+#if defined(USE_THREADS) || defined(USE_ITHREADS)
+#  ifdef OLD_PTHREADS_API
+    pthread_addr_t t;
+    if (pthread_getspecific(PL_thr_key, &t))
+	Perl_croak_nocontext("panic: pthread_getspecific");
+    return (void*)t;
+#  else
+#  ifdef I_MACH_CTHREADS
+    return (void*)cthread_data(cthread_self());
+#  else
+    return (void*)pthread_getspecific(PL_thr_key);
+#  endif
+#  endif
+#else
+    return (void*)NULL;
+#endif
+}
+
+void
+Perl_set_context(void *t)
+{
+#if defined(USE_THREADS) || defined(USE_ITHREADS)
+#  ifdef I_MACH_CTHREADS
+    cthread_set_data(cthread_self(), t);
+#  else
+    if (pthread_setspecific(PL_thr_key, t))
+	Perl_croak_nocontext("panic: pthread_setspecific");
+#  endif
+#endif
+}
+
+#endif /* !PERL_GET_CONTEXT_DEFINED */
 
 #ifdef USE_THREADS
+
 #ifdef FAKE_THREADS
 /* Very simplistic scheduler for now */
 void
@@ -3366,18 +3404,6 @@ Perl_cond_wait(pTHX_ perl_cond *cp)
     thr->i.prev_run->i.next_run = thr->i.next_run;
 }
 #endif /* FAKE_THREADS */
-
-#ifdef PTHREAD_GETSPECIFIC_INT
-struct perl_thread *
-Perl_getTHR(pTHX)
-{
-    pthread_addr_t t;
-
-    if (pthread_getspecific(PL_thr_key, &t))
-	Perl_croak(aTHX_ "panic: pthread_getspecific");
-    return (struct perl_thread *) t;
-}
-#endif
 
 MAGIC *
 Perl_condpair_magic(pTHX_ SV *sv)

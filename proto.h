@@ -32,6 +32,9 @@ PERL_CALLCONV Free_t	Perl_mfree(Malloc_t where);
 PERL_CALLCONV MEM_SIZE	Perl_malloced_size(void *p);
 #endif
 
+PERL_CALLCONV void*	Perl_get_context(void);
+PERL_CALLCONV void	Perl_set_context(void *thx);
+
 END_EXTERN_C
 
 /* functions with flag 'n' should come before here */

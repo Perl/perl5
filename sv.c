@@ -7338,10 +7338,10 @@ perl_clone_using(PerlInterpreter *proto_perl, UV flags,
 #  ifdef PERL_OBJECT
     CPerlObj *pPerl = new(ipM) CPerlObj(ipM, ipMS, ipMP, ipE, ipStd, ipLIO,
 					ipD, ipS, ipP);
-    PERL_SET_INTERP(pPerl);
+    PERL_SET_THX(pPerl);
 #  else		/* !PERL_OBJECT */
     PerlInterpreter *my_perl = (PerlInterpreter*)(*ipM->pMalloc)(ipM, sizeof(PerlInterpreter));
-    PERL_SET_INTERP(my_perl);
+    PERL_SET_THX(my_perl);
 
 #    ifdef DEBUGGING
     memset(my_perl, 0xab, sizeof(PerlInterpreter));
@@ -7369,7 +7369,7 @@ perl_clone_using(PerlInterpreter *proto_perl, UV flags,
     SV *sv;
     SV **svp;
     PerlInterpreter *my_perl = (PerlInterpreter*)PerlMem_malloc(sizeof(PerlInterpreter));
-    PERL_SET_INTERP(my_perl);
+    PERL_SET_THX(my_perl);
 
 #    ifdef DEBUGGING
     memset(my_perl, 0xab, sizeof(PerlInterpreter));
