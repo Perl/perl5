@@ -2117,7 +2117,7 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp)
 			/* No compiled RE interpolated, has runtime
 			   components ===> unsafe.  */
 			FAIL("Eval-group not allowed at runtime, use re 'eval'");
-		    if (PL_tainted)
+		    if (PL_tainting && PL_tainted)
 			FAIL("Eval-group in insecure regular expression");
 		}
 		
