@@ -302,17 +302,23 @@ To ensure that the output is explicitly rendered in the encoding you
 desire (and to avoid the warning), open the stream with the desired
 encoding. Some examples:
 
-    open FH, ">:ucs2",      "file"
-    open FH, ">:utf8",      "file";
-    open FH, ">:Shift-JIS", "file";
+    open FH, ">:utf8", "file";
+
+    open FH, ">:encoding(ucs2)",      "file";
+    open FH, ">:encoding(UTF-8)",     "file";
+    open FH, ">:encoding(shift_jis)", "file";
 
 and on already open streams use C<binmode()>:
 
-    binmode(STDOUT, ":ucs2");
     binmode(STDOUT, ":utf8");
-    binmode(STDOUT, ":Shift-JIS");
 
-See documentation for the C<Encode> module for many supported encodings.
+    binmode(STDOUT, ":encoding(ucs2)");
+    binmode(STDOUT, ":encoding(UTF-8)");
+    binmode(STDOUT, ":encoding(shift_jis)");
+
+See L<PerlIO> for the C<:utf8> layer;
+L<PerlIO::encoding> and L<Encode::PerlIO> for the C<:encoding()> layer;
+L<Encode::Supported> for many encodings supported by the C<Encode> module.
 
 Reading in a file that you know happens to be encoded in one of the
 Unicode encodings does not magically turn the data into Unicode in
@@ -322,7 +328,7 @@ opening files
     open(my $fh,'<:utf8', 'anything');
     my $line_of_unicode = <$fh>;
 
-    open(my $fh,'<:Big5', 'anything');
+    open(my $fh,'<:encoding(Big5)', 'anything');
     my $line_of_unicode = <$fh>;
 
 The I/O disciplines can also be specified more flexibly with
