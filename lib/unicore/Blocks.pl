@@ -12,7 +12,7 @@ return <<'END';
 0300	036F	Combining Diacritical Marks
 0370	03FF	Greek and Coptic
 0400	04FF	Cyrillic
-0500	052F	Cyrillic Supplementary
+0500	052F	Cyrillic Supplement
 0530	058F	Armenian
 0590	05FF	Hebrew
 0600	06FF	Arabic

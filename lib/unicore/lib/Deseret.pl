@@ -6,8 +6,8 @@
 # This file supports:
 # 	\p{Deseret} (and fuzzy permutations)
 # 
-# Meaning: Script 'DESERET'
+# Meaning: Script 'Deseret'
 #
 return <<'END';
-10400	1044F	DESERET
+10400	1044F	Deseret
 END

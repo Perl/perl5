@@ -11,11 +11,11 @@
   \p{Alpha}                                  [[:Alpha:]]
   \p{Any}                                    Alias for \p{Any} ([\x{0000}-\x{10FFFF}])
   \p{Any}                                    [\x{0000}-\x{10FFFF}]
-* \p{Arabic}                                 Script 'ARABIC'
-* \p{Armenian}                               Script 'ARMENIAN'
+* \p{Arabic}                                 Script 'Arabic'
+* \p{Armenian}                               Script 'Armenian'
 * \p{AsciiHexDigit}                          Extended property 'ASCII_Hex_Digit'
   \p{Assigned}                               All assigned code points
-* \p{Bengali}                                Script 'BENGALI'
+* \p{Bengali}                                Script 'Bengali'
   \p{BidiAL}                                 Bi-directional category 'AL'
   \p{BidiAN}                                 Bi-directional category 'AN'
   \p{BidiBN}                                 Bi-directional category 'BN'
@@ -37,27 +37,27 @@
   \p{BidiS}                                  Bi-directional category 'S'
   \p{BidiWS}                                 Bi-directional category 'WS'
   \p{Blank}                                  [[:Blank:]]
-* \p{Bopomofo}                               Script 'BOPOMOFO'
-* \p{Braille}                                Script 'BRAILLE'
-* \p{Buhid}                                  Script 'BUHID'
-* \p{CanadianAboriginal}                     Script 'CANADIAN_ABORIGINAL'
+* \p{Bopomofo}                               Script 'Bopomofo'
+* \p{Braille}                                Script 'Braille'
+* \p{Buhid}                                  Script 'Buhid'
+* \p{CanadianAboriginal}                     Script 'Canadian_Aboriginal'
   \p{Canon}                                  Decomposes to multiple characters
 * \p{Cc}                                     Alias for \p{Cc} (General Category 'Cc')
   \p{Cc}                                     General Category 'Cc'
 * \p{Cf}                                     Alias for \p{Cf} (General Category 'Cf')
   \p{Cf}                                     General Category 'Cf'
-* \p{Cherokee}                               Script 'CHEROKEE'
+* \p{Cherokee}                               Script 'Cherokee'
   \p{Cntrl}                                  [[:Cntrl:]]
 * \p{Cn}                                     Alias for \p{Cn} (General Category 'Cn' [not functional in Perl])
   \p{Cn}                                     General Category 'Cn' [not functional in Perl]
-* \p{Common}                                 Pseudo-Script of codepoints not in other Unicode scripts
+* \p{Common}                                 Script 'Common'
   \p{Compat}                                 Compatible with a more-basic character
 * \p{Co}                                     Alias for \p{Co} (General Category 'Co')
   \p{Co}                                     General Category 'Co'
 * \p{Cs}                                     Alias for \p{Cs} (General Category 'Cs')
   \p{Cs}                                     General Category 'Cs'
-* \p{Cypriot}                                Script 'CYPRIOT'
-* \p{Cyrillic}                               Script 'CYRILLIC'
+* \p{Cypriot}                                Script 'Cypriot'
+* \p{Cyrillic}                               Script 'Cyrillic'
 * \p{C}                                      Alias for \p{C} (Major Category 'C')
   \p{C}                                      Major Category 'C'
   \p{DCcircle}                               Compatible with 'circle'
@@ -78,25 +78,25 @@
   \p{DCwide}                                 Compatible with 'wide'
 * \p{Dash}                                   Extended property 'Dash'
 * \p{Deprecated}                             Extended property 'Deprecated'
-* \p{Deseret}                                Script 'DESERET'
-* \p{Devanagari}                             Script 'DEVANAGARI'
+* \p{Deseret}                                Script 'Deseret'
+* \p{Devanagari}                             Script 'Devanagari'
 * \p{Diacritic}                              Extended property 'Diacritic'
   \p{Digit}                                  [[:Digit:]]
-* \p{Ethiopic}                               Script 'ETHIOPIC'
+* \p{Ethiopic}                               Script 'Ethiopic'
 * \p{Extender}                               Extended property 'Extender'
-* \p{Georgian}                               Script 'GEORGIAN'
-* \p{Gothic}                                 Script 'GOTHIC'
+* \p{Georgian}                               Script 'Georgian'
+* \p{Gothic}                                 Script 'Gothic'
 * \p{GraphemeLink}                           Extended property 'Grapheme_Link'
   \p{Graph}                                  [[:Graph:]]
-* \p{Greek}                                  Script 'GREEK'
-* \p{Gujarati}                               Script 'GUJARATI'
-* \p{Gurmukhi}                               Script 'GURMUKHI'
-* \p{Hangul}                                 Script 'HANGUL'
-* \p{Hanunoo}                                Script 'HANUNOO'
-* \p{Han}                                    Script 'HAN'
-* \p{Hebrew}                                 Script 'HEBREW'
+* \p{Greek}                                  Script 'Greek'
+* \p{Gujarati}                               Script 'Gujarati'
+* \p{Gurmukhi}                               Script 'Gurmukhi'
+* \p{Hangul}                                 Script 'Hangul'
+* \p{Hanunoo}                                Script 'Hanunoo'
+* \p{Han}                                    Script 'Han'
+* \p{Hebrew}                                 Script 'Hebrew'
 * \p{HexDigit}                               Extended property 'Hex_Digit'
-* \p{Hiragana}                               Script 'HIRAGANA'
+* \p{Hiragana}                               Script 'Hiragana'
 * \p{Hyphen}                                 Extended property 'Hyphen'
 * \p{IdContinue}                             [\p{ID_Start}\p{Mn}\p{Mc}\p{Nd}\p{Pc}]
 * \p{IdStart}                                [\p{Ll}\p{Lu}\p{Lt}\p{Lm}\p{Lo}\p{Nl}]
@@ -135,7 +135,7 @@
 * \p{InControlPictures}                      Block 'Control Pictures'
 * \p{InCurrencySymbols}                      Block 'Currency Symbols'
 * \p{InCypriotSyllabary}                     Block 'Cypriot Syllabary'
-* \p{InCyrillicSupplementary}                Block 'Cyrillic Supplementary'
+* \p{InCyrillicSupplement}                   Block 'Cyrillic Supplement'
 * \p{InCyrillic}                             Block 'Cyrillic'
 * \p{InDeseret}                              Block 'Deseret'
 * \p{InDevanagari}                           Block 'Devanagari'
@@ -228,16 +228,17 @@
 * \p{InYiRadicals}                           Block 'Yi Radicals'
 * \p{InYiSyllables}                          Block 'Yi Syllables'
 * \p{InYijingHexagramSymbols}                Block 'Yijing Hexagram Symbols'
-* \p{Inherited}                              Script 'INHERITED'
+* \p{Inherited}                              Script 'Inherited'
 * \p{JoinControl}                            Extended property 'Join_Control'
-* \p{Kannada}                                Script 'KANNADA'
-* \p{Katakana}                               Script 'KATAKANA'
-* \p{Khmer}                                  Script 'KHMER'
+* \p{Kannada}                                Script 'Kannada'
+* \p{KatakanaOrHiragana}                     Script 'Katakana_Or_Hiragana'
+* \p{Katakana}                               Script 'Katakana'
+* \p{Khmer}                                  Script 'Khmer'
   \p{L&}                                     [\p{Ll}\p{Lu}\p{Lt}]
-* \p{Lao}                                    Script 'LAO'
-* \p{Latin}                                  Script 'LATIN'
-* \p{Limbu}                                  Script 'LIMBU'
-* \p{LinearB}                                Script 'LINEAR_B'
+* \p{Lao}                                    Script 'Lao'
+* \p{Latin}                                  Script 'Latin'
+* \p{Limbu}                                  Script 'Limbu'
+* \p{LinearB}                                Script 'Linear_B'
 * \p{Ll}                                     Alias for \p{Ll} (General Category 'Ll')
   \p{Ll}                                     General Category 'Ll'
 * \p{Lm}                                     Alias for \p{Lm} (General Category 'Lm')
@@ -253,7 +254,7 @@
   \p{Lu}                                     General Category 'Lu'
 * \p{L}                                      Alias for \p{L} (Major Category 'L')
   \p{L}                                      Major Category 'L'
-* \p{Malayalam}                              Script 'MALAYALAM'
+* \p{Malayalam}                              Script 'Malayalam'
 * \p{Math}                                   [\p{Sm}\p{OtherMath}]
 * \p{Mc}                                     Alias for \p{Mc} (General Category 'Mc')
   \p{Mc}                                     General Category 'Mc'
@@ -262,8 +263,8 @@
   \p{Mirrored}                               Mirrored in bidirectional text
 * \p{Mn}                                     Alias for \p{Mn} (General Category 'Mn')
   \p{Mn}                                     General Category 'Mn'
-* \p{Mongolian}                              Script 'MONGOLIAN'
-* \p{Myanmar}                                Script 'MYANMAR'
+* \p{Mongolian}                              Script 'Mongolian'
+* \p{Myanmar}                                Script 'Myanmar'
 * \p{M}                                      Alias for \p{M} (Major Category 'M')
   \p{M}                                      Major Category 'M'
 * \p{Nd}                                     Alias for \p{Nd} (General Category 'Nd')
@@ -275,10 +276,10 @@
   \p{No}                                     General Category 'No'
 * \p{N}                                      Alias for \p{N} (Major Category 'N')
   \p{N}                                      Major Category 'N'
-* \p{Ogham}                                  Script 'OGHAM'
-* \p{OldItalic}                              Script 'OLD_ITALIC'
-* \p{Oriya}                                  Script 'ORIYA'
-* \p{Osmanya}                                Script 'OSMANYA'
+* \p{Ogham}                                  Script 'Ogham'
+* \p{OldItalic}                              Script 'Old_Italic'
+* \p{Oriya}                                  Script 'Oriya'
+* \p{Osmanya}                                Script 'Osmanya'
 * \p{OtherAlphabetic}                        Extended property 'Other_Alphabetic'
 * \p{OtherDefaultIgnorableCodePoint}         Extended property 'Other_Default_Ignorable_Code_Point'
 * \p{OtherGraphemeExtend}                    Extended property 'Other_Grapheme_Extend'
@@ -306,11 +307,11 @@
   \p{P}                                      Major Category 'P'
 * \p{QuotationMark}                          Extended property 'Quotation_Mark'
 * \p{Radical}                                Extended property 'Radical'
-* \p{Runic}                                  Script 'RUNIC'
+* \p{Runic}                                  Script 'Runic'
 * \p{Sc}                                     Alias for \p{Sc} (General Category 'Sc')
   \p{Sc}                                     General Category 'Sc'
-* \p{Shavian}                                Script 'SHAVIAN'
-* \p{Sinhala}                                Script 'SINHALA'
+* \p{Shavian}                                Script 'Shavian'
+* \p{Sinhala}                                Script 'Sinhala'
 * \p{Sk}                                     Alias for \p{Sk} (General Category 'Sk')
   \p{Sk}                                     General Category 'Sk'
 * \p{Sm}                                     Alias for \p{Sm} (General Category 'Sm')
@@ -320,27 +321,29 @@
   \p{So}                                     General Category 'So'
   \p{SpacePerl}                              \s
   \p{Space}                                  [[:Space:]]
-* \p{Syriac}                                 Script 'SYRIAC'
+* \p{Sterm}                                  Extended property 'STerm'
+* \p{Syriac}                                 Script 'Syriac'
 * \p{S}                                      Alias for \p{S} (Major Category 'S')
   \p{S}                                      Major Category 'S'
-* \p{Tagalog}                                Script 'TAGALOG'
-* \p{Tagbanwa}                               Script 'TAGBANWA'
-* \p{TaiLe}                                  Script 'TAI_LE'
-* \p{Tamil}                                  Script 'TAMIL'
-* \p{Telugu}                                 Script 'TELUGU'
+* \p{Tagalog}                                Script 'Tagalog'
+* \p{Tagbanwa}                               Script 'Tagbanwa'
+* \p{TaiLe}                                  Script 'Tai_Le'
+* \p{Tamil}                                  Script 'Tamil'
+* \p{Telugu}                                 Script 'Telugu'
 * \p{TerminalPunctuation}                    Extended property 'Terminal_Punctuation'
-* \p{Thaana}                                 Script 'THAANA'
-* \p{Thai}                                   Script 'THAI'
-* \p{Tibetan}                                Script 'TIBETAN'
+* \p{Thaana}                                 Script 'Thaana'
+* \p{Thai}                                   Script 'Thai'
+* \p{Tibetan}                                Script 'Tibetan'
   \p{Title}                                  [[:Title:]]
-* \p{Ugaritic}                               Script 'UGARITIC'
+* \p{Ugaritic}                               Script 'Ugaritic'
 * \p{UnifiedIdeograph}                       Extended property 'Unified_Ideograph'
 * \p{Uppercase}                              [\p{Lu}\p{Other_Uppercase}]
   \p{Upper}                                  [[:Upper:]]
+* \p{VariationSelector}                      Extended property 'Variation_Selector'
 * \p{WhiteSpace}                             Extended property 'White_Space'
   \p{Word}                                   [[:Word:]]
   \p{XDigit}                                 [[:XDigit:]]
-* \p{Yi}                                     Script 'YI'
+* \p{Yi}                                     Script 'Yi'
 * \p{Zl}                                     Alias for \p{Zl} (General Category 'Zl')
   \p{Zl}                                     General Category 'Zl'
 * \p{Zp}                                     Alias for \p{Zp} (General Category 'Zp')

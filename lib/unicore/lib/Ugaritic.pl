@@ -6,8 +6,9 @@
 # This file supports:
 # 	\p{Ugaritic} (and fuzzy permutations)
 # 
-# Meaning: Script 'UGARITIC'
+# Meaning: Script 'Ugaritic'
 #
 return <<'END';
-10380	1039D	UGARITIC
+10380	1039D	Ugaritic
+1039F		Ugaritic
 END

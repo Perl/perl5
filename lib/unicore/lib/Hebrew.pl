@@ -6,17 +6,18 @@
 # This file supports:
 # 	\p{Hebrew} (and fuzzy permutations)
 # 
-# Meaning: Script 'HEBREW'
+# Meaning: Script 'Hebrew'
 #
 return <<'END';
-05D0	05EA	HEBREW
-05F0	05F2	HEBREW
-FB1D		HEBREW
-FB1F	FB28	HEBREW
-FB2A	FB36	HEBREW
-FB38	FB3C	HEBREW
-FB3E		HEBREW
-FB40	FB41	HEBREW
-FB43	FB44	HEBREW
-FB46	FB4F	HEBREW
+0591	05A1	Hebrew
+05A3	05B9	Hebrew
+05BB	05C4	Hebrew
+05D0	05EA	Hebrew
+05F0	05F4	Hebrew
+FB1D	FB36	Hebrew
+FB38	FB3C	Hebrew
+FB3E		Hebrew
+FB40	FB41	Hebrew
+FB43	FB44	Hebrew
+FB46	FB4F	Hebrew
 END

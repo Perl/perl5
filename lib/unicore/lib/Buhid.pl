@@ -6,8 +6,8 @@
 # This file supports:
 # 	\p{Buhid} (and fuzzy permutations)
 # 
-# Meaning: Script 'BUHID'
+# Meaning: Script 'Buhid'
 #
 return <<'END';
-1740	1753	BUHID
+1740	1753	Buhid
 END

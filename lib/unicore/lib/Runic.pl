@@ -6,9 +6,9 @@
 # This file supports:
 # 	\p{Runic} (and fuzzy permutations)
 # 
-# Meaning: Script 'RUNIC'
+# Meaning: Script 'Runic'
 #
 return <<'END';
-16A0	16EA	RUNIC
-16EE	16F0	RUNIC
+16A0	16EA	Runic
+16EE	16F0	Runic
 END

@@ -6,12 +6,12 @@
 # This file supports:
 # 	\p{Devanagari} (and fuzzy permutations)
 # 
-# Meaning: Script 'DEVANAGARI'
+# Meaning: Script 'Devanagari'
 #
 return <<'END';
-0901	0939	DEVANAGARI
-093C	094D	DEVANAGARI
-0950	0954	DEVANAGARI
-0958	0963	DEVANAGARI
-0966	096F	DEVANAGARI
+0901	0939	Devanagari
+093C	094D	Devanagari
+0950	0954	Devanagari
+0958	0963	Devanagari
+0966	096F	Devanagari
 END

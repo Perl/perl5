@@ -9,39 +9,42 @@
 # Meaning: Extended property 'Other_Math'
 #
 return <<'END';
-0028	002A	Other_Math
-002D		Other_Math
-002F		Other_Math
-005B	005E	Other_Math
-007B		Other_Math
-007D		Other_Math
+005E		Other_Math
+03D0	03D2	Other_Math
+03D5		Other_Math
+03F0	03F1	Other_Math
+03F4	03F5	Other_Math
 2016		Other_Math
 2032	2034	Other_Math
+2040		Other_Math
+2061	2063	Other_Math
 207D	207E	Other_Math
 208D	208E	Other_Math
 20D0	20DC	Other_Math
 20E1		Other_Math
+20E5	20E6	Other_Math
 2102		Other_Math
 210A	2113	Other_Math
 2115		Other_Math
 2119	211D	Other_Math
 2124		Other_Math
-2128		Other_Math
+2128	2129	Other_Math
 212C	212D	Other_Math
 212F	2131	Other_Math
 2133	2138	Other_Math
-FE35	FE38	Other_Math
-FE47	FE48	Other_Math
-FE59	FE5C	Other_Math
+213D	213F	Other_Math
+2145	2149	Other_Math
+23B7		Other_Math
+23D0		Other_Math
+27E6	27EB	Other_Math
+2983	2998	Other_Math
+29D8	29DB	Other_Math
+29FC	29FD	Other_Math
 FE61		Other_Math
 FE63		Other_Math
 FE68		Other_Math
-FF08	FF0A	Other_Math
-FF0D		Other_Math
-FF0F		Other_Math
-FF3B	FF3E	Other_Math
-FF5B		Other_Math
-FF5D		Other_Math
+FF3C		Other_Math
+FF3E		Other_Math
 1D400	1D454	Other_Math
 1D456	1D49C	Other_Math
 1D49E	1D49F	Other_Math

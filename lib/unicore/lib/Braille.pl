@@ -6,8 +6,8 @@
 # This file supports:
 # 	\p{Braille} (and fuzzy permutations)
 # 
-# Meaning: Script 'BRAILLE'
+# Meaning: Script 'Braille'
 #
 return <<'END';
-2800	28FF	BRAILLE
+2800	28FF	Braille
 END

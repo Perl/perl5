@@ -6,9 +6,9 @@
 # This file supports:
 # 	\p{Tagalog} (and fuzzy permutations)
 # 
-# Meaning: Script 'TAGALOG'
+# Meaning: Script 'Tagalog'
 #
 return <<'END';
-1700	170C	TAGALOG
-170E	1714	TAGALOG
+1700	170C	Tagalog
+170E	1714	Tagalog
 END

@@ -6,8 +6,8 @@
 # This file supports:
 # 	\p{Ogham} (and fuzzy permutations)
 # 
-# Meaning: Script 'OGHAM'
+# Meaning: Script 'Ogham'
 #
 return <<'END';
-1681	169A	OGHAM
+1680	169C	Ogham
 END

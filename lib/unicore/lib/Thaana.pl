@@ -6,8 +6,8 @@
 # This file supports:
 # 	\p{Thaana} (and fuzzy permutations)
 # 
-# Meaning: Script 'THAANA'
+# Meaning: Script 'Thaana'
 #
 return <<'END';
-0780	07B1	THAANA
+0780	07B1	Thaana
 END

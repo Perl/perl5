@@ -9,6 +9,7 @@
 # Meaning: Bi-directional category 'ES'
 #
 return <<'END';
-002F		
+002B		
+002D		
 FF0F		
 END

@@ -6,8 +6,9 @@
 # This file supports:
 # 	\p{OldItalic} (and fuzzy permutations)
 # 
-# Meaning: Script 'OLD_ITALIC'
+# Meaning: Script 'Old_Italic'
 #
 return <<'END';
-10300	1031E	OLD_ITALIC
+10300	1031E	Old_Italic
+10320	10323	Old_Italic
 END

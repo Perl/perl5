@@ -6,11 +6,12 @@
 # This file supports:
 # 	\p{Limbu} (and fuzzy permutations)
 # 
-# Meaning: Script 'LIMBU'
+# Meaning: Script 'Limbu'
 #
 return <<'END';
-1900	191C	LIMBU
-1920	192B	LIMBU
-1930	193B	LIMBU
-1946	194F	LIMBU
+1900	191C	Limbu
+1920	192B	Limbu
+1930	193B	Limbu
+1940		Limbu
+1944	194F	Limbu
 END

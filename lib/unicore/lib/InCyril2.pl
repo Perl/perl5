@@ -4,10 +4,10 @@
 
 #
 # This file supports:
-# 	\p{InCyrillicSupplementary} (and fuzzy permutations)
+# 	\p{InCyrillicSupplement} (and fuzzy permutations)
 # 
-# Meaning: Block 'Cyrillic Supplementary'
+# Meaning: Block 'Cyrillic Supplement'
 #
 return <<'END';
-0500	052F	Cyrillic Supplementary
+0500	052F	Cyrillic Supplement
 END

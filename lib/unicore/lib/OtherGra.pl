@@ -21,6 +21,7 @@ return <<'END';
 0D57		Other_Grapheme_Extend
 0DCF		Other_Grapheme_Extend
 0DDF		Other_Grapheme_Extend
+200C	200D	Other_Grapheme_Extend
 1D165		Other_Grapheme_Extend
 1D16E	1D16F	Other_Grapheme_Extend
 END

@@ -4,13 +4,12 @@
 
 #
 # This file supports:
-# 	\p{Mongolian} (and fuzzy permutations)
+# 	\p{VariationSelector} (and fuzzy permutations)
 # 
-# Meaning: Script 'Mongolian'
+# Meaning: Extended property 'Variation_Selector'
 #
 return <<'END';
-1800	180E	Mongolian
-1810	1819	Mongolian
-1820	1877	Mongolian
-1880	18A9	Mongolian
+180B	180D	Variation_Selector
+FE00	FE0F	Variation_Selector
+E0100	E01EF	Variation_Selector
 END

@@ -6,10 +6,10 @@
 # This file supports:
 # 	\p{Tagbanwa} (and fuzzy permutations)
 # 
-# Meaning: Script 'TAGBANWA'
+# Meaning: Script 'Tagbanwa'
 #
 return <<'END';
-1760	176C	TAGBANWA
-176E	1770	TAGBANWA
-1772	1773	TAGBANWA
+1760	176C	Tagbanwa
+176E	1770	Tagbanwa
+1772	1773	Tagbanwa
 END

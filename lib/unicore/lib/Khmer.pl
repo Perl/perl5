@@ -6,9 +6,11 @@
 # This file supports:
 # 	\p{Khmer} (and fuzzy permutations)
 # 
-# Meaning: Script 'KHMER'
+# Meaning: Script 'Khmer'
 #
 return <<'END';
-1780	17D3	KHMER
-17E0	17E9	KHMER
+1780	17DD	Khmer
+17E0	17E9	Khmer
+17F0	17F9	Khmer
+19E0	19FF	Khmer
 END

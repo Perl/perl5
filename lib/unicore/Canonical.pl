@@ -129,8 +129,8 @@
 
    cyrillic				    => 'Cyrillic',
 
- # InCyrillicSupplementary
-   cyrillicsupplementary		    => 'InCyril2',
+ # InCyrillicSupplement
+   cyrillicsupplement			    => 'InCyril2',
 
    dash 				    => 'Dash',
 
@@ -334,8 +334,8 @@
  # InCyrillic
    incyrillic				    => 'InCyrill',
 
- # InCyrillicSupplementary
-   incyrillicsupplementary		    => 'InCyril2',
+ # InCyrillicSupplement
+   incyrillicsupplement 		    => 'InCyril2',
 
  # InDeseret
    indeseret				    => 'InDesere',
@@ -630,6 +630,9 @@
    kannada				    => 'Kannada',
    katakana				    => 'Katakana',
 
+ # KatakanaOrHiragana
+   katakanaorhiragana			    => 'Katakan2',
+
  # InKatakanaPhoneticExtensions
    katakanaphoneticextensions		    => 'InKatak2',
 
@@ -827,6 +830,8 @@
  # InSpecials
    specials				    => 'InSpecia',
 
+   sterm				    => 'Sterm',
+
  # InSuperscriptsAndSubscripts
    superscriptsandsubscripts		    => 'InSupers',
 
@@ -886,6 +891,9 @@
 
  # UppercaseLetter
    uppercaseletter			    => 'Lu',
+
+ # VariationSelector
+   variationselector			    => 'Variatio',
 
  # InVariationSelectors
    variationselectors			    => 'InVariat',

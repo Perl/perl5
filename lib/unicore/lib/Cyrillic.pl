@@ -6,14 +6,13 @@
 # This file supports:
 # 	\p{Cyrillic} (and fuzzy permutations)
 # 
-# Meaning: Script 'CYRILLIC'
+# Meaning: Script 'Cyrillic'
 #
 return <<'END';
-0400	0481	CYRILLIC
-0483	0486	CYRILLIC
-048A	04CE	CYRILLIC
-04D0	04F5	CYRILLIC
-04F8	04F9	CYRILLIC
-0500	050F	CYRILLIC
-1D2B		CYRILLIC
+0400	0486	Cyrillic
+0488	04CE	Cyrillic
+04D0	04F5	Cyrillic
+04F8	04F9	Cyrillic
+0500	050F	Cyrillic
+1D2B		Cyrillic
 END
