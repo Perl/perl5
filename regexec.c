@@ -2182,7 +2182,7 @@ S_regmatch(pTHX_ regnode *prog)
 	    
 	    n = ARG(scan);
 	    PL_op = (OP_4tree*)PL_regdata->data[n];
-	    DEBUG_r( PerlIO_printf(Perl_debug_log, "  re_eval 0x%"UVxf"\n", (UV)PL_op) );
+	    DEBUG_r( PerlIO_printf(Perl_debug_log, "  re_eval 0x%"UVxf"\n", PTR2UV(PL_op)) );
 	    PL_curpad = AvARRAY((AV*)PL_regdata->data[n + 2]);
 	    PL_regendp[0] = PL_reg_magic->mg_len = locinput - PL_bostr;
 
@@ -3094,7 +3094,7 @@ S_regmatch(pTHX_ regnode *prog)
 	    break;
 	default:
 	    PerlIO_printf(Perl_error_log, "%"UVxf" %d\n",
-			  (UV)scan, OP(scan));
+			  PTR2UV(scan), OP(scan));
 	    Perl_croak(aTHX_ "regexp memory corruption");
 	}
 	scan = next;

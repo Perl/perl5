@@ -901,104 +901,11 @@ Free_t   Perl_mfree (Malloc_t where);
     --Andy Dougherty	August 1996
 */
 
-/*  We should be able to get Quad_t in most systems:
-    all of int64_t, long long, long, int, will work.
+typedef IVTYPE IV;
+typedef UVTYPE UV;
 
-    Beware of LP32 systems (ILP32, ILP32LL64).  Such systems have been
-    used to sizeof(long) == sizeof(foo*).  This is a bad assumption
-    because then IV/UV have been 32 bits, too.  Which, in turn means
-    that even if the system has quads (e.g. long long), IV cannot be a
-    quad.  Introducing a 64-bit IV (because of long long existing)
-    will introduce binary incompatibility.
-
-    Summary: a long long system needs to add -DUSE_LONG_LONG to $ccflags
-    to get quads -- and if its pointers are still 32 bits, this will break
-    binary compatibility.  Casting an IV (a long long) to a pointer will
-    truncate half of the IV away.  Most systems can just use
-    Configure -Duse64bits to get the -DUSE_LONG_LONG added either by
-    their hints files, or directly by Configure if they are using gcc.
-
-    --jhi		September 1999 */
-
-#if INTSIZE == 4 && LONGSIZE == 4 && PTRSIZE == 4
-#   define PERL_ILP32
-#   if defined(HAS_LONG_LONG) && LONGLONGSIZE == 8
-#       define PERL_ILP32LL64
-#   endif
-#endif
-
-#if LONGSIZE == 8 && PTRSIZE == 8
-#   define PERL_LP64
-#   if INTSIZE == 8
-#        define PERL_ILP64
-#   endif
-#endif
-
-#ifndef Quad_t
-#    if LONGSIZE == 8
-#       define Quad_t  long
-#       define Uquad_t unsigned long
-#       define PERL_QUAD_IS_LONG
-#    endif
-#endif
-
-#ifndef Quad_t
-#    if INTSIZE == 8
-#       define Quad_t  int
-#       define Uquad_t unsigned int
-#       define PERL_QUAD_IS_INT
-#    endif
-#endif
-
-#ifndef Quad_t
-#    ifdef USE_LONG_LONG /* See above note about LP32. --jhi */
-#       if defined(HAS_LONG_LONG) && LONGLONGSIZE == 8
-#	    define Quad_t  long long
-#           define Uquad_t unsigned long long
-#           define PERL_QUAD_IS_LONG_LONG
-#       endif
-#    endif
-#endif
-
-#ifndef Quad_t
-#    ifdef HAS_INT64_T
-#        define Quad_t  int64_t
-#        define Uquad_t uint64_t
-#        define PERL_QUAD_IS_INT64_T
-#    endif
-#endif
-
-#ifdef Quad_t
-#   define HAS_QUAD
-#   ifndef Uquad_t
-    /* Note that if your Quad_t is a typedef (not a #define) you *MUST*
-     * have defined by now Uquad_t yourself because 'unsigned type'
-     * is illegal. */
-#       define Uquad_t unsigned Quad_t
-#   endif
-#endif
-
-#if defined(USE_64_BITS) && defined(HAS_QUAD)
-#  ifdef PERL_QUAD_IS_LONG			/* LP64 */
-   typedef          long               IV;
-   typedef	    unsigned long      UV;
-#  else
-#      ifdef PERL_QUAD_IS_INT			/* ILP64 */
-   typedef          int                IV;
-   typedef	    unsigned int       UV;
-#      else
-#          ifdef PERL_QUAD_IS_LONG_LONG		/* LL64 */
-   typedef          long long          IV;
-   typedef	    unsigned long long UV;
-#          else
-#              ifdef PERL_QUAD_IS_INT64_T	/* C9X */
-   typedef          int64_t            IV;
-   typedef	    uint64_t           UV;
-#              endif
-#          endif
-#      endif
-#  endif     
-#  if defined(PERL_QUAD_IS_INT64_T) && defined(INT64_MAX)
+#ifdef USE_64_BITS
+#  if QUADCASE == 4 && defined(INT64_MAX) /* quad is int64_t */
 #    define IV_MAX INT64_MAX
 #    define IV_MIN INT64_MIN
 #    define UV_MAX UINT64_MAX
@@ -1012,14 +919,10 @@ Free_t   Perl_mfree (Malloc_t where);
 #    define UV_MAX PERL_UQUAD_MAX
 #    define UV_MIN PERL_UQUAD_MIN
 #  endif
-#  define IVSIZE 8
-#  define UVSIZE 8
 #  define IV_IS_QUAD
 #  define UV_IS_QUAD
 #else
-   typedef          long               IV;
-   typedef	    unsigned long      UV;
-#  if defined(INT32_MAX) && LONGSIZE == 4
+#  if defined(INT32_MAX) && IVSIZE == 4
 #    define IV_MAX INT32_MAX
 #    define IV_MIN INT32_MIN
 #    ifndef UINT32_MAX_BROKEN /* e.g. HP-UX with gcc messes this up */
@@ -1037,16 +940,15 @@ Free_t   Perl_mfree (Malloc_t where);
 #    define UV_MAX PERL_ULONG_MAX
 #    define UV_MIN PERL_ULONG_MIN
 #  endif
-#  if LONGSIZE == 8
+#  if IVSIZE == 8
 #    define IV_IS_QUAD
 #    define UV_IS_QUAD
 #  else
 #    undef IV_IS_QUAD
 #    undef UV_IS_QUAD
 #  endif
-#  define UVSIZE LONGSIZE
-#  define IVSIZE LONGSIZE
 #endif
+
 #define IV_DIG (BIT_DIGITS(IVSIZE * 8))
 #define UV_DIG (BIT_DIGITS(UVSIZE * 8))
 
@@ -1146,9 +1048,9 @@ Free_t   Perl_mfree (Malloc_t where);
 # endif
 #endif
 
+typedef NVTYPE NV;
+
 #ifdef USE_LONG_DOUBLE
-    typedef long double NV;
-#   define NVSIZE LONG_DOUBLESIZE
 #   define NV_DIG LDBL_DIG
 #   ifdef HAS_SQRTL
 #       define Perl_modf modfl
@@ -1164,8 +1066,6 @@ Free_t   Perl_mfree (Malloc_t where);
 #       define Perl_fmod fmodl
 #   endif
 #else
-    typedef double NV;
-#   define NVSIZE DOUBLESIZE
 #   define NV_DIG DBL_DIG
 #   define Perl_modf modf
 #   define Perl_frexp frexp
@@ -1355,7 +1255,7 @@ Free_t   Perl_mfree (Malloc_t where);
 #  endif
 #endif
 
-#ifdef HAS_QUAD
+#ifdef UV_IS_QUAD
 
 #  ifdef UQUAD_MAX
 #    define PERL_UQUAD_MAX ((UV)UQUAD_MAX)
@@ -1924,6 +1824,7 @@ typedef I32 CHECKPOINT;
 #define NV_WITHIN_IV(nv) (I_V(nv) >= IV_MIN && I_V(nv) <= IV_MAX)
 #define NV_WITHIN_UV(nv) ((nv)>=0.0 && U_V(nv) >= UV_MIN && U_V(nv) <= UV_MAX)
 
+/* The correct way: a Configure test where (UV)~0 is cast to NV and back. */
 /* Believe. */
 #define IV_FITS_IN_NV
 /* Doubt. */
@@ -1941,22 +1842,6 @@ typedef I32 CHECKPOINT;
 #               undef IV_FITS_IN_NV
 #           endif
 #       endif
-#   endif
-#endif
-
-#ifdef IV_IS_QUAD
-#  define UVuf PERL_PRIu64
-#  define IVdf PERL_PRId64
-#  define UVof PERL_PRIo64
-#  define UVxf PERL_PRIx64
-#else
-#   if LONGSIZE == 4
-#       define UVuf "lu"
-#       define IVdf "ld"
-#       define UVof "lo"
-#       define UVxf "lx"
-#   else
-        /* Any good ideas? */
 #   endif
 #endif
 

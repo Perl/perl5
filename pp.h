@@ -65,7 +65,7 @@
 #define POPu		((UV)SvUVx(POPs))
 #define POPl		((long)SvIVx(POPs))
 #define POPul		((unsigned long)SvIVx(POPs))
-#ifdef HAS_QUAD
+#ifdef Quad_t
 #define POPq		((Quad_t)SvIVx(POPs))
 #define POPuq		((Uquad_t)SvUVx(POPs))
 #endif
@@ -78,7 +78,7 @@
 #define TOPu		((UV)SvUV(TOPs))
 #define TOPl		((long)SvIV(TOPs))
 #define TOPul		((unsigned long)SvUV(TOPs))
-#ifdef HAS_QUAD
+#ifdef Quad_t
 #define TOPq		((Quad_t)SvIV(TOPs))
 #define TOPuq		((Uquad_t)SvUV(TOPs))
 #endif
@@ -125,7 +125,7 @@
 #define dPOPiv		IV value = POPi
 #define dTOPuv		UV value = TOPu
 #define dPOPuv		UV value = POPu
-#ifdef HAS_QUAD
+#ifdef Quad_t
 #define dTOPqv		Quad_t value = TOPu
 #define dPOPqv		Quad_t value = POPu
 #define dTOPuqv		Uquad_t value = TOPuq

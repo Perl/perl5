@@ -350,7 +350,10 @@ EOM
 	    ccflags="$ccflags `getconf LFS_CFLAGS`"
 	    ldflags="$ldflags `getconf LFS_LDFLAGS`"
 	    libswanted="$libswanted `getconf LFS_LIBS`"
-	    ccflags="$ccflags -DUSE_LONG_LONG"
+	    case "$ccflags" in
+	    *-DUSE_LONG_LONG*) ;;
+	    *) ccflags="$ccflags -DUSE_LONG_LONG" ;;
+	    esac
 	    # When a 64-bit cc becomes available $archname64
 	    # may need setting so that $archname gets it attached.
 	    ;;

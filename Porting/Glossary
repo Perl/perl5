@@ -176,6 +176,10 @@ cf_time (cf_who.U):
 	Holds the output of the "date" command when the configuration file was
 	produced. This is used to tag both config.sh and config_h.SH.
 
+charsize (charsize.U):
+	This variable contains the value of the CHARSIZE symbol, which
+	indicates to the C program how many bytes there are in a character.
+
 chgrp (Loc.U):
 	This variable is defined but not used by Configure.
 	The value is a plain '' and is not useful.
@@ -755,10 +759,6 @@ d_inetaton (d_inetaton.U):
 d_int64t (i_inttypes.U):
 	This symbol will be defined if the C compiler supports int64_t.
 
-d_iovec_s (i_sysuio.U):
-	This variable conditionally defines the HAS_STRUCT_IOVEC symbol,
-	which indicates that the struct iovec is supported.
-
 d_isascii (d_isascii.U):
 	This variable conditionally defines the HAS_ISASCII constant,
 	which indicates to the C program that isascii() is available.
@@ -781,10 +781,6 @@ d_ldbl_dig (d_ldbl_dig.U):
 d_link (d_link.U):
 	This variable conditionally defines HAS_LINK if link() is
 	available to create hard links.
-
-d_llseek (io64.U):
-	This variable conditionally defines the HAS_LLSEEK symbol, which
-	indicates to the C program that the llseek() routine is available.
 
 d_locconv (d_locconv.U):
 	This variable conditionally defines HAS_LOCALECONV if localeconv() is
@@ -1636,8 +1632,11 @@ flex (Loc.U):
 	This variable is defined but not used by Configure.
 	The value is a plain '' and is not useful.
 
+fpossize (fpossize.U):
+	This variable contains the size of a fpostype in bytes.
+
 fpostype (fpostype.U):
-	This variable defines Fpos_t to be something like fpost_t, long, 
+	This variable defines Fpos_t to be something like fpos_t, long, 
 	uint, or whatever type is used to declare file positions in libc.
 
 freetype (mallocsrc.U):
@@ -1667,6 +1666,16 @@ gccversion (cc.U):
 	If GNU cc (gcc) is used, this variable holds '1' or '2' to 
 	indicate whether the compiler is version 1 or 2.  This is used in
 	setting some of the default cflags.  It is set to '' if not gcc.
+
+gidformat (gidf.U):
+	This variable contains the format string used for printing a Gid_t.
+
+gidsign (gidsign.U):
+	This variable contains the signedness of a gidtype.
+	1 for unsigned, -1 for signed.
+
+gidsize (gidsize.U):
+	This variable contains the size of a gidtype in bytes.
 
 gidtype (gidtype.U):
 	This variable defines Gid_t to be something like gid_t, int,
@@ -1721,6 +1730,30 @@ huge (models.U):
 	to produce a program running with a huge memory model.  If the
 	huge model is not supported, contains the flag to produce large
 	model programs.  It is up to the Makefile to use this.
+
+i16size (perlxv.U):
+	This variable is the size of an I16 in bytes.
+
+i16type (perlxv.U):
+	This variable contains the C type used for Perl's I16.
+
+i32size (perlxv.U):
+	This variable is the size of an I32 in bytes.
+
+i32type (perlxv.U):
+	This variable contains the C type used for Perl's I32.
+
+i64size (perlxv.U):
+	This variable is the size of an I64 in bytes.
+
+i64type (perlxv.U):
+	This variable contains the C type used for Perl's I64.
+
+i8size (perlxv.U):
+	This variable is the size of an I8 in bytes.
+
+i8type (perlxv.U):
+	This variable contains the C type used for Perl's I8.
 
 i_arpainet (i_arpainet.U):
 	This variable conditionally defines the I_ARPA_INET symbol,
@@ -2137,6 +2170,16 @@ intsize (intsize.U):
 	This variable contains the value of the INTSIZE symbol, which
 	indicates to the C program how many bytes there are in an int.
 
+ivdformat (perlxvf.U):
+	This variable contains the format string used for printing
+	a Perl IV as a signed decimal integer. 
+
+ivsize (perlxv.U):
+	This variable is the size of an IV in bytes.
+
+ivtype (perlxv.U):
+	This variable contains the C type used for Perl's IV.
+
 known_extensions (Extensions.U):
 	This variable holds a list of all XS extensions included in 
 	the package.
@@ -2460,6 +2503,12 @@ nroff (Loc.U):
 	full pathname (if any) of the nroff program.  After Configure runs,
 	the value is reset to a plain "nroff" and is not useful.
 
+nvsize (perlxv.U):
+	This variable is the size of an NV in bytes.
+
+nvtype (perlxv.U):
+	This variable contains the C type used for Perl's NV.
+
 o_nonblock (nblock_io.U):
 	This variable bears the symbol value to be used during open() or fcntl()
 	to turn on non-blocking I/O for a file descriptor. If you wish to switch
@@ -2623,6 +2672,14 @@ ptrsize (ptrsize.U):
 	This variable contains the value of the PTRSIZE symbol, which
 	indicates to the C program how many bytes there are in a pointer.
 
+quadcase (quadtype.U):
+	This variable, if defined, encodes the type of a quad:
+	1 = int, 2 = long, 3 = long long, 4 = int64_t.
+
+quadtype (quadtype.U):
+	This variable defines Quad_t to be something like long, int, 
+	long long, int64_t, or whatever type is used for 64-bit integers.
+
 randbits (randfunc.U):
 	Indicates how many bits are produced by the function used to
 	generate normalized random numbers.
@@ -2785,6 +2842,11 @@ sitearch (sitearch.U):
 	which is the name of the private library for this package.  It may
 	have a ~ on the front. It is up to the makefile to eventually create
 	this directory while performing installation (with ~ substitution).
+	The standard distribution will put nothing in this directory.
+	After perl has been installed, users may install their own local
+	architecture-dependent modules in this directory with
+	MakeMaker Makefile.PL
+	or equivalent.  See INSTALL for details.
 
 sitearchexp (sitearch.U):
 	This variable is the ~name expanded version of sitearch, so that you
@@ -2795,6 +2857,11 @@ sitebin (sitebin.U):
 	to put add-on publicly executable files for the package in question.  It
 	is most often a local directory such as /usr/local/bin. Programs using
 	this variable must be prepared to deal with ~name substitution.
+	The standard distribution will put nothing in this directory.
+	After perl has been installed, users may install their own local
+	executables in this directory with
+	MakeMaker Makefile.PL
+	or equivalent.  See INSTALL for details.
 
 sitebinexp (sitebin.U):
 	This is the same as the sitebin variable, but is filename expanded at
@@ -2805,6 +2872,11 @@ sitelib (sitelib.U):
 	which is the name of the private library for this package.  It may
 	have a ~ on the front. It is up to the makefile to eventually create
 	this directory while performing installation (with ~ substitution).
+	The standard distribution will put nothing in this directory.
+	After perl has been installed, users may install their own local
+	architecture-independent modules in this directory with
+	MakeMaker Makefile.PL
+	or equivalent.  See INSTALL for details.
 
 sitelibexp (sitelib.U):
 	This variable is the ~name expanded version of sitelib, so that you
@@ -2813,6 +2885,7 @@ sitelibexp (sitelib.U):
 siteprefix (siteprefix.U):
 	This variable holds the full absolute path of the directory below
 	which the user will install add-on packages.
+	See INSTALL for usage and examples.
 
 siteprefixexp (siteprefix.U):
 	This variable holds the full absolute path of the directory below
@@ -3046,9 +3119,39 @@ troff (Loc.U):
 	This variable is defined but not used by Configure.
 	The value is a plain '' and is not useful.
 
+u16size (perlxv.U):
+	This variable is the size of an U16 in bytes.
+
+u16type (perlxv.U):
+	This variable contains the C type used for Perl's U16.
+
+u32size (perlxv.U):
+	This variable is the size of an U32 in bytes.
+
+u32type (perlxv.U):
+	This variable contains the C type used for Perl's U32.
+
+u64size (perlxv.U):
+	This variable is the size of an U64 in bytes.
+
+u64type (perlxv.U):
+	This variable contains the C type used for Perl's U64.
+
+u8size (perlxv.U):
+	This variable is the size of an U8 in bytes.
+
+u8type (perlxv.U):
+	This variable contains the C type used for Perl's U8.
+
+uidformat (uidf.U):
+	This variable contains the format string used for printing a Uid_t.
+
 uidsign (uidsign.U):
 	This variable contains the signedness of a uidtype.
 	1 for unsigned, -1 for signed.
+
+uidsize (uidsize.U):
+	This variable contains the size of a uidtype in bytes.
 
 uidtype (uidtype.U):
 	This variable defines Uid_t to be something like uid_t, int, 
@@ -3063,6 +3166,11 @@ uniq (Loc.U):
 	This variable is used internally by Configure to determine the
 	full pathname (if any) of the uniq program.  After Configure runs,
 	the value is reset to a plain "uniq" and is not useful.
+
+uquadtype (quadtype.U):
+	This variable defines Uquad_t to be something like unsigned long,
+	unsigned int, unsigned long long, uint64_t, or whatever type is
+	used for 64-bit integers.
 
 use64bits (use64bits.U):
 	This variable conditionally defines the USE_64_BITS symbol,
@@ -3081,6 +3189,10 @@ uselargefiles (uselfs.U):
 uselongdouble (uselongdbl.U):
 	This variable conditionally defines the USE_LONG_DOUBLE symbol,
 	and indicates that long doubles should be used when available.
+
+uselonglong (uselonglong.U):
+	This variable conditionally defines the USE_LONG_LONG symbol,
+	and indicates that long longs should be used when available.
 
 usemorebits (usemorebits.U):
 	This variable conditionally defines the USE_MORE_BITS symbol,
@@ -3157,13 +3269,32 @@ uuname (Loc.U):
 	This variable is defined but not used by Configure.
 	The value is a plain '' and is not useful.
 
+uvoformat (perlxvf.U):
+	This variable contains the format string used for printing
+	a Perl UV as an unsigned octal integer. 
+
+uvsize (perlxv.U):
+	This variable is the size of a UV in bytes.
+
+uvtype (perlxv.U):
+	This variable contains the C type used for Perl's UV.
+
+uvuformat (perlxvf.U):
+	This variable contains the format string used for printing
+	a Perl UV as an unsigned decimal integer. 
+
+uvxformat (perlxvf.U):
+	This variable contains the format string used for printing
+	a Perl UV as an unsigned hexadecimal integer. 
+
 vendorbin (vendorbin.U):
-	This variable contains the eventual value of the VENDORBIN symbol,
-	which is the name of the private directory for exuctables for this package.
-	It may have a ~ on the front. It is up to the makefile to eventually create
-	this directory while performing installation (with ~ substitution).
-	Vendors who distribute perl binaries may place their own
-	extensions and modules in this directory.
+	This variable contains the eventual value of the VENDORBIN symbol.
+	It may have a ~ on the front.
+	The standard distribution will put nothing in this directory.
+	Vendors who distribute perl may wish to place additional
+	binaries in this directory with
+	MakeMaker Makefile.PL INSTALLDIRS=vendor 
+	or equivalent.  See INSTALL for details.
 
 vendorbinexp (vendorbin.U):
 	This variable is the ~name expanded version of vendorbin, so that you
@@ -3171,11 +3302,12 @@ vendorbinexp (vendorbin.U):
 
 vendorlib (vendorlib.U):
 	This variable contains the eventual value of the VENDORLIB symbol,
-	which is the name of the private library for this package.  It may
-	have a ~ on the front. It is up to the makefile to eventually create
-	this directory while performing installation (with ~ substitution).
-	Vendors who distribute perl binaries may place their own
-	extensions and modules in this directory.
+	which is the name of the private library for this package.
+	The standard distribution will put nothing in this directory.
+	Vendors who distribute perl may wish to place their own
+	modules in this directory with
+	MakeMaker Makefile.PL INSTALLDIRS=vendor 
+	or equivalent.  See INSTALL for details.
 
 vendorlibexp (vendorlib.U):
 	This variable is the ~name expanded version of vendorlib, so that you
@@ -3184,6 +3316,7 @@ vendorlibexp (vendorlib.U):
 vendorprefix (vendorprefix.U):
 	This variable holds the full absolute path of the directory below
 	which the vendor will install add-on packages.
+	See INSTALL for usage and examples.
 
 vendorprefixexp (vendorprefix.U):
 	This variable holds the full absolute path of the directory below

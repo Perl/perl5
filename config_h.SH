@@ -998,6 +998,23 @@ sed <<!GROK!THIS! >config.h -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un-
  */
 #define STDCHAR $stdchar	/**/
 
+/* Quad_t:
+ *	This symbol holds the type used for 64-bit integers.
+ *	It can be int, long, long long, int64_t etc...
+ */
+/* QUADCASE:
+ *	This symbol, if defined, encodes the type of a quad:
+ *	1 = int, 2 = long, 3 = long long, 4 = int64_t.
+ */
+/* Uquad_t:
+ *	This symbol holds the type used for unsigned 64-bit integers.
+ *	It can be unsigned int, unsigned long, unsigned long long,
+ *	uint64_t etc...
+ */
+#define Quad_t $quadtype
+#define Uquad_t $uquadtype
+#define QUADCASE $quadcase
+
 /* HAS_ACCESSX:
  *	This symbol, if defined, indicates that the accessx routine is
  *	available to do extended access checks.
@@ -1464,8 +1481,10 @@ sed <<!GROK!THIS! >config.h -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un-
  *	execution path, but it should be accessible by the world.  The program
  *	should be prepared to do ~ expansion.
  *	The standard distribution will put nothing in this directory.
- *	Individual sites may place their own extensions and modules in
- *	this directory.
+ *	After perl has been installed, users may install their own local
+ *	architecture-dependent modules in this directory with
+ *		MakeMaker Makefile.PL
+ *	or equivalent.  See INSTALL for details.
  */
 /* SITEARCH_EXP:
  *	This symbol contains the ~name expanded version of SITEARCH, to be used
@@ -1480,8 +1499,10 @@ sed <<!GROK!THIS! >config.h -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un-
  *	execution path, but it should be accessible by the world.  The program
  *	should be prepared to do ~ expansion.
  *	The standard distribution will put nothing in this directory.
- *	Individual sites may place their own extensions and modules in
- *	this directory.
+ *	After perl has been installed, users may install their own local
+ *	architecture-independent modules in this directory with
+ *		MakeMaker Makefile.PL
+ *	or equivalent.  See INSTALL for details.
  */
 /* SITELIB_EXP:
  *	This symbol contains the ~name expanded version of SITELIB, to be used
@@ -1896,7 +1917,9 @@ sed <<!GROK!THIS! >config.h -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un-
  *	This symbol is defined if this system has a stat structure declaring
  *	st_blksize and st_blocks.
  */
+#ifndef USE_STAT_BLOCKS
 #$d_statblks USE_STAT_BLOCKS 	/**/
+#endif
 
 /* HAS_STRERROR:
  *	This symbol, if defined, indicates that the strerror routine is
@@ -2379,26 +2402,119 @@ sed <<!GROK!THIS! >config.h -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un-
 #$d_PRIfldbl PERL_PRIfldbl	$sPRIfldbl	/**/
 #$d_PRIgldbl PERL_PRIgldbl	$sPRIgldbl	/**/
 
-/* PERL_PRId64:
- *	This symbol, if defined, contains the string used by stdio to
- *	format 64-bit decimal numbers (format 'd') for output.
+/* IVTYPE:
+ *	This symbol defines the C type used for Perl's IV.
  */
-/* PERL_PRIu64:
- *	This symbol, if defined, contains the string used by stdio to
- *	format 64-bit unsigned decimal numbers (format 'u') for output.
+/* UVTYPE:
+ *	This symbol defines the C type used for Perl's UV.
  */
-/* PERL_PRIo64:
- *	This symbol, if defined, contains the string used by stdio to
- *	format 64-bit octal numbers (format 'o') for output.
+/* I8TYPE:
+ *	This symbol defines the C type used for Perl's I8.
  */
-/* PERL_PRIx64:
- *	This symbol, if defined, contains the string used by stdio to
- *	format 64-bit hexadecimal numbers (format 'x') for output.
+/* U8TYPE:
+ *	This symbol defines the C type used for Perl's U8.
  */
-#$d_PRId64 PERL_PRId64	$sPRId64	/**/
-#$d_PRIu64 PERL_PRIu64	$sPRIu64	/**/
-#$d_PRIo64 PERL_PRIo64	$sPRIo64	/**/
-#$d_PRIx64 PERL_PRIx64	$sPRIx64	/**/
+/* I16TYPE:
+ *	This symbol defines the C type used for Perl's I16.
+ */
+/* U16TYPE:
+ *	This symbol defines the C type used for Perl's U16.
+ */
+/* I32TYPE:
+ *	This symbol defines the C type used for Perl's I32.
+ */
+/* U32TYPE:
+ *	This symbol defines the C type used for Perl's U32.
+ */
+/* I64TYPE:
+ *	This symbol defines the C type used for Perl's I64.
+ */
+/* U64TYPE:
+ *	This symbol defines the C type used for Perl's U64.
+ */
+/* NVTYPE:
+ *	This symbol defines the C type used for Perl's NV.
+ */
+/* IVSIZE:
+ *	This symbol contains the sizeof(IV).
+ */
+/* UVSIZE:
+ *	This symbol contains the sizeof(UV).
+ */
+/* I8SIZE:
+ *	This symbol contains the sizeof(I8).
+ */
+/* U8SIZE:
+ *	This symbol contains the sizeof(U8).
+ */
+/* I16SIZE:
+ *	This symbol contains the sizeof(I16).
+ */
+/* U16SIZE:
+ *	This symbol contains the sizeof(U16).
+ */
+/* I32SIZE:
+ *	This symbol contains the sizeof(I32).
+ */
+/* U32SIZE:
+ *	This symbol contains the sizeof(U32).
+ */
+/* I64SIZE:
+ *	This symbol contains the sizeof(I64).
+ */
+/* U64SIZE:
+ *	This symbol contains the sizeof(U64).
+ */
+/* NVSIZE:
+ *	This symbol contains the sizeof(NV).
+ */
+#define	IVTYPE		$ivtype		/**/
+#define	UVTYPE		$uvtype		/**/
+#define	I8TYPE		$i8type		/**/
+#define	U8TYPE		$u8type		/**/
+#define	I16TYPE		$i16type	/**/
+#define	U16TYPE		$u16type	/**/
+#define	I32TYPE		$i32type	/**/
+#define	U32TYPE		$u32type	/**/
+#ifdef Quad_t
+#define	I64TYPE		$i64type	/**/
+#define	U64TYPE		$u64type	/**/
+#endif
+#define	NVTYPE		$nvtype		/**/
+#define	IVSIZE		$ivsize		/**/
+#define	UVSIZE		$uvsize		/**/
+#define	I8SIZE		$i8size		/**/
+#define	U8SIZE		$u8size		/**/
+#define	I16SIZE		$i16size	/**/
+#define	U16SIZE		$u16size	/**/
+#define	I32SIZE		$i32size	/**/
+#define	U32SIZE		$u32size	/**/
+#ifdef Quad_t
+#define	I64SIZE		$i64size	/**/
+#define	U64SIZE		$u64size	/**/
+#endif
+#define	NVSIZE		$nvsize		/**/
+
+/* IVdf:
+ *	This symbol defines the format string used for printing a Perl IV
+ *	as a signed decimal integer.
+ */
+/* UVuf:
+ *	This symbol defines the format string used for printing a Perl UV
+ *	as an unsigned decimal integer.
+ */
+/* UVof:
+ *	This symbol defines the format string used for printing a Perl UV
+ *	as an unsigned octal integer.
+ */
+/* UVxf:
+ *	This symbol defines the format string used for printing a Perl UV
+ *	as an unsigned hexadecimal integer.
+ */
+#define	IVdf		$ivdformat		/**/
+#define	UVuf		$uvuformat		/**/
+#define	UVof		$uvoformat		/**/
+#define	UVxf		$uvxformat		/**/
 
 /* SELECT_MIN_BITS:
  *	This symbol holds the minimum number of bits operated by select.
@@ -2438,39 +2554,63 @@ sed <<!GROK!THIS! >config.h -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un-
  *	be used when available.  If not defined, the native default interfaces
  *	will be used (be they 32 or 64 bits).
  */
+#ifndef USE_64_BITS
 #$use64bits	USE_64_BITS		/**/
+#endif
 
 /* USE_LARGE_FILES:
  *	This symbol, if defined, indicates that large file support
  *	should be used when available.  The USE_64_BITS symbol will
  *	also be turned on if necessary.
  */
+#ifndef USE_LARGE_FILES
 #$uselargefiles	USE_LARGE_FILES		/**/
+#endif
 
 /* USE_LONG_DOUBLE:
  *	This symbol, if defined, indicates that long doubles should
  *	be used when available.
  */
+#ifndef USE_LONG_DOUBLE
 #$uselongdouble	USE_LONG_DOUBLE		/**/
+#endif
+
+/* USE_LONG_LONG:
+ *	This symbol, if defined, indicates that long longs should
+ *	be used when available.
+ */
+#ifndef USE_LONG_LONG
+#$uselonglong	USE_LONG_LONG		/**/
+#endif
+
+#ifndef USE_MORE_BITS
+#$usemorebits	USE_MORE_BITS		/**/
+#endif
 
 /* MULTIPLICITY:
  *	This symbol, if defined, indicates that Perl should
  *	be built to use multiplicity.
  */
+#ifndef MULTIPLICTY
 #$usemultiplicity	MULTIPLICITY		/**/
+#endif
 
 /* USE_PERLIO:
  *	This symbol, if defined, indicates that the PerlIO abstraction should
  *	be used throughout.  If not defined, stdio should be
  *	used in a fully backward compatible manner.
  */
+#ifndef USE_PERLIO
 #$useperlio	USE_PERLIO		/**/
+#endif
 
 /* USE_SOCKS:
  *	This symbol, if defined, indicates that Perl should
  *	be built to use socks.
  */
+#ifndef USE_SOCKS
 #$usesocks	USE_SOCKS		/**/
+#endif
 
 /* PERL_XS_APIVERSION:
  *	This variable contains the version of the oldest perl binary
@@ -2633,7 +2773,9 @@ sed <<!GROK!THIS! >config.h -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un-
  *	This symbol, if defined, indicates that Perl should
  *	be built to use the old draft POSIX threads API.
  */
+#ifndef USE_TTHREADS
 #$usethreads	USE_THREADS		/**/
+#endif
 #$d_oldpthreads	OLD_PTHREADS_API		/**/
 
 /* Time_t:
@@ -2656,6 +2798,11 @@ sed <<!GROK!THIS! >config.h -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un-
  *	<sys/types.h> to get any typedef'ed information.
  */
 #define Fpos_t $fpostype		/* File position type */
+
+/* Gid_t_f:
+ *	This symbol defines the format string used for printing a Gid_t.
+ */
+#define	Gid_t_f		$gidformat		/**/
 
 /* Gid_t:
  *	This symbol holds the return type of getgid() and the type of
@@ -2700,11 +2847,10 @@ sed <<!GROK!THIS! >config.h -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un-
  */
 #define Size_t $sizetype	 /* length paramater for string functions */
 
-/* Uid_t_SIGN:
- *	This symbol holds the signedess of a Uid_t.
- *	1 for unsigned, -1 for signed.
+/* Uid_t_f:
+ *	This symbol defines the format string used for printing a Uid_t.
  */
-#define Uid_t_SIGN	$uidsign		/* UID sign */
+#define	Uid_t_f		$uidformat		/**/
 
 /* Uid_t:
  *	This symbol holds the type used to declare user ids in the kernel.

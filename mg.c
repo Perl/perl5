@@ -656,18 +656,18 @@ Perl_magic_get(pTHX_ SV *sv, MAGIC *mg)
 	break;
     case '(':
 	sv_setiv(sv, (IV)PL_gid);
-	Perl_sv_setpvf(aTHX_ sv, "%Vd", (IV)PL_gid);
+	Perl_sv_setpvf(aTHX_ sv, "%"Gid_t_f, PL_gid);
 	goto add_groups;
     case ')':
 	sv_setiv(sv, (IV)PL_egid);
-	Perl_sv_setpvf(aTHX_ sv, "%Vd", (IV)PL_egid);
+	Perl_sv_setpvf(aTHX_ sv, "%"Gid_t_f, PL_egid);
       add_groups:
 #ifdef HAS_GETGROUPS
 	{
 	    Groups_t gary[NGROUPS];
 	    i = getgroups(NGROUPS,gary);
 	    while (--i >= 0)
-		Perl_sv_catpvf(aTHX_ sv, " %Vd", (IV)gary[i]);
+		Perl_sv_catpvf(aTHX_ sv, " %"Gid_t_f, gary[i]);
 	}
 #endif
 	SvIOK_on(sv);	/* what a wonderful hack! */
