@@ -346,7 +346,7 @@ the strings?).
           5.6.1-TRIAL3  2001-Mar-19
           5.6.1-foolish 2001-Apr-01     The "fools-gold" release.
           5.6.1         2001-Apr-08
- Rafael	  5.6.2		2003-???-??
+ Rafael	  5.6.2-RC1	2003-Nov-08
 
  Jarkko   5.7.0         2000-Sep-02     The 5.7 track: Development.
           5.7.1         2001-Apr-09
@@ -364,6 +364,7 @@ the strings?).
           5.8.1         2003-Sep-25
  Nicholas 5.8.2-RC1     2003-Oct-27
           5.8.2-RC2     2003-Nov-03
+          5.8.2         2003-Nov-05
 
  Hugo     5.9.0         2003-Oct-27
 
