@@ -1186,7 +1186,6 @@ STATIC bool	S_utf8_mg_pos_init(pTHX_ SV *sv, MAGIC **mgp, STRLEN **cachep, I32 i
 #if defined(PERL_COPY_ON_WRITE)
 STATIC void	S_sv_release_COW(pTHX_ SV *sv, char *pvx, STRLEN cur, STRLEN len, U32 hash, SV *after);
 #endif
-STATIC const char*	S_my_strnchr(const char*, int c, size_t);
 #endif
 
 #if defined(PERL_IN_TOKE_C) || defined(PERL_DECL_PROT)

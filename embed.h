@@ -1886,9 +1886,6 @@
 #define sv_release_COW		S_sv_release_COW
 #endif
 #endif
-#ifdef PERL_CORE
-#define my_strnchr		S_my_strnchr
-#endif
 #endif
 #if defined(PERL_IN_TOKE_C) || defined(PERL_DECL_PROT)
 #ifdef PERL_CORE
@@ -4359,9 +4356,6 @@
 #ifdef PERL_CORE
 #define sv_release_COW(a,b,c,d,e,f)	S_sv_release_COW(aTHX_ a,b,c,d,e,f)
 #endif
-#endif
-#ifdef PERL_CORE
-#define my_strnchr		S_my_strnchr
 #endif
 #endif
 #if defined(PERL_IN_TOKE_C) || defined(PERL_DECL_PROT)
