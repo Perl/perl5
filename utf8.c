@@ -50,7 +50,7 @@ Perl_uvuni_to_utf8(pTHX_ U8 *d, UV uv)
 	*d++ = UTF_TO_NATIVE(uv);
 	return d;
     }
-#if defined(EBCDIC) || 1 /* always for testing */
+#if defined(EBCDIC)
     else {
 	STRLEN len  = UNISKIP(uv);
 	U8 *p = d+len-1;
