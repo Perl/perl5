@@ -131,7 +131,7 @@ sub init_aliases
     define_alias( qr/^UTF-8$/i => '"utf8"',);
     # Moved from Encode::ucs2_le
     define_alias( qr/^UCS-2LE$/i    => '"UTF-16LE"',
-		  qr/^UCS2-le$/i    => '"UCS-2"', );
+		  qr/^UCS2-LE$/i    => '"UTF-16LE"');
     # Moved from Encode::10464_1
     define_alias( qr/^UTF-16BE$/i    => '"UCS-2"',
 		  qr/^UCS2$/i        => '"UCS-2"',
