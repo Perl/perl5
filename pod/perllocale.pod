@@ -427,25 +427,28 @@ parameters as integers correctly formatted in the current locale:
         }
         print "\n";
 
-=head2 I18::Langinfo
+=head2 I18N::Langinfo
 
 Another interface for querying locale-dependent information is the
 I18N::Langinfo::langinfo() function, available at least in UNIX-like
 systems and VMS.
 
-The following example will import the langinfo() function itself
-(implicitly) and (explicitly) three string constants: a string for the
-abbreviated first day of the week (the numbering starts from Sunday =
-1) and two strings for the affirmative and negative answers for a
-yes/no question in the current locale.
+The following example will import the langinfo() function itself and
+three constants to be used as arguments to langinfo(): a constant for
+the abbreviated first day of the week (the numbering starts from
+Sunday = 1) and two more constants for the affirmative and negative
+answers for a yes/no question in the current locale.
 
-    use I18N::Langinfo qw(ABDAY_1 YESSTR NOSTR);
+    use I18N::Langinfo qw(langinfo ABDAY_1 YESSTR NOSTR);
 
-    print ABDAY_1, "? [", YESSTR, "/", NOSTR, "] ";
+    my ($abday_1, $yesstr, $nostr) = map { langinfo } qw(ABDAY_1 YESSTR NOSTR);
 
-In other words, in the "C" (or English) locale the above will print:
+    print "$abday_1? [$yesstr/$nostr] ";
 
-    Sun? [y/n] 
+In other words, in the "C" (or English) locale the above will probably
+print something like:
+
+    Sun? [yes/no] 
 
 See L<I18N::Langinfo> for more information.
 

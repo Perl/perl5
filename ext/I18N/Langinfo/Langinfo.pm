@@ -11,8 +11,9 @@ use AutoLoader;
 
 our @ISA = qw(Exporter DynaLoader);
 
+our @EXPORT = qw(langinfo);
+
 our @EXPORT_OK = qw(
-        langinfo
 	ABDAY_1
 	ABDAY_2
 	ABDAY_3
@@ -112,14 +113,17 @@ I18N::Langinfo - query locale information
 
 =head1 DESCRIPTION
 
-The langinfo() function queries various locale information that
-can be used to localize output and user interfaces.
+The langinfo() function queries various locale information that can be
+used to localize output and user interfaces.  The langinfo() requires
+one numeric argument that identifies the locale constant to query:
+if no argument is supplied, C<$_> is used.  The numeric constants
+appropriate to be used as arguments are exportable from I18N::Langinfo.
 
-The following example will import the langinfo() function itself
-(implicitly) and (explicitly) three constants to be used as arguments
-to langinfo(): a constant for the abbreviated first day of the week (the
-numbering starts from Sunday 1) and two more constant for the affirmative
-and negative answers for a yes/no question in the current locale.
+The following example will import the langinfo() function itself and
+three constants to be used as arguments to langinfo(): a constant for
+the abbreviated first day of the week (the numbering starts from
+Sunday = 1) and two more constants for the affirmative and negative
+answers for a yes/no question in the current locale.
 
     use I18N::Langinfo qw(langinfo ABDAY_1 YESSTR NOSTR);
 
@@ -127,9 +131,10 @@ and negative answers for a yes/no question in the current locale.
 
     print "$abday_1? [$yesstr/$nostr] ";
 
-In other words, in the "C" (or English) locale the above will probably print:
+In other words, in the "C" (or English) locale the above will probably
+print something like:
 
-    Sun? [y/n] 
+    Sun? [yes/no] 
 
 The usually available constants are
 
@@ -162,7 +167,7 @@ radix character (yes, this is redundant with POSIX::localeconv())
 
 for the affirmative and negative responses and expressions, and
 
-    ERA ERA_D_FMT ERA_D_T_FMT ETA_T_FMT
+    ERA ERA_D_FMT ERA_D_T_FMT ERA_T_FMT
 
 for the Japanese Emperor eras (naturally only defined under Japanese locales).
 
