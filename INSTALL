@@ -1148,6 +1148,39 @@ you have some libraries under /usr/local/ and others under
 
 =back
 
+=head2 Building DB, NDBM, and ODBM interfaces with Berkeley DB 3
+
+Perl interface for DB3 is part of Berkeley DB, but if you want to
+compile standard Perl DB/ODBM/NDBM interfaces, you must follow
+following instructions.
+
+Berkeley DB3 from Sleepycat Software is by default installed without
+DB1 compatibility code (needed for DB_File interface) and without
+links to compatibility files. So if you want to use packages written
+for DB/ODBM/NDBM interfaces, you need to configure DB3 with
+--enable-compat185 (and optionally with --enable-dump185) and create
+additional references (suppose you are installing DB3 with
+--prefix=/usr):
+
+    ln -s libdb-3.so /usr/lib/libdbm.so
+    ln -s libdb-3.so /usr/lib/libndbm.so
+    echo '#define DB_DBM_HSEARCH 1' >dbm.h 
+    echo '#include <db.h>' >>dbm.h
+    install -m 0644 dbm.h /usr/include/dbm.h 
+    install -m 0644 dbm.h /usr/include/ndbm.h
+
+Optionally, if you have compiled with --enable-compat185 (not needed
+for ODBM/NDBM):
+
+    ln -s libdb-3.so /usr/lib/libdb1.so
+    ln -s libdb-3.so /usr/lib/libdb.so
+
+ODBM emulation seems not to be perfect, but is quite usable,
+using DB 3.1.17:
+
+    lib/odbm.............FAILED at test 9
+        Failed 1/64 tests, 98.44% okay
+
 =head2 What if it doesn't work?
 
 If you run into problems, try some of the following ideas.
