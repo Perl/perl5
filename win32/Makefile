@@ -998,15 +998,18 @@ utils: $(PERLEXE) $(X2P)
 	copy ..\README.apollo   .\perlapollo.pod
 	copy ..\README.beos     .\perlbeos.pod
 	copy ..\README.bs2000   .\perlbs2000.pod
-	copy ..\README.ce	.\perlce.pod
+	copy ..\README.ce       .\perlce.pod
+	copy ..\README.cn       .\perlcn.pod
 	copy ..\README.cygwin   .\perlcygwin.pod
 	copy ..\README.dgux     .\perldgux.pod
 	copy ..\README.dos      .\perldos.pod
 	copy ..\README.epoc     .\perlepoc.pod
-	copy ..\README.freebsd     .\perlfreebsd.pod
-	copy ..\README.hurd     .\perlhurd.pod
+	copy ..\README.freebsd  .\perlfreebsd.pod
 	copy ..\README.hpux     .\perlhpux.pod
+	copy ..\README.hurd     .\perlhurd.pod
 	copy ..\README.irix     .\perlirix.pod
+	copy ..\README.jp       .\perljp.pod
+	copy ..\README.ko       .\perlko.pod
 	copy ..\README.machten  .\perlmachten.pod
 	copy ..\README.macos    .\perlmacos.pod
 	copy ..\README.macosx   .\perlmacosx.pod
@@ -1020,11 +1023,13 @@ utils: $(PERLEXE) $(X2P)
 	copy ..\README.qnx      .\perlqnx.pod
 	copy ..\README.solaris  .\perlsolaris.pod
 	copy ..\README.tru64    .\perltru64.pod
+	copy ..\README.tw       .\perltw.pod
 	copy ..\README.uts      .\perluts.pod
 	copy ..\README.vmesa    .\perlvmesa.pod
-	copy ..\vms\perlvms.pod .\perlvms.pod
+	copy ..\README.vms      .\perlvms.pod
 	copy ..\README.vos      .\perlvos.pod
 	copy ..\README.win32    .\perlwin32.pod
+	copy ..\vms\perlvms.pod .\perlvms.pod
 	$(MAKE) -f ..\win32\pod.mak converters
 	cd ..\lib
 	$(PERLEXE) lib_pm.PL
