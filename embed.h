@@ -1619,7 +1619,7 @@
 #if defined(PERL_CORE) || defined(PERL_EXT)
 #define regclass		S_regclass
 #endif
-#ifdef PERL_CORE
+#if defined(PERL_CORE) || defined(PERL_EXT)
 #define regcurly		S_regcurly
 #endif
 #if defined(PERL_CORE) || defined(PERL_EXT)
@@ -4043,7 +4043,7 @@
 #if defined(PERL_CORE) || defined(PERL_EXT)
 #define regclass(a)		S_regclass(aTHX_ a)
 #endif
-#ifdef PERL_CORE
+#if defined(PERL_CORE) || defined(PERL_EXT)
 #define regcurly(a)		S_regcurly(aTHX_ a)
 #endif
 #if defined(PERL_CORE) || defined(PERL_EXT)

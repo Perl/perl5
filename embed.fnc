@@ -1131,7 +1131,7 @@ Es	|regnode*|regatom	|struct RExC_state_t*|I32 *
 Es	|regnode*|regbranch	|struct RExC_state_t*|I32 *|I32
 Es	|void	|reguni		|struct RExC_state_t*|UV|char *|STRLEN*
 Es	|regnode*|regclass	|struct RExC_state_t*
-s	|I32	|regcurly	|char *
+Es	|I32	|regcurly	|char *
 Es	|regnode*|reg_node	|struct RExC_state_t*|U8
 Es	|regnode*|regpiece	|struct RExC_state_t*|I32 *
 Es	|void	|reginsert	|struct RExC_state_t*|U8|regnode *
