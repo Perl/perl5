@@ -1,0 +1,68 @@
+Please note: This file provides a summary of significant changes
+between versions and sub-versions of Perl, not necessarily a complete
+list of each modification.  If you'd like more detailed information,
+please consult the comments in the patches on which the relevant
+release of Perl is based.  (Patches can be found on any CPAN
+site, in the .../src/5.0 directory for full version releases,
+or in the .../src/5/0/unsupported directory for sub-version
+releases.)
+
+
+			   ---------------
+			    CAST AND CREW
+			   ---------------
+
+To give due honor to those who have made Perl what is is today,
+here are some of the more common names in the Changes file, and their
+current addresses (as of March 1997):
+
+    Gisle Aas           <gisle@aas.no>
+    Kenneth Albanowski  <kjahds@kjahds.com>
+    Graham Barr         <gbarr@ti.com>
+    Spider Boardman     <spider@orb.nashua.nh.us>
+    Tom Christiansen    <tchrist@perl.com>
+    Hallvard B Furuseth <h.b.furuseth@usit.uio.no>
+    M. J. T. Guy        <mjtg@cus.cam.ac.uk>
+    Gurusamy Sarathy    <gsar@engin.umich.edu>
+    Jarkko Hietaniemi   <jhi@iki.fi>
+    Nick Ing-Simmons    <nik@tiuk.ti.com>
+    Andreas Koenig      <a.koenig@mind.de>
+    Doug MacEachern     <dougm@opengroup.org>
+    Paul Marquess       <pmarquess@bfsec.bt.co.uk>
+    Hans Mulder         <hansm@euronet.nl>
+    Jeff Okamoto        <okamoto@hpcc123.corp.hp.com>
+    Ulrich Pfeifer      <pfeifer@charly.informatik.uni-dortmund.de>
+    Tom Phoenix         <rootbeer@teleport.com>
+    Norbert Pueschel    <pueschel@imsdd.meb.uni-bonn.de>
+    Dean Roehrich       <roehrich@cray.com>
+    Roderick Schertler  <roderick@argon.org>
+    Larry W. Virden     <lvirden@cas.org>
+    Ilya Zakharevich    <ilya@math.ohio-state.edu>
+
+And the Keepers of the Patch Pumpkin:
+
+    Charles Bailey      <bailey@hmivax.humgen.upenn.edu>
+    Tim Bunce           <Tim.Bunce@ig.co.uk>
+    Andy Dougherty      <doughera@lafcol.lafayette.edu>
+    Chip Salzenberg     <chip@perl.com>
+    Malcolm Beattie     <mbeattie@sable.ox.ac.uk>
+
+And, of course, the Author of Perl:
+
+    Larry Wall     	<larry@wall.org>
+
+----------------
+Version 5.004_64        Developer release working toward 5.005
+----------------
+
+[Put changes here.  Should we go back and put in changes for
+_51 onwards?]
+
+----------------
+Version 5.004_50        First developer release towards 5.005
+----------------
+
+Maintenance of the 5.004 version of perl continues with the 5.004_xx
+series, where 'xx' is <= 49.  Development of the next version, 5.005,
+starts with 5.004_50.
+
