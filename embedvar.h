@@ -427,6 +427,8 @@
 #define PL_utf8_cntrl		(PERL_GET_INTERP->Iutf8_cntrl)
 #define PL_utf8_digit		(PERL_GET_INTERP->Iutf8_digit)
 #define PL_utf8_graph		(PERL_GET_INTERP->Iutf8_graph)
+#define PL_utf8_idcont		(PERL_GET_INTERP->Iutf8_idcont)
+#define PL_utf8_idstart		(PERL_GET_INTERP->Iutf8_idstart)
 #define PL_utf8_lower		(PERL_GET_INTERP->Iutf8_lower)
 #define PL_utf8_mark		(PERL_GET_INTERP->Iutf8_mark)
 #define PL_utf8_print		(PERL_GET_INTERP->Iutf8_print)
@@ -726,6 +728,8 @@
 #define PL_utf8_cntrl		(vTHX->Iutf8_cntrl)
 #define PL_utf8_digit		(vTHX->Iutf8_digit)
 #define PL_utf8_graph		(vTHX->Iutf8_graph)
+#define PL_utf8_idcont		(vTHX->Iutf8_idcont)
+#define PL_utf8_idstart		(vTHX->Iutf8_idstart)
 #define PL_utf8_lower		(vTHX->Iutf8_lower)
 #define PL_utf8_mark		(vTHX->Iutf8_mark)
 #define PL_utf8_print		(vTHX->Iutf8_print)
@@ -1028,6 +1032,8 @@
 #define PL_Iutf8_cntrl		PL_utf8_cntrl
 #define PL_Iutf8_digit		PL_utf8_digit
 #define PL_Iutf8_graph		PL_utf8_graph
+#define PL_Iutf8_idcont		PL_utf8_idcont
+#define PL_Iutf8_idstart	PL_utf8_idstart
 #define PL_Iutf8_lower		PL_utf8_lower
 #define PL_Iutf8_mark		PL_utf8_mark
 #define PL_Iutf8_print		PL_utf8_print

@@ -582,6 +582,10 @@ END_EXTERN_C
 #define PL_utf8_digit		(*Perl_Iutf8_digit_ptr(aTHX))
 #undef  PL_utf8_graph
 #define PL_utf8_graph		(*Perl_Iutf8_graph_ptr(aTHX))
+#undef  PL_utf8_idcont
+#define PL_utf8_idcont		(*Perl_Iutf8_idcont_ptr(aTHX))
+#undef  PL_utf8_idstart
+#define PL_utf8_idstart		(*Perl_Iutf8_idstart_ptr(aTHX))
 #undef  PL_utf8_lower
 #define PL_utf8_lower		(*Perl_Iutf8_lower_ptr(aTHX))
 #undef  PL_utf8_mark

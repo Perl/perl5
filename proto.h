@@ -377,6 +377,7 @@ PERL_CALLCONV bool	Perl_is_utf8_string(pTHX_ U8 *s, STRLEN len);
 PERL_CALLCONV bool	Perl_is_utf8_alnum(pTHX_ U8 *p);
 PERL_CALLCONV bool	Perl_is_utf8_alnumc(pTHX_ U8 *p);
 PERL_CALLCONV bool	Perl_is_utf8_idfirst(pTHX_ U8 *p);
+PERL_CALLCONV bool	Perl_is_utf8_idcont(pTHX_ U8 *p);
 PERL_CALLCONV bool	Perl_is_utf8_alpha(pTHX_ U8 *p);
 PERL_CALLCONV bool	Perl_is_utf8_ascii(pTHX_ U8 *p);
 PERL_CALLCONV bool	Perl_is_utf8_space(pTHX_ U8 *p);

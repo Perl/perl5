@@ -342,6 +342,7 @@ Apd	|bool	|is_utf8_string	|U8 *s|STRLEN len
 Ap	|bool	|is_utf8_alnum	|U8 *p
 Ap	|bool	|is_utf8_alnumc	|U8 *p
 Ap	|bool	|is_utf8_idfirst|U8 *p
+Ap	|bool	|is_utf8_idcont	|U8 *p
 Ap	|bool	|is_utf8_alpha	|U8 *p
 Ap	|bool	|is_utf8_ascii	|U8 *p
 Ap	|bool	|is_utf8_space	|U8 *p

@@ -460,7 +460,10 @@ Converts the specified character to lowercase.
 #define isBLANK_LC_uni(c)	isBLANK(c) /* could be wrong */
 
 #define isALNUM_utf8(p)		is_utf8_alnum(p)
-#define isIDFIRST_utf8(p)	is_utf8_idfirst(p)
+/* The ID_Start of Unicode is quite limiting: it assumes a L-class
+ * character (meaning that you cannot have, say, a CJK character).
+ * Instead, let's allow ID_Continue but not digits. */
+#define isIDFIRST_utf8(p)	(is_utf8_idcont(p) && !is_utf8_digit(p))
 #define isALPHA_utf8(p)		is_utf8_alpha(p)
 #define isSPACE_utf8(p)		is_utf8_space(p)
 #define isDIGIT_utf8(p)		is_utf8_digit(p)

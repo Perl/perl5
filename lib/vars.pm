@@ -12,6 +12,10 @@ sub import {
     my ($pack, @imports) = @_;
     my ($sym, $ch);
     foreach (@imports) {
+	# TODO: UTF-8 names: (the unpack is quite wrong,
+	# /^(.)(.*)/ would probably be better.)  While you
+	# are at it, until declaring empty package is made
+	# to work the * is too lenient.
         ($ch, $sym) = unpack('a1a*', $_);
 	if ($sym =~ tr/A-Za-z_0-9//c) {
 	    # time for a more-detailed check-up
@@ -20,10 +24,9 @@ sub import {
 		Carp::croak("Can't declare individual elements of hash or array");
 	    } elsif (warnings::enabled() and length($sym) == 1 and $sym !~ tr/a-zA-Z//) {
 		warnings::warn("No need to declare built-in vars");
-            } elsif  (($^H &= strict::bits('vars')) &&
-		       # Either no 'use utf8' or if utf8, no non-word
-		       ($^H & 0x00800000 == 0 || # matches $utf8::hint_bits
-			$sym =~ /\W/) ) {
+            } elsif  (($^H &= strict::bits('vars'))) {
+		# TODO: UTF-8 names: be careful to load the UTF-8
+		# machinery only if the symbol requires it.
 		require Carp;
 		Carp::croak("'$_' is not a valid variable name under strict vars");
 	    }
