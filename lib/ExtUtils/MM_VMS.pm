@@ -456,6 +456,9 @@ sub constants {
     my($self) = @_;
     my(@m,$def,$macro);
 
+    # Be kind about case for pollution
+    for (@ARGV) { $_ = uc($_) if /POLLUTE/i; }
+
     if ($self->{DEFINE} ne '') {
 	my(@terms) = split(/\s+/,$self->{DEFINE});
 	my(@defs,@udefs);
@@ -674,6 +677,7 @@ sub cflags {
 	warn "MM_VMS: Ignoring unrecognized CCFLAGS elements \"$quals\"\n";
 	$quals = '';
     }
+    $definestr .= q["PERL_POLLUTE",] if $self->{POLLUTE};
     if (length $definestr) { chop($definestr); $quals .= "/Define=($definestr)"; }
     if (length $undefstr)  { chop($undefstr);  $quals .= "/Undef=($undefstr)";   }
     # Deal with $self->{DEFINE} here since some C compilers pay attention
@@ -2022,12 +2026,13 @@ $(MAKE_APERL_FILE) : $(FIRST_MAKEFILE)
 	$(NOECHO) $(PERL) "-I$(INST_ARCHLIB)" "-I$(INST_LIB)" "-I$(PERL_ARCHLIB)" "-I$(PERL_LIB)" \
 		Makefile.PL DIR=}, $dir, q{ \
 		MAKEFILE=$(MAKE_APERL_FILE) LINKTYPE=static \
-		MAKEAPERL=1 NORECURS=1
+		MAKEAPERL=1 NORECURS=1 };
+
+	push @m, map(q[ \\\n\t\t"$_"], @ARGV),q{
 
 $(MAP_TARGET) :: $(MAKE_APERL_FILE)
 	$(MMS)$(MMSQUALIFIERS)$(USEMAKEFILE)$(MAKE_APERL_FILE) static $(MMS$TARGET)
 };
-	push @m, map( " \\\n\t\t$_", @ARGV );
 	push @m, "\n";
 
 	return join '', @m;
