@@ -280,8 +280,15 @@ static Signal_t handle_thread_signal _((int sig));
 static Signal_t
 handle_thread_signal(int sig)
 {
-    char c = (char) sig;
-    write(sig_pipe[0], &c, 1);
+    unsigned char c = (unsigned char) sig;
+    /*
+     * We're not really allowed to call fprintf in a signal handler
+     * so don't be surprised if this isn't robust while debugging
+     * with -DL.
+     */
+    DEBUG_L(PerlIO_printf(PerlIO_stderr(),
+	    "handle_thread_signal: got signal %d\n", sig););
+    write(sig_pipe[1], &c, 1);
 }
 
 MODULE = Thread		PACKAGE = Thread
@@ -555,7 +562,7 @@ MODULE = Thread		PACKAGE = Thread::Signal
 void
 kill_sighandler_thread()
     PPCODE:
-	write(sig_pipe[0], "\0", 1);
+	write(sig_pipe[1], "\0", 1);
 	PUSHs(&sv_yes);
 
 void
@@ -566,22 +573,22 @@ init_thread_signals()
 	    XSRETURN_UNDEF;
 	PUSHs(&sv_yes);
 
-SV *
+void
 await_signal()
     PREINIT:
-	char c;
+	unsigned char c;
 	SSize_t ret;
     CODE:
 	do {
-	    ret = read(sig_pipe[1], &c, 1);
+	    ret = read(sig_pipe[0], &c, 1);
 	} while (ret == -1 && errno == EINTR);
 	if (ret == -1)
 	    croak("panic: await_signal");
-	if (ret == 0)
-	    XSRETURN_UNDEF;
-	RETVAL = c ? psig_ptr[c] : &sv_no;
-    OUTPUT:
-	RETVAL
+	ST(0) = sv_newmortal();
+	if (ret)
+	    sv_setsv(ST(0), c ? psig_ptr[c] : &sv_no);
+	DEBUG_L(PerlIO_printf(PerlIO_stderr(),
+			      "await_signal returning %s\n", SvPEEK(ST(0))););
 
 MODULE = Thread		PACKAGE = Thread::Specific
 

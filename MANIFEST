@@ -267,6 +267,7 @@ ext/Thread/Thread.pm	Thread extension Perl module
 ext/Thread/Thread.xs	Thread extension external subroutines
 ext/Thread/Thread/Queue.pm	Thread synchronised queue objects
 ext/Thread/Thread/Semaphore.pm	Thread semaphore objects
+ext/Thread/Thread/Signal.pm	Start a thread to run signal handlers
 ext/Thread/Thread/Specific.pm	Thread specific data access
 ext/Thread/create.t	Test thread creation
 ext/Thread/die.t	Test thread die()
