@@ -1699,7 +1699,8 @@ S_run_body(pTHX_ I32 oldscope)
 
     if (!PL_restartop) {
 	DEBUG_x(dump_all());
-	PERL_DEBUG(PerlIO_printf(Perl_debug_log, "\nEXECUTING...\n\n"));
+	if (!DEBUG_q_TEST)
+	  PERL_DEBUG(PerlIO_printf(Perl_debug_log, "\nEXECUTING...\n\n"));
 	DEBUG_S(PerlIO_printf(Perl_debug_log, "main thread is 0x%"UVxf"\n",
 			      PTR2UV(thr)));
 
@@ -2321,7 +2322,7 @@ Perl_get_debug_opts(pTHX_ char **s)
     int i = 0;
     if (isALPHA(**s)) {
 	/* if adding extra options, remember to update DEBUG_MASK */
-	static char debopts[] = "psltocPmfrxu HXDSTRJvC";
+	static char debopts[] = "psltocPmfrxu HXDSTRJvCAq";
 
 	for (; isALNUM(**s); (*s)++) {
 	    char *d = strchr(debopts,**s);

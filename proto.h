@@ -1333,8 +1333,7 @@ PERL_CALLCONV void	Perl_free_tied_hv_pool(pTHX);
 PERL_CALLCONV int	Perl_get_debug_opts(pTHX_ char **s);
 #endif
 PERL_CALLCONV void	Perl_save_set_svflags(pTHX_ SV* sv, U32 mask, U32 val);
-
-
+PERL_CALLCONV void	Perl_hv_assert(pTHX_ HV* tb);
 
 END_EXTERN_C
 

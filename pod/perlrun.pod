@@ -390,6 +390,8 @@ B<-D14> is equivalent to B<-Dtls>):
    524288  J  Do not s,t,P-debug (Jump over) opcodes within package DB
   1048576  v  Verbose: use in conjunction with other flags
   2097152  C  Copy On Write
+  4194304  A  Consistency checks on internal structures
+  8388608  q  quiet - currently only suppressed the "EXECUTING" message
 
 All these flags require B<-DDEBUGGING> when you compile the Perl
 executable (but see L<Devel::Peek>, L<re> which may change this).

@@ -1845,6 +1845,8 @@ Perl_hv_clear(pTHX_ HV *hv)
     if (!hv)
 	return;
 
+    DEBUG_A(Perl_hv_assert(aTHX_ hv));
+
     xhv = (XPVHV*)SvANY(hv);
 
     if (SvREADONLY(hv)) {
@@ -1938,6 +1940,7 @@ Perl_hv_undef(pTHX_ HV *hv)
     register XPVHV* xhv;
     if (!hv)
 	return;
+    DEBUG_A(Perl_hv_assert(aTHX_ hv));
     xhv = (XPVHV*)SvANY(hv);
     hfreeentries(hv);
     Safefree(xhv->xhv_array /* HvARRAY(hv) */);
@@ -2455,4 +2458,74 @@ S_share_hek_flags(pTHX_ const char *str, I32 len, register U32 hash, int flags)
 	Safefree(str);
 
     return HeKEY_hek(entry);
+}
+
+
+/*
+=for apidoc hv_assert
+
+Check that a hash is in an internally consistent state.
+
+=cut
+*/
+
+void
+Perl_hv_assert(pTHX_ HV *hv)
+{
+  HE* entry;
+  int withflags = 0;
+  int placeholders = 0;
+  int real = 0;
+  int bad = 0;
+  I32 riter = HvRITER(hv);
+  HE *eiter = HvEITER(hv);
+
+  (void)hv_iterinit(hv);
+
+  while ((entry = hv_iternext_flags(hv, HV_ITERNEXT_WANTPLACEHOLDERS))) {
+    /* sanity check the values */
+    if (HeVAL(entry) == &PL_sv_placeholder) {
+      placeholders++;
+    } else {
+      real++;
+    }
+    /* sanity check the keys */
+    if (HeSVKEY(entry)) {
+      /* Don't know what to check on SV keys.  */
+    } else if (HeKUTF8(entry)) {
+      withflags++;
+       if (HeKWASUTF8(entry)) {
+	 PerlIO_printf(Perl_debug_log,
+		       "hash key has both WASUFT8 and UTF8: '%.*s'\n",
+		       (int) HeKLEN(entry),  HeKEY(entry));
+	 bad = 1;
+       }
+    } else if (HeKWASUTF8(entry)) {
+      withflags++;
+    }
+  }
+  if (!SvTIED_mg((SV*)hv, PERL_MAGIC_tied)) {
+    if (HvUSEDKEYS(hv) != real) {
+      PerlIO_printf(Perl_debug_log, "Count %d key(s), but hash reports %d\n",
+		    (int) real, (int) HvUSEDKEYS(hv));
+      bad = 1;
+    }
+    if (HvPLACEHOLDERS(hv) != placeholders) {
+      PerlIO_printf(Perl_debug_log,
+		    "Count %d placeholder(s), but hash reports %d\n",
+		    (int) placeholders, (int) HvPLACEHOLDERS(hv));
+      bad = 1;
+    }
+  }
+  if (withflags && ! HvHASKFLAGS(hv)) {
+    PerlIO_printf(Perl_debug_log,
+		  "Hash has HASKFLAGS off but I count %d key(s) with flags\n",
+		  withflags);
+    bad = 1;
+  }
+  if (bad) {
+    sv_dump((SV *)hv);
+  }
+  HvRITER(hv) = riter;		/* Restore hash iterator state */
+  HvEITER(hv) = eiter;
 }

@@ -1393,8 +1393,7 @@ p	|void	|free_tied_hv_pool
 p	|int	|get_debug_opts	|char **s
 #endif
 Ap	|void	|save_set_svflags|SV* sv|U32 mask|U32 val
-
-
+Apod	|void	|hv_assert	|HV* tb
 
 END_EXTERN_C
 
