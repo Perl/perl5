@@ -8,6 +8,8 @@ $VERSION = '1.2';
 
 @ISA = qw(File::Spec::Unix);
 
+use Cwd;
+
 =head1 NAME
 
 File::Spec::Mac - File::Spec for MacOS
@@ -37,51 +39,87 @@ sub canonpath {
 
 =item catdir
 
-Concatenate two or more directory names to form a complete path ending with 
-a directory.  Put a trailing : on the end of the complete path if there 
-isn't one, because that's what's done in MacPerl's environment.
+Concatenate two or more directory names to form a path separated by colons
+(":") ending with a directory.  Automatically puts a trailing ":" on the
+end of the complete path, because that's what's done in MacPerl's
+environment and helps to distinguish a file path from a directory path.
 
-The fundamental requirement of this routine is that
+The intended purpose of this routine is to concatenate I<directory names>.
+But because of the nature of Macintosh paths, some additional possibilities
+are allowed to make using this routine give reasonable results for some
+common situations. In other words, you are also allowed to concatenate
+I<paths> instead of directory names (strictly speaking, a string like ":a"
+is a path, but not a name, since it contains a punctuation character ":").
 
-	  File::Spec->catdir(split(":",$path)) eq $path
+Here are the rules that are used: Each argument has its trailing ":" removed.
+Each argument, except the first, has its leading ":" removed.  They are then
+joined together by a ":" and a trailing ":" is added to the path.
 
-But because of the nature of Macintosh paths, some additional 
-possibilities are allowed to make using this routine give reasonable results 
-for some common situations.  Here are the rules that are used.  Each 
-argument has its trailing ":" removed.  Each argument, except the first,
-has its leading ":" removed.  They are then joined together by a ":".
+So, beside calls like
 
-So
+    File::Spec->catdir("a") = "a:"
+    File::Spec->catdir("a","b") = "a:b:"
+    File::Spec->catdir("","a","b") = ":a:b:"
+    File::Spec->catdir("a","","b") = "a::b:"
+    File::Spec->catdir("") = ":"
+    File::Spec->catdir("a","b","") = "a:b::"     (!)
+    File::Spec->catdir() = ""                    (special case)
 
-	  File::Spec->catdir("a","b") = "a:b:"
-	  File::Spec->catdir("a:",":b") = "a:b:"
-	  File::Spec->catdir("a:","b") = "a:b:"
-	  File::Spec->catdir("a",":b") = "a:b"
-	  File::Spec->catdir("a","","b") = "a::b"
+calls like the following
 
-etc.
+    File::Spec->catdir("a:",":b") = "a:b:"
+    File::Spec->catdir("a:b:",":c") = "a:b:c:"
+    File::Spec->catdir("a:","b") = "a:b:"
+    File::Spec->catdir("a",":b") = "a:b:"
+    File::Spec->catdir(":a","b") = ":a:b:"
+    File::Spec->catdir("","",":a",":b") = "::a:b:"
+    File::Spec->catdir("",":a",":b") = ":a:b:" (!)
+    File::Spec->catdir(":") = ":"
 
-To get a relative path (one beginning with :), begin the first argument with :
-or put a "" as the first argument.
+are allowed.
 
-If you don't want to worry about these rules, never allow a ":" on the ends 
-of any of the arguments except at the beginning of the first.
+To get a path beginning with a ":" (a relative path), put a "" as the first
+argument. Beginning the first argument with a ":" (e.g. ":a") will also work
+(see the examples).
 
-Under MacPerl, there is an additional ambiguity.  Does the user intend that
+Since Mac OS (Classic) uses the concept of volumes, there is an ambiguity:
+Does the first argument in
 
-	  File::Spec->catfile("LWP","Protocol","http.pm")
+    File::Spec->catdir("LWP","Protocol");
 
-be relative or absolute?  There's no way of telling except by checking for the
-existence of LWP: or :LWP, and even there he may mean a dismounted volume or
-a relative path in a different directory (like in @INC).   So those checks
-aren't done here. This routine will treat this as absolute.
+denote a volume or a directory, i.e. should the path be relative or absolute?
+There is no way of telling except by checking for the existence of "LWP:" (a
+volume) or ":LWP" (a directory), but those checks aren't made here. Thus, according
+to the above rules, the path "LWP:Protocol:" will be returned, which, considered
+alone, is an absolute path, although the volume "LWP:" may not exist. Hence, don't
+forget to put a ":" in the appropriate place in the path if you want to
+distinguish unambiguously. (Remember that a valid relative path should always begin
+with a ":", unless you are specifying a file or a directory that resides in the
+I<current> directory. In that case, the leading ":" is not mandatory.)
+
+With version 1.2 of File::Spec, there's a new method called C<catpath>, that
+takes volume, directory and file portions and returns an entire path (see below).
+While C<catdir> is still suitable for the concatenation of I<directory names>,
+you should consider using C<catpath> to concatenate I<volume names> and
+I<directory paths>, because it avoids any ambiguities. E.g.
+
+    $dir      = File::Spec->catdir("LWP","Protocol");
+    $abs_path = File::Spec->catpath("MacintoshHD:", $dir, "");
+
+yields
+
+    "MacintoshHD:LWP:Protocol:" .
+
 
 =cut
 
 sub catdir {
-    shift;
+    my $self = shift;
+    return '' unless @_;
     my @args = @_;
     my $result = shift @args;
+    #  To match the actual end of the string,
+    #  not ignoring newline, you can use \Z(?!\n).
     $result =~ s/:\Z(?!\n)//;
     foreach (@args) {
 	s/:\Z(?!\n)//;
@@ -95,21 +133,24 @@ sub catdir {
 
 Concatenate one or more directory names and a filename to form a
 complete path ending with a filename.  Since this uses catdir, the
-same caveats apply.  Note that the leading : is removed from the filename,
-so that 
+same caveats apply.  Note that the leading ":" is removed from the
+filename, so that
 
-	  File::Spec->catfile($ENV{HOME},"file");
+    File::Spec->catfile("a", "b", "file"); # = "a:b:file"
 
 and
 
-	  File::Spec->catfile($ENV{HOME},":file");
+    File::Spec->catfile("a", "b", ":file"); # = "a:b:file"
 
-give the same answer, as one might expect.
+give the same answer, as one might expect. To concatenate I<volume names>,
+I<directory paths> and I<filenames>, you should consider using C<catpath>
+(see below).
 
 =cut
 
 sub catfile {
     my $self = shift;
+    return '' unless @_;
     my $file = pop @_;
     return $file unless @_;
     my $dir = $self->catdir(@_);
@@ -119,7 +160,7 @@ sub catfile {
 
 =item curdir
 
-Returns a string representing the current directory.
+Returns a string representing the current directory. On Mac OS, this is ":".
 
 =cut
 
@@ -129,7 +170,7 @@ sub curdir {
 
 =item devnull
 
-Returns a string representing the null device.
+Returns a string representing the null device. On Mac OS, this is "Dev:Null".
 
 =cut
 
@@ -141,7 +182,9 @@ sub devnull {
 
 Returns a string representing the root directory.  Under MacPerl,
 returns the name of the startup volume, since that's the closest in
-concept, although other volumes aren't rooted there.
+concept, although other volumes aren't rooted there. The name has a
+trailing ":", because that's the correct specification for a volume
+name on Mac OS.
 
 =cut
 
@@ -159,10 +202,9 @@ sub rootdir {
 
 =item tmpdir
 
-Returns a string representation of the first existing directory
-from the following list or '' if none exist:
-
-    $ENV{TMPDIR}
+Returns the contents of $ENV{TMPDIR}, if that directory exits or the current working
+directory otherwise. Under MacPerl, $ENV{TMPDIR} will contain a path like
+"MacintoshHD:Temporary Items:", which is a hidden directory on your startup volume.
 
 =cut
 
@@ -170,13 +212,15 @@ my $tmpdir;
 sub tmpdir {
     return $tmpdir if defined $tmpdir;
     $tmpdir = $ENV{TMPDIR} if -d $ENV{TMPDIR};
-    $tmpdir = '' unless defined $tmpdir;
+    unless (defined($tmpdir)) {
+   	$tmpdir = cwd();
+    }
     return $tmpdir;
 }
 
 =item updir
 
-Returns a string representing the parent directory.
+Returns a string representing the parent directory. On Mac OS, this is "::".
 
 =cut
 
@@ -186,32 +230,41 @@ sub updir {
 
 =item file_name_is_absolute
 
-Takes as argument a path and returns true, if it is an absolute path.  In 
-the case where a name can be either relative or absolute (for example, a 
-folder named "HD" in the current working directory on a drive named "HD"), 
-relative wins.  Use ":" in the appropriate place in the path if you want to
-distinguish unambiguously.
+Takes as argument a path and returns true, if it is an absolute path.
+This does not consult the local filesystem. If
+the path has a leading ":", it's a relative path. Otherwise, it's an
+absolute path, unless the path doesn't contain any colons, i.e. it's a name
+like "a". In this particular case, the path is considered to be relative
+(i.e. it is considered to be a filename). Use ":" in the appropriate place
+in the path if you want to distinguish unambiguously. As a special case,
+the filename '' is always considered to be absolute.
 
-As a special case, the file name '' is always considered to be absolute.
+E.g.
+
+    File::Spec->file_name_is_absolute("a");             # false (relative)
+    File::Spec->file_name_is_absolute(":a:b:");         # false (relative)
+    File::Spec->file_name_is_absolute("MacintoshHD:");  # true (absolute)
+    File::Spec->file_name_is_absolute("");              # true (absolute)
+
 
 =cut
 
 sub file_name_is_absolute {
     my ($self,$file) = @_;
     if ($file =~ /:/) {
-	return ($file !~ m/^:/s);
+	return (! ($file =~ m/^:/s) );
     } elsif ( $file eq '' ) {
         return 1 ;
     } else {
-	return (! -e ":$file");
+	return 0; # i.e. a file like "a"
     }
 }
 
 =item path
 
-Returns the null list for the MacPerl application, since the concept is 
-usually meaningless under MacOS. But if you're using the MacPerl tool under 
-MPW, it gives back $ENV{Commands} suitably split, as is done in 
+Returns the null list for the MacPerl application, since the concept is
+usually meaningless under MacOS. But if you're using the MacPerl tool under
+MPW, it gives back $ENV{Commands} suitably split, as is done in
 :lib:ExtUtils:MM_Mac.pm.
 
 =cut
@@ -227,40 +280,107 @@ sub path {
 
 =item splitpath
 
+    ($volume,$directories,$file) = File::Spec->splitpath( $path );
+    ($volume,$directories,$file) = File::Spec->splitpath( $path, $no_file );
+
+Splits a path in to volume, directory, and filename portions.
+
+On Mac OS, assumes that the last part of the path is a filename unless
+$no_file is true or a trailing separator ":" is present.
+
+The volume portion is always returned with a trailing ":". The directory portion
+is always returned with a leading (to denote a relative path) and a trailing ":"
+(to denote a directory). The file portion is always returned I<without> a leading ":".
+Empty portions are returned as "".
+
+The results can be passed to L</catpath()> to get back a path equivalent to
+(usually identical to) the original path.
+
+
 =cut
 
 sub splitpath {
     my ($self,$path, $nofile) = @_;
-
-    my ($volume,$directory,$file) = ('','','');
+    my ($volume,$directory,$file);
 
     if ( $nofile ) {
-        ( $volume, $directory ) = $path =~ m@((?:[^:]+(?::|\Z(?!\n)))?)(.*)@s;
+        ( $volume, $directory ) = $path =~ m|^((?:[^:]+:)?)(.*)|s;
     }
     else {
-        $path =~ 
-            m@^( (?: [^:]+: )? ) 
-                ( (?: .*: )? )
-                ( .* )
-             @xs;
+        $path =~
+            m|^( (?: [^:]+: )? )
+               ( (?: .*: )? )
+               ( .* )
+             |xs;
         $volume    = $1;
         $directory = $2;
         $file      = $3;
     }
 
-    # Make sure non-empty volumes and directories end in ':'
-    $volume    .= ':' if $volume    =~ m@[^:]\Z(?!\n)@ ;
-    $directory .= ':' if $directory =~ m@[^:]\Z(?!\n)@ ;
+    $volume = '' unless defined($volume);
+	$directory = ":$directory" if ( $volume && $directory ); # take care of "HD::dir"
+    if ($directory) {
+        # Make sure non-empty directories begin and end in ':'
+        $directory .= ':' unless (substr($directory,-1) eq ':');
+        $directory = ":$directory" unless (substr($directory,0,1) eq ':');
+    } else {
+	$directory = '';
+    }
+    $file = '' unless defined($file);
+
     return ($volume,$directory,$file);
 }
 
 
 =item splitdir
 
+The opposite of L</catdir()>.
+
+    @dirs = File::Spec->splitdir( $directories );
+
+$directories must be only the directory portion of the path on systems
+that have the concept of a volume or that have path syntax that differentiates
+files from directories.
+
+Unlike just splitting the directories on the separator, empty directory names
+(C<"">) can be returned. Since C<catdir()> on Mac OS always appends a trailing
+colon to distinguish a directory path from a file path, a single trailing colon
+will be ignored, i.e. there's no empty directory name after it.
+
+Hence, on Mac OS, both
+
+    File::Spec->splitdir( ":a:b::c:" );    and
+    File::Spec->splitdir( ":a:b::c" );
+
+yield:
+
+    ( "", "a", "b", "", "c")
+
+while
+
+    File::Spec->splitdir( ":a:b::c::" );
+
+yields:
+
+    ( "", "a", "b", "", "c", "")
+
+
 =cut
 
 sub splitdir {
     my ($self,$directories) = @_ ;
+
+    if ($directories =~ /^:*\Z(?!\n)/) {
+	# dir is an empty string or a colon path like ':', i.e. the
+	# current dir, or '::', the parent dir, etc. We return that
+	# dir (as is done on Unix).
+	return $directories;
+    }
+
+    # remove a trailing colon, if any (this way, splitdir is the
+    # opposite of catdir, which automatically appends a ':')
+    $directories =~ s/:\Z(?!\n)//;
+
     #
     # split() likes to forget about trailing null fields, so here we
     # check to be sure that there will not be any before handling the
@@ -271,7 +391,7 @@ sub splitdir {
     }
     else {
         #
-        # since there was a trailing separator, add a file name to the end, 
+        # since there was a trailing separator, add a file name to the end,
         # then do the split, then replace it with ''.
         #
         my( @directories )= split( m@:@, "${directories}dummy" ) ;
@@ -283,41 +403,87 @@ sub splitdir {
 
 =item catpath
 
+    $path = File::Spec->catpath($volume,$directory,$file);
+
+Takes volume, directory and file portions and returns an entire path. On Mac OS,
+$volume, $directory and $file are concatenated.  A ':' is inserted if need be. You
+may pass an empty string for each portion. If all portions are empty, the empty
+string is returned. If $volume is empty, the result will be a relative path,
+beginning with a ':'. If $volume and $directory are empty, a leading ":" (if any)
+is removed form $file and the remainder is returned. If $file is empty, the
+resulting path will have a trailing ':'.
+
+
 =cut
 
 sub catpath {
-    my $self = shift ;
+    my ($self,$volume,$directory,$file) = @_;
 
-    my $result = shift ;
-    $result =~ s@^([^/])@/$1@s ;
-
-    my $segment ;
-    for $segment ( @_ ) {
-        if ( $result =~ m@[^/]\Z(?!\n)@ && $segment =~ m@^[^/]@s ) {
-            $result .= "/$segment" ;
-        }
-        elsif ( $result =~ m@/\Z(?!\n)@ && $segment =~ m@^/@s ) {
-            $result  =~ s@/+\Z(?!\n)@/@;
-            $segment =~ s@^/+@@s;
-            $result  .= "$segment" ;
-        }
-        else {
-            $result  .= $segment ;
-        }
+    if ( (! $volume) && (! $directory) ) {
+	$file =~ s/^:// if $file;
+	return $file ;
     }
 
-    return $result ;
+    my $path = $volume; # may be ''
+    $path .= ':' unless (substr($path, -1) eq ':'); # ensure trailing ':'
+
+    if ($directory) {
+	$directory =~ s/^://; # remove leading ':' if any
+	$path .= $directory;
+	$path .= ':' unless (substr($path, -1) eq ':'); # ensure trailing ':'
+    }
+
+    if ($file) {
+	$file =~ s/^://; # remove leading ':' if any
+	$path .= $file;
+    }
+
+    return $path;
 }
 
 =item abs2rel
 
-See L<File::Spec::Unix/abs2rel> for general documentation.
+Takes a destination path and an optional base path and returns a relative path
+from the base path to the destination path:
 
-Unlike C<File::Spec::Unix->abs2rel()>, this function will make
-checks against the local filesystem if necessary.  See
-L</file_name_is_absolute> for details.
+    $rel_path = File::Spec->abs2rel( $path ) ;
+    $rel_path = File::Spec->abs2rel( $path, $base ) ;
+
+Note that both paths are assumed to have a notation that distinguishes a
+directory path (with trailing ':') from a file path (without trailing ':').
+
+If $base is not present or '', then the current working directory is used.
+If $base is relative, then it is converted to absolute form using C<rel2abs()>.
+This means that it is taken to be relative to the current working directory.
+
+Since Mac OS has the concept of volumes, this assumes that both paths
+are on the $destination volume, and ignores the $base volume (!).
+
+If $base doesn't have a trailing colon, the last element of $base is
+assumed to be a filename. This filename is ignored (!). Otherwise all path
+components are assumed to be directories.
+
+If $path is relative, it is converted to absolute form using C<rel2abs()>.
+This means that it is taken to be relative to the current working directory.
+
+Based on code written by Shigio Yamaguchi.
+
 
 =cut
+
+# maybe this should be done in canonpath() ?
+sub _resolve_updirs {
+	my $path = shift @_;
+	my $proceed;
+
+	# resolve any updirs, e.g. "HD:tmp::file" -> "HD:file"
+	do {
+		$proceed = ($path =~ s/^(.*):[^:]+::(.*?)\z/$1:$2/);
+	} while ($proceed);
+
+	return $path;
+}
+
 
 sub abs2rel {
     my($self,$path,$base) = @_;
@@ -329,61 +495,105 @@ sub abs2rel {
 
     # Figure out the effective $base and clean it up.
     if ( !defined( $base ) || $base eq '' ) {
-        $base = cwd() ;
+	$base = cwd();
     }
     elsif ( ! $self->file_name_is_absolute( $base ) ) {
         $base = $self->rel2abs( $base ) ;
+	$base = _resolve_updirs( $base ); # resolve updirs in $base
+    }
+    else {
+	$base = _resolve_updirs( $base );
     }
 
-    # Now, remove all leading components that are the same
-    my @pathchunks = $self->splitdir( $path );
-    my @basechunks = $self->splitdir( $base );
+    # Split up paths
+    my ( $path_dirs, $path_file ) =  ($self->splitpath( $path ))[1,2] ;
 
-    while (@pathchunks && @basechunks && $pathchunks[0] eq $basechunks[0]) {
+    # ignore $base's volume and file
+    my $base_dirs = ($self->splitpath( $base ))[1] ;
+
+    # Now, remove all leading components that are the same
+    my @pathchunks = $self->splitdir( $path_dirs );
+    my @basechunks = $self->splitdir( $base_dirs );
+
+    while ( @pathchunks &&
+	    @basechunks &&
+	    lc( $pathchunks[0] ) eq lc( $basechunks[0] ) ) {
         shift @pathchunks ;
         shift @basechunks ;
     }
 
-    $path = join( ':', @pathchunks );
+    # @pathchunks now has the directories to descend in to.
+    $path_dirs = $self->catdir( @pathchunks );
 
     # @basechunks now contains the number of directories to climb out of.
-    $base = ':' x @basechunks ;
+    $base_dirs = (':' x @basechunks) . ':' ;
 
-    return "$base:$path" ;
+    return $self->catpath( '', $base_dirs . $path_dirs, $path_file ) ;
 }
 
 =item rel2abs
 
-See L<File::Spec::Unix/rel2abs> for general documentation.
+Converts a relative path to an absolute path:
 
-Unlike C<File::Spec::Unix->rel2abs()>, this function will make
-checks against the local filesystem if necessary.  See
-L</file_name_is_absolute> for details.
+    $abs_path = File::Spec->rel2abs( $path ) ;
+    $abs_path = File::Spec->rel2abs( $path, $base ) ;
+
+Note that both paths are assumed to have a notation that distinguishes a
+directory path (with trailing ':') from a file path (without trailing ':').
+
+If $base is not present or '', then $base is set to the current working
+directory. If $base is relative, then it is converted to absolute form
+using C<rel2abs()>. This means that it is taken to be relative to the
+current working directory.
+
+If $base doesn't have a trailing colon, the last element of $base is
+assumed to be a filename. This filename is ignored (!). Otherwise all path
+components are assumed to be directories.
+
+If $path is already absolute, it is returned and $base is ignored.
+
+Based on code written by Shigio Yamaguchi.
 
 =cut
 
 sub rel2abs {
-    my ($self,$path,$base ) = @_;
+    my ($self,$path,$base) = @_;
 
-    if ( ! $self->file_name_is_absolute( $path ) ) {
+    if ( ! $self->file_name_is_absolute($path) ) {
+        # Figure out the effective $base and clean it up.
         if ( !defined( $base ) || $base eq '' ) {
-            $base = cwd() ;
+	    $base = cwd();
         }
-        elsif ( ! $self->file_name_is_absolute( $base ) ) {
-            $base = $self->rel2abs( $base ) ;
-        }
-        else {
-            $base = $self->canonpath( $base ) ;
+        elsif ( ! $self->file_name_is_absolute($base) ) {
+            $base = $self->rel2abs($base) ;
         }
 
-        $path = $self->canonpath("$base$path") ;
+	# Split up paths
+
+	# igonore $path's volume
+        my ( $path_dirs, $path_file ) = ($self->splitpath($path))[1,2] ;
+
+        # ignore $base's file part
+	my ( $base_vol, $base_dirs, undef ) = $self->splitpath($base) ;
+
+	# Glom them together
+	$path_dirs = ':' if ($path_dirs eq '');
+	$base_dirs =~ s/:$//; # remove trailing ':', if any
+	$base_dirs = $base_dirs . $path_dirs;
+
+        $path = $self->catpath( $base_vol, $base_dirs, $path_file );
     }
-
-    return $path ;
+    return $path;
 }
 
 
 =back
+
+=head1 AUTHORS
+
+See the authors list in L<File::Spec>. Mac OS support by Paul Schinder
+<schinder@pobox.com> and Thomas Wegner <wegner_thomas@yahoo.com>.
+
 
 =head1 SEE ALSO
 

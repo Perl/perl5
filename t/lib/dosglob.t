@@ -15,51 +15,74 @@ print "1..10\n";
 use File::DosGlob 'glob';
 
 # test if $_ takes as the default
-$_ = "lib/a*.t";
+my $expected;
+if ($^O eq 'MacOS') {
+	$expected = $_ = ":lib:a*.t";
+} else {
+	$expected = $_ = "lib/a*.t";
+}
 my @r = glob;
-print "not " if $_ ne 'lib/a*.t';
+print "not " if $_ ne $expected;
 print "ok 1\n";
 # we should have at least abbrev.t, anydbm.t, autoloader.t
 print "# |@r|\nnot " if @r < 3;
 print "ok 2\n";
 
 # check if <*/*> works
-@r = <*/a*.t>;
+if ($^O eq 'MacOS') {
+	@r = <:*:a*.t>;
+} else {
+	@r = <*/a*.t>;
+}
 # atleast {argv,abbrev,anydbm,autoloader,append,arith,array,assignwarn,auto}.t
-print "not " if @r < 9;
+print "|@r| not " if @r < 9;
 print "ok 3\n";
 my $r = scalar @r;
 
 # check if scalar context works
 @r = ();
-while (defined($_ = <*/a*.t>)) {
+while (defined($_ = ($^O eq 'MacOS') ? <:*:a*.t> : <*/a*.t>)) {
     print "# $_\n";
     push @r, $_;
 }
 print "not " if @r != $r;
 print "ok 4\n";
-
 # check if list context works
 @r = ();
-for (<*/a*.t>) {
-    print "# $_\n";
-    push @r, $_;
+if ($^O eq 'MacOS') {
+	for (<:*:a*.t>) {
+    	print "# $_\n";
+    	push @r, $_;
+	}
+} else {
+	for (<*/a*.t>) {
+    	print "# $_\n";
+    	push @r, $_;
+	}
 }
 print "not " if @r != $r;
 print "ok 5\n";
 
 # test if implicit assign to $_ in while() works
 @r = ();
-while (<*/a*.t>) {
-    print "# $_\n";
-    push @r, $_;
+if ($^O eq 'MacOS') {
+	while (<:*:a*.t>) {
+    	print "# $_\n";
+   		push @r, $_;
+	}
+} else {
+	while (<*/a*.t>) {
+    	print "# $_\n";
+   		push @r, $_;
+	}
 }
 print "not " if @r != $r;
 print "ok 6\n";
 
 # test if explicit glob() gets assign magic too
 my @s = ();
-while (glob '*/a*.t') {
+my $pat = ($^O eq 'MacOS') ? ':*:a*.t': '*/a*.t';
+while (glob ($pat)) {
     print "# $_\n";
     push @s, $_;
 }
@@ -70,7 +93,8 @@ print "ok 7\n";
 package Foo;
 use File::DosGlob 'glob';
 @s = ();
-while (glob '*/a*.t') {
+my $pat = ($^O eq 'MacOS') ? ':*:a*.t': '*/a*.t';
+while (glob ($pat)) {
     print "# $_\n";
     push @s, $_;
 }
@@ -79,15 +103,28 @@ print "ok 8\n";
 
 # test if different glob ops maintain independent contexts
 @s = ();
-while (<*/a*.t>) {
-    my $i = 0;
-    print "# $_ <";
-    push @s, $_;
-    while (<*/b*.t>) {
-        print " $_";
-	$i++;
-    }
-    print " >\n";
+if ($^O eq 'MacOS') {
+	while (<:*:a*.t>) {
+    	my $i = 0;
+    	print "# $_ <";
+    	push @s, $_;
+    	while (<:*:b*.t>) {
+        	print " $_";
+		$i++;
+    	}
+    	print " >\n";
+	}
+} else {
+	while (<*/a*.t>) {
+    	my $i = 0;
+    	print "# $_ <";
+    	push @s, $_;
+    	while (<*/b*.t>) {
+        	print " $_";
+		$i++;
+    	}
+    	print " >\n";
+	}
 }
 print "not " if "@r" ne "@s";
 print "ok 9\n";
@@ -97,15 +134,28 @@ eval <<'EOT';
 use File::DosGlob 'GLOBAL_glob';
 package Bar;
 @s = ();
-while (<*/a*.t>) {
-    my $i = 0;
-    print "# $_ <";
-    push @s, $_;
-    while (glob '*/b*.t') {
-        print " $_";
-	$i++;
-    }
-    print " >\n";
+if ($^O eq 'MacOS') {
+	while (<:*:a*.t>) {
+    	my $i = 0;
+   		print "# $_ <";
+    	push @s, $_;
+    	while (glob ':*:b*.t') {
+        	print " $_";
+		$i++;
+    	}
+    	print " >\n";
+	}
+} else {
+	while (<*/a*.t>) {
+    	my $i = 0;
+   		print "# $_ <";
+    	push @s, $_;
+    	while (glob '*/b*.t') {
+        	print " $_";
+		$i++;
+    	}
+    	print " >\n";
+	}
 }
 print "not " if "@r" ne "@s";
 print "ok 10\n";

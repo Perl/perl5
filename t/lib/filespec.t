@@ -250,27 +250,152 @@ BEGIN {
 [ "OS2->catdir('A:/d1','B:/d2','d3','')", 'A:/d1/B:/d2/d3' ],
 [ "OS2->catfile('a','b','c')",            'a/b/c'          ],
 
-[ "Mac->splitpath('file')",          ',,file'          ],
-[ "Mac->splitpath(':file')",         ',:,file'         ],
-[ "Mac->splitpath(':d1',1)",         ',:d1:,'          ],
-[ "Mac->splitpath('d1',1)",          'd1:,,'           ],
-[ "Mac->splitpath('d1:d2:d3:')",     'd1:,d2:d3:,'     ],
-[ "Mac->splitpath('d1:d2:d3',1)",    'd1:,d2:d3:,'     ],
-[ "Mac->splitpath(':d1:d2:d3:')",    ',:d1:d2:d3:,'    ],
-[ "Mac->splitpath(':d1:d2:d3:',1)",  ',:d1:d2:d3:,'    ],
-[ "Mac->splitpath('d1:d2:d3:file')", 'd1:,d2:d3:,file' ],
-[ "Mac->splitpath('d1:d2:d3',1)",    'd1:,d2:d3:,'     ],
 
-[ "Mac->catdir('')",                ':'           ],
-[ "Mac->catdir('d1','d2','d3')",    'd1:d2:d3:'   ],
-[ "Mac->catdir('d1','d2/','d3')",   'd1:d2/:d3:'  ],
+[ "Mac->catpath('','','')",              ''                ],
+[ "Mac->catpath('',':','')",             ':'               ],
+[ "Mac->catpath('','::','')",            '::'              ],
+
+[ "Mac->catpath('hd','','')",            'hd:'             ],
+[ "Mac->catpath('hd:','','')",           'hd:'             ],
+[ "Mac->catpath('hd:',':','')",          'hd:'             ], 
+[ "Mac->catpath('hd:','::','')",         'hd::'            ],
+
+[ "Mac->catpath('hd','','file')",       'hd:file'          ],
+[ "Mac->catpath('hd',':','file')",      'hd:file'          ],
+[ "Mac->catpath('hd','::','file')",     'hd::file'         ],
+[ "Mac->catpath('hd',':::','file')",    'hd:::file'        ],
+
+[ "Mac->catpath('hd:','',':file')",      'hd:file'         ],
+[ "Mac->catpath('hd:',':',':file')",     'hd:file'         ],
+[ "Mac->catpath('hd:','::',':file')",    'hd::file'        ],
+[ "Mac->catpath('hd:',':::',':file')",   'hd:::file'       ],
+
+[ "Mac->catpath('hd:','d1','file')",     'hd:d1:file'      ],
+[ "Mac->catpath('hd:',':d1:',':file')",  'hd:d1:file'      ],
+
+[ "Mac->catpath('','d1','')",            ':d1:'            ],
+[ "Mac->catpath('',':d1','')",           ':d1:'            ],
+[ "Mac->catpath('',':d1:','')",          ':d1:'            ],
+
+[ "Mac->catpath('','d1','file')",        ':d1:file'        ],
+[ "Mac->catpath('',':d1:',':file')",     ':d1:file'        ],
+
+[ "Mac->catpath('','','file')",          'file'            ],
+[ "Mac->catpath('','',':file')",         'file'            ], # !
+[ "Mac->catpath('',':',':file')",        ':file'           ], # !
+
+
+[ "Mac->splitpath(':')",              ',:,'               ],
+[ "Mac->splitpath('::')",             ',::,'              ],
+[ "Mac->splitpath(':::')",            ',:::,'             ],
+
+[ "Mac->splitpath('file')",           ',,file'            ],
+[ "Mac->splitpath(':file')",          ',:,file'           ],
+
+[ "Mac->splitpath('d1',1)",           ',:d1:,'            ], # dir, not volume
+[ "Mac->splitpath(':d1',1)",          ',:d1:,'            ],
+[ "Mac->splitpath(':d1:',1)",         ',:d1:,'            ],
+[ "Mac->splitpath(':d1:')",           ',:d1:,'            ],
+[ "Mac->splitpath(':d1:d2:d3:')",     ',:d1:d2:d3:,'      ],
+[ "Mac->splitpath(':d1:d2:d3:',1)",   ',:d1:d2:d3:,'      ],
+[ "Mac->splitpath(':d1:file')",       ',:d1:,file'        ],
+[ "Mac->splitpath('::d1:file')",      ',::d1:,file'       ],
+
+[ "Mac->splitpath('hd:', 1)",         'hd:,,'             ],
+[ "Mac->splitpath('hd:')",            'hd:,,'             ],
+[ "Mac->splitpath('hd:d1:d2:')",      'hd:,:d1:d2:,'      ],
+[ "Mac->splitpath('hd:d1:d2',1)",     'hd:,:d1:d2:,'      ],
+[ "Mac->splitpath('hd:d1:d2:file')",  'hd:,:d1:d2:,file'  ],
+[ "Mac->splitpath('hd:d1:d2::file')", 'hd:,:d1:d2::,file' ],
+[ "Mac->splitpath('hd::d1:d2:file')", 'hd:,::d1:d2:,file' ], # invalid path
+[ "Mac->splitpath('hd:file')",        'hd:,,file'         ],
+
+[ "Mac->splitdir('')",                 ''            ],
+[ "Mac->splitdir(':')",                ':'           ],
+[ "Mac->splitdir('::')",               '::'          ],
+[ "Mac->splitdir(':::')",              ':::'         ],
+[ "Mac->splitdir(':::d1:d2')",         ',,,d1,d2'    ],
+
+[ "Mac->splitdir(':d1:d2:d3::')",      ',d1,d2,d3,'  ],
+[ "Mac->splitdir(':d1:d2:d3:')",       ',d1,d2,d3'   ],
+[ "Mac->splitdir(':d1:d2:d3')",        ',d1,d2,d3'   ],
+
+[ "Mac->splitdir('hd:d1:d2:::')",      'hd,d1,d2,,'  ],
+[ "Mac->splitdir('hd:d1:d2::')",       'hd,d1,d2,'   ],
+[ "Mac->splitdir('hd:d1:d2:')",        'hd,d1,d2'    ],
+[ "Mac->splitdir('hd:d1:d2')",         'hd,d1,d2'    ],
+[ "Mac->splitdir('hd:d1::d2::')",      'hd,d1,,d2,'  ],
+
+[ "Mac->catdir()",                 ''            ],
+[ "Mac->catdir('')",               ':'           ],
+[ "Mac->catdir(':')",              ':'           ],
+
+[ "Mac->catdir('', '')",           '::'          ], # Hmm... ":" ? 
+[ "Mac->catdir('', ':')",          '::'          ], # Hmm... ":" ? 
+[ "Mac->catdir(':', ':')",         '::'          ], # Hmm... ":" ? 
+[ "Mac->catdir(':', '')",          '::'          ], # Hmm... ":" ? 
+
+[ "Mac->catdir('', '::')",         '::'          ],
+[ "Mac->catdir(':', '::')",        '::'          ], # but catdir('::', ':') is ':::'
+
+[ "Mac->catdir('::', '')",         ':::'         ], # Hmm... "::" ? 
+[ "Mac->catdir('::', ':')",        ':::'         ], # Hmm... "::" ? 
+
+[ "Mac->catdir('::', '::')",       ':::'         ], # ok
+
+#
+# Unix counterparts:
+#
+
+# Unix catdir('.') =        "."
+
+# Unix catdir('','') =      "/"
+# Unix catdir('','.') =     "/"
+# Unix catdir('.','.') =    "."
+# Unix catdir('.','') =     "."
+
+# Unix catdir('','..') =    "/"
+# Unix catdir('.','..') =   ".."
+
+# Unix catdir('..','') =    ".."
+# Unix catdir('..','.') =   ".."
+# Unix catdir('..','..') =  "../.."
+
+[ "Mac->catdir(':d1','d2')",        ':d1:d2:'     ],
 [ "Mac->catdir('','d1','d2','d3')", ':d1:d2:d3:'  ],
 [ "Mac->catdir('','','d2','d3')",   '::d2:d3:'    ],
 [ "Mac->catdir('','','','d3')",     ':::d3:'      ],
-[ "Mac->catdir(':name')",           ':name:'      ],
-[ "Mac->catdir(':name',':name')",   ':name:name:' ],
+[ "Mac->catdir(':d1')",             ':d1:'        ],
+[ "Mac->catdir(':d1',':d2')",       ':d1:d2:'     ],
+[ "Mac->catdir('', ':d1',':d2')",   ':d1:d2:'     ],
+[ "Mac->catdir('','',':d1',':d2')", '::d1:d2:'    ],
 
-[ "Mac->catfile('a','b','c')", 'a:b:c' ],
+[ "Mac->catdir('hd')",              'hd:'         ],
+[ "Mac->catdir('hd','d1','d2')",    'hd:d1:d2:'   ],
+[ "Mac->catdir('hd','d1/','d2')",   'hd:d1/:d2:'  ],
+[ "Mac->catdir('hd','',':d1')",     'hd::d1:'     ],
+[ "Mac->catdir('hd','d1')",         'hd:d1:'      ],
+[ "Mac->catdir('hd','d1', '')",     'hd:d1::'     ],
+[ "Mac->catdir('hd','d1','','')",   'hd:d1:::'    ],
+[ "Mac->catdir('hd:',':d1')",       'hd:d1:'      ],
+[ "Mac->catdir('hd:d1:',':d2')",    'hd:d1:d2:'   ],
+[ "Mac->catdir('hd:','d1')",        'hd:d1:'      ],
+[ "Mac->catdir('hd',':d1')",        'hd:d1:'      ],
+[ "Mac->catdir('hd:d1:',':d2')",    'hd:d1:d2:'   ],
+[ "Mac->catdir('hd:d1:',':d2:')",   'hd:d1:d2:'   ],
+
+
+[ "Mac->catfile()",                      ''            ], 
+[ "Mac->catfile('')",                    ''            ],
+[ "Mac->catfile(':')",                   ':'           ],
+[ "Mac->catfile(':', '')",               ':'           ],
+
+[ "Mac->catfile('hd','d1','file')",      'hd:d1:file'  ],
+[ "Mac->catfile('hd','d1',':file')",     'hd:d1:file'  ],
+[ "Mac->catfile('file')",                'file'        ], 
+[ "Mac->catfile(':', 'file')",           ':file'       ], 
+[ "Mac->catfile('', 'file')",            ':file'       ], 
+
 
 [ "Mac->canonpath('')",                   ''     ],
 [ "Mac->canonpath(':')",                  ':'    ],
@@ -278,20 +403,33 @@ BEGIN {
 [ "Mac->canonpath('a::')",                'a::'  ],
 [ "Mac->canonpath(':a::')",               ':a::' ],
 
-[ "Mac->abs2rel('t1:t2:t3','t1:t2:t3')",    ':'            ],
-[ "Mac->abs2rel('t1:t2','t1:t2:t3')",       '::'           ],
-[ "Mac->abs2rel('t1:t4','t1:t2:t3')",       ':::t4'        ],
-[ "Mac->abs2rel('t1:t2:t4','t1:t2:t3')",    '::t4'         ],
-[ "Mac->abs2rel('t1:t2:t3:t4','t1:t2:t3')", ':t4'          ],
-[ "Mac->abs2rel('t4:t5:t6','t1:t2:t3')",    '::::t4:t5:t6' ],
-[ "Mac->abs2rel('t1','t1:t2:t3')",          ':::'          ],
+[ "Mac->abs2rel('hd:d1:d2:','hd:d1:d2:')",            ':'            ],
+[ "Mac->abs2rel('hd:d1:d2:','hd:d1:d2:file')",        ':'            ], # ignore base's file portion
+[ "Mac->abs2rel('hd:d1:d2:file','hd:d1:d2:')",        ':file'        ], 
+[ "Mac->abs2rel('hd:d1:','hd:d1:d2:')",               '::'           ],
+[ "Mac->abs2rel('hd:d3:','hd:d1:d2:')",               ':::d3:'       ],
+[ "Mac->abs2rel('hd:d3:','hd:d1:d2::')",              '::d3:'        ],
+[ "Mac->abs2rel('hd:d1:d4:d5:','hd:d1::d2:d3::')",    '::d1:d4:d5:'  ],
+[ "Mac->abs2rel('hd:d1:d4:d5:','hd:d1::d2:d3:')",     ':::d1:d4:d5:' ], # first, resolve updirs in base
+[ "Mac->abs2rel('hd:d1:d3:','hd:d1:d2:')",            '::d3:'        ],
+[ "Mac->abs2rel('hd:d1::d3:','hd:d1:d2:')",           ':::d3:'       ],
+[ "Mac->abs2rel('hd:d3:','hd:d1:d2:')",               ':::d3:'       ], # same as above
+[ "Mac->abs2rel('hd:d1:d2:d3:','hd:d1:d2:')",         ':d3:'         ],
+[ "Mac->abs2rel('hd:d1:d2:d3::','hd:d1:d2:')",        ':d3::'        ],
+[ "Mac->abs2rel('v1:d3:d4:d5:','v2:d1:d2:')",         ':::d3:d4:d5:' ], # ignore base's volume
+[ "Mac->abs2rel('hd:','hd:d1:d2:')",                  ':::'          ],
 
-[ "Mac->rel2abs(':t4','t1:t2:t3')",          't1:t2:t3:t4'    ],
-[ "Mac->rel2abs(':t4:t5','t1:t2:t3')",       't1:t2:t3:t4:t5' ],
-[ "Mac->rel2abs('','t1:t2:t3')",             ''               ],
-[ "Mac->rel2abs('::','t1:t2:t3')",           't1:t2:t3::'     ],
-[ "Mac->rel2abs('::t4','t1:t2:t3')",         't1:t2:t3::t4'   ],
-[ "Mac->rel2abs('t1','t1:t2:t3')",           't1'             ],
+[ "Mac->rel2abs(':d3:','hd:d1:d2:')",          'hd:d1:d2:d3:'     ], 
+[ "Mac->rel2abs(':d3:d4:','hd:d1:d2:')",       'hd:d1:d2:d3:d4:'  ], 
+[ "Mac->rel2abs('','hd:d1:d2:')",              ''                 ],
+[ "Mac->rel2abs('::','hd:d1:d2:')",            'hd:d1:d2::'       ],
+[ "Mac->rel2abs('::','hd:d1:d2:file')",        'hd:d1:d2::'       ],# ignore base's file portion
+[ "Mac->rel2abs(':file','hd:d1:d2:')",         'hd:d1:d2:file'    ],
+[ "Mac->rel2abs('::file','hd:d1:d2:')",        'hd:d1:d2::file'   ],
+[ "Mac->rel2abs('::d3:','hd:d1:d2:')",         'hd:d1:d2::d3:'    ],
+[ "Mac->rel2abs('hd:','hd:d1:d2:')",           'hd:'              ], # path already absolute
+[ "Mac->rel2abs('hd:d3:file','hd:d1:d2:')",    'hd:d3:file'       ],
+[ "Mac->rel2abs('hd:d3:','hd:d1:file')",       'hd:d3:'           ],
 ) ;
 
 # Grab all of the plain routines from File::Spec

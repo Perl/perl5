@@ -25,13 +25,15 @@ $Is_VMS     = $^O eq 'VMS';
 $Is_Dos   = $^O eq 'dos';
 $Is_os2   = $^O eq 'os2';
 $Is_Cygwin   = $^O eq 'cygwin';
-$PERL = ($Is_MSWin32 ? '.\perl' : './perl');
+$Is_MacOS = $^O eq 'MacOS';
+$PERL = ($Is_MacOS ? $^X : $Is_MSWin32 ? '.\perl' : './perl');
 
 print "1..35\n";
 
 eval '$ENV{"FOO"} = "hi there";';	# check that ENV is inited inside eval
-if ($Is_MSWin32) { ok 1, `cmd /x /c set FOO` eq "FOO=hi there\n"; }
-else             { ok 1, `echo \$FOO` eq "hi there\n"; }
+if ($Is_MSWin32)  { ok 1, `cmd /x /c set FOO` eq "FOO=hi there\n"; }
+elsif ($Is_MacOS) { ok "1 # skipped", 1; }
+else              { ok 1, `echo \$FOO` eq "hi there\n"; }
 
 unlink 'ajslkdfpqjsjfk';
 $! = 0;
@@ -39,7 +41,7 @@ open(FOO,'ajslkdfpqjsjfk');
 ok 2, $!, $!;
 close FOO; # just mention it, squelch used-only-once
 
-if ($Is_MSWin32 || $Is_Dos) {
+if ($Is_MSWin32 || $Is_Dos || $Is_MacOS) {
     ok "3 # skipped",1;
     ok "4 # skipped",1;
 }
@@ -122,10 +124,13 @@ ok 18, $$ > 0, $$;
     elsif($Is_os2) {
        $wd = Cwd::sys_cwd();
     }
+    elsif($Is_MacOS) {
+       $wd = ':';
+    }
     else {
 	$wd = '.';
     }
-    my $perl = "$wd/perl";
+    my $perl = $Is_MacOS ? $^X : "$wd/perl";
     my $headmaybe = '';
     my $tailmaybe = '';
     $script = "$wd/show-shebang";
@@ -150,6 +155,9 @@ EOT
     elsif ($Is_os2) {
       $script = "./show-shebang";
     }
+    elsif ($Is_MacOS) {
+      $script = ":show-shebang";
+    }
     if ($^O eq 'os390' or $^O eq 'posix-bc' or $^O eq 'vmesa') {  # no shebang
 	$headmaybe = <<EOH ;
     eval 'exec ./perl -S \$0 \${1+"\$\@"}'
@@ -165,7 +173,7 @@ print "\$^X is $^X, \$0 is $0\n";
 EOF
     ok 21, close(SCRIPT), $!;
     ok 22, chmod(0755, $script), $!;
-    $_ = `$script`;
+    $_ = $Is_MacOS ? `$perl $script` : `$script`;
     s/\.exe//i if $Is_Dos or $Is_Cygwin or $Is_os2;
     s{\bminiperl\b}{perl}; # so that test doesn't fail with miniperl
     s{is perl}{is $perl}; # for systems where $^X is only a basename
@@ -183,7 +191,7 @@ ok 26, $] >= 5.00319, $];
 ok 27, $^O;
 ok 28, $^T > 850000000, $^T;
 
-if ($Is_VMS || $Is_Dos) {
+if ($Is_VMS || $Is_Dos || $Is_MacOS) {
 	ok "29 # skipped", 1;
 	ok "30 # skipped", 1;
 }

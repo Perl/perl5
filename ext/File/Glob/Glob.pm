@@ -391,7 +391,7 @@ the standard Perl distribution.
 
 Mac OS (Classic) users should note a few differences. Since
 Mac OS is not Unix, when the glob code encounters a tilde glob (e.g.
-~user/foo) and the C<GLOB_TILDE> flag is used, it simply returns that
+~user) and the C<GLOB_TILDE> flag is used, it simply returns that
 pattern without doing any expansion.
 
 Glob on Mac OS is case-insensitive by default (if you don't use any
@@ -403,6 +403,29 @@ should be careful about specifying relative pathnames. While a full path
 always begins with a volume name, a relative pathname should always
 begin with a ':'.  If specifying a volume name only, a trailing ':' is
 required.
+
+The specification of pathnames in glob patterns adheres to the usual Mac
+OS conventions: The path separator is a colon ':', not a slash '/'. A
+full path always begins with a volume name. A relative pathname on Mac
+OS must always begin with a ':', except when specifying a file or
+directory name in the current working directory, where the leading colon
+is optional. If specifying a volume name only, a trailing ':' is
+required. Due to these rules, a glob like E<lt>*:E<gt> will find all
+mounted volumes, while a glob like E<lt>*E<gt> or E<lt>:*E<gt> will find
+all files and directories in the current directory.
+
+Note that updirs in the glob pattern are resolved before the matching begins,
+i.e. a pattern like "*HD:t?p::a*" will be matched as "*HD:a*". Note also,
+that a single trailing ':' in the pattern is ignored (unless it's a volume
+name pattern like "*HD:"), i.e. a glob like E<lt>:*:E<gt> will find both
+directories I<and> files (and not, as one might expect, only directories).
+You can, however, use the C<GLOB_MARK> flag to distinguish (without a file
+test) directory names from file names.
+
+If the C<GLOB_MARK> flag is set, all directory paths will have a ':' appended.
+Since a directory like 'lib:' is I<not> a valid I<relative> path on Mac OS,
+both a leading and a trailing colon will be added, when the directory name in
+question doesn't contain any colons (e.g. 'lib' becomes ':lib:').
 
 =back
 
