@@ -1,4 +1,4 @@
-print "1..47\n";
+print "1..64\n";
 
 BEGIN {
     chdir 't' if -d 't';
