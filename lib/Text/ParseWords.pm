@@ -92,7 +92,7 @@ sub quotewords {
     local(@words,$snippet,$field,$_);
 
     $_ = join('', @lines);
-    while ($_) {
+    while (length($_)) {
 	$field = '';
 	for (;;) {
             $snippet = '';
@@ -111,11 +111,11 @@ sub quotewords {
                 $snippet = $1;
                 $snippet = "\\$snippet" if ($keep);
             }
-	    elsif (!$_ || s/^$delim//) {
+	    elsif (!length($_) || s/^$delim//) {
                last;
 	    }
 	    else {
-                while ($_ && !(/^$delim/ || /^['"\\]/)) {
+                while (length($_) && !(/^$delim/ || /^['"\\]/)) {
 		   $snippet .=  substr($_, 0, 1);
                    substr($_, 0, 1) = '';
                 }
