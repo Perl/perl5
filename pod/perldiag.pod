@@ -2797,9 +2797,9 @@ Perl assumes that memory is now corrupted.  See L<perlfunc/ioctl>.
 =item Possible unintended interpolation of %s in string
 
 (W ambiguous) You said something like `@foo' in a double-quoted string
-but there was no array C<@foo> in scope at the time.  If you wanted
-literally to say `@foo' then backslash it: `\@foo'; otherwise find out
-what happened to the array you apparently lost track of.
+but there was no array C<@foo> in scope at the time. If you wanted a
+literal @foo, then write it as \@foo; otherwise find out what happened
+to the array you apparently lost track of.
 
 =item Possible Y2K bug: %s
 
