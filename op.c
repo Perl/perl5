@@ -5433,10 +5433,12 @@ ck_subr(OP *o)
 			    {
 				GV *gv = (GV*)((SVOP*)gvop)->op_sv;
 				OP *sibling = o2->op_sibling;
+				SV *n = newSVpvn("",0);
 				op_free(o2);
-				o2 = newSVOP(OP_CONST, 0,
-					     newSVpvn(GvNAME(gv),
-						      GvNAMELEN(gv)));
+				gv_fullname3(n, gv, "");
+				if (SvCUR(n)>6 && strnEQ(SvPVX(n),"main::",6))
+				    sv_chop(n, SvPVX(n)+6);
+				o2 = newSVOP(OP_CONST, 0, n);
 				prev->op_sibling = o2;
 				o2->op_sibling = sibling;
 			    }
