@@ -103,7 +103,7 @@ use Exporter ();
 use strict;
 
 use vars qw( $VERSION @ISA @EXPORT );
-$VERSION = "1.0401";
+$VERSION = "1.0402";
 @ISA = qw( Exporter );
 @EXPORT = qw( mkpath rmtree );
 
@@ -148,9 +148,16 @@ sub rmtree {
     my($roots, $verbose, $safe) = @_;
     my(@files);
     my($count) = 0;
-    $roots = [$roots] unless ref $roots;
     $verbose ||= 0;
     $safe ||= 0;
+
+    if ( defined($roots) && length($roots) ) {
+      $roots = [$roots] unless ref $roots;
+    }
+    else {
+      carp "No root path(s) specified\n";
+      return 0;
+    }
 
     my($root);
     foreach $root (@{$roots}) {
