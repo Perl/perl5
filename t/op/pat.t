@@ -2,7 +2,7 @@
 
 # $RCSfile: pat.t,v $$Revision: 4.1 $$Date: 92/08/07 18:28:12 $
 
-print "1..108\n";
+print "1..113\n";
 
 $x = "abc\ndef\n";
 
@@ -377,6 +377,22 @@ $test++;
 print "not " unless study(/\b\v$/) eq '\bv$';
 print "ok $test\n";
 $test++;
+
+$_ = 'xabcx';
+foreach $ans ('', 'c') {
+  /(?<=(?=a)..)((?=c)|.)/g;
+  print "not " unless $1 eq $ans;
+  print "ok $test\n";
+  $test++;
+}
+
+$_ = 'a';
+foreach $ans ('', 'a', '') {
+  /^|a|$/g;
+  print "not " unless $& eq $ans;
+  print "ok $test\n";
+  $test++;
+}
 
 sub must_warn_pat {
     my $warn_pat = shift;

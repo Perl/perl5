@@ -697,7 +697,7 @@ regtry(regexp *prog, char *startpos)
 	}
     }
     REGCP_SET;
-    if (regmatch(prog->program + 1) && reginput >= regtill) {
+    if (regmatch(prog->program + 1)) {
 	prog->startp[0] = startpos;
 	prog->endp[0] = reginput;
 	return 1;
@@ -1504,8 +1504,11 @@ regmatch(regnode *prog)
 	    }
 	    sayNO;
 	    break;
-	case SUCCEED:
 	case END:
+	    if (locinput < regtill)
+		sayNO;			/* Cannot match: too short. */
+	    /* Fall through */
+	case SUCCEED:
 	    reginput = locinput;	/* put where regtry can find it */
 	    sayYES;			/* Success! */
 	case SUSPEND:
