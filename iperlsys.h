@@ -49,46 +49,17 @@
  *
  */
 
-
 /*
-    Interface for perl stdio functions
+    Interface for perl stdio functions, or whatever we are Configure-d
+    to use.
 */
-
-
-/* Clean up (or at least document) the various possible #defines.
-   This section attempts to match the 5.003_03 Configure variables
-   onto the 5.003_02 header file values.
-   I can't figure out where USE_STDIO was supposed to be set.
-   --AD
-*/
-#ifndef USE_PERLIO
-# define PERLIO_IS_STDIO
-#endif
-
-/* Below is the 5.003_02 stuff. */
-#ifdef USE_STDIO
-#  ifndef PERLIO_IS_STDIO
-#      define PERLIO_IS_STDIO
-#  endif
-#else
-extern void PerlIO_init (void);
-#endif
+#include "perlio.h"
 
 #ifndef Sighandler_t
 typedef Signal_t (*Sighandler_t) (int);
 #endif
 
-#ifndef Fpos_t
-#define Fpos_t Off_t
-#endif
-
 #if defined(PERL_IMPLICIT_SYS)
-
-#ifndef PerlIO
-typedef struct _PerlIO PerlIOl;
-typedef PerlIOl *PerlIO;
-#define PerlIO PerlIO
-#endif /* No PerlIO */
 
 /* IPerlStdIO		*/
 struct IPerlStdIO;
@@ -192,6 +163,8 @@ struct IPerlStdIOInfo
     struct IPerlStdIO	perlStdIOList;
 };
 
+/* These do not belong here ... NI-S, 14 Nov 2000 */
+
 #ifdef USE_STDIO_PTR
 #  define PerlIO_has_cntptr(f)		1
 #  ifdef STDIO_PTR_LVALUE
@@ -222,6 +195,8 @@ struct IPerlStdIOInfo
 #else
 #define PerlIO_has_base(f)		0
 #endif
+
+/* Now take PerlIO * via function table */
 
 #define PerlIO_stdin()							\
 	(*PL_StdIO->pStdin)(PL_StdIO)
@@ -305,193 +280,7 @@ struct IPerlStdIOInfo
 #define PerlIO_isutf8(f)						\
 	(*PL_StdIO->pIsUtf8)(PL_StdIO, (f))
 
-#else	/* PERL_IMPLICIT_SYS */
-
-#include "perlsdio.h"
-#include "perl.h"
-#define PerlIO_fdupopen(f)		(f)
-#define PerlIO_isutf8(f)		0
-
 #endif	/* PERL_IMPLICIT_SYS */
-
-#ifndef PERLIO_IS_STDIO
-#ifdef USE_SFIO
-#include "perlsfio.h"
-#define PerlIO_isutf8(f)		0
-#endif /* USE_SFIO */
-#endif /* PERLIO_IS_STDIO */
-
-#ifndef EOF
-#define EOF (-1)
-#endif
-
-/* This is to catch case with no stdio */
-#ifndef BUFSIZ
-#define BUFSIZ 1024
-#endif
-
-#ifndef SEEK_SET
-#define SEEK_SET 0
-#endif
-
-#ifndef SEEK_CUR
-#define SEEK_CUR 1
-#endif
-
-#ifndef SEEK_END
-#define SEEK_END 2
-#endif
-
-#ifndef PerlIO
-typedef struct _PerlIO PerlIOl;
-typedef PerlIOl *PerlIO;
-#define PerlIO PerlIO
-#endif /* No PerlIO */
-
-#ifndef NEXT30_NO_ATTRIBUTE
-#ifndef HASATTRIBUTE       /* disable GNU-cc attribute checking? */
-#ifdef  __attribute__      /* Avoid possible redefinition errors */
-#undef  __attribute__
-#endif
-#define __attribute__(attr)
-#endif
-#endif
-
-#ifndef PerlIO_stdoutf
-extern int	PerlIO_stdoutf		(const char *,...)
-					__attribute__((__format__ (__printf__, 1, 2)));
-#endif
-#ifndef PerlIO_puts
-extern int	PerlIO_puts		(PerlIO *,const char *);
-#endif
-#ifndef PerlIO_open
-extern PerlIO *	PerlIO_open		(const char *,const char *);
-#endif
-#ifndef PerlIO_close
-extern int	PerlIO_close		(PerlIO *);
-#endif
-#ifndef PerlIO_eof
-extern int	PerlIO_eof		(PerlIO *);
-#endif
-#ifndef PerlIO_error
-extern int	PerlIO_error		(PerlIO *);
-#endif
-#ifndef PerlIO_clearerr
-extern void	PerlIO_clearerr		(PerlIO *);
-#endif
-#ifndef PerlIO_getc
-extern int	PerlIO_getc		(PerlIO *);
-#endif
-#ifndef PerlIO_putc
-extern int	PerlIO_putc		(PerlIO *,int);
-#endif
-#ifndef PerlIO_flush
-extern int	PerlIO_flush		(PerlIO *);
-#endif
-#ifndef PerlIO_ungetc
-extern int	PerlIO_ungetc		(PerlIO *,int);
-#endif
-#ifndef PerlIO_fileno
-extern int	PerlIO_fileno		(PerlIO *);
-#endif
-#ifndef PerlIO_fdopen
-extern PerlIO *	PerlIO_fdopen		(int, const char *);
-#endif
-#ifndef PerlIO_importFILE
-extern PerlIO *	PerlIO_importFILE	(FILE *,int);
-#endif
-#ifndef PerlIO_exportFILE
-extern FILE *	PerlIO_exportFILE	(PerlIO *,int);
-#endif
-#ifndef PerlIO_findFILE
-extern FILE *	PerlIO_findFILE		(PerlIO *);
-#endif
-#ifndef PerlIO_releaseFILE
-extern void	PerlIO_releaseFILE	(PerlIO *,FILE *);
-#endif
-#ifndef PerlIO_read
-extern SSize_t	PerlIO_read		(PerlIO *,void *,Size_t);
-#endif
-#ifndef PerlIO_write
-extern SSize_t	PerlIO_write		(PerlIO *,const void *,Size_t);
-#endif
-#ifndef PerlIO_setlinebuf
-extern void	PerlIO_setlinebuf	(PerlIO *);
-#endif
-#ifndef PerlIO_printf
-extern int	PerlIO_printf		(PerlIO *, const char *,...)
-					__attribute__((__format__ (__printf__, 2, 3)));
-#endif
-#ifndef PerlIO_sprintf
-extern int	PerlIO_sprintf		(char *, int, const char *,...)
-					__attribute__((__format__ (__printf__, 3, 4)));
-#endif
-#ifndef PerlIO_vprintf
-extern int	PerlIO_vprintf		(PerlIO *, const char *, va_list);
-#endif
-#ifndef PerlIO_tell
-extern Off_t	PerlIO_tell		(PerlIO *);
-#endif
-#ifndef PerlIO_seek
-extern int	PerlIO_seek		(PerlIO *, Off_t, int);
-#endif
-#ifndef PerlIO_rewind
-extern void	PerlIO_rewind		(PerlIO *);
-#endif
-#ifndef PerlIO_has_base
-extern int	PerlIO_has_base		(PerlIO *);
-#endif
-#ifndef PerlIO_has_cntptr
-extern int	PerlIO_has_cntptr	(PerlIO *);
-#endif
-#ifndef PerlIO_fast_gets
-extern int	PerlIO_fast_gets	(PerlIO *);
-#endif
-#ifndef PerlIO_canset_cnt
-extern int	PerlIO_canset_cnt	(PerlIO *);
-#endif
-#ifndef PerlIO_get_ptr
-extern STDCHAR * PerlIO_get_ptr		(PerlIO *);
-#endif
-#ifndef PerlIO_get_cnt
-extern int	PerlIO_get_cnt		(PerlIO *);
-#endif
-#ifndef PerlIO_set_cnt
-extern void	PerlIO_set_cnt		(PerlIO *,int);
-#endif
-#ifndef PerlIO_set_ptrcnt
-extern void	PerlIO_set_ptrcnt	(PerlIO *,STDCHAR *,int);
-#endif
-#ifndef PerlIO_get_base
-extern STDCHAR * PerlIO_get_base	(PerlIO *);
-#endif
-#ifndef PerlIO_get_bufsiz
-extern int	PerlIO_get_bufsiz	(PerlIO *);
-#endif
-#ifndef PerlIO_tmpfile
-extern PerlIO *	PerlIO_tmpfile		(void);
-#endif
-#ifndef PerlIO_stdin
-extern PerlIO *	PerlIO_stdin	(void);
-#endif
-#ifndef PerlIO_stdout
-extern PerlIO *	PerlIO_stdout	(void);
-#endif
-#ifndef PerlIO_stderr
-extern PerlIO *	PerlIO_stderr	(void);
-#endif
-#ifndef PerlIO_getpos
-extern int	PerlIO_getpos		(PerlIO *,Fpos_t *);
-#endif
-#ifndef PerlIO_setpos
-extern int	PerlIO_setpos		(PerlIO *,const Fpos_t *);
-#endif
-#ifndef PerlIO_fdupopen
-extern PerlIO *	PerlIO_fdupopen		(PerlIO *);
-#endif
-#ifndef PerlIO_isutf8
-extern int	PerlIO_isutf8		(PerlIO *);
-#endif
 
 /*
  *   Interface for directory functions

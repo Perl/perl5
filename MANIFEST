@@ -443,6 +443,7 @@ ext/re/re.xs		re extension external subroutines
 ext/util/make_ext	Used by Makefile to execute extension Makefiles
 ext/util/mkbootstrap	Turns ext/*/*_BS into bootstrap info
 fakethr.h		Fake threads header
+fakesdio.h		stdio in terms of PerlIO
 form.h			Public declarations for the above
 global.sym		Symbols that need hiding when embedded
 globals.c		File to declare global symbols (for shared library)
@@ -1148,7 +1149,8 @@ perl.h			Global declarations
 perlapi.c		Perl API functions
 perlapi.h		Perl API function declarations
 perlio.c		C code for PerlIO abstraction
-perlio.h		compatibility stub
+perlio.h		PerlIO abstraction
+perliol.h		PerlIO Layer definition
 perlio.sym		Symbols for PerlIO abstraction
 perlsdio.h		Fake stdio using perlio
 perlsfio.h		Prototype sfio mapping for PerlIO
