@@ -81,6 +81,23 @@
    standard library calls (where we pass an I32 and the library is
    expecting an int), but the disadvantage that an I32 is not 32 bits.
    Andy Dougherty	August 1996
+
+   In the future, we may perhaps want to think about something like
+    #if INTSIZE == 4
+	typedef I32 int;
+    #else
+    #  if LONGSIZE == 4
+	    typedef I32 long;
+    #  else
+    #    if SHORTSIZE == 4
+	    typedef I32 short;
+    #    else
+	    typedef I32 int;
+    #    endif
+    #  endif
+    #endif
+   For the moment, these are mentioned here so metaconfig will
+   construct Configure to figure out the various sizes.
 */
 
 typedef char		I8;

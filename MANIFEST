@@ -278,6 +278,7 @@ lib/AnyDBM_File.pm	Perl module to emulate dbmopen
 lib/AutoLoader.pm	Autoloader base class
 lib/AutoSplit.pm	Split up autoload functions
 lib/Benchmark.pm	Measure execution time
+lib/Bundle/CPAN.pm	The CPAN bundle
 lib/CPAN.pm		Interface to Comprehensive Perl Archive Network
 lib/CPAN/FirstTime.pm	Utility for creating CPAN config files
 lib/CPAN/Nox.pm		Runs CPAN while avoiding compiled extensions
@@ -770,7 +771,7 @@ win32/bin/search.bat	Win32 port
 win32/bin/test.bat	Win32 port
 win32/bin/webget.bat	Win32 port
 win32/bin/www.pl	Win32 port
-win32/config.h		Win32 port
+win32/config.H		Win32 config header (suffix not ".h" for metaconfig)
 win32/config.w32	Win32 port
 win32/dl_win32.xs	Win32 port
 win32/dosish.diff	Win32 port

@@ -20,7 +20,7 @@
 
 # $Id: Head.U,v 3.0.1.8 1995/07/25 13:40:02 ram Exp $
 #
-# Generated on Mon Jan 27 12:33:55 EST 1997 [metaconfig 3.0 PL60]
+# Generated on Sat Feb  1 00:26:40 EST 1997 [metaconfig 3.0 PL60]
 
 cat >/tmp/c1$$ <<EOF
 ARGGGHHHH!!!!!
@@ -505,6 +505,8 @@ i_varargs=''
 i_varhdr=''
 i_vfork=''
 intsize=''
+longsize=''
+shortsize=''
 libc=''
 libperl=''
 shrpenv=''
@@ -5725,32 +5727,57 @@ $rm -f set set.c
 set bzero d_bzero
 eval $inlibc
 
-: check for length of integer
+: check for lengths of integral types
 echo " "
 case "$intsize" in
 '')
 	echo "Checking to see how big your integers are..." >&4
-	$cat >try.c <<'EOCP'
+	$cat >intsize.c <<'EOCP'
 #include <stdio.h>
 main()
 {
-	printf("%d\n", sizeof(int));
+	printf("intsize=%d;\n", sizeof(int));
+	printf("longsize=%d;\n", sizeof(long));
+	printf("shortsize=%d;\n", sizeof(short));
+	fflush(stdout);
 	exit(0);
 }
 EOCP
-	if $cc $ccflags try.c -o try >/dev/null 2>&1 && ./try > /dev/null; then
-		intsize=`./try`
+#	If $libs contains -lsfio, and sfio is mis-configured, then it
+#	sometimes (apparently) runs and exits with a 0 status, but with no
+#	output!.  Thus we check with test -s whether we actually got any 
+#	output.  I think it has to do with sfio's use of _exit vs. exit,
+#	but I don't know for sure.  --Andy Dougherty  1/27/97.
+	if $cc $optimize $ccflags $ldflags -o intsize intsize.c $libs >/dev/null 2>&1 && 
+	./intsize > intsize.out 2>/dev/null && test -s intsize.out ; then
+		eval `$cat intsize.out`
 		echo "Your integers are $intsize bytes long."
+		echo "Your long integers are $longsize bytes long."
+		echo "Your short integers are $shortsize bytes long."
 	else
-		dflt='4'
-		echo "(I can't seem to compile the test program.  Guessing...)"
+		$cat >&4 <<EOM
+
+Help! I can't compile and run the intsize test program: please enlighten me!
+(This is probably a misconfiguration in your system or libraries, and
+you really ought to fix it.  Still, I'll try anyway.)
+
+EOM
+		dflt=4
 		rp="What is the size of an integer (in bytes)?"
 		. ./myread
 		intsize="$ans"
+		dflt=$intsize
+		rp="What is the size of a long integer (in bytes)?"
+		. ./myread
+		longsize="$ans"
+		dflt=2
+		rp="What is the size of a short integer (in bytes)?"
+		. ./myread
+		shortsize="$ans"
 	fi
 	;;
 esac
-$rm -f try.c try
+$rm -f intsize intsize.[co] intsize.out
 
 : see if signal is declared as pointer to function returning int or void
 echo " "
@@ -9031,23 +9058,31 @@ main()
 }
 EOM
 echo " "
-if $cc $ccflags $ldflags -o ssize ssize.c $libs > /dev/null 2>&1  &&
-		./ssize > /dev/null 2>&1 ; then
-	ssizetype=`./ssize`
+#	If $libs contains -lsfio, and sfio is mis-configured, then it
+#	sometimes (apparently) runs and exits with a 0 status, but with no
+#	output!.  Thus we check with test -s whether we actually got any 
+#	output.  I think it has to do with sfio's use of _exit vs. exit,
+#	but I don't know for sure.  --Andy Dougherty  1/27/97.
+if $cc $optimize $ccflags $ldflags -o ssize ssize.c $libs > /dev/null 2>&1  &&
+		./ssize > ssize.out 2>/dev/null && test -s ssize.out ; then
+	ssizetype=`$cat ssize.out`
 	echo "I'll be using $ssizetype for functions returning a byte count." >&4
 else
-	echo "(I can't compile and run the test program--please enlighten me!)"
-	$cat <<EOM
+	$cat >&4 <<EOM
+
+Help! I can't compile and run the ssize_t test program: please enlighten me!
+(This is probably a misconfiguration in your system or libraries, and
+you really ought to fix it.  Still, I'll try anyway.)
 
 I need a type that is the same size as $sizetype, but is guaranteed to
-be signed.  Common values are int and long.
+be signed.  Common values are ssize_t, int and long.
 
 EOM
 	rp="What signed type is the same size as $sizetype?"
 	. ./myread
 	ssizetype="$ans"
 fi
-$rm -f ssize ssize.[co]
+$rm -f ssize ssize.[co] ssize.out
 
 : see what type of char stdio uses.
 echo " "
@@ -10161,6 +10196,7 @@ ln='$ln'
 lns='$lns'
 locincpth='$locincpth'
 loclibpth='$loclibpth'
+longsize='$longsize'
 lp='$lp'
 lpr='$lpr'
 ls='$ls'
@@ -10235,6 +10271,7 @@ sh='$sh'
 shar='$shar'
 sharpbang='$sharpbang'
 shmattype='$shmattype'
+shortsize='$shortsize'
 shrpenv='$shrpenv'
 shsharp='$shsharp'
 sig_name='$sig_name'
