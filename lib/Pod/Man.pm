@@ -759,7 +759,7 @@ sub cmd_item {
         $index = $_;
         $index =~ s/^\s*[-*+o.]?(?:\s+|\Z)//;
     }
-    $_ = '*' unless $_;
+    $_ = '*' unless length $_; # length $_ not just $_ so that =item 0 works.
     s/^\*(\s|\Z)/\\\(bu$1/;
     if (@{ $$self{SHIFTS} } == @{ $$self{INDENTS} }) {
         $self->output (".RE\n");
