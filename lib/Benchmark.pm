@@ -198,14 +198,14 @@ Clear all cached times.
 =item cmpthese ( RESULTSHASHREF )
 
 Optionally calls timethese(), then outputs comparison chart.  This 
-chart is sorted from slowest to highest, and shows the percent 
+chart is sorted from slowest to fastest, and shows the percent 
 speed difference between each pair of tests.  Can also be passed 
 the data structure that timethese() returns:
 
     $results = timethese( .... );
     cmpthese( $results );
 
-Returns the data structure returned by timethese().
+Returns the data structure returned by timethese() (or passed in).
 
 =item countit(TIME, CODE)
 
@@ -444,9 +444,7 @@ sub runloop {
     # in &countit.  This, in turn, can reduce the number of calls to
     # &runloop a lot, and thus reduce additive errors.
     my $tbase = Benchmark->new(0)->[1];
-    do {
-       $t0 = Benchmark->new(0);
-    } while ( $t0->[1] == $tbase );
+    while ( ( $t0 = Benchmark->new(0) )->[1] == $tbase ) {} ;
     &$subref;
     $t1 = Benchmark->new($n);
     $td = &timediff($t1, $t0);
@@ -729,7 +727,7 @@ sub cmpthese{
        sort { $$a <=> $$b } map { \$_ } @col_widths[2..$#col_widths];
     my $max_width = ${$sorted_width_refs[-1]};
 
-    my $total = 0;
+    my $total = @col_widths - 1 ;
     for ( @col_widths ) { $total += $_ }
 
     STRETCHER:
