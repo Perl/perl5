@@ -21,23 +21,15 @@ eval {
     $have_setlocale++;
 };
 
-use vars qw(&LC_ALL);
-
 # Visual C's CRT goes silly on strings of the form "en_US.ISO8859-1"
 # and mingw32 uses said silly CRT
 $have_setlocale = 0 if $^O eq 'MSWin32' && $Config{cc} =~ /^(cl|gcc)/i;
 
-# 103 (the last test) may fail but that is sort-of okay.
-# (It indicates something broken in the environment, not Perl)
+print "1..", ($have_setlocale ? 114 : 98), "\n";
 
-print "1..", ($have_setlocale ? 103 : 98), "\n";
+use vars qw(&LC_ALL);
 
-use vars qw($a
-	    $English $German $French $Spanish
-	    @C @English @German @French @Spanish
-	    $Locale @Locale %UPPER %lower %bothcase @Neoalpha);
-
-$a = 'abc %';
+my $a = 'abc %';
 
 sub ok {
     my ($n, $result) = @_;
@@ -236,7 +228,6 @@ Chinese:zh:cn tw:cn.EUC eucCN eucTW euc.CN euc.TW tw.EUC
 Croation:hr:hr:2
 Czech:cs:cz:2
 Danish:dk:da:1
-Danish:dk:da:1
 Dutch:nl:nl:1
 English American British:en:au ca gb ie nz us uk:1 cp850
 Estonian:et:ee:1
@@ -302,8 +293,12 @@ trylocale("C");
 trylocale("POSIX");
 foreach (0..15) {
     trylocale("ISO8859-$_");
-    trylocale("iso_8859_$_");
     trylocale("iso8859$_");
+    trylocale("iso8859-$_");
+    trylocale("iso_8859_$_");
+    trylocale("isolatin$_");
+    trylocale("isolatin-$_");
+    trylocale("iso_latin_$_");
 }
 
 foreach my $locale (split(/\n/, $locales)) {
@@ -350,6 +345,7 @@ sub debugf {
 debug "# Locales = @Locale\n";
 
 my %Problem;
+my @Neoalpha;
 
 foreach $Locale (@Locale) {
     debug "# Locale = $Locale\n";
@@ -365,7 +361,9 @@ foreach $Locale (@Locale) {
 
     # Sieve the uppercase and the lowercase.
     
-    %UPPER = %lower = %bothcase = ();
+    my %UPPER = ();
+    my %lower = ();
+    my %BoThCaSe = ();
     for (@Alnum_) {
 	if (/[^\d_]/) { # skip digits and the _
 	    if (uc($_) eq $_) {
@@ -377,19 +375,19 @@ foreach $Locale (@Locale) {
 	}
     }
     foreach (keys %UPPER) {
-	$bothcase{$_}++ if exists $lower{$_};
+	$BoThCaSe{$_}++ if exists $lower{$_};
     }
     foreach (keys %lower) {
-	$bothcase{$_}++ if exists $UPPER{$_};
+	$BoThCaSe{$_}++ if exists $UPPER{$_};
     }
-    foreach (keys %bothcase) {
+    foreach (keys %BoThCaSe) {
 	delete $UPPER{$_};
 	delete $lower{$_};
     }
 
     debug "# UPPER    = ", join(" ", sort keys %UPPER   ), "\n";
     debug "# lower    = ", join(" ", sort keys %lower   ), "\n";
-    debug "# bothcase = ", join(" ", sort keys %bothcase), "\n";
+    debug "# BoThCaSe = ", join(" ", sort keys %BoThCaSe), "\n";
 
     # Find the alphabets that are not alphabets in the default locale.
 
@@ -426,43 +424,33 @@ foreach $Locale (@Locale) {
 	}
     }
 
-    # Test #100 removed but to preserve historical test number
-    # consistency we do not renumber the remaining tests.
-
     # Cross-check whole character set.
 
-    debug "# testing 101 with locale '$Locale'\n";
+    debug "# testing 100 with locale '$Locale'\n";
     for (map { chr } 0..255) {
 	if ((/\w/ and /\W/) or (/\d/ and /\D/) or (/\s/ and /\S/)) {
-	    $Problem{101}{$Locale} = 1;
-	    debug "# failed 101\n";
+	    $Problem{100}{$Locale} = 1;
+	    debug "# failed 100\n";
 	    last;
 	}
     }
 
     # Test for read-only scalars' locale vs non-locale comparisons.
 
-    debug "# testing 102 with locale '$Locale'\n";
+    debug "# testing 101 with locale '$Locale'\n";
     {
 	no locale;
 	$a = "qwerty";
 	{
 	    use locale;
 	    if ($a cmp "qwerty") {
-		$Problem{102}{$Locale} = 1;
-		debug "# failed 102\n";
+		$Problem{101}{$Locale} = 1;
+		debug "# failed 101\n";
 	    }
 	}
     }
 
-    # This test must be the last one because its failure is not fatal.
-    # The @Alnum_ should be internally consistent.
-    # Thanks to Hallvard Furuseth <h.b.furuseth@usit.uio.no>
-    # for inventing a way to test for ordering consistency
-    # without requiring any particular order.
-    # <jhi@iki.fi>
-    
-    debug "# testing 103 with locale '$Locale'\n";
+    debug "# testing 102 with locale '$Locale'\n";
     {
 	my ($from, $to, $lesser, $greater,
 	    @test, %test, $test, $yes, $no, $sign);
@@ -500,8 +488,8 @@ foreach $Locale (@Locale) {
 	    $test = 0;
 	    for my $ti (@test) { $test{$ti} = eval $ti ; $test ||= $test{$ti} }
 	    if ($test) {
-		$Problem{103}{$Locale} = 1;
-		debug "# failed 103 at:\n";
+		$Problem{102}{$Locale} = 1;
+		debug "# failed 102 at:\n";
 		debug "# lesser  = '$lesser'\n";
 		debug "# greater = '$greater'\n";
 		debug "# lesser cmp greater = ", $lesser cmp $greater, "\n";
@@ -522,12 +510,10 @@ foreach $Locale (@Locale) {
     }
 }
 
-no locale;
-
-foreach (99..103) {
+foreach (99..102) {
     if ($Problem{$_}) {
-	if ($_ == 103) {
-	    print "# The failure of test 103 is not necessarily fatal.\n";
+	if ($_ == 102) {
+	    print "# The failure of test 102 is not necessarily fatal.\n";
 	    print "# It usually indicates a problem in the enviroment,\n";
 	    print "# not in Perl itself.\n";
 	}
@@ -538,7 +524,7 @@ foreach (99..103) {
 
 my $didwarn = 0;
 
-foreach (99..103) {
+foreach (102..102) {
     if ($Problem{$_}) {
 	my @f = sort keys %{ $Problem{$_} };
 	my $f = join(" ", @f);
@@ -567,7 +553,7 @@ if ($didwarn) {
     
     foreach my $l (@Locale) {
 	my $p = 0;
-	foreach my $t (99..103) {
+	foreach my $t (102..102) {
 	    $p++ if $Problem{$t}{$l};
 	}
 	push @s, $l if $p == 0;
@@ -580,6 +566,77 @@ if ($didwarn) {
 	"# The following locales\n#\n",
         "#\t", $s, "\n#\n",
 	"# tested okay.\n#\n",
+}
+
+{
+    use locale;
+
+    my ($x, $y) = (1.23, 1.23);
+
+    my $a = "$x";
+    printf ''; # printf used to reset locale to "C"
+    my $b = "$y";
+
+    print "not " unless $a eq $b;
+    print "ok 103\n";
+
+    my $c = "$x";
+    my $z = sprintf ''; # sprintf used to reset locale to "C"
+    my $d = "$y";
+
+    print "not " unless $c eq $d;
+    print "ok 104\n";
+
+    my $w = 0;
+    local $SIG{__WARN__} = sub { $w++ };
+    local $^W = 1;
+
+    # the == (among other things) used to warn for locales
+    # that had something else than "." as the radix character
+
+    print "not " unless $c == 1.23;
+    print "ok 105\n";
+
+    print "not " unless $c == $x;
+    print "ok 106\n";
+
+    print "not " unless $c == $d;
+    print "ok 107\n";
+
+    debug "# 103..107: a = $a, b = $b, c = $c, d = $d\n";
+
+    {
+	no locale;
+	
+	my $e = "$x";
+
+	print "not " unless $e == 1.23;
+	print "ok 108\n";
+
+	print "not " unless $e == $x;
+	print "ok 109\n";
+
+	print "not " unless $e == $c;
+	print "ok 110\n";
+
+	debug "# 108..110: e = $e\n";
+    }
+
+    print "not " unless $w == 0;
+    print "ok 111\n";
+
+    my $f = "1.23";
+
+    print "not " unless $f == 1.23;
+    print "ok 112\n";
+
+    print "not " unless $f == $x;
+    print "ok 113\n";
+
+    print "not " unless $f == $c;
+    print "ok 114\n";
+
+    debug "# 112..114: f = $f\n";
 }
 
 # eof

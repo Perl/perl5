@@ -311,6 +311,9 @@
 #define mod			Perl_mod
 #define moreswitches		Perl_moreswitches
 #define my			Perl_my
+#ifdef USE_LOCALE_NUMERIC
+#define my_atof			Perl_my_atof
+#endif
 #if !defined(HAS_BCOPY) || !defined(HAS_SAFE_BCOPY)
 #define my_bcopy		Perl_my_bcopy
 #endif
@@ -423,6 +426,7 @@
 #define new_ctype		Perl_new_ctype
 #define new_numeric		Perl_new_numeric
 #define set_numeric_local	Perl_set_numeric_local
+#define set_numeric_radix	Perl_set_numeric_radix
 #define set_numeric_standard	Perl_set_numeric_standard
 #define require_pv		Perl_require_pv
 #define pidgone			Perl_pidgone
@@ -1612,6 +1616,9 @@
 #define mod(a,b)		Perl_mod(aTHX_ a,b)
 #define moreswitches(a)		Perl_moreswitches(aTHX_ a)
 #define my(a)			Perl_my(aTHX_ a)
+#ifdef USE_LOCALE_NUMERIC
+#define my_atof(a)		Perl_my_atof(aTHX_ a)
+#endif
 #if !defined(HAS_BCOPY) || !defined(HAS_SAFE_BCOPY)
 #define my_bcopy(a,b,c)		Perl_my_bcopy(aTHX_ a,b,c)
 #endif
@@ -1723,6 +1730,7 @@
 #define new_ctype(a)		Perl_new_ctype(aTHX_ a)
 #define new_numeric(a)		Perl_new_numeric(aTHX_ a)
 #define set_numeric_local()	Perl_set_numeric_local(aTHX)
+#define set_numeric_radix()	Perl_set_numeric_radix(aTHX)
 #define set_numeric_standard()	Perl_set_numeric_standard(aTHX)
 #define require_pv(a)		Perl_require_pv(aTHX_ a)
 #define pidgone(a,b)		Perl_pidgone(aTHX_ a,b)
@@ -2917,6 +2925,9 @@
 #define Perl_mod		CPerlObj::mod
 #define Perl_moreswitches	CPerlObj::moreswitches
 #define Perl_my			CPerlObj::my
+#ifdef USE_LOCALE_NUMERIC
+#define Perl_my_atof		CPerlObj::my_atof
+#endif
 #if !defined(HAS_BCOPY) || !defined(HAS_SAFE_BCOPY)
 #define Perl_my_bcopy		CPerlObj::my_bcopy
 #endif
@@ -3029,6 +3040,7 @@
 #define Perl_new_ctype		CPerlObj::new_ctype
 #define Perl_new_numeric	CPerlObj::new_numeric
 #define Perl_set_numeric_local	CPerlObj::set_numeric_local
+#define Perl_set_numeric_radix	CPerlObj::set_numeric_radix
 #define Perl_set_numeric_standard	CPerlObj::set_numeric_standard
 #define Perl_require_pv		CPerlObj::require_pv
 #define Perl_pidgone		CPerlObj::pidgone

@@ -280,6 +280,7 @@ Perl_mg_size
 Perl_mod
 Perl_moreswitches
 Perl_my
+Perl_my_atof
 Perl_my_bcopy
 Perl_my_bzero
 Perl_my_exit
@@ -382,6 +383,7 @@ Perl_new_collate
 Perl_new_ctype
 Perl_new_numeric
 Perl_set_numeric_local
+Perl_set_numeric_radix
 Perl_set_numeric_standard
 perl_parse
 Perl_require_pv

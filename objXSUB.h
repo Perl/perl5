@@ -406,6 +406,8 @@
 #define PL_numeric_local	pPerl->PL_numeric_local
 #undef  PL_numeric_name
 #define PL_numeric_name		pPerl->PL_numeric_name
+#undef  PL_numeric_radix
+#define PL_numeric_radix	pPerl->PL_numeric_radix
 #undef  PL_numeric_standard
 #define PL_numeric_standard	pPerl->PL_numeric_standard
 #undef  PL_ofmt
@@ -1361,6 +1363,10 @@
 #define moreswitches		pPerl->moreswitches
 #undef  my
 #define my			pPerl->my
+#ifdef USE_LOCALE_NUMERIC
+#undef  my_atof
+#define my_atof			pPerl->my_atof
+#endif
 #if !defined(HAS_BCOPY) || !defined(HAS_SAFE_BCOPY)
 #undef  my_bcopy
 #define my_bcopy		pPerl->my_bcopy
@@ -1571,6 +1577,8 @@
 #define new_numeric		pPerl->new_numeric
 #undef  set_numeric_local
 #define set_numeric_local	pPerl->set_numeric_local
+#undef  set_numeric_radix
+#define set_numeric_radix	pPerl->set_numeric_radix
 #undef  set_numeric_standard
 #define set_numeric_standard	pPerl->set_numeric_standard
 #undef  require_pv

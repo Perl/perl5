@@ -428,6 +428,7 @@
 #define PL_nthreads_cond	(PL_curinterp->Inthreads_cond)
 #define PL_numeric_local	(PL_curinterp->Inumeric_local)
 #define PL_numeric_name		(PL_curinterp->Inumeric_name)
+#define PL_numeric_radix	(PL_curinterp->Inumeric_radix)
 #define PL_numeric_standard	(PL_curinterp->Inumeric_standard)
 #define PL_ofmt			(PL_curinterp->Iofmt)
 #define PL_oldbufptr		(PL_curinterp->Ioldbufptr)
@@ -684,6 +685,7 @@
 #define PL_Inthreads_cond	PL_nthreads_cond
 #define PL_Inumeric_local	PL_numeric_local
 #define PL_Inumeric_name	PL_numeric_name
+#define PL_Inumeric_radix	PL_numeric_radix
 #define PL_Inumeric_standard	PL_numeric_standard
 #define PL_Iofmt		PL_ofmt
 #define PL_Ioldbufptr		PL_oldbufptr

@@ -1941,10 +1941,9 @@ Perl_magic_set(pTHX_ SV *sv, MAGIC *mg)
 	    char *p = SvPV(sv, len);
 	    Groups_t gary[NGROUPS];
 
-	    SET_NUMERIC_STANDARD();
 	    while (isSPACE(*p))
 		++p;
-	    PL_egid = I_V(atof(p));
+	    PL_egid = I_V(atol(p));
 	    for (i = 0; i < NGROUPS; ++i) {
 		while (*p && !isSPACE(*p))
 		    ++p;
@@ -1952,7 +1951,7 @@ Perl_magic_set(pTHX_ SV *sv, MAGIC *mg)
 		    ++p;
 		if (!*p)
 		    break;
-		gary[i] = I_V(atof(p));
+		gary[i] = I_V(atol(p));
 	    }
 	    if (i)
 		(void)setgroups(i, gary);

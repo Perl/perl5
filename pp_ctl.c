@@ -567,11 +567,16 @@ PP(pp_formline)
 	    gotsome = TRUE;
 	    value = SvNV(sv);
 	    /* Formats aren't yet marked for locales, so assume "yes". */
-	    SET_NUMERIC_LOCAL();
-	    if (arg & 256) {
-		sprintf(t, "%#*.*f", (int) fieldsize, (int) arg & 255, value);
-	    } else {
-		sprintf(t, "%*.0f", (int) fieldsize, value);
+	    {
+		RESTORE_NUMERIC_LOCAL();
+		if (arg & 256) {
+		    sprintf(t, "%#*.*f",
+			    (int) fieldsize, (int) arg & 255, value);
+		} else {
+		    sprintf(t, "%*.0f",
+			    (int) fieldsize, value);
+		}
+		RESTORE_NUMERIC_STANDARD();
 	    }
 	    t += fieldsize;
 	    break;
@@ -2727,7 +2732,7 @@ S_doeval(pTHX_ int gimme, OP** startop)
 	PERL_CONTEXT *cx;
 	I32 optype = 0;			/* Might be reset by POPEVAL. */
 	STRLEN n_a;
-
+	
 	PL_op = saveop;
 	if (PL_eval_root) {
 	    op_free(PL_eval_root);
@@ -2854,8 +2859,7 @@ PP(pp_require)
 
     sv = POPs;
     if (SvNIOKp(sv) && !SvPOKp(sv)) {
-	SET_NUMERIC_STANDARD();
-	if (atof(PL_patchlevel) + 0.00000999 < SvNV(sv))
+	if (Atof(PL_patchlevel) + 0.00000999 < SvNV(sv))
 	    DIE(aTHX_ "Perl %s required--this is only version %s, stopped",
 		SvPV(sv,n_a),PL_patchlevel);
 	RETPUSHYES;

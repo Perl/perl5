@@ -964,7 +964,7 @@ print \"  \\@INC:\\n    @INC\\n\";");
 	    Perl_croak(aTHX_ "%s had compilation errors.\n", PL_origfilename);
 	else {
 	    Perl_croak(aTHX_ "Execution of %s aborted due to compilation errors.\n",
-		PL_origfilename);
+		       PL_origfilename);
 	}
     }
     PL_curcop->cop_line = 0;
