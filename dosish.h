@@ -1,7 +1,9 @@
 #define ABORT() abort();
 
-#define BIT_BUCKET "/dev/null"  /* Will this work? */
+#define BIT_BUCKET "\dev\nul"
 #define PERL_SYS_INIT(c,v)
+#define PERL_SYS_TERM()
+#define dXSUB_SYS int dummy
 #define TMPPATH "plXXXXXX"
 
 /*
