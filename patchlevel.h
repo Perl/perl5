@@ -1,5 +1,5 @@
 #define PATCHLEVEL 4
-#define SUBVERSION 4
+#define SUBVERSION 5
 
 /*
 	local_patches -- list of locally applied less-than-subversion patches.
@@ -39,7 +39,7 @@
 /* The following line and terminating '};' are read by perlbug.PL. Don't alter. */ 
 static	char	*local_patches[] = {
 	NULL
-	,"MAINT_05_TRIAL_5 - 5.004_05 maintenance trial 5"
+	,"MAINT_TRIAL_5 - 5.004_05 maintenance trial 5"
 	,NULL
 };
 
