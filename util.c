@@ -3393,7 +3393,6 @@ Perl_new_struct_thread(pTHX_ struct perl_thread *t)
     thr->threadsv = newAV();
     thr->specific = newAV();
     thr->errsv = newSVpvn("", 0);
-    thr->errhv = newHV();
     thr->flags = THRf_R_JOINABLE;
     MUTEX_INIT(&thr->mutex);
 

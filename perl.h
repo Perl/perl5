@@ -684,15 +684,15 @@ Free_t   Perl_mfree (Malloc_t where);
 
 #ifdef USE_THREADS
 #  define ERRSV (thr->errsv)
-#  define ERRHV (thr->errhv)
 #  define DEFSV THREADSV(0)
 #  define SAVE_DEFSV save_threadsv(0)
 #else
 #  define ERRSV GvSV(PL_errgv)
-#  define ERRHV GvHV(PL_errgv)
 #  define DEFSV GvSV(PL_defgv)
 #  define SAVE_DEFSV SAVESPTR(GvSV(PL_defgv))
 #endif /* USE_THREADS */
+
+#define ERRHV GvHV(PL_errgv)	/* XXX unused, here for compatibility */
 
 #ifndef errno
 	extern int errno;     /* ANSI allows errno to be an lvalue expr.

@@ -129,8 +129,8 @@ struct block_loop {
 };
 
 #define PUSHLOOP(cx, ivar, s)						\
-	cx->blk_loop.label = PL_curcop->cop_label;				\
-	cx->blk_loop.resetsp = s - PL_stack_base;				\
+	cx->blk_loop.label = PL_curcop->cop_label;			\
+	cx->blk_loop.resetsp = s - PL_stack_base;			\
 	cx->blk_loop.redo_op = cLOOP->op_redoop;			\
 	cx->blk_loop.next_op = cLOOP->op_nextop;			\
 	cx->blk_loop.last_op = cLOOP->op_lastop;			\

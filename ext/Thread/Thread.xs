@@ -159,7 +159,6 @@ threadstart(void *arg)
     SvREFCNT_dec(thr->threadsv);
     SvREFCNT_dec(thr->specific);
     SvREFCNT_dec(thr->errsv);
-    SvREFCNT_dec(thr->errhv);
 
     /*Safefree(cxstack);*/
     while (PL_curstackinfo->si_next)

@@ -120,7 +120,7 @@ int* yychar_pointer = NULL;
  * LOOPX        : loop exiting command (goto, last, dump, etc)
  * FTST         : file test operator
  * FUN0         : zero-argument function
- * FUN1         : not used
+ * FUN1         : not used, except for not, which isn't a UNIOP
  * BOop         : bitwise or or xor
  * BAop         : bitwise and
  * SHop         : shift operator
@@ -4227,7 +4227,10 @@ Perl_yylex(pTHX)
 	    OPERATOR(USE);
 
 	case KEY_not:
-	    OPERATOR(NOTOP);
+	    if (*s == '(' || (s = skipspace(s), *s == '('))
+		FUN1(OP_NOT);
+	    else
+		OPERATOR(NOTOP);
 
 	case KEY_open:
 	    s = skipspace(s);
