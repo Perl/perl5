@@ -13,19 +13,14 @@ BEGIN {
         print "1..0 # Skip -- Perl configured without B module\n";
         exit 0;
     }
-    if ($Config::Config{'extensions'} !~ /\bData\/Dumper\b/) {
-	print
-	    "1..0 # Skip: Data::Dumper was not built, needed by OptreeCheck\n";
-	exit 0;
-    }
-    require 'test.pl';
+    # require 'test.pl'; # now done by OptreeCheck
 }
 
 # import checkOptree(), and %gOpts (containing test state)
 use OptreeCheck;	# ALSO DOES @ARGV HANDLING !!!!!!
 use Config;
 
-plan tests => 24;
+plan tests => 23;
 SKIP: {
 skip "no perlio in this build", 24 unless $Config::Config{useperlio};
 
@@ -40,11 +35,11 @@ checkOptree ( name	=> 'canonical example w -basic',
 	      bcopts	=> '-basic',
 	      code	=>  sub{$a=$b+42},
 	      expect	=> <<'EOT_EOT', expect_nt => <<'EONT_EONT');
-# 7  <1> leavesub[\d+ refs?] K/REFC,1 ->(end)
+# 7  <1> leavesub[1 ref] K/REFC,1 ->(end)
 # -     <@> lineseq KP ->7
 # 1        <;> nextstate(foo bar) v ->2
 # 6        <2> sassign sKS/2 ->7
-# 4           <2> add[t\d+] sK/2 ->5
+# 4           <2> add[t3] sK/2 ->5
 # -              <1> ex-rv2sv sK/1 ->3
 # 2                 <#> gvsv[*b] s ->3
 # 3              <$> const[IV 42] s ->4
@@ -212,8 +207,11 @@ EONT_EONT
 
 pass("OPTIONS IN CMDLINE MODE");
 
-checkOptree ( name	=> 'cmdline invoke -basic works',
-	      prog	=> 'sort @a',
+checkOptree ( name => 'cmdline invoke -basic works',
+	      prog => 'sort @a',
+	      errs => [ 'Useless use of sort in void context at -e line 1.',
+			'Name "main::a" used only once: possible typo at -e line 1.',
+			],
 	      #bcopts	=> '-basic', # default
 	      expect	=> <<'EOT_EOT', expect_nt => <<'EONT_EONT');
 # 7  <@> leave[1 ref] vKP/REFC ->(end)
@@ -233,10 +231,13 @@ EOT_EOT
 # 4           <$> gv(*a) s ->5
 EONT_EONT
 
-checkOptree ( name	=> 'cmdline invoke -exec works',
-	      prog	=> 'sort @a',
-	      bcopts	=> '-exec',
-	      expect	=> <<'EOT_EOT', expect_nt => <<'EONT_EONT');
+checkOptree ( name => 'cmdline invoke -exec works',
+	      prog => 'sort @a',
+	      errs => [ 'Useless use of sort in void context at -e line 1.',
+			'Name "main::a" used only once: possible typo at -e line 1.',
+			],
+	      bcopts => '-exec',
+	      expect => <<'EOT_EOT', expect_nt => <<'EONT_EONT');
 1  <0> enter 
 2  <;> nextstate(main 1 -e:1) v
 3  <0> pushmark s
@@ -255,33 +256,33 @@ EOT_EOT
 EONT_EONT
 
 ;
-$DB::single=1;
+
 checkOptree
     ( name	=> 'cmdline self-strict compile err using prog',
       prog	=> 'use strict; sort @a',
       bcopts	=> [qw/ -basic -concise -exec /],
-      errs	=> 'Global symbol "@a" requires explicit package name at .*? line 1.',
+      errs	=> 'Global symbol "@a" requires explicit package name at -e line 1.',
+      expect	=> 'nextstate',
+      expect_nt	=> 'nextstate',
+      noanchors => 1, # allow simple expectations to work
       );
 
 checkOptree
     ( name	=> 'cmdline self-strict compile err using code',
       code	=> 'use strict; sort @a',
       bcopts	=> [qw/ -basic -concise -exec /],
-      #noanchors	=> 1,
       errs	=> 'Global symbol "@a" requires explicit package name at .*? line 1.',
-      );
-
-checkOptree
-    ( name	=> 'useless use of sort in void context',
-      prog	=> 'our @a; sort @a',
-      bcopts	=> [qw/ -basic -concise -exec /],
-      errs	=> 'Useless use of sort in void context at -e line 1.',
+      note	=> 'this test relys on a kludge which copies $@ to rendering when empty',
+      expect	=> 'Global symbol',
+      expect_nt	=> 'Global symbol',
+      noanchors => 1, # allow simple expectations to work
       );
 
 checkOptree
     ( name	=> 'cmdline -basic -concise -exec works',
       prog	=> 'our @a; sort @a',
       bcopts	=> [qw/ -basic -concise -exec /],
+      errs	=> ['Useless use of sort in void context at -e line 1.'],
       expect	=> <<'EOT_EOT', expect_nt => <<'EONT_EONT');
 # 1  <0> enter 
 # 2  <;> nextstate(main 1 -e:1) v

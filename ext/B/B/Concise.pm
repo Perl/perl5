@@ -346,7 +346,7 @@ my @linenoise =
 
 my $chars = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
 
-sub op_flags {
+sub op_flags { # common flags (see BASOP.op_flags in op.h)
     my($x) = @_;
     my(@v);
     push @v, "v" if ($x & 3) == 1;
@@ -519,7 +519,8 @@ sub fmt_line {    # generate text-line for op.
     return $text; # suppress empty lines
 }
 
-my %priv;
+our %priv; # used to display each opcode's BASEOP.op_private values
+
 $priv{$_}{128} = "LVINTRO"
   for ("pos", "substr", "vec", "threadsv", "gvsv", "rv2sv", "rv2hv", "rv2gv",
        "rv2av", "rv2arylen", "aelem", "helem", "aslice", "hslice", "padsv",
@@ -913,48 +914,74 @@ sophisticated and flexible.
 
 =head1 EXAMPLE
 
-Here's is a short example of output (aka 'rendering'), using the
-default formatting conventions :
+Here's an example of 2 outputs (aka 'renderings'), using the
+-exec and -basic (i.e. default) formatting conventions on the same code
+snippet.
+
+    % perl -MO=Concise,-exec -e '$a = $b + 42'
+    1  <0> enter
+    2  <;> nextstate(main 1 -e:1) v
+    3  <#> gvsv[*b] s
+    4  <$> const[IV 42] s
+ *  5  <2> add[t3] sK/2
+    6  <#> gvsv[*a] s
+    7  <2> sassign vKS/2
+    8  <@> leave[1 ref] vKP/REFC
+
+Each line corresponds to an opcode. The opcode marked with '*' is used
+in a few examples below.
+
+The 1st column is the op's sequence number, starting at 1, and is
+displayed in base 36 by default.  This rendering is in -exec (i.e.
+execution) order.
+
+The symbol between angle brackets indicates the op's type, for
+example; <2> is a BINOP, <@> a LISTOP, and <#> is a PADOP, which is
+used in threaded perls. (see L</"OP class abbreviations">).
+
+The opname, as in B<'add[t1]'>, which may be followed by op-specific
+information in parentheses or brackets (ex B<'[t1]'>).
+
+The op-flags (ex B<'sK/2'>) follow, and are described in (L</"OP flags
+abbreviations">).
 
     % perl -MO=Concise -e '$a = $b + 42'
     8  <@> leave[1 ref] vKP/REFC ->(end)
     1     <0> enter ->2
     2     <;> nextstate(main 1 -e:1) v ->3
     7     <2> sassign vKS/2 ->8
-    5        <2> add[t1] sK/2 ->6
+ *  5        <2> add[t1] sK/2 ->6
     -           <1> ex-rv2sv sK/1 ->4
     3              <$> gvsv(*b) s ->4
     4           <$> const(IV 42) s ->5
     -        <1> ex-rv2sv sKRM*/1 ->7
     6           <$> gvsv(*a) s ->7
 
-Each line corresponds to an opcode. Null ops appear as C<ex-opname>,
-where I<opname> is the op that has been optimized away by perl.
+The default rendering is top-down, so they're not in execution order.
+This form reflects the way the stack is used to parse and evaluate
+expressions; the add operates on the two terms below it in the tree.
 
-The number on the first row indicates the op's sequence number. It's
-given in base 36 by default.
+Nullops appear as C<ex-opname>, where I<opname> is an op that has been
+optimized away by perl.  They're displayed with a sequence-number of
+'-', because they are not executed (they don't appear in previous
+example), they're printed here because they reflect the parse.
 
-The symbol between angle brackets indicates the op's type : for example,
-<2> is a BINOP, <@> a LISTOP, etc. (see L</"OP class abbreviations">).
+The arrow points to the sequence number of the next op; they're not
+displayed in -exec mode, for obvious reasons.
 
-The opname may be followed by op-specific information in parentheses
-(e.g. C<gvsv(*b)>), and by targ information in brackets (e.g.
-C<leave[t1]>).
+Note that because this rendering was done on a non-threaded perl, the
+PADOPs in the previous examples are now SVOPs, and some (but not all)
+of the square brackets have been replaced by round ones.  This is a
+subtle feature to provide some visual distinction between renderings
+on threaded and un-threaded perls.
 
-Next come the op flags. The common flags are listed below
-(L</"OP flags abbreviations">). The private flags follow, separated
-by a slash. For example, C<vKP/REFC> means that the leave op has
-public flags OPf_WANT_VOID, OPf_KIDS, and OPf_PARENS, and the private
-flag OPpREFCOUNTED.
-
-Finally an arrow points to the sequence number of the next op.
 
 =head1 OPTIONS
 
 Arguments that don't start with a hyphen are taken to be the names of
 subroutines to print the OPs of; if no such functions are specified,
 the main body of the program (outside any subroutines, and not
-including use'd or require'd files) is printed. Passing C<BEGIN>,
+including use'd or require'd files) is rendered.  Passing C<BEGIN>,
 C<CHECK>, C<INIT>, or C<END> will cause all of the corresponding
 special blocks to be printed.
 
@@ -974,8 +1001,9 @@ These options control the 'vertical display' of opcodes.  The display
 
 Print OPs in the order they appear in the OP tree (a preorder
 traversal, starting at the root). The indentation of each OP shows its
-level in the tree.  This mode is the default, so the flag is included
-simply for completeness.
+level in the tree, and the '->' at the end of the line indicates the
+next opcode in execution order.  This mode is the default, so the flag
+is included simply for completeness.
 
 =item B<-exec>
 
@@ -1162,12 +1190,14 @@ B:: namespace that represents the ops in your Perl code.
 
 =head2 OP flags abbreviations
 
-These symbols represent various flags which alter behavior of the
-opcode, sometimes in opcode-specific ways.
+OP flags are either public or private.  The public flags alter the
+behavior of each opcode in consistent ways, and are represented by 0
+or more single characters.
 
     v      OPf_WANT_VOID    Want nothing (void context)
     s      OPf_WANT_SCALAR  Want single value (scalar context)
     l      OPf_WANT_LIST    Want list of any length (list context)
+                            Want is unknown
     K      OPf_KIDS         There is a firstborn child.
     P      OPf_PARENS       This operator was parenthesized.
                              (Or block needs explicit scope entry.)
@@ -1176,6 +1206,18 @@ opcode, sometimes in opcode-specific ways.
     M      OPf_MOD          Will modify (lvalue).
     S      OPf_STACKED      Some arg is arriving on the stack.
     *      OPf_SPECIAL      Do something weird for this op (see op.h)
+
+Private flags, if any are set for an opcode, are displayed after a '/'
+
+    8  <@> leave[1 ref] vKP/REFC ->(end)
+    7     <2> sassign vKS/2 ->8
+
+They're opcode specific, and occur less often than the public ones, so
+they're represented by short mnemonics instead of single-chars; see
+L<op.h> for gory details, or try this quick 2-liner:
+
+  $> perl -MB::Concise -de 1
+  DB<1> |x \%B::Concise::priv
 
 =head1 FORMATTING SPECIFICATIONS
 
@@ -1303,7 +1345,7 @@ The target of the OP, or nothing for a nulled OP.
 
 =item B<#firstaddr>
 
-The address of the OP's first child, in hexidecimal.
+The address of the OP's first child, in hexadecimal.
 
 =item B<#flags>
 
@@ -1324,7 +1366,7 @@ mode, or empty otherwise.
 
 =item B<#lastaddr>
 
-The address of the OP's last child, in hexidecimal.
+The address of the OP's last child, in hexadecimal.
 
 =item B<#name>
 
@@ -1340,7 +1382,7 @@ The sequence number of the OP's next OP.
 
 =item B<#nextaddr>
 
-The address of the OP's next OP, in hexidecimal.
+The address of the OP's next OP, in hexadecimal.
 
 =item B<#noise>
 
@@ -1383,11 +1425,11 @@ Only available in 5.9 and later.
 
 =item B<#sibaddr>
 
-The address of the OP's next youngest sibling, in hexidecimal.
+The address of the OP's next youngest sibling, in hexadecimal.
 
 =item B<#svaddr>
 
-The address of the OP's SV, if it has an SV, in hexidecimal.
+The address of the OP's SV, if it has an SV, in hexadecimal.
 
 =item B<#svclass>
 
@@ -1468,9 +1510,10 @@ several styles.
 
 =head2 add_callback()
 
-If your newly minted styles refer to any #variables, you'll need to
-define a callback subroutine that will populate (or modify) those
-variables.  They are then available for use in the style you've chosen.
+If your newly minted styles refer to any new #variables, you'll need
+to define a callback subroutine that will populate (or modify) those
+variables.  They are then available for use in the style you've
+chosen.
 
 The callbacks are called for each opcode visited by Concise, in the
 same order as they are added.  Each subroutine is passed five
@@ -1499,8 +1542,8 @@ STDOUT.  You can reuse this, and can change the rendering style used
 each time; thereafter the coderef renders in the new style.
 
 B<walk_output> lets you change the print destination from STDOUT to
-another open filehandle, or (unless you've built with -Uuseperlio)
-into a string passed as a ref.
+another open filehandle, or into a string passed as a ref (unless
+you've built perl with -Uuseperlio).
 
     my $walker = B::Concise::compile('-terse','aFuncName', \&aSubRef);  # 1
     walk_output(\my $buf);
