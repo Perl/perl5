@@ -2985,7 +2985,7 @@ Perl_get_vtbl(pTHX_ int vtbl_id)
 I32
 Perl_my_fflush_all(pTHX)
 {
-#if defined(FFLUSH_NULL)
+#if defined(USE_PERLIO) || defined(FFLUSH_NULL) || defined(USE_SFIO)
     return PerlIO_flush(NULL);
 #else
 # if defined(HAS__FWALK)
