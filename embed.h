@@ -975,6 +975,7 @@
 #define save_lines		S_save_lines
 #define doeval			S_doeval
 #define doopen_pmc		S_doopen_pmc
+#define path_is_absolute	S_path_is_absolute
 #define qsortsv			S_qsortsv
 #endif
 #if defined(PERL_IN_PP_HOT_C) || defined(PERL_DECL_PROT)
@@ -2433,6 +2434,7 @@
 #define save_lines(a,b)		S_save_lines(aTHX_ a,b)
 #define doeval(a,b)		S_doeval(aTHX_ a,b)
 #define doopen_pmc(a,b)		S_doopen_pmc(aTHX_ a,b)
+#define path_is_absolute(a)	S_path_is_absolute(aTHX_ a)
 #define qsortsv(a,b,c)		S_qsortsv(aTHX_ a,b,c)
 #endif
 #if defined(PERL_IN_PP_HOT_C) || defined(PERL_DECL_PROT)

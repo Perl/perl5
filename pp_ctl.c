@@ -3028,30 +3028,11 @@ PP(pp_require)
 
     /* prepare to compile file */
 
-#ifdef MACOS_TRADITIONAL
-    if (PERL_FILE_IS_ABSOLUTE(name)
-	|| (*name == ':' && name[1] != ':' && strchr(name+2, ':')))
-    {
-	tryname = name;
-	tryrsfp = doopen_pmc(name,PERL_SCRIPT_MODE);
-	/* We consider paths of the form :a:b ambiguous and interpret them first
-	   as global then as local
-	*/
-    	if (!tryrsfp && *name == ':' && name[1] != ':' && strchr(name+2, ':'))
-	    goto trylocal;
-    }
-    else 
-trylocal: {
-#else
-    if (PERL_FILE_IS_ABSOLUTE(name)
-	|| (*name == '.' && (name[1] == '/' ||
-			     (name[1] == '.' && name[2] == '/'))))
-    {
+    if (path_is_absolute(name)) {
 	tryname = name;
 	tryrsfp = doopen_pmc(name,PERL_SCRIPT_MODE);
     }
-    else {
-#endif
+    if (!tryrsfp) {
 	AV *ar = GvAVn(PL_incgv);
 	I32 i;
 #ifdef VMS
@@ -3171,6 +3152,14 @@ trylocal: {
 		    }
 		}
 		else {
+		  if (!path_is_absolute(name)
+#ifdef MACOS_TRADITIONAL
+			/* We consider paths of the form :a:b ambiguous and interpret them first
+			   as global then as local
+			*/
+			|| (*name == ':' && name[1] != ':' && strchr(name+2, ':'))
+#endif
+		  ) {
 		    char *dir = SvPVx(dirsv, n_a);
 #ifdef MACOS_TRADITIONAL
 		    char buf[256];
@@ -3202,6 +3191,7 @@ trylocal: {
 			    tryname += 2;
 			break;
 		    }
+		  }
 		}
 	    }
 	}
@@ -4667,3 +4657,23 @@ sv_cmp_static(pTHXo_ register SV *str1, register SV *str2)
 }
 
 #endif /* PERL_OBJECT */
+
+/* perhaps someone can come up with a better name for
+   this?  it is not really "absolute", per se ... */
+static bool
+S_path_is_absolute(pTHX_ char *name)
+{
+    if (PERL_FILE_IS_ABSOLUTE(name)
+#ifdef MACOS_TRADITIONAL
+	|| (*name == ':' && name[1] != ':' && strchr(name+2, ':')))
+#else
+	|| (*name == '.' && (name[1] == '/' ||
+			     (name[1] == '.' && name[2] == '/'))))
+#endif
+    {
+	return TRUE;
+    }
+    else
+    	return FALSE;
+}
+
