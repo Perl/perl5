@@ -19,6 +19,7 @@ Porting/Glossary	Glossary of config.sh variables
 Porting/config.sh	Sample config.sh
 Porting/config_H	Sample config.h
 Porting/findvars	Find occurrences of words
+Porting/fixCORE		Find and fix modules that generate warnings
 Porting/fixvars		Find undeclared variables with C compiler and fix em
 Porting/genlog		Generate formatted changelogs by querying p4d
 Porting/makerel		Release making utility
