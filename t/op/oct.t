@@ -2,7 +2,7 @@
 
 # tests 51 onwards aren't all warnings clean. (intentionally)
 
-print "1..69\n";
+print "1..71\n";
 
 my $test = 1;
 
@@ -145,3 +145,8 @@ test ('hex', "x3A",	 0x3A);
 test ('hex', "0x4",	 4);
 test ('hex', "x4",	 4);
 
+eval '$a = oct "10\x{100}"';
+print $@ =~ /Wide character/ ? "ok $test\n" : "not ok $test\n"; $test++;
+
+eval '$a = hex "ab\x{100}"';
+print $@ =~ /Wide character/ ? "ok $test\n" : "not ok $test\n"; $test++;

@@ -2791,8 +2791,18 @@ PP(pp_hex)
     STRLEN len;
     NV result_nv;
     UV result_uv;
+    SV* sv = POPs;
 
-    tmps = (SvPVx(POPs, len));
+    tmps = (SvPVx(sv, len));
+    if (DO_UTF8(sv)) {
+	 /* If Unicode, try to downgrade
+	  * If not possible, croak. */
+         SV* tsv = sv_2mortal(newSVsv(sv));
+	 
+	 SvUTF8_on(tsv);
+	 sv_utf8_downgrade(tsv, FALSE);
+	 tmps = SvPVX(tsv);
+    }
     result_uv = grok_hex (tmps, &len, &flags, &result_nv);
     if (flags & PERL_SCAN_GREATER_THAN_UV_MAX) {
         XPUSHn(result_nv);
@@ -2811,8 +2821,18 @@ PP(pp_oct)
     STRLEN len;
     NV result_nv;
     UV result_uv;
+    SV* sv = POPs;
 
-    tmps = (SvPVx(POPs, len));
+    tmps = (SvPVx(sv, len));
+    if (DO_UTF8(sv)) {
+	 /* If Unicode, try to downgrade
+	  * If not possible, croak. */
+         SV* tsv = sv_2mortal(newSVsv(sv));
+	 
+	 SvUTF8_on(tsv);
+	 sv_utf8_downgrade(tsv, FALSE);
+	 tmps = SvPVX(tsv);
+    }
     while (*tmps && len && isSPACE(*tmps))
         tmps++, len--;
     if (*tmps == '0')
@@ -3178,15 +3198,15 @@ PP(pp_crypt)
     STRLEN n_a;
     STRLEN len;
     char *tmps = SvPV(left, len);
+
     if (DO_UTF8(left)) {
-         /* If Unicode, try to dowgrade.
+         /* If Unicode, try to downgrade.
 	  * If not possible, croak.
 	  * Yes, we made this up.  */
          SV* tsv = sv_2mortal(newSVsv(left));
-	 
+
 	 SvUTF8_on(tsv);
-	 if (!sv_utf8_downgrade(tsv, FALSE))
-	      Perl_croak(aTHX_ "Wide character in crypt");
+	 sv_utf8_downgrade(tsv, FALSE);
 	 tmps = SvPVX(tsv);
     }
 #   ifdef FCRYPT
