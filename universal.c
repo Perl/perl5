@@ -134,6 +134,7 @@ XS(XS_UNIVERSAL_can)
     SV   *rv;
     GV   *gv;
     CV   *cvp;
+    HV   *pkg = NULL;
 
     if (items != 2)
 	croak("Usage: UNIVERSAL::can(object-ref, method)");
@@ -142,8 +143,17 @@ XS(XS_UNIVERSAL_can)
     name = (char *)SvPV(ST(1),na);
     rv = &sv_undef;
 
-    if(SvROK(sv) && (sv = (SV*)SvRV(sv)) && SvOBJECT(sv)) {
-        gv = gv_fetchmethod(SvSTASH(sv), name);
+    if(SvROK(sv)) {
+        sv = (SV*)SvRV(sv);
+        if(SvOBJECT(sv))
+            pkg = SvSTASH(sv);
+    }
+    else {
+        pkg = gv_stashsv(sv, FALSE);
+    }
+
+    if (pkg) {
+        gv = gv_fetchmethod(pkg, name);
 
         if(gv && GvCV(gv)) {
             /* If the sub is only a stub then we may have a gv to AUTOLOAD */
