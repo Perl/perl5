@@ -4393,7 +4393,7 @@ Perl_cv_undef(pTHX_ CV *cv)
 	    AV *padlist = CvPADLIST(cv);
 	    I32 ix;
 	    /* pads may be cleared out already during global destruction */
-	    if (is_eval && !PL_dirty) {
+	    if ((is_eval && !PL_dirty) || CvSPECIAL(cv)) {
 		/* inner references to eval's cv must be fixed up */
 		AV *comppad_name = (AV*)AvARRAY(padlist)[0];
 		AV *comppad = (AV*)AvARRAY(padlist)[1];
