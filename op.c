@@ -3884,7 +3884,7 @@ S_new_logop(pTHX_ I32 type, I32 flags, OP** firstp, OP** otherp)
     }
     if (first->op_type == OP_CONST) {
 	if (ckWARN(WARN_BAREWORD) && (first->op_private & OPpCONST_BARE)) {
-	    if (first->op_private & OPpCONST_BARE)
+	    if (first->op_private & OPpCONST_STRICT)
 		no_bareword_allowed(first);
 	    else
 		Perl_warner(aTHX_ packWARN(WARN_BAREWORD), "Bareword found in conditional");
