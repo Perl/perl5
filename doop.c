@@ -77,7 +77,7 @@ S_do_trans_simple(pTHX_ SV *sv)
 
         ulen = 1;
         /* Need to check this, otherwise 128..255 won't match */
-	c = utf8_to_uv(s, &ulen);
+	c = utf8_to_uv(s, &ulen, 0);
         if (c < 0x100 && (ch = tbl[(short)c]) >= 0) {
             matches++;
             if (ch < 0x80) 
@@ -125,7 +125,7 @@ S_do_trans_count(pTHX_ SV *sv)/* SPC - OK */
             I32 ulen;
             ulen = 1;
             if (hasutf)
-                c = utf8_to_uv(s,&ulen);
+                c = utf8_to_uv(s,&ulen, 0);
             else
                 c = *s;
             if (c < 0x100 && tbl[c] >= 0)
@@ -364,7 +364,7 @@ S_do_trans_complex_utf8(pTHX_ SV *sv) /* SPC - NOT OK */
 	    }
 	    else if (uv == none) {	/* "none" is unmapped character */
 		I32 ulen;
-		*d++ = (U8)utf8_to_uv(s, &ulen);
+		*d++ = (U8)utf8_to_uv(s, &ulen, 0);
 		s += ulen;
 		puv = 0xfeedface;
 		continue;
@@ -405,7 +405,7 @@ S_do_trans_complex_utf8(pTHX_ SV *sv) /* SPC - NOT OK */
 	    }
 	    else if (uv == none) {	/* "none" is unmapped character */
 		I32 ulen;
-		*d++ = (U8)utf8_to_uv(s, &ulen);
+		*d++ = (U8)utf8_to_uv(s, &ulen, 0);
 		s += ulen;
 		continue;
 	    }
@@ -969,10 +969,10 @@ Perl_do_vop(pTHX_ I32 optype, SV *sv, SV *left, SV *right)
 	switch (optype) {
 	case OP_BIT_AND:
 	    while (lulen && rulen) {
-		luc = utf8_to_uv((U8*)lc, &ulen);
+		luc = utf8_to_uv((U8*)lc, &ulen, 0);
 		lc += ulen;
 		lulen -= ulen;
-		ruc = utf8_to_uv((U8*)rc, &ulen);
+		ruc = utf8_to_uv((U8*)rc, &ulen, 0);
 		rc += ulen;
 		rulen -= ulen;
 		duc = luc & ruc;
@@ -984,10 +984,10 @@ Perl_do_vop(pTHX_ I32 optype, SV *sv, SV *left, SV *right)
 	    break;
 	case OP_BIT_XOR:
 	    while (lulen && rulen) {
-		luc = utf8_to_uv((U8*)lc, &ulen);
+		luc = utf8_to_uv((U8*)lc, &ulen, 0);
 		lc += ulen;
 		lulen -= ulen;
-		ruc = utf8_to_uv((U8*)rc, &ulen);
+		ruc = utf8_to_uv((U8*)rc, &ulen, 0);
 		rc += ulen;
 		rulen -= ulen;
 		duc = luc ^ ruc;
@@ -996,10 +996,10 @@ Perl_do_vop(pTHX_ I32 optype, SV *sv, SV *left, SV *right)
 	    goto mop_up_utf;
 	case OP_BIT_OR:
 	    while (lulen && rulen) {
-		luc = utf8_to_uv((U8*)lc, &ulen);
+		luc = utf8_to_uv((U8*)lc, &ulen, 0);
 		lc += ulen;
 		lulen -= ulen;
-		ruc = utf8_to_uv((U8*)rc, &ulen);
+		ruc = utf8_to_uv((U8*)rc, &ulen, 0);
 		rc += ulen;
 		rulen -= ulen;
 		duc = luc | ruc;

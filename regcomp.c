@@ -2881,7 +2881,7 @@ tryagain:
 		default:
 		  normal_default:
 		    if ((*p & 0xc0) == 0xc0 && UTF) {
-			ender = utf8_to_uv((U8*)p, &numlen);
+			ender = utf8_to_uv((U8*)p, &numlen, 0);
 			p += numlen;
 		    }
 		    else
@@ -3635,12 +3635,12 @@ S_regclassutf8(pTHX)
 	namedclass = OOB_NAMEDCLASS;
 	if (!range)
 	    rangebegin = PL_regcomp_parse;
-	value = utf8_to_uv((U8*)PL_regcomp_parse, &numlen);
+	value = utf8_to_uv((U8*)PL_regcomp_parse, &numlen, 0);
 	PL_regcomp_parse += numlen;
 	if (value == '[')
 	    namedclass = regpposixcc(value);
 	else if (value == '\\') {
-	    value = (U32)utf8_to_uv((U8*)PL_regcomp_parse, &numlen);
+	    value = (U32)utf8_to_uv((U8*)PL_regcomp_parse, &numlen, 0);
 	    PL_regcomp_parse += numlen;
 	    /* Some compilers cannot handle switching on 64-bit integer
 	     * values, therefore value cannot be an UV.  Yes, this will

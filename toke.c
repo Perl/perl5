@@ -812,7 +812,7 @@ Perl_str_to_version(pTHX_ SV *sv)
 	I32 skip;
 	UV n;
 	if (utf)
-	    n = utf8_to_uv((U8*)start, &skip);
+	    n = utf8_to_uv((U8*)start, &skip, 0);
 	else {
 	    n = *(U8*)start;
 	    skip = 1;
@@ -1323,7 +1323,7 @@ S_scan_const(pTHX_ char *start)
 	/* (now in tr/// code again) */
 
 	if (*s & 0x80 && thisutf) {
-	   (void)utf8_to_uv((U8*)s, &len);
+	   (void)utf8_to_uv((U8*)s, &len, 0);
 	   if (len == 1) {
 	       /* illegal UTF8, make it valid */
 	       char *old_pvx = SvPVX(sv);

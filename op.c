@@ -2656,7 +2656,7 @@ Perl_pmtrans(pTHX_ OP *o, OP *expr, OP *repl)
 	    qsort(cp, i, sizeof(U8*), utf8compare);
 	    for (j = 0; j < i; j++) {
 		U8 *s = cp[j];
-		UV val = utf8_to_uv(s, &ulen);
+		UV val = utf8_to_uv(s, &ulen, 0);
 		s += ulen;
 		diff = val - nextmin;
 		if (diff > 0) {
@@ -2669,7 +2669,7 @@ Perl_pmtrans(pTHX_ OP *o, OP *expr, OP *repl)
 		    }
 	        }
 		if (*s == 0xff)
-		    val = utf8_to_uv(s+1, &ulen);
+		    val = utf8_to_uv(s+1, &ulen, 0);
 		if (val >= nextmin)
 		    nextmin = val + 1;
 	    }
@@ -2696,10 +2696,10 @@ Perl_pmtrans(pTHX_ OP *o, OP *expr, OP *repl)
 	while (t < tend || tfirst <= tlast) {
 	    /* see if we need more "t" chars */
 	    if (tfirst > tlast) {
-		tfirst = (I32)utf8_to_uv(t, &ulen);
+		tfirst = (I32)utf8_to_uv(t, &ulen, 0);
 		t += ulen;
 		if (t < tend && *t == 0xff) {	/* illegal utf8 val indicates range */
-		    tlast = (I32)utf8_to_uv(++t, &ulen);
+		    tlast = (I32)utf8_to_uv(++t, &ulen, 0);
 		    t += ulen;
 		}
 		else
@@ -2709,10 +2709,10 @@ Perl_pmtrans(pTHX_ OP *o, OP *expr, OP *repl)
 	    /* now see if we need more "r" chars */
 	    if (rfirst > rlast) {
 		if (r < rend) {
-		    rfirst = (I32)utf8_to_uv(r, &ulen);
+		    rfirst = (I32)utf8_to_uv(r, &ulen, 0);
 		    r += ulen;
 		    if (r < rend && *r == 0xff) {	/* illegal utf8 val indicates range */
-			rlast = (I32)utf8_to_uv(++r, &ulen);
+			rlast = (I32)utf8_to_uv(++r, &ulen, 0);
 			r += ulen;
 		    }
 		    else

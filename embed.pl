@@ -2074,7 +2074,7 @@ Ap	|I32	|utf8_distance	|U8 *a|U8 *b
 Ap	|U8*	|utf8_hop	|U8 *s|I32 off
 ApM	|U8*	|utf8_to_bytes	|U8 *s|STRLEN *len
 ApM	|U8*	|bytes_to_utf8	|U8 *s|STRLEN *len
-Ap	|UV	|utf8_to_uv	|U8 *s|I32* retlen
+Ap	|UV	|utf8_to_uv	|U8 *s|I32* retlen|bool checking
 Ap	|U8*	|uv_to_utf8	|U8 *d|UV uv
 p	|void	|vivify_defelem	|SV* sv
 p	|void	|vivify_ref	|SV* sv|U32 to_what

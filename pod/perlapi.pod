@@ -3182,10 +3182,18 @@ Found in file handy.h
 
 =item U8 *s
 
-Returns true if first C<len> bytes of the given string form valid a UTF8
-string, false otherwise.
+Returns the character value of the first character in the string C<s>
+which is assumed to be in UTF8 encoding; C<retlen> will be set to the
+length, in bytes, of that character, and the pointer C<s> will be
+advanced to the end of the character.
 
-	is_utf8_string	U8 *s(STRLEN len)
+If C<s> does not point to a well-formed UTF8 character, the behaviour
+is dependent on the value of C<checking>: if this is true, it is
+assumed that the caller will raise a warning, and this function will
+set C<retlen> to C<-1> and return. If C<checking> is not true, an optional UTF8
+warning is produced.
+
+	utf8_to_uv	U8 *s(I32 *retlen, I32 checking)
 
 =for hackers
 Found in file utf8.c
@@ -3195,7 +3203,7 @@ Found in file utf8.c
 Converts a string C<s> of length C<len> from UTF8 into byte encoding.
 Unlike C<bytes_to_utf8>, this over-writes the original string, and
 updates len to contain the new length.
-Returns zero on failure leaving the string and len unchanged
+Returns zero on failure, setting C<len> to -1.
 
 	U8 *	utf8_to_bytes(U8 *s, STRLEN *len)
 
