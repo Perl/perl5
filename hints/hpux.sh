@@ -197,6 +197,36 @@ case "$cc" in
 *gcc*) ccflags="$ccflags -DUINT32_MAX_BROKEN" ;;
 esac
 
+cat > UU/cc.cbu <<'EOSH'
+# XXX This script UU/cc.cbu will get 'called-back' by Configure after it
+# XXX has prompted the user for the C compiler to use.
+# Get gcc to share its secrets.
+echo 'main() { return 0; }' > try.c
+	# Indent to avoid propagation to config.sh
+	verbose=`${cc:-cc} -v -o try try.c 2>&1`
+if echo "$verbose" | grep '^Reading specs from' >/dev/null 2>&1; then
+	# Using gcc.
+	: nothing to see here, move on.
+else
+	# Using cc.
+        ar=${ar:-ar}
+	case "`$ar -V 2>&1`" in
+	*GNU*)
+	    if test -x /usr/bin/ar; then
+	    	cat <<END >&2
+
+NOTE: You are using HP cc(1) but GNU ar(1).  This might lead into trouble
+later on, I'm switching to HP ar to play safe.
+
+END
+		ar=/usr/bin/ar
+	    fi
+	;;
+    esac
+fi
+
+EOSH
+
 # Date: Fri, 6 Sep 96 23:15:31 CDT
 # From: "Daniel S. Lewart" <d-lewart@uiuc.edu>
 # I looked through the gcc.info and found this:
