@@ -269,7 +269,7 @@ sub fast_abs_path {
 # --- PORTING SECTION ---
 
 # VMS: $ENV{'DEFAULT'} points to default directory at all times
-# 06-Mar-1996  Charles Bailey  bailey@genetics.upenn.edu
+# 06-Mar-1996  Charles Bailey  bailey@newman.upenn.edu
 # Note: Use of Cwd::chdir() causes the logical name PWD to be defined
 #   in the process logical name table as the default device and directory
 #   seen by Perl. This may not be the same as the default device

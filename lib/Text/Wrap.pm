@@ -1,13 +1,13 @@
 package Text::Wrap;
 
-use vars qw(@ISA @EXPORT @EXPORT_OK $VERSION $columns $debug);
+use vars qw(@ISA @EXPORT @EXPORT_OK $VERSION $columns $debug $min_wrap_width);
 use strict;
 use Exporter;
 
-$VERSION = "97.02";
+$VERSION = "97.03";
 @ISA = qw(Exporter);
 @EXPORT = qw(wrap);
-@EXPORT_OK = qw($columns $tabstop fill);
+@EXPORT_OK = qw($columns $tabstop $min_wrap_width fill);
 
 use Text::Tabs qw(expand unexpand $tabstop);
 
@@ -15,6 +15,8 @@ use Text::Tabs qw(expand unexpand $tabstop);
 BEGIN	{
     $columns = 76;  # <= screen width
     $debug = 0;
+    # minimum wrap width (leaders will be shortened to accomodate this)
+    $min_wrap_width = int($columns/5);
 }
 
 sub wrap
@@ -24,8 +26,18 @@ sub wrap
     my @rv;
     my $t = expand(join(" ",@t));
 
+    my $xll = $columns - length(expand($xp)) - 1;
+    while ($xll < $min_wrap_width) {
+	chop $xp;
+	$xll = $columns - length(expand($xp)) - 1;
+    }
+
+    my $ll = $columns - length(expand($ip)) - 1;
+    while ($ll < $min_wrap_width) {
+	chop $ip;
+	$ll = $columns - length(expand($ip)) - 1;
+    }
     my $lead = $ip;
-    my $ll = $columns - length(expand($lead)) - 1;
     my $nl = "";
 
     $t =~ s/^\s+//;
@@ -42,9 +54,9 @@ sub wrap
 	    print "SPLIT $lead$1..\n" if $debug;
 	    push @rv, unexpand($lead . $1),"\n";
 	}
-	# recompute the leader
+	# reset the leader
 	$lead = $xp;
-	$ll = $columns - length(expand($lead)) - 1;
+	$ll = $xll;
 	$t =~ s/^\s+//;
     } 
     print "TAIL  $lead$t\n" if $debug;
@@ -98,7 +110,10 @@ Text::Wrap::wrap() is a very simple paragraph formatter.  It formats a
 single paragraph at a time by breaking lines at word boundries.
 Indentation is controlled for the first line ($initial_tab) and
 all subsquent lines ($subsequent_tab) independently.  $Text::Wrap::columns
-should be set to the full width of your output device.
+should be set to the full width of your output device (default is 76).
+$Text::Wrap::min_wrap_width controls the minimum number of columns that
+are reserved for the wrapped text (default is 15).  Indentation will
+be reduced to accomodate this value.
 
 Text::Wrap::fill() is a simple multi-paragraph formatter.  It formats
 each paragraph separately and then joins them together when it's done.  It
