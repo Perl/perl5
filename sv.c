@@ -3134,12 +3134,16 @@ sv_pos_u2b(register SV *sv, I32* offsetp, I32* lenp)
     send = s + len;
     while (s < send && uoffset--)
 	s += UTF8SKIP(s);
+    if (s >= send)
+	s = send;
     *offsetp = s - start;
     if (lenp) {
 	I32 ulen = *lenp;
 	start = s;
 	while (s < send && ulen--)
 	    s += UTF8SKIP(s);
+	if (s >= send)
+	    s = send;
 	*lenp = s - start;
     }
     return;
@@ -3957,12 +3961,18 @@ sv_reset(register char *s, HV *stash)
 	}
 	for (i = 0; i <= (I32) HvMAX(stash); i++) {
 	    for (entry = HvARRAY(stash)[i];
-	      entry;
-	      entry = HeNEXT(entry)) {
+		 entry;
+		 entry = HeNEXT(entry))
+	    {
 		if (!todo[(U8)*HeKEY(entry)])
 		    continue;
 		gv = (GV*)HeVAL(entry);
 		sv = GvSV(gv);
+		if (SvTHINKFIRST(sv)) {
+		    if (!SvREADONLY(sv) && SvROK(sv))
+			sv_unref(sv);
+		    continue;
+		}
 		(void)SvOK_off(sv);
 		if (SvTYPE(sv) >= SVt_PV) {
 		    SvCUR_set(sv, 0);

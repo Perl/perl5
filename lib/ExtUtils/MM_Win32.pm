@@ -473,7 +473,7 @@ sub perl_archive
 {
     my ($self) = @_;
     if($OBJ) {
-        if ($self->{CAPI} eq 'TRUE') {
+        if ($self->{CAPI}) {
             return '$(PERL_INC)\perlCAPI$(LIB_EXT)';
         }
     }

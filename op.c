@@ -219,6 +219,12 @@ pad_findlex(char *name, PADOFFSET newoff, U32 seq, CV* startcv, I32 cx_ix, I32 s
 		    SvNVX(namesv) = (double)PL_curcop->cop_seq;
 		    SvIVX(namesv) = PAD_MAX;	/* A ref, intro immediately */
 		    SvFAKE_on(namesv);		/* A ref, not a real var */
+		    if (SvOBJECT(sv)) {		/* A typed var */
+			SvOBJECT_on(namesv);
+			(void)SvUPGRADE(namesv, SVt_PVMG);
+			SvSTASH(namesv) = (HV*)SvREFCNT_inc((SV*)SvSTASH(sv));
+			PL_sv_objcount++;
+		    }
 		    if (CvANON(PL_compcv) || SvTYPE(PL_compcv) == SVt_PVFM) {
 			/* "It's closures all the way down." */
 			CvCLONE_on(PL_compcv);
@@ -1917,7 +1923,7 @@ append_list(I32 type, LISTOP *first, LISTOP *last)
     first->op_last = last->op_last;
     first->op_children += last->op_children;
     if (first->op_children)
-	last->op_flags |= OPf_KIDS;
+	first->op_flags |= OPf_KIDS;
 
     Safefree(last);
     return (OP*)first;
@@ -2071,7 +2077,7 @@ newBINOP(I32 type, I32 flags, OP *first, OP *last)
     if (binop->op_next)
 	return (OP*)binop;
 
-    binop->op_last = last = binop->op_first->op_sibling;
+    binop->op_last = binop->op_first->op_sibling;
 
     return fold_constants((OP *)binop);
 }

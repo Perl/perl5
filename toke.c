@@ -1076,8 +1076,10 @@ scan_const(char *start)
 		if (*s == '{') {
 		    char* e = strchr(s, '}');
 
-		    if (!e)
+		    if (!e) {
 			yyerror("Missing right brace on \\x{}");
+			e = s;
+		    }
 		    if (!utf) {
 			dTHR;
 			if (ckWARN(WARN_UTF8))

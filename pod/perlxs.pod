@@ -1212,13 +1212,15 @@ getnetconfigent() XSUB and an object created by a normal Perl subroutine.
 The typemap is a collection of code fragments which are used by the B<xsubpp>
 compiler to map C function parameters and values to Perl values.  The
 typemap file may consist of three sections labeled C<TYPEMAP>, C<INPUT>, and
-C<OUTPUT>.  The INPUT section tells the compiler how to translate Perl values
+C<OUTPUT>.  Any unlabelled initial section is assumed to be a C<TYPEMAP>
+section if a name is not explicitly specified.  The INPUT section tells
+the compiler how to translate Perl values
 into variables of certain C types.  The OUTPUT section tells the compiler
 how to translate the values from certain C types into values Perl can
 understand.  The TYPEMAP section tells the compiler which of the INPUT and
 OUTPUT code fragments should be used to map a given C type to a Perl value.
-Each of the sections of the typemap must be preceded by one of the TYPEMAP,
-INPUT, or OUTPUT keywords.
+The section labels C<TYPEMAP>, C<INPUT>, or C<OUTPUT> must begin
+in the first column on a line by themselves, and must be in uppercase.
 
 The default typemap in the C<ext> directory of the Perl source contains many
 useful types which can be used by Perl extensions.  Some extensions define

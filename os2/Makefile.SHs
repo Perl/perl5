@@ -18,7 +18,7 @@ $spitshell >>Makefile <<!GROK!THIS!
 
 PERL_VERSION = $perl_version
 
-AOUT_OPTIMIZE = $optimize
+AOUT_OPTIMIZE	= \$(OPTIMIZE)
 AOUT_CCCMD	= \$(CC) $aout_ccflags \$(AOUT_OPTIMIZE)
 AOUT_AR		= $aout_ar
 AOUT_OBJ_EXT	= $aout_obj_ext

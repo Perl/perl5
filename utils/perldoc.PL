@@ -91,7 +91,7 @@ Options:
     -F   Arguments are file names, not modules
     -v	 Verbosely describe what's going on
     -X	 use index if present (looks for pod.idx at $Config{archlib})
-
+    -q   Search the text of questions (not answers) in perlfaq[1-9]
 
 PageName|ModuleName...
          is the name of a piece of documentation that you want to look at. You 
@@ -459,7 +459,7 @@ if ($opt_q) {
    my @pod;
 
    while (<>) {
-      if (/^=head2\s+.*$opt_q/oi) {
+      if (/^=head2\s+.*(?:$opt_q)/oi) {
 	 $found = 1;
 	 push @pod, "=head1 Found in $ARGV\n\n" unless $found_in{$ARGV}++;
       } elsif (/^=head2/) {

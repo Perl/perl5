@@ -57,6 +57,18 @@ CCTYPE		*= BORLAND
 #CFG		*= Debug
 
 #
+# uncomment next option if you want to use the VC++ compiler optimization.
+# This option is only relevant for the Microsoft compiler; we automatically
+# use maximum optimization with the other compilers (unless you specify a
+# DEBUGGING build).
+# Warning: This is known to produce incorrect code for compiler versions
+# earlier than VC++ 98 (Visual Studio 6.0). VC++ 98 generates code that
+# successfully passes the Perl regression test suite. It hasn't yet been
+# widely tested with real applications though.
+#
+#CFG		*= Optimize
+
+#
 # uncomment to enable use of PerlCRT.DLL when using the Visual C compiler.
 # Highly recommended.  It has patches that fix known bugs in MSVCRT.DLL.
 # This currently requires VC 5.0 with Service Pack 3.
@@ -293,8 +305,8 @@ OPTIMIZE	= -Od $(RUNTIME)d -Zi -D_DEBUG -DDEBUGGING
 .ENDIF
 LINK_DBG	= -debug -pdb:none
 .ELSE
-.IF "$(CCTYPE)" == "MSVC20"
-OPTIMIZE	= -Od $(RUNTIME) -DNDEBUG
+.IF "$(CFG)" == "Optimize"
+OPTIMIZE	= -O2 $(RUNTIME) -DNDEBUG
 .ELSE
 OPTIMIZE	= -Od $(RUNTIME) -DNDEBUG
 .ENDIF

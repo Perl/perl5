@@ -13,8 +13,8 @@ Term::Complete - Perl word completion module
 
 =head1 SYNOPSIS
 
-    $input = complete('prompt_string', \@completion_list);
-    $input = complete('prompt_string', @completion_list);
+    $input = Complete('prompt_string', \@completion_list);
+    $input = Complete('prompt_string', @completion_list);
 
 =head1 DESCRIPTION
 
@@ -74,6 +74,9 @@ CONFIG: {
 sub Complete {
     my($prompt, @cmp_list, $return, @match, $l, $test, $cmp, $r);
 
+    $return = "";
+    $r      = 0;
+
     $prompt = shift;
     if (ref $_[0] || $_[0] =~ /^\*/) {
 	@cmp_lst = sort @{$_[0]};
@@ -113,8 +116,8 @@ sub Complete {
                 # (^U) kill
                 $_ eq $kill && do {
                     if ($r) {
-                        undef $r;
-			undef $return;
+                        $r	= 0;
+			$return	= "";
                         print("\r\n");
                         redo LOOP;
                     }
