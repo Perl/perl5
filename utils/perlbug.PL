@@ -91,7 +91,7 @@ BEGIN {
     $::HaveUtil = ($@ eq "");
 };
 
-my $Version = "1.28";
+my $Version = "1.29";
 
 # Changed in 1.06 to skip Mail::Send and Mail::Util if not available.
 # Changed in 1.07 to see more sendmail execs, and added pipe output.
@@ -124,6 +124,7 @@ my $Version = "1.28";
 # Changed in 1.26 Don't require -t STDIN for -ok. HVDS 98-07-15
 # Changed in 1.27 Added Mac OS and File::Spec support CNANDOR 99-07-27
 # Changed in 1.28 Additional questions for Perlbugtron RFOLEY 20.03.2000
+# Changed in 1.29 Perlbug(tron): auto(-ok), short prompts RFOLEY 05-05-2000
 
 # TODO: - Allow the user to re-name the file on mail failure, and
 #       make sure failure (transmission-wise) of Mail::Send is
@@ -158,30 +159,45 @@ Send();
 
 exit;
 
-sub ask_for_alternatives {
+sub ask_for_alternatives { # (category|severity)
     my $name = shift;
-    my $default = shift;
-    my @alts = @_;
+    my %alts = (
+	'category' => {
+	    'default' => 'core',
+	    'ok'      => 'install',
+	    'opts'    => [qw(core docs install library utilities)], # patch, notabug
+	},
+	'severity' => {
+	    'default' => 'low',
+	    'ok'      => 'none',
+	    'opts'    => [qw(critical high medium low wishlist none)], # zero
+	}, 	
+    );
+    die "Invalid alternative($name) requested\n" unless grep(/^$name$/, keys %alts); 
     my $alt = "";
-    paraprint <<EOF;
+    if ($ok) {
+	$alt = $alts{$name}{'ok'};
+    } else {
+ 	my @alts = @{$alts{$name}{'opts'}};
+	paraprint <<EOF;
 Please pick a \u$name from the following:
 
     @alts
 
 EOF
-    my $err = 0;
-    my $joined_alts = join('|', @alts);
-    do {
-	if ($err++ > 5) {
-	    die "Invalid $name: aborting.\n";
-	}
-	print "Please enter a \u$name [$default]: ";
-	$alt = <>;
-	chomp $alt;
-	if ($alt =~ /^\s*$/) {
-	    $alt = $default;
-	}
-    } while ($alt !~ /^($joined_alts)$/i);
+	my $err = 0;
+	do {
+	    if ($err++ > 5) {
+		die "Invalid $name: aborting.\n";
+	    }
+	    print "Please enter a \u$name [$alts{$name}{'default'}]: ";
+	    $alt = <>;
+	    chomp $alt;
+	    if ($alt =~ /^\s*$/) {
+		$alt = $alts{$name}{'default'};
+	    }
+	} while !((($alt) = grep(/^$alt/i, @alts)));
+    }
     lc $alt;
 }
 
@@ -276,8 +292,6 @@ EOF
 	    $subject = ($::opt_n ? 'Not ' : '')
 		    . "OK: perl $perl_version ${patch_tags}on"
 		    ." $::Config{'archname'} $::Config{'osvers'} $subject";
-	    $category = "install";
-	    $severity = "none";
 	    $ok = 1;
 	} else {
 	    Help();
@@ -468,14 +482,10 @@ EOF
     }
 
     # Prompt for category of bug
-    $category ||= ask_for_alternatives("category", "core",
-				     qw(core docs install
-					library utilities));
+    $category ||= ask_for_alternatives('category');
 
     # Prompt for severity of bug
-    $severity ||= ask_for_alternatives("severity", "low",
-				       qw(critical high medium
-					  low wishlist none));
+    $severity ||= ask_for_alternatives('severity');
 
     # Generate scratch file to edit report in
     $filename = filename();

@@ -862,13 +862,10 @@ called:
 =head1 SEE ALSO
 
 See L<DB_File> or L<Config> for some interesting tie() implementations.
+A good starting point for many tie() implementations is with one of the
+modules L<Tie::Scalar>, L<Tie::Array>, L<Tie::Hash>, or L<Tie::Handle>.
 
 =head1 BUGS
-
-Tied arrays are I<incomplete>.  They are also distinctly lacking something
-for the C<$#ARRAY> access (which is hard, as it's an lvalue), as well as
-the other obvious array functions, like push(), pop(), shift(), unshift(),
-and splice().
 
 You cannot easily tie a multilevel data structure (such as a hash of
 hashes) to a dbm file.  The first problem is that all but GDBM and
