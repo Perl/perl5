@@ -1,5 +1,14 @@
 2002-05-01   Gisle Aas <gisle@ActiveState.com>
 
+   Release 2.19
+
+   One more test suite update from Jarkko to sync it
+   even better with bleadperl.
+
+
+
+2002-05-01   Gisle Aas <gisle@ActiveState.com>
+
    Release 2.18
 
    Changes #12954 and #16173 from bleadperl.  Documentation typo fix

@@ -25,9 +25,9 @@ if (ord "A" == 193) { # EBCDIC
 EOT
 } else {
     $EXPECT = <<EOT;
-23cafa2de11474f0df8f808cc588bcc9  Changes
+3866f3543ef41421c6aed3f198e2e9f5  Changes
 3519f3d02c7c91158f732f0f00064657  README
-0268931475ae2a2e843ff58504cfa3f0  MD5.pm
+01cd8fd24bd46ce1db53074d2af6001a  MD5.pm
 1be293491bba726810f8e87671ee0328  MD5.xs
 754b9db19f79dbc4992f7166eb0f37ce  rfc1321.txt
 EOT
@@ -143,7 +143,6 @@ sub digest_file
     #print "$file $method\n";
 
     open(FILE, $file) or die "Can't open $file: $!";
-    binmode(FILE);
     my $digest = Digest::MD5->new->addfile(*FILE)->$method();
     close(FILE);
 
@@ -155,7 +154,6 @@ sub cat_file
     my($file) = @_;
     local $/;  # slurp
     open(FILE, $file) or die "Can't open $file: $!";
-    binmode(FILE);
     my $tmp = <FILE>;
     close(FILE);
     $tmp;
