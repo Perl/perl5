@@ -93,17 +93,19 @@ ok(1,"");
 
 if ($^O eq 'linux') { # We parse ps output so this is OS-dependent.
   # First modify $0 in a subthread.
-  print "# 1a: \$0 = $0\n";
-  join( threads->new( sub {
-	print "# 2a: \$0 = $0\n";
-	$0 = "foobar";
-	print "# 2b: \$0 = $0\n" } ) );
-  print "# 1b: \$0 = $0\n";
-  if (open PS, "ps -f |") {
+  print "# mainthread: \$0 = $0\n";
+  threads->new( sub {
+		  print "# subthread: \$0 = $0\n";
+		  $0 = "foobar";
+		  print "# subthread: \$0 = $0\n" } )->join;
+  print "# mainthread: \$0 = $0\n";
+  print "# pid = $$\n";
+  if (open PS, "ps -f |") { # Note: must work in (all) Linux(es).
     my $ok;
     while (<PS>) {
-      print "# $_";
-      if (/^\S+\s+$$\s.+\sfoobar\s*$/) {
+      s/\s+$//; # there seems to be extra whitespace at the end by ps(1)?
+      print "# $_\n";
+      if (/^\S+\s+$$\s.+\sfoobar$/) {
 	$ok++;
 	last;
       }
