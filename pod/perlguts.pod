@@ -1483,7 +1483,7 @@ information on how to use this function on tied arrays.
 
 =item AvFILL
 
-Same as C<av_len>.
+Same as C<av_len()>.  Deprecated, use C<av_len()> instead.
 
 =item av_len
 

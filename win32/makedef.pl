@@ -244,7 +244,7 @@ Perl_sv_nv
 Perl_sv_true
 Perl_sv_uv
 Perl_sv_pvn
-Perl_newRV_noinc)];
+)];
  }
 
 unless ($define{'FAKE_THREADS'})
