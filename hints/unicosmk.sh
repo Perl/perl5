@@ -29,6 +29,4 @@ if test "$d_shm" = ""; then
     esac
 fi
 # Otherwise the unpack %65c checksums will fail.
-pp_pack_cflags='ccflags="$ccflags -h ieeeconform"'
-
-
+pp_pack_cflags='ccflags="$ccflags -h scalar0 -h vector0"'
