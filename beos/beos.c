@@ -1,4 +1,4 @@
-#include "beosish.h"
+#include "beos/beosish.h"
 
 #undef waitpid
 
