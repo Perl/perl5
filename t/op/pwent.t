@@ -79,7 +79,11 @@ while (<PW>) {
 	warn "# Your $where line $. is empty.\n";
 	next;
     }
-    last if $n == $max;
+    if ($n == $max) {
+	local $/;
+	my $junk = <PW>;
+	last;
+    }
     # In principle we could whine if @s != 7 but do we know enough
     # of passwd file formats everywhere?
     if (@s == 7) {

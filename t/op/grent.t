@@ -77,7 +77,11 @@ while (<GR>) {
 	warn "# Your $where line $. is empty.\n";
 	next;
     }
-    last if $n == $max;
+    if ($n == $max) {
+	local $/;
+	my $junk = <GR>;
+	last;
+    }
     # In principle we could whine if @s != 4 but do we know enough
     # of group file formats everywhere?
     if (@s == 4) {
