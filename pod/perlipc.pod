@@ -660,14 +660,14 @@ instead.
     BEGIN { $ENV{PATH} = '/usr/ucb:/bin' }
     use Socket;
     use Carp;
-    $EOL = "\015\012";
+    my $EOL = "\015\012";
 
     sub logmsg { print "$0 $$: @_ at ", scalar localtime, "\n" }
 
     my $port = shift || 2345;
     my $proto = getprotobyname('tcp');
 
-    ($port) = $port =~ /^(\d+)$/                        || die "invalid port";
+    ($port) = $port =~ /^(\d+)$/                        or die "invalid port";
 
     socket(Server, PF_INET, SOCK_STREAM, $proto)	|| die "socket: $!";
     setsockopt(Server, SOL_SOCKET, SO_REUSEADDR,
@@ -703,7 +703,7 @@ go back to service a new client.
     BEGIN { $ENV{PATH} = '/usr/ucb:/bin' }
     use Socket;
     use Carp;
-    $EOL = "\015\012";
+    my $EOL = "\015\012";
 
     sub spawn;  # forward declaration
     sub logmsg { print "$0 $$: @_ at ", scalar localtime, "\n" }
@@ -711,7 +711,7 @@ go back to service a new client.
     my $port = shift || 2345;
     my $proto = getprotobyname('tcp');
 
-    ($port) = $port =~ /^(\d+)$/                        || die "invalid port";
+    ($port) = $port =~ /^(\d+)$/                        or die "invalid port";
 
     socket(Server, PF_INET, SOCK_STREAM, $proto)	|| die "socket: $!";
     setsockopt(Server, SOL_SOCKET, SO_REUSEADDR,
@@ -865,6 +865,7 @@ to be on the localhost, and thus everything works right.
     use Carp;
 
     BEGIN { $ENV{PATH} = '/usr/ucb:/bin' }
+    sub spawn;  # forward declaration
     sub logmsg { print "$0 $$: @_ at ", scalar localtime, "\n" }
 
     my $NAME = '/tmp/catsock';
@@ -899,6 +900,29 @@ to be on the localhost, and thus everything works right.
 	    print "Hello there, it's now ", scalar localtime, "\n";
 	    exec '/usr/games/fortune' or die "can't exec fortune: $!";
 	};
+    }
+
+    sub spawn {
+	my $coderef = shift;
+
+	unless (@_ == 0 && $coderef && ref($coderef) eq 'CODE') {
+	    confess "usage: spawn CODEREF";
+	}
+
+	my $pid;
+	if (!defined($pid = fork)) {
+	    logmsg "cannot fork: $!";
+	    return;
+	} elsif ($pid) {
+	    logmsg "begat $pid";
+	    return; # I'm the parent
+	}
+	# else I'm the child -- go spawn
+
+	open(STDIN,  "<&Client")   || die "can't dup client to stdin";
+	open(STDOUT, ">&Client")   || die "can't dup client to stdout";
+	## open(STDERR, ">&STDOUT") || die "can't dup stdout to stderr";
+	exit &$coderef();
     }
 
 As you see, it's remarkably similar to the Internet domain TCP server, so

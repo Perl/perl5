@@ -274,8 +274,8 @@ sub connect {
 	($host) = $host_uniq =~ /([A-Za-z0-9_.-]+)/; # allow FQDN (inc _)
     }
     unless ( $sock_type ) {
-        my $udp = getprotobyname('udp');
-        my $syslog = getservbyname('syslog','udp');
+        my $udp = getprotobyname('udp')                 || croak "getprotobyname failed for udp";
+        my $syslog = getservbyname('syslog','udp')      || croak "getservbyname failed";
         my $this = sockaddr_in($syslog, INADDR_ANY);
         my $that = sockaddr_in($syslog, inet_aton($host) || croak "Can't lookup $host");
         socket(SYSLOG,AF_INET,SOCK_DGRAM,$udp)           || croak "socket: $!";
