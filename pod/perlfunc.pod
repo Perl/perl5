@@ -3003,9 +3003,10 @@ Attempts to read LENGTH bytes of data into variable SCALAR from the
 specified FILEHANDLE, using the system call read(2).  It bypasses
 stdio, so mixing this with other kinds of reads may cause confusion.
 Returns the number of bytes actually read, or undef if there was an
-error.  SCALAR will be grown or shrunk to the length actually read.  An
-OFFSET may be specified to place the read data at some other place than
-the beginning of the string.
+error.  SCALAR will be grown or shrunk to the length actually read.
+An OFFSET may be specified to place the read data at some other
+place than the beginning of the string. A negative OFFSET counts
+backwards from the end of the string.
 
 =item system LIST
 
@@ -3025,9 +3026,10 @@ described in L<perlop/"`STRING`">.
 Attempts to write LENGTH bytes of data from variable SCALAR to the
 specified FILEHANDLE, using the system call write(2).  It bypasses
 stdio, so mixing this with prints may cause confusion.  Returns the
-number of bytes actually written, or undef if there was an error.  An
-OFFSET may be specified to get the write data from some other place than
-the beginning of the string.
+number of bytes actually written, or undef if there was an error.
+An OFFSET may be specified to get the write data from some other place
+than the beginning of the string. A negative OFFSET counts backwards
+from the end of the string.
 
 =item tell FILEHANDLE
 

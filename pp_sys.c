@@ -1087,6 +1087,7 @@ PP(pp_sysread)
     if (op->op_type == OP_RECV) {
 	bufsize = sizeof buf;
 	buffer = SvGROW(bufsv, length+1);
+	/* 'offset' means 'flags' here */
 	length = recvfrom(PerlIO_fileno(IoIFP(io)), buffer, length, offset,
 	    (struct sockaddr *)buf, &bufsize);
 	if (length < 0)
@@ -1107,6 +1108,11 @@ PP(pp_sysread)
     if (op->op_type == OP_RECV)
 	DIE(no_sock_func, "recv");
 #endif
+    if (offset < 0) {
+        if (-offset > blen)
+	   DIE("Too negative offset");
+	offset += blen;
+    }
     bufsize = SvCUR(bufsv);
     buffer = SvGROW(bufsv, length+offset+1);
     if (offset > bufsize) { /* Zero any newly allocated space */
@@ -1179,9 +1185,14 @@ PP(pp_send)
 	}
     }
     else if (op->op_type == OP_SYSWRITE) {
-	if (MARK < SP)
+        if (MARK < SP) {
 	    offset = SvIVx(*++MARK);
-	else
+	    if (offset < 0) {
+	        if (-offset > blen)
+		    DIE("Too negative offset");
+		offset += blen;
+	    }
+	} else
 	    offset = 0;
 	if (length > blen - offset)
 	    length = blen - offset;
