@@ -18,6 +18,7 @@ package Pod::Text::Termcap;
 
 require 5.004;
 
+use Config;
 use Pod::Text ();
 use POSIX ();
 use Term::Cap;
@@ -46,9 +47,12 @@ sub initialize {
     $ENV{TERMPATH} = "$ENV{HOME}/.termcap:/etc/termcap"
         . ":/usr/share/misc/termcap:/usr/share/lib/termcap";
 
-    my $termios = POSIX::Termios->new;
-    $termios->getattr;
-    my $ospeed = $termios->getospeed;
+    my $ospeed = '9600';
+    if (defined $Config{'i_termios'}) {
+      my $termios = POSIX::Termios->new;
+      $termios->getattr;
+      $ospeed = $termios->getospeed;
+    }
     my $term;
     eval { $term = Tgetent Term::Cap { TERM => undef, OSPEED => $ospeed } };
     $$self{BOLD} = $$term{_md} || "\e[1m";
