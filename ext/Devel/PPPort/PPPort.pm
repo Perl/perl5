@@ -199,7 +199,7 @@ __DATA__;
  * version of Perl.
  * 
  * This version of ppport.h is designed to support operation with Perl
- * installations back to 5.004, and has been tested up to 5.8.0.
+ * installations back to 5.004, and has been tested up to 5.8.1.
  *
  * If this version of ppport.h is failing during the compilation of this
  * module, please check if a newer version of Devel::PPPort is available
