@@ -17,6 +17,18 @@ This document describes differences between the 5.005 release and this one.
 
 TODO
 
+=over 4
+
+=item Possibly changed pseudo-random number generator
+
+In 5.005_0x and earlier, perl's rand() function used the C library
+rand(3) function.  As of 5.005_52, Configure tests for drand48(),
+random(), and rand() (in that order) and picks the first one it finds.
+Perl programs that depend on reproducing a specific set of pseudo-random
+numbers will now likely produce different output.
+
+=back
+
 =head2 C Source Incompatibilities
 
 =over 4
