@@ -9625,7 +9625,7 @@ perl_clone_using(PerlInterpreter *proto_perl, UV flags,
      * their pointers copied. */
 
     IV i;
-    CLONE_PARAMS* param = (CLONE_PARAMS*) MALLOC(SIZEOF(CLONE_PARAMS));
+    CLONE_PARAMS* param = (CLONE_PARAMS*) malloc(sizeof(CLONE_PARAMS));
 
     PerlInterpreter *my_perl = (PerlInterpreter*)(*ipM->pMalloc)(ipM, sizeof(PerlInterpreter));
     PERL_SET_THX(my_perl);
@@ -10335,3 +10335,4 @@ perl_clone_using(PerlInterpreter *proto_perl, UV flags,
 }
 
 #endif /* USE_ITHREADS */
+
