@@ -595,11 +595,21 @@ makedepend: makedepend.SH config.sh
 test-prep: miniperl perl preplibrary utilities $(dynamic_ext) $(nonxs_ext)
 	cd t && (rm -f perl$(EXE_EXT); $(LNS) ../perl$(EXE_EXT) perl$(EXE_EXT))
 
+# Second branch is for testing without a tty or controling terminal.
+# See t/op/stat.t
 test check: test-prep
-	cd t && $(LDLIBPTH) ./perl TEST </dev/tty
+	if (true </dev/tty) >/dev/null 2>&1; then \
+	  cd t && $(LDLIBPTH) ./perl TEST </dev/tty; \
+	else \
+	  cd t && PERL_SKIP_TTY_TEST=1 $(LDLIBPTH) ./perl TEST; \
+	fi
 
 utest ucheck: test-prep
-	cd t && $(LDLIBPTH) ./perl UTEST </dev/tty
+	if (true </dev/tty) >/dev/null 2>&1; then \
+	  cd t && $(LDLIBPTH) ./perl UTEST </dev/tty; \
+	else \
+	  cd t && PERL_SKIP_TTY_TEST=1 $(LDLIBPTH) ./perl UTEST; \
+	fi
 
 # For testing without a tty or controling terminal. See t/op/stat.t
 test-notty: test-prep
