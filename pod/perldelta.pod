@@ -299,6 +299,10 @@ provides seven bits of the total value, with the most significant
 first.  Bit eight of each byte is set, except for the last byte, in
 which bit eight is clear.
 
+Previous to Perl 5.004, both pack() and unpack() would ignore any
+unknown type characters in the template string. Now a fatal error will
+be generated.
+
 =item sysseek() and systell()
 
 These are new.  The sysseek() operator is a variant of seek() that works
@@ -1096,6 +1100,14 @@ were csh (e.g. C<full_csh='/usr/bin/tcsh'>); otherwise, make them all
 empty (except that C<d_csh> should be C<'undef'>) so that Perl will
 think csh is missing.  In either case, after editing config.sh, run
 C<./Configure -S> and rebuild Perl.
+
+=item Invalid type in pack: '%s'
+ 
+(F) The given character is not a valid pack type.  See L<perlfunc/pack>.
+ 
+=item Invalid type in unpack: '%s'
+ 
+(F) The given character is not a valid unpack type.  See L<perlfunc/unpack>.
 
 =item Name "%s::%s" used only once: possible typo
 

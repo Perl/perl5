@@ -1231,11 +1231,11 @@ greater than the maximum character.  See L<perlre>.
 
 =item Invalid type in pack: '%s'
 
-(F) The given character is not a valid pack type.  See L<perlop/pack>.
+(F) The given character is not a valid pack type.  See L<perlfunc/pack>.
 
 =item Invalid type in unpack: '%s'
 
-(F) The given character is not a valid unpack type.  See L<perlop/unpack>.
+(F) The given character is not a valid unpack type.  See L<perlfunc/unpack>.
 
 =item ioctl is not implemented
 
