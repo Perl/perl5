@@ -59,7 +59,7 @@ Perl_gv_IOadd(pTHX_ register GV *gv)
 GV *
 Perl_gv_fetchfile(pTHX_ const char *name)
 {
-    char smallbuf[256];
+    char smallbuf[256] = { 0 };
     char *tmpbuf;
     STRLEN tmplen;
     GV *gv;
