@@ -376,7 +376,21 @@ setlocale(LC_ALL, "C");
 debug "# Locales = @Locale\n";
 
 my %Problem;
+my %Okay;
+my %Testing;
 my @Neoalpha;
+
+sub tryneoalpha {
+    my ($Locale, $i, $test) = @_;
+    debug "# testing $i with locale '$Locale'\n"
+	unless $Testing{$i}{$Locale}++;
+    unless ($test) {
+	$Problem{$i}{$Locale} = 1;
+	debug "# failed $i with locale '$Locale'\n";
+    } else {
+	push @{$Okay{$i}}, $Locale;
+    }
+}
 
 foreach $Locale (@Locale) {
     debug "# Locale = $Locale\n";
@@ -442,44 +456,34 @@ foreach $Locale (@Locale) {
 
 	# Test \w.
     
-	debug "# testing 99 with locale '$Locale'\n";
 	{
 	    my $word = join('', @Neoalpha);
 
 	    $word =~ /^(\w+)$/;
 
-	    if ($1 ne $word) {
-		$Problem{99}{$Locale} = 1;
-		debug "# failed 99 ($1 vs $word)\n";
-	    }
+	    tryneoalpha($Locale, 99, $1 eq $word);
 	}
 
-	# Cross-check whole character set.
+	# Cross-check the whole 8-bit character set.
 
-	debug "# testing 100 with locale '$Locale'\n";
 	for (map { chr } 0..255) {
-	    if ((/\w/ and /\W/) or (/\d/ and /\D/) or (/\s/ and /\S/)) {
-		$Problem{100}{$Locale} = 1;
-		debug "# failed 100 for chr(", ord(), ")\n";
-	    }
+	    tryneoalpha($Locale, 100,
+			(/\w/ xor /\W/) ||
+			(/\d/ xor /\D/) ||
+			(/\s/ xor /\S/));
 	}
 
 	# Test for read-only scalars' locale vs non-locale comparisons.
 
-	debug "# testing 101 with locale '$Locale'\n";
 	{
 	    no locale;
 	    $a = "qwerty";
 	    {
 		use locale;
-		if ($a cmp "qwerty") {
-		    $Problem{101}{$Locale} = 1;
-		    debug "# failed 101\n";
-		}
+		tryneoalpha($Locale, 101, ($a cmp "qwerty") == 0);
 	    }
 	}
 
-	debug "# testing 102 with locale '$Locale'\n";
 	{
 	    my ($from, $to, $lesser, $greater,
 		@test, %test, $test, $yes, $no, $sign);
@@ -519,9 +523,8 @@ foreach $Locale (@Locale) {
 		    $test{$ti} = eval $ti;
 		    $test ||= $test{$ti}
 		}
+		tryneoalpha($Locale, 102, $test == 0);
 		if ($test) {
-		    $Problem{102}{$Locale} = 1;
-		    debug "# failed 102 at:\n";
 		    debug "# lesser  = '$lesser'\n";
 		    debug "# greater = '$greater'\n";
 		    debug "# lesser cmp greater = ",
@@ -552,106 +555,87 @@ foreach $Locale (@Locale) {
     printf ''; # printf used to reset locale to "C"
     my $b = "$y";
 
-    debug "# testing 103 with locale '$Locale'\n";
-    unless ($a eq $b) {
-	$Problem{103}{$Locale} = 1;
-	debug "# failed 103\n";
-    }
+    debug "# 103..107: a = $a, b = $b, Locale = $Locale\n";
+
+    tryneoalpha($Locale, 103, $a eq $b);
 
     my $c = "$x";
     my $z = sprintf ''; # sprintf used to reset locale to "C"
     my $d = "$y";
 
-    debug "# 103..107: a = $a, b = $b, c = $c, d = $d, Locale = $Locale\n";
+    debug "# 104..107: c = $c, d = $d, Locale = $Locale\n";
 
-    debug "# testing 104 with locale '$Locale'\n";
-    unless ($c eq $d) {
-	$Problem{104}{$Locale} = 1;
-	debug "# failed 104\n";
-    }
-
-    my $w = 0;
-    local $SIG{__WARN__} = sub { $w++ };
-    local $^W = 1;
-
-    # the == (among other things) used to warn for locales
-    # that had something else than "." as the radix character
-
-    debug "# testing 105 with locale '$Locale'\n";
-    unless ($c == 1.23) {
-	$Problem{105}{$Locale} = 1;
-	debug "# failed 105\n";
-    }
-
-    debug "# testing 106 with locale '$Locale'\n";
-    unless ($c == $x) {
-	$Problem{106}{$Locale} = 1;
-	debug "# failed 106\n";
-    }
-
-    debug "# testing 107 with locale '$Locale'\n";
-    unless ($c == $d) {
-	$Problem{107}{$Locale} = 1;
-	debug "# failed 107\n";
-    }
+    tryneoalpha($Locale, 104, $c eq $d); 
 
     {
-	no locale;
+	my $w = 0;
+	local $SIG{__WARN__} = sub { $w++ };
+	local $^W = 1;
+
+	# the == (among other ops) used to warn for locales
+	# that had something else than "." as the radix character
+
+	tryneoalpha($Locale, 105, $c == 1.23);
+
+	tryneoalpha($Locale, 106, $c == $x);
+
+	tryneoalpha($Locale, 107, $c == $d);
+
+	{
+	    no locale;
 	
-	my $e = "$x";
+	    my $e = "$x";
 
-	debug "# 108..110: e = $e, Locale = $Locale\n";
+	    debug "# 108..110: e = $e, Locale = $Locale\n";
 
-        debug "# testing 108 with locale '$Locale'\n";
-	unless ($e == 1.23) {
-	    $Problem{108}{$Locale} = 1;
-	    debug "# failed 108\n";
+	    tryneoalpha($Locale, 108, $e == 1.23);
+
+	    tryneoalpha($Locale, 109, $e == $x);
+	    
+	    tryneoalpha($Locale, 110, $e == $c);
+	}
+	
+	tryneoalpha($Locale, 111, $w == 0);
+
+	my $f = "1.23";
+
+	debug "# 112..114: f = $f, locale = $Locale\n";
+
+	tryneoalpha($Locale, 112, $f == 1.23);
+
+	tryneoalpha($Locale, 113, $f == $x);
+	
+	tryneoalpha($Locale, 114, $f == $c);
+    }
+
+    debug "# testing 115 with locale '$Locale'\n";
+    {
+	use locale;
+
+	sub lcA {
+	    my $lc0 = lc $_[0];
+	    my $lc1 = lc $_[1];
+	    return $lc0 cmp $lc1;
 	}
 
-        debug "# testing 109 with locale '$Locale'\n";
-	unless ($e == $x) {
-	    $Problem{109}{$Locale} = 1;
-	    debug "# failed 109\n";
+        sub lcB {
+	    return lc($_[0]) cmp lc($_[1]);
 	}
 
-        debug "# testing 110 with locale '$Locale'\n";
-	unless ($e == $c) {
-	    $Problem{110}{$Locale} = 1;
-	    debug "# failed 110\n";
-	}
-    }
+        my $x = "ab";
+        my $y = "aa";
+        my $z = "AB";
 
-    debug "# testing 111 with locale '$Locale'\n";
-    unless ($w == 0) {
-	$Problem{110}{$Locale} = 1;
-	debug "# failed 111\n";
-    }
-
-    my $f = "1.23";
-
-    debug "# 112..114: f = $f, locale = $Locale\n";
-
-    debug "# testing 112 with locale '$Locale'\n";
-    unless ($f == 1.23) {
-	$Problem{112}{$Locale} = 1;
-	debug "# failed 112\n";
-    }
-
-    debug "# testing 113 with locale '$Locale'\n";
-    unless ($f == $x) {
-	$Problem{113}{$Locale} = 1;
-	debug "# failed 113\n";
-    }
-
-    debug "# testing 114 with locale '$Locale'\n";
-    unless ($f == $c) {
-	$Problem{114}{$Locale} = 1;
-	debug "# failed 114\n";
+        tryneoalpha($Locale, 115,
+		    lcA($x, $y) == 1 && lcB($x, $y) == 1 ||
+		    lcA($x, $z) == 0 && lcB($x, $z) == 0);
     }
 }
 
+# Recount the errors.
+
 foreach (99..115) {
-    if ($Problem{$_}) {
+    if ($Problem{$_} || !defined $Okay{$_} || !@{$Okay{$_}}) {
 	if ($_ == 102) {
 	    print "# The failure of test 102 is not necessarily fatal.\n";
 	    print "# It usually indicates a problem in the enviroment,\n";
@@ -662,6 +646,8 @@ foreach (99..115) {
     print "ok $_\n";
 }
 
+# Give final advice.
+
 my $didwarn = 0;
 
 foreach (99..115) {
@@ -669,13 +655,14 @@ foreach (99..115) {
 	my @f = sort keys %{ $Problem{$_} };
 	my $f = join(" ", @f);
 	$f =~ s/(.{50,60}) /$1\n#\t/g;
-	warn
-	    "# The locale ", (@f == 1 ? "definition" : "definitions"), "\n#\n",
+	print
+	    "#\n",
+            "# The locale ", (@f == 1 ? "definition" : "definitions"), "\n#\n",
 	    "#\t", $f, "\n#\n",
 	    "# on your system may have errors because the locale test $_\n",
             "# failed in ", (@f == 1 ? "that locale" : "those locales"),
             ".\n";
-	warn <<EOW;
+	print <<EOW;
 #
 # If your users are not using these locales you are safe for the moment,
 # but please report this failure first to perlbug\@perl.com using the
@@ -687,6 +674,8 @@ EOW
 	$didwarn = 1;
     }
 }
+
+# Tell which locales ere okay.
 
 if ($didwarn) {
     my @s;
@@ -706,11 +695,6 @@ if ($didwarn) {
 	"# The following locales\n#\n",
         "#\t", $s, "\n#\n",
 	"# tested okay.\n#\n",
-}
-
-{
-    use locale;
-
 }
 
 # eof
