@@ -21,7 +21,7 @@ Test::Builder->new->no_ending(1);
 # Can't use Test.pm, that's a 5.005 thing.
 package main;
 
-print "1..28\n";
+print "1..22\n";
 
 my $test_num = 1;
 # Utility testing functions.
