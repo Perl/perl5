@@ -1344,6 +1344,17 @@ SV is B<not> incremented.
 =for hackers
 Found in file sv.c
 
+=item newSV
+
+Create a new null SV, or if len > 0, create a new empty SVt_PV type SV
+with an initial PV allocation of len+1. Normally accessed via the C<NEWSV>
+macro.
+
+	SV*	newSV(STRLEN len)
+
+=for hackers
+Found in file sv.c
+
 =item NEWSV
 
 Creates a new SV.  A non-zero C<len> parameter indicates the number of
@@ -1356,17 +1367,6 @@ C<id> is an integer id between 0 and 1299 (used to identify leaks).
 
 =for hackers
 Found in file handy.h
-
-=item newSV
-
-Create a new null SV, or if len > 0, create a new empty SVt_PV type SV
-with an initial PV allocation of len+1. Normally accessed via the C<NEWSV>
-macro.
-
-	SV*	newSV(STRLEN len)
-
-=for hackers
-Found in file sv.c
 
 =item newSViv
 
@@ -1869,6 +1869,70 @@ L<perlcall>.
 
 =for hackers
 Found in file scope.h
+
+=item sharedsv_find
+
+Tries to find if a given SV has a shared backend, either by
+looking at magic, or by checking if it is tied again threads::shared.
+
+	shared_sv*	sharedsv_find(SV* sv)
+
+=for hackers
+Found in file sharedsv.c
+
+=item sharedsv_init
+
+Saves a space for keeping SVs wider than an interpreter,
+currently only stores a pointer to the first interpreter.
+
+	void	sharedsv_init()
+
+=for hackers
+Found in file sharedsv.c
+
+=item sharedsv_lock
+
+Recursive locks on a sharedsv.
+Locks are dynamicly scoped at the level of the first lock.
+	void	sharedsv_lock(shared_sv* ssv)
+
+=for hackers
+Found in file sharedsv.c
+
+=item sharedsv_new
+
+Allocates a new shared sv struct, you must yourself create the SV/AV/HV.
+	shared_sv*	sharedsv_new()
+
+=for hackers
+Found in file sharedsv.c
+
+=item sharedsv_thrcnt_dec
+
+Decrements the threadcount of a shared sv. When a threads frontend is freed
+this function should be called.
+
+	void	sharedsv_thrcnt_dec(shared_sv* ssv)
+
+=for hackers
+Found in file sharedsv.c
+
+=item sharedsv_thrcnt_inc
+
+Increments the threadcount of a sharedsv.
+	void	sharedsv_thrcnt_inc(shared_sv* ssv)
+
+=for hackers
+Found in file sharedsv.c
+
+=item sharedsv_unlock
+
+Recursively unlocks a shared sv.
+
+	void	sharedsv_unlock(shared_sv* ssv)
+
+=for hackers
+Found in file sharedsv.c
 
 =item SP
 
@@ -2664,19 +2728,19 @@ false, defined or undefined.  Does not handle 'get' magic.
 =for hackers
 Found in file sv.h
 
+=item svtype
+
+An enum of flags for Perl types.  These are found in the file B<sv.h> 
+in the C<svtype> enum.  Test these flags with the C<SvTYPE> macro.
+
+=for hackers
+Found in file sv.h
+
 =item SvTYPE
 
 Returns the type of the SV.  See C<svtype>.
 
 	svtype	SvTYPE(SV* sv)
-
-=for hackers
-Found in file sv.h
-
-=item svtype
-
-An enum of flags for Perl types.  These are found in the file B<sv.h> 
-in the C<svtype> enum.  Test these flags with the C<SvTYPE> macro.
 
 =for hackers
 Found in file sv.h

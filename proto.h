@@ -1197,6 +1197,17 @@ STATIC void	S_debprof(pTHX_ OP *o);
 STATIC SV*	S_save_scalar_at(pTHX_ SV **sptr);
 #endif
 
+#if defined(USE_ITHREADS) && (defined(PERL_IN_SHAREDSV_C) || defined(PERL_DECL_PROT))
+PERL_CALLCONV void	Perl_sharedsv_init(pTHX);
+PERL_CALLCONV shared_sv*	Perl_sharedsv_new(pTHX);
+PERL_CALLCONV shared_sv*	Perl_sharedsv_find(pTHX_ SV* sv);
+PERL_CALLCONV void	Perl_sharedsv_lock(pTHX_ shared_sv* ssv);
+PERL_CALLCONV void	Perl_sharedsv_unlock(pTHX_ shared_sv* ssv);
+PERL_CALLCONV void	Perl_sharedsv_unlock_scope(pTHX_ shared_sv* ssv);
+PERL_CALLCONV void	Perl_sharedsv_thrcnt_inc(pTHX_ shared_sv* ssv);
+PERL_CALLCONV void	Perl_sharedsv_thrcnt_dec(pTHX_ shared_sv* ssv);
+#endif
+
 #if defined(PERL_IN_SV_C) || defined(PERL_DECL_PROT)
 STATIC IV	S_asIV(pTHX_ SV* sv);
 STATIC UV	S_asUV(pTHX_ SV* sv);

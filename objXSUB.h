@@ -2392,6 +2392,36 @@
 #endif
 #if defined(PERL_IN_SCOPE_C) || defined(PERL_DECL_PROT)
 #endif
+#if defined(USE_ITHREADS) && (defined(PERL_IN_SHAREDSV_C) || defined(PERL_DECL_PROT))
+#undef  Perl_sharedsv_init
+#define Perl_sharedsv_init	pPerl->Perl_sharedsv_init
+#undef  sharedsv_init
+#define sharedsv_init		Perl_sharedsv_init
+#undef  Perl_sharedsv_new
+#define Perl_sharedsv_new	pPerl->Perl_sharedsv_new
+#undef  sharedsv_new
+#define sharedsv_new		Perl_sharedsv_new
+#undef  Perl_sharedsv_find
+#define Perl_sharedsv_find	pPerl->Perl_sharedsv_find
+#undef  sharedsv_find
+#define sharedsv_find		Perl_sharedsv_find
+#undef  Perl_sharedsv_lock
+#define Perl_sharedsv_lock	pPerl->Perl_sharedsv_lock
+#undef  sharedsv_lock
+#define sharedsv_lock		Perl_sharedsv_lock
+#undef  Perl_sharedsv_unlock
+#define Perl_sharedsv_unlock	pPerl->Perl_sharedsv_unlock
+#undef  sharedsv_unlock
+#define sharedsv_unlock		Perl_sharedsv_unlock
+#undef  Perl_sharedsv_thrcnt_inc
+#define Perl_sharedsv_thrcnt_inc	pPerl->Perl_sharedsv_thrcnt_inc
+#undef  sharedsv_thrcnt_inc
+#define sharedsv_thrcnt_inc	Perl_sharedsv_thrcnt_inc
+#undef  Perl_sharedsv_thrcnt_dec
+#define Perl_sharedsv_thrcnt_dec	pPerl->Perl_sharedsv_thrcnt_dec
+#undef  sharedsv_thrcnt_dec
+#define sharedsv_thrcnt_dec	Perl_sharedsv_thrcnt_dec
+#endif
 #if defined(PERL_IN_SV_C) || defined(PERL_DECL_PROT)
 #  ifdef DEBUGGING
 #  endif

@@ -4266,6 +4266,57 @@ Perl_sys_intern_init(pTHXo)
 #endif
 #if defined(PERL_IN_SCOPE_C) || defined(PERL_DECL_PROT)
 #endif
+#if defined(USE_ITHREADS) && (defined(PERL_IN_SHAREDSV_C) || defined(PERL_DECL_PROT))
+
+#undef  Perl_sharedsv_init
+void
+Perl_sharedsv_init(pTHXo)
+{
+    ((CPerlObj*)pPerl)->Perl_sharedsv_init();
+}
+
+#undef  Perl_sharedsv_new
+shared_sv*
+Perl_sharedsv_new(pTHXo)
+{
+    return ((CPerlObj*)pPerl)->Perl_sharedsv_new();
+}
+
+#undef  Perl_sharedsv_find
+shared_sv*
+Perl_sharedsv_find(pTHXo_ SV* sv)
+{
+    return ((CPerlObj*)pPerl)->Perl_sharedsv_find(sv);
+}
+
+#undef  Perl_sharedsv_lock
+void
+Perl_sharedsv_lock(pTHXo_ shared_sv* ssv)
+{
+    ((CPerlObj*)pPerl)->Perl_sharedsv_lock(ssv);
+}
+
+#undef  Perl_sharedsv_unlock
+void
+Perl_sharedsv_unlock(pTHXo_ shared_sv* ssv)
+{
+    ((CPerlObj*)pPerl)->Perl_sharedsv_unlock(ssv);
+}
+
+#undef  Perl_sharedsv_thrcnt_inc
+void
+Perl_sharedsv_thrcnt_inc(pTHXo_ shared_sv* ssv)
+{
+    ((CPerlObj*)pPerl)->Perl_sharedsv_thrcnt_inc(ssv);
+}
+
+#undef  Perl_sharedsv_thrcnt_dec
+void
+Perl_sharedsv_thrcnt_dec(pTHXo_ shared_sv* ssv)
+{
+    ((CPerlObj*)pPerl)->Perl_sharedsv_thrcnt_dec(ssv);
+}
+#endif
 #if defined(PERL_IN_SV_C) || defined(PERL_DECL_PROT)
 #  ifdef DEBUGGING
 #  endif

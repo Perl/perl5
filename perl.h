@@ -2195,6 +2195,7 @@ typedef I32 (*filter_t) (pTHXo_ int, SV *, int);
 #include "scope.h"
 #include "warnings.h"
 #include "utf8.h"
+#include "sharedsv.h"
 
 /* Current curly descriptor */
 typedef struct curcur CURCUR;

@@ -1066,6 +1066,16 @@
 #if defined(PERL_IN_SCOPE_C) || defined(PERL_DECL_PROT)
 #define save_scalar_at		S_save_scalar_at
 #endif
+#if defined(USE_ITHREADS) && (defined(PERL_IN_SHAREDSV_C) || defined(PERL_DECL_PROT))
+#define sharedsv_init		Perl_sharedsv_init
+#define sharedsv_new		Perl_sharedsv_new
+#define sharedsv_find		Perl_sharedsv_find
+#define sharedsv_lock		Perl_sharedsv_lock
+#define sharedsv_unlock		Perl_sharedsv_unlock
+#define sharedsv_unlock_scope	Perl_sharedsv_unlock_scope
+#define sharedsv_thrcnt_inc	Perl_sharedsv_thrcnt_inc
+#define sharedsv_thrcnt_dec	Perl_sharedsv_thrcnt_dec
+#endif
 #if defined(PERL_IN_SV_C) || defined(PERL_DECL_PROT)
 #define asIV			S_asIV
 #define asUV			S_asUV
@@ -2569,6 +2579,16 @@
 #endif
 #if defined(PERL_IN_SCOPE_C) || defined(PERL_DECL_PROT)
 #define save_scalar_at(a)	S_save_scalar_at(aTHX_ a)
+#endif
+#if defined(USE_ITHREADS) && (defined(PERL_IN_SHAREDSV_C) || defined(PERL_DECL_PROT))
+#define sharedsv_init()		Perl_sharedsv_init(aTHX)
+#define sharedsv_new()		Perl_sharedsv_new(aTHX)
+#define sharedsv_find(a)	Perl_sharedsv_find(aTHX_ a)
+#define sharedsv_lock(a)	Perl_sharedsv_lock(aTHX_ a)
+#define sharedsv_unlock(a)	Perl_sharedsv_unlock(aTHX_ a)
+#define sharedsv_unlock_scope(a)	Perl_sharedsv_unlock_scope(aTHX_ a)
+#define sharedsv_thrcnt_inc(a)	Perl_sharedsv_thrcnt_inc(aTHX_ a)
+#define sharedsv_thrcnt_dec(a)	Perl_sharedsv_thrcnt_dec(aTHX_ a)
 #endif
 #if defined(PERL_IN_SV_C) || defined(PERL_DECL_PROT)
 #define asIV(a)			S_asIV(aTHX_ a)
@@ -5009,6 +5029,24 @@
 #if defined(PERL_IN_SCOPE_C) || defined(PERL_DECL_PROT)
 #define S_save_scalar_at	CPerlObj::S_save_scalar_at
 #define save_scalar_at		S_save_scalar_at
+#endif
+#if defined(USE_ITHREADS) && (defined(PERL_IN_SHAREDSV_C) || defined(PERL_DECL_PROT))
+#define Perl_sharedsv_init	CPerlObj::Perl_sharedsv_init
+#define sharedsv_init		Perl_sharedsv_init
+#define Perl_sharedsv_new	CPerlObj::Perl_sharedsv_new
+#define sharedsv_new		Perl_sharedsv_new
+#define Perl_sharedsv_find	CPerlObj::Perl_sharedsv_find
+#define sharedsv_find		Perl_sharedsv_find
+#define Perl_sharedsv_lock	CPerlObj::Perl_sharedsv_lock
+#define sharedsv_lock		Perl_sharedsv_lock
+#define Perl_sharedsv_unlock	CPerlObj::Perl_sharedsv_unlock
+#define sharedsv_unlock		Perl_sharedsv_unlock
+#define Perl_sharedsv_unlock_scope	CPerlObj::Perl_sharedsv_unlock_scope
+#define sharedsv_unlock_scope	Perl_sharedsv_unlock_scope
+#define Perl_sharedsv_thrcnt_inc	CPerlObj::Perl_sharedsv_thrcnt_inc
+#define sharedsv_thrcnt_inc	Perl_sharedsv_thrcnt_inc
+#define Perl_sharedsv_thrcnt_dec	CPerlObj::Perl_sharedsv_thrcnt_dec
+#define sharedsv_thrcnt_dec	Perl_sharedsv_thrcnt_dec
 #endif
 #if defined(PERL_IN_SV_C) || defined(PERL_DECL_PROT)
 #define S_asIV			CPerlObj::S_asIV

@@ -578,6 +578,13 @@ Perl_ptr_table_clear
 Perl_ptr_table_free
 Perl_sys_intern_clear
 Perl_sys_intern_init
+Perl_sharedsv_init
+Perl_sharedsv_new
+Perl_sharedsv_find
+Perl_sharedsv_lock
+Perl_sharedsv_unlock
+Perl_sharedsv_thrcnt_inc
+Perl_sharedsv_thrcnt_dec
 Perl_sv_setsv_flags
 Perl_sv_catpvn_flags
 Perl_sv_catsv_flags

@@ -1849,6 +1849,8 @@ regnodes.h			Description of nodes of RE engine
 run.c				The interpreter loop
 scope.c				Scope entry and exit code
 scope.h				Scope entry and exit header
+sharedsv.c			ithreads-shared scalar values code
+sharedsv.h			ithreads-shared scalar values header
 sv.c				Scalar value code
 sv.h				Scalar value header
 t/base/cond.t			See if conditionals work
