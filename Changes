@@ -31,6 +31,19 @@ or any other branch.
 Version v5.7.2		Development release working toward v5.8
 --------------
 ____________________________________________________________________________
+[ 14754] By: ams                                   on 2002/02/18  19:01:09
+        Log: Subject: [PATCH] VMS cando_by_name and current process privs
+             From: "Craig A. Berry" <craigberry@mac.com>
+             Date: Mon, 18 Feb 2002 14:03:30 -0600
+             Message-Id: <5.1.0.14.2.20020218132536.01b7a0b8@exchi01>
+     Branch: perl
+	   ! vms/vms.c
+____________________________________________________________________________
+[ 14753] By: jhi                                   on 2002/02/18  17:58:39
+        Log: Update Changes.
+     Branch: perl
+	   ! Changes patchlevel.h
+____________________________________________________________________________
 [ 14752] By: jhi                                   on 2002/02/18  17:54:44
         Log: What do you know; these tests unearthed nasty problems.
              Will resolve those first.
@@ -107,6 +120,25 @@ ____________________________________________________________________________
              Message-Id: <20020218154126.A692@rafael>
      Branch: perl
 	   ! pp_ctl.c t/op/do.t
+____________________________________________________________________________
+[ 14740] By: nick                                  on 2002/02/18  09:09:23
+        Log: Integrate mainline
+     Branch: perlio
+	  +> ext/Encode/CN/CN.pm ext/Encode/CN/Makefile.PL
+	  +> ext/Encode/JP/JP.pm ext/Encode/JP/Makefile.PL
+	  +> ext/Encode/KR/KR.pm ext/Encode/KR/Makefile.PL
+	  +> ext/Encode/TW/Makefile.PL ext/Encode/TW/TW.pm
+	  +> ext/Encode/lib/Encode/JP/Constants.pm
+	  +> ext/Encode/lib/Encode/JP/H2Z.pm
+	  +> ext/Encode/lib/Encode/JP/ISO_2022_JP.pm
+	  +> ext/Encode/lib/Encode/JP/JIS.pm ext/Encode/lib/Encode/JP/Tr.pm
+	  +> ext/Encode/t/JP.t ext/Encode/t/japanese.pl
+	  +> os2/OS2/Process/t/os2_process.t
+	  +> os2/OS2/Process/t/os2_process_kid.t
+	  +> os2/OS2/Process/t/os2_process_text.t
+	   - ext/Encode/EUC_JP/Japanese.pm ext/Encode/EUC_JP/Makefile.PL
+	   - ext/Encode/t/Japanese.t
+	  !> (integrate 47 files)
 ____________________________________________________________________________
 [ 14739] By: jhi                                   on 2002/02/18  05:02:47
         Log: EBCDIC: now the worst seems to be over for
@@ -200,7 +232,7 @@ ____________________________________________________________________________
 	   ! Porting/Glossary Porting/config.sh Porting/config_H
 ____________________________________________________________________________
 [ 14724] By: jhi                                   on 2002/02/17  01:12:37
-        Log: The #14175 and #14176 were okay: they just revealed
+        Log: The #14715 and #14716 were okay: they just revealed
              a bug in the EXACTF matching.
      Branch: perl
 	   ! regexec.c utf8.c
@@ -232,6 +264,13 @@ ____________________________________________________________________________
         Log: metaconfig unit change for #14720.
      Branch: perl
 	   ! Configure
+____________________________________________________________________________
+[ 14720] By: jhi                                   on 2002/02/16  15:36:42
+        Log: Regenerate Configure (small tweaks on Yitzchak's,
+             main difference being that the preference variables are
+             called gconvert_...).
+     Branch: metaconfig
+	   ! U/compline/d_gconvert.U
 ____________________________________________________________________________
 [ 14719] By: ams                                   on 2002/02/16  14:11:01
         Log: Subject: Re: [proof-of-concept PATCH] d_Gconvert and Configure
@@ -309,6 +348,13 @@ ____________________________________________________________________________
      Branch: perl
 	   ! hints/solaris_2.sh
 ____________________________________________________________________________
+[ 14708] By: jhi                                   on 2002/02/15  15:00:27
+        Log: metaconfig unit changes for #14707.
+     Branch: metaconfig
+	   ! U/modified/cc.U
+     Branch: metaconfig/U/perl
+	   ! Checkcc.U
+____________________________________________________________________________
 [ 14707] By: jhi                                   on 2002/02/15  15:00:01
         Log: Subject: Re: [PATCH hints/solaris_2.sh]; was Re: [PATCH Configure] Interaction  of cc.cbu and checkcc
              From: Robin Barker <rmb1@cise.npl.co.uk>
@@ -341,6 +387,36 @@ ____________________________________________________________________________
 	   ! os2/OS2/Process/Process.xs os2/os2.c os2/os2_base.t
 	   ! os2/os2ish.h
 ____________________________________________________________________________
+[ 14704] By: gsar                                  on 2002/02/15  08:42:48
+        Log: don't Safefree() PerlIO pointers we didn't allocate to begin with;
+             avoid wasteful PL_fdpid fiddling where that is not warranted;
+             mostly whitespace fixes
+             
+             these were longstanding todo items from:
+             http://www.xray.mpe.mpg.de/mailing-lists/perl5-porters/1998-04/msg01019.html
+     Branch: maint-5.6/perl
+	   ! doio.c
+____________________________________________________________________________
+[ 14702] By: nick                                  on 2002/02/15  08:31:41
+        Log: Integrate mainline
+     Branch: perlio
+	  +> lib/if.pm lib/if.t
+	  !> Configure MANIFEST ext/B/B/Deparse.pm ext/B/t/deparse.t
+	  !> lib/Net/Ping.pm lib/Net/Ping/CHANGES lib/Net/Ping/README
+	  !> lib/Net/Ping/t/110_icmp_inst.t lib/Net/Ping/t/120_udp_inst.t
+	  !> lib/Net/Ping/t/130_tcp_inst.t lib/Net/Ping/t/140_stream_inst.t
+	  !> lib/Net/Ping/t/200_ping_tcp.t lib/Net/Ping/t/300_ping_stream.t
+	  !> lib/Pod/Html.pm lib/Tie/Handle.pm lib/charnames.pm
+	  !> lib/charnames.t pod/perluniintro.pod pp_sys.c
+	  !> t/lib/warnings/pp_sys
+____________________________________________________________________________
+[ 14701] By: gsar                                  on 2002/02/15  08:04:58
+        Log: open(STDOUT, ">&=FOO") leaks PerlIO pointers badly on all platforms
+             (and also dies quickly on Windows); this bug crept in as
+             change#610, a.k.a change#646
+     Branch: maint-5.6/perl
+	   ! doio.c t/io/open.t
+____________________________________________________________________________
 [ 14700] By: jhi                                   on 2002/02/15  02:51:13
         Log: Subject: [ID 20020213.015] Pod::Html XHTML update for 5.7.2
              From: Ville "Skyttä" <ville.skytta@iki.fi>
@@ -353,6 +429,11 @@ ____________________________________________________________________________
         Log: Document and test the C0 and C1.
      Branch: perl
 	   ! lib/charnames.pm lib/charnames.t
+____________________________________________________________________________
+[ 14698] By: jhi                                   on 2002/02/14  22:21:55
+        Log: metaconfig unit change for #14697.
+     Branch: metaconfig
+	   ! U/modified/Init.U
 ____________________________________________________________________________
 [ 14697] By: jhi                                   on 2002/02/14  22:21:20
         Log: Also OS/2 seems to need exe set early.
@@ -400,6 +481,16 @@ ____________________________________________________________________________
      Branch: perl
 	   ! lib/Tie/Handle.pm
 ____________________________________________________________________________
+[ 14690] By: nick                                  on 2002/02/14  16:30:56
+        Log: Integrate mainline
+     Branch: perlio
+	  +> ext/threads/t/end.t lib/Tie/Memoize.pm lib/Tie/Memoize.t
+	  !> Changes MANIFEST Makefile.SH ext/threads/threads.pm
+	  !> ext/threads/threads.xs lib/ExtUtils/Installed.pm
+	  !> lib/ExtUtils/t/Installed.t lib/File/Spec/t/rel2abs2rel.t
+	  !> lib/Tie/Hash.pm patchlevel.h pod/perltie.pod t/op/groups.t
+	  !> utf8.c
+____________________________________________________________________________
 [ 14689] By: jhi                                   on 2002/02/14  16:03:50
         Log: Upgrade to Net::Ping 2.11.
      Branch: perl
@@ -431,6 +522,11 @@ ____________________________________________________________________________
      Branch: perl
 	   + lib/Tie/Memoize.pm lib/Tie/Memoize.t
 	   ! MANIFEST
+____________________________________________________________________________
+[ 14685] By: nick                                  on 2002/02/14  14:20:20
+        Log: Make dependencies more precise (for nmake)
+     Branch: perlio
+	   ! ext/Encode/EUC_JP/Makefile.PL
 ____________________________________________________________________________
 [ 14684] By: jhi                                   on 2002/02/14  14:09:10
         Log: Subject: [PATCH @13746] tied hashes
@@ -478,6 +574,11 @@ ____________________________________________________________________________
      Branch: perl
 	   ! ext/threads/threads.pm ext/threads/threads.xs
 ____________________________________________________________________________
+[ 14677] By: nick                                  on 2002/02/13  09:30:42
+        Log: Do not lc() the file names before doing dirname() or they don't match.
+     Branch: perlio
+	   ! lib/ExtUtils/t/Installed.t
+____________________________________________________________________________
 [ 14676] By: sky                                   on 2002/02/13  09:03:37
         Log: Subject: [PATCH] Re: File/Spec/t/rel2abs2rel2whatever broken again
              From: Michael G Schwern <schwern@pobox.com>
@@ -491,6 +592,19 @@ ____________________________________________________________________________
      Branch: perl
 	   + ext/threads/t/end.t
 	   ! MANIFEST ext/threads/threads.xs
+____________________________________________________________________________
+[ 14674] By: nick                                  on 2002/02/13  08:34:55
+        Log: Integrate mainline
+     Branch: perlio
+	  +> ext/threads/t/join.t
+	  !> Configure MANIFEST ext/threads/threads.xs hints/solaris_2.sh
+	  !> lib/dumpvar.pl lib/perl5db.pl pod/perldebug.pod pp_pack.c
+	  !> t/op/lc.t t/op/length.t t/uni/fold.t utf8.c
+____________________________________________________________________________
+[ 14673] By: jhi                                   on 2002/02/13  05:17:26
+        Log: metaconfig unit change for #14672.
+     Branch: metaconfig
+	   ! U/modified/lns.U
 ____________________________________________________________________________
 [ 14672] By: jhi                                   on 2002/02/13  05:17:07
         Log: $ln is supposed to be already set to $ln + executable suffix
@@ -577,6 +691,13 @@ ____________________________________________________________________________
 	   + ext/threads/t/join.t
 	   ! MANIFEST ext/threads/threads.xs
 ____________________________________________________________________________
+[ 14658] By: nick                                  on 2002/02/12  13:54:06
+        Log: Integrate mainline
+     Branch: perlio
+	  !> lib/ExtUtils/Installed.pm lib/ExtUtils/t/Embed.t
+	  !> lib/File/Spec/t/rel2abs2rel.t lib/Win32.pod t/op/each.t
+	  !> t/op/length.t t/test.pl toke.c win32/win32.c win32/win32.h
+____________________________________________________________________________
 [ 14657] By: jhi                                   on 2002/02/12  13:44:34
         Log: Subject: Re: [PATCH 5.6.1] Win32: Give user control over window creation behavior of system() function 
              From: Jan Dubois <JanD@ActiveState.com> 
@@ -637,6 +758,14 @@ ____________________________________________________________________________
      Branch: perl
 	   ! t/op/each.t
 ____________________________________________________________________________
+[ 14648] By: nick                                  on 2002/02/11  16:14:50
+        Log: Integrate mainline
+     Branch: perlio
+	  !> Changes Configure Makefile.SH autodoc.pl
+	  !> ext/Socket/socketpair.t hints/os2.sh lib/ExtUtils/Embed.pm
+	  !> lib/ExtUtils/t/Embed.t opcode.pl os2/Makefile.SHs os2/os2.c
+	  !> os2/os2ish.h patchlevel.h pod/perltoc.pod
+____________________________________________________________________________
 [ 14647] By: jhi                                   on 2002/02/11  15:11:14
         Log: Update Changes.
      Branch: perl
@@ -651,6 +780,18 @@ ____________________________________________________________________________
         Log: Forgot from #14641.
      Branch: perl
 	   ! lib/ExtUtils/t/Embed.t
+____________________________________________________________________________
+[ 14644] By: jhi                                   on 2002/02/11  14:49:14
+        Log: A forgotten metaconfig unit.
+     Branch: metaconfig/U/perl
+	   + i_features.U
+____________________________________________________________________________
+[ 14643] By: jhi                                   on 2002/02/11  14:47:11
+        Log: metaconfig unit changes for #14642.
+     Branch: metaconfig
+	   + U/modified/lns.U
+     Branch: metaconfig/U/perl
+	   ! issymlink.U
 ____________________________________________________________________________
 [ 14642] By: jhi                                   on 2002/02/11  14:46:39
         Log: -Dmksymlinks was broken by #14628.
@@ -689,6 +830,42 @@ ____________________________________________________________________________
 	  +> ext/Encode/t/table.euc ext/Encode/t/table.ref
 	   - ext/Encode/EUC_JP/EUC_JP.pm
 	  !> MANIFEST ext/Encode/EUC_JP/Makefile.PL ext/Encode/Encode.xs
+____________________________________________________________________________
+[ 14639] By: nick                                  on 2002/02/11  11:59:18
+        Log: Patch up the failing multi-byte write case, and un-skip
+             the test.
+     Branch: perlio
+	   ! ext/Encode/Encode.xs ext/Encode/t/Japanese.t
+____________________________________________________________________________
+[ 14638] By: nick                                  on 2002/02/11  10:55:39
+        Log: Add test for Japanese encoding (well euc-jp anyway).
+             Fix one bug shown by above
+             Skip test which does not pass yet.
+     Branch: perlio
+	   + ext/Encode/t/Japanese.t ext/Encode/t/table.euc
+	   + ext/Encode/t/table.ref
+	   ! MANIFEST ext/Encode/Encode.xs
+____________________________________________________________________________
+[ 14637] By: nick                                  on 2002/02/11  09:07:04
+        Log: Split Japanese encodings - part 2
+             - build separate .c files with separate 'compile' steps
+             - overall Japanese.xs / Japanese.pm which loads them
+     Branch: perlio
+	   ! ext/Encode/EUC_JP/Japanese.pm ext/Encode/EUC_JP/Makefile.PL
+____________________________________________________________________________
+[ 14636] By: nick                                  on 2002/02/11  08:15:42
+        Log: Re-structure Japanese encodings - part 1
+     Branch: perlio
+	  +> ext/Encode/EUC_JP/Japanese.pm
+	   - ext/Encode/EUC_JP/EUC_JP.pm
+	   ! MANIFEST ext/Encode/EUC_JP/Makefile.PL
+____________________________________________________________________________
+[ 14635] By: nick                                  on 2002/02/11  08:05:12
+        Log: Integrate mainline
+     Branch: perlio
+	  !> Configure djgpp/djgpp.c lib/ExtUtils/t/Installed.t
+	  !> lib/File/Spec.pm lib/perl5db.pl pod/perldiag.pod
+	  !> pod/perlport.pod pp_pack.c regcomp.c t/op/arith.t t/op/pack.t
 ____________________________________________________________________________
 [ 14634] By: jhi                                   on 2002/02/11  03:40:01
         Log: Subject: Re: [PATCH] Re: Modulus operator inconsistency
@@ -731,6 +908,11 @@ ____________________________________________________________________________
      Branch: perl
 	   ! pp_pack.c t/op/pack.t
 ____________________________________________________________________________
+[ 14629] By: jhi                                   on 2002/02/10  21:56:17
+        Log: metaconfig unit changes for #14628.
+     Branch: metaconfig/U/perl
+	   ! d_u32align.U issymlink.U
+____________________________________________________________________________
 [ 14628] By: jhi                                   on 2002/02/10  21:55:45
         Log: Two Configure tweaks; the u32align test was trying
              to write into a string literal, the ln -s test was
@@ -742,6 +924,16 @@ ____________________________________________________________________________
         Log: DJGPP tweaks from Laszlo Molnar.
      Branch: perl
 	   ! djgpp/djgpp.c lib/File/Spec.pm
+____________________________________________________________________________
+[ 14626] By: nick                                  on 2002/02/10  18:36:47
+        Log: Move PerlIO_perlio to layer_syms where it belongs?
+     Branch: perlio
+	   ! makedef.pl
+____________________________________________________________________________
+[ 14625] By: nick                                  on 2002/02/10  18:02:21
+        Log: Borland/Win32 tuning
+     Branch: perlio
+	   ! makedef.pl perlio.sym t/op/stat.t win32/config_H.bc
 ____________________________________________________________________________
 [ 14624] By: jhi                                   on 2002/02/10  15:33:40
         Log: Additional explanation for the [:...:] failure.
@@ -778,6 +970,26 @@ ____________________________________________________________________________
         Log: Portability notes: filename characters, character sets.
      Branch: perl
 	   ! pod/perlport.pod
+____________________________________________________________________________
+[ 14619] By: nick                                  on 2002/02/10  11:06:05
+        Log: Integrate mainline
+     Branch: perlio
+	   ! ext/Encode/Encode.pm
+	  !> Configure cop.h deb.c ext/B/B/Deparse.pm hints/bsdos.sh
+	  !> hints/os390.sh lib/ExtUtils/Embed.pm lib/perl5db.pl
+	  !> lib/unicore/Name.pl lib/unicore/mktables op.c pod/perlfaq2.pod
+	  !> pod/perlfaq3.pod pod/perlfaq4.pod pp_ctl.c
+	  !> t/lib/warnings/pp_hot t/op/arith.t toke.c util.c
+____________________________________________________________________________
+[ 14618] By: nick                                  on 2002/02/10  10:48:15
+        Log: Nick Clark's tweaks to Encode compile process
+             1. Use decimal constants to unit string arrays rather than
+             very long string litterals (latter having possible "\0"
+             on end issues, and needing ANSI C line splicing).
+             2. Replace tail-recursion during insert process with itteration.
+             Nick C sees 12% speedup from these.
+     Branch: perlio
+	   ! ext/Encode/compile
 ____________________________________________________________________________
 [ 14617] By: jhi                                   on 2002/02/10  02:56:54
         Log: Use the "Unicode 1.0" name field for control characters,
@@ -845,6 +1057,16 @@ ____________________________________________________________________________
      Branch: perl
 	   ! cop.h deb.c pp_ctl.c toke.c util.c
 ____________________________________________________________________________
+[ 14607] By: pudge                                 on 2002/02/08  19:21:04
+        Log: Redo CopFILE / MacPerl_MPWFIleName patch
+     Branch: maint-5.6/macperl
+	   ! cop.h deb.c pp_ctl.c toke.c util.c
+____________________________________________________________________________
+[ 14606] By: jhi                                   on 2002/02/08  19:18:41
+        Log: The metaconfig unit change to go with #14605.
+     Branch: metaconfig/U/perl
+	   ! libperl.U
+____________________________________________________________________________
 [ 14605] By: jhi                                   on 2002/02/08  19:18:17
         Log: The Configure change to go with #14604.
      Branch: perl
@@ -857,6 +1079,13 @@ ____________________________________________________________________________
              Message-ID: <Pine.SOL.4.10.10202081341170.15295-100000@maxwell.phys.lafayette.edu>
      Branch: perl
 	   ! hints/bsdos.sh
+____________________________________________________________________________
+[ 14603] By: nick                                  on 2002/02/08  18:16:09
+        Log: Integrate mainline
+     Branch: perlio
+	  +> ext/threads/t/libc.t
+	  !> Configure MANIFEST djgpp/djgppsed.sh doio.c perl.c pp_sys.c
+	  !> t/io/argv.t t/op/taint.t t/run/fresh_perl.t
 ____________________________________________________________________________
 [ 14602] By: sky                                   on 2002/02/08  15:19:15
         Log: Start testing for safe localtime functions, TODO, test more functions.
@@ -889,6 +1118,13 @@ ____________________________________________________________________________
      Branch: perl
 	  !> cv.h pod/perlapi.pod pod/perlintern.pod
 ____________________________________________________________________________
+[ 14598] By: jhi                                   on 2002/02/08  14:01:28
+        Log: metaconfig unit changes for #14597.
+     Branch: metaconfig
+	   ! U/modified/Loc.U
+     Branch: metaconfig/U/perl
+	   ! libperl.U
+____________________________________________________________________________
 [ 14597] By: jhi                                   on 2002/02/08  14:01:01
         Log: Configure DJGPP tweak from Laszlo Molnar.
      Branch: perl
@@ -898,6 +1134,23 @@ ____________________________________________________________________________
         Log: DJGPP tweaks from Laszlo Molnar.
      Branch: perl
 	   ! djgpp/djgppsed.sh perl.c
+____________________________________________________________________________
+[ 14595] By: nick                                  on 2002/02/08  09:19:29
+        Log: Extract something from yesterdays effort - convert my mail on pad
+             data structures (incoporating Sarathy's corrections/clarifications)
+             into POD in cv.h which gets autodoc.pl'ed into pod/perlintern.pod.
+     Branch: perlio
+	   ! cv.h pod/perlapi.pod pod/perlintern.pod
+____________________________________________________________________________
+[ 14594] By: nick                                  on 2002/02/08  08:34:49
+        Log: Integrate mainline
+     Branch: perlio
+	  +> NetWare/bat/BldNWExt-Exist.bat NetWare/t/NWModify-Exist.pl
+	  +> NetWare/t/NWScripts-Exist.pl t/base/num.t
+	  !> Changes MANIFEST ext/Encode/Encode.xs ext/Encode/Makefile.PL
+	  !> ext/Unicode/Normalize/t/norm.t ext/Unicode/Normalize/t/test.t
+	  !> hints/os390.sh lib/Benchmark.t lib/encoding.pm lib/encoding.t
+	  !> op.c patchlevel.h t/run/fresh_perl.t utf8.c
 ____________________________________________________________________________
 [ 14593] By: jhi                                   on 2002/02/08  03:08:20
         Log: To really skip the test an exit() is needed.
@@ -913,6 +1166,51 @@ ____________________________________________________________________________
         Log: In case of failure be more verbose.
      Branch: perl
 	   ! t/base/num.t
+____________________________________________________________________________
+[ 14590] By: pudge                                 on 2002/02/07  19:29:03
+        Log: Update Changes
+     Branch: maint-5.6/macperl
+	   ! macos/Changes
+____________________________________________________________________________
+[ 14589] By: pudge                                 on 2002/02/07  19:26:55
+        Log: Merge AEGizmos library into PPC binary
+     Branch: maint-5.6/macperl
+	   ! macos/Makefile.mk
+____________________________________________________________________________
+[ 14588] By: pudge                                 on 2002/02/07  18:51:05
+        Log: Add -ansifor for MrCpp options
+     Branch: maint-5.6/macperl
+	   ! macos/BuildRules.mk
+____________________________________________________________________________
+[ 14587] By: pudge                                 on 2002/02/07  18:46:28
+        Log: Check ownership of CatInfos (MacPerl Bug #494482)
+     Branch: maint-5.6/macperl
+	   ! macos/ext/Mac/Files/Files.xs
+____________________________________________________________________________
+[ 14586] By: pudge                                 on 2002/02/07  18:40:21
+        Log: Resource updates
+     Branch: maint-5.6/macperl
+	   ! macos/macperl/MacPerl.r macos/macperl/MacPerl.rsrc
+____________________________________________________________________________
+[ 14585] By: pudge                                 on 2002/02/07  18:38:44
+        Log: Empty path is ENOENT (MacPerl Bug #512351)
+     Branch: maint-5.6/macperl
+	   ! macos/macperl/MPAppleEvents.c
+____________________________________________________________________________
+[ 14584] By: pudge                                 on 2002/02/07  18:38:03
+        Log: Fix horrible list maintencance bugs (MacPerl Bug #443568)
+     Branch: maint-5.6/macperl
+	   ! macos/macperl/MPAEVTStream.cp
+____________________________________________________________________________
+[ 14583] By: pudge                                 on 2002/02/07  18:36:29
+        Log: macify(ABSTRACT_FROM)
+     Branch: maint-5.6/macperl
+	   ! macos/lib/ExtUtils/MM_MacOS.pm
+____________________________________________________________________________
+[ 14582] By: pudge                                 on 2002/02/07  18:35:20
+        Log: Use correct Mac filenames in error messages, caller()
+     Branch: maint-5.6/macperl
+	   ! deb.c pp_ctl.c toke.c util.c
 ____________________________________________________________________________
 [ 14581] By: jhi                                   on 2002/02/07  17:10:06
         Log: Sanity checks to see that the IV/NV and the PV of numeric
@@ -954,6 +1252,11 @@ ____________________________________________________________________________
      Branch: perl
 	   ! Changes patchlevel.h
 ____________________________________________________________________________
+[ 14575] By: nick                                  on 2002/02/06  15:23:24
+        Log: One way to avoid OS390 winge about #line directives.
+     Branch: perlio
+	   ! ext/Encode/EUC_JP/Makefile.PL
+____________________________________________________________________________
 [ 14574] By: jhi                                   on 2002/02/06  15:11:05
         Log: s/Netware/NetWare/
      Branch: perl
@@ -988,6 +1291,16 @@ ____________________________________________________________________________
      Branch: perl
 	   ! utf8.c
 ____________________________________________________________________________
+[ 14569] By: nick                                  on 2002/02/06  09:52:23
+        Log: Integrate mainline
+     Branch: perlio
+	  !> NetWare/Makefile NetWare/bat/BldNWExt.bat
+	  !> NetWare/dl_netware.xs NetWare/interface.c NetWare/interface.h
+	  !> NetWare/iperlhost.h NetWare/nw5.c NetWare/nw5sck.c
+	  !> NetWare/nw5sck.h NetWare/nw5thread.h NetWare/t/NWModify.pl
+	  !> NetWare/t/NWScripts.pl ext/Encode/t/Encode.t
+	  !> lib/File/Spec/t/rel2abs2rel.t makedef.pl
+____________________________________________________________________________
 [ 14568] By: jhi                                   on 2002/02/06  04:44:33
         Log: EBCDIC: 0x41 is not cricket.
      Branch: perl
@@ -1010,6 +1323,13 @@ ____________________________________________________________________________
      Branch: perl
 	   ! lib/File/Spec/t/rel2abs2rel.t
 ____________________________________________________________________________
+[ 14565] By: nick                                  on 2002/02/05  17:31:24
+        Log: Integrate mainline
+     Branch: perlio
+	  !> ext/DynaLoader/dl_dyld.xs ext/POSIX/t/posix.t hints/darwin.sh
+	  !> lib/File/Spec/t/rel2abs2rel.t perl.h regexec.c t/op/filetest.t
+	  !> utf8.h
+____________________________________________________________________________
 [ 14564] By: jhi                                   on 2002/02/05  17:05:40
         Log: Integrate perlio;
              
@@ -1022,6 +1342,17 @@ ____________________________________________________________________________
 	  +> ext/Encode/Encode/jis0201.ucm
 	  !> MANIFEST ext/Encode/EUC_JP/Makefile.PL ext/Encode/Makefile.PL
 	  !> ext/Encode/compile
+____________________________________________________________________________
+[ 14563] By: nick                                  on 2002/02/05  16:01:15
+        Log: More Encode tweaks:
+             - make expensive and marginal substring search optional (-O)
+             - enable -O for ASCII-oid encodings (search space is small)
+             - add ASCII-oid jis0201 to basic Encode.so
+             - add some other Japanese encodings to EUC_JP bundle (without -O)
+     Branch: perlio
+	   + ext/Encode/Encode/jis0201.ucm
+	   ! MANIFEST ext/Encode/EUC_JP/Makefile.PL ext/Encode/Makefile.PL
+	   ! ext/Encode/compile
 ____________________________________________________________________________
 [ 14562] By: sky                                   on 2002/02/05  14:50:36
         Log: Add in change for Apple/Darwin Bug: 2785519 to fix memory leaks.
@@ -1039,7 +1370,8 @@ ____________________________________________________________________________
 	   ! t/op/filetest.t
 ____________________________________________________________________________
 [ 14559] By: sky                                   on 2002/02/05  11:39:24
-        Log: Add . first to the PATH enviroment to test that we realy get ./perl and not some other older perl.
+        Log: Add . first to the PATH environment to test that we really
+             get ./perl and not some other older perl.
      Branch: perl
 	   ! lib/File/Spec/t/rel2abs2rel.t
 ____________________________________________________________________________
@@ -1052,6 +1384,18 @@ ____________________________________________________________________________
         Log: Enable building with threads under macosx, assume __APPLE__ means darwin and disable _r functions, since we don't have them.
      Branch: perl
 	   ! hints/darwin.sh perl.h
+____________________________________________________________________________
+[ 14556] By: nick                                  on 2002/02/05  06:58:52
+        Log: Integrate mainline
+     Branch: perlio
+	  !> MANIFEST configure.com ext/Encode/EUC_JP/Makefile.PL
+	  !> ext/Encode/Encode.xs lib/File/Find/t/find.t
+	  !> lib/File/Find/t/taint.t
+____________________________________________________________________________
+[ 14555] By: pudge                                 on 2002/02/05  02:20:45
+        Log: Integrate change #14439 from maintperl
+     Branch: maint-5.6/macperl
+	  !> op.c
 ____________________________________________________________________________
 [ 14554] By: jhi                                   on 2002/02/04  23:22:28
         Log: Subject: [PATCH] File::Find tests not cleaning up properly
@@ -1074,6 +1418,13 @@ ____________________________________________________________________________
      Branch: perl
 	   ! MANIFEST configure.com ext/Encode/EUC_JP/Makefile.PL
 	   ! ext/Encode/Encode.xs
+____________________________________________________________________________
+[ 14551] By: nick                                  on 2002/02/04  16:00:31
+        Log: Integrate mainline
+     Branch: perlio
+	  !> Changes lib/CPAN.pm lib/h2xs.t lib/locale.t
+	  !> lib/unicore/mktables patchlevel.h pod/perluniintro.pod
+	  !> regcomp.c
 ____________________________________________________________________________
 [ 14550] By: jhi                                   on 2002/02/04  14:47:00
         Log: Update Changes.
@@ -1111,6 +1462,16 @@ ____________________________________________________________________________
      Branch: perl
 	  !> ext/Encode/Encode.xs
 ____________________________________________________________________________
+[ 14545] By: nick                                  on 2002/02/03  20:03:38
+        Log: Remove debugging warning, be consistent about API fails.
+     Branch: perlio
+	   ! ext/Encode/Encode.xs
+____________________________________________________________________________
+[ 14544] By: nick                                  on 2002/02/03  19:47:48
+        Log: Carry on where we left off if we have to grow destination SV during XS encode/decode
+     Branch: perlio
+	   ! ext/Encode/Encode.xs
+____________________________________________________________________________
 [ 14543] By: jhi                                   on 2002/02/03  19:06:06
         Log: Subject: PATCH CPAN.pm
              From: Mark-Jason Dominus <mjd@plover.com>
@@ -1123,6 +1484,11 @@ ____________________________________________________________________________
         Log: Must search further back.
      Branch: perl
 	   ! lib/h2xs.t
+____________________________________________________________________________
+[ 14541] By: nick                                  on 2002/02/03  18:52:09
+        Log: Integrate mainline
+     Branch: perlio
+	  !> (integrate 29 files)
 ____________________________________________________________________________
 [ 14540] By: jhi                                   on 2002/02/03  18:33:53
         Log: EBCDIC: more natification.
@@ -1148,6 +1514,14 @@ ____________________________________________________________________________
         Log: Prettify.
      Branch: perl
 	   ! lib/unicore/mktables
+____________________________________________________________________________
+[ 14536] By: nick                                  on 2002/02/03  17:32:03
+        Log: Stable intermediate point in Encode cleanup.
+             :encode(euc-jp) works on Dan's table.euc
+             Much buffer copying and other silliness remains.
+     Branch: perlio
+	   ! ext/Encode/Encode.pm ext/Encode/Encode.xs
+	   ! ext/Encode/lib/Encode/Encoding.pm
 ____________________________________________________________________________
 [ 14535] By: jhi                                   on 2002/02/03  17:29:57
         Log: EBCDIC: it's much nicer to compare Unicode code points
@@ -1225,6 +1599,12 @@ ____________________________________________________________________________
      Branch: perl
 	   ! utils/h2xs.PL
 ____________________________________________________________________________
+[ 14526] By: nick                                  on 2002/02/03  14:54:18
+        Log: Fix SvGROW on an SV with SvLEN == 0 - copy in any existing data.
+             (Mis-feature discovered by Encode.)
+     Branch: perlio
+	   ! sv.c
+____________________________________________________________________________
 [ 14525] By: jhi                                   on 2002/02/02  16:44:58
         Log: EBCDIC: since #14519 made \N{...} to remap,
              the test cannot expect an ASCII code point.
@@ -1267,6 +1647,22 @@ ____________________________________________________________________________
      Branch: perl
 	   ! toke.c
 ____________________________________________________________________________
+[ 14518] By: nick                                  on 2002/02/01  18:32:03
+        Log: indent -kr -nce and some manual tweaks to match perl style.
+     Branch: perlio
+	   ! ext/Encode/Encode.xs
+____________________________________________________________________________
+[ 14517] By: nick                                  on 2002/02/01  18:20:46
+        Log: Integrate mainline
+     Branch: perlio
+	  !> Changes MANIFEST configpm doio.c lib/Attribute/Handlers.pm
+	  !> lib/Attribute/Handlers/t/multi.t lib/CPAN.pm
+	  !> lib/Math/Complex.pm lib/Math/Complex.t lib/open.pm
+	  !> patchlevel.h pod/perldiag.pod pod/perlfunc.pod
+	  !> pod/perluniintro.pod pp.c pp_sys.c regexec.c t/io/utf8.t
+	  !> t/lib/warnings/pp_sys t/lib/warnings/utf8 t/op/inccode.t
+	  !> t/op/lc.t t/op/stat.t t/run/switches.t utf8.c
+____________________________________________________________________________
 [ 14516] By: jhi                                   on 2002/02/01  16:46:16
         Log: Integrate perlio; 
              
@@ -1277,6 +1673,16 @@ ____________________________________________________________________________
 	   ! MANIFEST
 	  !> ext/Encode/EUC_JP/Makefile.PL ext/Encode/Encode.xs
 	  !> ext/Encode/Makefile.PL ext/Encode/compile
+____________________________________________________________________________
+[ 14515] By: nick                                  on 2002/02/01  16:27:59
+        Log: Minor Encode tweaks:
+             - move Encode.pm back to top of Encode like normal XS extension
+             - avoid .def as a file extension (Win32 builds)
+     Branch: perlio
+	  +> ext/Encode/Encode.pm
+	   - ext/Encode/lib/Encode.pm
+	   ! MANIFEST ext/Encode/EUC_JP/Makefile.PL ext/Encode/Encode.xs
+	   ! ext/Encode/Makefile.PL ext/Encode/compile
 ____________________________________________________________________________
 [ 14514] By: jhi                                   on 2002/02/01  14:45:26
         Log: Subject: [PATCH utf8.t] temp file not cleaned up
@@ -1394,6 +1800,20 @@ ____________________________________________________________________________
 	  !> ext/Encode/EUC_JP/Makefile.PL ext/Encode/compile
 	  !> ext/Encode/encode.h
 ____________________________________________________________________________
+[ 14499] By: nick                                  on 2002/01/30  09:57:47
+        Log: Collect some stats during compile process.
+             Experiment with effect of bundling all EUC-JP, EUC-CN, EUC-KR
+             as one XS - inconclusive - marginal win?
+             Add some comments to encode.h
+     Branch: perlio
+	   ! ext/Encode/EUC_JP/Makefile.PL ext/Encode/compile
+	   ! ext/Encode/encode.h
+____________________________________________________________________________
+[ 14498] By: nick                                  on 2002/01/30  07:27:55
+        Log: Integrate Jarkko's path/INC tweaks
+     Branch: perlio
+	  !> ext/Encode/compile
+____________________________________________________________________________
 [ 14497] By: jhi                                   on 2002/01/30  04:40:56
         Log: Subject: [PATCH] perl -V: (was: Re: Inline::C and Perl objects with C API's)   
              From: sthoenna@efn.org (Yitzchak Scott-Thoennes)
@@ -1439,6 +1859,34 @@ ____________________________________________________________________________
         Log: EBCDIC tweaks-- no new test passes, but getting closer.
      Branch: perl
 	   ! utf8.c
+____________________________________________________________________________
+[ 14490] By: nick                                  on 2002/01/29  21:20:57
+        Log: Basics of a compiled Encode XS extension
+     Branch: perlio
+	   + ext/Encode/EUC_JP/EUC_JP.pm ext/Encode/EUC_JP/Makefile.PL
+	   + ext/Encode/Encode/euc-jp.ucm
+	   ! MANIFEST ext/Encode/Encode.xs ext/Encode/compile
+	   ! ext/Encode/encode.h
+____________________________________________________________________________
+[ 14489] By: nick                                  on 2002/01/29  18:40:54
+        Log: Integrate mainline
+     Branch: perlio
+	  +> ext/Encode/MANIFEST ext/Encode/README ext/Encode/lib/Encode.pm
+	  +> ext/Encode/lib/Encode/Encoding.pm
+	  +> ext/Encode/lib/Encode/Internal.pm ext/Encode/lib/Encode/Tcl.pm
+	  +> ext/Encode/lib/Encode/Tcl/Escape.pm
+	  +> ext/Encode/lib/Encode/Tcl/Extended.pm
+	  +> ext/Encode/lib/Encode/Tcl/HanZi.pm
+	  +> ext/Encode/lib/Encode/Tcl/Table.pm
+	  +> ext/Encode/lib/Encode/Unicode.pm ext/Encode/lib/Encode/XS.pm
+	  +> ext/Encode/lib/Encode/iso10646_1.pm
+	  +> ext/Encode/lib/Encode/ucs2_le.pm ext/Encode/lib/Encode/utf8.pm
+	  +> ext/Encode/lib/EncodeFormat.pod ext/Encode/t/Encode.t
+	  +> ext/Encode/t/Tcl.t
+	   - ext/Encode.t ext/Encode/Encode.pm
+	   - ext/Encode/Encode/EncodeFormat.pod ext/Encode/Encode/Tcl.pm
+	   - ext/Encode/Encode/Tcl.t ext/Encode/Todo
+	  !> (integrate 33 files)
 ____________________________________________________________________________
 [ 14488] By: jhi                                   on 2002/01/29  16:38:58
         Log: Subject: Re: [PATCH] Attribute::Handlers lexical refcount skew (was Re: lexical with attribute, refcount high)
@@ -1509,6 +1957,11 @@ ____________________________________________________________________________
      Branch: perl
 	   ! ext/B/t/assembler.t
 ____________________________________________________________________________
+[ 14481] By: jhi                                   on 2002/01/28  21:58:44
+        Log: metaconfig unit change for #14480.
+     Branch: metaconfig
+	   ! U/modified/Init.U
+____________________________________________________________________________
 [ 14480] By: jhi                                   on 2002/01/28  21:57:37
         Log: DJGPP needs to know its exe soon, too.
      Branch: perl
@@ -1526,6 +1979,28 @@ ____________________________________________________________________________
              Borland compilers. (Borland builds one or two oddities.)
      Branch: perl
 	  !> win32/config.bc win32/makefile.mk
+____________________________________________________________________________
+[ 14477] By: nick                                  on 2002/01/28  20:12:31
+        Log: Set makefile.mk CCHOME etc. for default locations of MinGW and free
+             Borland compilers. (Borland builds one or two oddities.)
+     Branch: perlio
+	   ! win32/config.bc win32/makefile.mk
+____________________________________________________________________________
+[ 14476] By: nick                                  on 2002/01/28  18:43:47
+        Log: Integrate mainline
+     Branch: perlio
+	  !> Configure hints/hpux.sh
+____________________________________________________________________________
+[ 14475] By: nick                                  on 2002/01/28  17:15:12
+        Log: Integrate mainline
+     Branch: perlio
+	  !> Changes Configure ext/B/B.xs hints/hpux.sh lib/warnings.t
+	  !> patchlevel.h pp_sys.c t/lib/warnings/perl
+____________________________________________________________________________
+[ 14474] By: jhi                                   on 2002/01/28  17:12:51
+        Log: metaconfig unit change for #14472.
+     Branch: metaconfig/U/perl
+	   ! d_u32align.U
 ____________________________________________________________________________
 [ 14473] By: jhi                                   on 2002/01/28  17:12:27
         Log: Misunderstood Merijn's patch.
@@ -1546,6 +2021,11 @@ ____________________________________________________________________________
         Log: BeOS has sockets but not true ones.
      Branch: perl
 	   ! pp_sys.c
+____________________________________________________________________________
+[ 14469] By: jhi                                   on 2002/01/28  14:04:44
+        Log: metaconfig unit change for #14467.
+     Branch: metaconfig/U/perl
+	   ! d_u32align.U
 ____________________________________________________________________________
 [ 14468] By: jhi                                   on 2002/01/28  14:03:01
         Log: For some strange reason under the smoke harness the alignment
@@ -1575,6 +2055,21 @@ ____________________________________________________________________________
         Log: Integrate perlio; the 0nothread test failure without threads.
      Branch: perl
 	  !> ext/threads/shared/t/0nothread.t
+____________________________________________________________________________
+[ 14463] By: nick                                  on 2002/01/28  08:22:36
+        Log: Integrate mainline
+     Branch: perlio
+	  !> (integrate 37 files)
+____________________________________________________________________________
+[ 14462] By: nick                                  on 2002/01/28  08:09:53
+        Log: 1st attempt at skipping broke threads case.
+     Branch: perlio
+	   ! ext/threads/shared/t/0nothread.t
+____________________________________________________________________________
+[ 14461] By: nick                                  on 2002/01/28  07:25:58
+        Log: Skip new threads::shared test unless -Duseithreads
+     Branch: perlio
+	   ! ext/threads/shared/t/0nothread.t
 ____________________________________________________________________________
 [ 14460] By: jhi                                   on 2002/01/28  03:37:30
         Log: FAQ sync.
@@ -1613,6 +2108,11 @@ ____________________________________________________________________________
              see the comment in locale.t for more details.
      Branch: perl
 	   ! lib/locale.t
+____________________________________________________________________________
+[ 14454] By: jhi                                   on 2002/01/27  22:37:48
+        Log: metaconfig unit change for #14453.
+     Branch: metaconfig/U/perl
+	   ! libperl.U
 ____________________________________________________________________________
 [ 14453] By: jhi                                   on 2002/01/27  22:36:08
         Log: Subject: Bleadperl on Cygwin today
@@ -1706,6 +2206,13 @@ ____________________________________________________________________________
      Branch: perl
 	   ! ext/B/B/Deparse.pm
 ____________________________________________________________________________
+[ 14439] By: gsar                                  on 2002/01/27  00:02:48
+        Log: integrate change#14431 from perlio branch (Nick's fix for
+             change#13474 to be more defensive about looking at pad entries
+             that may not exist yet)
+     Branch: maint-5.6/perl
+	   ! op.c
+____________________________________________________________________________
 [ 14438] By: jhi                                   on 2002/01/26  23:56:53
         Log: Comment to avoid later "cleanups."
      Branch: perl
@@ -1731,6 +2238,13 @@ ____________________________________________________________________________
      Branch: perl
 	  !> win32/config.vc win32/config_H.bc win32/config_H.gc
 	  !> win32/config_H.vc
+____________________________________________________________________________
+[ 14434] By: nick                                  on 2002/01/26  22:27:08
+        Log: "All tests successful" VC6.0 Win32
+             (Update config.vc to need cppstdin so those tests are skipped...)
+     Branch: perlio
+	   ! win32/config.vc win32/config_H.bc win32/config_H.gc
+	   ! win32/config_H.vc
 ____________________________________________________________________________
 [ 14433] By: jhi                                   on 2002/01/26  21:38:56
         Log: Integrate perlio;
@@ -1760,6 +2274,18 @@ ____________________________________________________________________________
 	  !> lib/File/Find/t/taint.t lib/Filter/Simple.pm mg.c op.c
 	  !> win32/perlhost.h win32/win32.c win32/win32.h win32/win32iop.h
 ____________________________________________________________________________
+[ 14432] By: nick                                  on 2002/01/26  21:10:38
+        Log: Gurusamy Sarathy <gsar@ActiveState.com>'s patch to Filter::Simple
+             for CRLF line endings.
+     Branch: perlio
+	   ! lib/Filter/Simple.pm
+____________________________________________________________________________
+[ 14431] By: nick                                  on 2002/01/26  21:08:35
+        Log: Fix/band-aid for op.c's anon CV leak fix co-existing with threads.
+             Should really be looked at by someone that knows about pads.
+     Branch: perlio
+	   ! op.c
+____________________________________________________________________________
 [ 14430] By: jhi                                   on 2002/01/26  20:54:16
         Log: Subject: Re: [PATCH @14417] vmsify Pod::Usage and its test
              From: "Craig A. Berry" <craigberry@mac.com>       
@@ -1767,6 +2293,40 @@ ____________________________________________________________________________
              Message-Id: <a05101000b87895064ee3@[172.16.52.1]>
      Branch: perl
 	   ! lib/Pod/Usage.pm lib/Pod/t/Usage.t
+____________________________________________________________________________
+[ 14429] By: nick                                  on 2002/01/26  18:04:22
+        Log: Tinkering with thread cleanup mutex-ing - not the problem 
+             (op.c is) but could have been...
+     Branch: perlio
+	   ! ext/threads/threads.xs
+____________________________________________________________________________
+[ 14428] By: nick                                  on 2002/01/26  18:03:13
+        Log: Win32 signal emulation cleanup.
+     Branch: perlio
+	   ! win32/perlhost.h win32/win32.c win32/win32.h win32/win32iop.h
+____________________________________________________________________________
+[ 14427] By: nick                                  on 2002/01/26  13:59:33
+        Log: If we get to sighandler by mistake (no perl handler set) then
+             warn() and exit() rather than die() - should never happen
+             but if it does context needed to die is likely to be trashed
+             as well.
+     Branch: perlio
+	   ! mg.c
+____________________________________________________________________________
+[ 14426] By: nick                                  on 2002/01/26  13:56:23
+        Log: Integrate mainline
+     Branch: perlio
+	  !> Changes NetWare/config_H.wc config_h.SH ext/Encode/Encode.xs
+	  !> op.c patchlevel.h pod/perldebguts.pod t/op/universal.t
+	  !> t/run/fresh_perl.t
+____________________________________________________________________________
+[ 14425] By: nick                                  on 2002/01/26  08:11:33
+        Log: 1st two tests of File/Find/t/find.t and taint.t were run after 
+             calling cleanup(). If previous fail had left for_find directory,
+             but no content in it then cleanup() returned cd'ed to that directory.
+             So tests failed. Fixed cleanup()-s.
+     Branch: perlio
+	   ! lib/File/Find/t/find.t lib/File/Find/t/taint.t
 ____________________________________________________________________________
 [ 14424] By: jhi                                   on 2002/01/25  22:10:11
         Log: Integrate perlio;
@@ -1791,6 +2351,25 @@ ____________________________________________________________________________
              Message-ID: <20020125231733.A11733@rafael>
      Branch: perl
 	   ! t/op/universal.t
+____________________________________________________________________________
+[ 14422] By: nick                                  on 2002/01/25  21:37:03
+        Log: Save $! so that other syscalls don't disturb it before 
+             we test it.
+     Branch: perlio
+	   ! ext/Socket/socketpair.t
+____________________________________________________________________________
+[ 14421] By: nick                                  on 2002/01/25  19:05:57
+        Log: More Win32 tuning
+     Branch: perlio
+	   ! t/op/stat.t t/op/taint.t
+____________________________________________________________________________
+[ 14420] By: nick                                  on 2002/01/25  18:21:42
+        Log: Fix winsystem.t's attempt to build showav.exe to work 
+             with gcc (which writes a.exe unless told with -o ).
+             Also put in a few more fail-safes to check .exe got 
+             built somehow.
+     Branch: perlio
+	   ! t/op/winsystem.t
 ____________________________________________________________________________
 [ 14419] By: jhi                                   on 2002/01/25  17:25:05
         Log: Subject: [Patch Encode.xs] calculation of need overflows
@@ -1870,10 +2449,51 @@ ____________________________________________________________________________
      Branch: perl
 	   ! pod/perldebguts.pod
 ____________________________________________________________________________
+[ 14414] By: jhi                                   on 2002/01/25  14:08:17
+        Log: metaconfig unit change for #14413.
+     Branch: metaconfig
+	   ! U/modified/prototype.U
+____________________________________________________________________________
 [ 14413] By: jhi                                   on 2002/01/25  14:05:49
         Log: Okay, you can come home now, _().
      Branch: perl
 	   ! config_h.SH
+____________________________________________________________________________
+[ 14412] By: nick                                  on 2002/01/25  11:01:49
+        Log: Integrate mainline
+             All but ../lib/Unicode/UCD.t pass.
+     Branch: perlio
+	  +> lib/unicore/ArabicShaping.txt lib/unicore/BidiMirroring.txt
+	  +> lib/unicore/CaseFolding.txt
+	  +> lib/unicore/CompositionExclusions.txt
+	  +> lib/unicore/EastAsianWidth.txt lib/unicore/LineBreak.txt
+	  +> lib/unicore/SpecialCasing.txt lib/unicore/UnicodeData.txt
+	  +> vos/vos.c
+	   - lib/unicore/ArabShap.txt lib/unicore/BidiMirr.txt
+	   - lib/unicore/CaseFold.txt lib/unicore/CompExcl.txt
+	   - lib/unicore/EAWidth.txt lib/unicore/LineBrk.txt
+	   - lib/unicore/NamesList.html lib/unicore/PropList.html
+	   - lib/unicore/SpecCase.txt lib/unicore/UCD.html
+	   - lib/unicore/Unicode.html lib/unicore/Unicode.txt
+	   - lib/unicore/rename
+	  !> (integrate 424 files)
+____________________________________________________________________________
+[ 14411] By: nick                                  on 2002/01/25  09:45:13
+        Log: Linux/NFS hackery was not faking right number of passes.
+     Branch: perlio
+	   ! t/io/fs.t
+____________________________________________________________________________
+[ 14410] By: nick                                  on 2002/01/25  09:35:07
+        Log: threads::shared tidy up:
+             - Add _id() function to shared.xs so we can test refs point at same thing.
+             - Use that rather that comparing stringified ref in shared/t/hv_refs.t
+             - Allow no_share to pass if sharing to works despite mis-ordering.
+             - Change docs of threads to document ->create() (as used in tests),
+             and not mention "new".
+     Branch: perlio
+	   ! ext/threads/shared/shared.pm ext/threads/shared/shared.xs
+	   ! ext/threads/shared/t/hv_refs.t ext/threads/shared/t/no_share.t
+	   ! ext/threads/threads.pm
 ____________________________________________________________________________
 [ 14409] By: jhi                                   on 2002/01/24  21:08:35
         Log: Subject: perldebguts minor tweaks
@@ -1917,6 +2537,11 @@ ____________________________________________________________________________
      Branch: perl
 	   ! pod/perldiag.pod pp_hot.c
 ____________________________________________________________________________
+[ 14404] By: jhi                                   on 2002/01/24  13:13:55
+        Log: metaconfig unit change for #14403.
+     Branch: metaconfig/U/perl
+	   ! d_u32align.U
+____________________________________________________________________________
 [ 14403] By: jhi                                   on 2002/01/24  13:13:29
         Log: Pacify picky compilers (this time Sun Workshop).
      Branch: perl
@@ -1930,6 +2555,11 @@ ____________________________________________________________________________
      Branch: perl
 	   ! lib/dumpvar.pl
 ____________________________________________________________________________
+[ 14401] By: nick                                  on 2002/01/24  07:50:38
+        Log: Expand command line test globs on Win32.
+     Branch: perlio
+	   ! t/harness
+____________________________________________________________________________
 [ 14400] By: jhi                                   on 2002/01/24  02:49:05
         Log: Sprinkle some copyrights (use the oldest timestamp to
              be found in the repository, which is most often not right,
@@ -1942,6 +2572,69 @@ ____________________________________________________________________________
 	   ! perlsdio.h perlsfio.h perlvars.h proto.h regcomp.h regexp.h
 	   ! scope.h sharedsv.h taint.c thrdvar.h thread.h universal.c
 	   ! unixish.h xsutils.c
+____________________________________________________________________________
+[ 14399] By: pudge                                 on 2002/01/23  21:00:29
+        Log: Don't crash on Help for long text (bug #506672)
+     Branch: maint-5.6/macperl
+	   ! macos/macperl/MPHelp.c
+____________________________________________________________________________
+[ 14398] By: pudge                                 on 2002/01/23  20:03:38
+        Log: Fix minor path problem
+     Branch: maint-5.6/macperl
+	   ! macos/macperl/Droplets/tarzipme.plx
+____________________________________________________________________________
+[ 14397] By: pudge                                 on 2002/01/23  20:03:19
+        Log: Minor text changes
+     Branch: maint-5.6/macperl
+	   ! macos/Perl.r
+____________________________________________________________________________
+[ 14396] By: pudge                                 on 2002/01/23  20:02:45
+        Log: Bump versions, dates, etc.
+     Branch: maint-5.6/macperl
+	   ! macos/MPVersion.r macos/macperl/MPPreferences.c perl.c
+____________________________________________________________________________
+[ 14395] By: pudge                                 on 2002/01/23  20:01:43
+        Log: coderefs in @INC and absolute paths
+     Branch: maint-5.6/macperl
+	   ! embed.h pp_ctl.c proto.h
+____________________________________________________________________________
+[ 14394] By: pudge                                 on 2002/01/23  20:00:35
+        Log: Minor module thingys
+     Branch: maint-5.6/macperl
+	   ! macos/ext/Mac/Controls/Controls.xs
+	   ! macos/ext/Mac/Files/Files.xs macos/ext/Mac/Gestalt/Gestalt.pm
+	   ! macos/ext/Mac/ImageCompression/ImageCompression.xs
+	   ! macos/ext/Mac/InternetConfig/InternetConfig.pm
+	   ! macos/ext/Mac/InternetConfig/InternetConfig.xs
+	   ! macos/ext/Mac/Memory/Memory.pm macos/ext/Mac/Memory/Memory.xs
+	   ! macos/ext/Mac/Menus/Menus.pm macos/ext/Mac/MoreFiles/MF.xs
+	   ! macos/ext/Mac/MoreFiles/MoreFiles.pm
+	   ! macos/ext/Mac/Movies/Movies.xs
+	   ! macos/ext/Mac/Navigation/Navigation.pm
+	   ! macos/ext/Mac/Navigation/Navigation.xs
+	   ! macos/ext/Mac/Notification/Notification.xs
+	   ! macos/ext/Mac/OSA/OSA.pm macos/ext/Mac/Processes/Processes.pm
+	   ! macos/ext/Mac/Processes/Processes.xs
+	   ! macos/ext/Mac/QDOffscreen/QDOffscreen.xs
+	   ! macos/ext/Mac/QuickDraw/QuickDraw.pm
+	   ! macos/ext/Mac/QuickDraw/QuickDraw.xs
+	   ! macos/ext/Mac/QuickTimeVR/QuickTimeVR.xs
+	   ! macos/ext/Mac/Resources/Resources.pm
+	   ! macos/ext/Mac/Resources/Resources.xs macos/ext/Mac/SAT/SAT.pm
+	   ! macos/ext/Mac/SAT/SAT.xs macos/ext/Mac/Sound/Sound.pm
+	   ! macos/ext/Mac/Sound/Sound.xs macos/ext/Mac/Speech/Speech.pm
+	   ! macos/ext/Mac/SpeechRecognition/SpeechRecognition.pm
+	   ! macos/lib/Mac/Glue.pm macos/lib/Mac/OSA/Simple.pm
+____________________________________________________________________________
+[ 14393] By: nick                                  on 2002/01/23  19:52:19
+        Log: Except Win32 from echo tests. (Alarm does not break into connect)
+     Branch: perlio
+	   ! ext/Socket/Socket.t
+____________________________________________________________________________
+[ 14392] By: nick                                  on 2002/01/23  19:31:57
+        Log: SvTEMP_off to stop private PV's being stolen and stored in shared space
+     Branch: perlio
+	   ! ext/threads/shared/shared.xs
 ____________________________________________________________________________
 [ 14391] By: jhi                                   on 2002/01/23  18:48:45
         Log: Copyright++.  (Not all the toplevel *.h have one, it seems.)
@@ -1972,6 +2665,19 @@ ____________________________________________________________________________
         Log: Small update on todo.  Could use a lot more.
      Branch: perl
 	   ! pod/perltodo.pod
+____________________________________________________________________________
+[ 14387] By: nick                                  on 2002/01/23  14:19:30
+        Log: thread::shared nearly working again - remaining issue
+             is references withing shared space.
+             Added bulk test with no threads involved (for debugging)
+             Tuned tests to skip those needing _thrcnt
+     Branch: perlio
+	   + ext/threads/shared/t/0nothread.t
+	   ! MANIFEST ext/threads/shared/shared.pm
+	   ! ext/threads/shared/shared.xs ext/threads/shared/t/av_simple.t
+	   ! ext/threads/shared/t/hv_refs.t
+	   ! ext/threads/shared/t/hv_simple.t
+	   ! ext/threads/shared/t/sv_simple.t
 ____________________________________________________________________________
 [ 14386] By: jhi                                   on 2002/01/23  14:19:01
         Log: Subject: [ID 20020121.003] perldata doco bug
@@ -2005,6 +2711,11 @@ ____________________________________________________________________________
      Branch: perl
 	   ! t/run/fresh_perl.t
 ____________________________________________________________________________
+[ 14382] By: jhi                                   on 2002/01/23  03:47:35
+        Log: metaconfig unit change for #14381.
+     Branch: metaconfig/U/perl
+	   ! d_u32align.U
+____________________________________________________________________________
 [ 14381] By: jhi                                   on 2002/01/23  03:47:05
         Log: HP-UX 10.20 cc pacifying from Merijn.
      Branch: perl
@@ -2028,6 +2739,21 @@ ____________________________________________________________________________
      Branch: perl
 	   ! utf8.h
 ____________________________________________________________________________
+[ 14378] By: nick                                  on 2002/01/22  20:33:15
+        Log: Implement recursive lock and use of scope for PL_sharedsv_space,
+             so now croak() from asserts does not leave locks.
+             Make hv_simple compile (new prototype for debugging probe).
+     Branch: perlio
+	   ! ext/threads/shared/shared.pm ext/threads/shared/shared.xs
+	   ! ext/threads/shared/t/hv_simple.t
+____________________________________________________________________________
+[ 14377] By: nick                                  on 2002/01/22  17:32:21
+        Log: Shared scalars working, some shared array ops working.
+     Branch: perlio
+	   ! ext/threads/shared/shared.pm ext/threads/shared/shared.xs
+	   ! ext/threads/shared/t/sv_refs.t
+	   ! ext/threads/shared/t/sv_simple.t ext/threads/threads.xs perl.h
+____________________________________________________________________________
 [ 14376] By: jhi                                   on 2002/01/22  16:46:48
         Log: Subject: [PATCH] Support truncate() in VOS port
              From: Paul_GreenVOS@vos.stratus.com
@@ -2036,6 +2762,16 @@ ____________________________________________________________________________
      Branch: perl
 	   + vos/vos.c
 	   ! MANIFEST hints/vos.sh vos/vosish.h
+____________________________________________________________________________
+[ 14375] By: jhi                                   on 2002/01/22  16:38:06
+        Log: metaconfig unit changes for #14374.  Couldn't figure
+             how to get completely rid of _() (some weird dependency
+             pulling it in?) so renamed it as PROTO_().
+     Branch: metaconfig
+	   + U/modified/d_shmat.U U/modified/prototype.U
+	   ! U/protos/d_drand48proto.U
+     Branch: metaconfig/U/perl
+	   ! d_sbrkproto.U d_sockatmarkproto.U d_telldirproto.U
 ____________________________________________________________________________
 [ 14374] By: jhi                                   on 2002/01/22  16:36:41
         Log: Get rid of the _() macro since (1) we require ANSI anyway
@@ -2048,6 +2784,20 @@ ____________________________________________________________________________
 	   ! vos/config.alpha.h vos/config.ga.h win32/config_H.bc
 	   ! win32/config_H.gc win32/config_H.vc win32/config_H.win64
 	   ! wince/config.h wince/config_H.ce
+____________________________________________________________________________
+[ 14373] By: nick                                  on 2002/01/22  10:10:48
+        Log: Miss mg_len == 0 meaning don't Safefree
+     Branch: perlio
+	   ! mg.c
+____________________________________________________________________________
+[ 14372] By: nick                                  on 2002/01/21  22:34:06
+        Log: XS side of new threads::shared designed, coded and compiles,
+             and mostly commented but is totaly untested.
+             submit in case anyone wants a preview.
+     Branch: perlio
+	   + ext/threads/shared/typemap
+	   ! MANIFEST ext/threads/shared/shared.pm
+	   ! ext/threads/shared/shared.xs
 ____________________________________________________________________________
 [ 14371] By: jhi                                   on 2002/01/21  19:36:04
         Log: Subject: [BUG] /\_/ an unrecognized escape?
@@ -2125,6 +2875,28 @@ ____________________________________________________________________________
      Branch: perl
 	   ! lib/ExtUtils/MakeMaker.pm
 ____________________________________________________________________________
+[ 14363] By: nick                                  on 2002/01/20  20:38:23
+        Log: Add new threads/typemap to MANIFEST
+     Branch: perlio
+	   ! MANIFEST
+____________________________________________________________________________
+[ 14362] By: nick                                  on 2002/01/20  20:34:36
+        Log: Integrate mainline
+     Branch: perlio
+	  +> lib/Pod/t/Usage.t
+	  !> Configure ext/Cwd/t/cwd.t ext/Devel/DProf/DProf.t
+	  !> ext/File/Glob/t/basic.t ext/SDBM_File/sdbm.t
+	  !> lib/ExtUtils/MM_BeOS.pm pod/perl5004delta.pod
+	  !> pod/perl5005delta.pod pod/perl561delta.pod pod/perl56delta.pod
+	  !> pod/perlfaq1.pod pod/perlfaq2.pod pod/perltoc.pod pp.c
+	  !> t/comp/script.t t/op/oct.t t/op/stat.t t/run/fresh_perl.t
+	  !> util.c
+____________________________________________________________________________
+[ 14361] By: nick                                  on 2002/01/20  18:51:47
+        Log: Integrate MANIFEST
+     Branch: perlio
+	  !> MANIFEST
+____________________________________________________________________________
 [ 14360] By: jhi                                   on 2002/01/20  17:11:12
         Log: Subject: [PATCH] lib/ExtUtils/t/Command.t -- VOS Fixes
              From: Paul_GreenVOS@vos.stratus.com
@@ -2154,6 +2926,23 @@ ____________________________________________________________________________
      Branch: perl
 	   ! ext/File/Glob/t/basic.t
 ____________________________________________________________________________
+[ 14357] By: jhi                                   on 2002/01/20  16:44:29
+        Log: #14352 deleted ext/threads/threads.h
+     Branch: perlio
+	   ! MANIFEST
+____________________________________________________________________________
+[ 14356] By: jhi                                   on 2002/01/20  16:40:34
+        Log: Eradicate sharedsv.*
+     Branch: perlio
+	   ! NetWare/Makefile vos/build.cm win32/Makefile wince/Makefile.ce
+____________________________________________________________________________
+[ 14355] By: nick                                  on 2002/01/20  11:50:22
+        Log: threads work again on Win32. (Not threads::shared yet)
+             Submit to see if they do on Linux.
+     Branch: perlio
+	   ! ext/threads/shared/shared.xs ext/threads/threads.xs
+	   ! win32/makefile.mk
+____________________________________________________________________________
 [ 14354] By: jhi                                   on 2002/01/20  06:35:54
         Log: Make also hex() and oct() to croak if their arguments
              cannot be downgraded (that is, if they contain wide
@@ -2161,6 +2950,24 @@ ____________________________________________________________________________
              feature of sv_utf8_downgrade()).
      Branch: perl
 	   ! pp.c t/op/oct.t
+____________________________________________________________________________
+[ 14353] By: nick                                  on 2002/01/19  22:20:09
+        Log: Integrate Time/Local and its test
+     Branch: perlio
+	  !> lib/Time/Local.pm lib/Time/Local.t
+____________________________________________________________________________
+[ 14352] By: nick                                  on 2002/01/19  22:17:07
+        Log: Nearly-working threads re-structuring. Do not integrate,
+             submit-ing to get to Win32, and as "off site" backup.
+     Branch: perlio
+	   + ext/threads/typemap
+	   - ext/threads/threads.h sharedsv.c sharedsv.h
+	   ! MANIFEST Makefile.SH Makefile.micro embed.fnc embed.h
+	   ! embedvar.h ext/threads/shared/shared.pm
+	   ! ext/threads/shared/shared.xs ext/threads/threads.pm
+	   ! ext/threads/threads.xs global.sym intrpvar.h mg.c mg.h perl.h
+	   ! perlapi.c perlapi.h perlvars.h pod/perlapi.pod
+	   ! pod/perlintern.pod pp.c proto.h sv.c sv.h util.c
 ____________________________________________________________________________
 [ 14351] By: jhi                                   on 2002/01/19  21:06:58
         Log: Regen toc.
@@ -2205,7 +3012,7 @@ ____________________________________________________________________________
 	  !> pod/perlapi.pod pod/perlintern.pod proto.h sv.c util.c
 ____________________________________________________________________________
 [ 14345] By: gbarr                                 on 2002/01/19  16:51:23
-        Log: Alternative Time::Local algorithm that uses matematical formula
+        Log: Alternative Time::Local algorithm that uses matemathical formula
              for timegm instead of progressive guessing
      Branch: perl
 	   ! lib/Time/Local.pm
@@ -2263,16 +3070,52 @@ ____________________________________________________________________________
      Branch: perl
 	   ! lib/ExtUtils/MM_BeOS.pm
 ____________________________________________________________________________
+[ 14337] By: jhi                                   on 2002/01/19  02:48:15
+        Log: metaconfig unit change for #14336.
+     Branch: metaconfig
+	   ! U/modified/myhostname.U
+____________________________________________________________________________
 [ 14336] By: jhi                                   on 2002/01/19  02:47:50
         Log: Avoid bare "set", and kiss .uucp goodbye.
      Branch: perl
 	   ! Configure
+____________________________________________________________________________
+[ 14335] By: nick                                  on 2002/01/18  22:11:42
+        Log: Split out core of sv_magic() into sv_magicext().
+             sv_magic provides the extra restictions (no READONLY, only
+             one of each type, canned set of vtables), and sv_magicext()
+             does the actual data twiddling.
+             Also enhances semantics of ->mg_ptr setting via name/namlen
+             to allow either an uncopied ptr (namlen == 0), or a Newz()ed
+             scratch area (namlen > 0 && name == NULL).
+             sv_magicext also returns the MAGIC * it added.
+             sv_magicext is intended mainly for PERL_MAGIC_ext (~) magic.
+             
+             To come sv_unmagicext() - which will remove just one magic
+             of particular type, and additionaly match against ->mg_ptr,
+             or the MAGIC * (need to experiment as to which is more natural).
+     Branch: perlio
+	   ! embed.fnc embed.h embedvar.h global.sym perlapi.c perlapi.h
+	   ! pod/perlapi.pod pod/perlintern.pod proto.h sv.c util.c
 ____________________________________________________________________________
 [ 14334] By: jhi                                   on 2002/01/18  21:16:08
         Log: Retract #14327 for now, going to the limit seems
              to be too much for many platforms.
      Branch: perl
 	   ! lib/Time/Local.t
+____________________________________________________________________________
+[ 14333] By: nick                                  on 2002/01/18  18:58:33
+        Log: Integrate mainline
+     Branch: perlio
+	  !> Changes patchlevel.h
+____________________________________________________________________________
+[ 14332] By: nick                                  on 2002/01/18  16:19:06
+        Log: Integrate mainline
+     Branch: perlio
+	  +> lib/ExtUtils/Changes lib/ExtUtils/instmodsh
+	  +> lib/ExtUtils/t/hints.t t/lib/TieOut.pm
+	   - lib/ExtUtils/inst
+	  !> (integrate 32 files)
 ____________________________________________________________________________
 [ 14331] By: jhi                                   on 2002/01/18  16:09:38
         Log: Update Changes.
@@ -2398,6 +3241,11 @@ ____________________________________________________________________________
      Branch: perl
 	   ! lib/ExtUtils/MakeMaker.pm
 ____________________________________________________________________________
+[ 14316] By: jhi                                   on 2002/01/17  22:14:56
+        Log: metaconfig unit change for #14315.
+     Branch: metaconfig/U/perl
+	   ! uselongdbl.U
+____________________________________________________________________________
 [ 14315] By: jhi                                   on 2002/01/17  22:13:44
         Log: Subject: [PATCH] long doubles
              From: Nicholas Clark <nick@unfortu.net>
@@ -2406,6 +3254,11 @@ ____________________________________________________________________________
      Branch: perl
 	   ! Configure
 ____________________________________________________________________________
+[ 14314] By: jhi                                   on 2002/01/17  21:52:03
+        Log: metaconfig unit change for #14313.
+     Branch: metaconfig
+	   ! U/modified/i_ndbm.U
+____________________________________________________________________________
 [ 14313] By: jhi                                   on 2002/01/17  21:51:05
         Log: Subject: [PATCH] Trivial Configure patch (really i_ndbm.U)
              From: Andy Dougherty <doughera@lafayette.edu>
@@ -2413,6 +3266,19 @@ ____________________________________________________________________________
              Message-ID: <Pine.SOL.4.10.10201171141280.25122-100000@maxwell.phys.lafayette.edu>
      Branch: perl
 	   ! Configure
+____________________________________________________________________________
+[ 14312] By: nick                                  on 2002/01/17  21:38:38
+        Log: Integrate mainline (for ndbm fixes etc.)
+     Branch: perlio
+	  +> t/run/fresh_perl.t
+	   - t/run/kill_perl.t
+	  !> Changes MANIFEST ext/Opcode/Opcode.xs
+	  !> ext/SDBM_File/sdbm/Makefile.PL
+	  !> ext/Unicode/Normalize/Normalize.pm lib/Attribute/Handlers.pm
+	  !> lib/Attribute/Handlers/t/multi.t lib/ExtUtils/MM_Unix.pm
+	  !> lib/ExtUtils/MakeMaker.pm lib/ExtUtils/t/MM_Unix.t
+	  !> lib/Text/Tabs.pm mg.c patchlevel.h scope.c t/io/fs.t
+	  !> t/lib/warnings/mg t/op/crypt.t t/test.pl
 ____________________________________________________________________________
 [ 14311] By: sky                                   on 2002/01/17  21:01:00
         Log: Simplify the code that duplicates the threads 
@@ -2530,6 +3396,18 @@ ____________________________________________________________________________
      Branch: perl
 	  !> ext/Socket/Socket.xs
 ____________________________________________________________________________
+[ 14296] By: nick                                  on 2002/01/16  13:02:29
+        Log: offsetof() is in <stddef.h>
+     Branch: perlio
+	   ! ext/Socket/Socket.xs
+____________________________________________________________________________
+[ 14295] By: nick                                  on 2002/01/16  07:25:29
+        Log: Integrate mainline
+     Branch: perlio
+	  +> (branch 262 files)
+	   - (delete 285 files)
+	  !> (integrate 34 files)
+____________________________________________________________________________
 [ 14294] By: jhi                                   on 2002/01/16  05:37:29
         Log: Jeffrey's Unicode adventure continues: unify the In/*.pl
              and Is/*.pl to lib/*.pl, remove In.pl and Is.pl, introduce
@@ -2627,6 +3505,14 @@ ____________________________________________________________________________
 	   - lib/unicore/Is/IDStart.pl
 	   ! (edit 200 files)
 ____________________________________________________________________________
+[ 14288] By: jhi                                   on 2002/01/15  17:56:29
+        Log: metaconfig unit changes for #14287.
+     Branch: metaconfig
+	   + U/modified/Chk_MANI.U
+	   ! U/modified/Extract.U U/modified/Finish.U
+     Branch: metaconfig/U/perl
+	   ! Extensions.U dlsrc.U
+____________________________________________________________________________
 [ 14287] By: jhi                                   on 2002/01/15  17:55:54
         Log: Some protection against spaces in directory names.
              (Tru64 still has some makedepend problems in such
@@ -2673,6 +3559,150 @@ ____________________________________________________________________________
      Branch: perl
 	  !> (integrate 28 files)
 ____________________________________________________________________________
+[ 14283] By: pudge                                 on 2002/01/15  15:21:30
+        Log: Add Shuck URL
+     Branch: maint-5.6/macperl
+	   ! macos/macperl/MacPerl.podhelp
+____________________________________________________________________________
+[ 14282] By: pudge                                 on 2002/01/15  15:21:18
+        Log: Remove obsolete docs
+     Branch: maint-5.6/macperl
+	   ! ext/File/Glob/Glob.pm
+____________________________________________________________________________
+[ 14281] By: nick                                  on 2002/01/15  15:08:43
+        Log: Correct slab allocator for case where sizeof(IV) > sizeof(IV *)
+             e.g. -Duse64bitint on a 32-bit platform.
+             Now uses I32 for use-count and is more careful with its casts.
+     Branch: perlio
+	   ! intrpvar.h op.c
+____________________________________________________________________________
+[ 14280] By: pudge                                 on 2002/01/15  14:55:25
+        Log: Update bundled modules.  Yow!
+     Branch: maint-5.6/macperl
+	   + macos/bundled_ext/Compress/Zlib/constants.h
+	   + macos/bundled_ext/Compress/Zlib/constants.xs
+	   + macos/bundled_ext/Filter/Util/Call/ppport.h
+	   + macos/bundled_ext/Storable/t/compat-0.6.t
+	   + macos/bundled_ext/Storable/t/dump.pl
+	   + macos/bundled_lib/blib/lib/Mail/Mailer/qmail.pm
+	   + macos/bundled_lib/blib/lib/Net/HTTP/Methods.pm
+	   + macos/bundled_lib/blib/lib/Net/HTTPS.pm
+	   + macos/bundled_lib/blib/lib/URI/ssh.pm
+	   + macos/bundled_lib/t/Filter/Simple/ExportTest.pm
+	   + macos/bundled_lib/t/Filter/Simple/FilterOnlyTest.pm
+	   + macos/bundled_lib/t/Filter/Simple/FilterTest.pm
+	   + macos/bundled_lib/t/Filter/Simple/ImportTest.pm
+	   + macos/bundled_lib/t/Filter/Simple/data.t
+	   + macos/bundled_lib/t/Filter/Simple/export.t
+	   + macos/bundled_lib/t/Filter/Simple/filter_only.t
+	   + macos/bundled_lib/t/Filter/Simple/import.t
+	   + macos/bundled_lib/t/NEXT/actual.t
+	   + macos/bundled_lib/t/NEXT/actuns.t
+	   + macos/bundled_lib/t/NEXT/next.t
+	   + macos/bundled_lib/t/NEXT/unseen.t
+	   + macos/bundled_lib/t/libnet/netrc.t
+	   + macos/bundled_lib/t/libwww-perl/base/http.t
+	   + macos/bundled_lib/t/libwww-perl/live/activestate.t
+	   - macos/bundled_ext/Filter/t/FilterTest.pm
+	   - macos/bundled_ext/Storable/t/compat06.t
+	   - macos/bundled_ext/Storable/t/st-dump.pl
+	   - macos/bundled_lib/t/NEXT/test.pl
+	   - macos/bundled_lib/t/libwww-perl/live/google.t
+	   ! macos/bundled_ext/Compress/Zlib/ANNOUNCE
+	   ! macos/bundled_ext/Compress/Zlib/Makefile.PL
+	   ! macos/bundled_ext/Compress/Zlib/Makefile.mk
+	   ! macos/bundled_ext/Compress/Zlib/README
+	   ! macos/bundled_ext/Compress/Zlib/Zlib.pm
+	   ! macos/bundled_ext/Compress/Zlib/Zlib.xs
+	   ! macos/bundled_ext/Compress/Zlib/t/examples.t
+	   ! macos/bundled_ext/Filter/Util/Call/Call.pm
+	   ! macos/bundled_ext/Filter/Util/Call/Call.xs
+	   ! macos/bundled_ext/Filter/Util/Call/Makefile.PL
+	   ! macos/bundled_ext/Filter/t/call.t
+	   ! macos/bundled_ext/Filter/t/filter-util.pl
+	   ! macos/bundled_ext/Storable/ChangeLog
+	   ! macos/bundled_ext/Storable/README
+	   ! macos/bundled_ext/Storable/Storable.pm
+	   ! macos/bundled_ext/Storable/t/blessed.t
+	   ! macos/bundled_ext/Storable/t/canonical.t
+	   ! macos/bundled_ext/Storable/t/dclone.t
+	   ! macos/bundled_ext/Storable/t/forgive.t
+	   ! macos/bundled_ext/Storable/t/freeze.t
+	   ! macos/bundled_ext/Storable/t/lock.t
+	   ! macos/bundled_ext/Storable/t/overload.t
+	   ! macos/bundled_ext/Storable/t/recurse.t
+	   ! macos/bundled_ext/Storable/t/retrieve.t
+	   ! macos/bundled_ext/Storable/t/store.t
+	   ! macos/bundled_ext/Storable/t/tied.t
+	   ! macos/bundled_ext/Storable/t/tied_hook.t
+	   ! macos/bundled_ext/Storable/t/tied_items.t
+	   ! macos/bundled_ext/Storable/t/utf8.t
+	   ! macos/bundled_lib/blib/lib/File/Sort.pm
+	   ! macos/bundled_lib/blib/lib/Filter/Simple.pm
+	   ! macos/bundled_lib/blib/lib/HTTP/Headers.pm
+	   ! macos/bundled_lib/blib/lib/HTTP/Message.pm
+	   ! macos/bundled_lib/blib/lib/HTTP/Negotiate.pm
+	   ! macos/bundled_lib/blib/lib/HTTP/Request.pm
+	   ! macos/bundled_lib/blib/lib/HTTP/Response.pm
+	   ! macos/bundled_lib/blib/lib/LWP.pm
+	   ! macos/bundled_lib/blib/lib/LWP/Authen/Digest.pm
+	   ! macos/bundled_lib/blib/lib/LWP/Protocol/http.pm
+	   ! macos/bundled_lib/blib/lib/LWP/Protocol/https.pm
+	   ! macos/bundled_lib/blib/lib/LWP/UserAgent.pm
+	   ! macos/bundled_lib/blib/lib/Mail/Address.pm
+	   ! macos/bundled_lib/blib/lib/Mail/Cap.pm
+	   ! macos/bundled_lib/blib/lib/Mail/Field.pm
+	   ! macos/bundled_lib/blib/lib/Mail/Field/AddrList.pm
+	   ! macos/bundled_lib/blib/lib/Mail/Field/Date.pm
+	   ! macos/bundled_lib/blib/lib/Mail/Filter.pm
+	   ! macos/bundled_lib/blib/lib/Mail/Header.pm
+	   ! macos/bundled_lib/blib/lib/Mail/Internet.pm
+	   ! macos/bundled_lib/blib/lib/Mail/Mailer.pm
+	   ! macos/bundled_lib/blib/lib/Mail/Mailer/test.pm
+	   ! macos/bundled_lib/blib/lib/Mail/Send.pm
+	   ! macos/bundled_lib/blib/lib/Mail/Util.pm
+	   ! macos/bundled_lib/blib/lib/NEXT.pm
+	   ! macos/bundled_lib/blib/lib/Net/Config.pm
+	   ! macos/bundled_lib/blib/lib/Net/Domain.pm
+	   ! macos/bundled_lib/blib/lib/Net/FTP.pm
+	   ! macos/bundled_lib/blib/lib/Net/FTP/E.pm
+	   ! macos/bundled_lib/blib/lib/Net/FTP/L.pm
+	   ! macos/bundled_lib/blib/lib/Net/HTTP.pm
+	   ! macos/bundled_lib/blib/lib/Net/NNTP.pm
+	   ! macos/bundled_lib/blib/lib/Net/POP3.pm
+	   ! macos/bundled_lib/blib/lib/Net/SMTP.pm
+	   ! macos/bundled_lib/blib/lib/Net/libnetFAQ.pod
+	   ! macos/bundled_lib/blib/lib/Switch.pm
+	   ! macos/bundled_lib/blib/lib/Text/Balanced.pm
+	   ! macos/bundled_lib/blib/lib/URI/Escape.pm
+	   ! macos/bundled_lib/blib/lib/URI/ftp.pm
+	   ! macos/bundled_lib/blib/lib/lwpcook.pod
+	   ! macos/bundled_lib/t/Filter/Simple/filter.t
+	   ! macos/bundled_lib/t/Switch/t/nested.t
+	   ! macos/bundled_lib/t/Text/Balanced/t/extbrk.t
+	   ! macos/bundled_lib/t/Text/Balanced/t/extcbk.t
+	   ! macos/bundled_lib/t/Text/Balanced/t/extdel.t
+	   ! macos/bundled_lib/t/Text/Balanced/t/extmul.t
+	   ! macos/bundled_lib/t/Text/Balanced/t/extqlk.t
+	   ! macos/bundled_lib/t/Text/Balanced/t/exttag.t
+	   ! macos/bundled_lib/t/Text/Balanced/t/extvar.t
+	   ! macos/bundled_lib/t/Text/Balanced/t/gentag.t
+	   ! macos/bundled_lib/t/libnet/config.t
+	   ! macos/bundled_lib/t/libnet/ftp.t
+	   ! macos/bundled_lib/t/libnet/hostname.t
+	   ! macos/bundled_lib/t/libnet/nntp.t
+	   ! macos/bundled_lib/t/libnet/require.t
+	   ! macos/bundled_lib/t/libnet/smtp.t
+	   ! macos/bundled_lib/t/libwww-perl/base/headers.t
+	   ! macos/bundled_lib/t/libwww-perl/base/negotiate.t
+	   ! macos/bundled_lib/t/libwww-perl/live/jigsaw-auth-b.t
+	   ! macos/bundled_lib/t/libwww-perl/live/jigsaw-auth-d.t
+	   ! macos/bundled_lib/t/libwww-perl/live/jigsaw-chunk.t
+	   ! macos/bundled_lib/t/libwww-perl/live/jigsaw-md5.t
+	   ! macos/bundled_lib/t/libwww-perl/live/jigsaw-te.t
+	   ! macos/bundled_lib/t/libwww-perl/live/validator.t
+	   ! macos/lib/Mac/AppleEvents/Simple.pm macos/lib/Mac/Glue.pm
+____________________________________________________________________________
 [ 14279] By: jhi                                   on 2002/01/15  14:43:04
         Log: Subject: [PATCH] Socket::sockaddr_family
              From: Gisle Aas <gisle@ActiveState.com> 
@@ -2688,6 +3718,11 @@ ____________________________________________________________________________
              Message-ID: <20020115153630.A11568@rafael>
      Branch: perl
 	   ! pod/perldiag.pod
+____________________________________________________________________________
+[ 14277] By: nick                                  on 2002/01/15  14:30:51
+        Log: Correct name of PL_OP_SLAB_ALLOC
+     Branch: perlio
+	   ! perl.h
 ____________________________________________________________________________
 [ 14276] By: jhi                                   on 2002/01/15  14:22:38
         Log: NetWare tweak from Ananth Kesari.
@@ -2723,6 +3758,44 @@ ____________________________________________________________________________
         Log: Additional utf8_heavy.pl tweak from Jeffrey.
      Branch: perl
 	   ! lib/utf8_heavy.pl
+____________________________________________________________________________
+[ 14271] By: nick                                  on 2002/01/15  11:29:47
+        Log: Regen embed enable slab for PERL_IMPLICIT_SYS
+     Branch: perlio
+	   ! embed.h embedvar.h global.sym perl.h perlapi.c perlapi.h
+	   ! pod/perlapi.pod pod/perlintern.pod proto.h toke.c
+____________________________________________________________________________
+[ 14270] By: nick                                  on 2002/01/15  08:19:08
+        Log: Integrate rest of mainline
+     Branch: perlio
+	  !> (integrate 28 files)
+____________________________________________________________________________
+[ 14269] By: nick                                  on 2002/01/15  08:02:44
+        Log: Typo in #else branch of PL_SLAB_ALLOC
+     Branch: perlio
+	   ! op.c
+____________________________________________________________________________
+[ 14268] By: nick                                  on 2002/01/15  07:57:47
+        Log: const-ness fix in savepv's passing of NULL
+     Branch: perlio
+	   ! util.c
+____________________________________________________________________________
+[ 14267] By: nick                                  on 2002/01/15  07:42:17
+        Log: Hand merge of non slab allocator stuff
+     Branch: perlio
+	   ! op.c
+____________________________________________________________________________
+[ 14266] By: nick                                  on 2002/01/15  07:39:33
+        Log: Slab allocator submit after resolve -ay to keep it!
+     Branch: perlio
+	  !> op.c
+____________________________________________________________________________
+[ 14265] By: nick                                  on 2002/01/15  07:05:06
+        Log: Blind integrate of bulk of mainline.
+     Branch: perlio
+	  +> (branch 173 files)
+	   - (delete 184 files)
+	  !> (integrate 146 files)
 ____________________________________________________________________________
 [ 14264] By: jhi                                   on 2002/01/15  04:19:11
         Log: Pod nits.
@@ -2760,6 +3833,35 @@ ____________________________________________________________________________
              Message-ID: <20020114231843.E691@rafael>   
      Branch: perl
 	   ! pod/perlsub.pod t/op/override.t toke.c
+____________________________________________________________________________
+[ 14259] By: nick                                  on 2002/01/14  22:02:49
+        Log: Use PerlMemShared for CopSTASHPV and CopFILE.  MUCH harder than it sounds!
+             Need to use CopXXXXX macros everywhere and add CopSTASH_free
+             Add new scope type and add support for it to scope.c and scope stack
+             dup-er in sv.c. Add savesharedpv().
+             Also zealous version of Win32's vmem.h to catch all the abuses.
+             With this t/op/fork.t passes even with zealous checking and 
+             checker is point a finger at various threads/shared issues.
+             
+             PL_curcop->cop_io is still an issue.
+     Branch: perlio
+	   ! cop.h embed.fnc embed.h embedvar.h global.sym op.c op.h perl.c
+	   ! perlapi.c perlapi.h pod/perlapi.pod pod/perlintern.pod proto.h
+	   ! scope.c scope.h sv.c toke.c util.c win32/config_H.vc
+	   ! win32/config_h.PL win32/perlhost.h win32/perllib.c
+	   ! win32/vmem.h win32/win32.c win32/win32.h
+____________________________________________________________________________
+[ 14258] By: nick                                  on 2002/01/14  20:24:28
+        Log: Integrate build parts of mainline
+     Branch: perlio
+	  !> lib/ExtUtils/MM_Unix.pm lib/ExtUtils/t/MM_Unix.t
+	  !> lib/ExtUtils/t/MM_Win32.t
+____________________________________________________________________________
+[ 14257] By: nick                                  on 2002/01/14  16:10:54
+        Log: Inverted sense of special-ness of specialCopIO - supposed to 
+             be true if value is "special" i.e. NOT an SV.
+     Branch: perlio
+	   ! perlio.h
 ____________________________________________________________________________
 [ 14256] By: jhi                                   on 2002/01/14  14:42:12
         Log: Update Changes.
@@ -2809,6 +3911,15 @@ ____________________________________________________________________________
      Branch: perl
 	  !> embed.fnc embed.h embedvar.h global.sym intrpvar.h op.c perl.h
 	  !> perlapi.c perlapi.h proto.h
+____________________________________________________________________________
+[ 14250] By: nick                                  on 2002/01/13  23:22:34
+        Log: Slab allocator for ops
+             - moved the statics to intrpvar.h
+             - implemented Slab_Free()
+             - uses PerlMemShared (for now) if distinction exists.
+     Branch: perlio
+	   ! embed.fnc embed.h embedvar.h global.sym intrpvar.h op.c perl.h
+	   ! perlapi.c perlapi.h proto.h
 ____________________________________________________________________________
 [ 14249] By: jhi                                   on 2002/01/13  19:55:10
         Log: Start a new test category: uni.  Much of t/op/pat
@@ -2944,6 +4055,19 @@ ____________________________________________________________________________
      Branch: perl
 	   ! ext/Socket/socketpair.t
 ____________________________________________________________________________
+[ 14233] By: nick                                  on 2002/01/13  16:29:30
+        Log: Integrate mainline
+     Branch: perlio
+	  +> ext/B/C/C.xs ext/B/C/Makefile.PL t/op/unisprintf.t
+	  !> (integrate 46 files)
+____________________________________________________________________________
+[ 14232] By: nick                                  on 2002/01/13  15:37:48
+        Log: Win32 fixes:
+             - vmem.h hack to handle free-by-wrong-thread after eval "".
+             - Initialize timerid 
+     Branch: perlio
+	   ! win32/perlhost.h win32/perllib.c win32/vmem.h win32/win32.c
+____________________________________________________________________________
 [ 14231] By: jhi                                   on 2002/01/13  05:15:01
         Log: *groan*
      Branch: perl
@@ -2969,6 +4093,11 @@ ____________________________________________________________________________
         Log: Update Changes.
      Branch: perl
 	   ! Changes patchlevel.h
+____________________________________________________________________________
+[ 14226] By: jhi                                   on 2002/01/12  20:28:23
+        Log: metaconfig unit change for #14225.
+     Branch: metaconfig
+	   + U/modified/i_ndbm.U
 ____________________________________________________________________________
 [ 14225] By: jhi                                   on 2002/01/12  20:28:05
         Log: Subject: [PATCH 2] Re: [PATCH Configure ext/NDBM_File/hints/linux.pl] Support for linux systems with gdbm
@@ -3050,6 +4179,19 @@ ____________________________________________________________________________
              Message-ID: <15423.26442.891378.802062@soda.csua.berkeley.edu>
      Branch: perl
 	   ! ext/B/t/concise.t
+____________________________________________________________________________
+[ 14214] By: nick                                  on 2002/01/12  12:31:12
+        Log: Win32-ize socketpair test
+             - Win32 can fork even though $Config{d_fork} is undef
+             - SOCK_DGRAM does not work - skip those tests.
+     Branch: perlio
+	   ! ext/Socket/socketpair.t
+____________________________________________________________________________
+[ 14213] By: nick                                  on 2002/01/12  11:46:28
+        Log: Abstract out the cloning of SvPVX and handle shared pv in a 
+             safe (if suboptimal) manner. Does not fix op/fork.t :-(
+     Branch: perlio
+	   ! sv.c
 ____________________________________________________________________________
 [ 14212] By: ams                                   on 2002/01/12  06:10:52
         Log: Subject: [PATCH] More fixes for Stratus VOS
@@ -3159,6 +4301,14 @@ ____________________________________________________________________________
      Branch: perl
 	  !> win32/win32.c
 ____________________________________________________________________________
+[ 14196] By: nick                                  on 2002/01/11  20:58:20
+        Log: Install dummy signal() handlers for Win32's SIGINT and SIGBREAK
+             as C runtime seems to get its hands on them even though we said
+             they were handled.
+             Still an issue with "die" out of signal handler - get panic: pp_iter
+     Branch: perlio
+	   ! win32/win32.c
+____________________________________________________________________________
 [ 14195] By: jhi                                   on 2002/01/11  20:07:35
         Log: Integrate perlio;
              A mostly-stable version of "new" Win32 signal/kill support.
@@ -3181,6 +4331,29 @@ ____________________________________________________________________________
              somewhat freer form.
      Branch: perl
 	   ! doop.c sv.c
+____________________________________________________________________________
+[ 14193] By: nick                                  on 2002/01/11  18:25:34
+        Log: Integrate mainline (on Win32 - risky) for vmem.h stuff
+             Builds and passes a few tests.
+     Branch: perlio
+	  +> ext/B/t/concise.t lib/Test/Harness/Assert.pm
+	  +> lib/Test/Harness/Iterator.pm lib/Test/Harness/Straps.pm
+	  +> lib/Test/Harness/t/00compile.t lib/Test/Harness/t/assert.t
+	  +> lib/Test/Harness/t/callback.t lib/Test/Harness/t/nonumbers.t
+	  +> lib/Test/Harness/t/strap-analyze.t lib/Test/Harness/t/strap.t
+	  +> lib/Test/Simple/t/buffer.t lib/Test/Simple/t/diag.t
+	  +> t/lib/sample-tests/lone_not_bug
+	  +> t/lib/sample-tests/out_of_order t/lib/sample-tests/taint
+	  +> t/lib/sample-tests/vms_nit
+	  !> (integrate 63 files)
+____________________________________________________________________________
+[ 14192] By: nick                                  on 2002/01/11  17:49:39
+        Log: A mostly-stable version of "new" Win32 signal/kill support.
+     Branch: perlio
+	   ! XSUB.h mg.c win32/config.bc win32/config.gc win32/config.vc
+	   ! win32/config_H.bc win32/config_H.gc win32/config_H.vc
+	   ! win32/config_h.PL win32/makefile.mk win32/win32.c
+	   ! win32/win32.h
 ____________________________________________________________________________
 [ 14191] By: jhi                                   on 2002/01/11  15:34:53
         Log: Update Changes.
@@ -3381,6 +4554,23 @@ ____________________________________________________________________________
      Branch: perl
 	   ! ext/Encode/Encode.pm
 ____________________________________________________________________________
+[ 14168] By: nick                                  on 2002/01/10  17:33:31
+        Log: Integrate mainline
+     Branch: perlio
+	   - ext/Unicode/Normalize/Normalize.pod
+	  !> MANIFEST ext/B/B/Concise.pm ext/B/B/Deparse.pm ext/B/O.pm
+	  !> ext/Unicode/Normalize/Makefile.PL
+	  !> ext/Unicode/Normalize/Normalize.pm
+	  !> ext/Unicode/Normalize/Normalize.xs
+	  !> ext/Unicode/Normalize/mkheader hints/linux.sh pod/perlrun.pod
+	  !> pod/perlunicode.pod regexec.c t/lib/strict/vars t/op/readdir.t
+	  !> t/run/kill_perl.t toke.c
+____________________________________________________________________________
+[ 14167] By: nick                                  on 2002/01/10  17:08:35
+        Log: More signal hackery
+     Branch: perlio
+	   ! win32/win32.c
+____________________________________________________________________________
 [ 14166] By: jhi                                   on 2002/01/10  15:24:41
         Log: I think we can claim to be supporting Unicode
              "loose matching" now.
@@ -3423,6 +4613,11 @@ ____________________________________________________________________________
              Message-ID: <lrg05e7nx3.fsf@caliper.activestate.com>
      Branch: perl
 	   ! t/lib/strict/vars toke.c
+____________________________________________________________________________
+[ 14160] By: nick                                  on 2002/01/09  21:29:39
+        Log: Skeleton coding of more kill() support on Win32.
+     Branch: perlio
+	   ! win32/win32.c
 ____________________________________________________________________________
 [ 14159] By: jhi                                   on 2002/01/09  21:28:13
         Log: Subject: [PATCH] B::Deparse : support for \[...] prototypes
@@ -3474,10 +4669,25 @@ ____________________________________________________________________________
      Branch: perl
 	   ! t/op/readdir.t
 ____________________________________________________________________________
+[ 14153] By: nick                                  on 2002/01/09  16:18:57
+        Log: Integrate mainline
+     Branch: perlio
+	  +> ext/threads/t/stress_re.t t/op/unifold.t
+	   - lib/unifold.t
+	  !> Changes MANIFEST Makefile.SH ext/B/B/Deparse.pm op.c
+	  !> patchlevel.h pod/perldebug.pod regcomp.c regexec.c scope.c
+	  !> t/op/pat.t t/op/re_tests t/run/kill_perl.t utf8.c
+____________________________________________________________________________
 [ 14152] By: jhi                                   on 2002/01/09  14:37:01
         Log: Update Changes.
      Branch: perl
 	   ! Changes patchlevel.h
+____________________________________________________________________________
+[ 14151] By: nick                                  on 2002/01/09  14:27:36
+        Log: (Re-)implement alarm() for Win32.
+     Branch: perlio
+	   ! win32/config.vc win32/config_H.vc win32/win32.c win32/win32.h
+	   ! win32/win32iop.h
 ____________________________________________________________________________
 [ 14150] By: jhi                                   on 2002/01/09  14:27:23
         Log: Thinko.
@@ -3522,7 +4732,8 @@ ____________________________________________________________________________
 	   ! MANIFEST
 ____________________________________________________________________________
 [ 14144] By: jhi                                   on 2002/01/09  02:28:33
-        Log: Subject: Re: [ID 20010912.007] substr reference core dump
+        Log: (retracted by #14307)
+             Subject: Re: [ID 20010912.007] substr reference core dump
              From: Hugo van der Sanden <hv@crypt.compulink.co.uk>
              Date: Tue, 08 Jan 2002 19:17:50 +0000
              Message-Id: <200201081917.g08JHoE15793@crypt.compulink.co.uk>
@@ -3582,6 +4793,13 @@ ____________________________________________________________________________
              Message-Id: <200201081618.g08GIlN02821@crypt.compulink.co.uk>          
      Branch: perl
 	   ! regcomp.c
+____________________________________________________________________________
+[ 14136] By: nick                                  on 2002/01/08  16:11:55
+        Log: Integrate mainline
+     Branch: perlio
+	  +> lib/Math/BigInt/t/mbimbf.inc lib/Math/BigInt/t/require.t
+	  +> lib/Math/BigInt/t/sub_mif.t lib/Math/BigInt/t/use.t
+	  !> (integrate 37 files)
 ____________________________________________________________________________
 [ 14135] By: jhi                                   on 2002/01/08  15:12:38
         Log: Subject: Not OK 13843 
@@ -3644,6 +4862,16 @@ ____________________________________________________________________________
 	   ! ext/Opcode/Opcode.xs ext/Unicode/Normalize/Normalize.xs
 	   ! ext/Unicode/Normalize/mkheader x2p/str.c
 ____________________________________________________________________________
+[ 14127] By: pudge                                 on 2002/01/07  22:25:55
+        Log: Sync up Changes etc.
+     Branch: maint-5.6/macperl
+	   ! macos/Changes macos/MPVersion.r macos/ext/Mac/Memory/Memory.xs
+____________________________________________________________________________
+[ 14126] By: pudge                                 on 2002/01/07  22:23:06
+        Log: Eliminate nested calls to exit() (MacPerl bug #469132)
+     Branch: maint-5.6/macperl
+	   ! macos/macperl/MPFile.c macos/macperl/MPMain.c
+____________________________________________________________________________
 [ 14125] By: ams                                   on 2002/01/07  22:03:22
         Log: Subject: [PATCH] better Exporter docs (Re: [PATCH @13746] Leaner exporter)
              From: Nicholas Clark (sans From field in mail header)
@@ -3660,13 +4888,21 @@ ____________________________________________________________________________
      Branch: perl
 	   ! ext/Errno/Errno_pm.PL perl.h t/TEST t/test.pl vos/vosish.h
 ____________________________________________________________________________
+[ 14123] By: nick                                  on 2002/01/07  18:49:55
+        Log: Integrate mainline
+     Branch: perlio
+	  !> AUTHORS Changes dump.c ext/Storable/Storable.pm lib/sort.pm
+	  !> patchlevel.h pod/perl561delta.pod pod/perl56delta.pod
+	  !> pod/perlapi.pod pod/perldelta.pod pod/perltoc.pod regcomp.c
+	  !> regexec.c t/op/re_tests utf8.c utf8.h
+____________________________________________________________________________
 [ 14122] By: jhi                                   on 2002/01/07  16:09:50
         Log: Update Changes.
      Branch: perl
 	   ! Changes patchlevel.h
 ____________________________________________________________________________
 [ 14121] By: jhi                                   on 2002/01/07  16:03:34
-        Log: Subject: [PATCH] Correct module name in perldelta*                 
+        Log: Subject: [PATCH] Correct module name in perldelta*
              From: Mike Guy <mjtg@cam.ac.uk>
              Date: Mon, 07 Jan 2002 17:02:43 +0000
              Message-Id: <E16NdAZ-0001SW-00@draco.cus.cam.ac.uk>
@@ -3726,6 +4962,15 @@ ____________________________________________________________________________
      Branch: perl
 	   ! lib/sort.pm
 ____________________________________________________________________________
+[ 14110] By: nick                                  on 2002/01/06  22:05:19
+        Log: Integrate mainline - threads mended, DB_File sick?
+     Branch: perlio
+	  !> Changes ext/B/B.xs ext/B/B/C.pm ext/B/defsubs_h.PL
+	  !> ext/DB_File/Changes ext/DB_File/DB_File.pm
+	  !> ext/DB_File/DB_File.xs ext/DB_File/dbinfo
+	  !> ext/DB_File/t/db-recno.t ext/DB_File/version.c lib/sort.pm
+	  !> patchlevel.h pp_sys.c sv.c t/TEST t/op/lc.t utils/perlcc.PL
+____________________________________________________________________________
 [ 14109] By: jhi                                   on 2002/01/06  20:51:32
         Log: No need to overqualify.
      Branch: perl
@@ -3770,6 +5015,12 @@ ____________________________________________________________________________
         Log: Tests for #14098.
      Branch: perl
 	   ! t/op/lc.t
+____________________________________________________________________________
+[ 14102] By: nick                                  on 2002/01/06  11:33:55
+        Log: Integrate mainline (PPPort still multi-building).
+     Branch: perlio
+	  +> lib/unifold.t
+	  !> (integrate 30 files)
 ____________________________________________________________________________
 [ 14101] By: ams                                   on 2002/01/06  04:52:50
         Log: Subject: [PATCH] Bad prototype detection now an optional warning
@@ -3858,6 +5109,24 @@ ____________________________________________________________________________
      Branch: perl
 	  !> op.c
 ____________________________________________________________________________
+[ 14088] By: nick                                  on 2002/01/05  12:35:01
+        Log: One missing aTHX_
+     Branch: perlio
+	   ! op.c
+____________________________________________________________________________
+[ 14087] By: nick                                  on 2002/01/05  12:00:48
+        Log: Raw integrate of mainline - op.c looks dodgy.
+     Branch: perlio
+	  +> lib/Pod/t/Functions.t t/op/winsystem.t
+	   - lib/File/Spec/NW5.pm t/op/system.t
+	  !> (integrate 77 files)
+____________________________________________________________________________
+[ 14086] By: gsar                                  on 2002/01/05  00:19:01
+        Log: integrate changes from maint-5.6/macperl branch
+     Branch: maint-5.6/perl
+	  !> ext/IO/IO.xs lib/File/Find.pm lib/File/Spec/Mac.pm
+	  !> lib/Pod/Html.pm pod/perlmodinstall.pod pod/perlport.pod
+____________________________________________________________________________
 [ 14085] By: jhi                                   on 2002/01/04  23:36:23
         Log: In the UTF-8 branch of crypt() the extra \0 byte is required,
              found by Marc Lehmann.
@@ -3894,6 +5163,23 @@ ____________________________________________________________________________
      Branch: perl
 	  !> ext/IO/IO.xs
 ____________________________________________________________________________
+[ 14080] By: pudge                                 on 2002/01/04  21:21:22
+        Log: Bump version, update Changes
+     Branch: maint-5.6/macperl
+	   ! macos/Changes macos/MPVersion.r
+____________________________________________________________________________
+[ 14079] By: pudge                                 on 2002/01/04  21:09:40
+        Log: Add more droplets
+     Branch: maint-5.6/macperl
+	   + macos/macperl/Droplets/gluedialect.plx
+	   + macos/macperl/Droplets/glueedit.plx
+	   + macos/macperl/Droplets/gluemac.plx
+	   + macos/macperl/Droplets/gluescriptadds.plx
+	   + macos/macperl/Droplets/installme.plx
+	   + macos/macperl/Droplets/show_glue_pods.plx
+	   + macos/macperl/Droplets/tarzipme.plx
+	   + macos/macperl/Droplets/untarzipme.plx
+____________________________________________________________________________
 [ 14078] By: jhi                                   on 2002/01/04  21:07:05
         Log: Display the native pwd command.
      Branch: perl
@@ -3906,6 +5192,69 @@ ____________________________________________________________________________
      Branch: perl
 	   ! t/op/stat.t
 ____________________________________________________________________________
+[ 14076] By: pudge                                 on 2002/01/04  20:44:23
+        Log: First go at fixing Mac::Memory::_open (MacPerl Bug #494481)
+     Branch: maint-5.6/macperl
+	   + macos/HandleSocket.cp
+	   ! macos/ext/Mac/Memory/Memory.xs macos/ext/Mac/Memory/t/Memory.t
+	   ! macos/macperl.sym
+____________________________________________________________________________
+[ 14075] By: pudge                                 on 2002/01/04  20:42:06
+        Log: Doc updates
+     Branch: maint-5.6/macperl
+	   ! macos/ext/MacPerl/MacPerl.pm macos/ext/MacPerl/OSA.xs
+____________________________________________________________________________
+[ 14074] By: pudge                                 on 2002/01/04  20:41:26
+        Log: Update libraries
+     Branch: maint-5.6/macperl
+	   ! macos/macperl/Makefile.mk
+____________________________________________________________________________
+[ 14073] By: pudge                                 on 2002/01/04  20:40:11
+        Log: Update tests to Mac::StandardFile from StandardFile.pl,
+             plus other fixes
+     Branch: maint-5.6/macperl
+	   ! macos/ext/Mac/Menus/t/MenuBar.t
+	   ! macos/ext/Mac/Movies/t/PlayMacMovie.t
+	   ! macos/ext/Mac/Movies/t/PlayMovie.t
+	   ! macos/ext/Mac/QuickTimeVR/t/QTVRControl.t
+	   ! macos/ext/Mac/QuickTimeVR/t/QTVRInterceptor.t
+	   ! macos/ext/Mac/QuickTimeVR/t/QTVRotator.t
+	   ! macos/ext/Mac/Resources/t/Resources.t
+____________________________________________________________________________
+[ 14072] By: pudge                                 on 2002/01/04  20:37:44
+        Log: Mistakenly used dXSARGS instead of dSP (MacPerl Bug #494482)
+     Branch: maint-5.6/macperl
+	   ! macos/ext/Mac/Lists/Lists.xs macos/ext/Mac/Menus/Menus.xs
+	   ! macos/ext/Mac/Movies/Movies.xs
+	   ! macos/ext/Mac/QuickTimeVR/QuickTimeVR.xs
+	   ! macos/ext/Mac/StandardFile/StandardFile.xs
+	   ! macos/ext/Mac/Windows/Windows.xs
+____________________________________________________________________________
+[ 14071] By: pudge                                 on 2002/01/04  20:35:52
+        Log: Updates for Universal Headers 3.4 (forgot one)
+     Branch: maint-5.6/macperl
+	   ! macos/macperl/MPConsole.cp
+____________________________________________________________________________
+[ 14070] By: pudge                                 on 2002/01/04  20:32:57
+        Log: Updates for Universal Headers 3.4
+     Branch: maint-5.6/macperl
+	   ! macos/SubLaunch.c macos/ext/Mac/Navigation/Navigation.xs
+	   ! macos/ext/Mac/Navigation/typemap macos/macperl/MPAEUtils.c
+	   ! macos/macperl/MPAEVTStream.cp macos/macperl/MPAppleEvents.c
+	   ! macos/macperl/MPEditions.c macos/macperl/MPEditor.c
+	   ! macos/macperl/MPFile.c macos/macperl/MPGlobals.c
+	   ! macos/macperl/MPHelp.c macos/macperl/MPMain.c
+	   ! macos/macperl/MPPreferences.c macos/macperl/MPPseudoFile.cp
+	   ! macos/macperl/MPSave.c macos/macperl/MPScript.c
+	   ! macos/macperl/MPUtils.c macos/macperl/MPWindow.c
+____________________________________________________________________________
+[ 14069] By: pudge                                 on 2002/01/04  20:28:20
+        Log: Change AddEmulationProc to MacPerl_AddEmulationProc
+             from <200112112327.JAA25434@gpo.metropolis.net.au>;
+             don't crash on quit for 68K (MacPerl Bug #490013)
+     Branch: maint-5.6/macperl
+	   ! macos/macish.c macos/macperl/MPConsole.cp
+____________________________________________________________________________
 [ 14068] By: jhi                                   on 2002/01/04  20:24:59
         Log: If we do have socketpair(), make my_socketpair()
              just call the real socketpair().  This way we always
@@ -3913,6 +5262,42 @@ ____________________________________________________________________________
              corresponding to the my_socketpair in global.sym.
      Branch: perl
 	   ! embed.fnc embed.h makedef.pl proto.h util.c
+____________________________________________________________________________
+[ 14067] By: pudge                                 on 2002/01/04  20:19:18
+        Log: Disable sigaction (MacPerl Bug #470321)
+     Branch: maint-5.6/macperl
+	   ! macos/config.h macos/config.sh
+____________________________________________________________________________
+[ 14066] By: pudge                                 on 2002/01/04  20:16:47
+        Log: Make GUSI resource work (MacPerl Bug #464638)
+     Branch: maint-5.6/macperl
+	   ! macos/PerlGUSIConfig.cp macos/macperl/MacPerl.r
+	   ! macos/macperl/MacPerl.rsrc
+____________________________________________________________________________
+[ 14065] By: pudge                                 on 2002/01/04  20:14:26
+        Log: Make AutoSplit go a little deeper
+     Branch: maint-5.6/macperl
+	   ! macos/Makefile.mk
+____________________________________________________________________________
+[ 14064] By: pudge                                 on 2002/01/04  20:13:36
+        Log: A few doc updates from bleadperl
+     Branch: maint-5.6/macperl
+	   ! pod/perlmodinstall.pod pod/perlport.pod
+____________________________________________________________________________
+[ 14063] By: pudge                                 on 2002/01/04  20:12:11
+        Log: Sync up to latest changes from bleadperl
+     Branch: maint-5.6/macperl
+	   ! lib/File/Find.pm
+____________________________________________________________________________
+[ 14062] By: pudge                                 on 2002/01/04  20:09:20
+        Log: Define setbuf, setvbuf for Mac OS
+     Branch: maint-5.6/macperl
+	   ! ext/IO/IO.xs
+____________________________________________________________________________
+[ 14061] By: pudge                                 on 2002/01/04  20:07:38
+        Log: Delete by request of Mark-Jason Dominus (change #13676)
+     Branch: maint-5.6/macperl
+	   - macos/bundled_lib/blib/lib/Memoize/Saves.pm
 ____________________________________________________________________________
 [ 14060] By: jhi                                   on 2002/01/04  20:06:58
         Log: Spread the good word of "env".
@@ -4081,6 +5466,18 @@ ____________________________________________________________________________
      Branch: perl
 	   ! pod/perldiag.pod
 ____________________________________________________________________________
+[ 14035] By: nick                                  on 2002/01/03  09:22:42
+        Log: More strange perlio != mainline differences where
+             I have not been.
+     Branch: perlio
+	  !> hints/unicos.sh hints/unicosmk.sh
+____________________________________________________________________________
+[ 14034] By: nick                                  on 2002/01/03  09:19:37
+        Log: Integrate mainline (including force integrate of
+             lib/charnames.pm which had got out-of-step)
+     Branch: perlio
+	  !> ext/Devel/PPPort/Makefile.PL lib/charnames.pm
+____________________________________________________________________________
 [ 14033] By: ams                                   on 2002/01/03  08:24:24
         Log: Subject: Not ok 14031: PPPort Makefile.PL
              From: andreas.koenig@anima.de (Andreas J. Koenig)
@@ -4088,6 +5485,13 @@ ____________________________________________________________________________
              Message-Id: <m3sn9n94jp.fsf@anima.de>
      Branch: perl
 	   ! ext/Devel/PPPort/Makefile.PL
+____________________________________________________________________________
+[ 14032] By: nick                                  on 2002/01/03  08:24:00
+        Log: Integrate mainline.
+     Branch: perlio
+	  +> autodoc.pl embed.fnc ext/threads/shared/t/no_share.t
+	  +> lib/Pod/t/man.t lib/Pod/t/text-errors.t
+	  !> (integrate 31 files)
 ____________________________________________________________________________
 [ 14031] By: jhi                                   on 2002/01/03  01:52:04
         Log: Off-by-one is my middle name.
@@ -4154,6 +5558,19 @@ ____________________________________________________________________________
      Branch: perl
 	   ! lib/Cwd.pm
 ____________________________________________________________________________
+[ 14022] By: nick                                  on 2002/01/02  18:01:21
+        Log: More PPPort Makefile source dependence removal
+     Branch: perlio
+	   ! ext/Devel/PPPort/Makefile.PL
+____________________________________________________________________________
+[ 14021] By: nick                                  on 2002/01/02  17:44:36
+        Log: Sort out muddle of editing on three machines ...
+     Branch: perlio
+	  !> Changes MANIFEST cygwin/Makefile.SHs
+	  !> ext/Devel/PPPort/Makefile.PL ext/I18N/Langinfo/Langinfo.t
+	  !> ext/IO/lib/IO/Socket/INET.pm lib/Pod/t/basic.t
+	  !> lib/User/grent.t patchlevel.h perl.h regcomp.c regexec.c
+____________________________________________________________________________
 [ 14020] By: ams                                   on 2002/01/02  17:06:27
         Log: Fix misplaced application of #14016.
      Branch: perl
@@ -4168,6 +5585,11 @@ ____________________________________________________________________________
         Log: makedepend VOS fix from Paul Green.
      Branch: perl
 	   ! makedepend.SH
+____________________________________________________________________________
+[ 14017] By: nick                                  on 2002/01/02  16:09:43
+        Log: Avoid un-init perl_debug_pad in clones
+     Branch: perlio
+	   ! sv.c
 ____________________________________________________________________________
 [ 14016] By: ams                                   on 2002/01/02  15:58:11
         Log: Subject: [PATCH] random crash in B::LISTOP::last
@@ -4204,6 +5626,11 @@ ____________________________________________________________________________
              Message-Id: <E16Gm1U-00005z-00@baker-st.inpharmatica.co.uk>
      Branch: perl
 	   ! lib/Pod/Usage.pm
+____________________________________________________________________________
+[ 14011] By: nick                                  on 2002/01/02  08:38:18
+        Log: Integrate mainline
+     Branch: perlio
+	  !> (integrate 28 files)
 ____________________________________________________________________________
 [ 14010] By: jhi                                   on 2002/01/02  03:59:22
         Log: Make ibcmp_utf8() optionally progress in either string for
@@ -4330,6 +5757,11 @@ ____________________________________________________________________________
      Branch: perl
 	   ! regexec.c t/op/pat.t utf8.c
 ____________________________________________________________________________
+[ 13991] By: nick                                  on 2001/12/31  18:08:55
+        Log: Experimental binmode() re-coding (UNIX okay - but it would be...)
+     Branch: perlio
+	   ! perlio.c
+____________________________________________________________________________
 [ 13990] By: jhi                                   on 2001/12/31  17:13:12
         Log: Update Changes.
      Branch: perl
@@ -4416,6 +5848,17 @@ ____________________________________________________________________________
      Branch: perl
 	   ! ext/IO/lib/IO/Socket/INET.pm
 ____________________________________________________________________________
+[ 13976] By: nick                                  on 2001/12/31  13:56:11
+        Log: Integrate mainline
+     Branch: perlio
+	  !> (integrate 29 files)
+____________________________________________________________________________
+[ 13975] By: nick                                  on 2001/12/31  12:40:50
+        Log: perlio.c cleanup - in particular avoid accidental PerlIO_flush(NULL)
+             if PerlIONext is NULL.
+     Branch: perlio
+	   ! perlio.c perliol.h
+____________________________________________________________________________
 [ 13974] By: jhi                                   on 2001/12/31  04:59:53
         Log: Subject: Re: [PATCH] Basic bad prototype detection
              From: Sam Tregar <sam@tregar.com>
@@ -4491,6 +5934,14 @@ ____________________________________________________________________________
 	   ! lib/unicore/To/Fold.pl lib/unicore/mktables regcomp.c
 	   ! regexec.c utf8.c
 ____________________________________________________________________________
+[ 13962] By: nick                                  on 2001/12/30  18:33:41
+        Log: Integrate 8.3 fix for PPPort fix
+     Branch: perlio
+	  +> ext/Devel/PPPort/ppport_h.PL
+	   - ext/Devel/PPPort/ppport.h.PL
+	   ! ext/Devel/PPPort/MANIFEST
+	  !> ext/Devel/PPPort/Makefile.PL
+____________________________________________________________________________
 [ 13961] By: jhi                                   on 2001/12/30  17:35:45
         Log: Integrate perlio; more win32 stuff:
              
@@ -4510,6 +5961,15 @@ ____________________________________________________________________________
 	   - ext/Devel/PPPort/ppport.h.PL
 	   ! MANIFEST ext/Devel/PPPort/Makefile.PL
 ____________________________________________________________________________
+[ 13959] By: nick                                  on 2001/12/30  16:53:42
+        Log: Win32 stuff:
+             A. Use Perl_my_socketpair()
+             B. Use PerlSock_xxxx() rather than raw xxxx() so we get to load winsock.
+             C. (In passing) work round fact that $$ is now SvREADONLY so we need to 
+             take special measures to set it during pseudo-fork.
+     Branch: perlio
+	   ! util.c win32/perlhost.h
+____________________________________________________________________________
 [ 13958] By: jhi                                   on 2001/12/30  16:33:58
         Log: Integrate perlio; win32 kicking.
      Branch: perl
@@ -4517,6 +5977,11 @@ ____________________________________________________________________________
 	  !> embed.h embed.pl ext/Devel/PPPort/Makefile.PL
 	  !> ext/Devel/PPPort/t/test.t ext/Errno/Errno_pm.PL global.sym
 	  !> proto.h
+____________________________________________________________________________
+[ 13957] By: jhi                                   on 2001/12/30  16:32:33
+        Log: metaconfig unit change for #13956.
+     Branch: metaconfig
+	   ! U/modified/spitshell.U
 ____________________________________________________________________________
 [ 13956] By: jhi                                   on 2001/12/30  16:32:11
         Log: Must look for cat also in $PATH (noticed by Philip Newton).
@@ -4561,6 +6026,22 @@ ____________________________________________________________________________
      Branch: perl
 	   ! win32/perlhost.h win32/vmem.h
 ____________________________________________________________________________
+[ 13950] By: nick                                  on 2001/12/30  14:30:02
+        Log: Win32 hides some errno-oid constants in <winsock.h> under assumed names.
+             This gets them into Errno.pm - yet to prove they end up in $!.
+     Branch: perlio
+	   ! ext/Errno/Errno_pm.PL
+____________________________________________________________________________
+[ 13949] By: nick                                  on 2001/12/30  12:02:21
+        Log: Integrate Cwd muddle
+     Branch: perlio
+	  !> MANIFEST installperl lib/Cwd.pm
+____________________________________________________________________________
+[ 13948] By: nick                                  on 2001/12/30  11:51:40
+        Log: remove embed.pl duplicates
+     Branch: perlio
+	   ! embed.h embed.pl global.sym proto.h
+____________________________________________________________________________
 [ 13947] By: nick                                  on 2001/12/30  11:35:51
         Log: More Cwd tidy up
      Branch: perl
@@ -4571,6 +6052,24 @@ ____________________________________________________________________________
      Branch: perl
 	   + lib/Cwd.pm
 	   - ext/Cwd/Cwd.pm
+____________________________________________________________________________
+[ 13945] By: nick                                  on 2001/12/30  10:03:43
+        Log: Integrate mainline
+     Branch: perl
+	  +> ext/Cwd/Cwd.pm
+	   - lib/Cwd.pm
+	   ! MANIFEST
+     Branch: perlio
+	  !> (integrate 45 files)
+____________________________________________________________________________
+[ 13944] By: nick                                  on 2001/12/30  09:27:16
+        Log: "Port" Devel::PPPort to Win32:
+             - need to set @INC before use in the test
+             - {} are special to dmake, so use ppport.h.PL
+             rather than commandline 
+     Branch: perlio
+	   + ext/Devel/PPPort/ppport.h.PL
+	   ! ext/Devel/PPPort/Makefile.PL ext/Devel/PPPort/t/test.t
 ____________________________________________________________________________
 [ 13943] By: jhi                                   on 2001/12/29  21:30:48
         Log: Update Changes.
@@ -4624,11 +6123,22 @@ ____________________________________________________________________________
 	   ! wince/win32iop.h wince/win32thread.c wince/win32thread.h
 	   ! wince/wince.c wince/wince.h wince/wincesck.c x2p/a2py.c
 ____________________________________________________________________________
+[ 13938] By: nick                                  on 2001/12/29  19:23:32
+        Log: Integrate mainline (ok linux)
+     Branch: perlio
+	  +> lib/ExtUtils/t/MM_Win32.t lib/Pod/t/InputObjects.t
+	  !> (integrate 33 files)
+____________________________________________________________________________
 [ 13937] By: jhi                                   on 2001/12/29  18:28:36
         Log: Give up on serious testing of langinfo().  Leave the old
              code in place, though.
      Branch: perl
 	   ! ext/I18N/Langinfo/Langinfo.t
+____________________________________________________________________________
+[ 13936] By: nick                                  on 2001/12/29  18:20:33
+        Log: Routine regen_config_h - no real differences other than order of crypt 
+     Branch: perlio
+	   ! win32/config_H.bc win32/config_H.gc win32/config_H.vc
 ____________________________________________________________________________
 [ 13935] By: jhi                                   on 2001/12/29  17:36:08
         Log: Integrate perlio;
@@ -4638,6 +6148,17 @@ ____________________________________________________________________________
              Fudge Config.pm so File::Spec does not croak.
      Branch: perl
 	  !> win32/FindExt.pm win32/win32.h
+____________________________________________________________________________
+[ 13934] By: nick                                  on 2001/12/29  17:27:50
+        Log: Fudge Config.pm so File::Spec does not croak.
+     Branch: perlio
+	   ! win32/FindExt.pm
+____________________________________________________________________________
+[ 13933] By: jhi                                   on 2001/12/29  17:24:45
+        Log: metaconfig unit changes for #13932.
+     Branch: metaconfig
+	   + U/modified/Init.U
+	   ! U/compline/nblock_io.U U/modified/Head.U U/modified/Loc.U
 ____________________________________________________________________________
 [ 13932] By: jhi                                   on 2001/12/29  17:24:24
         Log: VOS tweaks from Paul Green.
@@ -4649,6 +6170,12 @@ ____________________________________________________________________________
 	   ! Configure hints/vos.sh perl.h util.c vos/build.cm
 	   ! vos/config.alpha.def vos/config.alpha.h vos/config.ga.def
 	   ! vos/config.ga.h vos/vosish.h
+____________________________________________________________________________
+[ 13931] By: nick                                  on 2001/12/29  17:00:38
+        Log: Define the two socket error numbers in terms of WSAEXXXXX equivalents
+             (just to get util.c to compile)
+     Branch: perlio
+	   ! win32/win32.h
 ____________________________________________________________________________
 [ 13930] By: jhi                                   on 2001/12/29  15:35:00
         Log: Subject: [PATCH] Pod whitespace cleanup, round 0.                
@@ -4684,6 +6211,11 @@ ____________________________________________________________________________
      Branch: perl
 	  !> embed.h embed.pl global.sym pod/perlapi.pod pp_sys.c proto.h
 ____________________________________________________________________________
+[ 13926] By: nick                                  on 2001/12/29  15:23:21
+        Log: Nick Clark's embed.pl fix for my_socketpair
+     Branch: perlio
+	   ! embed.h embed.pl global.sym pod/perlapi.pod proto.h
+____________________________________________________________________________
 [ 13925] By: jhi                                   on 2001/12/29  15:21:53
         Log: Slight tweaks on the MM_Win32.t.
      Branch: perl
@@ -4697,6 +6229,12 @@ ____________________________________________________________________________
      Branch: perl
 	   + lib/ExtUtils/t/MM_Win32.t
 	   ! MANIFEST
+____________________________________________________________________________
+[ 13923] By: nick                                  on 2001/12/29  15:12:07
+        Log: Quick fix (after couple of clever fixes failed) for
+             "accept leaks memory" fail [ID 20011223.001]
+     Branch: perlio
+	   ! pp_sys.c
 ____________________________________________________________________________
 [ 13922] By: jhi                                   on 2001/12/29  15:09:00
         Log: Subject: [PATCH] Module names and other nits
@@ -4715,6 +6253,17 @@ ____________________________________________________________________________
      Branch: perl
 	   ! ext/Socket/socketpair.t util.c
 ____________________________________________________________________________
+[ 13920] By: nick                                  on 2001/12/29  12:36:21
+        Log: Integrate mainline
+     Branch: perlio
+	  !> Changes Configure doop.c ext/B/B.pm ext/IO/lib/IO/t/io_dir.t
+	  !> ext/POSIX/POSIX.xs ext/Socket/socketpair.t
+	  !> lib/ExtUtils/MM_Unix.pm lib/ExtUtils/MM_VMS.pm
+	  !> lib/ExtUtils/t/Embed.t lib/ExtUtils/t/MM_Cygwin.t
+	  !> lib/warnings.t patchlevel.h pod/perlfunc.pod pod/perlport.pod
+	  !> pod/perluniintro.pod t/base/rs.t t/cmd/subval.t t/io/fflush.t
+	  !> t/op/sysio.t
+____________________________________________________________________________
 [ 13919] By: jhi                                   on 2001/12/28  17:01:39
         Log: Retract #13917.
      Branch: perl
@@ -4732,6 +6281,11 @@ ____________________________________________________________________________
         Log: (retracted by #13919)
      Branch: perl
 	   ! doop.c
+____________________________________________________________________________
+[ 13916] By: jhi                                   on 2001/12/28  01:17:04
+        Log: metaconfig unit change for #13915.
+     Branch: metaconfig/U/perl
+	   ! d_u32align.U
 ____________________________________________________________________________
 [ 13915] By: jhi                                   on 2001/12/28  01:16:45
         Log: Remove debris in any case.
@@ -4768,6 +6322,11 @@ ____________________________________________________________________________
         Log: More wait status trickery for BeOS.
      Branch: perl
 	   ! ext/POSIX/POSIX.xs
+____________________________________________________________________________
+[ 13909] By: jhi                                   on 2001/12/27  14:15:49
+        Log: metaconfig unit change for #13908.
+     Branch: metaconfig/U/perl
+	   ! d_u32align.U
 ____________________________________________________________________________
 [ 13908] By: jhi                                   on 2001/12/27  14:15:27
         Log: Try to catch the SIGBUS, as suggested by Nicholas Clark.
@@ -4846,6 +6405,13 @@ ____________________________________________________________________________
      Branch: perl
 	   ! lib/ExtUtils/t/MM_Cygwin.t
 ____________________________________________________________________________
+[ 13900] By: nick                                  on 2001/12/27  11:11:51
+        Log: Integrate mainline
+     Branch: perlio
+	  +> ext/Socket/socketpair.t lib/File/Spec/Cygwin.pm
+	  +> lib/File/Spec/NW5.pm
+	  !> (integrate 52 files)
+____________________________________________________________________________
 [ 13899] By: jhi                                   on 2001/12/26  21:30:13
         Log: Replace the awful (most likely generated and not very persistent)
              URL with something tangible.
@@ -4920,6 +6486,11 @@ ____________________________________________________________________________
 	   ! lib/Net/Ping/t/140_stream_inst.t lib/Net/Ping/t/200_ping_tcp.t
 	   ! lib/Net/Ping/t/300_ping_stream.t
 ____________________________________________________________________________
+[ 13889] By: jhi                                   on 2001/12/26  17:19:18
+        Log: metaconfig unit change for #13888.
+     Branch: metaconfig
+	   ! U/modified/Oldconfig.U
+____________________________________________________________________________
 [ 13888] By: jhi                                   on 2001/12/26  17:18:59
         Log: test -d /system is a bit too generic test for VOS
              (false hit in BeOS)
@@ -4992,6 +6563,11 @@ ____________________________________________________________________________
      Branch: perl
 	   ! t/op/pat.t
 ____________________________________________________________________________
+[ 13878] By: jhi                                   on 2001/12/24  17:16:10
+        Log: metaconfig unit change for #13877.
+     Branch: metaconfig
+	   ! U/modified/Unix.U
+____________________________________________________________________________
 [ 13877] By: jhi                                   on 2001/12/24  17:13:53
         Log: No-op.
      Branch: perl
@@ -5034,6 +6610,11 @@ ____________________________________________________________________________
      Branch: perl
 	   ! taint.c
 ____________________________________________________________________________
+[ 13870] By: jhi                                   on 2001/12/24  01:14:52
+        Log: metaconfig unit change for #13869.
+     Branch: metaconfig/U/perl
+	   ! d_u32align.U
+____________________________________________________________________________
 [ 13869] By: jhi                                   on 2001/12/24  01:14:06
         Log: The U32 alignment test wasn't really working, noticed
              by Paul Green.  Now the test works, but this means that
@@ -5041,6 +6622,12 @@ ____________________________________________________________________________
              places don't crash on the test.
      Branch: perl
 	   ! Configure
+____________________________________________________________________________
+[ 13868] By: jhi                                   on 2001/12/23  23:46:54
+        Log: metaconfig unit changes for #13867.
+     Branch: metaconfig
+	   ! U/compline/nblock_io.U U/modified/Unix.U
+	   ! U/modified/spitshell.U
 ____________________________________________________________________________
 [ 13867] By: jhi                                   on 2001/12/23  23:46:18
         Log: More VOS tweaks.
@@ -5127,6 +6714,28 @@ ____________________________________________________________________________
      Branch: perl
 	   ! regexec.c t/op/pat.t
 ____________________________________________________________________________
+[ 13854] By: nick                                  on 2001/12/22  20:01:27
+        Log: Win32 and makedef.pl fall-out of PerlIO/pTHX stuff
+     Branch: perlio
+	   ! makedef.pl perlio.h perlio.sym win32/win32.c
+____________________________________________________________________________
+[ 13853] By: nick                                  on 2001/12/22  19:58:53
+        Log: Put PerlIO stuff inside EXTERN C
+     Branch: perlio
+	   ! embed.pl proto.h
+____________________________________________________________________________
+[ 13852] By: nick                                  on 2001/12/22  18:04:34
+        Log: Add at least the "important" PerlIO_xxxx functions to embed.pl
+             so that they get implicit pTHX_ and we can avoid slow dTHX.
+     Branch: perlio
+	   ! embed.h embed.pl ext/IO/IO.xs global.sym globals.c perlio.c
+	   ! perlio.h pod/perlapi.pod proto.h
+____________________________________________________________________________
+[ 13851] By: jhi                                   on 2001/12/22  17:42:10
+        Log: metaconfig unit change for #13850.
+     Branch: metaconfig
+	   ! U/modified/Loc.U
+____________________________________________________________________________
 [ 13850] By: jhi                                   on 2001/12/22  17:41:40
         Log: Rework the make logic (again).
      Branch: perl
@@ -5140,6 +6749,34 @@ ____________________________________________________________________________
      Branch: perl
 	   ! regexec.c
 	  !> ext/POSIX/POSIX.pm perlio.c sv.c
+____________________________________________________________________________
+[ 13848] By: nick                                  on 2001/12/22  15:11:17
+        Log: The CR at EOF fix earlier broke CR at end-of-buffer.
+             This should be okay for both?
+     Branch: perlio
+	   ! perlio.c
+____________________________________________________________________________
+[ 13847] By: nick                                  on 2001/12/22  12:26:32
+        Log: Correct checking code which Ilya spotted was tripped by CR at EOF.
+             Also tone down perl -DP tracing of sv_gets.
+     Branch: perlio
+	   ! perlio.c sv.c
+____________________________________________________________________________
+[ 13846] By: nick                                  on 2001/12/22  10:49:27
+        Log: Fix mis-parse of autoloaded usage code by declaring the sub
+     Branch: perlio
+	   ! ext/POSIX/POSIX.pm
+____________________________________________________________________________
+[ 13845] By: nick                                  on 2001/12/22  10:44:11
+        Log: Integrate mainline - some fails:
+             Failed Test            Stat Wstat Total Fail  Failed  List of Failed
+             -------------------------------------------------------------------------------
+             ../ext/POSIX/t/posix.t  255 65280    38    9  23.68%  30-38
+             ../lib/encoding.t                    19    2  10.53%  17-18
+             op/pat.t                            770    3   0.39%  754-755 757
+     Branch: perlio
+	  +> ext/re/re.t lib/ExtUtils/t/MM_OS2.t
+	  !> (integrate 36 files)
 ____________________________________________________________________________
 [ 13844] By: jhi                                   on 2001/12/22  04:27:46
         Log: More Unicode casing fixes.
@@ -5196,6 +6833,12 @@ ____________________________________________________________________________
      Branch: perl
 	   ! pod/perltie.pod
 ____________________________________________________________________________
+[ 13836] By: jhi                                   on 2001/12/21  19:47:52
+        Log: metaconfig unit changes for #13835
+     Branch: metaconfig
+	   ! U/modified/Head.U U/modified/Loc.U U/modified/Unix.U
+	   ! U/modified/sh.U
+____________________________________________________________________________
 [ 13835] By: jhi                                   on 2001/12/21  19:47:03
         Log: Further VOS tweaks: the _exe needs to be introduced
              in the very beginning, and the make/gmake needs special
@@ -5207,6 +6850,11 @@ ____________________________________________________________________________
         Log: Update Changes.
      Branch: perl
 	   ! Changes patchlevel.h
+____________________________________________________________________________
+[ 13833] By: jhi                                   on 2001/12/21  14:46:45
+        Log: metaconfig unit change for #13832.
+     Branch: metaconfig
+	   ! U/modified/spitshell.U
 ____________________________________________________________________________
 [ 13832] By: jhi                                   on 2001/12/21  14:46:24
         Log: Also the search for cat needs to be _exe-aware.
@@ -5326,6 +6974,26 @@ ____________________________________________________________________________
      Branch: perl
 	   ! lib/Carp.t lib/Carp/Heavy.pm
 ____________________________________________________________________________
+[ 13815] By: nick                                  on 2001/12/20  10:23:42
+        Log: pTHX_ fixes for :win32 layer
+     Branch: perlio
+	   ! win32/win32io.c
+____________________________________________________________________________
+[ 13814] By: nick                                  on 2001/12/20  08:20:11
+        Log: Integrate mainline (mostly) utf8.c does not compile.
+     Branch: perlio
+	  +> lib/Net/Ping/CHANGES lib/Net/Ping/README
+	  +> lib/Net/Ping/t/100_load.t lib/Net/Ping/t/110_icmp_inst.t
+	  +> lib/Net/Ping/t/120_udp_inst.t lib/Net/Ping/t/130_tcp_inst.t
+	  +> lib/Net/Ping/t/140_stream_inst.t lib/Net/Ping/t/200_ping_tcp.t
+	  +> lib/Net/Ping/t/300_ping_stream.t
+	  !> Changes MANIFEST embed.h embed.pl embedvar.h
+	  !> ext/B/B/Assembler.pm lib/English.t lib/ExtUtils/t/Embed.t
+	  !> lib/File/stat.t lib/Net/Ping.pm lib/Shell.t os2/Makefile.SHs
+	  !> os2/OS2/REXX/DLL/Makefile.PL os2/os2.c os2/perlrexx.c
+	  !> patchlevel.h perlapi.h pod/perlfunc.pod pod/perlre.pod pp.c
+	  !> proto.h t/op/alarm.t thrdvar.h util.c wince/perldll.def
+____________________________________________________________________________
 [ 13813] By: jhi                                   on 2001/12/19  21:29:49
         Log: Some bincompat clawbacks.
      Branch: perl
@@ -5361,6 +7029,13 @@ ____________________________________________________________________________
 	  !> ext/Encode/Encode.xs ext/PerlIO/Scalar/Scalar.xs
 	  !> ext/PerlIO/Via/Via.xs perlio.c perliol.h
 ____________________________________________________________________________
+[ 13808] By: nick                                  on 2001/12/19  16:08:27
+        Log: Add pTHX to all vtable functions for future-proofing and
+             consistency of PerlIO layers.
+     Branch: perlio
+	   ! ext/Encode/Encode.xs ext/PerlIO/Scalar/Scalar.xs
+	   ! ext/PerlIO/Via/Via.xs perlio.c perliol.h
+____________________________________________________________________________
 [ 13807] By: jhi                                   on 2001/12/19  15:59:02
         Log: One more embedded (?sx) de-embedded, from Wolfgang Laun.
      Branch: perl
@@ -5392,6 +7067,13 @@ ____________________________________________________________________________
 	   + lib/Net/Ping/t/140_stream_inst.t lib/Net/Ping/t/200_ping_tcp.t
 	   + lib/Net/Ping/t/300_ping_stream.t
 	   ! MANIFEST lib/Net/Ping.pm
+____________________________________________________________________________
+[ 13803] By: nick                                  on 2001/12/19  14:43:24
+        Log: Integrate mainline
+     Branch: perlio
+	  +> ext/B/t/assembler.t lib/lib.t
+	  !> MANIFEST ext/B/B/Assembler.pm ext/B/B/Disassembler.pm
+	  !> lib/lib_pm.PL t/op/glob.t utf8.c
 ____________________________________________________________________________
 [ 13802] By: jhi                                   on 2001/12/19  14:25:27
         Log: B::Assembler/B::Disassembler patches and test;
@@ -5430,6 +7112,35 @@ ____________________________________________________________________________
         Log: Integrate with perlio.
      Branch: perl
 	  !> hv.c hv.h scope.c util.c
+____________________________________________________________________________
+[ 13797] By: nick                                  on 2001/12/19  12:03:21
+        Log: Remove the sometimes-lvalue cast
+     Branch: perlio
+	   ! hv.h
+____________________________________________________________________________
+[ 13796] By: nick                                  on 2001/12/19  11:02:27
+        Log: alarm.t with -Uuseperlio fix
+             - SA_RESTART should only be function of PERL_OLD_SIGNALS
+             not USE_PERLIO
+     Branch: perlio
+	   ! util.c
+____________________________________________________________________________
+[ 13795] By: nick                                  on 2001/12/19  10:19:40
+        Log: Fix READONLY hashes:
+             1. Discovered need for disabled scope.c part of Jeff's patch.
+             2. Corrected hv_delete* - entry was being de-linked from
+             chain (patch program not smart enough?)
+     Branch: perlio
+	   ! hv.c scope.c
+____________________________________________________________________________
+[ 13794] By: nick                                  on 2001/12/19  09:35:13
+        Log: Integrate mainline
+     Branch: perlio
+	  !> Configure Porting/checkURL.pl config_h.SH dump.c hints/vos.sh
+	  !> lib/Benchmark.t lib/Exporter.pm lib/ExtUtils/t/MM_Unix.t
+	  !> lib/utf8.t pod/perlfaq5.pod pod/perltoc.pod
+	  !> pod/perlunicode.pod pod/perluniintro.pod pp.c sv.c
+	  !> t/lib/warnings/utf8 utf8.c x2p/a2p.h x2p/str.c
 ____________________________________________________________________________
 [ 13793] By: jhi                                   on 2001/12/19  04:58:51
         Log: Regen toc.
@@ -5491,6 +7202,11 @@ ____________________________________________________________________________
      Branch: perl
 	   ! Porting/checkURL.pl
 ____________________________________________________________________________
+[ 13784] By: jhi                                   on 2001/12/19  01:05:25
+        Log: metaconfig unit change for #13783.
+     Branch: metaconfig
+	   ! U/modified/Loc.U
+____________________________________________________________________________
 [ 13783] By: jhi                                   on 2001/12/19  00:26:34
         Log: A bit too oversweeping matching in #13778.
      Branch: perl
@@ -5500,6 +7216,94 @@ ____________________________________________________________________________
         Log: Re-gen Configure based on #13778..13781.
      Branch: perl
 	   ! Configure config_h.SH
+____________________________________________________________________________
+[ 13781] By: jhi                                   on 2001/12/18  23:59:59
+        Log: First assume that crypt() can live happy normal life in
+             the libc or the moral equivalent; only then try magic.
+     Branch: metaconfig
+	   + U/modified/d_crypt.U
+____________________________________________________________________________
+[ 13780] By: jhi                                   on 2001/12/18  23:52:03
+        Log: In VOS ACLs confuse the testing.
+     Branch: metaconfig
+	   ! U/modified/Findhdr.U
+____________________________________________________________________________
+[ 13779] By: jhi                                   on 2001/12/18  23:47:39
+        Log: Either make or gmake.
+     Branch: metaconfig
+	   ! U/modified/Loc.U
+____________________________________________________________________________
+[ 13778] By: jhi                                   on 2001/12/18  23:44:56
+        Log: If your _exe is different from .exe and your test -f $foo
+             doesn't do magic to recognize $foo$_exe, you will need to
+             specify -D_exe=... on command line-- and this patch.
+     Branch: metaconfig
+	   + U/modified/sh.U
+	   ! U/modified/Loc.U
+____________________________________________________________________________
+[ 13777] By: jhi                                   on 2001/12/18  23:28:37
+        Log: Fix the bugs in #13768..13776, and regen Configure.
+     Branch: metaconfig
+	   ! U/compline/nblock_io.U U/modified/Findhdr.U
+	   ! U/modified/spitshell.U
+     Branch: metaconfig/U/perl
+	   ! issymlink.U perlpath.U
+     Branch: perl
+	   ! Configure config_h.SH
+____________________________________________________________________________
+[ 13776] By: jhi                                   on 2001/12/18  23:02:42
+        Log: Must test with $_exe. (There are plenty of similar
+             spots earlier but they are a tad more complex to fix
+             since they come before the hints are run.)
+     Branch: metaconfig
+	   + U/modified/yacc.U
+____________________________________________________________________________
+[ 13775] By: jhi                                   on 2001/12/18  22:59:04
+        Log: F_SETFL might require <fcntl.h>
+     Branch: metaconfig
+	   ! U/compline/nblock_io.U
+____________________________________________________________________________
+[ 13774] By: jhi                                   on 2001/12/18  22:53:41
+        Log: Don't require make; have both make and gmake optional.
+             (Maybe have a check that at least one of them is available?)
+     Branch: metaconfig
+	   ! U/modified/Loc.U
+____________________________________________________________________________
+[ 13773] By: jhi                                   on 2001/12/18  22:49:56
+        Log: cat might be farther than /bin or /usr/bin.
+     Branch: metaconfig
+	   ! U/modified/spitshell.U
+____________________________________________________________________________
+[ 13772] By: jhi                                   on 2001/12/18  22:44:45
+        Log: In VOS the path component separator is >, not /.
+     Branch: metaconfig
+	   ! U/modified/Findhdr.U
+____________________________________________________________________________
+[ 13771] By: jhi                                   on 2001/12/18  22:35:40
+        Log: The VOS shell doesn't implement the ? wildcard
+             (? is used for other purposes, I assume); but
+             it does implement the * wildcard, and that works
+             in the general case just fine.
+     Branch: metaconfig/U/perl
+	   ! d_dlsymun.U
+____________________________________________________________________________
+[ 13770] By: jhi                                   on 2001/12/18  22:28:41
+        Log: VOS detection.
+     Branch: metaconfig
+	   ! U/modified/Oldconfig.U
+____________________________________________________________________________
+[ 13769] By: jhi                                   on 2001/12/18  22:23:25
+        Log: Proper path for VOS.
+     Branch: metaconfig
+	   ! U/modified/Head.U
+____________________________________________________________________________
+[ 13768] By: jhi                                   on 2001/12/18  22:21:00
+        Log: Change s/>& 4/>&4/g for consistency.
+     Branch: metaconfig
+	   + U/modified/d_dosuid.U
+	   ! U/modified/d_socket.U
+     Branch: metaconfig/U/perl
+	   ! issymlink.U perlxvf.U
 ____________________________________________________________________________
 [ 13767] By: jhi                                   on 2001/12/18  22:13:14
         Log: Subject: Re: Benchmark.t failure on Linux
@@ -5548,6 +7352,13 @@ ____________________________________________________________________________
      Branch: perl
 	  !> ext/Devel/Peek/Peek.t hv.c hv.h scope.c sv.c t/lib/access.t
 ____________________________________________________________________________
+[ 13760] By: nick                                  on 2001/12/18  15:55:22
+        Log: Tidied version of Jeffrey Friedl's <jfriedl@yahoo.com> restricted hashes
+             - added delete of READONLY value inhibit & test for same
+             - re-tabbed
+     Branch: perlio
+	   ! ext/Devel/Peek/Peek.t hv.c hv.h scope.c sv.c t/lib/access.t
+____________________________________________________________________________
 [ 13759] By: jhi                                   on 2001/12/18  15:54:19
         Log: (Undone by #13766.)
              Retract #13752.
@@ -5563,6 +7374,22 @@ ____________________________________________________________________________
         Log: Make the utf8 malformedness messages more verbose.
      Branch: perl
 	   ! lib/utf8.t utf8.c
+____________________________________________________________________________
+[ 13756] By: nick                                  on 2001/12/18  14:43:58
+        Log: Integrate mainline
+     Branch: perlio
+	  +> lib/ExtUtils/t/Command.t lib/ExtUtils/t/Embed.t
+	  +> lib/ExtUtils/t/ExtUtils.t lib/ExtUtils/t/Installed.t
+	  +> lib/ExtUtils/t/MM_Cygwin.t lib/ExtUtils/t/MM_Unix.t
+	  +> lib/ExtUtils/t/MM_VMS.t lib/ExtUtils/t/Manifest.t
+	  +> lib/ExtUtils/t/Mkbootstrap.t lib/ExtUtils/t/Packlist.t
+	  +> lib/ExtUtils/t/testlib.t t/op/alarm.t
+	   - lib/ExtUtils.t lib/ExtUtils/Command.t lib/ExtUtils/Embed.t
+	   - lib/ExtUtils/Installed.t lib/ExtUtils/MM_Cygwin.t
+	   - lib/ExtUtils/MM_VMS.t lib/ExtUtils/Manifest.t
+	   - lib/ExtUtils/Mkbootstrap.t lib/ExtUtils/Packlist.t
+	   - lib/ExtUtils/testlib.t
+	  !> (integrate 28 files)
 ____________________________________________________________________________
 [ 13755] By: jhi                                   on 2001/12/18  14:05:26
         Log: README.aix updates from Jens-Uwe Mager.
@@ -5806,6 +7633,19 @@ ____________________________________________________________________________
         Log: Integrate perlio; interruptable system().
      Branch: perl
 	  !> util.c
+____________________________________________________________________________
+[ 13724] By: nick                                  on 2001/12/17  09:16:50
+        Log: Fix for alarm() breaking into wait*().
+             Call PERL_ASYNC_CHECK() on EINTR in Perl_wait4pid(), to dispatch
+             signal handler before caller re-does the system call.
+     Branch: perlio
+	   ! util.c
+____________________________________________________________________________
+[ 13723] By: nick                                  on 2001/12/17  07:45:13
+        Log: Integrate mainline
+     Branch: perlio
+	  +> (branch 26 files)
+	  !> (integrate 47 files)
 ____________________________________________________________________________
 [ 13722] By: jhi                                   on 2001/12/16  16:12:57
         Log: Disallow also Unicode ranges 0xFDD0..0xFDEF and
@@ -6081,6 +7921,13 @@ ____________________________________________________________________________
 	   + lib/Attribute/Handlers/t/multi.t
 	   ! MANIFEST pod/perldelta.pod pod/perlmodlib.pod pod/perltoc.pod
 ____________________________________________________________________________
+[ 13685] By: nick                                  on 2001/12/14  15:57:00
+        Log: Integrate mainline
+     Branch: perlio
+	  +> t/run/switcht.t
+	  !> MANIFEST embedvar.h intrpvar.h lib/Test/Harness.pm perl.c
+	  !> perlapi.h pod/perlrun.pod t/TEST taint.c
+____________________________________________________________________________
 [ 13684] By: jhi                                   on 2001/12/14  14:43:40
         Log: Subject: [PATCH taint.c intrpvar.h perl.c ...] -t taint warnings
              From: Michael G Schwern <schwern@pobox.com> 
@@ -6094,6 +7941,30 @@ ____________________________________________________________________________
 	   + t/run/switcht.t
 	   ! MANIFEST embedvar.h intrpvar.h lib/Test/Harness.pm perl.c
 	   ! perlapi.h pod/perlrun.pod t/TEST taint.c
+____________________________________________________________________________
+[ 13683] By: nick                                  on 2001/12/14  12:29:41
+        Log: Integrate mainline
+     Branch: perlio
+	  +> beos/beos.c beos/beosish.h ext/POSIX/t/waitpid.t
+	  +> lib/Term/ReadLine.t t/op/hashassign.t
+	   - lib/Attribute/Handlers.pm lib/Attribute/Handlers/Changes
+	   - lib/Attribute/Handlers/README
+	   - lib/Attribute/Handlers/demo/Demo.pm
+	   - lib/Attribute/Handlers/demo/Descriptions.pm
+	   - lib/Attribute/Handlers/demo/MyClass.pm
+	   - lib/Attribute/Handlers/demo/demo.pl
+	   - lib/Attribute/Handlers/demo/demo2.pl
+	   - lib/Attribute/Handlers/demo/demo3.pl
+	   - lib/Attribute/Handlers/demo/demo4.pl
+	   - lib/Attribute/Handlers/demo/demo_call.pl
+	   - lib/Attribute/Handlers/demo/demo_chain.pl
+	   - lib/Attribute/Handlers/demo/demo_cycle.pl
+	   - lib/Attribute/Handlers/demo/demo_hashdir.pl
+	   - lib/Attribute/Handlers/demo/demo_phases.pl
+	   - lib/Attribute/Handlers/demo/demo_range.pl
+	   - lib/Attribute/Handlers/demo/demo_rawdata.pl
+	   - lib/Attribute/Handlers/t/multi.t lib/Memoize/Saves.pm
+	  !> (integrate 101 files)
 ____________________________________________________________________________
 [ 13682] By: jhi                                   on 2001/12/14  04:10:37
         Log: Detypo.
@@ -6261,6 +8132,11 @@ ____________________________________________________________________________
      Branch: perl
 	   ! perlio.c regcomp.c taint.c toke.c
 ____________________________________________________________________________
+[ 13658] By: jhi                                   on 2001/12/12  14:09:09
+        Log: metaconfig unit change for #13657.
+     Branch: metaconfig
+	   ! U/modified/nis.U
+____________________________________________________________________________
 [ 13657] By: jhi                                   on 2001/12/12  14:08:49
         Log: Try YP/NIS also from /usr/lib/yp.
      Branch: perl
@@ -6407,6 +8283,11 @@ ____________________________________________________________________________
      Branch: perl
 	   ! configure.com
 ____________________________________________________________________________
+[ 13633] By: jhi                                   on 2001/12/11  21:48:57
+        Log: metaconfig unit change for #13632.
+     Branch: metaconfig/U/perl
+	   ! perlpath.U
+____________________________________________________________________________
 [ 13632] By: jhi                                   on 2001/12/11  21:48:26
         Log: Subject: $Config{perlpath} and -Dversiononly
              From: Rafael Garcia-Suarez <rgarciasuarez@free.fr>
@@ -6501,6 +8382,11 @@ ____________________________________________________________________________
      Branch: perl
 	   ! perlio.c
 ____________________________________________________________________________
+[ 13618] By: jhi                                   on 2001/12/11  05:22:39
+        Log: metaconfig unit change for #13617.
+     Branch: metaconfig/U/perl
+	   ! Extensions.U
+____________________________________________________________________________
 [ 13617] By: jhi                                   on 2001/12/11  05:22:08
         Log: BeOS has socket() but not enough to build a working Socket.
              Go figure.  ("BONE" (BeOS NEtworking?) is some sort of rumored
@@ -6510,6 +8396,32 @@ ____________________________________________________________________________
              complicated with the sale of the Be assets to Palm.)
      Branch: perl
 	   ! Configure
+____________________________________________________________________________
+[ 13616] By: pudge                                 on 2001/12/11  05:11:44
+        Log: Update changes
+     Branch: maint-5.6/macperl
+	   ! macos/Changes
+____________________________________________________________________________
+[ 13615] By: pudge                                 on 2001/12/11  05:09:34
+        Log: Add extra pod to help
+     Branch: maint-5.6/macperl
+	   ! macos/macperl/MacPerl.podhelp
+____________________________________________________________________________
+[ 13614] By: pudge                                 on 2001/12/11  05:08:51
+        Log: Return DoAppleScript errors in $@
+     Branch: maint-5.6/macperl
+	   ! macos/ext/MacPerl/OSA.xs
+____________________________________________________________________________
+[ 13613] By: pudge                                 on 2001/12/11  05:08:19
+        Log: Clear out $^E before each script run
+     Branch: maint-5.6/macperl
+	   ! macos/macperl/MPScript.c
+____________________________________________________________________________
+[ 13612] By: pudge                                 on 2001/12/11  04:58:52
+        Log: Integrate various changes from maint-5.6/perl/.
+     Branch: maint-5.6/macperl
+	  !> op.c pp.c pp_hot.c t/io/pipe.t t/op/cmp.t t/op/misc.t
+	  !> t/op/system_tests util.c win32/perlhost.h win32/win32.c
 ____________________________________________________________________________
 [ 13611] By: jhi                                   on 2001/12/11  04:29:32
         Log: Subject: Exporter's documentation shouldn't lie               
@@ -6720,6 +8632,18 @@ ____________________________________________________________________________
      Branch: perl
 	   ! hints/netbsd.sh
 ____________________________________________________________________________
+[ 13584] By: gsar                                  on 2001/12/10  02:04:58
+        Log: restrict change#13474 to eval"" CVs instead of any CV (avoids
+             potential performance hit and change in semantics of closure
+             lookups after C<undef &foo>)
+     Branch: maint-5.6/perl
+	   ! op.c
+____________________________________________________________________________
+[ 13583] By: jhi                                   on 2001/12/10  02:01:49
+        Log: metaconfig unit change for #13582.
+     Branch: metaconfig
+	   ! U/threads/usethreads.U
+____________________________________________________________________________
 [ 13582] By: jhi                                   on 2001/12/10  02:01:26
         Log: Update the ithreads selection info in Configure,
              as suggested by Michael Schwern.
@@ -6842,6 +8766,11 @@ ____________________________________________________________________________
         Log: Apply NetBSD patch-ab: NetBSD hints update.
      Branch: perl
 	   ! hints/netbsd.sh
+____________________________________________________________________________
+[ 13562] By: jhi                                   on 2001/12/09  20:31:38
+        Log: metaconfig unit changes for #13560.
+     Branch: metaconfig/U/perl
+	   ! dlsrc.U i_ieeefp.U libperl.U
 ____________________________________________________________________________
 [ 13561] By: jhi                                   on 2001/12/09  20:31:14
         Log: NetBSD has <ieeefp.h> but hidden.
@@ -7260,7 +9189,7 @@ ____________________________________________________________________________
 	   ! t/lib/Math/BigFloat/Subclass.pm t/lib/Math/BigInt/Subclass.pm
 ____________________________________________________________________________
 [ 13504] By: jhi                                   on 2001/12/07  00:56:58
-        Log: Mention also perl56delta in case somone is upgrading from
+        Log: Mention also perl56delta in case someone is upgrading from
              Perl 5.005_03.
      Branch: perl
 	   ! pod/perldelta.pod
@@ -7936,7 +9865,9 @@ ____________________________________________________________________________
 	   ! doio.c
 ____________________________________________________________________________
 [ 13408] By: jhi                                   on 2001/12/01  18:18:34
-        Log: If we are inside an eval, let's be silent about
+        Log: (replaced by #13556)
+             
+             If we are inside an eval, let's be silent about
              separate symbols and just croak() in the end.
      Branch: perl
 	   ! lib/Exporter/Heavy.pm
@@ -9040,7 +10971,7 @@ ____________________________________________________________________________
 ____________________________________________________________________________
 [ 13251] By: jhi                                   on 2001/11/25  02:48:04
         Log: In the MakeMaker pm_to_blib target don't copy all
-             the files in one fell swppo, deal with them hunkwise,
+             the files in one fell swoop, deal with them hunkwise,
              helps for CLIs with limited line lengths.
              (This seems to help for DJGPP building Encode,
              where there are dozens of files to copy.)
@@ -9294,7 +11225,7 @@ ____________________________________________________________________________
 	   ! d_procselfexe.U
 ____________________________________________________________________________
 [ 13213] By: jhi                                   on 2001/11/23  18:31:13
-        Log: Add probing for BSD-like /proc/curpoc/file.
+        Log: Add probing for BSD-like /proc/curproc/file.
      Branch: perl
 	   ! Configure config_h.SH
 ____________________________________________________________________________
@@ -10411,7 +12342,7 @@ ____________________________________________________________________________
 	   ! MANIFEST pod/buildtoc.PL pod/perl.pod pod/perltoc.pod
 ____________________________________________________________________________
 [ 13046] By: jhi                                   on 2001/11/16  14:14:38
-        Log: Document the negated lookeahead trick to emulate
+        Log: Document the negated lookahead trick to emulate
              character class subtraction.
      Branch: perl
 	   ! pod/perlunicode.pod
@@ -15966,7 +17897,7 @@ ____________________________________________________________________________
         Log: Fixes obscure bug that manifests itself by.
              local $!=0;undef*STDOUT;#segfaults
              Has been around for a while. Possible other magic IO vars are
-             possibly affected aswell. Reported by Jos Boumans.
+             possibly affected as well. Reported by Jos Boumans.
      Branch: perl
 	   ! mg.c
 ____________________________________________________________________________
@@ -24609,7 +26540,7 @@ ____________________________________________________________________________
 [ 11115] By: jhi                                   on 2001/07/02  23:06:27
         Log: Whitespace allowed at the ends of /lib/syscalls.exp lines
              (from Richard Hatch) (this was the cause of pipes() and
-             times() myeteriously not being found)
+             times() mysteriously not being found)
      Branch: perl
 	   ! Configure
 ____________________________________________________________________________
@@ -26132,7 +28063,7 @@ ____________________________________________________________________________
              Message-ID: <20010624173240.A16293@blackstar.co.uk>
              
              Document (well, mention) shortmess() and longmess()
-             to rob people of their fun of reinventing the weel.
+             to rob people of their fun of reinventing the wheel.
      Branch: perl
 	   ! lib/Carp.pm
 ____________________________________________________________________________
@@ -27457,7 +29388,7 @@ ____________________________________________________________________________
 	   ! ext/DynaLoader/DynaLoader_pm.PL
 ____________________________________________________________________________
 [ 10714] By: jhi                                   on 2001/06/19  10:48:19
-        Log: Revert #10656 for perfomance reasons but leave in the
+        Log: Revert #10656 for performance reasons but leave in the
              use of Hv*() macros -- in comments, so that grepping the
              source is easier, from Abhijit.  (Also add the ENV_HV_NAME speedup
              suggested by Sarathy, also by Abhijit.)
@@ -30303,7 +32234,7 @@ ____________________________________________________________________________
 	   ! perlio.c
 ____________________________________________________________________________
 [ 10345] By: nick                                  on 2001/05/31  10:01:57
-        Log: Conditionaly put back some "unused" dTHX which are used
+        Log: Conditionally put back some "unused" dTHX which are used
              with PERL_IMPLICIT_SYS
      Branch: perlio
 	   ! perlio.c
@@ -35792,7 +37723,7 @@ ____________________________________________________________________________
 	   ! hints/hpux.sh
 ____________________________________________________________________________
 [  9595] By: gsar                                  on 2001/04/06  14:57:17
-        Log: add a low-impact fix to accomodate darwin-ism
+        Log: add a low-impact fix to accommodate darwin-ism
      Branch: maint-5.6/perl
 	   ! ext/Errno/Errno_pm.PL
 ____________________________________________________________________________
@@ -36472,7 +38403,7 @@ ____________________________________________________________________________
 	   ! README.win32
 ____________________________________________________________________________
 [  9510] By: jhi                                   on 2001/04/01  20:45:10
-        Log: An ambiguosity warning.
+        Log: An ambiguousity warning.
      Branch: perl
 	   ! t/lib/trig.t
 ____________________________________________________________________________
@@ -38808,7 +40739,7 @@ ____________________________________________________________________________
              - Add some more macros to comprehend different shift amounts and
              possible swizzle in UTF-EBCDIC vs UTF-8. Change utf8.c to use them.
              - add utfebcdic.h which provides UTF-EBCDIC versions of the macros,
-             and conditionaly #include it.
+             and conditionally #include it.
              
              EBCDIC build as yet untested.  ASCII still fails the one test.
      Branch: perlio
@@ -39899,7 +41830,7 @@ ____________________________________________________________________________
         Log: Long-standing "defined but not used" SvPVbyte*() are about to get used
              for auto-downgrade hooks in gethostbyaddr() etc. (as per Camel-III).
              
-             Make SvPVbyte*() symetric with respect to SvPVutf8*() in that:
+             Make SvPVbyte*() symmetric with respect to SvPVutf8*() in that:
              - it does a sv_utf8_downgrade (c.f. SvPVutf8's sv_utf8_upgrade())
              - uses SvPV() rather than sv_2pv() in case it isn't a string.
      Branch: perlio
@@ -40877,7 +42808,7 @@ ____________________________________________________________________________
 [  8930] By: jhi                                   on 2001/02/25  17:25:47
         Log: (Retracted by #8395.)
              
-             Attempt to fix the EBCDIC character range problwm with //.
+             Attempt to fix the EBCDIC character range problem with //.
      Branch: perl
 	   ! regcomp.c
 ____________________________________________________________________________
@@ -42509,7 +44440,7 @@ ____________________________________________________________________________
 	   ! perl.c
 ____________________________________________________________________________
 [  8720] By: bailey                                on 2001/02/08  20:59:22
-        Log: Convert frwite()s to sockets to write()s, since some socket stacks
+        Log: Convert fwrite()s to sockets to write()s, since some socket stacks
              don't take kindly to stdio.
              Ignore "expected" SS$_NOLOGNAM when doing internal LNM lookups
              (for often optional LNMs)
@@ -44343,7 +46274,7 @@ ____________________________________________________________________________
 ____________________________________________________________________________
 [  8522] By: jhi                                   on 2001/01/23  13:51:28
         Log: print() instead of warn() so that stderr doesn't get
-             unncessarily polluted.
+             unnecessarily polluted.
      Branch: perl
 	   ! ext/Encode/compile
 ____________________________________________________________________________
@@ -44491,7 +46422,7 @@ ____________________________________________________________________________
              Message-Id: <200101192101.QAA11911@spotter.yi.org>
              Date: Fri, 19 Jan 2001 16:01:13 -0500
              
-             with a nit from Philip Netwon.
+             with a nit from Philip Newton.
      Branch: perl
 	   ! pod/perlfaq2.pod
 ____________________________________________________________________________
@@ -45019,7 +46950,7 @@ ____________________________________________________________________________
              I can use pack"U0a*" but it requires more typing and has
              runtime overhead.
              - Fix pp_regcomp bug uncovered by "0x00-0xff always produce bytes"
-             change, the bug apears if a pm has PMdf_UTF8 flag but interpolated
+             change, the bug appears if a pm has PMdf_UTF8 flag but interpolated
              string is not UTF8_on and has char 0x80-0xff.
              
              TODO: document and test qu.
@@ -45578,7 +47509,7 @@ ____________________________________________________________________________
              Date: Sun, 7 Jan 2001 03:16:55 +0200 (EET)
              Message-ID: <14935.50055.838449.408835@ix.netsoft.ro>
              
-             No need for the potentially unportable $SIG{CHLD}.
+             No need for the potentially nonportable $SIG{CHLD}.
      Branch: perl
 	   ! t/io/pipe.t
 ____________________________________________________________________________
@@ -45904,7 +47835,7 @@ ____________________________________________________________________________
 	   ! INSTALL ext/NDBM_File/NDBM_File.xs ext/ODBM_File/ODBM_File.xs
 ____________________________________________________________________________
 [  8319] By: jhi                                   on 2001/01/04  20:46:17
-        Log: Typo in #8312 when manually appying a problematic patch fragment.
+        Log: Typo in #8312 when manually applying a problematic patch fragment.
      Branch: perl
 	   ! ext/Storable/Storable.xs
 ____________________________________________________________________________
@@ -51697,7 +53628,7 @@ ____________________________________________________________________________
 [  7853] By: nick                                  on 2000/11/24  22:24:33
         Log: Re-arrange crlf vs binary for platforms that care.
              crlf layer is now "the" buffer layer and can turn its behaviour on/off.
-             Lip-service to making stdio layer work on such platfroms (untested).
+             Lip-service to making stdio layer work on such platforms (untested).
              Now fails 3 tests rather than one, checkin to see if I can debug 
              the issue under linux. (Do not merge.)
      Branch: perlio
@@ -58545,7 +60476,7 @@ ____________________________________________________________________________
 	   ! regexec.c sv.c toke.c utf8.c
 ____________________________________________________________________________
 [  7095] By: nick                                  on 2000/09/15  16:55:59
-        Log: Mutliplicity & ithreads fix for sv.c/Encode.xs
+        Log: Multiplicity & ithreads fix for sv.c/Encode.xs
              
              Subject: [ID 20000915.004] Not OK: perl v5.7.1 +devel-7094 on alpha-dec_osf-thread-multi 4.0f (UNINSTALLED)
              From: Spider Boardman <spider@Orb.Nashua.NH.US>
@@ -58617,7 +60548,7 @@ ____________________________________________________________________________
 ____________________________________________________________________________
 [  7084] By: jhi                                   on 2000/09/14  20:03:34
         Log: UTF8-encoded version of 256 is 0xc4 0x80; test that a char is
-             convertable to bytes by checking it doesn't go above 0xc3
+             convertible to bytes by checking it doesn't go above 0xc3
              
              Subject: Re: perl@7078
              From: Simon Cozens <simon@cozens.net>
@@ -59399,7 +61330,7 @@ ____________________________________________________________________________
 ____________________________________________________________________________
 [  6981] By: nick                                  on 2000/09/01  17:21:57
         Log: Document UNTIE. Also tweak implementation to suppress the 'inner references'
-             warning when UNTIE exists and instead pass the cound of extra references to
+             warning when UNTIE exists and instead pass the count of extra references to
              the UNTIE method.
      Branch: perl
 	   ! pod/perltie.pod pp_sys.c
@@ -63281,8 +65212,8 @@ ____________________________________________________________________________
              Message-Id: <20000721043729.30081.qmail@othersideofthe.earth.li>
              
              Exercise for the kind reader: should we or should we not
-             cache the utf8 conversion alonside the SV? (as magic,
-             as thestrxfrm()ed version is cached under use locale)
+             cache the utf8 conversion alongside the SV? (as magic,
+             as the strxfrm()ed version is cached under use locale)
              Argue both for and against.
      Branch: perl
 	   ! sv.c
@@ -64448,7 +66379,7 @@ ____________________________________________________________________________
 ____________________________________________________________________________
 [  6319] By: jhi                                   on 2000/07/06  03:11:46
         Log: Autogenerate pod/Makefile and pod/buildtoc.
-             buildtoc also checks whether the existin pods are
+             buildtoc also checks whether the existing pods are
              mentioned in MANIFEST and perl.pod, and vice versa.
              (None of the thusly found discrepancies fixed yet.)
              roffitall also needs to be autogenerated similarly but it
@@ -66337,7 +68268,7 @@ ____________________________________________________________________________
 	   ! pod/perlop.pod
 ____________________________________________________________________________
 [  6047] By: jhi                                   on 2000/05/02  17:41:24
-        Log: Call getspnam() only iff needd.
+        Log: Call getspnam() only iff needed.
      Branch: cfgperl
 	   ! pp_sys.c
 ____________________________________________________________________________
@@ -66738,7 +68669,7 @@ ____________________________________________________________________________
 	   ! Configure
 ____________________________________________________________________________
 [  5979] By: gsar                                  on 2000/04/28  03:07:54
-        Log: under useithreads, constant pad entries could inadvertantly be
+        Log: under useithreads, constant pad entries could inadvertently be
              shared across threads (from Eric Blood <eblood@xmission.com>);
              added Eric's test case to testsuite
      Branch: perl
