@@ -168,13 +168,12 @@ static	u_int nmalloc[NBUCKETS];
 #endif
 
 #ifdef DEBUGGING
-#define	ASSERT(p)   if (!(p)) botch("p"); else
+#define	ASSERT(p)   if (!(p)) botch(STRINGIFY(p));  else
 static void
 botch(s)
 	char *s;
 {
-
-	printf("assertion botched: %s\n", s);
+	PerlIO_printf(PerlIO_stderr(), "assertion botched: %s\n", s);
 	abort();
 }
 #else
