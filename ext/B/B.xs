@@ -797,6 +797,11 @@ IV
 SvIVX(sv)
 	B::IV	sv
 
+UV 
+SvUVX(sv) 
+	B::IV   sv
+                      
+
 MODULE = B	PACKAGE = B::IV
 
 #define needs64bits(sv) ((I32)SvIVX(sv) != SvIVX(sv))

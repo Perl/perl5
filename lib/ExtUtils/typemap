@@ -29,6 +29,7 @@ HV *			T_HVREF
 CV *			T_CVREF
 
 IV			T_IV
+UV			T_UV
 I32			T_IV
 I16			T_IV
 I8			T_IV

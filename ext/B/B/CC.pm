@@ -896,9 +896,9 @@ BEGIN {
     # XXX The standard perl PP code has extra handling for
     # some special case arguments of these operators.
     #
-    sub pp_add { numeric_binop($_[0], $plus_op, INTS_CLOSED) }
-    sub pp_subtract { numeric_binop($_[0], $minus_op, INTS_CLOSED) }
-    sub pp_multiply { numeric_binop($_[0], $multiply_op, INTS_CLOSED) }
+    sub pp_add { numeric_binop($_[0], $plus_op) }
+    sub pp_subtract { numeric_binop($_[0], $minus_op) }
+    sub pp_multiply { numeric_binop($_[0], $multiply_op) }
     sub pp_divide { numeric_binop($_[0], $divide_op) }
     sub pp_modulo { int_binop($_[0], $modulo_op) } # differs from perl's
 
@@ -944,7 +944,7 @@ sub pp_sassign {
 	($src, $dst) = ($dst, $src) if $backwards;
 	my $type = $src->{type};
 	if ($type == T_INT) {
-	    $dst->set_int($src->as_int);
+	    $dst->set_int($src->as_int,$src->{flags} & VALID_UNSIGNED);
 	} elsif ($type == T_DOUBLE) {
 	    $dst->set_numeric($src->as_numeric);
 	} else {
@@ -957,7 +957,11 @@ sub pp_sassign {
 	    my $type = $src->{type};
 	    runtime("if (PL_tainting && PL_tainted) TAINT_NOT;");
 	    if ($type == T_INT) {
-		runtime sprintf("sv_setiv(TOPs, %s);", $src->as_int);
+                if ($src->{flags} & VALID_UNSIGNED){ 
+                     runtime sprintf("sv_setuv(TOPs, %s);", $src->as_int);
+                }else{
+                    runtime sprintf("sv_setiv(TOPs, %s);", $src->as_int);
+                }
 	    } elsif ($type == T_DOUBLE) {
 		runtime sprintf("sv_setnv(TOPs, %s);", $src->as_double);
 	    } else {
