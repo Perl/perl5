@@ -24,8 +24,8 @@ It refers to the layer below. I<$fh> is not passed if the layer
 is at the bottom of the stack, for this reason and to maintain
 some level of "compatibility" with TIEHANDLE classes it is passed last.
 
-As an example, in Perl release 5.8.0 the MIME::QuotedPrint module
-defines the required TIEHANDLE methods so that you can say
+As an example, in Perl release 5.8.0 the included MIME::QuotedPrint
+module defines the required TIEHANDLE methods so that you can say
 
 	use MIME::QuotedPrint;
 	open(my $fh, ">Via(MIME::QuotedPrint)", "qp");
@@ -34,8 +34,8 @@ defines the required TIEHANDLE methods so that you can say
 
 =item $class->PUSHED([$mode][,$fh])
 
-Should return an object or the class. (Compare TIEHANDLE.)
-Mandatory.
+Should return an object or the class, or undef on failure.
+(Compare TIEHANDLE.)  Mandatory.
 
 =item $obj->POPPED([$fh])
 
@@ -81,17 +81,18 @@ Optional.
 =item $obj->SEEK($posn,$whence,$fh)
 
 Should return 0 on success, -1 on error.
-Optional. Default is to fail, but that is likely to be changed.
+Optional.  Default is to fail, but that is likely to be changed
+in future.
 
 =item $obj->TELL($fh)
 
 Returns file postion.
-Optional. Default to be determined.
+Optional.  Default to be determined.
 
 =item $obj->UNREAD($buffer,$fh)
 
 Returns the number of octets from buffer that have been sucessfully
-saved to be returned on future FILL/READ calls.  Optional. Default is
+saved to be returned on future FILL/READ calls.  Optional.  Default is
 to push data into a temporary layer above this one.
 
 =item $obj->FLUSH($fh)
@@ -127,10 +128,10 @@ Given the following module, Hex.pm:
 
     sub PUSHED
     {
-     my ($class,$mode) = @_;
+     my ($class,$mode,$fh) = @_;
      # When writing we buffer the data
-     my $write = '';
-     return bless \$write,$class;
+     my $buf = '';
+     return bless \$buf,$class;
     }
 
     sub FILL
@@ -138,7 +139,6 @@ Given the following module, Hex.pm:
      my ($obj,$fh) = @_;
      my $line = <$fh>;
      return (defined $line) ? pack("H*", $line) : undef;
-     return undef;
     }
 
     sub WRITE
