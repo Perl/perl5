@@ -91,13 +91,12 @@ This module was last revised 14-Feb-1996, for perl 5.002. $VERSION is
 $VERSION = "1.01"; # That's my hobby-horse, A.K.
 
 require 5.000;
-use Config;
 use Carp;
 require Exporter;
 @ISA = qw( Exporter );
 @EXPORT = qw( mkpath rmtree );
 
-$Is_VMS = $Config{'osname'} eq 'VMS';
+$Is_VMS = $^O eq 'VMS';
 
 sub mkpath {
     my($paths, $verbose, $mode) = @_;

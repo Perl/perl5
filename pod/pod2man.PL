@@ -15,8 +15,7 @@ use File::Basename qw(&basename &dirname);
 chdir(dirname($0));
 ($file = basename($0)) =~ s/\.PL$//;
 $file =~ s/\.pl$//
-	if ($Config{'osname'} eq 'VMS' or
-	    $Config{'osname'} eq 'OS2');  # "case-forgiving"
+	if ($^O eq 'VMS' or $^O eq 'os2');  # "case-forgiving"
 
 open OUT,">$file" or die "Can't create $file: $!";
 
@@ -395,17 +394,20 @@ if ($name ne 'something') {
     FCHECK: {
 	open(F, "< $ARGV[0]") || die "can't open $ARGV[0]: $!";
 	while (<F>) {
+	    next unless /^=\b/;
 	    if (/^=head1\s+NAME\s*$/) {  # an /m would forgive mistakes
 		$_ = <F>;
 		unless (/\s*-+\s+/) {
 		    $oops++;
-		    warn "$0: Improper man page - no dash in NAME header in paragraph $. of $ARGV[0]:\n"
+		    warn "$0: Improper man page - no dash in NAME header in paragraph $. of $ARGV[0]\n"
 		}
 		%namedesc = split /\s+-\s+/;
 		last FCHECK;
 	    }
+	    next if /^=cut\b/;	# DB_File and Net::Ping have =cut before NAME
+	    die "$0: Invalid man page - 1st pod line is not NAME in $ARGV[0]\n";
 	}
-	die "$0: Invalid man page - no NAME line in $ARGV[0]\n";
+	die "$0: Invalid man page - no documentation in $ARGV[0]\n";
     }
     close F;
 }
@@ -793,7 +795,7 @@ while (<>) {
 	}
 	elsif ($Cmd eq 'back') {
 	    $indent = pop(@indent);
-	    warn "Unmatched =back\n" unless defined $indent;
+	    warn "$0: Unmatched =back in paragraph $. of $ARGV\n" unless defined $indent;
 	    $needspace = 1;
 	}
 	elsif ($Cmd eq 'item') {
@@ -805,7 +807,7 @@ while (<>) {
 	    # this is just a comment
 	} 
 	else {
-	    warn "Unrecognized pod directive: $Cmd\n";
+	    warn "$0: Unrecognized pod directive in paragraph $. of $ARGV: $Cmd\n";
 	}
     }
     else {
@@ -951,7 +953,7 @@ sub noremap {
 
 sub init_noremap {
     if ( /[\200-\377]/ ) {
-	warn "high bit char in input stream";
+	warn "$0: high bit char in input stream in paragraph $. of $ARGV\n";
     }
 }
 
@@ -975,7 +977,7 @@ sub clear_noremap {
 	     exists $HTML_Escapes{$1}
 		? do { $HTML_Escapes{$1} }
 		: do {
-		    warn "Unknown escape: $& in $_";
+		    warn "$0: Unknown escape in paragraph $. of $ARGV: ``$&''\n";
 		    "E<$1>";
 		}
 	 }

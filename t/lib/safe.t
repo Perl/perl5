@@ -4,7 +4,7 @@ BEGIN {
     chdir 't' if -d 't';
     @INC = '../lib';
     require Config; import Config;
-    if ($Config{'extensions'} !~ /\bSafe\b/ && $Config{'osname'} ne 'VMS') {
+    if ($Config{'extensions'} !~ /\bSafe\b/ && $^O ne 'VMS') {
         print "1..0\n";
         exit 0;
     }
