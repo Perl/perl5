@@ -254,8 +254,8 @@ unlink "${script_name}$script_ext" if -f "${script_name}$script_ext";
 
 # pasthru()
 {
-    my $pasthru = ($Config{make} =~ /^nmake/i ? "/-nologo/" : "");
-    like( $MM->pasthru(), $pasthru, 'pasthru()' );
+    my $pastru = "PASTHRU = " . ($Config{make} =~ /^nmake/i ? "-nologo" : "");
+    is( $MM->pasthru(), $pastru, 'pasthru()' );
 }
 
 package FakeOut;
