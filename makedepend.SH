@@ -56,6 +56,12 @@ $rm -f *.c.c c/*.c.c
 if test -f Makefile; then
     rm -f $firstmakefile
     cp Makefile $firstmakefile
+    # On QNX, 'cp' preserves timestamp, so $firstmakefile appears
+    # to be out of date.  I don't know if OS/2 has touch, so do this:
+    case "$osname" in
+    os2) ;;
+    *) $touch $firstmakefile ;;
+    esac
 fi
 mf=$firstmakefile
 if test -f $mf; then
