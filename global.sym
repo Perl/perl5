@@ -631,6 +631,8 @@ Perl_sv_nosharing
 Perl_sv_nolocking
 Perl_sv_nounlocking
 Perl_nothreadhook
+Perl_Slab_Alloc
+Perl_Slab_Free
 Perl_sv_setsv_flags
 Perl_sv_catpvn_flags
 Perl_sv_catsv_flags

@@ -6,7 +6,7 @@
 #      License or the Artistic License, as specified in the README file.
 package B::Disassembler::BytecodeStream;
 
-our $VERSION = '1.02';
+our $VERSION = '1.03';
 
 use FileHandle;
 use Carp;
@@ -153,6 +153,15 @@ sub GET_IV {
     $Config{ivsize} == 4 ? &GET_I32 : &GET_IV64;
 }
 
+sub B::::GET_PADOFFSET {
+    $Config{ptrsize} == 8 ? &B::GET_IV64 : &B::GET_U32;
+}
+
+sub B::::GET_long {
+    $Config{longsize} == 8 ? &B::GET_IV64 : &B::GET_U32;
+}
+
+
 package B::Disassembler;
 use Exporter;
 @ISA = qw(Exporter);
@@ -162,7 +171,7 @@ use strict;
 
 use B::Asmdata qw(%insn_data @insn_name);
 
-our( $magic, $archname, $blversion, $ivsize, $ptrsize, $byteorder );
+our( $magic, $archname, $blversion, $ivsize, $ptrsize );
 
 sub dis_header($){
     my( $fh ) = @_;
@@ -172,11 +181,10 @@ sub dis_header($){
     $blversion = $fh->GET_strconst();
     $ivsize    = $fh->GET_U32();
     $ptrsize   = $fh->GET_U32();
-    $byteorder = $fh->GET_strconst();
 }
 
 sub get_header(){
-    return( $magic, $archname, $blversion, $ivsize, $ptrsize, $byteorder );
+    return( $magic, $archname, $blversion, $ivsize, $ptrsize);
 }
 
 sub disassemble_fh {

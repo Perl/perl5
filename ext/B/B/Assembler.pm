@@ -16,7 +16,7 @@ no warnings;			# XXX
 
 @ISA = qw(Exporter);
 @EXPORT_OK = qw(assemble_fh newasm endasm assemble asm);
-$VERSION = 0.05;
+$VERSION = 0.06;
 
 use strict;
 my %opnumber;
@@ -142,6 +142,14 @@ sub B::Asmdata::PUT_IV {
     $Config{ivsize} == 4 ? &B::Asmdata::PUT_I32 : &B::Asmdata::PUT_IV64;
 }
 
+sub B::Asmdata::PUT_PADOFFSET {
+    $Config{ptrsize} == 8 ? &B::Asmdata::PUT_IV64 : &B::Asmdata::PUT_U32;
+}
+
+sub B::Asmdata::PUT_long {
+    $Config{longsize} == 8 ? &B::Asmdata::PUT_IV64 : &B::Asmdata::PUT_U32;
+}
+
 my %unesc = (n => "\n", r => "\r", t => "\t", a => "\a",
 	     b => "\b", f => "\f", v => "\013");
 
@@ -181,8 +189,6 @@ sub gen_header {
     $header .= B::Asmdata::PUT_strconst(qq["$ByteLoader::VERSION"]);
     $header .= B::Asmdata::PUT_U32($Config{ivsize});
     $header .= B::Asmdata::PUT_U32($Config{ptrsize});
-    $header .= B::Asmdata::PUT_strconst(sprintf(qq["0x%s"], $Config{byteorder}));
-
     $header;
 }
 

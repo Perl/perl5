@@ -1413,14 +1413,10 @@
 #ifdef PERL_CORE
 #define apply_attrs_my		S_apply_attrs_my
 #endif
-#  if defined(PL_OP_SLAB_ALLOC)
-#ifdef PERL_CORE
-#define Slab_Alloc		S_Slab_Alloc
 #endif
-#ifdef PERL_CORE
-#define Slab_Free		S_Slab_Free
-#endif
-#  endif
+#if defined(PL_OP_SLAB_ALLOC)
+#define Slab_Alloc		Perl_Slab_Alloc
+#define Slab_Free		Perl_Slab_Free
 #endif
 #if defined(PERL_IN_PERL_C) || defined(PERL_DECL_PROT)
 #ifdef PERL_CORE
@@ -3921,14 +3917,10 @@
 #ifdef PERL_CORE
 #define apply_attrs_my(a,b,c,d)	S_apply_attrs_my(aTHX_ a,b,c,d)
 #endif
-#  if defined(PL_OP_SLAB_ALLOC)
-#ifdef PERL_CORE
-#define Slab_Alloc(a,b)		S_Slab_Alloc(aTHX_ a,b)
 #endif
-#ifdef PERL_CORE
-#define Slab_Free(a)		S_Slab_Free(aTHX_ a)
-#endif
-#  endif
+#if defined(PL_OP_SLAB_ALLOC)
+#define Slab_Alloc(a,b)		Perl_Slab_Alloc(aTHX_ a,b)
+#define Slab_Free(a)		Perl_Slab_Free(aTHX_ a)
 #endif
 #if defined(PERL_IN_PERL_C) || defined(PERL_DECL_PROT)
 #ifdef PERL_CORE

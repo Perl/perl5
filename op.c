@@ -30,13 +30,8 @@
 #define PERL_SLAB_SIZE 2048
 #endif
 
-#define NewOp(m,var,c,type) \
-	STMT_START { var = (type *) Slab_Alloc(m,c*sizeof(type)); } STMT_END
-
-#define FreeOp(p) Slab_Free(p)
-
-STATIC void *
-S_Slab_Alloc(pTHX_ int m, size_t sz)
+void *
+Perl_Slab_Alloc(pTHX_ int m, size_t sz)
 {
     /*
      * To make incrementing use count easy PL_OpSlab is an I32 *
@@ -74,8 +69,8 @@ S_Slab_Alloc(pTHX_ int m, size_t sz)
     return (void *)(PL_OpPtr + 1);
 }
 
-STATIC void
-S_Slab_Free(pTHX_ void *op)
+void
+Perl_Slab_Free(pTHX_ void *op)
 {
     I32 **ptr = (I32 **) op;
     I32 *slab = ptr[-1];
@@ -93,10 +88,6 @@ S_Slab_Free(pTHX_ void *op)
 	}
     }
 }
-
-#else
-#define NewOp(m, var, c, type) Newz(m, var, c, type)
-#define FreeOp(p) Safefree(p)
 #endif
 /*
  * In the following definition, the ", Nullop" is just to make the compiler

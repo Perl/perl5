@@ -175,7 +175,7 @@ byterun(pTHX_ register struct byteloader_state *bstate)
 	  case INSN_PV_CUR:		/* 15 */
 	    {
 		STRLEN arg;
-		BGET_U32(arg);
+		BGET_PADOFFSET(arg);
 		bstate->bs_pv.xpv_cur = arg;
 		break;
 	    }
@@ -227,14 +227,14 @@ byterun(pTHX_ register struct byteloader_state *bstate)
 	  case INSN_XPV_CUR:		/* 23 */
 	    {
 		STRLEN arg;
-		BGET_U32(arg);
+		BGET_PADOFFSET(arg);
 		SvCUR(bstate->bs_sv) = arg;
 		break;
 	    }
 	  case INSN_XPV_LEN:		/* 24 */
 	    {
 		STRLEN arg;
-		BGET_U32(arg);
+		BGET_PADOFFSET(arg);
 		SvLEN(bstate->bs_sv) = arg;
 		break;
 	    }
@@ -255,14 +255,14 @@ byterun(pTHX_ register struct byteloader_state *bstate)
 	  case INSN_XLV_TARGOFF:		/* 27 */
 	    {
 		STRLEN arg;
-		BGET_U32(arg);
+		BGET_PADOFFSET(arg);
 		LvTARGOFF(bstate->bs_sv) = arg;
 		break;
 	    }
 	  case INSN_XLV_TARGLEN:		/* 28 */
 	    {
 		STRLEN arg;
-		BGET_U32(arg);
+		BGET_PADOFFSET(arg);
 		LvTARGLEN(bstate->bs_sv) = arg;
 		break;
 	    }
@@ -444,7 +444,7 @@ byterun(pTHX_ register struct byteloader_state *bstate)
 	  case INSN_XCV_DEPTH:		/* 55 */
 	    {
 		long arg;
-		BGET_I32(arg);
+		BGET_long(arg);
 		CvDEPTH(bstate->bs_sv) = arg;
 		break;
 	    }
@@ -479,7 +479,7 @@ byterun(pTHX_ register struct byteloader_state *bstate)
 	  case INSN_AV_EXTEND:		/* 60 */
 	    {
 		SSize_t arg;
-		BGET_I32(arg);
+		BGET_PADOFFSET(arg);
 		BSET_av_extend(bstate->bs_sv, arg);
 		break;
 	    }
@@ -500,14 +500,14 @@ byterun(pTHX_ register struct byteloader_state *bstate)
 	  case INSN_XAV_FILL:		/* 63 */
 	    {
 		SSize_t arg;
-		BGET_I32(arg);
+		BGET_PADOFFSET(arg);
 		AvFILLp(bstate->bs_sv) = arg;
 		break;
 	    }
 	  case INSN_XAV_MAX:		/* 64 */
 	    {
 		SSize_t arg;
-		BGET_I32(arg);
+		BGET_PADOFFSET(arg);
 		AvMAX(bstate->bs_sv) = arg;
 		break;
 	    }
@@ -738,7 +738,7 @@ byterun(pTHX_ register struct byteloader_state *bstate)
 	  case INSN_OP_TARG:		/* 97 */
 	    {
 		PADOFFSET arg;
-		BGET_U32(arg);
+		BGET_PADOFFSET(arg);
 		PL_op->op_targ = arg;
 		break;
 	    }
@@ -817,13 +817,13 @@ byterun(pTHX_ register struct byteloader_state *bstate)
 	    {
 		pvindex arg;
 		BGET_pvindex(arg);
-		cPMOP->op_pmstashpv = arg;
+		BSET_op_pmstashpv(cPMOP, arg);
 		break;
 	    }
 	  case INSN_OP_PMREPLROOTPO:		/* 109 */
 	    {
 		PADOFFSET arg;
-		BGET_U32(arg);
+		BGET_PADOFFSET(arg);
 		cPMOP->op_pmreplroot = (OP*)arg;
 		break;
 	    }
@@ -881,7 +881,7 @@ byterun(pTHX_ register struct byteloader_state *bstate)
 	  case INSN_OP_PADIX:		/* 117 */
 	    {
 		PADOFFSET arg;
-		BGET_U32(arg);
+		BGET_PADOFFSET(arg);
 		cPADOP->op_padix = arg;
 		break;
 	    }

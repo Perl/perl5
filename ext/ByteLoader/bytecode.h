@@ -20,6 +20,10 @@ typedef char *pvindex;
 	BGET_FREAD(&arg, sizeof(U32), 1)
 #define BGET_UV(arg)	\
 	BGET_FREAD(&arg, sizeof(UV), 1)
+#define BGET_PADOFFSET(arg)	\
+	BGET_FREAD(&arg, sizeof(PADOFFSET), 1)
+#define BGET_long(arg)		\
+	BGET_FREAD(&arg, sizeof(long), 1)
 
 #define BGET_I32(arg)	BGET_U32(arg)
 #define BGET_IV(arg)	BGET_UV(arg)
@@ -28,7 +32,7 @@ typedef char *pvindex;
 	BGET_U32(arg);							\
 	if (arg) {							\
 	    New(666, bstate->bs_pv.xpv_pv, arg, char);			\
-	    bl_read(bstate->bs_fdata, (void*)bstate->bs_pv.xpv_pv, arg, 1);\
+	    bl_read(bstate->bs_fdata, bstate->bs_pv.xpv_pv, arg, 1);	\
 	    bstate->bs_pv.xpv_len = arg;				\
 	    bstate->bs_pv.xpv_cur = arg - 1;				\
 	} else {							\
@@ -187,14 +191,14 @@ typedef char *pvindex;
 	    SvFLAGS(sv) = arg;				\
 	    BSET_OBJ_STOREX(sv);			\
 	} STMT_END
-#define BSET_newop(o, arg)				\
-	((o = (OP*)safemalloc(arg)), memzero((char*)o,arg))
+
+#define BSET_newop(o, arg)	NewOpSz(666, o, arg)
 #define BSET_newopx(o, arg) STMT_START {	\
 	register int sz = arg & 0x7f;		\
-	register OP* new = (OP*) safemalloc(sz);\
-	memzero(new, sz);			\
-	/* new->op_next = o; XXX */		\
-	o = new;				\
+	register OP* newop;			\
+	BSET_newop(newop, sz);			\
+	/* newop->op_next = o; XXX */		\
+	o = newop;				\
 	arg >>=7;				\
 	BSET_op_type(o, arg);			\
 	BSET_OBJ_STOREX(o);			\
@@ -210,6 +214,8 @@ typedef char *pvindex;
 	Safefree(bstate->bs_obj_list);		\
 	return 0;				\
     } STMT_END
+
+#define BSET_op_pmstashpv(op, arg)	PmopSTASHPV_set(op, arg)
 
 /* 
  * stolen from toke.c: better if that was a function.
@@ -376,9 +382,5 @@ typedef char *pvindex;
 	    BGET_U32(sz); /* ptrsize */				\
 	    if (sz != PTRSIZE) {				\
 		HEADER_FAIL("different PTRSIZE");		\
-	    }							\
-	    BGET_strconst(str); /* byteorder */			\
-	    if (strNE(str, STRINGIFY(BYTEORDER))) {		\
-		HEADER_FAIL("different byteorder");	\
 	    }							\
 	} STMT_END
