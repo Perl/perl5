@@ -262,6 +262,9 @@ timestamp (meaning that about the only portable timestamp is the
 modification timestamp), or one second granularity of any timestamps
 (e.g. the FAT filesystem limits the time granularity to two seconds).
 
+The "inode change timestamp" (the <-C> filetest) may really be the
+"creation timestamp" (which it is not in UNIX).
+
 VOS perl can emulate Unix filenames with C</> as path separator.  The
 native pathname characters greater-than, less-than, number-sign, and
 percent-sign are always accepted.
@@ -1783,6 +1786,8 @@ as '', so numeric comparison or manipulation of these fields may cause
 
 mtime and atime are the same thing, and ctime is creation time instead of
 inode change time. (S<Mac OS>)
+
+ctime is creation time instead of inode change time  (Win32).
 
 device and inode are not meaningful.  (Win32)
 
