@@ -11,7 +11,7 @@
 package Pod::InputObjects;
 
 use vars qw($VERSION);
-$VERSION = 1.10;  ## Current version of this package
+$VERSION = 1.11;  ## Current version of this package
 require  5.004;    ## requires this Perl version or later
 
 #############################################################################

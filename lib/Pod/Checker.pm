@@ -10,7 +10,7 @@
 package Pod::Checker;
 
 use vars qw($VERSION);
-$VERSION = 1.097;  ## Current version of this package
+$VERSION = 1.098;  ## Current version of this package
 require  5.004;    ## requires this Perl version or later
 
 use Pod::ParseUtils; ## for hyperlinks and lists
@@ -26,6 +26,7 @@ Pod::Checker, podchecker() - check pod documents for syntax errors
   $syntax_okay = podchecker($filepath, $outputpath, %options);
 
   my $checker = new Pod::Checker %options;
+  $checker->parse_from_file($filepath, \*STDERR);
 
 =head1 OPTIONS/ARGUMENTS
 
@@ -57,13 +58,13 @@ It is hoped that curious/ambitious user will help flesh out and add the
 additional features they wish to see in B<Pod::Checker> and B<podchecker>
 and verify that the checks are consistent with L<perlpod>.
 
-The following checks are preformed:
+The following checks are currently preformed:
 
 =over 4
 
 =item *
 
-Unknown '=xxxx' commands, unknown 'X<...>' interior-sequences,
+Unknown '=xxxx' commands, unknown 'XE<lt>...E<gt>' interior-sequences,
 and unterminated interior sequences.
 
 =item *
@@ -96,14 +97,6 @@ misspelled links that seem to be internal links but should be links
 to something else.
 
 =back
-
-=head2 Additional Features
-
-While checking, this module collects document properties, e.g. the nodes
-for hyperlinks (C<=headX>, C<=item>). POD translators can use this feature
-to syntax-check and get the nodes in a first pass before actually starting
-to convert. This is expensive in terms of execution time, but allows for
-very robust conversions.
 
 =head1 DIAGNOSTICS
 
@@ -187,6 +180,10 @@ syntax described in L<perlpod>.
 =item * nonempty ZE<lt>E<gt>
 
 The C<ZE<lt>E<gt>> sequence is supposed to be empty.
+
+=item * empty XE<lt>E<gt>
+
+The index entry specified contains nothing but whitespace.
 
 =item * Spurious text after =pod / =cut
 
@@ -293,13 +290,13 @@ there were no POD commands at all found in the file.
 
 I<[T.B.D.]>
 
-=head1 AUTHOR
+=head1 INTERFACE
 
-Brad Appleton E<lt>bradapp@enteract.comE<gt> (initial version),
-Marek Rouchal E<lt>marek@saftsack.fs.uni-bayreuth.deE<gt>
-
-Based on code for B<Pod::Text::pod2text()> written by
-Tom Christiansen E<lt>tchrist@mox.perl.comE<gt>
+While checking, this module collects document properties, e.g. the nodes
+for hyperlinks (C<=headX>, C<=item>) and index entries (C<XE<lt>E<gt>>).
+POD translators can use this feature to syntax-check and get the nodes in
+a first pass before actually starting to convert. This is expensive in terms
+of execution time, but allows for very robust conversions.
 
 =cut
 
@@ -477,7 +474,7 @@ sub podchecker( $ ; $ % ) {
 
     ## Now check the pod document for errors
     $checker->parse_from_file($infile, $outfile);
-    
+
     ## Return the number of errors found
     return $checker->num_errors();
 }
@@ -509,10 +506,41 @@ sub initialize {
     $self->{_have_begin} = ''; # stores =begin
     $self->{_links} = []; # stack for internal hyperlinks
     $self->{_nodes} = []; # stack for =head/=item nodes
+    $self->{_index} = []; # text in X<>
     # print warnings?
     $self->{-warnings} = 1 unless(defined $self->{-warnings});
     $self->{_current_head1} = ''; # the current =head1 block
 }
+
+##################################
+
+=over 4
+
+=item C<$checker-E<gt>poderror( @args )>
+
+=item C<$checker-E<gt>poderror( {%opts}, @args )>
+
+Internal method for printing errors and warnings. If no options are
+given, simply prints "@_". The following options are recognized and used
+to form the output:
+
+  -msg
+
+A message to print prior to C<@args>.
+
+  -line
+
+The line number the error occurred in.
+
+  -file
+
+The file (name) the error occurred in.
+
+  -severity
+
+The error level, should be 'WARNING' or 'ERROR'.
+
+=cut
 
 # Invoked as $self->poderror( @args ), or $self->poderror( {%opts}, @args )
 sub poderror {
@@ -537,18 +565,43 @@ sub poderror {
       if($self->{-warnings} || !%opts || $opts{-severity} ne 'WARNING');
 }
 
-# set/retrieve the number of errors found
+##################################
+
+=item C<$checker-E<gt>num_errors()>
+
+Set (if argument specified) and retrieve the number of errors found.
+
+=cut
+
 sub num_errors {
    return (@_ > 1) ? ($_[0]->{_NUM_ERRORS} = $_[1]) : $_[0]->{_NUM_ERRORS};
 }
 
-# set and/or retrieve canonical name of POD
+##################################
+
+=item C<$checker-E<gt>name()>
+
+Set (if argument specified) and retrieve the canonical name of POD as
+found in the C<=head1 NAME> section.
+
+=cut
+
 sub name {
     return (@_ > 1 && $_[1]) ?
         ($_[0]->{-name} = $_[1]) : $_[0]->{-name};  
 }
 
-# set/return nodes of the current POD
+##################################
+
+=item C<$checker-E<gt>node()>
+
+Add (if argument specified) and retrieve the nodes (as defined by C<=headX>
+and C<=item>) of the current POD. The nodes are returned in the order of
+their occurence. They consist of plain text, each piece of whitespace is
+collapsed to a single blank.
+
+=cut
+
 sub node {
     my ($self,$text) = @_;
     if(defined $text) {
@@ -557,11 +610,48 @@ sub node {
         # add node, order important!
         push(@{$self->{_nodes}}, $text);
         # keep also a uniqueness counter
-        $self->{_unique_nodes}->{$text}++;
+        $self->{_unique_nodes}->{$text}++ if($text !~ /^\s*$/s);
         return $text;
     }
     @{$self->{_nodes}};
 }
+
+##################################
+
+=item C<$checker-E<gt>idx()>
+
+Add (if argument specified) and retrieve the index entries (as defined by
+C<XE<lt>E<gt>>) of the current POD. They consist of plain text, each piece
+of whitespace is collapsed to a single blank.
+
+=cut
+
+# set/return index entries of current POD
+sub idx {
+    my ($self,$text) = @_;
+    if(defined $text) {
+        $text =~ s/\s+$//s; # strip trailing whitespace
+        $text =~ s/\s+/ /gs; # collapse whitespace
+        # add node, order important!
+        push(@{$self->{_index}}, $text);
+        # keep also a uniqueness counter
+        $self->{_unique_nodes}->{$text}++ if($text !~ /^\s*$/s);
+        return $text;
+    }
+    @{$self->{_index}};
+}
+
+##################################
+
+=item C<$checker-E<gt>hyperlink()>
+
+Add (if argument specified) and retrieve the hyperlinks (as defined by
+C<LE<lt>E<gt>>) of the current POD. They consist of an 2-item array: line
+number and C<Pod::Hyperlink> object.
+
+=back
+
+=cut
 
 # set/return hyperlinks of the current POD
 sub hyperlink {
@@ -605,14 +695,22 @@ sub end_pod {
         }
     }
     foreach($self->hyperlink()) {
-        my $line = '';
-        s/^(\d+):// && ($line = $1);
-        if($_ && !$nodes{$_}) {
-            $self->poderror({ -line => $line, -file => $infile,
-                -severity => 'ERROR',
-                -msg => "unresolved internal link '$_'"});
+        my ($line,$link) = @$_;
+        # _TODO_ what if there is a link to the page itself by the name,
+        # e.g. in Tk::Pod : L<Tk::Pod/"DESCRIPTION">
+        if($link->node() && !$link->page() && $link->type() ne 'hyperlink') {
+            my $node = $self->_check_ptree($self->parse_text($link->node(),
+                $line), $line, $infile, 'L');
+            if($node && !$nodes{$node}) {
+                $self->poderror({ -line => $line || '', -file => $infile,
+                    -severity => 'ERROR',
+                    -msg => "unresolved internal link '$node'"});
+            }
         }
     }
+
+    # check the internal nodes for uniqueness. This pertains to
+    # =headX, =item and X<...>
     foreach(grep($self->{_unique_nodes}->{$_} > 1,
       keys %{$self->{_unique_nodes}})) {
         $self->poderror({ -line => '-', -file => $infile,
@@ -758,6 +856,7 @@ sub command {
             }
         }
         elsif($cmd =~ /^head(\d+)/) {
+            # check whether the previous =head section had some contents
             if(defined $self->{_commands_in_head} &&
               $self->{_commands_in_head} == 0 &&
               defined $self->{_last_head} &&
@@ -996,15 +1095,8 @@ sub _check_ptree {
             # check the link text
             $text .= $self->_check_ptree($self->parse_text($link->text(),
                 $line), $line, $file, "$nestlist$cmd");
-            my $node = '';
-            # remember internal link
-            # _TODO_ what if there is a link to the page itself by the name,
-            # e.g. in Tk::Pod : L<Tk::Pod/"DESCRIPTION">
-            if($link->node() && !$link->page() && $link->type() ne 'hyperlink') {
-                $node = $self->_check_ptree($self->parse_text($link->node(),
-                    $line), $line, $file, "$nestlist$cmd");
-                $self->hyperlink("$line:$node") if($node);
-            }
+            # remember link
+            $self->hyperlink([$line,$link]);
         }
         elsif($cmd =~ /[BCFIS]/) {
             # add the guts
@@ -1017,15 +1109,25 @@ sub _check_ptree {
                     -msg => "Nonempty Z<>"});
             }
         }
-        else { # X<>
-            # check, but add nothing to $text
-            $self->_check_ptree($contents, $line, $file, "$nestlist$cmd");
+        elsif($cmd eq 'X') {
+            my $idx = $self->_check_ptree($contents, $line, $file, "$nestlist$cmd");
+            if($idx =~ /^\s*$/s) {
+                $self->poderror({ -line => $line, -file => $file,
+                    -severity => 'ERROR', 
+                    -msg => "Empty X<>"});
+            }
+            else {
+                # remember this node
+                $self->idx($idx);
+            }
+        }
+        else {
+            # not reached
+            die "internal error";
         }
     }
     $text;
 }
-
-# _TODO_ overloadable methods for BC..Z<...> expansion?
 
 # process a block of verbatim text
 sub verbatim { 
@@ -1075,4 +1177,16 @@ sub _preproc_par
 }
 
 1;
+
+__END__
+
+=head1 AUTHOR
+
+Brad Appleton E<lt>bradapp@enteract.comE<gt> (initial version),
+Marek Rouchal E<lt>marek@saftsack.fs.uni-bayreuth.deE<gt>
+
+Based on code for B<Pod::Text::pod2text()> written by
+Tom Christiansen E<lt>tchrist@mox.perl.comE<gt>
+
+=cut
 
