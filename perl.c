@@ -4727,7 +4727,7 @@ Perl_my_failure_exit(pTHX)
 	    STATUS_NATIVE_SET(44);
     }
     else {
-	if (!vaxc$errno && errno)	/* unlikely */
+	if (!vaxc$errno)		/* unlikely */
 	    STATUS_NATIVE_SET(44);
 	else
 	    STATUS_NATIVE_SET(vaxc$errno);

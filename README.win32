@@ -43,11 +43,10 @@ following compilers on the Intel x86 architecture:
 
       Borland C++		version 5.02 or later
       Microsoft Visual C++	version 4.2 or later
-      Mingw32 with GCC		version 2.95.2 or better
+      MinGW with gcc		gcc version 2.95.2 or later
 
-The last of these is a high quality freeware compiler.  Support
-for it is still experimental.  (Older versions of GCC are known
-not to work.)
+The last of these is a high quality freeware compiler.  Use version
+3.2.x or later for the best results with this compiler.
 
 This port can also be built on the Intel IA64 using:
 
@@ -138,24 +137,19 @@ The nmake that comes with the Platform SDK will suffice for building
 Perl.  Make sure you are building within one of the "Build Environment"
 shells available after you install the Platform SDK from the Start Menu.
 
-=item MinGW32 with gcc
+=item MinGW release 3 with gcc
 
-The latest release of MinGW (at the time of writing) is 2.0.0, which comes 
-with gcc-3.2, and can be downloaded here:
+The latest release of MinGW at the time of writing is 3.1.0, which comes 
+with gcc-3.2.3, and can be downloaded here:
 
-    http://sourceforge.net/projects/mingw
+    http://www.mingw.org/
 
-Perl compiles with earlier releases of gcc (2.95 and up) that can be
-downloaded from the same place. If you use gcc-3.2, comment out the
-line:
-
-    USE_GCC_V3_2	*= define
-
-in win32\makefile.mk
+Perl also compiles with earlier releases of gcc (2.95.2 and up).  See below
+for notes about using earlier versions of MinGW/gcc.
 
 You also need dmake.  See L</"Make"> above on how to get it.
 
-=item MinGW release 1
+=item MinGW release 1 with gcc
 
 The MinGW-1.1 bundle comes with gcc-2.95.3.
 
