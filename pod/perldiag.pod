@@ -2996,10 +2996,8 @@ with a numeric comparison operator, like this :
 
 This expression is actually equivalent to C<$x & ($y == 0)>, due to the
 higher precedence of C<==>. This is probably not what you want. (If you
-really meant to write this, disable the warning, or, better, write
-C<$x & ($y == 0 ? 1 : 0)>). (This warning might also be produced when you
-use the bitwise exclusive or, C<^>. Consider using the low-precedence
-C<xor> operator instead. See L<perlop>.)
+really meant to write this, disable the warning, or, better, put the
+parentheses explicitly and write C<$x & ($y == 0)>).
 
 =item Possible unintended interpolation of %s in string
 
