@@ -315,7 +315,7 @@ prof_dump_until(pTHX_ long ix)
     }
 }
 
-inline static void
+static void
 set_cv_key(pTHX_ CV *cv, char *pname, char *gname)
 {
 	SvGROW(g_key_hash, sizeof(CV**) + strlen(pname) + strlen(gname) + 3);
