@@ -65,6 +65,14 @@ sub async (&;@) {
     return threads->new($cref,@_);
 }
 
+sub object {
+    return undef unless @_ > 1;
+    foreach (threads->list) {
+        return $_ if $_->tid == $_[1];
+    }
+    return undef;
+}
+
 $threads::threads = 1;
 
 bootstrap threads $VERSION;
@@ -97,6 +105,7 @@ threads - Perl extension allowing use of interpreter based threads from perl
     $thread->detach();
 
     $thread = threads->self();
+    $thread = threads->object( $tid );
 
     $thread->tid();
     threads->tid();
@@ -165,6 +174,12 @@ new thread that's created.
 
 NB the class method C<< threads->tid() >> is a quick way to get the
 current thread id if you don't have your thread object handy.
+
+=item threads->object( tid )
+
+This will return the thread object for the thread associated with the
+specified tid.  Returns undef if there is no thread associated with the tid
+or no tid is specified or the specified tid is undef.
 
 =item threads->yield();
 
