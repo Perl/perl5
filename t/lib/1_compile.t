@@ -106,6 +106,8 @@ sub compile_module {
     return scalar `$^X "-Ilib" t/lib/compmod.pl $module` =~ /^ok/;
 }
 
+# Add here modules that have their own test scripts and therefore
+# need not be test-compiled by 1_compile.t.
 __DATA__
 AnyDBM_File
 AutoLoader
@@ -119,6 +121,7 @@ CGI
 CGI::Pretty
 CGI::Util
 Carp
+Carp::Heavy
 Class::ISA
 Class::Struct
 CPAN
@@ -138,6 +141,8 @@ Env
 Errno
 Exporter
 Exporter::Heavy
+ExtUtils::Constant
+ExtUtils::MakeMaker
 Fatal
 Fcntl
 File::Basename
@@ -158,7 +163,8 @@ FindBin
 GDBM_File
 Getopt::Long
 Getopt::Std
-I18N:Collate
+I18N::LangTags
+I18N::Collate
 IO::Dir
 IO::File
 IO::Handle
@@ -177,6 +183,7 @@ Locale::Constants
 Locale::Country
 Locale::Currency
 Locale::Language
+Locale::Maketext
 MIME::Base64
 MIME::QuotedPrint
 Math::BigFloat
@@ -188,6 +195,7 @@ NEXT
 Net::hostent
 ODBM_File
 Opcode
+PerlIO
 POSIX
 Pod::Checker
 Pod::Find
@@ -228,6 +236,7 @@ Time::Piece
 UNIVERSAL
 XS::Typemap
 attrs
+autouse
 base
 bytes
 charnames
