@@ -23,7 +23,7 @@ use Config;
 use File::Basename;
 
 use vars qw(@ISA $VERSION);
-$VERSION = '2.04_01';
+$VERSION = '2.05';
 
 require ExtUtils::MM_Win32;
 @ISA = qw(ExtUtils::MM_Win32);
@@ -327,7 +327,10 @@ MAKE_FRAG
 MAKE_FRAG
     }
 
-    $m .= '	$(LD) $(LDFLAGS) $(OBJECT:.obj=.obj) -desc "Perl 5.8.0 Extension ($(BASEEXT))  XS_VERSION: $(XS_VERSION)" -nlmversion $(NLM_VERSION)';
+    # Reconstruct the X.Y.Z version.
+    my $version = join '.', map { sprintf "%d", $_ }
+                              $] =~ /(\d)\.(\d{3})(\d{2})/;
+    $m .= sprintf '	$(LD) $(LDFLAGS) $(OBJECT:.obj=.obj) -desc "Perl %s Extension ($(BASEEXT))  XS_VERSION: $(XS_VERSION)" -nlmversion $(NLM_VERSION)', $version;
 
     # Taking care of long names like FileHandle, ByteLoader, SDBM_File etc
     if($self->{NLM_SHORT_NAME}) {

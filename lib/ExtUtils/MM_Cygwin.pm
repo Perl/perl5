@@ -10,7 +10,7 @@ require ExtUtils::MM_Any;
 require ExtUtils::MM_Unix;
 @ISA = qw( ExtUtils::MM_Any ExtUtils::MM_Unix );
 
-$VERSION = 1.02_01;
+$VERSION = 1.03;
 
 sub cflags {
     my($self,$libperl)=@_;

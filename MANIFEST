@@ -1069,6 +1069,7 @@ lib/ExtUtils/t/prefixify.t	See if MakeMaker can apply a PREFIX
 lib/ExtUtils/t/problems.t	How MakeMaker reacts to build problems
 lib/ExtUtils/t/testlib.t	See if ExtUtils::testlib works
 lib/ExtUtils/t/VERSION_FROM.t	See if MakeMaker's VERSION_FROM works
+lib/ExtUtils/t/writemakefile_args.t   See if WriteMakefile works
 lib/ExtUtils/t/zz_cleanup_dummy.t   Cleanup MakeMaker test module
 lib/ExtUtils/testlib.pm		Fixes up @INC to use just-built extension
 lib/ExtUtils/typemap		Extension interface types
