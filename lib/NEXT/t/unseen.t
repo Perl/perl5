@@ -5,7 +5,7 @@ BEGIN {
     }
 }
 
-BEGIN { print "1..4\n"; }
+BEGIN { print "1..5\n"; }
 use NEXT;
 
 my $count=1;
@@ -34,3 +34,14 @@ my $foo = {};
 bless($foo,"A");
 
 $foo->test;
+
+package Diamond::Base;
+sub test { print "ok ", $count++, "\n"; shift->NEXT::UNSEEN::test; }
+
+package Diamond::Left;  @ISA = qw[Diamond::Base];
+package Diamond::Right; @ISA = qw[Diamond::Base];
+package Diamond::Top;   @ISA = qw[Diamond::Left Diamond::Right];
+
+package main;
+
+Diamond::Top->test;
