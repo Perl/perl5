@@ -290,11 +290,11 @@ sub do_lint {
     
     # Now do subs in main
     no strict qw(vars refs);
-    my $sym;
     local(*glob);
-    while (($sym, *glob) = each %{"main::"}) {
-	#warn "Trying $sym\n";#debug
-	svref_2object(\*glob)->EGV->lintcv unless $sym =~ /::$/;
+    for my $sym (keys %main::) {
+	next if $sym =~ /::$/;
+	*glob = $main::{$sym};
+        svref_2object(\*glob)->EGV->lintcv;
     }
 
     # Now do subs in non-main packages given by -u options

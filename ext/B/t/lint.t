@@ -79,11 +79,8 @@ RESULT
 Use of regexp variable $& at -e line 1
 RESULT
 
-    {
-	local $TODO = 'bug';
-	runlint 'regexp-variables', 's/./$&/', <<'RESULT';
+    runlint 'regexp-variables', 's/./$&/', <<'RESULT';
 Use of regexp variable $& at -e line 1
 RESULT
-    }
 
 }

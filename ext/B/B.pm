@@ -126,6 +126,11 @@ sub walkoptree_slow {
 	}
 	shift @parents;
     }
+    if (class($op) eq 'PMOP' && $op->pmreplroot && ${$op->pmreplroot}) {
+	unshift(@parents, $op);
+	walkoptree_slow($op->pmreplroot, $method, $level + 1);
+	shift @parents;
+    }
 }
 
 sub compile_stats {
