@@ -1045,8 +1045,6 @@ modkids(OP *o, I32 type)
     return o;
 }
 
-static I32 modcount;
-
 OP *
 mod(OP *o, I32 type)
 {
@@ -2421,6 +2419,7 @@ newASSIGNOP(I32 flags, OP *left, I32 optype, OP *right)
     }
 
     if (list_assignment(left)) {
+	dTHR;
 	modcount = 0;
 	eval_start = right;	/* Grandfathering $[ assignment here.  Bletch.*/
 	left = mod(left, OP_AASSIGN);
