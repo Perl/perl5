@@ -121,6 +121,7 @@
 
 #ifdef DOSISH
 # if defined(OS2)
+#   define PTHX_UNUSED
 #   include "../os2ish.h"
 # else
 #   include "../dosish.h"

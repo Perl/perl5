@@ -2319,7 +2319,7 @@ Perl_my_popen(pTHX_ char *cmd, char *mode)
     PERL_FLUSHALL_FOR_CHILD;
 #ifdef OS2
     if (doexec) {
-	return my_syspopen(cmd,mode);
+	return my_syspopen(aTHX_ cmd,mode);
     }
 #endif 
     This = (*mode == 'w');
