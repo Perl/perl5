@@ -1939,7 +1939,6 @@ sv_setsv(SV *dstr, register SV *sstr)
 	if (dtype < SVt_PVNV)
 	    sv_upgrade(dstr, SVt_PVNV);
 	break;
-
     case SVt_PVAV:
     case SVt_PVHV:
     case SVt_PVCV:
@@ -1990,8 +1989,10 @@ sv_setsv(SV *dstr, register SV *sstr)
 		    goto glob_assign;
 	    }
 	}
-	if (dtype < stype)
-	    sv_upgrade(dstr, stype);
+	if (stype == SVt_PVLV)
+	    SvUPGRADE(dstr, SVt_PVNV);
+	else
+	    SvUPGRADE(dstr, stype);
     }
 
     sflags = SvFLAGS(sstr);
