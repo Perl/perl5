@@ -63,6 +63,43 @@ equivalent:
     chop
     chop($_)
 
+Here are the places where Perl will assume $_ even if you 
+don't use it:
+
+=over 3
+
+=item *
+
+Various unary functions, including functions like ord() and int(), as well
+as the all file tests (C<-f>, C<-d>) except for C<-t>, which defaults to
+STDIN.
+
+=item *
+
+Various list functions like print() and unlink().
+
+=item *
+
+The pattern matching operations C<m//>, C<s///>, and C<tr///> when used
+without an C<=~> operator.
+
+=item * 
+
+The default iterator variable in a C<foreach> loop if no other
+variable is supplied.
+
+=item * 
+
+The implicit iterator variable in the grep() and map() functions.
+
+=item * 
+
+The default place to put an input record when a C<E<lt>FHE<gt>>
+operation's result is tested by itself as the sole criterion of a C<while>
+test.  Note that outside of a C<while> test, this will not happen.
+
+=back
+
 (Mnemonic: underline is understood in certain operations.)
 
 =item $<I<digit>>
@@ -181,8 +218,9 @@ currently selected output channel.  Default is 0.  Note that STDOUT
 will typically be line buffered if output is to the terminal and block
 buffered otherwise.  Setting this variable is useful primarily when you
 are outputting to a pipe, such as when you are running a Perl script
-under rsh and want to see the output as it's happening.  (Mnemonic:
-when you want your pipes to be piping hot.)
+under rsh and want to see the output as it's happening.  This has no
+effect on input buffering.  
+(Mnemonic: when you want your pipes to be piping hot.)
 
 =item output_field_separator HANDLE EXPR
 
@@ -444,7 +482,8 @@ you, if you're running setgid.)
 
 Note: "C<$E<lt>>", "C<$E<gt>>", "C<$(>" and "C<$)>" can only be set on machines
 that support the corresponding I<set[re][ug]id()> routine.  "C<$(>" and "C<$)>" 
-can only be swapped on machines supporting setregid().
+can only be swapped on machines supporting setregid().   Because Perl doesn't
+currently use initgroups(), you can't set your group vector to multiple groups.
 
 =item $PROGRAM_NAME
 
@@ -472,7 +511,9 @@ discouraged.
 
 =item $]
 
-The string printed out when you say C<perl -v>.  It can be used to
+The string printed out when you say C<perl -v>.
+(This is currently I<BROKEN>).
+It can be used to
 determine at the beginning of a script whether the perl interpreter
 executing the script is in the right range of versions.  If used in a
 numeric context, returns the version + patchlevel / 1000.  Example:
@@ -562,8 +603,13 @@ The array @INC contains the list of places to look for Perl scripts to
 be evaluated by the C<do EXPR>, C<require>, or C<use> constructs.  It
 initially consists of the arguments to any B<-I> command line switches,
 followed by the default Perl library, probably "/usr/local/lib/perl",
-followed by ".", to represent the current directory.
+followed by ".", to represent the current directory.  If you need to
+modify this at runtime, you should use the C<use lib> pragma in order
+to also get the machine-dependent library properly loaded:
 
+    use lib '/mypath/libdir/';
+    use SomeMod;
+  
 =item %INC
 
 The hash %INC contains entries for each filename that has
@@ -622,7 +668,9 @@ The routine indicated by $SIG{__DIE__} is called when a fatal exception
 is about to be thrown.  The error message is passed as the first
 argument.  When a __DIE__ hook routine returns, the exception
 processing continues as it would have in the absence of the hook,
-unless the hook routine itself exits via a goto, a loop exit, or a die.
+unless the hook routine itself exits via a C<goto>, a loop exit, or a die().
+The __DIE__ handler is explicitly disabled during the call, so that you
+can die from a __DIE__ handler.  Similarly for __WARN__.
 
 =back
 

@@ -14,6 +14,10 @@ use Carp;
 
 AutoSplit - split a package for autoloading
 
+=head1 SYNOPSIS
+
+ perl -e 'use AutoSplit; autosplit_modules(@ARGV)'  ...
+
 =head1 DESCRIPTION
 
 This function will split up your program into files that the AutoLoader

@@ -62,7 +62,7 @@ __END__
 
 =head1 NAME 
 
-C<overload.pm> - Package for overloading perl operations
+overload - Package for overloading perl operations
 
 =head1 SYNOPSIS
 

@@ -8,6 +8,7 @@ For ease of access, the Perl manual has been split up into a number
 of sections:
 
     perl	Perl overview (this section)
+    perltoc	Perl documentation table of contents
     perldata	Perl data structures
     perlsyn	Perl syntax
     perlop	Perl operators and precedence
@@ -21,6 +22,7 @@ of sections:
     perldsc	Perl data structures intro
     perllol	Perl data structures: lists of lists
     perlobj	Perl objects
+    perltie	Perl objects hidden behind simple variables
     perlbot	Perl OO tricks and examples
     perldebug	Perl debugging
     perldiag	Perl diagnostic messages
@@ -33,7 +35,6 @@ of sections:
     perlxstut	Perl XS tutorial
     perlguts	Perl internal functions for those doing extensions 
     perlcall	Perl calling conventions from C
-    perlovl	Perl overloading semantics
     perlembed	Perl how to embed perl in your C or C++ app
     perlpod	Perl plain old documentation
     perlbook	Perl book information
@@ -286,7 +287,10 @@ given identifier may not be longer than 255 characters, and no
 component of your PATH may be longer than 255 if you use B<-S>.  A regular
 expression may not compile to more than 32767 bytes internally.
 
-See the perl bugs database at L<http://perl.com/perl/bugs/>.
+See the perl bugs database at F<http://perl.com/perl/bugs/>.  You may
+mail your bug reports (be sure to include full configuration information
+as output by the myconfig program in the perl source tree) to
+F<perlbug@perl.com>.
 
 Perl actually stands for Pathologically Eclectic Rubbish Lister, but
 don't tell anyone I said that.

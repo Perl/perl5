@@ -4,13 +4,9 @@ perltrap - Perl traps for the unwary
 
 =head1 DESCRIPTION
 
-The biggest trap of all is forgetting to use the B<-w> switch;
-see L<perlrun>.  Making your entire program runnable under
-
-    use strict;
-
-can help make your program more bullet-proof, but sometimes
-it's too annoying for quick throw-away programs.
+The biggest trap of all is forgetting to use the B<-w> switch; see
+L<perlrun>.  The second biggest trap is not making your entire program
+runnable under C<use strict>.
 
 =head2 Awk Traps
 
@@ -358,6 +354,14 @@ function!  You may use the B<-w> switch to find such places.
 
 Symbols starting with C<_> are no longer forced into package C<main>, except
 for $_ itself (and @_, etc.).
+
+=item *
+
+Double-colon is now a valid package separator in an identifier.  Thus these
+behave differently in perl4 vs. perl5:
+
+    print "$a::$b::$c\n";
+    print "$var::abc::xyz\n";
 
 =item *
 

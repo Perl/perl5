@@ -10,9 +10,9 @@ IPC::Open2, open2 - open a process for both reading and writing
 =head1 SYNOPSIS
 
     use IPC::Open2;
-    $pid = open2('rdr', 'wtr', 'some cmd and args');
+    $pid = open2(\*RDR, \*WTR, 'some cmd and args');
       # or
-    $pid = open2('rdr', 'wtr', 'some', 'cmd', 'and', 'args');
+    $pid = open2(\*RDR, \*WTR, 'some', 'cmd', 'and', 'args');
 
 =head1 DESCRIPTION
 
@@ -39,7 +39,7 @@ however, are quite apt to cause deadlock.
 
 The big problem with this approach is that if you don't have control 
 over source code being run in the the child process, you can't control what it does 
-with pipe buffering.  Thus you can't just open a pipe to "cat -v" and continually
+with pipe buffering.  Thus you can't just open a pipe to C<cat -v> and continually
 read and write a line from it.
 
 =head1 SEE ALSO
@@ -80,8 +80,8 @@ sub open2 {
 
     # force unqualified filehandles into callers' package
     local($package) = caller;
-    $dad_rdr =~ s/^[^']+$/$package'$&/;
-    $dad_wtr =~ s/^[^']+$/$package'$&/;
+    $dad_rdr =~ s/^[^']+$/$package'$&/ unless ref $dad_rdr;
+    $dad_wtr =~ s/^[^']+$/$package'$&/ unless ref $dad_wtr;
 
     local($kid_rdr) = ++$fh;
     local($kid_wtr) = ++$fh;

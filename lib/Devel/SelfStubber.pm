@@ -60,6 +60,7 @@ sub stub {
 
 1;
 __END__
+
 =head1 NAME
 
 Devel::SelfStubber - generate stubs for a SelfLoading module

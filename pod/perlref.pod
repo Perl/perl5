@@ -1,20 +1,17 @@
-(Don't
-convert references into strings though, or you'll break their referenceness.)
-
 =head1 NAME
 
 perlref - Perl references and nested data structures
 
 =head1 DESCRIPTION
 
-In Perl 4 it was difficult to represent complex data structures, because
-all references had to be symbolic, and even that was difficult to do when
-you wanted to refer to a variable rather than a symbol table entry.  Perl
-5 not only makes it easier to use symbolic references to variables, but
-lets you have "hard" references to any piece of data.  Any scalar may hold
-a hard reference.  Since arrays and hashes contain scalars, you can now
-easily build arrays of arrays, arrays of hashes, hashes of arrays, arrays
-of hashes of functions, and so on.
+Before release 5 of Perl it was difficult to represent complex data
+structures, because all references had to be symbolic, and even that was
+difficult to do when you wanted to refer to a variable rather than a
+symbol table entry.  Perl 5 not only makes it easier to use symbolic
+references to variables, but lets you have "hard" references to any piece
+of data.  Any scalar may hold a hard reference.  Since arrays and hashes
+contain scalars, you can now easily build arrays of arrays, arrays of
+hashes, hashes of arrays, arrays of hashes of functions, and so on.
 
 Hard references are smart--they keep track of reference counts for you,
 automatically freeing the thing referred to when its reference count
@@ -52,6 +49,8 @@ reference that the backslash returned.  Here are some examples:
     $arrayref  = \@ARGV;
     $hashref   = \%ENV;
     $coderef   = \&handler;
+    $globref   = \*STDOUT;
+
 
 =item 2.
 
@@ -65,6 +64,13 @@ whose final element is itself reference to another anonymous array of three
 elements.  (The multidimensional syntax described later can be used to
 access this.  For example, after the above, $arrayref->[2][1] would have
 the value "b".)
+
+Note that taking a reference to an enumerated list is not the same
+as using square brackets--instead it's the same as creating
+a list of references!
+
+    @list = (\$a, \$b, \$c);  
+    @list = \($a, $b, $c);	# same thing!
 
 =item 3.
 
@@ -147,7 +153,7 @@ This prints
     Greetings, earthlings!
 
 Note particularly that $x continues to refer to the value passed into
-newprint() *despite* the fact that the "my $x" has seemingly gone out of
+newprint() I<despite> the fact that the "my $x" has seemingly gone out of
 scope by the time the anonymous subroutine runs.  That's what closure
 is all about.
 
@@ -173,6 +179,24 @@ References of the appropriate type can spring into existence if you
 dereference them in a context that assumes they exist.  Since we haven't
 talked about dereferencing yet, we can't show you any examples yet.
 
+=item 7.
+
+References to filehandles can be created by taking a reference to 
+a typeglob.  This is currently the best way to pass filehandles into or
+out of subroutines, or to store them in larger data structures.
+
+    splutter(\*STDOUT);
+    sub splutter {
+	my $fh = shift;
+	print $fh "her um well a hmmm\n";
+    }
+
+    $rec = get_rec(\*STDIN);
+    sub get_rec {
+	my $fh = shift;
+	return scalar <$fh>;
+    }
+
 =back
 
 That's it for creating references.  By now you're probably dying to
@@ -192,6 +216,7 @@ containing a reference of the correct type:
     $$arrayref[0] = "January";
     $$hashref{"KEY"} = "VALUE";
     &$coderef(1,2,3);
+    print $globref "output\n";
 
 It's important to understand that we are specifically I<NOT> dereferencing
 C<$arrayref[0]> or C<$hashref{"KEY"}> there.  The dereference of the
@@ -215,6 +240,7 @@ written like this:
     ${$arrayref}[0] = "January";
     ${$hashref}{"KEY"} = "VALUE";
     &{$coderef}(1,2,3);
+    $globref->print("output\n");  # iff you use FileHandle
 
 Admittedly, it's a little silly to use the curlies in this case, but
 the BLOCK can contain any arbitrary expression, in particular,
@@ -291,19 +317,22 @@ reference is pointing to.  See L<perlfunc>.
 The bless() operator may be used to associate a reference with a package
 functioning as an object class.  See L<perlobj>.
 
-A type glob may be dereferenced the same way a reference can, since
+A typeglob may be dereferenced the same way a reference can, since
 the dereference syntax always indicates the kind of reference desired.
 So C<${*foo}> and C<${\$foo}> both indicate the same scalar variable.
 
 Here's a trick for interpolating a subroutine call into a string:
 
-    print "My sub returned ${\mysub(1,2,3)}\n";
+    print "My sub returned @{[mysub(1,2,3)]} that time.\n";
 
-The way it works is that when the C<${...}> is seen in the double-quoted
-string, it's evaluated as a block.  The block executes the call to
-C<mysub(1,2,3)>, and then takes a reference to that.  So the whole block
-returns a reference to a scalar, which is then dereferenced by C<${...}>
-and stuck into the double-quoted string.
+The way it works is that when the C<@{...}> is seen in the double-quoted
+string, it's evaluated as a block.  The block creates a reference to an
+anonymous array containing the results of the call to C<mysub(1,2,3)>.  So
+the whole block returns a reference to an array, which is then
+dereferenced by C<@{...}> and stuck into the double-quoted string. This
+chicanery is also useful for arbitrary expressions:
+
+    print "That yeilds @{[$n + 5]} widgets\n";
 
 =head2 Symbolic references
 
@@ -407,7 +436,7 @@ The B<-w> switch will warn you if it interprets a reserved word as a string.
 But it will no longer warn you about using lowercase words, since the
 string is effectively quoted.
 
-=head2 WARNING
+=head1 WARNING
 
 You may not (usefully) use a reference as the key to a hash.  It will be
 converted into a string:
@@ -415,10 +444,21 @@ converted into a string:
     $x{ \$a } = $a;
 
 If you try to dereference the key, it won't do a hard dereference, and 
-you won't accomplish what you're attemping.
+you won't accomplish what you're attemping.  You might want to do something
+more like
 
-=head2 Further Reading
+    $r = \@a;
+    $x{ $r } = $r;
+
+And then at least you can use the values(), which will be
+real refs, instead of the keys(), which won't.
+
+=head1 SEE ALSO
 
 Besides the obvious documents, source code can be instructive.
 Some rather pathological examples of the use of references can be found
 in the F<t/op/ref.t> regression test in the Perl source directory.
+
+See also L<perldsc> and L<perllol> for how to use references to create
+complex data structures, and L<perlobj> for how to use them to create
+objects.

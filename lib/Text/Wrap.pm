@@ -30,6 +30,31 @@ package Text::Wrap;
 # Version: 9/21/95
 #
 
+=head1 NAME
+
+Text::Wrap -- wrap text into a paragraph
+
+=head1 SYNOPSIS
+
+	use Text::Wrap;
+	
+	$Text::Wrap::columns = 20; # Default
+	print wrap("\t","",Hello, world, it's a nice day, isn't it?");
+
+=head1 DESCRIPTION
+
+This module is a simple paragraph formatter that wraps text into a paragraph
+and indents each line. The single exported function, wrap(), takes three
+arguments. The first is included before the first output line, and the
+second argument is included before each subsequest output line. The third
+argument is the text to be wrapped.
+
+=head1 AUTHOR
+
+David Muir Sharnoff <muir@idiom.com>
+
+=cut
+
 require Exporter;
 
 @ISA = (Exporter);

@@ -1,8 +1,10 @@
-=head1 TITLE
+=head1 NAME
 
 perlLoL - Manipulating Lists of Lists in Perl
 
-=head1 Declaration and Access
+=head1 DESCRIPTION
+
+=head1 Declaration and Access of Lists of Lists
 
 The simplest thing to build is a list of lists (sometimes called an array
 of arrays).  It's reasonably easy to understand, and almost everything
@@ -299,48 +301,6 @@ If I were you, I'd put that in a function:
 	} $x_lo .. $x_hi;
     } 
 
-
-=head1 Passing Arguments
-
-One place where a list of lists crops up is when you pass
-in several list references to a function.  Consider:
-
-    @tailings = popmany ( \@a, \@b, \@c, \@d );
-
-    sub popmany {
-	my $aref;
-	my @retlist = ();
-	foreach $aref ( @_ ) {
-	    push @retlist, pop @$aref;
-	} 
-	return @retlist;
-    } 
-
-This function was designed to pop off the last element from each of
-its arguments and return those in a list.  In this function, 
-you can think of @_ as a list of lists.
-
-Just as a side note, what happens if the function is called with the
-"wrong" types of arguments?  Normally nothing, but in the case of
-references, we can be a bit pickier.  This isn't detectable at
-compile-time (yet--Larry does have a prototype prototype in the works for
-5.002), but you could check it at run time using the ref() function.
-
-    use Carp;
-    for $i ( 0 .. $#_) {
-	if (ref($_[$i]) ne 'ARRAY') {
-	    confess "popmany: arg $i not an array reference\n";
-	}
-    } 
-
-However, that's not usually necessary unless you want to trap it.  It's
-also dubious in that it would fail on a real array references blessed into
-its own class (an object).  But since you're all going to be using
-C<strict refs>, it would raise an exception anyway even without the die.
-
-This will matter more to you later on when you start building up 
-more complex data structures that all aren't woven of the same 
-cloth, so to speak.
 
 =head1 SEE ALSO
 

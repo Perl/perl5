@@ -3,8 +3,7 @@ $VERSION = 1.5;
 
 =head1 NAME
 
-Socket, sockaddr_in, sockaddr_un, inet_aton, inet_ntoa - load the C
-    socket.h defines and structure manipulators 
+Socket, sockaddr_in, sockaddr_un, inet_aton, inet_ntoa - load the C socket.h defines and structure manipulators 
 
 =head1 SYNOPSIS
 

@@ -56,10 +56,10 @@ sub warndirectuse {
 
 package ExtUtils::MakeMaker;
 
-# Last edited $Date: 1995/12/05 18:20:28 $ by Andreas Koenig
-# $Id: MakeMaker.pm,v 1.115 1995/12/05 18:20:28 k Exp $
+# Last edited $Date: 1995/12/10 23:38:09 $ by Andreas Koenig
+# $Id: MakeMaker.pm,v 1.116 1995/12/10 23:38:09 k Exp $
 
-$Version = $VERSION = "5.11";
+$Version = $VERSION = "5.12";
 
 $ExtUtils::MakeMaker::Version_OK = 4.13;	# Makefiles older than $Version_OK will die
 			# (Will be checked from MakeMaker version 4.13 onwards)
@@ -993,7 +993,7 @@ EOM
     # version compatibility between the *.pm file and the
     # corresponding *.xs file. The bottomline was, that we need an
     # XS_VERSION macro that defaults to VERSION:
-    $self->{XS_VERSION} ||= $self->{VERSION};
+    # $self->{XS_VERSION} ||= $self->{VERSION};
 
     # --- Initialize Perl Binary Locations
 
@@ -1132,25 +1132,27 @@ sub init_dirscan {	# --- File and Directory Lists (.xs .pm .pod etc)
     	$self->{MAN1PODS} = {};
     } else {
 	my %manifypods = ();
-	foreach $name (@{$self->{EXE_FILES}}) {
-	    local(*TESTPOD);
-	    my($ispod)=0;
-	    if (open(TESTPOD,"<$name")) {
-		my $testpodline;
-		while ($testpodline = <TESTPOD>) {
-		    if($testpodline =~ /^=head/) {
-			$ispod=1;
-			last;
+	if( exists $self->{EXE_FILES} ){
+		foreach $name (@{$self->{EXE_FILES}}) {
+		    local(*TESTPOD);
+		    my($ispod)=0;
+		    if (open(TESTPOD,"<$name")) {
+			my $testpodline;
+			while ($testpodline = <TESTPOD>) {
+			    if($testpodline =~ /^=head/) {
+				$ispod=1;
+				last;
+			    }
+			}
+			close(TESTPOD);
+		    } else {
+			# If it doesn't exist yet, we assume, it has pods in it
+			$ispod = 1;
+		    }
+		    if( $ispod ) {
+			$manifypods{$name} = $self->catdir('$(INST_MAN1DIR)',basename($name).'.$(MAN1EXT)');
 		    }
 		}
-		close(TESTPOD);
-	    } else {
-		# If it doesn't exist yet, we assume, it has pods in it
-		$ispod = 1;
-	    }
-	    if( $ispod ) {
-		$manifypods{$name} = $self->catdir('$(INST_MAN1DIR)',basename($name).'.$(MAN1EXT)');
-	    }
 	}
 
 	$self->{MAN1PODS} = \%manifypods;
@@ -1241,7 +1243,10 @@ sub init_others {	# --- Initialize Other Attributes
     # Compute EXTRALIBS, BSLOADLIBS and LDLOADLIBS from $self->{LIBS}
     # Lets look at $self->{LIBS} carefully: It may be an anon array, a string or
     # undefined. In any case we turn it into an anon array:
-    $self->{LIBS}=[] unless $self->{LIBS};
+
+    # May check $Config{libs} too, thus not empty.
+    $self->{LIBS}=[''] unless $self->{LIBS}; 
+
     $self->{LIBS}=[$self->{LIBS}] if ref \$self->{LIBS} eq SCALAR;
     $self->{LD_RUN_PATH} = "";
     my($libs);
@@ -1288,7 +1293,7 @@ sub init_others {	# --- Initialize Other Attributes
     $self->{UMASK_NULL} = "umask 0";
 }
 
-sub find_perl{
+sub find_perl {
     my($self, $ver, $names, $dirs, $trace) = @_;
     unless (ref $self){
 	ExtUtils::MakeMaker::TieAtt::warndirectuse((caller(0))[3]);
@@ -1306,10 +1311,10 @@ in these dirs:
 	next unless defined $dir; # $self->{PERL_SRC} may be undefined
 	foreach $name (@$names){
 	    my $abs;
-	    if ($name =~ m|^/|) {
+	    if ($self->file_name_is_absolute($name)) {
 		$abs = $name;
-	    } elsif ($name =~ m|/|) {
-		$abs = $self->catfile(".", $name); # not absolute
+	    } elsif ($name =~ m|/|) { # file_name_contains_path
+		$abs = $self->catfile(".", $name);
 	    } else {
 		$abs = $self->catfile($dir, $name);
 	    }
@@ -1363,6 +1368,12 @@ sub maybe_command_in_dirs {	# $ver is optional argument if looking for perl
 sub maybe_command {
     my($self,$file) = @_;
     return $file if -x $file && ! -d $file;
+    return;
+}
+
+sub perl_script {
+    my($self,$file) = @_;
+    return 1 if -r $file && ! -d $file;
     return;
 }
 
@@ -1421,9 +1432,9 @@ VERSION = $self->{VERSION}
 VERSION_SYM = $self->{VERSION_SYM}
 VERSION_MACRO = VERSION
 DEFINE_VERSION = -D\$(VERSION_MACRO)=\\\"\$(VERSION)\\\"
-XS_VERSION = $self->{XS_VERSION}
-XS_VERSION_MACRO = XS_VERSION
-XS_DEFINE_VERSION = -D\$(XS_VERSION_MACRO)=\\\"\$(XS_VERSION)\\\"
+# XS_VERSION = $self->{XS_VERSION}
+# XS_VERSION_MACRO = XS_VERSION
+# XS_DEFINE_VERSION = -D\$(XS_VERSION_MACRO)=\\\"\$(XS_VERSION)\\\"
 
 # In which directory should we put this extension during 'make'?
 # This is typically ./blib.
@@ -2286,7 +2297,7 @@ sub manifypods {
     } else {
 	$pod2man_exe = "$Config{bin}/pod2man";
     }
-    unless ($self->maybe_command($pod2man_exe)) {
+    unless ($self->perl_script($pod2man_exe)) {
 	# No pod2man but some MAN3PODS to be installed
 	print <<END;
 
@@ -2338,6 +2349,7 @@ $self->{PL_FILES}->{$plfile} :: $plfile
 sub installbin {
     my($self) = shift;
     return "" unless $self->{EXE_FILES} && ref $self->{EXE_FILES} eq "ARRAY";
+    return "" unless @{$self->{EXE_FILES}};
     my(@m, $from, $to, %fromto, @to);
     push @m, $self->dir_target(qw[$(INST_EXE)]);
     for $from (@{$self->{EXE_FILES}}) {
@@ -2615,7 +2627,7 @@ doc_install ::
 	@ echo Appending installation info to $(INSTALLARCHLIB)/perllocal.pod
 	@ $(PERL) -I$(INST_ARCHLIB) -I$(INST_LIB) -I$(PERL_ARCHLIB) -I$(PERL_LIB)  \\
 		-e "use ExtUtils::MakeMaker; MY->new({})->writedoc('Module', '$(NAME)', \\
-		'LINKTYPE=$(LINKTYPE)', 'VERSION=$(VERSION)', 'XS_VERSION=$(XS_VERSION)', \\
+		'LINKTYPE=$(LINKTYPE)', 'VERSION=$(VERSION)', \\
 		'EXE_FILES=$(EXE_FILES)')" >> $(INSTALLARCHLIB)/perllocal.pod
 };
 
@@ -3920,11 +3932,6 @@ that purpose.
 May be set to an empty string, which is identical to C<-prototypes>, or
 C<-noprototypes>. See the xsubpp documentation for details. MakeMaker
 defaults to the empty string.
-
-=item XS_VERSION
-
-Your version number for the XS part of your extension.  This defaults
-to S(VERSION).
 
 =back
 

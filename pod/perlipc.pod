@@ -1,7 +1,6 @@
 =head1 NAME
 
-perlipc - Perl interprocess communication (signals, fifos, pipes, safe
-subprocceses, sockets, and semaphores)
+perlipc - Perl interprocess communication (signals, fifos, pipes, safe subprocceses, sockets, and semaphores)
 
 =head1 DESCRIPTION
 

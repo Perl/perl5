@@ -39,7 +39,7 @@ The four routines are:
     SV*  newSVpv(char*, int);
     SV*  newSVsv(SV*);
 
-To change the value of an *already-existing* scalar, there are five routines:
+To change the value of an *already-existing* SV, there are five routines:
 
     void  sv_setiv(SV*, IV);
     void  sv_setnv(SV*, double);
@@ -49,7 +49,7 @@ To change the value of an *already-existing* scalar, there are five routines:
 
 Notice that you can choose to specify the length of the string to be
 assigned by using C<sv_setpvn> or C<newSVpv>, or you may allow Perl to
-calculate the length by using C<sv_setpv> or specifying 0 as the second
+calculate the length by using C<sv_setpv> or by specifying 0 as the second
 argument to C<newSVpv>.  Be warned, though, that Perl will determine the
 string's length by using C<strlen>, which depends on the string terminating
 with a NUL character.
@@ -95,7 +95,12 @@ the following macros:
     SvCUR(SV*)
     SvCUR_set(SV*, I32 val)
 
-But note that these are valid only if C<SvPOK()> is true.
+You can also get a pointer to the end of the string stored in the SV
+with the macro:
+
+    SvEND(SV*)
+
+But note that these last three macros are valid only if C<SvPOK()> is true.
 
 If you want to append something to the end of string stored in an C<SV*>,
 you can use the following functions:
@@ -203,12 +208,14 @@ Here are some other functions:
     SV**  av_store(AV*, I32 key, SV* val);
             /* Stores val at offset key */
 
-Take note that these two functions return C<SV**>'s, not C<SV*>'s.
+Take note that C<av_fetch> and C<av_store> return C<SV**>'s, not C<SV*>'s.
 
     void  av_clear(AV*);
             /* Clear out all elements, but leave the array */
     void  av_undef(AV*);
             /* Undefines the array, removing all elements */
+    void  av_extend(AV*, I32 key);
+            /* Extend the array to a total of key elements */
 
 If you know the name of an array variable, you can get a pointer to its AV
 by using the following:
@@ -265,10 +272,10 @@ specified below.
     char*  hv_iterkey(HE* entry, I32* retlen);
             /* Get the key from an HE structure and also return
                the length of the key string */
-    SV*     hv_iterval(HV*, HE* entry);
+    SV*    hv_iterval(HV*, HE* entry);
             /* Return a SV pointer to the value of the HE
                structure */
-    SV*     hv_iternextsv(HV*, char** key, I32* retlen);
+    SV*    hv_iternextsv(HV*, char** key, I32* retlen);
             /* This convenience routine combines hv_iternext,
 	       hv_iterkey, and hv_iterval.  The key and retlen
 	       arguments are return values for the key and its
@@ -289,31 +296,6 @@ The hash algorithm, for those who are interested, is:
     while (i--)
 	hash = hash * 33 + *s++;
 
-=head1 Creating New Variables
-
-To create a new Perl variable, which can be accessed from your Perl script,
-use the following routines, depending on the variable type.
-
-    SV*  perl_get_sv("varname", TRUE);
-    AV*  perl_get_av("varname", TRUE);
-    HV*  perl_get_hv("varname", TRUE);
-
-Notice the use of TRUE as the second parameter.  The new variable can now
-be set, using the routines appropriate to the data type.
-
-There are additional bits that may be OR'ed with the TRUE argument to enable
-certain extra features.  Those bits are:
-
-    0x02  Marks the variable as multiply defined, thus preventing the
-	  "Indentifier <varname> used only once: possible typo" warning.
-    0x04  Issues a "Had to create <varname> unexpectedly" warning if
-	  the variable didn't actually exist.  This is useful if
-	  you expected the variable to already exist and want to propagate
-	  this warning back to the user.
-	
-If the C<varname> argument does not contain a package specifier, it is
-created in the current package.
-
 =head2 References
 
 References are a special type of scalar that point to other data types
@@ -321,7 +303,7 @@ References are a special type of scalar that point to other data types
 
 To create a reference, use the following command:
 
-    SV*  newRV((SV*) thing);
+    SV* newRV((SV*) thing);
 
 The C<thing> argument can be any of an C<SV*>, C<AV*>, or C<HV*>.  Once
 you have a reference, you can use the following macro to dereference the
@@ -350,6 +332,75 @@ The most useful types that will be returned are:
     SVt_PVHV  Hash
     SVt_PVCV  Code
     SVt_PVMG  Blessed Scalar
+
+=head2 Blessed References and Class Objects
+
+References are also used to support object-oriented programming.  In the
+OO lexicon, an object is simply a reference that has been blessed into a
+package (or class).  Once blessed, the programmer may now use the reference
+to access the various methods in the class.
+
+A reference can be blessed into a package with the following function:
+
+    SV* sv_bless(SV* sv, HV* stash);
+
+The C<sv> argument must be a reference.  The C<stash> argument specifies
+which class the reference will belong to.  See the section on L<Stashes>
+for information on converting class names into stashes.
+
+/* Still under construction */
+
+Upgrades rv to reference if not already one.  Creates new SV for rv to
+point to.
+If classname is non-null, the SV is blessed into the specified class.
+SV is returned.
+
+	SV* newSVrv(SV* rv, char* classname);
+
+Copies integer or double into an SV whose reference is rv.  SV is blessed
+if classname is non-null.
+
+	SV* sv_setref_iv(SV* rv, char* classname, IV iv);
+	SV* sv_setref_nv(SV* rv, char* classname, NV iv);
+
+Copies pointer (I<not a string!>) into an SV whose reference is rv.
+SV is blessed if classname is non-null.
+
+	SV* sv_setref_pv(SV* rv, char* classname, PV iv);
+
+Copies string into an SV whose reference is rv.
+Set length to 0 to let Perl calculate the string length.
+SV is blessed if classname is non-null.
+
+	SV* sv_setref_pvn(SV* rv, char* classname, PV iv, int length);
+
+	int sv_isa(SV* sv, char* name);
+	int sv_isobject(SV* sv);
+
+=head1 Creating New Variables
+
+To create a new Perl variable, which can be accessed from your Perl script,
+use the following routines, depending on the variable type.
+
+    SV*  perl_get_sv("varname", TRUE);
+    AV*  perl_get_av("varname", TRUE);
+    HV*  perl_get_hv("varname", TRUE);
+
+Notice the use of TRUE as the second parameter.  The new variable can now
+be set, using the routines appropriate to the data type.
+
+There are additional bits that may be OR'ed with the TRUE argument to enable
+certain extra features.  Those bits are:
+
+    0x02  Marks the variable as multiply defined, thus preventing the
+	  "Indentifier <varname> used only once: possible typo" warning.
+    0x04  Issues a "Had to create <varname> unexpectedly" warning if
+	  the variable didn't actually exist.  This is useful if
+	  you expected the variable to already exist and want to propagate
+	  this warning back to the user.
+
+If the C<varname> argument does not contain a package specifier, it is
+created in the current package.
 
 =head1 XSUB's and the Argument Stack
 
@@ -408,6 +459,9 @@ explicitly done so (via the Perl C<undef> call or other routines in Perl
 itself).
 
 Add cruft about reference counts.
+	int SvREFCNT(SV* sv);
+	void SvREFCNT_inc(SV* sv);
+	void SvREFCNT_dec(SV* sv);
 
 In the above example with C<tzname>, we needed to create two new SV's to push
 onto the argument stack, that being the two strings.  However, we don't want
@@ -433,7 +487,7 @@ The mortal routines are not just for SV's -- AV's and HV's can be made mortal
 by passing their address (and casting them to C<SV*>) to the C<sv_2mortal> or
 C<sv_mortalcopy> routines.
 
-From Ilya:
+>From Ilya:
 Beware that the sv_2mortal() call is eventually equivalent to
 svREFCNT_dec(). A value can happily be mortal in two different contexts,
 and it will be svREFCNT_dec()ed twice, once on exit from these
@@ -446,7 +500,7 @@ You should be careful about creating mortal variables.  It is possible for
 strange things to happen should you make the same value mortal within
 multiple contexts.
 
-=head1 Stashes and Objects
+=head1 Stashes
 
 A stash is a hash table (associative array) that contains all of the
 different objects that are contained within a package.  Each key of the
@@ -454,7 +508,7 @@ stash is a symbol name (shared by all the different types of objects
 that have the same name), and each value in the hash table is called a
 GV (for Glob Value).  This GV in turn contains references to the various
 objects of that name, including (but not limited to) the following:
-    
+
     Scalar Value
     Array Value
     Hash Value
@@ -476,7 +530,7 @@ To get the stash pointer for a particular package, use the function:
 
 The first function takes a literal string, the second uses the string stored
 in the SV.  Remember that a stash is just a hash table, so you get back an
-C<HV*>.
+C<HV*>.  The C<create> flag will create a new package if it is set.
 
 The name that C<gv_stash*v> wants is the name of the package whose symbol table
 you want.  The default package is called C<main>.  If you have multiply nested
@@ -550,13 +604,27 @@ copy of the name is stored in C<mg_ptr> field.
 
 The sv_magic function uses C<how> to determine which, if any, predefined
 "Magic Virtual Table" should be assigned to the C<mg_virtual> field.
-See the "Magic Virtual Table" section below.
+See the "Magic Virtual Table" section below.  The C<how> argument is also
+stored in the C<mg_type> field.
 
 The C<obj> argument is stored in the C<mg_obj> field of the C<MAGIC>
 structure.  If it is not the same as the C<sv> argument, the reference
 count of the C<obj> object is incremented.  If it is the same, or if
 the C<how> argument is "#", or if it is a null pointer, then C<obj> is
 merely stored, without the reference count being incremented.
+
+There is also a function to add magic to an C<HV>:
+
+    void hv_magic(HV *hv, GV *gv, int how);
+
+This simply calls C<sv_magic> and coerces the C<gv> argument into an C<SV>.
+
+To remove the magic from an SV, call the function sv_unmagic:
+
+    void sv_unmagic(SV *sv, int type);
+
+The C<type> argument should be equal to the C<how> value when the C<SV>
+was initially made magical.
 
 =head2 Magic Virtual Tables
 
@@ -717,6 +785,7 @@ functions:
     FREETMPS
     LEAVE
     XPUSH*()
+    POP*()
 
 For more information, consult L<perlcall>.
 
@@ -766,6 +835,1346 @@ destination starting points.  Perl will move, copy, or zero out C<number>
 instances of the size of the C<type> data structure (using the C<sizeof>
 function).
 
+=head1 API LISTING
+
+This is a listing of functions, macros, flags, and variables that may be
+useful to extension writers or that may be found while reading other
+extensions.
+
+=over 8
+
+=item AvFILL
+
+See C<av_len>.
+
+=item av_clear
+
+Clears an array, making it empty.
+
+	void	av_clear _((AV* ar));
+
+=item av_extend
+
+Pre-extend an array.  The C<key> is the index to which the array should be
+extended.
+
+	void	av_extend _((AV* ar, I32 key));
+
+=item av_fetch
+
+Returns the SV at the specified index in the array.  The C<key> is the
+index.  If C<lval> is set then the fetch will be part of a store.  Check
+that the return value is non-null before dereferencing it to a C<SV*>.
+
+	SV**	av_fetch _((AV* ar, I32 key, I32 lval));
+
+=item av_len
+
+Returns the highest index in the array.  Returns -1 if the array is empty.
+
+	I32	av_len _((AV* ar));
+
+=item av_make
+
+Creats a new AV and populates it with a list of SVs.  The SVs are copied
+into the array, so they may be freed after the call to av_make.
+
+	AV*	av_make _((I32 size, SV** svp));
+
+=item av_pop
+
+Pops an SV off the end of the array.  Returns C<&sv_undef> if the array is
+empty.
+
+	SV*	av_pop _((AV* ar));
+
+=item av_push
+
+Pushes an SV onto the end of the array.
+
+	void	av_push _((AV* ar, SV* val));
+
+=item av_shift
+
+Shifts an SV off the beginning of the array.
+
+	SV*	av_shift _((AV* ar));
+
+=item av_store
+
+Stores an SV in an array.  The array index is specified as C<key>.  The
+return value will be null if the operation failed, otherwise it can be
+dereferenced to get the original C<SV*>.
+
+	SV**	av_store _((AV* ar, I32 key, SV* val));
+
+=item av_undef
+
+Undefines the array.
+
+	void	av_undef _((AV* ar));
+
+=item av_unshift
+
+Unshift an SV onto the beginning of the array.
+
+	void	av_unshift _((AV* ar, I32 num));
+
+=item CLASS
+
+Variable which is setup by C<xsubpp> to indicate the class name for a C++ XS
+constructor.  This is always a C<char*>.  See C<THIS> and L<perlxs>.
+
+=item Copy
+
+The XSUB-writer's interface to the C C<memcpy> function.  The C<s> is the
+source, C<d> is the destination, C<n> is the number of items, and C<t> is
+the type.
+
+	(void) Copy( s, d, n, t );
+
+=item croak
+
+This is the XSUB-writer's interface to Perl's C<die> function.  Use this
+function the same way you use the C C<printf> function.  See C<warn>.
+
+=item CvSTASH
+
+Returns the stash of the CV.
+
+	HV * CvSTASH( SV* sv )
+
+=item DBsingle
+
+When Perl is run in debugging mode, with the B<-d> switch, this SV is a
+boolean which indicates whether subs are being single-stepped.
+Single-stepping is automatically turned on after every step.  See C<DBsub>.
+
+=item DBsub
+
+When Perl is run in debugging mode, with the B<-d> switch, this GV contains
+the SV which holds the name of the sub being debugged.  See C<DBsingle>.
+The sub name can be found by
+
+	SvPV( GvSV( DBsub ), na )
+
+=item dMARK
+
+Declare a stack marker for the XSUB.  See C<MARK> and C<dORIGMARK>.
+
+=item dORIGMARK
+
+Saves the original stack mark for the XSUB.  See C<ORIGMARK>.
+
+=item dSP
+
+Declares a stack pointer for the XSUB.  See C<SP>.
+
+=item dXSARGS
+
+Sets up stack and mark pointers for an XSUB, calling dSP and dMARK.  This is
+usually handled automatically by C<xsubpp>.  Declares the C<items> variable
+to indicate the number of items on the stack.
+
+=item ENTER
+
+Opening bracket on a callback.  See C<LEAVE> and L<perlcall>.
+
+	ENTER;
+
+=item EXTEND
+
+Used to extend the argument stack for an XSUB's return values.
+
+	EXTEND( sp, int x );
+
+=item FREETMPS
+
+Closing bracket for temporaries on a callback.  See C<SAVETMPS> and
+L<perlcall>.
+
+	FREETMPS;
+
+=item G_ARRAY
+
+Used to indicate array context.  See C<GIMME> and L<perlcall>.
+
+=item G_DISCARD
+
+Indicates that arguments returned from a callback should be discarded.  See
+L<perlcall>.
+
+=item G_EVAL
+
+Used to force a Perl C<eval> wrapper around a callback.  See L<perlcall>.
+
+=item GIMME
+
+The XSUB-writer's equivalent to Perl's C<wantarray>.  Returns C<G_SCALAR> or
+C<G_ARRAY> for scalar or array context.
+
+=item G_NOARGS
+
+Indicates that no arguments are being sent to a callback.  See L<perlcall>.
+
+=item G_SCALAR
+
+Used to indicate scalar context.  See C<GIMME> and L<perlcall>.
+
+=item gv_stashpv
+
+Returns a pointer to the stash for a specified package.  If C<create> is set
+then the package will be created if it does not already exist.  If C<create>
+is not set and the package does not exist then NULL is returned.
+
+	HV*	gv_stashpv _((char* name, I32 create));
+
+=item gv_stashsv
+
+Returns a pointer to the stash for a specified package.  See C<gv_stashpv>.
+
+	HV*	gv_stashsv _((SV* sv, I32 create));
+
+=item GvSV
+
+Return the SV from the GV.
+
+=item he_free
+
+Releases a hash entry from an iterator.  See C<hv_iternext>.
+
+=item hv_clear
+
+Clears a hash, making it empty.
+
+	void	hv_clear _((HV* tb));
+
+=item hv_delete
+
+Deletes a key/value pair in the hash.  The value SV is removed from the hash
+and returned to the caller.  The C<lken> is the length of the key.  The
+C<flags> value will normally be zero; if set to G_DISCARD then null will be
+returned.
+
+	SV*	hv_delete _((HV* tb, char* key, U32 klen, I32 flags));
+
+=item hv_exists
+
+Returns a boolean indicating whether the specified hash key exists.  The
+C<lken> is the length of the key.
+
+	bool	hv_exists _((HV* tb, char* key, U32 klen));
+
+=item hv_fetch
+
+Returns the SV which corresponds to the specified key in the hash.  The
+C<lken> is the length of the key.  If C<lval> is set then the fetch will be
+part of a store.  Check that the return value is non-null before
+dereferencing it to a C<SV*>.
+
+	SV**	hv_fetch _((HV* tb, char* key, U32 klen, I32 lval));
+
+=item hv_iterinit
+
+Prepares a starting point to traverse a hash table.
+
+	I32	hv_iterinit _((HV* tb));
+
+=item hv_iterkey
+
+Returns the key from the current position of the hash iterator.  See
+C<hv_iterinit>.
+
+	char*	hv_iterkey _((HE* entry, I32* retlen));
+
+=item hv_iternext
+
+Returns entries from a hash iterator.  See C<hv_iterinit>.
+
+	HE*	hv_iternext _((HV* tb));
+
+=item hv_iternextsv
+
+Performs an C<hv_iternext>, C<hv_iterkey>, and C<hv_iterval> in one
+operation.
+
+	SV *	hv_iternextsv _((HV* hv, char** key, I32* retlen));
+
+=item hv_iterval
+
+Returns the value from the current position of the hash iterator.  See
+C<hv_iterkey>.
+
+	SV*	hv_iterval _((HV* tb, HE* entry));
+
+=item hv_magic
+
+Adds magic to a hash.  See C<sv_magic>.
+
+	void	hv_magic _((HV* hv, GV* gv, int how));
+
+=item HvNAME
+
+Returns the package name of a stash.  See C<SvSTASH>, C<CvSTASH>.
+
+	char *HvNAME (HV* stash)
+
+=item hv_store
+
+Stores an SV in a hash.  The hash key is specified as C<key> and C<klen> is
+the length of the key.  The C<hash> parameter is the pre-computed hash
+value; if it is zero then Perl will compute it.  The return value will be
+null if the operation failed, otherwise it can be dereferenced to get the
+original C<SV*>.
+
+	SV**	hv_store _((HV* tb, char* key, U32 klen, SV* val, U32 hash));
+
+=item hv_undef
+
+Undefines the hash.
+
+	void	hv_undef _((HV* tb));
+
+=item isALNUM
+
+Returns a boolean indicating whether the C C<char> is an ascii alphanumeric
+character or digit.
+
+	int isALNUM (char c)
+
+=item isALPHA
+
+Returns a boolean indicating whether the C C<char> is an ascii alphanumeric
+character.
+
+	int isALPHA (char c)
+
+=item isDIGIT
+
+Returns a boolean indicating whether the C C<char> is an ascii digit.
+
+	int isDIGIT (char c)
+
+=item isLOWER
+
+Returns a boolean indicating whether the C C<char> is a lowercase character.
+
+	int isLOWER (char c)
+
+=item isSPACE
+
+Returns a boolean indicating whether the C C<char> is whitespace.
+
+	int isSPACE (char c)
+
+=item isUPPER
+
+Returns a boolean indicating whether the C C<char> is an uppercase character.
+
+	int isUPPER (char c)
+
+=item items
+
+Variable which is setup by C<xsubpp> to indicate the number of items on the
+stack.  See L<perlxs>.
+
+=item LEAVE
+
+Closing bracket on a callback.  See C<ENTER> and L<perlcall>.
+
+	LEAVE;
+
+=item MARK
+
+Stack marker for the XSUB.  See C<dMARK>.
+
+=item mg_clear
+
+Clear something magical that the SV represents.  See C<sv_magic>.
+
+	int	mg_clear _((SV* sv));
+
+=item mg_copy
+
+Copies the magic from one SV to another.  See C<sv_magic>.
+
+	int	mg_copy _((SV *, SV *, char *, STRLEN));
+
+=item mg_find
+
+Finds the magic pointer for type matching the SV.  See C<sv_magic>.
+
+	MAGIC*	mg_find _((SV* sv, int type));
+
+=item mg_free
+
+Free any magic storage used by the SV.  See C<sv_magic>.
+
+	int	mg_free _((SV* sv));
+
+=item mg_get
+
+Do magic after a value is retrieved from the SV.  See C<sv_magic>.
+
+	int	mg_get _((SV* sv));
+
+=item mg_len
+
+Report on the SV's length.  See C<sv_magic>.
+
+	U32	mg_len _((SV* sv));
+
+=item mg_magical
+
+Turns on the magical status of an SV.  See C<sv_magic>.
+
+	void	mg_magical _((SV* sv));
+
+=item mg_set
+
+Do magic after a value is assigned to the SV.  See C<sv_magic>.
+
+	int	mg_set _((SV* sv));
+
+=item Move
+
+The XSUB-writer's interface to the C C<memmove> function.  The C<s> is the
+source, C<d> is the destination, C<n> is the number of items, and C<t> is
+the type.
+
+	(void) Move( s, d, n, t );
+
+=item na
+
+A variable which may be used with C<SvPV> to tell Perl to calculate the
+string length.
+
+=item New
+
+The XSUB-writer's interface to the C C<malloc> function.
+
+	void * New( x, void *ptr, int size, type )
+
+=item Newc
+
+The XSUB-writer's interface to the C C<malloc> function, with cast.
+
+	void * Newc( x, void *ptr, int size, type, cast )
+
+=item Newz
+
+The XSUB-writer's interface to the C C<malloc> function.  The allocated
+memory is zeroed with C<memzero>.
+
+	void * Newz( x, void *ptr, int size, type )
+
+=item newAV
+
+Creates a new AV.  The refcount is set to 1.
+
+	AV*	newAV _((void));
+
+=item newHV
+
+Creates a new HV.  The refcount is set to 1.
+
+	HV*	newHV _((void));
+
+=item newRV
+
+Creates an RV wrapper for an SV.  The refcount for the original SV is
+incremented.
+
+	SV*	newRV _((SV* ref));
+
+=item newSV
+
+Creates a new SV.  The C<len> parameter indicates the number of bytes of
+pre-allocated string space the SV should have.  The refcount for the new SV
+is set to 1.
+
+	SV*	newSV _((STRLEN len));
+
+=item newSViv
+
+Creates a new SV and copies an integer into it.  The refcount for the SV is
+set to 1.
+
+	SV*	newSViv _((IV i));
+
+=item newSVnv
+
+Creates a new SV and copies a double into it.  The refcount for the SV is
+set to 1.
+
+	SV*	newSVnv _((NV i));
+
+=item newSVpv
+
+Creates a new SV and copies a string into it.  The refcount for the SV is
+set to 1.  If C<len> is zero then Perl will compute the length.
+
+	SV*	newSVpv _((char* s, STRLEN len));
+
+=item newSVrv
+
+Creates a new SV for the RV, C<rv>, to point to.  If C<rv> is not an RV then
+it will be upgraded one.  If C<classname> is non-null then the new SV will
+be blessed in the specified package.  The new SV is returned and its
+refcount is 1.
+
+	SV*	newSVrv _((SV* rv, char* classname));
+
+=item newSVsv
+
+Creates a new SV which is an exact duplicate of the orignal SV.
+
+	SV*	newSVsv _((SV* old));
+
+=item newXS
+
+Used by C<xsubpp> to hook up XSUBs as Perl subs.
+
+=item newXSproto
+
+Used by C<xsubpp> to hook up XSUBs as Perl subs.  Adds Perl prototypes to
+the subs.
+
+=item Nullav
+
+Null AV pointer.
+
+=item Nullch
+
+Null character pointer.
+
+=item Nullcv
+
+Null CV pointer.
+
+=item Nullhv
+
+Null HV pointer.
+
+=item Nullsv
+
+Null SV pointer.
+
+=item ORIGMARK
+
+The original stack mark for the XSUB.  See C<dORIGMARK>.
+
+=item perl_alloc
+
+Allocates a new Perl interpreter.  See L<perlembed>.
+
+=item perl_call_argv
+
+Performs a callback to the specified Perl sub.  See L<perlcall>.
+
+	I32	perl_call_argv _((char* subname, I32 flags, char** argv));
+
+=item perl_call_method
+
+Performs a callback to the specified Perl method.  The blessed object must
+be on the stack.  See L<perlcall>.
+
+	I32	perl_call_method _((char* methname, I32 flags));
+
+=item perl_call_pv
+
+Performs a callback to the specified Perl sub.  See L<perlcall>.
+
+	I32	perl_call_pv _((char* subname, I32 flags));
+
+=item perl_call_sv
+
+Performs a callback to the Perl sub whose name is in the SV.  See
+L<perlcall>.
+
+	I32	perl_call_sv _((SV* sv, I32 flags));
+
+=item perl_construct
+
+Initializes a new Perl interpreter.  See L<perlembed>.
+
+=item perl_destruct
+
+Shuts down a Perl interpreter.  See L<perlembed>.
+
+=item perl_eval_sv
+
+Tells Perl to C<eval> the string in the SV.
+
+	I32	perl_eval_sv _((SV* sv, I32 flags));
+
+=item perl_free
+
+Releases a Perl interpreter.  See L<perlembed>.
+
+=item perl_get_av
+
+Returns the AV of the specified Perl array.  If C<create> is set and the
+Perl variable does not exist then it will be created.  If C<create> is not
+set and the variable does not exist then null is returned.
+
+	AV*	perl_get_av _((char* name, I32 create));
+
+=item perl_get_cv
+
+Returns the CV of the specified Perl sub.  If C<create> is set and the Perl
+variable does not exist then it will be created.  If C<create> is not
+set and the variable does not exist then null is returned.
+
+	CV*	perl_get_cv _((char* name, I32 create));
+
+=item perl_get_hv
+
+Returns the HV of the specified Perl hash.  If C<create> is set and the Perl
+variable does not exist then it will be created.  If C<create> is not
+set and the variable does not exist then null is returned.
+
+	HV*	perl_get_hv _((char* name, I32 create));
+
+=item perl_get_sv
+
+Returns the SV of the specified Perl scalar.  If C<create> is set and the
+Perl variable does not exist then it will be created.  If C<create> is not
+set and the variable does not exist then null is returned.
+
+	SV*	perl_get_sv _((char* name, I32 create));
+
+=item perl_parse
+
+Tells a Perl interpreter to parse a Perl script.  See L<perlembed>.
+
+=item perl_require_pv
+
+Tells Perl to C<require> a module.
+
+	void	perl_require_pv _((char* pv));
+
+=item perl_run
+
+Tells a Perl interpreter to run.  See L<perlembed>.
+
+=item POPi
+
+Pops an integer off the stack.
+
+	int POPi();
+
+=item POPl
+
+Pops a long off the stack.
+
+	long POPl();
+
+=item POPp
+
+Pops a string off the stack.
+
+	char * POPp();
+
+=item POPn
+
+Pops a double off the stack.
+
+	double POPn();
+
+=item POPs
+
+Pops an SV off the stack.
+
+	SV* POPs();
+
+=item PUSHMARK
+
+Opening bracket for arguments on a callback.  See C<PUTBACK> and L<perlcall>.
+
+	PUSHMARK(p)
+
+=item PUSHi
+
+Push an integer onto the stack.  The stack must have room for this element.
+See C<XPUSHi>.
+
+	PUSHi(int d)
+
+=item PUSHn
+
+Push a double onto the stack.  The stack must have room for this element.
+See C<XPUSHn>.
+
+	PUSHn(double d)
+
+=item PUSHp
+
+Push a string onto the stack.  The stack must have room for this element.
+The C<len> indicates the length of the string.  See C<XPUSHp>.
+
+	PUSHp(char *c, int len )
+
+=item PUSHs
+
+Push an SV onto the stack.  The stack must have room for this element.  See
+C<XPUSHs>.
+
+	PUSHs(sv)
+
+=item PUTBACK
+
+Closing bracket for XSUB arguments.  This is usually handled by C<xsubpp>.
+See C<PUSHMARK> and L<perlcall> for other uses.
+
+	PUTBACK;
+
+=item Renew
+
+The XSUB-writer's interface to the C C<realloc> function.
+
+	void * Renew( void *ptr, int size, type )
+
+=item Renewc
+
+The XSUB-writer's interface to the C C<realloc> function, with cast.
+
+	void * Renewc( void *ptr, int size, type, cast )
+
+=item RETVAL
+
+Variable which is setup by C<xsubpp> to hold the return value for an XSUB.
+This is always the proper type for the XSUB.  See L<perlxs>.
+
+=item safefree
+
+The XSUB-writer's interface to the C C<free> function.
+
+=item safemalloc
+
+The XSUB-writer's interface to the C C<malloc> function.
+
+=item saferealloc
+
+The XSUB-writer's interface to the C C<realloc> function.
+
+=item savepv
+
+Copy a string to a safe spot.  This does not use an SV.
+
+	char*	savepv _((char* sv));
+
+=item savepvn
+
+Copy a string to a safe spot.  The C<len> indicates number of bytes to
+copy.  This does not use an SV.
+
+	char*	savepvn _((char* sv, I32 len));
+
+=item SAVETMPS
+
+Opening bracket for temporaries on a callback.  See C<FREETMPS> and
+L<perlcall>.
+
+	SAVETMPS;
+
+=item SP
+
+Stack pointer.  This is usually handled by C<xsubpp>.  See C<dSP> and
+C<SPAGAIN>.
+
+=item SPAGAIN
+
+Refetch the stack pointer.  Used after a callback.  See L<perlcall>.
+
+	SPAGAIN;
+
+=item ST
+
+Used to access elements on the XSUB's stack.
+
+	SV* ST(int x)
+
+=item strEQ
+
+Test two strings to see if they are equal.  Returns true or false.
+
+	int strEQ( char *s1, char *s2 )
+
+=item strGE
+
+Test two strings to see if the first, C<s1>, is greater than or equal to the
+second, C<s2>.  Returns true or false.
+
+	int strGE( char *s1, char *s2 )
+
+=item strGT
+
+Test two strings to see if the first, C<s1>, is greater than the second,
+C<s2>.  Returns true or false.
+
+	int strGT( char *s1, char *s2 )
+
+=item strLE
+
+Test two strings to see if the first, C<s1>, is less than or equal to the
+second, C<s2>.  Returns true or false.
+
+	int strLE( char *s1, char *s2 )
+
+=item strLT
+
+Test two strings to see if the first, C<s1>, is less than the second,
+C<s2>.  Returns true or false.
+
+	int strLT( char *s1, char *s2 )
+
+=item strNE
+
+Test two strings to see if they are different.  Returns true or false.
+
+	int strNE( char *s1, char *s2 )
+
+=item strnEQ
+
+Test two strings to see if they are equal.  The C<len> parameter indicates
+the number of bytes to compare.  Returns true or false.
+
+	int strnEQ( char *s1, char *s2 )
+
+=item strnNE
+
+Test two strings to see if they are different.  The C<len> parameter
+indicates the number of bytes to compare.  Returns true or false.
+
+	int strnNE( char *s1, char *s2, int len )
+
+=item sv_2mortal
+
+Marks an SV as mortal.  The SV will be destroyed when the current context
+ends.
+
+	SV*	sv_2mortal _((SV* sv));
+
+=item sv_bless
+
+Blesses an SV into a specified package.  The SV must be an RV.  The package
+must be designated by its stash (see C<gv_stashpv()>).  The refcount of the
+SV is unaffected.
+
+	SV*	sv_bless _((SV* sv, HV* stash));
+
+=item sv_catpv
+
+Concatenates the string onto the end of the string which is in the SV.
+
+	void	sv_catpv _((SV* sv, char* ptr));
+
+=item sv_catpvn
+
+Concatenates the string onto the end of the string which is in the SV.  The
+C<len> indicates number of bytes to copy.
+
+	void	sv_catpvn _((SV* sv, char* ptr, STRLEN len));
+
+=item sv_catsv
+
+Concatentates the string from SV C<ssv> onto the end of the string in SV
+C<dsv>.
+
+	void	sv_catsv _((SV* dsv, SV* ssv));
+
+=item SvCUR
+
+Returns the length of the string which is in the SV.  See C<SvLEN>.
+
+	int SvCUR (SV* sv)
+
+=item SvCUR_set
+
+Set the length of the string which is in the SV.  See C<SvCUR>.
+
+	SvCUR_set (SV* sv, int val )
+
+=item SvEND
+
+Returns a pointer to the last character in the string which is in the SV.
+See C<SvCUR>.  Access the character as
+
+	*SvEND(sv)
+
+=item SvGROW
+
+Expands the character buffer in the SV.
+
+	char * SvGROW( SV* sv, int len )
+
+=item SvIOK
+
+Returns a boolean indicating whether the SV contains an integer.
+
+	int SvIOK (SV* SV)
+
+=item SvIOK_off
+
+Unsets the IV status of an SV.
+
+	SvIOK_off (SV* sv)
+
+=item SvIOK_on
+
+Tells an SV that it is an integer.
+
+	SvIOK_on (SV* sv)
+
+=item SvIOKp
+
+Returns a boolean indicating whether the SV contains an integer.  Checks the
+B<private> setting.  Use C<SvIOK>.
+
+	int SvIOKp (SV* SV)
+
+=item sv_isa
+
+Returns a boolean indicating whether the SV is blessed into the specified
+class.  This does not know how to check for subtype, so it doesn't work in
+an inheritance relationship.
+
+	int	sv_isa _((SV* sv, char* name));
+
+=item SvIV
+
+Returns the integer which is in the SV.
+
+	int SvIV (SV* sv)
+
+=item sv_isobject
+
+Returns a boolean indicating whether the SV is an RV pointing to a blessed
+object.  If the SV is not an RV, or if the object is not blessed, then this
+will return false.
+
+	int	sv_isobject _((SV* sv));
+
+=item SvIVX
+
+Returns the integer which is stored in the SV.
+
+	int  SvIVX (SV* sv);
+
+=item SvLEN
+
+Returns the size of the string buffer in the SV.  See C<SvCUR>.
+
+	int SvLEN (SV* sv)
+
+=item sv_magic
+
+Adds magic to an SV.
+
+	void	sv_magic _((SV* sv, SV* obj, int how, char* name, I32 namlen));
+
+=item sv_mortalcopy
+
+Creates a new SV which is a copy of the original SV.  The new SV is marked
+as mortal.
+
+	SV*	sv_mortalcopy _((SV* oldsv));
+
+=item SvOK
+
+Returns a boolean indicating whether the value is an SV.
+
+	int SvOK (SV* sv)
+
+=item sv_newmortal
+
+Creates a new SV which is mortal.  The refcount of the SV is set to 1.
+
+	SV*	sv_newmortal _((void));
+
+=item sv_no
+
+This is the C<false> SV.  See C<sv_yes>.  Always refer to this as C<&sv_no>.
+
+=item SvNIOK
+
+Returns a boolean indicating whether the SV contains a number, integer or
+double.
+
+	int SvNIOK (SV* SV)
+
+=item SvNIOK_off
+
+Unsets the NV/IV status of an SV.
+
+	SvNIOK_off (SV* sv)
+
+=item SvNIOKp
+
+Returns a boolean indicating whether the SV contains a number, integer or
+double.  Checks the B<private> setting.  Use C<SvNIOK>.
+
+	int SvNIOKp (SV* SV)
+
+=item SvNOK
+
+Returns a boolean indicating whether the SV contains a double.
+
+	int SvNOK (SV* SV)
+
+=item SvNOK_off
+
+Unsets the NV status of an SV.
+
+	SvNOK_off (SV* sv)
+
+=item SvNOK_on
+
+Tells an SV that it is a double.
+
+	SvNOK_on (SV* sv)
+
+=item SvNOKp
+
+Returns a boolean indicating whether the SV contains a double.  Checks the
+B<private> setting.  Use C<SvNOK>.
+
+	int SvNOKp (SV* SV)
+
+=item SvNV
+
+Returns the double which is stored in the SV.
+
+	double SvNV (SV* sv);
+
+=item SvNVX
+
+Returns the double which is stored in the SV.
+
+	double SvNVX (SV* sv);
+
+=item SvPOK
+
+Returns a boolean indicating whether the SV contains a character string.
+
+	int SvPOK (SV* SV)
+
+=item SvPOK_off
+
+Unsets the PV status of an SV.
+
+	SvPOK_off (SV* sv)
+
+=item SvPOK_on
+
+Tells an SV that it is a string.
+
+	SvPOK_on (SV* sv)
+
+=item SvPOKp
+
+Returns a boolean indicating whether the SV contains a character string.
+Checks the B<private> setting.  Use C<SvPOK>.
+
+	int SvPOKp (SV* SV)
+
+=item SvPV
+
+Returns a pointer to the string in the SV, or a stringified form of the SV
+if the SV does not contain a string.  If C<len> is C<na> then Perl will
+handle the length on its own.
+
+	char * SvPV (SV* sv, int len )
+
+=item SvPVX
+
+Returns a pointer to the string in the SV.  The SV must contain a string.
+
+	char * SvPVX (SV* sv)
+
+=item SvREFCNT
+
+Returns the value of the object's refcount.
+
+	int SvREFCNT (SV* sv);
+
+=item SvREFCNT_dec
+
+Decrements the refcount of the given SV.
+
+	void SvREFCNT_dec (SV* sv)
+
+=item SvREFCNT_inc
+
+Increments the refcount of the given SV.
+
+	void SvREFCNT_inc (SV* sv)
+
+=item SvROK
+
+Tests if the SV is an RV.
+
+	int SvROK (SV* sv)
+
+=item SvROK_off
+
+Unsets the RV status of an SV.
+
+	SvROK_off (SV* sv)
+
+=item SvROK_on
+
+Tells an SV that it is an RV.
+
+	SvROK_on (SV* sv)
+
+=item SvRV
+
+Dereferences an RV to return the SV.
+
+	SV*	SvRV (SV* sv);
+
+=item sv_setiv
+
+Copies an integer into the given SV.
+
+	void	sv_setiv _((SV* sv, IV num));
+
+=item sv_setnv
+
+Copies a double into the given SV.
+
+	void	sv_setnv _((SV* sv, double num));
+
+=item sv_setpv
+
+Copies a string into an SV.  The string must be null-terminated.
+
+	void	sv_setpv _((SV* sv, char* ptr));
+
+=item sv_setpvn
+
+Copies a string into an SV.  The C<len> parameter indicates the number of
+bytes to be copied.
+
+	void	sv_setpvn _((SV* sv, char* ptr, STRLEN len));
+
+=item sv_setref_iv
+
+Copies an integer into an SV, optionally blessing the SV.  The SV must be an
+RV.  The C<classname> argument indicates the package for the blessing.  Set
+C<classname> to C<Nullch> to avoid the blessing.  The new SV will be
+returned and will have a refcount of 1.
+
+	SV*	sv_setref_iv _((SV *rv, char *classname, IV iv));
+
+=item sv_setref_nv
+
+Copies a double into an SV, optionally blessing the SV.  The SV must be an
+RV.  The C<classname> argument indicates the package for the blessing.  Set
+C<classname> to C<Nullch> to avoid the blessing.  The new SV will be
+returned and will have a refcount of 1.
+
+	SV*	sv_setref_nv _((SV *rv, char *classname, double nv));
+
+=item sv_setref_pv
+
+Copies a pointer into an SV, optionally blessing the SV.  The SV must be an
+RV.  If the C<pv> argument is NULL then C<sv_undef> will be placed into the
+SV.  The C<classname> argument indicates the package for the blessing.  Set
+C<classname> to C<Nullch> to avoid the blessing.  The new SV will be
+returned and will have a refcount of 1.
+
+	SV*	sv_setref_pv _((SV *rv, char *classname, void* pv));
+
+Do not use with integral Perl types such as HV, AV, SV, CV, because those
+objects will become corrupted by the pointer copy process.
+
+Note that C<sv_setref_pvn> copies the string while this copies the pointer.
+
+=item sv_setref_pvn
+
+Copies a string into an SV, optionally blessing the SV.  The lenth of the
+string must be specified with C<n>.  The SV must be an RV.  The C<classname>
+argument indicates the package for the blessing.  Set C<classname> to
+C<Nullch> to avoid the blessing.  The new SV will be returned and will have
+a refcount of 1.
+
+	SV*	sv_setref_pvn _((SV *rv, char *classname, char* pv, I32 n));
+
+Note that C<sv_setref_pv> copies the pointer while this copies the string.
+
+=item sv_setsv
+
+Copies the contents of the source SV C<ssv> into the destination SV C<dsv>.
+
+	void	sv_setsv _((SV* dsv, SV* ssv));
+
+=item SvSTASH
+
+Returns the stash of the SV.
+
+	HV * SvSTASH (SV* sv)
+
+=item SVt_IV
+
+Integer type flag for scalars.  See C<svtype>.
+
+=item SVt_PV
+
+Pointer type flag for scalars.  See C<svtype>.
+
+=item SVt_PVAV
+
+Type flag for arrays.  See C<svtype>.
+
+=item SVt_PVCV
+
+Type flag for code refs.  See C<svtype>.
+
+=item SVt_PVHV
+
+Type flag for hashes.  See C<svtype>.
+
+=item SVt_PVMG
+
+Type flag for blessed scalars.  See C<svtype>.
+
+=item SVt_NV
+
+Double type flag for scalars.  See C<svtype>.
+
+=item SvTRUE
+
+Returns a boolean indicating whether Perl would evaluate the SV as true or
+false, defined or undefined.
+
+	int SvTRUE (SV* sv)
+
+=item SvTYPE
+
+Returns the type of the SV.  See C<svtype>.
+
+	svtype	SvTYPE (SV* sv)
+
+=item svtype
+
+An enum of flags for Perl types.  These are found in the file B<sv.h> in the
+C<svtype> enum.  Test these flags with the C<SvTYPE> macro.
+
+=item SvUPGRADE
+
+Used to upgrade an SV to a more complex form.  See C<svtype>.
+
+=item sv_undef
+
+This is the C<undef> SV.  Always refer to this as C<&sv_undef>.
+
+=item sv_usepvn
+
+Tells an SV to use C<ptr> to find its string value.  Normally the string is
+stored inside the SV; this allows the SV to use an outside string.  The
+string length, C<len>, must be supplied.  This function will realloc the
+memory pointed to by C<ptr>, so that pointer should not be freed or used by
+the programmer after giving it to sv_usepvn.
+
+	void	sv_usepvn _((SV* sv, char* ptr, STRLEN len));
+
+=item sv_yes
+
+This is the C<true> SV.  See C<sv_no>.  Always refer to this as C<&sv_yes>.
+
+=item THIS
+
+Variable which is setup by C<xsubpp> to designate the object in a C++ XSUB.
+This is always the proper type for the C++ object.  See C<CLASS> and
+L<perlxs>.
+
+=item toLOWER
+
+Converts the specified character to lowercase.
+
+	int toLOWER (char c)
+
+=item toUPPER
+
+Converts the specified character to uppercase.
+
+	int toUPPER (char c)
+
+=item warn
+
+This is the XSUB-writer's interface to Perl's C<warn> function.  Use this
+function the same way you use the C C<printf> function.  See C<croak()>.
+
+=item XPUSHi
+
+Push an integer onto the stack, extending the stack if necessary.  See
+C<PUSHi>.
+
+	XPUSHi(int d)
+
+=item XPUSHn
+
+Push a double onto the stack, extending the stack if necessary.  See
+C<PUSHn>.
+
+	XPUSHn(double d)
+
+=item XPUSHp
+
+Push a string onto the stack, extending the stack if necessary.  The C<len>
+indicates the length of the string.  See C<PUSHp>.
+
+	XPUSHp(char *c, int len)
+
+=item XPUSHs
+
+Push an SV onto the stack, extending the stack if necessary.  See C<PUSHs>.
+
+	XPUSHs(sv)
+
+=item XSRETURN
+
+Return from XSUB, indicating number of items on the stack.  This is usually
+handled by C<xsubpp>.
+
+	XSRETURN(x);
+
+=item XSRETURN_EMPTY
+
+Return from an XSUB immediately.
+
+	XSRETURN_EMPTY;
+
+=item XSRETURN_NO
+
+Return C<false> from an XSUB immediately.
+
+	XSRETURN_NO;
+
+=item XSRETURN_UNDEF
+
+Return C<undef> from an XSUB immediately.
+
+	XSRETURN_UNDEF;
+
+=item XSRETURN_YES
+
+Return C<true> from an XSUB immediately.
+
+	XSRETURN_YES;
+
+=item Zero
+
+The XSUB-writer's interface to the C C<memzero> function.  The C<d> is the
+destination, C<n> is the number of items, and C<t> is the type.
+
+	(void) Zero( d, n, t );
+
+=back
+
 =head1 AUTHOR
 
 Jeff Okamoto <okamoto@corp.hp.com>
@@ -774,6 +2183,9 @@ With lots of help and suggestions from Dean Roehrich, Malcolm Beattie,
 Andreas Koenig, Paul Hudson, Ilya Zakharevich, Paul Marquess, Neil
 Bowers, Matthew Green, Tim Bunce, and Spider Boardman.
 
+API Listing by Dean Roehrich <roehrich@cray.com>.
+
 =head1 DATE
 
-Version 19: 1995/4/26
+Version 20: 1995/12/14
+

@@ -123,8 +123,9 @@ An alternate delimiter may be specified using B<-F>.
 =item B<-c>
 
 causes Perl to check the syntax of the script and then exit without
-executing it.  Actually, it will execute C<BEGIN> and C<use> blocks,
-since these are considered part of the compilation.
+executing it.  Actually, it I<will> execute C<BEGIN>, C<END>, and C<use> blocks,
+since these are considered as occurring outside the execution of 
+your program.
 
 =item B<-d>
 
@@ -329,8 +330,10 @@ will work under any of csh, sh or Perl, such as the following:
 
 =item B<-T>
 
-forces "taint" checks to be turned on.  Ordinarily these checks are
-done only when running setuid or setgid.  See L<perlsec>.
+forces "taint" checks to be turned on so you can test them.  Ordinarily these checks are
+done only when running setuid or setgid.  It's a good idea to turn
+them on explicitly for programs run on another's behalf, such as CGI
+programs.  See L<perlsec>.
 
 =item B<-u>
 

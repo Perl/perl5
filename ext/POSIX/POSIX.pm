@@ -830,17 +830,13 @@ sub umask {
 }
 
 sub wait {
-    usage "wait(statusvariable)" if @_ != 1;
-    local $result = wait();
-    $_[0] = $?;
-    $result;
+    usage "wait()" if @_ != 0;
+    wait();
 }
 
 sub waitpid {
-    usage "waitpid(pid, statusvariable, options)" if @_ != 3;
-    local $result = waitpid($_[0], $_[2]);
-    $_[1] = $?;
-    $result;
+    usage "waitpid(pid, options)" if @_ != 2;
+    waitpid($_[0], $_[1]);
 }
 
 sub gmtime {

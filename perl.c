@@ -1093,7 +1093,7 @@ char *s;
 	s++;
 	return s;
     case 'v':
-	printf("\nThis is perl, version %s beta\n\n",patchlevel);
+	printf("\nThis is perl, version %s beta1g\n\n",patchlevel);
 	fputs("\nCopyright 1987-1995, Larry Wall\n",stdout);
 #ifdef MSDOS
 	fputs("MS-DOS port Copyright (c) 1989, 1990, Diomidis Spinellis\n",

@@ -171,6 +171,7 @@ sub lsdir { #yes, duplicate code seems less hassle than having an
 
 1;
 __END__
+
 =head1 NAME
 
 ExtUtils::Liblist - determine libraries to use and how to use them

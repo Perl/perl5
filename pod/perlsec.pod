@@ -45,7 +45,8 @@ exploit.  On these systems, Perl should be compiled with
 C<-DSETUID_SCRIPTS_ARE_SECURE_NOW>.  The B<Configure> program that builds
 Perl tries to figure this out for itself.
 
-When Perl is executing a setuid script, it takes special precautions to
+When executing a setuid script, or when you have turned on taint checking
+explicitly using the B<-T> flag, Perl takes special precautions to
 prevent you from falling into any obvious traps.  (In some ways, a Perl
 script is more secure than the corresponding C program.)  Any command line
 argument, environment variable, or input is marked as "tainted", and may
@@ -123,3 +124,24 @@ too!) Perl doesn't prevent you from opening tainted filenames for reading,
 so be careful what you print out.  The tainting mechanism is intended to
 prevent stupid mistakes, not to remove the need for thought.
 
+This gives us a reasonably safe way to open a file or pipe: just reset the
+id set to the original IDs.  Here's a way to do backticks reasonably
+safely.  Notice how the exec() is not called with a string that the shell
+could expand.  By the time we get to the exec(), tainting is turned off,
+however, so be careful what you call and what you pass it.
+
+    die unless defined $pid = open(KID, "-|");
+    if ($pid) {	          # parent
+	while (<KID>) {
+	    # do something
+	} 
+	close KID;
+    } else {
+	$> = $<; 
+	$) = $(;  # BUG: initgroups() not called
+	exec 'program', 'arg1', 'arg2';
+	die "can't exec program: $!";
+    } 
+
+For those even more concerned about safety, see the I<Safe> and I<Safe CGI> 
+modules at a CPAN site near you.  See L<perlmod> for a list of CPAN sites.

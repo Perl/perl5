@@ -31,7 +31,7 @@ getcwd - get pathname of current working directory
 The getcwd() function re-implements the getcwd(3) (or getwd(3)) functions
 in Perl.
 
-The fastgetcwd() function looks the same as getcwd(), but runs faster.
+The fastcwd() function looks the same as getcwd(), but runs faster.
 It's also more dangerous because you might conceivably chdir() out of a
 directory that you can't chdir() back into.
 

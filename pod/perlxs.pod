@@ -23,38 +23,7 @@ many common C types.  A supplement typemap must be created
 to handle special structures and types for the library being
 linked.
 
-=head2 Getting Started
-
-A new extension should begin with the B<h2xs> tool.  This will generate
-templates for the new Perl module (PM), the XS source file (XS), the MANIFEST
-file, and the Makefile.PL (PL) files.  The Makefile.PL file is a Perl script
-which will generate a Makefile.  This makefile knows how to find and run
-xsubpp for your extension.  When you type "make" your XS file will be run
-through xsubpp and a C file will be produced.  Then the C file will be
-compiled.  A simple example looks like this for an example module named
-B<Foo>:
-
-	$ h2xs -Afn Foo
-	$ cd ext/Foo
-	$ ls
-	Foo.pm Foo.xs MANIFEST Makefile.PL
-	$ perl5 Makefile.PL
-	$ ls
-	Foo.pm Foo.xs MANIFEST Makefile.PL Makefile
-	$ <edit Foo.pm and Foo.xs to add your stuff>
-	$ make
-	<you will see xsubpp run on Foo.xs and you'll see the C compiler
-	<run on Foo.c, and a bunch of other less-interesting things
-	<will happen.
-
-If your Perl was built with dynamic loading then the makefile will build a
-dynamically loadable extension.  If you don't have dynamic loading then the
-makefile will build a static extension and should create a new Perl binary.
-The default behavior depends on what is available.
-
-For more information about h2xs consult its manpage, embedded in the
-source.  For information about the Makefile.PL and Makefile consult the
-MakeMaker manpage.
+See L<perlxstut> for a tutorial on the whole extension creation process.
 
 =head2 On The Road
 
@@ -451,8 +420,8 @@ Perl as a single list.
           bool_t  status;
           status = rpcb_gettime( host, &timep );
           EXTEND(sp, 2);
-          PUSHs(sv_2mortal(newSVnv(status)));
-          PUSHs(sv_2mortal(newSVnv(timep)));
+          PUSHs(sv_2mortal(newSViv(status)));
+          PUSHs(sv_2mortal(newSViv(timep)));
           }
 
 Notice that the programmer must supply the C code necessary
@@ -535,7 +504,7 @@ then not push return values on the stack.
           {
           time_t  timep;
           if( rpcb_gettime( host, &timep ) )
-               PUSHs(sv_2mortal(newSVnv(timep)));
+               PUSHs(sv_2mortal(newSViv(timep)));
           else{
           /* Nothing pushed on stack, so an empty */
           /* list is implicitly returned. */
@@ -592,92 +561,89 @@ If a function is defined as a C++ method then it will assume
 its first argument is an object pointer.  The object pointer
 will be stored in a variable called THIS.  The object should
 have been created by C++ with the new() function and should
-be blessed by Perl with the sv_setptrobj() macro.  The
-blessing of the object by Perl can be handled by the
-T_PTROBJ typemap.
+be blessed by Perl with the sv_setref_pv() macro.  The
+blessing of the object by Perl can be handled by a typemap.  An example
+typemap is shown at the end of this section.
 
 If the method is defined as static it will call the C++
 function using the class::method() syntax.  If the method is not static
 the function will be called using the THIS->method() syntax.
 
-=head2 Perl Variables
+The next examples will use the following C++ class.
 
-The following demonstrates how the Perl variable $host can
-be accessed from an XSUB.  The function B<perl_get_sv()> is
-used to obtain a pointer to the variable, known as an B<SV>
-(Scalar Variable) internally.  The package name C<RPC> will be
-added to the name of the variable so perl_get_sv() will know
-in which package $host can be found.  If the package name is
-not supplied then perl_get_sv() will search package C<main> for
-the variable.  The macro B<SvPVX()> is then used to dereference
-the SV to obtain a C<char*> pointer to its contents.
+     class colors {
+          public:
+          colors();
+          ~colors();
+          int blue();
+          void set_blue( int );
 
-     void
-     rpcb_gettime()
-          PPCODE:
-          {
-          char *host;
-          SV *hostsv;
-          time_t timep;
+          private:
+          int c_blue;
+     };
 
-          hostsv = perl_get_sv( "RPC::host", FALSE );
-          if( hostsv != NULL ){
-               host = SvPVX( hostsv );
-               if( rpcb_gettime( host, &timep ) )
-                    PUSHs(sv_2mortal(newSVnv(timep)));
-          }
-          }
+The XSUBs for the blue() and set_blue() methods are defined with the class
+name but the parameter for the object (THIS, or "self") is implicit and is
+not listed.
 
-This Perl code can be used to call that XSUB.
-
-     $RPC::host = "localhost";
-     $timep = rpcb_gettime();
-
-In the above example the SV contained a C C<char*> but a Perl
-scalar variable may also contain numbers and references.  If
-the SV is expected to have a C C<int> then the macro B<SvIVX()>
-should be used to dereference the SV.  When the SV contains
-a C double then B<SvNVX()> should be used.
-
-The macro B<SvRV()> can be used to dereference an SV when it is a Perl
-reference.  The result will be another SV which points to the actual Perl
-variable.  This can then be dereferenced with SvPVX(), SvNVX(), or
-SvIVX().  The following XSUB will use SvRV().
+     int
+     color::blue()
 
      void
-     rpcb_gettime()
-          PPCODE:
-          {
-          char *host;
-          SV *rv;
-          SV *hostsv;
-          time_t timep;
+     color::set_blue( val )
+          int val
 
-          rv = perl_get_sv( "RPC::host", FALSE );
-          if( rv != NULL ){
-               hostsv = SvRV( rv );
-               host = SvPVX( hostsv );
-               if( rpcb_gettime( host, &timep ) )
-                    PUSHs(sv_2mortal(newSVnv(timep)));
-          }
-          }
+Both functions will expect an object as the first parameter.  The xsubpp
+compiler will call that object C<THIS> and will use it to call the specified
+method.  So in the C++ code the blue() and set_blue() methods will be called
+in the following manner.
 
-This Perl code will create a variable $RPC::host which is a
-reference to $MY::host.  The variable $MY::host contains the
-hostname which will be used.
+     RETVAL = THIS->blue();
 
-     $MY::host = "localhost";
-     $RPC::host = \$MY::host;
-     $timep = rpcb_gettime();
+     THIS->set_blue( val );
 
-The second argument to perl_get_sv() will normally be B<FALSE>
-as shown in the above examples.  An argument of B<TRUE> will
-cause variables to be created if they do not already exist.
-One should not use TRUE unless steps are taken to deal with
-a possibly empty SV.
+If the function's name is B<DESTROY> then the C++ C<delete> function will be
+called and C<THIS> will be given as its parameter.
 
-XSUBs may use B<perl_get_av()>, B<perl_get_hv()>, and B<perl_get_cv()> to
-access Perl arrays, hashes, and code values.
+     void
+     color::DESTROY()
+
+The C++ code will call C<delete>.
+
+     delete THIS;
+
+If the function's name is B<new> then the C++ C<new> function will be called
+to create a dynamic C++ object.  The XSUB will expect the class name, which
+will be kept in a variable called C<CLASS>, to be given as the first
+argument.
+
+     color *
+     color::new()
+
+The C++ code will call C<new>.
+
+	RETVAL = new color();
+
+The following is an example of a typemap that could be used for this C++
+example.
+
+    TYPEMAP
+    color *		O_OBJECT
+
+    OUTPUT
+    # The Perl object is blessed into 'CLASS', which should be a
+    # char* having the name of the package for the blessing.
+    O_OBJECT
+    	sv_setref_pv( $arg, CLASS, (void*)$var );
+
+    INPUT
+    O_OBJECT
+    	if( sv_isobject($arg) && (SvTYPE(SvRV($arg)) == SVt_PVMG) )
+    		$var = ($type)SvIV((SV*)SvRV( $arg ));
+    	else{
+    		warn( \"${Package}::$func_name() -- $var is not a blessed SV reference\" );
+    		XSRETURN_UNDEF;
+    	}
 
 =head2 Interface Strategy
 
@@ -706,41 +672,6 @@ Identify the structures used by the C functions.  In many
 cases it may be helpful to use the T_PTROBJ typemap for
 these structures so they can be manipulated by Perl as
 blessed objects.
-
-=head2 The Perl Module
-
-The Perl module is the link between the extension library,
-which was generated from XS code, and the Perl interpreter.
-The module is used to tell Perl what the extension library
-contains.  The name and package of the module should match
-the name of the library.
-
-The following is a Perl module for an extension containing
-some ONC+ RPC bind library functions.
-
-     package RPC;
-
-     require Exporter;
-     require DynaLoader;
-     @ISA = qw(Exporter DynaLoader);
-     @EXPORT = qw( rpcb_gettime rpcb_getmaps rpcb_getaddr
-                     rpcb_rmtcall rpcb_set rpcb_unset );
-
-     bootstrap RPC;
-     1;
-
-The RPC extension contains the functions found in the
-@EXPORT list.  By using the C<Exporter> module the RPC module
-can make these function names visible to the rest of the
-Perl program.  The C<DynaLoader> module will allow the RPC
-module to bootstrap the extension library.  To load this
-extension and make the functions available, the following
-Perl statement should be used.
-
-     use RPC;
-
-For more information about the DynaLoader consult its documentation in the
-ext/DynaLoader directory in the Perl source.
 
 =head2 Perl Objects And C Structures
 
@@ -807,76 +738,6 @@ object to the supplied XSUB DESTROY function.  Perl cannot determine, and
 does not care, that this object is a C struct and not a Perl object.  In
 this sense, there is no difference between the object created by the
 getnetconfigent() XSUB and an object created by a normal Perl subroutine.
-
-=head2 C Headers and Perl
-
-The B<h2xs> compiler is designed to convert C header files in
-/usr/include into Perl extensions.  This compiler will
-create a directory under the C<ext> directory of the Perl
-source and will populate it with a Makefile, a Perl Module,
-an XS source file, and a MANIFEST file.
-
-The following command will create an extension called C<Rusers>
-from the <rpcsvc/rusers.h> header.
-
-     h2xs rpcsvc/rusers
-
-When the Rusers extension has been compiled and installed
-Perl can use it to retrieve any C<#define> statements which
-were in the C header.
-
-     use Rusers;
-     print "RPC program number for rusers service: ";
-     print &RUSERSPROG, "\n";
-
-=head2 Creating A New Extension
-
-The B<h2xs> compiler can generate template source files and
-Makefiles.  These templates offer a suitable starting point
-for most extensions.  The following example demonstrates how
-one might use B<h2xs> to create an extension containing the RPC
-functions in this document.
-
-The extension will not use autoloaded functions and will not define
-constants, so the B<-A> option will be given to B<h2xs>.  When run from the
-Perl source directory, the B<h2xs> compiler will create the directory
-ext/RPC and will populate it with files called RPC.xs, RPC.pm, Makefile.PL,
-and MANIFEST.  The XS code for the RPC functions should be added to the
-RPC.xs file.  The @EXPORT list in RPC.pm should be updated to include the
-functions from RPC.xs.
-
-     h2xs -An RPC
-
-To compile the extension for dynamic loading the following
-command should be executed from the ext/RPC directory.
-
-     make dynamic
-
-If the extension will be statically linked into the Perl
-binary then the makefile (use C<makefile>, not C<Makefile>) in the
-Perl source directory should be edited to add C<ext/RPC/RPC.a>
-to the C<static_ext> variable.  Before making this change Perl
-should have already been built.  After the makefile has been
-updated the following command should be executed from the
-Perl source directory.
-
-     make
-
-Perl's B<Configure> script can also be used to add extensions.  The extension
-should be placed in the C<ext> directory under the Perl source before Perl
-has been built and prior to running Configure.  When Configure is run it
-will find the extension along with the other extensions in the C<ext>
-directory and will add it to the list of extensions to be built.  When make
-is run the extension will be built along with the other extensions.
-
-Configure recognizes extensions if they have an XS source
-file which matches the name of the extension directory.  If
-the extension directory includes a MANIFEST file Configure
-will search that file for any B<.SH> files and extract them
-after it extracts all the other .SH files listed in the main
-MANIFEST.  The main Perl Makefile will then run B<make> in the
-extension's directory if it finds an XS file matching the
-name of the extension's directory.
 
 =head2 The Typemap
 
@@ -982,4 +843,4 @@ File C<rpctest.pl>: Perl test program for the RPC extension.
 =head1 AUTHOR
 
 Dean Roehrich F<E<lt>roehrich@cray.comE<gt>>
-Oct 12, 1995
+Dec 10, 1995

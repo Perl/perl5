@@ -10,7 +10,7 @@ $ENV{EMXSHELL} = 'sh' if $Is_OS2; # to run commands
 $path_s = $Is_OS2 ? ';' : ':' ;
 
 @ISA=(Exporter);
-@EXPORT= qw(&runtests &test_lib);
+@EXPORT= qw(&runtests);
 @EXPORT_OK= qw($verbose $switches);
 
 $verbose = 0;
@@ -85,3 +85,63 @@ sub runtests {
 }
 
 1;
+__END__
+
+=head1 NAME
+
+Test::Harness - run perl standard test scripts with statistics
+
+=head1 SYNOPSIS
+
+use Test::Harness;
+
+runtests(@tests);
+
+=head1 DESCRIPTION
+
+Perl test scripts print to standard output C<"ok N"> for each single
+test, where C<N> is an increasing sequence of integers. The first line
+output by a standard test scxript is C<"1..M"> with C<M> being the
+number of tests that should be run within the test
+script. Test::Harness::runscripts(@tests) runs all the testscripts
+named as arguments and checks standard output for the expected
+C<"ok N"> strings.
+
+After all tests have been performed, runscripts() prints some
+performance statistics that are computed by the Benchmark module.
+
+=head1 EXPORT
+
+C<&runscripts> is exported by Test::Harness per default.
+
+=head1 DIAGNOSTICS
+
+=over 4
+
+=item C<All tests successful.\nFiles=%d,  Tests=%d, %s>
+
+If all tests are successful some statistics about the performance are
+printed.
+
+=item C<Failed 1 test, $pct% okay.>
+
+=item C<Failed %d/%d tests, %.2f%% okay.>
+
+If not all tests were successful, the script dies with one of the
+above messages.
+
+=back
+
+=head1 SEE ALSO
+
+See L<Benchmerk> for the underlying timing routines.
+
+=head1 BUGS
+
+Test::Harness uses $^X to determine the perl binary to run the tests
+with. Test scripts running via the shebang (C<#!>) line may not be portable
+because $^X is not consistent for shebang scripts across
+platforms. This is no problem when Test::Harness is run with an
+absolute path to the perl binary.
+
+=cut

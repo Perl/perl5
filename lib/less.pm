@@ -2,7 +2,11 @@ package less;
 
 =head1 NAME
 
-less - Perl pragma to request less of something from the compiler
+less - perl pragma to request less of something from the compiler
+
+=head1 SYNOPSIS
+
+    use less;  # unimplemented
 
 =head1 DESCRIPTION
 

@@ -5,30 +5,63 @@ require Exporter;
 @ISA = qw(Exporter);
 @EXPORT = qw(Complete);
 
-#
 #      @(#)complete.pl,v1.1            (me@anywhere.EBay.Sun.COM) 09/23/91
-#
-# Author: Wayne Thompson
-#
-# Description:
-#     This routine provides word completion.
-#     (TAB) attempts word completion.
-#     (^D)  prints completion list.
-#      (These may be changed by setting $Complete::complete, etc.)
-#
-# Diagnostics:
-#     Bell when word completion fails.
-#
-# Dependencies:
-#     The tty driver is put into raw mode.
-#
-# Bugs:
-#
-# Usage:
-#     $input = complete('prompt_string', \@completion_list);
-#         or
-#     $input = complete('prompt_string', @completion_list);
-#
+
+=head1 NAME
+
+Term::Complete - Perl word completion module
+
+=head1 SYNOPSIS
+
+    $input = complete('prompt_string', \@completion_list);
+    $input = complete('prompt_string', @completion_list);
+
+=head1 DESCRIPTION
+
+This routine provides word completion on the list of words in
+the array (or array ref).
+
+The tty driver is put into raw mode using the system command
+C<stty raw -echo> and restored using C<stty -raw echo>.
+
+The following command characters are defined:
+
+=over 4
+
+=item <tab>
+Attempts word completion.
+Cannot be changed.
+
+=item ^D
+
+Prints completion list.
+Defined by I<$Term::Complete::complete>.
+
+=item ^U
+
+Erases the current input.
+Defined by I<$Term::Complete::kill>.
+
+=item <del>, <bs>
+
+Erases one character.
+Defined by I<$Term::Complete::erase1> and I<$Term::Complete::erase2>.
+
+=back
+
+=head1 DIAGNOSTICS
+
+Bell sounds when word completion fails.
+
+=head1 BUGS
+
+The completion charater <tab> cannot be changed.
+
+=head1 AUTHOR
+
+Wayne Thompson
+
+=cut
 
 CONFIG: {
     $complete = "\004";

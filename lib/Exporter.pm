@@ -1,6 +1,15 @@
 package Exporter;
 
-=head1 Comments
+=head1 NAME
+
+Exporter - provide inport/export controls for Perl modules
+
+=head1 SYNOPSIS
+
+use Module;
+use Module qw(name1 name2 :tag /pattern/ !name);
+
+=head1 DESCRIPTION
 
 If the first entry in an import list begins with !, : or / then the
 list is treated as a series of specifications which either add to or

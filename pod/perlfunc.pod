@@ -54,9 +54,9 @@ null list.
 
 Remember the following rule:
 
-=over 5
+=over 8
 
-=item *
+=item  
 
 I<THERE IS NO GENERAL RULE FOR CONVERTING A LIST INTO A SCALAR!>
 
@@ -69,6 +69,121 @@ operators return the first value in the list.  Some operators return the
 last value in the list.  Some operators return a count of successful
 operations.  In general, they do what you want, unless you want
 consistency.
+
+=head2 Perl Functions by Category
+
+Here are Perl's functions (including things that look like
+functions, like some of the keywords and named operators)
+arranged by category.  Some functions appear in more
+than one place.
+
+=over
+
+=item Functions for SCALARs or strings
+
+chomp, chop, chr, crypt, hex, index, lc, lcfirst, length,
+oct, ord, pack, q/STRING/, qq/STRING/, reverse, rindex,
+sprintf, substr, tr///, uc, ucfirst, y///
+
+=item Regular expressions and pattern matching
+
+m//, pos, quotemeta, s///, split, study
+
+=item Numeric functions
+
+abs, atan2, cos, exp, hex, int, log, oct, rand, sin, sqrt,
+srand
+
+=item Functions for real @ARRAYs
+
+pop, push, shift, splice, unshift
+
+=item Functions for list data
+
+grep, join, map, qw/STRING/, reverse, sort, unpack
+
+=item Functions for real %HASHes
+
+delete, each, exists, keys, values
+
+=item Input and output functions
+
+binmode, close, closedir, dbmclose, dbmopen, die, eof,
+fileno, flock, format, getc, print, printf, read, readdir,
+rewinddir, seek, seekdir, select, syscall, sysread,
+syswrite, tell, telldir, truncate, warn, write
+
+=item Functions for fixed length data or records
+
+pack, read, syscall, sysread, syswrite, unpack, vec
+
+=item Functions for filehandles, files, or directories
+
+-X, chdir, chmod, chown, chroot, fcntl, glob, ioctl, link,
+lstat, mkdir, open, opendir, readlink, rename, rmdir,
+stat, symlink, umask, unlink, utime
+
+=item Keywords related to the control flow of your perl program
+
+caller, continue, die, do, dump, eval, exit, goto, last,
+next, redo, return, sub, wantarray
+
+=item Keywords related to scoping 
+
+caller, import, local, my, package, use
+
+=item Miscellaneous functions
+
+defined, dump, eval, formline, local, my, reset, scalar,
+undef, wantarray
+
+=item Functions for processes and process groups
+
+alarm, exec, fork, getpgrp, getppid, getpriority, kill,
+pipe, qx/STRING/, setpgrp, setpriority, sleep, system,
+times, wait, waitpid
+
+=item Keywords related to perl modules
+
+do, import, no, package, require, use
+
+=item Keywords related to classes and object-orientedness
+
+bless, dbmclose, dbmopen, package, ref, tie, untie, use
+
+=item Low-level socket functions
+
+accept, bind, connect, getpeername, getsockname,
+getsockopt, listen, recv, send, setsockopt, shutdown,
+socket, socketpair
+
+=item System V interprocess communication functions
+
+msgctl, msgget, msgrcv, msgsnd, semctl, semget, semop,
+shmctl, shmget, shmread, shmwrite
+
+=item Fetching user and group info
+
+endgrent, endhostent, endnetent, endpwent, getgrent,
+getgrgid, getgrnam, getlogin, getpwent, getpwnam,
+getpwuid, setgrent, setpwent
+
+=item Fetching network info
+
+endprotoent, endservent, gethostbyaddr, gethostbyname,
+gethostent, getnetbyaddr, getnetbyname, getnetent,
+getprotobyname, getprotobynumber, getprotoent,
+getservbyname, getservbyport, getservent, sethostent,
+setnetent, setprotoent, setservent
+
+=item Time-related functions
+
+gmtime, localtime, time, times
+
+=back
+
+=head2 Alphabetical Listing of Perl Functions
+
 
 =over 8
 
@@ -212,13 +327,17 @@ L<perlipc/"Sockets: Client/Server Communication">.
 
 =item binmode FILEHANDLE
 
-Arranges for the file to be read or written in "binary" mode in
-operating systems that distinguish between binary and text files.
-Files that are not in binary mode have CR LF sequences translated to LF
-on input and LF translated to CR LF on output.  Binmode has no effect
-under Unix; in DOS, it may be imperative--otherwise your DOS C library
-may mangle your file.  If FILEHANDLE is an expression,
-the value is taken as the name of the filehandle.
+Arranges for the file to be read or written in "binary" mode in operating
+systems that distinguish between binary and text files.  Files that are
+not in binary mode have CR LF sequences translated to LF on input and LF
+translated to CR LF on output.  Binmode has no effect under Unix; in DOS
+and similarly archaic systems, it may be imperative--otherwise your
+DOS-damaged C library may mangle your file.  The key distinction between
+systems that need binmode and those that don't is their text file
+formats.  Systems like Unix and Plan9 that delimit lines with a single
+character, and that encode that character in C as '\n', do not need
+C<binmode>.  The rest need it.  If FILEHANDLE is an expression, the value
+is taken as the name of the filehandle.
 
 =item bless REF,CLASSNAME
 
@@ -398,6 +517,16 @@ does.  Returns TRUE if it succeeded, FALSE otherwise.  NAME should be a
 packed address of the appropriate type for the socket.  See the examples in
 L<perlipc/"Sockets: Client/Server Communication">.
 
+=item continue BLOCK
+
+Actually a flow control statement rather than a function.  If there is a
+C<continue> BLOCK attached to a BLOCK (typically in a C<while> or
+C<foreach>), it is always executed just before the conditional is about to
+be evaluated again, just like the third part of a C<for> loop in C.  Thus
+it can be used to increment a loop variable, even when the loop has been
+continued via the C<next> statement (which is similar to the C C<continue>
+statement).
+
 =item cos EXPR
 
 Returns the cosine of EXPR (expressed in radians).  If EXPR is omitted
@@ -442,16 +571,16 @@ Breaks the binding between a DBM file and an associative array.
 
 [This function has been superseded by the tie() function.]
 
-This binds a dbm(3), ndbm(3), sdbm(3), gdbm(), or Berkeley DB file to an associative array.  ASSOC is the
-name of the associative array.  (Unlike normal open, the first argument
-is I<NOT> a filehandle, even though it looks like one).  DBNAME is the
-name of the database (without the F<.dir> or F<.pag> extension if any).  If the
-database does not exist, it is created with protection specified by
-MODE (as modified by the umask()).  If your system only supports the
-older DBM functions, you may perform only one dbmopen() in your program.
-In order versions of Perl,
-if your system had neither DBM nor ndbm, calling dbmopen() produced a
-fatal error; it now falls back to sdbm(3).  
+This binds a dbm(3), ndbm(3), sdbm(3), gdbm(), or Berkeley DB file to an
+associative array.  ASSOC is the name of the associative array.  (Unlike
+normal open, the first argument is I<NOT> a filehandle, even though it
+looks like one).  DBNAME is the name of the database (without the F<.dir>
+or F<.pag> extension if any).  If the database does not exist, it is
+created with protection specified by MODE (as modified by the umask()).
+If your system only supports the older DBM functions, you may perform only
+one dbmopen() in your program.  In older versions of Perl, if your system
+had neither DBM nor ndbm, calling dbmopen() produced a fatal error; it now
+falls back to sdbm(3).
 
 If you don't have write access to the DBM file, you can only read
 associative array variables, not set them.  If you want to test whether
@@ -469,11 +598,13 @@ function to iterate over large DBM files.  Example:
     }
     dbmclose(%HIST);
 
-See also L<DB_File> for many other interesting possibilities.
+See also L<AnyDBM_File> for a more general description of the pros and
+cons of the various dbm apparoches, as well as L<DB_File> for a particularly
+rich implementation.
 
 =item defined EXPR
 
-Returns a boolean value saying whether the lvalue EXPR has a real value
+Returns a boolean value saying whether EXPR has a real value
 or not.  Many operations return the undefined value under exceptional
 conditions, such as end of file, uninitialized variable, system error
 and such.  This function allows you to distinguish between an undefined
@@ -730,7 +861,7 @@ reader wonder what else might be happening (nothing is).) Cases 3 and 4
 likewise behave in the same way: they run the code <$x>, which does
 nothing at all.  (Case 4 is preferred for purely visual reasons.) Case 5
 is a place where normally you I<WOULD> like to use double quotes, except
-in that particular situation, you can just use symbolic references
+that in that particular situation, you can just use symbolic references
 instead, as in case 6.
 
 =item exec LIST
@@ -823,7 +954,11 @@ value is taken as the name of the filehandle.
 Calls flock(2) on FILEHANDLE.  See L<flock(2)> for definition of
 OPERATION.  Returns TRUE for success, FALSE on failure.  Will produce a
 fatal error if used on a machine that doesn't implement either flock(2) or
-fcntl(2). (fcntl(2) will be automatically used if flock(2) is missing.)
+fcntl(2). The fcntl(2) system call will be automatically used if flock(2)
+is missing from your system.  This makes flock() the portable file locking
+strategy, although it will only lock entire files, not records.  Note also
+that some versions of flock() cannot lock things over the network; you
+would need to use the more system-specific fcntl() for that.
 
 Here's a mailbox appender for BSD systems.
 
@@ -850,8 +985,7 @@ Here's a mailbox appender for BSD systems.
     print MBOX $msg,"\n\n";
     unlock();
 
-Note that many versions of flock() cannot lock things over the network.  
-You need to do locking with fcntl() for that.
+See also L<DB_File> for other flock() examples.
 
 =item fork
 
@@ -881,6 +1015,26 @@ fork() returns omitted);
     }
     waitpid($pid,0);
 
+See also L<perlipc> for more examples of forking and reaping
+moribund children.
+
+=item format
+
+Declare a picture format with use by the write() function.  For
+example:
+
+    format Something = 
+	Test: @<<<<<<<< @||||| @>>>>>
+	      $str,     $%,    '$' . int($num)
+    .
+
+    $str = "widget";
+    $num = $cost/$quantiy;
+    $~ = 'Something';
+    write;
+
+See L<perlform> for many details and examples.
+
 
 =item formline PICTURE, LIST
 
@@ -908,14 +1062,13 @@ formline() always returns TRUE.  See L<perlform> for other examples.
 Returns the next character from the input file attached to FILEHANDLE,
 or a null string at end of file.  If FILEHANDLE is omitted, reads from STDIN.
 This is not particularly efficient.  It cannot be used to get unbuffered
-single-character 
+single-characters, however.  For that, try something more like:
 
     if ($BSD_STYLE) {
 	system "stty cbreak </dev/tty >/dev/tty 2>&1";
     }
     else {
-	system "stty", '-icanon',
-	system "stty", 'eol', "\001"; 
+	system "stty", '-icanon', 'eol', "\001"; 
     }
 
     $key = getc(STDIN);
@@ -924,13 +1077,15 @@ single-character
 	system "stty -cbreak </dev/tty >/dev/tty 2>&1";
     }
     else {
-	system "stty", 'icanon';
-	system "stty", 'eol', '^@'; # ascii null
+	system "stty", 'icanon', 'eol', '^@'; # ascii null
     }
     print "\n";
 
 Determination of whether to whether $BSD_STYLE should be set 
-is left as an exercise to the reader.
+is left as an exercise to the reader.  
+
+See also the C<Term::ReadKey> module from your nearest CPAN site;
+details on CPAN can be found on L<perlmod/CPAN> 
 
 =item getlogin
 
@@ -1252,7 +1407,7 @@ or how about sorted by key:
     }
 
 To sort an array by value, you'll need to use a C<sort{}>
-function.  Here's a descending numeric sort by value:
+function.  Here's a descending numeric sort of a hash by its values:
 
     foreach $key (sort { $hash{$b} <=> $hash{$a} } keys %hash)) {
 	printf "%4d %s\n", $hash{$key}, $key;
@@ -1316,73 +1471,14 @@ it succeeded, FALSE otherwise.  See example in L<perlipc/"Sockets: Client/Server
 
 =item local EXPR
 
-In general, you should be using "my" instead of "local", because it's
-faster and safer.  Format variables often use "local" though, as
-do other variables whose current value must be visible to called
-subroutines.  This is known as dynamic scoping.  Lexical scoping is
-done with "my", which works more like C's auto declarations.
-
 A local modifies the listed variables to be local to the enclosing block,
-subroutine, eval or "do".  If more than one value is listed, the list
-must be placed in parens.  All the listed elements must be legal
-lvalues.  This operator works by saving the current values of those
-variables in LIST on a hidden stack and restoring them upon exiting the
-block, subroutine or eval.  This means that called subroutines can also
-reference the local variable, but not the global one.  The LIST may be
-assigned to if desired, which allows you to initialize your local
-variables.  (If no initializer is given for a particular variable, it
-is created with an undefined value.)  Commonly this is used to name the
-parameters to a subroutine.  Examples:
+subroutine, C<eval{}> or C<do>.  If more than one value is listed, the
+list must be placed in parens.  See L<perlsub/"Temporary Values via
+local()"> for details.
 
-    sub RANGEVAL {
-	local($min, $max, $thunk) = @_;
-	local $result = '';
-	local $i;
-
-	# Presumably $thunk makes reference to $i
-
-	for ($i = $min; $i < $max; $i++) {
-	    $result .= eval $thunk;
-	}
-
-	$result;
-    }
-
-
-    if ($sw eq '-v') {
-	# init local array with global array
-	local @ARGV = @ARGV;
-	unshift(@ARGV,'echo');
-	system @ARGV;
-    }
-    # @ARGV restored
-
-
-    # temporarily add to digits associative array
-    if ($base12) {
-	# (NOTE: not claiming this is efficient!)
-	local(%digits) = (%digits,'t',10,'e',11);
-	parse_num();
-    }
-
-Note that local() is a run-time command, and so gets executed every
-time through a loop.  In Perl 4 it used more stack storage each
-time until the loop was exited.  Perl 5 reclaims the space each time
-through, but it's still more efficient to declare your variables
-outside the loop.
-
-A local is simply a modifier on an lvalue expression.
-When you assign to a localized EXPR, the local doesn't change whether
-EXPR is viewed as a scalar or an array.  So
-
-    local($foo) = <STDIN>;
-    local @FOO = <STDIN>;
-
-both supply a list context to the righthand side, while
-
-    local $foo = <STDIN>;
-
-supplies a scalar context.
+But you really probably want to be using my() instead, because local() isn't
+what most people think of as "local").  See L<perlsub/"Private Variables
+via my()"> for details.
 
 =item localtime EXPR
 
@@ -1480,129 +1576,9 @@ an error.
 =item my EXPR
 
 A "my" declares the listed variables to be local (lexically) to the
-enclosing block, subroutine, C<eval>, or C<do/require/use>'d file.  If more than one value is
-listed, the list must be placed in parens.  All the listed elements
-must be legal lvalues.  Only alphanumeric identifiers may be lexically
-scoped--magical builtins like $/ must be localized with "local"
-instead.  You also cannot use my() on a package variable.
-In particular, you're not allowed to say
-
-    my $_;		# Illegal!
-    my $pack::$var;	# Illegal!
-
-Unlike the "local" declaration, variables declared with "my"
-are totally hidden from the outside world, including any called
-subroutines (even if it's the same subroutine--every call gets its own
-copy). 
-
-(An eval(), however, can see the lexical variables of the scope it is
-being evaluated in so long as the names aren't hidden by declarations within
-the eval() itself.  See L<perlref>.)
-
-The EXPR may be assigned to if desired, which allows you to initialize
-your variables.  (If no initializer is given for a particular
-variable, it is created with an undefined value.)  Commonly this is
-used to name the parameters to a subroutine.  Examples:
-
-    sub RANGEVAL {
-	my($min, $max, $thunk) = @_;
-	my $result = '';
-	my $i;
-
-	# Presumably $thunk makes reference to $i
-
-	for ($i = $min; $i < $max; $i++) {
-	    $result .= eval $thunk;
-	}
-
-	$result;
-    }
-
-
-    if ($sw eq '-v') {
-	# init my array with global array
-	my @ARGV = @ARGV;
-	unshift(@ARGV,'echo');
-	system @ARGV;
-    }
-    # Outer @ARGV again visible
-
-The "my" is simply a modifier on something you might assign to.
-So when you do assign to the EXPR, the "my" doesn't change whether
-EXPR is viewed as a scalar or an array.  So
-
-    my ($foo) = <STDIN>;
-    my @FOO = <STDIN>;
-
-both supply a list context to the righthand side, while
-
-    my $foo = <STDIN>;
-
-supplies a scalar context.  But the following only declares one variable:
-
-    my $foo, $bar = 1;
-
-That has the same effect as
-
-    my $foo;
-    $bar = 1;
-
-The declared variable is not introduced (is not visible) until after
-the current statement.  Thus,
-
-    my $x = $x;
-
-can be used to initialize the new $x with the value of the old $x, and 
-the expression
-
-    my $x = 123 and $x == 123
-
-is false unless the old $x happened to have the value 123.
-
-Some users may wish to encourage the use of lexically scoped variables.
-As an aid to catching implicit references to package variables,
-if you say
-
-    use strict 'vars';
-
-then any variable reference from there to the end of the enclosing
-block must either refer to a lexical variable, or must be fully
-qualified with the package name.  A compilation error results
-otherwise.  An inner block may countermand this with S<"no strict 'vars'">.
-
-Variables declared with "my" are not part of any package and
-are therefore never fully qualified with the package name.
-However, you may declare a "my" variable at the outer most
-scope of a file to totally hide any such identifiers from the 
-outside world.  This is similar to a C's static variables
-at the file level.  To do this with a subroutine requires the
-use of a closure (anonymous function): 
-
-    my $secret_version = '1.001-beta';
-    my $secret_sub = { print $secret_version };
-    &$secret_sub();
-
-This does not work with object methods, however; 
-all object methods have to be in the symbol table of some
-package to be found.
-
-Just because the "my" variable is lexically scoped doesn't mean that
-within a function it works like a C static.  Here's a mechanism for giving
-a function private variables with both lexical scoping and a static
-lifetime.
-
-    #!/usr/bin/perl -l
-    $var = "global";
-    {   my $count = 0;
-        my $var = "static";
-        sub foo {
-	    $count++;
-            print "$var (call # $count)";
-        }
-    }
-    print $var; foo();
-    print $var; foo();
-    print $var; foo();
+enclosing block, subroutine, C<eval>, or C<do/require/use>'d file.  If
+more than one value is listed, the list must be placed in parens.  See
+L<perlsub/"Private Variables via my()"> for details.
 
 =item next LABEL
 
@@ -1645,24 +1621,42 @@ of the real filehandle wanted.  If EXPR is omitted, the scalar variable of
 the same name as the FILEHANDLE contains the filename.  If the filename
 begins with "<" or nothing, the file is opened for input.  If the filename
 begins with ">", the file is opened for output.  If the filename begins
-with ">>", the file is opened for appending.  (You can put a '+' in front
+with ">>", the file is opened for appending.  You can put a '+' in front
 of the '>' or '<' to indicate that you want both read and write access to
-the file.)  If the filename begins with "|", the filename is interpreted
+the file; thus '+<' is usually preferred for read/write updates--the '+>'
+mode would clobber the file first.  These correspond to the fopen(3) modes
+of 'r', 'r+', 'w', 'w+', 'a', and 'a+'.
+
+If the filename begins with "|", the filename is interpreted
 as a command to which output is to be piped, and if the filename ends with
 a "|", the filename is interpreted See L<perlipc/"Using open() for IPC">
 for more examples of this.  as command which pipes input to us.  (You may
-not have a command that pipes both in and out, but see See L<open2>,
+not have a raw open() to a command that pipes both in I<and> out, but see See L<open2>,
 L<open3>, and L<perlipc/"Bidirectional Communication"> for alternatives.)
+
 Opening '-' opens STDIN and opening '>-' opens STDOUT.  Open returns
 non-zero upon success, the undefined value otherwise.  If the open
 involved a pipe, the return value happens to be the pid of the
-subprocess.  Examples:
+subprocess.  
+
+If you're unfortunate enough to be running Perl on a system that
+distinguishes between text files and binary files (modern operating
+systems don't care), then you should check out L</binmode> for tips for
+dealing with this.  The key distinction between systems that need binmode
+and those that don't is their text file formats.  Systems like Unix and
+Plan9 that delimit lines with a single character, and that encode that
+character in C as '\n', do not need C<binmode>.  The rest need it.
+
+
+Examples:
 
     $ARTICLE = 100;
     open ARTICLE or die "Can't find article $ARTICLE: $!\n";
     while (<ARTICLE>) {...
 
     open(LOG, '>>/usr/spool/news/twitlog'); # (log is reserved)
+
+    open(DBASE, '+<dbase.mine');	    # open for update
 
     open(ARTICLE, "caesar <$article |");    # decrypt article
 
@@ -1696,6 +1690,8 @@ with ">&", in which case the rest of the string is interpreted as the
 name of a filehandle (or file descriptor, if numeric) which is to be
 duped and opened.  You may use & after >, >>, <, +>, +>> and +<.  The
 mode you specify should match the mode of the original filehandle.
+(Duping a filehandle does not take into acount any existing contents of
+stdio buffers.)
 Here is a script that saves, redirects, and restores STDOUT and
 STDERR:
 
@@ -1760,8 +1756,24 @@ whitespace deleted.  In order to open a file with arbitrary weird
 characters in it, it's necessary to protect any leading and trailing
 whitespace thusly:
 
-        $file =~ s#^(\s)#./$1#;
-        open(FOO, "< $file\0");
+    $file =~ s#^(\s)#./$1#;
+    open(FOO, "< $file\0");
+
+If you want a "real" C open() (see L<open(2)) on your system, then
+you should probably use the POSIX::open() function as found in the L<POSIX> 
+documents.  For example:
+
+    use FileHandle;
+    use POSIX qw(:fcntl_h);
+    $fd = POSIX::open($path, O_RDWR|O_CREAT|O_EXCL, 0700);
+    die "POSIX::open $path: $!" unless defined $fd;
+    $fh = FileHandle->new_from_fd($fd, $amode) || die "fdopen: $!";
+    $fh->autoflush(1);
+    $fh->print("stuff $$\n");
+    seek($fh, 0, SEEK_SET);
+    print "File contains: ", <$fh>;
+
+See L</seek()> for some details about mixing reading and writing.
 
 =item opendir DIRHANDLE,EXPR
 
@@ -1866,6 +1878,25 @@ Examples:
 
 The same template may generally also be used in the unpack function.
 
+=item package NAMESPACE
+
+Declares the compilation unit as being in the given namespace.  The scope
+of the package declaration is from the declaration itself through the end of
+the enclosing block (the same scope as the local() operator).  All further
+unqualified dynamic identifiers will be in this namespace.  A package
+statement only affects dynamic variables--including those you've used
+local() on--but I<not> lexical variables created with my().  Typically it
+would be the first declaration in a file to be included by the C<require>
+or C<use> operator.  You can switch into a package in more than one place;
+it merely influences which symbol table is used by the compiler for the
+rest of that block.  You can refer to variables and filehandles in other
+packages by prefixing the identifier with the package name and a double
+colon:  C<$Package::Variable>.  If the package name is null, the C<main>
+package as assumed.  That is, C<$::sail> is equivalent to C<$main::sail>.
+
+See L<perlmod/"Packages"> for more information about packages, modules,
+and classes.  See L<perlsub> for other scoping issues.
+
 =item pipe READHANDLE,WRITEHANDLE
 
 Opens a pair of connected pipes like the corresponding system call.
@@ -1885,6 +1916,9 @@ Pops and returns the last value of the array, shortening the array by
     $tmp = $ARRAY[$#ARRAY--];
 
 If there are no elements in the array, returns the undefined value.
+If ARRAY is omitted, pops the
+@ARGV array in the main program, and the @_ array in subroutines, just
+like shift().
 
 =item pos SCALAR
 
@@ -1897,9 +1931,9 @@ in question.  May be modified to change that offset.
 
 =item print
 
-Prints a string or a comma-separated list of strings.  Returns non-zero
+Prints a string or a comma-separated list of strings.  Returns TRUE
 if successful.  FILEHANDLE may be a scalar variable name, in which case
-the variable contains the name of the filehandle, thus introducing one
+the variable contains the name of or a reference to the filehandle, thus introducing one
 level of indirection.  (NOTE: If FILEHANDLE is a variable and the next
 token is a term, it may be misinterpreted as an operator unless you
 interpose a + or put parens around the arguments.)  If FILEHANDLE is
@@ -1989,6 +2023,14 @@ Returns the next directory entry for a directory opened by opendir().
 If used in a list context, returns all the rest of the entries in the
 directory.  If there are no more entries, returns an undefined value in
 a scalar context or a null list in a list context.
+
+If you're planning to filetest the return values out of a readdir(), you'd
+better prepend the directory in question.  Otherwise, since we didn't
+chdir() there, it would have been testing the wrong file.
+
+    opendir(DIR, $some_dir) || die "can't opendir $some_dir: $!";
+    @dots = grep { /^\./ && -f "$some_dir/$_" } readdir(DIR);
+    closedir DIR;
 
 =item readlink EXPR
 
@@ -2177,7 +2219,15 @@ The substitution operator.  See L<perlop>.
 =item scalar EXPR
 
 Forces EXPR to be interpreted in a scalar context and returns the value
-of EXPR.
+of EXPR.  
+
+    @counts = ( scalar @a, scalar @b, scalar @c );
+
+There is no equivalent operator to force an expression to 
+be interpolated in a list context because it's in practice never
+needed.  If you really wanted to do so, however, you could use
+the construction C<@{[ (some expression) ]}>, but usually a simple
+C<(some expression)> suffices.
 
 =item seek FILEHANDLE,POSITION,WHENCE
 
@@ -2187,6 +2237,31 @@ of the filehandle.  The values for WHENCE are 0 to set the file pointer to
 POSITION, 1 to set the it to current plus POSITION, and 2 to set it to EOF
 plus offset.  You may use the values SEEK_SET, SEEK_CUR, and SEEK_END for
 this from POSIX module.  Returns 1 upon success, 0 otherwise.
+
+On some systems you have to do a seek whenever you switch between reading
+and writing.  Amongst other things, this may have the effect of calling
+stdio's clearerr(3).  A "whence" of 1 (SEEK_CUR) is useful for not moving
+the file pointer:
+
+    seek(TEST,0,1);
+
+This is also useful for applications emulating C<tail -f>.  Once you hit
+EOF on your read, and then sleep for a while, you might have to stick in a
+seek() to reset things.  First the simple trick listed above to clear the
+filepointer.  The seek() doesn't change the current position, but it
+I<does> clear the end-of-file condition on the handle, so that the next
+C<E<lt>FILE<E<gt>> makes Perl try again to read something.  Hopefully.
+
+If that doesn't work (some stdios are particularly cantankerous), then
+you may need something more like this:
+
+    for (;;) {
+	for ($curpos = tell(FILE); $_ = <FILE>; $curpos = tell(FILE)) {
+	    # search for some stuff and put it into files
+	}
+	sleep($for_a_while);
+	seek(FILE, $curpos, 0);
+    }
 
 =item seekdir DIRHANDLE,POS
 
@@ -2264,6 +2339,8 @@ You can effect a 250-microsecond sleep this way:
 
     select(undef, undef, undef, 0.25);
 
+B<WARNING>: Do not attempt to mix buffered I/O (like read() or <FH>)
+with select().  You have to use sysread() instead.
 
 =item semctl ID,SEMNUM,CMD,ARG
 
@@ -2380,6 +2457,10 @@ On some older systems, it may sleep up to a full second less than what
 you requested, depending on how it counts seconds.  Most modern systems
 always sleep the full amount.
 
+For delays of finer granularity than one second, you may use Perl's
+syscall() interface to access setitimer(2) if your system supports it, 
+or else see L</select()> below.  
+
 =item socket SOCKET,DOMAIN,TYPE,PROTOCOL
 
 Opens a socket of the specified kind and attaches it to filehandle
@@ -2411,11 +2492,12 @@ value provides the name of the subroutine to use.  In place of a
 SUBNAME, you can provide a BLOCK as an anonymous, in-line sort
 subroutine.
 
-In the interests of efficiency the normal calling code for subroutines
-is bypassed, with the following effects: the subroutine may not be a
-recursive subroutine, and the two elements to be compared are passed
-into the subroutine not via @_ but as $a and $b (see example below).
-They are passed by reference, so don't modify $a and $b.
+In the interests of efficiency the normal calling code for subroutines is
+bypassed, with the following effects: the subroutine may not be a
+recursive subroutine, and the two elements to be compared are passed into
+the subroutine not via @_ but as the package global variables $a and
+$b (see example below).  They are passed by reference, so don't
+modify $a and $b.  And don't try to declare them as lexicals either.
 
 Examples:
 
@@ -2424,6 +2506,9 @@ Examples:
 
     # same thing, but with explicit sort routine
     @articles = sort {$a cmp $b} @files;
+
+    # now case-insensitively
+    @articles = sort { uc($a) cmp uc($b)} @files;
 
     # same thing in reversed order
     @articles = sort {$b cmp $a} @files;
@@ -2449,6 +2534,53 @@ Examples:
 	    # prints xdogcatCainAbel
     print sort @george, 'to', @harry;
 	    # prints AbelAxedCainPunishedcatchaseddoggonetoxyz
+
+    # inefficiently sort by descending numeric compare using 
+    # the first integer after the first = sign, or the 
+    # whole record case-insensitively otherwise
+
+    @new = sort {
+	($b =~ /=(\d+)/)[0] <=> ($a =~ /=(\d+)/)[0]
+			    ||
+	            uc($a)  cmp  uc($b)
+    } @old;
+
+    # same thing, but much more efficiently;
+    # we'll build auxiliary indices instead
+    # for speed
+    @nums = @caps = ();
+    for (@old) { 
+	push @nums, /=(\d+)/;
+	push @caps, uc($_);
+    } 
+
+    @new = @old[ sort {
+			$nums[$b] <=> $nums[$a]
+				 ||
+			$caps[$a] cmp $caps[$b]
+		       } 0..$#old
+	       ];
+
+    # same thing using a Schwartzian Transform (no temps)
+    @new = map { $_->[0] }
+        sort { $b->[1] <=> $a->[1]
+                        ||
+               $a->[2] cmp $b->[2]
+        } map { [$_, /=(\d+)/, uc($_)] } @old;
+
+If you're and using strict, you I<MUST NOT> declare $a
+and $b as lexicals.  They are package globals.  That means
+if you're in the C<main> package, it's
+
+    @articles = sort {$main::b <=> $main::a} @files;
+
+or just
+
+    @articles = sort {$::b <=> $::a} @files;
+
+but if you're in the C<FooPack> package, it's
+
+    @articles = sort {$FooPack::b <=> $FooPack::a} @files;
 
 =item splice ARRAY,OFFSET,LENGTH,LIST
 
@@ -2567,10 +2699,11 @@ L</chomp>, and L</join>.)
 =item sprintf FORMAT,LIST
 
 Returns a string formatted by the usual printf conventions of the C
-language.  (The * character for an indirectly specified length is not
+language.  See L<sprintf(3)> or L<printf(3)> on your system for details.
+(The * character for an indirectly specified length is not
 supported, but you can get the same effect by interpolating a variable
-into the pattern.)  Some C libraries' implementations of sprintf() can dump core
-when fed ludiocrous arguments.
+into the pattern.)  Some C libraries' implementations of sprintf() can
+dump core when fed ludicrous arguments.
 
 =item sqrt EXPR
 
@@ -2579,12 +2712,13 @@ root of $_.
 
 =item srand EXPR
 
-Sets the random number seed for the C<rand> operator.  If EXPR is
-omitted, does C<srand(time)>.  Of course, you'd need something much more
-random than that for cryptographic purposes, since it's easy to guess
-the current time.  Checksumming the compressed output of rapidly
-changing operating system status programs is the usual method.
-Examples are posted regularly to comp.security.unix.
+Sets the random number seed for the C<rand> operator.  If EXPR is omitted,
+does C<srand(time)>.  Many folks use an explicit C<srand(time ^ $$)>
+instead.  Of course, you'd need something much more random than that for
+cryptographic purposes, since it's easy to guess the current time.
+Checksumming the compressed output of rapidly changing operating system
+status programs is the usual method.  Examples are posted regularly to
+the comp.security.unix newsgroup.
 
 =item stat FILEHANDLE
 
@@ -2667,6 +2801,18 @@ out the names of those files that contain a match:
 	print $file, "\n";
     }
 
+=item sub BLOCK
+
+=item sub NAME
+
+=item sub NAME BLOCK
+
+This is subroutine definition, not a real function I<per se>.  With just a
+NAME (and possibly prototypes), it's just a forward declaration.  Without
+a NAME, it's an anonymous function declaration, and does actually return a
+value: the CODE ref of the closure you just created. See L<perlsub> and
+L<perlref> for details.
+
 =item substr EXPR,OFFSET,LEN
 
 =item substr EXPR,OFFSET
@@ -2731,7 +2877,9 @@ first, and the parent process waits for the child process to complete.
 Note that argument processing varies depending on the number of
 arguments.  The return value is the exit status of the program as
 returned by the wait() call.  To get the actual exit value divide by
-256.  See also L</exec>.
+256.  See also L</exec>.  This is I<NOT> what you want to use to capture 
+the output from a command, for that you should merely use backticks, as
+described in L<perlop/"`STRING`">.
 
 =item syswrite FILEHANDLE,SCALAR,LENGTH,OFFSET
 
@@ -2767,8 +2915,8 @@ to be enchanted.  CLASSNAME is the name of a class implementing objects
 of correct type.  Any additional arguments are passed to the "new"
 method of the class (meaning TIESCALAR, TIEARRAY, or TIEHASH).
 Typically these are arguments such as might be passed to the dbm_open()
-function of C.  The object returned by the "new" method +is also
-returned by the tie() function, which would be useful if you +want to
+function of C.  The object returned by the "new" method is also
+returned by the tie() function, which would be useful if you want to
 access other methods in CLASSNAME.
 
 Note that functions such as keys() and values() may return huge array
@@ -2947,8 +3095,6 @@ package.  It is exactly equivalent to
 
     BEGIN { require Module; import Module LIST; }
 
-If you don't want your namespace altered, use require instead.
-
 The BEGIN forces the require and import to happen at compile time.  The
 require makes sure the module is loaded into memory if it hasn't been
 yet.  The import is not a builtin--it's just an ordinary static method
@@ -2956,7 +3102,15 @@ call into the "Module" package to tell the module to import the list of
 features back into the current package.  The module can implement its
 import method any way it likes, though most modules just choose to
 derive their import method via inheritance from the Exporter class that
-is defined in the Exporter module.
+is defined in the Exporter module. See L<Exporter>.
+
+If you don't want your namespace altered, explicitly supply an empty list:
+
+    use Module ();
+
+That is exactly equivalent to
+
+    BEGIN { require Module; }
 
 Because this is a wide-open interface, pragmas (compiler directives)
 are also implemented this way.  Currently implemented pragmas are:

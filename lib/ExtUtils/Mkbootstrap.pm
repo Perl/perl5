@@ -7,12 +7,17 @@ $Version=2.0; # just to start somewhere
 
 sub Mkbootstrap {
 
-=head1 USEFUL SUBROUTINES
+=head1 NAME
 
-=head2 Mkbootstrap()
+Mkbootstrap - make a bootstrap file for use by DynaLoader
 
-Make a bootstrap file for use by this system's DynaLoader.  It
-typically gets called from an extension Makefile.
+=head1 SYNOPSIS
+
+C<mkbootstrap>
+
+=head1 DESCRIPTION
+
+Mkbootstrap typically gets called from an extension Makefile.
 
 There is no C<*.bs> file supplied with the extension. Instead a
 C<*_BS> file which has code for the special cases, like posix for
@@ -20,15 +25,14 @@ berkeley db on the NeXT.
 
 This file will get parsed, and produce a maybe empty
 C<@DynaLoader::dl_resolve_using> array for the current architecture.
-That will be extended by $BSLOADLIBS, which was computed by Andy's
-extliblist script. If this array still is empty, we do nothing, else
-we write a .bs file with an C<@DynaLoader::dl_resolve_using> array, but
-without any C<if>s, because there is no longer a need to deal with
-special cases.
+That will be extended by $BSLOADLIBS, which was computed by
+ExtUtils::Liblist::ext(). If this array still is empty, we do nothing,
+else we write a .bs file with an C<@DynaLoader::dl_resolve_using>
+array.
 
-The C<*_BS> file can put some code into the generated C<*.bs> file by placing
-it in C<$bscode>. This is a handy 'escape' mechanism that may prove
-useful in complex situations.
+The C<*_BS> file can put some code into the generated C<*.bs> file by
+placing it in C<$bscode>. This is a handy 'escape' mechanism that may
+prove useful in complex situations.
 
 If @DynaLoader::dl_resolve_using contains C<-L*> or C<-l*> entries then
 Mkbootstrap will automatically add a dl_findfile() call to the

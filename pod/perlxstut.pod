@@ -22,7 +22,7 @@ are welcome.
 Our first extension will be very simple.  When we call the routine in the
 extension, it will print out a well-known message and terminate.
 
-Run "h2xs -A -n Test1".  This creates a directory named Test1, possibly under
+Run C<h2xs -A -n Test1>.  This creates a directory named Test1, possibly under
 ext/ if it exists in the current working directory.  Four files will be
 created in the Test1 dir: MANIFEST, Makefile.PL, Test1.pm, Test1.xs.
 
@@ -80,7 +80,7 @@ Let's edit the .xs file by adding this to the end of the file:
 		CODE:
 		printf("Hello, world!\n");
 
-Now we'll run "perl Makefile.PL".  This will create a real Makefile,
+Now we'll run C<perl Makefile.PL>.  This will create a real Makefile,
 which make needs.  It's output looks something like:
 
 	% perl Makefile.PL
@@ -128,7 +128,7 @@ Now we run the script and we should see the following output:
 Now let's create a simple extension that will take a single argument and
 return 0 if the argument is even, 1 if the argument is odd.
 
-Run "h2xs -A -n Test2".  This will create a Test2 directory with a file
+Run C<h2xs -A -n Test2>.  This will create a Test2 directory with a file
 Test2.xs underneath it.  Add the following to the end of the XS file:
 
 	int
@@ -236,7 +236,7 @@ from other extensions or from the calling program itself.
 Our third extension will take one argument as its input, round off that
 value, and set the argument to the rounded value.
 
-Run "h2xs -A -n Test3".  This will create a Test3 directory with a file
+Run C<h2xs -A -n Test3>.  This will create a Test3 directory with a file
 Test3.xs underneath it.  Add the following to the end of the XS file:
 
 	void
@@ -438,9 +438,9 @@ Now let's move the libtest4.h and libtest.a files into a sub-directory under
 Okay, now that we have a header file and a library, let's begin actually
 writing the extension.
 
-Run "h2xs -n Test4 /tmp/test4/include/libtest4.h" (notice we are no longer
-specifying -A as an argument).  This will create a Test4 directory with a file
-Test4.xs underneath it.  If we look at it now, we'll see some interesting
+Run C<h2xs -n Test4 /tmp/test4/include/libtest4.h> (notice we are no longer
+specifying B<-A> as an argument).  This will create a Test4 directory with a file
+F<Test4.xs> underneath it.  If we look at it now, we'll see some interesting
 things have been added to the various files.
 
 =over 2

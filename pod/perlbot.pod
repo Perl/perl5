@@ -2,7 +2,7 @@
 
 perlbot - Bag'o Object Tricks (the BOT)
 
-=head1 INTRODUCTION
+=head1 DESCRIPTION
 
 The following collection of tricks and hints is intended to whet curious
 appetites about such things as the use of instance variables and the

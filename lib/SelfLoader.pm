@@ -100,6 +100,7 @@ sub _package_defined {}
 
 1;
 __END__
+
 =head1 NAME
 
 SelfLoader - load functions only on demand

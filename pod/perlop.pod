@@ -37,7 +37,7 @@ Perl easier for C folks.)
 
 In the following sections, these operators are covered in precedence order.
 
-=head1 DESCRIPTIONS
+=head1 DESCRIPTION
 
 =head2 Terms and List Operators (Leftward)
 
@@ -127,7 +127,9 @@ The autodecrement operator is not magical.
 =head2 Exponentiation
 
 Binary "**" is the exponentiation operator.  Note that it binds even more
-tightly than unary minus, so -2**4 is -(2**4), not (-2)**4.
+tightly than unary minus, so -2**4 is -(2**4), not (-2)**4. (This is
+implemented using C's pow(3) function, which actually works on doubles
+internally.)
 
 =head2 Symbolic Unary Operators
 
@@ -155,17 +157,17 @@ thing from interpretation.
 
 =head2 Binding Operators
 
-Binary "=~" binds an expression to a pattern match.
-Certain operations search or modify the string $_ by default.  This
-operator makes that kind of operation work on some other string.  The
-right argument is a search pattern, substitution, or translation.  The
-left argument is what is supposed to be searched, substituted, or
-translated instead of the default $_.  The return value indicates the
-success of the operation.  (If the right argument is an expression
-rather than a search pattern, substitution, or translation, it is
-interpreted as a search pattern at run time.  This is less efficient
-than an explicit search, since the pattern must be compiled every time
-the expression is evaluated--unless you've used C</o>.)
+Binary "=~" binds an expression to a pattern match.  Certain operations
+search or modify the string $_ by default.  This operator makes that kind
+of operation work on some other string.  The right argument is a search
+pattern, substitution, or translation.  The left argument is what is
+supposed to be searched, substituted, or translated instead of the default
+$_.  The return value indicates the success of the operation.  (If the
+right argument is an expression rather than a search pattern,
+substitution, or translation, it is interpreted as a search pattern at run
+time.  This is less efficient than an explicit search, since the pattern
+must be compiled every time the expression is evaluated--unless you've
+used C</o>.)
 
 Binary "!~" is just like "=~" except the return value is negated in
 the logical sense.
@@ -404,15 +406,24 @@ specified.
 Ternary "?:" is the conditional operator, just as in C.  It works much
 like an if-then-else.  If the argument before the ? is true, the
 argument before the : is returned, otherwise the argument after the :
-is returned.  Scalar or list context propagates downward into the 2nd
-or 3rd argument, whichever is selected.  The operator may be assigned
-to if both the 2nd and 3rd arguments are legal lvalues (meaning that you
-can assign to them):
+is returned.  For example:
+
+    printf "I have %d dog%s.\n", $n, 
+	    ($n == 1) ? '' : "s";
+
+Scalar or list context propagates downward into the 2nd
+or 3rd argument, whichever is selected.  
+
+    $a = $ok ? $b : $c;  # get a scalar
+    @a = $ok ? @b : @c;  # get an array
+    $a = $ok ? @b : @c;  # oops, that's just a count!
+
+The operator may be assigned to if both the 2nd and 3rd arguments are
+legal lvalues (meaning that you can assign to them):
 
     ($a_or_b ? $a : $b) = $c;
 
-Note that this is not guaranteed to contribute to the readability of
-your program.
+This is not necessarily guaranteed to contribute to the readability of your program.
 
 =head2 Assignment Operators
 
@@ -464,7 +475,7 @@ In a list context, it's just the list argument separator, and inserts
 both its arguments into the list.
 
 The => digraph is mostly just a synonym for the comma operator.  It's useful for
-documenting arguments that come in pairs.  As of 5.001, it also forces
+documenting arguments that come in pairs.  As of release 5.001, it also forces
 any word to the left of it to be interpreted as a string.
 
 =head2 List Operators (Rightward)
@@ -543,7 +554,7 @@ the same character fore and aft, but the 4 sorts of brackets
 		 s{}{}	 Substitution	   yes
 		tr{}{}	 Translation	   no
 
-For constructs that do interpolation, variables beginning with "C<$> or "C<@>"
+For constructs that do interpolation, variables beginning with "C<$>" or "C<@>"
 are interpolated, as are the following sequences:
 
     \t		tab
@@ -574,6 +585,11 @@ Apart from the above, there are no multiple levels of interpolation.  In
 particular, contrary to the expectations of shell programmers, backquotes
 do I<NOT> interpolate within double quotes, nor do single quotes impede
 evaluation of variables when used within double quotes.
+
+=head2 Regexp Quotelike Operators
+
+Here are the quotelike operators that apply to pattern
+matching and related activities.
 
 =over 8
 
@@ -912,7 +928,9 @@ of C<$?>).  Unlike in B<csh>, no translation is done on the return
 data--newlines remain newlines.  Unlike in any of the shells, single
 quotes do not hide variable names in the command from interpretation.
 To pass a $ through to the shell you need to hide it with a backslash.
-The generalized form of backticks is C<qx//>.
+The generalized form of backticks is C<qx//>.  (Because backticks
+always undergo shell expansion as well, see L<perlsec> for 
+security concerns.)
 
 Evaluating a filehandle in angle brackets yields the next line from
 that file (newline included, so it's never false until end of file, at
@@ -935,7 +953,7 @@ The filehandles STDIN, STDOUT and STDERR are predefined.  (The
 filehandles C<stdin>, C<stdout> and C<stderr> will also work except in
 packages, where they would be interpreted as local identifiers rather
 than global.)  Additional filehandles may be created with the open()
-function.
+function.  See L<perlfunc/open()> for details on this.
 
 If a <FILEHANDLE> is used in a context that is looking for a list, a
 list consisting of all the input lines is returned, one line per list
@@ -996,9 +1014,13 @@ haven't set @ARGV, will input from STDIN.
 
 If the string inside the angle brackets is a reference to a scalar
 variable (e.g. <$foo>), then that variable contains the name of the
-filehandle to input from.
+filehandle to input from, or a reference to the same.  For example:
 
-If the string inside angle brackets is not a filehandle, it is interpreted
+    $fh = \*STDIN;
+    $line = <$fh>;
+
+If the string inside angle brackets is not a filehandle or a scalar
+variable containing a filehandle name or reference, then it is interpreted
 as a filename pattern to be globbed, and either a list of filenames or the
 next filename in the list is returned, depending on context.  One level of
 $ interpretation is done first, but you can't say C<E<lt>$fooE<gt>>

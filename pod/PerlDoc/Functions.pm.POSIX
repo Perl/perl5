@@ -1,0 +1,215 @@
+POSIX::_exit	POSIX	terminate a process
+POSIX::abort	POSIX	generate a fault
+POSIX::abs	POSIX	integer absolute value
+POSIX::access	POSIX	determine accessibility of file
+POSIX::acos	POSIX	trigonometric functions
+POSIX::alarm	POSIX	schedule signal after specified time
+POSIX::asctime	POSIX	convert date and time
+POSIX::asin	POSIX	trigonometric functions
+POSIX::assert	POSIX	program verification
+POSIX::atan2	POSIX	trigonometric functions
+POSIX::atan	POSIX	trigonometric functions
+POSIX::atof	POSIX	convert string to double-precision number
+POSIX::atoi	POSIX	convert string to integer
+POSIX::atol	POSIX	convert string to integer
+POSIX::bsearch	POSIX	binary search a sorted table
+POSIX::calloc	POSIX	memory allocator
+POSIX::ceil	POSIX	round to integral value in floating-point or integer format
+POSIX::chdir	POSIX	change current working directory
+POSIX::chmod	POSIX	change mode of file
+POSIX::chown	POSIX	change owner and group of a file
+POSIX::clearerr	POSIX	stream status inquiries
+POSIX::clock	POSIX	report CPU time used
+POSIX::close	POSIX	delete a descriptor
+POSIX::closedir	POSIX	directory operations
+POSIX::cos	POSIX	trigonometric functions
+POSIX::cosh	POSIX	hyperbolic functions
+POSIX::creat	POSIX	create a new file
+POSIX::ctermid	POSIX	generate filename for terminal
+POSIX::ctime	POSIX	convert date and time
+POSIX::cuserid	POSIX	get character login name of the user
+POSIX::dup2	POSIX	duplicate a descriptor
+POSIX::dup	POSIX	duplicate a descriptor
+POSIX::errno	POSIX	system error messages
+POSIX::execl	POSIX	execute a file
+POSIX::execle	POSIX	execute a file
+POSIX::execlp	POSIX	execute a file
+POSIX::execv	POSIX	execute a file
+POSIX::execve	POSIX	execute a file
+POSIX::execvp	POSIX	execute a file
+POSIX::exit	POSIX	terminate a process after performing cleanup
+POSIX::exp	POSIX	exponential, logarithm, power
+POSIX::fabs	POSIX	appendix and related miscellaneous functions for IEEE arithmetic
+POSIX::fclose	POSIX	close or flush a stream
+POSIX::fcntl	POSIX	file control
+POSIX::fdopen	POSIX	open a stream
+POSIX::feof	POSIX	stream status inquiries
+POSIX::ferror	POSIX	stream status inquiries
+POSIX::fflush	POSIX	close or flush a stream
+POSIX::fgetc	POSIX	get character or integer from stream
+POSIX::fgets	POSIX	get a string from a stream
+POSIX::fileno	POSIX	stream status inquiries
+POSIX::floor	POSIX	round to integral value in floating-point or integer format
+POSIX::fmod	POSIX	appendix and related miscellaneous functions for IEEE arithmetic
+POSIX::fopen	POSIX	open a stream
+POSIX::fork	POSIX	create a new process
+POSIX::fpathconf	POSIX	query file system related limits and options
+POSIX::fprintf	POSIX	formatted output conversion
+POSIX::fputc	POSIX	put character or word on a stream
+POSIX::fputs	POSIX	put a string on a stream
+POSIX::fread	POSIX	buffered binary input/output
+POSIX::free	POSIX	memory allocator
+POSIX::freopen	POSIX	open a stream
+POSIX::frexp	POSIX	traditional UNIX functions
+POSIX::fscanf	POSIX	formatted input conversion
+POSIX::fseek	POSIX	reposition a stream
+POSIX::fstat	POSIX	get file status
+POSIX::ftell	POSIX	reposition a stream
+POSIX::fwrite	POSIX	buffered binary input/output
+POSIX::getc	POSIX	get character or integer from stream
+POSIX::getchar	POSIX	get character or integer from stream
+POSIX::getcwd	POSIX	get pathname of current working directory
+POSIX::getegid	POSIX	get group identity
+POSIX::getenv	POSIX	return value for environment name
+POSIX::geteuid	POSIX	get user identity
+POSIX::getgid	POSIX	get group identity
+POSIX::getgrgid	POSIX	get group file entry
+POSIX::getgrnam	POSIX	get group file entry
+POSIX::getgroups	POSIX	get or set supplementary group IDs
+POSIX::getlogin	POSIX	get login name
+POSIX::getpgrp	POSIX	return or set the process group of a process
+POSIX::getpid	POSIX	get process identification
+POSIX::getppid	POSIX	get process identification
+POSIX::getpwnam	POSIX	get password file entry
+POSIX::getpwuid	POSIX	get password file entry
+POSIX::gets	POSIX	get a string from a stream
+POSIX::getuid	POSIX	get user identity
+POSIX::gmtime	POSIX	convert date and time
+POSIX::isalnum	POSIX	character classification and conversion macros and functions
+POSIX::isalpha	POSIX	character classification and conversion macros and functions
+POSIX::isatty	POSIX	find name of a terminal
+POSIX::iscntrl	POSIX	character classification and conversion macros and functions
+POSIX::isdigit	POSIX	character classification and conversion macros and functions
+POSIX::isgraph	POSIX	character classification and conversion macros and functions
+POSIX::islower	POSIX	character classification and conversion macros and functions
+POSIX::isprint	POSIX	character classification and conversion macros and functions
+POSIX::ispunct	POSIX	character classification and conversion macros and functions
+POSIX::isspace	POSIX	character classification and conversion macros and functions
+POSIX::isupper	POSIX	character classification and conversion macros and functions
+POSIX::isxdigit	POSIX	character classification and conversion macros and functions
+POSIX::kill	POSIX	send a signal to a process or a group of processes
+POSIX::ldexp	POSIX	traditional UNIX functions
+POSIX::link	POSIX	make a hard link to a file
+POSIX::localeconv	POSIX	get numeric and monetary formatting conventions
+POSIX::localtime	POSIX	convert date and time
+POSIX::log10	POSIX	exponential, logarithm, power
+POSIX::log	POSIX	exponential, logarithm, power
+POSIX::longjmp	POSIX	non-local goto
+POSIX::lseek	POSIX	move read/write pointer
+POSIX::malloc	POSIX	memory allocator
+POSIX::mblen	POSIX	multibyte character handling
+POSIX::mbstowcs	POSIX	multibyte character handling
+POSIX::mbtowc	POSIX	multibyte character handling
+POSIX::memchr	POSIX	memory operations
+POSIX::memcmp	POSIX	memory operations
+POSIX::memcpy	POSIX	memory operations
+POSIX::memset	POSIX	memory operations
+POSIX::mkdir	POSIX	make a directory file
+POSIX::mkfifo	POSIX	make a special file
+POSIX::modf	POSIX	traditional UNIX functions
+POSIX::nice	POSIX	change nice value of a process
+POSIX::open	POSIX	open or create a file for reading or writing
+POSIX::opendir	POSIX	directory operations
+POSIX::pathconf	POSIX	query file system related limits and options
+POSIX::pause	POSIX	stop until signal
+POSIX::perror	POSIX	system error messages
+POSIX::pipe	POSIX	create an interprocess communication channel
+POSIX::pow	POSIX	exponential, logarithm, power
+POSIX::pow	POSIX	multiple precision integer arithmetic
+POSIX::printf	POSIX	formatted output conversion
+POSIX::putc	POSIX	put character or word on a stream
+POSIX::putchar	POSIX	put character or word on a stream
+POSIX::puts	POSIX	put a string on a stream
+POSIX::qsort	POSIX	quicker sort
+POSIX::rand	POSIX	simple random number generator
+POSIX::read	POSIX	read input
+POSIX::readdir	POSIX	directory operations
+POSIX::realloc	POSIX	memory allocator
+POSIX::rename	POSIX	change the name of a file
+POSIX::rewind	POSIX	reposition a stream
+POSIX::rewinddir	POSIX	directory operations
+POSIX::rmdir	POSIX	remove a directory file
+POSIX::scanf	POSIX	formatted input conversion
+POSIX::setbuf	POSIX	assign buffering to a stream
+POSIX::setgid	POSIX	set user and group ID
+POSIX::setjmp	POSIX	non-local goto
+POSIX::setlocale	POSIX	set international environment
+POSIX::setpgid	POSIX	set process group ID for job control
+POSIX::setsid	POSIX	create session and set process group ID
+POSIX::setuid	POSIX	set user and group ID
+POSIX::setvbuf	POSIX	assign buffering to a stream
+POSIX::sigaction	POSIX	examine and change signal action 
+POSIX::siglongjmp	POSIX	non-local goto
+POSIX::sigpending	POSIX	examine pending signals
+POSIX::sigprocmask	POSIX	examine and change blocked signals
+POSIX::sigsetjmp	POSIX	non-local goto
+POSIX::sigsuspend	POSIX	automatically release blocked signals and wait for interrupt
+POSIX::sin	POSIX	trigonometric functions
+POSIX::sinh	POSIX	hyperbolic functions
+POSIX::sleep	POSIX	suspend execution for interval
+POSIX::sprintf	POSIX	formatted output conversion
+POSIX::sqrt	POSIX	cube root, square root
+POSIX::srand	POSIX	simple random number generator
+POSIX::sscanf	POSIX	formatted input conversion
+POSIX::stat	POSIX	get file status
+POSIX::strcat	POSIX	string operations
+POSIX::strchr	POSIX	string operations
+POSIX::strcmp	POSIX	string operations
+POSIX::strcoll	POSIX	compare or transform strings using collating information
+POSIX::strcpy	POSIX	string operations
+POSIX::strcspn	POSIX	string operations
+POSIX::strftime	POSIX	convert date and time
+POSIX::strlen	POSIX	string operations
+POSIX::strncat	POSIX	string operations
+POSIX::strncmp	POSIX	string operations
+POSIX::strncpy	POSIX	string operations
+POSIX::strpbrk	POSIX	string operations
+POSIX::strrchr	POSIX	string operations
+POSIX::strspn	POSIX	string operations
+POSIX::strstr	POSIX	string operations
+POSIX::strtod	POSIX	convert string to double-precision number
+POSIX::strtok	POSIX	string operations
+POSIX::strtol	POSIX	convert string to integer
+POSIX::strxfrm	POSIX	compare or transform strings using collating information
+POSIX::sysconf	POSIX	query system related limits, values, options
+POSIX::system	POSIX	issue a shell command
+POSIX::tan	POSIX	trigonometric functions
+POSIX::tanh	POSIX	hyperbolic functions
+POSIX::tcdrain	POSIX	get and set terminal attributes, line control, get and set baud rate, get and set terminal foreground process group ID
+POSIX::tcflow	POSIX	get and set terminal attributes, line control, get and set baud rate, get and set terminal foreground process group ID
+POSIX::tcflush	POSIX	get and set terminal attributes, line control, get and set baud rate, get and set terminal foreground process group ID
+POSIX::tcgetpgrp	POSIX	get, set foreground process group ID
+POSIX::tcsendbreak	POSIX	get and set terminal attributes, line control, get and set baud rate, get and set terminal foreground process group ID
+POSIX::tcsetpgrp	POSIX	get, set foreground process group ID
+POSIX::tell	POSIX	move read/write pointer
+POSIX::time	POSIX	get date and time
+POSIX::times	POSIX	get process times
+POSIX::tmpfile	POSIX	create a temporary file
+POSIX::tmpnam	POSIX	create a name for a temporary file
+POSIX::tolower	POSIX	character classification and conversion macros and functions
+POSIX::toupper	POSIX	character classification and conversion macros and functions
+POSIX::ttyname	POSIX	find name of a terminal
+POSIX::tzset	POSIX	convert date and time
+POSIX::umask	POSIX	set file creation mode mask
+POSIX::uname	POSIX	get information about current system
+POSIX::ungetc	POSIX	push character back into input stream
+POSIX::unlink	POSIX	remove directory entry
+POSIX::utime	POSIX	set file times
+POSIX::vfprintf	POSIX	print formatted output of a varargs argument list
+POSIX::vprintf	POSIX	print formatted output of a varargs argument list
+POSIX::vsprintf	POSIX	print formatted output of a varargs argument list
+POSIX::wait	POSIX	wait for process to terminate or stop, examine returned status
+POSIX::waitpid	POSIX	wait for process to terminate or stop, examine returned status
+POSIX::wcstombs	POSIX	multibyte character handling
+POSIX::wctomb	POSIX	multibyte character handling
+POSIX::write	POSIX	write output

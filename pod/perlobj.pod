@@ -34,7 +34,7 @@ We'll cover these points now in more depth.
 
 Unlike say C++, Perl doesn't provide any special syntax for
 constructors.  A constructor is merely a subroutine that returns a
-reference that has been "blessed" into a class, generally the
+reference to something "blessed" into a class, generally the
 class that the subroutine is defined in.  Here is a typical
 constructor:
 
@@ -61,7 +61,33 @@ that wish to call methods in the class as part of the construction:
 	my $self = {}
 	bless $self;
 	$self->initialize();
-	$self;
+	return $self;
+    }
+
+If you care about inheritance (and you should; see L<perlmod/"Modules:
+Creation, Use and Abuse">), then you want to use the two-arg form of bless
+so that your constructors may be inherited:
+
+    sub new {
+	my $class = shift;
+	my $self = {};
+	bless $self, $class
+	$self->initialize();
+	return $self;
+    }
+
+Or if you expect people to call not just C<CLASS->new()> but also
+C<$obj->new()>, then use something like this.  The initialize()
+method used will be of whatever $class we blessed the 
+object into:
+
+    sub new {
+	my $this = shift;
+	my $class = ref($this) || $this;
+	my $self = {};
+	bless $self, $class
+	$self->initialize();
+	return $self;
     }
 
 Within the class package, the methods will typically deal with the
@@ -100,7 +126,7 @@ package.  This is how Perl implements inheritance.  Each element of the
 @ISA array is just the name of another package that happens to be a
 class package.  The classes are searched (depth first) for missing
 methods in the order that they occur in @ISA.  The classes accessible
-through @ISA are known as base classes of the current class.
+through @ISA are known as base classes of the current class. 
 
 If a missing method is found in one of the base classes, it is cached
 in the current class for efficiency.  Changing @ISA or defining new
@@ -224,6 +250,16 @@ name with the package like this:
     $fred = Critter->MyCritter::find("Fred");
     $fred->MyCritter::display('Height', 'Weight');
 
+If you're trying to control where the method search begins I<and> you're
+executing in the class itself, then you may use the SUPER pseudoclass,
+which says to start looking in your base class's @ISA list without having
+to explicitly name it:
+
+    $self->SUPER::display('Height', 'Weight');
+
+Please note that the C<SUPER::> construct is I<only> meaningful within the
+class.
+
 Sometimes you want to call a method when you don't know the method name
 ahead of time.  You can use the arrow form, replacing the method name
 with a simple scalar variable containing the method name:
@@ -268,6 +304,107 @@ That's about all there is to it.  Now you just need to go off and buy a
 book about object-oriented design methodology, and bang your forehead
 with it for the next six months or so.
 
+=head2 Two-Phased Garbage Collection
+
+For most purposes, Perl uses a fast and simple reference-based
+garbage collection system.  For this reason, there's an extra
+dereference going on at some level, so if you haven't built
+your Perl executable using your C compiler's C<-O> flag, performance
+will suffer.  If you I<have> built Perl with C<cc -O>, then this
+probably won't matter.
+
+A more serious concern is that unreachable memory with a non-zero
+reference count will not normally get freed.  Therefore, this is a bad
+idea:  
+
+    {
+	my $a;
+	$a = \$a;
+    } 
+
+Even thought $a I<should> go away, it can't.  When building recursive data
+structures, you'll have to break the self-reference yourself explicitly
+if you don't care to leak.  For example, here's a self-referential
+node such as one might use in a sophisticated tree structure:
+
+    sub new_node {
+	my $self = shift;
+	my $class = ref($self) || $self;
+	my $node = {};
+	$node->{LEFT} = $node->{RIGHT} = $node;
+	$node->{DATA} = [ @_ ];
+	return bless $node => $class;
+    } 
+
+If you create nodes like that, they (currently) won't go away unless you
+break their self reference yourself.  (In other words, this is not to be
+construed as a feature, and you shouldn't depend on it.)
+
+Almost.
+
+When an interpreter thread finally shuts down (usually when your program
+exits), then a rather costly but complete mark-and-sweep style of garbage
+collection is performed, and everything allocated by that thread gets
+destroyed.  This is essential to support Perl as an embedded or a
+multithreadable language.  For example, this program demonstrates Perl's
+two-phased garbage collection:
+
+    #!/usr/bin/perl 
+    package Subtle;
+
+    sub new {
+	my $test;
+	$test = \$test;
+	warn "CREATING " . \$test;
+	return bless \$test;
+    } 
+
+    sub DESTROY {
+	my $self = shift;
+	warn "DESTROYING $self";
+    } 
+
+    package main;
+
+    warn "starting program";
+    {
+	my $a = Subtle->new;
+	my $b = Subtle->new;
+	$$a = 0;  # break selfref
+	warn "leaving block";
+    } 
+
+    warn "just exited block";
+    warn "time to die...";
+    exit;
+
+When run as F</tmp/test>, the following output is produced:
+
+    starting program at /tmp/test line 18.
+    CREATING SCALAR(0x8e5b8) at /tmp/test line 7.
+    CREATING SCALAR(0x8e57c) at /tmp/test line 7.
+    leaving block at /tmp/test line 23.
+    DESTROYING Subtle=SCALAR(0x8e5b8) at /tmp/test line 13.
+    just exited block at /tmp/test line 26.
+    time to die... at /tmp/test line 27.
+    DESTROYING Subtle=SCALAR(0x8e57c) during global destruction.
+
+Notice that "global destruction" bit there?  That's the thread
+garbage collector reaching the unreachable.  
+
+Objects are always destructed, even when regular refs aren't and in fact
+are destructed in a separate pass before ordinary refs just to try to
+prevent object destructors from using refs that have been themselves
+destructed.  Plain refs are only garbage collected if the destruct level
+is greater than 0.  You can test the higher levels of global destruction
+by setting the PERL_DESTRUCT_LEVEL environment variable, presuming
+C<-DDEBUGGING> was enabled during perl build time.
+
+A more complete garbage collection strategy will be implemented
+at a future date.
+
 =head1 SEE ALSO
 
-You should also check out L<perlbot> for other object tricks, traps, and tips.
+You should also check out L<perlbot> for other object tricks, traps, and tips, 
+as well as L<perlmod> for some style guides on constructing both modules
+and classes.

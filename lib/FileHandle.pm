@@ -2,7 +2,7 @@ package FileHandle;
 
 # Note that some additional FileHandle methods are defined in POSIX.pm.
 
-=head1 NAME 
+=head1 NAME
 
 FileHandle - supply object methods for filehandles
 
@@ -21,7 +21,6 @@ cacheout - keep more files open than the system permits
 See L<perlvar> for complete descriptions of each of the following supported C<FileHandle> 
 methods:
 
-    print
     autoflush
     output_field_separator
     output_record_separator
@@ -35,14 +34,54 @@ methods:
     format_line_break_characters
     format_formfeed
 
+Furthermore, for doing normal I/O you might need these:
+
+=over 
+
+=item $fh->print
+
+See L<perlfunc/print>.
+
+=item $fh->printf
+
+See L<perlfunc/printf>.
+
+=item $fh->getline
+
+This works like <$fh> described in L<perlop/"I/O Operators"> except that it's more readable 
+and can be safely called in an array context but still
+returns just one line.
+
+=item $fh->getlines
+
+This works like <$fh> when called in an array context to
+read all the remaining lines in a file, except that it's more readable.
+It will also croak() if accidentally called in a scalar context.
+
+=back
+
+=head2 The cacheout() Library
+
 The cacheout() function will make sure that there's a filehandle
 open for writing available as the pathname you give it.  It automatically
 closes and re-opens files if you exceed your system file descriptor maximum.
+
+=head1 SEE ALSO
+
+L<perlfunc>, 
+L<perlop/"I/O Operators">,
+L<POSIX/"FileHandle">
 
 =head1 BUGS
 
 F<sys/param.h> lies with its C<NOFILE> define on some systems,
 so you may have to set $cacheout::maxopen yourself.
+
+Some of the methods that set variables (like format_name()) don't
+seem to work.
+
+The POSIX functions that create FileHandle methods should be
+in this module instead.
 
 Due to backwards compatibility, all filehandles resemble objects
 of class C<FileHandle>, or actually classes derived from that class.
@@ -53,11 +92,11 @@ class from C<FileHandle> and inherit those methods.
 
 require 5.000;
 use English;
+use Carp;
 use Exporter;
 
 @ISA = qw(Exporter);
 @EXPORT = qw(
-    print
     autoflush
     output_field_separator
     output_record_separator
@@ -70,6 +109,12 @@ use Exporter;
     format_top_name
     format_line_break_characters
     format_formfeed
+
+    print
+    printf
+    getline
+    getlines
+
     cacheout
 );
 
@@ -77,6 +122,24 @@ sub print {
     local($this) = shift;
     print $this @_;
 }
+
+sub printf {
+    local($this) = shift;
+    printf $this @_;
+}
+
+sub getline {
+    local($this) = shift;
+    croak "usage: FileHandle::getline()" if @_;
+    return scalar <$this>;
+} 
+
+sub getlines {
+    local($this) = shift;
+    croak "usage: FileHandle::getline()" if @_;
+    croak "can't call FileHandle::getlines in a scalar context" if wantarray;
+    return <$this>;
+} 
 
 sub autoflush {
     local($old) = select($_[0]);

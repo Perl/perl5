@@ -53,13 +53,17 @@ name without fully qualifying it.
 
 =item C<strict subs>
 
-This disables the poetry optimization,
-generating a compile-time error if you 
-try to use a bareword identifier that's not a subroutine.
+This disables the poetry optimization, generating a compile-time error if
+you try to use a bareword identifier that's not a subroutine, unless it
+appears in curly braces or on the left hand side of the "=>" symbol.
+
 
     use strict 'subs';
     $SIG{PIPE} = Plumber;   	# blows up
-    $SIG{"PIPE"} = "Plumber"; 	# just fine
+    $SIG{PIPE} = "Plumber"; 	# just fine: bareword in curlies always ok
+    $SIG{PIPE} = \&Plumber; 	# preferred form
+
+
 
 =back
 

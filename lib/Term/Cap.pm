@@ -1,138 +1,250 @@
-# Term::Cap.pm -- Termcap interface routines
 package Term::Cap;
+use Carp;
 
-# Converted to package on 25 Feb 1994 <sanders@bsdi.com>
-#
-# Usage:
-#	require 'ioctl.pl';
-#	ioctl(TTY,$TIOCGETP,$sgtty);
-#	($ispeed,$ospeed) = unpack('cc',$sgtty);
-#
-#	require Term::Cap;
-#
-#	$term = Tgetent Term::Cap { TERM => undef, OSPEED => $ospeed };
-#		sets $term->{'_cm'}, etc.
-#	$this->Trequire(qw/ce ku kd/);
-#		die unless entries are defined for the terminal
-#	$term->Tgoto('cm', $col, $row, $FH);
-#	$term->Tputs('dl', $cnt = 1, $FH);
-#	$this->Tpad($string, $cnt = 1, $FH);
-#		processes a termcap string and adds padding if needed
-#		if $FH is undefined these just return the string
-#
-# CHANGES:
-#	Converted to package
-#	Allows :tc=...: in $ENV{'TERMCAP'} (flows to default termcap file)
-#	Now die's properly if it can't open $TERMCAP or if the eval $loop fails
-#	Tputs() results are cached (use Tgoto or Tpad to avoid)
-#	Tgoto() will do output if $FH is passed (like Tputs without caching)
-#	Supports POSIX termios speeds and old style speeds
-#	Searches termcaps properly (TERMPATH, etc)
-#	The output routines are optimized for cached Tputs().
-#	$this->{_xx} is the raw termcap data and $this->{xx} is a
-#	    cached and padded string for count == 1.
-#
+# Last updated: Thu Dec 14 20:02:42 CST 1995 by sanders@bsdi.com
 
-# internal routines
-sub getenv { defined $ENV{$_[0]} ? $ENV{$_[0]} : ''; }
-sub termcap_path {
-    local @termcap_path = ('/etc/termcap', '/usr/share/misc/termcap');
-    local $v;
-    if ($v = getenv(TERMPATH)) {
-	# user specified path
-	@termcap_path = split(':', $v);
-    } else {
-	# default path
-	@termcap_path = ('/etc/termcap', '/usr/share/misc/termcap');
-	$v = getenv(HOME);
-	unshift(@termcap_path, $v . '/.termcap') if $v;
+# TODO:
+# support Berkeley DB termcaps
+# should probably be a .xs module
+# force $FH into callers package?
+# keep $FH in object at Tgetent time?
+
+=head1 NAME
+
+Term::Cap - Perl termcap interface
+
+=head1 SYNOPSIS
+
+    require Term::Cap;
+    $terminal = Tgetent Term::Cap { TERM => undef, OSPEED => $ospeed };
+    $terminal->Trequire(qw/ce ku kd/);
+    $terminal->Tgoto('cm', $col, $row, $FH);
+    $terminal->Tputs('dl', $count, $FH);
+    $terminal->Tpad($string, $count, $FH);
+
+=head1 DESCRIPTION
+
+These are low-level functions to extract and use capabilities from
+a terminal capability (termcap) database.
+
+The B<Tgetent> function extracts the entry of the specified terminal
+type I<TERM> (defaults to the environment variable I<TERM>) from the
+database.
+
+It will look in the environment for a I<TERMCAP> variable.  If
+found, and the value does not begin with a slash, and the terminal
+type name is the same as the environment string I<TERM>, the
+I<TERMCAP> string is used instead of reading a termcap file.  If
+it does begin with a slash, the string is used as a path name of
+the termcap file to search.  If I<TERMCAP> does not begin with a
+slash and name is different from I<TERM>, B<Tgetent> searches the
+files F<$HOME/.termcap>, F</etc/termcap>, and F</usr/share/misc/termcap>,
+in that order, unless the environment variable I<TERMPATH> exists,
+in which case it specifies a list of file pathnames (separated by
+spaces or colons) to be searched B<instead>.  Whenever multiple
+files are searched and a tc field occurs in the requested entry,
+the entry it names must be found in the same file or one of the
+succeeding files.  If there is a C<:tc=...:> in the I<TERMCAP>
+environment variable string it will continue the search in the
+files as above.
+
+I<OSPEED> is the terminal output bit rate (often mistakenly called
+the baud rate).  I<OSPEED> can be specified as either a POSIX
+termios/SYSV termio speeds (where 9600 equals 9600) or an old
+BSD-style speeds (where 13 equals 9600).
+
+B<Tgetent> returns a blessed object reference which the user can
+then use to send the control strings to the terminal using B<Tputs>
+and B<Tgoto>.  It calls C<croak> on failure.
+
+B<Tgoto> decodes a cursor addressing string with the given parameters.
+
+The output strings for B<Tputs> are cached for counts of 1 for performance.
+B<Tgoto> and B<Tpad> do not cache.  C<$self-E<gt>{_xx}> is the raw termcap
+data and C<$self-E<gt>{xx}> is the cached version.
+
+    print $terminal->Tpad($self->{_xx}, 1);
+
+B<Tgoto>, B<Tputs>, and B<Tpad> return the string and will also
+output the string to $FH if specified.
+
+The extracted termcap entry is available in the object
+as C<$self-E<gt>{TERMCAP}>.
+
+=head1 EXAMPLES
+
+    # Get terminal output speed
+    require POSIX;
+    my $termios = new POSIX::Termios;
+    $termios->getattr;
+    my $ospeed = $termios->getospeed;
+
+    # Old-style ioctl code to get ospeed:
+    #     require 'ioctl.pl';
+    #     ioctl(TTY,$TIOCGETP,$sgtty);
+    #     ($ispeed,$ospeed) = unpack('cc',$sgtty);
+
+    # allocate and initialize a terminal structure
+    $terminal = Tgetent Term::Cap { TERM => undef, OSPEED => $ospeed };
+
+    # require certain capabilities to be available
+    $terminal->Trequire(qw/ce ku kd/);
+
+    # Output Routines, if $FH is undefined these just return the string
+
+    # Tgoto does the % expansion stuff with the given args
+    $terminal->Tgoto('cm', $col, $row, $FH);
+
+    # Tputs doesn't do any % expansion.
+    $terminal->Tputs('dl', $count = 1, $FH);
+
+=cut
+
+# Returns a list of termcap files to check.
+sub termcap_path { ## private
+    my @termcap_path;
+    # $TERMCAP, if it's a filespec
+    push(@termcap_path, $ENV{TERMCAP}) if $ENV{TERMCAP} =~ /^\//;
+    if ($ENV{TERMPATH}) {
+	# Add the users $TERMPATH
+	push(@termcap_path, split(/(:|\s+)/, $ENV{TERMPATH}))
     }
-    # we always search TERMCAP first
-    $v = getenv(TERMCAP);
-    unshift(@termcap_path, $v) if $v =~ /^\//;
+    else {
+	# Defaults
+	push(@termcap_path,
+	    $ENV{'HOME'} . '/.termcap',
+	    '/etc/termcap',
+	    '/usr/share/misc/termcap',
+	);
+    }
+    # return the list of those termcaps that exist
     grep(-f, @termcap_path);
 }
 
-sub Tgetent {
-    local($type) = shift;
-    local($this) = @_;
-    local($TERM,$TERMCAP,$term,$entry,$cap,$loop,$field,$entry,$_);
+sub Tgetent { ## public -- static method
+    my $class = shift;
+    my $self = bless shift, $class;
+    my($term,$cap,$search,$field,$max,$tmp_term,$TERMCAP);
+    local($termpat,$state,$first,$entry);	# used inside eval
+    local $_;
 
-    warn "Tgetent: no ospeed set\n" unless $this->{OSPEED} > 0;
-    $this->{DECR} = 10000 / $this->{OSPEED} if $this->{OSPEED} > 50;
-    $term = $TERM = $this->{TERM} =
-	$this->{TERM} || getenv(TERM) || die "Tgetent: TERM not set\n";
-
-    $TERMCAP = getenv(TERMCAP);
-    $TERMCAP = '' if $TERMCAP =~ m:^/: || $TERMCAP !~ /(^|\|)$TERM[:\|]/;
-    local @termcap_path = &termcap_path;
-    die "Tgetent: Can't find a valid termcap file\n"
-	unless @termcap_path || $TERMCAP;
-
-    # handle environment TERMCAP, setup for continuation if needed
-    $entry = $TERMCAP;
-    $entry =~ s/:tc=([^:]+):/:/ && ($TERM = $1);
-    if ($TERMCAP eq '' || $1) {				# the search goes on
-	local $first = $TERMCAP eq '' ? 1 : 0;		# make it pretty
-	local $max = 32;				# max :tc=...:'s
-	local $state = 1;				# 0 == finished
-							# 1 == next file
-							# 2 == search again
-	do {
-	    if ($state == 1) {
-		$TERMCAP = shift @termcap_path
-		    || die "Tgetent: failed lookup on $TERM\n";
-	    } else {
-		$max-- || die "Tgetent: termcap loop at $TERM\n";
-		$state = 1;				# back to default state
-	    }
-
-	    open(TERMCAP,"< $TERMCAP\0") || die "Tgetent: $TERMCAP: $!\n";
-	    # print STDERR "Trying... $TERMCAP\n";
-	    $loop = "
-		while (<TERMCAP>) {
-		    next if /^\t/;
-		    next if /^#/;
-		    if (/(^|\\|)${TERM}[:\\|]/) {
-			chop;
-			s/^[^:]*:// unless \$first++;
-			\$state = 0;
-			while (chop eq '\\\\') {
-			    \$_ .= <TERMCAP>;
-			    chop;
-			}
-			\$_ .= ':';
-			last;
-		    }
-		}
-		\$entry .= \$_;
-	    ";
-	    eval $loop;
-	    die $@ if $@;
-	    #print STDERR "$TERM: $_\n--------\n";	# DEBUG
-	    close TERMCAP;
-	    # If :tc=...: found then search this file again
-	    $entry =~ s/:tc=([^:]+):/:/ && ($TERM = $1, $state = 2);
-	} while $state != 0;
+    # Compute PADDING factor from OSPEED (to be used by Tpad)
+    if (! $self->{OSPEED}) {
+	carp "OSPEED was not set, defaulting to 9600";
+	$self->{OSPEED} = 9600;
     }
-    die "Tgetent: Can't find $term\n" unless $entry ne '';
-    $entry =~ s/:\s+:/:/g;
-    $this->{TERMCAP} = $entry;
-    #print STDERR $entry, "\n";				# DEBUG
+    if ($self->{OSPEED} < 16) {
+	# delays for old style speeds
+	my @pad = (0,200,133.3,90.9,74.3,66.7,50,33.3,16.7,8.3,5.5,4.1,2,1,.5,.2);
+	$self->{PADDING} = $pad[$self->{OSPEED}];
+    }
+    else {
+	$self->{PADDING} = 10000 / $self->{OSPEED};
+    }
+
+    $self->{TERM} = ($self->{TERM} || $ENV{TERM} || croak "TERM not set");
+    $term = $self->{TERM};	# $term is the term type we are looking for
+
+    # $tmp_term is always the next term (possibly :tc=...:) we are looking for
+    $tmp_term = $self->{TERM};
+    # protect any pattern metacharacters in $tmp_term 
+    $termpat = $tmp_term; $termpat =~ s/(\W)/\\$1/g;
+
+    my $foo = $ENV{TERMCAP};
+
+    # $entry is the extracted termcap entry
+    if (($foo !~ m:^/:) && ($foo =~ m/(^|\|)${termpat}[:|]/)) {
+	$entry = $foo;
+    }
+
+    my @termcap_path = termcap_path;
+    croak "Can't find a valid termcap file" unless @termcap_path || $entry;
+
+    $state = 1;					# 0 == finished
+						# 1 == next file
+						# 2 == search again
+
+    $first = 0;					# first entry (keeps term name)
+
+    $max = 32;					# max :tc=...:'s
+
+    if ($entry) {
+	# ok, we're starting with $TERMCAP
+	$first++;				# we're the first entry
+	# do we need to continue?
+	if ($entry =~ s/:tc=([^:]+):/:/) {
+	    $tmp_term = $1;
+	    # protect any pattern metacharacters in $tmp_term 
+	    $termpat = $tmp_term; $termpat =~ s/(\W)/\\$1/g;
+	}
+	else {
+	    $state = 0;				# we're already finished
+	}
+    }
+
+    # This is eval'ed inside the while loop for each file
+    $search = q{
+	while ($_ = <TERMCAP>) {
+	    next if /^\\t/ || /^#/;
+	    if ($_ =~ m/(^|\\|)${termpat}[:|]/o) {
+		chomp;
+		s/^[^:]*:// if $first++;
+		$state = 0;
+		while ($_ =~ s/\\\\$//) { $_ .= <TERMCAP>; chomp; }
+		last;
+	    }
+	}
+	$entry .= $_;
+    };
+
+    while ($state != 0) {
+	if ($state == 1) {
+	    # get the next TERMCAP
+	    $TERMCAP = shift @termcap_path
+		|| croak "failed termcap lookup on $tmp_term";
+	}
+	else {
+	    # do the same file again
+	    # prevent endless recursion
+	    $max-- || croak "failed termcap loop at $tmp_term";
+	    $state = 1;		# ok, maybe do a new file next time
+	}
+
+	open(TERMCAP,"< $TERMCAP\0") || croak "open $TERMCAP: $!";
+	eval $search;
+	die $@ if $@;
+	close TERMCAP;
+
+	# If :tc=...: found then search this file again
+	$entry =~ s/:tc=([^:]+):/:/ && ($tmp_term = $1, $state = 2);
+	# protect any pattern metacharacters in $tmp_term 
+	$termpat = $tmp_term; $termpat =~ s/(\W)/\\$1/g;
+    }
+
+    croak "Can't find $term" if $entry eq '';
+    $entry =~ s/:+\s*:+/:/g;				# cleanup $entry
+    $entry =~ s/:+/:/g;					# cleanup $entry
+    $self->{TERMCAP} = $entry;				# save it
+    # print STDERR "DEBUG: $entry = ", $entry, "\n";
 
     # Precompile $entry into the object
+    $entry =~ s/^[^:]*://;
     foreach $field (split(/:[\s:\\]*/,$entry)) {
-	if ($field =~ /^\w\w$/) {
-	    $this->{'_' . $field} = 1 unless defined $this->{'_' . $1};
+	if ($field =~ /^(\w\w)$/) {
+	    $self->{'_' . $field} = 1 unless defined $self->{'_' . $1};
+	    # print STDERR "DEBUG: flag $1\n";
 	}
 	elsif ($field =~ /^(\w\w)\@/) {
-	    $this->{'_' . $1} = "";
+	    $self->{'_' . $1} = "";
+	    # print STDERR "DEBUG: unset $1\n";
 	}
 	elsif ($field =~ /^(\w\w)#(.*)/) {
-	    $this->{'_' . $1} = $2 unless defined $this->{'_' . $1};
+	    $self->{'_' . $1} = $2 unless defined $self->{'_' . $1};
+	    # print STDERR "DEBUG: numeric $1 = $2\n";
 	}
 	elsif ($field =~ /^(\w\w)=(.*)/) {
-	    next if defined $this->{'_' . ($cap = $1)};
+	    # print STDERR "DEBUG: string $1 = $2\n";
+	    next if defined $self->{'_' . ($cap = $1)};
 	    $_ = $2;
 	    s/\\E/\033/g;
 	    s/\\(\d\d\d)/pack('c',oct($1) & 0177)/eg;
@@ -146,47 +258,47 @@ sub Tgetent {
 	    s/\^(.)/pack('c',ord($1) & 31)/eg;
 	    s/\\(.)/$1/g;
 	    s/\377/^/g;
-	    $this->{'_' . $cap} = $_;
+	    $self->{'_' . $cap} = $_;
 	}
-	# else { warn "Tgetent: junk in $term: $field\n"; }
+	# else { carp "junk in $term ignored: $field"; }
     }
-    $this->{'_pc'} = "\0" unless defined $this->{'_pc'};
-    $this->{'_bc'} = "\b" unless defined $this->{'_bc'};
-    $this;
+    $self->{'_pc'} = "\0" unless defined $self->{'_pc'};
+    $self->{'_bc'} = "\b" unless defined $self->{'_bc'};
+    $self;
 }
 
-# delays for old style speeds
-@Tpad = (0,200,133.3,90.9,74.3,66.7,50,33.3,16.7,8.3,5.5,4.1,2,1,.5,.2);
-
-# $term->Tpad($string, $cnt, $FH);
-sub Tpad {
-    local($this, $string, $cnt, $FH) = @_;
-    local($decr, $ms);
+# $terminal->Tpad($string, $cnt, $FH);
+sub Tpad { ## public
+    my $self = shift;
+    my($string, $cnt, $FH) = @_;
+    my($decr, $ms);
 
     if ($string =~ /(^[\d.]+)(\*?)(.*)$/) {
 	$ms = $1;
 	$ms *= $cnt if $2;
 	$string = $3;
-	$decr = $this->{OSPEED} < 50 ? $Tpad[$this->{OSPEED}] : $this->{DECR};
+	$decr = $self->{PADDING};
 	if ($decr > .1) {
 	    $ms += $decr / 2;
-	    $string .= $this->{'_pc'} x ($ms / $decr);
+	    $string .= $self->{'_pc'} x ($ms / $decr);
 	}
     }
     print $FH $string if $FH;
     $string;
 }
 
-# $term->Tputs($cap, $cnt, $FH);
-sub Tputs {
-    local($this, $cap, $cnt, $FH) = @_;
-    local $string;
+# $terminal->Tputs($cap, $cnt, $FH);
+sub Tputs { ## public
+    my $self = shift;
+    my($cap, $cnt, $FH) = @_;
+    my $string;
 
     if ($cnt > 1) {
-	$string = Tpad($this, $this->{'_' . $cap}, $cnt);
+	$string = Tpad($self, $self->{'_' . $cap}, $cnt);
     } else {
-	$string = defined $this->{$cap} ? $this->{$cap} :
-	    ($this->{$cap} = Tpad($this, $this->{'_' . $cap}, 1));
+	# cache result because Tpad can be slow
+	$string = defined $self->{$cap} ? $self->{$cap} :
+	    ($self->{$cap} = Tpad($self, $self->{'_' . $cap}, 1));
     }
     print $FH $string if $FH;
     $string;
@@ -207,15 +319,16 @@ sub Tputs {
 # %n   exclusive-or all parameters with 0140 (Datamedia 2500)
 # %D   Reverse coding (value - 2*(value%16)), no output (Delta Data)
 #
-# $term->Tgoto($cap, $col, $row, $FH);
-sub Tgoto {
-    local($this, $cap, $code, $tmp, $FH) = @_;
-    local $string = $this->{'_' . $cap};
-    local $result = '';
-    local $after = '';
-    local $online = 0;
-    local @tmp = ($tmp,$code);
-    local $cnt = $code;
+# $terminal->Tgoto($cap, $col, $row, $FH);
+sub Tgoto { ## public
+    my $self = shift;
+    my($cap, $code, $tmp, $FH) = @_;
+    my $string = $self->{'_' . $cap};
+    my $result = '';
+    my $after = '';
+    my $online = 0;
+    my @tmp = ($tmp,$code);
+    my $cnt = $code;
 
     while ($string =~ /^([^%]*)%(.)(.*)/) {
 	$result .= $1;
@@ -228,10 +341,10 @@ sub Tgoto {
 	    $tmp = shift(@tmp);
 	    if ($tmp == 0 || $tmp == 4 || $tmp == 10) {
 		if ($online) {
-		    ++$tmp, $after .= $this->{'_up'} if $this->{'_up'};
+		    ++$tmp, $after .= $self->{'_up'} if $self->{'_up'};
 		}
 		else {
-		    ++$tmp, $after .= $this->{'_bc'};
+		    ++$tmp, $after .= $self->{'_bc'};
 		}
 	    }
 	    $result .= sprintf("%c",$tmp);
@@ -269,19 +382,21 @@ sub Tgoto {
 	    return "OOPS";
 	}
     }
-    $string = Tpad($this, $result . $string . $after, $cnt);
+    $string = Tpad($self, $result . $string . $after, $cnt);
     print $FH $string if $FH;
     $string;
 }
 
-# $this->Trequire($cap1, $cap2, ...);
-sub Trequire {
-    local $this = shift;
-    local $_;
-    foreach (@_) {
-	die "Trequire: Terminal does not support: $_\n"
-	    unless defined $this->{'_' . $_} && $this->{'_' . $_};
+# $terminal->Trequire(qw/ce ku kd/);
+sub Trequire { ## public
+    my $self = shift;
+    my($cap,@undefined);
+    foreach $cap (@_) {
+	push(@undefined, $cap)
+	    unless defined $self->{'_' . $cap} && $self->{'_' . $cap};
     }
+    croak "Terminal does not support: (@undefined)" if @undefined;
 }
 
 1;
+

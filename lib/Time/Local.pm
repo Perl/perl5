@@ -6,31 +6,38 @@ use Carp;
 @ISA = qw(Exporter);
 @EXPORT = qw(timegm timelocal);
 
-# timelocal.pl
-#
-# Usage:
-#	$time = timelocal($sec,$min,$hours,$mday,$mon,$year);
-#	$time = timegm($sec,$min,$hours,$mday,$mon,$year);
+=head1 NAME
 
-# These routines are quite efficient and yet are always guaranteed to agree
-# with localtime() and gmtime().  We manage this by caching the start times
-# of any months we've seen before.  If we know the start time of the month,
-# we can always calculate any time within the month.  The start times
-# themselves are guessed by successive approximation starting at the
-# current time, since most dates seen in practice are close to the
-# current date.  Unlike algorithms that do a binary search (calling gmtime
-# once for each bit of the time value, resulting in 32 calls), this algorithm
-# calls it at most 6 times, and usually only once or twice.  If you hit
-# the month cache, of course, it doesn't call it at all.
+Time::Local - efficiently compute tome from local and GMT time
 
-# timelocal is implemented using the same cache.  We just assume that we're
-# translating a GMT time, and then fudge it when we're done for the timezone
-# and daylight savings arguments.  The timezone is determined by examining
-# the result of localtime(0) when the package is initialized.  The daylight
-# savings offset is currently assumed to be one hour.
+=head1 SYNOPSIS
 
-# Both routines return -1 if the integer limit is hit. I.e. for dates
-# after the 1st of January, 2038 on most machines.
+    $time = timelocal($sec,$min,$hours,$mday,$mon,$year);
+    $time = timegm($sec,$min,$hours,$mday,$mon,$year);
+
+=head1 DESCRIPTION
+
+These routines are quite efficient and yet are always guaranteed to agree
+with localtime() and gmtime().  We manage this by caching the start times
+of any months we've seen before.  If we know the start time of the month,
+we can always calculate any time within the month.  The start times
+themselves are guessed by successive approximation starting at the
+current time, since most dates seen in practice are close to the
+current date.  Unlike algorithms that do a binary search (calling gmtime
+once for each bit of the time value, resulting in 32 calls), this algorithm
+calls it at most 6 times, and usually only once or twice.  If you hit
+the month cache, of course, it doesn't call it at all.
+
+timelocal is implemented using the same cache.  We just assume that we're
+translating a GMT time, and then fudge it when we're done for the timezone
+and daylight savings arguments.  The timezone is determined by examining
+the result of localtime(0) when the package is initialized.  The daylight
+savings offset is currently assumed to be one hour.
+
+Both routines return -1 if the integer limit is hit. I.e. for dates
+after the 1st of January, 2038 on most machines.
+
+=cut
 
 @epoch = localtime(0);
 $tzmin = $epoch[2] * 60 + $epoch[1];	# minutes east of GMT

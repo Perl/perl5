@@ -9,7 +9,7 @@ IPC::Open3, open3 - open a process for reading, writing, and error handling
 
 =head1 SYNOPSIS
 
-    $pid = open3('WTRFH', 'RDRFH', 'ERRFH' 
+    $pid = open3(\*WTRFH, \*RDRFH, \*ERRFH 
 		    'some cmd and args', 'optarg', ...);
 
 =head1 DESCRIPTION
@@ -23,6 +23,11 @@ If WTRFH begins with "<&", then WTRFH will be closed in the parent, and
 the child will read from it directly.  If RDRFH or ERRFH begins with
 ">&", then the child will send output directly to that file handle.  In both
 cases, there will be a dup(2) instead of a pipe(2) made.
+
+If you try to read from the child's stdout writer and their stderr
+writer, you'll have problems with blocking, which means you'll
+want to use select(), which means you'll have to use sysread() instead
+of normal stuff.
 
 All caveats from open2() continue to apply.  See L<open2> for details.
 
@@ -78,9 +83,9 @@ sub open3 {
 
     # force unqualified filehandles into callers' package
     my($package) = caller;
-    $dad_wtr =~ s/^[^:]+$/$package\:\:$&/;
-    $dad_rdr =~ s/^[^:]+$/$package\:\:$&/;
-    $dad_err =~ s/^[^:]+$/$package\:\:$&/;
+    $dad_wtr =~ s/^[^:]+$/$package\:\:$&/ unless ref $dad_wtr;
+    $dad_rdr =~ s/^[^:]+$/$package\:\:$&/ unless ref $dad_rdr;
+    $dad_err =~ s/^[^:]+$/$package\:\:$&/ unless ref $dad_err;
 
     my($kid_rdr) = ++$fh;
     my($kid_wtr) = ++$fh;

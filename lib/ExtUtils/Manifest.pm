@@ -27,7 +27,8 @@ C<ExtUtils::Manifest::manicopy($read,$target,$how);>
 =head1 DESCRIPTION
 
 Mkmanifest() writes all files in and below the current directory to a
-file named C<MANIFEST> in the current directory. It works similar to
+file named in the global variable $ExtUtils::Manifest::MANIFEST (which
+defaults to C<MANIFEST>) in the current directory. It works similar to
 
     find . -print
 
@@ -89,6 +90,17 @@ expressions should appear one on each line. A typical example:
 C<&mkmanifest>, C<&manicheck>, C<&filecheck>, C<&fullcheck>,
 C<&maniread>, and C<&manicopy> are exportable.
 
+=head1 GLOBAL VARIABLES
+
+C<$ExtUtils::Manifest::MANIFEST> defaults to C<MANIFEST>. Changing it
+results in both a different C<MANIFEST> and a different
+C<MANIFEST.SKIP> file. This is useful if you want to maintain
+different distributions for different audiences (say a user version
+and a developer version including RCS).
+
+<$ExtUtils::Manifest::Quiet> defaults to 0. If set to a true value,
+all functions act silently.
+
 =head1 DIAGNOSTICS
 
 All diagnostic output is sent to C<STDERR>.
@@ -117,6 +129,10 @@ to MANIFEST. $Verbose is set to 1 by default.
 
 =back
 
+=head1 SEE ALSO
+
+L<ExtUtils::MakeMaker> which has handy targets for most of the functionality.
+
 =head1 AUTHOR
 
 Andreas Koenig F<E<lt>koenig@franz.ww.TU-Berlin.DEE<gt>>
@@ -136,9 +152,11 @@ $Debug = 0;
 $Verbose = 1;
 $Is_VMS = $Config{'osname'} eq 'VMS';
 
-$VERSION = $VERSION = substr(q$Revision: 1.17 $,10,4);
+$VERSION = $VERSION = substr(q$Revision: 1.18 $,10,4);
 
 $Quiet = 0;
+
+$MANIFEST = 'MANIFEST';
 
 # Really cool fix from Ilya :)
 unless (defined $Config{d_link}) {
@@ -150,8 +168,8 @@ sub mkmanifest {
     my $read = maniread() or $manimiss++;
     $read = {} if $manimiss;
     local *M;
-    rename "MANIFEST", "MANIFEST.bak" unless $manimiss;
-    open M, ">MANIFEST" or die "Could not open MANIFEST: $!";
+    rename $MANIFEST, "$MANIFEST.bak" unless $manimiss;
+    open M, ">$MANIFEST" or die "Could not open $MANIFEST: $!";
     my $matches = _maniskip();
     my $found = manifind();
     my($key,$val,$file,%all);
@@ -159,7 +177,7 @@ sub mkmanifest {
     foreach $file (sort keys %all) {
 	next if &$matches($file);
 	if ($Verbose){
-	    warn "Added to MANIFEST: $file\n" unless exists $read->{$file};
+	    warn "Added to $MANIFEST: $file\n" unless exists $read->{$file};
 	}
 	my $text = $all{$file};
 	($file,$text) = split(/\s+/,$text,2) if $Is_VMS;
@@ -205,7 +223,7 @@ sub _manicheck {
     if ($arg & 1){
 	my $found = manifind();
 	foreach $file (sort keys %$read){
-	    warn "Debug: manicheck checking from MANIFEST $file\n" if $Debug;
+	    warn "Debug: manicheck checking from $MANIFEST $file\n" if $Debug;
 	    unless ( exists $found->{$file} ) {
 		warn "No such file: $file\n" unless $Quiet;
 		push @missfile, $file;
@@ -224,7 +242,7 @@ sub _manicheck {
 	    }
 	    warn "Debug: manicheck checking from disk $file\n" if $Debug;
 	    unless ( exists $read->{$file} ) {
-		warn "Not in MANIFEST: $file\n" unless $Quiet;
+		warn "Not in $MANIFEST: $file\n" unless $Quiet;
 		push @missentry, $file;
 	    }
 	}
@@ -234,7 +252,7 @@ sub _manicheck {
 
 sub maniread {
     my ($mfile) = @_;
-    $mfile = "MANIFEST" unless defined $mfile;
+    $mfile = $MANIFEST unless defined $mfile;
     my $read = {};
     local *M;
     unless (open M, $mfile){
@@ -255,7 +273,7 @@ sub _maniskip {
     my ($mfile) = @_;
     my $matches = sub {0};
     my @skip ;
-    my $mfile = "MANIFEST.SKIP" unless defined $mfile;
+    my $mfile = "$MANIFEST.SKIP" unless defined $mfile;
     local *M;
     return $matches unless -f $mfile;
     open M, $mfile or return $matches;

@@ -226,15 +226,16 @@ statement in that block is true.  While this "feature" continues to work in
 version 5, it has been deprecated, so please change any occurrences of "if BLOCK" to
 "if (do BLOCK)".
 
-=head2 For and Foreach
+=head2 For Loops
 
-Perl's C-style C<for> loop works exactly like the corresponding C<while> loop:
+Perl's C-style C<for> loop works exactly like the corresponding C<while> loop;
+that means that this:
 
     for ($i = 1; $i < 10; $i++) {
 	...
     }
 
-is the same as
+is the same as this:
 
     $i = 1;
     while ($i < 10) {
@@ -242,6 +243,20 @@ is the same as
     } continue {
 	$i++;
     }
+
+Besides the normal array index looping, C<for> can lend itself
+to many other interesting applications.  Here's one that avoids the
+problem you get into if you explicitly test for end-of-file on 
+an interactive file descriptor causing your program to appear to 
+hang.
+
+    $on_a_tty = -t STDIN && -t STDOUT;
+    sub prompt { print "yes? " if $on_a_tty }
+    for ( prompt(); <STDIN>; prompt() ) {
+	# do something
+    } 
+
+=head2 Foreach Loops
 
 The C<foreach> loop iterates over a normal list value and sets the
 variable VAR to be each element of the list in turn.  The variable is
@@ -286,26 +301,26 @@ Here's how a C programmer might code up a particular algorithm in Perl:
 	    }
 	    $ary1[$i] += $ary2[$j];
 	}
+	# this is where that last takes me
     }
 
 Whereas here's how a Perl programmer more confortable with the idiom might
-do it this way:
+do it:
 
-    OUTER: foreach $i (@ary1) { 
-    INNER:   foreach $j (@ary2) {
-		next OUTER if $i > $j;
-		$i += $j;
+    OUTER: foreach $wid (@ary1) { 
+    INNER:   foreach $jet (@ary2) {
+		next OUTER if $wid > $jet;
+		$wid += $jet;
 	     } 
 	  } 
 
-See how much easier this is?  It's cleaner, safer, and faster.
-It's cleaner because it's less noisy.
-It's safer because if code gets added
+See how much easier this is?  It's cleaner, safer, and faster.  It's
+cleaner because it's less noisy.  It's safer because if code gets added
 between the inner and outer loops later, you won't accidentally excecute
 it because you've explicitly asked to iterate the other loop rather than
-merely terminating the inner one.  
-And it's faster because Perl exececute C<foreach> statement more 
-rapidly than it would the equivalent C<for> loop.
+merely terminating the inner one.  And it's faster because Perl executes a
+C<foreach> statement more rapidly than it would the equivalent C<for>
+loop.
 
 =head2 Basic BLOCKs and Switch Statements
 
@@ -335,7 +350,7 @@ above, you could write
 	$nothing = 1;
     }
 
-(That's actually not as strange as it looks one you realize that you can
+(That's actually not as strange as it looks once you realize that you can
 use loop control "operators" within an expression,  That's just the normal
 C comma operator.)
 
@@ -399,6 +414,18 @@ a temporary assignment to $_ for convenient matching:
 		die "unknown value for form variable where: `$where'";
 	    } 
 
+Another interesting approach to a switch statement is arrange
+for a C<do> block to return the proper value:
+
+    $amode = do {
+	if     ($flag & O_RDONLY) { "r" } 
+	elsif  ($flag & O_WRONLY) { ($flag & O_APPEND) ? "w" : "a" } 
+	elsif  ($flag & O_RDWR)   {
+	    if ($flag & O_CREAT)  { "w+" }
+	    else                  { ($flag & O_APPEND) ? "r+" : "a+" }
+	}
+    };
+
 =head2 Goto
 
 Although not for the faint of heart, Perl does support a C<goto> statement.
@@ -433,3 +460,47 @@ In almost cases like this, it's usually a far, far better idea to use the
 structured control flow mechanisms of C<next>, C<last>, or C<redo> insetad
 resorting to a C<goto>.  For certain applications, the catch and throw pair of
 C<eval{}> and die() for exception processing can also be a prudent approach.
+
+=head2 PODs: Embedded Documentation
+
+Perl has a mechanism for intermixing documentation with source code.
+If while expecting the beginning of a new statement, the compiler
+encounters a line that begins with an equal sign and a word, like this
+
+    =head1 Here There Be Pods!
+
+Then that text and all remaining text up through and including a line
+beginning with C<=cut> will be ignored.  The format of the intervening
+text is described in L<perlpod>. 
+
+This allows you to intermix your source code
+and your documentation text freely, as in
+
+    =item snazzle($)
+
+    The snazzle() function will behave in the most spectacular 
+    form that you can possibly imagine, not even excepting
+    cybernetic pyrotechnics.
+
+    =cut back to the compiler, nuff of this pod stuff!
+
+    sub snazzle($) {
+	my $thingie = shift;
+	.........
+    } 
+
+Note that pod translators should only look at paragraphs beginning 
+with a pod diretive (it makes parsing easier), whereas the compiler
+actually knows to look for pod escapes even in the middle of a 
+paragraph.  This means that the following secret stuff will be
+ignored by both the compiler and the translators.
+
+    $a=3;
+    =secret stuff
+     warn "Neither POD nor CODE!?"
+    =cut back
+    print "got $a\n";
+
+You probably shouldn't rely upon the warn() being podded out forever.
+Not all pod translators are well-behaved in this regard, and perhaps
+the compiler will become pickier.

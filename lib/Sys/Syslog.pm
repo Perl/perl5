@@ -125,7 +125,7 @@ sub syslog {
 	if ($lo_cons) {
 	    if ($pid = fork) {
 		unless ($lo_nowait) {
-		    do {$died = wait;} until $died == $pid || $died < 0;
+		    $died = waitpid($pid, 0);
 		}
 	    }
 	    else {
@@ -147,44 +147,12 @@ sub xlate {
 }
 
 sub connect {
-    $pat = 'S n C4 x8';
-
-    $af_unix = AF_UNIX();
-    $af_inet = AF_INET();
-
-    $stream = SOCK_STREAM();
-    $datagram = SOCK_DGRAM();
-
-    ($name,$aliases,$proto) = getprotobyname('udp');
-    $udp = $proto;
-
-    ($name,$aliase,$port,$proto) = getservbyname('syslog','udp');
-    $syslog = $port;
-
-    if ($myname = hostname()) {
-	($name,$aliases,$addrtype,$length,@addrs) = gethostbyname($myname);
-	croak "Can't lookup $myname" unless $name;
-	@bytes = unpack("C4",$addrs[0]);
-    }
-    else {
-	@bytes = (0,0,0,0);
-    }
-    $this = pack($pat, $af_inet, 0, @bytes);
-
-    if ($host =~ /^\d+\./) {
-	@bytes = split(/\./,$host);
-    }
-    else {
-	($name,$aliases,$addrtype,$length,@addrs) = gethostbyname($host);
-	croak "Can't lookup $host" unless $name;
-	@bytes = unpack("C4",$addrs[0]);
-    }
-    $that = pack($pat,$af_inet,$syslog,@bytes);
-
-    socket(SYSLOG,$af_inet,$datagram,$udp) || croak "socket: $!";
-    bind(SYSLOG,$this) || croak "bind: $!";
-    connect(SYSLOG,$that) || croak "connect: $!";
-
+    my $udp = getprotobyname('udp');
+    my $syslog = getservbyname('syslog','udp');
+    my $this = sockaddr_in($syslog, INADDR_ANY);
+    my $that = sockaddr_in($syslog, inet_aton($host) || croak "Can't lookup $host");
+    socket(SYSLOG,AF_INET,SOCK_DGRAM,$udp) 	     || croak "socket: $!";
+    connect(SYSLOG,$that) 			     || croak "connect: $!";
     local($old) = select(SYSLOG); $| = 1; select($old);
     $connected = 1;
 }

@@ -528,25 +528,84 @@ Here is the output from the code above.
 	untie @h ;
 
 
+=head2 Locking Databases
 
-=head1 CHANGES
+Concurrent access of a read-write database by several parties requires
+them all to use some kind of locking.  Here's an example of Tom's that
+uses the I<fd> method to get the file descriptor, and then a careful
+open() to give something Perl will flock() for you.  Run this repeatedly
+in the background to watch the locks granted in proper order.
 
-=head2 0.1
+    use Fcntl;
+    use DB_File;
+
+    use strict;
+
+    sub LOCK_SH { 1 }
+    sub LOCK_EX { 2 }
+    sub LOCK_NB { 4 }
+    sub LOCK_UN { 8 }
+
+    my($oldval, $fd, $db, %db, $value, $key);
+
+    $key = shift || 'default';
+    $value = shift || 'magic';
+
+    $value .= " $$";
+
+    $db = tie(%db, 'DB_File', '/tmp/foo.db', O_CREAT|O_RDWR, 0644) 
+	    || die "dbcreat /tmp/foo.db $!";
+    $fd = $db->fd;
+    print "$$: db fd is $fd\n";
+    open(DB_FH, "+<&=$fd") || die "dup $!";
+
+
+    unless (flock (DB_FH, LOCK_SH | LOCK_NB)) {
+	print "$$: CONTENTION; can't read during write update!
+		    Waiting for read lock ($!) ....";
+	unless (flock (DB_FH, LOCK_SH)) { die "flock: $!" }
+    } 
+    print "$$: Read lock granted\n";
+
+    $oldval = $db{$key};
+    print "$$: Old value was $oldval\n";
+    flock(DB_FH, LOCK_UN);
+
+    unless (flock (DB_FH, LOCK_EX | LOCK_NB)) {
+	print "$$: CONTENTION; must have exclusive lock!
+		    Waiting for write lock ($!) ....";
+	unless (flock (DB_FH, LOCK_EX)) { die "flock: $!" }
+    } 
+
+    print "$$: Write lock granted\n";
+    $db{$key} = $value;
+    sleep 10;
+
+    flock(DB_FH, LOCK_UN);
+    untie %db;
+    close(DB_FH);
+    print "$$: Updated db to $key=$value\n";
+
+=head1 HISTORY
+
+=over
+
+=item 0.1
 
 First Release.
 
-=head2 0.2
+=item 0.2
 
 When B<DB_File> is opening a database file it no longer terminates the
 process if I<dbopen> returned an error. This allows file protection
 errors to be caught at run time. Thanks to Judith Grass
-<grass@cybercash.com> for spotting the bug.
+E<lt>grass@cybercash.comE<gt> for spotting the bug.
 
-=head2 0.3
+=item 0.3
 
 Added prototype support for multiple btree compare callbacks.
 
-=head2 1.0
+=item 1.0
 
 B<DB_File> has been in use for over a year. To reflect that, the
 version number has been incremented to 1.0.
@@ -556,7 +615,7 @@ Added complete support for multiple concurrent callbacks.
 Using the I<push> method on an empty list didn't work properly. This
 has been fixed.
 
-=head2 1.01
+=item 1.01
 
 Fixed a core dump problem with SunOS.
 
@@ -583,8 +642,10 @@ suggest any enhancements, I would welcome your comments.
 
 =head1 AVAILABILITY
 
-Berkeley DB is available via the hold C<ftp.cs.berkeley.edu> in the
-directory C</ucb/4bsd/db.tar.gz>.  It is I<not> under the GPL.
+Berkeley DB is available at your nearest CPAN archive (see
+L<perlmod/"CPAN"> for a list) in F<src/misc/db.1.85.tar.gz>, or via the
+host F<ftp.cs.berkeley.edu> in F</ucb/4bsd/db.tar.gz>.  It is I<not> under
+the GPL.
 
 =head1 SEE ALSO
 

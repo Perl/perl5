@@ -2,6 +2,19 @@
 
 POSIX - Perl interface to IEEE Std 1003.1
 
+=head1 SYNOPSIS
+
+    use POSIX;
+    use POSIX qw(setsid);
+    use POSIX qw(:errno_h :fcntl_h);
+
+    printf "EINTR is %d\n", EINTR;
+
+    $sess_id = POSIX::setsid();
+
+    $fd = POSIX::open($path, O_CREAT|O_EXCL|O_WRONLY, 0644);
+	# note: that's a filedescriptor, *NOT* a filehandle
+
 =head1 DESCRIPTION
 
 The POSIX module permits you to access all (or nearly all) the standard
@@ -21,15 +34,6 @@ The second section describes some classes for signal objects, TTY objects,
 and other miscellaneous objects.  The remaining sections list various
 constants and macros in an organization which roughly follows IEEE Std
 1003.1b-1993.
-
-=head1 EXAMPLES
-
-    printf "EINTR is %d\n", EINTR;
-
-    $sess_id = POSIX::setsid();
-
-    $fd = POSIX::open($path, O_CREAT|O_EXCL|O_WRONLY, 0644);
-	# note: that's a filedescriptor, *NOT* a filehandle
 
 =head1 NOTE
 
@@ -99,6 +103,7 @@ This is identical to the C function C<asin()>.
 
 =item assert
 
+Unimplemented.
 
 =item atan
 
@@ -158,6 +163,11 @@ This is identical to the C function C<clock()>.
 
 =item close
 
+Close the file.  This uses file descriptors such as those obtained by calling
+C<POSIX::open>.
+
+	$fd = POSIX::open( "foo", &POSIX::O_RDONLY );
+	POSIX::close( $fd );
 
 Returns C<undef> on failure.
 
@@ -175,10 +185,15 @@ This is identical to the C function C<cosh()>.
 
 =item creat
 
+Create a new file.  This returns a file descriptor like the ones returned by
+C<POSIX::open>.  Use C<POSIX::close> to close the file.
+
+	$fd = POSIX::creat( "foo", 0611 );
+	POSIX::close( $fd );
 
 =item ctermid
 
-Generates the path name for controlling terminal.
+Generates the path name for the controlling terminal.
 
 	$path = POSIX::ctermid();
 
@@ -202,11 +217,19 @@ div() is C-specific.
 
 =item dup
 
+This is similar to the C function C<dup()>.
+
+This uses file descriptors such as those obtained by calling
+C<POSIX::open>.
 
 Returns C<undef> on failure.
 
 =item dup2
 
+This is similar to the C function C<dup2()>.
+
+This uses file descriptors such as those obtained by calling
+C<POSIX::open>.
 
 Returns C<undef> on failure.
 
@@ -310,6 +333,14 @@ This is identical to Perl's builtin C<fork()> function.
 
 =item fpathconf
 
+Retrieves the value of a configurable limit on a file or directory.  This
+uses file descriptors such as those obtained by calling C<POSIX::open>.
+
+The following will determine the maximum length of the longest allowable
+pathname on the filesystem which holds C</tmp/foo>.
+
+	$fd = POSIX::open( "/tmp/foo", &POSIX::O_RDONLY );
+	$path_max = POSIX::fpathconf( $fd, &POSIX::_PC_PATH_MAX );
 
 Returns C<undef> on failure.
 
@@ -339,6 +370,9 @@ freopen() is C-specific--use open instead.
 
 =item frexp
 
+Return the mantissa and exponent of a floating-point number.
+
+	($mantissa, $exponent) = POSIX::frexp( 3.14 );
 
 =item fscanf
 
@@ -354,6 +388,12 @@ Use method C<FileHandle::setpos()> instead.
 
 =item fstat
 
+Get file status.  This uses file descriptors such as those obtained by
+calling C<POSIX::open>.  The data returned is identical to the data from
+Perl's builtin C<stat> function.
+
+	$fd = POSIX::open( "foo", &POSIX::O_RDONLY );
+	@stats = POSIX::fstat( $fd );
 
 =item ftell
 
@@ -441,9 +481,13 @@ This is identical to Perl's builtin C<gmtime()> function.
 
 =item isalnum
 
+This is identical to the C function, except that it can apply to a single
+character or to a whole string.
 
 =item isalpha
 
+This is identical to the C function, except that it can apply to a single
+character or to a whole string.
 
 =item isatty
 
@@ -452,30 +496,48 @@ to a tty.
 
 =item iscntrl
 
+This is identical to the C function, except that it can apply to a single
+character or to a whole string.
 
 =item isdigit
 
+This is identical to the C function, except that it can apply to a single
+character or to a whole string.
 
 =item isgraph
 
+This is identical to the C function, except that it can apply to a single
+character or to a whole string.
 
 =item islower
 
+This is identical to the C function, except that it can apply to a single
+character or to a whole string.
 
 =item isprint
 
+This is identical to the C function, except that it can apply to a single
+character or to a whole string.
 
 =item ispunct
 
+This is identical to the C function, except that it can apply to a single
+character or to a whole string.
 
 =item isspace
 
+This is identical to the C function, except that it can apply to a single
+character or to a whole string.
 
 =item isupper
 
+This is identical to the C function, except that it can apply to a single
+character or to a whole string.
 
 =item isxdigit
 
+This is identical to the C function, except that it can apply to a single
+character or to a whole string.
 
 =item kill
 
@@ -499,6 +561,32 @@ This is identical to Perl's builtin C<link()> function.
 
 =item localeconv
 
+Get numeric formatting information.  Returns a reference to a hash
+containing the current locale formatting values.
+
+The database for the B<de> (Deutsch or German) locale.
+
+	$loc = POSIX::setlocale( &POSIX::LC_ALL, "de" );
+	print "Locale = $loc\n";
+	$lconv = POSIX::localeconv();
+	print "decimal_point	= ", $lconv->{decimal_point},	"\n";
+	print "thousands_sep	= ", $lconv->{thousands_sep},	"\n";
+	print "grouping	= ", $lconv->{grouping},	"\n";
+	print "int_curr_symbol	= ", $lconv->{int_curr_symbol},	"\n";
+	print "currency_symbol	= ", $lconv->{currency_symbol},	"\n";
+	print "mon_decimal_point = ", $lconv->{mon_decimal_point}, "\n";
+	print "mon_thousands_sep = ", $lconv->{mon_thousands_sep}, "\n";
+	print "mon_grouping	= ", $lconv->{mon_grouping},	"\n";
+	print "positive_sign	= ", $lconv->{positive_sign},	"\n";
+	print "negative_sign	= ", $lconv->{negative_sign},	"\n";
+	print "int_frac_digits	= ", $lconv->{int_frac_digits},	"\n";
+	print "frac_digits	= ", $lconv->{frac_digits},	"\n";
+	print "p_cs_precedes	= ", $lconv->{p_cs_precedes},	"\n";
+	print "p_sep_by_space	= ", $lconv->{p_sep_by_space},	"\n";
+	print "n_cs_precedes	= ", $lconv->{n_cs_precedes},	"\n";
+	print "n_sep_by_space	= ", $lconv->{n_sep_by_space},	"\n";
+	print "p_sign_posn	= ", $lconv->{p_sign_posn},	"\n";
+	print "n_sign_posn	= ", $lconv->{n_sign_posn},	"\n";
 
 =item localtime
 
@@ -518,6 +606,11 @@ longjmp() is C-specific: use die instead.
 
 =item lseek
 
+Move the read/write file pointer.  This uses file descriptors such as
+those obtained by calling C<POSIX::open>.
+
+	$fd = POSIX::open( "foo", &POSIX::O_RDONLY );
+	$off_t = POSIX::lseek( $fd, 0, &POSIX::SEEK_SET );
 
 Returns C<undef> on failure.
 
@@ -527,12 +620,15 @@ malloc() is C-specific.
 
 =item mblen
 
+This is identical to the C function C<mblen()>.
 
 =item mbstowcs
 
+This is identical to the C function C<mbstowcs()>.
 
 =item mbtowc
 
+This is identical to the C function C<mbtowc()>.
 
 =item memchr
 
@@ -560,19 +656,40 @@ This is identical to Perl's builtin C<mkdir()> function.
 
 =item mkfifo
 
+This is similar to the C function C<mkfifo()>.
 
 Returns C<undef> on failure.
 
 =item mktime
 
+Convert date/time info to a calendar time.
+
+Synopsis:
+
+	mktime(sec, min, hour, mday, mon, year, wday = 0, yday = 0, isdst = 0)
+
+The month (C<mon>), weekday (C<wday>), and yearday (C<yday>) begin at zero.
+I.e. January is 0, not 1; Sunday is 0, not 1; January 1st is 0, not 1.  The
+year (C<year>) is given in years since 1900.  I.e. The year 1995 is 95; the
+year 2001 is 101.  Consult your system's C<mktime()> manpage for details
+about these and the other arguments.
+
+Calendar time for December 12, 1995, at 10:30 am.
+
+	$time_t = POSIX::mktime( 0, 30, 10, 12, 11, 95 );
+	print "Date = ", POSIX::ctime($time_t);
 
 Returns C<undef> on failure.
 
 =item modf
 
+Return the integral and fractional parts of a floating-point number.
+
+	($fractional, $integral) = POSIX::modf( 3.14 );
 
 =item nice
 
+This is similar to the C function C<nice()>.
 
 Returns C<undef> on failure.
 
@@ -582,11 +699,36 @@ offsetof() is C-specific.
 
 =item open
 
+Open a file for reading for writing.  This returns file descriptors, not
+Perl filehandles.  Use C<POSIX::close> to close the file.
+
+Open a file read-only with mode 0666.
+
+	$fd = POSIX::open( "foo" );
+
+Open a file for read and write.
+
+	$fd = POSIX::open( "foo", &POSIX::O_RDWR );
+
+Open a file for write, with truncation.
+
+	$fd = POSIX::open( "foo", &POSIX::O_WRONLY | &POSIX::O_TRUNC );
+
+Create a new file with mode 0640.  Set up the file for writing.
+
+	$fd = POSIX::open( "foo", &POSIX::O_CREAT | &POSIX::O_WRONLY, 0640 );
 
 Returns C<undef> on failure.
 
 =item opendir
 
+Open a directory for reading.
+
+	$dir = POSIX::opendir( "/tmp" );
+	@files = POSIX::readdir( $dir );
+	POSIX::closedir( $dir );
+
+Returns C<undef> on failure.
 
 =item pathconf
 
@@ -611,6 +753,12 @@ This is identical to the C function C<perror()>.
 
 =item pipe
 
+Create an interprocess channel.  This returns file descriptors like those
+returned by C<POSIX::open>.
+
+	($fd0, $fd1) = POSIX::pipe();
+	POSIX::write( $fd0, "hello", 5 );
+	POSIX::read( $fd1, $buf, 5 );
 
 =item pow
 
@@ -648,6 +796,12 @@ rand() is non-portable, use Perl's rand instead.
 
 =item read
 
+Read from a file.  This uses file descriptors such as those obtained by
+calling C<POSIX::open>.  If the buffer C<$buf> is not large enough for the
+read then Perl will extend it to make room for the request.
+
+	$fd = POSIX::open( "foo", &POSIX::O_RDONLY );
+	$bytes = POSIX::read( $fd, $buf, 3 );
 
 Returns C<undef> on failure.
 
@@ -701,6 +855,7 @@ The following will set the traditional UNIX system locale behavior.
 
 =item setpgid
 
+This is similar to the C function C<setpgid()>.
 
 Returns C<undef> on failure.
 
@@ -714,6 +869,13 @@ Sets the real user id for this process.
 
 =item sigaction
 
+Detailed signal management.  This uses C<POSIX::SigAction> objects for the
+C<action> and C<oldaction> arguments.  Consult your system's C<sigaction>
+manpage for details.
+
+Synopsis:
+
+	sigaction(sig, action, oldaction = 0)
 
 Returns C<undef> on failure.
 
@@ -723,11 +885,25 @@ siglongjmp() is C-specific: use die instead.
 
 =item sigpending
 
+Examine signals that are blocked and pending.  This uses C<POSIX::SigSet>
+objects for the C<sigset> argument.  Consult your system's C<sigpending>
+manpage for details.
+
+Synopsis:
+
+	sigpending(sigset)
 
 Returns C<undef> on failure.
 
 =item sigprocmask
 
+Change and/or examine calling process's signal mask.  This uses
+C<POSIX::SigSet> objects for the C<sigset> and C<oldsigset> arguments.
+Consult your system's C<sigprocmask> manpage for details.
+
+Synopsis:
+
+	sigprocmask(how, sigset, oldsigset = 0)
 
 Returns C<undef> on failure.
 
@@ -737,6 +913,13 @@ sigsetjmp() is C-specific: use eval {} instead.
 
 =item sigsuspend
 
+Install a signal mask and suspend process until signal arrives.  This uses
+C<POSIX::SigSet> objects for the C<signal_mask> argument.  Consult your
+system's C<sigsuspend> manpage for details.
+
+Synopsis:
+
+	sigsuspend(signal_mask)
 
 Returns C<undef> on failure.
 
@@ -754,6 +937,7 @@ This is identical to Perl's builtin C<sleep()> function.
 
 =item sprintf
 
+This is identical to Perl's builtin C<sprintf()> function.
 
 =item sqrt
 
@@ -801,6 +985,22 @@ Returns the error string for the specified errno.
 
 =item strftime
 
+Convert date and time information to string.  Returns the string.
+
+Synopsis:
+
+	strftime(fmt, sec, min, hour, mday, mon, year, wday = 0, yday = 0, isdst = 0)
+
+The month (C<mon>), weekday (C<wday>), and yearday (C<yday>) begin at zero.
+I.e. January is 0, not 1; Sunday is 0, not 1; January 1st is 0, not 1.  The
+year (C<year>) is given in years since 1900.  I.e. The year 1995 is 95; the
+year 2001 is 101.  Consult your system's C<strftime()> manpage for details
+about these and the other arguments.
+
+The string for Tuesday, December 12, 1995.
+
+	$str = POSIX::strftime( "%A, %B %d, %Y", 0, 0, 0, 12, 11, 95, 2 );
+	print "$str\n";
 
 =item strlen
 
@@ -852,6 +1052,9 @@ strtol() is C-specific.
 
 =item strxfrm
 
+String transformation.  Returns the transformed string.
+
+	$dst = POSIX::strxfrm( $src );
 
 =item sysconf
 
@@ -877,16 +1080,19 @@ This is identical to the C function C<tanh()>.
 
 =item tcdrain
 
+This is similar to the C function C<tcdrain()>.
 
 Returns C<undef> on failure.
 
 =item tcflow
 
+This is similar to the C function C<tcflow()>.
 
 Returns C<undef> on failure.
 
 =item tcflush
 
+This is similar to the C function C<tcflush()>.
 
 Returns C<undef> on failure.
 
@@ -896,11 +1102,13 @@ This is identical to the C function C<tcgetpgrp()>.
 
 =item tcsendbreak
 
+This is similar to the C function C<tcsendbreak()>.
 
 Returns C<undef> on failure.
 
 =item tcsetpgrp
 
+This is similar to the C function C<tcsetpgrp()>.
 
 Returns C<undef> on failure.
 
@@ -940,9 +1148,14 @@ This is identical to Perl's builtin C<uc()> function.
 
 =item ttyname
 
+This is identical to the C function C<ttyname()>.
 
 =item tzname
 
+Retrieves the time conversion information from the C<tzname> variable.
+
+	POSIX::tzset();
+	($std, $dst) = POSIX::tzname();
 
 =item tzset
 
@@ -954,6 +1167,9 @@ This is identical to Perl's builtin C<umask()> function.
 
 =item uname
 
+Get name of current operating system.
+
+	($sysname, $nodename, $release, $version, $machine ) = POSIX::uname();
 
 =item ungetc
 
@@ -981,18 +1197,32 @@ vsprintf() is C-specific.
 
 =item wait
 
+This is identical to Perl's builtin C<wait()> function.
 
 =item waitpid
 
+Wait for a child process to change state.  This is identical to Perl's
+builtin C<waitpid()> function.
+
+	$pid = POSIX::waitpid( -1, &POSIX::WNOHANG );
+	print "status = ", ($? / 256), "\n";
 
 =item wcstombs
 
+This is identical to the C function C<wcstombs()>.
 
 =item wctomb
 
+This is identical to the C function C<wctomb()>.
 
 =item write
 
+Write to a file.  This uses file descriptors such as those obtained by
+calling C<POSIX::open>.
+
+	$fd = POSIX::open( "foo", &POSIX::O_WRONLY );
+	$buf = "hello";
+	$bytes = POSIX::write( $b, $buf, 5 );
 
 Returns C<undef> on failure.
 
@@ -1006,50 +1236,119 @@ Returns C<undef> on failure.
 
 =item new
 
+Open a file and return a Perl filehandle.  The first parameter is the
+filename and the second parameter is the mode.  The mode should be specified
+as C<a> for append, C<w> for write, and E<lt> or C<""> for read.
+
+Open a file for reading.
+
+	$fh = FileHandle->new( "foo", "" );
+	die "Unable to open foo for reading" unless $fh;
+
+Open a file for writing.
+
+	$fh = FileHandle->new( "foo", "w" );
+	die "Unable to open foo for writing" unless $fh;
+
+Use C<FileHandle::close()> to close the file or let the FileHandle object's
+destructor perform the close.
 
 =item clearerr
 
+Resets the error indicator and EOF indicator to zero.
+
+	$fh->clearerr;
 
 =item close
 
+Close the file.
+
+	$fh->close;
 
 =item eof
 
+Tests for end of file.
+
+	if( $fh->eof ){
+		print "end of file\n";
+	}
 
 =item error
 
+Returns non-zero if there has been an error while reading or writing a file.
+
+	if( $fh->error ){
+		print "error\n";
+	}
 
 =item fileno
 
+Returns the integer file descriptor associated with the file.
+
+	$fileno = $fh->fileno;
 
 =item flush
 
+Flush the stream.
+
+	$fh->flush;
 
 Returns C<undef> on failure.
 
 =item getc
 
+Get a character from the stream.
+
+	$ch = $fh->getc;
 
 =item getpos
 
+Retrieve the file pointer position.  The returned value can be used as an
+argument to C<setpos()>.
+
+	$pos = $fh->getpos;
 
 =item gets
 
+Retrieve a line from the open file.
+
+	$line = $fh->gets;
 
 =item new_from_fd
 
+Open a file using a file descriptor.  Return a Perl filehandle.  The first
+parameter should be a file descriptor, which can come from C<POSIX::open()>.
+The second parameter, the mode, should be C<a> for append, C<w> for write,
+and E<lt> or C<""> for read.  The mode should match the mode which was used
+when the file descriptor was created.
+
+	$fd = POSIX::open( "typemap" );
+	$fh = FileHandle->new_from_fd( $fd, "<" );
+	die "FileHandle failed" unless $fh;
 
 =item new_tmpfile
 
+Creates a temporary file, opens it for writing, and returns a Perl
+filehandle.  Consult your system's C<tmpfile()> manpage for details.
+
+	$fh = FileHandle->new_tmpfile;
+	die "FileHandle failed" unless $fh;
 
 =item seek
 
+Reposition file pointer.
+
+	$fh->seek( 2, &POSIX::SEEK_SET );
 
 =item setbuf
 
 
 =item setpos
 
+Set the file pointer position.
+
+	$pos = $fh->getpos;
+	$fh->setpos( $pos );
 
 Returns C<undef> on failure.
 
@@ -1060,6 +1359,9 @@ Returns C<undef> on failure.
 
 =item tell
 
+Returns the current file position, in bytes.
+
+	$pos = $fh->tell;
 
 =item ungetc
 
@@ -1072,8 +1374,17 @@ Returns C<undef> on failure.
 
 =item new
 
-Creates a new SigAction object.  This object will be destroyed automatically
-when it is no longer needed.
+Creates a new C<POSIX::SigAction> object which corresponds to the C
+C<struct sigaction>.  This object will be destroyed automatically when it is
+no longer needed.  The first parameter is the fully-qualified name of a sub
+which is a signal-handler.  The second parameter is a C<POSIX::SigSet>
+object.  The third parameter contains the C<sa_flags>.
+
+	$sigset = POSIX::SigSet->new;
+	$sigaction = POSIX::SigAction->new( 'main::handler', $sigset, &POSIX::SA_NOCLDSTOP );
+
+This C<POSIX::SigAction> object should be used with the C<POSIX::sigaction()>
+function.
 
 =back
 
@@ -1150,6 +1461,15 @@ when it is no longer needed.
 
 =item getattr
 
+Get terminal control attributes.
+
+Obtain the attributes for stdin.
+
+	$termios->getattr()
+
+Obtain the attributes for stdout.
+
+	$termios->getattr( 1 )
 
 Returns C<undef> on failure.
 
@@ -1198,6 +1518,11 @@ Retrieve the output baud rate.
 
 =item setattr
 
+Set terminal control attributes.
+
+Set attributes immediately for stdout.
+
+	$termios->setattr( 1, &POSIX::TCSANOW );
 
 Returns C<undef> on failure.
 
@@ -1448,5 +1773,5 @@ WIFEXITED WEXITSTATUS WIFSIGNALED WTERMSIG WIFSTOPPED WSTOPSIG
 
 =head1 CREATION
 
-This document generated by mkposixman.PL version 951129.
+This document generated by ./mkposixman.PL version 19951212.
 

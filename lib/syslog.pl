@@ -31,7 +31,15 @@ package syslog;
 
 $host = 'localhost' unless $host;	# set $syslog'host to change
 
+if ($] >= 5) {
+    warn "You should 'use Sys::Socket' instead; continuing" # if $^W
+} 
+
 require 'syslog.ph';
+
+ eval 'require Socket' 		|| 
+eval { require "socket.ph" } 	|| 
+       require "sys/socket.ph";
 
 $maskpri = &LOG_UPTO(&LOG_DEBUG);
 
@@ -141,16 +149,16 @@ sub xlate {
 sub connect {
     $pat = 'S n C4 x8';
 
-    $af_unix = 1;
-    $af_inet = 2;
+    $af_unix = &AF_UNIX;
+    $af_inet = &AF_INET;
 
-    $stream = 1;
-    $datagram = 2;
+    $stream = &SOCK_STREAM;
+    $datagram = &SOCK_DGRAM;
 
     ($name,$aliases,$proto) = getprotobyname('udp');
     $udp = $proto;
 
-    ($name,$aliase,$port,$proto) = getservbyname('syslog','udp');
+    ($name,$aliases,$port,$proto) = getservbyname('syslog','udp');
     $syslog = $port;
 
     if (chop($myname = `hostname`)) {

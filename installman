@@ -74,7 +74,7 @@ sub runpod2man {
     # yet. (The user may have set the $install* Configure variables 
     # to point to some temporary home, from which the executable gets
     # installed by occult means.)
-    $pod2man = "../perl -I ../lib ../pod/pod2man";
+    $pod2man = "../perl -I ../lib ../pod/pod2man --section=$manext --official";
 
     &makedir($mandir);
     # Make a list of all the .pm and .pod files in the directory.  We will
@@ -89,8 +89,13 @@ sub runpod2man {
 	$manpage =~ s#\.p(m|od)$##;
 	$manpage =~ s#/#::#g;
 	$manpage = "${mandir}/${manpage}.${manext}";
-	# Print $release $patchlevel stuff?  or should pod2man do that?
 	&cmd("$pod2man $mod > $manpage");
+	if (-z $manpage) {
+	    print STDERR "unlink $manpage\n";
+	    unless ($notify) {
+		unlink($manpage) || warn "cannot unlink $manpage: $!";
+	    } 
+	} 
     }
     chdir "$builddir" || die "Unable to cd back to $builddir directory!\n$!\n";
 }
@@ -116,9 +121,10 @@ sub cmd {
     local($cmd) = @_;
     print STDERR "  $cmd\n";
     unless ($notify) {
-	system $cmd;
-	warn "Command failed!!!\n" if $?;
+	fork ? wait : exec $cmd;
+	warn "Command failed!!\n" if $?;
     }
+    return $? != 0;
 }
 
 sub link {

@@ -1,6 +1,3 @@
-# by David Sundstrom   sunds@asictest.sc.ti.com
-#    Texas Instruments
-
 package Sys::Hostname;
 
 use Carp;
@@ -8,9 +5,31 @@ require Exporter;
 @ISA = qw(Exporter);
 @EXPORT = qw(hostname);
 
-#
-# Try every conceivable way to get hostname.
-# 
+=head1 NAME
+
+Sys::Hostname - Try every conceivable way to get hostname
+
+=head1 SYNOPSIS
+
+    use Sys::Hostname;
+    $host = hostname;
+
+=head1 DESCRIPTION
+
+Attempts several methods of getting the system hostname and
+then caches the result.  It tries C<syscall(SYS_gethostname)>,
+C<`hostname`>, C<`uname -n`>, and the file F</com/host>.
+If all that fails it C<croak>s.
+
+All nulls, returns, and newlines are removed from the result.
+
+=head1 AUTHOR
+
+David Sundstrom <sunds@asictest.sc.ti.com>
+
+Texas Instruments
+
+=cut
 
 sub hostname {
 

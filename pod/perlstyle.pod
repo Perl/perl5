@@ -4,11 +4,16 @@ perlstyle - Perl style guide
 
 =head1 DESCRIPTION
 
-=head2 Style
-
 Each programmer will, of course, have his or her own preferences in
 regards to formatting, but there are some general guidelines that will
 make your programs easier to read, understand, and maintain.  
+
+The most important thing is to run your programs under the B<-w>
+flag at all times.  You may turn it off explicitly for particular
+portions of code via the C<$^W> variable if you must.  You should
+also always run under C<use strict> or know the reason why not.
+The <use sigtrap> and even <use diagnostics> pragmas may also prove
+useful.
 
 Regarding aesthetics of code lay out, about the only thing Larry
 cares strongly about is that the closing curly brace of
@@ -166,6 +171,35 @@ determined by the B<Configure> program when Perl was installed.
 Choose mnemonic identifiers.  If you can't remember what mnemonic means,
 you've got a problem.
 
+=item * 
+
+While short identifiers like $gotit are probably ok, use underscores to
+separate words.  It is generally easier to read $var_names_like_this than
+$VarNamesLikeThis, especially for non-native speakers of English. It's
+also a simple rule that works consistently with VAR_NAMES_LIKE_THIS.
+
+Package names are sometimes an exception to this rule.  Perl informally
+reserves lowercase module names for "pragma" modules like C<integer> and
+C<strict>.  Other modules should begin with a capital letter and use mixed
+case, but probably without underscores due to limitations in primitive
+filesystems' representations of module names as files that must fit into a
+few sparse bites.
+
+=item *
+
+You may find it helpful to use letter case to indicate the scope 
+or nature of a variable. For example: 
+
+    $ALL_CAPS_HERE   constants only (beware clashes with perl vars!)  
+    $Some_Caps_Here  package-wide global/static 
+    $no_caps_here    function scope my() or local() variables 
+
+Function and method names seem to work best as all lowercase. 
+E.g., $obj->as_string(). 
+
+You can use a leading underscore to indicate that a variable or
+function should not be used outside the package that defined it.
+
 =item *
 
 If you have a really hairy regular expression, use the C</x> modifier and
@@ -199,6 +233,16 @@ to fit on one line anyway.
 
 =item *
 
+Always check the return codes of system calls.  Good error messages should
+go to STDERR, include which program caused the problem, what the failed
+system call and arguments were, and VERY IMPORTANT) should contain the
+standard system error message for what went wrong.  Here's a simple but
+sufficient example:
+
+    opendir(D, $dir)	 or die "can't opendir $dir: $!";
+
+=item *
+
 Line up your translations when it makes sense:
 
     tr [abc]
@@ -222,4 +266,3 @@ Be consistent.
 Be nice.
 
 =back
-

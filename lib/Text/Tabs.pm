@@ -10,6 +10,35 @@
 # Version: 9/21/95
 #
 
+=head1 NAME
+
+Text::Tabs -- expand and unexpand tabs
+
+=head1 SYNOPSIS
+
+	use Text::Tabs;
+	
+	#$tabstop = 8; # Defaults
+	print expand("Hello\tworld");
+	print unexpand("Hello,        world");
+	$tabstop = 4;
+	print join("\n",expand(split(/\n/,
+		"Hello\tworld,\nit's a nice day.\n"
+		)));
+
+=head1 DESCRIPTION
+
+This module expands and unexpands tabs into spaces, as per the unix expand
+and unexpand programs. Either function should be passed an array of strings
+(newlines may I<not> be included, and should be used to split an incoming
+string into separate elements.) which will be processed and returned.
+
+=head1 AUTHOR
+
+David Muir Sharnoff <muir@idiom.com>
+
+=cut
+
 package Text::Tabs;
 
 require Exporter;

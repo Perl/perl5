@@ -4,15 +4,19 @@ perlre - Perl regular expressions
 
 =head1 DESCRIPTION
 
-For a description of how to use regular expressions in matching
-operations, see C<m//> and C<s///> in L<perlop>.  The matching operations can
+This page describes the syntax of regular expressions in Perl.  For a
+description of how to actually I<use> regular expressions in matching
+operations, plus various examples of the same, see C<m//> and C<s///> in
+L<perlop>.
+
+The matching operations can
 have various modifiers, some of which relate to the interpretation of
 the regular expression inside.  These are:
 
     i   Do case-insensitive pattern matching.
     m   Treat string as multiple lines.
     s   Treat string as single line.
-    x   Use extended regular expressions.
+    x   Extend your pattern's legibilty with whitespace and comments.
 
 These are usually written as "the C</x> modifier", even though the delimiter
 in question might not actually be a slash.  In fact, any of these
@@ -102,15 +106,15 @@ also work:
     \f		form feed
     \v		vertical tab, whatever that is
     \a		alarm (bell)
-    \e		escape
-    \033	octal char
-    \x1b	hex char
+    \e		escape (think troff)
+    \033	octal char (think of a PDP-11)
+    \x1B	hex char
     \c[		control char
-    \l		lowercase next char
-    \u		uppercase next char
-    \L		lowercase till \E
-    \U		uppercase till \E
-    \E		end case modification
+    \l		lowercase next char (think vi)
+    \u		uppercase next char (think vi)
+    \L		lowercase till \E (think vi)
+    \U		uppercase till \E (think vi)
+    \E		end case modification (think vi)
     \Q		quote regexp metacharacters till \E
 
 In addition, Perl defines the following:
@@ -123,9 +127,9 @@ In addition, Perl defines the following:
     \D	Match a non-digit character
 
 Note that C<\w> matches a single alphanumeric character, not a whole
-word.  To match a word you'd need to say C<\w+>.  You may use C<\w>, C<\W>, C<\s>,
-C<\S>, C<\d> and C<\D> within character classes (though not as either end of a
-range).
+word.  To match a word you'd need to say C<\w+>.  You may use C<\w>,
+C<\W>, C<\s>, C<\S>, C<\d> and C<\D> within character classes (though not
+as either end of a range).
 
 Perl defines the following zero-width assertions:
 
@@ -145,16 +149,16 @@ C</m> modifier is used, while "^" and "$" will match at every internal line
 boundary.
 
 When the bracketing construct C<( ... )> is used, \<digit> matches the
-digit'th substring.  (Outside of the pattern, always use "$" instead of
-"\" in front of the digit.  The scope of $<digit> (and C<$`>, C<$&>, and C<$')>
-extends to the end of the enclosing BLOCK or eval string, or to the
-next successful pattern match, whichever comes first.
-If you want to
-use parentheses to delimit subpattern (e.g. a set of alternatives) without
+digit'th substring.  Outside of the pattern, always use "$" instead of "\"
+in front of the digit.  (The \<digit> notation can on rare occasion work
+outside the current pattern, this should not be relied upon.  See the
+WARNING below.) The scope of $<digit> (and C<$`>, C<$&>, and C<$')>
+extends to the end of the enclosing BLOCK or eval string, or to the next
+successful pattern match, whichever comes first.  If you want to use
+parentheses to delimit subpattern (e.g. a set of alternatives) without
 saving it as a subpattern, follow the ( with a ?.
-The \<digit> notation
-sometimes works outside the current pattern, but should not be relied
-upon.)  You may have as many parentheses as you wish.  If you have more
+
+You may have as many parentheses as you wish.  If you have more
 than 9 substrings, the variables $10, $11, ... refer to the
 corresponding substring.  Within the pattern, \10, \11, etc. refer back
 to substrings if there have been at least that many left parens before
@@ -202,7 +206,8 @@ extensions are already supported:
 
 =item (?#text)
 
-A comment.  The text is ignored.
+A comment.  The text is ignored.  If the C</x> switch is used to enable
+whitespace formatting, a simple C<#> will suffice.
 
 =item (?:regexp)
 
@@ -312,3 +317,28 @@ rules for that subpattern.  Therefore, C<(0|0x)\d*\s\1\d*> will
 match "0x1234 0x4321",but not "0x1234 01234", since subpattern 1
 actually matched "0x", even though the rule C<0|0x> could
 potentially match the leading 0 in the second number.
+
+=head2 WARNING on \1 vs $1
+
+Some people get too used to writing things like
+
+    $pattern =~ s/(\W)/\\\1/g;
+
+This is grandfathered for the RHS of a substitute to avoid shocking the
+B<sed> addicts, but it's a dirty habit to get into.  That's because in
+PerlThink, the right-hand side of a C<s///> is a double-quoted string.  C<\1> in
+the usual double-quoted string means a control-A.  The customary Unix
+meaning of C<\1> is kludged in for C<s///>.  However, if you get into the habit
+of doing that, you get yourself into trouble if you then add an C</e>
+modifier.
+
+    s/(\d+)/ \1 + 1 /eg;
+
+Or if you try to do
+
+    s/(\d+)/\1000/;
+
+You can't disambiguate that by saying C<\{1}000>, whereas you can fix it with
+C<${1}000>.  Basically, the operation of interpolation should not be confused
+with the operation of matching a backreference.  Certainly they mean two
+different things on the I<left> side of the C<s///>.

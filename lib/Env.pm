@@ -2,7 +2,12 @@ package Env;
 
 =head1 NAME
 
-Env - Perl module that imports environment variables
+Env - perl module that imports environment variables
+
+=head1 SYNOPSIS
+
+    use Env;
+    use Env qw(PATH HOME TERM);
 
 =head1 DESCRIPTION
 

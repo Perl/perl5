@@ -1,8 +1,8 @@
-=head1 TITLE
+=head1 NAME
 
-perldsc - Manipulating Complex Data Structures in Perl
+perldsc - Perl Data Structures Cookbook
 
-=head1 INTRODUCTION
+=head1 DESCRIPTION
 
 The single feature most sorely lacking in the Perl programming language
 prior to its 5.0 release was complex data structures.  Even without direct
@@ -335,14 +335,493 @@ given the assignment to $LoL above, here's the debugger output:
 
 There's also a lower-case B<x> command which is nearly the same.
 
+=head1 CODE EXAMPLES
+
+Presented with little comment (these will get their own man pages someday)
+here are short code examples illustrating access of various 
+types of data structures.
+
+=head1 LISTS OF LISTS
+
+=head2 Declaration of a LIST OF LISTS
+
+ @LoL = (
+        [ "fred", "barney" ],
+        [ "george", "jane", "elroy" ],
+        [ "homer", "marge", "bart" ],
+      );
+
+=head2 Generation of a LIST OF LISTS
+
+ # reading from file
+ while ( <> ) {
+     push @LoL, [ split ];
+
+
+ # calling a function
+ for $i ( 1 .. 10 ) {
+     $LoL[$i] = [ somefunc($i) ];
+
+
+ # using temp vars
+ for $i ( 1 .. 10 ) {
+     @tmp = somefunc($i);
+     $LoL[$i] = [ @tmp ];
+
+
+ # add to an existing row
+ push @{ $LoL[0] }, "wilma", "betty";
+
+=head2 Access and Printing of a LIST OF LISTS
+
+ # one element
+ $LoL[0][0] = "Fred";
+
+ # another element
+ $LoL[1][1] =~ s/(\w)/\u$1/;
+
+ # print the whole thing with refs
+ for $aref ( @LoL ) {
+     print "\t [ @$aref ],\n";
+
+
+ # print the whole thing with indices
+ for $i ( 0 .. $#LoL ) {
+     print "\t [ @{$LoL[$i]} ],\n";
+
+
+ # print the whole thing one at a time
+ for $i ( 0 .. $#LoL ) {
+     for $j ( 0 .. $#{$LoL[$i]} ) {
+         print "elt $i $j is $LoL[$i][$j]\n";
+     }
+
+
+=head1 HASHES OF LISTS
+
+=head2 Declaration of a HASH OF LISTS
+
+ %HoL = (
+        "flintstones"        => [ "fred", "barney" ],
+        "jetsons"            => [ "george", "jane", "elroy" ],
+        "simpsons"           => [ "homer", "marge", "bart" ],
+      );
+
+=head2 Generation of a HASH OF LISTS
+
+ # reading from file
+ # flintstones: fred barney wilma dino
+ while ( <> ) {
+     next unless s/^(.*?):\s*//;
+     $HoL{$1} = [ split ];
+
+
+ # reading from file; more temps
+ # flintstones: fred barney wilma dino
+ while ( $line = <> ) {
+     ($who, $rest) = split /:\s*/, $line, 2;
+     @fields = split ' ', $rest;
+     $HoL{$who} = [ @fields ];
+
+
+ # calling a function that returns a list
+ for $group ( "simpsons", "jetsons", "flintstones" ) {
+     $HoL{$group} = [ get_family($group) ];
+
+
+ # likewise, but using temps
+ for $group ( "simpsons", "jetsons", "flintstones" ) {
+     @members = get_family($group);
+     $HoL{$group} = [ @members ];
+
+
+ # append new members to an existing family
+ push @{ $HoL{"flintstones"} }, "wilma", "betty";
+
+=head2 Access and Printing of a HASH OF LISTS
+
+ # one element
+ $HoL{flintstones}[0] = "Fred";
+
+ # another element
+ $HoL{simpsons}[1] =~ s/(\w)/\u$1/;
+
+ # print the whole thing
+ foreach $family ( keys %HoL ) {
+     print "$family: @{ $HoL{$family} }\n"
+
+
+ # print the whole thing with indices
+ foreach $family ( keys %HoL ) {
+     print "family: ";
+     foreach $i ( 0 .. $#{ $HoL{$family} ) {
+         print " $i = $HoL{$family}[$i]";
+     }
+     print "\n";
+
+
+ # print the whole thing sorted by number of members
+ foreach $family ( sort { @{$HoL{$b}} <=> @{$HoL{$b}} } keys %HoL ) {
+     print "$family: @{ $HoL{$family} }\n"
+
+ # print the whole thing sorted by number of members and name
+ foreach $family ( sort { @{$HoL{$b}} <=> @{$HoL{$a}} } keys %HoL ) {
+     print "$family: ", join(", ", sort @{ $HoL{$family}), "\n";
+
+=head1 LISTS OF HASHES
+
+=head2 Declaration of a LIST OF HASHES
+
+ @LoH = (
+        {
+           Lead      => "fred",
+           Friend    => "barney",
+        },
+        {
+            Lead     => "george",
+            Wife     => "jane",
+            Son      => "elroy",
+        },
+        {
+            Lead     => "homer",
+            Wife     => "marge",
+            Son      => "bart",
+        }
+  );
+
+=head2 Generation of a LIST OF HASHES
+
+ # reading from file
+ # format: LEAD=fred FRIEND=barney
+ while ( <> ) {
+     $rec = {};
+     for $field ( split ) {
+         ($key, $value) = split /=/, $field;
+         $rec->{$key} = $value;
+     }
+     push @LoH, $rec;
+
+
+ # reading from file
+ # format: LEAD=fred FRIEND=barney
+ # no temp
+ while ( <> ) {
+     push @LoH, { split /[\s+=]/ };
+
+
+ # calling a function  that returns a key,value list, like
+ # "lead","fred","daughter","pebbles"
+ while ( %fields = getnextpairset() )
+     push @LoH, { %fields };
+
+
+ # likewise, but using no temp vars
+ while (<>) {
+     push @LoH, { parsepairs($_) };
+
+
+ # add key/value to an element
+ $LoH[0]{"pet"} = "dino";
+ $LoH[2]{"pet"} = "santa's little helper";
+
+=head2 Access and Printing of a LIST OF HASHES
+
+ # one element
+ $LoH[0]{"lead"} = "fred";
+
+ # another element
+ $LoH[1]{"lead"} =~ s/(\w)/\u$1/;
+
+ # print the whole thing with refs
+ for $href ( @LoH ) {
+     print "{ ";
+     for $role ( keys %$href ) {
+         print "$role=$href->{$role} ";
+     }
+     print "}\n";
+
+
+ # print the whole thing with indices
+ for $i ( 0 .. $#LoH ) {
+     print "$i is { ";
+     for $role ( keys %{ $LoH[$i] } ) {
+         print "$role=$LoH[$i]{$role} ";
+     }
+     print "}\n";
+
+
+ # print the whole thing one at a time
+ for $i ( 0 .. $#LoH ) {
+     for $role ( keys %{ $LoH[$i] } ) {
+         print "elt $i $role is $LoH[$i]{$role}\n";
+     }
+
+=head1 HASHES OF HASHES
+
+=head2 Declaration of a HASH OF HASHES
+
+ %HoH = (
+        "flintstones" => {
+            "lead"    => "fred",
+            "pal"     => "barney",
+        },
+        "jetsons"     => {
+             "lead"   => "george",
+             "wife"   => "jane",
+             "his boy"=> "elroy",
+         }
+        "simpsons"    => {
+             "lead"   => "homer",
+             "wife"   => "marge",
+             "kid"    => "bart",
+      );
+
+=head2 Generation of a HASH OF HASHES
+
+ # reading from file
+ # flintstones: lead=fred pal=barney wife=wilma pet=dino
+ while ( <> ) {
+     next unless s/^(.*?):\s*//;
+     $who = $1;
+     for $field ( split ) {
+         ($key, $value) = split /=/, $field;
+         $HoH{$who}{$key} = $value;
+     }
+
+
+ # reading from file; more temps
+ while ( <> ) {
+     next unless s/^(.*?):\s*//;
+     $who = $1;
+     $rec = {};
+     $HoH{$who} = $rec;
+     for $field ( split ) {
+         ($key, $value) = split /=/, $field;
+         $rec->{$key} = $value;
+     }
+
+
+ # calling a function  that returns a key,value list, like
+ # "lead","fred","daughter","pebbles"
+ while ( %fields = getnextpairset() )
+     push @a, { %fields };
+
+
+ # calling a function  that returns a key,value hash
+ for $group ( "simpsons", "jetsons", "flintstones" ) {
+     $HoH{$group} = { get_family($group) };
+
+
+ # likewise, but using temps
+ for $group ( "simpsons", "jetsons", "flintstones" ) {
+     %members = get_family($group);
+     $HoH{$group} = { %members };
+
+
+ # append new members to an existing family
+ %new_folks = (
+     "wife" => "wilma",
+     "pet"  => "dino";
+ );
+ for $what (keys %new_folks) {
+     $HoH{flintstones}{$what} = $new_folks{$what};
+
+
+=head2 Access and Printing of a HASH OF HASHES
+
+ # one element
+ $HoH{"flintstones"}{"wife"} = "wilma";
+
+ # another element
+ $HoH{simpsons}{lead} =~ s/(\w)/\u$1/;
+
+ # print the whole thing
+ foreach $family ( keys %HoH ) {
+     print "$family: ";
+     for $role ( keys %{ $HoH{$family} } {
+         print "$role=$HoH{$family}{$role} ";
+     }
+     print "}\n";
+
+
+ # print the whole thing  somewhat sorted
+ foreach $family ( sort keys %HoH ) {
+     print "$family: ";
+     for $role ( sort keys %{ $HoH{$family} } {
+         print "$role=$HoH{$family}{$role} ";
+     }
+     print "}\n";
+
+
+ # print the whole thing sorted by number of members
+ foreach $family ( sort { keys %{$HoH{$b}} <=> keys %{$HoH{$b}} } keys %HoH ) {
+     print "$family: ";
+     for $role ( sort keys %{ $HoH{$family} } {
+         print "$role=$HoH{$family}{$role} ";
+     }
+     print "}\n";
+
+
+ # establish a sort order (rank) for each role
+ $i = 0;
+ for ( qw(lead wife son daughter pal pet) ) { $rank{$_} = ++$i }
+
+ # now print the whole thing sorted by number of members
+ foreach $family ( sort { keys %{$HoH{$b}} <=> keys %{$HoH{$b}} } keys %HoH ) {
+     print "$family: ";
+     # and print these according to rank order
+     for $role ( sort { $rank{$a} <=> $rank{$b} keys %{ $HoH{$family} } {
+         print "$role=$HoH{$family}{$role} ";
+     }
+     print "}\n";
+
+
+=head1 MORE ELABORATE RECORDS
+
+=head2 Declaration of MORE ELABORATE RECORDS
+
+Here's a sample showing how to create and use a record whose fields are of
+many different sorts:
+
+     $rec = {
+         STRING  => $string,
+         LIST    => [ @old_values ],
+         LOOKUP  => { %some_table },
+         FUNC    => \&some_function,
+         FANON   => sub { $_[0] ** $_[1] },
+         FH      => \*STDOUT,
+     };
+
+     print $rec->{STRING};
+
+     print $rec->{LIST}[0];
+     $last = pop @ { $rec->{LIST} };
+
+     print $rec->{LOOKUP}{"key"};
+     ($first_k, $first_v) = each %{ $rec->{LOOKUP} };
+
+     $answer = &{ $rec->{FUNC} }($arg);
+     $answer = &{ $rec->{FANON} }($arg1, $arg2);
+
+     # careful of extra block braces on fh ref
+     print { $rec->{FH} } "a string\n";
+
+     use FileHandle;
+     $rec->{FH}->autoflush(1);
+     $rec->{FH}->print(" a string\n");
+
+=head2 Declaration of a HASH OF COMPLEX RECORDS
+
+     %TV = (
+        "flintstones" => {
+            series   => "flintstones",
+            nights   => [ qw(monday thursday friday) ];
+            members  => [
+                { name => "fred",    role => "lead", age  => 36, },
+                { name => "wilma",   role => "wife", age  => 31, },
+                { name => "pebbles", role => "kid", age  =>  4, },
+            ],
+        },
+
+        "jetsons"     => {
+            series   => "jetsons",
+            nights   => [ qw(wednesday saturday) ];
+            members  => [
+                { name => "george",  role => "lead", age  => 41, },
+                { name => "jane",    role => "wife", age  => 39, },
+                { name => "elroy",   role => "kid",  age  =>  9, },
+            ],
+         },
+
+        "simpsons"    => {
+            series   => "simpsons",
+            nights   => [ qw(monday) ];
+            members  => [
+                { name => "homer", role => "lead", age  => 34, },
+                { name => "marge", role => "wife", age => 37, },
+                { name => "bart",  role => "kid",  age  =>  11, },
+            ],
+         },
+      );
+
+=head2 Generation of a HASH OF COMPLEX RECORDS
+
+     # reading from file
+     # this is most easily done by having the file itself be
+     # in the raw data format as shown above.  perl is happy
+     # to parse complex datastructures if declared as data, so
+     # sometimes it's easiest to do that
+
+     # here's a piece by piece build up
+     $rec = {};
+     $rec->{series} = "flintstones";
+     $rec->{nights} = [ find_days() ];
+
+     @members = ();
+     # assume this file in field=value syntax
+     while () {
+         %fields = split /[\s=]+/;
+         push @members, { %fields };
+     }
+     $rec->{members} = [ @members ];
+
+     # now remember the whole thing
+     $TV{ $rec->{series} } = $rec;
+
+     ###########################################################
+     # now, you might want to make interesting extra fields that
+     # include pointers back into the same data structure so if
+     # change one piece, it changes everywhere, like for examples
+     # if you wanted a {kids} field that was an array reference
+     # to a list of the kids' records without having duplicate
+     # records and thus update problems.
+     ###########################################################
+     foreach $family (keys %TV) {
+         $rec = $TV{$family}; # temp pointer
+         @kids = ();
+         for $person ( @{$rec->{members}} ) {
+             if ($person->{role} =~ /kid|son|daughter/) {
+                 push @kids, $person;
+             }
+         }
+         # REMEMBER: $rec and $TV{$family} point to same data!!
+         $rec->{kids} = [ @kids ];
+     }
+
+     # you copied the list, but the list itself contains pointers
+     # to uncopied objects. this means that if you make bart get
+     # older via
+
+     $TV{simpsons}{kids}[0]{age}++;
+
+     # then this would also change in
+     print $TV{simpsons}{members}[2]{age};
+
+     # because $TV{simpsons}{kids}[0] and $TV{simpsons}{members}[2]
+     # both point to the same underlying anonymous hash table
+
+     # print the whole thing
+     foreach $family ( keys %TV ) {
+         print "the $family";
+         print " is on during @{ $TV{$family}{nights} }\n";
+         print "its members are:\n";
+         for $who ( @{ $TV{$family}{members} } ) {
+             print " $who->{name} ($who->{role}), age $who->{age}\n";
+         }
+         print "it turns out that $TV{$family}{'lead'} has ";
+         print scalar ( @{ $TV{$family}{kids} } ), " kids named ";
+         print join (", ", map { $_->{name} } @{ $TV{$family}{kids} } );
+         print "\n";
+     }
+
 =head1 SEE ALSO
 
-perlref(1), perldata(1)
+L<perlref>, L<perllol>, L<perldata>, L<perlobj>
 
 =head1 AUTHOR
 
 Tom Christiansen E<lt>F<tchrist@perl.com>E<gt>
 
 Last update: 
-Sat Oct  7 22:41:09 MDT 1995
+Tue Dec 12 09:20:26 MST 1995
 

@@ -365,6 +365,8 @@ perly.h			The header file for perly.c
 perly.y			Yacc grammar for perl
 pl2pm			A pl to pm translator
 pod/Makefile		Make pods into something else
+pod/PerlDoc/Functions.pm	used by splitpod
+pod/buildtoc		generate perltoc.pod
 pod/perl.pod		Top level perl man page
 pod/perlbook.pod	Book info
 pod/perlbot.pod		Object-oriented Bag o' Tricks
@@ -391,6 +393,7 @@ pod/perlsec.pod		Security info
 pod/perlstyle.pod	Style info
 pod/perlsub.pod		Subroutine info
 pod/perlsyn.pod		Syntax info
+pod/perltoc.pod		TOC info
 pod/perltrap.pod	Trap info
 pod/perlvar.pod		Variable info
 pod/perlxs.pod		XS api info
@@ -398,7 +401,10 @@ pod/perlxstut.pod	XS tutorial
 pod/pod2html.PL		Precursor for translator to turn pod into HTML
 pod/pod2latex.PL	Precursor for translator to turn pod into LaTeX
 pod/pod2man.PL		Precursor for translator to turn pod into manpage
+pod/pod2text	        Precursor for translator to turn pod into text
+pod/roffitall		troff the whole man page set
 pod/splitman		Splits perlfunc into multiple man pages
+pod/splitpod		Splits perlfunc into multiple pod pages
 pp.c			Push/Pop code
 pp.h			Push/Pop code defs
 pp_ctl.c		Push/Pop code for control flow
