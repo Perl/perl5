@@ -405,6 +405,9 @@ $a = 123.456E_-12; print "$a\n";	# 36
 $a = 123.456E-_12; print "$a\n";	# 37
 $a = 123.456E-1_2; print "$a\n";
 $a = 123.456E-12_; print "$a\n";	# 39
+$a = 1__23; print "$a\n";		# 40
+$a = 12.3__4; print "$a\n";		# 41
+$a = 12.34e1__2; print "$a\n";		# 42
 no warnings 'syntax' ;
 $a = _123; print "$a\n";
 $a = 1_23; print "$a\n";
@@ -443,6 +446,9 @@ $a = 123.456E_-12; print "$a\n";
 $a = 123.456E-_12; print "$a\n";
 $a = 123.456E-1_2; print "$a\n";
 $a = 123.456E-12_; print "$a\n";
+$a = 1__23; print "$a\n";
+$a = 12.3__4; print "$a\n";
+$a = 12.34e1__2; print "$a\n";
 EXPECT
 Misplaced _ in number at - line 6.
 Misplaced _ in number at - line 11.
@@ -461,6 +467,9 @@ Misplaced _ in number at - line 35.
 Misplaced _ in number at - line 36.
 Misplaced _ in number at - line 37.
 Misplaced _ in number at - line 39.
+Misplaced _ in number at - line 40.
+Misplaced _ in number at - line 41.
+Misplaced _ in number at - line 42.
 _123
 123
 123
@@ -498,6 +507,9 @@ _123
 1.23456e-10
 1.23456e-10
 1.23456e-10
+123
+12.34
+12340000000000
 _123
 123
 123
@@ -535,6 +547,9 @@ _123
 1.23456e-10
 1.23456e-10
 1.23456e-10
+123
+12.34
+12340000000000
 ########
 # toke.c
 use warnings 'bareword' ;

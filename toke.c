@@ -7189,29 +7189,21 @@ Perl_scan_num(pTHX_ char *start, YYSTYPE* lvalp)
 	        lastub = s++;
 	    }
 
-	    /* read off the first digit */
-	    if (isDIGIT(*s)) {
-		if (d >= e)
-		    Perl_croak(aTHX_ number_too_long);
-		*d++ = *s++;
-	    }
-
 	    /* read digits of exponent */
 	    while (isDIGIT(*s) || *s == '_') {
 	        if (isDIGIT(*s)) {
 		    if (d >= e)
 		        Perl_croak(aTHX_ number_too_long);
-		    *d++ = *s;
+		    *d++ = *s++;
 		}
 		else {
 		   if (ckWARN(WARN_SYNTAX) &&
 		       ((lastub && s == lastub + 1) ||
-			!isDIGIT(s[1])))
+			(!isDIGIT(s[1]) && s[1] != '_')))
 		       Perl_warner(aTHX_ WARN_SYNTAX,
 				   "Misplaced _ in number");
-		   lastub = s;
+		   lastub = s++;
 		}
-		s++;
 	    }
 	}
 
