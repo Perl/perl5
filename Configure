@@ -20,7 +20,7 @@
 
 # $Id: Head.U,v 3.0.1.9 1997/02/28 15:02:09 ram Exp $
 #
-# Generated on Thu May  2 01:39:49 EET DST 2002 [metaconfig 3.0 PL70]
+# Generated on Thu May  9 02:52:48 EET DST 2002 [metaconfig 3.0 PL70]
 # (with additional metaconfig patches by perlbug@perl.org)
 
 cat >c1$$ <<EOF
@@ -18900,7 +18900,7 @@ for i in \`$cc -v -c tmp.c 2>&1 $postprocess_cc_v\`
 do
 	case "\$i" in
 	-D*) echo "\$i" | $sed 's/^-D//';;
-	-A*) $test "$gccversion" && echo "\$i" | $sed 's/^-A\(.*\)(\(.*\))/\1=\2/';;
+	-A*) $test "$gccversion" && echo "\$i" | $sed 's/^-A//' | $sed 's/\(.*\)(\(.*\))/\1=\2/';;
 	esac
 done
 $rm -f try.c
