@@ -7,9 +7,12 @@
  * blame Henry for some of the lack of readability.
  */
 
-/* $Header: regcomp.c,v 3.0 89/10/18 15:22:29 lwall Locked $
+/* $Header: regcomp.c,v 3.0.1.1 89/11/11 04:51:04 lwall Locked $
  *
  * $Log:	regcomp.c,v $
+ * Revision 3.0.1.1  89/11/11  04:51:04  lwall
+ * patch2: /[\000]/ didn't work
+ * 
  * Revision 3.0  89/10/18  15:22:29  lwall
  * 3.0 baseline
  * 
@@ -874,7 +877,6 @@ regclass()
 	}
 	if (*regparse != ']')
 		FAIL("unmatched [] in regexp");
-	regset(bits,0,0);		/* always bomb out on null */
 	regparse++;
 	return ret;
 }

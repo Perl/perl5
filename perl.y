@@ -1,4 +1,4 @@
-/* $Header: perl.y,v 3.0.1.1 89/10/26 23:20:41 lwall Locked $
+/* $Header: perl.y,v 3.0.1.2 89/11/11 04:49:04 lwall Locked $
  *
  *    Copyright (c) 1989, Larry Wall
  *
@@ -6,6 +6,12 @@
  *    as specified in the README file that comes with the perl 3.0 kit.
  *
  * $Log:	perl.y,v $
+ * Revision 3.0.1.2  89/11/11  04:49:04  lwall
+ * patch2: moved yydebug to where its type doesn't matter
+ * patch2: !$foo++ was unreasonably illegal
+ * patch2: local(@foo) didn't work
+ * patch2: default args to unary operators didn't work
+ * 
  * Revision 3.0.1.1  89/10/26  23:20:41  lwall
  * patch1: grandfathered "format stdout"
  * patch1: operator(); is now normally equivalent to operator;
@@ -82,11 +88,17 @@ ARG *arg5;
 
 %% /* RULES */
 
-prog	:	lineseq
+prog	:	/* NULL */
+		{
+#if defined(YYDEBUG) && defined(DEBUGGING)
+		    yydebug = (debug & 1);
+#endif
+		}
+	/*CONTINUED*/	lineseq
 			{ if (in_eval)
-				eval_root = block_head($1);
+				eval_root = block_head($2);
 			    else
-				main_root = block_head($1); }
+				main_root = block_head($2); }
 	;
 
 compblock:	block CONTINUE block
@@ -379,18 +391,6 @@ sexpr	:	sexpr '=' sexpr
 			{ $$ = mod_match(O_MATCH, $1, $3); }
 	|	sexpr NMATCH sexpr
 			{ $$ = mod_match(O_NMATCH, $1, $3); }
-	|	term INC
-			{ $$ = addflags(1, AF_POST|AF_UP,
-			    l(make_op(O_ITEM,1,$1,Nullarg,Nullarg))); }
-	|	term DEC
-			{ $$ = addflags(1, AF_POST,
-			    l(make_op(O_ITEM,1,$1,Nullarg,Nullarg))); }
-	|	INC term
-			{ $$ = addflags(1, AF_PRE|AF_UP,
-			    l(make_op(O_ITEM,1,$2,Nullarg,Nullarg))); }
-	|	DEC term
-			{ $$ = addflags(1, AF_PRE,
-			    l(make_op(O_ITEM,1,$2,Nullarg,Nullarg))); }
 	|	term
 			{ $$ = $1; }
 	;
@@ -403,6 +403,18 @@ term	:	'-' term %prec UMINUS
 			{ $$ = make_op(O_NOT, 1, $2, Nullarg, Nullarg); }
 	|	'~' term
 			{ $$ = make_op(O_COMPLEMENT, 1, $2, Nullarg, Nullarg);}
+	|	term INC
+			{ $$ = addflags(1, AF_POST|AF_UP,
+			    l(make_op(O_ITEM,1,$1,Nullarg,Nullarg))); }
+	|	term DEC
+			{ $$ = addflags(1, AF_POST,
+			    l(make_op(O_ITEM,1,$1,Nullarg,Nullarg))); }
+	|	INC term
+			{ $$ = addflags(1, AF_PRE|AF_UP,
+			    l(make_op(O_ITEM,1,$2,Nullarg,Nullarg))); }
+	|	DEC term
+			{ $$ = addflags(1, AF_PRE,
+			    l(make_op(O_ITEM,1,$2,Nullarg,Nullarg))); }
 	|	FILETEST WORD
 			{ opargs[$1] = 0;	/* force it special */
 			    $$ = make_op($1, 1,
@@ -419,9 +431,9 @@ term	:	'-' term %prec UMINUS
 				  $1 == O_FTTTY?stabent("STDIN",TRUE):defstab),
 				Nullarg, Nullarg); }
 	|	LOCAL '(' expr ')'
-			{ $$ = l(make_op(O_ITEM, 1,
+			{ $$ = l(localize(make_op(O_ASSIGN, 1,
 				localize(listish(make_list($3))),
-				Nullarg,Nullarg)); }
+				Nullarg,Nullarg))); }
 	|	'(' expr ')'
 			{ $$ = make_list(hide_ary($2)); }
 	|	'(' ')'
@@ -533,7 +545,7 @@ term	:	'-' term %prec UMINUS
 			{ $$ = make_op($1,1,cval_to_arg($2),
 			    Nullarg,Nullarg); }
 	|	UNIOP
-			{ $$ = make_op($1,1,Nullarg,Nullarg,Nullarg);
+			{ $$ = make_op($1,0,Nullarg,Nullarg,Nullarg);
 			  if ($1 == O_EVAL || $1 == O_RESET)
 			    $$ = fixeval($$); }
 	|	UNIOP sexpr
@@ -642,8 +654,10 @@ term	:	'-' term %prec UMINUS
 			    Nullarg, Nullarg)); }
 	|	FUNC0
 			{ $$ = make_op($1, 0, Nullarg, Nullarg, Nullarg); }
+	|	FUNC0 '(' ')'
+			{ $$ = make_op($1, 0, Nullarg, Nullarg, Nullarg); }
 	|	FUNC1 '(' ')'
-			{ $$ = make_op($1, 1, Nullarg, Nullarg, Nullarg);
+			{ $$ = make_op($1, 0, Nullarg, Nullarg, Nullarg);
 			  if ($1 == O_EVAL || $1 == O_RESET)
 			    $$ = fixeval($$); }
 	|	FUNC1 '(' expr ')'

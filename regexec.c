@@ -7,9 +7,12 @@
  * blame Henry for some of the lack of readability.
  */
 
-/* $Header: regexec.c,v 3.0 89/10/18 15:22:53 lwall Locked $
+/* $Header: regexec.c,v 3.0.1.1 89/11/11 04:52:04 lwall Locked $
  *
  * $Log:	regexec.c,v $
+ * Revision 3.0.1.1  89/11/11  04:52:04  lwall
+ * patch2: /\b$foo/ didn't work
+ * 
  * Revision 3.0  89/10/18  15:22:53  lwall
  * 3.0 baseline
  * 
@@ -262,7 +265,7 @@ int safebase;	/* no need to remember string in subbase */
 			    }
 			    s++;
 		    }
-		    if (tmp && regtry(prog,s))
+		    if ((minlen || tmp) && regtry(prog,s))
 			    goto got_it;
 		    break;
 		case NBOUND:
@@ -282,7 +285,7 @@ int safebase;	/* no need to remember string in subbase */
 				    goto got_it;
 			    s++;
 		    }
-		    if (!tmp && regtry(prog,s))
+		    if ((minlen || !tmp) && regtry(prog,s))
 			    goto got_it;
 		    break;
 		case ALNUM:

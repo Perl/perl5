@@ -1,4 +1,4 @@
-/* $Header: walk.c,v 3.0 89/10/18 15:35:48 lwall Locked $
+/* $Header: walk.c,v 3.0.1.1 89/11/11 05:09:33 lwall Locked $
  *
  *    Copyright (c) 1989, Larry Wall
  *
@@ -6,6 +6,9 @@
  *    as specified in the README file that comes with the perl 3.0 kit.
  *
  * $Log:	walk.c,v $
+ * Revision 3.0.1.1  89/11/11  05:09:33  lwall
+ * patch2: in a2p, awk script with no line actions still needs main loop
+ * 
  * Revision 3.0  89/10/18  15:35:48  lwall
  * 3.0 baseline
  * 
@@ -139,7 +142,7 @@ int minprec;			/* minimum precedence without parens */
 		str_cat(str,"continue {\n    $FNRbase = $. if eof;\n}\n");
 	}
 	else
-	    str_cat(str,"# (no line actions)\n");
+	    str_cat(str,"while (<>) { }		# (no line actions)\n");
 	if (ops[node+4].ival) {
 	    realexit = TRUE;
 	    str_cat(str,"\n");

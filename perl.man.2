@@ -1,7 +1,11 @@
 ''' Beginning of part 2
-''' $Header: perl.man.2,v 3.0 89/10/18 15:21:37 lwall Locked $
+''' $Header: perl.man.2,v 3.0.1.1 89/11/11 04:43:10 lwall Locked $
 '''
 ''' $Log:	perl.man.2,v $
+''' Revision 3.0.1.1  89/11/11  04:43:10  lwall
+''' patch2: made some line breaks depend on troff vs. nroff
+''' patch2: example of unshift had args backwards
+''' 
 ''' Revision 3.0  89/10/18  15:21:37  lwall
 ''' 3.0 baseline
 ''' 
@@ -124,7 +128,13 @@ Here's an example of looking up non-numeric uids:
 	print "Files: "
 	$pattern = <STDIN>;
 	chop($pattern);
+.ie t \{\
 	open(pass, \'/etc/passwd\') || die "Can't open passwd: $!\en";
+'br\}
+.el \{\
+	open(pass, \'/etc/passwd\')
+		|| die "Can't open passwd: $!\en";
+'br\}
 	while (<pass>) {
 		($login,$pass,$uid,$gid) = split(/:/);
 		$uid{$login} = $uid;
@@ -287,7 +297,13 @@ Equivalent examples:
 .nf
 
 .ne 3
+.ie t \{\
 	die "Can't cd to spool: $!\en" unless chdir \'/usr/spool/news\';
+'br\}
+.el \{\
+	die "Can't cd to spool: $!\en"
+		unless chdir \'/usr/spool/news\';
+'br\}
 
 	chdir \'/usr/spool/news\' || die "Can't cd to spool: $!\en" 
 
@@ -559,6 +575,7 @@ Argument processing and value return works just like ioctl below.
 Note that fcntl will produce a fatal error if used on a machine that doesn't implement
 fcntl(2).
 .Ip "fileno(FILEHANDLE)" 8 4
+.Ip "fileno FILEHANDLE" 8 4
 Returns the file descriptor for a filehandle.
 Useful for constructing bitmaps for select().
 If FILEHANDLE is an expression, the value is taken as the name of
@@ -621,7 +638,13 @@ Returns the packed sockaddr address of other end of the SOCKET connection.
 	# An internet sockaddr
 	$sockaddr = 'S n a4 x8';
 	$hersockaddr = getpeername(S);
+.ie t \{\
 	($family, $port, $heraddr) = unpack($sockaddr,$hersockaddr);
+'br\}
+.el \{\
+	($family, $port, $heraddr) =
+			unpack($sockaddr,$hersockaddr);
+'br\}
 
 .fi
 .Ip "getpgrp(PID)" 8 4
@@ -650,24 +673,24 @@ getpriority(2).
 .Ip "getnetbyaddr(ADDR,ADDRTYPE)" 8
 .Ip "getprotobynumber(NUMBER)" 8
 .Ip "getservbyport(PORT,PROTO)" 8
-.Ip "getpwent()" 8
-.Ip "getgrent()" 8
-.Ip "gethostent()" 8
-.Ip "getnetent()" 8
-.Ip "getprotoent()" 8
-.Ip "getservent()" 8
-.Ip "setpwent()" 8
-.Ip "setgrent()" 8
+.Ip "getpwent" 8
+.Ip "getgrent" 8
+.Ip "gethostent" 8
+.Ip "getnetent" 8
+.Ip "getprotoent" 8
+.Ip "getservent" 8
+.Ip "setpwent" 8
+.Ip "setgrent" 8
 .Ip "sethostent(STAYOPEN)" 8
 .Ip "setnetent(STAYOPEN)" 8
 .Ip "setprotoent(STAYOPEN)" 8
 .Ip "setservent(STAYOPEN)" 8
-.Ip "endpwent()" 8
-.Ip "endgrent()" 8
-.Ip "endhostent()" 8
-.Ip "endnetent()" 8
-.Ip "endprotoent()" 8
-.Ip "endservent()" 8
+.Ip "endpwent" 8
+.Ip "endgrent" 8
+.Ip "endhostent" 8
+.Ip "endnetent" 8
+.Ip "endprotoent" 8
+.Ip "endservent" 8
 These routines perform the same functions as their counterparts in the
 system library.
 The return values from the various get routines are as follows:
@@ -702,7 +725,13 @@ Returns the packed sockaddr address of this end of the SOCKET connection.
 	# An internet sockaddr
 	$sockaddr = 'S n a4 x8';
 	$mysockaddr = getsockname(S);
+.ie t \{\
 	($family, $port, $myaddr) = unpack($sockaddr,$mysockaddr);
+'br\}
+.el \{\
+	($family, $port, $myaddr) =
+			unpack($sockaddr,$mysockaddr);
+'br\}
 
 .fi
 .Ip "getsockopt(SOCKET,LEVEL,OPTNAME)" 8 3
@@ -715,7 +744,13 @@ Typically used as follows:
 .nf
 
 .ne 3
+.ie t \{\
     ($sec,$min,$hour,$mday,$mon,$year,$wday,$yday,$isdst) = gmtime(time);
+'br\}
+.el \{\
+    ($sec,$min,$hour,$mday,$mon,$year,$wday,$yday,$isdst) =
+						gmtime(time);
+'br\}
 
 .fi
 All array elements are numeric, and come straight out of a struct tm.
@@ -818,7 +853,13 @@ separated by the value of EXPR, and returns the string.
 Example:
 .nf
     
+.ie t \{\
     $_ = join(\|\':\', $login,$passwd,$uid,$gid,$gcos,$home,$shell);
+'br\}
+.el \{\
+    $_ = join(\|\':\',
+		$login,$passwd,$uid,$gid,$gcos,$home,$shell);
+'br\}
 
 .fi
 See
@@ -929,7 +970,7 @@ Examples:
 	if ($sw eq \'-v\') {
 	    # init local array with global array
 	    local(@ARGV) = @ARGV;
-	    unshift(\'echo\',@ARGV);
+	    unshift(@ARGV,\'echo\');
 	    system @ARGV;
 	}
 	# @ARGV restored
@@ -954,7 +995,13 @@ Typically used as follows:
 .nf
 
 .ne 3
+.ie t \{\
     ($sec,$min,$hour,$mday,$mon,$year,$wday,$yday,$isdst) = localtime(time);
+'br\}
+.el \{\
+    ($sec,$min,$hour,$mday,$mon,$year,$wday,$yday,$isdst) =
+						localtime(time);
+'br\}
 
 .fi
 All array elements are numeric, and come straight out of a struct tm.
@@ -970,6 +1017,7 @@ If EXPR is omitted, returns log of $_.
 .Ip "lstat(FILEHANDLE)" 8 6
 .Ip "lstat FILEHANDLE" 8
 .Ip "lstat(EXPR)" 8
+.Ip "lstat SCALARVARIABLE" 8
 Does the same thing as the stat() function, but stats a symbolic link
 instead of the file the symbolic link points to.
 If symbolic links are unimplemented on your system, a normal stat is done.

@@ -1,4 +1,4 @@
-char rcsid[] = "$Header: perly.c,v 3.0 89/10/18 15:22:21 lwall Locked $\nPatch level: ###\n";
+char rcsid[] = "$Header: perly.c,v 3.0.1.1 89/11/11 04:50:04 lwall Locked $\nPatch level: ###\n";
 /*
  *    Copyright (c) 1989, Larry Wall
  *
@@ -6,6 +6,9 @@ char rcsid[] = "$Header: perly.c,v 3.0 89/10/18 15:22:21 lwall Locked $\nPatch l
  *    as specified in the README file that comes with the perl 3.0 kit.
  *
  * $Log:	perly.c,v $
+ * Revision 3.0.1.1  89/11/11  04:50:04  lwall
+ * patch2: moved yydebug to where its type didn't matter
+ * 
  * Revision 3.0  89/10/18  15:22:21  lwall
  * 3.0 baseline
  * 
@@ -92,18 +95,17 @@ setuid perl scripts securely.\n");
 	    perldb = TRUE;
 	    s++;
 	    goto reswitch;
-#ifdef DEBUGGING
 	case 'D':
+#ifdef DEBUGGING
 #ifdef TAINT
 	    if (euid != uid || egid != gid)
 		fatal("No -D allowed in setuid scripts");
 #endif
 	    debug = atoi(s+1);
-#ifdef YYDEBUG
-	    yydebug = (debug & 1);
+#else
+	    warn("Recompile perl with -DDEBUGGING to use -D switch\n");
 #endif
 	    break;
-#endif
 	case 'e':
 #ifdef TAINT
 	    if (euid != uid || egid != gid)
@@ -531,8 +533,12 @@ FIX YOUR KERNEL, PUT A C WRAPPER AROUND THIS SCRIPT, OR USE -u AND UNDUMP!\n");
 	fatal("Execution aborted due to compilation errors.\n");
 
     New(50,loop_stack,128,struct loop);
-    New(51,debname,128,char);
-    New(52,debdelim,128,char);
+#ifdef DEBUGGING
+    if (debug) {
+	New(51,debname,128,char);
+	New(52,debdelim,128,char);
+    }
+#endif
     curstash = defstash;
 
     preprocess = FALSE;

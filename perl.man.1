@@ -1,7 +1,11 @@
 .rn '' }`
-''' $Header: perl.man.1,v 3.0 89/10/18 15:21:29 lwall Locked $
+''' $Header: perl.man.1,v 3.0.1.1 89/11/11 04:41:22 lwall Locked $
 ''' 
 ''' $Log:	perl.man.1,v $
+''' Revision 3.0.1.1  89/11/11  04:41:22  lwall
+''' patch2: explained about sh and ${1+"$@"}
+''' patch2: documented that space must separate word and '' string
+''' 
 ''' Revision 3.0  89/10/18  15:21:29  lwall
 ''' 3.0 baseline
 ''' 
@@ -347,6 +351,12 @@ After
 .I perl
 locates the script, it parses the lines and ignores them because
 the variable $running_under_some_shell is never true.
+A better construct than $* would be ${1+"$@"}, which handles embedded spaces
+and such in the filenames, but doesn't work if the script is being interpreted
+by csh.
+In order to start up sh rather than csh, some systems may have to replace the
+#! line with a line containing just
+a colon, which will be politely ignored by perl.
 .TP 5
 .B \-u
 causes
@@ -531,6 +541,9 @@ The following code segment prints out \*(L"The price is $100.\*(R"
 .fi
 Note that you can put curly brackets around the identifier to delimit it
 from following alphanumerics.
+Also note that a single quoted string must be separated from a preceding
+word by a space, since single quote is a valid character in an identifier
+(see Packages).
 .PP
 Array values are interpolated into double-quoted strings by joining all the
 elements of the array with the delimiter specified in the $" variable,
@@ -549,7 +562,7 @@ The following are equivalent:
 	system "echo @ARGV";
 
 .fi
-Within search patterns (which also undergo double-quoteish substitution)
+Within search patterns (which also undergo double-quotish substitution)
 there is a bad ambiguity:  Is /$foo[bar]/ to be
 interpreted as /${foo}[bar]/ (where [bar] is a character class for the
 regular expression) or as /${foo[bar]}/ (where [bar] is the subscript to

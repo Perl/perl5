@@ -1,4 +1,4 @@
-/* $Header: perl.h,v 3.0.1.1 89/10/26 23:17:08 lwall Locked $
+/* $Header: perl.h,v 3.0.1.2 89/11/11 04:39:38 lwall Locked $
  *
  *    Copyright (c) 1989, Larry Wall
  *
@@ -6,6 +6,12 @@
  *    as specified in the README file that comes with the perl 3.0 kit.
  *
  * $Log:	perl.h,v $
+ * Revision 3.0.1.2  89/11/11  04:39:38  lwall
+ * patch2: Configure may now set -DDEBUGGING
+ * patch2: netinet/in.h needed sys/types.h some places
+ * patch2: more <sys/time.h> and <time.h> wrangling
+ * patch2: yydebug moved to where type doesn't matter  
+ * 
  * Revision 3.0.1.1  89/10/26  23:17:08  lwall
  * patch1: vfork now conditionally defined based on VFORK
  * patch1: DEC risc machines have a buggy memcmp
@@ -15,10 +21,6 @@
  * 3.0 baseline
  * 
  */
-
-#ifndef lint
-#define DEBUGGING
-#endif
 
 #define VOIDUSED 1
 #include "config.h"
@@ -51,26 +53,25 @@ extern char *memcpy(), *memset();
 #include <setjmp.h>
 #include <sys/param.h>	/* if this needs types.h we're still wrong */
 
-#ifdef I_NETINET_IN
-#include <netinet/in.h>
-#endif
-
 #ifndef _TYPES_		/* If types.h defines this it's easy. */
 #ifndef major		/* Does everyone's types.h define this? */
 #include <sys/types.h>
 #endif
 #endif
 
+#ifdef I_NETINET_IN
+#include <netinet/in.h>
+#endif
+
 #include <sys/stat.h>
 
-#ifdef TMINSYS
+#if defined(TMINSYS) || defined(I_SYSTIME)
 #include <sys/time.h>
-#else
-#ifdef I_SYSTIME
-#include <sys/time.h>
-#else
+#ifdef TIMETOO
 #include <time.h>
 #endif
+#else
+#include <time.h>
 #endif
 
 #include <sys/times.h>
@@ -93,6 +94,9 @@ extern char *memcpy(), *memset();
 #ifdef NDBM
 #include <ndbm.h>
 #define SOME_DBM
+#ifdef ODBM
+#undef ODBM
+#endif
 #else
 #ifdef ODBM
 #ifdef NULL
@@ -129,7 +133,11 @@ EXT int dbmlen;
 #define DIRENT dirent
 #else
 #ifdef I_SYSDIR
+#ifdef hp9000s500
+#include <ndir.h>	/* may be wrong in the future */
+#else
 #include <sys/dir.h>
+#endif
 #define DIRENT direct
 #endif
 #endif
@@ -233,8 +241,20 @@ EXT STR *Str;
 #define BYTEORDER 01234
 #endif
 
+#if defined(htonl) && !defined(HTONL)
+#define HTONL
+#endif
+#if defined(htons) && !defined(HTONS)
+#define HTONS
+#endif
+#if defined(ntohl) && !defined(NTOHL)
+#define NTOHL
+#endif
+#if defined(ntohs) && !defined(NTOHS)
+#define NTOHS
+#endif
 #ifndef HTONL
-#if BYTEORDER != 04321
+#if (BYTEORDER != 04321) && (BYTEORDER != 087654321)
 #define HTONS
 #define HTONL
 #define NTOHS
@@ -246,7 +266,7 @@ EXT STR *Str;
 #define ntohl my_ntohl
 #endif
 #else
-#if BYTEORDER == 04321
+#if (BYTEORDER == 04321) || (BYTEORDER == 087654321)
 #undef HTONS
 #undef HTONL
 #undef NTOHS
@@ -419,7 +439,10 @@ EXT bool sawstudy INIT(FALSE);		/* do fbminstr on all strings */
 EXT bool sawi INIT(FALSE);		/* study must assume case insensitive */
 EXT bool sawvec INIT(FALSE);
 
-EXT int csh INIT(0);		/* 1 if /bin/csh is there, -1 if not */
+#ifdef CSH
+char *cshname INIT(CSH);
+int cshlen INIT(0);
+#endif /* CSH */
 
 #ifdef TAINT
 EXT bool tainted INIT(FALSE);		/* using variables controlled by $< */
@@ -469,7 +492,6 @@ EXT int dlmax INIT(128);
 EXT char *debname;
 EXT char *debdelim;
 #define YYDEBUG 1
-extern int yydebug;
 #endif
 EXT int perldb INIT(0);
 

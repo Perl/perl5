@@ -1,7 +1,10 @@
 ''' Beginning of part 3
-''' $Header: perl.man.3,v 3.0 89/10/18 15:21:46 lwall Locked $
+''' $Header: perl.man.3,v 3.0.1.1 89/11/11 04:45:06 lwall Locked $
 '''
 ''' $Log:	perl.man.3,v $
+''' Revision 3.0.1.1  89/11/11  04:45:06  lwall
+''' patch2: made some line breaks depend on troff vs. nroff
+''' 
 ''' Revision 3.0  89/10/18  15:21:46  lwall
 ''' 3.0 baseline
 ''' 
@@ -71,11 +74,29 @@ Examples:
 	open article || die "Can't find article $article: $!\en";
 	while (<article>) {\|.\|.\|.
 
+.ie t \{\
 	open(LOG, \'>>/usr/spool/news/twitlog\'\|);	# (log is reserved)
+'br\}
+.el \{\
+	open(LOG, \'>>/usr/spool/news/twitlog\'\|);
+					# (log is reserved)
+'br\}
 
+.ie t \{\
 	open(article, "caesar <$article |"\|);		# decrypt article
+'br\}
+.el \{\
+	open(article, "caesar <$article |"\|);
+					# decrypt article
+'br\}
 
+.ie t \{\
 	open(extract, "|sort >/tmp/Tmp$$"\|);		# $$ is our process#
+'br\}
+.el \{\
+	open(extract, "|sort >/tmp/Tmp$$"\|);
+					# $$ is our process#
+'br\}
 
 .ne 7
 	# process argument list of files along with any includes
@@ -91,7 +112,12 @@ Examples:
 			print STDERR "Can't open $filename: $!\en";
 			return;
 		}
+.ie t \{\
 		while (<$input>) {		# note the use of indirection
+'br\}
+.el \{\
+		while (<$input>) {		# note use of indirection
+'br\}
 			if (/^#include "(.*)"/) {
 				do process($1, $input);
 				next;
@@ -105,10 +131,12 @@ You may also, in the Bourne shell tradition, specify an EXPR beginning
 with \*(L">&\*(R", in which case the rest of the string
 is interpreted as the name of a filehandle
 (or file descriptor, if numeric) which is to be duped and opened.
+You may use & after >, >>, <, +>, +>> and +<.
+The mode you specify should match the mode of the original filehandle.
 Here is a script that saves, redirects, and restores
 .I STDOUT
 and
-.IR STDIN :
+.IR STDERR :
 .nf
 
 .ne 21
@@ -229,7 +257,7 @@ Examples:
 	$foo = pack("a14","abcdefg");
 	# "abcdefg\e0\e0\e0\e0\e0\e0\e0"
 
-	$foo = pack("i9pl", gmtime());
+	$foo = pack("i9pl", gmtime);
 	# a real struct tm (on my system anyway)
 
 .fi
@@ -312,6 +340,7 @@ FILEHANDLE.
 Returns the number of bytes actually read.
 SCALAR will be grown or shrunk to the length actually read.
 .Ip "readdir(DIRHANDLE)" 8 3
+.Ip "readdir DIRHANDLE" 8
 Returns the next directory entry for a directory opened by opendir().
 If used in an array context, returns all the rest of the entries in the
 directory.
@@ -535,7 +564,13 @@ The usual idiom is:
 
 or to block until something becomes ready:
 
+.ie t \{\
 	$nfound = select($rout=$rin, $wout=$win, $eout=$ein, undef);
+'br\}
+.el \{\
+	$nfound = select($rout=$rin, $wout=$win,
+				$eout=$ein, undef);
+'br\}
 
 .fi
 Any of the bitmasks can also be undef.
@@ -731,9 +766,10 @@ Sets the random number seed for the
 .I rand
 operator.
 If EXPR is omitted, does srand(time).
-.Ip "stat(FILEHANDLE)" 8 6
+.Ip "stat(FILEHANDLE)" 8 8
 .Ip "stat FILEHANDLE" 8
 .Ip "stat(EXPR)" 8
+.Ip "stat SCALARVARIABLE" 8
 Returns a 13-element array giving the statistics for a file, either the file
 opened via FILEHANDLE, or named by EXPR.
 Typically used as follows:
@@ -830,7 +866,7 @@ If OFFSET is negative, starts that far from the end of the string.
 You can use the substr() function as an lvalue, in which case EXPR must
 be an lvalue.
 If you assign something shorter than LEN, the string will shrink, and
-if you assign something longer than LEN, the string will grow to accomodate it.
+if you assign something longer than LEN, the string will grow to accommodate it.
 To keep the string the same length you may need to pad or chop your value using
 sprintf().
 .Ip "syscall(LIST)" 8 6
@@ -925,6 +961,7 @@ Examples:
 .fi
 .Ip "umask(EXPR)" 8 4
 .Ip "umask EXPR" 8
+.Ip "umask" 8
 Sets the umask for the process and returns the old one.
 If EXPR is omitted, merely returns current umask.
 .Ip "undef(EXPR)" 8 6
@@ -1038,8 +1075,11 @@ This interpretation is not enabled unless there is at least one vec() in
 your program, to protect older programs.
 .Ip "wait" 8 6
 Waits for a child process to terminate and returns the pid of the deceased
-process.
+process, or -1 if there are no child processes.
 The status is returned in $?.
+If you expected a child and didn't find it, you probably had a call to
+system, a close on a pipe, or backticks between the fork and the wait.
+These constructs also do a wait and may have harvested your child process.
 .Ip "wantarray" 8 4
 Returns true if the context of the currently executing subroutine
 is looking for an array value.
@@ -1054,7 +1094,7 @@ Returns false if the context is looking for a scalar.
 Produces a message on STDERR just like \*(L"die\*(R", but doesn't exit.
 .Ip "write(FILEHANDLE)" 8 6
 .Ip "write(EXPR)" 8
-.Ip "write(\|)" 8
+.Ip "write" 8
 Writes a formatted record (possibly multi-line) to the specified file,
 using the format associated with that file.
 By default the format for a file is the one having the same name is the

@@ -1,4 +1,4 @@
-/* $Header: stab.c,v 3.0 89/10/18 15:23:23 lwall Locked $
+/* $Header: stab.c,v 3.0.1.1 89/11/11 04:55:07 lwall Locked $
  *
  *    Copyright (c) 1989, Larry Wall
  *
@@ -6,6 +6,9 @@
  *    as specified in the README file that comes with the perl 3.0 kit.
  *
  * $Log:	stab.c,v $
+ * Revision 3.0.1.1  89/11/11  04:55:07  lwall
+ * patch2: sys_errlist[sys_nerr] is illegal
+ * 
  * Revision 3.0  89/10/18  15:23:23  lwall
  * 3.0 baseline
  * 
@@ -140,7 +143,7 @@ STR *str;
     case '!':
 	str_numset(stab_val(stab), (double)errno);
 	str_set(stab_val(stab),
-	  errno < 0 || errno > sys_nerr ? "(unknown)" : sys_errlist[errno]);
+	  errno < 0 || errno >= sys_nerr ? "(unknown)" : sys_errlist[errno]);
 	stab_val(stab)->str_nok = 1;	/* what a wonderful hack! */
 	break;
     case '<':

@@ -1,4 +1,4 @@
-/* $Header: str.c,v 3.0.1.1 89/10/26 23:23:41 lwall Locked $
+/* $Header: str.c,v 3.0.1.2 89/11/11 04:56:22 lwall Locked $
  *
  *    Copyright (c) 1989, Larry Wall
  *
@@ -6,6 +6,9 @@
  *    as specified in the README file that comes with the perl 3.0 kit.
  *
  * $Log:	str.c,v $
+ * Revision 3.0.1.2  89/11/11  04:56:22  lwall
+ * patch2: uchar gives Crays fits
+ * 
  * Revision 3.0.1.1  89/10/26  23:23:41  lwall
  * patch1: string ordering tests were wrong
  * patch1: $/ now works even when STDSTDIO undefined
@@ -840,7 +843,7 @@ STR *src;
 		    else if (*d == '[' && s[-1] == ']') { /* char class? */
 			int weight = 2;		/* let's weigh the evidence */
 			char seen[256];
-			unsigned char uchar = 0, lastuchar;
+			unsigned char unchar = 0, lastunchar;
 
 			Zero(seen,256,char);
 			*--s = '\0';
@@ -857,12 +860,12 @@ STR *src;
 				weight -= 100;
 			}
 			for (d++; d < s; d++) {
-			    lastuchar = uchar;
-			    uchar = (unsigned char)*d;
+			    lastunchar = unchar;
+			    unchar = (unsigned char)*d;
 			    switch (*d) {
 			    case '&':
 			    case '$':
-				weight -= seen[uchar] * 10;
+				weight -= seen[unchar] * 10;
 				if (isalpha(d[1]) || isdigit(d[1]) ||
 				  d[1] == '_') {
 				    d = scanreg(d,s,tokenbuf);
@@ -880,7 +883,7 @@ STR *src;
 				}
 				break;
 			    case '\\':
-				uchar = 254;
+				unchar = 254;
 				if (d[1]) {
 				    if (index("wds",d[1]))
 					weight += 100;
@@ -898,8 +901,8 @@ STR *src;
 				    weight += 100;
 				break;
 			    case '-':
-				if (lastuchar < d[1] || d[1] == '\\') {
-				    if (index("aA01! ",lastuchar))
+				if (lastunchar < d[1] || d[1] == '\\') {
+				    if (index("aA01! ",lastunchar))
 					weight += 30;
 				    if (index("zZ79~",d[1]))
 					weight += 30;
@@ -913,12 +916,12 @@ STR *src;
 					weight -= 150;
 				    d = bufptr;
 				}
-				if (uchar == lastuchar + 1)
+				if (unchar == lastunchar + 1)
 				    weight += 5;
-				weight -= seen[uchar];
+				weight -= seen[unchar];
 				break;
 			    }
-			    seen[uchar]++;
+			    seen[unchar]++;
 			}
 #ifdef DEBUGGING
 			if (debug & 512)

@@ -1,4 +1,4 @@
-/* $Header: toke.c,v 3.0.1.1 89/10/26 23:26:21 lwall Locked $
+/* $Header: toke.c,v 3.0.1.2 89/11/11 05:04:42 lwall Locked $
  *
  *    Copyright (c) 1989, Larry Wall
  *
@@ -6,6 +6,9 @@
  *    as specified in the README file that comes with the perl 3.0 kit.
  *
  * $Log:	toke.c,v $
+ * Revision 3.0.1.2  89/11/11  05:04:42  lwall
+ * patch2: fixed a CLINE macro conflict
+ * 
  * Revision 3.0.1.1  89/10/26  23:26:21  lwall
  * patch1: disambiguated word after "sort" better
  * 
@@ -20,6 +23,9 @@
 
 char *reparse;		/* if non-null, scanreg found ${foo[$bar]} */
 
+#ifdef CLINE
+#undef CLINE
+#endif
 #define CLINE (cmdline = (line < cmdline ? line : cmdline))
 
 #define META(c) ((c) | 128)
@@ -86,7 +92,7 @@ yylex()
 
   retry:
 #ifdef YYDEBUG
-    if (yydebug)
+    if (debug & 1)
 	if (index(s,'\n'))
 	    fprintf(stderr,"Tokener at %s",s);
 	else
@@ -159,7 +165,13 @@ yylex()
 	}
 #endif
 	bufend = linestr->str_ptr + linestr->str_cur;
-	firstline = FALSE;
+	if (firstline) {
+	    while (s < bufend && isspace(*s))
+		s++;
+	    if (*s == ':')	/* for csh's that have to exec sh scripts */
+		s++;
+	    firstline = FALSE;
+	}
 	goto retry;
     case ' ': case '\t': case '\f':
 	s++;
@@ -2094,10 +2106,8 @@ load_format()
 
 set_csh()
 {
-    if (!csh) {
-	if (stat("/bin/csh",&statbuf) < 0)
-	    csh = -1;
-	else
-	    csh = 1;
-    }
+#ifdef CSH
+    if (!cshlen)
+	cshlen = strlen(cshname);
+#endif
 }

@@ -28,9 +28,13 @@ $spitshell >s2p <<!GROK!THIS!
 : In the following dollars and backticks do not need the extra backslash.
 $spitshell >>s2p <<'!NO!SUBS!'
 
-# $Header: s2p.SH,v 3.0 89/10/18 15:35:02 lwall Locked $
+# $Header: s2p.SH,v 3.0.1.1 89/11/11 05:08:25 lwall Locked $
 #
 # $Log:	s2p.SH,v $
+# Revision 3.0.1.1  89/11/11  05:08:25  lwall
+# patch2: in s2p, + within patterns needed backslashing
+# patch2: s2p was printing out some debugging info to the output file
+# 
 # Revision 3.0  89/10/18  15:35:02  lwall
 # 3.0 baseline
 # 
@@ -418,7 +422,7 @@ ${space}next line;";
 		elsif ($c eq ']') {
 		    $inbracket = 0;
 		}
-		elsif (!$repl && index("()",$c) >= 0) {
+		elsif (!$repl && index("()+",$c) >= 0) {
 		    $_ = substr($_,0,$i) . '\\' . substr($_,$i,10000);
 		    $i++;
 		    $len++;
@@ -583,10 +587,9 @@ sub fetchpat {
     local($inbracket);
     local($prefix,$delim,$ch);
 
-    delim: while (s:^([^\](|)[\\/]*)([](|)[\\/])::) {
+    delim: while (s:^([^\]+(|)[\\/]*)([]+(|)[\\/])::) {
 	$prefix = $1;
 	$delim = $2;
-	print "$prefix\t$delim\t$_\n";
 	if ($delim eq '\\') {
 	    s/(.)//;
 	    $ch = $1;
@@ -597,13 +600,11 @@ sub fetchpat {
 	    $inbracket = 1;
 	    s/^\^// && ($delim .= '^');
 	    s/^]// && ($delim .= ']');
-	    print "$prefix\t$delim\t$_\n";
 	}
 	elsif ($delim eq ']') {
 	    $inbracket = 0;
 	}
 	elsif ($inbracket || $delim ne $outer) {
-	    print "Adding\n";
 	    $delim = '\\' . $delim;
 	}
 	$addr .= $prefix;

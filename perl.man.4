@@ -1,7 +1,11 @@
 ''' Beginning of part 4
-''' $Header: perl.man.4,v 3.0.1.1 89/10/26 23:18:43 lwall Locked $
+''' $Header: perl.man.4,v 3.0.1.2 89/11/11 04:46:40 lwall Locked $
 '''
 ''' $Log:	perl.man.4,v $
+''' Revision 3.0.1.2  89/11/11  04:46:40  lwall
+''' patch2: made some line breaks depend on troff vs. nroff
+''' patch2: clarified operation of ^ and $ when $* is false
+''' 
 ''' Revision 3.0.1.1  89/10/26  23:18:43  lwall
 ''' patch1: documented the desirability of unnecessary parentheses
 ''' 
@@ -218,7 +222,7 @@ You can actually assign to *name anywhere, but the previous referent of
 This may or may not bother you.
 .Sp
 Note that scalars are already passed by reference, so you can modify scalar
-arguments without using this mechanism by refering explicitly to the $_[nnn]
+arguments without using this mechanism by referring explicitly to the $_[nnn]
 in question.
 You can modify all the elements of an array by passing all the elements
 as scalars, but you have to use the * mechanism to push, pop or change the
@@ -267,12 +271,14 @@ Examples:
 	}
 
 .fi
-By default, the ^ character matches only the beginning of the string,
-the $ character matches only at the end (or before the newline at the end)
+By default, the ^ character is only guaranteed to match at the beginning
+of the string,
+the $ character only at the end (or before the newline at the end)
 and
 .I perl
 does certain optimizations with the assumption that the string contains
 only one line.
+The behavior of ^ and $ on embedded newlines will be inconsistent.
 You may, however, wish to treat a string as a multi-line buffer, such that
 the ^ will match after any newline within the string, and $ will match
 before any newline.
@@ -477,7 +483,13 @@ Here is a sample client (untested):
 	($name, $aliases, $proto) = getprotobyname('tcp');
 	($name, $aliases, $port) = getservbyname($port, 'tcp')
 		unless $port =~ /^\ed+$/;;
+.ie t \{\
 	($name, $aliases, $type, $len, $thisaddr) = gethostbyname($hostname);
+'br\}
+.el \{\
+	($name, $aliases, $type, $len, $thisaddr) =
+					gethostbyname($hostname);
+'br\}
 	($name, $aliases, $type, $len, $thataddr) = gethostbyname($them);
 
 	$this = pack($sockaddr, &AF_INET, 0, $thisaddr);
@@ -532,7 +544,7 @@ And here's a server:
 		($addr = accept(NS,S)) || die $!;
 		print "accept ok\en";
 
-		($af,$port,$inetaddr) = unpack($pat,$addr);
+		($af,$port,$inetaddr) = unpack($sockaddr,$addr);
 		@inetaddr = unpack('C4',$inetaddr);
 		print "$af $port @inetaddr\en";
 
@@ -1035,7 +1047,7 @@ machine, test the construct in an eval to see if it fails.
 If you know what version or patchlevel a particular feature was implemented,
 you can test $] to see if it will be there.
 .Ip 4. 4 4
-Choose mnemonic indentifiers.
+Choose mnemonic identifiers.
 .Ip 5. 4 4
 Be consistent.
 .Sh "Debugging"
@@ -1219,7 +1231,7 @@ of an array can be tainted, and others not.
 If you try to do something insecure, you will get a fatal error saying 
 something like \*(L"Insecure dependency\*(R" or \*(L"Insecure PATH\*(R".
 Note that you can still write an insecure system call or exec,
-but only by explicity doing something like the last example above.
+but only by explicitly doing something like the last example above.
 You can also bypass the tainting mechanism by referencing
 subpatterns\*(--\c
 .I perl
@@ -1373,7 +1385,7 @@ The following variables work differently
 	  OFS	\h'|2.5i'$,
 	  ORS	\h'|2.5i'$\e
 	  RLENGTH	\h'|2.5i'length($&)
-	  RS	\h'|2.5i'$/
+	  RS	\h'|2.5i'$\/
 	  RSTART	\h'|2.5i'length($\`)
 	  SUBSEP	\h'|2.5i'$;
 

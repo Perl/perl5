@@ -1,4 +1,4 @@
-/* $Header: util.c,v 3.0 89/10/18 15:32:43 lwall Locked $
+/* $Header: util.c,v 3.0.1.1 89/11/11 05:06:13 lwall Locked $
  *
  *    Copyright (c) 1989, Larry Wall
  *
@@ -6,6 +6,9 @@
  *    as specified in the README file that comes with the perl 3.0 kit.
  *
  * $Log:	util.c,v $
+ * Revision 3.0.1.1  89/11/11  05:06:13  lwall
+ * patch2: made dup2 a little better
+ * 
  * Revision 3.0  89/10/18  15:32:43  lwall
  * 3.0 baseline
  * 
@@ -1089,6 +1092,15 @@ char	*mode;
 	    close(p[THIS]);
 	}
 	if (doexec) {
+#if !defined(FCNTL) || !defined(F_SETFD)
+	    int fd;
+
+#ifndef NOFILE
+#define NOFILE 20
+#endif
+	    for (fd = 3; fd < NOFILE; fd++)
+		close(fd);
+#endif
 	    do_exec(cmd);	/* may or may not use the shell */
 	    _exit(1);
 	}
@@ -1106,13 +1118,36 @@ char	*mode;
     return fdopen(p[this], mode);
 }
 
+#ifdef NOTDEF
+dumpfds(s)
+char *s;
+{
+    int fd;
+    struct stat tmpstatbuf;
+
+    fprintf(stderr,"%s", s);
+    for (fd = 0; fd < 32; fd++) {
+	if (fstat(fd,&tmpstatbuf) >= 0)
+	    fprintf(stderr," %d",fd);
+    }
+    fprintf(stderr,"\n");
+}
+#endif
+
 #ifndef DUP2
 dup2(oldfd,newfd)
 int oldfd;
 int newfd;
 {
+    int fdtmp[10];
+    int fdx = 0;
+    int fd;
+
     close(newfd);
-    while (dup(oldfd) != newfd) ;	/* good enough for our purposes */
+    while ((fd = dup(oldfd)) != newfd)	/* good enough for low fd's */
+	fdtmp[fdx++] = fd;
+    while (fdx > 0)
+	close(fdtmp[--fdx]);
 }
 #endif
 
