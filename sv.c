@@ -27,9 +27,9 @@
 #define SV_COW_NEXT_SV(sv)	INT2PTR(SV *,SvUVX(sv))
 /* This is a pessamistic view. Scalar must be purely a read-write PV to copy-
    on-write.  */
-#define CAN_COW_MASK	(SVs_OBJECT|SVs_GMG|SVs_SMG|SVf_IOK|SVf_NOK|SVf_POK| \
-			 SVf_ROK|SVp_IOK|SVp_NOK|SVp_POK|SVf_FAKE|SVf_OOK| \
-			 SVf_BREAK|SVf_READONLY|SVf_AMAGIC)
+#define CAN_COW_MASK	(SVs_OBJECT|SVs_GMG|SVs_SMG|SVs_RMG|SVf_IOK|SVf_NOK| \
+			 SVf_POK|SVf_ROK|SVp_IOK|SVp_NOK|SVp_POK|SVf_FAKE| \
+			 SVf_OOK|SVf_BREAK|SVf_READONLY|SVf_AMAGIC)
 #define CAN_COW_FLAGS	(SVp_POK|SVf_POK)
 #endif
 
@@ -3932,8 +3932,8 @@ Perl_sv_setsv_flags(pTHX_ SV *dstr, register SV *sstr, I32 flags)
             if (DEBUG_C_TEST) {
                 PerlIO_printf(Perl_debug_log,
                               "Copy on write: sstr --> dstr\n");
-                Perl_sv_dump(sstr);
-                Perl_sv_dump(dstr);
+                sv_dump(sstr);
+                sv_dump(dstr);
             }
             if (!isSwipe) {
                 /* I believe I should acquire a global SV mutex if
@@ -4258,6 +4258,7 @@ S_sv_release_COW(pTHX_ register SV *sv, char *pvx, STRLEN cur, STRLEN len,
                  /* don't loop forever if the structure is bust, and we have
                     a pointer into a closed loop.  */
                 assert (current != after);
+                assert (SvPVX(current) == pvx);
             }
             /* Make the SV before us point to the SV after us.  */
             SV_COW_NEXT_SV(current) = after;
@@ -4307,7 +4308,7 @@ Perl_sv_force_normal_flags(pTHX_ register SV *sv, U32 flags)
                 PerlIO_printf(Perl_debug_log,
                               "Copy on write: Force normal %ld\n",
                               (long) flags);
-                Perl_sv_dump(sv);
+                sv_dump(sv);
             }
             SvFAKE_off(sv);
             SvREADONLY_off(sv);
@@ -4323,9 +4324,9 @@ Perl_sv_force_normal_flags(pTHX_ register SV *sv, U32 flags)
                 SvCUR(sv) = cur;
                 *SvEND(sv) = '\0';
             }
-            S_sv_release_COW(sv, pvx, cur, len, hash, next);
+            sv_release_COW(sv, pvx, cur, len, hash, next);
             if (DEBUG_C_TEST) {
-                Perl_sv_dump(sv);
+                sv_dump(sv);
             }
 	}
 	else if (PL_curcop != &PL_compiling)
@@ -5228,9 +5229,9 @@ Perl_sv_clear(pTHX_ register SV *sv)
                    then recheck the COW status.  */
                 if (DEBUG_C_TEST) {
                     PerlIO_printf(Perl_debug_log, "Copy on write: clear\n");
-                    Perl_sv_dump(sv);
+                    sv_dump(sv);
                 }
-                S_sv_release_COW(sv, SvPVX(sv), SvCUR(sv), SvLEN(sv),
+                sv_release_COW(sv, SvPVX(sv), SvCUR(sv), SvLEN(sv),
                                  SvUVX(sv), SV_COW_NEXT_SV(sv));
                 /* And drop it here.  */
                 SvFAKE_off(sv);
