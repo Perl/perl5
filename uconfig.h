@@ -2792,7 +2792,7 @@
 #endif
 #define	NVSIZE		8		/**/
 #undef	NV_PRESERVES_UV
-#define	NV_PRESERVES_UV_BITS	define
+#define	NV_PRESERVES_UV_BITS	0
 
 /* IVdf:
  *	This symbol defines the format string used for printing a Perl IV
