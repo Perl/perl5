@@ -427,11 +427,11 @@ oplist(pTHX_ OP *o, SV **SP)
             SP = oplist(aTHX_ cPMOPo->op_pmreplstart, SP);
             continue;
 	case OP_SORT:
-	    if (o->op_flags & (OPf_STACKED|OPf_SPECIAL)) {
+	    if (o->op_flags & OPf_STACKED && o->op_flags & OPf_SPECIAL) {
 		OP *kid = cLISTOPo->op_first->op_sibling;   /* pass pushmark */
 		kid = kUNOP->op_first;                      /* pass rv2gv */
 		kid = kUNOP->op_first;                      /* pass leave */
-		SP = oplist(aTHX_ kid, SP);
+		SP = oplist(aTHX_ kid->op_next, SP);
 	    }
 	    continue;
         }

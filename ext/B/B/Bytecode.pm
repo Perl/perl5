@@ -17,22 +17,25 @@ use B qw(class main_cv main_root main_start cstring comppadlist
 	OPpLVAL_INTRO SVf_FAKE SVf_READONLY);
 use B::Asmdata qw(@specialsv_name);
 use B::Assembler qw(asm newasm endasm);
-no warnings;					# XXX
 
 #################################################
 
-my $ithreads = $Config{'useithreads'} eq 'define';
-my ($varix, $opix, $savebegins);
+my ($varix, $opix, $savebegins, %walked, %files, @cloop);
 my %strtab = (0,0);
 my %svtab = (0,0);
 my %optab = (0,0);
 my %spectab = (0,0);
-my %walked;
-my @cloop;
 my $tix = 1;
 sub asm;
 sub nice ($) { }
-my %files;
+
+BEGIN {
+    my $ithreads = $Config{'useithreads'} eq 'define';
+    eval qq{
+	sub ITHREADS() { $ithreads }
+	sub VERSION() { $] }
+    }; die $@ if $@;
+}
 
 #################################################
 
@@ -55,7 +58,7 @@ sub B::OP::ix {
     my $op = shift;
     my $ix = $optab{$$op};
     defined($ix) ? $ix : do {
-	nice '['.$op->name.']';
+	nice "[".$op->name." $tix]";
 	asm "newopx", $op->size | $op->type <<7;
 	$optab{$$op} = $opix = $ix = $tix++;
 	$op->bsave($ix);
@@ -230,7 +233,7 @@ sub B::PVIV::bsave {
     $sv->ROK ?
 	$sv->B::RV::bsave($ix):
 	$sv->B::NULL::bsave($ix);
-    asm "xiv", !$ithreads && $sv->FLAGS & (SVf_FAKE|SVf_READONLY) ?
+    asm "xiv", !ITHREADS && $sv->FLAGS & (SVf_FAKE|SVf_READONLY) ?
 	"0 but true" : $sv->IVX;
 }
 
@@ -419,7 +422,7 @@ sub B::UNOP::bsave {
     my $firstix = 
 	$name =~ /fl[io]p/
 			# that's just neat
-    ||	(!$ithreads && $name eq 'regcomp')
+    ||	(!ITHREADS && $name eq 'regcomp')
 			# trick for /$a/o in pp_regcomp
     ||	$name eq 'rv2sv'
 	    && $op->flags & OPf_MOD	
@@ -452,23 +455,34 @@ sub B::BINOP::bsave {
 
 # not needed if no pseudohashes
 
-*B::BINOP::bsave = *B::OP::bsave if $] >= 5.009;
+*B::BINOP::bsave = *B::OP::bsave if VERSION >= 5.009;
 
 # deal with sort / formline 
 
 sub B::LISTOP::bsave {
     my ($op, $ix) = @_;
     my $name = $op->name;
-    if ($name eq 'sort' && $op->flags & (OPf_SPECIAL|OPf_STACKED)) {
+    sub blocksort() { OPf_SPECIAL|OPf_STACKED }
+    if ($name eq 'sort' && ($op->flags & blocksort) == blocksort) {
 	my $first = $op->first;
+	my $pushmark = $first->sibling;
+	my $rvgv = $pushmark->first;
+	my $leave = $rvgv->first;
+
+	my $leaveix = $leave->ix;
+
+	my $rvgvix = $rvgv->ix;
+	asm "ldop", $rvgvix unless $rvgvix == $opix;
+	asm "op_first", $leaveix;
+
+	my $pushmarkix = $pushmark->ix;
+	asm "ldop", $pushmarkix unless $pushmarkix == $opix;
+	asm "op_first", $rvgvix;
+
 	my $firstix = $first->ix;
-	my $firstsiblix = do {
-	    local *B::UNOP::bsave = *B::UNOP::bsave_fat;
-	    local *B::LISTOP::bsave = *B::UNOP::bsave_fat;
-	    $first->sibling->ix;
-	};
 	asm "ldop", $firstix unless $firstix == $opix;
-	asm "op_sibling", $firstsiblix;
+	asm "op_sibling", $pushmarkix;
+
 	$op->B::OP::bsave($ix);
 	asm "op_first", $firstix;
     } elsif ($name eq 'formline') {
@@ -501,7 +515,7 @@ sub B::BINOP::bsave_fat {
     my ($op,$ix) = @_;
     my $last = $op->last;
     my $lastix = $op->last->ix;
-    if ($] < 5.009 && $op->name eq 'aassign' && $last->name eq 'null') {
+    if (VERSION < 5.009 && $op->name eq 'aassign' && $last->name eq 'null') {
 	asm "ldop", $lastix unless $lastix == $opix;
 	asm "op_targ", $last->targ;
     }
@@ -524,7 +538,7 @@ sub B::PMOP::bsave {
 
     # my $pmnextix = $op->pmnext->ix;	# XXX
 
-    if ($ithreads) {
+    if (ITHREADS) {
 	if ($op->name eq 'subst') {
 	    $rrop = "op_pmreplroot";
 	    $rrarg = $op->pmreplroot->ix;
@@ -599,7 +613,7 @@ sub B::COP::bsave {
     my ($cop,$ix) = @_;
     my $warnix = $cop->warnings->ix;
     my $ioix = $cop->io->ix;
-    if ($ithreads) {
+    if (ITHREADS) {
 	$cop->B::OP::bsave($ix);
 	asm "cop_stashpv", pvix $cop->stashpv;
 	asm "cop_file", pvix $cop->file;
@@ -754,10 +768,10 @@ sub compile {
 	    no strict 'refs';
 	    nice "<DATA>";
 	    my $dh = *{defstash->NAME."::DATA"};
-	    local undef $/;
-	    if (length (my $data = <$dh>)) {
+	    unless (eof $dh) {
+		local undef $/;
 		asm "data", ord 'D';
-		print $data;
+		print <$dh>;
 	    } else {
 		asm "ret";
 	    }
