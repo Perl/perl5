@@ -192,8 +192,8 @@ There may well be others.  For example, on an EBCDIC implementation
 such as z/OS (OS/390) or OS/400 (using the ILE, the PASE is ASCII-based)
 the above material is similar to "Unix" but the code numbers change:
 
-    LF  eq  \025  eq  \x15  eq           chr(21)  eq  CP-1047 21
-    LF  eq  \045  eq  \x25  eq  \cU  eq  chr(37)  eq  CP-0037 37
+    LF  eq  \025  eq  \x15  eq  \cU  eq  chr(21)  eq  CP-1047 21
+    LF  eq  \045  eq  \x25  eq           chr(37)  eq  CP-0037 37
     CR  eq  \015  eq  \x0D  eq  \cM  eq  chr(13)  eq  CP-1047 13
     CR  eq  \015  eq  \x0D  eq  \cM  eq  chr(13)  eq  CP-0037 13
 
