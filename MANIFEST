@@ -529,6 +529,7 @@ ext/PerlIO/Scalar/Makefile.PL	PerlIO layer for scalars
 ext/PerlIO/Scalar/Scalar.pm	PerlIO layer for scalars
 ext/PerlIO/Scalar/Scalar.xs	PerlIO layer for scalars
 ext/PerlIO/t/encoding.t		See if PerlIO encoding conversion works
+ext/PerlIO/t/fail.t		See if bad layers fail
 ext/PerlIO/t/fallback.t		See if PerlIO fallbacks work
 ext/PerlIO/t/scalar.t		See if PerlIO::Scalar works
 ext/PerlIO/t/via.t		See if PerlIO::Via works
