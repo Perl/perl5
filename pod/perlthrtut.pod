@@ -272,6 +272,17 @@ messy, it's best to isolate the thread-specific code in its own
 module.  In our example above, that's what MyMod_threaded is, and it's
 only imported if we're running on a threaded Perl.
 
+=head2 A Note about the Examples
+
+Although thread support is considered to be stable, there are still a number
+of quirks that may startle you when you try out any of the examples below.
+In a real situation, care should be taken that all threads are finished
+executing before the program exits.  That care has B<not> been taken in these
+examples in the interest of simplicity.  Running these examples "as is" will
+produce error messages, usually caused by the fact that there are still
+threads running when the program exits.  You should not be alarmed by this.
+Future versions of Perl may fix this problem.
+
 =head2 Creating Threads
 
 The L<threads> package provides the tools you need to create new
@@ -302,7 +313,7 @@ part of the C<threads::new> call, like this:
     $Param3 = "foo"; 
     $thr = threads->new(\&sub1, "Param 1", "Param 2", $Param3); 
     $thr = threads->new(\&sub1, @ParamList); 
-    $thr = threads->new(\&sub1, qw(Param1 Param2 $Param3));
+    $thr = threads->new(\&sub1, qw(Param1 Param2 Param3));
 
     sub sub1 { 
         my @InboundParameters = @_; 
@@ -336,7 +347,7 @@ this. yield() is pretty straightforward, and works like this:
 	    my $thread = shift;
 	    my $foo = 50;
 	    while($foo--) { print "in thread $thread\n" }
-	    threads->yield();
+	    threads->yield;
 	    $foo = 50;
 	    while($foo--) { print "in thread $thread\n" }
     }
@@ -502,8 +513,8 @@ possibility of error:
     my $c : shared;
     my $thr1 = threads->create(sub { $b = $a; $a = $b + 1; }); 
     my $thr2 = threads->create(sub { $c = $a; $a = $c + 1; });
-    $thr1->join();
-    $thr2->join();
+    $thr1->join;
+    $thr2->join;
 
 Two threads both access $a.  Each thread can potentially be interrupted
 at any point, or be executed in any order.  At the end, $a could be 3
@@ -531,7 +542,7 @@ techniques such as queues, which remove some of the hard work involved.
 The lock() function takes a shared variable and puts a lock on it.  
 No other thread may lock the variable until the the variable is unlocked
 by the thread holding the lock. Unlocking happens automatically
-when the locking thread exists the outermost block that contains
+when the locking thread exits the outermost block that contains
 C<lock()> function.  Using lock() is straightforward: this example has
 several threads doing some calculations in parallel, and occasionally
 updating a running total:
@@ -547,7 +558,7 @@ updating a running total:
 	    # (... do some calculations and set $result ...)
 	    {
 		lock($total); # block until we obtain the lock
-		$total += $result
+		$total += $result;
 	    } # lock implicitly released at end of scope
 	    last if $result == 0;
 	}
@@ -587,7 +598,7 @@ lock() on the variable goes out of scope. For example:
 	{
 	    {
 		lock($x); # wait for lock
-		lock($x): # NOOP - we already have the lock
+		lock($x); # NOOP - we already have the lock
 		{
 		    lock($x); # NOOP
 		    {
@@ -673,7 +684,7 @@ this:
     use threads; 
     use threads::shared::queue;
 
-    my $DataQueue = threads::shared::queue->new(); 
+    my $DataQueue = threads::shared::queue->new; 
     $thr = threads->new(sub { 
         while ($DataElement = $DataQueue->dequeue) { 
             print "Popped $DataElement off the queue\n";
@@ -685,7 +696,7 @@ this:
     $DataQueue->enqueue(\$thr); 
     sleep 10; 
     $DataQueue->enqueue(undef);
-    $thr->join();
+    $thr->join;
 
 You create the queue with C<new threads::shared::queue>.  Then you can
 add lists of scalars onto the end with enqueue(), and pop scalars off
@@ -738,9 +749,9 @@ gives a quick demonstration:
         } 
     }
 
-    $thr1->join();
-    $thr2->join();
-    $thr3->join();
+    $thr1->join;
+    $thr2->join;
+    $thr3->join;
 
 The three invocations of the subroutine all operate in sync.  The
 semaphore, though, makes sure that only one thread is accessing the
@@ -770,8 +781,8 @@ of these defaults simply by passing in different values:
         $semaphore->up(5); # Increment the counter by five
     }
 
-    $thr1->detach();
-    $thr2->detach();
+    $thr1->detach;
+    $thr2->detach;
 
 If down() attempts to decrement the counter below zero, it blocks until
 the counter is large enough.  Note that while a semaphore can be created
@@ -881,7 +892,7 @@ things we've covered.  This program finds prime numbers using threads.
     14 } 
     15
     16 $stream->enqueue(undef);
-    17 $kid->join();
+    17 $kid->join;
     18
     19 sub check_num {
     20     my ($upstream, $cur_prime) = @_;
@@ -897,7 +908,7 @@ things we've covered.  This program finds prime numbers using threads.
     30         }
     31     } 
     32     $downstream->enqueue(undef) if $kid;
-    33     $kid->join()		if $kid;
+    33     $kid->join		if $kid;
     34 }
 
 This program uses the pipeline model to generate prime numbers.  Each

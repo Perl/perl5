@@ -817,6 +817,11 @@ the file, say, by doing C<make install>.
 functioning as a class, but that package doesn't define that particular
 method, nor does any of its base classes.  See L<perlobj>.
 
+=item Can't locate PerlIO%s
+
+(F) You tried to use in open() a PerlIO layer that does not exist,
+e.g. open(FH, ">:nosuchlayer", "somefile").
+
 =item (perhaps you forgot to load "%s"?)
 
 (F) This is an educated guess made in conjunction with the message

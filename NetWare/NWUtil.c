@@ -472,15 +472,16 @@ void fnAppendArgument(PCOMMANDLINEPARSER pclp, char *new_arg)
 	strcpy(pclp->m_argv[pclp->m_argc], new_arg);	// Appended the new argument.
 	pclp->m_argc++;		// Increment the number of parameters appended.
 
-	// The char array is emptied for all elements upto the end so that there are no junk characters.
-	// If this is not done, then the issue is like this:
+	// The char array is emptied for all elements upto the end so that there are no
+	// junk characters. If this is not done, then the issue is like this:
 	// - Simple perl command like "perl" on the system console works fine for the first time.
-	// - When it is given the second time, a new blank screen should come up which also
-	//   allows for editing. This was not consistently working well.
-	//   More so when the command was like, "perl   ", that is the name "perl"
-	//   followed by a few blank spaces. It used to give error in opening file and
-	//   would give some junk as the filename unable to open.
-	// Once the below fix was done, it is working fine.
+	// - When "perl" is executed the second time, a new blank screen should come up
+	//   which allows for editing also. This was not consistently working well.
+	//   More so when the command was like, "perl   ", that is the name "perl" followed
+	//   by a few blank spaces, it used to give error in opening file:
+	//   "unable to open the file" since the filename would have some junk characters.
+	// 
+	// These issues are fixed through the code below.
 	for(i=pclp->m_argc; i<pclp->m_argv_len; i++)
 		strncpy(pclp->m_argv[i], "", (MAX_DN_BYTES * sizeof(char)));	// MAX_DN_BYTES is the size of pclp->m_argv[].
 
