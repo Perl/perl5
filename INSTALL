@@ -74,7 +74,10 @@ proceeding.
 
 If you're building Perl on a non-Unix system, you should also read
 the README file specific to your operating system, since this may
-provide additional or different instructions for building Perl.
+provide additional or different instructions for building Perl. There
+are also README files for several flavors of Unix systems, such as
+Solaris, HP-UX, and AIX; if you have one of those systems, you should
+also read the README file specific to that system.
 
 If there is a hint file for your system (in the hints/ directory) you
 should also read that hint file for specific information for your
