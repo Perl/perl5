@@ -21,14 +21,15 @@ die "Patchlevel of perl ($patchlevel)",
 
 $usage =
 "Usage:  installman --man1dir=/usr/wherever --man1ext=1
-                    --man3dir=/usr/wherever --man3ext=3
-		    --notify --help
+                   --man3dir=/usr/wherever --man3ext=3
+	           --notify --silent --help
 	Defaults are:
 	man1dir = $Config{'installman1dir'};
 	man1ext = $Config{'man1ext'};
 	man3dir = $Config{'installman3dir'};
 	man3ext = $Config{'man3ext'};
-	--notify (or -n) just lists commands that would be executed.\n";
+	--notify (or -n) just lists commands that would be executed.
+        --silent (or -S) be silent. Only report errors.\n";
 
 GetOptions( qw( man1dir=s man1ext=s man3dir=s man3ext=s notify n help silent S)) 
 	|| die $usage;
@@ -39,7 +40,7 @@ $man1dir = defined($opt_man1dir) ? $opt_man1dir : $Config{'installman1dir'};
 $man1ext = defined($opt_man1ext) ? $opt_man1ext : $Config{'man1ext'};
 $man3dir = defined($opt_man3dir) ? $opt_man3dir : $Config{'installman3dir'};
 $man3ext = defined($opt_man3ext) ? $opt_man3ext : $Config{'man3ext'};
-$silent  = $opt_silent || $opt_s;
+$silent  = $opt_silent || $opt_S;
 
 $notify = $opt_notify || $opt_n;
 
@@ -174,7 +175,7 @@ sub lsmodpods {
 }
 
 $packlist->write() unless $notify;
-warn "  Installation complete\n";
+warn "  Installation complete\n" unless $silent;
 
 exit 0;
     
@@ -184,7 +185,7 @@ exit 0;
 
 sub cmd {
     local($cmd) = @_;
-    warn "  $cmd\n" unless $cmd;
+    warn "  $cmd\n" unless $silent;
     unless ($notify) {
 	if ($Config{d_fork}) {
 	    fork ? wait : exec $cmd;  # Allow user to ^C out of command.
@@ -215,7 +216,7 @@ sub link {
     my($from,$to) = @_;
     my($success) = 0;
 
-    warn $silent ? "  $to\n" : "  ln $from $to\n";
+    warn "  ln $from $to\n" unless $silent;
     eval {
         CORE::link($from, $to)
             ? $success++
