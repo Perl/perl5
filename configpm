@@ -63,6 +63,7 @@ open(CONFIG_SH, 'config.sh') || die "Can't open config.sh: $!";
 while(<CONFIG_SH>) { if (/^version='(.+)'$/) { $myver = $1; last } }
 close(CONFIG_SH);
 die "Can't find version in config.sh\n" unless defined $myver;;
+$myver =~ s/_/./g if $^O eq 'VMS';
 
 printf CONFIG <<'ENDOFBEG', ($myver) x 3;
 # This file was created by configpm when Perl was built. Any changes
