@@ -7970,13 +7970,8 @@ Perl_scan_vstring(pTHX_ char *s, SV *sv)
     char *pos = s;
     char *start = s;
 
-    if (*pos == 'v') {
-      pos++;  /* get past 'v' */
-      if (ckWARN(WARN_DEPRECATED))
-	Perl_warner(aTHX_ packWARN(WARN_DEPRECATED),
-		    "v-strings are deprecated (especially those starting with 'v')");
-    }
-
+    if (*pos == 'v')
+        pos++;
     while (pos < PL_bufend && (isDIGIT(*pos) || *pos == '_'))
 	pos++;
     if ( *pos != '.') {
@@ -7990,6 +7985,10 @@ Perl_scan_vstring(pTHX_ char *s, SV *sv)
 	    return pos;
 	}
     }
+
+    if (*start == 'v' && ckWARN(WARN_DEPRECATED))
+	 Perl_warner(aTHX_ packWARN(WARN_DEPRECATED),
+		     "v-strings are deprecated (especially those starting with 'v')");
 
     if (!isALPHA(*pos)) {
 	UV rev;
