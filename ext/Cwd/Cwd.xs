@@ -127,14 +127,15 @@ _cwdxs_abs_path(char *start)
 {
   DIR *parent;
   Direntry_t *dp;
-  char dotdots[MAXPATHLEN] = "", dir[MAXPATHLEN] = "";
-  char name[FILENAME_MAX] = "";
+  char dotdots[MAXPATHLEN] = { 0 };
+  char dir[MAXPATHLEN]     = { 0 };
+  char name[MAXPATHLEN]    = { 0 };
   char *cwd;
   int namelen;
   struct stat cst, pst, tst;
 
   if (PerlLIO_stat(start, &cst) < 0) {
-    warn("stat(%s): %s", start, Strerror(errno));
+    warn("abs_path: stat(\"%s\"): %s", start, Strerror(errno));
     return FALSE;
   }
 
@@ -147,7 +148,7 @@ _cwdxs_abs_path(char *start)
 
     if (PerlLIO_stat(dotdots, &cst) < 0) {
       Safefree(cwd);
-      warn("stat(%s): %s", dotdots, Strerror(errno));
+      warn("abs_path: stat(\"%s\"): %s", dotdots, Strerror(errno));
       return FALSE;
     }
     
@@ -155,47 +156,59 @@ _cwdxs_abs_path(char *start)
       /* We've reached the root: previous is same as current */
       break;
     } else {
+      STRLEN dotdotslen = strlen(dotdots);
+
       /* Scan through the dir looking for name of previous */
       if (!(parent = PerlDir_open(dotdots))) {
         Safefree(cwd);
-        warn("opendir(%s): %s", dotdots, Strerror(errno));
+        warn("abs_path: opendir(\"%s\"): %s", dotdots, Strerror(errno));
         return FALSE;
       }
     
+      SETERRNO(0,SS$_NORMAL); /* for readdir() */
       while ((dp = PerlDir_read(parent)) != NULL) {
         if (strEQ(dp->d_name, "."))
           continue;
         if (strEQ(dp->d_name, ".."))
           continue;
         
-        Zero(name, FILENAME_MAX, char);
-        Copy(dotdots, name, strlen(dotdots), char);
-        *(name + strlen(dotdots)) = '/';
-        strcat(name, dp->d_name);
+        Copy(dotdots, name, dotdotslen, char);
+        name[dotdotslen] = '/';
+#ifdef DIRNAMLEN
+	namelen = dp->d_namlen;
+#else
+	namelen = strlen(dp->d_name);
+#endif
+        Copy(dp->d_name, name + dotdotslen + 1, namelen, char);
+	name[dotdotslen + 1 + namelen] = 0;
         
         if (PerlLIO_lstat(name, &tst) < 0) {
           Safefree(cwd);
           PerlDir_close(parent);
-          warn("lstat(%s): %s", name, Strerror(errno));
+          warn("abs_path: lstat(\"%s\"): %s", name, Strerror(errno));
           return FALSE;
         }
         
         if (tst.st_dev == pst.st_dev && tst.st_ino == pst.st_ino)
           break;
+
+	SETERRNO(0,SS$_NORMAL); /* for readdir() */
       }
       
-#ifdef DIRNAMLEN
-      namelen = dp->d_namlen;
-#else
-      namelen = strlen(dp->d_name);
-#endif
+
+      if (!dp && errno) {
+        warn("abs_path: readdir(\"%s\"): %s", dotdots, Strerror(errno));
+        Safefree(cwd);
+        return FALSE;
+      }
+
       Move(cwd, cwd + namelen + 1, strlen(cwd), char);
       Copy(dp->d_name, cwd + 1, namelen, char);
 #ifdef VOID_CLOSEDIR
       PerlDir_close(dir);
 #else
       if (PerlDir_close(parent) < 0) {
-        warn("closedir(%s): %s", dotdots, Strerror(errno));
+        warn("abs_path: closedir(\"%s\"): %s", dotdots, Strerror(errno));
         Safefree(cwd);
         return FALSE;
       }
