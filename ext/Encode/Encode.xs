@@ -91,7 +91,7 @@ PerlIOEncode_pushed(pTHX_ PerlIO * f, const char *mode, SV * arg)
     if (!SvROK(e->enc)) {
 	e->enc = Nullsv;
 	errno = EINVAL;
-	Perl_warner(aTHX_ WARN_IO, "Cannot find encoding \"%" SVf "\"",
+	Perl_warner(aTHX_ packWARN(WARN_IO), "Cannot find encoding \"%" SVf "\"",
 		    arg);
 	code = -1;
     }
@@ -541,7 +541,7 @@ encode_method(pTHX_ encode_t * enc, encpage_t * dir, SV * src,
 			UV ch =
 			    utf8n_to_uvuni(s + slen, (SvCUR(src) - slen),
 					   &clen, 0);
-			Perl_warner(aTHX_ WARN_UTF8,
+			Perl_warner(aTHX_ packWARN(WARN_UTF8),
 				    "\"\\N{U+%" UVxf
 				    "}\" does not map to %s", ch,
 				    enc->name[0]);

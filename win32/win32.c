@@ -575,7 +575,7 @@ do_aspawn(void *vreally, void **vmark, void **vsp)
     else {
 	if (status < 0) {
 	    if (ckWARN(WARN_EXEC))
-		Perl_warner(aTHX_ WARN_EXEC, "Can't spawn \"%s\": %s", argv[0], strerror(errno));
+		Perl_warner(aTHX_ packWARN(WARN_EXEC), "Can't spawn \"%s\": %s", argv[0], strerror(errno));
 	    status = 255 * 256;
 	}
 	else
@@ -690,7 +690,7 @@ do_spawn2(char *cmd, int exectype)
     else {
 	if (status < 0) {
 	    if (ckWARN(WARN_EXEC))
-		Perl_warner(aTHX_ WARN_EXEC, "Can't %s \"%s\": %s",
+		Perl_warner(aTHX_ packWARN(WARN_EXEC), "Can't %s \"%s\": %s",
 		     (exectype == EXECF_EXEC ? "exec" : "spawn"),
 		     cmd, strerror(errno));
 	    status = 255 * 256;

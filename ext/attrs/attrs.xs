@@ -28,7 +28,7 @@ import(...)
 	if (!PL_compcv || !(cv = CvOUTSIDE(PL_compcv)))
 	    croak("can't set attributes outside a subroutine scope");
 	if (ckWARN(WARN_DEPRECATED))
-	    Perl_warner(aTHX_ WARN_DEPRECATED,
+	    Perl_warner(aTHX_ packWARN(WARN_DEPRECATED),
 			"pragma \"attrs\" is deprecated, "
 			"use \"sub NAME : ATTRS\" instead");
 	for (i = 1; i < items; i++) {
