@@ -249,7 +249,9 @@ a scalar is encoded internally in UTF-8 (Unicode).
 
 =head1 Modules and Pragmata
 
-=head2 Updated Modules
+=head2 Updated Modules And Pragmata
+
+base
 
 B::Concise
 
@@ -257,6 +259,8 @@ B::Deparse
 
 Benchmark - an optional feature, C<:hireswallclock>, now allows
 for high resolution wall clock times (uses Time::HiRes).
+
+bytes - now has bytes::substr.
 
 CGI
 
@@ -277,8 +281,8 @@ Digest::MD5
 Encode - significant updates on the encoding pragma functionality
 (tr/// and the DATA filehandle, formats).  The ISO 8859-6 conversion
 table has been corrected (the 0x30..0x39 erroneously mapped to
-U+0660..U+0669, instead of U+0030..U+0039), the UTF7 encoding has
-been added.
+U+0660..U+0669, instead of U+0030..U+0039).  The UTF-7 encoding has
+been added (making Encode feature-complete with Unicode::String).
 
 libnet
 
@@ -286,7 +290,7 @@ Math::BigInt
 
 MIME::Base64
 
-NEXT - diamond inheritance now works
+NEXT - diamond inheritance now works.
 
 Net::Ping
 
@@ -296,7 +300,8 @@ Pod::LaTeX
 
 PodParsers
 
-Pod::Perldoc - complete rewrite
+Pod::Perldoc - complete rewrite.  As a side-effect, no more refuses
+to startup when run by root.
 
 Scalar::Util - new utilities: refaddr, isvstring, looks_like_number,
 set_prototype.
@@ -319,7 +324,7 @@ Time::HiRes - use of nanosleep(), if available, allows mixing
 subsecond sleeps with alarms.
 
 threads - several fixes, for example for join() problems and memory
-leaks.  In some platforms (like Linux) that use glibc the memory
+leaks.  In some platforms (like Linux) that use glibc the minimum memory
 footprint of one ithread has been reduced by several hundred kilobytes.
 
 threads::shared - many memory leaks have been fixed.
@@ -438,7 +443,7 @@ and F<README.perlce>.
 =head2 Closures, eval and lexicals
 
 There have been many fixes in the area of anonymous subs, lexicals and
-closures. Although this means that Perl is now more "correct", it is
+closures.  Although this means that Perl is now more "correct", it is
 possible that some existing code will break that happens to rely on
 the faulty behaviour.  In practice this is unlikely unless your code
 contains a very complex nesting of anonymous subs, evals and lexicals.
@@ -589,6 +594,11 @@ Pipes and sockets are now automatically in binary mode.
 The four-argument form of select() did not preserve $! (errno) properly
 when there were errors in the underlying call.  This is now fixed.
 
+=item *
+
+The "CR CR LF" problem of has been fixed, binmode(FH, ":crlf")
+is now effectively a no-op.
+
 =back
 
 =head1 New or Changed Diagnostics
@@ -722,7 +732,7 @@ Verbose modifier C<v> added for C<-DXv> and C<-Dsv>, see L<perlrun>.
 =head1 New Tests
 
 In Perl 5.8.0 there were about 69000 separate tests in about 700 test files,
-in Perl 5.8.1 there are about 75000 separate tests in about 750 test files.
+in Perl 5.8.1 there are about 77000 separate tests in about 780 test files.
 The exact numbers depend on the Perl configuration and on the operating
 system platform.
 
@@ -922,8 +932,12 @@ The v-strings as such may be removed.  What will keep working is
 the v-less form (1.2.3) when used with C<use>, C<require>, and
 C<$VERSION>.  The v-ful version (v1.2.3) may become obsolete.
 The equivalence of strings and v-strings (e.g. that currently 5.8.0
-is equal to "\5\8\0") will go away, and instead the 1.2.3 will be
-a "version object", as will be the C<$^V>.
+is equal to "\5\8\0") will go away, and instead the 1.2.3 will be a
+"version object", as will be the C<$^V>.  B<There is no deprecation
+warning for v-strings>, though: it is quite hard to detect when
+v-strings are being used safely, and when they are not.  Therefore
+to avoid false warnings, or miss needed ones it was decided that
+deprecation warnings will not be be given.
 
 =item *
 
@@ -932,6 +946,7 @@ a "version object", as will be the C<$^V>.
 =item *
 
 The C<$*> Variable Will Be Removed
+(it was deprecated a long time ago)
 
 =item *
 
