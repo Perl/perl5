@@ -778,7 +778,10 @@ PP(pp_rv2av)
 	    U32 i;
 	    for (i=0; i < (U32)maxarg; i++) {
 		SV **svp = av_fetch(av, i, FALSE);
-		SP[i+1] = (svp) ? *svp : &PL_sv_undef;
+		/* See note in pp_helem, and bug id #27839 */
+		SP[i+1] = svp
+		    ? SvGMAGICAL(*svp) ? sv_mortalcopy(*svp) : *svp
+		    : &PL_sv_undef;
 	    }
 	}
 	else {

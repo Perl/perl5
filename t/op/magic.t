@@ -36,7 +36,7 @@ sub skip {
     return 1;
 }
 
-print "1..53\n";
+print "1..54\n";
 
 $Is_MSWin32  = $^O eq 'MSWin32';
 $Is_NetWare  = $^O eq 'NetWare';
@@ -410,4 +410,16 @@ ok "@+" eq "10 1 6 10";
 	$ok = "a$\b" eq "aa\0bb";
     }
     ok $ok;
+}
+
+# Test for bug [perl #27839]
+{
+    my $x;
+    sub f {
+	"abc" =~ /(.)./;
+	$x = "@+";
+	return @+;
+    };
+    my @y = f();
+    ok( $x eq "@y", "return a magic array ($x) vs (@y)" );
 }
