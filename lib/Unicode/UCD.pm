@@ -204,7 +204,7 @@ sub charinfo {
         last;
       }
     }
-    openunicode(\$UNICODEFH, "Unicode.txt");
+    openunicode(\$UNICODEFH, "UnicodeData.txt");
     if (defined $UNICODEFH) {
 	use Search::Dict 1.02;
 	if (look($UNICODEFH, "$hexk;", { xfrm => sub { $_[0] =~ /^([^;]+);(.+)/; sprintf "%06X;$2", hex($1) } } ) >= 0) {
@@ -492,7 +492,7 @@ my %COMPEXCL;
 
 sub _compexcl {
     unless (%COMPEXCL) {
-	if (openunicode(\$COMPEXCLFH, "CompExcl.txt")) {
+	if (openunicode(\$COMPEXCLFH, "CompositionExclusions.txt")) {
 	    while (<$COMPEXCLFH>) {
 		if (/^([0-9A-F]+) \# /) {
 		    my $code = hex($1);
@@ -562,7 +562,7 @@ my %CASEFOLD;
 
 sub _casefold {
     unless (%CASEFOLD) {
-	if (openunicode(\$CASEFOLDFH, "CaseFold.txt")) {
+	if (openunicode(\$CASEFOLDFH, "CaseFolding.txt")) {
 	    while (<$CASEFOLDFH>) {
 		if (/^([0-9A-F]+); ([CFSI]); ([0-9A-F]+(?: [0-9A-F]+)*);/) {
 		    my $code = hex($1);
@@ -642,7 +642,7 @@ my %CASESPEC;
 
 sub _casespec {
     unless (%CASESPEC) {
-	if (openunicode(\$CASESPECFH, "SpecCase.txt")) {
+	if (openunicode(\$CASESPECFH, "SpecialCasing.txt")) {
 	    while (<$CASESPECFH>) {
 		if (/^([0-9A-F]+); ([0-9A-F]+(?: [0-9A-F]+)*)?; ([0-9A-F]+(?: [0-9A-F]+)*)?; ([0-9A-F]+(?: [0-9A-F]+)*)?; (\w+(?: \w+)*)?/) {
 		    my ($hexcode, $lower, $title, $upper, $condition) =
@@ -669,7 +669,7 @@ sub _casespec {
 				  upper     => $oldupper,
 				  condition => $oldcondition };
 			    } else {
-				warn __PACKAGE__, ": SpecCase.txt:", $., ": No oldlocale for 0x$hexcode\n"
+				warn __PACKAGE__, ": SpecialCasing.txt:", $., ": No oldlocale for 0x$hexcode\n"
 			    }
 			}
 			my ($locale) =

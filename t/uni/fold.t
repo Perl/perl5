@@ -7,7 +7,7 @@ use File::Spec;
 
 my $CF = File::Spec->catfile(File::Spec->catdir(File::Spec->updir,
 					       "lib", "unicore"),
-			    "CaseFold.txt");
+			    "CaseFolding.txt");
 
 if (open(CF, $CF)) {
     my @CF;
