@@ -3459,8 +3459,9 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state)
     if (!SIZE_ONLY && ckWARN(WARN_REGEXP) && POSIXCC(nextvalue))
 	checkposixcc(pRExC_state);
 
-    if (UCHARAT(RExC_parse) == ']' || UCHARAT(RExC_parse) == '-')
-	goto charclassloop;		/* allow 1st char to be ] or - */
+    /* allow 1st char to be ] (allowing it to be - is dealt with later) */
+    if (UCHARAT(RExC_parse) == ']')
+	goto charclassloop;
 
     while (RExC_parse < RExC_end && UCHARAT(RExC_parse) != ']') {
 
