@@ -1,3 +1,4 @@
+#! /bin/sh
 case $CONFIG in
 '')
 	if test -f config.sh; then TOP=.;
@@ -16,6 +17,9 @@ esac
 case "$0" in
 */*) cd `expr X$0 : 'X\(.*\)/'` ;;
 esac
+
+: ${bin_sh=/bin/sh}
+
 echo "Extracting makedepend (with variable substitutions)"
 rm -f makedepend
 $spitshell >makedepend <<!GROK!THIS!
@@ -53,6 +57,7 @@ export PATH
 $cat /dev/null >.deptmp
 $rm -f *.c.c c/*.c.c
 if test -f Makefile; then
+    rm -f $firstmakefile
     cp Makefile $firstmakefile
 fi
 mf=$firstmakefile
@@ -128,7 +133,7 @@ rm .shlist.old
 if $test -s .deptmp; then
     for file in `cat .shlist`; do
 	$echo `$expr X$file : 'X\(.*\).SH'`: $file $TOP/config.sh \; \
-	    /bin/sh $file >> .deptmp
+	    $bin_sh $file >> .deptmp
     done
     $echo "Updating $mf..."
     $echo "# If this runs make out of memory, delete /usr/include lines." \
@@ -155,11 +160,12 @@ else
        $sed -f .hsed >> $mf.new
     for file in `$cat .shlist`; do
 	$echo `$expr X$file : 'X\(.*\).SH'`: $file $TOP/config.sh \; \
-	    /bin/sh $file >> $mf.new
+	    $bin_sh $file >> $mf.new
     done
 fi
 $rm -f $mf.old
 $cp $mf $mf.old
+$rm -f $mf
 $cp $mf.new $mf
 $rm $mf.new
 $echo "# WARNING: Put nothing here or make depend will gobble it up!" >> $mf
