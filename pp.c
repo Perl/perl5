@@ -3834,7 +3834,14 @@ PP(pp_pack)
 	case 'p':
 	    while (len-- > 0) {
 		fromstr = NEXTFROM;
-		aptr = SvPV_force(fromstr, na);	/* XXX Error if TEMP? */
+		if (fromstr == &sv_undef)
+		  aptr = NULL;
+		else {
+		  if (SvREADONLY(fromstr) && curcop != &compiling) {
+		    fromstr = sv_mortalcopy(fromstr);
+		  }
+		  aptr = SvPV_force(fromstr, na);
+		}
 		sv_catpvn(cat, (char*)&aptr, sizeof(char*));
 	    }
 	    break;
