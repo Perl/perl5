@@ -414,12 +414,6 @@ This is to speed up
 C<qr//> already gives us a way of saving compiled regexps, but it should
 be done automatically.
 
-=head2 Re-entrant functions
-
-Add configure probes for C<_r> forms of system calls and fit them to the
-core. Unfortunately, calling conventions for these functions and not
-standardised.
-
 =head2 Cross-compilation support
 
 Bart Schuller reports that using C<microperl> and a cross-compiler, he
