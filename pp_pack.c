@@ -2917,17 +2917,17 @@ S_pack_rec(pTHX_ SV *cat, tempsym_t* symptr, SV **beglist, SV **endlist )
 		fromstr = NEXTFROM;
 		  auv = SvUV(fromstr);
 		  if (utf8) {
-		      char buffer[UTF8_MAXLEN], *end;
-		      end = uvuni_to_utf8_flags(buffer, auv,
+		      char buffer[UTF8_MAXLEN], *endb;
+		      endb = uvuni_to_utf8_flags(buffer, auv,
 						     ckWARN(WARN_UTF8) ?
 						0 : UNICODE_ALLOW_ANY);
-		      if (cur >= end-(end-buffer)*2) {
+		      if (cur >= end-(endb-buffer)*2) {
 			  *cur = '\0';
 			  SvCUR(cat) = cur - start;
-			  GROWING(0, cat, start, cur, len+(end-buffer)*2);
+			  GROWING(0, cat, start, cur, len+(endb-buffer)*2);
 			  end = start+SvLEN(cat)-UTF8_MAXLEN;
 		      }
-		      bytes_to_uni(aTHX_ buffer, end-buffer, &cur);
+		      bytes_to_uni(aTHX_ buffer, endb-buffer, &cur);
 		  } else {
 		      if (cur >= end) {
 			  *cur = '\0';
