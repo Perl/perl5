@@ -465,6 +465,8 @@ working example of something along the lines of:
 
 The debugger has numerous options settable using the C<O> command,
 either interactively or from the environment or an rc file.
+(./.perldb or ~/.perldb under Unix.)
+
 
 =over 12
 
@@ -600,9 +602,11 @@ include lexicals in a module's file scope, or lost in closures.
 
 =back
 
-During startup, options are initialized from C<$ENV{PERLDB_OPTS}>.
-You may place the initialization options C<TTY>, C<noTTY>,
-C<ReadLine>, and C<NonStop> there.
+After the rc file is read, the debugger reads the C<$ENV{PERLDB_OPTS}>
+environment variable and parses this as the remainder of a `O ...'
+line as one might enter at the debugger prompt.  You may place the
+initialization options C<TTY>, C<noTTY>, C<ReadLine>, and C<NonStop>
+there.
 
 If your rc file contains:
 
