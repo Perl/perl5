@@ -106,7 +106,6 @@ dprof_times(struct tms *t)
 
 XS(XS_Devel__DProf_END);        /* used by prof_mark() */
 
-static SV * Sub;        /* pointer to $DB::sub */
 static PerlIO *fp;      /* pointer to tmon.out file */
 
 /* Added -JH */
@@ -255,6 +254,7 @@ prof_mark( opcode ptype )
         STRLEN len;
         SV *sv;
 	U32 id;
+	SV *Sub = GvSV(DBsub);       /* name of current sub */
 
         if( SAVE_STACK ){
                 if( profstack_ix + 5 > profstack_max ){
@@ -552,6 +552,7 @@ XS(XS_DB_sub)
         dXSARGS;
         dORIGMARK;
         HV *oldstash = curstash;
+	SV *Sub = GvSV(DBsub);       /* name of current sub */
 
         SP -= items;
 
@@ -605,6 +606,7 @@ XS(XS_DB_goto)
 
                 dORIGMARK;
                 HV *oldstash = curstash;
+		SV *Sub = GvSV(DBsub);       /* name of current sub */
                 /* SP -= items;  added by xsubpp */
                 DBG_SUB_NOTIFY( "XS DBsub(%s)\n", SvPV(Sub, na) );
 
@@ -662,7 +664,6 @@ BOOT:
                 dowarn = warn_tmp;
         }
 
-        Sub = GvSV(DBsub);       /* name of current sub */
         sv_setiv( DBsingle, 0 ); /* disable DB single-stepping */
 
 	{

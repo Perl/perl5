@@ -929,6 +929,8 @@ Perl_newGVgen(pTHX_ char *pack)
 GP*
 Perl_gp_ref(pTHX_ GP *gp)
 {
+    if (!gp)
+	return (GP*)NULL;
     gp->gp_refcnt++;
     if (gp->gp_cv) {
 	if (gp->gp_cvgen) {

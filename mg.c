@@ -1640,7 +1640,7 @@ Perl_magic_set(pTHX_ SV *sv, MAGIC *mg)
 	                PL_dowarn |= G_WARN_ONCE ;
 	        }
 	    }
-	}    
+	}
 	break;
     case '.':
 	if (PL_localizing) {

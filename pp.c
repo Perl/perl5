@@ -4938,8 +4938,13 @@ PP(pp_split)
     TAINT_IF((pm->op_pmflags & PMf_LOCALE) &&
 	     (pm->op_pmflags & (PMf_WHITE | PMf_SKIPWHITE)));
 
-    if (pm->op_pmreplroot)
+    if (pm->op_pmreplroot) {
+#ifdef USE_ITHREADS
+	ary = GvAVn((GV*)PL_curpad[(PADOFFSET)pm->op_pmreplroot]);
+#else
 	ary = GvAVn((GV*)pm->op_pmreplroot);
+#endif
+    }
     else if (gimme != G_ARRAY)
 #ifdef USE_THREADS
 	ary = (AV*)PL_curpad[0];
