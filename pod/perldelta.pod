@@ -76,9 +76,6 @@ You can now weaken references to read only values.
 
 =item Test::Harness
 
-This provides the C<prove> utility, which makes it easy to run an individual
-regression test at the command line.
-
 =item threads::shared
 
 C<cond_wait> has a new two argument form. C<cond_timedwait> has been added.
@@ -87,8 +84,12 @@ C<cond_wait> has a new two argument form. C<cond_timedwait> has been added.
 
 =head1 Utility Changes
 
-C<find2perl> now assumes C<-print> as a default action. It needed to be
-specified explicitly.
+C<find2perl> now assumes C<-print> as a default action. Previously, it
+needed to be specified explicitly.
+
+A new utility, C<prove>, makes it easy to run an individual regression test
+at the command line. C<prove> is part of Test::Harness, which users of earlier
+Perl versions can install from CPAN.
 
 =head1 New Documentation
 
@@ -117,7 +118,7 @@ Reading $^E now preserves $!. Previously, the C code implementing $^E
 did not preserve C<errno>, so reading $^E could cause C<errno> and therefore
 C<$!> to change unexpectedly.
 
-Reentrant functions will (one more) work with C++. 5.8.2 introduced a bugfix
+Reentrant functions will (once more) work with C++. 5.8.2 introduced a bugfix
 which accidentally broke the compilation of Perl extensions written in C++
 
 =head1 New or Changed Diagnostics
@@ -126,7 +127,7 @@ which accidentally broke the compilation of Perl extensions written in C++
 
 The hash code has been refactored to reduce source duplication. The
 external interface is unchanged, and aside from the bug fixes described
-above, there should be not change in behaviour.
+above, there should be no change in behaviour.
 
 C<hv_clear_placeholders> is now part of the perl API
 
@@ -141,7 +142,7 @@ avoid bugs where names clash.
 =head1 Known Problems
 
 We have a backlog of unresolved bugs. Dealing with bugs and bug reports
-is  unglamorous work; not something ideally suited to volunteer labour,
+is unglamorous work; not something ideally suited to volunteer labour,
 but that is all that we have.
 
 The perl5 development team are implementing changes to help address this
