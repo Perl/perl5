@@ -141,12 +141,6 @@ Home page for ISO 639-2.
 =back
 
 
-=head1 ENCODING
-
-The language names are encoded in UTF-8.  (Currently this matters
-only for two languages: Norwegian BokmÅ√Å•l, and VolapÅ√Åºk.)
-
-
 =head1 AUTHOR
 
 Neil Bowers E<lt>neil@bowers.comE<gt>
