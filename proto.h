@@ -365,7 +365,7 @@ PERL_CALLCONV bool	Perl_is_uni_xdigit_lc(pTHX_ U32 c);
 PERL_CALLCONV U32	Perl_to_uni_upper_lc(pTHX_ U32 c);
 PERL_CALLCONV U32	Perl_to_uni_title_lc(pTHX_ U32 c);
 PERL_CALLCONV U32	Perl_to_uni_lower_lc(pTHX_ U32 c);
-PERL_CALLCONV int	Perl_is_utf8_char(pTHX_ U8 *p);
+PERL_CALLCONV STRLEN	Perl_is_utf8_char(pTHX_ U8 *p);
 PERL_CALLCONV bool	Perl_is_utf8_string(pTHX_ U8 *s, STRLEN len);
 PERL_CALLCONV bool	Perl_is_utf8_alnum(pTHX_ U8 *p);
 PERL_CALLCONV bool	Perl_is_utf8_alnumc(pTHX_ U8 *p);
