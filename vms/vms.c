@@ -695,7 +695,21 @@ prime_env_iter(void)
         continue;
       }
       PERL_HASH(hash,key,keylen);
-      sv = newSVpvn(cp2,cp1 - cp2 + 1);
+
+      if (cp1 == cp2 && *cp2 == '.') {
+        /* A single dot usually means an unprintable character, such as a null
+         * to indicate a zero-length value.  Get the actual value to make sure.
+         */
+        char lnm[LNM$C_NAMLENGTH+1];
+        char eqv[LNM$C_NAMLENGTH+1];
+        strncpy(lnm, key, keylen);
+        int trnlen = vmstrnenv(lnm, eqv, 0, fildev, 0);
+        sv = newSVpvn(eqv, strlen(eqv));
+      }
+      else {
+        sv = newSVpvn(cp2,cp1 - cp2 + 1);
+      }
+
       SvTAINTED_on(sv);
       hv_store(envhv,key,keylen,sv,hash);
       hv_store(seenhv,key,keylen,&PL_sv_yes,hash);
