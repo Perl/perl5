@@ -1768,7 +1768,6 @@ unshift(db, ...)
 	    DBT		value ;
 	    int		i ;
 	    int		One ;
-	    DB *	Db = db->dbp ;
 	    STRLEN	n_a;
 
 	    DBT_clear(key) ; 
@@ -1791,7 +1790,7 @@ unshift(db, ...)
 #ifdef DB_VERSION_MAJOR
            	RETVAL = (db->cursor->c_put)(db->cursor, &key, &value, DB_BEFORE) ;
 #else
-	        RETVAL = (Db->put)(Db, &key, &value, R_IBEFORE) ;
+	        RETVAL = (db->dbp->put)(db->dbp, &key, &value, R_IBEFORE) ;
 #endif
 	        if (RETVAL != 0)
 	            break;

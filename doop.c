@@ -141,7 +141,7 @@ S_do_trans_complex(pTHX_ SV *sv)/* SPC - NOT OK */
     I32 grows = PL_op->op_private & OPpTRANS_GROWS;
     I32 complement = PL_op->op_private & OPpTRANS_COMPLEMENT;
     I32 del = PL_op->op_private & OPpTRANS_DELETE;
-    STRLEN len, rlen;
+    STRLEN len, rlen = 0;
     short *tbl;
     I32 ch;
 
@@ -308,7 +308,7 @@ S_do_trans_simple_utf8(pTHX_ SV *sv)/* SPC - OK */
     SV** svp = hv_fetch(hv, "NONE", 4, FALSE);
     UV none = svp ? SvUV(*svp) : 0x7fffffff;
     UV extra = none + 1;
-    UV final;
+    UV final = 0;
     UV uv;
     I32 isutf8;
     U8 hibit = 0;
@@ -397,7 +397,7 @@ STATIC I32
 S_do_trans_count_utf8(pTHX_ SV *sv)/* SPC - OK */
 {
     U8 *s;
-    U8 *start, *send;
+    U8 *start = 0, *send;
     I32 matches = 0;
     STRLEN len;
 
@@ -448,7 +448,7 @@ S_do_trans_complex_utf8(pTHX_ SV *sv) /* SPC - NOT OK */
     SV** svp = hv_fetch(hv, "NONE", 4, FALSE);
     UV none = svp ? SvUV(*svp) : 0x7fffffff;
     UV extra = none + 1;
-    UV final;
+    UV final = 0;
     bool havefinal = FALSE;
     UV uv;
     STRLEN len;
@@ -1084,7 +1084,7 @@ Perl_do_vop(pTHX_ I32 optype, SV *sv, SV *left, SV *right)
     char *rsave;
     bool left_utf = DO_UTF8(left);
     bool right_utf = DO_UTF8(right);
-    I32 needlen;
+    I32 needlen = 0;
 
     if (left_utf && !right_utf)
 	sv_utf8_upgrade(right);

@@ -61,7 +61,6 @@ main(register int argc, register char **argv, register char **env)
     for (argc--,argv++; argc; argc--,argv++) {
 	if (argv[0][0] != '-' || !argv[0][1])
 	    break;
-      reswitch:
 	switch (argv[0][1]) {
 #ifdef DEBUGGING
 	case 'D':
@@ -212,11 +211,12 @@ yylex(void)
 
   retry:
 #if YYDEBUG
-    if (yydebug)
+    if (yydebug) {
 	if (strchr(s,'\n'))
 	    fprintf(stderr,"Tokener at %s",s);
 	else
 	    fprintf(stderr,"Tokener at %s\n",s);
+    }
 #endif
     switch (*s) {
     default:
@@ -1226,7 +1226,7 @@ fixfargs(int name, int arg, int prevargs)
 {
     int type;
     STR *str;
-    int numargs;
+    int numargs = 0;
 
     if (!arg)
 	return prevargs;

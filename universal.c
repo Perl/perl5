@@ -405,6 +405,10 @@ XS(XS_utf8_native_to_unicode)
 {
  dXSARGS;
  UV uv = SvUV(ST(0));
+
+ if (items > 1)
+     Perl_croak(aTHX_ "Usage: utf8::native_to_unicode(sv)");
+
  ST(0) = sv_2mortal(newSViv(NATIVE_TO_UNI(uv)));
  XSRETURN(1);
 }
@@ -413,6 +417,10 @@ XS(XS_utf8_unicode_to_native)
 {
  dXSARGS;
  UV uv = SvUV(ST(0));
+
+ if (items > 1)
+     Perl_croak(aTHX_ "Usage: utf8::unicode_to_native(sv)");
+
  ST(0) = sv_2mortal(newSViv(UNI_TO_NATIVE(uv)));
  XSRETURN(1);
 }

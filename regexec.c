@@ -360,17 +360,16 @@ char *
 Perl_re_intuit_start(pTHX_ regexp *prog, SV *sv, char *strpos,
 		     char *strend, U32 flags, re_scream_pos_data *data)
 {
-    register I32 start_shift;
+    register I32 start_shift = 0;
     /* Should be nonnegative! */
-    register I32 end_shift;
+    register I32 end_shift   = 0;
     register char *s;
     register SV *check;
     char *strbeg;
     char *t;
     I32 ml_anch;
-    char *tmp;
     register char *other_last = Nullch;	/* other substr checked before this */
-    char *check_at;			/* check substr found at this pos */
+    char *check_at = Nullch;		/* check substr found at this pos */
 #ifdef DEBUGGING
     char *i_strpos = strpos;
 #endif
@@ -778,7 +777,7 @@ Perl_re_intuit_start(pTHX_ regexp *prog, SV *sv, char *strpos,
         s = find_byclass(prog, prog->regstclass, s, endpos, startpos, 1);
 	if (!s) {
 #ifdef DEBUGGING
-	    char *what;
+	    char *what = 0;
 #endif
 	    if (endpos == strend) {
 		DEBUG_r( PerlIO_printf(Perl_debug_log,
@@ -839,13 +838,17 @@ Perl_re_intuit_start(pTHX_ regexp *prog, SV *sv, char *strpos,
 	    DEBUG_r( what = "floating" );
 	    goto hop_and_restart;
 	}
-	DEBUG_r( if (t != s)
-		     PerlIO_printf(Perl_debug_log,
+	if (t != s) {
+            DEBUG_r(PerlIO_printf(Perl_debug_log,
 			"By STCLASS: moving %ld --> %ld\n",
-			(long)(t - i_strpos), (long)(s - i_strpos));
-		 else
-		     PerlIO_printf(Perl_debug_log,
-			"Does not contradict STCLASS...\n") );
+                                  (long)(t - i_strpos), (long)(s - i_strpos))
+                   );
+        }
+        else {
+            DEBUG_r(PerlIO_printf(Perl_debug_log,
+                                  "Does not contradict STCLASS...\n"); 
+                   );
+        }
     }
   giveup:
     DEBUG_r(PerlIO_printf(Perl_debug_log, "%s%s:%s match at offset %ld\n",
@@ -1596,9 +1599,10 @@ Perl_regexec_flags(pTHX_ register regexp *prog, char *stringarg, register char *
 		s++;
 	    }
 	}
-	DEBUG_r(did_match ||
+	DEBUG_r(if (!did_match)
 		PerlIO_printf(Perl_debug_log,
-			      "Did not find anchored character...\n"));
+                                  "Did not find anchored character...\n")
+               );
     }
     /*SUPPRESS 560*/
     else if (do_utf8 == (UTF!=0) &&
@@ -1662,14 +1666,16 @@ Perl_regexec_flags(pTHX_ register regexp *prog, char *stringarg, register char *
 		}
 	    }
 	}
-	DEBUG_r(did_match ||
-		PerlIO_printf(Perl_debug_log, "Did not find %s substr `%s%.*s%s'%s...\n",
+	DEBUG_r(if (!did_match)
+                    PerlIO_printf(Perl_debug_log, 
+                                  "Did not find %s substr `%s%.*s%s'%s...\n",
 			      ((must == prog->anchored_substr)
 			       ? "anchored" : "floating"),
 			      PL_colors[0],
 			      (int)(SvCUR(must) - (SvTAIL(must)!=0)),
 			      SvPVX(must),
-			      PL_colors[1], (SvTAIL(must) ? "$" : "")));
+                                  PL_colors[1], (SvTAIL(must) ? "$" : ""))
+               );
 	goto phooey;
     }
     else if ((c = prog->regstclass)) {
@@ -1960,13 +1966,15 @@ S_regmatch(pTHX_ regnode *prog)
     register I32 nextchr;	/* renamed nextchr - nextchar colides with
 				   function of same name */
     register I32 n;		/* no or next */
-    register I32 ln;		/* len or last */
-    register char *s;		/* operand or save */
+    register I32 ln = 0;	/* len or last */
+    register char *s = Nullch;	/* operand or save */
     register char *locinput = PL_reginput;
-    register I32 c1, c2, paren;	/* case fold search, parenth */
+    register I32 c1 = 0, c2 = 0, paren;	/* case fold search, parenth */
     int minmod = 0, sw = 0, logical = 0;
     I32 unwind = 0;
+#if 0
     I32 firstcp = PL_savestack_ix;
+#endif
     register bool do_utf8 = DO_UTF8(PL_reg_sv);
 
 #ifdef DEBUGGING
@@ -2935,7 +2943,6 @@ S_regmatch(pTHX_ regnode *prog)
 	    inner = NEXTOPER(scan);
 	  do_branch:
 	    {
-		CHECKPOINT lastcp;
 		c1 = OP(scan);
 		if (OP(next) != c1)	/* No choice. */
 		    next = inner;	/* Avoid recursion. */
@@ -3774,7 +3781,7 @@ S_regrepeat(pTHX_ regnode *p, I32 max)
 STATIC I32
 S_regrepeat_hard(pTHX_ regnode *p, I32 max, I32 *lp)
 {
-    register char *scan;
+    register char *scan = Nullch;
     register char *start;
     register char *loceol = PL_regeol;
     I32 l = 0;
