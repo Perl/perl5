@@ -513,7 +513,7 @@ pm_to_blib: $(TO_INST_PM)
 }. ($NMAKE ? q{
 $(PM_TO_BLIB)
 <<
-	} : '') . $self->{NOECHO}.q{$(TOUCH) $@
+	} : '') . "\t".$self->{NOECHO}.q{$(TOUCH) $@
 };
 }
 
