@@ -1,6 +1,6 @@
 /*    util.c
  *
- *    Copyright (c) 1991-2002, Larry Wall
+ *    Copyright (c) 1991-2003, Larry Wall
  *
  *    You may distribute under the terms of either the GNU General Public
  *    License or the Artistic License, as specified in the README file.
@@ -4333,7 +4333,7 @@ Perl_parse_unicode_opts(pTHX_ char **popt)
        opt = PERL_UNICODE_DEFAULT_FLAGS;
 
   if (opt & ~PERL_UNICODE_ALL_FLAGS)
-       Perl_croak(aTHX_ "Unknown Unicode option value 0x%"UVuf,
+       Perl_croak(aTHX_ "Unknown Unicode option value %"UVuf,
 		  (UV) (opt & ~PERL_UNICODE_ALL_FLAGS));
 
   *popt = p;

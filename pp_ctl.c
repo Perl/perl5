@@ -1,6 +1,6 @@
 /*    pp_ctl.c
  *
- *    Copyright (c) 1991-2002, Larry Wall
+ *    Copyright (c) 1991-2003, Larry Wall
  *
  *    You may distribute under the terms of either the GNU General Public
  *    License or the Artistic License, as specified in the README file.
@@ -328,7 +328,9 @@ PP(pp_formline)
     bool gotsome = FALSE;
     STRLEN len;
     STRLEN fudge = SvCUR(tmpForm) * (IN_BYTES ? 1 : 3) + 1;
-    bool item_is_utf = FALSE;
+    bool item_is_utf8 = FALSE;
+    bool targ_is_utf8 = FALSE;
+    SV * nsv = Nullsv;
 
     if (!SvMAGICAL(tmpForm) || !SvCOMPILED(tmpForm)) {
 	if (SvREADONLY(tmpForm)) {
@@ -339,8 +341,9 @@ PP(pp_formline)
 	else
 	    doparseform(tmpForm);
     }
-
     SvPV_force(PL_formtarget, len);
+    if (DO_UTF8(PL_formtarget))
+	targ_is_utf8 = TRUE;
     t = SvGROW(PL_formtarget, len + fudge + 1);  /* XXX SvCUR bad */
     t += len;
     f = SvPV(tmpForm, len);
@@ -387,6 +390,21 @@ PP(pp_formline)
 
 	case FF_LITERAL:
 	    arg = *fpc++;
+	    if (targ_is_utf8 && !SvUTF8(tmpForm)) {
+		SvCUR_set(PL_formtarget, t - SvPVX(PL_formtarget));
+		*t = '\0';
+		sv_catpvn_utf8_upgrade(PL_formtarget, f, arg, nsv);
+		t = SvEND(PL_formtarget);
+		break;
+	    }
+	    if (!targ_is_utf8 && DO_UTF8(tmpForm)) {
+		SvCUR_set(PL_formtarget, t - SvPVX(PL_formtarget));
+		*t = '\0';
+		sv_utf8_upgrade(PL_formtarget);
+		SvGROW(PL_formtarget, SvCUR(PL_formtarget) + fudge + 1);
+		t = SvEND(PL_formtarget);
+		targ_is_utf8 = TRUE;
+	    }
 	    while (arg--)
 		*t++ = *f++;
 	    break;
@@ -431,13 +449,13 @@ PP(pp_formline)
 			    break;
 			s++;
 		    }
-		    item_is_utf = TRUE;
+		    item_is_utf8 = TRUE;
 		    itemsize = s - item;
 		    sv_pos_b2u(sv, &itemsize);
 		    break;
 		}
 	    }
-	    item_is_utf = FALSE;
+	    item_is_utf8 = FALSE;
 	    if (itemsize > fieldsize)
 		itemsize = fieldsize;
 	    send = chophere = s + itemsize;
@@ -492,11 +510,11 @@ PP(pp_formline)
 			itemsize = chophere - item;
 			sv_pos_b2u(sv, &itemsize);
 		    }
-		    item_is_utf = TRUE;
+		    item_is_utf8 = TRUE;
 		    break;
 		}
 	    }
-	    item_is_utf = FALSE;
+	    item_is_utf8 = FALSE;
 	    if (itemsize <= fieldsize) {
 		send = chophere = s + itemsize;
 		while (s < send) {
@@ -552,7 +570,15 @@ PP(pp_formline)
 	case FF_ITEM:
 	    arg = itemsize;
 	    s = item;
-	    if (item_is_utf) {
+	    if (item_is_utf8) {
+		if (!targ_is_utf8) {
+		    SvCUR_set(PL_formtarget, t - SvPVX(PL_formtarget));
+		    *t = '\0';
+		    sv_utf8_upgrade(PL_formtarget);
+		    SvGROW(PL_formtarget, SvCUR(PL_formtarget) + fudge + 1);
+		    t = SvEND(PL_formtarget);
+		    targ_is_utf8 = TRUE;
+		}
 		while (arg--) {
 		    if (UTF8_IS_CONTINUED(*s)) {
 			STRLEN skip = UTF8SKIP(s);
@@ -575,6 +601,21 @@ PP(pp_formline)
 			if ( !((*t++ = *s++) & ~31) )
 			    t[-1] = ' ';
 		    }
+		}
+		break;
+	    }
+	    if (targ_is_utf8 && !item_is_utf8) {
+		SvCUR_set(PL_formtarget, t - SvPVX(PL_formtarget));
+		*t = '\0';
+		sv_catpvn_utf8_upgrade(PL_formtarget, s, arg, nsv);
+		for (; t < SvEND(PL_formtarget); t++) {
+#ifdef EBCDIC
+		    int ch = *t++ = *s++;
+		    if (iscntrl(ch))
+#else
+		    if (!(*t & ~31))
+#endif
+			*t = ' ';
 		}
 		break;
 	    }
@@ -601,22 +642,32 @@ PP(pp_formline)
 	case FF_LINEGLOB:
 	    item = s = SvPV(sv, len);
 	    itemsize = len;
-	    item_is_utf = FALSE;		/* XXX is this correct? */
+	    if ((item_is_utf8 = DO_UTF8(sv)))
+		itemsize = sv_len_utf8(sv);	    
 	    if (itemsize) {
+		bool chopped = FALSE;
 		gotsome = TRUE;
-		send = s + itemsize;
+		send = s + len;
 		while (s < send) {
 		    if (*s++ == '\n') {
-			if (s == send)
+			if (s == send) {
 			    itemsize--;
+			    chopped = TRUE;
+			}
 			else
 			    lines++;
 		    }
 		}
 		SvCUR_set(PL_formtarget, t - SvPVX(PL_formtarget));
-		sv_catpvn(PL_formtarget, item, itemsize);
+		if (targ_is_utf8)
+		    SvUTF8_on(PL_formtarget);
+		sv_catsv(PL_formtarget, sv);
+		if (chopped)
+		    SvCUR_set(PL_formtarget, SvCUR(PL_formtarget) - 1);
 		SvGROW(PL_formtarget, SvCUR(PL_formtarget) + fudge + 1);
 		t = SvPVX(PL_formtarget) + SvCUR(PL_formtarget);
+		if (item_is_utf8)
+		    targ_is_utf8 = TRUE;
 	    }
 	    break;
 
@@ -712,6 +763,8 @@ PP(pp_formline)
 			if (strnEQ(linemark, linemark - arg, arg))
 			    DIE(aTHX_ "Runaway format");
 		    }
+		    if (targ_is_utf8)
+			SvUTF8_on(PL_formtarget);
 		    FmLINES(PL_formtarget) = lines;
 		    SP = ORIGMARK;
 		    RETURNOP(cLISTOP->op_first);
@@ -751,6 +804,8 @@ PP(pp_formline)
 	case FF_END:
 	    *t = '\0';
 	    SvCUR_set(PL_formtarget, t - SvPVX(PL_formtarget));
+	    if (targ_is_utf8)
+		SvUTF8_on(PL_formtarget);
 	    FmLINES(PL_formtarget) += lines;
 	    SP = ORIGMARK;
 	    RETPUSHYES;
