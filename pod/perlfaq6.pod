@@ -1,6 +1,6 @@
 =head1 NAME
 
-perlfaq6 - Regular Expressions ($Revision: 1.8 $, $Date: 2002/01/31 04:27:55 $)
+perlfaq6 - Regular Expressions ($Revision: 1.10 $, $Date: 2002/04/07 18:32:57 $)
 
 =head1 DESCRIPTION
 
@@ -634,10 +634,12 @@ L<perlfaq2>).
 
 =head2 What's wrong with using grep or map in a void context?
 
-Both grep and map build a return list, regardless of their context.
-This means you're making Perl go to the trouble of building up a
-return list that you then just ignore.  That's no way to treat a
-programming language, you insensitive scoundrel!
+The problem is that both grep and map build a return list,
+regardless of the context.  This means you're making Perl go
+to the trouble of building a list that you then just throw away.
+If the list is large, you waste both time and space.  If your
+intent is to iterate over the list then use a for loop for this
+purpose.
 
 =head2 How can I match strings with multibyte characters?
 

@@ -1,6 +1,6 @@
 =head1 NAME
 
-perlfaq4 - Data Manipulation ($Revision: 1.19 $, $Date: 2002/03/11 22:15:19 $)
+perlfaq4 - Data Manipulation ($Revision: 1.20 $, $Date: 2002/04/07 18:46:13 $)
 
 =head1 DESCRIPTION
 
@@ -1335,28 +1335,21 @@ lists, or you could just do something like this with an array:
 If you either have Perl 5.8.0 or later installed, or if you have
 Scalar-List-Utils 1.03 or later installed, you can say:
 
-        use List::Util 'shuffle';
+    use List::Util 'shuffle';
 
 	@shuffled = shuffle(@list);
 
-If not, you can use this:
+If not, you can use a Fisher-Yates shuffle.
 
-    # fisher_yates_shuffle
-    # generate a random permutation of an array in place
-    # As in shuffling a deck of cards
-    #
     sub fisher_yates_shuffle {
         my $deck = shift;  # $deck is a reference to an array
         my $i = @$deck;
-        while (--$i) {
+        while ($i--) {
             my $j = int rand ($i+1);
             @$deck[$i,$j] = @$deck[$j,$i];
         }
     }
 
-And here is an example of using it:
-
-    #
     # shuffle my mpeg collection
     #
     my @mpeg = <audio/*/*.mp3>;
