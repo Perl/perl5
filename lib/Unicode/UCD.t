@@ -1,3 +1,4 @@
+#!perl -w
 BEGIN {
     if (ord("A") == 193) {
 	print "1..0 # Skip: EBCDIC\n";
@@ -6,6 +7,11 @@ BEGIN {
     chdir 't' if -d 't';
     @INC = '../lib';
     @INC = "::lib" if $^O eq 'MacOS'; # module parses @INC itself
+    require Config; import Config;
+    if ($Config{'extensions'} !~ /\bStorable\b/) {
+        print "1..0 # Skip: Storable was not built; Unicode::UCD uses Storable\n";
+        exit 0;
+    }
 }
 
 use strict;
