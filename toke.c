@@ -4610,10 +4610,11 @@ register char *s;
     char term;
     register char *d;
     char *peek;
+    int outer = (rsfp && !lex_inwhat);
 
     s += 2;
     d = tokenbuf;
-    if (!rsfp)
+    if (!outer)
 	*d++ = '\n';
     for (peek = s; *peek == ' ' || *peek == '\t'; peek++) ;
     if (*peek && strchr("`'\"",*peek)) {
@@ -4638,7 +4639,7 @@ register char *s;
     *d = '\0';
     len = d - tokenbuf;
     d = "\n";
-    if (rsfp || !(d=ninstr(s,bufend,d,d+1)))
+    if (outer || !(d=ninstr(s,bufend,d,d+1)))
 	herewas = newSVpv(s,bufend-s);
     else
 	s--, herewas = newSVpv(s,d-s);
@@ -4659,7 +4660,7 @@ register char *s;
     multi_start = curcop->cop_line;
     multi_open = multi_close = '<';
     term = *tokenbuf;
-    if (!rsfp) {
+    if (!outer) {
 	d = s;
 	while (s < bufend &&
 	  (*s != term || memNE(s,tokenbuf,len)) ) {
@@ -4680,7 +4681,7 @@ register char *s;
     else
 	sv_setpvn(tmpstr,"",0);   /* avoid "uninitialized" warning */
     while (s >= bufend) {	/* multiple line string? */
-	if (!rsfp ||
+	if (!outer ||
 	 !(oldoldbufptr = oldbufptr = s = linestart = filter_gets(linestr, rsfp, 0))) {
 	    curcop->cop_line = multi_start;
 	    missingterm(tokenbuf);
