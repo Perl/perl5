@@ -463,8 +463,7 @@ sub _run_all_tests {
                 bench    => 0,
                );
 
-    my @dir_files;
-    @dir_files = _globdir $Files_In_Dir if defined $Files_In_Dir;
+    my @dir_files = _globdir $Files_In_Dir if defined $Files_In_Dir;
     my $t_start = new Benchmark;
 
     my $width = _leader_width(@tests);
