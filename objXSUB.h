@@ -13,7 +13,6 @@
 /* XXX soon to be eliminated, only a few things in PERLCORE need these now */
 
 #if defined(PERL_IMPLICIT_SYS)
-#else
 #endif
 #if defined(USE_ITHREADS)
 #  if defined(PERL_IMPLICIT_SYS)

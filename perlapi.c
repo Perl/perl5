@@ -53,7 +53,6 @@ START_EXTERN_C
 /* C-API layer for PERL_OBJECT */
 
 #if defined(PERL_IMPLICIT_SYS)
-#else
 #endif
 #if defined(USE_ITHREADS)
 #  if defined(PERL_IMPLICIT_SYS)
