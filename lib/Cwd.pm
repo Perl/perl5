@@ -443,7 +443,6 @@ sub _os2_cwd {
 
 sub _win32_cwd {
     $ENV{'PWD'} = Win32::GetCwd();
-    $ENV{'PWD'} =~ s:\\:/:g ;
     return $ENV{'PWD'};
 }
 
