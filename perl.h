@@ -1371,6 +1371,7 @@ typedef I32 (*filter_t) _((int, SV *, int));
 #        include "os2thread.h"
 #      else
 #        ifdef I_MACH_CTHREADS
+#          include <mach/cthreads.h>
 typedef cthread_t	perl_os_thread;
 typedef mutex_t		perl_mutex;
 typedef condition_t	perl_cond;
