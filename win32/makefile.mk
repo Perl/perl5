@@ -259,11 +259,11 @@ DEBUG_MSTATS	= undef
 BUILDOPT	+= -DPERL_DEBUGGING_MSTATS
 .ENDIF
 
-.IF "$(USE_IMP_SYS)$(USE_MULTI)" == "defineundef"
+.IF "$(USE_IMP_SYS) $(USE_MULTI)" == "define undef"
 USE_MULTI	!= define
 .ENDIF
 
-.IF "$(USE_ITHREADS)$(USE_MULTI)" == "defineundef"
+.IF "$(USE_ITHREADS) $(USE_MULTI)" == "define undef"
 USE_MULTI	!= define
 .ENDIF
 
@@ -536,6 +536,17 @@ BLINK_FLAGS	= $(PRIV_LINK_FLAGS) $(LINK_FLAGS)
 
 #################### do not edit below this line #######################
 ############# NO USER-SERVICEABLE PARTS BEYOND THIS POINT ##############
+
+# Some dmake's built with Borland C++, including Sarathy's one at:
+# http://search.cpan.org/CPAN/authors/id/G/GS/GSAR/dmake-4.1pl1-win32.zip
+# require backslashes to be doubled-up when written to $(mktmp) files.
+# Other dmake's do not require this and would actually output a double
+# backslash if they were doubled-up.
+.IF "$(shell type $(mktmp \\))"=="\\"
+B=\\
+.ELSE
+B=\\\
+.ENDIF
 
 o *= .obj
 a *= .lib
@@ -836,8 +847,8 @@ POD2TEXT	= $(PODDIR)\pod2text
 #	-- BKS 10-17-1999
 CFG_VARS	=					\
 		INST_DRV=$(INST_DRV)		~	\
-		INST_TOP=$(INST_TOP:s/\/\\/)	~	\
-		INST_VER=$(INST_VER:s/\/\\/)	~	\
+		INST_TOP=$(INST_TOP:s,\,$B,)	~	\
+		INST_VER=$(INST_VER:s,\,$B,)	~	\
 		INST_ARCH=$(INST_ARCH)		~	\
 		archname=$(ARCHNAME)		~	\
 		cc=$(CC)			~	\
@@ -847,9 +858,9 @@ CFG_VARS	=					\
 		d_crypt=$(D_CRYPT)		~	\
 		d_mymalloc=$(PERL_MALLOC)	~	\
 		libs=$(LIBFILES:f)		~	\
-		incpath=$(CCINCDIR:s/\/\\/)	~	\
+		incpath=$(CCINCDIR:s,\,$B,)	~	\
 		libperl=$(PERLIMPLIB:f)		~	\
-		libpth=$(CCLIBDIR:s/\/\\/);$(EXTRALIBDIRS:s/\/\\/)	~	\
+		libpth=$(CCLIBDIR:s,\,$B,);$(EXTRALIBDIRS:s,\,$B,)	~	\
 		libc=$(LIBC)			~	\
 		make=dmake			~	\
 		_o=$(o)				~	\
@@ -862,7 +873,7 @@ CFG_VARS	=					\
 		usemultiplicity=$(USE_MULTI)	~	\
 		useperlio=$(USE_PERLIO)		~	\
 		uselargefiles=$(USE_LARGE_FILES)	~	\
-		LINK_FLAGS=$(LINK_FLAGS:s/\/\\/)	~	\
+		LINK_FLAGS=$(LINK_FLAGS:s,\,$B,)	~	\
 		optimize=$(OPTIMIZE)
 
 #
