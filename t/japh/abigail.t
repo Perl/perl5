@@ -3,6 +3,18 @@
 #
 # Tests derived from Japhs.
 #
+# These test use obscure features of Perl, or surprising combinations
+# of features. The tests were added because in the past, they have
+# exposed several bugs in Perl.
+#
+# Some of these tests may actually (mis)use bugs or use undefined behaviour.
+# These tests are still useful - behavioural changes or bugfixes will be
+# noted, and a remark can be put in the documentation. (Don't forget to
+# disable the test!)
+#
+# Getting everything to run well on the myriad of platforms Perl runs on
+# is unfortunally, not a trivial task.
+#
 
 BEGIN {
     if (ord("A") == 193) {
