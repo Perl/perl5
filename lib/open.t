@@ -45,6 +45,7 @@ like( $warn, qr/Unknown PerlIO layer/,
 
 SKIP: {
     skip("no perlio, no :utf8", 1) unless (find PerlIO::Layer 'perlio');
+    skip("no Encode for locale layer", 1) unless eval { require Encode }; 
     # now load a real-looking locale
     $ENV{LC_ALL} = ' .utf8';
     import( 'IN', 'locale' );
