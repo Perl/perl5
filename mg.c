@@ -1964,6 +1964,9 @@ Perl_magic_set(pTHX_ SV *sv, MAGIC *mg)
 	    STATUS_POSIX_SET(SvIOK(sv) ? SvIVX(sv) : sv_2iv(sv));
 	break;
     case '!':
+        /* Don't be merge these two SETERRNO calls because
+	 * the idea is to make non-VMS places not to see
+	 * the dollar in the identifier: that is non-ANSI. */
 #ifdef VMS
 	SETERRNO(0, (SvIV(sv) == EVMSERR) ? 4 : vaxc$errno);
 #else
