@@ -912,10 +912,6 @@ Perl_leave_scope(pTHX_ I32 base)
 	    PL_op = (OP*)SSPOPPTR;
 	    break;
 	case SAVEt_HINTS:
-	    if (GvHV(PL_hintgv)) {
-		SvREFCNT_dec((SV*)GvHV(PL_hintgv));
-		GvHV(PL_hintgv) = NULL;
-	    }
 	    *(I32*)&PL_hints = (I32)SSPOPINT;
 	    break;
 	case SAVEt_COMPPAD:

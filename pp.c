@@ -826,7 +826,7 @@ PP(pp_undef)
     case SVt_PVFM:
 	{
 	    /* let user-undef'd sub keep its identity */
-	    GV* gv = (GV*)SvREFCNT_inc(CvGV((CV*)sv));
+	    GV* gv = CvGV((CV*)sv);
 	    cv_undef((CV*)sv);
 	    CvGV((CV*)sv) = gv;
 	}
