@@ -2056,6 +2056,7 @@ Porting/config.sh	Sample config.sh
 Porting/config_H	Sample config.h
 Porting/Contract	Social contract for contributed modules in Perl core
 Porting/findvars	Find occurrences of words
+Porting/findrfuncs	Find reentrant variants of functions used in an executable
 Porting/fixCORE		Find and fix modules that generate warnings
 Porting/fixvars		Find undeclared variables with C compiler and fix em
 Porting/genlog		Generate formatted changelogs by querying p4d

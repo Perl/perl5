@@ -96,8 +96,13 @@ my @exe = qw(
     vms/ext/Stdio/test.pl
     vms/ext/filespec.t
     x2p/*.SH
-    Porting/patchls
+    Porting/findrfuncs
+    Porting/genlog
     Porting/makerel
+    Porting/p4d2p
+    Porting/p4desc
+    Porting/patchls
+    Porting/*.pl
     mpeix/nm
     mpeix/relink
 );

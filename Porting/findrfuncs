@@ -1,0 +1,81 @@
+#!/usr/bin/perl -w
+
+#
+# findrfuncs: find reentrant variants of functions used in an executable.
+# Requires a functional "nm -u".  Searches headers in /usr/include
+# to find available *_r functions and looks for non-reentrant
+# variants used in the supplied executable.
+#
+# Gurusamy Sarathy
+# gsar@ActiveState.com
+#
+# Hacked to automatically find the executable and shared objects.
+# --jhi
+
+use strict;
+use File::Find;
+
+my @EXES;
+my $NMU = 'nm -u';
+my @INCDIRS = qw(/usr/include);
+my $SO = 'so';
+my $EXE = '';
+
+if (open(CONFIG, "config.sh")) {
+    local $/;
+    my $CONFIG = <CONFIG>;
+    $SO  = $1 if $CONFIG =~ /^so='(\w+)'/m;
+    $EXE = $1 if $CONFIG =~ /^_exe='\.(\w+)'/m;
+}
+
+push @EXES, "perl$EXE";
+
+find(sub {push @EXES, $File::Find::name if /.$SO$/}, '.' );
+
+push @EXES, @ARGV;
+
+if ($^O eq 'dec_osf') {
+    $NMU = 'nm -Bu';
+}
+
+my %rfuncs;
+my @syms;
+find(sub {
+	return unless -f $File::Find::name;
+	open my $F, "<$File::Find::name"
+	    or die "Can't open $File::Find::name: $!";
+	my $line;
+	while (defined ($line = <$F>)) {
+	    if ($line =~ /\b(\w+_r)\b/) {
+		#warn "$1 => $File::Find::name\n";
+	        $rfuncs{$1} = $File::Find::name;
+	    }
+	}
+	close $F;
+     }, @INCDIRS);
+
+# delete bogus symbols grepped out of comments and such
+delete $rfuncs{setlocale_r} if $^O eq 'linux';
+
+for my $exe (@EXES) {
+    for my $sym (`$NMU $exe`) {
+        chomp $sym;
+	$sym =~ s/^\s+[Uu]\s+//;
+        $sym =~ s/^\s+//;
+        next if /\s/;
+        $sym =~ s/\@.*\z//;	# remove @@GLIBC_2.0 etc
+        # warn "#### $sym\n";
+        if (exists $rfuncs{"${sym}_r"}) {
+    	    push @syms, $sym;
+        }
+    }
+    
+    if (@syms) {
+        print "\nFollowing symbols in $exe have reentrant versions:\n";
+        for my $sym (@syms) {
+    	    print "$sym => $sym" . "_r (in file " . $rfuncs{"${sym}_r"} . ")\n";
+        }
+    }
+    @syms = ();
+}
+
