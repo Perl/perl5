@@ -31,12 +31,12 @@ BEGIN
     }
   print "# INC = @INC\n";
 
-  plan tests => 435 
+  plan tests => 438 
     + 16;		# own tests
   }
 
-use Math::BigInt 1.50;
-use Math::BigFloat 1.27;
+use Math::BigInt 1.53;
+use Math::BigFloat 1.30;
 
 use vars qw/$mbi $mbf/;
 

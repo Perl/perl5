@@ -18,7 +18,7 @@ package Math::BigInt;
 my $class = "Math::BigInt";
 require 5.005;
 
-$VERSION = '1.52';
+$VERSION = '1.53';
 use Exporter;
 @ISA =       qw( Exporter );
 @EXPORT_OK = qw( objectify _swap bgcd blcm); 
@@ -161,7 +161,7 @@ sub round_mode
 sub upgrade
   {
   no strict 'refs';
-  # make Class->round_mode() work
+  # make Class->upgrade() work
   my $self = shift;
   my $class = ref($self) || $self || __PACKAGE__;
   if (defined $_[0])
@@ -170,6 +170,20 @@ sub upgrade
     return ${"${class}::upgrade"} = $u;
     }
   return ${"${class}::upgrade"};
+  }
+
+sub downgrade
+  {
+  no strict 'refs';
+  # make Class->downgrade() work
+  my $self = shift;
+  my $class = ref($self) || $self || __PACKAGE__;
+  if (defined $_[0])
+    {
+    my $u = shift;
+    return ${"${class}::downgrade"} = $u;
+    }
+  return ${"${class}::downgrade"};
   }
 
 sub div_scale
@@ -278,7 +292,7 @@ sub config
     class => $class,
     };
   foreach (
-   qw/upgrade downgrade precisison accuracy round_mode VERSION div_scale/)
+   qw/upgrade downgrade precision accuracy round_mode VERSION div_scale/)
     {
     $cfg->{lc($_)} = ${"${class}::$_"};
     };
@@ -1079,7 +1093,7 @@ sub is_nan
   my ($self,$x) = ref($_[0]) ? (ref($_[0]),$_[0]) : objectify(1,@_);
 
   return 1 if $x->{sign} eq $nan;
-  return 0;
+  0;
   }
 
 sub is_inf
@@ -1097,7 +1111,7 @@ sub is_inf
     }
   $sign = quotemeta($sign.'inf');
   return 1 if ($x->{sign} =~ /^$sign$/);
-  return 0;
+  0;
   }
 
 sub is_one
@@ -1314,7 +1328,7 @@ sub bmod
   # modulus (or remainder)
   # (BINT or num_str, BINT or num_str) return BINT
   my ($self,$x,$y,@r) = objectify(2,@_);
- 
+
   return $x if $x->modify('bmod');
   $r[3] = $y;					# no push!
   if (($x->{sign} !~ /^[+-]$/) || ($y->{sign} !~ /^[+-]$/) || $y->is_zero())
@@ -1747,8 +1761,7 @@ sub mantissa
 
   if ($x->{sign} !~ /^[+-]$/)
     {
-    my $s = $x->{sign}; $s =~ s/^[+]//;
-    return $self->new($s); 		# +inf => inf
+    return $self->new($x->{sign}); 		# keep + or - sign
     }
   my $m = $x->copy();
   # that's inefficient

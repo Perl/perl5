@@ -25,7 +25,8 @@ BEGIN
     }
   print "# INC = @INC\n";
 
-  plan tests => 1991;
+   plan tests => 1990
+    + 2;			# our own tests
   }
 
 use Math::BigInt upgrade => 'Math::BigFloat';
@@ -38,5 +39,6 @@ $CL = "Math::BigInt::Calc";
 $ECL = "Math::BigFloat";
 
 ok (Math::BigInt->upgrade(),'Math::BigFloat');
+ok (Math::BigInt->downgrade()||'','');
 
 require 'upgrade.inc';	# all tests here for sharing

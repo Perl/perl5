@@ -12,7 +12,7 @@ package Math::BigFloat;
 #   _p: precision
 #   _f: flags, used to signal MBI not to touch our private parts
 
-$VERSION = '1.29';
+$VERSION = '1.30';
 require 5.005;
 use Exporter;
 use Math::BigInt qw/objectify/;
@@ -75,7 +75,7 @@ BEGIN { tie $rnd_mode, 'Math::BigFloat'; }
   my %hand_ups = map { $_ => 1 }  
    qw / is_nan is_inf is_negative is_positive
         accuracy precision div_scale round_mode fneg fabs babs fnot
-        objectify
+        objectify upgrade downgrade
 	bone binf bnan bzero
       /;
 
@@ -113,6 +113,8 @@ sub new
   # handle '+inf', '-inf' first
   if ($wanted =~ /^[+-]?inf$/)
     {
+    return $downgrade->new($wanted) if $downgrade;
+
     $self->{_e} = Math::BigInt->bzero();
     $self->{_m} = Math::BigInt->bzero();
     $self->{sign} = $wanted;
@@ -124,6 +126,9 @@ sub new
   if (!ref $mis)
     {
     die "$wanted is not a number initialized to $class" if !$NaNOK;
+    
+    return $downgrade->bnan() if $downgrade;
+    
     $self->{_e} = Math::BigInt->bzero();
     $self->{_m} = Math::BigInt->bzero();
     $self->{sign} = $nan;
@@ -138,6 +143,19 @@ sub new
     $self->{_e} -= CORE::length($$mfv) if CORE::length($$mfv) != 0; 		
     $self->{sign} = $$mis;
     }
+  # if downgrade, inf, NaN or integers go down
+
+  if ($downgrade && $self->{_e}->{sign} eq '+')
+    {
+#   print "downgrading $$miv$$mfv"."E$$es$$ev";
+    if ($self->{_e}->is_zero())
+      {
+      $self->{_m}->{sign} = $$mis;		# negative if wanted
+      return $downgrade->new($self->{_m});
+      }
+    return $downgrade->new("$$mis$$miv$$mfv"."E$$es$$ev");
+    }
+
   # print "mbf new $self->{sign} $self->{_m} e $self->{_e}\n";
   $self->bnorm()->round(@r);		# first normalize, then round
   }
@@ -196,7 +214,7 @@ sub bstr
  
   my $es = '0'; my $len = 1; my $cad = 0; my $dot = '.';
 
-  my $not_zero = !$x->is_zero();
+  my $not_zero = ! $x->is_zero();
   if ($not_zero)
     {
     $es = $x->{_m}->bstr();
@@ -314,13 +332,14 @@ sub bcmp
   # adjust so that exponents are equal
   my $lxm = $x->{_m}->length();
   my $lym = $y->{_m}->length();
-  my $lx = $lxm + $x->{_e};
-  my $ly = $lym + $y->{_e};
-  my $l = $lx - $ly; $l->bneg() if $x->{sign} eq '-';
+  # the numify somewhat limits our length, but makes it much faster
+  my $lx = $lxm + $x->{_e}->numify();
+  my $ly = $lym + $y->{_e}->numify();
+  my $l = $lx - $ly; $l = -$l if $x->{sign} eq '-';
   return $l <=> 0 if $l != 0;
   
   # lengths (corrected by exponent) are equal
-  # so make mantissa euqal length by padding with zero (shift left)
+  # so make mantissa equal length by padding with zero (shift left)
   my $diff = $lxm - $lym;
   my $xm = $x->{_m};		# not yet copy it
   my $ym = $y->{_m};
@@ -332,7 +351,7 @@ sub bcmp
     {
     $xm = $x->{_m}->copy()->blsft(-$diff,10);
     }
-  my $rc = $xm->bcmp($ym);
+  my $rc = $xm->bacmp($ym);
   $rc = -$rc if $x->{sign} eq '-';		# -124 < -123
   $rc <=> 0;
   }
@@ -363,8 +382,9 @@ sub bacmp
   # adjust so that exponents are equal
   my $lxm = $x->{_m}->length();
   my $lym = $y->{_m}->length();
-  my $lx = $lxm + $x->{_e};
-  my $ly = $lym + $y->{_e};
+  # the numify somewhat limits our length, but makes it much faster
+  my $lx = $lxm + $x->{_e}->numify();
+  my $ly = $lym + $y->{_e}->numify();
   my $l = $lx - $ly;
   return $l <=> 0 if $l != 0;
   
@@ -381,7 +401,7 @@ sub bacmp
     {
     $xm = $x->{_m}->copy()->blsft(-$diff,10);
     }
-  $xm->bcmp($ym) <=> 0;
+  $xm->bacmp($ym) <=> 0;
   }
 
 sub badd 
@@ -410,7 +430,7 @@ sub badd
     }
 
   # speed: no add for 0+y or x+0
-  return $x if $y->is_zero();				# x+0
+  return $x->bround($a,$p,$r) if $y->is_zero();		# x+0
   if ($x->is_zero())					# 0+y
     {
     # make copy, clobbering up x (modify in place!)
@@ -421,18 +441,24 @@ sub badd
     }
  
   # take lower of the two e's and adapt m1 to it to match m2
-  my $e = $y->{_e}; $e = Math::BigInt::bzero() if !defined $e;	# if no BFLOAT
-  $e = $e - $x->{_e};
+  my $e = $y->{_e};
+  $e = Math::BigInt::bzero() if !defined $e;	# if no BFLOAT ?
+  $e = $e->copy();				# make copy (didn't do it yet)
+  $e->bsub($x->{_e});
   my $add = $y->{_m}->copy();
-  if ($e < 0)
+#  if ($e < 0)				# < 0
+  if ($e->{sign} eq '-')		# < 0
     {
     my $e1 = $e->copy()->babs();
-    $x->{_m} *= (10 ** $e1);
+    #$x->{_m} *= (10 ** $e1);
+    $x->{_m}->blsft($e1,10);
     $x->{_e} += $e;			# need the sign of e
     }
-  elsif ($e > 0)
+#  if ($e > 0)				# > 0
+  elsif (!$e->is_zero())		# > 0
     {
-    $add *= (10 ** $e);
+    #$add *= (10 ** $e);
+    $add->blsft($e,10);
     }
   # else: both e are the same, so just leave them
   $x->{_m}->{sign} = $x->{sign}; 		# fiddle with signs
@@ -450,12 +476,14 @@ sub bsub
   # subtract second arg from first, modify first
   my ($self,$x,$y,$a,$p,$r) = objectify(2,@_);
 
-  if (!$y->is_zero())		# don't need to do anything if $y is 0
+  if ($y->is_zero())		# still round for not adding zero
     {
-    $y->{sign} =~ tr/+\-/-+/;	# does nothing for NaN
-    $x->badd($y,$a,$p,$r);	# badd does not leave internal zeros
-    $y->{sign} =~ tr/+\-/-+/;	# refix $y (does nothing for NaN)
+    return $x->round($a,$p,$r);
     }
+  
+  $y->{sign} =~ tr/+\-/-+/;	# does nothing for NaN
+  $x->badd($y,$a,$p,$r);	# badd does not leave internal zeros
+  $y->{sign} =~ tr/+\-/-+/;	# refix $y (does nothing for NaN)
   $x;				# already rounded by badd()
   }
 
@@ -1017,31 +1045,22 @@ sub bsqrt
 
 sub bfac
   {
-  # (BINT or num_str, BINT or num_str) return BINT
+  # (BFLOAT or num_str, BFLOAT or num_str) return BFLOAT
   # compute factorial numbers
   # modifies first argument
   my ($self,$x,@r) = objectify(1,@_);
 
-  return $x->bnan() if $x->{sign} ne '+';	# inf, NnN, <0 etc => NaN
-  return $x->bone(@r) if $x->is_zero() || $x->is_one();		# 0 or 1 => 1
+  return $x->bnan() 
+    if (($x->{sign} ne '+') ||		# inf, NaN, <0 etc => NaN
+     ($x->{_e}->{sign} ne '+'));	# digits after dot?
 
-  return $x->bnan() if $x->{_e}->{sign} ne '+';	# digits after dot?
+  return $x->bone(@r) if $x->is_zero() || $x->is_one();		# 0 or 1 => 1
   
   # use BigInt's bfac() for faster calc
   $x->{_m}->blsft($x->{_e},10);		# un-norm m
   $x->{_e}->bzero();			# norm $x again
   $x->{_m}->bfac();			# factorial
-  $x->bnorm();
- 
-  #my $n = $x->copy();
-  #$x->bone();
-  #my $f = $self->new(2);
-  #while ($f->bacmp($n) < 0)
-  #  {
-  #  $x->bmul($f); $f->binc();
-  #  }
-  #$x->bmul($f);					# last step
-  $x->round(@r);				# round
+  $x->bnorm()->round(@r);
   }
 
 sub bpow 
@@ -1063,9 +1082,12 @@ sub bpow
     # if $x == -1 and odd/even y => +1/-1  because +-1 ^ (+-1) => +-1
     return $y1->is_odd() ? $x : $x->babs(1);
     }
-  return $x if $x->is_zero() && $y->{sign} eq '+'; # 0**y => 0 (if not y <= 0)
-  # 0 ** -y => 1 / (0 ** y) => / 0! (1 / 0 => +inf)
-  return $x->binf() if $x->is_zero() && $y->{sign} eq '-';
+  if ($x->is_zero())
+    {
+    return $x if $y->{sign} eq '+'; 	# 0**y => 0 (if not y <= 0)
+    # 0 ** -y => 1 / (0 ** y) => / 0! (1 / 0 => +inf)
+    $x->binf();
+    }
 
   # calculate $x->{_m} ** $y and $x->{_e} * $y separately (faster)
   $y1->babs();
@@ -1079,7 +1101,7 @@ sub bpow
     my $z = $x->copy(); $x->bzero()->binc();
     return $x->bdiv($z,$a,$p,$r);	# round in one go (might ignore y's A!)
     }
-  return $x->round($a,$p,$r,$y);
+  $x->round($a,$p,$r,$y);
   }
 
 ###############################################################################
@@ -1246,9 +1268,14 @@ sub bfloor
   # if $x has digits after dot
   if ($x->{_e}->{sign} eq '-')
     {
-    $x->{_m}->brsft(-$x->{_e},10);
-    $x->{_e}->bzero();
-    $x-- if $x->{sign} eq '-';
+    #$x->{_m}->brsft(-$x->{_e},10);
+    #$x->{_e}->bzero();
+    #$x-- if $x->{sign} eq '-';
+
+    $x->{_e}->{sign} = '+';			# negate e
+    $x->{_m}->brsft($x->{_e},10);		# cut off digits after dot
+    $x->{_e}->bzero();				# trunc/norm	
+    $x->{_m}->binc() if $x->{sign} eq '-';	# decrement if negative
     }
   $x->round($a,$p,$r);
   }
@@ -1264,9 +1291,14 @@ sub bceil
   # if $x has digits after dot
   if ($x->{_e}->{sign} eq '-')
     {
-    $x->{_m}->brsft(-$x->{_e},10);
-    $x->{_e}->bzero();
-    $x++ if $x->{sign} eq '+';
+    #$x->{_m}->brsft(-$x->{_e},10);
+    #$x->{_e}->bzero();
+    #$x++ if $x->{sign} eq '+';
+
+    $x->{_e}->{sign} = '+';			# negate e
+    $x->{_m}->brsft($x->{_e},10);		# cut off digits after dot
+    $x->{_e}->bzero();				# trunc/norm	
+    $x->{_m}->binc() if $x->{sign} eq '+';	# decrement if negative
     }
   $x->round($a,$p,$r);
   }
@@ -1396,7 +1428,14 @@ sub import
     elsif ($_[$i] eq 'upgrade')
       {
       # this causes upgrading
-      $upgrade = $_[$i+1];              # or undef to disable
+      $upgrade = $_[$i+1];		# or undef to disable
+      my $s = 2; $s = 1 if @a-$j < 2;   # avoid "can not modify non-existant..."
+      splice @a, $j, $s; $j -= $s;
+      }
+    elsif ($_[$i] eq 'downgrade')
+      {
+      # this causes downgrading
+      $downgrade = $_[$i+1];		# or undef to disable
       my $s = 2; $s = 1 if @a-$j < 2;   # avoid "can not modify non-existant..."
       splice @a, $j, $s; $j -= $s;
       }
@@ -1415,13 +1454,16 @@ sub bnorm
 
   return $x if $x->{sign} !~ /^[+-]$/;		# inf, nan etc
 
-  my $zeros = $x->{_m}->_trailing_zeros();	# correct for trailing zeros 
-  if ($zeros != 0)
-    {
-    $x->{_m}->brsft($zeros,10); $x->{_e} += $zeros;
-    }
-  # for something like 0Ey, set y to 1, and -0 => +0
-  $x->{sign} = '+', $x->{_e}->bone() if $x->{_m}->is_zero();
+#  if (!$x->{_m}->is_odd())
+#    {
+    my $zeros = $x->{_m}->_trailing_zeros();	# correct for trailing zeros 
+    if ($zeros != 0)
+      {
+      $x->{_m}->brsft($zeros,10); $x->{_e}->badd($zeros);
+      }
+    # for something like 0Ey, set y to 1, and -0 => +0
+    $x->{sign} = '+', $x->{_e}->bone() if $x->{_m}->is_zero();
+#    }
   # this is to prevent automatically rounding when MBI's globals are set
   $x->{_m}->{_f} = MB_NEVER_ROUND;
   $x->{_e}->{_f} = MB_NEVER_ROUND;
@@ -1439,19 +1481,14 @@ sub as_number
   # return copy as a bigint representation of this BigFloat number
   my ($self,$x) = ref($_[0]) ? (ref($_[0]),$_[0]) : objectify(1,@_);
 
-  my $z;
-  if ($x->{_e}->is_zero())
+  my $z = $x->{_m}->copy();
+  if ($x->{_e}->{sign} eq '-')		# < 0
     {
-    $z = $x->{_m}->copy();
-    $z->{sign} = $x->{sign};
-    return $z;
-    }
-  $z = $x->{_m}->copy();
-  if ($x->{_e} < 0)
-    {
-    $z->brsft(-$x->{_e},10);
+    $x->{_e}->{sign} = '+';		# flip
+    $z->brsft($x->{_e},10);
+    $x->{_e}->{sign} = '-';		# flip back
     } 
-  else
+  elsif (!$x->{_e}->is_zero())		# > 0 
     {
     $z->blsft($x->{_e},10);
     }
