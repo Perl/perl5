@@ -6476,7 +6476,8 @@ $ WRITE CONFIG "$ define/translation=concealed ''vms_prefix' ''prefix'"
 $ WRITE CONFIG "$ ext = "".exe"""
 $ IF sharedperl
 $ THEN
-$ WRITE CONFIG "$ if f$getsyi(""HW_MODEL"") .ge. 1024 then ext = "".AXE"""
+$ WRITE CONFIG "$ if f$getsyi(""ARCH_TYPE"") .eq. 2 then ext = "".AXE"""
+$ WRITE CONFIG "$ if f$getsyi(""ARCH_TYPE"") .eq. 3 then ext = "".IXE"""
 $ ENDIF
 $ IF (perl_symbol)
 $ THEN

@@ -33,6 +33,11 @@
 ~FLAGS~
 
 #: >>>>> Architecture-specific options <<<<<
+.ifdef IXE
+O = .ibj
+OLB = .ilb
+E = .ixe
+.else
 .ifdef AXE
 # File type to use for object files
 O = .abj
@@ -48,13 +53,19 @@ OLB = .olb
 # File type to use for executable images
 E = .exe
 .endif
+.endif
 
+.ifdef __IA64__
+ARCH = VMS_IA64
+OBJVAL = $(O)
+.else
 .ifdef __AXP__
 ARCH = VMS_AXP
 OBJVAL = $(O)
 .else
 ARCH = VMS_VAX
 OBJVAL = $(MMS$TARGET_NAME)$(O)
+.endif
 .endif
 
 PERL_VERSION = ~PV~
