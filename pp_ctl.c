@@ -45,8 +45,8 @@ static I32 sv_ncmp _((SV *a, SV *b));
 static I32 sv_i_ncmp _((SV *a, SV *b));
 static I32 amagic_ncmp _((SV *a, SV *b));
 static I32 amagic_i_ncmp _((SV *a, SV *b));
-I32 amagic_cmp _((SV *str1, SV *str2));
-I32 amagic_cmp_locale _((SV *str1, SV *str2));
+static I32 amagic_cmp _((SV *str1, SV *str2));
+static I32 amagic_cmp_locale _((SV *str1, SV *str2));
 #endif
 
 PP(pp_wantarray)
@@ -826,7 +826,7 @@ amagic_i_ncmp(register SV *a, register SV *b)
     return sv_i_ncmp(a, b);
 }
 
-I32
+STATIC I32
 amagic_cmp(register SV *str1, register SV *str2)
 {
     SV *tmpsv;
@@ -848,7 +848,7 @@ amagic_cmp(register SV *str1, register SV *str2)
     return sv_cmp(str1, str2);
 }
 
-I32
+STATIC I32
 amagic_cmp_locale(register SV *str1, register SV *str2)
 {
     SV *tmpsv;
