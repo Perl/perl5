@@ -1145,8 +1145,15 @@ typedef NVTYPE NV;
 #   endif
 #   define NV_DIG LDBL_DIG
 #   ifdef HAS_SQRTL
-#       define Perl_modf modfl
-#       define Perl_frexp frexpl
+        /* libsunmath doesn't have modfl and frexpl as of mid-March 2000 */
+	/* XXX Configure probe for modfl and frexpl needed XXX */
+#       if defined(__sun) && defined(__svr4)
+#           define Perl_modf(x,y) ((long double)modf((double)(x),(double*)(y)))
+#           define Perl_frexp(x) ((long double)frexp((double)(x)))
+#       else
+#           define Perl_modf modfl
+#           define Perl_frexp frexpl
+#       endif
 #       define Perl_cos cosl
 #       define Perl_sin sinl
 #       define Perl_sqrt sqrtl
