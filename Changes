@@ -32,6 +32,77 @@ Version v5.7.1		Development release working toward v5.8
 --------------
 
 ____________________________________________________________________________
+[  8221] By: jhi                                   on 2000/12/21  16:23:48
+        Log: Rename testsyml to issymlink.
+     Branch: perl
+	   ! Configure Porting/Glossary Porting/config.sh Porting/config_H
+	   ! epoc/config.sh pod/perltoc.pod win32/config.bc win32/config.gc
+	   ! win32/config.vc
+____________________________________________________________________________
+[  8220] By: jhi                                   on 2000/12/21  15:47:26
+        Log: Robustness support for #8218 (symlink forest) since the GNU
+             tools seem to be overly picky about symlinkage depths.
+     Branch: perl
+	   ! Makefile.SH t/io/fs.t
+____________________________________________________________________________
+[  8219] By: jhi                                   on 2000/12/21  15:38:27
+        Log: Metaconfig changes for #8218.
+     Branch: metaconfig
+	   ! U/modified/Oldconfig.U
+     Branch: metaconfig/U/perl
+	   + Mksymlinks.U
+	   ! testsyml.U
+____________________________________________________________________________
+[  8218] By: jhi                                   on 2000/12/21  15:37:57
+        Log: Add Configure option -Dmksymlinks which will create a symlink
+             forest if the current/build differs from the source directory.
+             TODO: mkdir -p is not portable.
+     Branch: perl
+	   ! Configure
+____________________________________________________________________________
+[  8217] By: jhi                                   on 2000/12/21  14:39:12
+        Log: Subject: [PATCH] Re: Latest tarball doesn't build with threads
+             From: Nick Ing-Simmons <nik@tiuk.ti.com> 
+             Date: Thu, 21 Dec 2000 09:38:18 GMT
+             Message-Id: <200012210938.JAA29043@mikado.tiuk.ti.com>
+             
+             The ofs became an SV.
+     Branch: perl
+	   ! ext/Thread/Thread.xs
+____________________________________________________________________________
+[  8216] By: jhi                                   on 2000/12/21  05:40:21
+        Log: The polymorphism seems to have fixed 20000517.001.
+     Branch: perl
+	   ! t/pragma/utf8.t
+____________________________________________________________________________
+[  8215] By: jhi                                   on 2000/12/21  04:44:52
+        Log: read() documentation tweak for 20001121.004.
+     Branch: perl
+	   ! pod/perlfunc.pod
+____________________________________________________________________________
+[  8214] By: jhi                                   on 2000/12/21  03:54:11
+        Log: Fix for 20001210.003, "write(FH) on closed FH causes segv".
+     Branch: perl
+	   ! pp_sys.c t/op/misc.t
+____________________________________________________________________________
+[  8213] By: jhi                                   on 2000/12/21  00:28:10
+        Log: Subject: [patch: perl@8211]VMS: add -Duseperlio capacity to configure.com
+             From: Peter Prymmer <pvhp@forte.com>
+             Date: Wed, 20 Dec 2000 16:13:32 -0800 (PST)
+             Message-ID: <Pine.OSF.4.10.10012201609140.11967-100000@aspara.forte.com>
+     Branch: perl
+	   ! configure.com
+____________________________________________________________________________
+[  8212] By: jhi                                   on 2000/12/21  00:26:21
+        Log: Edit edit edit.
+     Branch: perl
+	   ! pod/perlfaq3.pod
+____________________________________________________________________________
+[  8211] By: jhi                                   on 2000/12/20  18:52:46
+        Log: Update Changes.
+     Branch: perl
+	   ! Changes patchlevel.h
+____________________________________________________________________________
 [  8210] By: jhi                                   on 2000/12/20  18:34:47
         Log: Yet another editor edit.
      Branch: perl
