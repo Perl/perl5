@@ -32,6 +32,191 @@ Version v5.7.0		Development release working toward v5.8
 --------------
 
 ____________________________________________________________________________
+[  7572] By: jhi                                   on 2000/11/06  13:48:41
+        Log: Subject: Re: rsync'ed patches vs. rsync'ed source
+             From: "H.Merijn Brand" <h.m.brand@hccnet.nl>
+             Date: Mon, 06 Nov 2000 10:11:42 +0100
+             Message-Id: <20001106100920.9BAD.H.M.BRAND@hccnet.nl>
+     Branch: perl
+	   ! pod/perlhack.pod
+____________________________________________________________________________
+[  7571] By: jhi                                   on 2000/11/06  01:45:51
+        Log: AUTHORS updates.
+     Branch: perl
+	   ! AUTHORS
+____________________________________________________________________________
+[  7570] By: jhi                                   on 2000/11/06  00:18:00
+        Log: Fix for
+             
+             Subject: [ID 20000728.005] perl -P broken
+             From: David Dyck <dcd@tc.fluke.com>
+             Date: Fri, 28 Jul 2000 17:19:16 -0700
+             Message-Id: <200007290019.RAA08484@dd.tc.fluke.com>
+             
+             (hopefully).  The fix is also not complete, it seems to break
+             BOM swallowing for libc5 systems, but until someone figures
+             out a way to do this without ftell(), this will do.
+     Branch: perl
+	   ! toke.c
+____________________________________________________________________________
+[  7569] By: jhi                                   on 2000/11/06  00:05:30
+        Log: Document that the evaled syntax errors cause scalar leaks.
+     Branch: perl
+	   ! t/comp/proto.t
+____________________________________________________________________________
+[  7568] By: jhi                                   on 2000/11/05  23:14:47
+        Log: opmini.o can linger from Configures past.
+     Branch: perl
+	   ! Makefile.SH
+____________________________________________________________________________
+[  7567] By: jhi                                   on 2000/11/05  21:28:39
+        Log: Fake __FUNCTION__ for non-gcc builds, cast madvise()
+             first argument correctly.
+     Branch: perl
+	   ! perlio.c
+____________________________________________________________________________
+[  7566] By: jhi                                   on 2000/11/05  21:15:56
+        Log: Integrate perlio.
+     Branch: perl
+	  !> perlio.c
+____________________________________________________________________________
+[  7565] By: jhi                                   on 2000/11/05  21:15:13
+        Log: Use -dM for gcc (the suggested patch did it only for Linux,
+             but I think it can be generalized).
+             
+             Subject: Re: connect and $!{EINPROGRESS} pb (was [ID 20001030.010] [PATCH] io_multihomed.t failing)
+             From: Pixel <pixel@mandrakesoft.com>
+             Date: 05 Nov 2000 21:49:34 +0100 
+             Message-ID: <ly8zqygn4x.fsf@leia.mandrakesoft.com>
+     Branch: perl
+	   ! ext/Errno/Errno_pm.PL
+____________________________________________________________________________
+[  7563] By: jhi                                   on 2000/11/05  19:48:55
+        Log: Add a note for future generations about bug id 20000229.006.
+     Branch: perl
+	   ! malloc.c
+____________________________________________________________________________
+[  7562] By: jhi                                   on 2000/11/05  19:38:24
+        Log: Fix for bug id 19990615.008, pos() unset during s///ge.
+     Branch: perl
+	   ! pp_ctl.c t/op/pos.t
+____________________________________________________________________________
+[  7561] By: jhi                                   on 2000/11/05  18:21:46
+        Log: Add =pod to be tidy.
+     Branch: perl
+	   ! lib/Math/Complex.pm
+____________________________________________________________________________
+[  7560] By: jhi                                   on 2000/11/05  17:38:46
+        Log: Upgrade to Storable 1.0.6, from Raphael Manfredi.
+     Branch: perl
+	   ! ext/Storable/ChangeLog ext/Storable/Storable.pm
+	   ! ext/Storable/Storable.xs t/lib/st-recurse.t
+____________________________________________________________________________
+[  7559] By: jhi                                   on 2000/11/05  17:32:59
+        Log: Subject: [Corrected/tested PATCH] Re: [ID 20001102.008] Not OK: perl v5.7.0 +DEVEL7503 on i686-linux 2.2.16
+             From: "Peter J. Farley III" <pjfarley@banet.net>
+             Date: Sun, 05 Nov 2000 11:55:59 -0500
+             Message-Id: <4.3.1.0.20001105115341.00b35160@pop5.banet.net> 
+     Branch: perl
+	   ! t/lib/syslog.t
+____________________________________________________________________________
+[  7558] By: jhi                                   on 2000/11/05  17:29:19
+        Log: Integrate perlio.
+     Branch: perl
+	  !> perlio.c
+____________________________________________________________________________
+[  7557] By: jhi                                   on 2000/11/05  17:22:01
+        Log: A fix of sorts for 20000329.026, a better error message
+             for a missing "use charnames" when using the \N{...}. 
+     Branch: perl
+	   ! pod/perldiag.pod toke.c
+____________________________________________________________________________
+[  7556] By: jhi                                   on 2000/11/05  16:33:50
+        Log: Test tweak: show also the failed locales.
+             
+             Subject: [ID 20001105.001] Not OK: perl v5.7.0 +DEVEL7523 on i86pc-solaris 2.8  
+             From: Lupe Christoph <lupe@lupe-christoph.de>         
+             Date: Sun, 5 Nov 2000 12:39:27 +0100 (MET)
+             Message-Id: <200011051139.MAA12442@lupe-christoph.de>
+     Branch: perl
+	   ! t/pragma/locale.t
+____________________________________________________________________________
+[  7553] By: jhi                                   on 2000/11/05  01:12:16
+        Log: Fix for
+             
+             Subject: [ID 20001004.007] taint propogation is inconsistent
+             From: pimlott@idiomtech.com (Andrew Pimlott) 
+             Date: Wed, 4 Oct 2000 23:17:44 -0400 (EDT)
+             Message-Id: <m13h1XU-000SEmC@nolfolan.idiomtech.com>
+             
+             The culprit was sv_setsv() which was rather blindly
+             propagating taint, which lead to behaviour where was
+             a tainted anon hash value was seen all the values from
+             then on became tainted.
+     Branch: perl
+	   ! sv.c t/op/taint.t
+____________________________________________________________________________
+[  7552] By: jhi                                   on 2000/11/04  23:44:18
+        Log: Some cpps don't like splitting conditionals across several lines.
+     Branch: perl
+	   ! perlio.c
+____________________________________________________________________________
+[  7549] By: jhi                                   on 2000/11/04  23:14:01
+        Log: Fix for
+             
+             Subject: [ID 20001004.006] undef is never tainted
+             From: pimlott@idiomtech.com (Andrew Pimlott)
+             Date: Wed, 4 Oct 2000 21:57:43 -0400 (EDT)
+             Message-Id: <m13h0I3-000SEmC@nolfolan.idiomtech.com>
+             
+             An undef read from a slurped file was not tainted.
+     Branch: perl
+	   ! pp_hot.c t/op/taint.t
+____________________________________________________________________________
+[  7548] By: jhi                                   on 2000/11/04  22:56:21
+        Log: Test tweak ($Config{useperlio} is by default undef) .
+     Branch: perl
+	   ! t/lib/b.t
+____________________________________________________________________________
+[  7547] By: jhi                                   on 2000/11/04  22:43:56
+        Log: Integrate perlio.
+     Branch: perl
+	  +> lib/perlio.pm
+	  !> MANIFEST iperlsys.h objXSUB.h perlapi.c perlio.c
+	  !> pod/perlapi.pod t/lib/b.t
+____________________________________________________________________________
+[  7546] By: jhi                                   on 2000/11/04  22:40:59
+        Log: Configure would use a bad $myuname from an old config.sh.
+             
+             Subject: [PATCH 5.6.1-to-be and 5.7.x] Very old Configure myuname bug
+             From: Andy Dougherty <doughera@lafayette.edu>
+             Date: Sat, 4 Nov 2000 14:15:29 -0500 (EST)
+             Message-ID: <Pine.SOL.4.10.10011041410120.982-100000@maxwell.phys.lafayette.edu>
+     Branch: metaconfig
+	   ! U/modified/Oldconfig.U
+     Branch: perl
+	   ! Configure config_h.SH
+____________________________________________________________________________
+[  7545] By: jhi                                   on 2000/11/04  22:36:54
+        Log: Subject: Locales support (setlocale) fixes
+             From: "Konovalov, Vadim" <vkonovalov@lucent.com>
+             Date: Sat, 4 Nov 2000 10:15:48 +0300 
+             Message-ID: <402099F49BEED211999700805FC7359F82511F@ru0028exch01.spb.lucent.com>
+             
+             Modified quite a bit to be more portable.
+     Branch: perl
+	   ! embed.h embed.pl perl.h proto.h util.c
+____________________________________________________________________________
+[  7544] By: jhi                                   on 2000/11/04  22:32:47
+        Log: Dying is too strict here, better just skip.
+     Branch: perl
+	   ! t/op/misc.t
+____________________________________________________________________________
+[  7542] By: jhi                                   on 2000/11/04  21:09:28
+        Log: More Changes tweakery.
+     Branch: perl
+	   ! Changes Porting/genlog
+____________________________________________________________________________
 [  7541] By: jhi                                   on 2000/11/04  20:58:18
         Log: Changes fixups.
      Branch: perl
