@@ -1855,6 +1855,7 @@ Perl_hv_iternext_flags(pTHX_ HV *hv, I32 flags)
 	Newz(506, xhv->xhv_array /* HvARRAY(hv) */,
 	     PERL_HV_ARRAY_ALLOC_BYTES(xhv->xhv_max+1 /* HvMAX(hv)+1 */),
 	     char);
+    /* At start of hash, entry is NULL.  */
     if (entry)
     {
 	entry = HeNEXT(entry);
@@ -1869,8 +1870,11 @@ Perl_hv_iternext_flags(pTHX_ HV *hv, I32 flags)
 	}
     }
     while (!entry) {
+	/* OK. Come to the end of the current list.  Grab the next one.  */
+
 	xhv->xhv_riter++; /* HvRITER(hv)++ */
 	if (xhv->xhv_riter > (I32)xhv->xhv_max /* HvRITER(hv) > HvMAX(hv) */) {
+	    /* There is no next one.  End of the hash.  */
 	    xhv->xhv_riter = -1; /* HvRITER(hv) = -1 */
 	    break;
 	}
@@ -1878,10 +1882,14 @@ Perl_hv_iternext_flags(pTHX_ HV *hv, I32 flags)
 	entry = ((HE**)xhv->xhv_array)[xhv->xhv_riter];
 
         if (!(flags & HV_ITERNEXT_WANTPLACEHOLDERS)) {
-            /* if we have an entry, but it's a placeholder, don't count it */
-            if (entry && HeVAL(entry) == &PL_sv_undef)
-                entry = 0;
-        }
+            /* If we have an entry, but it's a placeholder, don't count it.
+	       Try the next.  */
+	    while (entry && HeVAL(entry) == &PL_sv_undef)
+		entry = HeNEXT(entry);
+	}
+	/* Will loop again if this linked list starts NULL
+	   (for HV_ITERNEXT_WANTPLACEHOLDERS)
+	   or if we run through it and find only placeholders.  */
     }
 
     if (oldentry && HvLAZYDEL(hv)) {		/* was deleted earlier? */
