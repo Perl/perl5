@@ -2,7 +2,7 @@ BEGIN {require 5.002;} # MakeMaker 5.17 was the last MakeMaker that was compatib
 
 package ExtUtils::MakeMaker;
 
-$VERSION = "5.4302";
+$VERSION = "5.44";
 $Version_OK = "5.17";	# Makefiles older than $Version_OK will die
 			# (Will be checked from MakeMaker version 4.13 onwards)
 ($Revision = substr(q$Revision: 1.222 $, 10)) =~ s/\s+$//;
@@ -17,7 +17,7 @@ use Carp ();
 use vars qw(
 
 	    @ISA @EXPORT @EXPORT_OK $AUTOLOAD
-	    $ISA_TTY $Is_Mac $Is_OS2 $Is_VMS $Revision $Setup_done
+	    $ISA_TTY $Is_Mac $Is_OS2 $Is_VMS $Revision
 	    $VERSION $Verbose $Version_OK %Config %Keep_after_flush
 	    %MM_Sections %Prepend_dot_dot %Recognized_Att_Keys
 	    @Get_from_Config @MM_Sections @Overridable @Parent
@@ -95,31 +95,15 @@ if ($Is_Cygwin) {
 # we know for sure we will use most of the autoloaded functions once
 # we have to use one of them. So we write our own loader
 
-sub AUTOLOAD {
-    my $code;
-    if (defined fileno(DATA)) {
-	my $fh = select DATA;
-	my $o = $/;			# For future reads from the file.
-	$/ = "\n__END__\n";
-	$code = <DATA>;
-	$/ = $o;
-	select $fh;
-	close DATA;
-	eval $code;
-	if ($@) {
-	    $@ =~ s/ at .*\n//;
-	    Carp::croak $@;
-	}
-    } else {
-	warn "AUTOLOAD called unexpectedly for $AUTOLOAD"; 
-    }
-    defined(&$AUTOLOAD) or die "Myloader inconsistency error";
-    goto &$AUTOLOAD;
-}
+full_setup();
 
 # The only subroutine we do not SelfLoad is Version_Check because it's
 # called so often. Loading this minimum still requires 1.2 secs on my
 # Indy :-(
+
+# 3 years later we can say, Version_check takes 0.2 secs on my Linux
+# and MakeMaker has become so stable that we could drop the use of
+# Version_check altogether
 
 sub Version_check {
     my($checkversion) = @_;
@@ -140,38 +124,10 @@ sub warnhandler {
     warn @_;
 }
 
-sub ExtUtils::MakeMaker::eval_in_subdirs ;
-sub ExtUtils::MakeMaker::eval_in_x ;
-sub ExtUtils::MakeMaker::full_setup ;
-sub ExtUtils::MakeMaker::writeMakefile ;
-sub ExtUtils::MakeMaker::new ;
-sub ExtUtils::MakeMaker::check_manifest ;
-sub ExtUtils::MakeMaker::parse_args ;
-sub ExtUtils::MakeMaker::check_hints ;
-sub ExtUtils::MakeMaker::mv_all_methods ;
-sub ExtUtils::MakeMaker::skipcheck ;
-sub ExtUtils::MakeMaker::flush ;
-sub ExtUtils::MakeMaker::mkbootstrap ;
-sub ExtUtils::MakeMaker::mksymlists ;
-sub ExtUtils::MakeMaker::neatvalue ;
-sub ExtUtils::MakeMaker::selfdocument ;
-sub ExtUtils::MakeMaker::WriteMakefile ;
-sub ExtUtils::MakeMaker::prompt ($;$) ;
-
-1;
-
-__DATA__
-
-package ExtUtils::MakeMaker;
-
 sub WriteMakefile {
     Carp::croak "WriteMakefile: Need even number of args" if @_ % 2;
     local $SIG{__WARN__} = \&warnhandler;
 
-    unless ($Setup_done++){
-	full_setup();
-	undef &ExtUtils::MakeMaker::full_setup; #safe memory
-    }
     my %att = @_;
     MM->new(\%att)->flush;
 }
@@ -388,7 +344,7 @@ sub ExtUtils::MakeMaker::new {
 	if ($@) {
 	    warn "Warning: prerequisite $prereq failed to load: $@";
 	}
-	else if ($prereq->VERSION < $self->{PREREQ_PM}->{$prereq} ){
+	elsif ($prereq->VERSION < $self->{PREREQ_PM}->{$prereq} ){
 	    warn "Warning: prerequisite $prereq $self->{PREREQ_PM}->{$prereq} not found";
 # Why is/was this 'delete' here?  We need PREREQ_PM later to make PPDs.
 #	} else {
