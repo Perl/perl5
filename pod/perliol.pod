@@ -383,7 +383,7 @@ thus equivalent to C<PerlIO_fdopen>. In this case I<nargs> will be zero.
 
 If I<nargs> is greater than zero then it gives the number of arguments passed
 to C<open>, otherwise it will be 1 if for example C<PerlIO_open> was called.
-In simple cases SvPV(*args) is the pathname to open.
+In simple cases SvPV_nolen(*args) is the pathname to open.
 
 Having said all that translation-only layers do not need to provide C<Open()> at all,
 but rather leave the opening to a lower level layer and wait to be "pushed".
