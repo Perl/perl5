@@ -55,7 +55,7 @@ Execution of - aborted due to compilation errors.
 
 # strict vars - error
 use strict 'vars' ;
-$fred ;
+<$fred> ;
 EXPECT
 Global symbol "$fred" requires explicit package name at - line 4.
 Execution of - aborted due to compilation errors.
