@@ -74,6 +74,231 @@ indicator:
 
 
 ----------------
+Version 5.005_02        Second maintenance release of 5.005
+----------------
+
+____________________________________________________________________________
+[  1697] By: gsar                                  on 1998/08/02  05:20:12
+        Log: support OE/MVS
+             From: Jarkko Hietaniemi <jhi@iki.fi>
+             Message-Id: <199808010903.MAA09371@alpha.hut.fi>
+             Date: Sat, 1 Aug 1998 12:03:02 +0300 (EET DST)
+             Subject: [PATCH] 5.005_01: OE MVS
+     Branch: maint-5.005/perl
+           + README.os390 ebcdic.c
+	   ! Configure MANIFEST doio.c ext/Errno/Errno_pm.PL gv.c handy.h
+	   ! hints/os390.sh lib/bigint.pl mg.c patchlevel.h perl.c perl.h
+	   ! perly.c perly.h perly.y perly_c.diff pod/perldelta.pod
+	   ! pod/perlport.pod pp.c pp_ctl.c pp_hot.c pp_sys.c sv.c
+	   ! t/base/term.t t/comp/package.t t/comp/require.t
+	   ! t/lib/bigintpm.t t/lib/cgi-html.t t/lib/filehand.t t/lib/ph.t
+	   ! t/op/auto.t t/op/bop.t t/op/each.t t/op/magic.t t/op/misc.t
+	   ! t/op/ord.t t/op/pack.t t/op/quotemeta.t t/op/re_tests
+	   ! t/op/regexp.t t/op/sort.t t/op/sprintf.t t/op/subst.t
+	   ! t/op/taint.t t/op/universal.t t/pragma/constant.t
+	   ! t/pragma/overload.t t/pragma/subs.t toke.c x2p/a2p.h
+           ! x2p/a2py.c
+____________________________________________________________________________
+[  1696] By: gsar                                  on 1998/08/02  05:03:09
+        Log: VMS patches
+             From: pvhp@forte.com (Peter Prymmer)
+             Message-Id: <9807290017.AA01833@forte.com>
+             Date: Tue, 28 Jul 98 17:17:33 PDT
+             Subject: Re: Not OK: perl 5.00501 on VMS_AXP-thread I7.2
+             --
+             From: Dan Sugalski <sugalskd@osshe.edu>
+             Message-Id: <3.0.5.32.19980729125623.00b562b0@ous.edu>
+             Date: Wed, 29 Jul 1998 12:56:23 -0700
+             Subject: [PATCH 5.005_01]Typo in CONFIGURE.COM (vms)
+             --
+             From: Dan Sugalski <sugalskd@osshe.edu>
+             Date: Thu, 30 Jul 1998 09:02:24 -0700
+             Message-Id: <3.0.5.32.19980730090224.00b70eb0@ous.edu>
+             Subject: [PATCH 5.005_01]VMS config SOCKETSHR typo patch and fcntl check
+     Branch: maint-5.005/perl
+           ! configure.com vms/subconfigure.com
+____________________________________________________________________________
+[  1695] By: gsar                                  on 1998/08/02  04:49:32
+        Log: rename duplicate warning in regexec.c
+     Branch: maint-5.005/perl
+           ! regexec.c
+____________________________________________________________________________
+[  1694] By: gsar                                  on 1998/08/02  04:44:20
+        Log: beware egcs' ld on Solaris
+             From: Tom Spindler <dogcow@home.merit.edu>
+             Message-ID: <19980801212158.A2934@home.merit.edu>
+             Date: Sat, 1 Aug 1998 21:21:58 -0400
+             Subject: Re: [PATCH perl5.005_01] hints/solaris_2.sh, egcs, and ld
+     Branch: maint-5.005/perl
+           ! hints/solaris_2.sh
+____________________________________________________________________________
+[  1693] By: gsar                                  on 1998/08/02  04:41:43
+        Log: de-utf-ized variation of Ilya's patch
+             From: Jan-Pieter Cornet <johnpc@xs4all.net>
+             Date: 31 Jul 1998 12:44:57 +0200
+             Message-ID: <6ps779$hmj$1@xs1.xs4all.nl>
+             Subject: Re: s/\s*$//g in majordomo causes segfault under 5.005_01
+     Branch: maint-5.005/perl
+           ! regexec.c
+____________________________________________________________________________
+[  1692] By: gsar                                  on 1998/08/02  04:39:14
+        Log: better validation of SysV IPC availability
+             From: Jarkko Hietaniemi <jarkko.hietaniemi@research.nokia.com>
+             Date: Fri, 31 Jul 1998 13:13:57 +0300 (EEST)
+             Message-Id: <199807311013.NAA28887@koah.research.nokia.com>
+             Subject: Re: lib/ipc_sysv.t fails under FreeBSD 2.2.1 
+     Branch: maint-5.005/perl
+	   ! Configure INSTALL ext/IPC/SysV/SysV.xs pod/perldiag.pod
+           ! t/lib/ipc_sysv.t
+____________________________________________________________________________
+[  1691] By: gsar                                  on 1998/08/02  04:32:30
+        Log: fix bug in display of watched expressions
+             From: Ilya Zakharevich <ilya@math.ohio-state.edu>
+             Date: Thu, 30 Jul 1998 20:02:04 -0400 (EDT)
+             Message-Id: <199807310002.UAA21681@monk.mps.ohio-state.edu>
+             Subject: Re: Bug? in perl5db.pl [PATCH]
+     Branch: maint-5.005/perl
+           ! lib/perl5db.pl
+____________________________________________________________________________
+[  1690] By: gsar                                  on 1998/08/02  04:29:08
+        Log: applied all but one hunk
+             From: Horst von Brand <vonbrand@sleipnir.valparaiso.cl>
+             Date: Thu, 30 Jul 1998 17:19:42 -0400
+             Message-Id: <199807302119.RAA06852@sleipnir.valparaiso.cl>
+             Subject: Some typos in perldelta.pod
+     Branch: maint-5.005/perl
+           ! pod/perldelta.pod
+____________________________________________________________________________
+[  1689] By: gsar                                  on 1998/08/02  04:27:02
+        Log: From: Andy Dougherty <doughera@lafcol.lafayette.edu>
+             Date: Thu, 30 Jul 1998 10:22:36 -0400 (EDT)
+             Message-Id: <Pine.SUN.3.96.980730101627.17514B-100000@newton.phys>
+             Subject: [PATCH 5.005_05] Remove redundant dTHR
+     Branch: maint-5.005/perl
+           ! mg.c sv.c
+____________________________________________________________________________
+[  1688] By: gsar                                  on 1998/08/02  04:25:49
+        Log: From: Tom Hughes <thh@cyberscience.com>
+             Date: 30 Jul 1998 09:47:31 +0100
+             Message-ID: <yek1zr3vi70.fsf@elva.cyberscience.com>
+             Subject: Class::Struct has an incomplete tied array package
+     Branch: maint-5.005/perl
+           ! lib/Class/Struct.pm
+____________________________________________________________________________
+[  1687] By: gsar                                  on 1998/08/02  04:21:48
+        Log: ensure implicit close on local(*FH) doesn't affect $! and thence $?
+     Branch: maint-5.005/perl
+           ! sv.c t/op/die_exit.t
+____________________________________________________________________________
+[  1686] By: gsar                                  on 1998/08/02  03:57:28
+        Log: From: Jarkko Hietaniemi <jhi@iki.fi>
+             Date: Thu, 30 Jul 1998 00:39:30 +0300 (EET DST)
+             Message-Id: <199807292139.AAA01795@alpha.hut.fi>
+             Subject: Re: [PATCH] 5.004_05-MAINT_TRIAL_5: three locale fixes
+     Branch: maint-5.005/perl
+           ! ext/POSIX/POSIX.xs pod/perllocale.pod
+____________________________________________________________________________
+[  1685] By: gsar                                  on 1998/08/02  03:54:15
+        Log: PERL_OBJECT bincompat fixes from Douglas Lankshear <dougl@ActiveState.com>
+             Date: Wed, 29 Jul 1998 10:45:31 -0700
+             Message-ID: <000101bdbb18$ae767550$a32fa8c0@tau.Active>
+             Subject: [PATCH 5.005_01] Fixes binary compatibility for PERL_OBJECT
+             --
+             Date: Sat, 1 Aug 1998 09:33:19 -0700
+             Message-ID: <000701bdbd6a$17ada180$a32fa8c0@tau.Active>
+             Subject: [PATCH 5.005_01]
+     Branch: maint-5.005/perl
+           ! perl.h proto.h
+____________________________________________________________________________
+[  1684] By: gsar                                  on 1998/08/02  03:49:33
+        Log: hand-apply whitespace-mutiliated patch
+             From: Nicholas Clark <nick@flirble.org>
+             Date: Tue, 28 Jul 1998 16:40:42 +0100 (BST)
+             Message-Id: <199807281540.QAA04640@flirble.org>
+             Subject: [PATCH] POSIX::ELOOP
+     Branch: maint-5.005/perl
+           ! ext/POSIX/POSIX.pm ext/POSIX/POSIX.xs
+____________________________________________________________________________
+[  1683] By: gsar                                  on 1998/08/02  03:45:26
+        Log: document return values of do() better
+             From: "M.J.T. Guy" <mjtg@cus.cam.ac.uk>
+             Date: Tue, 28 Jul 1998 12:44:36 +0100
+             Message-Id: <E0z18BI-0003cH-00@taurus.cus.cam.ac.uk>
+             Subject: [PATCH] Re: Obscurity of lexicals with do ""
+     Branch: maint-5.005/perl
+           ! pod/perlfunc.pod
+____________________________________________________________________________
+[  1682] By: gsar                                  on 1998/08/02  03:42:26
+        Log: avoid reusing foreach itervar if magic got tacked onto it
+             From: Stephen McCamant <alias@mcs.com>
+             Date: Tue, 28 Jul 1998 22:18:25 -0500 (CDT)
+             Message-ID: <13758.36756.215424.719750@alias-2.pr.mcs.net>
+             Subject: [PATCH] Re: pos() resetting changed with 5.005?
+     Branch: maint-5.005/perl
+           ! pp_hot.c
+____________________________________________________________________________
+[  1681] By: gsar                                  on 1998/08/02  03:39:27
+        Log: From: Nick Ing-Simmons <nik@tiuk.ti.com>
+             Date: Wed, 29 Jul 1998 13:28:14 +0100
+             Message-Id: <199807291228.NAA20055@tiuk.ti.com>
+             Subject: [Patch] Math::Complex - Ambiguous call resolved as CORE::foo()
+     Branch: maint-5.005/perl
+           + Porting/fixCORE
+           ! MANIFEST lib/Math/Complex.pm
+____________________________________________________________________________
+[  1680] By: gsar                                  on 1998/08/02  03:33:07
+        Log: From: h.sanden@elsevier.nl (Hugo van der Sanden)
+             Date: Mon, 27 Jul 1998 13:34:45 +0200
+             Message-Id: <199807271134.NAA24475@dorlas.elsevier.nl>
+             Subject: perlcall.pod
+     Branch: maint-5.005/perl
+           ! pod/perlcall.pod
+____________________________________________________________________________
+[  1679] By: gsar                                  on 1998/08/02  03:29:41
+        Log: MM_Win32::maybe_command() case-insesitivity tweak
+     Branch: maint-5.005/perl
+           ! lib/ExtUtils/MM_Win32.pm
+____________________________________________________________________________
+[  1678] By: gsar                                  on 1998/08/02  03:24:29
+        Log: fix MM_Win32::maybe_command()
+     Branch: maint-5.005/perl
+           ! lib/ExtUtils/MM_Win32.pm
+____________________________________________________________________________
+[  1677] By: gsar                                  on 1998/08/01  19:52:19
+        Log: fixes for overloading bugs and docs, tweaked some
+             From: Ilya Zakharevich <ilya@math.ohio-state.edu>
+             Date: Sat, 25 Jul 1998 21:28:16 -0400 (EDT)
+             Message-Id: <199807260128.VAA10543@monk.mps.ohio-state.edu>
+             Subject: [PATCH 5.004_76] better overloading
+     Branch: maint-5.005/perl
+	   ! Changes gv.c lib/dumpvar.pl lib/overload.pm lib/perl5db.pl
+           ! t/pragma/overload.t
+____________________________________________________________________________
+[  1676] By: gsar                                  on 1998/08/01  19:37:13
+        Log: stray s/foo/PL_foo/
+             From: win@in.rhein-main.de (Winfried Koenig)
+             Date: Mon, 27 Jul 98 21:13 MET
+             Message-Id: <m0z0teW-00019aC@incom.rhein-main.de>
+             Subject: Bug in pp_rename and ISC hint
+     Branch: maint-5.005/perl
+           ! pp_sys.c
+____________________________________________________________________________
+[  1675] By: gsar                                  on 1998/08/01  19:22:13
+        Log: newer Porting/patchls from maint-5.004
+     Branch: maint-5.005/perl
+           ! Porting/patchls
+____________________________________________________________________________
+[  1674] By: gsar                                  on 1998/08/01  17:50:44
+        Log: fix buggy detection of failed glob()
+     Branch: maint-5.005/perl
+           ! pp_hot.c
+____________________________________________________________________________
+[  1673] By: gsar                                  on 1998/07/29  18:14:32
+        Log: fix typo in change#1489 that prevented magic-autovivification
+     Branch: maint-5.005/perl
+           ! mg.c
+
+----------------
 Version 5.005_01        First maintenance release of 5.005
 ----------------
 
