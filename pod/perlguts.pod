@@ -614,8 +614,7 @@ including (but not limited to) the following:
     Scalar Value
     Array Value
     Hash Value
-    File Handle
-    Directory Handle
+    I/O Handle
     Format
     Subroutine
 
@@ -1426,7 +1425,7 @@ created.
 =head2 Compile pass 2: context propagation
 
 When a context for a part of compile tree is known, it is propagated
-down through the tree.  Aat this time the context can have 5 values
+down through the tree.  At this time the context can have 5 values
 (instead of 2 for runtime context): void, boolean, scalar, list, and
 lvalue.  In contrast with the pass 1 this pass is processed from top
 to bottom: a node's context determines the context for its children.
