@@ -515,7 +515,7 @@ pop(), push(), shift(), splice(), unshift().
 
 =item *
 
-C<pack() / unpack()> now can group template letters with C<()> and then
+C<pack() / unpack()> can now group template letters with C<()> and then
 apply repetition/count modifiers on the groups.
 
 =item *
@@ -1067,14 +1067,14 @@ AutoLoader can now be disabled with C<no AutoLoader;>.
 
 =item *
 
-B::Deparse has been significantly enhanced by Robin Houston.  It now
-can deparse almost all of the standard test suite (so that the tests
+B::Deparse has been significantly enhanced by Robin Houston.  It can
+now deparse almost all of the standard test suite (so that the tests
 still succeed).  There is a make target "test.deparse" for trying this
 out.
 
 =item *
 
-Carp has now better interface documentation, and the @CARP_NOT
+Carp now has better interface documentation, and the @CARP_NOT
 interface has been added to get optional control over where errors
 are reported independently of @ISA, by Ben Tilly.
 
