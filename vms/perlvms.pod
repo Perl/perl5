@@ -271,7 +271,7 @@ Perl functions were implemented in the VMS port of Perl
     setpwent, shift, sin, sleep, sort, splice, split,
     sprintf, sqrt, srand, stat, study, substr, sysread,
     system*, syswrite, tell, telldir, tie, time, times*,
-    tr///, uc, ucfirst, umask, undef, unlink, unpack,
+    tr///, uc, ucfirst, umask, undef, unlink*, unpack,
     untie, unshift, use, utime*, values, vec, wait,
     waitpid*, wantarray, warn, write, y///
 
@@ -413,6 +413,37 @@ especially that the VAXCRTL (at least) keeps track only of
 subprocesses spawned using L<fork> and L<exec>; it will not
 accumulate the times of suprocesses spawned via pipes, L<system>,
 or backticks.
+
+=item unlink LIST
+
+C<unlink> will delete the highest version of a file only; in
+order to delete all versions, you need to say
+    1 while (unlink LIST);
+You may need to make this change to scripts written for a
+Unix system which expect that after a call to C<unlink>,
+no files with the names passed to C<unlink> will exist.
+(Note: This can be changed at compile time by including
+C<#define UNLINK_ALL_VERSIONS> in config.h.
+
+C<unlink> will delete a file if at all possible, even if it
+requires changing file protection (though it won't try to
+change the protection of the parent directory).  You can tell
+whether you've got explicit delete access to a file by using the
+C<VMS::Filespec::candelete> operator.  For instance, in order
+to delete only files to which you have delete access, you could
+say something like
+    sub safe_unlink {
+        my($file,$num);
+        foreach $file (@_) {
+            next unless VMS::Filespec::candelete($file);
+            $num += unlink $file;
+        }
+        $num;
+    }
+Finally, if C<unlink> has to change the file protection to
+delete the file, and you interrupt it in midstream, the file
+may be left intact, but with a changed ACL allowing you delete
+access.
 
 =item utime LIST
 

@@ -1298,6 +1298,8 @@ PP(pp_return)
 
     if (stack == sortstack) {
 	if (cxstack_ix == sortcxix || dopoptosub(cxstack_ix) < sortcxix) {
+	    if (cxstack_ix > sortcxix)
+		dounwind(sortcxix);
 	    AvARRAY(stack)[1] = *SP;
 	    stack_sp = stack_base + 1;
 	    return 0;

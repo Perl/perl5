@@ -1,4 +1,0 @@
-#!./miniperl
-BEGIN { unshift @INC, "lib" }
-use AutoSplit;
-autosplit_lib_modules(@ARGV);

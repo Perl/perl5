@@ -33,6 +33,20 @@
 
 #define HAS_KILL
 #define HAS_WAIT
+  
+/* UNLINK_ALL_VERSIONS:
+ *	This symbol, if defined, indicates that the program should arrange
+ *	to remove all versions of a file if unlink() is called.  This is
+ *	probably only relevant for VMS.
+ */
+/* #define UNLINK_ALL_VERSIONS		/**/
+
+/* VMS:
+ *	This symbol, if defined, indicates that the program is running under
+ *	VMS.  It is currently automatically set by cpps running under VMS,
+ *	and is included here for completeness only.
+ */
+/* #define VMS		/**/
 
 #if !defined(NSIG) || defined(M_UNIX) || defined(M_XENIX)
 # include <signal.h>

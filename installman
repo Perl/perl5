@@ -1,0 +1,155 @@
+#!./perl
+BEGIN { @INC = ('lib') }
+use Config;
+use Getopt::Long;
+use File::Find;
+require Cwd;
+
+umask 022;
+
+$ver = $];
+$release = substr($ver,0,3);   # Not used presently.
+$patchlevel = substr($ver,3,2);
+die "Patchlevel of perl ($patchlevel)",
+    "and patchlevel of config.sh ($Config{'PATCHLEVEL'}) don't match\n"
+	if $patchlevel != $Config{'PATCHLEVEL'};
+
+$usage =
+"Usage:  installman --man1dir=/usr/wherever --man1ext=1
+                    --man3dir=/usr/wherever --man3ext=3
+		    --notify --help
+	Defaults are:
+	man1dir = $Config{'installman1dir'};
+	man1ext = $Config{'man1ext'};
+	man3dir = $Config{'installman3dir'};
+	man3ext = $Config{'man3ext'};
+	--notify (or -n) just lists commands that would be executed.\n";
+
+GetOptions( qw( man1dir=s man1ext=s man3dir=s man3ext=s notify help)) 
+	|| die $usage;
+
+# These are written funny to avoid -w typo warnings.
+$man1dir = defined($opt_man1dir) ? $opt_man1dir : $Config{'installman1dir'};
+$man1ext = defined($opt_man1ext) ? $opt_man1ext : $Config{'man1ext'};
+$man3dir = defined($opt_man3dir) ? $opt_man3dir : $Config{'installman3dir'};
+$man3ext = defined($opt_man3ext) ? $opt_man3ext : $Config{'man3ext'};
+
+$notify = defined($opt_notify) ? $opt_notify : 0;
+
+#Sanity checks
+
+-x  "./perl"	|| warn "./perl not found!  Have you run make?\n";
+-d  $Config{'installprivlib'}
+	|| warn "Perl library directory $Config{'installprivlib'} not found.
+		Have you run make install?.  (Installing anyway.)\n";
+-x 't/TEST'		|| warn "WARNING: You've never run 'make test'!!!",
+	"  (Installing anyway.)\n";
+
+# Install the main pod pages.
+runpod2man('pod', $man1dir, $man1ext);
+
+# Install the pods for library modules.
+runpod2man('lib', $man3dir, $man3ext);
+
+sub runpod2man {
+    my($poddir, $mandir, $manext) = @_;
+    my($builddir) = Cwd::getcwd();
+
+    if ($mandir eq ' ' or $mandir eq '') {
+	print STDERR "Skipping installation of $poddir man pages.\n";
+	return;
+    }
+
+    chdir $poddir || die "Unable to cd to $poddir directory!\n$!\n";
+
+    # We insist on using the current version of pod2man in case there
+    # are enhancements or changes from previous installed versions.
+    $pod2man = "../pod/pod2man";
+    -x  $pod2man	|| die "Executable $pod2man not found.\n";
+
+    &makedir($mandir);
+    # Make a list of all the .pm and .pod files in the directory.  We will
+    # always run pod2man from the lib directory and feed it the full pathname
+    # of the pod.  This might be useful for pod2man someday.
+    @modpods = ();
+    find(\&lsmodpods, '.');
+    foreach $mod (@modpods) {
+	$manpage = $mod;
+	# Convert name from  File/Basename.pm to File::Basename.3 format,
+	# if necessary.
+	$manpage =~ s#\.p(m|od)$##;
+	$manpage =~ s#/#::#g;
+	$manpage = "${mandir}/${manpage}.${manext}";
+	# Print $release $patchlevel stuff?  or should pod2man do that?
+	&cmd("$pod2man $mod > $manpage");
+    }
+    chdir "$builddir" || die "Unable to cd back to $builddir directory!\n$!\n";
+}
+
+sub lsmodpods {
+    my $dir  = $File::Find::dir;
+    my $name = $File::Find::name;
+    if (-f $_) {
+        $name =~ s#^\./##;
+	push(@modpods, $name) if ($name =~ /\.p(m|od)$/);
+    }
+}
+
+print STDERR "  Installation complete\n";
+
+exit 0;
+    
+
+###############################################################################
+# Utility subroutines from installperl
+
+sub cmd {
+    local($cmd) = @_;
+    print STDERR "  $cmd\n";
+    unless ($notify) {
+	system $cmd;
+	warn "Command failed!!!\n" if $?;
+    }
+}
+
+sub link {
+    local($from,$to) = @_;
+
+    print STDERR "  ln $from $to\n";
+    link($from,$to) || warn "Couldn't link $from to $to: $!\n" unless $notify;
+}
+
+sub chmod {
+    local($mode,$name) = @_;
+
+    printf STDERR "  chmod %o %s\n", $mode, $name;
+    chmod($mode,$name) || warn sprintf("Couldn't chmod %o %s: $!\n",$mode,$name)
+	unless $notify;
+}
+
+sub makedir {
+    local($dir) = @_;
+    unless (-d $dir) {
+	local($shortdir) = $dir;
+
+	$shortdir =~ s#(.*)/.*#$1#;
+	&makedir($shortdir);
+
+	print STDERR "  mkdir $dir\n";
+	mkdir($dir, 0777) || warn "Couldn't create $dir: $!\n" unless $notify;
+    }
+}
+
+sub samepath {
+    local($p1, $p2) = @_;
+    local($dev1, $ino1, $dev2, $ino2);
+
+    if ($p1 ne $p2) {
+	($dev1, $ino1) = stat($p1);
+	($dev2, $ino2) = stat($p2);
+	($dev1 == $dev2 && $ino1 == $ino2);
+    }
+    else {
+	1;
+    }
+}

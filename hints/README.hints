@@ -1,5 +1,5 @@
 These files are used by Configure to set things which Configure either
-can't or doesn't guess properly.  Most of these hints files are from
+can't or doesn't guess properly.  Many of these hints files are from
 perl4.  They may or may not work with perl5, but they are probably a
 good starting point.
 
@@ -7,6 +7,7 @@ The following hints files have been tested with at least some version
 of perl5 and are probably reasonably close to being correct:
 
 aix.sh
+aux.sh
 bsd386.sh
 dec_osf.sh
 dgux.sh
@@ -15,6 +16,7 @@ freebsd.sh
 hpux_9.sh
 irix_4.sh
 irix_5.sh
+irix_6.sh
 isc.sh
 linux.sh
 netbsd.sh
@@ -33,7 +35,6 @@ The following hints files have not been tested with perl5:
 3b1.sh
 altos486.sh
 apollo.sh
-aux.sh
 dnix.sh
 dynix.sh
 fps.sh

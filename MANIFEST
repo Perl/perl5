@@ -1,5 +1,6 @@
 Artistic		The "Artistic License"
-Changes			Differences between Perl 4 and Perl 5
+Changes			Differences from previous versions.
+Changes.Conf		Recent changes in the Configure & build process
 Configure		Portability tool
 Copying			The GNU General Public License
 Doc/perl5-notes		Samples of new functionality
@@ -11,19 +12,18 @@ README			The Instructions
 README.vms		Notes about VMS
 Todo			The Wishlist
 XSUB.h			Include file for extension subroutines
-autosplit		Splits up autoloader functions
 av.c			Array value code
 av.h			Array value header
 c2ph.SH			program to translate dbx stabs to perl
 c2ph.doc		documentation for c2ph
 cflags.SH		A script that emits C compilation flags per file
-config.H		Sample config.h
+config_H		Sample config.h
 config_h.SH		Produces config.h
 configpm		Produces lib/Config.pm
+configure		Crude emulation of GNU configure
 cop.h			Control operator header
 cv.h			Code value header
 deb.c			Debugging routines
-doSH			Script to run all the *.SH files
 doio.c			I/O operations
 doop.c			Support code for various operations
 dosish.h		Some defines for MS/DOSish machines
@@ -85,7 +85,6 @@ ext/DB_File/DB_File.xs		Berkeley DB extension external subroutines
 ext/DB_File/DB_File_BS		Berkeley DB extension mkbootstrap fodder
 ext/DB_File/Makefile.PL		Berkeley DB extension makefile writer
 ext/DB_File/typemap		Berkeley DB extension interface types
-ext/DynaLoader/DynaLoader.doc	Dynamic Loader specification
 ext/DynaLoader/DynaLoader.pm	Dynamic Loader perl module
 ext/DynaLoader/Makefile.PL	Dynamic Loader makefile writer
 ext/DynaLoader/README		Dynamic Loader notes and intro
@@ -187,6 +186,7 @@ hints/dec_osf.sh	Hints for named architecture
 hints/dgux.sh		Hints for named architecture
 hints/dnix.sh		Hints for named architecture
 hints/dynix.sh		Hints for named architecture
+hints/epix.sh		Hints for named architecture
 hints/esix4.sh		Hints for named architecture
 hints/fps.sh		Hints for named architecture
 hints/freebsd.sh	Hints for named architecture
@@ -230,6 +230,7 @@ hints/utekv.sh		Hints for named architecture
 hints/uts.sh		Hints for named architecture
 hv.c			Hash value code
 hv.h			Hash value header
+installman		Perl script to install man pages for pods.
 installperl		Perl script to do "make install" dirty work
 interp.sym		Interpreter specific symbols to hide in a struct
 ioctl.pl		Sample ioctl.pl
@@ -263,6 +264,7 @@ lib/Math/Complex.pm	A Complex package
 lib/Net/Ping.pm		Ping methods
 lib/Search/Dict.pm	A module to do binary search on dictionaries
 lib/Shell.pm		A module to make AUTOLOADEed system() calls
+lib/SubstrHash.pm	Compact hash for known key, value and table size
 lib/Sys/Hostname.pm	Hostname methods
 lib/Sys/Syslog.pm	Perl module supporting syslogging
 lib/Term/Cap.pm		Perl module supporting termcap usage
@@ -273,7 +275,6 @@ lib/Text/ParseWords.pm	Perl module to split words on arbitrary delimiter
 lib/Text/Soundex.pm	Perl module to implement Soundex
 lib/Text/Tabs.pm	Do expand and unexpand
 lib/TieHash.pm		Base class for tied hashes
-lib/SubstrHash.pm	Compact hash for known key, value and table size
 lib/Time/Local.pm	Reverse translation of localtime, gmtime
 lib/abbrev.pl		An abbreviation table builder
 lib/assert.pl		assertion and panic with stack trace
@@ -334,6 +335,7 @@ patchlevel.h		The current patch level of perl
 perl.c			main()
 perl.h			Global declarations
 perl_exp.SH		Creates list of exported symbols for AIX.
+perldoc.SH		A simple tool to find & display perl's documentation
 perlsh			A poor man's perl shell
 perly.c			A byacc'ed perly.y
 perly.c.diff		Fixup perly.c to allow recursion
@@ -342,39 +344,6 @@ perly.h			The header file for perly.c
 perly.y			Yacc grammar for perl
 pl2pm			A pl to pm translator
 pod/Makefile		Make pods into something else
-pod/modpods/Abbrev.pod		Doc for Abbrev.pm
-pod/modpods/AnyDBMFile.pod	Doc for AnyDBMFile.pm
-pod/modpods/AutoLoader.pod	Doc for AutoLoader.pm
-pod/modpods/AutoSplit.pod	Doc for AutoSplit.pm
-pod/modpods/Basename.pod	Doc for Basename.pm
-pod/modpods/Benchmark.pod	Doc for Benchmark.pm
-pod/modpods/Carp.pod		Doc for Carp.pm
-pod/modpods/CheckTree.pod	Doc for CheckTree.pm
-pod/modpods/Collate.pod		Doc for Collate.pm
-pod/modpods/Config.pod		Doc for Config.pm
-pod/modpods/Cwd.pod		Doc for Cwd.pm
-pod/modpods/DB_File.pod		Doc for File.pm
-pod/modpods/Dynaloader.pod	Doc for Dynaloader.pm
-pod/modpods/English.pod		Doc for English.pm
-pod/modpods/Env.pod		Doc for Env.pm
-pod/modpods/Exporter.pod	Doc for Exporter.pm
-pod/modpods/Fcntl.pod		Doc for Fcntl.pm
-pod/modpods/FileHandle.pod	Doc for FileHandle.pm
-pod/modpods/Find.pod		Doc for Find.pm
-pod/modpods/Finddepth.pod	Doc for Finddepth.pm
-pod/modpods/GetOptions.pod	Doc for GetOptions.pm
-pod/modpods/Getopt.pod		Doc for Getopt.pm
-pod/modpods/MakeMaker.pod	Doc for MakeMaker.pm
-pod/modpods/Open2.pod		Doc for Open2.pm
-pod/modpods/Open3.pod		Doc for Open3.pm
-pod/modpods/POSIX.pod		Doc for POSIX.pm
-pod/modpods/Ping.pod		Doc for Ping.pm
-pod/modpods/Socket.pod		Doc for Socket.pm
-pod/modpods/integer.pod		Doc for integer.pm
-pod/modpods/less.pod		Doc for less.pm
-pod/modpods/sigtrap.pod		Doc for sigtrap.pm
-pod/modpods/strict.pod		Doc for strict.pm
-pod/modpods/subs.pod		Doc for subs.pm
 pod/perl.pod		Top level perl man page
 pod/perlapi.pod		XS api info
 pod/perlbook.pod	Book info
@@ -435,6 +404,7 @@ t/cmd/subval.t		See if subroutine values work
 t/cmd/switch.t		See if switch optimizations work
 t/cmd/while.t		See if while loops work
 t/comp/cmdopt.t		See if command optimization works
+t/comp/cpp.aux		main file for cpp.t
 t/comp/cpp.t		See if C preprocessor works
 t/comp/decl.t		See if declarations work
 t/comp/multiline.t	See if multiline strings work
@@ -561,4 +531,3 @@ x2p/str.h		Public declarations for the above
 x2p/util.c		Utility routines
 x2p/util.h		Public declarations for the above
 x2p/walk.c		Parse tree walker
-xf			A script to translate Perl 4 symbols to Perl 5

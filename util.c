@@ -1031,7 +1031,7 @@ char *nam;
 }
 #endif /* !VMS */
 
-#ifdef EUNICE
+#ifdef UNLINK_ALL_VERSIONS
 I32
 unlnk(f)	/* unlink all versions of a file */
 char *f;

@@ -38,8 +38,6 @@
 #define cop_seqmax	Perl_cop_seqmax
 #define cos_amg		Perl_cos_amg
 #define cryptseen	Perl_cryptseen
-#define cryptswitch_add	Perl_cryptswitch_add
-#define cryptswitch_fp	Perl_cryptswitch_fp
 #define cshlen		Perl_cshlen
 #define cshname		Perl_cshname
 #define curcop		Perl_curcop
@@ -61,6 +59,9 @@
 #define expect		Perl_expect
 #define expectterm	Perl_expectterm
 #define fallback_amg	Perl_fallback_amg
+#define filter_add	Perl_filter_add
+#define filter_del	Perl_filter_del
+#define filter_read	Perl_filter_read
 #define fold		Perl_fold
 #define freq		Perl_freq
 #define ge_amg		Perl_ge_amg
@@ -179,6 +180,7 @@
 #define retstack_ix	Perl_retstack_ix
 #define retstack_max	Perl_retstack_max
 #define rsfp		Perl_rsfp
+#define rsfp_filters	Perl_rsfp_filters
 #define rshift_amg	Perl_rshift_amg
 #define rshift_ass_amg	Perl_rshift_ass_amg
 #define savestack	Perl_savestack

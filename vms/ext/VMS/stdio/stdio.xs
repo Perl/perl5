@@ -20,7 +20,7 @@
 
 /* Use type for FILE * from Perl's XSUB typemap.  This is a bit
  * of a hack, since all Perl filehandles using this type will permit
- * both read & write operations, but it saves to write the PPCODE
+ * both read & write operations, but it saves having to write the PPCODE
  * directly for updating the Perl filehandles.
  */
 typedef FILE * InOutStream;
@@ -46,6 +46,7 @@ vmsfopen(name,...)
 	      if (*(name+1) == '>') *mode = 'a', name += 2;
 	      else *mode = 'w',  name++;
 	    }
+	    else if (*name == '<') name++;
 	    myargc = items - 1;
 	    for (i = 0; i < myargc; i++) args[i] = SvPV(ST(i+1),na);
 	    /* This hack brought to you by C's opaque arglist management */

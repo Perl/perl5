@@ -13,8 +13,13 @@ while (@ARGV) {
 umask 022;
 
 @scripts = ('cppstdin', 'c2ph', 'h2xs', 'pstruct', 'x2p/s2p', 'x2p/find2perl',
-	    'pod/pod2man', 'pod/pod2html', 'pod/pod2latex' );
-@manpages = (<pod/*.man>, 'x2p/a2p.man', 'x2p/s2p.man');
+	    'perldoc', 'pod/pod2man', 'pod/pod2html', 'pod/pod2latex' );
+
+# pod documentation now handled by separate installman script.
+# These two are archaic leftovers.
+@manpages = ('x2p/a2p.man', 'x2p/s2p.man');
+
+@pods = (<pod/*.pod>);
 
 # Read in the config file.
 
@@ -100,19 +105,27 @@ for (@scripts) {
     }
 }
 
-# Install man pages.
+# Install pod pages.  Where? I guess in $installprivlib/pod.
+&makedir("${installprivlib}/pod");
+foreach $file (@pods) {
+    # $file is a name like  pod/perl.pod
+    cp_if_diff($file, "${installprivlib}/${file}");
+}
 
-if ($installmansrc ne '') {
-    &makedir($installmansrc);
+# Install old man pages.
 
-    if (! &samepath($installmansrc, '.')) {
+if ($installman1dir ne '') {
+    &makedir($installman1dir);
+
+    if (! &samepath($installman1dir, '.')) {
 	for (@manpages) {
-	    ($new = $_) =~ s/man$/$manext/;
+	    ($new = $_) =~ s/man$/$man1ext/;
 	    $new =~ s#.*/##;
-	    print STDERR "  Installing $installmansrc/$new\n";
+	    print STDERR "  Installing $installman1dir/$new\n";
 	    next if $nonono;
 	    open(MI,$_) || warn "Can't open $_: $!\n";
-	    open(MO,">$installmansrc/$new") || warn "Can't install $installmansrc/$new: $!\n";
+	    open(MO,">$installman1dir/$new") || 
+		    warn "Can't install $installman1dir/$new: $!\n";
 	    print MO ".ds RP Release $release Patchlevel $patchlevel\n";
 	    while (<MI>) {
 		print MO;
@@ -146,11 +159,6 @@ else {
 makedir("$installarchlib/CORE");
 foreach $file (<*.h libperl*.*>) {
     cp_if_diff($file,"$installarchlib/CORE/$file");
-    if ($file =~ /\.a$/ && $osname =~ /^(next|sunos)$/) { 
-       # on NeXTs and Suns we have to rerun ranlib after copying libraries
-	   # (maybe on all platforms which have ranlib ?)
-       &cmd("$ranlib $installarchlib/CORE/$file");
-    }
 }
 # AIX needs perl.exp installed as well.
 cp_if_diff("perl.exp" ,"$installarchlib/CORE/perl.exp") if ($osname eq 'aix');
@@ -319,11 +327,7 @@ sub installlib {
 	if ($?) {
 	    &unlink("$installlib/$name");
 	    &makedir("$installlib/$dir");
-	    &cmd("cp $_ $installlib/$dir");
-	    if (/\.a$/ && $osname eq 'next') { 
-		#on NeXTs we have to rerun ranlib after copying libraries
-		&cmd("$ranlib $installlib/$dir/$_");
-	    }
+	    cp_if_diff("$_", "$installlib/$dir/$_");
 	    # HP-UX (at least) needs to maintain execute permissions
 	    # on dynamically-loaded libraries.
 	    if ($name =~ /\.(so|$dlext)$/o) {
@@ -338,12 +342,26 @@ sub installlib {
     }
 }
 
+# Copy $from to $to, only if $from is different than $to.
+# Also preserve modification times for .a libraries.
+# On some systems, if you do
+#   ranlib libperl.a
+#   cp libperl.a /usr/local/lib/perl5/archlib/CORE/libperl.a
+# and then try to link against the installed libperl.a, you might
+# get an error message to the effect that the symbol table is older
+# than the library.
 sub cp_if_diff {
     my($from,$to)=@_;
     -f $from || die "$0: $from not found";
     system "cmp", "-s", $from, $to;
     if ($?) {
+	my ($atime, $mtime);
 	unlink($to);   # In case we don't have write permissions.
 	cmd("cp $from $to");
+	# Restore timestamps if it's a .a library.
+	if ($to =~ /\.a$/) {
+	    ($atime, $mtime) = (stat $from)[8,9];
+	    utime $atime, $mtime, $to;
+	}
     }
 }

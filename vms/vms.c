@@ -1100,7 +1100,7 @@ static char *do_tovmsspec(char *path, char *buf, int ts) {
 
   if (path == NULL) return NULL;
   if (buf) rslt = buf;
-  else if (ts) New(7016,rslt,strlen(path)+1,char);
+  else if (ts) New(7016,rslt,strlen(path)+3,char);
   else rslt = __tovmsspec_retbuf;
   if (strpbrk(path,"]:>") ||
       (dirend = strrchr(path,'/')) == NULL) {

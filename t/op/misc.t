@@ -46,9 +46,6 @@ BEGIN
 	    "foo";
         }
 ########
--P 
-use POSIX;
-########
 $array[128]=1
 ########
 $x=0x0eabcd; print $x->ref;

@@ -48,7 +48,9 @@ void	cv_undef _((CV* cv));
 #ifdef DEBUGGING
 void	cx_dump _((CONTEXT* cs));
 #endif
-void	cryptswitch_add _((cryptswitch_t funcp));
+SV *	filter_add _((filter_t funcp, SV *datasv));
+void	filter_del _((filter_t funcp));
+I32	filter_read _((int idx, SV *buffer, int maxlen));
 I32	cxinc _((void));
 void	deb _((char* pat,...)) __attribute__((format(printf,1,2)));
 void	deb_growlevel _((void));
@@ -448,7 +450,9 @@ void	sv_usepvn _((SV* sv, char* ptr, STRLEN len));
 void	taint_env _((void));
 void	taint_not _((char *s));
 void	taint_proper _((char* f, char* s));
+#ifdef UNLINK_ALL_VERSIONS
 I32	unlnk _((char* f));
+#endif
 void	utilize _((int aver, OP* id, OP* arg));
 I32	wait4pid _((int pid, int* statusp, int flags));
 void	warn _((char* pat,...)) __attribute__((format(printf,1,2)));

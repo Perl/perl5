@@ -1,0 +1,65 @@
+#! /bin/sh
+# GNU configure-like front end to metaconfig's Configure.
+#
+# Written by Andy Dougherty (doughera@lafcol.lafayette.edu)
+# and matthew green (mrg@mame.mu.oz.au)
+#
+# public domain.
+
+opts=''
+for f in $*
+do
+  case $f in
+    --help)
+      echo This is GNU configure-like front end for a MetaConfig Configure.
+      echo It understands the follow GNU configure options:
+      echo "  --prefix=PREFIX"
+      echo "  --help"
+      echo ""
+      echo And these environment variables:
+      echo "  CFLAGS"
+      echo "  CC"
+      echo "  DEFS"
+      echo 0
+      ;;
+    --prefix=*)
+      shift
+      arg=`echo $f | sed 's/--prefix=/-Dprefix=/'`
+      opts="$opts $arg"
+      ;;
+    --*)
+      opt=`echo $f | sed 's/=.*//'`
+      echo This GNU configure front end does not understand $opt
+      exit 1
+      ;;
+    *)
+      shift
+      opts="$opts $f"
+      ;;
+  esac
+done
+
+case "$CC" in
+  '') ;;
+  *) opts="$opts -Dcc='$CC'" ;;
+esac
+
+# join DEFS and CFLAGS together.
+
+ccflags=''
+if test "x$DEFS" != x
+then
+  ccflags=$DEFS
+fi
+if test "x$CFLAGS" != x
+then
+  ccflags="$ccflags $CFLAGS"
+fi
+
+if test "x$ccflags" != x
+then
+  opts="$opts -Dccflags='$ccflags'"
+fi
+
+echo ./Configure "$opts" -des
+./Configure "$opts" -des

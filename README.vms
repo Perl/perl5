@@ -211,7 +211,7 @@ If you're interested in up-to-date information on Perl development and
 internals, you might want to subscribe to the perl5-porters mailing list.  You
 can do this by sending a message to perl5-porters-request@nicoh.com, containing
 the single line
-subscribe perl5-porters Your Name Here
+subscribe perl5-porters
 This is a moderately high-volume list at the moment (25-50 messages/day).
 
 Finally, if you're interested in ongoing information about the VMS port, you

@@ -36,6 +36,22 @@ of sections:
 (If you're intending to read these straight through for the first time,
 the suggested order will tend to reduce the number of forward references.)
 
+Additional documentation for perl modules is available in
+the F</usr/local/lib/perl5/man/man3> directory.  You can view this
+with a man(1) program by including the following in the
+appropriate start-up files.  (You may have to adjust the path to
+match $Config{'man3dir'}.)
+
+    .profile (for sh, bash or ksh users):
+	MANPATH=$MANPATH:/usr/local/lib/perl5/man
+	export MANPATH
+
+    .login (for csh or tcsh users):
+	setenv MANPATH $MANPATH:/usr/local/lib/perl5/man
+
+If that doesn't work for some reason, you can still use the
+supplied perldoc script to view module information.
+
 If something strange has gone wrong with your program and you're not
 sure where you should look for help, try the B<-w> switch first.  It
 will often point out exactly where the trouble is.
@@ -269,3 +285,4 @@ how many more is left as an exercise to the reader.
 
 The three principle virtues of a programmer are Laziness,
 Impatience, and Hubris.  See the Camel Book for why.
+

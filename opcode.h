@@ -2058,7 +2058,7 @@ EXT U32 opargs[] = {
 	0x0001111d,	/* shmget */
 	0x0001111d,	/* shmctl */
 	0x0011111d,	/* shmread */
-	0x0011111c,	/* shmwrite */
+	0x0011111d,	/* shmwrite */
 	0x0000111d,	/* msgget */
 	0x0001111d,	/* msgctl */
 	0x0001111d,	/* msgsnd */

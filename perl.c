@@ -996,7 +996,7 @@ char *s;
 	return s;
     case 'v':
 	printf("\nThis is perl, version %s\n\n",patchlevel);
-	fputs("\tUnofficial patchlevel 1e.\n",stdout);
+	fputs("\tUnofficial patchlevel 1i.\n",stdout);
 	fputs("\nCopyright 1987-1994, Larry Wall\n",stdout);
 #ifdef MSDOS
 	fputs("MS-DOS port Copyright (c) 1989, 1990, Diomidis Spinellis\n",
@@ -1690,6 +1690,9 @@ init_perllib()
 	    incpush(getenv("PERLLIB"));
     }
 
+#ifdef SITELIB_EXP
+    incpush(SITELIB_EXP);
+#endif
 #ifdef ARCHLIB_EXP
     incpush(ARCHLIB_EXP);
 #endif

@@ -43,7 +43,9 @@ case $CONFIG in
 	;;
 esac
 
-PATH="$PATH:."
+# We need .. when we are in the x2p directory if we are using the
+# cppstdin wrapper script.
+PATH="$PATH:.:.."
 export PATH
 
 $cat /dev/null >.deptmp

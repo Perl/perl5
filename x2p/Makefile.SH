@@ -26,8 +26,6 @@ cat >Makefile <<!GROK!THIS!
 
 CC = $cc
 BYACC = $byacc
-mansrc = $mansrc
-manext = $manext
 LDFLAGS = $ldflags
 SMALL = $small
 LARGE = $large $split
@@ -51,6 +49,8 @@ manpages = a2p.man s2p.man
 util =
 
 sh = Makefile.SH cflags.SH find2perl.SH s2p.SH
+
+addedbyconf = Makefile cflags find2perl s2p
 
 h = EXTERN.h INTERN.h ../config.h handy.h hash.h a2p.h str.h util.h
 
@@ -94,7 +94,7 @@ clean:
 
 realclean: clean
 	rm -f *.orig core $(addedbyconf) all malloc.c
-	rm -f Makefile cflags find2perl s2p makefile makefile.old
+	rm -f makefile makefile.old
 
 # The following lint has practically everything turned on.  Unfortunately,
 # you have to wade through a lot of mumbo jumbo that can't be suppressed.

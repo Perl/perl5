@@ -310,6 +310,11 @@ sed <<!GROK!THIS! >config.h -e 's!^#undef!/\*#define!' -e 's!^#un-def!#undef!'
  *	a macro using sprintf("%g") is used. Arguments for the Gconvert
  *	macro are: value, number of digits, whether trailing zeros should
  *	be retained, and the output buffer.
+ *	Possible values are:
+ *		d_Gconvert='gconvert((x),(n),(t),(b))'
+ *		d_Gconvert='gcvt((x),(n),(b))'
+ *		d_Gconvert='sprintf((b),"%.*g",(n),(x))'
+ *	The last two assume trailing zeros should not be kept.
  */
 #define Gconvert(x,n,t,b) $d_Gconvert
 
@@ -406,12 +411,6 @@ sed <<!GROK!THIS! >config.h -e 's!^#undef!/\*#define!' -e 's!^#un-def!#undef!'
  *	available to create hard links.
  */
 #$d_link HAS_LINK	/**/
-
-/* USE_LINUX_STDIO:
- *	This symbol is defined if this system has a FILE structure declaring
- *	_IO_read_base, _IO_read_ptr, and _IO_read_end in stdio.h.
- */
-#$d_linuxstd USE_LINUX_STDIO 	/**/
 
 /* HAS_LOCALECONV:
  *	This symbol, if defined, indicates that the localeconv routine is
@@ -749,11 +748,55 @@ sed <<!GROK!THIS! >config.h -e 's!^#undef!/\*#define!' -e 's!^#un-def!#undef!'
  */
 #$d_statblks USE_STAT_BLOCKS 	/**/
 
-/* USE_STD_STDIO:
- *	This symbol is defined if this system has a FILE structure declaring
- *	_ptr and _cnt in stdio.h.
+/* USE_STDIO_PTR:
+ *	This symbol is defined if the _ptr and _cnt fields (or similar)
+ *	of the stdio FILE structure can be used to access the stdio buffer
+ *	for a file handle.  If this is defined, then the FILE_ptr(fp)
+ *	and FILE_cnt(fp) macros will also be defined and should be used
+ *	to access these fields.
  */
-#$d_stdstdio USE_STD_STDIO 	/**/
+/* USE_STDIO_BASE:
+ *	This symbol is defined if the _base field (or similar) of the
+ *	stdio FILE structure can be used to access the stdio buffer for
+ *	a file handle.  If this is defined, then the FILE_base(fp) macro
+ *	will also be defined and should be used to access this field.
+ *	Also, the FILE_bufsiz(fp) macro will be defined and should be used
+ *	to determine the number of bytes in the buffer.  USE_STDIO_BASE
+ *	will never be defined unless USE_STDIO_PTR is.
+ */
+#$d_stdstdio USE_STDIO_PTR 	/**/
+#$d_stdiobase USE_STDIO_BASE 	/**/
+
+/* FILE_ptr:
+ *	This macro is used to access the _ptr field (or equivalent) of the
+ *	FILE structure pointed to by its argument. This macro will always be
+ *	defined if USE_STDIO_PTR is defined.
+ */
+/* FILE_cnt:
+ *	This macro is used to access the _cnt field (or equivalent) of the
+ *	FILE structure pointed to by its argument. This macro will always be
+ *	defined if USE_STDIO_PTR is defined.
+ */
+#ifdef USE_STDIO_PTR
+#define FILE_ptr(fp)	$stdio_ptr
+#define FILE_cnt(fp)	$stdio_cnt
+#endif
+
+/* FILE_base:
+ *	This macro is used to access the _base field (or equivalent) of the
+ *	FILE structure pointed to by its argument. This macro will always be
+ *	defined if USE_STDIO_BASE is defined.
+ */
+/* FILE_bufsiz:
+ *	This macro is used to determine the number of bytes in the I/O
+ *	buffer pointed to by _base field (or equivalent) of the FILE
+ *	structure pointed to its argument. This macro will always be defined
+ *	if USE_STDIO_BASE is defined.
+ */
+#ifdef USE_STDIO_BASE
+#define FILE_base(fp)	$stdio_base
+#define FILE_bufsiz(fp)	$stdio_bufsiz
+#endif
 
 /* HAS_STRCHR:
  *	This symbol is defined to indicate that the strchr()/strrchr()
@@ -1037,7 +1080,7 @@ sed <<!GROK!THIS! >config.h -e 's!^#undef!/\*#define!' -e 's!^#un-def!#undef!'
 #$i_memory I_MEMORY		/**/
 
 /* I_NDBM:
- *	This symbol, if defined, indicates that ndbm.h exists and should
+ *	This symbol, if defined, indicates that <ndbm.h> exists and should
  *	be included.
  */
 #$i_ndbm I_NDBM	/**/
@@ -1354,18 +1397,10 @@ sed <<!GROK!THIS! >config.h -e 's!^#undef!/\*#define!' -e 's!^#un-def!#undef!'
 #define M_VOID			/* Xenix strikes again */
 #endif
 
-/* EUNICE:
- *	This symbol, if defined, indicates that the program is being compiled
- *	under the EUNICE package under VMS.  The program will need to handle
- *	things like files that don't go away the first time you unlink them,
- *	due to version numbering.  It will also need to compensate for lack
- *	of a respectable link() command.
- */
 /* VMS:
  *	This symbol, if defined, indicates that the program is running under
  *	VMS.  It is currently only set in conjunction with the EUNICE symbol.
  */
-#$d_eunice EUNICE		/**/
 #$d_eunice VMS		/**/
 
 /* LOC_SED:
@@ -1413,6 +1448,12 @@ sed <<!GROK!THIS! >config.h -e 's!^#undef!/\*#define!' -e 's!^#un-def!#undef!'
  *	This symbol, if defined, indicates that we're using our own malloc.
  */
 #$d_mymalloc MYMALLOC			/**/
+
+/* SITELIB_EXP:
+ *	This symbol contains the ~name expanded version of SITELIB, to be used
+ *	in programs that are not prepared to deal with ~ expansion at run-time.
+ */
+#$d_sitelib SITELIB_EXP "$sitelibexp"		/**/
 
 #endif
 !GROK!THIS!

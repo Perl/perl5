@@ -74,12 +74,6 @@ cccdlflags='-Zelf -Zpic'
 ccdlflags='-Zelf -Zlink=dynamic -Wl,-Bexport -u sigaction'
 lddlflags='-Zlink=so'
 
-# Configure imagines that stdio.h is "standard", but it really isn't.
-# Things like the -T and -B file test operators (on file handles) fail when
-# it tries to treat it as "standard"
-#
-d_stdstdio='undef'
-
 # Configure imagines that it sees a pw_quota field, but it is really in a
 # different structure than the one it thinks it is looking at.  WARNING:
 # Setting this here in the hints file doesn't help. You need to fix this by

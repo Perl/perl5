@@ -35,8 +35,6 @@ concat_ass_amg
 cop_seqmax
 cos_amg
 cryptseen
-cryptswitch_add
-cryptswitch_fp
 cshlen
 cshname
 curcop
@@ -58,6 +56,9 @@ exp_amg
 expect
 expectterm
 fallback_amg
+filter_add
+filter_del
+filter_read
 fold
 freq
 ge_amg
@@ -176,6 +177,7 @@ retstack
 retstack_ix
 retstack_max
 rsfp
+rsfp_filters
 rshift_amg
 rshift_ass_amg
 savestack

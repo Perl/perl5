@@ -147,9 +147,7 @@ I32 level;
 	if (GvCVGEN(topgv) >= sub_generation)
 	    return topgv;	/* valid cached inheritance */
 	if (!GvCVGEN(topgv)) {	/* not an inheritance cache */
-	    if (CvROOT(cv) || CvXSUB(cv))
-		return topgv;	/* real definition */
-	    /* a simple undef -- save the slot for possible re-use */
+	    return topgv;
 	}
 	else {
 	    /* stale cached entry, just junk it */

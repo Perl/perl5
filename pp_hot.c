@@ -974,7 +974,7 @@ do_readline()
 		sv_setpvn(tmpcmd, cshname, cshlen);
 		sv_catpv(tmpcmd, " -cf 'set nonomatch; glob ");
 		sv_catsv(tmpcmd, tmpglob);
-		sv_catpv(tmpcmd, "'|");
+		sv_catpv(tmpcmd, "' 2>/dev/null |");
 #else
 		sv_setpv(tmpcmd, "echo ");
 		sv_catsv(tmpcmd, tmpglob);
@@ -1809,8 +1809,10 @@ PP(pp_method)
     sv = *(stack_base + TOPMARK + 1);
     
     gv = 0;
+    if (SvGMAGICAL(sv))
+        mg_get(sv);
     if (SvROK(sv))
-	ob = SvRV(sv);
+	ob = (SV*)SvRV(sv);
     else {
 	GV* iogv;
 	char* packname = 0;

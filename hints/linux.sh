@@ -8,31 +8,28 @@
 #
 # Consolidated by Andy Dougherty <doughera@lafcol.lafayette.edu>
 #
-# Last updated Thu Apr  6 12:22:03 EDT 1995
+# Last updated Tue May 30 14:25:02 EDT 1995
 #
 # If you wish to use something other than 'gcc' for your compiler,
 # you should specify it on the Configure command line.  To use
-# gcc-elf, for exmample, type 
+# gcc-elf, for exmample, type
 # ./Configure -Dcc=gcc-elf
 
 # perl goes into the /usr tree.  See the Filesystem Standard
 # available via anonymous FTP at tsx-11.mit.edu in
 # /pub/linux/docs/linux-standards/fsstnd.
-# This used to be
-# bin='/usr/bin'
-# but it doesn't seem sensible to put the binary in /usr and all the
-# rest of the support stuff (lib, man pages) into /usr/local.
-# However, allow a command line override, e.g. Configure -Dprefix=/foo/bar
+# Allow a command line override, e.g. Configure -Dprefix=/foo/bar
 case "$prefix" in
 '') prefix='/usr' ;;
 esac
 
 # Perl expects BSD style signal handling.
-# gcc defines _G_HAVE_BOOL to 1, but doesn't actually supply bool.
+# gcc-2.6.3 defines _G_HAVE_BOOL to 1, but doesn't actually supply bool.
 ccflags="-D__USE_BSD_SIGNAL -Dbool=char -DHAS_BOOL $ccflags"
 
 # The following functions are gcc built-ins, but the Configure tests
-# may fail because it doesn't supply a proper prototype.
+# may fail because they don't supply proper prototypes.
+# This should be fixed as of 5.001f.  I'd appreciate reports.
 d_memcmp=define
 d_memcpy=define
 
@@ -40,9 +37,13 @@ d_memcpy=define
 # function in <sys/stat.h>.
 d_lstat=define
 
+# Explanation?
 d_dosuid='define'
 
+# I think Configure gets this right now, but I'd appreciate reports.
 malloctype='void *'
+
+# Explanation?
 usemymalloc='n'
 
 case "$optimize" in
@@ -73,10 +74,16 @@ if ${cc:-gcc} try.c >/dev/null 2>&1 && ./a.out; then
 
 You appear to have ELF support.  I'll try to use it for dynamic loading.
 EOM
-    # Configure now handles these automatically.
 else
-    echo "You don't have an ELF gcc, using dld if available."
-    # We might possibly have a version of DLD around.
+    cat <<'EOM'
+
+You don't have an ELF gcc.  I will use dld if possible.  If you are
+using a version of DLD earlier than 3.2.6, or don't have it at all, you
+should probably upgrade. If you are forced to use 3.2.4, you should
+uncomment a couple of lines in hints/linux.sh and rerun Configure to
+disallow shared libraries.
+
+EOM
     lddlflags="-r $lddlflags"
     # These empty values are so that Configure doesn't put in the
     # Linux ELF values.
@@ -91,16 +98,21 @@ else
 fi
 rm -rf try.c a.out
 
-cat <<'EOM'
+case "$BASH_VERSION" in
+1.14.3*)
+    cat <<'EOM'
 
-You should take a look at hints/linux.sh. There are a some lines you
-may wish to change.
+If you get failure of op/exec test #5 during the test phase, you probably
+have a buggy version of bash. Upgrading to a recent version (1.14.4 or
+later) should fix the problem.
+
 EOM
+;;
+esac
 
-# And -- reported by one user:
-# We need to get -lc away from the link lines.
-# If we leave it there we get SEGV from miniperl during the build.
-# This may have to do with bugs in the pre-release version of libc for ELF.
-# Uncomment the next two lines to remove -lc from the link line.
-# set `echo " $libswanted " | sed -e 's@ c @ @'`
-# libswanted="$*"
+# In addition, on some systems there is a problem with perl and NDBM, which
+# causes AnyDBM and NDBM_File to lock up. This is evidenced in the tests as
+# AnyDBM just freezing.  Currently we disable NDBM for all linux systems.
+# If someone can suggest a more robust test, that would be appreciated.
+d_dbm_open=undef
+

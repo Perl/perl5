@@ -68,14 +68,16 @@ Installation
     run ok, the defaults will usually be right.  It will then proceed to
     make config.h, config.sh, and Makefile.  You may have to explicitly
     say     sh Configure    to ensure that Configure is run under sh.
-    If you're a hotshot, run Configure -d to take all the defaults and
-    then edit config.sh to patch up any flaws and run Configure -S.
+    If you're a hotshot, run Configure -d to take all the defaults,
+    edit config.sh to patch up any flaws, and then run Configure -S.
 
     Configure supports a number of useful options.  Run Configure -h 
     to get a listing.  To compile with gcc, for example, you can run 
-    Configure -Dcc=gcc, or answer 'gcc' at the cc prompt.  This is the
-    preferred way to invoke an alternate compiler, since the hints
-    files can then set appropriate defaults.
+    Configure -Dcc=gcc, or answer 'gcc' at the cc prompt.  
+    
+    If you wish to use gcc (or another alternative compiler))
+    you should use  Configure -Dcc=gcc.  That way, the the hints
+    files can set appropriate defaults.
     
     If you change compilers or make other significant changes, you should
     probably _not_ re-use your old config.sh.  Simply remove it or
@@ -94,7 +96,7 @@ Installation
     if your sh doesn't handle them, but all other # comments will be taken
     care of.
 
-    (If you don't have sh, you'll have to copy the sample file config.H to
+    (If you don't have sh, you'll have to copy the sample file config_H to
     config.h and edit the config.h to reflect your system's peculiarities.)
 
 2)  Glance through config.h to make sure system dependencies are correct.
@@ -130,36 +132,49 @@ Installation
     Makefile.SH, since a default rule only takes effect in the
     absence of a specific rule.
 
-    Many of the following hints are now done automatically by Configure.
-    Some of the hints here were for Perl 4, and are probably obsolete.
-    They're left here for the moment just to give you some ideas for
-    what to try if you're having trouble.
+    If you used a hint file, try reading the comments in the hint file
+    for further tips and information.
 
-    AIX/RT may need a -a switch and -DCRIPPLED_CC.
-    Ultrix 3.[01] on MIPS needs to undefine WAITPID--the system call is busted.
-    MIPS machines may need to undef d_volatile.
-    MIPS machines may need to turn off -O on some files.
-    Some MIPS machines may need to undefine CASTNEGFLOAT.
+    If you can successfully build miniperl, but the process crashes
+    during the building of extensions, you should run
+    	make minitest
+    to test your version of miniperl.
+
+    Some additional things that have been reported for either perl4 or
+    perl5:
+
     Genix may need to use libc rather than libc_s, or #undef VARARGS.
+
     NCR Tower 32 (OS 2.01.01) may need -W2,-Sl,2000 and #undef MKDIR.
-    A/UX may appear to work with -O -B/usr/lib/big/ optimizer flags.
-    A/UX may need -lposix to find rewinddir.
-    A/UX may need -ZP -DPOSIX, and -g if big cc is used.
+
     UTS may need one or more of -DCRIPPLED_CC, -K or -g, and undef LSTAT.
+
     If you get syntax errors on '(', try -DCRIPPLED_CC.
+
     Machines with half-implemented dbm routines will need to #undef I_ODBM 
+
     SCO prior to 3.2.4 may be missing dbmclose().  An upgrade to 3.2.4
     that includes libdbm.nfs (which includes dbmclose()) may be available.
+
     If you get duplicates upon linking for malloc et al, say -DHIDEMYMALLOC.
+
     If you get duplicate function definitions (a perl function has the
     same name as another function on your system) try -DEMBED.
+
     If you get varags problems with gcc, be sure that gcc is installed
     correctly.  When using gcc, you should probably have i_stdarg='define'
-    and i_varags='undef' in config.sh.
+    and i_varags='undef' in config.sh.  The problem is usually solved
+    by running fixincludes correctly.
+
     If you wish to use dynamic loading on SunOS or Solaris, and you
     have GNU as and GNU ld installed, you may need to add -B/bin/ to
     your $ccflags and $ldflags so that the system's versions of as 
     and ld are used.
+
+    If you run into dynamic loading problems, check your setting of
+    the LD_LIBRARY_PATH environment variable.  Perl should build 
+    fine with LD_LIBRARY_PATH unset, though that may depend on details
+    of your local set-up.
 
 5)  make test
 
@@ -173,13 +188,14 @@ Installation
 
 6)  make install
 
-    This will put perl into a public directory (such as /usr/local/bin).
-    It will also try to put the man pages in a reasonable place.  It will not
-    nroff the man page, however.  You may need to be root to do this.  If
-    you are not root, you must own the directories in question and you should
-    ignore any messages about chown not working.
+    This will put perl into a public directory (such as
+    /usr/local/bin).  It will also try to put the man pages in a
+    reasonable place.  It will not nroff the man page, however.  You
+    may need to be root to run make install.  If you are not root, you
+    must own the directories in question and you should ignore any
+    messages about chown not working.
 
-    make install will also install the following:
+    make install will install the following:
 	perl,
 	    perl5.nnn	where nnn is the current release number.  This
 			will be a link to perl.
@@ -192,6 +208,7 @@ Installation
 	s2p		sed-to-perl translator
 	find2perl	find-to-perl translator
 	h2xs		Converts C .h header files to Perl extensions.
+	perldoc		Tool to read perl's pod documentation.
 	pod2html,	Converters from perl's pod documentation format
 	pod2latex, and 	to other useful formats.
 	pod2man
@@ -200,6 +217,9 @@ Installation
 			Configure, usually under /usr/local/lib/perl5/.
 	man pages	in the location specified to Configure, usually
 			something like /usr/local/man/man1.
+	module		in the location specified to Configure, usually
+	man pages	under /usr/local/lib/perl5/man/man3.
+	pod/*.pod	in $privlib/pod/.
 
 	Perl's *.h header files and the libperl.a library are also
 	installed under $archlib so that you may later build new
@@ -208,9 +228,11 @@ Installation
 	make install may also offer to install perl in a "standard" location.
 	
     Most of the documentation in the pod/ directory is also available 
-    in HTML format.  Type
+    in HTML and LaTeX format.  Type
 	cd pod; make html; cd ..
-    to generate the html versions.
+    to generate the html versions, and
+	cd pod; make tex; cd ..
+    to generate the LaTeX versions.
 
 7)  Read the manual entries before running perl.
 

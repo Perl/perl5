@@ -29,6 +29,52 @@ require Exporter;
 
 ENDOFBEG
 
+print CONFIG <<'EndOfPod';
+=head1 NAME
+
+Config - access Perl configuration option
+
+=head1 SYNOPSIS
+
+    use Config;
+    if ($Config{'cc'} =~ /gcc/) {
+	print "built by gcc\n";
+    } 
+
+=head1 DESCRIPTION
+
+The Config module contains everything that was available to the
+C<Configure> program at Perl build time.  Shell variables from
+F<config.sh> are stored in the readonly-variable C<%Config>, indexed by
+their names.
+
+=head1 EXAMPLE
+
+Here's a more sophisticated example of using %Config:
+
+    use Config;
+
+    defined $Config{sig_name} || die "No sigs?";
+    foreach $name (split(' ', $Config{sig_name})) {
+	$signo{$name} = $i;
+	$signame[$i] = $name;
+	$i++;
+    }   
+
+    print "signal #17 = $signame[17]\n";
+    if ($signo{ALRM}) { 
+	print "SIGALRM is $signo{ALRM}\n";
+    }   
+
+=head1 NOTE
+
+This module contains a good example of how to make a variable
+readonly to those outside of it.  
+
+=cut
+
+EndOfPod
+
 @fast{@fast} = @fast;
 @extensions{@extensions} = @extensions;
 @non_v=();

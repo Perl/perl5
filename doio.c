@@ -567,8 +567,8 @@ GV *gv;
 
     while (IoIFP(io)) {
 
-#ifdef USE_STD_STDIO			/* (the code works without this) */
-	if (IoIFP(io)->_cnt > 0)	/* cheat a little, since */
+#ifdef USE_STDIO_PTR			/* (the code works without this) */
+	if (FILE_cnt(IoIFP(io)) > 0)	/* cheat a little, since */
 	    return FALSE;		/* this is the most usual case */
 #endif
 
@@ -577,9 +577,9 @@ GV *gv;
 	    (void)ungetc(ch, IoIFP(io));
 	    return FALSE;
 	}
-#ifdef USE_STD_STDIO
-	if (IoIFP(io)->_cnt < -1)
-	    IoIFP(io)->_cnt = -1;
+#ifdef USE_STDIO_PTR
+	if (FILE_cnt(IoIFP(io)) < -1)
+	    FILE_cnt(IoIFP(io)) = -1;
 #endif
 	if (op->op_flags & OPf_SPECIAL) { /* not necessarily a real EOF yet? */
 	    if (!nextargv(argvgv))	/* get another fp handy */

@@ -51,12 +51,6 @@ cccdlflags='-Zpic'
 ccdlflags='-Zlink=dynamic -Wl,-Bexport'
 lddlflags='-Zlink=so'
 
-# Configure imagines that stdio.h is "standard", but it really isn't.
-# Things like the -T and -B file test operators (on file handles) fail when
-# it tries to treat it as "standard"
-#
-d_stdstdio='undef'
-
 # Configure sometime finds what it believes to be ndbm header files on the
 # system and imagines that we have the NDBM library, but we really don't.
 # There is something there that once resembled ndbm, but it is purely

@@ -1045,7 +1045,9 @@ register SV *sv;
 		not_a_number(sv);
 	    return (IV)atol(SvPVX(sv));
 	}
-	return 0;
+        if (!SvROK(sv)) {
+            return 0;
+        }
     }
     if (SvTHINKFIRST(sv)) {
 	if (SvROK(sv)) {
@@ -1123,7 +1125,9 @@ register SV *sv;
 	}
 	if (SvIOKp(sv))
 	    return (double)SvIVX(sv);
-	return 0;
+        if (!SvROK(sv)) {
+            return 0;
+        }
     }
     if (SvTHINKFIRST(sv)) {
 	if (SvROK(sv)) {
@@ -1202,8 +1206,10 @@ STRLEN *lp;
 	    Gconvert(SvNVX(sv), DBL_DIG, 0, tokenbuf);
 	    goto tokensave;
 	}
-	*lp = 0;
-	return "";
+        if (!SvROK(sv)) {
+            *lp = 0;
+            return "";
+        }
     }
     if (SvTHINKFIRST(sv)) {
 	if (SvROK(sv)) {
@@ -2362,7 +2368,7 @@ register FILE *fp;
 I32 append;
 {
     register char *bp;		/* we're going to steal some values */
-#ifdef USE_STD_STDIO
+#ifdef USE_STDIO_PTR
     register I32 cnt;		/*  from the stdio struct and put EVERYTHING */
     register STDCHAR *ptr;	/*   in the innermost loop into registers */
     STRLEN bpx;
@@ -2392,8 +2398,8 @@ I32 append;
 	    }
 	} while (i != EOF);
     }
-#ifdef USE_STD_STDIO	/* Here is some breathtakingly efficient cheating */
-    cnt = fp->_cnt;			/* get count into register */
+#ifdef USE_STDIO_PTR	/* Here is some breathtakingly efficient cheating */
+    cnt = FILE_cnt(fp);			/* get count into register */
     (void)SvPOK_only(sv);		/* validate pointer */
     if (SvLEN(sv) - append <= cnt + 1) { /* make sure we have the room */
 	if (cnt > 80 && SvLEN(sv) > append) {
@@ -2408,7 +2414,7 @@ I32 append;
     else
 	shortbuffered = 0;
     bp = SvPVX(sv) + append;		/* move these two too to registers */
-    ptr = fp->_ptr;
+    ptr = FILE_ptr(fp);
     for (;;) {
       screamer:
 	if (cnt > 0) {
@@ -2428,11 +2434,11 @@ I32 append;
 	    continue;
 	}
 
-	fp->_cnt = cnt;			/* deregisterize cnt and ptr */
-	fp->_ptr = ptr;
+	FILE_cnt(fp) = cnt;		/* deregisterize cnt and ptr */
+	FILE_ptr(fp) = ptr;
 	i = _filbuf(fp);		/* get more characters */
-	cnt = fp->_cnt;
-	ptr = fp->_ptr;			/* reregisterize cnt and ptr */
+	cnt = FILE_cnt(fp);
+	ptr = FILE_ptr(fp);		/* reregisterize cnt and ptr */
 
 	if (i == EOF)			/* all done for ever? */
 	    goto thats_really_all_folks;
@@ -2455,12 +2461,12 @@ thats_all_folks:
 thats_really_all_folks:
     if (shortbuffered)
 	cnt += shortbuffered;
-    fp->_cnt = cnt;			/* put these back or we're in trouble */
-    fp->_ptr = ptr;
+    FILE_cnt(fp) = cnt;			/* put these back or we're in trouble */
+    FILE_ptr(fp) = ptr;
     *bp = '\0';
     SvCUR_set(sv, bp - SvPVX(sv));	/* set length */
 
-#else /* !USE_STD_STDIO */	/* The big, slow, and stupid way */
+#else /* !USE_STDIO_PTR */	/* The big, slow, and stupid way */
 
     {
 	char buf[8192];
@@ -2493,7 +2499,7 @@ screamer:
 	}
     }
 
-#endif /* USE_STD_STDIO */
+#endif /* USE_STDIO_PTR */
 
     if (rspara) {
         while (i != EOF) {

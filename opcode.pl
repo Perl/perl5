@@ -558,7 +558,7 @@ sleep		sleep			ck_fun		ist	S?
 shmget		shmget			ck_fun		imst	S S S
 shmctl		shmctl			ck_fun		imst	S S S
 shmread		shmread			ck_fun		imst	S S S S
-shmwrite	shmwrite		ck_fun		ist	S S S S
+shmwrite	shmwrite		ck_fun		imst	S S S S
 
 # Message passing.
 

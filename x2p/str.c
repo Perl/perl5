@@ -287,7 +287,7 @@ str_gets(str,fp)
 register STR *str;
 register FILE *fp;
 {
-#ifdef USE_STD_STDIO		/* Here is some breathtakingly efficient cheating */
+#ifdef USE_STDIO_PTR		/* Here is some breathtakingly efficient cheating */
 
     register char *bp;		/* we're going to steal some values */
     register int cnt;		/*  from the stdio struct and put EVERYTHING */
@@ -296,13 +296,13 @@ register FILE *fp;
     int i;
     int bpx;
 
-    cnt = fp->_cnt;			/* get count into register */
+    cnt = FILE_cnt(fp);			/* get count into register */
     str->str_nok = 0;			/* invalidate number */
     str->str_pok = 1;			/* validate pointer */
     if (str->str_len <= cnt)		/* make sure we have the room */
 	GROWSTR(&(str->str_ptr), &(str->str_len), cnt+1);
     bp = str->str_ptr;			/* move these two too to registers */
-    ptr = fp->_ptr;
+    ptr = FILE_ptr(fp);
     for (;;) {
 	while (--cnt >= 0) {
 	    if ((*bp++ = *ptr++) == newline)
@@ -314,11 +314,11 @@ register FILE *fp;
 		}
 	}
 	
-	fp->_cnt = cnt;			/* deregisterize cnt and ptr */
-	fp->_ptr = ptr;
+	FILE_cnt(fp) = cnt;		/* deregisterize cnt and ptr */
+	FILE_ptr(fp) = ptr;
 	i = _filbuf(fp);		/* get more characters */
-	cnt = fp->_cnt;
-	ptr = fp->_ptr;			/* reregisterize cnt and ptr */
+	cnt = FILE_cnt(fp);
+	ptr = FILE_ptr(fp);		/* reregisterize cnt and ptr */
 
 	bpx = bp - str->str_ptr;	/* prepare for possible relocation */
 	GROWSTR(&(str->str_ptr), &(str->str_len), str->str_cur + cnt + 1);
@@ -334,12 +334,12 @@ register FILE *fp;
     }
 
 thats_all_folks:
-    fp->_cnt = cnt;			/* put these back or we're in trouble */
-    fp->_ptr = ptr;
+    FILE_cnt(fp) = cnt;			/* put these back or we're in trouble */
+    FILE_ptr(fp) = ptr;
     *bp = '\0';
     str->str_cur = bp - str->str_ptr;	/* set length */
 
-#else /* !USE_STD_STDIO */	/* The big, slow, and stupid way */
+#else /* !USE_STDIO_PTR */	/* The big, slow, and stupid way */
 
     static char buf[4192];
 
@@ -348,7 +348,7 @@ thats_all_folks:
     else
 	str_set(str, No);
 
-#endif /* USE_STD_STDIO */
+#endif /* USE_STDIO_PTR */
 
     return str->str_cur ? str->str_ptr : Nullch;
 }

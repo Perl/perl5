@@ -1,10 +1,16 @@
+#irix_4.sh
+# Last modified Fri May  5 14:06:37 EDT 1995
 optimize='-O1'
-usemymalloc='y'
+
+# Does Configure really get these wrong? Why?
 d_voidsig=define
-usevfork=false
 d_charsprf=undef
-ccflags="-ansiposix -signed"
-#
+
+case "$cc" in
+*gcc) ccflags="$ccflags -D_BSD_TYPES" ;;
+*) ccflags="$ccflags -ansiposix -signed" ;;
+esac
+
 # This hint due thanks Hershel Walters <walters@smd4d.wes.army.mil>
 # Date: Tue, 31 Jan 1995 16:32:53 -0600 (CST)
 # Subject: IRIX4.0.4(.5? 5.0?) problems

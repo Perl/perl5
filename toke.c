@@ -43,6 +43,7 @@ static I32 sublex_start _((void));
 #ifdef CRIPPLED_CC
 static int uni _((I32 f, char *s));
 #endif
+static char * filter_gets _((SV *sv, FILE *fp));
 
 /* The following are arranged oddly so that the guard on the switch statement
  * can get by with a single comparison (if the compiler is smart enough).
@@ -329,7 +330,7 @@ register char *s;
 	}
 	if (s < bufend || !rsfp || lex_state != LEX_NORMAL)
 	    return s;
-	if ((s = sv_gets(linestr, rsfp, 0)) == Nullch) {
+	if ((s = filter_gets(linestr, rsfp)) == Nullch) {
 	    if (minus_n || minus_p) {
 		sv_setpv(linestr,minus_p ? ";}continue{print" : "");
 		sv_catpv(linestr,";}");
@@ -982,15 +983,132 @@ incl_perldb()
 }
 
 
-/* Encrypted script support: cryptswitch_add() may be called to */
-/* define a function which may manipulate the input stream      */
-/* (via popen() etc) to decode the input if required.           */
-/* At the moment we only allow one cryptswitch function.        */
-void
-cryptswitch_add(funcp)
-    cryptswitch_t funcp;
+/* Encoded script support. filter_add() effectively inserts a
+ * 'pre-processing' function into the current source input stream. 
+ * Note that the filter function only applies to the current source file
+ * (e.g., it will not affect files 'require'd or 'use'd by this one).
+ *
+ * The datasv parameter (which may be NULL) can be used to pass
+ * private data to this instance of the filter. The filter function
+ * can recover the SV using the FILTER_DATA macro and use it to
+ * store private buffers and state information.
+ *
+ * The supplied datasv parameter is upgraded to a PVIO type
+ * and the IoDIRP field is used to store the function pointer.
+ * Note that IoTOP_NAME, IoFMT_NAME, IoBOTTOM_NAME, if set for
+ * private use must be set using malloc'd pointers.
+ */
+static int filter_debug = 0;
+
+SV *
+filter_add(funcp, datasv)
+    filter_t funcp;
+    SV *datasv;
 {
-    cryptswitch_fp = funcp;
+    if (!funcp){ /* temporary handy debugging hack to be deleted */
+	filter_debug = atoi((char*)datasv);
+	return NULL;
+    }
+    if (!rsfp_filters)
+	rsfp_filters = newAV();
+    if (!datasv)
+	datasv = newSV(0);
+    if (!SvUPGRADE(datasv, SVt_PVIO))
+        die("Can't upgrade filter_add data to SVt_PVIO");
+    IoDIRP(datasv) = (DIR*)funcp; /* stash funcp into spare field */
+    if (filter_debug)
+	warn("filter_add func %lx (%s)", funcp, SvPV(datasv,na));
+    av_push(rsfp_filters, datasv);
+    return(datasv);
+}
+ 
+
+/* Delete most recently added instance of this filter function.	*/
+void
+filter_del(funcp)
+    filter_t funcp;
+{
+    if (filter_debug)
+	warn("filter_del func %lx", funcp);
+    if (!rsfp_filters || AvFILL(rsfp_filters)<0)
+	return;
+    /* if filter is on top of stack (usual case) just pop it off */
+    if (IoDIRP(FILTER_DATA(AvFILL(rsfp_filters))) == (void*)funcp){
+	sv_free(av_pop(rsfp_filters));
+        return;
+    }
+    /* we need to search for the correct entry and clear it	*/
+    die("filter_del can only delete in reverse order (currently)");
+}
+
+
+/* Invoke the n'th filter function for the current rsfp.	 */
+I32
+filter_read(idx, buf_sv, maxlen)
+    int idx;
+    SV *buf_sv;
+    int maxlen;		/* 0 = read one text line */
+{
+    filter_t funcp;
+    SV *datasv = NULL;
+    if (!rsfp_filters)
+	return -1;
+    if (idx > AvFILL(rsfp_filters)){       /* Any more filters?	*/
+	/* Provide a default input filter to make life easy.	*/
+	/* Note that we append to the line. This is handy.	*/
+	/* We ignore maxlen here				*/
+	if (filter_debug)
+	    warn("filter_read %d: from rsfp\n", idx);
+	if (maxlen) { 
+ 	    /* Want a block */
+	    int len ;
+	    int old_len = SvCUR(buf_sv) ;
+
+	    /* ensure buf_sv is large enough */
+	    SvGROW(buf_sv, old_len + maxlen) ;
+	    if ((len = fread(SvPVX(buf_sv) + old_len, 1, maxlen, rsfp)) <= 0)
+		return len ;
+	    SvCUR_set(buf_sv, old_len + len) ;
+	} else {
+	    /* Want a line */
+            if (sv_gets(buf_sv, rsfp, (SvCUR(buf_sv)>0) ? 1 : 0) == NULL)
+	        return -1;		/* end of file */
+	}
+	return SvCUR(buf_sv);
+    }
+    /* Skip this filter slot if filter has been deleted	*/
+    if ( (datasv = FILTER_DATA(idx)) == &sv_undef){
+	if (filter_debug)
+	    warn("filter_read %d: skipped (filter deleted)\n", idx);
+	return FILTER_READ(idx+1, buf_sv, maxlen); /* recurse */
+    }
+    /* Get function pointer hidden within datasv	*/
+    funcp = (filter_t)IoDIRP(datasv);
+    if (filter_debug)
+	warn("filter_read %d: via function %lx (%s)\n",
+		idx, funcp, SvPV(datasv,na));
+    /* Call function. The function is expected to 	*/
+    /* call "FILTER_READ(idx+1, buf_sv)" first.		*/
+    /* Return: <0:error/eof, >=0:not eof (see yylex())	*/
+    return (*funcp)(idx, buf_sv, maxlen);
+}
+
+static char *
+filter_gets(sv,fp)
+register SV *sv;
+register FILE *fp;
+{
+    if (rsfp_filters) {
+
+        SvCUR_set(sv, 0);	/* start with empty line	*/
+        if (FILTER_READ(0, sv, 0) > 0)
+            return ( SvPVX(sv) ) ;
+        else
+	    return Nullch ;
+    }
+    else 
+        return (sv_gets(sv, fp, 0)) ;
+    
 }
 
 
@@ -1236,16 +1354,8 @@ yylex()
 	    }
 	    goto retry;
 	}
-	/* Give cryptswitch a chance. Note that cryptswitch_fp may */
-	/* be either be called once if it redirects rsfp and unregisters */
-	/* itself, or it may be called on every line if it loads linestr. */
-	if (cryptswitch_fp && (*cryptswitch_fp)()) {
-	    oldoldbufptr = oldbufptr = s = SvPVX(linestr);
-	    bufend = SvPVX(linestr) + SvCUR(linestr);
-	    goto retry;
-	}
 	do {
-	    if ((s = sv_gets(linestr, rsfp, 0)) == Nullch) {
+	    if ((s = filter_gets(linestr, rsfp)) == Nullch) {
 	      fake_eof:
 		if (rsfp) {
 		    if (preprocess && !in_eval)
@@ -1560,6 +1670,9 @@ yylex()
 	OPERATOR(tmp);
     case ')':
 	tmp = *s++;
+	s = skipspace(s);
+	if (*s == '{')
+	    PREBLOCK(tmp);
 	TERM(tmp);
     case ']':
 	s++;
@@ -4246,7 +4359,7 @@ register char *s;
 	sv_setpvn(tmpstr,"",0);   /* avoid "uninitialized" warning */
     while (s >= bufend) {	/* multiple line string? */
 	if (!rsfp ||
-	 !(oldoldbufptr = oldbufptr = s = sv_gets(linestr, rsfp, 0))) {
+	 !(oldoldbufptr = oldbufptr = s = filter_gets(linestr, rsfp))) {
 	    curcop->cop_line = multi_start;
 	    missingterm(tokenbuf);
 	}
@@ -4405,7 +4518,7 @@ char *start;
     if (s < bufend) break;	/* string ends on this line? */
 
 	if (!rsfp ||
-	 !(oldoldbufptr = oldbufptr = s = sv_gets(linestr, rsfp, 0))) {
+	 !(oldoldbufptr = oldbufptr = s = filter_gets(linestr, rsfp))) {
 	    curcop->cop_line = multi_start;
 	    return Nullch;
 	}
@@ -4583,7 +4696,7 @@ register char *s;
 	}
 	s = eol;
 	if (rsfp) {
-	    s = sv_gets(linestr, rsfp, 0);
+	    s = filter_gets(linestr, rsfp);
 	    oldoldbufptr = oldbufptr = bufptr = SvPVX(linestr);
 	    bufend = bufptr + SvCUR(linestr);
 	    if (!s) {

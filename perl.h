@@ -127,6 +127,10 @@ EXT char Error[1];
 #   undef HAS_MEMCMP
 #endif
 
+#ifdef I_MEMORY
+#  include <memory.h>
+#endif
+
 #ifdef HAS_MEMCPY
 #  if !defined(STANDARD_C) && !defined(I_STRING) && !defined(I_MEMORY)
 #    ifndef memcpy
@@ -525,9 +529,12 @@ typedef struct xpvio XPVIO;
 typedef struct mgvtbl MGVTBL;
 typedef union any ANY;
 
-typedef int (*cryptswitch_t) _((void));
-
 #include "handy.h"
+
+typedef I32 (*filter_t) _((int, SV *, int));
+#define FILTER_READ(idx, sv, len)  filter_read(idx, sv, len)
+#define FILTER_DATA(idx)	   (AvARRAY(rsfp_filters)[idx])
+#define FILTER_ISREADER(idx)	   (idx >= AvFILL(rsfp_filters))
 
 #ifdef DOSISH
 #   include "dosish.h"
@@ -780,7 +787,7 @@ Off_t lseek _((int,Off_t,int));
 char *getlogin _((void));
 #endif
 
-#ifdef EUNICE
+#ifdef UNLINK_ALL_VERSIONS /* Currently only makes sense for VMS */
 #define UNLINK unlnk
 I32 unlnk _((char*));
 #else
@@ -1080,7 +1087,7 @@ EXT char *	oldoldbufptr;
 EXT char *	bufend;
 EXT expectation expect INIT(XSTATE);	/* how to interpret ambiguous tokens */
 EXT char *	autoboot_preamble INIT(Nullch);
-EXT cryptswitch_t cryptswitch_fp;
+EXT AV * 	rsfp_filters;
 
 EXT I32		multi_start;	/* 1st line of multi-line string */
 EXT I32		multi_end;	/* last line of multi-line string */

@@ -10,7 +10,7 @@
  * config.h for VMS
  */                 
 
-/* Configuration time: 12-Oct-1994 17:00
+/* Configuration time: 18-Apr-1995 17:00
  * Configured by: Charles Bailey  bailey@genetics.upenn.edu
  * Target system: VMS
  */
@@ -460,7 +460,7 @@
  *	but not always right so it should be emitted by the program only
  *	when HAS_SHMAT_PROTOTYPE is not defined to avoid conflicting defs.
  */
-#undef Shmat_t char *	/**/ /* config-skip */
+#undef Shmat_t 	/**/ /* config-skip */
 #undef HAS_SHMAT_PROTOTYPE	/**/
 
 /* USE_STAT_BLOCKS:
@@ -469,11 +469,51 @@
  */
 #undef USE_STAT_BLOCKS 	/**/
 
-/* USE_STD_STDIO:
- *	This symbol is defined if this system has a FILE structure declaring
- *	_ptr and _cnt in stdio.h.
+/* USE_STDIO_PTR:
+ *	This symbol is defined if the _ptr and _cnt fields (or similar)
+ *	of the stdio FILE structure can be used to access the stdio buffer
+ *	for a file handle.  If this is defined, then the FILE_ptr(fp)
+ *	and FILE_cnt(fp) macros will also be defined and should be used
+ *	to access these fields.
  */
-#undef USE_STD_STDIO 	/**/
+/* USE_STDIO_BASE:
+ *	This symbol is defined if the _base field (or similar) of the
+ *	stdio FILE structure can be used to access the stdio buffer for
+ *	a file handle.  If this is defined, then the FILE_base(fp) macro
+ *	will also be defined and should be used to access this field.
+ *	Also, the FILE_bufsiz(fp) macro will be defined and should be used
+ *	to determine the number of bytes in the buffer.  USE_STDIO_BASE
+ *	will never be defined unless USE_STDIO_PTR is.
+ */
+#undef USE_STDIO_PTR 	/**/
+#undef USE_STDIO_BASE 	/**/
+
+/* FILE_ptr:
+ *	This macro is used to access the _ptr field (or equivalent) of the
+ *	FILE structure pointed to by its argument. This macro will always be
+ *	defined if USE_STDIO_PTR is defined.
+ */
+/* FILE_cnt:
+ *	This macro is used to access the _cnt field (or equivalent) of the
+ *	FILE structure pointed to by its argument. This macro will always be
+ *	defined if USE_STDIO_PTR is defined.
+ */
+#ifdef USE_STDIO_PTR
+#endif
+
+/* FILE_base:
+ *	This macro is used to access the _base field (or equivalent) of the
+ *	FILE structure pointed to by its argument. This macro will always be
+ *	defined if USE_STDIO_BASE is defined.
+ */
+/* FILE_bufsiz:
+ *	This macro is used to determine the number of bytes in the I/O
+ *	buffer pointed to by _base field (or equivalent) of the FILE
+ *	structure pointed to its argument. This macro will always be defined
+ *	if USE_STDIO_BASE is defined.
+ */
+#ifdef USE_STDIO_BASE
+#endif
 
 /* USE_STRUCT_COPY:
  *	This symbol, if defined, indicates that this C compiler knows how
@@ -892,20 +932,15 @@
 #define M_VOID			/* Xenix strikes again */     /* config-skip */
 #endif
 
-
-/* EUNICE:
- *	This symbol, if defined, indicates that the program is being compiled
- *	under the EUNICE package under VMS.  The program will need to handle
- *	things like files that don't go away the first time you unlink them,
- *	due to version numbering.  It will also need to compensate for lack
- *	of a respectable link() command.
+/* UNLINK_ALL_VERSIONS:
+ *	This symbol, if defined, indicates that the program should arrange
+ *	to remove all versions of a file if unlink() is called.
  */
+#undef UNLINK_ALL_VERSIONS		/**/
+
 /* VMS:
  *	This symbol, if defined, indicates that the program is running under
- *	VMS.  It is currently only set in conjunction with the EUNICE symbol.
- */
-#define EUNICE		/**/
-/* This symbol is automagically defined by all VMS C compilers I've seen.
+ *	VMS.  It's symbol automagically defined by all VMS C compilers I've seen.
  * Just in case, however . . . */
 #ifndef VMS
 #define VMS		/**/

@@ -78,11 +78,7 @@ $spitshell >>Makefile <<!GROK!THIS!
 BYACC = $byacc
 CC = $cc
 LD = $ld
-bin = $installbin
-scriptdir = $scriptdir
-privlib = $installprivlib
-mansrc = $mansrc
-manext = $manext
+
 LDFLAGS = $ldflags
 CLDFLAGS = $ldflags
 
@@ -93,6 +89,18 @@ mallocobj = $mallocobj
 LNS = $lns
 RMS = rm -f
 ranlib = $ranlib
+
+# The following are mentioned only to make metaconfig include the
+# appropriate questions in Configure.  If you want to change these,
+# edit config.sh instead, or specify --man1dir=/wherever on 
+# installman commandline.
+bin = $installbin
+scriptdir = $scriptdir
+privlib = $installprivlib
+man1dir = $man1dir
+man1ext = $man1ext
+man3dir = $man3dir
+man3ext = $man3ext
 
 # The following are used to build and install shared libraries for
 # dynamic loading.
@@ -127,13 +135,11 @@ CCCMD = `sh $(shellflags) cflags $(perllib) $@`
 
 private = preplibrary lib/ExtUtils/Miniperl.pm lib/Config.pm
 
-scripts =
+sh = Makefile.SH c2ph.SH cflags.SH config_h.SH h2ph.SH h2xs.SH makeaperl.SH \
+	makedepend.SH makedir.SH perl_exp.SH perldoc.SH writemain.SH
 
-manpages = perl.man
-
-util =
-
-sh = Makefile.SH cflags.SH makedepend.SH makedir.SH writemain.SH
+addedbyconf = UU Makefile c2ph cflags config.h h2ph h2xs makeaperl \
+	makedepend makedir perl_exp perldoc writemain
 
 h1 = EXTERN.h INTERN.h XSUB.h av.h config.h cop.h cv.h dosish.h
 h2 = embed.h form.h gv.h handy.h hv.h keywords.h mg.h op.h
@@ -166,8 +172,6 @@ perllib = libperl$(PLIBSUF)
 
 lintflags = -hbvxac
 
-addedbyconf = UU
-
 # grrr
 SHELL = /bin/sh
 
@@ -176,15 +180,13 @@ SHELL = /bin/sh
 
 all: makefile miniperl $(private) $(public) $(dynamic_ext)
 	@echo " "; echo "	Making x2p stuff"; cd x2p; $(MAKE) all
-	@echo " "; echo "	Making docs"; cd pod; $(MAKE) all;
+	
+# This is now done by installman only if you actually want the man pages.
+#	@echo " "; echo "	Making docs"; cd pod; $(MAKE) all;
 
 # Phony target to force checking subdirectories.
 FORCE:
 
-!NO!SUBS!
-
-: Now on to the rest of the Makefile.
-$spitshell >>Makefile <<'!NO!SUBS!'
 # The $& notation tells Sequent machines that it can do a parallel make,
 # and is harmless otherwise.
 
@@ -250,11 +252,22 @@ sperl.o: perl.c perly.h patchlevel.h $(h)
 	$(CCCMD) -DIAMSUID sperl.c
 	$(RMS) sperl.c
 
+# The following three header files are generated automatically
+# The correct versions should be already supplied with the perl kit,
+# in case you don't have perl or 'sh' available.
+# The - is to ignore error return codes in case you have the source
+# installed read-only or you don't have perl yet.
+keywords.h: keywords.pl
+	@echo "Don't worry if this fails."
+	- perl keywords.pl
+
 opcode.h: opcode.pl
+	@echo "Don't worry if this fails."
 	- perl opcode.pl
 
 embed.h: embed_h.sh global.sym interp.sym
-	sh embed_h.sh
+	@echo "Don't worry if this fails."
+	- sh embed_h.sh
 
 # We have to call our ./makedir because Ultrix 4.3 make can't handle the line
 #	test -d lib/auto || mkdir lib/auto
@@ -273,8 +286,17 @@ lib/Config.pm: config.sh miniperl
 lib/ExtUtils/Miniperl.pm: miniperlmain.c miniperl minimod.PL lib/Config.pm
 	./miniperl minimod.PL > tmp && mv tmp $@
 
-install: all
+install: all install.perl install.man
+
+install.perl:	all
 	./perl installperl
+
+install.man:	all
+	./perl installman
+
+# Not implemented yet.
+#install.html:	all
+#	./perl installhtml
 
 # I now supply perly.c with the kits, so the following section is
 # used only if you force byacc to run by saying
@@ -336,12 +358,11 @@ realclean: clean
 	done
 	rm -f *.orig */*.orig *~ */*~ core t/core t/c t/perl
 	rm -rf $(addedbyconf)
-	rm -f Makefile cflags makedepend makedir writemain
-	rm -f config.h makefile makefile.old
+	rm -f makefile makefile.old
 	rm -f $(private)
 	rm -rf lib/auto
 	rm -f lib/.exists
-	rm -f h2ph h2ph.man c2ph pstruct h2xs makeaperl
+	rm -f h2ph.man pstruct
 	rm -rf .config
 	@echo "Note that make realclean does not delete config.sh"
 
@@ -373,6 +394,11 @@ depend: makedepend
 test: miniperl perl preplibrary $(dynamic_ext)
 	- cd t && chmod +x TEST */*.t
 	- cd t && (rm -f perl; $(LNS) ../perl perl) && ./perl TEST </dev/tty
+
+minitest: miniperl
+	- cd t && chmod +x TEST */*.t
+	- cd t && (rm -f perl; $(LNS) ../miniperl perl) \
+		&& ./perl TEST base/*.t comp/*.t cmd/*.t io/*.t op/*.t </dev/tty
 
 clist:	$(c)
 	echo $(c) | tr ' ' '\012' >.clist

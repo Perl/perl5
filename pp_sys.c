@@ -17,11 +17,15 @@
 #include "EXTERN.h"
 #include "perl.h"
 
-/* Omit this -- it causes too much grief on mixed systems.
-#ifdef I_UNISTD
-#include <unistd.h>
-#endif
+/* XXX Omit this -- it causes too much grief on mixed systems.
+   Next time, I should force broken systems to unset i_unistd in
+   hint files.
 */
+#if 0
+# ifdef I_UNISTD
+#  include <unistd.h>
+# endif
+#endif
 
 /* Put this after #includes because fork and vfork prototypes may
    conflict.
@@ -1242,7 +1246,12 @@ PP(pp_flock)
     int argtype;
     GV *gv;
     FILE *fp;
-#ifdef HAS_FLOCK
+
+#if !defined(HAS_FLOCK) && defined(HAS_LOCKF)
+#  define flock lockf_emulate_flock
+#endif
+
+#if defined(HAS_FLOCK) || defined(flock)
     argtype = POPi;
     if (MAXARG <= 0)
 	gv = last_in_gv;
@@ -1260,11 +1269,7 @@ PP(pp_flock)
     PUSHi(value);
     RETURN;
 #else
-# ifdef HAS_LOCKF
-    DIE(no_func, "flock()"); /* XXX emulate flock() with lockf()? */
-# else
     DIE(no_func, "flock()");
-# endif
 #endif
 }
 
@@ -2032,18 +2037,12 @@ PP(pp_fttty)
     RETPUSHNO;
 }
 
-#if defined(USE_STD_STDIO) || defined(atarist) /* this will work with atariST */
-# define FBASE(f) ((f)->_base)
-# define FSIZE(f) ((f)->_cnt + ((f)->_ptr - (f)->_base))
-# define FPTR(f) ((f)->_ptr)
-# define FCOUNT(f) ((f)->_cnt)
-#else 
-# if defined(USE_LINUX_STDIO)
-#   define FBASE(f) ((f)->_IO_read_base)
-#   define FSIZE(f) ((f)->_IO_read_end - FBASE(f))
-#   define FPTR(f) ((f)->_IO_read_ptr)
-#   define FCOUNT(f) ((f)->_IO_read_end - FPTR(f))
-# endif
+#if defined(atarist) /* this will work with atariST. Configure will
+			make guesses for other systems. */
+# define FILE_base(f) ((f)->_base)
+# define FILE_ptr(f) ((f)->_ptr)
+# define FILE_cnt(f) ((f)->_cnt)
+# define FILE_bufsiz(f) ((f)->_cnt + ((f)->_ptr - (f)->_base))
 #endif
 
 PP(pp_fttext)
@@ -2073,22 +2072,22 @@ PP(pp_fttext)
 	    io = GvIO(statgv);
 	}
 	if (io && IoIFP(io)) {
-#ifdef FBASE
+#ifdef FILE_base
 	    Fstat(fileno(IoIFP(io)), &statcache);
 	    if (S_ISDIR(statcache.st_mode))	/* handle NFS glitch */
 		if (op->op_type == OP_FTTEXT)
 		    RETPUSHNO;
 		else
 		    RETPUSHYES;
-	    if (FCOUNT(IoIFP(io)) <= 0) {
+	    if (FILE_cnt(IoIFP(io)) <= 0) {
 		i = getc(IoIFP(io));
 		if (i != EOF)
 		    (void)ungetc(i, IoIFP(io));
 	    }
-	    if (FCOUNT(IoIFP(io)) <= 0)	/* null file is anything */
+	    if (FILE_cnt(IoIFP(io)) <= 0)	/* null file is anything */
 		RETPUSHYES;
-	    len = FSIZE(IoIFP(io));
-	    s = FBASE(IoIFP(io));
+	    len = FILE_bufsiz(IoIFP(io));
+	    s = FILE_base(IoIFP(io));
 #else
 	    DIE("-T and -B not implemented on filehandles");
 #endif
@@ -2321,7 +2320,7 @@ char *cmd;
 char *filename;
 {
     char mybuf[8192];
-    char *s, 
+    char *s,
 	 *save_filename = filename;
     int anum = 1;
     FILE *myfp;
@@ -3871,3 +3870,91 @@ PP(pp_syscall)
 #endif
 }
 
+#if !defined(HAS_FLOCK) && defined(HAS_LOCKF)
+
+/*  XXX Emulate flock() with lockf().  This is just to increase
+    portability of scripts.  The calls are not completely
+    interchangeable.  What's really needed is a good file
+    locking module.
+*/
+
+/*  We might need <unistd.h> because it sometimes defines the lockf()
+    constants.  Unfortunately, <unistd.h> causes troubles on some mixed
+    (BSD/POSIX) systems, such as SunOS 4.1.3.  We could just try including
+    <unistd.h> here in this part of the file, but that might
+    conflict with various other #defines and includes above, such as
+	#define vfork fork above.
+
+   Further, the lockf() constants aren't POSIX, so they might not be
+   visible if we're compiling with _POSIX_SOURCE defined.  Thus, we'll
+   just stick in the SVID values and be done with it.  Sigh.
+*/
+
+# ifndef F_ULOCK
+#  define F_ULOCK	0	/* Unlock a previously locked region */
+# endif
+# ifndef F_LOCK
+#  define F_LOCK	1	/* Lock a region for exclusive use */
+# endif
+# ifndef F_TLOCK
+#  define F_TLOCK	2	/* Test and lock a region for exclusive use */
+# endif
+# ifndef F_TEST
+#  define F_TEST	3	/* Test a region for other processes locks */
+# endif
+
+/* These are the flock() constants.  Since this sytems doesn't have
+   flock(), the values of the constants are probably not available.
+*/
+# ifndef LOCK_SH
+#  define LOCK_SH 1
+# endif
+# ifndef LOCK_EX
+#  define LOCK_EX 2
+# endif
+# ifndef LOCK_NB
+#  define LOCK_NB 4
+# endif
+# ifndef LOCK_UN
+#  define LOCK_UN 8
+# endif
+
+int
+lockf_emulate_flock (fd, operation)
+int fd;
+int operation;
+{
+    int i;
+    switch (operation) {
+
+	/* LOCK_SH - get a shared lock */
+	case LOCK_SH:
+	/* LOCK_EX - get an exclusive lock */
+	case LOCK_EX:
+	    i = lockf (fd, F_LOCK, 0);
+	    break;
+
+	/* LOCK_SH|LOCK_NB - get a non-blocking shared lock */
+	case LOCK_SH|LOCK_NB:
+	/* LOCK_EX|LOCK_NB - get a non-blocking exclusive lock */
+	case LOCK_EX|LOCK_NB:
+	    i = lockf (fd, F_TLOCK, 0);
+	    if (i == -1)
+		if ((errno == EAGAIN) || (errno == EACCES))
+		    errno = EWOULDBLOCK;
+	    break;
+
+	/* LOCK_UN - unlock */
+	case LOCK_UN:
+	    i = lockf (fd, F_ULOCK, 0);
+	    break;
+
+	/* Default - can't decipher operation */
+	default:
+	    i = -1;
+	    errno = EINVAL;
+	    break;
+    }
+    return (i);
+}
+#endif

@@ -83,7 +83,7 @@ FULLPERL = $att{FULLPERL}
 # FULLEXT = Pathname for extension directory (eg DBD/Oracle).
 # BASEEXT = Basename part of FULLEXT. May be just equal FULLEXT.
 # ROOTEXT = Directory part of FULLEXT with leading slash (e.g /DBD)
-FULLEXT = ",vmsify($att{FULLEXT}),"
+FULLEXT = ",vmspath($att{FULLEXT}),"
 BASEEXT = $att{BASEEXT}
 ROOTEXT = ",($att{ROOTEXT} eq '') ? '[]' : vmspath($att{ROOTEXT}),"
 
