@@ -212,188 +212,6 @@ S_do_trans_UU_count(pTHX_ SV *sv)
 }
 
 STATIC I32
-S_do_trans_UC_simple(pTHX_ SV *sv)
-{
-    dTHR;
-    U8 *s;
-    U8 *send;
-    U8 *d;
-    I32 matches = 0;
-    STRLEN len;
-
-    SV* rv = (SV*)cSVOP->op_sv;
-    HV* hv = (HV*)SvRV(rv);
-    SV** svp = hv_fetch(hv, "NONE", 4, FALSE);
-    UV none = svp ? SvUV(*svp) : 0x7fffffff;
-    UV extra = none + 1;
-    UV final;
-    UV uv;
-
-    s = (U8*)SvPV(sv, len);
-    send = s + len;
-
-    svp = hv_fetch(hv, "FINAL", 5, FALSE);
-    if (svp)
-	final = SvUV(*svp);
-
-    d = s;
-    while (s < send) {
-	if ((uv = swash_fetch(rv, s)) < none) {
-	    s += UTF8SKIP(s);
-	    matches++;
-	    *d++ = (U8)uv;
-	}
-	else if (uv == none) {
-	    I32 ulen;
-	    uv = utf8_to_uv(s, &ulen);
-	    s += ulen;
-	    *d++ = (U8)uv;
-	}
-	else if (uv == extra) {
-	    s += UTF8SKIP(s);
-	    matches++;
-	    *d++ = (U8)final;
-	}
-	else
-	    s += UTF8SKIP(s);
-    }
-    *d = '\0';
-    SvCUR_set(sv, d - (U8*)SvPVX(sv));
-    SvSETMAGIC(sv);
-
-    return matches;
-}
-
-STATIC I32
-S_do_trans_CU_simple(pTHX_ SV *sv)
-{
-    dTHR;
-    U8 *s;
-    U8 *send;
-    U8 *d;
-    U8 *dst;
-    I32 matches = 0;
-    STRLEN len;
-
-    SV* rv = (SV*)cSVOP->op_sv;
-    HV* hv = (HV*)SvRV(rv);
-    SV** svp = hv_fetch(hv, "NONE", 4, FALSE);
-    UV none = svp ? SvUV(*svp) : 0x7fffffff;
-    UV extra = none + 1;
-    UV final;
-    UV uv;
-    U8 tmpbuf[UTF8_MAXLEN];
-    I32 bits = 16;
-
-    s = (U8*)SvPV(sv, len);
-    send = s + len;
-
-    svp = hv_fetch(hv, "BITS", 4, FALSE);
-    if (svp)
-	bits = (I32)SvIV(*svp);
-
-    svp = hv_fetch(hv, "FINAL", 5, FALSE);
-    if (svp)
-	final = SvUV(*svp);
-
-    Newz(801, d, len * (bits >> 3) + 1, U8);
-    dst = d;
-
-    while (s < send) {
-	uv = *s++;
-	if (uv < 0x80)
-	    tmpbuf[0] = uv;
-	else {
-	    tmpbuf[0] = (( uv >>  6)         | 0xc0);
-	    tmpbuf[1] = (( uv        & 0x3f) | 0x80);
-	}
-
-	if ((uv = swash_fetch(rv, tmpbuf)) < none) {
-	    matches++;
-	    d = uv_to_utf8(d, uv);
-	}
-	else if (uv == none)
-	    d = uv_to_utf8(d, s[-1]);
-	else if (uv == extra) {
-	    matches++;
-	    d = uv_to_utf8(d, final);
-	}
-    }
-    *d = '\0';
-    sv_usepvn_mg(sv, (char*)dst, d - dst);
-
-    return matches;
-}
-
-/* utf-8 to latin-1 */
-
-STATIC I32
-S_do_trans_UC_trivial(pTHX_ SV *sv)
-{
-    dTHR;
-    U8 *s;
-    U8 *send;
-    U8 *d;
-    STRLEN len;
-
-    s = (U8*)SvPV(sv, len);
-    send = s + len;
-
-    d = s;
-    while (s < send) {
-	if (*s < 0x80)
-	    *d++ = *s++;
-	else {
-	    I32 ulen;
-	    UV uv = utf8_to_uv(s, &ulen);
-	    s += ulen;
-	    *d++ = (U8)uv;
-	}
-    }
-    *d = '\0';
-    SvCUR_set(sv, d - (U8*)SvPVX(sv));
-    SvSETMAGIC(sv);
-
-    return SvCUR(sv);
-}
-
-/* latin-1 to utf-8 */
-
-STATIC I32
-S_do_trans_CU_trivial(pTHX_ SV *sv)
-{
-    dTHR;
-    U8 *s;
-    U8 *send;
-    U8 *d;
-    U8 *dst;
-    I32 matches;
-    STRLEN len;
-
-    s = (U8*)SvPV(sv, len);
-    send = s + len;
-
-    Newz(801, d, len * 2 + 1, U8);
-    dst = d;
-
-    matches = send - s;
-
-    while (s < send) {
-	if (*s < 0x80)
-	    *d++ = *s++;
-	else {
-	    UV uv = *s++;
-	    *d++ = (( uv >>  6)         | 0xc0);
-	    *d++ = (( uv        & 0x3f) | 0x80);
-	}
-    }
-    *d = '\0';
-    sv_usepvn_mg(sv, (char*)dst, d - dst);
-
-    return matches;
-}
-
-STATIC I32
 S_do_trans_UU_complex(pTHX_ SV *sv)
 {
     dTHR;
@@ -599,31 +417,19 @@ Perl_do_trans(pTHX_ SV *sv)
 
     switch (PL_op->op_private & 63) {
     case 0:
-	return do_trans_CC_simple(sv);
-
-    case OPpTRANS_FROM_UTF:
-	return do_trans_UC_simple(sv);
-
-    case OPpTRANS_TO_UTF:
-	return do_trans_CU_simple(sv);
-
-    case OPpTRANS_FROM_UTF|OPpTRANS_TO_UTF:
-	return do_trans_UU_simple(sv);
+    if (SvUTF8(sv)) 
+        return do_trans_UU_simple(sv);
+    else
+        return do_trans_CC_simple(sv);
 
     case OPpTRANS_IDENTICAL:
-	return do_trans_CC_count(sv);
-
-    case OPpTRANS_FROM_UTF|OPpTRANS_IDENTICAL:
-	return do_trans_UC_trivial(sv);
-
-    case OPpTRANS_TO_UTF|OPpTRANS_IDENTICAL:
-	return do_trans_CU_trivial(sv);
-
-    case OPpTRANS_FROM_UTF|OPpTRANS_TO_UTF|OPpTRANS_IDENTICAL:
-	return do_trans_UU_count(sv);
+    if (SvUTF8(sv)) 
+        return do_trans_UU_count(sv);
+    else
+        return do_trans_CC_count(sv);
 
     default:
-	if (PL_op->op_private & (OPpTRANS_FROM_UTF|OPpTRANS_TO_UTF))
+	if (SvUTF8(sv))
 	    return do_trans_UU_complex(sv); /* could be UC or CU too */
 	else
 	    return do_trans_CC_complex(sv);

@@ -6130,45 +6130,20 @@ S_scan_trans(pTHX_ char *start)
 	Perl_croak(aTHX_ "Transliteration replacement not terminated");
     }
 
-    if (UTF) {
-	o = newSVOP(OP_TRANS, 0, 0);
-	utf8 = OPpTRANS_FROM_UTF|OPpTRANS_TO_UTF;
-    }
-    else {
 	New(803,tbl,256,short);
 	o = newPVOP(OP_TRANS, 0, (char*)tbl);
-	utf8 = 0;
-    }
 
     complement = del = squash = 0;
-    while (strchr("cdsCU", *s)) {
+    while (strchr("cds", *s)) {
 	if (*s == 'c')
 	    complement = OPpTRANS_COMPLEMENT;
 	else if (*s == 'd')
 	    del = OPpTRANS_DELETE;
 	else if (*s == 's')
 	    squash = OPpTRANS_SQUASH;
-	else {
-	    switch (count++) {
-	    case 0:
-		if (*s == 'C')
-		    utf8 &= ~OPpTRANS_FROM_UTF;
-		else
-		    utf8 |= OPpTRANS_FROM_UTF;
-		break;
-	    case 1:
-		if (*s == 'C')
-		    utf8 &= ~OPpTRANS_TO_UTF;
-		else
-		    utf8 |= OPpTRANS_TO_UTF;
-		break;
-	    default: 
-		Perl_croak(aTHX_ "Too many /C and /U options");
-	    }
-	}
 	s++;
     }
-    o->op_private = del|squash|complement|utf8;
+    o->op_private = del|squash|complement;
 
     PL_lex_op = o;
     yylval.ival = OP_TRANS;
