@@ -21,6 +21,251 @@ http://dev.macperl.org/.
 This file contains only changes that affect the maint-5.6/macperl branch.
 
 ----------------
+Version v5.6.1b4
+----------------
+
+____________________________________________________________________________
+[ 14589] By: pudge                                 on 2002/02/07  19:26:55
+        Log: Merge AEGizmos library into PPC binary
+     Branch: maint-5.6/macperl
+	   ! macos/Makefile.mk
+____________________________________________________________________________
+[ 14588] By: pudge                                 on 2002/02/07  18:51:05
+        Log: Add -ansifor for MrCpp options
+     Branch: maint-5.6/macperl
+	   ! macos/BuildRules.mk
+____________________________________________________________________________
+[ 14587] By: pudge                                 on 2002/02/07  18:46:28
+        Log: Check ownership of CatInfos (MacPerl Bug #494482)
+     Branch: maint-5.6/macperl
+	   ! macos/ext/Mac/Files/Files.xs
+____________________________________________________________________________
+[ 14586] By: pudge                                 on 2002/02/07  18:40:21
+        Log: Resource updates
+     Branch: maint-5.6/macperl
+	   ! macos/macperl/MacPerl.r macos/macperl/MacPerl.rsrc
+____________________________________________________________________________
+[ 14585] By: pudge                                 on 2002/02/07  18:38:44
+        Log: Empty path is ENOENT (MacPerl Bug #512351)
+     Branch: maint-5.6/macperl
+	   ! macos/macperl/MPAppleEvents.c
+____________________________________________________________________________
+[ 14584] By: pudge                                 on 2002/02/07  18:38:03
+        Log: Fix horrible list maintencance bugs (MacPerl Bug #443568)
+     Branch: maint-5.6/macperl
+	   ! macos/macperl/MPAEVTStream.cp
+____________________________________________________________________________
+[ 14583] By: pudge                                 on 2002/02/07  18:36:29
+        Log: macify(ABSTRACT_FROM)
+     Branch: maint-5.6/macperl
+	   ! macos/lib/ExtUtils/MM_MacOS.pm
+____________________________________________________________________________
+[ 14582] By: pudge                                 on 2002/02/07  18:35:20
+        Log: Use correct Mac filenames in error messages, caller()
+     Branch: maint-5.6/macperl
+	   ! deb.c pp_ctl.c toke.c util.c
+____________________________________________________________________________
+[ 14555] By: pudge                                 on 2002/02/05  02:20:45
+        Log: Integrate change #14439 from maintperl
+     Branch: maint-5.6/macperl
+	  !> op.c
+____________________________________________________________________________
+[ 14399] By: pudge                                 on 2002/01/23  21:00:29
+        Log: Don't crash on Help for long text (bug #506672)
+     Branch: maint-5.6/macperl
+	   ! macos/macperl/MPHelp.c
+____________________________________________________________________________
+[ 14398] By: pudge                                 on 2002/01/23  20:03:38
+        Log: Fix minor path problem
+     Branch: maint-5.6/macperl
+	   ! macos/macperl/Droplets/tarzipme.plx
+____________________________________________________________________________
+[ 14397] By: pudge                                 on 2002/01/23  20:03:19
+        Log: Minor text changes
+     Branch: maint-5.6/macperl
+	   ! macos/Perl.r
+____________________________________________________________________________
+[ 14396] By: pudge                                 on 2002/01/23  20:02:45
+        Log: Bump versions, dates, etc.
+     Branch: maint-5.6/macperl
+	   ! macos/MPVersion.r macos/macperl/MPPreferences.c perl.c
+____________________________________________________________________________
+[ 14395] By: pudge                                 on 2002/01/23  20:01:43
+        Log: coderefs in @INC and absolute paths
+     Branch: maint-5.6/macperl
+	   ! embed.h pp_ctl.c proto.h
+____________________________________________________________________________
+[ 14394] By: pudge                                 on 2002/01/23  20:00:35
+        Log: Minor module thingys
+     Branch: maint-5.6/macperl
+	   ! macos/ext/Mac/Controls/Controls.xs
+	   ! macos/ext/Mac/Files/Files.xs macos/ext/Mac/Gestalt/Gestalt.pm
+	   ! macos/ext/Mac/ImageCompression/ImageCompression.xs
+	   ! macos/ext/Mac/InternetConfig/InternetConfig.pm
+	   ! macos/ext/Mac/InternetConfig/InternetConfig.xs
+	   ! macos/ext/Mac/Memory/Memory.pm macos/ext/Mac/Memory/Memory.xs
+	   ! macos/ext/Mac/Menus/Menus.pm macos/ext/Mac/MoreFiles/MF.xs
+	   ! macos/ext/Mac/MoreFiles/MoreFiles.pm
+	   ! macos/ext/Mac/Movies/Movies.xs
+	   ! macos/ext/Mac/Navigation/Navigation.pm
+	   ! macos/ext/Mac/Navigation/Navigation.xs
+	   ! macos/ext/Mac/Notification/Notification.xs
+	   ! macos/ext/Mac/OSA/OSA.pm macos/ext/Mac/Processes/Processes.pm
+	   ! macos/ext/Mac/Processes/Processes.xs
+	   ! macos/ext/Mac/QDOffscreen/QDOffscreen.xs
+	   ! macos/ext/Mac/QuickDraw/QuickDraw.pm
+	   ! macos/ext/Mac/QuickDraw/QuickDraw.xs
+	   ! macos/ext/Mac/QuickTimeVR/QuickTimeVR.xs
+	   ! macos/ext/Mac/Resources/Resources.pm
+	   ! macos/ext/Mac/Resources/Resources.xs macos/ext/Mac/SAT/SAT.pm
+	   ! macos/ext/Mac/SAT/SAT.xs macos/ext/Mac/Sound/Sound.pm
+	   ! macos/ext/Mac/Sound/Sound.xs macos/ext/Mac/Speech/Speech.pm
+	   ! macos/ext/Mac/SpeechRecognition/SpeechRecognition.pm
+	   ! macos/lib/Mac/Glue.pm macos/lib/Mac/OSA/Simple.pm
+____________________________________________________________________________
+[ 14283] By: pudge                                 on 2002/01/15  15:21:30
+        Log: Add Shuck URL
+     Branch: maint-5.6/macperl
+	   ! macos/macperl/MacPerl.podhelp
+____________________________________________________________________________
+[ 14282] By: pudge                                 on 2002/01/15  15:21:18
+        Log: Remove obsolete docs
+     Branch: maint-5.6/macperl
+	   ! ext/File/Glob/Glob.pm
+____________________________________________________________________________
+[ 14280] By: pudge                                 on 2002/01/15  14:55:25
+        Log: Update bundled modules.  Yow!
+     Branch: maint-5.6/macperl
+	   + macos/bundled_ext/Compress/Zlib/constants.h
+	   + macos/bundled_ext/Compress/Zlib/constants.xs
+	   + macos/bundled_ext/Filter/Util/Call/ppport.h
+	   + macos/bundled_ext/Storable/t/compat-0.6.t
+	   + macos/bundled_ext/Storable/t/dump.pl
+	   + macos/bundled_lib/blib/lib/Mail/Mailer/qmail.pm
+	   + macos/bundled_lib/blib/lib/Net/HTTP/Methods.pm
+	   + macos/bundled_lib/blib/lib/Net/HTTPS.pm
+	   + macos/bundled_lib/blib/lib/URI/ssh.pm
+	   + macos/bundled_lib/t/Filter/Simple/ExportTest.pm
+	   + macos/bundled_lib/t/Filter/Simple/FilterOnlyTest.pm
+	   + macos/bundled_lib/t/Filter/Simple/FilterTest.pm
+	   + macos/bundled_lib/t/Filter/Simple/ImportTest.pm
+	   + macos/bundled_lib/t/Filter/Simple/data.t
+	   + macos/bundled_lib/t/Filter/Simple/export.t
+	   + macos/bundled_lib/t/Filter/Simple/filter_only.t
+	   + macos/bundled_lib/t/Filter/Simple/import.t
+	   + macos/bundled_lib/t/NEXT/actual.t
+	   + macos/bundled_lib/t/NEXT/actuns.t
+	   + macos/bundled_lib/t/NEXT/next.t
+	   + macos/bundled_lib/t/NEXT/unseen.t
+	   + macos/bundled_lib/t/libnet/netrc.t
+	   + macos/bundled_lib/t/libwww-perl/base/http.t
+	   + macos/bundled_lib/t/libwww-perl/live/activestate.t
+	   - macos/bundled_ext/Filter/t/FilterTest.pm
+	   - macos/bundled_ext/Storable/t/compat06.t
+	   - macos/bundled_ext/Storable/t/st-dump.pl
+	   - macos/bundled_lib/t/NEXT/test.pl
+	   - macos/bundled_lib/t/libwww-perl/live/google.t
+	   ! macos/bundled_ext/Compress/Zlib/ANNOUNCE
+	   ! macos/bundled_ext/Compress/Zlib/Makefile.PL
+	   ! macos/bundled_ext/Compress/Zlib/Makefile.mk
+	   ! macos/bundled_ext/Compress/Zlib/README
+	   ! macos/bundled_ext/Compress/Zlib/Zlib.pm
+	   ! macos/bundled_ext/Compress/Zlib/Zlib.xs
+	   ! macos/bundled_ext/Compress/Zlib/t/examples.t
+	   ! macos/bundled_ext/Filter/Util/Call/Call.pm
+	   ! macos/bundled_ext/Filter/Util/Call/Call.xs
+	   ! macos/bundled_ext/Filter/Util/Call/Makefile.PL
+	   ! macos/bundled_ext/Filter/t/call.t
+	   ! macos/bundled_ext/Filter/t/filter-util.pl
+	   ! macos/bundled_ext/Storable/ChangeLog
+	   ! macos/bundled_ext/Storable/README
+	   ! macos/bundled_ext/Storable/Storable.pm
+	   ! macos/bundled_ext/Storable/t/blessed.t
+	   ! macos/bundled_ext/Storable/t/canonical.t
+	   ! macos/bundled_ext/Storable/t/dclone.t
+	   ! macos/bundled_ext/Storable/t/forgive.t
+	   ! macos/bundled_ext/Storable/t/freeze.t
+	   ! macos/bundled_ext/Storable/t/lock.t
+	   ! macos/bundled_ext/Storable/t/overload.t
+	   ! macos/bundled_ext/Storable/t/recurse.t
+	   ! macos/bundled_ext/Storable/t/retrieve.t
+	   ! macos/bundled_ext/Storable/t/store.t
+	   ! macos/bundled_ext/Storable/t/tied.t
+	   ! macos/bundled_ext/Storable/t/tied_hook.t
+	   ! macos/bundled_ext/Storable/t/tied_items.t
+	   ! macos/bundled_ext/Storable/t/utf8.t
+	   ! macos/bundled_lib/blib/lib/File/Sort.pm
+	   ! macos/bundled_lib/blib/lib/Filter/Simple.pm
+	   ! macos/bundled_lib/blib/lib/HTTP/Headers.pm
+	   ! macos/bundled_lib/blib/lib/HTTP/Message.pm
+	   ! macos/bundled_lib/blib/lib/HTTP/Negotiate.pm
+	   ! macos/bundled_lib/blib/lib/HTTP/Request.pm
+	   ! macos/bundled_lib/blib/lib/HTTP/Response.pm
+	   ! macos/bundled_lib/blib/lib/LWP.pm
+	   ! macos/bundled_lib/blib/lib/LWP/Authen/Digest.pm
+	   ! macos/bundled_lib/blib/lib/LWP/Protocol/http.pm
+	   ! macos/bundled_lib/blib/lib/LWP/Protocol/https.pm
+	   ! macos/bundled_lib/blib/lib/LWP/UserAgent.pm
+	   ! macos/bundled_lib/blib/lib/Mail/Address.pm
+	   ! macos/bundled_lib/blib/lib/Mail/Cap.pm
+	   ! macos/bundled_lib/blib/lib/Mail/Field.pm
+	   ! macos/bundled_lib/blib/lib/Mail/Field/AddrList.pm
+	   ! macos/bundled_lib/blib/lib/Mail/Field/Date.pm
+	   ! macos/bundled_lib/blib/lib/Mail/Filter.pm
+	   ! macos/bundled_lib/blib/lib/Mail/Header.pm
+	   ! macos/bundled_lib/blib/lib/Mail/Internet.pm
+	   ! macos/bundled_lib/blib/lib/Mail/Mailer.pm
+	   ! macos/bundled_lib/blib/lib/Mail/Mailer/test.pm
+	   ! macos/bundled_lib/blib/lib/Mail/Send.pm
+	   ! macos/bundled_lib/blib/lib/Mail/Util.pm
+	   ! macos/bundled_lib/blib/lib/NEXT.pm
+	   ! macos/bundled_lib/blib/lib/Net/Config.pm
+	   ! macos/bundled_lib/blib/lib/Net/Domain.pm
+	   ! macos/bundled_lib/blib/lib/Net/FTP.pm
+	   ! macos/bundled_lib/blib/lib/Net/FTP/E.pm
+	   ! macos/bundled_lib/blib/lib/Net/FTP/L.pm
+	   ! macos/bundled_lib/blib/lib/Net/HTTP.pm
+	   ! macos/bundled_lib/blib/lib/Net/NNTP.pm
+	   ! macos/bundled_lib/blib/lib/Net/POP3.pm
+	   ! macos/bundled_lib/blib/lib/Net/SMTP.pm
+	   ! macos/bundled_lib/blib/lib/Net/libnetFAQ.pod
+	   ! macos/bundled_lib/blib/lib/Switch.pm
+	   ! macos/bundled_lib/blib/lib/Text/Balanced.pm
+	   ! macos/bundled_lib/blib/lib/URI/Escape.pm
+	   ! macos/bundled_lib/blib/lib/URI/ftp.pm
+	   ! macos/bundled_lib/blib/lib/lwpcook.pod
+	   ! macos/bundled_lib/t/Filter/Simple/filter.t
+	   ! macos/bundled_lib/t/Switch/t/nested.t
+	   ! macos/bundled_lib/t/Text/Balanced/t/extbrk.t
+	   ! macos/bundled_lib/t/Text/Balanced/t/extcbk.t
+	   ! macos/bundled_lib/t/Text/Balanced/t/extdel.t
+	   ! macos/bundled_lib/t/Text/Balanced/t/extmul.t
+	   ! macos/bundled_lib/t/Text/Balanced/t/extqlk.t
+	   ! macos/bundled_lib/t/Text/Balanced/t/exttag.t
+	   ! macos/bundled_lib/t/Text/Balanced/t/extvar.t
+	   ! macos/bundled_lib/t/Text/Balanced/t/gentag.t
+	   ! macos/bundled_lib/t/libnet/config.t
+	   ! macos/bundled_lib/t/libnet/ftp.t
+	   ! macos/bundled_lib/t/libnet/hostname.t
+	   ! macos/bundled_lib/t/libnet/nntp.t
+	   ! macos/bundled_lib/t/libnet/require.t
+	   ! macos/bundled_lib/t/libnet/smtp.t
+	   ! macos/bundled_lib/t/libwww-perl/base/headers.t
+	   ! macos/bundled_lib/t/libwww-perl/base/negotiate.t
+	   ! macos/bundled_lib/t/libwww-perl/live/jigsaw-auth-b.t
+	   ! macos/bundled_lib/t/libwww-perl/live/jigsaw-auth-d.t
+	   ! macos/bundled_lib/t/libwww-perl/live/jigsaw-chunk.t
+	   ! macos/bundled_lib/t/libwww-perl/live/jigsaw-md5.t
+	   ! macos/bundled_lib/t/libwww-perl/live/jigsaw-te.t
+	   ! macos/bundled_lib/t/libwww-perl/live/validator.t
+	   ! macos/lib/Mac/AppleEvents/Simple.pm macos/lib/Mac/Glue.pm
+____________________________________________________________________________
+[ 14127] By: pudge                                 on 2002/01/07  22:25:55
+        Log: Sync up Changes etc.
+     Branch: maint-5.6/macperl
+	   ! macos/Changes macos/MPVersion.r macos/ext/Mac/Memory/Memory.xs
+
+----------------
 Version v5.6.1b3
 ----------------
 
