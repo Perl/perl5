@@ -5171,11 +5171,11 @@ case "$vendorprefix" in
 	;;
 *)	d_vendorlib="$define"
 	: determine where vendor-supplied modules go.
-	: Usual default is /usr/local/lib/perl5/vendor_perl
+	: Usual default is /usr/local/lib/perl5/vendor_perl/$version
 	prog=`echo $package | $sed 's/-*[0-9.]*$//'`
 	case "$installstyle" in
-	*lib/perl5*) dflt=$vendorprefix/lib/$package/vendor_$prog ;;
-	*)	     dflt=$vendorprefix/lib/vendor_$prog ;;
+	*lib/perl5*) dflt=$vendorprefix/lib/$package/vendor_$prog/$version ;;
+	*)	     dflt=$vendorprefix/lib/vendor_$prog/$version ;;
 	esac
 	fn=d~+
 	rp='Pathname for the vendor-supplied library files?'
