@@ -2080,6 +2080,8 @@ PP(pp_substr)
 	RETPUSHUNDEF;
     }
     else {
+	I32 upos = pos;
+	I32 urem = rem;
 	if (utfcurlen)
 	    sv_pos_u2b(sv, &pos, &rem);
 	tmps += pos;
@@ -2114,8 +2116,8 @@ PP(pp_substr)
 		    SvREFCNT_dec(LvTARG(TARG));
 		LvTARG(TARG) = SvREFCNT_inc(sv);
 	    }
-	    LvTARGOFF(TARG) = pos;
-	    LvTARGLEN(TARG) = rem;
+	    LvTARGOFF(TARG) = upos;
+	    LvTARGLEN(TARG) = urem;
 	}
     }
     SPAGAIN;
@@ -2268,9 +2270,6 @@ PP(pp_chr)
 	SvUTF8_on(TARG);
 	XPUSHs(TARG);
 	RETURN;
-    }
-    else {
-	SvUTF8_off(TARG);
     }
 
     SvGROW(TARG,2);
