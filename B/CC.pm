@@ -1465,7 +1465,9 @@ sub compile {
 		$freetmps_each_bblock = 1 unless $freetmps_each_loop;
 	    }
 	} elsif ($opt eq "m") {
+	    $arg ||= shift @options;
 	    $module = $arg;
+	    push(@unused_sub_packages, $arg);
 	} elsif ($opt eq "D") {
             $arg ||= shift @options;
 	    foreach $arg (split(//, $arg)) {
