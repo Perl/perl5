@@ -166,7 +166,6 @@ profiledata
 provide_ref
 psig_name
 psig_ptr
-qrt_amg
 rcsid
 reall_srchlen
 regarglen
@@ -222,6 +221,7 @@ sin_amg
 sle_amg
 slt_amg
 sne_amg
+sqrt_amg
 stack_base
 stack_max
 stack_sp
