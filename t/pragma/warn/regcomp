@@ -7,7 +7,7 @@
 	$a = "ABC123" ; $a =~ /(?=a)*/'
 
   /%.127s/: Unrecognized escape \\%c passed through"	[S_regatom] 
-  	/\m/
+  	$x = '\m' ; /$x/
 
   Character class syntax [. .] is reserved for future extensions [S_regpposixcc]
 
@@ -25,33 +25,34 @@
 
 __END__
 # regcomp.c [S_regpiece]
-use warnings 'unsafe' ;
+use warnings 'regexp' ;
 my $a = "ABC123" ; 
 $a =~ /(?=a)*/ ;
-no warnings 'unsafe' ;
+no warnings 'regexp' ;
 $a =~ /(?=a)*/ ;
 EXPECT
 (?=a)* matches null string many times at - line 4.
 ########
 # regcomp.c [S_study_chunk]
-use warnings 'unsafe' ;
+use warnings 'regexp' ;
 $_ = "" ;
 /(?=a)?/;
-no warnings 'unsafe' ;
+no warnings 'regexp' ;
 /(?=a)?/;
 EXPECT
 Strange *+?{} on zero-length expression at - line 4.
 ########
 # regcomp.c [S_regatom]
-use warnings 'unsafe' ;
-$a =~ /a\mb\b/ ;
-no warnings 'unsafe' ;
-$a =~ /a\mb\b/ ;
+$x = '\m' ;
+use warnings 'regexp' ;
+$a =~ /a$x/ ;
+no warnings 'regexp' ;
+$a =~ /a$x/ ;
 EXPECT
-Unrecognized escape \m passed through at - line 3.
+/a\m/: Unrecognized escape \m passed through at - line 4.
 ########
 # regcomp.c [S_regpposixcc S_checkposixcc]
-use warnings 'unsafe' ;
+use warnings 'regexp' ;
 $_ = "" ;
 /[:alpha:]/;
 /[.bar.]/;
@@ -60,7 +61,7 @@ $_ = "" ;
 /[[.foo.]]/;
 /[[=bar=]]/;
 /[:zog:]/;
-no warnings 'unsafe' ;
+no warnings 'regexp' ;
 /[:alpha:]/;
 /[.foo.]/;
 /[=bar=]/;
@@ -83,7 +84,7 @@ Character class [:zog:] unknown at - line 20.
 ########
 # regcomp.c [S_regclass]
 $_ = "";
-use warnings 'unsafe' ;
+use warnings 'regexp' ;
 /[a-b]/;
 /[a-\d]/;
 /[\d-b]/;
@@ -93,7 +94,7 @@ use warnings 'unsafe' ;
 /[[:digit:]-b]/;
 /[[:alpha:]-[:digit:]]/;
 /[[:digit:]-[:alpha:]]/;
-no warnings 'unsafe' ;
+no warnings 'regexp' ;
 /[a-b]/;
 /[a-\d]/;
 /[\d-b]/;
@@ -122,7 +123,7 @@ BEGIN {
 }
 use utf8;
 $_ = "";
-use warnings 'unsafe' ;
+use warnings 'regexp' ;
 /[a-b]/;
 /[a-\d]/;
 /[\d-b]/;
@@ -132,7 +133,7 @@ use warnings 'unsafe' ;
 /[[:digit:]-b]/;
 /[[:alpha:]-[:digit:]]/;
 /[[:digit:]-[:alpha:]]/;
-no warnings 'unsafe' ;
+no warnings 'regexp' ;
 /[a-b]/;
 /[a-\d]/;
 /[\d-b]/;
@@ -153,9 +154,9 @@ EXPECT
 /[[:digit:]-[:alpha:]]/: false [] range "[:digit:]-" in regexp at - line 19.
 ########
 # regcomp.c [S_regclass S_regclassutf8]
-use warnings 'unsafe' ;
+use warnings 'regexp' ;
 $a =~ /[a\zb]/ ;
-no warnings 'unsafe' ;
+no warnings 'regexp' ;
 $a =~ /[a\zb]/ ;
 EXPECT
 /[a\zb]/: Unrecognized escape \z in character class passed through at - line 3.
