@@ -463,8 +463,7 @@ perl_destruct(pTHXx)
 
     /* Destroy the main CV and syntax tree */
     if (PL_main_root) {
-        /* If running under -d may not have PL_comppad. */
-        PL_curpad = PL_comppad ? AvARRAY(PL_comppad) : NULL;
+	PAD_UPDATE_CURPAD;
 	op_free(PL_main_root);
 	PL_main_root = Nullop;
     }
@@ -1040,7 +1039,7 @@ setuid perl scripts securely.\n");
     }
 
     if (PL_main_root) {
-	PL_curpad = AvARRAY(PL_comppad);
+	PAD_UPDATE_CURPAD;
 	op_free(PL_main_root);
 	PL_main_root = Nullop;
     }
@@ -1108,7 +1107,6 @@ S_parse_body(pTHX_ char **env, XSINIT_t xsinit)
     int fdscript = -1;
     VOL bool dosearch = FALSE;
     char *validarg = "";
-    AV* comppadlist;
     register SV *sv;
     register char *s;
     char *cddir = Nullch;
@@ -1451,27 +1449,12 @@ print \"  \\@INC:\\n    @INC\\n\";");
     sv_upgrade((SV *)PL_compcv, SVt_PVCV);
     CvUNIQUE_on(PL_compcv);
 
-    PL_comppad = newAV();
-    av_push(PL_comppad, Nullsv);
-    PL_curpad = AvARRAY(PL_comppad);
-    PL_comppad_name = newAV();
-    PL_comppad_name_fill = 0;
-    PL_min_intro_pending = 0;
-    PL_padix = 0;
+    CvPADLIST(PL_compcv) = pad_new(0);
 #ifdef USE_5005THREADS
-    av_store(PL_comppad_name, 0, newSVpvn("@_", 2));
-    PL_curpad[0] = (SV*)newAV();
-    SvPADMY_on(PL_curpad[0]);	/* XXX Needed? */
     CvOWNER(PL_compcv) = 0;
     New(666, CvMUTEXP(PL_compcv), 1, perl_mutex);
     MUTEX_INIT(CvMUTEXP(PL_compcv));
 #endif /* USE_5005THREADS */
-
-    comppadlist = newAV();
-    AvREAL_off(comppadlist);
-    av_store(comppadlist, 0, (SV*)PL_comppad_name);
-    av_store(comppadlist, 1, (SV*)PL_comppad);
-    CvPADLIST(PL_compcv) = comppadlist;
 
     boot_core_PerlIO();
     boot_core_UNIVERSAL();

@@ -1208,8 +1208,6 @@ S_doform(pTHX_ CV *cv, GV *gv, OP *retop)
 {
     register PERL_CONTEXT *cx;
     I32 gimme = GIMME_V;
-    AV* padlist = CvPADLIST(cv);
-    SV** svp = AvARRAY(padlist);
 
     ENTER;
     SAVETMPS;
@@ -1217,8 +1215,7 @@ S_doform(pTHX_ CV *cv, GV *gv, OP *retop)
     push_return(retop);
     PUSHBLOCK(cx, CXt_FORMAT, PL_stack_sp);
     PUSHFORMAT(cx);
-    SAVEVPTR(PL_curpad);
-    PL_curpad = AvARRAY((AV*)svp[1]);
+    PAD_SET_CUR(CvPADLIST(cv), 1);
 
     setdefout(gv);	    /* locally select filehandle so $% et al work */
     return CvSTART(cv);

@@ -766,7 +766,7 @@
 #define pad_alloc		Perl_pad_alloc
 #endif
 #ifdef PERL_CORE
-#define pad_allocmy		Perl_pad_allocmy
+#define allocmy			Perl_allocmy
 #endif
 #ifdef PERL_CORE
 #define pad_findmy		Perl_pad_findmy
@@ -1367,12 +1367,6 @@
 #define too_many_arguments	S_too_many_arguments
 #endif
 #ifdef PERL_CORE
-#define pad_addlex		S_pad_addlex
-#endif
-#ifdef PERL_CORE
-#define pad_findlex		S_pad_findlex
-#endif
-#ifdef PERL_CORE
 #define newDEFSVOP		S_newDEFSVOP
 #endif
 #ifdef PERL_CORE
@@ -1386,14 +1380,6 @@
 #endif
 #ifdef PERL_CORE
 #define gv_ename		S_gv_ename
-#endif
-#  if defined(DEBUG_CLOSURES)
-#ifdef PERL_CORE
-#define cv_dump			S_cv_dump
-#endif
-#  endif
-#ifdef PERL_CORE
-#define cv_clone2		S_cv_clone2
 #endif
 #ifdef PERL_CORE
 #define scalar_mod_type		S_scalar_mod_type
@@ -2103,6 +2089,54 @@
 #ifdef PERL_IN_DEB_C
 #ifdef PERL_CORE
 #define deb_stack_n		S_deb_stack_n
+#endif
+#endif
+#ifdef PERL_CORE
+#define pad_new			Perl_pad_new
+#endif
+#ifdef PERL_CORE
+#define pad_undef		Perl_pad_undef
+#endif
+#ifdef PERL_CORE
+#define pad_add_name		Perl_pad_add_name
+#endif
+#ifdef PERL_CORE
+#define pad_add_anon		Perl_pad_add_anon
+#endif
+#ifdef PERL_CORE
+#define pad_check_dup		Perl_pad_check_dup
+#endif
+#ifdef DEBUGGING
+#ifdef PERL_CORE
+#define pad_setsv		Perl_pad_setsv
+#endif
+#endif
+#ifdef PERL_CORE
+#define pad_block_start		Perl_pad_block_start
+#endif
+#ifdef PERL_CORE
+#define pad_tidy		Perl_pad_tidy
+#endif
+#ifdef PERL_CORE
+#define do_dump_pad		Perl_do_dump_pad
+#endif
+#ifdef PERL_CORE
+#define pad_fixup_inner_anons	Perl_pad_fixup_inner_anons
+#endif
+#ifdef PERL_CORE
+#define pad_push		Perl_pad_push
+#endif
+#if defined(PERL_IN_PAD_C) || defined(PERL_DECL_PROT)
+#ifdef PERL_CORE
+#define pad_findlex		S_pad_findlex
+#endif
+#  if defined(DEBUGGING)
+#ifdef PERL_CORE
+#define cv_dump			S_cv_dump
+#endif
+#  endif
+#ifdef PERL_CORE
+#define cv_clone2		S_cv_clone2
 #endif
 #endif
 #define ck_anoncode		Perl_ck_anoncode
@@ -3212,7 +3246,7 @@
 #define pad_alloc(a,b)		Perl_pad_alloc(aTHX_ a,b)
 #endif
 #ifdef PERL_CORE
-#define pad_allocmy(a)		Perl_pad_allocmy(aTHX_ a)
+#define allocmy(a)		Perl_allocmy(aTHX_ a)
 #endif
 #ifdef PERL_CORE
 #define pad_findmy(a)		Perl_pad_findmy(aTHX_ a)
@@ -3224,7 +3258,7 @@
 #define oopsHV(a)		Perl_oopsHV(aTHX_ a)
 #endif
 #ifdef PERL_CORE
-#define pad_leavemy(a)		Perl_pad_leavemy(aTHX_ a)
+#define pad_leavemy()		Perl_pad_leavemy(aTHX)
 #endif
 #define pad_sv(a)		Perl_pad_sv(aTHX_ a)
 #ifdef PERL_CORE
@@ -3234,7 +3268,7 @@
 #define pad_reset()		Perl_pad_reset(aTHX)
 #endif
 #ifdef PERL_CORE
-#define pad_swipe(a)		Perl_pad_swipe(aTHX_ a)
+#define pad_swipe(a,b)		Perl_pad_swipe(aTHX_ a,b)
 #endif
 #ifdef PERL_CORE
 #define peep(a)			Perl_peep(aTHX_ a)
@@ -3806,12 +3840,6 @@
 #define too_many_arguments(a,b)	S_too_many_arguments(aTHX_ a,b)
 #endif
 #ifdef PERL_CORE
-#define pad_addlex(a)		S_pad_addlex(aTHX_ a)
-#endif
-#ifdef PERL_CORE
-#define pad_findlex(a,b,c,d,e,f,g)	S_pad_findlex(aTHX_ a,b,c,d,e,f,g)
-#endif
-#ifdef PERL_CORE
 #define newDEFSVOP()		S_newDEFSVOP(aTHX)
 #endif
 #ifdef PERL_CORE
@@ -3825,14 +3853,6 @@
 #endif
 #ifdef PERL_CORE
 #define gv_ename(a)		S_gv_ename(aTHX_ a)
-#endif
-#  if defined(DEBUG_CLOSURES)
-#ifdef PERL_CORE
-#define cv_dump(a)		S_cv_dump(aTHX_ a)
-#endif
-#  endif
-#ifdef PERL_CORE
-#define cv_clone2(a,b)		S_cv_clone2(aTHX_ a,b)
 #endif
 #ifdef PERL_CORE
 #define scalar_mod_type(a,b)	S_scalar_mod_type(aTHX_ a,b)
@@ -4541,6 +4561,54 @@
 #ifdef PERL_IN_DEB_C
 #ifdef PERL_CORE
 #define deb_stack_n(a,b,c,d,e)	S_deb_stack_n(aTHX_ a,b,c,d,e)
+#endif
+#endif
+#ifdef PERL_CORE
+#define pad_new(a)		Perl_pad_new(aTHX_ a)
+#endif
+#ifdef PERL_CORE
+#define pad_undef(a,b)		Perl_pad_undef(aTHX_ a,b)
+#endif
+#ifdef PERL_CORE
+#define pad_add_name(a,b,c,d)	Perl_pad_add_name(aTHX_ a,b,c,d)
+#endif
+#ifdef PERL_CORE
+#define pad_add_anon(a,b)	Perl_pad_add_anon(aTHX_ a,b)
+#endif
+#ifdef PERL_CORE
+#define pad_check_dup(a,b,c)	Perl_pad_check_dup(aTHX_ a,b,c)
+#endif
+#ifdef DEBUGGING
+#ifdef PERL_CORE
+#define pad_setsv(a,b)		Perl_pad_setsv(aTHX_ a,b)
+#endif
+#endif
+#ifdef PERL_CORE
+#define pad_block_start(a)	Perl_pad_block_start(aTHX_ a)
+#endif
+#ifdef PERL_CORE
+#define pad_tidy(a)		Perl_pad_tidy(aTHX_ a)
+#endif
+#ifdef PERL_CORE
+#define do_dump_pad(a,b,c,d)	Perl_do_dump_pad(aTHX_ a,b,c,d)
+#endif
+#ifdef PERL_CORE
+#define pad_fixup_inner_anons(a,b,c)	Perl_pad_fixup_inner_anons(aTHX_ a,b,c)
+#endif
+#ifdef PERL_CORE
+#define pad_push(a,b,c)		Perl_pad_push(aTHX_ a,b,c)
+#endif
+#if defined(PERL_IN_PAD_C) || defined(PERL_DECL_PROT)
+#ifdef PERL_CORE
+#define pad_findlex(a,b,c,d,e,f,g)	S_pad_findlex(aTHX_ a,b,c,d,e,f,g)
+#endif
+#  if defined(DEBUGGING)
+#ifdef PERL_CORE
+#define cv_dump(a,b)		S_cv_dump(aTHX_ a,b)
+#endif
+#  endif
+#ifdef PERL_CORE
+#define cv_clone2(a,b)		S_cv_clone2(aTHX_ a,b)
 #endif
 #endif
 #define ck_anoncode(a)		Perl_ck_anoncode(aTHX_ a)

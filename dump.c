@@ -1314,26 +1314,8 @@ Perl_do_sv_dump(pTHX_ I32 level, PerlIO *file, SV *sv, I32 nest, I32 maxnest, bo
 	if (type == SVt_PVFM)
 	    Perl_dump_indent(aTHX_ level, file, "  LINES = %"IVdf"\n", (IV)FmLINES(sv));
 	Perl_dump_indent(aTHX_ level, file, "  PADLIST = 0x%"UVxf"\n", PTR2UV(CvPADLIST(sv)));
-	if (nest < maxnest && CvPADLIST(sv)) {
-	    AV* padlist = CvPADLIST(sv);
-	    AV* pad_name = (AV*)*av_fetch(padlist, 0, FALSE);
-	    AV* pad = (AV*)*av_fetch(padlist, 1, FALSE);
-	    SV** pname = AvARRAY(pad_name);
-	    SV** ppad = AvARRAY(pad);
-	    I32 ix;
-
-	    for (ix = 1; ix <= AvFILL(pad_name); ix++) {
-		if (SvPOK(pname[ix]))
-		    Perl_dump_indent(aTHX_ level,
-				/* %5d below is enough whitespace. */
-				file,
-				"%5d. 0x%"UVxf" (%s\"%s\" %"IVdf"-%"IVdf")\n",
-				(int)ix, PTR2UV(ppad[ix]),
-				SvFAKE(pname[ix]) ? "FAKE " : "",
-				SvPVX(pname[ix]),
-				(IV)SvNVX(pname[ix]),
-				(IV)SvIVX(pname[ix]));
-	    }
+	if (nest < maxnest) {
+	    do_dump_pad(level+1, file, CvPADLIST(sv), 0);
 	}
 	{
 	    CV *outside = CvOUTSIDE(sv);

@@ -222,6 +222,7 @@ do_test(13,
     OWNER = $ADDR
 )?    FLAGS = 0x4
     PADLIST = $ADDR
+    PADNAME = $ADDR\\($ADDR\\) PAD = $ADDR\\($ADDR\\)
     OUTSIDE = $ADDR \\(MAIN\\)');
 
 do_test(14,
@@ -247,9 +248,10 @@ do_test(14,
     OWNER = $ADDR
 )?    FLAGS = 0x0
     PADLIST = $ADDR
-      \\d+\\. $ADDR \\("\\$pattern" \\d+-\\d+\\)
-     \\d+\\. $ADDR \\(FAKE "\\$DEBUG" 0-\\d+\\)
-     \\d+\\. $ADDR \\("\\$dump" \\d+-\\d+\\)
+    PADNAME = $ADDR\\($ADDR\\) PAD = $ADDR\\($ADDR\\)
+       \\d+\\. $ADDR<\\d+>      \\(\\d+,\\d+\\) "\\$pattern"
+      \\d+\\. $ADDR<\\d+> FAKE \\(\\d+,\\d+\\) "\\$DEBUG"
+      \\d+\\. $ADDR<\\d+>      \\(\\d+,\\d+\\) "\\$dump"
     OUTSIDE = $ADDR \\(MAIN\\)');
 
 do_test(15,

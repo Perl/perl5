@@ -2263,6 +2263,7 @@ typedef        struct crypt_data {     /* straight from /usr/include/crypt.h */
 #include "util.h"
 #include "form.h"
 #include "gv.h"
+#include "pad.h"
 #include "cv.h"
 #include "opnames.h"
 #include "op.h"
@@ -2509,6 +2510,8 @@ Gid_t getegid (void);
 #  define DEBUG_R_TEST_ (PL_debug & DEBUG_R_FLAG)
 #  define DEBUG_J_TEST_ (PL_debug & DEBUG_J_FLAG)
 #  define DEBUG_v_TEST_ (PL_debug & DEBUG_v_FLAG)
+#  define DEBUG_Xv_TEST_ (DEBUG_X_TEST_ && DEBUG_v_TEST_)
+
 
 #ifdef DEBUGGING
 
@@ -2529,6 +2532,7 @@ Gid_t getegid (void);
 #  define DEBUG_u_TEST DEBUG_u_TEST_
 #  define DEBUG_H_TEST DEBUG_H_TEST_
 #  define DEBUG_X_TEST DEBUG_X_TEST_
+#  define DEBUG_Xv_TEST DEBUG_Xv_TEST_
 #  define DEBUG_D_TEST DEBUG_D_TEST_
 #  define DEBUG_S_TEST DEBUG_S_TEST_
 #  define DEBUG_T_TEST DEBUG_T_TEST_
@@ -2564,6 +2568,7 @@ Gid_t getegid (void);
 #  define DEBUG_u(a) DEBUG__(DEBUG_u_TEST, a)
 #  define DEBUG_H(a) DEBUG__(DEBUG_H_TEST, a)
 #  define DEBUG_X(a) DEBUG__(DEBUG_X_TEST, a)
+#  define DEBUG_Xv(a) DEBUG__(DEBUG_Xv_TEST, a)
 #  define DEBUG_D(a) DEBUG__(DEBUG_D_TEST, a)
 
 #  ifdef USE_5005THREADS
@@ -2592,6 +2597,7 @@ Gid_t getegid (void);
 #  define DEBUG_u_TEST (0)
 #  define DEBUG_H_TEST (0)
 #  define DEBUG_X_TEST (0)
+#  define DEBUG_Xv_TEST (0)
 #  define DEBUG_D_TEST (0)
 #  define DEBUG_S_TEST (0)
 #  define DEBUG_T_TEST (0)
@@ -2615,6 +2621,7 @@ Gid_t getegid (void);
 #  define DEBUG_u(a)
 #  define DEBUG_H(a)
 #  define DEBUG_X(a)
+#  define DEBUG_Xv(a)
 #  define DEBUG_D(a)
 #  define DEBUG_S(a)
 #  define DEBUG_T(a)
@@ -2883,10 +2890,8 @@ typedef Sighandler_t Sigsave_t;
 # ifndef register
 #  define register
 # endif
-# define PAD_SV(po) pad_sv(po)
 # define RUNOPS_DEFAULT Perl_runops_debug
 #else
-# define PAD_SV(po) PL_curpad[po]
 # define RUNOPS_DEFAULT Perl_runops_standard
 #endif
 

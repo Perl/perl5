@@ -200,10 +200,10 @@ PP(pp_padsv)
     XPUSHs(TARG);
     if (PL_op->op_flags & OPf_MOD) {
 	if (PL_op->op_private & OPpLVAL_INTRO)
-	    SAVECLEARSV(PL_curpad[PL_op->op_targ]);
+	    SAVECLEARSV(PAD_SVl(PL_op->op_targ));
         else if (PL_op->op_private & OPpDEREF) {
 	    PUTBACK;
-	    vivify_ref(PL_curpad[PL_op->op_targ], PL_op->op_private & OPpDEREF);
+	    vivify_ref(PAD_SVl(PL_op->op_targ), PL_op->op_private & OPpDEREF);
 	    SPAGAIN;
 	}
     }
@@ -2620,7 +2620,7 @@ try_autoload:
 	    if (SP > PL_stack_base + TOPMARK)
 		sv = *(PL_stack_base + TOPMARK + 1);
 	    else {
-		AV *av = (AV*)PL_curpad[0];
+		AV *av = (AV*)PAD_SVl(0);
 		if (hasargs || !av || AvFILLp(av) < 0
 		    || !(sv = AvARRAY(av)[0]))
 		{
@@ -2771,7 +2771,7 @@ try_autoload:
 		AV* av;
 		I32 items;
 #ifdef USE_5005THREADS
-		av = (AV*)PL_curpad[0];
+		av = (AV*)PAD_SVl(0);
 #else
 		av = GvAV(PL_defgv);
 #endif /* USE_5005THREADS */		
@@ -2810,7 +2810,6 @@ try_autoload:
 	dMARK;
 	register I32 items = SP - MARK;
 	AV* padlist = CvPADLIST(cv);
-	SV** svp = AvARRAY(padlist);
 	push_return(PL_op->op_next);
 	PUSHBLOCK(cx, CXt_SUB, MARK);
 	PUSHSUB(cx);
@@ -2822,53 +2821,13 @@ try_autoload:
 	 */
 	if (CvDEPTH(cv) < 2)
 	    (void)SvREFCNT_inc(cv);
-	else {	/* save temporaries on recursion? */
+	else {
 	    PERL_STACK_OVERFLOW_CHECK();
-	    if (CvDEPTH(cv) > AvFILLp(padlist)) {
-		AV *av;
-		AV *newpad = newAV();
-		SV **oldpad = AvARRAY(svp[CvDEPTH(cv)-1]);
-		I32 ix = AvFILLp((AV*)svp[1]);
-		I32 names_fill = AvFILLp((AV*)svp[0]);
-		svp = AvARRAY(svp[0]);
-		for ( ;ix > 0; ix--) {
-		    if (names_fill >= ix && svp[ix] != &PL_sv_undef) {
-			char *name = SvPVX(svp[ix]);
-			if ((SvFLAGS(svp[ix]) & SVf_FAKE) /* outer lexical? */
-			    || *name == '&')		  /* anonymous code? */
-			{
-			    av_store(newpad, ix, SvREFCNT_inc(oldpad[ix]));
-			}
-			else {				/* our own lexical */
-			    if (*name == '@')
-				av_store(newpad, ix, sv = (SV*)newAV());
-			    else if (*name == '%')
-				av_store(newpad, ix, sv = (SV*)newHV());
-			    else
-				av_store(newpad, ix, sv = NEWSV(0,0));
-			    SvPADMY_on(sv);
-			}
-		    }
-		    else if (IS_PADGV(oldpad[ix]) || IS_PADCONST(oldpad[ix])) {
-			av_store(newpad, ix, sv = SvREFCNT_inc(oldpad[ix]));
-		    }
-		    else {
-			av_store(newpad, ix, sv = NEWSV(0,0));
-			SvPADTMP_on(sv);
-		    }
-		}
-		av = newAV();		/* will be @_ */
-		av_extend(av, 0);
-		av_store(newpad, 0, (SV*)av);
-		AvFLAGS(av) = AVf_REIFY;
-		av_store(padlist, CvDEPTH(cv), (SV*)newpad);
-		AvFILLp(padlist) = CvDEPTH(cv);
-		svp = AvARRAY(padlist);
-	    }
+	    pad_push(padlist, CvDEPTH(cv), 1);
 	}
 #ifdef USE_5005THREADS
 	if (!hasargs) {
-	    AV* av = (AV*)PL_curpad[0];
+	    AV* av = (AV*)PAD_SVl(0);
 
 	    items = AvFILLp(av) + 1;
 	    if (items) {
@@ -2880,8 +2839,7 @@ try_autoload:
 	    }
 	}
 #endif /* USE_5005THREADS */		
-	SAVEVPTR(PL_curpad);
-    	PL_curpad = AvARRAY((AV*)svp[CvDEPTH(cv)]);
+	PAD_SET_CUR(padlist, CvDEPTH(cv));
 #ifndef USE_5005THREADS
 	if (hasargs)
 #endif /* USE_5005THREADS */
@@ -2893,7 +2851,7 @@ try_autoload:
 	    DEBUG_S(PerlIO_printf(Perl_debug_log,
 	    			  "%p entersub preparing @_\n", thr));
 #endif
-	    av = (AV*)PL_curpad[0];
+	    av = (AV*)PAD_SVl(0);
 	    if (AvREAL(av)) {
 		/* @_ is normally not REAL--this should only ever
 		 * happen when DB::sub() calls things that modify @_ */
@@ -2905,7 +2863,7 @@ try_autoload:
 	    cx->blk_sub.savearray = GvAV(PL_defgv);
 	    GvAV(PL_defgv) = (AV*)SvREFCNT_inc(av);
 #endif /* USE_5005THREADS */
-	    cx->blk_sub.oldcurpad = PL_curpad;
+	    CX_CURPAD_SAVE(cx->blk_sub);
 	    cx->blk_sub.argarray = av;
 	    ++MARK;
 

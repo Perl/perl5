@@ -23,15 +23,6 @@
  *			which may or may not check number of children).
  */
 
-#if PTRSIZE == 4
-typedef U32TYPE PADOFFSET;
-#else
-#   if PTRSIZE == 8
-typedef U64TYPE PADOFFSET;
-#   endif
-#endif
-#define NOT_IN_PAD ((PADOFFSET) -1)
-
 #ifdef DEBUGGING_OPS
 #define OPCODE opcode
 #else
@@ -390,13 +381,13 @@ struct loop {
 
 
 #ifdef USE_ITHREADS
-#  define	cGVOPx_gv(o)	((GV*)PL_curpad[cPADOPx(o)->op_padix])
+#  define	cGVOPx_gv(o)	((GV*)PAD_SVl(cPADOPx(o)->op_padix))
 #  define	IS_PADGV(v)	(v && SvTYPE(v) == SVt_PVGV && GvIN_PAD(v))
 #  define	IS_PADCONST(v)	(v && SvREADONLY(v))
 #  define	cSVOPx_sv(v)	(cSVOPx(v)->op_sv \
-				 ? cSVOPx(v)->op_sv : PL_curpad[(v)->op_targ])
+				 ? cSVOPx(v)->op_sv : PAD_SVl((v)->op_targ))
 #  define	cSVOPx_svp(v)	(cSVOPx(v)->op_sv \
-				 ? &cSVOPx(v)->op_sv : &PL_curpad[(v)->op_targ])
+				 ? &cSVOPx(v)->op_sv : &PAD_SVl((v)->op_targ))
 #else
 #  define	cGVOPx_gv(o)	((GV*)cSVOPx(o)->op_sv)
 #  define	IS_PADGV(v)	FALSE

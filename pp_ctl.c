@@ -1549,6 +1549,8 @@ PP(pp_lineseq)
     return NORMAL;
 }
 
+/* like pp_nextstate, but used instead when the debugger is active */
+
 PP(pp_dbstate)
 {
     PL_curcop = (COP*)PL_op;
@@ -1589,8 +1591,7 @@ PP(pp_dbstate)
 	PUSHSUB_DB(cx);
 	CvDEPTH(cv)++;
 	(void)SvREFCNT_inc(cv);
-	SAVEVPTR(PL_curpad);
-	PL_curpad = AvARRAY((AV*)*av_fetch(CvPADLIST(cv),1,FALSE));
+	PAD_SET_CUR(CvPADLIST(cv),1);
 	RETURNOP(CvSTART(cv));
     }
     else
@@ -1626,7 +1627,7 @@ PP(pp_enteriter)
 #endif /* USE_5005THREADS */
     if (PL_op->op_targ) {
 #ifndef USE_ITHREADS
-	svp = &PL_curpad[PL_op->op_targ];		/* "my" variable */
+	svp = &PAD_SVl(PL_op->op_targ);		/* "my" variable */
 	SAVESPTR(*svp);
 #else
 	SAVEPADSV(PL_op->op_targ);
@@ -2114,13 +2115,13 @@ PP(pp_goto)
 		    av = newAV();
 		    av_extend(av, items-1);
 		    AvFLAGS(av) = AVf_REIFY;
-		    PL_curpad[0] = (SV*)(cx->blk_sub.argarray = av);
+		    PAD_SVl(0) = (SV*)(cx->blk_sub.argarray = av);
 		}
 	    }
 	    else if (CvXSUB(cv)) {	/* put GvAV(defgv) back onto stack */
 		AV* av;
 #ifdef USE_5005THREADS
-		av = (AV*)PL_curpad[0];
+		av = (AV*)PAD_SVl(0);
 #else
 		av = GvAV(PL_defgv);
 #endif
@@ -2171,7 +2172,6 @@ PP(pp_goto)
 	    }
 	    else {
 		AV* padlist = CvPADLIST(cv);
-		SV** svp = AvARRAY(padlist);
 		if (CxTYPE(cx) == CXt_EVAL) {
 		    PL_in_eval = cx->blk_eval.old_in_eval;
 		    PL_eval_root = cx->blk_eval.old_eval_root;
@@ -2180,60 +2180,18 @@ PP(pp_goto)
 		}
 		cx->blk_sub.cv = cv;
 		cx->blk_sub.olddepth = (U16)CvDEPTH(cv);
+
 		CvDEPTH(cv)++;
 		if (CvDEPTH(cv) < 2)
 		    (void)SvREFCNT_inc(cv);
-		else {	/* save temporaries on recursion? */
+		else {
 		    if (CvDEPTH(cv) == 100 && ckWARN(WARN_RECURSION))
 			sub_crush_depth(cv);
-		    if (CvDEPTH(cv) > AvFILLp(padlist)) {
-			AV *newpad = newAV();
-			SV **oldpad = AvARRAY(svp[CvDEPTH(cv)-1]);
-			I32 ix = AvFILLp((AV*)svp[1]);
-			I32 names_fill = AvFILLp((AV*)svp[0]);
-			svp = AvARRAY(svp[0]);
-			for ( ;ix > 0; ix--) {
-			    if (names_fill >= ix && svp[ix] != &PL_sv_undef) {
-				char *name = SvPVX(svp[ix]);
-				if ((SvFLAGS(svp[ix]) & SVf_FAKE)
-				    || *name == '&')
-				{
-				    /* outer lexical or anon code */
-				    av_store(newpad, ix,
-					SvREFCNT_inc(oldpad[ix]) );
-				}
-				else {		/* our own lexical */
-				    if (*name == '@')
-					av_store(newpad, ix, sv = (SV*)newAV());
-				    else if (*name == '%')
-					av_store(newpad, ix, sv = (SV*)newHV());
-				    else
-					av_store(newpad, ix, sv = NEWSV(0,0));
-				    SvPADMY_on(sv);
-				}
-			    }
-			    else if (IS_PADGV(oldpad[ix]) || IS_PADCONST(oldpad[ix])) {
-				av_store(newpad, ix, sv = SvREFCNT_inc(oldpad[ix]));
-			    }
-			    else {
-				av_store(newpad, ix, sv = NEWSV(0,0));
-				SvPADTMP_on(sv);
-			    }
-			}
-			if (cx->blk_sub.hasargs) {
-			    AV* av = newAV();
-			    av_extend(av, 0);
-			    av_store(newpad, 0, (SV*)av);
-			    AvFLAGS(av) = AVf_REIFY;
-			}
-			av_store(padlist, CvDEPTH(cv), (SV*)newpad);
-			AvFILLp(padlist) = CvDEPTH(cv);
-			svp = AvARRAY(padlist);
-		    }
+		    pad_push(padlist, CvDEPTH(cv), cx->blk_sub.hasargs);
 		}
 #ifdef USE_5005THREADS
 		if (!cx->blk_sub.hasargs) {
-		    AV* av = (AV*)PL_curpad[0];
+		    AV* av = (AV*)PAD_SVl(0);
 		
 		    items = AvFILLp(av) + 1;
 		    if (items) {
@@ -2244,21 +2202,20 @@ PP(pp_goto)
 			PUTBACK ;		
 		    }
 		}
-#endif /* USE_5005THREADS */		
-		SAVEVPTR(PL_curpad);
-		PL_curpad = AvARRAY((AV*)svp[CvDEPTH(cv)]);
+#endif /* USE_5005THREADS */
+		PAD_SET_CUR(padlist, CvDEPTH(cv));
 #ifndef USE_5005THREADS
 		if (cx->blk_sub.hasargs)
 #endif /* USE_5005THREADS */
 		{
-		    AV* av = (AV*)PL_curpad[0];
+		    AV* av = (AV*)PAD_SVl(0);
 		    SV** ary;
 
 #ifndef USE_5005THREADS
 		    cx->blk_sub.savearray = GvAV(PL_defgv);
 		    GvAV(PL_defgv) = (AV*)SvREFCNT_inc(av);
 #endif /* USE_5005THREADS */
-		    cx->blk_sub.oldcurpad = PL_curpad;
+		    CX_CURPAD_SAVE(cx->blk_sub);
 		    cx->blk_sub.argarray = av;
 		    ++mark;
 
@@ -2682,7 +2639,6 @@ S_doeval(pTHX_ int gimme, OP** startop)
     dSP;
     OP *saveop = PL_op;
     CV *caller;
-    AV* comppadlist;
     I32 i;
 
     PL_in_eval = ((saveop && saveop->op_type == OP_REQUIRE)
@@ -2690,16 +2646,6 @@ S_doeval(pTHX_ int gimme, OP** startop)
 		  : EVAL_INEVAL);
 
     PUSHMARK(SP);
-
-    /* set up a scratch pad */
-
-    SAVEI32(PL_padix);
-    SAVEVPTR(PL_curpad);
-    SAVESPTR(PL_comppad);
-    SAVESPTR(PL_comppad_name);
-    SAVEI32(PL_comppad_name_fill);
-    SAVEI32(PL_min_intro_pending);
-    SAVEI32(PL_max_intro_pending);
 
     caller = PL_compcv;
     for (i = cxstack_ix - 1; i >= 0; i--) {
@@ -2725,24 +2671,9 @@ S_doeval(pTHX_ int gimme, OP** startop)
     MUTEX_INIT(CvMUTEXP(PL_compcv));
 #endif /* USE_5005THREADS */
 
-    PL_comppad = newAV();
-    av_push(PL_comppad, Nullsv);
-    PL_curpad = AvARRAY(PL_comppad);
-    PL_comppad_name = newAV();
-    PL_comppad_name_fill = 0;
-    PL_min_intro_pending = 0;
-    PL_padix = 0;
-#ifdef USE_5005THREADS
-    av_store(PL_comppad_name, 0, newSVpvn("@_", 2));
-    PL_curpad[0] = (SV*)newAV();
-    SvPADMY_on(PL_curpad[0]);	/* XXX Needed? */
-#endif /* USE_5005THREADS */
+    /* set up a scratch pad */
 
-    comppadlist = newAV();
-    AvREAL_off(comppadlist);
-    av_store(comppadlist, 0, (SV*)PL_comppad_name);
-    av_store(comppadlist, 1, (SV*)PL_comppad);
-    CvPADLIST(PL_compcv) = comppadlist;
+    CvPADLIST(PL_compcv) = pad_new(padnew_SAVE);
 
     if (!saveop ||
 	(saveop->op_type != OP_REQUIRE && saveop->op_type != OP_DOFILE))
