@@ -3024,7 +3024,7 @@ typedef struct am_table_short AMTS;
  * so perl may have to guard against stack overflow.
  */
 #ifndef PERL_STACK_OVERFLOW_CHECK
-#define PERL_STACK_OVERFLOW_CHECK()  0
+#define PERL_STACK_OVERFLOW_CHECK()  NOOP
 #endif
 
 /*
@@ -3034,7 +3034,7 @@ typedef struct am_table_short AMTS;
  * massively.
  */
 #ifndef PERL_ASYNC_CHECK
-#define PERL_ASYNC_CHECK()  0
+#define PERL_ASYNC_CHECK()  NOOP
 #endif
 
 /*
@@ -3044,7 +3044,7 @@ typedef struct am_table_short AMTS;
  * it to NULL.
  */
 #ifndef PERL_ALLOC_CHECK
-#define PERL_ALLOC_CHECK(p)  0
+#define PERL_ALLOC_CHECK(p)  NOOP
 #endif
 
 /*
