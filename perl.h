@@ -29,6 +29,22 @@
 
 #include "embed.h"
 
+#ifdef __cplusplus
+#  define START_EXTERN_C extern "C" {
+#  define END_EXTERN_C }
+#  define EXTERN_C extern "C"
+#else
+#  define START_EXTERN_C 
+#  define END_EXTERN_C 
+#  define EXTERN_C
+#endif
+
+#if defined(USE_THREADS) /* && !defined(PERL_CORE) && !defined(PERLDLL) */
+#ifndef CRIPPLED_CC
+#define CRIPPLED_CC
+#endif
+#endif
+
 #ifdef OP_IN_REGISTER
 #  ifdef __GNUC__
 #    define stringify_immed(s) #s
@@ -63,21 +79,6 @@ register struct op *op asm(stringify(OP_IN_REGISTER));
 #define NOOP (void)0
 
 #define WITH_THR(s) do { dTHR; s; } while (0)
-
-#ifdef USE_THREADS
-#  ifdef FAKE_THREADS
-#    include "fakethr.h"
-#  else
-#    ifdef WIN32
-#      include "win32/win32thread.h"
-#    else
-#      include <pthread.h>
-typedef pthread_mutex_t perl_mutex;
-typedef pthread_cond_t perl_cond;
-typedef pthread_key_t perl_key;
-#    endif /* WIN32 */
-#  endif /* FAKE_THREADS */
-#endif /* USE_THREADS */
 
 /*
  * SOFT_CAST can be used for args to prototyped functions to retain some
@@ -949,7 +950,31 @@ typedef I32 (*filter_t) _((int, SV *, int));
 #     include "unixish.h"
 #   endif
 # endif
-#endif
+#endif         
+
+/* 
+ * USE_THREADS needs to be after unixish.h as <pthread.h> includes <sys/signal.h>
+ * which defines NSIG - which will stop inclusion of <signal.h>
+ * this results in many functions being undeclared which bothers C++
+ * May make sense to have threads after "*ish.h" anyway
+ */
+
+#ifdef USE_THREADS
+#  ifdef FAKE_THREADS
+#    include "fakethr.h"
+#  else
+#    ifdef WIN32
+#      include <win32thread.h>
+#    else
+#      include <pthread.h>
+typedef pthread_mutex_t perl_mutex;
+typedef pthread_cond_t perl_cond;
+typedef pthread_key_t perl_key;
+#    endif /* WIN32 */
+#  endif /* FAKE_THREADS */
+#endif /* USE_THREADS */
+
+
   
 #ifdef VMS
 #   define STATUS_NATIVE	statusvalue_vms
@@ -1029,7 +1054,7 @@ union any {
 };
 
 #ifdef USE_THREADS
-#define ARGSproto struct thread *
+#define ARGSproto struct thread *thr
 #else
 #define ARGSproto void
 #endif /* USE_THREADS */
@@ -1121,13 +1146,7 @@ EXT char Error[1];
 #define U_I(what) ((unsigned int)(what))
 #define U_L(what) ((U32)(what))
 #else
-#  ifdef __cplusplus
-    extern "C" {
-#  endif
-U32 cast_ulong _((double));
-#  ifdef __cplusplus
-    }
-#  endif
+EXTERN_C U32 cast_ulong _((double));
 #define U_S(what) ((U16)cast_ulong((double)(what)))
 #define U_I(what) ((unsigned int)cast_ulong((double)(what)))
 #define U_L(what) (cast_ulong((double)(what)))
@@ -1138,15 +1157,11 @@ U32 cast_ulong _((double));
 #define I_V(what) ((IV)(what))
 #define U_V(what) ((UV)(what))
 #else
-#  ifdef __cplusplus
-    extern "C" {
-#  endif
+START_EXTERN_C
 I32 cast_i32 _((double));
 IV cast_iv _((double));
 UV cast_uv _((double));
-#  ifdef __cplusplus
-    }
-#  endif
+END_EXTERN_C
 #define I_32(what) (cast_i32((double)(what)))
 #define I_V(what) (cast_iv((double)(what)))
 #define U_V(what) (cast_uv((double)(what)))
@@ -1251,9 +1266,7 @@ char *strcpy(), *strcat();
 #ifdef I_MATH
 #    include <math.h>
 #else
-#   ifdef __cplusplus
-	extern "C" {
-#   endif
+START_EXTERN_C
 	    double exp _((double));
 	    double log _((double));
 	    double log10 _((double));
@@ -1265,9 +1278,7 @@ char *strcpy(), *strcat();
 	    double cos _((double));
 	    double atan2 _((double,double));
 	    double pow _((double,double));
-#   ifdef __cplusplus
-	};
-#   endif
+END_EXTERN_C
 #endif
 
 #ifndef __cplusplus
@@ -1364,7 +1375,7 @@ EXT struct thread *	thr;		/* Currently executing (fake) thread */
 
 /* VMS doesn't use environ array and NeXT has problems with crt0.o globals */
 #if !defined(VMS) && !(defined(NeXT) && defined(__DYNAMIC__))
-#ifndef DONT_DECLARE_STD
+#if !defined(DONT_DECLARE_STD) || (defined(__svr4__) && defined(__GNUC__) && defined(sun))
 extern char **	environ;	/* environment variables supplied via exec */
 #endif
 #else
@@ -1985,10 +1996,7 @@ struct interpreter {
 #include "thread.h"
 #include "pp.h"
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
+START_EXTERN_C
 #include "proto.h"
 
 #ifdef EMBED
@@ -1999,9 +2007,7 @@ extern "C" {
 #define sv_setptrref(rv,ptr) sv_setref_iv(rv,Nullch,(IV)ptr)
 #endif
 
-#ifdef __cplusplus
-};
-#endif
+END_EXTERN_C
 
 /* The following must follow proto.h */
 

@@ -11,7 +11,7 @@
 # newly built perl.
 INST_DRV=c:
 INST_TOP=$(INST_DRV)\perl
-BUILDOPT=-DUSE_THREADS -TP
+BUILDOPT=-DUSE_THREADS
 CORECCOPT=
 
 #
@@ -204,7 +204,7 @@ WIN32_C = perllib.c \
 WIN32_OBJ = win32.obj \
 	win32io.obj \
 	win32sck.obj \
-	win32thread.obj 
+	win32thread.obj
 
 PERL95_OBJ = perl95.obj \
 	win32mt.obj \
@@ -273,7 +273,7 @@ DYNALOADMODULES=	\
 	$(OPCODE_DLL)	\
 	$(SDBM_FILE_DLL)\
 	$(IO_DLL)	\
-	$(ATTRS_DLL)    \
+	$(ATTRS_DLL)	\
 	$(THREAD_DLL)
 
 POD2HTML=$(PODDIR)\pod2html
@@ -307,13 +307,13 @@ config.w32 : $(CFGSH_TMPL)
 .\config.h : $(CFGH_TMPL)
 	-del /f config.h
 	copy $(CFGH_TMPL) config.h
-	
 
 ..\config.sh : config.w32 $(MINIPERL) config_sh.PL
 	$(MINIPERL) -I..\lib config_sh.PL "INST_DRV=$(INST_DRV)" \
 	    "INST_TOP=$(INST_TOP)" "cc=$(CC)" "ccflags=$(OPTIMIZE) $(DEFINES)" \
 	    "cf_email=$(EMAIL)" "libs=$(LIBFILES)" "incpath=$(CCINCDIR)" \
 	    "libpth=$(CCLIBDIR)" "libc=$(LIBC)" \
+	    "LINK_FLAGS=$(LINK_FLAGS)" \
 	    config.w32 > ..\config.sh
 
 $(CONFIGPM) : $(MINIPERL) ..\config.sh config_h.PL ..\minimod.pl
@@ -387,7 +387,7 @@ $(PERL95EXE): $(PERLDLL) $(CONFIGPM) $(PERL95_OBJ)
 	del perl95.exe
 
 $(DYNALOADER).c: $(MINIPERL) $(EXTDIR)\DynaLoader\dl_win32.xs $(CONFIGPM)
-	if not exist ..\lib\auto md ..\lib\auto
+	if not exist ..\lib\auto mkdir ..\lib\auto
 	$(XCOPY) $(EXTDIR)\$(*B)\$(*B).pm $(LIBDIR)\$(NULL)
 	cd $(EXTDIR)\$(*B)
 	$(XSUBPP) dl_win32.xs > $(*B).c

@@ -96,7 +96,7 @@ RUNTIME  = -MD
 .ENDIF
 INCLUDES = -I.\include -I. -I..
 #PCHFLAGS = -Fp$(INTDIR)\vcmoduls.pch -YX 
-DEFINES  = -DWIN32 $(BUILDOPT) -D_CONSOLE -D_WIN32_WINNT=0x400
+DEFINES  = -DWIN32 -D_CONSOLE $(BUILDOPT)
 LOCDEFS  = -DPERLDLL
 SUBSYS   = console
 
@@ -131,7 +131,7 @@ LIBFILES = oldnames.lib kernel32.lib user32.lib gdi32.lib \
 	version.lib odbc32.lib odbccp32.lib
 
 CFLAGS   = -nologo -W3 $(INCLUDES) $(DEFINES) $(LOCDEFS) $(PCHFLAGS) $(OPTIMIZE)
-LINK_FLAGS  = -nologo $(LIBFILES) $(LINK_DBG) -machine:I386
+LINK_FLAGS  = -nologo $(LIBFILES) $(LINK_DBG) -machine:$(PROCESSOR_ARCHITECTURE)
 OBJOUT_FLAG = -Fo
 
 .ENDIF
@@ -314,7 +314,6 @@ CORE_H = ..\av.h	\
 	.\include\netdb.h	\
 	.\include\sys\socket.h	\
 	.\win32.h
-
 
 EXTENSIONS=DynaLoader Socket IO Fcntl Opcode SDBM_File attrs Thread
 
@@ -601,7 +600,7 @@ minitest : $(MINIPERL) $(GLOBEXE) $(CONFIGPM)
 	cd ..\t && \
 	$(MINIPERL) -I..\lib test base/*.t comp/*.t cmd/*.t io/*.t op/*.t pragma/*.t
 
-test : all
+test-prep : all
 	$(XCOPY) $(PERLEXE) ..\t\$(NULL)
 	$(XCOPY) $(PERLDLL) ..\t\$(NULL)
 .IF "$(CCTYPE)" == "BORLAND"
@@ -609,7 +608,13 @@ test : all
 .ELSE
 	$(XCOPY) $(GLOBEXE) ..\t\$(NULL)
 .ENDIF
+
+test : test-prep
 	cd ..\t && $(PERLEXE) -I..\lib harness
+
+test-notty : test-prep
+	set PERL_SKIP_TTY_TEST=1 && \
+	cd ..\t && $(PERLEXE) -I.\lib harness
 
 clean : 
 	-@erase miniperlmain.obj

@@ -3589,9 +3589,10 @@ SV *ref;
     return sv;
 }
 
-#ifdef CRIPPLED_CC
+
+
 SV *
-newRV_noinc(ref)
+Perl_newRV_noinc(ref)
 SV *ref;
 {
     register SV *sv;
@@ -3600,7 +3601,6 @@ SV *ref;
     SvREFCNT_dec(ref);
     return sv;
 }
-#endif /* CRIPPLED_CC */
 
 /* make an exact duplicate of old */
 
@@ -3794,21 +3794,21 @@ I32 lref;
     }
 }
 
-#ifndef SvTRUE
 I32
-SvTRUE(sv)
+sv_true(sv)
 register SV *sv;
 {
+    dTHR;
     if (!sv)
 	return 0;
     if (SvGMAGICAL(sv))
 	mg_get(sv);
     if (SvPOK(sv)) {
-	register XPV* Xpv;
-	if ((Xpv = (XPV*)SvANY(sv)) &&
-		(*Xpv->xpv_pv > '0' ||
-		Xpv->xpv_cur > 1 ||
-		(Xpv->xpv_cur && *Xpv->xpv_pv != '0')))
+	register XPV* tXpv;
+	if ((tXpv = (XPV*)SvANY(sv)) &&
+		(*tXpv->xpv_pv > '0' ||
+		tXpv->xpv_cur > 1 ||
+		(tXpv->xpv_cur && *tXpv->xpv_pv != '0')))
 	    return 1;
 	else
 	    return 0;
@@ -3824,42 +3824,34 @@ register SV *sv;
 	}
     }
 }
-#endif /* !SvTRUE */
 
-#ifndef SvIV
 IV
-SvIV(sv)
+sv_iv(sv)
 register SV *sv;
 {
     if (SvIOK(sv))
 	return SvIVX(sv);
     return sv_2iv(sv);
 }
-#endif /* !SvIV */
 
-#ifndef SvUV
 UV
-SvUV(sv)
+sv_uv(sv)
 register SV *sv;
 {
     if (SvIOK(sv))
 	return SvUVX(sv);
     return sv_2uv(sv);
 }
-#endif /* !SvUV */
 
-#ifndef SvNV
 double
-SvNV(sv)
+sv_nv(sv)
 register SV *sv;
 {
     if (SvNOK(sv))
 	return SvNVX(sv);
     return sv_2nv(sv);
 }
-#endif /* !SvNV */
 
-#ifdef CRIPPLED_CC
 char *
 sv_pvn(sv, lp)
 SV *sv;
@@ -3871,7 +3863,6 @@ STRLEN *lp;
     }
     return sv_2pv(sv, lp);
 }
-#endif
 
 char *
 sv_pvn_force(sv, lp)

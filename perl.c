@@ -2867,11 +2867,11 @@ init_main_thread()
     thr->prev = thr;
     MUTEX_UNLOCK(&threads_mutex);
 
-#ifdef HAVE_THREAD_INTERN
-    init_thread_intern(thr);
+#ifdef INIT_THREAD_INTERN
+    INIT_THREAD_INTERN(thr);
 #else
     thr->self = pthread_self();
-#endif /* HAVE_THREAD_INTERN */
+#endif /* INIT_THREAD_INTERN */
     SET_THR(thr);
 
     /*

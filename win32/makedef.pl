@@ -154,7 +154,11 @@ Perl_eval_mutex
 Perl_eval_cond
 Perl_eval_owner
 Perl_threads_mutex
+Perl_new_struct_thread
+Perl_nthreads
 Perl_nthreads_cond
+Perl_per_thread_magicals
+Perl_thrsv
 Perl_unlock_condpair
 Perl_vtbl_mutex
 Perl_magic_mutexfree

@@ -2602,7 +2602,7 @@ struct thread *t;
     INIT_THREAD_INTERN(thr);
 #else
     thr->self = pthread_self();
-#endif /* HAVE_THREAD_INTERN */
+#endif /* INIT_THREAD_INTERN */
     return thr;
 }
 #endif /* USE_THREADS */
