@@ -1932,8 +1932,9 @@ The Thread extension is now not built at all under ithreads
 (C<Configure -Duseithreads>) because it wouldn't work anyway (the
 Thread extension requires being Configured with C<-Duse5005threads>).
 
-But note that the Thread.pm interface is now shared by both
-thread models.
+B<Note that the 5.005 threads are unsupported and deprecated: if you
+have code written for the old threads you should migrate it to the
+new ithreads model.>
 
 =item *
 
@@ -3263,7 +3264,7 @@ Use Term::ReadKey 2.20 or later.
 
 B<Note that support for 5.005-style threading is deprecated,
 experimental and practically unsupported.  In 5.10, it is expected
-to be removed.>
+to be removed.  You should migrate your code to ithreads.>
 
 The following tests are known to fail due to fundamental problems in
 the 5.005 threading implementation. These are not new failures--Perl
