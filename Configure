@@ -20,7 +20,7 @@
 
 # $Id: Head.U,v 3.0.1.9 1997/02/28 15:02:09 ram Exp $
 #
-# Generated on Tue Jul 31 17:53:39 EET DST 2001 [metaconfig 3.0 PL70]
+# Generated on Tue Jul 31 18:10:25 EET DST 2001 [metaconfig 3.0 PL70]
 # (with additional metaconfig patches by perlbug@perl.org)
 
 cat >c1$$ <<EOF
@@ -3519,14 +3519,6 @@ case "$ccname" in
 '') ccname="$cc" ;;
 esac
 
-case "$gccversion" in
-'') ;;
-*)  case "$ccflags" in
-    *-Wall*) ;;
-    *) ccflags="$ccflags -Wall" ;;
-    esac
-    ;;
-esac
 
 : decide how portable to be.  Allow command line overrides.
 case "$d_portable" in
