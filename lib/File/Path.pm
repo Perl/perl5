@@ -41,8 +41,8 @@ It returns a list of all directories (including intermediates, determined
 using the Unix '/' separator) created.
 
 If a system error prevents a directory from being created, then the
-C<mkpath> function throws a fatal error with Perl's C<croak> mechanism.
-This error can be trapped with an C<eval> block:
+C<mkpath> function throws a fatal error with C<Carp::croak>. This error
+can be trapped with an C<eval> block:
 
   eval { mkpath($dir) };
   if ($@) {
