@@ -673,9 +673,7 @@ Perl_leave_scope(pTHX_ I32 base)
 	    DEBUG_S(PerlIO_printf(Perl_debug_log,
 				  "restore svref: %p %p:%s -> %p:%s\n",
 				  ptr, sv, SvPEEK(sv), value, SvPEEK(value)));
-	    if (SvTYPE(sv) >= SVt_PVMG && SvMAGIC(sv) &&
-		SvTYPE(sv) != SVt_PVGV)
-	    {
+	    if (SvTYPE(sv) == SVt_PVMG && SvMAGIC(sv)) {
 		(void)SvUPGRADE(value, SvTYPE(sv));
 		SvMAGIC(value) = SvMAGIC(sv);
 		SvFLAGS(value) |= SvMAGICAL(sv);
@@ -687,9 +685,7 @@ Perl_leave_scope(pTHX_ I32 base)
 	     * croaking that might ensue when the SvSETMAGIC() below is
 	     * called, or to avoid two different SVs pointing at the same
 	     * SvMAGIC()).  This needs a total rethink.  --GSAR */
-	    else if (SvTYPE(value) >= SVt_PVMG && SvMAGIC(value) &&
-		     SvTYPE(value) != SVt_PVGV)
-	    {
+	    else if (SvTYPE(value) == SVt_PVMG && SvMAGIC(value)) {
 		SvFLAGS(value) |= (SvFLAGS(value) &
 				  (SVp_NOK|SVp_POK)) >> PRIVSHIFT;
 		SvMAGICAL_off(value);

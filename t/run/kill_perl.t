@@ -816,3 +816,21 @@ ok
 print "ok" if 'X' =~ /\X/;
 EXPECT
 ok
+######## segfault in 5.6.1 within peep()
+@a = (1..9);
+@b = sort { @c = sort { @d = sort { 0 } @a; @d; } @a; } @a;
+print join '', @a, "\n";
+EXPECT
+123456789
+######## [ID 20010912.007] segfault or "Can't modify non-existent substring"
+$b="abcde";
+$s = \substr($b, 2, 1);
+print "before: $$s\n";
+{
+  local $k;
+  *k = $s;
+}
+print "after: $$s\n";
+EXPECT
+before: c
+after: c

@@ -324,7 +324,7 @@ lintflags = -hbvxac
 
 all: $(FIRSTMAKEFILE) miniperl$(EXE_EXT) extra.pods $(private) $(public) $(dynamic_ext) $(nonxs_ext) extras.make
 	@echo " ";
-	@echo "	Everything is up to date. 'make test' to run test suite."
+	@echo "	Everything is up to date. Type '$(MAKE) test' to run test suite."
 
 compile: all
 	echo "testing compilation" > testcompile;
@@ -822,7 +822,7 @@ regen_headers:	FORCE
 	-perl autodoc.pl
 
 regen_pods:	FORCE
-	-cd pod; $(LDLIBPTH) make regen_pods
+	-cd pod; $(LDLIBPTH) $(MAKE) regen_pods
 
 regen_all: $(PERLYVMS) regen_headers regen_pods
 
@@ -855,7 +855,7 @@ n_dummy $(nonxs_ext):	miniperl$(EXE_EXT) preplibrary $(DYNALOADER) FORCE
 clean:		_tidy _mopup
 
 realclean:	_realcleaner _mopup
-	@echo "Note that make realclean does not delete config.sh or Policy.sh"
+	@echo "Note that '$(MAKE) realclean' does not delete config.sh or Policy.sh"
 
 _clobber:
 	-@rm -f Cross/run-* Cross/to-* Cross/from-*

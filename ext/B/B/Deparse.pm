@@ -7,7 +7,7 @@
 # but essentially none of his code remains.
 
 package B::Deparse;
-use Carp 'cluck', 'croak';
+use Carp;
 use B qw(class main_root main_start main_cv svref_2object opnumber cstring
 	 OPf_WANT OPf_WANT_VOID OPf_WANT_SCALAR OPf_WANT_LIST
 	 OPf_KIDS OPf_REF OPf_STACKED OPf_SPECIAL OPf_MOD
@@ -952,87 +952,87 @@ sub maybe_my {
 # pp_padany -- does not exist after parsing
 
 sub pp_enter { # see also leave
-    cluck "unexpected OP_ENTER";
+    carp "unexpected OP_ENTER";
     return "XXX";
 }
 
 sub pp_pushmark { # see also list
-    cluck "unexpected OP_PUSHMARK";
+    carp "unexpected OP_PUSHMARK";
     return "XXX";
 }
 
 sub pp_leavesub { # see also deparse_sub
-    cluck "unexpected OP_LEAVESUB";
+    carp "unexpected OP_LEAVESUB";
     return "XXX";
 }
 
 sub pp_leavewrite { # see also deparse_format
-    cluck "unexpected OP_LEAVEWRITE";
+    carp "unexpected OP_LEAVEWRITE";
     return "XXX";
 }
 
 sub pp_method { # see also entersub
-    cluck "unexpected OP_METHOD";
+    carp "unexpected OP_METHOD";
     return "XXX";
 }
 
 sub pp_regcmaybe { # see also regcomp
-    cluck "unexpected OP_REGCMAYBE";
+    carp "unexpected OP_REGCMAYBE";
     return "XXX";
 }
 
 sub pp_regcreset { # see also regcomp
-    cluck "unexpected OP_REGCRESET";
+    carp "unexpected OP_REGCRESET";
     return "XXX";
 }
 
 sub pp_substcont { # see also subst
-    cluck "unexpected OP_SUBSTCONT";
+    carp "unexpected OP_SUBSTCONT";
     return "XXX";
 }
 
 sub pp_grepstart { # see also grepwhile
-    cluck "unexpected OP_GREPSTART";
+    carp "unexpected OP_GREPSTART";
     return "XXX";
 }
 
 sub pp_mapstart { # see also mapwhile
-    cluck "unexpected OP_MAPSTART";
+    carp "unexpected OP_MAPSTART";
     return "XXX";
 }
 
 sub pp_method_named {
-    cluck "unexpected OP_METHOD_NAMED";
+    carp "unexpected OP_METHOD_NAMED";
     return "XXX";
 }
 
 sub pp_flip { # see also flop
-    cluck "unexpected OP_FLIP";
+    carp "unexpected OP_FLIP";
     return "XXX";
 }
 
 sub pp_iter { # see also leaveloop
-    cluck "unexpected OP_ITER";
+    carp "unexpected OP_ITER";
     return "XXX";
 }
 
 sub pp_enteriter { # see also leaveloop
-    cluck "unexpected OP_ENTERITER";
+    carp "unexpected OP_ENTERITER";
     return "XXX";
 }
 
 sub pp_enterloop { # see also leaveloop
-    cluck "unexpected OP_ENTERLOOP";
+    carp "unexpected OP_ENTERLOOP";
     return "XXX";
 }
 
 sub pp_leaveeval { # see also entereval
-    cluck "unexpected OP_LEAVEEVAL";
+    carp "unexpected OP_LEAVEEVAL";
     return "XXX";
 }
 
 sub pp_entertry { # see also leavetry
-    cluck "unexpected OP_ENTERTRY";
+    carp "unexpected OP_ENTERTRY";
     return "XXX";
 }
 
@@ -1219,7 +1219,7 @@ sub find_scope_en { ((find_scope(@_))[1]); }
 # Recurses down the tree, looking for pad variable introductions and COPs
 sub find_scope {
     my ($self, $op, $scope_st, $scope_en) = @_;
-Carp::cluck() if !defined $op;
+    carp("Undefined op in find_scope") if !defined $op;
     return ($scope_st, $scope_en) unless $op->flags & OPf_KIDS;
 
     for (my $o=$op->first; $$o; $o=$o->sibling) {
@@ -1620,7 +1620,6 @@ sub pp_scalar {
 sub padval {
     my $self = shift;
     my $targ = shift;
-    #cluck "curcv was undef" unless $self->{curcv};
     return (($self->{'curcv'}->PADLIST->ARRAY)[1]->ARRAY)[$targ];
 }
 
@@ -2595,7 +2594,7 @@ sub rv2x {
     my($op, $cx, $type) = @_;
 
     if (class($op) eq 'NULL' || !$op->can("first")) {
-	Carp::cluck("Unexpected op in pp_rv2x");
+	carp("Unexpected op in pp_rv2x");
 	return 'XXX';
     }
     my $kid = $op->first;
@@ -3665,7 +3664,7 @@ sub matchop {
 	    $re = re_uninterp(escape_str(re_unback($op->precomp)));
 	}
     } elsif ($kid->name ne 'regcomp') {
-	Carp::cluck("found ".$kid->name." where regcomp expected");
+	carp("found ".$kid->name." where regcomp expected");
     } else {
 	($re, $quote) = $self->regcomp($kid, 1, $extended);
     }

@@ -7035,7 +7035,7 @@ Perl_peep(pTHX_ register OP *o)
 	    else if (o->op_next->op_type == OP_RV2AV) {
 		OP* pop = o->op_next->op_next;
 		IV i;
-		if (pop->op_type == OP_CONST &&
+		if (pop && pop->op_type == OP_CONST &&
 		    (PL_op = pop->op_next) &&
 		    pop->op_next->op_type == OP_AELEM &&
 		    !(pop->op_next->op_private &
