@@ -32,7 +32,13 @@
 #    define __int64 long long
 #  endif
 #  define Win32_Winsock
+#ifdef __cplusplus
+/* Mingw32 gcc -xc++ objects to __attribute((unused)) at least */
+#undef  PERL_UNUSED_DECL 
+#define PERL_UNUSED_DECL 
 #endif
+#endif
+
 
 /* Define DllExport akin to perl's EXT, 
  * If we are in the DLL or mimicing the DLL for Win95 work round
