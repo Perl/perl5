@@ -400,6 +400,9 @@ ext/POSIX/hints/openbsd.pl	Hint for POSIX for named architecture
 ext/POSIX/hints/sunos_4.pl	Hint for POSIX for named architecture
 ext/POSIX/hints/svr4.pl		Hint for POSIX for named architecture
 ext/POSIX/typemap		POSIX extension interface types
+ext/PerlIO/Scalar/Makefile.PL	PerlIO layer for scalars
+ext/PerlIO/Scalar/Scalar.pm	PerlIO layer for scalars
+ext/PerlIO/Scalar/Scalar.xs	PerlIO layer for scalars
 ext/SDBM_File/Makefile.PL	SDBM extension makefile writer
 ext/SDBM_File/SDBM_File.pm	SDBM extension Perl module
 ext/SDBM_File/SDBM_File.xs	SDBM extension external subroutines
@@ -1480,6 +1483,7 @@ t/lib/io_linenum.t	See if I/O line numbers are tracked correctly
 t/lib/io_multihomed.t	See if INET sockets work with multi-homed hosts
 t/lib/io_pipe.t		See if pipe()-related methods from IO work
 t/lib/io_poll.t		See if poll()-related methods from IO work
+t/lib/io_scalar.t	Test of PerlIO::Scalar
 t/lib/io_sel.t		See if select()-related methods from IO work
 t/lib/io_sock.t		See if INET socket-related methods from IO work
 t/lib/io_taint.t	See if the untaint method from IO works

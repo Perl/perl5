@@ -914,6 +914,10 @@
 #define Perl_my_popen		pPerl->Perl_my_popen
 #undef  my_popen
 #define my_popen		Perl_my_popen
+#undef  Perl_my_popen_list
+#define Perl_my_popen_list	pPerl->Perl_my_popen_list
+#undef  my_popen_list
+#define my_popen_list		Perl_my_popen_list
 #endif
 #undef  Perl_my_setenv
 #define Perl_my_setenv		pPerl->Perl_my_setenv

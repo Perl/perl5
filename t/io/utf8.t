@@ -3,8 +3,7 @@
 BEGIN {
     chdir 't' if -d 't';
     @INC = '../lib';
-    require Config; import Config;
-    unless ($Config{'useperlio'}) {
+    unless (defined &perlio::import) {
 	print "1..0 # Skip: not perlio\n";
 	exit 0;
     }
@@ -79,7 +78,7 @@ open F, ">:utf8", 'a' or die $!;
 binmode(F);  # we write a "\n" and then tell() - avoid CRLF issues.
 print F $a;
 my $y;
-{ my $x = tell(F); 
+{ my $x = tell(F);
     { use bytes; $y = length($a);}
     print "not " unless $x == $y;
     print "ok 16\n";
@@ -99,7 +98,7 @@ print "not ($y) " unless $y == 1;
 print "ok 18\n";
 }
 
-{ my $x = tell(F); 
+{ my $x = tell(F);
     { use bytes; $y += 3;}
     print "not ($x,$y) " unless $x == $y;
     print "ok 19\n";

@@ -339,7 +339,7 @@ PerlIO_funcs PerlIO_encode = {
  PerlIOBase_eof,
  PerlIOBase_error,
  PerlIOBase_clearerr,
- PerlIOBuf_setlinebuf,
+ PerlIOBase_setlinebuf,
  PerlIOEncode_get_base,
  PerlIOBuf_bufsiz,
  PerlIOBuf_get_ptr,

@@ -4048,15 +4048,10 @@ getcwd()
 	else
 	    PUSHs(&PL_sv_undef);
 #else
-	dSP;
 	require_pv("Cwd.pm");
-
-	ENTER;
-	SAVETMPS;
+        /* Module require may have grown the stack */
+	SPAGAIN;
 	PUSHMARK(sp);
 	PUTBACK;
-	call_pv("Cwd::cwd", GIMME_V);
-	FREETMPS;
-	LEAVE;
-	XSRETURN(1);
+	XSRETURN(call_pv("Cwd::cwd", GIMME_V));
 #endif

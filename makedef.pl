@@ -547,8 +547,10 @@ my @layer_syms = qw(
 			 PerlIOBase_eof
 			 PerlIOBase_error
 			 PerlIOBase_fileno
+			 PerlIOBase_setlinebuf
+			 PerlIOBase_pushed
+			 PerlIOBase_read
 			 PerlIOBuf_bufsiz
-			 PerlIOBuf_fdopen
 			 PerlIOBuf_fill
 			 PerlIOBuf_flush
 			 PerlIOBuf_get_cnt
@@ -556,15 +558,15 @@ my @layer_syms = qw(
 			 PerlIOBuf_open
 			 PerlIOBuf_pushed
 			 PerlIOBuf_read
-			 PerlIOBuf_reopen
 			 PerlIOBuf_seek
 			 PerlIOBuf_set_ptrcnt
-			 PerlIOBuf_setlinebuf
 			 PerlIOBuf_tell
 			 PerlIOBuf_unread
 			 PerlIOBuf_write
 			 PerlIO_define_layer
+			 PerlIO_arg_fetch
 			 PerlIO_pending
+			 PerlIO_allocate
 			 PerlIO_push
 			 PerlIO_unread
 );
@@ -924,8 +926,10 @@ PerlIOBuf_set_ptrcnt
 PerlIOBuf_get_cnt
 PerlIOBuf_get_ptr
 PerlIOBuf_bufsiz
-PerlIOBuf_setlinebuf
 PerlIOBase_clearerr
+PerlIOBase_setlinebuf
+PerlIOBase_pushed
+PerlIOBase_read
 PerlIOBase_error
 PerlIOBase_eof
 PerlIOBuf_tell
@@ -933,9 +937,7 @@ PerlIOBuf_seek
 PerlIOBuf_write
 PerlIOBuf_unread
 PerlIOBuf_read
-PerlIOBuf_reopen
 PerlIOBuf_open
-PerlIOBuf_fdopen
 PerlIOBase_fileno
 PerlIOBuf_pushed
 PerlIOBuf_fill
@@ -945,6 +947,8 @@ PerlIO_define_layer
 PerlIO_pending
 PerlIO_unread
 PerlIO_push
+PerlIO_allocate
+PerlIO_arg_fetch
 PerlIO_apply_layers
 perlsio_binmode
 PerlIO_binmode

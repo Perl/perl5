@@ -11,7 +11,7 @@ use warnings;
 $Is_VMS = $^O eq 'VMS';
 $Is_Dos = $^O eq 'dos';
 
-print "1..66\n";
+print "1..70\n";
 
 my $test = 1;
 
@@ -287,5 +287,20 @@ ok;
 	print <F>;
 	close F;
     }
+    ok;
+}
+
+# 67..70 - magic temporary file via 3 arg open with undef
+{
+    open(my $x,"+<",undef) or print "not ";
+    ok;
+    print "not " unless defined(fileno($x));
+    ok;
+    select $x;
+    ok;   # goes to $x
+    select STDOUT;
+    seek($x,0,0);
+    print <$x>;
+    print "not " unless tell($x) > 3;
     ok;
 }

@@ -93,6 +93,8 @@ EXT PerlIO_funcs PerlIO_mmap;
 #endif
 
 extern PerlIO *PerlIO_allocate(pTHX);
+extern SV *PerlIO_arg_fetch(pTHX_ AV *av,IV n);
+#define PerlIOArg PerlIO_arg_fetch(aTHX_ layers,n+1)
 
 #if O_BINARY != O_TEXT
 #define PERLIO_STDTEXT "t"
@@ -106,6 +108,7 @@ extern PerlIO *PerlIO_allocate(pTHX);
 extern IV	PerlIOBase_fileno    (PerlIO *f);
 extern IV	PerlIOBase_pushed    (PerlIO *f, const char *mode,SV *arg);
 extern IV	PerlIOBase_popped    (PerlIO *f);
+extern SSize_t	PerlIOBase_read       (PerlIO *f, void *vbuf, Size_t count);
 extern SSize_t	PerlIOBase_unread    (PerlIO *f, const void *vbuf, Size_t count);
 extern IV	PerlIOBase_eof       (PerlIO *f);
 extern IV	PerlIOBase_error     (PerlIO *f);
@@ -145,7 +148,6 @@ extern Off_t	PerlIOBuf_tell       (PerlIO *f);
 extern IV	PerlIOBuf_close      (PerlIO *f);
 extern IV	PerlIOBuf_flush      (PerlIO *f);
 extern IV	PerlIOBuf_fill       (PerlIO *f);
-extern void	PerlIOBuf_setlinebuf (PerlIO *f);
 extern STDCHAR *PerlIOBuf_get_base   (PerlIO *f);
 extern Size_t	PerlIOBuf_bufsiz     (PerlIO *f);
 extern STDCHAR *PerlIOBuf_get_ptr    (PerlIO *f);

@@ -743,7 +743,8 @@ SETARGV_OBJ	= setargv$(o)
 
 DYNAMIC_EXT	= Socket IO Fcntl Opcode SDBM_File POSIX attrs Thread B re \
 		Data/Dumper Devel/Peek ByteLoader Devel/DProf File/Glob \
-		Sys/Hostname Storable Filter/Util/Call Encode Digest/MD5
+		Sys/Hostname Storable Filter/Util/Call Encode \
+		Digest/MD5 PerlIO/Scalar
 STATIC_EXT	= DynaLoader
 NONXS_EXT	= Errno
 
@@ -759,6 +760,7 @@ THREAD		= $(EXTDIR)\Thread\Thread
 B		= $(EXTDIR)\B\B
 RE		= $(EXTDIR)\re\re
 DUMPER		= $(EXTDIR)\Data\Dumper\Dumper
+SCALAR		= $(EXTDIR)\PerlIO\Scalar\Scalar
 ERRNO		= $(EXTDIR)\Errno\Errno
 PEEK		= $(EXTDIR)\Devel\Peek\Peek
 BYTELOADER	= $(EXTDIR)\ByteLoader\ByteLoader
@@ -780,6 +782,7 @@ ATTRS_DLL	= $(AUTODIR)\attrs\attrs.dll
 THREAD_DLL	= $(AUTODIR)\Thread\Thread.dll
 B_DLL		= $(AUTODIR)\B\B.dll
 DUMPER_DLL	= $(AUTODIR)\Data\Dumper\Dumper.dll
+SCALAR_DLL	= $(AUTODIR)\PerlIO\Scalar\Scalar.dll
 PEEK_DLL	= $(AUTODIR)\Devel\Peek\Peek.dll
 RE_DLL		= $(AUTODIR)\re\re.dll
 BYTELOADER_DLL	= $(AUTODIR)\ByteLoader\ByteLoader.dll
@@ -804,6 +807,7 @@ EXTENSION_C	=		\
 		$(THREAD).c	\
 		$(RE).c		\
 		$(DUMPER).c	\
+		$(SCALARR).c	\
 		$(PEEK).c	\
 		$(B).c		\
 		$(BYTELOADER).c	\
@@ -824,6 +828,7 @@ EXTENSION_DLL	=		\
 		$(POSIX_DLL)	\
 		$(ATTRS_DLL)	\
 		$(DUMPER_DLL)	\
+		$(SCALAR_DLL)	\
 		$(PEEK_DLL)	\
 		$(B_DLL)	\
 		$(RE_DLL)	\
@@ -1144,6 +1149,11 @@ $(DUMPER_DLL): $(PERLDEP) $(DUMPER).xs
 	..\..\..\miniperl -I..\..\..\lib Makefile.PL INSTALLDIRS=perl
 	cd $(EXTDIR)\Data\$(*B) && $(MAKE)
 
+$(SCALAR_DLL): $(PERLDEP) $(SCALAR).xs
+	cd $(EXTDIR)\PerlIO\$(*B) && \
+	..\..\..\miniperl -I..\..\..\lib Makefile.PL INSTALLDIRS=perl
+	cd $(EXTDIR)\PerlIO\$(*B) && $(MAKE)
+
 $(DPROF_DLL): $(PERLDEP) $(DPROF).xs
 	cd $(EXTDIR)\Devel\$(*B) && \
 	..\..\..\miniperl -I..\..\..\lib Makefile.PL INSTALLDIRS=perl
@@ -1284,6 +1294,7 @@ distclean: clean
 	-del /f $(LIBDIR)\SDBM_File.pm $(LIBDIR)\Socket.pm $(LIBDIR)\POSIX.pm
 	-del /f $(LIBDIR)\B.pm $(LIBDIR)\O.pm $(LIBDIR)\re.pm
 	-del /f $(LIBDIR)\Data\Dumper.pm $(LIBDIR)\ByteLoader.pm
+	-del /f $(LIBDIR)\PerlIO\Scalar.pm
 	-del /f $(LIBDIR)\Devel\Peek.pm $(LIBDIR)\Devel\DProf.pm
 	-del /f $(LIBDIR)\File\Glob.pm
 	-del /f $(LIBDIR)\Storable.pm

@@ -211,7 +211,7 @@ Perl_do_openn(pTHX_ GV *gv, register char *name, I32 len, int as_raw,
 	if (num_svs) {
 	    /* New style explict name, type is just mode and discipline/layer info */
 	    STRLEN l;
-	    name = SvPV(*svp, l) ;
+	    name = SvOK(*svp) ? SvPV(*svp, l) : "";
 	    len = (I32)l;
 	    name = savepvn(name, len);
 	    SAVEFREEPV(name);
@@ -512,7 +512,9 @@ Perl_do_openn(pTHX_ GV *gv, register char *name, I32 len, int as_raw,
 	}
     }
 
-    if (IoTYPE(io) && IoTYPE(io) != IoTYPE_PIPE && IoTYPE(io) != IoTYPE_STD) {
+    if (IoTYPE(io) && IoTYPE(io) != IoTYPE_PIPE && IoTYPE(io) != IoTYPE_STD &&
+	/* FIXME: This next term is a hack to avoid fileno on PerlIO::Scalar */
+	!(num_svs && SvROK(*svp))) {
 	if (PerlLIO_fstat(PerlIO_fileno(fp),&PL_statbuf) < 0) {
 	    (void)PerlIO_close(fp);
 	    goto say_false;

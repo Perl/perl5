@@ -233,6 +233,7 @@ Perl_my_memcmp
 Perl_my_memset
 Perl_my_pclose
 Perl_my_popen
+Perl_my_popen_list
 Perl_my_setenv
 Perl_my_stat
 Perl_my_swap
