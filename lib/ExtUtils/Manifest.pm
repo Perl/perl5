@@ -152,7 +152,7 @@ $Debug = 0;
 $Verbose = 1;
 $Is_VMS = $Config{'osname'} eq 'VMS';
 
-$VERSION = $VERSION = substr(q$Revision: 1.18 $,10,4);
+$VERSION = $VERSION = substr(q$Revision: 1.22 $,10,4);
 
 $Quiet = 0;
 
@@ -174,13 +174,15 @@ sub mkmanifest {
     my $found = manifind();
     my($key,$val,$file,%all);
     my %all = (%$found, %$read);
+    $all{$MANIFEST} = ($Is_VMS ? "$MANIFEST\t\t" : '') . 'This list of files'
+        if $manimiss; # add new MANIFEST to known file list
     foreach $file (sort keys %all) {
 	next if &$matches($file);
 	if ($Verbose){
 	    warn "Added to $MANIFEST: $file\n" unless exists $read->{$file};
 	}
 	my $text = $all{$file};
-	($file,$text) = split(/\s+/,$text,2) if $Is_VMS;
+	($file,$text) = split(/\s+/,$text,2) if $Is_VMS && $text;
 	my $tabs = (5 - (length($file)+1)/8);
 	$tabs = 1 if $tabs < 1;
 	$tabs = 0 unless $text;
@@ -301,11 +303,15 @@ sub manicopy {
     require File::Basename;
     my(%dirs,$file);
     $target = VMS::Filespec::unixify($target) if $Is_VMS;
-    umask 0;
+    umask 0 unless $Is_VMS;
+    File::Path::mkpath([ $target ],1,$Is_VMS ? undef : 0755);
     foreach $file (keys %$read){
 	$file = VMS::Filespec::unixify($file) if $Is_VMS;
-	my $dir = File::Basename::dirname($file);
-	File::Path::mkpath(["$target/$dir"],1,0755);
+	if ($file =~ m!/!) { # Ilya, that hurts, I fear, or maybe not?
+	    my $dir = File::Basename::dirname($file);
+	    $dir = VMS::Filespec::unixify($dir) if $Is_VMS;
+	    File::Path::mkpath(["$target/$dir"],1,$Is_VMS ? undef : 0755);
+	}
 	if ($Is_VMS) { vms_cp_if_diff($file,"$target/$file"); }
 	else         { cp_if_diff($file, "$target/$file", $how); }
     }
@@ -346,7 +352,7 @@ sub vms_cp_if_diff {
     else { $diff++; }
     close F;
     if ($diff) {
-	system('copy',vmsify($from),vmsify($to)) & 1
+	system('copy',VMS::Filespec::vmsify($from),VMS::Filespec::vmsify($to)) & 1
 	    or confess "Copy failed: $!";
     }
 }

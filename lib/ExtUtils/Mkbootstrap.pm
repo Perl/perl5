@@ -9,7 +9,7 @@ sub Mkbootstrap {
 
 =head1 NAME
 
-Mkbootstrap - make a bootstrap file for use by DynaLoader
+ExtUtils::Mkbootstrap - make a bootstrap file for use by DynaLoader
 
 =head1 SYNOPSIS
 
