@@ -190,11 +190,19 @@ S_regcppop(pTHX)
 			  (IV)(*PL_reglastparen + 1), (IV)PL_regnpar);
 	}
     );
+#if 0
+    /* It would seem that the similar code in regtry()
+     * already takes care of this, and in fact it is in
+     * a better location to since this code can #if 0-ed out
+     * but the code in regtry() is needed or otherwise tests
+     * requiring null fields (pat.t#187 and split.t#{13,14}
+     * (as of 7877)  will fail. --jhi */
     for (paren = *PL_reglastparen + 1; paren <= PL_regnpar; paren++) {
 	if (paren > PL_regsize)
 	    PL_regstartp[paren] = -1;
 	PL_regendp[paren] = -1;
     }
+#endif
     return input;
 }
 
@@ -1791,7 +1799,14 @@ S_regtry(pTHX_ regexp *prog, char *startpos)
     /* XXXX What this code is doing here?!!!  There should be no need
        to do this again and again, PL_reglastparen should take care of
        this!  --ilya*/
-    /* Tests pat.t#187 and split.t#{13,14} seem to depend on this. --jhi */
+
+    /* Tests pat.t#187 and split.t#{13,14} seem to depend on this code.
+     * Actually, the code in regcppop() (which Ilya may be meaning by
+     * PL_reglastparen), does not seem to be needed at all (?!), whereas
+     * this code *is* needed for the above-mentioned tests to succeed.
+     * The common theme on those tests seems to be returning null fields
+     * from matches. --jhi */
+#if 1
     sp = prog->startp;
     ep = prog->endp;
     if (prog->nparens) {
@@ -1800,6 +1815,7 @@ S_regtry(pTHX_ regexp *prog, char *startpos)
 	    *++ep = -1;
 	}
     }
+#endif
     REGCP_SET(lastcp);
     if (regmatch(prog->program + 1)) {
 	prog->endp[0] = PL_reginput - PL_bostr;
