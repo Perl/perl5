@@ -740,6 +740,7 @@ PP(pp_chop)
     djSP; dMARK; dTARGET; dORIGMARK;
     while (MARK < SP)
 	do_chop(TARG, *++MARK);
+    SP = ORIGMARK;
     PUSHTARG;
     RETURN;
 }

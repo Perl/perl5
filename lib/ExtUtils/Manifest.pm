@@ -8,7 +8,7 @@ use Carp;
 use strict;
 
 use vars qw($VERSION @ISA @EXPORT_OK
-	    $Is_VMS $Debug $Verbose $Quiet $MANIFEST $found);
+	    $Is_MacOS $Is_VMS $Debug $Verbose $Quiet $MANIFEST $found);
 
 $VERSION = substr(q$Revision: 1.33 $, 10);
 @ISA=('Exporter');
