@@ -31,6 +31,298 @@ or any other branch.
 Version v5.7.2		Development release working toward v5.8
 --------------
 ____________________________________________________________________________
+[ 12086] By: jhi                                   on 2001/09/19  13:02:58
+        Log: Correct numbering of the tests is useful.
+     Branch: perl
+	   ! ext/threads/t/basic.t
+____________________________________________________________________________
+[ 12085] By: jhi                                   on 2001/09/19  12:11:15
+        Log: More tests now too.
+     Branch: perl
+	   ! lib/ExtUtils/Command.t
+____________________________________________________________________________
+[ 12084] By: jhi                                   on 2001/09/19  12:08:33
+        Log: More tests now.
+     Branch: perl
+	   ! ext/threads/t/basic.t
+____________________________________________________________________________
+[ 12083] By: jhi                                   on 2001/09/19  11:35:55
+        Log: The test assumed 7-bit ASCII.  Now it "just"
+             assumes 8-bit whatever.
+     Branch: perl
+	   ! t/op/crypt.t
+____________________________________________________________________________
+[ 12082] By: jhi                                   on 2001/09/19  11:19:56
+        Log: Subject: Re: [PATCH] Smoke 12057 /pro/3gl/CPAN/perl-current
+             From: "H.Merijn Brand" <h.m.brand@hccnet.nl>
+             Date: Wed, 19 Sep 2001 11:45:28 +0200
+             Message-Id: <20010919110037.19C7.H.M.BRAND@hccnet.nl>
+             
+             Lvalue casts are not portable.
+     Branch: perl
+	   ! ext/threads/threads.xs
+____________________________________________________________________________
+[ 12081] By: sky                                   on 2001/09/19  10:17:52
+        Log: Make the basic test contain only realy basic API tests
+             Seems to be a problem with detach.
+     Branch: perl
+	   ! ext/threads/t/basic.t
+____________________________________________________________________________
+[ 12080] By: ams                                   on 2001/09/19  01:23:55
+        Log: Subject: [PATCH] Syncing with Test::Simple 0.19
+             From: Michael G Schwern <schwern@pobox.com>
+             Date: Tue, 18 Sep 2001 19:53:48 -0400
+             Message-Id: <20010918195348.M585@blackrider>
+             
+             Subject: [REPATCH] Re: [PATCH lib/Test/More.pm] Stray newline confusing t/TEST
+             From: Michael G Schwern <schwern@pobox.com>
+             Date: Tue, 18 Sep 2001 22:07:13 -0400
+             Message-Id: <20010918220713.B19616@blackrider>
+     Branch: perl
+	   ! lib/Test/More.pm lib/Test/Simple.pm lib/Test/Simple/Changes
+	   ! lib/Test/Simple/t/exit.t lib/Test/Simple/t/extra.t
+	   ! lib/Test/Simple/t/fail-more.t lib/Test/Simple/t/fail.t
+	   ! lib/Test/Simple/t/missing.t lib/Test/Simple/t/todo.t
+	   ! lib/Test/Tutorial.pod
+____________________________________________________________________________
+[ 12079] By: jhi                                   on 2001/09/19  00:19:45
+        Log: Indent the test a bit.
+     Branch: perl
+	   ! ext/threads/t/basic.t
+____________________________________________________________________________
+[ 12078] By: jhi                                   on 2001/09/18  22:54:21
+        Log: Subject: [PATCH bleadperl] added tainting for getcwd for Win32
+             From: Nikola Knezevic <indy@tesla.rcub.bg.ac.yu>
+             Date: Tue, 18 Sep 2001 18:06:44 +0200
+             Message-ID: <11018348611.20010918180644@tesla.rcub.bg.ac.yu>
+     Branch: perl
+	   ! win32/win32.c
+____________________________________________________________________________
+[ 12077] By: jhi                                   on 2001/09/18  22:52:24
+        Log: Subject: stat access time is wrong on Win95
+             From: Nikola Knezevic <indy@tesla.rcub.bg.ac.yu>
+             Date: Tue, 18 Sep 2001 21:59:24 +0200
+             Message-ID: <413158386.20010918215924@tesla.rcub.bg.ac.yu>
+     Branch: perl
+	   ! lib/ExtUtils/Command.pm lib/ExtUtils/Command.t
+____________________________________________________________________________
+[ 12076] By: ams                                   on 2001/09/18  22:11:25
+        Log: Subject: [PATCH] Re: [PATCH] t/op/crypt.t
+             From: Michael G Schwern <schwern@pobox.com>
+             Date: Tue, 18 Sep 2001 18:47:14 -0400
+             Message-Id: <20010918184714.I585@blackrider>
+     Branch: perl
+	   ! t/op/crypt.t
+____________________________________________________________________________
+[ 12075] By: sky                                   on 2001/09/18  19:29:37
+        Log: two test failures
+             From: Rafael Garcia-Suarez <rgarciasuarez@free.fr>
+             Message-ID: <20010918221702.A17408@rafael>
+             partly applied, #12074 already fixed half the patch
+     Branch: perl
+	   ! ext/threads/t/basic.t
+____________________________________________________________________________
+[ 12074] By: sky                                   on 2001/09/18  18:49:03
+        Log: Fixes test case failure introduced by #12071, the warning is
+             now correctly spelled :-)
+     Branch: perl
+	   ! ext/IO/lib/IO/t/io_sel.t
+____________________________________________________________________________
+[ 12073] By: sky                                   on 2001/09/18  18:46:22
+        Log: Make the test behave properly!
+     Branch: perl
+	   ! ext/threads/t/basic.t
+____________________________________________________________________________
+[ 12072] By: ams                                   on 2001/09/18  18:44:59
+        Log: OP_RCATLINE is an SVOP, not a BASEOP.
+     Branch: perl
+	   ! opcode.h opcode.pl
+____________________________________________________________________________
+[ 12071] By: ams                                   on 2001/09/18  18:06:27
+        Log: Deprecate != Depreciate.
+     Branch: perl
+	   ! ext/IO/lib/IO/Handle.pm ext/IO/lib/IO/Select.pm
+	   ! lib/Pod/ParseUtils.pm
+____________________________________________________________________________
+[ 12070] By: ams                                   on 2001/09/18  15:14:58
+        Log: Subject: [PATCH] Getopt::Std cleanup
+             From: Rafael Garcia-Suarez <rgarciasuarez@free.fr>
+             Date: Tue, 18 Sep 2001 17:32:13 +0200
+             Message-Id: <20010918173213.C777@rafael>
+     Branch: perl
+	   ! lib/Getopt/Std.pm lib/Getopt/Std.t
+____________________________________________________________________________
+[ 12069] By: sky                                   on 2001/09/18  14:56:33
+        Log: Forgot the makefile
+     Branch: perl
+	   + ext/threads/Makefile.PL
+____________________________________________________________________________
+[ 12068] By: sky                                   on 2001/09/18  14:13:26
+        Log: Adds the thread 0.05 module. It is now moved to the core from CPAN.
+             The test will fail because of Test.pm not knowing about threads. 
+             basic needs to be manually tested
+             compile time warnings on IV2PTR conversions need to be fixed
+     Branch: perl
+	   + ext/threads/Changes ext/threads/README ext/threads/t/basic.t
+	   + ext/threads/threads.h ext/threads/threads.pm
+	   + ext/threads/threads.xs
+	   ! MANIFEST
+____________________________________________________________________________
+[ 12067] By: jhi                                   on 2001/09/18  11:51:08
+        Log: DJGPP tweak from Laszlo Molnar.
+     Branch: perl
+	   ! djgpp/config.over
+____________________________________________________________________________
+[ 12066] By: sky                                   on 2001/09/18  10:24:31
+        Log: Changed how ownership of mutexes are held. We never hold a mutex only a slot indicating that we own the lock.
+     Branch: perl
+	   ! sharedsv.c sharedsv.h
+____________________________________________________________________________
+[ 12065] By: jhi                                   on 2001/09/18  00:00:09
+        Log: Strip ^iso- from the Encode filenames to be 8.3-friendly,
+             ditto ^cns.
+     Branch: perl
+	   + ext/Encode/Encode/11643-1.enc ext/Encode/Encode/11643-2.enc
+	   + ext/Encode/Encode/2022-cn.enc ext/Encode/Encode/2022-jp.enc
+	   + ext/Encode/Encode/2022-jp1.enc ext/Encode/Encode/2022-jp2.enc
+	   + ext/Encode/Encode/2022-kr.enc ext/Encode/Encode/2022.enc
+	   + ext/Encode/Encode/8859-1.enc ext/Encode/Encode/8859-1.ucm
+	   + ext/Encode/Encode/8859-10.enc ext/Encode/Encode/8859-10.ucm
+	   + ext/Encode/Encode/8859-11.enc ext/Encode/Encode/8859-11.ucm
+	   + ext/Encode/Encode/8859-13.enc ext/Encode/Encode/8859-13.ucm
+	   + ext/Encode/Encode/8859-14.enc ext/Encode/Encode/8859-14.ucm
+	   + ext/Encode/Encode/8859-15.enc ext/Encode/Encode/8859-15.ucm
+	   + ext/Encode/Encode/8859-16.enc ext/Encode/Encode/8859-16.ucm
+	   + ext/Encode/Encode/8859-2.enc ext/Encode/Encode/8859-2.ucm
+	   + ext/Encode/Encode/8859-3.enc ext/Encode/Encode/8859-3.ucm
+	   + ext/Encode/Encode/8859-4.enc ext/Encode/Encode/8859-4.ucm
+	   + ext/Encode/Encode/8859-5.enc ext/Encode/Encode/8859-5.ucm
+	   + ext/Encode/Encode/8859-6.enc ext/Encode/Encode/8859-6.ucm
+	   + ext/Encode/Encode/8859-7.enc ext/Encode/Encode/8859-7.ucm
+	   + ext/Encode/Encode/8859-8.enc ext/Encode/Encode/8859-8.ucm
+	   + ext/Encode/Encode/8859-9.enc ext/Encode/Encode/8859-9.ucm
+	   + ext/Encode/Encode/ir-197.enc
+	   - ext/Encode/Encode/cns11643-1.enc
+	   - ext/Encode/Encode/cns11643-2.enc
+	   - ext/Encode/Encode/iso2022-cn.enc
+	   - ext/Encode/Encode/iso2022-jp.enc
+	   - ext/Encode/Encode/iso2022-jp1.enc
+	   - ext/Encode/Encode/iso2022-jp2.enc
+	   - ext/Encode/Encode/iso2022-kr.enc ext/Encode/Encode/iso2022.enc
+	   - ext/Encode/Encode/iso8859-1.enc
+	   - ext/Encode/Encode/iso8859-1.ucm
+	   - ext/Encode/Encode/iso8859-10.enc
+	   - ext/Encode/Encode/iso8859-10.ucm
+	   - ext/Encode/Encode/iso8859-11.enc
+	   - ext/Encode/Encode/iso8859-11.ucm
+	   - ext/Encode/Encode/iso8859-13.enc
+	   - ext/Encode/Encode/iso8859-13.ucm
+	   - ext/Encode/Encode/iso8859-14.enc
+	   - ext/Encode/Encode/iso8859-14.ucm
+	   - ext/Encode/Encode/iso8859-15.enc
+	   - ext/Encode/Encode/iso8859-15.ucm
+	   - ext/Encode/Encode/iso8859-16.enc
+	   - ext/Encode/Encode/iso8859-16.ucm
+	   - ext/Encode/Encode/iso8859-2.enc
+	   - ext/Encode/Encode/iso8859-2.ucm
+	   - ext/Encode/Encode/iso8859-3.enc
+	   - ext/Encode/Encode/iso8859-3.ucm
+	   - ext/Encode/Encode/iso8859-4.enc
+	   - ext/Encode/Encode/iso8859-4.ucm
+	   - ext/Encode/Encode/iso8859-5.enc
+	   - ext/Encode/Encode/iso8859-5.ucm
+	   - ext/Encode/Encode/iso8859-6.enc
+	   - ext/Encode/Encode/iso8859-6.ucm
+	   - ext/Encode/Encode/iso8859-7.enc
+	   - ext/Encode/Encode/iso8859-7.ucm
+	   - ext/Encode/Encode/iso8859-8.enc
+	   - ext/Encode/Encode/iso8859-8.ucm
+	   - ext/Encode/Encode/iso8859-9.enc
+	   - ext/Encode/Encode/iso8859-9.ucm
+	   - ext/Encode/Encode/isoir-197.enc
+	   ! MANIFEST ext/Encode/Encode/Tcl.t ext/Encode/Makefile.PL
+____________________________________________________________________________
+[ 12064] By: jhi                                   on 2001/09/17  23:53:38
+        Log: Must Uppercase.
+     Branch: perl
+	   ! ext/Encode/Encode.pm
+____________________________________________________________________________
+[ 12063] By: jhi                                   on 2001/09/17  23:39:28
+        Log: Add various encodings.
+     Branch: perl
+	   + ext/Encode/Encode/iso8859-11.enc
+	   + ext/Encode/Encode/iso8859-11.ucm ext/Encode/Encode/koi8-f.enc
+	   + ext/Encode/Encode/koi8-f.ucm ext/Encode/Encode/koi8-u.enc
+	   + ext/Encode/Encode/koi8-u.ucm ext/Encode/Encode/nextstep.enc
+	   + ext/Encode/Encode/nextstep.ucm ext/Encode/Encode/roman8.enc
+	   + ext/Encode/Encode/roman8.ucm ext/Encode/Encode/viscii.enc
+	   + ext/Encode/Encode/viscii.ucm
+	   ! MANIFEST ext/Encode/Encode.pm
+____________________________________________________________________________
+[ 12062] By: jhi                                   on 2001/09/17  22:48:21
+        Log: lib/unicode relic.
+     Branch: perl
+	   ! ext/Encode/compile
+____________________________________________________________________________
+[ 12061] By: jhi                                   on 2001/09/17  20:50:16
+        Log: Subject: [PATCH] Re: filename problems
+             From: Michael G Schwern <schwern@pobox.com>
+             Date: Mon, 17 Sep 2001 17:26:26 -0400
+             Message-ID: <20010917172626.Q585@blackrider>
+     Branch: perl
+	   + t/lib/sample-tests/head_end t/lib/sample-tests/head_fail
+	   - t/lib/sample-tests/header_at_end
+	   - t/lib/sample-tests/header_at_end_fail
+	   ! MANIFEST lib/Test/Harness/t/test-harness.t
+____________________________________________________________________________
+[ 12060] By: jhi                                   on 2001/09/17  20:14:53
+        Log: Explicitly explain the 1e9 seconds, not everybody
+             is a C geek.
+     Branch: perl
+	   ! ext/Time/HiRes/HiRes.pm
+____________________________________________________________________________
+[ 12059] By: jhi                                   on 2001/09/17  20:07:20
+        Log: Explain an apparent bug reported by
+             Richard J. Barbalace <rjbarbal@MIT.EDU>,
+             with additional explanation from Gisle Aas.
+     Branch: perl
+	   ! ext/Time/HiRes/HiRes.pm
+____________________________________________________________________________
+[ 12058] By: ams                                   on 2001/09/17  19:52:01
+        Log: Subject: [PATCH t/lib/warnings/pp, t/lib/warnings/op] new tests
+             From: Rafael Garcia-Suarez <rgarciasuarez@free.fr>
+             Date: Mon, 17 Sep 2001 22:48:05 +0200
+             Message-Id: <20010917224805.C11744@rafael>
+     Branch: perl
+	   ! t/lib/warnings/op t/lib/warnings/pp
+____________________________________________________________________________
+[ 12057] By: ams                                   on 2001/09/17  16:51:18
+        Log: Its a nit!
+     Branch: perl
+	   ! sv.h
+____________________________________________________________________________
+[ 12056] By: ams                                   on 2001/09/17  16:47:55
+        Log: Subject: [PATCH perl@12023] waitpid enhancements for VMS
+             From: "Craig A. Berry" <craigberry@mac.com>
+             Date: Mon, 17 Sep 2001 12:34:20 -0500
+             Message-Id: <5.1.0.14.0.20010916222208.0469cdf8@exchi01>
+     Branch: perl
+	   ! vms/vms.c
+____________________________________________________________________________
+[ 12055] By: ams                                   on 2001/09/17  16:05:15
+        Log: Subject: [PATCH] Make CPAN.pm use Digest::MD5
+             From: Gisle Aas <gisle@ActiveState.com>
+             Date: 16 Apr 2001 16:20:34 -0700
+             Message-ID: <lrlmp0sa7x.fsf@caliper.ActiveState.com>
+             (Applied by hand.)
+     Branch: perl
+	   ! lib/CPAN.pm lib/CPAN/Nox.pm
+____________________________________________________________________________
+[ 12054] By: jhi                                   on 2001/09/17  14:06:26
+        Log: Update Changes.
+     Branch: perl
+	   ! Changes patchlevel.h
+____________________________________________________________________________
 [ 12053] By: jhi                                   on 2001/09/17  13:45:26
         Log: Adding new files to the MANIFEST is always nice.
      Branch: perl
