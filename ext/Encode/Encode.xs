@@ -5,7 +5,7 @@
 #include "XSUB.h"
 #define U8 U8
 #include "encode.h"
-#include "iso8859.h"
+#include "8859.h"
 #include "EBCDIC.h"
 #include "Symbols.h"
 
@@ -661,7 +661,7 @@ BOOT:
 #if defined(USE_PERLIO) && !defined(USE_SFIO)
  PerlIO_define_layer(aTHX_ &PerlIO_encode);
 #endif
-#include "iso8859.def"
+#include "8859.def"
 #include "EBCDIC.def"
 #include "Symbols.def"
 }

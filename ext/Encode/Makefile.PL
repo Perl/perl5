@@ -1,6 +1,6 @@
 use ExtUtils::MakeMaker;
 
-my %tables = (iso8859 => ['ascii.ucm', 'cp1250.ucm', 'koi8-r.ucm' ],
+my %tables = (8859 => ['ascii.ucm', 'cp1250.ucm', 'koi8-r.ucm' ],
               EBCDIC  => ['cp1047.ucm','cp37.ucm','posix-bc.ucm'],
               Symbols => ['symbol.ucm','dingbats.ucm'],
              );
@@ -10,7 +10,7 @@ while (defined(my $file = readdir(ENC)))
  {
   if ($file =~ /8859.*\.ucm/)
    {
-    push(@{$tables{iso8859}},$file);
+    push(@{$tables{8859}},$file);
    }
  }
 closedir(ENC);
