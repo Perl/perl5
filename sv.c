@@ -10189,13 +10189,16 @@ perl_clone_using(PerlInterpreter *proto_perl, UV flags,
 	    ENTER;
 	    SAVETMPS;
 	    PUSHMARK(SP);
-	    XPUSHs(newSVpv(HvNAME(stash), 0));
+           XPUSHs(sv_2mortal(newSVpv(HvNAME(stash), 0)));
 	    PUTBACK;
 	    call_sv((SV*)GvCV(cloner), G_DISCARD);
 	    FREETMPS;
 	    LEAVE;
 	}
     }
+
+    SvREFCNT_dec(param->stashes);
+    Safefree(param);
 
 #ifdef PERL_OBJECT
     return (PerlInterpreter*)pPerl;
