@@ -6,7 +6,7 @@ BEGIN {
     require Config; import Config;
 }
 
-print "1..159\n";
+print "1..160\n";
 
 $format = "c2 x5 C C x s d i l a6";
 # Need the expression in here to force ary[5] to be numeric.  This avoids
@@ -416,3 +416,6 @@ print 'not ' unless v1.20.300.4000 ne
                     sprintf "%vd", pack("C0U*",1,20,300,4000); 
 print "ok $test\n"; $test++;
 
+# 160
+print "not " unless join(" ", unpack("C*", chr(0x1e2))) eq "199 162";
+print "ok $test\n"; $test++;
