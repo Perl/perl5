@@ -962,6 +962,8 @@ Adp	|void	|sv_nolocking	|SV *
 Adp	|void	|sv_nounlocking	|SV *
 Adp	|int	|nothreadhook
 
+p	|PerlIO*|my_tmpfp
+
 END_EXTERN_C
 
 #if defined(PERL_IN_DOOP_C) || defined(PERL_DECL_PROT)

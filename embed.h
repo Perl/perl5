@@ -1244,6 +1244,9 @@
 #define sv_nolocking		Perl_sv_nolocking
 #define sv_nounlocking		Perl_sv_nounlocking
 #define nothreadhook		Perl_nothreadhook
+#ifdef PERL_CORE
+#define my_tmpfp		Perl_my_tmpfp
+#endif
 #if defined(PERL_IN_DOOP_C) || defined(PERL_DECL_PROT)
 #ifdef PERL_CORE
 #define do_trans_simple		S_do_trans_simple
@@ -3716,6 +3719,9 @@
 #define sv_nolocking(a)		Perl_sv_nolocking(aTHX_ a)
 #define sv_nounlocking(a)	Perl_sv_nounlocking(aTHX_ a)
 #define nothreadhook()		Perl_nothreadhook(aTHX)
+#ifdef PERL_CORE
+#define my_tmpfp()		Perl_my_tmpfp(aTHX)
+#endif
 #if defined(PERL_IN_DOOP_C) || defined(PERL_DECL_PROT)
 #ifdef PERL_CORE
 #define do_trans_simple(a)	S_do_trans_simple(aTHX_ a)

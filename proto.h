@@ -920,6 +920,8 @@ PERL_CALLCONV void	Perl_sv_nolocking(pTHX_ SV *);
 PERL_CALLCONV void	Perl_sv_nounlocking(pTHX_ SV *);
 PERL_CALLCONV int	Perl_nothreadhook(pTHX);
 
+PERL_CALLCONV PerlIO*	Perl_my_tmpfp(pTHX);
+
 END_EXTERN_C
 
 #if defined(PERL_IN_DOOP_C) || defined(PERL_DECL_PROT)
