@@ -321,7 +321,7 @@ eval {File::Find::find( {wanted => \&simple_wanted, untaint => 1,
 
 print "# $@" if $@;
 #$^D = 8;
-if ($^O eq 'MSWin32' || $^O eq 'cygwin') {
+if ($^O eq 'MSWin32') {
 	Skip("$^O does not taint cwd");
     } 
 else {
