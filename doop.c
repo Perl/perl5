@@ -648,7 +648,8 @@ Perl_do_join(pTHX_ register SV *sv, SV *del, register SV **mark, register SV **s
     STRLEN delimlen;
     STRLEN tmplen;
 
-    (void) SvPV(del, delimlen); /* get the delimlen */
+    (void) SvPV(del, delimlen); /* stringify and get the delimlen */
+    /* SvCUR assumes it's SvPOK() and woe betide you if it's not. */
 
     mark++;
     len = (items > 0 ? (delimlen * (items - 1) ) : 0);
