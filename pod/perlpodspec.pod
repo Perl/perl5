@@ -238,7 +238,7 @@ ignored.  Examples:
   # This is the first line of program text.
   sub foo { # This is the second.
 
-It is an error to try to I<start> a Pod black with a "=cut" command.  In
+It is an error to try to I<start> a Pod block with a "=cut" command.  In
 that case, the Pod processor must halt parsing of the input file, and
 must by default emit a warning.
 
