@@ -647,10 +647,6 @@ Glue to provide EXISTS for NDBM_File for Storable use
 
 Glue to provide EXISTS for SDBM_File for Storable use
 
-=item Memoize::Saves
-
-Plug-in module to specify which return values should be memoized
-
 =item Memoize::Storable
 
 Store Memoized data in Storable database

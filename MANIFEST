@@ -1063,7 +1063,6 @@ lib/Memoize/ExpireFile.pm	Memoize
 lib/Memoize/ExpireTest.pm	Memoize
 lib/Memoize/NDBM_File.pm	Memoize
 lib/Memoize/README		Memoize
-lib/Memoize/Saves.pm		Memoize
 lib/Memoize/SDBM_File.pm	Memoize
 lib/Memoize/Storable.pm		Memoize
 lib/Memoize/t/array.t		Memoize
