@@ -75,8 +75,8 @@ if (!$> || ! -w 'Op.stat.tmp') {print "ok 10\n";} else {print "not ok 10\n";}
 eval '$> = $olduid;';		# switch uid back (may not be implemented)
 print "# olduid=$olduid, newuid=$>\n" unless ($> == $olduid);
 
-if ($Is_MSWin32 or ! -x 'Op.stat.tmp') {print "ok 11\n";}
-else                                   {print "not ok 11\n";}
+if (! -x 'Op.stat.tmp') {print "ok 11\n";}
+else                    {print "not ok 11\n";}
 
 foreach ((12,13,14,15,16,17)) {
     print "ok $_\n";		#deleted tests

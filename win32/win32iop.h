@@ -138,6 +138,7 @@ void *	SetIOSubSystem(void	*piosubsystem);
 #define tmpfile()		win32_tmpfile()
 #define abort()			win32_abort()
 #define fstat(fd,bufptr)   	win32_fstat(fd,bufptr)
+#define stat(pth,bufptr)   	win32_stat(pth,bufptr)
 #define setmode(fd,mode)	win32_setmode(fd,mode)
 #define lseek(fd,offset,orig)	win32_lseek(fd,offset,orig)
 #define tell(fd)		win32_tell(fd)

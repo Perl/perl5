@@ -514,7 +514,7 @@ opendir(char *filename)
 /*  char           *dummy;*/
 
     /* check to see if filename is a directory */
-    if(stat(filename, &sbuf) < 0 || sbuf.st_mode & S_IFDIR == 0) {
+    if (win32_stat(filename, &sbuf) < 0 || sbuf.st_mode & S_IFDIR == 0) {
 	return NULL;
     }
 
@@ -764,6 +764,7 @@ win32_stat(const char *path, struct stat *buffer)
     char		t[MAX_PATH]; 
     const char	*p = path;
     int		l = strlen(path);
+    int		res;
 
     if (l > 1) {
 	switch(path[l - 1]) {
@@ -776,7 +777,28 @@ win32_stat(const char *path, struct stat *buffer)
 	    };
 	}
     }
-    return stat(p, buffer);
+    res = pIOSubSystem->pfnstat(p,buffer);
+#ifdef __BORLANDC__
+    if (res == 0) {
+	if (S_ISDIR(buffer->st_mode))
+	    buffer->st_mode |= S_IWRITE | S_IEXEC;
+	else if (S_ISREG(buffer->st_mode)) {
+	    if (l >= 4 && path[l-4] == '.') {
+		const char *e = path + l - 3;
+		if (strnicmp(e,"exe",3)
+		    && strnicmp(e,"bat",3)
+		    && strnicmp(e,"com",3)
+		    && (IsWin95() || strnicmp(e,"cmd",3)))
+		    buffer->st_mode &= ~S_IEXEC;
+		else
+		    buffer->st_mode |= S_IEXEC;
+	    }
+	    else
+		buffer->st_mode &= ~S_IEXEC;
+	}
+    }
+#endif
+    return res;
 }
 
 #ifndef USE_WIN32_RTL_ENV
