@@ -595,6 +595,9 @@ U32 *	_Perl_opargs(void)
 
 void xs_handler(CV* cv, CPerlObj* p)
 {
+#ifndef NO_XSLOCKS
+    XSLock localLock(p);
+#endif
     void(*func)(CV*);
     SV* sv;
     MAGIC* m = pPerl->Perl_mg_find((SV*)cv, '~');

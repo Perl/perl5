@@ -952,7 +952,7 @@ clean :
 	-@erase $(WIN32_OBJ)
 	-@erase $(DLL_OBJ)
 	-@erase $(X2P_OBJ)
-	-@erase ..\*$(o) ..\*.lib ..\*.exp *$(o) *.lib *.exp
+	-@erase ..\*$(o) ..\*.lib ..\*.exp ..\*.res *$(o) *.lib *.exp *.res
 	-@erase ..\t\*.exe ..\t\*.dll ..\t\*.bat
 	-@erase ..\x2p\*.exe ..\x2p\*.bat
 	-@erase *.ilk

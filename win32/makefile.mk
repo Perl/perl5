@@ -1114,7 +1114,7 @@ clean :
 	-@erase $(WIN32_OBJ)
 	-@erase $(DLL_OBJ)
 	-@erase $(X2P_OBJ)
-	-@erase ..\*$(o) ..\*$(a) ..\*.exp *$(o) *$(a) *.exp
+	-@erase ..\*$(o) ..\*$(a) ..\*.exp ..\*.res *$(o) *$(a) *.exp *.res
 	-@erase ..\t\*.exe ..\t\*.dll ..\t\*.bat
 	-@erase ..\x2p\*.exe ..\x2p\*.bat
 	-@erase *.ilk
