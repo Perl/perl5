@@ -414,6 +414,7 @@ ext/POSIX/hints/next_3.pl       Hint for POSIX for named architecture
 ext/POSIX/hints/openbsd.pl	Hint for POSIX for named architecture
 ext/POSIX/hints/sunos_4.pl	Hint for POSIX for named architecture
 ext/POSIX/hints/svr4.pl		Hint for POSIX for named architecture
+ext/POSIX/hints/uts.pl		Hint for POSIX for named architecture
 ext/POSIX/typemap		POSIX extension interface types
 ext/PerlIO/Scalar/Makefile.PL	PerlIO layer for scalars
 ext/PerlIO/Scalar/Scalar.pm	PerlIO layer for scalars
