@@ -42,6 +42,9 @@ use Carp;
 our %encoding;
 my @alias;  # ordered matching list
 my %alias;  # cached known aliases
+                     # 0  1  2  3  4  5   6   7   8   9  10
+our @latin2iso_num = ( 0, 1, 2, 3, 4, 9, 10, 13, 14, 15, 16 );
+
 
 sub encodings
 {
@@ -60,7 +63,6 @@ sub findAlias
      my $alias = $alias[$i];
      my $val   = $alias[$i+1];
      my $new;
-
      if (ref($alias) eq 'Regexp' && $_ =~ $alias)
       {
        $new = eval $val;
@@ -101,8 +103,6 @@ sub define_alias
 define_alias( qr/^iso[-_]?(\d+)[-_](\d+)$/i => '"iso-$1-$2"' );
 
 # Allow latin-1 style names as well
-                    # 0  1  2  3  4  5   6   7   8   9  10
-my @latin2iso_num = ( 0, 1, 2, 3, 4, 9, 10, 13, 14, 15, 16 );
 define_alias( qr/^latin[-_]?(\d+)$/i => '"iso-8859-$latin2iso_num[$1]"' );
 
 # Common names for non-latin prefered MIME names
@@ -136,6 +136,10 @@ sub getEncoding
 {
  my ($class,$name) = @_;
  my $enc;
+ if (ref($name) && $name->can('new_sequence'))
+  {
+   return $name;
+  }
  if (exists $encoding{$name})
   {
    return $encoding{$name};
