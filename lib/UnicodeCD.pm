@@ -32,9 +32,24 @@ UnicodeCD - Unicode character database
     use UnicodeCD 'charscript';
     my $charscript = charblock($codepoint);
 
+    use UnicodeCD 'charblocks';
+    my $charblocks = charblocks();
+
+    use UnicodeCD 'charscripts';
+    my %charscripts = charscripts();
+
+    use UnicodeCD qw(charscript charinrange);
+    my $range = charscript($script);
+    print "looks like $script\n" if charinrange($range, $codepoint);
+
+    use UnicodeCD 'compexcl';
+    my $compexcl = compexcl($codepoint);
+
+    my $unicode_version = UnicodeCD::UnicodeVersion();
+
 =head1 DESCRIPTION
 
-The Unicode module offers a simple interface to the Unicode Character
+The UnicodeCD module offers a simple interface to the Unicode Character
 Database.
 
 =cut
@@ -382,7 +397,7 @@ by L</charblocks> and </charscripts> by using charinrange():
     use UnicodeCD qw(charscript charinrange);
 
     $range = charscript('Hiragana');
-    print "looks like hiragana\n" if charinrange($range, $code);
+    print "looks like hiragana\n" if charinrange($range, $codepoint);
 
 =cut
 
