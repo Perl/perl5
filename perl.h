@@ -439,7 +439,7 @@ register struct op *Perl_op asm(stringify(OP_IN_REGISTER));
 #endif
 
 /* Use the reentrant APIs like localtime_r and getpwent_r */
-#if defined(USE_THREADS) && defined(USE_ITHREADS) && !defined(USE_REENTRANT_API)
+#if (defined(USE_THREADS) || defined(USE_ITHREADS)) && !defined(USE_REENTRANT_API)
 #   define USE_REENTRANT_API
 #endif
 
