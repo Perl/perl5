@@ -7242,13 +7242,13 @@ Perl_ss_dup(pTHX_ PerlInterpreter *proto_perl)
 	    ptr = POPPTR(ss,ix);
 	    TOPPTR(nss,ix) = any_dup(ptr, proto_perl);	/* XXX quite arbitrary */
 	    dptr = POPDPTR(ss,ix);
-	    TOPDPTR(nss,ix) = (void (*)(void*))any_dup(dptr, proto_perl);
+	    TOPDPTR(nss,ix) = (void (*)(void*))any_dup((void *)dptr, proto_perl);
 	    break;
 	case SAVEt_DESTRUCTOR_X:
 	    ptr = POPPTR(ss,ix);
 	    TOPPTR(nss,ix) = any_dup(ptr, proto_perl);	/* XXX quite arbitrary */
 	    dxptr = POPDXPTR(ss,ix);
-	    TOPDXPTR(nss,ix) = (void (*)(pTHXo_ void*))any_dup(dxptr, proto_perl);
+	    TOPDXPTR(nss,ix) = (void (*)(pTHXo_ void*))any_dup((void *)dxptr, proto_perl);
 	    break;
 	case SAVEt_REGCONTEXT:
 	case SAVEt_ALLOC:
