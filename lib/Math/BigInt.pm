@@ -18,7 +18,7 @@ package Math::BigInt;
 my $class = "Math::BigInt";
 require 5.005;
 
-$VERSION = '1.72';
+$VERSION = '1.73';
 use Exporter;
 @ISA =       qw( Exporter );
 @EXPORT_OK = qw( objectify bgcd blcm); 
@@ -55,6 +55,9 @@ use overload
 '|='	=>	sub { $_[0]->bior($_[1]); },
 '**='	=>	sub { $_[0]->bpow($_[1]); },
 
+'<<='	=>	sub { $_[0]->blsft($_[1]); },
+'>>='	=>	sub { $_[0]->brsft($_[1]); },
+
 # not supported by Perl yet
 '..'	=>	\&_pointpoint,
 
@@ -79,7 +82,7 @@ use overload
 'sqrt'  =>	sub { $_[0]->copy()->bsqrt(); },
 '~'	=>	sub { $_[0]->copy()->bnot(); },
 
-# for sub it is a bit tricky to keep b: b-a => -a+b
+# for subtract it is a bit tricky to keep b: b-a => -a+b
 '-'	=>	sub { my $c = $_[0]->copy; $_[2] ?
                    $c->bneg()->badd($_[1]) :
                    $c->bsub( $_[1]) },
@@ -1670,12 +1673,61 @@ sub bpow
 
   return $x if $x->modify('bpow');
 
+  return $x->bnan() if $x->{sign} eq $nan || $y->{sign} eq $nan;
+
+  # inf handling
+  if (($x->{sign} =~ /^[+-]inf$/) || ($y->{sign} =~ /^[+-]inf$/))
+    {
+    if (($x->{sign} =~ /^[+-]inf$/) && ($y->{sign} =~ /^[+-]inf$/))
+      {
+      # +-inf ** +-inf
+      return $x->bnan();
+      }
+    # +-inf ** Y
+    if ($x->{sign} =~ /^[+-]inf/)
+      {
+      # +inf ** 0 => NaN
+      return $x->bnan() if $y->is_zero();
+      # -inf ** -1 => 1/inf => 0
+      return $x->bzero() if $y->is_one('-') && $x->is_negative();
+
+      # +inf ** Y => inf
+      return $x if $x->{sign} eq '+inf';
+
+      # -inf ** Y => -inf if Y is odd
+      return $x if $y->is_odd();
+      return $x->babs();
+      }
+    # X ** +-inf
+
+    # 1 ** +inf => 1
+    return $x if $x->is_one();
+    
+    # 0 ** inf => 0
+    return $x if $x->is_zero() && $y->{sign} =~ /^[+]/;
+
+    # 0 ** -inf => inf
+    return $x->binf() if $x->is_zero();
+
+    # -1 ** -inf => NaN
+    return $x->bnan() if $x->is_one('-') && $y->{sign} =~ /^[-]/;
+
+    # -X ** -inf => 0
+    return $x->bzero() if $x->{sign} eq '-' && $y->{sign} =~ /^[-]/;
+
+    # -1 ** inf => NaN
+    return $x->bnan() if $x->{sign} eq '-';
+
+    # X ** inf => inf
+    return $x->binf() if $y->{sign} =~ /^[+]/;
+    # X ** -inf => 0
+    return $x->bzero();
+    }
+
   return $upgrade->bpow($upgrade->new($x),$y,@r)
    if defined $upgrade && !$y->isa($self);
 
   $r[3] = $y;					# no push!
-  return $x if $x->{sign} =~ /^[+-]inf$/;	# -inf/+inf ** x
-  return $x->bnan() if $x->{sign} eq $nan || $y->{sign} eq $nan;
 
   # cases 0 ** Y, X ** 0, X ** 1, 1 ** Y are handled by Calc or Emu
 

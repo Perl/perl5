@@ -12,7 +12,7 @@ package Math::BigFloat;
 #   _a	: accuracy
 #   _p	: precision
 
-$VERSION = '1.46';
+$VERSION = '1.47';
 require 5.005;
 
 require Exporter;
@@ -132,7 +132,8 @@ sub new
     $self->{sign} = $wanted->sign();
     return $self->bnorm();
     }
-  # got string
+  # else: got a string
+
   # handle '+inf', '-inf' first
   if ($wanted =~ /^[+-]?inf$/)
     {
@@ -144,6 +145,17 @@ sub new
     $self->{sign} = $wanted;
     $self->{sign} = '+inf' if $self->{sign} eq 'inf';
     return $self->bnorm();
+    }
+
+  # shortcut for simple forms like '12' that neither have trailing nor leading
+  # zeros
+  if ($wanted =~ /^([+-]?)([1-9][0-9]*[1-9])$/)
+    {
+    $self->{_e} = $MBI->_zero();
+    $self->{_es} = '+';
+    $self->{sign} = $1 || '+';
+    $self->{_m} = $MBI->_new($2);
+    return $self->round(@r) if !$downgrade;
     }
 
   my ($mis,$miv,$mfv,$es,$ev) = Math::BigInt::_split($wanted);
@@ -178,22 +190,28 @@ sub new
       ($self->{_e}, $self->{_es}) =
 	_e_sub ($self->{_e}, $len, $self->{_es}, '+');
       }
-    $self->{sign} = $$mis;
-    
-    # we can only have trailing zeros on the mantissa of $$mfv eq ''
-    if (CORE::length($$mfv) == 0)
+    # we can only have trailing zeros on the mantissa if $$mfv eq ''
+    else
       {
-      my $zeros = $MBI->_zeros($self->{_m});	# correct for trailing zeros 
+      # Use a regexp to count the trailing zeros in $$miv instead of _zeros()
+      # because that is faster, especially when _m is not stored in base 10.
+      my $zeros = 0; $zeros = CORE::length($1) if $$miv =~ /[1-9](0*)$/; 
       if ($zeros != 0)
         {
         my $z = $MBI->_new($zeros);
+        # turn '120e2' into '12e3'
         $MBI->_rsft ( $self->{_m}, $z, 10);
 	_e_add ( $self->{_e}, $z, $self->{_es}, '+');
         }
       }
+    $self->{sign} = $$mis;
+
     # for something like 0Ey, set y to 1, and -0 => +0
+    # Check $$miv for beeing '0' and $$mfv eq '', because otherwise _m could not
+    # have become 0. That's faster than to call $MBI->_is_zero().
     $self->{sign} = '+', $self->{_e} = $MBI->_one()
-     if $MBI->_is_zero($self->{_m});
+     if $$miv eq '0' and $$mfv eq '';
+
     return $self->round(@r) if !$downgrade;
     }
   # if downgrade, inf, NaN or integers go down
@@ -1887,8 +1905,11 @@ sub bpow
     ($self,$x,$y,$a,$p,$r) = objectify(2,@_);
     }
 
-  return $x if $x->{sign} =~ /^[+-]inf$/;
   return $x->bnan() if $x->{sign} eq $nan || $y->{sign} eq $nan;
+  return $x if $x->{sign} =~ /^[+-]inf$/;
+  
+  # -2 ** -2 => NaN
+  return $x->bnan() if $x->{sign} eq '-' && $y->{sign} eq '-';
 
   # cache the result of is_zero
   my $y_is_zero = $y->is_zero();
@@ -1896,7 +1917,7 @@ sub bpow
   return $x         if $x->is_one() || $y->is_one();
 
   my $x_is_zero = $x->is_zero();
-  return $x->_pow($y,$a,$p,$r) if !$x_is_zero && !$y->is_int();	# non-integer power
+  return $x->_pow($y,$a,$p,$r) if !$x_is_zero && !$y->is_int();		# non-integer power
 
   my $y1 = $y->as_number()->{value};			# make MBI part
 

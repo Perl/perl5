@@ -6,7 +6,7 @@ use strict;
 
 use vars qw/$VERSION/;
 
-$VERSION = '0.42';
+$VERSION = '0.43';
 
 # Package to store unsigned big integers in decimal and do math with them
 
@@ -37,7 +37,7 @@ sub api_version () { 1; }
  
 # constants for easier life
 my $nan = 'NaN';
-my ($MBASE,$BASE,$RBASE,$BASE_LEN,$MAX_VAL,$BASE_LEN2,$BASE_LEN_SMALL);
+my ($MBASE,$BASE,$RBASE,$BASE_LEN,$MAX_VAL,$BASE_LEN_SMALL);
 my ($AND_BITS,$XOR_BITS,$OR_BITS);
 my ($AND_MASK,$XOR_MASK,$OR_MASK);
 
@@ -68,7 +68,6 @@ sub _base_len
     $BASE_LEN = shift if (defined $_[0]);		# one more arg?
     $BASE = int("1e".$BASE_LEN);
 
-    $BASE_LEN2 = int($BASE_LEN_SMALL / 2);		# for mul shortcut
     $MBASE = int("1e".$BASE_LEN_SMALL);
     $RBASE = abs('1e-'.$BASE_LEN_SMALL);		# see USE_MUL
     $MAX_VAL = $MBASE-1;
@@ -1804,7 +1803,7 @@ sub _from_hex
   # convert a hex number to decimal (ref to string, return ref to array)
   my ($c,$hs) = @_;
 
-  my $m = [ 0x10000000 ];			# 28 bit at a time (<32 bit!)
+  my $m = _new($c, 0x10000000);			# 28 bit at a time (<32 bit!)
   my $d = 7;					# 7 digits at a time
   if ($] <= 5.006)
     {
@@ -1824,7 +1823,14 @@ sub _from_hex
     $val =~ s/^[+-]?0x// if $len == 0;		# for last part only because
     $val = hex($val);				# hex does not like wrong chars
     $i -= $d; $len --;
-    _add ($c, $x, _mul ($c, [ $val ], $mul ) ) if $val != 0;
+    my $adder = [ $val ];
+    # if the resulting number was to big to fit into one element, create a
+    # two-element version (bug found by Mark Lakata - Thanx!)
+    if (CORE::length($val) > $BASE_LEN)
+      {
+      $adder = _new($c,$val);
+      }
+    _add ($c, $x, _mul ($c, $adder, $mul ) ) if $val != 0;
     _mul ($c, $mul, $m ) if $len >= 0; 		# skip last mul
     }
   $x;
