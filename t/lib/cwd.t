@@ -26,11 +26,13 @@ print +(!defined(&chdir) &&
 # Must find an external pwd (or equivalent) command.
 
 my $pwd_cmd =
-    ($^O eq "Win32") ? "cd" : (grep { -x && -f } map { "$_/pwd" }
+    ($^O eq "MSWin32") ? "cd" : (grep { -x && -f } map { "$_/pwd" }
 			       split m/$Config{path_sep}/, $ENV{PATH})[0];
 
 if (defined $pwd_cmd) {
     chomp(my $start = `$pwd_cmd`);
+    # Win32's cd returns native C:\ style
+    $start =~ s,\\,/,g if $^O eq 'MSWin32';
     if ($?) {
 	for (3..6) {
 	    print "ok $_ # Skip: '$pwd_cmd' failed\n";
@@ -68,12 +70,18 @@ print +($fastcwd    =~ m|$want$| ? "" : "not "), "ok 9\n";
 print +($fastgetcwd =~ m|$want$| ? "" : "not "), "ok 10\n";
 
 # Cwd::chdir should also update $ENV{PWD}
+print "#$ENV{PWD}\n";
 print +($ENV{PWD} =~ m|$want$| ? "" : "not "), "ok 11\n";
 Cwd::chdir ".."; rmdir "dir";
+print "#$ENV{PWD}\n";
 Cwd::chdir ".."; rmdir "a";
+print "#$ENV{PWD}\n";
 Cwd::chdir ".."; rmdir "to";
+print "#$ENV{PWD}\n";
 Cwd::chdir ".."; rmdir "path";
+print "#$ENV{PWD}\n";
 Cwd::chdir ".."; rmdir "pteerslt";
+print "#$ENV{PWD}\n";
 print +($ENV{PWD}  =~ m|\bt$| ? "" : "not "), "ok 12\n";
 
 if ($Config{d_symlink}) {
