@@ -264,6 +264,12 @@ sub _win32_ext {
     # make sure paths with spaces are properly quoted
     @extralibs = map { (/\s/ && !/^".*"$/) ? qq["$_"] : $_ } @extralibs;
     $lib = join(' ',@extralibs);
+
+    # normalize back to backward slashes (to help braindead tools)
+    # XXX this may break equally braindead GNU tools that don't understand
+    # backslashes, either.  Seems like one can't win here.  Cursed be CP/M.
+    $lib =~ s,/,\\,g;
+
     warn "Result: $lib\n" if $verbose;
     wantarray ? ($lib, '', $lib, '') : $lib;
 }
