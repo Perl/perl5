@@ -18,7 +18,7 @@
 if test ! -z "$OS2_SHELL"; then alias find=gnufind; fi
 
 # Insure proper order (.h after .c, .xs before .c in subdirs):
-topfiles="`echo ' ' *.y *.c *.h ' ' | sed 's/ embed.h / /'`"
+topfiles="`echo ' ' *.y *.c *.h ' ' | sed 's/ embed.h / /' | sed 's/ globals.c / /'`"
 subdirfiles="`( find ./*/* -name '*.[cy]' -print | sort ; find ./*/* -name '*.[hH]' -print | sort )`"
 xsfiles="`find . -name '*.xs' -print | sort`"
 
@@ -48,6 +48,7 @@ etags -o TAGS.tmp \
 	config_h.SH
 etags -o TAGS.tmp -a "$@" $topfiles
 etags -o TAGS.tmp -a -D -l none -r '/#define.*\t\(Perl_.*\)/\1/' embed.h
+etags -o TAGS.tmp -a globals.c
 
 perl -w014pe 'if (s/^( [^\n\x7F\x1]*\b	# 1:   TAG group
 	               (\w+)		#   2: word
