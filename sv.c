@@ -5568,7 +5568,7 @@ S_utf8_mg_pos(pTHX_ SV *sv, MAGIC **mgp, STRLEN **cachep, I32 i, I32 *offsetp, I
 	    *mgp = mg_find(sv, PERL_MAGIC_utf8);
 	if (*mgp && (*mgp)->mg_ptr) {
 	    *cachep = (STRLEN *) (*mgp)->mg_ptr;
-	    if ((*cachep)[i] == uoff)	/* An exact match. */
+	    if ((*cachep)[i] == (STRLEN)uoff)	/* An exact match. */
 		 found = TRUE;
 	    else {			/* We will skip to the right spot. */
 		 STRLEN forw  = 0;
@@ -5580,9 +5580,9 @@ S_utf8_mg_pos(pTHX_ SV *sv, MAGIC **mgp, STRLEN **cachep, I32 i, I32 *offsetp, I
 		  * 2 * backw in the below comes from).  (The real
 		  * figure of course depends on the UTF-8 data.) */
 
-		 if ((*cachep)[i] > uoff) {
+		 if ((*cachep)[i] > (STRLEN)uoff) {
 		      forw  = uoff;
-		      backw = (*cachep)[i] - uoff;
+		      backw = (*cachep)[i] - (STRLEN)uoff;
 
 		      if (forw < 2 * backw)
 			   p = start;
@@ -5594,9 +5594,9 @@ S_utf8_mg_pos(pTHX_ SV *sv, MAGIC **mgp, STRLEN **cachep, I32 i, I32 *offsetp, I
 		 else if (i == 0) { /* (*cachep)[i] < uoff */
 		      STRLEN ulen = sv_len_utf8(sv);
 
-		      if (uoff < ulen) {
-			   forw  = uoff - (*cachep)[i];
-			   backw = ulen - uoff;
+		      if ((STRLEN)uoff < ulen) {
+			   forw  = (STRLEN)uoff - (*cachep)[i];
+			   backw = ulen - (STRLEN)uoff;
 
 			   if (forw < 2 * backw)
 				p = start + (*cachep)[i+1];
@@ -5622,7 +5622,7 @@ S_utf8_mg_pos(pTHX_ SV *sv, MAGIC **mgp, STRLEN **cachep, I32 i, I32 *offsetp, I
 		      }
 
 		      /* Update the cache. */
-		      (*cachep)[i]   = uoff;
+		      (*cachep)[i]   = (STRLEN)uoff;
 		      (*cachep)[i+1] = p - start;
  
 		      found = TRUE;
