@@ -18,10 +18,8 @@ BEGIN {
             exit 0;
         }
     }
-    if ($^O eq 'darwin'
-	&& $Config{db_version_major} == 1
-	&& $Config{db_version_minor} == 0
-	&& $Config{db_version_patch} == 0) {
+    use DB_File;
+    if ($^O eq 'darwin' && ($DB_File::db_version < 2)) {
 	warn <<EOM;
 #
 # This test is known to crash in Mac OS X versions 10.2 (or earlier)
@@ -31,7 +29,6 @@ EOM
     }
 }
 
-use DB_File; 
 use Fcntl;
 
 print "1..177\n";

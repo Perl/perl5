@@ -106,10 +106,7 @@ sub bad_one
 # Some older versions of Berkeley DB version 1 will fail db-recno
 # tests 61, 63, 64 and 65.
 EOM
-        if ($^O eq 'darwin'
-	    && $Config{db_version_major} == 1
-	    && $Config{db_version_minor} == 0
-	    && $Config{db_version_patch} == 0) {
+        if ($^O eq 'darwin' && ($DB_File::db_version || 0) < 2) {
 	    print STDERR <<EOM ;
 #
 # For example Mac OS X 10.2 (or earlier) has such an old
