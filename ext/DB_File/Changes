@@ -237,3 +237,12 @@
 1.66 15th March 1999
 
    * Added DBM Filter code
+
+1.67 6th June 1999
+
+   * Added DBM Filter documentation to DB_File.pm
+
+   * Fixed DBM Filter code to work with 5.004
+
+   * A few instances of newSVpvn were used in 1.66. This isn't available in
+     Perl 5.004_04 or earlier. Replaced with newSVpv.

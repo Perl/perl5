@@ -1,10 +1,10 @@
 # DB_File.pm -- Perl 5 interface to Berkeley DB 
 #
 # written by Paul Marquess (Paul.Marquess@btinternet.com)
-# last modified 6th March 1999
-# version 1.66
+# last modified 6th June 1999
+# version 1.67
 #
-#     Copyright (c) 1995-9 Paul Marquess. All rights reserved.
+#     Copyright (c) 1995-1999 Paul Marquess. All rights reserved.
 #     This program is free software; you can redistribute it and/or
 #     modify it under the same terms as Perl itself.
 
@@ -145,7 +145,7 @@ use vars qw($VERSION @ISA @EXPORT $AUTOLOAD $DB_BTREE $DB_HASH $DB_RECNO $db_ver
 use Carp;
 
 
-$VERSION = "1.66" ;
+$VERSION = "1.67" ;
 
 #typedef enum { DB_BTREE, DB_HASH, DB_RECNO } DBTYPE;
 $DB_BTREE = new DB_File::BTREEINFO ;
@@ -407,6 +407,12 @@ DB_File - Perl5 access to Berkeley DB version 1.x
  $X->push(list);
  $a = $X->shift;
  $X->unshift(list);
+
+ # DBM Filters
+ $old_filter = $db->filter_store_key  ( sub { ... } ) ;
+ $old_filter = $db->filter_store_value( sub { ... } ) ;
+ $old_filter = $db->filter_fetch_key  ( sub { ... } ) ;
+ $old_filter = $db->filter_fetch_value( sub { ... } ) ;
 
  untie %hash ;
  untie @array ;
@@ -1488,6 +1494,141 @@ R_RECNOSYNC is the only valid flag at present.
 
 =back
 
+=head1 DBM FILTERS
+
+A DBM Filter is a piece of code that is be used when you I<always>
+want to make the same transformation to all keys and/or values in a
+DBM database.
+
+There are four methods associated with DBM Filters. All work identically,
+and each is used to install (or uninstall) a single DBM Filter. Each
+expects a single parameter, namely a reference to a sub. The only
+difference between them is the place that the filter is installed.
+
+To summarise:
+
+=over 5
+
+=item B<filter_store_key>
+
+If a filter has been installed with this method, it will be invoked
+every time you write a key to a DBM database.
+
+=item B<filter_store_value>
+
+If a filter has been installed with this method, it will be invoked
+every time you write a value to a DBM database.
+
+
+=item B<filter_fetch_key>
+
+If a filter has been installed with this method, it will be invoked
+every time you read a key from a DBM database.
+
+=item B<filter_fetch_value>
+
+If a filter has been installed with this method, it will be invoked
+every time you read a value from a DBM database.
+
+=back
+
+You can use any combination of the methods, from none, to all four.
+
+All filter methods return the existing filter, if present, or C<undef>
+in not.
+
+To delete a filter pass C<undef> to it.
+
+=head2 The Filter
+
+When each filter is called by Perl, a local copy of C<$_> will contain
+the key or value to be filtered. Filtering is achieved by modifying
+the contents of C<$_>. The return code from the filter is ignored.
+
+=head2 An Example -- the NULL termination problem.
+
+Consider the following scenario. You have a DBM database
+that you need to share with a third-party C application. The C application
+assumes that I<all> keys and values are NULL terminated. Unfortunately
+when Perl writes to DBM databases it doesn't use NULL termination, so
+your Perl application will have to manage NULL termination itself. When
+you write to the database you will have to use something like this:
+
+    $hash{"$key\0"} = "$value\0" ;
+
+Similarly the NULL needs to be taken into account when you are considering
+the length of existing keys/values.
+
+It would be much better if you could ignore the NULL terminations issue
+in the main application code and have a mechanism that automatically
+added the terminating NULL to all keys and values whenever you write to
+the database and have them removed when you read from the database. As I'm
+sure you have already guessed, this is a problem that DBM Filters can
+fix very easily.
+
+    use strict ;
+    use DB_File ;
+
+    my %hash ;
+    my $filename = "/tmp/filt" ;
+    unlink $filename ;
+
+    my $db = tie %hash, 'DB_File', $filename, O_CREAT|O_RDWR, 0666, $DB_HASH 
+      or die "Cannot open $filename: $!\n" ;
+
+    # Install DBM Filters
+    $db->filter_fetch_key  ( sub { s/\0$//    } ) ;
+    $db->filter_store_key  ( sub { $_ .= "\0" } ) ;
+    $db->filter_fetch_value( sub { s/\0$//    } ) ;
+    $db->filter_store_value( sub { $_ .= "\0" } ) ;
+
+    $hash{"abc"} = "def" ;
+    my $a = $hash{"ABC"} ;
+    # ...
+    undef $db ;
+    untie %hash ;
+
+Hopefully the contents of each of the filters should be
+self-explanatory. Both "fetch" filters remove the terminating NULL,
+and both "store" filters add a terminating NULL.
+
+
+=head2 Another Example -- Key is a C int.
+
+Here is another real-life example. By default, whenever Perl writes to
+a DBM database it always writes the key and value as strings. So when
+you use this:
+
+    $hash{12345} = "soemthing" ;
+
+the key 12345 will get stored in the DBM database as the 5 byte string
+"12345". If you actually want the key to be stored in the DBM database
+as a C int, you will have to use C<pack> when writing, and C<unpack>
+when reading.
+
+Here is a DBM Filter that does it:
+
+    use strict ;
+    use DB_File ;
+    my %hash ;
+    my $filename = "/tmp/filt" ;
+    unlink $filename ;
+
+
+    my $db = tie %hash, 'DB_File', $filename, O_CREAT|O_RDWR, 0666, $DB_HASH 
+      or die "Cannot open $filename: $!\n" ;
+
+    $db->filter_fetch_key  ( sub { $_ = unpack("i", $_) } ) ;
+    $db->filter_store_key  ( sub { $_ = pack ("i", $_) } ) ;
+    $hash{123} = "def" ;
+    # ...
+    undef $db ;
+    untie %hash ;
+
+This time only two filters have been used -- we only need to manipulate
+the contents of the key, so it wasn't necessary to install any value
+filters.
+
 =head1 HINTS AND TIPS 
 
 
@@ -1557,7 +1698,7 @@ shared by both a Perl and a C application.
 
 The vast majority of problems that are reported in this area boil down
 to the fact that C strings are NULL terminated, whilst Perl strings are
-not. 
+not. See L<DBM FILTERS> for a generic way to work around this problem.
 
 Here is a real example. Netscape 2.0 keeps a record of the locations you
 visit along with the time you last visited them in a DB_HASH database.
@@ -1746,6 +1887,19 @@ double quotes, like this:
 Although it might seem like a real pain, it is really worth the effort
 of having a C<use strict> in all your scripts.
 
+=head1 REFERENCES
+
+Articles that are either about B<DB_File> or make use of it.
+
+=over 5
+
+=item 1.
+
+I<Full-Text Searching in Perl>, Tim Kientzle (tkientzle@ddj.com),
+Dr. Dobb's Journal, Issue 295, January 1999, pp 34-41
+
+=back
+
 =head1 HISTORY
 
 Moved to the Changes file.
@@ -1771,10 +1925,8 @@ F<modules/by-module/DB_File>.
 This version of B<DB_File> will work with either version 1.x or 2.x of
 Berkeley DB, but is limited to the functionality provided by version 1.
 
-The official web site for Berkeley DB is
-F<http://www.sleepycat.com/db>. The ftp equivalent is
-F<ftp.sleepycat.com:/pub>. Both versions 1 and 2 of Berkeley DB are
-available there.
+The official web site for Berkeley DB is F<http://www.sleepycat.com>.
+Both versions 1 and 2 of Berkeley DB are available there.
 
 Alternatively, Berkeley DB version 1 is available at your nearest CPAN
 archive in F<src/misc/db.1.85.tar.gz>.
@@ -1785,7 +1937,7 @@ compile properly on IRIX 5.3.
 
 =head1 COPYRIGHT
 
-Copyright (c) 1995-9 Paul Marquess. All rights reserved. This program
+Copyright (c) 1995-1999 Paul Marquess. All rights reserved. This program
 is free software; you can redistribute it and/or modify it under the
 same terms as Perl itself.
 
