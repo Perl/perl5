@@ -11,7 +11,7 @@ our($VERSION, $verbose, $switches, $have_devel_corestack, $curtest,
     $columns, @ISA, @EXPORT, @EXPORT_OK);
 $have_devel_corestack = 0;
 
-$VERSION = "1.1604";
+$VERSION = "1.1605";
 
 $ENV{HARNESS_ACTIVE} = 1;
 
@@ -121,7 +121,7 @@ sub runtests {
 			$ok++;
 			$totok++;
 		    }
-		} elsif (/^ok\s*(\d*)(\s*\#\s*[Ss]kip\S*(?:(?>\s+)(.+))?)?/) {
+		} elsif (/^ok\s*(\d*)(\s*\#\s*[Ss]kip\S*(?:(?>\s+)(.+))?)?$/) {
 		    $this = $1 if $1 > 0;
 		    print "${ml}ok $this/$max" if $ml;
 		    $ok++;
@@ -138,6 +138,10 @@ sub runtests {
 		      $skip_reason = $reason;
 		    }
 		    $bonus++, $totbonus++ if $todo{$this};
+		} else {
+		    # an ok or not ok not matching the 2 cases above...
+		    # just ignore it for compatibility with TEST
+		    next;
 		}
 		if ($this > $next) {
 		    # print "Test output counter mismatch [test $this]\n";
@@ -468,12 +472,14 @@ script(s). The default value is C<-w>.
 
 If the standard output line contains substring C< # Skip> (with
 variations in spacing and case) after C<ok> or C<ok NUMBER>, it is
-counted as a skipped test.  If the whole testscript succeeds, the
-count of skipped tests is included in the generated output.
+counted as a skipped test.  In no other circumstance is anything
+allowed to follow C<ok> or C<ok NUMBER>.  If the whole testscript
+succeeds, the count of skipped tests is included in the generated
+output.
 
-C<Test::Harness> reports the text after C< # Skip(whatever)> as a
-reason for skipping.  Similarly, one can include a similar explanation
-in a C<1..0> line emitted if the test is skipped completely:
+C<Test::Harness> reports the text after C< # Skip\S*\s+> as a reason
+for skipping.  Similarly, one can include a similar explanation in a
+C<1..0> line emitted if the test is skipped completely:
 
   1..0 # Skipped: no leverage found
 
