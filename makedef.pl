@@ -425,6 +425,7 @@ unless ($define{'PERL_IMPLICIT_CONTEXT'}) {
 unless ($define{'PERL_IMPLICIT_SYS'}) {
     skip_symbols [qw(
 		    perl_alloc_using
+		    perl_clone_using
 		    )];
 }
 
@@ -747,6 +748,8 @@ __DATA__
 # extra globals not included above.
 perl_alloc
 perl_alloc_using
+perl_clone
+perl_clone_using
 perl_construct
 perl_destruct
 perl_free

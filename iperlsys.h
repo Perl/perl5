@@ -293,6 +293,7 @@ struct IPerlStdIOInfo
 
 #include "perlsdio.h"
 #include "perl.h"
+#define PerlIO_fdupopen(f)		(f)
 
 #endif	/* PERL_IMPLICIT_SYS */
 

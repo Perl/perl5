@@ -823,6 +823,8 @@
 #else
 #endif
 #if defined(USE_ITHREADS)
+#  if defined(USE_IMPLICIT_SYS)
+#  endif
 #endif
 #if defined(MYMALLOC)
 #endif

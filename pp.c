@@ -2261,7 +2261,7 @@ PP(pp_ucfirst)
 	
 	tend = uv_to_utf8(tmpbuf, uv);
 
-	if (!SvPADTMP(sv) || tend - tmpbuf != ulen) {
+	if (!SvPADTMP(sv) || tend - tmpbuf != ulen || SvREADONLY(sv)) {
 	    dTARGET;
 	    sv_setpvn(TARG, (char*)tmpbuf, tend - tmpbuf);
 	    sv_catpvn(TARG, (char*)(s + ulen), slen - ulen);
@@ -2273,7 +2273,7 @@ PP(pp_ucfirst)
 	}
     }
     else {
-	if (!SvPADTMP(sv)) {
+	if (!SvPADTMP(sv) || SvREADONLY(sv)) {
 	    dTARGET;
 	    sv_setsv(TARG, sv);
 	    sv = TARG;
@@ -2318,7 +2318,7 @@ PP(pp_lcfirst)
 	
 	tend = uv_to_utf8(tmpbuf, uv);
 
-	if (!SvPADTMP(sv) || tend - tmpbuf != ulen) {
+	if (!SvPADTMP(sv) || tend - tmpbuf != ulen || SvREADONLY(sv)) {
 	    dTARGET;
 	    sv_setpvn(TARG, (char*)tmpbuf, tend - tmpbuf);
 	    sv_catpvn(TARG, (char*)(s + ulen), slen - ulen);
@@ -2330,7 +2330,7 @@ PP(pp_lcfirst)
 	}
     }
     else {
-	if (!SvPADTMP(sv)) {
+	if (!SvPADTMP(sv) || SvREADONLY(sv)) {
 	    dTARGET;
 	    sv_setsv(TARG, sv);
 	    sv = TARG;
@@ -2397,7 +2397,7 @@ PP(pp_uc)
 	}
     }
     else {
-	if (!SvPADTMP(sv)) {
+	if (!SvPADTMP(sv) || SvREADONLY(sv)) {
 	    dTARGET;
 	    sv_setsv(TARG, sv);
 	    sv = TARG;
@@ -2468,7 +2468,7 @@ PP(pp_lc)
 	}
     }
     else {
-	if (!SvPADTMP(sv)) {
+	if (!SvPADTMP(sv) || SvREADONLY(sv)) {
 	    dTARGET;
 	    sv_setsv(TARG, sv);
 	    sv = TARG;
@@ -4852,9 +4852,13 @@ PP(pp_pack)
 		     * of pack() (and all copies of the result) are
 		     * gone.
 		     */
-		    if (ckWARN(WARN_UNSAFE) && (SvTEMP(fromstr) || SvPADTMP(fromstr)))
+		    if (ckWARN(WARN_UNSAFE) && (SvTEMP(fromstr)
+						|| (SvPADTMP(fromstr)
+						    && !SvREADONLY(fromstr))))
+		    {
 			Perl_warner(aTHX_ WARN_UNSAFE,
 				"Attempt to pack pointer to temporary value");
+		    }
 		    if (SvPOK(fromstr) || SvNIOK(fromstr))
 			aptr = SvPV(fromstr,n_a);
 		    else

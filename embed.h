@@ -49,6 +49,8 @@
 #else
 #endif
 #if defined(USE_ITHREADS)
+#  if defined(USE_IMPLICIT_SYS)
+#  endif
 #endif
 #if defined(MYMALLOC)
 #define malloced_size		Perl_malloced_size
@@ -1462,6 +1464,8 @@
 #else
 #endif
 #if defined(USE_ITHREADS)
+#  if defined(USE_IMPLICIT_SYS)
+#  endif
 #endif
 #if defined(MYMALLOC)
 #define malloced_size		Perl_malloced_size
@@ -2848,6 +2852,8 @@
 #else
 #endif
 #if defined(USE_ITHREADS)
+#  if defined(USE_IMPLICIT_SYS)
+#  endif
 #endif
 #if defined(MYMALLOC)
 #define malloc			Perl_malloc

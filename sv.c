@@ -6526,13 +6526,23 @@ Perl_ss_dup(pTHX_ PerlInterpreter *proto_perl)
 #endif
 
 PerlInterpreter *
-perl_clone(PerlInterpreter *my_perl, UV flags)
+perl_clone(PerlInterpreter *proto_perl, UV flags)
 {
 #ifdef PERL_OBJECT
-    CPerlObj *pPerl = (CPerlObj*)my_perl;
+    CPerlObj *pPerl = (CPerlObj*)proto_perl;
 #endif
-    return perl_clone_using(my_perl, flags, PL_Mem, PL_MemShared, PL_MemParse,
-			    PL_Env, PL_StdIO, PL_LIO, PL_Dir, PL_Sock, PL_Proc);
+
+#ifdef PERL_IMPLICIT_SYS
+    return perl_clone_using(proto_perl, flags,
+			    proto_perl->IMem,
+			    proto_perl->IMemShared,
+			    proto_perl->IMemParse,
+			    proto_perl->IEnv,
+			    proto_perl->IStdIO,
+			    proto_perl->ILIO,
+			    proto_perl->IDir,
+			    proto_perl->ISock,
+			    proto_perl->IProc);
 }
 
 PerlInterpreter *
@@ -6550,23 +6560,23 @@ perl_clone_using(PerlInterpreter *proto_perl, UV flags,
     IV i;
     SV *sv;
     SV **svp;
-#ifdef PERL_OBJECT
+#  ifdef PERL_OBJECT
     CPerlObj *pPerl = new(ipM) CPerlObj(ipM, ipMS, ipMP, ipE, ipStd, ipLIO,
 					ipD, ipS, ipP);
     PERL_SET_INTERP(pPerl);
-#else
+#  else		/* !PERL_OBJECT */
     PerlInterpreter *my_perl = (PerlInterpreter*)(*ipM->pMalloc)(ipM, sizeof(PerlInterpreter));
     PERL_SET_INTERP(my_perl);
 
-#  ifdef DEBUGGING
+#    ifdef DEBUGGING
     memset(my_perl, 0xab, sizeof(PerlInterpreter));
     PL_markstack = 0;
     PL_scopestack = 0;
     PL_savestack = 0;
     PL_retstack = 0;
-#  else
+#    else	/* !DEBUGGING */
     Zero(my_perl, 1, PerlInterpreter);
-#  endif
+#    endif	/* DEBUGGING */
 
     /* host pointers */
     PL_Mem		= ipM;
@@ -6578,7 +6588,13 @@ perl_clone_using(PerlInterpreter *proto_perl, UV flags,
     PL_Dir		= ipD;
     PL_Sock		= ipS;
     PL_Proc		= ipP;
-#endif
+#  endif	/* PERL_OBJECT */
+#else		/* !PERL_IMPLICIT_SYS */
+    IV i;
+    SV *sv;
+    SV **svp;
+    PerlInterpreter *my_perl = (PerlInterpreter*)PerlMem_malloc(sizeof(PerlInterpreter));
+#endif		/* PERL_IMPLICIT_SYS */
 
     /* arena roots */
     PL_xiv_arenaroot	= NULL;

@@ -1040,12 +1040,14 @@ jno	|int	|perl_parse	|PerlInterpreter* interp|XSINIT_t xsinit \
 				|int argc|char** argv|char** env
 #if defined(USE_ITHREADS)
 jno	|PerlInterpreter*|perl_clone|PerlInterpreter* interp, UV flags
+#  if defined(USE_IMPLICIT_SYS)
 jno	|PerlInterpreter*|perl_clone_using|PerlInterpreter *interp|UV flags \
 				|struct IPerlMem* m|struct IPerlMem* ms \
 				|struct IPerlMem* mp|struct IPerlEnv* e \
 				|struct IPerlStdIO* io|struct IPerlLIO* lio \
 				|struct IPerlDir* d|struct IPerlSock* s \
 				|struct IPerlProc* p
+#  endif
 #endif
 
 #if defined(MYMALLOC)

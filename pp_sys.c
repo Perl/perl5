@@ -3602,7 +3602,7 @@ PP(pp_fork)
     PUSHi(childpid);
     RETURN;
 #else
-#  if defined(USE_ITHREADS) && defined(WIN32)
+#  if defined(USE_ITHREADS) && defined(USE_IMPLICIT_SYS)
     djSP; dTARGET;
     Pid_t childpid;
 
@@ -3800,7 +3800,7 @@ PP(pp_exec)
 #endif
     }
 
-#ifdef USE_ITHREADS
+#if !defined(HAS_FORK) && defined(USE_ITHREADS) && defined(USE_IMPLICIT_SYS)
     if (value >= 0)
 	my_exit(value);
 #endif
