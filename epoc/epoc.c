@@ -11,7 +11,6 @@
 #include <stdio.h>
 #include <sys/unistd.h>
 
-char *environ = NULL;
 void
 Perl_epoc_init(int *argcp, char ***argvp) {
   int i;
@@ -87,4 +86,62 @@ __fixunsdfsi (a)
   return (SItype) a;
 }
 
+#include "EXTERN.h"
+#include "perl.h"
+#include "XSUB.h"
+
+int 
+do_aspawn( pTHX_ SV *really,SV **mark,SV **sp) {
+  return do_spawn( really, mark, sp);
+}
+
+int
+do_spawn (pTHX_ SV *really,SV **mark,SV **sp)
+{
+    dTHR;
+    int  rc;
+    char **a,*cmd,**ptr, *cmdline, **argv, *p2; 
+    STRLEN n_a;
+    size_t len = 0;
+
+    if (sp<=mark)
+      return -1;
+    
+    a=argv=ptr=(char**) malloc ((sp-mark+3)*sizeof (char*));
+    
+    while (++mark <= sp) {
+      if (*mark)
+	*a = SvPVx(*mark, n_a);
+      else
+	*a = "";
+      len += strlen( *a) + 1;
+      a++;
+    }
+    *a = Nullch;
+
+    if (!(really && *(cmd = SvPV(really, n_a)))) {
+      cmd = argv[0];
+      argv++;
+    }
+      
+    cmdline = (char * ) malloc( len + 1);
+    cmdline[ 0] = '\0';
+    while (*argv != NULL) {
+      strcat( cmdline, *argv++);
+      strcat( cmdline, " ");
+    }
+
+    for (p2=cmd; *p2 != '\0'; p2++) {
+      /* Change / to \ */
+      if ( *p2 == '/') 
+	*p2 = '\\';
+    }
+    rc = epoc_spawn( cmd, cmdline);
+    free( ptr);
+    free( cmdline);
+    
+    return rc;
+}
+
+ 
 #endif

@@ -153,15 +153,13 @@ emacs/ptags		Creates smart TAGS file
 embed.h			Maps symbols to safer names
 embed.pl		Produces {embed,embedvar,objXSUB,proto}.h, global.sym
 embedvar.h		C namespace management
-epoc/autosplit.pl	EPOC port
-epoc/config.h		EPOC port
-epoc/Config.pm		EPOC port
-epoc/createpkg.pl	EPOC port
+epoc/config.sh		EPOC port config.sh template
+epoc/createpkg.pl	EPOC port generate PKG file
 epoc/epoc.c		EPOC port
 epoc/epoc_stubs.c	EPOC port
+epoc/epocish.c		EPOC port
 epoc/epocish.h		EPOC port
-epoc/perl.mmp		EPOC port
-epoc/perl.pkg		EPOC port
+epoc/link.pl            EPOC port link a exe
 ext/B/B.pm		Compiler backend support functions and methods
 ext/B/B.xs		Compiler backend external subroutines
 ext/B/B/Asmdata.pm	Compiler backend data for assembler

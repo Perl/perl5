@@ -18,7 +18,7 @@ use Exporter;
 # legacy
 
 require IO::Socket::INET;
-require IO::Socket::UNIX;
+require IO::Socket::UNIX if ($^O ne 'epoc');
 
 @ISA = qw(IO::Handle);
 

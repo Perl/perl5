@@ -65,6 +65,10 @@ sub hostname {
     chomp($host = `hostname 2> NUL`) unless defined $host;
     return $host;
   }
+  elsif ($^O eq 'epoc') {
+    $host = 'localhost';
+    return $host;
+  }
   else {  # Unix
 
     # method 2 - syscall is preferred since it avoids tainting problems
