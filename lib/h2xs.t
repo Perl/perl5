@@ -16,7 +16,7 @@ BEGIN {
 # use strict; # we are not really testing this
 use File::Path;  # for cleaning up with rmtree()
 use Test;
-
+use File::Spec;
 
 my $extracted_program = '../utils/h2xs'; # unix, nt, ...
 if ($^O eq 'VMS') { $extracted_program = '[-.utils]h2xs.com'; }
@@ -162,7 +162,7 @@ while (my ($args, $version, $expectation) = splice @tests, 0, 3) {
   }
 
   foreach my $leaf ("$name.pm", 'Makefile.PL') {
-    my $file = ($^O eq 'MacOS') ? ":$name:$leaf" : "$name/$leaf";
+    my $file = File::Spec->catfile($name, $leaf);
     if (ok (open (FILE, $file), 1, "open $file")) {
       my $match = qr/use $version;/;
       my $found;
