@@ -116,11 +116,6 @@ print "1..2\n";
 
 $pwgid = $( + 0;
 ($pwgnam) = getgrgid($pwgid);
-if ($Config{myuname} =~ /^cygwin_nt/i) { # basegroup on CYGWIN_NT has id = 0.
-    @basegroup{$pwgid,$pwgnam} = (0,0);
-} else {
-    @basegroup{$pwgid,$pwgnam} = (1,1);
-}
 $seen{$pwgid}++;
 
 print "# pwgid = $pwgid, pwgnam = $pwgnam\n";
@@ -145,12 +140,28 @@ if ($^O =~ /^(?:uwin|solaris)$/) {
 	$gr1 = join(' ', sort @gr);
 }
 
+if ($Config{myuname} =~ /^cygwin_nt/i) { # basegroup on CYGWIN_NT has id = 0.
+    @basegroup{$pwgid,$pwgnam} = (0,0);
+} else {
+    @basegroup{$pwgid,$pwgnam} = (1,1);
+}
 $gr2 = join(' ', grep(!$basegroup{$_}++, sort split(' ',$groups)));
 
+my $ok1 = 0;
 if ($gr1 eq $gr2 || ($gr1 eq '' && $gr2 eq $pwgid)) {
     print "ok 1\n";
+    $ok1++;
 }
-else {
+elsif ($Config{myuname} =~ /^cygwin_nt/i) { # basegroup on CYGWIN_NT has id = 0.
+    # Retry in default unix mode
+    %basegroup = ( $pwgid => 1, $pwgnam => 1 );
+    $gr2 = join(' ', grep(!$basegroup{$_}++, sort split(' ',$groups)));
+    if ($gr1 eq $gr2 || ($gr1 eq '' && $gr2 eq $pwgid)) {
+	print "ok 1 # This Cygwin behaves like Unix (Win2k?)\n";
+	$ok1++;
+    }
+}
+unless ($ok1) {
     print "#gr1 is <$gr1>\n";
     print "#gr2 is <$gr2>\n";
     print "not ok 1\n";
