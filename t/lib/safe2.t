@@ -10,6 +10,7 @@ BEGIN {
     }
     # test 30 rather naughtily expects English error messages
     $ENV{'LC_ALL'} = 'C';
+    $ENV{LANGUAGE} = 'C'; # GNU locale extension
 }
 
 # Tests Todo:
