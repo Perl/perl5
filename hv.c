@@ -442,13 +442,13 @@ hv_delete(HV *hv, char *key, U32 klen, I32 flags)
 		}
 		return Nullsv;          /* element cannot be deleted */
 	    }
-        }
 #ifdef ENV_IS_CASELESS
-	else if (mg_find((SV*)hv,'E')) {
-	    sv = sv_2mortal(newSVpv(key,klen));
-	    key = strupr(SvPVX(sv));
-	}
+	    else if (mg_find((SV*)hv,'E')) {
+		sv = sv_2mortal(newSVpv(key,klen));
+		key = strupr(SvPVX(sv));
+	    }
 #endif
+        }
     }
     xhv = (XPVHV*)SvANY(hv);
     if (!xhv->xhv_array)
@@ -512,15 +512,15 @@ hv_delete_ent(HV *hv, SV *keysv, I32 flags, U32 hash)
 		}		
 		return Nullsv;		/* element cannot be deleted */
 	    }
-	}
 #ifdef ENV_IS_CASELESS
-	else if (mg_find((SV*)hv,'E')) {
-	    key = SvPV(keysv, klen);
-	    keysv = sv_2mortal(newSVpv(key,klen));
-	    (void)strupr(SvPVX(keysv));
-	    hash = 0; 
-	}
+	    else if (mg_find((SV*)hv,'E')) {
+		key = SvPV(keysv, klen);
+		keysv = sv_2mortal(newSVpv(key,klen));
+		(void)strupr(SvPVX(keysv));
+		hash = 0; 
+	    }
 #endif
+	}
     }
     xhv = (XPVHV*)SvANY(hv);
     if (!xhv->xhv_array)
