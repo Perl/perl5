@@ -3118,19 +3118,19 @@ Perl's sprintf() permits the following universally-known conversions:
    %f	a floating-point number, in fixed decimal notation
    %g	a floating-point number, in %e or %f notation
 
-In addition, Perl permits the following ANSI-invented conversions:
+In addition, Perl permits the following widely-supported conversions:
 
-   %i	a synonym for %d
    %X	like %x, but using upper-case letters
    %E	like %e, but using an upper-case "E"
    %G	like %g, but with an upper-case "E" (if applicable)
    %p	a pointer (outputs the Perl value's address in hexadecimal)
-   %n	special: B<stores> into the next variable in the parameter
-        list the number of characters printed so far
+   %n	special: *stores* the number of characters output so far
+        into the next variable in the parameter list 
 
-Finally, for backward (and we do mean "backward") compatibility,
-Perl permits these nonstandard but unaccountably popular conversions:
+Finally, for backward (and we do mean "backward") compatibility, Perl
+permits these unnecessary but widely-supported conversions:
 
+   %i	a synonym for %d
    %D	a synonym for %ld
    %U	a synonym for %lu
    %O	a synonym for %lo
@@ -3143,17 +3143,14 @@ and the conversion letter:
    +       prefix positive number with a plus sign
    -       left-justify within the field
    0       use zeros, not spaces, to right-justify
+   #       prefix octal with "0", hex with "0x"
    number  minimum field width
    .number "precision": digits after decimal point for floating-point,
            max length for string, minimum length for integer
    l       interpret integer as C type "long" or "unsigned long"
-
-In addition, Perl permits the following ANSI-invented flags:
-
-   #       prefix octal with "0", hex with "0x"
    h       interpret integer as C type "short" or "unsigned short"
 
-Finally, there is one Perl-specific flag:
+There is also one Perl-specific flag:
 
    V       interpret integer as Perl's standard integer type
 

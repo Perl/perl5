@@ -275,8 +275,8 @@ switch?
 The B<-w> switch is not mandatory.
 
 Perl is at the mercy of your machine's definitions of various
-operations such as type casting, atof(), and sprintf().  The latter
-can even trigger a core dump when passed ludicrous input values.
+operations such as type casting, atof(), and floating-point
+output with sprintf().
 
 If your stdio requires a seek or eof between reads and writes on a
 particular stream, so does Perl.  (This doesn't apply to sysread()
