@@ -19,7 +19,7 @@ $Is_Mac = $^O eq 'MacOS';
 $Is_Win32 = $^O eq 'MSWin32';
 $Is_Dos = $^O eq 'dos';
 
-$Is_PERL_OBJECT   = 1 if $Config{'ccflags'} =~ /-DPERL_OBJECT/;
+$Is_PERL_OBJECT = $Config{'ccflags'} =~ /-DPERL_OBJECT/;
 
 if ($Is_VMS = $^O eq 'VMS') {
     require VMS::Filespec;
@@ -233,6 +233,7 @@ sub ExtUtils::MM_Unix::tools_other ;
 sub ExtUtils::MM_Unix::top_targets ;
 sub ExtUtils::MM_Unix::writedoc ;
 sub ExtUtils::MM_Unix::xs_c ;
+sub ExtUtils::MM_Unix::xs_cpp ;
 sub ExtUtils::MM_Unix::xs_o ;
 sub ExtUtils::MM_Unix::xsubpp_version ;
 
@@ -374,7 +375,7 @@ sub cflags {
 	$self->{uc $_} ||= $cflags{$_}
     }
 
-    if ($self->{CAPI} && $Is_PERL_OBJECT == 1) {
+    if ($self->{CAPI} && $Is_PERL_OBJECT) {
         $self->{CCFLAGS} =~ s/-DPERL_OBJECT(\s|$)//;
         $self->{CCFLAGS} .= '-DPERL_CAPI';
         if ($Is_Win32 && $Config{'cc'} =~ /^cl.exe/i) {
@@ -3484,7 +3485,22 @@ sub xs_c {
     return '' unless $self->needs_linking();
     '
 .xs.c:
-	$(PERL) -I$(PERL_ARCHLIB) -I$(PERL_LIB) $(XSUBPP) $(XSPROTOARG) $(XSUBPPARGS) $*.xs >$*.tc && $(MV) $*.tc $@
+	$(PERL) -I$(PERL_ARCHLIB) -I$(PERL_LIB) $(XSUBPP) $(XSPROTOARG) $(XSUBPPARGS) $*.xs >xstmp.c && $(MV) xstmp.c $*.c
+';
+}
+
+=item xs_cpp (o)
+
+Defines the suffix rules to compile XS files to C++.
+
+=cut
+
+sub xs_cpp {
+    my($self) = shift;
+    return '' unless $self->needs_linking();
+    '
+.xs.cpp:
+	$(PERL) -I$(PERL_ARCHLIB) -I$(PERL_LIB) $(XSUBPP) $(XSPROTOARG) $(XSUBPPARGS) $*.xs >xstmp.c && $(MV) xstmp.c $*.cpp
 ';
 }
 

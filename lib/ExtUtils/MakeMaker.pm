@@ -2,7 +2,7 @@ BEGIN {require 5.002;} # MakeMaker 5.17 was the last MakeMaker that was compatib
 
 package ExtUtils::MakeMaker;
 
-$Version = $VERSION = "5.4302";
+$VERSION = "5.4302";
 $Version_OK = "5.17";	# Makefiles older than $Version_OK will die
 			# (Will be checked from MakeMaker version 4.13 onwards)
 ($Revision = substr(q$Revision: 1.222 $, 10)) =~ s/\s+$//;
@@ -35,9 +35,7 @@ use vars qw(
 #
 @ISA = qw(Exporter);
 @EXPORT = qw(&WriteMakefile &writeMakefile $Verbose &prompt);
-@EXPORT_OK = qw($VERSION &Version_check &neatvalue &mkbootstrap &mksymlists
-		$Version);
-		# $Version in mixed case will go away!
+@EXPORT_OK = qw($VERSION &Version_check &neatvalue &mkbootstrap &mksymlists);
 
 #
 # Dummy package MM inherits actual methods from OS-specific
@@ -72,10 +70,6 @@ $Is_VMS   = $^O eq 'VMS';
 $Is_OS2   = $^O eq 'os2';
 $Is_Mac   = $^O eq 'MacOS';
 $Is_Win32 = $^O eq 'MSWin32';
-
-# This is for module authors to query, so they can enable 'CAPI' => 'TRUE'
-# in their Makefile.pl
-$CAPI_support = 1;
 
 require ExtUtils::MM_Unix;
 
@@ -243,27 +237,21 @@ sub full_setup {
 
     AUTHOR ABSTRACT ABSTRACT_FROM BINARY_LOCATION
     C CAPI CCFLAGS CONFIG CONFIGURE DEFINE DIR DISTNAME DL_FUNCS DL_VARS
-    EXCLUDE_EXT EXE_FILES FIRST_MAKEFILE FULLPERL FUNCLIST H
+    EXCLUDE_EXT EXE_FILES FIRST_MAKEFILE FULLPERL FUNCLIST H IMPORTS
     INC INCLUDE_EXT INSTALLARCHLIB INSTALLBIN INSTALLDIRS INSTALLMAN1DIR
     INSTALLMAN3DIR INSTALLPRIVLIB INSTALLSCRIPT INSTALLSITEARCH
     INSTALLSITELIB INST_ARCHLIB INST_BIN INST_EXE INST_LIB
-    INST_MAN1DIR INST_MAN3DIR INST_SCRIPT LDFROM LIB LIBPERL_A LIBS LICENSE_HREF
+    INST_MAN1DIR INST_MAN3DIR INST_SCRIPT LDFROM LIB LIBPERL_A LIBS
     LINKTYPE MAKEAPERL MAKEFILE MAN1PODS MAN3PODS MAP_TARGET MYEXTLIB
     NAME NEEDS_LINKING NOECHO NORECURS NO_VC OBJECT OPTIMIZE PERL PERLMAINCC
     PERL_ARCHLIB PERL_LIB PERL_SRC PERM_RW PERM_RWX
-    PL_FILES PM PMLIBDIRS PPM_INSTALL_SCRIPT PPM_INSTALL_EXEC PREFIX
+    PL_FILES PM PMLIBDIRS PPM_INSTALL_EXEC PPM_INSTALL_SCRIPT PREFIX
     PREREQ_PM SKIP TYPEMAPS VERSION VERSION_FROM XS XSOPT XSPROTOARG
     XS_VERSION clean depend dist dynamic_lib linkext macro realclean
     tool_autosplit
-
-    IMPORTS
-
-    installpm
 	/;
 
-    # IMPORTS is used under OS/2
-
-    # ^^^ installpm is deprecated, will go about Summer 96
+    # IMPORTS is used under OS/2 and Win32
 
     # @Overridable is close to @MM_Sections but not identical.  The
     # order is important. Many subroutines declare macros. These
@@ -283,7 +271,7 @@ sub full_setup {
 
  pasthru
 
- c_o xs_c xs_o top_targets linkext dlsyms dynamic dynamic_bs
+ c_o xs_c xs_cpp xs_o top_targets linkext dlsyms dynamic dynamic_bs
  dynamic_lib static static_lib manifypods processPL installbin subdirs
  clean realclean dist_basics dist_core dist_dir dist_test dist_ci
  install force perldepend makefile staticmake test ppd
@@ -1176,18 +1164,43 @@ recommends it (or you know what you're doing).
 The following attributes can be specified as arguments to WriteMakefile()
 or as NAME=VALUE pairs on the command line:
 
-=cut
-
-# The following "=item C" is used by the attrib_help routine
-# likewise the "=back" below. So be careful when changing it!
-
 =over 2
+
+=item AUTHOR
+
+String containing name (and email address) of package author(s). Is used
+in PPD (Perl Package Description) files for PPM (Perl Package Manager).
+
+=item ABSTRACT
+
+One line description of the module. Will be included in PPD file.
+
+=item ABSTRACT_FROM
+
+Name of the file that contains the package description. MakeMaker looks
+for a line in the POD matching /^($package\s-\s)(.*)/. This is typically
+the first line in the "=head1 NAME" section. $2 becomes the abstract.
+
+=item BINARY_LOCATION
+
+Used when creating PPD files for binary packages.  It can be set to a
+full or relative path or URL to the binary archive for a particular
+architecture.  For example:
+
+	perl Makefile.PL BINARY_LOCATION=x86/Agent.tar.gz
+
+builds a PPD package that references a binary of the C<Agent> package,
+located in the C<x86> directory.
 
 =item C
 
 Ref to array of *.c file names. Initialised from a directory scan
 and the values portion of the XS attribute hash. This is not
 currently used by MakeMaker but may be handy in Makefile.PLs.
+
+=item CAPI
+
+Switch to force usage of the Perl C API even when compiling for PERL_OBJECT.
 
 =item CCFLAGS
 
@@ -1237,12 +1250,12 @@ NAME above.
 
 =item DL_FUNCS
 
-Hashref of symbol names for routines to be made available as
-universal symbols.  Each key/value pair consists of the package name
-and an array of routine names in that package.  Used only under AIX
-(export lists) and VMS (linker options) at present.  The routine
-names supplied will be expanded in the same way as XSUB names are
-expanded by the XS() macro.  Defaults to
+Hashref of symbol names for routines to be made available as universal
+symbols.  Each key/value pair consists of the package name and an
+array of routine names in that package.  Used only under AIX, OS/2,
+VMS and Win32 at present.  The routine names supplied will be expanded
+in the same way as XSUB names are expanded by the XS() macro.
+Defaults to
 
   {"$(NAME)" => ["boot_$(NAME)" ] }
 
@@ -1251,12 +1264,14 @@ e.g.
   {"RPC" => [qw( boot_rpcb rpcb_gettime getnetconfigent )],
    "NetconfigPtr" => [ 'DESTROY'] }
 
+Please see the L<ExtUtils::Mksymlists> documentation for more information
+about the DL_FUNCS, DL_VARS and FUNCLIST attributes.
+
 =item DL_VARS
 
-Array of symbol names for variables to be made available as
-universal symbols.  Used only under AIX (export lists) and VMS
-(linker options) at present.  Defaults to [].  (e.g. [ qw(
-Foo_version Foo_numstreams Foo_tree ) ])
+Array of symbol names for variables to be made available as universal symbols.
+Used only under AIX, OS/2, VMS and Win32 at present.  Defaults to [].
+(e.g. [ qw(Foo_version Foo_numstreams Foo_tree ) ])
 
 =item EXCLUDE_EXT
 
@@ -1296,7 +1311,8 @@ Ref to array of *.h file names. Similar to C.
 
 =item IMPORTS
 
-IMPORTS is only used on OS/2.
+This attribute is used to specify names to be imported into the
+extension. It is only used on OS/2 and Win32.
 
 =item INC
 
@@ -1353,14 +1369,14 @@ directory if INSTALLDIRS is set to perl.
 Used by 'make install' which copies files from INST_SCRIPT to this
 directory.
 
-=item INSTALLSITELIB
-
-Used by 'make install', which copies files from INST_LIB to this
-directory if INSTALLDIRS is set to site (default).
-
 =item INSTALLSITEARCH
 
 Used by 'make install', which copies files from INST_ARCHLIB to this
+directory if INSTALLDIRS is set to site (default).
+
+=item INSTALLSITELIB
+
+Used by 'make install', which copies files from INST_LIB to this
 directory if INSTALLDIRS is set to site (default).
 
 =item INST_ARCHLIB
@@ -1576,6 +1592,15 @@ they contain will be installed in the corresponding location in the
 library.  A libscan() method can be used to alter the behaviour.
 Defining PM in the Makefile.PL will override PMLIBDIRS.
 
+=item PPM_INSTALL_EXEC
+
+Name of the executable used to run C<PPM_INSTALL_SCRIPT> below.
+
+=item PPM_INSTALL_SCRIPT
+
+Name of the script that gets executed by the Perl Package Manager after
+the installation of a package.
+
 =item PREFIX
 
 Can be used to set the three INSTALL* attributes in one go (except for
@@ -1710,10 +1735,6 @@ links the rest. Default is 'best'.
 
   {ARMAYBE => 'ar', OTHERLDFLAGS => '...', INST_DYNAMIC_DEP => '...'}
 
-=item installpm
-
-Deprecated as of MakeMaker 5.23. See L<ExtUtils::MM_Unix/pm_to_blib>.
-
 =item linkext
 
   {LINKTYPE => 'static', 'dynamic' or ''}
@@ -1739,12 +1760,6 @@ be linked.
   {MAXLEN =E<gt> 8}
 
 =back
-
-=cut
-
-# bug in pod2html, so leave the =back
-
-# Don't delete this cut, MM depends on it!
 
 =head2 Overriding MakeMaker Methods
 
