@@ -16,7 +16,7 @@ BEGIN {
 }
 
 use strict;
-use Test::More tests => 38;
+use Test::More tests => 36;
 use MakeMaker::Test::Utils;
 use ExtUtils::MakeMaker;
 use File::Spec;
@@ -62,8 +62,6 @@ is( $mm->{VERSION}, 0.01,            'VERSION' );
 
 foreach my $prefix (qw(PREFIX PERLPREFIX SITEPREFIX VENDORPREFIX)) {
     unlike( $mm->{$prefix}, qr/\$\(PREFIX\)/ );
-    like( $mm->{$prefix}, qr/^\$\(DESTDIR\)/, 
-                                   "\$(DESTDIR) prepended to $prefix" );
 }
 
 
@@ -85,11 +83,10 @@ like( $stdout->read, qr{
 undef $stdout;
 untie *STDOUT;
 
-is( $mm->{PREFIX}, '$(DESTDIR)'.$PREFIX,   'PREFIX' );
+is( $mm->{PREFIX}, $PREFIX,   'PREFIX' );
 
 foreach my $prefix (qw(PERLPREFIX SITEPREFIX VENDORPREFIX)) {
-    is( $mm->{$prefix}, '$(DESTDIR)$(PREFIX)', 
-                                       "\$(PREFIX) overrides $prefix" );
+    is( $mm->{$prefix}, '$(PREFIX)', "\$(PREFIX) overrides $prefix" );
 }
 
 is( !!$mm->{PERL_CORE}, !!$ENV{PERL_CORE}, 'PERL_CORE' );
@@ -134,7 +131,10 @@ while( my($type, $vars) = each %Install_Vars) {
 # are generated.
 {
     undef *ExtUtils::MM_Unix::Config;
+    undef *ExtUtils::MM_Unix::Config_Override;
     %ExtUtils::MM_Unix::Config = %Config;
+    *ExtUtils::MM_VMS::Config = \%ExtUtils::MM_Unix::Config;
+
     $ExtUtils::MM_Unix::Config{installman1dir} = '';
     $ExtUtils::MM_Unix::Config{installman3dir} = '';
 
@@ -151,4 +151,38 @@ while( my($type, $vars) = each %Install_Vars) {
 
     is( $mm->{INSTALLMAN1DIR}, $wibble );
     is( $mm->{INSTALLMAN3DIR}, 'none'  );
+}
+
+# Check that when installvendorman*dir is set in Config it is honored
+# [rt.cpan.org 2949]
+{
+    undef *ExtUtils::MM_Unix::Config;
+    undef *ExtUtils::MM_Unix::Config_Override;
+    undef *ExtUtils::MM_VMS::Config;
+
+    %ExtUtils::MM_Unix::Config = %Config;
+    *ExtUtils::MM_VMS::Config = \%ExtUtils::MM_Unix::Config;
+
+    $ExtUtils::MM_Unix::Config{installvendorman1dir} = 
+      File::Spec->catdir('foo','bar');
+    $ExtUtils::MM_Unix::Config{installvendorman3dir} = '';
+    $ExtUtils::MM_Unix::Config{usevendorprefix} = 1;
+    $ExtUtils::MM_Unix::Config{vendorprefixexp} = 'something';
+
+    my $stdout = tie *STDOUT, 'TieOut' or die;
+    my $mm = WriteMakefile(
+                   NAME          => 'Big::Dummy',
+                   VERSION_FROM  => 'lib/Big/Dummy.pm',
+                   PREREQ_PM     => {},
+                   PERL_CORE     => $ENV{PERL_CORE},
+
+                   # In case the local installation doesn't have man pages.
+                   INSTALLMAN1DIR=> 'foo/bar/baz',
+                   INSTALLMAN3DIR=> 'foo/bar/baz',
+                  );
+
+    is( $mm->{INSTALLVENDORMAN1DIR}, File::Spec->catdir('foo','bar'), 
+                      'installvendorman1dir (in %Config) not modified' );
+    isnt( $mm->{INSTALLVENDORMAN3DIR}, '', 
+                      'installvendorman3dir (not in %Config) set'  );
 }
