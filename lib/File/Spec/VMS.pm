@@ -156,9 +156,9 @@ sub canonpath {
       else          { return vmsify($path);  }
     }
     else {
+      $path =~ s/([\[<])000000\./$1/g;                  # [000000.foo     ==> [foo
+      $path =~ s/([^-]+)\.000000([\]\>])/$1$2/g;        # foo.000000]     ==> foo]
       $path =~ s-\]\[--g;  $path =~ s/><//g;            # foo.][bar       ==> foo.bar
-      $path =~ s/([\[<])000000\./$1/;                   # [000000.foo     ==> [foo
-      $path =~ s/([^-]+)\.000000([\]\>])/$1$2/;         # foo.000000]     ==> foo]
       1 while $path =~ s{([\[<-])\.-}{$1-};             # [.-.-           ==> [--
       $path =~ s/\.[^\[<\.]+\.-([\]\>])/$1/;            # bar.foo.-]      ==> bar]
       $path =~ s/([\[<])(-+)/$1 . "\cx" x length($2)/e; # encode leading '-'s
