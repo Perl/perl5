@@ -143,6 +143,11 @@ Turn on debugging messages.
 Allows an extension to be created for a header even if that header is
 not found in standard include directories.
 
+=item B<-g>, B<--global>
+
+Include code for safely storing static data in the .xs file. 
+Extensions that do no make use of static data can ignore this option.
+
 =item B<-h>, B<-?>, B<--help>
 
 Print the usage, help and version for this h2xs and exit.
@@ -465,6 +470,7 @@ OPTIONS:
     -d, --debugging       Turn on debugging messages.
     -f, --force           Force creation of the extension even if the C header
                           does not exist.
+    -g, --global          Include code for safely storing static data in the .xs file. 
     -h, -?, --help        Display this help message
     -k, --omit-const-func Omit 'const' attribute on function arguments
                           (used with -x).
@@ -498,6 +504,7 @@ my ($opt_A,
     $opt_c,
     $opt_d,
     $opt_f,
+    $opt_g,
     $opt_h,
     $opt_k,
     $opt_m,
@@ -528,6 +535,7 @@ my %options = (
                 'omit-constant|c'    => \$opt_c,
                 'debugging|d'        => \$opt_d,
                 'force|f'            => \$opt_f,
+                'global|g'           => \$opt_g,
                 'help|h|?'           => \$opt_h,
                 'omit-const-func|k'  => \$opt_k,
                 'gen-tied-var|m'     => \$opt_m,
@@ -1201,6 +1209,21 @@ if( @path_h ){
     print XS "\n";
 }
 
+print XS <<"END" if $opt_g;
+
+/* Global Data */
+
+#define MY_CXT_KEY "${module}::_guts" XS_VERSION
+
+typedef struct {
+    /* Put Global Data in here */
+    int dummy;		/* you can access this elsewhere as MY_CXT.dummy */
+} my_cxt_t;
+
+START_MY_CXT
+
+END
+
 my %pointer_typedefs;
 my %struct_typedefs;
 
@@ -1269,6 +1292,18 @@ END
 # If a constant() function was #included then output a corresponding
 # XS declaration:
 print XS "INCLUDE: $constsfname.xs\n" unless $opt_c;
+
+print XS <<"END" if $opt_g;
+
+BOOT:
+{
+    MY_CXT_INIT;
+    /* If any of the fields in the my_cxt_t struct need
+       to be initialised, do it here.
+     */
+}
+
+END
 
 foreach (sort keys %const_xsub) {
     print XS <<"END";
