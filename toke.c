@@ -1147,12 +1147,21 @@ S_scan_const(pTHX_ char *start)
 	    case 't':
 		*d++ = '\t';
 		break;
+#ifdef EBCDIC
+	    case 'e':
+		*d++ = '\047';  /* CP 1047 */
+		break;
+	    case 'a':
+		*d++ = '\057';  /* CP 1047 */
+		break;
+#else
 	    case 'e':
 		*d++ = '\033';
 		break;
 	    case 'a':
 		*d++ = '\007';
 		break;
+#endif
 	    } /* end switch */
 
 	    s++;
