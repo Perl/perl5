@@ -3987,7 +3987,8 @@ C<redo> work.
 
 =item ref
 
-Returns a true value if EXPR is a reference, false otherwise.  If EXPR
+Returns a non-empty string if EXPR is a reference, the empty
+string otherwise. If EXPR
 is not specified, C<$_> will be used.  The value returned depends on the
 type of thing the reference is a reference to.
 Builtin types include:
