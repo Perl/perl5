@@ -243,7 +243,7 @@ Most code should use utf8_to_uvchr() rather than call this directly.
 UV
 Perl_utf8n_to_uvuni(pTHX_ U8 *s, STRLEN curlen, STRLEN *retlen, U32 flags)
 {
-    UV uv = *s, ouv;
+    UV uv = *s, ouv = 0;
     STRLEN len = 1;
     bool dowarn = ckWARN_d(WARN_UTF8);
     STRLEN expectlen = 0;

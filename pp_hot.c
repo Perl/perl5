@@ -395,8 +395,8 @@ PP(pp_add)
 	/* Unless the left argument is integer in range we are going to have to
 	   use NV maths. Hence only attempt to coerce the right argument if
 	   we know the left is integer.  */
-	register UV auv;
-	bool auvok;
+	register UV auv = 0;
+	bool auvok = FALSE;
 	bool a_valid = 0;
 
 	if (!useleft) {
@@ -1628,7 +1628,7 @@ PP(pp_helem)
     U32 defer = PL_op->op_private & OPpLVAL_DEFER;
     SV *sv;
     U32 hash = (SvFAKE(keysv) && SvREADONLY(keysv)) ? SvUVX(keysv) : 0;
-    I32 preeminent;
+    I32 preeminent = 0;
 
     if (SvTYPE(hv) == SVt_PVHV) {
 	if (PL_op->op_private & OPpLVAL_INTRO)
@@ -2991,7 +2991,7 @@ S_method_common(pTHX_ SV* meth, U32* hashp)
     HV* stash;
     char* name;
     STRLEN namelen;
-    char* packname;
+    char* packname = 0;
     STRLEN packlen;
 
     name = SvPV(meth, namelen);

@@ -3677,7 +3677,8 @@ Perl_sv_setpvn(pTHX_ register SV *sv, register const char *ptr, register STRLEN 
     else {
         /* len is STRLEN which is unsigned, need to copy to signed */
 	IV iv = len;
-	assert(iv >= 0);
+	if (iv < 0)
+	    Perl_croak(aTHX_ "panic: sv_setpvn called with negative strlen");
     }
     (void)SvUPGRADE(sv, SVt_PV);
 
@@ -5124,7 +5125,7 @@ Perl_sv_gets(pTHX_ register SV *sv, register PerlIO *fp, I32 append)
     register STDCHAR rslast;
     register STDCHAR *bp;
     register I32 cnt;
-    I32 i;
+    I32 i = 0;
 
     SV_CHECK_THINKFIRST(sv);
     (void)SvUPGRADE(sv, SVt_PV);
@@ -6990,7 +6991,7 @@ Perl_sv_vcatpvfn(pTHX_ SV *sv, const char *pat, STRLEN patlen, va_list *args, SV
     STRLEN origlen;
     I32 svix = 0;
     static char nullstr[] = "(null)";
-    SV *argsv;
+    SV *argsv = Nullsv;
 
     /* no matter what, this is a string now */
     (void)SvPV_force(sv, origlen);
@@ -7058,7 +7059,7 @@ Perl_sv_vcatpvfn(pTHX_ SV *sv, const char *pat, STRLEN patlen, va_list *args, SV
 	STRLEN veclen = 0;
 	char c;
 	int i;
-	unsigned base;
+	unsigned base = 0;
 	IV iv;
 	UV uv;
 	NV nv;

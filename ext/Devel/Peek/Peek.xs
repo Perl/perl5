@@ -10,7 +10,7 @@ DeadCode(pTHX)
     return Nullsv;
 #else
     SV* sva;
-    SV* sv, *dbg;
+    SV* sv;
     SV* ret = newRV_noinc((SV*)newAV());
     register SV* svend;
     int tm = 0, tref = 0, ts = 0, ta = 0, tas = 0;

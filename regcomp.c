@@ -949,7 +949,7 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp, I32 *deltap, reg
 	    flags &= ~SCF_DO_STCLASS;
 	}
 	else if (strchr((char*)PL_varies,OP(scan))) {
-	    I32 mincount, maxcount, minnext, deltanext, fl;
+	    I32 mincount, maxcount, minnext, deltanext, fl = 0;
 	    I32 f = flags, pos_before = 0;
 	    regnode *oscan = scan;
 	    struct regnode_charclass_class this_class;
@@ -1260,7 +1260,7 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp, I32 *deltap, reg
 	    }
 	}
 	else if (strchr((char*)PL_simple,OP(scan))) {
-	    int value;
+	    int value = 0;
 
 	    if (flags & SCF_DO_SUBSTR) {
 		scan_commit(pRExC_state,data);
@@ -1914,7 +1914,6 @@ Perl_pregcomp(pTHX_ char *exp, char *xend, PMOP *pm)
 	if ((!r->anchored_substr || r->anchored_offset) && stclass_flag
 	    && !(data.start_class->flags & ANYOF_EOS)
 	    && !cl_is_anything(data.start_class)) {
-	    SV *sv;
 	    I32 n = add_data(pRExC_state, 1, "f");
 
 	    New(1006, RExC_rx->data->data[n], 1,
@@ -1925,10 +1924,11 @@ Perl_pregcomp(pTHX_ char *exp, char *xend, PMOP *pm)
 	    r->regstclass = (regnode*)RExC_rx->data->data[n];
 	    r->reganch &= ~ROPT_SKIP;	/* Used in find_byclass(). */
 	    PL_regdata = r->data; /* for regprop() */
-	    DEBUG_r((sv = sv_newmortal(),
-		     regprop(sv, (regnode*)data.start_class),
-		     PerlIO_printf(Perl_debug_log, "synthetic stclass `%s'.\n",
-				   SvPVX(sv))));
+	    DEBUG_r({ SV *sv = sv_newmortal();
+	              regprop(sv, (regnode*)data.start_class);
+		      PerlIO_printf(Perl_debug_log,
+				    "synthetic stclass `%s'.\n",
+				    SvPVX(sv));});
 	}
 
 	/* A temporary algorithm prefers floated substr to fixed one to dig more info. */
@@ -1966,7 +1966,6 @@ Perl_pregcomp(pTHX_ char *exp, char *xend, PMOP *pm)
 	r->check_substr = r->anchored_substr = r->float_substr = Nullsv;
 	if (!(data.start_class->flags & ANYOF_EOS)
 	    && !cl_is_anything(data.start_class)) {
-	    SV *sv;
 	    I32 n = add_data(pRExC_state, 1, "f");
 
 	    New(1006, RExC_rx->data->data[n], 1,
@@ -1976,10 +1975,11 @@ Perl_pregcomp(pTHX_ char *exp, char *xend, PMOP *pm)
 		       struct regnode_charclass_class);
 	    r->regstclass = (regnode*)RExC_rx->data->data[n];
 	    r->reganch &= ~ROPT_SKIP;	/* Used in find_byclass(). */
-	    DEBUG_r((sv = sv_newmortal(),
-		     regprop(sv, (regnode*)data.start_class),
-		     PerlIO_printf(Perl_debug_log, "synthetic stclass `%s'.\n",
-				   SvPVX(sv))));
+	    DEBUG_r({ SV* sv = sv_newmortal();
+	              regprop(sv, (regnode*)data.start_class);
+		      PerlIO_printf(Perl_debug_log,
+				    "synthetic stclass `%s'.\n",
+				    SvPVX(sv));});
 	}
     }
 
@@ -3265,9 +3265,9 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state)
     register regnode *ret;
     STRLEN numlen;
     IV namedclass;
-    char *rangebegin;
+    char *rangebegin = 0;
     bool need_class = 0;
-    SV *listsv;
+    SV *listsv = Nullsv;
     register char *e;
     UV n;
     bool optimize_invert = TRUE;

@@ -384,7 +384,7 @@ test_time(pTHX_ clock_t *r, clock_t *u, clock_t *s)
     int i, j, k = 0;
     HV *oldstash = PL_curstash;
     struct tms t1, t2;
-    clock_t realtime1, realtime2;
+    clock_t realtime1 = 0, realtime2 = 0;
     U32 ototal = g_total;
     U32 ostack = g_SAVE_STACK;
     U32 operldb = PL_perldb;

@@ -1093,13 +1093,13 @@ PP(pp_modulo)
 {
     dSP; dATARGET; tryAMAGICbin(modulo,opASSIGN);
     {
-	UV left;
-	UV right;
+	UV left  = 0;
+	UV right = 0;
 	bool left_neg;
 	bool right_neg;
 	bool use_double = 0;
-	NV dright;
-	NV dleft;
+	NV dright = 0.0;
+	NV dleft  = 0.0;
 
 	if (SvIOK_notUV(TOPs) && !SvNOK(TOPs) && !SvPOK(TOPs)) {
 	    IV i = SvIVX(POPs);
@@ -1265,8 +1265,8 @@ PP(pp_subtract)
 	/* Unless the left argument is integer in range we are going to have to
 	   use NV maths. Hence only attempt to coerce the right argument if
 	   we know the left is integer.  */
-	register UV auv;
-	bool auvok;
+	register UV auv = 0;
+	bool auvok = FALSE;
 	bool a_valid = 0;
 
 	if (!useleft) {
@@ -2716,7 +2716,7 @@ PP(pp_substr)
 {
     dSP; dTARGET;
     SV *sv;
-    I32 len;
+    I32 len = 0;
     STRLEN curlen;
     STRLEN utf8_curlen;
     I32 pos;
@@ -4117,7 +4117,7 @@ PP(pp_unpack)
     register char *patend = pat + llen;
     I32 datumtype;
     register I32 len;
-    register I32 bits;
+    register I32 bits = 0;
     register char *str;
 
     /* These must not be in registers: */
@@ -4137,8 +4137,8 @@ PP(pp_unpack)
     float afloat;
     double adouble;
     I32 checksum = 0;
-    register U32 culong;
-    NV cdouble;
+    register U32 culong = 0;
+    NV cdouble = 0.0;
     int commas = 0;
     int star;
 #ifdef PERL_NATINT_PACK
