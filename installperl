@@ -1,6 +1,7 @@
 #!./perl
 BEGIN { @INC=('./lib', '../lib') }
 use File::Find;
+use File::Path qw(mkpath);
 use Config;
 
 $mainperldir = "/usr/bin";
@@ -57,7 +58,7 @@ $osname = $Config{osname};
 if ($d_dosuid && $>) { die "You must run as root to install suidperl\n"; }
 
    $installbin		|| die "No installbin directory in config.sh\n";
--d $installbin		|| makedir($installbin);
+-d $installbin		|| mkpath($installbin, 1, 0777);
 -d $installbin		|| die "$installbin is not a directory\n";
 -w $installbin		|| die "$installbin is not writable by you\n"
 	unless $installbin =~ m#^/afs/# || $nonono;
@@ -73,7 +74,7 @@ if ($d_shrplib) {
 	warn "WARNING: Can't find libperl*.$so* to install into $shrpdir.",
 	    "  (Installing other things anyway.)\n";
     } else {
-	&makedir($shrpdir);
+	mkpath($shrpdir, 1, 0777);
 	-w $shrpdir	|| die "$shrpdir is not writable by you\n";
 	&cmd("cp libperl*.$so* $shrpdir");
     }
@@ -108,7 +109,7 @@ if (! &samepath($installbin, 'x2p')) {
 
 # Install scripts.
 
-&makedir($installscript);
+mkpath($installscript, 1, 0777);
 
 for (@scripts) {
     if (-f $_) {   # cppstdin might not exist on this system.
@@ -118,7 +119,7 @@ for (@scripts) {
 }
 
 # Install pod pages.  Where? I guess in $installprivlib/pod.
-&makedir("${installprivlib}/pod");
+mkpath("${installprivlib}/pod", 1, 0777);
 foreach $file (@pods) {
     # $file is a name like  pod/perl.pod
     cp_if_diff($file, "${installprivlib}/${file}");
@@ -127,7 +128,7 @@ foreach $file (@pods) {
 # Install old man pages.
 
 if ($installman1dir ne '') {
-    &makedir($installman1dir);
+    mkpath($installman1dir, 1, 0777);
 
     if (! &samepath($installman1dir, '.')) {
 	for (@manpages) {
@@ -152,10 +153,10 @@ if ($installman1dir ne '') {
 
 $do_installarchlib = $do_installprivlib = 0;
     
-&makedir($installprivlib);
-&makedir($installarchlib);
-&makedir($installsitelib) if ($installsitelib);
-&makedir($installsitearch) if ($installsitearch);
+mkpath($installprivlib, 1, 0777);
+mkpath($installarchlib, 1, 0777);
+mkpath($installsitelib, 1, 0777) if ($installsitelib);
+mkpath($installsitearch, 1, 0777) if ($installsitearch);
 
 if (chdir "lib") {
     $do_installarchlib = ! &samepath($installarchlib, '.');
@@ -171,7 +172,7 @@ else {
 }
 
 # Install header files and libraries.
-makedir("$installarchlib/CORE");
+mkpath("$installarchlib/CORE", 1, 0777);
 foreach $file (<*.h libperl*.*>) {
     cp_if_diff($file,"$installarchlib/CORE/$file");
 }
@@ -316,19 +317,6 @@ sub chmod {
 	unless $nonono;
 }
 
-sub makedir {
-    local($dir) = @_;
-    unless (-d $dir) {
-	local($shortdir) = $dir;
-
-	$shortdir =~ s#(.*)/.*#$1#;
-	&makedir($shortdir);
-
-	print STDERR "  mkdir $dir\n";
-	mkdir($dir, 0777) || warn "Couldn't create $dir: $!\n" unless $nonono;
-    }
-}
-
 sub samepath {
     local($p1, $p2) = @_;
     local($dev1, $ino1, $dev2, $ino2);
@@ -374,7 +362,7 @@ sub installlib {
 	system "cmp", "-s", $_, "$installlib/$name";
 	if ($?) {
 	    &unlink("$installlib/$name");
-	    &makedir("$installlib/$dir");
+	    mkpath("$installlib/$dir", 1, 0777);
 	    cp_if_diff($_, "$installlib/$name");
 	    # HP-UX (at least) needs to maintain execute permissions
 	    # on dynamically-loaded libraries.
@@ -386,7 +374,7 @@ sub installlib {
 	    }
 	}
     } elsif (-d $_) {
-	&makedir("$installlib/$name");
+	mkpath("$installlib/$name", 1, 0777);
     }
 }
 
