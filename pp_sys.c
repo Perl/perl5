@@ -3679,6 +3679,8 @@ PP(pp_fork)
     EXTEND(SP, 1);
     PERL_FLUSHALL_FOR_CHILD;
     childpid = PerlProc_fork();
+    if (childpid == -1)
+	RETSETUNDEF;
     PUSHi(childpid);
     RETURN;
 #  else

@@ -1770,8 +1770,10 @@ PerlProcFork(struct IPerlProc* piPerl)
 			  (LPVOID)new_perl, 0, &id);
 #    endif
     PERL_SET_THX(aTHXo);	/* XXX perl_clone*() set TLS */
-    if (!handle)
-	Perl_croak(aTHX_ "panic: pseudo fork() failed");
+    if (!handle) {
+	errno = EAGAIN;
+	return -1;
+    }
     w32_pseudo_child_handles[w32_num_pseudo_children] = handle;
     w32_pseudo_child_pids[w32_num_pseudo_children] = id;
     ++w32_num_pseudo_children;
