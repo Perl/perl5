@@ -173,7 +173,9 @@ struct perl_thread;
 #    define dTHX	dTHXa(THR)
 #    define dTHR	dNOOP
 #  else
-#    define MULTIPLICITY
+#    ifndef MULTIPLICITY
+#      define MULTIPLICITY
+#    endif
 #    define pTHX	register PerlInterpreter *my_perl
 #    define aTHX	my_perl
 #    define dTHXa(a)	pTHX = (PerlInterpreter *)a
