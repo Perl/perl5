@@ -1388,7 +1388,6 @@ PP(pp_enteriter)
 		     croak("Range iterator outside integer range");
 		 cx->blk_loop.iterix = SvIV(sv);
 		 cx->blk_loop.itermax = SvIV((SV*)cx->blk_loop.iterary);
-		 sv_setiv(*svp, 0); /* make sure index SV is IV capable */
 	    }
 	    else
 		cx->blk_loop.iterlval = newSVsv(sv);

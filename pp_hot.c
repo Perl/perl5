@@ -1459,14 +1459,7 @@ PP(pp_iter)
 	/* integer increment */
 	if (cx->blk_loop.iterix > cx->blk_loop.itermax)
 	    RETPUSHNO;
-
-	/* we know that the loop index SV is IV capable, so we can save
-	 * some time by doing the essential work of sv_setiv() ourself.
-	 */
-	sv = *cx->blk_loop.itervar;
-	(void)SvIOK_only(sv);
-	SvIVX(sv) = cx->blk_loop.iterix++;
-
+	sv_setiv(*cx->blk_loop.itervar, cx->blk_loop.iterix++);
 	RETPUSHYES;
     }
 
