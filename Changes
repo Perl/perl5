@@ -31,6 +31,272 @@ or any other branch.
 Version v5.7.1		Development release working toward v5.8
 --------------
 ____________________________________________________________________________
+[  9793] By: jhi                                   on 2001/04/23  13:44:18
+        Log: Duplicate lines.
+     Branch: perl
+	   ! MANIFEST
+____________________________________________________________________________
+[  9792] By: jhi                                   on 2001/04/23  13:39:13
+        Log: Subject: Re: PATCH 5.7.1
+             From: Mark-Jason Dominus <mjd@plover.com>
+             Date: Mon, 23 Apr 2001 10:30:21 -0400
+             Message-ID: <20010423143021.17335.qmail@plover.com>
+     Branch: perl
+	   ! perl.h sv.c
+____________________________________________________________________________
+[  9791] By: jhi                                   on 2001/04/23  13:32:40
+        Log: Add the CPAN.pm 1.59_54 tests.
+     Branch: perl
+	   + t/lib/cpan-loadme.t t/lib/cpan-vcmp.t
+	   ! MANIFEST
+____________________________________________________________________________
+[  9790] By: jhi                                   on 2001/04/23  13:21:55
+        Log: Subject: Deparse nit
+             From: Robin Houston <robin@kitsite.com>
+             Date: Mon, 23 Apr 2001 12:38:20 +0100
+             Message-ID: <20010423123820.A19945@puffinry.freeserve.co.uk>
+     Branch: perl
+	   ! ext/B/B/Deparse.pm
+____________________________________________________________________________
+[  9789] By: jhi                                   on 2001/04/23  13:19:07
+        Log: Subject: [PATCH] bug 20010423.002
+             From: Robin Houston <robin@kitsite.com>
+             Date: Mon, 23 Apr 2001 13:12:30 +0100
+             Message-ID: <20010423131230.A20074@puffinry.freeserve.co.uk>
+     Branch: perl
+	   ! pp.c
+____________________________________________________________________________
+[  9788] By: jhi                                   on 2001/04/23  13:02:49
+        Log: Subject: PATCH [5.7.1] hv.c unused #define
+             From: Mark-Jason Dominus <mjd@plover.com>
+             Date: Sun, 22 Apr 2001 14:17:49 -0400
+             Message-ID: <20010422181749.26976.qmail@plover.com>
+     Branch: perl
+	   ! hv.c
+____________________________________________________________________________
+[  9787] By: jhi                                   on 2001/04/23  13:02:02
+        Log: Subject: PATCH 5.7.1
+             From: Mark-Jason Dominus <mjd@plover.com>
+             Date: Sun, 22 Apr 2001 15:12:57 -0400
+             Message-ID: <20010422191258.6539.qmail@plover.com>
+             
+             plus Sarathy's STMT_START + STMT_END suggestion.
+     Branch: perl
+	   ! perl.h
+____________________________________________________________________________
+[  9786] By: jhi                                   on 2001/04/23  12:53:25
+        Log: Fix for
+             
+             Subject: [ID 20010423.001] perlapi documentation inconsistency (SvGROW)
+             From: dLux <dlux@spam.sch.bme.hu>
+             Date: Mon, 23 Apr 2001 01:25:26 +0200
+             Message-Id: <E14rTEM-0000CB-00@dl.sch.bme.hu>
+             
+             (SvGROW really does return a char *.)
+     Branch: perl
+	   ! pod/perlapi.pod sv.h
+____________________________________________________________________________
+[  9785] By: jhi                                   on 2001/04/23  04:34:04
+        Log: Time::Piece work continues.  $t->day removed since
+             I think it's too confusing.  Now has normal and
+             abbreviated length weekday names and month names,
+             the names change with _names(), not _list().
+             Now has strftime() in Perl, _strftime() is
+             the libc version (to which strftime() falls back
+             if it doesn't know the format.  To do: the reverse
+             of strftime, strptime(), and the localisation of both.
+     Branch: perl
+	   ! ext/Time/Piece/Piece.pm ext/Time/Piece/Piece.xs
+	   ! t/lib/time-piece.t
+____________________________________________________________________________
+[  9784] By: jhi                                   on 2001/04/23  02:41:46
+        Log: Subject: Re: [PATCH] Re: [ID 20010422.003] Core dump in overloaded bool while using ' 
+             From: andreas.koenig@anima.de (Andreas J. Koenig)
+             Date: 23 Apr 2001 05:20:55 +0200
+             Message-ID: <m3ofto5mjs.fsf@ak-71.mind.de>
+     Branch: perl
+	   ! t/pragma/overload.t
+____________________________________________________________________________
+[  9783] By: jhi                                   on 2001/04/22  23:32:42
+        Log: Subject: [PATCH B::Deparse] Distinguish package variables, if necessary
+             From: Robin Houston <robin@kitsite.com>
+             Date: Mon, 23 Apr 2001 00:38:18 +0100
+             Message-ID: <20010423003818.A19109@puffinry.freeserve.co.uk>
+     Branch: perl
+	   ! ext/B/B/Deparse.pm
+____________________________________________________________________________
+[  9782] By: jhi                                   on 2001/04/22  20:55:43
+        Log: Subject: [PATCH] Re: [ID 20010422.003] Core dump in overloaded bool while using '
+             From: Simon Cozens <simon@netthink.co.uk>
+             Date: Sun, 22 Apr 2001 18:47:25 +0100
+             Message-ID: <20010422184725.A14411@netthink.co.uk>
+     Branch: perl
+	   ! sv.c t/pragma/overload.t
+____________________________________________________________________________
+[  9781] By: jhi                                   on 2001/04/22  20:52:13
+        Log: Subject: [PATCH] Support BEGIN blocks in B::Deparse (& more)
+             From: Robin Houston <robin@kitsite.com>
+             Date: Sun, 22 Apr 2001 22:14:50 +0100
+             Message-ID: <20010422221450.A18921@puffinry.freeserve.co.uk>
+     Branch: perl
+	   ! ext/B/B/Concise.pm ext/B/B/Deparse.pm ext/B/O.pm
+____________________________________________________________________________
+[  9780] By: nick                                  on 2001/04/22  20:40:31
+        Log: Integrate mainline.
+     Branch: perlio
+	  +> t/lib/b-debug.t t/lib/b-deparse.t t/lib/b-showlex.t
+	  +> t/lib/b-stash.t
+	  !> (integrate 38 files)
+____________________________________________________________________________
+[  9779] By: jhi                                   on 2001/04/22  15:16:03
+        Log: Subject: IO::Socket::INET patch
+             From: andrew deryabin <djsf@technarchy.ru>
+             Date: Sat, 21 Apr 2001 17:46:52 +0400
+             Message-ID: <20010421174652.B1426@technarchy>
+     Branch: perl
+	   ! ext/IO/lib/IO/Socket/INET.pm
+____________________________________________________________________________
+[  9778] By: jhi                                   on 2001/04/22  15:14:33
+        Log: Subject: Re: ANYOF_SIZE is wrong in 5.7.1 
+             From: Mark-Jason Dominus <mjd@plover.com>
+             Date: Sat, 21 Apr 2001 21:27:49 -0400
+             Message-ID: <20010422012749.27024.qmail@plover.com>
+     Branch: perl
+	   ! regcomp.c
+____________________________________________________________________________
+[  9777] By: jhi                                   on 2001/04/22  15:10:51
+        Log: Subject: Re: Regex debugger patch 
+             From: Mark-Jason Dominus <mjd@plover.com>
+             Date: Sat, 21 Apr 2001 21:48:51 -0400
+             Message-ID: <20010422014851.27165.qmail@plover.com>
+     Branch: perl
+	   ! pod/perldebguts.pod
+____________________________________________________________________________
+[  9776] By: jhi                                   on 2001/04/22  15:09:48
+        Log: Subject: Re: Regex debugger patch
+             From: Mark-Jason Dominus <mjd@plover.com>
+             Date: Sat, 21 Apr 2001 14:24:39 -0400
+             Message-ID: <20010421182439.16508.qmail@plover.com>
+             
+             Regex debugger backend.
+     Branch: perl
+	   ! regcomp.c regexp.h
+____________________________________________________________________________
+[  9775] By: jhi                                   on 2001/04/21  16:45:40
+        Log: Subject: [PATCH] Typo in utf8.h
+             From: Jesús Quiroga <jquiroga@pobox.com>
+             Date: Sat, 21 Apr 2001 19:25:33 +0200
+             Message-Id: <5.0.2.1.1.20010421192107.01ce5a50@ix.netcorps.com>
+     Branch: perl
+	   ! utf8.h
+____________________________________________________________________________
+[  9774] By: jhi                                   on 2001/04/21  16:43:52
+        Log: Subject: [ID 20010421.010] Perl 5.6.1 on Unixware 7
+             From: Joe Orton <jorton@redhat.com>
+             Date: Tue, 17 Apr 2001 15:50:43 +0100
+             Message-Id: <20010417155043.D19132@eu.c2.net>
+     Branch: perl
+	   ! hints/svr5.sh
+____________________________________________________________________________
+[  9773] By: jhi                                   on 2001/04/21  15:30:15
+        Log: Subject: Patch utils/h2xs.PL
+             From: Elaine -HFB- Ashton <elaine@chaos.wustl.edu>
+             Date: Sat, 21 Apr 2001 10:32:16 -0500
+             Message-ID: <20010421103216.C14521@chaos.wustl.edu>
+             
+             Add MAILING list and LICENSE templates.
+     Branch: perl
+	   ! utils/h2xs.PL
+____________________________________________________________________________
+[  9772] By: jhi                                   on 2001/04/21  15:28:36
+        Log: Subject: perlfaq2.patch for 5.7.1
+             From: Elaine -HFB- Ashton <elaine@chaos.wustl.edu>
+             Message-ID: <20010420164219.J3194@chaos.wustl.edu>
+             Date: Fri, 20 Apr 2001 16:42:19 -0500
+             
+             rm an extra tab, a blurb about the xx.cpan to clarify
+             which countries actually have that and dejanews is history
+             as well as most of that nonsensical entry.
+     Branch: perl
+	   ! pod/perlfaq2.pod
+____________________________________________________________________________
+[  9771] By: jhi                                   on 2001/04/21  15:27:17
+        Log: Subject: perlfaq1.patch for 5.7.1
+             From: Elaine -HFB- Ashton <elaine@chaos.wustl.edu>
+             Date: Fri, 20 Apr 2001 16:57:36 -0500
+             Message-ID: <20010420165736.K3194@chaos.wustl.edu>
+             
+             Evil URLs must die. Especially when they are broken.
+     Branch: perl
+	   ! pod/perlfaq1.pod
+____________________________________________________________________________
+[  9770] By: jhi                                   on 2001/04/21  15:23:38
+        Log: Subject: [PATCH ext/B/B.pm and tests] B::walksymtable improperly documented?
+             From: Michael G Schwern <schwern@pobox.com>
+             Date: Sat, 21 Apr 2001 16:11:12 +0100
+             Message-ID: <20010421161112.L19736@blackrider.blackstar.co.uk>
+     Branch: perl
+	   + t/lib/b-debug.t t/lib/b-deparse.t t/lib/b-showlex.t
+	   + t/lib/b-stash.t
+	   ! MANIFEST ext/B/B.pm t/lib/b.t
+____________________________________________________________________________
+[  9769] By: jhi                                   on 2001/04/21  15:03:32
+        Log: Subject: [PATCH utils/h2ph.PL] Confused by "#if &__GNUC_PREREQ (2,97)"
+             From: Michael G Schwern <schwern@pobox.com>
+             Date: Sat, 21 Apr 2001 09:48:00 +0100
+             Message-ID: <20010421094759.B19736@blackrider.blackstar.co.uk>
+     Branch: perl
+	   ! utils/h2ph.PL
+____________________________________________________________________________
+[  9768] By: jhi                                   on 2001/04/21  14:33:49
+        Log: PerlIO and Encode doc cleanup and tweaks.
+     Branch: perl
+	   ! ext/Encode/Encode.pm ext/PerlIO/Scalar/Scalar.pm
+	   ! ext/PerlIO/Via/Via.pm lib/PerlIO.pm
+____________________________________________________________________________
+[  9767] By: jhi                                   on 2001/04/21  12:40:16
+        Log: Integrate perlio.
+     Branch: perl
+	  !> doio.c
+____________________________________________________________________________
+[  9766] By: nick                                  on 2001/04/20  18:28:35
+        Log: Avoid core dump on
+             open(STDOUT,">",\$foo);
+     Branch: perlio
+	   ! doio.c
+____________________________________________________________________________
+[  9765] By: jhi                                   on 2001/04/20  13:23:43
+        Log: Subject: Re: [abigail@foad.org: [ID 20000901.065] -MO=Deparse and $^W and $[ in same string.]
+             From: Robin Houston <robin@kitsite.com>
+             Date: Fri, 20 Apr 2001 14:29:22 +0100
+             Message-ID: <20010420142921.A14960@puffinry.freeserve.co.uk>
+     Branch: perl
+	   ! ext/B/B.pm ext/B/B/Deparse.pm
+____________________________________________________________________________
+[  9764] By: jhi                                   on 2001/04/20  13:19:33
+        Log: Subject: [PATCH: perl@9742] avoid t/u-*.t test on platforms where List/Util was not built
+             From: Peter Prymmer <pvhp@forte.com>
+             Date: Thu, 19 Apr 2001 17:40:14 -0700 (PDT)
+             Message-ID: <Pine.OSF.4.10.10104191737200.348917-100000@aspara.forte.com>
+     Branch: perl
+	   ! t/lib/u-blessed.t t/lib/u-dualvar.t t/lib/u-first.t
+	   ! t/lib/u-max.t t/lib/u-maxstr.t t/lib/u-min.t t/lib/u-minstr.t
+	   ! t/lib/u-readonly.t t/lib/u-reduce.t t/lib/u-reftype.t
+	   ! t/lib/u-sum.t t/lib/u-tainted.t t/lib/u-weak.t
+____________________________________________________________________________
+[  9763] By: jhi                                   on 2001/04/20  12:36:39
+        Log: Subject: Re: A new PerlIO coredump
+             From: Nick Ing-Simmons <nik@tiuk.ti.com>
+             Date: Fri, 20 Apr 2001 14:29:41 +0100 (BST)
+             Message-Id: <200104201329.OAA16021@mikado.tiuk.ti.com>
+     Branch: perl
+	   ! doio.c
+____________________________________________________________________________
+[  9762] By: jhi                                   on 2001/04/19  23:02:30
+        Log: Update Changes.
+     Branch: perl
+	   ! Changes patchlevel.h
+____________________________________________________________________________
 [  9761] By: jhi                                   on 2001/04/19  22:59:19
         Log: More cleanup cleanup.
      Branch: perl
