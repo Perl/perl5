@@ -3684,7 +3684,7 @@ L<perlref> for more on this.
 
 =item Useless use of %s with no values
 
-(W misc) You used the push() or unshift() function with no arguments
+(W syntax) You used the push() or unshift() function with no arguments
 apart from the array, like C<push(@x)> or C<unshift(@foo)>. That won't
 usually have any effect on the array, so is completely useless. It's
 possible in principle that push(@tied_array) could have some effect

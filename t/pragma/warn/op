@@ -887,10 +887,10 @@ in end
 ########
 # op.c
 my @x;
-use warnings 'misc' ;
+use warnings 'syntax' ;
 push(@x);
 unshift(@x);
-no warnings 'misc' ;
+no warnings 'syntax' ;
 push(@x);
 unshift(@x);
 EXPECT
