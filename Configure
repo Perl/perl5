@@ -20,7 +20,7 @@
 
 # $Id: Head.U,v 3.0.1.9 1997/02/28 15:02:09 ram Exp $
 #
-# Generated on Sun Nov 26 20:19:22 EET 2000 [metaconfig 3.0 PL70]
+# Generated on Wed Nov 29 18:47:12 EET 2000 [metaconfig 3.0 PL70]
 # (with additional metaconfig patches by perlbug@perl.org)
 
 cat >/tmp/c1$$ <<EOF
@@ -13587,6 +13587,11 @@ case "$i_stdarg" in
 	$cat >try.c <<EOCP
 #include <stdarg.h>
 #include <stdio.h>
+#$i_stdlib I_STDLIB
+#ifdef I_STDLIB
+#include <stdlib.h>
+#endif
+#include <signal.h>
 
 int
 ivfprintf(FILE *f, const char *fmt, va_list *valp)
@@ -13611,6 +13616,8 @@ myprintf(char *fmt, ...)
 int
 main(int ac, char **av)
 {
+  signal(SIGSEGV, exit);
+
   myprintf("%s%cs all right, then\n", "that", '\'');                            
   exit(0);      
 }
