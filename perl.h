@@ -1555,7 +1555,7 @@ char *getlogin _((void));
 #define UNLINK unlnk
 I32 unlnk _((char*));
 #else
-#define UNLINK unlink
+#define UNLINK PerlLIO_unlink
 #endif
 
 #ifndef HAS_SETREUID
@@ -2118,6 +2118,49 @@ typedef void *Thread;
 #endif
 
 #ifdef PERL_OBJECT
+/* from perly.c */
+#undef  yydebug
+#undef  yynerrs
+#undef  yyerrflag
+#undef  yychar
+#undef  yyssp
+#undef  yyvsp
+#undef  yyval
+#undef  yylval
+#define yydebug	    PL_yydebug
+#define yynerrs	    PL_yynerrs
+#define yyerrflag   PL_yyerrflag
+#define yychar	    PL_yychar
+#define yyssp	    PL_yyssp
+#define yyvsp	    PL_yyvsp
+#define yyval	    PL_yyval
+#define yylval	    PL_yylval
+PERLVAR(yydebug,		int)
+PERLVAR(yynerrs,		int)
+PERLVAR(yyerrflag,		int)
+PERLVAR(yychar,			int)
+PERLVAR(yyssp,			short*)
+PERLVAR(yyvsp,			YYSTYPE*)
+PERLVAR(yyval,			YYSTYPE)
+PERLVAR(yylval,			YYSTYPE)
+
+#define efloatbuf		PL_efloatbuf
+#define efloatsize		PL_efloatsize
+PERLVAR(efloatbuf,		char *)
+PERLVAR(efloatsize,		STRLEN)
+
+#define glob_index		PL_glob_index
+#define srand_called	PL_srand_called
+#define uudmap			PL_uudmap
+#define bitcount		PL_bitcount
+#define filter_debug	PL_filter_debug
+PERLVAR(glob_index,		int)
+PERLVAR(srand_called,	bool)
+PERLVAR(uudmap[256],	char)
+PERLVAR(bitcount,		char*)
+PERLVAR(filter_debug,	int)
+
+
 /*
  * The following is a buffer where new variables must
  * be defined to maintain binary compatibility with PERL_OBJECT

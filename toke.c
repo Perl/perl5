@@ -1301,7 +1301,9 @@ incl_perldb(void)
  * Note that IoTOP_NAME, IoFMT_NAME, IoBOTTOM_NAME, if set for
  * private use must be set using malloc'd pointers.
  */
+#ifndef PERL_OBJECT
 static int filter_debug = 0;
+#endif
 
 SV *
 filter_add(filter_t funcp, SV *datasv)
@@ -1976,7 +1978,7 @@ yylex(void)
 		    else
 			newargv = PL_origargv;
 		    newargv[0] = ipath;
-		    execv(ipath, newargv);
+		    PerlProc_execv(ipath, newargv);
 		    croak("Can't exec %s", ipath);
 		}
 		if (d) {

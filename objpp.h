@@ -4,9 +4,9 @@
 #undef  amagic_call
 #define amagic_call       CPerlObj::Perl_amagic_call
 #undef  amagic_cmp
-#define amagic_cmp        CPerlObj::Perl_amagic_cmp
+#define amagic_cmp        CPerlObj::amagic_cmp
 #undef  amagic_cmp_locale
-#define amagic_cmp_locale CPerlObj::Perl_amagic_cmp_locale
+#define amagic_cmp_locale CPerlObj::amagic_cmp_locale
 #undef  Gv_AMupdate
 #define Gv_AMupdate       CPerlObj::Perl_Gv_AMupdate
 #undef  add_data
@@ -293,6 +293,8 @@
 #define do_vecset         CPerlObj::Perl_do_vecset
 #undef  do_vop
 #define do_vop            CPerlObj::Perl_do_vop
+#undef  dofile
+#define dofile            CPerlObj::Perl_dofile
 #undef  do_clean_all
 #define do_clean_all      CPerlObj::do_clean_all
 #undef  do_clean_named_objs

@@ -4458,8 +4458,10 @@ sv_vcatpvfn(SV *sv, const char *pat, STRLEN patlen, va_list *args, SV **svargs, 
 	STRLEN elen = 0;
 	char ebuf[TYPE_DIGITS(int) * 2 + 16]; /* large enough for "%#.#f" */
 
+#ifndef PERL_OBJECT
 	static char *efloatbuf = Nullch;
 	static STRLEN efloatsize = 0;
+#endif
 
 	char c;
 	int i;

@@ -105,9 +105,9 @@ typedef unsigned UBW;
 static void doencodes _((SV* sv, char* s, I32 len));
 static SV* refto _((SV* sv));
 static U32 seed _((void));
+static bool srand_called = FALSE;
 #endif
 
-static bool srand_called = FALSE;
 
 /* variations on pp_null */
 
@@ -2954,7 +2954,9 @@ mul128(SV *sv, U8 m)
 
 static const char uuemap[] =
     "`!\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_";
+#ifndef PERL_OBJECT
 static char uudmap[256];        /* Initialised on first use */
+#endif
 #if 'I' == 73 && 'J' == 74
 /* On an ASCII/ISO kind of system */
 #define ISUUCHAR(ch)    ((ch) >= ' ' && (ch) < 'a')
@@ -3003,7 +3005,9 @@ PP(pp_unpack)
     I32 checksum = 0;
     register U32 culong;
     double cdouble;
+#ifndef PERL_OBJECT
     static char* bitcount = 0;
+#endif
     int commas = 0;
 
     if (gimme != G_ARRAY) {		/* arrange to do first one only */

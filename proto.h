@@ -822,6 +822,8 @@ void debprof _((OP *o));
 
 void *bset_obj_store _((void *obj, I32 ix));
 OP *new_logop _((I32 type, I32 flags, OP **firstp, OP **otherp));
+I32     amagic_cmp _((register SV *str1, register SV *str2));
+I32     amagic_cmp_locale _((register SV *str1, register SV *str2));
 
 #define PPDEF(s) OP* CPerlObj::s _((ARGSproto));
 public:
@@ -866,6 +868,7 @@ void restore_rsfp _((void *f));
 void restore_expect _((void *e));
 void restore_lex_expect _((void *e));
 void yydestruct _((void *ptr));
+
 VIRTUAL int fprintf _((PerlIO *pf, const char *pat, ...));
 VIRTUAL SV**	get_specialsv_list _((void));
 
@@ -897,11 +900,9 @@ VIRTUAL void	sv_setsv_mg _((SV *dstr, SV *sstr));
 VIRTUAL void	sv_usepvn_mg _((SV *sv, char *ptr, STRLEN len));
 
 VIRTUAL MGVTBL*	get_vtbl _((int vtbl_id));
-
+VIRTUAL OP*	dofile _((OP* term));
 VIRTUAL void	save_generic_svref _((SV** sptr));
-VIRTUAL I32     amagic_cmp _((register SV *str1, register SV *str2));
-VIRTUAL I32     amagic_cmp_locale _((register SV *str1, register SV *str2));
-
+ 
 /* New virtual functions must be added here to maintain binary
  * compatablity with PERL_OBJECT
  */

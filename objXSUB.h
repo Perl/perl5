@@ -690,10 +690,6 @@
 
 #undef  amagic_call
 #define amagic_call         pPerl->Perl_amagic_call
-#undef  amagic_cmp
-#define amagic_cmp          pPerl->Perl_amagic_cmp
-#undef  amagic_cmp_locale
-#define amagic_cmp_locale   pPerl->Perl_amagic_cmp_locale
 #undef  Perl_GetVars
 #define Perl_GetVars        pPerl->Perl_GetVars
 #undef  Gv_AMupdate
@@ -910,6 +906,8 @@
 #define do_vecset           pPerl->Perl_do_vecset
 #undef  do_vop
 #define do_vop              pPerl->Perl_do_vop
+#undef  dofile
+#define dofile              pPerl->Perl_dofile
 #undef  dowantarray
 #define dowantarray         pPerl->Perl_dowantarray
 #undef  dump_all

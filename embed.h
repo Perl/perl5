@@ -27,8 +27,6 @@
 #define add_ass_amg		Perl_add_ass_amg
 #define additem			Perl_additem
 #define amagic_call		Perl_amagic_call
-#define amagic_cmp		Perl_amagic_cmp
-#define amagic_cmp_locale	Perl_amagic_cmp_locale
 #define append_elem		Perl_append_elem
 #define append_list		Perl_append_list
 #define apply			Perl_apply
@@ -161,6 +159,7 @@
 #define do_trans		Perl_do_trans
 #define do_vecset		Perl_do_vecset
 #define do_vop			Perl_do_vop
+#define dofile			Perl_dofile
 #define dofindlabel		Perl_dofindlabel
 #define dopoptoeval		Perl_dopoptoeval
 #define dounwind		Perl_dounwind

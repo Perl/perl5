@@ -1,8 +1,7 @@
-
-#ifdef PERL_OBJECT
-#define USE_SOCKETS_AS_HANDLES
 #include "EXTERN.h"
 #include "perl.h"
+
+#ifdef PERL_OBJECT
 
 #define NO_XSLOCKS
 #include "XSUB.H"
@@ -35,12 +34,15 @@ CPerlObj *pPerl;
 int
 main(int argc, char **argv, char **env)
 {
+    char szModuleName[MAX_PATH];
     CPerlHost host;
     int exitstatus = 1;
 
     if(!host.PerlCreate())
 	exit(exitstatus);
 
+    GetModuleFileName(NULL, szModuleName, sizeof(szModuleName));
+    argv[0] = szModuleName;
     exitstatus = host.PerlParse(xs_init, argc, argv, NULL);
 
     if (!exitstatus)
@@ -74,6 +76,9 @@ __declspec(dllimport) int RunPerl(int argc, char **argv, char **env, void *ios);
 int
 main(int argc, char **argv, char **env)
 {
+    char szModuleName[MAX_PATH];
+    GetModuleFileName(NULL, szModuleName, sizeof(szModuleName));
+    argv[0] = szModuleName;
     return RunPerl(argc, argv, env, (void*)0);
 }
 
