@@ -189,9 +189,9 @@ threadstart(void *arg)
     SvREFCNT_dec(PL_lastscream);
     SvREFCNT_dec(PL_defoutgv);
     Safefree(PL_reg_poscache);
-    thr->thr_done = 1;
 
     MUTEX_LOCK(&thr->mutex);
+    thr->thr_done = 1;
     DEBUG_S(PerlIO_printf(Perl_debug_log,
 			  "%p: threadstart finishing: state is %u\n",
 			  thr, ThrSTATE(thr)));
@@ -453,7 +453,7 @@ done(t)
 	Thread	t
     PPCODE:
 #ifdef USE_THREADS
-     PUSHs(t->thr_done ? &PL_sv_yes : &PL_sv_no);
+	PUSHs(t->thr_done ? &PL_sv_yes : &PL_sv_no);
 #endif
 
 void

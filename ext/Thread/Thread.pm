@@ -34,7 +34,6 @@ Thread - manipulate threads in Perl (EXPERIMENTAL, subject to change)
     my $tid = Thread->self->tid; 
     my $tlist = Thread->list;
 
-
     lock($scalar);
     yield();
 
@@ -191,7 +190,7 @@ assigned starting with one.
 
 The C<flags> method returns the flags for the thread. This is the
 integer value corresponding to the internal flags for the thread, and
-the value man not be all that meaningful to you.
+the value may not be all that meaningful to you.
 
 =item done
 
