@@ -1430,6 +1430,7 @@ PP(pp_subst)
 	|| (SvTYPE(TARG) > SVt_PVLV
 	    && !(SvTYPE(TARG) == SVt_PVGV && SvFAKE(TARG))))
 	croak(no_modify);
+    PUTBACK;
     s = SvPV(TARG, len);
     if (!SvPOKp(TARG) || SvTYPE(TARG) == SVt_PVGV)
 	force_on_match = 1;
@@ -1637,6 +1638,7 @@ PP(pp_subst)
 	sv_free(dstr);
 
 	TAINT_IF(rxtainted & 1);
+	SPAGAIN;
 	PUSHs(sv_2mortal(newSViv((I32)iters)));
 
 	(void)SvPOK_only(TARG);
