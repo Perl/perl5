@@ -862,6 +862,16 @@ switches, or explicitly, failed for the indicated reason.  Usually this
 is because you don't have read permission for a file which you named on
 the command line.
 
+=item Can't open a reference
+
+(W io) You tried to open a scalar reference for reading or writing,
+using the 3-arg open() syntax :
+
+    open FH, '>', $ref;
+
+but your version of perl is compiled without perlio, and this form of
+open is not supported.
+
 =item Can't open bidirectional pipe
 
 (W pipe) You tried to say C<open(CMD, "|cmd|")>, which is not supported.
