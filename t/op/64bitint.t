@@ -127,25 +127,17 @@ if ($^O ne 'unicos') {
     $x = $q * 1234567;
     print "not " unless $x == 15241567763770867 && $x > $f;
     print "ok 23\n";
-} else {
-    # Unicos has imprecise doubles (14 decimal digits or so),
-    # the multiplication mangles the low-order bits.
-    $x = $q * 1234;
-    print "not " unless $x == 15234567763834 && $x > $f;
-    print "ok 23\n";
-}
 
-$x /= 1234567;
-print "not " unless $x == $q && $x > $f;
-print "ok 24\n";
+    $x /= 1234567;
+    print "not " unless $x == $q && $x > $f;
+    print "ok 24\n";
 
-$x = 98765432109 % 12345678901;
-print "not " unless $x == 901;
-print "ok 25\n";
+    $x = 98765432109 % 12345678901;
+    print "not " unless $x == 901;
+    print "ok 25\n";
+    
+    # The following 12 tests adapted from op/inc.
 
-# The following 12 tests adapted from op/inc.
-
-if ($^O ne 'unicos') {
     $a = 9223372036854775807;
     $c = $a++;
     print "not " unless $a == 9223372036854775808;
@@ -225,9 +217,9 @@ if ($^O ne 'unicos') {
 
 } else {
     # Unicos has imprecise doubles (14 decimal digits or so),
-    # near the UV/IV limites the low-order bits become mangled
-    # even by simple additions and subtractions.
-    for (26..37) {
+    # especially if operating near the UV/IV limits the low-order bits
+    # become mangled even by simple arithmetic operations.
+    for (23..37) {
 	print "ok #_ # skipped: too imprecise numbers\n";
     }
 }
