@@ -349,7 +349,7 @@ cat > UU/use64bitint.cbu <<'EOCBU'
 # This script UU/use64bitint.cbu will get 'called-back' by Configure 
 # after it has prompted the user for whether to use 64 bit integers.
 case "$use64bitint" in
-$define|true|[yY]*)
+"$define"|true|[yY]*)
 	    case "`uname -r`" in
 	    2.[1-6])
 		cat >&4 <<EOM
@@ -367,10 +367,10 @@ cat > UU/use64bitall.cbu <<'EOCBU'
 # This script UU/use64bitall.cbu will get 'called-back' by Configure 
 # after it has prompted the user for whether to be maximally 64 bitty.
 case "$use64bitall" in
-$define|true|[yY]*)
+"$define"|true|[yY]*)
 	    case "$cc -v 2>/dev/null" in
 	    *gcc*)
-		# I don't know what are the flags to get gcc sparcv9-aware,
+		# I don't know what are the flags to make gcc sparcv9-aware,
 	        # I'm just guessing. --jhi
 		ccflags="$ccflags -mv9"
 		ldflags="$ccflags -mv9"
@@ -382,6 +382,7 @@ $define|true|[yY]*)
 		lddlflags="$lddlflags -G `getconf XBS5_LP64_OFF64_LDFLAGS`"
 		;;
 	    esac	
+	    libc='/usr/lib/sparcv9/libc.so'
 	    loclibpth="$loclibpth /usr/lib/sparcv9"
 	    libscheck='case "`/usr/bin/file $xxx`" in
 *64-bit*|*SPARCV9*) ;;
@@ -391,6 +392,14 @@ esac'
 esac
 EOCBU
  
+# Actually, we want to run this already now, if so requested,
+# because we need to fix up the library paths right now.
+case "$use64bitall" in
+"$define"|true|[yY]*)
+	. ./use64bitall.cbu
+	;;
+esac
+
 # This is just a trick to include some useful notes.
 cat > /dev/null <<'End_of_Solaris_Notes'
 
