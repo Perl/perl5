@@ -47,7 +47,7 @@ following compilers:
 
       Borland C++		version 5.02 or later
       Microsoft Visual C++	version 4.2 or later
-      Mingw32 with EGCS		version 1.0.2
+      Mingw32 with EGCS		versions 1.0.2, 1.1
       Mingw32 with GCC		version 2.8.1
 
 The last two of these are high quality freeware compilers.  Support
@@ -232,8 +232,8 @@ from where Borland chose to install it, into the Windows system directory
 (usually somewhere like C:\WINNT\SYSTEM32), and rerun the test.
 
 The Visual C runtime apparently has a bug that causes posix.t to fail
-one it test#2.  This usually happens only if you extracted the files in
-text mode.
+test#2.  This usually happens only if you extracted the files in text
+mode.  Enable the USE_PERLCRT option in the Makefile to fix this bug.
 
 Please report any other failures as described under L<BUGS AND CAVEATS>.
 
@@ -269,9 +269,21 @@ variables you can set in L<perlrun>.
 You can also control the shell that perl uses to run system() and
 backtick commands via PERL5SHELL.  See L<perlrun>.
 
-Currently, Perl does not depend on the registry, but can look up
-values if you choose to put them there.  [XXX add registry locations
-that perl looks at here.]
+Perl does not depend on the registry, but it can look up certain default
+values if you choose to put them there.  Perl attempts to read entries from
+C<HKEY_CURRENT_USER\Software\Perl> and C<HKEY_LOCAL_MACHINE\Software\Perl>.
+Entries in the former override entries in the latter.  One or more of the
+following entries (of type REG_SZ or REG_EXPAND_SZ) may be set:
+
+    lib-$]		version-specific path to add to @INC
+    lib			path to add to @INC
+    sitelib-$]		version-specific path to add to @INC
+    sitelib		path to add to @INC
+    PERL*		fallback for all %ENV lookups that begin with "PERL"
+
+Note the C<$]> in the above is not literal.  Substitute whatever version
+of perl you want to honor that entry, e.g. C<5.00502>.  Paths must be
+separated with semicolons, as usual on win32.
 
 =item File Globbing
 
@@ -693,7 +705,9 @@ sundry hacks since then.
 
 Borland support was added in 5.004_01 (Gurusamy Sarathy).
 
-Last updated: 12 July 1998
+GCC/mingw32 support was added in 5.005 (Nick Ing-Simmons).
+
+Last updated: 22 September 1998
 
 =cut
 
