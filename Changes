@@ -28,6 +28,27 @@ example from http://www.xray.mpe.mpg.de/mailing-lists/perl5-porters/
 Version v5.8.1		Maintenance release working toward v5.8.1
 --------------
 ____________________________________________________________________________
+[ 20146] By: jhi                                   on 2003/07/11  05:12:43
+        Log: Integrate:
+             [ 20145]
+             I think the API for mod_perl v2 should be simply that
+             PL_modperl sets the PL_hash_seed (and PL_hash_seed_set)
+             itself, hopefully from a good source of random bits.
+     Branch: maint-5.8/perl
+	  !> perl.c
+____________________________________________________________________________
+[ 20144] By: jhi                                   on 2003/07/11  00:35:56
+        Log: Integrate:
+             [ 20143]
+             pTHX.
+     Branch: maint-5.8/perl
+	  !> util.c
+____________________________________________________________________________
+[ 20142] By: jhi                                   on 2003/07/11  00:31:29
+        Log: Update Changes.
+     Branch: maint-5.8/perl
+	   ! Changes patchlevel.h
+____________________________________________________________________________
 [ 20141] By: jhi                                   on 2003/07/11  00:27:41
         Log: Integrate:
              [ 20137]
