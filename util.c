@@ -3666,7 +3666,7 @@ Perl_get_ppaddr(pTHX)
 
 #ifndef HAS_GETENV_LEN
 char *
-Perl_getenv_len(pTHX_ char *env_elem, unsigned long *len)
+Perl_getenv_len(pTHX_ const char *env_elem, unsigned long *len)
 {
     char *env_trans = PerlEnv_getenv(env_elem);
     if (env_trans)

@@ -489,8 +489,8 @@ Perl_magic_get(pTHX_ SV *sv, MAGIC *mg)
 	{
 	    char msg[256];
 	    
-	    sv_setnv(sv,(double)gLastMacOSErr);
-	    sv_setpv(sv, gLastMacOSErr ? GetSysErrText(gLastMacOSErr, msg) : "");	
+	    sv_setnv(sv,(double)gMacPerl_OSErr);
+	    sv_setpv(sv, gMacPerl_OSErr ? GetSysErrText(gMacPerl_OSErr, msg) : "");	
 	}
 #else	
 #ifdef VMS
@@ -1670,7 +1670,7 @@ Perl_magic_set(pTHX_ SV *sv, MAGIC *mg)
 	break;
     case '\005':  /* ^E */
 #ifdef MACOS_TRADITIONAL
-	gLastMacOSErr = SvIOK(sv) ? SvIVX(sv) : sv_2iv(sv);
+	gMacPerl_OSErr = SvIOK(sv) ? SvIVX(sv) : sv_2iv(sv);
 #else
 #  ifdef VMS
 	set_vaxc_errno(SvIOK(sv) ? SvIVX(sv) : sv_2iv(sv));

@@ -82,7 +82,7 @@ if ($Is_OS2) {
     require ExtUtils::MM_OS2;
 }
 if ($Is_Mac) {
-    require ExtUtils::MM_Mac;
+    require ExtUtils::MM_MacOS;
 }
 if ($Is_Win32) {
     require ExtUtils::MM_Win32;
