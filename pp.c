@@ -3323,14 +3323,12 @@ PP(pp_ucfirst)
     register U8 *s;
     STRLEN slen;
 
-    if (DO_UTF8(sv)) {
+    if (DO_UTF8(sv) && (s = (U8*)SvPV(sv, slen)) && slen && UTF8_IS_START(*s)) {
 	U8 tmpbuf[UTF8_MAXLEN_UCLC+1];
 	STRLEN ulen;
 	STRLEN tculen;
 
-	s = (U8*)SvPV(sv, slen);
 	utf8_to_uvchr(s, &ulen);
-
 	toTITLE_utf8(s, tmpbuf, &tculen);
 	utf8_to_uvchr(tmpbuf, 0);
 
@@ -3385,7 +3383,6 @@ PP(pp_lcfirst)
 
 	toLOWER_utf8(s, tmpbuf, &ulen);
 	uv = utf8_to_uvchr(tmpbuf, 0);
-	
 	tend = uvchr_to_utf8(tmpbuf, uv);
 
 	if (!SvPADTMP(sv) || (STRLEN)(tend - tmpbuf) != ulen || SvREADONLY(sv)) {
