@@ -919,7 +919,7 @@ Extensions: buildext.pl $(PERLDEP) $(CONFIGPM)
 	$(MINIPERL) -I..\lib buildext.pl $(MAKE) $(PERLDEP) $(EXTDIR)
 
 Extensions_clean: 
-	$(MINIPERL) -I..\lib buildext.pl $(MAKE) $(PERLDEP) $(EXTDIR) clean
+	-if exist $(MINIPERL) $(MINIPERL) -I..\lib buildext.pl $(MAKE) $(PERLDEP) $(EXTDIR) clean
 
 #----------------------------------------------------------------------------------
 
@@ -1090,7 +1090,7 @@ clean : Extensions_clean
 	-@$(DEL) perlglob$(o)
 	-@$(DEL) perlmain$(o)
 	-@$(DEL) config.w32
-	-@$(DEL) /f config.h
+	-@$(DEL) config.h
 	-@$(DEL) $(GLOBEXE)
 	-@$(DEL) $(PERLEXE)
 	-@$(DEL) $(WPERLEXE)
