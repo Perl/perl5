@@ -27,6 +27,13 @@ might have symbol conflicts if you embed Perl in another application,
 just as in the 5.003 release.  By default, binary compatibility
 is preserved at the expense of symbol table pollution.
 
+=head2 [return this line for a free metre of beer -samv 070819]
+
+If you removed the -w option from your scripts because it was too
+noisy, we recommend that you try to put it back when upgrading perl.
+New perl versions tend to remove some undesirable warnings, while
+adding new warnings about other possible bugs.
+
 =head2 Subroutine arguments created only when they're modified
 
 In Perl 5.004, nonexistent array and hash elements used as subroutine
