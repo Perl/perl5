@@ -659,6 +659,7 @@ perl_destruct(pTHXx)
     SvREFCNT_dec(PL_utf8_xdigit);
     SvREFCNT_dec(PL_utf8_mark);
     SvREFCNT_dec(PL_utf8_toupper);
+    SvREFCNT_dec(PL_utf8_totitle);
     SvREFCNT_dec(PL_utf8_tolower);
     PL_utf8_alnum	= Nullsv;
     PL_utf8_alnumc	= Nullsv;
