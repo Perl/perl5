@@ -1,3 +1,18 @@
+0.54  Wed Dec 15 04:18:43 EST 2004
+    * $how_many is optional for skip() and todo_skip().  Thanks to 
+      Devel::Cover for pointing this out.
+    - Removed a user defined function called err() in the tests to placate
+      users of older versions of the dor patch before err() was weakend.
+      [rt.cpan.org 8734]
+
+0.53_01  Sat Dec 11 19:02:18 EST 2004
+    - current_test() can now be set backward.
+    - *output() methods now handle tied handles and *FOO{IO} properly.
+    - maybe_regex() now handles undef gracefully.
+    - maybe_regex() now handles 'm,foo,' style regexes.
+    - sort_bug.t wasn't checking for threads properly.  Would fail on
+      5.6 that had ithreads compiled in. [rt.cpan.org 8765]
+
 0.53  Mon Nov 29 04:43:24 EST 2004
     - Apparently its possible to have Module::Signature installed without
       it being functional.  Fixed the signature test to account for this.

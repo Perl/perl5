@@ -10,15 +10,18 @@ BEGIN {
 require Test::Harness;
 use Test::More;
 
-# This feature requires a fairly new version of Test::Harness
-(my $th_version = $Test::Harness::VERSION) =~ s/_//; # for X.Y_Z alpha versions
+# Shut up a "used only once" warning in 5.5.4.
+my $th_version  = $Test::Harness::VERSION = $Test::Harness::VERSION;
+$th_version =~ s/_//;   # for X.Y_Z alpha versions
+
+# TODO requires a fairly new version of Test::Harness
 if( $th_version < 2.03 ) {
     plan tests => 1;
     fail "Need Test::Harness 2.03 or up.  You have $th_version.";
     exit;
 }
 
-plan tests => 16;
+plan tests => 18;
 
 
 $Why = 'Just testing the todo interface.';
@@ -68,4 +71,21 @@ TODO: {
     fail("Just testing todo");
     die "todo_skip should prevent this";
     pass("Again");
+}
+
+
+{
+    my $warning;
+    local $SIG{__WARN__} = sub { $warning = join "", @_ };
+    TODO: {
+        # perl gets the line number a little wrong on the first
+        # statement inside a block.
+        1 == 1;
+#line 82
+        todo_skip "Just testing todo_skip";
+        fail("So very failed");
+    }
+    is( $warning, "todo_skip() needs to know \$how_many tests are in the ".
+                  "block at $0 line 82\n",
+        'todo_skip without $how_many warning' );
 }
