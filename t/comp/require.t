@@ -45,7 +45,7 @@ do_require "1";
 print "# $@\nnot " if $@;
 print "ok ",$i++,"\n";
 
-END { unlink 'bleah.pm'; }
+END { 1 while unlink 'bleah.pm'; }
 
 # ***interaction with pod (don't put any thing after here)***
 

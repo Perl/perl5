@@ -203,6 +203,7 @@
 #    define telldir		PerlDir_tell
 #    define putenv		PerlEnv_putenv
 #    define getenv		PerlEnv_getenv
+#    define uname		PerlEnv_uname
 #    define stdin		PerlIO_stdin()
 #    define stdout		PerlIO_stdout()
 #    define stderr		PerlIO_stderr()

@@ -242,7 +242,7 @@
  *	even if used by a process with super-user privileges.
  */
 #define HAS_GETHOSTNAME	/**/
-/*#define HAS_UNAME		/**/
+#define HAS_UNAME		/**/
 /*#define PHOSTNAME ""	/ * How to get the host name */
 
 /* HAS_GETLOGIN:

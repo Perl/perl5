@@ -124,7 +124,17 @@ directory name to be F<.>).
 
 
 ## use strict;
-use re 'taint';
+# A bit of juggling to insure that C<use re 'taint';> awlays works, since
+# File::Basename is used during the Perl build, when the re extension may
+# not be available.
+BEGIN {
+  unless (eval { require re; })
+    { eval ' sub re::import { $^H |= 0x00100000; } ' }
+  import re 'taint';
+}
+
+
+
 
 require Exporter;
 @ISA = qw(Exporter);

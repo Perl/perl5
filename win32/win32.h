@@ -83,6 +83,18 @@ struct tms {
 	long	tms_cstime;
 };
 
+#ifndef SYS_NMLN
+#define SYS_NMLN	257
+#endif
+
+struct utsname {
+    char sysname[SYS_NMLN];
+    char nodename[SYS_NMLN];
+    char release[SYS_NMLN];
+    char version[SYS_NMLN];
+    char machine[SYS_NMLN];
+};
+
 #ifndef START_EXTERN_C
 #undef EXTERN_C
 #ifdef __cplusplus

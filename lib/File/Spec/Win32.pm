@@ -99,7 +99,7 @@ sub canonpath {
     my ($self,$path,$reduce_ricochet) = @_;
     $path =~ s/^([a-z]:)/\u$1/;
     $path =~ s|/|\\|g;
-    $path =~ s|([^\\])\\+|\1\\|g;                  # xx////xx  -> xx/xx
+    $path =~ s|([^\\])\\+|$1\\|g;                  # xx////xx  -> xx/xx
     $path =~ s|(\\\.)+\\|\\|g;                     # xx/././xx -> xx/xx
     $path =~ s|^(\.\\)+|| unless $path eq ".\\";   # ./xx      -> xx
     $path =~ s|\\$||

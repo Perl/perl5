@@ -362,7 +362,7 @@ sub _vms_ext {
     return ('', '', $crtlstr, '');
   }
 
-  my(@dirs,@libs,$dir,$lib,%sh,%olb,%obj,$ldlib);
+  my(@dirs,@libs,$dir,$lib,%found,@fndlibs,$ldlib);
   my $cwd = cwd();
   my($so,$lib_ext,$obj_ext) = @Config{'so','lib_ext','obj_ext'};
   # List of common Unix library names and there VMS equivalents
@@ -430,28 +430,28 @@ sub _vms_ext {
         warn "\tChecking $name\n" if $verbose > 2;
         if (-f ($test = VMS::Filespec::rmsexpand($name))) {
           # It's got its own suffix, so we'll have to figure out the type
-          if    ($test =~ /(?:$so|exe)$/i)      { $type = 'sh'; }
-          elsif ($test =~ /(?:$lib_ext|olb)$/i) { $type = 'olb'; }
+          if    ($test =~ /(?:$so|exe)$/i)      { $type = 'SHR'; }
+          elsif ($test =~ /(?:$lib_ext|olb)$/i) { $type = 'OLB'; }
           elsif ($test =~ /(?:$obj_ext|obj)$/i) {
             warn "Note (probably harmless): "
 			 ."Plain object file $test found in library list\n";
-            $type = 'obj';
+            $type = 'OBJ';
           }
           else {
             warn "Note (probably harmless): "
 			 ."Unknown library type for $test; assuming shared\n";
-            $type = 'sh';
+            $type = 'SHR';
           }
         }
         elsif (-f ($test = VMS::Filespec::rmsexpand($name,$so))      or
                -f ($test = VMS::Filespec::rmsexpand($name,'.exe')))     {
-          $type = 'sh';
+          $type = 'SHR';
           $name = $test unless $test =~ /exe;?\d*$/i;
         }
         elsif (not length($ctype) and  # If we've got a lib already, don't bother
                ( -f ($test = VMS::Filespec::rmsexpand($name,$lib_ext)) or
                  -f ($test = VMS::Filespec::rmsexpand($name,'.olb'))))  {
-          $type = 'olb';
+          $type = 'OLB';
           $name = $test unless $test =~ /olb;?\d*$/i;
         }
         elsif (not length($ctype) and  # If we've got a lib already, don't bother
@@ -459,17 +459,18 @@ sub _vms_ext {
                  -f ($test = VMS::Filespec::rmsexpand($name,'.obj'))))  {
           warn "Note (probably harmless): "
 		       ."Plain object file $test found in library list\n";
-          $type = 'obj';
+          $type = 'OBJ';
           $name = $test unless $test =~ /obj;?\d*$/i;
         }
         if (defined $type) {
           $ctype = $type; $cand = $name;
-          last if $ctype eq 'sh';
+          last if $ctype eq 'SHR';
         }
       }
       if ($ctype) { 
-        eval '$' . $ctype . "{'$cand'}++";
-        die "Error recording library: $@" if $@;
+        # This has to precede any other CRTLs, so just make it first
+        if ($cand eq 'VAXCCURSE') { unshift @{$found{$ctype}}, $cand; }  
+        else                      { push    @{$found{$ctype}}, $cand; }
         warn "\tFound as $cand (really $test), type $ctype\n" if $verbose > 1;
         next LIB;
       }
@@ -478,15 +479,10 @@ sub _vms_ext {
 		 ."No library found for $lib\n";
   }
 
-  @libs = sort keys %obj;
-  # This has to precede any other CRTLs, so just make it first
-  if ($olb{VAXCCURSE}) {
-    push(@libs,"$olb{VAXCCURSE}/Library");
-    delete $olb{VAXCCURSE};
-  }
-  push(@libs, map { "$_/Library" } sort keys %olb);
-  push(@libs, map { "$_/Share"   } sort keys %sh);
-  $lib = join(' ',@libs);
+  push @fndlibs, @{$found{OBJ}}                      if exists $found{OBJ};
+  push @fndlibs, map { "$_/Library" } @{$found{OLB}} if exists $found{OLB};
+  push @fndlibs, map { "$_/Share"   } @{$found{SHR}} if exists $found{SHR};
+  $lib = join(' ',@fndlibs);
 
   $ldlib = $crtlstr ? "$lib $crtlstr" : $lib;
   warn "Result:\n\tEXTRALIBS: $lib\n\tLDLOADLIBS: $ldlib\n" if $verbose;

@@ -830,10 +830,12 @@ Examples:
     ($one,$five,$fifteen) = (`uptime` =~ /(\d+\.\d+)/g);
 
     # scalar context
-    $/ = ""; $* = 1;  # $* deprecated in modern perls
-    while (defined($paragraph = <>)) {
-	while ($paragraph =~ /[a-z]['")]*[.!?]+['")]*\s/g) {
-	    $sentences++;
+    {
+	local $/ = "";
+	while (defined($paragraph = <>)) {
+	    while ($paragraph =~ /[a-z]['")]*[.!?]+['")]*\s/g) {
+		$sentences++;
+	    }
 	}
     }
     print "$sentences\n";

@@ -1465,8 +1465,8 @@ $(INST_STATIC) : $(OBJECT) $(MYEXTLIB)
       push(@m,"\t",'Library/Object/Replace $(MMS$TARGET) $(MMS$SOURCE_LIST)',"\n");
     }
     
-    foreach $lib (split $self->{EXTRALIBS}) {
-      $lib = '""' if $lib eq '"';
+    push @m, "\t\$(NOECHO) \$(PERL) -e 1 >\$(INST_ARCHAUTODIR)extralibs.ld\n";
+    foreach $lib (split ' ', $self->{EXTRALIBS}) {
       push(@m,"\t",'$(NOECHO) $(PERL) -e "print qq{',$lib,'\n}" >>$(INST_ARCHAUTODIR)extralibs.ld',"\n");
     }
     push @m, $self->dir_target('$(INST_ARCHAUTODIR)');
@@ -2312,7 +2312,7 @@ $(MAP_TARGET) :: $(MAKE_APERL_FILE)
     $tmp = $self->fixpath($tmp,1);
     if (@optlibs) { $extralist = join(' ',@optlibs); }
     else          { $extralist = ''; }
-    # Let ExtUtils::Liblist find the necessary for us (but skip PerlShr;
+    # Let ExtUtils::Liblist find the necessary libs for us (but skip PerlShr)
     # that's what we're building here).
     push @optlibs, grep { !/PerlShr/i } split +($self->ext())[2];
     if ($libperl) {

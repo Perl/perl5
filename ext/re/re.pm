@@ -74,6 +74,8 @@ See L<perlmodlib/Pragmatic Modules>.
 
 =cut
 
+# N.B. File::Basename contains a literal for 'taint' as a fallback.  If
+# taint is changed here, File::Basename must be updated as well.
 my %bitmask = (
 taint	=> 0x00100000,
 eval	=> 0x00200000,

@@ -1051,7 +1051,7 @@ EOP
 			pop(@hist) if length($cmd) > 1;
 			$i = $1 ? ($#hist-($2?$2:1)) : ($2?$2:$#hist);
 			$cmd = $hist[$i];
-			print $OUT $cmd;
+			print $OUT $cmd, "\n";
 			redo CMD; };
 		    $cmd =~ /^$sh$sh\s*([\x00-\xff]*)/ && do {
 			&system($1);
@@ -1067,7 +1067,7 @@ EOP
 			    next CMD;
 			}
 			$cmd = $hist[$i];
-			print $OUT $cmd;
+			print $OUT $cmd, "\n";
 			redo CMD; };
 		    $cmd =~ /^$sh$/ && do {
 			&system($ENV{SHELL}||"/bin/sh");

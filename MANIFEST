@@ -33,6 +33,7 @@ Porting/patchls		Flexible patch file listing utility
 Porting/pumpkin.pod	Guidelines and hints for Perl maintainers
 README			The Instructions
 README.amiga		Notes about AmigaOS port
+README.apollo		Notes about Apollo DomainOS port
 README.beos		Notes about BeOS port
 README.cygwin32		Notes about Cygwin32 port
 README.dos		Notes about dos/djgpp port
@@ -55,6 +56,7 @@ Todo			The Wishlist
 Todo-5.005		What needs doing before 5.005 release
 XSlock.h		Include file for extensions built with PERL_OBJECT defined
 XSUB.h			Include file for extension subroutines
+apollo/netinet/in.h	Apollo DomainOS port: C header file frontend
 av.c			Array value code
 av.h			Array value header
 beos/nm.c		BeOS port
@@ -581,9 +583,15 @@ lib/Net/hostent.pm	By-name interface to Perl's builtin gethost*
 lib/Net/netent.pm	By-name interface to Perl's builtin getnet*
 lib/Net/protoent.pm	By-name interface to Perl's builtin getproto*
 lib/Net/servent.pm	By-name interface to Perl's builtin getserv*
+lib/Pod/Checker.pm	Pod-Parser - check POD documents for syntax errors
 lib/Pod/Functions.pm	used by pod/splitpod
 lib/Pod/Html.pm		Convert POD data to HTML
+lib/Pod/InputObjects.pm	Pod-Parser - define objects for input streams
+lib/Pod/Parser.pm	Pod-Parser - define base class for parsing POD
+lib/Pod/PlainText.pm	Pod-Parser - convert POD data to formatted ASCII text
+lib/Pod/Select.pm	Pod-Parser - select portions of POD docs
 lib/Pod/Text.pm		Convert POD data to formatted ASCII text
+lib/Pod/Usage.pm	Pod-Parser - print usage messages
 lib/Search/Dict.pm	Perform binary search on dictionaries
 lib/SelectSaver.pm	Enforce proper select scoping
 lib/SelfLoader.pm	Load functions only on demand
@@ -992,6 +1000,9 @@ pod/pod2html.PL		Precursor for translator to turn pod into HTML
 pod/pod2latex.PL	Precursor for translator to turn pod into LaTeX
 pod/pod2man.PL		Precursor for translator to turn pod into manpage
 pod/pod2text.PL		Precursor for translator to turn pod into text
+pod/pod2usage.PL	Pod-Parser - print usage messages from POD docs
+pod/podchecker.PL	Pod-Parser - Pod::Checker::podchecker() CLI
+pod/podselect.PL	Pod-Parser - Pod::Select::podselect() CLI
 pod/roffitall		troff the whole man page set
 pod/rofftoc		Generate a table of contents in troff format
 pod/splitman		Splits perlfunc into multiple man pages
@@ -1086,6 +1097,7 @@ t/lib/fields.t          See if base/fields works
 t/lib/filecache.t	See if FileCache works
 t/lib/filecopy.t	See if File::Copy works
 t/lib/filefind.t	See if File::Find works
+t/lib/filefunc.t	See if File::Spec::Functions works
 t/lib/filehand.t	See if FileHandle works
 t/lib/filepath.t	See if File::Path works
 t/lib/filespec.t	See if File::Spec works
@@ -1225,6 +1237,31 @@ t/op/unshift.t		See if unshift works
 t/op/vec.t		See if vectors work
 t/op/wantarray.t	See if wantarray works
 t/op/write.t		See if write works
+t/pod/emptycmd.t	Test empty pod directives
+t/pod/emptycmd.xr	Expected results for emptycmd.t
+t/pod/for.t		Test =for directive
+t/pod/for.xr		Expected results for for.t
+t/pod/headings.t	Test =head directives
+t/pod/headings.xr	Expected results for headings.t
+t/pod/include.t		Test =include directive
+t/pod/include.xr	Expected results for include.t
+t/pod/included.t	Test =include directive
+t/pod/included.xr	Expected results for included.t
+t/pod/lref.t		Test L<...> sequences
+t/pod/lref.xr		Expected results for lref.t
+t/pod/nested_items.t	Test nested =items
+t/pod/nested_items.xr	Expected results for nested_items.t
+t/pod/nested_seqs.t	Test nested interior sequences
+t/pod/nested_seqs.xr	Expected results for nested_seqs.t
+t/pod/oneline_cmds.t	Test single paragraph ==cmds
+t/pod/oneline_cmds.xr	Expected results for oneline_cmds.t
+t/pod/poderrs.t		Test POD errors
+t/pod/poderrs.xr	Expected results for emptycmd.t
+t/pod/special_seqs.t	Test "special" interior sequences
+t/pod/special_seqs.xr	Expected results for emptycmd.t
+t/pod/testcmp.pl	Module to compare output against expected results
+t/pod/testp2pt.pl	Module to test Pod::PlainText for a given file
+t/pod/testpchk.pl	Module to test Pod::Checker for a given file
 t/pragma/constant.t	See if compile-time constants work
 t/pragma/locale.t	See if locale support (i18n and l10n) works
 t/pragma/overload.t	See if operator overloading works
@@ -1233,6 +1270,7 @@ t/pragma/strict-subs	Tests of "use strict 'subs'" for strict.t
 t/pragma/strict-vars	Tests of "use strict 'vars'" for strict.t
 t/pragma/strict.t	See if strictures work
 t/pragma/subs.t		See if subroutine pseudo-importation works
+t/pragma/utf8.t		See if utf8 operations work
 t/pragma/warn/1global	Tests of global warnings for warning.t
 t/pragma/warn/2use	Tests for "use warning" for warning.t
 t/pragma/warn/3both	Tests for interaction of $^W and "use warning"

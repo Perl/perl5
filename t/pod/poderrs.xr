@@ -1,0 +1,11 @@
+*** ERROR: Unknown command "unknown1" at line 21 of file t/poderrs.t
+*** ERROR: Unknown interior-sequence "N" at line 21 of file t/poderrs.t
+*** ERROR: Unknown interior-sequence "D" at line 22 of file t/poderrs.t
+*** ERROR: Unknown interior-sequence "Q" at line 25 of file t/poderrs.t
+*** ERROR: Unknown interior-sequence "A" at line 26 of file t/poderrs.t
+*** ERROR: Unknown interior-sequence "V" at line 27 of file t/poderrs.t
+*** ERROR: Unknown interior-sequence "Y" at line 27 of file t/poderrs.t
+** Unterminated B<...> at t/poderrs.t line 31
+** Unterminated I<...> at t/poderrs.t line 30
+** Unterminated C<...> at t/poderrs.t line 33
+t/poderrs.t has 10 pod syntax errors.

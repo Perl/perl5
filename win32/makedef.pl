@@ -451,6 +451,7 @@ win32_open_osfhandle
 win32_get_osfhandle
 win32_ioctl
 win32_utime
+win32_uname
 win32_wait
 win32_waitpid
 win32_kill

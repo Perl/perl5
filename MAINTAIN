@@ -427,9 +427,15 @@ lib/Net/hostent.pm		tchrist
 lib/Net/netent.pm		tchrist
 lib/Net/protoent.pm		tchrist
 lib/Net/servent.pm		tchrist
+lib/Pod/Checker.pm		bradapp
 lib/Pod/Functions.pm	
 lib/Pod/Html.pm			tchrist
+lib/Pod/InputObjects.pm		bradapp
+lib/Pod/Parser.pm		bradapp
+lib/Pod/PlainText.pm		bradapp
+lib/Pod/Select.pm		bradapp
 lib/Pod/Text.pm			tchrist
+lib/Pod/Usage.pm		bradapp
 lib/Search/Dict.pm	
 lib/SelectSaver.pm	
 lib/SelfLoader.pm	
@@ -549,6 +555,9 @@ perly.fixer
 perly.h	
 perly.y	
 plan9/*				plan9
+pod/pod2usage.PL		bradapp
+pod/podchecker.PL		bradapp
+pod/podselect.PL		bradapp
 pod/*				doc
 pod/buildtoc	
 pod/checkpods.PL	
@@ -809,6 +818,7 @@ t/op/unshift.t
 t/op/vec.t	
 t/op/wantarray.t	
 t/op/write.t	
+t/pod/*				bradapp
 t/pragma/constant.t	
 t/pragma/locale.t		locale
 t/pragma/overload.t		ilya

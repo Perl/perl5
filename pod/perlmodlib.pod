@@ -161,6 +161,10 @@ get pathname of current working directory
 
 access to Berkeley DB
 
+=item Devel::Peek
+
+data debugging tool for the XS programmer
+
 =item Devel::SelfStubber
 
 generate stubs for a SelfLoading module
@@ -260,6 +264,14 @@ traverse a file tree
 =item File::Path
 
 create or remove a series of directories
+
+=item File::Spec
+
+portably perform operations on file names
+
+=item File::Spec::Functions
+
+function call interface to File::Spec module
 
 =item File::stat
 

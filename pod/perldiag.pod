@@ -1378,16 +1378,25 @@ logic, or you need to put a conditional in to guard against meaningless input.
 (F) You tried to divide a number by 0 to get the remainder.  Most numbers
 don't take to this kindly.
 
-=item Illegal octal digit
+=item Illegal binary digit %s
+
+(F) You used a digit other than 0 and 1 in a binary number.
+
+=item Illegal octal digit %s
 
 (F) You used an 8 or 9 in a octal number.
 
-=item Illegal octal digit ignored
+=item Illegal binary digit %s ignored
+
+(W) You may have tried to use a digit other than 0 or 1 in a binary number.
+Interpretation of the binary number stopped before the offending digit.
+
+=item Illegal octal digit %s ignored
 
 (W) You may have tried to use an 8 or 9 in a octal number.  Interpretation
 of the octal number stopped before the 8 or 9.
 
-=item Illegal hex digit ignored
+=item Illegal hex digit %s ignored
 
 (W) You may have tried to use a character other than 0 - 9 or A - F in a
 hexadecimal number.  Interpretation of the hexadecimal number stopped

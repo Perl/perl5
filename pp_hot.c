@@ -2155,8 +2155,13 @@ PP(pp_entersub)
 	    if (SP > PL_stack_base + TOPMARK)
 		sv = *(PL_stack_base + TOPMARK + 1);
 	    else {
-		MUTEX_UNLOCK(CvMUTEXP(cv));
-		croak("no argument for locked method call");
+		AV *av = (AV*)PL_curpad[0];
+		if (hasargs || !av || AvFILLp(av) < 0
+		    || !(sv = AvARRAY(av)[0]))
+		{
+		    MUTEX_UNLOCK(CvMUTEXP(cv));
+		    croak("no argument for locked method call");
+		}
 	    }
 	    if (SvROK(sv))
 		sv = SvRV(sv);
