@@ -72,7 +72,7 @@ $! ##ADD NEW CONSTANTS HERE##
 $ perl_i_prot="undef"
 $ perl_d_getespwnam="undef"
 $ perl_d_getprpwnam="undef"
-$ perl_d_isnan= = "define"
+$ perl_d_isnan= "define"
 $ perl_sizesize = "4"
 $ perl_shmattype = ""
 $ perl_mmaptype = ""
