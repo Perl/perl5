@@ -1162,7 +1162,7 @@ a return, a goto, or a loop control statement.
 (W) You are blessing a reference to a zero length string.  This has
 the effect of blessing the reference into the package main.  This is
 usually not what you want.  Consider providing a default target
-package, e.g. bless($ref, $p or 'MyPackage');
+package, e.g. bless($ref, $p || 'MyPackage');
 
 =item Fatal VMS error at %s, line %d
 

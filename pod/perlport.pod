@@ -251,7 +251,7 @@ make it so the resulting files have a unique (case-insensitively)
 first 8 characters.
 
 Don't assume C<E<lt>> won't be the first character of a filename.  Always
-use C<E<gt>> explicitly to open a file for reading:
+use C<E<lt>> explicitly to open a file for reading:
 
     open(FILE, "<$existing_file") or die $!;
 
