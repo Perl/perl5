@@ -14,17 +14,20 @@ use warnings; # uses #3 and #4, since warnings uses Carp
 
 use Exporter (); # use #5
 
-our $VERSION   = "0.58";
+# Maint doesn't have patch 22353 (op_seq changes)
+
+our $VERSION   = "0.60";
 our @ISA       = qw(Exporter);
 our @EXPORT_OK = qw(set_style set_style_standard add_callback
-		    concise_subref concise_cv concise_main);
+		    concise_subref concise_cv concise_main
+		    add_style walk_output);
 
 # use #6
 use B qw(class ppname main_start main_root main_cv cstring svref_2object
 	 SVf_IOK SVf_NOK SVf_POK SVf_IVisUV SVf_FAKE OPf_KIDS OPf_SPECIAL
 	 CVf_ANON);
 
-my %style = 
+my %style =
   ("terse" =>
    ["(?(#label =>\n)?)(*(    )*)#class (#addr) #name (?([#targ])?) "
     . "#svclass~(?((#svaddr))?)~#svval~(?(label \"#coplabel\")?)\n",
@@ -55,23 +58,53 @@ my($format, $gotofmt, $treefmt);
 my $curcv;
 my $cop_seq_base;
 my @callbacks;
+my $stylename;
 
 sub set_style {
     ($format, $gotofmt, $treefmt) = @_;
+    die "expecting 3 style-format args\n" unless @_ == 3;
+}
+
+sub add_style {
+    my ($newstyle,@args) = @_;
+    die "style '$newstyle' already exists, choose a new name\n"
+	if exists $style{$newstyle};
+    die "expecting 3 style-format args\n" unless @args == 3;
+    $style{$newstyle} = [@args];
 }
 
 sub set_style_standard {
-    my($name) = @_;
-    set_style(@{$style{$name}});
+    ($stylename) = @_;
+    die "err: style '$stylename' unknown\n" unless exists $style{$stylename};
+    set_style(@{$style{$stylename}});
 }
 
 sub add_callback {
     push @callbacks, @_;
 }
 
+# output handle, used with all Concise-output printing
+our $walkHandle = \*STDOUT;	# public for your convenience
+
+sub walk_output { # updates $walkHandle
+    my $handle = shift;
+    if (ref $handle eq 'SCALAR') {
+	# in 5.8+, open(FILEHANDLE,MODE,REFERENCE) writes to string
+	open my $tmp, '>', $handle;	# but cant re-set an existing filehandle
+	$walkHandle = $tmp;		# so use my $tmp as intermediate var
+	return;
+    }
+    $walkHandle = $handle;
+    my $iotype = ref $walkHandle;
+    die "expecting argument/object that can print\n"
+	unless $iotype eq 'GLOB' or $iotype and $walkHandle->can('print');
+}
+
 sub concise_subref {
-    my($order, $subref) = @_;
-    concise_cv_obj($order, svref_2object($subref));
+    my($order, $coderef) = @_;
+    my $codeobj = svref_2object($coderef);
+    die "err: not a coderef: $coderef\n" unless ref $codeobj eq 'B::CV';#CODE';
+    concise_cv_obj($order, $codeobj);
 }
 
 # This should have been called concise_subref, but it was exported
@@ -81,13 +114,14 @@ sub concise_cv { concise_subref(@_); }
 sub concise_cv_obj {
     my ($order, $cv) = @_;
     $curcv = $cv;
+    die "err: coderef has no START\n" if class($cv->START) eq "NULL";
     sequence($cv->START);
     if ($order eq "exec") {
 	walk_exec($cv->START);
     } elsif ($order eq "basic") {
 	walk_topdown($cv->ROOT, sub { $_[0]->concise($_[1]) }, 0);
     } else {
-	print tree($cv->ROOT, 0)
+	print $walkHandle tree($cv->ROOT, 0);
     }
 }
 
@@ -100,7 +134,7 @@ sub concise_main {
 	walk_exec(main_start);
     } elsif ($order eq "tree") {
 	return if class(main_root) eq "NULL";
-	print tree(main_root, 0);
+	print $walkHandle tree(main_root, 0);
     } elsif ($order eq "basic") {
 	return if class(main_root) eq "NULL";
 	walk_topdown(main_root,
@@ -116,8 +150,8 @@ sub concise_specials {
     } elsif ($name eq "CHECK") {
 	pop @cv_s; # skip the CHECK block that calls us
     }
-    for my $cv (@cv_s) {	
-	print "$name $i:\n";
+    for my $cv (@cv_s) {
+	print $walkHandle "$name $i:\n";
 	$i++;
 	concise_cv_obj($order, $cv);
     }
@@ -126,7 +160,7 @@ sub concise_specials {
 my $start_sym = "\e(0"; # "\cN" sometimes also works
 my $end_sym   = "\e(B"; # "\cO" respectively
 
-my @tree_decorations = 
+my @tree_decorations =
   (["  ", "--", "+-", "|-", "| ", "`-", "-", 1],
    [" ", "-", "+", "+", "|", "`", "", 0],
    ["  ", map("$start_sym$_$end_sym", "qq", "wq", "tq", "x ", "mq", "q"), 1],
@@ -169,7 +203,8 @@ sub compile {
 	} elsif ($o eq "-littleendian") {
 	    $big_endian = 0;
 	} elsif (exists $style{substr($o, 1)}) {
-	    set_style(@{$style{substr($o, 1)}});
+	    $stylename = substr($o, 1);
+	    set_style(@{$style{$stylename}});
 	} else {
 	    warn "Option $o unrecognized";
 	}
@@ -194,15 +229,25 @@ sub compile {
 				     B::end_av->isa("B::AV") ?
 				     B::end_av->ARRAY : ());
 		} else {
-		    $objname = "main::" . $objname unless $objname =~ /::/;
-		    print "$objname:\n";
-		    eval "concise_subref(\$order, \\&$objname)";
-		    die "concise_subref($order, \\&$objname) failed: $@" if $@;
+		    # convert function names to subrefs
+		    my $objref;
+		    if (ref $objname) {
+			print $walkHandle "B::Concise::compile($objname)\n";
+			$objref = $objname;
+		    } else {
+			$objname = "main::" . $objname unless $objname =~ /::/;
+			print $walkHandle "$objname:\n";
+			no strict 'refs';
+			die "err: unknown function ($objname)\n"
+			    unless *{$objname}{CODE};
+			$objref = \&$objname;
+		    }
+		    concise_subref($order, $objref);
 		}
 	    }
 	}
 	if (!@args or $do_main) {
-	    print "main program:\n" if $do_main;
+	    print $walkHandle "main program:\n" if $do_main;
 	    concise_main($order);
 	}
     }
@@ -261,6 +306,12 @@ sub base_n {
 
 my %sequence_num;
 my $seq_max = 1;
+
+sub reset_sequence {
+    # reset the sequence
+    %sequence_num = ();
+    $seq_max = 1;
+}
 
 sub seq {
     my($op) = @_;
@@ -362,17 +413,21 @@ sub sequence {
 }
 
 sub fmt_line {
-    my($hr, $fmt, $level) = @_;
-    my $text = $fmt;
+    my($hr, $text, $level) = @_;
+    return '' if $hr->{SKIP};	# another way to suppress lines of output
+
     $text =~ s/\(\?\(([^\#]*?)\#(\w+)([^\#]*?)\)\?\)/
-      $hr->{$2} ? $1.$hr->{$2}.$3 : ""/eg;
+	$hr->{$2} ? $1.$hr->{$2}.$3 : ""/eg;
+
     $text =~ s/\(x\((.*?);(.*?)\)x\)/$order eq "exec" ? $1 : $2/egs;
     $text =~ s/\(\*\(([^;]*?)\)\*\)/$1 x $level/egs;
     $text =~ s/\(\*\((.*?);(.*?)\)\*\)/$1 x ($level - 1) . $2 x ($level>0)/egs;
     $text =~ s/#([a-zA-Z]+)(\d+)/sprintf("%-$2s", $hr->{$1})/eg;
     $text =~ s/#([a-zA-Z]+)/$hr->{$1}/eg;
     $text =~ s/[ \t]*~+[ \t]*/ /g;
-    return $text;
+    chomp $text;
+    return "$text\n" if $text ne "";
+    return $text; # suppress empty lines
 }
 
 my %priv;
@@ -614,7 +669,8 @@ sub concise_op {
     $h{label} = $labels{$op->seq};
     $h{typenum} = $op->type;
     $h{noise} = $linenoise[$op->type];
-    $_->(\%h, $op, \$format, \$level) for @callbacks;
+
+    $_->(\%h, $op, \$format, \$level, $stylename) for @callbacks;
     return fmt_line(\%h, $format, $level);
 }
 
@@ -623,10 +679,10 @@ sub B::OP::concise {
     if ($order eq "exec" and $lastnext and $$lastnext != $$op) {
 	my $h = {"seq" => seq($lastnext), "class" => class($lastnext),
 		 "addr" => sprintf("%#x", $$lastnext)};
-	print fmt_line($h, $gotofmt, $level+1);
+	print $walkHandle fmt_line($h, $gotofmt, $level+1);
     }
     $lastnext = $op->next;
-    print concise_op($op, $level, $format);
+    print $walkHandle concise_op($op, $level, $format);
 }
 
 # B::OP::terse (see Terse.pm) now just calls this
@@ -676,7 +732,7 @@ sub tree {
 	    if (substr($lines[$i], 0, 1) eq " ") {
 		$lines[$i] = $nokid . $lines[$i];
 	    } else {
-		$lines[$i] = $kid . $lines[$i];		
+		$lines[$i] = $kid . $lines[$i];
 	    }
 	}
 	$lines[$i] = $kids . $lines[$i];
@@ -711,7 +767,7 @@ sub tree {
 # sequence numbers which are easier to control. This way we also don't
 # stand in the way of a possible future removal of OP sequence
 # numbers).
-
+ 
 # When you say "perl -MO=Concise -e '$a'", the output should look like:
 
 # 4  <@> leave[t1] vKP/REFC ->(end)
@@ -1117,43 +1173,112 @@ The numeric value of the OP's type, in decimal.
 
 =head1 Using B::Concise outside of the O framework
 
-It is possible to extend B<B::Concise> by using it outside of the B<O>
-framework and providing new styles and new variables.
+You can use B<B::Concise>, and call compile() directly, thereby
+avoiding the compile-only operation of O.  For example, you could use
+the debugger to step through B::Concise::compile() itself.
+
+When doing so, you can alter Concise output by providing new output
+styles, and optionally by adding callback routines which populate new
+variables that may be rendered as part of those styles.  For all
+following sections, please review L</FORMATTING SPECIFICATIONS>.
+
+=head2 example: Altering Concise Output
 
     use B::Concise qw(set_style add_callback);
-    set_style($format, $gotofmt, $treefmt);
+    set_style($your_format, $your_gotofmt, $your_treefmt);
     add_callback
-    (
-        sub
-        {
-            my ($h, $op, $level, $format) = @_;
+      ( sub {
+            my ($h, $op, $format, $level, $stylename) = @_;
             $h->{variable} = some_func($op);
         }
-    );
+      );
     B::Concise::compile(@options)->();
 
-You can specify a style by calling the B<set_style> subroutine.  If you
-have a new variable in your style, or you want to change the value of an
-existing variable, you will need to add a callback to specify the value
-for that variable.
+=head2 set_style()
 
-This is done by calling B<add_callback> passing references to any
-callback subroutines.  The subroutines are called in the same order as
-they are added.  Each subroutine is passed four parameters.  These are a
-reference to a hash, the keys of which are the names of the variables
-and the values of which are their values, the op, the level and the
-format.
+B<set_style> accepts 3 arguments, and updates the three components of an
+output style (basic-exec, goto, tree). It has one minor drawback though:
+it doesn't register the style under a new name, thus you may prefer to use
+add_style() and/or set_style_standard() instead.
+
+=head2 add_style()
+
+This subroutine accepts a new style name and three style arguments as
+above, and creates, registers, and selects the newly named style.  It is
+an error to re-add a style; call set_style_standard() to switch between
+several styles.
+
+=head2 set_style_standard($name)
+
+This restores one of the standard styles: C<terse>, C<concise>,
+C<linenoise>, C<debug>, C<env>, into effect.  It also accepts style
+names previously defined with add_style().
+
+=head2 add_callback()
+
+If your newly minted styles refer to any #variables, you'll need to
+define a callback subroutine that will populate (or modify) those
+variables.  They are then available for use in the style you've chosen.
+
+The callbacks are called for each opcode visited by Concise, in the
+same order as they are added.  Each subroutine is passed five
+parameters.
+
+  1. A hashref, containing the variable names and values which are
+     populated into the report-line for the op
+  2. the op, as a B<B::OP> object
+  3. a reference to the format string
+  4. the formatting (indent) level
+  5. the selected stylename
 
 To define your own variables, simply add them to the hash, or change
 existing values if you need to.  The level and format are passed in as
 references to scalars, but it is unlikely that they will need to be
 changed or even used.
 
-To switch back to one of the standard styles like C<concise> or
-C<terse>, use C<set_style_standard>.
+=head2 running B::Concise::compile()
 
-To see the output, call the subroutine returned by B<compile> in the
-same way that B<O> does.
+B<compile> accepts options as described above in L</OPTIONS>, and
+arguments, which are either coderefs, or subroutine names.
+
+compile() constructs and returns a coderef, which when invoked, scans
+the optree, and prints the results to STDOUT.  Once you have the
+coderef, you may change the output style; thereafter the coderef renders
+in the new style.
+
+B<walk_output> lets you change the print destination from STDOUT to
+another open filehandle, or into a string passed as a ref.
+
+    walk_output(\my $buf);
+    B::Concise::compile('-concise','funcName', \&aSubRef)->();
+    print "Concise Results: $buf\n";
+
+For each subroutine visited, the opcode info is preceded by a single
+line containing either the subroutine name or the stringified coderef.
+
+To switch back to one of the standard styles like C<concise> or
+C<terse>, call C<set_style_standard>, or pass the style name into
+B::Concise::compile() (as done above).
+
+=head2 B::Concise::reset_sequence()
+
+This function (not exported) lets you reset the sequence numbers (note
+that they're numbered arbitrarily, their goal being to be human
+readable).  Its purpose is mostly to support testing, i.e. to compare
+the concise output from two identical anonymous subroutines (but
+different instances).  Without the reset, B::Concise, seeing that
+they're separate optrees, generates different sequence numbers in
+the output.
+
+=head2 Errors
+
+All detected errors, (invalid arguments, internal errors, etc.) are
+resolved with a die($message). Use an eval if you wish to catch these
+errors and continue processing.
+
+In particular, B<compile> will die as follows if you've asked for a
+non-existent function-name, a non-existent coderef, or a non-CODE
+reference.
 
 =head1 AUTHOR
 
