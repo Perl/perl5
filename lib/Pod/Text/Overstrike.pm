@@ -1,5 +1,5 @@
 # Pod::Text::Overstrike -- Convert POD data to formatted overstrike text
-# $Id: Overstrike.pm,v 1.2 2001/07/10 11:04:36 eagle Exp $
+# $Id: Overstrike.pm,v 1.3 2001/10/20 08:11:29 eagle Exp $
 #
 # Created by Joe Smith <Joe.Smith@inwap.com> 30-Nov-2000
 #   (based on Pod::Text::Color by Russ Allbery <rra@stanford.edu>)
@@ -36,7 +36,7 @@ use vars qw(@ISA $VERSION);
 # Don't use the CVS revision as the version, since this module is also in Perl
 # core and too many things could munge CVS magic revision strings.  This
 # number should ideally be the same as the CVS revision in podlators, however.
-$VERSION = 1.02;
+$VERSION = 1.03;
 
 
 ##############################################################################
@@ -81,6 +81,13 @@ sub seq_b { local $_ = $_[1]; s/(.)\cH\1//g; s/_\cH//g; s/(.)/$1\b$1/g; $_ }
 sub seq_f { local $_ = $_[1]; s/(.)\cH\1//g; s/_\cH//g; s/(.)/_\b$1/g; $_ }
 sub seq_i { local $_ = $_[1]; s/(.)\cH\1//g; s/_\cH//g; s/(.)/_\b$1/g; $_ }
 
+# Output any included code in bold.
+sub output_code {
+    my ($self, $code) = @_;
+    $code =~ s/(.)/$1\b$1/g;
+    $self->output ($code);
+}
+
 # We unfortunately have to override the wrapping code here, since the normal
 # wrapping code gets really confused by all the escape sequences.
 sub wrap {
@@ -90,7 +97,7 @@ sub wrap {
     my $spaces = ' ' x $$self{MARGIN};
     my $width = $$self{width} - $$self{MARGIN};
     while (length > $width) {
-        if (s/^((?:(?:[^\n]\cH)?[^\n]){0,$width})\s+//
+        if (s/^((?:(?:[^\n]\cH)?[^\n]){0,$width})(\Z|\s+)//
             || s/^((?:(?:[^\n]\cH)?[^\n]){$width})//) {
             $output .= $spaces . $1 . "\n";
         } else {
@@ -159,6 +166,7 @@ Joe Smith <Joe.Smith@inwap.com>, using the framework created by Russ Allbery
 =head1 COPYRIGHT AND LICENSE
 
 Copyright 2000 by Joe Smith <Joe.Smith@inwap.com>.
+Copyright 2001 by Russ Allbery <rra@stanford.edu>.
 
 This program is free software; you may redistribute it and/or modify it
 under the same terms as Perl itself.

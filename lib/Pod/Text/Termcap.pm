@@ -1,7 +1,7 @@
 # Pod::Text::Termcap -- Convert POD data to ASCII text with format escapes.
-# $Id: Termcap.pm,v 1.1 2001/07/10 11:04:36 eagle Exp $
+# $Id: Termcap.pm,v 1.2 2001/10/20 08:09:30 eagle Exp $
 #
-# Copyright 1999 by Russ Allbery <rra@stanford.edu>
+# Copyright 1999, 2001 by Russ Allbery <rra@stanford.edu>
 #
 # This program is free software; you may redistribute it and/or modify it
 # under the same terms as Perl itself.
@@ -30,7 +30,7 @@ use vars qw(@ISA $VERSION);
 # Don't use the CVS revision as the version, since this module is also in Perl
 # core and too many things could munge CVS magic revision strings.  This
 # number should ideally be the same as the CVS revision in podlators, however.
-$VERSION = 1.01;
+$VERSION = 1.02;
 
 
 ##############################################################################
@@ -81,6 +81,12 @@ sub cmd_head2 {
 # Fix up B<> and I<>.  Note that we intentionally don't do F<>.
 sub seq_b { my $self = shift; return "$$self{BOLD}$_[0]$$self{NORM}" }
 sub seq_i { my $self = shift; return "$$self{UNDL}$_[0]$$self{NORM}" }
+
+# Output any included code in bold.
+sub output_code {
+    my ($self, $code) = @_;
+    $self->output ($$self{BOLD} . $code . $$self{NORM});
+}
 
 # Override the wrapping code to igore the special sequences.
 sub wrap {
@@ -143,7 +149,7 @@ Russ Allbery <rra@stanford.edu>.
 
 =head1 COPYRIGHT AND LICENSE
 
-Copyright 1999 by Russ Allbery <rra@stanford.edu>.
+Copyright 1999, 2001 by Russ Allbery <rra@stanford.edu>.
 
 This program is free software; you may redistribute it and/or modify it
 under the same terms as Perl itself.
