@@ -19,6 +19,10 @@
 
   /%.127s/: false [] range \"%*.*s\" in regexp [S_regclassutf8]
 
+  /%.127s/: Unrecognized escape \\%c in character class passed through"	[S_regclass] 
+
+  /%.127s/: Unrecognized escape \\%c in character class passed through"	[S_regclassutf8] 
+
 __END__
 # regcomp.c [S_regpiece]
 use warnings 'unsafe' ;
@@ -40,8 +44,9 @@ Strange *+?{} on zero-length expression at - line 4.
 ########
 # regcomp.c [S_regatom]
 use warnings 'unsafe' ;
-$a =~ /\m/ ;
+$a =~ /a\mb\b/ ;
 no warnings 'unsafe' ;
+$a =~ /a\mb\b/ ;
 EXPECT
 Unrecognized escape \m passed through at - line 3.
 ########
@@ -139,3 +144,11 @@ EXPECT
 /[[:digit:]-b]/: false [] range "[:digit:]-" in regexp at - line 11.
 /[[:alpha:]-[:digit:]]/: false [] range "[:alpha:]-" in regexp at - line 12.
 /[[:digit:]-[:alpha:]]/: false [] range "[:digit:]-" in regexp at - line 13.
+########
+# regcomp.c [S_regclass S_regclassutf8]
+use warnings 'unsafe' ;
+$a =~ /[a\zb]/ ;
+no warnings 'unsafe' ;
+$a =~ /[a\zb]/ ;
+EXPECT
+/[a\zb]/: Unrecognized escape \z in character class passed through at - line 3.
