@@ -212,7 +212,8 @@ EOT
 	else {
 	    my $compile;
             my $pl2c = "$testswitch -I../lib ../utils/perlcc --testsuite " .
-                       "$switch -L .. " .
+              # -O9 for good measure, -fcog is broken ATM
+                       "$switch -Wb=-O9,-fno-cog -L .. " .
                        "-I \".. ../lib/CORE\" $args $utf $test -o ";
 
             if( $^O eq 'MSWin32' ) {

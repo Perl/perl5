@@ -20,7 +20,7 @@
 
 # $Id: Head.U,v 3.0.1.9 1997/02/28 15:02:09 ram Exp $
 #
-# Generated on Sun Dec 30 19:31:52 EET 2001 [metaconfig 3.0 PL70]
+# Generated on Sat Jan 12 23:16:55 EET 2002 [metaconfig 3.0 PL70]
 # (with additional metaconfig patches by perlbug@perl.org)
 
 cat >c1$$ <<EOF
@@ -16051,6 +16051,19 @@ eval $inhdr
 : see if ndbm.h is available
 set ndbm.h t_ndbm
 eval $inhdr
+
+case "$t_ndbm" in
+$undef)
+    # Some Linux distributions such as RedHat 7.1 put the
+    # ndbm.h header in /usr/include/gdbm/ndbm.h.
+    if $test -f /usr/include/gdbm/ndbm.h; then
+        ccflags="$ccflags -I/usr/include/gdbm"
+        cppflags="$cppflags -I/usr/include/gdbm"
+        t_ndbm=$define
+    fi
+    ;;
+esac
+
 case "$t_ndbm" in
 $define)
 	: see if dbm_open exists

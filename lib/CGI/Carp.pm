@@ -318,10 +318,10 @@ sub set_message {
     return $CGI::Carp::CUSTOM_MSG;
 }
 
-sub confess { CGI::Carp::die Carp::longmess \@_; }
-sub croak   { CGI::Carp::die Carp::shortmess \@_; }
-sub carp    { CGI::Carp::warn Carp::shortmess \@_; }
-sub cluck   { CGI::Carp::warn Carp::longmess \@_; }
+sub confess { CGI::Carp::die Carp::longmess @_; }
+sub croak   { CGI::Carp::die Carp::shortmess @_; }
+sub carp    { CGI::Carp::warn Carp::shortmess @_; }
+sub cluck   { CGI::Carp::warn Carp::longmess @_; }
 
 # We have to be ready to accept a filehandle as a reference
 # or a string.

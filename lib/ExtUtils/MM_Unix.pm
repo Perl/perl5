@@ -11,7 +11,7 @@ use strict;
 our ($Is_Mac,$Is_OS2,$Is_VMS,$Is_Win32,$Is_Dos,
 	    $Verbose,%pm,%static,$Xsubpp_Version);
 
-our $VERSION = '1.12604';
+our $VERSION = '1.12605';
 
 require ExtUtils::MakeMaker;
 ExtUtils::MakeMaker->import(qw($Verbose &neatvalue));
@@ -1613,10 +1613,11 @@ sub init_dirscan {	# --- File and Directory Lists (.xs .pm .pod etc)
 
 =item init_main
 
-Initializes NAME, FULLEXT, BASEEXT, PARENT_NAME, DLBASE, PERL_SRC,
-PERL_LIB, PERL_ARCHLIB, PERL_INC, INSTALLDIRS, INST_*, INSTALL*,
-PREFIX, CONFIG, AR, AR_STATIC_ARGS, LD, OBJ_EXT, LIB_EXT, EXE_EXT, MAP_TARGET,
-LIBPERL_A, VERSION_FROM, VERSION, DISTNAME, VERSION_SYM.
+Initializes AR, AR_STATIC_ARGS, BASEEXT, CONFIG, DISTNAME, DLBASE,
+EXE_EXT, FULLEXT, FULLPERL, INST_*, INSTALL*, INSTALLDIRS, LD,
+LIB_EXT, LIBPERL_A, MAP_TARGET, NAME, OBJ_EXT, PARENT_NAME, PERL,
+PERL_ARCHLIB, PERL_INC, PERL_LIB, PERL_SRC, PERLRUN, PERLRUNINST,
+PREFIX, TEST_LIBS, VERSION, VERSION_FROM, VERSION_SYM, XS_VERSION.
 
 =cut
 
@@ -2035,6 +2036,11 @@ usually solves this kind of problem.
     }
     else {
         push @perls, 'miniperl';
+    }
+
+    # Build up a set of file names (not command names).
+    foreach $element (@perls) {
+        $element .= "$Config{exe_ext}";
     }
 
     $self->{PERL} ||=

@@ -3627,7 +3627,10 @@ sub pp_split {
     my($op, $cx) = @_;
     my($kid, @exprs, $ary, $expr);
     $kid = $op->first;
-    if ($ {$kid->pmreplroot}) {
+    # under ithreads pmreplroot is an integer, not an SV
+    my $replroot = $kid->pmreplroot;
+    if ( ( ref($replroot) && $$replroot ) ||
+         ( !ref($replroot) && $replroot ) ) {
 	$ary = $self->stash_variable('@', $self->gv_name($kid->pmreplroot));
     }
     for (; !null($kid); $kid = $kid->sibling) {

@@ -410,6 +410,9 @@ BOOT:
 #define B_sv_undef()	&PL_sv_undef
 #define B_sv_yes()	&PL_sv_yes
 #define B_sv_no()	&PL_sv_no
+#ifdef USE_ITHREADS
+#define B_regex_padav()	PL_regex_padav
+#endif
 
 B::AV
 B_init_av()
@@ -419,6 +422,13 @@ B_begin_av()
 
 B::AV
 B_end_av()
+
+#ifdef USE_ITHREADS
+
+B::AV
+B_regex_padav()
+
+#endif
 
 B::CV
 B_main_cv()
@@ -677,8 +687,12 @@ LISTOP_children(o)
 #define PMOP_pmreplstart(o)	o->op_pmreplstart
 #define PMOP_pmnext(o)		o->op_pmnext
 #define PMOP_pmregexp(o)	PM_GETRE(o)
+#ifdef USE_ITHREADS
+#define PMOP_pmoffset(o)	o->op_pmoffset
+#endif
 #define PMOP_pmflags(o)		o->op_pmflags
 #define PMOP_pmpermflags(o)	o->op_pmpermflags
+#define PMOP_pmdynflags(o)      o->op_pmdynflags
 
 MODULE = B	PACKAGE = B::PMOP		PREFIX = PMOP_
 
@@ -691,9 +705,13 @@ PMOP_pmreplroot(o)
 	root = o->op_pmreplroot;
 	/* OP_PUSHRE stores an SV* instead of an OP* in op_pmreplroot */
 	if (o->op_type == OP_PUSHRE) {
+#ifdef USE_ITHREADS
+            sv_setiv(ST(0), INT2PTR(PADOFFSET,root) );
+#else
 	    sv_setiv(newSVrv(ST(0), root ?
 			     svclassnames[SvTYPE((SV*)root)] : "B::SV"),
 		     PTR2IV(root));
+#endif
 	}
 	else {
 	    sv_setiv(newSVrv(ST(0), cc_opclassname(aTHX_ root)), PTR2IV(root));
@@ -707,6 +725,14 @@ B::PMOP
 PMOP_pmnext(o)
 	B::PMOP		o
 
+#ifdef USE_ITHREADS
+
+IV
+PMOP_pmoffset(o)
+	B::PMOP		o
+
+#endif
+
 U16
 PMOP_pmflags(o)
 	B::PMOP		o
@@ -714,6 +740,10 @@ PMOP_pmflags(o)
 U16
 PMOP_pmpermflags(o)
 	B::PMOP		o
+
+U8
+PMOP_pmdynflags(o)
+        B::PMOP         o
 
 void
 PMOP_precomp(o)
@@ -943,7 +973,7 @@ SvPV(sv)
 	B::PV	sv
     CODE:
         ST(0) = sv_newmortal();
-        if( SvPOK(sv) ) {
+        if( SvPOK(sv) ) { 
             sv_setpvn(ST(0), SvPVX(sv), SvCUR(sv));
             SvFLAGS(ST(0)) |= SvUTF8(sv);
         }
@@ -983,6 +1013,7 @@ SvSTASH(sv)
 #define MgFLAGS(mg) mg->mg_flags
 #define MgOBJ(mg) mg->mg_obj
 #define MgLENGTH(mg) mg->mg_len
+#define MgREGEX(mg) ((IV)(mg->mg_obj))
 
 MODULE = B	PACKAGE = B::MAGIC	PREFIX = Mg	
 
@@ -1011,6 +1042,19 @@ MgOBJ(mg)
         }
         else {
             croak( "OBJ is not meaningful on r-magic" );
+        }
+    OUTPUT:
+        RETVAL
+
+IV
+MgREGEX(mg)
+	B::MAGIC	mg
+    CODE:
+        if( mg->mg_type == 'r' ) {
+            RETVAL = MgREGEX(mg);
+        }
+        else {
+            croak( "REGEX is only meaningful on r-magic" );
         }
     OUTPUT:
         RETVAL

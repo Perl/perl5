@@ -34,7 +34,7 @@ my $os =  ($ExtUtils::MM_Unix::Is_OS2 	|| 0)
 	+ ($ExtUtils::MM_Unix::Is_VMS   || 0); 
 ok ( $os <= 1,  'There can be only one (or none)');
 
-is ($ExtUtils::MM_Unix::VERSION, '1.12604', 'Should be that version');
+is ($ExtUtils::MM_Unix::VERSION, '1.12605', 'Should be that version');
 
 # when the following calls like canonpath, catdir etc are replaced by
 # File::Spec calls, the test's become a bit pointless

@@ -37,24 +37,65 @@ sub output
  my ($section, $fh, $format) = @_;
  my $sym = $section->symtable || {};
  my $default = $section->default;
+ my $i;
  foreach (@{$section->[-1]{values}})
   {
    s{(s\\_[0-9a-f]+)}{ exists($sym->{$1}) ? $sym->{$1} : $default; }ge;
-   printf $fh $format, $_;
+   printf $fh $format, $_, $i;
+   ++$i;
   }
 }
 
 package B::C::InitSection;
 
-use vars qw(@ISA); @ISA = qw(B::C::Section);
+# avoid use vars
+@B::C::InitSection::ISA = qw(B::C::Section);
 
 sub new {
     my $class = shift;
+    my $max_lines = 10000; #pop;
     my $section = $class->SUPER::new( @_ );
 
     $section->[-1]{evals} = [];
+    $section->[-1]{chunks} = [];
+    $section->[-1]{nosplit} = 0;
+    $section->[-1]{current} = [];
+    $section->[-1]{count} = 0;
+    $section->[-1]{max_lines} = $max_lines;
 
     return $section;
+}
+
+sub split {
+    my $section = shift;
+    $section->[-1]{nosplit}--
+      if $section->[-1]{nosplit} > 0;
+}
+
+sub no_split {
+    shift->[-1]{nosplit}++;
+}
+
+sub inc_count {
+    my $section = shift;
+
+    $section->[-1]{count} += $_[0];
+    # this is cheating
+    $section->add();
+}
+
+sub add {
+    my $section = shift->[-1];
+    my $current = $section->{current};
+    my $nosplit = $section->{nosplit};
+
+    push @$current, @_;
+    $section->{count} += scalar(@_);
+    if( !$nosplit && $section->{count} >= $section->{max_lines} ) {
+        push @{$section->{chunks}}, $current;
+        $section->{current} = [];
+        $section->{count} = 0;
+    }
 }
 
 sub add_eval {
@@ -68,24 +109,63 @@ sub add_eval {
 }
 
 sub output {
-    my $section = shift;
+    my( $section, $fh, $format, $init_name ) = @_;
+    my $sym = $section->symtable || {};
+    my $default = $section->default;
+    push @{$section->[-1]{chunks}}, $section->[-1]{current};
 
-    foreach my $i ( @{$section->[-1]{evals}} ) {
-        $section->add( sprintf q{eval_pv("%s",1);}, $i );
+    my $name = "aaaa";
+    foreach my $i ( @{$section->[-1]{chunks}} ) {
+        print $fh <<"EOT";
+static int perl_init_${name}()
+{
+	dTARG;
+	dSP;
+EOT
+        foreach my $j ( @$i ) {
+            $j =~ s{(s\\_[0-9a-f]+)}
+                   { exists($sym->{$1}) ? $sym->{$1} : $default; }ge;
+            print $fh "\t$j\n";
+        }
+        print $fh "\treturn 0;\n}\n";
+
+        $section->SUPER::add( "perl_init_${name}();" );
+        ++$name;
     }
-    $section->SUPER::output( @_ );
+    foreach my $i ( @{$section->[-1]{evals}} ) {
+        $section->SUPER::add( sprintf q{eval_pv("%s",1);}, $i );
+    }
+
+    print $fh <<"EOT";
+static int ${init_name}()
+{
+	dTARG;
+	dSP;
+EOT
+    $section->SUPER::output( $fh, $format );
+    print $fh "\treturn 0;\n}\n";
 }
 
 
 package B::C;
 use Exporter ();
+our %REGEXP;
+
+{ # block necessary for caller to work
+    my $caller = caller;
+    if( $caller eq 'O' ) {
+        require XSLoader;
+        XSLoader::load( 'B::C' );
+    }
+}
+
 @ISA = qw(Exporter);
 @EXPORT_OK = qw(output_all output_boilerplate output_main mark_unused
 		init_sections set_callback save_unused_subs objsym save_context);
 
 use B qw(minus_c sv_undef walkoptree walksymtable main_root main_start peekop
 	 class cstring cchar svref_2object compile_stats comppadlist hash
-	 threadsv_names main_cv init_av end_av opnumber amagic_generation
+	 threadsv_names main_cv init_av end_av regex_padav opnumber amagic_generation
 	 AVf_REAL HEf_SVKEY SVf_POK SVf_ROK CVf_CONST);
 use B::Asmdata qw(@specialsv_name);
 
@@ -117,6 +197,8 @@ my $save_data_fh = 0;
 my $save_sig = 0;
 my ($debug_cops, $debug_av, $debug_cv, $debug_mg);
 my $max_string_len;
+
+my $ithreads = $Config{useithreads} eq 'define';
 
 my @threadsv_names;
 BEGIN {
@@ -191,16 +273,23 @@ sub savere {
 }
 
 sub savepv {
-    my $pv = shift;         
-    $pv    = '' unless defined $pv;  # Is this sane ?
+    my $pv = pack "a*", shift;
     my $pvsym = 0;
     my $pvmax = 0;
-    if ($pv_copy_on_grow) { 
-	my $cstring = cstring($pv);
-	if ($cstring ne "0") { # sic
-	    $pvsym = sprintf("pv%d", $pv_index++);
-	    $decl->add(sprintf("static char %s[] = %s;", $pvsym, $cstring));
-	}
+    if ($pv_copy_on_grow) {
+        $pvsym = sprintf("pv%d", $pv_index++);
+
+        if( defined $max_string_len && length($pv) > $max_string_len ) {
+            my $chars = join ', ', map { cchar $_ } split //, $pv;
+            $decl->add(sprintf("static char %s[] = { %s };", $pvsym, $chars));
+        }
+        else {
+	     my $cstring = cstring($pv);
+            if ($cstring ne "0") { # sic
+                $decl->add(sprintf("static char %s[] = %s;",
+                                   $pvsym, $cstring));
+	    }
+        }
     } else {
 	$pvmax = length(pack "a*",$pv) + 1;
     }
@@ -223,7 +312,7 @@ sub save_pv_or_rv {
 
     my $rok = $sv->FLAGS & SVf_ROK;
     my $pok = $sv->FLAGS & SVf_POK;
-    my( $pv, $len, $savesym, $pvmax );
+    my( $len, $pvmax, $savesym, $pv ) = ( 0, 0 );
     if( $rok ) {
        $savesym = '(char*)' . save_rv( $sv );
     }
@@ -383,15 +472,19 @@ sub B::SVOP::save {
     my ($op, $level) = @_;
     my $sym = objsym($op);
     return $sym if defined $sym;
-    my $svsym = $op->sv->save;
-    $svopsect->add(sprintf("s\\_%x, s\\_%x, %s, %u, %u, %u, 0x%x, 0x%x, Nullsv",
+    my $sv = $op->sv;
+    my $svsym = '(SV*)' . $sv->save;
+    my $is_const_addr = $svsym =~ m/Null|\&/;
+    $svopsect->add(sprintf("s\\_%x, s\\_%x, %s, %u, %u, %u, 0x%x, 0x%x, %s",
 			   ${$op->next}, ${$op->sibling}, $op->fake_ppaddr,
 			   $op->targ, $op->type, $op_seq, $op->flags,
-			   $op->private));
+			   $op->private,
+                           ( $is_const_addr ? $svsym : 'Nullsv' )));
     my $ix = $svopsect->index;
     $init->add(sprintf("svop_list[$ix].op_ppaddr = %s;", $op->ppaddr))
         unless $optimize_ppaddr;
-    $init->add("svop_list[$ix].op_sv = (SV*)$svsym;");
+    $init->add("svop_list[$ix].op_sv = $svsym;")
+        unless $is_const_addr;
     savesym($op, "(OP*)&svop_list[$ix]");
 }
 
@@ -399,14 +492,14 @@ sub B::PADOP::save {
     my ($op, $level) = @_;
     my $sym = objsym($op);
     return $sym if defined $sym;
-    $padopsect->add(sprintf("s\\_%x, s\\_%x, %s, %u, %u, %u, 0x%x, 0x%x, 0",
+    $padopsect->add(sprintf("s\\_%x, s\\_%x, %s, %u, %u, %u, 0x%x, 0x%x, %d",
 			   ${$op->next}, ${$op->sibling}, $op->fake_ppaddr,
 			   $op->targ, $op->type, $op_seq, $op->flags,
-			   $op->private));
+			   $op->private,$op->padix));
     my $ix = $padopsect->index;
     $init->add(sprintf("padop_list[$ix].op_ppaddr = %s;", $op->ppaddr))
         unless $optimize_ppaddr;
-    $init->add(sprintf("padop_list[$ix].op_padix = %ld;", $op->padix));
+#    $init->add(sprintf("padop_list[$ix].op_padix = %ld;", $op->padix));
     savesym($op, "(OP*)&padop_list[$ix]");
 }
 
@@ -429,13 +522,13 @@ sub B::COP::save {
     elsif ($is_special && $$warnings == 5) {
         # no warnings 'all';
         $warn_sv = $optimize_warn_sv ?
-            'INT2PTR(SV*,1)' :
+            'INT2PTR(SV*,2)' :
             'pWARN_NONE';
     }
     elsif ($is_special) {
         # use warnings;
         $warn_sv = $optimize_warn_sv ?
-            'INT2PTR(SV*,1)' :
+            'INT2PTR(SV*,3)' :
             'pWARN_STD';
     }
     else {
@@ -466,11 +559,15 @@ sub B::PMOP::save {
     return $sym if defined $sym;
     my $replroot = $op->pmreplroot;
     my $replstart = $op->pmreplstart;
-    my $replrootfield = sprintf("s\\_%x", $$replroot);
+    my $replrootfield;
     my $replstartfield = sprintf("s\\_%x", $$replstart);
     my $gvsym;
     my $ppaddr = $op->ppaddr;
-    if ($$replroot) {
+    # under ithreads, OP_PUSHRE.op_replroot is an integer
+    $replrootfield = sprintf("s\\_%x", $$replroot) if ref $replroot;
+    if($ithreads && $op->name eq "pushre") {
+        $replrootfield = "INT2PTR(OP*,${replroot})";
+    } elsif ($$replroot) {
 	# OP_PUSHRE (a mutated version of OP_MATCH for the regexp
 	# argument to a split) stores a GV in op_pmreplroot instead
 	# of a substitution syntax tree. We don't want to walk that...
@@ -485,12 +582,13 @@ sub B::PMOP::save {
     # pmnext handling is broken in perl itself, I think. Bad op_pmnext
     # fields aren't noticed in perl's runtime (unless you try reset) but we
     # segfault when trying to dereference it to find op->op_pmnext->op_type
-    $pmopsect->add(sprintf("s\\_%x, s\\_%x, %s, %u, %u, %u, 0x%x, 0x%x, s\\_%x, s\\_%x, %s, %s, 0, 0, 0x%x, 0x%x",
+    $pmopsect->add(sprintf("s\\_%x, s\\_%x, %s, %u, %u, %u, 0x%x, 0x%x, s\\_%x, s\\_%x, %s, %s, 0, %u, 0x%x, 0x%x, 0x%x",
 			   ${$op->next}, ${$op->sibling}, $op->fake_ppaddr, $op->targ,
 			   $op->type, $op_seq, $op->flags, $op->private,
 			   ${$op->first}, ${$op->last}, 
 			   $replrootfield, $replstartfield,
-			   $op->pmflags, $op->pmpermflags,));
+                           ( $ithreads ? $op->pmoffset : 0 ),
+			   $op->pmflags, $op->pmpermflags, $op->pmdynflags ));
     my $pm = sprintf("pmop_list[%d]", $pmopsect->index);
     $init->add(sprintf("$pm.op_ppaddr = %s;", $ppaddr))
         unless $optimize_ppaddr;
@@ -720,12 +818,19 @@ sub B::PVMG::save_magic {
 		$init->add(sprintf("sv_magic((SV*)s\\_%x, (SV*)s\\_%x, %s,(char *) %s, %d);",
 			   $$sv, $$obj, cchar($type),$ptrsv,$len));
         }elsif( $type eq 'r' ){
-#               can't save r-MAGIC: we need a PMOP to recompile
-#               the regexp, so die 'cleanly'
-                confess "Can't save r-MAGICAL scalars (yet)"
-#               my($resym,$relen) = savere( $sv->precomp );
-#               $init->add(sprintf("sv_magic((SV*)s\\_%x, , %s, %s, %d);",
-#                                  $$sv, $resym, cchar($type),cstring($ptr),$len));
+            my $rx = $mg->REGEX;
+            my $pmop = $REGEXP{$rx};
+
+            confess "PMOP not found for REGEXP $rx" unless $pmop;
+
+            my( $resym, $relen ) = savere( $mg->precomp );
+            my $pmsym = $pmop->save;
+            $init->add( split /\n/, sprintf <<CODE, $$sv, cchar($type), cstring($ptr) );
+{
+    REGEXP* rx = pregcomp($resym, $resym + $relen, (PMOP*)$pmsym);
+    sv_magic((SV*)s\\_%x, (SV*)rx, %s, %s, %d);
+}
+CODE
         }else{
 		$init->add(sprintf("sv_magic((SV*)s\\_%x, (SV*)s\\_%x, %s, %s, %d);",
 			   $$sv, $$obj, cchar($type),cstring($ptr),$len));
@@ -923,7 +1028,12 @@ sub B::CV::save {
 	warn sprintf("done saving GV 0x%x for CV 0x%x\n",
 		     $$gv, $$cv) if $debug_cv;
     }
-    $init->add(sprintf("CvFILE($sym) = %s;", cstring($cv->FILE)));
+    if( $ithreads ) {
+        $init->add( savepvn( "CvFILE($sym)", $cv->FILE) );
+    }
+    else {
+        $init->add(sprintf("CvFILE($sym) = %s;", cstring($cv->FILE)));
+    }
     my $stash = $cv->STASH;
     if ($$stash) {
 	$stash->save;
@@ -932,7 +1042,7 @@ sub B::CV::save {
 		     $$stash, $$cv) if $debug_cv;
     }
     $symsect->add(sprintf("svix%d\t(XPVCV*)&xpvcv_list[%u], %lu, 0x%x",
-			  $sv_ix, $xpvcv_ix, $cv->REFCNT +1 , $cv->FLAGS));
+			  $sv_ix, $xpvcv_ix, $cv->REFCNT +1*0 , $cv->FLAGS));
     return $sym;
 }
 
@@ -962,17 +1072,20 @@ sub B::GV::save {
 	}
     }
     $init->add(qq[$sym = gv_fetchpv($name, TRUE, SVt_PV);],
-	       sprintf("SvFLAGS($sym) = 0x%x;", $gv->FLAGS),
+	       sprintf("SvFLAGS($sym) = 0x%x;", $gv->FLAGS ),
 	       sprintf("GvFLAGS($sym) = 0x%x;", $gv->GvFLAGS));
     $init->add(sprintf("GvLINE($sym) = %u;", $gv->LINE)) unless $is_empty;
-
+    # XXX hack for when Perl accesses PVX of GVs
+    $init->add("SvPVX($sym) = emptystring;\n");
     # Shouldn't need to do save_magic since gv_fetchpv handles that
     #$gv->save_magic;
+    # XXX will always be > 1!!!
     my $refcnt = $gv->REFCNT + 1;
-    $init->add(sprintf("SvREFCNT($sym) += %u;", $refcnt - 1)) if $refcnt > 1;
+    $init->add(sprintf("SvREFCNT($sym) += %u;", $refcnt - 1 )) if $refcnt > 1;
 
     return $sym if $is_empty;
 
+    # XXX B::walksymtable creates an extra reference to the GV
     my $gvrefcnt = $gv->GvREFCNT;
     if ($gvrefcnt > 1) {
 	$init->add(sprintf("GvREFCNT($sym) += %u;", $gvrefcnt - 1));
@@ -998,7 +1111,8 @@ sub B::GV::save {
     $savefields&=~Save_CV if $fullname eq 'attributes::bootstrap';
 
     # save it
-    if (defined($egvsym)) {
+    # XXX is that correct?
+    if (defined($egvsym) && $egvsym !~ m/Null/ ) {
 	# Shared glob *foo = *bar
 	$init->add("gp_free($sym);",
 		   "GvGP($sym) = GvGP($egvsym);");
@@ -1062,6 +1176,7 @@ sub B::GV::save {
     }
     return $sym;
 }
+
 sub B::AV::save {
     my ($av) = @_;
     my $sym = objsym($av);
@@ -1088,18 +1203,38 @@ sub B::AV::save {
 			     $$av, $i++, class($el), $$el);
 	    }
 	}
-	my @names = map($_->save, @array);
+#	my @names = map($_->save, @array);
 	# XXX Better ways to write loop?
 	# Perhaps svp[0] = ...; svp[1] = ...; svp[2] = ...;
 	# Perhaps I32 i = 0; svp[i++] = ...; svp[i++] = ...; svp[i++] = ...;
+
+        # micro optimization: op/pat.t ( and other code probably )
+        # has very large pads ( 20k/30k elements ) passing them to
+        # ->add is a performance bottleneck: passing them as a
+        # single string cuts runtime from 6min20sec to 40sec
+
+        # you want to keep this out of the no_split/split
+        # map("\t*svp++ = (SV*)$_;", @names),
+        my $acc = '';
+        foreach my $i ( 0..$#array ) {
+              $acc .= "\t*svp++ = (SV*)" . $array[$i]->save . ";\n\t";
+        }
+        $acc .= "\n";
+
+        $init->no_split;
 	$init->add("{",
 		   "\tSV **svp;",
 		   "\tAV *av = (AV*)&sv_list[$sv_list_index];",
 		   "\tav_extend(av, $fill);",
-		   "\tsvp = AvARRAY(av);",
-	       map("\t*svp++ = (SV*)$_;", @names),
-		   "\tAvFILLp(av) = $fill;",
+		   "\tsvp = AvARRAY(av);" );
+        $init->add($acc);
+	$init->add("\tAvFILLp(av) = $fill;",
 		   "}");
+        $init->split;
+        # we really added a lot of lines ( B::C::InitSection->add
+        # should really scan for \n, but that would slow
+        # it down
+        $init->inc_count( $#array );
     } else {
 	my $max = $av->MAX;
 	$init->add("av_extend((AV*)&sv_list[$sv_list_index], $max);")
@@ -1144,6 +1279,7 @@ sub B::HV::save {
 	for ($i = 1; $i < @contents; $i += 2) {
 	    $contents[$i] = $contents[$i]->save;
 	}
+        $init->no_split;
 	$init->add("{", "\tHV *hv = (HV*)&sv_list[$sv_list_index];");
 	while (@contents) {
 	    my ($key, $value) = splice(@contents, 0, 2);
@@ -1154,6 +1290,7 @@ sub B::HV::save {
 #			       cstring($key),length($key),$value, 0));
 	}
 	$init->add("}");
+        $init->split;
     }
     $hv->save_magic();
     return savesym($hv, "(HV*)&sv_list[$sv_list_index]");
@@ -1165,15 +1302,13 @@ sub B::IO::save_data {
 
     # XXX using $DATA might clobber it!
     my $sym = svref_2object( \\$data )->save;
-    foreach my $i ( split /\n/, <<CODE ) {
+    $init->add( split /\n/, <<CODE );
     {
         GV* gv = (GV*)gv_fetchpv( "$globname", TRUE, SVt_PV );
         SV* sv = $sym;
         GvSV( gv ) = sv;
     }
 CODE
-        $init->add( $i );
-    }
     # for PerlIO::Scalar
     $use_xsloader = 1;
     $init->add_eval( sprintf 'open(%s, "<", $%s)', $globname, $globname );
@@ -1245,6 +1380,9 @@ sub output_all {
 	    print "Static $typename ${name}_list[$lines];\n";
 	}
     }
+    # XXX hack for when Perl accesses PVX of GVs
+    print 'Static char emptystring[] = "\0";';
+
     $decl->output(\*STDOUT, "%s\n");
     print "\n";
     foreach $section (@sections) {
@@ -1253,19 +1391,12 @@ sub output_all {
 	    my $name = $section->name;
 	    my $typename = ($name eq "xpvcv") ? "XPVCV_or_similar" : uc($name);
 	    printf "static %s %s_list[%u] = {\n", $typename, $name, $lines;
-	    $section->output(\*STDOUT, "\t{ %s },\n");
+	    $section->output(\*STDOUT, "\t{ %s }, /* %d */\n");
 	    print "};\n\n";
 	}
     }
 
-    print <<"EOT";
-static int $init_name()
-{
-	dTARG;
-	dSP;
-EOT
-    $init->output(\*STDOUT, "\t%s\n");
-    print "\treturn 0;\n}\n";
+    $init->output(\*STDOUT, "\t%s\n", $init_name );
     if ($verbose) {
 	warn compile_stats();
 	warn "NULLOP count: $nullop_count\n";
@@ -1393,6 +1524,11 @@ EOT
 
 sub output_main {
     print <<'EOT';
+/* if USE_IMPLICIT_SYS, we need a 'real' exit */
+#if defined(exit)
+#undef exit
+#endif
+
 int
 main(int argc, char **argv, char **env)
 {
@@ -1401,9 +1537,10 @@ main(int argc, char **argv, char **env)
     char **fakeargv;
     GV* tmpgv;
     SV* tmpsv;
+    int options_count;
 
     PERL_SYS_INIT3(&argc,&argv,&env);
- 
+
     if (!PL_do_undump) {
 	my_perl = perl_alloc();
 	if (!my_perl)
@@ -1411,7 +1548,22 @@ main(int argc, char **argv, char **env)
 	perl_construct( my_perl );
 	PL_perl_destruct_level = 0;
     }
+EOT
+    if( $ithreads ) {
+        # XXX init free elems!
+        my $pad_len = regex_padav->FILL + 1 - 1; # first is an avref
 
+        print <<EOT;
+#ifdef USE_ITHREADS
+    for( i = 0; i < $pad_len; ++i ) {
+        av_push( PL_regex_padav, newSViv(0) );
+    }
+    PL_regex_pad = AvARRAY( PL_regex_padav );
+#endif
+EOT
+    }
+
+    print <<'EOT';
 #ifdef CSH
     if (!PL_cshlen) 
       PL_cshlen = strlen(PL_cshname);
@@ -1427,18 +1579,25 @@ main(int argc, char **argv, char **env)
     fakeargv[0] = argv[0];
     fakeargv[1] = "-e";
     fakeargv[2] = "";
+    options_count = 3;
 EOT
     # honour -T
-    print sprintf '    fakeargv[3] = ( %s ) ? "-T" : "" ;'."\n", ${^TAINT};
+    print <<EOT;
+    if( ${^TAINT} ) {
+        fakeargv[options_count] = "-T";
+        ++options_count;
+    }
+EOT
     print <<'EOT';
 #ifndef ALLOW_PERL_OPTIONS
-    fakeargv[4] = "--";
+    fakeargv[options_count] = "--";
+    ++options_count;
 #endif /* ALLOW_PERL_OPTIONS */
     for (i = 1; i < argc; i++)
-	fakeargv[i + EXTRA_OPTIONS] = argv[i];
-    fakeargv[argc + EXTRA_OPTIONS] = 0;
+	fakeargv[i + options_count - 1] = argv[i];
+    fakeargv[argc + options_count - 1] = 0;
 
-    exitstatus = perl_parse(my_perl, xs_init, argc + EXTRA_OPTIONS,
+    exitstatus = perl_parse(my_perl, xs_init, argc + options_count - 1,
 			    fakeargv, NULL);
 
     if (exitstatus)
@@ -1554,7 +1713,7 @@ EOT
            else {
               print qq/\tperl_call_pv("XSLoader::load",G_DISCARD);\n/;
            }
-           print "\n#else\n";
+           print "#else\n";
 	   print "\tboot_$stashxsub(aTHX_ NULL);\n";
            print "#endif\n";
 	   print qq/\tSPAGAIN;\n/;
@@ -1759,9 +1918,10 @@ sub save_main {
     # save %SIG ( in case it was set in a BEGIN block )
     if( $save_sig ) {
         local $SIG{__WARN__} = $warner;
+        $init->no_split;
         $init->add("{", "\tHV* hv = get_hv(\"main::SIG\",1);" );
         foreach my $k ( keys %SIG ) {
-            next unless $SIG{$k};
+            next unless ref $SIG{$k};
             my $cv = svref_2object( \$SIG{$k} );
             my $sv = $cv->save;
             $init->add('{',sprintf 'SV* sv = (SV*)%s;', $sv );
@@ -1771,6 +1931,7 @@ sub save_main {
             $init->add('mg_set(sv);','}');
         }
         $init->add('}');
+        $init->split;
     }
     # honour -w
     $init->add( sprintf "    PL_dowarn = ( %s ) ? G_WARN_ON : G_WARN_OFF;", $^W );
@@ -1839,6 +2000,10 @@ sub compile {
                        'use-script-name' => \$use_perl_script_name,
                        'save-sig-hash' => \$save_sig,
                      );
+    my %optimization_map = ( 0 => [ qw() ], # special case
+                             1 => [ qw(-fcog) ],
+                             2 => [ qw(-fwarn-sv -fppaddr) ],
+                           );
   OPTION:
     while ($option = shift @options) {
 	if ($option =~ /^-(.)(.*)/) {
@@ -1891,11 +2056,12 @@ sub compile {
             }
 	} elsif ($opt eq "O") {
 	    $arg = 1 if $arg eq "";
-	    $pv_copy_on_grow = 0;
-	    if ($arg >= 1) {
-		# Optimisations for -O1
-		$pv_copy_on_grow = 1;
-	    }
+            my @opt;
+            foreach my $i ( 1 .. $arg ) {
+                push @opt, @{$optimization_map{$i}}
+                    if exists $optimization_map{$i};
+            }
+            unshift @options, @opt;
         } elsif ($opt eq "e") {
             push @eval_at_startup, $arg;
 	} elsif ($opt eq "l") {
@@ -2037,8 +2203,23 @@ Save compile-time modifications to the %SIG hash.
 
 =item B<-On>
 
-Optimisation level (n = 0, 1, 2, ...). B<-O> means B<-O1>.  Currently,
-B<-O1> and higher set B<-fcog>.
+Optimisation level (n = 0, 1, 2, ...). B<-O> means B<-O1>.
+
+=over 4
+
+=item B<-O0>
+
+Disable all optimizations.
+
+=item B<-O1>
+
+Enable B<-fcog>.
+
+=item B<-O2>
+
+Enable B<-fppaddr>, B<-fwarn-sv>.
+
+=back
 
 =item B<-llimit>
 

@@ -3848,7 +3848,7 @@ PP(pp_anonhash)
 	if (MARK < SP)
 	    sv_setsv(val, *++MARK);
 	else if (ckWARN(WARN_MISC))
-	    Perl_warner(aTHX_ WARN_MISC, "Odd number of elements in hash assignment");
+	    Perl_warner(aTHX_ WARN_MISC, "Odd number of elements in anonymous hash");
 	(void)hv_store_ent(hv,key,val,0);
     }
     SP = ORIGMARK;

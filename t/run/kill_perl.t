@@ -52,7 +52,7 @@ foreach my $prog (@prgs) {
 
     my($prog,$expected) = split(/\nEXPECT\n/, $raw_prog);
 
-    kill_perl($prog, $expected, { switches => $switch }, $name);
+    kill_perl($prog, $expected, { switches => [$switch] }, $name);
 }
 
 __END__
@@ -707,17 +707,6 @@ sub DESTROY {
 EXPECT
 Bar=ARRAY(0x...)
 ########
-# 20010407.008 sprintf removes utf8-ness
-$a = sprintf "\x{1234}";
-printf "%x %d\n", unpack("U*", $a), length($a);
-$a = sprintf "%s", "\x{5678}";
-printf "%x %d\n", unpack("U*", $a), length($a);
-$a = sprintf "\x{1234}%s", "\x{5678}";
-printf "%x %x %d\n", unpack("U*", $a), length($a);
-EXPECT
-1234 1
-5678 1
-1234 5678 2
 ######## found by Markov chain stress testing
 eval "a.b.c.d.e.f;sub"
 EXPECT
@@ -807,6 +796,7 @@ package main;
 $test = Foo->new(); # must be package var
 END
 {
+	1 while unlink 'dbmtest';
 	1 while unlink <dbmtest.*>;
 	print "ok\n";
 }

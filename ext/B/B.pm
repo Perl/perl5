@@ -21,7 +21,7 @@ require Exporter;
 		amagic_generation
 		walkoptree_slow walkoptree walkoptree_exec walksymtable
 		parents comppadlist sv_undef compile_stats timing_info
-		begin_av init_av end_av);
+		begin_av init_av end_av regex_padav);
 
 sub OPf_KIDS ();
 use strict;
@@ -411,6 +411,11 @@ string using the length and offset information in the struct:
 for ordinary scalars it will return the string that you'd see
 from Perl, even if it contains null characters.
 
+=item RV
+
+Same as B::RV::RV, except that it will die() if the PV isn't
+a reference.
+
 =item PVX
 
 This method is less often useful. It assumes that the string
@@ -440,6 +445,10 @@ are always stored with a null terminator, and the length field
 
 =item MOREMAGIC
 
+=item precomp
+
+Only valid on r-magic, returns the string that generated the regexp.
+
 =item PRIVATE
 
 =item TYPE
@@ -448,7 +457,14 @@ are always stored with a null terminator, and the length field
 
 =item OBJ
 
+Will die() if called on r-magic.
+
 =item PTR
+
+=item REGEX
+
+Only valid on r-magic, returns the integer value of the REGEX stored
+in the MAGIC.
 
 =back
 
@@ -565,6 +581,13 @@ If you're working with globs at runtime, and need to disambiguate
 
 =item IoFLAGS
 
+=item IsSTD
+
+Takes one arguments ( 'stdin' | 'stdout' | 'stderr' ) and returns true
+if the IoIFP of the object is equal to the handle whose name was
+passed as argument ( i.e. $io->IsSTD('stderr') is true if
+IoIFP($io) == PerlIO_stdin() ).
+
 =back
 
 =head2 B::AV METHODS
@@ -606,6 +629,8 @@ If you're working with globs at runtime, and need to disambiguate
 =item XSUB
 
 =item XSUBANY
+
+For constant subroutines, returns the constant SV returned by the subroutine.
 
 =item CvFLAGS
 
@@ -723,9 +748,15 @@ This returns the op description from the global C PL_op_desc array
 
 =item pmflags
 
+=item pmdynflags
+
 =item pmpermflags
 
 =item precomp
+
+=item pmoffet
+
+Only when perl was compiled with ithreads.
 
 =back
 
@@ -802,6 +833,14 @@ program.
 
 Returns the AV object (i.e. in class B::AV) representing INIT blocks.
 
+=item begin_av
+
+Returns the AV object (i.e. in class B::AV) representing BEGIN blocks.
+
+=item end_av
+
+Returns the AV object (i.e. in class B::AV) representing END blocks.
+
 =item main_root
 
 Returns the root op (i.e. an object in the appropriate B::OP-derived
@@ -814,6 +853,10 @@ Returns the starting op of the main part of the Perl program.
 =item comppadlist
 
 Returns the AV object (i.e. in class B::AV) of the global comppadlist.
+
+=item regex_padav
+
+Only when perl was compiled with ithreads.
 
 =item sv_undef
 

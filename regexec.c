@@ -111,7 +111,7 @@
 #define HOPMAYBEc(pos,off) ((char*)HOPMAYBE(pos,off))
 
 #define HOPBACK(pos, off) (		\
-    (UTF && PL_reg_match_utf8)		\
+    (PL_reg_match_utf8)			\
 	? reghopmaybe((U8*)pos, -off)	\
     : (pos - off >= PL_bostr)		\
 	? (U8*)(pos - off)		\
@@ -916,15 +916,19 @@ S_find_byclass(pTHX_ regexp * prog, regnode *c, char *s, char *strend, char *sta
 	switch (OP(c)) {
 	case ANYOF:
 	    while (s < strend) {
-		if (reginclass(c, (U8*)s, do_utf8)) {
+	        STRLEN skip = do_utf8 ? UTF8SKIP(s) : 1;
+
+		if (reginclass(c, (U8*)s, do_utf8) ||
+		    (ANYOF_UNICODE_FOLD_SHARP_S(c, s, strend) &&
+		     (skip = 2))) {
 		    if (tmp && (norun || regtry(prog, s)))
 			goto got_it;
 		    else
 			tmp = doevery;
 		}
-		else
-		    tmp = 1;
-		s += do_utf8 ? UTF8SKIP(s) : 1;
+		else 
+		     tmp = 1;
+		s += skip;
 	    }
 	    break;
 	case CANY:
@@ -1012,12 +1016,12 @@ S_find_byclass(pTHX_ regexp * prog, regnode *c, char *s, char *strend, char *sta
 		        c = utf8_to_uvchr((U8*)s, &len);
 
 			/* Handle some of the three Greek sigmas cases.
-			  * Note that not all the possible combinations
-			  * are handled here: some of them are handled
-			  * handled by the standard folding rules, and
-			  * some of them (the character class or ANYOF
-			  * cases) are handled during compiletime in
-			  * regexec.c:S_regclass(). */
+			 * Note that not all the possible combinations
+			 * are handled here: some of them are handled
+			 * by the standard folding rules, and some of
+			 * them (the character class or ANYOF cases)
+			 * are handled during compiletime in
+			 * regexec.c:S_regclass(). */
 			if (c == (UV)UNICODE_GREEK_CAPITAL_LETTER_SIGMA ||
 			    c == (UV)UNICODE_GREEK_SMALL_LETTER_FINAL_SIGMA)
 			    c = (UV)UNICODE_GREEK_SMALL_LETTER_SIGMA;
@@ -1554,9 +1558,7 @@ Perl_regexec_flags(pTHX_ register regexp *prog, char *stringarg, register char *
     }
 
     minlen = prog->minlen;
-    if (strend - startpos < minlen &&
-	!PL_reg_match_utf8 /* ANYOFs can balloon to EXACTFs */
-	) {
+    if (strend - startpos < minlen) {
         DEBUG_r(PerlIO_printf(Perl_debug_log,
 			      "String too short [regexec_flags]...\n"));
 	goto phooey;
@@ -2110,6 +2112,7 @@ typedef union re_unwind_t {
 
 #define sayYES goto yes
 #define sayNO goto no
+#define sayNO_ANYOF goto no_anyof
 #define sayYES_FINAL goto yes_final
 #define sayYES_LOUD  goto yes_loud
 #define sayNO_FINAL  goto no_final
@@ -2370,8 +2373,20 @@ S_regmatch(pTHX_ regnode *prog)
 		char *e = PL_regeol;
 
 		if (ibcmp_utf8(s, 0,  ln, do_utf8,
-			       l, &e, 0,  UTF))
-		     sayNO;
+			       l, &e, 0,  UTF)) {
+		     /* One more case for the sharp s:
+		      * pack("U0U*", 0xDF) =~ /ss/i,
+		      * the 0xC3 0x9F are the UTF-8
+		      * byte sequence for the U+00DF. */
+		     if (!(do_utf8 &&
+			   toLOWER(s[0]) == 's' &&
+			   ln >= 2 &&
+			   toLOWER(s[1]) == 's' &&
+			   (U8)l[0] == 0xC3 &&
+			   e - l >= 2 &&
+			   (U8)l[1] == 0x9F))
+			  sayNO;
+		}
 		locinput = e;
 		nextchr = UCHARAT(locinput);
 		break;
@@ -2398,21 +2413,33 @@ S_regmatch(pTHX_ regnode *prog)
 	        STRLEN inclasslen = PL_regeol - locinput;
 
 	        if (!reginclasslen(scan, (U8*)locinput, &inclasslen, do_utf8))
-		    sayNO;
+		    sayNO_ANYOF;
 		if (locinput >= PL_regeol)
 		    sayNO;
 		locinput += inclasslen;
 		nextchr = UCHARAT(locinput);
+		break;
 	    }
 	    else {
 		if (nextchr < 0)
 		    nextchr = UCHARAT(locinput);
 		if (!reginclass(scan, (U8*)locinput, do_utf8))
-		    sayNO;
+		    sayNO_ANYOF;
 		if (!nextchr && locinput >= PL_regeol)
 		    sayNO;
 		nextchr = UCHARAT(++locinput);
+		break;
 	    }
+	no_anyof:
+	    /* If we might have the case of the German sharp s
+	     * in a casefolding Unicode character class. */
+
+	    if (ANYOF_UNICODE_FOLD_SHARP_S(scan, locinput, PL_regeol)) {
+		 locinput += 2;
+		 nextchr = UCHARAT(locinput);
+	    }
+	    else
+		 sayNO;
 	    break;
 	case ALNUML:
 	    PL_reg_flags |= RF_tainted;

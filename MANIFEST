@@ -82,6 +82,8 @@ ext/B/B/Stackobj.pm	Compiler stack objects support functions
 ext/B/B/Stash.pm	Compiler module to identify stashes
 ext/B/B/Terse.pm	Compiler Terse backend
 ext/B/B/Xref.pm		Compiler Xref backend
+ext/B/C/C.xs		Compiler C backend external subroutines
+ext/B/C/Makefile.PL	Compiler C backend makefile writer
 ext/B/defsubs_h.PL	Generator for constant subroutines
 ext/B/Makefile.PL	Compiler backend makefile writer
 ext/B/NOTES		Compiler backend notes
@@ -2332,6 +2334,7 @@ t/op/time.t			See if time functions work
 t/op/tr.t			See if tr works
 t/op/undef.t			See if undef works
 t/op/unifold.t			See if Unicode folding works
+t/op/unisprintf.t		See if Unicode sprintf works
 t/op/universal.t		See if UNIVERSAL class works
 t/op/unshift.t			See if unshift works
 t/op/utf8decode.t		See if UTF-8 decoding works
