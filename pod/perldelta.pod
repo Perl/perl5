@@ -190,6 +190,24 @@ It is now possible to build Perl with AT&T's sfio IO package
 instead of stdio.  See L<perlapio> for more details, and
 the F<INSTALL> file for how to use it.
 
+=head2 New and changed syntax
+
+=over
+
+=item $coderef->(PARAMS)
+
+A subroutine reference may now be suffixed with an arrow and a
+(possibly empty) parameter list.  This syntax denotes a call of the
+referenced subroutine, with the given parameters (if any).
+
+This new syntax follows the pattern of C<$hashref-E<gt>{FOO}> and
+C<$aryref-E<gt>[$foo]>; now, C<&$subref($foo)> may now be written
+C<$subref-E<gt>($foo)>.  All of these arrow terms may be chained;
+thus, C<&{$table-E<gt>{FOO}}($bar)> may now be written
+C<$table-E<gt>{FOO}->($bar)>.
+
+=back
+
 =head2 New and changed builtin constants
 
 =over

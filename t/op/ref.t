@@ -101,7 +101,7 @@ $subref = \&mysub;
 &$subref;
 
 $subrefref = \\&mysub2;
-&$$subrefref("ok 24\n");
+$$subrefref->("ok 24\n");
 sub mysub2 { print shift }
 
 # Test the ref operator.

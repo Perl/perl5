@@ -924,6 +924,10 @@ CGI script to do bad things?
 
 =item Internal change: PerlIO abstraction interface
 
+=item New and changed syntax
+
+$coderef->(PARAMS)
+
 =item New and changed builtin constants
 
 __PACKAGE__

@@ -529,6 +529,13 @@ term	:	term ASSIGNOP term
 			    prepend_elem(OP_LIST,
 				$4,
 				scalar(newCVREF(0,scalar($2))))); dep();}
+	|	term ARROW '(' ')'	%prec '('
+			{ $$ = newUNOP(OP_ENTERSUB, OPf_STACKED,
+				   newCVREF(0, scalar($1))); }
+	|	term ARROW '(' expr ')'	%prec '('
+			{ $$ = newUNOP(OP_ENTERSUB, OPf_STACKED,
+				   append_elem(OP_LIST, $4,
+				       newCVREF(0, scalar($1)))); }
 	|	LOOPEX
 			{ $$ = newOP($1, OPf_SPECIAL);
 			    hints |= HINT_BLOCK_SCOPE; }

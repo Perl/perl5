@@ -698,8 +698,8 @@ many different sorts:
      print $rec->{LOOKUP}{"key"};
      ($first_k, $first_v) = each %{ $rec->{LOOKUP} };
 
-     $answer = &{ $rec->{THATCODE} }($arg);
-     $answer = &{ $rec->{THISCODE} }($arg1, $arg2);
+     $answer = $rec->{THATCODE}->($arg);
+     $answer = $rec->{THISCODE}->($arg1, $arg2);
 
      # careful of extra block braces on fh ref
      print { $rec->{HANDLE} } "a string\n";

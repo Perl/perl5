@@ -318,14 +318,15 @@ it's presumably referencing.  That would be case 3.
 
 =item 3.
 
-The case of individual array elements arises often enough that it gets
-cumbersome to use method 2.  As a form of syntactic sugar, the two
-lines like that above can be written:
+Subroutine calls and lookups of individual array elements arise often
+enough that it gets cumbersome to use method 2.  As a form of
+syntactic sugar, the examples for method 2 may be written:
 
-    $arrayref->[0] = "January";
-    $hashref->{"KEY"} = "VALUE";
+    $arrayref->[0] = "January";   # Array element
+    $hashref->{"KEY"} = "VALUE";  # Hash element
+    $coderef->(1,2,3);            # Subroutine call
 
-The left side of the array can be any expression returning a reference,
+The left side of the arrow can be any expression returning a reference,
 including a previous dereference.  Note that C<$array[$x]> is I<NOT> the
 same thing as C<$array-E<gt>[$x]> here:
 
