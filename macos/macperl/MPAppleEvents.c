@@ -9,6 +9,9 @@ Apple Developer Support UK
 Language	:	MPW C
 
 $Log: MPAppleEvents.c,v $
+Revision 1.5  2002/02/04 07:46:28  neeri
+Empty path is ENOENT (MacPerl Bug #512351)
+
 Revision 1.4  2002/01/04 03:34:45  pudge
 Modifications for universal headers 3.4
 
@@ -5543,6 +5546,8 @@ pascal OSErr Text2FSSpec(
 	memcpy(file, path, size);
 	file[size] = 0;
 	
+	if (!size)
+		return dirNFErr;
 	if (err = GUSIPath2FSp(file, &spec))
 		return err;
 	if (err = GUSIFSpGetCatInfo(&spec, &info))
