@@ -148,6 +148,8 @@ END_EXTERN_C
 #define PL_bufptr		(*Perl_Ibufptr_ptr(aTHX))
 #undef  PL_checkav
 #define PL_checkav		(*Perl_Icheckav_ptr(aTHX))
+#undef  PL_checkav_save
+#define PL_checkav_save		(*Perl_Icheckav_save_ptr(aTHX))
 #undef  PL_collation_ix
 #define PL_collation_ix		(*Perl_Icollation_ix_ptr(aTHX))
 #undef  PL_collation_name

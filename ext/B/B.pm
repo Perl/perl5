@@ -21,7 +21,7 @@ require Exporter;
 		amagic_generation perlstring
 		walkoptree_slow walkoptree walkoptree_exec walksymtable
 		parents comppadlist sv_undef compile_stats timing_info
-		begin_av init_av end_av regex_padav);
+		begin_av init_av check_av end_av regex_padav);
 
 sub OPf_KIDS ();
 use strict;
@@ -373,6 +373,10 @@ Returns the SV object corresponding to the C variable C<amagic_generation>.
 =item C<init_av>
 
 Returns the AV object (i.e. in class B::AV) representing INIT blocks.
+
+=item check_av
+
+Returns the AV object (i.e. in class B::AV) representing CHECK blocks.
 
 =item begin_av
 
