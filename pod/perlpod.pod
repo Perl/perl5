@@ -95,7 +95,7 @@ treat some of these as synonyms.)
 
 And don't forget, when using any command, that the command lasts up until
 the end of the B<paragraph>, not the line. Hence in the examples below, you
-can see the blank lines after each command to end its paragraph.
+can see the empty lines after each command to end its paragraph.
 
 Some examples of lists include:
 
@@ -188,7 +188,7 @@ documentation with a "=head1" command at the beginning, and end it
 with a "=cut" command.  Perl will ignore the pod text.  See any of the
 supplied library modules for examples.  If you're going to put your
 pods at the end of the file, and you're using an __END__ or __DATA__
-cut mark, make sure to put a blank line there before the first pod
+cut mark, make sure to put an empty line there before the first pod
 directive.
 
     __END__
@@ -198,7 +198,7 @@ directive.
 
     modern - I am a modern module
 
-If you had not had that blank line there, then the translators wouldn't
+If you had not had that empty line there, then the translators wouldn't
 have seen it.
 
 =head1 Common Pod Pitfalls
@@ -208,7 +208,7 @@ have seen it.
 =item *
 
 Pod translators usually will require paragraphs to be separated by
-completely empty lines.  If you have an apparently blank line with
+completely empty lines.  If you have an apparently empty line with
 some spaces on it, this can cause odd formatting.
 
 =item *
@@ -222,7 +222,7 @@ sensibly.
 =item *
 
 The script F<pod/checkpods.PL> in the Perl source distribution
-provides skeletal checking for lines that look blank but aren't
+provides skeletal checking for lines that look empty but aren't
 B<only>, but is there as a placeholder until someone writes
 Pod::Checker.  The best way to check your pod is to pass it through
 one or more translators and proofread the result, or print out the

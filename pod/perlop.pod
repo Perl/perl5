@@ -741,10 +741,10 @@ combine several regexps like this to process a string part-by-part,
 doing different actions depending on which regexp matched.  The next
 regexp would step in at the place the previous one left off.
 
-    $_ = <<'EOL';
+ $_ = <<'EOL';
       $url = new URI::URL "http://www/";   die if $url eq "xXx";
-EOL
-  LOOP:
+ EOL
+ LOOP:
     {
       print(" digits"),		redo LOOP if /\G\d+\b[,.;]?\s*/g;
       print(" lowercase"),	redo LOOP if /\G[a-z]+\b[,.;]?\s*/g;

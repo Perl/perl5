@@ -753,7 +753,7 @@ with L<perlfunc/my> whenever possible.
      exit(exitstatus);
  }
 
- 
+
 Now compile:
 
  % cc -o persistent persistent.c `perl -MExtUtils::Embed -e ccopts -e ldopts` 

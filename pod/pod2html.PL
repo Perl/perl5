@@ -526,7 +526,7 @@ sub find_refs {
     for ($$thing) {
 	#s:L<([a-zA-Z][^\s\/]+)(\([^\)]+\))>:the I<$1>$2 manpage:g;
         s@(\S+?://\S*[^.,;!?\s])@noremap(qq{<A HREF="$1">$1</A>})@ge;
-        s,([a-z0-9_.-]+\@([a-z0-9_-]+\.)+([a-z0-9_-]+)),noremap(qq{<A HREF="MAILTO:$1">$1</A>}),gie;
+        s,([a-z0-9_.-]+\@([a-z0-9_-]+\.)+([a-z0-9_-]+)),noremap(qq{<A HREF="mailto:$1">$1</A>}),gie;
 	s/L<([^>]*)>/lrefs($1,$htype)/ge;
 	s/([CIBF])<(\W*?(-?\w*).*?)>/picrefs($1, $2, $3, $htype)/ge;
 	s/(S)<([^\/]\W*?(-?\w*).*?)>/picrefs($1, $2, $3, $htype)/ge;

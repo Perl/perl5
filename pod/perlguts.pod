@@ -162,7 +162,7 @@ bus error, or just weird results.  Change the zero to C<&sv_undef> in the first
 line and all will be well.
 
 To free an SV that you've created, call C<SvREFCNT_dec(SV*)>.  Normally this
-call is not necessary (see the section on L<Reference Counts and Mortality>).
+call is not necessary (see L<Reference Counts and Mortality>).
 
 =head2 What's Really Stored in an SV?
 
@@ -422,7 +422,7 @@ A reference can be blessed into a package with the following function:
     SV* sv_bless(SV* sv, HV* stash);
 
 The C<sv> argument must be a reference.  The C<stash> argument specifies
-which class the reference will belong to.  See the section on 
+which class the reference will belong to.  See
 L<Stashes and Globs> for information on converting class names into stashes.
 
 /* Still under construction */
@@ -1587,7 +1587,7 @@ C<hv_iterinit>.
 	char*	hv_iterkey _((HE* entry, I32* retlen));
 
 =item hv_iterkeysv
-	
+
 Returns the key as an C<SV*> from the current position of the hash
 iterator.  The return value will always be a mortal copy of the
 key.  Also see C<hv_iterinit>.

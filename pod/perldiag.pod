@@ -481,7 +481,7 @@ They must have ordinary identifiers as names.
 =item Can't do in-place edit without backup
 
 (F) You're on a system such as MSDOS that gets confused if you try reading
-from a deleted (but still opened) file.  You have to say B<-i>C<.bak>, or some
+from a deleted (but still opened) file.  You have to say C<-i.bak>, or some
 such.
 
 =item Can't do inplace edit: %s E<gt> 14 characters
@@ -2467,7 +2467,7 @@ bad side effects.
 =item Use of bare E<lt>E<lt> to mean E<lt>E<lt>"" is deprecated
 
 (D) You are now encouraged to use the explicitly quoted form if you
-wish to use a blank line as the terminator of the here-document.
+wish to use an empty line as the terminator of the here-document.
 
 =item Use of implicit split to @_ is deprecated
 
