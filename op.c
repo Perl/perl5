@@ -1432,7 +1432,7 @@ Perl_mod(pTHX_ OP *o, I32 type)
 		    Perl_croak(aTHX_
 			       "panic: unexpected lvalue entersub "
 			       "args: type/targ %ld:%"UVuf,
-			       (long)kid->op_type,kid->op_targ);
+			       (long)kid->op_type, (UV)kid->op_targ);
 		kid = kLISTOP->op_first;
 	      skip_kids:
 		while (kid->op_sibling)
@@ -1463,7 +1463,7 @@ Perl_mod(pTHX_ OP *o, I32 type)
 			Perl_croak(aTHX_
 				   "panic: unexpected lvalue entersub "
 				   "entry via type/targ %ld:%"UVuf,
-				   (long)kid->op_type,kid->op_targ);
+				   (long)kid->op_type, (UV)kid->op_targ);
 		    kid->op_private |= OPpLVAL_INTRO;
 		    break;	/* Postpone until runtime */
 		}
@@ -1476,7 +1476,7 @@ Perl_mod(pTHX_ OP *o, I32 type)
 		    Perl_croak(aTHX_
 			       "Unexpected constant lvalue entersub "
 			       "entry via type/targ %ld:%"UVuf,
-			       (long)kid->op_type,kid->op_targ);
+			       (long)kid->op_type, (UV)kid->op_targ);
 		if (kid->op_type != OP_GV) {
 		    /* Restore RV2CV to check lvalueness */
 		  restore_2cv:
