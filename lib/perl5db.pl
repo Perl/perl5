@@ -540,14 +540,12 @@ if ($notty) {
 
     $OUT = \*OUT;
   }
-  select($OUT);
+  my $previous = select($OUT);
   $| = 1;			# for DB::OUT
-  select(STDOUT);
+  select($previous);
 
   $LINEINFO = $OUT unless defined $LINEINFO;
   $lineinfo = $console unless defined $lineinfo;
-
-  $| = 1;			# for real STDOUT
 
   $header =~ s/.Header: ([^,]+),v(\s+\S+\s+\S+).*$/$1$2/;
   unless ($runnonstop) {
