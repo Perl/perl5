@@ -264,7 +264,9 @@ sub xlate {
     $name = uc $name;
     $name = "LOG_$name" unless $name =~ /^LOG_/;
     $name = "Sys::Syslog::$name";
-    eval { &$name } || -1;
+    # Can't have just eval { &$name } || -1 because some LOG_XXX may be zero.
+    my $value = eval { &$name };
+    defined $value ? $value : -1;
 }
 
 sub connect {
