@@ -2954,7 +2954,7 @@ if all the bytes have hibit clear.
 STRLEN
 Perl_sv_utf8_upgrade(pTHX_ register SV *sv)
 {
-    char *s, *t, *e;
+    U8 *s, *t, *e;
     int  hibit = 0;
 
     if (!sv)
@@ -2966,25 +2966,24 @@ Perl_sv_utf8_upgrade(pTHX_ register SV *sv)
     if (SvUTF8(sv))
 	return SvCUR(sv);
 
+    if (SvREADONLY(sv) && SvFAKE(sv)) {
+	sv_force_normal(sv);
+    }
+
     /* This function could be much more efficient if we had a FLAG in SVs
      * to signal if there are any hibit chars in the PV.
      * Given that there isn't make loop fast as possible
      */
-    s = SvPVX(sv);
-    e = SvEND(sv);
+    s = (U8 *) SvPVX(sv);
+    e = (U8 *) SvEND(sv);
     t = s;
     while (t < e) {
-	if ((hibit = UTF8_IS_CONTINUED(*t++)))
+	if ((hibit = UTF8_IS_CONTINUED(NATIVE_TO_ASCII(*t++))))
 	    break;
     }
-
     if (hibit) {
 	STRLEN len;
 
-	if (SvREADONLY(sv) && SvFAKE(sv)) {
-	    sv_force_normal(sv);
-	    s = SvPVX(sv);
-	}
 	len = SvCUR(sv) + 1; /* Plus the \0 */
 	SvPVX(sv) = (char*)bytes_to_utf8((U8*)s, &len);
 	SvCUR(sv) = len - 1;
@@ -2992,6 +2991,12 @@ Perl_sv_utf8_upgrade(pTHX_ register SV *sv)
 	    Safefree(s); /* No longer using what was there before. */
 	SvLEN(sv) = len; /* No longer know the real size. */
     }
+#ifdef EBCDIC
+    else {
+	for (t = s; t < e; t++)
+	    *t = NATIVE_TO_ASCII(*t);
+    }
+#endif
     /* Mark as UTF-8 even if no hibit - saves scanning loop */
     SvUTF8_on(sv);
     return SvCUR(sv);
@@ -4755,8 +4760,7 @@ Perl_sv_eq(pTHX_ register SV *sv1, register SV *sv2)
     char *pv2;
     STRLEN cur2;
     I32  eq     = 0;
-    bool pv1tmp = FALSE;
-    bool pv2tmp = FALSE;
+    char *tpv   = Nullch;
 
     if (!sv1) {
 	pv1 = "";
@@ -4775,31 +4779,33 @@ Perl_sv_eq(pTHX_ register SV *sv1, register SV *sv2)
     /* do not utf8ize the comparands as a side-effect */
     if (cur1 && cur2 && SvUTF8(sv1) != SvUTF8(sv2) && !IN_BYTE) {
 	bool is_utf8 = TRUE;
-
+        /* UTF-8ness differs */
 	if (PL_hints & HINT_UTF8_DISTINCT)
 	    return FALSE;
 
 	if (SvUTF8(sv1)) {
+	    /* sv1 is the UTF-8 one , If is equal it must be downgrade-able */
 	    char *pv = (char*)bytes_from_utf8((U8*)pv1, &cur1, &is_utf8);
-
-	    if ((pv1tmp = (pv != pv1)))
-		pv1 = pv;
+	    if (pv != pv1)
+		pv1 = tpv = pv;
 	}
 	else {
+	    /* sv2 is the UTF-8 one , If is equal it must be downgrade-able */
 	    char *pv = (char *)bytes_from_utf8((U8*)pv2, &cur2, &is_utf8);
-
-	    if ((pv2tmp = (pv != pv2)))
-		pv2 = pv;
+	    if (pv != pv2)
+		pv2 = tpv = pv;
+	}
+	if (is_utf8) {
+	    /* Downgrade not possible - cannot be eq */
+	    return FALSE;
 	}
     }
 
     if (cur1 == cur2)
 	eq = memEQ(pv1, pv2, cur1);
 	
-    if (pv1tmp)
-	Safefree(pv1);
-    if (pv2tmp)
-	Safefree(pv2);
+    if (tpv != Nullch)
+	Safefree(tpv);
 
     return eq;
 }

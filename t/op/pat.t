@@ -293,7 +293,7 @@ for $l (125, 140, 250, 270, 300000, 30) { # Ordered to free memory
   print "# length=$l\nnot " unless "ba$a=" =~ /a$a=/;
   print "ok $test\n";
   $test++;
-  
+
   print "not " if "b$a=" =~ /a$a=/;
   print "ok $test\n";
   $test++;
@@ -313,11 +313,11 @@ $long_var_len = join '|', 8120 .. 28645;
        );
 
 for ( keys %ans ) {
-  print "# const-len `$_' not =>  $ans{$_}\nnot " 
+  print "# const-len `$_' not =>  $ans{$_}\nnot "
     if $ans{$_} xor /a(?=([yx]($long_constant_len)){2,4}[k-o]).*b./o;
   print "ok $test\n";
   $test++;
-  print "# var-len   `$_' not =>  $ans{$_}\nnot " 
+  print "# var-len   `$_' not =>  $ans{$_}\nnot "
     if $ans{$_} xor /a(?=([yx]($long_var_len)){2,4}[k-o]).*b./o;
   print "ok $test\n";
   $test++;
@@ -326,26 +326,26 @@ for ( keys %ans ) {
 $_ = " a (bla()) and x(y b((l)u((e))) and b(l(e)e)e";
 $expect = "(bla()) ((l)u((e))) (l(e)e)";
 
-sub matchit { 
+sub matchit {
   m/
      (
-       \( 
+       \(
        (?{ $c = 1 })		# Initialize
        (?:
 	 (?(?{ $c == 0 })       # PREVIOUS iteration was OK, stop the loop
 	   (?!
 	   )			# Fail: will unwind one iteration back
-	 )	    
+	 )	
 	 (?:
 	   [^()]+		# Match a big chunk
 	   (?=
 	     [()]
 	   )			# Do not try to match subchunks
 	 |
-	   \( 
+	   \(
 	   (?{ ++$c })
 	 |
-	   \) 
+	   \)
 	   (?{ --$c })
 	 )
        )+			# This may not match with different subblocks
@@ -412,7 +412,7 @@ for $code ('{$blah = 45}','=xx') {
   if ($code eq '=xx') {
     print "#'$@','$res','$blah'\nnot " unless not $@ and $res;
   } else {
-    print "#'$@','$res','$blah'\nnot " unless $@ and $@ =~ /not allowed at runtime/ and $blah == 12;    
+    print "#'$@','$res','$blah'\nnot " unless $@ and $@ =~ /not allowed at runtime/ and $blah == 12;
   }
   print "ok $test\n";
   $test++;
@@ -511,9 +511,9 @@ foreach $ans ('', 'a', '') {
 }
 
 sub prefixify {
-  my($v,$a,$b,$res) = @_; 
-  $v =~ s/\Q$a\E/$b/; 
-  print "not " unless $res eq $v; 
+  my($v,$a,$b,$res) = @_;
+  $v =~ s/\Q$a\E/$b/;
+  print "not " unless $res eq $v;
   print "ok $test\n";
   $test++;
 }
@@ -526,23 +526,23 @@ print "not " unless $1 and /$1/;
 print "ok $test\n";
 $test++;
 
-$a=qr/(?{++$b})/; 
+$a=qr/(?{++$b})/;
 $b = 7;
-/$a$a/; 
-print "not " unless $b eq '9'; 
+/$a$a/;
+print "not " unless $b eq '9';
 print "ok $test\n";
 $test++;
 
-$c="$a"; 
-/$a$a/; 
-print "not " unless $b eq '11'; 
+$c="$a";
+/$a$a/;
+print "not " unless $b eq '11';
 print "ok $test\n";
 $test++;
 
 {
-  use re "eval"; 
-  /$a$c$a/; 
-  print "not " unless $b eq '14'; 
+  use re "eval";
+  /$a$c$a/;
+  print "not " unless $b eq '14';
   print "ok $test\n";
   $test++;
 
@@ -562,9 +562,9 @@ $test++;
   $test++;
 
 
-  no re "eval"; 
+  no re "eval";
   $match = eval { /$a$c$a/ };
-  print "not " 
+  print "not "
     unless $b eq '14' and $@ =~ /Eval-group not allowed/ and not $match;
   print "ok $test\n";
   $test++;
@@ -598,8 +598,8 @@ print "ok $test\n";
 $test++;
 print "not " unless $c == 3;
 print "ok $test\n";
-$test++;  
-  
+$test++;
+
 sub must_warn_pat {
     my $warn_pat = shift;
     return sub { print "not " unless $_[0] =~ /$warn_pat/ }
@@ -660,7 +660,7 @@ print "not " if $+[0] != 2 or $-[0] != 1;
 print "ok $test\n";
 $test++;
 
-print "not " 
+print "not "
    if defined $+[1] or defined $-[1] or defined $+[2] or defined $-[2];
 print "ok $test\n";
 $test++;
@@ -682,7 +682,7 @@ print "not " if $+[2] != 3 or $-[2] != 2;
 print "ok $test\n";
 $test++;
 
-print "not " 
+print "not "
    if defined $+[3] or defined $-[3] or defined $+[4] or defined $-[4];
 print "ok $test\n";
 $test++;
@@ -704,7 +704,7 @@ print "not " if $+[3] != 3 or $-[3] != 2;
 print "ok $test\n";
 $test++;
 
-print "not " 
+print "not "
    if defined $+[2] or defined $-[2] or defined $+[4] or defined $-[4];
 print "ok $test\n";
 $test++;
@@ -722,31 +722,31 @@ print "not " if $+[1] != 2 or $-[1] != 1;
 print "ok $test\n";
 $test++;
 
-print "not " 
+print "not "
    if defined $+[2] or defined $-[2] or defined $+[3] or defined $-[3];
 print "ok $test\n";
 $test++;
 
 eval { $+[0] = 13; };
-print "not " 
+print "not "
    if $@ !~ /^Modification of a read-only value attempted/;
 print "ok $test\n";
 $test++;
 
 eval { $-[0] = 13; };
-print "not " 
+print "not "
    if $@ !~ /^Modification of a read-only value attempted/;
 print "ok $test\n";
 $test++;
 
 eval { @+ = (7, 6, 5); };
-print "not " 
+print "not "
    if $@ !~ /^Modification of a read-only value attempted/;
 print "ok $test\n";
 $test++;
 
 eval { @- = qw(foo bar); };
-print "not " 
+print "not "
    if $@ !~ /^Modification of a read-only value attempted/;
 print "ok $test\n";
 $test++;
@@ -792,7 +792,7 @@ $test++;
 
 undef $foo; undef $bar;
 print "#'$str','$foo','$bar'\nnot "
-    unless $str =~ /b(?{$foo = $_; $bar = pos})c/ 
+    unless $str =~ /b(?{$foo = $_; $bar = pos})c/
 	and $foo eq 'abcde' and $bar eq 2;
 print "ok $test\n";
 $test++;
@@ -800,7 +800,7 @@ $test++;
 undef $foo; undef $bar;
 pos $str = undef;
 print "#'$str','$foo','$bar'\nnot "
-    unless $str =~ /b(?{$foo = $_; $bar = pos})c/g 
+    unless $str =~ /b(?{$foo = $_; $bar = pos})c/g
 	and $foo eq 'abcde' and $bar eq 2 and pos $str eq 3;
 print "ok $test\n";
 $test++;
@@ -809,14 +809,14 @@ $_ = $str;
 
 undef $foo; undef $bar;
 print "#'$str','$foo','$bar'\nnot "
-    unless /b(?{$foo = $_; $bar = pos})c/ 
+    unless /b(?{$foo = $_; $bar = pos})c/
 	and $foo eq 'abcde' and $bar eq 2;
 print "ok $test\n";
 $test++;
 
 undef $foo; undef $bar;
 print "#'$str','$foo','$bar'\nnot "
-    unless /b(?{$foo = $_; $bar = pos})c/g 
+    unless /b(?{$foo = $_; $bar = pos})c/g
 	and $foo eq 'abcde' and $bar eq 2 and pos eq 3;
 print "ok $test\n";
 $test++;
@@ -832,7 +832,7 @@ $test++;
 undef $foo; undef $bar;
 $_ = 'abcde|abcde';
 print "#'$str','$foo','$bar','$_'\nnot "
-    unless s/b(?{$foo = $_; $bar = pos})c/x/g and $foo eq 'abcde|abcde' 
+    unless s/b(?{$foo = $_; $bar = pos})c/x/g and $foo eq 'abcde|abcde'
 	and $bar eq 8 and $_ eq 'axde|axde';
 print "ok $test\n";
 $test++;
@@ -906,7 +906,7 @@ print "not " unless($1  eq 'cd');
 print "ok $test\n";
 $test++;
 
-$_='123x123'; 
+$_='123x123';
 @res = /(\d*|x)/g;
 print "not " unless('123||x|123|' eq join '|', @res);
 print "ok $test\n";
@@ -1118,7 +1118,7 @@ $test++;
 print "not " unless "@space2" eq "spc tab";
 print "ok $test # @space2\n";
 $test++;
- 
+
 # bugid 20001021.005 - this caused a SEGV
 print "not " unless undef =~ /^([^\/]*)(.*)$/;
 print "ok $test\n";
@@ -1133,6 +1133,8 @@ $test++;
 $_ = "a\x{100}b";
 if (/(.)(\C)(\C)(.)/) {
   print "ok 232\n";
+  # currently \C are still tagged as UTF-8
+  use bytes;
   if ($1 eq "a") {
     print "ok 233\n";
   } else {
@@ -1161,6 +1163,8 @@ if (/(.)(\C)(\C)(.)/) {
 $_ = "\x{100}";
 if (/(\C)/g) {
   print "ok 237\n";
+  # currently \C are still tagged as UTF-8
+  use bytes;
   if ($1 eq "\xC4") {
     print "ok 238\n";
   } else {
@@ -1173,6 +1177,8 @@ if (/(\C)/g) {
 }
 if (/(\C)/g) {
   print "ok 239\n";
+  # currently \C are still tagged as UTF-8
+  use bytes;
   if ($1 eq "\x80") {
     print "ok 240\n";
   } else {
@@ -1350,7 +1356,7 @@ print "ok 247\n";
 	     " "				=> 'Zs',
 	     "\0"				=> 'Cc',
 	     );
-	     
+	
     for my $char (keys %s) {
 	my $class = $s{$char};
 	my $code  = sprintf("%04x", ord($char));
@@ -1521,16 +1527,16 @@ print "ok 247\n";
 	print "ok 576\n";
 
 	print "not " unless $` eq "abc\x{100}" && length($`) == 4;
-	print "ok 577\n"; 
+	print "ok 577\n";
 
 	print "not " unless $& eq "\x{200}\x{300}\x{380}" && length($&) == 3;
-	print "ok 578\n"; 
+	print "ok 578\n";
 
 	print "not " unless $' eq "\x{400}defg" && length($') == 5;
-	print "ok 579\n"; 
+	print "ok 579\n";
 
 	print "not " unless $1 eq "\x{200}\x{300}" && length($1) == 2;
-	print "ok 580\n"; 
+	print "ok 580\n";
     } else {
 	for (576..580) { print "not ok $_\n" }
     }

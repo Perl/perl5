@@ -88,7 +88,7 @@ END_EXTERN_C
 #define UTF8_IS_START(c)		(((U8)c) >= 0xc0 && (((U8)c) <= 0xfd))
 #define UTF8_IS_CONTINUATION(c)		(((U8)c) >= 0x80 && (((U8)c) <= 0xbf))
 #define UTF8_IS_CONTINUED(c) 		(((U8)c) &  0x80)
-#define UTF8_IS_DOWNGRADEABLE_START(c)	(((U8)c & 0xfc) != 0xc0)
+#define UTF8_IS_DOWNGRADEABLE_START(c)	(((U8)c & 0xfc) == 0xc0)
 
 #define UTF8_CONTINUATION_MASK		((U8)0x3f)
 #define UTF8_ACCUMULATION_SHIFT		6
@@ -139,14 +139,18 @@ END_EXTERN_C
 /* EBCDIC-happy ways of converting native code to UTF8 */
 
 #ifdef EBCDIC
-#define NATIVE_TO_ASCII(ch)                  PL_e2a[(ch)]
-#define ASCII_TO_NATIVE(ch)                  PL_a2e[(ch)]
-#define UNI_TO_NATIVE(ch)                    (((ch) > 0x100) ? (ch) : (UV) PL_a2e[(ch)])
-#define NATIVE_TO_UNI(ch)                    (((ch) > 0x100) ? (ch) : (UV) PL_e2a[(ch)])
+#define NATIVE_TO_ASCII(ch)      PL_e2a[(ch)&255]
+#define ASCII_TO_NATIVE(ch)      PL_a2e[(ch)&255]
+#define NATIVE_TO_UNI(ch)        (((ch) > 255) ? (ch) : (UV) PL_e2a[(ch)])
+#define UNI_TO_NATIVE(ch)        (((ch) > 255) ? (ch) : (UV) PL_a2e[(ch)])
+#define NATIVE_TO_NEED(enc,ch)   ((enc) ? NATIVE_TO_ASCII(ch) : (ch))
+#define ASCII_TO_NEED(enc,ch)    ((enc) ? (ch) : ASCII_TO_NATIVE(ch))
 #else
-#define NATIVE_TO_ASCII(ch)                  (ch)
-#define ASCII_TO_NATIVE(ch)                  (ch)
-#define UNI_TO_NATIVE(ch)                    (ch)
-#define NATIVE_TO_UNI(ch)                    (ch)
+#define NATIVE_TO_ASCII(ch)      (ch)
+#define ASCII_TO_NATIVE(ch)      (ch)
+#define UNI_TO_NATIVE(ch)        (ch)
+#define NATIVE_TO_UNI(ch)        (ch)
+#define NATIVE_TO_NEED(enc,ch)   (ch)
+#define ASCII_TO_NEED(enc,ch)    (ch)
 #endif
 
