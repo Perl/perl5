@@ -3030,10 +3030,12 @@ Perl_yylex(pTHX)
 			CvLOCKED_on(PL_compcv);
 		    else if (!PL_in_my && len == 6 && strnEQ(s, "method", len))
 			CvMETHOD_on(PL_compcv);
-#ifdef USE_ITHREADS
 		    else if (PL_in_my == KEY_our && len == 6 &&
 			     strnEQ(s, "unique", len))
+#ifdef USE_ITHREADS
 			GvUNIQUE_on(cGVOPx_gv(yylval.opval));
+#else
+			; /* skip that case to avoid loading attributes.pm */
 #endif
 		    /* After we've set the flags, it could be argued that
 		       we don't need to do the attributes.pm-based setting
