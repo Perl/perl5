@@ -30,6 +30,12 @@ sub append {
     }
 }
 
+sub append_range {
+    my ($table, $code_ini, $code_fin, $name) = @_;
+    append($table, $code_ini, $name);
+    extend($table, $code_fin);
+}
+
 sub inverse {
     my ($table) = @_;
     my $inverse = [];
@@ -174,6 +180,30 @@ if (open(my $Unicode, "Unicode.txt")) {
     my @Number;
     my @Mirrored;
     my %To;
+
+
+    my $LastCodeInt = -1; # a numeric, not a hexadecimal string.
+
+    # UnicodeData-3.1.0.html says 
+    # no characters in the file have the property, Cn, Not Assigned.
+
+    sub check_no_characters { # in the scope of my $LastCodeInt;
+	my $code = shift;
+	my $diff_from_last = hex($code) - $LastCodeInt;
+	my $code_ini = sprintf("%04X", $LastCodeInt + 1);
+	$LastCodeInt = hex($code);
+	if ($diff_from_last == 1) {
+	    return;
+	} elsif ($diff_from_last == 2) {
+	    append($Cat{Cn}		||= [], $code_ini);
+	    append($Cat{C}		||= [], $code_ini);
+	} else {
+	    my $code_fin = sprintf("%04X", hex($code) - 1);
+	    append_range($Cat{Cn}	||= [], $code_ini, $code_fin);
+	    append_range($Cat{C}	||= [], $code_ini, $code_fin);
+	}
+    }
+
     while (<$Unicode>) {
 	next unless /^[0-9A-Fa-f]+;/;
 	s/\s+$//;
@@ -184,6 +214,12 @@ if (open(my $Unicode, "Unicode.txt")) {
 	    $upper, $lower, $title) = split(/\s*;\s*/);
 
 	if ($name =~ /^<(.+), (First|Last)>$/) {
+	    if($2 eq 'First') {
+		check_no_characters($code);
+	    } else {
+		$LastCodeInt = hex($code);
+	    }
+
 	    $name = $1;
 	    gencat(\@Name, \%General, \@General, \%Cat,
 		   $name, $cat, $code,
@@ -193,6 +229,7 @@ if (open(my $Unicode, "Unicode.txt")) {
 		$InIn{$name} = $General{$name};
 	    }
 	} else {
+	    check_no_characters($code);
 
 	    gencat(\@Name, \%General, \@General, \%Cat,
 		   $name, $cat, $code, \&append);
@@ -222,6 +259,8 @@ if (open(my $Unicode, "Unicode.txt")) {
 	    append(\@Mirrored,                   $code) if $mirrored eq "Y";
 	}
     }
+
+    check_no_characters(sprintf("%X", $LastUnicodeCodepoint + 1));
 
     flush(\@Name, "Name.pl");
 
@@ -467,10 +506,10 @@ for my $prop (sort { $a->[0] <=> $b->[0] } @Props) {
     }
 }
 
-# Assigned is everything not Cn aka Noncharacter_Code_Point
+# Assigned is everything not Cn
 
 $In{Assigned} = $InId++;
-my $Assigned = inverse($Prop{Noncharacter_Code_Point});
+my $Assigned = inverse($Cat{Cn});
 $InIn{Assigned} = $Assigned;
 
 sub merge_general_and_extended {
@@ -642,10 +681,6 @@ EOT
 } else {
     die "$0: In.pl: $!\n";
 }
-
-# Easy low-calorie cheat.
-use File::Copy;
-copy("In/$In{Noncharacter_Code_Point}.pl", "Is/Cn.pl");
 
 #
 # Write out the real In mappings
