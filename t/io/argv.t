@@ -5,34 +5,8 @@ BEGIN {
     @INC = '../lib';
 }
 
-sub runthis {
-    my($prog, $stdin, @files) = @_;
-
-    my $cmd = '';
-    if ($^O eq 'MSWin32' || $^O eq 'NetWare' || $^O eq 'VMS' ) {
-        $cmd = qq{$^X -e "$prog"};
-        $cmd .= " ". join ' ', map qq{"$_"}, @files if @files;
-        $cmd = qq{$^X -le "print '$stdin'" | } . $cmd if defined $stdin;
-    }
-    else {
-        $cmd = qq{$^X -e '$prog' @files};
-        $cmd = qq{$^X -le 'print q{$stdin}' | } . $cmd if defined $stdin;
-    }
-
-    # The combination of $^X, pipes and STDIN is broken on VMS and
-    # will hang.
-    if( defined $stdin && $^O eq 'VMS' && $TODO ) {
-        return 0;
-    }
-
-    my $result = `$cmd`;
-    $result =~ s/\n\n/\n/ if $^O eq 'VMS'; # pipes sometimes double these
-
-    return $result;
-}
-
-    
 require "./test.pl";
+
 plan(tests => 21);
 
 use File::Spec;
@@ -43,16 +17,24 @@ open(TRY, '>Io_argv1.tmp') || (die "Can't open temp file: $!");
 print TRY "a line\n";
 close TRY;
 
-$x = runthis( 'while (<>) { print $., $_; }', undef, ('Io_argv1.tmp') x 2);
+$x = runperl(
+    prog	=> 'while (<>) { print $., $_; }',
+    args	=> [ 'Io_argv1.tmp', 'Io_argv1.tmp' ],
+);
 is($x, "1a line\n2a line\n", '<> from two files');
 
 {
-    local $TODO = 'The combo of STDIN, pipes and $^X is broken on VMS'
-      if $^O eq 'VMS';
-    $x = runthis( 'while (<>) { print $_; }', 'foo', 'Io_argv1.tmp', '-' );
+    $x = runperl(
+	prog	=> 'while (<>) { print $_; }',
+	stdin	=> "foo\n",
+	args	=> [ 'Io_argv1.tmp', '-' ],
+    );
     is($x, "a line\nfoo\n", '   from a file and STDIN');
 
-    $x = runthis( 'while (<>) {print $_;}', 'foo' );
+    $x = runperl(
+	prog	=> 'while (<>) { print $_; }',
+	stdin	=> "foo\n",
+    );
     is($x, "foo\n", '   from just STDIN');
 }
 

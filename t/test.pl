@@ -169,4 +169,63 @@ USE_OK
     _ok(!$@, _where(), "use $use");
 }
 
+# runperl - Runs a separate perl interpreter.
+# Arguments :
+#   switches => [ command-line switches ]
+#   nolib    => 1 # don't use -I../lib (included by default)
+#   prog     => one-liner (avoid quotes)
+#   progfile => perl script
+#   stdin    => string to feed the stdin
+#   stderr   => redirect stderr to stdout
+#   args     => [ command-line arguments to the perl program ]
+
+my $is_mswin    = $^O eq 'MSWin32';
+my $is_netware  = $^O eq 'NetWare';
+my $is_macos    = $^O eq 'MacOS';
+my $is_vms      = $^O eq 'VMS';
+
+sub runperl {
+    my %args = @_;
+    my $runperl = $^X;
+    if (defined $args{switches}) {
+	$runperl .= ' ' . join ' ', map qq("$_"), @{ $args{switches} };
+    }
+    unless (defined $args{nolib}) {
+	if ($is_macos && $args{stderr}) {
+	    $runperl .= ' -I::lib -MMac::err=unix';
+	}
+	else {
+	    $runperl .= ' "-I../lib"';
+	}
+    }
+    if (defined $args{prog}) {
+	if ($is_mswin || $is_netware || $is_vms) {
+	    $runperl .= qq( -e ") . $args{prog} . qq(");
+	}
+	else {
+	    $runperl .= qq( -e ') . $args{prog} . qq(');
+	}
+    } elsif (defined $args{progfile}) {
+	$runperl .= qq( "$args{progfile}");
+    }
+    if (defined $args{stdin}) {
+	if ($is_mswin || $is_netware || $is_vms) {
+	    $runperl = qq{$^X -e "print q(} .
+		$args{stdin} . q{)" | } . $runperl;
+	}
+	else {
+	    $runperl = qq{$^X -e 'print q(} .
+		$args{stdin} . q{)' | } . $runperl;
+	}
+    }
+    if (defined $args{args}) {
+	$runperl .= ' ' . join ' ', map qq("$_"), @{ $args{args} };
+    }
+    $runperl .= ' 2>&1' if $args{stderr} && !$is_macos;
+    $runperl .= " \xB3 Dev:Null" if !defined $args{stderr} && $is_macos;
+    my $result = `$runperl`;
+    $result =~ s/\n\n/\n/ if $is_vms; # XXX pipes sometimes double these
+    return $result;
+}
+
 1;
