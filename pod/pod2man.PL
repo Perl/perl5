@@ -705,6 +705,9 @@ while (<>) {
 
 	# trofficate backslashes; must do it before what happens below
 	s/\\/noremap('\\e')/ge;
+	# protect leading periods and quotes against *roff
+	# mistaking them for directives
+	s/^(?:[A-Z]<)?[.']/\\&$&/gm;
 
 	# first hide the escapes in case we need to
 	# intuit something and get it wrong due to fmting
