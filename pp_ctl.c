@@ -89,13 +89,12 @@ PP(pp_regcomp)
     
     tmpstr = POPs;
 
-     /* prevent recompiling under /o and ithreads. */
+    /* prevent recompiling under /o and ithreads. */
 #if defined(USE_ITHREADS) || defined(USE_THREADS)
-     if (pm->op_pmflags & PMf_KEEP && PM_GETRE(pm))
-	  RETURN;
+    if (pm->op_pmflags & PMf_KEEP && PM_GETRE(pm))
+	 RETURN;
 #endif
 
-    tmpstr = POPs;
     if (SvROK(tmpstr)) {
 	SV *sv = SvRV(tmpstr);
 	if(SvMAGICAL(sv))
