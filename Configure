@@ -4947,6 +4947,10 @@ EOM
     esac
 
 	: Try to guess additional flags to pick up local libraries.
+	: Be careful not to append to a plain 'none'
+	case "$dflt" in
+	none) dflt='' ;;
+	esac
 	for thisflag in $ldflags; do
 		case "$thisflag" in
 		-L*)
