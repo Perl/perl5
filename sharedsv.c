@@ -89,12 +89,24 @@ Perl_sharedsv_find(pTHX_ SV* sv)
     shared_sv* ssv = NULL; 
     switch (SvTYPE(sv)) {
         case SVt_PVMG:
-            {MAGIC* mg = mg_find(sv, PERL_MAGIC_ext);
-            
-            if(strcmp(mg->mg_ptr,"threads::shared"))
-                break;
-            ssv = (shared_sv*) SvIV(mg->mg_obj);
-	    }
+        case SVt_PVAV:
+        case SVt_PVHV: {
+            MAGIC* mg = mg_find(sv, PERL_MAGIC_ext);
+            if(mg) {
+	        if(strcmp(mg->mg_ptr,"threads::shared"))
+                    break;
+                ssv = (shared_sv*) SvIV(mg->mg_obj);
+	        break;
+             }
+	    
+	     mg = mg_find(sv,PERL_MAGIC_tied);
+             if(mg) {
+                 SV* obj = SvTIED_obj(sv,mg);
+	         if(sv_derived_from(obj, "threads::shared"))
+		     ssv = (shared_sv*) SvIV(SvRV(obj));
+                 break;
+             }
+	}
     }            
     return ssv;
 }
