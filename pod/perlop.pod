@@ -811,15 +811,13 @@ substrings matched by all the parentheses in the regular expression.
 If there are no parentheses, it returns a list of all the matched
 strings, as if there were parentheses around the whole pattern.
 
-In scalar context, C<m//g> iterates through the string, returning TRUE
-each time it matches, and FALSE when it eventually runs out of matches.
-(In other words, it remembers where it left off last time and restarts
-the search at that point.  You can actually find the current match
-position of a string or set it using the pos() function; see
-L<perlfunc/pos>.)  A failed match normally resets the search position to
-the beginning of the string, but you can avoid that by adding the C</c>
-modifier (e.g. C<m//gc>).  Modifying the target string also resets the
-search position.
+In scalar context, each execution of C<m//g> finds the next match,
+returning TRUE if it matches, and FALSE if there is no further match.
+The position after the last match can be read or set using the pos()
+function; see L<perlfunc/pos>.   A failed match normally resets the
+search position to the beginning of the string, but you can avoid that
+by adding the C</c> modifier (e.g. C<m//gc>).  Modifying the target
+string also resets the search position.
 
 You can intermix C<m//g> matches with C<m/\G.../g>, where C<\G> is a
 zero-width assertion that matches the exact position where the previous
