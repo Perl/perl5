@@ -1360,7 +1360,7 @@ Perl_to_utf8_case(pTHX_ U8 *p, U8* ustrp, STRLEN *lenp, SV **swashp, char *norma
 	      /* It was "normal" (a single character mapping). */
 	      UV uv3 = UNI_TO_NATIVE(uv2);
 	      
-	      len = uvuni_to_utf8(ustrp, uv3) - ustrp;
+	      len = uvchr_to_utf8(ustrp, uv3) - ustrp;
 	 }
     }
 
