@@ -10,7 +10,7 @@ BEGIN {
 
 use ExtUtils::testlib;
 use strict;
-BEGIN { print "1..11\n" };
+BEGIN { print "1..12\n" };
 use threads;
 use threads::shared;
 
@@ -117,4 +117,17 @@ if ($^O eq 'linux') { # We parse ps output so this is OS-dependent.
   }
 } else {
   skip("\$0 check: only on Linux");
+}
+
+{
+    my $t = threads->new(sub {});
+    $t->join;
+    my $x = threads->new(sub {});
+    $x->join;
+    eval {
+      $t->join;
+    };
+    my $ok = 0;
+    $ok++ if($@ =~/Thread already joined/);
+    ok($ok, "Double join works");
 }

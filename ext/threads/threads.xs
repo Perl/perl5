@@ -601,7 +601,7 @@ Perl_ithread_join(pTHX_ SV *obj)
 	/* We have finished with it */
 	thread->state |= PERL_ITHR_JOINED;
 	MUTEX_UNLOCK(&thread->mutex);
-    	sv_unmagic(SvRV(obj),PERL_MAGIC_shared_scalar);
+    	
 	return retparam;
     }
     return (AV*)NULL;
