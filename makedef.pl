@@ -105,6 +105,7 @@ while (<CFG>) {
     $define{$1} = 1 if /^\s*#\s*define\s+(USE_5005THREADS)\b/;
     $define{$1} = 1 if /^\s*#\s*define\s+(USE_ITHREADS)\b/;
     $define{$1} = 1 if /^\s*#\s*define\s+(USE_PERLIO)\b/;
+    $define{$1} = 1 if /^\s*#\s*define\s+(USE_SFIO)\b/;
     $define{$1} = 1 if /^\s*#\s*define\s+(MULTIPLICITY)\b/;
     $define{$1} = 1 if /^\s*#\s*define\s+(PERL_IMPLICIT_SYS)\b/;
     $define{$1} = 1 if /^\s*#\s*define\s+(PERL_BINCOMPAT_5005)\b/;
@@ -341,6 +342,8 @@ elsif ($PLATFORM eq 'MacOS') {
 		    Perl_safexmalloc
 		    Perl_safexrealloc
 		    Perl_unlnk
+		    Perl_sys_intern_clear
+		    Perl_sys_intern_init
 		    )];
 }
 
