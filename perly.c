@@ -1747,7 +1747,7 @@ case 35:
 break;
 case 37:
 #line 269 "perly.y"
-{ (void)scan_num("1"); yyval.opval = yylval.opval; }
+{ (void)scan_num("1", &yylval); yyval.opval = yylval.opval; }
 break;
 case 39:
 #line 274 "perly.y"

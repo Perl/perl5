@@ -2652,9 +2652,9 @@ Perl_scan_hex(pTHXo_ char* start, I32 len, I32* retlen)
 
 #undef  Perl_scan_num
 char*
-Perl_scan_num(pTHXo_ char* s)
+Perl_scan_num(pTHXo_ char* s, YYSTYPE *lvalp)
 {
-    return ((CPerlObj*)pPerl)->Perl_scan_num(s);
+    return ((CPerlObj*)pPerl)->Perl_scan_num(s, lvalp);
 }
 
 #undef  Perl_scan_oct

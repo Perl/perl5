@@ -848,7 +848,7 @@ S_force_version(pTHX_ char *s)
         for (; isDIGIT(*d) || *d == '_' || *d == '.'; d++);
         if (*d == ';' || isSPACE(*d) || *d == '}' || !*d) {
 	    SV *ver;
-            s = scan_num(s);
+            s = scan_num(s, &yylval);
             version = yylval.opval;
 	    ver = cSVOPx(version)->op_sv;
 	    if (SvPOK(ver) && !SvNIOK(ver)) {
@@ -2071,20 +2071,15 @@ Perl_yylex(pTHX_ YYSTYPE *lvalp, int *lcharp)
 Perl_yylex(pTHX)
 #endif
 {
-
+    dTHR;
     int r;
 
 #ifdef USE_PURE_BISON
-/* increment level and store the argument pointers */
-    yyactlevel++;
-    if (yyactlevel >= YYMAXLEVEL) {
-/* What to do ??? */
-    }
     yylval_pointer[yyactlevel] = lvalp;
     yychar_pointer[yyactlevel] = lcharp;
-    /* Save last pointer at the bottom */
-    yylval_pointer[0] = lvalp;
-    yychar_pointer[0] = lcharp;
+    yyactlevel++;
+    if (yyactlevel >= YYMAXLEVEL)
+	Perl_croak(aTHX_ "panic: YYMAXLEVEL");
 #endif
 
     r = S_syylex(aTHX);
@@ -3549,7 +3544,7 @@ S_syylex(pTHX) /* need to be separate from yylex for reentrancy */
 	/* FALL THROUGH */
     case '0': case '1': case '2': case '3': case '4':
     case '5': case '6': case '7': case '8': case '9':
-	s = scan_num(s);
+	s = scan_num(s, &yylval);
 	if (PL_expect == XOPERATOR)
 	    no_op("Number",s);
 	TERM(THING);
@@ -3619,7 +3614,7 @@ S_syylex(pTHX) /* need to be separate from yylex for reentrancy */
 	    while (isDIGIT(*start) || *start == '_')
 		start++;
 	    if (*start == '.' && isDIGIT(start[1])) {
-		s = scan_num(s);
+		s = scan_num(s, &yylval);
 		TERM(THING);
 	    }
 	    /* avoid v123abc() or $h{v1}, allow C<print v10;> */
@@ -3630,7 +3625,7 @@ S_syylex(pTHX) /* need to be separate from yylex for reentrancy */
 		gv = gv_fetchpv(s, FALSE, SVt_PVCV);
 		*start = c;
 		if (!gv) {
-		    s = scan_num(s);
+		    s = scan_num(s, &yylval);
 		    TERM(THING);
 		}
 	    }
@@ -6739,7 +6734,7 @@ S_scan_str(pTHX_ char *start, int keep_quoted, int keep_delims)
 */
   
 char *
-Perl_scan_num(pTHX_ char *start)
+Perl_scan_num(pTHX_ char *start, YYSTYPE* lvalp)
 {
     register char *s = start;		/* current position in buffer */
     register char *d;			/* destination in temp buffer */
@@ -7152,9 +7147,9 @@ vstring:
     /* make the op for the constant and return */
 
     if (sv)
-	yylval.opval = newSVOP(OP_CONST, 0, sv);
+	lvalp->opval = newSVOP(OP_CONST, 0, sv);
     else
-	yylval.opval = Nullop;
+	lvalp->opval = Nullop;
 
     return s;
 }
