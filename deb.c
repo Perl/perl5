@@ -191,7 +191,7 @@ Perl_deb_stack_all(pTHX)
 	else
 	    si_name = si_names[si_name_ix];
 	PerlIO_printf(Perl_debug_log, "STACK %"IVdf": %s\n",
-						si_ix, si_name);
+						(IV)si_ix, si_name);
 
 	for (ix=0; ix<=si->si_cxix; ix++) {
 
