@@ -3451,13 +3451,22 @@ Perl_utilize(pTHX_ int aver, I32 floor, OP *version, OP *id, OP *arg)
 	    newSTATEOP(0, Nullch, imop) ));
 
     if (packname) {
-#ifdef WIN32
-        if (ckWARN(WARN_MISC) && !gv_stashpvn(packname, packlen, FALSE)) {
-            Perl_warner(aTHX_ WARN_MISC,
-                        "Package `%s' not found "
-                        "(did you use the incorrect case?)", packname);
-        }
-#endif
+	 /* The "did you use incorrect case?" warning used to be here.
+	  * The problem is that on case-insensitive filesystems one
+	  * might get false positives for "use" (and "require"):
+	  * "use Strict" or "require CARP" will work.  This causes
+	  * portability problems for the script: in case-strict
+	  * filesystems the script will stop working.
+	  *
+	  * The "incorrect case" warning checked whether "use Foo"
+	  * imported "Foo" to your namespace, but that is wrong, too:
+	  * there is no requirement nor promise in the language that
+	  * a Foo.pm should or would contain anything in package "Foo".
+	  *
+	  * There is very little Configure-wise that can be done, either:
+	  * the case-sensitivity of the build filesystem of Perl does not
+	  * help in guessing the case-sensitivity of the runtime environment.
+	  */
         safefree(packname);
     }
 
