@@ -2553,7 +2553,7 @@ S_docatch(pTHX_ OP *o)
 }
 
 OP *
-Perl_sv_compile_2op(pTHX_ SV *sv, OP** startop, char *code, AV** avp)
+Perl_sv_compile_2op(pTHX_ SV *sv, OP** startop, char *code, PAD** padp)
 /* sv Text to convert to OP tree. */
 /* startop op_free() this to undo. */
 /* code Short string id of the caller. */
@@ -2618,7 +2618,8 @@ Perl_sv_compile_2op(pTHX_ SV *sv, OP** startop, char *code, AV** avp)
     (*startop)->op_type = OP_NULL;
     (*startop)->op_ppaddr = PL_ppaddr[OP_NULL];
     lex_end();
-    *avp = (AV*)SvREFCNT_inc(PL_comppad);
+    /* XXX DAPM do this properly one year */
+    *padp = (AV*)SvREFCNT_inc(PL_comppad);
     LEAVE;
     if (PL_curcop == &PL_compiling)
 	PL_compiling.op_private = (U8)(PL_hints & HINT_PRIVATE_MASK);

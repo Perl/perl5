@@ -178,8 +178,6 @@ END_EXTERN_C
 #define PL_cop_seqmax		(*Perl_Icop_seqmax_ptr(aTHX))
 #undef  PL_copline
 #define PL_copline		(*Perl_Icopline_ptr(aTHX))
-#undef  PL_cred_mutex
-#define PL_cred_mutex		(*Perl_Icred_mutex_ptr(aTHX))
 #undef  PL_cryptseen
 #define PL_cryptseen		(*Perl_Icryptseen_ptr(aTHX))
 #undef  PL_cshlen
@@ -190,8 +188,6 @@ END_EXTERN_C
 #define PL_curcopdb		(*Perl_Icurcopdb_ptr(aTHX))
 #undef  PL_curstname
 #define PL_curstname		(*Perl_Icurstname_ptr(aTHX))
-#undef  PL_curthr
-#define PL_curthr		(*Perl_Icurthr_ptr(aTHX))
 #undef  PL_custom_op_descs
 #define PL_custom_op_descs	(*Perl_Icustom_op_descs_ptr(aTHX))
 #undef  PL_custom_op_names
@@ -232,12 +228,6 @@ END_EXTERN_C
 #define PL_error_count		(*Perl_Ierror_count_ptr(aTHX))
 #undef  PL_euid
 #define PL_euid			(*Perl_Ieuid_ptr(aTHX))
-#undef  PL_eval_cond
-#define PL_eval_cond		(*Perl_Ieval_cond_ptr(aTHX))
-#undef  PL_eval_mutex
-#define PL_eval_mutex		(*Perl_Ieval_mutex_ptr(aTHX))
-#undef  PL_eval_owner
-#define PL_eval_owner		(*Perl_Ieval_owner_ptr(aTHX))
 #undef  PL_eval_root
 #define PL_eval_root		(*Perl_Ieval_root_ptr(aTHX))
 #undef  PL_eval_start
@@ -254,8 +244,6 @@ END_EXTERN_C
 #define PL_expect		(*Perl_Iexpect_ptr(aTHX))
 #undef  PL_fdpid
 #define PL_fdpid		(*Perl_Ifdpid_ptr(aTHX))
-#undef  PL_fdpid_mutex
-#define PL_fdpid_mutex		(*Perl_Ifdpid_mutex_ptr(aTHX))
 #undef  PL_filemode
 #define PL_filemode		(*Perl_Ifilemode_ptr(aTHX))
 #undef  PL_forkprocess
@@ -408,10 +396,6 @@ END_EXTERN_C
 #define PL_nice_chunk_size	(*Perl_Inice_chunk_size_ptr(aTHX))
 #undef  PL_nomemok
 #define PL_nomemok		(*Perl_Inomemok_ptr(aTHX))
-#undef  PL_nthreads
-#define PL_nthreads		(*Perl_Inthreads_ptr(aTHX))
-#undef  PL_nthreads_cond
-#define PL_nthreads_cond	(*Perl_Inthreads_cond_ptr(aTHX))
 #undef  PL_numeric_compat1
 #define PL_numeric_compat1	(*Perl_Inumeric_compat1_ptr(aTHX))
 #undef  PL_numeric_local
@@ -522,8 +506,6 @@ END_EXTERN_C
 #define PL_stdingv		(*Perl_Istdingv_ptr(aTHX))
 #undef  PL_strtab
 #define PL_strtab		(*Perl_Istrtab_ptr(aTHX))
-#undef  PL_strtab_mutex
-#define PL_strtab_mutex		(*Perl_Istrtab_mutex_ptr(aTHX))
 #undef  PL_sub_generation
 #define PL_sub_generation	(*Perl_Isub_generation_ptr(aTHX))
 #undef  PL_sublex_info
@@ -536,10 +518,6 @@ END_EXTERN_C
 #define PL_sv_arenaroot		(*Perl_Isv_arenaroot_ptr(aTHX))
 #undef  PL_sv_count
 #define PL_sv_count		(*Perl_Isv_count_ptr(aTHX))
-#undef  PL_sv_lock_mutex
-#define PL_sv_lock_mutex	(*Perl_Isv_lock_mutex_ptr(aTHX))
-#undef  PL_sv_mutex
-#define PL_sv_mutex		(*Perl_Isv_mutex_ptr(aTHX))
 #undef  PL_sv_no
 #define PL_sv_no		(*Perl_Isv_no_ptr(aTHX))
 #undef  PL_sv_objcount
@@ -550,22 +528,12 @@ END_EXTERN_C
 #define PL_sv_undef		(*Perl_Isv_undef_ptr(aTHX))
 #undef  PL_sv_yes
 #define PL_sv_yes		(*Perl_Isv_yes_ptr(aTHX))
-#undef  PL_svref_mutex
-#define PL_svref_mutex		(*Perl_Isvref_mutex_ptr(aTHX))
 #undef  PL_sys_intern
 #define PL_sys_intern		(*Perl_Isys_intern_ptr(aTHX))
 #undef  PL_taint_warn
 #define PL_taint_warn		(*Perl_Itaint_warn_ptr(aTHX))
 #undef  PL_tainting
 #define PL_tainting		(*Perl_Itainting_ptr(aTHX))
-#undef  PL_threadnum
-#define PL_threadnum		(*Perl_Ithreadnum_ptr(aTHX))
-#undef  PL_threads_mutex
-#define PL_threads_mutex	(*Perl_Ithreads_mutex_ptr(aTHX))
-#undef  PL_threadsv_names
-#define PL_threadsv_names	(*Perl_Ithreadsv_names_ptr(aTHX))
-#undef  PL_thrsv
-#define PL_thrsv		(*Perl_Ithrsv_ptr(aTHX))
 #undef  PL_tokenbuf
 #define PL_tokenbuf		(*Perl_Itokenbuf_ptr(aTHX))
 #undef  PL_uid

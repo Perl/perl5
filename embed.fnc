@@ -716,7 +716,7 @@ Apd	|I32	|sv_cmp_locale	|SV* sv1|SV* sv2
 #if defined(USE_LOCALE_COLLATE)
 Apd	|char*	|sv_collxfrm	|SV* sv|STRLEN* nxp
 #endif
-Ap	|OP*	|sv_compile_2op	|SV* sv|OP** startp|char* code|AV** avp
+Ap	|OP*	|sv_compile_2op	|SV* sv|OP** startp|char* code|PAD** padp
 Apd	|int	|getcwd_sv	|SV* sv
 Apd	|void	|sv_dec		|SV* sv
 Ap	|void	|sv_dump	|SV* sv

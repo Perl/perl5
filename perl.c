@@ -349,7 +349,6 @@ perl_destruct(pTHXx)
 
     /* Destroy the main CV and syntax tree */
     if (PL_main_root) {
-	PAD_UPDATE_CURPAD;
 	op_free(PL_main_root);
 	PL_main_root = Nullop;
     }
@@ -909,7 +908,6 @@ setuid perl scripts securely.\n");
     }
 
     if (PL_main_root) {
-	PAD_UPDATE_CURPAD;
 	op_free(PL_main_root);
 	PL_main_root = Nullop;
     }

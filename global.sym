@@ -51,7 +51,6 @@ Perl_cast_i32
 Perl_cast_iv
 Perl_cast_uv
 Perl_my_chsize
-Perl_condpair_magic
 Perl_croak
 Perl_vcroak
 Perl_croak_nocontext
@@ -325,7 +324,6 @@ Perl_vcmp
 Perl_ninstr
 Perl_op_free
 Perl_pad_sv
-Perl_new_struct_thread
 Perl_reentrant_size
 Perl_reentrant_init
 Perl_reentrant_free
@@ -505,7 +503,6 @@ Perl_to_utf8_upper
 Perl_to_utf8_title
 Perl_to_utf8_fold
 Perl_unlnk
-Perl_unlock_condpair
 Perl_unpack_str
 Perl_unsharepvn
 Perl_utf16_to_utf8
@@ -540,7 +537,6 @@ Perl_safesysfree
 Perl_GetVars
 Perl_runops_standard
 Perl_runops_debug
-Perl_sv_lock
 Perl_sv_catpvf_mg
 Perl_sv_vcatpvf_mg
 Perl_sv_catpv_mg
