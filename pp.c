@@ -1785,7 +1785,6 @@ S_seed(pTHX)
 #define   SEED_C3	269
 #define   SEED_C5	26107
 
-    dTHR;
 #ifndef PERL_NO_DEV_RANDOM
     int fd;
 #endif
@@ -5327,7 +5326,6 @@ PP(pp_split)
 void
 Perl_unlock_condpair(pTHX_ void *svv)
 {
-    dTHR;
     MAGIC *mg = mg_find((SV*)svv, 'm');
 
     if (!mg)

@@ -20,8 +20,6 @@
 int
 Perl_runops_standard(pTHX)
 {
-    dTHR;
-
     while ((PL_op = CALL_FPTR(PL_op->op_ppaddr)(aTHX))) {
 	PERL_ASYNC_CHECK();
     }
@@ -34,7 +32,6 @@ int
 Perl_runops_debug(pTHX)
 {
 #ifdef DEBUGGING
-    dTHR;
     if (!PL_op) {
 	if (ckWARN_d(WARN_DEBUGGING))
 	    Perl_warner(aTHX_ WARN_DEBUGGING, "NULL OP IN RUN");
@@ -96,7 +93,6 @@ void
 Perl_watch(pTHX_ char **addr)
 {
 #ifdef DEBUGGING
-    dTHR;
     PL_watchaddr = addr;
     PL_watchok = *addr;
     PerlIO_printf(Perl_debug_log, "WATCHING, %"UVxf" is currently %"UVxf"\n",

@@ -46,7 +46,6 @@ static long incompartment;
 static SV*
 exec_in_REXX(pTHX_ char *cmd, char * handlerName, RexxFunctionHandler *handler)
 {
-    dTHR;
     HMODULE hRexx, hRexxAPI;
     BYTE    buf[200];
     LONG    APIENTRY (*pRexxStart) (LONG, PRXSTRING, PSZ, PRXSTRING, 

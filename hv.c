@@ -149,7 +149,6 @@ Perl_hv_fetch(pTHX_ HV *hv, const char *key, U32 klen, I32 lval)
 
     if (SvRMAGICAL(hv)) {
 	if (mg_find((SV*)hv,'P')) {
-	    dTHR;
 	    sv = sv_newmortal();
 	    mg_copy((SV*)hv, sv, key, klen);
 	    PL_hv_fetch_sv = sv;
@@ -246,7 +245,6 @@ Perl_hv_fetch_ent(pTHX_ HV *hv, SV *keysv, I32 lval, register U32 hash)
 
     if (SvRMAGICAL(hv)) {
 	if (mg_find((SV*)hv,'P')) {
-	    dTHR;
 	    sv = sv_newmortal();
 	    keysv = sv_2mortal(newSVsv(keysv));
 	    mg_copy((SV*)hv, sv, (char*)keysv, HEf_SVKEY);
@@ -463,7 +461,6 @@ Perl_hv_store_ent(pTHX_ HV *hv, SV *keysv, SV *val, register U32 hash)
 
     xhv = (XPVHV*)SvANY(hv);
     if (SvMAGICAL(hv)) {
-	dTHR;
  	bool needs_copy;
  	bool needs_store;
  	hv_magic_check (hv, &needs_copy, &needs_store);
@@ -721,7 +718,6 @@ Perl_hv_exists(pTHX_ HV *hv, const char *key, U32 klen)
 
     if (SvRMAGICAL(hv)) {
 	if (mg_find((SV*)hv,'P')) {
-	    dTHR;
 	    sv = sv_newmortal();
 	    mg_copy((SV*)hv, sv, key, klen); 
 	    magic_existspack(sv, mg_find(sv, 'p'));
@@ -797,7 +793,6 @@ Perl_hv_exists_ent(pTHX_ HV *hv, SV *keysv, U32 hash)
 
     if (SvRMAGICAL(hv)) {
 	if (mg_find((SV*)hv,'P')) {
-	    dTHR;		/* just for SvTRUE */
 	    sv = sv_newmortal();
 	    keysv = sv_2mortal(newSVsv(keysv));
 	    mg_copy((SV*)hv, sv, (char*)keysv, HEf_SVKEY); 
@@ -1449,12 +1444,8 @@ Perl_unsharepvn(pTHX_ const char *str, I32 len, U32 hash)
 	break;
     }
     UNLOCK_STRTAB_MUTEX;
-    
-    {
-        dTHR;
-        if (!found && ckWARN_d(WARN_INTERNAL))
-	    Perl_warner(aTHX_ WARN_INTERNAL, "Attempt to free non-existent shared string");    
-    }
+    if (!found && ckWARN_d(WARN_INTERNAL))
+	Perl_warner(aTHX_ WARN_INTERNAL, "Attempt to free non-existent shared string");    
 }
 
 /* get a (constant) string ptr from the global string table

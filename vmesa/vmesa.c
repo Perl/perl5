@@ -121,7 +121,6 @@ do_aspawn(SV* really, SV **mark, SV **sp)
     status = FAIL;
     if (sp > mark)
     {
-       dTHR;
        New(401,PL_Argv, sp - mark + 1, char*);
        a = PL_Argv;
        while (++mark <= sp)
@@ -286,7 +285,6 @@ do_spawn(char *cmd, int execf)
                     (const char **) environ);
        if (pid < 0)
        {
-          dTHR;
           status = FAIL;
           if (ckWARN(WARN_EXEC))
              warner(WARN_EXEC,"Can't exec \"%s\": %s",

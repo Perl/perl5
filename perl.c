@@ -298,7 +298,6 @@ Shuts down a Perl interpreter.  See L<perlembed>.
 void
 perl_destruct(pTHXx)
 {
-    dTHR;
     int destruct_level;  /* 0=none, 1=full, 2=full with checks */
     I32 last_sv_count;
     HV *hv;
@@ -813,7 +812,6 @@ Tells a Perl interpreter to parse a Perl script.  See L<perlembed>.
 int
 perl_parse(pTHXx_ XSINIT_t xsinit, int argc, char **argv, char **env)
 {
-    dTHR;
     I32 oldscope;
     int ret;
     dJMPENV;
@@ -915,7 +913,6 @@ S_vparse_body(pTHX_ va_list args)
 STATIC void *
 S_parse_body(pTHX_ char **env, XSINIT_t xsinit)
 {
-    dTHR;
     int argc = PL_origargc;
     char **argv = PL_origargv;
     char *scriptname = NULL;
@@ -1342,7 +1339,6 @@ Tells a Perl interpreter to run.  See L<perlembed>.
 int
 perl_run(pTHXx)
 {
-    dTHR;
     I32 oldscope;
     int ret = 0;
     dJMPENV;
@@ -1410,8 +1406,6 @@ S_vrun_body(pTHX_ va_list args)
 STATIC void *
 S_run_body(pTHX_ I32 oldscope)
 {
-    dTHR;
-
     DEBUG_r(PerlIO_printf(Perl_debug_log, "%s $` $& $' support.\n",
                     PL_sawampersand ? "Enabling" : "Omitting"));
 
@@ -1470,10 +1464,8 @@ Perl_get_sv(pTHX_ const char *name, I32 create)
 #ifdef USE_THREADS
     if (name[1] == '\0' && !isALPHA(name[0])) {
 	PADOFFSET tmp = find_threadsv(name);
-    	if (tmp != NOT_IN_PAD) {
-	    dTHR;
+    	if (tmp != NOT_IN_PAD)
 	    return THREADSV(tmp);
-	}
     }
 #endif /* USE_THREADS */
     gv = gv_fetchpv(name, create, SVt_PV);
@@ -1793,8 +1785,6 @@ S_vcall_body(pTHX_ va_list args)
 STATIC void
 S_call_body(pTHX_ OP *myop, int is_eval)
 {
-    dTHR;
-
     if (PL_op == myop) {
 	if (is_eval)
 	    PL_op = Perl_pp_entereval(aTHX);	/* this doesn't do a POPMARK */
@@ -2027,7 +2017,6 @@ Perl_moreswitches(pTHX_ char *s)
     switch (*s) {
     case '0':
     {
-	dTHR;
 	numlen = 0;			/* disallow underscores */
 	rschar = (U32)scan_oct(s, 4, &numlen);
 	SvREFCNT_dec(PL_nrs);
@@ -2103,7 +2092,6 @@ Perl_moreswitches(pTHX_ char *s)
 	}
 	PL_debug |= 0x80000000;
 #else
-	dTHR;
 	if (ckWARN_d(WARN_DEBUGGING))
 	    Perl_warner(aTHX_ WARN_DEBUGGING,
 	           "Recompile perl with -DDEBUGGING to use -D switch\n");
@@ -2165,7 +2153,6 @@ Perl_moreswitches(pTHX_ char *s)
 	    s += numlen;
 	}
 	else {
-	    dTHR;
 	    if (RsPARA(PL_nrs)) {
 		PL_ors = "\n\n";
 		PL_orslen = 2;
@@ -2480,7 +2467,6 @@ S_init_interp(pTHX)
 STATIC void
 S_init_main_stash(pTHX)
 {
-    dTHR;
     GV *gv;
 
     /* Note that strtab is a rather special HV.  Assumptions are made
@@ -2524,8 +2510,6 @@ S_init_main_stash(pTHX)
 STATIC void
 S_open_script(pTHX_ char *scriptname, bool dosearch, SV *sv, int *fdscript)
 {
-    dTHR;
-
     *fdscript = -1;
 
     if (PL_e_script) {
@@ -2819,7 +2803,6 @@ S_validate_suid(pTHX_ char *validarg, char *scriptname, int fdscript)
      */
 
 #ifdef DOSUID
-    dTHR;
     char *s, *s2;
 
     if (PerlLIO_fstat(PerlIO_fileno(PL_rsfp),&PL_statbuf) < 0)	/* normal stat is insecure */
@@ -3017,7 +3000,6 @@ FIX YOUR KERNEL, PUT A C WRAPPER AROUND THIS SCRIPT, OR USE -u AND UNDUMP!\n");
 #else /* !DOSUID */
     if (PL_euid != PL_uid || PL_egid != PL_gid) {	/* (suidperl doesn't exist, in fact) */
 #ifndef SETUID_SCRIPTS_ARE_SECURE_NOW
-	dTHR;
 	PerlLIO_fstat(PerlIO_fileno(PL_rsfp),&PL_statbuf);	/* may be either wrapped or real suid */
 	if ((PL_euid != PL_uid && PL_euid == PL_statbuf.st_uid && PL_statbuf.st_mode & S_ISUID)
 	    ||
@@ -3108,7 +3090,6 @@ S_forbid_setid(pTHX_ char *s)
 void
 Perl_init_debugger(pTHX)
 {
-    dTHR;
     HV *ostash = PL_curstash;
 
     PL_curstash = PL_debstash;
@@ -3176,7 +3157,6 @@ Perl_init_stacks(pTHX)
 STATIC void
 S_nuke_stacks(pTHX)
 {
-    dTHR;
     while (PL_curstackinfo->si_next)
 	PL_curstackinfo = PL_curstackinfo->si_next;
     while (PL_curstackinfo) {
@@ -3213,7 +3193,6 @@ S_init_lexer(pTHX)
 STATIC void
 S_init_predump_symbols(pTHX)
 {
-    dTHR;
     GV *tmpgv;
     IO *io;
 
@@ -3253,7 +3232,6 @@ S_init_predump_symbols(pTHX)
 STATIC void
 S_init_postdump_symbols(pTHX_ register int argc, register char **argv, register char **env)
 {
-    dTHR;
     char *s;
     SV *sv;
     GV* tmpgv;
@@ -3647,8 +3625,9 @@ S_init_main_thread(pTHX)
     PERL_SET_THX(thr);
 
     /*
-     * These must come after the SET_THR because sv_setpvn does
-     * SvTAINT and the taint fields require dTHR.
+     * These must come after the thread self setting
+     * because sv_setpvn does SvTAINT and the taint
+     * fields thread selfness being set.
      */
     PL_toptarget = NEWSV(0,0);
     sv_upgrade(PL_toptarget, SVt_PVFM);
@@ -3676,7 +3655,6 @@ S_init_main_thread(pTHX)
 void
 Perl_call_list(pTHX_ I32 oldscope, AV *paramList)
 {
-    dTHR;
     SV *atsv;
     line_t oldline = CopLINE(PL_curcop);
     CV *cv;
@@ -3781,8 +3759,6 @@ S_call_list_body(pTHX_ CV *cv)
 void
 Perl_my_exit(pTHX_ U32 status)
 {
-    dTHR;
-
     DEBUG_S(PerlIO_printf(Perl_debug_log, "my_exit: thread %p, status %lu\n",
 			  thr, (unsigned long) status));
     switch (status) {
@@ -3831,7 +3807,6 @@ Perl_my_failure_exit(pTHX)
 STATIC void
 S_my_exit_jump(pTHX)
 {
-    dTHR;
     register PERL_CONTEXT *cx;
     I32 gimme;
     SV **newsp;

@@ -1038,7 +1038,6 @@ PP(pp_sselect)
 void
 Perl_setdefout(pTHX_ GV *gv)
 {
-    dTHR;
     if (gv)
 	(void)SvREFCNT_inc(gv);
     if (PL_defoutgv)
@@ -1121,7 +1120,6 @@ PP(pp_read)
 STATIC OP *
 S_doform(pTHX_ CV *cv, GV *gv, OP *retop)
 {
-    dTHR;
     register PERL_CONTEXT *cx;
     I32 gimme = GIMME_V;
     AV* padlist = CvPADLIST(cv);
@@ -1357,7 +1355,6 @@ PP(pp_prtf)
 
     sv = NEWSV(0,0);
     if (!(io = GvIO(gv))) {
-        dTHR;
 	if (ckWARN2(WARN_UNOPENED,WARN_CLOSED))
 	    report_evil_fh(gv, io, PL_op->op_type);
 	SETERRNO(EBADF,RMS$_IFI);
@@ -2532,7 +2529,6 @@ PP(pp_stat)
 		? PerlLIO_fstat(PerlIO_fileno(IoIFP(GvIOn(gv))), &PL_statcache) : -1);
 	}
 	if (PL_laststatval < 0) {
-	    dTHR;
 	    if (ckWARN2(WARN_UNOPENED,WARN_CLOSED))
 		report_evil_fh(gv, GvIO(gv), PL_op->op_type);
 	    max = 0;
@@ -3087,7 +3083,6 @@ PP(pp_fttext)
 		len = 512;
 	}
 	else {
-	    dTHR;
 	    if (ckWARN2(WARN_UNOPENED,WARN_CLOSED)) {
 		gv = cGVOP_gv;
 		report_evil_fh(gv, GvIO(gv), PL_op->op_type);

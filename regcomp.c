@@ -394,7 +394,6 @@ static void clear_re(pTHXo_ void *r);
 STATIC void
 S_scan_commit(pTHX_ scan_data_t *data)
 {
-    dTHR;
     STRLEN l = CHR_SVLEN(data->last_found);
     STRLEN old_l = CHR_SVLEN(*data->longest);
     
@@ -559,7 +558,6 @@ S_study_chunk(pTHX_ regnode **scanp, I32 *deltap, regnode *last, scan_data_t *da
 			/* deltap: Write maxlen-minlen here. */
 			/* last: Stop before this one. */
 {
-    dTHR;
     I32 min = 0, pars = 0, code;
     regnode *scan = *scanp, *next;
     I32 delta = 0;
@@ -1483,7 +1481,6 @@ S_study_chunk(pTHX_ regnode **scanp, I32 *deltap, regnode *last, scan_data_t *da
 STATIC I32
 S_add_data(pTHX_ I32 n, char *s)
 {
-    dTHR;
     if (PL_regcomp_rx->data) {
 	Renewc(PL_regcomp_rx->data, 
 	       sizeof(*PL_regcomp_rx->data) + sizeof(void*) * (PL_regcomp_rx->data->count + n - 1), 
@@ -1504,7 +1501,6 @@ S_add_data(pTHX_ I32 n, char *s)
 void
 Perl_reginitcolors(pTHX)
 {
-    dTHR;
     int i = 0;
     char *s = PerlEnv_getenv("PERL_RE_COLORS");
 	    
@@ -1545,7 +1541,6 @@ Perl_reginitcolors(pTHX)
 regexp *
 Perl_pregcomp(pTHX_ char *exp, char *xend, PMOP *pm)
 {
-    dTHR;
     register regexp *r;
     regnode *scan;
     regnode *first;
@@ -1915,7 +1910,6 @@ STATIC regnode *
 S_reg(pTHX_ I32 paren, I32 *flagp)
     /* paren: Parenthesized? 0=top, 1=(, inside: changed to letter. */
 {
-    dTHR;
     register regnode *ret;		/* Will be the head of the group. */
     register regnode *br;
     register regnode *lastbr;
@@ -1974,7 +1968,6 @@ S_reg(pTHX_ I32 paren, I32 *flagp)
 		/* FALL THROUGH */
 	    case '{':
 	    {
-		dTHR;
 		I32 count = 1, n = 0;
 		char c;
 		char *s = PL_regcomp_parse;
@@ -2260,7 +2253,6 @@ S_reg(pTHX_ I32 paren, I32 *flagp)
 STATIC regnode *
 S_regbranch(pTHX_ I32 *flagp, I32 first)
 {
-    dTHR;
     register regnode *ret;
     register regnode *chain = NULL;
     register regnode *latest;
@@ -2326,7 +2318,6 @@ S_regbranch(pTHX_ I32 *flagp, I32 first)
 STATIC regnode *
 S_regpiece(pTHX_ I32 *flagp)
 {
-    dTHR;
     register regnode *ret;
     register char op;
     register char *next;
@@ -2494,7 +2485,6 @@ S_regpiece(pTHX_ I32 *flagp)
 STATIC regnode *
 S_regatom(pTHX_ I32 *flagp)
 {
-    dTHR;
     register regnode *ret = 0;
     I32 flags;
 
@@ -3013,7 +3003,6 @@ S_regwhite(pTHX_ char *p, char *e)
 STATIC I32
 S_regpposixcc(pTHX_ I32 value)
 {
-    dTHR;
     char *posixcc = 0;
     I32 namedclass = OOB_NAMEDCLASS;
 
@@ -3168,7 +3157,6 @@ S_checkposixcc(pTHX)
 STATIC regnode *
 S_regclass(pTHX)
 {
-    dTHR;
     register U32 value;
     register I32 lastvalue = OOB_CHAR8;
     register I32 range = 0;
@@ -3645,7 +3633,6 @@ S_regclass(pTHX)
 STATIC regnode *
 S_regclassutf8(pTHX)
 {
-    dTHR;
     register char *e;
     register U32 value;
     register U32 lastvalue = OOB_UTF8;
@@ -3916,7 +3903,6 @@ S_regclassutf8(pTHX)
 STATIC char*
 S_nextchar(pTHX)
 {
-    dTHR;
     char* retval = PL_regcomp_parse++;
 
     for (;;) {
@@ -3949,7 +3935,6 @@ S_nextchar(pTHX)
 STATIC regnode *			/* Location. */
 S_reg_node(pTHX_ U8 op)
 {
-    dTHR;
     register regnode *ret;
     register regnode *ptr;
 
@@ -3974,7 +3959,6 @@ S_reg_node(pTHX_ U8 op)
 STATIC regnode *			/* Location. */
 S_reganode(pTHX_ U8 op, U32 arg)
 {
-    dTHR;
     register regnode *ret;
     register regnode *ptr;
 
@@ -3999,7 +3983,6 @@ S_reganode(pTHX_ U8 op, U32 arg)
 STATIC void
 S_reguni(pTHX_ UV uv, char* s, STRLEN* lenp)
 {
-    dTHR;
     *lenp = SIZE_ONLY ? UNISKIP(uv) : (uv_to_utf8((U8*)s, uv) - (U8*)s);
 }
 
@@ -4011,7 +3994,6 @@ S_reguni(pTHX_ UV uv, char* s, STRLEN* lenp)
 STATIC void
 S_reginsert(pTHX_ U8 op, regnode *opnd)
 {
-    dTHR;
     register regnode *src;
     register regnode *dst;
     register regnode *place;
@@ -4042,7 +4024,6 @@ S_reginsert(pTHX_ U8 op, regnode *opnd)
 STATIC void
 S_regtail(pTHX_ regnode *p, regnode *val)
 {
-    dTHR;
     register regnode *scan;
     register regnode *temp;
 
@@ -4072,7 +4053,6 @@ S_regtail(pTHX_ regnode *p, regnode *val)
 STATIC void
 S_regoptail(pTHX_ regnode *p, regnode *val)
 {
-    dTHR;
     /* "Operandless" and "op != BRANCH" are synonymous in practice. */
     if (p == NULL || SIZE_ONLY)
 	return;
@@ -4186,7 +4166,6 @@ void
 Perl_regdump(pTHX_ regexp *r)
 {
 #ifdef DEBUGGING
-    dTHR;
     SV *sv = sv_newmortal();
 
     (void)dumpuntil(r->program, r->program + 1, NULL, sv, 0);
@@ -4268,7 +4247,6 @@ void
 Perl_regprop(pTHX_ SV *sv, regnode *o)
 {
 #ifdef DEBUGGING
-    dTHR;
     register int k;
 
     sv_setpvn(sv, "", 0);
@@ -4438,7 +4416,6 @@ Perl_re_intuit_string(pTHX_ regexp *prog)
 void
 Perl_pregfree(pTHX_ struct regexp *r)
 {
-    dTHR;
     DEBUG_r(if (!PL_colorset) reginitcolors());
 
     if (!r || (--r->refcnt > 0))
@@ -4519,7 +4496,6 @@ Perl_pregfree(pTHX_ struct regexp *r)
 regnode *
 Perl_regnext(pTHX_ register regnode *p)
 {
-    dTHR;
     register I32 offset;
 
     if (p == &PL_regdummy)
@@ -4571,7 +4547,6 @@ S_re_croak2(pTHX_ const char* pat1,const char* pat2,...)
 void
 Perl_save_re_context(pTHX)
 {                   
-    dTHR;
     SAVEPPTR(PL_bostr);
     SAVEPPTR(PL_regprecomp);		/* uncompiled string. */
     SAVEI32(PL_regnpar);		/* () count. */

@@ -274,7 +274,6 @@ S_missingterm(pTHX_ char *s)
 void
 Perl_deprecate(pTHX_ char *s)
 {
-    dTHR;
     if (ckWARN(WARN_DEPRECATED))
 	Perl_warner(aTHX_ WARN_DEPRECATED, "Use of %s is deprecated", s);
 }
@@ -337,7 +336,6 @@ S_cr_textfilter(pTHX_ int idx, SV *sv, int maxlen)
 void
 Perl_lex_start(pTHX_ SV *line)
 {
-    dTHR;
     char *s;
     STRLEN len;
 
@@ -433,7 +431,6 @@ Perl_lex_end(pTHX)
 STATIC void
 S_incline(pTHX_ char *s)
 {
-    dTHR;
     char *t;
     char *n;
     char *e;
@@ -495,7 +492,6 @@ S_incline(pTHX_ char *s)
 STATIC char *
 S_skipspace(pTHX_ register char *s)
 {
-    dTHR;
     if (PL_lex_formbrack && PL_lex_brackets <= PL_lex_formbrack) {
 	while (s < PL_bufend && SPACE_OR_TAB(*s))
 	    s++;
@@ -614,7 +610,6 @@ S_check_uni(pTHX)
 {
     char *s;
     char *t;
-    dTHR;
 
     if (PL_oldoldbufptr != PL_last_uni)
 	return;
@@ -680,7 +675,6 @@ S_uni(pTHX_ I32 f, char *s)
 STATIC I32
 S_lop(pTHX_ I32 f, int x, char *s)
 {
-    dTHR;
     yylval.ival = f;
     CLINE;
     PL_expect = x;
@@ -782,7 +776,6 @@ S_force_ident(pTHX_ register char *s, int kind)
 	PL_nextval[PL_nexttoke].opval = o;
 	force_next(WORD);
 	if (kind) {
-	    dTHR;		/* just for in_eval */
 	    o->op_private = OPpCONST_ENTERED;
 	    /* XXX see note in pp_entereval() for why we forgo typo
 	       warnings if the symbol must be introduced in an eval.
@@ -995,7 +988,6 @@ S_sublex_start(pTHX)
 STATIC I32
 S_sublex_push(pTHX)
 {
-    dTHR;
     ENTER;
 
     PL_lex_state = PL_sublex_info.super_state;
@@ -1323,7 +1315,6 @@ S_scan_const(pTHX_ char *start)
 	    if (PL_lex_inwhat == OP_SUBST && !PL_lex_inpat &&
 		isDIGIT(*s) && *s != '0' && !isDIGIT(s[1]))
 	    {
-		dTHR;			/* only for ckWARN */
 		if (ckWARN(WARN_SYNTAX))
 		    Perl_warner(aTHX_ WARN_SYNTAX, "\\%c better written as $%c", *s, *s);
 		*--s = '$';
@@ -1348,7 +1339,6 @@ S_scan_const(pTHX_ char *start)
 		/* FALL THROUGH */
 	    default:
 	        {
-		    dTHR;
 		    if (ckWARN(WARN_MISC) && isALPHA(*s))
 			Perl_warner(aTHX_ WARN_MISC, 
 			       "Unrecognized escape \\%c passed through",
@@ -2088,7 +2078,6 @@ S_find_in_my_stash(pTHX_ char *pkgname, I32 len)
 int
 Perl_yylex_r(pTHX_ YYSTYPE *lvalp, int *lcharp)
 {
-    dTHR;
     int r;
 
     yylval_pointer[yyactlevel] = lvalp;
@@ -2116,7 +2105,6 @@ Perl_yylex(pTHX_ YYSTYPE *lvalp, int *lcharp)
 Perl_yylex(pTHX)
 #endif
 {
-    dTHR;
     register char *s;
     register char *d;
     register I32 tmp;
@@ -5793,7 +5781,6 @@ S_checkcomma(pTHX_ register char *s, char *name, char *what)
     char *w;
 
     if (*s == ' ' && s[1] == '(') {	/* XXX gotta be a better way */
-	dTHR;				/* only for ckWARN */
 	if (ckWARN(WARN_SYNTAX)) {
 	    int level = 1;
 	    for (w = s+2; *w && level; w++) {
@@ -6076,7 +6063,6 @@ S_scan_ident(pTHX_ register char *s, register char *send, char *dest, STRLEN des
 	    *d = '\0';
 	    while (s < send && SPACE_OR_TAB(*s)) s++;
 	    if ((*s == '[' || (*s == '{' && strNE(dest, "sub")))) {
-		dTHR;			/* only for ckWARN */
 		if (ckWARN(WARN_AMBIGUOUS) && keyword(dest, d - dest)) {
 		    const char *brack = *s == '[' ? "[...]" : "{...}";
 		    Perl_warner(aTHX_ WARN_AMBIGUOUS,
@@ -6108,7 +6094,6 @@ S_scan_ident(pTHX_ register char *s, register char *send, char *dest, STRLEN des
 	    if (funny == '#')
 		funny = '@';
 	    if (PL_lex_state == LEX_NORMAL) {
-		dTHR;			/* only for ckWARN */
 		if (ckWARN(WARN_AMBIGUOUS) &&
 		    (keyword(dest, d - dest) || get_cv(dest, FALSE)))
 		{
@@ -6309,7 +6294,6 @@ S_scan_trans(pTHX_ char *start)
 STATIC char *
 S_scan_heredoc(pTHX_ register char *s)
 {
-    dTHR;
     SV *herewas;
     I32 op_type = OP_SCALAR;
     I32 len;
@@ -6663,7 +6647,6 @@ S_scan_inputsymbol(pTHX_ char *start)
 STATIC char *
 S_scan_str(pTHX_ char *start, int keep_quoted, int keep_delims)
 {
-    dTHR;
     SV *sv;				/* scalar value: string */
     char *tmps;				/* temp string, used for delimiter matching */
     register char *s = start;		/* current position in the buffer */
@@ -6894,7 +6877,6 @@ Perl_scan_num(pTHX_ char *start, YYSTYPE* lvalp)
 	     we in octal/hex/binary?" indicator to disallow hex characters
 	     when in octal mode.
 	   */
-    	    dTHR;
 	    NV n = 0.0;
 	    UV u = 0;
 	    I32 shift;
@@ -6982,7 +6964,6 @@ Perl_scan_num(pTHX_ char *start, YYSTYPE* lvalp)
 
 			if ((x >> shift) != u
 			    && !(PL_hints & HINT_NEW_BINARY)) {
-			    dTHR;
 			    overflowed = TRUE;
 			    n = (NV) u;
 			    if (ckWARN_d(WARN_OVERFLOW))
@@ -7014,7 +6995,6 @@ Perl_scan_num(pTHX_ char *start, YYSTYPE* lvalp)
 	  out:
 	    sv = NEWSV(92,0);
 	    if (overflowed) {
-		dTHR;
 		if (ckWARN(WARN_PORTABLE) && n > 4294967295.0)
 		    Perl_warner(aTHX_ WARN_PORTABLE,
 				"%s number > %s non-portable",
@@ -7023,7 +7003,6 @@ Perl_scan_num(pTHX_ char *start, YYSTYPE* lvalp)
 	    }
 	    else {
 #if UVSIZE > 4
-		dTHR;
 		if (ckWARN(WARN_PORTABLE) && u > 0xffffffff)
 		    Perl_warner(aTHX_ WARN_PORTABLE,
 				"%s number > %s non-portable",
@@ -7053,7 +7032,6 @@ Perl_scan_num(pTHX_ char *start, YYSTYPE* lvalp)
 	       if -w is on
 	    */
 	    if (*s == '_') {
-		dTHR;			/* only for ckWARN */
 		if (ckWARN(WARN_SYNTAX) && lastub && s - lastub != 3)
 		    Perl_warner(aTHX_ WARN_SYNTAX, "Misplaced _ in number");
 		lastub = ++s;
@@ -7069,7 +7047,6 @@ Perl_scan_num(pTHX_ char *start, YYSTYPE* lvalp)
 
 	/* final misplaced underbar check */
 	if (lastub && s - lastub != 3) {
-	    dTHR;
 	    if (ckWARN(WARN_SYNTAX))
 		Perl_warner(aTHX_ WARN_SYNTAX, "Misplaced _ in number");
 	}
@@ -7287,7 +7264,6 @@ vstring:
 STATIC char *
 S_scan_formline(pTHX_ register char *s)
 {
-    dTHR;
     register char *eol;
     register char *t;
     SV *stuff = newSVpvn("",0);
@@ -7378,7 +7354,6 @@ S_set_csh(pTHX)
 I32
 Perl_start_subparse(pTHX_ I32 is_format, U32 flags)
 {
-    dTHR;
     I32 oldsavestack_ix = PL_savestack_ix;
     CV* outsidecv = PL_compcv;
     AV* comppadlist;
@@ -7434,7 +7409,6 @@ Perl_start_subparse(pTHX_ I32 is_format, U32 flags)
 int
 Perl_yywarn(pTHX_ char *s)
 {
-    dTHR;
     PL_in_eval |= EVAL_WARNONLY;
     yyerror(s);
     PL_in_eval &= ~EVAL_WARNONLY;
@@ -7444,7 +7418,6 @@ Perl_yywarn(pTHX_ char *s)
 int
 Perl_yyerror(pTHX_ char *s)
 {
-    dTHR;
     char *where = NULL;
     char *context = NULL;
     int contlen = -1;
