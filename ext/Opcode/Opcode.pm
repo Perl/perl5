@@ -332,7 +332,7 @@ invert_opset function.
 
     cond_expr flip flop andassign orassign and or xor
 
-    warn die lineseq nextstate unstack scope enter leave
+    warn die lineseq nextstate scope enter leave
 
     rv2cv anoncode prototype
 
@@ -365,7 +365,7 @@ used to implement a resource attack (e.g., consume all available CPU time).
     grepstart grepwhile
     mapstart mapwhile
     enteriter iter
-    enterloop leaveloop
+    enterloop leaveloop unstack
     last next redo
     goto
 
