@@ -10,7 +10,7 @@ BEGIN {
 }
 
 if ( $symlink_exists ) { print "1..59\n"; }
-else                   { print "1..34\n"; }
+else                   { print "1..31\n"; }
 
 use File::Find;
 
@@ -52,7 +52,7 @@ sub MkDir($$) {
 }
 
 sub wanted {
-#  print "'$_' => 1, ";
+  print "# '$_' => 1\n";
   Check( $Expect{$_} );
   delete $Expect{$_};
   $File::Find::prune=1 if  $_ eq 'FABA';
@@ -73,14 +73,16 @@ touch('FA/FAB/FAB_ord');
 MkDir( 'FA/FAB/FABA',0770  );
 touch('FA/FAB/FABA/FABA_ord');
 
-%Expect=('.' => 1, 'FSL' => 1, 'FA_ord' => 1, 'FAB' => 1, 'FAB_ord' => 1, 'FABA' => 1,
-         'FAA' => 1, 'FAA_ord' => 1);
-
+%Expect = ('.' => 1, 'FSL' => 1, 'FA_ord' => 1, 'FAB' => 1, 'FAB_ord' => 1,
+	   'FABA' => 1, 'FAA' => 1, 'FAA_ord' => 1);
+delete $Expect{'FSL'} unless $symlink_exists;
 File::Find::find( {wanted => \&wanted, },'FA' );
 Check( scalar(keys %Expect) == 0 );
 
-%Expect=('FA' => 1, 'FA/FSL' => 1, 'FA/FA_ord' => 1, 'FA/FAB' => 1, 'FA/FAB/FAB_ord' => 1,
-         'FA/FAB/FABA' => 1, 'FA/FAB/FABA/FABA_ord' => 1, 'FA/FAA' => 1, 'FA/FAA/FAA_ord' => 1);
+%Expect=('FA' => 1, 'FA/FSL' => 1, 'FA/FA_ord' => 1, 'FA/FAB' => 1,
+	 'FA/FAB/FAB_ord' => 1, 'FA/FAB/FABA' => 1,
+	 'FA/FAB/FABA/FABA_ord' => 1, 'FA/FAA' => 1, 'FA/FAA/FAA_ord' => 1);
+delete $Expect{'FA/FSL'} unless $symlink_exists;
 File::Find::find( {wanted => \&wanted, no_chdir => 1},'FA' );
 
 Check( scalar(keys %Expect) == 0 );
