@@ -82,6 +82,8 @@ extern int h_errno;
 # ifdef HAS_GETPWENT
 #ifndef getpwent
   struct passwd *getpwent (void);
+#elif defined (VMS) && defined (my_getpwent)
+  struct passwd *Perl_my_getpwent (void);
 #endif
 # endif
 #endif

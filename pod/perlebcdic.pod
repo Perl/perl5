@@ -97,6 +97,26 @@ for VM/ESA.  CCSID 1047 differs from CCSID 0037 in eight places.
 The EBCDIC code page in use on Siemens' BS2000 system is distinct from
 1047 and 0037.  It is identified below as the POSIX-BC set.
 
+=head2 Unicode code points versus EBCDIC code points
+
+In Unicode terminology a I<code point> is the number assigned to a
+character: for example, in EBCDIC the character "A" is usually assigned
+the number 193.  In Unicode the character "A" is assigned the number 65.
+This causes a problem with the semantics of the pack/unpack "U", which
+are supposed to pack Unicode code points to characters and back to numbers.
+The problem is: which code points to use for code points less than 256?
+(for 256 and over there's no problem: Unicode code points are used)
+In EBCDIC, for the low 256 the EBCDIC code points are used.  This
+means that the equivalences
+
+	pack("U", ord($character)) eq $character
+	unpack("U", $character) == ord $character
+
+will hold.  (If Unicode code points were applied consistently over
+all the possible code points, pack("U",ord("A")) would in EBCDIC
+equal I<A with acute> or chr(101), and unpack("U", "A") would equal
+65, or I<non-breaking space>, not 193, or ord "A".)
+
 =head2 Unicode and UTF
 
 UTF is a Unicode Transformation Format.  UTF-8 is a Unicode conforming

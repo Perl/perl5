@@ -96,7 +96,7 @@
 #define	STATIC	static
 #endif
 
-#define REGINCLASS(p,c)  (ANYOF_FLAGS(p) ? reginclasslen(p,c,0,0) : ANYOF_BITMAP_TEST(p,*(c)))
+#define REGINCLASS(p,c)  (ANYOF_FLAGS(p) ? reginclass(p,c,0,0) : ANYOF_BITMAP_TEST(p,*(c)))
 
 /*
  * Forwards.
@@ -926,7 +926,7 @@ S_find_byclass(pTHX_ regexp * prog, regnode *c, char *s, char *strend, char *sta
 		STRLEN skip = do_utf8 ? UTF8SKIP(s) : 1;
 		  
 		if (do_utf8 ?
-		    reginclasslen(c, (U8*)s, 0, do_utf8) :
+		    reginclass(c, (U8*)s, 0, do_utf8) :
 		    REGINCLASS(c, (U8*)s) ||
 		    (ANYOF_FOLD_SHARP_S(c, s, strend) &&
 		     /* The assignment of 2 is intentional:
@@ -2054,12 +2054,6 @@ S_regtry(pTHX_ regexp *prog, char *startpos)
             New(22,PL_reg_start_tmp, PL_reg_start_tmpl, char*);
     }
 
-#ifdef DEBUGGING
-    sv_setpvn(PERL_DEBUG_PAD(0), "", 0);
-    sv_setpvn(PERL_DEBUG_PAD(1), "", 0);
-    sv_setpvn(PERL_DEBUG_PAD(2), "", 0);
-#endif
-
     /* XXXX What this code is doing here?!!!  There should be no need
        to do this again and again, PL_reglastparen should take care of
        this!  --ilya*/
@@ -2425,11 +2419,11 @@ S_regmatch(pTHX_ regnode *prog)
 	    if (do_utf8) {
 	        STRLEN inclasslen = PL_regeol - locinput;
 
-	        if (!reginclasslen(scan, (U8*)locinput, &inclasslen, do_utf8))
+	        if (!reginclass(scan, (U8*)locinput, &inclasslen, do_utf8))
 		    sayNO_ANYOF;
 		if (locinput >= PL_regeol)
 		    sayNO;
-		locinput += inclasslen ? inclasslen : 1;
+		locinput += inclasslen ? inclasslen : UTF8SKIP(locinput);
 		nextchr = UCHARAT(locinput);
 		break;
 	    }
@@ -3954,7 +3948,7 @@ S_regrepeat(pTHX_ regnode *p, I32 max)
 	if (do_utf8) {
 	    loceol = PL_regeol;
 	    while (hardcount < max && scan < loceol &&
-		   reginclasslen(p, (U8*)scan, 0, do_utf8)) {
+		   reginclass(p, (U8*)scan, 0, do_utf8)) {
 		scan += UTF8SKIP(scan);
 		hardcount++;
 	    }
@@ -4226,7 +4220,7 @@ Perl_regclass_swash(pTHX_ register regnode* node, bool doinit, SV** listsvp, SV 
 }
 
 /*
- - reginclasslen - determine if a character falls into a character class
+ - reginclass - determine if a character falls into a character class
  
   The n is the ANYOF regnode, the p is the target string, lenp
   is pointer to the maximum length of how far to go in the p
@@ -4236,7 +4230,7 @@ Perl_regclass_swash(pTHX_ register regnode* node, bool doinit, SV** listsvp, SV 
  */
 
 STATIC bool
-S_reginclasslen(pTHX_ register regnode *n, register U8* p, STRLEN* lenp, register bool do_utf8)
+S_reginclass(pTHX_ register regnode *n, register U8* p, STRLEN* lenp, register bool do_utf8)
 {
     char flags = ANYOF_FLAGS(n);
     bool match = FALSE;
@@ -4246,7 +4240,7 @@ S_reginclasslen(pTHX_ register regnode *n, register U8* p, STRLEN* lenp, registe
 
     c = do_utf8 ? utf8_to_uvchr(p, &len) : *p;
 
-    plen = lenp ? *lenp : UNISKIP(c);
+    plen = lenp ? *lenp : UNISKIP(NATIVE_TO_UNI(c));
     if (do_utf8 || (flags & ANYOF_UNICODE)) {
         if (lenp)
 	    *lenp = 0;
@@ -4291,7 +4285,7 @@ S_reginclasslen(pTHX_ register regnode *n, register U8* p, STRLEN* lenp, registe
 	    }
 	}
 	if (match && lenp && *lenp == 0)
-	    *lenp = UNISKIP(c);
+	    *lenp = UNISKIP(NATIVE_TO_UNI(c));
     }
     if (!match && c < 256) {
 	if (ANYOF_BITMAP_TEST(n, c))
@@ -4350,20 +4344,6 @@ S_reginclasslen(pTHX_ register regnode *n, register U8* p, STRLEN* lenp, registe
     }
 
     return (flags & ANYOF_INVERT) ? !match : match;
-}
-
-/*
- - reginclass - determine if a character falls into a character class
-
-  The n is the ANYOF regnode, the p is the target string, do_utf8 tells
-  whether the target string is in UTF-8.
-
- */
-
-STATIC bool
-S_reginclass(pTHX_ register regnode *n, register U8* p, register bool do_utf8)
-{
-    return S_reginclasslen(aTHX_ n, p, 0, do_utf8);
 }
 
 STATIC U8 *

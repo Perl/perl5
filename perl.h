@@ -1233,7 +1233,7 @@ typedef NVTYPE NV;
 #   else
 #       define Perl_frexp(x,y) ((long double)frexp((double)(x),y))
 #   endif
-#   ifndef Perl_isinf
+#   ifndef Perl_isnan
 #       ifdef HAS_ISNANL
 #           define Perl_isnan(x) isnanl(x)
 #       endif
@@ -1341,7 +1341,7 @@ typedef NVTYPE NV;
 #if !defined(Perl_fp_class) && defined(HAS_FPCLASSIFY)
 #    include <math.h>
 #    define Perl_fp_class(x)		fpclassify(x)
-#    define Perl_fp_class_nan(x)	(fp_classify(x)==FP_SNAN|FP|_fp_classify(x)==QNAN)
+#    define Perl_fp_class_nan(x)	(fp_classify(x)==FP_SNAN||fp_classify(x)==FP_QNAN)
 #    define Perl_fp_class_inf(x)	(fp_classify(x)==FP_INFINITE)
 #    define Perl_fp_class_norm(x)	(fp_classify(x)==FP_NORMAL)
 #    define Perl_fp_class_denorm(x)	(fp_classify(x)==FP_SUBNORMAL)
@@ -3183,7 +3183,7 @@ struct perl_debug_pad {
 };
 
 #define PERL_DEBUG_PAD(i)	&(PL_debug_pad.pad[i])
-#define PERL_DEBUG_PAD_ZERO(i)	(sv_setpvn(PERL_DEBUG_PAD(i), "", 0), PERL_DEBUG_PAD(i))
+#define PERL_DEBUG_PAD_ZERO(i)	(SvPVX(PERL_DEBUG_PAD(i))[0] = 0, SvCUR(PERL_DEBUG_PAD(i)) = 0, PERL_DEBUG_PAD(i))
 
 /* Enable variables which are pointers to functions */
 typedef void (CPERLscope(*peep_t))(pTHX_ OP* o);

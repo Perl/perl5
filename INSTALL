@@ -490,9 +490,9 @@ for you to use to distribute add-on modules.
 These are normally empty, but may be set as needed.  For example,
 a vendor might choose the following settings:
 
-	$prefix		/usr/bin
-	$siteprefix	/usr/local/bin
-	$vendorprefix	/usr/bin
+	$prefix		/usr
+	$siteprefix	/usr/local
+	$vendorprefix	/usr
 
 This would have the effect of setting the following:
 

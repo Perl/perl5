@@ -28,6 +28,460 @@ example from http://www.xray.mpe.mpg.de/mailing-lists/perl5-porters/
 Version v5.7.X		Development release working toward v5.8
 --------------
 ____________________________________________________________________________
+[ 15299] By: jhi                                   on 2002/03/18  14:53:11
+        Log: OS/390 update.
+     Branch: perl
+	   ! pod/perldelta.pod
+____________________________________________________________________________
+[ 15298] By: jhi                                   on 2002/03/18  14:44:19
+        Log: Forgot from #15288.
+     Branch: perl
+	   ! ext/B/B.xs
+____________________________________________________________________________
+[ 15297] By: jhi                                   on 2002/03/18  14:39:15
+        Log: Make regex DEBUGGING faster.
+     Branch: perl
+	   ! perl.c perl.h regexec.c
+____________________________________________________________________________
+[ 15296] By: jhi                                   on 2002/03/18  14:28:10
+        Log: Undo accidental perl.h part of #15295 (wait for #15297)
+     Branch: perl
+	   ! perl.h
+____________________________________________________________________________
+[ 15295] By: jhi                                   on 2002/03/18  14:26:59
+        Log: Subject: prefix slip
+             From: andreas.koenig@anima.de (Andreas J. Koenig)
+             Date: Mon, 18 Mar 2002 16:24:46 +0100
+             Message-ID: <m3y9gp3nlt.fsf@anima.de>
+             
+             (perl.h part accidental, undone by #15296)
+     Branch: perl
+	   ! INSTALL perl.h
+____________________________________________________________________________
+[ 15294] By: jhi                                   on 2002/03/18  14:19:29
+        Log: Be tidy.
+     Branch: perl
+	   ! ext/B/t/xref.t
+____________________________________________________________________________
+[ 15293] By: jhi                                   on 2002/03/18  14:14:17
+        Log: Subject: [PATCH] re: long double vs. Tru64 UNIX 
+             From: Spider Boardman <spider@web.zk3.dec.com>
+             Date: Mon, 18 Mar 2002 10:09:50 -0500
+             Message-Id: <200203181509.KAA419788@leggy.zk3.dec.com>
+     Branch: perl
+	   ! README.tru64 hints/dec_osf.sh
+____________________________________________________________________________
+[ 15292] By: jhi                                   on 2002/03/18  13:57:06
+        Log: NetWare tweaks from C Aditya <caditya@novell.com>
+     Branch: perl
+	   ! NetWare/nwperlsys.c cop.h iperlsys.h op.c
+____________________________________________________________________________
+[ 15291] By: jhi                                   on 2002/03/18  13:52:40
+        Log: metaconfig unit change for #15290.
+     Branch: metaconfig/U/perl
+	   ! perlxv.U
+____________________________________________________________________________
+[ 15290] By: jhi                                   on 2002/03/18  13:52:15
+        Log: Subject: d_nv_preserves_uv_bits
+             From: Nicholas Clark <nick@unfortu.net>
+             Date: Thu, 14 Mar 2002 22:24:19 +0000
+             Message-ID: <20020314222419.GE363@Bagpuss.unfortu.net>
+     Branch: perl
+	   ! Configure Porting/Glossary Porting/config.sh config_h.SH
+	   ! configure.com epoc/config.sh pod/perltoc.pod t/op/pack.t
+	   ! uconfig.sh vos/config.alpha.def vos/config.ga.def
+	   ! win32/config.bc win32/config.gc win32/config.vc
+	   ! win32/config.win64
+____________________________________________________________________________
+[ 15289] By: jhi                                   on 2002/03/18  13:44:14
+        Log: Subject: Re: perl@15244
+             From: Spider Boardman <spider@web.zk3.dec.com>
+             Date: Mon, 18 Mar 2002 09:38:55 -0500
+             Message-Id: <200203181438.JAA406792@leggy.zk3.dec.com>
+             
+             (IA64 work.)
+     Branch: perl
+	   ! hints/hpux.sh perl.h
+____________________________________________________________________________
+[ 15288] By: jhi                                   on 2002/03/18  13:41:34
+        Log: Subject: [PATCH B] B::perlstring()
+             From: Rafael Garcia-Suarez <rgarciasuarez@free.fr>
+             Date: Sun, 17 Mar 2002 23:06:12 +0100
+             Message-ID: <20020317230612.A24442@rafael>
+     Branch: perl
+	   ! ext/B/B.pm ext/B/B/Deparse.pm ext/B/Makefile.PL
+____________________________________________________________________________
+[ 15287] By: jhi                                   on 2002/03/18  13:40:28
+        Log: Subject: [PATCH] another pack "w" thing
+             From: Nicholas Clark <nick@unfortu.net>
+             Date: Sat, 16 Mar 2002 21:52:15 +0000
+             Message-ID: <20020316215215.GF330@Bagpuss.unfortu.net>
+     Branch: perl
+	   ! pp_pack.c t/op/pack.t
+____________________________________________________________________________
+[ 15286] By: jhi                                   on 2002/03/18  13:39:20
+        Log: More prototypes blindness in Solaris.
+             (TODO: readdir64_r really needs to be seen.)
+     Branch: perl
+	   ! hints/solaris_2.sh
+____________________________________________________________________________
+[ 15285] By: jhi                                   on 2002/03/18  13:24:03
+        Log: Integrate perlio;
+             
+             Tidy the "does not map" message for non-characters
+             (e.g. iso-8859-3 "\xA5").
+     Branch: perl
+	  !> ext/Encode/Encode.xs
+____________________________________________________________________________
+[ 15284] By: nick                                  on 2002/03/18  11:00:31
+        Log: Integrate mainline
+     Branch: perlio
+	  +> lib/Tie/File/t/30_defer.t lib/Tie/File/t/31_autodefer.t
+	  +> lib/Tie/File/t/32_defer_misc.t
+	  !> MANIFEST embed.fnc embed.h global.sym hints/solaris_2.sh
+	  !> lib/Tie/File.pm lib/Tie/File/t/00_version.t
+	  !> lib/Tie/File/t/15_pushpop.t lib/Tie/File/t/17_misc_meth.t
+	  !> lib/Tie/File/t/22_autochomp.t pod/perlfaq3.pod
+	  !> pod/perlhack.pod pp_hot.c pp_sys.c proto.h reentr.c reentr.h
+	  !> reentr.pl regexec.c t/op/pat.t util.c
+____________________________________________________________________________
+[ 15283] By: gbarr                                 on 2002/03/18  10:10:55
+        Log: Sync with Scalar-List-Utils-1.07
+     Branch: perl
+	   + ext/List/Util/t/openhan.t
+	   ! MANIFEST ext/List/Util/ChangeLog
+	   ! ext/List/Util/lib/List/Util.pm
+	   ! ext/List/Util/lib/Scalar/Util.pm
+____________________________________________________________________________
+[ 15282] By: nick                                  on 2002/03/18  08:11:28
+        Log: Tidy the "does not map" message for non-characters
+             (e.g. iso-8859-3 "\xA5").
+     Branch: perlio
+	   ! ext/Encode/Encode.xs
+____________________________________________________________________________
+[ 15281] By: ams                                   on 2002/03/18  04:44:37
+        Log: URL fix from MJD.
+     Branch: perl
+	   ! pod/perlfaq3.pod
+____________________________________________________________________________
+[ 15280] By: jhi                                   on 2002/03/18  01:58:51
+        Log: More prototype calming (really should fix the Configure
+             protochk, but not at this point in time).
+     Branch: perl
+	   ! hints/solaris_2.sh
+____________________________________________________________________________
+[ 15279] By: jhi                                   on 2002/03/18  01:19:40
+        Log: return at the wrong side of #endif.
+     Branch: perl
+	   ! util.c
+____________________________________________________________________________
+[ 15278] By: ams                                   on 2002/03/17  23:45:31
+        Log: Typo fix from Stas Bekman.
+     Branch: perl
+	   ! pod/perlhack.pod
+____________________________________________________________________________
+[ 15277] By: ams                                   on 2002/03/17  23:41:35
+        Log: Upgrade to Tie::File 0.21.
+     Branch: perl
+	   + lib/Tie/File/t/30_defer.t lib/Tie/File/t/31_autodefer.t
+	   + lib/Tie/File/t/32_defer_misc.t
+	   ! MANIFEST lib/Tie/File.pm lib/Tie/File/t/00_version.t
+	   ! lib/Tie/File/t/15_pushpop.t lib/Tie/File/t/17_misc_meth.t
+	   ! lib/Tie/File/t/22_autochomp.t
+____________________________________________________________________________
+[ 15276] By: jhi                                   on 2002/03/17  21:50:26
+        Log: Simple speed gainback (as it was in 5.6): for non-Unicode
+             character classes use inlined macros instead of the full
+             function call.
+     Branch: perl
+	   ! regexec.c
+____________________________________________________________________________
+[ 15275] By: jhi                                   on 2002/03/17  20:14:18
+        Log: Integrate perlio;
+             
+             Avoid overwrite of un-allocated memory when SvCUR > SvLEN
+             
+             Other :encoding oddities
+             - we should really pop while we can still make method calls
+             in case DESTROY does something.
+             - Provide a no-op DESTROY
+             - Use SvPV_only() rather than just SvPV_on()
+     Branch: perl
+	  !> ext/Encode/Encode.pm ext/Encode/Encode.xs
+	  !> ext/Encode/lib/Encode/Encoding.pm sv.c
+____________________________________________________________________________
+[ 15274] By: nick                                  on 2002/03/17  20:00:12
+        Log: Other :encoding oddities
+             - we should really pop while we can still make method calls
+             in case DESTROY does something.
+             - Provide a no-op DESTROY
+             - Use SvPV_only() rather than just SvPV_on()
+     Branch: perlio
+	   ! ext/Encode/Encode.pm ext/Encode/Encode.xs
+	   ! ext/Encode/lib/Encode/Encoding.pm
+____________________________________________________________________________
+[ 15273] By: nick                                  on 2002/03/17  19:53:24
+        Log: Avoid overwrite of un-allocated memory when SvCUR > SvLEN
+     Branch: perlio
+	   ! sv.c
+____________________________________________________________________________
+[ 15272] By: jhi                                   on 2002/03/17  18:39:22
+        Log: Implement the retry-on-ERANGE for the get*_r().
+             The buffer will keep doubling until 64k.
+     Branch: perl
+	   ! embed.fnc embed.h global.sym pp_sys.c proto.h reentr.c
+	   ! reentr.h reentr.pl
+____________________________________________________________________________
+[ 15271] By: nick                                  on 2002/03/17  17:38:44
+        Log: Integrate mainline
+     Branch: perlio
+	  +> lib/Tie/File/t/22_autochomp.t lib/Tie/File/t/23_rv_ac_splice.t
+	  +> t/op/pow.t
+	  !> (integrate 28 files)
+____________________________________________________________________________
+[ 15270] By: jhi                                   on 2002/03/17  15:49:38
+        Log: Subject: UTF-8 bug (maybe alreayd known?)
+             From: andreas.koenig@anima.de (Andreas J. Koenig)
+             Date: Fri, 08 Mar 2002 16:36:01 +0100
+             Message-ID: <m3n0xjul5q.fsf@anima.de>
+     Branch: perl
+	   ! pp_hot.c t/op/pat.t
+____________________________________________________________________________
+[ 15269] By: nick                                  on 2002/03/17  09:12:39
+        Log: Integarate mainline
+     Branch: perlio
+	  +> lib/Tie/File/t/00_version.t lib/Tie/File/t/18_rs_fixrec.t
+	  +> lib/Tie/File/t/19_cache.t lib/Tie/File/t/20_cache_full.t
+	  +> lib/Tie/File/t/21_win32.t reentr.c reentr.h reentr.pl
+	  !> (integrate 69 files)
+____________________________________________________________________________
+[ 15268] By: jhi                                   on 2002/03/17  04:23:49
+        Log: Subject: SEGV in s/// and UTF-8
+             From: andreas.koenig@anima.de (Andreas J. Koenig)
+             Date: Tue, 12 Mar 2002 00:40:09 +0100
+             Message-ID: <m3r8mqad2e.fsf@anima.de>
+     Branch: perl
+	   ! regexec.c t/op/pat.t
+____________________________________________________________________________
+[ 15267] By: jhi                                   on 2002/03/16  19:57:03
+        Log: Thwart IRIX long doubles and sloppy pow() (in Perl, **);
+             from Nicholas Clark.  Fixes lib/integer.t and t/op/pack.t
+             which assume that 2**someinteger is accurate.
+     Branch: perl
+	   + t/op/pow.t
+	   ! MANIFEST pp.c t/test.pl
+____________________________________________________________________________
+[ 15266] By: jhi                                   on 2002/03/16  18:55:53
+        Log: _r-ify config.win64, too.
+     Branch: perl
+	   ! win32/config.win64
+____________________________________________________________________________
+[ 15265] By: jhi                                   on 2002/03/16  18:51:45
+        Log: Better place to initialize (IRIX cc noticed that
+             the many "goto defchars" bypass the initialization)
+     Branch: perl
+	   ! regcomp.c
+____________________________________________________________________________
+[ 15264] By: jhi                                   on 2002/03/16  18:41:19
+        Log: If not building threaded, never mind the threaded prototypes.
+     Branch: perl
+	   ! Configure reentr.pl
+____________________________________________________________________________
+[ 15263] By: jhi                                   on 2002/03/16  18:40:53
+        Log: metaconfig: If not using threads, not point probing for the
+             prototypes (since they might be hidden behind many defines
+             we won't have if not building threaded)
+     Branch: metaconfig
+	   ! U/threads/d_asctime_r.U U/threads/d_crypt_r.U
+	   ! U/threads/d_ctermid_r.U U/threads/d_ctime_r.U
+	   ! U/threads/d_drand48_r.U U/threads/d_endgrent_r.U
+	   ! U/threads/d_endhostent_r.U U/threads/d_endnetent_r.U
+	   ! U/threads/d_endprotoent_r.U U/threads/d_endpwent_r.U
+	   ! U/threads/d_endservent_r.U U/threads/d_getgrent_r.U
+	   ! U/threads/d_getgrgid_r.U U/threads/d_getgrnam_r.U
+	   ! U/threads/d_gethostbyaddr_r.U U/threads/d_gethostbyname_r.U
+	   ! U/threads/d_gethostent_r.U U/threads/d_getlogin_r.U
+	   ! U/threads/d_getnetbyaddr_r.U U/threads/d_getnetbyname_r.U
+	   ! U/threads/d_getnetent_r.U U/threads/d_getprotobyname_r.U
+	   ! U/threads/d_getprotobynumber_r.U U/threads/d_getprotoent_r.U
+	   ! U/threads/d_getpwent_r.U U/threads/d_getpwnam_r.U
+	   ! U/threads/d_getpwuid_r.U U/threads/d_getservbyname_r.U
+	   ! U/threads/d_getservbyport_r.U U/threads/d_getservent_r.U
+	   ! U/threads/d_getspnam_r.U U/threads/d_gmtime_r.U
+	   ! U/threads/d_localtime_r.U U/threads/d_random_r.U
+	   ! U/threads/d_readdir64_r.U U/threads/d_readdir_r.U
+	   ! U/threads/d_setgrent_r.U U/threads/d_sethostent_r.U
+	   ! U/threads/d_setlocale_r.U U/threads/d_setnetent_r.U
+	   ! U/threads/d_setprotoent_r.U U/threads/d_setpwent_r.U
+	   ! U/threads/d_setservent_r.U U/threads/d_srand48_r.U
+	   ! U/threads/d_srandom_r.U U/threads/d_strerror_r.U
+	   ! U/threads/d_tmpnam_r.U U/threads/d_ttyname_r.U
+____________________________________________________________________________
+[ 15262] By: jhi                                   on 2002/03/16  18:29:26
+        Log: FreeBSD is lying to us: there is no threadsafe gethostbyaddr_r.
+     Branch: perl
+	   ! hints/freebsd.sh
+____________________________________________________________________________
+[ 15261] By: ams                                   on 2002/03/16  18:14:04
+        Log: Upgrade to Tie::File 0.20.
+     Branch: perl
+	   + lib/Tie/File/t/22_autochomp.t lib/Tie/File/t/23_rv_ac_splice.t
+	   ! MANIFEST lib/Tie/File.pm lib/Tie/File/t/00_version.t
+	   ! lib/Tie/File/t/01_gen.t lib/Tie/File/t/02_fetchsize.t
+	   ! lib/Tie/File/t/03_longfetch.t lib/Tie/File/t/07_rv_splice.t
+	   ! lib/Tie/File/t/08_ro.t lib/Tie/File/t/09_gen_rs.t
+	   ! lib/Tie/File/t/11_rv_splice_rs.t
+	   ! lib/Tie/File/t/12_longfetch_rs.t lib/Tie/File/t/15_pushpop.t
+	   ! lib/Tie/File/t/16_handle.t
+____________________________________________________________________________
+[ 15260] By: jhi                                   on 2002/03/16  18:12:25
+        Log: There seems to be a trend for the *time_r to be hidden.
+     Branch: perl
+	   ! hints/irix_6.sh
+____________________________________________________________________________
+[ 15259] By: jhi                                   on 2002/03/16  17:58:08
+        Log: Subject: [PATCH lib/Pod/Html.pm] fix anchor generation code (ID 20020312.006)  
+             From: Stas Bekman <stas@stason.org>
+             Date: Sun, 17 Mar 2002 02:11:26 +0800 (SGT)
+             Message-ID: <Pine.LNX.4.44.0203170205130.16962-100000@hope.stason.org>
+     Branch: perl
+	   ! lib/Pod/Html.pm
+____________________________________________________________________________
+[ 15258] By: jhi                                   on 2002/03/16  17:54:49
+        Log: Subject: [PATCH] Re: dumpvar.pl bug
+             From: Peter Scott <Peter@PSDT.com>
+             Date: Fri, 15 Mar 2002 18:19:21 -0800
+             Message-id: <4.3.2.7.2.20020315153302.00bac420@shell2.webquarry.com>
+     Branch: perl
+	   ! lib/dumpvar.pl lib/perl5db.pl
+____________________________________________________________________________
+[ 15257] By: jhi                                   on 2002/03/16  17:52:29
+        Log: More paranoid _r protochecking.  At least Tru64 and
+             Linux need additional hinting help to believe that
+             the time_r protos exist; turn on FreeBSD _THREAD_SAFE
+             to see what goes bang.
+     Branch: perl
+	   ! Configure hints/dec_osf.sh hints/freebsd.sh hints/linux.sh
+	   ! reentr.pl
+____________________________________________________________________________
+[ 15256] By: jhi                                   on 2002/03/16  17:51:08
+        Log: metaconfig: more paranoid _r protochecking.
+     Branch: metaconfig
+	   ! U/threads/d_asctime_r.U U/threads/d_crypt_r.U
+	   ! U/threads/d_ctermid_r.U U/threads/d_ctime_r.U
+	   ! U/threads/d_drand48_r.U U/threads/d_endgrent_r.U
+	   ! U/threads/d_endhostent_r.U U/threads/d_endnetent_r.U
+	   ! U/threads/d_endprotoent_r.U U/threads/d_endpwent_r.U
+	   ! U/threads/d_endservent_r.U U/threads/d_getgrent_r.U
+	   ! U/threads/d_getgrgid_r.U U/threads/d_getgrnam_r.U
+	   ! U/threads/d_gethostbyaddr_r.U U/threads/d_gethostbyname_r.U
+	   ! U/threads/d_gethostent_r.U U/threads/d_getlogin_r.U
+	   ! U/threads/d_getnetbyaddr_r.U U/threads/d_getnetbyname_r.U
+	   ! U/threads/d_getnetent_r.U U/threads/d_getprotobyname_r.U
+	   ! U/threads/d_getprotobynumber_r.U U/threads/d_getprotoent_r.U
+	   ! U/threads/d_getpwent_r.U U/threads/d_getpwnam_r.U
+	   ! U/threads/d_getpwuid_r.U U/threads/d_getservbyname_r.U
+	   ! U/threads/d_getservbyport_r.U U/threads/d_getservent_r.U
+	   ! U/threads/d_getspnam_r.U U/threads/d_gmtime_r.U
+	   ! U/threads/d_localtime_r.U U/threads/d_random_r.U
+	   ! U/threads/d_readdir64_r.U U/threads/d_readdir_r.U
+	   ! U/threads/d_setgrent_r.U U/threads/d_sethostent_r.U
+	   ! U/threads/d_setlocale_r.U U/threads/d_setnetent_r.U
+	   ! U/threads/d_setprotoent_r.U U/threads/d_setpwent_r.U
+	   ! U/threads/d_setservent_r.U U/threads/d_srand48_r.U
+	   ! U/threads/d_srandom_r.U U/threads/d_strerror_r.U
+	   ! U/threads/d_tmpnam_r.U U/threads/d_ttyname_r.U
+____________________________________________________________________________
+[ 15255] By: jhi                                   on 2002/03/16  16:23:07
+        Log: HP-UX gcc 3 warnings found by Sarathy.
+     Branch: perl
+	   ! regcomp.c sv.c
+____________________________________________________________________________
+[ 15254] By: jhi                                   on 2002/03/16  16:18:49
+        Log: Subject: Re: [ID 20020315.003] timelocal does not return fractal values anymore
+             From: Slaven Rezic <slaven.rezic@berlin.de>
+             Date: 16 Mar 2002 15:29:18 +0100
+             Message-ID: <877kocwpq9.fsf@vran.herceg.de>
+     Branch: perl
+	   ! pod/perldelta.pod
+____________________________________________________________________________
+[ 15253] By: jhi                                   on 2002/03/16  16:11:49
+        Log: HP-UX has also endgrent_r/endpwent_r marked obsolete.
+     Branch: perl
+	   ! Porting/findrfuncs reentr.h reentr.pl
+____________________________________________________________________________
+[ 15252] By: gsar                                  on 2002/03/16  15:36:16
+        Log: UIN32_MAX with borken under HP-UX+gcc
+     Branch: perl
+	   ! handy.h
+____________________________________________________________________________
+[ 15251] By: ams                                   on 2002/03/16  02:38:08
+        Log: Subject: [PATCH @15047] Use of inherited AUTOLOAD for non-method
+             *::DESTROY() is deprecated
+             From: Ilya Zakharevich <ilya@math.ohio-state.edu>
+             Date: Thu, 14 Mar 2002 18:39:22 -0500
+             Message-Id: <20020314183922.A8448@math.ohio-state.edu>
+             
+             Subject: Re: [PATCH @15047] Use of inherited AUTOLOAD for non-method
+             *::DESTROY() is deprecated
+             From: Dave Mitchell <davem@fdgroup.com>
+             Date: Fri, 15 Mar 2002 19:22:49 +0000
+             Message-Id: <20020315192249.A22389@fdgroup.com>
+     Branch: perl
+	   ! gv.c t/op/method.t
+____________________________________________________________________________
+[ 15250] By: ams                                   on 2002/03/16  02:14:41
+        Log: Plural nit.
+     Branch: perl
+	   ! pod/perldelta.pod
+____________________________________________________________________________
+[ 15249] By: jhi                                   on 2002/03/15  20:46:10
+        Log: Doesn't make sense to test for protos if the
+             functions are not to be used (!= functions exist!)
+             This might be the key (well, a key) to the HP-UX
+             problems.
+     Branch: perl
+	   ! reentr.h reentr.pl
+____________________________________________________________________________
+[ 15248] By: jhi                                   on 2002/03/15  20:05:46
+        Log: Typo in #15247.
+     Branch: perl
+	   ! hints/hpux.sh
+____________________________________________________________________________
+[ 15247] By: jhi                                   on 2002/03/15  19:41:43
+        Log: The UINT32_MAX_BROKEN is still needed for pre-gcc-3
+             in HP-UX (from H.Merijn Brand)
+     Branch: perl
+	   ! hints/hpux.sh
+____________________________________________________________________________
+[ 15246] By: ams                                   on 2002/03/15  17:53:23
+        Log: Subject: minor corrections in perldelta.pod
+             From: mjd@plover.com
+             Date: 15 Mar 2002 18:48:42 -0000
+             Message-Id: <20020315184842.13573.qmail@plover.com>
+     Branch: perl
+	   ! pod/perldelta.pod
+____________________________________________________________________________
+[ 15245] By: ams                                   on 2002/03/15  17:37:52
+        Log: Upgrade to Tie::File 0.19.
+     Branch: perl
+	   + lib/Tie/File/t/00_version.t lib/Tie/File/t/18_rs_fixrec.t
+	   + lib/Tie/File/t/19_cache.t lib/Tie/File/t/20_cache_full.t
+	   + lib/Tie/File/t/21_win32.t
+	   ! MANIFEST lib/Tie/File.pm lib/Tie/File/t/01_gen.t
+	   ! lib/Tie/File/t/02_fetchsize.t lib/Tie/File/t/03_longfetch.t
+	   ! lib/Tie/File/t/04_splice.t lib/Tie/File/t/05_size.t
+	   ! lib/Tie/File/t/06_fixrec.t lib/Tie/File/t/07_rv_splice.t
+	   ! lib/Tie/File/t/08_ro.t lib/Tie/File/t/09_gen_rs.t
+	   ! lib/Tie/File/t/10_splice_rs.t lib/Tie/File/t/13_size_rs.t
+	   ! lib/Tie/File/t/15_pushpop.t lib/Tie/File/t/16_handle.t
+	   ! lib/Tie/File/t/17_misc_meth.t
+____________________________________________________________________________
+[ 15244] By: jhi                                   on 2002/03/15  17:13:33
+        Log: Update Changes.
+     Branch: perl
+	   ! Changes patchlevel.h
+____________________________________________________________________________
 [ 15243] By: jhi                                   on 2002/03/15  16:18:16
         Log: Forgot from #15241.
      Branch: perl

@@ -93,6 +93,11 @@ is(
     '1001', 'glob FOO used in subroutine foo'
 );
 
+END {
+    close XREF;
+    1 while unlink $file;
+}
+
 # End of tests.
 # Now some stuff to feed B::Xref
 
@@ -100,3 +105,4 @@ is(
 package Testing::Xref;
 sub foo { print FOO %::xreftable; }
 sub bar { print FOO foo; }
+

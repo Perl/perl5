@@ -2614,21 +2614,22 @@ OS/390 has rather many test failures but the situation is actually
 better than it was in 5.6.0, it's just that so many new modules and
 tests have been added.
 
- ../ext/B/t/deparse.t                       17    1   5.88%  14
- ../ext/IO/lib/IO/t/io_unix.t                5    4  80.00%  2-5
- ../lib/utf8.t                              94   13  13.83%  27 30-31 43 46 73
-                                                             76 79 82 85 88 91
-                                                             94
- ../lib/Benchmark.t              1   256   159    1   0.63%  75
- ../lib/ExtUtils/t/Embed.t                   9    9 100.00%  1-9
- ../lib/ExtUtils/t/ExtUtils.t               27   19  70.37%  5-23
- op/pat.t                                  858    9   1.05%  242-243 665 776 785
-                                                             832-834 845
- op/sprintf.t                              224    3   1.34%  98 100 136
- op/tr.t                                    97    5   5.15%  63 71-74
- uni/fold.t                                767    8   1.04%  25-26 62 169 196
-                                                             648 697-698
-57 tests and 377 subtests skipped.
+ ../ext/B/t/deparse.t                        17    1   5.88%  14
+ ../ext/Data/Dumper/t/dumper.t              321    2   0.62%  311 314
+ ../ext/IO/lib/IO/t/io_unix.t                 5    4  80.00%  2-5
+ ../lib/utf8.t                               94   13  13.83%  27 30-31 43 46 73
+                                                              76 79 82 85 88 91
+                                                              94
+ ../lib/Benchmark.t               1   256   159    1   0.63%  75
+ ../lib/ExtUtils/t/Embed.t                    9    9 100.00%  1-9
+ ../lib/ExtUtils/t/ExtUtils.t                27   19  70.37%  5-23
+ op/pat.t                                   864    9   1.04%  242-243 665 776
+                                                              785 832-834 845
+ op/sprintf.t                               224    3   1.34%  98 100 136
+ op/tr.t                                     97    5   5.15%  63 71-74
+ uni/fold.t                                 767    8   1.04%  25-26 62 169 196
+                                                              648 697-698
+ 60 tests and 384 subtests skipped.
 
 =head2 op/sprintf tests 129 and 130
 

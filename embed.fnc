@@ -1157,8 +1157,7 @@ s	|I32	|regmatch	|regnode *prog
 s	|I32	|regrepeat	|regnode *p|I32 max
 s	|I32	|regrepeat_hard	|regnode *p|I32 max|I32 *lp
 s	|I32	|regtry		|regexp *prog|char *startpos
-s	|bool	|reginclass	|regnode *n|U8 *p|bool do_utf8sv_is_utf8
-s	|bool	|reginclasslen	|regnode *n|U8 *p|STRLEN *lenp|bool do_utf8sv_is_utf8
+s	|bool	|reginclass	|regnode *n|U8 *p|STRLEN *lenp|bool do_utf8sv_is_utf8
 s	|CHECKPOINT|regcppush	|I32 parenfloor
 s	|char*|regcppop
 s	|char*|regcp_set_to	|I32 ss

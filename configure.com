@@ -4916,7 +4916,7 @@ $ IF tmp .EQS. "preserve"
 $ THEN 
 $   d_nv_preserves_uv = "define"
 $   echo "Yes, they can." 
-$   d_nv_preserves_uv_bits = F$STRING(F$INTEGER(uvsize) * 8)
+$   nv_preserves_uv_bits = F$STRING(F$INTEGER(uvsize) * 8)
 $ ELSE
 $   d_nv_preserves_uv = "undef"
 $   echo "No, they can't."
@@ -4940,7 +4940,7 @@ $   WS "    exit(0);"
 $   WS "}"
 $   CS
 $   GOSUB compile
-$   d_nv_preserves_uv_bits = tmp
+$   nv_preserves_uv_bits = tmp
 $ ENDIF
 $!
 $ echo4 "Checking whether your kill() uses SYS$FORCEX..."
@@ -4948,15 +4948,16 @@ $ kill_by_sigprc = "undef"
 $ OS
 $ WS "#include <stdio.h>"
 $ WS "#include <signal.h>"
+$ WS "#include <unistd.h>"
 $ WS "void handler(int s) { printf(""%d\n"",s); } "
 $ WS "main(){"
 $ WS "    printf(""0"");"
-$ WS "    signal(1,handler); kill(0,1);"
+$ WS "    signal(1,handler); kill(getpid(),1);"
 $ WS "}"
 $ CS
 $ ON ERROR THEN CONTINUE
 $ GOSUB compile
-$ IF tmp .NES. "0"
+$ IF tmp .NES. "01"
 $ THEN 
 $   echo4 "Yes, it does." 
 $   echo4 "Checking whether we can use SYS$SIGPRC instead"
@@ -5275,7 +5276,7 @@ $ WC "d_mymalloc='" + d_mymalloc + "'"
 $ WC "d_nice='define'"
 $ WC "d_nl_langinfo='" + d_nl_langinfo + "'"
 $ WC "d_nv_preserves_uv='" + d_nv_preserves_uv + "'"
-$ WC "d_nv_preserves_uv_bits='" + d_nv_preserves_uv_bits + "'"
+$ WC "nv_preserves_uv_bits='" + nv_preserves_uv_bits + "'"
 $ WC "d_off64_t='" + d_off64_t + "'"
 $ WC "d_old_pthread_create_joinable='" + d_old_pthread_create_joinable + "'"
 $ WC "d_oldarchlib='define'"

@@ -7,7 +7,7 @@
 #
 package B;
 
-our $VERSION = '1.00';
+our $VERSION = '1.01';
 
 use XSLoader ();
 require Exporter;
@@ -18,7 +18,7 @@ require Exporter;
 @EXPORT_OK = qw(minus_c ppname save_BEGINs
 		class peekop cast_I32 cstring cchar hash threadsv_names
 		main_root main_start main_cv svref_2object opnumber
-		amagic_generation
+		amagic_generation perlstring
 		walkoptree_slow walkoptree walkoptree_exec walksymtable
 		parents comppadlist sv_undef compile_stats timing_info
 		begin_av init_av end_av regex_padav);
@@ -940,6 +940,11 @@ is only useful in a BEGIN block or else the flag is set too late.
 
 Returns a double-quote-surrounded escaped version of STR which can
 be used as a string in C source code.
+
+=item perlstring(STR)
+
+Returns a double-quote-surrounded escaped version of STR which can
+be used as a string in Perl source code.
 
 =item class(OBJ)
 

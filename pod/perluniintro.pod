@@ -169,15 +169,23 @@ To output UTF-8 always, use the ":utf8" output discipline.  Prepending
 to this sample program ensures the output is completely UTF-8, and      
 of course, removes the warning.
 
-Perl 5.8.0 also supports Unicode on EBCDIC platforms.  There, the
-support is somewhat harder to implement since additional conversions
-are needed at every step.  Because of these difficulties, the Unicode
-support isn't quite as full as in other, mainly ASCII-based, platforms
-(the Unicode support is better than in the 5.6 series, which didn't
-work much at all for EBCDIC platform).  On EBCDIC platforms, the
-internal Unicode encoding form is UTF-EBCDIC instead of UTF-8 (the
-difference is that as UTF-8 is "ASCII-safe" in that ASCII characters
-encode to UTF-8 as-is, UTF-EBCDIC is "EBCDIC-safe").
+=head2 Unicode and EBCDIC
+
+Perl 5.8.0 also supports Unicode on EBCDIC platforms.  There,
+the Unicode support is somewhat more complex to implement since
+additional conversions are needed at every step.  Some problems
+remain, but they all seem to be related to the combination of
+the extra mapping just described and case-insensitive matching:
+for example, "\x{131}" (LATIN SMALL LETTER DOTLESS I) does not
+match "I" case-insensitively, as it should under Unicode.
+(The match succeeds in ASCII-derived platforms.)
+
+In any case, the Unicode support on EBCDIC platforms is better than
+in the 5.6 series, which didn't work much at all for EBCDIC platform.
+On EBCDIC platforms, the internal Unicode encoding form is UTF-EBCDIC
+instead of UTF-8 (the difference is that as UTF-8 is "ASCII-safe" in
+that ASCII characters encode to UTF-8 as-is, UTF-EBCDIC is
+"EBCDIC-safe").
 
 =head2 Creating Unicode
 

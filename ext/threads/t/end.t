@@ -1,4 +1,7 @@
 
+# test that END blocks are run in the thread that created them and
+# not in any child threads
+
 BEGIN {
     chdir 't' if -d 't';
     @INC = '../lib';

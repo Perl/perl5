@@ -1,3 +1,11 @@
+Change 713 on 2002/03/18 by <gbarr@pobox.com> (Graham Barr)
+
+	Add Scalar::Util::openhandle()
+
+Change 647 on 2001/09/18 by <gbarr@pobox.com> (Graham Barr)
+
+	Release 1.06
+
 Change 645 on 2001/09/07 by <gbarr@pobox.com> (Graham Barr)
 
 	Some platforms require the main executable to export symbols

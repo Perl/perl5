@@ -87,9 +87,8 @@ perl_alloc(void)
 	WCValHashTable<void*>*	m_allocList;
 	m_allocList = new WCValHashTable<void*> (fnAllocListHash, 256);
 	fnInsertHashListAddrs(m_allocList, FALSE);
-
  	my_perl = perl_alloc_using(&perlMem,
-				   NULL,
+				   &perlMem,
 				   NULL,
 				   &perlEnv,
 				   &perlStdIO,
@@ -169,9 +168,8 @@ perl_alloc_override(struct IPerlMem** ppMem, struct IPerlMem** ppMemShared,
 		lpProc=&perlProc;
 	else
 		lpProc=*ppProc;
-
 	my_perl = perl_alloc_using(lpMem,
-				   NULL,
+				   lpMem,
 				   NULL,
 				   lpEnv,
 				   lpStdio,

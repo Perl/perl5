@@ -5,7 +5,7 @@ use POSIX 'SEEK_SET';
 use Fcntl 'O_CREAT', 'O_RDWR', 'LOCK_EX';
 require 5.005;
 
-$VERSION = "0.21";
+$VERSION = "0.50";
 my $DEFAULT_MEMORY_SIZE = 1<<21;    # 2 megabytes
 
 my %good_opt = map {$_ => 1, "-$_" => 1} 
@@ -318,9 +318,9 @@ sub EXTEND {
 
 sub DELETE {
   my ($self, $n) = @_;
-  $self->_delete_deferred($n) if $self->{defer};
   my $lastrec = $self->FETCHSIZE-1;
   my $rec = $self->FETCH($n);
+  $self->_delete_deferred($n) if $self->{defer};
   if ($n == $lastrec) {
     $self->_seek($n);
     $self->_chop_file;
@@ -960,7 +960,7 @@ Tie::File - Access the lines of a disk file via a Perl array
 
 =head1 SYNOPSIS
 
-	# This file documents Tie::File version 0.21
+	# This file documents Tie::File version 0.50
 
 	tie @array, 'Tie::File', filename or die ...;
 
@@ -1486,7 +1486,7 @@ any news of importance, will be available at
 
 =head1 LICENSE
 
-C<Tie::File> version 0.21 is copyright (C) 2002 Mark Jason Dominus.
+C<Tie::File> version 0.50 is copyright (C) 2002 Mark Jason Dominus.
 
 This library is free software; you may redistribute it and/or modify
 it under the same terms as Perl itself.
@@ -1514,7 +1514,7 @@ For licensing inquiries, contact the author at:
 
 =head1 WARRANTY
 
-C<Tie::File> version 0.21 comes with ABSOLUTELY NO WARRANTY.
+C<Tie::File> version 0.50 comes with ABSOLUTELY NO WARRANTY.
 For details, see the license.
 
 =head1 THANKS

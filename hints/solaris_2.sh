@@ -394,7 +394,8 @@ EOM
 
 	# These prototypes should be visible since we using
 	# -D_REENTRANT, but that does not seem to work.
-	# It does seem to work for getnetbyaddr_r, weirdly enough.
+	# It does seem to work for getnetbyaddr_r, weirdly enough,
+	# and other _r functions. (Solaris 8)
 
 	d_ctermid_r_proto="$define"
 	d_gethostbyaddr_r_proto="$define"
@@ -404,6 +405,10 @@ EOM
 	d_getprotobynumber_r_proto="$define"
 	d_getservbyname_r_proto="$define"
 	d_getservbyport_r_proto="$define"
+
+	# Ditto. (Solaris 7)
+	d_readdir_r_proto="$define"
+	d_readdir64_r_proto="$define"
 
 	;;
 esac

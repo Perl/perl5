@@ -48,6 +48,14 @@ You cannot Configure Perl to use long doubles unless you have at least
 Tru64 V5.0, the long double support simply wasn't functional before
 that.
 
+At the time of this writing, there's a bug in the Tru64 libc printing
+of long doubles when not using "e" notation.  The values are correct
+and usable, but you only get a limited number of digits displayed
+unless you force the issue by using C<printf "%.33e",$num> or the like.
+For Tru64 versions V5.0A through V5.1A, a patch is expected sometime after
+perl 5.8.0 is released.  If your libc has not yet been patched, you'll get
+a warning from Configure when selecting long doubles.
+
 =head2 64-bit Perl on Tru64
 
 In Tru64 Perl's integers are automatically 64-bit wide, there is

@@ -11,7 +11,7 @@ $: = Tie::File::_default_recsep();
 my $data = "rec0$:rec1$:rec2$:";
 my ($o, $n);
 
-print "1..42\n";
+print "1..53\n";
 
 my $N = 1;
 use Tie::File;
@@ -101,16 +101,16 @@ $del = delete $a[3];            # shortens file!
 check_contents("0$:1$:2$:");    # deferred writes NOT flushed
 expect($a[3], undef);
 expect($a[2], "");
-exoect($del, "3");
+expect($del, "3");
 $a[2] = "cookies";
 $del = delete $a[2];            # shortens file!
 expect($a[2], undef);
-exoect($del, 'cookies');
+expect($del, 'cookies');
 check_contents("0$:1$:");
 $a[0] = "crackers";
 $del = delete $a[0];            # file unchanged
 expect($a[0], "");
-exoect($del, 'crackers');
+expect($del, 'crackers');
 check_contents("0$:1$:");       # no change yet
 $o->flush;
 check_contents("$:1$:");        # record 0 is NOT 'cookies';

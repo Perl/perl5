@@ -2163,26 +2163,21 @@ Perl_pack_cat(pTHX_ SV *cat, char *pat, register char *patend, register SV **beg
 	case 'w':
             while (len-- > 0) {
 		fromstr = NEXTFROM;
-		adouble = Perl_floor(SvNV(fromstr));
+		adouble = SvNV(fromstr);
 
 		if (adouble < 0)
 		    Perl_croak(aTHX_ "Cannot compress negative numbers");
 
-		if (
-#if UVSIZE > 4 && UVSIZE >= NVSIZE
-		    adouble <= 0xffffffff
-#else
-#   ifdef CXUX_BROKEN_CONSTANT_CONVERT
-		    adouble <= UV_MAX_cxux
-#   else
-		    adouble <= UV_MAX
-#   endif
-#endif
-		    )
+                /* 0xFFFFFFFFFFFFFFFF may cast to 18446744073709551616.0,
+                   which is == UV_MAX_P1. IOK is fine (instead of UV_only), as
+                   any negative IVs will have already been got by the croak()
+                   above. IOK is untrue for fractions, so we test them
+                   against UV_MAX_P1.  */
+		if (SvIOK(fromstr) || adouble < UV_MAX_P1)
 		{
 		    char   buf[1 + sizeof(UV)];
 		    char  *in = buf + sizeof(buf);
-		    UV     auv = U_V(adouble);
+		    UV     auv = SvUV(fromstr);
 
 		    do {
 			*--in = (auv & 0x7f) | 0x80;
@@ -2216,6 +2211,7 @@ Perl_pack_cat(pTHX_ SV *cat, char *pat, register char *patend, register SV **beg
 		    char   buf[sizeof(double) * 2];	/* 8/7 <= 2 */
 		    char  *in = buf + sizeof(buf);
 
+                    adouble = Perl_floor(adouble);
 		    do {
 			double next = floor(adouble / 128);
 			*--in = (unsigned char)(adouble - (next * 128)) | 0x80;

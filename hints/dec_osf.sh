@@ -310,6 +310,41 @@ Cannot continue, aborting.
 EOF
 		exit 1
 		;;
+	*)
+		# Test whether libc's been fixed yet.
+		cat >try.c <<\TRY
+#include <stdio.h>
+int main(int argc, char **argv)
+{
+	unsigned long uvmax = ~0UL;
+	long double ld = uvmax + 0.0L;
+	char buf1[30], buf2[30];
+
+	(void) sprintf(buf1, "%lu", uvmax);
+	(void) sprintf(buf2, "%.0Lf", ld);
+	return strcmp(buf1, buf2) != 0;
+}
+TRY
+		# Don't bother trying to work with Configure's idea of
+		# cc and the various flags.  This might not work as-is
+		# with gcc -- but we're testing libc, not the compiler.
+		if cc -o try -std try.c && ./try
+		then
+			: ok
+		else
+			cat <<\UGLY >&4
+!
+Warning!  Your libc has not yet been patched so that its "%Lf" format for
+printing long doubles shows all the significant digits.  You will get errors
+in the t/op/numconvert test because of this.  (The data is still good
+internally, and the "%e" format of printf() or sprintf() in perl will still
+produce valid results.)  See README.tru64 for additional details.
+
+Continuing anyway.
+!
+UGLY
+		fi
+		$rm -f try try.c
 	esac
 	;;
 esac
