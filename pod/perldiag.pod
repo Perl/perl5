@@ -1485,12 +1485,6 @@ PDP-11 or something?
 to be a read-write filehandle, you needed to open it with "+<" or "+>"
 or "+>>" instead of with "<" or nothing.  If you intended only to write
 the file, use ">" or ">>".  See L<perlfunc/open>.
-The warning will also occur if STDOUT (file descriptor 1) or STDERR
-(file descriptor 2) is opened for input, this is a pre-emptive warning in
-case some other part of your program or a child process is expecting STDOUT
-and STDERR to be writable. This can happen accidentally if you
-C<close(STDOUT)> or STDERR and then C<open> an unrelated handle which
-will resuse the lowest numbered available descriptor.
 
 =item Filehandle %s opened only for output
 
@@ -1498,12 +1492,17 @@ will resuse the lowest numbered available descriptor.
 If you intended it to be a read/write filehandle, you needed to open it
 with "+<" or "+>" or "+>>" instead of with "<" or nothing.  If you
 intended only to read from the file, use "<".  See L<perlfunc/open>.
-The warning will also occur if STDIN (file descriptor 0) is opened
-for output - this is a pre-emptive warning in case some other part of your
-program or a child process is expecting STDIN to be readable.
-This can happen accidentally if you C<close(STDIN)> and then C<open> an
-unrelated handle which will resuse the lowest numbered available
-descriptor.
+
+=item Filehandle %s reopened as %s only for input
+
+(W io) You opened for reading a filehandle that got the same filehandle id
+as STDOUT or STDERR. This occured because you closed STDOUT or STDERR
+previously.
+
+=item Filehandle STDIN reopened as %s only for output
+
+(W io) You opened for writing a filehandle that got the same filehandle id
+as STDIN. This occured because you closed STDIN previously.
 
 =item Final $ should be \$ or $name
 

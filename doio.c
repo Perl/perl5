@@ -536,12 +536,14 @@ Perl_do_openn(pTHX_ GV *gv, register char *name, I32 len, int as_raw,
 	if ((IoTYPE(io) == IoTYPE_RDONLY) &&
 	    (fp == PerlIO_stdout() || fp == PerlIO_stderr())) {
 		Perl_warner(aTHX_ packWARN(WARN_IO),
-			    "Filehandle STD%s opened only for input",
-			    (fp == PerlIO_stdout()) ? "OUT" : "ERR");
+			    "Filehandle STD%s reopened as %s only for input",
+			    ((fp == PerlIO_stdout()) ? "OUT" : "ERR"),
+			    GvENAME(gv));
 	}
 	else if ((IoTYPE(io) == IoTYPE_WRONLY) && fp == PerlIO_stdin()) {
 		Perl_warner(aTHX_ packWARN(WARN_IO),
-			    "Filehandle STDIN opened only for output");
+			    "Filehandle STDIN reopened as %s only for output",
+			    GvENAME(gv));
 	}
     }
 
