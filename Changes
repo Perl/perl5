@@ -28,6 +28,162 @@ example from http://www.xray.mpe.mpg.de/mailing-lists/perl5-porters/
 Version v5.8.1		Maintenance release working toward v5.8.1
 --------------
 ____________________________________________________________________________
+[ 20536] By: jhi                                   on 2003/08/06  19:07:34
+        Log: Integrate:
+             [ 20535]
+             ESUCCESS = 0 is not true, but exists.
+     Branch: maint-5.8/perl
+	  !> ext/Errno/t/Errno.t
+____________________________________________________________________________
+[ 20534] By: jhi                                   on 2003/08/06  18:46:41
+        Log: Integrate:
+             [ 20529]
+             Various tweaks to help DJGPP builds.
+             
+             [ 20530]
+             Make code agree with documentation (from Wolfgang Friebel)
+             
+             [ 20533]
+             Subject: [pathc] Sys:Syslog.pm::syslog() - Better error message
+             From: jari.aalto@poboxes.com (Jari Aalto)
+             Date: Wed, 06 Aug 2003 14:24:42 +0300
+             Message-ID: <ekzzowp1.fsf@blue.sea.net>
+     Branch: maint-5.8/perl
+	  !> djgpp/djgppsed.sh ext/Sys/Syslog/Syslog.pm hints/dos_djgpp.sh
+	  !> lib/ExtUtils/MakeMaker.pm
+____________________________________________________________________________
+[ 20532] By: jhi                                   on 2003/08/06  18:37:49
+        Log: Andreas says the current PAUSE indexer will
+             handle 5.8.1 fine without META.yml, and the
+             spec of META is far from solid yet.
+     Branch: maint-5.8/perl
+	   - META.yml
+	   ! MANIFEST
+____________________________________________________________________________
+[ 20531] By: jhi                                   on 2003/08/06  18:35:02
+        Log: Some goat entrails.
+     Branch: maint-5.8/perl
+	   ! pod/perldelta.pod
+____________________________________________________________________________
+[ 20528] By: jhi                                   on 2003/08/06  15:03:43
+        Log: Integrate:
+             [ 20513]
+             Subject: [PATCH] dprofpp.PL again -- #20488 thinko
+             From: "Craig A. Berry" <craigberry@mac.com>
+             Date: Wed, 06 Aug 2003 00:18:36 -0500
+             Message-ID: <3F308FAC.4090409@mac.com>
+             
+             (from vmsperl list)
+             
+             [ 20514]
+             Subject: Re: [PATCH pod/perlfaq2.pod] update Friedl book listing for 2nd edition
+             From: Tim Jenness <t.jenness@jach.hawaii.edu>
+             Date: Tue, 5 Aug 2003 17:21:46 -1000 (HST)
+             Message-ID: <Pine.LNX.4.44.0308051720280.8532-100000@lapaki>
+             
+             [ 20520]
+             Subject: [PATCH] Re: [PATCH] Re: MakeMaker doesn't pasthru DEFINE command-line args to subdirs on Win32
+             From: Steve Hay <steve.hay@uk.radan.com>
+             Date: Wed, 06 Aug 2003 10:56:44 +0100
+             Message-ID: <3F30D0DC.20700@uk.radan.com>
+             
+             [ 20523]
+             Subject: maint @ 20512
+             From: Robin Barker <Robin.Barker@npl.co.uk>
+             Date: Wed, 6 Aug 2003 15:31:33 +0100
+             Message-ID: <533D273D4014D411AB1D00062938C4D904046625@hotel.npl.co.uk>
+             
+             [ 20526]
+             Cast away gcc 3.3 type conversion pickiness.
+             
+             [ 20527]
+             More PASTHRU patching from Steve Hay.
+     Branch: maint-5.8/perl
+	  !> MANIFEST Porting/Maintainers.pl ext/threads/threads.xs
+	  !> lib/ExtUtils/MM_Unix.pm pad.c pod/perlfaq2.pod
+	  !> utils/dprofpp.PL
+____________________________________________________________________________
+[ 20525] By: jhi                                   on 2003/08/06  13:40:23
+        Log: Subject: perl with cygwin 1.5, need help
+             From: "Gerrit P. Haase" <gp@familiehaase.de>
+             Date: Sun, 3 Aug 2003 10:57:32 +0200
+             Message-ID: <561375447098.20030803105732@familiehaase.de>
+             
+             (needed manual fitting)
+     Branch: maint-5.8/perl
+	   ! pad.c
+____________________________________________________________________________
+[ 20522] By: jhi                                   on 2003/08/06  13:29:26
+        Log: Restore everything regarding "v-string deprecation"
+             back the way it was, because trying to implement what Larry
+             wants (use 1.2.3 and use Module 1.2.3 should work without
+             warnings, note that the latter means that also
+             $VERSION = 1.2.3 should work without warnings) while
+             trying to warn for 'improper' uses of, seems to be
+             easier said than done.
+             
+             Only the deprecation message work and related doc changes
+             are retracted, not John Peacock's internal v-strings
+             cleanup work.
+             
+             Also the %h=(v65=>42) fix stays since Larry okayed it.
+             
+             In addition, one warning introduced in 5.8.0 is removed
+             ("v-string in use/require non-portable.") since that
+             obviously doesn't work well with Larry's vision.
+     Branch: maint-5.8/perl
+	   ! configpm embedvar.h ext/Encode/t/at-cn.t ext/Encode/t/at-tw.t
+	   ! intrpvar.h perlapi.h pod/perldata.pod pod/perldelta.pod
+	   ! pod/perldiag.pod pod/perlfunc.pod pod/perlvar.pod pp_ctl.c
+	   ! pp_hot.c t/lib/warnings/pp_ctl t/lib/warnings/toke t/op/pack.t
+	   ! toke.c
+____________________________________________________________________________
+[ 20521] By: jhi                                   on 2003/08/06  11:59:35
+        Log: In addition to #20519.
+     Branch: maint-5.8/perl
+	   ! pod/perldiag.pod
+____________________________________________________________________________
+[ 20519] By: jhi                                   on 2003/08/06  11:35:18
+        Log: In case I misunderstood and v1.2.3 is still cool.
+     Branch: maint-5.8/perl
+	   ! pod/perldiag.pod pod/perlfunc.pod pod/perlvar.pod
+	   ! t/lib/warnings/toke toke.c
+____________________________________________________________________________
+[ 20518] By: jhi                                   on 2003/08/06  11:26:56
+        Log: Rework the version strings/objects documentation.
+     Branch: maint-5.8/perl
+	   ! pod/perldata.pod pod/perlfunc.pod pod/perlvar.pod
+____________________________________________________________________________
+[ 20517] By: jhi                                   on 2003/08/06  11:06:04
+        Log: Don't warn in the v65 => case about the leading 'v'.
+     Branch: maint-5.8/perl
+	   ! toke.c
+____________________________________________________________________________
+[ 20516] By: jhi                                   on 2003/08/06  10:47:28
+        Log: Retract #20472.
+     Branch: maint-5.8/perl
+	   ! pod/perldata.pod pod/perldelta.pod pod/perldiag.pod
+	   ! pod/perlfunc.pod pod/perlvar.pod
+____________________________________________________________________________
+[ 20515] By: jhi                                   on 2003/08/06  10:44:50
+        Log: v-strings saga continues.
+             - use/require 1.2.3 is okay, do not warn
+             - however, v1.2.3 is warnable offense
+             - as is e.g. '$a = 1.2.3'
+             - remove the 'v-strings in use/require non-portable' warning
+             
+             Next I need to bring back the recently removed or reworked
+             v-strings documentation and rework all that to talk of
+             'version objects'.
+     Branch: maint-5.8/perl
+	   ! embedvar.h intrpvar.h perlapi.h pod/perldiag.pod pp_ctl.c
+	   ! t/lib/warnings/toke toke.c
+____________________________________________________________________________
+[ 20512] By: jhi                                   on 2003/08/05  20:08:02
+        Log: Update Changes.
+     Branch: maint-5.8/perl
+	   ! Changes patchlevel.h
+____________________________________________________________________________
 [ 20511] By: jhi                                   on 2003/08/05  19:29:26
         Log: Integrate:
              [ 20510]
