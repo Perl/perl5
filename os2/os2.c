@@ -390,7 +390,7 @@ char *inicmd;
 {
     dTHR;
 	int trueflag = flag;
-	int rc, pass = 1, err;
+	int rc, pass = 1;
 	char *tmps;
 	char buf[256], *s = 0;
 	char *args[4];
@@ -429,7 +429,8 @@ char *inicmd;
 #endif 
 	if (rc < 0 && pass == 1
 	    && (tmps == PL_Argv[0])) { /* Cannot transfer `really' via shell. */
-	    err = errno;
+	    int err = errno;
+
 	    if (err == ENOENT || err == ENOEXEC) {
 		/* No such file, or is a script. */
 		/* Try adding script extensions to the file name, and
@@ -581,7 +582,7 @@ char *inicmd;
 		/* Not found: restore errno */
 		errno = err;
 	    }
-	} else if (rc < 0 && pass == 2 && err == ENOENT) { /* File not found */
+	} else if (rc < 0 && pass == 2 && errno == ENOENT) { /* File not found */
 	    char *no_dir = strrchr(PL_Argv[0], '/');
 
 	    /* Do as pdksh port does: if not found with /, try without
@@ -596,7 +597,7 @@ char *inicmd;
 	    warn("Can't %s \"%s\": %s\n", 
 		 ((execf != EXECF_EXEC && execf != EXECF_TRUEEXEC) 
 		  ? "spawn" : "exec"),
-		 PL_Argv[0], Strerror(err));
+		 PL_Argv[0], Strerror(errno));
 	if (rc < 0 && (execf != EXECF_SPAWN_NOWAIT) 
 	    && ((trueflag & 0xFF) == P_WAIT)) 
 	    rc = 255 << 8; /* Emulate the fork(). */
