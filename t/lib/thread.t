@@ -34,23 +34,21 @@ $t->join;
 
 sub islocked
 {
- use attrs 'locked';
  my $val = shift;
  my $ret;
  print $val;
  if (@_)
   {
    $ret = Thread->new(\&islocked, @_);
-   join $ret;
+   $ret->join;
   }
 }
 
 $t = new Thread \&islocked, map { "ok $_\n" } 6..10;
-sleep 2;
-join $t;
+$t->join;
 
 # test that sleep lets other thread run
 $t = new Thread \&islocked,"ok 11\n";
 sleep 6;
 print "ok 12\n";
-join $t;
+$t->join;
