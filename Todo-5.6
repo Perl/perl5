@@ -1,3 +1,7 @@
+Bugs
+    perl_run() can longjmp out
+    fix small memory leaks on compile-time failures
+
 Unicode support
     finish byte <-> utf8 and localencoding <-> utf8 conversions 
     make "$bytestr$charstr" do the right conversion
@@ -64,7 +68,6 @@ Win32 stuff
     work out DLL versioning
 
 Miscellaneous
-    magic_setisa should be made to update %FIELDS [???]
     add new modules (Archive::Tar, Compress::Zlib, CPAN::FTP?)
     replace pod2html with new PodtoHtml? (requires other modules from CPAN)
     automate testing with large parts of CPAN
