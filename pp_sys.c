@@ -3581,7 +3581,9 @@ PP(pp_ghostent)
 #if defined(HAS_GETHOSTENT) && !defined(DONT_DECLARE_STD)
     struct hostent *PerlSock_gethostbyname(const char *);
     struct hostent *PerlSock_gethostbyaddr(const Gethbadd_addr_t, Gethbadd_alen_t, int);
+#ifndef PerlSock_gethostent
     struct hostent *PerlSock_gethostent(void);
+#endif
 #endif
     struct hostent *hent;
     unsigned long len;
@@ -3761,7 +3763,9 @@ PP(pp_gprotoent)
 #ifndef DONT_DECLARE_STD
     struct protoent *PerlSock_getprotobyname(const char *);
     struct protoent *PerlSock_getprotobynumber(int);
+#ifndef PerlSock_getprotoent
     struct protoent *PerlSock_getprotoent(void);
+#endif
 #endif
     struct protoent *pent;
 
@@ -3831,7 +3835,9 @@ PP(pp_gservent)
 #ifndef DONT_DECLARE_STD
     struct servent *PerlSock_getservbyname(const char *, const char *);
     struct servent *PerlSock_getservbynumber();
+#ifndef PerlSock_getservent
     struct servent *PerlSock_getservent(void);
+#endif
 #endif
     struct servent *sent;
 
