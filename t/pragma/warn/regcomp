@@ -29,7 +29,7 @@ $a =~ /(?=a)*/ ;
 no warnings 'regexp' ;
 $a =~ /(?=a)*/ ;
 EXPECT
-(?=a)* matches null string many times before HERE mark in regex m/(?=a)* << HERE / at - line 4.
+(?=a)* matches null string many times in regex; marked by <-- HERE in m/(?=a)* <-- HERE / at - line 4.
 ########
 # regcomp.c [S_study_chunk]
 use warnings 'regexp' ;
@@ -38,7 +38,7 @@ $_ = "" ;
 no warnings 'regexp' ;
 /(?=a)?/;
 EXPECT
-Quantifier unexpected on zero-length expression before HERE mark in regex m/(?=a)? << HERE / at - line 4.
+Quantifier unexpected on zero-length expression in regex; marked by <-- HERE in m/(?=a)? <-- HERE / at - line 4.
 ########
 # regcomp.c [S_regatom]
 $x = '\m' ;
@@ -47,7 +47,7 @@ $a =~ /a$x/ ;
 no warnings 'regexp' ;
 $a =~ /a$x/ ;
 EXPECT
-Unrecognized escape \m passed through before HERE mark in regex m/a\m << HERE / at - line 4.
+Unrecognized escape \m passed through in regex; marked by <-- HERE in m/a\m <-- HERE / at - line 4.
 ########
 # regcomp.c [S_regpposixcc S_checkposixcc]
 #
@@ -61,9 +61,9 @@ no warnings 'regexp' ;
 /[:zog:]/;
 /[[:zog:]]/;
 EXPECT
-POSIX syntax [: :] belongs inside character classes before HERE mark in regex m/[:alpha:] << HERE / at - line 5.
-POSIX syntax [: :] belongs inside character classes before HERE mark in regex m/[:zog:] << HERE / at - line 6.
-POSIX class [:zog:] unknown before HERE mark in regex m/[[:zog:] << HERE ]/
+POSIX syntax [: :] belongs inside character classes in regex; marked by <-- HERE in m/[:alpha:] <-- HERE / at - line 5.
+POSIX syntax [: :] belongs inside character classes in regex; marked by <-- HERE in m/[:zog:] <-- HERE / at - line 6.
+POSIX class [:zog:] unknown in regex; marked by <-- HERE in m/[[:zog:] <-- HERE ]/
 ########
 # regcomp.c [S_checkposixcc]
 #
@@ -73,8 +73,8 @@ $_ = "" ;
 no warnings 'regexp' ;
 /[.zog.]/;
 EXPECT
-POSIX syntax [. .] belongs inside character classes before HERE mark in regex m/[.zog.] << HERE / at - line 5.
-POSIX syntax [. .] is reserved for future extensions before HERE mark in regex m/[.zog.] << HERE /
+POSIX syntax [. .] belongs inside character classes in regex; marked by <-- HERE in m/[.zog.] <-- HERE / at - line 5.
+POSIX syntax [. .] is reserved for future extensions in regex; marked by <-- HERE in m/[.zog.] <-- HERE /
 ########
 # regcomp.c [S_checkposixcc]
 #
@@ -84,7 +84,7 @@ $_ = "" ;
 no warnings 'regexp' ;
 /[[.zog.]]/;
 EXPECT
-POSIX syntax [. .] is reserved for future extensions before HERE mark in regex m/[[.zog.] << HERE ]/
+POSIX syntax [. .] is reserved for future extensions in regex; marked by <-- HERE in m/[[.zog.] <-- HERE ]/
 ########
 # regcomp.c [S_regclass]
 $_ = "";
@@ -109,14 +109,14 @@ no warnings 'regexp' ;
 /[[:alpha:]-[:digit:]]/;
 /[[:digit:]-[:alpha:]]/;
 EXPECT
-False [] range "a-\d" before HERE mark in regex m/[a-\d << HERE ]/ at - line 5.
-False [] range "\d-" before HERE mark in regex m/[\d- << HERE b]/ at - line 6.
-False [] range "\s-" before HERE mark in regex m/[\s- << HERE \d]/ at - line 7.
-False [] range "\d-" before HERE mark in regex m/[\d- << HERE \s]/ at - line 8.
-False [] range "a-[:digit:]" before HERE mark in regex m/[a-[:digit:] << HERE ]/ at - line 9.
-False [] range "[:digit:]-" before HERE mark in regex m/[[:digit:]- << HERE b]/ at - line 10.
-False [] range "[:alpha:]-" before HERE mark in regex m/[[:alpha:]- << HERE [:digit:]]/ at - line 11.
-False [] range "[:digit:]-" before HERE mark in regex m/[[:digit:]- << HERE [:alpha:]]/ at - line 12.
+False [] range "a-\d" in regex; marked by <-- HERE in m/[a-\d <-- HERE ]/ at - line 5.
+False [] range "\d-" in regex; marked by <-- HERE in m/[\d- <-- HERE b]/ at - line 6.
+False [] range "\s-" in regex; marked by <-- HERE in m/[\s- <-- HERE \d]/ at - line 7.
+False [] range "\d-" in regex; marked by <-- HERE in m/[\d- <-- HERE \s]/ at - line 8.
+False [] range "a-[:digit:]" in regex; marked by <-- HERE in m/[a-[:digit:] <-- HERE ]/ at - line 9.
+False [] range "[:digit:]-" in regex; marked by <-- HERE in m/[[:digit:]- <-- HERE b]/ at - line 10.
+False [] range "[:alpha:]-" in regex; marked by <-- HERE in m/[[:alpha:]- <-- HERE [:digit:]]/ at - line 11.
+False [] range "[:digit:]-" in regex; marked by <-- HERE in m/[[:digit:]- <-- HERE [:alpha:]]/ at - line 12.
 ########
 # regcomp.c [S_regclassutf8]
 BEGIN {
@@ -148,14 +148,14 @@ no warnings 'regexp' ;
 /[[:alpha:]-[:digit:]]/;
 /[[:digit:]-[:alpha:]]/;
 EXPECT
-False [] range "a-\d" before HERE mark in regex m/[a-\d << HERE ]/ at - line 12.
-False [] range "\d-" before HERE mark in regex m/[\d- << HERE b]/ at - line 13.
-False [] range "\s-" before HERE mark in regex m/[\s- << HERE \d]/ at - line 14.
-False [] range "\d-" before HERE mark in regex m/[\d- << HERE \s]/ at - line 15.
-False [] range "a-[:digit:]" before HERE mark in regex m/[a-[:digit:] << HERE ]/ at - line 16.
-False [] range "[:digit:]-" before HERE mark in regex m/[[:digit:]- << HERE b]/ at - line 17.
-False [] range "[:alpha:]-" before HERE mark in regex m/[[:alpha:]- << HERE [:digit:]]/ at - line 18.
-False [] range "[:digit:]-" before HERE mark in regex m/[[:digit:]- << HERE [:alpha:]]/ at - line 19.
+False [] range "a-\d" in regex; marked by <-- HERE in m/[a-\d <-- HERE ]/ at - line 12.
+False [] range "\d-" in regex; marked by <-- HERE in m/[\d- <-- HERE b]/ at - line 13.
+False [] range "\s-" in regex; marked by <-- HERE in m/[\s- <-- HERE \d]/ at - line 14.
+False [] range "\d-" in regex; marked by <-- HERE in m/[\d- <-- HERE \s]/ at - line 15.
+False [] range "a-[:digit:]" in regex; marked by <-- HERE in m/[a-[:digit:] <-- HERE ]/ at - line 16.
+False [] range "[:digit:]-" in regex; marked by <-- HERE in m/[[:digit:]- <-- HERE b]/ at - line 17.
+False [] range "[:alpha:]-" in regex; marked by <-- HERE in m/[[:alpha:]- <-- HERE [:digit:]]/ at - line 18.
+False [] range "[:digit:]-" in regex; marked by <-- HERE in m/[[:digit:]- <-- HERE [:alpha:]]/ at - line 19.
 ########
 # regcomp.c [S_regclass S_regclassutf8]
 use warnings 'regexp' ;
@@ -163,5 +163,5 @@ $a =~ /[a\zb]/ ;
 no warnings 'regexp' ;
 $a =~ /[a\zb]/ ;
 EXPECT
-Unrecognized escape \z in character class passed through before HERE mark in regex m/[a\z << HERE b]/ at - line 3.
+Unrecognized escape \z in character class passed through in regex; marked by <-- HERE in m/[a\z <-- HERE b]/ at - line 3.
 
