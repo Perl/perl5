@@ -1,6 +1,6 @@
 =head1 NAME
 
-Pumpkin - Notes on handling the Perl Patch Pumpkin
+Pumpkin - Notes on handling the Perl Patch Pumpkin And Porting Perl
 
 =head1 SYNOPSIS
 
@@ -1305,6 +1305,97 @@ people who will not read your disclaimer.
 Here, in no particular order, are some Configure and build-related
 items that merit consideration.  This list isn't exhaustive, it's just
 what I came up with off the top of my head.
+
+=head2 Adding missing library functions to Perl
+
+The perl Configure script automatically determines which headers and
+functions you have available on your system and arranges for them to be
+included in the compilation and linking process.  Occasionally, when porting
+perl to an operating system for the first time, you may find that the
+operating system is missing a key function.  While perl may still build
+without this function, no perl program will be able to reference the missing
+function.  You may be able to write the missing function yourself, or you
+may be able to find the missing function in the distribution files for
+another software package.  In this case, you need to instruct the perl
+configure-and-build process to use your function.  Perform these steps.
+
+=over 3
+
+=item *
+
+Code and test the function you wish to add.  Test is carefully; you will
+have a much easier time debugging your code independently than when it is a
+part of perl.
+
+=item *
+
+Here is an implementation of the POSIX truncate function for an operating
+system (VOS) that does not supply one, but which does supply the ftruncate()
+function.
+
+  /* Beginning of modification history */
+  /* Written 02-01-02 by Nick Ing-Simmons (nick@ing-simmons.net) */
+  /* End of modification history */
+  
+  /* VOS doesn't supply a truncate function, so we build one up
+     from the available POSIX functions.  */
+  
+  #include <fcntl.h>
+  #include <sys/types.h>
+  #include <unistd.h>
+  
+  int
+  truncate(const char *path, off_t len)
+  {
+   int fd = open(path,O_WRONLY);
+   int code = -1;
+   if (fd >= 0) {
+     code = ftruncate(fd,len);
+     close(fd);
+   }
+   return code;
+  }
+
+Place this file into a subdirectory that has the same name as the operating
+system. This file is named perl/vos/vos.c
+
+=item *
+
+If your operating system has a hints file (in perl/hints/XXX.sh for an
+operating system named XXX), then start with it.  If your operating system
+has no hints file, then create one.  You can use a hints file for a similar
+operating system, if one exists, as a template.
+
+=item *
+
+Add lines like the following to your hints file. The first line
+(d_truncate="define") instructs Configure that the truncate() function
+exists. The second line (archobjs="vos.o") instructs the makefiles that the
+perl executable depends on the existence of a file named "vos.o".  (Make
+will automatically look for "vos.c" and compile it with the same options as
+the perl source code).  The final line ("test -h...") adds a symbolic link
+to the top-level directory so that make can find vos.c.  Of course, you
+should use your own operating system name for the source file of extensions,
+not "vos.c".
+
+  # VOS does not have truncate() but we supply one in vos.c
+  d_truncate="define"
+  archobjs="vos.o"
+  
+  # Help gmake find vos.c
+  test -h vos.c || ln -s vos/vos.c vos.c
+
+The hints file is a series of shell commands that are run in the top-level
+directory (the "perl" directory).  Thus, these commands are simply executed
+by Configure at an appropriate place during its execution.
+
+=item *
+
+At this point, you can run the Configure script and rebuild perl.  Carefully
+test the newly-built perl to ensure that normal paths, and error paths,
+behave as you expect.
+
+=back
 
 =head2 Good ideas waiting for round tuits
 
