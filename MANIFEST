@@ -15,11 +15,11 @@ Changes5.003		Differences between 5.002 and 5.003
 Changes5.004		Differences between 5.003 and 5.004
 Changes5.005		Differences between 5.004 and 5.005
 Changes5.6		Differences between 5.005 and 5.6
+config_h.SH		Produces config.h
 configpm		Produces lib/Config.pm
 Configure		Portability tool
 configure.com		Configure-equivalent for VMS
 configure.gnu		Crude emulation of GNU configure
-config_h.SH		Produces config.h
 cop.h			Control operator header
 Copying			The GNU General Public License
 Cross/README		Cross-compilation
@@ -47,9 +47,9 @@ embedvar.h		C namespace management
 epoc/config.sh		EPOC port config.sh template
 epoc/createpkg.pl	EPOC port generate PKG file
 epoc/epoc.c		EPOC port
+epoc/epoc_stubs.c	EPOC port
 epoc/epocish.c		EPOC port
 epoc/epocish.h		EPOC port
-epoc/epoc_stubs.c	EPOC port
 epoc/link.pl		EPOC port link a exe
 ext/attrs.t			See if attrs works with C<sub : attrs>
 ext/attrs/attrs.pm		attrs extension Perl module
@@ -114,10 +114,10 @@ ext/Data/Dumper/t/dumper.t	See if Data::Dumper works
 ext/Data/Dumper/t/overload.t	See if Data::Dumper works for overloaded data
 ext/Data/Dumper/Todo		Data pretty printer, futures
 ext/DB_File/Changes	Berkeley DB extension change log
-ext/DB_File/dbinfo	Berkeley DB database version checker
 ext/DB_File/DB_File.pm	Berkeley DB extension Perl module
 ext/DB_File/DB_File.xs	Berkeley DB extension external subroutines
 ext/DB_File/DB_File_BS	Berkeley DB extension mkbootstrap fodder
+ext/DB_File/dbinfo	Berkeley DB database version checker
 ext/DB_File/hints/dynixptx.pl	Hint for DB_File for named architecture
 ext/DB_File/hints/sco.pl	Hint for DB_File for named architecture
 ext/DB_File/Makefile.PL	Berkeley DB extension makefile writer
@@ -146,7 +146,6 @@ ext/Digest/MD5/t/align.t	See if Digest::MD5 extension works
 ext/Digest/MD5/t/badfile.t	See if Digest::MD5 extension works
 ext/Digest/MD5/t/files.t	See if Digest::MD5 extension works
 ext/Digest/MD5/typemap		Digest::MD5 extension
-ext/DynaLoader/dlutils.c	Dynamic loader utilities for dl_*.xs files
 ext/DynaLoader/dl_aix.xs	AIX implementation
 ext/DynaLoader/dl_beos.xs	BeOS implementation
 ext/DynaLoader/dl_dld.xs	GNU dld style implementation
@@ -160,6 +159,7 @@ ext/DynaLoader/dl_next.xs	NeXT implementation
 ext/DynaLoader/dl_none.xs	Stub implementation
 ext/DynaLoader/dl_vmesa.xs	VM/ESA implementation
 ext/DynaLoader/dl_vms.xs	VMS implementation
+ext/DynaLoader/dlutils.c	Dynamic loader utilities for dl_*.xs files
 ext/DynaLoader/DynaLoader_pm.PL	Dynamic Loader perl module
 ext/DynaLoader/hints/aix.pl	Hint for DynaLoader for named architecture
 ext/DynaLoader/hints/linux.pl	Hint for DynaLoader for named architecture
@@ -984,11 +984,11 @@ lib/Memoize/t/normalize.t	Memoize
 lib/Memoize/t/prototype.t	Memoize
 lib/Memoize/t/speed.t		Memoize
 lib/Memoize/t/tie.t		Memoize
-lib/Memoize/t/tiefeatures.t	Memoize
 lib/Memoize/t/tie_gdbm.t	Memoize
 lib/Memoize/t/tie_ndbm.t	Memoize
 lib/Memoize/t/tie_sdbm.t	Memoize
 lib/Memoize/t/tie_storable.t	Memoize
+lib/Memoize/t/tiefeatures.t	Memoize
 lib/Memoize/t/unmemoize.t	Memoize
 lib/Memoize/TODO		Memoize
 lib/Net/ChangeLog.libnet	libnet
@@ -1160,8 +1160,6 @@ lib/Time/localtime.pm		By-name interface to Perl's builtin localtime
 lib/Time/localtime.t		Test for Time::localtime
 lib/Time/tm.pm			Internal object for Time::{gm,local}time
 lib/timelocal.pl		Perl library supporting inverse of localtime, gmtime
-lib/Unicode/UCD.pm			Unicode character database
-lib/Unicode/UCD.t			See if Unicode character database works
 lib/unicode/ArabLink.pl		Unicode character database
 lib/unicode/ArabLnkGrp.pl	Unicode character database
 lib/unicode/ArabShap.txt	Unicode character database
@@ -1441,6 +1439,8 @@ lib/unicode/To/Lower.pl		Unicode character database
 lib/unicode/To/Title.pl		Unicode character database
 lib/unicode/To/Upper.pl		Unicode character database
 lib/unicode/UCD.html		Unicode character database
+lib/Unicode/UCD.pm			Unicode character database
+lib/Unicode/UCD.t			See if Unicode character database works
 lib/unicode/Unicode.html	Unicode character database
 lib/unicode/Unicode.txt		Unicode character database
 lib/unicode/version		The version of the Unicode
@@ -1544,8 +1544,8 @@ opcode.pl			Opcode header generatore
 opnames.h			Automatically generated opcode header
 os2/Changes			Changelog for OS/2 port
 os2/diff.configure		Patches to Configure
-os2/dlfcn.h			Addon for dl_open
 os2/dl_os2.c			Addon for dl_open
+os2/dlfcn.h			Addon for dl_open
 os2/Makefile.SHs		Shared library generation for OS/2
 os2/os2.c			Additional code for OS/2
 os2/os2.sym			Additional symbols to export
@@ -1588,10 +1588,10 @@ os2/OS2/REXX/t/rx_tievar.t	DLL access module
 os2/OS2/REXX/t/rx_tieydb.t	DLL access module
 os2/OS2/REXX/t/rx_varset.t	DLL access module
 os2/OS2/REXX/t/rx_vrexx.t	DLL access module
+os2/os2_base.t			Additional tests for builtin methods
 os2/os2add.sym			Overriding symbols to export
 os2/os2ish.h			Header for OS/2
 os2/os2thread.h			pthread-like typedefs
-os2/os2_base.t			Additional tests for builtin methods
 os2/perl2cmd.pl			Corrects installed binaries under OS/2
 patchlevel.h			The current patch level of perl
 perl.c				main()
@@ -1610,8 +1610,8 @@ perly.c				A byacc'ed perly.y
 perly.fixer			A program to remove yacc stack limitations
 perly.h				The header file for perly.c
 perly.y				Yacc grammar for perl
-perlyline.pl			Perl code to fix #line directives and gcc warnings in perly.c
 perly_c.diff			Fixup perly.c to allow recursion
+perlyline.pl			Perl code to fix #line directives and gcc warnings in perly.c
 plan9/aperl			Shell to make Perl error messages Acme-friendly
 plan9/arpa/inet.h		Plan9 port: replacement C header file
 plan9/buildinfo			Plan9 port: configuration information
@@ -1987,6 +1987,7 @@ t/op/pwent.t			See if getpw*() functions work
 t/op/quotemeta.t		See if quotemeta works
 t/op/rand.t			See if rand works
 t/op/range.t			See if .. works
+t/op/re_tests			Regular expressions for regexp.t
 t/op/read.t			See if read() works
 t/op/readdir.t			See if readdir() works
 t/op/recurse.t			See if deep recursion works
@@ -1996,7 +1997,6 @@ t/op/regexp_noamp.t		See if regular expressions work with optimizations
 t/op/regmesg.t			See if one can get regular expression errors
 t/op/repeat.t			See if x operator works
 t/op/reverse.t			See if reverse operator works
-t/op/re_tests			Regular expressions for regexp.t
 t/op/runlevel.t			See if die() works from perl_call_*()
 t/op/sleep.t			See if sleep works
 t/op/sort.t			See if sort works
@@ -2005,11 +2005,11 @@ t/op/split.t			See if split works
 t/op/sprintf.t			See if sprintf works
 t/op/stat.t			See if stat works
 t/op/study.t			See if study works
+t/op/sub_lval.t			See if lvalue subroutines work
 t/op/subst.t			See if substitution works
-t/op/substr.t			See if substr works
 t/op/subst_amp.t		See if $&-related substitution works
 t/op/subst_wamp.t		See if substitution works with $& present
-t/op/sub_lval.t			See if lvalue subroutines work
+t/op/substr.t			See if substr works
 t/op/sysio.t			See if sysread and syswrite work
 t/op/taint.t			See if tainting works
 t/op/tie.t			See if tie/untie functions work
@@ -2110,9 +2110,9 @@ vms/ext/Stdio/test.pl		regression tests for VMS::Stdio
 vms/ext/vmsish.pm		Control VMS-specific behavior of Perl core
 vms/ext/vmsish.t		Tests for vmsish.pm
 vms/ext/XSSymSet.pm		manage linker symbols when building extensions
+vms/gen_shrfls.pl		generate options files and glue for shareable image
 vms/genconfig.pl		retcon config.sh from config.h
 vms/genopt.com			hack to write options files in case of broken makes
-vms/gen_shrfls.pl		generate options files and glue for shareable image
 vms/make_command.com		record MM[SK] command used to build Perl
 vms/mms2make.pl			convert descrip.mms to make syntax
 vms/munchconfig.c		performs shell $var substitution for VMS
@@ -2124,9 +2124,9 @@ vms/sockadapt.c			glue for SockshShr socket support
 vms/sockadapt.h			glue for SockshShr socket support
 vms/test.com			DCL driver for regression tests
 vms/vms.c			VMS-specific C code for Perl core
+vms/vms_yfix.pl			convert Unix perly.[ch] to VMS perly_[ch].vms
 vms/vmsish.h			VMS-specific C header for Perl core
 vms/vmspipe.com			VMS-specific piped command helper script
-vms/vms_yfix.pl			convert Unix perly.[ch] to VMS perly_[ch].vms
 vms/writemain.pl		Generate perlmain.c from miniperlmain.c+extensions
 vos/build.cm			VOS command macro to build Perl
 vos/Changes			Changes made to port Perl to the VOS operating system
@@ -2141,12 +2141,11 @@ vos/install_perl.cm		VOS command macro to install perl after building
 vos/Makefile			A helper for maintaining the config.*.* in UNIX
 vos/perl.bind			VOS bind control file
 vos/test_vos_dummies.c		Test program for "vos_dummies.c"
-vos/vosish.h			VOS-specific header file
 vos/vos_dummies.c		Wrappers to soak up undefined functions
+vos/vosish.h			VOS-specific header file
 warnings.h			The warning numbers
 warnings.pl			Program to write warnings.h and lib/warnings.pm
 win32/bin/exetype.pl		Set executable type to CONSOLE or WINDOWS
-win32/bin/mdelete.bat		multifile delete
 win32/bin/perlglob.pl		Win32 globbing
 win32/bin/pl2bat.pl		wrap perl scripts into batch files
 win32/bin/runperl.pl		run perl script via batch file namesake
@@ -2171,6 +2170,7 @@ win32/include/netdb.h		Win32 port
 win32/include/sys/socket.h	Win32 port
 win32/Makefile			Win32 makefile for NMAKE (Visual C++ build)
 win32/makefile.mk		Win32 makefile for DMAKE (BC++, VC++ builds)
+win32/mdelete.bat		multifile delete
 win32/perlglob.c		Win32 port
 win32/perlhost.h		Perl "host" implementation
 win32/perllib.c			Win32 port
