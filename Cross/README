@@ -1,1 +1,3 @@
-This is for moment just a placeholder.
+If Perl is built using a cross-compilation environment the Cross
+directory will contain temporary helper scripts for the duration
+of the build.

@@ -6775,18 +6775,6 @@ FETCH_I<type>_ATTRIBUTES, MODIFY_I<type>_ATTRIBUTES
 
 =back
 
-=head2 attrs - set/get attributes of a subroutine (deprecated)
-
-=over 4
-
-=item SYNOPSIS
-
-=item DESCRIPTION
-
-method, locked
-
-=back
-
 =head2 autouse - postpone load of modules until a function is used
 
 =over 4
@@ -8577,7 +8565,7 @@ C<ccflags_uselargefiles>, C<ccname>, C<ccsymbols>, C<ccversion>, C<cf_by>,
 C<cf_email>, C<cf_time>, C<charsize>, C<chgrp>, C<chmod>, C<chown>,
 C<clocktype>, C<comm>, C<compress>, C<contains>, C<cp>, C<cpio>, C<cpp>,
 C<cpp_stuff>, C<cppccsymbols>, C<cppflags>, C<cpplast>, C<cppminus>,
-C<cpprun>, C<cppstdin>, C<cppsymbols>, C<crosscompile>, C<cryptlib>, C<csh>
+C<cpprun>, C<cppstdin>, C<cppsymbols>, C<cryptlib>, C<csh>
 
 =item d
 
@@ -8665,7 +8653,8 @@ C<exe_ext>, C<expr>, C<extensions>
 =item f
 
 C<fflushall>, C<fflushNULL>, C<find>, C<firstmakefile>, C<flex>,
-C<fpossize>, C<fpostype>, C<freetype>, C<full_ar>, C<full_csh>, C<full_sed>
+C<fpossize>, C<fpostype>, C<freetype>, C<from>, C<full_ar>, C<full_csh>,
+C<full_sed>
 
 =item g
 
@@ -8758,7 +8747,7 @@ C<quadkind>, C<quadtype>
 =item r
 
 C<randbits>, C<randfunc>, C<randseedtype>, C<ranlib>, C<rd_nodata>,
-C<revision>, C<rm>, C<rmail>, C<runnm>
+C<revision>, C<rm>, C<rmail>, C<run>, C<runnm>
 
 =item s
 
@@ -8779,20 +8768,20 @@ C<stdio_stream_array>, C<strings>, C<submit>, C<subversion>, C<sysman>
 
 =item t
 
-C<tail>, C<tar>, C<tbl>, C<tee>, C<test>, C<timeincl>, C<timetype>,
-C<touch>, C<tr>, C<trnl>, C<troff>
+C<tail>, C<tar>, C<targetarch>, C<tbl>, C<tee>, C<test>, C<timeincl>,
+C<timetype>, C<to>, C<touch>, C<tr>, C<trnl>, C<troff>
 
 =item u
 
 C<u16size>, C<u16type>, C<u32size>, C<u32type>, C<u64size>, C<u64type>,
 C<u8size>, C<u8type>, C<uidformat>, C<uidsign>, C<uidsize>, C<uidtype>,
 C<uname>, C<uniq>, C<uquadtype>, C<use5005threads>, C<use64bitall>,
-C<use64bitint>, C<usedl>, C<useithreads>, C<uselargefiles>,
-C<uselongdouble>, C<usemorebits>, C<usemultiplicity>, C<usemymalloc>,
-C<usenm>, C<useopcode>, C<useperlio>, C<useposix>, C<usesfio>,
-C<useshrplib>, C<usesocks>, C<usethreads>, C<usevendorprefix>, C<usevfork>,
-C<usrinc>, C<uuname>, C<uvoformat>, C<uvsize>, C<uvtype>, C<uvuformat>,
-C<uvxformat>, C<uvXUformat>
+C<use64bitint>, C<usecrosscompile>, C<usedl>, C<useithreads>,
+C<uselargefiles>, C<uselongdouble>, C<usemorebits>, C<usemultiplicity>,
+C<usemymalloc>, C<usenm>, C<useopcode>, C<useperlio>, C<useposix>,
+C<usereentrant>, C<usesfio>, C<useshrplib>, C<usesocks>, C<usethreads>,
+C<usevendorprefix>, C<usevfork>, C<usrinc>, C<uuname>, C<uvoformat>,
+C<uvsize>, C<uvtype>, C<uvuformat>, C<uvxformat>, C<uvXUformat>
 
 =item v
 
@@ -9398,22 +9387,6 @@ arrays
 =item LIMITATIONS
 
 =item AUTHOR
-
-=back
-
-=head2 Errno - System errno constants
-
-=over 4
-
-=item SYNOPSIS
-
-=item DESCRIPTION
-
-=item CAVEATS
-
-=item AUTHOR
-
-=item COPYRIGHT
 
 =back
 
@@ -14105,27 +14078,6 @@ C<Storable::is_retrieving>
 
 =back
 
-=head2 Syslog, Sys::Syslog, openlog, closelog, setlogmask, syslog - Perl
-interface to the UNIX syslog(3) calls
-
-=over 4
-
-=item SYNOPSIS
-
-=item DESCRIPTION
-
-openlog $ident, $logopt, $facility, syslog $priority, $format, @args,
-setlogmask $mask_priority, setlogsock $sock_type (added in 5.004_02),
-closelog
-
-=item EXAMPLES
-
-=item SEE ALSO
-
-=item AUTHOR
-
-=back
-
 =head2 Syslog::Syslog, Sys::Syslog, openlog, closelog, setlogmask, syslog -
 Perl interface to the UNIX syslog(3) calls
 
@@ -14741,24 +14693,6 @@ getitimer ( $which )
 
 =head2 Time::Piece::Seconds, Time::Seconds - a simple API to convert
 seconds to other date values
-
-=over 4
-
-=item SYNOPSIS
-
-=item DESCRIPTION
-
-=item METHODS
-
-=item AUTHOR
-
-=item LICENSE
-
-=item Bugs
-
-=back
-
-=head2 Time::Seconds - a simple API to convert seconds to other date values
 
 =over 4
 

@@ -328,11 +328,6 @@ cppsymbols (Cppsym.U):
 	not in this list, see ccsymbols and cppccsymbols.
 	The list is a space-separated list of symbol=value tokens.
 
-crosscompile (crosscompile.U):
-	This variable conditionally defines the CROSSCOMPILE symbol
-	which signifies that the build process is be a cross-compilation.
-	This is normally set by hints files or from Configure command line.
-
 cryptlib (d_crypt.U):
 	This variable holds -lcrypt or the path to a libcrypt.a archive if
 	the crypt() function is not defined in the standard C library. It is
@@ -1984,6 +1979,12 @@ freetype (mallocsrc.U):
 	This variable contains the return type of free().  It is usually
 	void, but occasionally int.
 
+from (Cross.U):
+	This variable contains the command used by Configure
+	to copy files from the target host.  Useful and available
+	only during Perl build.
+	The string ':' if not cross-compiling.
+
 full_ar (Loc_ar.U):
 	This variable contains the full pathname to 'ar', whether or
 	not the user has specified 'portability'.  This is only used
@@ -3197,6 +3198,12 @@ rmail (Loc.U):
 	This variable is defined but not used by Configure.
 	The value is a plain '' and is not useful.
 
+run (Cross.U):
+	This variable contains the command used by Configure
+	to copy and execute a cross-compiled executable in the
+	target host.  Useful and available only during Perl build.
+	Empty string '' if not cross-compiling.
+
 runnm (usenm.U):
 	This variable contains 'true' or 'false' depending whether the
 	nm extraction should be performed or not, according to the value
@@ -3582,6 +3589,10 @@ tar (Loc.U):
 	This variable is defined but not used by Configure.
 	The value is a plain '' and is not useful.
 
+targetarch (Cross.U):
+	If cross-compiling, this variable contains the target architecture.
+	If not, this will be empty.
+
 tbl (Loc.U):
 	This variable is defined but not used by Configure.
 	The value is a plain '' and is not useful.
@@ -3602,6 +3613,12 @@ timetype (d_time.U):
 	This variable holds the type returned by time(). It can be long,
 	or time_t on BSD sites (in which case <sys/types.h> should be
 	included). Anyway, the type Time_t should be used.
+
+to (Cross.U):
+	This variable contains the command used by Configure
+	to copy to from the target host.  Useful and available
+	only during Perl build.
+	The string ':' if not cross-compiling.
 
 touch (Loc.U):
 	This variable is used internally by Configure to determine the
@@ -3698,6 +3715,10 @@ use64bitint (use64bits.U):
 	is employed, just enough to get 64-bit integers into Perl.
 	This may mean using for example "long longs", while your memory
 	may still be limited to 2 gigabytes.
+
+usecrosscompile (Cross.U):
+	This variable conditionally defines the USE_CROSS_COMPILE symbol,
+	and indicates that Perl has been cross-compiled.
 
 usedl (dlsrc.U):
 	This variable indicates if the system supports dynamic
