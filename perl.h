@@ -1,4 +1,4 @@
-/* $Header: perl.h,v 3.0.1.5 90/02/28 17:52:28 lwall Locked $
+/* $Header: perl.h,v 3.0.1.6 90/03/12 16:40:43 lwall Locked $
  *
  *    Copyright (c) 1989, Larry Wall
  *
@@ -6,6 +6,9 @@
  *    as specified in the README file that comes with the perl 3.0 kit.
  *
  * $Log:	perl.h,v $
+ * Revision 3.0.1.6  90/03/12  16:40:43  lwall
+ * patch13: did some ndir straightening up for Xenix
+ * 
  * Revision 3.0.1.5  90/02/28  17:52:28  lwall
  * patch9: Configure now determines whether volatile is supported
  * patch9: volatilized some more variables for super-optimizing compilers
@@ -197,20 +200,20 @@ EXT int dbmlen;
 #define ntohi ntohl
 #endif
 
-#if defined(I_DIRENT) && !defined(xenix)
+#if defined(I_DIRENT) && !defined(M_XENIX)
 #   include <dirent.h>
 #   define DIRENT dirent
 #else
-#   ifdef I_SYSDIR
-#	ifdef hp9000s500
-#	    include <ndir.h>	/* may be wrong in the future */
-#	else
-#	    include <sys/dir.h>
-#	endif
+#   ifdef I_SYSNDIR
+#	include <sys/ndir.h>
 #	define DIRENT direct
 #   else
-#	ifdef I_SYSNDIR
-#	    include <sys/ndir.h>
+#	ifdef I_SYSDIR
+#	    ifdef hp9000s500
+#		include <ndir.h>	/* may be wrong in the future */
+#	    else
+#		include <sys/dir.h>
+#	    endif
 #	    define DIRENT direct
 #	endif
 #   endif

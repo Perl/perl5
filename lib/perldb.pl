@@ -1,6 +1,6 @@
 package DB;
 
-$header = '$Header: perldb.pl,v 3.0.1.1 89/10/26 23:14:02 lwall Locked $';
+$header = '$Header: perldb.pl,v 3.0.1.2 90/03/12 16:39:39 lwall Locked $';
 #
 # This file is automatically included if you do perl -d.
 # It's probably not useful to include this yourself.
@@ -10,6 +10,10 @@ $header = '$Header: perldb.pl,v 3.0.1.1 89/10/26 23:14:02 lwall Locked $';
 # have a breakpoint.  It also inserts a do 'perldb.pl' before the first line.
 #
 # $Log:	perldb.pl,v $
+# Revision 3.0.1.2  90/03/12  16:39:39  lwall
+# patch13: perl -d didn't format stack traces of *foo right
+# patch13: perl -d wiped out scalar return values of subroutines
+# 
 # Revision 3.0.1.1  89/10/26  23:14:02  lwall
 # patch1: RCS expanded an unintended $Header in lib/perldb.pl
 # 
@@ -385,9 +389,8 @@ sub sub {
     $single |= 4 if $#stack == $deep;
     local(@args) = @_;
     for (@args) {
-	if (/^Stab/ && length($_) == length($_main{'_main'})) {
+	if (/^StB\000/ && length($_) == length($_main{'_main'})) {
 	    $_ = sprintf("%s",$_);
-	    print "ARG: $_\n";
 	}
 	else {
 	    s/'/\\'/g;
@@ -397,14 +400,16 @@ sub sub {
     push(@sub, $sub . '(' . join(', ', @args) . ') from ' . $line);
     if (wantarray) {
 	@i = &$sub;
+	--$#sub;
+	$single |= pop(@stack);
+	@i;
     }
     else {
 	$i = &$sub;
-	@i = $i;
+	--$#sub;
+	$single |= pop(@stack);
+	$i;
     }
-    --$#sub;
-    $single |= pop(@stack);
-    @i;
 }
 
 $single = 1;			# so it stops on first executable statement

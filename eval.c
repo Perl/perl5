@@ -1,4 +1,4 @@
-/* $Header: eval.c,v 3.0.1.4 90/02/28 17:36:59 lwall Locked $
+/* $Header: eval.c,v 3.0.1.5 90/03/12 16:37:40 lwall Locked $
  *
  *    Copyright (c) 1989, Larry Wall
  *
@@ -6,6 +6,11 @@
  *    as specified in the README file that comes with the perl 3.0 kit.
  *
  * $Log:	eval.c,v $
+ * Revision 3.0.1.5  90/03/12  16:37:40  lwall
+ * patch13: undef $/ didn't work as advertised
+ * patch13: added list slice operator (LIST)[LIST]
+ * patch13: added splice operator: @oldelems = splice(@array,$offset,$len,LIST)
+ * 
  * Revision 3.0.1.4  90/02/28  17:36:59  lwall
  * patch9: added pipe function
  * patch9: a return in scalar context wouldn't return array
@@ -59,7 +64,7 @@ STR str_args;
 static STAB *stab2;
 static STIO *stio;
 static struct lstring *lstr;
-static char old_record_separator;
+static int old_record_separator;
 extern int wantarray;
 
 double sin(), cos(), atan2(), pow();
@@ -159,7 +164,8 @@ register int sp;
 	    tmps = str_get(tmpstr);	/* force to be string */
 	    STR_GROW(str, (anum * str->str_cur) + 1);
 	    repeatcpy(str->str_ptr, tmps, tmpstr->str_cur, anum);
-	    str->str_cur *= anum; str->str_ptr[str->str_cur] = '\0';
+	    str->str_cur *= anum;
+	    str->str_ptr[str->str_cur] = '\0';
 	}
 	else
 	    str_sset(str,&str_no);
@@ -642,24 +648,31 @@ register int sp;
 	    str_magic(str, tmpstab, 'D', tmps, anum);
 #endif
 	break;
+    case O_LSLICE:
+	anum = 2;
+	argtype = FALSE;
+	goto do_slice_already;
     case O_ASLICE:
-	anum = TRUE;
+	anum = 1;
 	argtype = FALSE;
 	goto do_slice_already;
     case O_HSLICE:
-	anum = FALSE;
+	anum = 0;
 	argtype = FALSE;
 	goto do_slice_already;
     case O_LASLICE:
-	anum = TRUE;
+	anum = 1;
 	argtype = TRUE;
 	goto do_slice_already;
     case O_LHSLICE:
-	anum = FALSE;
+	anum = 0;
 	argtype = TRUE;
       do_slice_already:
-	sp = do_slice(arg[1].arg_ptr.arg_stab,anum,argtype,
+	sp = do_slice(arg[1].arg_ptr.arg_stab,str,anum,argtype,
 	    gimme,arglast);
+	goto array_return;
+    case O_SPLICE:
+	sp = do_splice(stab_array(arg[1].arg_ptr.arg_stab),str,gimme,arglast);
 	goto array_return;
     case O_PUSH:
 	if (arglast[2] - arglast[1] != 1)

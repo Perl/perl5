@@ -1,7 +1,11 @@
 ''' Beginning of part 3
-''' $Header: perl.man.3,v 3.0.1.4 90/02/28 18:00:09 lwall Locked $
+''' $Header: perl.man.3,v 3.0.1.5 90/03/12 16:52:21 lwall Locked $
 '''
 ''' $Log:	perl.man.3,v $
+''' Revision 3.0.1.5  90/03/12  16:52:21  lwall
+''' patch13: documented that print $filehandle &foo is ambiguous
+''' patch13: added splice operator: @oldelems = splice(@array,$offset,$len,LIST)
+''' 
 ''' Revision 3.0.1.4  90/02/28  18:00:09  lwall
 ''' patch9: added pipe function
 ''' patch9: documented how to handle arbitrary weird characters in filenames
@@ -319,6 +323,9 @@ Prints a string or a comma-separated list of strings.
 Returns non-zero if successful.
 FILEHANDLE may be a scalar variable name, in which case the variable contains
 the name of the filehandle, thus introducing one level of indirection.
+(NOTE: If FILEHANDLE is a variable and the next token is a term, it may be
+misinterpreted as an operator unless you interpose a + or put parens around
+the arguments.)
 If FILEHANDLE is omitted, prints by default to standard output (or to the
 last selected output channel\*(--see select()).
 If LIST is also omitted, prints $_ to
@@ -329,6 +336,9 @@ use the select operation.
 Note that, because print takes a LIST, anything in the LIST is evaluated
 in an array context, and any subroutine that you call will have one or more
 of its expressions evaluated in an array context.
+Also be careful not to follow the print keyword with a left parenthesis
+unless you want the corresponding right parenthesis to terminate the
+arguments to the print--interpose a + or put parens around all the arguments.
 .Ip "printf(FILEHANDLE LIST)" 8 10
 .Ip "printf(LIST)" 8
 .Ip "printf FILEHANDLE LIST" 8
@@ -715,6 +725,37 @@ Examples:
 		# prints xdogcatCainAbel
 	print sort @george, \'to\', @harry;
 		# prints AbelAxedCainPunishedcatchaseddoggonetoxyz
+
+.fi
+.Ip "splice(ARRAY,OFFSET,LENGTH,LIST)" 8 8
+.Ip "splice(ARRAY,OFFSET,LENGTH)" 8
+.Ip "splice(ARRAY,OFFSET)" 8
+Removes the elements designated by OFFSET and LENGTH from an array, and
+replaces them with the elements of LIST, if any.
+Returns the elements removed from the array.
+The array grows or shrinks as necessary.
+If LENGTH is omitted, removes everything from OFFSET onward.
+The following equivalencies hold (assuming $[ == 0):
+.nf
+
+	push(@a,$x,$y)\h'|3.5i'splice(@a,$#x+1,0,$x,$y)
+	pop(@a)\h'|3.5i'splice(@a,-1)
+	shift(@a)\h'|3.5i'splice(@a,0,1)
+	unshift(@a,$x,$y)\h'|3.5i'splice(@a,0,0,$x,$y)
+	$a[$x] = $y\h'|3.5i'splice(@a,$x,1,$y);
+
+Example, assuming array lengths are passed before arrays:
+	
+	sub aeq {	# compare two array values
+		local(@a) = splice(@_,0,shift);
+		local(@b) = splice(@_,0,shift);
+		return 0 unless @a == @b;	# same len?
+		while (@a) {
+		    return 0 if pop(@a) ne pop(@b);
+		}
+		return 1;
+	}
+	if (&aeq($len,@foo[1..$len],0+@bar,@bar)) { ... }
 
 .fi
 .Ip "split(/PATTERN/,EXPR,LIMIT)" 8 8

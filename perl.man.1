@@ -1,7 +1,12 @@
 .rn '' }`
-''' $Header: perl.man.1,v 3.0.1.3 90/02/28 17:54:32 lwall Locked $
+''' $Header: perl.man.1,v 3.0.1.4 90/03/12 16:44:33 lwall Locked $
 ''' 
 ''' $Log:	perl.man.1,v $
+''' Revision 3.0.1.4  90/03/12  16:44:33  lwall
+''' patch13: (LIST,) now legal
+''' patch13: improved LIST documentation
+''' patch13: example of if-elsif switch was wrong  
+''' 
 ''' Revision 3.0.1.3  90/02/28  17:54:32  lwall
 ''' patch9: @array in scalar context now returns length of array
 ''' patch9: in manual, example of open and ?: was backwards
@@ -630,7 +635,12 @@ bar
 
 .fi
 Array literals are denoted by separating individual values by commas, and
-enclosing the list in parentheses.
+enclosing the list in parentheses:
+.nf
+
+	(LIST)
+
+.fi
 In a context not requiring an array value, the value of the array literal
 is the value of the final element, as in the C comma operator.
 For example,
@@ -645,6 +655,46 @@ assigns the entire array value to array foo, but
 
 .fi
 assigns the value of variable bar to variable foo.
+Note that the value of an actual array in a scalar context is the length
+of the array; the following assigns to $foo the value 3:
+.nf
+
+.ne 2
+    @foo = (\'cc\', \'\-E\', $bar);
+    $foo = @foo;		# $foo gets 3
+
+.fi
+You may have an optional comma before the closing parenthesis of an
+array literal, so that you can say:
+.nf
+
+    @foo = (
+	1,
+	2,
+	3,
+    );
+
+.fi
+When a LIST is evaluated, each element of the list is evaluated in
+an array context, and the resulting array value is interpolated into LIST
+just as if each individual element were a member of LIST.  Thus arrays
+lose their identity in a LIST\*(--the list
+
+	(@foo,@bar,&SomeSub)
+
+contains all the elements of @foo followed by all the elements of @bar,
+followed by all the elements returned by the subroutine named SomeSub.
+.PP
+A list value may also be subscripted like a normal array.
+Examples:
+.nf
+
+	$time = (stat($file))[8];	# stat returns array value
+	$digit = ('a','b','c','d','e','f')[$digit-10];
+	return (pop(@foo),pop(@foo))[0];
+
+.fi
+.PP
 Array lists may be assigned to if and only if each element of the list
 is an lvalue:
 .nf
@@ -1079,11 +1129,11 @@ or even
 
 .ne 8
 	if (/^abc/)
-		{ $abc = 1; last foo; }
+		{ $abc = 1; }
 	elsif (/^def/)
-		{ $def = 1; last foo; }
+		{ $def = 1; }
 	elsif (/^xyz/)
-		{ $xyz = 1; last foo; }
+		{ $xyz = 1; }
 	else
 		{$nothing = 1;}
 

@@ -1,7 +1,10 @@
 ''' Beginning of part 4
-''' $Header: perl.man.4,v 3.0.1.5 90/02/28 18:01:52 lwall Locked $
+''' $Header: perl.man.4,v 3.0.1.6 90/03/12 16:54:04 lwall Locked $
 '''
 ''' $Log:	perl.man.4,v $
+''' Revision 3.0.1.6  90/03/12  16:54:04  lwall
+''' patch13: improved documentation of *name
+''' 
 ''' Revision 3.0.1.5  90/02/28  18:01:52  lwall
 ''' patch9: $0 is now always the command name
 ''' 
@@ -211,7 +214,7 @@ of it rather than working with a local copy.
 In perl you can refer to all the objects of a particular name by prefixing
 the name with a star: *foo.
 When evaluated, it produces a scalar value that represents all the objects
-of that name.
+of that name, including any filehandle, format or subroutine.
 When assigned to within a local() operation, it causes the name mentioned
 to refer to whatever * value was assigned to it.
 Example:
@@ -243,6 +246,11 @@ The * mechanism will probably be more efficient in any case.
 Since a *name value contains unprintable binary data, if it is used as
 an argument in a print, or as a %s argument in a printf or sprintf, it
 then has the value '*name', just so it prints out pretty.
+.Sp
+Even if you don't want to modify an array, this mechanism is useful for
+passing multiple arrays in a single LIST, since normally the LIST mechanism
+will merge all the array values so that you can't extract out the
+individual arrays.
 .Sh "Regular Expressions"
 The patterns used in pattern matching are regular expressions such as
 those supplied in the Version 8 regexp routines.
@@ -1221,7 +1229,7 @@ For example:
 
 .ne 4
 	system "echo $foo";		# Insecure
-	system "echo", $foo;	# Secure (doesn't use sh)
+	system "/bin/echo", $foo;	# Secure (doesn't use sh)
 	system "echo $bar";		# Insecure
 	system "echo $abc";		# Insecure until PATH set
 

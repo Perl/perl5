@@ -7,9 +7,12 @@
  * blame Henry for some of the lack of readability.
  */
 
-/* $Header: regcomp.c,v 3.0.1.2 90/02/28 18:08:35 lwall Locked $
+/* $Header: regcomp.c,v 3.0.1.3 90/03/12 16:59:22 lwall Locked $
  *
  * $Log:	regcomp.c,v $
+ * Revision 3.0.1.3  90/03/12  16:59:22  lwall
+ * patch13: pattern matches can now use \0 to mean \000
+ * 
  * Revision 3.0.1.2  90/02/28  18:08:35  lwall
  * patch9: /[\200-\377]/ didn't work on machines with signed chars
  * 
@@ -639,7 +642,7 @@ int *flagp;
 			goto defchar;
 		case '0': case '1': case '2': case '3': case '4':
 		case '5': case '6': case '7': case '8': case '9':
-			if (isdigit(regparse[1]))
+			if (isdigit(regparse[1]) || *regparse == '0')
 				goto defchar;
 			else {
 				ret = regnode(REF + *regparse++ - '0');
@@ -708,10 +711,10 @@ int *flagp;
 					break;
 				case '0': case '1': case '2': case '3':case '4':
 				case '5': case '6': case '7': case '8':case '9':
-				    if (isdigit(p[1])) {
-					foo = *p++ - '0';
-					foo <<= 3;
-					foo += *p - '0';
+				    if (isdigit(p[1]) || *p == '0') {
+					foo = *p - '0';
+					if (isdigit(p[1]))
+					    foo = (foo<<3) + *++p - '0';
 					if (isdigit(p[1]))
 					    foo = (foo<<3) + *++p - '0';
 					ender = foo;

@@ -1,4 +1,4 @@
-/* $Header: toke.c,v 3.0.1.5 90/02/28 18:47:06 lwall Locked $
+/* $Header: toke.c,v 3.0.1.6 90/03/12 17:06:36 lwall Locked $
  *
  *    Copyright (c) 1989, Larry Wall
  *
@@ -6,6 +6,10 @@
  *    as specified in the README file that comes with the perl 3.0 kit.
  *
  * $Log:	toke.c,v $
+ * Revision 3.0.1.6  90/03/12  17:06:36  lwall
+ * patch13: last semicolon of program is now optional, just for Randal
+ * patch13: added splice operator: @oldelems = splice(@array,$offset,$len,LIST)
+ * 
  * Revision 3.0.1.5  90/02/28  18:47:06  lwall
  * patch9: return grandfathered to never be function call
  * patch9: non-existent perldb.pl now gives reasonable error message
@@ -216,7 +220,7 @@ yylex()
 	    }
 	    oldoldbufptr = oldbufptr = s = str_get(linestr);
 	    str_set(linestr,"");
-	    RETURN(0);
+	    RETURN(';');	/* not infinite loop because rsfp is NULL now */
 	}
 	oldoldbufptr = oldbufptr = bufptr = s;
 	if (perldb) {
@@ -1008,6 +1012,10 @@ yylex()
 		TERM(SPLIT);
 	    if (strEQ(d,"sprintf"))
 		FL(O_SPRINTF);
+	    if (strEQ(d,"splice")) {
+		yylval.ival = O_SPLICE;
+		OPERATOR(PUSH);
+	    }
 	    break;
 	case 'q':
 	    if (strEQ(d,"sqrt"))

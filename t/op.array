@@ -1,8 +1,8 @@
 #!./perl
 
-# $Header: op.array,v 3.0 89/10/18 15:26:55 lwall Locked $
+# $Header: op.array,v 3.0.1.1 90/03/12 17:03:03 lwall Locked $
 
-print "1..30\n";
+print "1..36\n";
 
 @ary = (1,2,3,4,5);
 if (join('',@ary) eq '12345') {print "ok 1\n";} else {print "not ok 1\n";}
@@ -98,3 +98,23 @@ print join(' ',@foo) eq 'the time men come' ? "ok 29\n" : "not ok 29\n";
 
 @foo = grep(!/e/,split(' ','now is the time for all good men to come to'));
 print join(' ',@foo) eq 'now is for all good to to' ? "ok 30\n" : "not ok 30\n";
+
+$foo = join('',('a','b','c','d','e','f')[0..5]);
+print $foo eq 'abcdef' ? "ok 31\n" : "not ok 31\n";
+
+$foo = join('',('a','b','c','d','e','f')[0..1]);
+print $foo eq 'ab' ? "ok 32\n" : "not ok 32\n";
+
+$foo = join('',('a','b','c','d','e','f')[6]);
+print $foo eq '' ? "ok 33\n" : "not ok 33\n";
+
+@foo = ('a','b','c','d','e','f')[0,2,4];
+@bar = ('a','b','c','d','e','f')[1,3,5];
+$foo = join('',(@foo,@bar)[0..5]);
+print $foo eq 'acebdf' ? "ok 34\n" : "not ok 34\n";
+
+$foo = ('a','b','c','d','e','f')[0,2,4];
+print $foo eq 'e' ? "ok 35\n" : "not ok 35\n";
+
+$foo = ('a','b','c','d','e','f')[1];
+print $foo eq 'b' ? "ok 36\n" : "not ok 36\n";

@@ -1,4 +1,4 @@
-/* $Header: str.c,v 3.0.1.5 90/02/28 18:30:38 lwall Locked $
+/* $Header: str.c,v 3.0.1.6 90/03/12 17:02:14 lwall Locked $
  *
  *    Copyright (c) 1989, Larry Wall
  *
@@ -6,6 +6,9 @@
  *    as specified in the README file that comes with the perl 3.0 kit.
  *
  * $Log:	str.c,v $
+ * Revision 3.0.1.6  90/03/12  17:02:14  lwall
+ * patch13: substr as lvalue didn't invalidate old numeric value
+ * 
  * Revision 3.0.1.5  90/02/28  18:30:38  lwall
  * patch9: you may now undef $/ to have no input record separator
  * patch9: nested evals clobbered their longjmp environment
@@ -459,6 +462,9 @@ int littlelen;
     register char *bigend;
     register int i;
 
+    bigstr->str_nok = 0;
+    bigstr->str_pok = SP_VALID;	/* disable possible screamer */
+
     i = littlelen - len;
     if (i > 0) {			/* string might grow */
 	STR_GROW(bigstr, bigstr->str_cur + i + 1);
@@ -485,8 +491,6 @@ int littlelen;
 
     if (midend > bigend)
 	fatal("panic: str_insert");
-
-    bigstr->str_pok = SP_VALID;	/* disable possible screamer */
 
     if (mid - big > bigend - midend) {	/* faster to shorten from end */
 	if (littlelen) {

@@ -1,4 +1,4 @@
-/* $Header: perl.y,v 3.0.1.4 90/02/28 18:03:23 lwall Locked $
+/* $Header: perl.y,v 3.0.1.5 90/03/12 16:55:56 lwall Locked $
  *
  *    Copyright (c) 1989, Larry Wall
  *
@@ -6,6 +6,10 @@
  *    as specified in the README file that comes with the perl 3.0 kit.
  *
  * $Log:	perl.y,v $
+ * Revision 3.0.1.5  90/03/12  16:55:56  lwall
+ * patch13: added list slice operator (LIST)[LIST]
+ * patch13: (LIST,) now legal
+ * 
  * Revision 3.0.1.4  90/02/28  18:03:23  lwall
  * patch9: line numbers were bogus during certain portions of foreach evaluation
  * 
@@ -444,6 +448,8 @@ term	:	'-' term %prec UMINUS
 			{ $$ = l(localize(make_op(O_ASSIGN, 1,
 				localize(listish(make_list($3))),
 				Nullarg,Nullarg))); }
+	|	'(' expr ',' ')'
+			{ $$ = make_list(hide_ary($2)); }
 	|	'(' expr ')'
 			{ $$ = make_list(hide_ary($2)); }
 	|	'(' ')'
@@ -474,6 +480,11 @@ term	:	'-' term %prec UMINUS
 				stab2arg(A_STAB,hadd($1)),
 				jmaybe($3),
 				Nullarg); }
+	|	'(' expr ')' '[' expr ']'	%prec '('
+			{ $$ = make_op(O_LSLICE, 3,
+				Nullarg,
+				listish(make_list($5)),
+				listish(make_list($2))); }
 	|	ARY '[' expr ']'	%prec '('
 			{ $$ = make_op(O_ASLICE, 2,
 				stab2arg(A_STAB,aadd($1)),

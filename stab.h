@@ -1,4 +1,4 @@
-/* $Header: stab.h,v 3.0.1.1 89/12/21 20:19:53 lwall Locked $
+/* $Header: stab.h,v 3.0.1.2 90/03/12 17:00:43 lwall Locked $
  *
  *    Copyright (c) 1989, Larry Wall
  *
@@ -6,6 +6,9 @@
  *    as specified in the README file that comes with the perl 3.0 kit.
  *
  * $Log:	stab.h,v $
+ * Revision 3.0.1.2  90/03/12  17:00:43  lwall
+ * patch13: did some ndir straightening up for Xenix
+ * 
  * Revision 3.0.1.1  89/12/21  20:19:53  lwall
  * patch7: in stab.h, added some CRIPPLED_CC support for Microport
  * 
@@ -63,7 +66,7 @@ HASH *stab_hash();
 struct stio {
     FILE	*ifp;		/* ifp and ofp are normally the same */
     FILE	*ofp;		/* but sockets need separate streams */
-#if defined(I_DIRENT) || defined(I_SYSDIR)
+#ifdef READDIR
     DIR		*dirp;		/* for opendir, readdir, etc */
 #endif
     long	lines;		/* $. */

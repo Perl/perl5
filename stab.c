@@ -1,4 +1,4 @@
-/* $Header: stab.c,v 3.0.1.4 90/02/28 18:19:14 lwall Locked $
+/* $Header: stab.c,v 3.0.1.5 90/03/12 17:00:11 lwall Locked $
  *
  *    Copyright (c) 1989, Larry Wall
  *
@@ -6,6 +6,9 @@
  *    as specified in the README file that comes with the perl 3.0 kit.
  *
  * $Log:	stab.c,v $
+ * Revision 3.0.1.5  90/03/12  17:00:11  lwall
+ * patch13: undef $/ didn't work as advertised
+ * 
  * Revision 3.0.1.4  90/02/28  18:19:14  lwall
  * patch9: $0 is now always the command name
  * patch9: you may now undef $/ to have no input record separator
@@ -309,7 +312,7 @@ STR *str;
 	    multiline = (i != 0);
 	    break;
 	case '/':
-	    if (str->str_ptr) {
+	    if (str->str_pok) {
 		record_separator = *str_get(str);
 		rslen = str->str_cur;
 	    }

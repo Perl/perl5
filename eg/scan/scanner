@@ -1,6 +1,6 @@
 #!/usr/bin/perl
 
-# $Header: scanner,v 3.0 89/10/18 15:16:02 lwall Locked $
+# $Header: scanner,v 3.0.1.1 90/03/12 16:35:15 lwall Locked $
 
 # This runs all the scan_* routines on all the machines in /etc/ghosts.
 # We run this every morning at about 6 am:
@@ -68,15 +68,15 @@ scan: while ($scan = shift(@scanlist)) {
 		    $cmd = '/usr/bin/perl';
 		}
 		close(scan);
-		if (open(pipe,"exec rsh $host '$cmd' <.x|")) {
+		if (open(PIPE,"exec rsh $host '$cmd' <.x|")) {
 		    sleep(5);
 		    unlink '.x';
-		    while (<pipe>) {
+		    while (<PIPE>) {
 			last if $iter++ > 1000;		# must be looping
 			next if /^[0-9.]+u [0-9.]+s/;
 			print $showhost,$_;
 		    }
-		    close(pipe);
+		    close(PIPE);
 		} else {
 		    print "(Can't execute rsh: $!)\n";
 		}

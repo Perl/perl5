@@ -1,6 +1,6 @@
 #! /usr/bin/perl
 
-# $Header: gsh,v 3.0.1.1 90/02/28 17:14:10 lwall Locked $
+# $Header: gsh,v 3.0.1.2 90/03/12 16:34:11 lwall Locked $
 
 # Do rsh globally--see man page
 
@@ -75,16 +75,16 @@ line: while (<>) {		# for each line of ghosts
     if ($wanted > 0) {
 	print "rsh $host$l$n '$cmd'\n" unless $silent;
 	$SIG{'INT'} = 'DEFAULT';
-	if (open(pipe,"rsh $host$l$n '$cmd'$dist 2>&1|")) {	# start an rsh
+	if (open(PIPE,"rsh $host$l$n '$cmd'$dist 2>&1|")) {	# start an rsh
 	    $SIG{'INT'} = 'cont';
-	    for ($iter=0; <pipe>; $iter++) {
+	    for ($iter=0; <PIPE>; $iter++) {
 		unless ($iter) {
 		    $remainder .= "$host+"
 			if /Connection timed out|Permission denied/;
 		}
 		print $showhost,$_;
 	    }
-	    close(pipe);
+	    close(PIPE);
 	} else {
 	    print "(Can't execute rsh: $!)\n";
 	    $SIG{'INT'} = 'cont';
