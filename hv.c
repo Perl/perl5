@@ -233,7 +233,6 @@ bool *needs_store;
 	    case 'I':
 	    case 'S':
 		*needs_store = FALSE;
-	    default:
 	    }
 	}
 	mg = mg->mg_moremagic;
