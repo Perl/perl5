@@ -1396,7 +1396,7 @@ be the glob for "AUTOLOAD".  In this case the corresponing variable
 $AUTOLOAD is already setup.
 
 Note that if you want to keep this glob for a long time, you need to
-check for it being "AUTOLOAD", since at the later time the the call
+check for it being "AUTOLOAD", since at the later time the call
 may load a different subroutine due to $AUTOLOAD changing its value.
 Use the glob created via a side effect to do this.
 

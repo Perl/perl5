@@ -886,7 +886,7 @@ This is a form of Laziness.  (Getting polymorphed is also what happens
 when the wizard decides you'd look better as a frog.)
 
 Every now and then you'll want to have a method call trigger both its
-derived class (also know as "subclass") version as well as its base class
+derived class (also known as "subclass") version as well as its base class
 (also known as "superclass") version.  In practice, constructors and
 destructors are likely to want to do this, and it probably also makes
 sense in the debug() method we showed previously.

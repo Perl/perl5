@@ -168,7 +168,7 @@ Perl defines the following zero-width assertions:
     \G	Match only where previous m//g left off
 
 A word boundary (C<\b>) is defined as a spot between two characters that
-has a C<\w> on one side of it and and a C<\W> on the other side of it (in
+has a C<\w> on one side of it and a C<\W> on the other side of it (in
 either order), counting the imaginary characters off the beginning and
 end of the string as matching a C<\W>.  (Within character classes C<\b>
 represents backspace rather than a word boundary.)  The C<\A> and C<\Z> are
@@ -338,7 +338,7 @@ When the match runs, the first part of the regular expression (C<\b(foo)>)
 finds a possible match right at the beginning of the string, and loads up
 $1 with "Foo".  However, as soon as the matching engine sees that there's
 no whitespace following the "Foo" that it had saved in $1, it realizes its
-mistake and starts over again one character after where it had had the
+mistake and starts over again one character after where it had the
 tentative match.  This time it goes all the way until the next occurrence
 of "foo". The complete regular expression matches this time, and you get
 the expected output of "table follows foo."
