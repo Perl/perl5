@@ -225,12 +225,6 @@ as bold, italic, or code.
 
 (F) The input file wasn't available for the given reason.
 
-=item high bit char in input stream
-
-(W) You can't use high-bit characters in the input stream,
-because the translator uses them for its own nefarious purposes.
-Use an HTML entity in angle brackets instead.
-
 =item Improper man page - no dash in NAME header in paragraph %d of %s
 
 (W) The NAME header did not have an isolated dash in it.  This is
@@ -292,8 +286,7 @@ directives.
 
 =head1 RESTRICTIONS
 
-You shouldn't use 8-bit characters in the input stream, as these
-will be used by the translator.
+None at this time.
 
 =head1 BUGS
 
@@ -311,7 +304,15 @@ Tom Christiansen such that Larry probably doesn't recognize it anymore.
 $/ = "";
 $cutting = 1;
 
-($version,$patch) = `\PATH=.:..:\$PATH; perl -v` =~ /version (\d\.\d{3}(?: +)(?:\S+)?)(?:.*patchlevel (\d\S*))?/s;
+# We try first to get the version number from a local binary, in case we're
+# running an installed version of Perl to produce documentation from an
+# uninstalled newer version's pod files.
+if ($^O ne 'plan9') {
+  ($version,$patch) =
+    `\PATH=.:..:\$PATH; perl -v` =~ /version (\d\.\d{3})(?:_(\d{2}))?/;
+}
+# No luck; we'll just go with the running Perl's version
+($version,$patch) = $] =~ /^(.{5})(\d{2})?/ unless $version;
 $DEF_RELEASE  = "perl $version";
 $DEF_RELEASE .= ", patch $patch" if $patch;
 
@@ -952,9 +953,8 @@ sub noremap {
 }
 
 sub init_noremap {
-    if ( /[\200-\377]/ ) {
-	warn "$0: high bit char in input stream in paragraph $. of $ARGV\n";
-    }
+	# escape high bit characters in input stream
+	s/([\200-\377])/"E<".ord($1).">"/ge;
 }
 
 sub clear_noremap {
@@ -969,13 +969,19 @@ sub clear_noremap {
     # otherwise the interative \w<> processing would have
     # been hosed by the E<gt>
     s {
-	    E<	
-	    ( [A-Za-z]+ )	
+	    E<
+	    (
+	        ( \d + ) 
+	        | ( [A-Za-z]+ )	
+	    )
 	    >	
     } {
-	 do {	
-	     exists $HTML_Escapes{$1}
-		? do { $HTML_Escapes{$1} }
+	 do {
+	     defined $2
+		? chr($2)
+		:	
+	     exists $HTML_Escapes{$3}
+		? do { $HTML_Escapes{$3} }
 		: do {
 		    warn "$0: Unknown escape in paragraph $. of $ARGV: ``$&''\n";
 		    "E<$1>";
