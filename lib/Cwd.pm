@@ -168,6 +168,7 @@ if ($^O eq 'os2' && defined &sys_cwd && defined &sys_abspath) {
 
 eval {
     require XSLoader;
+    undef *Cwd::fastcwd; # avoid redefinition warning
     XSLoader::load('Cwd');
 };
 
