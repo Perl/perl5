@@ -545,7 +545,7 @@ Here is an efficient way to delete all files older than a week:
 This is faster than using the B<-exec> switch of B<find> because you don't
 have to start a process on every filename found.  It does suffer from
 the bug of mishandling newlines in pathnames, which you can fix if
-you
+you follow the example under B<-0>. 
 
 C<BEGIN> and C<END> blocks may be used to capture control before or after
 the implicit program loop, just as in B<awk>.
