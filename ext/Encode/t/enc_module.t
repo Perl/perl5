@@ -51,7 +51,7 @@ while(<STDIN>){
     is ($cmp[$i++], $_, "encoding vs. STDIN - $i");
 }
 
-close STDOUT;
+close STDOUT unless $^O eq 'freebsd';
 unlink $file1 unless $cmp;
 __END__
 
