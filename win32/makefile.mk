@@ -17,7 +17,7 @@ INST_TOP	*= $(INST_DRV)\perl5004.5x
 
 #
 # uncomment to enable threads-capabilities
-#USE_THREADS	*= define
+USE_THREADS	*= define
 
 #
 # uncomment one
@@ -39,6 +39,13 @@ CCTYPE		*= BORLAND
 # if you didn't set CRYPT_SRC and if you have des_fcrypt() available in a
 # library, uncomment this, and make sure the library exists (see README.win32)
 #CRYPT_LIB	*= des_fcrypt.lib
+
+#
+# set this if you wish to use perl's malloc
+# WARNING: Turning this on/off WILL break binary compatibility with extensions
+# you may have compiled with/without it.  Be prepared to recompile all extensions
+# if you change the default.
+PERL_MALLOC	*= define
 
 #
 # set the install locations of the compiler include/libraries
@@ -65,6 +72,10 @@ D_CRYPT=undef
 .ELSE
 D_CRYPT=define
 CRYPT_FLAG=-DHAVE_DES_FCRYPT
+.ENDIF
+
+.IF "$(PERL_MALLOC)" == ""
+PERL_MALLOC	*= undef
 .ENDIF
 
 #BUILDOPT	*= -DMULTIPLICITY 
@@ -298,6 +309,11 @@ NOOP=@echo
 CRYPT_OBJ=$(CRYPT_SRC:db:+$(o))
 .ENDIF
 
+.IF "$(PERL_MALLOC)" == "define"
+MALLOC_SRC	= ..\malloc.c
+MALLOC_OBJ	= ..\malloc$(o)
+.ENDIF
+
 #
 # filenames given to xsubpp must have forward slashes (since it puts
 # full pathnames in #line strings)
@@ -330,7 +346,7 @@ CORE_C=	..\av.c		\
 	..\toke.c	\
 	..\universal.c	\
 	..\util.c	\
-	..\malloc.c	\
+	$(MALLOC_SRC)	\
 	$(CRYPT_SRC)
 
 CORE_OBJ= ..\av$(o)	\
@@ -360,7 +376,7 @@ CORE_OBJ= ..\av$(o)	\
 	..\toke$(o)	\
 	..\universal$(o)\
 	..\util$(o)	\
-	..\malloc$(o)	\
+	$(MALLOC_OBJ)	\
 	$(CRYPT_OBJ)
 
 WIN32_C = perllib.c \
@@ -469,6 +485,7 @@ CFG_VARS=   "INST_DRV=$(INST_DRV)"		\
 	    "ccflags=$(OPTIMIZE) $(DEFINES)"	\
 	    "cf_email=$(EMAIL)"			\
 	    "d_crypt=$(D_CRYPT)"		\
+	    "d_mymalloc=$(PERL_MALLOC)"		\
 	    "libs=$(LIBFILES:f)"		\
 	    "incpath=$(CCINCDIR)"		\
 	    "libpth=$(strip $(CCLIBDIR) $(LIBFILES:d))" \
@@ -534,8 +551,7 @@ $(CONFIGPM) : $(MINIPERL) ..\config.sh config_h.PL ..\minimod.pl
 	$(XCOPY) ..\*.h $(COREDIR)\*.*
 	$(XCOPY) *.h $(COREDIR)\*.*
 	$(RCOPY) include $(COREDIR)\*.*
-	$(MINIPERL) -I..\lib config_h.PL || $(MAKE) CCTYPE=$(CCTYPE) \
-	    CFG=$(CFG) $(CONFIGPM)
+	$(MINIPERL) -I..\lib config_h.PL || $(MAKE) $(MAKEMACROS) $(CONFIGPM)
 
 LKPRE = INPUT (
 LKPOST = )

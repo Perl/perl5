@@ -453,11 +453,8 @@ system error.  This is more specific information about the last
 system error than that provided by C<$!>.  This is particularly
 important when C<$!> is set to B<EVMSERR>.
 
-Under OS/2, C<$^E> is set based on the value returned by the OS/2
-call C<_syserrno()> only when a call into the OS/2 API generates
-an error.  In this case, C<$!> is set to a special value to
-indicate that C<$^E> should be checked.  Otherwise, C<$^E> is
-just the same as C<$!>.
+Under OS/2, C<$^E> is set to the error code of the last call to
+OS/2 API either via CRT, or directly from perl.
 
 Under Win32, C<$^E> always returns the last error information
 reported by the Win32 call C<GetLastError()> which describes
