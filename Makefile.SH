@@ -867,52 +867,58 @@ makedepend: makedepend.SH config.sh
 # Cannot delegate rebuilding of t/perl to make
 # to allow interlaced test and minitest
 
-_test-prep: miniperl $(PERL)$(EXE_EXT) preplibrary utilities $(dynamic_ext) $(nonxs_ext) $(TEST_PERL_DLL)
+_test_prep: $(PERL)$(EXE_EXT)
 	cd t && (rm -f $(PERL)$(EXE_EXT); $(LNS) ../$(PERL)$(EXE_EXT) $(PERL)$(EXE_EXT))
 
-test-prep: 
-	PERL=./perl $(MAKE) _test-prep
+test_prep: miniperl ./perl$(EXE_EXT) preplibrary utilities $(dynamic_ext) $(nonxs_ext) $(TEST_PERL_DLL)
+	PERL=./perl $(MAKE) _test_prep
 
-_test-tty:
+_test_tty:
 	cd t && $(LDLIBPTH) $(PERL_DEBUG) $(PERL) TEST $(UTF8) </dev/tty
 
-_test-notty:
+_test_notty:
 	cd t && $(LDLIBPTH) $(PERL_DEBUG) PERL_SKIP_TTY_TEST=1 $(PERL) TEST $(UTF8)
 
 # The second branch is for testing without a tty or controlling terminal,
 # see t/op/stat.t
 _test:
 	if (true </dev/tty) >/dev/null 2>&1; then \
-	  $(MAKE) _test-tty; \
+	  $(MAKE) _test_tty; \
 	else \
-	  $(MAKE) _test-notty; \
+	  $(MAKE) _test_notty; \
 	fi
 
-test check: test-prep
+test check: test_prep
 	PERL=./perl $(MAKE) _test
 
-test-tty: test-prep
-	PERL=./perl $(MAKE) _test-tty
+test_tty: test_prep
+	PERL=./perl $(MAKE) _test_tty
 
-test-notty: test-prep
-	PERL=./perl $(MAKE) _test-notty
+test_notty: test_prep
+	PERL=./perl $(MAKE) _test_notty
 
-utest ucheck: test-prep
+utest ucheck: test_prep
 	PERL=./perl UTF8=-utf8 $(MAKE) _test
+
+# Backward compat.
+
+test-tty:	test_tty
+
+test-notty:	test_notty
 
 # Targets for Third Degree testing.
 
-test-prep.third:
-	PERL=./perl.third $(MAKE) _test-prep
+test_prep.third: test_prep perl.third
+	PERL=./perl.third $(MAKE) _test_prep
 
-test.third check.third:	test-prep.third perl.third
+test.third check.third:	test_prep.third perl.third
 	PERL=./perl.third PERL_DEBUG=PERL_3LOG=1 $(MAKE) _test
 
-utest.third ucheck.third: test-prep.third perl.third
+utest.third ucheck.third: test_prep.third perl.third
 	PERL=./perl.third PERL_DEBUG=PERL_3LOG=1UTF=-utf8 $(MAKE) _test
 
-test-notty.third: test-prep.third perl.third
-	PERL=./perl.third $(MAKE) PERL_DEBUG=PERL_3LOG=1 _test-notty
+test_notty.third: test_prep.third perl.third
+	PERL=./perl.third $(MAKE) PERL_DEBUG=PERL_3LOG=1 _test_notty
 
 # Can't depend on lib/Config.pm because that might be where miniperl
 # is crashing.
