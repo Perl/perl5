@@ -2059,6 +2059,14 @@ you say
 the compiler will precompute the number which that expression
 represents so that the interpreter won't have to.
 
+=head2 No-ops
+
+Perl doesn't officially have a no-op operator, but the bare constants
+C<0> and C<1> are special-cased to not produce a warning in a void
+context, so you can for example safely do
+
+    1 while foo();
+
 =head2 Bitwise String Operators
 
 Bitstrings of any size may be manipulated by the bitwise operators
