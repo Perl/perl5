@@ -774,11 +774,11 @@ win32_readdir(DIR *dirp)
     if (dirp->curr) {
 	/* first set up the structure to return */
 	len = strlen(dirp->curr);
-	dirp->dirstr.d_name = dirp->curr;
+	strcpy(dirp->dirstr.d_name, dirp->curr);
 	dirp->dirstr.d_namlen = len;
 
 	/* Fake an inode */
-	dirp->dirstr.d_ino = (long)dirp->curr;
+	dirp->dirstr.d_ino = dirp->curr - dirp->start;
 
 	/* Now set up for the next call to readdir */
 	dirp->curr += len + 1;
@@ -792,8 +792,6 @@ win32_readdir(DIR *dirp)
 
 	    /* finding the next file that matches the wildcard
 	     * (which should be all of them in this directory!).
-	     * the variable idx should point one past the null terminator
-	     * of the previous string found.
 	     */
 	    if (USING_WIDE()) {
 		res = FindNextFileW(dirp->handle, &wFindData);
@@ -808,15 +806,18 @@ win32_readdir(DIR *dirp)
 		    ptr = aFindData.cFileName;
 	    }
 	    if (res) {
-		len = strlen(ptr)+1;
+		long endpos = dirp->end - dirp->start;
+		long newsize = endpos + strlen(ptr) + 1;
 		/* bump the string table size by enough for the
 		 * new name and it's null terminator */
-		while (dirp->end + len > dirp->start + dirp->size) {
+		while (newsize > dirp->size) {
+		    long curpos = dirp->curr - dirp->start;
 		    dirp->size *= 2;
 		    Renew(dirp->start, dirp->size, char);
+		    dirp->curr = dirp->start + curpos;
 		}
-		strcpy(dirp->end, ptr);
-		dirp->end += idx;
+		strcpy(dirp->start + endpos, ptr);
+		dirp->end = dirp->start + newsize;
 		dirp->nfiles++;
 	    }
 	    else
@@ -858,7 +859,7 @@ win32_closedir(DIR *dirp)
 {
     dTHXo;
     if (dirp->handle != INVALID_HANDLE_VALUE)
-	FindClose(p->handle);
+	FindClose(dirp->handle);
     Safefree(dirp->start);
     Safefree(dirp);
     return 1;

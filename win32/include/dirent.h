@@ -26,7 +26,7 @@ typedef struct direct
 {
 	long	d_ino;			/* inode number (not used by MS-DOS)  */
 	long	d_namlen;		/* name length  */
-	char	*d_name;		/* file name  */
+	char	d_name[257];		/* file name  */
 } _DIRECT;
 
 /* structure for dir operations */
