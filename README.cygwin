@@ -31,7 +31,7 @@ about this project can be found at:
 
 A recent net or commercial release of Cygwin is required.
 
-At the time this document was last updated, Cygwin 1.3.6 was current.
+At the time this document was last updated, Cygwin 1.3.9 was current.
 
 
 =head2 Cygwin Configuration
@@ -135,11 +135,7 @@ The MD5 port was done by Andy Piper:
 
 =item * C<-lgdbm> (C<use GDBM_File>)
 
-GDBM is available for Cygwin.  GDBM's ndbm/dbm compatibility feature
-also makes C<NDBM_File> and C<ODBM_File> possible (although they add
-little extra value).
-
-NOTE: The ndbm/dbm emulations only completely work on NTFS partitions.
+GDBM is available for Cygwin.
 
 =item * C<-ldb> (C<use DB_File>)
 
@@ -205,12 +201,17 @@ These are B<not> yet available with Cygwin.
 
 =item * C<-Dusethreads>
 
-POSIX threads are B<not> yet implemented in Cygwin.
+POSIX threads are B<not> yet implemented in Cygwin completely.
 
 =item * C<-Duselargefiles>
 
 Although Win32 supports large files, Cygwin currently uses 32-bit integers
 for internal size and position calculations.
+
+=item * C<-Dmksymlinks>
+
+Use this to build perl outside of the source tree.  This works with Cygwin.
+Details can be found in the F<INSTALL> document.
 
 =back
 
@@ -342,7 +343,7 @@ to portability, more information can be found in the Cygwin documentation.
 
 =item * Pathnames
 
-Cygwin pathnames can be separated by forward (F</>) or backward (F<\>)
+Cygwin pathnames can be separated by forward (F</>) or backward (F<\\>)
 slashes.  They may also begin with drive letters (F<C:>) or Universal
 Naming Codes (F<//UNC>).  DOS device names (F<aux>, F<con>, F<prn>,
 F<com*>, F<lpt?>, F<nul>) are invalid as base filenames.  However, they
@@ -401,7 +402,7 @@ access by native Win32 programs).
 
 This will install Perl, including I<man> pages.
 
-  make install | tee log.make-install
+  make install 2>&1 | tee log.make-install
 
 NOTE: If C<STDERR> is redirected `C<make install>' will B<not> prompt
 you to install I<perl> into F</usr/bin>.
@@ -494,20 +495,10 @@ be kept as clean as possible.
 
 When I<make> starts, it warns about overriding commands for F<perlmain.o>.
 
-`C<make clean>' does not remove library F<.def> or F<.exe.stackdump>
-files.
-
-The I<ld2> script contains references to the source directory.  You should
-change these to $installbin after `C<make install>'.
-
 Support for swapping real and effective user and group IDs is incomplete.
 On WinNT Cygwin provides setuid(), seteuid(), setgid() and setegid().
 However, additional Cygwin calls for manipulating WinNT access tokens
 and security contexts are required.
-
-When building DLLs, `C<dllwrap --export-all-symbols>' is used to export
-global symbols.  It might be better to generate an explicit F<.def> file
-(see F<makedef.pl>).  Also, DLLs can now be build with `C<gcc -shared>'.
 
 =head1 AUTHORS
 
@@ -516,8 +507,9 @@ Eric Fifer <egf7@columbia.edu>,
 alexander smishlajev <als@turnhere.com>,
 Steven Morlock <newspost@morlock.net>,
 Sebastien Barre <Sebastien.Barre@utc.fr>,
-Teun Burgers <burgers@ecn.nl>.
+Teun Burgers <burgers@ecn.nl>,
+Gerrit Haase <gh@familiehaase.de>.
 
 =head1 HISTORY
 
-Last updated: 9 November 2000
+Last updated: 2002-02-27

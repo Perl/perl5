@@ -62,7 +62,7 @@ if ($args !~ /\-o (\S+)/) {
   $command .=" -Wl,--output-exp=$libname$EXP_EXT" if $EXP_EXT;
   $command .=" -Wl,--out-implib=$libname.dll$LIB_EXT" if $LIB_EXT;
   $command .=" -Wl,--export-all-symbols" if $EXPORT_ALL;
-  $command .=" -Wl,--enable-auto-import -Wl,--stack,67108864"; # always
+  $command .=" -Wl,--enable-auto-import -Wl,--stack,8388608"; # always
 
   # other args are passed through
   shellexec("$command \\\n$args\n");
