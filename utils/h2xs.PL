@@ -903,7 +903,7 @@ if( @path_h ){
             for my $item (split /,/, $enum_body) {
                 my ($key, $declared_val) = $item =~ /(\w+)\s*(?:=\s*(.*))?/;
                 $val = defined($declared_val) && length($declared_val) ? $declared_val : 1 + $val;
-                $seen_define{$key} = $declared_val;
+                $seen_define{$key} = $val;
                 $const_names{$key}++;
             }
         } # while (...)
