@@ -20,7 +20,7 @@
 
 # $Id: Head.U,v 3.0.1.9 1997/02/28 15:02:09 ram Exp $
 #
-# Generated on Wed Oct 14 17:00:29 EET DST 1998 [metaconfig 3.0 PL70]
+# Generated on Tue Oct 20 11:18:44 EET DST 1998 [metaconfig 3.0 PL70]
 # (with additional metaconfig patches by jhi@iki.fi)
 
 cat >/tmp/c1$$ <<EOF
@@ -10636,7 +10636,7 @@ fi
 $rm -f foo* bar* 
 
 
-: see whether the various POSIXish _yields exist within given cccmd
+: see whether the various POSIXish _yields exist
 $cat >try.c <<EOP
 #include <pthread.h>
 #include <stdio.h>
@@ -10658,12 +10658,17 @@ EOP
 set try -DSCHED_YIELD
 if eval $compile; then
     val="$define"
-    echo 'sched_yield() found.' >&4
     sched_yield='sched_yield()'
 else
     val="$undef"
-    echo 'sched_yield() NOT found.' >&4
 fi
+case "$usethreads" in
+$define)
+	case "$val" in
+	$define) echo 'sched_yield() found.' >&4	;;
+	*)	 echo 'sched_yield() NOT found.' >&4	;;
+	esac
+esac
 set d_sched_yield
 eval $setvar
 
@@ -10685,9 +10690,13 @@ else
 	val="$undef"
     fi
 fi
-case "$val" in
-$define) echo 'pthread_yield() found.' >&4	;;
-*)	 echo 'pthread_yield() NOT found.' >&4	;;
+case "$usethreads" in
+$define)
+	case "$val" in
+	$define) echo 'pthread_yield() found.' >&4	;;
+	*)	 echo 'pthread_yield() NOT found.' >&4	;;
+	esac
+	;;
 esac
 set d_pthread_yield
 eval $setvar
