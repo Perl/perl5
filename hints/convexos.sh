@@ -15,6 +15,7 @@ osvers=$4
 # a mixed system, so we undef d_getpgrp.
 #   Andy Dougherty		doughera@lafcol.lafayette.edu
 #
-case "$osvers" in
-10.2)	d_getpgrp='undef' ;;
-esac
+if [ "$osvers" -ge 10.2 ]
+then 
+	d_getpgrp='undef' ;;
+fi
