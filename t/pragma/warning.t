@@ -4,11 +4,12 @@ BEGIN {
     chdir 't' if -d 't';
     @INC = '../lib';
     $ENV{PERL5LIB} = '../lib';
+    require Config; import Config;
 }
 
 $| = 1;
 
-my $Is_VMS = $^O eq 'VMS';
+my $Is_VMS     = $^O eq 'VMS';
 my $Is_MSWin32 = $^O eq 'MSWin32';
 my $tmpfile = "tmp0000";
 my $i = 0 ;
@@ -86,11 +87,24 @@ for (@prgs){
     $results =~ s/\n%[A-Z]+-[SIWEF]-.*$// if $Is_VMS;  # clip off DCL status msg
     $expected =~ s/\n+$//;
     my $prefix = ($results =~ s/^PREFIX\n//) ;
+    # any special options? (OPTIONS foo bar zap)
+    my $option_regex = 0;
+    if ($expected =~ s/^OPTIONS? (.+)\n//) {
+	foreach my $option (split(' ', $1)) {
+	    if ($option eq 'regex') { # allow regular expressions
+		$option_regex = 1;
+	    } else {
+		die "$0: Unknown OPTION '$option'\n";
+	    }
+	}
+    }
     if ( $results =~ s/^SKIPPED\n//) {
 	print "$results\n" ;
     }
-    elsif (($prefix and $results !~ /^\Q$expected/) or
-	   (!$prefix and $results ne $expected)){
+    elsif (($prefix  && (( $option_regex && $results !~ /^$expected/) ||
+			 (!$option_regex && $results !~ /^\Q$expected/))) or
+	   (!$prefix && (( $option_regex && $results !~ /^$expected/) ||
+			 (!$option_regex && $results ne $expected)))) {
         print STDERR "PROG: $switch\n$prog\n";
         print STDERR "EXPECTED:\n$expected\n";
         print STDERR "GOT:\n$results\n";
