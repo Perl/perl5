@@ -452,6 +452,9 @@ $SIG{__WARN__} = sub {
     warn @_ unless $_[0] =~ /^Enourmous test number/ ||
                    $_[0] =~ /^Can't detailize/
 };
+
+$SAMPLE_TESTS = VMS::Filespec::unixify($SAMPLE_TESTS) if $^O eq 'VMS';
+
 while( my($test, $expect) = each %samples ) {
     for (0..$#{$expect->{details}}) {
         $expect->{details}[$_]{type} = ''

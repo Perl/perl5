@@ -52,6 +52,8 @@ $strap->{callback} = sub {
     push @out, $type;
 };
                             
+$SAMPLE_TESTS = VMS::Filespec::unixify($SAMPLE_TESTS) if $^O eq 'VMS';
+
 while( my($test, $expect) = each %samples ) {
     local @out = ();
 

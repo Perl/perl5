@@ -423,6 +423,8 @@ use_ok('Test::Harness');
 
 tie *NULL, 'My::Dev::Null' or die $!;
 
+$SAMPLE_TESTS = VMS::Filespec::unixify($SAMPLE_TESTS) if $^O eq 'VMS';
+
 while (my($test, $expect) = each %samples) {
     # _run_all_tests() runs the tests but skips the formatting.
     my($totals, $failed);
