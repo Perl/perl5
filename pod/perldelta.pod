@@ -3037,7 +3037,7 @@ existing code that relies on the broken semantics. It is important
 that you check and alter any such code now.  In the future release,
 localising a tied array or hash will convert that variable into a new,
 empty, and B<untied> array or hash. At the end of the block, the variable
-will be repointed at the original tied thinggy. Note that no tied methods
+will be repointed at the original tied thingy. Note that no tied methods
 will be called at any point during this process. (With the existing
 behaviour, the variable remains tied while localised.)
 
