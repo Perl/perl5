@@ -24,6 +24,13 @@
 char *getenv _((char *)); /* Usually in <stdlib.h> */
 #endif
 
+#ifdef I_FCNTL
+#include <fcntl.h>
+#endif
+#ifdef I_SYS_FILE
+#include <sys/file.h>
+#endif
+
 dEXTCONST char rcsid[] = "perl.c\nPatch level: ###\n";
 
 #ifdef IAMSUID
@@ -679,21 +686,36 @@ setuid perl scripts securely.\n");
 	    if (euid != uid || egid != gid)
 		croak("No -e allowed in setuid scripts");
 	    if (!e_fp) {
+#ifdef HAS_UMASK
+		int oldumask = PerlLIO_umask(0177);
+#endif
 	        e_tmpname = savepv(TMPPATH);
 #ifdef HAS_MKSTEMP
 		e_tmpfd = PerlLIO_mkstemp(e_tmpname);
-
-		if (e_tmpfd < 0)
-		    croak("Can't mkstemp() temporary file \"%s\"", e_tmpname);
-		e_fp = PerlIO_fdopen(e_tmpfd,"w");
 #else /* use mktemp() */
 		(void)PerlLIO_mktemp(e_tmpname);
 		if (!*e_tmpname)
-		    croak("Can't mktemp() temporary file \"%s\"", e_tmpname);
+		    croak("Cannot generate temporary filename");
+# if defined(HAS_OPEN3) && defined(O_EXCL)
+		e_tmpfd = open(e_tmpname,
+			       O_WRONLY | O_CREAT | O_EXCL,
+			       0600);
+# else
+		(void)UNLINK(e_tmpname);
+		/* Yes, potential race.  But at least we can say we tried. */
 		e_fp = PerlIO_open(e_tmpname,"w");
-#endif /* HAS_MKSTEMP */
+# endif
+#endif /* ifdef HAS_MKSTEMP */
+#if defined(HAS_MKSTEMP) || (defined(HAS_OPEN3) && defined(O_EXCL))
+		if (e_tmpfd < 0)
+		    croak("Cannot create temporary file \"%s\"", e_tmpname);
+		e_fp = PerlIO_fdopen(e_tmpfd,"w");
+#endif
   		if (!e_fp)
- 		    croak("Cannot open temporary file \"%s\"", e_tmpname);
+ 		    croak("Cannot create temporary file \"%s\"", e_tmpname);
+#ifdef HAS_UMASK
+		(void)PerlLIO_umask(oldumask);
+#endif
 	    }
 	    if (*++s)
 		PerlIO_puts(e_fp,s);
