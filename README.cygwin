@@ -193,24 +193,21 @@ Win9x the shm*() functions seem to hang.
 
 =head2 Configure-time Options
 
-The F<INSTALL> document describes several Configure-time options.
-Some of these will work with Cygwin, others are not yet possible.  Also,
-some of these are experimental.
+The F<INSTALL> document describes several Configure-time options.  Some of
+these will work with Cygwin, others are not yet possible.  Also, some of
+these are experimental.  You can either select an option when Configure
+prompts you or you can define (undefine) symbols on the command line.
 
 =over 4
 
 =item * C<-Uusedl>
 
-If you want to force Perl to be compiled statically, you can either
-choose this when Configure prompts you or you can use the Configure
-command line option.
+Undefining this symbol forces Perl to be compiled statically.
 
 =item * C<-Uusemymalloc>
 
 By default Perl uses the malloc() included with the Perl source.  If you
-want to force Perl to build with the system malloc(), you can either
-choose this when Configure prompts you or you can use the Configure
-command line option.
+want to force Perl to build with the system malloc() undefine this symbol.
 
 =item * C<-Dusemultiplicity>
 
@@ -221,7 +218,7 @@ more than one interpreter instance.  This works with the Cygwin port.
 
 The PerlIO abstraction works with the Cygwin port.
 
-=item * C<-Duse64bits>
+=item * C<-Duse64bitint>
 
 I<gcc> supports 64-bit integers.  However, several additional long long
 functions are necessary to use them within Perl (I<{strtol,strtoul}l>).
@@ -240,7 +237,7 @@ POSIX threads are B<not> yet implemented in Cygwin.
 
 =item * C<-Duselargefiles>
 
-Although Win32 supports large files, Cygwin currently uses 32-bit ints
+Although Win32 supports large files, Cygwin currently uses 32-bit integers
 for internal size and position calculations.
 
 =back
@@ -264,6 +261,18 @@ hint file.
 
 You should keep the recommended value.
 
+=item * dlsym
+
+I<ld2> is needed to build dynamic libraries, but it does not exist
+when dlsym() checking occurs (it is not created until `C<make>' runs).
+You will see the following message:
+
+  Checking whether your dlsym() needs a leading underscore ...
+  I can't compile and run the test program.
+  I'm guessing that dlsym doesn't need a leading underscore.
+
+Since the guess is correct, this is not a problem.
+
 =item * Win9x and d_eofnblk
 
 Win9x does not correctly report C<EOF> with a non-blocking read on a
@@ -286,6 +295,16 @@ Configure reports:
   Your stdio doesn't appear very std.
 
 This is correct.
+
+=item * Compiler/Preprocessor defines
+
+The following error occurs because of the Cygwin C<#define> of
+C<_LONG_DOUBLE>:
+
+  Guessing which symbols your C compiler and preprocessor define...
+  try.c:3847: parse error
+
+This failure does not seem to cause any problems.
 
 =back
 
@@ -609,4 +628,4 @@ Teun Burgers E<lt>burgers@ecn.nlE<gt>.
 
 =head1 HISTORY
 
-Last updated: 25 February 2000
+Last updated: 1 March 2000
