@@ -13,6 +13,7 @@ Changes5.002		Differences between 5.001 and 5.002
 Changes5.003		Differences between 5.002 and 5.003
 Changes5.004		Differences between 5.003 and 5.004
 Changes5.005		Differences between 5.004 and 5.005
+Changes5.6		Differences between 5.005 and 5.6.1
 Changes			Differences from previous version
 config_h.SH		Produces config.h
 configpm		Produces lib/Config.pm
