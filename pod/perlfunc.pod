@@ -2230,6 +2230,11 @@ element of a list returned by grep (for example, in a C<foreach>, C<map>
 or another C<grep>) actually modifies the element in the original list.
 This is usually something to be avoided when writing clear code.
 
+If C<$_> is lexical in the scope where the C<grep> appears (because it has
+been declared with C<my $_>) then, in addition the be locally aliased to
+the list elements, C<$_> keeps being lexical inside the block; i.e. it
+can't be seen from the outside, avoiding any potential side-effects.
+
 See also L</map> for a list composed of the results of the BLOCK or EXPR.
 
 =item hex EXPR
@@ -2614,6 +2619,11 @@ it can cause bizarre results if the elements of LIST are not variables.
 Using a regular C<foreach> loop for this purpose would be clearer in
 most cases.  See also L</grep> for an array composed of those items of
 the original list for which the BLOCK or EXPR evaluates to true.
+
+If C<$_> is lexical in the scope where the C<map> appears (because it has
+been declared with C<my $_>) then, in addition the be locally aliased to
+the list elements, C<$_> keeps being lexical inside the block; i.e. it
+can't be seen from the outside, avoiding any potential side-effects.
 
 C<{> starts both hash references and blocks, so C<map { ...> could be either
 the start of map BLOCK LIST or map EXPR, LIST. Because perl doesn't look

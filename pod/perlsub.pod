@@ -588,6 +588,8 @@ separator.
 Notably, if you want to work with a brand new value of the default scalar
 $_, and avoid the potential problem listed above about $_ previously
 carrying a magic value, you should use C<local *_> instead of C<local $_>.
+As of perl 5.9.1, you can also use the lexical form of C<$_> (declaring it
+with C<my $_>), which avoids completely this problem.
 
 =head3 Localization of elements of composite types
 

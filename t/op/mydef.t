@@ -5,7 +5,7 @@ BEGIN {
     @INC = '../lib';
 }
 
-print "1..48\n";
+print "1..56\n";
 
 my $test = 0;
 sub ok ($$) {
@@ -55,13 +55,15 @@ ok( $_ eq 'global', 's/// on global $_ again' );
 
 $_ = "global";
 {
+    my $_ = 'local';
     for my $_ ("foo") {
 	ok( $_ eq "foo", 'for my $_' );
 	/(.)/;
 	ok( $1 eq "f", '...m// in for my $_' );
 	ok( our $_ eq 'global', '...our $_ inside for my $_' );
     }
-    ok( $_ eq 'global', '...$_ restored outside for my $_' );
+    ok( $_ eq 'local', '...my $_ restored outside for my $_' );
+    ok( our $_ eq 'global', '...our $_ restored outside for my $_' );
 }
 {
     for our $_ ("bar") {
@@ -83,10 +85,20 @@ $_ = "global";
 	ok( /^[67]\z/, 'local lexical $_ is seen in map' );
 	{ ok( our $_ eq 'global', 'our $_ still visible' ); }
 	ok( $_ == 6 || $_ == 7, 'local lexical $_ is still seen in map' );
+	{ my $_ ; ok( !defined, 'nested my $_ is undefined' ); }
     } 6, 7;
     ok( $buf eq 'gxgx', q/...map doesn't modify outer lexical $_/ );
     ok( $_ eq 'x', '...my $_ restored outside map' );
     ok( our $_ eq 'global', '...our $_ restored outside map' );
+    map { my $_; ok( !defined, 'redeclaring $_ in map block undefs it' ); } 1;
+}
+{ map { my $_; ok( !defined, 'declaring $_ in map block undefs it' ); } 1; }
+{
+    sub tmap3 () { return $_ };
+    my $_ = 'local';
+    sub tmap4 () { return $_ };
+    my $x = join '-', map $_.tmap3.tmap4, 1 .. 2;
+    ok( $x eq '1globallocal-2globallocal', 'map without {}' );
 }
 {
     my $buf = '';
@@ -103,6 +115,14 @@ $_ = "global";
     ok( $buf eq 'gygy', q/...grep doesn't modify outer lexical $_/ );
     ok( $_ eq 'y', '...my $_ restored outside grep' );
     ok( our $_ eq 'global', '...our $_ restored outside grep' );
+}
+{
+    sub tgrep3 () { return $_ };
+    my $_ = 'local';
+    sub tgrep4 () { return $_ };
+    my $x = join '-', grep $_=$_.tgrep3.tgrep4, 1 .. 2;
+    ok( $x eq '1globallocal-2globallocal', 'grep without {} with side-effect' );
+    ok( $_ eq 'local', '...but without extraneous side-effects' );
 }
 {
     my $s = "toto";
