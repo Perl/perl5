@@ -500,7 +500,7 @@ force_next(I32 type)
 }
 
 static char *
-force_word(register char *start, int token, int check_keyword, int allow_pack, int allow_tick)
+force_word(register char *start, int token, int check_keyword, int allow_pack, int allow_initial_tick)
 {
     register char *s;
     STRLEN len;
@@ -509,7 +509,7 @@ force_word(register char *start, int token, int check_keyword, int allow_pack, i
     s = start;
     if (isIDFIRST(*s) ||
 	(allow_pack && *s == ':') ||
-	(allow_tick && *s == '\'') )
+	(allow_initial_tick && *s == '\'') )
     {
 	s = scan_word(s, tokenbuf, sizeof tokenbuf, allow_pack, &len);
 	if (check_keyword && keyword(tokenbuf, len))
@@ -3542,7 +3542,7 @@ yylex(void)
 	    if (*s == ';' || *s == ')')		/* probably a close */
 		croak("sort is now a reserved word");
 	    expect = XTERM;
-	    s = force_word(s,WORD,TRUE,TRUE,TRUE);
+	    s = force_word(s,WORD,TRUE,TRUE,FALSE);
 	    LOP(OP_SORT,XREF);
 
 	case KEY_split:

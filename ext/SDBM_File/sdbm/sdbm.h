@@ -49,7 +49,7 @@ typedef struct {
 
 extern datum nullitem;
 
-#if defined(__STDC__) || defined(__cplusplus)
+#if defined(__STDC__) || defined(__cplusplus) || defined(CAN_PROTOTYPE)
 #define proto(p) p
 #else
 #define proto(p) ()

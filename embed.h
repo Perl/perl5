@@ -254,7 +254,6 @@
 #define he_root			Perl_he_root
 #define hexdigit		Perl_hexdigit
 #define hints			Perl_hints
-#define hoistmust		Perl_hoistmust
 #define hv_clear		Perl_hv_clear
 #define hv_delayfree_ent	Perl_hv_delayfree_ent
 #define hv_delete		Perl_hv_delete
@@ -911,6 +910,8 @@
 #define rsignal_save		Perl_rsignal_save
 #define rsignal_state		Perl_rsignal_state
 #define runops			Perl_runops
+#define runops_debug		Perl_runops_debug
+#define runops_standard		Perl_runops_standard
 #define rxres_free		Perl_rxres_free
 #define rxres_restore		Perl_rxres_restore
 #define rxres_save		Perl_rxres_save

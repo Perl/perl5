@@ -55,7 +55,7 @@ CCLIBDIR = $(CCHOME)\lib
 CC = bcc32
 LINK32 = tlink32
 LIB32 = tlib
-IMPLIB = implib
+IMPLIB = implib -c
 
 #
 # Options
@@ -64,7 +64,7 @@ RUNTIME  = -D_RTLDLL
 INCLUDES = -I.\include -I. -I.. -I$(CCINCDIR)
 #PCHFLAGS = -H -H$(INTDIR)\bcmoduls.pch 
 DEFINES  = -DWIN32 $(BUILDOPT) 
-LOCDEFS  = -DPERLDLL
+LOCDEFS  = -DPERLDLL -DPERL_CORE
 SUBSYS   = console
 LIBC = cw32mti.lib
 LIBFILES = import32.lib $(LIBC) odbc32.lib odbccp32.lib
@@ -97,7 +97,7 @@ RUNTIME  = -MD
 INCLUDES = -I.\include -I. -I..
 #PCHFLAGS = -Fp$(INTDIR)\vcmoduls.pch -YX 
 DEFINES  = -DWIN32 -D_CONSOLE $(BUILDOPT)
-LOCDEFS  = -DPERLDLL
+LOCDEFS  = -DPERLDLL -DPERL_CORE
 SUBSYS   = console
 
 .IF "$(RUNTIME)" == "-MD"

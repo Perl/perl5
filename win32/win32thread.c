@@ -1,15 +1,15 @@
 #include "EXTERN.h"
 #include "perl.h"
 
-__declspec(thread) struct thread *Perl_current_thread = NULL;
+__declspec(thread) struct perl_thread *Perl_current_thread = NULL;
 
 void
-Perl_setTHR(struct thread *t)
+Perl_setTHR(struct perl_thread *t)
 {
  Perl_current_thread = t;
 }
 
-struct thread *
+struct perl_thread *
 Perl_getTHR(void)
 {
  return Perl_current_thread;
