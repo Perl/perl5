@@ -20,7 +20,7 @@
 
 # $Id: Head.U,v 3.0.1.9 1997/02/28 15:02:09 ram Exp $
 #
-# Generated on Fri Mar 22 17:58:57 EET 2002 [metaconfig 3.0 PL70]
+# Generated on Sun Mar 24 20:31:34 EET 2002 [metaconfig 3.0 PL70]
 # (with additional metaconfig patches by perlbug@perl.org)
 
 cat >c1$$ <<EOF
@@ -5699,7 +5699,7 @@ done >libc.tmp
 $echo $n ".$c"
 $grep fprintf libc.tmp > libc.ptf
 xscan='eval "<libc.ptf $com >libc.list"; $echo $n ".$c" >&4'
-xrun='eval "<libc.tmp $com >libc.list"; echo "done" >&4'
+xrun='eval "<libc.tmp $com >libc.list"; echo "done." >&4'
 xxx='[ADTSIW]'
 if com="$sed -n -e 's/__IO//' -e 's/^.* $xxx  *_[_.]*//p' -e 's/^.* $xxx  *//p'";\
 	eval $xscan;\
