@@ -965,12 +965,13 @@ lib/File/Find/t/taint.t		See if File::Find works with taint
 lib/File/Path.pm		Do things like `mkdir -p' and `rm -r'
 lib/File/Path.t			See if File::Path works
 lib/File/Spec.pm		portable operations on file names
-lib/File/Spec.t			See if File::Spec works
 lib/File/Spec/Epoc.pm		portable operations on EPOC file names
 lib/File/Spec/Functions.pm	Function interface to File::Spec object methods
-lib/File/Spec/Functions.t	See if File::Spec::Functions works
 lib/File/Spec/Mac.pm		portable operations on Mac file names
 lib/File/Spec/OS2.pm		portable operations on OS2 file names
+lib/File/Spec/t/Functions.t     See if File::Spec::Functions works
+lib/File/Spec/t/rel2abs2rel.t   See if File::Spec->rel2abs/abs2rel works
+lib/File/Spec/t/Spec.t		See if File::Spec works
 lib/File/Spec/Unix.pm		portable operations on Unix file names
 lib/File/Spec/VMS.pm		portable operations on VMS file names
 lib/File/Spec/Win32.pm		portable operations on Win32 file names
