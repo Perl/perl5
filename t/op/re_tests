@@ -760,3 +760,5 @@ tt+$	xxxtt	y	-	-
 '(?!\A)x'm	a\nxb\n	y	-	-
 ^(a(b)?)+$	aba	y	-$1-$2-	-a--
 ^(aa(bb)?)+$	aabbaa	y	-$1-$2-	-aa--
+^(a)?a$	a	y	-$1-	--
+^(a)?(?(1)a|b)+$	a	n	-	-
