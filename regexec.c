@@ -1002,7 +1002,7 @@ S_find_byclass(pTHX_ regexp * prog, regnode *c, char *s, char *strend, char *sta
 			    c == (UV)UNICODE_GREEK_SMALL_LETTER_FINAL_SIGMA)
 			    c = (UV)UNICODE_GREEK_SMALL_LETTER_SIGMA;
 			if ( (c == c1 || c == c2 || f == c1 || f == c2)
-			     && (ln == len ||
+			     && (ln == len || ln == foldlen ||
 				 !ibcmp_utf8(s, do_utf8, (I32)(strend - s),
 					     m, UTF, (I32)ln))
 			     && (norun || regtry(prog, s)) )
