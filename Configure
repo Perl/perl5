@@ -20,7 +20,7 @@
 
 # $Id: Head.U,v 3.0.1.9 1997/02/28 15:02:09 ram Exp $
 #
-# Generated on Sat Apr 19 20:43:09 EET DST 2003 [metaconfig 3.0 PL70]
+# Generated on Sat Apr 19 21:10:39 EET DST 2003 [metaconfig 3.0 PL70]
 # (with additional metaconfig patches by perlbug@perl.org)
 
 cat >c1$$ <<EOF
@@ -5481,6 +5481,19 @@ case "$use64bitall" in
 	;;
 esac
 
+case "$d_quad:$use64bitint" in
+$undef:$define)
+	cat >&4 <<EOF
+
+*** You have chosen to use 64-bit integers,
+*** but none cannot be found.
+*** Cannot continue, aborting.
+
+EOF
+	exit 1
+	;;
+esac
+
 : check for length of double
 echo " "
 case "$doublesize" in
@@ -5488,10 +5501,14 @@ case "$doublesize" in
 	echo "Checking to see how big your double precision numbers are..." >&4
 	$cat >try.c <<EOCP
 #include <stdio.h>
+#$i_stdlib I_STDLIB
+#ifdef I_STDLIB
+#include <stdlib.h>
+#endif
 int main()
 {
     printf("%d\n", (int)sizeof(double));
-    return(0);
+    exit(0);
 }
 EOCP
 	set try
@@ -6207,21 +6224,12 @@ case "$use64bitall" in
 	case "$ptrsize" in
 	4)	cat <<EOM >&4
 
-*** You have chosen a maximally 64-bit build, but your pointers
-*** are only 4 bytes wide, disabling maximal 64-bitness.
+*** You have chosen a maximally 64-bit build,
+*** but your pointers are only 4 bytes wide.
+*** Cannot continue, aborting.
 
 EOM
-		use64bitall="$undef"
-		case "$use64bitint" in
-		"$define"|true|[yY]*) ;;
-		*)	cat <<EOM >&4
-
-*** Downgrading from maximal 64-bitness to using 64-bit integers.
-
-EOM
-			use64bitint="$define"
-			;;
-		esac
+		exit 1
 		;;
 	esac
 	;;
