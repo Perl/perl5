@@ -8,7 +8,7 @@ BEGIN {
         print "1..0\n";
         exit 0;
     }
-    print "1..9\n";
+    print "1..11\n";
 }
 END {
     print "not ok 1\n" unless $loaded;
@@ -79,7 +79,7 @@ if ($^O eq 'mpeix' or $^O eq 'MSWin32' or $^O eq 'os2' or $^O eq 'VMS'
     print "ok 6 # skipped\n";
 }
 else {
-    $dir = "PtEeRsLt.dir";
+    $dir = "pteerslt";
     mkdir $dir, 0;
     @a = bsd_glob("$dir/*", GLOB_ERR);
     #print "\@a = ", array(@a);
@@ -124,3 +124,29 @@ unless (@a == 1 and $a[0] eq $ENV{HOME}) {
     print "not ";
 }
 print "ok 9\n";
+
+# GLOB_ALPHASORT (default) should sort alphabetically regardless of case
+mkdir "pteerslt", 0777;
+chdir "pteerslt";
+@f_ascii = qw(A.test B.test C.test a.test b.test c.test);
+@f_alpha = qw(A.test a.test B.test b.test C.test c.test);
+for (@f_ascii) {
+    open T, "> $_";
+    close T;
+}
+$pat = "*.test";
+$ok = 1;
+@g_ascii = bsd_glob($pat, 0);
+for (@f_ascii) {
+    $ok = 0 unless $_ eq shift @g_ascii;
+}
+print $ok ? "ok 10\n" : "not ok 10\n";
+$ok = 1;
+@g_alpha = bsd_glob($pat);
+for (@f_alpha) {
+    $ok = 0 unless $_ eq shift @g_alpha;
+}
+print $ok ? "ok 11\n" : "not ok 11\n";
+unlink @f_ascii;
+chdir "..";
+rmdir "pteerslt";
