@@ -7,19 +7,23 @@
 
 package ExtUtils::MM_VMS;
 
+use strict;
+
 use Carp qw( &carp );
 use Config;
 require Exporter;
 use VMS::Filespec;
 use File::Basename;
 use File::Spec;
-our($Revision, @ISA);
-$Revision = '5.56 (27-Apr-1999)';
+our($Revision, @ISA, $VERSION);
+# All on one line so MakeMaker can see it.
+($VERSION) = ($Revision = '5.56 (27-Apr-1999)') =~ /^([\d.]+)/;
 
 @ISA = qw( File::Spec );
 unshift @MM::ISA, 'ExtUtils::MM_VMS';
 
-Exporter::import('ExtUtils::MakeMaker', '$Verbose', '&neatvalue');
+require ExtUtils::MakeMaker;
+ExtUtils::MakeMaker->import('$Verbose', '&neatvalue');
 
 =head1 NAME
 

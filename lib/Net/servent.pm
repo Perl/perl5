@@ -2,6 +2,7 @@ package Net::servent;
 use strict;
 
 use 5.005_64;
+our $VERSION = '1.00';
 our(@EXPORT, @EXPORT_OK, %EXPORT_TAGS);
 BEGIN {
     use Exporter   ();

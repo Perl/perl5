@@ -2,18 +2,19 @@ package Opcode;
 
 require 5.005_64;
 
+use strict;
+
 our($VERSION, $XS_VERSION, @ISA, @EXPORT_OK);
 
 $VERSION = "1.04";
 $XS_VERSION = "1.03";
 
-use strict;
 use Carp;
 use Exporter ();
 use XSLoader ();
-@ISA = qw(Exporter);
 
 BEGIN {
+    @ISA = qw(Exporter);
     @EXPORT_OK = qw(
 	opset ops_to_opset
 	opset_to_ops opset_to_hex invert_opset

@@ -7,6 +7,8 @@ use vars qw(%layers @layers);
 # Populate hash in non-PerlIO case
 %layers = (crlf => 1, raw => 0) unless (@layers);
 
+our $VERSION = '1.00';
+
 sub import {
     shift;
     die "`use open' needs explicit list of disciplines" unless @_;

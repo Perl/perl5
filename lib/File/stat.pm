@@ -4,6 +4,8 @@ use strict;
 use 5.005_64;
 our(@EXPORT, @EXPORT_OK, %EXPORT_TAGS);
 
+our $VERSION = '1.00';
+
 BEGIN { 
     use Exporter   ();
     @EXPORT      = qw(stat lstat);

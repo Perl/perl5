@@ -1,5 +1,7 @@
 package Tie::SubstrHash;
 
+our $VERSION = '1.00';
+
 =head1 NAME
 
 Tie::SubstrHash - Fixed-table-size, fixed-key-length hashing

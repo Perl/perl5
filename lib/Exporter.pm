@@ -2,87 +2,84 @@ package Exporter;
 
 require 5.001;
 
-$ExportLevel = 0;
-$Verbose ||= 0;
-$VERSION = '5.562';
+use strict;
+no strict 'refs';
+
+our $Debug = 0;
+our $ExportLevel = 0;
+our $Verbose ||= 0;
+our $VERSION = '5.562';
 
 sub export_to_level {
   require Exporter::Heavy;
-  goto &heavy_export_to_level;
+  goto &Exporter::Heavy::heavy_export_to_level;
 }
 
 sub export {
   require Exporter::Heavy;
-  goto &heavy_export;
+  goto &Exporter::Heavy::heavy_export;
 }
 
 sub export_tags {
   require Exporter::Heavy;
-  _push_tags((caller)[0], "EXPORT",    \@_);
+  Exporter::Heavy::_push_tags((caller)[0], "EXPORT",    \@_);
 }
 
 sub export_ok_tags {
   require Exporter::Heavy;
-  _push_tags((caller)[0], "EXPORT_OK", \@_);
+  Exporter::Heavy::_push_tags((caller)[0], "EXPORT_OK", \@_);
 }
 
 sub import {
   my $pkg = shift;
   my $callpkg = caller($ExportLevel);
-  *exports = *{"$pkg\::EXPORT"};
+
+  my($exports, $export_cache) = (\@{"$pkg\::EXPORT"},
+                                 \%{"$pkg\::EXPORT"});
   # We *need* to treat @{"$pkg\::EXPORT_FAIL"} since Carp uses it :-(
-  *fail = *{"$pkg\::EXPORT_FAIL"};
+  my($fail) = \@{"$pkg\::EXPORT_FAIL"};
   return export $pkg, $callpkg, @_
-    if $Verbose or $Debug or @fail > 1;
-  my $args = @_ or @_ = @exports;
+    if $Verbose or $Debug or @$fail > 1;
+  my $args = @_ or @_ = @$exports;
   
-  if ($args and not %exports) {
-    foreach my $sym (@exports, @{"$pkg\::EXPORT_OK"}) {
+  if ($args and not %$export_cache) {
+    foreach my $sym (@$exports, @{"$pkg\::EXPORT_OK"}) {
       $sym =~ s/^&//;
-      $exports{$sym} = 1;
+      $export_cache->{$sym} = 1;
     }
   }
   if ($Verbose or $Debug 
-      or grep {/\W/ or $args and not exists $exports{$_}
-	       or @fail and $_ eq $fail[0]
+      or grep {/\W/ or $args and not exists $export_cache->{$_}
+	       or @$fail and $_ eq $fail->[0]
 	       or (@{"$pkg\::EXPORT_OK"} 
 		   and $_ eq ${"$pkg\::EXPORT_OK"}[0])} @_) {
     return export $pkg, $callpkg, ($args ? @_ : ());
   }
-  #local $SIG{__WARN__} = sub {require Carp; goto &Carp::carp};
   local $SIG{__WARN__} = 
 	sub {require Carp; local $Carp::CarpLevel = 1; &Carp::carp};
-  foreach $sym (@_) {
+  foreach my $sym (@_) {
     # shortcut for the common case of no type character
     *{"$callpkg\::$sym"} = \&{"$pkg\::$sym"};
   }
 }
 
-1;
 
-# A simple self test harness. Change 'require Carp' to 'use Carp ()' for testing.
-# package main; eval(join('',<DATA>)) or die $@ unless caller;
-__END__
-package Test;
-$INC{'Exporter.pm'} = 1;
-@ISA = qw(Exporter);
-@EXPORT      = qw(A1 A2 A3 A4 A5);
-@EXPORT_OK   = qw(B1 B2 B3 B4 B5);
-%EXPORT_TAGS = (T1=>[qw(A1 A2 B1 B2)], T2=>[qw(A1 A2 B3 B4)], T3=>[qw(X3)]);
-@EXPORT_FAIL = qw(B4);
-Exporter::export_ok_tags('T3', 'unknown_tag');
+# Default methods
+
 sub export_fail {
-    map { "Test::$_" } @_	# edit symbols just as an example
+    my $self = shift;
+    @_;
 }
 
-package main;
-$Exporter::Verbose = 1;
-#import Test;
-#import Test qw(X3);		# export ok via export_ok_tags()
-#import Test qw(:T1 !A2 /5/ !/3/ B5);
-import Test qw(:T2 !B4);
-import Test qw(:T2);		# should fail
+
+sub require_version {
+    require Exporter::Heavy;
+    goto &Exporter::Heavy::require_version;
+}
+
+
 1;
+
 
 =head1 NAME
 

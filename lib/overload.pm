@@ -1,5 +1,7 @@
 package overload;
 
+our $VERSION = '1.00';
+
 $overload::hint_bits = 0x20000;
 
 sub nil {}

@@ -159,10 +159,13 @@ particular used C<Term::ReadLine::*> package).
 
 =cut
 
+use strict;
+
 package Term::ReadLine::Stub;
-@ISA = qw'Term::ReadLine::Tk Term::ReadLine::TermCap';
+our @ISA = qw'Term::ReadLine::Tk Term::ReadLine::TermCap';
 
 $DB::emacs = $DB::emacs;	# To peacify -w
+our @rl_term_set;
 *rl_term_set = \@Term::ReadLine::TermCap::rl_term_set;
 
 sub ReadLine {'Term::ReadLine::Stub'}
@@ -208,7 +211,7 @@ sub findConsole {
       }
     }
 
-    $consoleOUT = $console;
+    my $consoleOUT = $console;
     $console = "&STDIN" unless defined $console;
     if (!defined $consoleOUT) {
       $consoleOUT = defined fileno(STDERR) ? "&STDERR" : "&STDOUT";
@@ -222,19 +225,19 @@ sub new {
   #local (*FIN, *FOUT);
   my ($FIN, $FOUT, $ret);
   if (@_==2) {
-    ($console, $consoleOUT) = findConsole;
+    my($console, $consoleOUT) = findConsole;
 
     open(FIN, "<$console"); 
     open(FOUT,">$consoleOUT");
     #OUT->autoflush(1);		# Conflicts with debugger?
-    $sel = select(FOUT);
+    my $sel = select(FOUT);
     $| = 1;				# for DB::OUT
     select($sel);
     $ret = bless [\*FIN, \*FOUT];
   } else {			# Filehandles supplied
     $FIN = $_[2]; $FOUT = $_[3];
     #OUT->autoflush(1);		# Conflicts with debugger?
-    $sel = select($FOUT);
+    my $sel = select($FOUT);
     $| = 1;				# for DB::OUT
     select($sel);
     $ret = bless [$FIN, $FOUT];
@@ -266,6 +269,8 @@ sub Features { \%features }
 
 package Term::ReadLine;		# So late to allow the above code be defined?
 
+our $VERSION = '1.00';
+
 my ($which) = exists $ENV{PERL_RL} ? split /\s+/, $ENV{PERL_RL} : undef;
 if ($which) {
   if ($which =~ /\bgnu\b/i){
@@ -285,7 +290,7 @@ if ($which) {
 
 # To make possible switch off RL in debugger: (Not needed, work done
 # in debugger).
-
+our @ISA;
 if (defined &Term::ReadLine::Gnu::readline) {
   @ISA = qw(Term::ReadLine::Gnu Term::ReadLine::Stub);
 } elsif (defined &Term::ReadLine::Perl::readline) {
@@ -298,10 +303,11 @@ package Term::ReadLine::TermCap;
 
 # Prompt-start, prompt-end, command-line-start, command-line-end
 #     -- zero-width beautifies to emit around prompt and the command line.
-@rl_term_set = ("","","","");
+our @rl_term_set = ("","","","");
 # string encoded:
-$rl_term_set = ',,,';
+our $rl_term_set = ',,,';
 
+our $terminal;
 sub LoadTermCap {
   return if defined $terminal;
   
@@ -329,8 +335,10 @@ sub ornaments {
 
 package Term::ReadLine::Tk;
 
+our($count_handle, $count_DoOne, $count_loop);
 $count_handle = $count_DoOne = $count_loop = 0;
 
+our($giveup);
 sub handle {$giveup = 1; $count_handle++}
 
 sub Tk_loop {

@@ -2,6 +2,8 @@ package vars;
 
 require 5.002;
 
+our $VERSION = '1.00';
+
 # The following require can't be removed during maintenance
 # releases, sadly, because of the risk of buggy code that does
 # require Carp; Carp::croak "..."; without brackets dying

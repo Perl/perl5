@@ -1,7 +1,9 @@
 package Term::Cap;
 use Carp;
 
-# Last updated: Thu Dec 14 20:02:42 CST 1995 by sanders@bsdi.com
+our $VERSION = '1.00';
+
+# Last updated: Thu Nov 30 23:34:29 EST 2000 by schwern@pobox.com
 
 # TODO:
 # support Berkeley DB termcaps

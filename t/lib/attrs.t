@@ -11,9 +11,12 @@ BEGIN {
     }
 }
 
+use warnings;
+no warnings qw(deprecated);     # else attrs cries.
+
 sub NTESTS () ;
 
-my $test, $ntests;
+my ($test, $ntests);
 BEGIN {$ntests=0}
 $test=0;
 my $failed = 0;
@@ -119,7 +122,7 @@ BEGIN {++$ntests}
 
 {
     my $w = "" ;
-    local $SIG{__WARN__} = sub {$w = @_[0]} ;
+    local $SIG{__WARN__} = sub {$w = shift} ;
     eval 'sub w1 ($) { use warnings "deprecated"; use attrs "locked"; $_[0]++ }';
     (print "not "), $failed=1 if $@;
     print "ok ",++$test,"\n";
