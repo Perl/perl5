@@ -611,9 +611,8 @@ S_hv_fetch_common(pTHX_ HV *hv, SV *keysv, const char *key, STRLEN klen,
     else
 #endif
     {
-	/* oentry = &(HvARRAY(hv))[hash & (I32) HvMAX(hv)]; */
-	oentry = &((HE**)xhv->xhv_array)[hash & (I32) xhv->xhv_max];
-	entry = *oentry;
+	/* entry = (HvARRAY(hv))[hash & (I32) HvMAX(hv)]; */
+	entry = ((HE**)xhv->xhv_array)[hash & (I32) xhv->xhv_max];
     }
     for (; entry; ++n_links, entry = HeNEXT(entry)) {
 	if (HeHASH(entry) != hash)		/* strings can't be equal */
@@ -722,15 +721,16 @@ S_hv_fetch_common(pTHX_ HV *hv, SV *keysv, const char *key, STRLEN klen,
 
     /* Welcome to hv_store...  */
 
-    if (!oentry) {
+    if (!xhv->xhv_array) {
 	/* Not sure if we can get here.  I think the only case of oentry being
 	   NULL is for %ENV with dynamic env fetch.  But that should disappear
 	   with magic in the previous code.  */
 	Newz(503, xhv->xhv_array /* HvARRAY(hv) */,
 	     PERL_HV_ARRAY_ALLOC_BYTES(xhv->xhv_max+1 /* HvMAX(hv)+1 */),
 	     char);
-	oentry = &((HE**)xhv->xhv_array)[hash & (I32) xhv->xhv_max];
     }
+
+    oentry = &((HE**)xhv->xhv_array)[hash & (I32) xhv->xhv_max];
 
     entry = new_HE();
     /* share_hek_flags will do the free for us.  This might be considered
