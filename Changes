@@ -75,9 +75,58 @@ indicator:
 
 
 ----------------
-Version v5.5.640        Development release working toward 5.6
+Version v5.5.640        Development release working toward v5.6
 ----------------
 
+____________________________________________________________________________
+[  4966] By: gsar                                  on 2000/02/02  11:42:03
+        Log: workaround for undefined symbol
+     Branch: perl
+	   ! win32/win32.h
+____________________________________________________________________________
+[  4965] By: gsar                                  on 2000/02/02  11:19:19
+        Log: on cygwin, h_errno is now "__declspec(dllimport) int h_errno"
+             (from Eric Fifer <EFifer@sanwaint.com>)
+     Branch: perl
+	   ! pp_sys.c
+____________________________________________________________________________
+[  4964] By: gsar                                  on 2000/02/02  11:11:15
+        Log: adjust notes on use5005threads
+     Branch: perl
+	   ! Configure INSTALL README.threads
+____________________________________________________________________________
+[  4963] By: gsar                                  on 2000/02/02  10:14:30
+        Log: fix typo
+     Branch: perl
+	   ! Configure
+____________________________________________________________________________
+[  4962] By: gsar                                  on 2000/02/02  10:13:10
+        Log: integrate selected changes from cfgperl (#4899,4900,4904,4918)
+     Branch: perl
+	  !> Configure Porting/Glossary Porting/config.sh Porting/config_H
+	  !> config_h.SH ext/IO/IO.xs lib/Benchmark.pm
+____________________________________________________________________________
+[  4961] By: gsar                                  on 2000/02/02  09:55:45
+        Log: PodParser-1.092 update via CPAN (from Brad Appleton)
+     Branch: perl
+	   + lib/Pod/Find.pm lib/Pod/ParseUtils.pm
+	   ! MANIFEST lib/Pod/Checker.pm t/pod/poderrs.t t/pod/poderrs.xr
+____________________________________________________________________________
+[  4960] By: gsar                                  on 2000/02/02  08:22:31
+        Log: replace misleading docs with a BUGS section
+     Branch: perl
+	   ! lib/English.pm
+____________________________________________________________________________
+[  4959] By: gsar                                  on 2000/02/02  08:16:17
+        Log: remove FUD from perlfunc/use (from M J T Guy)
+     Branch: perl
+	   ! pod/perlfunc.pod
+____________________________________________________________________________
+[  4958] By: gsar                                  on 2000/02/02  08:13:04
+        Log: Benchmark displays bogus CPU stats (suggested by Cedric Auzanne
+             <cedric.auzanne@nist.gov>)
+     Branch: perl
+	   ! Changes lib/Benchmark.pm
 ____________________________________________________________________________
 [  4957] By: gsar                                  on 2000/02/02  08:04:52
         Log: fix coredump on C<"x" =~ /x/; print @-> (from Ilya Zakharevich)
