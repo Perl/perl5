@@ -97,7 +97,7 @@ sub get_files {
 	$file{'../../vmesa/errno.h'} = 1;
     } elsif ($Config{archname} eq 'epoc') {
 	# Watch out for cross compiling for EPOC (usually done on linux)
-	$file{'/usr/local/epoc/include/libc/sys/errno.h'} = 1;
+	$file{'/usr/local/epocemx/epocsdk/include/libc/sys/errno.h'} = 1;
     } elsif ($^O eq 'linux' &&
 	     $Config{gccversion} ne '' # might be using, say, Intel's icc
 	     ) {
