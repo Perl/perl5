@@ -2867,7 +2867,7 @@ STATIC regnode *
 S_regclass(pTHX)
 {
     dTHR;
-    register UV value;
+    register U32 value;
     register I32 lastvalue = OOB_CHAR8;
     register I32 range = 0;
     register regnode *ret;
@@ -2911,6 +2911,8 @@ S_regclass(pTHX)
 	    namedclass = regpposixcc(value);
 	else if (value == '\\') {
 	    value = UCHARAT(PL_regcomp_parse++);
+	    /* Some compilers cannot handle switching on 64-bit integer
+	     * values, therefore value cannot be an UV. --jhi */
 	    switch (value) {
 	    case 'w':	namedclass = ANYOF_ALNUM;	break;
 	    case 'W':	namedclass = ANYOF_NALNUM;	break;
@@ -3312,7 +3314,7 @@ S_regclassutf8(pTHX)
 {
     dTHR;
     register char *e;
-    register UV value;
+    register U32 value;
     register U32 lastvalue = OOB_UTF8;
     register I32 range = 0;
     register regnode *ret;
@@ -3353,8 +3355,11 @@ S_regclassutf8(pTHX)
 	if (value == '[')
 	    namedclass = regpposixcc(value);
 	else if (value == '\\') {
-	    value = utf8_to_uv((U8*)PL_regcomp_parse, &numlen);
+	    value = (U32)utf8_to_uv((U8*)PL_regcomp_parse, &numlen);
 	    PL_regcomp_parse += numlen;
+	    /* Some compilers cannot handle switching on 64-bit integer
+	     * values, therefore value cannot be an UV.  Yes, this will
+	     * be a problem later if we want switch on Unicode.  --jhi */
 	    switch (value) {
 	    case 'w':		namedclass = ANYOF_ALNUM;		break;
 	    case 'W':		namedclass = ANYOF_NALNUM;		break;
