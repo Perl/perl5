@@ -201,12 +201,15 @@ LibObjectsMRC = {$(libc)}.MrC.o
 
 .PHONY : translators sitelib_install
 
-all: PLib Obj miniperl $(private) $(plextract) $(public) dynlibrary runperl extrlibrary
+all: PLib Obj xsubppdup miniperl $(private) $(plextract) $(public) dynlibrary runperl extrlibrary
 	@echo " "; echo "	Everything is up to date."
 
 PLib: 
 	NewFolder PLib
-	
+
+xsubppdup:
+	Duplicate -y xsubpp ::lib:ExtUtils:xsubpp
+
 translators:	miniperl :lib:Config.pm
 .IF "68K" == "$(MACPERL_INST_TOOL_68K)"
 	@echo "	Making x2p stuff"; 
@@ -239,7 +242,7 @@ sitelib_install:
 # build problems but that's not obvious to the novice.
 # The Module used here must not depend on Config or any extensions.
 
-.INIT : Obj PLib 
+.INIT : Obj PLib xsubppdup
 
 miniperl:  miniperl.{$(MACPERL_BUILD_TOOL)}
 	FatBuild miniperl $(MACPERL_INST_TOOL_PPC) $(MACPERL_INST_TOOL_68K)
