@@ -48,9 +48,7 @@ my $jisx0208 = File::Spec->catfile(dirname(__FILE__), 'jisx0208.utf');
 my $jisx0212 = File::Spec->catfile(dirname(__FILE__), 'jisx0212.utf');
 
 open my $fh, $jisx0208 or die "$jisx0208: $!";
-if (PerlIO::Layer->find('perlio')) {
-    binmode($fh, ":bytes"); # in case LC_ALL is UTF8ish
-}
+binmode($fh);
 $utf8off = join('' => <$fh>);
 close $fh;
 $utf8on = decode('utf8', $utf8off);
@@ -80,9 +78,7 @@ Encode::Guess->set_suspects(keys %CJKT);
 
 for my $name (keys %CJKT){
     open my $fh, $CJKT{$name} or die "$CJKT{$name}: $!";
-    if (PerlIO::Layer->find('perlio')) {
-        binmode($fh, ":bytes"); # in case LC_ALL is UTF8ish
-    }
+    binmode($fh);
     $utf8off = join('' => <$fh>);
     close $fh;
 
