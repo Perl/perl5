@@ -2096,6 +2096,9 @@ approach.
 
 =head1 Coexistence with earlier versions of perl5
 
+Perl 5.8 is not binary compatible with earlier versions of Perl.
+In other words, you have to recompile your XS modules.
+
 In general, you can usually safely upgrade from one version of Perl (e.g.
 5.004_04) to another similar version (e.g. 5.004_05) without re-compiling
 all of your add-on extensions.  You can also safely leave the old version
