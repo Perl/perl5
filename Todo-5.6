@@ -43,9 +43,6 @@ Namespace cleanup
     API-space:    complete the list of things that constitute public api
 
 Configure
-    fix the vicious cyclic multidependency of cc <-> libpth <-> loclibpth
-	libswanted <-> usethreads <-> use64bitint <-> use64bitall <->
-  	uselargefiles <-> ...  
     make configuring+building away from source directory work (VPATH et al)
 	this is related to: cross-compilation configuring (see Todo)
     _r support (see Todo for mode detailed description)
@@ -57,7 +54,7 @@ Configure
 	PREFERABLY AS AN EXTENSION
     IPv6 support: see RFC2292, RFC2553
 	PREFERABLY AS AN EXTENSION
-	there already is Socket6
+	there already is Socket6 in CPAN
 
 Long doubles
     figure out where the PV->NV->PV conversion gets it wrong at least
