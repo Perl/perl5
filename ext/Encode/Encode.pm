@@ -96,27 +96,25 @@ sub define_alias
   }
 }
 
-my %isolatin2num =
-	(
-	1 =>  1,
-	2 =>  2,
-	3 =>  3,
-	4 =>  4,
-	5 =>  9,
-	6 => 10,
-	7 => 13,
-	8 => 14,
-	9 => 15,
-       10 => 16,
-	);
-
+# Allow variants of iso-8859-1 etc.
 define_alias( qr/^iso[-_]?(\d+)[-_](\d+)$/i => '"iso-$1-$2"' );
-define_alias( qr/^(?:iso[-_]?)?latin[-_]?(\d+)$/i =>
-              '"iso-8859-$isolatin2num{$1}"' );
-define_alias( qr/^(\S+)[\s_]+(.*)$/i => '"$1-$2"' );
-#define_alias( sub { return /^iso-(\d+-\d+)$/i  ? "iso$1" : '' } );
-define_alias( 'ascii' => 'US-ascii');
+
+# Allow latin-1 style names as well
+                    # 0  1  2  3  4  5   6   7   8   9  10
+my @latin2iso_num = ( 0, 1, 2, 3, 4, 9, 10, 13, 14, 15, 16 );
+define_alias( qr/^latin[-_]?(\d+)$/i => '"iso-8859-$latin2iso_num[$1]"' );
+
+# Common names for non-latin prefered MIME names
+define_alias( 'ascii'    => 'US-ascii',
+              'cyrillic' => 'iso-8859-5',
+              'arabic'   => 'iso-8859-6',
+              'greek'    => 'iso-8859-7',
+              'hebrew'   => 'iso-8859-8');
+
 define_alias( 'ibm-1047' => 'cp1047');
+
+# Map white space and _ to '-'
+define_alias( qr/^(\S+)[\s_]+(.*)$/i => '"$1-$2"' );
 
 sub define_encoding
 {

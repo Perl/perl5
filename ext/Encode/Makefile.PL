@@ -1,6 +1,6 @@
 use ExtUtils::MakeMaker;
 
-my %tables = (iso8859 => ['ascii.ucm', 'cp1250.ucm'],
+my %tables = (iso8859 => ['ascii.ucm', 'cp1250.ucm', 'koi8-r.ucm' ],
               EBCDIC  => ['cp1047.ucm','cp37.ucm','posix-bc.ucm'],
               Symbols => ['symbol.ucm','dingbats.ucm'],
              );

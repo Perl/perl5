@@ -589,7 +589,7 @@ if ($define{'USE_PERLIO'}) {
 			 PerlIO_write
 			 )];
     }
-    else {
+} else {
 	# Skip the PerlIO New Generation symbols.
 	skip_symbols [qw(
 			 PerlIOBase_clearerr
@@ -618,8 +618,7 @@ if ($define{'USE_PERLIO'}) {
 			 PerlIO_push
 			 PerlIO_unread
 			)];
-    }
-}
+} 
 
 for my $syms (@syms) {
     open (GLOBAL, "<$syms") || die "failed to open $syms: $!\n";
