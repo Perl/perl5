@@ -68,7 +68,7 @@ case "$osvers" in
 	d_setrgid='undef'
 	d_setruid='undef'
 	;;
-2.1*|3.0*)
+2.1*)
 	# Use 2.1's shlicc2 for dynamic linking
 	# Since cc -o is linking, use it for compiling too.
 	# I'm not sure whether Configure is careful about
