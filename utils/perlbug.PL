@@ -3,6 +3,7 @@
 use Config;
 use File::Basename qw(&basename &dirname);
 use Cwd;
+use File::Spec::Functions;
 
 # List explicitly here the variables you want Configure to
 # generate.  Metaconfig only looks for shell variables, so you
@@ -23,7 +24,8 @@ open OUT, ">$file" or die "Can't create $file: $!";
 
 # extract patchlevel.h information
 
-open PATCH_LEVEL, "<../patchlevel.h" or die "Can't open patchlevel.h: $!";
+open PATCH_LEVEL, "<" . catfile(updir, "patchlevel.h")
+    or die "Can't open patchlevel.h: $!";
 
 my $patchlevel_date = (stat PATCH_LEVEL)[9];
 
@@ -74,6 +76,7 @@ my \@patches = (
 print OUT <<'!NO!SUBS!';
 
 use Config;
+use File::Spec::Functions;
 use Getopt::Std;
 use strict;
 
@@ -86,7 +89,7 @@ BEGIN {
     $::HaveUtil = ($@ eq "");
 };
 
-my $Version = "1.26";
+my $Version = "1.27";
 
 # Changed in 1.06 to skip Mail::Send and Mail::Util if not available.
 # Changed in 1.07 to see more sendmail execs, and added pipe output.
@@ -117,6 +120,7 @@ my $Version = "1.26";
 # Changed in 1.24 Added '-F<file>' to save report HVDS 98-07-01
 # Changed in 1.25 Warn on failure to open save file. HVDS 98-07-12
 # Changed in 1.26 Don't require -t STDIN for -ok. HVDS 98-07-15
+# Changed in 1.27 Added Mac OS and File::Spec support CNANDOR 99-07-27
 
 # TODO: - Allow the user to re-name the file on mail failure, and
 #       make sure failure (transmission-wise) of Mail::Send is
@@ -124,7 +128,7 @@ my $Version = "1.26";
 #       - Test -b option
 
 my( $file, $usefile, $cc, $address, $perlbug, $testaddress, $filename,
-    $subject, $from, $verbose, $ed, $outfile,
+    $subject, $from, $verbose, $ed, $outfile, $Is_MacOS,
     $fh, $me, $Is_MSWin32, $Is_VMS, $msg, $body, $andcc, %REP, $ok);
 
 my $config_tag2 = "$] - $Config{cf_time}";
@@ -154,6 +158,11 @@ sub Init {
 
     $Is_MSWin32 = $^O eq 'MSWin32';
     $Is_VMS = $^O eq 'VMS';
+    $Is_MacOS = $^O eq 'MacOS';
+
+    @ARGV = split m/\s+/,
+        MacPerl::Ask('Provide command-line args here (-h for help):')
+        if $Is_MacOS && $MacPerl::Version =~ /App/;
 
     if (!getopts("dhva:s:b:f:F:r:e:SCc:to:n:")) { Help(); exit; };
 
@@ -196,6 +205,7 @@ sub Init {
     $ed = $::opt_e || $ENV{VISUAL} || $ENV{EDITOR} || $ENV{EDIT}
 	|| ($Is_VMS && "edit/tpu")
 	|| ($Is_MSWin32 && "notepad")
+	|| ($Is_MacOS && '')
 	|| "vi";
 
     # Not OK - provide build failure template by finessing OK report
@@ -255,6 +265,7 @@ EOF
     # My username
     $me = $Is_MSWin32 ? $ENV{'USERNAME'}
 	    : $^O eq 'os2' ? $ENV{'USER'} || $ENV{'LOGNAME'}
+	    : $Is_MacOS ? $ENV{'USER'}
 	    : eval { getpwuid($<) };	# May be missing
 
     $from = $::Config{'cf_email'}
@@ -307,6 +318,13 @@ EOF
 	my $guess;
 
 	$guess = $ENV{'REPLY-TO'} || $ENV{'REPLYTO'} || '';
+        if ($Is_MacOS) {
+            require Mac::InternetConfig;
+            $guess = $Mac::InternetConfig::InternetConfig{
+                Mac::InternetConfig::kICEmail()
+            };
+        }
+
 	unless ($guess) {
 	    my $domain;
 	    if ($::HaveUtil) {
@@ -562,7 +580,15 @@ EOF
     }
 
 tryagain:
-    my $sts = system("$ed $filename");
+    my $sts = system("$ed $filename") unless $Is_MacOS;
+    if ($Is_MacOS) {
+        require ExtUtils::MakeMaker;
+        ExtUtils::MM_MacOS::launch_file($filename);
+        paraprint <<EOF;
+Press Enter when done.
+EOF
+        scalar <>;
+    }
     if ($sts) {
 	paraprint <<EOF;
 The editor you chose (`$ed') could apparently not be run!
@@ -786,7 +812,7 @@ Options:
   -v    Include Verbose configuration data in the report
   -f    File containing the body of the report. Use this to
         quickly send a prepared message.
-  -F	File to output the resulting mail message to, instead of mailing.
+  -F    File to output the resulting mail message to, instead of mailing.
   -S    Send without asking for confirmation.
   -a    Address to send the report to. Defaults to `$address'.
   -c    Address to send copy of report to. Defaults to `$cc'.
@@ -799,7 +825,7 @@ Options:
         this if you don't give it here.
   -e    Editor to use.
   -t    Test mode. The target address defaults to `$testaddress'.
-  -d	Data mode (the default if you redirect or pipe output.)
+  -d    Data mode (the default if you redirect or pipe output.)
         This prints out your configuration data, without mailing
         anything. You can use this with -v to get more complete data.
   -ok   Report successful build on this system to perl porters
@@ -818,11 +844,12 @@ EOF
 sub filename {
     my $dir = $Is_VMS ? 'sys$scratch:'
 	: ($Is_MSWin32 && $ENV{'TEMP'}) ? $ENV{'TEMP'}
-	: '/tmp/';
+        : $Is_MacOS ? $ENV{'TMPDIR'}
+	: '/tmp';
     $filename = "bugrep0$$";
-    $dir .= "\\" if $Is_MSWin32 and $dir !~ m|[\\/]$|;
-    $filename++ while -e "$dir$filename";
-    $filename = "$dir$filename";
+#    $dir .= "\\" if $Is_MSWin32 and $dir !~ m|[\\/]$|;
+    $filename++ while -e catfile($dir, $filename);
+    $filename = catfile($dir, $filename);
 }
 
 sub paraprint {
@@ -908,8 +935,8 @@ Check in L<perldiag> to see what any Perl error message(s) mean.
 If message isn't in perldiag, it probably isn't generated by Perl.
 Consult your operating system documentation instead.
 
-If you are on a non-UNIX platform check also L<perlport>, some
-features may not be implemented or work differently.
+If you are on a non-UNIX platform check also L<perlport>, as some
+features may be unimplemented or work differently.
 
 Try to study the problem under the perl debugger, if necessary.
 See L<perldebug>.
@@ -1098,8 +1125,9 @@ by Gurusamy Sarathy (E<lt>gsar@umich.eduE<gt>), Tom Christiansen
 (E<lt>tchrist@perl.comE<gt>), Nathan Torkington (E<lt>gnat@frii.comE<gt>),
 Charles F. Randall (E<lt>cfr@pobox.comE<gt>), Mike Guy
 (E<lt>mjtg@cam.a.ukE<gt>), Dominic Dunlop (E<lt>domo@computer.orgE<gt>),
-Hugo van der Sanden (E<lt>hv@crypt0.demon.co.ukE<gt>), and
-Jarkko Hietaniemi (E<lt>jhi@iki.fiE<gt>).
+Hugo van der Sanden (E<lt>hv@crypt0.demon.co.ukE<gt>),
+Jarkko Hietaniemi (E<lt>jhi@iki.fiE<gt>), and Chris Nandor
+(E<lt>pudge@pobox.comE<gt>).
 
 =head1 SEE ALSO
 
