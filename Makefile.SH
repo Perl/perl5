@@ -41,7 +41,14 @@ true)
 		;;
 	aix*)
 		shrpldflags="-H512 -T512 -bhalt:4 -bM:SRE -bE:perl.exp"
-		shrpldflags="$shrpldflags -b noentry $ldflags $libs $cryptlib"
+		case "$osvers" in
+		3*)
+			shrpldflags="$shrpldflags -e _nostart $ldflags $libs $cryptlib"
+			;;
+		*)
+			shrpldflags="$shrpldflags -b noentry $ldflags $libs $cryptlib"
+			;;
+		esac
 		aixinstdir=`pwd | sed 's/\/UU$//'`
 		linklibperl="-L $archlibexp/CORE -L $aixinstdir -lperl"
 		;;

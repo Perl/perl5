@@ -57,6 +57,15 @@ y*)
 	;;
 esac
 
+# 
+# If we use the PerlIO abstraction layer, add its symbols
+#
+
+if [ $useperlio = "define" ]
+then
+	grep '^[A-Za-z]' perlio.sym >> perl.exp
+fi
+
 #
 # Extra globals not included above (including a few that might
 # not actually be defined, but there's no harm in that).
