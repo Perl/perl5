@@ -782,7 +782,7 @@ for more discussion of the issues.
 
 =head1 SEE ALSO
 
-L<encoding>, L<Encode>, L<open>, L<bytes>, L<utf8>, L<perlretut>,
-L<perlvar/"${^WIDE_SYSTEM_CALLS}">
+L<perluniintro>, L<encoding>, L<Encode>, L<open>, L<utf8>, L<bytes>,
+L<perlretut>, L<perlvar/"${^WIDE_SYSTEM_CALLS}">
 
 =cut

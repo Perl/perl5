@@ -1653,12 +1653,11 @@ Unicode characters in the range of 128-255 use two hexadecimal digits
 with braces: C<\x{ab}>.  Note that this is different than C<\xab>,
 which is just a hexadecimal byte with no Unicode significance.
 
-B<NOTE>: in perl 5.6.0 it used to be that one needed to say C<use utf8>
-to use any Unicode features.  This is no more the case: for almost all
-Unicode processing, the explicit C<utf8> pragma is not needed.
-(The only case where it matters is if your Perl script is in Unicode,
-that is, encoded in UTF-8/UTF-16/UTF-EBCDIC: then an explicit C<use utf8>
-is needed.)
+B<NOTE>: in Perl 5.6.0 it used to be that one needed to say C<use
+utf8> to use any Unicode features.  This is no more the case: for
+almost all Unicode processing, the explicit C<utf8> pragma is not
+needed.  (The only case where it matters is if your Perl script is in
+Unicode and encoded in UTF-8, then an explicit C<use utf8> is needed.)
 
 Figuring out the hexadecimal sequence of a Unicode character you want
 or deciphering someone else's hexadecimal Unicode regexp is about as
