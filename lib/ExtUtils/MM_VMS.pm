@@ -231,7 +231,9 @@ invoke Perl images.
 sub find_perl {
     my($self, $ver, $names, $dirs, $trace) = @_;
     my($name,$dir,$vmsfile,@sdirs,@snames,@cand);
+    my($rslt);
     my($inabs) = 0;
+    local *TCF;
     # Check in relative directories first, so we pick up the current
     # version of Perl if we're running MakeMaker as part of the main build.
     @sdirs = sort { my($absa) = $self->file_name_is_absolute($a);
@@ -277,15 +279,28 @@ sub find_perl {
     foreach $name (@cand) {
 	print "Checking $name\n" if ($trace >= 2);
 	# If it looks like a potential command, try it without the MCR
-	if ($name =~ /^[\w\-\$]+$/ &&
-            `$name -e "require $ver; print ""VER_OK\\n"""` =~ /VER_OK/) {
+        if ($name =~ /^[\w\-\$]+$/) {
+            open(TCF,">temp_mmvms.com") || die('unable to open temp file');
+            print TCF "\$ set message/nofacil/nosever/noident/notext\n";
+            print TCF "\$ $name -e \"require $ver; print \"\"VER_OK\\n\"\"\"\n";
+            close TCF;
+            $rslt = `\@temp_mmvms.com` ;
+            unlink('temp_mmvms.com');
+            if ($rslt =~ /VER_OK/) {
 	    print "Using PERL=$name\n" if $trace;
 	    return $name;
 	}
+        }
 	next unless $vmsfile = $self->maybe_command($name);
 	$vmsfile =~ s/;[\d\-]*$//;  # Clip off version number; we can use a newer version as well
 	print "Executing $vmsfile\n" if ($trace >= 2);
-        if (`MCR $vmsfile -e "require $ver; print ""VER_OK\\n"""` =~ /VER_OK/) {
+        open(TCF,">temp_mmvms.com") || die('unable to open temp file');
+        print TCF "\$ set message/nofacil/nosever/noident/notext\n";
+        print TCF "\$ mcr $vmsfile -e \"require $ver; print \"\"VER_OK\\n\"\"\" \n";
+        close TCF;
+        $rslt = `\@temp_mmvms.com`;
+        unlink('temp_mmvms.com');
+        if ($rslt =~ /VER_OK/) {
 	    print "Using PERL=MCR $vmsfile\n" if $trace;
 	    return "MCR $vmsfile";
 	}
@@ -1018,7 +1033,7 @@ sub dist {
 
     # Sanitize these for use in $(DISTVNAME) filespec
     $attribs{VERSION} =~ s/[^\w\$]/_/g;
-    $attribs{NAME} =~ s/[^\w\$]/_/g;
+    $attribs{NAME} =~ s/[^\w\$]/-/g;
 
     return ExtUtils::MM_Unix::dist($self,%attribs);
 }
@@ -1194,8 +1209,8 @@ $(BASEEXT).opt : Makefile.PL
 	                   s/.*[:>\/\]]//;       # Trim off dir spec
 			   $upcase ? uc($_) : $_;
 	                 } split ' ', $self->eliminate_macros($self->{OBJECT});
-	my($tmp,@lines,$elt) = '';
-	my $tmp = shift @omods;
+        my($tmp, @lines,$elt) = '';
+	$tmp = shift @omods;
 	foreach $elt (@omods) {
 	    $tmp .= ",$elt";
 		if (length($tmp) > 80) { push @lines, $tmp;  $tmp = ''; }
@@ -1652,6 +1667,9 @@ dist : $(DIST_DEFAULT)
 zipdist : $(DISTVNAME).zip
 	$(NOECHO) $(NOOP)
 
+tardist : $(DISTVNAME).tar$(SUFFIX)
+	$(NOECHO) $(NOOP)
+
 $(DISTVNAME).zip : distdir
 	$(PREOP)
 	$(ZIP) "$(ZIPFLAGS)" $(MMS$TARGET) [.$(DISTVNAME)...]*.*;
@@ -1661,7 +1679,7 @@ $(DISTVNAME).zip : distdir
 $(DISTVNAME).tar$(SUFFIX) : distdir
 	$(PREOP)
 	$(TO_UNIX)
-	$(TAR) "$(TARFLAGS)" $(DISTVNAME).tar [.$(DISTVNAME)]
+        $(TAR) "$(TARFLAGS)" $(DISTVNAME).tar [.$(DISTVNAME)...]
 	$(RM_RF) $(DISTVNAME)
 	$(COMPRESS) $(DISTVNAME).tar
 	$(POSTOP)
