@@ -94,7 +94,7 @@ print expected(bless({}, $1), "E", "HASH"), "ok 19\n";
 print expected(bless([]), 'main', "ARRAY"), "ok 22\n";
 {
     local $SIG{__WARN__} = sub { push @w, join '', @_ };
-    local $^W = 1;
+    use warnings;
 
     $m = bless [];
     print expected($m, 'main', "ARRAY"), "ok 23\n";
