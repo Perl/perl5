@@ -15,8 +15,10 @@ BEGIN {
 use Config;
 
 BEGIN {
-    for (keys %ENV) { # untaint ENV
-	($ENV{$_}) = $ENV{$_} =~ /(.*)/;
+    if ($^O ne 'VMS') {
+	for (keys %ENV) { # untaint ENV
+	    ($ENV{$_}) = $ENV{$_} =~ /(.*)/;
+	}
     }
 
     # Remove insecure directories from PATH
