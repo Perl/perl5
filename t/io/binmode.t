@@ -2,11 +2,13 @@
 
 BEGIN {
     chdir 't' if -d 't';
-    @INC = '../lib';
+    @INC = qw(. ../lib);
 }
 
-use Test::More tests => 8;
 use Config;
+
+require "test.pl";
+plan(tests => 8);
 
 ok( binmode(STDERR),            'STDERR made binary' );
 if ($Config{useperlio}) {

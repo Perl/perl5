@@ -1,9 +1,16 @@
 #!./perl -w
 
+BEGIN {
+    chdir "t" if -d "t";
+    @INC = qw(. ../lib);
+}
+
 # Test srand.
 
 use strict;
-use Test::More tests => 4;
+
+require "test.pl";
+plan(tests => 4);
 
 # Generate a load of random numbers.
 # int() avoids possible floating point error.

@@ -3853,6 +3853,16 @@ if you wish to use an empty line as the terminator of the here-document.
 (D deprecated) You are now encouraged to use the shorter *glob{IO} form
 to access the filehandle slot within a typeglob.
 
+=item Use of chdir('') or chdir(undef) as chdir() deprecated
+
+(D deprecated) chdir() with no arguments is documented to change to
+$ENV{HOME} or $ENV{LOGDIR}.  chdir(undef) and chdir('') share this
+behavior, but that has been deprecated.  In future versions they
+will simply fail.
+
+Be careful to check that what you pass to chdir() is defined and not
+blank, else you might find yourself in your home directory.
+
 =item Use of implicit split to @_ is deprecated
 
 (D deprecated) It makes a lot of work for the compiler when you clobber
@@ -4054,6 +4064,16 @@ where the problem was discovered. See L<perlre>.
 (P) The attempt to translate a C<use Module n.n LIST> statement into
 its equivalent C<BEGIN> block found an internal inconsistency with
 the version number.
+
+=item v-string in use/require is non-portable
+
+(W) The use of v-strings is non-portable to older, pre-5.6, Perls.
+If you want your scripts to be backward portable, use the floating
+point version number: for example, instead of C<use 5.6.1> say
+C<use 5.006_001>.  This of course won't help: the older Perls
+won't suddenly start understanding newer features, but at least
+they will show a sensible error message indicating the required
+minimum version.
 
 =item Warning: something's wrong
 

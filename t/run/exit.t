@@ -5,7 +5,7 @@
 
 BEGIN {
     chdir 't' if -d 't';
-    @INC = '../lib';
+    @INC = qw(. ../lib);
 }
 
 # VMS and Windows need -e "...", most everything else works better with '
@@ -22,7 +22,8 @@ BEGIN {
     $numtests = ($^O eq 'VMS') ? 7 : 3; 
 }
 
-use Test::More tests => $numtests;
+require "test.pl";
+plan(tests => $numtests);
 
 my $exit, $exit_arg;
 

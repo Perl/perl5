@@ -2,7 +2,7 @@
 
 BEGIN {
     chdir 't' if -d 't';
-    @INC = '../lib';
+    @INC = qw(. ../lib);
     $SIG{'__WARN__'} = sub { warn $_[0] if $DOWARN };
 }
 
@@ -11,8 +11,8 @@ $DOWARN = 1; # enable run-time warnings now
 use Config;
 $tests = $Config{'uvsize'} == 8 ? 47 : 44;
 
-require Test::More;
-Test::More->import( tests => $tests );
+require "test.pl";
+plan( tests => $tests );
 
 eval { use v5.5.640; };
 is( $@, '', "use v5.5.640; $@");
