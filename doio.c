@@ -572,8 +572,6 @@ Perl_do_openn(pTHX_ GV *gv, register char *name, I32 len, int as_raw,
 	    }
 	}
 	if (savefd != fd) {
-	    Pid_t pid;
-	    SV *sv;
 	    /* Still a small can-of-worms here if (say) PerlIO::Scalar
 	       is assigned to (say) STDOUT - for now let dup2() fail
 	       and provide the error
@@ -584,22 +582,35 @@ Perl_do_openn(pTHX_ GV *gv, register char *name, I32 len, int as_raw,
 	    }
 #ifdef VMS
 	    if (savefd != PerlIO_fileno(PerlIO_stdin())) {
-	      char newname[FILENAME_MAX+1];
-             if (PerlIO_getname(fp, newname)) {
-	        if (fd == PerlIO_fileno(PerlIO_stdout())) Perl_vmssetuserlnm(aTHX_ "SYS$OUTPUT", newname);
-	        if (fd == PerlIO_fileno(PerlIO_stderr())) Perl_vmssetuserlnm(aTHX_ "SYS$ERROR",  newname);
-	      }
+                char newname[FILENAME_MAX+1];
+                if (PerlIO_getname(fp, newname)) {
+                    if (fd == PerlIO_fileno(PerlIO_stdout()))
+                        Perl_vmssetuserlnm(aTHX_ "SYS$OUTPUT", newname);
+                    if (fd == PerlIO_fileno(PerlIO_stderr()))
+                        Perl_vmssetuserlnm(aTHX_ "SYS$ERROR",  newname);
+                }
 	    }
 #endif
-	    LOCK_FDPID_MUTEX;
-	    sv = *av_fetch(PL_fdpid,fd,TRUE);
-	    (void)SvUPGRADE(sv, SVt_IV);
-	    pid = SvIVX(sv);
-	    SvIVX(sv) = 0;
-	    sv = *av_fetch(PL_fdpid,savefd,TRUE);
-	    UNLOCK_FDPID_MUTEX;
-	    (void)SvUPGRADE(sv, SVt_IV);
-	    SvIVX(sv) = pid;
+
+#if !defined(WIN32)
+           /* PL_fdpid isn't used on Windows, so avoid this useless work.
+            * XXX Probably the same for a lot of other places. */
+            {
+                Pid_t pid;
+                SV *sv;
+
+                LOCK_FDPID_MUTEX;
+                sv = *av_fetch(PL_fdpid,fd,TRUE);
+                (void)SvUPGRADE(sv, SVt_IV);
+                pid = SvIVX(sv);
+                SvIVX(sv) = 0;
+                sv = *av_fetch(PL_fdpid,savefd,TRUE);
+                (void)SvUPGRADE(sv, SVt_IV);
+                SvIVX(sv) = pid;
+                UNLOCK_FDPID_MUTEX;
+            }
+#endif
+
 	    if (was_fdopen) {
                 /* need to close fp without closing underlying fd */
                 int ofd = PerlIO_fileno(fp);
