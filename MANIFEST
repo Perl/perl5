@@ -1650,6 +1650,7 @@ os2/os2ish.h			Header for OS/2
 os2/os2thread.h			pthread-like typedefs
 os2/os2_base.t			Additional tests for builtin methods
 os2/perl2cmd.pl			Corrects installed binaries under OS/2
+os2/perlrexx.c			Support perl interpreter embedded in REXX
 patchlevel.h			The current patch level of perl
 perl.c				main()
 perl.h				Global declarations

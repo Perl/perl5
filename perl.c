@@ -3440,7 +3440,8 @@ S_init_postdump_symbols(pTHX_ register int argc, register char **argv, register 
 	    } /* else what? */
 	}
 #endif /* NEED_ENVIRON_DUP_FOR_MODIFY */
-	for (; *env; env++) {
+	if (env)
+	  for (; *env; env++) {
 	    if (!(s = strchr(*env,'=')))
 		continue;
 	    *s++ = '\0';
@@ -3450,7 +3451,7 @@ S_init_postdump_symbols(pTHX_ register int argc, register char **argv, register 
 	    sv = newSVpv(s--,0);
 	    (void)hv_store(hv, *env, s - *env, sv, 0);
 	    *s = '=';
-	}
+	  }
 #ifdef NEED_ENVIRON_DUP_FOR_MODIFY
 	if (dup_env_base) {
 	    char **dup_env;

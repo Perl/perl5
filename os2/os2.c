@@ -184,6 +184,8 @@ os2_cond_wait(perl_cond *c, perl_mutex *m)
 } 
 #endif 
 
+static int exe_is_aout(void);
+
 /*****************************************************************************/
 /* 2.1 would not resolve symbols on demand, and has no ExtLIBPATH. */
 #define C_ARR_LEN(sym)	(sizeof(sym)/sizeof(*sym))
@@ -467,6 +469,9 @@ getpriority(int which /* ignored */, int pid)
 /*****************************************************************************/
 /* spawn */
 
+int emx_runtime_init;			/* If 1, we need to manually init it */
+int emx_exception_init;			/* If 1, we need to manually set it */
+
 /* There is no big sense to make it thread-specific, since signals 
    are delivered to thread 1 only.  XXXX Maybe make it into an array? */
 static int spawn_pid;
@@ -529,11 +534,14 @@ result(pTHX_ int flag, int pid)
 #endif
 }
 
-#define EXECF_SPAWN 0
-#define EXECF_EXEC 1
-#define EXECF_TRUEEXEC 2
-#define EXECF_SPAWN_NOWAIT 3
-#define EXECF_SPAWN_BYFLAG 4
+enum execf_t {
+  EXECF_SPAWN,
+  EXECF_EXEC,
+  EXECF_TRUEEXEC,
+  EXECF_SPAWN_NOWAIT,
+  EXECF_SPAWN_BYFLAG,
+  EXECF_SYNC
+};
 
 /* const char* const ptypes[] = { "FS", "DOS", "VIO", "PM", "DETACH" }; */
 
@@ -579,6 +587,11 @@ static ULONG os2_mytype;
 
 /* Spawn/exec a program, revert to shell if needed. */
 /* global PL_Argv[] contains arguments. */
+
+extern ULONG _emx_exception (	EXCEPTIONREPORTRECORD *,
+				EXCEPTIONREGISTRATIONRECORD *,
+                                CONTEXTRECORD *,
+                                void *);
 
 int
 do_spawn_ve(pTHX_ SV *really, U32 flag, U32 execf, char *inicmd, U32 addflag)
@@ -707,6 +720,8 @@ do_spawn_ve(pTHX_ SV *really, U32 flag, U32 execf, char *inicmd, U32 addflag)
 	    rc = spawnvp(trueflag | P_OVERLAY,tmps,PL_Argv);
 	else if (execf == EXECF_SPAWN_NOWAIT)
 	    rc = spawnvp(flag,tmps,PL_Argv);
+        else if (execf == EXECF_SYNC)
+	    rc = spawnvp(trueflag,tmps,PL_Argv);
         else				/* EXECF_SPAWN, EXECF_SPAWN_BYFLAG */
 	    rc = result(aTHX_ trueflag, 
 			spawnvp(flag,tmps,PL_Argv));
@@ -1001,7 +1016,7 @@ do_spawn3(pTHX_ char *cmd, int execf, int flag)
 	       should be smart enough to start itself gloriously. */
 	  doshell:
 	    if (execf == EXECF_TRUEEXEC)
-                rc = execl(shell,shell,copt,cmd,(char*)0);		
+                rc = execl(shell,shell,copt,cmd,(char*)0);
 	    else if (execf == EXECF_EXEC)
                 rc = spawnl(P_OVERLAY,shell,shell,copt,cmd,(char*)0);
 	    else if (execf == EXECF_SPAWN_NOWAIT)
@@ -1010,8 +1025,11 @@ do_spawn3(pTHX_ char *cmd, int execf, int flag)
                 rc = spawnl(flag,shell,shell,copt,cmd,(char*)0);
 	    else {
 		/* In the ak code internal P_NOWAIT is P_WAIT ??? */
-		rc = result(aTHX_ P_WAIT,
-			    spawnl(P_NOWAIT,shell,shell,copt,cmd,(char*)0));
+		if (execf == EXECF_SYNC)
+		   rc = spawnl(P_WAIT,shell,shell,copt,cmd,(char*)0);
+		else
+		   rc = result(aTHX_ P_WAIT,
+			       spawnl(P_NOWAIT,shell,shell,copt,cmd,(char*)0));
 		if (rc < 0 && ckWARN(WARN_EXEC))
 		    Perl_warner(aTHX_ WARN_EXEC, "Can't %s \"%s\": %s", 
 			 (execf == EXECF_SPAWN ? "spawn" : "exec"),
@@ -2274,7 +2292,10 @@ Xs_OS2_init(pTHX)
 	GvMULTI_on(gv);
 #ifdef PERL_IS_AOUT
 	sv_setiv(GvSV(gv), 1);
-#endif 
+#endif
+	gv = gv_fetchpv("OS2::can_fork", TRUE, SVt_PV);
+	GvMULTI_on(gv);
+	sv_setiv(GvSV(gv), exe_is_aout());
 	gv = gv_fetchpv("OS2::emx_rev", TRUE, SVt_PV);
 	GvMULTI_on(gv);
 	sv_setiv(GvSV(gv), _emx_rev);
@@ -2295,18 +2316,330 @@ Xs_OS2_init(pTHX)
 
 OS2_Perl_data_t OS2_Perl_data;
 
+extern void _emx_init(void*);
+
+static void jmp_out_of_atexit(void);
+
+#define FORCE_EMX_INIT_CONTRACT_ARGV	1
+#define FORCE_EMX_INIT_INSTALL_ATEXIT	2
+
+static void
+my_emx_init(void *layout) {
+    static volatile void *p = 0;	/* Cannot be on stack! */
+
+    /* Can't just call emx_init(), since it moves the stack pointer */
+    /* It also busts a lot of registers, so be extra careful */
+    __asm__(	"pushf\n"
+		"pusha\n"
+		"movl %%esp, %1\n"
+		"push %0\n"
+		"call __emx_init\n"
+		"movl %1, %%esp\n"
+		"popa\n"
+		"popf\n" : : "r" (layout), "m" (p)	);
+}
+
+struct layout_table_t {
+    ULONG text_base;
+    ULONG text_end;
+    ULONG data_base;
+    ULONG data_end;
+    ULONG bss_base;
+    ULONG bss_end;
+    ULONG heap_base;
+    ULONG heap_end;
+    ULONG heap_brk;
+    ULONG heap_off;
+    ULONG os2_dll;
+    ULONG stack_base;
+    ULONG stack_end;
+    ULONG flags;
+    ULONG reserved[2];
+    char options[64];
+};
+
+static ULONG
+my_os_version() {
+    static ULONG res;			/* Cannot be on stack! */
+
+    /* Can't just call emx_init(), since it moves the stack pointer */
+    /* It also busts a lot of registers, so be extra careful */
+    __asm__(	"pushf\n"
+		"pusha\n"
+		"call ___os_version\n"
+		"movl %%eax, %0\n"
+		"popa\n"
+		"popf\n" : "=m" (res)	);
+
+    return res;
+}
+
+static void
+force_init_emx_runtime(EXCEPTIONREGISTRATIONRECORD *preg, ULONG flags)
+{
+    /* Calling emx_init() will bust the top of stack: it installs an
+       exception handler and puts argv data there. */
+    char *oldarg, *oldenv;
+    void *oldstackend, *oldstack;
+    PPIB pib;
+    PTIB tib;
+    static ULONG os2_dll;
+    ULONG rc, error = 0, out;
+    char buf[512];
+    static struct layout_table_t layout_table;
+    struct {
+	char buf[48*1024]; /* _emx_init() requires 32K, cmd.exe has 64K only */
+	double alignment1;
+	EXCEPTIONREGISTRATIONRECORD xreg;
+    } *newstack;
+    char *s;
+
+    layout_table.os2_dll = (ULONG)&os2_dll;
+    layout_table.flags   = 0x02000002;	/* flags: application, OMF */
+
+    DosGetInfoBlocks(&tib, &pib);
+    oldarg = pib->pib_pchcmd;
+    oldenv = pib->pib_pchenv;
+    oldstack = tib->tib_pstack;
+    oldstackend = tib->tib_pstacklimit;
+
+    /* Minimize the damage to the stack via reducing the size of argv. */
+    if (flags & FORCE_EMX_INIT_CONTRACT_ARGV) {
+	pib->pib_pchcmd = "\0\0";	/* Need 3 concatenated strings */
+	pib->pib_pchcmd = "\0";		/* Ended by an extra \0. */
+    }
+
+    newstack = alloca(sizeof(*newstack));
+    /* Emulate the stack probe */
+    s = ((char*)newstack) + sizeof(*newstack);
+    while (s > (char*)newstack) {
+	s[-1] = 0;
+	s -= 4096;
+    }
+
+    /* Reassigning stack is documented to work */
+    tib->tib_pstack = (void*)newstack;
+    tib->tib_pstacklimit = (void*)((char*)newstack + sizeof(*newstack));
+
+    /* Can't just call emx_init(), since it moves the stack pointer */
+    my_emx_init((void*)&layout_table);
+
+    /* Remove the exception handler, cannot use it - too low on the stack.
+       Check whether it is inside the new stack.  */
+    buf[0] = 0;
+    if (tib->tib_pexchain >= tib->tib_pstacklimit
+	|| tib->tib_pexchain < tib->tib_pstack) {
+	error = 1;
+	sprintf(buf,
+		"panic: ExceptionHandler misplaced: not %#lx <= %#lx < %#lx\n",
+		(unsigned long)tib->tib_pstack,
+		(unsigned long)tib->tib_pexchain,
+		(unsigned long)tib->tib_pstacklimit);	
+	goto finish;
+    }
+    if (tib->tib_pexchain != &(newstack->xreg)) {
+	sprintf(buf, "ExceptionHandler misplaced: %#lx != %#lx\n",
+		(unsigned long)tib->tib_pexchain,
+		(unsigned long)&(newstack->xreg));	
+    }
+    rc = DosUnsetExceptionHandler((EXCEPTIONREGISTRATIONRECORD *)tib->tib_pexchain);
+    if (rc)
+	sprintf(buf + strlen(buf), 
+		"warning: DosUnsetExceptionHandler rc=%#lx=%lu\n", rc, rc);
+
+    if (preg) {
+	/* ExceptionRecords should be on stack, in a correct order.  Sigh... */
+	preg->prev_structure = 0;
+	preg->ExceptionHandler = _emx_exception;
+	rc = DosSetExceptionHandler(preg);
+	if (rc) {
+	    sprintf(buf + strlen(buf),
+		    "warning: DosSetExceptionHandler rc=%#lx=%lu\n", rc, rc);
+	    DosWrite(2, buf, strlen(buf), &out);
+	    emx_exception_init = 1;	/* Do it around spawn*() calls */
+	}
+    } else
+	emx_exception_init = 1;		/* Do it around spawn*() calls */
+
+  finish:
+    /* Restore the damage */
+    pib->pib_pchcmd = oldarg;
+    pib->pib_pchcmd = oldenv;
+    tib->tib_pstacklimit = oldstackend;
+    tib->tib_pstack = oldstack;
+    emx_runtime_init = 1;
+    if (buf[0])
+	DosWrite(2, buf, strlen(buf), &out);
+    if (error)
+	exit(56);
+}
+
+jmp_buf at_exit_buf;
+int longjmp_at_exit;
+
+static void
+jmp_out_of_atexit(void)
+{
+    if (longjmp_at_exit)
+	longjmp(at_exit_buf, 1);
+}
+
+extern void _CRT_term(void);
+
+int emx_runtime_secondary;
+
+void
+Perl_OS2_term(void **p, int exitstatus, int flags)
+{
+    if (!emx_runtime_secondary)
+	return;
+
+    /* The principal executable is not running the same CRTL, so there
+       is nobody to shutdown *this* CRTL except us... */
+    if (flags & FORCE_EMX_DEINIT_EXIT) {
+	if (p && !emx_exception_init)
+	    DosUnsetExceptionHandler((EXCEPTIONREGISTRATIONRECORD *)p);
+	/* Do not run the executable's CRTL's termination routines */
+	exit(exitstatus);		/* Run at-exit, flush buffers, etc */
+    }
+    /* Run at-exit list, and jump out at the end */
+    if ((flags & FORCE_EMX_DEINIT_RUN_ATEXIT) && !setjmp(at_exit_buf)) {
+	longjmp_at_exit = 1;
+	exit(exitstatus);		/* The first pass through "if" */
+    }
+
+    /* Get here if we managed to jump out of exit(), or did not run atexit. */
+    longjmp_at_exit = 0;		/* Maybe exit() is called again? */
+#if 0 /* _atexit_n is not exported */
+    if (flags & FORCE_EMX_DEINIT_RUN_ATEXIT)
+	_atexit_n = 0;			/* Remove the atexit() handlers */
+#endif
+    /* Will segfault on program termination if we leave this dangling... */
+    if (p && !emx_exception_init)
+	DosUnsetExceptionHandler((EXCEPTIONREGISTRATIONRECORD *)p);
+    /* Typically there is no need to do this, done from _DLL_InitTerm() */
+    if (flags & FORCE_EMX_DEINIT_CRT_TERM)
+	_CRT_term();			/* Flush buffers, etc. */
+    /* Now it is a good time to call exit() in the caller's CRTL... */
+}
+
+#include <emx/startup.h>
+
+extern ULONG __os_version();		/* See system.doc */
+
+static int emx_wasnt_initialized;
+
+void
+check_emx_runtime(char **env, EXCEPTIONREGISTRATIONRECORD *preg)
+{
+    ULONG v_crt, v_emx;
+
+    /*  If _environ is not set, this code sits in a DLL which
+	uses a CRT DLL which not compatible with the executable's
+	CRT library.  Some parts of the DLL are not initialized.
+     */
+    if (_environ != NULL)
+	return;				/* Properly initialized */
+
+    /*  If the executable does not use EMX.DLL, EMX.DLL is not completely
+	initialized either.  Uninitialized EMX.DLL returns 0 in the low
+	nibble of __os_version().  */
+    v_emx = my_os_version();
+
+    /*	_osmajor and _osminor are normally set in _DLL_InitTerm of CRT DLL
+	(=>_CRT_init=>_entry2) via a call to __os_version(), then
+	reset when the EXE initialization code calls _text=>_init=>_entry2.
+	The first time they are wrongly set to 0; the second time the
+	EXE initialization code had already called emx_init=>initialize1
+	which correctly set version_major, version_minor used by
+	__os_version().  */
+    v_crt = (_osmajor | _osminor);
+
+    if ((_emx_env & 0x200) && !(v_emx & 0xFFFF)) {	/* OS/2, EMX uninit. */ 
+	force_init_emx_runtime( preg,
+				FORCE_EMX_INIT_CONTRACT_ARGV 
+				| FORCE_EMX_INIT_INSTALL_ATEXIT );
+	emx_wasnt_initialized = 1;
+	/* Update CRTL data basing on now-valid EMX runtime data */
+	if (!v_crt) {		/* The only wrong data are the versions. */
+	    v_emx = my_os_version();			/* *Now* it works */
+	    *(unsigned char *)&_osmajor = v_emx & 0xFF;	/* Cast out const */
+	    *(unsigned char *)&_osminor = (v_emx>>8) & 0xFF;
+	}
+    }
+    emx_runtime_secondary = 1;
+    /* if (flags & FORCE_EMX_INIT_INSTALL_ATEXIT) */
+    atexit(jmp_out_of_atexit);		/* Allow run of atexit() w/o exit()  */
+
+    if (!env) {				/* Fetch from the process info block */
+	int c = 0;
+	PPIB pib;
+	PTIB tib;
+	char *e, **ep;
+
+	DosGetInfoBlocks(&tib, &pib);
+	e = pib->pib_pchenv;
+	while (*e) {			/* Get count */
+	    c++;
+	    e = e + strlen(e) + 1;
+	}
+	e = pib->pib_pchenv;
+	while (*e) {			/* Get count */
+	    c++;
+	    e = e + strlen(e) + 1;
+	}
+	New(1307, env, c + 1, char*);
+	ep = env;
+	e = pib->pib_pchenv;
+	while (c--) {
+	    *ep++ = e;
+	    e = e + strlen(e) + 1;
+	}
+	*ep = NULL;
+    }
+    _environ = _org_environ = env;
+}
+
+#define ENTRY_POINT 0x10000
+
+static int
+exe_is_aout(void)
+{
+    struct layout_table_t *layout;
+    if (emx_wasnt_initialized)
+	return 0;
+    /* Now we know that the principal executable is an EMX application 
+       - unless somebody did already play with delayed initialization... */
+    /* With EMX applications to determine whether it is AOUT one needs
+       to examine the start of the executable to find "layout" */
+    if ( *(unsigned char*)ENTRY_POINT != 0x68		/* PUSH n */
+	 || *(unsigned char*)(ENTRY_POINT+5) != 0xe8	/* CALL */
+	 || *(unsigned char*)(ENTRY_POINT+10) != 0xeb	/* JMP */
+	 || *(unsigned char*)(ENTRY_POINT+12) != 0xe8)	/* CALL */
+	return 0;					/* ! EMX executable */
+    /* Fix alignment */
+    Copy((char*)(ENTRY_POINT+1), &layout, 1, struct layout_table_t*);
+    return !(layout->flags & 2);			
+}
+
 void
 Perl_OS2_init(char **env)
 {
+    Perl_OS2_init3(env, 0, 0);
+}
+
+void
+Perl_OS2_init3(char **env, void **preg, int flags)
+{
     char *shell;
 
+    _uflags (_UF_SBRK_MODEL, _UF_SBRK_ARBITRARY);
     MALLOC_INIT;
+
+    check_emx_runtime(env, (EXCEPTIONREGISTRATIONRECORD *)preg);
+
     settmppath();
     OS2_Perl_data.xs_init = &Xs_OS2_init;
-    _uflags (_UF_SBRK_MODEL, _UF_SBRK_ARBITRARY);
-    if (environ == NULL && env) {
-	environ = env;
-    }
     if ( (shell = getenv("PERL_SH_DRIVE")) ) {
 	New(1304, PL_sh_path, strlen(SH_PATH) + 1, char);
 	strcpy(PL_sh_path, SH_PATH);
