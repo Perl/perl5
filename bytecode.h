@@ -36,7 +36,7 @@ EXT I32 obj_list_fill INIT(-1);
 #define BGET_U8(arg)	arg = BGET_FGETC()
 
 #if INDIRECT_BGET_MACROS
-#define BGET_PV(arg)	do {		\
+#define BGET_PV(arg)	STMT_START {	\
 	BGET_U32(arg);			\
 	if (arg)			\
 	    bs.freadpv(arg, bs.data);	\
@@ -45,13 +45,13 @@ EXT I32 obj_list_fill INIT(-1);
 	    pv.xpv_len = 0;		\
 	    pv.xpv_cur = 0;		\
 	}				\
-    } while (0)
+    } STMT_END
 #else
-#define BGET_PV(arg)	do {			\
+#define BGET_PV(arg)	STMT_START {		\
 	BGET_U32(arg);				\
 	if (arg) {				\
 	    New(666, pv.xpv_pv, arg, char);	\
-	    PerlIO_fread(pv.xpv_pv, 1, arg, fp);	\
+	    PerlIO_fread(pv.xpv_pv, 1, arg, fp);\
 	    pv.xpv_len = arg;			\
 	    pv.xpv_cur = arg - 1;		\
 	} else {				\
@@ -59,7 +59,7 @@ EXT I32 obj_list_fill INIT(-1);
 	    pv.xpv_len = 0;			\
 	    pv.xpv_cur = 0;			\
 	}					\
-    } while (0)
+    } STMT_END
 #endif /* INDIRECT_BGET_MACROS */
 
 #define BGET_comment(arg) \
@@ -70,7 +70,7 @@ EXT I32 obj_list_fill INIT(-1);
  * machines such that 32-bit machine compilers don't whine about the shift
  * count being too high even though the code is never reached there.
  */
-#define BGET_IV64(arg) do {				\
+#define BGET_IV64(arg) STMT_START {			\
 	U32 hi, lo;					\
 	BGET_U32(hi);					\
 	BGET_U32(lo);					\
@@ -84,7 +84,7 @@ EXT I32 obj_list_fill INIT(-1);
 	    iv_overflows++;				\
 	    arg = 0;					\
 	}						\
-    } while (0)
+    } STMT_END
 
 #define BGET_op_tr_array(arg) do {	\
 	unsigned short *ary;		\
@@ -97,31 +97,31 @@ EXT I32 obj_list_fill INIT(-1);
     } while (0)
 
 #define BGET_pvcontents(arg)	arg = pv.xpv_pv
-#define BGET_strconst(arg)	do {	\
+#define BGET_strconst(arg) STMT_START {	\
 	for (arg = tokenbuf; (*arg = BGET_FGETC()); arg++) /* nothing */; \
 	arg = tokenbuf;			\
-    } while (0)
+    } STMT_END
 
-#define BGET_double(arg)	do {	\
+#define BGET_double(arg) STMT_START {	\
 	char *str;			\
 	BGET_strconst(str);		\
 	arg = atof(str);		\
-    } while (0)
+    } STMT_END
 
-#define BGET_objindex(arg) do {	\
-	U32 ix;			\
-	BGET_U32(ix);		\
-	arg = obj_list[ix];	\
-    } while (0)
+#define BGET_objindex(arg) STMT_START {	\
+	U32 ix;				\
+	BGET_U32(ix);			\
+	arg = obj_list[ix];		\
+    } STMT_END
 
 #define BSET_ldspecsv(sv, arg) sv = specialsv_list[arg]
 				    
 #define BSET_sv_refcnt_add(svrefcnt, arg)	svrefcnt += arg
 #define BSET_gp_refcnt_add(gprefcnt, arg)	gprefcnt += arg
-#define BSET_gp_share(sv, arg)	do {	\
-	gp_free((GV*)sv);		\
-	GvGP(sv) = GvGP(arg);		\
-    } while (0)
+#define BSET_gp_share(sv, arg) STMT_START {	\
+	gp_free((GV*)sv);			\
+	GvGP(sv) = GvGP(arg);			\
+    } STMT_END
 
 #define BSET_gv_fetchpv(sv, arg)	sv = (SV*)gv_fetchpv(arg, TRUE, SVt_PV)
 #define BSET_gv_stashpv(sv, arg)	sv = (SV*)gv_stashpv(arg, TRUE)
@@ -144,11 +144,11 @@ EXT I32 obj_list_fill INIT(-1);
 		pregcomp(arg, arg + pv.xpv_cur, ((PMOP*)o)) : 0
 #define BSET_newsv(sv, arg)	sv = NEWSV(666,0); SvUPGRADE(sv, arg)
 #define BSET_newop(o, arg)	o = (OP*)safemalloc(optype_size[arg])
-#define BSET_newopn(o, arg)	do {	\
-	OP *oldop = o;			\
-	BSET_newop(o, arg);		\
-	oldop->op_next = o;		\
-    } while (0)
+#define BSET_newopn(o, arg) STMT_START {	\
+	OP *oldop = o;				\
+	BSET_newop(o, arg);			\
+	oldop->op_next = o;			\
+    } STMT_END
 
 #define BSET_ret(foo) return
 
@@ -156,12 +156,12 @@ EXT I32 obj_list_fill INIT(-1);
  * Kludge special-case workaround for OP_MAPSTART
  * which needs the ppaddr for OP_GREPSTART. Blech.
  */
-#define BSET_op_type(o, arg)	do {	\
-	o->op_type = arg;		\
-	if (arg == OP_MAPSTART)		\
-	    arg = OP_GREPSTART;		\
-	o->op_ppaddr = ppaddr[arg];	\
-    } while (0)
+#define BSET_op_type(o, arg) STMT_START {	\
+	o->op_type = arg;			\
+	if (arg == OP_MAPSTART)			\
+	    arg = OP_GREPSTART;			\
+	o->op_ppaddr = ppaddr[arg];		\
+    } STMT_END
 #define BSET_op_ppaddr(o, arg) croak("op_ppaddr not yet implemented")
 #define BSET_curpad(pad, arg) pad = AvARRAY(arg)
 
