@@ -2,6 +2,14 @@
 
 require 5.003;
 
+my @extvars = qw(sv_undef sv_yes sv_no na dowarn
+                 curcop compiling 
+                 tainting tainted stack_base stack_sp sv_arenaroot
+                 curstash DBsub DBsingle debstash
+                 rsfp 
+                 stdingv
+                );
+
 sub readsyms (\%$) {
     my ($syms, $file) = @_;
     %$syms = ();
@@ -284,5 +292,21 @@ print EM <<'END';
 #endif /* PERL_GLOBAL_STRUCT */
 
 END
+
+print EM <<'END';
+
+#ifndef MIN_PERL_DEFINE  
+
+END
+
+for $sym (sort @extvars) {
+    print EM hide($sym,"PL_$sym");
+}
+
+print EM <<'END';
+
+#endif /* MIN_PERL_DEFINE */
+END
+
 
 close(EM);
