@@ -17,6 +17,12 @@
 #  include <fcntl.h>
 #endif
 
+#ifndef SIOCATMARK
+#   ifdef I_SYS_SOCKIO
+#       include <sys/sockio.h>
+#   endif
+#endif
+
 #ifdef PerlIO
 typedef int SysRet;
 typedef PerlIO * InputStream;
@@ -262,7 +268,6 @@ CODE:
 
 MODULE = IO	PACKAGE = IO::Handle	PREFIX = f
 
-
 int
 ungetc(handle, c)
 	InputStream	handle
@@ -408,6 +413,32 @@ fsync(handle)
 	RETVAL
 
 
+MODULE = IO	PACKAGE = IO::Socket
+
+SysRet
+sockatmark (sock)
+   InputStream sock
+   PROTOTYPE: $
+   PREINIT:
+     int fd,flag,result;
+   CODE:
+   {
+     fd = PerlIO_fileno(sock);
+#ifdef HAS_SOCKATMARK
+     flag = sockatmark(fd);
+#else
+#   ifdef SIOCATMARK
+     if (ioctl(fd, SIOCATMARK, &flag) != 0)
+       XSRETURN_UNDEF;
+#   else
+     not_here("IO::Socket::atmark");
+#  endif
+     RETVAL = flag;
+#endif
+   }
+   OUTPUT:
+     RETVAL
+
 BOOT:
 {
     HV *stash;
@@ -471,3 +502,4 @@ BOOT:
         newCONSTSUB(stash,"SEEK_END", newSViv(SEEK_END));
 #endif
 }
+
