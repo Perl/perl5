@@ -1,4 +1,4 @@
-/* $Header: doio.c,v 3.0.1.10 90/08/13 22:14:29 lwall Locked $
+/* $Header: doio.c,v 3.0.1.11 90/10/15 16:16:11 lwall Locked $
  *
  *    Copyright (c) 1989, Larry Wall
  *
@@ -6,6 +6,14 @@
  *    as specified in the README file that comes with the perl 3.0 kit.
  *
  * $Log:	doio.c,v $
+ * Revision 3.0.1.11  90/10/15  16:16:11  lwall
+ * patch29: added SysV IPC
+ * patch29: file - didn't auto-close cleanly
+ * patch29: close; core dumped
+ * patch29: more MSDOS and OS/2 updates, from Kai Uwe Rommel
+ * patch29: various portability fixes
+ * patch29: *foo now prints as *package'foo
+ * 
  * Revision 3.0.1.10  90/08/13  22:14:29  lwall
  * patch28: close-on-exec problems on dup'ed file descriptors
  * patch28: F_FREESP wasn't implemented the way I thought
@@ -75,6 +83,13 @@
 #include <sys/select.h>
 #endif
 
+#ifdef SYSVIPC
+#include <sys/ipc.h>
+#include <sys/msg.h>
+#include <sys/sem.h>
+#include <sys/shm.h>
+#endif
+
 #ifdef I_PWD
 #include <pwd.h>
 #endif
@@ -112,15 +127,18 @@ int len;
 	fd = fileno(stio->ifp);
 	if (stio->type == '|')
 	    result = mypclose(stio->ifp);
-	else if (stio->ifp != stio->ofp) {
-	    if (stio->ofp)
-		fclose(stio->ofp);
-	    result = fclose(stio->ifp);
-	}
-	else if (stio->type != '-')
-	    result = fclose(stio->ifp);
-	else
+	else if (stio->type == '-')
 	    result = 0;
+	else if (stio->ifp != stio->ofp) {
+	    if (stio->ofp) {
+		result = fclose(stio->ofp);
+		fclose(stio->ifp);	/* clear stdio, fd already closed */
+	    }
+	    else
+		result = fclose(stio->ifp);
+	}
+	else
+	    result = fclose(stio->ifp);
 	if (result == EOF && fd > 2)
 	    fprintf(stderr,"Warning: unable to close filehandle %s properly.\n",
 	      stab_name(stab));
@@ -391,9 +409,14 @@ STAB *stab;
 bool explicit;
 {
     bool retval = FALSE;
-    register STIO *stio = stab_io(stab);
+    register STIO *stio;
     int status;
 
+    if (!stab)
+	stab = argvstab;
+    if (!stab)
+	return FALSE;
+    stio = stab_io(stab);
     if (!stio) {		/* never opened */
 	if (dowarn && explicit)
 	    warn("Close on unopened file <%s>",stab_name(stab));
@@ -408,9 +431,12 @@ bool explicit;
 	else if (stio->type == '-')
 	    retval = TRUE;
 	else {
-	    if (stio->ofp && stio->ofp != stio->ifp)		/* a socket */
-		fclose(stio->ofp);
-	    retval = (fclose(stio->ifp) != EOF);
+	    if (stio->ofp && stio->ofp != stio->ifp) {		/* a socket */
+		retval = (fclose(stio->ofp) != EOF);
+		fclose(stio->ifp);	/* clear stdio, fd already closed */
+	    }
+	    else
+		retval = (fclose(stio->ifp) != EOF);
 	}
 	stio->ofp = stio->ifp = Nullfp;
     }
@@ -552,7 +578,11 @@ STR *argstr;
     }
     else {
 	retval = (int)str_gnum(argstr);
+#ifdef MSDOS
+	s = (char*)(long)retval;		/* ouch */
+#else
 	s = (char*)retval;		/* ouch */
+#endif
     }
 
 #ifndef lint
@@ -593,7 +623,7 @@ int *arglast;
 	if (tmpstab != defstab) {
 	    statstab = tmpstab;
 	    str_set(statname,"");
-	    if (!stab_io(tmpstab) ||
+	    if (!stab_io(tmpstab) || !stab_io(tmpstab)->ifp ||
 	      fstat(fileno(stab_io(tmpstab)->ifp),&statcache) < 0) {
 		max = 0;
 	    }
@@ -665,7 +695,7 @@ int *arglast;
 }
 
 #if !defined(TRUNCATE) && !defined(CHSIZE) && defined(F_FREESP)
-	    /* code courtesy of Pim Zandbergen */
+	/* code courtesy of William Kucharski */
 #define CHSIZE
 
 int chsize(fd, length)
@@ -836,10 +866,12 @@ FILE *fp;
     }
     else {
 	tmps = str_get(str);
-	if (*tmps == 'S' && tmps[1] == 't' && tmps[2] == 'a' && tmps[3] == 'b'
+	if (*tmps == 'S' && tmps[1] == 't' && tmps[2] == 'B' && tmps[3] == '\0'
 	  && str->str_cur == sizeof(STBP) && strlen(tmps) < str->str_cur) {
-	    tmps = stab_name(((STAB*)str));	/* a stab value, be nice */
-	    str = ((STAB*)str)->str_magic;
+	    STR *tmpstr = str_static(&str_undef);
+	    stab_fullname(tmpstr,((STAB*)str));/* a stab value, be nice */
+	    str = tmpstr;
+	    tmps = str->str_ptr;
 	    putc('*',fp);
 	}
 	if (str->str_cur && (fwrite(tmps,1,str->str_cur,fp) == 0 || ferror(fp)))
@@ -1920,7 +1952,9 @@ int *arglast;
 #ifdef PWCLASS
 	str_set(str,pwent->pw_class);
 #else
+#ifdef PWCOMMENT
 	str_set(str, pwent->pw_comment);
+#endif
 #endif
 	(void)astore(ary, ++sp, str = str_static(&str_no));
 	str_set(str, pwent->pw_gecos);
@@ -2288,3 +2322,242 @@ int effective;
 #endif
     return FALSE;
 }
+
+#ifdef SYSVIPC
+
+int
+do_ipcget(optype, arglast)
+int optype;
+int *arglast;
+{
+    register STR **st = stack->ary_array;
+    register int sp = arglast[0];
+    key_t key;
+    int n, flags;
+
+    key = (key_t)str_gnum(st[++sp]);
+    n = (optype == O_MSGGET) ? 0 : (int)str_gnum(st[++sp]);
+    flags = (int)str_gnum(st[++sp]);
+    errno = 0;
+    switch (optype)
+    {
+    case O_MSGGET:
+	return msgget(key, flags);
+    case O_SEMGET:
+	return semget(key, n, flags);
+    case O_SHMGET:
+	return shmget(key, n, flags);
+    }
+    return -1;			/* should never happen */
+}
+
+int
+do_ipcctl(optype, arglast)
+int optype;
+int *arglast;
+{
+    register STR **st = stack->ary_array;
+    register int sp = arglast[0];
+    STR *astr;
+    char *a;
+    int id, n, cmd, infosize, getinfo, ret;
+
+    id = (int)str_gnum(st[++sp]);
+    n = (optype == O_SEMCTL) ? (int)str_gnum(st[++sp]) : 0;
+    cmd = (int)str_gnum(st[++sp]);
+    astr = st[++sp];
+
+    infosize = 0;
+    getinfo = (cmd == IPC_STAT);
+
+    switch (optype)
+    {
+    case O_MSGCTL:
+	if (cmd == IPC_STAT || cmd == IPC_SET)
+	    infosize = sizeof(struct msqid_ds);
+	break;
+    case O_SHMCTL:
+	if (cmd == IPC_STAT || cmd == IPC_SET)
+	    infosize = sizeof(struct shmid_ds);
+	break;
+    case O_SEMCTL:
+	if (cmd == IPC_STAT || cmd == IPC_SET)
+	    infosize = sizeof(struct semid_ds);
+	else if (cmd == GETALL || cmd == SETALL)
+	{
+	    struct semid_ds semds;
+	    if (semctl(id, 0, IPC_STAT, &semds) == -1)
+		return -1;
+	    getinfo = (cmd == GETALL);
+	    infosize = semds.sem_nsems * sizeof(ushort);
+	}
+	break;
+    }
+
+    if (infosize)
+    {
+	if (getinfo)
+	{
+	    STR_GROW(astr, infosize+1);
+	    a = str_get(astr);
+	}
+	else
+	{
+	    a = str_get(astr);
+	    if (astr->str_cur != infosize)
+	    {
+		errno = EINVAL;
+		return -1;
+	    }
+	}
+    }
+    else
+    {
+	int i = (int)str_gnum(astr);
+	a = (char *)i;		/* ouch */
+    }
+    errno = 0;
+    switch (optype)
+    {
+    case O_MSGCTL:
+	ret = msgctl(id, cmd, a);
+	break;
+    case O_SEMCTL:
+	ret = semctl(id, n, cmd, a);
+	break;
+    case O_SHMCTL:
+	ret = shmctl(id, cmd, a);
+	break;
+    }
+    if (getinfo && ret >= 0) {
+	astr->str_cur = infosize;
+	astr->str_ptr[infosize] = '\0';
+    }
+    return ret;
+}
+
+int
+do_msgsnd(arglast)
+int *arglast;
+{
+    register STR **st = stack->ary_array;
+    register int sp = arglast[0];
+    STR *mstr;
+    char *mbuf;
+    int id, msize, flags;
+
+    id = (int)str_gnum(st[++sp]);
+    mstr = st[++sp];
+    flags = (int)str_gnum(st[++sp]);
+    mbuf = str_get(mstr);
+    if ((msize = mstr->str_cur - sizeof(long)) < 0) {
+	errno = EINVAL;
+	return -1;
+    }
+    errno = 0;
+    return msgsnd(id, mbuf, msize, flags);
+}
+
+int
+do_msgrcv(arglast)
+int *arglast;
+{
+    register STR **st = stack->ary_array;
+    register int sp = arglast[0];
+    STR *mstr;
+    char *mbuf;
+    long mtype;
+    int id, msize, flags, ret;
+
+    id = (int)str_gnum(st[++sp]);
+    mstr = st[++sp];
+    msize = (int)str_gnum(st[++sp]);
+    mtype = (long)str_gnum(st[++sp]);
+    flags = (int)str_gnum(st[++sp]);
+    mbuf = str_get(mstr);
+    if (mstr->str_cur < sizeof(long)+msize+1) {
+	STR_GROW(mstr, sizeof(long)+msize+1);
+	mbuf = str_get(mstr);
+    }
+    errno = 0;
+    ret = msgrcv(id, mbuf, msize, mtype, flags);
+    if (ret >= 0) {
+	mstr->str_cur = sizeof(long)+ret;
+	mstr->str_ptr[sizeof(long)+ret] = '\0';
+    }
+    return ret;
+}
+
+int
+do_semop(arglast)
+int *arglast;
+{
+    register STR **st = stack->ary_array;
+    register int sp = arglast[0];
+    STR *opstr;
+    char *opbuf;
+    int id, opsize;
+
+    id = (int)str_gnum(st[++sp]);
+    opstr = st[++sp];
+    opbuf = str_get(opstr);
+    opsize = opstr->str_cur;
+    if (opsize < sizeof(struct sembuf)
+	|| (opsize % sizeof(struct sembuf)) != 0) {
+	errno = EINVAL;
+	return -1;
+    }
+    errno = 0;
+    return semop(id, opbuf, opsize/sizeof(struct sembuf));
+}
+
+int
+do_shmio(optype, arglast)
+int optype;
+int *arglast;
+{
+    register STR **st = stack->ary_array;
+    register int sp = arglast[0];
+    STR *mstr;
+    char *mbuf, *shm;
+    int id, mpos, msize;
+    struct shmid_ds shmds;
+    extern char *shmat();
+
+    id = (int)str_gnum(st[++sp]);
+    mstr = st[++sp];
+    mpos = (int)str_gnum(st[++sp]);
+    msize = (int)str_gnum(st[++sp]);
+    errno = 0;
+    if (shmctl(id, IPC_STAT, &shmds) == -1)
+	return -1;
+    if (mpos < 0 || msize < 0 || mpos + msize > shmds.shm_segsz) {
+	errno = EFAULT;		/* can't do as caller requested */
+	return -1;
+    }
+    shm = shmat(id, (char *)NULL, (optype == O_SHMREAD) ? SHM_RDONLY : 0);
+    if (shm == (char *)-1)	/* I hate System V IPC, I really do */
+	return -1;
+    mbuf = str_get(mstr);
+    if (optype == O_SHMREAD) {
+	if (mstr->str_cur < msize) {
+	    STR_GROW(mstr, msize+1);
+	    mbuf = str_get(mstr);
+	}
+	bcopy(shm + mpos, mbuf, msize);
+	mstr->str_cur = msize;
+	mstr->str_ptr[msize] = '\0';
+    }
+    else {
+	int n;
+
+	if ((n = mstr->str_cur) > msize)
+	    n = msize;
+	bcopy(mbuf, shm + mpos, n);
+	if (n < msize)
+	    bzero(shm + mpos + n, msize - n);
+    }
+    return shmdt(shm);
+}
+
+#endif /* SYSVIPC */

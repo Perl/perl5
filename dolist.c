@@ -1,4 +1,4 @@
-/* $Header: dolist.c,v 3.0.1.9 90/08/13 22:15:35 lwall Locked $
+/* $Header: dolist.c,v 3.0.1.10 90/10/15 16:19:48 lwall Locked $
  *
  *    Copyright (c) 1989, Larry Wall
  *
@@ -6,6 +6,11 @@
  *    as specified in the README file that comes with the perl 3.0 kit.
  *
  * $Log:	dolist.c,v $
+ * Revision 3.0.1.10  90/10/15  16:19:48  lwall
+ * patch29: added caller
+ * patch29: added scalar reverse
+ * patch29: sort undefined_subroutine @array is now a fatal error
+ * 
  * Revision 3.0.1.9  90/08/13  22:15:35  lwall
  * patch28: defined(@array) and defined(%array) didn't work right
  * 
@@ -1301,12 +1306,6 @@ int *arglast;
     register STR **down = &st[arglast[2]];
     register int i = arglast[2] - arglast[1];
 
-    if (gimme != G_ARRAY) {
-	str_sset(str,&str_undef);
-	STABSET(str);
-	st[arglast[0]+1] = str;
-	return arglast[0]+1;
-    }
     while (i-- > 0) {
 	*up++ = *down;
 	if (i-- > 0)
@@ -1315,6 +1314,32 @@ int *arglast;
     i = arglast[2] - arglast[1];
     Copy(down+1,up,i/2,STR*);
     return arglast[2] - 1;
+}
+
+int
+do_sreverse(str,gimme,arglast)
+STR *str;
+int gimme;
+int *arglast;
+{
+    STR **st = stack->ary_array;
+    register char *up;
+    register char *down;
+    register int tmp;
+
+    str_sset(str,st[arglast[2]]);
+    up = str_get(str);
+    if (str->str_cur > 1) {
+	down = str->str_ptr + str->str_cur - 1;
+	while (down > up) {
+	    tmp = *up;
+	    *up++ = *down;
+	    *down-- = tmp;
+	}
+    }
+    STABSET(str);
+    st[arglast[0]+1] = str;
+    return arglast[0]+1;
 }
 
 static CMD *sortcmd;
@@ -1359,9 +1384,11 @@ int *arglast;
     max = up - &st[sp];
     sp--;
     if (max > 1) {
-	if (stab_sub(stab) && (sortcmd = stab_sub(stab)->cmd)) {
+	if (stab) {
 	    int oldtmps_base = tmps_base;
 
+	    if (!stab_sub(stab) || !(sortcmd = stab_sub(stab)->cmd))
+		fatal("Undefined subroutine \"%s\" in sort", stab_name(stab));
 	    if (!sortstack) {
 		sortstack = anew(Nullstab);
 		sortstack->ary_flags = 0;
@@ -1468,11 +1495,79 @@ int *arglast;
 }
 
 int
+do_caller(arg,maxarg,gimme,arglast)
+ARG *arg;
+int maxarg;
+int gimme;
+int *arglast;
+{
+    STR **st = stack->ary_array;
+    register int sp = arglast[0];
+    register CSV *csv = curcsv;
+    STR *str;
+    int count = 0;
+
+    if (!csv)
+	fatal("There is no caller");
+    if (maxarg)
+	count = (int) str_gnum(st[sp+1]);
+    for (;;) {
+	if (!csv)
+	    return sp;
+	if (csv->curcsv && csv->curcsv->sub == stab_sub(DBsub))
+	    count++;
+	if (!count--)
+	    break;
+	csv = csv->curcsv;
+    }
+    if (gimme != G_ARRAY) {
+	STR *str = arg->arg_ptr.arg_str;
+	str_set(str,csv->curcmd->c_stash->tbl_name);
+	STABSET(str);
+	st[++sp] = str;
+	return sp;
+    }
+
+#ifndef lint
+    (void)astore(stack,++sp,
+      str_2static(str_make(csv->curcmd->c_stash->tbl_name,0)) );
+    (void)astore(stack,++sp,
+      str_2static(str_make(stab_val(csv->curcmd->c_filestab)->str_ptr,0)) );
+    (void)astore(stack,++sp,
+      str_2static(str_nmake((double)csv->curcmd->c_line)) );
+    if (!maxarg)
+	return sp;
+    str = str_static(&str_undef);
+    stab_fullname(str, csv->stab);
+    (void)astore(stack,++sp, str);
+    (void)astore(stack,++sp,
+      str_2static(str_nmake((double)csv->hasargs)) );
+    (void)astore(stack,++sp,
+      str_2static(str_nmake((double)csv->wantarray)) );
+    if (csv->hasargs) {
+	ARRAY *ary = csv->argarray;
+
+	if (dbargs->ary_max < ary->ary_fill)
+	    astore(dbargs,ary->ary_fill,Nullstr);
+	Copy(ary->ary_array, dbargs->ary_array, ary->ary_fill+1, STR*);
+	dbargs->ary_fill = ary->ary_fill;
+    }
+#else
+    (void)astore(stack,++sp,
+      str_2static(str_make("",0)));
+#endif
+    return sp;
+}
+
+int
 do_tms(str,gimme,arglast)
 STR *str;
 int gimme;
 int *arglast;
 {
+#ifdef MSDOS
+    return -1;
+#else
     STR **st = stack->ary_array;
     register int sp = arglast[0];
 
@@ -1502,6 +1597,7 @@ int *arglast;
       str_2static(str_nmake(0.0)));
 #endif
     return sp;
+#endif
 }
 
 int

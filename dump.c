@@ -1,4 +1,4 @@
-/* $Header: dump.c,v 3.0.1.1 90/03/27 15:49:58 lwall Locked $
+/* $Header: dump.c,v 3.0.1.2 90/10/15 16:22:10 lwall Locked $
  *
  *    Copyright (c) 1989, Larry Wall
  *
@@ -6,6 +6,9 @@
  *    as specified in the README file that comes with the perl 3.0 kit.
  *
  * $Log:	dump.c,v $
+ * Revision 3.0.1.2  90/10/15  16:22:10  lwall
+ * patch29: *foo now prints as *package'foo
+ * 
  * Revision 3.0.1.1  90/03/27  15:49:58  lwall
  * patch16: changed unsigned to unsigned int
  * 
@@ -25,13 +28,15 @@ dump_all()
     register int i;
     register STAB *stab;
     register HENT *entry;
+    STR *str = str_static(&str_undef);
 
     dump_cmd(main_root,Nullcmd);
     for (i = 0; i <= 127; i++) {
 	for (entry = defstash->tbl_array[i]; entry; entry = entry->hent_next) {
 	    stab = (STAB*)entry->hent_val;
 	    if (stab_sub(stab)) {
-		dump("\nSUB %s = ", stab_name(stab));
+		stab_fullname(str,stab);
+		dump("\nSUB %s = ", str->str_ptr);
 		dump_cmd(stab_sub(stab)->cmd,Nullcmd);
 	    }
 	}
@@ -246,13 +251,17 @@ unsigned int flags;
 dump_stab(stab)
 register STAB *stab;
 {
+    STR *str;
+
     if (!stab) {
 	fprintf(stderr,"{}\n");
 	return;
     }
+    str = str_static(&str_undef);
     dumplvl++;
     fprintf(stderr,"{\n");
-    dump("STAB_NAME = %s\n",stab_name(stab));
+    stab_fullname(str,stab);
+    dump("STAB_NAME = %s\n", str->str_ptr);
     dumplvl--;
     dump("}\n");
 }

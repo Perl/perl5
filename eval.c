@@ -1,4 +1,4 @@
-/* $Header: eval.c,v 3.0.1.8 90/08/13 22:17:14 lwall Locked $
+/* $Header: eval.c,v 3.0.1.9 90/10/15 16:46:13 lwall Locked $
  *
  *    Copyright (c) 1989, Larry Wall
  *
@@ -6,6 +6,20 @@
  *    as specified in the README file that comes with the perl 3.0 kit.
  *
  * $Log:	eval.c,v $
+ * Revision 3.0.1.9  90/10/15  16:46:13  lwall
+ * patch29: added caller
+ * patch29: added scalar
+ * patch29: added cmp and <=>
+ * patch29: added sysread and syswrite
+ * patch29: added -M, -A and -C
+ * patch29: index and substr now have optional 3rd args
+ * patch29: you can now read into the middle string
+ * patch29: ~ now works on vector string
+ * patch29: non-existent array values no longer cause core dumps
+ * patch29: eof; core dumped
+ * patch29: oct and hex now produce unsigned result
+ * patch29: unshift did not return the documented value
+ * 
  * Revision 3.0.1.8  90/08/13  22:17:14  lwall
  * patch28: the NSIG hack didn't work right on Xenix
  * patch28: defined(@array) and defined(%array) didn't work right
@@ -90,7 +104,6 @@ static STAB *stab2;
 static STIO *stio;
 static struct lstring *lstr;
 static int old_record_separator;
-extern int wantarray;
 
 double sin(), cos(), atan2(), pow();
 
@@ -158,6 +171,8 @@ register int sp;
     case O_ITEM:
 	if (gimme == G_ARRAY)
 	    goto array_return;
+	/* FALL THROUGH */
+    case O_SCALAR:
 	STR_SSET(str,st[1]);
 	STABSET(str);
 	break;
@@ -353,6 +368,14 @@ register int sp;
 	value = str_gnum(st[1]);
 	value = (value != str_gnum(st[2])) ? 1.0 : 0.0;
 	goto donumset;
+    case O_NCMP:
+	value = str_gnum(st[1]);
+	value -= str_gnum(st[2]);
+	if (value > 0.0)
+	    value = 1.0;
+	else if (value < 0.0)
+	    value = -1.0;
+	goto donumset;
     case O_BIT_AND:
 	if (!sawvec || st[1]->str_nok || st[2]->str_nok) {
 	    value = str_gnum(st[1]);
@@ -466,12 +489,12 @@ register int sp;
 	else {
 	    STR_SSET(str,st[1]);
 	    tmps = str_get(str);
-	    for (anum = str->str_cur; anum; anum--)
+	    for (anum = str->str_cur; anum; anum--, tmps++)
 		*tmps = ~*tmps;
 	}
 	break;
     case O_SELECT:
-	tmps = stab_name(defoutstab);
+	stab_fullname(str,defoutstab);
 	if (maxarg > 0) {
 	    if ((arg[1].arg_type & A_MASK) == A_WORD)
 		defoutstab = arg[1].arg_ptr.arg_stab;
@@ -481,7 +504,6 @@ register int sp;
 		stab_io(defoutstab) = stio_new();
 	    curoutstab = defoutstab;
 	}
-	str_set(str, tmps);
 	STABSET(str);
 	break;
     case O_WRITE:
@@ -617,8 +639,6 @@ register int sp;
     case O_AELEM:
 	anum = ((int)str_gnum(st[2])) - arybase;
 	str = afetch(stab_array(arg[1].arg_ptr.arg_stab),anum,FALSE);
-	if (!str)
-	    goto say_undef;
 	break;
     case O_DELETE:
 	tmpstab = arg[1].arg_ptr.arg_stab;
@@ -653,13 +673,11 @@ register int sp;
 	tmpstab = arg[1].arg_ptr.arg_stab;
 	tmps = str_get(st[2]);
 	str = hfetch(stab_hash(tmpstab),tmps,st[2]->str_cur,FALSE);
-	if (!str)
-	    goto say_undef;
 	break;
     case O_LAELEM:
 	anum = ((int)str_gnum(st[2])) - arybase;
 	str = afetch(stab_array(arg[1].arg_ptr.arg_stab),anum,TRUE);
-	if (!str)
+	if (!str || str == &str_undef)
 	    fatal("Assignment to non-creatable value, subscript %d",anum);
 	break;
     case O_LHELEM:
@@ -667,7 +685,7 @@ register int sp;
 	tmps = str_get(st[2]);
 	anum = st[2]->str_cur;
 	str = hfetch(stab_hash(tmpstab),tmps,anum,TRUE);
-	if (!str)
+	if (!str || str == &str_undef)
 	    fatal("Assignment to non-creatable value, subscript \"%s\"",tmps);
 	if (tmpstab == envstab)		/* heavy wizardry going on here */
 	    str_magic(str, tmpstab, 'E', tmps, anum);	/* str is now magic */
@@ -678,6 +696,8 @@ register int sp;
 	else if (stab_hash(tmpstab)->tbl_dbm)
 	    str_magic(str, tmpstab, 'D', tmps, anum);
 #endif
+	else if (perldb && tmpstab == DBline)
+	    str_magic(str, tmpstab, 'L', tmps, anum);
 	break;
     case O_LSLICE:
 	anum = 2;
@@ -752,7 +772,7 @@ register int sp;
 	if (anum < 0 || anum > st[1]->str_cur)
 	    str_nset(str,"",0);
 	else {
-	    optype = (int)str_gnum(st[3]);
+	    optype = maxarg < 3 ? st[1]->str_cur : (int)str_gnum(st[3]);
 	    if (optype < 0)
 		optype = 0;
 	    tmps += anum;
@@ -802,12 +822,20 @@ register int sp;
 	tmps = str_get(st[1]);
 	value = (double) !str_eq(st[1],st[2]);
 	goto donumset;
+    case O_SCMP:
+	tmps = str_get(st[1]);
+	value = (double) str_cmp(st[1],st[2]);
+	goto donumset;
     case O_SUBR:
 	sp = do_subr(arg,gimme,arglast);
 	st = stack->ary_array + arglast[0];		/* maybe realloced */
 	goto array_return;
     case O_DBSUBR:
-	sp = do_dbsubr(arg,gimme,arglast);
+	sp = do_subr(arg,gimme,arglast);
+	st = stack->ary_array + arglast[0];		/* maybe realloced */
+	goto array_return;
+    case O_CALLER:
+	sp = do_caller(arg,maxarg,gimme,arglast);
 	st = stack->ary_array + arglast[0];		/* maybe realloced */
 	goto array_return;
     case O_SORT:
@@ -815,14 +843,16 @@ register int sp;
 	    stab = arg[1].arg_ptr.arg_stab;
 	else
 	    stab = stabent(str_get(st[1]),TRUE);
-	if (!stab)
-	    stab = defoutstab;
 	sp = do_sort(str,stab,
 	  gimme,arglast);
 	goto array_return;
     case O_REVERSE:
-	sp = do_reverse(str,
-	  gimme,arglast);
+	if (gimme == G_ARRAY)
+	    sp = do_reverse(str,
+	      gimme,arglast);
+	else
+	    sp = do_sreverse(str,
+	      gimme,arglast);
 	goto array_return;
     case O_WARN:
 	if (arglast[2] - arglast[1] != 1) {
@@ -893,13 +923,11 @@ register int sp;
 	    tmps = str_get(st[1]);
 	if (!tmps || !*tmps) {
 	    tmpstr = hfetch(stab_hash(envstab),"HOME",4,FALSE);
-	    if (tmpstr)
-		tmps = str_get(tmpstr);
+	    tmps = str_get(tmpstr);
 	}
 	if (!tmps || !*tmps) {
 	    tmpstr = hfetch(stab_hash(envstab),"LOGDIR",6,FALSE);
-	    if (tmpstr)
-		tmps = str_get(tmpstr);
+	    tmps = str_get(tmpstr);
 	}
 #ifdef TAINT
 	taintproper("Insecure dependency in chdir");
@@ -918,7 +946,7 @@ register int sp;
 	    tmps = "";
 	else
 	    tmps = str_get(st[1]);
-	str_reset(tmps,arg[2].arg_ptr.arg_hash);
+	str_reset(tmps,curcmd->c_stash);
 	value = 1.0;
 	goto donumset;
     case O_LIST:
@@ -946,8 +974,10 @@ register int sp;
 	    stab = arg[1].arg_ptr.arg_stab;
 	else
 	    stab = stabent(str_get(st[1]),TRUE);
-	if (do_eof(stab))	/* make sure we have fp with something */
-	    str_set(str, No);
+	if (!stab)
+	    stab = argvstab;
+	if (!stab || do_eof(stab)) /* make sure we have fp with something */
+	    goto say_undef;
 	else {
 #ifdef TAINT
 	    tainted = 1;
@@ -972,21 +1002,27 @@ register int sp;
 	goto donumset;
     case O_RECV:
     case O_READ:
+    case O_SYSREAD:
 	if ((arg[1].arg_type & A_MASK) == A_WORD)
 	    stab = arg[1].arg_ptr.arg_stab;
 	else
 	    stab = stabent(str_get(st[1]),TRUE);
 	tmps = str_get(st[2]);
 	anum = (int)str_gnum(st[3]);
-	STR_GROW(st[2], anum+1), (tmps = str_get(st[2]));	/* sneaky */
 	errno = 0;
+	maxarg = sp - arglast[0];
+	if (maxarg > 4)
+	    warn("Too many args on read");
+	if (maxarg == 4)
+	    maxarg = (int)str_gnum(st[4]);
+	else
+	    maxarg = 0;
 	if (!stab_io(stab) || !stab_io(stab)->ifp)
-	    goto say_zero;
+	    goto say_undef;
 #ifdef SOCKET
-	else if (optype == O_RECV) {
+	if (optype == O_RECV) {
 	    argtype = sizeof buf;
-	    optype = (int)str_gnum(st[4]);
-	    anum = recvfrom(fileno(stab_io(stab)->ifp), tmps, anum, optype,
+	    anum = recvfrom(fileno(stab_io(stab)->ifp), tmps, anum, maxarg,
 		buf, &argtype);
 	    if (anum >= 0) {
 		st[2]->str_cur = anum;
@@ -997,55 +1033,77 @@ register int sp;
 		str_sset(str,&str_undef);
 	    break;
 	}
-	else if (stab_io(stab)->type == 's') {
-	    argtype = sizeof buf;
-	    anum = recvfrom(fileno(stab_io(stab)->ifp), tmps, anum, 0,
-		buf, &argtype);
-	}
 #else
-	else if (optype == O_RECV)
+	if (optype == O_RECV)
 	    goto badsock;
 #endif
+	STR_GROW(st[2], anum+maxarg+1), (tmps = str_get(st[2]));  /* sneaky */
+#ifdef SOCKET
+	if (stab_io(stab)->type == 's') {
+	    argtype = sizeof buf;
+	    anum = recvfrom(fileno(stab_io(stab)->ifp), tmps+maxarg, anum, 0,
+		buf, &argtype);
+	}
 	else
-	    anum = fread(tmps, 1, anum, stab_io(stab)->ifp);
+#endif
+	if (optype == O_SYSREAD) {
+	    anum = read(fileno(stab_io(stab)->ifp), tmps+maxarg, anum);
+	}
+	else
+	    anum = fread(tmps+maxarg, 1, anum, stab_io(stab)->ifp);
 	if (anum < 0)
 	    goto say_undef;
-	st[2]->str_cur = anum;
-	st[2]->str_ptr[anum] = '\0';
+	st[2]->str_cur = anum+maxarg;
+	st[2]->str_ptr[anum+maxarg] = '\0';
 	value = (double)anum;
 	goto donumset;
+    case O_SYSWRITE:
     case O_SEND:
-#ifdef SOCKET
 	if ((arg[1].arg_type & A_MASK) == A_WORD)
 	    stab = arg[1].arg_ptr.arg_stab;
 	else
 	    stab = stabent(str_get(st[1]),TRUE);
 	tmps = str_get(st[2]);
 	anum = (int)str_gnum(st[3]);
-	optype = sp - arglast[0];
 	errno = 0;
-	if (optype > 4)
-	    warn("Too many args on send");
 	stio = stab_io(stab);
+	maxarg = sp - arglast[0];
 	if (!stio || !stio->ifp) {
 	    anum = -1;
-	    if (dowarn)
-		warn("Send on closed socket");
+	    if (dowarn) {
+		if (optype == O_SYSWRITE)
+		    warn("Syswrite on closed filehandle");
+		else
+		    warn("Send on closed socket");
+	    }
 	}
-	else if (optype >= 4) {
+	else if (optype == O_SYSWRITE) {
+	    if (maxarg > 4)
+		warn("Too many args on syswrite");
+	    if (maxarg == 4)
+		optype = (int)str_gnum(st[4]);
+	    else
+		optype = 0;
+	    anum = write(fileno(stab_io(stab)->ifp), tmps+optype, anum);
+	}
+#ifdef SOCKET
+	else if (maxarg >= 4) {
+	    if (maxarg > 4)
+		warn("Too many args on send");
 	    tmps2 = str_get(st[4]);
 	    anum = sendto(fileno(stab_io(stab)->ifp), tmps, st[2]->str_cur,
 	      anum, tmps2, st[4]->str_cur);
 	}
 	else
 	    anum = send(fileno(stab_io(stab)->ifp), tmps, st[2]->str_cur, anum);
+#else
+	else
+	    goto badsock;
+#endif
 	if (anum < 0)
 	    goto say_undef;
 	value = (double)anum;
 	goto donumset;
-#else
-	goto badsock;
-#endif
     case O_SEEK:
 	if ((arg[1].arg_type & A_MASK) == A_WORD)
 	    stab = arg[1].arg_ptr.arg_stab;
@@ -1059,7 +1117,7 @@ register int sp;
     case O_RETURN:
 	tmps = "_SUB_";		/* just fake up a "last _SUB_" */
 	optype = O_LAST;
-	if (wantarray == G_ARRAY) {
+	if (curcsv->wantarray == G_ARRAY) {
 	    lastretstr = Nullstr;
 	    lastspbase = arglast[1];
 	    lastsize = arglast[2] - arglast[1];
@@ -1118,8 +1176,17 @@ register int sp;
 	longjmp(top_env, 1);
     case O_INDEX:
 	tmps = str_get(st[1]);
+	if (maxarg < 3)
+	    anum = 0;
+	else {
+	    anum = (int) str_gnum(st[3]) - arybase;
+	    if (anum < 0)
+		anum = 0;
+	    else if (anum > st[1]->str_cur)
+		anum = st[1]->str_cur;
+	}
 #ifndef lint
-	if (!(tmps2 = fbminstr((unsigned char*)tmps,
+	if (!(tmps2 = fbminstr((unsigned char*)tmps + anum,
 	  (unsigned char*)tmps + st[1]->str_cur, st[2])))
 #else
 	if (tmps2 = fbminstr(Null(unsigned char*),Null(unsigned char*),Nullstr))
@@ -1131,8 +1198,17 @@ register int sp;
     case O_RINDEX:
 	tmps = str_get(st[1]);
 	tmps2 = str_get(st[2]);
+	if (maxarg < 3)
+	    anum = st[1]->str_cur;
+	else {
+	    anum = (int) str_gnum(st[3]) - arybase + st[2]->str_cur;
+	    if (anum < 0)
+		anum = 0;
+	    else if (anum > st[1]->str_cur)
+		anum = st[1]->str_cur;
+	}
 #ifndef lint
-	if (!(tmps2 = rninstr(tmps,  tmps  + st[1]->str_cur,
+	if (!(tmps2 = rninstr(tmps,  tmps  + anum,
 			      tmps2, tmps2 + st[2]->str_cur)))
 #else
 	if (tmps2 = rninstr(Nullch,Nullch,Nullch,Nullch))
@@ -1370,8 +1446,11 @@ register int sp;
     case O_FORK:
 #ifdef FORK
 	anum = fork();
-	if (!anum && (tmpstab = stabent("$",allstabs)))
-	    str_numset(STAB_STR(tmpstab),(double)getpid());
+	if (!anum) {
+	    if (tmpstab = stabent("$",allstabs))
+		str_numset(STAB_STR(tmpstab),(double)getpid());
+	    hclear(pidstatus);	/* no kids, so don't wait for 'em */
+	}
 	value = (double)anum;
 	goto donumset;
 #else
@@ -1384,6 +1463,20 @@ register int sp;
 	anum = wait(&argflags);
 	if (anum > 0)
 	    pidgone(anum,argflags);
+	value = (double)anum;
+#endif
+	statusvalue = (unsigned short)argflags;
+	goto donumset;
+#else
+	fatal("Unsupported function wait");
+	break;
+#endif
+    case O_WAITPID:
+#ifdef WAITPID
+#ifndef lint
+	anum = (int)str_gnum(st[1]);
+	optype = (int)str_gnum(st[2]);
+	anum = wait4pid(anum, &argflags,optype);
 	value = (double)anum;
 #endif
 	statusvalue = (unsigned short)argflags;
@@ -1412,15 +1505,14 @@ register int sp;
 #ifndef lint
 	    ihand = signal(SIGINT, SIG_IGN);
 	    qhand = signal(SIGQUIT, SIG_IGN);
-	    while ((argtype = wait(&argflags)) != anum && argtype >= 0)
-		pidgone(argtype,argflags);
+	    argtype = wait4pid(anum, &argflags, 0);
 #else
 	    ihand = qhand = 0;
 #endif
 	    (void)signal(SIGINT, ihand);
 	    (void)signal(SIGQUIT, qhand);
 	    statusvalue = (unsigned short)argflags;
-	    if (argtype == -1)
+	    if (argtype < 0)
 		value = -1.0;
 	    else {
 		value = (double)((unsigned int)argflags & 0xffff);
@@ -1446,7 +1538,7 @@ register int sp;
 	}
 	goto donumset;
 #endif /* FORK */
-    case O_EXEC:
+    case O_EXEC_OP:
 	if ((arg[1].arg_type & A_MASK) == A_STAB)
 	    value = (double)do_aexec(st[1],arglast);
 	else if (arglast[2] - arglast[1] != 1)
@@ -1463,7 +1555,7 @@ register int sp;
 	argtype = 3;
 
       snarfnum:
-	anum = 0;
+	tmplong = 0;
 	if (maxarg < 1)
 	    tmps = str_get(stab_val(defstab));
 	else
@@ -1478,15 +1570,15 @@ register int sp;
 		/* FALL THROUGH */
 	    case '0': case '1': case '2': case '3': case '4':
 	    case '5': case '6': case '7':
-		anum <<= argtype;
-		anum += *tmps++ & 15;
+		tmplong <<= argtype;
+		tmplong += *tmps++ & 15;
 		break;
 	    case 'a': case 'b': case 'c': case 'd': case 'e': case 'f':
 	    case 'A': case 'B': case 'C': case 'D': case 'E': case 'F':
 		if (argtype != 4)
 		    goto out;
-		anum <<= 4;
-		anum += (*tmps++ & 7) + 9;
+		tmplong <<= 4;
+		tmplong += (*tmps++ & 7) + 9;
 		break;
 	    case 'x':
 		argtype = 4;
@@ -1495,7 +1587,7 @@ register int sp;
 	    }
 	}
       out:
-	value = (double)anum;
+	value = (double)tmplong;
 	goto donumset;
     case O_CHOWN:
 #ifdef CHOWN
@@ -1535,6 +1627,54 @@ register int sp;
 	fatal("Unsupported function umask");
 	break;
 #endif
+#ifdef SYSVIPC
+    case O_MSGGET:
+    case O_SHMGET:
+    case O_SEMGET:
+	if ((anum = do_ipcget(optype, arglast)) == -1)
+	    goto say_undef;
+	value = (double)anum;
+	goto donumset;
+    case O_MSGCTL:
+    case O_SHMCTL:
+    case O_SEMCTL:
+	anum = do_ipcctl(optype, arglast);
+	if (anum == -1)
+	    goto say_undef;
+	if (anum != 0) {
+	    value = (double)anum;
+	    goto donumset;
+	}
+	str_set(str,"0 but true");
+	STABSET(str);
+	break;
+    case O_MSGSND:
+	value = (double)(do_msgsnd(arglast) >= 0);
+	goto donumset;
+    case O_MSGRCV:
+	value = (double)(do_msgrcv(arglast) >= 0);
+	goto donumset;
+    case O_SEMOP:
+	value = (double)(do_semop(arglast) >= 0);
+	goto donumset;
+    case O_SHMREAD:
+    case O_SHMWRITE:
+	value = (double)(do_shmio(optype, arglast) >= 0);
+	goto donumset;
+#else /* not SYSVIPC */
+    case O_MSGGET:
+    case O_MSGCTL:
+    case O_MSGSND:
+    case O_MSGRCV:
+    case O_SEMGET:
+    case O_SEMCTL:
+    case O_SEMOP:
+    case O_SHMGET:
+    case O_SHMCTL:
+    case O_SHMREAD:
+    case O_SHMWRITE:
+	fatal("System V IPC is not implemented on this machine");
+#endif /* not SYSVIPC */
     case O_RENAME:
 	tmps = str_get(st[1]);
 	tmps2 = str_get(st[2]);
@@ -1603,6 +1743,10 @@ register int sp;
 #define EACCES EPERM
 #endif
 		if (instr(buf,"cannot make"))
+		    errno = EEXIST;
+		else if (instr(buf,"existing file"))
+		    errno = EEXIST;
+		else if (instr(buf,"ile exists"))
 		    errno = EEXIST;
 		else if (instr(buf,"non-exist"))
 		    errno = ENOENT;
@@ -1769,13 +1913,13 @@ register int sp;
 	if (arglast[2] - arglast[1] != 1)
 	    do_unshift(ary,arglast);
 	else {
-	    str = Str_new(52,0);		/* must copy the STR */
-	    str_sset(str,st[2]);
+	    STR *tmpstr = Str_new(52,0);	/* must copy the STR */
+	    str_sset(tmpstr,st[2]);
 	    aunshift(ary,1);
-	    (void)astore(ary,0,str);
+	    (void)astore(ary,0,tmpstr);
 	}
 	value = (double)(ary->ary_fill + 1);
-	break;
+	goto donumset;
 
     case O_REQUIRE:
     case O_DOFILE:
@@ -1789,7 +1933,7 @@ register int sp;
 	tainted |= tmpstr->str_tainted;
 	taintproper("Insecure dependency in eval");
 #endif
-	sp = do_eval(tmpstr, optype, arg[2].arg_ptr.arg_hash,
+	sp = do_eval(tmpstr, optype, curcmd->c_stash,
 	    gimme,arglast);
 	goto array_return;
 
@@ -1844,6 +1988,22 @@ register int sp;
 	if (mystat(arg,st[1]) < 0)
 	    goto say_undef;
 	value = (double)statcache.st_size;
+	goto donumset;
+
+    case O_FTMTIME:
+	if (mystat(arg,st[1]) < 0)
+	    goto say_undef;
+	value = (double)(basetime - statcache.st_mtime) / 86400.0;
+	goto donumset;
+    case O_FTATIME:
+	if (mystat(arg,st[1]) < 0)
+	    goto say_undef;
+	value = (double)(basetime - statcache.st_atime) / 86400.0;
+	goto donumset;
+    case O_FTCTIME:
+	if (mystat(arg,st[1]) < 0)
+	    goto say_undef;
+	value = (double)(basetime - statcache.st_ctime) / 86400.0;
 	goto donumset;
 
     case O_FTSOCK:
@@ -2116,6 +2276,8 @@ register int sp;
 	    stab = arg[1].arg_ptr.arg_stab;
 	else
 	    stab = stabent(str_get(st[1]),TRUE);
+	if (!stab)
+	    goto say_undef;
 	sp = do_getsockname(optype,stab,arglast);
 	goto array_return;
 
@@ -2250,6 +2412,8 @@ register int sp;
 	    stab = arg[1].arg_ptr.arg_stab;
 	else
 	    stab = stabent(str_get(st[1]),TRUE);
+	if (!stab)
+	    goto say_undef;
 	sp = do_dirop(optype,stab,gimme,arglast);
 	goto array_return;
     case O_SYSCALL:
