@@ -12,9 +12,9 @@ use Test;
 BEGIN 
   {
   $| = 1;
-  # chdir 't' if -d 't';
+  chdir 't' if -d 't';
   unshift @INC, '../lib'; # for running manually
-  plan tests => 254;
+  plan tests => 260;
   }
 
 # for finding out whether round finds correct class
@@ -99,11 +99,29 @@ ok ($Math::BigFloat::round_mode,'even');
 ok (Math::BigFloat::round_mode(),'even');
 ok (Math::BigFloat->round_mode(),'even');
 
+# old way
+ok ($Math::BigInt::rnd_mode,'even');
+ok ($Math::BigFloat::rnd_mode,'even');
+
 $x = eval 'Math::BigInt->round_mode("huhmbi");';
 ok ($@ =~ /^Unknown round mode huhmbi at/);
 
 $x = eval 'Math::BigFloat->round_mode("huhmbf");';
 ok ($@ =~ /^Unknown round mode huhmbf at/);
+
+# old way (now with test for validity)
+$x = eval '$Math::BigInt::rnd_mode = "huhmbi";';
+ok ($@ =~ /^Unknown round mode huhmbi at/);
+$x = eval '$Math::BigFloat::rnd_mode = "huhmbi";';
+ok ($@ =~ /^Unknown round mode huhmbi at/);
+# see if accessor also changes old variable
+Math::BigInt->round_mode('odd');
+ok ($Math::BigInt::rnd_mode,'odd');
+Math::BigFloat->round_mode('odd');
+ok ($Math::BigFloat::rnd_mode,'odd');
+
+Math::BigInt->round_mode('even');
+Math::BigFloat->round_mode('even');
 
 # accessors
 foreach my $class (qw/Math::BigInt Math::BigFloat/)
@@ -208,8 +226,8 @@ $Math::BigFloat::precision = undef;
 $x = Math::BigFloat->new('123.456'); $x->accuracy(4);   ok ($x,'123.5');
 $x = Math::BigFloat->new('123.456'); $x->precision(-2); ok ($x,'123.46');
 
-$x = Math::BigInt->new('123456');    $x->accuracy(4);   ok ($x,123500);
-$x = Math::BigInt->new('123456');    $x->precision(2);  ok ($x,123500);
+$x = Math::BigInt->new(123456);      $x->accuracy(4);   ok ($x,123500);
+$x = Math::BigInt->new(123456);      $x->precision(2);  ok ($x,123500);
 
 ###############################################################################
 # test actual rounding via round()

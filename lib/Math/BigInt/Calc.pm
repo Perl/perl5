@@ -8,12 +8,13 @@ require Exporter;
 use vars qw/@ISA $VERSION/;
 @ISA = qw(Exporter);
 
-$VERSION = '0.14';
+$VERSION = '0.16';
 
 # Package to store unsigned big integers in decimal and do math with them
 
 # Internally the numbers are stored in an array with at least 1 element, no
-# leading zero parts (except the first) and in base 100000 
+# leading zero parts (except the first) and in base 1eX where X is determined
+# automatically at loading time to be the maximum possible value
 
 # todo:
 # - fully remove funky $# stuff (maybe)
@@ -86,7 +87,6 @@ sub _new
   # Convert a number from string format to internal base 100000 format.
   # Assumes normalized value as input.
   my $d = $_[1];
-  # print "_new $d $$d\n";
   my $il = CORE::length($$d)-1;
   # these leaves '00000' instead of int 0 and will be corrected after any op
   return [ reverse(unpack("a" . ($il % $BASE_LEN+1) 
@@ -103,6 +103,12 @@ sub _one
   {
   # create a one
   return [ 1 ];
+  }
+
+sub _two
+  {
+  # create a two (for _pow)
+  return [ 2 ];
   }
 
 sub _copy
@@ -232,9 +238,7 @@ sub _sub
     for $i (@$sx)
       {
       last unless defined $sy->[$j] || $car;
-      #print "x: $i y: $sy->[$j] c: $car\n";
       $i += $BASE if $car = (($i -= ($sy->[$j] || 0) + $car) < 0); $j++;
-      #print "x: $i y: $sy->[$j-1] c: $car\n";
       }
     # might leave leading zeros, so fix that
     __strip_zeros($sx);
@@ -246,10 +250,8 @@ sub _sub
     for $i (@$sx)
       {
       last unless defined $sy->[$j] || $car;
-      #print "$sy->[$j] $i $car => $sx->[$j]\n";
       $sy->[$j] += $BASE
        if $car = (($sy->[$j] = $i-($sy->[$j]||0) - $car) < 0);
-      #print "$sy->[$j] $i $car => $sy->[$j]\n";
       $j++;
       }
     # might leave leading zeros, so fix that
@@ -294,7 +296,7 @@ sub _mul_use_mul
        $prod - ($car = int($prod * $RBASE)) * $BASE;  # see USE_MUL
       }
     $prod[$cty] += $car if $car; # need really to check for 0?
-    $xi = shift @prod;
+    $xi = shift @prod || 0;	# || 0 makes v5.005_3 happy
     }
   push @$xv, @prod;
   __strip_zeros($xv);
@@ -324,7 +326,7 @@ sub _mul_use_div
        $prod - ($car = int($prod / $BASE)) * $BASE;
       }
     $prod[$cty] += $car if $car; # need really to check for 0?
-    $xi = shift @prod;
+    $xi = shift @prod || 0;	# || 0 makes v5.005_3 happy
     }
   push @$xv, @prod;
   __strip_zeros($xv);
@@ -524,13 +526,14 @@ sub _mod
     return $rem;
     }
   my $y = $yo->[0];
-  # both are single element
+  # both are single element arrays
   if (scalar @$x == 1)
     {
     $x->[0] %= $y;
     return $x;
     }
 
+  # @y is single element, but  @x has more than one
   my $b = $BASE % $y;
   if ($b == 0)
     {
@@ -539,26 +542,31 @@ sub _mod
     # so need to consider only last element: O(1)
     $x->[0] %= $y;
     }
+  elsif ($b == 1)
+    {
+    # else need to go trough all elements: O(N),  but loop is a bit simplified
+    my $r = 0;
+    foreach (@$x)
+      {
+      $r += $_ % $y;
+      $r %= $y;
+      }
+    $r = 0 if $r == $y;
+    $x->[0] = $r;
+    }
   else
     {
-    # else need to go trough all elemens: O(N)
-    # XXX not ready yet
-    my ($xo,$rem) = _div($c,$x,$yo);
-    return $rem;
-
-#    my $i = 0; my $r = 1;
-#    print "Multi: ";
-#    foreach (@$x)
-#      {
-#      print "$_ $r $b $y\n";
-#      print "\$_ % \$y = ",$_ % $y,"\n";
-#      print "\$_ % \$y * \$b = ",($_ % $y) * $b,"\n";
-#      $r += ($_ % $y) * $b;
-#      print "$r $b $y =>";
-#      $r %= $y if $r > $y;
-#      print " $r\n";
-#      }
-#    $x->[0] = $r;
+    # else need to go trough all elements: O(N)
+    my $r = 0; my $bm = 1;
+    foreach (@$x)
+      {
+      $r += ($_ % $y) * $bm;
+      $bm *= $b;
+      $bm %= $y;
+      $r %= $y;
+      }
+    $r = 0 if $r == $y;
+    $x->[0] = $r;
     }
   splice (@$x,1);
   return $x;
@@ -595,13 +603,9 @@ sub _rsft
       while ($dst < $len)
         {
         $vd = $z.$x->[$src];
-        #print "$dst $src '$vd' ";
         $vd = substr($vd,-$BASE_LEN,$BASE_LEN-$rem);
-        #print "'$vd' ";
         $src++;
         $vd = substr($z.$x->[$src],-$rem,$rem) . $vd;
-        #print "'$vd1' ";
-        #print "'$vd'\n";
         $vd = substr($vd,-$BASE_LEN,$BASE_LEN) if length($vd) > $BASE_LEN;
         $x->[$dst] = int($vd);
         $dst++;
@@ -630,19 +634,14 @@ sub _lsft
     my $rem = $len % $BASE_LEN;			# remainder to shift
     my $dst = $src + int($len/$BASE_LEN);	# destination
     my $vd;					# further speedup
-    #print "src $src:",$x->[$src]||0," dst $dst:",$v->[$dst]||0," rem $rem\n";
     $x->[$src] = 0;				# avoid first ||0 for speed
     my $z = '0' x $BASE_LEN;
     while ($src >= 0)
       {
       $vd = $x->[$src]; $vd = $z.$vd;
-      #print "s $src d $dst '$vd' ";
       $vd = substr($vd,-$BASE_LEN+$rem,$BASE_LEN-$rem);
-      #print "'$vd' ";
       $vd .= $src > 0 ? substr($z.$x->[$src-1],-$BASE_LEN,$rem) : '0' x $rem;
-      #print "'$vd' ";
       $vd = substr($vd,-$BASE_LEN,$BASE_LEN) if length($vd) > $BASE_LEN;
-      #print "'$vd'\n";
       $x->[$dst] = int($vd);
       $dst--; $src--;
       }
@@ -650,10 +649,27 @@ sub _lsft
     while ($dst >= 0) { $x->[$dst--] = 0; }
     # fix spurios last zero element
     splice @$x,-1 if $x->[-1] == 0;
-    #print "elems: "; my $i = 0;
-    #foreach (reverse @$v) { print "$i $_ "; $i++; } print "\n";
     }
   $x;
+  }
+
+sub _pow
+  {
+  # power of $x to $y
+  # ref to array, ref to array, return ref to array
+  my ($c,$cx,$cy) = @_;
+
+  my $pow2 = _one();
+  my $two = _two();
+  my $y1 = _copy($c,$cy);
+  while (!_is_one($c,$y1))
+    {
+    _mul($c,$pow2,$cx) if _is_odd($c,$y1);
+    _div($c,$y1,$two);
+    _mul($c,$cx,$cx);
+    }
+  _mul($c,$cx,$pow2) unless _is_one($c,$pow2);
+  return $cx;
   }
 
 ##############################################################################
@@ -667,15 +683,12 @@ sub _acmp
 
   my ($c,$cx, $cy) = @_;
 
-  #print "$cx $cy\n"; 
   my ($i,$a,$x,$y,$k);
   # calculate length based on digits, not parts
   $x = _len('',$cx); $y = _len('',$cy);
-  # print "length: ",($x-$y),"\n";
   my $lxy = $x - $y;				# if different in length
   return -1 if $lxy < 0;
   return 1 if $lxy > 0;
-  #print "full compare\n";
   $i = 0; $a = 0;
   # first way takes 5.49 sec instead of 4.87, but has the early out advantage
   # so grep is slightly faster, but more inflexible. hm. $_ instead of $k
@@ -847,17 +860,19 @@ functions can also be used to support Math::Bigint, like Math::BigInt::Pari.
 
 =head1 DESCRIPTION
 
-In order to allow for multiple big integer libraries, Math::BigInt
-was rewritten to use library modules for core math routines. Any
-module which follows the same API as this can be used instead by
-using the following call:
+In order to allow for multiple big integer libraries, Math::BigInt was
+rewritten to use library modules for core math routines. Any module which
+follows the same API as this can be used instead by using the following:
 
 	use Math::BigInt lib => 'libname';
 
+'libname' is either the long name ('Math::BigInt::Pari'), or only the short
+version like 'Pari'.
+
 =head1 EXPORT
 
-The following functions MUST be defined in order to support
-the use by Math::BigInt:
+The following functions MUST be defined in order to support the use by
+Math::BigInt:
 
 	_new(string)	return ref to new object from ref to decimal string
 	_zero()		return a new object with value 0
@@ -900,8 +915,8 @@ the use by Math::BigInt:
 			return 0 for ok, otherwise error message as string
 
 The following functions are optional, and can be defined if the underlying lib
-has a fast way to do them. If undefined, Math::BigInt will use a pure, but
-slow, Perl way as fallback to emulate these:
+has a fast way to do them. If undefined, Math::BigInt will use pure Perl (hence
+slow) fallback routines to emulate these:
 
 	_from_hex(str)	return ref to new object from ref to hexadecimal string
 	_from_bin(str)	return ref to new object from ref to binary string
@@ -944,8 +959,9 @@ returning a different reference.
 
 Return values are always references to objects or strings. Exceptions are
 C<_lsft()> and C<_rsft()>, which return undef if they can not shift the
-argument. This is used to delegate shifting of bases different than 10 back
-to Math::BigInt, which will use some generic code to calculate the result.
+argument. This is used to delegate shifting of bases different than the one
+you can support back to Math::BigInt, which will use some generic code to
+calculate the result.
 
 =head1 WRAP YOUR OWN
 

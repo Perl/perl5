@@ -6,11 +6,32 @@ use strict;
 BEGIN
   {
   $| = 1;
-  unshift @INC, '../lib'; # for running manually
-  my $location = $0; $location =~ s/bigfltpm.t//;
-  unshift @INC, $location; # to locate the testing files
-  # chdir 't' if -d 't';
-  plan tests => 1299;
+  # to locate the testing files
+  my $location = $0; $location =~ s/bigfltpm.t//i;
+  if ($ENV{PERL_CORE})
+    {
+    # testing with the core distribution
+    @INC = qw(../lib);
+    }
+  unshift @INC, '../lib';
+  if (-d 't')
+    {
+    chdir 't';
+    require File::Spec;
+    unshift @INC, File::Spec->catdir(File::Spec->updir, $location);
+    }
+  else
+    {
+    unshift @INC, $location;
+    }
+  print "# INC = @INC\n";
+
+#  unshift @INC, '../lib'; # for running manually
+#  my $location = $0; $location =~ s/bigfltpm.t//;
+#  unshift @INC, $location; # to locate the testing files
+#  # chdir 't' if -d 't';
+
+  plan tests => 1325;
   }
 
 use Math::BigInt;

@@ -31,53 +31,35 @@ while (<DATA>)
         $try .= "\$x;";
       } elsif ($f eq "finf") {
         $try .= "\$x->finf('$args[1]');";
-      } elsif ($f eq "fnan") {
-        $try .= "\$x->fnan();";
-      } elsif ($f eq "numify") {
-        $try .= "\$x->numify();";
+      } elsif ($f eq "is_inf") {
+        $try .= "\$x->is_inf('$args[1]');"; 
       } elsif ($f eq "fone") {
         $try .= "\$x->bone('$args[1]');";
       } elsif ($f eq "fstr") {
         $try .= "\$x->accuracy($args[1]); \$x->precision($args[2]);";
         $try .= '$x->fstr();';
-      } elsif ($f eq "fsstr") {
-        $try .= '$x->fsstr();';
       } elsif ($f eq "parts") {
         # ->bstr() to see if an object is returned
         $try .= '($a,$b) = $x->parts(); $a = $a->bstr(); $b = $b->bstr();';
         $try .= '"$a $b";';
-      } elsif ($f eq "length") {
-        $try .= '$x->length();';
       } elsif ($f eq "exponent") {
         # ->bstr() to see if an object is returned
         $try .= '$x->exponent()->bstr();';
       } elsif ($f eq "mantissa") {
         # ->bstr() to see if an object is returned
         $try .= '$x->mantissa()->bstr();';
-      } elsif ($f eq "fneg") {
-        $try .= '$x->bneg();';
-      } elsif ($f eq "fnorm") {
-        $try .= '$x->fnorm();';
-      } elsif ($f eq "bfloor") {
-        $try .= '$x->ffloor();';
-      } elsif ($f eq "bceil") {
-        $try .= '$x->fceil();';
-      } elsif ($f eq "is_zero") {
-        $try .= '$x->is_zero();';
-      } elsif ($f eq "is_one") {
-        $try .= '$x->is_one();';
-      } elsif ($f eq "is_positive") {
-        $try .= '$x->is_positive();';
-      } elsif ($f eq "is_negative") {
-        $try .= '$x->is_negative();';
-      } elsif ($f eq "is_odd") {
-        $try .= '$x->is_odd();';
-      } elsif ($f eq "is_even") {
-        $try .= '$x->is_even();';
+      } elsif ($f eq "numify") {
+        $try .= "\$x->numify();";
+      } elsif ($f eq "length") {
+        $try .= "\$x->length();";
+      # some unary ops (test the bxxx form, since that is done by AUTOLOAD)
+      } elsif ($f =~ /^f(nan|sstr|neg|floor|ceil|abs)$/) {
+        $try .= "\$x->b$1();";
+      # some is_xxx test function	
+      } elsif ($f =~ /^is_(zero|one|negative|positive|odd|even|nan)$/) {
+        $try .= "\$x->$f();";
       } elsif ($f eq "as_number") {
         $try .= '$x->as_number();';
-      } elsif ($f eq "fabs") {
-        $try .= '$x->fabs();';
       } elsif ($f eq "finc") {
         $try .= '++$x;';
       } elsif ($f eq "fdec") {
@@ -135,6 +117,8 @@ while (<DATA>)
         print "# Tried: '$try'\n" if !ok ($ans1, $ans);
         if (ref($ans1) eq "$class")
 	  {
+	  # float numbers are normalized (for now), so mantissa shouldn't have
+	  # trailing zeros
 	  #print $ans1->_trailing_zeros(),"\n";
           print "# Has trailing zeros after '$try'\n"
 	   if !ok ($ans1->{_m}->_trailing_zeros(), 0);
@@ -179,6 +163,14 @@ fnormNaN:NaN
 -inf:-inf
 123:123
 -123.4567:-123.4567
+# invalid inputs
+1__2:NaN
+1E1__2:NaN
+11__2E2:NaN
+#1.E3:NaN
+.2E-3.:NaN
+#1e3e4:NaN
+.2E2:20
 &as_number
 0:0
 1:1
@@ -929,6 +921,25 @@ nanfsqrt:NaN
 +123.456:11.11107555549866648462149404118219234119
 +15241.38393:123.4559999756998444766131352122991626468
 +1.44:1.2
+&is_nan
+123:0
+abc:1
+NaN:1
+-123:0
+&is_inf
++inf::1
+-inf::1
+abc::0
+1::0
+NaN::0
+-1::0
++inf:-:0
++inf:+:1
+-inf:-:1
+-inf:+:0
+# it must be exactly /^[+-]inf$/
++infinity::0
+-infinity::0
 &is_odd
 abc:0
 0:0
@@ -1022,7 +1033,7 @@ NaNone:0
 1:1
 -1:0
 -2:0
-&bfloor
+&ffloor
 0:0
 abc:NaN
 +inf:inf
@@ -1031,7 +1042,7 @@ abc:NaN
 -51:-51
 -51.2:-52
 12.2:12
-&bceil
+&fceil
 0:0
 abc:NaN
 +inf:inf

@@ -10,7 +10,6 @@
 #   _a   : accuracy
 #   _p   : precision
 #   _f   : flags, used by MBF to flag parts of a float as untouchable
-#   _cow : copy on write: number of objects that share the data (NRY)
 
 # Remember not to take shortcuts ala $xs = $x->{value}; $CALC->foo($xs); since
 # underlying lib might change the reference!
@@ -19,21 +18,19 @@ package Math::BigInt;
 my $class = "Math::BigInt";
 require 5.005;
 
-$VERSION = '1.46';
+$VERSION = '1.47';
 use Exporter;
 @ISA =       qw( Exporter );
 @EXPORT_OK = qw( bneg babs bcmp badd bmul bdiv bmod bnorm bsub
-                 bgcd blcm
-		 bround 
+                 bgcd blcm bround 
                  blsft brsft band bior bxor bnot bpow bnan bzero 
                  bacmp bstr bsstr binc bdec binf bfloor bceil
                  is_odd is_even is_zero is_one is_nan is_inf sign
 		 is_positive is_negative
-		 length as_number
-		 objectify _swap
+		 length as_number objectify _swap
                ); 
 #@EXPORT = qw( );
-use vars qw/$round_mode $accuracy $precision $div_scale/;
+use vars qw/$round_mode $accuracy $precision $div_scale $rnd_mode/;
 use strict;
 
 # Inside overload, the first arg is always an object. If the original code had
@@ -66,12 +63,18 @@ use overload
 '-='	=>	sub { $_[0]->bsub($_[1]); },
 '*='	=>	sub { $_[0]->bmul($_[1]); },
 '/='	=>	sub { scalar $_[0]->bdiv($_[1]); },
+'%='	=>	sub { $_[0]->bmod($_[1]); },
+'^='	=>	sub { $_[0]->bxor($_[1]); },
+'&='	=>	sub { $_[0]->band($_[1]); },
+'|='	=>	sub { $_[0]->bior($_[1]); },
 '**='	=>	sub { $_[0]->bpow($_[1]); },
+
+'..'	=>	\&_pointpoint,
 
 '<=>'	=>	sub { $_[2] ?
                       ref($_[0])->bcmp($_[1],$_[0]) : 
                       ref($_[0])->bcmp($_[0],$_[1])},
-'cmp'	=>	sub { 
+'cmp'	=>	sub {
          $_[2] ? 
                $_[1] cmp $_[0]->bstr() :
                $_[0]->bstr() cmp $_[1] },
@@ -106,9 +109,10 @@ use overload
   return $t;
   },
 
-qw(
-""	bstr
-0+	numify),		# Order of arguments unsignificant
+# the original qw() does not work with the TIESCALAR below, why?
+# Order of arguments unsignificant
+'""' => sub { $_[0]->bstr(); },
+'0+' => sub { $_[0]->numify(); }
 ;
 
 ##############################################################################
@@ -126,6 +130,18 @@ $round_mode = 'even'; # one of 'even', 'odd', '+inf', '-inf', 'zero' or 'trunc'
 $accuracy   = undef;
 $precision  = undef;
 $div_scale  = 40;
+
+##############################################################################
+# the old code had $rnd_mode, so we need to support it, too
+
+$rnd_mode   = 'even';
+sub TIESCALAR  { my ($class) = @_; bless \$round_mode, $class; }
+sub FETCH      { return $round_mode; }
+sub STORE      { $rnd_mode = $_[0]->round_mode($_[1]); }
+
+BEGIN { tie $rnd_mode, 'Math::BigInt'; }
+
+############################################################################## 
 
 sub round_mode
   {
@@ -279,7 +295,7 @@ sub copy
     {
     if ($k eq 'value')
       {
-      $self->{$k} = $CALC->_copy($x->{$k});
+      $self->{value} = $CALC->_copy($x->{value});
       }
     elsif (ref($x->{$k}) eq 'SCALAR')
       {
@@ -491,7 +507,7 @@ sub bstr
   # make a string from bigint object
   my $x = shift; $class = ref($x) || $x; $x = $class->new(shift) if !ref($x); 
   # my ($self,$x) = ref($_[0]) ? (ref($_[0]),$_[0]) : objectify(1,@_); 
-  
+ 
   if ($x->{sign} !~ /^[+-]$/)
     {
     return $x->{sign} unless $x->{sign} eq '+inf';	# -inf, NaN
@@ -608,7 +624,7 @@ sub round
 
 sub bnorm
   { 
-  # (numstr or or BINT) return BINT
+  # (numstr or BINT) return BINT
   # Normalize number -- no-op here
   my ($self,$x) = ref($_[0]) ? (ref($_[0]),$_[0]) : objectify(1,@_);
   return $x;
@@ -1010,24 +1026,6 @@ sub bmul
 
   $x->{value} = $CALC->_mul($x->{value},$y->{value});  # do actual math
   return $x->round($a,$p,$r,$y);
-
- # from http://groups.google.com/groups?selm=3BBF69A6.72E1%40pointecom.net
- #
- # my $yc = $y->copy();	# make copy of second argument
- # my $carry = $self->bzero();
- #
- # # XXX 
- # while ($yc > 1)
- #   {
- #   #print "$x\t$yc\t$carry\n";
- #   $carry += $x if $yc->is_odd();
- #   $yc->brsft(1,2);
- #   $x->blsft(1,2);
- #   }
- # $x += $carry;
- # #print "result $x\n";
- #
- # return $x->round($a,$p,$r,$y);
   }
 
 sub _div_inf
@@ -1128,7 +1126,6 @@ sub bdiv
   $x->{sign} = '+' if $CALC->_is_zero($x->{value});
   $x->round($a,$p,$r,$y); 
 
-#  print "in div round ",$a||'a undef'," ",$p|| 'p undef'," $r\n";
   if (wantarray)
     {
     if (! $CALC->_is_zero($rem->{value}))
@@ -1176,7 +1173,7 @@ sub bmod
     }
   else
     {
-    $x = (&bdiv($self,$x,$y))[1];
+    $x = (&bdiv($self,$x,$y))[1];		# slow way
     }
   $x->bround($a,$p,$r);
   }
@@ -1211,13 +1208,14 @@ sub bpow
     $x->{value} = $CALC->_pow($x->{value},$y->{value});
     return $x->round($a,$p,$r);
     }
-  # based on the assumption that shifting in base 10 is fast, and that mul
-  # works faster if numbers are small: we count trailing zeros (this step is
-  # O(1)..O(N), but in case of O(N) we save much more time due to this),
-  # stripping them out of the multiplication, and add $count * $y zeros
-  # afterwards like this:
-  # 300 ** 3 == 300*300*300 == 3*3*3 . '0' x 2 * 3 == 27 . '0' x 6
-  # creates deep recursion?
+
+# based on the assumption that shifting in base 10 is fast, and that mul
+# works faster if numbers are small: we count trailing zeros (this step is
+# O(1)..O(N), but in case of O(N) we save much more time due to this),
+# stripping them out of the multiplication, and add $count * $y zeros
+# afterwards like this:
+# 300 ** 3 == 300*300*300 == 3*3*3 . '0' x 2 * 3 == 27 . '0' x 6
+# creates deep recursion?
 #  my $zeros = $x->_trailing_zeros();
 #  if ($zeros > 0)
 #    {
@@ -1230,19 +1228,12 @@ sub bpow
 
   my $pow2 = $self->__one();
   my $y1 = $class->new($y);
-  my ($res);
   my $two = $self->new(2);
   while (!$y1->is_one())
     {
-    # thats a tad (between 8 and 17%) faster for small results 
-    # 7777 ** 7777 is not faster, but 2 ** 150, 3 ** 16, 3 ** 256 etc are
     $pow2->bmul($x) if $y1->is_odd();
     $y1->bdiv($two);
-    $x->bmul($x) unless $y1->is_zero(); 
-
-    # ($y1,$res)=&bdiv($y1,2);
-    # if (!$res->is_zero()) { &bmul($pow2,$x); }
-    # if (!$y1->is_zero())  { &bmul($x,$x); }
+    $x->bmul($x);
     }
   $x->bmul($pow2) unless $pow2->is_one();
   return $x->round($a,$p,$r);
@@ -1259,7 +1250,7 @@ sub blsft
 
   $n = 2 if !defined $n; return $x->bnan() if $n <= 0 || $y->{sign} eq '-';
 
-  my $t = $CALC->_lsft($x->{value},$y->{value},$n) if $CALC->can('_lsft');
+  my $t; $t = $CALC->_lsft($x->{value},$y->{value},$n) if $CALC->can('_lsft');
   if (defined $t)
     {
     $x->{value} = $t; return $x;
@@ -1279,7 +1270,7 @@ sub brsft
 
   $n = 2 if !defined $n; return $x->bnan() if $n <= 0 || $y->{sign} eq '-';
 
-  my $t = $CALC->_rsft($x->{value},$y->{value},$n) if $CALC->can('_rsft');
+  my $t; $t = $CALC->_rsft($x->{value},$y->{value},$n) if $CALC->can('_rsft');
   if (defined $t)
     {
     $x->{value} = $t; return $x;
@@ -2013,7 +2004,8 @@ sub _split
   # 2.1234 # 0.12        # 1 	      # 1E1 # 2.134E1 # 434E-10 # 1.02009E-2 
   # .2 	   # 1_2_3.4_5_6 # 1.4E1_2_3  # 1e3 # +.2
 
-  #print "input: '$$x' ";
+  return if $$x =~ /[Ee].*[Ee]/;	# more than one E => error
+
   my ($m,$e) = split /[Ee]/,$$x;
   $e = '0' if !defined $e || $e eq "";
   # print "m '$m' e '$e'\n";
@@ -3146,9 +3138,13 @@ the same terms as Perl itself.
 
 =head1 SEE ALSO
 
-L<Math::BigFloat> and L<Math::Big>.
+L<Math::BigFloat> and L<Math::Big> as well as L<Math::BigInt::BitVect>,
+L<Math::BigInt::Pari> and  L<Math::BigInt::GMP>.
 
-L<Math::BigInt::BitVect> and L<Math::BigInt::Pari>.
+The package at
+L<http://search.cpan.org/search?mode=module&query=Math%3A%3ABigInt> contains
+more documentation including a full version history, testcases, empty
+subclass files and benchmarks.
 
 =head1 AUTHORS
 

@@ -60,18 +60,9 @@ while (<DATA>)
     $try = "\$x = $class->new(\"$args[0]\");";
     if ($f eq "bnorm"){
       $try = "\$x = $class->bnorm(\"$args[0]\");";
-    } elsif ($f eq "is_zero") {
-      $try .= '$x->is_zero();';
-    } elsif ($f eq "is_one") {
-      $try .= '$x->is_one();';
-    } elsif ($f eq "is_odd") {
-      $try .= '$x->is_odd();';
-    } elsif ($f eq "is_even") {
-      $try .= '$x->is_even();';
-    } elsif ($f eq "is_negative") {
-      $try .= '$x->is_negative();';
-    } elsif ($f eq "is_positive") {
-      $try .= '$x->is_positive();';
+    # some is_xxx tests
+    } elsif ($f =~ /^is_(zero|one|odd|even|negative|positive|nan)$/) {
+      $try .= "\$x->$f();";
     } elsif ($f eq "as_hex") {
       $try .= '$x->as_hex();';
     } elsif ($f eq "as_bin") {
@@ -82,26 +73,9 @@ while (<DATA>)
       $try .= "\$x->binf('$args[1]');";
     } elsif ($f eq "bone") {
       $try .= "\$x->bone('$args[1]');";
-    } elsif ($f eq "bnan") {
-      $try .= "\$x->bnan();";
-    } elsif ($f eq "bfloor") {
-      $try .= '$x->bfloor();';
-    } elsif ($f eq "bceil") {
-      $try .= '$x->bceil();';
-    } elsif ($f eq "bsstr") {
-      $try .= '$x->bsstr();';
-    } elsif ($f eq "bneg") {
-      $try .= '$x->bneg();';
-    } elsif ($f eq "babs") {
-      $try .= '$x->babs();';
-    } elsif ($f eq "binc") {
-      $try .= '++$x;'; 
-    } elsif ($f eq "bdec") {
-      $try .= '--$x;'; 
-    }elsif ($f eq "bnot") {
-      $try .= '~$x;';
-    }elsif ($f eq "bsqrt") {
-      $try .= '$x->bsqrt();';
+    # some unary ops
+    } elsif ($f =~ /^b(nan|floor|ceil|sstr|neg|abs|inc|dec|not|sqrt)$/) {
+      $try .= "\$x->$f();";
     }elsif ($f eq "length") {
       $try .= '$x->length();';
     }elsif ($f eq "exponent"){
@@ -134,6 +108,12 @@ while (<DATA>)
         $try .= '$x / $y;';
       }elsif ($f eq "bdiv-list"){
         $try .= 'join (",",$x->bdiv($y));';
+      # overload via x=
+      }elsif ($f =~ /^.=$/){
+        $try .= "\$x $f \$y;";
+      # overload via x
+      }elsif ($f =~ /^.$/){
+        $try .= "\$x $f \$y;";
       }elsif ($f eq "bmod"){
         $try .= '$x % $y;';
       }elsif ($f eq "bgcd")
@@ -265,29 +245,8 @@ print "# For '$try'\n" if (!ok "$ans" , "false" );
 # object with stringify overload for this. see Math::String tests as example
 
 ###############################################################################
-# check shortcuts
-$try = "\$x = $class->new(1); \$x += 9;";
-$try .= "'ok' if \$x == 10;";
-$ans = eval $try;
-print "# For '$try'\n" if (!ok "$ans" , "ok" ); 
-
-$try = "\$x = $class->new(1); \$x -= 9;";
-$try .= "'ok' if \$x == -8;";
-$ans = eval $try;
-print "# For '$try'\n" if (!ok "$ans" , "ok" ); 
-
-$try = "\$x = $class->new(1); \$x *= 9;";
-$try .= "'ok' if \$x == 9;";
-$ans = eval $try;
-print "# For '$try'\n" if (!ok "$ans" , "ok" ); 
-
-$try = "\$x = $class->new(10); \$x /= 2;";
-$try .= "'ok' if \$x == 5;";
-$ans = eval $try;
-print "# For '$try'\n" if (!ok "$ans" , "ok" ); 
-
-###############################################################################
 # check reversed order of arguments
+
 $try = "\$x = $class->new(10); \$x = 2 ** \$x;";
 $try .= "'ok' if \$x == 1024;"; $ans = eval $try;
 print "# For '$try'\n" if (!ok "$ans" , "ok" ); 
@@ -306,6 +265,22 @@ print "# For '$try'\n" if (!ok "$ans" , "ok" );
 
 $try = "\$x = $class\->new(10); \$x = 20 / \$x;";
 $try .= "'ok' if \$x == 2;"; $ans = eval $try;
+print "# For '$try'\n" if (!ok "$ans" , "ok" ); 
+
+$try = "\$x = $class\->new(3); \$x = 20 % \$x;";
+$try .= "'ok' if \$x == 2;"; $ans = eval $try;
+print "# For '$try'\n" if (!ok "$ans" , "ok" ); 
+
+$try = "\$x = $class\->new(7); \$x = 20 & \$x;";
+$try .= "'ok' if \$x == 4;"; $ans = eval $try;
+print "# For '$try'\n" if (!ok "$ans" , "ok" ); 
+
+$try = "\$x = $class\->new(7); \$x = 0x20 | \$x;";
+$try .= "'ok' if \$x == 0x27;"; $ans = eval $try;
+print "# For '$try'\n" if (!ok "$ans" , "ok" ); 
+
+$try = "\$x = $class\->new(7); \$x = 0x20 ^ \$x;";
+$try .= "'ok' if \$x == 0x27;"; $ans = eval $try;
 print "# For '$try'\n" if (!ok "$ans" , "ok" ); 
 
 ###############################################################################
@@ -474,7 +449,6 @@ ok ($x, 23456);
 # construct a number with a zero-hole of BASE_LEN
 $x = '1' x $bl . '0' x $bl . '1' x $bl . '0' x $bl;
 $y = '1' x (2*$bl);
-#print "$x * $y\n";
 $x = Math::BigInt->new($x)->bmul($y);
 # result is 123..$bl .  $bl x (3*bl-1) . $bl...321 . '0' x $bl
 $y = ''; my $d = '';
@@ -482,7 +456,6 @@ for (my $i = 1; $i <= $bl; $i++)
   {
   $y .= $i; $d = $i.$d;
   }
-#print "$y $d\n";
 $y .= $bl x (3*$bl-1) . $d . '0' x $bl;
 ok ($x,$y);
 
@@ -531,10 +504,33 @@ sub is_valid
   # test done, see if error did crop up
   ok (1,1), return if ($e eq '0');
 
-  ok (1,$e." op '$f'");
+  ok (1,$e." after op '$f'");
   }
 
 __DATA__
+&.=
+1234:-345:1234-345
+&+=
+1:2:3
+-1:-2:-3
+&-=
+1:2:-1
+-1:-2:1
+&*=
+2:3:6
+-1:5:-5
+&%=
+100:3:1
+8:9:8
+&/=
+100:3:33
+-8:2:-4
+&|=
+2:1:3
+&&=
+5:7:5
+&^=
+5:7:2
 &is_negative
 0:0
 -1:1
@@ -629,7 +625,7 @@ inf:inf
 +inf:inf
 -inf:-inf
 0inf:NaN
-# normal input
+# abnormal input
 :NaN
 abc:NaN
    1 a:NaN
@@ -637,6 +633,29 @@ abc:NaN
 11111b:NaN
 +1z:NaN
 -1z:NaN
+# only one underscore between two digits
+_123:NaN
+_123_:NaN
+123_:NaN
+1__23:NaN
+1E1__2:NaN
+1_E12:NaN
+1E_12:NaN
+1_E_12:NaN
++_1E12:NaN
++0_1E2:100
++0_0_1E2:100
+-0_0_1E2:-100
+-0_0_1E+0_0_2:-100
+E1:NaN
+E23:NaN
+1.23E1:NaN
+1.23E-1:NaN
+# bug with two E's in number beeing valid
+1e2e3:NaN
+1e2r:NaN
+1e2.0:NaN
+# normal input
 0:0
 +0:0
 +00:0
@@ -655,29 +674,24 @@ abc:NaN
 -123456789:-123456789
 -00000100000:-100000
 1_2_3:123
-_123:NaN
-_123_:NaN
-_123_:NaN
-1__23:NaN
 10000000000E-1_0:1
 1E2:100
 1E1:10
 1E0:1
-E1:NaN
-E23:NaN
 1.23E2:123
-1.23E1:NaN
-1.23E-1:NaN
 100E-1:10
 # floating point input
+# .2e2:20
+1.E3:1000
 1.01E2:101
 1010E-1:101
 -1010E0:-1010
 -1010E1:-10100
+1234.00:1234
+# non-integer numbers
 -1010E-2:NaN
 -1.01E+1:NaN
 -1.01E-1:NaN
-1234.00:1234
 &bnan
 1:NaN
 2:NaN
@@ -693,6 +707,11 @@ boneNaN:+:+1
 1:+:inf
 2:-:-inf
 3:abc:inf
+&is_nan
+123:0
+abc:1
+NaN:1
+-123:0
 &is_inf
 +inf::1
 -inf::1
@@ -1156,6 +1175,8 @@ abc:+1:abc:NaN
 4:-3:-2
 1:-3:-2
 4095:4095:0
+100041000510123:3:0
+152403346:12345:4321
 &bgcd
 abc:abc:NaN
 abc:+0:NaN

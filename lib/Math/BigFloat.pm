@@ -11,7 +11,7 @@
 
 package Math::BigFloat;
 
-$VERSION = '1.24';
+$VERSION = '1.25';
 require 5.005;
 use Exporter;
 use Math::BigInt qw/objectify/;
@@ -29,7 +29,7 @@ use Math::BigInt qw/objectify/;
 
 #@EXPORT = qw( );
 use strict;
-use vars qw/$AUTOLOAD $accuracy $precision $div_scale $round_mode/;
+use vars qw/$AUTOLOAD $accuracy $precision $div_scale $round_mode $rnd_mode/;
 my $class = "Math::BigFloat";
 
 use overload
@@ -54,6 +54,18 @@ $round_mode = 'even'; # one of 'even', 'odd', '+inf', '-inf', 'zero' or 'trunc'
 $accuracy   = undef;
 $precision  = undef;
 $div_scale  = 40;
+
+##############################################################################
+# the old code had $rnd_mode, so we need to support it, too
+
+$rnd_mode   = 'even';
+sub TIESCALAR   { my ($class) = @_; bless \$round_mode, $class; }
+sub FETCH       { return $round_mode; }
+sub STORE       { $rnd_mode = $_[0]->round_mode($_[1]); }
+
+BEGIN { tie $rnd_mode, 'Math::BigFloat'; }
+ 
+##############################################################################
 
 # in case we call SUPER::->foo() and this wants to call modify()
 # sub modify () { 0; }
@@ -97,7 +109,7 @@ sub new
   if ((ref($wanted)) && (ref($wanted) ne $class))
     {
     $self->{_m} = $wanted->as_number();		# get us a bigint copy
-    $self->{_e} = Math::BigInt->new(0);
+    $self->{_e} = Math::BigInt->bzero();
     $self->{_m}->babs();
     $self->{sign} = $wanted->sign();
     return $self->bnorm();
@@ -106,8 +118,8 @@ sub new
   # handle '+inf', '-inf' first
   if ($wanted =~ /^[+-]?inf$/)
     {
-    $self->{_e} = Math::BigInt->new(0);
-    $self->{_m} = Math::BigInt->new(0);
+    $self->{_e} = Math::BigInt->bzero();
+    $self->{_m} = Math::BigInt->bzero();
     $self->{sign} = $wanted;
     $self->{sign} = '+inf' if $self->{sign} eq 'inf';
     return $self->bnorm();
@@ -117,18 +129,18 @@ sub new
   if (!ref $mis)
     {
     die "$wanted is not a number initialized to $class" if !$NaNOK;
-    $self->{_e} = Math::BigInt->new(0);
-    $self->{_m} = Math::BigInt->new(0);
+    $self->{_e} = Math::BigInt->bzero();
+    $self->{_m} = Math::BigInt->bzero();
     $self->{sign} = $nan;
     }
   else
     {
     # make integer from mantissa by adjusting exp, then convert to bigint
     $self->{_e} = Math::BigInt->new("$$es$$ev");	# exponent
-    $self->{_m} = Math::BigInt->new("$$mis$$miv$$mfv"); # create mantissa
+    $self->{_m} = Math::BigInt->new("$$miv$$mfv"); 	# create mantissa
     # 3.123E0 = 3123E-3, and 3.123E-2 => 3123E-5
-    $self->{_e} -= CORE::length($$mfv); 		
-    $self->{sign} = $self->{_m}->sign(); $self->{_m}->babs();
+    $self->{_e} -= CORE::length($$mfv) if CORE::length($$mfv) != 0; 		
+    $self->{sign} = $$mis;
     }
   #print "$wanted => $self->{sign} $self->{value}\n";
   $self->bnorm();	# first normalize
@@ -1455,11 +1467,9 @@ This might change in the future, so do not depend on it.
 
 See also: L<Rounding|Rounding>.
 
-Math::BigFloat supports both precision and accuracy. (here should follow
-a short description of both).
-
-Precision: digits after the '.', laber, schwad
-Accuracy: Significant digits blah blah
+Math::BigFloat supports both precision and accuracy. For a full documentation,
+examples and tips on these topics please see the large section in
+L<Math::BigInt>.
 
 Since things like sqrt(2) or 1/3 must presented with a limited precision lest
 a operation consumes all resources, each operation produces no more than
