@@ -474,6 +474,13 @@ wide bit complement.
 
 =item *
 
+lc(), uc(), lcfirst(), and ucfirst() work for simple cases
+where the mapping goes from a single Unicode character to
+another single Unicode character.  More complex cases, where
+for example one character maps into several, are not yet implemented.
+
+=item *
+
 And finally, C<scalar reverse()> reverses by character rather than by byte.
 
 =back
