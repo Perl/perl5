@@ -610,6 +610,7 @@ ext/Storable/t/dclone.t		See if Storable works
 ext/Storable/t/downgrade.t	See if Storable works
 ext/Storable/t/forgive.t	See if Storable works
 ext/Storable/t/freeze.t		See if Storable works
+ext/Storable/t/integer.t	See if Storable works
 ext/Storable/t/lock.t		See if Storable works
 ext/Storable/t/make_downgrade.pl	See if Storable works
 ext/Storable/t/malice.t		See if Storable copes with corrupt files

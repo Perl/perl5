@@ -1836,89 +1836,134 @@ static int store_scalar(stcxt_t *cxt, SV *sv)
 			pv = SvPV(sv, len);			/* We know it's SvPOK */
 			goto string;				/* Share code below */
 		}
-	} else if (flags & SVp_POK) {		/* SvPOKp(sv) => string */
-		I32 wlen;						/* For 64-bit machines */
-		pv = SvPV(sv, len);
-
-		/*
-		 * Will come here from below with pv and len set if double & netorder,
-		 * or from above if it was readonly, POK and NOK but neither &PL_sv_yes
-		 * nor &PL_sv_no.
-		 */
-	string:
-
-		wlen = (I32) len;				/* WLEN via STORE_SCALAR expects I32 */
-		if (SvUTF8 (sv))
-			STORE_UTF8STR(pv, wlen);
-		else
-			STORE_SCALAR(pv, wlen);
-		TRACEME(("ok (scalar 0x%"UVxf" '%s', length = %"IVdf")",
-			 PTR2UV(sv), SvPVX(sv), (IV)len));
-
-	} else if (flags & SVp_NOK) {		/* SvNOKp(sv) => double */
-		NV nv = SvNV(sv);
-
-		/*
-		 * Watch for number being an integer in disguise.
-		 */
-		if (nv == (NV) (iv = I_V(nv))) {
-			TRACEME(("double %"NVff" is actually integer %"IVdf, nv, iv));
-			goto integer;		/* Share code below */
-		}
-
-		if (cxt->netorder) {
-			TRACEME(("double %"NVff" stored as string", nv));
-			pv = SvPV(sv, len);
-			goto string;		/* Share code above */
-		}
-
-		PUTMARK(SX_DOUBLE);
-		WRITE(&nv, sizeof(nv));
-
-		TRACEME(("ok (double 0x%"UVxf", value = %"NVff")", PTR2UV(sv), nv));
-
-	} else if (flags & SVp_IOK) {		/* SvIOKp(sv) => integer */
-		iv = SvIV(sv);
-
-		/*
-		 * Will come here from above with iv set if double is an integer.
-		 */
-	integer:
-
-		/*
-		 * Optimize small integers into a single byte, otherwise store as
-		 * a real integer (converted into network order if they asked).
-		 */
-
-		if (iv >= -128 && iv <= 127) {
-			unsigned char siv = (unsigned char) (iv + 128);	/* [0,255] */
-			PUTMARK(SX_BYTE);
-			PUTMARK(siv);
-			TRACEME(("small integer stored as %d", siv));
-		} else if (cxt->netorder) {
-			I32 niv;
-#ifdef HAS_HTONL
-			niv = (I32) htonl(iv);
-			TRACEME(("using network order"));
+	} else if (flags & SVf_POK) {
+            /* public string - go direct to string read.  */
+            goto string_readlen;
+        } else if (
+#if (PATCHLEVEL <= 6)
+            /* For 5.6 and earlier NV flag trumps IV flag, so only use integer
+               direct if NV flag is off.  */
+            (flags & (SVf_NOK | SVf_IOK)) == SVf_IOK
 #else
-			niv = (I32) iv;
-			TRACEME(("as-is for network order"));
+            /* 5.7 rules are that if IV public flag is set, IV value is as
+               good, if not better, than NV value.  */
+            flags & SVf_IOK
 #endif
-			PUTMARK(SX_NETINT);
-			WRITE_I32(niv);
-		} else {
-			PUTMARK(SX_INTEGER);
-			WRITE(&iv, sizeof(iv));
-		}
+            ) {
+            iv = SvIV(sv);
+            /*
+             * Will come here from below with iv set if double is an integer.
+             */
+          integer:
 
-		TRACEME(("ok (integer 0x%"UVxf", value = %"IVdf")", PTR2UV(sv), iv));
+            /* Sorry. This isn't in 5.005_56 (IIRC) or earlier.  */
+#ifdef SVf_IVisUV
+            /* Need to do this out here, else 0xFFFFFFFF becomes iv of -1
+             * (for example) and that ends up in the optimised small integer
+             * case. 
+             */
+            if ((flags & SVf_IVisUV) && SvUV(sv) > IV_MAX) {
+                TRACEME(("large unsigned integer as string, value = %"UVuf, SvUV(sv)));
+                goto string_readlen;
+            }
+#endif
+            /*
+             * Optimize small integers into a single byte, otherwise store as
+             * a real integer (converted into network order if they asked).
+             */
 
+            if (iv >= -128 && iv <= 127) {
+                unsigned char siv = (unsigned char) (iv + 128);	/* [0,255] */
+                PUTMARK(SX_BYTE);
+                PUTMARK(siv);
+                TRACEME(("small integer stored as %d", siv));
+            } else if (cxt->netorder) {
+#ifndef HAS_HTONL
+                TRACEME(("no htonl, fall back to string for integer"));
+                goto string_readlen;
+#else
+                I32 niv;
+
+
+#if IVSIZE > 4
+                if (
+#ifdef SVf_IVisUV
+                    /* Sorry. This isn't in 5.005_56 (IIRC) or earlier.  */
+                    ((flags & SVf_IVisUV) && SvUV(sv) > 0x7FFFFFFF) ||
+#endif
+                    (iv > 0x7FFFFFFF) || (iv < -0x80000000)) {
+                    /* Bigger than 32 bits.  */
+                    TRACEME(("large network order integer as string, value = %"IVdf, iv));
+                    goto string_readlen;
+                }
+#endif
+
+                niv = (I32) htonl((I32) iv);
+                TRACEME(("using network order"));
+                PUTMARK(SX_NETINT);
+                WRITE_I32(niv);
+#endif
+            } else {
+                PUTMARK(SX_INTEGER);
+                WRITE(&iv, sizeof(iv));
+            }
+            
+            TRACEME(("ok (integer 0x%"UVxf", value = %"IVdf")", PTR2UV(sv), iv));
+	} else if (flags & SVf_NOK) {
+            NV nv;
+#if (PATCHLEVEL <= 6)
+            nv = SvNV(sv);
+            /*
+             * Watch for number being an integer in disguise.
+             */
+            if (nv == (NV) (iv = I_V(nv))) {
+                TRACEME(("double %"NVff" is actually integer %"IVdf, nv, iv));
+                goto integer;		/* Share code above */
+            }
+#else
+
+            SvIV_please(sv);
+            if (SvIOK(sv)) {
+                iv = SvIV(sv);
+                goto integer;		/* Share code above */
+            }
+            nv = SvNV(sv);
+#endif
+
+            if (cxt->netorder) {
+                TRACEME(("double %"NVff" stored as string", nv));
+                goto string_readlen;		/* Share code below */
+            }
+
+            PUTMARK(SX_DOUBLE);
+            WRITE(&nv, sizeof(nv));
+
+            TRACEME(("ok (double 0x%"UVxf", value = %"NVff")", PTR2UV(sv), nv));
+
+	} else if (flags & (SVp_POK | SVp_NOK | SVp_IOK)) {
+            I32 wlen; /* For 64-bit machines */
+
+          string_readlen:
+            pv = SvPV(sv, len);
+
+            /*
+             * Will come here from above  if it was readonly, POK and NOK but
+             * neither &PL_sv_yes nor &PL_sv_no.
+             */
+          string:
+
+            wlen = (I32) len; /* WLEN via STORE_SCALAR expects I32 */
+            if (SvUTF8 (sv))
+                STORE_UTF8STR(pv, wlen);
+            else
+                STORE_SCALAR(pv, wlen);
+            TRACEME(("ok (scalar 0x%"UVxf" '%s', length = %"IVdf")",
+                     PTR2UV(sv), SvPVX(sv), (IV)len));
 	} else
-		CROAK(("Can't determine type of %s(0x%"UVxf")",
-		       sv_reftype(sv, FALSE),
-		       PTR2UV(sv)));
-
-	return 0;		/* Ok, no recursion on scalars */
+            CROAK(("Can't determine type of %s(0x%"UVxf")",
+                   sv_reftype(sv, FALSE),
+                   PTR2UV(sv)));
+        return 0;		/* Ok, no recursion on scalars */
 }
 
 /*
@@ -5483,6 +5528,10 @@ PROTOTYPES: ENABLE
 
 BOOT:
     init_perinterp();
+#ifdef DEBUGME
+    /* Only disable the used only once warning if we are in debugging mode.  */
+    gv_fetchpv("Storable::DEBUGME",   GV_ADDMULTI, SVt_PV);
+#endif
 
 int
 pstore(f,obj)
