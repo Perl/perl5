@@ -53,7 +53,7 @@ typedef struct {
 
 EXTCONST datum nullitem
 #ifdef DOINIT
-                        = {NULL, 0}
+                        = {0, 0}
 #endif
                                    ;
 
