@@ -264,6 +264,11 @@ If your Perl has been built with PERL_OLD_SIGNALS (one has
 to explicitly add that symbol to ccflags, see C<perl -V>),
 signal handling is not threadsafe.
 
+=item Detached threads on Windows
+
+There aren't supported yet (as of perl 5.8.3), as they may lead to
+memory access violation problems.
+
 =back
 
 =head1 AUTHOR and COPYRIGHT
