@@ -3909,12 +3909,13 @@ into that kind of thing.
 =item sysread FILEHANDLE,SCALAR,LENGTH
 
 Attempts to read LENGTH bytes of data into variable SCALAR from the
-specified FILEHANDLE, using the system call read(2).  It bypasses
-stdio, so mixing this with other kinds of reads, C<print()>, C<write()>,
-C<seek()>, or C<tell()> can cause confusion because stdio usually buffers
-data.  Returns the number of bytes actually read, C<0> at end of file,
-or undef if there was an error.  SCALAR will be grown or shrunk so that
-the last byte actually read is the last byte of the scalar after the read.
+specified FILEHANDLE, using the system call read(2).  It bypasses stdio,
+so mixing this with other kinds of reads, C<print()>, C<write()>,
+C<seek()>, C<tell()>, or C<eof()> can cause confusion because stdio
+usually buffers data.  Returns the number of bytes actually read, C<0>
+at end of file, or undef if there was an error.  SCALAR will be grown or
+shrunk so that the last byte actually read is the last byte of the
+scalar after the read.
 
 An OFFSET may be specified to place the read data at some place in the
 string other than the beginning.  A negative OFFSET specifies
@@ -3927,13 +3928,13 @@ the result of the read is appended.
 
 Sets FILEHANDLE's system position using the system call lseek(2).  It
 bypasses stdio, so mixing this with reads (other than C<sysread()>),
-C<print()>, C<write()>, C<seek()>, or C<tell()> may cause confusion.  FILEHANDLE may
-be an expression whose value gives the name of the filehandle.  The
-values for WHENCE are C<0> to set the new position to POSITION, C<1> to set
-the it to the current position plus POSITION, and C<2> to set it to EOF
-plus POSITION (typically negative).  For WHENCE, you may use the
-constants C<SEEK_SET>, C<SEEK_CUR>, and C<SEEK_END> from either the C<IO::Seekable>
-or the POSIX module.
+C<print()>, C<write()>, C<seek()>, C<tell()>, or C<eof()> may cause
+confusion.  FILEHANDLE may be an expression whose value gives the name
+of the filehandle.  The values for WHENCE are C<0> to set the new
+position to POSITION, C<1> to set the it to the current position plus
+POSITION, and C<2> to set it to EOF plus POSITION (typically negative).
+For WHENCE, you may use the constants C<SEEK_SET>, C<SEEK_CUR>, and
+C<SEEK_END> from either the C<IO::Seekable> or the POSIX module.
 
 Returns the new position, or the undefined value on failure.  A position
 of zero is returned as the string "C<0> but true"; thus C<sysseek()> returns
@@ -3994,11 +3995,11 @@ Attempts to write LENGTH bytes of data from variable SCALAR to the
 specified FILEHANDLE, using the system call write(2).  If LENGTH is
 not specified, writes whole SCALAR. It bypasses
 stdio, so mixing this with reads (other than C<sysread())>, C<print()>,
-C<write()>, C<seek()>, or C<tell()> may cause confusion because stdio usually
-buffers data.  Returns the number of bytes actually written, or C<undef>
-if there was an error.  If the LENGTH is greater than the available
-data in the SCALAR after the OFFSET, only as much data as is available
-will be written.
+C<write()>, C<seek()>, C<tell()>, or C<eof()> may cause confusion
+because stdio usually buffers data.  Returns the number of bytes
+actually written, or C<undef> if there was an error.  If the LENGTH is
+greater than the available data in the SCALAR after the OFFSET, only as
+much data as is available will be written.
 
 An OFFSET may be specified to write the data from some part of the
 string other than the beginning.  A negative OFFSET specifies writing
