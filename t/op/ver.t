@@ -13,7 +13,7 @@ use Config;
 require "test.pl";
 plan( tests => 50 );
 
-eval { use v5.5.640; };
+eval 'use v5.5.640';
 is( $@, '', "use v5.5.640; $@");
 
 require_ok('v5.5.640');
@@ -52,7 +52,7 @@ is(v1.20.300.4000, "\x{1}\x{14}\x{12c}\x{fa0}",'compare embedded \x{} string');
 
 #
 # now do the same without the "v"
-eval { use 5.5.640; };
+eval 'use 5.5.640';
 is( $@, '', "use 5.5.640; $@");
 
 require_ok('5.5.640');
