@@ -49,12 +49,10 @@ case "$osvers" in
 #
 2.0.5*|2.0-built*|2.1*)
  	usevfork='true'
- 	d_dosuid='define'
 	;;
 #
 # Guesses at what will be needed after 2.1
 *)	usevfork='true'
- 	d_dosuid='define'
 	;;
 esac
 
