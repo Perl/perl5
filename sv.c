@@ -2745,12 +2745,7 @@ Perl_sv_setsv(pTHX_ SV *dstr, register SV *sstr)
 			    if (!GvCVGEN((GV*)dstr) &&
 				(CvROOT(cv) || CvXSUB(cv)))
 			    {
-				SV *const_sv = cv_const_sv(cv);
-				bool const_changed = TRUE;
-				if(const_sv)
-				    const_changed = sv_cmp(const_sv,
-					   op_const_sv(CvSTART((CV*)sref),
-						       (CV*)sref));
+ 				SV *const_sv;
 				/* ahem, death to those who redefine
 				 * active sort subs */
 				if (PL_curstackinfo->si_type == PERLSI_SORT &&
@@ -2758,11 +2753,20 @@ Perl_sv_setsv(pTHX_ SV *dstr, register SV *sstr)
 				    Perl_croak(aTHX_
 				    "Can't redefine active sort subroutine %s",
 					  GvENAME((GV*)dstr));
-				if ((const_changed && const_sv) || ckWARN(WARN_REDEFINE))
-				    Perl_warner(aTHX_ WARN_REDEFINE, const_sv ?
-					     "Constant subroutine %s redefined"
-					     : "Subroutine %s redefined",
-					     GvENAME((GV*)dstr));
+ 				/* Redefining a sub - warning is mandatory if
+ 				   it was a const and its value changed. */
+ 				if (ckWARN(WARN_REDEFINE)
+ 				    || (CvCONST(cv)
+ 					&& (!CvCONST((CV*)sref)
+ 					    || sv_cmp(cv_const_sv(cv),
+ 						      cv_const_sv((CV*)sref)))))
+ 				{
+ 				    Perl_warner(aTHX_ WARN_REDEFINE,
+ 					CvCONST(cv)
+ 					? "Constant subroutine %s redefined"
+ 					: "Subroutine %s redefined", 
+ 					GvENAME((GV*)dstr));
+ 				}
 			    }
 			    cv_ckproto(cv, (GV*)dstr,
 				       SvPOK(sref) ? SvPVX(sref) : Nullch);

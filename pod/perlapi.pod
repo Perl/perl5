@@ -287,6 +287,19 @@ Returns the stash of the CV.
 =for hackers
 Found in file cv.h
 
+=item cv_const_sv
+
+If C<cv> is a constant sub eligible for inlining. returns the constant
+value returned by the sub.  Otherwise, returns NULL.
+
+Constant subs can be created with C<newCONSTSUB> or as described in
+L<perlsub/"Constant Functions">.
+
+	SV*	cv_const_sv(CV* cv)
+
+=for hackers
+Found in file op.c
+
 =item dMARK
 
 Declare a stack marker variable, C<mark>, for the XSUB.  See C<MARK> and
@@ -1162,7 +1175,7 @@ Found in file handy.h
 Creates a constant sub equivalent to Perl C<sub FOO () { 123 }> which is
 eligible for inlining at compile-time.
 
-	void	newCONSTSUB(HV* stash, char* name, SV* sv)
+	CV*	newCONSTSUB(HV* stash, char* name, SV* sv)
 
 =for hackers
 Found in file op.c

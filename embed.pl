@@ -1441,7 +1441,7 @@ Afnp	|int	|fprintf_nocontext|PerlIO* stream|const char* fmt|...
 #endif
 p	|void	|cv_ckproto	|CV* cv|GV* gv|char* p
 p	|CV*	|cv_clone	|CV* proto
-Ap	|SV*	|cv_const_sv	|CV* cv
+Apd	|SV*	|cv_const_sv	|CV* cv
 p	|SV*	|op_const_sv	|OP* o|CV* cv
 Ap	|void	|cv_undef	|CV* cv
 Ap	|void	|cx_dump	|PERL_CONTEXT* cs
@@ -1761,7 +1761,7 @@ Ap	|OP*	|newANONHASH	|OP* o
 Ap	|OP*	|newANONSUB	|I32 floor|OP* proto|OP* block
 Ap	|OP*	|newASSIGNOP	|I32 flags|OP* left|I32 optype|OP* right
 Ap	|OP*	|newCONDOP	|I32 flags|OP* expr|OP* trueop|OP* falseop
-Apd	|void	|newCONSTSUB	|HV* stash|char* name|SV* sv
+Apd	|CV*	|newCONSTSUB	|HV* stash|char* name|SV* sv
 Ap	|void	|newFORM	|I32 floor|OP* o|OP* block
 Ap	|OP*	|newFOROP	|I32 flags|char* label|line_t forline \
 				|OP* sclr|OP* expr|OP*block|OP*cont

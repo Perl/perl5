@@ -1743,10 +1743,10 @@ Perl_newCONDOP(pTHXo_ I32 flags, OP* expr, OP* trueop, OP* falseop)
 }
 
 #undef  Perl_newCONSTSUB
-void
+CV*
 Perl_newCONSTSUB(pTHXo_ HV* stash, char* name, SV* sv)
 {
-    ((CPerlObj*)pPerl)->Perl_newCONSTSUB(stash, name, sv);
+    return ((CPerlObj*)pPerl)->Perl_newCONSTSUB(stash, name, sv);
 }
 
 #undef  Perl_newFORM

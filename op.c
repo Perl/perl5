@@ -4112,6 +4112,10 @@ Perl_cv_undef(pTHX_ CV *cv)
     CvGV(cv) = Nullgv;
     SvREFCNT_dec(CvOUTSIDE(cv));
     CvOUTSIDE(cv) = Nullcv;
+    if (CvCONST(cv)) {
+	SvREFCNT_dec((SV*)CvXSUBANY(cv).any_ptr);
+	CvCONST_off(cv);
+    }
     if (CvPADLIST(cv)) {
 	/* may be during global destruction */
 	if (SvREFCNT(CvPADLIST(cv))) {
@@ -4312,6 +4316,15 @@ S_cv_clone2(pTHX_ CV *proto, CV *outside)
 #endif
 
     LEAVE;
+
+    if (CvCONST(cv)) {
+	SV* const_sv = op_const_sv(CvSTART(cv), cv);
+	assert(const_sv);
+	/* constant sub () { $x } closing over $x - see lib/constant.pm */
+	SvREFCNT_dec(cv);
+	cv = newCONSTSUB(CvSTASH(proto), 0, const_sv);
+    }
+
     return cv;
 }
 
@@ -4350,12 +4363,25 @@ Perl_cv_ckproto(pTHX_ CV *cv, GV *gv, char *p)
     }
 }
 
+static void const_sv_xsub(pTHXo_ CV* cv);
+
+/*
+=for apidoc cv_const_sv
+
+If C<cv> is a constant sub eligible for inlining. returns the constant
+value returned by the sub.  Otherwise, returns NULL.
+
+Constant subs can be created with C<newCONSTSUB> or as described in
+L<perlsub/"Constant Functions">.
+
+=cut
+*/
 SV *
 Perl_cv_const_sv(pTHX_ CV *cv)
 {
-    if (!cv || !SvPOK(cv) || SvCUR(cv))
+    if (!cv || !CvCONST(cv))
 	return Nullsv;
-    return op_const_sv(CvSTART(cv), cv);
+    return (SV*)CvXSUBANY(cv).any_ptr;
 }
 
 SV *
@@ -4385,7 +4411,17 @@ Perl_op_const_sv(pTHX_ OP *o, CV *cv)
 	else if ((type == OP_PADSV || type == OP_CONST) && cv) {
 	    AV* padav = (AV*)(AvARRAY(CvPADLIST(cv))[1]);
 	    sv = padav ? AvARRAY(padav)[o->op_targ] : Nullsv;
-	    if (!sv || (!SvREADONLY(sv) && SvREFCNT(sv) > 1))
+	    if (!sv)
+		return Nullsv;
+	    if (CvCONST(cv)) {
+		/* We get here only from cv_clone2() while creating a closure.
+		   Copy the const value here instead of in cv_clone2 so that
+		   SvREADONLY_on doesn't lead to problems when leaving
+		   scope.
+		*/
+		sv = newSVsv(sv);
+	    }
+	    if (!SvREADONLY(sv) && SvREFCNT(sv) > 1)
 		return Nullsv;
 	}
 	else
@@ -4427,6 +4463,7 @@ Perl_newATTRSUB(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs, OP *block)
     char *ps = proto ? SvPVx(((SVOP*)proto)->op_sv, n_a) : Nullch;
     register CV *cv=0;
     I32 ix;
+    SV *const_sv;
 
     name = o ? SvPVx(cSVOPo->op_sv, n_a) : Nullch;
     if (!name && PERLDB_NAMEANON && CopLINE(PL_curcop)) {
@@ -4465,12 +4502,17 @@ Perl_newATTRSUB(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs, OP *block)
 	SvREFCNT_dec(PL_compcv);
 	cv = PL_compcv = NULL;
 	PL_sub_generation++;
-	goto noblock;
+	goto done;
     }
 
-    if (!name || GvCVGEN(gv))
-	cv = Nullcv;
-    else if ((cv = GvCV(gv))) {
+    cv = (!name || GvCVGEN(gv)) ? Nullcv : GvCV(gv);
+
+    if (!block || !ps || *ps || attrs)
+	const_sv = Nullsv;
+    else
+	const_sv = op_const_sv(block, Nullcv);
+
+    if (cv) {
         bool exists = CvROOT(cv) || CvXSUB(cv);
         /* if the subroutine doesn't exist and wasn't pre-declared
          * with a prototype, assume it will be AUTOLOADed,
@@ -4480,8 +4522,6 @@ Perl_newATTRSUB(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs, OP *block)
 	    cv_ckproto(cv, gv, ps);
 	/* already defined (or promised)? */
 	if (exists || GvASSUMECV(gv)) {
-	    SV* const_sv;
-	    bool const_changed = TRUE;
 	    if (!block && !attrs) {
 		/* just a "sub foo;" when &foo is already defined */
 		SAVEFREESV(PL_compcv);
@@ -4490,24 +4530,43 @@ Perl_newATTRSUB(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs, OP *block)
 	    /* ahem, death to those who redefine active sort subs */
 	    if (PL_curstackinfo->si_type == PERLSI_SORT && PL_sortcop == CvSTART(cv))
 		Perl_croak(aTHX_ "Can't redefine active sort subroutine %s", name);
-	    if (!block)
-		goto withattrs;
-	    if ((const_sv = cv_const_sv(cv)))
-		const_changed = sv_cmp(const_sv, op_const_sv(block, Nullcv));
-            if ((const_sv && const_changed) || ckWARN(WARN_REDEFINE))
-	    {
-		line_t oldline = CopLINE(PL_curcop);
-		CopLINE_set(PL_curcop, PL_copline);
-		Perl_warner(aTHX_ WARN_REDEFINE,
-			const_sv ? "Constant subroutine %s redefined"
-				 : "Subroutine %s redefined", name);
-		CopLINE_set(PL_curcop, oldline);
+	    if (block) {
+		if (ckWARN(WARN_REDEFINE)
+		    || (CvCONST(cv)
+			&& (!const_sv || sv_cmp(cv_const_sv(cv), const_sv))))
+		{
+		    line_t oldline = CopLINE(PL_curcop);
+		    CopLINE_set(PL_curcop, PL_copline);
+		    Perl_warner(aTHX_ WARN_REDEFINE,
+			CvCONST(cv) ? "Constant subroutine %s redefined"
+				    : "Subroutine %s redefined", name);
+		    CopLINE_set(PL_curcop, oldline);
+		}
+		SvREFCNT_dec(cv);
+		cv = Nullcv;
 	    }
-	    SvREFCNT_dec(cv);
-	    cv = Nullcv;
 	}
     }
-  withattrs:
+    if (const_sv) {
+	SvREFCNT_inc(const_sv);
+	if (cv) {
+	    cv_undef(cv);
+	    sv_setpv((SV*)cv, "");  /* prototype is "" */
+	    CvXSUBANY(cv).any_ptr = const_sv;
+	    CvXSUB(cv) = const_sv_xsub;
+	    CvCONST_on(cv);
+	    /* XXX Does anybody care that CvFILE(cv) is blank? */
+	}
+	else {
+	    GvCV(gv) = Nullcv;
+	    cv = newCONSTSUB(NULL, name, const_sv);
+	}
+	op_free(block);
+	SvREFCNT_dec(PL_compcv);
+	PL_compcv = NULL;
+	PL_sub_generation++;
+	goto done;
+    }
     if (attrs) {
 	HV *stash;
 	SV *rcv;
@@ -4591,12 +4650,8 @@ Perl_newATTRSUB(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs, OP *block)
 	    }
 	}
     }
-    if (!block) {
-      noblock:
-	PL_copline = NOLINE;
-	LEAVE_SCOPE(floor);
-	return cv;
-    }
+    if (!block)
+	goto done;
 
     if (AvFILLp(PL_comppad_name) < AvFILLp(PL_comppad))
 	av_store(PL_comppad_name, AvFILLp(PL_comppad), Nullsv);
@@ -4635,6 +4690,9 @@ Perl_newATTRSUB(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs, OP *block)
 		PL_curpad[ix] = Nullsv;
 	    }
 	}
+	assert(!CvCONST(cv));
+	if (ps && !*ps && op_const_sv(block, cv))
+	    CvCONST_on(cv);
     }
     else {
 	AV *av = newAV();			/* Will be @_ */
@@ -4750,10 +4808,11 @@ eligible for inlining at compile-time.
 =cut
 */
 
-void
+CV *
 Perl_newCONSTSUB(pTHX_ HV *stash, char *name, SV *sv)
 {
     dTHR;
+    CV* cv;
 
     ENTER;
 
@@ -4774,15 +4833,14 @@ Perl_newCONSTSUB(pTHX_ HV *stash, char *name, SV *sv)
 #endif
     }
 
-    newATTRSUB(
-	start_subparse(FALSE, 0),
-	newSVOP(OP_CONST, 0, newSVpv(name,0)),
-	newSVOP(OP_CONST, 0, &PL_sv_no),	/* SvPV(&PL_sv_no) == "" -- GMB */
-	Nullop,
-	newSTATEOP(0, Nullch, newSVOP(OP_CONST, 0, sv))
-    );
+    cv = newXS(name, const_sv_xsub, __FILE__);
+    CvXSUBANY(cv).any_ptr = sv;
+    CvCONST_on(cv);
+    sv_setpv((SV*)cv, "");  /* prototype is "" */
 
     LEAVE;
+
+    return cv;
 }
 
 /*
@@ -4814,7 +4872,10 @@ Perl_newXS(pTHX_ char *name, XSUBADDR_t subaddr, char *filename)
 		line_t oldline = CopLINE(PL_curcop);
 		if (PL_copline != NOLINE)
 		    CopLINE_set(PL_curcop, PL_copline);
-		Perl_warner(aTHX_ WARN_REDEFINE, "Subroutine %s redefined",name);
+		Perl_warner(aTHX_ WARN_REDEFINE,
+			    CvCONST(cv) ? "Constant subroutine %s redefined"
+					: "Subroutine %s redefined"
+			    ,name);
 		CopLINE_set(PL_curcop, oldline);
 	    }
 	    SvREFCNT_dec(cv);
@@ -6842,4 +6903,15 @@ Perl_peep(pTHX_ register OP *o)
 	oldop = o;
     }
     LEAVE;
+}
+
+#include "XSUB.h"
+
+/* Efficient sub that returns a constant scalar value. */
+static void
+const_sv_xsub(pTHXo_ CV* cv)
+{
+    dXSARGS;
+    ST(0) = sv_2mortal(newSVsv((SV*)XSANY.any_ptr));
+    XSRETURN(1);
 }
