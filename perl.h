@@ -1748,8 +1748,7 @@ IEXT bool	Isawstudy;	/* do fbm_instr on all strings */
 IEXT bool	Isawvec;
 IEXT bool	Iunsafe;
 IEXT char *	Iinplace;
-IEXT char *	Ie_tmpname;
-IEXT PerlIO *	Ie_fp;
+IEXT SV *	Ie_script;
 IEXT U32	Iperldb;
 	/* This value may be raised by extensions for testing purposes */
 IEXT int	Iperl_destruct_level IINIT(0);	/* 0=none, 1=full, 2=full with checks */
