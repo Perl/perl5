@@ -503,7 +503,7 @@ Perl_hv_delete(pTHX_ HV *hv, const char *key, U32 klen, I32 flags)
 	if (flags & G_DISCARD)
 	    sv = Nullsv;
 	else {
-	    sv = HeVAL(entry);
+	    sv = sv_2mortal(HeVAL(entry));
 	    HeVAL(entry) = &PL_sv_undef;
 	}
 	if (entry == xhv->xhv_eiter)
@@ -579,7 +579,7 @@ Perl_hv_delete_ent(pTHX_ HV *hv, SV *keysv, I32 flags, U32 hash)
 	if (flags & G_DISCARD)
 	    sv = Nullsv;
 	else {
-	    sv = HeVAL(entry);
+	    sv = sv_2mortal(HeVAL(entry));
 	    HeVAL(entry) = &PL_sv_undef;
 	}
 	if (entry == xhv->xhv_eiter)
