@@ -1,11 +1,11 @@
 # GetOpt::Long.pm -- POSIX compatible options parsing
 
-# RCS Status      : $Id: GetoptLong.pm,v 2.5 1996-10-19 16:47:51+02 jv Exp $
+# RCS Status      : $Id: GetoptLong.pm,v 2.6 1997-01-11 13:12:01+01 jv Exp $
 # Author          : Johan Vromans
 # Created On      : Tue Sep 11 15:00:12 1990
 # Last Modified By: Johan Vromans
-# Last Modified On: Sat Oct 19 16:46:23 1996
-# Update Count    : 504
+# Last Modified On: Sat Jan 11 13:11:35 1997
+# Update Count    : 506
 # Status          : Released
 
 package Getopt::Long;
@@ -14,7 +14,7 @@ require Exporter;
 
 @ISA = qw(Exporter);
 @EXPORT = qw(&GetOptions $REQUIRE_ORDER $PERMUTE $RETURN_IN_ORDER);
-$VERSION = sprintf("%d.%02d", '$Revision: 2.5 $ ' =~ /(\d+)\.(\d+)/);
+$VERSION = sprintf("%d.%02d", '$Revision: 2.6 $ ' =~ /(\d+)\.(\d+)/);
 use vars qw($autoabbrev $getopt_compat $ignorecase $bundling $order
 	    $passthrough $error $debug 
 	    $REQUIRE_ORDER $PERMUTE $RETURN_IN_ORDER
@@ -80,7 +80,7 @@ linkage specified in the HASH.
 The command line options are taken from array @ARGV. Upon completion
 of GetOptions, @ARGV will contain the rest (i.e. the non-options) of
 the command line.
-
+ 
 Each option specifier designates the name of the option, optionally
 followed by an argument specifier. Values for argument specifiers are:
 
@@ -530,7 +530,7 @@ sub GetOptions {
 				# than once in differing environments
     $error = 0;
 
-    print STDERR ('GetOptions $Revision: 2.5 $ ',
+    print STDERR ('GetOptions $Revision: 2.6 $ ',
 		  "[GetOpt::Long $Getopt::Long::VERSION] -- ",
 		  "called from package \"$pkg\".\n",
 		  "  (@ARGV)\n",
@@ -925,6 +925,11 @@ sub find_option {
 	    print STDERR ("=> option \"$opt\" -> \"$tryopt\"\n")
 		if $debug;
 	}
+    }
+
+    # Map to all lowercase if ignoring case.
+    elsif ( $ignorecase ) {
+	$tryopt = lc ($opt);
     }
 
     # Check validity by fetching the info.
