@@ -29,7 +29,6 @@ For ease of access, the Perl manual has been split up into several sections.
     perlreftut		Perl references short introduction
     perldsc		Perl data structures intro
     perllol		Perl data structures: arrays of arrays
-    perlopentut		Perl open() tutorial
 
     perlrequick		Perl regular expressions quick start
     perlretut		Perl regular expressions tutorial
@@ -56,11 +55,13 @@ For ease of access, the Perl manual has been split up into several sections.
       perlfaq9		Networking
   
 =head2 Reference Manual
+
     perlsyn		Perl syntax
     perldata		Perl data structures
     perlop		Perl operators and precedence
     perlsub		Perl subroutines
     perlfunc		Perl built-in functions
+      perlopentut	Perl open() tutorial
     perlpod		Perl plain old documentation
     perlrun		Perl execution and options
     perldiag		Perl diagnostic messages
