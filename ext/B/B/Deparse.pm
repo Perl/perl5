@@ -3074,7 +3074,7 @@ sub re_unback {
     my($str) = @_;
 
     # the insane complexity here is due to the behaviour of "\c\"
-    $str =~ s/(^|[^\\]|\\c\\)(?<!\\c)\\(\\\\)*(?=[\0-\031\177-\377])/$1$2/g;
+    $str =~ s/(^|[^\\]|\\c\\)(?<!\\c)\\(\\\\)*(?=[^[:print:]])/$1$2/g;
     return $str;
 }
 
