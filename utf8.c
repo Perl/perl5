@@ -362,7 +362,7 @@ Perl_utf8_to_uv_simple(pTHX_ U8* s, STRLEN* retlen)
 }
 
 /*
-=for apidoc|utf8_length|U8 *s|U8 *e
+=for apidoc Am|STRLEN|utf8_length|U8* s|U8 *e
 
 Return the length of the UTF-8 char encoded string C<s> in characters.
 Stops at C<e> (inclusive).  If C<e E<lt> s> or if the scan would end
@@ -390,8 +390,16 @@ Perl_utf8_length(pTHX_ U8* s, U8* e)
     return len;
 }
 
-/* utf8_distance(a,b) returns the number of UTF8 characters between
-   the pointers a and b							*/
+/*
+=for apidoc Am|IV|utf8_distance|U8 *a|U8 *b
+
+Returns the number of UTF8 characters between the UTF-8 pointers C<a>
+and C<b>.
+
+WARNING: use only if you *know* that the pointers point inside the
+same UTF-8 buffer.
+
+=cut */
 
 IV
 Perl_utf8_distance(pTHX_ U8 *a, U8 *b)
@@ -422,7 +430,16 @@ Perl_utf8_distance(pTHX_ U8 *a, U8 *b)
     return off;
 }
 
-/* WARNING: do not use the following unless you *know* off is within bounds */
+/*
+=for apidoc Am|U8*|utf8_hop|U8 *s|I32 off
+
+Move the C<s> pointing to UTF-8 data by C<off> characters, either forward
+or backward.
+
+WARNING: do not use the following unless you *know* C<off> is within
+the UTF-8 buffer pointed to by C<s>.
+
+=cut */
 
 U8 *
 Perl_utf8_hop(pTHX_ U8 *s, I32 off)

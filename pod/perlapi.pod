@@ -3063,8 +3063,8 @@ Found in file sv.c
 
 Unsets the RV status of the SV, and decrements the reference count of
 whatever was being referenced by the RV.  This can almost be thought of
-as a reversal of C<newSVrv>.  This is C<sv_unref_flags> with C<flag>
-of zero.  See C<SvROK_off>.  
+as a reversal of C<newSVrv>.  This is C<sv_unref_flags> with the C<flag>
+being zero.  See C<SvROK_off>.  
 
 	void	sv_unref(SV* sv)
 
@@ -3215,6 +3215,43 @@ Returns true if first C<len> bytes of the given string form valid a UTF8
 string, false otherwise.
 
 	is_utf8_string	U8 *s(STRLEN len)
+
+=for hackers
+Found in file utf8.c
+
+=item utf8_distance
+
+Returns the number of UTF8 characters between the UTF-8 pointers C<a>
+and C<b>.
+
+WARNING: use only if you *know* that the pointers point inside the
+same UTF-8 buffer.
+
+	IV	utf8_distance(U8 *a, U8 *b)
+
+=for hackers
+Found in file utf8.c
+
+=item utf8_hop
+
+Move the C<s> pointing to UTF-8 data by C<off> characters, either forward
+or backward.
+
+WARNING: do not use the following unless you *know* C<off> is within
+the UTF-8 buffer pointed to by C<s>.
+
+	U8*	utf8_hop(U8 *s, I32 off)
+
+=for hackers
+Found in file utf8.c
+
+=item utf8_length
+
+Return the length of the UTF-8 char encoded string C<s> in characters.
+Stops at C<e> (inclusive).  If C<e E<lt> s> or if the scan would end
+up past C<e>, croaks.
+
+	STRLEN	utf8_length(U8* s, U8 *e)
 
 =for hackers
 Found in file utf8.c
