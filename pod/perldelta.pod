@@ -15,11 +15,11 @@ the L<perl58delta>, which describes differences between 5.6.0 and
 
 =head2 Hash Randomisation
 
-Due to security reasons, the "random ordering" of hashes has been made
-even more random.  Previously while the order of hash elements from
-keys(), values(), and each() was essentially random, it was still
-repeatable.  Now, however, the order varies between different runs
-of Perl.
+Mainly due to security reasons, the "random ordering" of hashes
+has been made even more random.  Previously while the order of hash
+elements from keys(), values(), and each() was essentially random,
+it was still repeatable.  Now, however, the order varies between
+different runs of Perl.
 
 B<Perl has never guaranteed any ordering of the hash keys>, and the
 ordering has already changed several times during the lifetime of
@@ -186,6 +186,8 @@ podlators
 
 Pod::LaTeX
 
+PodParsers
+
 Pod::Perldoc
 
 Scalar::Util - New utilities: refaddr, isvstring, looks_like_number,
@@ -196,9 +198,14 @@ foolproof).
 
 Term::ANSIcolor
 
+Test::Harness - now much more picky about extra or missing output
+from test scripts.
+
 Test::More
 
 Test::Simple
+
+Text::Balanced
 
 Time::HiRes - Use of nanosleep(), if available, allows mixing
 subsecond sleeps with alarms.
@@ -281,7 +288,8 @@ environment.  See README.os400.
 
 =head1 Selected Bug Fixes
 
-Setting $0 works again in Linux.
+Setting $0 works again in Linux (with certain limitations that
+Perl cannot do much about: see L<perlvar/$0>).
 
 Setting $0 now works in HP-UX.
 
