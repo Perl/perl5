@@ -6,7 +6,7 @@ require Exporter;
 @ISA = qw(Exporter);
 @EXPORT_OK = qw(rearrange make_attributes unescape escape expires);
 
-$VERSION = '1.3';
+$VERSION = '1.31';
 
 $EBCDIC = "\t" ne "\011";
 if ($EBCDIC) {
