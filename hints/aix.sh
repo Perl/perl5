@@ -257,11 +257,11 @@ EOM
 	lddlflags="$*"
 
 	# Insert pthreads to libswanted, before any libc or libC.
-	set `echo X "$libswanted "| sed -e 's/ \([cC]\) / pthreads \1 /'`
+	set `echo X "$libswanted "| sed -e 's/ \([cC]_r\) / pthreads \1 /'`
 	shift
 	libswanted="$*"
 	# Insert pthreads to lddlflags, before any libc or libC.
-	set `echo X "$lddlflags " | sed -e 's/ \(-l[cC]\) / -lpthreads \1 /'`
+	set `echo X "$lddlflags " | sed -e 's/ \(-l[cC]_r\) / -lpthreads \1 /'`
 	shift
 	lddlflags="$*"
 
