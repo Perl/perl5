@@ -39,7 +39,7 @@ LDFLAGS = $ldflags
 #mallocobj = $mallocobj
 shellflags = $shellflags
 
-libs = $libs
+libs = $perllibs
 
 $make_set_make
 # grrr
