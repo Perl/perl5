@@ -9,7 +9,7 @@ BEGIN {
     @INC = '../lib';
 }
 
-print "1..73\n";
+print "1..74\n";
 
 @A::ISA = 'B';
 @B::ISA = 'C';
@@ -248,5 +248,21 @@ test (
 	Foo->$x = 'ok';
     ] || $@, 'ok'
 );
+
+# An autoloaded, inherited DESTROY may be invoked differently than normal
+# methods, and has been known to give rise to spurious warnings
+# eg <200203121600.QAA11064@gizmo.fdgroup.co.uk>
+
+{
+    use warnings;
+    my $w = '';
+    local $SIG{__WARN__} = sub { $w = $_[0] };
+
+    sub AutoDest::Base::AUTOLOAD {}
+    @AutoDest::ISA = qw(AutoDest::Base);
+    { my $x = bless {}, 'AutoDest'; }
+    $w =~ s/\n//g;
+    test($w, '');
+}
 
 print "# $cnt tests completed\n";
