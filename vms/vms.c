@@ -6935,6 +6935,15 @@ init_os_extras()
 
   store_pipelocs(aTHX);
 
+#ifdef Drand01_is_rand
+/* this hackery brought to you by a bug in DECC for /ieee=denorm */
+  { 
+    int ix = RAND_MAX;
+    float x = (float)ix;
+    PL_my_inv_rand_max = 1./x;
+  }
+#endif
+
   return;
 }
   

@@ -2374,6 +2374,9 @@ $   rp = "Use IEEE math? [''dflt'] "
 $   GOSUB myread
 $   IF ans .eqs. "" THEN ans = "''dflt'"
 $   use_ieee_math = "''ans'"
+$ ELSE
+$   be_case_sensitive = "n"
+$   use_ieee_math = "n"
 $ ENDIF
 $! CC Flags
 $ echo ""
@@ -4511,6 +4514,7 @@ $!
 $! Check rand48 and its ilk
 $!
 $ echo4 "Looking for a random number function..."
+$ d_use_rand = "undef"
 $ OS
 $ WS "#if defined(__DECC) || defined(__DECCXX)"
 $ WS "#include <stdlib.h>"
@@ -4551,9 +4555,10 @@ $   IF compile_status .EQ. good_compile .AND. link_status .EQ. good_link
 $   THEN
 $     echo4 "OK, found random()."
 $   ELSE
-$     drand01="(((float)rand())/((float)RAND_MAX))"
+$     drand01="(((float)rand())*PL_my_inv_rand_max)"
 $     randseedtype = "unsigned"
 $     seedfunc = "srand"
+$     d_use_rand = "define"
 $     echo4 "Yick, looks like I have to use rand()."
 $   ENDIF
 $ ENDIF
@@ -5727,6 +5732,7 @@ $ THEN
 $! Alas this does not help to build Fcntl
 $!   WC "#define PERL_IGNORE_FPUSIG SIGFPE"
 $ ENDIF
+$ if d_use_rand .EQS. "define" then WC "#define Drand01_is_rand"
 $ CLOSE CONFIG
 $!
 $ echo4 "Doing variable substitutions on .SH files..."
