@@ -860,11 +860,7 @@ static void*	get_from_bigger_buckets(int bucket, MEM_SIZE size);
 static union overhead *getpages	(MEM_SIZE needed, int *nblksp, int bucket);
 static int	getpages_adjacent(MEM_SIZE require);
 
-#if defined(PERL_EMERGENCY_SBRK) && defined(PERL_CORE)
-
-#  ifndef BIG_SIZE
-#    define BIG_SIZE (1<<16)		/* 64K */
-#  endif 
+#ifdef PERL_CORE
 
 #ifdef I_MACH_CTHREADS
 #  undef  MUTEX_LOCK
@@ -915,6 +911,12 @@ static  u_int start_slack;
 #endif
 
 static	u_int goodsbrk;
+
+# ifdef PERL_EMERGENCY_SBRK
+
+#  ifndef BIG_SIZE
+#    define BIG_SIZE (1<<16)		/* 64K */
+#  endif
 
 static char *emergency_buffer;
 static MEM_SIZE emergency_buffer_size;
@@ -983,9 +985,10 @@ emergency_sbrk(MEM_SIZE size)
     return Nullch;
 }
 
-#else /* !(defined(PERL_EMERGENCY_SBRK) && defined(PERL_CORE)) */
+# else /*  !defined(PERL_EMERGENCY_SBRK) */
 #  define emergency_sbrk(size)	-1
-#endif /* !(defined(PERL_EMERGENCY_SBRK) && defined(PERL_CORE)) */
+# endif
+#endif /* ifdef PERL_CORE */
 
 #ifdef DEBUGGING
 #undef ASSERT
@@ -1062,6 +1065,9 @@ Perl_malloc(register size_t nbytes)
 		{
 		    dTHX;
 		    if (!PL_nomemok) {
+#if defined(PLAIN_MALLOC) && defined(NO_FANCY_MALLOC)
+		        PerlIO_puts(PerlIO_stderr(),"Out of memory!\n");
+#else
 			char buff[80];
 			char *eb = buff + sizeof(buff) - 1;
 			char *s = eb;
@@ -1084,6 +1090,7 @@ Perl_malloc(register size_t nbytes)
 			} while (n /= 10);
 			PerlIO_puts(PerlIO_stderr(),s);
 			PerlIO_puts(PerlIO_stderr()," bytes!\n");
+#endif /* defined(PLAIN_MALLOC) && defined(NO_FANCY_MALLOC) */
 			my_exit(1);
 		    }
 		}
@@ -1391,7 +1398,9 @@ getpages(MEM_SIZE needed, int *nblksp, int bucket)
 	sbrked_remains = require - needed;
 	last_op = cp;
     }
+#if !defined(PLAIN_MALLOC) && !defined(NO_FANCY_MALLOC)
     no_mem = 0;
+#endif
     last_sbrk_top = cp + require;
 #ifdef DEBUGGING_MSTATS
     goodsbrk += require;
