@@ -9,7 +9,7 @@ perlhist - the Perl history records
 =begin RCS
 
 #
-# $Id: perlhist.pod,v 1.57 1999/01/26 17:38:07 jhi Exp $
+# $Id: perlhist.pod,v 1.2 2000/01/24 11:44:47 jhi Exp $
 #
 
 =end RCS
@@ -316,7 +316,7 @@ the strings?).
           5.005_03-MT4  1999-Jan-26
           5.005_03-MT5  1999-Jan-28
           5.005_03      1999-Mar-28
- Chip     5.005_04	1999-***-**
+ Chip     5.005_04	2000-***-**
 
  Sarathy  5.005_50      1998-Jul-26     The 5.6 development track.
           5.005_51      1998-Aug-10
@@ -330,8 +330,10 @@ the strings?).
 	  5.005_59	1999-Aug-02
 	  5.005_60	1999-Aug-02
 	  5.005_61	1999-Aug-20
-	  5.005_62	1999-Sep-**
-	  5.6 beta	1999-***-**
+	  5.005_62	1999-Oct-15
+	  5.005_63	1999-Dec-09
+	  5.005_64	2000-***-**
+	  5.6 beta	2000-***-**
 
 =head2 SELECTED RELEASE SIZES
 
