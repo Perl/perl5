@@ -14,23 +14,27 @@ BEGIN {
 }
 
 
-use List::Util qw(max);
+use List::Util qw(shuffle);
 
 print "1..5\n";
 
-print "not " unless defined &max;
+my @r;
+
+@r = shuffle();
+print "not " if @r;
 print "ok 1\n";
 
-print "not " unless max(1) == 1;
+@r = shuffle(9);
+print "not " unless @r == 1 and $r[0] = 9;
 print "ok 2\n";
 
-print "not " unless max(1,2) == 2;
+my @in = 1..100;
+@r = shuffle(@in);
+print "not " unless @r == @in;
 print "ok 3\n";
 
-print "not " unless max(2,1) == 2;
+print "not " if join("",@r) eq join("",@in);
 print "ok 4\n";
 
-my @a = map { rand() } 1 .. 20;
-my @b = sort { $a <=> $b } @a;
-print "not " unless max(@a) == $b[-1];
+print "not " if join("",sort { $a <=> $b } @r) ne join("",@in);
 print "ok 5\n";

@@ -1,3 +1,35 @@
+Change 636 on 2001/09/03 by <gbarr@pobox.com> (Graham Barr)
+
+	More changes to help merging with core dist
+
+Change 635 on 2001/09/03 by <gbarr@pobox.com> (Graham Barr)
+
+	Added List::Util::shuffle() similar to that described in
+	the perl FAQ except it returns a shuffled list instead of
+	modifying an array passed by reference
+
+Change 632 on 2001/09/03 by <gbarr@pobox.com> (Graham Barr)
+
+	Handle tied variables passed for the number to dualvar()
+	Preserve number type (IV/UV/NV) in dualvar()
+
+Change 631 on 2001/08/31 by <gbarr@pobox.com> (Graham Barr)
+
+	Handle eval{} inside of the code blocks for first and reduce
+
+Change 629 on 2001/08/22 by <gbarr@pobox.com> (Graham Barr)
+
+	perl5.004 does not like exit from within a BEGIN, it core dumps
+
+Change 628 on 2001/08/22 by <gbarr@pobox.com> (Graham Barr)
+
+	Fix stack problem in first() and reduce()
+	Align with core dist
+
+Change 483 on 2000/04/10 by <gbarr@pobox.com> (Graham Barr)
+
+	Release 1.02
+
 Change 482 on 2000/04/10 by <gbarr@pobox.com> (Graham Barr)
 
 	Check for SvMAGICAL on argument for reftype and blessed

@@ -387,6 +387,7 @@ ext/List/Util/t/minstr.t	List::Util
 ext/List/Util/t/readonly.t	Scalar::Util
 ext/List/Util/t/reduce.t	List::Util
 ext/List/Util/t/reftype.t	Scalar::Util
+ext/List/Util/t/shuffle.t	List::Util
 ext/List/Util/t/sum.t		List::Util
 ext/List/Util/t/tainted.t	Scalar::Util
 ext/List/Util/t/weak.t		Scalar::Util

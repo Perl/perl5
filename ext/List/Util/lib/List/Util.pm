@@ -10,8 +10,8 @@ require Exporter;
 require DynaLoader;
 
 our @ISA       = qw(Exporter DynaLoader);
-our @EXPORT_OK = qw(first min max minstr maxstr reduce sum);
-our $VERSION   = "1.02_00";
+our @EXPORT_OK = qw(first min max minstr maxstr reduce sum shuffle);
+our $VERSION   = "1.03_00";
 
 bootstrap List::Util $VERSION;
 
@@ -127,6 +127,10 @@ element is returned and BLOCK is not executed.
     $foo = reduce { $a lt $b ? $a : $b } 'aa'..'zz' # minstr
     $foo = reduce { $a + $b } 1 .. 10               # sum
     $foo = reduce { $a . $b } @bar                  # concat
+
+=item shuffle LIST
+
+Returns the elements of LIST in a random order
 
 =item sum LIST
 
