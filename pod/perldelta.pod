@@ -75,6 +75,12 @@ since it, in a way, falsely promised that the features could be used.
 
 =item *
 
+The (bogus) escape sequences \8, \9, and \_ now give an optional
+warning ("Unrecognized escape passed through").  There is no need
+to \-escape any C<\w> character.
+
+=item *
+
 lstat(FILEHANDLE) now gives a warning because the operation makes no sense.
 In future releases this may become a fatal error.
 
