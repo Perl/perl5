@@ -94,7 +94,7 @@ static long		tokenize(char *str, char **dest, char ***destv);
 static BOOL		has_shell_metachars(char *ptr);
 static long		filetime_to_clock(PFILETIME ft);
 static BOOL		filetime_from_time(PFILETIME ft, time_t t);
-static char *		get_emd_part(char *leading, char *trailing, ...);
+static char *		get_emd_part(char **leading, char *trailing, ...);
 static void		remove_dead_process(long deceased);
 static long		find_pid(int pid);
 static char *		qualified_path(const char *cmd);
@@ -136,48 +136,45 @@ IsWinNT(void) {
     return (os_id() == VER_PLATFORM_WIN32_NT);
 }
 
+/* *ptr is expected to point to valid allocated space (can't be NULL) */
 char*
 GetRegStrFromKey(HKEY hkey, const char *lpszValueName, char** ptr, DWORD* lpDataLen)
-{   /* Retrieve a REG_SZ or REG_EXPAND_SZ from the registry */
+{
+    /* Retrieve a REG_SZ or REG_EXPAND_SZ from the registry */
     HKEY handle;
     DWORD type;
     const char *subkey = "Software\\Perl";
+    char *str = Nullch;
     long retval;
 
     retval = RegOpenKeyEx(hkey, subkey, 0, KEY_READ, &handle);
-    if (retval == ERROR_SUCCESS){
+    if (retval == ERROR_SUCCESS) {
 	retval = RegQueryValueEx(handle, lpszValueName, 0, &type, NULL, lpDataLen);
 	if (retval == ERROR_SUCCESS && type == REG_SZ) {
-	    if (*ptr) {
-		Renew(*ptr, *lpDataLen, char);
-	    }
-	    else {
-		New(1312, *ptr, *lpDataLen, char);
-	    }
-	    retval = RegQueryValueEx(handle, lpszValueName, 0, NULL, (PBYTE)*ptr, lpDataLen);
-	    if (retval != ERROR_SUCCESS) {
-		Safefree(*ptr);
-		*ptr = Nullch;
-	    }
+	    Renew(*ptr, *lpDataLen, char);
+	    retval = RegQueryValueEx(handle, lpszValueName, 0, NULL,
+				     (PBYTE)*ptr, lpDataLen);
+	    if (retval == ERROR_SUCCESS)
+		str = *ptr;
 	}
 	RegCloseKey(handle);
     }
-    return *ptr;
+    return str;
 }
 
+/* *ptr is expected to point to valid allocated space (can't be NULL) */
 char*
 GetRegStr(const char *lpszValueName, char** ptr, DWORD* lpDataLen)
 {
-    *ptr = GetRegStrFromKey(HKEY_CURRENT_USER, lpszValueName, ptr, lpDataLen);
-    if (*ptr == Nullch)
-    {
-	*ptr = GetRegStrFromKey(HKEY_LOCAL_MACHINE, lpszValueName, ptr, lpDataLen);
-    }
-    return *ptr;
+    char *str = GetRegStrFromKey(HKEY_CURRENT_USER, lpszValueName, ptr, lpDataLen);
+    if (!str)
+	str = GetRegStrFromKey(HKEY_LOCAL_MACHINE, lpszValueName, ptr, lpDataLen);
+    return str;
 }
 
+/* *prev_path is expected to point to valid allocated space (can't be NULL) */
 static char *
-get_emd_part(char *prev_path, char *trailing_path, ...)
+get_emd_part(char **prev_path, char *trailing_path, ...)
 {
     char base[10];
     va_list ap;
@@ -240,23 +237,17 @@ get_emd_part(char *prev_path, char *trailing_path, ...)
     strcpy(++ptr, trailing_path);
 
     /* only add directory if it exists */
-    if(GetFileAttributes(mod_name) != (DWORD) -1) {
+    if (GetFileAttributes(mod_name) != (DWORD) -1) {
 	/* directory exists */
 	newsize = strlen(mod_name) + 1;
-	if (prev_path) {
-	    oldsize = strlen(prev_path) + 1;
-	    newsize += oldsize;			/* includes plus 1 for ';' */
-	    Renew(prev_path, newsize, char);
-	    prev_path[oldsize-1] = ';';
-	    strcpy(&prev_path[oldsize], mod_name);
-	}
-	else {
-	    New(1311, prev_path, newsize, char);
-	    strcpy(prev_path, mod_name);
-	}
+	oldsize = strlen(*prev_path) + 1;
+	newsize += oldsize;			/* includes plus 1 for ';' */
+	Renew(*prev_path, newsize, char);
+	(*prev_path)[oldsize-1] = ';';
+	strcpy(&(*prev_path)[oldsize], mod_name);
     }
 
-    return prev_path;
+    return *prev_path;
 }
 
 char *
@@ -264,17 +255,21 @@ win32_get_privlib(char *pl)
 {
     char *stdlib = "lib";
     char buffer[MAX_PATH+1];
-    char *path = Nullch;
+    char **path;
     DWORD datalen;
+    SV *sv = sv_2mortal(newSVpvn("",127));
 
     /* $stdlib = $HKCU{"lib-$]"} || $HKLM{"lib-$]"} || $HKCU{"lib"} || $HKLM{"lib"} || "";  */
     sprintf(buffer, "%s-%s", stdlib, pl);
-    path = GetRegStr(buffer, &path, &datalen);
-    if (!path)
-	path = GetRegStr(stdlib, &path, &datalen);
+    path = &SvPVX(sv);
+    if (!GetRegStr(buffer, path, &datalen))
+	(void)GetRegStr(stdlib, path, &datalen);
 
     /* $stdlib .= ";$EMD/../../lib" */
-    return get_emd_part(path, stdlib, ARCHNAME, "bin", Nullch);
+    (void)get_emd_part(path, stdlib, ARCHNAME, "bin", Nullch);
+    SvCUR_set(sv, strlen(*path));
+    SvLEN_set(sv, SvCUR(sv)+1);
+    return SvPVX(sv);
 }
 
 char *
@@ -284,41 +279,44 @@ win32_get_sitelib(char *pl)
     char regstr[40];
     char pathstr[MAX_PATH+1];
     DWORD datalen;
-    char *path1 = Nullch;
-    char *path2 = Nullch;
+    char **path1, *str1 = Nullch;
+    char **path2, *str2 = Nullch;
     int len, newsize;
+    SV *sv1 = sv_2mortal(newSVpvn("",127));
+    SV *sv2 = sv_2mortal(newSVpvn("",127));
 
     /* $HKCU{"sitelib-$]"} || $HKLM{"sitelib-$]"} . ---; */
     sprintf(regstr, "%s-%s", sitelib, pl);
-    path1 = GetRegStr(regstr, &path1, &datalen);
+    path1 = &SvPVX(sv1);
+    (void)GetRegStr(regstr, path1, &datalen);
 
     /* $sitelib .=
      * ";$EMD/" . ((-d $EMD/../../../$]) ? "../../.." : "../.."). "/site/$]/lib";  */
     sprintf(pathstr, "site/%s/lib", pl);
-    path1 = get_emd_part(path1, pathstr, ARCHNAME, "bin", pl, Nullch);
+    str1 = get_emd_part(path1, pathstr, ARCHNAME, "bin", pl, Nullch);
 
     /* $HKCU{'sitelib'} || $HKLM{'sitelib'} . ---; */
-    path2 = GetRegStr(sitelib, &path2, &datalen);
+    path2 = &SvPVX(sv2);
+    (void)GetRegStr(sitelib, path2, &datalen);
 
     /* $sitelib .=
      * ";$EMD/" . ((-d $EMD/../../../$]) ? "../../.." : "../.."). "/site/lib";  */
-    path2 = get_emd_part(path2, "site/lib", ARCHNAME, "bin", pl, Nullch);
+    str2 = get_emd_part(path2, "site/lib", ARCHNAME, "bin", pl, Nullch);
 
-    if (!path1)
-	return path2;
+    SvCUR_set(sv1, strlen(*path1));
+    SvLEN_set(sv1, SvCUR(sv1)+1);
+    SvCUR_set(sv2, strlen(*path2));
+    SvLEN_set(sv2, SvCUR(sv2)+1);
 
-    if (!path2)
-	return path1;
+    if (!str1)
+	return *path2;
+    if (!str2)
+	return *path1;
 
-    len = strlen(path1);
-    newsize = len + strlen(path2) + 2; /* plus one for ';' */
+    sv_catpvn(sv1, ";", 1);
+    sv_catsv(sv1, sv2);
 
-    Renew(path1, newsize, char);
-    path1[len++] = ';';
-    strcpy(&path1[len], path2);
-
-    Safefree(path2);
-    return path1;
+    return SvPVX(sv1);
 }
 
 
