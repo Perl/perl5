@@ -1294,10 +1294,6 @@ Inheritance is a powerful but subtle device, best used only after careful
 forethought and design.  Aggregation instead of inheritance is often a
 better approach.
 
-We use the hypothetical our() syntax for package variables.  It works
-like C<use vars>, but looks like my().  It should be in this summer's
-major release (5.6) of perl--we hope.
-
 You can't use file-scoped lexicals in conjunction with the SelfLoader
 or the AutoLoader, because they alter the lexical scope in which the
 module's methods wind up getting compiled.
