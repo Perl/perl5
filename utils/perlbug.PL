@@ -904,6 +904,19 @@ the bug, and encourage the maintainers with kind words (but never any
 flames!).  Feel free to resend your bug report if the next released
 version of perl comes out and your bug is still present.
 
+If it is important to you that your bug be fixed B<soon>, you may 
+wish to arrange with a programmer to do the work. If you don't 
+have one handy, you may reach many talented folks who already 
+know the internals of Perl by mentioning your desire to hire a 
+contract programmer in your bug report. (In reality, this is
+hardly ever necessary, since the Perl maintainers are simple 
+folk dedicated to helping Perl approach perfection. The only 
+thing that makes them happier than fixing bugs is to be given 
+a plate of warm cookies and a glass of milk at bedtime. 
+Nevertheless, very few of the developers have taken a vow of 
+poverty (though some have had poverty thrust upon them), and 
+so this may be your way of contributing to Perl.)
+
 =head1 OPTIONS
 
 =over 8
