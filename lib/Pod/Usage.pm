@@ -10,7 +10,7 @@
 package Pod::Usage;
 
 use vars qw($VERSION);
-$VERSION = 1.13;  ## Current version of this package
+$VERSION = 1.14;  ## Current version of this package
 require  5.005;    ## requires this Perl version or later
 
 =head1 NAME
@@ -80,6 +80,9 @@ program's usage message.
 =item C<-exitval>
 
 The desired exit status to pass to the B<exit()> function.
+This should be an integer, or else the string "NOEXIT" to
+indicate that control should simply be returned without
+terminating the invoking process.
 
 =item C<-verbose>
 
@@ -395,6 +398,7 @@ with re-writing this manpage.
 use strict;
 #use diagnostics;
 use Carp;
+use Config;
 use Exporter;
 use File::Spec;
 
@@ -497,8 +501,19 @@ sub pod2usage {
     }
 
     ## Now translate the pod document and then exit with the desired status
-    $parser->parse_from_file($opts{"-input"}, $opts{"-output"});
-    exit($opts{"-exitval"});
+    if ( $opts{"-verbose"} >= 2 
+             and  !ref($opts{"-input"})
+             and  $opts{"-output"} == \*STDOUT )
+    {
+       ## spit out the entire PODs. Might as well invoke perldoc
+       my $progpath = File::Spec->catfile($Config{bin}, "perldoc");
+       system($progpath, $opts{"-input"});
+    }
+    else {
+       $parser->parse_from_file($opts{"-input"}, $opts{"-output"});
+    }
+
+    exit($opts{"-exitval"})  unless (lc($opts{"-exitval"}) eq 'noexit');
 }
 
 ##---------------------------------------------------------------------------

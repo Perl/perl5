@@ -10,7 +10,7 @@
 package Pod::Parser;
 
 use vars qw($VERSION);
-$VERSION = 1.12;  ## Current version of this package
+$VERSION = 1.13;  ## Current version of this package
 require  5.005;    ## requires this Perl version or later
 
 #############################################################################
@@ -782,11 +782,11 @@ sub parse_text {
     ## Iterate over all sequence starts text (NOTE: split with
     ## capturing parens keeps the delimiters)
     $_ = $text;
-    my @tokens = split /([A-Z]<(?:<+\s+)?)/;
+    my @tokens = split /([A-Z]<(?:<+\s)?)/;
     while ( @tokens ) {
         $_ = shift @tokens;
         ## Look for the beginning of a sequence
-        if ( /^([A-Z])(<(?:<+\s+)?)$/ ) {
+        if ( /^([A-Z])(<(?:<+\s)?)$/ ) {
             ## Push a new sequence onto the stack of those "in-progress"
             ($cmd, $ldelim) = ($1, $2);
             $seq = Pod::InteriorSequence->new(
