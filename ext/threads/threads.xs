@@ -23,7 +23,9 @@ void* Perl_thread_run(void * arg) {
 
 	SHAREDSvLOCK(threads);
 	SHAREDSvEDIT(threads);
-	thread_tid_ptr = Perl_newSVuv(PL_sharedsv_space, PTR2UV(thread->thr));
+	PERL_THREAD_ALLOC_SPECIFIC(self_key);
+	PERL_THREAD_SET_SPECIFIC(self_key,INT2PTR(void*,thread->tid));
+	thread_tid_ptr = Perl_newSVuv(PL_sharedsv_space, PTR2UV(PERL_THREAD_GET_SPECIFIC(self_key)));	
 	thread_ptr = Perl_newSVuv(PL_sharedsv_space, PTR2UV(thread));
 	hv_store_ent((HV*)SHAREDSvGET(threads), thread_tid_ptr, thread_ptr,0);
    	SvREFCNT_dec(thread_tid_ptr);
@@ -152,8 +154,13 @@ SV* Perl_thread_create(char* class, SV* init_function, SV* params) {
 	thread->handle = CreateThread(NULL, 0, Perl_thread_run,
 			(LPVOID)thread, 0, &thread->thr);
 
+
+#else
+#ifdef OLD_PTHREADS_API
+	pthread_create( &thread->thr, (pthread_attr_t)NULL, Perl_thread_run, thread);
 #else
 	pthread_create( &thread->thr, (pthread_attr_t*)NULL, Perl_thread_run, thread);
+#endif
 #endif
 	MUTEX_UNLOCK(&create_mutex);	
 
@@ -185,13 +192,9 @@ SV* Perl_thread_self (char* class) {
 	
 	SHAREDSvLOCK(threads);
 	SHAREDSvEDIT(threads);
-#ifdef WIN32
-	thread_tid_ptr = Perl_newSVuv(PL_sharedsv_space,
-				      (UV) GetCurrentThreadId());
-#else
-	thread_tid_ptr = Perl_newSVuv(PL_sharedsv_space,
-				      PTR2UV(pthread_self()));
-#endif
+
+	thread_tid_ptr = Perl_newSVuv(PL_sharedsv_space, PTR2UV(PERL_THREAD_GET_SPECIFIC(self_key)));	
+
 	thread_entry = Perl_hv_fetch_ent(PL_sharedsv_space,
 					 (HV*) SHAREDSvGET(threads),
 					 thread_tid_ptr, 0,0);
@@ -229,9 +232,7 @@ void Perl_thread_detach(SV* obj) {
 	ithread* thread = (ithread*)SvIV(SvRV(obj));
 	MUTEX_LOCK(&thread->mutex);
 	thread->detached = 1;
-#if !defined(WIN32)
-	pthread_detach(thread->thr);
-#endif
+	PERL_THREAD_DETACH(thread->thr);
 	MUTEX_UNLOCK(&thread->mutex);
 }
 
@@ -283,7 +284,9 @@ BOOT:
 		thread->thr = pthread_self();
 #endif
 		SHAREDSvEDIT(threads);
-		thread_tid_ptr = Perl_newSVuv(PL_sharedsv_space, PTR2UV(thread->thr));
+		PERL_THREAD_ALLOC_SPECIFIC(self_key);
+		PERL_THREAD_SET_SPECIFIC(self_key,0);
+		thread_tid_ptr = Perl_newSVuv(PL_sharedsv_space, PTR2UV(PERL_THREAD_GET_SPECIFIC(self_key)));
 		thread_ptr = Perl_newSVuv(PL_sharedsv_space, PTR2UV(thread));
 		hv_store_ent((HV*) SHAREDSvGET(threads), thread_tid_ptr, thread_ptr,0);
 	   	SvREFCNT_dec(thread_tid_ptr);
