@@ -3017,6 +3017,8 @@ tryagain:
 		case '\\':
 		    switch (*++p) {
 		    case 'A':
+		    case 'C':
+		    case 'X':
 		    case 'G':
 		    case 'Z':
 		    case 'z':
