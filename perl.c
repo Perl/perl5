@@ -881,7 +881,7 @@ I32 create;
 {
     GV* gv = gv_fetchpv(name, create, SVt_PVCV);
     if (create && !GvCVu(gv))
-    	return newSUB(start_subparse(),
+    	return newSUB(start_subparse(0),
 		      newSVOP(OP_CONST, 0, newSVpv(name,0)),
 		      Nullop,
 		      Nullop);

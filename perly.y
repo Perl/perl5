@@ -276,18 +276,16 @@ subrout	:	SUB startsub subname proto subbody
 			{ newSUB($2, $3, $4, $5); }
 	;
 
-startsub:	/* NULL */	/* start a subroutine scope */
-			{ $$ = start_subparse(); }
+startsub:	/* NULL */	/* start a regular subroutine scope */
+			{ $$ = start_subparse(0); }
 	;
 
 startanonsub:	/* NULL */	/* start an anonymous subroutine scope */
-			{ $$ = start_subparse();
-			  CvANON_on(compcv); }
+			{ $$ = start_subparse(CVf_ANON); }
 	;
 
 startformsub:	/* NULL */	/* start a format subroutine scope */
-			{ $$ = start_subparse();
-			  CvFORMAT_on(compcv); }
+			{ $$ = start_subparse(CVf_FORMAT); }
 	;
 
 subname	:	WORD	{ char *name = SvPVx(((SVOP*)$1)->op_sv, na);

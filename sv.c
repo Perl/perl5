@@ -3593,7 +3593,7 @@ I32 lref;
 	    ENTER;
 	    tmpsv = NEWSV(704,0);
 	    gv_efullname3(tmpsv, gv, Nullch);
-	    newSUB(start_subparse(),
+	    newSUB(start_subparse(0),
 		   newSVOP(OP_CONST, 0, tmpsv),
 		   Nullop,
 		   Nullop);
@@ -4179,10 +4179,11 @@ SV* sv;
 	if (HvNAME(sv))
 	    PerlIO_printf(Perl_debug_log, "  NAME = \"%s\"\n", HvNAME(sv));
 	break;
-    case SVt_PVFM:
     case SVt_PVCV:
 	if (SvPOK(sv))
 	    PerlIO_printf(Perl_debug_log, "  PROTOTYPE = \"%s\"\n", SvPV(sv,na));
+	/* FALL THROUGH */
+    case SVt_PVFM:
 	PerlIO_printf(Perl_debug_log, "  STASH = 0x%lx\n", (long)CvSTASH(sv));
 	PerlIO_printf(Perl_debug_log, "  START = 0x%lx\n", (long)CvSTART(sv));
 	PerlIO_printf(Perl_debug_log, "  ROOT = 0x%lx\n", (long)CvROOT(sv));

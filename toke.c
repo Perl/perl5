@@ -2010,7 +2010,9 @@ yylex()
 		    bufptr = s;
 		    return yylex();		/* ignore fake brackets */
 		}
-		if (*s != '[' && *s != '{' && (*s != '-' || s[1] != '>'))
+		if (*s == '-' && s[1] == '>')
+		    lex_state = LEX_INTERPENDMAYBE;
+		else if (*s != '[' && *s != '{')
 		    lex_state = LEX_INTERPEND;
 	    }
 	}
@@ -4350,8 +4352,13 @@ I32 ck_uni;
     }
     if (bracket) {
 	if (isSPACE(s[-1])) {
-	    while (s < send && (*s == ' ' || *s == '\t')) s++;
-	    *d = *s;
+	    while (s < send) {
+		char ch = *s++;
+		if (ch != ' ' && ch != '\t') {
+		    *d = ch;
+		    break;
+		}
+	    }
 	}
 	if (isIDFIRST(*d)) {
 	    d++;
@@ -5062,7 +5069,8 @@ set_csh()
 }
 
 int
-start_subparse()
+start_subparse(flags)
+U32 flags;
 {
     int oldsavestack_ix = savestack_ix;
     CV* outsidecv = compcv;
@@ -5084,7 +5092,8 @@ start_subparse()
     SAVEI32(pad_reset_pending);
 
     compcv = (CV*)NEWSV(1104,0);
-    sv_upgrade((SV *)compcv, SVt_PVCV);
+    sv_upgrade((SV *)compcv, (flags & CVf_FORMAT) ? SVt_PVFM : SVt_PVCV);
+    CvFLAGS(compcv) |= flags;
 
     comppad = newAV();
     comppad_name = newAV();

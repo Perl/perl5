@@ -420,7 +420,7 @@ char*	sharepvn _((char* sv, I32 len, U32 hash));
 HEK*	share_hek _((char* sv, I32 len, U32 hash));
 Signal_t sighandler _((int sig));
 SV**	stack_grow _((SV** sp, SV**p, int n));
-int	start_subparse _((void));
+int	start_subparse _((U32 flags));
 void	sub_crush_depth _((CV* cv));
 bool	sv_2bool _((SV* sv));
 CV*	sv_2cv _((SV* sv, HV** st, GV** gvp, I32 lref));

@@ -2894,7 +2894,7 @@ CV* outside;
     SAVESPTR(compcv);
 
     cv = compcv = (CV*)NEWSV(1104,0);
-    sv_upgrade((SV *)cv, SVt_PVCV);
+    sv_upgrade((SV *)cv, SvTYPE(proto));
     CvCLONED_on(cv);
     if (CvANON(proto))
 	CvANON_on(cv);
@@ -3310,7 +3310,6 @@ OP *block;
     CvSTART(cv) = LINKLIST(CvROOT(cv));
     CvROOT(cv)->op_next = 0;
     peep(CvSTART(cv));
-    FmLINES(cv) = 0;
     op_free(op);
     copline = NOLINE;
     LEAVE_SCOPE(floor);

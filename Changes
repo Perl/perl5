@@ -9,6 +9,82 @@ releases.)
 
 
 ----------------
+Version 5.003_22
+----------------
+
+This release is primarily made up of bug fixes, the foremost among
+which repairs a showstopper memory corruption bug in formats.
+
+ CORE LANGUAGE CHANGES
+
+  Title:  "Fix parsing of C< ${ xyz } >"
+   From:  Chip Salzenberg <chip@atlantic.net>
+  Files:  toke.c
+
+  Title:  "Don't parse method calls in strings"
+   From:  Chip Salzenberg <chip@atlantic.net>
+  Files:  toke.c
+
+  Title:  "Fix overly picky carping about leading '{' in regex"
+   From:  Chip Salzenberg <chip@atlantic.net>
+  Files:  regcomp.c
+
+ OTHER CORE CHANGES
+
+  Title:  "Fix memory corruption from formats"
+   From:  Chip Salzenberg <chip@atlantic.net>
+  Files:  op.c perl.c perly.c perly.c.diff perly.y proto.h sv.c toke.c
+
+ BUILD PROCESS
+
+  Title:  "Fix '_mopop' typo"
+   From:  Chip Salzenberg <chip@atlantic.net>
+  Files:  Makefile.SH
+
+ LIBRARY AND EXTENSIONS
+
+  Title:  "Gut IO::Handle::DESTROY"
+   From:  Chip Salzenberg <chip@atlantic.net>
+  Files:  ext/IO/lib/IO/Handle.pm
+
+  Title:  "RiscOS is case-insensitive"
+   From:  Chip Salzenberg <chip@atlantic.net>
+  Files:  lib/File/Basename.pm
+
+ TESTS
+
+  Title:  "Fix thinko in db-recno.t"
+   From:  Chip Salzenberg <chip@atlantic.net>
+  Files:  t/lib/db-recno.t
+
+ UTILITIES
+
+  Title:  "Make perlbug more cautionary and more verbose"
+   From:  Kenneth Albanowski and Jarkko Hietaniemi
+  Files:  utils/perlbug.PL
+
+ DOCUMENTATION
+
+  Title:  "NEW roffitall + INSTALL fix"
+   From:  Raphael Manfredi <Raphael_Manfredi@grenoble.hp.com>
+ Msg-ID:  <6058.853410121@lyon.grenoble.hp.com>
+   Date:  Thu, 16 Jan 97 11:22:01 +0100
+  Files:  INSTALL pod/roffitall
+
+  Title:  "srand() doc update"
+   From:  Roderick Schertler <roderick@gate.net>
+ Msg-ID:  <24195.853379065@eeyore.ibcinc.com>
+   Date:  Wed, 15 Jan 1997 20:44:25 -0500
+  Files:  pod/perlfunc.pod
+
+  Title:  "documentation of configpm (perl5.003_20)"
+   From:  win@in.rhein-main.de (Winfried Koenig)
+ Msg-ID:  <m0vkU40-0004WAC@incom.rhein-main.de>
+   Date:  Wed, 15 Jan 1997 14:03:27 +0200 (EET)
+  Files:  configpm
+
+
+----------------
 Version 5.003_21
 ----------------
 
