@@ -972,10 +972,14 @@ LD_PRELOAD, specifying the exact filename you wish to be used; and on
 Digital Unix, you can override LD_LIBRARY_PATH by setting the
 _RLD_ROOT environment variable to point to the perl build directory.
 
-The only reliable answer is that you should specify a different
-directory for the architecture-dependent library for your -DDEBUGGING
-version of perl.  You can do this by changing all the *archlib*
-variables in config.sh to point to your new architecture-dependent library.
+In other words, it is generally not a good idea to try to build a perl
+with a shared library if $archlib/CORE/$libperl already exists from a
+previous build.
+
+A good workaround is to specify a different directory for the
+architecture-dependent library for your -DDEBUGGING version of perl.
+You can do this by changing all the *archlib* variables in config.sh to
+point to your new architecture-dependent library.
 
 =head2 Malloc Issues
 
