@@ -1083,6 +1083,7 @@ t/op/inc.t		See if inc/dec of integers near 32 bit limit work
 t/op/index.t		See if index works
 t/op/int.t		See if int works
 t/op/join.t		See if join works
+t/op/lex_assign.t	See if ops involving lexicals or pad temps work
 t/op/list.t		See if array lists work
 t/op/local.t		See if local works
 t/op/magic.t		See if magic variables work

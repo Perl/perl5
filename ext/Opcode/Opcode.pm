@@ -130,7 +130,7 @@ Your mileage will vary. If in any doubt B<do not use it>.
 =head1 Operator Names and Operator Lists
 
 The canonical list of operator names is the contents of the array
-op_name defined and initialised in file F<opcode.h> of the Perl
+PL_op_name defined and initialised in file F<opcode.h> of the Perl
 source distribution (and installed into the perl library).
 
 Each operator has both a terse name (its opname) and a more verbose or

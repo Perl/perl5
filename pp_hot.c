@@ -202,7 +202,23 @@ PP(pp_padsv)
 
 PP(pp_readline)
 {
+    tryAMAGICunTARGET(iter, 0);
     PL_last_in_gv = (GV*)(*PL_stack_sp--);
+    if (PL_op->op_flags & OPf_SPECIAL) {	/* Are called as <$var> */
+	if (SvROK(PL_last_in_gv)) {
+	    if (SvTYPE(SvRV(PL_last_in_gv)) != SVt_PVGV) 
+		goto hard_way;
+	    PL_last_in_gv = (GV*)SvRV(PL_last_in_gv);
+	} else if (SvTYPE(PL_last_in_gv) != SVt_PVGV) {
+	  hard_way: {
+	    dSP;
+	    XPUSHs((SV*)PL_last_in_gv);
+	    PUTBACK;
+	    pp_rv2gv(ARGS);
+	    PL_last_in_gv = (GV*)(*PL_stack_sp--);
+	  }
+	}
+    }
     return do_readline();
 }
 
@@ -403,16 +419,18 @@ PP(pp_print)
 
 PP(pp_rv2av)
 {
-    djSP; dPOPss;
+    djSP; dTOPss;
     AV *av;
 
     if (SvROK(sv)) {
       wasref:
+	tryAMAGICunDEREF(to_av);
+
 	av = (AV*)SvRV(sv);
 	if (SvTYPE(av) != SVt_PVAV)
 	    DIE("Not an ARRAY reference");
 	if (PL_op->op_flags & OPf_REF) {
-	    PUSHs((SV*)av);
+	    SETs((SV*)av);
 	    RETURN;
 	}
     }
@@ -420,7 +438,7 @@ PP(pp_rv2av)
 	if (SvTYPE(sv) == SVt_PVAV) {
 	    av = (AV*)sv;
 	    if (PL_op->op_flags & OPf_REF) {
-		PUSHs((SV*)av);
+		SETs((SV*)av);
 		RETURN;
 	    }
 	}
@@ -441,9 +459,11 @@ PP(pp_rv2av)
 			DIE(PL_no_usym, "an ARRAY");
 		    if (ckWARN(WARN_UNINITIALIZED))
 			warner(WARN_UNINITIALIZED, PL_warn_uninit);
-		    if (GIMME == G_ARRAY)
+		    if (GIMME == G_ARRAY) {
+			POPs;
 			RETURN;
-		    RETPUSHUNDEF;
+		    }
+		    RETSETUNDEF;
 		}
 		sym = SvPV(sv,PL_na);
 		if (PL_op->op_private & HINT_STRICT_REFS)
@@ -456,7 +476,7 @@ PP(pp_rv2av)
 	    if (PL_op->op_private & OPpLVAL_INTRO)
 		av = save_ary(gv);
 	    if (PL_op->op_flags & OPf_REF) {
-		PUSHs((SV*)av);
+		SETs((SV*)av);
 		RETURN;
 	    }
 	}
@@ -464,6 +484,7 @@ PP(pp_rv2av)
 
     if (GIMME == G_ARRAY) {
 	I32 maxarg = AvFILL(av) + 1;
+	POPs;				/* XXXX May be optimized away? */
 	EXTEND(SP, maxarg);          
 	if (SvRMAGICAL(av)) {
 	    U32 i; 
@@ -480,7 +501,7 @@ PP(pp_rv2av)
     else {
 	dTARGET;
 	I32 maxarg = AvFILL(av) + 1;
-	PUSHi(maxarg);
+	SETi(maxarg);
     }
     RETURN;
 }
@@ -492,6 +513,8 @@ PP(pp_rv2hv)
 
     if (SvROK(sv)) {
       wasref:
+	tryAMAGICunDEREF(to_hv);
+
 	hv = (HV*)SvRV(sv);
 	if (SvTYPE(hv) != SVt_PVHV && SvTYPE(hv) != SVt_PVAV)
 	    DIE("Not a HASH reference");
@@ -2016,6 +2039,10 @@ PP(pp_entersub)
 	    cv = perl_get_cv(sym, TRUE);
 	    break;
 	}
+	{
+	    SV **sp = &sv;		/* Used in tryAMAGICunDEREF macro. */
+	    tryAMAGICunDEREF(to_cv);
+	}	
 	cv = (CV*)SvRV(sv);
 	if (SvTYPE(cv) == SVt_PVCV)
 	    break;

@@ -5643,16 +5643,16 @@ scan_inputsymbol(char *start)
 	    if ((tmp = pad_findmy(d)) != NOT_IN_PAD) {
 		OP *o = newOP(OP_PADSV, 0);
 		o->op_targ = tmp;
-		PL_lex_op = (OP*)newUNOP(OP_READLINE, 0, newUNOP(OP_RV2GV, 0, o));
+		PL_lex_op = (OP*)newUNOP(OP_READLINE, 0, o);
 	    }
 	    else {
 		GV *gv = gv_fetchpv(d+1,TRUE, SVt_PV);
 		PL_lex_op = (OP*)newUNOP(OP_READLINE, 0,
-					newUNOP(OP_RV2GV, 0,
 					    newUNOP(OP_RV2SV, 0,
-						newGVOP(OP_GV, 0, gv))));
+						newGVOP(OP_GV, 0, gv)));
 	    }
-	    /* we created the ops in lex_op, so make yylval.ival a null op */
+	    PL_lex_op->op_flags |= OPf_SPECIAL;
+	    /* we created the ops in PL_lex_op, so make yylval.ival a null op */
 	    yylval.ival = OP_NULL;
 	}
 

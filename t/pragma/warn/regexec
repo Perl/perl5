@@ -1,5 +1,9 @@
   regexec.c	
 
+  This test generates "bad free" warnings when run under
+  PERL_DESTRUCT_LEVEL.  This file merely serves as a placeholder
+  for investigation.
+
   Complex regular subexpression recursion limit (%d) exceeded
 
         $_ = 'a' x (2**15+1); /^()(a\1)*$/ ;
@@ -11,12 +15,11 @@
   REG_INFTY configuration variable value does not affect outcome.)
 __END__
 # regexec.c
+print("SKIPPED\n# most systems run into stacksize limits\n"),exit;
 use warning 'unsafe' ;
 $SIG{__WARN__} = sub{local ($m) = shift;
                  $m =~ s/\(\d+\)/(*MASKED*)/;
                  print STDERR $m};
-print("SKIPPED\n# win32 can't increase stacksize in shell\n"),exit
-    if $^O eq 'MSWin32';
 $_ = 'a' x (2**15+1); 
 /^()(a\1)*$/ ;
 #
@@ -38,12 +41,11 @@ EXPECT
 Complex regular subexpression recursion limit (*MASKED*) exceeded at - line 9.
 ########
 # regexec.c
+print("SKIPPED\n# most systems run into stacksize limits\n"),exit;
 use warning 'unsafe' ;
 $SIG{__WARN__} = sub{local ($m) = shift;
                  $m =~ s/\(\d+\)/(*MASKED*)/;
                  print STDERR $m};
-print("SKIPPED\n# win32 can't increase stacksize in shell\n"),exit
-    if $^O eq 'MSWin32';
 $_ = 'a' x (2**15+1);
 /^()(a\1)*?$/ ;
 #

@@ -1062,6 +1062,12 @@ sub B::GV::savecv {
 	    warn sprintf("saving extra CV &%s::%s (0x%x) from GV 0x%x\n",
 			 $gv->STASH->NAME, $name, $$cv, $$gv);
 	}
+      my $package=$gv->STASH->NAME;
+      if ( ! grep(/^$package$/,@unused_sub_packages)){
+          warn sprintf("omitting cv in superclass %s", $gv->STASH->NAME) 
+              if $debug_cv;
+          return ;
+      }
 	$gv->save;
     }
 }
@@ -1069,12 +1075,17 @@ sub B::GV::savecv {
 sub save_unused_subs {
     my %search_pack;
     map { $search_pack{$_} = 1 } @_;
+    @unused_sub_packages=@_;
     no strict qw(vars refs);
     walksymtable(\%{"main::"}, "savecv", sub {
 	my $package = shift;
 	$package =~ s/::$//;
 	#warn "Considering $package\n";#debug
 	return 1 if exists $search_pack{$package};
+      #sub try for a partial match
+      if (grep(/^$package\:\:/,@unused_sub_packages)){ 
+          return 1;   
+      }       
 	#warn "    (nothing explicit)\n";#debug
 	# Omit the packages which we use (and which cause grief
 	# because of fancy "goto &$AUTOLOAD" stuff).
@@ -1088,6 +1099,7 @@ sub save_unused_subs {
 	foreach $m (qw(new DESTROY TIESCALAR TIEARRAY TIEHASH)) {
 	    if (defined(&{$package."::$m"})) {
 		warn "$package has method $m: -u$package assumed\n";#debug
+              push @unused_sub_package, $package;
 		return 1;
 	    }
 	}

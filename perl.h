@@ -2472,7 +2472,44 @@ EXT MGVTBL PL_vtbl_amagicelem;
 
 #ifdef OVERLOAD
 
-#define NofAMmeth 58
+enum {
+  fallback_amg,        abs_amg,
+  bool__amg,   nomethod_amg,
+  string_amg,  numer_amg,
+  add_amg,     add_ass_amg,
+  subtr_amg,   subtr_ass_amg,
+  mult_amg,    mult_ass_amg,
+  div_amg,     div_ass_amg,
+  modulo_amg,  modulo_ass_amg,
+  pow_amg,     pow_ass_amg,
+  lshift_amg,  lshift_ass_amg,
+  rshift_amg,  rshift_ass_amg,
+  band_amg,    band_ass_amg,
+  bor_amg,     bor_ass_amg,
+  bxor_amg,    bxor_ass_amg,
+  lt_amg,      le_amg,
+  gt_amg,      ge_amg,
+  eq_amg,      ne_amg,
+  ncmp_amg,    scmp_amg,
+  slt_amg,     sle_amg,
+  sgt_amg,     sge_amg,
+  seq_amg,     sne_amg,
+  not_amg,     compl_amg,
+  inc_amg,     dec_amg,
+  atan2_amg,   cos_amg,
+  sin_amg,     exp_amg,
+  log_amg,     sqrt_amg,
+  repeat_amg,   repeat_ass_amg,
+  concat_amg,  concat_ass_amg,
+  copy_amg,    neg_amg,
+  to_sv_amg,   to_av_amg,
+  to_hv_amg,   to_gv_amg,
+  to_cv_amg,   iter_amg,    
+  max_amg_code,
+};
+
+#define NofAMmeth max_amg_code
+
 #ifdef DOINIT
 EXTCONST char * PL_AMG_names[NofAMmeth] = {
   "fallback",	"abs",			/* "fallback" should be the first. */
@@ -2503,7 +2540,10 @@ EXTCONST char * PL_AMG_names[NofAMmeth] = {
   "log",	"sqrt",
   "x",		"x=",
   ".",		".=",
-  "=",		"neg"
+  "=",		"neg",
+  "${}",	"@{}",
+  "%{}",	"*{}",
+  "&{}",	"<>",
 };
 #else
 EXTCONST char * PL_AMG_names[NofAMmeth];
@@ -2533,37 +2573,6 @@ typedef struct am_table_short AMTS;
 #define AMT_AMAGIC_on(amt)	((amt)->flags |= AMTf_AMAGIC)
 #define AMT_AMAGIC_off(amt)	((amt)->flags &= ~AMTf_AMAGIC)
 
-enum {
-  fallback_amg,	abs_amg,
-  bool__amg,	nomethod_amg,
-  string_amg,	numer_amg,
-  add_amg,	add_ass_amg,
-  subtr_amg,	subtr_ass_amg,
-  mult_amg,	mult_ass_amg,
-  div_amg,	div_ass_amg,
-  modulo_amg,	modulo_ass_amg,
-  pow_amg,	pow_ass_amg,
-  lshift_amg,	lshift_ass_amg,
-  rshift_amg,	rshift_ass_amg,
-  band_amg,	band_ass_amg,
-  bor_amg,	bor_ass_amg,
-  bxor_amg,	bxor_ass_amg,
-  lt_amg,	le_amg,
-  gt_amg,	ge_amg,
-  eq_amg,	ne_amg,
-  ncmp_amg,	scmp_amg,
-  slt_amg,	sle_amg,
-  sgt_amg,	sge_amg,
-  seq_amg,	sne_amg,
-  not_amg,	compl_amg,
-  inc_amg,	dec_amg,
-  atan2_amg,	cos_amg,
-  sin_amg,	exp_amg,
-  log_amg,	sqrt_amg,
-  repeat_amg,   repeat_ass_amg,
-  concat_amg,	concat_ass_amg,
-  copy_amg,	neg_amg
-};
 
 /*
  * some compilers like to redefine cos et alia as faster

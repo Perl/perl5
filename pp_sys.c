@@ -350,6 +350,8 @@ PP(pp_backtick)
 PP(pp_glob)
 {
     OP *result;
+    tryAMAGICunTARGET(iter, -1);
+
     ENTER;
 
 #ifndef VMS

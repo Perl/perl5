@@ -4047,6 +4047,10 @@ sv_2cv(SV *sv, HV **st, GV **gvp, I32 lref)
 	if (SvGMAGICAL(sv))
 	    mg_get(sv);
 	if (SvROK(sv)) {
+	    dTHR;
+	    SV **sp = &sv;		/* Used in tryAMAGICunDEREF macro. */
+	    tryAMAGICunDEREF(to_cv);
+
 	    cv = (CV*)SvRV(sv);
 	    if (SvTYPE(cv) != SVt_PVCV)
 		croak("Not a subroutine reference");

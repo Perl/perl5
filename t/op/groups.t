@@ -1,6 +1,6 @@
 #!./perl
 
-$ENV{PATH} = '/bin:/usr/bin:/usr/ucb:/usr/xpg4/bin';
+$ENV{PATH} = '/usr/xpg4/bin:/bin:/usr/bin:/usr/ucb';
 
 unless (($groups = `(id -Gn || groups) 2>/dev/null`) ne '') {
     print "1..0\n";

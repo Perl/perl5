@@ -1269,6 +1269,15 @@ amagic_call(SV *left, SV *right, int method, int flags)
 	     lr = 1;
 	   }
 	   break;
+	 case iter_amg:			/* XXXX Eventually should do to_gv. */
+	 case to_sv_amg:
+	 case to_av_amg:
+	 case to_hv_amg:
+	 case to_gv_amg:
+	 case to_cv_amg:
+	     /* FAIL safe */
+	     return NULL;	/* Delegate operation to standard mechanisms. */
+	     break;
 	 default:
 	   goto not_found;
 	 }

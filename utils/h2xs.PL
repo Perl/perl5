@@ -362,8 +362,8 @@ chdir($modpname) || die "Can't chdir $ext$modpname: $!\n";
 
 my %types_seen;
 my %std_types;
-my $fdecls;
-my $fdecls_parsed;
+my $fdecls = [];
+my $fdecls_parsed = [];
 
 if( ! $opt_X ){  # use XS, unless it was disabled
   open(XS, ">$modfname.xs") || die "Can't create $ext$modpname/$modfname.xs: $!\n";
@@ -374,22 +374,20 @@ if( ! $opt_X ){  # use XS, unless it was disabled
     get_typemap();
     my $c;
     my $filter;
-        my @fdecls;
-        foreach my $filename (@path_h) {
-    my $addflags = $opt_F || '';
-    if ($fullpath =~ /,/) {
-      $filename = $`;
-      $filter = $';
+    foreach my $filename (@path_h) {
+      my $addflags = $opt_F || '';
+      if ($fullpath =~ /,/) {
+	$filename = $`;
+	$filter = $';
+      }
+      warn "Scanning $filename for functions...\n";
+      $c = new C::Scan 'filename' => $filename, 'filename_filter' => $filter,
+	'add_cppflags' => $addflags;
+      $c->set('includeDirs' => ["$Config::Config{archlib}/CORE"]);
+      
+      push @$fdecls_parsed, @{ $c->get('parsed_fdecls') };
+      push(@$fdecls, @{$c->get('fdecls')});
     }
-    warn "Scanning $filename for functions...\n";
-    $c = new C::Scan 'filename' => $filename, 'filename_filter' => $filter,
-    'add_cppflags' => $addflags;
-    $c->set('includeDirs' => ["$Config::Config{archlib}/CORE"]);
-    
-    $fdecls_parsed = $c->get('parsed_fdecls');
-            push(@fdecls, @{$c->get('fdecls')});
-        }
-        $fdecls = [ @fdecls ];
   }
 }
 
