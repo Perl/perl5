@@ -50,6 +50,11 @@
 
 #include "XSUB.h"
 
+#ifdef __Lynx__
+/* Missing proto on LynxOS */
+int mkstemp(char*);
+#endif
+
 /* Call the callback or PerlIOBase, and return failure. */
 #define Perl_PerlIO_or_Base(f, callback, base, failure, args) 	\
 	if (PerlIOValid(f)) {					\

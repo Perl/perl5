@@ -176,6 +176,18 @@ static char zero_but_true[ZBTLEN + 1] = "0 but true";
 
 #include "reentr.h"
 
+#ifdef __Lynx__
+/* Missing protos on LynxOS */
+void sethostent(int);
+void endhostent(void);
+void setnetent(int);
+void endnetent(void);
+void setprotoent(int);
+void endprotoent(void);
+void setservent(int);
+void endservent(void);
+#endif
+
 #undef PERL_EFF_ACCESS_R_OK	/* EFFective uid/gid ACCESS R_OK */
 #undef PERL_EFF_ACCESS_W_OK
 #undef PERL_EFF_ACCESS_X_OK
