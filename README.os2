@@ -664,6 +664,12 @@ Possible locations to get this from are
   ftp://ftp.cdrom.com/pub/os2/dev32/
   ftp://ftp.cdrom.com/pub/os2/emx09c/
 
+It is reported that the following archives contain enough utils to
+build perl: gnufutil.zip, gnusutil.zip, gnututil.zip, gnused.zip,
+gnupatch.zip, gnuawk.zip, gnumake.zip and ksh527rt.zip.  Note that
+all these utilities are known to be available from LEO:
+
+  ftp://ftp.leo.org/pub/comp/os/os2/leo/gnu
 
 Make sure that no copies or perl are currently running.  Later steps
 of the build may fail since an older version of perl.dll loaded into
@@ -1306,7 +1312,11 @@ substituted with F<path2>.
 
 Should be used if the perl library is moved from the default
 location in preference to C<PERL(5)LIB>, since this would not leave wrong
-entries in <@INC>. 
+entries in @INC.  Say, if the compiled version of perl looks for @INC
+in F<f:/perllib/lib>, and you want to install the library in
+F<h:/opt/gnu>, do
+
+  set PERLLIB_PREFIX=f:/perllib/lib;h:/opt/gnu
 
 =head2 C<PERL_BADLANG>
 
