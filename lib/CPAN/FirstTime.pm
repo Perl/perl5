@@ -292,7 +292,7 @@ by ENTER.
     my(@path) = split /$Config{'path_sep'}/, $ENV{'PATH'};
     local $^W = $old_warn;
     my $progname;
-    for $progname (qw/gzip tar unzip make lynx wget ncftpget ncftp ftp/){
+    for $progname (qw/gzip tar unzip make lynx wget ncftpget ncftp ftp gpg/){
       if ($^O eq 'MacOS') {
           $CPAN::Config->{$progname} = 'not_here';
           next;

@@ -1,6 +1,6 @@
 # -*- Mode: cperl; coding: utf-8; cperl-indent-level: 4 -*-
 package CPAN;
-$VERSION = '1.74';
+$VERSION = '1.74_01';
 # $Id: CPAN.pm,v 1.409 2003/07/28 22:07:23 k Exp $
 
 # only used during development:
@@ -774,12 +774,15 @@ sub has_inst {
 });
 	sleep 2;
     } elsif ($mod eq "Module::Signature"){
-	$CPAN::Frontend->myprint(qq{
+	# No point in complaining unless the user can reasonably install it.
+	if (eval { require Crypt::OpenPGP; 1 } or
+	    defined $CPAN::Config->{'gpg'}) {
+	    $CPAN::Frontend->myprint(qq{
   CPAN: Module::Signature security checks disabled because Module::Signature
   not installed.  Please consider installing the Module::Signature module.
-
 });
-	sleep 2;
+	    sleep 2;
+	}
     } else {
 	delete $INC{$file}; # if it inc'd LWP but failed during, say, URI
     }
@@ -3667,12 +3670,13 @@ sub dir_listing {
 	File::Spec->catfile($CPAN::Config->{keep_source_where},
 			    "authors", "id", @$chksumfile);
 
-
     my $fh;
 
-    # purge and refetch old (pre-PGP) CHECKSUMS; they are a security hazard
+    # Purge and refetch old (pre-PGP) CHECKSUMS; they are a security
+    # hazard.  (Without GPG installed they are not that much better,
+    # though.)
     $fh = FileHandle->new;
-    if (open($fh, $lc_want)){
+    if (open($fh, $lc_want)) {
 	my $line = <$fh>; close $fh;
 	unlink($lc_want) unless $line =~ /PGP/;
     }
