@@ -1479,28 +1479,6 @@ lib/IPC/Open2.pm		Open a two-ended pipe
 lib/IPC/Open2.t			See if IPC::Open2 works
 lib/IPC/Open3.pm		Open a three-ended pipe!
 lib/IPC/Open3.t			See if IPC::Open3 works
-lib/IPC/Run/Debug.pm		IPC::Run
-lib/IPC/Run/IO.pm		IPC::Run
-lib/IPC/Run.pm			IPC::Run
-lib/IPC/Run/t/adopt.t		IPC::Run
-lib/IPC/Run/t/binmode.t		IPC::Run
-lib/IPC/Run/t/bogus.t		IPC::Run
-lib/IPC/Run/t/filter.t		IPC::Run
-lib/IPC/Run/t/harness.t		IPC::Run
-lib/IPC/Run/Timer.pm		IPC::Run
-lib/IPC/Run/t/io.t		IPC::Run
-lib/IPC/Run/t/kill_kill.t	IPC::Run
-lib/IPC/Run/t/parallel.t	IPC::Run
-lib/IPC/Run/t/pty.t		IPC::Run
-lib/IPC/Run/t/pump.t		IPC::Run
-lib/IPC/Run/t/run.t		IPC::Run
-lib/IPC/Run/t/signal.t		IPC::Run
-lib/IPC/Run/t/timeout.t		IPC::Run
-lib/IPC/Run/t/timer.t		IPC::Run
-lib/IPC/Run/t/win32_compile.t	IPC::Run
-lib/IPC/Run/Win32Helper.pm	IPC::Run
-lib/IPC/Run/Win32IO.pm		IPC::Run
-lib/IPC/Run/Win32Pump.pm	IPC::Run
 lib/less.pm			For "use less"
 lib/less.t			See if less support works
 lib/lib_pm.PL			For "use lib", produces lib/lib.pm
