@@ -5,7 +5,7 @@
 
 #define PERL_REVISION	5		/* age */
 #define PERL_VERSION	5		/* epoch */
-#define PERL_SUBVERSION	62		/* generation */
+#define PERL_SUBVERSION	63		/* generation */
 
 /* Compatibility across versions:  MakeMaker will install add-on
    modules in a directory with the PERL_APIVERSION version number.  
@@ -18,7 +18,7 @@
 
    See INSTALL for how this works.
 */
-#define PERL_APIVERSION 5.00562		/* Adjust manually as needed.  */
+#define PERL_APIVERSION 5.00563		/* Adjust manually as needed.  */
 
 #define __PATCHLEVEL_H_INCLUDED__
 #endif
