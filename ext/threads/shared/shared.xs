@@ -147,3 +147,269 @@ new(class, value)
         RETVAL
 
 
+MODULE = threads::shared		PACKAGE = threads::shared::av
+
+SV* 
+new(class, value)
+	SV* class
+	SV* value
+	CODE:
+	shared_sv* shared = Perl_sharedsv_new(aTHX);
+	SV* obj = newSViv((IV)shared);
+        SHAREDSvEDIT(shared);
+        SHAREDSvGET(shared) = (SV*) newAV();
+        SHAREDSvRELEASE(shared);
+        RETVAL = obj;
+        OUTPUT:
+        RETVAL
+
+void
+STORE(self, index, value)
+        SV* self
+	SV* index
+        SV* value
+        CODE:    
+        shared_sv* shared = (shared_sv*) SvIV(SvRV(self));
+        shared_sv* slot;
+        SV* aentry;
+	SV** aentry_;
+	SHAREDSvLOCK(shared);
+	aentry_ = av_fetch((AV*) SHAREDSvGET(shared), SvIV(index), 0);
+	if(aentry_ && SvIV((*aentry_))) {
+	    aentry = (*aentry_);
+            slot = (shared_sv*) SvIV(aentry);
+            if(SvROK(SHAREDSvGET(slot)))
+                Perl_sharedsv_thrcnt_dec(aTHX_ (shared_sv*) SvIV(SvRV(SHAREDSvGET(slot))));
+            SHAREDSvEDIT(slot);
+            sv_setsv(SHAREDSvGET(slot), value);
+            SHAREDSvRELEASE(slot);
+	} else {
+            slot = Perl_sharedsv_new(aTHX);
+            SHAREDSvEDIT(shared);
+            SHAREDSvGET(slot) = newSVsv(value);
+            aentry = newSViv((IV)slot);
+            av_store((AV*) SHAREDSvGET(shared), SvIV(index), aentry);
+            SHAREDSvRELEASE(shared);
+	}
+        SHAREDSvUNLOCK(shared);
+
+SV*
+FETCH(self, index)
+        SV* self
+	SV* index
+	CODE:
+	shared_sv* shared = (shared_sv*) SvIV(SvRV(self));
+	shared_sv* slot;
+	SV* aentry;
+	SV** aentry_;
+	SV* retval;
+	SHAREDSvLOCK(shared);
+ 	aentry_ = av_fetch((AV*) SHAREDSvGET(shared), SvIV(index),0);
+	if(aentry_) {
+	    aentry = (*aentry_);
+            if(SvTYPE(aentry) == SVt_NULL) {
+	        retval = &PL_sv_undef;
+	    } else {
+	        slot = (shared_sv*) SvIV(aentry);
+                retval = newSVsv(SHAREDSvGET(slot));
+            }
+	} else {
+	    retval = &PL_sv_undef;
+	}
+        SHAREDSvUNLOCK(shared);	
+        RETVAL = retval;
+        OUTPUT:
+        RETVAL
+
+void
+PUSH(self, ...)
+	SV* self
+	CODE:
+	shared_sv* shared = (shared_sv*) SvIV(SvRV(self));
+        int i;
+        SHAREDSvLOCK(shared);
+	for(i = 1; i < items; i++) {
+    	    shared_sv* slot = Perl_sharedsv_new(aTHX);
+	    SV* tmp = ST(i);
+            SHAREDSvEDIT(slot);
+	    SHAREDSvGET(slot) = newSVsv(tmp);
+	    av_push((AV*) SHAREDSvGET(shared), newSViv((IV)slot));	    
+	    SHAREDSvRELEASE(slot);
+	}
+        SHAREDSvUNLOCK(shared);
+
+void
+UNSHIFT(self, ...)
+	SV* self
+	CODE:
+	shared_sv* shared = (shared_sv*) SvIV(SvRV(self));
+        int i;
+        SHAREDSvLOCK(shared);
+	SHAREDSvEDIT(shared);
+	av_unshift((AV*)SHAREDSvGET(shared), items - 1);
+	SHAREDSvRELEASE(shared);
+	for(i = 1; i < items; i++) {
+    	    shared_sv* slot = Perl_sharedsv_new(aTHX);
+	    SV* tmp = ST(i);
+            SHAREDSvEDIT(slot);
+	    SHAREDSvGET(slot) = newSVsv(tmp);
+	    av_store((AV*) SHAREDSvGET(shared), i - 1, newSViv((IV)slot));
+	    SHAREDSvRELEASE(slot);
+	}
+        SHAREDSvUNLOCK(shared);
+
+SV*
+POP(self)
+	SV* self
+	CODE:
+	shared_sv* shared = (shared_sv*) SvIV(SvRV(self));
+	shared_sv* slot;
+	SV* retval;
+	SHAREDSvLOCK(shared);
+	SHAREDSvEDIT(shared);
+	retval = av_pop((AV*)SHAREDSvGET(shared));
+	SHAREDSvRELEASE(shared);
+	if(retval && SvIV(retval)) {
+	    slot = (shared_sv*) SvIV(retval);
+	    retval = newSVsv(SHAREDSvGET(slot));
+            Perl_sharedsv_thrcnt_dec(aTHX_ slot);
+	} else {
+            retval = &PL_sv_undef;
+	}
+	SHAREDSvUNLOCK(shared);
+	RETVAL = retval;
+	OUTPUT:
+	RETVAL
+
+
+SV*
+SHIFT(self)
+	SV* self
+	CODE:
+	shared_sv* shared = (shared_sv*) SvIV(SvRV(self));
+	shared_sv* slot;
+	SV* retval;
+	SHAREDSvLOCK(shared);
+	SHAREDSvEDIT(shared);
+	retval = av_shift((AV*)SHAREDSvGET(shared));
+	SHAREDSvRELEASE(shared);
+	if(retval && SvIV(retval)) {
+	    slot = (shared_sv*) SvIV(retval);
+	    retval = newSVsv(SHAREDSvGET(slot));
+            Perl_sharedsv_thrcnt_dec(aTHX_ slot);
+	} else {
+            retval = &PL_sv_undef;
+	}
+	SHAREDSvUNLOCK(shared);
+	RETVAL = retval;
+	OUTPUT:
+	RETVAL
+
+void
+CLEAR(self)
+	SV* self
+	CODE:
+	shared_sv* shared = (shared_sv*) SvIV(SvRV(self));
+	shared_sv* slot;
+	SV** svp;
+	I32 i;
+	SHAREDSvLOCK(shared);
+	svp = AvARRAY((AV*)SHAREDSvGET(shared));
+	i   = AvFILLp((AV*)SHAREDSvGET(shared));
+	while ( i >= 0) {
+	    if(SvIV(svp[i])) {
+	        Perl_sharedsv_thrcnt_dec(aTHX_ (shared_sv*) SvIV(svp[i]));
+	    }
+	    i--;
+	}
+	SHAREDSvEDIT(shared);
+	av_clear((AV*)SHAREDSvGET(shared));
+	SHAREDSvRELEASE(shared);
+	SHAREDSvUNLOCK(shared);
+	
+void
+EXTEND(self, count)
+	SV* self
+	SV* count
+	CODE:
+	shared_sv* shared = (shared_sv*) SvIV(SvRV(self));
+	SHAREDSvEDIT(shared);
+	av_extend((AV*)SHAREDSvGET(shared), (I32) SvIV(count));
+	SHAREDSvRELEASE(shared);
+
+
+
+
+SV*
+EXISTS(self, index)
+	SV* self
+	SV* index
+	CODE:
+	shared_sv* shared = (shared_sv*) SvIV(SvRV(self));
+	I32 exists;
+	SHAREDSvLOCK(shared);
+	exists = av_exists((AV*) SHAREDSvGET(shared), (I32) SvIV(index));
+	if(exists) {
+	    RETVAL = &PL_sv_yes;
+	} else {
+	    RETVAL = &PL_sv_no;
+	}
+	SHAREDSvUNLOCK(shared);
+
+void
+STORESIZE(self,count)
+	SV* self
+	SV* count
+	CODE:
+	shared_sv* shared = (shared_sv*) SvIV(SvRV(self));
+	SHAREDSvEDIT(shared);
+	av_fill((AV*) SHAREDSvGET(shared), (I32) SvIV(count));
+	SHAREDSvRELEASE(shared);
+
+SV*
+FETCHSIZE(self)
+	SV* self
+	CODE:
+	shared_sv* shared = (shared_sv*) SvIV(SvRV(self));
+	SHAREDSvLOCK(shared);
+	RETVAL = newSViv(av_len((AV*) SHAREDSvGET(shared)) + 1);
+	SHAREDSvUNLOCK(shared);
+	OUTPUT:
+	RETVAL
+
+SV*
+DELETE(self,index)
+	SV* self
+	SV* index
+	CODE:
+	shared_sv* shared = (shared_sv*) SvIV(SvRV(self));
+	shared_sv* slot;
+	SHAREDSvLOCK(shared);
+	if(av_exists((AV*) SHAREDSvGET(shared), (I32) SvIV(index))) {
+	    SV* tmp;
+	    SHAREDSvEDIT(shared);
+	    tmp = av_delete((AV*)SHAREDSvGET(shared), (I32) SvIV(index),0);
+	    SHAREDSvRELEASE(shared);
+	    if(SvIV(tmp)) {
+		slot = (shared_sv*) SvIV(tmp);
+		RETVAL = newSVsv(SHAREDSvGET(slot));
+                Perl_sharedsv_thrcnt_dec(aTHX_ slot);               
+	    } else {
+                RETVAL = &PL_sv_undef;
+	    }	    
+	} else {
+	    RETVAL = &PL_sv_undef;
+	}	
+	SHAREDSvUNLOCK(shared);
+	OUTPUT:
+	RETVAL
+
+AV*
+SPLICE(self, offset, length, ...)
+	SV* self
+	SV* offset
+	SV* length
+	CODE:
+	croak("Splice is not implmented for shared arrays");
+	
+

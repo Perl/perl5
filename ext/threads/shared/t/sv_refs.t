@@ -23,7 +23,7 @@ sub ok {
 use Devel::Peek;
 use ExtUtils::testlib;
 use strict;
-BEGIN { print "1..9\n" };
+BEGIN { print "1..10\n" };
 use threads;
 use threads::shared;
 ok(1,1,"loaded");
@@ -53,4 +53,10 @@ $baz = "original";
 $bar = \$baz;
 $foo = \$bar;
 ok(9,$$$foo eq 'original', "Check reference chain");
-
+my($t1,$t2);
+share($t1);
+share($t2);
+$t2 = "text";
+$t1 = \$t2;
+threads->create(sub { $t1 = "bar" })->join();
+ok(10,$t1 eq 'bar',"Check that assign to a ROK works");

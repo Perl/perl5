@@ -39,10 +39,12 @@ sub share_enabled (\[$@%]) { # \]
     my $value = $_[0];
     my $ref = reftype($value);
     if($ref eq 'SCALAR') {
-      my $obj = \threads::shared::sv->new($$value);
-      bless $obj, 'threads::shared::sv';
-      $shared{$$obj} = $value;
-      weaken($shared{$$obj});
+	my $obj = \threads::shared::sv->new($$value);
+	bless $obj, 'threads::shared::sv';
+	$shared{$$obj} = $value;
+	weaken($shared{$$obj});
+    } elsif($ref eq "ARRAY") {
+	tie @$value, 'threads::shared::av', $value;
     } else {
 	die "You cannot share ref of type $_[0]\n";
     }
@@ -57,11 +59,27 @@ sub CLONE {
 	}
 }
 
+sub DESTROY {
+    my $self = shift;
+    delete($shared{$$self});
+}
+
 package threads::shared::sv;
 use base 'threads::shared';
 
+sub DESTROY {}
+
 package threads::shared::av;
 use base 'threads::shared';
+use Scalar::Util qw(weaken);
+sub TIEARRAY {
+	my $class = shift;
+        my $value = shift;
+	my $self = bless \threads::shared::av->new($value),'threads::shared::av';
+	$shared{$self->ptr} = $value;
+	weaken($shared{$self->ptr});
+	return $self;
+}
 
 package threads::shared::hv;
 use base 'threads::shared';
@@ -79,9 +97,9 @@ threads::shared - Perl extension for sharing data structures between threads
   use threads::shared;
 
   my($foo, @foo, %foo);
-  share(\$foo);
-  share(\@foo);
-  share(\%hash);
+  share($foo);
+  share(@foo);
+  share(%hash);
   my $bar = share([]);
   $hash{bar} = share({});
 
@@ -104,15 +122,13 @@ share(), lock(), unlock(), cond_wait, cond_signal, cond_broadcast
 =head1 BUGS
 
 Not stress tested!
-Does not support references
 Does not support splice on arrays!
-The exported functions need a reference due to unsufficent prototyping!
 
 =head1 AUTHOR
 
-Artur Bergman E<lt>artur at contiller.seE<gt>
+Arthur Bergman E<lt>arthur at contiller.seE<gt>
 
-threads is released under the same license as Perl
+threads::shared is released under the same license as Perl
 
 =head1 SEE ALSO
 
