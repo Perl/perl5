@@ -3090,6 +3090,5 @@ ok("bbbbac" =~ /$pattern/ && $1 eq 'a', "[perl #3547]");
     ok( $1 ne "\xC4\x80", '$1 is not non-utf-8' );
 }
 
-# last test 984
-
+# last test 986
 
