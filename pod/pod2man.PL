@@ -927,10 +927,16 @@ while (<>) {
 	elsif ($Cmd eq 'over') {
 	    push(@indent,$indent);
 	    $indent += ($_ + 0) || 5;
+	    if ($#indent > 0) {
+		print ".RS ", $indent[$#indent] - $indent[$#indent - 1], "\n";
+	    }
 	}
 	elsif ($Cmd eq 'back') {
 	    $indent = pop(@indent);
 	    warn "$0: Unmatched =back in paragraph $. of $ARGV\n" unless defined $indent;
+	    if ($#indent >= 0) {
+		print ".RE\n";
+	    }
 	    $needspace = 1;
 	}
 	elsif ($Cmd eq 'item') {
@@ -940,7 +946,7 @@ while (<>) {
 	    s/\\\*\(L"([^"]+?)""/'$1'/g;
 	    s/[^"]""([^"]+?)""[^"]/'$1'/g;
 	    # here do something about the $" in perlvar?
-	    print STDOUT qq{.Ip "$_" $indent\n};
+	    print STDOUT qq{.Ip "$_" $indent-$indent[$#indent]\n};
       push(@Indices, qq{.IX Item "$_"\n});
 	}
 	elsif ($Cmd eq 'pod') {
