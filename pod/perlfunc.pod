@@ -682,9 +682,9 @@ On POSIX systems, you can detect this condition this way:
 
 Returns the character represented by that NUMBER in the character set.
 For example, C<chr(65)> is C<"A"> in either ASCII or Unicode, and
-chr(0x263a) is a Unicode smiley face. Within the scope of C<use utf8>,
-characters higher than 127 are encoded in Unicode; if you don't want
-this, temporarily C<use bytes> or use C<pack("C*",...)>
+chr(0x263a) is a Unicode smiley face.  Note that characters from
+127 to 255 (inclusive) are not encoded in Unicode for backward
+compatibility reasons.
 
 For the reverse, use L</ord>.
 See L<utf8> for more about Unicode.
@@ -2310,9 +2310,9 @@ C<redo> work.
 =item lc
 
 Returns an lowercased version of EXPR.  This is the internal function
-implementing the C<\L> escape in double-quoted strings.
-Respects current LC_CTYPE locale if C<use locale> in force.  See L<perllocale>
-and L<utf8>.
+implementing the C<\L> escape in double-quoted strings.  Respects
+current LC_CTYPE locale if C<use locale> in force.  See L<perllocale>
+and L<perlunicode>.
 
 If EXPR is omitted, uses C<$_>.
 
@@ -2320,9 +2320,10 @@ If EXPR is omitted, uses C<$_>.
 
 =item lcfirst
 
-Returns the value of EXPR with the first character lowercased.  This is
-the internal function implementing the C<\l> escape in double-quoted strings.
-Respects current LC_CTYPE locale if C<use locale> in force.  See L<perllocale>.
+Returns the value of EXPR with the first character lowercased.  This
+is the internal function implementing the C<\l> escape in
+double-quoted strings.  Respects current LC_CTYPE locale if C<use
+locale> in force.  See L<perllocale> and L<perlunicode>.
 
 If EXPR is omitted, uses C<$_>.
 
@@ -3080,8 +3081,8 @@ follows:
     P	A pointer to a structure (fixed-length string).
 
     u	A uuencoded string.
-    U	A Unicode character number.  Encodes to UTF-8 internally.
-	Works even if C<use utf8> is not in effect.
+    U	A Unicode character number.  Encodes to UTF-8 internally
+	(or UTF-EBCDIC in EBCDIC platforms).
 
     w	A BER compressed integer.  Its bytes represent an unsigned
 	integer in base 128, most significant digit first, with as
@@ -5367,10 +5368,11 @@ otherwise.
 =item uc
 
 Returns an uppercased version of EXPR.  This is the internal function
-implementing the C<\U> escape in double-quoted strings.
-Respects current LC_CTYPE locale if C<use locale> in force.  See L<perllocale>.
-Under Unicode (C<use utf8>) it uses the standard Unicode uppercase mappings.  (It
-does not attempt to do titlecase mapping on initial letters.  See C<ucfirst> for that.)
+implementing the C<\U> escape in double-quoted strings.  Respects
+current LC_CTYPE locale if C<use locale> in force.  See L<perllocale>
+and L<perlunicode>.  Under Unicode it uses the standard Unicode
+uppercase mappings.  (It does not attempt to do titlecase mapping on
+initial letters.  See C<ucfirst> for that.)
 
 If EXPR is omitted, uses C<$_>.
 
@@ -5378,11 +5380,10 @@ If EXPR is omitted, uses C<$_>.
 
 =item ucfirst
 
-Returns the value of EXPR with the first character
-in uppercase (titlecase in Unicode).  This is
-the internal function implementing the C<\u> escape in double-quoted strings.
-Respects current LC_CTYPE locale if C<use locale> in force.  See L<perllocale>
-and L<utf8>.
+Returns the value of EXPR with the first character in uppercase
+(titlecase in Unicode).  This is the internal function implementing
+the C<\u> escape in double-quoted strings.  Respects current LC_CTYPE
+locale if C<use locale> in force.  See L<perllocale> and L<perlunicode>.
 
 If EXPR is omitted, uses C<$_>.
 

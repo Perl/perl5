@@ -1647,13 +1647,18 @@ sequence of bytes (the old way) or as a sequence of Unicode characters
 than C<chr(127)> may be represented using the C<\x{hex}> notation,
 with C<hex> a hexadecimal integer:
 
-    use utf8;    # We will be doing Unicode processing
     /\x{263a}/;  # match a Unicode smiley face :)
 
 Unicode characters in the range of 128-255 use two hexadecimal digits
 with braces: C<\x{ab}>.  Note that this is different than C<\xab>,
-which is just a hexadecimal byte with no Unicode
-significance.
+which is just a hexadecimal byte with no Unicode significance.
+
+B<NOTE>: in perl 5.6.0 it used to be that one needed to say C<use utf8>
+to use any Unicode features.  This is no more the case: for almost all
+Unicode processing, the explicit C<utf8> pragma is not needed.
+(The only case where it matters is if your Perl script is in Unicode,
+that is, encoded in UTF-8/UTF-16/UTF-EBCDIC: then an explicit C<use utf8>
+is needed.)
 
 Figuring out the hexadecimal sequence of a Unicode character you want
 or deciphering someone else's hexadecimal Unicode regexp is about as
@@ -1664,14 +1669,11 @@ specified in the Unicode standard.  For instance, if we wanted to
 represent or match the astrological sign for the planet Mercury, we
 could use
 
-    use utf8;              # We will be doing Unicode processing
     use charnames ":full"; # use named chars with Unicode full names
     $x = "abc\N{MERCURY}def";
     $x =~ /\N{MERCURY}/;   # matches
 
 One can also use short names or restrict names to a certain alphabet:
-
-    use utf8;              # We will be doing Unicode processing
 
     use charnames ':full';
     print "\N{GREEK SMALL LETTER SIGMA} is called sigma.\n";
@@ -1693,7 +1695,6 @@ characters, but matching a single byte is required, we can use the C<\C>
 escape sequence.  C<\C> is a character class akin to C<.> except that
 it matches I<any> byte 0-255.  So
 
-    use utf8;              # We will be doing Unicode processing
     use charnames ":full"; # use named chars with Unicode full names
     $x = "a";
     $x =~ /\C/;  # matches 'a', eats one byte
@@ -1715,7 +1716,6 @@ the C<\P{name}> character class, which is the negation of the
 C<\p{name}> class.  For example, to match lower and uppercase
 characters,
 
-    use utf8;              # We will be doing Unicode processing
     use charnames ":full"; # use named chars with Unicode full names
     $x = "BOB";
     $x =~ /^\p{IsUpper}/;   # matches, uppercase char class
@@ -1788,7 +1788,6 @@ be used just like C<\d>, both inside and outside of character classes:
     /\s+[abc[:digit:]xyz]\s*/;  # match a,b,c,x,y,z, or a digit
     /^=item\s[:digit:]/;        # match '=item',
                                 # followed by a space and a digit
-    use utf8;
     use charnames ":full";
     /\s+[abc\p{IsDigit}xyz]\s+/;  # match a,b,c,x,y,z, or a digit
     /^=item\s\p{IsDigit}/;        # match '=item',

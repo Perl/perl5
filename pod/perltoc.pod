@@ -1992,7 +1992,7 @@ LC_NUMERIC, LC_TIME, LANG
 =item Important Caveats
 
 Input and Output Disciplines, Regular Expressions, C<use utf8> still needed
-to enable a few features
+to enable UTF-8/UTF-EBCDIC in scripts
 
 =item Byte and Character semantics
 
@@ -6003,6 +6003,50 @@ Source, Compiled Module Source, Perl Modules/Scripts
 
 =back
 
+=head2 perldos - Perl under DOS, W31, W95.
+
+=over 4
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+=over 4
+
+=item Prerequisites for Compiling Perl on DOS
+
+DJGPP, Pthreads
+
+=item Shortcomings of Perl under DOS
+
+=item Building Perl on DOS
+
+=item Testing Perl on DOS
+
+=item Installation of Perl on DOS
+
+=back
+
+=item BUILDING AND INSTALLING MODULES ON DOS
+
+=over 4
+
+=item Building Prerequisites for Perl on DOS
+
+=item Unpacking CPAN Modules on DOS
+
+=item Building Non-XS Modules on DOS
+
+=item Building XS Modules on DOS
+
+=back
+
+=item AUTHOR
+
+=item SEE ALSO
+
+=back
+
 =head2 perlepoc, README.epoc - Perl for EPOC
 
 =over 4
@@ -6870,6 +6914,48 @@ LIST, waitpid PID,FLAGS
 =item AUTHOR
 
 =item LAST UPDATE
+
+=back
+
+=head2 perlwin32 - Perl under Win32
+
+=over 4
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+=over 4
+
+=item Setting Up Perl on Win32
+
+Make, Command Shell, Borland C++, Microsoft Visual C++, Mingw32 with GCC
+
+=item Building
+
+=item Testing Perl on Win32
+
+=item Installation of Perl on Win32
+
+=item Usage Hints for Perl on Win32
+
+Environment Variables, File Globbing, Using perl from the command line,
+Building Extensions, Command-line Wildcard Expansion, Win32 Specific
+Extensions, Running Perl Scripts, Miscellaneous Things
+
+=back
+
+=item BUGS AND CAVEATS
+
+=item AUTHORS
+
+Gary Ng E<lt>71564.1743@CompuServe.COME<gt>, Gurusamy Sarathy
+E<lt>gsar@activestate.comE<gt>, Nick Ing-Simmons
+E<lt>nick@ing-simmons.netE<gt>
+
+=item SEE ALSO
+
+=item HISTORY
 
 =back
 
