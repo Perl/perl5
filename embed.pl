@@ -1130,6 +1130,8 @@ sub docout ($$$) { # output the docs for one function
     my($fh, $name, $docref) = @_;
     my($flags, $docs, $ret, $file, @args) = @$docref;
 
+    $docs .= "NOTE: this function is experimental and may change or be
+removed without notice.\n\n" if $flags =~ /x/;
     $docs .= "NOTE: the perl_ form of this function is deprecated.\n\n" 
 	if $flags =~ /p/;
 
@@ -1169,6 +1171,7 @@ walk_table {	# load documented functions into approriate hash
 	if ($flags =~ /A/) {
 	    my $docref = delete $docfuncs{$func};
 	    warn "no docs for $func\n" unless $docref and @$docref;
+        $docref->[0].="x" if $flags =~ /M/;
 	    $apidocs{$func} = [$docref->[0] . 'A', $docref->[1], $retval,
 			       $docref->[3], @args];
 	} else {
@@ -1302,6 +1305,7 @@ __END__
 :       o		has no compatibility macro (#define foo Perl_foo)
 :       j		not a member of CPerlObj
 :       x		not exported
+:       M		may change
 :
 : Individual flags may be separated by whitespace.
 :
@@ -1966,7 +1970,7 @@ Ap	|NV	|sv_nv		|SV* sv
 Ap	|char*	|sv_pvn		|SV *sv|STRLEN *len
 Ap	|char*	|sv_pvutf8n	|SV *sv|STRLEN *len
 Ap	|char*	|sv_pvbyten	|SV *sv|STRLEN *len
-Ap	|I32	|sv_true	|SV *sv
+Apd	|I32	|sv_true	|SV *sv
 p	|void	|sv_add_arena	|char* ptr|U32 size|U32 flags
 Ap	|int	|sv_backoff	|SV* sv
 Apd	|SV*	|sv_bless	|SV* sv|HV* stash
@@ -1978,9 +1982,9 @@ Apd	|void	|sv_catsv	|SV* dsv|SV* ssv
 Apd	|void	|sv_chop	|SV* sv|char* ptr
 p	|void	|sv_clean_all
 p	|void	|sv_clean_objs
-Ap	|void	|sv_clear	|SV* sv
+Apd	|void	|sv_clear	|SV* sv
 Apd	|I32	|sv_cmp		|SV* sv1|SV* sv2
-Ap	|I32	|sv_cmp_locale	|SV* sv1|SV* sv2
+Apd	|I32	|sv_cmp_locale	|SV* sv1|SV* sv2
 #if defined(USE_LOCALE_COLLATE)
 Ap	|char*	|sv_collxfrm	|SV* sv|STRLEN* nxp
 #endif
@@ -1989,9 +1993,9 @@ Apd	|void	|sv_dec		|SV* sv
 Ap	|void	|sv_dump	|SV* sv
 Apd	|bool	|sv_derived_from|SV* sv|const char* name
 Apd	|I32	|sv_eq		|SV* sv1|SV* sv2
-Ap	|void	|sv_free	|SV* sv
+Apd	|void	|sv_free	|SV* sv
 p	|void	|sv_free_arenas
-Ap	|char*	|sv_gets	|SV* sv|PerlIO* fp|I32 append
+Apd	|char*	|sv_gets	|SV* sv|PerlIO* fp|I32 append
 Apd	|char*	|sv_grow	|SV* sv|STRLEN newlen
 Apd	|void	|sv_inc		|SV* sv
 Apd	|void	|sv_insert	|SV* bigsv|STRLEN offset|STRLEN len \
@@ -1999,7 +2003,7 @@ Apd	|void	|sv_insert	|SV* bigsv|STRLEN offset|STRLEN len \
 Apd	|int	|sv_isa		|SV* sv|const char* name
 Apd	|int	|sv_isobject	|SV* sv
 Apd	|STRLEN	|sv_len		|SV* sv
-Ap	|STRLEN	|sv_len_utf8	|SV* sv
+Apd	|STRLEN	|sv_len_utf8	|SV* sv
 Apd	|void	|sv_magic	|SV* sv|SV* obj|int how|const char* name \
 				|I32 namlen
 Apd	|SV*	|sv_mortalcopy	|SV* oldsv
@@ -2008,11 +2012,11 @@ Ap	|SV*	|sv_newref	|SV* sv
 Ap	|char*	|sv_peek	|SV* sv
 Ap	|void	|sv_pos_u2b	|SV* sv|I32* offsetp|I32* lenp
 Ap	|void	|sv_pos_b2u	|SV* sv|I32* offsetp
-Ap	|char*	|sv_pvn_force	|SV* sv|STRLEN* lp
-Ap	|char*	|sv_pvutf8n_force|SV* sv|STRLEN* lp
+Apd	|char*	|sv_pvn_force	|SV* sv|STRLEN* lp
+Apd	|char*	|sv_pvutf8n_force|SV* sv|STRLEN* lp
 Ap	|char*	|sv_pvbyten_force|SV* sv|STRLEN* lp
-Ap	|char*	|sv_reftype	|SV* sv|int ob
-Ap	|void	|sv_replace	|SV* sv|SV* nsv
+Apd	|char*	|sv_reftype	|SV* sv|int ob
+Apd	|void	|sv_replace	|SV* sv|SV* nsv
 Ap	|void	|sv_report_used
 Ap	|void	|sv_reset	|char* s|HV* stash
 Afpd	|void	|sv_setpvf	|SV* sv|const char* pat|...
@@ -2031,7 +2035,7 @@ Apd	|void	|sv_setpvn	|SV* sv|const char* ptr|STRLEN len
 Apd	|void	|sv_setsv	|SV* dsv|SV* ssv
 Ap	|void	|sv_taint	|SV* sv
 Ap	|bool	|sv_tainted	|SV* sv
-Ap	|int	|sv_unmagic	|SV* sv|int type
+Apd	|int	|sv_unmagic	|SV* sv|int type
 Apd	|void	|sv_unref	|SV* sv
 Ap	|void	|sv_untaint	|SV* sv
 Apd	|bool	|sv_upgrade	|SV* sv|U32 mt
@@ -2064,8 +2068,8 @@ Ap	|U8*	|utf16_to_utf8	|U16* p|U8 *d|I32 bytelen
 Ap	|U8*	|utf16_to_utf8_reversed|U16* p|U8 *d|I32 bytelen
 Ap	|I32	|utf8_distance	|U8 *a|U8 *b
 Ap	|U8*	|utf8_hop	|U8 *s|I32 off
-Ap	|U8*	|utf8_to_bytes	|U8 *s|STRLEN len
-Ap	|U8*	|bytes_to_utf8	|U8 *s|STRLEN *len
+ApM	|U8*	|utf8_to_bytes	|U8 *s|STRLEN len
+ApM	|U8*	|bytes_to_utf8	|U8 *s|STRLEN *len
 Ap	|UV	|utf8_to_uv	|U8 *s|I32* retlen
 Ap	|U8*	|uv_to_utf8	|U8 *d|UV uv
 p	|void	|vivify_defelem	|SV* sv
@@ -2153,13 +2157,13 @@ Ap	|char*	|sv_2pvbyte_nolen|SV* sv
 Ap	|char*	|sv_pv		|SV *sv
 Ap	|char*	|sv_pvutf8	|SV *sv
 Ap	|char*	|sv_pvbyte	|SV *sv
-Ap      |void   |sv_utf8_upgrade|SV *sv
-Ap      |bool   |sv_utf8_downgrade|SV *sv|bool fail_ok
-Ap      |void   |sv_utf8_encode |SV *sv
+Apd      |void   |sv_utf8_upgrade|SV *sv
+ApdM      |bool   |sv_utf8_downgrade|SV *sv|bool fail_ok
+ApdM      |void   |sv_utf8_encode |SV *sv
 Ap      |bool   |sv_utf8_decode |SV *sv
 Ap	|void	|sv_force_normal|SV *sv
 Ap	|void	|tmps_grow	|I32 n
-Ap	|SV*	|sv_rvweaken	|SV *sv
+Apd	|SV*	|sv_rvweaken	|SV *sv
 p	|int	|magic_killbackrefs|SV *sv|MAGIC *mg
 Ap	|OP*	|newANONATTRSUB	|I32 floor|OP *proto|OP *attrs|OP *block
 Ap	|CV*	|newATTRSUB	|I32 floor|OP *o|OP *proto|OP *attrs|OP *block

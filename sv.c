@@ -2390,6 +2390,14 @@ Perl_sv_2bool(pTHX_ register SV *sv)
     }
 }
 
+/*
+=for apidoc sv_utf8_upgrade
+
+Convert the PV of an SV to its UTF8-encoded form.
+
+=cut
+*/
+
 void
 Perl_sv_utf8_upgrade(pTHX_ register SV *sv)
 {
@@ -2430,6 +2438,17 @@ Perl_sv_utf8_upgrade(pTHX_ register SV *sv)
 	SvUTF8_on(sv);
     }
 }
+
+/*
+=for apidoc sv_utf8_downgrade
+
+Attempt to convert the PV of an SV from UTF8-encoded to byte encoding.
+This may not be possible if the PV contains non-byte encoding characters;
+if this is the case, either returns false or, if C<fail_ok> is not
+true, croaks.
+
+=cut
+*/
 
 bool
 Perl_sv_utf8_downgrade(pTHX_ register SV* sv, bool fail_ok)
@@ -2479,6 +2498,15 @@ Perl_sv_utf8_downgrade(pTHX_ register SV* sv, bool fail_ok)
     }
     return TRUE;
 }
+
+/*
+=for apidoc sv_utf8_encode
+
+Convert the PV of an SV to UTF8-encoded, but then turn off the C<SvUTF8>
+flag so that it looks like bytes again. Nothing calls this. 
+
+=cut
+*/
 
 void
 Perl_sv_utf8_encode(pTHX_ register SV *sv)
@@ -3451,6 +3479,14 @@ Perl_sv_magic(pTHX_ register SV *sv, SV *obj, int how, const char *name, I32 nam
 	SvFLAGS(sv) &= ~(SVf_IOK|SVf_NOK|SVf_POK);
 }
 
+/*
+=for apidoc sv_unmagic
+
+Removes magic from an SV.
+
+=cut
+*/
+
 int
 Perl_sv_unmagic(pTHX_ SV *sv, int type)
 {
@@ -3484,6 +3520,14 @@ Perl_sv_unmagic(pTHX_ SV *sv, int type)
 
     return 0;
 }
+
+/*
+=for apidoc sv_rvweaken
+
+Weaken a reference.
+
+=cut
+*/
 
 SV *
 Perl_sv_rvweaken(pTHX_ SV *sv)
@@ -3636,7 +3680,13 @@ Perl_sv_insert(pTHX_ SV *bigstr, STRLEN offset, STRLEN len, char *little, STRLEN
     SvSETMAGIC(bigstr);
 }
 
-/* make sv point to what nstr did */
+/*
+=for apidoc sv_replace
+
+Make the first argument a copy of the second, then delete the original.
+
+=cut
+*/
 
 void
 Perl_sv_replace(pTHX_ register SV *sv, register SV *nsv)
@@ -3664,6 +3714,15 @@ Perl_sv_replace(pTHX_ register SV *sv, register SV *nsv)
     SvFLAGS(nsv) |= SVTYPEMASK;		/* Mark as freed */
     del_SV(nsv);
 }
+
+/*
+=for apidoc sv_clear
+
+Clear an SV, making it empty. Does not free the memory used by the SV
+itself.
+
+=cut
+*/
 
 void
 Perl_sv_clear(pTHX_ register SV *sv)
@@ -3858,6 +3917,14 @@ Perl_sv_newref(pTHX_ SV *sv)
     return sv;
 }
 
+/*
+=for apidoc sv_free
+
+Free the memory used by an SV.
+
+=cut
+*/
+
 void
 Perl_sv_free(pTHX_ SV *sv)
 {
@@ -3925,6 +3992,15 @@ Perl_sv_len(pTHX_ register SV *sv)
 	junk = SvPV(sv, len);
     return len;
 }
+
+/*
+=for apidoc sv_len_utf8
+
+Returns the number of characters in the string in an SV, counting wide
+UTF8 bytes as a single character.
+
+=cut
+*/
 
 STRLEN
 Perl_sv_len_utf8(pTHX_ register SV *sv)
@@ -4121,6 +4197,15 @@ Perl_sv_cmp(pTHX_ register SV *str1, register SV *str2)
 	return cur1 < cur2 ? -1 : 1;
 }
 
+/*
+=for apidoc sv_cmp_locale
+
+Compares the strings in two SVs in a locale-aware manner. See
+L</sv_cmp_locale>
+
+=cut
+*/
+
 I32
 Perl_sv_cmp_locale(pTHX_ register SV *sv1, register SV *sv2)
 {
@@ -4221,6 +4306,15 @@ Perl_sv_collxfrm(pTHX_ SV *sv, STRLEN *nxp)
 }
 
 #endif /* USE_LOCALE_COLLATE */
+
+/*
+=for apidoc sv_gets
+
+Get a line from the filehandle and store it into the SV, optionally
+appending to the currently-stored string.
+
+=cut
+*/
 
 char *
 Perl_sv_gets(pTHX_ register SV *sv, register PerlIO *fp, I32 append)
@@ -5128,6 +5222,14 @@ Perl_sv_2cv(pTHX_ SV *sv, HV **st, GV **gvp, I32 lref)
     }
 }
 
+/*
+=for apidoc sv_true
+
+Returns true if the SV has a true value by Perl's rules.
+
+=cut
+*/
+
 I32
 Perl_sv_true(pTHX_ register SV *sv)
 {
@@ -5206,6 +5308,14 @@ Perl_sv_pvn(pTHX_ SV *sv, STRLEN *lp)
     return sv_2pv(sv, lp);
 }
 
+/*
+=for apidoc sv_pvn_force
+
+Get a sensible string out of the SV somehow.
+
+=cut
+*/
+
 char *
 Perl_sv_pvn_force(pTHX_ SV *sv, STRLEN *lp)
 {
@@ -5278,12 +5388,29 @@ Perl_sv_pvutf8n(pTHX_ SV *sv, STRLEN *lp)
     return sv_pvn(sv,lp);
 }
 
+/*
+=for apidoc sv_pvutf8n_force
+
+Get a sensible UTF8-encoded string out of the SV somehow. See
+L</sv_pvn_force>.
+
+=cut
+*/
+
 char *
 Perl_sv_pvutf8n_force(pTHX_ SV *sv, STRLEN *lp)
 {
     sv_utf8_upgrade(sv);
     return sv_pvn_force(sv,lp);
 }
+
+/*
+=for apidoc sv_reftype
+
+Returns a string describing what the SV is a reference to.
+
+=cut
+*/
 
 char *
 Perl_sv_reftype(pTHX_ SV *sv, int ob)
