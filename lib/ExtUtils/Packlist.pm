@@ -200,7 +200,7 @@ filename followed by the key=value pairs from the hash.  Reading back the
 
 =head1 FUNCTIONS
 
-=over
+=over 4
 
 =item new()
 

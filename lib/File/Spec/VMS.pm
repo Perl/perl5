@@ -26,7 +26,7 @@ See File::Spec::Unix for a documentation of the methods provided
 there. This package overrides the implementation of these methods, not
 the semantics.
 
-=over
+=over 4
 
 =item eliminate_macros
 
@@ -138,7 +138,7 @@ sub fixpath {
 
 =head2 Methods always loaded
 
-=over
+=over 4
 
 =item canonpath (override)
 

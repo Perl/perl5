@@ -325,16 +325,16 @@ and C<join> can all produce a C<"Useless use of xxx in void context">
 warning.
 
     use warnings ;
- 
+
     time ;
- 
+
     {
         use warnings FATAL => qw(void) ;
         length "abc" ;
     }
- 
+
     join "", 1,2,3 ;
- 
+
     print "done\n" ;     
 
 When run it produces this output

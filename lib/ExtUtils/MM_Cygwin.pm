@@ -103,7 +103,7 @@ ExtUtils::MM_Cygwin - methods to override UN*X behaviour in ExtUtils::MakeMaker
 
 See ExtUtils::MM_Unix for a documentation of the methods provided there.
 
-=over
+=over 4
 
 =item canonpath
 

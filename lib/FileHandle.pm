@@ -225,7 +225,7 @@ supported C<FileHandle> methods:
 
 Furthermore, for doing normal I/O you might need these:
 
-=over 
+=over 4
 
 =item $fh->print
 

@@ -56,7 +56,7 @@ be imported individually, and with the C<:crlf> export tag:
 
 In addition, some structure manipulation functions are available:
 
-=over
+=over 4
 
 =item inet_aton HOSTNAME
 

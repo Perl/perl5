@@ -31,7 +31,7 @@ C<attrs::get> on a subroutine reference or name returns its list
 of attribute names. Notice that C<attrs::get> is not exported.
 Valid attributes are as follows.
 
-=over
+=over 4
 
 =item method
 

@@ -1,3 +1,11 @@
+
+# Call.pm
+#
+# Copyright (c) 1995-2001 Paul Marquess. All rights reserved.
+#
+# This program is free software; you can redistribute it and/or
+# modify it under the same terms as Perl itself.
+ 
 package Filter::Util::Call ;
 
 require 5.002 ;
@@ -58,13 +66,16 @@ __END__
 Filter::Util::Call - Perl Source Filter Utility Module
 
 =head1 SYNOPSIS
- 
+
     use Filter::Util::Call ;
 
 =head1 DESCRIPTION
 
 This module provides you with the framework to write I<Source Filters>
-in Perl.
+in Perl. 
+
+An alternate interface to Filter::Util::Call is now available. See
+L<Filter::Simple> for more details.
 
 A I<Perl Source Filter> is implemented as a Perl module. The structure
 of the module can take one of two broadly similar formats. To
@@ -74,7 +85,7 @@ filter> and the second as I<closure filter>.
 Here is a skeleton for the I<method filter>:
 
     package MyFilter ;
-    
+
     use Filter::Util::Call ;
 
     sub import
@@ -82,28 +93,28 @@ Here is a skeleton for the I<method filter>:
         my($type, @arguments) = @_ ;
         filter_add([]) ;
     }
-    
+
     sub filter
     {
         my($self) = @_ ;
         my($status) ;
-    
+
         $status = filter_read() ;
         $status ;
     }
-    
+
     1 ;
 
 and this is the equivalent skeleton for the I<closure filter>:
 
     package MyFilter ;
-    
+
     use Filter::Util::Call ;
 
     sub import
     {
         my($type, @arguments) = @_ ;
-    
+
         filter_add(
             sub 
             {
@@ -112,7 +123,7 @@ and this is the equivalent skeleton for the I<closure filter>:
                 $status ;
             } )
     }
-    
+
     1 ;
 
 To make use of either of the two filter modules above, place the line
@@ -293,26 +304,26 @@ occurrences of the string C<"Joe"> to C<"Jim">. Not particularly
 Useful, but it is the first example and I wanted to keep it simple.
 
     package Joe2Jim ;
-    
+
     use Filter::Util::Call ;
 
     sub import
     {
         my($type) = @_ ;
-    
+
         filter_add(bless []) ;
     }
-    
+
     sub filter
     {
         my($self) = @_ ;
         my($status) ;
-    
+
         s/Joe/Jim/g
             if ($status = filter_read()) > 0 ;
         $status ;
     }
-    
+
     1 ;
 
 Here is an example of using the filter:
@@ -333,10 +344,10 @@ I<closure filter>. To reflect its enhanced role, the filter is called
 C<Subst>.
 
     package Subst ;
- 
+
     use Filter::Util::Call ;
     use Carp ;
- 
+
     sub import
     {
         croak("usage: use Subst qw(from to)")
@@ -371,14 +382,14 @@ will print a count of the number of substitutions actually made.
 Note that C<$status> is set to C<1> in this case.
 
     package Count ;
- 
+
     use Filter::Util::Call ;
- 
+
     sub filter
     {
         my ($self) = @_ ;
         my ($status) ;
- 
+
         if (($status = filter_read()) > 0 ) {
             s/Joe/Jim/g ;
 	    ++ $$self ;
@@ -391,14 +402,14 @@ Note that C<$status> is set to C<1> in this case.
 
         $status ;
     }
- 
+
     sub import
     {
         my ($self) = @_ ;
         my ($count) = 0 ;
         filter_add(\$count) ;
     }
- 
+
     1 ;
 
 Here is a script which uses it:
@@ -429,39 +440,51 @@ When used as a filter we want to invoke it like this:
 Here is the module.
 
     package NewSubst ;
- 
+
     use Filter::Util::Call ;
     use Carp ;
- 
+
     sub import
     {
         my ($self, $start, $stop, $from, $to) = @_ ;
         my ($found) = 0 ;
         croak("usage: use Subst qw(start stop from to)")
             unless @_ == 5 ;
- 
+
         filter_add( 
             sub 
             {
                 my ($status) ;
-             
+
                 if (($status = filter_read()) > 0) {
-             
+
                     $found = 1
                         if $found == 0 and /$start/ ;
-             
+
                     if ($found) {
                         s/$from/$to/ ;
                         filter_del() if /$stop/ ;
                     }
-             
+
                 }
                 $status ;
             } )
-    
+
     }
-     
+
     1 ;
+
+=head1 Filter::Simple
+
+If you intend using the Filter::Call functionality, I would strongly
+recommend that you check out Damian Conway's excellent Filter::Simple
+module. This module provides a much cleaner interface than
+Filter::Util::Call. Although it doesn't allow the fine control that
+Filter::Util::Call does, it should be adequate for the majority of
+applications. It's available at
+
+   http://www.cpan.org/modules/by-author/Damian_Conway/Filter-Simple.tar.gz
+   http://www.csse.monash.edu.au/~damian/CPAN/Filter-Simple.tar.gz
 
 =head1 AUTHOR
 

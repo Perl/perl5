@@ -172,6 +172,8 @@ IPC::Semaphore - SysV Semaphore IPC object class
 
 =head1 DESCRIPTION
 
+A class providing an object based interface to SysV IPC semaphores.
+
 =head1 METHODS
 
 =over 4

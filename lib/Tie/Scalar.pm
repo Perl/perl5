@@ -47,7 +47,7 @@ For developers wishing to write their own tied-scalar classes, the methods
 are summarized below. The L<perltie> section not only documents these, but
 has sample code as well:
 
-=over
+=over 4
 
 =item TIESCALAR classname, LIST
 

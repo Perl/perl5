@@ -126,6 +126,8 @@ IPC::Msg - SysV Msg IPC object class
 
 =head1 DESCRIPTION
 
+A class providing an object based interface to SysV IPC message queues.
+
 =head1 METHODS
 
 =over 4

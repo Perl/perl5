@@ -1,3 +1,21 @@
+Thu Mar 15 01:22:32 MET 2001   Raphael Manfredi <Raphael_Manfredi@pobox.com>
+
+. Description:
+
+	Last version was wrongly compiling with assertions on, due
+	to an edit glitch.  That did not cause any problem (apart from
+	a slight performance loss) excepted on Win* platforms, where the
+	assertion code does not compile.
+
+Sat Feb 17 13:37:37 MET 2001   Raphael Manfredi <Raphael_Manfredi@pobox.com>
+
+. Description:
+
+	Version 1.0.10.
+
+	Forgot to increase version number at previous patch (there were
+	two of them, which is why we jump from 1.0.8 to 1.0.10).
+
 Sat Feb 17 13:35:00 MET 2001   Raphael Manfredi <Raphael_Manfredi@pobox.com>
 
 . Description:
@@ -75,6 +93,20 @@ Thu Oct 26 19:14:38 MEST 2000   Raphael Manfredi <Raphael_Manfredi@pobox.com>
 
 	Just check $^O, in t/lock.t: there's no need to pull the whole
 	Config module for that.
+
+Mon Oct 23 20:03:49 MEST 2000   Raphael Manfredi <Raphael_Manfredi@pobox.com>
+
+. Description:
+
+	Version 1.0.4.
+
+	Protected calls to flock() for DOS platform: apparently, the
+	flock/fcnlt emulation is reported to be broken on that
+	platform.
+
+	Added logcarp emulation if they don't have Log::Agent, since
+	we now use it to carp when lock_store/lock_retrieve is used
+	on DOS.
 
 Fri Sep 29 21:52:29 MEST 2000   Raphael Manfredi <Raphael_Manfredi@pobox.com>
 

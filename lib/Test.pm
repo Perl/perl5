@@ -151,7 +151,7 @@ __END__
 
 =head1 NAME
 
-  Test - provides a simple framework for writing test scripts
+Test - provides a simple framework for writing test scripts
 
 =head1 SYNOPSIS
 

@@ -592,7 +592,6 @@ __END__
 
 Data::Dumper - stringified perl data structures, suitable for both printing and C<eval>
 
-
 =head1 SYNOPSIS
 
     use Data::Dumper;

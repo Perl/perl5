@@ -34,7 +34,7 @@ Uses the value of a previous getpos call to return to a previously visited
 position. Returns "0 but true" on success, C<undef> on failure.
 
 =back
-  
+
 See L<perlfunc> for complete descriptions of each of the following
 supported C<IO::Seekable> methods, which are just front ends for the
 corresponding built-in functions:
@@ -80,7 +80,7 @@ of zero is returned as the string C<"0 but true">
 Returns the IO::File's current position, or -1 on error.
 
 =back
-  
+
 =head1 SEE ALSO
 
 L<perlfunc>, 

@@ -418,7 +418,7 @@ EOF
     print CONFIG <<EOF;
 =head2 $c
 
-=over
+=over 4
 
 EOF
     $text = 1;

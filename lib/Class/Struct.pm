@@ -361,7 +361,7 @@ optionally preceded by a C<'*'>.
 The accessor method provided by C<struct> for an element depends
 on the declared type of the element.
 
-=over
+=over 4
 
 =item Scalar (C<'$'> or C<'*$'>)
 
@@ -437,7 +437,7 @@ See Example 3 below for an example of initialization.
 
 =head1 EXAMPLES
 
-=over
+=over 4
 
 =item Example 1
 

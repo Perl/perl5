@@ -2303,8 +2303,8 @@ Look around, Check it's new, Discuss the need, Choose a name, Check again
 =item Step-by-step: Making the module
 
 Start with F<h2xs>, Use L<strict|strict> and L<warnings|warnings>, Use
-L<Carp|Carp>, Use L<Exporter|Exporter> - wisely!, Use L<plain old
-documentation|perlpod>, Write tests, Write the README
+L<Carp|Carp>, Use L<Exporter|Exporter> - wisely!,
+Use L<plain old documentation|perlpod>, Write tests, Write the README
 
 =item Step-by-step: Distributing your module
 

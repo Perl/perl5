@@ -95,7 +95,7 @@ would yield
     $dir  eq 'Doc_Root:[Help]'
     $type eq '.Rnh'
 
-=over
+=over 4
 
 =item C<basename>
 

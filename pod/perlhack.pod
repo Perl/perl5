@@ -1241,7 +1241,7 @@ Run the program with the given arguments.
 =item break source.c:xxx
 
 Tells the debugger that we'll want to pause execution when we reach
-either the named function (but see L</Function names>!) or the given
+either the named function (but see L<perlguts/Internal Functions>!) or the given
 line in the named source file.
 
 =item step
@@ -1299,7 +1299,7 @@ C<+> operator:
     (gdb) break Perl_pp_add
     Breakpoint 1 at 0x46249f: file pp_hot.c, line 309.
 
-Notice we use C<Perl_pp_add> and not C<pp_add> - see L<perlguts/Function Names>.
+Notice we use C<Perl_pp_add> and not C<pp_add> - see L<perlguts/Internal Functions>.
 With the breakpoint in place, we can run our program:
 
     (gdb) run -e '$b = "6XXXX"; $c = 2.3; $a = $b + $c'

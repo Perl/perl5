@@ -41,7 +41,7 @@ the semantics.
 
 =head2 Methods always loaded
 
-=over
+=over 4
 
 =item wraplist
 
@@ -173,7 +173,7 @@ For overridden methods, documentation is limited to an explanation
 of why this method overrides the MM_Unix method; see the ExtUtils::MM_Unix
 documentation for more details.
 
-=over
+=over 4
 
 =item guess_name (override)
 

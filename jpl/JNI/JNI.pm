@@ -269,6 +269,8 @@ JNI - Perl encapsulation of the Java Native Interface
 
 =head1 DESCRIPTION
 
+This module provides an encapsulation in Perl of the Java Native Interface.
+
 =head1 Exported constants
 
   JNI_ABORT

@@ -295,7 +295,7 @@ ccdlflags(), xsi_header(), xsi_protos(), xsi_body()
 
 =head1 FUNCTIONS
 
-=over
+=over 4
 
 =item xsinit()
 

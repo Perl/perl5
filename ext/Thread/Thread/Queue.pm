@@ -59,7 +59,7 @@ before checking to make sure that it stays in a consistent state)
 =head1 SEE ALSO
 
 L<Thread>
-  
+
 =cut
 
 sub new {

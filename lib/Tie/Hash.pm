@@ -10,24 +10,24 @@ Tie::Hash, Tie::StdHash - base class definitions for tied hashes
 
     package NewHash;
     require Tie::Hash;
-    
+
     @ISA = (Tie::Hash);
-    
+
     sub DELETE { ... }		# Provides needed method
     sub CLEAR { ... }		# Overrides inherited method
-    
-    
+
+
     package NewStdHash;
     require Tie::Hash;
-    
+
     @ISA = (Tie::StdHash);
-    
+
     # All methods provided by default, define only those needing overrides
     sub DELETE { ... }
-    
-    
+
+
     package main;
-    
+
     tie %new_hash, 'NewHash';
     tie %new_std_hash, 'NewStdHash';
 
@@ -46,7 +46,7 @@ For developers wishing to write their own tied hashes, the required methods
 are briefly defined below. See the L<perltie> section for more detailed
 descriptive, as well as example code:
 
-=over
+=over 4
 
 =item TIEHASH classname, LIST
 

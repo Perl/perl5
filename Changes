@@ -32,6 +32,340 @@ Version v5.7.1		Development release working toward v5.8
 --------------
 
 ____________________________________________________________________________
+[  9171] By: jhi                                   on 2001/03/15  15:09:32
+        Log: Subject: Re: Another Borland C++ problem.
+             From: "Vadim Konovalov" <watman@inbox.ru>
+             Date: Sat, 10 Mar 2001 19:26:07 +0300
+             Message-ID: <001601c0a97f$143fcc40$da7b55c2@vad>
+             
+             Borland filename case problem.
+     Branch: perl
+	   + win32/sncfnmcs.pl
+	   ! MANIFEST README.win32
+____________________________________________________________________________
+[  9170] By: jhi                                   on 2001/03/15  14:54:23
+        Log: Add Locale::Codes 1.06, from Neil Bowers.
+     Branch: perl
+	   + lib/Locale/Constants.pm lib/Locale/Country.pm
+	   + lib/Locale/Currency.pm lib/Locale/Language.pm t/lib/lc-all.t
+	   + t/lib/lc-constants.t t/lib/lc-country.t t/lib/lc-currency.t
+	   + t/lib/lc-language.t t/lib/lc-uk.t
+	   ! MANIFEST
+____________________________________________________________________________
+[  9169] By: jhi                                   on 2001/03/15  14:19:01
+        Log: Upgrade to Storable 1.0.11, from Raphael Manfredi.
+     Branch: perl
+	   ! ext/Storable/ChangeLog ext/Storable/Storable.pm
+	   ! ext/Storable/Storable.xs
+____________________________________________________________________________
+[  9168] By: jhi                                   on 2001/03/15  14:13:22
+        Log: Integrate changes #9120,9167 from mainline to maintperl.
+             
+             Subject: [PATCH 5.6.1] OS/2 docs
+             
+             Subject: [PATCH 5.6.1] perldoc
+     Branch: maint-5.6/perl
+	  !> os2/Changes utils/perldoc.PL
+____________________________________________________________________________
+[  9167] By: jhi                                   on 2001/03/15  14:07:42
+        Log: Subject: [PATCH 5.6.1] perldoc
+             From: Ilya Zakharevich <ilya@math.ohio-state.edu>
+             Date: Wed, 14 Mar 2001 23:46:52 -0500
+             Message-ID: <20010314234652.A7972@math.ohio-state.edu>
+     Branch: perl
+	   ! utils/perldoc.PL
+____________________________________________________________________________
+[  9166] By: jhi                                   on 2001/03/15  13:53:15
+        Log: sigaction test condition tweakage.
+     Branch: perl
+	   ! t/lib/sigaction.t
+____________________________________________________________________________
+[  9165] By: alanbur                               on 2001/03/15  03:49:17
+        Log: Resynchronised with parent
+     Branch: maint-5.6/pureperl
+	  +> os2/os2add.sym t/op/anonsub.t
+	  !> (integrate 72 files)
+____________________________________________________________________________
+[  9164] By: jhi                                   on 2001/03/15  01:05:01
+        Log: Avoid stomping off the beginning of an array in tr///.
+     Branch: perl
+	   ! op.c
+____________________________________________________________________________
+[  9163] By: jhi                                   on 2001/03/15  00:58:57
+        Log: h2ph strictness and cleanliness from Kurt Starsinic.
+     Branch: perl
+	   ! utils/h2ph.PL
+____________________________________________________________________________
+[  9162] By: gsar                                  on 2001/03/15  00:56:53
+        Log: avoid warnings
+     Branch: maint-5.6/perl
+	   ! t/op/magic.t
+____________________________________________________________________________
+[  9161] By: gsar                                  on 2001/03/15  00:52:09
+        Log: clearing of $ENV{PERL_DESTRUCT_LEVEL} interferes with purify
+             results
+     Branch: maint-5.6/perl
+	   ! t/op/magic.t
+____________________________________________________________________________
+[  9160] By: jhi                                   on 2001/03/14  22:02:10
+        Log: Do not use the Perl malloc in IRIX, suggested by
+             Helmus Jarausch.
+     Branch: perl
+	   ! hints/irix_6.sh
+____________________________________________________________________________
+[  9159] By: nick                                  on 2001/03/14  21:45:59
+        Log: Integrate mainline
+     Branch: perlio
+	  +> t/op/loopctl.t
+	  !> (integrate 41 files)
+____________________________________________________________________________
+[  9158] By: jhi                                   on 2001/03/14  21:10:09
+        Log: The Day of the Retractions continues: the #9138
+             (integrated in #9144) doesn't work well in mainline.
+     Branch: perl
+	   ! t/comp/proto.t t/op/lex_assign.t t/op/local.t t/op/pat.t
+	   ! t/op/regexp.t t/pragma/strict-vars t/pragma/warn/op
+	   ! t/pragma/warn/regcomp t/pragma/warn/toke t/pragma/warnings.t
+____________________________________________________________________________
+[  9157] By: jhi                                   on 2001/03/14  20:58:12
+        Log: The #9145 CANNOT be enabled: the clear_pmop code still
+             dumps core all over in Tru64.
+     Branch: perl
+	   ! op.c op.h t/op/pat.t
+____________________________________________________________________________
+[  9156] By: jhi                                   on 2001/03/14  20:48:06
+        Log: Integrate change #9154 from maintperl to mainline.
+             
+             PerlIO_stdoutf() wasn't properly supported under PERL_IMPLICIT_SYS
+             (caused Storable 1.0.10 to break on windows)
+     Branch: perl
+	  !> embed.h embed.pl global.sym globals.c iperlsys.h objXSUB.h
+	  !> perlapi.c proto.h
+____________________________________________________________________________
+[  9155] By: jhi                                   on 2001/03/14  20:23:53
+        Log: Retract #9136: breaks threading (and binary compatibility).
+     Branch: perl
+	   ! ext/DynaLoader/dl_aix.xs hints/aix.sh makedef.pl
+____________________________________________________________________________
+[  9154] By: gsar                                  on 2001/03/14  17:48:18
+        Log: PerlIO_stdoutf() wasn't properly supported under PERL_IMPLICIT_SYS
+             (caused Storable 1.0.10 to break on windows)
+     Branch: maint-5.6/perl
+	   ! embed.h embed.pl global.sym globals.c iperlsys.h objXSUB.h
+	   ! perlapi.c proto.h
+____________________________________________________________________________
+[  9153] By: jhi                                   on 2001/03/14  13:35:21
+        Log: Tweaked a tweak from H.Merijn Brand on the sigaction test.
+     Branch: perl
+	   ! t/lib/sigaction.t
+____________________________________________________________________________
+[  9152] By: gsar                                  on 2001/03/14  07:29:40
+        Log: back out changes#9012,9010,9009 and parts of change#9016
+             (causes ABRs under purify, and some prerequisites don't
+             seem to be there in 5.6.x)
+     Branch: maint-5.6/perl
+	   ! doop.c op.c t/op/tr.t toke.c
+____________________________________________________________________________
+[  9151] By: gsar                                  on 2001/03/14  07:01:29
+        Log: reenable change#9145 (the test was busted due to a missing
+             C<print "ok 27\n">)
+     Branch: perl
+	   ! op.c op.h t/op/pat.t
+____________________________________________________________________________
+[  9150] By: jhi                                   on 2001/03/14  06:38:36
+        Log: Retract #9145.
+     Branch: perl
+	   ! op.c op.h t/op/pat.t
+____________________________________________________________________________
+[  9149] By: jhi                                   on 2001/03/14  06:14:56
+        Log: Retract #9143.
+     Branch: perl
+	   ! op.c
+____________________________________________________________________________
+[  9148] By: gsar                                  on 2001/03/14  06:13:02
+        Log: Uninitialized Memory Read in regexec.c
+     Branch: perl
+	   ! regexec.c
+____________________________________________________________________________
+[  9147] By: jhi                                   on 2001/03/14  04:59:54
+        Log: Subject: PATCH: make goto work in nested eval ""
+             From: Robin Houston <robin@kitsite.com>
+             Date: Wed, 14 Mar 2001 04:16:10 +0000
+             Message-ID: <20010314041610.A16307@puffinry.freeserve.co.uk>
+     Branch: perl
+	   ! pp_ctl.c t/op/goto.t
+____________________________________________________________________________
+[  9146] By: jhi                                   on 2001/03/14  04:42:54
+        Log: Preserve the #ifdef PERL_CORE in perly.h.
+     Branch: perl
+	   ! perly.fixer
+____________________________________________________________________________
+[  9145] By: jhi                                   on 2001/03/14  03:57:41
+        Log: (Retracted by #9150.)
+     Branch: perl
+	   ! op.c op.h t/op/pat.t
+____________________________________________________________________________
+[  9144] By: jhi                                   on 2001/03/14  03:50:38
+        Log: Integrate changes #9137,9138,9142 from maintperl into mainline.
+             
+             fix leak in pregcomp() when RE fails to compile (e.g. m/\\/)
+             
+             remove squelch controls for "Scalars leaked" messages in most places
+             (these are now cured)
+             
+             fix another memory leak reported by purify (tie callbacks that
+             croak can leak when wiping out magic)
+     Branch: perl
+	  !> regcomp.c scope.c t/comp/proto.t t/op/lex_assign.t
+	  !> t/op/local.t t/op/pat.t t/op/regexp.t t/pragma/strict-vars
+	  !> t/pragma/warn/op t/pragma/warn/regcomp t/pragma/warn/toke
+	  !> t/pragma/warnings.t
+____________________________________________________________________________
+[  9143] By: jhi                                   on 2001/03/14  03:37:53
+        Log: (Retracted by #9149.)
+     Branch: perl
+	   ! op.c
+____________________________________________________________________________
+[  9142] By: gsar                                  on 2001/03/14  03:20:48
+        Log: fix another memory leak reported by purify (tie callbacks that
+             croak can leak when wiping out magic)
+     Branch: maint-5.6/perl
+	   ! scope.c
+____________________________________________________________________________
+[  9141] By: jhi                                   on 2001/03/14  02:55:00
+        Log: Subject: PATCH for [ID 20010305.003]
+             From: Robin Houston <robin@kitsite.com>
+             Date: Wed, 14 Mar 2001 02:45:51 +0000
+             Message-ID: <20010314024551.A16207@puffinry.freeserve.co.uk>
+     Branch: perl
+	   ! pp_ctl.c t/op/eval.t
+____________________________________________________________________________
+[  9140] By: jhi                                   on 2001/03/14  02:41:54
+        Log: Subject: Re: [ID 20010309.004] my-variables lose values while goto'ing within a for(;;)-loop
+             Date: Wed, 14 Mar 2001 01:52:51 +0000
+             From: Robin Houston <robin@kitsite.com>
+             Message-ID: <20010314015251.B16112@puffinry.freeserve.co.uk>
+             
+             Fix for 2000313.004.
+     Branch: perl
+	   ! pp_ctl.c t/op/goto.t
+____________________________________________________________________________
+[  9139] By: jhi                                   on 2001/03/14  02:40:50
+        Log: Subject: Re: [ID 20010309.004] my-variables lose values while goto'ing within a for(;;)-loop
+             From: Robin Houston <robin@kitsite.com>
+             Date: Wed, 14 Mar 2001 00:43:45 +0000
+             Message-ID: <20010314004345.A15892@puffinry.freeserve.co.uk>
+     Branch: perl
+	   + t/op/loopctl.t
+	   ! AUTHORS MANIFEST perly.c perly.y perly_c.diff t/op/goto.t
+	   ! vms/perly_c.vms
+____________________________________________________________________________
+[  9138] By: gsar                                  on 2001/03/14  01:18:00
+        Log: remove squelch controls for "Scalars leaked" messages in most places
+             (these are now cured)
+     Branch: maint-5.6/perl
+	   ! t/comp/proto.t t/op/lex_assign.t t/op/local.t t/op/pat.t
+	   ! t/op/regexp.t t/pragma/strict-vars t/pragma/warn/op
+	   ! t/pragma/warn/regcomp t/pragma/warn/toke t/pragma/warnings.t
+____________________________________________________________________________
+[  9137] By: gsar                                  on 2001/03/14  00:57:04
+        Log: fix leak in pregcomp() when RE fails to compile (e.g. m/\\/)
+     Branch: maint-5.6/perl
+	   ! regcomp.c
+____________________________________________________________________________
+[  9136] By: jhi                                   on 2001/03/13  23:12:24
+        Log: (Retracted by #9155)
+             
+             Subject: Re: [gsar@ActiveState.com: v5.6.1 trial2 is available]
+             From: Jens-Uwe Mager <jum@helios.de>
+             Date: Wed, 21 Feb 2001 21:32:04 +0100
+             Message-ID: <20010221213203.A18340@ans.helios.de>
+     Branch: perl
+	   ! ext/DynaLoader/dl_aix.xs hints/aix.sh makedef.pl
+____________________________________________________________________________
+[  9135] By: jhi                                   on 2001/03/13  22:50:05
+        Log: Integrate perlio.
+     Branch: perl
+	  !> pp.c
+____________________________________________________________________________
+[  9134] By: jhi                                   on 2001/03/13  22:49:05
+        Log: Integrate change #9131 from maintperl into mainline.
+             
+             make the error text look more consistent in hints/hpux.sh
+     Branch: perl
+	  !> hints/hpux.sh
+____________________________________________________________________________
+[  9133] By: gsar                                  on 2001/03/13  22:46:20
+        Log: integrate change#9067 from mainline
+             
+             Re: [PATCH: 5.6.1 trial2] DynaLoading for OS/390 build option
+     Branch: maint-5.6/perl
+	  !> lib/ExtUtils/MM_Unix.pm
+____________________________________________________________________________
+[  9132] By: jhi                                   on 2001/03/13  22:41:21
+        Log: Subject:  Re: [ID 20010309.004] my-variables lose values while goto'ing within a for(;;)-loop
+             From: "John P. Linderman" <jpl@research.att.com>
+             Date: Tue, 13 Mar 2001 12:36:32 -0500 (EST)
+             Message-Id: <200103131736.MAA35615@raptor.research.att.com>
+             
+             A more correct prime finder.
+     Branch: perl
+	   ! lib/Tie/SubstrHash.pm
+____________________________________________________________________________
+[  9131] By: gsar                                  on 2001/03/13  22:30:42
+        Log: make the error text look more consistent in hints/hpux.sh
+     Branch: maint-5.6/perl
+	   ! hints/hpux.sh
+____________________________________________________________________________
+[  9130] By: jhi                                   on 2001/03/13  22:23:44
+        Log: Subject: Re: 9122 and sigaction/switch on HP-UX 11.00
+             From: "H.Merijn Brand" <h.m.brand@hccnet.nl>
+             Date: Tue, 13 Mar 2001 18:41:26 +0100
+             Message-Id: <20010313184043.BFFC.H.M.BRAND@hccnet.nl>
+             
+             If the test is run non-interactively the default handler
+             is different.
+     Branch: perl
+	   ! t/lib/sigaction.t
+____________________________________________________________________________
+[  9129] By: jhi                                   on 2001/03/13  22:20:21
+        Log: Subject:  [PATCH perl@9125] t/lib/1_compile.t  VMS mod
+             From: lane@DUPHY4.Physics.Drexel.Edu (Charles Lane)
+             Message-Id: <010313164414.d1225@DUPHY4.Physics.Drexel.Edu>
+             Date:     Tue, 13 Mar 2001 16:44:32 EST
+     Branch: perl
+	   ! t/lib/1_compile.t
+____________________________________________________________________________
+[  9128] By: jhi                                   on 2001/03/13  22:18:34
+        Log: Subject: Another patch for integer.pm POD 
+             From: "John L. Allen" <allen@grumman.com>
+             Date: Tue, 13 Mar 2001 16:14:02 -0500 (EST)
+             Message-ID: <Pine.SOL.3.91.1010313160755.1630A-100000@gateway.grumman.com>
+     Branch: perl
+	   ! lib/integer.pm
+____________________________________________________________________________
+[  9127] By: nick                                  on 2001/03/13  21:26:30
+        Log: Integrate mainline.
+     Branch: perlio
+	  +> lib/Switch.pm lib/Text/Balanced.pm lib/Text/Balanced.pod
+	  +> t/lib/switch.t t/lib/tb-genxt.t t/lib/tb-xbrak.t
+	  +> t/lib/tb-xcode.t t/lib/tb-xdeli.t t/lib/tb-xmult.t
+	  +> t/lib/tb-xquot.t t/lib/tb-xtagg.t t/lib/tb-xvari.t
+	  !> Changes Configure MANIFEST README.os2 README.os390
+	  !> ext/re/Makefile.PL hints/aix.sh hints/os390.sh lib/integer.pm
+	  !> os2/Changes patchlevel.h win32/perlhost.h
+____________________________________________________________________________
+[  9126] By: nick                                  on 2001/03/13  20:39:51
+        Log: #ifdef'ed out code to make packed side of pack/unpack
+             octets. (i.e. pack('U') => encode_utf8).
+     Branch: perlio
+	   ! pp.c
+____________________________________________________________________________
+[  9125] By: jhi                                   on 2001/03/13  15:07:16
+        Log: Update Changes.
+     Branch: perl
+	   ! Changes patchlevel.h
+____________________________________________________________________________
 [  9124] By: jhi                                   on 2001/03/13  14:22:45
         Log: Workaround for the buggy ("internal compiler error")
              AIX C compiler 5.0.1.0: skip the optimization for regcomp.c
