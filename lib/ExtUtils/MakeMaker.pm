@@ -2,10 +2,10 @@ BEGIN {require 5.002;} # MakeMaker 5.17 was the last MakeMaker that was compatib
 
 package ExtUtils::MakeMaker;
 
-$Version = $VERSION = "5.34";
+$Version = $VERSION = "5.36";
 $Version_OK = "5.17";	# Makefiles older than $Version_OK will die
 			# (Will be checked from MakeMaker version 4.13 onwards)
-($Revision = substr(q$Revision: 1.202 $, 10)) =~ s/\s+$//;
+($Revision = substr(q$Revision: 1.206 $, 10)) =~ s/\s+$//;
 
 
 
@@ -152,7 +152,9 @@ sub ExtUtils::MakeMaker::WriteMakefile ;
 sub ExtUtils::MakeMaker::prompt ;
 
 1;
-#__DATA__
+
+__DATA__
+
 package ExtUtils::MakeMaker;
 
 sub WriteMakefile {
@@ -297,7 +299,7 @@ sub full_setup {
     @Get_from_Config = 
 	qw(
 	   ar cc cccdlflags ccdlflags dlext dlsrc ld lddlflags ldflags libc
-	   lib_ext obj_ext ranlib sitelibexp sitearchexp so
+	   lib_ext mab obj_ext ranlib sitelibexp sitearchexp so
 	  );
 
     my $item;
@@ -411,14 +413,14 @@ sub ExtUtils::MakeMaker::new {
 	$self->{Correct_relativ_directories}=0;
     }
 
-    my $class = ++$PACKNAME;
+    my $newclass = ++$PACKNAME;
     {
 #	no strict;
-	print "Blessing Object into class [$class]\n" if $Verbose>=2;
-	mv_all_methods("MY",$class);
-	bless $self, $class;
+	print "Blessing Object into class [$newclass]\n" if $Verbose>=2;
+	mv_all_methods("MY",$newclass);
+	bless $self, $newclass;
 	push @Parent, $self;
-	@{"$class\:\:ISA"} = 'MM';
+	@{"$newclass\:\:ISA"} = 'MM';
     }
 
     if (defined $Parent[-2]){
@@ -430,7 +432,7 @@ sub ExtUtils::MakeMaker::new {
 	    $self->{$key} = $self->catdir("..",$self->{$key})
 		unless $self->file_name_is_absolute($self->{$key});
 	}
-	$self->{PARENT}->{CHILDREN}->{$class} = $self if $self->{PARENT};
+	$self->{PARENT}->{CHILDREN}->{$newclass} = $self if $self->{PARENT};
     } else {
 	parse_args($self,@ARGV);
     }
