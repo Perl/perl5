@@ -833,6 +833,7 @@ lib/Term/ReadLine.pm	Stub readline library
 lib/Test.pm		A simple framework for writing test scripts
 lib/Test/Harness.pm	A test harness
 lib/Text/Abbrev.pm	An abbreviation table builder
+lib/Text/Abbrev/t/abbrev.t	Text::Abbrev
 lib/Text/Balanced.pm	Text::Balanced
 lib/Text/Balanced.pod	Text::Balanced
 lib/Text/ParseWords.pm	Perl module to split words on arbitrary delimiter
@@ -1291,8 +1292,8 @@ perly.c			A byacc'ed perly.y
 perly.fixer		A program to remove yacc stack limitations
 perly.h			The header file for perly.c
 perly.y			Yacc grammar for perl
-perlyline.pl		Perl code to fix #line directives and gcc warnings in perly.c
 perly_c.diff		Fixup perly.c to allow recursion
+perlyline.pl		Perl code to fix #line directives and gcc warnings in perly.c
 plan9/aperl		Shell to make Perl error messages Acme-friendly
 plan9/arpa/inet.h	Plan9 port: replacement C header file
 plan9/buildinfo		Plan9 port: configuration information
@@ -2012,8 +2013,8 @@ win32/vdir.h		Perl "host" virtual directory manager
 win32/vmem.h		Perl "host" memory manager
 win32/win32.c		Win32 port
 win32/win32.h		Win32 port
-win32/win32iop.h	Win32 port
 win32/win32io.c		Win32 PerlIO layer support
+win32/win32iop.h	Win32 port
 win32/win32sck.c	Win32 port
 win32/win32thread.c	Win32 functions for threads
 win32/win32thread.h	Win32 port mapping to threads
@@ -2038,4 +2039,3 @@ x2p/util.c		Utility routines
 x2p/util.h		Public declarations for the above
 x2p/walk.c		Parse tree walker
 xsutils.c		Additional bundled package methods not in UNIVERSAL::
-lib/Text/Abbrev/t/abbrev.t	Text::Abbrev
