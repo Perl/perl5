@@ -66,10 +66,7 @@ S_do_trans_simple(pTHX_ SV *sv)
 	c = utf8_to_uv(s, send - s, &ulen, 0);
         if (c < 0x100 && (ch = tbl[(short)c]) >= 0) {
             matches++;
-            if (UTF8_IS_ASCII(ch))
-                *d++ = ch;
-            else
-                d = uv_to_utf8(d,ch);
+	    d = uv_to_utf8(d, ch);
             s += ulen;
         }
 	else { /* No match -> copy */
