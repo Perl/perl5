@@ -76,6 +76,9 @@ ok (socketpair (LEFT, RIGHT, AF_UNIX, SOCK_STREAM, PF_UNSPEC),
     "socketpair (LEFT, RIGHT, AF_UNIX, SOCK_STREAM, PF_UNSPEC)")
   or print "# \$\! = $!\n";
 
+binmode(LEFT,  ":bytes");
+binmode(RIGHT, ":bytes");
+
 my @left = ("hello ", "world\n");
 my @right = ("perl ", "rules!"); # Not like I'm trying to bias any survey here.
 
@@ -161,6 +164,9 @@ SKIP: {
 ok (socketpair (LEFT, RIGHT, AF_UNIX, SOCK_DGRAM, PF_UNSPEC),
     "socketpair (LEFT, RIGHT, AF_UNIX, SOCK_DGRAM, PF_UNSPEC)")
   or print "# \$\! = $!\n";
+
+binmode(LEFT,  ":bytes");
+binmode(RIGHT, ":bytes");
 
 foreach (@left) {
   # is (syswrite (LEFT, $_), length $_, "write " . _qq ($_) . " to left");
