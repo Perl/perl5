@@ -140,6 +140,10 @@ PERLVAR(Iforkprocess,	int)		/* so do_open |- can return proc# */
 /* subprocess state */
 PERLVAR(Ifdpid,		AV *)		/* keep fd-to-pid mappings for my_popen */
 
+#ifdef USE_THREADS
+PERLVAR(Ifdpid_mutex,	perl_mutex)	/* mutex for fdpid array */
+#endif
+
 /* internal state */
 PERLVAR(Itainting,	bool)		/* doing taint checks */
 PERLVARI(Iop_mask,	char *,	NULL)	/* masked operations for safe evals */
@@ -442,6 +446,10 @@ PERLVAR(IProc,		struct IPerlProc*)
 
 #if defined(USE_ITHREADS)
 PERLVAR(Iptr_table,	PTR_TBL_t*)
+#endif
+
+#if defined(USE_THREADS)
+PERLVAR(Isv_lock_mutex,	perl_mutex)	/* Mutex for SvLOCK macro */
 #endif
 
 PERLVAR(Inullstash,	HV *)		/* illegal symbols end up here */

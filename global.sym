@@ -542,3 +542,4 @@ Perl_ptr_table_fetch
 Perl_ptr_table_store
 Perl_ptr_table_split
 Perl_sys_intern_init
+Perl_lock

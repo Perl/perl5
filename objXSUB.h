@@ -2257,6 +2257,10 @@
 #  if defined(LEAKTEST)
 #  endif
 #endif
+#undef  Perl_lock
+#define Perl_lock		pPerl->Perl_lock
+#undef  lock
+#define lock			Perl_lock
 #if defined(PERL_OBJECT)
 #endif
 
