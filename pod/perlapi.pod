@@ -5615,6 +5615,16 @@ This is usually handled automatically by C<xsubpp> by calling C<dXSARGS>.
 =for hackers
 Found in file XSUB.h
 
+=item dAXMARK
+
+Sets up the C<ax> variable and stack marker variable C<mark>.
+This is usually handled automatically by C<xsubpp> by calling C<dXSARGS>.
+
+		dAXMARK;
+
+=for hackers
+Found in file XSUB.h
+
 =item dITEMS
 
 Sets up the C<items> variable.

@@ -54,6 +54,10 @@ C<xsubpp>.
 Sets up the C<ax> variable.
 This is usually handled automatically by C<xsubpp> by calling C<dXSARGS>.
 
+=for apidoc Ams||dAXMARK
+Sets up the C<ax> variable and stack marker variable C<mark>.
+This is usually handled automatically by C<xsubpp> by calling C<dXSARGS>.
+
 =for apidoc Ams||dITEMS
 Sets up the C<items> variable.
 This is usually handled automatically by C<xsubpp> by calling C<dXSARGS>.
@@ -97,11 +101,14 @@ is a lexical $_ in scope.
 
 #define dAX I32 ax = MARK - PL_stack_base + 1
 
+#define dAXMARK				\
+	I32 ax = POPMARK;		\
+	register SV **mark = PL_stack_base + ax++
+
 #define dITEMS I32 items = SP - MARK
 
 #define dXSARGS				\
-	dSP; dMARK;			\
-	dAX; dITEMS
+	dSP; dAXMARK; dITEMS
 
 #define dXSTARG SV * targ = ((PL_op->op_private & OPpENTERSUB_HASTARG) \
 			     ? PAD_SV(PL_op->op_targ) : sv_newmortal())
