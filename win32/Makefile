@@ -115,8 +115,8 @@ INST_VER	= \5.00503
 #
 #CCHOME		= f:\msvc20
 CCHOME		= $(MSVCDIR)
-CCINCDIR	= $(CCHOME)\include
-CCLIBDIR	= $(CCHOME)\lib
+CCINCDIR	= '$(CCHOME)\include'
+CCLIBDIR	= '$(CCHOME)\lib'
 
 #
 # specify space-separated list of extra directories to look for libraries

@@ -17,6 +17,9 @@ $opt{'cf_email'} = $opt{'cf_by'} . '@' . (gethostbyname('localhost'))[0]
 	unless $opt{'cf_email'};
 $opt{'usemymalloc'} = 'y' if $opt{'d_mymalloc'} eq 'define';
 
+$opt{libpth} =~ s/'/"/g if exists $opt{libpth};
+$opt{incpth} =~ s/'/"/g if exists $opt{incpth};
+
 while (<>)
  {
   s/~([\w_]+)~/$opt{$1}/g;

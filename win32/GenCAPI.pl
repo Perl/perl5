@@ -422,6 +422,7 @@ mess_sv
 ors
 opsave
 eval_mutex
+strtab_mutex
 orslen
 ofmt
 modcount

@@ -216,6 +216,7 @@ unless ($define{'USE_THREADS'})
   skip_symbols [qw(
 PL_thr_key
 PL_sv_mutex
+PL_strtab_mutex
 PL_svref_mutex
 PL_malloc_mutex
 PL_eval_mutex
