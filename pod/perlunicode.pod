@@ -670,16 +670,16 @@ Level 3 - Locale-Sensitive Support
 =head2 Unicode Encodings
 
 Unicode characters are assigned to I<code points> which are abstract
-numbers.  To use this numbers various encodings are needed.
+numbers.  To use these numbers various encodings are needed.
 
 =over 4
 
 =item UTF-8
 
-UTF-8 is the encoding used internally by Perl.  UTF-8 is variable
+UTF-8 is the encoding used internally by Perl.  UTF-8 is a variable
 length (1 to 6 bytes, current character allocations require 4 bytes), 
-byteorder independent encoding.  For ASCII UTF-8 is transparent
-(and we really mean 7-bit ASCII, not any 8-bit encoding).
+byteorder independent encoding.  For ASCII, UTF-8 is transparent
+(and we really do mean 7-bit ASCII, not any 8-bit encoding).
 
 =item UTF-16, UTF-16BE, UTF16-LE, Surrogates, and BOMs (Byte Order Marks)
 
@@ -701,20 +701,26 @@ and the decoding is
 
 	$uni = 0x10000 + ($hi - 0xD8000) * 0x400 + ($lo - 0xDC00);
 
-Because of the 16-bitness, UTF-16 is byteorder dependent.  The UTF-16
+Because of the 16-bitness, UTF-16 is byteorder dependent.  UTF-16
 itself can be used for in-memory computations, but if storage or
-transfer is required, either the UTF-16BE (Big Endian), or UTF-16LE
+transfer is required, either UTF-16BE (Big Endian) or UTF-16LE
 (Little Endian) must be chosen.
 
 This introduces another problem: what if you just know that your data
 is UTF-16, but you don't know which endianness?  Byte Order Marks
 (BOMs) are a solution to this.  A special character has been reserved
-in Unicode to function as a byte order marker: the 0xFFFE is the BOM.
+in Unicode to function as a byte order marker: the character with the
+code point 0xFEFF is the BOM.
 The trick is that if you read a BOM, you will know the byte order,
 since if it was written on a big endian platform, you will read the
-bytes 0xFF 0xFE, but if it was written on a little endian platform,
-you will read the bytes 0xFE 0xFF.  (And if the originating platform
-was writing in UTF-8, you will read the bytes 0xEF 0xBF 0xBE.)
+bytes 0xFE 0xFF, but if it was written on a little endian platform,
+you will read the bytes 0xFF 0xFE.  (And if the originating platform
+was writing in UTF-8, you will read the bytes 0xEF 0xBB 0xBF.)
+The way this trick works is that the character with the code point
+0xFFFE is guaranteed not to be a valid Unicode character, so the
+sequence of bytes 0xFF 0xFE is unambiguously "BOM, represented in
+little-endian format" and cannot be "0xFFFE, represented in
+big-endian format".
 
 =item UTF-32, UTF-32BE, UTF32-LE
 
@@ -723,9 +729,9 @@ the units are 32-bit, and therefore the surrogate scheme is not needed.
 
 =item UCS-2, UCS-4
 
-Encodings defined by the ISO 10646 standard.  UCS-2 is 16-bit
-encoding, UCS-4 is 32-bit encoding.  Unlike the UTF-16 the UCS-2
-is not extensible beyond 0xFFFF.
+Encodings defined by the ISO 10646 standard.  UCS-2 is a 16-bit
+encoding, UCS-4 is a 32-bit encoding.  Unlike UTF-16, UCS-2
+is not extensible beyond 0xFFFF, because it does not use surrogates.
 
 =item UTF-7
 
@@ -735,13 +741,13 @@ transport/storage is not eight-bit safe.  Defined by RFC 2152.
 =head2 Unicode in Perl on EBCDIC
 
 The way Unicode is handled on EBCDIC platforms is still rather
-experimental.  On such a platform references to UTF-8 encoding in this
+experimental.  On such a platform, references to UTF-8 encoding in this
 document and elsewhere should be read as meaning UTF-EBCDIC as
 specified in Unicode Technical Report 16 unless ASCII vs EBCDIC issues
 are specifically discussed. There is no C<utfebcdic> pragma or
-":utfebcdic" layer, rather "utf8" and ":utf8" are re-used to mean
-platform's "natural" 8-bit encoding of Unicode. See L<perlebcdic> for
-more discussion of the issues.
+":utfebcdic" layer, rather, "utf8" and ":utf8" are re-used to mean
+the platform's "natural" 8-bit encoding of Unicode. See L<perlebcdic>
+for more discussion of the issues.
 
 =back
 
