@@ -4,6 +4,13 @@ our $VERSION = '1.00';
 
 use Encode;
 
+BEGIN {
+    if (ord("A") == 193) {
+	require Carp;
+	Carp::croak "encoding pragma does not support EBCDIC platforms";
+    }
+}
+
 sub import {
     my ($class, $name) = @_;
     $name = $ENV{PERL_ENCODING} if @_ < 2;
@@ -93,6 +100,8 @@ encoding can be found, C<Unknown encoding '...'> error will be thrown.
 For native multibyte encodings (either fixed or variable length)
 the current implementation of the regular expressions may introduce
 recoding errors for longer regular expression literals than 127 bytes.
+
+The encoding pragma is not supported on EBCDIC platforms.
 
 =head1 SEE ALSO
 
