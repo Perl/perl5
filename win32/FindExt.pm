@@ -4,7 +4,8 @@ use File::Find;
 use File::Basename;
 use Cwd;
 
-my $no = join('|',qw(DynaLoader GDBM_File ODBM_File NDBM_File DB_File Syslog Sysv));
+my $no = join('|',qw(DynaLoader GDBM_File ODBM_File NDBM_File DB_File
+		     Syslog SysV Langinfo));
 $no = qr/^(?:$no)$/i;
 
 my %ext;
