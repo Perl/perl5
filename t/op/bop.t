@@ -9,7 +9,7 @@ BEGIN {
     @INC = '../lib';
 }
 
-print "1..143\n";
+print "1..145\n";
 
 # numerics
 print ((0xdead & 0xbeef) == 0x9ead ? "ok 1\n" : "not ok 1\n");
@@ -330,3 +330,8 @@ is(stores($y), 0);
 is(~~$y, "c");
 is(fetches($y), 1);
 is(stores($y), 0);
+
+$a = "\0\x{100}"; chop($a);
+ok(utf8::is_utf8($a)); # make sure UTF8 flag is still there
+$a = ~$a;
+is($a, "\xFF", "~ works with utf-8");
