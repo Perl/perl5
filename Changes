@@ -32,6 +32,215 @@ Version v5.7.1		Development release working toward v5.8
 --------------
 
 ____________________________________________________________________________
+[  8069] By: jhi                                   on 2000/12/10  04:39:19
+        Log: Subject: Re: PATCH: Let Test::Harness bail out early (Was: Testing module dependencies)
+             From: andreas.koenig@anima.de (Andreas J. Koenig)
+             Date: 09 Dec 2000 17:14:25 +0100
+             Message-ID: <m3wvd9o9lq.fsf@ak-71.mind.de>
+     Branch: perl
+	   + t/base/commonsense.t
+	   ! MANIFEST lib/Test/Harness.pm t/TEST t/UTEST
+____________________________________________________________________________
+[  8068] By: jhi                                   on 2000/12/10  04:17:36
+        Log: Subject: [PATCH 5.7.0@8047] RE: [ID 20001013.009] DB_File issues warning when setting element to    undef
+             From: "Paul Marquess" <paul_marquess@yahoo.co.uk>
+             Date: Sat, 9 Dec 2000 16:47:22 -0000
+             Message-ID: <002001c061ff$b3aba820$a20a140a@bfs.phone.com>
+     Branch: perl
+	   ! ext/DB_File/typemap ext/GDBM_File/GDBM_File.pm
+	   ! ext/GDBM_File/typemap ext/NDBM_File/NDBM_File.pm
+	   ! ext/NDBM_File/typemap ext/ODBM_File/ODBM_File.pm
+	   ! ext/ODBM_File/typemap ext/SDBM_File/SDBM_File.pm
+	   ! ext/SDBM_File/typemap t/lib/db-btree.t t/lib/db-hash.t
+	   ! t/lib/db-recno.t t/lib/gdbm.t t/lib/ndbm.t t/lib/odbm.t
+	   ! t/lib/sdbm.t
+____________________________________________________________________________
+[  8067] By: jhi                                   on 2000/12/10  03:52:02
+        Log: Test case for #8066.
+     Branch: perl
+	   ! t/op/misc.t
+____________________________________________________________________________
+[  8066] By: jhi                                   on 2000/12/10  03:50:30
+        Log: Subject: [PATCH] Re: [ID 20001202.002] [BUG all] 'die qr{pattern}' does not check termination
+             From: Simon Cozens <simon@cozens.net>
+             Date: Sun, 10 Dec 2000 00:55:37 +0000
+             Message-ID: <20001210005537.B16221@deep-dark-truthful-mirror.perlhacker.org>
+     Branch: perl
+	   ! pp_sys.c
+____________________________________________________________________________
+[  8065] By: jhi                                   on 2000/12/10  03:44:52
+        Log: Test case for #8064.
+     Branch: perl
+	   ! t/comp/proto.t
+____________________________________________________________________________
+[  8064] By: jhi                                   on 2000/12/10  03:42:32
+        Log: Subject: Re: prototype of substr
+             From: Simon Cozens <simon@cozens.net>
+             Date: Sun, 10 Dec 2000 00:13:33 +0000
+             Message-ID: <20001210001333.A16221@deep-dark-truthful-mirror.perlhacker.org>
+             
+             Make CORE::substr to be '$$;$$' instead of '$$;$;$'.
+     Branch: perl
+	   ! pp.c
+____________________________________________________________________________
+[  8063] By: jhi                                   on 2000/12/10  03:39:42
+        Log: Subject: [PATCH] perlguts.pod
+             From: Simon Cozens <simon@cozens.net>
+             Date: Sun, 10 Dec 2000 00:06:47 +0000
+             Message-ID: <20001210000647.A16203@deep-dark-truthful-mirror.perlhacker.org>
+             
+             Documentation of the different types of ops,
+             plus the functions in dump.c
+     Branch: perl
+	   ! pod/perlguts.pod
+____________________________________________________________________________
+[  8062] By: jhi                                   on 2000/12/10  03:30:04
+        Log: Subject: [ID 20001209.006] Not OK: perl v5.7.0 +DEVEL7978 on armv4l-linux-64int 2.2.17-rmk1 (UNINSTALLED)
+             From: Nicholas Clark <nick@talking.bollo.cx>
+             Date: Sat, 09 Dec 2000 18:57:25 +0000
+             Message-Id: <E144pBV-0002Nv-00@Bagpuss.unfortu.net>
+             
+             Be more robust in weird hostname setups.
+     Branch: perl
+	   ! t/lib/net-hostent.t
+____________________________________________________________________________
+[  8061] By: jhi                                   on 2000/12/10  03:28:21
+        Log: Pacify fussy compiler. 
+     Branch: perl
+	   ! pp_sys.c
+____________________________________________________________________________
+[  8060] By: jhi                                   on 2000/12/10  02:52:46
+        Log: Integrate perlio.
+     Branch: perl
+	  !> pp_sys.c t/io/utf8.t
+____________________________________________________________________________
+[  8059] By: nick                                  on 2000/12/09  23:40:14
+        Log: read/sysread/recv should now be utf8 aware.
+             Basic test for utf8 read.
+     Branch: perlio
+	   ! pp_sys.c t/io/utf8.t
+____________________________________________________________________________
+[  8058] By: jhi                                   on 2000/12/09  21:56:02
+        Log: Integrate perlio.
+     Branch: perl
+	  +> t/io/utf8.t
+	  !> MANIFEST doio.c perlio.c pp_sys.c sv.c t/comp/require.t toke.c
+____________________________________________________________________________
+[  8057] By: jhi                                   on 2000/12/09  21:53:35
+        Log: Subject: Re: Additional patch for UTF8-keys (Re: perl@8016)
+             From: Inaba Hiroto <inaba@st.rim.or.jp>
+             Date: Sun, 10 Dec 2000 05:53:21 +0900
+             Message-ID: <3A329BC0.15E8BFF9@st.rim.or.jp>
+             
+             Tests for #8056.
+     Branch: perl
+	   ! t/op/each.t
+____________________________________________________________________________
+[  8056] By: jhi                                   on 2000/12/09  21:51:16
+        Log: Subject: Additional patch for UTF8-keys (Re: perl@8016)
+             From: Inaba Hiroto <inaba@st.rim.or.jp>
+             Date: Sat, 09 Dec 2000 18:02:00 +0900
+             Message-ID: <3A31F508.34F4BB23@st.rim.or.jp>
+             
+             exists() didn't work for UTF-8 keys, and neither did shared hash keys.
+     Branch: perl
+	   ! embed.h embed.pl hv.c objXSUB.h op.c proto.h sv.c
+____________________________________________________________________________
+[  8055] By: nick                                  on 2000/12/09  20:11:48
+        Log: Make write() (i.e. formats) utf8-aware by calling do_print() rather
+             than raw PerlIO_write() - does not seem to break any tests.
+     Branch: perlio
+	   ! pp_sys.c
+____________________________________________________________________________
+[  8054] By: nick                                  on 2000/12/09  19:47:30
+        Log: Make print, syswrite, send, readline, getc honour utf8-ness of PerlIO.
+             (sysread, recv and write i.e. formats still to do...)
+             Allow :utf8 or :bytes in PerlIO_apply_layers() so that
+             open($fh,">:utf8","name")
+             etc. work. - "applying" those just sets/clears the UTF8 bit of the top layer,
+             so no extra overhead is involved.
+             Tweak t/comp/require.t to add a 'use bytes' to permit its dubious writing of BOM
+             to a non-utf8 stream.
+             Add initial io/utf8.t
+             Fix SvPVutf8() - sv_2pv() was not expecting to be called with something
+             that was already SvPOK() - (we just fossiked with SvUTF8 bit). Fix that
+             and also just use the SvPV macro in sv_2pvutf8() to avoid the issue/overhead.
+     Branch: perlio
+	   + t/io/utf8.t
+	   ! MANIFEST doio.c perlio.c pp_sys.c sv.c t/comp/require.t
+____________________________________________________________________________
+[  8053] By: nick                                  on 2000/12/09  19:26:37
+        Log: Did not get that has_utf8/this_utf8 fix right last time, another spot
+             was only testing this_utf8.
+     Branch: perlio
+	   ! toke.c
+____________________________________________________________________________
+[  8052] By: nick                                  on 2000/12/09  19:09:41
+        Log: Typo/thinko in S_scan_const() - seeing high bit sets has_utf8 not this_utf8
+             i.e. the output string has one, but don't mess with source assumption.
+     Branch: perlio
+	   ! toke.c
+____________________________________________________________________________
+[  8051] By: jhi                                   on 2000/12/09  16:55:17
+        Log: Integrate perlio.
+     Branch: perl
+	  !> MANIFEST embedvar.h intrpvar.h mg.c perl.c perlapi.h pp_hot.c
+	  !> sv.c thrdvar.h util.c
+____________________________________________________________________________
+[  8050] By: jhi                                   on 2000/12/09  16:48:07
+        Log: Nits noticed by Peter Prymmer.
+     Branch: perl
+	   ! lib/ExtUtils/MM_VMS.pm
+____________________________________________________________________________
+[  8049] By: nick                                  on 2000/12/09  13:49:40
+        Log: UTF8 output prework.
+             - Store $\ and $, as SVs so they can have SvUTF8 flag
+             - use do_print() rather than raw PerlIO_write() to print them.
+     Branch: perlio
+	   ! embedvar.h intrpvar.h mg.c perl.c perlapi.h pp_hot.c sv.c
+	   ! thrdvar.h util.c
+____________________________________________________________________________
+[  8048] By: nick                                  on 2000/12/09  12:30:43
+        Log: Integrate mainline.
+     Branch: perlio
+	  +> ext/Encode/Encode/iso8859-16.enc ext/POSIX/hints/svr4.pl
+	  +> t/op/reverse.t
+	  !> Changes MANIFEST doop.c ext/POSIX/Makefile.PL hints/svr4.sh
+	  !> lib/ExtUtils/MM_OS2.pm lib/ExtUtils/MM_Unix.pm
+	  !> lib/ExtUtils/MM_VMS.pm lib/ExtUtils/Manifest.pm patchlevel.h
+	  !> pod/perlapi.pod pod/perlfunc.pod pod/perlintern.pod pp.h
+	  !> pp_hot.c t/README t/base/term.t t/lib/bigfltpm.t
+	  !> t/op/utf8decode.t t/pragma/warn/utf8 utf8.c utf8.h
+____________________________________________________________________________
+[  8047] By: jhi                                   on 2000/12/09  00:23:27
+        Log: Subject: Re: [pvhp@forte.com: [ID 20001208.004] Not OK: perl v5.7.0 +DEVEL8042 on VMS_AXP V7.1 (UNINSTALLED)]
+             From: Michael G Schwern <schwern@pobox.com>
+             Date: Fri, 8 Dec 2000 14:43:04 -0600
+     Branch: perl
+	   ! lib/ExtUtils/MM_VMS.pm
+____________________________________________________________________________
+[  8046] By: jhi                                   on 2000/12/08  23:10:27
+        Log: A missed check-in.
+     Branch: perl
+	   ! lib/ExtUtils/Manifest.pm
+____________________________________________________________________________
+[  8045] By: jhi                                   on 2000/12/08  21:57:12
+        Log: (null check-in)
+     Branch: perl
+	   ! lib/ExtUtils/MM_Unix.pm pod/perlintern.pod
+____________________________________________________________________________
+[  8044] By: jhi                                   on 2000/12/08  21:11:06
+        Log: Add ISO 8859-16 encoding.  Not a standard yet but seems to be
+             at the final draft stage.
+     Branch: perl
+	   + ext/Encode/Encode/iso8859-16.enc
+	   ! MANIFEST
+____________________________________________________________________________
+[  8043] By: jhi                                   on 2000/12/08  16:39:04
+        Log: Update Changes.
+     Branch: perl
+	   ! Changes patchlevel.h
+____________________________________________________________________________
 [  8042] By: jhi                                   on 2000/12/08  16:33:39
         Log: Do not return the Unicode replacement character if UTF-8
              decoding goes awry, it should be up to the caller to decide.
