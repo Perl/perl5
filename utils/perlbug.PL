@@ -45,7 +45,7 @@ while (<PATCH_LEVEL>) {
 my $patch_desc = "'" . join("',\n    '", @patches) . "'";
 my $patch_tags = join "", map /(\S+)/ ? "+$1 " : (), @patches;
 
-close PATCH_LEVEL;
+close(PATCH_LEVEL) or die "Error closing patchlevel.h: $!";
 
 # TO DO (prehaps): store/embed $Config::config_sh into perlbug. When perlbug is
 # used, compare $Config::config_sh with the stored version. If they differ then
@@ -91,7 +91,7 @@ BEGIN {
     $::HaveUtil = ($@ eq "");
 };
 
-my $Version = "1.30";
+my $Version = "1.31";
 
 # Changed in 1.06 to skip Mail::Send and Mail::Util if not available.
 # Changed in 1.07 to see more sendmail execs, and added pipe output.
@@ -126,6 +126,7 @@ my $Version = "1.30";
 # Changed in 1.28 Additional questions for Perlbugtron RFOLEY 20.03.2000
 # Changed in 1.29 Perlbug(tron): auto(-ok), short prompts RFOLEY 05-05-2000
 # Changed in 1.30 Added warnings on failure to open files MSTEVENS 13-07-2000
+# Changed in 1.31 Add checks on close().Fix my $var unless. TJENNESS 26-07-2000
 
 # TODO: - Allow the user to re-name the file on mail failure, and
 #       make sure failure (transmission-wise) of Mail::Send is
@@ -537,7 +538,7 @@ EOF
 	while (<F>) {
 	    print REP $_
 	}
-	close(F);
+	close(F) or die "Error closing `$file': $!";
     } else {
 	print REP <<EOF;
 
@@ -551,7 +552,7 @@ EOF
 EOF
     }
     Dump(*REP);
-    close(REP);
+    close(REP) or die "Error closing report file: $!";
 
     # read in the report template once so that
     # we can track whether the user does any editing.
@@ -561,7 +562,7 @@ EOF
 	s/\s+//g;
 	$REP{$_}++;
     }
-    close(REP);
+    close(REP) or die "Error closing report file `$filename': $!";
 } # sub Query
 
 sub Dump {
@@ -641,7 +642,8 @@ EOF
     }
 
 tryagain:
-    my $sts = system("$ed $filename") unless $Is_MacOS;
+    my $sts;
+    $sts = system("$ed $filename") unless $Is_MacOS;
     if ($Is_MacOS) {
         require ExtUtils::MakeMaker;
         ExtUtils::MM_MacOS::launch_file($filename);
@@ -736,8 +738,8 @@ EOF
 		print FILE "Reply-To: $from\n" if $from;
 		print FILE "\n";
 		while (<REP>) { print FILE }
-		close(REP);
-		close(FILE);
+		close(REP) or die "Error closing report file `$filename': $!";
+		close(FILE) or die "Error closing $file: $!";
 
 		print "\nMessage saved in `$file'.\n";
 		exit;
@@ -745,7 +747,7 @@ EOF
 		# Display the message
 		open(REP, "<$filename") or die "Couldn't open file `$filename': $!\n";
 		while (<REP>) { print $_ }
-		close(REP);
+		close(REP) or die "Error closing report file `$filename': $!";
 	    } elsif ($action =~ /^se/i) { # <S>end
 		# Send the message
 		print "Are you certain you want to send this message?\n"
@@ -789,7 +791,7 @@ sub Send {
 	$fh = $msg->open;
 	open(REP, "<$filename") or die "Couldn't open `$filename': $!\n";
 	while (<REP>) { print $fh $_ }
-	close(REP);
+	close(REP) or die "Error closing $filename: $!";
 	$fh->close;
 
 	print "\nMessage sent.\n";
@@ -843,7 +845,7 @@ sendout:
 	print SENDMAIL "\n\n";
 	open(REP, "<$filename") or die "Couldn't open `$filename': $!\n";
 	while (<REP>) { print SENDMAIL $_ }
-	close(REP);
+	close(REP) or die "Error closing $filename: $!";
 
 	if (close(SENDMAIL)) {
 	    printf "\nMessage %s.\n", $outfile ? "saved" : "sent";
