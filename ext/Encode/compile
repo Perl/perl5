@@ -92,6 +92,12 @@ elsif ($cname =~ /\.ucm$/)
   $doUcm = 1;
  }
 
+# 2nd argument is file containing list of filenames
+my $flist = shift(@ARGV);
+open(FLIST,$flist) || die "Cannot open $flist:$!";
+chomp(my @encfiles = <FLIST>);
+close(FLIST);
+
 my %encoding;
 my %strings;
 
@@ -109,7 +115,7 @@ sub cmp_name
  return $a cmp $b;
 }
 
-foreach my $enc (sort cmp_name @ARGV)
+foreach my $enc (sort cmp_name @encfiles)
  {
   my ($name,$sfx) = $enc =~ /^.*?([\w-]+)\.(enc|ucm)$/;
   if (open(E,$enc))
