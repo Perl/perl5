@@ -6445,8 +6445,22 @@ Perl_ss_dup(pTHX_ PerlInterpreter *proto_perl)
 	    break;
 	case SAVEt_FREEOP:
 	    ptr = POPPTR(ss,ix);
-	    if (ptr && (((OP*)ptr)->op_private & OPpREFCOUNTED))
-		TOPPTR(nss,ix) = any_dup(ptr, proto_perl);
+	    if (ptr && (((OP*)ptr)->op_private & OPpREFCOUNTED)) {
+		/* these are assumed to be refcounted properly */
+		switch (((OP*)ptr)->op_type) {
+		case OP_LEAVESUB:
+		case OP_LEAVESUBLV:
+		case OP_LEAVEEVAL:
+		case OP_LEAVE:
+		case OP_SCOPE:
+		case OP_LEAVEWRITE:
+		    TOPPTR(nss,ix) = any_dup(ptr, proto_perl);
+		    break;
+		default:
+		    TOPPTR(nss,ix) = Nullop;
+		    break;
+		}
+	    }
 	    else
 		TOPPTR(nss,ix) = Nullop;
 	    break;

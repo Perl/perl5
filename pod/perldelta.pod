@@ -141,7 +141,7 @@ work.  The following previously allowed construct:
 
     print not (1,2,3)[0];
 
-needs to written with additional parentheses now:
+needs to be written with additional parentheses now:
 
     print not((1,2,3)[0]);
 
@@ -166,6 +166,10 @@ specified via MakeMaker:
 
 =item C<PERL_IMPLICIT_CONTEXT>
 
+PERL_IMPLICIT_CONTEXT is automatically enabled whenever Perl is built
+with one of -Dusethreads, -Dusemultiplicity, or both.  It is not
+intended to be enabled by users at this time.
+
 This new build option provides a set of macros for all API functions
 such that an implicit interpreter/thread context argument is passed to
 every API function.  As a result of this, something like C<sv_setsv(foo,bar)>
@@ -181,9 +185,6 @@ functions.
 Note that the above issue is not relevant to the default build of
 Perl, whose interfaces continue to match those of prior versions
 (but subject to the other options described here).
-
-PERL_IMPLICIT_CONTEXT is automatically enabled whenever Perl is built
-with one of -Dusethreads, -Dusemultiplicity, or both.
 
 See L<perlguts/"The Perl API"> for detailed information on the
 ramifications of building Perl using this option.
@@ -319,6 +320,52 @@ building and installing from source, the defaults should be fine.
 Perl can optionally use UTF-8 as its internal representation for character
 strings.  The C<utf8> pragma enables this support in the current lexical
 scope.  See L<utf8> for more information.
+
+=head2 Interpreter threads
+
+WARNING: This is an experimental feature in a pre-alpha state.  Use
+at your own risk.
+
+Perl 5.005_63 introduces the beginnings of support for running multiple
+interpreters concurrently in different threads.  In conjunction with
+the perl_clone() API call, which can be used to selectively duplicate
+the state of any given interpreter, it is possible to compile a
+piece of code once in an interpreter, clone that interpreter
+one or more times, and run all the resulting interpreters in distinct
+threads.
+
+On Windows, this feature is used to emulate fork() at the interpreter
+level.  See L<perlfork>.
+
+This feature is still in evolution.  It is eventually meant to be used
+to selectively clone a subroutine and data reachable from that
+subroutine in a separate interpreter and run the cloned subroutine
+in a separate thread.  Since there is no shared data between the
+interpreters, little or no locking will be needed (unless parts of
+the symbol table are explicitly shared).  This is obviously intended
+to be an easy-to-use replacement for the existing threads support.
+
+Support for cloning interpreters must currently be manually enabled
+by defining the cpp macro USE_ITHREADS on non-Windows platforms.
+(See win32/Makefile for how to enable it on Windows.)  The resulting
+perl executable will be functionally identical to one that was built
+without USE_ITHREADS, but the perl_clone() API call will only be
+available in the former.
+
+USE_ITHREADS enables Perl source code changes that provide a clear
+separation between the op tree and the data it operates with.  The
+former is considered immutable, and can therefore be shared between
+an interpreter and all of its clones, while the latter is considered
+local to each interpreter, and is therefore copied for each clone.
+
+Note that building Perl with the -Dusemultiplicity Configure option
+is adequate if you wish to run multiple B<independent> interpreters
+concurrently in different threads.  USE_ITHREADS only needs to be
+enabled if you wish to obtain access to perl_clone() and cloned
+interpreters.
+
+[XXX TODO - the Compiler backends may be broken when USE_ITHREADS is
+enabled.]
 
 =head2 Lexically scoped warning categories
 
@@ -498,7 +545,7 @@ and the long double support.
 
 Perl subroutines with a prototype of C<($$)> and XSUBs in general can
 now be used as sort subroutines.  In either case, the two elements to
-be compared as passed as normal parameters in @_.  See L<perlfunc/sort>.
+be compared are passed as normal parameters in @_.  See L<perlfunc/sort>.
 
 For unprototyped sort subroutines, the historical behavior of passing 
 the elements to be compared as the global variables $a and $b remains
