@@ -91,6 +91,8 @@ struct tms {
 #define USE_FIXED_OSFHANDLE
 #endif
 
+#define ENV_IS_CASELESS
+
 #ifndef VER_PLATFORM_WIN32_WINDOWS	/* VC-2.0 headers dont have this */
 #define VER_PLATFORM_WIN32_WINDOWS	1
 #endif

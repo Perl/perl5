@@ -24,7 +24,7 @@ $Is_VMS     = $^O eq 'VMS';
 $Is_Dos   = $^O eq 'dos';
 $PERL = ($Is_MSWin32 ? '.\perl' : './perl');
 
-print "1..30\n";
+print "1..34\n";
 
 eval '$ENV{"FOO"} = "hi there";';	# check that ENV is inited inside eval
 if ($Is_MSWin32) { ok 1, `cmd /x /c set FOO` eq "FOO=hi there\n"; }
@@ -37,8 +37,8 @@ ok 2, $!, $!;
 close FOO; # just mention it, squelch used-only-once
 
 if ($Is_MSWin32 || $Is_Dos) {
-    ok 3,1;
-    ok 4,1;
+    ok "3 # skipped",1;
+    ok "4 # skipped",1;
 }
 else {
   # the next tests are embedded inside system simply because sh spits out
@@ -165,8 +165,8 @@ ok 27, $^O;
 ok 28, $^T > 850000000, $^T;
 
 if ($Is_VMS || $Is_Dos) {
-	ok 29, 1;
-	ok 30, 1;
+	ok "29 # skipped", 1;
+	ok "30 # skipped", 1;
 }
 else {
 	$PATH = $ENV{PATH};
@@ -182,3 +182,20 @@ else {
 						: (`echo \$NoNeSuCh` eq "foo\n") );
 }
 
+# test case-insignificance of %ENV (these tests must be enabled only
+# when perl is compiled with -DENV_IS_CASELESS)
+if ($Is_MSWin32) {
+    %ENV = ();
+    $ENV{'Foo'} = 'bar';
+    $ENV{'fOo'} = 'baz';
+    ok 31, (scalar(keys(%ENV)) == 1);
+    ok 32, exists($ENV{'FOo'});
+    ok 33, (delete($ENV{'foO'}) eq 'baz');
+    ok 34, (scalar(keys(%ENV)) == 0);
+}
+else {
+    ok "31 # skipped",1;
+    ok "32 # skipped",1;
+    ok "33 # skipped",1;
+    ok "34 # skipped",1;
+}
