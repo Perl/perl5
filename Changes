@@ -31,6 +31,174 @@ or any other branch.
 Version v5.7.2		Development release working toward v5.8
 --------------
 ____________________________________________________________________________
+[ 11682] By: jhi                                   on 2001/08/15  13:26:00
+        Log: The #11673 necessitated a test tweak.
+     Branch: perl
+	   ! t/io/utf8.t
+____________________________________________________________________________
+[ 11681] By: jhi                                   on 2001/08/15  13:12:50
+        Log: Also UNICOS is in the general case unable to silently
+             handle fp overflows.
+     Branch: perl
+	   ! numeric.c
+____________________________________________________________________________
+[ 11680] By: jhi                                   on 2001/08/15  13:05:15
+        Log: Try to get NV_MIN, NV_MAX, NV_MIN_10_EXP, NV_MAX_10_EXP,
+             NV_EPSILON #defined.
+     Branch: perl
+	   ! perl.h
+____________________________________________________________________________
+[ 11679] By: jhi                                   on 2001/08/15  12:48:32
+        Log: Re-establish the fp overflow detection for VAX VMS; there
+             is no easy way to have the IEEE fp silent overflow semantics.
+             (in Alpha VMS we still will use IEEE fp by default-- but it
+             is still possible to configure Perl to use G_FLOAT)
+     Branch: perl
+	   ! numeric.c
+____________________________________________________________________________
+[ 11678] By: jhi                                   on 2001/08/15  12:27:41
+        Log: Subject: [PATCH] pp_lock 
+             From: "Arthur Bergman" <arthur@contiller.se>
+             Date: Wed, 15 Aug 2001 11:52:16 +0200
+             Message-ID: <008401c1256f$f75a91b0$21000a0a@vogw2kdev>
+     Branch: perl
+	   ! pp.c
+____________________________________________________________________________
+[ 11677] By: jhi                                   on 2001/08/15  12:26:44
+        Log: Subject: Re: [ID 20010809.023] perlre misleads when stating that (?i) should be at front of pattern 
+             From: Hugo van der Sanden <hv@crypt.compulink.co.uk>
+             Date: Wed, 15 Aug 2001 11:32:11 +0100
+             Message-Id: <200108151032.f7FAWBI30961@crypt.compulink.co.uk>
+     Branch: perl
+	   ! regcomp.c t/op/re_tests
+____________________________________________________________________________
+[ 11676] By: jhi                                   on 2001/08/15  12:25:29
+        Log: Subject: Re: [ID 20010811.006] re_eval: logical leaks 
+             From: Hugo van der Sanden <hv@crypt.compulink.co.uk>
+             Date: Wed, 15 Aug 2001 10:33:49 +0100
+             Message-Id: <200108150933.f7F9Xnr11222@crypt.compulink.co.uk>
+     Branch: perl
+	   ! regexec.c t/op/re_tests
+____________________________________________________________________________
+[ 11675] By: jhi                                   on 2001/08/15  03:28:20
+        Log: Subject: Re: bug in File::Spec 0.82 (canonpath)
+             From: Barrie Slaymaker <barries@slaysys.com>
+             Date: Tue, 14 Aug 2001 14:32:25 -0400
+             Message-ID: <20010814143225.A19822@jester.slaysys.com>
+     Branch: perl
+	   ! lib/File/Spec.t lib/File/Spec/Unix.pm
+____________________________________________________________________________
+[ 11674] By: jhi                                   on 2001/08/15  03:25:32
+        Log: Subject: [PATCH: perl@11626] modify VMS default prefix for installation
+             From: Peter Prymmer <pvhp@forte.com>
+             Date: Tue, 14 Aug 2001 13:33:32 -0700 (PDT)
+             Message-ID: <Pine.OSF.4.10.10108141327590.192110-100000@aspara.forte.com>
+     Branch: perl
+	   ! README.vms configure.com
+____________________________________________________________________________
+[ 11673] By: jhi                                   on 2001/08/15  03:16:14
+        Log: Subject: [PATCH perl@11660] Warning incorrectly reported without -w
+             From: Rafael Garcia-Suarez <rgarciasuarez@free.fr>
+             Date: Tue, 14 Aug 2001 21:23:27 +0200
+             Message-ID: <20010814212327.A1919@rafael>
+     Branch: perl
+	   ! doio.c
+____________________________________________________________________________
+[ 11672] By: jhi                                   on 2001/08/15  03:15:25
+        Log: Subject: [PATCH bleadperl] fixing SDBM_File problems under win32
+             From: Nikola Knezevic <indy@tesla.rcub.bg.ac.yu> 
+             Date: Tue, 14 Aug 2001 22:30:11 +0200
+             Message-ID: <4224685483.20010814223011@tesla.rcub.bg.ac.yu>
+             
+             Combination of nmake, quoting, and Perl expanded $( in here-doc.
+     Branch: perl
+	   ! ext/SDBM_File/Makefile.PL
+____________________________________________________________________________
+[ 11671] By: jhi                                   on 2001/08/14  13:44:40
+        Log: Todo updates.
+     Branch: perl
+	   ! pod/perltodo.pod
+____________________________________________________________________________
+[ 11670] By: jhi                                   on 2001/08/14  13:10:36
+        Log: Subject: [PATCH bleadperl CORE] removing sv.c warnings on VC++5.0
+             From: Nikola Knezevic <indy@tesla.rcub.bg.ac.yu> 
+             Date: Mon, 13 Aug 2001 23:15:01 +0200
+             Message-ID: <6114148607.20010813231501@tesla.rcub.bg.ac.yu>
+     Branch: perl
+	   ! sv.c
+____________________________________________________________________________
+[ 11669] By: jhi                                   on 2001/08/14  13:07:09
+        Log: Subject: [PATCH] [b-]showlex.t
+             From: Nikola Knezevic <indy@tesla.rcub.bg.ac.yu>
+             Date: Sun, 12 Aug 2001 22:24:51 +0200
+             Message-ID: <6510457078.20010812222451@tesla.rcub.bg.ac.yu>
+             
+             The 4nt command shell will expand the % in command line
+             no matter what quoting is attempted, changed the % to @.
+     Branch: perl
+	   ! ext/B/Showlex.t
+____________________________________________________________________________
+[ 11668] By: jhi                                   on 2001/08/14  13:01:02
+        Log: Subject: [PATCH] magic.t
+             From: Nikola Knezevic <indy@tesla.rcub.bg.ac.yu> 
+             Date: Sun, 12 Aug 2001 20:49:27 +0200
+             Message-ID: <844732764.20010812204927@tesla.rcub.bg.ac.yu>
+     Branch: perl
+	   ! t/op/magic.t
+____________________________________________________________________________
+[ 11667] By: jhi                                   on 2001/08/14  12:35:17
+        Log: Add sharedsv* to the DOSish platforms; plus add
+             some WinCE files to the list of DOSish files.
+     Branch: perl
+	   ! NetWare/Makefile Porting/makerel win32/Makefile
+	   ! win32/makefile.mk wince/Makefile.ce
+____________________________________________________________________________
+[ 11666] By: jhi                                   on 2001/08/14  12:29:57
+        Log: More DOSish files.
+     Branch: perl
+	   ! Porting/makerel
+____________________________________________________________________________
+[ 11665] By: jhi                                   on 2001/08/14  12:27:58
+        Log: Strip CRs from the WinCE files.  Now we need to
+             figure out in which CRs are really needed: probably
+             Makefile.ce and the README files, at least, probably
+             also the registry.bat.
+     Branch: perl
+	   ! wince/Makefile.ce wince/README.compile wince/README.perlce
+	   ! wince/config.h wince/include/cectype.h wince/include/errno.h
+	   ! wince/include/sys/stat.h wince/include/sys/types.h
+	   ! wince/include/sys/utime.h wince/include/time.h wince/perl.rc
+	   ! wince/perldll.def wince/registry.bat wince/wince.h
+	   ! wince/xbuildall.ksh wince/xdistclean.ksh wince/xmakediffs.ksh
+____________________________________________________________________________
+[ 11664] By: jhi                                   on 2001/08/14  12:05:09
+        Log: Add some files to DOSish and writables.
+     Branch: perl
+	   ! Porting/makerel
+____________________________________________________________________________
+[ 11663] By: jhi                                   on 2001/08/14  03:08:07
+        Log: Compile failure message tidying.
+     Branch: perl
+	   ! t/lib/1_compile.t
+____________________________________________________________________________
+[ 11662] By: jhi                                   on 2001/08/14  01:41:22
+        Log: The new sharedsv* should be exported only if usethreads.
+     Branch: perl
+	   ! makedef.pl
+____________________________________________________________________________
+[ 11661] By: jhi                                   on 2001/08/14  00:25:30
+        Log: Subject: [PATCH: perl@11626] URL updates for README.os390
+             From: Peter Prymmer <pvhp@forte.com>
+             Date: Mon, 13 Aug 2001 15:21:06 -0700 (PDT)
+             Message-ID: <Pine.OSF.4.10.10108131517570.151295-100000@aspara.forte.com>
+     Branch: perl
+	   ! README.os390
+____________________________________________________________________________
+[ 11660] By: jhi                                   on 2001/08/13  12:54:54
+        Log: Update Changes.
+     Branch: perl
+	   ! Changes patchlevel.h
+____________________________________________________________________________
 [ 11659] By: jhi                                   on 2001/08/13  12:45:21
         Log: Subject: [PATHC] sharedsv.[c|h]
              From: "Artur Bergman" <artur@contiller.se>
