@@ -664,6 +664,8 @@ END_EXTERN_C
 #define PL_Sv			(*Perl_TSv_ptr(aTHX))
 #undef  PL_Xpv
 #define PL_Xpv			(*Perl_TXpv_ptr(aTHX))
+#undef  PL_av_fetch_sv
+#define PL_av_fetch_sv		(*Perl_Tav_fetch_sv_ptr(aTHX))
 #undef  PL_bodytarget
 #define PL_bodytarget		(*Perl_Tbodytarget_ptr(aTHX))
 #undef  PL_bostr
@@ -708,6 +710,8 @@ END_EXTERN_C
 #define PL_formtarget		(*Perl_Tformtarget_ptr(aTHX))
 #undef  PL_hv_fetch_ent_mh
 #define PL_hv_fetch_ent_mh	(*Perl_Thv_fetch_ent_mh_ptr(aTHX))
+#undef  PL_hv_fetch_sv
+#define PL_hv_fetch_sv		(*Perl_Thv_fetch_sv_ptr(aTHX))
 #undef  PL_in_eval
 #define PL_in_eval		(*Perl_Tin_eval_ptr(aTHX))
 #undef  PL_last_in_gv
