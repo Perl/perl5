@@ -581,6 +581,11 @@ commands:
 
 Print only first N elements ('' for all).
 
+=item C<dumpDepth>
+
+Limit recursion depth to N levels when dumping structures.
+Negative values are interpreted as infinity.  Default: infinity.
+
 =item C<compactDump>, C<veryCompact>
 
 Change the style of array and hash output.  If C<compactDump>, short array

@@ -328,7 +328,8 @@ $trace = $signal = $single = 0;	# Uninitialized warning suppression
                                 # (local $^W cannot help - other packages!).
 $inhibit_exit = $option{PrintRet} = 1;
 
-@options     = qw(hashDepth arrayDepth DumpDBFiles DumpPackages DumpReused
+@options     = qw(hashDepth arrayDepth dumpDepth
+                  DumpDBFiles DumpPackages DumpReused
 		  compactDump veryCompact quote HighBit undefPrint
 		  globPrint PrintRet UsageOnly frame AutoTrace
 		  TTY noTTY ReadLine NonStop LineInfo maxTraceLen
@@ -1826,7 +1827,10 @@ sub dumpit {
 	do 'dumpvar.pl';
     }
     if (defined &main::dumpValue) {
-	&main::dumpValue(shift);
+        my $v = shift;
+        my $maxdepth = shift || $option{dumpDepth};
+        $maxdepth = -1 unless defined $maxdepth;   # -1 means infinite depth
+	&main::dumpValue($v, $maxdepth);
     } else {
 	print $OUT "dumpvar.pl not available.\n";
     }
@@ -2184,7 +2188,7 @@ sub parse_options {
     # too dangerous to let intuitive usage overwrite important things
     # defaultion should never be the default
     my %opt_needs_val = map { ( $_ => 1 ) } qw{
-        arrayDepth hashDepth LineInfo maxTraceLen ornaments windowSize
+        dumpDepth arrayDepth hashDepth LineInfo maxTraceLen ornaments windowSize
         pager quote ReadLine recallCommand RemotePort ShellBang TTY
     };
     while (length) {
