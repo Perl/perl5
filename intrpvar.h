@@ -558,8 +558,6 @@ PERLVARI(Ippid,		IV,		0)
 
 PERLVARI(Ihash_seed, UV, 0)		/* Hash initializer */
 
-PERLVAR(Icsighandlerp,	Sighandler_t)
-
 /* New variables must be added to the very end, before this comment,
  * for binary compatibility (the offsets of the old members must not change).
  * (Don't forget to add your variable also to perl_clone()!)
