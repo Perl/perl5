@@ -70,7 +70,7 @@ GUSIConfiguration::FileSuffix	sSuffices[] = {
 extern "C" void GUSISetupConfig()
 {
 	GUSIConfiguration * config =
-		GUSIConfiguration::CreateInstance(GUSIConfiguration::kNoResource);
+		GUSIConfiguration::CreateInstance(GUSIConfiguration::kDefaultResourceID);
 
 	config->ConfigureSuffices(
 		sizeof(sSuffices)/sizeof(GUSIConfiguration::FileSuffix)-1, sSuffices);

@@ -9,6 +9,12 @@ Apple Developer Support UK
 Language	:	MPW C
 
 $Log: MacPerl.r,v $
+Revision 1.12  2002/01/04 05:07:10  pudge
+GUSI template
+
+Revision 1.11  2002/01/03 21:52:18  neeri
+Enable preference resources (MacPerl Bug #464638)
+
 Revision 1.10  2001/10/03 19:23:16  pudge
 Sync with perforce maint-5.6/macperl
 
@@ -131,6 +137,7 @@ include "MercutioMDEF.rsrc";
 
 include ":Obj:FontLDEF.rsrc";
 
+include "MacPerl.rsrc" 'GU·I'(10240);
 include "MacPerl.rsrc" 'BNDL'(128);
 include "MacPerl.rsrc" 'McPL'(0);
 include "MacPerl.rsrc" 'ICN#'(128);
@@ -1100,3 +1107,50 @@ resource 'STR#' (256) {
 
 #include "MPTerminology.r"
 #include "MPBalloons.r"
+
+/************************** GUSI **************************/
+#define GUSI_PREF_VERSION '0150'
+
+type 'TMPL' {
+	wide array {
+		pstring;
+		literal longint;
+	};
+};
+
+resource 'TMPL' (10240, "GU·I") {
+	{
+		"Type of created files",		'TNAM',
+		"Creator of created files",	'TNAM',
+		"Automatically spin cursor", 	'DBYT',
+#if GUSI_PREF_VERSION > '0102'
+		"Not using chdir()",				'BBIT',
+		"Accurate stat()",				'BBIT',
+		"TCP daemon",						'BBIT',
+		"UDP daemon",						'BBIT',
+#if GUSI_PREF_VERSION >= '0150'
+		"Own Console",						'BBIT',
+#else
+		"Reserved",							'BBIT',
+#endif
+#if GUSI_PREF_VERSION >= '0180'
+		"Don't initialize QuickDraw",	'BBIT',
+		"Open files shared",				'BBIT',
+		"Raise SIGPIPE",					'BBIT',
+#else
+		"Reserved",							'BBIT',
+		"Reserved",							'BBIT',
+		"Reserved",							'BBIT',
+#endif
+		"Version (don't change)",		'TNAM',		
+#if GUSI_PREF_VERSION >= '0120'
+		"NumSuffices",						'OCNT',
+		"*****",								'LSTC',
+		"Suffix",							'TNAM',
+		"Type for suffix",				'TNAM',
+		"Creator for suffix",			'TNAM',
+		"*****",								'LSTE',
+#endif
+#endif		
+	}
+};
