@@ -687,19 +687,17 @@ PP(pp_modulo)
 {
     dSP; dATARGET; tryAMAGICbin(mod,opASSIGN);
     {
-      register unsigned long tmpulong;
-      register long tmplong;
-      I32 value;
+      register IV value;
+      register UV uval;
 
-      tmpulong = (unsigned long) POPn;
-      if (tmpulong == 0L)
+      uval = POPn;
+      if (!uval)
 	DIE("Illegal modulus zero");
       value = TOPn;
-      if (value >= 0.0)
-	value = (I32)(((unsigned long)value) % tmpulong);
+      if (value >= 0)
+	value = (UV)value % uval;
       else {
-	tmplong = (long)value;
-	value = (I32)(tmpulong - ((-tmplong - 1) % tmpulong)) - 1;
+	value = (uval - ((UV)(-value - 1) % uval)) - 1;
       }
       SETi(value);
       RETURN;
@@ -926,7 +924,10 @@ PP(pp_bit_and) {
       if (SvNIOKp(left) || SvNIOKp(right)) {
 	unsigned long value = U_L(SvNV(left));
 	value = value & U_L(SvNV(right));
-	SETn((double)value);
+	if ((IV)value == value)
+	    SETi(value);
+	else
+	    SETn((double)value);
       }
       else {
 	do_vop(op->op_type, TARG, left, right);
@@ -944,7 +945,10 @@ PP(pp_bit_xor)
       if (SvNIOKp(left) || SvNIOKp(right)) {
 	unsigned long value = U_L(SvNV(left));
 	value = value ^ U_L(SvNV(right));
-	SETn((double)value);
+	if ((IV)value == value)
+	    SETi(value);
+	else
+	    SETn((double)value);
       }
       else {
 	do_vop(op->op_type, TARG, left, right);
@@ -962,7 +966,10 @@ PP(pp_bit_or)
       if (SvNIOKp(left) || SvNIOKp(right)) {
 	unsigned long value = U_L(SvNV(left));
 	value = value | U_L(SvNV(right));
-	SETn((double)value);
+	if ((IV)value == value)
+	    SETi(value);
+	else
+	    SETn((double)value);
       }
       else {
 	do_vop(op->op_type, TARG, left, right);
@@ -1019,11 +1026,11 @@ PP(pp_complement)
       register I32 anum;
 
       if (SvNIOKp(sv)) {
-	IV iv = ~SvIV(sv);
-	if (iv < 0)
-	    SETn( (double) ~U_L(SvNV(sv)) );
+	UV value = ~SvIV(sv);
+	if ((IV)value == value)
+	    SETi(value);
 	else
-	    SETi( iv );
+	    SETn((double)value);
       }
       else {
 	register char *tmps;
@@ -2687,7 +2694,10 @@ PP(pp_unpack)
 		    Copy(s, &auint, 1, unsigned int);
 		    s += sizeof(unsigned int);
 		    sv = NEWSV(41, 0);
-		    sv_setiv(sv, (I32)auint);
+		    if (auint <= I32_MAX)
+		    	sv_setiv(sv, (I32)auint);
+		    else
+		    	sv_setnv(sv, (double)auint);
 		    PUSHs(sv_2mortal(sv));
 		}
 	    }
