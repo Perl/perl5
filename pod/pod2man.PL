@@ -36,7 +36,7 @@ $Config{startperl}
 print OUT <<'!NO!SUBS!';
 
 # pod2man -- Convert POD data to formatted *roff input.
-# $Id: pod2man.PL,v 1.9 2001/11/26 08:44:58 eagle Exp $
+# $Id: pod2man.PL,v 1.10 2002/07/15 05:45:56 eagle Exp $
 #
 # Copyright 1999, 2000, 2001 by Russ Allbery <rra@stanford.edu>
 #
@@ -448,9 +448,8 @@ Other man pages to check out, like man(1), man(7), makewhatis(8), or
 catman(8).  Normally a simple list of man pages separated by commas, or a
 paragraph giving the name of a reference work.  Man page references, if they
 use the standard C<name(section)> form, don't have to be enclosed in
-LE<lt>E<gt>, but other things in this section probably should be when
-appropriate.  You may need to use the C<LE<lt>...|...E<gt>> syntax to keep
-B<pod2man> and B<pod2text> from being too verbose; see perlpod(1).
+LE<lt>E<gt> (although it's recommended), but other things in this section
+probably should be when appropriate.
 
 If the package has a mailing list, include a URL or subscription
 instructions here.
@@ -525,6 +524,10 @@ L<troff(1)>, L<man(7)>
 
 The man page documenting the an macro set may be L<man(5)> instead of
 L<man(7)> on your system.
+
+The current version of this script is always available from its web site at
+L<http://www.eyrie.org/~eagle/software/podlators/>.  It is also part of the
+Perl core distribution as of 5.6.0.
 
 =head1 AUTHOR
 

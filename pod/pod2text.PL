@@ -247,8 +247,12 @@ current terminal device.
 
 =head1 SEE ALSO
 
-L<Pod::Text|Pod::Text>, L<Pod::Text::Color|Pod::Text::Color>,
-L<Pod::Text::Termcap|Pod::Text::Termcap>, L<Pod::Parser|Pod::Parser>
+L<Pod::Text>, L<Pod::Text::Color>, L<Pod::Text::Overstrike>,
+L<Pod::Text::Termcap>, L<Pod::Parser>
+
+The current version of this script is always available from its web site at
+L<http://www.eyrie.org/~eagle/software/podlators/>.  It is also part of the
+Perl core distribution as of 5.6.0.
 
 =head1 AUTHOR
 
