@@ -1,7 +1,7 @@
 package Encode::MIME::Header;
 use strict;
 # use warnings;
-our $VERSION = do { my @r = (q$Revision: 1.8 $ =~ /\d+/g); sprintf "%d."."%02d" x $#r, @r };
+our $VERSION = do { my @r = (q$Revision: 1.9 $ =~ /\d+/g); sprintf "%d."."%02d" x $#r, @r };
 use Encode qw(find_encoding encode_utf8 decode_utf8);
 use MIME::Base64;
 use Carp;
@@ -145,7 +145,7 @@ sub _encode{
     $llen *= $enc eq 'B' ? 3.0/4.0 : 1.0/3.0;
     my @result = ();
     my $chunk = '';
-    while(my $chr = substr($str, 0, 1, '')){
+    while(length(my $chr = substr($str, 0, 1, ''))){
 	use bytes ();
 	if (bytes::length($chunk) + bytes::length($chr) > $llen){
 	    push @result, SINGLE->{$enc}($chunk);
