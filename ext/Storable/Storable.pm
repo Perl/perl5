@@ -21,7 +21,7 @@ package Storable; @ISA = qw(Exporter DynaLoader);
 use AutoLoader;
 use vars qw($canonical $forgive_me $VERSION);
 
-$VERSION = '2.04';
+$VERSION = '2.05';
 *AUTOLOAD = \&AutoLoader::AUTOLOAD;		# Grrr...
 
 #
@@ -509,6 +509,18 @@ creating lookup tables for complicated queries.
 Canonical order does not imply network order; those are two orthogonal
 settings.
 
+=head1 CODE REFERENCES
+
+Since Storable version 2.05, CODE references may be serialized with
+the help of L<B::Deparse>. To enable this feature, set
+C<$Storable::Deparse> to a true value. To enable deserializazion,
+C<$Storable::Eval> should be set to a true value. Be aware that
+deserialization is done through C<eval>, which is dangerous if the
+Storable file contains malicious data. You can set C<$Storable::Eval>
+to a subroutine reference which would be used instead of C<eval>. See
+below for an example using a L<Safe> compartment for deserialization
+of CODE references.
+
 =head1 FORWARD COMPATIBILITY
 
 This release of Storable can be used on a newer version of Perl to
@@ -783,6 +795,21 @@ which prints (on my machine):
 
 	Blue is still 0.100000
 	Serialization of %color is 102 bytes long.
+
+Serialization of CODE references and deserialization in a safe
+compartment:
+
+	use Storable qw(freeze thaw);
+	use Safe;
+	use strict;
+	my $safe = new Safe;
+	# permitting the "require" opcode is necessary when using "use strict"
+	$safe->permit(qw(:default require));
+	local $Storable::Deparse = 1;
+	local $Storable::Eval = sub { $safe->reval($_[0]) };
+	my $serialized = freeze(sub { print "42\n" });
+	my $code = thaw($serialized);
+	$code->(); # prints 42
 
 =head1 WARNING
 

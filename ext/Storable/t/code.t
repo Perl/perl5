@@ -147,7 +147,6 @@ ok(prototype($thawed->[4]), prototype($obj[0]->[4]));
 ######################################################################
 # Security with
 #   $Storable::Eval
-#   $Storable::Safe
 #   $Storable::Deparse
 
 {
@@ -214,8 +213,8 @@ ok(prototype($thawed->[4]), prototype($obj[0]->[4]));
 	$freezed = freeze $obj[0]->[$i];
 	$@ = "";
 	eval { $thawed = thaw $freezed };
-	skip(q{ok($@, ""});
-	skip(q{$thawed->(), $res});
+	ok($@, "");
+	ok($thawed->(), $res);
     }
 
     $freezed = freeze $obj[0]->[6];
