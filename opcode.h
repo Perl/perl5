@@ -11,15 +11,11 @@
 
 START_EXTERN_C
 
-#ifdef PERL_CUSTOM_OPS
+
 #define OP_NAME(o) (o->op_type == OP_CUSTOM ? custom_op_name(o) : \
                     PL_op_name[o->op_type])
 #define OP_DESC(o) (o->op_type == OP_CUSTOM ? custom_op_desc(o) : \
                     PL_op_desc[o->op_type])
-#else
-#define OP_NAME(o) PL_op_name[o->op_type]
-#define OP_DESC(o) PL_op_desc[o->op_type]
-#endif
 
 #ifndef DOINIT
 EXT char *PL_op_name[];

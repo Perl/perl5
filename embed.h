@@ -871,10 +871,8 @@
 #define sys_intern_clear	Perl_sys_intern_clear
 #define sys_intern_init		Perl_sys_intern_init
 #endif
-#if defined(PERL_CUSTOM_OPS)
 #define custom_op_name		Perl_custom_op_name
 #define custom_op_desc		Perl_custom_op_desc
-#endif
 #if defined(PERL_IN_AV_C) || defined(PERL_DECL_PROT)
 #define avhv_index_sv		S_avhv_index_sv
 #define avhv_index		S_avhv_index
@@ -2384,10 +2382,8 @@
 #define sys_intern_clear()	Perl_sys_intern_clear(aTHX)
 #define sys_intern_init()	Perl_sys_intern_init(aTHX)
 #endif
-#if defined(PERL_CUSTOM_OPS)
 #define custom_op_name(a)	Perl_custom_op_name(aTHX_ a)
 #define custom_op_desc(a)	Perl_custom_op_desc(aTHX_ a)
-#endif
 #if defined(PERL_IN_AV_C) || defined(PERL_DECL_PROT)
 #define avhv_index_sv(a)	S_avhv_index_sv(aTHX_ a)
 #define avhv_index(a,b,c)	S_avhv_index(aTHX_ a,b,c)
