@@ -65,7 +65,7 @@ my @death =
 
  '/(x)\2/' => 'Reference to nonexistent group before {#} mark in regex m/(x)\2{#}/',
 
- 'my $m = chr(92); $m =~ $m', => 'Trailing \ in regex m/\/',
+ 'my $m = "\\\"; $m =~ $m', => 'Trailing \ in regex m/\/',
 
  '/\x{1/' => 'Missing right brace on \x{} before {#} mark in regex m/\x{{#}1/',
 
@@ -101,15 +101,24 @@ my @death =
 
 my $total = (@death + @warning)/2;
 
+# utf8 is a noop on EBCDIC platforms, it is not fatal
+my $Is_EBCDIC = (ord('A') == 193);
+if ($Is_EBCDIC) {
+    my @utf8_death = grep(/utf8/, @death); 
+    $total = $total - $#utf8_death;
+}
+
 print "1..$total\n";
 
 my $count = 0;
 
 while (@death)
 {
-    $count++;
     my $regex = shift @death;
     my $result = shift @death;
+    # skip the utf8 test on EBCDIC since they do not die
+    next if ($Is_EBCDIC && $regex =~ /utf8/);
+    $count++;
 
     $_ = "x";
     eval $regex;

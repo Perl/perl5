@@ -15,6 +15,12 @@
 
 __END__
 # utf8.c [utf8_to_uv] -W
+BEGIN {
+    if (ord('A') == 193) {
+        print "SKIPPED\n# ebcdic platforms do not generate Malformed UTF-8 warnings.";
+        exit 0;
+    }
+}
 use utf8 ;
 my $a = "snøstorm" ;
 {
