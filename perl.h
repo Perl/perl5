@@ -425,6 +425,9 @@ int usleep(unsigned int);
 #  define MYSWAP
 #endif
 
+/* Cannot include embed.h here on Win32 as win32.h has not 
+   yet been included and defines some config variables e.g. HAVE_INTERP_INTERN
+ */
 #if !defined(PERL_FOR_X2P) && !defined(WIN32)
 #  include "embed.h"
 #endif
@@ -1890,7 +1893,7 @@ typedef pthread_key_t	perl_key;
 #endif	/* NETWARE */
 #endif /* USE_5005THREADS || USE_ITHREADS */
 
-#ifdef WIN32
+#if defined(WIN32)
 #  include "win32.h"
 #endif
 
@@ -3228,6 +3231,7 @@ END_EXTERN_C
 #endif
 
 #if defined(WIN32)
+/* Now all the config stuff is setup we can include embed.h */
 #  include "embed.h"
 #endif
 
