@@ -2690,6 +2690,7 @@ try_autoload:
 	    cx->blk_sub.savearray = GvAV(PL_defgv);
 	    GvAV(PL_defgv) = (AV*)SvREFCNT_inc(av);
 #endif /* USE_THREADS */
+	    cx->blk_sub.oldcurpad = PL_curpad;
 	    cx->blk_sub.argarray = av;
 	    ++MARK;
 

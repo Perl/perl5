@@ -80,6 +80,7 @@ struct block_sub {
     U16		olddepth;
     U8		hasargs;
     U8		lval;		/* XXX merge lval and hasargs? */
+    SV **	oldcurpad;
 };
 
 #define PUSHSUB(cx)							\
@@ -126,7 +127,7 @@ struct block_sub {
 		cx->blk_sub.argarray = newAV();				\
 		av_extend(cx->blk_sub.argarray, fill);			\
 		AvFLAGS(cx->blk_sub.argarray) = AVf_REIFY;		\
-		PL_curpad[0] = (SV*)cx->blk_sub.argarray;		\
+		cx->blk_sub.oldcurpad[0] = (SV*)cx->blk_sub.argarray;	\
 	    }								\
 	    else {							\
 		CLEAR_ARGARRAY(cx->blk_sub.argarray);			\

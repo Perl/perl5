@@ -917,6 +917,7 @@ PP(pp_sort)
 		cx->blk_sub.savearray = GvAV(PL_defgv);
 		GvAV(PL_defgv) = (AV*)SvREFCNT_inc(av);
 #endif /* USE_THREADS */
+		cx->blk_sub.oldcurpad = PL_curpad;
 		cx->blk_sub.argarray = av;
 	    }
 	    qsortsv((myorigmark+1), max,
@@ -2312,6 +2313,7 @@ PP(pp_goto)
 		    cx->blk_sub.savearray = GvAV(PL_defgv);
 		    GvAV(PL_defgv) = (AV*)SvREFCNT_inc(av);
 #endif /* USE_THREADS */
+		    cx->blk_sub.oldcurpad = PL_curpad;
 		    cx->blk_sub.argarray = av;
 		    ++mark;
 
