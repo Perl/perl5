@@ -1,6 +1,6 @@
 #!./perl
 
-# $RCSfile: TEST,v $$Revision: 4.1 $$Date: 92/08/07 18:27:00 $
+# Last change: Fri Jan 10 09:57:03 WET 1997
 
 # This is written in a peculiar style, since we're trying to avoid
 # most of the constructs we'll be testing for.
@@ -21,7 +21,7 @@ $ENV{EMXSHELL} = 'sh';        # For OS/2
 
 if ($ARGV[0] eq '') {
     @ARGV = split(/[ \n]/,
-      `echo base/*.t comp/*.t cmd/*.t pragma/*.t io/*.t; echo op/*.t lib/*.t`);
+      `echo base/*.t comp/*.t cmd/*.t io/*.t; echo op/*.t pragma/*.t lib/*.t`);
 }
 
 if ($^O eq 'os2' || $^O eq 'qnx') {
@@ -117,11 +117,17 @@ if ($bad == 0) {
 } else {
     $pct = sprintf("%.2f", $good / $total * 100);
     if ($bad == 1) {
-	warn "Failed 1 test, $pct% okay.\n";
+	warn "Failed 1 test script out of $total, $pct% okay.\n";
     } else {
-	die "Failed $bad/$total tests, $pct% okay.\n";
+	warn "Failed $bad test scripts out of $total, $pct% okay.\n";
     }
+       warn <<'SHRDLU';
+   ### Since not all tests were successful, you may want to run some
+   ### of them individually and examine any diagnostic messages they
+   ### produce.  See the INSTALL document's section on "make test".
+SHRDLU
 }
 ($user,$sys,$cuser,$csys) = times;
-print sprintf("u=%g  s=%g  cu=%g  cs=%g  files=%d  tests=%d\n",
+print sprintf("u=%g  s=%g  cu=%g  cs=%g  scripts=%d  tests=%d\n",
     $user,$sys,$cuser,$csys,$files,$totmax);
+exit $bad != 0;
