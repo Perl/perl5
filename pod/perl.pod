@@ -81,7 +81,7 @@ For ease of access, the Perl manual has been split up into several sections.
     perlnumber		Perl number semantics
 
     perlthrtut		Perl threads tutorial
-      perlothrtut		Perl threads tutorial
+      perlothrtut		Old Perl threads tutorial
 
     perlport		Perl portability guide
     perllocale		Perl locale support
@@ -270,7 +270,8 @@ Described in L<perlreftut>, L<perlref>, L<perldsc>, and L<perllol>.
 
 object-oriented programming
 
-Described in L<perlobj>, L<perltoot>, and L<perlbot>.
+Described in L<perlobj>, L<perlboot>, L<perltoot>, L<perltooc>,
+and L<perlbot>.
 
 =item *
 
@@ -307,7 +308,7 @@ Described in L<perlre>, with additional examples in L<perlop>.
 enhanced debugger and interactive Perl environment,
 with integrated editor support
 
-Described in L<perldebug>.
+Described in L<perldebtut>, L<perldebug> and L<perldebguts>.
 
 =item *
 
@@ -347,8 +348,9 @@ Perl developers, please write to perl-thanks@perl.org .
  a2p	awk to perl translator
  s2p	sed to perl translator
 
- http://www.perl.com/	    the Perl Home Page
- http://www.perl.com/CPAN   the Comprehensive Perl Archive
+ http://www.perl.com/       the Perl Home Page
+ http://www.cpan.org/       the Comprehensive Perl Archive
+ http://www.perl.org/       Perl Mongers (Perl user groups)
 
 =head1 DIAGNOSTICS
 
