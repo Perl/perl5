@@ -36,6 +36,7 @@ CP              := Duplicate -y
 RM_F			:= $(MACPERL_SRC)SafeDel
 RM_RF			:= $(MACPERL_SRC)SafeDel
 MV			    := Rename -y
+TOUCH 			:= SetFile -m .
 
 SOURCE 		*= $(BASEEXT).c $(MORE_SRC)
 MODULES		*= $(BASEEXT).pm $(MORE_MODS)

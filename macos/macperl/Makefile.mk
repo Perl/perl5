@@ -127,7 +127,7 @@ ObjectsMrC 		= {$(MacPerlSources) $(PerlSources)}.MrC.o
 
 Static_Ext_Xtr =	\
 	Compress:Zlib:Zlib Digest:MD5:MD5 HTML:Parser:Parser \
-	MIME:Base64:Base64 Storable:Storable
+	MIME:Base64:Base64 Storable:Storable List:Util:Util
 Static_Ext_Mac	= 	\
 	MacPerl:MacPerl 
 Static_Ext_Std	= \

@@ -207,13 +207,15 @@ RMS = delete -y
 public		=	perl translators sitelib_install 
 Dynamic_Ext_Mac	=	Mac
 Dynamic_Ext_Std	=	
-Dynamic_Ext_Xtr =	# \
-#	Compress:Zlib Digest:MD5 HTML:Parser MIME:Base64 Storable
+Dynamic_Ext_Xtr =	
 Static_Ext_Xtr =	\
 	Compress:Zlib:Zlib Digest:MD5:MD5 HTML:Parser:Parser \
-	MIME:Base64:Base64 Storable:Storable
+	MIME:Base64:Base64 Storable:Storable List:Util:Util
 Static_Ext_Mac	= 	\
 	MacPerl:MacPerl 
+########
+# sync all extensions with both config.sh and macperl/Makefile.mk!
+########
 Static_Ext_Std	= 	\
 	B:B ByteLoader:ByteLoader Data:Dumper:Dumper DB_File:DB_File \
 	Devel:DProf:DProf Devel:Peek:Peek DynaLoader:DynaLoader \
@@ -371,7 +373,7 @@ preplibrary: miniperl
 	Echo > preplibrary
 
 dynlibrary: perl PerlStub
-	For i in :ext:{$(Dynamic_Ext_Mac)} ::ext:{$(Dynamic_Ext_Std)}
+	For i in :bundled_ext:{$(Dynamic_Ext_Xtr)} ::ext:{$(Dynamic_Ext_Std)} :ext:{$(Dynamic_Ext_Mac)}
 		directory {{i}}
 		Set Echo 0
 		If `Exists Makefile.PL` != ""
