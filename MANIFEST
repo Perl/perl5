@@ -118,6 +118,7 @@ ext/IO/lib/IO/Socket.pm		IO::Socket extension Perl module
 ext/NDBM_File/Makefile.PL	NDBM extension makefile writer
 ext/NDBM_File/NDBM_File.pm	NDBM extension Perl module
 ext/NDBM_File/NDBM_File.xs	NDBM extension external subroutines
+ext/NDBM_File/hints/dynixptx.pl	Hint for NDBM_File for named architecture
 ext/NDBM_File/hints/solaris.pl	Hint for NDBM_File for named architecture
 ext/NDBM_File/hints/svr4.pl	Hint for NDBM_File for named architecture
 ext/NDBM_File/typemap		NDBM extension interface types
@@ -140,6 +141,7 @@ ext/POSIX/Makefile.PL		POSIX extension makefile writer
 ext/POSIX/POSIX.pm		POSIX extension Perl module
 ext/POSIX/POSIX.pod		POSIX extension documentation
 ext/POSIX/POSIX.xs		POSIX extension external subroutines
+ext/POSIX/hints/next_3.pl	Hint for POSIX for named architecture
 ext/POSIX/typemap		POSIX extension interface types
 ext/SDBM_File/Makefile.PL	SDBM extension makefile writer
 ext/SDBM_File/SDBM_File.pm	SDBM extension Perl module
@@ -326,6 +328,7 @@ lib/Tie/Hash.pm		Base class for tied hashes
 lib/Tie/Scalar.pm	Base class for tied scalars
 lib/Tie/SubstrHash.pm	Compact hash for known key, value and table size
 lib/Time/Local.pm	Reverse translation of localtime, gmtime
+lib/UNIVERSAL.pm	Base class for ALL classes.
 lib/abbrev.pl		An abbreviation table builder
 lib/assert.pl		assertion and panic with stack trace
 lib/bigfloat.pl		An arbitrary precision floating point package
@@ -473,6 +476,7 @@ pod/perlembed.pod	Embedding info
 pod/perlform.pod	Format info
 pod/perlfunc.pod	Function info
 pod/perlguts.pod	Internals info
+pod/perli18n.pod	I18N info
 pod/perlipc.pod		IPC info
 pod/perllol.pod		How to use lists of lists.
 pod/perlmod.pod		Module info
@@ -546,16 +550,30 @@ t/io/pipe.t		See if secure pipes work
 t/io/print.t		See if print commands work
 t/io/read.t		See if read works
 t/io/tell.t		See if file seeking works
+t/lib/abbrev.t		See if Text::Abbrev works
 t/lib/anydbm.t		See if AnyDBM_File works
+t/lib/autoloader.t	See if AutoLoader works
+t/lib/basename.t	See if File::Basename works
 t/lib/bigint.t		See if bigint.pl works
 t/lib/bigintpm.t	See if BigInt.pm works
+t/lib/checktree.t	See if File::CheckTree works
+t/lib/complex.t		See if Math::Complex works
 t/lib/db-btree.t	See if DB_File works
 t/lib/db-hash.t		See if DB_File works
 t/lib/db-recno.t	See if DB_File works
 t/lib/dirhand.t		See if DirHandle works
 t/lib/english.t		See if English works
+t/lib/env.t		See if Env works
+t/lib/fatal.t		See if Fatal works
+t/lib/filecache.t	See if FileCache works
+t/lib/filecopy.t	See if File::Copy works
+t/lib/filefind.t	See if File::Find works
 t/lib/filehand.t	See if FileHandle works
+t/lib/filepath.t	See if File::Path works
+t/lib/findbin.t		See if FindBin works
 t/lib/gdbm.t		See if GDBM_File works
+t/lib/getopt.t		See if Getopt::Std and Getopt::Long works
+t/lib/hostname.t	See if Sys::Hostname works
 t/lib/io_dup.t		See if dup()-related methods from IO work
 t/lib/io_pipe.t		See if pipe()-related methods from IO work
 t/lib/io_sock.t		See if INET socket-related methods from IO work
@@ -566,12 +584,19 @@ t/lib/ndbm.t		See if NDBM_File works
 t/lib/odbm.t		See if ODBM_File works
 t/lib/opcode.t		See if Opcode works
 t/lib/ops.t		See if Opcode works
+t/lib/parsewords.t	See if Text::ParseWords works
 t/lib/posix.t		See if POSIX works
 t/lib/safe1.t		See if Safe works
 t/lib/safe2.t		See if Safe works
 t/lib/sdbm.t		See if SDBM_File works
+t/lib/searchdict.t	See if Search::Dict works
+t/lib/selectsaver.t	See if SelectSaver works
 t/lib/socket.t		See if Socket works
 t/lib/soundex.t		See if Soundex works
+t/lib/symbol.t		See if Symbol works
+t/lib/texttabs.t	See if Text::Tabs works
+t/lib/textwrap.t	See if Text::Wrap works
+t/lib/timelocal.t	See if Time::Local works
 t/op/append.t		See if . works
 t/op/array.t		See if array operations work
 t/op/auto.t		See if autoincrement et all work
@@ -676,7 +701,7 @@ x2p/INTERN.h		Same as above
 x2p/Makefile.SH		Precursor to Makefile
 x2p/a2p.c		Output of a2p.y run through byacc
 x2p/a2p.h		Global declarations
-x2p/a2p.man		Manual page for awk to perl translator
+x2p/a2p.pod		Pod for awk to perl translator
 x2p/a2p.y		A yacc grammer for awk
 x2p/a2py.c		Awk compiler, sort of
 x2p/cflags.SH		A script that emits C compilation flags per file
@@ -685,7 +710,6 @@ x2p/handy.h		Handy definitions
 x2p/hash.c		Associative arrays again
 x2p/hash.h		Public declarations for the above
 x2p/s2p.PL		Sed to perl translator
-x2p/s2p.man		Manual page for sed to perl translator
 x2p/str.c		String handling package
 x2p/str.h		Public declarations for the above
 x2p/util.c		Utility routines
