@@ -3,7 +3,7 @@
  */
 
 /*
- * $Id: Storable.xs,v 1.0.1.4 2000/10/26 17:11:04 ram Exp ram $
+ * $Id: Storable.xs,v 1.0.1.4 2000/10/26 17:11:04 ram Exp $
  *
  *  Copyright (c) 1995-2000, Raphael Manfredi
  *  
@@ -11,6 +11,9 @@
  *  in the README file that comes with the distribution.
  *
  * $Log: Storable.xs,v $
+ * Revision 1.0.1.5  2000/11/05 17:21:24  ram
+ * patch6: fixed severe "object lost" bug for STORABLE_freeze returns
+ *
  * Revision 1.0.1.4  2000/10/26 17:11:04  ram
  * patch5: auto requires module of blessed ref when STORABLE_thaw misses
  *
@@ -94,14 +97,21 @@ typedef double NV;			/* Older perls lack the NV type */
 #endif
 
 #ifdef DEBUGME
-#ifndef DASSERT
-#define DASSERT
-#endif
-#define TRACEME(x)	do { PerlIO_stdoutf x; PerlIO_stdoutf("\n"); } while (0)
+/*
+ * TRACEME() will only output things when the $Storable::DEBUGME is true.
+ */
+
+#define TRACEME(x)	do {									\
+	if (SvTRUE(perl_get_sv("Storable::DEBUGME", TRUE)))	\
+		{ PerlIO_stdoutf x; PerlIO_stdoutf("\n"); }			\
+} while (0)
 #else
 #define TRACEME(x)
 #endif
 
+#ifndef DASSERT
+#define DASSERT
+#endif
 #ifdef DASSERT
 #define ASSERT(x,y)	do {									\
 	if (!(x)) {												\
@@ -242,6 +252,7 @@ typedef struct stcxt {
 	int entry;			/* flags recursion */
 	int optype;			/* type of traversal operation */
     HV *hseen;			/* which objects have been seen, store time */
+    AV *hook_seen;		/* which SVs were returned by STORABLE_freeze() */
     AV *aseen;			/* which objects have been seen, retrieve time */
     HV *hclass;			/* which classnames have been seen, store time */
     AV *aclass;			/* which classnames have been seen, retrieve time */
@@ -953,6 +964,15 @@ static void init_store_context(
 	 */
 
 	cxt->hook = newHV();			/* Table where hooks are cached */
+
+	/*
+	 * The `hook_seen' array keeps track of all the SVs returned by
+	 * STORABLE_freeze hooks for us to serialize, so that they are not
+	 * reclaimed until the end of the serialization process.  Each SV is
+	 * only stored once, the first time it is seen.
+	 */
+
+	cxt->hook_seen = newAV();		/* Lists SVs returned by STORABLE_freeze */
 }
 
 /*
@@ -992,6 +1012,9 @@ static void clean_store_context(stcxt_t *cxt)
 
 	hv_undef(cxt->hook);
 	sv_free((SV *) cxt->hook);
+
+	av_undef(cxt->hook_seen);
+	sv_free((SV *) cxt->hook_seen);
 
 	cxt->entry = 0;
 	cxt->s_dirty = 0;
@@ -2116,11 +2139,14 @@ static int store_hook(
 
 	for (i = 1; i < count; i++) {
 		SV **svh;
-		SV *xsv = ary[i];
+		SV *rsv = ary[i];
+		SV *xsv;
+		AV *av_hook = cxt->hook_seen;
 
-		if (!SvROK(xsv))
-			CROAK(("Item #%d from hook in %s is not a reference", i, class));
-		xsv = SvRV(xsv);		/* Follow ref to know what to look for */
+		if (!SvROK(rsv))
+			CROAK(("Item #%d returned by STORABLE_freeze "
+				"for %s is not a reference", i, class));
+		xsv = SvRV(rsv);		/* Follow ref to know what to look for */
 
 		/*
 		 * Look in hseen and see if we have a tag already.
@@ -2156,11 +2182,34 @@ static int store_hook(
 			CROAK(("Could not serialize item #%d from hook in %s", i, class));
 
 		/*
+		 * It was the first time we serialized `xsv'.
+		 *
+		 * Keep this SV alive until the end of the serialization: if we
+		 * disposed of it right now by decrementing its refcount, and it was
+		 * a temporary value, some next temporary value allocated during
+		 * another STORABLE_freeze might take its place, and we'd wrongly
+		 * assume that new SV was already serialized, based on its presence
+		 * in cxt->hseen.
+		 *
+		 * Therefore, push it away in cxt->hook_seen.
+		 */
+
+		av_store(av_hook, AvFILLp(av_hook)+1, SvREFCNT_inc(xsv));
+
+	sv_seen:
+		/*
+		 * Dispose of the REF they returned.  If we saved the `xsv' away
+		 * in the array of returned SVs, that will not cause the underlying
+		 * referenced SV to be reclaimed.
+		 */
+
+		ASSERT(SvREFCNT(xsv) > 1, ("SV will survive disposal of its REF"));
+		SvREFCNT_dec(rsv);			/* Dispose of reference */
+
+		/*
 		 * Replace entry with its tag (not a real SV, so no refcnt increment)
 		 */
 
-	sv_seen:
-		SvREFCNT_dec(xsv);
 		ary[i] = *svh;
 		TRACEME(("listed object %d at 0x%"UVxf" is tag #%"UVuf,
 			 i-1, PTR2UV(xsv), PTR2UV(*svh)));

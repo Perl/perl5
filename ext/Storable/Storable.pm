@@ -1,4 +1,4 @@
-;# $Id: Storable.pm,v 1.0.1.5 2000/10/26 17:10:18 ram Exp ram $
+;# $Id: Storable.pm,v 1.0.1.5 2000/10/26 17:10:18 ram Exp $
 ;#
 ;#  Copyright (c) 1995-2000, Raphael Manfredi
 ;#  
@@ -6,6 +6,9 @@
 ;#  in the README file that comes with the distribution.
 ;#
 ;# $Log: Storable.pm,v $
+;# Revision 1.0.1.6  2000/11/05 17:20:25  ram
+;# patch6: increased version number
+;#
 ;# Revision 1.0.1.5  2000/10/26 17:10:18  ram
 ;# patch5: documented that store() and retrieve() can return undef
 ;# patch5: added paragraph explaining the auto require for thaw hooks
@@ -35,7 +38,7 @@ package Storable; @ISA = qw(Exporter DynaLoader);
 use AutoLoader;
 use vars qw($forgive_me $VERSION);
 
-$VERSION = '1.005';
+$VERSION = '1.006';
 *AUTOLOAD = \&AutoLoader::AUTOLOAD;		# Grrr...
 
 #
