@@ -3343,6 +3343,20 @@ Perl_utf8_hop(pTHXo_ U8 *s, I32 off)
     return ((CPerlObj*)pPerl)->Perl_utf8_hop(s, off);
 }
 
+#undef  Perl_utf8_to_bytes
+U8*
+Perl_utf8_to_bytes(pTHXo_ U8 *s, STRLEN len)
+{
+    return ((CPerlObj*)pPerl)->Perl_utf8_to_bytes(s, len);
+}
+
+#undef  Perl_bytes_to_utf8
+U8*
+Perl_bytes_to_utf8(pTHXo_ U8 *s, STRLEN len)
+{
+    return ((CPerlObj*)pPerl)->Perl_bytes_to_utf8(s, len);
+}
+
 #undef  Perl_utf8_to_uv
 UV
 Perl_utf8_to_uv(pTHXo_ U8 *s, I32* retlen)

@@ -223,7 +223,7 @@ Perl_utf8_hop(pTHX_ U8 *s, I32 off)
 }
 
 /*
-=for apidoc utf8_to_bytes
+=for apidoc Am|U8 *|utf8_to_bytes|U8 *s|STRLEN len
 
 Converts a string C<s> of length C<len> from UTF8 into ASCII encoding.
 Unlike C<bytes_to_utf8>, this over-writes the original string.
@@ -256,11 +256,12 @@ Perl_utf8_to_bytes(pTHX_ U8* s, STRLEN len)
 }
 
 /*
-=for apidoc bytes_to_utf8
+=for apidoc Am|U8 *|bytes_to_utf8|U8 *s|STRLEN len
 
 Converts a string C<s> of length C<len> from ASCII into UTF8 encoding.
 Returns a pointer to the newly-created string.
 
+=cut
 */
 
 U8*

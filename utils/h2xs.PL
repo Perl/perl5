@@ -834,48 +834,48 @@ my $email = 'a.u.thor@a.galaxy.far.far.away';
 
 my $revhist = '';
 $revhist = <<EOT if $opt_C;
-
-=head1 HISTORY
-
-=over 8
-
-=item $TEMPLATE_VERSION
-
-Original version; created by h2xs $H2XS_VERSION with options
-
-  @ARGS
-
-=back
-
+#
+#=head1 HISTORY
+#
+#=over 8
+#
+#=item $TEMPLATE_VERSION
+#
+#Original version; created by h2xs $H2XS_VERSION with options
+#
+#  @ARGS
+#
+#=back
+#
 EOT
 
 my $exp_doc = <<EOD;
-
-=head2 EXPORT
-
-None by default.
-
+#
+#=head2 EXPORT
+#
+#None by default.
+#
 EOD
 if (@const_names and not $opt_P) {
   $exp_doc .= <<EOD;
-=head2 Exportable constants
-
-  @{[join "\n  ", @const_names]}
-
+#=head2 Exportable constants
+#
+#  @{[join "\n  ", @const_names]}
+#
 EOD
 }
 if (defined $fdecls and @$fdecls and not $opt_P) {
   $exp_doc .= <<EOD;
-=head2 Exportable functions
-
+#=head2 Exportable functions
+#
 EOD
-  $exp_doc .= <<EOD if $opt_p;
-When accessing these functions from Perl, prefix C<$opt_p> should be removed.
-
+#  $exp_doc .= <<EOD if $opt_p;
+#When accessing these functions from Perl, prefix C<$opt_p> should be removed.
+#
 EOD
   $exp_doc .= <<EOD;
-  @{[join "\n  ", @known_fnames{@fnames}]}
-
+#  @{[join "\n  ", @known_fnames{@fnames}]}
+#
 EOD
 }
 
@@ -898,7 +898,7 @@ my $pod = <<"END" unless $opt_P;
 #unedited.
 #
 #Blah blah blah.
-#$exp_doc$revhist
+$exp_doc$revhist
 #=head1 AUTHOR
 #
 #$author, $email
