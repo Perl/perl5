@@ -233,6 +233,15 @@ source code level, this shouldn't be that drastic a change.
 
 =item *
 
+The PerlIO C<:raw> discipline (as described in Camel III) is deprecated
+because its definition (as either the discipline version of C<binmode(FH)>
+or as the opposite of C<:crlf>) didn't really work: most importantly
+because turning off "clrfness" is not enough to make a stream truly
+binary.  Instead of C<:raw> use one of the following: C<open(..., ':bytes')>,
+C<binmode(FH)>, C<sysopen()> + C<sysread()>.
+
+=item *
+
 The current user-visible implementation of pseudo-hashes (the weird
 use of the first array element) is deprecated starting from Perl 5.8.0
 and will be removed in Perl 5.10.0, and the feature will be
@@ -1224,6 +1233,20 @@ hit by saying
 (Assuming, of course, that you don't need the troublesome variables
 C<$`>, C<$&>, or C<$'>.)  Also, introduced C<@LAST_MATCH_START> and
 C<@LAST_MATCH_END> English aliases for C<@-> and C<@+>.
+
+=item *
+
+ExtUtils::MakeMaker has been significantly cleaned up and fixed.
+The enhanced version has also been backported to earlier releases
+of Perl and submitted to CPAN so that the earlier releases can
+enjoy the fixes.
+
+=item *
+
+The arguments of WriteMakefile() in Makefile.PL are now checked
+for sanity much more carefully than before.  This may cause new
+warnings when modules are being insalled.  See L<ExtUtils::MakeMaker>
+for more details.
 
 =item *
 
@@ -3051,12 +3074,14 @@ find out whether it is threadsafe.  See L<perlthrtut> for more information.
 This is a known bug in FreeBSD's readdir_r() (see L<perlfreebsd>
 (README.freebsd)), which hopefully will be fixed in FreeBSD 4.6.
 
-=head2 FreeBSD Failing locale Test 117 For ISO8859-15 Locales
+=head2 FreeBSD Failing locale Test 117 For ISO 8859-15 Locales
 
-The ISO8859-15 locales may fail the locale test 117 in FreeBSD.
+The ISO 8859-15 locales may fail the locale test 117 in FreeBSD.
 This is caused by the characters \xFF (y with diaeresis) and \xBE
 (Y with diaeresis) not behaving correctly when being matched
-case-insensitively.
+case-insensitively.  Apparently this problem has been fixed in
+the latest FreeBSD releases.
+( http://www.freebsd.org/cgi/query-pr.cgi?pr=34308 )
 
 =head2 IRIX fails ext/List/Util/t/shuffle.t
 

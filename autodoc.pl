@@ -7,7 +7,7 @@ BEGIN {  push @INC, 'lib' }	# glob() below requires File::Glob
 
 
 #
-# See database of global and static function prototypes at the __END__.
+# See database of global and static function prototypes in embed.fnc
 # This is used to generate prototype headers under various configurations,
 # export symbols lists for different platforms, and macros to provide an
 # implicit interpreter context argument.
