@@ -1,4 +1,3 @@
-# Written $Id: //depot/perlio/ext/Encode/compile#16 $
 # ./compile -n koi8-r -o Encode/koi8-r.ucm Encode/koi8-r.enc
 <code_set_name> "koi8-r"
 <mb_cur_min> 1

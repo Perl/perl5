@@ -1,4 +1,3 @@
-# Written $Id: //depot/perlio/ext/Encode/compile#14 $
 # compile -n symbol -o Encode/symbol.ucm Encode/symbol.enc
 <code_set_name> "symbol"
 <mb_cur_min> 1

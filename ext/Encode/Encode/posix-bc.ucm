@@ -1,4 +1,3 @@
-# Written $Id: //depot/perlio/ext/Encode/compile#14 $
 # compile -n posix-bc -o Encode/posix-bc.ucm Encode/posix-bc.enc
 <code_set_name> "posix-bc"
 <mb_cur_min> 1
