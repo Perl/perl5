@@ -305,7 +305,7 @@ The I<ELEMENT_LIST> has the form
 Each name-type pair declares one element of the struct. Each
 element name will be defined as an accessor method unless a
 method by that name is explicitly defined; in the latter case, a
-warning is issued if the warning flag (-w) is set.
+warning is issued if the warning flag (B<-w>) is set.
 
 
 =head2 Element Types and Accessor Methods
