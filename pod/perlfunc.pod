@@ -1276,7 +1276,10 @@ formed from the files listed on the command line and accessed via the
 C<< <> >> operator.  Since C<< <> >> isn't explicitly opened,
 as a normal filehandle is, an C<eof()> before C<< <> >> has been
 used will cause C<@ARGV> to be examined to determine if input is
-available.
+available.   Similarly, an C<eof()> after C<< <> >> has returned 
+end-of-file will assume you are processing another C<@ARGV> list,
+and if you haven't set C<@ARGV>, will read input from C<STDIN>;
+see L<perlop/"I/O Operators">.
 
 In a C<< while (<>) >> loop, C<eof> or C<eof(ARGV)> can be used to
 detect the end of each file, C<eof()> will only detect the end of the
