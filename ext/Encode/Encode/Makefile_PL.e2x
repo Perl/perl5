@@ -14,9 +14,30 @@ my %tables = (
 	     );
 
 #### DO NOT EDIT BEYOND THIS POINT!
-my $enc2xs = '$_Enc2xs_';
+require File::Spec;
+my ($enc2xs, $encode_h) = ();
+PATHLOOP:
+for my $d (split /:/, $ENV{PATH}){
+    for my $f (qw/enc2xs enc2xs5.7.3/){
+        my $path = File::Spec->catfile($d, $f);
+        -x $path and $enc2xs = $path and last PATHLOOP;
+    }
+}
+$enc2xs or die "enc2xs not found!";
+print "enc2xs is $enc2xs\n";
+my %encode_h = ();
+for my $d (@INC){
+    my $dir = File::Spec->catfile($d, "Encode");
+    my $file =  File::Spec->catfile($dir, "encode.h");
+    -f $file and $encode_h{$dir} = -M $file;
+}
+%encode_h or die "encode.h not found!";
+# find the latest one
+($encode_h) = sort {$encode_h{$b} <=> $encode_h{$a}} keys %encode_h;
+print "encode.h is at $encode_h\n";
+
 WriteMakefile(
-              INC		=> "-I$_E2X_",
+              INC		=> "-I$encode_h",
 #### END_OF_HEADER -- DO NOT EDIT THIS LINE BY HAND! ####
 	      NAME		=> 'Encode::'.$name,
 	      VERSION_FROM	=> "$name.pm",
@@ -27,6 +48,9 @@ WriteMakefile(
 		  DIST_DEFAULT => 'all tardist',
 	      },
 	      MAN3PODS	=> {},
+	      PREREQ_PM => {
+			    'Encode'     => "1.41",
+                           },
 	      # OS 390 winges about line numbers > 64K ???
 	      XSOPT => '-nolinenumbers',
 	      );

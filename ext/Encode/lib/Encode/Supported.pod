@@ -16,9 +16,9 @@ the first in the following sequence (with a few exceptions).
 
 =item *
 
-The name used by the perl community.  That includes 'utf8' and 'ascii'.
-Unlike aliases, canonical names directly reaches the method so such
-frequently used words like 'utf8' should do without alias lookups.
+The name used by the Perl community.  That includes 'utf8' and 'ascii'.
+Unlike aliases, canonical names directly reach the method so such
+frequently used words like 'utf8' don't need to do alias lookups.
 
 =item *
 
@@ -27,7 +27,7 @@ The MIME name as defined in IETF RFCs  This includes all "iso-"'s.
 =item * 
 
 The name in the IANA registry.
-        
+
 =item *
 
 The name used by the organization that defined it.
@@ -40,31 +40,30 @@ safely tell if a given encoding is implemented or not just by passing
 the canonical name.
 
 Because of all the alias issues, and because in the general case 
-encodings have state, "Encode" uses the encoding object internally 
+encodings have state, "Encode" uses an encoding object internally 
 once an operation is in progress.
 
 =head1 Supported Encodings
 
 As of Perl 5.8.0, at least the following encodings are recognized.
 Note that unless otherwise specified, they are all case insensitive
-(via alias) and all occurrance of spaces are replaced with '-'.  In
-other words, "ISO 8859 1" and "iso-8859-1" are identical.
+(via alias) and all occurrence of spaces are replaced with '-'.
+In other words, "ISO 8859 1" and "iso-8859-1" are identical.
 
 Encodings are categorized and implemented in several different modules
 but you don't have to C<use Encode::XX> to make them available for
-most cases.  Encode.pm will automatically load those modules in need.
+most cases.  Encode.pm will automatically load those modules on demand.
 
 =head2 Built-in Encodings
 
 The following encodings are always available.
 
-  Canonical	Aliases                      Comments & References
+  Canonical     Aliases                      Comments & References
   ----------------------------------------------------------------
-  ascii         US-ascii				    [ECMA]
-  iso-8859-1	latin1					     [ISO]
-  utf8          UTF-8					 [RFC2279]
+  ascii         US-ascii                                    [ECMA]
+  iso-8859-1    latin1                                       [ISO]
+  utf8          UTF-8                                    [RFC2279]
   ----------------------------------------------------------------
-
 
 =head2 Encode::Unicode -- other Unicode encodings
 
@@ -96,49 +95,50 @@ encoding implemented as extended ASCII.  For most cases it uses
 
 =item ISO-8859 and corresponding vendor mappings
 
-Since there are so many, They are presented in table format with
-Languages and corresponding encoding names by vendors.  Note the table
+Since there are so many, they are presented in table format with
+languages and corresponding encoding names by vendors.  Note the table
 is sorted in order of ISO-8859 and the corresponding vendor mappings
 are slightly different from that of ISO.  See
 L<http://czyborra.com/charsets/iso8859.html> for details.
 
-  Lang/Regions	ISO/Other Std.	DOS	Windows	Macintosh  Others
+  Lang/Regions  ISO/Other Std.  DOS     Windows Macintosh  Others
   ----------------------------------------------------------------
-  N. America    (ASCII)		cp437	     AdobeStandardEncoding
-				cp863 (DOSCanadaF)
-  W.  Europe	(iso-8859-1)	cp850	cp1252	MacRoman  nextstep
-							 hp-roman8
-				cp860 (DOSPortuguese)
-  CE. Europe	iso-8859-2	cp852   cp1250	MacCentralEurRoman
-						MacCroatian
-						MacRomanian
-						MacRumanian
-  Latin3(*3)	iso-8859-3	
-  Latin4(*4)	iso-8859-4		
-  Cyrillics	iso-8859-5 	cp855	cp1251	MacCyrillic
-    (Also see next section)	cp866		MacUkrainian
-  Arabic	iso-8859-6	cp864	cp1256	MacArabic
-				cp1006          MacFarsi
-  Greek		iso-8859-7	cp737	cp1253	MacGreek
-				cp869 (DOSGreek2)
-  Hebrew	iso-8859-8	cp862	cp1255	MacHebrew
-  Turkish	iso-8859-9	cp857	cp1254	MacTurkish
-  Nordics	iso-8859-10	cp865
-				cp861		MacIcelandic
-						MacSami
-  Thai		iso-8859-11	cp874		MacThai
+  N. America    (ASCII)         cp437        AdobeStandardEncoding
+                                cp863 (DOSCanadaF)
+  W.  Europe    iso-8859-1      cp850   cp1252  MacRoman  nextstep
+                                                         hp-roman8
+                                cp860 (DOSPortuguese)
+  Cntrl. Europe iso-8859-2      cp852   cp1250  MacCentralEurRoman
+                                                MacCroatian
+                                                MacRomanian
+                                                MacRumanian
+  Latin3 [1]    iso-8859-3      
+  Latin4 [2]    iso-8859-4              
+  Cyrillics     iso-8859-5      cp855   cp1251  MacCyrillic
+    (Also see next section)     cp866           MacUkrainian
+  Arabic        iso-8859-6      cp864   cp1256  MacArabic
+                                cp1006          MacFarsi
+  Greek         iso-8859-7      cp737   cp1253  MacGreek
+                                cp869 (DOSGreek2)
+  Hebrew        iso-8859-8      cp862   cp1255  MacHebrew
+  Turkish       iso-8859-9      cp857   cp1254  MacTurkish
+  Nordics       iso-8859-10     cp865
+                                cp861           MacIcelandic
+                                                MacSami
+  Thai          iso-8859-11 [3] cp874           MacThai
   (iso-8859-12 is nonexistent. Reserved for Indics?)
-  Baltics       iso-8859-13   	cp775		cp1257
+  Baltics       iso-8859-13     cp775           cp1257
   Celtics       iso-8859-14
-  Latin9(*15)   iso-8859-15
+  Latin9 [4]    iso-8859-15
   Latin10       iso-8859-16
-  Vietnamese	viscii			cp1258	MacVietnamese
+  Vietnamese    viscii                  cp1258  MacVietnamese
   ----------------------------------------------------------------
 
-  (*3) Esperanto, Maltese, and Turkish. Turkish is now on 8859-5
-  (*4) Baltics.  Now on 8859-10
-  (*9) Nicknamed Latin0; Euro sign as well as  French and Finnish
-       letters that are missing from 8859-1 are added.
+  [1] Esperanto, Maltese, and Turkish. Turkish is now on 8859-5.
+  [2] Baltics.  Now on 8859-10.
+  [3] Also know as TIS 620. 
+  [4] Nicknamed Latin0; Euro sign as well as French and Finnish
+      letters that are missing from 8859-1 are added.
 
 All cp* are also available as ibm-*, ms-*, and windows-* .  See also
 L<http://czyborra.com/charsets/codepages.html>.
@@ -151,59 +151,59 @@ for details
 =item KOI8 - De Facto Standard for Cyrillic world
 
 Though ISO-8859 does have ISO-8859, KOI8 series is far more popular
-in the Net.   L<Encode> comes with the following KOI charsets.  for
-gory details, See <http://czyborra.com/charsets/cyrillic.html> for 
-details.  
+in the Net.   L<Encode> comes with the following KOI charsets.
+For gory details, see L<http://czyborra.com/charsets/cyrillic.html>
 
   ----------------------------------------------------------------
-  koi8-f					
-  koi8-r cp878						 [RFC1489]
-  koi8-u						 [RFC2319]
-  
+  koi8-f                                        
+  koi8-r cp878                                           [RFC1489]
+  koi8-u                                                 [RFC2319]
+  ----------------------------------------------------------------
+
 =item gsm0338 - Hentai Latin 1
 
-GSM0338 is for GSM handsets. Though it shares alpanumerals with ASCII,
-control character ranges and other parts are mapped very differently,
-presumablly to store Greek and Cyrillic alphabets.  This one is also 
-covered in Encode::Byte even thought this one does not comply extended
-ASCII.
+GSM0338 is for GSM handsets. Though it shares alphanumerals with
+ASCII, control character ranges and other parts are mapped very
+differently, presumably to store Greek and Cyrillic alphabets.
+This is also covered in Encode::Byte even though it does not
+comply to extended ASCII.
 
 =back
 
 =head2 The CJK: Chinese, Japanese, Korean (Multibyte)
 
-Note Vietnamese is listed above.  Also read "Encoding vs Charset"
+Note that Vietnamese is listed above.  Also read "Encoding vs Charset"
 below.  Also note these are implemented in distinct module by
-languages, due the the size concerns.  Please also refer to their
+languages, due the the size concerns.  Please refer to their
 respective document pages.
 
 =over 4
 
 =item Encode::CN -- Continental China
 
-  Standard	DOS/Win	Macintosh	         Comment/Reference
+  Standard      DOS/Win Macintosh                Comment/Reference
   ----------------------------------------------------------------
-  euc-cn(*1)		MacChineseSimp
-  (gbk)         cp936 (*2)
-  gb12345-raw			   { GB12345 without CES }
-  gb2312-raw			   { GB2312  without CES }
+  euc-cn [1]            MacChineseSimp
+  (gbk)         cp936 [2]
+  gb12345-raw                      { GB12345 without CES }
+  gb2312-raw                       { GB2312  without CES }
   hz
   iso-ir-165
   ----------------------------------------------------------------
 
-  (*1) GB2312 is aliased to this.  see L<Microsoft-related naming mess>
-  (*2) gbk is aliased to this. see L<Microsoft-related naming mess>
+  [1] GB2312 is aliased to this.  see L<Microsoft-related naming mess>
+  [2] gbk is aliased to this. see L<Microsoft-related naming mess>
 
 =item Encode::JP -- Japan
 
-  Standard	DOS/Win	Macintosh 	         Comment/Reference
+  Standard      DOS/Win Macintosh                Comment/Reference
   ----------------------------------------------------------------
   euc-jp
-  shiftjis	cp932	macJapanese
+  shiftjis      cp932   macJapanese
   7bit-jis
   euc-jp
-  iso-2022-jp				                 [RFC1468]
-  iso-2022-jp-1				                 [RFC2237]
+  iso-2022-jp                                            [RFC1468]
+  iso-2022-jp-1                                          [RFC2237]
   jis0201-raw  { JIS X 0201 (roman + halfwidth kana) without CES }
   jis0208-raw  { JIS X 0208 (Kanji + fullwidth kana) without CES }
   jis0212-raw  { JIS X 0212 (Extended Kanji)         without CES }
@@ -211,24 +211,23 @@ respective document pages.
 
 =item Encode::KR -- Korea
 
-  Standard	DOS/Win	Macintosh 	         Comment/Reference
+  Standard      DOS/Win Macintosh                Comment/Reference
   ----------------------------------------------------------------
-  euc-kr		MacKorean                        [RFC1557]
-		cp949 (*)                    
-  iso-2022-kr				                 [RFC1557]
+  euc-kr                MacKorean                        [RFC1557]
+                cp949 [1]                    
+  iso-2022-kr                                            [RFC1557]
   johab                                  [KS X 1001:1998, Annex 3]
   ksc5601-raw                              { KSC5601 without CES }
   ----------------------------------------------------------------
 
-  (*) ks_c_5601-1987, (x-)?windows-949, and uhc are aliased to
-  this.  See below.
-  
-                         
+  [1] ks_c_5601-1987, (x-)?windows-949, and uhc are aliased to this.
+  See below.
+
 =item Encode::TW -- Taiwan
 
-  Standard	DOS/Win	Macintosh 	         Comment/Reference
+  Standard      DOS/Win Macintosh                Comment/Reference
   ----------------------------------------------------------------
-  big5		cp950	MacChineseTrad
+  big5          cp950   MacChineseTrad
   big5-hkscs
   ----------------------------------------------------------------
 
@@ -237,7 +236,7 @@ respective document pages.
 Due to size concerns, additional Chinese encodings below are
 distributed separately on CPAN, under the name Encode::HanExtra.
 
-  Standard	DOS/Win	Macintosh 	         Comment/Reference
+  Standard      DOS/Win Macintosh                Comment/Reference
   ----------------------------------------------------------------
   gb18030
   euc-tw
@@ -280,7 +279,7 @@ For symbols  and dingbats.
 =head1 Unsupported encodings
 
 The following are not supported as yet.  Some because they are rarely
-usede, some because of technical difficulty.  They may be supported by
+used, some because of technical difficulties.  They may be supported by
 external modules via CPAN in future, however.
 
 =over 4
@@ -289,23 +288,22 @@ external modules via CPAN in future, however.
 
 Not very popular yet.  Needs Unicode Database or equivalent to
 implement encode() (Because it includes JIS X 0208/0212, KSC5601, and
-GB2312 sumulteniously, which code points in unicode overlap.  So you
+GB2312 simultaneously, which code points in Unicode overlap.  So you
 need to lookup the database to determine what character set a given
 Unicode character should belong). 
 
-=item   ISO-2022-CN [RFC1922]
+=item ISO-2022-CN [RFC1922]
 
 Not very popular.  Needs CNS 11643-1 and 2 which are not available in
-this module.  CNS 11643 is supported (via euc-tw) in
-Encode::HanExtra.  Autrijus may add support for this encoding in his
-module in future 
+this module.  CNS 11643 is supported (via euc-tw) in Encode::HanExtra.
+Autrijus may add support for this encoding in his module in future.
 
 =item various UP-UX encodings
 
-The following are unsoported due to the lack of mapping data.
-  
+The following are unsupported due to the lack of mapping data.
+
   '8'  - arabic8, greek8, hebrew8, kana8, thai8, and turkish8
-  '15' - japanese15, korean15, and  roi15
+  '15' - japanese15, korean15, and roi15
 
 =item Cyrillic encoding ISO-IR-111
 
@@ -315,7 +313,11 @@ Anton doubts its usefulness.
 
 None of the Encode team knows Hebrew enough (ISO-8859-8, cp1255 and
 MacHebrew are supported because and just because there were mappings
-available at L<http://www.unicode.org/>).  Contribution welcome.
+available at L<http://www.unicode.org/>).  Contributions welcome.
+
+=item ISIRI 3342, Iran System, ISIRI 2900 [Farsi]
+
+Ditto.
 
 =item Thai encoding TCVN
 
@@ -323,14 +325,17 @@ Ditto.
 
 =item Vietnamese encodings VPS
 
-Though Jungshik has reported that mozilla supports this encoding,  It was too late for us to add one.  In future via a separate module.  See
-L<http://lxr.mozilla.org/seamonkey/source/intl/uconv/ucvlatin/vps.uf> and
+Though Jungshik has reported that Mozilla supports this encoding it
+was too late before 5.8.0 for us to add one.  In future via a separate
+module.  See
+L<http://lxr.mozilla.org/seamonkey/source/intl/uconv/ucvlatin/vps.uf>
+and
 L<http://lxr.mozilla.org/seamonkey/source/intl/uconv/ucvlatin/vps.ut>
 if you are interested in helping us.
 
-=item various Mac encodings
+=item Various Mac encodings
 
-The following are unsoported due to the lack of mapping data. 
+The following are unsupported due to the lack of mapping data. 
 
   MacArmenian,  MacBengali,   MacBurmese,   MacEthiopic
   MacExtArabic, MacGeorgian,  MacKannada,   MacKhmer
@@ -338,14 +343,14 @@ The following are unsoported due to the lack of mapping data.
   MacSinhalese, MacTamil,     MacTelugu,    MacTibetan
   MacVietnamese
 
-The rest of which already available are based upon the vendor mappings at 
-L<http://www.unicode.org/Public/MAPPINGS/VENDORS/APPLE/> .
+The rest of which already available are based upon the vendor mappings
+at L<http://www.unicode.org/Public/MAPPINGS/VENDORS/APPLE/> .
 
 =item (Mac) Indic encodings
 
 The maps for the following is available at L<http://www.unicode.org/>
-but remains unsupport because those encordigs need algorithmical
-approach, unsupported by F<enc2xs>
+but remains unsupport because those encodings need algorithmical
+approach, currently unsupported by F<enc2xs>
 
   MacDevanagari
   MacGurmukhi
@@ -355,7 +360,7 @@ For details, please see C<Unicode mapping issues and notes:> at
 L<http://www.unicode.org/Public/MAPPINGS/VENDORS/APPLE/DEVANAGA.TXT> .
 
 I believe this issue is prevalent not only for Mac Indics but also in
-other Indic encodings but those mentions were the only Indic encodings
+other Indic encodings, but the above were the only Indic encodings
 maps that I could find at L<http://www.unicode.org/> .
 
 =back
@@ -364,8 +369,8 @@ maps that I could find at L<http://www.unicode.org/> .
 
 We are used to using the term (character) I<encoding> and I<character set>
 interchangeably.  But just as using the term byte and character is
-dangerous and should be differenciated when needed, we need to
-differenciate I<encoding> and I<character set>.
+dangerous and should be differentiated when needed, we need to
+differentiate I<encoding> and I<character set>.
 
 To understand that, it's follow how we make computers grok our characters.
 
@@ -379,13 +384,13 @@ collection of characters I<character repertoire>.
 =item *
 
 Then we have to give each character a unique ID so your computer can
-tell the differnce from 'a' to 'A'.  This itemized character
-repartoire is now a I<character set>.
+tell the difference from 'a' to 'A'.  This itemized character
+repertoire is now a I<character set>.
 
 =item *
 
 If your computer can grow the character set without further
-proccessing, you can go ahead use it.  This is called a I<coded
+processing, you can go ahead use it.  This is called a I<coded
 character set> (CCS) or I<raw character encoding>.  ASCII is used this
 way for most cases.
 
@@ -430,7 +435,7 @@ is added by 0x80
 By carefully looking at at the encoded byte sequence, you may find the
 byte sequence conforms a unique number.  In that sense EUC is a CCS
 generated by a CES above from up to four CCS (complicated?).  UTF-8
-falls into this category.  See L<perlunicode/"UTF-8"> to find how
+falls into this category.  See L<perlUnicode/"UTF-8"> to find how
 UTF-8 maps Unicode to a byte sequence.
 
 You may also find by now why 7bit ISO-2022 cannot conform a CCS.  If
@@ -514,7 +519,7 @@ it is beyond the power of words to describe the way HTML browsers
 encode non-C<ASCII> form data. To get a general impression visit
 L<http://ppewww.ph.gla.ac.uk/~flavell/charset/form-i18n.html>.
 While encoding of form data has stabilized for C<UTF-8> coded pages
-(at least IE 5/6, NS 6, Opera 6 behave consitently), be sure to
+(at least IE 5/6, NS 6, Opera 6 behave consistently), be sure to
 expect fun (and cross-browser discrepancies) with C<UTF-16> coded
 pages!
 
@@ -590,8 +595,8 @@ Microsoft's understanding of C<Shift_JIS>.
 
 JIS has not endorsed the full Microsoft standard however.
 The official C<Shift_JIS> includes only JIS X 0201 and JIS X 0208
-subsets, while Microsoft has always been meaning C<Shift_JIS> to
-encode a wider character repertoire. See C<IANA> registration for
+character sets, while Microsoft has always been meaning C<Shift_JIS>
+to encode a wider character repertoire. See C<IANA> registration for
 C<Windows-31J>.
 
 As a historical predecessor Microsoft's variant
@@ -612,7 +617,7 @@ Encode separately supports C<Shift_JIS> and C<cp932>.
 =item character repertoire
 
 A collection of unique characters.  A I<character> set in the most
-strict sense. At this stage characters are not numberd.
+strict sense. At this stage characters are not numbered.
 
 =item coded character set (CCS)
 
@@ -658,7 +663,7 @@ than the 8 bit version, 7 bit version is not very popular except for
 iso-2022-jp, the de facto standard CES for e-mails.
 
 8 bit version can conform a CCS.  EUC and ISO-8859 are two examples
-thereof.  pre-5.6 perl could use them as string literals.
+thereof.  Pre-5.6 perl could use them as string literals.
 
 =item UCS
 
@@ -673,13 +678,13 @@ octets.
 =item Unicode
 
 A Character Set that aims to include all character repertoire of the
-world.  Many character sets in various national as well as industorial
+world.  Many character sets in various national as well as industrial
 standards have become, in a way, just subsets of Unicode.
 
 =item UTF
 
 Short for I<Unicode Transformation Format>.  Determines how to map a
-unicode character into byte sequnece.
+Unicode character into byte sequence.
 
 =item UTF-16
 
@@ -739,7 +744,7 @@ L<http://www.iso.ch/>
 
 =item RFC
 
-Request For Comment -- need I say more?
+Request For Comments -- need I say more?
 L<http://www.rfc.net/>, L<http://www.faqs.org/rfcs/>
 
 =item UC
@@ -753,7 +758,7 @@ L<http://www.unicode.org/>
 
 L<http://www.unicode.org/glossary/>
 
-The glossary of this document is based opon this site.
+The glossary of this document is based upon this site.
 
 =back
 
@@ -784,11 +789,11 @@ You will find brief info on C<EUC-CN>, C<GBK> and mostly on C<GB 18030>
 
 L<http://jshin.net/faq>
 
-And especially it's subject 8
+And especially it's subject 8.
 
 L<http://jshin.net/faq/qa8.html>
 
-a comprehensive overview of the Korean (C<KS *>) standards.
+A comprehensive overview of the Korean (C<KS *>) standards.
 
 =back
 
@@ -817,5 +822,5 @@ L<http://www.oreilly.com/catalog/cjkvinfo/>
 
 I could not find this page because the hostname doesn't resolve!
 
- Brief description for most of the mentioned CJK encodings
+Brief description for most of the mentioned CJK encodings
 L<http://www.debian.org.ru/doc/manuals/intro-i18n/ch-codes.html>

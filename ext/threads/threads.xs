@@ -76,6 +76,7 @@ ithread *threads;
 #define ithread_CLONE(thread)		Perl_ithread_CLONE(aTHX_ thread)
 #define ithread_detach(thread)		Perl_ithread_detach(aTHX_ thread)
 #define ithread_tid(thread)		((thread)->tid)
+#define ithread_yield(thread)		(YIELD);
 
 static perl_mutex create_destruct_mutex;  /* protects the creation and destruction of threads*/
 
@@ -566,6 +567,8 @@ PPCODE:
   SvREFCNT_dec(params);
 }
 
+void
+ithread_yield(ithread *thread)
 
 void
 ithread_detach(ithread *thread)

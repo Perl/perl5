@@ -19,7 +19,7 @@ BEGIN {
     $| = 1;
 }
 use strict;
-use Test::More tests => 22;
+use Test::More tests => 15;
 #use Test::More qw(no_plan);
 use Encode;
 use File::Basename;
@@ -74,55 +74,6 @@ print $dst $txt;
 close($dst);
 close($src);
 ok(compare($euc,$rnd) == 0);
-
-is($enc->name,'euc-kr');
-
-my $skip_perlio;
-eval { require PerlIO::encoding; };
-if ($@){
-    $skip_perlio = 1;
-}else{
-    $skip_perlio = 0;
-    binmode(STDIN);
-}
-
-$skip_perlio ||= (@ARGV and shift eq 'perlio');
-
-SKIP: {
-    skip "PerlIO Encoding Needed", 6 if $skip_perlio;
-    print "# src :encoding test\n";
-    open($src,"<encoding(euc-kr)",$euc) || die "Cannot open $euc:$!";
-    binmode($src);
-    ok(defined($src) && fileno($src));
-    open($dst,">:utf8",$utf) || die "Cannot open $utf:$!";
-    binmode($dst);
-    ok(defined($dst) || fileno($dst));
-    my $out = select($dst);
-    while (<$src>) { print; }
-    close($dst);
-    close($src);
-
- TODO:
-    {
-	local $TODO = 'needs debugging on VMS' if $^O eq 'VMS';
-	ok(compare($utf,$ref) == 0);
-    }
-    select($out);
-
-    print "# dst :encoding test\n";
-    open($src,"<:utf8",$ref) || die "Cannot open $ref:$!";
-    binmode($src);
-    ok(defined($src) || fileno($src));
-    open($dst,">encoding(euc-kr)",$rnd) || die "Cannot open $rnd:$!";
-    binmode($dst);
-    ok(defined($dst) || fileno($dst));
-    $out = select($dst);
-    while (<$src>) { print; }
-    close($dst);
-    close($src);
-    ok(compare($euc,$rnd) == 0);
-    select($out);
-}
 
 is($enc->name,'euc-kr');
 

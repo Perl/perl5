@@ -1,5 +1,5 @@
 package PerlIO::encoding;
-our $VERSION = '0.01';
+our $VERSION = '0.02';
 use XSLoader ();
 use Encode;
 XSLoader::load 'PerlIO::encoding';
@@ -12,18 +12,21 @@ PerlIO::encoding - encoding layer
 
 =head1 SYNOPSIS
 
-   open($fh, "<",  \$scalar);
-   open($fh, ">",  \$scalar);
-   open($fh, ">>", \$scalar);
-
-   open($fh, "<...",  \$scalar); # for example open($fh, "<:crlf", \$scalar);
-   open($fh, ">...",  \$scalar); # for example open($fh, ">:utf8", \$scalar);
-   open($fh, ">>..",  \$scalar);
+  open($f, "<:encoding(foo)", "infoo");
+  open($f, ">:encoding(bar)", "outbar");
 
 =head1 DESCRIPTION
 
-Open scalars for "in memory" input and output.  The scalars will
-behave as if they were files.
+Open a filehandle with a transparent encoding filter.
+
+On input, convert the bytes expected to be in the specified
+character set and encoding to Perl string data (Unicode and
+Perl's internal Unicode encoding, UTF-8).  On output, convert
+Perl string data into the specified character set and encoding.
+
+=head1 SEE ALSO
+
+L<open>, L<Encode>, L<perlfunc/binmode>, L<perluniintro>
 
 =cut
 

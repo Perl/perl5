@@ -5,7 +5,7 @@ BEGIN {
     }
 }
 use Encode;
-our $VERSION = do { my @r = (q$Revision: 1.23 $ =~ /\d+/g); sprintf "%d."."%02d" x $#r, @r };
+our $VERSION = do { my @r = (q$Revision: 1.24 $ =~ /\d+/g); sprintf "%d."."%02d" x $#r, @r };
 
 use XSLoader;
 XSLoader::load(__PACKAGE__,$VERSION);
@@ -89,6 +89,6 @@ to find why it is implemented that way.
 
 =head1 SEE ALSO
 
-L<Encode>,L<Encode::CJKguide>
+L<Encode>
 
 =cut

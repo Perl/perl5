@@ -3,41 +3,10 @@ package Encode::Unicode;
 use strict;
 use warnings;
 
-our $VERSION = do { my @r = (q$Revision: 1.31 $ =~ /\d+/g); sprintf "%d."."%02d" x $#r, @r };
+our $VERSION = do { my @r = (q$Revision: 1.32 $ =~ /\d+/g); sprintf "%d."."%02d" x $#r, @r };
 
-#
-# Aux. subs & constants
-#
-
-sub FBCHAR(){ 0xFFFd }
-sub BOM_BE(){ 0xFeFF }
-sub BOM16LE(){ 0xFFFe }
-sub BOM32LE(){ 0xFFFe0000 }
-
-sub valid_ucs2($){
-    return
-	(0 <= $_[0] && $_[0] < 0xD800)
-	    || 	( 0xDFFF < $_[0] && $_[0] <= 0xFFFF);
-}
-
-sub issurrogate($){   0xD800 <= $_[0]  && $_[0] <= 0xDFFF }
-sub isHiSurrogate($){ 0xD800 <= $_[0]  && $_[0] <  0xDC00 }
-sub isLoSurrogate($){ 0xDC00 <= $_[0]  && $_[0] <= 0xDFFF }
-
-sub ensurrogate($){
-    use integer; # we have divisions
-    my $uni = shift;
-    my  $hi = ($uni - 0x10000) / 0x400 + 0xD800;
-    my  $lo = ($uni - 0x10000) % 0x400 + 0xDC00;
-    return ($hi, $lo);
-}
-
-sub desurrogate($$){
-    my ($hi, $lo) = @_;
-    return 0x10000 + ($hi - 0xD800)*0x400 + ($lo - 0xDC00);
-}
-
-sub Mask { {2 => 0xffff,  4 => 0xffffffff} }
+use XSLoader;
+XSLoader::load(__PACKAGE__,$VERSION);
 
 #
 # Object Generator 8 transcoders all at once!
@@ -96,16 +65,47 @@ sub set_transcoder{
     }elsif($type eq "classic"){
 	*decode = \&decode_classic;
 	*encode = \&encode_classic;
-    }elsif($type eq "xs"){
-	*decode = \&decode_xs;
-	*encode = \&encode_xs;
     }else{
-	require Carp;
+	require Carp; 
 	Carp::croak __PACKAGE__, "::set_transcoder(modern|classic|xs)";
     }
 }
 
 set_transcoder("xs");
+
+#
+# Aux. subs & constants
+#
+
+sub FBCHAR(){ 0xFFFd }
+sub BOM_BE(){ 0xFeFF }
+sub BOM16LE(){ 0xFFFe }
+sub BOM32LE(){ 0xFFFe0000 }
+
+sub valid_ucs2($){
+    return 
+	(0 <= $_[0] && $_[0] < 0xD800) 
+	    || 	( 0xDFFF < $_[0] && $_[0] <= 0xFFFF);
+}
+
+sub issurrogate($){   0xD800 <= $_[0]  && $_[0] <= 0xDFFF }
+sub isHiSurrogate($){ 0xD800 <= $_[0]  && $_[0] <  0xDC00 }
+sub isLoSurrogate($){ 0xDC00 <= $_[0]  && $_[0] <= 0xDFFF }
+
+sub ensurrogate($){
+    use integer; # we have divisions
+    my $uni = shift;
+    my  $hi = ($uni - 0x10000) / 0x400 + 0xD800;
+    my  $lo = ($uni - 0x10000) % 0x400 + 0xDC00;
+    return ($hi, $lo);
+}
+
+sub desurrogate($$){
+    my ($hi, $lo) = @_;
+    return 0x10000 + ($hi - 0xD800)*0x400 + ($lo - 0xDC00);
+}
+
+sub Mask { {2 => 0xffff,  4 => 0xffffffff} }
 
 #
 # *_modern are much faster but guzzle more memory
@@ -127,7 +127,7 @@ sub decode_modern($$;$)
 	my $ord = shift @ord;
 	unless ($size == 4 or valid_ucs2($ord &= $mask)){
 	    if ($ucs2){
-		$chk and
+		$chk and 
 		    poisoned2death($obj, "no surrogates allowed", $ord);
 		shift @ord; # skip the next one as well
 		$ord = FBCHAR;
@@ -163,12 +163,12 @@ sub encode_modern($$;$)
 	unless ($size == 4 or valid_ucs2($ord)) {
 	    unless(issurrogate($ord)){
 		if ($ucs2){
-		    $chk and
+		    $chk and 
 			poisoned2death($obj, "code point too high", $ord);
 
 		    push @str, FBCHAR;
 		}else{
-		
+		 
 		    push @str, ensurrogate($ord);
 		}
 	    }else{  # not supposed to happen
@@ -200,7 +200,7 @@ sub decode_classic($$;$)
 	 my $ord = unpack($endian, substr($str, 0, $size, ''));
 	unless ($size == 4 or valid_ucs2($ord &= $mask)){
 	    if ($ucs2){
-		$chk and
+		$chk and 
 		    poisoned2death($obj, "no surrogates allowed", $ord);
 		substr($str,0,$size,''); # skip the next one as well
 		$ord = FBCHAR;
@@ -236,7 +236,7 @@ sub encode_classic($$;$)
 	unless ($size == 4 or valid_ucs2($ord)) {
 	    unless(issurrogate($ord)){
 		if ($ucs2){
-		    $chk and
+		    $chk and 
 			poisoned2death($obj, "code point too high", $ord);
 		    $str .= pack($endian, FBCHAR);
 		}else{
@@ -256,7 +256,7 @@ sub BOMB {
     my ($size, $bom) = @_;
     my $N = $size == 2 ? 'n' : 'N';
     my $ord = unpack($N, $bom);
-    return ($ord eq BOM_BE) ? $N :
+    return ($ord eq BOM_BE) ? $N : 
 	($ord eq BOM16LE) ? 'v' : ($ord eq BOM32LE) ? 'V' : undef;
 }
 
@@ -279,7 +279,7 @@ Encode::Unicode -- Various Unicode Transform Format
 
 =head1 SYNOPSIS
 
-    use Encode qw/encode decode/;
+    use Encode qw/encode decode/; 
     $ucs2 = encode("UCS-2BE", $utf8);
     $utf8 = decode("UCS-2BE", $ucs2);
 
@@ -361,7 +361,7 @@ called Byte Order Mark (BOM) is prepended to the head of string.
   -------------------------
 
 =back
-
+ 
 This modules handles BOM as follows.
 
 =over 4
@@ -375,7 +375,7 @@ simply treated as one of characters (ZERO WIDTH NO-BREAK SPACE).
 
 When BE or LE is omitted during decode(), it checks if BOM is in the
 beginning of the string and if found endianness is set to what BOM
-says.  If not found, dies.
+says.  If not found, dies. 
 
 =item *
 
@@ -428,7 +428,7 @@ And to desurrogate;
  $uni = 0x10000 + ($hi - 0xD800) * 0x400 + ($lo - 0xDC00);
 
 Note this move has made \x{D800}-\x{DFFF} into a forbidden zone but
-perl does not prohibit the use of characters within this range.  To perl,
+perl does not prohibit the use of characters within this range.  To perl, 
 every one of \x{0000_0000} up to \x{ffff_ffff} (*) is I<a character>.
 
   (*) or \x{ffff_ffff_ffff_ffff} if your perl is compiled with 64-bit
@@ -445,7 +445,7 @@ RFC 2781 L<http://rfc.net/rfc2781.html>,
 L<http://www.unicode.org/unicode/faq/utf_bom.html>
 
 Ch. 15, pp. 403 of C<Programming Perl (3rd Edition)>
-by Larry Wall, Tom Christiansen, Jon Orwant;
+by Larry Wall, Tom Christiansen, Jon Orwant; 
 O'Reilly & Associates; ISBN 0-596-00027-8
 
 =cut

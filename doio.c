@@ -213,6 +213,15 @@ Perl_do_openn(pTHX_ GV *gv, register char *name, I32 len, int as_raw,
 	if (num_svs) {
 	    /* New style explict name, type is just mode and discipline/layer info */
 	    STRLEN l = 0;
+#ifdef USE_STDIO
+	    if (SvROK(*svp) && !strchr(name,'&')) {
+		if (ckWARN(WARN_IO))
+		    Perl_warner(aTHX_ packWARN(WARN_IO),
+			    "Can't open a reference");
+		SETERRNO(EINVAL, LIB$_INVARG);
+		goto say_false;
+	    }
+#endif /* USE_STDIO */
 	    name = SvOK(*svp) ? SvPV(*svp, l) : "";
 	    len = (I32)l;
 	    name = savepvn(name, len);

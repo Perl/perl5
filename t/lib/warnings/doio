@@ -228,3 +228,22 @@ no warnings 'io' ;
 $a = eof STDOUT ;
 EXPECT
 Filehandle STDOUT opened only for output at - line 3.
+########
+# doio.c [Perl_do_openn]
+use Config;
+BEGIN {
+    if ($Config{useperlio}) {
+	print <<EOM;
+SKIPPED
+# warns only without perlio
+EOM
+	exit;
+    }
+}
+use warnings 'io';
+my $x = "foo";
+open FOO, '>', \$x;
+no warnings 'io';
+open FOO, '>', \$x;
+EXPECT
+Can't open a reference at - line 14.

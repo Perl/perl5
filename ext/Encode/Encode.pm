@@ -1,6 +1,6 @@
 package Encode;
 use strict;
-our $VERSION = do { my @r = (q$Revision: 1.42 $ =~ /\d+/g); sprintf "%d."."%02d" x $#r, @r };
+our $VERSION = do { my @r = (q$Revision: 1.50 $ =~ /\d+/g); sprintf "%d."."%02d" x $#r, @r };
 our $DEBUG = 0;
 
 require DynaLoader;
@@ -9,28 +9,31 @@ require Exporter;
 our @ISA = qw(Exporter DynaLoader);
 
 # Public, encouraged API is exported by default
-our @EXPORT = qw (
-  decode
-  decode_utf8
-  encode
-  encode_utf8
-  encodings
-  find_encoding
+
+our @EXPORT = qw(
+  decode  decode_utf8  encode  encode_utf8
+  encodings  find_encoding
 );
 
+our @FB_FLAGS  = qw(DIE_ON_ERR WARN_ON_ERR RETURN_ON_ERR LEAVE_SRC PERLQQ);
+our @FB_CONSTS = qw(FB_DEFAULT FB_QUIET FB_WARN FB_PERLQQ FB_CROAK);
+
 our @EXPORT_OK =
-    qw(
-       _utf8_off
-       _utf8_on
-       define_encoding
-       from_to
-       is_16bit
-       is_8bit
-       is_utf8
-       resolve_alias
-       utf8_downgrade
-       utf8_upgrade
-      );
+    ( 
+     qw(
+       _utf8_off _utf8_on define_encoding from_to is_16bit is_8bit
+       is_utf8 perlio_ok resolve_alias utf8_downgrade utf8_upgrade
+      ),
+     @FB_FLAGS, @FB_CONSTS,
+    );
+
+our %EXPORT_TAGS = 
+    (
+     all          =>  [ @EXPORT, @EXPORT_OK ],
+     fallbacks    =>  [ @FB_CONSTS ],
+     fallback_all =>  [ @FB_CONSTS, @FB_FLAGS ],
+    );
+
 
 bootstrap Encode ();
 
@@ -62,6 +65,13 @@ sub encodings
     return
 	sort { lc $a cmp lc $b }
              grep {!/^(?:Internal|Unicode)$/o} keys %Encoding;
+}
+
+sub perlio_ok{
+    exists $INC{"PerlIO/encoding.pm"} or return 0;
+    my $stash = ref($_[0]);
+    $stash ||= ref(find_encoding($_[0]));
+    return ($stash eq "Encode::XS" || $stash eq "Encode::Unicode");
 }
 
 sub define_encoding
@@ -253,7 +263,8 @@ sub predefine_encodings{
 
 require Encode::Encoding;
 
-eval { require PerlIO::encoding };
+eval qq{ use PerlIO::encoding 0.02 };
+# warn $@ if $@;
 
 1;
 
@@ -366,12 +377,7 @@ For example to convert ISO-8859-1 data to UTF-8:
 
 =item [$length =] from_to($string, FROM_ENCODING, TO_ENCODING [,CHECK])
 
-Convert B<in-place> the data between two encodings.  How did the data
-in $string originally get to be in FROM_ENCODING?  Either using
-encode() or through PerlIO: See L</"Encoding and IO">.
-For encoding names and aliases, see L</"Defining Aliases">. 
-For CHECK see L</"Handling Malformed Data">.
-
+Convert B<in-place> the data between two encodings.
 For example to convert ISO-8859-1 data to UTF-8:
 
 	from_to($data, "iso-8859-1", "utf-8");
@@ -461,81 +467,103 @@ exported via C<use encode qw(resolve_alias)>.
 
 See L<Encode::Alias> on details.
 
-=head1 Encoding and IO
+=head1 Encoding via PerlIO
 
-It is very common to want to do encoding transformations when
-reading or writing files, network connections, pipes etc.
-If Perl is configured to use the new 'perlio' IO system then
-C<Encode> provides a "layer" (See L<perliol>) which can transform
-data as it is read or written.
+If your perl supports I<PerlIO>, you can use PerlIO layer to directly
+decode and encode via filehandle.  The following two examples are
+totally identical by functionality.
 
-Here is how the blind poet would modernise the encoding:
+  # via PerlIO
+  open my $in,  "<:encoding(shiftjis)", $infile  or die;
+  open my $out, ">:encoding(euc-jp)",   $outfile or die;
+  while(<>){ print; }
 
-    use Encode;
-    open(my $iliad,'<:encoding(iso-8859-7)','iliad.greek');
-    open(my $utf8,'>:utf8','iliad.utf8');
-    my @epic = <$iliad>;
-    print $utf8 @epic;
-    close($utf8);
-    close($illiad);
+  # via from_to
+  open my $in,  $infile  or die;
+  open my $out, $outfile or die;
+  while(<>){ 
+    from_to($_, "shiftjis", "euc", 1);
+  }
 
-In addition the new IO system can also be configured to read/write
-UTF-8 encoded characters (as noted above this is efficient):
+Unfortunately, not all encodings are PerlIO-savvy.  You can check if
+your encoding is supported by PerlIO by C<perlio_ok> method.
 
-    open(my $fh,'>:utf8','anything');
-    print $fh "Any \x{0021} string \N{SMILEY FACE}\n";
+  Encode::perlio_ok("iso-20220jp");        # false
+  find_encoding("iso-2022-jp")->perlio_ok; # false
+  use Encode qw(perlio_ok);                # exported upon request
+  perlio_ok("euc-jp")                      # true if PerlIO is enabled
 
-Either of the above forms of "layer" specifications can be made the default
-for a lexical scope with the C<use open ...> pragma. See L<open>.
-
-Once a handle is open is layers can be altered using C<binmode>.
-
-Without any such configuration, or if Perl itself is built using
-system's own IO, then write operations assume that file handle accepts
-only I<bytes> and will C<die> if a character larger than 255 is
-written to the handle. When reading, each octet from the handle
-becomes a byte-in-a-character. Note that this default is the same
-behaviour as bytes-only languages (including Perl before v5.6) would
-have, and is sufficient to handle native 8-bit encodings
-e.g. iso-8859-1, EBCDIC etc. and any legacy mechanisms for handling
-other encodings and binary data.
-
-In other cases it is the programs responsibility to transform
-characters into bytes using the API above before doing writes, and to
-transform the bytes read from a handle into characters before doing
-"character operations" (e.g. C<lc>, C</\W+/>, ...).
-
-You can also use PerlIO to convert larger amounts of data you don't
-want to bring into memory.  For example to convert between ISO-8859-1
-(Latin 1) and UTF-8 (or UTF-EBCDIC in EBCDIC machines):
-
-    open(F, "<:encoding(iso-8859-1)", "data.txt") or die $!;
-    open(G, ">:utf8",                 "data.utf") or die $!;
-    while (<F>) { print G }
-
-    # Could also do "print G <F>" but that would pull
-    # the whole file into memory just to write it out again.
-
-More examples:
-
-    open(my $f, "<:encoding(cp1252)")
-    open(my $g, ">:encoding(iso-8859-2)")
-    open(my $h, ">:encoding(latin9)")       # iso-8859-15
-
-See L<PerlIO> for more information.
-
-See also L<encoding> for how to change the default encoding of the
-data in your script.
+For gory details, see L<Encode::PerlIO>;
 
 =head1 Handling Malformed Data
 
-If I<CHECK> is not set, (en|de)code will put I<substitution character> in
+=over 4
+
+THE I<CHECK> argument is used as follows.  When you omit it, it is
+identical to I<CHECK> = 0.
+
+=item I<CHECK> = Encode::FB_DEFAULT ( == 0)
+
+If I<CHECK> is 0, (en|de)code will put I<substitution character> in
 place of the malformed character.  for UCM-based encodings,
 E<lt>subcharE<gt> will be used.  For Unicode, \xFFFD is used.  If the
 data is supposed to be UTF-8, an optional lexical warning (category
 utf8) is given. 
 
-If I<CHECK> is true but not a code reference, dies with an error message.
+=item I<CHECK> = Encode::DIE_ON_ERROR (== 1)
+
+If I<CHECK> is 1, methods will die immediately  with an error
+message.  so when I<CHECK> is set,  you should trap the fatal error
+with eval{} unless you really want to let it die on error.
+
+=item I<CHECK> = Encode::FB_QUIET
+
+If I<CHECK> is set to Encode::FB_QUIET, (en|de)code will immediately
+return proccessed part on error, with data passed via argument
+overwritten with unproccessed part.  This is handy when have to
+repeatedly call because the source data is chopped in the middle for
+some reasons, such as fixed-width buffer.  Here is a sample code that 
+just does this.
+
+  my $data = '';
+  while(defined(read $fh, $buffer, 256)){
+    # buffer may end in partial character so we append
+    $data .= $buffer;
+    $utf8 .= decode($encoding, $data, ENCODE::FB_QUIET);
+    # $data now contains unprocessed partial character
+  }
+
+=item I<CHECK> = Encode::FB_WARN
+
+This is the same as above, except it warns on error.  Handy when you
+are debugging the mode above.
+
+=item perlqq mode (I<CHECK> = Encode::FB_PERLQQ)
+
+For encodings that are implemented by Encode::XS, CHECK ==
+Encode::FB_PERLQQ turns (en|de)code into C<perlqq> fallback mode.
+
+When you decode, '\xI<XX>' will be placed where I<XX> is the hex
+representation of the octet  that could not be decoded to utf8.  And
+when you encode, '\x{I<xxxx>}' will be placed where I<xxxx> is the
+Unicode ID of the character that cannot be found in the character
+repartoire of the encoding.
+
+=item The bitmask
+
+These modes are actually set via bitmask.  here is how FB_XX are laid
+out.  for FB_XX you can import via C<use Encode qw(:fallbacks)> for
+generic bitmask constants, you can import via
+ C<use Encode qw(:fallback_all)>.
+
+                       FB_DEFAULT FB_CROAK FB_QUIET FB_WARN  FB_PERLQQ
+  DIE_ON_ERR     0x0001             X
+  WARN_ON_ERR    0x0002                                X
+  RETURN_ON_ERR  0x0004                      X         X
+  LEAVE_SRC      0x0008
+  PERLQQ         0x0100                                        X
+
+=head2 Unemplemented fallback schemes
 
 In future you will be able to use a code reference to a callback
 function for the value of I<CHECK> but its API is still undecided.
@@ -588,7 +616,7 @@ not a string.
 
 L<Encode::Encoding>,
 L<Encode::Supported>,
-L<PerlIO>, 
+L<Encode::PerlIO>, 
 L<encoding>,
 L<perlebcdic>, 
 L<perlfunc/open>, 
@@ -596,7 +624,7 @@ L<perlunicode>,
 L<utf8>, 
 the Perl Unicode Mailing List E<lt>perl-unicode@perl.orgE<gt>
 
-head2 MAINTAINER
+=head1 MAINTAINER
 
 This project was originated by Nick Ing-Simmons and later maintained
 by Dan Kogai E<lt>dankogai@dan.co.jpE<gt>.  See AUTHORS for full list

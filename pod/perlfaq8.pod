@@ -680,50 +680,38 @@ there, and the old standard error shows up on the old standard out.
 
 =head2 Why doesn't open() return an error when a pipe open fails?
 
-Because the pipe open takes place in two steps: first Perl calls
-fork() to start a new process, then this new process calls exec() to
-run the program you really wanted to open.  The first step reports
-success or failure to your process, so open() can only tell you
-whether the fork() succeeded or not.
+If the second argument to a piped C<open> contains shell
+metacharacters, perl fork()s, then exec()s a shell to decode the
+metacharacters and eventually run the desired program.  If the program
+couldn't be run, it's the shell that gets the message, not Perl. All
+your Perl program can find out is whether the shell itself could be
+successfully started.  You can still capture the shell's STDERR and
+check it for error messages.  See L<"How can I capture STDERR from an
+external command?"> elsewhere in this document, or use the
+L<IPC::Open3> module.
 
-To find out if the exec() step succeeded, you have to catch SIGCHLD
-and wait() to get the exit status.  You should also catch SIGPIPE if
-you're writing to the child--you may not have found out the exec()
-failed by the time you write.  This is documented in L<perlipc>.
-
-In some cases, even this won't work.  If the second argument to a
-piped open() contains shell metacharacters, perl fork()s, then exec()s
-a shell to decode the metacharacters and eventually run the desired
-program.  Now when you call wait(), you only learn whether or not the
-I<shell> could be successfully started...it's best to avoid shell
-metacharacters.
-
-On systems that follow the spawn() paradigm, open() I<might> do what
-you expect--unless perl uses a shell to start your command. In this
-case the fork()/exec() description still applies.
+If there are no shell metacharacters in the argument of C<open>, Perl
+runs the command directly, without using the shell, and can correctly
+report whether the command started.
 
 =head2 What's wrong with using backticks in a void context?
 
 Strictly speaking, nothing.  Stylistically speaking, it's not a good
-way to write maintainable code because backticks have a (potentially
-humongous) return value, and you're ignoring it.  It's may also not be very
-efficient, because you have to read in all the lines of output, allocate
-memory for them, and then throw it away.  Too often people are lulled
-to writing:
+way to write maintainable code.  Perl has several operators for
+running external commands.  Backticks are one; they collect the output
+from the command for use in your program.  The C<system> function is
+another; it doesn't do this.  
 
-    `cp file file.bak`;
-
-And now they think "Hey, I'll just always use backticks to run programs."
-Bad idea: backticks are for capturing a program's output; the system()
-function is for running programs.
+Writing backticks in your program sends a clear message to the readers
+of your code that you wanted to collect the output of the command.
+Why send a clear message that isn't true?
 
 Consider this line:
 
     `cat /etc/termcap`;
 
-You haven't assigned the output anywhere, so it just wastes memory
-(for a little while).  You forgot to check C<$?> to see whether
-the program even ran correctly, too.  Even if you wrote
+You forgot to check C<$?> to see whether the program even ran
+correctly.  Even if you wrote
 
     print `cat /etc/termcap`;
 
