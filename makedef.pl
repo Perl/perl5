@@ -438,6 +438,33 @@ elsif ($PLATFORM eq 'netware') {
 			Perl_getenv_len
 			Perl_my_pclose
 			Perl_my_popen
+			Perl_sys_intern_init
+			Perl_sys_intern_dup
+			Perl_sys_intern_clear
+			Perl_my_bcopy
+			Perl_PerlIO_write
+			Perl_PerlIO_unread
+			Perl_PerlIO_tell
+			Perl_PerlIO_stdout
+			Perl_PerlIO_stdin
+			Perl_PerlIO_stderr
+			Perl_PerlIO_setlinebuf
+			Perl_PerlIO_set_ptrcnt
+			Perl_PerlIO_set_cnt
+			Perl_PerlIO_seek
+			Perl_PerlIO_read
+			Perl_PerlIO_get_ptr
+			Perl_PerlIO_get_cnt
+			Perl_PerlIO_get_bufsiz
+			Perl_PerlIO_get_base
+			Perl_PerlIO_flush
+			Perl_PerlIO_fill
+			Perl_PerlIO_fileno
+			Perl_PerlIO_error
+			Perl_PerlIO_eof
+			Perl_PerlIO_close
+			Perl_PerlIO_clearerr
+			PerlIO_perlio
 			)];
 }
 
@@ -1118,6 +1145,10 @@ foreach my $symbol (qw(
 			fnInsertHashListAddrs
 			fnGetHashListAddrs
 			Perl_deb
+			Perl_sv_setsv
+			Perl_sv_catsv
+			Perl_sv_catpvn
+			Perl_sv_2pv
 			   ))
     {
 	try_symbol($symbol);
@@ -1131,12 +1162,7 @@ foreach my $symbol (sort keys %export) {
     output_symbol($symbol);
 }
 
-if ($PLATFORM eq 'netware') {
-	# This may not be the right way to do.  This is to make sure
-	# that the last symbol will not contain a comma else
-	# Watcom linker cribs
-	print "\tdummy\n";
-} elsif ($PLATFORM eq 'os2') {
+if ($PLATFORM eq 'os2') {
 	print "; LAST_ORDINAL=$sym_ord\n";
 }
 

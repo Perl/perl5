@@ -245,7 +245,7 @@ If you wish to run the test cases, type:
 =item 1
 
 If you have built perl using the Configure script, ensure that
-you have modify permission to >system>ported and type
+you have modify permission to C<< >system>ported >> and type
 
      gmake install
 

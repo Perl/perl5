@@ -1,5 +1,5 @@
 package encoding;
-our $VERSION = do { my @r = (q$Revision: 1.31 $ =~ /\d+/g); sprintf "%d."."%02d" x $#r, @r };
+our $VERSION = do { my @r = (q$Revision: 1.33 $ =~ /\d+/g); sprintf "%d."."%02d" x $#r, @r };
 
 use Encode;
 use strict;
@@ -11,8 +11,11 @@ BEGIN {
     }
 }
 
-our $HAS_PERLIO = exists $INC{"PerlIO/encoding.pm"};
-$HAS_PERLIO or binmode(STDIN);
+our $HAS_PERLIO = 0;
+eval { require PerlIO::encoding };
+unless ($@){
+    $HAS_PERLIO = (PerlIO::encoding->VERSION >= 0.02);
+}
 
 sub import {
     my $class = shift;
@@ -34,10 +37,13 @@ sub import {
 		    require Carp;
 		    Carp::croak "Unknown encoding for $h, '$arg{$h}'";
 		}
-		eval qq{ binmode($h, ":encoding($arg{$h})") };
+		eval { binmode($h, ":encoding($arg{$h})") };
 	    }else{
 		unless (exists $arg{$h}){
-		    eval qq{ binmode($h, ":encoding($name)") };
+		    eval { 
+			no warnings 'uninitialized';
+			binmode($h, ":encoding($name)");
+		    };
 		}
 	    }
 	    if ($@){
@@ -83,7 +89,7 @@ __END__
 
 =head1 NAME
 
-encoding -  allows you to write your script in non-ascii or non-utf8
+encoding - allows you to write your script in non-ascii or non-utf8
 
 =head1 SYNOPSIS
 
@@ -93,12 +99,12 @@ encoding -  allows you to write your script in non-ascii or non-utf8
   # or you can even do this if your shell supports your native encoding
 
   perl -Mencoding=latin2 -e '...' # Feeling centrally European?
-  perl -Mencoding=euc-ko -e '...'
+  perl -Mencoding=euc-kr -e '...' # Or Korean?
 
   # or from the shebang line
 
   #!/your/path/to/perl -Mencoding="8859-6" # Arabian Nights
-  #!/your/path/to/perl -Mencoding=euc-tw
+  #!/your/path/to/perl -Mencoding=big5     # Taiwanese
 
   # more control
 
@@ -118,14 +124,14 @@ encoding -  allows you to write your script in non-ascii or non-utf8
 Let's start with a bit of history: Perl 5.6.0 introduced Unicode
 support.  You could apply C<substr()> and regexes even to complex CJK
 characters -- so long as the script was written in UTF-8.  But back
-then text editors that supported UTF-8 were still rare and many users
-rather chose to write scripts in legacy encodings, given up whole new
-feature of Perl 5.6.
+then, text editors that supported UTF-8 were still rare and many users
+instead chose to write scripts in legacy encodings, giving up a whole
+new feature of Perl 5.6.
 
-Rewind to the future: starting from perl 5.8.0 with B<encoding>
+Rewind to the future: starting from perl 5.8.0 with the B<encoding>
 pragma, you can write your script in any encoding you like (so long
 as the C<Encode> module supports it) and still enjoy Unicode support.
-You can write a code in EUC-JP as follows:
+You can write code in EUC-JP as follows:
 
   my $Rakuda = "\xF1\xD1\xF1\xCC"; # Camel in Kanji
                #<-char-><-char->   # 4 octets
@@ -149,7 +155,7 @@ STDIN, STDOUT, and STDERR to the specified encoding.  Therefore,
 Will print "\xF1\xD1\xF1\xCC is the symbol of perl.\n",
 not "\x{99F1}\x{99DD} is the symbol of perl.\n".
 
-You can override this by giving extra arguments, see below.
+You can override this by giving extra arguments; see below.
 
 =head1 USAGE
 
@@ -157,9 +163,9 @@ You can override this by giving extra arguments, see below.
 
 =item use encoding [I<ENCNAME>] ;
 
-Sets the script encoding to I<ENCNAME> and filehandle disciplines of
-STDIN, STDOUT are set to ":encoding(I<ENCNAME>)".  Note STDERR will
-not be changed.
+Sets the script encoding to I<ENCNAME>. Filehandle disciplines of
+STDIN and STDOUT are set to ":encoding(I<ENCNAME>)".  Note that STDERR
+will not be changed.
 
 If no encoding is specified, the environment variable L<PERL_ENCODING>
 is consulted.  If no encoding can be found, the error C<Unknown encoding
@@ -170,14 +176,14 @@ C<binmode> to change disciplines of those.
 
 =item use encoding I<ENCNAME> [ STDIN =E<gt> I<ENCNAME_IN> ...] ;
 
-You can also individually set encodings of STDIN and STDOUT via
+You can also individually set encodings of STDIN and STDOUT via the
 C<< STDIN => I<ENCNAME> >> form.  In this case, you cannot omit the
 first I<ENCNAME>.  C<< STDIN => undef >> turns the IO transcoding
 completely off.
 
 =item no encoding;
 
-Unsets the script encoding and the disciplines of STDIN, STDOUT are
+Unsets the script encoding. The disciplines of STDIN, STDOUT are
 reset to ":raw" (the default unprocessed raw stream of bytes).
 
 =back
@@ -188,7 +194,7 @@ reset to ":raw" (the default unprocessed raw stream of bytes).
 
 The pragma is a per script, not a per block lexical.  Only the last
 C<use encoding> or C<no encoding> matters, and it affects B<the whole script>.
-However, <no encoding> pragma is supported and C<use encoding> can
+However, the <no encoding> pragma is supported and C<use encoding> can
 appear as many times as you want in a given script.  The multiple use
 of this pragma is discouraged.
 
@@ -221,8 +227,9 @@ the C<encoding> pragma is present, even the 0x80..0xFF range always
 gets UTF-8 encoded.
 
 After all, the best thing about this pragma is that you don't have to
-resort to \x... just to spell your name in native a encoding.  So feel
-free to put your strings in your encoding in quotes and regexes.
+resort to \x{....} just to spell your name in a native encoding.
+So feel free to put your strings in your encoding in quotes and
+regexes.
 
 =head1 Non-ASCII Identifiers and Filter option
 
@@ -231,25 +238,25 @@ identifiers.  In order to make C<${"\x{4eba}"}++> ($human++, where human
 is a single Han ideograph) work, you still need to write your script
 in UTF-8 or use a source filter.
 
-In other words, the same restriction as Jperl applies.
+In other words, the same restriction as with Jperl applies.
 
-If you dare to experiment, however, you can try Filter option.
+If you dare to experiment, however, you can try the Filter option.
 
 =over 4
 
 =item use encoding I<ENCNAME> Filter=E<gt>1;
 
-This turns encoding pragma into source filter.  While the default
+This turns the encoding pragma into a source filter.  While the default
 approach just decodes interpolated literals (in qq() and qr()), this
-will apply source filter to entire source code.  In this case, STDIN
-and STDOUT remain untouched.
+will apply a source filter to the entire source code.  In this case,
+STDIN and STDOUT remain untouched.
 
 =back
 
 What does this mean?  Your source code behaves as if it is written in
-UTF-8.  So even if your editor only supports Shift_JIS, for example.
-You can still try examples in Chapter 15 of C<Programming Perl, 3rd
-Ed.> For instance, you can use UTF-8 identifiers.
+UTF-8.  So even if your editor only supports Shift_JIS, for example,
+you can still try examples in Chapter 15 of C<Programming Perl, 3rd
+Ed.>.  For instance, you can use UTF-8 identifiers.
 
 This option is significantly slower and (as of this writing) non-ASCII
 identifiers are not very stable WITHOUT this option and with the
@@ -262,7 +269,7 @@ do not use Filter=E<gt>1.
 
     use encoding "iso 8859-7";
 
-    # The \xDF of ISO 8859-7 (Greek) is \x{3af} in Unicode.
+    # \xDF in ISO 8859-7 (Greek) is \x{3af} in Unicode.
 
     $a = "\xDF";
     $b = "\x{100}";
@@ -287,18 +294,19 @@ do not use Filter=E<gt>1.
     print "exa\n"  if "\x{3af}" cmp pack("C", 0xdf) == 0;
 
     # ... but pack/unpack C are not affected, in case you still
-    # want back to your native encoding
+    # want to go back to your native encoding
 
     print "zetta\n" if unpack("C", (pack("C", 0xdf))) == 0xdf;
 
 =head1 KNOWN PROBLEMS
 
-For native multibyte encodings (either fixed or variable length)
+For native multibyte encodings (either fixed or variable length),
 the current implementation of the regular expressions may introduce
-recoding errors for longer regular expression literals than 127 bytes.
+recoding errors for regular expression literals longer than 127 bytes.
 
 The encoding pragma is not supported on EBCDIC platforms.
-(Porters wanted.)
+(Porters who are willing and able to remove this limitation are
+welcome.)
 
 =head1 SEE ALSO
 

@@ -13,6 +13,10 @@
 #include "a2p.h"
 #include "util.h"
 
+#ifdef NETWARE
+char *savestr(char *str);
+#endif
+
 STR *
 hfetch(register HASH *tb, char *key)
 {

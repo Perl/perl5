@@ -1,9 +1,18 @@
 package PerlIO::encoding;
-our $VERSION = '0.03';
+use strict;
+our $VERSION = '0.04';
+our $DEBUG = 0;
+$DEBUG and warn __PACKAGE__, " called by ", join(", ", caller), "\n";
+
+#
+# Now these are all done in encoding.xs DO NOT COMMENT'em out!
+#
+# use Encode qw(:fallbacks);
+# our $check;
+
 use XSLoader ();
-use Encode (); # Load but do not import anything.
-our $check;
-XSLoader::load 'PerlIO::encoding';
+XSLoader::load(__PACKAGE__, $VERSION);
+
 1;
 __END__
 
@@ -16,8 +25,8 @@ PerlIO::encoding - encoding layer
   open($f, "<:encoding(foo)", "infoo");
   open($f, ">:encoding(bar)", "outbar");
 
-  use Encode;
-  $PerlIO::encoding::check = Encode::FB_PERLQQ();
+  use Encode qw(:fallbacks);
+  $PerlIO::encoding::check = FB_PERLQQ;
 
 =head1 DESCRIPTION
 
@@ -37,5 +46,4 @@ encode and decode.
 L<open>, L<Encode>, L<perlfunc/binmode>, L<perluniintro>
 
 =cut
-
 

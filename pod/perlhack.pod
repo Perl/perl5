@@ -1683,7 +1683,7 @@ warnings during the compilation phase.  Make sure that you mention
 this when you post your patch to P5P; the pumpking needs to know this.
 
 When you write your new code, please be conscious of existing code
-conventions used in the perl source files.  See <perlstyle> for
+conventions used in the perl source files.  See L<perlstyle> for
 details.  Although most of the guidelines discussed seem to focus on
 Perl code, rather than c, they all apply (except when they don't ;).
 See also I<Porting/patching.pod> file in the Perl source distribution

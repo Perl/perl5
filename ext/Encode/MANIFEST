@@ -47,31 +47,33 @@ lib/Encode/JP/JIS7.pm	Encode extension
 lib/Encode/KR/2022_KR.pm	 Encode extension
 lib/Encode/PerlIO.pod	Documents for Encode & PerlIO
 lib/Encode/Supported.pod	Documents for supported encodings
-t/Aliases.t	Encode extension test
-t/CN.t		Encode extension test
-t/Encode.t		Encode extension test
-t/Encoder.t	Encode::Encoder test
-t/JP.t		Encode extension test
-t/KR.t		Encode extension test
-t/TW.t		Encode extension test
-t/Unicode.t	Encode extension test
-t/bogus.ucm	Sample data for ucmlint
-t/encoding.t	encoding extension test
-t/fallback.t	Encode extension test
-t/gb2312.euc	test data
-t/gb2312.ref	test data
-t/grow.t	Encode extension test
-t/jisx0201.euc	test data
-t/jisx0201.ref	test data
-t/jisx0208.euc	test data
-t/jisx0208.ref	test data
-t/jisx0212.euc	test data
-t/jisx0212.ref	test data
-t/jperl.t	encoding extension test
-t/ksc5601.euc	test data
-t/ksc5601.ref	test data
-t/perlio.t	encoding extension test
-t/unibench.pl	Unicode benchmark
+t/unibench.pl	benchmark script
+t/Aliases.t	test script
+t/CJKT.t	test script
+t/Encode.t	test script
+t/Encoder.t	test script
+t/Unicode.t	test script
+t/at-cn.t	test script
+t/at-tw.t	test script
+t/big5-eten.enc	test data
+t/big5-eten.utf	test data
+t/big5-hkscs.enc	test data
+t/big5-hkscs.utf	test data
+t/encoding.t	test script
+t/fallback.t	test script
+t/gb2312.enc	test data
+t/gb2312.utf	test data
+t/grow.t	test script
+t/jisx0201.enc	test data
+t/jisx0201.utf	test data
+t/jisx0208.enc	test data
+t/jisx0208.utf	test data
+t/jisx0212.enc	test data
+t/jisx0212.utf	test data
+t/jperl.t	test script
+t/ksc5601.enc	test data
+t/ksc5601.utf	test data
+t/perlio.t	test script
 ucm/8859-1.ucm	Unicode Character Map
 ucm/8859-10.ucm	Unicode Character Map
 ucm/8859-11.ucm	Unicode Character Map

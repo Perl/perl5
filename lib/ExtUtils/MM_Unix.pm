@@ -12,7 +12,7 @@ use File::Spec;
 use DirHandle;
 use strict;
 use vars qw($VERSION @ISA
-            $Is_Mac $Is_OS2 $Is_VMS $Is_Win32 $Is_Dos $Is_VOS
+            $Is_Mac $Is_OS2 $Is_VMS $Is_Win32 $Is_Dos $Is_VOS $Is_NetWare
             $Verbose %pm %static $Xsubpp_Version
             %Config_Override
            );
@@ -29,6 +29,11 @@ $Is_Mac   = $^O eq 'MacOS';
 $Is_Win32 = $^O eq 'MSWin32';
 $Is_Dos   = $^O eq 'dos';
 $Is_VOS   = $^O eq 'vos';
++$Is_NetWare = $Config{'osname'} eq 'NetWare'; # Config{'osname'} intentional
+if ($Is_NetWare) {
+	$^O = 'NetWare';
+ 	$Is_Win32 = 0;
+}
 
 if ($Is_VMS = $^O eq 'VMS') {
     require VMS::Filespec;
@@ -1557,7 +1562,7 @@ sub init_main {
     if ($self->{PERL_SRC}){
 	$self->{PERL_LIB}     ||= File::Spec->catdir("$self->{PERL_SRC}","lib");
 	$self->{PERL_ARCHLIB} = $self->{PERL_LIB};
-	$self->{PERL_INC}     = ($Is_Win32) ? File::Spec->catdir($self->{PERL_LIB},"CORE") : $self->{PERL_SRC};
+	$self->{PERL_INC}     = ($Is_Win32 || $Is_NetWare) ? File::Spec->catdir($self->{PERL_LIB},"CORE") : $self->{PERL_SRC};
 
 	# catch a situation that has occurred a few times in the past:
 	unless (
@@ -1570,6 +1575,8 @@ sub init_main {
 		$Is_Mac
 		or
 		$Is_Win32
+		or
+		$Is_NetWare
 	       ){
 	    warn qq{
 You cannot build extensions below the perl source tree after executing
@@ -2255,7 +2262,7 @@ sub installbin {
     push(@m, qq{
 EXE_FILES = @{$self->{EXE_FILES}}
 
-} . ($Is_Win32
+} . (($Is_Win32 || $Is_NetWare)
   ? q{FIXIN = pl2bat.bat
 } : q{FIXIN = $(PERLRUN) "-MExtUtils::MY" \
     -e "MY->fixin(shift)"

@@ -88,7 +88,13 @@ typedef void		(*LPSetBuf)(struct IPerlStdIO*, FILE*, char*);
 typedef int		(*LPSetVBuf)(struct IPerlStdIO*, FILE*, char*, int,
 			    Size_t);
 typedef void		(*LPSetCnt)(struct IPerlStdIO*, FILE*, int);
+
+#ifndef NETWARE
 typedef void		(*LPSetPtr)(struct IPerlStdIO*, FILE*, char*);
+#elif defined(NETWARE)
+typedef void		(*LPSetPtr)(struct IPerlStdIO*, FILE*, char*, int);
+#endif
+
 typedef void		(*LPSetlinebuf)(struct IPerlStdIO*, FILE*);
 typedef int		(*LPPrintf)(struct IPerlStdIO*, FILE*, const char*,
 			    ...);

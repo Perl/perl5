@@ -3,7 +3,7 @@ package Encode::Unicode;
 use strict;
 use warnings;
 
-our $VERSION = do { my @r = (q$Revision: 1.32 $ =~ /\d+/g); sprintf "%d."."%02d" x $#r, @r };
+our $VERSION = do { my @r = (q$Revision: 1.35 $ =~ /\d+/g); sprintf "%d."."%02d" x $#r, @r };
 
 use XSLoader;
 XSLoader::load(__PACKAGE__,$VERSION);
@@ -47,11 +47,23 @@ sub new_sequence
     return bless {%$self},ref($self);
 }
 
+sub needs_lines { 0 };
+
+sub perlio_ok { 
+    eval{ require PerlIO::encoding };
+    if ($@){
+	return 0;
+    }else{
+	return 1;
+    }
+}
+
 
 #
-# three implementation of (en|de)code exist.  XS version is the fastest.
-# *_modern use # an array and *_classic stick with substr.  *_classic is
-#  much slower but more memory conservative.  *_xs is default.
+# three implementations of (en|de)code exist.  The XS version is the
+# fastest.  *_modern uses an array and *_classic sticks with substr.
+# *_classic is  much slower but more memory conservative.
+# *_xs is the default.
 
 sub set_transcoder{
     no warnings qw(redefine);
@@ -273,7 +285,7 @@ __END__
 
 =head1 NAME
 
-Encode::Unicode -- Various Unicode Transform Format
+Encode::Unicode -- Various Unicode Transformation Formats
 
 =cut
 
@@ -308,8 +320,8 @@ UTF-8, UTF-16, UTF-16BE, UTF-16LE, UTF-32, UTF-32BE and UTF-32LE.
   UTF-16BE    2/4   N   Y       S.P           S.P    0xd82a,0xdfcd
   UTF-16LE	2   N   Y       S.P           S.P    0x2ad8,0xcddf
   UTF-32	4   Y   -  is bogus         As is            BE/LE
-  UTF-32BE	4   N   -     bogus         As is       0x0010abcd
-  UTF-32LE	4   N   -     bogus         As is       0xcdab1000
+  UTF-32BE	4   N   -     bogus         As is       0x0001abcd
+  UTF-32LE	4   N   -     bogus         As is       0xcdab0100
   UTF-8       1-4   -   -     bogus   >= 4 octets   \xf0\x9a\af\8d
   ---------------+-----------------+------------------------------
 
@@ -317,38 +329,41 @@ UTF-8, UTF-16, UTF-16BE, UTF-16LE, UTF-32, UTF-32BE and UTF-32LE.
 
 =head1 Size, Endianness, and BOM
 
-You can categorize these CES by 3 criteria;  Size of each character,
-Endianness, and Byte Order Mark.
+You can categorize these CES by 3 criteria:  size of each character,
+endianness, and Byte Order Mark.
 
-=head2 by Size
+=head2 by size
 
 UCS-2 is a fixed-length encoding with each character taking 16 bits.
-It B<does not> support I<Surrogate Pairs>.  When a surrogate pair is
-encountered during decode(), its place is filled with \xFFFD without
-I<CHECK> or croaks if I<CHECK>.  When a character whose ord value is
-larger than 0xFFFF is encountered, it uses 0xFFFD without I<CHECK> or
-croaks if <CHECK>.
+It B<does not> support I<surrogate pairs>.  When a surrogate pair
+is encountered during decode(), its place is filled with \x{FFFD}
+if I<CHECK> is 0, or the routine croaks if I<CHECK> is 1.  When a
+character whose ord value is larger than 0xFFFF is encountered,
+its place is filled with \x{FFFD} if I<CHECK> is 0, or the routine
+croaks if I<CHECK> is 1.
 
-UTF-16 is almost the same as UCS-2 but it supports I<Surrogate Pairs>.
+UTF-16 is almost the same as UCS-2 but it supports I<surrogate pairs>.
 When it encounters a high surrogate (0xD800-0xDBFF), it fetches the
-following low surrogate (0xDC00-0xDFFF), C<desurrogate>s them to form a
-character.  Bogus surrogates result in death.  When \x{10000} or above
-is encountered during encode(), it C<ensurrogate>s them and pushes the
-surrogate pair to the output stream.
+following low surrogate (0xDC00-0xDFFF) and C<desurrogate>s them to
+form a character.  Bogus surrogates result in death.  When \x{10000}
+or above is encountered during encode(), it C<ensurrogate>s them and
+pushes the surrogate pair to the output stream.
 
 UTF-32 is a fixed-length encoding with each character taking 32 bits.
-Since it is 32-bit there is no need for I<Surrogate Pairs>.
+Since it is 32-bit, there is no need for I<surrogate pairs>.
 
-=head2 by Endianness
+=head2 by endianness
 
-First (and now failed) goal of Unicode was to map all character
-repertories into a fixed-length integer so programmers are happy.
-Since each character is either I<short> or I<long> in C, you have to
-put endianness of each platform when you pass data to one another.
+The first (and now failed) goal of Unicode was to map all character
+repertoires into a fixed-length integer so that programmers are happy.
+Since each character is either a I<short> or I<long> in C, you have to
+pay attention to the endianness of each platform when you pass data
+to one another.
 
 Anything marked as BE is Big Endian (or network byte order) and LE is
-Little Endian (aka VAX byte order).  For anything without, a character
-called Byte Order Mark (BOM) is prepended to the head of string.
+Little Endian (aka VAX byte order).  For anything not marked either
+BE or LE, a character called Byte Order Mark (BOM) indicating the
+endianness is prepended to the string.
 
 =over 4
 
@@ -362,31 +377,31 @@ called Byte Order Mark (BOM) is prepended to the head of string.
 
 =back
  
-This modules handles BOM as follows.
+This modules handles the BOM as follows.
 
 =over 4
 
 =item *
 
 When BE or LE is explicitly stated as the name of encoding, BOM is
-simply treated as one of characters (ZERO WIDTH NO-BREAK SPACE).
+simply treated as a normal character (ZERO WIDTH NO-BREAK SPACE).
 
 =item *
 
-When BE or LE is omitted during decode(), it checks if BOM is in the
-beginning of the string and if found endianness is set to what BOM
-says.  If not found, dies. 
+When BE or LE is omitted during decode(), it checks if BOM is at the
+beginning of the string; if one is found, the endianness is set to
+what the BOM says.  If no BOM is found, the routine dies.
 
 =item *
 
 When BE or LE is omitted during encode(), it returns a BE-encoded
 string with BOM prepended.  So when you want to encode a whole text
-file, make sure you encode() by whole text, not line by line or each
-line, not file, is prepended with BOMs.
+file, make sure you encode() the whole text at once, not line by line
+or each line, not file, will have a BOM prepended.
 
 =item *
 
-C<UCS-2> is an exception.  Unlike others this is an alias of UCS-2BE.
+C<UCS-2> is an exception.  Unlike others, this is an alias of UCS-2BE.
 UCS-2 is already registered by IANA and others that way.
 
 =back
@@ -404,18 +419,19 @@ magnitude so let's forgive them.
 Vogons here ;)  Or, comparing Encode to Babel Fish is completely
 appropriate -- if you can only stick this into your ear :)
 
-Surrogate pairs were born when Unicode Consortium finally
+Surrogate pairs were born when the Unicode Consortium finally
 admitted that 16 bits were not big enough to hold all the world's
-character repertoire.  But they have already made UCS-2 16-bit.  What
+character repertoires.  But they already made UCS-2 16-bit.  What
 do we do?
 
-Back then 0xD800-0xDFFF was not allocated.  Let's split them half and
-use the first half to represent C<upper half of a character> and the
-latter C<lower half of a character>.  That way you can represent 1024
-* 1024 = 1048576 more characters.  Now we can store character ranges
-up to \x{10ffff} even with 16-bit encodings.  This pair of
-half-character is now called a I<Surrogate Pair> and UTF-16 is the
-name of the encoding that embraces them.
+Back then, the range 0xD800-0xDFFF was not allocated.  Let's split
+that range in half and use the first half to represent the C<upper
+half of a character> and the second half to represent the C<lower
+half of a character>.  That way, you can represent 1024 * 1024 =
+1048576 more characters.  Now we can store character ranges up to
+\x{10ffff} even with 16-bit encodings.  This pair of half-character is
+now called a I<surrogate pair> and UTF-16 is the name of the encoding
+that embraces them.
 
 Here is a formula to ensurrogate a Unicode character \x{10000} and
 above;
@@ -432,9 +448,7 @@ perl does not prohibit the use of characters within this range.  To perl,
 every one of \x{0000_0000} up to \x{ffff_ffff} (*) is I<a character>.
 
   (*) or \x{ffff_ffff_ffff_ffff} if your perl is compiled with 64-bit
-  integer support! (**)
-
-  (**) Is anything beyond \x{11_0000} still Unicode :?
+  integer support!
 
 =head1 SEE ALSO
 

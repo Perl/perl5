@@ -1,6 +1,6 @@
 package Encode::Byte;
 use Encode;
-our $VERSION = do { my @r = (q$Revision: 1.21 $ =~ /\d+/g); sprintf "%d."."%02d" x $#r, @r };
+our $VERSION = do { my @r = (q$Revision: 1.22 $ =~ /\d+/g); sprintf "%d."."%02d" x $#r, @r };
 
 use XSLoader;
 XSLoader::load(__PACKAGE__,$VERSION);
@@ -15,7 +15,7 @@ Encode::Byte - Single Byte Encodings
 =head1 SYNOPSIS
 
     use Encode qw/encode decode/; 
-    $greek = encode("iso-885-7", $utf8);   # loads Encode::Byte implicitly
+    $greek = encode("iso-8859-7", $utf8);  # loads Encode::Byte implicitly
     $utf8  = decode("iso-8859-7", $greek); # ditto
 
 =head1 ABSTRACT
@@ -78,7 +78,7 @@ supported are as follows.
   cp1251	WinCyrillic
   cp1252	WinLatin1
   cp1253	WinGreek
-  cp1254	WinTurkiskh
+  cp1254	WinTurkish
   cp1255	WinHebrew
   cp1256	WinArabic
   cp1257	WinBaltic

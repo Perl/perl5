@@ -1,13 +1,13 @@
 #
-# $Id: H2Z.pm,v 1.0 2002/03/28 23:26:28 dankogai Exp $
+# $Id: H2Z.pm,v 1.1 2002/04/22 03:43:05 dankogai Exp $
 #
 
 package Encode::JP::H2Z;
 
 use strict;
 
-our $RCSID = q$Id: H2Z.pm,v 1.0 2002/03/28 23:26:28 dankogai Exp $;
-our $VERSION = do { my @r = (q$Revision: 1.0 $ =~ /\d+/g); sprintf "%d."."%02d" x $#r, @r };
+our $RCSID = q$Id: H2Z.pm,v 1.1 2002/04/22 03:43:05 dankogai Exp $;
+our $VERSION = do { my @r = (q$Revision: 1.1 $ =~ /\d+/g); sprintf "%d."."%02d" x $#r, @r };
 
 use Carp;
 
@@ -125,6 +125,7 @@ use vars qw(%_D2Z  $_PAT_D2Z
 #$_PAT_Z2D    = join("|", keys %_Z2D);
 
 sub h2z {
+    no warnings qw(uninitialized);
     my $r_str = shift;
     my ($keep_dakuten) = @_;
     my $n = 0;

@@ -245,31 +245,33 @@ ext/Encode/lib/Encode/JP/JIS7.pm	Encode extension
 ext/Encode/lib/Encode/KR/2022_KR.pm	 Encode extension
 ext/Encode/lib/Encode/PerlIO.pod	Documents for Encode & PerlIO
 ext/Encode/lib/Encode/Supported.pod	Documents for supported encodings
-ext/Encode/t/Aliases.t	Encode extension test
-ext/Encode/t/CN.t		Encode extension test
-ext/Encode/t/Encode.t		Encode extension test
-ext/Encode/t/Encoder.t	Encode::Encoder test
-ext/Encode/t/JP.t		Encode extension test
-ext/Encode/t/KR.t		Encode extension test
-ext/Encode/t/TW.t		Encode extension test
-ext/Encode/t/Unicode.t	Encode extension test
-ext/Encode/t/bogus.ucm	Sample data for ucmlint
-ext/Encode/t/encoding.t	encoding extension test
-ext/Encode/t/fallback.t	Encode extension test
-ext/Encode/t/gb2312.euc	test data
-ext/Encode/t/gb2312.ref	test data
-ext/Encode/t/grow.t	Encode extension test
-ext/Encode/t/jisx0201.euc	test data
-ext/Encode/t/jisx0201.ref	test data
-ext/Encode/t/jisx0208.euc	test data
-ext/Encode/t/jisx0208.ref	test data
-ext/Encode/t/jisx0212.euc	test data
-ext/Encode/t/jisx0212.ref	test data
-ext/Encode/t/jperl.t	encoding extension test
-ext/Encode/t/ksc5601.euc	test data
-ext/Encode/t/ksc5601.ref	test data
-ext/Encode/t/perlio.t
-ext/Encode/t/unibench.pl	Unicode benchmark
+ext/Encode/t/unibench.pl	benchmark script
+ext/Encode/t/Aliases.t	test script
+ext/Encode/t/CJKT.t	test script
+ext/Encode/t/Encode.t	test script
+ext/Encode/t/Encoder.t	test script
+ext/Encode/t/Unicode.t	test script
+ext/Encode/t/at-cn.t	test script
+ext/Encode/t/at-tw.t	test script
+ext/Encode/t/big5-eten.enc	test data
+ext/Encode/t/big5-eten.utf	test data
+ext/Encode/t/big5-hkscs.enc	test data
+ext/Encode/t/big5-hkscs.utf	test data
+ext/Encode/t/encoding.t	test script
+ext/Encode/t/fallback.t	test script
+ext/Encode/t/gb2312.enc	test data
+ext/Encode/t/gb2312.utf	test data
+ext/Encode/t/grow.t	test script
+ext/Encode/t/jisx0201.enc	test data
+ext/Encode/t/jisx0201.utf	test data
+ext/Encode/t/jisx0208.enc	test data
+ext/Encode/t/jisx0208.utf	test data
+ext/Encode/t/jisx0212.enc	test data
+ext/Encode/t/jisx0212.utf	test data
+ext/Encode/t/jperl.t	test script
+ext/Encode/t/ksc5601.enc	test data
+ext/Encode/t/ksc5601.utf	test data
+ext/Encode/t/perlio.t	test script
 ext/Encode/ucm/8859-1.ucm	Unicode Character Map
 ext/Encode/ucm/8859-10.ucm	Unicode Character Map
 ext/Encode/ucm/8859-11.ucm	Unicode Character Map
@@ -511,10 +513,10 @@ ext/Opcode/Opcode.xs		Opcode extension external subroutines
 ext/Opcode/ops.pm		"Pragma" form of Opcode extension Perl module
 ext/Opcode/ops.t		See if Opcode works
 ext/Opcode/Safe.pm		Safe extension Perl module
-ext/PerlIO/encoding/MANIFEST	PerlIO::encoding list of files
-ext/PerlIO/encoding/Makefile.PL	PerlIO::encoding makefile writer
 ext/PerlIO/encoding/encoding.pm	PerlIO::encoding
 ext/PerlIO/encoding/encoding.xs	PerlIO::encoding
+ext/PerlIO/encoding/Makefile.PL	PerlIO::encoding makefile writer
+ext/PerlIO/encoding/MANIFEST	PerlIO::encoding list of files
 ext/PerlIO/PerlIO.t		See if PerlIO works
 ext/PerlIO/Scalar/Makefile.PL	PerlIO layer for scalars
 ext/PerlIO/Scalar/Scalar.pm	PerlIO layer for scalars
@@ -646,21 +648,21 @@ ext/threads/Changes		ithreads
 ext/threads/Makefile.PL		ithreads
 ext/threads/README		ithreads
 ext/threads/shared/Makefile.PL  thread shared variables
+ext/threads/shared/queue.pm	Threadsafe queue.
 ext/threads/shared/README       thread shared variables
 ext/threads/shared/shared.pm    thread shared variables
 ext/threads/shared/shared.xs    thread shared variables
 ext/threads/shared/t/0nothread.t	Tests for basic shared array functionality.
-ext/threads/shared/t/av_simple.t	Tests for basic shared array functionality.
 ext/threads/shared/t/av_refs.t	Tests for arrays containing references
+ext/threads/shared/t/av_simple.t	Tests for basic shared array functionality.
 ext/threads/shared/t/hv_refs.t	Test shared hashes containing references
 ext/threads/shared/t/hv_simple.t	Tests for basic shared hash functionality.
 ext/threads/shared/t/no_share.t	Tests for disabled share on variables.
+ext/threads/shared/t/queue.t	thread shared variables
 ext/threads/shared/t/shared_attr.t	Test :shared attribute
 ext/threads/shared/t/sv_refs.t	thread shared variables
 ext/threads/shared/t/sv_simple.t	thread shared variables
-ext/threads/shared/t/queue.t	thread shared variables
 ext/threads/shared/typemap	thread::shared types
-ext/threads/shared/queue.pm	Threadsafe queue.
 ext/threads/t/basic.t		ithreads
 ext/threads/t/end.t		Test end functions
 ext/threads/t/join.t		Testing the join function
@@ -792,6 +794,7 @@ hints/sunos_4_1.sh		Hints for named architecture
 hints/super-ux.sh		Hints for named architecture
 hints/svr4.sh			Hints for named architecture
 hints/svr5.sh			Hints for named architecture
+hints/t001.c			Test case for gcc bug
 hints/ti1500.sh			Hints for named architecture
 hints/titanos.sh		Hints for named architecture
 hints/ultrix_4.sh		Hints for named architecture
@@ -1921,6 +1924,7 @@ myconfig.SH			Prints summary of the current configuration
 NetWare/bat/BldNWExt-Exist.bat	NetWare port
 NetWare/bat/BldNWExt.bat	NetWare port
 NetWare/bat/Buildtype.bat	NetWare port
+NetWare/bat/CWbuild.bat		NetWare port
 NetWare/bat/MPKBuild.bat	NetWare port
 NetWare/bat/Setmpksdk.bat	NetWare port
 NetWare/bat/Setnlmsdk.bat	NetWare port
@@ -1940,10 +1944,12 @@ NetWare/deb.h			NetWare port
 NetWare/dl_netware.xs		NetWare port
 NetWare/intdef.h		NetWare port
 NetWare/interface.c		NetWare port
+NetWare/interface.cpp		NetWare port
 NetWare/interface.h		NetWare port
 NetWare/iperlhost.h		NetWare port
 NetWare/Main.c			NetWare port
 NetWare/Makefile		NetWare port
+NetWare/MP.imp			NetWare port
 NetWare/netware.h		NetWare port
 NetWare/nw5.c			NetWare port
 NetWare/nw5iop.h		NetWare port
@@ -1951,7 +1957,10 @@ NetWare/nw5sck.c		NetWare port
 NetWare/nw5sck.h		NetWare port
 NetWare/nw5thread.c		NetWare port
 NetWare/nw5thread.h		NetWare port
+NetWare/nwhashcls.cpp		NetWare port
+NetWare/nwhashcls.h		NetWare port
 NetWare/Nwmain.c		NetWare port
+NetWare/nwperlhost.h		NetWare port
 NetWare/nwperlsys.c		NetWare port
 NetWare/nwperlsys.h		NetWare port
 NetWare/Nwpipe.c		NetWare port
@@ -1963,6 +1972,9 @@ NetWare/NWTInfo.c		NetWare port
 NetWare/nwtinfo.h		NetWare port
 NetWare/NWUtil.c		NetWare port
 NetWare/nwutil.h		NetWare port
+NetWare/nwvmem.h		NetWare port
+NetWare/perllib.cpp		NetWare port
+NetWare/splittree.pl		NetWare port
 NetWare/t/NWModify.pl		NetWare port
 NetWare/t/NWScripts.pl		NetWare port
 NetWare/t/Readme.txt		NetWare port
@@ -2207,15 +2219,14 @@ README.beos		Notes about BeOS port
 README.bs2000		Notes about BS2000 POSIX port
 README.ce		Notes about WinCE port
 README.cn		About using Perl and Simplified Chinese
-README.jp		About using Perl and Japanese
-README.ko		About using Perl and Korean
-README.tw		About using Perl and Traditional Chinese
 README.cygwin		Notes about Cygwin port
 README.dgux		Notes about DG/UX port
 README.dos		Notes about DOS/DJGPP port
 README.epoc		Notes about EPOC port
 README.hpux		Notes about HP-UX port
 README.hurd		Notes about GNU/Hurd port
+README.jp		About using Perl and Japanese
+README.ko		About using Perl and Korean
 README.machten		Notes about Power MachTen port
 README.macos		Notes about Mac OS (Classic)
 README.micro		Notes about microperl
@@ -2229,6 +2240,7 @@ README.qnx		Notes about QNX port
 README.solaris		Notes about Solaris port
 README.threads		Notes about multithreading
 README.tru64		Notes about Tru64
+README.tw		About using Perl and Traditional Chinese
 README.uts		Notes about UTS
 README.vmesa		Notes about VM/ESA port
 README.vms		Notes about installing the VMS port

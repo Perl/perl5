@@ -1,6 +1,6 @@
 package Encode;
 use strict;
-our $VERSION = do { my @r = (q$Revision: 1.52 $ =~ /\d+/g); sprintf "%d."."%02d" x $#r, @r };
+our $VERSION = do { my @r = (q$Revision: 1.58 $ =~ /\d+/g); sprintf "%d."."%02d" x $#r, @r };
 our $DEBUG = 0;
 use XSLoader ();
 XSLoader::load 'Encode';
@@ -65,10 +65,9 @@ sub encodings
 }
 
 sub perlio_ok{
-    exists $INC{"PerlIO/encoding.pm"} or return 0;
-    my $stash = ref($_[0]);
-    $stash ||= ref(find_encoding($_[0]));
-    return ($stash eq "Encode::XS" || $stash eq "Encode::Unicode");
+    my $obj = ref($_[0]) ? $_[0] : find_encoding($_[0]);
+    $obj->can("perlio_ok") and return $obj->perlio_ok();
+    return 0; # safety net
 }
 
 sub define_encoding
@@ -253,25 +252,10 @@ sub predefine_encodings{
 	    $_[1] = '' if $chk;
 	    return $octets;
 	};
-	$Encode::Encoding{utf8} =
+	$Encode::Encoding{utf8} = 
 	    bless {Name => "utf8"} => "Encode::utf8";
     }
 }
-
-require Encode::Encoding;
-@Encode::XS::ISA = qw(Encode::Encoding);
-
-# This is very dodgy - PerlIO::encoding does "use Encode" and  _BEFORE_ it gets a
-# chance to set its VERSION we potentially delete it from %INC so it will be re-loaded
-# NI-S
-eval {
-    require PerlIO::encoding;
-    unless (PerlIO::encoding->VERSION >= 0.02){
-	delete $INC{"PerlIO/encoding.pm"};
-    }
-};
-# warn $@ if $@;
-@Encode::XS::ISA = qw(Encode::Encoding);
 
 1;
 
@@ -285,13 +269,12 @@ Encode - character encodings
 
     use Encode;
 
-
 =head2 Table of Contents
 
-Encode consists of a collection of modules which details are too big
+Encode consists of a collection of modules whose details are too big
 to fit in one document.  This POD itself explains the top-level APIs
 and general topics at a glance.  For other topics and more details,
-see the PODs below;
+see the PODs below:
 
   Name			        Description
   --------------------------------------------------------
@@ -317,16 +300,16 @@ codepoint" for the character (the exceptions are those platforms where
 the legacy encoding is some variant of EBCDIC rather than a super-set
 of ASCII - see L<perlebcdic>).
 
-Traditionally computer data has been moved around in 8-bit chunks
+Traditionally, computer data has been moved around in 8-bit chunks
 often called "bytes". These chunks are also known as "octets" in
 networking standards. Perl is widely used to manipulate data of many
 types - not only strings of characters representing human or computer
-languages but also "binary" data being the machines representation of
+languages but also "binary" data being the machine's representation of
 numbers, pixels in an image - or just about anything.
 
-When Perl is processing "binary data" the programmer wants Perl to
+When Perl is processing "binary data", the programmer wants Perl to
 process "sequences of bytes". This is not a problem for Perl - as a
-byte has 256 possible values it easily fits in Perl's much larger
+byte has 256 possible values, it easily fits in Perl's much larger
 "logical character".
 
 =head2 TERMINOLOGY
@@ -346,7 +329,7 @@ I<byte>: a character in the range 0..255
 =item *
 
 I<octet>: 8 bits of data, with ordinal values 0..255
-(Term for bytes passed to or from a non-Perl context, e.g. disk file.)
+(Term for bytes passed to or from a non-Perl context, e.g. a disk file.)
 
 =back
 
@@ -360,32 +343,32 @@ and such details may change in future releases.
 
 =item $octets  = encode(ENCODING, $string[, CHECK])
 
-Encodes string from Perl's internal form into I<ENCODING> and returns
+Encodes a string from Perl's internal form into I<ENCODING> and returns
 a sequence of octets.  ENCODING can be either a canonical name or
-alias.  For encoding names and aliases, see L</"Defining Aliases">.
-For CHECK see L</"Handling Malformed Data">.
+an alias.  For encoding names and aliases, see L</"Defining Aliases">.
+For CHECK, see L</"Handling Malformed Data">.
 
-For example to convert (internally UTF-8 encoded) Unicode string to
+For example, to convert (internally UTF-8 encoded) Unicode string to
 iso-8859-1 (also known as Latin1),
 
   $octets = encode("iso-8859-1", $unicode);
 
 =item $string = decode(ENCODING, $octets[, CHECK])
 
-Decode sequence of octets assumed to be in I<ENCODING> into Perl's
-internal form and returns the resulting string.  as in encode(),
-ENCODING can be either a canonical name or alias. For encoding names
-and aliases, see L</"Defining Aliases">.  For CHECK see
+Decodes a sequence of octets assumed to be in I<ENCODING> into Perl's
+internal form and returns the resulting string.  As in encode(),
+ENCODING can be either a canonical name or an alias. For encoding names
+and aliases, see L</"Defining Aliases">.  For CHECK, see
 L</"Handling Malformed Data">.
 
-For example to convert ISO-8859-1 data to UTF-8:
+For example, to convert ISO-8859-1 data to UTF-8:
 
   $utf8 = decode("iso-8859-1", $latin1);
 
 =item [$length =] from_to($string, FROM_ENCODING, TO_ENCODING [,CHECK])
 
-Convert B<in-place> the data between two encodings.
-For example to convert ISO-8859-1 data to UTF-8:
+Converts B<in-place> data between two encodings.
+For example, to convert ISO-8859-1 data to UTF-8:
 
 	from_to($data, "iso-8859-1", "utf-8");
 
@@ -394,36 +377,37 @@ and to convert it back:
 	from_to($data, "utf-8", "iso-8859-1");
 
 Note that because the conversion happens in place, the data to be
-converted cannot be a string constant, it must be a scalar variable.
+converted cannot be a string constant; it must be a scalar variable.
 
-from_to() return the length of the converted string on success, undef
+from_to() returns the length of the converted string on success, undef
 otherwise.
 
 =back
 
 =head2 UTF-8 / utf8
 
-The Unicode consortium defines the UTF-8 standard as a way of encoding
-the entire Unicode repertoire as sequences of octets.  This encoding is
-expected to become very widespread. Perl can use this form internally
-to represent strings, so conversions to and from this form are
-particularly efficient (as octets in memory do not have to change,
-just the meta-data that tells Perl how to treat them).
+The Unicode Consortium defines the UTF-8 transformation format as a
+way of encoding the entire Unicode repertoire as sequences of octets.
+This encoding is expected to become very widespread. Perl can use this
+form internally to represent strings, so conversions to and from this
+form are particularly efficient (as octets in memory do not have to
+change, just the meta-data that tells Perl how to treat them).
 
 =over 4
 
 =item $octets = encode_utf8($string);
 
-The characters that comprise string are encoded in Perl's superset of UTF-8
-and the resulting octets returned as a sequence of bytes. All possible
-characters have a UTF-8 representation so this function cannot fail.
+The characters that comprise $string are encoded in Perl's superset of
+UTF-8 and the resulting octets are returned as a sequence of bytes. All
+possible characters have a UTF-8 representation so this function cannot
+fail.
 
 =item $string = decode_utf8($octets [, CHECK]);
 
 The sequence of octets represented by $octets is decoded from UTF-8
 into a sequence of logical characters. Not all sequences of octets
 form valid UTF-8 encodings, so it is possible for this call to fail.
-For CHECK see L</"Handling Malformed Data">.
+For CHECK, see L</"Handling Malformed Data">.
 
 =back
 
@@ -438,7 +422,7 @@ ones that are not loaded yet, say
 
   @all_encodings = Encode->encodings(":all");
 
-Or you can give the name of specific module.
+Or you can give the name of a specific module.
 
   @with_jp = Encode->encodings("Encode::JP");
 
@@ -446,12 +430,12 @@ When "::" is not in the name, "Encode::" is assumed.
 
   @ebcdic = Encode->encodings("EBCDIC");
 
-To find which encodings are supported by this package in details,
+To find out in detail which encodings are supported by this package,
 see L<Encode::Supported>.
 
 =head2 Defining Aliases
 
-To add new alias to a given encoding,  Use;
+To add a new alias to a given encoding, use:
 
   use Encode;
   use Encode::Alias;
@@ -469,16 +453,16 @@ i.e.
   Encode::resolve_alias("iso-8859-12")   # false; nonexistent
   Encode::resolve_alias($name) eq $name  # true if $name is canonical
 
-This resolve_alias() does not need C<use Encode::Alias> and is
-exported via C<use encode qw(resolve_alias)>.
+resolve_alias() does not need C<use Encode::Alias>; it can be
+exported via C<use Encode qw(resolve_alias)>.
 
-See L<Encode::Alias> on details.
+See L<Encode::Alias> for details.
 
 =head1 Encoding via PerlIO
 
-If your perl supports I<PerlIO>, you can use PerlIO layer to directly
-decode and encode via filehandle.  The following two examples are
-totally identical by functionality.
+If your perl supports I<PerlIO>, you can use a PerlIO layer to decode
+and encode directly via a filehandle.  The following two examples
+are totally identical in their functionality.
 
   # via PerlIO
   open my $in,  "<:encoding(shiftjis)", $infile  or die;
@@ -486,82 +470,90 @@ totally identical by functionality.
   while(<>){ print; }
 
   # via from_to
-  open my $in,  $infile  or die;
-  open my $out, $outfile or die;
+  open my $in,  "<", $infile  or die;
+  open my $out, ">", $outfile or die;
   while(<>){
-    from_to($_, "shiftjis", "euc", 1);
+    from_to($_, "shiftjis", "euc-jp", 1);
   }
 
-Unfortunately, not all encodings are PerlIO-savvy.  You can check if
-your encoding is supported by PerlIO by C<perlio_ok> method.
+Unfortunately, there may be encodings are PerlIO-savvy.  You can check
+if your encoding is supported by PerlIO by calling the C<perlio_ok>
+method.
 
-  Encode::perlio_ok("iso-20220jp");        # false
-  find_encoding("iso-2022-jp")->perlio_ok; # false
-  use Encode qw(perlio_ok);                # exported upon request
-  perlio_ok("euc-jp")                      # true if PerlIO is enabled
+  Encode::perlio_ok("hz");             # False
+  find_encoding("euc-cn")->perlio_ok;  # True where PerlIO is available
 
-For gory details, see L<Encode::PerlIO>;
+  use Encode qw(perlio_ok);            # exported upon request
+  perlio_ok("euc-jp")
+
+Fortunately, all encodings that come with Encode core are PerlIO-savvy
+except for hz and ISO-2022-kr.  See L<Encode::Encoding> for details.
+
+For gory details, see L<Encode::PerlIO>.
 
 =head1 Handling Malformed Data
 
 =over 4
 
-THE I<CHECK> argument is used as follows.  When you omit it, it is
-identical to I<CHECK> = 0.
+The I<CHECK> argument is used as follows.  When you omit it,
+the behaviour is the same as if you had passed a value of 0 for
+I<CHECK>.
 
 =item I<CHECK> = Encode::FB_DEFAULT ( == 0)
 
-If I<CHECK> is 0, (en|de)code will put I<substitution character> in
-place of the malformed character.  for UCM-based encodings,
-E<lt>subcharE<gt> will be used.  For Unicode, \xFFFD is used.  If the
-data is supposed to be UTF-8, an optional lexical warning (category
-utf8) is given.
+If I<CHECK> is 0, (en|de)code will put a I<substitution character>
+in place of a malformed character.  For UCM-based encodings,
+E<lt>subcharE<gt> will be used.  For Unicode, "\x{FFFD}" is used.
+If the data is supposed to be UTF-8, an optional lexical warning
+(category utf8) is given.
 
 =item I<CHECK> = Encode::DIE_ON_ERROR (== 1)
 
-If I<CHECK> is 1, methods will die immediately  with an error
-message.  so when I<CHECK> is set,  you should trap the fatal error
-with eval{} unless you really want to let it die on error.
+If I<CHECK> is 1, methods will die immediately with an error
+message.  Therefore, when I<CHECK> is set to 1,  you should trap the
+fatal error with eval{} unless you really want to let it die on error.
 
 =item I<CHECK> = Encode::FB_QUIET
 
 If I<CHECK> is set to Encode::FB_QUIET, (en|de)code will immediately
-return processed part on error, with data passed via argument
-overwritten with unprocessed part.  This is handy when have to
-repeatedly call because the source data is chopped in the middle for
-some reasons, such as fixed-width buffer.  Here is a sample code that
-just does this.
+return the portion of the data that has been processed so far when
+an error occurs. The data argument will be overwritten with
+everything after that point (that is, the unprocessed part of data).
+This is handy when you have to call decode repeatedly in the case
+where your source data may contain partial multi-byte character
+sequences, for example because you are reading with a fixed-width
+buffer. Here is some sample code that does exactly this:
 
   my $data = '';
   while(defined(read $fh, $buffer, 256)){
-    # buffer may end in partial character so we append
+    # buffer may end in a partial character so we append
     $data .= $buffer;
     $utf8 .= decode($encoding, $data, ENCODE::FB_QUIET);
-    # $data now contains unprocessed partial character
+    # $data now contains the unprocessed partial character
   }
 
 =item I<CHECK> = Encode::FB_WARN
 
-This is the same as above, except it warns on error.  Handy when you
-are debugging the mode above.
+This is the same as above, except that it warns on error.  Handy when
+you are debugging the mode above.
 
 =item perlqq mode (I<CHECK> = Encode::FB_PERLQQ)
 
 For encodings that are implemented by Encode::XS, CHECK ==
 Encode::FB_PERLQQ turns (en|de)code into C<perlqq> fallback mode.
 
-When you decode, '\xI<XX>' will be placed where I<XX> is the hex
-representation of the octet  that could not be decoded to utf8.  And
-when you encode, '\x{I<xxxx>}' will be placed where I<xxxx> is the
-Unicode ID of the character that cannot be found in the character
-repertoire of the encoding.
+When you decode, '\xI<XX>' will be inserted for a malformed character,
+where I<XX> is the hex representation of the octet  that could not be
+decoded to utf8.  And when you encode, '\x{I<xxxx>}' will be inserted,
+where I<xxxx> is the Unicode ID of the character that cannot be found
+in the character repertoire of the encoding.
 
 =item The bitmask
 
-These modes are actually set via bitmask.  here is how FB_XX are laid
-out.  for FB_XX you can import via C<use Encode qw(:fallbacks)> for
-generic bitmask constants, you can import via
- C<use Encode qw(:fallback_all)>.
+These modes are actually set via a bitmask.  Here is how the FB_XX
+constants are laid out.  You can import the FB_XX constants via
+C<use Encode qw(:fallbacks)>; you can import the generic bitmask
+constants via C<use Encode qw(:fallback_all)>.
 
                      FB_DEFAULT FB_CROAK FB_QUIET FB_WARN  FB_PERLQQ
  DIE_ON_ERR    0x0001             X
@@ -570,9 +562,9 @@ generic bitmask constants, you can import via
  LEAVE_SRC     0x0008
  PERLQQ        0x0100                                        X
 
-=head2 Unemplemented fallback schemes
+=head2 Unimplemented fallback schemes
 
-In future you will be able to use a code reference to a callback
+In the future, you will be able to use a code reference to a callback
 function for the value of I<CHECK> but its API is still undecided.
 
 =head1 Defining Encodings
@@ -583,38 +575,38 @@ To define a new encoding, use:
     define_encoding($object, 'canonicalName' [, alias...]);
 
 I<canonicalName> will be associated with I<$object>.  The object
-should provide the interface described in L<Encode::Encoding>
+should provide the interface described in L<Encode::Encoding>.
 If more than two arguments are provided then additional
-arguments are taken as aliases for I<$object> as for C<define_alias>.
+arguments are taken as aliases for I<$object>, as for C<define_alias>.
 
 See L<Encode::Encoding> for more details.
 
 =head1 Messing with Perl's Internals
 
 The following API uses parts of Perl's internals in the current
-implementation.  As such they are efficient, but may change.
+implementation.  As such, they are efficient but may change.
 
 =over 4
 
 =item is_utf8(STRING [, CHECK])
 
-[INTERNAL] Test whether the UTF-8 flag is turned on in the STRING.
+[INTERNAL] Tests whether the UTF-8 flag is turned on in the STRING.
 If CHECK is true, also checks the data in STRING for being well-formed
 UTF-8.  Returns true if successful, false otherwise.
 
 =item _utf8_on(STRING)
 
-[INTERNAL] Turn on the UTF-8 flag in STRING.  The data in STRING is
+[INTERNAL] Turns on the UTF-8 flag in STRING.  The data in STRING is
 B<not> checked for being well-formed UTF-8.  Do not use unless you
 B<know> that the STRING is well-formed UTF-8.  Returns the previous
-state of the UTF-8 flag (so please don't test the return value as
-I<not> success or failure), or C<undef> if STRING is not a string.
+state of the UTF-8 flag (so please don't treat the return value as
+indicating success or failure), or C<undef> if STRING is not a string.
 
 =item _utf8_off(STRING)
 
-[INTERNAL] Turn off the UTF-8 flag in STRING.  Do not use frivolously.
-Returns the previous state of the UTF-8 flag (so please don't test the
-return value as I<not> success or failure), or C<undef> if STRING is
+[INTERNAL] Turns off the UTF-8 flag in STRING.  Do not use frivolously.
+Returns the previous state of the UTF-8 flag (so please don't treat the
+return value as indicating success or failure), or C<undef> if STRING is
 not a string.
 
 =back
@@ -634,7 +626,7 @@ the Perl Unicode Mailing List E<lt>perl-unicode@perl.orgE<gt>
 =head1 MAINTAINER
 
 This project was originated by Nick Ing-Simmons and later maintained
-by Dan Kogai E<lt>dankogai@dan.co.jpE<gt>.  See AUTHORS for full list
+by Dan Kogai E<lt>dankogai@dan.co.jpE<gt>.  See AUTHORS for a full list
 of people involved.  For any questions, use
 E<lt>perl-unicode@perl.orgE<gt> so others can share.
 

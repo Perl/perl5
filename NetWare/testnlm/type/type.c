@@ -24,7 +24,7 @@ void main (int argc, char** argv)
 
   fnInitGpfGlobals();
   SetCurrentNameSpace(NWOS2_NAME_SPACE);
-  defaultDir = getenv("PERL_ROOT");
+  defaultDir = (char *)getenv("PERL_ROOT");
   if (!defaultDir || (strlen(defaultDir) == 0))
     defaultDir = "sys:\\perl\\scripts";
   chdir(defaultDir);

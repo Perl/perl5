@@ -2813,12 +2813,7 @@ needing further debugging and/or porting work.
 =head2 Win32
 
 In multi-CPU boxes there are some problems with the I/O buffering:
-some output may appear twice.  The following Win32 failures are known
-as of 5.7.3:
-
- Failed Test                 Stat Wstat Total Fail  Failed  List of Failed
- -------------------------------------------------------------------------
-  ..\ext/threads/t/end.t                6    4  66.67%  3-6
+some output may appear twice.
 
 =head2 XML::Parser not working
 

@@ -1,5 +1,5 @@
 #!./perl
-# $Id: piconv,v 1.23 2002/04/19 05:36:43 dankogai Exp $
+# $Id: piconv,v 1.24 2002/04/22 02:45:50 dankogai Exp $
 #
 use 5.7.3;
 use strict;
@@ -86,42 +86,43 @@ piconv -- iconv(1), reinvented in perl
 
 =head1 DESCRIPTION
 
-B<piconv> is perl version of F<iconv>, a character encoding converter
-widely available for various Unixen today.   This script was primarily
-a technology demonstrator for Perl 5.8.0, you can use piconv in the
-place of iconv for virtually any cases.
+B<piconv> is perl version of B<iconv>, a character encoding converter
+widely available for various Unixen today.  This script was primarily
+a technology demonstrator for Perl 5.8.0, but you can use piconv in the
+place of iconv for virtually any case.
 
-piconv converts character encoding of either STDIN or files specified
-in the argument and prints out to STDOUT.
+piconv converts the character encoding of either STDIN or files
+specified in the argument and prints out to STDOUT.
 
-Here are list of options.
+Here is the  list of options.
 
 =over 4
 
 =item -f from_encoding
 
-Specifies the encoding you are converting from.  Unlike F<iconv>,
-this option can be omitted.  In such cases the current locale is used.
+Specifies the encoding you are converting from.  Unlike B<iconv>,
+this option can be omitted.  In such cases, the current locale is used.
 
 =item -t to_encoding
 
-Specifies the encoding you are converting to.  Unlike F<iconv>,
-this option can be omitted.  In such cases the current locale is used.
+Specifies the encoding you are converting to.  Unlike B<iconv>,
+this option can be omitted.  In such cases, the current locale is used.
 
-Therefore when both -f and -t are omitted, F<piconv> just acts like F<cat>.
+Therefore, when both -f and -t are omitted, B<piconv> just acts
+like B<cat>.
 
 =item -s I<string>
 
-uses I<string> instead of file for the source of text.  Same as F<iconv>.
+uses I<string> instead of file for the source of text.  Same as B<iconv>.
 
 =item -l
 
 Lists all available encodings, one per line, in case-insensitive
-order.  Note that only the canonical names are listed, many aliases
+order.  Note that only the canonical names are listed; many aliases
 exist.  For example, the names are case-insensitive, and many standard
-and common aliases work, like "latin1" for "ISO 8859-1", or "ibm850"
+and common aliases work, such as "latin1" for "ISO-8859-1", or "ibm850"
 instead of "cp850", or "winlatin1" for "cp1252".  See L<Encode::Supported>
-for the full discussion.
+for a full discussion.
 
 =item -C I<N>
 
@@ -147,7 +148,7 @@ Invokes debugging mode.  Primarily for Encode hackers.
 =item -S scheme
 
 Selects which scheme is to be used for conversion.  Available schemes
-are as follows;
+are as follows:
 
 =over 4
 
@@ -166,7 +167,7 @@ The new perlIO layer is used.  NI-S' favorite.
 
 =back
 
-Like I<-D> option, this is also for Encode hackers.
+Like the I<-D> option, this is also for Encode hackers.
 
 =back
 

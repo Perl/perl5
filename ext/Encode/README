@@ -13,7 +13,7 @@ DESCRIPTION
 
 INSTALLATION
 
-To install this module type the following:
+To install this module, type the following:
 
    perl Makefile.PL
    make
@@ -25,14 +25,14 @@ To install scripts under bin/ directories also,
    perl Makefile.PL MORE_SCRIPTS
    make && make test && make install
 
-by default, only enc2xs and piconv are installed.
+By default, only enc2xs and piconv are installed.
 
 To install *.ucm files also, say
 
    perl Makefile.PL INSTALL_UCM
    make && make test && make install
 
-by default, *.ucm are not installed.
+By default, *.ucm are not installed.
 
 DEPENDENCIES
 
@@ -41,10 +41,10 @@ This module requires perl5.7.3 or later.
 MAINTAINER
 
 This project was originated by Nick Ing-Simmons and later maintained by
-Dan Kogai <dankogai@dan.co.jp>.  See AUTHORS for full list of people
+Dan Kogai <dankogai@dan.co.jp>.  See AUTHORS for the full list of people
 involved.
 
 QUESTIONS?
 
-If you have any questions "perldoc Encode" does not answer, please
+If you have any questions which "perldoc Encode" does not answer, please
 feel free to ask at perl-unicode@perl.org.

@@ -16,6 +16,11 @@
 #include "perl.h"
 #include "patchlevel.h"			/* for local_patches */
 
+#ifdef NETWARE
+#include "nwutil.h"	
+char *nw_get_sitelib(const char *pl);
+#endif
+
 /* XXX If this causes problems, set i_unistd=undef in the hint file.  */
 #ifdef I_UNISTD
 #include <unistd.h>
@@ -925,7 +930,7 @@ perl_free(pTHXx)
 #    endif
     PerlMem_free(aTHXx);
 #    ifdef NETWARE
-    nw5_delete_internal_host(host);
+    nw_delete_internal_host(host);
 #    else
     win32_delete_internal_host(host);
 #    endif

@@ -38,8 +38,8 @@ public:
 	void PerlDestroy(PerlInterpreter *my_perl);
 	void PerlFree(PerlInterpreter *my_perl);
 
-	bool RegisterWithThreadTable(void);
-	bool UnregisterWithThreadTable(void);
+	//bool RegisterWithThreadTable(void);
+	//bool UnregisterWithThreadTable(void);
 };
 
 

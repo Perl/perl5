@@ -1,10 +1,10 @@
 #
-# $Id: Encoder.pm,v 0.4 2002/04/12 20:23:05 dankogai Exp $
+# $Id: Encoder.pm,v 0.5 2002/04/22 02:45:50 dankogai Exp $
 #
 package Encode::Encoder;
 use strict;
 use warnings;
-our $VERSION = do { my @r = (q$Revision: 0.4 $ =~ /\d+/g); sprintf "%d."."%02d"  x $#r, @r };
+our $VERSION = do { my @r = (q$Revision: 0.5 $ =~ /\d+/g); sprintf "%d."."%02d"  x $#r, @r };
 
 require Exporter;
 our @ISA = qw(Exporter);
@@ -119,10 +119,10 @@ Encode::Encoder -- Object Oriented Encoder
 
 =head1 ABSTRACT
 
-B<Encode::Encoder> allows you to use Encode via OOP style.  This is
-not only more intuitive than functional approach, but also handier
-when you want to stack encodings.  Suppose you want your UTF-8 string
-converted to Latin1 then Base64, you can simply say
+B<Encode::Encoder> allows you to use Encode in an object-oriented
+style.  This is not only more intuitive than a functional approach,
+but also handier when you want to stack encodings.  Suppose you want
+your UTF-8 string converted to Latin1 then Base64: you can simply say
 
   my $base64 = encoder($utf8)->latin1->base64;
 
@@ -131,7 +131,7 @@ instead of
   my $latin1 = encode("latin1", $utf8);
   my $base64 = encode_base64($utf8);
 
-or lazier and convolted
+or the lazier and more convoluted
 
   my $base64 = encode_base64(encode("latin1", $utf8));
 
@@ -143,14 +143,14 @@ Here is how to use this module.
 
 =item *
 
-There are at least two instance variable stored in hash reference,
+There are at least two instance variables stored in a hash reference,
 {data} and {encoding}.
 
 =item *
 
-When there is no method, it takes the method name as the name of
-encoding and encode instance I<data> with I<encoding>.  If successful,
-instance I<encoding> is set accordingly.
+When there is no method, it takes the method name as the name of the
+encoding and encodes the instance I<data> with I<encoding>.  If successful,
+the instance I<encoding> is set accordingly.
 
 =item *
 
@@ -161,14 +161,14 @@ because the stringify operator ("") is overridden to do exactly that.
 
 =head2 Predefined Methods
 
-This module predefines the methods below;
+This module predefines the methods below:
 
 =over 4
 
 =item $e = Encode::Encoder-E<gt>new([$data, $encoding]);
 
 returns an encoder object.  Its data is initialized with $data if
-there, and its encoding is set to $encoding if there.
+present, and its encoding is set to $encoding if present.
 
 When $encoding is omitted, it defaults to utf8 if $data is already in
 utf8 or "" (empty string) otherwise.
@@ -179,20 +179,20 @@ is an alias of Encode::Encoder-E<gt>new().  This one is exported on demand.
 
 =item $e-E<gt>data([$data])
 
-when $data is present, sets instance data to $data and returns the
-object itself. otherwise the current instance data is returned.
+When $data is present, sets the instance data to $data and returns the
+object itself.  Otherwise, the current instance data is returned.
 
 =item $e-E<gt>encoding([$encoding])
 
-when $encoding is present, sets instance encoding to $encoding and
-returns the object itself. otherwise the current instance encoding is
+When $encoding is present, sets the instance encoding to $encoding and
+returns the object itself.  Otherwise, the current instance encoding is
 returned.
 
 =item $e-E<gt>bytes([$encoding])
 
-decodes instance data from $encoding, or instance encoding if omitted.
-when the conversion is successful, the enstance encoding will be set
-to "" . 
+decodes instance data from $encoding, or the instance encoding if
+omitted.  If the conversion is successful, the instance encoding
+will be set to "".
 
 The name I<bytes> was deliberately picked to avoid namespace tainting
 -- this module may be used as a base class so method names that appear
@@ -202,9 +202,9 @@ in Encode::Encoding are avoided.
 
 =head2 Example: base64 transcoder
 
-This module is desined to work with L<Encode::Encoding>.
-To make the Base64 transcorder example above really work, you should
-write a module like this.
+This module is designed to work with L<Encode::Encoding>.
+To make the Base64 transcoder example above really work, you could
+write a module like this:
 
   package Encode::Base64;
   use base 'Encode::Encoding';
@@ -221,7 +221,7 @@ write a module like this.
   1;
   __END__
 
-And your caller module should be like this;
+And your caller module would be something like this:
 
   use Encode::Encoder;
   use Encode::Base64;
@@ -231,19 +231,19 @@ And your caller module should be like this;
   encoder($data)->iso_8859_1->base64;
   encoder($base64)->bytes('base64')->latin1;
 
-=head2 operator overloading
+=head2 Operator Overloading
 
 This module overloads two operators, stringify ("") and numify (0+).
 
-Stringify dumps the data therein.
+Stringify dumps the data inside the object.
 
-Numify returns the number of bytes therein.
+Numify returns the number of bytes in the instance data.
 
 They come in handy when you want to print or find the size of data.
 
 =head1 SEE ALSO
 
-L<Encode>
+L<Encode>,
 L<Encode::Encoding>
 
 =cut

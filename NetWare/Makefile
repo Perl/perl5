@@ -1,7 +1,7 @@
 ##
-## Makefile to build Perl on NetWare using Microsoft NMAKE and Watcom tools
+## Makefile to build Perl on NetWare using Microsoft NMAKE and CodeWarrior tools
 ##
-## This will build perl.nlm, perl.lib and extensions called NLPs
+## This will build perl.nlm, perl.lib and extensions called NLMs
 ##
 
 ##
@@ -13,11 +13,12 @@
 ##
 
 ## This file is created by using the makefile that creates Windows Perl as the reference
-## Author: sgp
-## Date Created: 13th July 2000
-## Date Modified: 29th Mar 2001
-
+## Author:
+## Date Created: 25th March 2002
+## Date Modified: 
 # Name of the NLM
+
+
 NLM_NAME		= perl.nlm
 NLM_NAME8		= Perl
 
@@ -30,6 +31,7 @@ NW_FLAGS	= -DNETWARE -DNLM_PLATFORM -DNETDB_USE_INTERNET
 
 REL_DIR	= Release
 DEB_DIR = Debug
+
 
 !ifndef MAKE_TYPE
 #MAKE_TYPE = Release
@@ -44,101 +46,106 @@ XDCTOOL	= mpkxdc
 !ifndef MPKBASE
 #MPKBASE			= p:\mpk
 !message "Run bat\setnwbld.bat to set the NetWare MPK SDK before continuing.\n"
-!error
 !endif																#ifndef MPKBASE
-NLM_INCLUDE_MP		= $(MPKBASE)\include
+NLM_INCLUDE_MP		= -I$(MPKBASE)\include
 MPKTOOL = $(MPKBASE)\$(XDCTOOL)
 !else
 MPKMESSAGE = Non MPK Build...
 NLM_INCLUDE_MP =
 MPKTOOL = 
-!endif																#ifdef USE_MPK
+!endif					#ifdef USE_MPK
+
+!ifndef NLM_VERSION
+NLM_VERSION    = 3,20,0
+!endif
 
 !ifndef NLMSDKBASE
 #NLMSDKBASE		= P:\ndk\nwsdk
 !message "Run bat\setnwbld.bat to set the NetWare SDK before continuing.\n"
 !error
-!endif																#ifndef NLMSDKBASE
+!endif														#ifndef NLMSDKBASE
+UCSINC          = p:\apps\script\sw\ucs-inc
 NLMIMPORTS      = $(NLMSDKBASE)\imports
 
-!ifdef WATCOM
-C_COMPILER		= wcc386
-CPP_COMPILER	= wpp386
-NLM_LINK		= wlink
-NLM_LIB			= lib386
-TOOL_HEADERS	= $(WATCOM)\H;$(WATCOM)\H\NT
-TOOL_PATH		= $(WATCOM)\BINNT;$(WATCOM)\BINW
-CCFLAGS			= /zp1 /5s /w1 /zq /ms /otexanih /fpi
-COMPILER_FLAG	= -DWATCOM
-ERROR_FLAG		= -Fr
-!if "$(MAKE_TYPE)"=="Debug"
-BLDDIR          = $(DEB_DIR)
-BLDMESG			= Debug version,
-!ifdef USE_D2
-BS_CFLAGS	= /od /d2 /en /st /hc -DDEBUGGING -DUSE_D2 $(DBG_FLAG)
-BLDMESG		= $(BLDMESG) Using /d2 option
-!else
-BS_CFLAGS	= /od /d1 /en /st /hc -DDEBUGGING $(DBG_FLAG)
-BLDMESG		= $(BLDMESG) Using /d1 option
-!endif																#!ifdef USE_D2	
-! else
-BLDDIR          = $(REL_DIR)
-BLDMESG		= Release version
-BS_CFLAGS	= 
-!endif																#if "$(MAKE_TYPE)"=="Debug"
-!else																#ifdef WATCOM
-!ifdef CODEWARRIOR
-# Here comes the CW tools - TO BE FILLED TO BUILD WITH CW -
-C_COMPILER		= 
-CPP_COMPILER	= 
-NLM_LINK		= 
-NLM_LIB			= 
+!ifndef SECURITYBASE
+SECURITYBASE		= P:\apps\script\sw\nwsec
+!message "Run bat\SetSecSdk.bat to set the Security paths before continuing.\n"
+#!error
+!endif																#!ifndef MAKE_TYPE
+SECURITY_IMPORTS	= $(SECURITYBASE)\imports
+
+    # Here comes the CW tools - TO BE FILLED TO BUILD WITH CW -
+MODULE_DESC     = "Perl 5.7.3 for NetWare"
+CCTYPE          = CodeWarrior
+C_COMPILER		= mwccnlm -c
+CPP_COMPILER	= mwccnlm
+LINK		    = mwldnlm      
+LD              = mwldnlm
+NLM_LIB	    	= mwldnlm -type library
 TOOL_HEADERS	= 
 TOOL_PATH		= 
-CCFLAGS			= 
-COMPILER_FLAG	= 
-ERROR_FLAG		=
+CWCPPFLAGS      = -cpp_exceptions on -wchar_t off -bool on -w on -ansi off
+CCFLAGS			= -maxerrors 25 -processor Pentium -align packed \
+                  -w nounusedarg -msext on -sym on -sym codeview4 -sym internal \
+                  -DN_PLAT_NLM -DNLM=1 -D__NO_MATH_OPS -msgstyle gcc
+COMPILER_FLAG	= -d NETWARE
+ERROR_FLAG		= -sym on -sym codeview4 -sym internal
+LDFLAGS         = -type generic -stacksize 16384 -zerobss \
+                  -nofail -msgstyle gcc -nostderr -w on \
+                  -nlmversion $(NLM_VERSION) \
+                  -copy "Copyright (C) 2000-01\, 2002 Novell\, Inc. All Rights Reserved." \
+                  -sym on -sym codeview4 -sym internal -osym perl.sym
+
 # Debug flags comes here - Not mandatory - required only for debug build
 !if "$(MAKE_TYPE)"=="Debug"
 BLDDIR          = $(DEB_DIR)
-BLDMESG			= Debug version,
+BLDMESG	    = Debug version,
 !ifdef USE_D2
-BS_CFLAGS	= 
+BS_CFLAGS	= -opt off -inline off -sym on -sym codeview4 -sym internal -DDEBUGGING -DDKFBPON
 BLDMESG		= $(BLDMESG) Using /d2 option
+##LDFLAGS		= $(LDFLAGS) -sym on -sym codeview4 -sym internal -osym $(BLDDIR)\$*.sym
+LDFLAGS		= $(LDFLAGS) -sym on -sym codeview4 -sym internal
+## -osym $(BLDDIR)\$(NLM_NAME8).sym
 !else
-BS_CFLAGS	= 
+BS_CFLAGS	= -opt off -inline off -sym on -sym codeview4 -sym internal -DDEBUGGING -DDKFBPON
 BLDMESG		= $(BLDMESG) Using /d1 option
-!endif																#!ifdef USE_D2	
-! else
+##LDFLAGS		= $(LDFLAGS) -sym on -sym codeview4 -sym internal -osym $(BLDDIR)\$*.sym
+LDFLAGS		= $(LDFLAGS) -sym on -sym codeview4 -sym internal
+## -osym $(BLDDIR)\$(NLM_NAME8).sym
+!endif											#!ifdef USE_D2	
+!else
 BLDDIR      = $(REL_DIR)
 BLDMESG		= Release version
+##BS_CFLAGS	= -opt speed -inline smart -inline auto -sym off
 BS_CFLAGS	= 
-!endif																#if "$(MAKE_TYPE)"=="Debug"
-!else																#!ifdef CODEWARRIOR
-!message "Tools base directory is not defined. Run bat\setnwbld.bat before proceeding"
-!error
-Run bat\setnwbld.bat
-!endif																#!ifdef CODEWARRIOR
-!endif																#ifdef WATCOM
+!endif									 			#if "$(MAKE_TYPE)"=="Debug"												#!ifdef CODEWARRIOR
 
 ADD_LOCDEFS =	-DPERL_CORE
 
 NLM_INCLUDE			= -I$(NLMSDKBASE)\include
 NLM_INCLUDE_NLM		= -I$(NLMSDKBASE)\include\nlm
 NLM_INCLUDE_NLM_SYS = -I$(NLMSDKBASE)\include\nlm\sys
+NLM_INCLUDE_OBSLETE = -I$(NLMSDKBASE)\include\nlm\obsolete
+# SECURITY_INCLUDE	= -I$(SECURITYBASE)\include
+NLM_INCLUDE_UCS     = -I$(UCSINC)
+!if "$(NW_EXTNS)"=="yes" 
 INCLUDE_NW          = -I.\include
+!endif
 INC_PREV			= -I..
-INC_THIS			= -I.\
+INC_THIS			= -I.
 
-NLM_INCLUDE_PATH = $(NLMSDKBASE)\include\nlm;$(NLMSDKBASE)\include;$(NLMSDKBASE)\include\nlm\sys;$(NLM_INCLUDE_MP);$(TOOL_HEADERS)
-
-INCLUDE = $(NLM_INCLUDE_PATH)
+NLM_INCLUDE_PATH = $(NLM_INCLUDE) $(NLM_INCLUDE_NLM) $(NLM_INCLUDE_NLM_SYS) $(NLM_INCLUDE_OBSLETE) \
+                   $(NLM_INCLUDE_MP) $(NLM_INCLUDE_UCS) $(TOOL_HEADERS) 
+INCLUDE = $(INC_THIS) $(INC_PREV) -I- $(NLM_INCLUDE_PATH)
 
 PATH = $(PATH);$(TOOL_PATH)
  
-NLM_INCLUDES	=	-I$(COREDIR) $(INCLUDE_NW) $(INC_THIS) $(INC_PREV)
+NLM_INCLUDES	= -I$(COREDIR) $(INCLUDE_NW)
 
-COMPLER_FLAGS	=  $(CCFLAGS) $(BS_CFLAGS) $(ADD_BUILDOPT) $(NW_FLAGS) $(COMPILER_FLAG) $(MPKFLAGS)
+CCFLAGS     = $(CCFLAGS) $(INCLUDE)
+
+COMPLER_FLAGS	=  $(BS_CFLAGS) $(ADD_BUILDOPT) $(NW_FLAGS) $(COMPILER_FLAG) $(MPKFLAGS) $(CCFLAGS)
+                  
 
 # Source file list
 NW_H_FILES			=	\
@@ -151,14 +158,15 @@ NW_H_FILES			=	\
 						.\nwplglob.h	\
 						.\nwtinfo.h	\
 						.\nwutil.h	\
-						.\nwperlsys.h	\
+						.\nwhashcls.h \
 
 NW_HOST_H_FILES		=	\
 						.\iperlhost.h	\
 						.\interface.h	\
 						.\netware.h	\
 						.\nw5sck.h	\
-						.\nwperlsys.h	\
+						.\nwperlhost.h	\
+
 
 CLIB_H_FILES		=	\
 						.\clibsdio.h	\
@@ -178,18 +186,23 @@ NW_SRC				=	\
 						.\nwtinfo.c \
 						.\nwutil.c  \
 
+NW_CPP_SRC          =   \
+						.\nwhashcls.cpp \
+						.\interface.cpp \
+						.\perllib.cpp   \
+
 EXT_MAIN_SRC		=	\
 						.\Main.c	\
 
 PERL_IO_SRC			=	\
 						..\perlio.c	
 
-PERL_LIB_SRC		=	\
-						.\interface.c	\
-						.\nwperlsys.c \
+CLIBSTUF_OBJ		=	\
+						.\CLIBstuf.obj
 
-
+#PERL_TMP_OBJ       = $(PERL_TEMP_SRC:.c=.obj)
 NW_SRC_OBJ			= $(NW_SRC:.c=.obj)
+NW_CPP_SRC_OBJ      = $(NW_CPP_SRC:.cpp=.obj)
 NLM_MICROCORE_OBJ	= $(MICROCORE_SRC:.c=.obj) 
 PERL_LIB_OBJ		= $(PERL_LIB_SRC:.c=.obj)
 PERL_IO_OBJ			= $(PERL_IO_SRC:.c=.obj)
@@ -198,14 +211,16 @@ EXT_MAIN_OBJ		= $(EXT_MAIN_SRC:.c=.obj)
 
 # For dependency checking 
 # $(BLDDIR) in place of Release or Debug is not working, should look into this - sgp
-!if "$(BLDDIR)"=="Release"
+!if "$(BLDDIR)"=="Release" 
 NLM_OBJ				= $(NLM_CORE_OBJ:..\=.\Release\)
 NEWTARE_OBJ_DEP		= $(NW_SRC_OBJ:.\=.\Release\)
+NEWTARE_CPP_OBJ_DEP	= $(NW_CPP_SRC_OBJ:.\=.\Release\)
 PERL_LIB_OBJ_DEP	= $(PERL_LIB_OBJ:.\=.\Release\)
 PERL_IO_OBJ_DEP		= $(PERL_IO_OBJ:..\=.\Release\)
 !else
 NLM_OBJ				= $(NLM_CORE_OBJ:..\=.\Debug\)
 NEWTARE_OBJ_DEP		= $(NW_SRC_OBJ:.\=.\Debug\)
+NEWTARE_CPP_OBJ_DEP	= $(NW_CPP_SRC_OBJ:.\=.\Debug\)
 PERL_LIB_OBJ_DEP	= $(PERL_LIB_OBJ:.\=.\Debug\)
 PERL_IO_OBJ_DEP		= $(PERL_IO_OBJ:..\=.\Debug\)
 !endif
@@ -221,6 +236,7 @@ NW_CFG_VARS = \
 		"INST_NW_VER=$(INST_NW_VER)"	\
 		"archname=$(ARCHNAME)"			\
 		"cc=$(C_COMPILER)"				\
+		"ar=$(LINK)"				\
 		"ccflags=$(COMPLER_FLAGS)"	\
 		"cf_email=$(EMAIL)"			\
 		"d_crypt=$(D_CRYPT)"			\
@@ -238,16 +254,15 @@ NW_CFG_VARS = \
 		"useithreads=$(USE_ITHREADS)"		\
 		"usethreads=$(USE_5005THREADS)"		\
 		"usemultiplicity=$(USE_MULTI)"		\
-		"ld=$(NLM_LINK)"			\
+		"ld=$(LINK)"			\
 		"base_import=$(BASE_IMPORT_FILES)"	\
 		"LINK_FLAGS=$(LINK_FLAGS:"=\")"		\
 		"optimize="		\
-		"d_times=define"					\
 		"d_stdio_cnt_lval=undef"		\
 		"d_stdio_ptr_lval=undef"		\
 		"d_stdiobase=undef"				\
 		"d_stdstdio=undef"				\
-		"d_times=undef"			\
+		"d_times=undef"					\
 		"direntrytype=DIR"				\
 		"nlm_version=$(NLM_VERSION)"		\
 		"d_archname=NetWare"	\
@@ -258,72 +273,70 @@ NW_CFG_VARS = \
 NW_CFGSH_TMPL	= config.wc
 NW_CFGH_TMPL	= config_H.wc
 
-SOCKET_NLP		= $(AUTODIR)\Socket\Socket.nlp
-FCNTL_NLP		= $(AUTODIR)\Fcntl\Fcntl.nlp
-IO_NLP			= $(AUTODIR)\IO\IO.nlp
-OPCODE_NLP		= $(AUTODIR)\Opcode\Opcode.nlp
-SDBM_FILE_NLP		= $(AUTODIR)\SDBM_File\SDBM_File.nlp
-POSIX_NLP		= $(AUTODIR)\POSIX\POSIX.nlp
-ATTRS_NLP		= $(AUTODIR)\attrs\attrs.nlp
-THREAD_NLP		= $(AUTODIR)\Thread\Thread.nlp
-B_NLP			= $(AUTODIR)\B\B.nlp
-DUMPER_NLP		= $(AUTODIR)\Data\Dumper\Dumper.nlp
-PEEK_NLP		= $(AUTODIR)\Devel\Peek\Peek.nlp
-RE_NLP			= $(AUTODIR)\re\re.nlp
-BYTELOADER_NLP		= $(AUTODIR)\ByteLoader\ByteLoader.nlp
-DPROF_NLP		= $(AUTODIR)\Devel\DProf\DProf.nlp
-GLOB_NLP		= $(AUTODIR)\File\Glob\Glob.nlp
-HOSTNAME_NLP		= $(AUTODIR)\Sys\Hostname\Hostname.nlp
-CWD_NLP			= $(AUTODIR)\Cwd\Cwd.nlp
-STORABLE_NLP		= $(AUTODIR)\Storable\Storable.nlp
-LISTUTIL_NLP		= $(AUTODIR)\List\Util\Util.nlp
-MIMEBASE64_NLP		= $(AUTODIR)\MIME\Base64\Base64.nlp
-XSTYPEMAP_NLP		= $(AUTODIR)\XS\Typemap\Typemap.nlp
-UNICODENORMALIZE_NLP	= $(AUTODIR)\XS\Typemap\Typemap.nlp
+SOCKET_NLM	= $(AUTODIR)\Socket\Socket.NLM
+FCNTL_NLM	= $(AUTODIR)\Fcntl\Fcntl.NLM
+IO_NLM		= $(AUTODIR)\IO\IO.NLM
+OPCODE_NLM	= $(AUTODIR)\Opcode\Opcode.NLM
+SDBM_FILE_NLM	= $(AUTODIR)\SDBM_File\SDBM_File.NLM
+POSIX_NLM	= $(AUTODIR)\POSIX\POSIX.NLM
+ATTRS_NLM	= $(AUTODIR)\attrs\attrs.NLM
+THREAD_NLM	= $(AUTODIR)\Thread\Thread.NLM
+B_NLM		= $(AUTODIR)\B\B.NLM
+DUMPER_NLM	= $(AUTODIR)\Data\Dumper\Dumper.NLM
+PEEK_NLM	= $(AUTODIR)\Devel\Peek\Peek.NLM
+RE_NLM		= $(AUTODIR)\re\re.NLM
+BYTELOADER_NLM	= $(AUTODIR)\ByteLoader\ByteLoader.NLM
+DPROF_NLM	= $(AUTODIR)\Devel\DProf\DProf.NLM
+GLOB_NLM	= $(AUTODIR)\File\Glob\Glob.NLM
+HOSTNAME_NLM	= $(AUTODIR)\Sys\Hostname\Hostname.NLM
+CWD_NLM			= $(EXTDIR)\Cwd\Cwd.NLM
+STORABLE_NLM		= $(EXTDIR)\Storable\Storable.NLM
+LISTUTIL_NLM		= $(EXTDIR)\List\Util.NLM
+MIMEBASE64_NLM		= $(EXTDIR)\MIME\Base64\Base64.NLM
+XSTYPEMAP_NLM		= $(EXTDIR)\XS\Typemap\Typemap.NLM
+UNICODENORMALIZE_NLM 	= $(EXTDIR)\Unicode\Normalize\Normalize.NLM
 
-EXTENSION_NLP	=		\
-		$(FCNTL_NLP)	\
-		$(BYTELOADER_NLP)	\
-		$(IO_NLP)		\
-		$(SOCKET_NLP)	\
-		$(OPCODE_NLP)	\
-		$(B_NLP)		\
-		$(ATTRS_NLP)	\
-		$(SDBM_FILE_NLP)	\
-		$(POSIX_NLP)	\
-		$(THREAD_NLP)	\
-		$(DUMPER_NLP)	\
-		$(GLOB_NLP)		\
-		$(PEEK_NLP)		\
-		$(RE_NLP)	\
-		$(DPROF_NLP)	\
-		$(HOSTNAME_NLP) \
-		$(STORABLE_NLP)	\
-		$(LISTUTIL_NLP)	\
-		$(MIMEBASE64_NLP) \
-		$(XSTYPEMAP_NLP)	\
-		$(UNICODENORMALIZE_NLP)	\
-#		$(CWD_NLP)	\
-# cwd.pm needs to be modifed for NetWare.
+EXTENSION_NLM	= 		\
+		$(SDBM_FILE_NLM)	\
+		$(POSIX_NLM)	\
+		$(THREAD_NLM)	\
+		$(DUMPER_NLM)	\
+		$(GLOB_NLM)		\
+		$(PEEK_NLM)		\
+		$(RE_NLM)	\
+		$(DPROF_NLM)	\
+		$(HOSTNAME_NLM)		\
+		$(CWD_NLM)		\
+		$(STORABLE_NLM)		\
+		$(LISTUTIL_NLM)		\
+		$(MIMEBASE64_NLM)	\
+		$(XSTYPEMAP_NLM)	\
+		$(FCNTL_NLM)	\
+		$(SOCKET_NLM)	\
+		$(OPCODE_NLM)	\
+		$(B_NLM)		\
+		$(ATTRS_NLM)	\
+		$(BYTELOADER_NLM)	\
+		$(IO_NLM)		\
+		$(UNICODENORMALIZE_NLM)
 
+# Begin - Following is required to build NetWare specific extensions CGI2Perl, Perl2UCS and UCSExt
 
-# Begin - Following is required to build NetWare specific extensions Perl2UCS, UCSExt & CGI2Perl
+CGI2PERL		= CGI2Perl\CGI2Perl
+PERL2UCS		= $(EXTDIR)\Perl2UCS\Perl2UCS
+UCSExt			= $(EXTDIR)\Perl2UCS\UCSExt
 
-PERL2UCS	= $(EXTDIR)\Perl2UCS\Perl2UCS
-UCSEXT		= $(EXTDIR)\UCSExt\UCSExt
-CGI2PERL	= CGI2Perl\CGI2Perl
-
-PERL2UCS_NLP	=	$(AUTODIR)\Perl2UCS\Perl2UCS.nlp
-UCSEXT_NLP		=	$(AUTODIR)\UCSExt\UCSExt.nlp
-CGI2PERL_NLP	=	\CGI2Perl\CGI2Perl.nlp
+CGI2PERL_NLM = \CGI2Perl\CGI2Perl.NLM
+PERL2UCS_NLM = $(AUTODIR)\Perl2UCS\Perl2UCS.NLM
+UCSExt_NLM = $(AUTODIR)\UCSExt\UCSExt.NLM
 
 NETWARE_EXTNS =	\
-		$(PERL2UCS_NLP)	\
-		$(UCSEXT_NLP)	\
-		$(CGI2PERL_NLP)
+		$(CGI2PERL_NLM) \
+		$(UCSExt_NLM)	\
+		$(PERL2UCS_NLM)	\
+
 
 # End
-
 
 ECHO_SRC			= TestNLM\echo\echo.c
 TYPE_SRC			= TestNLM\type\type.c
@@ -342,15 +355,15 @@ SCREEN          = 'none'
 !endif
 
 !ifndef NLM_DESCRIPTION
-NLM_DESCRIPTION = $(NLM_NAME8) for Netware
+NLM_DESCRIPTION = $(NLM_NAME8) for NetWare
 !endif
 
 !ifndef NLM_VERSION
-NLM_VERSION    = 5.72.0
+NLM_VERSION    = 3.1.0
 !endif
 
 !ifndef NLM_EXT
-NLM_EXT        = NLM
+NLM_EXT         = NLM
 !endif
 
 !ifndef BUILT
@@ -358,7 +371,8 @@ BUILT     = $(BLDDIR)\$(NLM_NAME8).$(NLM_EXT)
 !endif
 
 !ifndef BASE_IMPORT_FILES
-BASE_IMPORT_FILES = Import @$(NLMIMPORTS)\clib.imp, @$(NLMIMPORTS)\nlmlib.imp, @$(NLMIMPORTS)\threads.imp, @$(NLMIMPORTS)\nit.imp, @$(NLMIMPORTS)\socklib.imp, @$(NLMIMPORTS)\fpsm.imp, @$(NLMIMPORTS)\lib0.imp
+BASE_IMPORT_FILES = Import @$(NLMIMPORTS)\clib.imp, @$(NLMIMPORTS)\nlmlib.imp, @$(NLMIMPORTS)\threads.imp, @$(NLMIMPORTS)\nit.imp, @$(NLMIMPORTS)\socklib.imp, \
+@$(NLMIMPORTS)\fpsm.imp, @$(NLMIMPORTS)\lib0.imp, @$(SECURITY_IMPORTS)\nwsec.imp
 !endif
 
 !ifdef USE_MPK
@@ -368,32 +382,18 @@ BASE_IMPORT_FILES = $(BASE_IMPORT_FILES), @$(MPKBASE)\import\mpkorg.imp
 !ifndef BASE_IMPORT_FNS
 BASE_IMPORT_FNS = Import ImportSymbol, GetSystemConsoleScreen, LoadModule
 !endif
-
-!ifdef WATCOM
-NWLIBPATH  = $(WATCOM)\lib386\netware
-LIBPATH386 = $(WATCOM)\lib386
-LIBPATH = $(NWLIBPATH);$(LIBPATH386)
-!else																#!ifdef WATCOM
-!ifdef CODEWARRIOR
-NWLIBPATH  = 
-LIBPATH386 =
-LIBPATH = 
-!else																#!ifdef CODEWARRIOR
-!error Please define the tools base directory before proceeding
-!endif																#!ifdef CODEWARRIOR
-!endif																#!ifdef WATCOM
-
+																
+																
 !ifndef BASE_LIBRARIES
-!ifdef WATCOM
-BASE_LIBRARIES = Library plib3s.lib,math3s.lib,clib3s.lib
-!else
-!ifdef CODEWARRIOR
+#!ifdef WATCOM
+#BASE_LIBRARIES = Library plib3s.lib,math3s.lib,clib3s.lib
+#!else
+!ifdef CODEWAR
 BASE_LIBRARIES = 
 !endif																#!ifdef CODEWARRIOR
-!endif																#!ifdef WATCOM	
-!endif																#!ifndef BASE_LIBRARIES
-
-COPYRIGHT = (C) Copyright 2001-2002 Novell Inc. All rights reserved.
+!endif																
+																
+COPYRIGHT = (C) Copyright 2002 Novell Inc. All Rights Reserved.
 
 EXPORTS = Export @perl.imp
 
@@ -401,7 +401,7 @@ EXPORTS = Export @perl.imp
 # Set these to wherever you want "nmake install" to put your
 # newly built perl.
 #
-INST_DRV	= c:
+INST_DRV	= C:
 INST_TOP	= $(INST_DRV)\perl
 
 INST_NW_DRV = i:
@@ -419,7 +419,7 @@ INST_NW_TOP2 = $(INST_NW_DRV)\perl
 # versioned installation can be obtained by setting INST_TOP above to a
 # path that includes an arbitrary version string.
 #
-INST_VER	= \5.7.3
+INST_VER	= \5.7.2
 
 #
 # Comment this out if you DON'T want your perl installation to have
@@ -436,6 +436,7 @@ INST_ARCH	= \$(ARCHNAME)
 # uncomment to enable multiple interpreters.  This is need for fork()
 # emulation.
 #
+
 USE_MULTI	= define
 
 #
@@ -456,7 +457,6 @@ USE_IMP_SYS	= define
 # else USE_STDIO will be defined.
 #USE_PERLIO	= define
 #USE_STDIO = define
-
 #
 # WARNING! This option is deprecated and will eventually go away (enable
 # USE_ITHREADS instead).
@@ -587,6 +587,7 @@ ARCHNAME		= $(ARCHNAME)-perlio
 #ADD_BUILDOPT	= $(ADD_BUILDOPT) -DUSE_STDIO
 !ENDIF
 
+
 ARCHDIR		= ..\lib\$(ARCHNAME)
 COREDIR		= ..\lib\CORE
 AUTODIR		= ..\lib\auto
@@ -621,7 +622,7 @@ o = .obj
 # Rules
 # 
 
-.SUFFIXES : .c $(o) .nlm .lib .nlp
+.SUFFIXES : .c $(o) .nlm .lib .NLM
 
 
 #
@@ -657,6 +658,7 @@ UTILS		=			\
 		..\x2p\s2p		
 
 MAKE		= nmake -nologo
+#NMAKE       = $(C_COMPILER) $(INCLUDE) $(NLM_INCLUDES) $(COMPLER_FLAGS) $(ADD_LOCDEFS) $(ERROR_FLAG) $(*F).c -o $@
 
 XCOPY		= xcopy /f /r /i /d
 RCOPY		= xcopy /f /r /i /e /d
@@ -759,8 +761,8 @@ CORE_NOCFG_H	=		\
 		..\EXTERN.h	\
 		..\perlvars.h	\
 		..\intrpvar.h	\
-		..\thrdvar.h
-
+		..\thrdvar.h	
+		
 CORE_H		= $(CORE_NOCFG_H) .\config.h
 
 DLL_OBJ		= $(DLL_SRC:.c=.obj)
@@ -771,28 +773,27 @@ DYNAMIC_EXT	= Socket IO Fcntl Opcode SDBM_File POSIX attrs Thread B re \
 		Storable/Storable List/Util MIME/Base64/Base64 \
 		XS/Typemap/Typemap Unicode/Normalize/Normalize Sys/Hostname
 
-
 STATIC_EXT	= DynaLoader
 NONXS_EXT	= Errno
 
-DYNALOADER		= $(EXTDIR)\DynaLoader\DynaLoader
-SOCKET			= $(EXTDIR)\Socket\Socket
-FCNTL			= $(EXTDIR)\Fcntl\Fcntl
-OPCODE			= $(EXTDIR)\Opcode\Opcode
-SDBM_FILE		= $(EXTDIR)\SDBM_File\SDBM_File
+DYNALOADER	= $(EXTDIR)\DynaLoader\DynaLoader
+SOCKET		= $(EXTDIR)\Socket\Socket
+FCNTL		= $(EXTDIR)\Fcntl\Fcntl
+OPCODE		= $(EXTDIR)\Opcode\Opcode
+SDBM_FILE	= $(EXTDIR)\SDBM_File\SDBM_File
 IO			= $(EXTDIR)\IO\IO
-POSIX			= $(EXTDIR)\POSIX\POSIX
-ATTRS			= $(EXTDIR)\attrs\attrs
-THREAD			= $(EXTDIR)\Thread\Thread
+POSIX		= $(EXTDIR)\POSIX\POSIX
+ATTRS		= $(EXTDIR)\attrs\attrs
+THREAD		= $(EXTDIR)\Thread\Thread
 B			= $(EXTDIR)\B\B
 RE			= $(EXTDIR)\re\re
-DUMPER			= $(EXTDIR)\Data\Dumper\Dumper
-ERRNO			= $(EXTDIR)\Errno\Errno
-PEEK			= $(EXTDIR)\Devel\Peek\Peek
-BYTELOADER		= $(EXTDIR)\ByteLoader\ByteLoader
-DPROF			= $(EXTDIR)\Devel\DProf\DProf
-GLOB			= $(EXTDIR)\File\Glob\Glob
-HOSTNAME		= $(EXTDIR)\Sys\Hostname\Hostname
+DUMPER		= $(EXTDIR)\Data\Dumper\Dumper
+ERRNO		= $(EXTDIR)\Errno\Errno
+PEEK		= $(EXTDIR)\Devel\Peek\Peek
+BYTELOADER	= $(EXTDIR)\ByteLoader\ByteLoader
+DPROF		= $(EXTDIR)\Devel\DProf\DProf
+GLOB		= $(EXTDIR)\File\Glob\Glob
+HOSTNAME	= $(EXTDIR)\Sys\Hostname\Hostname
 CWD			= $(EXTDIR)\Cwd\Cwd
 STORABLE		= $(EXTDIR)\Storable\Storable
 LISTUTIL		= $(EXTDIR)\List\Util
@@ -802,7 +803,7 @@ UNICODENORMALIZE	= $(EXTDIR)\Unicode\Normalize\Normalize
 
 ERRNO_PM_NW	= $(LIBDIR)\Errno.pm
 
-EXTENSION_C	=		\
+EXTENSION_C	= 		\
 		$(SOCKET).c	\
 		$(FCNTL).c	\
 		$(OPCODE).c	\
@@ -838,7 +839,7 @@ POD2TEXT	= $(PODDIR)\pod2text
 # Top targets
 #
 
-all : .cleanoldfiles .\nwconfig.h $(CONFIGPM) $(NLM_NAME) $(EXTENSION_NLP) $(EXTENSION_NPM) $(TEST_NLMS) $(NETWARE_EXTNS)
+all : .cleanoldfiles .\nwconfig.h $(CONFIGPM) $(NLM_NAME) $(EXTENSION_NPM) $(NETWARE_EXTNS) $(TEST_NLMS) $(EXTENSION_NLM) 
 
 #------------------------------------------------------------
 
@@ -877,65 +878,44 @@ $(MINIMOD) : $(MINIPERL) ..\minimod.pl
 
 ..\x2p\a2p$(o) : ..\x2p\a2p.c
 	@echo $(MPKMESSAGE)...$(BLDMESG)...$@
-	@$(C_COMPILER) -I..\x2p $(NLM_INCLUDES) $(COMPLER_FLAGS) $(ADD_LOCDEFS) $(OBJOUT_FLAG)$@ $(ERROR_FLAG)$*.err ..\x2p\a2p.c
-
+	$(C_COMPILER) $(COMPLER_FLAGS) $(NLM_INCLUDES) -I..\x2p $(ADD_LOCDEFS) $(ERROR_FLAG) $*.c -o $@
+    @echo Built $(@)
+	
 ..\x2p\hash$(o) : ..\x2p\hash.c
 	@echo $(MPKMESSAGE)...$(BLDMESG)...$@
-	@$(C_COMPILER) -I..\x2p  $(NLM_INCLUDES) $(COMPLER_FLAGS) $(ADD_LOCDEFS)  $(OBJOUT_FLAG)$@ $(ERROR_FLAG)$*.err ..\x2p\hash.c
-
+	$(C_COMPILER) $(COMPLER_FLAGS) $(NLM_INCLUDES) -I..\x2p $(ADD_LOCDEFS) $(ERROR_FLAG) $*.c -o $@
+    @echo Built $(@)
+	
 ..\x2p\str$(o) : ..\x2p\str.c
 	@echo $(MPKMESSAGE)...$(BLDMESG)...$@
-	@$(C_COMPILER) -I..\x2p  $(NLM_INCLUDES) $(COMPLER_FLAGS) $(ADD_LOCDEFS) $(OBJOUT_FLAG)$@ $(ERROR_FLAG)$*.err ..\x2p\str.c
+	$(C_COMPILER) $(COMPLER_FLAGS) $(NLM_INCLUDES) -I..\x2p $(ADD_LOCDEFS) $(ERROR_FLAG) $*.c -o $@
+    @echo Built $(@)
 
 ..\x2p\util$(o) : ..\x2p\util.c
 	@echo $(MPKMESSAGE)...$(BLDMESG)...$@
-	@$(C_COMPILER) -I..\x2p  $(NLM_INCLUDES) $(COMPLER_FLAGS) $(ADD_LOCDEFS) $(OBJOUT_FLAG)$@ $(ERROR_FLAG)$*.err ..\x2p\util.c
+	$(C_COMPILER) $(COMPLER_FLAGS) $(NLM_INCLUDES) -I..\x2p $(ADD_LOCDEFS) $(ERROR_FLAG) $*.c -o $@
+    @echo Built $(@)
 
 ..\x2p\walk$(o) : ..\x2p\walk.c
 	@echo $(MPKMESSAGE)...$(BLDMESG)...$@
-	@$(C_COMPILER) -I..\x2p  $(NLM_INCLUDES) $(COMPLER_FLAGS) $(ADD_LOCDEFS) $(OBJOUT_FLAG)$@ $(ERROR_FLAG)$*.err ..\x2p\walk.c
-
+	$(C_COMPILER) $(COMPLER_FLAGS) $(NLM_INCLUDES) -I..\x2p $(ADD_LOCDEFS) $(ERROR_FLAG) $*.c -o $@
+    @echo Built $(@)
+	
 $(X2P) : $(MINIPERL) $(X2P_OBJ)
+	@echo Building $@..........
 	$(MINIPERL) ..\x2p\find2perl.PL
 	$(MINIPERL) ..\x2p\s2p.PL
+# Linker definitions and lining come here for CODEWARRIOR
+    @echo $(BASE_IMPORT_FILES) > $*.def
+    @echo MODULE clib >> $*.def
+    @echo Import @perl.imp >> $*.def
 !ifdef USE_XDC
 	$(MPKTOOL) $(XDCFLAGS) $*.xdc
+	@echo Import Mp.imp >> $*.def
+	@echo xdcdata $*.xdc >> $*.def
 !endif
-!ifdef WATCOM
-	@$(NLM_LINK) @<<$*.link
- Form   Novell NLM 'Awk to Perl converter'
- Name   $(X2P)
-  Option Quiet
- Option Version = $(NLM_VERSION)
- Option Copyright '$(COPYRIGHT)'
- Option Caseexact
- Option Map=$*.map, Verbose, screenname 'System Console'
- Option Stack=32k
- Option SYMFILE=$*.sym
-!ifdef USE_XDC
- OPTION	XDCDATA=$*.xdc
-!endif
- Option NoDefaultLibs
- $(EXTRA_LINK_OPTION)
-!if "$(MAKE_TYPE)"=="Debug"
-   Debug novell
-   Debug codeview
-!endif
-LibPath $(LIBPATH)
- $(BASE_LIBRARIES)
- Module clib
- $(BASE_IMPORT_FNS)
- $(BASE_IMPORT_FILES)
- $(ADD_IMPORT_FNS)
-Import @perl.imp
- $(EXPORTS)
- File   $(X2P_OBJ:.obj=,) .\$(BLDDIR)\clibstuf.obj
-<<KEEP
-!else
-!ifdef CODEWARRIOR	
-# Linker definitions and lining come here for CODEWARRIOR
-!endif
-!endif
+##    $(LINK) $(LDFLAGS) $(BS_CFLAGS) -desc "Awk to Perl Translator" $(X2P_OBJ) $(BLDDIR)\clibstuf.obj -commandfile $*.def -o $@ 
+    $(LINK) $(LDFLAGS) -desc "Awk to Perl Translator" $(X2P_OBJ) $(BLDDIR)\clibstuf.obj -commandfile $*.def -o $@ 
 
 $(EXTDIR)\DynaLoader\dl_netware.xs: dl_netware.xs
 	copy dl_netware.xs $(EXTDIR)\DynaLoader\dl_netware.xs
@@ -945,7 +925,7 @@ HEADERS :
 	@copy << stdio.h >\nwnul
 
 /*
- * (C) Copyright 2001-2002 Novell Inc. All rights reserved.
+ * (C) Copyright 2002 Novell Inc. All Rights Reserved.
  *
  * You may distribute under the terms of either the GNU General Public
  * License or the Artistic License, as specified in the README file.
@@ -957,7 +937,7 @@ HEADERS :
  * DESCRIPTION	:	Generated header file, do not edit. See makefile.
  *                  This header file causes the includer to use clibstuf.h
  *                  The purpose of clibstuf is to make sure that Perl, cgi2perl and
- *                  all the perl extension nlm's (*.NLP) use the Novell Netware CLIB versions
+ *                  all the perl extension nlm's (*.NLM) use the Novell Netware CLIB versions
  *                  of standard functions. This code loads up a whole bunch of function pointers
  *                  to point at the standard CLIB functions.
  * Author		:	HYAK
@@ -982,7 +962,7 @@ HEADERS :
 	@copy << string.h >\nwnul
 
 /*
- * (C) Copyright 2001-2002 Novell Inc. All rights reserved.
+ * (C) Copyright 2002 Novell Inc. All Rights Reserved.
  *
  * You may distribute under the terms of either the GNU General Public
  * License or the Artistic License, as specified in the README file.
@@ -994,7 +974,7 @@ HEADERS :
  * DESCRIPTION	:	Generated header file, do not edit. See makefile.
  *                  This header file causes the includer to use clibstuf.h
  *                  The purpose of clibstuf is to make sure that Perl, cgi2perl and
- *                  all the perl extension nlm's (*.NLP) use the Novell Netware CLIB versions
+ *                  all the perl extension nlm's (*.NLM) use the Novell Netware CLIB versions
  *                  of standard functions. This code loads up a whole bunch of function pointers
  *                  to point at the standard CLIB functions.
  * Author		:	HYAK
@@ -1017,99 +997,64 @@ HEADERS :
 	@copy string.h $(COREDIR)
 
 
-$(NLM_NAME): MESSAGE HEADERS $(BLDDIR)\nwnul $(NLM_OBJ) $(NEWTARE_OBJ_DEP) $(PERL_IO_OBJ_DEP) $(PERL_LIB_OBJ_DEP) $(DLL_OBJ) .XDC $(PERLIMPLIB) $(EXT_MAIN_OBJ)
+$(NLM_NAME): MESSAGE HEADERS $(BLDDIR)\nul $(NLM_OBJ) $(NEWTARE_OBJ_DEP) $(NEWTARE_CPP_OBJ_DEP) $(PERL_IO_OBJ_DEP) $(DLL_OBJ) \
+            $(PERLIMPLIB) $(EXT_MAIN_OBJ) $(PERL_TEMP_OBJ) #$(PERL_LIB_OBJ) 
 	@echo======= Linking $@ at $(MAKEDIR)\$(BLDDIR) =======
-!ifdef WATCOM
-	@$(NLM_LINK) @<<$(BLDDIR)\$*.link
- Form   Novell NLM '$(NLM_DESCRIPTION)'
- Name   $(BUILT)
- Option Quiet
- Option Version = $(NLM_VERSION)
- Option Copyright '$(COPYRIGHT)'
- Option Caseexact
- Option Map=$(BLDDIR)\$(NLM_NAME8).map, Verbose, screenname $(SCREEN)
- Option Stack=1000
-!ifdef NLM_NAME8
- Option SYMFILE=$(BLDDIR)\$(NLM_NAME8).sym
-!ifdef USE_XDC
- OPTION	XDCDATA=$(BLDDIR)\$(NLM_NAME8).xdc
-!endif
-!else
- Option SYMFILE=$(BLDDIR)\$(NLM_NAME).sym
-!ifdef USE_XDC
- OPTION	XDCDATA=$(BLDDIR)\$(NLM_NAME).xdc
-!endif
-!endif
- Option NoDefaultLibs
- $(EXTRA_LINK_OPTION)
-!if "$(MAKE_TYPE)"=="Debug"
-   # Debug all
-   Debug novell
-   Debug codeview
-!endif
-LibPath $(LIBPATH)
- $(BASE_LIBRARIES)
- Module clib
- Module netdb
- $(BASE_IMPORT_FNS)
- $(BASE_IMPORT_FILES)
- $(ADD_IMPORT_FNS)
-Import @perl.imp
- $(EXPORTS)
- File   $(NEWTARE_OBJ_DEP:.obj=.obj,) $(NLM_OBJ:.obj=.obj,) $(PERL_IO_OBJ_DEP:.obj=.obj,) $(PERL_LIB_OBJ_DEP:.obj=.obj,) $(DLL_OBJ:.obj=.obj,)
-<<KEEP
-!else
-!ifdef CODEWARRIOR	
 # Linker definitions and lining come here for CODEWARRIOR
-!endif
-!endif
-	copy ..\win32\splittree.pl .. 
-	$(MINIPERL) -I..\lib ..\splittree.pl "../LIB" $(AUTODIR)
-
-
-!if "$(MAKE_TYPE)"=="Debug"
+	@echo $(BASE_IMPORT_FILES) > $*.def
+	@echo MODULE clib >> $*.def
+	@echo MODULE netdb >> $*.def
+#   @echo MODULE nwsec >> $*.def
+	@echo $(EXPORTS) >> $*.def
+!ifdef USE_XDC
+	@echo======= Creating XDC file
+	@echo Import Mp.imp >> $*.def
 !ifdef NLM_NAME8
-	.\bat\cvpack $(BLDDIR)\$(NLM_NAME8).sym
+	$(MPKTOOL) $(XDCFLAGS) $(BLDDIR)\$(NLM_NAME8).xdc
+	@echo xdcdata $(BLDDIR)\$(NLM_NAME8).xdc >> $*.def
 !else
-	.\bat\cvpack $(BLDDIR)\$(NLM_NAME).sym
+	$(MPKTOOL) $(XDCFLAGS) $(BLDDIR)\$(NLM_NAME).xdc
+	@echo xdcdata $(BLDDIR)\$(NLM_NAME).xdc >> $*.def 
 !endif
 !endif
-
+##    $(LINK) $(LDFLAGS) $(BS_CFLAGS) -desc "Perl 5.6.1 for NetWare" $(NEWTARE_OBJ_DEP:.obj=.obj) $(NLM_OBJ:.obj=.obj) $(PERL_IO_OBJ_DEP:.obj=.obj) $(DLL_OBJ:.obj=.obj) $(NEWTARE_CPP_OBJ_DEP:.obj=.obj) -commandfile $*.def -o .\$(BLDDIR)\$@
+	$(LINK) $(LDFLAGS) -desc $(MODULE_DESC) $(NEWTARE_OBJ_DEP:.obj=.obj) $(NLM_OBJ:.obj=.obj) $(PERL_IO_OBJ_DEP:.obj=.obj) $(DLL_OBJ:.obj=.obj) $(NEWTARE_CPP_OBJ_DEP:.obj=.obj) -commandfile $*.def -o .\$(BLDDIR)\$@
+	copy splittree.pl .. 
+	$(MINIPERL) -I..\lib ..\splittree.pl "../LIB" $(AUTODIR)
+	@echo ========Linked $@ ==========
+##!if "$(MAKE_TYPE)"=="Debug"
+##!ifdef NLM_NAME8
+## 	.\bat\cvpack $(BLDDIR)\$(NLM_NAME8).sym
+##!else
+## 	.\bat\cvpack $(BLDDIR)\$(NLM_NAME).sym
+##!endif
+##!endif
 	@echo======= Finished building $(BUILT).
- 
-# Create the debug\release directory if not existing
-$(BLDDIR)\nwnul:
-	@echo . . . . mkdir $(BLDDIR)
-	@mkdir $(BLDDIR)
+
+# Create the debug or release directory if not existing
+$(BLDDIR)\nul:
+  	@echo . . . . mkdir $(BLDDIR)
+  	@mkdir $(BLDDIR)
+	@echo '$(BLDDIR)' directory created.
 
 MESSAGE: 
 	@echo======= $(MAKE_ACTION)ing $(NLM_NAME) at $(MAKEDIR)\$(BLDDIR) ======= 
+  
+$(PERLIMPLIB): perllib.imp
 
-.XDC:
-!ifdef USE_XDC
-        @echo======= Creating XDC file
-!ifdef NLM_NAME8
-        $(MPKTOOL) $(XDCFLAGS) $(BLDDIR)\$(NLM_NAME8).xdc
-!else
-        $(MPKTOOL) $(XDCFLAGS) $(BLDDIR)\$(NLM_NAME).xdc
-!endif
-!endif
-
-$(PERLIMPLIB): perllib.def
-	$(NLM_LIB) -def:perllib.def -out:$(PERLIMPLIB)
-	$(XCOPY) $(PERLIMPLIB) $(COREDIR)
-
-perllib.def : $(MINIPERL) $(CONFIGPM) ..\global.sym ..\pp.sym ..\makedef.pl
-	$(MINIPERL) -w ..\makedef.pl PLATFORM=netware FILETYPE=def $(BS_CFLAGS) $(DEFINES) $(ADD_BUILDOPT) \
-	    CCTYPE=$(CCTYPE) > perllib.def
-	$(MINIPERL) -w ..\makedef.pl PLATFORM=netware FILETYPE=imp $(BS_CFLAGS) $(DEFINES) $(ADD_BUILDOPT) \
-	    CCTYPE=$(CCTYPE) > perl.imp
-
+perllib.imp : $(MINIPERL) $(CONFIGPM) ..\global.sym ..\pp.sym ..\makedef.pl
+#	$(MINIPERL) -w ..\makedef.pl PLATFORM=netware FILETYPE=def $(ADD_BUILDOPT) \
+#	    CCTYPE=$(CCTYPE) > perllib.def
+	@echo (Perl) > perl.imp
+  	$(MINIPERL) -w ..\makedef.pl PLATFORM=netware FILETYPE=imp $(BS_CFLAGS) $(DEFINES) $(ADD_BUILDOPT) \
+	    CCTYPE=$(CCTYPE) >> perl.imp
+	copy perl.imp $(COREDIR)
+  
 $(DLL_OBJ) : $(DYNALOADER).c $(CORE_H) $(EXTDIR)\DynaLoader\dlutils.c
-	@echo $(MPKMESSAGE)...$(BLDMESG)...$@
-	@$(C_COMPILER) @<<$(BLDDIR)\$(*F).options 
-	$(NLM_INCLUDES) -I$(EXTDIR)\DynaLoader\ $(COMPLER_FLAGS) $(ADD_LOCDEFS) $(OBJOUT_FLAG)$@ $(ERROR_FLAG)$(BLDDIR)\$(*F).err $(EXTDIR)\DynaLoader\$(*F).c
-<<KEEP
+  	@echo $(MPKMESSAGE)...$(BLDMESG)...$@
+	@$(C_COMPILER) $(NLM_INCLUDES) $(COMPLER_FLAGS) $(NLM_INCLUDES) $(ADD_LOCDEFS) $(ERROR_FLAG) -I$(EXTDIR)\DynaLoader \
+	$(EXTDIR)\DynaLoader\$(*F).c -o $@
+	@echo $(@) Done.
 
 $(DYNALOADER).c : $(MINIPERL) $(EXTDIR)\DynaLoader\dl_netware.xs $(CONFIGPM)
 	if not exist $(AUTODIR) mkdir $(AUTODIR)
@@ -1122,38 +1067,35 @@ $(DYNALOADER).c : $(MINIPERL) $(EXTDIR)\DynaLoader\dl_netware.xs $(CONFIGPM)
 	cd $(EXTDIR)\$(*B)
 	$(XSUBPP) dl_netware.xs > $(*B).c
 	cd ..\..\netware
+	@echo Dynaloader Done
 
-$(PERL_LIB_OBJ_DEP) : $(NW_HOST_H_FILES) $(*F).c
-	@echo $(MPKMESSAGE)...$(BLDMESG)...$@
-	@$(CPP_COMPILER) @<<$(BLDDIR)\$(*F).options 
-	-I.. $(NLM_INCLUDES) $(COMPLER_FLAGS) $(ADD_LOCDEFS) $(OBJOUT_FLAG)$@ $(ERROR_FLAG)$*.err $(*F).c
-<<KEEP
 
 $(PERL_IO_OBJ_DEP) : ..\$(*F).c
 	@echo $(MPKMESSAGE) $(BLDMESG) $@
-	@$(C_COMPILER) @<<$(BLDDIR)\$(*F).options 
-	$(NLM_INCLUDES) $(COMPLER_FLAGS) $(ADD_LOCDEFS) $(OBJOUT_FLAG)$@ $(ERROR_FLAG)$*.err ..\$(*F).c
-<<KEEP
+	$(C_COMPILER) $(COMPLER_FLAGS) $(NLM_INCLUDES) $(ADD_LOCDEFS) $(ERROR_FLAG) ..\$(*F).c -o $@
+	@echo Built $(@)
 
 $(NLM_OBJ)	: ..\$(*F).c
 	@echo $(MPKMESSAGE) $(BLDMESG) $@
-	@$(C_COMPILER) @<<$(BLDDIR)\$(*F).options 
-	$(NLM_INCLUDES) $(COMPLER_FLAGS) $(ADD_LOCDEFS) $(OBJOUT_FLAG)$@ $(ERROR_FLAG)$*.err ..\$(*F).c
-<<KEEP
-
+	$(C_COMPILER) $(COMPLER_FLAGS) $(NLM_INCLUDES) $(ADD_LOCDEFS) $(ERROR_FLAG) ..\$(*F).c -o $@
+	@echo Built $(@)
+	
+    
 $(NEWTARE_OBJ_DEP) : $(NW_H_FILES) $(NW_HOST_H_FILES) $(*F).c
 	@echo $(MPKMESSAGE) $(BLDMESG) $@
-	@$(C_COMPILER) @<<$(BLDDIR)\$(*F).options 
-	$(NLM_INCLUDES) $(COMPLER_FLAGS) $(ADD_LOCDEFS) $(OBJOUT_FLAG)$@ $(ERROR_FLAG)$*.err $(*F).c
-<<KEEP
+	$(C_COMPILER) $(COMPLER_FLAGS) $(NLM_INCLUDES) $(ADD_LOCDEFS) $(ERROR_FLAG) $(*F).c -o $@
+    @echo Built $(@)
+
+$(NEWTARE_CPP_OBJ_DEP) : $(NW_H_FILES) $(NW_HOST_H_FILES) $(*F).cpp
+	@echo $(MPKMESSAGE) $(BLDMESG) $@
+	$(C_COMPILER) $(CWCPPFLAGS) $(COMPLER_FLAGS) $(NLM_INCLUDES) $(ADD_LOCDEFS) $(ERROR_FLAG) $(*F).cpp -o $@
+    @echo Built $(@)
 
 $(EXT_MAIN_OBJ) : $(CLIB_H_FILES)
-	@echo $(MPKMESSAGE) $(BLDMESG) $@
-	@$(C_COMPILER) @<<$(BLDDIR)\$(*F).options
-	$(NLM_INCLUDES) $(COMPLER_FLAGS) $(ADD_LOCDEFS) $(OBJOUT_FLAG)$@ $(ERROR_FLAG)$*.err $(*F).c
-<<KEEP
-	$(NLM_LIB) $@ $(NLMIMPORTS)\prelude.obj -out:$*.lib
-	@copy $*.lib $(COREDIR)
+    @echo $(MPKMESSAGE) $(BLDMESG) $@
+    $(C_COMPILER)  $(NLM_INCLUDES) $(COMPLER_FLAGS) $(ADD_LOCDEFS) $(ERROR_FLAG) $(*F).c -o $@	
+    $(LD) -type library $@ -o $*.lib
+    @copy $*.lib $(COREDIR)
 
 # Delete any files that might have got created during building miniperl.exe
 # config.sh will definitely be created
@@ -1184,139 +1126,141 @@ $(EXT_MAIN_OBJ) : $(CLIB_H_FILES)
 config.nw5 : $(NW_CFGSH_TMPL)
 	copy $(NW_CFGSH_TMPL) config.nw5
 
-$(SOCKET_NLP): $(NLM_NAME) $(SOCKET).xs
+$(SOCKET_NLM): $(NLM_NAME) $(SOCKET).xs
 	cd $(EXTDIR)\$(*B)
 	..\..\miniperl -I..\..\lib Makefile.PL PERL_CORE=1 INSTALLDIRS=perl
 	$(MAKE)
 	cd ..\..\netware
 
-$(HOSTNAME_NLP): $(NLM_NAME) $(HOSTNAME).xs
+$(HOSTNAME_NLM): $(NLM_NAME) $(HOSTNAME).xs
 	cd $(EXTDIR)\Sys\$(*B)
 	..\..\..\miniperl -I..\..\..\lib Makefile.PL PERL_CORE=1 INSTALLDIRS=perl
 	$(MAKE)
 	cd ..\..\..\netware
 
-$(FCNTL_NLP):
+$(FCNTL_NLM):
 	cd $(EXTDIR)\$(*B)
 	..\..\miniperl -I..\..\lib Makefile.PL PERL_CORE=1 INSTALLDIRS=perl
 	$(MAKE)
 	cd ..\..\netware
 
-$(IO_NLP):
+$(IO_NLM):
 	cd $(EXTDIR)\$(*B)
 	..\..\miniperl -I..\..\lib Makefile.PL PERL_CORE=1 INSTALLDIRS=perl
 	$(MAKE)
 	cd ..\..\netware
 
-$(OPCODE_NLP):
+$(OPCODE_NLM):
 	cd $(EXTDIR)\$(*B)
 	..\..\miniperl -I..\..\lib Makefile.PL PERL_CORE=1 INSTALLDIRS=perl
 	$(MAKE)
 	cd ..\..\netware
 
-$(B_NLP):
+$(B_NLM):
 	cd $(EXTDIR)\$(*B)
 	..\..\miniperl -I..\..\lib Makefile.PL PERL_CORE=1 INSTALLDIRS=perl
 	$(MAKE)
 	cd ..\..\netware
 
-$(DUMPER_NLP):
+$(DUMPER_NLM):
 	cd $(EXTDIR)\Data\$(*B)
 	..\..\..\miniperl -I..\..\..\lib Makefile.PL PERL_CORE=1 INSTALLDIRS=perl
 	$(MAKE)
 	cd ..\..\..\netware
 
-$(PEEK_NLP):
+$(PEEK_NLM):
 	cd $(EXTDIR)\Devel\$(*B)
 	..\..\..\miniperl -I..\..\..\lib Makefile.PL PERL_CORE=1 INSTALLDIRS=perl
 	$(MAKE)
 	cd ..\..\..\netware
 
-$(RE_NLP):
+$(RE_NLM):
 	cd $(EXTDIR)\$(*B)
 	..\..\miniperl -I..\..\lib Makefile.PL PERL_CORE=1 INSTALLDIRS=perl
 	$(MAKE)
 	cd ..\..\netware
 
-$(BYTELOADER_NLP):
+$(BYTELOADER_NLM):
 	cd $(EXTDIR)\$(*B)
 	..\..\miniperl -I..\..\lib Makefile.PL PERL_CORE=1 INSTALLDIRS=perl
 	$(MAKE)
 	cd ..\..\netware
 
-$(DPROF_NLP):
+$(DPROF_NLM):
 	cd $(EXTDIR)\Devel\$(*B)
 	..\..\..\miniperl -I..\..\..\lib Makefile.PL PERL_CORE=1 INSTALLDIRS=perl
 	$(MAKE)
 	cd ..\..\..\netware
 
-$(GLOB_NLP):
+$(GLOB_NLM):
 	cd $(EXTDIR)\File\$(*B)
 	..\..\..\miniperl -I..\..\..\lib Makefile.PL PERL_CORE=1 INSTALLDIRS=perl
 	$(MAKE)
 	cd ..\..\..\netware
 
-$(POSIX_NLP):
+$(POSIX_NLM):
 	cd $(EXTDIR)\$(*B)
 	..\..\miniperl -I..\..\lib Makefile.PL PERL_CORE=1 INSTALLDIRS=perl
 	$(MAKE)
 	cd ..\..\netware
 
-$(THREAD_NLP):
+$(THREAD_NLM):
 	cd $(EXTDIR)\$(*B)
 	..\..\miniperl -I..\..\lib Makefile.PL PERL_CORE=1 INSTALLDIRS=perl
 	$(MAKE)
 	cd ..\..\netware
 
-$(ATTRS_NLP):
+$(ATTRS_NLM):
 	cd $(EXTDIR)\$(*B)
 	..\..\miniperl -I..\..\lib Makefile.PL PERL_CORE=1 INSTALLDIRS=perl
 	$(MAKE)
 	cd ..\..\netware
 
-$(SDBM_FILE_NLP):
+$(SDBM_FILE_NLM):
 	cd $(EXTDIR)\$(*B)
 	..\..\miniperl -I..\..\lib Makefile.PL PERL_CORE=1 INSTALLDIRS=perl
 	$(MAKE)
 	cd ..\..\netware
 
-$(CWD_NLP):
+$(CWD_NLM):
 	cd $(EXTDIR)\$(*B)
 	..\..\miniperl -I..\..\lib Makefile.PL PERL_CORE=1 INSTALLDIRS=perl
 	$(MAKE)
 	cd ..\..\netware
 
-$(STORABLE_NLP):
+$(STORABLE_NLM):
 	cd $(EXTDIR)\$(*B)
 	..\..\miniperl -I..\..\lib Makefile.PL PERL_CORE=1 INSTALLDIRS=perl
 	$(MAKE)
 	cd ..\..\netware
 
-$(LISTUTIL_NLP):
+$(LISTUTIL_NLM):
 	cd $(EXTDIR)\List\$(*B)
 	..\..\..\miniperl -I..\..\lib Makefile.PL PERL_CORE=1 INSTALLDIRS=perl
 	$(MAKE)
 	cd ..\..\..\netware
 
-$(MIMEBASE64_NLP):
+$(MIMEBASE64_NLM):
 	cd $(EXTDIR)\Mime\$(*B)
 	..\..\..\miniperl -I..\..\lib Makefile.PL PERL_CORE=1 INSTALLDIRS=perl
 	$(MAKE)
 	cd ..\..\..\netware
 
-$(XSTYPEMAP_NLP):
+$(XSTYPEMAP_NLM):
 	cd $(EXTDIR)\XS\$(*B)
 	..\..\..\miniperl -I..\..\lib Makefile.PL PERL_CORE=1 INSTALLDIRS=perl
 	$(MAKE)
 	cd ..\..\..\netware
 
-$(UNICODENORMALIZE_NLP):
+$(UNICODENORMALIZE_NLM):
 	cd $(EXTDIR)\Unicode\$(*B)
 	..\..\..\miniperl -I..\..\lib Makefile.PL PERL_CORE=1 INSTALLDIRS=perl
 	$(MAKE)
 	cd ..\..\..\netware
 
+
 $(ERRNO_PM_NW):
+#	@echo Building $@
 	cd $(EXTDIR)\$(*B)
 	..\..\miniperl -I..\..\lib Makefile.PL PERL_CORE=1 INSTALLDIRS=perl
 	$(MAKE)
@@ -1324,98 +1268,66 @@ $(ERRNO_PM_NW):
 
 $(ECHO_SRC_OBJ): $*.c
 	@echo $(MPKMESSAGE) $(BLDMESG) $@
-	@$(C_COMPILER) @<<$*.options 
-	$(NLM_INCLUDES) $(COMPLER_FLAGS) $(ADD_LOCDEFS) $(OBJOUT_FLAG)$@ $(ERROR_FLAG)$*.err $*.c
-<<KEEP
+	$(C_COMPILER) $(NLM_INCLUDES) $(COMPLER_FLAGS) $(ADD_LOCDEFS) $(ERROR_FLAG) $*.c -o $@
+	@echo Built $(@)
 
 $(ECHO_NLM): $(ECHO_SRC_OBJ)
 	@echo======= Linking $@ =======
+# Linker definitions and lining come here for CODEWARRIOR
+    @echo $(BASE_IMPORT_FILES) > $*.def
+    @echo MODULE clib >> $*.def
+    @echo Import @perl.imp >> $*.def
 !ifdef USE_XDC
 	$(MPKTOOL) $(XDCFLAGS) $*.xdc
+	@echo Import @MP.imp >> $*.def
+	@echo xdcdata $*.xdc >> $*.def 
 !endif
-!ifdef WATCOM
-	@$(NLM_LINK) @<<$*.link
- Form   Novell NLM 'DOS echo emulation for Perl Testing' Name $@ 
- Option Quiet Option Version = $(NLM_VERSION) Option Copyright '$(COPYRIGHT)' Option Caseexact Option Map=$*.map, Verbose, screenname 'System Console' Option Stack=1000 Option SYMFILE=$*.sym  Option NoDefaultLibs
-!ifdef USE_XDC
- OPTION	XDCDATA=$*.xdc
-!endif
- $(EXTRA_LINK_OPTION)
-!if "$(MAKE_TYPE)"=="Debug"
-   Debug novell
-   Debug codeview
-!endif
-LibPath $(LIBPATH)
- $(BASE_LIBRARIES) Module clib $(BASE_IMPORT_FNS) $(BASE_IMPORT_FILES) $(ADD_IMPORT_FNS)
-Import @perl.imp
- $(EXPORTS)
- File   $(ECHO_SRC_OBJ:.obj=.obj,) .\$(BLDDIR)\clibstuf.obj
-<<KEEP
-!else
-!ifdef CODEWARRIOR	
-# Linker definitions and lining come here for CODEWARRIOR
-!endif
-!endif
+##    $(LINK) $(LDFLAGS) $(BS_CFLAGS) -desc "DOS Echo emulation for Perl testing" $(ECHO_SRC_OBJ) $(BLDDIR)\clibstuf.obj -commandfile $*.def -o $@
+    $(LINK) $(LDFLAGS) -desc "DOS Echo emulation for Perl testing" $(ECHO_SRC_OBJ) $(BLDDIR)\clibstuf.obj -commandfile $*.def -o $@
 	@echo======= Linking Complete =======
 
 $(TYPE_SRC_OBJ): $*.c
 	@echo $(MPKMESSAGE) $(BLDMESG) $@
-	@$(C_COMPILER) @<<$*.options 
-	$(NLM_INCLUDES) $(COMPLER_FLAGS) $(ADD_LOCDEFS) $(OBJOUT_FLAG)$@ $(ERROR_FLAG)$*.err $*.c
-<<KEEP
-
+	$(C_COMPILER) $(NLM_INCLUDES) $(COMPLER_FLAGS) $(ADD_LOCDEFS) $(ERROR_FLAG) $*.c -o $@
+	@echo Built $(@)
+	
 $(TYPE_NLM): $(TYPE_SRC_OBJ)
 	@echo======= Linking $@ =======
+# Linker definitions and lining come here for CODEWARRIOR
+    @echo $(BASE_IMPORT_FILES) > $*.def
+    @echo MODULE clib >> $*.def
+    @echo Import @perl.imp >> $*.def
 !ifdef USE_XDC
 	$(MPKTOOL) $(XDCFLAGS) $*.xdc
+	@echo Import @MP.imp >> $*.def 
+	@echo xdcdata $*.xdc >> $*.def 
 !endif
-!ifdef WATCOM
-	@$(NLM_LINK) @<<$*.link
- Form   Novell NLM 'DOS type emulation for Perl Testing' Name $@ 
- Option Quiet Option Version = $(NLM_VERSION) Option Copyright '$(COPYRIGHT)' Option Caseexact Option Map=$*.map, Verbose, screenname 'System Console' Option Stack=1000 Option SYMFILE=$*.sym
-!ifdef USE_XDC
- OPTION	XDCDATA=$*.xdc
-!endif
- Option NoDefaultLibs
- $(EXTRA_LINK_OPTION)
-!if "$(MAKE_TYPE)"=="Debug"
-   Debug novell
-   Debug codeview
-!endif
-LibPath $(LIBPATH)
- $(BASE_LIBRARIES) Module clib $(BASE_IMPORT_FNS) $(BASE_IMPORT_FILES) $(ADD_IMPORT_FNS)
-Import @perl.imp
- $(EXPORTS)
- File   $(TYPE_SRC_OBJ:.obj=.obj,) .\$(BLDDIR)\clibstuf.obj
-<<KEEP
-!else
-!ifdef CODEWARRIOR	
-# Linker definitions and lining come here for CODEWARRIOR
-!endif
-!endif
+##    $(LINK) $(LDFLAGS) $(BS_CFLAGS) -desc "DOS Type emulation for Perl testing" $(TYPE_SRC_OBJ) $(BLDDIR)\clibstuf.obj -commandfile $*.def -o $@
+    $(LINK) $(LDFLAGS) -desc "DOS Type emulation for Perl testing" $(TYPE_SRC_OBJ) $(BLDDIR)\clibstuf.obj -commandfile $*.def -o $@
 	@echo======= Linking Complete =======
 
+
 # Build NetWare specific extensions
-$(CGI2PERL_NLP):
+$(CGI2PERL_NLM):
 !if "$(NW_EXTNS)"=="yes"
 	cd $(*B)
-	..\..\miniperl -I..\..\lib Makefile.PL PERL_CORE=1 INSTALLDIRS=perl
+	..\..\miniperl -I..\..\lib Makefile.PL "CCCDLFLAGS=-bool on -lang c++" PERL_CORE=1 INSTALLDIRS=perl
 	$(MAKE)
 	cd ..\..\netware
 !endif
 
-$(PERL2UCS_NLP):
+$(PERL2UCS_NLM):
 !if "$(NW_EXTNS)"=="yes"
 	cd $(EXTDIR)\$(*B)
-	..\..\miniperl -I..\..\lib Makefile.PL PERL_CORE=1 INSTALLDIRS=perl
+	..\..\miniperl -I..\..\lib Makefile.PL "CCCDLFLAGS=-bool on -lang c++" PERL_CORE=1 INSTALLDIRS=perl
 	$(MAKE)
 	cd ..\..\netware
 !endif
 
-$(UCSEXT_NLP):
+$(UCSExt_NLM):
 !if "$(NW_EXTNS)"=="yes"
 	cd $(EXTDIR)\$(*B)
-	..\..\miniperl -I..\..\lib Makefile.PL PERL_CORE=1 INSTALLDIRS=perl
+	..\..\miniperl -I..\..\lib Makefile.PL "CCCDLFLAGS=-bool on -lang c++" PERL_CORE=1 INSTALLDIRS=perl
 	$(MAKE)
 	cd ..\..\netware
 !endif
@@ -1425,7 +1337,7 @@ nwclean:
 	-rmdir /s /q $(DEB_DIR)
 	@if exist .\stdio.h del /f /q .\stdio.h
 	@if exist .\string.h del /f /q .\string.h
-	@if exist .\Main.obj del /f /q  .\Main.obj
+	@if exist .\Main.obj del /f /q .\Main.obj
 	@if exist .\Main.lib del /f /q .\Main.lib
 	@if exist .\config.nw5 del /f /q .\config.nw5
 	@if exist .\perl.imp del /f /q .\perl.imp
@@ -1537,4 +1449,3 @@ clean :
 	-@erase ..\*$(o) ..\*.lib ..\*.exp *$(o) *.lib *.exp *.res
 	-@erase ..\t\*.exe ..\t\*.dll ..\t\*.bat
 	-@erase ..\x2p\*.nlm ..\x2p\*.bat
-

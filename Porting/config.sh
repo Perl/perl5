@@ -8,7 +8,7 @@
 
 # Package name      : perl5
 # Source directory  : .
-# Configuration time: Mon Apr  8 20:15:42 EET DST 2002
+# Configuration time: Tue Apr 23 06:32:48 EET DST 2002
 # Configured by     : jhi
 # Target system     : osf1 alpha.hut.fi v4.0 878 alpha 
 
@@ -64,7 +64,7 @@ ccsymbols='__alpha=1 __LANGUAGE_C__=1 __osf__=1 __unix__=1 _LONGLONG=1 _SYSTYPE_
 ccversion='V5.6-082'
 cf_by='jhi'
 cf_email='yourname@yourhost.yourplace.com'
-cf_time='Mon Apr  8 20:15:42 EET DST 2002'
+cf_time='Tue Apr 23 06:32:48 EET DST 2002'
 charsize='1'
 chgrp=''
 chmod='chmod'
@@ -495,7 +495,7 @@ dlsrc='dl_dlopen.xs'
 doublesize='8'
 drand01='drand48()'
 drand48_r_proto='0'
-dynamic_ext='B ByteLoader Cwd DB_File Data/Dumper Devel/DProf Devel/PPPort Devel/Peek Digest/MD5 Encode Fcntl File/Glob Filter/Util/Call I18N/Langinfo IO IPC/SysV List/Util MIME/Base64 NDBM_File ODBM_File Opcode POSIX PerlIO/Scalar PerlIO/Via SDBM_File Socket Storable Sys/Hostname Sys/Syslog Time/HiRes Unicode/Normalize XS/Typemap attrs re'
+dynamic_ext='B ByteLoader Cwd DB_File Data/Dumper Devel/DProf Devel/PPPort Devel/Peek Digest/MD5 Encode Fcntl File/Glob Filter/Util/Call I18N/Langinfo IO IPC/SysV List/Util MIME/Base64 NDBM_File ODBM_File Opcode POSIX PerlIO/Scalar PerlIO/Via PerlIO/encoding SDBM_File Socket Storable Sys/Hostname Sys/Syslog Time/HiRes Unicode/Normalize XS/Typemap attrs re threads threads/shared'
 eagain='EAGAIN'
 ebcdic='undef'
 echo='echo'
@@ -510,7 +510,7 @@ endservent_r_proto='0'
 eunicefix=':'
 exe_ext=''
 expr='expr'
-extensions='B ByteLoader Cwd DB_File Data/Dumper Devel/DProf Devel/PPPort Devel/Peek Digest/MD5 Encode Fcntl File/Glob Filter/Util/Call I18N/Langinfo IO IPC/SysV List/Util MIME/Base64 NDBM_File ODBM_File Opcode POSIX PerlIO/Scalar PerlIO/Via SDBM_File Socket Storable Sys/Hostname Sys/Syslog Time/HiRes Unicode/Normalize XS/Typemap attrs re Errno'
+extensions='B ByteLoader Cwd DB_File Data/Dumper Devel/DProf Devel/PPPort Devel/Peek Digest/MD5 Encode Fcntl File/Glob Filter/Util/Call I18N/Langinfo IO IPC/SysV List/Util MIME/Base64 NDBM_File ODBM_File Opcode POSIX PerlIO/Scalar PerlIO/Via PerlIO/encoding SDBM_File Socket Storable Sys/Hostname Sys/Syslog Time/HiRes Unicode/Normalize XS/Typemap attrs re threads threads/shared Errno'
 extras=''
 fflushNULL='define'
 fflushall='undef'
@@ -677,7 +677,7 @@ issymlink='test -h'
 ivdformat='"ld"'
 ivsize='8'
 ivtype='long'
-known_extensions='B ByteLoader Cwd DB_File Data/Dumper Devel/DProf Devel/PPPort Devel/Peek Digest/MD5 Encode Fcntl File/Glob Filter/Util/Call GDBM_File I18N/Langinfo IO IPC/SysV List/Util MIME/Base64 NDBM_File ODBM_File Opcode POSIX PerlIO/Scalar PerlIO/Via SDBM_File Socket Storable Sys/Hostname Sys/Syslog Thread Time/HiRes Unicode/Normalize XS/Typemap attrs re threads threads/shared'
+known_extensions='B ByteLoader Cwd DB_File Data/Dumper Devel/DProf Devel/PPPort Devel/Peek Digest/MD5 Encode Fcntl File/Glob Filter/Util/Call GDBM_File I18N/Langinfo IO IPC/SysV List/Util MIME/Base64 NDBM_File ODBM_File Opcode POSIX PerlIO/Scalar PerlIO/Via PerlIO/encoding SDBM_File Socket Storable Sys/Hostname Sys/Syslog Thread Time/HiRes Unicode/Normalize XS/Typemap attrs re threads threads/shared'
 ksh=''
 ld='ld'
 lddlflags='-shared -expect_unresolved "*" -msym -std -s'
@@ -771,7 +771,7 @@ patchlevel='7'
 path_sep=':'
 perl5='perl'
 perl=''
-perl_patchlevel='15771'
+perl_patchlevel='16080'
 perladmin='yourname@yourhost.yourplace.com'
 perllibs='-lm -lutil'
 perlpath='/opt/perl/bin/perl5.7.3'
@@ -955,7 +955,7 @@ vendorlibexp=''
 vendorprefix=''
 vendorprefixexp=''
 version='5.7.3'
-version_patchlevel_string='version 7 subversion 3 patch 15771'
+version_patchlevel_string='version 7 subversion 3 patch 16080'
 versiononly='define'
 vi=''
 voidflags='15'
@@ -985,7 +985,7 @@ PERL_SUBVERSION=3
 PERL_API_REVISION=5
 PERL_API_VERSION=5
 PERL_API_SUBVERSION=0
-PERL_PATCHLEVEL=15771
+PERL_PATCHLEVEL=16080
 PERL_CONFIG_SH=true
 # Variables propagated from previous config.sh file.
 pp_sys_cflags='ccflags="$ccflags -DNO_EFF_ONLY_OK"'

@@ -17,7 +17,7 @@
 /*
  * Package name      : perl5
  * Source directory  : .
- * Configuration time: Mon Apr  8 20:15:42 EET DST 2002
+ * Configuration time: Tue Apr 23 06:32:48 EET DST 2002
  * Configured by     : jhi
  * Target system     : osf1 alpha.hut.fi v4.0 878 alpha 
  */
@@ -1028,7 +1028,7 @@
 
 /* BYTEORDER:
  *	This symbol holds the hexadecimal constant defined in byteorder,
- *	i.e. 0x1234 or 0x4321, etc...
+ *	in a UV, i.e. 0x1234 or 0x4321 or 0x12345678, etc...
  *	If the compiler supports cross-compiling or multiple-architecture
  *	binaries (eg. on NeXT systems), use compiler-defined macros to
  *	determine the byte order.

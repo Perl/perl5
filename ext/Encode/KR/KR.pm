@@ -4,11 +4,13 @@ BEGIN {
 	die "Encode::KR not supported on EBCDIC\n";
     }
 }
-our $VERSION = do { my @r = (q$Revision: 1.21 $ =~ /\d+/g); sprintf "%d."."%02d" x $#r, @r };
+our $VERSION = do { my @r = (q$Revision: 1.22 $ =~ /\d+/g); sprintf "%d."."%02d" x $#r, @r };
 
 use Encode;
 use XSLoader;
 XSLoader::load(__PACKAGE__,$VERSION);
+
+use Encode::KR::2022_KR;
 
 1;
 __END__
@@ -56,12 +58,12 @@ mean "cp949" encodings.  To fix that, the following aliases are set;
   qr/(?:x-)?windows-949$/i => '"cp949"'
   qr/ks_c_5601-1987$/i     => '"cp949"'
 
-ASCII part (0x00-0x7f) is preserved for all encodings, even though it
-conflicts with mappings by the Unicode Consortium.  See
+The ASCII region (0x00-0x7f) is preserved for all encodings, even
+though this conflicts with mappings by the Unicode Consortium.  See
 
 L<http://www.debian.or.jp/~kubota/unicode-symbols.html.en>
 
-to find why it is implemented that way.
+to find out why it is implemented that way.
 
 =head1 SEE ALSO
 

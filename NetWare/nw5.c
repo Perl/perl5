@@ -581,8 +581,8 @@ nw_open(const char *path, int flag, ...)
     pmode = va_arg(ap, int);
     va_end(ap);
 
-	if (stricmp(path, "/dev/nul")==0)
-	path = "NWNUL";
+	if (stricmp(path, "/dev/null")==0)
+	path = "NUL";
 
 	return open(path, flag, pmode);
 }
@@ -968,3 +968,10 @@ fork(void)
 	return 0;
 }
 
+
+// added to remove undefied symbol error in CodeWarrior compilation
+int
+Perl_Ireentrant_buffer_ptr(aTHX)
+{
+	return 0;
+}

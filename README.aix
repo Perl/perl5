@@ -51,8 +51,14 @@ show the base, but is not always complete:
     # oslevel
     4.3.0.0
     # lslpp -l | grep 'bos.rte '
-    bos.rte      4.3.2.1  COMMITTED  Base Operating System Runtime
-    bos.rte      4.3.2.0  COMMITTED  Base Operating System Runtime
+    bos.rte           4.3.3.75  COMMITTED  Base Operating System Runtime
+    bos.rte            4.3.2.0  COMMITTED  Base Operating System Runtime
+    #
+
+As a side note, perl cannot be built without bos.adt.syscalls installed
+
+    # lslpp -l | grep syscalls
+    bos.adt.syscalls  4.3.3.50  COMMITTED  System Calls Application
     #
 
 =head2 Building Dynamic Extensions on AIX

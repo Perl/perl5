@@ -1,9 +1,66 @@
 # Revision history for Perl extension Encode.
 #
-# $Id: Changes,v 1.52 2002/04/20 23:43:47 dankogai Exp dankogai $
+# $Id: Changes,v 1.58 2002/04/22 23:54:22 dankogai Exp $
 #
 
-1.52 $Date: 2002/04/20 23:43:47 $
+$Revision: 1.58 $ $Date: 2002/04/22 23:54:22 $
+! TW/TW.pm
+  s/MacChineseSimp/MacChineseTrad/ # ... oops.
+! bin/ucm2text
+! t/*.t
+- t/*.euc t/*.ref
++ t/*.enc t/*.utf
+  Now all CJKT encodings go thru round-trip test via t/CJKT.t.
+  t/(CN|TW).t by Autrijus are renamed at-(cn|tw).t
+  t/(JP|KR).t are aggregated to t/CJKT.t
+  test data are all remade via bin/ucm2text.
+  And ....  They are no longer skipped for -Uuseperlio !
+
+1.57 2002/04/22 20:27:30
+! t/JP.t t/KR.t t/perlio.t
+  unless (find PerlIO::Layer 'perlio') ... line is back again.
+  t/JP.t and t/KR.t were supposed to work but maybe '>:utf8' lines
+  need PerlIO.  Sigh....
+! Encode.xs Unicode/Unicode.pm lib/Encode/JP/JIS7.pm t/perlio.t
+  ->perlio_ok now does eval{ require PerlIO::encoding } there so
+  it correctly returns 1 when PerlIO::encoding is yet loaded.
+! Encode.xs
+  perl-current patch #16072 reflected
+
+1.56 2002/04/22 09:48:07 
+! Encode.pm encoding.pm t/perlio.t t/jperl.t
+  New PerlIO::encoding 0.04 compliance met
+
+1.55 2002/04/22 03:43:05   
+! Encode.pm Encode.xs Unicode/Unicode.pm
+  needs_lines() defined so Encode::Encoding is no longer needed
+  for perlio
+
+1.54 2002/04/22 02:50:01
+! Encode.pm! Encode.xs! Unicode/Unicode.pm t/perlio.t
+! lib/Encode/Encoding.pm lib/Encode/CN/HZ.pm
+  now perlio_ok is true by default if PerlIO::encoding->VERSION is
+  0.03 or larger.  POD in Encode::Encoding revised to reflect this.
+  Encode::XS and Encode::Unicode now has perlio_ok() method.
+! lib/Encode/Supported.pod
+  s/UP-UX/HP-UX/ by jhi
+! AUTHORS Byte/Byte.pm CN/CN.pm Encode.pm JP/JP.pm KR/KR.pm README
+! Symbol/Symbol.pm TW/TW.pm Unicode/Unicode.pm bin/enc2xs bin/piconv
+! bin/ucmlint encoding.pm lib/Encode/Alias.pm lib/Encode/CN/HZ.pm
+! lib/Encode/Config.pm lib/Encode/Encoder.pm lib/Encode/Encoding.pm
+! lib/Encode/KR/2022_KR.pm lib/Encode/PerlIO.pod
+! lib/Encode/Supported.pod
+  Huge document fixes by Philip.
+! AUTHORS
+! t/JP.t
+  s/compare\(/compare_text\(/o by Sarathy.  Adds him to AUTHORS
+  http://public.activestate.com/cgi-bin/perlbrowse?patch=16049
+! t/perlio.t
+  binmode() after "<:encoding" to make Win32 happy, by Mattia.
+  Mattia added to AUTHORS file
+  Message-Id: <3CC3150F.5798.22A05AE@localhost>
+
+1.52 2002/04/20 23:43:47
 ! t/perlio.t
   TODO: is now SKIP:, as NI-XS requested.  Also adds more
   eraborate failure analysis added.
@@ -410,7 +467,7 @@
   Typo fixes and improvements by jhi
   Message-Id: <200204010201.FAA03564@alpha.hut.fi>, et al.
 
-1.11  $Date: 2002/04/20 23:43:47 $
+1.11  $Date: 2002/04/22 23:54:22 $
 + t/encoding.t
 + t/jperl.t
 ! MANIFEST
