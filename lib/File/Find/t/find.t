@@ -48,6 +48,7 @@ BEGIN {
      require File::Find;
      import File::Find;
 }
+
 cleanup();
 
 find({wanted => sub { print "ok 1\n" if $_ eq 'access.t'; } },
@@ -56,27 +57,28 @@ find({wanted => sub { print "ok 1\n" if $_ eq 'access.t'; } },
 finddepth({wanted => sub { print "ok 2\n" if $_ eq 'access.t'; } },
 	File::Spec->curdir);
 
+
 my $case = 2;
 my $FastFileTests_OK = 0;
 
 sub cleanup {
     if (-d dir_path('for_find')) {
         chdir(dir_path('for_find'));
-    }
-    if (-d dir_path('fa')) {
-        unlink file_path('fa', 'fa_ord'),
-               file_path('fa', 'fsl'),
-               file_path('fa', 'faa', 'faa_ord'),
-               file_path('fa', 'fab', 'fab_ord'),
-               file_path('fa', 'fab', 'faba', 'faba_ord'),
-               file_path('fb', 'fb_ord'),
-               file_path('fb', 'fba', 'fba_ord');
-        rmdir dir_path('fa', 'faa');
-        rmdir dir_path('fa', 'fab', 'faba');
-        rmdir dir_path('fa', 'fab');
-        rmdir dir_path('fa');
-        rmdir dir_path('fb', 'fba');
-        rmdir dir_path('fb');
+	if (-d dir_path('fa')) {
+            unlink file_path('fa', 'fa_ord'),
+                   file_path('fa', 'fsl'),
+                   file_path('fa', 'faa', 'faa_ord'),
+                   file_path('fa', 'fab', 'fab_ord'),
+                   file_path('fa', 'fab', 'faba', 'faba_ord'),
+                   file_path('fb', 'fb_ord'),
+                   file_path('fb', 'fba', 'fba_ord');
+            rmdir dir_path('fa', 'faa');
+            rmdir dir_path('fa', 'fab', 'faba');
+            rmdir dir_path('fa', 'fab');
+            rmdir dir_path('fa');
+            rmdir dir_path('fb', 'fba');
+            rmdir dir_path('fb');
+        }
         chdir(File::Spec->updir);
         rmdir dir_path('for_find');
     }
