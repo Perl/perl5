@@ -1767,7 +1767,7 @@ case 56:
 { char *name = SvPV(((SVOP*)yyvsp[0].opval)->op_sv, na);
 			  if (strEQ(name, "BEGIN") || strEQ(name, "END")
 			      || strEQ(name, "INIT"))
-			      CvUNIQUE_on(compcv);
+			  { CvUNIQUE_on(compcv); subline = -subline; }
 			  yyval.opval = yyvsp[0].opval; }
 break;
 case 57:

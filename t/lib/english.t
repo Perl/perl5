@@ -5,19 +5,23 @@ print "1..16\n";
 BEGIN { @INC = '../lib' }
 use English;
 use Config;
-my $threads = $Config{'ccflags'} =~ /-DUSE_THREADS\b/;
+my $threads = $Config{archname} =~ /-thread$/;
 
 print $PID == $$ ? "ok 1\n" : "not ok 1\n";
 
 $_ = 1;
-print $ARG == $_ ? "ok 2\n" : "not ok 2\n";
+print $ARG == $_  || $threads ? "ok 2\n" : "not ok 2\n";
 
 sub foo {
     print $ARG[0] == $_[0] || $threads ? "ok 3\n" : "not ok 3\n";
 }
 &foo(1);
 
-$ARG = "ok 4\nok 5\nok 6\n";
+if ($threads) {
+    $_ = "ok 4\nok 5\nok 6\n";
+} else {
+    $ARG = "ok 4\nok 5\nok 6\n";
+}
 /ok 5\n/;
 print $PREMATCH, $MATCH, $POSTMATCH;
 

@@ -759,7 +759,7 @@ PP(pp_match)
     if (op->op_flags & OPf_STACKED)
 	TARG = POPs;
     else {
-	TARG = GvSV(defgv);
+	TARG = DEFSV;
 	EXTEND(SP,1);
     }
     PUTBACK;				/* EVAL blocks need stack_sp. */
@@ -1432,7 +1432,7 @@ PP(pp_subst)
     if (op->op_flags & OPf_STACKED)
 	TARG = POPs;
     else {
-	TARG = GvSV(defgv);
+	TARG = DEFSV;
 	EXTEND(SP,1);
     }
     if (SvREADONLY(TARG)
@@ -1705,7 +1705,7 @@ PP(pp_grepwhile)
 
 	src = stack_base[*markstack_ptr];
 	SvTEMP_off(src);
-	GvSV(defgv) = src;
+	DEFSV = src;
 
 	RETURNOP(cLOGOP->op_other);
     }

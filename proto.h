@@ -136,7 +136,7 @@ void	dump_sub _((GV* gv));
 void	fbm_compile _((SV* sv));
 char*	fbm_instr _((unsigned char* big, unsigned char* bigend, SV* littlesv));
 #ifdef USE_THREADS
-PADOFFSET	find_thread_magical _((char *name));
+PADOFFSET	find_threadsv _((char *name));
 #endif
 OP*	force_list _((OP* arg));
 OP*	fold_constants _((OP* arg));
@@ -443,6 +443,7 @@ SV*	save_scalar _((GV* gv));
 void	save_pptr _((char** pptr));
 void	save_sptr _((SV** sptr));
 SV*	save_svref _((SV** sptr));
+SV**	save_threadsv _((PADOFFSET i));
 OP*	sawparens _((OP* o));
 OP*	scalar _((OP* o));
 OP*	scalarkids _((OP* o));

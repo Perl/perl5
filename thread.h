@@ -218,7 +218,7 @@ struct thread {
     HV *	cvcache;
     perl_thread	self;			/* Underlying thread object */
     U32		flags;
-    AV *	magicals;		/* Per-thread magicals */
+    AV *	threadsv;		/* Per-thread SVs ($_, $@ etc.) */
     AV *	specific;		/* Thread-specific user data */
     SV *	errsv;			/* Backing SV for $@ */
     HV *	errhv;			/* HV for what was %@ in pp_ctl.c */

@@ -216,6 +216,7 @@
 #define filter_add		Perl_filter_add
 #define filter_del		Perl_filter_del
 #define filter_read		Perl_filter_read
+#define find_threadsv		Perl_find_threadsv
 #define fold			Perl_fold
 #define fold_constants		Perl_fold_constants
 #define fold_locale		Perl_fold_locale
@@ -516,7 +517,6 @@
 #define padix			Perl_padix
 #define patleave		Perl_patleave
 #define peep			Perl_peep
-#define per_thread_magicals	Perl_per_thread_magicals
 #define pidgone			Perl_pidgone
 #define pidstatus		Perl_pidstatus
 #define pmflag			Perl_pmflag
@@ -938,6 +938,7 @@
 #define save_scalar		Perl_save_scalar
 #define save_sptr		Perl_save_sptr
 #define save_svref		Perl_save_svref
+#define save_threadsv		Perl_save_threadsv
 #define savepv			Perl_savepv
 #define savepvn			Perl_savepvn
 #define savestack		Perl_savestack
@@ -1084,6 +1085,7 @@
 #define thisexpr		Perl_thisexpr
 #define thr_key			Perl_thr_key
 #define threads_mutex		Perl_threads_mutex
+#define threadsv_names		Perl_threadsv_names
 #define timesbuf		Perl_timesbuf
 #define tokenbuf		Perl_tokenbuf
 #define too_few_arguments	Perl_too_few_arguments

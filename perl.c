@@ -937,7 +937,7 @@ print \"  \\@INC:\\n    @INC\\n\";");
     SvREFCNT_dec(rs);
     rs = SvREFCNT_inc(nrs);
 #ifdef USE_THREADS
-    sv_setsv(*av_fetch(thr->magicals, find_thread_magical("/"), FALSE), rs); 
+    sv_setsv(*av_fetch(thr->threadsv, find_threadsv("/"), FALSE), rs); 
 #else
     sv_setsv(GvSV(gv_fetchpv("/", TRUE, SVt_PV)), rs);
 #endif /* USE_THREADS */
@@ -1052,10 +1052,10 @@ perl_get_sv(char *name, I32 create)
     GV *gv;
 #ifdef USE_THREADS
     if (name[1] == '\0' && !isALPHA(name[0])) {
-	PADOFFSET tmp = find_thread_magical(name);
+	PADOFFSET tmp = find_threadsv(name);
     	if (tmp != NOT_IN_PAD) {
 	    dTHR;
-	    return *av_fetch(thr->magicals, tmp, FALSE);
+	    return *av_fetch(thr->threadsv, tmp, FALSE);
 	}
     }
 #endif /* USE_THREADS */
@@ -2501,7 +2501,7 @@ init_predump_symbols(void)
     GV *othergv;
 
 #ifdef USE_THREADS
-    sv_setpvn(*av_fetch(thr->magicals,find_thread_magical("\""),FALSE)," ", 1);
+    sv_setpvn(*av_fetch(thr->threadsv,find_threadsv("\""),FALSE)," ", 1);
 #else
     sv_setpvn(GvSV(gv_fetchpv("\"", TRUE, SVt_PV)), " ", 1);
 #endif /* USE_THREADS */
@@ -2789,7 +2789,7 @@ init_main_thread()
     Newz(53, thr, 1, struct thread);
     curcop = &compiling;
     thr->cvcache = newHV();
-    thr->magicals = newAV();
+    thr->threadsv = newAV();
     thr->specific = newAV();
     thr->errhv = newHV();
     thr->flags = THRf_R_JOINABLE;

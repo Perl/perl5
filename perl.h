@@ -462,9 +462,13 @@ register struct op *op asm(stringify(OP_IN_REGISTER));
 #ifdef USE_THREADS
 #  define ERRSV (thr->errsv)
 #  define ERRHV (thr->errhv)
+#  define DEFSV *av_fetch(thr->threadsv, find_threadsv("_"), FALSE)
+#  define SAVE_DEFSV save_threadsv(find_threadsv("_"))
 #else
 #  define ERRSV GvSV(errgv)
 #  define ERRHV GvHV(errgv)
+#  define DEFSV GvSV(defgv)
+#  define SAVE_DEFSV SAVESPTR(GvSV(defgv))
 #endif /* USE_THREADS */
 
 #ifndef errno
@@ -1349,7 +1353,7 @@ int runops_standard _((void));
 int runops_debug _((void));
 #endif
 
-#define PER_THREAD_MAGICALS "123456789&`'+/.,\\\";^-%=|~:\001\005!@"
+#define THREADSV_NAMES "_123456789&`'+/.,\\\";^-%=|~:\001\005!@"
 
 /****************/
 /* Truly global */
@@ -1367,7 +1371,7 @@ EXT struct thread *	eval_owner;	/* Owner thread for doeval */
 EXT int			nthreads;	/* Number of threads currently */
 EXT perl_mutex		threads_mutex;	/* Mutex for nthreads and thread list */
 EXT perl_cond		nthreads_cond;	/* Condition variable for nthreads */
-EXT char *		per_thread_magicals INIT(PER_THREAD_MAGICALS);
+EXT char *		threadsv_names INIT(THREADSV_NAMES);
 #ifdef FAKE_THREADS
 EXT struct thread *	thr;		/* Currently executing (fake) thread */
 #endif

@@ -2465,7 +2465,7 @@ new_struct_thread(struct thread *t)
 
     curcop = &compiling;
     thr->cvcache = newHV();
-    thr->magicals = newAV();
+    thr->threadsv = newAV();
     thr->specific = newAV();
     thr->errsv = newSVpv("", 0);
     thr->errhv = newHV();
@@ -2506,16 +2506,15 @@ new_struct_thread(struct thread *t)
     bodytarget = newSVsv(t->Tbodytarget);
     toptarget = newSVsv(t->Ttoptarget);
     
-    /* Initialise all per-thread magicals that the template thread used */
-    svp = AvARRAY(t->magicals);
-    for (i = 0; i <= AvFILL(t->magicals); i++, svp++) {
+    /* Initialise all per-thread SVs that the template thread used */
+    svp = AvARRAY(t->threadsv);
+    for (i = 0; i <= AvFILL(t->threadsv); i++, svp++) {
 	if (*svp && *svp != &sv_undef) {
 	    SV *sv = newSVsv(*svp);
-	    av_store(thr->magicals, i, sv);
-	    sv_magic(sv, 0, 0, &per_thread_magicals[i], 1);
+	    av_store(thr->threadsv, i, sv);
+	    sv_magic(sv, 0, 0, &threadsv_names[i], 1);
 	    DEBUG_L(PerlIO_printf(PerlIO_stderr(),
-				  "new_struct_thread: copied magical %d %p->%p\n",i,
-                                  t, thr));
+		"new_struct_thread: copied threadsv %d %p->%p\n",i, t, thr));
 	}
     } 
 

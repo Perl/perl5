@@ -40,6 +40,7 @@ static OP *too_many_arguments _((OP *o, char* name));
 static void null _((OP* o));
 static PADOFFSET pad_findlex _((char* name, PADOFFSET newoff, U32 seq,
 	CV* startcv, I32 cx_ix));
+static OP *newDEFSVOP _((void));
 
 static char*
 gv_ename(GV *gv)
@@ -496,42 +497,46 @@ pad_reset(void)
 }
 
 #ifdef USE_THREADS
-/* find_thread_magical is not reentrant */
+/* find_threadsv is not reentrant */
 PADOFFSET
-find_thread_magical(char *name)
+find_threadsv(char *name)
 {
     dTHR;
     char *p;
     PADOFFSET key;
     SV **svp;
-    /* We currently only handle single character magicals */
-    p = strchr(per_thread_magicals, *name);
+    /* We currently only handle names of a single character */
+    p = strchr(threadsv_names, *name);
     if (!p)
 	return NOT_IN_PAD;
-    key = p - per_thread_magicals;
-    svp = av_fetch(thr->magicals, key, FALSE);
+    key = p - threadsv_names;
+    svp = av_fetch(thr->threadsv, key, FALSE);
     if (!svp) {
 	SV *sv = NEWSV(0, 0);
-	av_store(thr->magicals, key, sv);
+	av_store(thr->threadsv, key, sv);
 	/*
 	 * Some magic variables used to be automagically initialised
 	 * in gv_fetchpv. Those which are now per-thread magicals get
 	 * initialised here instead.
 	 */
 	switch (*name) {
+	case '_':
+	    break;
 	case ';':
 	    sv_setpv(sv, "\034");
+	    sv_magic(sv, 0, 0, name, 1); 
 	    break;
 	case '&':
 	case '`':
 	case '\'':
 	    sawampersand = TRUE;
 	    SvREADONLY_on(sv);
+	default:
+	    sv_magic(sv, 0, 0, name, 1); 
 	    break;
 	}
-	sv_magic(sv, 0, 0, name, 1); 
 	DEBUG_L(PerlIO_printf(PerlIO_stderr(),
-			      "find_thread_magical: new SV %p for $%s%c\n",
+			      "find_threadsv: new SV %p for $%s%c\n",
 			      sv, (*name < 32) ? "^" : "",
 			      (*name < 32) ? toCTRL(*name) : *name));
     }
@@ -565,7 +570,7 @@ op_free(OP *o)
 	break;
 #ifdef USE_THREADS
     case OP_THREADSV:
-	o->op_targ = 0;	/* Was holding index into thr->magicals AV. */
+	o->op_targ = 0;	/* Was holding index into thr->threadsv AV. */
 	break;
 #endif /* USE_THREADS */
     default:
@@ -613,7 +618,7 @@ op_free(OP *o)
 static void
 null(OP *o)
 {
-    if (o->op_type != OP_NULL && o->op_targ > 0)
+    if (o->op_type != OP_NULL && o->op_type != OP_THREADSV && o->op_targ > 0)
 	pad_free(o->op_targ);
     o->op_targ = o->op_type;
     o->op_type = OP_NULL;
@@ -1529,6 +1534,18 @@ block_end(I32 floor, OP *seq)
     return retval;
 }
 
+static OP *
+newDEFSVOP(void)
+{
+#ifdef USE_THREADS
+    OP *o = newOP(OP_THREADSV, 0);
+    o->op_targ = find_threadsv("_");
+    return o;
+#else
+    return newSVREF(newGVOP(OP_GV, 0, defgv));
+#endif /* USE_THREADS */
+}
+
 void
 newPROG(OP *o)
 {
@@ -1592,7 +1609,7 @@ jmaybe(OP *o)
 	OP *o2;
 #ifdef USE_THREADS
 	o2 = newOP(OP_THREADSV, 0);
-	o2->op_targ = find_thread_magical(";");
+	o2->op_targ = find_threadsv(";");
 #else
 	o2 = newSVREF(newGVOP(OP_GV, 0, gv_fetchpv(";", TRUE, SVt_PV))),
 #endif /* USE_THREADS */
@@ -2110,7 +2127,7 @@ pmruntime(OP *o, OP *expr, OP *repl)
 #ifdef USE_THREADS
 	else if (repl->op_type == OP_THREADSV
 		 && strchr("&`'123456789+",
-			   per_thread_magicals[repl->op_targ]))
+			   threadsv_names[repl->op_targ]))
 	{
 	    curop = 0;
 	}
@@ -2793,7 +2810,7 @@ newLOOPOP(I32 flags, I32 debuggable, OP *expr, OP *block)
 	if (expr->op_type == OP_READLINE || expr->op_type == OP_GLOB
 	    || (expr->op_type == OP_NULL && expr->op_targ == OP_GLOB)) {
 	    expr = newUNOP(OP_DEFINED, 0,
-		newASSIGNOP(0, newSVREF(newGVOP(OP_GV, 0, defgv)), 0, expr) );
+		newASSIGNOP(0, newDEFSVOP(), 0, expr) );
 	}
     }
 
@@ -2827,7 +2844,7 @@ newWHILEOP(I32 flags, I32 debuggable, LOOP *loop, I32 whileline, OP *expr, OP *b
     if (expr && (expr->op_type == OP_READLINE || expr->op_type == OP_GLOB
 		 || (expr->op_type == OP_NULL && expr->op_targ == OP_GLOB))) {
 	expr = newUNOP(OP_DEFINED, 0,
-	    newASSIGNOP(0, newSVREF(newGVOP(OP_GV, 0, defgv)), 0, expr) );
+	    newASSIGNOP(0, newDEFSVOP(), 0, expr) );
     }
 
     if (!block)
@@ -2914,11 +2931,22 @@ newFOROP(I32 flags,char *label,line_t forline,OP *sv,OP *expr,OP *block,OP *cont
 	    op_free(sv);
 	    sv = Nullop;
 	}
+	else if (sv->op_type == OP_THREADSV) { /* per-thread variable */
+	    padoff = sv->op_targ;
+	    iterflags |= OPf_SPECIAL;
+	    op_free(sv);
+	    sv = Nullop;
+	}
 	else
 	    croak("Can't use %s for loop variable", op_desc[sv->op_type]);
     }
     else {
+#ifdef USE_THREADS
+	padoff = find_threadsv("_");
+	iterflags |= OPf_SPECIAL;
+#else
 	sv = newGVOP(OP_GV, 0, defgv);
+#endif
     }
     if (expr->op_type == OP_RV2AV || expr->op_type == OP_PADAV) {
 	expr = scalar(ref(expr, OP_ITER));
@@ -3409,9 +3437,9 @@ newSUB(I32 floor, OP *o, OP *proto, OP *block)
 	    CV *cv;
 	    HV *hv;
 
-	    sv_setpvf(sv, "%_:%ld-%ld",
-		    GvSV(curcop->cop_filegv),
-		    (long)subline, (long)curcop->cop_line);
+	    sv_setpvf(sv, "%_:%ld-%ld", GvSV(curcop->cop_filegv),
+		    (long)(subline < 0 ? -subline : subline),
+		    (long)curcop->cop_line);
 	    gv_efullname3(tmpstr, gv, Nullch);
 	    hv_store(GvHV(DBsub), SvPVX(tmpstr), SvCUR(tmpstr), sv, 0);
 	    if (!db_postponed) {
@@ -3846,7 +3874,7 @@ ck_eval(OP *o)
     }
     else {
 	op_free(o);
-	o = newUNOP(OP_ENTEREVAL, 0, newSVREF(newGVOP(OP_GV, 0, defgv)));
+	o = newUNOP(OP_ENTEREVAL, 0, newDEFSVOP());
     }
     o->op_targ = (PADOFFSET)hints;
     return o;
@@ -3974,7 +4002,7 @@ ck_ftst(OP *o)
            return newGVOP(type, OPf_REF, gv_fetchpv("main::STDIN", TRUE,
 				SVt_PVIO));
 	else
-	    return newUNOP(type, 0, newSVREF(newGVOP(OP_GV, 0, defgv)));
+	    return newUNOP(type, 0, newDEFSVOP());
     }
     return o;
 }
@@ -4007,7 +4035,7 @@ ck_fun(OP *o)
 	    kid = kid->op_sibling;
 	}
 	if (!kid && opargs[type] & OA_DEFGV)
-	    *tokid = kid = newSVREF(newGVOP(OP_GV, 0, defgv));
+	    *tokid = kid = newDEFSVOP();
 
 	while (oa && kid) {
 	    numargs++;
@@ -4105,7 +4133,7 @@ ck_fun(OP *o)
     }
     else if (opargs[type] & OA_DEFGV) {
 	op_free(o);
-	return newUNOP(type, 0, newSVREF(newGVOP(OP_GV, 0, defgv)));
+	return newUNOP(type, 0, newDEFSVOP());
     }
 
     if (oa) {
@@ -4123,7 +4151,7 @@ ck_glob(OP *o)
     GV *gv;
 
     if ((o->op_flags & OPf_KIDS) && !cLISTOPo->op_first->op_sibling)
-	append_elem(OP_GLOB, o, newSVREF(newGVOP(OP_GV, 0, defgv)));
+	append_elem(OP_GLOB, o, newDEFSVOP());
 
     if (!((gv = gv_fetchpv("glob", FALSE, SVt_PVCV)) && GvIMPORTED_CV(gv)))
 	gv = gv_fetchpv("CORE::GLOBAL::glob", FALSE, SVt_PVCV);
@@ -4260,7 +4288,7 @@ ck_listiob(OP *o)
     }
 	
     if (!kid)
-	append_elem(o->op_type, o, newSVREF(newGVOP(OP_GV, 0, defgv)) );
+	append_elem(o->op_type, o, newDEFSVOP());
 
     o = listkids(o);
 
@@ -4383,7 +4411,7 @@ ck_shift(OP *o)
 	
 	op_free(o);
 #ifdef USE_THREADS
-	if (subline) {
+	if (subline > 0) {
 	    argop = newOP(OP_PADAV, OPf_REF);
 	    argop->op_targ = 0;		/* curpad[0] is @_ */
 	}
@@ -4394,7 +4422,7 @@ ck_shift(OP *o)
 	}
 #else
 	argop = newUNOP(OP_RV2AV, 0,
-	    scalar(newGVOP(OP_GV, 0, subline ?
+	    scalar(newGVOP(OP_GV, 0, subline > 0 ?
 			   defgv : gv_fetchpv("ARGV", TRUE, SVt_PVAV))));
 #endif /* USE_THREADS */
 	return newUNOP(type, 0, scalar(argop));
@@ -4485,7 +4513,7 @@ ck_split(OP *o)
     scalar(kid);
 
     if (!kid->op_sibling)
-	append_elem(OP_SPLIT, o, newSVREF(newGVOP(OP_GV, 0, defgv)) );
+	append_elem(OP_SPLIT, o, newDEFSVOP());
 
     kid = kid->op_sibling;
     scalar(kid);

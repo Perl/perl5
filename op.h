@@ -74,6 +74,7 @@ typedef U32 PADOFFSET;
 				/*  On UNOPs, saw bare parens, e.g. eof(). */
 				/*  On OP_ENTERSUB || OP_NULL, saw a "do". */
 				/*  On OP_(ENTER|LEAVE)EVAL, don't clear $@ */
+				/*  On OP_ENTERITER, loop var is per-thread */
 
 /* old names; don't use in new code, but don't break them, either */
 #define OPf_LIST	1
