@@ -1244,6 +1244,7 @@ EOP
 			for (@ini_INC) {
 			  push @flags, '-I', $_;
 			}
+			push @flags, '-T' if ${^TAINT};
 			# Arrange for setting the old INC:
 			set_list("PERLDB_INC", @ini_INC);
 			if ($0 eq '-e') {
