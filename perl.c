@@ -1468,7 +1468,7 @@ usage(char *name)		/* XXX move this out into a module ? */
 "-T              turn on tainting checks",
 "-u              dump core after parsing script",
 "-U              allow unsafe operations",
-"-v              print version number and patchlevel of perl",
+"-v              print version number, patchlevel plus VERY IMPORTANT perl info",
 "-V[:variable]   print perl configuration information",
 "-w              TURN WARNINGS ON FOR COMPILATION OF YOUR SCRIPT. Recommended.",
 "-x[directory]   strip off text before #!perl line and perhaps cd to directory",
@@ -1695,7 +1695,10 @@ moreswitches(char *s)
 #endif
 	printf("\n\
 Perl may be copied only under the terms of either the Artistic License or the\n\
-GNU General Public License, which may be found in the Perl 5.0 source kit.\n\n");
+GNU General Public License, which may be found in the Perl 5.0 source kit.\n\n\
+Complete documentation for Perl, including FAQ lists, should be found on\n\
+this system using `man perl' or `perldoc perl'.  If you have access to the\n\
+Internet, point your browser at http://www.perl.com/, the Perl Home Page.\n\n");
 	PerlProc_exit(0);
     case 'w':
 	dowarn = TRUE;
