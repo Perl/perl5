@@ -8859,6 +8859,40 @@ S_gv_share(pTHX_ SV *sstr)
 
 /* duplicate an SV of any type (including AV, HV etc) */
 
+void
+Perl_rvpv_dup(pTHX_ SV *dstr, SV *sstr, CLONE_PARAMS* param)
+{
+    if (SvROK(sstr)) {
+        SvRV(dstr) = SvWEAKREF(sstr)
+		     ? sv_dup(SvRV(sstr), param)
+		     : sv_dup_inc(SvRV(sstr), param);
+    }
+    else if (SvPVX(sstr)) {
+	/* Has something there */
+	if (SvLEN(sstr)) {
+	    /* Normal PV - clone whole allocated space */ 
+	    SvPVX(dstr) = SAVEPVN(SvPVX(sstr), SvLEN(sstr)-1);
+	}  
+	else {
+	    /* Special case - not normally malloced for some reason */
+	    if (SvREADONLY(sstr) && SvFAKE(sstr)) {
+		/* A "shared" PV - clone it as unshared string */
+		SvFAKE_off(dstr);
+		SvREADONLY_off(dstr);
+		SvPVX(dstr) = SAVEPVN(SvPVX(sstr), SvCUR(sstr));
+	    }
+	    else {
+		/* Some other special case - random pointer */
+		SvPVX(dstr) = SvPVX(sstr);		
+            }
+	}
+    }
+    else {
+	/* Copy the Null */
+	SvPVX(dstr) = SvPVX(sstr);
+    }
+}
+
 SV *
 Perl_sv_dup(pTHX_ SV *sstr, CLONE_PARAMS* param)
 {
@@ -8900,36 +8934,20 @@ Perl_sv_dup(pTHX_ SV *sstr, CLONE_PARAMS* param)
 	break;
     case SVt_RV:
 	SvANY(dstr)	= new_XRV();
-    SvRV(dstr)    = SvRV(sstr) && SvWEAKREF(sstr)
-			? sv_dup(SvRV(sstr), param)
-			: sv_dup_inc(SvRV(sstr), param);
+	Perl_rvpv_dup(aTHX_ dstr, sstr, param);
 	break;
     case SVt_PV:
 	SvANY(dstr)	= new_XPV();
 	SvCUR(dstr)	= SvCUR(sstr);
 	SvLEN(dstr)	= SvLEN(sstr);
-	if (SvROK(sstr))
-        SvRV(dstr)    = SvWEAKREF(sstr)
-			? sv_dup(SvRV(sstr), param)
-			: sv_dup_inc(SvRV(sstr), param);
-	else if (SvPVX(sstr) && SvLEN(sstr))
-	    SvPVX(dstr)	= SAVEPVN(SvPVX(sstr), SvLEN(sstr)-1);
-	else
-	    SvPVX(dstr)	= SvPVX(sstr);		/* XXX shared string/random ptr? */
+	Perl_rvpv_dup(aTHX_ dstr, sstr, param);
 	break;
     case SVt_PVIV:
 	SvANY(dstr)	= new_XPVIV();
 	SvCUR(dstr)	= SvCUR(sstr);
 	SvLEN(dstr)	= SvLEN(sstr);
 	SvIVX(dstr)	= SvIVX(sstr);
-	if (SvROK(sstr))
-        SvRV(dstr)    = SvWEAKREF(sstr)
-			? sv_dup(SvRV(sstr), param)
-			: sv_dup_inc(SvRV(sstr), param);
-	else if (SvPVX(sstr) && SvLEN(sstr))
-	    SvPVX(dstr)	= SAVEPVN(SvPVX(sstr), SvLEN(sstr)-1);
-	else
-	    SvPVX(dstr)	= SvPVX(sstr);		/* XXX shared string/random ptr? */
+	Perl_rvpv_dup(aTHX_ dstr, sstr, param);
 	break;
     case SVt_PVNV:
 	SvANY(dstr)	= new_XPVNV();
@@ -8937,14 +8955,7 @@ Perl_sv_dup(pTHX_ SV *sstr, CLONE_PARAMS* param)
 	SvLEN(dstr)	= SvLEN(sstr);
 	SvIVX(dstr)	= SvIVX(sstr);
 	SvNVX(dstr)	= SvNVX(sstr);
-	if (SvROK(sstr))
-        SvRV(dstr)    = SvWEAKREF(sstr)
-			? sv_dup(SvRV(sstr), param)
-			: sv_dup_inc(SvRV(sstr), param);
-	else if (SvPVX(sstr) && SvLEN(sstr))
-	    SvPVX(dstr)	= SAVEPVN(SvPVX(sstr), SvLEN(sstr)-1);
-	else
-	    SvPVX(dstr)	= SvPVX(sstr);		/* XXX shared string/random ptr? */
+	Perl_rvpv_dup(aTHX_ dstr, sstr, param);
 	break;
     case SVt_PVMG:
 	SvANY(dstr)	= new_XPVMG();
@@ -8954,14 +8965,7 @@ Perl_sv_dup(pTHX_ SV *sstr, CLONE_PARAMS* param)
 	SvNVX(dstr)	= SvNVX(sstr);
 	SvMAGIC(dstr)	= mg_dup(SvMAGIC(sstr), param);
 	SvSTASH(dstr)	= hv_dup_inc(SvSTASH(sstr), param);
-	if (SvROK(sstr))
-        SvRV(dstr)    = SvWEAKREF(sstr)
-			? sv_dup(SvRV(sstr), param)
-			: sv_dup_inc(SvRV(sstr), param);
-	else if (SvPVX(sstr) && SvLEN(sstr))
-	    SvPVX(dstr)	= SAVEPVN(SvPVX(sstr), SvLEN(sstr)-1);
-	else
-	    SvPVX(dstr)	= SvPVX(sstr);		/* XXX shared string/random ptr? */
+	Perl_rvpv_dup(aTHX_ dstr, sstr, param);
 	break;
     case SVt_PVBM:
 	SvANY(dstr)	= new_XPVBM();
@@ -8971,14 +8975,7 @@ Perl_sv_dup(pTHX_ SV *sstr, CLONE_PARAMS* param)
 	SvNVX(dstr)	= SvNVX(sstr);
 	SvMAGIC(dstr)	= mg_dup(SvMAGIC(sstr), param);
 	SvSTASH(dstr)	= hv_dup_inc(SvSTASH(sstr), param);
-	if (SvROK(sstr))
-        SvRV(dstr)    = SvWEAKREF(sstr)
-			? sv_dup(SvRV(sstr), param)
-			: sv_dup_inc(SvRV(sstr), param);
-	else if (SvPVX(sstr) && SvLEN(sstr))
-	    SvPVX(dstr)	= SAVEPVN(SvPVX(sstr), SvLEN(sstr)-1);
-	else
-	    SvPVX(dstr)	= SvPVX(sstr);		/* XXX shared string/random ptr? */
+	Perl_rvpv_dup(aTHX_ dstr, sstr, param);
 	BmRARE(dstr)	= BmRARE(sstr);
 	BmUSEFUL(dstr)	= BmUSEFUL(sstr);
 	BmPREVIOUS(dstr)= BmPREVIOUS(sstr);
@@ -8991,14 +8988,7 @@ Perl_sv_dup(pTHX_ SV *sstr, CLONE_PARAMS* param)
 	SvNVX(dstr)	= SvNVX(sstr);
 	SvMAGIC(dstr)	= mg_dup(SvMAGIC(sstr), param);
 	SvSTASH(dstr)	= hv_dup_inc(SvSTASH(sstr), param);
-	if (SvROK(sstr))
-        SvRV(dstr)    = SvWEAKREF(sstr)
-			? sv_dup(SvRV(sstr), param)
-			: sv_dup_inc(SvRV(sstr), param);
-	else if (SvPVX(sstr) && SvLEN(sstr))
-	    SvPVX(dstr)	= SAVEPVN(SvPVX(sstr), SvLEN(sstr)-1);
-	else
-	    SvPVX(dstr)	= SvPVX(sstr);		/* XXX shared string/random ptr? */
+	Perl_rvpv_dup(aTHX_ dstr, sstr, param);
 	LvTARGOFF(dstr)	= LvTARGOFF(sstr);	/* XXX sometimes holds PMOP* when DEBUGGING */
 	LvTARGLEN(dstr)	= LvTARGLEN(sstr);
 	LvTARG(dstr)	= sv_dup_inc(LvTARG(sstr), param);
@@ -9024,14 +9014,7 @@ Perl_sv_dup(pTHX_ SV *sstr, CLONE_PARAMS* param)
 	SvNVX(dstr)	= SvNVX(sstr);
 	SvMAGIC(dstr)	= mg_dup(SvMAGIC(sstr), param);
 	SvSTASH(dstr)	= hv_dup_inc(SvSTASH(sstr), param);
-	if (SvROK(sstr))
-        SvRV(dstr)    = SvWEAKREF(sstr)
-			? sv_dup(SvRV(sstr), param)
-			: sv_dup_inc(SvRV(sstr), param);
-	else if (SvPVX(sstr) && SvLEN(sstr))
-	    SvPVX(dstr)	= SAVEPVN(SvPVX(sstr), SvLEN(sstr)-1);
-	else
-	    SvPVX(dstr)	= SvPVX(sstr);		/* XXX shared string/random ptr? */
+	Perl_rvpv_dup(aTHX_ dstr, sstr, param);
 	GvNAMELEN(dstr)	= GvNAMELEN(sstr);
 	GvNAME(dstr)	= SAVEPVN(GvNAME(sstr), GvNAMELEN(sstr));
     	GvSTASH(dstr)	= hv_dup_inc(GvSTASH(sstr), param);
@@ -9047,14 +9030,7 @@ Perl_sv_dup(pTHX_ SV *sstr, CLONE_PARAMS* param)
 	SvNVX(dstr)	= SvNVX(sstr);
 	SvMAGIC(dstr)	= mg_dup(SvMAGIC(sstr), param);
 	SvSTASH(dstr)	= hv_dup_inc(SvSTASH(sstr), param);
-	if (SvROK(sstr))
-        SvRV(dstr)    = SvWEAKREF(sstr)
-			? sv_dup(SvRV(sstr), param)
-			: sv_dup_inc(SvRV(sstr), param);
-	else if (SvPVX(sstr) && SvLEN(sstr))
-	    SvPVX(dstr)	= SAVEPVN(SvPVX(sstr), SvLEN(sstr)-1);
-	else
-	    SvPVX(dstr)	= SvPVX(sstr);		/* XXX shared string/random ptr? */
+	Perl_rvpv_dup(aTHX_ dstr, sstr, param);
 	IoIFP(dstr)	= fp_dup(IoIFP(sstr), IoTYPE(sstr), param);
 	if (IoOFP(sstr) == IoIFP(sstr))
 	    IoOFP(dstr) = IoIFP(dstr);
@@ -9162,10 +9138,7 @@ Perl_sv_dup(pTHX_ SV *sstr, CLONE_PARAMS* param)
 	SvNVX(dstr)	= SvNVX(sstr);
 	SvMAGIC(dstr)	= mg_dup(SvMAGIC(sstr), param);
 	SvSTASH(dstr)	= hv_dup_inc(SvSTASH(sstr), param);
-	if (SvPVX(sstr) && SvLEN(sstr))
-	    SvPVX(dstr)	= SAVEPVN(SvPVX(sstr), SvLEN(sstr)-1);
-	else
-	    SvPVX(dstr)	= SvPVX(sstr);		/* XXX shared string/random ptr? */
+	Perl_rvpv_dup(aTHX_ dstr, sstr, param);
 	CvSTASH(dstr)	= hv_dup(CvSTASH(sstr), param); /* NOTE: not refcounted */
 	CvSTART(dstr)	= CvSTART(sstr);
 	CvROOT(dstr)	= OpREFCNT_inc(CvROOT(sstr));
