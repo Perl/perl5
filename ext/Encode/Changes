@@ -1,9 +1,29 @@
 # Revision history for Perl extension Encode.
 #
-# $Id: Changes,v 1.68 2002/05/03 12:20:13 dankogai Exp $
+# $Id: Changes,v 1.69 2002/05/04 16:41:18 dankogai Exp dankogai $
 #
 
-$Revision: 1.68 $ $Date: 2002/05/03 12:20:13 $
+$Revision: 1.69 $ $Date: 2002/05/04 16:41:18 $
+! lib/Encode/MIME/Header
+  Floating-point coerced for UNICOS (in integer arithmetics it folds 
+  line one character too early).  Verification by Mark is pending.
+  Message-Id: <C670F60D-5F4F-11D6-A5CA-00039301D480@dan.co.jp>
+! Unicode/Unicode.pm
+  more doc patch from Elizabeth
+  Message-Id: <4.2.0.58.20020503210946.02f4ed30@mickey.dijkmat.nl>
+! Encode/Makefile_PL.e2x
+  More platform-independent patch from Benjamin
+  Message-Id: <3CD31BE0.69F79B06@earthlink.net>
+! lib/Encode/Guess AUTHORS
+  split regex fix by Graham Barr.  Adds him to AUTHORS.
+  Message-Id: <20020504085419.E95940@valueclick.com>
+! Encode/Makefile_PL.e2x
+  enc2xs script discovery made smarter and more sensible, first cited
+  by Miyagawa-kun and further suggestions by Rafael and Andreas
+! Encode.pm lib/Encode/Guess.pm t/fallback.t t/guess.t t/mime-header.t
+  "The EBCDIC remapping of the low 256 bites again" #16372 by jhi
+
+1.68 2002/05/03 12:20:13
 ! lib/Encode/Alias.pm lib/Encode/Supported.pod t/Alias.t AUTHORS
   UCS-4 added to aliases of UTF-32 by Elizabeth Mattijsen.  Alias.t
   and Supported.pod modified to reflect the change.  Elizabeth added
@@ -583,7 +603,7 @@ $Revision: 1.68 $ $Date: 2002/05/03 12:20:13 $
   Typo fixes and improvements by jhi
   Message-Id: <200204010201.FAA03564@alpha.hut.fi>, et al.
 
-1.11  $Date: 2002/05/03 12:20:13 $
+1.11  $Date: 2002/05/04 16:41:18 $
 + t/encoding.t
 + t/jperl.t
 ! MANIFEST

@@ -3,7 +3,7 @@ package Encode::Unicode;
 use strict;
 use warnings;
 
-our $VERSION = do { my @r = (q$Revision: 1.36 $ =~ /\d+/g); sprintf "%d."."%02d" x $#r, @r };
+our $VERSION = do { my @r = (q$Revision: 1.37 $ =~ /\d+/g); sprintf "%d."."%02d" x $#r, @r };
 
 use XSLoader;
 XSLoader::load(__PACKAGE__,$VERSION);
@@ -288,7 +288,8 @@ for UTF-8, which is a native format in perl).
 
 I<Character Encoding Scheme> A character encoding form plus byte
 serialization. There are seven character encoding schemes in Unicode:
-UTF-8, UTF-16, UTF-16BE, UTF-16LE, UTF-32, UTF-32BE and UTF-32LE.
+UTF-8, UTF-16, UTF-16BE, UTF-16LE, UTF-32 (UCS-4), UTF-32BE (UCS-4BE) and
+UTF-32LE (UCS-4LE).
 
 =item Quick Reference
 
@@ -330,7 +331,7 @@ form a character.  Bogus surrogates result in death.  When \x{10000}
 or above is encountered during encode(), it C<ensurrogate>s them and
 pushes the surrogate pair to the output stream.
 
-UTF-32 is a fixed-length encoding with each character taking 32 bits.
+UTF-32 (UCS-4) is a fixed-length encoding with each character taking 32 bits.
 Since it is 32-bit, there is no need for I<surrogate pairs>.
 
 =head2 by endianness
@@ -434,10 +435,11 @@ every one of \x{0000_0000} up to \x{ffff_ffff} (*) is I<a character>.
 =head1 SEE ALSO
 
 L<Encode>, L<http://www.unicode.org/glossary/>,
+L<http://www.unicode.org/unicode/faq/utf_bom.html>,
 
 RFC 2781 L<http://rfc.net/rfc2781.html>,
 
-L<http://www.unicode.org/unicode/faq/utf_bom.html>
+The whole Unicode standard L<http://www.unicode.org/unicode/uni2book/u2.html>
 
 Ch. 15, pp. 403 of C<Programming Perl (3rd Edition)>
 by Larry Wall, Tom Christiansen, Jon Orwant; 
