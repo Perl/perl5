@@ -6390,19 +6390,16 @@ Perl_peep(pTHX_ register OP *o)
 		o->op_targ = ix;
 	    }
 #endif
-	    /* FALL THROUGH */
-	case OP_UC:
-	case OP_UCFIRST:
-	case OP_LC:
-	case OP_LCFIRST:
+	    o->op_seq = PL_op_seqmax++;
+	    break;
+
 	case OP_CONCAT:
-	case OP_JOIN:
-	case OP_QUOTEMETA:
 	    if (o->op_next && o->op_next->op_type == OP_STRINGIFY) {
 		if (o->op_next->op_private & OPpTARGET_MY) {
 		    if (o->op_flags & OPf_STACKED) /* chained concats */
 			goto ignore_optimization;
 		    else {
+			/* assert(PL_opargs[o->op_type] & OA_TARGLEX); */
 			o->op_targ = o->op_next->op_targ;
 			o->op_next->op_targ = 0;
 			o->op_private |= OPpTARGET_MY;

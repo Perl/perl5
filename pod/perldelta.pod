@@ -722,7 +722,7 @@ Natively 64-bit systems like Alpha and Cray need neither -Duse64bitint
 nor -Duse64bitall.
 
 Last but not least: note that due to Perl's habit of always using
-floating point numbers the quads are still not true integers.
+floating point numbers, the quads are still not true integers.
 When quads overflow their limits (0...18_446_744_073_709_551_615 unsigned,
 -9_223_372_036_854_775_808...9_223_372_036_854_775_807 signed), they
 are silently promoted to floating point numbers, after which they will

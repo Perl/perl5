@@ -429,6 +429,10 @@ Perl_do_op_dump(pTHX_ I32 level, PerlIO *file, OP *o)
     }
     if (o->op_private) {
 	SV *tmpsv = newSVpvn("", 0);
+	if (PL_opargs[o->op_type] & OA_TARGLEX) {
+	    if (o->op_private & OPpTARGET_MY)
+		sv_catpv(tmpsv, ",TARGET_MY");
+	}
 	if (o->op_type == OP_AASSIGN) {
 	    if (o->op_private & OPpASSIGN_COMMON)
 		sv_catpv(tmpsv, ",COMMON");
