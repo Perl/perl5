@@ -106,6 +106,115 @@ Version v5.7.0		Development release working toward v5.8
 --------------
 
 ____________________________________________________________________________
+[  7347] By: jhi                                   on 2000/10/16  13:55:27
+        Log: Add the capability to include/exclude branches.
+     Branch: perl
+	   ! Porting/genlog
+____________________________________________________________________________
+[  7346] By: jhi                                   on 2000/10/16  13:18:04
+        Log: Add Charles Lane.
+     Branch: perl
+	   ! AUTHORS Changes
+____________________________________________________________________________
+[  7345] By: jhi                                   on 2000/10/16  13:13:21
+        Log: Add a perldelta note about the change #6024, pointed out by Sarathy.
+     Branch: perl
+	   ! pod/perldelta.pod
+____________________________________________________________________________
+[  7244] By: jhi                                   on 2000/10/16  02:29:54
+        Log: Subject: $Carp::ExportLevel confusion in Exporter
+             From: "Ben Tilly" <ben_tilly@hotmail.com>
+             Date: Sat, 14 Oct 2000 16:44:34 EDT
+             Message-ID: <LAW2-F258sQwY6YHkid00003788@hotmail.com>
+     Branch: perl
+	   ! lib/Exporter/Heavy.pm
+____________________________________________________________________________
+[  7243] By: jhi                                   on 2000/10/16  02:28:33
+        Log: Subject: [PATCH perlguts.pod] Document offset hack
+             From: Simon Cozens <simon@cozens.net>
+             Message-ID: <20001014193225.A6568@pembro4.pmb.ox.ac.uk>
+             Date: Sat, 14 Oct 2000 19:32:25 +0100
+     Branch: perl
+	   ! pod/perlguts.pod
+____________________________________________________________________________
+[  7241] By: jhi                                   on 2000/10/16  02:22:44
+        Log: Subject: small pod patch
+             From: Dan Boorstein <dan_boo@bellsouth.net>
+             Date: Sat, 14 Oct 2000 14:29:24 -0400
+             Message-ID: <39E8A604.B501DB4F@bellsouth.net>
+     Branch: perl
+	   ! pod/perlfaq7.pod pod/perlmod.pod
+____________________________________________________________________________
+[  7240] By: jhi                                   on 2000/10/16  02:13:46
+        Log: -w cleanup.
+             
+             Subject: Re: Problems with bleadperl 
+             From: "Stephen P. Potter" <spp@ds.net>
+             Date: Fri, 13 Oct 2000 13:32:49 -0400
+             Message-Id: <200010131732.NAA19391@spp.users.ds.net>
+     Branch: perl
+	   ! t/pragma/overload.t
+____________________________________________________________________________
+[  7239] By: jhi                                   on 2000/10/16  01:41:18
+        Log: One more ~utf8 tweak.
+     Branch: perl
+	   ! t/op/bop.t
+____________________________________________________________________________
+[  7238] By: jhi                                   on 2000/10/16  01:34:14
+        Log: Tweak the test of #7235.
+     Branch: perl
+	   ! t/op/bop.t
+____________________________________________________________________________
+[  7237] By: jhi                                   on 2000/10/16  01:25:04
+        Log: Fix a couple of compiler-noted nits in #7235.
+     Branch: perl
+	   ! pp.c
+____________________________________________________________________________
+[  7236] By: jhi                                   on 2000/10/16  01:22:46
+        Log: Fix few quad issues, which for example broke chr(~chr(~0)) for UTF8.
+     Branch: perl
+	   ! pp.c pp_hot.c
+____________________________________________________________________________
+[  7235] By: jhi                                   on 2000/10/15  16:24:44
+        Log: Make ~(chr(a).chr(b)) eq chr(~a).chr(~b) on utf8.
+             
+             From: Simon Cozens <simon@cozens.net>
+             Subject: [PATCH] Re: [ID 20000918.005] ~ on wide chars
+             Date: Sat, 14 Oct 2000 20:52:13 +0100
+             Message-ID: <20001014205213.A9645@pembro4.pmb.ox.ac.uk>
+     Branch: perl
+	   ! pp.c t/op/bop.t utf8.h
+____________________________________________________________________________
+[  7234] By: jhi                                   on 2000/10/15  15:19:29
+        Log: split() utf8 fixes.  Should fix both 20001014.001 and 20000426.003.
+             The problem was that rx->minlen was in chars while pp_split()
+             thought it would be in bytes. 
+     Branch: perl
+	   ! pp.c t/pragma/utf8.t
+____________________________________________________________________________
+[  7233] By: jhi                                   on 2000/10/14  20:24:24
+        Log: Document FNCASE=y as discussed in the bug 20000902.009.
+     Branch: perl
+	   ! README.dos
+____________________________________________________________________________
+[  7232] By: jhi                                   on 2000/10/14  18:52:21
+        Log: Add test for bug id 20000427.003 (which seems to have
+             been fixed) (also duplicate as 20000427.004, though
+             with a higher severity).  Move one utf8 from op/append
+             to pragma/utf8, tag the tests with bug ids.
+     Branch: perl
+	   ! t/op/append.t t/pragma/utf8.t
+____________________________________________________________________________
+[  7231] By: jhi                                   on 2000/10/14  17:28:37
+        Log: Test cases for bug id 20000323.056 (the bug seems to be fixed).
+     Branch: perl
+	   ! t/pragma/utf8.t
+____________________________________________________________________________
+[  7229] By: jhi                                   on 2000/10/14  00:49:22
+        Log: Update Changes.
+     Branch: perl
+	   ! Changes patchlevel.h
+____________________________________________________________________________
 [  7228] By: jhi                                   on 2000/10/14  00:46:10
         Log: Subject: RFC: a (temporary?) way around utf8.pm for EBCDIC
              From: Peter Prymmer <pvhp@forte.com>
