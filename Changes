@@ -28,6 +28,236 @@ example from http://www.xray.mpe.mpg.de/mailing-lists/perl5-porters/
 Version v5.8.6		Maintenance release working toward v5.8.6
 --------------
 ____________________________________________________________________________
+[ 23477] By: nicholas                              on 2004/11/05  21:03:42
+        Log: Integrate:
+             [ 23475]
+             Subject: Re: Buidling stable.tar.gz on Unix as non-root [PATCH]
+             Date: Fri, 5 Nov 2004 10:36:57 -0500 (EST)
+             From: Andy Dougherty <doughera@lafayette.edu>
+             Message-ID: <Pine.SOL.4.58.0411051035020.15217@maxwell.phys.lafayette.edu>
+     Branch: maint-5.8/perl
+	  !> INSTALL
+____________________________________________________________________________
+[ 23476] By: nicholas                              on 2004/11/05  20:18:51
+        Log: Integrate:
+             [ 23423]
+             Small updates to the web addresses for Perl, noticed by Robert Spier
+             
+             [ 23466]
+             FAQ sync
+     Branch: maint-5.8/perl
+	  !> pod/perl.pod pod/perlfaq.pod pod/perlfaq1.pod pod/perlfaq2.pod
+	  !> pod/perlfaq3.pod pod/perlfaq4.pod pod/perlfaq5.pod
+	  !> pod/perlfaq6.pod pod/perlfaq7.pod pod/perlfaq8.pod
+	  !> pod/perlfaq9.pod
+____________________________________________________________________________
+[ 23464] By: nicholas                              on 2004/11/01  18:20:33
+        Log: Subject: Re: [patches] optree_* tests unexpectedly succeeding. + maint-only patch
+             From: Jim Cromie <jcromie@divsol.com>
+             Message-ID: <417EB697.9020301@divsol.com>
+             Date: Tue, 26 Oct 2004 14:41:59 -0600
+     Branch: maint-5.8/perl
+	   ! ext/B/t/optree_check.t
+____________________________________________________________________________
+[ 23463] By: nicholas                              on 2004/11/01  15:28:24
+        Log: Integrate:
+             [ 23444]
+             Skip tests if Devel::Peek not built
+     Branch: maint-5.8/perl
+	  !> ext/threads/shared/t/sv_refs.t ext/threads/t/end.t
+	  !> ext/threads/t/join.t lib/base/t/fields-base.t
+____________________________________________________________________________
+[ 23462] By: nicholas                              on 2004/11/01  14:51:33
+        Log: Integrate:
+             [ 23445]
+             Set the IV values for PL_sv_yes and PL_sv_no at initialisation time.
+     Branch: maint-5.8/perl
+	  !> perl.c sv.c
+____________________________________________________________________________
+[ 23461] By: nicholas                              on 2004/11/01  14:36:03
+        Log: Integrate:
+             [ 23440]
+             Assimilate I18N::LangTags 0.35
+             
+             [ 23442]
+             Oops. Forgot to add the new test in I18N::LangTags 0.35
+             
+             [ 23443]
+             Assimilate PathTools 3.01 (File::Spec and Cwd)
+     Branch: maint-5.8/perl
+	  +> lib/I18N/LangTags/t/20_locales.t
+	  !> MANIFEST ext/Cwd/t/cwd.t lib/Cwd.pm lib/File/Spec.pm
+	  !> lib/File/Spec/VMS.pm lib/I18N/LangTags.pm
+	  !> lib/I18N/LangTags/ChangeLog lib/I18N/LangTags/List.pm
+	  !> lib/I18N/LangTags/README
+____________________________________________________________________________
+[ 23460] By: nicholas                              on 2004/11/01  14:16:33
+        Log: Integrate:
+             [ 23439]
+             Subject: [PATCH] Temporary fix for usemallocwrap problems on IRIX (was Re: usemallocwrap problems on IRIX (was Re: Problem and question))
+             Date: Sun, 31 Oct 2004 04:01:42 -0500
+             From: Ed Allen Smith <easmith@beatrice.rutgers.edu>
+             Message-Id: <mid+200410310901.i9V91g1Y519894@dogberry.rutgers.edu>
+     Branch: maint-5.8/perl
+	  !> hints/irix_6.sh
+____________________________________________________________________________
+[ 23459] By: nicholas                              on 2004/11/01  14:04:39
+        Log: Integrate:
+             [ 23431]
+             Subject: [PATCH] 36 additional tests for B
+             From: Steve Peters <steve@fisharerojo.org>
+             Date: Fri, 29 Oct 2004 00:53:22 -0500
+             Message-Id: <200410290053.22947.steve@fisharerojo.org>
+             
+             [ 23446]
+             Subject: [patches] optree_* tests unexpectedly succeeding. + maint-only patch
+             From: Jim Cromie <jim.cromie@gmail.com>
+             Message-ID: <cfe85dfa04102515365f11ef10@mail.gmail.com>
+             Date: Mon, 25 Oct 2004 16:36:40 -0600
+     Branch: maint-5.8/perl
+	  !> ext/B/t/b.t ext/B/t/optree_check.t ext/B/t/optree_varinit.t
+____________________________________________________________________________
+[ 23458] By: nicholas                              on 2004/11/01  13:39:35
+        Log: Integrate:
+             [ 23424]
+             Fix [perl #32130] Errno.pm must not pass references to "prototype"
+     Branch: maint-5.8/perl
+	  !> ext/Errno/Errno_pm.PL ext/Errno/t/Errno.t
+____________________________________________________________________________
+[ 23456] By: nicholas                              on 2004/11/01  13:06:23
+        Log: Integrate:
+             [ 23438]
+             [perl #32033] Using foreach on threads::shared array crashes perl
+             The FETCH code for shared aggregate elements could leak a shared RV
+             address into a private SV. RVs are now handled specially, in the
+             same way that they already were for scalar shared magic.
+     Branch: maint-5.8/perl
+	  !> ext/threads/shared/shared.xs
+____________________________________________________________________________
+[ 23454] By: nicholas                              on 2004/11/01  12:38:48
+        Log: Integrate:
+             [ 23419]
+             Subject: [PATCH] Re: Devel::Peek: hash quality 125%?
+             From: Tels <perl_dummy@bloodgate.com>
+             Date: Sat, 23 Oct 2004 16:56:31 +0200
+             Message-Id: <200410231656.40995@bloodgate.com>
+             
+             [ 23420]
+             Subject: Re: [perl #31937] perlop: add basic =~ examples
+             From: Steve Peters <steve@fisharerojo.org>
+             Date: Sat, 23 Oct 2004 08:01:51 -0500
+             Message-Id: <200410230801.51649.steve@fisharerojo.org>
+             
+             [ 23422]
+             Subject: [perl #30227] [PATCH]splain vs. -w 
+             From: "Steve Peters via RT" <perlbug-followup@perl.org>
+             Date: 23 Oct 2004 13:55:41 -0000
+             Message-ID: <rt-3.0.11-30227-98375.1.28465791111211@perl.org>
+             
+             [ 23432]
+             Document sv_magic() changes brought about by sv_magicext()
+             
+             Change 14335 made sv_magic() a wrapper to a new sv_magicext(),
+             but didn't update the documentation for sv_magic() to reflect
+             the changed handling of the name/namlen arguments.
+             
+             Also correct a couple of typos, and mention sv_magicext() in
+             perlguts.
+     Branch: maint-5.8/perl
+	  !> ext/Devel/Peek/Changes ext/Devel/Peek/Peek.pm
+	  !> lib/diagnostics.pm pod/perlapi.pod pod/perlguts.pod
+	  !> pod/perlop.pod sv.c
+____________________________________________________________________________
+[ 23453] By: nicholas                              on 2004/11/01  12:17:44
+        Log: Integrate:
+             [ 23266]
+             [perl #31078] Fields package bug
+             An intermediate class with no fields messes up private fields
+             in the base class.
+             
+             [ 23267]
+             I somehow managed to omit the base.pm change from #23266
+     Branch: maint-5.8/perl
+	  !> lib/base.pm lib/base/t/fields-base.t
+____________________________________________________________________________
+[ 23452] By: nicholas                              on 2004/11/01  10:24:35
+        Log: Improvements and corrections as suggested by Ed Allen Smith,
+             Glenn Linderman, Yitzchak Scott-Thoennes and Steve Hay
+     Branch: maint-5.8/perl
+	   ! pod/perl586delta.pod
+____________________________________________________________________________
+[ 23451] By: nicholas                              on 2004/10/31  18:46:53
+        Log: First draft of 5.8.6's perldelta
+     Branch: maint-5.8/perl
+	   ! pod/perl586delta.pod
+____________________________________________________________________________
+[ 23447] By: nicholas                              on 2004/10/31  14:25:17
+        Log: Integrate:
+             [ 23365]
+             Fix [perl #31971] local $^D gives noise
+             
+             (ish. Actually a rewrite to give binary compatibility)
+     Branch: maint-5.8/perl
+	   ! embed.fnc embed.h mg.c perl.c proto.h
+____________________________________________________________________________
+[ 23430] By: nicholas                              on 2004/10/28  10:20:54
+        Log: Integrate:
+             [ 23425]
+             Subject: [PATCH] lib/Carp.t improvements
+             From: "Craig A. Berry" <craigberry@mac.com>
+             Date: Tue, 26 Oct 2004 23:32:25 -0500
+             Message-Id: <417F24D9.1000904@mac.com>
+     Branch: maint-5.8/perl
+	  !> lib/Carp.t
+____________________________________________________________________________
+[ 23429] By: nicholas                              on 2004/10/28  10:07:49
+        Log: Integrate:
+             [ 23418]
+             [perl #32039] Chained goto &sub drops data too early.
+             
+             Change 22373 to stop a memory leak in goto &foo intead caused
+             the elements of @_ to be freed too early. This revised fix
+             just transfers the reifiedness of the old @_ to the new @_
+             
+             [ 23426]
+             include flags and refcount in the list of leaked scalars
+     Branch: maint-5.8/perl
+	  !> perl.c pp_ctl.c t/op/goto.t
+____________________________________________________________________________
+[ 23428] By: nicholas                              on 2004/10/28  09:26:16
+        Log: Integrate:
+             [ 23416]
+             Subject: [PATCH] ext/IO/IO.xs: fix blocking on sparc linux
+             Message-ID: <20041022033033.GA12362@londo.c47.org>
+             From: Brendan O'Dea <bod@debian.org>
+             Date: Fri, 22 Oct 2004 13:30:33 +1000
+     Branch: maint-5.8/perl
+	  !> ext/IO/IO.xs
+____________________________________________________________________________
+[ 23427] By: nicholas                              on 2004/10/28  09:10:57
+        Log: Integrate:
+             [ 23417]
+             Upgrade to Encode 2.07
+             
+             [ 23421]
+             Upgrade to Encode 2.08.
+     Branch: maint-5.8/perl
+	  !> ext/Encode/AUTHORS ext/Encode/Changes ext/Encode/Encode.pm
+	  !> ext/Encode/Encode.xs ext/Encode/META.yml
+	  !> ext/Encode/Unicode/Unicode.pm ext/Encode/Unicode/Unicode.xs
+	  !> ext/Encode/encoding.pm ext/Encode/lib/Encode/Encoding.pm
+	  !> ext/Encode/t/Encode.t ext/Encode/t/fallback.t
+	  !> ext/Encode/ucm/macArabic.ucm ext/Encode/ucm/macCentEuro.ucm
+	  !> ext/Encode/ucm/macChinsimp.ucm ext/Encode/ucm/macChintrad.ucm
+	  !> ext/Encode/ucm/macDingbats.ucm ext/Encode/ucm/macGreek.ucm
+	  !> ext/Encode/ucm/macKorean.ucm ext/Encode/ucm/macROMnn.ucm
+	  !> ext/Encode/ucm/macSymbol.ucm ext/Encode/ucm/macThai.ucm
+____________________________________________________________________________
+[ 23415] By: nicholas                              on 2004/10/22  18:01:45
+        Log: Update Changes
+     Branch: maint-5.8/perl
+	   ! Changes patchlevel.h
+____________________________________________________________________________
 [ 23414] By: nicholas                              on 2004/10/22  17:48:44
         Log: Integrate:
              [ 23410]

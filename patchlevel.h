@@ -120,7 +120,7 @@ hunk.
 #if !defined(PERL_PATCHLEVEL_H_IMPLICIT) && !defined(LOCAL_PATCH_COUNT)
 static	char	*local_patches[] = {
 	NULL
-	,"MAINT23414"
+	,"MAINT23477"
 	,NULL
 };
 
