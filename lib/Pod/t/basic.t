@@ -101,6 +101,8 @@ for (sort keys %translators) {
         if ($master eq $output) {
             print "ok $n\n";
             unlink "out.$translators{$_}";
+	} elsif ($^O eq 'os390' && $translators{$_} eq 'cap') {
+	    print "ok $n # Skip: $^O is using a high-bit character for ESC\n";
         } else {
             my @master = split m/[\r\n]+/, $master;
             my @output = split m/[\r\n]+/, $output;
