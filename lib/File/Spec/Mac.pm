@@ -75,71 +75,77 @@ calls like the following
 
 are allowed.
 
-Here are the rules that are used in C<catdir()>; note that we try to be as 
-compatible as possible to Unix: 
+Here are the rules that are used in C<catdir()>; note that we try to be as
+compatible as possible to Unix:
 
 =over 2
 
-
 =item 1.
-The resulting path is relative by default, i.e. the resulting path will have a 
+
+The resulting path is relative by default, i.e. the resulting path will have a
 leading colon.
 
-
 =item 2.
-A trailing colon is added automatically to the resulting path, to denote a 
+
+A trailing colon is added automatically to the resulting path, to denote a
 directory.
 
-
 =item 3.
-Generally, each argument has one leading ":" and one trailing ":" removed (if 
-any). They are then joined together by a ":". Special treatment applies for 
-arguments denoting updir paths like "::lib:", see (4), or arguments consisting 
-solely of colons ("colon paths"), see (5).
 
+Generally, each argument has one leading ":" and one trailing ":"
+removed (if any). They are then joined together by a ":". Special
+treatment applies for arguments denoting updir paths like "::lib:",
+see (4), or arguments consisting solely of colons ("colon paths"),
+see (5).
 
 =item 4.
-When an updir path like ":::lib::" is passed as argument, the number of  
-directories to climb up is handled correctly, not removing leading or trailing
-colons when necessary. E.g.
+
+When an updir path like ":::lib::" is passed as argument, the number
+of directories to climb up is handled correctly, not removing leading
+or trailing colons when necessary. E.g.
 
     catdir(":::a","::b","c")    = ":::a::b:c:"
     catdir(":::a::","::b","c")  = ":::a:::b:c:"
 
 
 =item 5.
-Adding a colon ":" or empty string "" to a path at I<any> position doesn't 
-alter the path, i.e. these arguments are ignored. (When a "" is passed as 
-the first argument, it has a special meaning, see (6) ). This way, a colon 
-":" is handled like a "." (curdir) on Unix, while an empty string "" is
-generally ignored (see C<Unix-E<gt>canonpath()> ). Likewise, a "::" is handled 
-like a ".." (updir), and a ":::" is handled like a "../.." etc.  E.g.
+
+Adding a colon ":" or empty string "" to a path at I<any> position
+doesn't alter the path, i.e. these arguments are ignored. (When a ""
+is passed as the first argument, it has a special meaning, see
+(6)). This way, a colon ":" is handled like a "." (curdir) on Unix,
+while an empty string "" is generally ignored (see
+C<Unix-E<gt>canonpath()> ). Likewise, a "::" is handled like a ".."
+(updir), and a ":::" is handled like a "../.." etc.  E.g.
 
     catdir("a",":",":","b")   = ":a:b:"
     catdir("a",":","::",":b") = ":a::b:"
 
-
 =item 6.
-If the first argument is an empty string "" or is a volume name, i.e. matches 
-the pattern /^[^:]+:/, the resulting path is B<absolute>. 
+
+If the first argument is an empty string "" or is a volume name, i.e. matches
+the pattern /^[^:]+:/, the resulting path is B<absolute>.
 
 =item 7.
-Passing an empty string "" as the first argument to C<catdir()> is like passing 
-C<File::Spec-E<gt>rootdir()> as the first argument, i.e.
+
+Passing an empty string "" as the first argument to C<catdir()> is
+like passingC<File::Spec-E<gt>rootdir()> as the first argument, i.e.
 
     catdir("","a","b")          is the same as
 
     catdir(rootdir(),"a","b"). 
 
-This is true on Unix, where C<catdir("","a","b")> yields "/a/b" and C<rootdir()> is  
-"/". Note that C<rootdir()> on Mac OS is the startup volume, which is the closest  
-in concept to Unix' "/". This should help to run existing scripts originally written 
-for Unix.
+This is true on Unix, where C<catdir("","a","b")> yields "/a/b" and
+C<rootdir()> is "/". Note that C<rootdir()> on Mac OS is the startup
+volume, which is the closest in concept to Unix' "/". This should help
+to run existing scripts originally written for Unix.
 
 =item 8.
-For absolute paths, some cleanup is done, to ensure that the volume name isn't
-immediately followed by updirs. This is invalid, because this would go beyond 
-"root". Generally, these cases are handled like their Unix counterparts:
+
+For absolute paths, some cleanup is done, to ensure that the volume
+name isn't immediately followed by updirs. This is invalid, because
+this would go beyond "root". Generally, these cases are handled like
+their Unix counterparts:
 
  Unix:
     Unix->catdir("","")                 =  "/"
@@ -152,20 +158,24 @@ immediately followed by updirs. This is invalid, because this would go beyond
     Mac->catdir("","::")                =  rootdir()         # can't go beyond root
     Mac->catdir("",":","::","::","a")   =  rootdir() . "a:"  # (e.g. "HD:a:")
 
-However, this approach is limited to the first arguments following "root" (again, see
-C<Unix-E<gt>canonpath()> ). If there are more arguments that move up the directory  
-tree, an invalid path going beyond root can be created. 
+However, this approach is limited to the first arguments following
+"root" (again, see C<Unix-E<gt>canonpath()> ). If there are more
+arguments that move up the directory tree, an invalid path going
+beyond root can be created.
 
 =back
 
-As you've seen, you can force C<catdir()> to create an absolute path by passing either
-an empty string or a path that begins with a volume name as the first argument. However,
-you are strongly encouraged not to do so, since this is done only for backward 
-compatibility. Newer versions of File::Spec come with a method called C<catpath()> (see 
-below), that is designed to offer a portable solution for the creation of absolute paths.
-It takes volume, directory and file portions and returns an entire path. While 
-C<catdir()> is still suitable for the concatenation of I<directory names>, you are 
-encouraged to use C<catpath()> to concatenate I<volume names> and I<directory paths>. E.g.
+As you've seen, you can force C<catdir()> to create an absolute path
+by passing either an empty string or a path that begins with a volume
+name as the first argument. However, you are strongly encouraged not
+to do so, since this is done only for backward compatibility. Newer
+versions of File::Spec come with a method called C<catpath()> (see
+below), that is designed to offer a portable solution for the creation
+of absolute paths.  It takes volume, directory and file portions and
+returns an entire path. While C<catdir()> is still suitable for the
+concatenation of I<directory names>, you are encouraged to use
+C<catpath()> to concatenate I<volume names> and I<directory
+paths>. E.g.
 
     $dir      = File::Spec->catdir("tmp","sources");
     $abs_path = File::Spec->catpath("MacintoshHD:", $dir,"");
