@@ -20,7 +20,7 @@
 
 # $Id: Head.U,v 3.0.1.9 1997/02/28 15:02:09 ram Exp $
 #
-# Generated on Wed Apr 23 23:08:10 EET DST 2003 [metaconfig 3.0 PL70]
+# Generated on Sat Apr 26 00:02:55 EET DST 2003 [metaconfig 3.0 PL70]
 # (with additional metaconfig patches by perlbug@perl.org)
 
 cat >c1$$ <<EOF
@@ -20299,8 +20299,17 @@ case "$noextensions" in
     ;;
 esac
 
+# Sanity check:  We require an extension suitable for use with
+# AnyDBM_File, as well as Fcntl and IO.  (Failure to have these
+# should show up as failures in the test suite, but it's helpful to
+# catch them now.) The 'extensions' list is normally sorted
+# alphabetically, so we need to accept either
+#    DB_File ... Fcntl ... IO  ....
+# or something like
+#    Fcntl ... NDBM_File ... IO  ....
 case "$extensions" in
 *"_File "*" Fcntl "*" IO "*) ;;
+*" Fcntl "*"_File "*" IO "*) ;;
 *) echo "WARNING: Extensions DB_File or *DBM_File, Fcntl, and IO not configured." >&4
    echo "WARNING: The Perl you are building will be quite crippled." >& 4
    ;;
