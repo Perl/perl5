@@ -3,7 +3,7 @@ package Digest::MD5;
 use strict;
 use vars qw($VERSION @ISA @EXPORT_OK);
 
-$VERSION = '2.27';  # $Date: 2003/08/05 06:08:10 $
+$VERSION = '2.30';  # $Date: 2003/10/09 09:26:59 $
 
 require Exporter;
 *import = \&Exporter::import;
@@ -104,7 +104,7 @@ characters from this set: 'A'..'Z', 'a'..'z', '0'..'9', '+' and
 Note that the base64 encoded string returned is not padded to be a
 multiple of 4 bytes long.  If you want interoperability with other
 base64 encoded md5 digests you might want to append the redundant
-string redundant "==" to the result.
+string "==" to the result.
 
 =back
 
@@ -247,7 +247,7 @@ This is useful when calculating checksum for files:
     close(FILE);
     print $md5->b64digest, " $file\n";
 
-Or we can use the builtin addfile method for more efficient reading of
+Or we can use the addfile method for more efficient reading of
 the file:
 
     use Digest::MD5;

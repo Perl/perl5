@@ -1,5 +1,5 @@
 #
-# $Id: Base64.pm,v 2.29 2003/05/13 18:22:09 gisle Exp $
+# $Id: Base64.pm,v 2.34 2003/10/09 19:15:42 gisle Exp $
 
 package MIME::Base64;
 
@@ -33,7 +33,7 @@ The following functions are provided:
 
 Encode data by calling the encode_base64() function.  The first
 argument is the string to encode.  The second argument is the line
-ending sequence to use (it is optional and defaults to C<"\n">).  The
+ending sequence to use.  It is optional and defaults to "\n".  The
 returned encoded string is broken into lines of no more than 76
 characters each and it will end with $eol unless it is empty.  Pass an
 empty string as second argument if you do not want the encoded string
@@ -49,8 +49,8 @@ Any character not part of the 65-character base64 subset set is
 silently ignored.  Characters occuring after a '=' padding character
 are never decoded.
 
-If the length of the string to decode (after ignoring
-non-base64 chars) is not a multiple of 4 or padding occurs too early,
+If the length of the string to decode, after ignoring
+non-base64 chars, is not a multiple of 4 or padding occurs too early,
 then a warning is generated if perl is running under C<-w>.
 
 =back
@@ -127,6 +127,10 @@ Mulder <hansm@wsinti07.win.tue.nl>
 The XS implementation use code from metamail.  Copyright 1991 Bell
 Communications Research, Inc. (Bellcore)
 
+=head1 SEE ALSO
+
+L<MIME::QuotedPrint>
+
 =cut
 
 use strict;
@@ -137,7 +141,7 @@ require DynaLoader;
 @ISA = qw(Exporter DynaLoader);
 @EXPORT = qw(encode_base64 decode_base64);
 
-$VERSION = '2.20';
+$VERSION = '2.21';
 
 eval { bootstrap MIME::Base64 $VERSION; };
 if ($@) {
@@ -153,10 +157,20 @@ if ($@) {
 # The XS implementation runs about 20 times faster, but the Perl
 # code might be more portable, so it is still here.
 
-use integer;
-
 sub old_encode_base64 ($;$)
 {
+    if ($] >= 5.006) {
+	require bytes;
+	if (bytes::length($_[0]) > length($_[0]) ||
+	    ($] >= 5.008 && $_[0] =~ /[^\0-\xFF]/))
+	{
+	    require Carp;
+	    Carp::croak("The Base64 encoding is only defined for bytes");
+	}
+    }
+
+    use integer;
+
     my $eol = $_[1];
     $eol = "\n" unless defined $eol;
 
@@ -180,6 +194,7 @@ sub old_encode_base64 ($;$)
 sub old_decode_base64 ($)
 {
     local($^W) = 0; # unpack("u",...) gives bogus warning in 5.00[123]
+    use integer;
 
     my $str = shift;
     $str =~ tr|A-Za-z0-9+=/||cd;            # remove non-base64 chars
