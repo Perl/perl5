@@ -1,4 +1,4 @@
-/* $Header: doarg.c,v 3.0 89/10/18 15:10:41 lwall Locked $
+/* $Header: doarg.c,v 3.0.1.1 89/11/11 04:17:20 lwall Locked $
  *
  *    Copyright (c) 1989, Larry Wall
  *
@@ -6,6 +6,10 @@
  *    as specified in the README file that comes with the perl 3.0 kit.
  *
  * $Log:	doarg.c,v $
+ * Revision 3.0.1.1  89/11/11  04:17:20  lwall
+ * patch2: printf %c, %D, %X and %O didn't work right
+ * patch2: printf of unsigned vs signed needed separate casts on some machines
+ * 
  * Revision 3.0  89/10/18  15:10:41  lwall
  * 3.0 baseline
  * 
@@ -505,22 +509,44 @@ register STR **sarg;
 	    case 'l':
 		dolong = TRUE;
 		break;
-	    case 'D': case 'X': case 'O':
+	    case 'c':
+		ch = *(++t);
+		*t = '\0';
+		xlen = (int)str_gnum(*(sarg++));
+		if (strEQ(t-2,"%c")) {	/* some printfs fail on null chars */
+		    *buf = xlen;
+		    str_ncat(str,s,t - s - 2);
+		    str_ncat(str,buf,1);  /* so handle simple case */
+		    *buf = '\0';
+		}
+		else
+		    (void)sprintf(buf,s,xlen);
+		s = t;
+		*(t--) = ch;
+		break;
+	    case 'D':
 		dolong = TRUE;
 		/* FALL THROUGH */
-	    case 'c':
-		*buf = (int)str_gnum(*(sarg++));
-		str_ncat(str,buf,1);	/* force even if null */
-		*buf = '\0';
-		s = t+1;
-		break;
-	    case 'd': case 'x': case 'o': case 'u':
+	    case 'd':
 		ch = *(++t);
 		*t = '\0';
 		if (dolong)
 		    (void)sprintf(buf,s,(long)str_gnum(*(sarg++)));
 		else
 		    (void)sprintf(buf,s,(int)str_gnum(*(sarg++)));
+		s = t;
+		*(t--) = ch;
+		break;
+	    case 'X': case 'O':
+		dolong = TRUE;
+		/* FALL THROUGH */
+	    case 'x': case 'o': case 'u':
+		ch = *(++t);
+		*t = '\0';
+		if (dolong)
+		    (void)sprintf(buf,s,(unsigned long)str_gnum(*(sarg++)));
+		else
+		    (void)sprintf(buf,s,(unsigned int)str_gnum(*(sarg++)));
 		s = t;
 		*(t--) = ch;
 		break;

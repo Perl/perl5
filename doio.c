@@ -1,4 +1,4 @@
-/* $Header: doio.c,v 3.0.1.1 89/10/26 23:10:05 lwall Locked $
+/* $Header: doio.c,v 3.0.1.2 89/11/11 04:25:51 lwall Locked $
  *
  *    Copyright (c) 1989, Larry Wall
  *
@@ -6,6 +6,16 @@
  *    as specified in the README file that comes with the perl 3.0 kit.
  *
  * $Log:	doio.c,v $
+ * Revision 3.0.1.2  89/11/11  04:25:51  lwall
+ * patch2: orthogonalized the file modes some so we can have <& +<& etc.
+ * patch2: do_open() now detects sockets passed to process from parent
+ * patch2: fd's above 2 are now closed on exec
+ * patch2: csh code can now use csh from other than /bin
+ * patch2: getsockopt, get{sock,peer}name didn't define result properly
+ * patch2: warn("shutdown") was replicated
+ * patch2: gethostbyname was misdeclared
+ * patch2: telldir() is sometimes a macro
+ * 
  * Revision 3.0.1.1  89/10/26  23:10:05  lwall
  * patch1: Configure now checks for BSD shadow passwords
  * 
@@ -89,61 +99,65 @@ register char *name;
 	fp = mypopen(name,"w");
 	writing = 1;
     }
-    else if (*name == '>' && name[1] == '>') {
-#ifdef TAINT
-	taintproper("Insecure dependency in open");
-#endif
-	mode[0] = stio->type = 'a';
-	for (name += 2; isspace(*name); name++) ;
-	fp = fopen(name, mode);
-	writing = 1;
-    }
-    else if (*name == '>' && name[1] == '&') {
-#ifdef TAINT
-	taintproper("Insecure dependency in open");
-#endif
-	for (name += 2; isspace(*name); name++) ;
-	if (isdigit(*name))
-	    fd = atoi(name);
-	else {
-	    stab = stabent(name,FALSE);
-	    if (stab_io(stab) && stab_io(stab)->ifp) {
-		fd = fileno(stab_io(stab)->ifp);
-		stio->type = stab_io(stab)->type;
-	    }
-	    else
-		fd = -1;
-	}
-	fp = fdopen(dup(fd),stio->type == 'a' ? "a" :
-	  (stio->type == '<' ? "r" : "w") );
-	writing = 1;
-    }
     else if (*name == '>') {
 #ifdef TAINT
 	taintproper("Insecure dependency in open");
 #endif
-	for (name++; isspace(*name); name++) ;
-	if (strEQ(name,"-")) {
-	    fp = stdout;
-	    stio->type = '-';
+	name++;
+	if (*name == '>') {
+	    mode[0] = stio->type = 'a';
+	    name++;
 	}
-	else  {
+	else
 	    mode[0] = 'w';
-	    fp = fopen(name,mode);
-	}
 	writing = 1;
+	if (*name == '&') {
+	  duplicity:
+	    name++;
+	    while (isspace(*name))
+		name++;
+	    if (isdigit(*name))
+		fd = atoi(name);
+	    else {
+		stab = stabent(name,FALSE);
+		if (!stab || !stab_io(stab))
+		    return FALSE;
+		if (stab_io(stab) && stab_io(stab)->ifp) {
+		    fd = fileno(stab_io(stab)->ifp);
+		    if (stab_io(stab)->type == 's')
+			stio->type = 's';
+		}
+		else
+		    fd = -1;
+	    }
+	    fp = fdopen(dup(fd),mode);
+	}
+	else {
+	    while (isspace(*name))
+		name++;
+	    if (strEQ(name,"-")) {
+		fp = stdout;
+		stio->type = '-';
+	    }
+	    else  {
+		fp = fopen(name,mode);
+	    }
+	}
     }
     else {
 	if (*name == '<') {
-	    for (name++; isspace(*name); name++) ;
+	    mode[0] = 'r';
+	    name++;
+	    while (isspace(*name))
+		name++;
+	    if (*name == '&')
+		goto duplicity;
 	    if (strEQ(name,"-")) {
 		fp = stdin;
 		stio->type = '-';
 	    }
-	    else  {
-		mode[0] = 'r';
+	    else
 		fp = fopen(name,mode);
-	    }
 	}
 	else if (name[len-1] == '|') {
 #ifdef TAINT
@@ -177,21 +191,39 @@ register char *name;
 	    (void)fclose(fp);
 	    return FALSE;
 	}
-	if ((statbuf.st_mode & S_IFMT) != S_IFREG &&
+	result = (statbuf.st_mode & S_IFMT);
+	if (result != S_IFREG &&
 #ifdef S_IFSOCK
-	    (statbuf.st_mode & S_IFMT) != S_IFSOCK &&
+	    result != S_IFSOCK &&
 #endif
 #ifdef S_IFFIFO
-	    (statbuf.st_mode & S_IFMT) != S_IFFIFO &&
+	    result != S_IFFIFO &&
 #endif
-	    (statbuf.st_mode & S_IFMT) != S_IFCHR) {
+#ifdef S_IFIFO
+	    result != S_IFIFO &&
+#endif
+	    result != 0 &&		/* socket? */
+	    result != S_IFCHR) {
 	    (void)fclose(fp);
 	    return FALSE;
 	}
+#ifdef S_IFSOCK
+	if (result == S_IFSOCK || result == 0)
+	    stio->type = 's';	/* in case a socket was passed in to us */
+#endif
     }
+#if defined(FCNTL) && defined(F_SETFD)
+    fd = fileno(fp);
+    if (fd >= 3)
+	fcntl(fd,F_SETFD,1);
+#endif
     stio->ifp = fp;
-    if (writing)
-	stio->ofp = fp;
+    if (writing) {
+	if (stio->type != 's')
+	    stio->ofp = fp;
+	else
+	    stio->ofp = fdopen(fileno(fp),"w");
+    }
     return TRUE;
 }
 
@@ -823,9 +855,10 @@ char *cmd;
 
     /* save an extra exec if possible */
 
-    if (csh > 0 && strnEQ(cmd,"/bin/csh -c",11)) {
+#ifdef CSH
+    if (strnEQ(cmd,cshname,cshlen) && strnEQ(cmd+cshlen," -c",3)) {
 	strcpy(flags,"-c");
-	s = cmd+11;
+	s = cmd+cshlen+3;
 	if (*s == 'f') {
 	    s++;
 	    strcat(flags,"f");
@@ -841,12 +874,13 @@ char *cmd;
 		*--s = '\0';
 	    if (s[-1] == '\'') {
 		*--s = '\0';
-		execl("/bin/csh","csh", flags,ncmd,(char*)0);
+		execl(cshname,"csh", flags,ncmd,(char*)0);
 		*s = '\'';
 		return FALSE;
 	    }
 	}
     }
+#endif /* CSH */
 
     /* see if there are shell metacharacters in it */
 
@@ -1102,6 +1136,7 @@ int *arglast;
     case O_GSOCKOPT:
 	st[sp] = str_2static(str_new(257));
 	st[sp]->str_cur = 256;
+	st[sp]->str_pok = 1;
 	if (getsockopt(fd, lvl, optname, st[sp]->str_ptr, &st[sp]->str_cur) < 0)
 	    goto nuts;
 	break;
@@ -1117,7 +1152,7 @@ int *arglast;
 
 nuts:
     if (dowarn)
-	warn("shutdown() on closed fd");
+	warn("[gs]etsockopt() on closed fd");
     st[sp] = &str_undef;
     return sp;
 
@@ -1143,6 +1178,7 @@ int *arglast;
 
     st[sp] = str_2static(str_new(257));
     st[sp]->str_cur = 256;
+    st[sp]->str_pok = 1;
     fd = fileno(stio->ifp);
     switch (optype) {
     case O_GETSOCKNAME:
@@ -1159,7 +1195,7 @@ int *arglast;
 
 nuts:
     if (dowarn)
-	warn("shutdown() on closed fd");
+	warn("get{sock,peer}name() on closed fd");
     st[sp] = &str_undef;
     return sp;
 
@@ -1175,7 +1211,7 @@ int *arglast;
     register int sp = arglast[0];
     register char **elem;
     register STR *str;
-    struct hostent *gethostbynam();
+    struct hostent *gethostbyname();
     struct hostent *gethostbyaddr();
 #ifdef GETHOSTENT
     struct hostent *gethostent();
@@ -1687,7 +1723,9 @@ int *arglast;
     register int sp = arglast[1];
     register STIO *stio;
     long along;
+#ifndef telldir
     long telldir();
+#endif
     struct DIRENT *readdir();
     register struct DIRENT *dp;
 

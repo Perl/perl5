@@ -1,6 +1,9 @@
-/* $Header: malloc.c,v 3.0.1.1 89/10/26 23:15:05 lwall Locked $
+/* $Header: malloc.c,v 3.0.1.2 89/11/11 04:36:37 lwall Locked $
  *
  * $Log:	malloc.c,v $
+ * Revision 3.0.1.2  89/11/11  04:36:37  lwall
+ * patch2: malloc pointer corruption check made more portable
+ * 
  * Revision 3.0.1.1  89/10/26  23:15:05  lwall
  * patch1: some declarations were missing from malloc.c
  * patch1: sparc machines had alignment problems in malloc.c
@@ -137,13 +140,15 @@ malloc(nbytes)
   	if ((p = (union overhead *)nextf[bucket]) == NULL)
   		return (NULL);
 	/* remove from linked list */
-	if (*((int*)p) > 0x10000000)
+#ifdef RCHECK
+	if (*((int*)p) & (sizeof(union overhead) - 1))
 #ifndef I286
 	    fprintf(stderr,"Corrupt malloc ptr 0x%x at 0x%x\n",*((int*)p),p);
 #else
 	    fprintf(stderr,"Corrupt malloc ptr 0x%lx at 0x%lx\n",*((int*)p),p);
 #endif
-  	nextf[bucket] = nextf[bucket]->ov_next;
+#endif
+  	nextf[bucket] = p->ov_next;
 	p->ov_magic = MAGIC;
 	p->ov_index= bucket;
 #ifdef MSTATS

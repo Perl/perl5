@@ -1,4 +1,4 @@
-/* $Header: cmd.c,v 3.0.1.1 89/10/26 23:04:21 lwall Locked $
+/* $Header: cmd.c,v 3.0.1.2 89/11/11 04:08:56 lwall Locked $
  *
  *    Copyright (c) 1989, Larry Wall
  *
@@ -6,6 +6,10 @@
  *    as specified in the README file that comes with the perl 3.0 kit.
  *
  * $Log:	cmd.c,v $
+ * Revision 3.0.1.2  89/11/11  04:08:56  lwall
+ * patch2: non-BSD machines required two ^D's for <>
+ * patch2: grow_dlevel() not inside #ifdef DEBUGGING
+ * 
  * Revision 3.0.1.1  89/10/26  23:04:21  lwall
  * patch1: heuristically disabled optimization could cause core dump
  * 
@@ -475,6 +479,7 @@ until_loop:
 	    fp = stab_io(last_in_stab)->ifp;
 	    retstr = stab_val(defstab);
 	    newsp = -2;
+	  keepgoing:
 	    if (fp && str_gets(retstr, fp, 0)) {
 		if (*retstr->str_ptr == '0' && retstr->str_cur == 1)
 		    match = FALSE;
@@ -482,8 +487,17 @@ until_loop:
 		    match = TRUE;
 		stab_io(last_in_stab)->lines++;
 	    }
-	    else if (stab_io(last_in_stab)->flags & IOF_ARGV)
-		goto doeval;	/* doesn't necessarily count as EOF yet */
+	    else if (stab_io(last_in_stab)->flags & IOF_ARGV) {
+		if (!fp)
+		    goto doeval;	/* first time through */
+		fp = nextargv(last_in_stab);
+		if (fp)
+		    goto keepgoing;
+		(void)do_close(last_in_stab,FALSE);
+		stab_io(last_in_stab)->flags |= IOF_START;
+		retstr = &str_undef;
+		match = FALSE;
+	    }
 	    else {
 		retstr = &str_undef;
 		match = FALSE;
@@ -1060,6 +1074,7 @@ int base;
     }
 }
 
+#ifdef DEBUGGING
 void
 grow_dlevel()
 {
@@ -1067,3 +1082,4 @@ grow_dlevel()
     Renew(debname, dlmax, char);
     Renew(debdelim, dlmax, char);
 }
+#endif

@@ -1,4 +1,4 @@
-/* $Header: dolist.c,v 3.0.1.1 89/10/26 23:11:51 lwall Locked $
+/* $Header: dolist.c,v 3.0.1.2 89/11/11 04:28:17 lwall Locked $
  *
  *    Copyright (c) 1989, Larry Wall
  *
@@ -6,6 +6,9 @@
  *    as specified in the README file that comes with the perl 3.0 kit.
  *
  * $Log:	dolist.c,v $
+ * Revision 3.0.1.2  89/11/11  04:28:17  lwall
+ * patch2: non-existent slice values are now undefined rather than null
+ * 
  * Revision 3.0.1.1  89/10/26  23:11:51  lwall
  * patch1: split in a subroutine wrongly freed referenced arguments
  * patch1: reverse didn't work
@@ -668,7 +671,7 @@ int *arglast;
 			lval);
 		}
 		else
-		    st[sp-1] = Nullstr;
+		    st[sp-1] = &str_undef;
 	    }
 	}
 	else {
@@ -681,7 +684,7 @@ int *arglast;
 			str_magic(st[sp-1],stab,magic,tmps,len);
 		}
 		else
-		    st[sp-1] = Nullstr;
+		    st[sp-1] = &str_undef;
 	    }
 	}
 	sp--;
@@ -691,7 +694,7 @@ int *arglast;
 	    if (st[max])
 		st[sp] = afetch(stab_array(stab),(int)str_gnum(st[max]), lval);
 	    else
-		st[sp] = Nullstr;
+		st[sp] = &str_undef;
 	}
 	else {
 	    if (st[max]) {
@@ -702,7 +705,7 @@ int *arglast;
 		    str_magic(st[sp],stab,magic,tmps,len);
 	    }
 	    else
-		st[sp] = Nullstr;
+		st[sp] = &str_undef;
 	}
     }
     return sp;

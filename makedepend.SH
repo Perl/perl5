@@ -15,9 +15,12 @@ esac
 echo "Extracting makedepend (with variable substitutions)"
 $spitshell >makedepend <<!GROK!THIS!
 $startsh
-# $Header: makedepend.SH,v 3.0 89/10/18 15:20:19 lwall Locked $
+# $Header: makedepend.SH,v 3.0.1.1 89/11/11 04:35:32 lwall Locked $
 #
 # $Log:	makedepend.SH,v $
+# Revision 3.0.1.1  89/11/11  04:35:32  lwall
+# patch2: makedepend now uses cppflags determined by Configure
+# 
 # Revision 3.0  89/10/18  15:20:19  lwall
 # 3.0 baseline
 # 
@@ -25,7 +28,7 @@ $startsh
 export PATH || (echo "OOPS, this isn't sh.  Desperation time.  I will feed myself to sh."; sh \$0; kill \$\$)
 
 cat='$cat'
-ccflags='$ccflags $sockethdr'
+cppflags='$cppflags'
 cp='$cp'
 cpp='$cppstdin'
 echo='$echo'
@@ -41,19 +44,6 @@ uniq='$uniq'
 !GROK!THIS!
 
 $spitshell >>makedepend <<'!NO!SUBS!'
-
-: the following weeds options from ccflags that are of no interest to cpp
-case "$ccflags" in
-'');;
-*)  set X $ccflags
-    ccflags=''
-    for flag do
-	case $flag in
-	-D*|-I*) ccflags="$ccflags $flag";;
-	esac
-    done
-    ;;
-esac
 
 $cat /dev/null >.deptmp
 $rm -f *.c.c c/*.c.c
@@ -96,7 +86,7 @@ for file in `$cat .clist`; do
 	-e 's|\\$||' \
 	-e p \
 	-e '}'
-    $cpp -I/usr/local/include -I. $ccflags $file.c | \
+    $cpp -I/usr/local/include -I. $cppflags $file.c | \
     $sed \
 	-e '/^# *[0-9]/!d' \
 	-e 's/^.*"\(.*\)".*$/'$filebase'.o: \1/' \

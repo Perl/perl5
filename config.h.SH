@@ -91,6 +91,12 @@ sed <<!GROK!THIS! >config.h -e 's!^#undef!/\*#undef!'
  */
 #$d_crypt	CRYPT		/**/
 
+/* CSH:
+ *	This symbol, if defined, indicates that the C-shell exists.
+ *	If defined, contains the full pathname of csh.
+ */
+#$d_csh CSH "$csh"		/**/
+
 /* DOSUID:
  *	This symbol, if defined, indicates that the C program should
  *	check the script that it is executing for setuid/setgid bits, and
@@ -376,8 +382,13 @@ sed <<!GROK!THIS! >config.h -e 's!^#undef!/\*#undef!'
 /* I_SYSTIME:
  *	This symbol is defined if this system has the file <sys/time.h>.
  */
+/* I_TIMETOO:
+ *	This symbol is defined if <sys/time.h> exists but doesn't include
+ *	<time.h>.
+ */
 #$d_tminsys	TMINSYS 	/**/
 #$i_systime	I_SYSTIME 	/**/
+#$i_timetoo	I_TIMETOO 	/**/
 
 /* VARARGS:
  *	This symbol, if defined, indicates to the C program that it should
@@ -411,6 +422,11 @@ sed <<!GROK!THIS! >config.h -e 's!^#undef!/\*#undef!'
  */
 #$d_vprintf	VPRINTF		/**/
 #$d_charvspr	CHARVSPRINTF 	/**/
+
+/* WAIT4:
+ *	This symbol, if defined, indicates that wait4() exists.
+ */
+#$d_wait4	WAIT4	/**/
 
 /* GIDTYPE:
  *	This symbol has a value like gid_t, int, ushort, or whatever type is
@@ -475,9 +491,9 @@ sed <<!GROK!THIS! >config.h -e 's!^#undef!/\*#undef!'
 #$i_pwd	I_PWD		/**/
 #$d_pwquota	PWQUOTA		/**/
 #$d_pwage	PWAGE		/**/
-#$d_pwage	PWCHANGE	/**/
-#$d_pwage	PWCLASS		/**/
-#$d_pwage	PWEXPIRE	/**/
+#$d_pwchange	PWCHANGE	/**/
+#$d_pwclass	PWCLASS		/**/
+#$d_pwexpire	PWEXPIRE	/**/
 
 /* I_SYSDIR:
  *	This symbol, if defined, indicates to the C program that it should

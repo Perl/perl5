@@ -1,4 +1,4 @@
-/* $Header: eval.c,v 3.0 89/10/18 15:17:04 lwall Locked $
+/* $Header: eval.c,v 3.0.1.1 89/11/11 04:31:51 lwall Locked $
  *
  *    Copyright (c) 1989, Larry Wall
  *
@@ -6,6 +6,11 @@
  *    as specified in the README file that comes with the perl 3.0 kit.
  *
  * $Log:	eval.c,v $
+ * Revision 3.0.1.1  89/11/11  04:31:51  lwall
+ * patch2: mkdir and rmdir needed to quote argument when passed to shell
+ * patch2: mkdir and rmdir now return better error codes
+ * patch2: fileno, seekdir, rewinddir and closedir now disallow defaults
+ * 
  * Revision 3.0  89/10/18  15:17:04  lwall
  * 3.0 baseline
  * 
@@ -169,7 +174,6 @@ register int sp;
 	if (arg[1].arg_flags & AF_ARYOK) {
 	    if (arg->arg_len == 1) {
 		arg->arg_type = O_LOCAL;
-		arg->arg_flags |= AF_LOCAL;
 		goto local;
 	    }
 	    else {
@@ -1449,29 +1453,59 @@ register int sp;
 #endif
 #ifdef MKDIR
 	value = (double)(mkdir(tmps,anum) >= 0);
+	goto donumset;
 #else
-	(void)sprintf(buf,"mkdir %s 2>&1",tmps);
+	(void)strcpy(buf,"mkdir ");
+#endif
+#if !defined(MKDIR) || !defined(RMDIR)
       one_liner:
+	for (tmps2 = buf+6; *tmps; ) {
+	    *tmps2++ = '\\';
+	    *tmps2++ = *tmps++;
+	}
+	(void)strcpy(tmps2," 2>&1");
 	rsfp = mypopen(buf,"r");
 	if (rsfp) {
 	    *buf = '\0';
 	    tmps2 = fgets(buf,sizeof buf,rsfp);
 	    (void)mypclose(rsfp);
 	    if (tmps2 != Nullch) {
-		for (errno = 1; errno <= sys_nerr; errno++) {
+		for (errno = 1; errno < sys_nerr; errno++) {
 		    if (instr(buf,sys_errlist[errno]))	/* you don't see this */
 			goto say_zero;
 		}
 		errno = 0;
+#ifndef EACCES
+#define EACCES EPERM
+#endif
+		if (instr(buf,"cannot make"))
+		    errno = EEXIST;
+		else if (instr(buf,"non-exist"))
+		    errno = ENOENT;
+		else if (instr(buf,"not empty"))
+		    errno = EBUSY;
+		else if (instr(buf,"cannot access"))
+		    errno = EACCES;
+		else
+		    errno = EPERM;
 		goto say_zero;
 	    }
-	    else
-		value = 1.0;
+	    else {	/* some mkdirs return no failure indication */
+		tmps = str_get(st[1]);
+		anum = (stat(tmps,&statbuf) >= 0);
+		if (optype == O_RMDIR)
+		    anum = !anum;
+		if (anum)
+		    errno = 0;
+		else
+		    errno = EACCES;	/* a guess */
+		value = (double)anum;
+	    }
+	    goto donumset;
 	}
 	else
 	    goto say_zero;
 #endif
-	goto donumset;
     case O_RMDIR:
 	if (maxarg < 1)
 	    tmps = str_get(stab_val(defstab));
@@ -1484,7 +1518,7 @@ register int sp;
 	value = (double)(rmdir(tmps) >= 0);
 	goto donumset;
 #else
-	(void)sprintf(buf,"rmdir %s 2>&1",tmps);
+	(void)strcpy(buf,"rmdir ");
 	goto one_liner;		/* see above in MKDIR */
 #endif
     case O_GETPPID:
@@ -1968,6 +2002,8 @@ register int sp;
 	fatal("Unsupported socket function");
 #endif /* SOCKET */
     case O_FILENO:
+	if (maxarg < 1)
+	    goto say_undef;
 	if ((arg[1].arg_type & A_MASK) == A_WORD)
 	    stab = arg[1].arg_ptr.arg_stab;
 	else
@@ -2014,6 +2050,8 @@ register int sp;
     case O_SEEKDIR:
     case O_REWINDDIR:
     case O_CLOSEDIR:
+	if (maxarg < 1)
+	    goto say_undef;
 	if ((arg[1].arg_type & A_MASK) == A_WORD)
 	    stab = arg[1].arg_ptr.arg_stab;
 	else

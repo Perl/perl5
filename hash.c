@@ -1,4 +1,4 @@
-/* $Header: hash.c,v 3.0 89/10/18 15:18:32 lwall Locked $
+/* $Header: hash.c,v 3.0.1.1 89/11/11 04:34:18 lwall Locked $
  *
  *    Copyright (c) 1989, Larry Wall
  *
@@ -6,6 +6,9 @@
  *    as specified in the README file that comes with the perl 3.0 kit.
  *
  * $Log:	hash.c,v $
+ * Revision 3.0.1.1  89/11/11  04:34:18  lwall
+ * patch2: CX/UX needed to set the key each time in associative iterators
+ * 
  * Revision 3.0  89/10/18  15:18:32  lwall
  * 3.0 baseline
  * 
@@ -377,6 +380,8 @@ register HASH *tb;
 	if (entry) {
 #ifdef NDBM
 #ifdef _CX_UX
+	    key.dptr = entry->hent_key;
+	    key.dsize = entry->hent_klen;
 	    key = dbm_nextkey(tb->tbl_dbm, key);
 #else
 	    key = dbm_nextkey(tb->tbl_dbm);

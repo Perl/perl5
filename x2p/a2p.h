@@ -1,4 +1,4 @@
-/* $Header: a2p.h,v 3.0 89/10/18 15:34:14 lwall Locked $
+/* $Header: a2p.h,v 3.0.1.1 89/11/11 05:07:00 lwall Locked $
  *
  *    Copyright (c) 1989, Larry Wall
  *
@@ -6,6 +6,9 @@
  *    as specified in the README file that comes with the perl 3.0 kit.
  *
  * $Log:	a2p.h,v $
+ * Revision 3.0.1.1  89/11/11  05:07:00  lwall
+ * patch2: Configure may now set -DDEBUGGING
+ * 
  * Revision 3.0  89/10/18  15:34:14  lwall
  * 3.0 baseline
  * 
@@ -215,8 +218,6 @@ union {
     int ival;
     char *cval;
 } ops[OPSMAX];		/* hope they have 200k to spare */
-
-#define DEBUGGING
 
 #include <stdio.h>
 #include <ctype.h>

@@ -1,6 +1,6 @@
 #!./perl
 
-# $Header: op.magic,v 3.0 89/10/18 15:29:54 lwall Locked $
+# $Header: op.magic,v 3.0.1.1 89/11/11 05:00:07 lwall Locked $
 
 $| = 1;		# command buffering
 
@@ -9,8 +9,9 @@ print "1..5\n";
 eval '$ENV{"foo"} = "hi there";';	# check that ENV is inited inside eval
 if (`echo \$foo` eq "hi there\n") {print "ok 1\n";} else {print "not ok 1\n";}
 
+unlink 'ajslkdfpqjsjfk';
 $! = 0;
-open(foo,'ajslkdfpqjsjfkslkjdflksd');
+open(foo,'ajslkdfpqjsjfk');
 if ($! == 2) {print "ok 2\n";} else {print "not ok 2\n";}
 
 # the next tests are embedded inside system simply because sh spits out

@@ -2,9 +2,12 @@
  * kit sizes from getting too big.
  */
 
-/* $Header: evalargs.xc,v 3.0.1.1 89/10/26 23:12:55 lwall Locked $
+/* $Header: evalargs.xc,v 3.0.1.2 89/11/11 04:33:05 lwall Locked $
  *
  * $Log:	evalargs.xc,v $
+ * Revision 3.0.1.2  89/11/11  04:33:05  lwall
+ * patch2: Configure now locates csh
+ * 
  * Revision 3.0.1.1  89/10/26  23:12:55  lwall
  * patch1: glob didn't free a temporary string
  * 
@@ -232,10 +235,11 @@
 	    argflags |= AF_POST;	/* enable newline chopping */
 	    last_in_stab = argptr.arg_stab;
 	    old_record_separator = record_separator;
-	    if (csh > 0)
-		record_separator = 0;
-	    else
-		record_separator = '\n';
+#ifdef CSH
+	    record_separator = 0;
+#else
+	    record_separator = '\n';
+#endif
 	    goto do_read;
 	case A_READ:
 	    last_in_stab = argptr.arg_stab;
@@ -258,24 +262,26 @@
 			    }
 			}
 			fp = nextargv(last_in_stab);
-			if (!fp)  /* Note: fp != stab_io(last_in_stab)->ifp */
+			if (!fp) { /* Note: fp != stab_io(last_in_stab)->ifp */
 			    (void)do_close(last_in_stab,FALSE); /* now it does*/
+			    stab_io(last_in_stab)->flags |= IOF_START;
+			}
 		    }
 		    else if (argtype == A_GLOB) {
 			(void) interp(str,stab_val(last_in_stab),sp);
 			st = stack->ary_array;
 			tmpstr = Str_new(55,0);
-			if (csh > 0) {
-			    str_set(tmpstr,"/bin/csh -cf 'set nonomatch; glob ");
-			    str_scat(tmpstr,str);
-			    str_cat(tmpstr,"'|");
-			}
-			else {
-			    str_set(tmpstr, "echo ");
-			    str_scat(tmpstr,str);
-			    str_cat(tmpstr,
-			      "|tr -s ' \t\f\r' '\\012\\012\\012\\012'|");
-			}
+#ifdef CSH
+			str_nset(tmpstr,cshname,cshlen);
+			str_cat(tmpstr," -cf 'set nonomatch; glob ");
+			str_scat(tmpstr,str);
+			str_cat(tmpstr,"'|");
+#else
+			str_set(tmpstr, "echo ");
+			str_scat(tmpstr,str);
+			str_cat(tmpstr,
+			  "|tr -s ' \t\f\r' '\\012\\012\\012\\012'|");
+#endif
 			(void)do_open(last_in_stab,tmpstr->str_ptr);
 			fp = stab_io(last_in_stab)->ifp;
 			str_free(tmpstr);

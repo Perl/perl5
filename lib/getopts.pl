@@ -14,16 +14,16 @@ sub Getopts {
 	$pos = index($argumentative,$first);
 	if($pos >= $[) {
 	    if($args[$pos+1] eq ':') {
-		shift;
+		shift(@ARGV);
 		if($rest eq '') {
-		    $rest = shift;
+		    $rest = shift(@ARGV);
 		}
 		eval "\$opt_$first = \$rest;";
 	    }
 	    else {
 		eval "\$opt_$first = 1";
 		if($rest eq '') {
-		    shift;
+		    shift(@ARGV);
 		}
 		else {
 		    $ARGV[0] = "-$rest";
@@ -36,7 +36,7 @@ sub Getopts {
 		$ARGV[0] = "-$rest";
 	    }
 	    else {
-		shift;
+		shift(@ARGV);
 	    }
 	}
     }

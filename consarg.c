@@ -1,4 +1,4 @@
-/* $Header: consarg.c,v 3.0 89/10/18 15:10:30 lwall Locked $
+/* $Header: consarg.c,v 3.0.1.1 89/11/11 04:14:30 lwall Locked $
  *
  *    Copyright (c) 1989, Larry Wall
  *
@@ -6,6 +6,11 @@
  *    as specified in the README file that comes with the perl 3.0 kit.
  *
  * $Log:	consarg.c,v $
+ * Revision 3.0.1.1  89/11/11  04:14:30  lwall
+ * patch2: '-' x 26 made warnings about undefined value
+ * patch2: eval with no args caused strangeness
+ * patch2: local(@foo) didn't work, but local(@foo,$bar) did
+ * 
  * Revision 3.0  89/10/18  15:10:30  lwall
  * 3.0 baseline
  * 
@@ -304,6 +309,7 @@ register ARG *arg;
 	    break;
 	case O_REPEAT:
 	    i = (int)str_gnum(s2);
+	    str_nset(str,"",0);
 	    while (i-- > 0)
 		str_scat(str,s1);
 	    break;
@@ -652,6 +658,8 @@ register ARG *arg;
 		    arg[2].arg_flags |= AF_ARYOK;
 		}
 	    }
+	    else if (arg->arg_type == O_ASSIGN)
+		arg[1].arg_flags |= AF_ARYOK;
 	}
 	else if (arg1->arg_type == O_HELEM || arg1->arg_type == O_LHELEM)
 	    arg1->arg_type = O_LHELEM;
@@ -667,6 +675,8 @@ register ARG *arg;
 		    arg[2].arg_flags |= AF_ARYOK;
 		}
 	    }
+	    else if (arg->arg_type == O_ASSIGN)
+		arg[1].arg_flags |= AF_ARYOK;
 	}
 	else if (arg1->arg_type == O_ASLICE) {
 	    arg1->arg_type = O_LASLICE;
@@ -900,6 +910,8 @@ fixeval(arg)
 ARG *arg;
 {
     Renew(arg, 3, ARG);
+    if (arg->arg_len == 0)
+	arg[1].arg_type = A_NULL;
     arg->arg_len = 2;
     arg[2].arg_ptr.arg_hash = curstash;
     arg[2].arg_type = A_NULL;
