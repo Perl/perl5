@@ -352,7 +352,7 @@ MAGIC *mg;
 #	    include <starlet.h>
 	    char msg[255];
 	    $DESCRIPTOR(msgdsc,msg);
-	    sv_setiv(sv, (IV)vaxc$errno);
+	    sv_setnv(sv,(double) vaxc$errno);
 	    if (sys$getmsg(vaxc$errno,&msgdsc.dsc$w_length,&msgdsc,0,0) & 1)
 		sv_setpvn(sv,msgdsc.dsc$a_pointer,msgdsc.dsc$w_length);
 	    else
@@ -360,14 +360,14 @@ MAGIC *mg;
 	}
 #else
 #ifdef OS2
-	sv_setiv(sv, (IV)Perl_rc);
+	sv_setnv(sv, (double)Perl_rc);
 	sv_setpv(sv, os2error(Perl_rc));
 #else
-	sv_setiv(sv, (IV)errno);
+	sv_setnv(sv, (double)errno);
 	sv_setpv(sv, errno ? Strerror(errno) : "");
 #endif
 #endif
-	SvIOK_on(sv);	/* what a wonderful hack! */
+	SvNOK_on(sv);	/* what a wonderful hack! */
 	break;
     case '\006':		/* ^F */
 	sv_setiv(sv, (IV)maxsysfd);
@@ -506,12 +506,12 @@ MAGIC *mg;
 	break;
     case '!':
 #ifdef VMS
-	sv_setiv(sv, (IV)((errno == EVMSERR) ? vaxc$errno : errno));
+	sv_setnv(sv, (double)((errno == EVMSERR) ? vaxc$errno : errno));
 	sv_setpv(sv, errno ? Strerror(errno) : "");
 #else
 	{
 	int saveerrno = errno;
-	sv_setiv(sv, (IV)errno);
+	sv_setnv(sv, (double)errno);
 #ifdef OS2
 	if (errno == errno_isOS2) sv_setpv(sv, os2error(Perl_rc));
 	else
@@ -520,7 +520,7 @@ MAGIC *mg;
 	errno = saveerrno;
 	}
 #endif
-	SvIOK_on(sv);	/* what a wonderful hack! */
+	SvNOK_on(sv);	/* what a wonderful hack! */
 	break;
     case '<':
 	sv_setiv(sv, (IV)uid);
@@ -551,7 +551,7 @@ MAGIC *mg;
 	}
 #endif
 	sv_setpv(sv,buf);
-	SvIOK_on(sv);	/* what a wonderful hack! */
+	SvNOK_on(sv);	/* what a wonderful hack! */
 	break;
     case '*':
 	break;
@@ -815,6 +815,18 @@ MAGIC* mg;
 }
 #endif /* OVERLOAD */
 
+int
+magic_setnkeys(sv,mg)
+SV* sv;
+MAGIC* mg;
+{
+    if (LvTARG(sv)) {
+	hv_ksplit((HV*)LvTARG(sv), SvIV(sv));
+	LvTARG(sv) = Nullsv;	/* Don't allow a ref to reassign this. */
+    }
+    return 0;
+}
+
 static int
 magic_methpack(sv,mg,meth)
 SV* sv;
@@ -1042,11 +1054,11 @@ MAGIC* mg;
 {
     if (SvFAKE(sv)) {			/* FAKE globs can get coerced */
 	SvFAKE_off(sv);
-	gv_efullname(sv,((GV*)sv), "*");
+	gv_efullname3(sv,((GV*)sv), "*");
 	SvFAKE_on(sv);
     }
     else
-	gv_efullname(sv,((GV*)sv), "*");	/* a gv value, be nice */
+	gv_efullname3(sv,((GV*)sv), "*");	/* a gv value, be nice */
     return 0;
 }
 
