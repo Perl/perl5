@@ -1237,7 +1237,7 @@ WARNING
             next unless $self->maybe_command($abs);
             print "Executing $abs\n" if ($trace >= 2);
 
-            my $version_check = qq{$abs -e "require $ver; print qq{VER_OK\n}"};
+            my $version_check = qq{$abs -le "require $ver; print qq{VER_OK}"};
             # To avoid using the unportable 2>&1 to supress STDERR,
             # we close it before running the command.
             # However, thanks to a thread library bug in many BSDs
@@ -2641,7 +2641,7 @@ realclean ::
 	last unless defined $from;
 	my $todir = dirname($to);
 	push @m, "
-$to: $from \$(FIRST_MAKEFILE) blibdirs
+$to : $from \$(FIRST_MAKEFILE) blibdirs
 	\$(NOECHO) \$(RM_F) $to
 	\$(CP) $from $to
 	\$(FIXIN) $to
@@ -2972,8 +2972,8 @@ $(OBJECT) : $(FIRST_MAKEFILE)
 $(FIRST_MAKEFILE) : Makefile.PL $(CONFIGDEP)
 	$(NOECHO) $(ECHO) "Makefile out-of-date with respect to $?"
 	$(NOECHO) $(ECHO) "Cleaning current config before rebuilding Makefile..."
-	$(NOECHO) $(RM_F) $(MAKEFILE_OLD)
-	$(NOECHO) $(MV)   $(FIRST_MAKEFILE) $(MAKEFILE_OLD)
+	-$(NOECHO) $(RM_F) $(MAKEFILE_OLD)
+	-$(NOECHO) $(MV)   $(FIRST_MAKEFILE) $(MAKEFILE_OLD)
 	-$(MAKE) -f $(MAKEFILE_OLD) clean $(DEV_NULL) || $(NOOP)
 	$(PERLRUN) Makefile.PL }.join(" ",map(qq["$_"],@ARGV)).q{
 	$(NOECHO) $(ECHO) "==> Your Makefile has been rebuilt. <=="
@@ -3845,7 +3845,7 @@ test :: \$(TEST_TYPE)
 ");
 
     if ($Is_Win95) {
-        push(@m, map(qq{\t\$(NOECHO) \$(PERLRUN) -e "exit unless -f shift; chdir '$_'; system q{\$(MAKE) test \$(PASTHRU)}" \$(FIRST_MAKEFILE)\n}, @{$self->{DIR}}));
+        push(@m, map(qq{\t\$(NOECHO) \$(PERLRUN) -e "exit unless -f shift; chdir '$_'; system q[\$(MAKE) test \$(PASTHRU)]" \$(FIRST_MAKEFILE)\n}, @{$self->{DIR}}));
     }
     else {
         push(@m, map("\t\$(NOECHO) cd $_ && \$(TEST_F) \$(FIRST_MAKEFILE) && \$(MAKE) test \$(PASTHRU)\n", @{$self->{DIR}}));
@@ -4039,7 +4039,7 @@ $(O_FILES): $(H_FILES)
 ' if @{$self->{O_FILES} || []} && @{$self->{H} || []};
 
     push @m, q{
-help:
+help :
 	perldoc ExtUtils::MakeMaker
 };
 

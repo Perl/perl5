@@ -107,7 +107,7 @@ sub blibdirs_target {
     my @mkpath = $self->split_command('$(NOECHO) $(MKPATH)', @dirs);
     my @chmod  = $self->split_command('$(NOECHO) $(CHMOD) 755', @dirs);
 
-    my $make = "\nblibdirs :: \n";
+    my $make = "\nblibdirs :: Makefile.PL \n";
     $make .= join "", map { "\t$_\n" } @mkpath, @chmod;
     $make .= "\t\$(NOECHO) \$(TOUCH) blibdirs\n\n";
 

@@ -192,6 +192,20 @@ RCLEAN
 }
 
 
+=item max_exec_len
+
+Win98 chokes on things like Encode if we set the max length to nmake's max
+of 2K.  So we go for a more conservative value of 1K.
+
+=cut
+
+sub max_exec_len {
+    my $self = shift;
+
+    return $self->{_MAX_EXEC_LEN} ||= 1024;
+}
+
+
 =item os_flavor
 
 Win95 and Win98 and WinME are collectively Win9x and Win32
