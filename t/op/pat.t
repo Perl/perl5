@@ -6,7 +6,7 @@
 
 $| = 1;
 
-print "1..941\n";
+print "1..942\n";
 
 BEGIN {
     chdir 't' if -d 't';
@@ -2995,4 +2995,14 @@ END
 print "\x{0712}" =~ /\p{Syriac1}/ ? "ok $test\n" : "not ok $test\n"; $test++;
 print "\x{072F}" =~ /\P{Syriac1}/ ? "ok $test\n" : "not ok $test\n"; $test++;
 
-# last test 940
+{
+    # Change #18179: previously failed with "panic: end_shift"
+    my $s = "\x{100}" x 5;
+    my $ok = $s =~ /(\x{100}{4})/;
+    my($ord, $len) = (ord $1, length $1);
+    print +($ok && $ord == 0x100 && $len == 4)
+	    ? "ok $test\n" : "not ok $test\t# $ok/$ord/$len\n";
+    ++$test;
+}
+
+# last test 942
