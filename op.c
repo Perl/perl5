@@ -4557,6 +4557,11 @@ Perl_newATTRSUB(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs, OP *block)
 	SvREFCNT_inc(const_sv);
 	if (cv) {
 	    cv_undef(cv);
+#ifdef USE_THREADS
+	    New(666, CvMUTEXP(cv), 1, perl_mutex);
+	    MUTEX_INIT(CvMUTEXP(cv));
+	    CvOWNER(cv) = 0;
+#endif /* USE_THREADS */
 	    sv_setpv((SV*)cv, "");  /* prototype is "" */
 	    CvXSUBANY(cv).any_ptr = const_sv;
 	    CvXSUB(cv) = const_sv_xsub;
