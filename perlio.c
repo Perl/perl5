@@ -4868,7 +4868,7 @@ PerlIO_tmpfile(void)
      if (fd >= 0)
 	  f = PerlIO_fdopen(fd, "w+b");
 #else /* WIN32 */
-#    if defined(HAS_MKSTEMP) && ! defined(VMS)
+#    if defined(HAS_MKSTEMP) && ! defined(VMS) && ! defined(OS2)
      SV *sv = newSVpv("/tmp/PerlIO_XXXXXX", 0);
 
      /*

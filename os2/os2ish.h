@@ -49,6 +49,8 @@
  */
 #undef USEMYBINMODE
 
+#define SOCKET_OPEN_MODE	"b"
+
 /* Stat_t:
  *	This symbol holds the type used to declare buffers for information
  *	returned by stat().  It's usually just struct stat.  It may be necessary

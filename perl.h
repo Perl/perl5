@@ -4367,6 +4367,14 @@ extern void moncontrol(int);
 #  define PIPESOCK_MODE
 #endif
 
+#ifndef SOCKET_OPEN_MODE
+#  define SOCKET_OPEN_MODE	PIPESOCK_MODE
+#endif
+
+#ifndef PIPE_OPEN_MODE
+#  define PIPE_OPEN_MODE	PIPESOCK_MODE
+#endif
+
 #define PERL_MAGIC_UTF8_CACHESIZE	2
 
 #define PERL_UNICODE_STDIN_FLAG			0x0001
