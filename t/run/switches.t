@@ -1,6 +1,6 @@
 #!./perl -w
 
-# Tests for the command-line switches -0, -c, -l, -s, -m, -M, -V
+# Tests for the command-line switches -0, -c, -l, -s, -m, -M, -V, -v
 # Some switches have their own tests, see MANIFEST.
 
 BEGIN {
@@ -10,7 +10,7 @@ BEGIN {
 
 require "./test.pl";
 
-plan(tests => 20);
+plan(tests => 22);
 
 # due to a bug in VMS's piping which makes it impossible for runperl()
 # to emulate echo -n (ie. stdin always winds up with a newline), these 
@@ -183,9 +183,13 @@ SWTESTPM
     local $TODO = '';   # these ones should work on VMS
 
     # basic perl -V should generate significant output.
-    # we don't test actual format since it could change
+    # we don't test actual format too much since it could change
     like( runperl( switches => ['-V'] ), qr/(\n.*){20}/,
           '-V generates 20+ lines' );
+
+    like( runperl( switches => ['-V'] ),
+	  qr/\ASummary of my perl5 .*configuration:/,
+          '-V looks okay' );
 
     # lookup a known config var
     chomp( $r=runperl( switches => ['-V:osname'] ) );
@@ -205,4 +209,19 @@ SWTESTPM
 
     # make sure each line we got matches the re
     ok( !( grep !/^i\D+size=/, split /^/, $r ), '-V:re correct' );
+}
+
+# Tests for -v
+
+{
+    local $TODO = '';   # these ones should work on VMS
+
+    # basic perl -V should generate significant output.
+    # we don't test actual format since it could change
+    my $v = sprintf "%vd", $^V;
+    use Config;
+    like( runperl( switches => ['-v'] ),
+	  qr/This is perl, v$v built for $Config{archname}.+Copyright.+Larry Wall.+Artistic License.+GNU General Public License/s,
+          '-v looks okay' );
+
 }
