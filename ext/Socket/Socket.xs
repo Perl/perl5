@@ -51,7 +51,7 @@ my_inet_aton(cp, addr)
 register const char *cp;
 struct in_addr *addr;
 {
-	register unsigned long val;
+	register U32 val;
 	register int base;
 	register char c;
 	int nparts;
@@ -59,6 +59,8 @@ struct in_addr *addr;
 	unsigned int parts[4];
 	register unsigned int *pp = parts;
 
+	if (!cp)
+		return 0;
 	for (;;) {
 		/*
 		 * Collect number up to ``.''.
