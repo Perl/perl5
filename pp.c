@@ -622,7 +622,7 @@ PP(pp_pow)
 {
     dSP; dATARGET; tryAMAGICbin(pow,opASSIGN); 
     {
-      dPOPTOPnnrl_ul;
+      dPOPTOPnnrl;
       SETn( pow( left, right) );
       RETURN;
     }
@@ -632,7 +632,7 @@ PP(pp_multiply)
 {
     dSP; dATARGET; tryAMAGICbin(mult,opASSIGN); 
     {
-      dPOPTOPnnrl_ul;
+      dPOPTOPnnrl;
       SETn( left * right );
       RETURN;
     }
@@ -642,7 +642,7 @@ PP(pp_divide)
 {
     dSP; dATARGET; tryAMAGICbin(div,opASSIGN); 
     {
-      dPOPPOPnnrl_ul;
+      dPOPPOPnnrl;
       double value;
       if (right == 0.0)
 	DIE("Illegal division by zero");
@@ -684,7 +684,7 @@ PP(pp_modulo)
 	  SETi( left % right );
       }
       else {
-	register double left = USE_LEFT(TOPs) ? SvNV(TOPs) : 0.0;
+	register double left = TOPn;
 	if (left < 0.0)
 	  SETu( (right - (U_V(-left) - 1) % right) - 1 );
 	else
