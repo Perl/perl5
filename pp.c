@@ -2377,6 +2377,7 @@ PP(pp_complement)
 	register I32 anum;
 	STRLEN len;
 
+	(void)SvPV_nomg(sv,len);
 	sv_setsv_nomg(TARG, sv);
 	tmps = (U8*)SvPV_force(TARG, len);
 	anum = len;
