@@ -28,6 +28,493 @@ example from http://www.xray.mpe.mpg.de/mailing-lists/perl5-porters/
 Version v5.8.5		Maintenance release working toward v5.8.5
 --------------
 ____________________________________________________________________________
+[ 22999] By: nicholas                              on 2004/06/27  12:18:13
+        Log: Integrate:
+             [ 21936]
+             fix [perl #24660], [perl #24663].
+             
+             [ 22106]
+             still problems with backreferences + reverse cloning
+             after #21936 - the weak reference may live on the pad.
+     Branch: maint-5.8/perl
+	  !> mg.c sv.c
+____________________________________________________________________________
+[ 22989] By: nicholas                              on 2004/06/24  15:09:34
+        Log: Integrate:
+             [ 22872]
+             First step to generating Unicode files for the regexp engine at build
+             time - targets in the Makefile
+             
+             [ 22873]
+             Convert to using File::Spec, so that we can build Unicode files
+             on all platforms
+             
+             [ 22879]
+             Run mktables as part of the build process.
+             Don't ship any of the files that it generates in lib/unicore
+             
+             [ 22880]
+             Don't need to require utf8_pva.pl at top of file
+             
+             [ 22881]
+             replace the run time code in lib/utf8_pva.pl with data generated
+             at build by mktables, stored in lib/unicore/PVA.pl
+             
+             [ 22887]
+             Subject: Re: Smoke [5.9.2] 22881 FAIL(M) MSWin32 WinXP/.Net SP1 (x86/1 cpu)
+             From: Steve Hay <steve.hay@uk.radan.com>
+             Date: Tue, 01 Jun 2004 15:30:37 +0100
+             Message-ID: <40BC930D.90701@uk.radan.com>
+             
+             [ 22899]
+             Workaround a dmake oddity.
+             Subject: Re: Smoke [5.9.2] 22881 FAIL(M) MSWin32 WinXP/.Net SP1 (x86/1 cpu)
+             From: Steve Hay <steve.hay@uk.radan.com>
+             Date: Thu, 03 Jun 2004 12:16:13 +0100
+             Message-ID: <40BF087D.8030005@uk.radan.com>
+             
+             [ 22924]
+             Subject: Change 22872 breaks shared miniperl invocation
+             From: Alexey Tourbin <at@altlinux.ru>
+             Date: Fri, 4 Jun 2004 13:24:17 +0400
+             Message-ID: <20040604092417.GA13447@solemn.turbinal.org>
+             
+             [ 22961]
+             'make test' without preceeding 'make' fails.
+             Change #22872 added a target to run mktables, but this was
+             skipped if 'make test' was run first, causing the build of
+             Unicode::Normalize to fail.
+             
+             [ 22963]
+             make mktables always update modifed time to play better with make
+     Branch: maint-5.8/perl
+	   - (delete 420 files)
+	  !> MANIFEST Makefile.SH lib/unicore/mktables lib/utf8_heavy.pl
+	  !> vms/descrip_mms.template win32/Makefile win32/makefile.mk
+____________________________________________________________________________
+[ 22987] By: nicholas                              on 2004/06/23  15:54:27
+        Log: Integrate:
+             [ 22960]
+             When expecting an error, it's best to check the text you got, rather
+             than blindly assuming that it's correct.
+     Branch: maint-5.8/perl
+	  !> t/op/write.t
+____________________________________________________________________________
+[ 22986] By: nicholas                              on 2004/06/23  15:30:36
+        Log: Integrate:
+             [ 22928]
+             t/comp/utf.t failed when configuring with -Dnoextensions=Encode
+             
+             [ 22947]
+             Need to skip test 7 if perl built without the PerlIO::scalar extension
+             
+             [ 22948]
+             Can't test the B modules if we didn't build 'em
+             
+             [ 22949]
+             Unicode::UCD uses Storable, so we can't test if Storable isn't built.
+             
+             [ 22950]
+             D'oh. Don't turn on warnings on the #! line without actually testing
+             the full code in case it warns.
+             
+             [ 22951]
+             If we don't build B, we should skip all its tests.
+             
+             [ 22952]
+             Skip re tests if re not built.
+             
+             [ 22953]
+             Skip test if Devel::PPPort not built
+             
+             [ 22954]
+             Skip test if perl configured without threads::shared
+             
+             [ 22955]
+             Not ideal, but skip all of IO's tests if Socket is not built.
+             
+             [ 22956]
+             Skip tests when PerlIO::scalar and PerlIO::via aren't built
+             
+             [ 22957]
+             Also needs skipping if PerlIO::via not built
+             
+             [ 22958]
+             This needs POSIX, so skip if no POSIX
+             
+             [ 22959]
+             Case insensitive file systems are bad, m'kay
+             
+             [ 22965]
+             Skip test if Devel::PPPort is not built.
+             Probably should fix h2xs to work without it.
+             
+             [ 22966]
+             Skip test if Data::Dumper not built
+             
+             [ 22967]
+             Skip tests if List::Util not built
+     Branch: maint-5.8/perl
+	  !> (integrate 31 files)
+____________________________________________________________________________
+[ 22985] By: nicholas                              on 2004/06/23  15:15:37
+        Log: Integrate:
+             [ 22907]
+             Upgrade to Test::Harness 2.42
+             
+             [ 22908]
+             Upgrade to Time::Local 1.10.
+             
+             [ 22909]
+             Upgrade to Unicode::Collate 0.40
+             
+             [ 22912]
+             Upgrade to Pod::LaTeX 0.57
+             
+             [ 22914]
+             Upgrade to CGI.pm 3.05
+             
+             [ 22915]
+             Upgrade to Digest 1.08.
+             
+             [ 22916]
+             Upgrade to Pod::Perldoc 3.13
+             
+             [ 22920]
+             Upgrade to Pod::Parser 1.28
+             (except Pod::Find, which has local patches not yet on CPAN)
+             
+             [ 22931]
+             Reapply change #20983, rolled back by change #22920,
+             as noticed by Craig Berry.
+     Branch: maint-5.8/perl
+	  +> lib/Pod/Perldoc/t/01_about_verbose.t lib/Pod/t/user.t
+	  !> MANIFEST lib/CGI.pm lib/CGI/Carp.pm lib/CGI/Util.pm
+	  !> lib/CGI/t/html.t lib/Digest.pm lib/Pod/Checker.pm
+	  !> lib/Pod/LaTeX.pm lib/Pod/ParseUtils.pm lib/Pod/Parser.pm
+	  !> lib/Pod/Perldoc.pm lib/Pod/Perldoc/ToMan.pm
+	  !> lib/Test/Harness.pm lib/Test/Harness/Changes
+	  !> lib/Test/Harness/bin/prove lib/Test/Harness/t/prove-switches.t
+	  !> lib/Time/Local.pm lib/Time/Local.t lib/Unicode/Collate.pm
+	  !> lib/Unicode/Collate/t/hangul.t pod/pod2latex.PL
+	  !> pod/pod2usage.PL pod/podchecker.PL pod/podselect.PL
+	  !> t/pod/find.t
+____________________________________________________________________________
+[ 22984] By: nicholas                              on 2004/06/23  14:38:51
+        Log: Integrate:
+             [ 22906]
+             Patch 22835 Failed to upgrade all the new files in Encode 2.01
+             As spotted by Jerry D. Hedden
+             
+             [ 22911]
+             Upgrade to Unicode::Normalize 0.30.
+             
+             [ 22970]
+             Subject: [PATCH] DB_File 1.809  was RE: [perl #30237] DB_File methods and substr don't mix
+             From: "Paul Marquess" <Paul.Marquess@btinternet.com>
+             Date: Tue, 22 Jun 2004 21:29:12 +0100
+             Message-Id: <20040622202910.WBSU21846.mta08-svc.ntlworld.com@MARQUESSPT21>
+     Branch: maint-5.8/perl
+	  !> ext/DB_File/Changes ext/DB_File/DB_File.pm
+	  !> ext/DB_File/DB_File.xs ext/DB_File/t/db-btree.t
+	  !> ext/DB_File/t/db-hash.t ext/DB_File/t/db-recno.t
+	  !> ext/DB_File/typemap ext/Encode/Changes ext/Encode/Encode.pm
+	  !> ext/Encode/META.yml ext/Unicode/Normalize/Changes
+	  !> ext/Unicode/Normalize/Normalize.pm
+	  !> ext/Unicode/Normalize/Normalize.xs
+	  !> ext/Unicode/Normalize/t/illegal.t
+	  !> ext/Unicode/Normalize/t/short.t
+	  !> ext/Unicode/Normalize/t/split.t
+____________________________________________________________________________
+[ 22983] By: nicholas                              on 2004/06/23  13:41:45
+        Log: Integrate:
+             [ 22902]
+             Subject: Re: [PATCH] [perl #29841] utf8::decode doesn't work under -T 
+             From: SADAHIRO Tomoyuki <bqw10602@nifty.com>
+             Date: Sun, 06 Jun 2004 00:37:21 +0900
+             Message-Id: <20040606003344.57B2.BQW10602@nifty.com>
+             
+             [ 22976]
+             Add a regression test for bug #23765 (by Jarkko)
+     Branch: maint-5.8/perl
+	   ! t/op/substr.t
+	  !> lib/utf8.pm pod/perlapi.pod sv.c t/op/utftaint.t
+____________________________________________________________________________
+[ 22982] By: nicholas                              on 2004/06/23  13:22:41
+        Log: Integrate:
+             [ 22904]
+             Subject: Re: [PATCH] Re: Lack of error for large string on Solaris
+             From: Jarkko Hietaniemi <jhi@iki.fi>
+             Date: Mon, 07 Jun 2004 20:09:42 +0300
+             Message-ID: <40C4A156.5030205@iki.fi>
+             
+             [ 22922]
+             Remove the "malloc wrappage" tests, due to their unportability
+             (as suggested by Jarkko.)
+     Branch: maint-5.8/perl
+	  !> av.c pod/perldiag.pod pp.c pp_hot.c t/op/array.t t/op/repeat.t
+____________________________________________________________________________
+[ 22981] By: nicholas                              on 2004/06/23  13:08:18
+        Log: Integrate:
+             [ 22876]
+             Subject: [PATCH] Fix anomalies in Carp functions
+             From: Steve Hay <steve.hay@uk.radan.com>
+             Date: Tue, 25 May 2004 16:05:02 +0100
+             Message-ID: <40B3609E.5060502@uk.radan.com>
+             
+             [ 22883]
+             Subject: [PATCH] Shell.pm: pod rewrite and new mini-feature $Shell::raw
+             From: LAUN Wolfgang <wolfgang.laun@alcatel.at>
+             Date: Tue, 1 Jun 2004 07:52:58 +0200 
+             Message-ID: <DF27CDCBD2581D4B88431901094E4B4D02B0C744@attmsx1.aut.alcatel.at>
+             
+             [ 22886]
+             Subject: [Fwd: [PATCH] Pod::Find should ignore SCM files and dirs]
+             From: Alan Burlison <Alan.Burlison@sun.com>
+             Date: Fri, 28 May 2004 23:28:44 +0100
+             Message-ID: <40B7BD1C.40309@sun.com>
+             
+             [ 22888]
+             Subject: [PATCH] Remove redundant %SIG assignments from FileCache
+             From: Alan Burlison <Alan.Burlison@Sun.COM>
+             Date: Fri, 28 May 2004 12:27:06 +0100
+             Message-ID: <40B7220A.4040305@sun.com>
+             
+             [ 22898]
+             Carp was mostly unusable with Safe because it may require
+             Carp::Heavy at run-time (while require() is forbidden.)
+             Have Safe load Carp::Heavy.
+             
+             [ 22921]
+             Subject: [PATCH] Re: [perl #24081] invalid regexp in perl -V
+             From: Robin Barker <Robin.Barker@npl.co.uk>
+             Date: Wed, 9 Jun 2004 12:02:01 +0100 
+             Message-ID: <533D273D4014D411AB1D00062938C4D9040468F1@hotel.npl.co.uk>
+             with further adjustements for bleadperl
+             
+             [ 22938]
+             Subject: [PATCH] File::Basename docs
+             From: Boris Zentner <bzm@2bz.de>
+             Date: Sat, 12 Jun 2004 16:29:42 +0200
+             Message-Id: <200406121629.42595.bzm@2bz.de>
+             
+             [ 22940]
+             More forgiving version comparison in perlivp.
+             
+             [ 22971]
+             Adjust array index in FileCache.pm.
+             
+             Subject: [perl #30291] Use of uninitialized value (array index reference) in FileCache.pm module at line 140 
+             From: bbucklan@jpl-devvax.jpl.nasa.gov (via RT) <perlbug-followup@perl.org>
+             Date: 15 Jun 2004 16:55:22 -0000
+             Message-ID: <rt-3.0.9-30291-90552.18.5392299690759@perl.org>
+             
+             [ 22972]
+             Proposed patch + test case.
+             
+             Subject: [perl #30409] charnames.pm clobbers default variable 
+             From: Marcel "Grünauer" (via RT) <perlbug-followup@perl.org>
+             Date: 22 Jun 2004 16:43:50 -0000
+             Message-ID: <rt-3.0.9-30409-91174.12.8617678524438@perl.org>
+     Branch: maint-5.8/perl
+	  !> configpm ext/Opcode/Safe.pm lib/Carp.pm lib/Carp.t
+	  !> lib/Carp/Heavy.pm lib/Config.t lib/File/Basename.pm
+	  !> lib/FileCache.pm lib/Pod/Find.pm lib/Shell.pm lib/autouse.t
+	  !> lib/charnames.pm lib/charnames.t utils/perlivp.PL
+____________________________________________________________________________
+[ 22980] By: nicholas                              on 2004/06/23  12:44:49
+        Log: Integrate:
+             [ 22870]
+             [perl #29708] Problem with autouse (causing Perl to crash)
+             @_ sometimes wasn't getting created right
+             
+             [ 22913]
+             [perl #30061] double DESTROY in for loop
+             pp_iter decremented the ref count of the previous iterant before
+             unaliasing it. This could lead to DESTROY being called with the
+             loop variable still aliased to the freed value. If the DESTROY
+             also contained a for loop with the same iterator variable, the
+             freed value would get resurrected then freed for a second time.
+             
+             [ 22945]
+             As 2/3rds (or 3/4s) of the SV head structure is rewritten, it doesn't
+             seem that memzero() of everything is the most efficient idea.
+             
+             [ 22962]
+             fix typo in gp_free
+             
+             [ 22969]
+             Abolish the "Tied variable freed while still in use" error - I have
+             a way to cleanly avoid the coredump.
+     Branch: maint-5.8/perl
+	  !> gv.c mg.c pad.c pod/perldiag.pod pp_ctl.c pp_hot.c sv.c
+	  !> t/cmd/for.t t/op/goto.t t/op/tie.t
+____________________________________________________________________________
+[ 22979] By: nicholas                              on 2004/06/23  10:32:34
+        Log: Integrate:
+             [ 22877]
+             Subject: [PATCH] Re: [perl #29969] h2ph not correctly processing glibc sys/sysmacros.ph 
+             From: <wolfgang.laun@chello.at>
+             Date: Sun, 30 May 2004 17:27:07 +0200
+             Message-Id: <20040530152707.ZLWL22856.viefep16-int.chello.at@localhost>
+             
+             [ 22925]
+             Make h2ph able to understand a limited set of inline functions.
+             The glibc apparently now ships headers that use inline functions
+             instead of plain old macros.
+             
+             [ 22929]
+             More h2ph tweaking for gcc __inline functions
+             
+             [ 22930]
+             More h2ph tweaks: recognition of C types
+             
+             [ 22933]
+             More h2ph voodoo.
+     Branch: maint-5.8/perl
+	  !> README.win32 configure.com ext/NDBM_File/hints/linux.pl
+	  !> ext/threads/threads.xs hints/aix.sh hints/hpux.sh perl.c
+	  !> win32/makefile.mk
+____________________________________________________________________________
+[ 22978] By: nicholas                              on 2004/06/23  10:07:41
+        Log: Integrate:
+             [ 22877]
+             Subject: [PATCH] Re: [perl #29969] h2ph not correctly processing glibc sys/sysmacros.ph 
+             From: <wolfgang.laun@chello.at>
+             Date: Sun, 30 May 2004 17:27:07 +0200
+             Message-Id: <20040530152707.ZLWL22856.viefep16-int.chello.at@localhost>
+             
+             [ 22925]
+             Make h2ph able to understand a limited set of inline functions.
+             The glibc apparently now ships headers that use inline functions
+             instead of plain old macros.
+             
+             [ 22929]
+             More h2ph tweaking for gcc __inline functions
+             
+             [ 22930]
+             More h2ph tweaks: recognition of C types
+             
+             [ 22933]
+             More h2ph voodoo.
+     Branch: maint-5.8/perl
+	  !> utils/h2ph.PL
+____________________________________________________________________________
+[ 22974] By: nicholas                              on 2004/06/22  21:59:24
+        Log: Integrate:
+             [ 22882]
+             Subject: [PATCH] perlhack.pod - working with the Perl source
+             From: Dave Rolsky <autarch@urth.org>
+             Date: Mon, 31 May 2004 12:52:43 -0500 (CDT)
+             Message-ID: <Pine.LNX.4.58.0405311250520.7714@urth.org>
+             
+             [ 22885]
+             Subject: Re: [PATCH] UPDATE - Grammatical fixes and explanations in perlfunc.pod (sysopen)
+             From: Paul Fenwick <pjf@perltraining.com.au>
+             Date: Tue, 1 Jun 2004 11:31:34 +1000
+             Message-ID: <20040601013134.GA11005@perltraining.com.au>
+             
+             [ 22890]
+             Subject: [PATCH] Re: [perl #29765] PERL-5.8.4 INSTALL
+             From: Andrew Dougherty <doughera@lafayette.edu>
+             Date: Tue, 1 Jun 2004 16:25:48 -0400 (EDT)
+             Message-ID: <Pine.SOL.4.58.0406011619090.4066@maxwell.phys.lafayette.edu>
+             
+             [ 22891]
+             Detypo.
+             
+             [ 22895]
+             Fix apidoc entries for PUSHMARK and newXSproto.
+             
+             [ 22900]
+             perlpodspec uses 'nonbreaking' and 'non-breaking'.
+             Normalize on the hyphenated spelling.
+             
+             [ 22903]
+             Subject: [perl #30073] Misleading docs of Text::Wrap 
+             From: perl-5.8.0@ton.iguana.be (via RT) <perlbug-followup@perl.org>
+             Date: 6 Jun 2004 21:50:19 -0000
+             Message-ID: <rt-3.0.9-30073-89834.19.0927626986204@perl.org>
+             
+             [ 22905]
+             Subject: Re: newSVpvn(NULL, 0); doesn't work as advertised
+             From: Marcus Holland-Moritz <mhx-perl@gmx.net>
+             Date: Fri, 4 Jun 2004 16:29:44 +0200
+             Message-Id: <20040604162944.4011f1c6@r2d2>
+             
+             [ 22910]
+             Remove a spurious \n in a perltie example,
+             noticed by Geoffrey Young.
+             
+             [ 22917]
+             Several updates, major, and minor corrections, model updates,
+             explained the model numbering of HP-UX servers.
+             
+             [ 22919]
+             s/64bit/64-bit/g for consistency in the READMEs.
+             
+             [ 22923]
+             Subject: Re: [perl #30045] Transliteration replacement not terminated message obscure
+             From: Yitzchak Scott-Thoennes <sthoenna@efn.org>
+             Date: Mon, 7 Jun 2004 00:28:55 -0700
+             Message-ID: <20040607072854.GB1028@efn.org>
+             
+             [ 22927]
+             Remove a warning against unsafe signals in perlipc.pod,
+             now that we have "safe signals".
+             
+             [ 22936]
+             Subject: [PATCH] perlop.pod: add an example to the .. and ... operators
+             From: Shlomi Fish <shlomif@vipe.technion.ac.il>
+             Date: Tue, 15 Jun 2004 10:15:15 +0300 (IDT)
+             Message-ID: <Pine.LNX.4.56.0406151013140.14618@vipe.technion.ac.il>
+     Branch: maint-5.8/perl
+	  !> INSTALL README README.aix README.hpux XSUB.h lib/Text/Wrap.pm
+	  !> pod/perlapi.pod pod/perldiag.pod pod/perlfunc.pod
+	  !> pod/perlhack.pod pod/perlintern.pod pod/perlipc.pod
+	  !> pod/perlop.pod pod/perlpodspec.pod pod/perltie.pod pp.h
+	  !> pp_ctl.c sv.c
+____________________________________________________________________________
+[ 22973] By: nicholas                              on 2004/06/22  21:35:46
+        Log: Integrate:
+             [ 22824]
+             Fix new B::Concise test output
+             Subject: Re: Smoke [5.9.2] 22820 FAIL(F) openbsd 3.5 (i386/1 cpu)
+             From: Jim Cromie <jcromie@divsol.com>
+             Date: Mon, 17 May 2004 09:19:00 -0600
+             Message-ID: <40A8D7E4.1020007@divsol.com>
+             
+             (the t/TEST part)
+             
+             [ 22875]
+             Subject: [PATCH] Fix generation of perlapi.pod
+             From: Steve Hay <steve.hay@uk.radan.com>
+             Date: Fri, 28 May 2004 11:46:41 +0100
+             Message-ID: <40B71891.6090806@uk.radan.com>
+             
+             [ 22878]
+             Subject: [perl #29937] Entries missing from .packlist 
+             From: jdhedden@1979.usna.com (via RT) <perlbug-followup@perl.org>
+             Date: 28 May 2004 19:23:48 -0000
+             Message-ID: <rt-3.0.9-29937-88315.2.18472609678159@perl.org>
+             
+             [ 22894]
+             Document embed.fnc 'U' and 's' flags.
+             
+             [ 22932]
+             Subject: [PATCH] t/TEST
+             From: Abe Timmerman <abe@ztreet.demon.nl>
+             Date: Sun, 13 Jun 2004 11:41:49 +0200
+             Message-Id: <200406131141.50361.abe@ztreet.demon.nl>
+     Branch: maint-5.8/perl
+	  !> autodoc.pl embed.fnc installman installperl pod/perlapi.pod
+	  !> t/TEST
+____________________________________________________________________________
+[ 22871] By: nicholas                              on 2004/05/30  15:36:14
+        Log: Update Changes
+     Branch: maint-5.8/perl
+	   ! Changes patchlevel.h
+____________________________________________________________________________
 [ 22869] By: nicholas                              on 2004/05/30  14:26:17
         Log: Integrate:
              [ 22835]
