@@ -340,9 +340,9 @@ struct IPerlStdIOInfo
 #define PerlSIO_set_ptr(f,p)		PerlIOProc_abort()
 #endif
 #define PerlSIO_setlinebuf(f)		setlinebuf(f)
-#define PerlSIO_printf			Perl_fprintf_nocontext
-#define PerlSIO_stdoutf			*PL_StdIO->pPrintf
-#define PerlSIO_vprintf(f,fmt,a)	
+#define PerlSIO_printf			fprintf
+#define PerlSIO_stdoutf			printf
+#define PerlSIO_vprintf(f,fmt,a)	vfprintf(f,fmt,a)
 #define PerlSIO_ftell(f)		ftell(f)
 #define PerlSIO_fseek(f,o,w)		fseek(f,o,w)
 #define PerlSIO_fgetpos(f,p)		fgetpos(f,p)
@@ -809,7 +809,7 @@ struct IPerlMemInfo
 
 /* Shared memory macros */
 #ifdef NETWARE
-  
+
  #define PerlMemShared_malloc(size)			    \
 	(*PL_Mem->pMalloc)(PL_Mem, (size))
 #define PerlMemShared_realloc(buf, size)		    \

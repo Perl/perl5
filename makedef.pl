@@ -114,6 +114,8 @@ if ($PLATFORM eq 'win32') {
     if ($define{PERL_IMPLICIT_SYS}) {
 	output_symbol("perl_get_host_info");
 	output_symbol("perl_alloc_override");
+    }
+    if ($define{USE_ITHREADS}) {
 	output_symbol("perl_clone_host");
     }
 }
@@ -695,6 +697,30 @@ my @layer_syms = qw(
 			 PerlIO_push
 			 PerlIO_sv_dup
 			 PerlIO_perlio
+
+Perl_PerlIO_clearerr
+Perl_PerlIO_close
+Perl_PerlIO_eof
+Perl_PerlIO_error
+Perl_PerlIO_fileno
+Perl_PerlIO_fill
+Perl_PerlIO_flush
+Perl_PerlIO_get_base
+Perl_PerlIO_get_bufsiz
+Perl_PerlIO_get_cnt
+Perl_PerlIO_get_ptr
+Perl_PerlIO_read
+Perl_PerlIO_seek
+Perl_PerlIO_set_cnt
+Perl_PerlIO_set_ptrcnt
+Perl_PerlIO_setlinebuf
+Perl_PerlIO_stderr
+Perl_PerlIO_stdin
+Perl_PerlIO_stdout
+Perl_PerlIO_tell
+Perl_PerlIO_unread
+Perl_PerlIO_write
+
 );
 
 
@@ -787,6 +813,8 @@ if ($define{'USE_PERLIO'}) {
 	# Skip the PerlIO layer symbols - although
 	# nothing should have exported them any way
 	skip_symbols \@layer_syms;
+        skip_symbols [qw(PL_def_layerlist PL_known_layers PL_perlio)];
+
 	# Also do NOT add abstraction symbols from $perlio_sym
 	# abstraction is done as #define to stdio
 	# Remaining remnants that _may_ be functions
@@ -1242,14 +1270,11 @@ perl_free
 perl_parse
 perl_run
 # Oddities from PerlIO 
-PerlIO_open
 PerlIO_binmode
 PerlIO_getpos
 PerlIO_init
-PerlIO_perlio
 PerlIO_setpos
 PerlIO_sprintf
-PerlIO_printf
 PerlIO_sv_dup
 PerlIO_tmpfile
 PerlIO_vsprintf

@@ -40,7 +40,7 @@
 #if defined(PERL_IMPLICIT_SYS)
 #ifndef USE_PERLIO
 #ifndef NETWARE
-# define USE_PERLIO
+/* # define USE_PERLIO */
 #endif
 #endif
 #endif
