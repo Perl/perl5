@@ -2662,9 +2662,9 @@ ExtUtils::Mkbootstrap, ExtUtils::Mksymlists, ExtUtils::Packlist,
 ExtUtils::testlib, Fatal, Fcntl, File::Basename, File::CheckTree,
 File::Compare, File::Copy, File::DosGlob, File::Find, File::Path,
 File::Spec, File::Spec::Cygwin, File::Spec::Epoc, File::Spec::Functions,
-File::Spec::Mac, File::Spec::NW5, File::Spec::OS2, File::Spec::Unix,
-File::Spec::VMS, File::Spec::Win32, File::Temp, File::stat, FileCache,
-FileHandle, Filter::Simple, FindBin, Getopt::Long, Getopt::Std, Hash::Util,
+File::Spec::Mac, File::Spec::OS2, File::Spec::Unix, File::Spec::VMS,
+File::Spec::Win32, File::Temp, File::stat, FileCache, FileHandle,
+Filter::Simple, FindBin, Getopt::Long, Getopt::Std, Hash::Util,
 I18N::Collate, I18N::LangTags, I18N::LangTags::List, IO, IPC::Open2,
 IPC::Open3, Locale::Constants, Locale::Country, Locale::Currency,
 Locale::Language, Locale::Maketext, Locale::Maketext::TPJ13,
@@ -7735,11 +7735,13 @@ C<OS2::Error(do_harderror,do_exception)>, C<OS2::Errors2Drive(drive)>,
 OS2::SysInfo(), OS2::BootDrive(), C<OS2::MorphPM(serve)>,
 C<OS2::UnMorphPM(serve)>, C<OS2::Serve_Messages(force)>,
 C<OS2::Process_Messages(force [, cnt])>, C<OS2::_control87(new,mask)>,
-OS2::get_control87(), C<OS2::set_control87_em(new=MCW_EM,mask=MCW_EM)>
+OS2::get_control87(), C<OS2::set_control87_em(new=MCW_EM,mask=MCW_EM)>,
+C<OS2::DLLname([how [, \&xsub]])>
 
 =item Prebuilt variables:
 
-$OS2::emx_rev, $OS2::emx_env, $OS2::os_ver
+$OS2::emx_rev, $OS2::emx_env, $OS2::os_ver, $OS2::is_aout, $OS2::can_fork,
+$OS2::nsyserror
 
 =item Misfeatures
 
@@ -7752,7 +7754,10 @@ C<flock>
 
 =item Centralized management of resources
 
-C<HAB>, C<HMQ>
+C<HAB>, C<HMQ>, Treating errors reported by OS/2 API,
+C<CheckOSError(expr)>, C<CheckWinError(expr)>, C<SaveWinError(expr)>,
+C<SaveCroakWinError(expr,die,name1,name2)>, C<WinError_2_Perl_rc>,
+C<FillWinError>, C<FillOSError(rc)>, Loading DLLs and ordinals in DLLs
 
 =back
 
@@ -7797,6 +7802,8 @@ C<HAB>, C<HMQ>
 =item Evolution
 
 =over 4
+
+=item Text-mode filehandles
 
 =item Priorities
 
@@ -19551,51 +19558,6 @@ Win32::Sleep(TIME), Win32::Spawn(COMMAND, ARGS, PID),
 Win32::UnregisterServer(LIBRARYNAME)
 
 =back
-
-=back
-
-=head2 XS::APItest - Test the perl C API
-
-=over 4
-
-=item SYNOPSIS
-
-=item ABSTRACT
-
-=item DESCRIPTION
-
-=over 4
-
-=item EXPORT
-
-B<print_double>, B<print_long_double>, B<have_long_double>, B<print_nv>,
-B<print_iv>, B<print_uv>, B<print_int>, B<print_long>, B<print_float>
-
-=back
-
-=item SEE ALSO
-
-=item AUTHORS
-
-=item COPYRIGHT AND LICENSE
-
-=back
-
-=head2 XS::Typemap - module to test the XS typemaps distributed with perl
-
-=over 4
-
-=item SYNOPSIS
-
-=item DESCRIPTION
-
-=back
-
-=over 4
-
-=item NOTES
-
-=item AUTHOR
 
 =back
 

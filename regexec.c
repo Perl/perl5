@@ -3990,7 +3990,9 @@ S_regrepeat(pTHX_ regnode *p, I32 max)
     register bool do_utf8 = PL_reg_match_utf8;
 
     scan = PL_reginput;
-    if (max != REG_INFTY && max < loceol - scan)
+    if (max == REG_INFTY)
+	max = I32_MAX;
+    else if (max < loceol - scan)
       loceol = scan + max;
     switch (OP(p)) {
     case REG_ANY:

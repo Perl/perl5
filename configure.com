@@ -6294,11 +6294,20 @@ $ EXIT
 $ ENDSUBROUTINE ! Bad_environment
 $ echo ""
 $ echo4 "Checking for dangerous pre-existing global symbols and logical names."
-$ CALL Bad_environment "TMP"
-$ CALL Bad_environment "LIB"
-$ CALL Bad_environment "T"
-$ CALL Bad_environment "FOO"
 $ CALL Bad_environment "EXT"
+$ CALL Bad_environment "FOO"
+$ CALL Bad_environment "LIB"
+$ CALL Bad_environment "LIST"
+$ CALL Bad_environment "MIME"
+$ CALL Bad_environment "POSIX"
+$ CALL Bad_environment "SYS"
+$ CALL Bad_environment "T"
+$ CALL Bad_environment "THREAD"
+$ CALL Bad_environment "THREADS"
+$ CALL Bad_environment "TIME"
+$ CALL Bad_environment "TMP"
+$ CALL Bad_environment "UNICODE"
+$ CALL Bad_environment "UTIL"
 $ CALL Bad_environment "TEST" "SYMBOL"
 $ IF f$search("config.msg") .eqs. "" THEN echo "OK."
 $!
@@ -6495,9 +6504,9 @@ $ echo4 ""
 $!
 $ IF ( F$SEARCH("config.msg").NES."" ) 
 $ THEN
-$   echo "Hmm.  I also noted the following information while running:"
-$   echo ""
-$   type config.msg
+$   echo4 "Hmm.  I also noted the following information while running:"
+$   echo4 ""
+$   TYPE/OUTPUT=SYS$ERROR: config.msg
 $   SET PROTECTION=(SYSTEM:RWED,OWNER:RWED) config.msg
 $   DELETE/NOLOG/NOCONFIRM config.msg;
 $ ENDIF

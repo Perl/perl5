@@ -6,7 +6,7 @@ BEGIN {
     require './test.pl';
 }
 
-plan tests => 5816;
+plan tests => 5819;
 
 use strict;
 use warnings;
@@ -139,6 +139,23 @@ sub list_eq ($$) {
     }
     cmp_ok(unpack ('w',$x), '==', ~0 - 1);
     cmp_ok(unpack ('w',$y), '==', ~0 - 2);
+
+    # These should spot that pack 'w' is using NV, not double, on platforms
+    # where IVs are smaller than doubles, and harmlessly pass elsewhere.
+    # (tests for change 16861)
+    my $x0 = 2**54+3;
+    my $y0 = 2**54-2;
+
+    $x = pack 'w', $x0;
+    $y = pack 'w', $y0;
+
+    if ($x0 == $y0) {
+        is($x, $y, "NV arithmetic");
+    } else {
+        isnt($x, $y, "IV/NV arithmetic");
+    }
+    cmp_ok(unpack ('w',$x), '==', $x0);
+    cmp_ok(unpack ('w',$y), '==', $y0);
 }
 
 

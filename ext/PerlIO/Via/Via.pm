@@ -15,6 +15,11 @@ PerlIO::Via - Helper class for PerlIO layers implemented in perl
 
    open($fh,"<:Via(Some::Package)",...);
 
+   use PerlIO::Via::SomeLayer;
+
+   # Assume PerlIO::Via:: default namespace when SomeLayer.pm is not found
+   open($fh,"<:Via(SomeLayer)",...);
+
 =head1 DESCRIPTION
 
 The package to be used as a layer should implement at least some of the

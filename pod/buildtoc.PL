@@ -304,12 +304,13 @@ find \&getpods => qw(../lib ../ext);
 sub getpods {
     if (/\.p(od|m)$/) {
 	my $file = $File::Find::name;
-	return if $file eq '../lib/Pod/Functions.pm'; # Used only by pod itself
+        return if $file eq '../lib/Pod/Functions.pm'; # Used only by pod itself
         return if $file =~ m!lib/Attribute/Handlers/demo/!;
-	return if $file =~ m!lib/Net/FTP/.+\.pm!; # Hi, Graham! :-)
+        return if $file =~ m!lib/Net/FTP/.+\.pm!; # Hi, Graham! :-)
         return if $file =~ m!lib/Math/BigInt/t/!;
-	return if $file =~ m!/Devel/PPPort/[Hh]arness|lib/Devel/Harness!i;
-	die "tut $name" if $file =~ /TUT/;
+        return if $file =~ m!/Devel/PPPort/[Hh]arness|lib/Devel/Harness!i;
+        return if $file =~ m!XS/(?:APItest|Typemap)!;
+        die "tut $name" if $file =~ /TUT/;
 	unless (open (F, "< $_\0")) {
 	    warn "bogus <$file>: $!";
 	    system "ls", "-l", $file;

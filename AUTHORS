@@ -1,7 +1,7 @@
 # To give due honour to those who have made Perl 5 what it is today,
 # here are easily-from-changelogs-extractable people and their
-# (hopefully) current and preferred email addresses (as of early 2002,
-# if known) from the Changes files.  These people have either submitted
+# (hopefully) current and preferred email addresses (as of 2002, if known)
+# from the Changes files.  These people have either submitted
 # patches or suggestions, or their bug reports or comments have inspired
 # the appropriate patches.  Corrections, additions, deletions welcome;
 # send them to perl5-porters@perl.org, preferably as the output of diff(1),
@@ -26,6 +26,7 @@ Alan Harder                    <Alan.Harder@Ebay.Sun.COM>
 Alan Modra
 Albert Chin-A-Young            <china@thewrittenword.com>
 Albert Dvornik                 <bert@genscan.com>
+Alessandro Forghieri           <alf@orion.it>
 Alex Cough                     <alex@rcon.rog>
 Alexander Gough                <alexander.gough@st-hughs.oxford.ac.uk>
 Alexander Klimov               <ask@wisdom.weizmann.ac.il>
@@ -40,6 +41,7 @@ Andreas Schwab                 <schwab@suse.de>
 Andrew Bettison                <andrewb@zip.com.au>
 Andrew Cohen                   <cohen@andy.bu.edu>
 andrew deryabin                <djsf@technarchy.ru>
+Andrew Hamm                    <AHamm@civica.com.au>
 Andrew M. Langmead             <aml@world.std.com>
 Andrew Pimlott                 <pimlott@idiomtech.com>
 Andrew Vignaux                 <ajv@nz.sangacorp.com>
@@ -237,6 +239,7 @@ Greg Earle
 Greg Kuperberg
 Greg Seibert                   <seibert@Lynx.COM>
 Greg Ward                      <gward@ase.com>
+Gregor Chrupala                <gregor.chrupala@star-group.net>
 Gregory Martin Pfeil           <pfeilgm@technomadic.org>
 Guenter Schmidt                <gsc@bruker.de>
 Guido Flohr                    <gufl0000@stud.uni-sb.de>
@@ -511,6 +514,7 @@ Olaf Flebbe                    <o.flebbe@science-computing.de>
 Olaf Titz                      <olaf@bigred.inka.de>
 Ollivier Robert                <roberto@keltia.freenix.fr>
 Owen Taylor                    <owt1@cornell.edu>
+parv                           <parv@pair.com>
 Patrick Hayes                  <Patrick.Hayes.CAP_SESA@renault.fr>
 Patrick O'Brien                <pdo@cs.umd.edu>
 Paul A Sand                    <pas@unh.edu>
@@ -526,6 +530,7 @@ Paul Moore                     <Paul.Moore@uk.origin-it.com>
 Paul Rogers                    <Paul.Rogers@Central.Sun.COM>
 Paul Saab                      <ps@yahoo-inc.com>
 Paul Schinder                  <schinder@pobox.com>
+Per Einar Ellefsen             <per.einar@skynet.be>
 Pete Peterson                  <petersonp@genrad.com>
 Peter Chines                   <pchines@nhgri.nih.gov>
 Peter Gessner                  <peter.gessner@post.rwth-aachen.de>
@@ -621,6 +626,7 @@ Stephen O. Lidie               <lusol@turkey.cc.Lehigh.EDU>
 Stephen P. Potter              <spp@ds.net>
 Stephen Zander                 <gibreel@pobox.com>
 Steve A Fink                   <sfink@cs.berkeley.edu>
+Steve Hay                      <Steve.Hay@uk.radan.com>
 Steve Kelem                    <steve.kelem@xilinx.com>
 Steve McDougall                <swmcd@world.std.com>
 Steve Nielsen                  <spn@enteract.com>

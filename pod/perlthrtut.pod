@@ -465,8 +465,8 @@ assignment will cause the thread to die. For example:
     ... create some threads ...
 
     $hash{a} = 1;	# all threads see exists($hash{a}) and $hash{a} == 1
-    $hash{a} = $var	# okay - copy-by-value: same affect as previous
-    $hash{a} = $svar	# okay - copy-by-value: same affect as previous
+    $hash{a} = $var	# okay - copy-by-value: same effect as previous
+    $hash{a} = $svar	# okay - copy-by-value: same effect as previous
     $hash{a} = \$svar	# okay - a reference to a shared variable
     $hash{a} = \$var	# This will die
     delete $hash{a}	# okay - all threads will see !exists($hash{a})
