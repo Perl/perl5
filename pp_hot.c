@@ -881,7 +881,7 @@ play_it_again:
 		goto nope;
 	    else if ((rx->reganch & ROPT_CHECK_ALL) && !sawampersand)
 		goto yup;
-	    if (s && rx->check_offset_max < t - s) {
+	    if (s && rx->check_offset_max < s - t) {
 		++BmUSEFUL(rx->check_substr);
 		s -= rx->check_offset_max;
 	    }

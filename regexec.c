@@ -782,7 +782,7 @@ regmatch(regnode *prog)
 
 	switch (OP(scan)) {
 	case BOL:
-	    if (locinput == regbol
+	    if (locinput == bostr
 		? regprev == '\n'
 		: (multiline && 
 		   (nextchr || locinput < regeol) && locinput[-1] == '\n') )
@@ -792,7 +792,7 @@ regmatch(regnode *prog)
 	    }
 	    sayNO;
 	case MBOL:
-	    if (locinput == regbol
+	    if (locinput == bostr
 		? regprev == '\n'
 		: ((nextchr || locinput < regeol) && locinput[-1] == '\n') )
 	    {
