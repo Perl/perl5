@@ -489,6 +489,7 @@ $x = $class->new('-322056000'); ($x,$y) = $x->bdiv('-12882240');
 
 ok ($y,'0'); is_valid($y);	# $y not '-0'
 
+###############################################################################
 # all tests done
 
 1;
@@ -836,6 +837,10 @@ NaN::0
 +inf:+:1
 -inf:-:1
 -inf:+:0
+-inf:-inf:1
+-inf:+inf:0
++inf:-inf:0
++inf:+inf:1
 # it must be exactly /^[+-]inf$/
 +infinity::0
 -infinity::0
