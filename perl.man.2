@@ -1,7 +1,12 @@
 ''' Beginning of part 2
-''' $Header: perl_man.2,v 3.0.1.8 90/08/13 22:21:00 lwall Locked $
+''' $Header: perl_man.2,v 3.0.1.9 90/10/15 18:17:37 lwall Locked $
 '''
 ''' $Log:	perl.man.2,v $
+''' Revision 3.0.1.9  90/10/15  18:17:37  lwall
+''' patch29: added caller
+''' patch29: index and substr now have optional 3rd args
+''' patch29: added SysV IPC
+''' 
 ''' Revision 3.0.1.8  90/08/13  22:21:00  lwall
 ''' patch28: documented that you can't interpolate $) or $| in pattern
 ''' 
@@ -88,6 +93,17 @@ to LF on input and LF translated to CR LF on output.
 Binmode has no effect under Unix.
 If FILEHANDLE is an expression, the value is taken as the name of
 the filehandle.
+.Ip "caller(EXPR)"
+.Ip "caller"
+Returns the context of the current subroutine call:
+.nf
+
+	($package,$filename,$line) = caller;
+
+.fi
+With EXPR, returns some extra information that the debugger uses to print
+a stack trace.  The value of EXPR indicates how many call frames to go
+back before the current one.
 .Ip "chdir(EXPR)" 8 2
 .Ip "chdir EXPR" 8 2
 Changes the working directory to EXPR, if possible.
@@ -824,8 +840,12 @@ the LIST is not a named array.
 Returns the decimal value of EXPR interpreted as an hex string.
 (To interpret strings that might start with 0 or 0x see oct().)
 If EXPR is omitted, uses $_.
+.Ip "index(STR,SUBSTR,POSITION)" 8 4
 .Ip "index(STR,SUBSTR)" 8 4
-Returns the position of the first occurrence of SUBSTR in STR, based at 0, or whatever you've
+Returns the position of the first occurrence of SUBSTR in STR at or after
+POSITION.
+If POSITION is omitted, starts searching from the beginning of the string.
+The return value is based at 0, or whatever you've
 set the $[ variable to.
 If the substring is not found, returns one less than the base, ordinarily \-1.
 .Ip "int(EXPR)" 8 4
@@ -985,8 +1005,8 @@ This means that called subroutines can also reference the local variable,
 but not the global one.
 The LIST may be assigned to if desired, which allows you to initialize
 your local variables.
-(If no initializer is given, all scalars are initialized to the null string
-and all arrays and associative arrays to the null array.)
+(If no initializer is given for a particular variable, it is created with
+an undefined value.)
 Commonly this is used to name the parameters to a subroutine.
 Examples:
 .nf
@@ -1123,3 +1143,23 @@ matched.
 Creates the directory specified by FILENAME, with permissions specified by
 MODE (as modified by umask).
 If it succeeds it returns 1, otherwise it returns 0 and sets $! (errno).
+.Ip "msgctl(ID,CMD,ARG)" 8 4
+Calls the System V IPC function msgctl.  If CMD is &IPC_STAT, then ARG
+must be a variable which will hold the returned msqid_ds structure.
+Returns like ioctl: the undefined value for error, "0 but true" for
+zero, or the actual return value otherwise.
+.Ip "msgget(KEY,FLAGS)" 8 4
+Calls the System V IPC function msgget.  Returns the message queue id,
+or the undefined value if there is an error.
+.Ip "msgsnd(ID,MSG,FLAGS)" 8 4
+Calls the System V IPC function msgsnd to send the message MSG to the
+message queue ID.  MSG must begin with the long integer message type,
+which may be created with pack("L", $type).  Returns true if
+successful, or false if there is an error.
+.Ip "msgrcv(ID,VAR,SIZE,TYPE,FLAGS)" 8 4
+Calls the System V IPC function msgrcv to receive a message from
+message queue ID into variable VAR with a maximum message size of
+SIZE.  Note that if a message is received, the message type will be
+the first thing in VAR, and the maximum length of VAR is SIZE plus the
+size of the message type.  Returns true if successful, or false if
+there is an error.

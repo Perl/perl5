@@ -1,6 +1,6 @@
 package DB;
 
-$header = '$Header: perldb.pl,v 3.0.1.3 90/08/09 04:00:58 lwall Locked $';
+$header = '$Header: perldb.pl,v 3.0.1.4 90/10/15 17:40:38 lwall Locked $';
 #
 # This file is automatically included if you do perl -d.
 # It's probably not useful to include this yourself.
@@ -10,6 +10,12 @@ $header = '$Header: perldb.pl,v 3.0.1.3 90/08/09 04:00:58 lwall Locked $';
 # have a breakpoint.  It also inserts a do 'perldb.pl' before the first line.
 #
 # $Log:	perldb.pl,v $
+# Revision 3.0.1.4  90/10/15  17:40:38  lwall
+# patch29: added caller
+# patch29: the debugger now understands packages and evals
+# patch29: scripts now run at almost full speed under the debugger
+# patch29: more variables are settable from debugger
+# 
 # Revision 3.0.1.3  90/08/09  04:00:58  lwall
 # patch19: debugger now allows continuation lines
 # patch19: debugger can now dump lists of variables
@@ -30,57 +36,55 @@ $header = '$Header: perldb.pl,v 3.0.1.3 90/08/09 04:00:58 lwall Locked $';
 # 
 #
 
-open(IN,"/dev/tty");		# so we don't dingle stdin
-open(OUT,">/dev/tty");	# so we don't dongle stdout
+open(IN, "</dev/tty") || open(IN,  "<&STDIN");	# so we don't dingle stdin
+open(OUT,">/dev/tty") || open(OUT, ">&STDOUT");	# so we don't dongle stdout
 select(OUT);
 $| = 1;				# for DB'OUT
 select(STDOUT);
 $| = 1;				# for real STDOUT
+$sub = '';
 
 $header =~ s/.Header: ([^,]+),v(\s+\S+\s+\S+).*$/$1$2/;
-print OUT "\nLoading custom DB from $header\n\nEnter h for help.\n\n";
+print OUT "\nLoading DB routines from $header\n\nEnter h for help.\n\n";
 
 sub DB {
-    local($. ,$@, $!, $[, $,, $/, $\);
-    $[ = 0; $, = ""; $/ = "\n"; $\ = "";
-    ($line) = @_;
-    if ($stop[$line]) {
+    &save;
+    ($package, $filename, $line) = caller;
+    $usercontext = '($@, $!, $[, $,, $/, $\) = @saved;' .
+	"package $package;";		# this won't let them modify, alas
+    local(*dbline) = "_<$filename";
+    $max = $#dbline;
+    if (($stop,$action) = split(/\0/,$dbline{$line})) {
 	if ($stop eq '1') {
 	    $signal |= 1;
 	}
 	else {
-	    package main;
-	    $DB'signal |= eval $DB'stop[$DB'line];  print DB'OUT $@;
-	    $DB'stop[$DB'line] =~ s/;9$//;
+	    $signal |= &eval($stop);
+	    $dbline{$line} =~ s/;9($|\0)/$1/;
 	}
     }
     if ($single || $trace || $signal) {
-	print OUT "$sub($line):\t",$line[$line];
-	for ($i = $line + 1; $i <= $max && $line[$i] == 0; ++$i) {
-	    last if $line[$i] =~ /^\s*(}|#|\n)/;
-	    print OUT "$sub($i):\t",$line[$i];
+	print OUT "$package'" unless $sub =~ /'/;
+	print OUT "$sub($filename:$line):\t",$dbline[$line];
+	for ($i = $line + 1; $i <= $max && $dbline[$i] == 0; ++$i) {
+	    last if $dbline[$i] =~ /^\s*(}|#|\n)/;
+	    print OUT "$sub($filename:$i):\t",$dbline[$i];
 	}
     }
-    if ($action[$line]) {
-	package main;
-	eval $DB'action[$DB'line];  print DB'OUT $@;
-    }
+    &eval($action) if $action;
     if ($single || $signal) {
-	if ($pre) {
-	    package main;
-	    eval $DB'pre;  print DB'OUT $@;
-	}
+	&eval($pre) if $pre;
 	print OUT $#stack . " levels deep in subroutine calls!\n"
 	    if $single & 4;
 	$start = $line;
-	while ((print OUT "  DB<", $#hist+1, "> "), $cmd=<IN>) {
+	while ((print OUT "  DB<", $#hist+1, "> "), $cmd=&gets) {
 	    $single = 0;
 	    $signal = 0;
 	    $cmd eq '' && exit 0;
 	    chop($cmd);
 	    $cmd =~ s/\\$// && do {
 		print OUT "  cont: ";
-		$cmd .= <IN>;
+		$cmd .= &gets;
 		redo;
 	    };
 	    $cmd =~ /^q$/ && exit 0;
@@ -93,7 +97,7 @@ sub DB {
 T		Stack trace.
 s		Single step.
 n		Next, steps over subroutine calls.
-f		Finish current subroutine.
+r		Return from current subroutine.
 c [line]	Continue; optionally inserts a one-time-only breakpoint 
 		at the specified line.
 <CR>		Repeat last n or s.
@@ -104,6 +108,7 @@ l		List next window.
 -		List previous window.
 w line		List window around line.
 l subname	List subroutine.
+f filename	Switch to filename.
 /pattern/	Search forwards for pattern; final / is optional.
 ?pattern?	Search backwards for pattern.
 L		List breakpoints and actions.
@@ -121,17 +126,17 @@ a [line] command
 		Sequence is: check for breakpoint, print line if necessary,
 		do action, prompt user if breakpoint or step, evaluate line.
 A		Delete all actions.
-V [pkg [vars]]	List some (default all) variables in a package (default main).
-X [vars]	Same as \"V main [vars]\".
+V [pkg [vars]]	List some (default all) variables in package (default current).
+X [vars]	Same as \"V currentpackage [vars]\".
 < command	Define command before prompt.
 > command	Define command after prompt.
 ! number	Redo command (default previous command).
 ! -number	Redo number\'th to last command.
 H -number	Display last number commands (default all).
 q or ^D		Quit.
-p expr		Same as \"package main; print DB'OUT expr\".
+p expr		Same as \"print DB'OUT expr\" in current package.
 = [alias value]	Define a command alias, or list current aliases.
-command		Execute as a perl statement.
+command		Execute as a perl statement in current package.
 
 ";
 		next; };
@@ -141,18 +146,13 @@ command		Execute as a perl statement.
 		next; };
 	    $cmd =~ /^S$/ && do {
 		foreach $subname (sort(keys %sub)) {
-		    if ($subname =~ /^main'(.*)/) {
-			print OUT $1,"\n";
-		    }
-		    else {
-			print OUT $subname,"\n";
-		    }
+		    print OUT $subname,"\n";
 		}
 		next; };
-	    $cmd =~ s/^X\b/V main/;
+	    $cmd =~ s/^X\b/V $package/;
 	    $cmd =~ /^V$/ && do {
-		$cmd = 'V main'; };
-		$cmd =~ /^V\s*(\S+)\s*(.*)/ && do {
+		$cmd = 'V $package'; };
+	    $cmd =~ /^V\s*(\S+)\s*(.*)/ && do {
 		$packname = $1;
 		@vars = split(' ',$2);
 		do 'dumpvar.pl' unless defined &main'dumpvar;
@@ -163,10 +163,40 @@ command		Execute as a perl statement.
 		    print DB'OUT "dumpvar.pl not available.\n";
 		}
 		next; };
+	    $cmd =~ /^f\s*(.*)/ && do {
+		$file = $1;
+		if (!$file) {
+		    print OUT "The old f command is now the r command.\n";
+		    print OUT "The new f command switches filenames.\n";
+		    next;
+		}
+		if (!defined $_main{'_<' . $file}) {
+		    if (($try) = grep(m#^_<.*$file#, keys %_main)) {
+			$file = substr($try,2);
+			print "\n$file:\n";
+		    }
+		}
+		if (!defined $_main{'_<' . $file}) {
+		    print OUT "There's no code here anything matching $file.\n";
+		    next;
+		}
+		elsif ($file ne $filename) {
+		    *dbline = "_<$file";
+		    $max = $#dbline;
+		    $filename = $file;
+		    $start = 1;
+		    $cmd = "l";
+		} };
 	    $cmd =~ /^l\s*(['A-Za-z_]['\w]*)/ && do {
 		$subname = $1;
 		$subname = "main'" . $subname unless $subname =~ /'/;
-		$subrange = $sub{$subname};
+		$subname = "main" . $subname if substr($subname,0,1) eq "'";
+		($file,$subrange) = split(/:/,$sub{$subname});
+		if ($file ne $filename) {
+		    *dbline = "_<$file";
+		    $max = $#dbline;
+		    $filename = $file;
+		}
 		if ($subrange) {
 		    if (eval($subrange) < -$window) {
 			$subrange =~ s/-.*/+/;
@@ -199,7 +229,7 @@ command		Execute as a perl statement.
 		$i = $line if $i eq '.';
 		$i = 1 if $i < 1;
 		for (; $i <= $end; $i++) {
-		    print OUT "$i:\t", $line[$i];
+		    print OUT "$i:\t", $dbline[$i];
 		    last if $signal;
 		}
 		$start = $i;	# remember in case they want more
@@ -208,47 +238,61 @@ command		Execute as a perl statement.
 	    $cmd =~ /^D$/ && do {
 		print OUT "Deleting all breakpoints...\n";
 		for ($i = 1; $i <= $max ; $i++) {
-		    $stop[$i] = 0;
+		    if (defined $dbline{$i}) {
+			$dbline{$i} =~ s/^[^\0]+//;
+			if ($dbline{$i} =~ s/^\0?$//) {
+			    delete $dbline{$i};
+			}
+		    }
 		}
 		next; };
 	    $cmd =~ /^L$/ && do {
 		for ($i = 1; $i <= $max; $i++) {
-		    if ($stop[$i] || $action[$i]) {
-			print OUT "$i:\t", $line[$i];
-			print OUT "  break if (", $stop[$i], ")\n" 
-			    if $stop[$i];
-			print OUT "  action:  ", $action[$i], "\n" 
-			    if $action[$i];
+		    if (defined $dbline{$i}) {
+			print OUT "$i:\t", $dbline[$i];
+			($stop,$action) = split(/\0/, $dbline{$i});
+			print OUT "  break if (", $stop, ")\n" 
+			    if $stop;
+			print OUT "  action:  ", $action, "\n" 
+			    if $action;
 			last if $signal;
 		    }
 		}
 		next; };
 	    $cmd =~ /^b\s*(['A-Za-z_]['\w]*)\s*(.*)/ && do {
 		$subname = $1;
-		$subname = "main'" . $subname unless $subname =~ /'/;
-		($i) = split(/-/, $sub{$subname});
+		$cond = $2 || '1';
+		$subname = "$package'" . $subname unless $subname =~ /'/;
+		$subname = "main" . $subname if substr($subname,0,1) eq "'";
+		($filename,$i) = split(/[:-]/, $sub{$subname});
 		if ($i) {
-		    ++$i while $line[$i] == 0 && $i < $#line;
-		    $stop[$i] = $2 ? $2 : 1;
+		    *dbline = "_<$filename";
+		    ++$i while $dbline[$i] == 0 && $i < $#dbline;
+		    $dbline{$i} =~ s/^[^\0]*/$cond/;
 		} else {
-		    print OUT "Subroutine $1 not found.\n";
+		    print OUT "Subroutine $subname not found.\n";
 		}
 		next; };
 	    $cmd =~ /^b\s*(\d*)\s*(.*)/ && do {
 		$i = ($1?$1:$line);
-		if ($line[$i] == 0) {
+		$cond = $2 || '1';
+		if ($dbline[$i] == 0) {
 		    print OUT "Line $i not breakable.\n";
 		} else {
-		    $stop[$i] = $2 ? $2 : 1;
+		    $dbline{$i} =~ s/^[^\0]*/$cond/;
 		}
 		next; };
 	    $cmd =~ /^d\s*(\d+)?/ && do {
 		$i = ($1?$1:$line);
-		$stop[$i] = '';
+		$dbline{$i} =~ s/^[^\0]*//;
+		delete $dbline{$i} if $dbline{$i} eq '';
 		next; };
 	    $cmd =~ /^A$/ && do {
 		for ($i = 1; $i <= $max ; $i++) {
-		    $action[$i] = '';
+		    if (defined $dbline{$i}) {
+			$dbline{$i} =~ s/\0[^\0]*//;
+			delete $dbline{$i} if $dbline{$i} eq '';
+		    }
 		}
 		next; };
 	    $cmd =~ /^<\s*(.*)/ && do {
@@ -259,10 +303,11 @@ command		Execute as a perl statement.
 		next; };
 	    $cmd =~ /^a\s*(\d+)(\s+(.*))?/ && do {
 		$i = $1;
-		if ($line[$i] == 0) {
+		if ($dbline[$i] == 0) {
 		    print OUT "Line $i may not have an action.\n";
 		} else {
-		    $action[$i] = do action($3);
+		    $dbline{$i} =~ s/\0[^\0]*//;
+		    $dbline .= "\0" . do action($3);
 		}
 		next; };
 	    $cmd =~ /^n$/ && do {
@@ -276,23 +321,42 @@ command		Execute as a perl statement.
 	    $cmd =~ /^c\s*(\d*)\s*$/ && do {
 		$i = $1;
 		if ($i) {
-		    if ($line[$i] == 0) {
+		    if ($dbline[$i] == 0) {
 		        print OUT "Line $i not breakable.\n";
 			next;
 		    }
-		    $stop[$i] .= ";9";	# add one-time-only b.p.
+		    $dbline{$i} =~ s/(\0|$)/;9$1/;	# add one-time-only b.p.
 		}
 		for ($i=0; $i <= $#stack; ) {
 		    $stack[$i++] &= ~1;
 		}
 		last; };
-	    $cmd =~ /^f$/ && do {
+	    $cmd =~ /^r$/ && do {
 		$stack[$#stack] |= 2;
 		last; };
 	    $cmd =~ /^T$/ && do {
-		for ($i=0; $i <= $#sub; ) {
-		    print OUT $sub[$i++], "\n";
+		local($p,$f,$l,$s,$h,$a,@a,@sub);
+		for ($i = 1; ($p,$f,$l,$s,$h,$w) = caller($i); $i++) {
+		    @a = @args;
+		    for (@a) {
+			if (/^StB\000/ && length($_) == length($_main{'_main'})) {
+			    $_ = sprintf("%s",$_);
+			}
+			else {
+			    s/'/\\'/g;
+			    s/([^\0]*)/'$1'/ unless /^-?[\d.]+$/;
+			    s/([\200-\377])/sprintf("M-%c",ord($1)&0177)/eg;
+			    s/([\0-\37\177])/sprintf("^%c",ord($1)^64)/eg;
+			}
+		    }
+		    $w = $w ? '@ = ' : '$ = ';
+		    $a = $h ? '(' . join(', ', @a) . ')' : '';
+		    push(@sub, "$w&$s$a from file $f line $l\n");
 		    last if $signal;
+		}
+		for ($i=0; $i <= $#sub; $i++) {
+		    last if $signal;
+		    print OUT $sub[$i];
 		}
 	        next; };
 	    $cmd =~ /^\/(.*)$/ && do {
@@ -312,8 +376,8 @@ command		Execute as a perl statement.
 		    ++$start;
 		    $start = 1 if ($start > $max);
 		    last if ($start == $end);
-		    if ($line[$start] =~ m'."\n$pat\n".'i) {
-			print OUT "$start:\t", $line[$start], "\n";
+		    if ($dbline[$start] =~ m'."\n$pat\n".'i) {
+			print OUT "$start:\t", $dbline[$start], "\n";
 			last;
 		    }
 		} ';
@@ -336,8 +400,8 @@ command		Execute as a perl statement.
 		    --$start;
 		    $start = $max if ($start <= 0);
 		    last if ($start == $end);
-		    if ($line[$start] =~ m'."\n$pat\n".'i) {
-			print OUT "$start:\t", $line[$start], "\n";
+		    if ($dbline[$start] =~ m'."\n$pat\n".'i) {
+			print OUT "$start:\t", $dbline[$start], "\n";
 			last;
 		    }
 		} ';
@@ -385,26 +449,38 @@ command		Execute as a perl statement.
 		    };
 		};
 		next; };
-	    {
-		package main;
-		eval $DB'cmd;
-	    }
-	    print OUT $@,"\n";
+	    &eval($cmd);
+	    print OUT "\n";
 	}
 	if ($post) {
-	    package main;
-	    eval $DB'post;  print DB'OUT $@;
+	    &eval($post);
 	}
     }
+    ($@, $!, $[, $,, $/, $\) = @saved;
+}
+
+sub save {
+    @saved = ($@, $!, $[, $,, $/, $\);
+    $[ = 0; $, = ""; $/ = "\n"; $\ = "";
+}
+
+sub eval {
+    eval "$usercontext $_[0]; &DB'save";
+    print OUT $@;
 }
 
 sub action {
     local($action) = @_;
     while ($action =~ s/\\$//) {
 	print OUT "+ ";
-	$action .= <IN>;
+	$action .= &gets;
     }
     $action;
+}
+
+sub gets {
+    local($.);
+    <IN>;
 }
 
 sub catch {
@@ -415,33 +491,19 @@ sub sub {
     push(@stack, $single);
     $single &= 1;
     $single |= 4 if $#stack == $deep;
-    local(@args) = @_;
-    for (@args) {
-	if (/^StB\000/ && length($_) == length($_main{'_main'})) {
-	    $_ = sprintf("%s",$_);
-	}
-	else {
-	    s/'/\\'/g;
-	    s/(.*)/'$1'/ unless /^-?[\d.]+$/;
-	}
-    }
-    push(@sub, $sub . '(' . join(', ', @args) . ') from ' . $line);
     if (wantarray) {
 	@i = &$sub;
-	--$#sub;
 	$single |= pop(@stack);
 	@i;
     }
     else {
 	$i = &$sub;
-	--$#sub;
 	$single |= pop(@stack);
 	$i;
     }
 }
 
 $single = 1;			# so it stops on first executable statement
-$max = $#line;
 @hist = ('?');
 $SIG{'INT'} = "DB'catch";
 $deep = 100;		# warning if stack gets this deep
@@ -449,13 +511,11 @@ $window = 10;
 $preview = 3;
 
 @stack = (0);
-@args = @ARGV;
+@ARGS = @ARGV;
 for (@args) {
     s/'/\\'/g;
     s/(.*)/'$1'/ unless /^-?[\d.]+$/;
 }
-push(@sub, 'main(' . join(', ', @args) . ")" );
-$sub = 'main';
 
 if (-f '.perldb') {
     do './.perldb';

@@ -1,7 +1,16 @@
 ''' Beginning of part 3
-''' $Header: perl_man.3,v 3.0.1.8 90/08/09 04:39:04 lwall Locked $
+''' $Header: perl_man.3,v 3.0.1.9 90/10/16 10:02:43 lwall Locked $
 '''
 ''' $Log:	perl.man.3,v $
+''' Revision 3.0.1.9  90/10/16  10:02:43  lwall
+''' patch29: you can now read into the middle string
+''' patch29: index and substr now have optional 3rd args
+''' patch29: added scalar reverse
+''' patch29: added scalar
+''' patch29: added SysV IPC
+''' patch29: added waitpid
+''' patch29: added sysread and syswrite
+''' 
 ''' Revision 3.0.1.8  90/08/09  04:39:04  lwall
 ''' patch19: added require operator
 ''' patch19: added truncate operator
@@ -417,11 +426,16 @@ Returns a random fractional number between 0 and the value of EXPR.
 (EXPR should be positive.)
 If EXPR is omitted, returns a value between 0 and 1.
 See also srand().
+.Ip "read(FILEHANDLE,SCALAR,LENGTH,OFFSET)" 8 5
 .Ip "read(FILEHANDLE,SCALAR,LENGTH)" 8 5
 Attempts to read LENGTH bytes of data into variable SCALAR from the specified
 FILEHANDLE.
-Returns the number of bytes actually read.
+Returns the number of bytes actually read, or undef if there was an error.
 SCALAR will be grown or shrunk to the length actually read.
+An OFFSET may be specified to place the read data at some other place
+than the beginning of the string.
+This call is actually implemented in terms of stdio's fread call.  To get
+a true read system call, see sysread.
 .Ip "readdir(DIRHANDLE)" 8 3
 .Ip "readdir DIRHANDLE" 8
 Returns the next directory entry for a directory opened by opendir().
@@ -547,13 +561,19 @@ That's the preferred method\*(--use of an explicit
 is a bit slower.)
 .Ip "reverse(LIST)" 8 4
 .Ip "reverse LIST" 8
-Returns an array value consisting of the elements of LIST in the opposite order.
+In an array context, returns an array value consisting of the elements
+of LIST in the opposite order.
+In a scalar context, returns a string value consisting of the bytes of
+the first element of LIST in the opposite order.
 .Ip "rewinddir(DIRHANDLE)" 8 5
 .Ip "rewinddir DIRHANDLE" 8
 Sets the current position to the beginning of the directory for the readdir() routine on DIRHANDLE.
+.Ip "rindex(STR,SUBSTR,POSITION)" 8 6
 .Ip "rindex(STR,SUBSTR)" 8 4
 Works just like index except that it
 returns the position of the LAST occurrence of SUBSTR in STR.
+If POSITION is specified, returns the last occurrence at or before that
+position.
 .Ip "rmdir(FILENAME)" 8 4
 .Ip "rmdir FILENAME" 8
 Deletes the directory specified by FILENAME if it is empty.
@@ -606,6 +626,9 @@ Examples:
 .fi
 (Note the use of $ instead of \|\e\| in the last example.  See section
 on regular expressions.)
+.Ip "scalar(EXPR)" 8 3
+Forces EXPR to be interpreted in a scalar context and returns the value
+of EXPR.
 .Ip "seek(FILEHANDLE,POSITION,WHENCE)" 8 3
 Randomly positions the file pointer for FILEHANDLE, just like the fseek()
 call of stdio.
@@ -691,6 +714,30 @@ Any of the bitmasks can also be undef.
 The timeout, if specified, is in seconds, which may be fractional.
 NOTE: not all implementations are capable of returning the $timeleft.
 If not, they always return $timeleft equal to the supplied $timeout.
+.Ip "semctl(ID,SEMNUM,CMD,ARG)" 8 4
+Calls the System V IPC function semctl.  If CMD is &IPC_STAT or
+&GETALL, then ARG must be a variable which will hold the returned
+semid_ds structure or semaphore value array.  Returns like ioctl: the
+undefined value for error, "0 but true" for zero, or the actual return
+value otherwise.
+.Ip "semget(KEY,NSEMS,SIZE,FLAGS)" 8 4
+Calls the System V IPC function semget.  Returns the semaphore id, or
+the undefined value if there is an error.
+.Ip "semop(KEY,OPSTRING)" 8 4
+Calls the System V IPC function semop to perform semaphore operations
+such as signaling and waiting.  OPSTRING must be a packed array of
+semop structures.  Each semop structure can be generated with
+'pack("sss", $semnum, $semop, $semflag)'.  The number of semaphore
+operations is implied by the length of OPSTRING.  Returns true if
+successful, or false if there is an error.  As an example, the
+following code waits on semaphore $semnum of semaphore id $semid:
+.nf
+
+	$semop = pack("sss", $semnum, -1, 0);
+	die "Semaphore trouble: $!\n" unless semop($semid, $semop);
+
+.fi
+To signal the semaphore, replace "-1" with "1".
 .Ip "send(SOCKET,MSG,FLAGS,TO)" 8 4
 .Ip "send(SOCKET,MSG,FLAGS)" 8
 Sends a message on a socket.
@@ -720,9 +767,27 @@ shortening the array by 1 and moving everything down.
 If there are no elements in the array, returns the undefined value.
 If ARRAY is omitted, shifts the @ARGV array in the main program, and the @_
 array in subroutines.
+(This is determined lexically.)
 See also unshift(), push() and pop().
 Shift() and unshift() do the same thing to the left end of an array that push()
 and pop() do to the right end.
+.Ip "shmctl(ID,CMD,ARG)" 8 4
+Calls the System V IPC function shmctl.  If CMD is &IPC_STAT, then ARG
+must be a variable which will hold the returned shmid_ds structure.
+Returns like ioctl: the undefined value for error, "0 but true" for
+zero, or the actual return value otherwise.
+.Ip "shmget(KEY,SIZE,FLAGS)" 8 4
+Calls the System V IPC function shmget.  Returns the shared memory
+segment id, or the undefined value if there is an error.
+.Ip "shmread(ID,VAR,POS,SIZE)" 8 4
+.Ip "shmwrite(ID,STRING,POS,SIZE)" 8
+Reads or writes the System V shared memory segment ID starting at
+position POS for size SIZE by attaching to it, copying in/out, and
+detaching from it.  When reading, VAR must be a variable which
+will hold the data read.  When writing, if STRING is too long,
+only SIZE bytes are used; if STRING is too short, nulls are
+written to fill out SIZE bytes.  Return true if successful, or
+false if there is an error.
 .Ip "shutdown(SOCKET,HOW)" 8 3
 Shuts down a socket connection in the manner indicated by HOW, which has
 the same interpretation as in the system call of the same name.
@@ -800,7 +865,7 @@ If LENGTH is omitted, removes everything from OFFSET onward.
 The following equivalencies hold (assuming $[ == 0):
 .nf
 
-	push(@a,$x,$y)\h'|3.5i'splice(@a,$#x+1,0,$x,$y)
+	push(@a,$x,$y)\h'|3.5i'splice(@a,$#a+1,0,$x,$y)
 	pop(@a)\h'|3.5i'splice(@a,-1)
 	shift(@a)\h'|3.5i'splice(@a,0,1)
 	unshift(@a,$x,$y)\h'|3.5i'splice(@a,0,0,$x,$y)
@@ -1009,9 +1074,11 @@ contain a match:
 
 .fi
 .Ip "substr(EXPR,OFFSET,LEN)" 8 2
+.Ip "substr(EXPR,OFFSET)" 8 2
 Extracts a substring out of EXPR and returns it.
 First character is at offset 0, or whatever you've set $[ to.
 If OFFSET is negative, starts that far from the end of the string.
+If LEN is omitted, returns everything to the end of the string.
 You can use the substr() function as an lvalue, in which case EXPR must
 be an lvalue.
 If you assign something shorter than LEN, the string will shrink, and
@@ -1048,6 +1115,16 @@ like numbers.
 	syscall(&SYS_write, fileno(STDOUT), "hi there\en", 9);
 
 .fi
+.Ip "sysread(FILEHANDLE,SCALAR,LENGTH,OFFSET)" 8 5
+.Ip "sysread(FILEHANDLE,SCALAR,LENGTH)" 8 5
+Attempts to read LENGTH bytes of data into variable SCALAR from the specified
+FILEHANDLE, using the system call read(2).
+It bypasses stdio, so mixing this with other kinds of reads may cause
+confusion.
+Returns the number of bytes actually read, or undef if there was an error.
+SCALAR will be grown or shrunk to the length actually read.
+An OFFSET may be specified to place the read data at some other place
+than the beginning of the string.
 .Ip "system(LIST)" 8 6
 .Ip "system LIST" 8
 Does exactly the same thing as \*(L"exec LIST\*(R" except that a fork
@@ -1058,6 +1135,15 @@ call.
 To get the actual exit value divide by 256.
 See also
 .IR exec .
+.Ip "syswrite(FILEHANDLE,SCALAR,LENGTH,OFFSET)" 8 5
+.Ip "syswrite(FILEHANDLE,SCALAR,LENGTH)" 8 5
+Attempts to write LENGTH bytes of data from variable SCALAR to the specified
+FILEHANDLE, using the system call write(2).
+It bypasses stdio, so mixing this with prints may cause
+confusion.
+Returns the number of bytes actually written, or undef if there was an error.
+An OFFSET may be specified to place the read data at some other place
+than the beginning of the string.
 .Ip "tell(FILEHANDLE)" 8 6
 .Ip "tell FILEHANDLE" 8 6
 .Ip "tell" 8
@@ -1245,9 +1331,28 @@ your program, to protect older programs.
 Waits for a child process to terminate and returns the pid of the deceased
 process, or -1 if there are no child processes.
 The status is returned in $?.
-If you expected a child and didn't find it, you probably had a call to
-system, a close on a pipe, or backticks between the fork and the wait.
-These constructs also do a wait and may have harvested your child process.
+.Ip "waitpid(PID,FLAGS)" 8 6
+Waits for a particular child process to terminate and returns the pid of the deceased
+process, or -1 if there is no such child process.
+The status is returned in $?.
+If you say
+.nf
+
+	require "sys/wait.h";
+	.\|.\|.
+	waitpid(-1,&WNOHANG);
+
+.fi
+then you can do a non-blocking wait for any process.  Non-blocking wait
+is only available on machines supporting either the
+.I waitpid (2)
+or
+.I wait4 (2)
+system calls.
+However, waiting for a particular pid with FLAGS of 0 is implemented
+everywhere.  (Perl emulates the system call by remembering the status
+values of processes that have exited but have not been harvested by the
+Perl script yet.)
 .Ip "wantarray" 8 4
 Returns true if the context of the currently executing subroutine
 is looking for an array value.

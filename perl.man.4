@@ -1,7 +1,10 @@
 ''' Beginning of part 4
-''' $Header: perl_man.4,v 3.0.1.10 90/08/09 04:47:35 lwall Locked $
+''' $Header: perl_man.4,v 3.0.1.11 90/10/16 10:04:28 lwall Locked $
 '''
 ''' $Log:	perl.man.4,v $
+''' Revision 3.0.1.11  90/10/16  10:04:28  lwall
+''' patch29: added @###.## fields to format
+''' 
 ''' Revision 3.0.1.10  90/08/09  04:47:35  lwall
 ''' patch19: added require operator
 ''' patch19: added numeric interpretation of $]
@@ -396,6 +399,8 @@ to do rudimentary multi-line text block filling.
 The length of the field is supplied by padding out the field
 with multiple <, >, or | characters to specify, respectively, left justification,
 right justification, or centering.
+As an alternate form of right justification,
+you may also use # characters (with an optional .) to specify a numeric field.
 If any of the values supplied for these fields contains a newline, only
 the text up to the newline is printed.
 The special field @* can be used for printing multi-line values.
@@ -1220,6 +1225,7 @@ may be redirected to.
 .PP
 If you want to modify the debugger, copy perldb.pl from the perl library
 to your current directory and modify it as necessary.
+(You'll also have to put -I. on your command line.)
 You can do some customization by setting up a .perldb file which contains
 initialization code.
 For instance, you could make aliases like these:

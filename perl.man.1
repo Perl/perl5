@@ -1,7 +1,12 @@
 .rn '' }`
-''' $Header: perl_man.1,v 3.0.1.7 90/08/09 04:24:03 lwall Locked $
+''' $Header: perl_man.1,v 3.0.1.8 90/10/15 18:16:19 lwall Locked $
 ''' 
 ''' $Log:	perl.man.1,v $
+''' Revision 3.0.1.8  90/10/15  18:16:19  lwall
+''' patch29: added DATA filehandle to read stuff after __END__
+''' patch29: added cmp and <=>
+''' patch29: added -M, -A and -C
+''' 
 ''' Revision 3.0.1.7  90/08/09  04:24:03  lwall
 ''' patch19: added -x switch to extract script from input trash
 ''' patch19: Added -c switch to do compilation only
@@ -451,7 +456,7 @@ The
 switch only controls the the disposal of leading garbage.
 The script must be terminated with __END__ if there is trailing garbage
 to be ignored (the script can process any or all of the trailing garbage
-via standard input if desired).
+via the DATA filehandle if desired).
 .Sh "Data Types and Objects"
 .PP
 .I Perl
@@ -622,10 +627,8 @@ They may only be used as separate tokens; they will not be interpolated
 into strings.
 In addition, the token __END__ may be used to indicate the logical end of the
 script before the actual end of file.
-Any following text is ignored (but if the script is being read from
-the standard input, then the rest of the input is available by reading
-from filehandle STDIN).
-The two control characters ^D and ^Z are synonyms for __END__.
+Any following text is ignored (but may be read via the DATA filehandle).
+The two control characters ^D and ^Z are synomyms for __END__.
 .PP
 A word that doesn't have any other interpretation in the grammar will be
 treated as if it had single quotes around it.
@@ -1305,6 +1308,10 @@ String greater than.
 String less than or equal.
 .Ip ge 8
 String greater than or equal.
+.Ip cmp 8
+String comparison, returning -1, 0, or 1.
+.Ip <=> 8
+Numeric comparison, returning -1, 0, or 1.
 .Ip =~ 8 2
 Certain operations search or modify the string \*(L"$_\*(R" by default.
 This operator makes that kind of operation work on some other string.
@@ -1423,6 +1430,9 @@ The operator may be any of:
 	\-t	Filehandle is opened to a tty.
 	\-T	File is a text file.
 	\-B	File is a binary file (opposite of \-T).
+	\-M	Age of file in days when script started.
+	\-A	Same for access time.
+	\-C	Same for inode change time.
 
 .fi
 The interpretation of the file permission operators \-r, \-R, \-w, \-W, \-x and \-X

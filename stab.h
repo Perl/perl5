@@ -1,4 +1,4 @@
-/* $Header: stab.h,v 3.0.1.3 90/08/09 05:18:42 lwall Locked $
+/* $Header: stab.h,v 3.0.1.4 90/10/16 10:33:08 lwall Locked $
  *
  *    Copyright (c) 1989, Larry Wall
  *
@@ -6,6 +6,10 @@
  *    as specified in the README file that comes with the perl 3.0 kit.
  *
  * $Log:	stab.h,v $
+ * Revision 3.0.1.4  90/10/16  10:33:08  lwall
+ * patch29: *foo now prints as *package'foo
+ * patch29: package behavior is now more consistent
+ * 
  * Revision 3.0.1.3  90/08/09  05:18:42  lwall
  * patch19: Added support for linked-in C subroutines
  * 
@@ -27,6 +31,7 @@ struct stabptrs {
     FCMD	*stbp_form;	/* format value */
     ARRAY	*stbp_array;	/* array value */
     HASH	*stbp_hash;	/* associative array value */
+    HASH	*stbp_stash;	/* symbol table for this stab */
     SUBR	*stbp_sub;	/* subroutine value */
     int		stbp_lastexpr;	/* used by nothing_in_common() */
     line_t	stbp_line;	/* line first declared at (for -w) */
@@ -57,6 +62,7 @@ HASH *stab_hash();
 				 ((STBP*)(stab->str_ptr))->stbp_hash : \
 				 ((STBP*)(hadd(stab)->str_ptr))->stbp_hash)
 #endif			/* Microport 2.4 hack */
+#define stab_stash(stab)	(((STBP*)(stab->str_ptr))->stbp_stash)
 #define stab_sub(stab)		(((STBP*)(stab->str_ptr))->stbp_sub)
 #define stab_lastexpr(stab)	(((STBP*)(stab->str_ptr))->stbp_lastexpr)
 #define stab_line(stab)		(((STBP*)(stab->str_ptr))->stbp_line)
@@ -93,7 +99,7 @@ struct sub {
     CMD		*cmd;
     int		(*usersub)();
     int		userindex;
-    char	*filename;
+    STAB	*filestab;
     long	depth;	/* >= 2 indicates recursive call */
     ARRAY	*tosave;
 };
@@ -117,3 +123,4 @@ EXT int delaymagic INIT(0);
 
 STAB *aadd();
 STAB *hadd();
+STAB *fstab();
