@@ -760,6 +760,9 @@ I32 dopoptosub _((I32 startingblock));
 I32 dopoptosub_at _((PERL_CONTEXT* cxstk, I32 startingblock));
 void save_lines _((AV *array, SV *sv));
 OP *doeval _((int gimme, OP** startop));
+I32 amagic_cmp _((SV *str1, SV *str2));
+I32 amagic_cmp_locale _((SV *str1, SV *str2));
+
 SV *mul128 _((SV *sv, U8 m));
 SV *is_an_int _((char *s, STRLEN l));
 int div128 _((SV *pnum, bool *done));
