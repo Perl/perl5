@@ -202,7 +202,7 @@ ok(30, $value eq $shifted );
 # UNSHIFT
 
 # empty list
-($FA ? unshift @h : $X->unshift) ;
+($FA ? unshift @h,() : $X->unshift) ;
 ok(31, ($FA ? @h == @data : $X->length == @data ));
 
 my @new_data = qw(add this to the start of the array) ;

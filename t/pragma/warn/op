@@ -884,3 +884,15 @@ in begin
 in mainline
 in end
 in end
+########
+# op.c
+my @x;
+use warnings 'misc' ;
+push(@x);
+unshift(@x);
+no warnings 'misc' ;
+push(@x);
+unshift(@x);
+EXPECT
+Useless use of push with no arguments at - line 4.
+Useless use of unshift with no arguments at - line 5.

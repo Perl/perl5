@@ -3949,6 +3949,15 @@ which means that Perl 5 will try to call the subroutine when the
 assignment is executed, which is probably not what you want.  (If it IS
 what you want, put an & in front.)
 
+=item Useless use of %s with no arguments
+
+(W misc) You used the push() or unshift() function with no arguments
+apart from the array, like C<push(@x)> or C<unshift(@foo)>. That won't
+usually have any effect on the array, so is completely useless. It's
+possible in principle that push(@tied_array) could have some effect
+if the array is tied to a class which implements a PUSH method. If so,
+you can write it as C<push(@tied_array,())> to avoid this warning.
+
 =back
 
 =cut
