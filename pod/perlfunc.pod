@@ -3689,6 +3689,8 @@ Unlike dbmopen(), the tie() function will not use or require a module
 for you--you need to do that explicitly yourself.  See L<DB_File>
 or the F<Config> module for interesting tie() implementations.
 
+For further details see L<perltie>, L<tied VARIABLE>.
+
 =item tied VARIABLE
 
 Returns a reference to the object underlying VARIABLE (the same value
