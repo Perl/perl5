@@ -5,7 +5,8 @@
 #
 
 my $file = "tf$$.txt";
-my $data = "rec0$/rec1$/rec2$/";
+$: = Tie::File::_default_recsep();
+my $data = "rec0$:rec1$:rec2$:";
 
 print "1..50\n";
 
@@ -138,11 +139,11 @@ print !defined($r) ? "ok $N\n" : "not ok $N \# return should have been undef\n";
 $N++;
 
 $r = splice(@a, 2, 1);
-print $r eq "pie$/" ? "ok $N\n" : "not ok $N \# return should have been 'pie'\n";
+print $r eq "pie$:" ? "ok $N\n" : "not ok $N \# return should have been 'pie'\n";
 $N++;
 
 $r = splice(@a, 0, 2);
-print $r eq "like$/" ? "ok $N\n" : "not ok $N \# return should have been 'like'\n";
+print $r eq "like$:" ? "ok $N\n" : "not ok $N \# return should have been 'like'\n";
 $N++;
 
 # (49-50) Test default arguments
@@ -164,7 +165,7 @@ sub init_file {
 # expected results are in @_
 sub check_result {
   my @x = @_;
-  chomp @r;
+  s/$:$// for @r;
   my $good = 1;
   $good = 0 unless @r == @x;
   for my $i (0 .. $#r) {

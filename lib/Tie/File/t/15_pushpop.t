@@ -13,7 +13,8 @@ use POSIX 'SEEK_SET';
 
 my $file = "tf$$.txt";
 1 while unlink $file;
-my $data = "rec0$/rec1$/rec2$/";
+$: = Tie::File::_default_recsep();
+my $data = "rec0$:rec1$:rec2$:";
 
 print "1..38\n";
 
@@ -34,28 +35,28 @@ check_contents($data);
 print $n == 3 ? "ok $N\n" : "not ok $N # size is $n, should be 3\n";
 $N++;
 
-$n = push @a, "rec3", "rec4\n";
-check_contents("$ {data}rec3$/rec4$/");
+$n = push @a, "rec3", "rec4$:";
+check_contents("$ {data}rec3$:rec4$:");
 print $n == 5 ? "ok $N\n" : "not ok $N # size is $n, should be 5\n";
 $N++;
 
 # Trivial push
-$n = push(@a, ());
-check_contents("$ {data}rec3$/rec4$/");
+$n = push @a, ();
+check_contents("$ {data}rec3$:rec4$:");
 print $n == 5 ? "ok $N\n" : "not ok $N # size is $n, should be 5\n";
 $N++;
 
 # (12-20) POP tests
 $n = pop @a;
-check_contents("$ {data}rec3$/");
-print $n eq "rec4$/" ? "ok $N\n" : "not ok $N # last rec is $n, should be rec4\n";
+check_contents("$ {data}rec3$:");
+print $n eq "rec4$:" ? "ok $N\n" : "not ok $N # last rec is $n, should be rec4\n";
 $N++;
 
 # Presumably we have already tested this to death
 splice(@a, 1, 3);
 $n = pop @a;
 check_contents("");
-print $n eq "rec0$/" ? "ok $N\n" : "not ok $N # last rec is $n, should be rec0\n";
+print $n eq "rec0$:" ? "ok $N\n" : "not ok $N # last rec is $n, should be rec0\n";
 $N++;
 
 $n = pop @a;
@@ -70,28 +71,28 @@ check_contents($data);
 print $n == 3 ? "ok $N\n" : "not ok $N # size is $n, should be 3\n";
 $N++;
 
-$n = unshift @a, "rec3", "rec4\n";
-check_contents("rec3$/rec4$/$data");
+$n = unshift @a, "rec3", "rec4$:";
+check_contents("rec3$:rec4$:$data");
 print $n == 5 ? "ok $N\n" : "not ok $N # size is $n, should be 5\n";
 $N++;
 
 # Trivial unshift
-$n = unshift(@a, ());
-check_contents("rec3$/rec4$/$data");
+$n = unshift @a, ();
+check_contents("rec3$:rec4$:$data");
 print $n == 5 ? "ok $N\n" : "not ok $N # size is $n, should be 5\n";
 $N++;
 
 # (30-38) SHIFT tests
 $n = shift @a;
-check_contents("rec4$/$data");
-print $n eq "rec3$/" ? "ok $N\n" : "not ok $N # last rec is $n, should be rec3\n";
+check_contents("rec4$:$data");
+print $n eq "rec3$:" ? "ok $N\n" : "not ok $N # last rec is $n, should be rec3\n";
 $N++;
 
 # Presumably we have already tested this to death
 splice(@a, 1, 3);
 $n = shift @a;
 check_contents("");
-print $n eq "rec4$/" ? "ok $N\n" : "not ok $N # last rec is $n, should be rec4\n";
+print $n eq "rec4$:" ? "ok $N\n" : "not ok $N # last rec is $n, should be rec4\n";
 $N++;
 
 $n = shift @a;
@@ -114,10 +115,17 @@ sub check_contents {
   if ($a eq $x) {
     print "ok $N\n";
   } else {
-    s{$/}{\\n}g for $a, $x;
-    print "not ok $N\n# expected <$x>, got <$a>\n";
+    ctrlfix(my $msg = "# expected <$x>, got <$a>");
+    print "not ok $N\n$msg\n";
   }
   $N++;
+}
+
+sub ctrlfix {
+  for (@_) {
+    s/\n/\\n/g;
+    s/\r/\\r/g;
+  }
 }
 
 END {

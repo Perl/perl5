@@ -1422,6 +1422,7 @@ lib/Tie/Array/splice.t		Test for Tie::Array::SPLICE
 lib/Tie/Array/std.t		Test for Tie::StdArray
 lib/Tie/Array/stdpush.t		Test for Tie::StdArray
 lib/Tie/File.pm                 Files as tied arrays.
+lib/Tie/File/t/00_version.t     Test for Tie::File.
 lib/Tie/File/t/01_gen.t         Test for Tie::File.
 lib/Tie/File/t/02_fetchsize.t   Test for Tie::File.
 lib/Tie/File/t/03_longfetch.t   Test for Tie::File.
@@ -1439,6 +1440,10 @@ lib/Tie/File/t/14_lock.t        Test for Tie::File.
 lib/Tie/File/t/15_pushpop.t     Test for Tie::File.
 lib/Tie/File/t/16_handle.t      Test for Tie::File.
 lib/Tie/File/t/17_misc_meth.t   Test for Tie::File.
+lib/Tie/File/t/18_rs_fixrec.t   Test for Tie::File.
+lib/Tie/File/t/19_cache.t       Test for Tie::File.
+lib/Tie/File/t/20_cache_full.t  Test for Tie::File.
+lib/Tie/File/t/21_win32.t       Test for Tie::File.
 lib/Tie/Handle.pm		Base class for tied handles
 lib/Tie/Handle/stdhandle.t	Test for Tie::StdHandle
 lib/Tie/Hash.pm			Base class for tied hashes

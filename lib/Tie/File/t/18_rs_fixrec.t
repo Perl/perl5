@@ -2,7 +2,7 @@
 
 use POSIX 'SEEK_SET';
 my $file = "tf$$.txt";
-$: = Tie::File::_default_recsep();
+$/ = "blah";
 
 print "1..5\n";
 
@@ -15,11 +15,11 @@ print $o ? "ok $N\n" : "not ok $N\n";
 $N++;
 
 $a[0] = 'rec0';
-check_contents("rec0$:");
-$a[1] = "rec1$:";
-check_contents("rec0$:rec1$:");
-$a[2] = "rec2$:$:";             # should we detect this?
-check_contents("rec0$:rec1$:rec2$:$:");
+check_contents("rec0blah");
+$a[1] = "rec1blah";
+check_contents("rec0blahrec1blah");
+$a[2] = "rec2blahblah";             # should we detect this?
+check_contents("rec0blahrec1blahrec2blahblah");
 
 sub check_contents {
   my $x = shift;

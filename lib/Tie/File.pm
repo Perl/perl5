@@ -5,7 +5,7 @@ use POSIX 'SEEK_SET';
 use Fcntl 'O_CREAT', 'O_RDWR', 'LOCK_EX';
 require 5.005;
 
-$VERSION = "0.17";
+$VERSION = "0.19";
 
 # Idea: The object will always contain an array of byte offsets
 # this will be filled in as is necessary and convenient.
@@ -19,7 +19,10 @@ $VERSION = "0.17";
 
 # Record numbers start at ZERO.
 
-my $DEFAULT_CACHE_SIZE = 1<<21;    # 2 megabytes
+my $DEFAULT_MEMORY_SIZE = 1<<21;    # 2 megabytes
+
+my %good_opt = map {$_ => 1, "-$_" => 1} 
+               qw(memory dw_size mode recsep discipline);
 
 sub TIEARRAY {
   if (@_ % 2 != 0) {
@@ -29,13 +32,28 @@ sub TIEARRAY {
 
   # transform '-foo' keys into 'foo' keys
   for my $key (keys %opts) {
+    unless ($good_opt{$key}) {
+      croak("$pack: Unrecognized option '$key'\n");
+    }
     my $okey = $key;
     if ($key =~ s/^-+//) {
       $opts{$key} = delete $opts{$okey};
     }
   }
 
-  $opts{cachesize} ||= $DEFAULT_CACHE_SIZE;
+  unless (defined $opts{memory}) {
+    # default is the larger of the default cache size and the 
+    # deferred-write buffer size (if specified)
+    $opts{memory} = $DEFAULT_MEMORY_SIZE;
+    $opts{memory} = $opts{dw_size} 
+      if defined $opts{dw_size} && $opts{dw_size} > $DEFAULT_MEMORY_SIZE;
+  }
+  $opts{dw_size} = $opts{memory} unless defined $opts{dw_size};
+  if ($opts{dw_size} > $opts{memory}) {
+      croak("$pack: dw_size may not be larger than total memory allocation\n");
+  }
+  $opts{deferred} = {};         # no records presently deferred
+  $opts{deferred_s} = 0;        # count of total bytes in ->{deferred}
 
   # the cache is a hash instead of an array because it is likely to be
   # sparsely populated
@@ -45,7 +63,9 @@ sub TIEARRAY {
 
   $opts{offsets} = [0];
   $opts{filename} = $file;
-  $opts{recsep} = $/ unless defined $opts{recsep};
+  unless (defined $opts{recsep}) { 
+    $opts{recsep} = _default_recsep();
+  }
   $opts{recseplen} = length($opts{recsep});
   if ($opts{recseplen} == 0) {
     croak "Empty record separator not supported by $pack";
@@ -67,6 +87,12 @@ sub TIEARRAY {
     binmode $fh;
   }
   { my $ofh = select $fh; $| = 1; select $ofh } # autoflush on write
+  if (defined $opts{discipline} && $] >= 5.006) {
+    # This avoids a compile-time warning under 5.005
+    eval 'binmode($fh, $opts{discipline})';
+    croak $@ if $@ =~ /unknown discipline/i;
+    die if $@;
+  }
   $opts{fh} = $fh;
 
   bless \%opts => $pack;
@@ -89,6 +115,19 @@ sub FETCH {
   my $fh = $self->{FH};
   $self->_seek($n);             # we can do this now that offsets is populated
   my $rec = $self->_read_record;
+
+# If we happen to have just read the first record, check to see if
+# the length of the record matches what 'tell' says.  If not, Tie::File
+# won't work, and should drop dead.
+#
+#  if ($n == 0 && defined($rec) && tell($self->{fh}) != length($rec)) {
+#    if (defined $self->{discipline}) {
+#      croak "I/O discipline $self->{discipline} not supported";
+#    } else {
+#      croak "File encoding not supported";
+#    }
+#  }
+
   $self->_cache_insert($n, $rec) if defined $rec;
   $rec;
 }
@@ -98,9 +137,7 @@ sub STORE {
 
   $self->_fixrecs($rec);
 
-  # TODO: what should we do about the cache?  Install the new record
-  # in the cache only if the old version of the same record was
-  # already there?
+  return $self->_store_deferred($n, $rec) if $self->{defer};
 
   # We need this to decide whether the new record will fit
   # It incidentally populates the offsets table 
@@ -109,8 +146,12 @@ sub STORE {
 
   # _check_cache promotes record $n to MRU.  Is this correct behavior?
   if (my $cached = $self->_check_cache($n)) {
+    my $len_diff = length($rec) - length($cached);
     $self->{cache}{$n} = $rec;
-    $self->{cached} += length($rec) - length($cached);
+    $self->{cached} += $len_diff;
+    $self->_cache_flush 
+      if $len_diff > 0
+        && $self->{deferred_s} + $self->{cached} > $self->{memory};
   }
 
   if (not defined $oldrec) {
@@ -120,6 +161,7 @@ sub STORE {
   }
   my $len_diff = length($rec) - length($oldrec);
 
+  # length($oldrec) here is not consistent with text mode  TODO XXX BUG
   $self->_twrite($rec, $self->{offsets}[$n], length($oldrec));
 
   # now update the offsets
@@ -127,6 +169,21 @@ sub STORE {
   # to the end
   for (@{$self->{offsets}}[$n+1 .. $#{$self->{offsets}}]) {
     $_ += $len_diff;
+  }
+}
+
+sub _store_deferred {
+  my ($self, $n, $rec) = @_;
+  $self->_uncache($n);
+  my $old_deferred = $self->{deferred}{$n};
+  $self->{deferred}{$n} = $rec;
+  $self->{deferred_s} += length($rec);
+  $self->{deferred_s} -= length($old_deferred) if defined $old_deferred;
+  if ($self->{deferred_s} > $self->{dw_size}) {
+    $self->flush;
+    $self->defer;               # flush clears the 'defer' flag
+  } elsif ($self->{deferred_s} + $self->{cached} > $self->{memory}) {
+    $self->_cache_flush;
   }
 }
 
@@ -154,6 +211,7 @@ sub STORESIZE {
   $self->_seek($len);
   $self->_chop_file;
   $#{$self->{offsets}} = $len;
+#  $self->{offsets}[0] = 0;      # in case we just chopped this
   my @cached = grep $_ >= $len, keys %{$self->{cache}};
   $self->_uncache(@cached);
 }
@@ -222,6 +280,16 @@ sub EXISTS {
 }
 
 sub SPLICE {
+  my $self = shift;
+  $self->_flush if $self->{defer};
+  $self->_splice(@_);
+}
+
+sub DESTROY {
+  $self->flush if $self->{defer};
+}
+
+sub _splice {
   my ($self, $pos, $nrecs, @data) = @_;
   my @result;
 
@@ -308,11 +376,19 @@ sub SPLICE {
   # moved records - records past the site of the change
   # need to be renumbered
   # Maybe merge this with the previous block?
-  for (keys %{$self->{cache}}) {
-    next unless $_ >= $pos + $nrecs;
-    $self->{cache}{$_-$nrecs+@data} = delete $self->{cache}{$_};
+  {
+    my %adjusted;
+    for (keys %{$self->{cache}}) {
+      next unless $_ >= $pos + $nrecs;
+      $adjusted{$_-$nrecs+@data} = delete $self->{cache}{$_};
+    }
+    @{$self->{cache}}{keys %adjusted} = values %adjusted;
+#    for (keys %{$self->{cache}}) {
+#      next unless $_ >= $pos + $nrecs;
+#      $self->{cache}{$_-$nrecs+@data} = delete $self->{cache}{$_};
+#    }
   }
-
+    
   # fix the LRU queue
   my(@new, @changed);
   for (@{$self->{lru}}) {
@@ -325,6 +401,11 @@ sub SPLICE {
     }
   }
   @{$self->{lru}} = (@new, @changed);
+
+  # Now there might be too much data in the cache, if we spliced out
+  # some short records and spliced in some long ones.  If so, flush
+  # the cache.
+  $self->_cache_flush;
 
   # Yes, the return value of 'splice' *is* actually this complicated
   wantarray ? @result : @result ? $result[-1] : undef;
@@ -460,13 +541,13 @@ sub _cache_insert {
   my ($self, $n, $rec) = @_;
 
   # Do not cache records that are too big to fit in the cache.
-  return unless length $rec <= $self->{cachesize};
+  return unless length $rec <= $self->{memory};
 
   $self->{cache}{$n} = $rec;
   $self->{cached} += length $rec;
   push @{$self->{lru}}, $n;     # most-recently-used is at the END
 
-  $self->_cache_flush if $self->{cached} > $self->{cachesize};
+  $self->_cache_flush if $self->{cached} > $self->{memory};
 }
 
 sub _uncache {
@@ -492,10 +573,10 @@ sub _check_cache {
 
 sub _cache_flush {
   my ($self) = @_;
-  while ($self->{cached} > $self->{cachesize}) {
+  while ($self->{cached} + $self->{deferred_s} > $self->{memory}) {
     my $lru = shift @{$self->{lru}};
-    $self->{cached} -= length $lru;
-    delete $self->{cache}{$lru};
+    my $rec = delete $self->{cache}{$lru};
+    $self->{cached} -= length $rec;
   }
 }
 
@@ -551,18 +632,76 @@ sub flock {
   flock $fh, $op;
 }
 
+# Defer writes
+sub defer {
+  my $self = shift;
+  $self->{defer} = 1;
+}
+
+# Flush deferred writes
+#
+# This could be better optimized to write the file in one pass, instead
+# of one pass per block of records.  But that will require modifications
+# to _twrite, so I should have a good _twite test suite first.
+sub flush {
+  my $self = shift;
+
+  $self->_flush;
+  $self->{defer} = 0;
+}
+
+sub _flush {
+  my $self = shift;
+  my @writable = sort {$a<=>$b} (keys %{$self->{deferred}});
+  
+  while (@writable) {
+    # gather all consecutive records from the front of @writable
+    my $first_rec = shift @writable;
+    my $last_rec = $first_rec+1;
+    ++$last_rec, shift @writable while @writable && $last_rec == $writable[0];
+    --$last_rec;
+    $self->_fill_offsets_to($last_rec);
+    $self->_extend_file_to($last_rec);
+    $self->_splice($first_rec, $last_rec-$first_rec+1, 
+                   @{$self->{deferred}}{$first_rec .. $last_rec});
+  }
+
+  $self->discard;               # clear out defered-write-cache
+}
+
+# Discard deferred writes
+sub discard {
+  my $self = shift;
+  undef $self->{deferred};
+  $self->{deferred_s} = 0;
+  $self->{defer} = 0;
+}
+
+# Not yet implemented
+sub autodefer { }
+
+sub _default_recsep {
+  my $recsep = $/;
+  if ($^O eq 'MSWin32') {
+    # Windows users expect files to be terminated with \r\n
+    # But $/ is set to \n instead
+    # Note that this also transforms \n\n into \r\n\r\n.
+    # That is a feature.
+    $recsep =~ s/\n/\r\n/g;
+  }
+  $recsep;
+}
+
 # Given a file, make sure the cache is consistent with the
 # file contents
 sub _check_integrity {
   my ($self, $file, $warn) = @_;
   my $good = 1; 
 
-
   if (not defined $self->{offsets}[0]) {
     $warn && print STDERR "# offset 0 is missing!\n";
     $good = 0;
   } elsif ($self->{offsets}[0] != 0) {
-    $warn && print STDERR "# offset 0 is missing!\n";
     $warn && print STDERR "# rec 0: offset <$self->{offsets}[0]> s/b 0!\n";
     $good = 0;
   }
@@ -589,15 +728,15 @@ sub _check_integrity {
     }
   }
 
-  my $cachesize = 0;
+  my $memory = 0;
   while (my ($n, $r) = each %{$self->{cache}}) {
-    $cachesize += length($r);
+    $memory += length($r);
     next if $n+1 <= $.;         # checked this already
     $warn && print STDERR "# spurious caching of record $n\n";
     $good = 0;
   }
-  if ($cachesize != $self->{cached}) {
-    $warn && print STDERR "# cache size is $self->{cached}, should be $cachesize\n";
+  if ($memory != $self->{cached}) {
+    $warn && print STDERR "# cache size is $self->{cached}, should be $memory\n";
     $good = 0;
   }
 
@@ -605,7 +744,7 @@ sub _check_integrity {
   for (@{$self->{lru}}) {
     $seen{$_}++;
     if (not exists $self->{cache}{$_}) {
-      print "# $_ is mentioned in the LRU queue, but not in the cache\n";
+      $warn && print "# $_ is mentioned in the LRU queue, but not in the cache\n";
       $good = 0;
     }
   }
@@ -613,7 +752,7 @@ sub _check_integrity {
   if (@duplicate) {
     my $records = @duplicate == 1 ? 'Record' : 'Records';
     my $appear  = @duplicate == 1 ? 'appears' : 'appear';
-    print "# $records @duplicate $appear multiple times in LRU queue: @{$self->{lru}}\n";
+    $warn && print "# $records @duplicate $appear multiple times in LRU queue: @{$self->{lru}}\n";
     $good = 0;
   }
   for (keys %{$self->{cache}}) {
@@ -634,7 +773,7 @@ Tie::File - Access the lines of a disk file via a Perl array
 
 =head1 SYNOPSIS
 
-	# This file documents Tie::File version 0.17
+	# This file documents Tie::File version 0.19
 
 	tie @array, 'Tie::File', filename or die ...;
 
@@ -666,17 +805,21 @@ gigantic files.
 
 Changes to the array are reflected in the file immediately.
 
+Lazy people may now stop reading the manual.
+
 =head2 C<recsep>
 
 What is a 'record'?  By default, the meaning is the same as for the
 C<E<lt>...E<gt>> operator: It's a string terminated by C<$/>, which is
-probably C<"\n">.  You may change the definition of "record" by
-supplying the C<recsep> option in the C<tie> call:
-
+probably C<"\n">.  (Minor exception: on dos and Win32 systems, a
+'record' is a string terminated by C<"\r\n">.)  You may change the
+definition of "record" by supplying the C<recsep> option in the C<tie>
+call:
 
 	tie @array, 'Tie::File', $file, recsep => 'es';
 
-This says that records are delimited by the string C<es>.  If the file contained the following data:
+This says that records are delimited by the string C<es>.  If the file
+contained the following data:
 
 	Curse these pesky flies!\n
 
@@ -686,9 +829,6 @@ then the C<@array> would appear to have four elements:
 	"e pes"
 	"ky flies"
 	"!\n"
-
-Windows users will probably want to use C<recsep =E<gt> "\r\n"> to get
-files terminated with the usual CRLF sequence.
 
 An undefined value is not permitted as a record separator.  Perl's
 special "paragraph mode" semantics (E<agrave> la C<$/ = "">) are not
@@ -741,28 +881,34 @@ For example:
 
 Opening the data file in write-only or append mode is not supported.
 
-=head2 C<cachesize>
+=head2 C<memory>
+
+This is an (inexact) upper limit on the amount of memory that
+C<Tie::File> will consume at any time while managing the file.  
+At present, this is used as a bound on the size of the read cache.
 
 Records read in from the file are cached, to avoid having to re-read
 them repeatedly.  If you read the same record twice, the first time it
 will be stored in memory, and the second time it will be fetched from
-memory.
+the I<read cache>.  The amount of data in the read cache will not
+exceed the value you specified for C<memory>.  If C<Tie::File> wants
+to cache a new record, but the read cache is full, it will make room
+by expiring the least-recently visited records from the read cache.
 
-The cache has a bounded size; when it exceeds this size, the
-least-recently visited records will be purged from the cache.  The
-default size is 2Mib.  You can adjust the amount of space used for the
-cache by supplying the C<cachesize> option.  The argument is the desired cache size, in bytes.
+The default memory limit is 2Mib.  You can adjust the maximum read
+cache size by supplying the C<memory> option.  The argument is the
+desired cache size, in bytes.
 
 	# I have a lot of memory, so use a large cache to speed up access
-	tie @array, 'Tie::File', $file, cachesize => 20_000_000;
+	tie @array, 'Tie::File', $file, memory => 20_000_000;
 
-Setting the cache size to 0 will inhibit caching; records will be
+Setting the memory limit to 0 will inhibit caching; records will be
 fetched from disk every time you examine them.
 
 =head2 Option Format
 
 C<-mode> is a synonym for C<mode>.  C<-recsep> is a synonym for
-C<recsep>.  C<-cachesize> is a synonym for C<cachesize>.  You get the
+C<recsep>.  C<-memory> is a synonym for C<memory>.  You get the
 idea.
 
 =head1 Public Methods
@@ -772,7 +918,9 @@ The C<tie> call returns an object, say C<$o>.  You may call
 	$rec = $o->FETCH($n);
 	$o->STORE($n, $rec);
 
-to fetch or store the record at line C<$n>, respectively.  The only other public method in this package is:
+to fetch or store the record at line C<$n>, respectively; similarly
+the other tied array methods.  (See L<perltie> for details.)  You may
+also call the following methods on this object:
 
 =head2 C<flock>
 
@@ -817,57 +965,50 @@ C<sysopen>, you may use:
 Handles that were opened write-only won't work.  Handles that were
 opened read-only will work as long as you don't try to write to them.
 Handles must be attached to seekable sources of data---that means no
-pipes or sockets.  If you try to supply a non-seekable handle, the
-C<tie> call will try to abort your program.  This feature is not yet
-supported under VMS.
+pipes or sockets.  If you supply a non-seekable handle, the C<tie>
+call will try to abort your program.
 
 =head1 CAVEATS
 
 (That's Latin for 'warnings'.)
 
-=head2 Efficiency Note
+=over 4
+
+=item *
+
+This is BETA RELEASE SOFTWARE.  It may have bugs.  See the discussion
+below about the (lack of any) warranty.
+
+=item * 
 
 Every effort was made to make this module efficient.  Nevertheless,
 changing the size of a record in the middle of a large file will
-always be slow, because everything after the new record must be moved.
+always be fairly slow, because everything after the new record must be
+moved.
 
-In particular, note that:
+In particular, note that the following innocent-looking loop has very
+bad behavior:
 
-	# million-line file
-	for (@file_array) {
-	  $_ .= 'x';
-	}
+        # million-line file
+        for (@file_array) {
+          $_ .= 'x';
+        }
 
-is likely to be very slow, because the first iteration must relocate
-lines 1 through 999,999; the second iteration must relocate lines 2
-through 999,999, and so on.  The relocation is done using block
-writes, however, so it's not as slow as it might be.
+This is likely to be very slow, because the first iteration must
+relocate lines 1 through 999,999; the second iteration must relocate
+lines 2 through 999,999, and so on.  The relocation is done using
+block writes, however, so it's not as slow as it might be.
 
 A soon-to-be-released version of this module will provide a mechanism
 for getting better performance in such cases, by deferring the writing
-until it can be done all at once.
+until it can be done all at once.  This deferred writing feature might
+be enabled automagically if C<Tie::File> guesses that you are about to write many consecutive records.  To disable this feature, use 
 
-=head2 Efficiency Note 2
+	(tied @o)->autodefer(0);
 
-Not every effort was made to make this module as efficient as
-possible.  C<FETCHSIZE> should use binary search instead of linear
-search.  The cache's LRU queue should be a heap instead of a list.
-These defects are probably minor; in any event, they will be fixed in
-a later version of the module.
+(At present, this call does nothing.)
 
-=head2 Efficiency Note 3
-
-The author has supposed that since this module is concerned with file
-I/O, almost all normal use of it will be heavily I/O bound, and that
-the time to maintain complicated data structures inside the module
-will be dominated by the time to actually perform the I/O.  This
-suggests, for example, that an LRU read-cache is a good tradeoff,
-even if it requires substantial adjustment following a C<splice>
-operation.
-
-=head1 CAVEATS
-
-(That's Latin for 'warnings'.)
+=item *
 
 The behavior of tied arrays is not precisely the same as for regular
 arrays.  For example:
@@ -882,6 +1023,110 @@ see the record separator (typically, $a[10] will appear to contain
 There are other minor differences, but in general, the correspondence
 is extremely close.
 
+=item *
+
+Not quite every effort was made to make this module as efficient as
+possible.  C<FETCHSIZE> should use binary search instead of linear
+search.  The cache's LRU queue should be a heap instead of a list.
+These defects are probably minor; in any event, they will be fixed in
+a later version of the module.
+
+=item *
+
+The author has supposed that since this module is concerned with file
+I/O, almost all normal use of it will be heavily I/O bound, and that
+the time to maintain complicated data structures inside the module
+will be dominated by the time to actually perform the I/O.  This
+suggests, for example, that an LRU read-cache is a good tradeoff,
+even if it requires substantial adjustment following a C<splice>
+operation.
+
+=back
+
+=head1 WHAT ABOUT C<DB_File>?
+
+C<DB_File>'s C<DB_RECNO> feature does something similar to
+C<Tie::File>, but there are a number of reasons that you might prefer
+C<Tie::File>.  C<DB_File> is a great piece of software, but the
+C<DB_RECNO> part is less great than the rest of it.
+
+=over 4
+
+=item *
+
+C<DB_File> reads your entire file into memory, modifies it in memory,
+and the writes out the entire file again when you untie the file.
+This is completely impractical for large files.
+
+C<Tie::File> does not do any of those things.  It doesn't try to read
+the entire file into memory; instead it uses a lazy approach and
+caches recently-used records.  The cache size is strictly bounded by
+the C<memory> option.  DB_File's C<-E<gt>{cachesize}> doesn't prevent
+your process from blowing up when reading a big file.
+
+=item *
+
+C<DB_File> has an extremely poor writing strategy.  If you have a
+ten-megabyte file and tie it with C<DB_File>, and then use
+
+        $a[0] =~ s/PERL/Perl/;
+
+C<DB_file> will then read the entire ten-megabyte file into memory, do
+the change, and write the entire file back to disk, reading ten
+megabytes and writing ten megabytes.  C<Tie::File> will read and write
+only the first record.
+
+If you have a million-record file and tie it with C<DB_File>, and then
+use
+
+        $a[999998] =~ s/Larry/Larry Wall/;
+
+C<DB_File> will read the entire million-record file into memory, do
+the change, and write the entire file back to disk.  C<Tie::File> will
+only rewrite records 999998 and 999999.  During the writing process,
+it will never have more than a few kilobytes of data in memory at any
+time, even if the two records are very large.
+
+=item *
+
+Since changes to C<DB_File> files only appear when you do C<untie>, it
+can be inconvenient to arrange for concurrent access to the same file
+by two or more processes.  Each process needs to call C<$db-E<gt>sync>
+after every write.  When you change a C<Tie::File> array, the changes
+are reflected in the file immediately; no explicit C<-E<gt>sync> call
+is required.  (The forthcoming "deferred writing" mode will allow you
+to request that writes be held in memory until explicitly C<sync>'ed.)
+
+=item *
+
+C<DB_File> is only installed by default if you already have the C<db>
+library on your system; C<Tie::File> is pure Perl and is installed by
+default no matter what.  Starting with Perl 5.7.3 you can be
+absolutely sure it will be everywhere.  You will never have that
+surety with C<DB_File>.  If you don't have C<DB_File> yet, it requires
+a C compiler.  You can install C<Tie::File> from CPAN in five minutes
+with no compiler.
+
+=item *
+
+C<DB_File> is written in C, so if you aren't allowed to install
+modules on your system, it is useless.  C<Tie::File> is written in Perl,
+so even if you aren't allowed to install modules, you can look into
+the source code, see how it works, and copy the subroutines or the
+ideas from the subroutines directly into your own Perl program.
+
+=item *
+
+Except in very old, unsupported versions, C<DB_File>'s free license
+requires that you distribute the source code for your entire
+application.  If you are not able to distribute the source code for
+your application, you must negotiate an alternative license from
+Sleepycat, possibly for a fee.  Tie::File is under the Perl Artistic
+license and can be distributed free under the same terms as Perl
+itself.
+
+=back
+
 =head1 AUTHOR
 
 Mark Jason Dominus
@@ -894,7 +1139,7 @@ C<mjd-perl-tiefile-subscribe@plover.com>.
 
 =head1 LICENSE
 
-C<Tie::File> version 0.17 is copyright (C) 2002 Mark Jason Dominus.
+C<Tie::File> version 0.19 is copyright (C) 2002 Mark Jason Dominus.
 
 This library is free software; you may redistribute it and/or modify
 it under the same terms as Perl itself.
@@ -922,7 +1167,7 @@ For licensing inquiries, contact the author at:
 
 =head1 WARRANTY
 
-C<Tie::File> version 0.17 comes with ABSOLUTELY NO WARRANTY.
+C<Tie::File> version 0.19 comes with ABSOLUTELY NO WARRANTY.
 For details, see the license.
 
 =head1 THANKS
@@ -933,14 +1178,18 @@ supportive, and competent.  (Usually the rule is "choose any one.")
 Also big thanks to Abhijit Menon-Sen for all of the same things.
 
 Special thanks to Craig Berry (for VMS portability help), Randy Kobes
-(for Win32 portability help), the rest of the CPAN testers (for
-testing).
+(for Win32 portability help), Clinton Pierce and Autrijus Tang (for
+heroic eleventh-hour Win32 testing above and beyond the call of duty),
+and the rest of the CPAN testers (for testing generally).
 
 More thanks to:
+Edward Avis /
 Gerrit Haase /
+Nikola Knezevic /
 Nick Ing-Simmons /
 Tassilo von Parseval /
 H. Dieter Pearcey /
+Slaven Rezic /
 Peter Somu /
 Tels
 
@@ -948,13 +1197,10 @@ Tels
 
 Test DELETE machinery more carefully.
 
-More tests.  (Configuration options, cache flushery.  _twrite should
-be tested separately, because there are a lot of weird special cases
-lurking in there.)
+More tests.  (C<mode> option.  _twrite should be tested separately,
+because there are a lot of weird special cases lurking in there.)
 
 More tests.  (Stuff I didn't think of yet.)
-
-Deferred writing. (!!!)
 
 Paragraph mode?
 
@@ -963,6 +1209,15 @@ More tests.
 Fixed-length mode.
 
 Maybe an autolocking mode?
+
+Finish deferred writing.
+
+Autodeferment.
+
+Record locking with fcntl()?  Then you might support an undo log and
+get real transactions.  What a coup that would be.
+
+Leave-blanks mode
 
 =cut
 

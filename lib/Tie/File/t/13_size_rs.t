@@ -73,12 +73,19 @@ sub check_contents {
   if ($a eq $x) {
     print "ok $N\n";
   } else {
-    s{$/}{\\n}g for $a, $x;
-    print "not ok $N\n# expected <$x>, got <$a>\n";
+    ctrlfix(my $msg = "# expected <$x>, got <$a>");
+    print "not ok $N\n$msg\n";
   }
   $N++;
 }
 
+
+sub ctrlfix {
+  for (@_) {
+    s/\n/\\n/g;
+    s/\r/\\r/g;
+  }
+}
 
 END {
   undef $o;

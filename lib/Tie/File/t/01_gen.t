@@ -2,7 +2,7 @@
 
 my $file = "tf$$.txt";
 
-print "1..56\n";
+print "1..62\n";
 
 my $N = 1;
 use Tie::File;
@@ -11,6 +11,8 @@ print "ok $N\n"; $N++;
 my $o = tie @a, 'Tie::File', $file;
 print $o ? "ok $N\n" : "not ok $N\n";
 $N++;
+
+$: = $o->{recsep};
 
 # 3-5 create
 $a[0] = 'rec0';
@@ -60,13 +62,18 @@ check_contents("sh0", "sh1", "short2", "", "rec4");
 $a[3] = 'rec3';
 check_contents("sh0", "sh1", "short2", "rec3", "rec4");
 
+# (57-59) zero out file
+@a = ();
+check_contents();
 
-# try inserting a record into the middle of an empty file
+# (60-62) insert into the middle of an empty file
+$a[3] = "rec3";
+check_contents("", "", "", "rec3");
 
 use POSIX 'SEEK_SET';
 sub check_contents {
   my @c = @_;
-  my $x = join $/, @c, '';
+  my $x = join $:, @c, '';
   local *FH = $o->{fh};
   seek FH, 0, SEEK_SET;
 #  my $open = open FH, "< $file";
@@ -76,7 +83,7 @@ sub check_contents {
   if ($a eq $x) {
     print "ok $N\n";
   } else {
-    s{$/}{\\n}g for $a, $x;
+    ctrlfix($a, $x);
     print "not ok $N\n# expected <$x>, got <$a>\n";
   }
   $N++;
@@ -85,9 +92,9 @@ sub check_contents {
   my $good = 1;
   my $msg;
   for (0.. $#c) {
-    unless ($a[$_] eq "$c[$_]$/") {
-      $msg = "expected $c[$_]$/, got $a[$_]";
-      $msg =~ s{$/}{\\n}g;
+    unless ($a[$_] eq "$c[$_]$:") {
+      $msg = "expected $c[$_]$:, got $a[$_]";
+      ctrlfix($msg);
       $good = 0;
     }
   }
@@ -97,6 +104,13 @@ sub check_contents {
   print $o->_check_integrity($file, $ENV{INTEGRITY}) 
       ? "ok $N\n" : "not ok $N\n";
   $N++;
+}
+
+sub ctrlfix {
+  for (@_) {
+    s/\n/\\n/g;
+    s/\r/\\r/g;
+  }
 }
 
 END {
