@@ -792,7 +792,7 @@ sub dist_target {
 
     my $date_check = $self->oneliner(<<'CODE', ['-l']);
 print 'Warning: Makefile possibly out of date with $(VERSION_FROM)'
-  if -e '$(VERSION_FROM)' and -M '$(VERSION_FROM)' < -M '$(FIRST_MAKEFILE)';
+    if -e '$(VERSION_FROM)' and -M '$(VERSION_FROM)' < -M '$(FIRST_MAKEFILE)';
 CODE
 
     return sprintf <<'MAKE_FRAG', $date_check;
@@ -2591,8 +2591,7 @@ EXE_FILES = @{$self->{EXE_FILES}}
 
 } . ($Is_Win32
   ? q{FIXIN = pl2bat.bat
-} : q{FIXIN = $(PERLRUN) "-MExtUtils::MY" \
-    -e "MY->fixin(shift)"
+} : q{FIXIN = $(PERLRUN) "-MExtUtils::MY" -e "MY->fixin(shift)"
 }).qq{
 pure_all :: @to
 	\$(NOECHO) \$(NOOP)
@@ -3566,7 +3565,8 @@ sub oneliner {
     $cmd =~ s{^\n+}{};
     $cmd =~ s{\n+$}{};
 
-    $cmd = $self->quote_literal($cmd);
+    my @cmds = split /\n/, $cmd;
+    $cmd = join "\n\t-e ", map $self->quote_literal($_), @cmds;
     $cmd = $self->escape_newlines($cmd);
 
     $switches = join ' ', @$switches;

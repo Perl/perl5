@@ -130,9 +130,9 @@ sub init_linker {
 
     $self->{PERL_ARCHIVE} = "\$(PERL_INC)/libperl\$(LIB_EXT)";
 
-    $self->{PERL_ARCHIVE_AFTER} = !$OS2::is_aout 
-      ? "\$(PERL_INC)/libperl_override\$(LIB_EXT)"
-      : '';
+    $self->{PERL_ARCHIVE_AFTER} = $OS2::is_aout
+      ? ''
+      : '$(PERL_INC)/libperl_override$(LIB_EXT)';
     $self->{EXPORT_LIST} = '$(BASEEXT).def';
 }
 
