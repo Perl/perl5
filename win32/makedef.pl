@@ -517,6 +517,7 @@ win32_setnetent
 win32_setprotoent
 win32_setservent
 win32_getenv
+win32_putenv
 win32_perror
 win32_setbuf
 win32_setvbuf

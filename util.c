@@ -1501,21 +1501,16 @@ my_setenv(char *nam,char *val)
 
 #else /* !USE_WIN32_RTL_ENV */
 
-    /* The sane way to deal with the environment.
-     * Has these advantages over putenv() & co.:
-     *  * enables us to store a truly empty value in the
-     *    environment (like in UNIX).
-     *  * we don't have to deal with RTL globals, bugs and leaks.
-     *  * Much faster.
-     * Why you may want to enable USE_WIN32_RTL_ENV:
-     *  * environ[] and RTL functions will not reflect changes,
-     *    which might be an issue if extensions want to access
-     *    the env. via RTL.  This cuts both ways, since RTL will
-     *    not see changes made by extensions that call the Win32
-     *    functions directly, either.
-     * GSAR 97-06-07
-     */
-    SetEnvironmentVariable(nam,val);
+    register char *envstr;
+    STRLEN len = strlen(nam) + 3;
+    if (!val) {
+	val = "";
+    }
+    len += strlen(val);
+    New(904, envstr, len, char);
+    (void)sprintf(envstr,"%s=%s",nam,val);
+    (void)PerlEnv_putenv(envstr);
+    Safefree(envstr);
 
 #endif
 }

@@ -989,6 +989,11 @@ char*   _win32_getenv(const char *name)
     return pPerl->PL_piENV->Getenv(name, ErrorNo());
 }
 
+int   _win32_putenv(const char *name)
+{
+    return pPerl->PL_piENV->Putenv(name, ErrorNo());
+}
+
 int          _win32_open_osfhandle(long handle, int flags)
 {
     return pPerl->PL_piStdIO->OpenOSfhandle(handle, flags);

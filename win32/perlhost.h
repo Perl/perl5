@@ -88,7 +88,7 @@ public:
     };
     virtual int Putenv(const char *envstring, int &err)
     {
-	return putenv(envstring);
+	return win32_putenv(envstring);
     };
     virtual char* LibPath(char *pl)
     {

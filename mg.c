@@ -766,7 +766,7 @@ magic_clear_all_env(SV *sv, MAGIC *mg)
 	    *end = '\0';
 	    my_setenv(cur,Nullch);
 	    *end = '=';
-	    cur += strlen(end+1)+1;
+	    cur = end + strlen(end+1)+2;
 	}
 	else if ((len = strlen(cur)))
 	    cur += len+1;
