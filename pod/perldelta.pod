@@ -283,7 +283,7 @@ Win32::GetFolderPath
 =head1 Utility Changes
 
 The Perl debugger (F<lib/perl5db.pl>) has now been extensively
-documented and bugs found while documented have been fixed.
+documented and bugs found while documenting have been fixed.
 
 perldoc has been rewritten from scratch to be more robust and
 featureful.
