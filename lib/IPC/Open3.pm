@@ -10,7 +10,7 @@ require Exporter;
 use Carp;
 use Symbol 'qualify';
 
-$VERSION	= 1.01;
+$VERSION	= 1.0101;
 @ISA		= qw(Exporter);
 @EXPORT		= qw(open3);
 
@@ -32,8 +32,8 @@ on the same file handle.
 
 If WTRFH begins with "E<lt>&", then WTRFH will be closed in the parent, and
 the child will read from it directly.  If RDRFH or ERRFH begins with
-"E<gt>&", then the child will send output directly to that file handle.  In both
-cases, there will be a dup(2) instead of a pipe(2) made.
+"E<gt>&", then the child will send output directly to that file handle.
+In both cases, there will be a dup(2) instead of a pipe(2) made.
 
 If you try to read from the child's stdout writer and their stderr
 writer, you'll have problems with blocking, which means you'll
@@ -119,6 +119,8 @@ sub xclose {
     close $_[0] or croak "$Me: close($_[0]) failed: $!";
 }
 
+my $do_spawn = $^O eq 'os2';
+
 sub _open3 {
     local $Me = shift;
     my($package, $dad_wtr, $dad_rdr, $dad_err, @cmd) = @_;
@@ -145,8 +147,8 @@ sub _open3 {
     xpipe $dad_rdr, $kid_wtr if !$dup_rdr;
     xpipe $dad_err, $kid_err if !$dup_err && $dad_err ne $dad_rdr;
 
-    $kidpid = xfork;
-    if ($kidpid == 0) {
+    $kidpid = $do_spawn ? -1 : xfork;
+    if ($kidpid == 0) {		# Kid
 	# If she wants to dup the kid's stderr onto her stdout I need to
 	# save a copy of her stdout before I put something else there.
 	if ($dad_rdr ne $dad_err && $dup_err
@@ -185,6 +187,47 @@ sub _open3 {
 	local($")=(" ");
 	exec @cmd
 	    or croak "open3: exec of @cmd failed";
+    } elsif ($do_spawn) {
+	# All the bookkeeping of coincidence between handles is
+	# handled in spawn_with_handles.
+
+	my @close;
+	if ($dup_wtr) {
+	  $kid_rdr = $dad_wtr;
+	  push @close, \*{$kid_rdr};
+	} else {
+	  push @close, \*{$dad_wtr}, \*{$kid_rdr};
+	}
+	if ($dup_rdr) {
+	  $kid_wtr = $dad_rdr;
+	  push @close, \*{$kid_wtr};
+	} else {
+	  push @close, \*{$dad_rdr}, \*{$kid_wtr};
+	}
+	if ($dad_rdr ne $dad_err) {
+	    if ($dup_err) {
+	      $kid_err = $dad_err ;
+	      push @close, \*{$kid_err};
+	    } else {
+	      push @close, \*{$dad_err}, \*{$kid_err};
+	    }
+	} else {
+	  $kid_err = $kid_wtr;
+	}
+	require IO::Pipe;
+	$kidpid = eval {
+	    spawn_with_handles( [ { mode => 'r',
+				    open_as => \*{$kid_rdr},
+				    handle => \*STDIN },
+				  { mode => 'w',
+				    open_as => \*{$kid_wtr},
+				    handle => \*STDOUT },
+				  { mode => 'w',
+				    open_as => \*{$kid_err},
+				    handle => \*STDERR },
+				], \@close, @cmd);
+	};
+	die "open3: $@" if $@;
     }
 
     xclose $kid_rdr if !$dup_wtr;
@@ -199,7 +242,48 @@ sub _open3 {
 }
 
 sub open3 {
+    if (@_ < 4) {
+	local $" = ', ';
+	croak "open3(@_): not enough arguments";
+    }
     return _open3 'open3', scalar caller, @_
 }
-1; # so require is happy
 
+sub spawn_with_handles {
+    my $fds = shift;		# Fields: handle, mode, open_as
+    my $close_in_child = shift;
+    my ($fd, $pid, @saved_fh, $saved, %saved, @errs);
+    require Fcntl;
+
+    foreach $fd (@$fds) {
+	$fd->{tmp_copy} = IO::Handle->new_from_fd($fd->{handle}, $fd->{mode});
+	$saved{fileno $fd->{handle}} = $fd->{tmp_copy};
+    }
+    foreach $fd (@$fds) {
+	bless $fd->{handle}, 'IO::Handle'
+	    unless eval { $fd->{handle}->isa('IO::Handle') } ;
+	# If some of handles to redirect-to coincide with handles to
+	# redirect, we need to use saved variants:
+	$fd->{handle}->fdopen($saved{fileno $fd->{open_as}} || $fd->{open_as},
+			      $fd->{mode});
+    }
+    # Stderr may be redirected below, so we save the err text:
+    foreach $fd (@$close_in_child) {
+	fcntl($fd, Fcntl::F_SETFD(), 1) or push @errs, "fcntl $fd: $!"
+	    unless $saved{fileno $fd};	# Do not close what we redirect!
+    }
+
+    unless (@errs) {
+	$pid = eval { system 1, @_ }; # 1 == P_NOWAIT
+	push @errs, "IO::Pipe: Can't spawn-NOWAIT: $!" if !$pid || $pid < 0;
+    }
+
+    foreach $fd (@$fds) {
+	$fd->{handle}->fdopen($fd->{tmp_copy}, $fd->{mode});
+	$fd->{tmp_copy}->close or croak "Can't close: $!";
+    }
+    croak join "\n", @errs if @errs;
+    return $pid;
+}
+
+1; # so require is happy
