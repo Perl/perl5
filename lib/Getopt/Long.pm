@@ -2,7 +2,7 @@
 
 package Getopt::Long;
 
-# RCS Status      : $Id: GetoptLong.pl,v 2.24 2000-03-14 21:28:52+01 jv Exp jv $
+# RCS Status      : $Id: GetoptLong.pl,v 2.25 2000-08-28 21:45:17+02 jv Exp $
 # Author          : Johan Vromans
 # Created On      : Tue Sep 11 15:00:12 1990
 # Last Modified By: Johan Vromans
@@ -36,7 +36,7 @@ BEGIN {
     require 5.004;
     use Exporter ();
     use vars     qw($VERSION @ISA @EXPORT @EXPORT_OK %EXPORT_TAGS);
-    $VERSION     = 2.23_05;
+    $VERSION     = 2.24;
 
     @ISA         = qw(Exporter);
     @EXPORT      = qw(&GetOptions $REQUIRE_ORDER $PERMUTE $RETURN_IN_ORDER);
@@ -210,7 +210,7 @@ __END__
 
 ################ AutoLoading subroutines ################
 
-# RCS Status      : $Id: GetoptLongAl.pl,v 2.28 2000-05-12 11:26:41+02 jv Exp jv $
+# RCS Status      : $Id: GetoptLongAl.pl,v 2.29 2000-08-28 21:56:18+02 jv Exp $
 # Author          : Johan Vromans
 # Created On      : Fri Mar 27 11:50:30 1998
 # Last Modified By: Johan Vromans
@@ -239,7 +239,7 @@ sub GetOptions {
     print STDERR ("GetOpt::Long $Getopt::Long::VERSION ",
 		  "called from package \"$pkg\".",
 		  "\n  ",
-		  'GetOptionsAl $Revision: 2.28 $ ',
+		  'GetOptionsAl $Revision: 2.29 $ ',
 		  "\n  ",
 		  "ARGV: (@ARGV)",
 		  "\n  ",
@@ -1626,6 +1626,19 @@ POSIXLY_CORRECT has been set, in which case C<auto_abbrev> is disabled.
 Allow C<+> to start options.
 Default is enabled unless environment variable
 POSIXLY_CORRECT has been set, in which case C<getopt_compat> is disabled.
+
+=item gnu_compat
+
+C<gnu_compat> controls whether C<--opt=> is allowed, and what it should
+do. Without C<gnu_compat>, C<--opt=> gives an error. With C<gnu_compat>,
+C<--opt=> will give option C<opt> and empty value.
+This is the way GNU getopt_long() does it.
+
+=item gnu_getopt
+
+This is a short way of setting C<gnu_compat> C<bundling> C<permute>
+C<no_getopt_compat>. With C<gnu_getopt>, command line handling should be
+fully compatible with GNU getopt_long().
 
 =item require_order
 
