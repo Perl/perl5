@@ -1487,6 +1487,16 @@ memory is zeroed with C<memzero>.
 =for hackers
 Found in file handy.h
 
+=item Poison
+
+Fill up memory with a pattern (byte 0xAB over and over again) that
+hopefully catches attempts to access uninitialized memory.
+
+	void	Poison(void* dest, int nitems, type)
+
+=for hackers
+Found in file handy.h
+
 =item Renew
 
 The XSUB-writer's interface to the C C<realloc> function.

@@ -80,9 +80,10 @@ Perl_new_stackinfo(pTHX_ I32 stitems, I32 cxitems)
     si->si_cxmax = cxitems - 1;
     si->si_cxix = -1;
     si->si_type = PERLSI_UNDEF;
-    /* Needs to be Newz() instead of New() because PUSHSUBST()
-     * in pp_subst() might otherwise read uninitialized heap. */
-    Newz(56, si->si_cxstack, cxitems, PERL_CONTEXT);
+    New(56, si->si_cxstack, cxitems, PERL_CONTEXT);
+    /* Without any kind of initialising PUSHSUBST()
+     * in pp_subst() will read uninitialised heap. */
+    Poison(si->si_cxstack, cxitems, PERL_CONTEXT);
     return si;
 }
 
@@ -92,10 +93,9 @@ Perl_cxinc(pTHX)
     IV old_max = cxstack_max;
     cxstack_max = GROW(cxstack_max);
     Renew(cxstack, cxstack_max + 1, PERL_CONTEXT);	/* XXX should fix CXINC macro */
-    /* Needs to Zero()ed because otherwise deep enough recursion
-     * (such as in lib/Math/BigInt/t/upgrade.t) will end up reading
-     * uninitialized heap. */
-    Zero(cxstack + old_max + 1, cxstack_max - old_max, PERL_CONTEXT);
+    /* Without any kind of initialising deep enough recursion
+     * will end up reading uninitialised PERL_CONTEXTs. */
+    Poison(cxstack + old_max + 1, cxstack_max - old_max, PERL_CONTEXT);
     return cxstack_ix + 1;
 }
 

@@ -132,6 +132,16 @@ instead of raw C<char *> strings:
 Note also the existence of C<sv_catpvf> and C<sv_vcatpvfn>, combining
 concatenation with formatting.
 
+Sometimes instead of zeroing the allocated heap by using Newz() you
+should consider "poisoning" the data.  This means writing a bit
+pattern into it that should be illegal as pointers (and floating point
+numbers), and also hopefully surprising enough as integers, so that
+any code attempting to use the data without forethought will break
+sooner rather than later.  Poisoning can be done using the Poison()
+macro, which has similar arguments as Zero():
+
+    Poison(dst, n, t)
+
 =head2 Character Class Tests
 
 There are two types of character class tests that Perl implements: one

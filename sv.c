@@ -9711,7 +9711,7 @@ perl_clone_using(PerlInterpreter *proto_perl, UV flags,
     PERL_SET_THX(my_perl);
 
 #  ifdef DEBUGGING
-    memset(my_perl, 0xab, sizeof(PerlInterpreter));
+    Poison(my_perl, 1, PerlInterpreter);
     PL_markstack = 0;
     PL_scopestack = 0;
     PL_savestack = 0;
@@ -9742,7 +9742,7 @@ perl_clone_using(PerlInterpreter *proto_perl, UV flags,
 
 
 #    ifdef DEBUGGING
-    memset(my_perl, 0xab, sizeof(PerlInterpreter));
+    Poison(my_perl, 1, PerlInterpreter);
     PL_markstack = 0;
     PL_scopestack = 0;
     PL_savestack = 0;
