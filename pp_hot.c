@@ -2536,7 +2536,13 @@ try_autoload:
 	    			  "%p entersub preparing @_\n", thr));
 #endif
 	    av = (AV*)PL_curpad[0];
-	    assert(!AvREAL(av));
+	    if (AvREAL(av)) {
+		/* @_ is normally not REAL--this should only ever
+		 * happen when DB::sub() calls things that modify @_ */
+		av_clear(av);
+		AvREAL_off(av);
+		AvREIFY_on(av);
+	    }
 #ifndef USE_THREADS
 	    cx->blk_sub.savearray = GvAV(PL_defgv);
 	    GvAV(PL_defgv) = (AV*)SvREFCNT_inc(av);

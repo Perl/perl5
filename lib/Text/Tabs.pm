@@ -7,7 +7,7 @@ require Exporter;
 @EXPORT = qw(expand unexpand $tabstop);
 
 use vars qw($VERSION $tabstop $debug);
-$VERSION = 96.121201;
+$VERSION = 98.112801;
 
 use strict;
 
@@ -18,7 +18,7 @@ BEGIN	{
 
 sub expand
 {
-	my @l = @_;
+	my (@l) = @_;
 	for $_ (@l) {
 		1 while s/(^|\n)([^\t\n]*)(\t+)/
 			$1. $2 . (" " x 
@@ -32,7 +32,7 @@ sub expand
 
 sub unexpand
 {
-	my @l = @_;
+	my (@l) = @_;
 	my @e;
 	my $x;
 	my $line;
