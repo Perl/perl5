@@ -1217,14 +1217,13 @@ Perl_sv_2iv(pTHX_ register SV *sv)
 	    SvNVX(sv) = d;
 	    (void)SvNOK_on(sv);
 	    (void)SvIOK_on(sv);
-	    DEBUG_c(PerlIO_printf(Perl_debug_log,
 #if defined(USE_LONG_DOUBLE)
-				  "0x%lx 2nv(%Lg)\n",
+	    DEBUG_c(PerlIO_printf(Perl_debug_log, "0x%lx 2nv(%Lg)\n",
+				  (unsigned long)sv, SvNVX(sv)));
 #else
-				  "0x%lx 2nv(%g)\n",
+	    DEBUG_c(PerlIO_printf(Perl_debug_log, "0x%lx 2nv(%g)\n",
+				  (unsigned long)sv, SvNVX(sv)));
 #endif
-				  (unsigned long)sv,
-				  SvNVX(sv)));
 	    if (SvNVX(sv) < (NV)IV_MAX + 0.5)
 		SvIVX(sv) = I_V(SvNVX(sv));
 	    else {
@@ -1362,14 +1361,13 @@ Perl_sv_2uv(pTHX_ register SV *sv)
 	    SvNVX(sv) = d;
 	    (void)SvNOK_on(sv);
 	    (void)SvIOK_on(sv);
-	    DEBUG_c(PerlIO_printf(Perl_debug_log,
 #if defined(USE_LONG_DOUBLE)
-				  "0x%lx 2nv(%Lg)\n",
+	    DEBUG_c(PerlIO_printf(Perl_debug_log, "0x%lx 2nv(%Lg)\n",
+				  (unsigned long)sv, SvNVX(sv)));
 #else
-				  "0x%lx 2nv(%g)\n",
+	    DEBUG_c(PerlIO_printf(Perl_debug_log, "0x%lx 2nv(%g)\n",
+				  (unsigned long)sv, SvNVX(sv)));
 #endif
-				  (unsigned long)sv,
-				  SvNVX(sv)));
 	    if (SvNVX(sv) < -0.5) {
 		SvIVX(sv) = I_V(SvNVX(sv));
 		goto ret_zero;
@@ -1490,17 +1488,21 @@ Perl_sv_2nv(pTHX_ register SV *sv)
 	    sv_upgrade(sv, SVt_PVNV);
 	else
 	    sv_upgrade(sv, SVt_NV);
+#if defined(USE_LONG_DOUBLE)
 	DEBUG_c({
 	    RESTORE_NUMERIC_STANDARD();
-	    PerlIO_printf(Perl_debug_log,
-#if defined(USE_LONG_DOUBLE)
-			  "0x%lx num(%Lg)\n",
-#else
-			  "0x%lx num(%g)\n",
-#endif
-			  (unsigned long)sv,SvNVX(sv)));
+	    PerlIO_printf(Perl_debug_log, "0x%lx num(%Lg)\n",
+			  (unsigned long)sv, SvNVX(sv));
 	    RESTORE_NUMERIC_LOCAL();
 	});
+#else
+	DEBUG_c({
+	    RESTORE_NUMERIC_STANDARD();
+	    PerlIO_printf(Perl_debug_log, "0x%lx num(%g)\n",
+			  (unsigned long)sv, SvNVX(sv));
+	    RESTORE_NUMERIC_LOCAL();
+	});
+#endif
     }
     else if (SvTYPE(sv) < SVt_PVNV)
 	sv_upgrade(sv, SVt_PVNV);
@@ -1525,17 +1527,21 @@ Perl_sv_2nv(pTHX_ register SV *sv)
 	return 0.0;
     }
     SvNOK_on(sv);
+#if defined(USE_LONG_DOUBLE)
     DEBUG_c({
 	RESTORE_NUMERIC_STANDARD();
-	PerlIO_printf(Perl_debug_log,
-#if defined(USE_LONG_DOUBLE)
-		      "0x%lx 2nv(%Lg)\n",
-#else
-		      "0x%lx 1nv(%g)\n",
-#endif
-		      (unsigned long)sv,SvNVX(sv)));
+	PerlIO_printf(Perl_debug_log, "0x%lx 2nv(%Lg)\n",
+		      (unsigned long)sv, SvNVX(sv));
 	RESTORE_NUMERIC_LOCAL();
     });
+#else
+    DEBUG_c({
+	RESTORE_NUMERIC_STANDARD();
+	PerlIO_printf(Perl_debug_log, "0x%lx 1nv(%g)\n",
+		      (unsigned long)sv, SvNVX(sv));
+	RESTORE_NUMERIC_LOCAL();
+    });
+#endif
     return SvNVX(sv);
 }
 
