@@ -1,8 +1,17 @@
 # hints/solaris_2.sh
-# Last modified:  Tue Apr 13 13:12:49 EDT 1999
+# Last modified: Friday, 2000-09-01
+# Lupe Christoph <lupe@lupe-christoph.de>
+# Based on version by:
 # Andy Dougherty  <doughera@lafayette.edu>
-# Based on input from lots of folks, especially
+# Which was based on input from lots of folks, especially
 # Dean Roehrich <roehrich@ironwood-fddi.cray.com>
+# Additional input from Alan Burlison, Jarkko Hietaniemi,
+# and Richard Soderberg.
+
+# For consistency with gcc, we do not adopt Sun Marketing's
+# removal of the '2.' prefix from the Solaris version number.
+# (Configure tries to detect an old fixincludes and needs
+# this information.)
 
 # If perl fails tests that involve dynamic loading of extensions, and
 # you are using gcc, be sure that you are NOT using GNU as and ld.  One
@@ -23,13 +32,14 @@ d_suidsafe=define
 set `echo $glibpth | sed -e 's@/usr/ucblib@@'`
 glibpth="$*"
 
-# Remove bad libraries.  -lucb contains incompatible routines.
-# -lld doesn't do anything useful.
+# Remove unwanted libraries.  -lucb contains incompatible routines.
+# -lld and -lsec don't do anything useful. -lcrypt does not
+# really provide anything we need over -lc, so we droip it, too.
 # -lmalloc can cause a problem with GNU CC & Solaris.  Specifically,
 # libmalloc.a may allocate memory that is only 4 byte aligned, but
 # GNU CC on the Sparc assumes that doubles are 8 byte aligned.
 # Thanks to  Hallvard B. Furuseth <h.b.furuseth@usit.uio.no>
-set `echo " $libswanted " | sed -e 's@ ld @ @' -e 's@ malloc @ @' -e 's@ ucb @ @'`
+set `echo " $libswanted " | sed -e 's@ ld @ @' -e 's@ malloc @ @' -e 's@ ucb @ @' -e 's@ sec @ @' -e 's@ crypt @ @'` 
 libswanted="$*"
 
 # Look for architecture name.  We want to suggest a useful default.
@@ -51,9 +61,11 @@ case "$ccversion" in
 *) ccversion='' ;;
 esac
 
-cat >UU/workshoplibpth.cbu<<'EOCBU'
+if test `uname -p` = "sparc"; then
+    # This is only needed for SPARC V9
+    cat >UU/workshoplibpth.cbu<<'EOCBU'
 case "$workshoplibpth_done" in
-'')	case "$use64bitall" in
+    '')	case "$use64bitall" in
 	"$define"|true|[yY]*)
             loclibpth="$loclibpth /usr/lib/sparcv9"
             if test -n "$workshoplibs"; then
@@ -72,6 +84,7 @@ case "$workshoplibpth_done" in
 	;;
 esac
 EOCBU
+fi
 
 case "$ccname" in
 workshop)
@@ -402,16 +415,35 @@ case "$usemorebits" in
 	;;
 esac
 
-cat > UU/use64bitall.cbu <<'EOCBU'
+if test `uname -p` = "sparc"; then
+    cat > UU/use64bitint.cbu <<'EOCBU'
+# This script UU/use64bitint.cbu will get 'called-back' by Configure 
+# after it has prompted the user for whether to use 64 bit integers.
+case "$use64bitint" in
+"$define"|true|[yY]*)
+	    case "`uname -r`" in
+	    5.[0-4])
+		cat >&4 <<EOM
+Solaris `uname -r|sed -e 's/^5\./2./'` does not support 64-bit integers.
+You should upgrade to at least Solaris 2.5.
+EOM
+		exit 1
+		;;
+	    esac
+	    ;;
+esac
+EOCBU
+
+    cat > UU/use64bitall.cbu <<'EOCBU'
 # This script UU/use64bitall.cbu will get 'called-back' by Configure 
 # after it has prompted the user for whether to be maximally 64 bitty.
 case "$use64bitall-$use64bitall_done" in
 "$define-"|true-|[yY]*-)
 	    case "`uname -r`" in
-	    5.[1-6])
+	    5.[0-6])
 		cat >&4 <<EOM
-Solaris `uname -r|sed -e 's/^5\.\([789]\)$/\1/'` does not support 64-bit pointers.
-You should upgrade to at least Solaris 7.
+Solaris `uname -r|sed -e 's/^5\./2./'` does not support 64-bit pointers.
+You should upgrade to at least Solaris 2.7.
 EOM
 		exit 1
 		;;
@@ -421,13 +453,12 @@ EOM
 		cat >&4 <<EOM
 
 I do not see the 64-bit libc, $libc.
-(You are either in an old sparc or in an x86.)
 Cannot continue, aborting.
 
 EOM
 		exit 1
 	    fi 
-	    . ./UU/workshoplibpth.cbu
+	    . ./workshoplibpth.cbu
 	    case "$cc -v 2>/dev/null" in
 	    *gcc*)
 		echo 'main() { return 0; }' > try.c
@@ -467,14 +498,15 @@ esac'
 	    ;;
 esac
 EOCBU
- 
-# Actually, we want to run this already now, if so requested,
-# because we need to fix up things right now.
-case "$use64bitall" in
-"$define"|true|[yY]*)
+
+    # Actually, we want to run this already now, if so requested,
+    # because we need to fix up things right now.
+    case "$use64bitall" in
+    "$define"|true|[yY]*)
 	. ./UU/use64bitall.cbu
 	;;
-esac
+    esac
+fi
 
 cat > UU/uselongdouble.cbu <<'EOCBU'
 # This script UU/uselongdouble.cbu will get 'called-back' by Configure 
@@ -580,68 +612,85 @@ roehrich@cray.com
 
 -----------
 
-From: Casper.Dik@Holland.Sun.COM (Casper H.S. Dik - Network Security Engineer)
-Subject: Solaris 2 Frequently Asked Questions (FAQ) 1.48
-Date: 25 Jul 1995 12:20:18 GMT
+Archive-name: Solaris2/FAQ
+Version: 1.70
+Last-Modified: 2000/07/06 10:01:14
+Maintained-by: Casper Dik <Casper.Dik@Holland.Sun.COM>
 
-5.7) Why do I get __builtin_va_alist or __builtin_va_arg_incr undefined?
+5.9) Why do I get __builtin_va_alist or __builtin_va_arg_incr undefined? 
 
     You're using gcc without properly installing the gcc fixed
-    include files.  Or you ran fixincludes after installing gcc
-    w/o moving the gcc supplied varargs.h and stdarg.h files
-    out of the way and moving them back again later.  This often
-    happens when people install gcc from a binary distribution.
-    If there's a tmp directory in gcc's include directory, fixincludes
-    didn't complete.  You should have run "just-fixinc" instead.
+    include files. Or you ran fixincludes after installing gcc
+    w/o moving the gcc supplied varargs.h and stdarg.h files out
+    of the way and moving them back again later. This often
+    happens when people install gcc from a binary
+    distribution. If there's a tmp directory in gcc's include
+    directory, fixincludes didn't complete. You should have run
+    "just-fixinc" instead.
 
-    Another possible cause is using ``gcc -I/usr/include.''
+    Another possible cause is that you're using ``gcc -I/usr/include.''
+
+    Reinstall gcc or upgrade to gcc 2.8.0 or later, which
+    doesn't require a reinstallation after every OS upgrade, if
+    you run Solaris 2.5 or later.
 
 6.1) Where is the C compiler or where can I get one?
 
     [...]
 
-    3) Gcc.
+    4) Gcc. 
 
-    Gcc is available from the GNU archives in source and binary
-    form.  Look in a directory called sparc-sun-solaris2 for
-    binaries.  You need gcc 2.3.3 or later.  You should not use
-    GNU as or GNU ld.  Make sure you run just-fixinc if you use
-    a binary distribution.  Better is to get a binary version and
-    use that to bootstrap gcc from source.
+    Gcc is available from the GNU archives in source form. You
+    need gcc 2.3.3 or later, and you should prefer gcc 2.8.0 or
+    later as it works better with Solaris 2.x include files. You
+    should not use GNU as or GNU ld. Make sure you run
+    just-fixinc if you use a binary distribution. Better is to
+    get a binary version and use that to bootstrap gcc from
+    source.
 
-    [...]
+    GNU software is available from: 
+
+    prep.ai.mit.edu:/pub/gnu
+    gatekeeper.dec.com:/pub/GNU
+    ftp.uu.net:/systems/gnu
+    wuarchive.wustl.edu:/mirrors/gnu
+    nic.funet.fi:/pub/gnu
 
     When you install gcc, don't make the mistake of installing
     GNU binutils or GNU libc, they are not as capable as their
     counterparts you get with Solaris 2.x.
 
-6.9) I can't get perl 4.036 to compile or run.
+6.11) I can't get perl 4.036 to compile or run. 
 
-    Run Configure, and use the solaris_2_0 hints, *don't* use
-    the solaris_2_1 hints and don't use the config.sh you may
-    already have.  First you must make sure Configure and make
-    don't find /usr/ucb/cc.  (It must use gcc or the native C
+    Run Configure, and use the solaris_2_0 hints, don't use the
+    solaris_2_1 hints and don't use the config.sh you may
+    already have. First you must make sure Configure and make
+    don't find /usr/ucb/cc. (It must use gcc or the native C
     compiler: /opt/SUNWspro/bin/cc)
 
-    Some questions need a special answer.
+    Some questions need a special answer. 
 
-    Are your system (especially dbm) libraries compiled with gcc? [y] y
+    Are your system (especially dbm) libraries compiled with
+    gcc? [y] y
 
     yes: gcc 2.3.3 or later uses the standard calling
     conventions, same as Sun's C.
 
     Any additional cc flags? [ -traditional -Dvolatile=__volatile__
     -I/usr/ucbinclude] -traditional -Dvolatile=__volatile__
-    Remove /usr/ucbinclude.
+
+    Remove /usr/ucbinclude. 
 
     Any additional libraries? [-lsocket -lnsl -ldbm -lmalloc -lm
     -lucb] -lsocket -lnsl  -lm
 
-    Don't include -ldbm, -lmalloc and -lucb.
+    Don't include -ldbm, -lmalloc and -lucb. 
 
-    Perl 5 compiled out of the box.
+    Perl 5 compiles out of the box. 
 
-7.0) 64-bitness, from Alan Burlison (added by jhi 2000-02-21)
+----------------------------------------------------------------
+
+64-bitness, from Alan Burlison (added by jhi 2000-02-21)
 
   You need a machine running Solaris 2.7 or above.
 
@@ -688,4 +737,3 @@ Date: 25 Jul 1995 12:20:18 GMT
   > to build 64 bit apps unless they need the address space.
 
 End_of_Solaris_Notes
-
