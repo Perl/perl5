@@ -25,11 +25,14 @@ a tied hash is used in scalar context, such as
 	...
     }
 
-Previously the FIRSTKEY method would be called on a tied hash, which has the
-side effect of resetting the iterator, behaviour inconsistent with normal
-hashes. The new code implementing C<SCALAR> will use the old behaviour for
-classes which do not (yet) provide C<SCALAR>. Please see L<perltie/SCALAR>
-for the full details and caveats.
+
+The old behaviour was that %tied_hash would return whatever would have been
+returned for that hash before the hash was tied (so usually 0). The new
+behaviour in the absense of a SCALAR method is to return TRUE if in the
+middle of an C<each> iteration, and otherwise call FIRSTKEY to check if the
+hash is empty (making sure that a subsequent C<each> will also begin by
+calling FIRSTKEY). Please see L<perltie/SCALAR> for the full details and
+caveats.
 
 =head1 Modules and Pragmata
 
@@ -55,8 +58,8 @@ The Perl Foundation's grant to Autrijus Tang)
 
 =item FindBin
 
-A function C<again> is provided to resolve problems where two modules in
-different directories which to use FindBin.
+A function C<again> is provided to resolve problems where modules in different
+directories wish to use FindBin.
 
 =item List::Util
 
