@@ -26,7 +26,8 @@ See L<warnings>.
 
 Some of these messages are generic.  Spots that vary are denoted with a %s,
 just as in a printf format.  Note that some messages start with a %s!
-The symbols C<"%(-?@> sort before the letters, while C<[> and C<\> sort after.
+Since the messages are listed in alphabetical order, the symbols
+C<"%(-?@> sort before the letters, while C<[> and C<\> sort after.
 
 =over 4
 
@@ -672,9 +673,11 @@ They must have ordinary identifiers as names.
 from a deleted (but still opened) file.  You have to say C<-i.bak>, or some
 such.
 
-=item Can't do inplace edit: %s E<gt> 14 characters
+=item Can't do inplace edit: %s would not be unique
 
-(S) There isn't enough room in the filename to make a backup name for the file.
+(S) Your filesystem does not support filenames longer than 14
+characters and Perl was unable to create a unique filename during
+inplace editing with the B<-i> switch.  The file was ignored.
 
 =item Can't do inplace edit: %s is not a regular file
 
@@ -921,10 +924,16 @@ pointers into them.  You tried to redefine one such sort subroutine when it
 was currently active, which is not allowed.  If you really want to do
 this, you should write C<sort { &func } @x> instead of C<sort func @x>.
 
+=item Can't remove %s: %s, skipping file 
+
+(S) You requested an inplace edit without creating a backup file.  Perl
+was unable to remove the original file to replace it with the modified
+file.  The file was left unmodified.
+
 =item Can't rename %s to %s: %s, skipping file
 
-(S) The rename done by the B<-i> switch failed for some reason, probably because
-you don't have write permission to the directory.
+(S) The rename done by the B<-i> switch failed for some reason,
+probably because you don't have write permission to the directory.
 
 =item Can't reopen input pipe (name: %s) in binary mode
 
