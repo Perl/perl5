@@ -707,15 +707,15 @@ sub deparse_format {
 	$op = $op->sibling; # skip nextstate
 	my @exprs;
 	$kid = $op->first->sibling; # skip pushmark
-	push @text, $self->const_sv($kid)->PV;
+	push @text, "\f".$self->const_sv($kid)->PV;
 	$kid = $kid->sibling;
 	for (; not null $kid; $kid = $kid->sibling) {
 	    push @exprs, $self->deparse($kid, 0);
 	}
-	push @text, join(", ", @exprs)."\n" if @exprs;
+	push @text, "\f".join(", ", @exprs)."\n" if @exprs;
 	$op = $op->sibling;
     }
-    return join("", @text) . ".";
+    return join("", @text) . "\f.";
 }
 
 sub is_scope {
