@@ -136,6 +136,10 @@ print something like:
 
     Sun? [yes/no] 
 
+but under a French locale
+
+    dim? [oui/non] 
+
 The usually available constants are
 
     ABDAY_1 ABDAY_2 ABDAY_3 ABDAY_4 ABDAY_5 ABDAY_6 ABDAY_7
@@ -150,7 +154,7 @@ for abbreviated and full length days of the week and months of the year,
     D_T_FMT D_FMT T_FMT
 
 for the date-time, date, and time formats used by the strftime() function
-(see L<POSIX>, and also L<Time::Piece>),
+(see L<POSIX>)
 
     AM_STR PM_STR T_FMT_AMPM
 
