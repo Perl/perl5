@@ -8366,13 +8366,6 @@ Perl_re_dup(pTHX_ REGEXP *r, clone_params *param)
     New(0, ret->endp, npar, I32);
     Copy(r->startp, ret->startp, npar, I32);
 
-    if (r->regstclass) {
-	New(0, ret->regstclass, 1, regnode);
-	StructCopy(r->regstclass, ret->regstclass, regnode);
-    }
-    else
-	ret->regstclass = NULL;
-
     New(0, ret->substrs, 1, struct reg_substr_data);
     for (s = ret->substrs->data, i = 0; i < 3; i++, s++) {
 	s->min_offset = r->substrs->data[i].min_offset;
@@ -8380,6 +8373,7 @@ Perl_re_dup(pTHX_ REGEXP *r, clone_params *param)
 	s->substr     = sv_dup_inc(r->substrs->data[i].substr, param);
     }
 
+    ret->regstclass = NULL;
     if (r->data) {
 	struct reg_data *d;
 	int count = r->data->count;
@@ -8403,6 +8397,7 @@ Perl_re_dup(pTHX_ REGEXP *r, clone_params *param)
 		New(0, d->data[i], 1, struct regnode_charclass_class);
 		StructCopy(r->data->data[i], d->data[i],
 			    struct regnode_charclass_class);
+		ret->regstclass = (regnode*)d->data[i];
 		break;
 	    case 'o':
 	    case 'n':
@@ -8420,8 +8415,6 @@ Perl_re_dup(pTHX_ REGEXP *r, clone_params *param)
     Copy(r->offsets, ret->offsets, 2*len+1, U32);
 
     ret->precomp        = SAVEPV(r->precomp);
-    ret->subbeg         = SAVEPV(r->subbeg);
-    ret->sublen         = r->sublen;
     ret->refcnt         = r->refcnt;
     ret->minlen         = r->minlen;
     ret->prelen         = r->prelen;
@@ -8429,6 +8422,13 @@ Perl_re_dup(pTHX_ REGEXP *r, clone_params *param)
     ret->lastparen      = r->lastparen;
     ret->lastcloseparen = r->lastcloseparen;
     ret->reganch        = r->reganch;
+
+    ret->sublen         = r->sublen;
+
+    if (RX_MATCH_COPIED(ret))
+	ret->subbeg  = SAVEPV(r->subbeg);
+    else
+	ret->subbeg = Nullch;
 
     ptr_table_store(PL_ptr_table, r, ret);
     return ret;
