@@ -200,6 +200,8 @@ main(register int argc, register char **argv, register char **env)
 	  "The operation I've selected may be wrong for the operand types.\n");
     }
     exit(0);
+    /* by ANSI specs return is needed. This also shuts up VC++ and his warnings */
+    return(0);
 }
 
 #define RETURN(retval) return (bufptr = s,retval)
