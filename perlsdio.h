@@ -19,7 +19,7 @@
 #define PerlIO_fdopen			fdopen
 #define PerlIO_reopen			freopen
 #ifdef SOCKS_64BIT_BUG
-#  define PerlIO_close(f)		(Perl_do_s64_delete_buffer(f), fclose(f))
+#  define PerlIO_close(f)		(Perl_do_s64_delete_buffer(aTHX_ f), fclose(f))
 #else
 #  define PerlIO_close(f)		fclose(f)
 #endif
@@ -48,10 +48,10 @@
 #  define PerlIO_tell(f)		ftell(f)
 #else
 #  ifdef SOCKS_64BIT_BUG
-#    define PerlIO_getc(f)		Perl_do_s64_getc(f)
-#    define PerlIO_ungetc(f,c)		Perl_do_s64_ungetc(c,f)
-#    define PerlIO_read(f,buf,count)	Perl_do_s64_fread(buf,count,f)
-#    define PerlIO_tell(f)		Perl_do_s64_tell(f)
+#    define PerlIO_getc(f)		Perl_do_s64_getc(aTHX_ f)
+#    define PerlIO_ungetc(f,c)		Perl_do_s64_ungetc(aTHX_ c,f)
+#    define PerlIO_read(f,buf,count)	Perl_do_s64_fread(aTHX_ buf,count,f)
+#    define PerlIO_tell(f)		Perl_do_s64_tell(aTHX_ f)
 #  else
 #    define PerlIO_getc(f)		getc(f)
 #    define PerlIO_ungetc(f,c)		ungetc(c,f)
@@ -66,7 +66,7 @@
 #define PerlIO_clearerr(f)		clearerr(f)
 #define PerlIO_flush(f)			Fflush(f)
 #ifdef SOCKS_64BIT_BUG
-#  define PerlIO_seek(f,o,w)		Perl_do_s64_seek(f,o,w)
+#  define PerlIO_seek(f,o,w)		Perl_do_s64_seek(aTHX_ f,o,w)
 #else
 #  if defined(VMS) && !defined(__DECC)
    /* Old VAXC RTL doesn't reset EOF on seek; Perl folk seem to expect this */
