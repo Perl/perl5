@@ -126,6 +126,13 @@ A reference to a reference now stringifies as "REF(0x81485ec)" instead
 of "SCALAR(0x81485ec)" in order to be more consistent with the return
 value of ref().
 
+=head2 pack/unpack D/F recycled
+
+The undocumented pack/unpack template letters D/F have been recyled
+for better use: now they stand for long double (if supported by the
+platform) and NV (Perl internal floating point type).  (They used
+to be aliases for f/d, but you never knew that.)
+
 =head2 Deprecations
 
 =over 4
@@ -456,6 +463,7 @@ apply repetition/count modifiers on the groups.
 
 C<pack() / unpack()> can now process the Perl internal numeric types:
 IVs, UVs, NVs-- and also long doubles, if supported by the platform.
+The template letters are C<j>, C<J>, C<F>, and C<D>.
 
 =item *
 
@@ -659,6 +667,11 @@ frontend Filter::Simple is to be preferred.  See L<Filter::Util::Call>.
 
 =item *
 
+C<if> is a new pragma for conditional inclusion of modules, from
+Ilya Zakharevich.
+
+=item *
+
 L<libnet> is a collection of perl5 modules related to network
 programming, from Graham Barr.  See L<Net::FTP>, L<Net::NNTP>,
 L<Net::Ping>, L<Net::POP3>, L<Net::SMTP>, and L<Net::Time>.
@@ -856,6 +869,10 @@ C<threads::shared> allows data sharing for interpreter threads, from
 Arthur Bergman.  In the ithreads model any data sharing between
 threads must be explicit, as opposed to the old 5.005 thread model
 where data sharing was implicit.  See L<threads::shared>.
+
+=item *
+
+C<Tie::Memoize>, by Ilya Zakharevich, provides on-demand loaded hashes.
 
 =item *
 
