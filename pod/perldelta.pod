@@ -88,33 +88,31 @@ point format on OpenVMS Alpha, potentially breaking binary compatibility
 with external libraries or existing data.  G_FLOAT is still available as
 a configuration option.  The default on VAX (D_FLOAT) has not changed.
 
-=head2 Different Definition of the Unicode Character Classes \p{In...}
+=head2 New Unicode Properties
 
-As suggested by the Unicode consortium, the Unicode character classes
-now prefer I<scripts> as opposed to I<blocks> (as defined by Unicode);
-in Perl, when the C<\p{In....}> and the C<\p{In....}> regular expression
-constructs are used.  This has changed the definition of some of those
-character classes.
+Unicode I<scripts> are now supported. Scripts are similar to (and superior
+to) Unicode I<blocks>. The difference between scripts and blocks is that
+scripts are the glyphs used by a language or a group of languages, while
+the blocks are more artificial groupings of (mostly) 256 characters based
+on the Unicode numbering.
 
-The difference between scripts and blocks is that scripts are the
-glyphs used by a language or a group of languages, while the blocks
-are more artificial groupings of 256 characters based on the Unicode
-numbering.
+In general, scripts are more inclusive, but not universally so. For
+example, while the script C<Latin> includes all the Latin characters and
+their various diacritic-adorned versions, it does not include the various
+punctuation or digits (since they are not solely C<Latin>).
 
-In general this change results in more inclusive Unicode character
-classes, but changes to the other direction also do take place:
-for example while the script C<Latin> includes all the Latin
-characters and their various diacritic-adorned versions, it
-does not include the various punctuation or digits (since they
-are not solely C<Latin>).
+A number of other properties are now supported, including C<\p{L&}>,
+C<\p{Any}> C<\p{Assigned}>, C<\p{Unassigned}>, C<\p{Blank}> and
+C<\p{SpacePerl}> (along with their C<\P{...}> versions, of course).
+See L<perlunicode> for details, and more additions.
 
-Changes in the character class semantics may have happened if a script
-and a block happen to have the same name, for example C<Hebrew>.
-In such cases the script wins and C<\p{InHebrew}> now means the script
-definition of Hebrew.  The block definition in still available,
-though, by appending C<Block> to the name: C<\p{InHebrewBlock}> means
-what C<\p{InHebrew}> meant in perl 5.6.0.  For the full list
-of affected character classes, see L<perlunicode/Blocks>.
+The C<In> or C<Is> prefix to names used with the C<\p{...}> and C<\P{...}>
+are now almost always optional. The only exception is that a C<In> prefix
+is required to signify a Unicode block when a block name conflicts with a
+script name. For example, C<\p{Tibetan}> refers to the script, while
+C<\p{InTibetan}> refers to the block. When there is no name conflict, you
+can omit the C<In> from the block name (e.g. C<\p{BraillePatterns}>), but
+to be safe, it's probably best to always use the C<In>).
 
 =head2 Perl Parser Stress Tested
 
@@ -351,12 +349,14 @@ considerations, is the Unihan database.
 
 =item *
 
-The Unicode character classes \p{Blank} and \p{SpacePerl} have been
-added.  "Blank" is like C isblank(), that is, it contains only
-"horizontal whitespace" (the space character is, the newline isn't),
-and the "SpacePerl" is the Unicode equivalent of C<\s> (\p{Space}
-isn't, since that includes the vertical tabulator character, whereas
-C<\s> doesn't.)
+The properties \p{Blank} and \p{SpacePerl} have been added. "Blank" is like
+C isblank(), that is, it contains only "horizontal whitespace" (the space
+character is, the newline isn't), and the "SpacePerl" is the Unicode
+equivalent of C<\s> (\p{Space} isn't, since that includes the vertical
+tabulator character, whereas C<\s> doesn't.)
+
+See "New Unicode Properties" earlier in this document for additional
+information on changes with Unicode properties.
 
 =back
 

@@ -208,7 +208,7 @@ my ($revision,$version,$subversion) = split '\.', sprintf("%vd",$^V);
 
 my $v = sprintf("%d.%.3d%.3d",$revision,$version,$subversion);
 
-ok( $v eq "$]", "\$^V eq \$] (string)");
+ok( $v eq "$]", qq{"\$^V eq "\$]"});
 
 $v = $revision + $version/1000 + $subversion/1000000;
 

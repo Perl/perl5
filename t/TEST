@@ -72,7 +72,7 @@ sub _find_tests {
 }
 
 unless (@ARGV) {
-    foreach my $dir (qw(base comp cmd run io op)) {
+    foreach my $dir (qw(base comp cmd run io op uni)) {
         _find_tests($dir);
     }
     _find_tests("lib") unless $core;
