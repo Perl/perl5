@@ -48,7 +48,7 @@ modify_SV_attributes(pTHXo_ SV *sv, SV **retlist, SV **attrlist, int numattrs)
 
     for (nret = 0 ; numattrs && (attr = *attrlist++); numattrs--) {
 	name = SvPV(attr, len);
-	if ((negated = (*name == '-'))) {
+	if ((negated = (*name == '-')) || (*name == '+')) {
 	    name++;
 	    len--;
 	}
@@ -87,6 +87,34 @@ modify_SV_attributes(pTHXo_ SV *sv, SV **retlist, SV **attrlist, int numattrs)
 		}
 		break;
 	    }
+          case SVt_IV:
+          case SVt_NV:
+          case SVt_PV:
+          case SVt_PVIV:
+          case SVt_PVNV:
+          case SVt_PVAV:
+          case SVt_PVHV:
+	    switch ((int)len) {
+              case 8:
+		switch (*name) {
+                  case 'r':
+                    if (strEQ(name, "readonly")) {
+			if (negated)
+			    SvREADONLY_off(sv);
+			else
+			    SvREADONLY_on(sv);
+                        if (SvTYPE(sv) == SVt_PVAV && SvMAGIC(sv)
+                            && mg_find(sv, 'I')) { /* @ISA */
+                            if (negated)
+                                PL_hints &= ~HINT_CT_MRESOLVE;
+                            else
+                                PL_hints |= HINT_CT_MRESOLVE;
+                        }
+			continue;
+                    }
+                    break;
+                }
+            }
 	    break;
 	default:
 	    /* nothing, yet */

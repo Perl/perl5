@@ -1436,6 +1436,7 @@ t/op/local.t		See if local works
 t/op/lop.t		See if logical operators work
 t/op/magic.t		See if magic variables work
 t/op/method.t		See if method calls work
+t/op/method2entersub.t	See if methods-to-entersubs works
 t/op/misc.t		See if miscellaneous bugs have been fixed
 t/op/mkdir.t		See if mkdir works
 t/op/my.t		See if lexical scoping works

@@ -6215,6 +6215,81 @@ Perl_ck_join(pTHX_ OP *o)
     return ck_fun(o);
 }
 
+STATIC OP *
+S_method_2entersub(pTHX_ OP *o, OP *o2, OP *svop)
+{
+    GV *gv;
+    SV *method = ((SVOP*)svop)->op_sv;
+    char *methname;
+    STRLEN methlen;
+    HV *stash;
+    OP *mop;
+
+    if (svop->op_type == OP_METHOD_NAMED) {
+        methname = SvPV(method, methlen);
+    }
+    else {
+        return Nullop;
+    }
+
+    if (o2->op_type == OP_CONST) {
+        STRLEN len;
+        char *package = SvPV(((SVOP*)o2)->op_sv, len);
+        stash = gv_stashpvn(package, len, FALSE);
+    }
+    else if (o2->op_type == OP_PADSV) {
+        /* my Dog $spot = shift; $spot->bark */
+        SV *sv = *av_fetch(PL_comppad_name, o2->op_targ, FALSE);
+        if (sv && SvOBJECT(sv)) {
+            stash = SvSTASH(sv);
+        }
+        else {
+            return Nullop;
+        }
+    }
+    else {
+        return Nullop;
+    }
+
+    /* -1 so cache globs are not created */
+    /* XXX: support SUPER:: and UNIVERSAL, but not AUTOLOAD */
+    if (!(stash && (gv = gv_fetchmeth(stash, methname, methlen, -1)) && 
+          isGV(gv))) {
+        return Nullop;
+    }
+
+    /* XXX: check entire @ISA tree for readonly-ness ? */
+    if (GvSTASH(CvGV(GvCV(gv))) != stash) {
+        GV **gvp, *isagv;
+        AV *av;
+        gvp = (GV**)hv_fetch(stash, "ISA", 3, FALSE);
+        av = (gvp && (isagv = *gvp) && isagv != (GV*)&PL_sv_undef) ? 
+            GvAV(isagv) : Nullav;
+
+        if (isagv && av && !SvREADONLY((SV*)av)) {
+            return Nullop; /* @ISA is not frozen */
+        }
+
+        gv = CvGV(GvCV(gv)); /* point to the real gv */
+    }
+
+    if (o2->op_type == OP_CONST) {
+        /* remove bareword-ness of class name */
+        o2->op_private &= ~(OPpCONST_BARE|OPpCONST_STRICT); 
+    }
+
+    for (mop = o2; mop->op_sibling->op_sibling; mop = mop->op_sibling) ;
+
+    op_free(mop->op_sibling); /* loose OP_METHOD_NAMED */
+    mop->op_sibling = scalar(newUNOP(OP_RV2CV, 0,
+                                     newGVOP(OP_GV, 0, gv)));
+
+    ((cUNOPo->op_first->op_sibling)
+     ? cUNOPo : ((UNOP*)cUNOPo->op_first))->op_first->op_sibling = o2;
+
+    return ck_subr(o);
+}
+
 OP *
 Perl_ck_subr(pTHX_ OP *o)
 {
@@ -6249,8 +6324,16 @@ Perl_ck_subr(pTHX_ OP *o)
 	}
     }
     else if (cvop->op_type == OP_METHOD || cvop->op_type == OP_METHOD_NAMED) {
-	if (o2->op_type == OP_CONST)
+	if ((PL_hints & HINT_CT_MRESOLVE) && /* use base qw(... +readonly) */
+            (o2->op_type == OP_CONST || o2->op_type == OP_PADSV)) {
+            OP *nop;
+            if ((nop = method_2entersub(o, o2, cvop))) {
+                return nop;
+            }
+        }
+	if (o2->op_type == OP_CONST) {
 	    o2->op_private &= ~OPpCONST_STRICT;
+        }
 	else if (o2->op_type == OP_LIST) {
 	    OP *o = ((UNOP*)o2)->op_first->op_sibling;
 	    if (o && o->op_type == OP_CONST)

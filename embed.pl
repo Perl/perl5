@@ -2251,6 +2251,7 @@ s	|char*	|gv_ename	|GV *gv
 s	|void	|cv_dump	|CV *cv
 s	|CV*	|cv_clone2	|CV *proto|CV *outside
 s	|bool	|scalar_mod_type|OP *o|I32 type
+s	|OP *	|method_2entersub|OP *o|OP *o2|OP *svop
 s	|OP *	|my_kid		|OP *o|OP *attrs
 s	|OP *	|dup_attrlist	|OP *o
 s	|void	|apply_attrs	|HV *stash|SV *target|OP *attrs

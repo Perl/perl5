@@ -407,7 +407,7 @@ No checks against the filesystem are made.
 
 =cut
 
-sub rel2abs($;$;) {
+sub rel2abs($$;$;) {
     my ($self,$path,$base ) = @_;
 
     # Clean up $path

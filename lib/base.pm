@@ -52,14 +52,21 @@ sub import {
     my $fields_base;
     my $pkg = caller(0);
 
+    my @attrs;
+    my $isa = \@{"$pkg\::ISA"};
+
     foreach my $base (@_) {
+        if ($base =~ /^[-+]/) { #attribute
+            push @attrs, $base;
+            next;
+        }
 	next if $pkg->isa($base);
-	push @{"$pkg\::ISA"}, $base;
+	push @$isa, $base;
 	unless (exists ${"$base\::"}{VERSION}) {
 	    eval "require $base";
 	    # Only ignore "Can't locate" errors from our eval require.
 	    # Other fatal errors (syntax etc) must be reported.
-	    die if $@ && $@ !~ /^Can't locate .*? at \(eval /;
+	    die if $@ && $@ !~ /^Can\'t locate .*? at \(eval /;
 	    unless (%{"$base\::"}) {
 		require Carp;
 		Carp::croak("Base class package \"$base\" is empty.\n",
@@ -86,6 +93,10 @@ sub import {
     if ($fields_base) {
 	require fields;
 	fields::inherit($pkg, $fields_base);
+    }
+    if (@attrs) {
+        require attributes;
+        attributes::->import($pkg, $isa, @attrs);
     }
 }
 

@@ -40,7 +40,7 @@ sub install {
 
     my(%hash) = %$hash;
     my(%pack, $dir, $warn_permissions);
-    my($packlist) = ExtUtils::Packlist->new();
+    my($packlist) = ExtUtils::Packlist->new(undef);
     # -w doesn't work reliably on FAT dirs
     $warn_permissions++ if $^O eq 'MSWin32';
     local(*DIR);
