@@ -33,4 +33,4 @@ continue {
 if (`$CAT .a .b .c` eq "bar\nbar\nbar\n") {print "ok 1\n";} else {print "not ok 1\n";}
 if (`$CAT .a$^I .b$^I .c$^I` eq "foo\nfoo\nfoo\n") {print "ok 2\n";} else {print "not ok 2\n";}
 
-unlink '.a', '.b', '.c', '.a$^I', '.b$^I', '.c$^I';
+unlink '.a', '.b', '.c', ".a$^I", ".b$^I", ".c$^I";
