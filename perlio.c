@@ -4814,35 +4814,43 @@ PerlIO_stdoutf(const char *fmt, ...)
 PerlIO *
 PerlIO_tmpfile(void)
 {
-    /*
-     * I have no idea how portable mkstemp() is ...
-     */
-#if defined(WIN32) || !defined(HAVE_MKSTEMP)
-    dTHX;
-    PerlIO *f = NULL;
-    FILE *stdio = PerlSIO_tmpfile();
-    if (stdio) {
-	if ((f = PerlIO_push(aTHX_(PerlIO_allocate(aTHX)), &PerlIO_stdio, "w+", Nullsv))) {
-	    PerlIOStdio *s = PerlIOSelf(f, PerlIOStdio);
-	    s->stdio = stdio;
-	}
-    }
-    return f;
-#else
-    dTHX;
-    SV *sv = newSVpv("/tmp/PerlIO_XXXXXX", 0);
-    int fd = mkstemp(SvPVX(sv));
-    PerlIO *f = NULL;
-    if (fd >= 0) {
-	f = PerlIO_fdopen(fd, "w+");
-	if (f) {
-	    PerlIOBase(f)->flags |= PERLIO_F_TEMP;
-	}
-	PerlLIO_unlink(SvPVX(sv));
-	SvREFCNT_dec(sv);
-    }
-    return f;
-#endif
+     dTHX;
+     PerlIO *f = NULL;
+     int fd = -1;
+#ifdef WIN32
+     fd = win32_tmpfd();
+     if (fd >= 0)
+	  f = PerlIO_fdopen(fd, "w+b");
+#else /* WIN32 */
+#    ifdef HAS_MKSTEMP
+     SV *sv = newSVpv("/tmp/PerlIO_XXXXXX", 0);
+
+     /*
+      * I have no idea how portable mkstemp() is ... NI-S
+      */
+     fd = mkstemp(SvPVX(sv));
+     if (fd >= 0) {
+	  f = PerlIO_fdopen(fd, "w+");
+	  if (f)
+	       PerlIOBase(f)->flags |= PERLIO_F_TEMP;
+	  PerlLIO_unlink(SvPVX(sv));
+	  SvREFCNT_dec(sv);
+     }
+#    else	/* !HAS_MKSTEMP, fallback to stdio tmpfile(). */
+     FILE *stdio = PerlSIO_tmpfile();
+
+     if (stdio) {
+	  if ((f = PerlIO_push(aTHX_(PerlIO_allocate(aTHX)),
+                               &PerlIO_stdio, "w+", Nullsv))) {
+               PerlIOStdio *s = PerlIOSelf(f, PerlIOStdio);
+
+               if (s)
+                    s->stdio = stdio;
+          }
+     }
+#    endif /* else HAS_MKSTEMP */
+#endif /* else WIN32 */
+     return f;
 }
 
 #undef HAS_FSETPOS
