@@ -380,10 +380,16 @@ sub expr {
         };
 	# Eliminate typedefs
 	/\(([\w\s]+)[\*\s]*\)\s*[\w\(]/ && do {
+	    my $doit = 1;
 	    foreach (split /\s+/, $1) {  # Make sure all the words are types,
-		last unless ($isatype{$_} or $_ eq 'struct' or $_ eq 'union');
+	        unless($isatype{$_} or $_ eq 'struct' or $_ eq 'union'){
+		    $doit = 0;
+		    last;
+		}
 	    }
-	    s/\([\w\s]+[\*\s]*\)// && next;      # then eliminate them.
+	    if( $doit ){
+		s/\([\w\s]+[\*\s]*\)// && next;      # then eliminate them.
+	    }
 	};
 	# struct/union member, including arrays:
 	s/^([_A-Z]\w*(\[[^\]]+\])?((\.|->)[_A-Z]\w*(\[[^\]]+\])?)+)//i && do {
