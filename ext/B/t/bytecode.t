@@ -22,7 +22,8 @@ for (@tests) {
     my ($script, $expect) = split />>>+\n/;
     $expect =~ s/\n$//;
     open T, ">$test"; print T $script; close T;
-    $got = run_perl(switches => "-MO=Bytecode,-H,-o$test",
+    $got = run_perl(switches => [ "-MO=Bytecode,-H,-o$test" ],
+		    stderr   => 1,
 		    progfile => $test);
     unless ($?) {
 	$got = run_perl(progfile => $test);
