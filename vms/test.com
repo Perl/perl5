@@ -115,10 +115,8 @@ use Config;
 use File::Spec;
 
 @compexcl=('cpp.t');
-@libexcl=('io_sel.t');
-
 @opexcl=('die_exit.t','exec.t','groups.t','magic.t','stat.t');
-@exclist=(@compexcl,@ioexcl,@libexcl,@opexcl);
+@exclist=(@compexcl,@libexcl,@opexcl);
 foreach $file (@exclist) { $skip{$file}++; }
 
 $| = 1;
