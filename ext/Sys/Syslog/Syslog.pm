@@ -194,7 +194,7 @@ sub setlogsock {
     } elsif (lc($setsock) eq 'stream') {
 	unless (defined $syslog_path) {
 	    my @try = qw(/dev/log /dev/conslog);
-	    if (length &_PATH_LOG) {
+	    if (length &_PATH_LOG) { # Undefined _PATH_LOG is "".
 		unshift @try, &_PATH_LOG;
             }
 	    for my $try (@try) {
@@ -203,9 +203,10 @@ sub setlogsock {
 		    last;
 		}
 	    }
-	    carp "stream passed to setlogsock, but could not find any device";
+	    carp "stream passed to setlogsock, but could not find any device"
+		unless defined $syslog_path;
         }
-	if (!-w $syslog_path) {
+	unless (-w $syslog_path) {
 	    carp "stream passed to setlogsock, but $syslog_path is not writable";
 	    return undef;
 	} else {
