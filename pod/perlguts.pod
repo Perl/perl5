@@ -1328,7 +1328,8 @@ Similar to C<save_scalar>, but localize C<@gv> and C<%gv>.
 
 Duplicates the current value of C<SV>, on the exit from the current
 C<ENTER>/C<LEAVE> I<pseudo-block> will restore the value of C<SV>
-using the stored value.
+using the stored value. It doesn't handle magic. Use C<save_scalar> if
+magic is affected.
 
 =item C<void save_list(SV **sarg, I32 maxsarg)>
 
