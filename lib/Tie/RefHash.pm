@@ -43,7 +43,7 @@ Gurusamy Sarathy        gsar@umich.edu
 
 =head1 VERSION
 
-Version 1.21    22 Jun 1999
+Version 1.2    15 Dec 1996
 
 =head1 SEE ALSO
 
@@ -94,6 +94,7 @@ sub EXISTS {
 
 sub FIRSTKEY {
   my $s = shift;
+  my $a = scalar(keys %{$s->[0]}) + scalar(keys %{$s->[1]});
   $s->[2] = 0;
   $s->NEXTKEY;
 }
