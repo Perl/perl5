@@ -42,11 +42,11 @@ and the 'base' pragma modules.  The 'base' pragma will copy fields
 from base classes and the 'fields' pragma adds new fields.  Field
 names that start with an underscore character are made private to a
 class and are not visible to subclasses.  Inherited fields can be
-overridden but will generate a warning if used together with the -w
-option.
+overridden but will generate a warning if used together with the C<-w>
+switch.
 
 The effect of all this is that you can have objects with named fields
-which are as compact and as fast arrays too access.  This only works
+which are as compact and as fast arrays to access.  This only works
 as long as the objects are accessed through properly typed variables.
 For untyped access to work you have to make sure that a reference to
 the proper %FIELDS hash is assigned to the 0'th element of the array
