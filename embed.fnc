@@ -1282,7 +1282,7 @@ s	|HV *	|find_in_my_stash|char *pkgname|I32 len
 s	|SV*	|new_constant	|char *s|STRLEN len|const char *key|SV *sv \
 				|SV *pv|const char *type
 #  if defined(DEBUGGING)
-s	|void	|tokereport	|char *thing|char *s|I32 rv
+s	|int	|tokereport	|char *s|I32 rv
 #  endif
 s	|int	|ao		|int toketype
 s	|void	|depcom

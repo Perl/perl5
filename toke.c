@@ -75,6 +75,22 @@ static I32 utf16rev_textfilter(pTHX_ int idx, SV *sv, int maxlen);
 #define LEX_FORMLINE		 1
 #define LEX_KNOWNEXT		 0
 
+#ifdef DEBUGGING
+static char* lex_state_names[] = {
+    "KNOWNEXT",
+    "FORMLINE",
+    "INTERPCONST",
+    "INTERPCONCAT",
+    "INTERPENDMAYBE",
+    "INTERPEND",
+    "INTERPSTART",
+    "INTERPPUSH",
+    "INTERPCASEMOD",
+    "INTERPNORMAL",
+    "NORMAL"
+};
+#endif
+
 #ifdef ff_next
 #undef ff_next
 #endif
@@ -116,79 +132,197 @@ static I32 utf16rev_textfilter(pTHX_ int idx, SV *sv, int maxlen);
  * Also see LOP and lop() below.
  */
 
-/* Note that REPORT() and REPORT2() will be expressions that supply
- * their own trailing comma, not suitable for statements as such. */
 #ifdef DEBUGGING /* Serve -DT. */
-#   define REPORT(x,retval) tokereport(x,s,(int)retval),
-#   define REPORT2(x,retval) tokereport(x,s, yylval.ival),
+#   define REPORT(retval) tokereport(s,(int)retval)
 #else
-#   define REPORT(x,retval)
-#   define REPORT2(x,retval)
+#   define REPORT(retval) (retval)
 #endif
 
-#define TOKEN(retval) return (REPORT2("token",retval) PL_bufptr = s,(int)retval)
-#define OPERATOR(retval) return (REPORT2("operator",retval) PL_expect = XTERM, PL_bufptr = s,(int)retval)
-#define AOPERATOR(retval) return ao((REPORT2("aop",retval) PL_expect = XTERM, PL_bufptr = s,(int)retval))
-#define PREBLOCK(retval) return (REPORT2("preblock",retval) PL_expect = XBLOCK,PL_bufptr = s,(int)retval)
-#define PRETERMBLOCK(retval) return (REPORT2("pretermblock",retval) PL_expect = XTERMBLOCK,PL_bufptr = s,(int)retval)
-#define PREREF(retval) return (REPORT2("preref",retval) PL_expect = XREF,PL_bufptr = s,(int)retval)
-#define TERM(retval) return (CLINE, REPORT2("term",retval) PL_expect = XOPERATOR, PL_bufptr = s,(int)retval)
-#define LOOPX(f) return(yylval.ival=f, REPORT("loopx",f) PL_expect = XTERM,PL_bufptr = s,(int)LOOPEX)
-#define FTST(f) return(yylval.ival=f, REPORT("ftst",f) PL_expect = XTERMORDORDOR,PL_bufptr = s,(int)UNIOP)
-#define FUN0(f) return(yylval.ival = f, REPORT("fun0",f) PL_expect = XOPERATOR,PL_bufptr = s,(int)FUNC0)
-#define FUN1(f) return(yylval.ival = f, REPORT("fun1",f) PL_expect = XOPERATOR,PL_bufptr = s,(int)FUNC1)
-#define BOop(f) return ao((yylval.ival=f, REPORT("bitorop",f) PL_expect = XTERM,PL_bufptr = s,(int)BITOROP))
-#define BAop(f) return ao((yylval.ival=f, REPORT("bitandop",f) PL_expect = XTERM,PL_bufptr = s,(int)BITANDOP))
-#define SHop(f) return ao((yylval.ival=f, REPORT("shiftop",f) PL_expect = XTERM,PL_bufptr = s,(int)SHIFTOP))
-#define PWop(f) return ao((yylval.ival=f, REPORT("powop",f) PL_expect = XTERM,PL_bufptr = s,(int)POWOP))
-#define PMop(f) return(yylval.ival=f, REPORT("matchop",f) PL_expect = XTERM,PL_bufptr = s,(int)MATCHOP)
-#define Aop(f) return ao((yylval.ival=f, REPORT("add",f) PL_expect = XTERM,PL_bufptr = s,(int)ADDOP))
-#define Mop(f) return ao((yylval.ival=f, REPORT("mul",f) PL_expect = XTERM,PL_bufptr = s,(int)MULOP))
-#define Eop(f) return(yylval.ival=f, REPORT("eq",f) PL_expect = XTERM,PL_bufptr = s,(int)EQOP)
-#define Rop(f) return(yylval.ival=f, REPORT("rel",f) PL_expect = XTERM,PL_bufptr = s,(int)RELOP)
+#define TOKEN(retval) return ( PL_bufptr = s, REPORT(retval))
+#define OPERATOR(retval) return (PL_expect = XTERM, PL_bufptr = s, REPORT(retval))
+#define AOPERATOR(retval) return ao((PL_expect = XTERM, PL_bufptr = s, REPORT(retval)))
+#define PREBLOCK(retval) return (PL_expect = XBLOCK,PL_bufptr = s, REPORT(retval))
+#define PRETERMBLOCK(retval) return (PL_expect = XTERMBLOCK,PL_bufptr = s, REPORT(retval))
+#define PREREF(retval) return (PL_expect = XREF,PL_bufptr = s, REPORT(retval))
+#define TERM(retval) return (CLINE, PL_expect = XOPERATOR, PL_bufptr = s, REPORT(retval))
+#define LOOPX(f) return (yylval.ival=f, PL_expect=XTERM, PL_bufptr=s, REPORT((int)LOOPEX))
+#define FTST(f)  return (yylval.ival=f, PL_expect=XTERMORDORDOR, PL_bufptr=s, REPORT((int)UNIOP))
+#define FUN0(f)  return (yylval.ival=f, PL_expect=XOPERATOR, PL_bufptr=s, REPORT((int)FUNC0))
+#define FUN1(f)  return (yylval.ival=f, PL_expect=XOPERATOR, PL_bufptr=s, REPORT((int)FUNC1))
+#define BOop(f)  return ao((yylval.ival=f, PL_expect=XTERM, PL_bufptr=s, REPORT((int)BITOROP)))
+#define BAop(f)  return ao((yylval.ival=f, PL_expect=XTERM, PL_bufptr=s, REPORT((int)BITANDOP)))
+#define SHop(f)  return ao((yylval.ival=f, PL_expect=XTERM, PL_bufptr=s, REPORT((int)SHIFTOP)))
+#define PWop(f)  return ao((yylval.ival=f, PL_expect=XTERM, PL_bufptr=s, REPORT((int)POWOP)))
+#define PMop(f)  return(yylval.ival=f, PL_expect=XTERM, PL_bufptr=s, REPORT((int)MATCHOP))
+#define Aop(f)   return ao((yylval.ival=f, PL_expect=XTERM, PL_bufptr=s, REPORT((int)ADDOP)))
+#define Mop(f)   return ao((yylval.ival=f, PL_expect=XTERM, PL_bufptr=s, REPORT((int)MULOP)))
+#define Eop(f)   return (yylval.ival=f, PL_expect=XTERM, PL_bufptr=s, REPORT((int)EQOP))
+#define Rop(f)   return (yylval.ival=f, PL_expect=XTERM, PL_bufptr=s, REPORT((int)RELOP))
 
 /* This bit of chicanery makes a unary function followed by
  * a parenthesis into a function with one argument, highest precedence.
  * The UNIDOR macro is for unary functions that can be followed by the //
  * operator (such as C<shift // 0>).
  */
-#define UNI2(f,x) return(yylval.ival = f, \
-	REPORT("uni",f) \
+#define UNI2(f,x) return ( \
+	yylval.ival = f, \
 	PL_expect = x, \
 	PL_bufptr = s, \
 	PL_last_uni = PL_oldbufptr, \
 	PL_last_lop_op = f, \
-	(*s == '(' || (s = skipspace(s), *s == '(') ? (int)FUNC1 : (int)UNIOP) )
+	REPORT( \
+	    (*s == '(' || (s = skipspace(s), *s == '(')  \
+	    ? (int)FUNC1 : (int)UNIOP)))
 #define UNI(f)    UNI2(f,XTERM)
 #define UNIDOR(f) UNI2(f,XTERMORDORDOR)
 
-#define UNIBRACK(f) return(yylval.ival = f, \
-        REPORT("uni",f) \
+#define UNIBRACK(f) return ( \
+	yylval.ival = f, \
 	PL_bufptr = s, \
 	PL_last_uni = PL_oldbufptr, \
-	(*s == '(' || (s = skipspace(s), *s == '(') ? (int)FUNC1 : (int)UNIOP) )
+        REPORT( \
+	    (*s == '(' || (s = skipspace(s), *s == '(') \
+	? (int)FUNC1 : (int)UNIOP)))
 
 /* grandfather return to old style */
 #define OLDLOP(f) return(yylval.ival=f,PL_expect = XTERM,PL_bufptr = s,(int)LSTOP)
 
 #ifdef DEBUGGING
 
-STATIC void
-S_tokereport(pTHX_ char *thing, char* s, I32 rv)
-{
-    DEBUG_T({
-        SV* report = newSVpv(thing, 0);
-        Perl_sv_catpvf(aTHX_ report, ":line %d:%"IVdf":", CopLINE(PL_curcop),
-		(IV)rv);
+/* how to interpret the yylval associated with the token */
+enum token_type {
+    TOKENTYPE_NONE,
+    TOKENTYPE_IVAL,
+    TOKENTYPE_OPNUM, /* yylval.ival contains an opcode number */
+    TOKENTYPE_PVAL,
+    TOKENTYPE_OPVAL,
+    TOKENTYPE_GVVAL
+};
 
+static struct debug_tokens { int token, type; char *name;} debug_tokens[] =
+{
+    { ADDOP,		TOKENTYPE_OPNUM,	"ADDOP" },
+    { ANDAND,		TOKENTYPE_NONE,		"ANDAND" },
+    { ANDOP,		TOKENTYPE_NONE,		"ANDOP" },
+    { ANONSUB,		TOKENTYPE_IVAL,		"ANONSUB" },
+    { ARROW,		TOKENTYPE_NONE,		"ARROW" },
+    { ASSIGNOP,		TOKENTYPE_OPNUM,	"ASSIGNOP" },
+    { BITANDOP,		TOKENTYPE_OPNUM,	"BITANDOP" },
+    { BITOROP,		TOKENTYPE_OPNUM,	"BITOROP" },
+    { COLONATTR,	TOKENTYPE_NONE,		"COLONATTR" },
+    { CONTINUE,		TOKENTYPE_NONE,		"CONTINUE" },
+    { DO,		TOKENTYPE_NONE,		"DO" },
+    { DOLSHARP,		TOKENTYPE_NONE,		"DOLSHARP" },
+    { DORDOR,		TOKENTYPE_NONE,		"DORDOR" },
+    { DOROP,		TOKENTYPE_OPNUM,	"DOROP" },
+    { DOTDOT,		TOKENTYPE_IVAL,		"DOTDOT" },
+    { ELSE,		TOKENTYPE_NONE,		"ELSE" },
+    { ELSIF,		TOKENTYPE_IVAL,		"ELSIF" },
+    { EQOP,		TOKENTYPE_OPNUM,	"EQOP" },
+    { FOR,		TOKENTYPE_IVAL,		"FOR" },
+    { FORMAT,		TOKENTYPE_NONE,		"FORMAT" },
+    { FUNC,		TOKENTYPE_OPNUM,	"FUNC" },
+    { FUNC0,		TOKENTYPE_OPNUM,	"FUNC0" },
+    { FUNC0SUB,		TOKENTYPE_OPVAL,	"FUNC0SUB" },
+    { FUNC1,		TOKENTYPE_OPNUM,	"FUNC1" },
+    { FUNCMETH,		TOKENTYPE_OPVAL,	"FUNCMETH" },
+    { HASHBRACK,	TOKENTYPE_NONE,		"HASHBRACK" },
+    { IF,		TOKENTYPE_IVAL,		"IF" },
+    { LABEL,		TOKENTYPE_PVAL,		"LABEL" },
+    { LOCAL,		TOKENTYPE_IVAL,		"LOCAL" },
+    { LOOPEX,		TOKENTYPE_OPNUM,	"LOOPEX" },
+    { LSTOP,		TOKENTYPE_OPNUM,	"LSTOP" },
+    { LSTOPSUB,		TOKENTYPE_OPVAL,	"LSTOPSUB" },
+    { MATCHOP,		TOKENTYPE_OPNUM,	"MATCHOP" },
+    { METHOD,		TOKENTYPE_OPVAL,	"METHOD" },
+    { MULOP,		TOKENTYPE_OPNUM,	"MULOP" },
+    { MY,		TOKENTYPE_IVAL,		"MY" },
+    { MYSUB,		TOKENTYPE_NONE,		"MYSUB" },
+    { NOAMP,		TOKENTYPE_NONE,		"NOAMP" },
+    { NOTOP,		TOKENTYPE_NONE,		"NOTOP" },
+    { OROP,		TOKENTYPE_IVAL,		"OROP" },
+    { OROR,		TOKENTYPE_NONE,		"OROR" },
+    { PACKAGE,		TOKENTYPE_NONE,		"PACKAGE" },
+    { PMFUNC,		TOKENTYPE_OPVAL,	"PMFUNC" },
+    { POSTDEC,		TOKENTYPE_NONE,		"POSTDEC" },
+    { POSTINC,		TOKENTYPE_NONE,		"POSTINC" },
+    { POWOP,		TOKENTYPE_OPNUM,	"POWOP" },
+    { PREDEC,		TOKENTYPE_NONE,		"PREDEC" },
+    { PREINC,		TOKENTYPE_NONE,		"PREINC" },
+    { PRIVATEREF,	TOKENTYPE_OPVAL,	"PRIVATEREF" },
+    { REFGEN,		TOKENTYPE_NONE,		"REFGEN" },
+    { RELOP,		TOKENTYPE_OPNUM,	"RELOP" },
+    { SHIFTOP,		TOKENTYPE_OPNUM,	"SHIFTOP" },
+    { SUB,		TOKENTYPE_NONE,		"SUB" },
+    { THING,		TOKENTYPE_OPVAL,	"THING" },
+    { UMINUS,		TOKENTYPE_NONE,		"UMINUS" },
+    { UNIOP,		TOKENTYPE_OPNUM,	"UNIOP" },
+    { UNIOPSUB,		TOKENTYPE_OPVAL,	"UNIOPSUB" },
+    { UNLESS,		TOKENTYPE_IVAL,		"UNLESS" },
+    { UNTIL,		TOKENTYPE_IVAL,		"UNTIL" },
+    { USE,		TOKENTYPE_IVAL,		"USE" },
+    { WHILE,		TOKENTYPE_IVAL,		"WHILE" },
+    { WORD,		TOKENTYPE_OPVAL,	"WORD" },
+    { 0,		TOKENTYPE_NONE,		0 }
+};
+
+/* dump the returned token in rv, plus any optional arg in yylval */
+
+STATIC int
+S_tokereport(pTHX_ char* s, I32 rv)
+{
+    if (DEBUG_T_TEST) {
+	char *name = Nullch;
+	enum token_type type = TOKENTYPE_NONE;
+	struct debug_tokens *p;
+        SV* report = NEWSV(0, 60);
+
+        Perl_sv_catpvf(aTHX_ report, "<== ");
+
+	for (p = debug_tokens; p->token; p++) {
+	    if (p->token == (int)rv) {
+		name = p->name;
+		type = p->type;
+		break;
+	    }
+	}
+	if (name)
+	    Perl_sv_catpvf(aTHX_ report, "%s", name);
+	else if ((char)rv > ' ' && (char)rv < '~')
+	    Perl_sv_catpvf(aTHX_ report, "'%c'", (char)rv);
+	else if (!rv)
+	    Perl_sv_catpvf(aTHX_ report, "EOF");
+	else
+	    Perl_sv_catpvf(aTHX_ report, "?? %"IVdf, (IV)rv);
+	switch (type) {
+	case TOKENTYPE_NONE:
+	case TOKENTYPE_GVVAL: /* doesn't appear to be used */
+	    break;
+	case TOKENTYPE_IVAL:
+	    Perl_sv_catpvf(aTHX_ report, "(ival=%"IVdf")", yylval.ival);
+	    break;
+	case TOKENTYPE_OPNUM:
+	    Perl_sv_catpvf(aTHX_ report, "(ival=op_%s)",
+				    PL_op_name[yylval.ival]);
+	    break;
+	case TOKENTYPE_PVAL:
+	    Perl_sv_catpvf(aTHX_ report, "(pval=\"%s\")", yylval.pval);
+	    break;
+	case TOKENTYPE_OPVAL:
+	    Perl_sv_catpvf(aTHX_ report, "(opval=op_%s)",
+				    PL_op_name[yylval.opval->op_type]);
+	    break;
+	}
+        Perl_sv_catpvf(aTHX_ report, " at line %d [", CopLINE(PL_curcop));
         if (s - PL_bufptr > 0)
             sv_catpvn(report, PL_bufptr, s - PL_bufptr);
         else {
             if (PL_oldbufptr && *PL_oldbufptr)
                 sv_catpv(report, PL_tokenbuf);
         }
-        PerlIO_printf(Perl_debug_log, "### %s\n", SvPV_nolen(report));
-    });
+        PerlIO_printf(Perl_debug_log, "### %s]\n", SvPV_nolen(report));
+    };
+    return (int)rv;
 }
 
 #endif
@@ -697,20 +831,19 @@ S_lop(pTHX_ I32 f, int x, char *s)
 {
     yylval.ival = f;
     CLINE;
-    REPORT("lop", f)
     PL_expect = x;
     PL_bufptr = s;
     PL_last_lop = PL_oldbufptr;
     PL_last_lop_op = (OPCODE)f;
     if (PL_nexttoke)
-	return LSTOP;
+	return REPORT(LSTOP);
     if (*s == '(')
-	return FUNC;
+	return REPORT(FUNC);
     s = skipspace(s);
     if (*s == '(')
-	return FUNC;
+	return REPORT(FUNC);
     else
-	return LSTOP;
+	return REPORT(LSTOP);
 }
 
 /*
@@ -2176,9 +2309,13 @@ Perl_yylex(pTHX)
     bool bof = FALSE;
     I32 orig_keyword = 0;
 
+    DEBUG_T( {
+	PerlIO_printf(Perl_debug_log, "### LEX_%s\n",
+					lex_state_names[PL_lex_state]);
+    } );
     /* check if there's an identifier for us to look at */
     if (PL_pending_ident)
-        return S_pending_ident(aTHX);
+        return REPORT(S_pending_ident(aTHX));
 
     /* no identifier pending identification */
 
@@ -2202,7 +2339,7 @@ Perl_yylex(pTHX)
               "### Next token after '%s' was known, type %"IVdf"\n", PL_bufptr,
               (IV)PL_nexttype[PL_nexttoke]); });
 
-	return(PL_nexttype[PL_nexttoke]);
+	return REPORT(PL_nexttype[PL_nexttoke]);
 
     /* interpolated case modifiers like \L \U, including \Q and \E.
        when we get here, PL_bufptr is at the \
@@ -2225,7 +2362,7 @@ Perl_yylex(pTHX)
 		    PL_bufptr += 2;
 		    PL_lex_state = LEX_INTERPCONCAT;
 		}
-		return ')';
+		return REPORT(')');
 	    }
 	    if (PL_bufptr != PL_bufend)
 		PL_bufptr += 2;
@@ -2247,7 +2384,7 @@ Perl_yylex(pTHX)
 		if (strchr("LU", *s) &&
 		    (strchr(PL_lex_casestack, 'L') || strchr(PL_lex_casestack, 'U'))) {
 		    PL_lex_casestack[--PL_lex_casemods] = '\0';
-		    return ')';
+		    return REPORT(')');
 		}
 		if (PL_lex_casemods > 10)
 		    Renew(PL_lex_casestack, PL_lex_casemods + 2, char);
@@ -2281,11 +2418,11 @@ Perl_yylex(pTHX)
 	}
 
     case LEX_INTERPPUSH:
-        return sublex_push();
+        return REPORT(sublex_push());
 
     case LEX_INTERPSTART:
 	if (PL_bufptr == PL_bufend)
-	    return sublex_done();
+	    return REPORT(sublex_done());
 	DEBUG_T({ PerlIO_printf(Perl_debug_log,
               "### Interpolated variable at '%s'\n", PL_bufptr); });
 	PL_expect = XTERM;
@@ -2319,7 +2456,7 @@ Perl_yylex(pTHX)
 	if (PL_lex_dojoin) {
 	    PL_lex_dojoin = FALSE;
 	    PL_lex_state = LEX_INTERPCONCAT;
-	    return ')';
+	    return REPORT(')');
 	}
 	if (PL_lex_inwhat == OP_SUBST && PL_linestr == PL_lex_repl
 	    && SvEVALED(PL_lex_repl))
@@ -2335,7 +2472,7 @@ Perl_yylex(pTHX)
 	    Perl_croak(aTHX_ "panic: INTERPCONCAT");
 #endif
 	if (PL_bufptr == PL_bufend)
-	    return sublex_done();
+	    return REPORT(sublex_done());
 
 	if (SvIVX(PL_linestr) == '\'') {
 	    SV *sv = newSVsv(PL_linestr);
@@ -2379,7 +2516,7 @@ Perl_yylex(pTHX)
     PL_oldoldbufptr = PL_oldbufptr;
     PL_oldbufptr = s;
     DEBUG_T( {
-	PerlIO_printf(Perl_debug_log, "### Tokener expecting %s at %s\n",
+	PerlIO_printf(Perl_debug_log, "### Tokener expecting %s at [%s]\n",
 		      exp_name[PL_expect], s);
     } );
 
@@ -2992,7 +3129,7 @@ Perl_yylex(pTHX)
 			yyerror("Unterminated attribute parameter in attribute list");
 			if (attrs)
 			    op_free(attrs);
-			return 0;	/* EOF indicator */
+			return REPORT(0);	/* EOF indicator */
 		    }
 		}
 		if (PL_lex_stuff) {
@@ -3449,7 +3586,7 @@ Perl_yylex(pTHX)
 	    if (PL_lex_formbrack && PL_lex_brackets == PL_lex_formbrack) {
 		PL_expect = XTERM;
 		depcom();
-		return ','; /* grandfather non-comma-format format */
+		return REPORT(','); /* grandfather non-comma-format format */
 	    }
 	}
 
@@ -3692,7 +3829,7 @@ Perl_yylex(pTHX)
 	    if (PL_lex_formbrack && PL_lex_brackets == PL_lex_formbrack) {
 		PL_expect = XTERM;
 		depcom();
-		return ',';	/* grandfather non-comma-format format */
+		return REPORT(','); /* grandfather non-comma-format format */
 	    }
 	    else
 		no_op("String",s);
@@ -3711,7 +3848,7 @@ Perl_yylex(pTHX)
 	    if (PL_lex_formbrack && PL_lex_brackets == PL_lex_formbrack) {
 		PL_expect = XTERM;
 		depcom();
-		return ',';	/* grandfather non-comma-format format */
+		return REPORT(','); /* grandfather non-comma-format format */
 	    }
 	    else
 		no_op("String",s);
@@ -3999,7 +4136,7 @@ Perl_yylex(pTHX)
 		    /* Two barewords in a row may indicate method call. */
 
 		    if ((isIDFIRST_lazy_if(s,UTF) || *s == '$') && (tmp=intuit_method(s,gv)))
-			return tmp;
+			return REPORT(tmp);
 
 		    /* If not a declared subroutine, it's an indirect object. */
 		    /* (But it's an indir obj regardless for sort.) */
@@ -4056,7 +4193,7 @@ Perl_yylex(pTHX)
 		if (!orig_keyword
 			&& (isIDFIRST_lazy_if(s,UTF) || *s == '$')
 			&& (tmp = intuit_method(s,gv)))
-		    return tmp;
+		    return REPORT(tmp);
 
 		/* Not a method, so call it a subroutine (if defined) */
 
