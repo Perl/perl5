@@ -289,7 +289,7 @@ ext/Encode/Encode/macGreek.enc	Encoding tables
 ext/Encode/Encode/macIceland.enc	Encoding tables
 ext/Encode/Encode/macJapan.enc	Encoding tables
 ext/Encode/Encode/macRoman.enc	Encoding tables
-ext/Encode/Encode/macRomania.enc	Encoding tables
+ext/Encode/Encode/macRumanian.enc	Encoding tables
 ext/Encode/Encode/macSami.enc	Encoding tables
 ext/Encode/Encode/macThai.enc	Encoding tables
 ext/Encode/Encode/macTurkish.enc	Encoding tables
