@@ -177,8 +177,11 @@ PerlIO *supplied_fp;
 	    if (strNE(name,"-"))
 		TAINT_ENV();
 	    TAINT_PROPER("piped open");
-	    if (dowarn && name[strlen(name)-1] == '|')
-		warn("Can't do bidirectional pipe");
+	    if (name[strlen(name)-1] == '|') {
+		name[strlen(name)-1] = '\0' ;
+	        if (dowarn)
+		    warn("Can't do bidirectional pipe");
+	    }
 	    fp = my_popen(name,"w");
 	    writing = 1;
 	}
