@@ -207,6 +207,7 @@ sub update_polar {
 sub plus {
 	my ($z1, $z2, $regular) = @_;
 	my ($re1, $im1) = @{$z1->cartesian};
+	$z2 = cplx($z2) unless ref $z2;
 	my ($re2, $im2) = ref $z2 ? @{$z2->cartesian} : ($z2, 0);
 	unless (defined $regular) {
 		$z1->set_cartesian([$re1 + $re2, $im1 + $im2]);
@@ -223,7 +224,8 @@ sub plus {
 sub minus {
 	my ($z1, $z2, $inverted) = @_;
 	my ($re1, $im1) = @{$z1->cartesian};
-	my ($re2, $im2) = ref $z2 ? @{$z2->cartesian} : ($z2, 0);
+	$z2 = cplx($z2) unless ref $z2;
+	my ($re2, $im2) = @{$z2->cartesian};
 	unless (defined $inverted) {
 		$z1->set_cartesian([$re1 - $re2, $im1 - $im2]);
 		return $z1;
@@ -231,6 +233,7 @@ sub minus {
 	return $inverted ?
 		(ref $z1)->make($re2 - $re1, $im2 - $im1) :
 		(ref $z1)->make($re1 - $re2, $im1 - $im2);
+
 }
 
 #
@@ -241,8 +244,8 @@ sub minus {
 sub multiply {
 	my ($z1, $z2, $regular) = @_;
 	my ($r1, $t1) = @{$z1->polar};
-	my ($r2, $t2) = ref $z2 ?
-	    @{$z2->polar} : (abs($z2), $z2 >= 0 ? 0 : pi);
+	$z2 = cplxe(abs($z2), $z2 >= 0 ? 0 : pi) unless ref $z2;
+	my ($r2, $t2) = @{$z2->polar};
 	unless (defined $regular) {
 		$z1->set_polar([$r1 * $r2, $t1 + $t2]);
 		return $z1;
@@ -251,11 +254,11 @@ sub multiply {
 }
 
 #
-# divbyzero
+# _divbyzero
 #
 # Die on division by zero.
 #
-sub divbyzero {
+sub _divbyzero {
     my $mess = "$_[0]: Division by zero.\n";
 
     if (defined $_[1]) {
@@ -272,11 +275,35 @@ sub divbyzero {
 }
 
 #
-# zerotozero
+# (divide)
+#
+# Computes z1/z2.
+#
+sub divide {
+	my ($z1, $z2, $inverted) = @_;
+	my ($r1, $t1) = @{$z1->polar};
+	$z2 = cplxe(abs($z2), $z2 >= 0 ? 0 : pi) unless ref $z2;
+	my ($r2, $t2) = @{$z2->polar};
+	unless (defined $inverted) {
+		_divbyzero "$z1/0" if ($r2 == 0);
+		$z1->set_polar([$r1 / $r2, $t1 - $t2]);
+		return $z1;
+	}
+	if ($inverted) {
+		_divbyzero "$z2/0" if ($r1 == 0);
+		return (ref $z1)->emake($r2 / $r1, $t2 - $t1);
+	} else {
+		_divbyzero "$z1/0" if ($r2 == 0);
+		return (ref $z1)->emake($r1 / $r2, $t1 - $t2);
+	}
+}
+
+#
+# _zerotozero
 #
 # Die on zero raised to the zeroth.
 #
-sub zerotozero {
+sub _zerotozero {
     my $mess = "The zero raised to the zeroth power is not defined.\n";
 
     my @up = caller(1);
@@ -287,39 +314,23 @@ sub zerotozero {
 }
 
 #
-# (divide)
-#
-# Computes z1/z2.
-#
-sub divide {
-	my ($z1, $z2, $inverted) = @_;
-	my ($r1, $t1) = @{$z1->polar};
-	my ($r2, $t2) = ref $z2 ?
-	    @{$z2->polar} : (abs($z2), $z2 >= 0 ? 0 : pi);
-	unless (defined $inverted) {
-		divbyzero "$z1/0" if ($r2 == 0);
-		$z1->set_polar([$r1 / $r2, $t1 - $t2]);
-		return $z1;
-	}
-	if ($inverted) {
-		divbyzero "$z2/0" if ($r1 == 0);
-		return (ref $z1)->emake($r2 / $r1, $t2 - $t1);
-	} else {
-		divbyzero "$z1/0" if ($r2 == 0);
-		return (ref $z1)->emake($r1 / $r2, $t1 - $t2);
-	}
-}
-
-#
 # (power)
 #
 # Computes z1**z2 = exp(z2 * log z1)).
 #
 sub power {
 	my ($z1, $z2, $inverted) = @_;
-	zerotozero if ($z1 == 0 and $z2 == 0);
-	return exp($z1 * log $z2) if defined $inverted && $inverted;
-	return exp($z2 * log $z1);
+	_zerotozero if ($z1 == 0 and $z2 == 0);
+	return 1 if ($z1 == 1);
+	return 0 if ($z2 == 0);
+	$z2 = cplx($z2) unless ref $z2;
+	unless (defined $inverted) {
+		my $z3 = exp($z2 * log $z1);
+		$z1->set_cartesian([@{$z3->cartesian}]);
+		return $z1;
+	}
+	return exp($z2 * log $z1) unless $inverted;
+	return exp($z1 * log $z2);
 }
 
 #
@@ -416,6 +427,21 @@ sub cbrt {
 }
 
 #
+# _rootbad
+#
+# Die on bad root.
+#
+sub _rootbad {
+    my $mess = "Root $_[0] not defined, root must be positive integer.\n";
+
+    my @up = caller(1);
+    
+    $mess .= "Died at $up[1] line $up[2].\n";
+
+    die $mess;
+}
+
+#
 # root
 #
 # Computes all nth root for z, returning an array whose size is n.
@@ -427,8 +453,7 @@ sub cbrt {
 #
 sub root {
 	my ($z, $n) = @_;
-	$n = int($n + 0.5);
-	return undef unless $n > 0;
+	_rootbad($n) if ($n < 1 or int($n) != $n);
 	my ($r, $t) = ref $z ? @{$z->polar} : (abs($z), $z >= 0 ? 0 : pi);
 	my @root;
 	my $k;
@@ -565,7 +590,7 @@ sub sin {
 sub tan {
 	my ($z) = @_;
 	my $cz = cos($z);
-	divbyzero "tan($z)", "cos($z)" if ($cz == 0);
+	_divbyzero "tan($z)", "cos($z)" if ($cz == 0);
 	return sin($z) / $cz;
 }
 
@@ -577,7 +602,7 @@ sub tan {
 sub sec {
 	my ($z) = @_;
 	my $cz = cos($z);
-	divbyzero "sec($z)", "cos($z)" if ($cz == 0);
+	_divbyzero "sec($z)", "cos($z)" if ($cz == 0);
 	return 1 / $cz;
 }
 
@@ -589,7 +614,7 @@ sub sec {
 sub csc {
 	my ($z) = @_;
 	my $sz = sin($z);
-	divbyzero "csc($z)", "sin($z)" if ($sz == 0);
+	_divbyzero "csc($z)", "sin($z)" if ($sz == 0);
 	return 1 / $sz;
 }
 
@@ -608,7 +633,7 @@ sub cosec { Math::Complex::csc(@_) }
 sub cot {
 	my ($z) = @_;
 	my $sz = sin($z);
-	divbyzero "cot($z)", "sin($z)" if ($sz == 0);
+	_divbyzero "cot($z)", "sin($z)" if ($sz == 0);
 	return cos($z) / $sz;
 }
 
@@ -649,7 +674,7 @@ sub asin {
 sub atan {
 	my ($z) = @_;
 	$z = cplx($z, 0) unless ref $z;
-	divbyzero "atan($z)", "i - $z" if ($z == i);
+	_divbyzero "atan($z)", "i - $z" if ($z == i);
 	return i/2*log((i + $z) / (i - $z));
 }
 
@@ -660,7 +685,7 @@ sub atan {
 #
 sub asec {
 	my ($z) = @_;
-	divbyzero "asec($z)", $z if ($z == 0);
+	_divbyzero "asec($z)", $z if ($z == 0);
 	return acos(1 / $z);
 }
 
@@ -671,7 +696,7 @@ sub asec {
 #
 sub acsc {
 	my ($z) = @_;
-	divbyzero "acsc($z)", $z if ($z == 0);
+	_divbyzero "acsc($z)", $z if ($z == 0);
 	return asin(1 / $z);
 }
 
@@ -690,7 +715,7 @@ sub acosec { Math::Complex::acsc(@_) }
 sub acot {
 	my ($z) = @_;
 	$z = cplx($z, 0) unless ref $z;
-	divbyzero "acot($z)", "$z - i" if ($z == i);
+	_divbyzero "acot($z)", "$z - i" if ($z == i);
 	return i/-2 * log((i + $z) / ($z - i));
 }
 
@@ -708,10 +733,15 @@ sub acotan { Math::Complex::acot(@_) }
 #
 sub cosh {
 	my ($z) = @_;
-	my ($x, $y) = ref $z ? @{$z->cartesian} : ($z, 0);
+	my $real;
+	unless (ref $z) {
+	    $z = cplx($z, 0);
+	    $real = 1;
+	}
+	my ($x, $y) = @{$z->cartesian};
 	my $ex = exp($x);
 	my $ex_1 = 1 / $ex;
-	return ($ex + $ex_1)/2 unless ref $z;
+	return ($ex + $ex_1)/2 if $real;
 	return (ref $z)->make(cos($y) * ($ex + $ex_1)/2,
 			      sin($y) * ($ex - $ex_1)/2);
 }
@@ -723,10 +753,15 @@ sub cosh {
 #
 sub sinh {
 	my ($z) = @_;
-	my ($x, $y) = ref $z ? @{$z->cartesian} : ($z, 0);
+	my $real;
+	unless (ref $z) {
+	    $z = cplx($z, 0);
+	    $real = 1;
+	}
+	my ($x, $y) = @{$z->cartesian};
 	my $ex = exp($x);
 	my $ex_1 = 1 / $ex;
-	return ($ex - $ex_1)/2 unless ref $z;
+	return ($ex - $ex_1)/2 if $real;
 	return (ref $z)->make(cos($y) * ($ex - $ex_1)/2,
 			      sin($y) * ($ex + $ex_1)/2);
 }
@@ -739,7 +774,7 @@ sub sinh {
 sub tanh {
 	my ($z) = @_;
 	my $cz = cosh($z);
-	divbyzero "tanh($z)", "cosh($z)" if ($cz == 0);
+	_divbyzero "tanh($z)", "cosh($z)" if ($cz == 0);
 	return sinh($z) / $cz;
 }
 
@@ -751,7 +786,7 @@ sub tanh {
 sub sech {
 	my ($z) = @_;
 	my $cz = cosh($z);
-	divbyzero "sech($z)", "cosh($z)" if ($cz == 0);
+	_divbyzero "sech($z)", "cosh($z)" if ($cz == 0);
 	return 1 / $cz;
 }
 
@@ -763,7 +798,7 @@ sub sech {
 sub csch {
 	my ($z) = @_;
 	my $sz = sinh($z);
-	divbyzero "csch($z)", "sinh($z)" if ($sz == 0);
+	_divbyzero "csch($z)", "sinh($z)" if ($sz == 0);
 	return 1 / $sz;
 }
 
@@ -782,7 +817,7 @@ sub cosech { Math::Complex::csch(@_) }
 sub coth {
 	my ($z) = @_;
 	my $sz = sinh($z);
-	divbyzero "coth($z)", "sinh($z)" if ($sz == 0);
+	_divbyzero "coth($z)", "sinh($z)" if ($sz == 0);
 	return cosh($z) / $sz;
 }
 
@@ -822,7 +857,7 @@ sub asinh {
 #
 sub atanh {
 	my ($z) = @_;
-	divbyzero 'atanh(1)', "1 - $z" if ($z == 1);
+	_divbyzero 'atanh(1)', "1 - $z" if ($z == 1);
 	$z = cplx($z, 0) unless ref $z;
 	my $cz = (1 + $z) / (1 - $z);
 	return log($cz) / 2;
@@ -835,7 +870,7 @@ sub atanh {
 #
 sub asech {
 	my ($z) = @_;
-	divbyzero 'asech(0)', $z if ($z == 0);
+	_divbyzero 'asech(0)', $z if ($z == 0);
 	return acosh(1 / $z);
 }
 
@@ -846,7 +881,7 @@ sub asech {
 #
 sub acsch {
 	my ($z) = @_;
-	divbyzero 'acsch(0)', $z if ($z == 0);
+	_divbyzero 'acsch(0)', $z if ($z == 0);
 	return asinh(1 / $z);
 }
 
@@ -864,7 +899,7 @@ sub acosech { Math::Complex::acsch(@_) }
 #
 sub acoth {
 	my ($z) = @_;
-	divbyzero 'acoth(1)', "$z - 1" if ($z == 1);
+	_divbyzero 'acoth(1)', "$z - 1" if ($z == 1);
 	$z = cplx($z, 0) unless ref $z;
 	my $cz = (1 + $z) / ($z - 1);
 	return log($cz) / 2;

@@ -23,11 +23,11 @@ while (<DATA>) {
 	next if $_ eq '' || /^\#/;
 	chomp;
 	$test_set = 0;		# Assume not a test over a set of values
-	if (/^&(.*)/) {
+	if (/^&(.+)/) {
 		$op = $1;
 		next;
 	}
-	elsif (/^\{(.*)\}/) {
+	elsif (/^\{(.+)\}/) {
 		set($1, \@set, \@val);
 		next;
 	}
@@ -51,6 +51,17 @@ while (<DATA>) {
 
 # test the divbyzeros
 
+sub test_dbz {
+    for my $op (@_) {
+	$test++;
+
+#	push(@script, qq(print "# '$op'\n";));
+	push(@script, qq(eval '$op';));
+	push(@script, qq(print 'not ' unless (\$@ =~ /Division by zero/);));
+	push(@script, qq(print "ok $test\n";));
+    }
+}
+
 test_dbz(
 	 'i/0',
 #	 'tan(pi/2)',	# may succeed thanks to floating point inaccuracies
@@ -71,24 +82,50 @@ test_dbz(
 	 'acoth(1)'
 	);
 
-sub test_dbz {
+# test the 0**0
+
+sub test_ztz {
+	$test++;
+
+#	push(@script, qq(print "# 0**0\n";));
+	push(@script, qq(eval 'cplx(0)**cplx(0)';));
+	push(@script, qq(print 'not ' unless (\$@ =~ /zero raised to the/);));
+	push(@script, qq(print "ok $test\n";));
+}
+
+test_ztz;
+
+# test the bad roots
+
+sub test_broot {
     for my $op (@_) {
 	$test++;
 
-	push(@script, qq(eval '$op';));
-	push(@script, qq(print 'not ' unless (\$@ =~ /Division by zero/);));
+#	push(@script, qq(print "# root(2, $op)\n";));
+	push(@script, qq(eval 'root(2, $op)';));
+	push(@script, qq(print 'not ' unless (\$@ =~ /root must be/);));
 	push(@script, qq(print "ok $test\n";));
     }
 }
+
+test_broot(qw(-3 -2.1 0 0.99));
 
 print "1..$test\n";
 eval join '', @script;
 die $@ if $@;
 
+sub abop {
+	my ($op) = @_;
+
+	push(@script, qq(print "# $op=\n";));
+}
+
 sub test {
 	my ($op, $z, @args) = @_;
+	my ($baop) = 0;
 	$test++;
 	my $i;
+	$baop = 1 if ($op =~ s/;=$//);
 	for ($i = 0; $i < @args; $i++) {
 		$val = value($args[$i]);
 		push @script, "\$z$i = $val;\n";
@@ -109,6 +146,28 @@ sub test {
 		}
 		push @script, "\$res = $try; ";
 		push @script, "check($test, '$try', \$res, \$z$#args, $args);\n";
+		if (@args > 2 and $baop) { # binary assignment ops
+			$test++;
+			# check the op= works
+			push @script, <<EOB;
+{
+        my \$za = cplx(ref \$z0 ? \@{\$z0->cartesian} : (\$z0, 0));
+
+	my (\$z1r, \$z1i) = ref \$z1 ? \@{\$z1->cartesian} : (\$z1, 0);
+
+        my \$zb = cplx(\$z1r, \$z1i);
+
+	\$za $op= \$zb;
+	my (\$zbr, \$zbi) = \@{\$zb->cartesian};
+
+	check($test, '\$z0 $op= \$z1', \$za, \$z$#args, $args);
+EOB
+			$test++;
+			# check that the rhs has not changed
+			push @script, qq(print "not " unless (\$zbr == \$z1r and \$zbi == \$z1i););
+			push @script, qq(print "ok $test\n";);
+			push @script, "}\n";
+		}
 	}
 }
 
@@ -169,7 +228,7 @@ sub check {
 	}
 }
 __END__
-&+
+&+;=
 (3,4):(3,4):(6,8)
 (-3,4):(3,-4):(0,0)
 (3,4):-3:(0,4)
@@ -179,19 +238,20 @@ __END__
 &++
 (2,1):(3,1)
 
-&-
+&-;=
 (2,3):(-2,-3)
 [2,pi/2]:[2,-(pi)/2]
 2:[2,0]:(0,0)
 [3,0]:2:(1,0)
 3:(4,5):(-1,-5)
 (4,5):3:(1,5)
+(2,1):(3,5):(-1,-4)
 
 &--
 (1,2):(0,2)
 [2,pi]:[3,pi]
 
-&*
+&*;=
 (0,1):(0,1):(-1,0)
 (4,5):(1,0):(4,5)
 [2,2*pi/3]:(1,0):[2,2*pi/3]
@@ -200,7 +260,7 @@ __END__
 (0,1):(4,1):(-1,4)
 (2,1):(4,-1):(9,2)
 
-&/
+&/;=
 (3,4):(3,4):(1,0)
 (4,-5):1:(4,-5)
 1:(0,1):(0,-1)
@@ -208,6 +268,11 @@ __END__
 (9,2):(4,-1):(2,1)
 [4,pi]:[2,pi/2]:[2,pi/2]
 [2,pi/2]:[4,pi]:[0.5,-(pi)/2]
+
+&**;=
+(2,0):(3,0):(8,0)
+(3,0):(2,0):(9,0)
+(2,3):(4,0):(-119,-120)
 
 &Re
 (3,4):3
