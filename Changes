@@ -79,6 +79,33 @@ Version 5.005_62        Development release working toward 5.006
 ----------------
 
 ____________________________________________________________________________
+[  4390] By: gsar                                  on 1999/10/15  09:45:51
+        Log: lvalue subs patch (change#4081) breaks C<\(Foo->Bar())>;
+             avoid tickling it in Pod::Man for now; other nits in
+             Pod::*
+     Branch: perl
+	   ! lib/Pod/Man.pm lib/Pod/Parser.pm pod/perldelta.pod
+	   ! pod/perlopentut.pod
+____________________________________________________________________________
+[  4389] By: gsar                                  on 1999/10/15  08:55:01
+        Log: disable internal globbing for miniperl (or build breaks out
+             in a rash of failed dependencies)
+     Branch: perl
+	   ! Makefile.SH op.c win32/Makefile win32/makefile.mk
+____________________________________________________________________________
+[  4388] By: jhi                                   on 1999/10/15  08:07:49
+        Log: Integrate with Sarathy.
+     Branch: cfgperl
+	  !> Changes ext/POSIX/POSIX.xs lib/Benchmark.pm pod/perldelta.pod
+	  !> pod/perlfaq2.pod win32/include/dirent.h win32/win32.c
+____________________________________________________________________________
+[  4387] By: gsar                                  on 1999/10/15  07:46:24
+        Log: integrate cfgperl contents into mainline
+     Branch: perl
+	   ! Changes
+	  !> pod/perldelta.pod pod/perldiag.pod regcomp.c
+	  !> t/pragma/warn/regcomp
+____________________________________________________________________________
 [  4386] By: gsar                                  on 1999/10/15  05:45:36
         Log: various little goofs in change#4385
      Branch: perl

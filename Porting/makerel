@@ -114,13 +114,13 @@ my @writables = qw(
     ext/ByteLoader/byterun.h
     global.sym
     keywords.h
-    lib/warning.pm
+    lib/warnings.pm
     objXSUB.h
     opcode.h
     pp.sym
     pp_proto.h
     regnodes.h
-    warning.h
+    warnings.h
     win32/config_H.bc
     win32/config_H.gc
     win32/config_H.vc
