@@ -124,7 +124,7 @@ I32	do_semop _((SV** mark, SV** sp));
 I32	do_shmio _((I32 optype, SV** mark, SV** sp));
 #endif
 VIRTUAL void	do_sprintf _((SV* sv, I32 len, SV** sarg));
-VIRTUAL long	do_sysseek _((GV* gv, long pos, int whence));
+VIRTUAL Off_t	do_sysseek _((GV* gv, Off_t pos, int whence));
 VIRTUAL Off_t	do_tell _((GV* gv));
 VIRTUAL I32	do_trans _((SV* sv));
 VIRTUAL void	do_vecset _((SV* sv));

@@ -754,8 +754,8 @@ do_seek(GV *gv, Off_t pos, int whence)
     return FALSE;
 }
 
-long
-do_sysseek(GV *gv, long int pos, int whence)
+Off_t
+do_sysseek(GV *gv, Off_t pos, int whence)
 {
     register IO *io;
     register PerlIO *fp;

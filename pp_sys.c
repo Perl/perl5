@@ -1599,13 +1599,13 @@ PP(pp_sysseek)
     djSP;
     GV *gv;
     int whence = POPi;
-    long offset = POPl;
+    Off_t offset = POPl;
 
     gv = PL_last_in_gv = (GV*)POPs;
     if (PL_op->op_type == OP_SEEK)
 	PUSHs(boolSV(do_seek(gv, offset, whence)));
     else {
-	long n = do_sysseek(gv, offset, whence);
+	Off_t n = do_sysseek(gv, offset, whence);
 	PUSHs((n < 0) ? &PL_sv_undef
 	      : sv_2mortal(n ? newSViv((IV)n)
 			   : newSVpv(zero_but_true, ZBTLEN)));
