@@ -3544,11 +3544,14 @@ $   type = "''perl_i64type'"
 $   size_name = "i64size"
 $   gosub type_size_check
 $   perl_i64size="''line'"
+$   perl_ivtype="''perl_i64type'"
 $
 $   type = "''perl_u64type'"
 $   size_name = "u64size"
 $   gosub type_size_check
 $   perl_u64size="''line'"
+$   perl_uvtype="''perl_u64type'"
+$   perl_nvtype="long double"
 $ Else
 $   perl_i64size="undef"
 $   perl_u64size="undef"

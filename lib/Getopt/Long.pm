@@ -102,7 +102,7 @@ ConfigDefaults();
 
 ################ Object Oriented routines ################
 
-=experimental
+=for experimental
 
 # NOTE: The object oriented routines use $error for thread locking.
 eval "sub lock{}" if $] < 5.005;

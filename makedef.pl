@@ -103,14 +103,14 @@ close(CFG);
 # perl.h logic duplication begins
 
 if ($define{USE_ITHREADS}) {
-    if (!$define{MULTIPLICITY} && !defined{PERL_OBJECT}) {
+    if (!$define{MULTIPLICITY} && !define{PERL_OBJECT}) {
         $define{MULTIPLICITY} = 1;
     }
 }
 
 $define{PERL_IMPLICIT_CONTEXT} ||=
     $define{USE_ITHREADS} ||
-    $define{USE_THREADS}  ||
+    $define{USE_5005THREADS}  ||
     $define{MULTIPLICITY} ;
 
 if ($define{PERL_CAPI}) {

@@ -7002,7 +7002,8 @@ Perl_scan_num(pTHX_ char *start)
 	if (floatit) {
 	    char *tp;
 	    errno = 0;
-#ifdef USE_LONG_DOUBLE
+/* For some reason VMS doesn't have strrold at the moment. Dunno why */
+#if defined(USE_LONG_DOUBLE) && (defined(HAS_STRTOLD) || !defined(VMS))
 	    value = strtold(PL_tokenbuf,&tp);
 #else
 	    value = strtod(PL_tokenbuf,&tp);
