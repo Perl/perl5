@@ -14,7 +14,7 @@ use Sys::Syslog qw(:DEFAULT setlogsock);
 
 print "1..6\n";
 
-if (Sys::Syslog::_PATH_LOG()) {
+if (Sys::Syslog::_PATH_LOG() and -e Sys::Syslog::_PATH_LOG()) {
     print defined(eval { setlogsock('unix') }) ? "ok 1\n" : "not ok 1\n";
     print defined(eval { openlog('perl', 'ndelay', 'local0') }) ? "ok 2\n" : "not ok 2\n";
     print defined(eval { syslog('info', 'test') }) ? "ok 3\n" : "not ok 3\n";
