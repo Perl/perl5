@@ -4156,7 +4156,7 @@ char *tzname[] = { "" , "" };
 #endif
 
 void
-init_tm(struct tm *ptm)		/* see mktime, strftime and asctime	*/
+Perl_init_tm(pTHX_ struct tm *ptm)	/* see mktime, strftime and asctime */
 {
 #ifdef STRUCT_TM_HASZONE
     Time_t now;
@@ -4170,7 +4170,7 @@ init_tm(struct tm *ptm)		/* see mktime, strftime and asctime	*/
  * semantics (and overhead) of mktime().
  */
 void
-mini_mktime(struct tm *ptm)
+Perl_mini_mktime(pTHX_ struct tm *ptm)
 {
     int yearday;
     int secs;
@@ -4363,7 +4363,7 @@ mini_mktime(struct tm *ptm)
 }
 
 char *
-my_strftime(char *fmt, int sec, int min, int hour, int mday, int mon, int year, int wday, int yday, int isdst)
+Perl_my_strftime(pTHX_ char *fmt, int sec, int min, int hour, int mday, int mon, int year, int wday, int yday, int isdst)
 {
 #ifdef HAS_STRFTIME
   char *buf;
