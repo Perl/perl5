@@ -63,6 +63,7 @@ typedef U32 PADOFFSET;
 				/*  On flipflop, we saw ... instead of .. */
 				/*  On UNOPs, saw bare parens, e.g. eof(). */
 				/*  On OP_ENTERSUB || OP_NULL, saw a "do". */
+				/*  On OP_(ENTER|LEAVE)EVAL, don't clear $@ */
 
 /* Private for lvalues */
 #define OPpLVAL_INTRO	128	/* Lvalue must be localized */
