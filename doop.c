@@ -599,9 +599,12 @@ Perl_do_trans(pTHX_ SV *sv)
     I32 hasutf = (PL_op->op_private &
                     (OPpTRANS_FROM_UTF|OPpTRANS_TO_UTF));
 
-    if (SvREADONLY(sv) && !(PL_op->op_private & OPpTRANS_IDENTICAL))
-	Perl_croak(aTHX_ PL_no_modify);
-
+    if (SvREADONLY(sv)) {
+        if (SvFAKE(sv))
+            sv_force_normal(sv);
+        if (SvREADONLY(sv) && !(PL_op->op_private & OPpTRANS_IDENTICAL))
+            Perl_croak(aTHX_ PL_no_modify);
+    }
     (void)SvPV(sv, len);
     if (!len)
 	return 0;

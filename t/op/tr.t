@@ -5,7 +5,7 @@ BEGIN {
     @INC = '../lib';
 }
 
-print "1..70\n";
+print "1..71\n";
 
 $_ = "abcdefghijklmnopqrstuvwxyz";
 
@@ -390,4 +390,10 @@ print "ok 69\n";
 print "not " unless $a eq "XZY";
 print "ok 70\n";
 
-
+# pp_trans needs to unshare shared hash keys
+# Used to fail with "Modification of a read-only value attempted"
+%a = (N=>1);
+foreach (keys %a) {
+  tr/N/n/;
+  print +($_ eq 'n' ? '' : "not ") . "ok 71\n";
+}
