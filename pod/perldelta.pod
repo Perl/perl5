@@ -200,6 +200,10 @@ natively, ASCII or EBCDIC, unless GLOB_ALPHASORT is specified.) [561]
 
 =item *
 
+The *glob{FILEHANDLE} is deprecated, use *glob{IO} instead.
+
+=item *
+
 Spurious syntax errors generated in certain situations, when glob()
 caused File::Glob to be loaded for the first time, have been fixed. [561]
 
@@ -2809,13 +2813,37 @@ A socket handle leak in accept() has been fixed. [561]
 
 =head1 New or Changed Diagnostics
 
+Please see L<perldiag> for more details.
+
 =over 4
+
+=item *
+
+Ambiguous range in the transliteration operator (like a-z-9) now
+gives a warning.
+
+=item *
+
+Two new debugging options have been added: if you have compiled your
+Perl with debugging, you can use the -DT [561] and -DR options to trace
+tokenising and to add reference counts to displaying variables,
+respectively.
 
 =item *
 
 The lexical warnings category "deprecated" is no longer a sub-category
 of the "syntax" category. It is now a top-level category in its own
 right.
+
+=item *
+
+Unadorned dump() will now give a warning suggesting to
+use explicit CORE::dump() if that's what really is meant.
+
+=item *
+
+The "Unrecognized escape" warning has been extended to include C<\8>,
+C<\9>, and C<\_>.  There is no need to escape any of the C<\w> characters.
 
 =item *
 
@@ -2826,21 +2854,46 @@ marked by a C<E<lt>-- HERE> marker.
 
 =item *
 
+Various I/O (and socket) functions like binmode(), close(), and so
+forth now more consistently warn if they are used illogically either
+on a yet unopened or on an already closed filehandle (or socket).
+
+=item *
+
+Using lstat() on a filehandle now gives a warning.  (It's a non-sensical
+thing to do.)
+
+=item *
+
+The C<-M> and C<-m> options now warn if you didn't supply the module name.
+
+=item *
+
+If you in C<use> specify a required minimum version, modules matching
+the name and but not defining a $VERSION will cause a fatal failure.
+
+=item *
+
+Using negative offset for vec() in lvalue context is now a warnable offense.
+
+=item *
+
+Odd number of arguments to oveload::constant now elicits a warning.
+
+=item *
+
+Odd number of elements to in anonymous hash now elicits a warning.
+
+=item *
+
 The various "opened only for", "on closed", "never opened" warnings
 drop the C<main::> prefix for filehandles in the C<main> package,
 for example C<STDIN> instead of C<main::STDIN>.
 
 =item *
 
-The "Unrecognized escape" warning has been extended to include C<\8>,
-C<\9>, and C<\_>.  There is no need to escape any of the C<\w> characters.
-
-=item *
-
-Two new debugging options have been added: if you have compiled your
-Perl with debugging, you can use the -DT [561] and -DR options to trace
-tokenising and to add reference counts to displaying variables,
-respectively.
+Subroutine prototypes are now checked more carefully, you may
+get warnings for example if you have used non-prototype characters.
 
 =item *
 
@@ -2861,9 +2914,26 @@ for the C<"c"> format and a number less than -128 or more than 127.
 
 =item *
 
+pack C<P> format now demands an explicit size.
+
+=item *
+
+unpack C<w> now warns of unterminated compressed integers.
+
+=item *
+
+Warnings relating to the use of PerlIO have been added.
+
+=item *
+
 Certain regex modifiers such as C<(?o)> make sense only if applied to
 the entire regex.  You will get an optional warning if you try to do
 otherwise.
+
+=item *
+
+Variable length lookbehind has not yet been implemented, trying to
+use it will tell that.
 
 =item *
 
@@ -2872,14 +2942,56 @@ has been deprecated for a while.  Now you will get an optional warning.
 
 =item *
 
+Warnings relating to the use of the new restricted hashes feature
+have been added.
+
+=item *
+
+Self-ties of arrays and hashes are not supported and fatal errors
+will happen even at an attempt to do so.
+
+=item *
+
 Using C<sort> in scalar context now issues an optional warning.
 This didn't do anything useful, as the sort was not performed.
+
+=item *
+
+Using the /g modifier in split() is meaningless and will cause a warning.
+
+=item *
+
+Using splice() past the end of an array now causes a warning.
+
+=item *
+
+Malformed Unicode encodings (UTF-8 and UTF-16) cause a lot of warnings,
+ad doestrying to use UTF-16 surrogates (which are unimplemented).
+
+=item *
+
+Trying to use Unicode characters on an I/O stream without marking the
+stream's encoding (using open() or binmode()) will cause "Wide character"
+warnings.
+
+=item *
+
+Use of v-strings in use/require causes a (backward) portability warning.
+
+=item *
+
+Warnings relating to the use interpreter threads and their shared data
+have been added.
 
 =back
 
 =head1 Changed Internals
 
 =over 4
+
+=item *
+
+PerlIO is now the default.
 
 =item *
 
