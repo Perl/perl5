@@ -13,10 +13,7 @@ BEGIN {
 my $SAMPLE_TESTS = $ENV{PERL_CORE} ? 'lib/sample-tests' : 't/sample-tests';
 
 use strict;
-
-use Test::More tests => 35;
-
-use_ok('Test::Harness::Straps');
+use Test::More;
 
 my $IsVMS = $^O eq 'VMS';
 
@@ -380,7 +377,28 @@ my %samples = (
                                          { 'ok' => 1, actual_ok => 1 },
                                        ]
                        },
+
+   'shbang_misparse' =>{
+                        passing     => 1,
+
+                        'exit'      => 0,
+                        'wait'      => 0,
+
+                        max         => 2,
+                        seen        => 2,
+
+                        'ok'          => 2,
+                        'todo'        => 0,
+                        'skip'        => 0,
+                        bonus       => 0,
+
+                        details     => [ ({ 'ok' => 1, actual_ok => 1 }) x 2 ]
+                       },
 );
+
+plan tests => (keys(%samples) * 2) + 1;
+
+use_ok('Test::Harness::Straps');
 
 $SIG{__WARN__} = sub { 
     warn @_ unless $_[0] =~ /^Enourmous test number/ ||

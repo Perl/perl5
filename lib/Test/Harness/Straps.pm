@@ -1,12 +1,12 @@
 # -*- Mode: cperl; cperl-indent-level: 4 -*-
-# $Id: Straps.pm,v 1.4 2002/05/05 02:32:54 schwern Exp $
+# $Id: Straps.pm,v 1.6 2002/05/17 23:04:11 schwern Exp $
 
 package Test::Harness::Straps;
 
 use strict;
 use vars qw($VERSION);
 use Config;
-$VERSION = '0.10';
+$VERSION = '0.11';
 
 use Test::Harness::Assert;
 use Test::Harness::Iterator;
@@ -277,7 +277,7 @@ sub analyze_file {
         eval q{use vmsish "status"; $results{'exit'} = $?};
     }
     else {
-        $results{'exit'} = $? / 256;
+        $results{'exit'} = _wait2exit($?);
     }
     $results{passing} = 0 unless $? == 0;
 
@@ -285,6 +285,16 @@ sub analyze_file {
 
     return %results;
 }
+
+
+eval { require POSIX; &POSIX::WEXITSTATUS(0) };
+if( $@ ) {
+    *_wait2exit = sub { $_[0] >> 8 };
+}
+else {
+    *_wait2exit = sub { POSIX::WEXITSTATUS($_[0]) }
+}
+
 
 =begin _private
 
@@ -306,7 +316,7 @@ sub _switches {
     $s .= " $ENV{'HARNESS_PERL_SWITCHES'}"
       if exists $ENV{'HARNESS_PERL_SWITCHES'};
     $s .= join " ", qq[ "-$1"], map {qq["-I$_"]} $self->_filtered_INC
-      if $first =~ /^#!.*\bperl.*-\w*([Tt]+)/;
+      if $first =~ /^#!.*\bperl.*\s-\w*([Tt]+)/;
 
     close(TEST) or print "can't close $file. $!\n";
 

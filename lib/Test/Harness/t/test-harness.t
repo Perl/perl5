@@ -364,6 +364,22 @@ my %samples = (
                                             },
                                   all_ok => 0,
                                  },
+            'shbang_misparse' => {
+                                  total => {
+                                            bonus      => 0,
+                                            max        => 2,
+                                            'ok'       => 2,
+                                            files      => 1,
+                                            bad        => 0,
+                                            good       => 1,
+                                            tests      => 1,
+                                            sub_skipped=> 0,
+                                            'todo'     => 0,
+                                            skipped    => 0,
+                                           },
+                                  failed => { },
+                                  all_ok => 1,
+                                 },
            );
 
 plan tests => (keys(%samples) * 7) + 1;
