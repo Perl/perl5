@@ -1749,15 +1749,17 @@ win32_uname(struct utsname *name)
     /* machine (architecture) */
     {
 	SYSTEM_INFO info;
+	DWORD procarch;
 	char *arch;
 	GetSystemInfo(&info);
 
 #if (defined(__BORLANDC__)&&(__BORLANDC__<=0x520)) \
  || (defined(__MINGW32__) && !defined(_ANONYMOUS_UNION))
-	switch (info.u.s.wProcessorArchitecture) {
+	procarch = info.u.s.wProcessorArchitecture;
 #else
-	switch (info.wProcessorArchitecture) {
+	procarch = info.wProcessorArchitecture;
 #endif
+	switch (procarch) {
 	case PROCESSOR_ARCHITECTURE_INTEL:
 	    arch = "x86"; break;
 	case PROCESSOR_ARCHITECTURE_MIPS:
@@ -1766,10 +1768,45 @@ win32_uname(struct utsname *name)
 	    arch = "alpha"; break;
 	case PROCESSOR_ARCHITECTURE_PPC:
 	    arch = "ppc"; break;
-	default:
+#ifdef PROCESSOR_ARCHITECTURE_SHX
+	case PROCESSOR_ARCHITECTURE_SHX:
+	    arch = "shx"; break;
+#endif
+#ifdef PROCESSOR_ARCHITECTURE_ARM
+	case PROCESSOR_ARCHITECTURE_ARM:
+	    arch = "arm"; break;
+#endif
+#ifdef PROCESSOR_ARCHITECTURE_IA64
+	case PROCESSOR_ARCHITECTURE_IA64:
+	    arch = "ia64"; break;
+#endif
+#ifdef PROCESSOR_ARCHITECTURE_ALPHA64
+	case PROCESSOR_ARCHITECTURE_ALPHA64:
+	    arch = "alpha64"; break;
+#endif
+#ifdef PROCESSOR_ARCHITECTURE_MSIL
+	case PROCESSOR_ARCHITECTURE_MSIL:
+	    arch = "msil"; break;
+#endif
+#ifdef PROCESSOR_ARCHITECTURE_AMD64
+	case PROCESSOR_ARCHITECTURE_AMD64:
+	    arch = "amd64"; break;
+#endif
+#ifdef PROCESSOR_ARCHITECTURE_IA32_ON_WIN64
+	case PROCESSOR_ARCHITECTURE_IA32_ON_WIN64:
+	    arch = "ia32-64"; break;
+#endif
+#ifdef PROCESSOR_ARCHITECTURE_UNKNOWN
+	case PROCESSOR_ARCHITECTURE_UNKNOWN:
 	    arch = "unknown"; break;
+#endif
+	default:
+	    sprintf(name->machine, "unknown(0x%x)", procarch);
+	    arch = name->machine;
+	    break;
 	}
-	strcpy(name->machine, arch);
+	if (name->machine != arch)
+	    strcpy(name->machine, arch);
     }
     return 0;
 }
