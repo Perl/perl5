@@ -14,7 +14,7 @@ require Exporter;
 @ISA = qw(Exporter);
 @EXPORT = qw(struct);
 
-$VERSION = '0.59';
+$VERSION = '0.60';
 
 ## Tested on 5.002 and 5.003 without class membership tests:
 my $CHECK_CLASS_MEMBERSHIP = ($] >= 5.003_95);
@@ -203,11 +203,13 @@ sub struct {
             if( defined $arrays{$name} ){
                 $out .= "    my \$i;\n";
                 $out .= "    \@_ ? (\$i = shift) : return \$r->$elem;\n"; 
+                $out .= "    if (ref(\$i) eq 'ARRAY' && !\@_) { \$r->$elem = \$i; return \$r }\n";
                 $sel = "->[\$i]";
             }
             elsif( defined $hashes{$name} ){
                 $out .= "    my \$i;\n";
-                $out .= "    \@_ ? (\$i = shift) : return \$r->$elem;\n"; 
+                $out .= "    \@_ ? (\$i = shift) : return \$r->$elem;\n";
+                $out .= "    if (ref(\$i) eq 'HASH' && !\@_) { \$r->$elem = \$i; return \$r }\n";
                 $sel = "->{\$i}";
             }
             elsif( defined $classes{$name} ){
@@ -389,6 +391,10 @@ is C<'@'>, the accessor returns the array element value.  If the
 element type is C<'*@'>, a reference to the array element is
 returned.
 
+As a special case, when the accessor is called with an array reference
+as the sole argument, this causes an assignment of the whole array element.
+The object reference is returned.
+
 =item Hash (C<'%'> or C<'*%'>)
 
 The element is a hash, initialized by default to C<()>.
@@ -402,6 +408,10 @@ one element of the hash; the second argument, if present, is
 assigned to the hash element.  If the element type is C<'%'>, the
 accessor returns the hash element value.  If the element type is
 C<'*%'>, a reference to the hash element is returned.
+
+As a special case, when the accessor is called with a hash reference
+as the sole argument, this causes an assignment of the whole hash element.
+The object reference is returned.
 
 =item Class (C<'Class_Name'> or C<'*Class_Name'>)
 
