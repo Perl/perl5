@@ -7832,6 +7832,8 @@ perl_clone_using(PerlInterpreter *proto_perl, UV flags,
     ptr_table_store(PL_ptr_table, &proto_perl->Icompiling, &PL_compiling);
     if (!specialWARN(PL_compiling.cop_warnings))
 	PL_compiling.cop_warnings = sv_dup_inc(PL_compiling.cop_warnings);
+    if (!specialCopIO(PL_compiling.cop_io))
+	PL_compiling.cop_io = sv_dup_inc(PL_compiling.cop_io);
     PL_curcop		= (COP*)any_dup(proto_perl->Tcurcop, proto_perl);
 
     /* pseudo environmental stuff */

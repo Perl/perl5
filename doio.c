@@ -510,11 +510,29 @@ Perl_do_open9(pTHX_ GV *gv, register char *name, I32 len, int as_raw,
     IoIFP(io) = fp;
     if (!num_svs) {
 	/* Need to supply default type info from open.pm */
+	SV *layers = PL_curcop->cop_io;
 	type = NULL;
+	if (layers) {
+	    STRLEN len;
+	    type = SvPV(layers,len);
+	    if (type && mode[0] != 'r') {
+		/* Skip to write part */
+		char *s = strchr(type,0);
+		if (s && (s-type) < len) {
+		    type = s+1;
+		}
+	    }
+	}
+	else if (O_BINARY != O_TEXT) {
+	    type = ":crlf";
+	}
     }
     if (type) {
 	while (isSPACE(*type)) type++;
 	if (*type) {
+	   if (PerlIO_apply_layers(aTHX_ IoIFP(io),mode,type) != 0) {
+		goto say_false;
+	   }
 	}
     }
 
@@ -529,6 +547,15 @@ Perl_do_open9(pTHX_ GV *gv, register char *name, I32 len, int as_raw,
 		PerlIO_close(fp);
 		IoIFP(io) = Nullfp;
 		goto say_false;
+	    }
+	    if (type && *type) {
+		if (PerlIO_apply_layers(aTHX_ IoOFP(io),mode,type) != 0) {
+		    PerlIO_close(IoOFP(io));
+		    PerlIO_close(fp);
+		    IoIFP(io) = Nullfp;
+		    IoOFP(io) = Nullfp;
+		    goto say_false;
+		}
 	    }
 	}
 	else

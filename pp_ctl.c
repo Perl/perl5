@@ -654,8 +654,8 @@ PP(pp_formline)
 #if defined(USE_LONG_DOUBLE)
 		if (arg & 256) {
 		    sprintf(t, "%#0*.*" PERL_PRIfldbl,
-			    (int) fieldsize, (int) arg & 255, value); 
-/* is this legal? I don't have long doubles */      
+			    (int) fieldsize, (int) arg & 255, value);
+/* is this legal? I don't have long doubles */
 		} else {
 		    sprintf(t, "%0*.0" PERL_PRIfldbl, (int) fieldsize, value);
 		}
@@ -672,7 +672,7 @@ PP(pp_formline)
 	    }
 	    t += fieldsize;
 	    break;
-	    
+	
 	case FF_NEWLINE:
 	    f++;
 	    while (t-- > linemark && *t == ' ') ;
@@ -782,7 +782,7 @@ PP(pp_mapwhile)
     I32 count;
     I32 shift;
     SV** src;
-    SV** dst; 
+    SV** dst;
 
     /* first, move source pointer to the next item in the source list */
     ++PL_markstack_ptr[-1];
@@ -814,7 +814,7 @@ PP(pp_mapwhile)
 	     * irrelevant.  --jhi */
             if (shift < count)
                 shift = count; /* Avoid shifting too often --Ben Tilly */
-	    
+	
 	    EXTEND(SP,shift);
 	    src = SP;
 	    dst = (SP += shift);
@@ -824,9 +824,9 @@ PP(pp_mapwhile)
 		*dst-- = *src--;
 	}
 	/* copy the new items down to the destination list */
-	dst = PL_stack_base + (PL_markstack_ptr[-2] += items) - 1; 
+	dst = PL_stack_base + (PL_markstack_ptr[-2] += items) - 1;
 	while (items--)
-	    *dst-- = SvTEMP(TOPs) ? POPs : sv_mortalcopy(POPs); 
+	    *dst-- = SvTEMP(TOPs) ? POPs : sv_mortalcopy(POPs);
     }
     LEAVE;					/* exit inner scope */
 
@@ -1169,27 +1169,27 @@ S_dopoptolabel(pTHX_ char *label)
 	switch (CxTYPE(cx)) {
 	case CXt_SUBST:
 	    if (ckWARN(WARN_EXITING))
-		Perl_warner(aTHX_ WARN_EXITING, "Exiting substitution via %s", 
+		Perl_warner(aTHX_ WARN_EXITING, "Exiting substitution via %s",
 			PL_op_name[PL_op->op_type]);
 	    break;
 	case CXt_SUB:
 	    if (ckWARN(WARN_EXITING))
-		Perl_warner(aTHX_ WARN_EXITING, "Exiting subroutine via %s", 
+		Perl_warner(aTHX_ WARN_EXITING, "Exiting subroutine via %s",
 			PL_op_name[PL_op->op_type]);
 	    break;
 	case CXt_FORMAT:
 	    if (ckWARN(WARN_EXITING))
-		Perl_warner(aTHX_ WARN_EXITING, "Exiting format via %s", 
+		Perl_warner(aTHX_ WARN_EXITING, "Exiting format via %s",
 			PL_op_name[PL_op->op_type]);
 	    break;
 	case CXt_EVAL:
 	    if (ckWARN(WARN_EXITING))
-		Perl_warner(aTHX_ WARN_EXITING, "Exiting eval via %s", 
+		Perl_warner(aTHX_ WARN_EXITING, "Exiting eval via %s",
 			PL_op_name[PL_op->op_type]);
 	    break;
 	case CXt_NULL:
 	    if (ckWARN(WARN_EXITING))
-		Perl_warner(aTHX_ WARN_EXITING, "Exiting pseudo-block via %s", 
+		Perl_warner(aTHX_ WARN_EXITING, "Exiting pseudo-block via %s",
 			PL_op_name[PL_op->op_type]);
 	    return -1;
 	case CXt_LOOP:
@@ -1295,27 +1295,27 @@ S_dopoptoloop(pTHX_ I32 startingblock)
 	switch (CxTYPE(cx)) {
 	case CXt_SUBST:
 	    if (ckWARN(WARN_EXITING))
-		Perl_warner(aTHX_ WARN_EXITING, "Exiting substitution via %s", 
+		Perl_warner(aTHX_ WARN_EXITING, "Exiting substitution via %s",
 			PL_op_name[PL_op->op_type]);
 	    break;
 	case CXt_SUB:
 	    if (ckWARN(WARN_EXITING))
-		Perl_warner(aTHX_ WARN_EXITING, "Exiting subroutine via %s", 
+		Perl_warner(aTHX_ WARN_EXITING, "Exiting subroutine via %s",
 			PL_op_name[PL_op->op_type]);
 	    break;
 	case CXt_FORMAT:
 	    if (ckWARN(WARN_EXITING))
-		Perl_warner(aTHX_ WARN_EXITING, "Exiting format via %s", 
+		Perl_warner(aTHX_ WARN_EXITING, "Exiting format via %s",
 			PL_op_name[PL_op->op_type]);
 	    break;
 	case CXt_EVAL:
 	    if (ckWARN(WARN_EXITING))
-		Perl_warner(aTHX_ WARN_EXITING, "Exiting eval via %s", 
+		Perl_warner(aTHX_ WARN_EXITING, "Exiting eval via %s",
 			PL_op_name[PL_op->op_type]);
 	    break;
 	case CXt_NULL:
 	    if (ckWARN(WARN_EXITING))
-		Perl_warner(aTHX_ WARN_EXITING, "Exiting pseudo-block via %s", 
+		Perl_warner(aTHX_ WARN_EXITING, "Exiting pseudo-block via %s",
 			PL_op_name[PL_op->op_type]);
 	    return -1;
 	case CXt_LOOP:
@@ -1668,10 +1668,10 @@ PP(pp_caller)
 	SV * mask ;
 	SV * old_warnings = cx->blk_oldcop->cop_warnings ;
 
-	if  (old_warnings == pWARN_NONE || 
+	if  (old_warnings == pWARN_NONE ||
 		(old_warnings == pWARN_STD && (PL_dowarn & G_WARN_ON) == 0))
             mask = newSVpvn(WARN_NONEstring, WARNsize) ;
-        else if (old_warnings == pWARN_ALL || 
+        else if (old_warnings == pWARN_ALL ||
 		  (old_warnings == pWARN_STD && PL_dowarn & G_WARN_ON))
             mask = newSVpvn(WARN_ALLstring, WARNsize) ;
         else
@@ -2238,7 +2238,7 @@ PP(pp_goto)
 	    if (cxix < cxstack_ix)
 		dounwind(cxix);
 	    TOPBLOCK(cx);
-	    if (CxTYPE(cx) == CXt_EVAL && cx->blk_eval.old_op_type == OP_ENTEREVAL) 
+	    if (CxTYPE(cx) == CXt_EVAL && cx->blk_eval.old_op_type == OP_ENTEREVAL)
 		DIE(aTHX_ "Can't goto subroutine from an eval-string");
 	    mark = PL_stack_sp;
 	    if (CxTYPE(cx) == CXt_SUB && cx->blk_sub.hasargs) {
@@ -2306,7 +2306,7 @@ PP(pp_goto)
 
 		    PL_stack_sp--;		/* There is no cv arg. */
 		    /* Push a mark for the start of arglist */
-		    PUSHMARK(mark); 
+		    PUSHMARK(mark);
 		    (void)(*CvXSUB(cv))(aTHXo_ cv);
 		    /* Pop the current context like a decent sub should */
 		    POPBLOCK(cx, PL_curpm);
@@ -2380,14 +2380,14 @@ PP(pp_goto)
 #ifdef USE_THREADS
 		if (!cx->blk_sub.hasargs) {
 		    AV* av = (AV*)PL_curpad[0];
-		    
+		
 		    items = AvFILLp(av) + 1;
 		    if (items) {
 			/* Mark is at the end of the stack. */
 			EXTEND(SP, items);
 			Copy(AvARRAY(av), SP + 1, items, SV*);
 			SP += items;
-			PUTBACK ;		    
+			PUTBACK ;		
 		    }
 		}
 #endif /* USE_THREADS */		
@@ -2437,7 +2437,7 @@ PP(pp_goto)
 		     */
 		    SV *sv = GvSV(PL_DBsub);
 		    CV *gotocv;
-		    
+		
 		    if (PERLDB_SUB_NN) {
 			SvIVX(sv) = PTR2IV(cv); /* Already upgraded, saved */
 		    } else {
@@ -3103,7 +3103,7 @@ PP(pp_require)
     	if (!tryrsfp && name[0] == ':' && name[1] != ':' && strchr(name+2, ':'))
 	    goto trylocal;
     }
-    else 
+    else
 trylocal: {
 #else
     }
@@ -3312,8 +3312,10 @@ trylocal: {
         PL_compiling.cop_warnings = pWARN_ALL ;
     else if (PL_dowarn & G_WARN_ALL_OFF)
         PL_compiling.cop_warnings = pWARN_NONE ;
-    else 
+    else
         PL_compiling.cop_warnings = pWARN_STD ;
+    SAVESPTR(PL_compiling.cop_io);
+    PL_compiling.cop_io = Nullsv;
 
     if (filter_sub || filter_child_proc) {
 	SV *datasv = filter_add(run_user_filter, Nullsv);
@@ -3367,7 +3369,7 @@ PP(pp_entereval)
     ENTER;
     lex_start(sv);
     SAVETMPS;
- 
+
     /* switch to eval mode */
 
     if (PERLDB_NAMEEVAL && CopLINE(PL_curcop)) {
@@ -3398,6 +3400,13 @@ PP(pp_entereval)
     else {
         PL_compiling.cop_warnings = newSVsv(PL_curcop->cop_warnings);
         SAVEFREESV(PL_compiling.cop_warnings);
+    }
+    SAVESPTR(PL_compiling.cop_io);
+    if (specialCopIO(PL_curcop->cop_io))
+        PL_compiling.cop_io = PL_curcop->cop_io;
+    else {
+        PL_compiling.cop_io = newSVsv(PL_curcop->cop_io);
+        SAVEFREESV(PL_compiling.cop_io);
     }
 
     push_return(PL_op->op_next);
@@ -3582,7 +3591,7 @@ S_doparseform(pTHX_ SV *sv)
 
     if (len == 0)
 	Perl_croak(aTHX_ "Null picture in formline");
-    
+
     New(804, fops, (send - s)*3+10, U16);    /* Almost certainly too long... */
     fpc = fops;
 
@@ -3610,7 +3619,7 @@ S_doparseform(pTHX_ SV *sv)
 	case ' ': case '\t':
 	    skipspaces++;
 	    continue;
-	    
+	
 	case '\n': case 0:
 	    arg = s - base;
 	    skipspaces++;
@@ -3766,7 +3775,7 @@ S_doparseform(pTHX_ SV *sv)
  * Research Group at University of California, Berkeley.
  *
  * See also: "Optimistic Merge Sort" (SODA '92)
- *      
+ *
  * The integration to Perl is by John P. Linderman <jpl@research.att.com>.
  *
  * The code can be distributed under the same terms as Perl itself.

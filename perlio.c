@@ -28,6 +28,14 @@
 #define PERL_IN_PERLIO_C
 #include "perl.h"
 
+#ifndef PERLIO_LAYERS
+int
+PerlIO_apply_layers(pTHX_ PerlIO *f, const char *mode, const char *names)
+{
+ Perl_croak(aTHX_ "Cannot apply \"%s\" in non-PerlIO perl",names);
+}
+#endif
+
 #if !defined(PERL_IMPLICIT_SYS)
 
 #ifdef PERLIO_IS_STDIO
@@ -232,7 +240,7 @@ XS(XS_perlio_unimport)
 }
 
 SV *
-PerlIO_find_layer(char *name, STRLEN len)
+PerlIO_find_layer(const char *name, STRLEN len)
 {
  dTHX;
  SV **svp;
@@ -313,7 +321,7 @@ XS(XS_io_MODIFY_SCALAR_ATTRIBUTES)
  for (i=2; i < items; i++)
   {
    STRLEN len;
-   char *name = SvPV(ST(i),len);
+   const char *name = SvPV(ST(i),len);
    SV *layer  = PerlIO_find_layer(name,len);
    if (layer)
     {
@@ -348,7 +356,7 @@ PerlIO_default_layer(I32 n)
  int len;
  if (!PerlIO_layer_hv)
   {
-   char *s  = PerlEnv_getenv("PERLIO");
+   const char *s  = PerlEnv_getenv("PERLIO");
    newXS("perlio::import",XS_perlio_import,__FILE__);
    newXS("perlio::unimport",XS_perlio_unimport,__FILE__);
 #if 0
@@ -371,10 +379,12 @@ PerlIO_default_layer(I32 n)
         s++;
        if (*s)
         {
-         char *e = s;
+         const char *e = s;
          SV *layer;
          while (*e && !isSPACE((unsigned char)*e))
           e++;
+         if (*s == ':')
+          s++;
          layer = PerlIO_find_layer(s,e-s);
          if (layer)
           {
@@ -410,6 +420,46 @@ PerlIO_default_layer(I32 n)
   }
  /* PerlIO_debug("Layer %d is %s\n",n,tab->name); */
  return tab;
+}
+
+int
+PerlIO_apply_layers(pTHX_ PerlIO *f, const char *mode, const char *names)
+{
+ if (names)
+  {
+   const char *s = names;
+   while (*s)
+    {
+     while (isSPACE(*s))
+      s++;
+     if (*s == ':')
+      s++;
+     if (*s)
+      {
+       const char *e = s;
+       while (*e && *e != ':' && !isSPACE(*e))
+        e++;
+       if (e > s)
+        {
+         SV *layer = PerlIO_find_layer(s,e-s);
+         if (layer)
+          {
+           PerlIO_funcs *tab = INT2PTR(PerlIO_funcs *, SvIV(layer));
+           if (tab)
+            {
+             PerlIO *new = PerlIO_push(f,tab,mode);
+             if (!new)
+              return -1;
+            }
+          }
+         else
+          Perl_warn(aTHX_ "perlio: unknown layer \"%.*s\"",(e-s),s);
+        }
+       s = e;
+      }
+    }
+  }
+ return 0;
 }
 
 #define PerlIO_default_top() PerlIO_default_layer(-1)

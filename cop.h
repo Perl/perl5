@@ -21,6 +21,7 @@ struct cop {
     I32		cop_arybase;	/* array base this line was compiled with */
     line_t      cop_line;       /* line # of this command */
     SV *	cop_warnings;	/* lexical warnings bitmask */
+    SV *	cop_io;		/* lexical IO defaults */
 };
 
 #define Nullcop Null(COP*)
