@@ -564,8 +564,6 @@ sub installlib {
 		and chmod($name =~ /\.(so|$dlext)$/o ? 0555 : 0444,
 			   "$installlib/$name");
 	}
-    } elsif (-d $_) {
-	mkpath("$installlib/$name", 1, 0777);
     }
 }
 
