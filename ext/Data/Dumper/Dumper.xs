@@ -4,8 +4,11 @@
 #include "XSUB.h"
 
 #ifndef PERL_VERSION
-#include "patchlevel.h"
-#define PERL_VERSION PATCHLEVEL
+#    include <patchlevel.h>
+#    ifndef PERL_VERSION
+#        include <could_not_find_Perl_patchlevel.h>
+#    endif
+#    define PERL_VERSION PATCHLEVEL
 #endif
 
 #if PERL_VERSION < 5

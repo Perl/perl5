@@ -44,7 +44,10 @@ extern "C" {
 }
 #endif
 
-#include "patchlevel.h"
+#include <patchlevel.h>
+#ifndef PERL_VERSION
+#    include <could_not_find_Perl_patchlevel.h>
+#endif
 #if PATCHLEVEL <= 4 && !defined(PL_dowarn)
    #define PL_dowarn dowarn
 #endif
