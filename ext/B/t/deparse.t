@@ -15,7 +15,7 @@ use warnings;
 use strict;
 use Config;
 
-print "1..15\n";
+print "1..16\n";
 
 use B::Deparse;
 my $deparse = B::Deparse->new() or print "not ";
@@ -180,3 +180,7 @@ print $main::x[1];
 # 12
 my %x;
 $x{warn()};
+####
+# 13
+my $foo;
+$_ .= <ARGV> . <$foo>;
