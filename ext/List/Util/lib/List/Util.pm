@@ -7,17 +7,13 @@
 package List::Util;
 
 require Exporter;
+require DynaLoader;
 
-@ISA = qw(Exporter);
-@EXPORT_OK = qw(first min max minstr maxstr reduce sum);
-$VERSION = $VERSION = "1.02";
+our @ISA       = qw(Exporter DynaLoader);
+our @EXPORT_OK = qw(first min max minstr maxstr reduce sum);
+our $VERSION   = "1.02";
 
-eval {
-  require DynaLoader;
-  local @ISA = qw(DynaLoader);
-  bootstrap List::Util $VERSION;
-  1
-};
+bootstrap List::Util $VERSION;
 
 1;
 

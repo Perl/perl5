@@ -9,22 +9,9 @@ package Scalar::Util;
 require Exporter;
 require List::Util; # List::Util loads the XS
 
-$VERSION = $VERSION = $List::Util::VERSION;
-@ISA = qw(Exporter);
-@EXPORT_OK = qw(blessed dualvar reftype weaken isweak tainted readonly);
-
-sub export_fail {
-  if (grep { /^(weaken|isweak)$/ } @_ ) {
-    require Carp;
-    Carp::croak("Weak references are not implemented in the version of perl");
-  }
-  if (grep { /^dualvar$/ } @_ ) {
-    require Carp;
-    Carp::croak("dualvar is only avaliable with the XS version");
-  }
-  
-  @_;
-}
+our @ISA       = qw(Exporter);
+our @EXPORT_OK = qw(blessed dualvar reftype weaken isweak tainted readonly);
+our $VERSION   = $List::Util::VERSION;
 
 1;
 
@@ -68,10 +55,18 @@ value STRING in a string context.
 
 If EXPR is a scalar which is a weak reference the result is true.
 
+=item readonly SCALAR
+
+Returns true if SCALAR is readonly.
+
 =item reftype EXPR
 
 If EXPR evaluates to a reference the type of the variable referenced
 is returned. Otherwise C<undef> is returned.
+
+=item tainted EXPR
+
+Return true if the result of EXPR is tainted
 
 =item weaken REF
 
