@@ -32,6 +32,42 @@ Version v5.7.1		Development release working toward v5.8
 --------------
 
 ____________________________________________________________________________
+[  8210] By: jhi                                   on 2000/12/20  18:34:47
+        Log: Yet another editor edit.
+     Branch: perl
+	   ! pod/perlfaq3.pod
+____________________________________________________________________________
+[  8209] By: jhi                                   on 2000/12/20  15:33:28
+        Log: More Win32 Perling.
+     Branch: perl
+	   ! pod/perlfaq3.pod
+____________________________________________________________________________
+[  8208] By: jhi                                   on 2000/12/20  15:07:46
+        Log: More Win32 editor/IDE/shell hints.
+     Branch: perl
+	   ! pod/perlfaq3.pod
+____________________________________________________________________________
+[  8207] By: jhi                                   on 2000/12/20  03:54:08
+        Log: Subject: [PATCH] obscure timing knowledge
+             From: Nicholas Clark <nick@ccl4.org>
+             Date: Tue, 19 Dec 2000 19:22:31 +0000
+             Message-ID: <20001219192231.F2827@plum.flirble.org>
+     Branch: perl
+	   ! sv.c
+____________________________________________________________________________
+[  8206] By: jhi                                   on 2000/12/20  03:45:57
+        Log: Subject: [ID 20001219.011] Not OK: perl v5.7.1 +DEVEL8205 on alpha-dec_osf-perlio-multi 4.0f (UNINSTALLED)
+             From: Spider Boardman <spider@leggy.zk3.dec.com>
+             Date: Tue, 19 Dec 2000 21:30:16 -0500
+             Message-Id: <200012200230.VAA17619@leggy.zk3.dec.com>
+     Branch: perl
+	   ! sv.c
+____________________________________________________________________________
+[  8205] By: jhi                                   on 2000/12/19  23:02:01
+        Log: Update Changes.
+     Branch: perl
+	   ! Changes patchlevel.h
+____________________________________________________________________________
 [  8204] By: jhi                                   on 2000/12/19  22:58:18
         Log: Recode the naughty binary bytes ([\x00-\x08\x0b-\x1f\x7f-\xff])
              using the \xHH notation.  No more inlined UTF-8, sigh, but easier
