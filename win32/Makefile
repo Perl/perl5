@@ -2,7 +2,7 @@
 # Makefile to build perl on Windows NT using Microsoft NMAKE.
 #
 # This is set up to build a perl.exe that runs off a shared library
-# (perl56.dll).  Also makes individual DLLs for the XS extensions.
+# (perl57.dll).  Also makes individual DLLs for the XS extensions.
 #
 
 ##
@@ -29,7 +29,7 @@ INST_TOP	= $(INST_DRV)\perl
 # versioned installation can be obtained by setting INST_TOP above to a
 # path that includes an arbitrary version string.
 #
-INST_VER	= \5.6.0
+INST_VER	= \5.7.0
 
 #
 # Comment this out if you DON'T want your perl installation to have
@@ -428,8 +428,12 @@ $(o).dll:
 
 #
 # various targets
-PERLIMPLIB	= ..\perl56.lib
-PERLDLL		= ..\perl56.dll
+
+# makedef.pl must be updated if this changes, and this should normally
+# only change when there is an incompatible revision of the public API.
+# XXX so why did we change it from perl56 to perl57?
+PERLIMPLIB	= ..\perl57.lib
+PERLDLL		= ..\perl57.dll
 
 MINIPERL	= ..\miniperl.exe
 MINIDIR		= .\mini
@@ -1120,7 +1124,8 @@ clean :
 	-@$(DEL) $(WPERLEXE)
 	-@$(DEL) $(PERLDLL)
 	-@$(DEL) $(CORE_OBJ)
-	-if exist $(MINIDIR) deltree /y $(MINIDIR) 
+	-if exist $(MINIDIR) rmdir /s /q $(MINIDIR) 
+	-rmdir /s $(MINIDIR) 
 	-@$(DEL) $(WIN32_OBJ)
 	-@$(DEL) $(DLL_OBJ)
 	-@$(DEL) $(X2P_OBJ)

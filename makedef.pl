@@ -132,7 +132,7 @@ if ($define{PERL_OBJECT}) {
 
 if ($PLATFORM eq 'win32') {
     warn join(' ',keys %define)."\n";
-    print "LIBRARY Perl56\n";
+    print "LIBRARY Perl57\n";
     print "DESCRIPTION 'Perl interpreter'\n";
     print "EXPORTS\n";
     if ($define{PERL_IMPLICIT_SYS}) {
@@ -312,7 +312,6 @@ elsif ($PLATFORM eq 'os2') {
 
 unless ($define{'DEBUGGING'}) {
     skip_symbols [qw(
-		    Perl_deb
 		    Perl_deb_growlevel
 		    Perl_debop
 		    Perl_debprofdump

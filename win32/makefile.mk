@@ -50,7 +50,7 @@ INST_ARCH	*= \$(ARCHNAME)
 # uncomment to enable multiple interpreters.  This is need for fork()
 # emulation.
 #
-USE_MULTI	*= define
+#USE_MULTI	*= define
 
 #
 # Beginnings of interpreter cloning/threads; still very incomplete.
@@ -111,7 +111,7 @@ CCTYPE		*= GCC
 # If not enabled, we automatically try to use maximum optimization
 # with all compilers that are known to have a working optimizer.
 #
-CFG		*= Debug
+#CFG		*= Debug
 
 #
 # uncomment to enable use of PerlCRT.DLL when using the Visual C compiler.
@@ -579,6 +579,9 @@ CFGH_TMPL	= config_H.vc
 
 .ENDIF
 
+# makedef.pl must be updated if this changes, and this should normally
+# only change when there is an incompatible revision of the public API.
+# XXX so why did we change it from perl56 to perl57?
 PERLIMPLIB	*= ..\perl57$(a)
 PERLDLL		= ..\perl57.dll
 
