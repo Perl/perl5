@@ -1117,11 +1117,11 @@ plan9/plan9.c		Plan9 port: Plan9-specific C routines
 plan9/plan9ish.h	Plan9 port: Plan9-specific C header file
 plan9/setup.rc		Plan9 port: script for easy build+install
 plan9/versnum		Plan9 port: script to print version number
-pod/Makefile		Make pods into something else
+pod/Makefile.SH		generate Makefile whichs makes pods into something else
 pod/Win32.pod		Documentation for Win32 extras
-pod/buildtoc		generate perltoc.pod
+pod/buildtoc.PL		generate buildtoc which generates perltoc.pod
 pod/checkpods.PL	Tool to check for common errors in pods
-pod/perl.pod		Top level perl man page
+pod/perl.pod		Top level perl documentation
 pod/perl5004delta.pod	Changes from 5.003 to 5.004
 pod/perl5005delta.pod	Changes from 5.004 to 5.005
 pod/perl56delta.pod	Changes from 5.005 to 5.6

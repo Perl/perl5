@@ -222,20 +222,22 @@ private = preplibrary lib/ExtUtils/Miniperl.pm lib/Config.pm
 # Files to be built with variable substitution before miniperl
 # is available.
 sh = Makefile.SH cflags.SH config_h.SH makeaperl.SH makedepend.SH \
-	makedir.SH myconfig.SH writemain.SH
+	makedir.SH myconfig.SH writemain.SH pod/Makefile.SH
 
 shextract = Makefile cflags config.h makeaperl makedepend \
-	makedir myconfig writemain
+	makedir myconfig writemain pod/Makefile
 
 # Files to be built with variable substitution after miniperl is
 # available.  Dependencies handled manually below (for now).
 
 pl = pod/pod2html.PL pod/pod2latex.PL pod/pod2man.PL pod/pod2text.PL \
-	pod/pod2usage.PL pod/podchecker.PL pod/podselect.PL
+	pod/pod2usage.PL pod/podchecker.PL pod/podselect.PL \
+	pod/buildtoc.PL
 
 # lib/lib.pm is not listed here because it has a rule of its own.
 plextract = pod/pod2html pod/pod2latex pod/pod2man pod/pod2text \
-	pod/pod2usage pod/podchecker pod/podselect
+	pod/pod2usage pod/podchecker pod/podselect \
+	pod/buildtoc
 
 addedbyconf = UU $(shextract) $(plextract) lib/lib.pm pstruct
 
@@ -638,6 +640,9 @@ regen_headers:	FORCE
 	-perl bytecode.pl
 	-perl regcomp.pl
 	-perl warnings.pl
+
+regen_pods:	FORCE
+	-cd pod; $(LDLIBPTH) make regen_pods
 
 # Extensions:
 # Names added to $(dynamic_ext) or $(static_ext) or $(nonxs_ext) will

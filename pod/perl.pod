@@ -12,8 +12,7 @@ B<perl>	S<[ B<-sTuU> ]> S<[ B<-hv> ] [ B<-V>[:I<configvar>] ]>
     S<[ B<-i>[I<extension>] ]> S<[ B<-e> I<'command'> ] 
     [ B<--> ] [ I<programfile> ] [ I<argument> ]...>
 
-For ease of access, the Perl manual has been split up into several
-sections:
+For ease of access, the Perl manual has been split up into several sections:
 
     perl		Perl overview (this section)
     perldelta		Perl changes since previous version

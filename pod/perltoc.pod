@@ -1387,25 +1387,26 @@ delete(), each(), values() and hash iteration are faster
 
 =item New or Changed Diagnostics
 
-"%s" variable %s masks earlier declaration in same %s, "my sub" not yet
-implemented, "our" variable %s redeclared, '!' allowed only after types %s,
-/ cannot take a count, / must be followed by a, A or Z, / must be followed
-by a*, A* or Z*, / must follow a numeric type, /%s/: Unrecognized escape
-\\%c passed through, /%s/: Unrecognized escape \\%c in character class
-passed through, /%s/ should probably be written as "%s", %s() called too
-early to check prototype, %s argument is not a HASH or ARRAY element, %s
-argument is not a HASH or ARRAY element or slice, %s argument is not a
-subroutine name, %s package attribute may clash with future reserved word:
-%s, (in cleanup) %s, <> should be quotes, Attempt to join self, Bad evalled
-substitution pattern, Bad realloc() ignored, Bareword found in conditional,
-Binary number > 0b11111111111111111111111111111111 non-portable, Bit vector
-size > 32 non-portable, Buffer overflow in prime_env_iter: %s, Can't check
-filesystem of script "%s", Can't declare class for non-scalar %s in "%s",
-Can't declare %s in "%s", Can't ignore signal CHLD, forcing to default,
-Can't modify non-lvalue subroutine call, Can't read CRTL environ, Can't
-remove %s: %s, skipping file, Can't return %s from lvalue subroutine, Can't
-weaken a nonreference, Character class [:%s:] unknown, Character class
-syntax [%s] belongs inside character classes, Constant is not %s reference,
+(perhaps you forgot to load "%s"?), "%s" variable %s masks earlier
+declaration in same %s, "my sub" not yet implemented, "our" variable %s
+redeclared, '!' allowed only after types %s, / cannot take a count, / must
+be followed by a, A or Z, / must be followed by a*, A* or Z*, / must follow
+a numeric type, /%s/: Unrecognized escape \\%c passed through, /%s/:
+Unrecognized escape \\%c in character class passed through, /%s/ should
+probably be written as "%s", %s() called too early to check prototype, %s
+argument is not a HASH or ARRAY element, %s argument is not a HASH or ARRAY
+element or slice, %s argument is not a subroutine name, %s package
+attribute may clash with future reserved word: %s, (in cleanup) %s, <>
+should be quotes, Attempt to join self, Bad evalled substitution pattern,
+Bad realloc() ignored, Bareword found in conditional, Binary number >
+0b11111111111111111111111111111111 non-portable, Bit vector size > 32
+non-portable, Buffer overflow in prime_env_iter: %s, Can't check filesystem
+of script "%s", Can't declare class for non-scalar %s in "%s", Can't
+declare %s in "%s", Can't ignore signal CHLD, forcing to default, Can't
+modify non-lvalue subroutine call, Can't read CRTL environ, Can't remove
+%s: %s, skipping file, Can't return %s from lvalue subroutine, Can't weaken
+a nonreference, Character class [:%s:] unknown, Character class syntax [%s]
+belongs inside character classes, Constant is not %s reference,
 constant(%s): %s, CORE::%s is not a keyword, defined(@array) is deprecated,
 defined(%hash) is deprecated, Did not produce a valid header, (Did you mean
 "local" instead of "our"?), Document contains no data, entering effective
@@ -3332,7 +3333,7 @@ program
 
 =back
 
-=item Embedding Perl under Win32
+=item Embedding Perl under Windows
 
 =item MORAL
 
@@ -3813,48 +3814,49 @@ B::Stash, B::Terse, B::Xref
 =item DESCRIPTION
 
 AvFILL, av_clear, av_extend, av_fetch, av_len, av_make, av_pop, av_push,
-av_shift, av_store, av_undef, av_unshift, call_argv, call_method, call_pv,
-call_sv, CLASS, Copy, croak, CvSTASH, dMARK, dORIGMARK, dSP, dXSARGS,
-dXSI32, ENTER, eval_pv, eval_sv, EXTEND, fbm_compile, fbm_instr, FREETMPS,
-get_av, get_cv, get_hv, get_sv, GIMME, GIMME_V, GvSV, gv_fetchmeth,
-gv_fetchmethod, gv_fetchmethod_autoload, gv_stashpv, gv_stashsv, G_ARRAY,
-G_DISCARD, G_EVAL, G_NOARGS, G_SCALAR, G_VOID, HEf_SVKEY, HeHASH, HeKEY,
-HeKLEN, HePV, HeSVKEY, HeSVKEY_force, HeSVKEY_set, HeVAL, HvNAME, hv_clear,
-hv_delete, hv_delete_ent, hv_exists, hv_exists_ent, hv_fetch, hv_fetch_ent,
-hv_iterinit, hv_iterkey, hv_iterkeysv, hv_iternext, hv_iternextsv,
-hv_iterval, hv_magic, hv_store, hv_store_ent, hv_undef, isALNUM, isALPHA,
-isDIGIT, isLOWER, isSPACE, isUPPER, items, ix, LEAVE, looks_like_number,
-MARK, mg_clear, mg_copy, mg_find, mg_free, mg_get, mg_length, mg_magical,
-mg_set, Move, New, newAV, Newc, newCONSTSUB, newHV, newRV_inc, newRV_noinc,
-NEWSV, newSViv, newSVnv, newSVpv, newSVpvf, newSVpvn, newSVrv, newSVsv,
-newSVuv, newXS, newXSproto, Newz, Nullav, Nullch, Nullcv, Nullhv, Nullsv,
-ORIGMARK, perl_alloc, perl_construct, perl_destruct, perl_free, perl_parse,
-perl_run, PL_DBsingle, PL_DBsub, PL_DBtrace, PL_dowarn, PL_modglobal,
-PL_na, PL_sv_no, PL_sv_undef, PL_sv_yes, POPi, POPl, POPn, POPp, POPs,
-PUSHi, PUSHMARK, PUSHn, PUSHp, PUSHs, PUSHu, PUTBACK, Renew, Renewc,
-require_pv, RETVAL, Safefree, savepv, savepvn, SAVETMPS, SP, SPAGAIN, ST,
-strEQ, strGE, strGT, strLE, strLT, strNE, strnEQ, strnNE, StructCopy,
-SvCUR, SvCUR_set, SvEND, SvGETMAGIC, SvGROW, SvIOK, SvIOKp, SvIOK_off,
-SvIOK_on, SvIOK_only, SvIV, SvIVX, SvLEN, SvLOCK, SvNIOK, SvNIOKp,
-SvNIOK_off, SvNOK, SvNOKp, SvNOK_off, SvNOK_on, SvNOK_only, SvNV, SvNVX,
-SvOK, SvOOK, SvPOK, SvPOKp, SvPOK_off, SvPOK_on, SvPOK_only, SvPV, SvPVX,
-SvPV_force, SvPV_nolen, SvREFCNT, SvREFCNT_dec, SvREFCNT_inc, SvROK,
-SvROK_off, SvROK_on, SvRV, SvSETMAGIC, SvSetSV, SvSetSV_nosteal, SvSTASH,
-SvTAINT, SvTAINTED, SvTAINTED_off, SvTAINTED_on, SvTRUE, SvTYPE, svtype,
-SVt_IV, SVt_NV, SVt_PV, SVt_PVAV, SVt_PVCV, SVt_PVHV, SVt_PVMG, SvUNLOCK,
-SvUPGRADE, SvUV, SvUVX, sv_2mortal, sv_bless, sv_catpv, sv_catpvf,
-sv_catpvf_mg, sv_catpvn, sv_catpvn_mg, sv_catpv_mg, sv_catsv, sv_catsv_mg,
-sv_chop, sv_cmp, sv_dec, sv_derived_from, sv_eq, sv_grow, sv_inc,
-sv_insert, sv_isa, sv_isobject, sv_len, sv_magic, sv_mortalcopy,
-sv_newmortal, sv_setiv, sv_setiv_mg, sv_setnv, sv_setnv_mg, sv_setpv,
-sv_setpvf, sv_setpvf_mg, sv_setpviv, sv_setpviv_mg, sv_setpvn,
-sv_setpvn_mg, sv_setpv_mg, sv_setref_iv, sv_setref_nv, sv_setref_pv,
-sv_setref_pvn, sv_setsv, sv_setsv_mg, sv_setuv, sv_setuv_mg, sv_unref,
-sv_upgrade, sv_usepvn, sv_usepvn_mg, sv_vcatpvfn, sv_vsetpvfn, THIS,
-toLOWER, toUPPER, warn, XPUSHi, XPUSHn, XPUSHp, XPUSHs, XPUSHu, XS,
-XSRETURN, XSRETURN_EMPTY, XSRETURN_IV, XSRETURN_NO, XSRETURN_NV,
-XSRETURN_PV, XSRETURN_UNDEF, XSRETURN_YES, XST_mIV, XST_mNO, XST_mNV,
-XST_mPV, XST_mUNDEF, XST_mYES, XS_VERSION, XS_VERSION_BOOTCHECK, Zero
+av_shift, av_store, av_undef, av_unshift, bytes_to_utf8, call_argv,
+call_method, call_pv, call_sv, CLASS, Copy, croak, CvSTASH, dMARK,
+dORIGMARK, dSP, dXSARGS, dXSI32, ENTER, eval_pv, eval_sv, EXTEND,
+fbm_compile, fbm_instr, FREETMPS, get_av, get_cv, get_hv, get_sv, GIMME,
+GIMME_V, GvSV, gv_fetchmeth, gv_fetchmethod, gv_fetchmethod_autoload,
+gv_stashpv, gv_stashsv, G_ARRAY, G_DISCARD, G_EVAL, G_NOARGS, G_SCALAR,
+G_VOID, HEf_SVKEY, HeHASH, HeKEY, HeKLEN, HePV, HeSVKEY, HeSVKEY_force,
+HeSVKEY_set, HeVAL, HvNAME, hv_clear, hv_delete, hv_delete_ent, hv_exists,
+hv_exists_ent, hv_fetch, hv_fetch_ent, hv_iterinit, hv_iterkey,
+hv_iterkeysv, hv_iternext, hv_iternextsv, hv_iterval, hv_magic, hv_store,
+hv_store_ent, hv_undef, isALNUM, isALPHA, isDIGIT, isLOWER, isSPACE,
+isUPPER, items, ix, LEAVE, looks_like_number, MARK, mg_clear, mg_copy,
+mg_find, mg_free, mg_get, mg_length, mg_magical, mg_set, Move, New, newAV,
+Newc, newCONSTSUB, newHV, newRV_inc, newRV_noinc, NEWSV, newSViv, newSVnv,
+newSVpv, newSVpvf, newSVpvn, newSVrv, newSVsv, newSVuv, newXS, newXSproto,
+Newz, Nullav, Nullch, Nullcv, Nullhv, Nullsv, ORIGMARK, perl_alloc,
+perl_construct, perl_destruct, perl_free, perl_parse, perl_run,
+PL_DBsingle, PL_DBsub, PL_DBtrace, PL_dowarn, PL_modglobal, PL_na,
+PL_sv_no, PL_sv_undef, PL_sv_yes, POPi, POPl, POPn, POPp, POPs, PUSHi,
+PUSHMARK, PUSHn, PUSHp, PUSHs, PUSHu, PUTBACK, Renew, Renewc, require_pv,
+RETVAL, Safefree, savepv, savepvn, SAVETMPS, SP, SPAGAIN, ST, strEQ, strGE,
+strGT, strLE, strLT, strNE, strnEQ, strnNE, StructCopy, SvCUR, SvCUR_set,
+SvEND, SvGETMAGIC, SvGROW, SvIOK, SvIOKp, SvIOK_off, SvIOK_on, SvIOK_only,
+SvIV, SvIVX, SvLEN, SvLOCK, SvNIOK, SvNIOKp, SvNIOK_off, SvNOK, SvNOKp,
+SvNOK_off, SvNOK_on, SvNOK_only, SvNV, SvNVX, SvOK, SvOOK, SvPOK, SvPOKp,
+SvPOK_off, SvPOK_on, SvPOK_only, SvPV, SvPVX, SvPV_force, SvPV_nolen,
+SvREFCNT, SvREFCNT_dec, SvREFCNT_inc, SvROK, SvROK_off, SvROK_on, SvRV,
+SvSETMAGIC, SvSetSV, SvSetSV_nosteal, SvSTASH, SvTAINT, SvTAINTED,
+SvTAINTED_off, SvTAINTED_on, SvTRUE, SvTYPE, svtype, SVt_IV, SVt_NV,
+SVt_PV, SVt_PVAV, SVt_PVCV, SVt_PVHV, SVt_PVMG, SvUNLOCK, SvUPGRADE, SvUV,
+SvUVX, sv_2mortal, sv_bless, sv_catpv, sv_catpvf, sv_catpvf_mg, sv_catpvn,
+sv_catpvn_mg, sv_catpv_mg, sv_catsv, sv_catsv_mg, sv_chop, sv_cmp, sv_dec,
+sv_derived_from, sv_eq, sv_grow, sv_inc, sv_insert, sv_isa, sv_isobject,
+sv_len, sv_magic, sv_mortalcopy, sv_newmortal, sv_setiv, sv_setiv_mg,
+sv_setnv, sv_setnv_mg, sv_setpv, sv_setpvf, sv_setpvf_mg, sv_setpviv,
+sv_setpviv_mg, sv_setpvn, sv_setpvn_mg, sv_setpv_mg, sv_setref_iv,
+sv_setref_nv, sv_setref_pv, sv_setref_pvn, sv_setsv, sv_setsv_mg, sv_setuv,
+sv_setuv_mg, sv_unref, sv_upgrade, sv_usepvn, sv_usepvn_mg, sv_vcatpvfn,
+sv_vsetpvfn, THIS, toLOWER, toUPPER, U8 *s, utf8_to_bytes, warn, XPUSHi,
+XPUSHn, XPUSHp, XPUSHs, XPUSHu, XS, XSRETURN, XSRETURN_EMPTY, XSRETURN_IV,
+XSRETURN_NO, XSRETURN_NV, XSRETURN_PV, XSRETURN_UNDEF, XSRETURN_YES,
+XST_mIV, XST_mNO, XST_mNV, XST_mPV, XST_mUNDEF, XST_mYES, XS_VERSION,
+XS_VERSION_BOOTCHECK, Zero
 
 =item AUTHORS
 
@@ -4145,30 +4147,6 @@ double
 
 =back
 
-=head2 lib - manipulate @INC at compile time
-
-=over
-
-=item SYNOPSIS
-
-=item DESCRIPTION
-
-=over
-
-=item Adding directories to @INC
-
-=item Deleting directories from @INC
-
-=item Restoring original @INC
-
-=back
-
-=item SEE ALSO
-
-=item AUTHOR
-
-=back
-
 =head2 locale - Perl pragma to use and avoid POSIX locales for built-in
 operations
 
@@ -4287,32 +4265,6 @@ integer, float, binary, q, qr
 =item DIAGNOSTICS
 
 =item BUGS
-
-=back
-
-=head2 pwent - Perl pragma to control the pwent functions
-
-=over
-
-=item SYNOPSIS
-
-=item DESCRIPTION
-
-=over
-
-=item subpragma shadow_password
-
-=back
-
-=back
-
-=head2 re - Perl pragma to alter regular expression behaviour
-
-=over
-
-=item SYNOPSIS
-
-=item DESCRIPTION
 
 =back
 
@@ -4872,18 +4824,6 @@ C<-oFILENAME>, C<-r>, C<-D[tO]>
 
 =back
 
-=head2 Bblock, B::Bblock - Walk basic blocks
-
-=over
-
-=item SYNOPSIS
-
-=item DESCRIPTION
-
-=item AUTHOR
-
-=back
-
 =head2 Benchmark - benchmark running times of Perl code
 
 =over
@@ -4939,29 +4879,6 @@ STYLE ] ), cmpthese ( RESULTSHASHREF ), countit(TIME, CODE), disablecache (
 =item AUTHOR
 
 =item SEE ALSO
-
-=back
-
-=head2 Bytecode, B::Bytecode - Perl compiler's bytecode backend
-
-=over
-
-=item SYNOPSIS
-
-=item DESCRIPTION
-
-=item OPTIONS
-
-B<-ofilename>, B<-afilename>, B<-->, B<-f>, B<-fcompress-nullops>,
-B<-fomit-sequence-numbers>, B<-fbypass-nullops>, B<-On>, B<-D>, B<-Do>,
-B<-Db>, B<-Da>, B<-DC>, B<-S>, B<-Ppackage>    Stores package in the
-output.    =back
-
-=item EXAMPLES
-
-=item BUGS
-
-=item AUTHORS
 
 =back
 
@@ -5543,275 +5460,6 @@ Example 1, Example 2, Example 3
 
 =back
 
-=head2 Config - access Perl configuration information
-
-=over
-
-=item SYNOPSIS
-
-=item DESCRIPTION
-
-myconfig(), config_sh(), config_vars(@names)
-
-=item EXAMPLE
-
-=item WARNING
-
-=item GLOSSARY
-
-=over
-
-=item _
-
-C<_a>, C<_exe>, C<_o>
-
-=item a
-
-C<afs>, C<alignbytes>, C<ansi2knr>, C<aphostname>, C<api_revision>,
-C<api_subversion>, C<api_version>, C<api_versionstring>, C<ar>, C<archlib>,
-C<archlibexp>, C<archname64>, C<archname>, C<archobjs>, C<awk>
-
-=item b
-
-C<baserev>, C<bash>, C<bin>, C<bincompat5005>, C<binexp>, C<bison>,
-C<byacc>, C<byteorder>
-
-=item c
-
-C<c>, C<castflags>, C<cat>, C<cc>, C<cccdlflags>, C<ccdlflags>, C<ccflags>,
-C<ccsymbols>, C<cf_by>, C<cf_email>, C<cf_time>, C<charsize>, C<chgrp>,
-C<chmod>, C<chown>, C<clocktype>, C<comm>, C<compress>
-
-=item C
-
-C<CONFIGDOTSH>, C<contains>, C<cp>, C<cpio>, C<cpp>, C<cpp_stuff>,
-C<cppccsymbols>, C<cppflags>, C<cpplast>, C<cppminus>, C<cpprun>,
-C<cppstdin>, C<cppsymbols>, C<crosscompile>, C<cryptlib>, C<csh>
-
-=item d
-
-C<d_access>, C<d_accessx>, C<d_alarm>, C<d_archlib>, C<d_atolf>,
-C<d_atoll>, C<d_attribut>, C<d_bcmp>, C<d_bcopy>, C<d_bincompat5005>,
-C<d_bsd>, C<d_bsdgetpgrp>, C<d_bsdsetpgrp>, C<d_bzero>, C<d_casti32>,
-C<d_castneg>, C<d_charvspr>, C<d_chown>, C<d_chroot>, C<d_chsize>,
-C<d_closedir>, C<d_const>, C<d_crypt>, C<d_csh>, C<d_cuserid>,
-C<d_dbl_dig>, C<d_difftime>, C<d_dirnamlen>, C<d_dlerror>, C<d_dlopen>,
-C<d_dlsymun>, C<d_dosuid>, C<d_drand48proto>, C<d_dup2>, C<d_eaccess>,
-C<d_endgrent>, C<d_endhent>, C<d_endnent>, C<d_endpent>, C<d_endpwent>,
-C<d_endsent>, C<d_eofnblk>, C<d_eunice>, C<d_fchmod>, C<d_fchown>,
-C<d_fcntl>, C<d_fd_macros>, C<d_fd_set>, C<d_fds_bits>, C<d_fgetpos>,
-C<d_flexfnam>, C<d_flock>, C<d_fork>, C<d_fpathconf>, C<d_fpos64_t>,
-C<d_frexpl>, C<d_fs_data_s>, C<d_fseeko>, C<d_fsetpos>, C<d_fstatfs>,
-C<d_fstatvfs>, C<d_ftello>, C<d_ftime>, C<d_Gconvert>, C<d_getcwd>,
-C<d_getespwnam>, C<d_getfsstat>, C<d_getgrent>, C<d_getgrps>,
-C<d_gethbyaddr>, C<d_gethbyname>, C<d_gethent>, C<d_gethname>,
-C<d_gethostprotos>, C<d_getlogin>, C<d_getmnt>, C<d_getmntent>,
-C<d_getnbyaddr>, C<d_getnbyname>, C<d_getnent>, C<d_getnetprotos>,
-C<d_getpbyname>, C<d_getpbynumber>, C<d_getpent>, C<d_getpgid>,
-C<d_getpgrp2>, C<d_getpgrp>, C<d_getppid>, C<d_getprior>,
-C<d_getprotoprotos>, C<d_getprpwnam>, C<d_getpwent>, C<d_getsbyname>,
-C<d_getsbyport>, C<d_getsent>, C<d_getservprotos>, C<d_getspnam>,
-C<d_gettimeod>, C<d_gnulibc>, C<d_grpasswd>, C<d_hasmntopt>, C<d_htonl>,
-C<d_iconv>, C<d_index>, C<d_inetaton>, C<d_int64_t>, C<d_isascii>,
-C<d_isnan>, C<d_isnanl>, C<d_killpg>, C<d_lchown>, C<d_ldbl_dig>,
-C<d_link>, C<d_locconv>, C<d_lockf>, C<d_longdbl>, C<d_longlong>,
-C<d_lseekproto>, C<d_lstat>, C<d_madvise>, C<d_mblen>, C<d_mbstowcs>,
-C<d_mbtowc>, C<d_memchr>, C<d_memcmp>, C<d_memcpy>, C<d_memmove>,
-C<d_memset>, C<d_mkdir>, C<d_mkdtemp>, C<d_mkfifo>, C<d_mkstemp>,
-C<d_mkstemps>, C<d_mktime>, C<d_mmap>, C<d_modfl>, C<d_mprotect>, C<d_msg>,
-C<d_msg_ctrunc>, C<d_msg_dontroute>, C<d_msg_oob>, C<d_msg_peek>,
-C<d_msg_proxy>, C<d_msgctl>, C<d_msgget>, C<d_msgrcv>, C<d_msgsnd>,
-C<d_msync>, C<d_munmap>, C<d_mymalloc>, C<d_nice>, C<d_nv_preserves_uv>,
-C<d_nv_preserves_uv_bits>, C<d_off64_t>, C<d_old_pthread_create_joinable>,
-C<d_oldpthreads>, C<d_oldsock>, C<d_open3>, C<d_pathconf>, C<d_pause>,
-C<d_perl_otherlibdirs>, C<d_phostname>, C<d_pipe>, C<d_poll>,
-C<d_portable>, C<d_PRId64>, C<d_PRIeldbl>, C<d_PRIEldbl>, C<d_PRIfldbl>,
-C<d_PRIFldbl>, C<d_PRIgldbl>, C<d_PRIGldbl>, C<d_PRIi64>, C<d_PRIo64>,
-C<d_PRIu64>, C<d_PRIx64>, C<d_PRIX64>, C<d_pthread_yield>, C<d_pwage>,
-C<d_pwchange>, C<d_pwclass>, C<d_pwcomment>, C<d_pwexpire>, C<d_pwgecos>,
-C<d_pwpasswd>, C<d_pwquota>, C<d_qgcvt>, C<d_quad>, C<d_readdir>,
-C<d_readlink>, C<d_rename>, C<d_rewinddir>, C<d_rmdir>, C<d_safebcpy>,
-C<d_safemcpy>, C<d_sanemcmp>, C<d_sched_yield>, C<d_scm_rights>,
-C<d_seekdir>, C<d_select>, C<d_sem>, C<d_semctl>, C<d_semctl_semid_ds>,
-C<d_semctl_semun>, C<d_semget>, C<d_semop>, C<d_setegid>, C<d_seteuid>,
-C<d_setgrent>, C<d_setgrps>, C<d_sethent>, C<d_setlinebuf>, C<d_setlocale>,
-C<d_setnent>, C<d_setpent>, C<d_setpgid>, C<d_setpgrp2>, C<d_setpgrp>,
-C<d_setprior>, C<d_setpwent>, C<d_setregid>, C<d_setresgid>,
-C<d_setresuid>, C<d_setreuid>, C<d_setrgid>, C<d_setruid>, C<d_setsent>,
-C<d_setsid>, C<d_setvbuf>, C<d_sfio>, C<d_shm>, C<d_shmat>,
-C<d_shmatprototype>, C<d_shmctl>, C<d_shmdt>, C<d_shmget>, C<d_sigaction>,
-C<d_sigsetjmp>, C<d_socket>, C<d_socklen_t>, C<d_sockpair>, C<d_sqrtl>,
-C<d_statblks>, C<d_statfs_f_flags>, C<d_statfs_s>, C<d_statvfs>,
-C<d_stdio_cnt_lval>, C<d_stdio_ptr_lval>, C<d_stdio_stream_array>,
-C<d_stdiobase>, C<d_stdstdio>, C<d_strchr>, C<d_strcoll>, C<d_strctcpy>,
-C<d_strerrm>, C<d_strerror>, C<d_strtod>, C<d_strtol>, C<d_strtold>,
-C<d_strtoll>, C<d_strtoul>, C<d_strtoull>, C<d_strtouq>, C<d_strxfrm>,
-C<d_suidsafe>, C<d_symlink>, C<d_syscall>, C<d_sysconf>, C<d_sysernlst>,
-C<d_syserrlst>, C<d_system>, C<d_tcgetpgrp>, C<d_tcsetpgrp>, C<d_telldir>,
-C<d_telldirproto>, C<d_time>, C<d_times>, C<d_truncate>, C<d_tzname>,
-C<d_umask>, C<d_uname>, C<d_union_semun>, C<d_ustat>, C<d_vendorarch>,
-C<d_vendorbin>, C<d_vendorlib>, C<d_vfork>, C<d_void_closedir>,
-C<d_voidsig>, C<d_voidtty>, C<d_volatile>, C<d_vprintf>, C<d_wait4>,
-C<d_waitpid>, C<d_wcstombs>, C<d_wctomb>, C<d_xenix>, C<date>,
-C<db_hashtype>, C<db_prefixtype>, C<defvoidused>, C<direntrytype>,
-C<dlext>, C<dlsrc>, C<doublesize>, C<drand01>, C<dynamic_ext>
-
-=item e
-
-C<eagain>, C<ebcdic>, C<echo>, C<egrep>, C<emacs>, C<eunicefix>,
-C<exe_ext>, C<expr>, C<extensions>
-
-=item f
-
-C<fflushall>, C<fflushNULL>, C<find>, C<firstmakefile>, C<flex>,
-C<fpossize>, C<fpostype>, C<freetype>, C<full_ar>, C<full_csh>, C<full_sed>
-
-=item g
-
-C<gccversion>, C<gidformat>, C<gidsign>, C<gidsize>, C<gidtype>,
-C<glibpth>, C<grep>, C<groupcat>, C<groupstype>, C<gzip>
-
-=item h
-
-C<h_fcntl>, C<h_sysfile>, C<hint>, C<hostcat>, C<huge>
-
-=item i
-
-C<i16size>, C<i16type>, C<i32size>, C<i32type>, C<i64size>, C<i64type>,
-C<i8size>, C<i8type>, C<i_arpainet>, C<i_bsdioctl>, C<i_db>, C<i_dbm>,
-C<i_dirent>, C<i_dld>, C<i_dlfcn>, C<i_fcntl>, C<i_float>, C<i_gdbm>,
-C<i_grp>, C<i_iconv>, C<i_ieeefp>, C<i_inttypes>, C<i_limits>, C<i_locale>,
-C<i_machcthr>, C<i_malloc>, C<i_math>, C<i_memory>, C<i_mntent>, C<i_ndbm>,
-C<i_netdb>, C<i_neterrno>, C<i_netinettcp>, C<i_niin>, C<i_poll>,
-C<i_prot>, C<i_pthread>, C<i_pwd>, C<i_rpcsvcdbm>, C<i_sfio>, C<i_sgtty>,
-C<i_shadow>, C<i_socks>, C<i_stdarg>, C<i_stddef>, C<i_stdlib>,
-C<i_string>, C<i_sunmath>, C<i_sysaccess>, C<i_sysdir>, C<i_sysfile>,
-C<i_sysfilio>, C<i_sysin>, C<i_sysioctl>, C<i_syslog>, C<i_sysmman>,
-C<i_sysmode>, C<i_sysmount>, C<i_sysndir>, C<i_sysparam>, C<i_sysresrc>,
-C<i_syssecrt>, C<i_sysselct>, C<i_syssockio>, C<i_sysstat>, C<i_sysstatfs>,
-C<i_sysstatvfs>, C<i_systime>, C<i_systimek>, C<i_systimes>, C<i_systypes>,
-C<i_sysuio>, C<i_sysun>, C<i_sysutsname>, C<i_sysvfs>, C<i_syswait>,
-C<i_termio>, C<i_termios>, C<i_time>, C<i_unistd>, C<i_ustat>, C<i_utime>,
-C<i_values>, C<i_varargs>, C<i_varhdr>, C<i_vfork>,
-C<ignore_versioned_solibs>, C<inc_version_list>, C<inc_version_list_init>,
-C<incpath>, C<inews>, C<installarchlib>, C<installbin>, C<installman1dir>,
-C<installman3dir>, C<installprefix>, C<installprefixexp>,
-C<installprivlib>, C<installscript>, C<installsitearch>, C<installsitebin>,
-C<installsitelib>, C<installstyle>, C<installusrbinperl>,
-C<installvendorarch>, C<installvendorbin>, C<installvendorlib>, C<intsize>,
-C<ivdformat>, C<ivsize>, C<ivtype>
-
-=item k
-
-C<known_extensions>, C<ksh>
-
-=item l
-
-C<large>, C<ld>, C<lddlflags>, C<ldflags>, C<ldlibpthname>, C<less>,
-C<lib_ext>, C<libc>, C<libperl>, C<libpth>, C<libs>, C<libsdirs>,
-C<libsfiles>, C<libsfound>, C<libspath>, C<libswanted>, C<line>, C<lint>,
-C<lkflags>, C<ln>, C<lns>, C<locincpth>, C<loclibpth>, C<longdblsize>,
-C<longlongsize>, C<longsize>, C<lp>, C<lpr>, C<ls>, C<lseeksize>,
-C<lseektype>
-
-=item m
-
-C<mail>, C<mailx>, C<make>, C<make_set_make>, C<mallocobj>, C<mallocsrc>,
-C<malloctype>, C<man1dir>, C<man1direxp>, C<man1ext>, C<man3dir>,
-C<man3direxp>, C<man3ext>
-
-=item M
-
-C<Mcc>, C<medium>, C<mips_type>, C<mkdir>, C<mmaptype>, C<models>,
-C<modetype>, C<more>, C<multiarch>, C<mv>, C<myarchname>, C<mydomain>,
-C<myhostname>, C<myuname>
-
-=item n
-
-C<n>, C<netdb_hlen_type>, C<netdb_host_type>, C<netdb_name_type>,
-C<netdb_net_type>, C<nm>, C<nm_opt>, C<nm_so_opt>, C<nonxs_ext>, C<nroff>,
-C<nvsize>, C<nvtype>
-
-=item o
-
-C<o_nonblock>, C<obj_ext>, C<old_pthread_create_joinable>, C<optimize>,
-C<orderlib>, C<osname>, C<osvers>, C<otherlibdirs>
-
-=item p
-
-C<package>, C<pager>, C<passcat>, C<patchlevel>, C<path_sep>, C<perl5>,
-C<perl>
-
-=item P
-
-C<PERL_REVISION>, C<PERL_SUBVERSION>, C<PERL_VERSION>, C<perladmin>,
-C<perlpath>, C<pg>, C<phostname>, C<pidtype>, C<plibpth>, C<pm_apiversion>,
-C<pmake>, C<pr>, C<prefix>, C<prefixexp>, C<privlib>, C<privlibexp>,
-C<prototype>, C<ptrsize>
-
-=item q
-
-C<quadkind>, C<quadtype>
-
-=item r
-
-C<randbits>, C<randfunc>, C<randseedtype>, C<ranlib>, C<rd_nodata>,
-C<revision>, C<rm>, C<rmail>, C<runnm>
-
-=item s
-
-C<sched_yield>, C<scriptdir>, C<scriptdirexp>, C<sed>, C<seedfunc>,
-C<selectminbits>, C<selecttype>, C<sendmail>, C<sh>, C<shar>, C<sharpbang>,
-C<shmattype>, C<shortsize>, C<shrpenv>, C<shsharp>, C<sig_count>,
-C<sig_name>, C<sig_name_init>, C<sig_num>, C<sig_num_init>, C<signal_t>,
-C<sitearch>, C<sitearchexp>, C<sitebin>, C<sitebinexp>, C<sitelib>,
-C<sitelib_stem>, C<sitelibexp>, C<siteprefix>, C<siteprefixexp>,
-C<sizesize>, C<sizetype>, C<sleep>, C<smail>, C<small>, C<so>,
-C<sockethdr>, C<socketlib>, C<socksizetype>, C<sort>, C<spackage>,
-C<spitshell>, C<split>, C<sPRId64>, C<sPRIeldbl>, C<sPRIEldbl>,
-C<sPRIfldbl>, C<sPRIFldbl>, C<sPRIgldbl>, C<sPRIGldbl>, C<sPRIi64>,
-C<sPRIo64>, C<sPRIu64>, C<sPRIx64>, C<sPRIX64>, C<src>, C<ssizetype>,
-C<startperl>, C<startsh>, C<static_ext>, C<stdchar>, C<stdio_base>,
-C<stdio_bufsiz>, C<stdio_cnt>, C<stdio_filbuf>, C<stdio_ptr>,
-C<stdio_stream_array>, C<strings>, C<submit>, C<subversion>, C<sysman>
-
-=item t
-
-C<tail>, C<tar>, C<tbl>, C<tee>, C<test>, C<timeincl>, C<timetype>,
-C<touch>, C<tr>, C<trnl>, C<troff>
-
-=item u
-
-C<u16size>, C<u16type>, C<u32size>, C<u32type>, C<u64size>, C<u64type>,
-C<u8size>, C<u8type>, C<uidformat>, C<uidsign>, C<uidsize>, C<uidtype>,
-C<uname>, C<uniq>, C<uquadtype>, C<use5005threads>, C<use64bitall>,
-C<use64bitint>, C<usedl>, C<useithreads>, C<uselargefiles>,
-C<uselongdouble>, C<usemorebits>, C<usemultiplicity>, C<usemymalloc>,
-C<usenm>, C<useopcode>, C<useperlio>, C<useposix>, C<usesfio>,
-C<useshrplib>, C<usesocks>, C<usethreads>, C<usevendorprefix>, C<usevfork>,
-C<usrinc>, C<uuname>, C<uvoformat>, C<uvsize>, C<uvtype>, C<uvuformat>,
-C<uvxformat>
-
-=item v
-
-C<vendorarch>, C<vendorarchexp>, C<vendorbin>, C<vendorbinexp>,
-C<vendorlib>, C<vendorlib_stem>, C<vendorlibexp>, C<vendorprefix>,
-C<vendorprefixexp>, C<version>, C<vi>, C<voidflags>
-
-=item x
-
-C<xlibpth>, C<xs_apiversion>
-
-=item z
-
-C<zcat>, C<zip>
-
-=back
-
-=item NOTE
-
-=back
-
 =head2 Cwd, getcwd - get pathname of current working directory
 
 =over
@@ -6157,37 +5805,6 @@ veryCompact, set, get
 
 =back
 
-=head2 DynaLoader - Dynamically load C libraries into Perl code
-
-=over
-
-=item SYNOPSIS
-
-=item DESCRIPTION
-
-@dl_library_path, @dl_resolve_using, @dl_require_symbols, @dl_librefs,
-@dl_modules, dl_error(), $dl_debug, dl_findfile(), dl_expandspec(),
-dl_load_file(), dl_unload_file(), dl_loadflags(), dl_find_symbol(),
-dl_find_symbol_anywhere(), dl_undef_symbols(), dl_install_xsub(),
-bootstrap()
-
-=item AUTHOR
-
-=back
-
-=head2 DynaLoader::XSLoader, XSLoader - Dynamically load C libraries into
-Perl code
-
-=over
-
-=item SYNOPSIS
-
-=item DESCRIPTION
-
-=item AUTHOR
-
-=back
-
 =head2 English - use nice English (or awk) names for ugly punctuation
 variables
 
@@ -6231,6 +5848,8 @@ arrays
 =item Selecting What To Export
 
 =item Specialised Import Lists
+
+=item Constants can be inlined
 
 =item Exporting without using Export's import method
 
@@ -6877,18 +6496,6 @@ C<Added to MANIFEST:> I<file>
 
 =back
 
-=head2 ExtUtils::Miniperl, writemain - write the C code for perlmain.c
-
-=over
-
-=item SYNOPSIS
-
-=item DESCRIPTION
-
-=item SEE ALSO
-
-=back
-
 =head2 ExtUtils::Mkbootstrap - make a bootstrap file for use by DynaLoader
 
 =over
@@ -7327,10 +6934,6 @@ splitpath
 splitdir
 
 catpath
-
-abs2rel
-
-rel2abs
 
 =over
 
@@ -8152,22 +7755,6 @@ functions
 
 =back
 
-=head2 O - Generic interface to Perl Compiler backends
-
-=over
-
-=item SYNOPSIS
-
-=item DESCRIPTION
-
-=item CONVENTIONS
-
-=item IMPLEMENTATION
-
-=item AUTHOR
-
-=back
-
 =head2 ODBM_File - Tied access to odbm files
 
 =over
@@ -8304,12 +7891,12 @@ rewinddir, rmdir, scanf, setgid, setjmp, setlocale, setpgid, setsid,
 setuid, sigaction, siglongjmp, sigpending, sigprocmask, sigsetjmp,
 sigsuspend, sin, sinh, sleep, sprintf, sqrt, srand, sscanf, stat, strcat,
 strchr, strcmp, strcoll, strcpy, strcspn, strerror, strftime, strlen,
-strncat, strncmp, strncpy, stroul, strpbrk, strrchr, strspn, strstr,
-strtod, strtok, strtol, strtoul, strxfrm, sysconf, system, tan, tanh,
-tcdrain, tcflow, tcflush, tcgetpgrp, tcsendbreak, tcsetpgrp, time, times,
-tmpfile, tmpnam, tolower, toupper, ttyname, tzname, tzset, umask, uname,
-ungetc, unlink, utime, vfprintf, vprintf, vsprintf, wait, waitpid,
-wcstombs, wctomb, write
+strncat, strncmp, strncpy, strpbrk, strrchr, strspn, strstr, strtod,
+strtok, strtol, strtoul, strxfrm, sysconf, system, tan, tanh, tcdrain,
+tcflow, tcflush, tcgetpgrp, tcsendbreak, tcsetpgrp, time, times, tmpfile,
+tmpnam, tolower, toupper, ttyname, tzname, tzset, umask, uname, ungetc,
+unlink, utime, vfprintf, vprintf, vsprintf, wait, waitpid, wcstombs,
+wctomb, write
 
 =item CLASSES
 
@@ -8396,8 +7983,6 @@ Constants
 =item WAIT
 
 Constants, Macros
-
-=item CREATION
 
 =back
 
@@ -10066,20 +9651,6 @@ functions
 =item HISTORY
 
 March 18th, 2000
-
-=back
-
-=head2 XSLoader - Dynamically load C libraries into Perl code
-
-=over
-
-=item SYNOPSIS
-
-=item DESCRIPTION
-
-=item AUTHOR
-
-=back
 
 =head1 AUXILIARY DOCUMENTATION
 

@@ -1,8 +1,59 @@
+#!/usr/local/bin/perl
+
+use Config;
+use File::Basename qw(&basename &dirname);
+use Cwd;
+
+# List explicitly here the variables you want Configure to
+# generate.  Metaconfig only looks for shell variables, so you
+# have to mention them as if they were shell variables, not
+# %Config entries.  Thus you write
+#  $startperl
+# to ensure Configure will look for $Config{startperl}.
+
+# This forces PL files to create target in same directory as PL file.
+# This is so that make depend always knows where to find PL derivatives.
+$origdir = cwd;
+chdir(dirname($0));
+($file = basename($0)) =~ s/\.PL$//;
+$file =~ s/\.pl$// if ($^O eq 'os2' or $^O eq 'dos');  # "case-forgiving"
+$file =~ s/\.pl$/.com/ if ($^O eq 'VMS');              # "case-forgiving"
+
+open OUT,">$file" or die "Can't create $file: $!";
+
+print "Extracting $file (with variable substitutions)\n";
+
+# In this section, perl variables will be expanded during extraction.
+# You can use $Config{...} to use Configure variables.
+
+print OUT <<"!GROK!THIS!";
+$Config{'startperl'}
+    eval 'exec perl -S \$0 "\$@"'
+        if 0;
+!GROK!THIS!
+
+# In the following, perl variables are not expanded during extraction.
+
+print OUT <<'!NO!SUBS!';
+
+#
+# buildtoc
+#
+# Build perltoc.pod and sanity check the list of pods against all
+# of the MANIFEST, perl.pod, and ourselves.
+#
+
 use File::Find;
 use Cwd;
 use Text::Wrap;
 
+@PODS = glob("*.pod");
+
 sub output ($);
+
+if (-d "pod") {
+  die "$0: failed to chdir('pod'): $!\n" unless chdir("pod");
+}
 
 @pods = qw(
 	   perl perlfaq perlfaq1 perlfaq2 perlfaq3 perlfaq4 perlfaq5
@@ -18,6 +69,58 @@ sub output ($);
 	  );
 
 for (@pods) { s/$/.pod/ }
+@pods{@pods} = ();
+@PODS{@PODS} = ();
+
+open(MANI, "../MANIFEST") || die "$0: opening ../MANIFEST failed: $!";
+while (<MANI>) {
+  if (m!^pod/([^.]+\.pod)\s+!i) {
+     push @MANIPODS, $1;
+  }
+}
+close(MANI);
+@MANIPODS{@MANIPODS} = ();
+
+open(PERLPOD, "perl.pod") || die "$0: opening perl.pod failed: $!\n";
+while (<PERLPOD>) {
+  if (/^For ease of access, /../^\(If you're intending /) {
+	if (/^\s+(perl\w+)\s+Perl /) {
+		push @PERLPODS, "$1.pod";
+	}
+  }
+}
+close(PERLPOD);
+die "$0: could not find the pod listing of perl.pod\n"
+  unless @PERLPODS;
+@PERLPODS{@PERLPODS} = ();
+
+# Cross-check against ourselves
+# Cross-check against the MANIFEST
+# Cross-check against the perl.pod
+
+foreach my $i (sort keys %PODS) {
+  warn "$0: $i exists but is unknown by buildtoc\n"
+	unless exists $pods{$i};
+  warn "$0: $i exists but is unknown by ../MANIFEST\n"
+	unless exists $MANIPODS{$i};
+  warn "$0: $i exists but is unknown by perl.pod\n"
+	unless exists $PERLPODS{$i};
+}
+foreach my $i (sort keys %pods) {
+  warn "$0: $i is known by buildtoc but does not exist\n"
+	unless exists $PODS{$i};
+}
+foreach my $i (sort keys %MANIPODS) {
+  warn "$0: $i is known by ../MANIFEST but does not exist\n"
+	unless exists $PODS{$i};
+}
+foreach my $i (sort keys %PERLPODS) {
+  warn "$0: $i is known by perl.pod but does not exist\n"
+	unless exists $PODS{$i};
+}
+
+# We are ready to rock.
+open(OUT, ">perltoc.pod") || die "$0: creating perltoc.pod failed: $!";
 
 $/ = '';
 @ARGV = @pods;
@@ -64,7 +167,7 @@ sub getpods {
 		    return;
 		}
 	    }
-	    warn "EVIL $file\n";
+	    warn "$0: $file: cannot find =head1 NAME\n";
 	}
     }
 }
@@ -243,11 +346,11 @@ sub output ($) {
     for (split /(\n)/, shift) {
 	if ($_ eq "\n") {
 	    if ($LINE) {
-		print wrap('', '', $LINE);
+		print OUT wrap('', '', $LINE);
 		$LINE = '';
 	    }
 	    if ($NEWLINE < 2) {
-		print;
+		print OUT;
 		$NEWLINE++;
 	    }
 	}
@@ -257,3 +360,6 @@ sub output ($) {
 	}
     }
 }
+
+!NO!SUBS!
+
