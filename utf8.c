@@ -1579,8 +1579,7 @@ Perl_sv_uni_display(pTHX_ SV *dsv, SV *ssv, STRLEN pvlim, UV flags)
 Return true if the strings s1 and s2 differ case-insensitively, false
 if not (if they are equal case-insensitively).  If u1 is true, the
 string s1 is assumed to be in UTF-8-encoded Unicode.  If u2 is true,
-the string s2 is assumed to be in UTF-8-encoded Unicode.  (If both u1
-and u2 are false, ibcmp() is called.)
+the string s2 is assumed to be in UTF-8-encoded Unicode.
 
 For case-insensitiveness, the "casefolding" of Unicode is used
 instead of upper/lowercasing both the characters, see
@@ -1588,50 +1587,52 @@ http://www.unicode.org/unicode/reports/tr21/ (Case Mappings).
 
 =cut */
 I32
-Perl_ibcmp_utf8(pTHX_ const char *s1, bool u1, const char *s2, bool u2, register I32 len)
+Perl_ibcmp_utf8(pTHX_ const char *s1, bool u1, register I32 len1, const char *s2, bool u2, register I32 len2)
 {
-     if (u1 || u2) {
-	  register U8 *a = (U8*)s1;
-	  register U8 *b = (U8*)s2;
-	  STRLEN la, lb;
-	  UV ca, cb;
-	  STRLEN ulen1, ulen2;
-	  U8 tmpbuf1[UTF8_MAXLEN*3+1];
-	  U8 tmpbuf2[UTF8_MAXLEN*3+1];
-	  
-	  while (len) {
-	       if (u1)
-		    ca = utf8_to_uvchr((U8*)a, &la);
-	       else {
-		    ca = *a;
-		    la = 1;
-	       }
-	       if (u2)
-		    cb = utf8_to_uvchr((U8*)b, &lb);
-	       else {
-		    cb = *b;
-		    lb = 1;
-	       }
-	       if (ca != cb) {
-		    if (u1)
-			 to_uni_fold(NATIVE_TO_UNI(ca), tmpbuf1, &ulen1);
-		    else
-			 ulen1 = 1;
-		    if (u2)
-			 to_uni_fold(NATIVE_TO_UNI(cb), tmpbuf2, &ulen2);
-		    else
-			 ulen2 = 1;
-		    if (ulen1 != ulen2
-			|| (ulen1 == 1 && PL_fold[ca] != PL_fold[cb])
-			|| memNE((char *)tmpbuf1, (char *)tmpbuf2, ulen1))
-			 return 1;
-	       }
-	       a += la;
-	       b += lb;
+     register U8 *a  = (U8*)s1;
+     register U8 *b  = (U8*)s2;
+     register U8 *ae = b + len1;
+     register U8 *be = b + len2;
+     STRLEN la, lb;
+     UV ca, cb;
+     STRLEN ulen1, ulen2;
+     U8 tmpbuf1[UTF8_MAXLEN*3+1];
+     U8 tmpbuf2[UTF8_MAXLEN*3+1];
+     
+     while (a < ae && b < be) {
+	  if (u1) {
+	       if (a + UTF8SKIP(a) > ae)
+		    break;
+	       ca = utf8_to_uvchr((U8*)a, &la);
+	  } else {
+	       ca = *a;
+	       la = 1;
 	  }
-	  return 0;
+	  if (u2) {
+	       if (b + UTF8SKIP(b) > be)
+		    break;
+	       cb = utf8_to_uvchr((U8*)b, &lb);
+	  } else {
+	       cb = *b;
+	       lb = 1;
+	  }
+	  if (ca != cb) {
+	       if (u1)
+		    to_uni_fold(NATIVE_TO_UNI(ca), tmpbuf1, &ulen1);
+	       else
+		    ulen1 = 1;
+	       if (u2)
+		    to_uni_fold(NATIVE_TO_UNI(cb), tmpbuf2, &ulen2);
+	       else
+		    ulen2 = 1;
+	       if (ulen1 != ulen2
+		   || (ulen1 == 1 && PL_fold[ca] != PL_fold[cb])
+		   || memNE((char *)tmpbuf1, (char *)tmpbuf2, ulen1))
+		    return 1; /* mismatch */
+	  }
+	  a += la;
+	  b += lb;
      }
-     else
-         return ibcmp(s1, s2, len);
+     return a == ae && b == be ? 0 : 1; /* 0 match, 1 mismatch */
 }
 

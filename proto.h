@@ -315,7 +315,7 @@ PERL_CALLCONV HE*	Perl_hv_store_ent(pTHX_ HV* tb, SV* key, SV* val, U32 hash);
 PERL_CALLCONV void	Perl_hv_undef(pTHX_ HV* tb);
 PERL_CALLCONV I32	Perl_ibcmp(pTHX_ const char* a, const char* b, I32 len);
 PERL_CALLCONV I32	Perl_ibcmp_locale(pTHX_ const char* a, const char* b, I32 len);
-PERL_CALLCONV I32	Perl_ibcmp_utf8(pTHX_ const char* a, bool ua, const char* b, bool ub, I32 len);
+PERL_CALLCONV I32	Perl_ibcmp_utf8(pTHX_ const char* a, bool ua, I32 len1, const char* b, bool ub, I32 len2);
 PERL_CALLCONV bool	Perl_ingroup(pTHX_ Gid_t testgid, Uid_t effective);
 PERL_CALLCONV void	Perl_init_argv_symbols(pTHX_ int, char **);
 PERL_CALLCONV void	Perl_init_debugger(pTHX);

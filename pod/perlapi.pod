@@ -1113,14 +1113,13 @@ Found in file hv.c
 Return true if the strings s1 and s2 differ case-insensitively, false
 if not (if they are equal case-insensitively).  If u1 is true, the
 string s1 is assumed to be in UTF-8-encoded Unicode.  If u2 is true,
-the string s2 is assumed to be in UTF-8-encoded Unicode.  (If both u1
-and u2 are false, ibcmp() is called.)
+the string s2 is assumed to be in UTF-8-encoded Unicode.
 
 For case-insensitiveness, the "casefolding" of Unicode is used
 instead of upper/lowercasing both the characters, see
 http://www.unicode.org/unicode/reports/tr21/ (Case Mappings).
 
-	I32	ibcmp_utf8(const char* a, bool ua, const char* b, bool ub, I32 len)
+	I32	ibcmp_utf8(const char* a, bool ua, I32 len1, const char* b, bool ub, I32 len2)
 
 =for hackers
 Found in file utf8.c

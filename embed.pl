@@ -1333,7 +1333,7 @@ Apd	|HE*	|hv_store_ent	|HV* tb|SV* key|SV* val|U32 hash
 Apd	|void	|hv_undef	|HV* tb
 Ap	|I32	|ibcmp		|const char* a|const char* b|I32 len
 Ap	|I32	|ibcmp_locale	|const char* a|const char* b|I32 len
-Apd	|I32	|ibcmp_utf8	|const char* a|bool ua|const char* b|bool ub|I32 len
+Apd	|I32	|ibcmp_utf8	|const char* a|bool ua|I32 len1|const char* b|bool ub|I32 len2
 p	|bool	|ingroup	|Gid_t testgid|Uid_t effective
 p	|void	|init_argv_symbols|int|char **
 p	|void	|init_debugger

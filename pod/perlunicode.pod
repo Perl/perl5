@@ -885,9 +885,9 @@ code points).
 
 =item *
 
-ibcmp_utf8(s1, u1, s2, u2, len) can be used to compare two strings
-case-insensitively in Unicode.  (For case-sensitive comparisons you
-can just use memEQ() and memNE() as usual.)
+ibcmp_utf8(s1, u1, len1, s2, u2, len2) can be used to compare two
+strings case-insensitively in Unicode.  (For case-sensitive
+comparisons you can just use memEQ() and memNE() as usual.)
 
 =back
 
