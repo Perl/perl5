@@ -23,7 +23,7 @@ case "$prefix" in
   ''|'/usr')
 	# Default install; use non-system directories
 	prefix='/usr/local'; # Built-in perl uses /usr
-	siteprefix=''/usr/local';
+	siteprefix='/usr/local';
 	# Where to put modules.
 	sitelib="/Library/Perl/${version}"; # FIXME: Want "/Network/Perl/${version}" also
 	# 4BSD uses ${prefix}/share/man, not ${prefix}/man.
